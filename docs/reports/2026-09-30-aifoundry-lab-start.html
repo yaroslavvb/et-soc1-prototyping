@@ -1,0 +1,1131 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New user? Start now · the AI Foundry ET-SoC-1 lab</title>
+<meta name="description" content="For new users of the AI Foundry lab's three machines and four ET-SoC-1 cards: how to get access, the lab's rules on one screen, and a self-contained brief to paste into a coding agent (Claude Code or similar) so that it sets you up safely: what it may and may not do and why, a first-hour checklist with exact commands, the traps of 23–30 September with their fixes, how to measure so results hold, how to leave the lab clean, and where to ask.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; --ref: #8c8b85;
+  --ok: #008300; --warn: #eda100; --bad: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+    --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+  --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-text-size-adjust: 100%; }
+main { max-width: 940px; margin: 0 auto; padding: 28px 16px 72px; }
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; margin: 44px 0 10px; }
+h3 { font-size: 1rem; margin: 22px 0 8px; }
+.byline { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 22px; }
+.lede { font-size: 1.05rem; }
+.small { font-size: 0.85rem; color: var(--ink-2); }
+a { color: var(--c1); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre code { padding: 0; background: none; border-radius: 0; font-size: inherit; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.kpi .lab { color: var(--ink-2); font-size: 0.8rem; }
+.kpi .val { font-size: 1.5rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi .sub { color: var(--ink-2); font-size: 0.8rem; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.chart.scroll svg { min-width: 640px; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 320px; display: none; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lab { fill: var(--ink-2); font-size: 12px; }
+.lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.lvl { font-weight: 600; white-space: nowrap; }
+.wide table { min-width: 760px; }
+.chip { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid transparent; }
+.chip.works_now { color: var(--ok); border-color: var(--ok); }
+.chip.needs_fw_change { color: var(--c1); border-color: var(--c1); }
+.chip.needs_tooling { color: var(--warn); border-color: var(--warn); }
+.chip.research_only { color: var(--muted); border-color: var(--muted); }
+.chip.impossible_on_silicon { color: var(--bad); border-color: var(--bad); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.82rem; color: var(--ink-2); margin: 6px 0 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 6px; }
+.controls button { font: inherit; font-size: 0.82rem; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; min-height: 30px; }
+.controls button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.verif { font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+.verif.confirmed::before { content: "✓ "; color: var(--ok); }
+.verif.disputed::before { content: "± "; color: var(--warn); }
+.verif.unverified::before { content: "· "; }
+ol li, ul li { margin: 5px 0; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; }
+.chart-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.s1 { stroke: var(--c1); } .s2 { stroke: var(--c2); } .s3 { stroke: var(--c3); } .s4 { stroke: var(--c4); } .s5 { stroke: var(--c5); }
+.ln { fill: none; stroke-width: 2; stroke-linejoin: round; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.math-display { display: block; overflow-x: auto; overflow-y: hidden; max-width: 100%; margin: 16px 0 18px;
+  padding: 2px 0; text-align: center; color: var(--ink); }
+.math-display svg { max-width: none; }
+.math-inline { color: var(--ink); }
+.math-inline svg, .math-display svg { vertical-align: middle; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+/* chartkit:css:begin (the chart toolkit's CSS; scripts/paste-chartkit.py copies this block into standalone pages) */
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-sortable th[aria-sort] { padding: 0; }
+.ck-sortable th .ck-sort { font: inherit; font-weight: inherit; color: inherit; text-align: inherit; background: none; border: 0;
+  width: 100%; min-height: 32px; padding: inherit; padding: 6px 8px; cursor: pointer; }
+.ck-sortable th .ck-sort::after { content: ' \2195'; color: var(--muted); font-weight: 400; }
+.ck-sortable th[aria-sort="ascending"] .ck-sort::after { content: ' \2191'; color: var(--ink); }
+.ck-sortable th[aria-sort="descending"] .ck-sort::after { content: ' \2193'; color: var(--ink); }
+.ck-sortable th .ck-sort:focus-visible { outline: 2px solid var(--c1); outline-offset: -2px; }
+.ck-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 0 6px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-filter input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 8px; padding: 4px 8px; min-height: 32px; width: min(260px, 100%); }
+.ck-filter input:focus-visible { outline: 2px solid var(--c1); outline-offset: 1px; }
+.ck-filter-n { color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
+/* chartkit:css:end */
+</style>
+</head>
+<body>
+<main>
+<style>
+.steps3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 18px 0 6px;
+  counter-reset: s3; }
+.steps3 .card { position: relative; padding-top: 14px; }
+.steps3 .card b { display: block; margin-bottom: 2px; }
+.steps3 .card b::before { counter-increment: s3; content: counter(s3); display: inline-flex; align-items: center;
+  justify-content: center; width: 1.5em; height: 1.5em; margin-right: 8px; border-radius: 999px; font-size: 0.85rem;
+  background: var(--ink); color: var(--page); }
+.steps3 .card p { margin: 0; font-size: 0.92rem; color: var(--ink-2); }
+.cards4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 14px 0 6px; }
+.cards4 .card { border-top: 4px solid var(--c); padding: 12px 14px; }
+.cards4 .card.off { opacity: 0.8; border-top-style: dashed; }
+.cards4 .nm { font-weight: 650; }
+.cards4 .fw { color: var(--ink-2); font-size: 0.82rem; }
+.cards4 .ck { margin: 6px 0 2px; font-size: 0.92rem; }
+.cards4 .nt { color: var(--ink-2); font-size: 0.84rem; }
+.cards4 .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; border-radius: 999px; padding: 0 8px;
+  margin-left: 6px; border: 1px solid currentColor; vertical-align: 1px; }
+.cards4 .tag.yes { color: var(--ok); } .cards4 .tag.no { color: var(--bad); }
+ol.rules { list-style: none; padding: 0; margin: 12px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px 18px; counter-reset: r; }
+ol.rules li { margin: 0; padding: 10px 12px 10px 42px; position: relative; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px; }
+ol.rules li::before { counter-increment: r; content: counter(r); position: absolute; left: 12px; top: 10px;
+  font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+ol.rules li b { display: block; }
+ol.rules li span { color: var(--ink-2); font-size: 0.88rem; }
+.setup { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: flex-end; margin: 14px 0 12px; }
+.setup label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--ink-2); }
+.setup input, .setup select { font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--axis); border-radius: 8px; padding: 6px 10px; min-height: 38px; width: min(240px, 100%); }
+.setup input:focus-visible, .setup select:focus-visible, .btn:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.setup .hint { font-size: 0.8rem; color: var(--muted); flex-basis: 100%; margin: 0; }
+.copybox { border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.copybox .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px;
+  border-bottom: 1px solid var(--border); }
+.copybox .bar .meta { flex: 1 1 220px; font-size: 0.84rem; color: var(--ink-2); }
+.copybox .bar .meta b { color: var(--ink); font-size: 0.95rem; }
+.btn { font: inherit; font-size: 0.92rem; font-weight: 600; border-radius: 999px; padding: 7px 16px; min-height: 38px;
+  cursor: pointer; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); }
+.btn.primary { background: var(--ink); color: var(--page); }
+.btn.small { font-size: 0.8rem; padding: 3px 12px; min-height: 30px; font-weight: 500; }
+.copystat { font-size: 0.84rem; color: var(--ok); min-width: 4em; }
+.copybox pre { margin: 0; border-radius: 0; max-height: 440px; overflow: auto; white-space: pre-wrap;
+  overflow-wrap: anywhere; font-size: 0.8rem; line-height: 1.5; background: var(--code-bg); }
+.alt { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px 0; font-size: 0.9rem; }
+.alt code { overflow-wrap: anywhere; }
+.brief { border-left: 3px solid var(--grid); padding-left: 16px; }
+.brief h3 { font-size: 1.12rem; margin: 30px 0 8px; }
+.brief h3:first-child { margin-top: 8px; }
+.brief .bnav ol { columns: 2 220px; column-gap: 24px; margin: 6px 0 0; padding-left: 1.4em; font-size: 0.92rem; }
+.brief .bnav li { margin: 3px 0; break-inside: avoid; }
+.brief pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.brief td code { overflow-wrap: anywhere; }
+.brief a, .brief code { overflow-wrap: anywhere; }
+.ph { background: color-mix(in srgb, var(--warn) 22%, transparent); border-radius: 3px; }
+.fill { background: color-mix(in srgb, var(--ok) 20%, transparent); border-radius: 3px; }
+@media (max-width: 599px) {
+  .brief { padding-left: 10px; }
+  .copybox pre { max-height: 360px; }
+}
+</style>
+
+<h1>New to the ET-SoC-1 lab? Start now</h1>
+<p class="byline">30 September 2026 (PDT) · for new users of the AI Foundry lab and their coding agents · part of the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<p class="lede">The AI Foundry lab has three machines with four ET-SoC-1 cards, and several people, CI jobs and
+long measurement queues share them. This page gets you in, puts the rules on one screen, and gives you a brief to
+paste into your coding agent (Claude Code or similar), so that the agent can set you up without spoiling anyone
+else's work. The brief holds what a week of running experiments on these cards taught us (23–30 September).</p>
+
+<div class="steps3">
+  <div class="card"><b>Get access</b><p>Ask the lab lead for an account and a Tailscale invite, and which machine
+  and card to use.</p></div>
+  <div class="card"><b>Log in once</b><p>Run <code>ssh &lt;you&gt;@aifoundryN</code> and approve the link it
+  prints in your browser.</p></div>
+  <div class="card"><b>Hand the brief to your agent</b><p><a href="#hand-this-to-your-agent">Fill in your login and
+  card, then copy it</a>.</p></div>
+</div>
+
+<h2 id="what-the-lab-is">What the lab is</h2>
+<p>Three x86_64 Ubuntu 24.04 machines on AI Foundry's Tailscale network: aifoundry1 has two cards, aifoundry2 and
+aifoundry3 one each. Each card is an ET-SoC-1 on PCIe: 1,088 small RISC-V cores (“minions”) with vector and tensor
+units, 32 of its 34 shires running kernels, and 32 GB of LPDDR4X. The four cards run three firmware releases and
+behave differently, so a number measured on one card needs its card named.</p>
+<div class="cards4" id="cards4"></div>
+<p class="small">Other users of the cards include CI runners on aifoundry1 and aifoundry2, a demo service on
+aifoundry3, and measurement queues that hold a card for hours. Nothing on these cards limits the die temperature,
+so stop any run yourself at a 90 °C die mean.</p>
+
+<h2 id="what-you-need">What you need</h2>
+<ol>
+  <li><b>An account and a Tailscale invite.</b> Ask the lab lead for an account on the machines and an invite to
+  the lab's Tailscale network. Ask also which machine and card to use, and for an invite to #community-lab on the
+  AI Foundry Discord, where people say which machine they are using.</li>
+  <li><b>Tailscale on your computer.</b> Accept the invite and install Tailscale.</li>
+  <li><b>The first login.</b> <code>ssh &lt;you&gt;@aifoundryN</code> prints a <code>login.tailscale.com</code>
+  link and waits. Open it in a browser signed in to the lab's network and approve it. Tailscale asks again after its
+  check period (12 hours by default). If the link answers 404, sign out of login.tailscale.com, sign back in and run ssh again. “Policy does not
+  permit” can mean that your account does not exist on that machine yet: ask the lab lead.</li>
+  <li><b>Read the login banner.</b> It lists the machine's cards, who is using them now, and the rules. It is
+  older than the brief: where they differ, follow the brief.</li>
+  <li><b>Hand the brief to your agent.</b> The agent cannot approve a Tailscale login, push to GitHub or post on
+  Discord for you. When it hands you a link or a question, it waits for you.</li>
+</ol>
+
+<h2 id="the-rules-on-one-screen">The rules on one screen</h2>
+<ol class="rules">
+  <li><b>Ask before you use a card.</b><span>The lab lead says which machine and card. Post “using aifoundryN” in
+  #community-lab on the AI Foundry Discord, and “released” when done.</span></li>
+  <li><b>Look first with <code>et-who</code>.</b><span>It lists who holds each card and never opens one. A card
+  opens in one process at a time; two users corrupt both runs.</span></li>
+  <li><b>Lock, and cap at 10 s.</b><span><code>ET_DEVICES=&lt;N&gt; flock -n /run/lock/etsoc-shire&lt;N&gt;.lock timeout 10 &lt;cmd&gt;</code>.
+  On aifoundry1, ET_DEVICES=1 selects card 1; without it a program opens card 0. Long holds block everyone, and
+  only the lab admin can recover a hung card.</span></li>
+  <li><b>Stop tools gently.</b><span>Ctrl-C or a plain <code>kill</code>, never <code>kill -9</code>. The telemetry
+  sampler finishes its request in flight on either; a request cut off mid-way leaves a stale reply that kills the
+  next program to open the card.</span></li>
+  <li><b>Never reset a card or change its settings.</b><span>Resets, clocks, TDP, thresholds, firmware and driver
+  change other people's runs silently, and a reset can hang a card. Ask the lab admin.</span></li>
+  <li><b>Stop at a 90 °C die mean.</b><span>Nothing on the cards limits their temperature; one ran at 90–103 °C and
+  nothing tripped.</span></li>
+  <li><b>Work in your home directory.</b><span><code>/tmp</code> is cleared at every boot, each machine has its own
+  <code>/home</code>, and aifoundry1's disk is nearly full. Build with <code>nice</code> and <code>-j4</code>.</span></li>
+  <li><b>Leave nothing behind.</b><span>No locks, samplers or stray jobs; log out when done. Some queues wait while
+  another user is logged in.</span></li>
+</ol>
+
+<h2 id="hand-this-to-your-agent">Hand this to your agent</h2>
+<p>Fill in your login and the card the lab lead gave you, then copy the brief into your agent's first message. The
+brief says who the agent works for and what it may not do, gives a first-hour checklist with exact commands, the
+traps we hit and their fixes, how to measure so results hold, how to leave the lab clean, and where to ask.</p>
+<div class="setup">
+  <label>Your login on the lab machines<input id="f-login" type="text" autocomplete="off" autocapitalize="off"
+    spellcheck="false" placeholder="e.g. alice" maxlength="32"></label>
+  <label>Your machine and card<select id="f-card"></select></label>
+  <p class="hint" data-role="hint">Optional. Anything left blank stays in angle brackets, and the agent asks you.</p>
+</div>
+<div class="copybox">
+  <div class="bar">
+    <div class="meta" data-role="meta"><b>START.md</b> · the agent brief</div>
+    <button class="btn primary" type="button" data-role="copy">Copy for your agent</button>
+    <button class="btn" type="button" data-role="download">Download .md</button>
+    <span class="copystat" data-role="stat" aria-live="polite">&nbsp;</span>
+  </div>
+  <pre data-role="raw" tabindex="0" aria-label="The agent brief, as markdown"></pre>
+</div>
+<div class="alt"><span>Or point the agent at the current copy in the repository:</span>
+  <code data-role="alttext">Read https://raw.githubusercontent.com/yaroslavvb/et-soc1-prototyping/main/docs/lab-start/START.md and follow it.</code>
+  <button class="btn small" type="button" data-role="copyalt">Copy</button></div>
+<p class="small">The brief lives in the repository as <code>docs/lab-start/START.md</code>, which is the copy to
+edit; this page shows it word for word.</p>
+
+<h2 id="the-brief-to-read">The brief, to read</h2>
+<p class="small">The same text as above, rendered. Highlighted: <span class="ph">&lt;placeholders&gt;</span> still to
+fill in, and <span class="fill">values you filled in</span>.</p>
+<div class="brief" id="brief-view"></div>
+
+<h2 id="related-reports">Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a>: the hub, with every ET-SoC-1 measurement report.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram">The ET-SoC-1, interactively</a>: the chip's parts, drawn and explained.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a>: what each operation costs in joules on these cards.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature telemetry</a>: every way to read a card's power and temperature, and what each number means.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating">The effect of overheating</a>: why the 90 °C stop matters.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">The improvement ladder</a>: the hub's section that links the lab problems report, with each known problem and its status.</li>
+<li><a href="https://github.com/yaroslavvb/et-soc1-prototyping">The repository</a>: the knowledge base, the workloads and the tools; start with <code>AGENT.md</code>.</li>
+</ul>
+<p class="small"><b>Versions.</b> 30 September 2026: first edition, from the lab's notes of 23–30 September, a
+read-only check of the three machines at 13:24–13:40 PDT that day, and a review and a cold-start test of the brief
+on aifoundry3 (13:46–13:52 PDT, no card opened), whose findings it applies.</p>
+</main>
+
+<script>
+/* chart toolkit: docs/reports/sources/chartkit.js */
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame.
+   Added 26 Sep 2026: sortTable (sortable, filterable tables) and the card registry (cards, card, cardsIn, cardSeg,
+   pick, cardMark, cardLegend): aifoundry2 --c1 dot, aifoundry3 --c2 ring, aifoundry1-c1 --c3 diamond, all cards --ink. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'diamond' ? el('polygon', {points: '9,0 14,5 9,10 4,5'}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box' || m === 'diamond') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (it.dash) e.style.strokeDasharray = it.dash; else if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    api.quiet = v => set(v, false);  // show v as selected without calling onChange
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- cards: one registry for every page (fixed colour, mark and label per card), a shared card selector and a picker
+     for values shaped {mean, se, n, per_card: {<card>: {mean, se, n}}}. aifoundry1-c0 is kept for old data only: it is
+     excluded from the version-3 campaign (amendment A4) and never offered by cardSeg unless a page passes it. ---- */
+  const CARDS = [
+    {id: 'aifoundry2', short: 'a2', label: 'aifoundry2', color: 'var(--c1)', mark: 'dot'},
+    {id: 'aifoundry3', short: 'a3', label: 'aifoundry3', color: 'var(--c2)', mark: 'ring'},
+    {id: 'aifoundry1-c1', short: 'a1c1', label: 'aifoundry1 card 1', color: 'var(--c3)', mark: 'diamond'},
+    {id: 'aifoundry1-c0', short: 'a1c0', label: 'aifoundry1 card 0', color: 'var(--ref)', mark: 'box'},
+  ];
+  const POOLED = {id: 'pooled', short: 'all', label: 'all cards', color: 'var(--ink)', mark: 'dot'};
+  const cardIndex = {};
+  CARDS.forEach(c => { cardIndex[c.id] = c; cardIndex[c.short] = c; });
+  /* The registry entry for a card id or short name; an unknown card gets --ref and its own name. */
+  function card(id) {
+    if (id === 'pooled' || id === 'all') return POOLED;
+    return cardIndex[id] || {id, short: id, label: id, color: 'var(--ref)', mark: 'box'};
+  }
+  /* The cards present in an object's keys (or a list), in registry order, then any others in their order. */
+  function cardsIn(keysOrObj) {
+    const ks = Array.isArray(keysOrObj) ? keysOrObj : Object.keys(keysOrObj || {});
+    const norm = ks.map(k => (cardIndex[k] ? cardIndex[k].id : k));
+    return CARDS.map(c => c.id).filter(id => norm.includes(id)).concat(norm.filter(k => !cardIndex[k]));
+  }
+  /* A card selector on bus('card'): options are o.cards (default: every registered card but aifoundry1-c0), with
+     "all cards" first when o.pooled. Every cardSeg on a page follows the others. */
+  function cardSeg(hostEl, o) {
+    o = o || {};
+    const ids = (o.cards || CARDS.filter(c => c.id !== 'aifoundry1-c0').map(c => c.id)).map(k => card(k).id);
+    const opts = (o.pooled ? [['pooled', o.pooledLabel || POOLED.label]] : []).concat(ids.map(id => [id, card(id).label]));
+    const b = bus(o.bus || 'card');
+    const start = b.value != null && opts.some(x => x[0] === b.value) ? b.value : (o.value || opts[0][0]);
+    const api = seg(hostEl, {label: o.label == null ? 'Card' : o.label, options: opts, value: start,
+      onChange: v => { b.emit(v, api); if (o.onChange) o.onChange(v); }});
+    b.on((v, from) => { if (from !== api && opts.some(x => x[0] === v) && api.value !== v) { api.quiet(v); if (o.onChange) o.onChange(v); } });
+    return api;
+  }
+  /* {mean, se, n, card} of v for a card ('pooled' = v itself), or null when the card has no value (never a zero). */
+  function pick(v, id) {
+    if (v == null) return null;
+    if (typeof v === 'number') return {mean: v, se: null, n: null, card: 'pooled'};
+    const c = id == null || id === 'pooled' || id === 'all' ? null : card(id).id;
+    const src = c == null ? v : (v.per_card || {})[c];
+    if (src == null) return null;
+    const m = typeof src === 'number' ? src : src.mean;
+    if (m == null || !isFinite(m)) return null;
+    return {mean: m, se: typeof src === 'number' ? null : (src.se == null ? null : src.se), n: typeof src === 'number' ? null : (src.n == null ? null : src.n), card: c || 'pooled'};
+  }
+  /* A card's mark at (x, y) in an SVG group: dot, ring, diamond or box, in the card's colour (or colour, if given). */
+  function cardMark(g, id, x, y, r, colour) {
+    const c = Object.assign({}, card(id)), R = r || 4;
+    if (colour) c.color = colour;
+    let e;
+    if (c.mark === 'diamond') e = el('polygon', {points: `${x},${y - R * 1.25} ${x + R * 1.25},${y} ${x},${y + R * 1.25} ${x - R * 1.25},${y}`}, g);
+    else if (c.mark === 'box') e = el('rect', {x: x - R, y: y - R, width: 2 * R, height: 2 * R}, g);
+    else e = el('circle', {cx: x, cy: y, r: c.mark === 'ring' ? R - 0.5 : R}, g);
+    if (c.mark === 'ring') { e.style.fill = 'var(--surface)'; e.style.stroke = c.color; e.style.strokeWidth = '2'; }
+    else e.style.fill = c.color;
+    return e;
+  }
+  /* Legend items for a list of cards (for legend()). */
+  const cardLegend = ids => ids.map(id => { const c = card(id); return {key: c.id, label: c.label, color: c.color, mark: c.mark}; });
+
+  /* ---- a sortable, filterable table: click a header to sort (aria-sort), numbers parsed with the true minus, thin
+     spaces and thousands commas; o.filter adds a text box that hides rows not containing it. Rows keep their DOM
+     nodes, so any listeners on them survive. A header with data-nosort is left alone. ---- */
+  function cellValue(td) {
+    const raw = (td.getAttribute('data-sort') != null ? td.getAttribute('data-sort') : td.textContent).trim();
+    const t = raw.replace(/−/g, '-').replace(/[   ,]/g, '').replace(/^[~≈<>≤≥]\s*/, '');
+    const m = t.match(/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i);
+    return m && (t.length === m[0].length || /^[\s%×x°a-zA-Zµ/()]/.test(t.slice(m[0].length))) ? {n: parseFloat(m[0])} : {s: raw.toLowerCase()};
+  }
+  function sortTable(table, o) {
+    o = o || {};
+    const t = $(table), tb = t.tBodies[0], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (!tb || !hr) return null;
+    const orig = [...tb.rows];
+    let col = -1, dir = 0;
+    const heads = [...hr.cells];
+    let k = 0;
+    const colOf = heads.map(h => { const c = k; k += h.colSpan || 1; return c; });
+    heads.forEach((h, i) => {
+      if (h.hasAttribute('data-nosort') || (h.colSpan || 1) > 1) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ck-sort';
+      while (h.firstChild) b.appendChild(h.firstChild);
+      h.appendChild(b); h.setAttribute('aria-sort', 'none');
+      b.addEventListener('click', () => {
+        dir = col === colOf[i] ? (dir === 1 ? -1 : dir === -1 ? 0 : 1) : 1; col = colOf[i];
+        heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none'));
+        if (dir) h.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+        const rows = dir ? [...orig].sort((a, b2) => {
+          const ca = a.cells[col], cb = b2.cells[col];
+          if (!ca || !cb) return 0;
+          const va = cellValue(ca), vb = cellValue(cb);
+          if (va.n != null && vb.n != null) return dir * (va.n - vb.n);
+          if (va.n != null) return -1;
+          if (vb.n != null) return 1;
+          return dir * va.s.localeCompare(vb.s);
+        }) : orig;
+        rows.forEach(r => tb.appendChild(r));
+      });
+    });
+    if (o.filter) {
+      const w = document.createElement('div'); w.className = 'ck-filter';
+      const id = 'ck-f' + (++uid), lab = document.createElement('label'), inp = document.createElement('input');
+      lab.htmlFor = id; lab.textContent = o.filterLabel || 'Filter rows'; inp.id = id; inp.type = 'search';
+      const cnt = document.createElement('span'); cnt.className = 'ck-filter-n'; cnt.setAttribute('aria-live', 'polite');
+      inp.addEventListener('input', () => {
+        const q = inp.value.trim().toLowerCase(); let n = 0;
+        orig.forEach(r => { const on = !q || r.textContent.toLowerCase().includes(q); r.classList.toggle('ck-hidden', !on); if (on) n++; });
+        cnt.textContent = q ? `${n} of ${orig.length} rows` : '';
+      });
+      w.append(lab, inp, cnt);
+      const ref = t.closest('.wide, .scroll, .ck-table-wrap') || t; ref.parentNode.insertBefore(w, ref);
+    }
+    t.classList.add('ck-sortable');
+    return {table: t, reset() { col = -1; dir = 0; heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none')); orig.forEach(r => tb.appendChild(r)); }};
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
+})();
+
+</script>
+<script>
+const D = {"source":"docs/lab-start/START.md","md":"# The AI Foundry ET-SoC-1 lab: a brief for your coding agent\n\nVersion of 30 September 2026 (PDT). The current copy is `docs/lab-start/START.md` in\nhttps://github.com/yaroslavvb/et-soc1-prototyping; if this one is more than a month old, read that one instead.\n\n## Your setup\n\nYour person fills these in. Ask about anything still in angle brackets.\n\n- Your person's login on the lab machines: `<login>`\n- The machine and card the lab lead gave them: `<host>`, card `<N>`\n- The card number is 0 on aifoundry2 and aifoundry3, and 1 on aifoundry1.\n- Jobs to leave alone: every job that is not yours.\n\n## Who you work for, and the limits\n\nYou work for one person, a new user of a shared lab: three x86_64 Ubuntu 24.04 machines (aifoundry1, aifoundry2,\naifoundry3) with four ET-SoC-1 PCIe cards, each with 1,088 small RISC-V cores (\"minions\"). Other people, CI jobs, a\ndemo service and queues that run for hours share the cards. A mistake on a card spoils other people's runs, and\nonly the lab admin can recover a hung card.\n\nYou may, without asking: run `et-who`, `loginctl list-sessions`, `uptime`, `ps`, `df`, `et-lab-health`,\n`et-lab-manifest`, `dmesg` and `coredumpctl`; clone, edit, build and simulate in your person's home directory, with\n`nice` and `-j4`, but not while `et-who` or the step 2 check shows someone's run on this host: wait or ask.\n\nAsk your person first: before the first card run of each session, before any run of more than one process, and\nbefore anything shared, such as a long detached job, a drain of a card's queue (see Traps), or any download, install\nor pip package over 100 MB on aifoundry1, whose disk is nearly full and shared with the system.\n\nNever do these; if one seems needed, stop and tell your person, who asks the lab admin:\n\n- reset a card, or change its TDP, clocks, thresholds, power management, voltages, trace level, telemetry\n  statistics (`ettelem --reset-ms`), firmware, driver or `/opt/et`;\n- use sudo or root, or change any system setting;\n- use any card but card `<N>` on `<host>`; never aifoundry1's card 0, which overheats;\n- run `/opt/et/bin/dev_mngt_service` or `et-powertop` on aifoundry1: they open card 0 even with `-n 1`;\n- `kill -9` a process that holds a card, or touch another user's processes or files;\n- put a secret on an ssh command line: every user on the host can read a remote command in full with `ps`.\n\nLeave to your person, and wait: the Tailscale login approval, GitHub pushes, logins to publishing services, posts on\nthe AI Foundry Discord, and anything for the lab admin.\n\n## The four cards\n\n| Card | Firmware | Clock | Idle | Watch for | Use it for |\n|---|---|---|---|---|---|\n| aifoundry2 | 1.3.1 | DVFS 600\u2013800 MHz, above 600 only below about 68 \u00b0C, which it rarely is, so usually 600 | 31\u201336 W hot, 27 W cold | some traffic starves its meter; a CI runner shares it | the main card; ask before power work: comparable runs there start from a die at about 76 \u00b0C, which takes minutes of heating |\n| aifoundry3 | 1.3.1 | pinned at 600 MHz (NoC 400) at every boot; no thermal step | 23.6 W at 50 \u00b0C | reaches 88 \u00b0C under load, nothing slows it; a demo service can use the card without the lock | switching power over idle, never absolute watts |\n| aifoundry1 card 1 | 1.2.0 | 600 MHz always | 33\u201335 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; disk 99% full; a CI runner shares the host | anything at a fixed 600 MHz |\n| aifoundry1 card 0 | 1.4.1 | idles at 300 MHz | 18.6\u201318.8 W | overheats: 115\u2013117 \u00b0C after 10 minutes of short tests | nothing |\n\nNothing on these cards limits the die temperature: aifoundry2 once ran at a 90\u2013103 \u00b0C mean and nothing tripped.\nEvery host has driver 0.20.0 and RISC-V GCC 15.1 in `/opt/et`, but a different runtime build.\n\n## The rules, with the why\n\n1. **Use only your card, and only when it is free.** A free lock is not permission: queues release it between\n   blocks. Why: two users on one card corrupt both runs, and your heat changes the next person's run.\n2. **Look before every run** with `et-who --check`: exit 0 free, 1 held (your own lock included), 2 check failed.\n   Never parse the sentence plain `et-who` prints. On exit 2, stop and tell your person; never run a card without\n   the check. On aifoundry1 it counts both cards, so a holder on card 0 also gives exit 1: show your person the\n   `et-who` output and wait. Why: each device node opens in one process at a time.\n3. **Run every device-opening process under the card lock, capped at 10 s:**\n   `ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 <cmd>`. `-n` fails at once instead of\n   waiting. `ET_DEVICES` selects the card on aifoundry1 and is ignored elsewhere. Only programs built on aifoundry1\n   against its `/opt/et` honour it; check with `grep -aq ET_DEVICES <binary>` before the first run there. Exit 1\n   with no output means the lock was taken; exit 124 means `timeout` stopped the program at 10 s. Either way, stop\n   and run `et-who`. Release the lock between sub-tests. Why: long holds block everyone. The lock is advisory, and\n   aifoundry3's demo does not take it, so run `et-who` again after each run.\n4. **Stop tools with Ctrl-C, a plain `kill` or `timeout`'s default signal**, never `kill -9` or `timeout -s KILL`.\n   Why: ettelem finishes the request in flight on Ctrl-C or SIGTERM, and `kill -9` never lets it; a request cut off\n   mid-way leaves a stale reply, and the next program that opens the card dies. Other programs die at once either\n   way, so keep each run well inside its `timeout` (sgemm stops itself at 8 s).\n5. **Call `registerRuntimeLogLevels()` first in every host `main`**; copy it from any `workloads/*/host/main.cpp`.\n   Why: a race in the runtime's logging crashes about 1 launch in 100 on aifoundry3. With the fix, 641 launches\n   had 0 crashes where 6.4 were expected.\n6. **Work in your home directory.** `/tmp` is cleared at every boot, and each machine has its own `/home`.\n7. **Build into directories of your own**, and never rebuild, edit or copy over files a running job uses. Why: bash\n   reads a script while it runs, and the job would run a binary its recorded hash does not match.\n8. **Code-only work never reaches a card.** Give every script a dry mode that fails closed, run it from absolute\n   paths, and check `et-who` afterwards. Why: on 25 September a code-only agent ran a real block, because a `cd` in\n   a backgrounded chain did not apply.\n9. **Stop any run at a 90 \u00b0C die mean.**\n10. **Start long jobs detached**, because the hosts use Wi-Fi and a dropped ssh hangs up its command:\n    `setsid nohup <cmd> > <log> 2>&1 < /dev/null & echo $!`. Stop the job by that PID. A detached job still runs\n    each device-opening process under the lock and `timeout 10`.\n\n## The first hour\n\nStop at the first surprise.\n\n**0. Agree the plan.** Confirm the setup lines with your person. They post \"using `<host>`\" in #community-lab on\nthe AI Foundry Discord.\n\n**1. Reach the machine.** First check that `tailscale status` on your person's computer lists `<host>`. If\nTailscale is missing or the host is not listed, stop: your person accepts the lab's Tailscale invite and installs\nTailscale. If `<host>` does not resolve, use the full name `tailscale status` shows. The first ssh prints a\nlogin.tailscale.com link and waits, so ask your person to run `ssh <login>@<host> true` in their own terminal and\napprove the link. Tailscale asks again after its check period (12 hours by default): if a later ssh prints the link\nagain, give it to your person and wait. If the link answers 404, they sign out of login.tailscale.com, sign in and\nretry. \"Policy does not permit\" can mean the account does not exist there yet.\n\nSend each block below as one command, so that its `cd` and variables carry through to its last line:\n\n```bash\nssh <login>@<host> 'bash -s' <<'EOF'\n...one block from below, as written...\nEOF\n```\n\nA remote command gets no `/opt/et/bin` on its PATH: keep the absolute paths below. If your person runs you on the\nlab machine itself, install the agent in their home directory without sudo, start it in `~`, run it inside tmux,\nrun the blocks directly, and log out when done.\n\n**2. Look.**\n\n```bash\net-who; loginctl list-sessions; uptime\nps -eo user,etime,comm | grep -E '_host$|ettelem|queue.sh|sys_emu|it_test|dev_mngt|powertop|Runner.Worker'\net-lab-health; echo \"exit $?\"\ncat /etc/motd\n```\n\nAny `ps` line that is not yours means someone's run or queue is active on this host: ask your person before a card\nrun, even when `et-who` shows the card free. `who` and `et-lab-health` miss ssh command sessions; `loginctl` shows\nthem. `et-lab-health` is read-only. Exit 1 means a WARN line, and aifoundry1 always has some: read them. Someone\nlogged in is not someone using a card; `et-who` is what counts. If it shows card `<N>` held, look again after a few\nminutes, at most once a minute, or ask your person; never take another card instead. The banner (`/etc/motd`) is\nolder than this brief: where they differ, follow the brief.\n\n**3. Get the code.** A clone without the reports' raw data takes about 35 MB; the full shallow clone is 380 MB.\n\n```bash\nfree=$(df --output=avail -BG ~ | tail -1 | tr -dc 0-9)\n[ \"$free\" -ge 5 ] || { echo \"only ${free} GB free: stop and ask your person\"; exit 1; }\ngit clone --depth 1 --filter=blob:none --sparse https://github.com/yaroslavvb/et-soc1-prototyping ~/et-soc1-prototyping\ncd ~/et-soc1-prototyping && git sparse-checkout set --no-cone '/*' '!/docs/reports/'\n```\n\nThe clone's `CLAUDE.md` and `AGENT.md` are the owner's standing instructions. Where they differ from this brief,\nthis brief wins. Do not commit or push to the clone, deploy pages, or run `scripts/deploy-lab*.sh`,\n`scripts/check-mirror.py` or `tools/claims-v3` queues. If you run on the host, start the agent in `~`, not in the\nclone, so the clone's `CLAUDE.md` does not load as your instructions.\n\nRead `AGENT.md` \u00a75\u20137, \"Traps that cost time here\" in `docs/findings/14-card-behaviour.md`, and\n`docs/et-soc1-notes.md` before writing kernels. Start from `workloads/`, which use the runtime API and build on the\nhost. Skip `kernels/` and `launchers/`: they need a gp-sdk the lab machines do not have. Link programs you build\nwithout CMake with `-Wl,-rpath,/opt/et/lib`. For Python packages, make a venv\n(`python3 -m venv --system-site-packages ~/venv`); numpy is installed.\n\n**4. Simulator smoke, no card.** It passes 3 tests in about 110 s: give it a 5-minute tool timeout, or start it\ndetached (rule 10). It writes its logs into the directory it runs in, so run it in a run directory.\n\n```bash\nmkdir -p ~/runs/first-hour && cd ~/runs/first-hour && nice /opt/et/bin/it_test_code_loading\n```\n\n**5. Card smoke, under 1 s.** Run it from the same directory. aifoundry1's copy honours `ET_DEVICES` (checked on\n30 September); aifoundry2 and aifoundry3 ignore it.\n\n```bash\ncd ~/runs/first-hour\n[ <N> = 0 ] || grep -aq ET_DEVICES /opt/et/bin/it_test_code_loading || { echo \"ignores ET_DEVICES: stop\"; exit 1; }\net-who --check && ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie\net-who\n```\n\n**6. Build a workload and run it in the simulator.**\n\n```bash\ncd ~/et-soc1-prototyping\ncmake -S workloads/sgemm -B build/sgemm-mine -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev\nnice cmake --build build/sgemm-mine -j4\nmkdir -p build/sgemm-mine/run\ncd build/sgemm-mine/run && nice ../host/sgemm_host --sysemu -n 64 --shires 0x1 --reps 1\n```\n\nExpect `mismatches 0/4096` and `PASS` after about a minute. A warning that `CMAKE_INSTALL_LIBDIR` is unused is\nharmless. The simulator checks correctness, never speed.\n\n**7. Run it on the card, and record the run.**\n\n```bash\ncd ~/et-soc1-prototyping\nR=~/runs/first-hour; mkdir -p $R\n[ <N> = 0 ] || grep -aq ET_DEVICES build/sgemm-mine/host/sgemm_host || { echo \"ignores ET_DEVICES: stop\"; exit 1; }\net-lab-manifest > $R/manifest.txt; date > $R/when.txt\net-who --check && ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 \\\n  build/sgemm-mine/host/sgemm_host -n 512 --reps 3 | tee $R/out.txt\net-who\n```\n\nExpect `mismatches 0/262144`, `PASS` and about 2.4 ms per launch (aifoundry3, 18 September; host timings changed on\n25 September). Host clocks are in PDT.\n\n**8. Read telemetry safely.**\n\n```bash\ncd ~/et-soc1-prototyping\ncmake -S tools/ettelem -B build/ettelem-mine -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev\nnice cmake --build build/ettelem-mine -j4\nR=~/runs/first-hour\n[ <N> = 0 ] || grep -aq ET_DEVICES build/ettelem-mine/ettelem || { echo \"ignores ET_DEVICES: stop\"; exit 1; }\net-who --check && ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 \\\n  build/ettelem-mine/ettelem sample --seconds 5 --every-ms 100 > $R/idle.jsonl\net-who\n```\n\nEach line has `board_w`, `mhz.minion`, the die mean `temp_c.minshire[0]` and `took_ms`. An empty file is a failed\nstart (about 1 in 3): wait a few seconds and retry once. If the retry is empty too, stop and tell your person; never\nloop or drain yourself. Use only `sample` and `config`, never `--reset-ms` or `loglevel`. The sampler and\n`sgemm_host` both hold the management node, so never run them together.\n\n**9. Finish.** Check that `et-who` lists nothing of yours, and tell your person what ran and what you saw; the\nfiles are in `~/runs/first-hour`. They post \"released\" in #community-lab.\n\n**Next.** Read two worked examples: `workloads/sparseparity/README.md` (a kernel brought up in stages, with\nnegative controls) and `tools/claims-v3/pcie2/README.md` (pre-registered, developed on one card, validated on\nanother). Copy their patterns; do not run their runners, which are written for the owner's trees.\n\n## Traps: symptom, cause, fix\n\n| Symptom | Cause | Fix |\n|---|---|---|\n| a locked command exits 1 with no output, or exits 124 | `flock -n` found the card taken; `timeout` stopped the run at 10 s | `et-who`, then wait or ask; never retry in a loop |\n| \"Device or resource busy\" | another process holds the node | `et-who`, then wait |\n| `who` or `et-lab-health` says nobody is logged in | ssh command sessions leave no login record | `loginctl list-sessions` |\n| every program dies with `std::bad_function_call` on opening the card | a killed tool left a stale reply | with your person's OK, on aifoundry2 or aifoundry3 only, drain once: `et-who --check && flock -n /run/lock/etsoc-shire0.lock timeout 10 /opt/et/bin/dev_mngt_service -m DM_CMD_GET_MODULE_POWER -n 0 -u 5000`; on aifoundry1, stop and tell your person |\n| SIGSEGV (exit 139) 1.08 s in, about 1 run in 100, aifoundry3 | the runtime's logging race | rule 5; with an old binary, repeat the launch |\n| every launch fails: `KernelLaunchCmIfaceMulticastFailed`, or \"Perhaps the Master Minion is hanged?\" | the card is wedged, often by a TensorSend or credit wait with no partner | stop; tell your person, for the lab admin. In kernels, poll `fccnb` with a bailout |\n| clock or power differ between identical runs | the governor acts on temperature: above a 65 \u00b0C mean a card runs at 600 MHz; a cool, busy aifoundry2 climbs to 800 | check `mhz.minion` in every sample; start each run at the same temperature |\n| watts differ between cards | idle and leakage differ | compare the run minus the idle just before it |\n| readings lag the work | rails are running averages (\u03c4 about 1 s), board power updates every 133\u2013224 ms, the die reads whole degrees | skip 2\u20133 s after any change |\n| `took_ms` of 76 ms to 1.6 s on aifoundry2 | some on-chip traffic starves the meter | drop bursts whose median is over 60 ms |\n| a host program fails while a sampler runs | both open the management node | later, not in the first hour: open the ops node only (`createPcieDeviceLayer(true, false)`) and hold one lock for both, `flock -n <lock> sh -c '...'`, each process with its own `timeout 10` |\n| on aifoundry1, `dev_mngt_service` or `et-powertop` disturbs card 0 | they open both cards, even with `-n` | never run them on aifoundry1; tell your person |\n| `pgrep -f` or `pkill -f` over ssh matches itself | the remote command line holds the pattern | bracket it (`'[m]y_run.sh'`); kill by PID |\n| a running script breaks after an edit or scp | bash reads the file as it runs | copy to a temporary name, then `mv`; `chmod +x` after scp |\n| wrong results only with many minions | the L1 is not coherent and writes back whole 64 B lines | give each hart whole lines, or use L/G ops or evicts |\n| a memory pattern with no buffer \"works\" | it writes address 0, and nothing reports it | check every buffer on the host before launch |\n| an empty kernel costs about 0.56 ms, a 4 KB copy about 0.4 ms | runtime overhead | batch the work |\n| host timings differ between hosts | each host has its own runtime build | compare host timings within one host |\n\nKernel code that traps or hangs:\n\n- `double` anywhere, and `fcvt.s.lu` (64-bit integer to float).\n- In U-mode: `fdiv`, `fsqrt`, `frsq`, `fsin`, packed integer division, and reading the `cycle` CSR.\n- Scratchpad offset 0 (start buffers 256 KB in), and a global atomic through scratchpad ID 0x7F.\n- Many shires spinning on one global atomic hangs its home shire: use a credit-release barrier.\n- Only hart 0 of a minion may issue tensor ops. TensorSend has one ready bit per minion: change partners only\n  across a barrier. `sys_emu` catches neither.\n- Erratum 1.29: nothing inserts its workaround and `sys_emu` does not model it. Simulate with `-vpurf_warn`, and\n  suspect it when results are wrong only on silicon.\n\n## Measuring so results hold\n\n- **Pre-register.** Commit theories, numeric predictions and the decision rule before the first run. Write each\n  change as a dated amendment before the data it touches. Report a failed prediction as failed.\n- **Develop on one card, validate on another**, with the code frozen in between. Report development values, never\n  judge them. Replicate across passes, sessions or cards, never across samples in one burst.\n- **Freeze with hashes** of the code, schedules, predictions and each kernel's `.text`. Every pass runs\n  `sha256sum -c` and refuses to start on any difference.\n- **Run dry, then smoke (about 30 s of card time), then for real.**\n- **Bring kernels up in stages:** a CPU oracle, `sys_emu` with its checkers, 1 minion, 1 shire, 32 shires. Give\n  each step an expected result and a modelled time, and include negative controls that must fail.\n- **Stop at the first failure**: write a STOP file that only a person removes.\n- **Keep the host quiet while measuring**: no builds, `sys_emu` or other device processes.\n- **Control the heat.** Start each run from the same die temperature, and compare switching power. Budget 3\u20138 times\n  more wall-clock time than card time, for cooling.\n- **Record everything in a repository**, because agent memory stays on one machine: the `et-lab-manifest` output,\n  the firmware from the table above (only the lab admin changes it), the `.text` hash, the command and the PDT time.\n\n## Leaving the lab clean\n\n- `et-who` lists no node or lock of yours.\n- `ps -u <login> -o pid,etime,cmd`: stop only the jobs you started, by the PIDs you recorded, with a plain\n  `kill <pid>`; ask about any other.\n- `du -sh ~/* | sort -h | tail`: delete only the builds and simulator logs you made, above all on aifoundry1; ask\n  before deleting anything else.\n- Copy anything worth keeping out of `/tmp`, where agents often keep scratch files.\n- Log out and close the tmux sessions you started: some queues wait while another user is logged in.\n- Your person posts \"released\" in #community-lab.\n\n## When something breaks, and where to ask\n\n- Look: `dmesg | grep ET` (refused opens, card errors, resets), `coredumpctl list`, `et-lab-health`.\n- On a wedged card, an error you do not understand, or a die over 90 \u00b0C: stop. Do not retry in a loop, and never\n  reset. Give your person the time (PDT), host, card, command, error text, `et-who` output and `dmesg` lines.\n- Accounts, access, which card and lab policy: the lab lead. A hung card or anything needing root: the lab admin.\n  #community-lab on the AI Foundry Discord is the shared place to ask; the lab lead can send an invite.\n- Before reporting a problem, check the lab problems report, which lists the known ones with their status. The\n  hub's improvement ladder links it: https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve\n\n## Read next\n\n- The reports hub: https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability\n- The chip, interactively: https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram\n- What each operation costs in joules: https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual\n- The effect of overheating: https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating\n","sha256":"7df69e63e9b3826a42286f6825052ac39257dc2c604ace1d9005c090c69d8fb7","words":3401,"words_prose":3134,"placeholders":["N","host","login"],"cards":[{"id":"aifoundry2","host":"aifoundry2","n":0,"firmware":"1.3.1","clock":"firmware DVFS, usually 600 MHz","note":"the main card; a CI runner shares it","use":true},{"id":"aifoundry3","host":"aifoundry3","n":0,"firmware":"1.3.1","clock":"pinned at 600 MHz","note":"a demo service can use it without the lock","use":true},{"id":"aifoundry1-c1","host":"aifoundry1","n":1,"firmware":"1.2.0","clock":"600 MHz always","note":"select with ET_DEVICES=1; the host's disk is nearly full","use":true},{"id":"aifoundry1-c0","host":"aifoundry1","n":0,"firmware":"1.4.1","clock":"idles at 300 MHz","note":"overheats: nobody uses it","use":false}]};
+/* New user? Start now. D is brief.json (docs/lab-start/make_page_data.py): D.md is START.md word for word, D.cards the
+   card tiles. The copy box shows D.md with the viewer's login and card filled in; the rendered view below it is the
+   same text through a small markdown renderer that knows only what START.md uses (headings, paragraphs, flat lists,
+   pipe tables, fenced code, inline code, bold, links). Nothing is stored or sent anywhere. */
+(function () {
+  const q = sel => document.querySelector(sel);
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const slug = t => t.toLowerCase().replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, '').replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '').slice(0, 50);
+
+  /* ---- the card tiles, from the data */
+  const tiles = q('#cards4');
+  D.cards.forEach(c => {
+    const k = CK.card(c.id), d = document.createElement('div');
+    d.className = 'card' + (c.use ? '' : ' off');
+    d.style.setProperty('--c', k.color);
+    d.innerHTML = `<div class="nm">${esc(k.label)}<span class="tag ${c.use ? 'yes' : 'no'}">${c.use ? 'usable' : 'off limits'}</span></div>`
+      + `<div class="fw">firmware ${esc(c.firmware)}` + (c.use ? ` · lock <code>etsoc-shire${c.n}.lock</code>` : '') + '</div>'
+      + `<div class="ck">${esc(c.clock)}</div><div class="nt">${esc(c.note)}</div>`;
+    tiles.appendChild(d);
+  });
+
+  /* ---- the setup fields: login and card fill the brief's <login>, <host> and <N> */
+  const sel = q('#f-card'), inp = q('#f-login'), hint = q('[data-role=hint]');
+  const opt = (v, t, dis) => { const o = document.createElement('option'); o.value = v; o.textContent = t; o.disabled = !!dis; sel.appendChild(o); };
+  opt('', 'not chosen yet');
+  D.cards.forEach(c => opt(c.use ? c.host + '|' + c.n : '', CK.card(c.id).label + (c.use ? '' : ' (not used)'), !c.use));
+  const LOGIN = /^[a-z_][a-z0-9_-]{0,31}$/;
+  const S1 = '\u0001', S2 = '\u0002';                    // around a filled value, marked after rendering
+  function values() {
+    const v = {}, l = inp.value.trim();
+    if (l && LOGIN.test(l)) v.login = l;
+    if (sel.value) { const [h, n] = sel.value.split('|'); v.host = h; v.N = n; }
+    hint.textContent = l && !LOGIN.test(l)
+      ? 'A login is lower-case letters, digits, "-" and "_"; this one is left out.'
+      : 'Optional. Anything left blank stays in angle brackets, and the agent asks you.';
+    return v;
+  }
+  const fill = (md, v, mark) => md.replace(/<(login|host|N)>/g, (m, k) => v[k] == null ? m : (mark ? S1 + v[k] + S2 : v[k]));
+
+  /* ---- a small markdown renderer for START.md */
+  function inline(s) {
+    const code = [];
+    s = s.replace(/`([^`]+)`/g, (m, c) => { code.push(c); return '\u0000' + (code.length - 1) + '\u0000'; });
+    s = esc(s)
+      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>')
+      .replace(/(^|[\s(])(https?:\/\/[^\s<)"]*[^\s<)".,;:])/g, '$1<a href="$2">$2</a>');
+    return s.replace(/\u0000(\d+)\u0000/g, (m, i) => '<code>' + esc(code[+i]) + '</code>');
+  }
+  function cells(row) {                                   // split a pipe row, ignoring pipes inside code spans
+    const out = []; let cur = '', inCode = false;
+    const r = row.trim().replace(/^\|/, '').replace(/\|$/, '');
+    for (const ch of r) {
+      if (ch === '`') inCode = !inCode;
+      if (ch === '|' && !inCode) { out.push(cur.trim()); cur = ''; } else cur += ch;
+    }
+    out.push(cur.trim());
+    return out;
+  }
+  const ITEM = /^(?:[-*]|(\d+)\.)\s+(.*)$/;
+  const BLOCK = /^(```|#{1,6}\s|\||[-*]\s|\d+\.\s)/;
+  function render(md) {
+    const L = md.split('\n'), out = [], heads = [];
+    let i = 0;
+    while (i < L.length) {
+      const l = L[i];
+      if (!l.trim()) { i++; continue; }
+      if (l.startsWith('```')) {
+        const buf = []; i++;
+        while (i < L.length && !L[i].startsWith('```')) buf.push(L[i++]);
+        i++;
+        out.push('<pre><code>' + esc(buf.join('\n')) + '</code></pre>');
+        continue;
+      }
+      let m = l.match(/^(#{1,4})\s+(.*)$/);
+      if (m) {
+        i++;
+        if (m[1].length === 1) continue;                  // the title: the page has its own
+        const tag = m[1].length === 2 ? 'h3' : 'h4', id = 'brief-' + slug(m[2]);
+        if (tag === 'h3') heads.push([id, inline(m[2])]);
+        out.push(`<${tag} id="${id}">${inline(m[2])}</${tag}>`);
+        continue;
+      }
+      if (l.startsWith('|')) {
+        const rows = [];
+        while (i < L.length && L[i].startsWith('|')) rows.push(L[i++]);
+        const hd = cells(rows[0]), body = rows.slice(2).map(cells);
+        out.push('<div class="table-wrap"><table class="stack"><thead><tr>' + hd.map(h => '<th>' + inline(h) + '</th>').join('')
+          + '</tr></thead><tbody>' + body.map(r => '<tr>' + r.map((c, j) =>
+            `<td data-label="${esc(hd[j] || '')}">${inline(c)}</td>`).join('') + '</tr>').join('') + '</tbody></table></div>');
+        continue;
+      }
+      m = l.match(ITEM);
+      if (m) {
+        const ordered = m[1] != null, start = ordered ? +m[1] : 1, items = [];
+        while (i < L.length) {
+          const x = L[i], mm = x.match(ITEM);
+          if (mm && (mm[1] != null) === ordered) { items.push(mm[2]); i++; continue; }
+          if (x.trim() && /^\s{2,}\S/.test(x) && items.length) { items[items.length - 1] += ' ' + x.trim(); i++; continue; }
+          break;
+        }
+        const tag = ordered ? 'ol' : 'ul';
+        out.push(`<${tag}${ordered && start !== 1 ? ` start="${start}"` : ''}>` + items.map(t => '<li>' + inline(t) + '</li>').join('') + `</${tag}>`);
+        continue;
+      }
+      const buf = [l.trim()]; i++;
+      while (i < L.length && L[i].trim() && !BLOCK.test(L[i])) buf.push(L[i++].trim());
+      out.push('<p>' + inline(buf.join(' ')) + '</p>');
+    }
+    const nav = '<nav class="bnav card"><b>In the brief</b><ol>' + heads.map(([id, t]) => `<li><a href="#${id}">${t}</a></li>`).join('') + '</ol></nav>';
+    return nav + out.join('\n');
+  }
+
+  /* ---- fill the copy box and the rendered view */
+  const raw = q('[data-role=raw]'), view = q('#brief-view'), meta = q('[data-role=meta]');
+  let text = D.md;
+  function update() {
+    const v = values();
+    text = fill(D.md, v, false);
+    raw.textContent = text;
+    const html = render(fill(D.md, v, true))
+      .replace(/\u0001([^\u0002]*)\u0002/g, '<span class="fill">$1</span>')
+      .replace(/&lt;(login|host|N)&gt;/g, '<span class="ph">&lt;$1&gt;</span>');
+    view.innerHTML = html;
+    view.querySelectorAll('h3[id]').forEach(h => {         // the same "#" links the template gives other headings
+      const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#';
+      a.title = 'link to this section'; h.appendChild(a);
+    });
+    view.querySelectorAll('code').forEach(c => {           // repository paths as links, as the template does once
+      const t = c.textContent.trim();
+      if (c.closest('pre, a') || !/^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/.test(t)) return;
+      const a = document.createElement('a'); a.href = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/' + t;
+      c.parentNode.insertBefore(a, c); a.appendChild(c);
+    });
+    const left = (text.match(/<(login|host|N)>/g) || []).length;
+    meta.innerHTML = `<b>START.md</b> · ${CK.fmt.num(D.words, 0)} words · version of 30 September 2026`
+      + (left ? ` · ${left} placeholder${left === 1 ? '' : 's'} left for the agent to ask about` : ' · filled in');
+  }
+  inp.addEventListener('input', update);
+  sel.addEventListener('change', update);
+  update();
+
+  /* ---- copy and download. Clipboard first; inside a frame that forbids it, a selected textarea and execCommand. */
+  function copyText(t, stat, btn) {
+    const done = ok => {
+      stat.textContent = ok ? 'Copied' : 'Select the text and copy it';
+      stat.style.color = ok ? 'var(--ok)' : 'var(--warn)';
+      if (!ok && btn === 'raw') { const r = document.createRange(); r.selectNodeContents(raw); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+      clearTimeout(copyText.t); copyText.t = setTimeout(() => { stat.innerHTML = '&nbsp;'; }, 4000);
+    };
+    const fallback = () => {
+      try {
+        const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed'; ta.style.opacity = '0'; ta.style.top = '0'; document.body.appendChild(ta);
+        ta.select(); const ok = document.execCommand('copy'); ta.remove(); done(ok);
+      } catch (_) { done(false); }
+    };
+    try {
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(() => done(true), fallback);
+      else fallback();
+    } catch (_) { fallback(); }
+  }
+  const stat = q('[data-role=stat]');
+  q('[data-role=copy]').addEventListener('click', () => copyText(text, stat, 'raw'));
+  q('[data-role=copyalt]').addEventListener('click', () => copyText(q('[data-role=alttext]').textContent.trim(), stat, 'alt'));
+  q('[data-role=download]').addEventListener('click', () => {
+    try {
+      const url = URL.createObjectURL(new Blob([text], {type: 'text/markdown'}));
+      const a = document.createElement('a'); a.href = url; a.download = 'START.md'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    } catch (_) { stat.textContent = 'Download blocked: copy instead'; stat.style.color = 'var(--warn)'; }
+  });
+})();
+
+</script>
+<script>
+/* Section anchors. Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links. Runs after the section-anchor
+   script above, whose h2 ids the contents list links to. Pages not built from this template paste both blocks
+   before </main>.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].parentNode.insertBefore(nav, h2s[0]);
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
+</script>
+</body>
+</html>

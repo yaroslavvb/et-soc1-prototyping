@@ -1,0 +1,173 @@
+<style>
+.steps3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 18px 0 6px;
+  counter-reset: s3; }
+.steps3 .card { position: relative; padding-top: 14px; }
+.steps3 .card b { display: block; margin-bottom: 2px; }
+.steps3 .card b::before { counter-increment: s3; content: counter(s3); display: inline-flex; align-items: center;
+  justify-content: center; width: 1.5em; height: 1.5em; margin-right: 8px; border-radius: 999px; font-size: 0.85rem;
+  background: var(--ink); color: var(--page); }
+.steps3 .card p { margin: 0; font-size: 0.92rem; color: var(--ink-2); }
+.cards4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 14px 0 6px; }
+.cards4 .card { border-top: 4px solid var(--c); padding: 12px 14px; }
+.cards4 .card.off { opacity: 0.8; border-top-style: dashed; }
+.cards4 .nm { font-weight: 650; }
+.cards4 .fw { color: var(--ink-2); font-size: 0.82rem; }
+.cards4 .ck { margin: 6px 0 2px; font-size: 0.92rem; }
+.cards4 .nt { color: var(--ink-2); font-size: 0.84rem; }
+.cards4 .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; border-radius: 999px; padding: 0 8px;
+  margin-left: 6px; border: 1px solid currentColor; vertical-align: 1px; }
+.cards4 .tag.yes { color: var(--ok); } .cards4 .tag.no { color: var(--bad); }
+ol.rules { list-style: none; padding: 0; margin: 12px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px 18px; counter-reset: r; }
+ol.rules li { margin: 0; padding: 10px 12px 10px 42px; position: relative; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px; }
+ol.rules li::before { counter-increment: r; content: counter(r); position: absolute; left: 12px; top: 10px;
+  font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+ol.rules li b { display: block; }
+ol.rules li span { color: var(--ink-2); font-size: 0.88rem; }
+.setup { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: flex-end; margin: 14px 0 12px; }
+.setup label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--ink-2); }
+.setup input, .setup select { font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--axis); border-radius: 8px; padding: 6px 10px; min-height: 38px; width: min(240px, 100%); }
+.setup input:focus-visible, .setup select:focus-visible, .btn:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.setup .hint { font-size: 0.8rem; color: var(--muted); flex-basis: 100%; margin: 0; }
+.copybox { border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.copybox .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px;
+  border-bottom: 1px solid var(--border); }
+.copybox .bar .meta { flex: 1 1 220px; font-size: 0.84rem; color: var(--ink-2); }
+.copybox .bar .meta b { color: var(--ink); font-size: 0.95rem; }
+.btn { font: inherit; font-size: 0.92rem; font-weight: 600; border-radius: 999px; padding: 7px 16px; min-height: 38px;
+  cursor: pointer; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); }
+.btn.primary { background: var(--ink); color: var(--page); }
+.btn.small { font-size: 0.8rem; padding: 3px 12px; min-height: 30px; font-weight: 500; }
+.copystat { font-size: 0.84rem; color: var(--ok); min-width: 4em; }
+.copybox pre { margin: 0; border-radius: 0; max-height: 440px; overflow: auto; white-space: pre-wrap;
+  overflow-wrap: anywhere; font-size: 0.8rem; line-height: 1.5; background: var(--code-bg); }
+.alt { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px 0; font-size: 0.9rem; }
+.alt code { overflow-wrap: anywhere; }
+.brief { border-left: 3px solid var(--grid); padding-left: 16px; }
+.brief h3 { font-size: 1.12rem; margin: 30px 0 8px; }
+.brief h3:first-child { margin-top: 8px; }
+.brief .bnav ol { columns: 2 220px; column-gap: 24px; margin: 6px 0 0; padding-left: 1.4em; font-size: 0.92rem; }
+.brief .bnav li { margin: 3px 0; break-inside: avoid; }
+.brief pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.brief td code { overflow-wrap: anywhere; }
+.brief a, .brief code { overflow-wrap: anywhere; }
+.ph { background: color-mix(in srgb, var(--warn) 22%, transparent); border-radius: 3px; }
+.fill { background: color-mix(in srgb, var(--ok) 20%, transparent); border-radius: 3px; }
+@media (max-width: 599px) {
+  .brief { padding-left: 10px; }
+  .copybox pre { max-height: 360px; }
+}
+</style>
+
+<h1>New to the ET-SoC-1 lab? Start now</h1>
+<p class="byline">30 September 2026 (PDT) · for new users of the AI Foundry lab and their coding agents · part of the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<p class="lede">The AI Foundry lab has three machines with four ET-SoC-1 cards, and several people, CI jobs and
+long measurement queues share them. This page gets you in, puts the rules on one screen, and gives you a brief to
+paste into your coding agent (Claude Code or similar), so that the agent can set you up without spoiling anyone
+else's work. The brief holds what a week of running experiments on these cards taught us (23–30 September).</p>
+
+<div class="steps3">
+  <div class="card"><b>Get access</b><p>Ask the lab lead for an account and a Tailscale invite, and which machine
+  and card to use.</p></div>
+  <div class="card"><b>Log in once</b><p>Run <code>ssh &lt;you&gt;@aifoundryN</code> and approve the link it
+  prints in your browser.</p></div>
+  <div class="card"><b>Hand the brief to your agent</b><p><a href="#hand-this-to-your-agent">Fill in your login and
+  card, then copy it</a>.</p></div>
+</div>
+
+<h2 id="what-the-lab-is">What the lab is</h2>
+<p>Three x86_64 Ubuntu 24.04 machines on AI Foundry's Tailscale network: aifoundry1 has two cards, aifoundry2 and
+aifoundry3 one each. Each card is an ET-SoC-1 on PCIe: 1,088 small RISC-V cores (“minions”) with vector and tensor
+units, 32 of its 34 shires running kernels, and 32 GB of LPDDR4X. The four cards run three firmware releases and
+behave differently, so a number measured on one card needs its card named.</p>
+<div class="cards4" id="cards4"></div>
+<p class="small">Other users of the cards include CI runners on aifoundry1 and aifoundry2, a demo service on
+aifoundry3, and measurement queues that hold a card for hours. Nothing on these cards limits the die temperature,
+so stop any run yourself at a 90 °C die mean.</p>
+
+<h2 id="what-you-need">What you need</h2>
+<ol>
+  <li><b>An account and a Tailscale invite.</b> Ask the lab lead for an account on the machines and an invite to
+  the lab's Tailscale network. Ask also which machine and card to use, and for an invite to #community-lab on the
+  AI Foundry Discord, where people say which machine they are using.</li>
+  <li><b>Tailscale on your computer.</b> Accept the invite and install Tailscale.</li>
+  <li><b>The first login.</b> <code>ssh &lt;you&gt;@aifoundryN</code> prints a <code>login.tailscale.com</code>
+  link and waits. Open it in a browser signed in to the lab's network and approve it. Tailscale asks again after its
+  check period (12 hours by default). If the link answers 404, sign out of login.tailscale.com, sign back in and run ssh again. “Policy does not
+  permit” can mean that your account does not exist on that machine yet: ask the lab lead.</li>
+  <li><b>Read the login banner.</b> It lists the machine's cards, who is using them now, and the rules. It is
+  older than the brief: where they differ, follow the brief.</li>
+  <li><b>Hand the brief to your agent.</b> The agent cannot approve a Tailscale login, push to GitHub or post on
+  Discord for you. When it hands you a link or a question, it waits for you.</li>
+</ol>
+
+<h2 id="the-rules-on-one-screen">The rules on one screen</h2>
+<ol class="rules">
+  <li><b>Ask before you use a card.</b><span>The lab lead says which machine and card. Post “using aifoundryN” in
+  #community-lab on the AI Foundry Discord, and “released” when done.</span></li>
+  <li><b>Look first with <code>et-who</code>.</b><span>It lists who holds each card and never opens one. A card
+  opens in one process at a time; two users corrupt both runs.</span></li>
+  <li><b>Lock, and cap at 10 s.</b><span><code>ET_DEVICES=&lt;N&gt; flock -n /run/lock/etsoc-shire&lt;N&gt;.lock timeout 10 &lt;cmd&gt;</code>.
+  On aifoundry1, ET_DEVICES=1 selects card 1; without it a program opens card 0. Long holds block everyone, and
+  only the lab admin can recover a hung card.</span></li>
+  <li><b>Stop tools gently.</b><span>Ctrl-C or a plain <code>kill</code>, never <code>kill -9</code>. The telemetry
+  sampler finishes its request in flight on either; a request cut off mid-way leaves a stale reply that kills the
+  next program to open the card.</span></li>
+  <li><b>Never reset a card or change its settings.</b><span>Resets, clocks, TDP, thresholds, firmware and driver
+  change other people's runs silently, and a reset can hang a card. Ask the lab admin.</span></li>
+  <li><b>Stop at a 90 °C die mean.</b><span>Nothing on the cards limits their temperature; one ran at 90–103 °C and
+  nothing tripped.</span></li>
+  <li><b>Work in your home directory.</b><span><code>/tmp</code> is cleared at every boot, each machine has its own
+  <code>/home</code>, and aifoundry1's disk is nearly full. Build with <code>nice</code> and <code>-j4</code>.</span></li>
+  <li><b>Leave nothing behind.</b><span>No locks, samplers or stray jobs; log out when done. Some queues wait while
+  another user is logged in.</span></li>
+</ol>
+
+<h2 id="hand-this-to-your-agent">Hand this to your agent</h2>
+<p>Fill in your login and the card the lab lead gave you, then copy the brief into your agent's first message. The
+brief says who the agent works for and what it may not do, gives a first-hour checklist with exact commands, the
+traps we hit and their fixes, how to measure so results hold, how to leave the lab clean, and where to ask.</p>
+<div class="setup">
+  <label>Your login on the lab machines<input id="f-login" type="text" autocomplete="off" autocapitalize="off"
+    spellcheck="false" placeholder="e.g. alice" maxlength="32"></label>
+  <label>Your machine and card<select id="f-card"></select></label>
+  <p class="hint" data-role="hint">Optional. Anything left blank stays in angle brackets, and the agent asks you.</p>
+</div>
+<div class="copybox">
+  <div class="bar">
+    <div class="meta" data-role="meta"><b>START.md</b> · the agent brief</div>
+    <button class="btn primary" type="button" data-role="copy">Copy for your agent</button>
+    <button class="btn" type="button" data-role="download">Download .md</button>
+    <span class="copystat" data-role="stat" aria-live="polite">&nbsp;</span>
+  </div>
+  <pre data-role="raw" tabindex="0" aria-label="The agent brief, as markdown"></pre>
+</div>
+<div class="alt"><span>Or point the agent at the current copy in the repository:</span>
+  <code data-role="alttext">Read https://raw.githubusercontent.com/yaroslavvb/et-soc1-prototyping/main/docs/lab-start/START.md and follow it.</code>
+  <button class="btn small" type="button" data-role="copyalt">Copy</button></div>
+<p class="small">The brief lives in the repository as <code>docs/lab-start/START.md</code>, which is the copy to
+edit; this page shows it word for word.</p>
+
+<h2 id="the-brief-to-read">The brief, to read</h2>
+<p class="small">The same text as above, rendered. Highlighted: <span class="ph">&lt;placeholders&gt;</span> still to
+fill in, and <span class="fill">values you filled in</span>.</p>
+<div class="brief" id="brief-view"></div>
+
+<h2 id="related-reports">Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a>: the hub, with every ET-SoC-1 measurement report.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram">The ET-SoC-1, interactively</a>: the chip's parts, drawn and explained.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a>: what each operation costs in joules on these cards.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature telemetry</a>: every way to read a card's power and temperature, and what each number means.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating">The effect of overheating</a>: why the 90 °C stop matters.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">The improvement ladder</a>: the hub's section that links the lab problems report, with each known problem and its status.</li>
+<li><a href="https://github.com/yaroslavvb/et-soc1-prototyping">The repository</a>: the knowledge base, the workloads and the tools; start with <code>AGENT.md</code>.</li>
+</ul>
+<p class="small"><b>Versions.</b> 30 September 2026: first edition, from the lab's notes of 23–30 September, a
+read-only check of the three machines at 13:24–13:40 PDT that day, and a review and a cold-start test of the brief
+on aifoundry3 (13:46–13:52 PDT, no card opened), whose findings it applies.</p>
+</main>
