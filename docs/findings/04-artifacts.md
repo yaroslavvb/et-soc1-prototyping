@@ -661,6 +661,25 @@ The page for Q66 and E59: noisy sparse parity solved on the card's 1,024 minions
   locked `timeout 10` process each) and `energy.sh` (board energy per solve).
 - **Commits:** `92b168f`, `ddb493f`, `4aea801`, `65e6ba6`, `a768f84`, `6082cb9` (the table below).
 
+## A22 — Feasibility of running the ET-SoC-1 without its heatsink (30 September)
+
+The page for Q70: can a lab card run with its heatsink off, so that a sensor can look straight at the chip?
+
+- **Page:** `docs/reports/2026-09-30-esperanto-without-heatsink.html`, slug `et-soc1-without-heatsink`, space
+  `f4722866-cd5b-430d-b6a5-b45795486735`, public from its first deploy (30 September, 14:40 PDT). In the hub's §1
+  index under "Energy and power"; linked from the effect-of-overheating, heat placement and power-and-temperature pages
+  and from the owner's thermal camera page (space `9f8173a6`, deployed as a folder with the links added).
+  [`../reports/MIRROR.md`](../reports/MIRROR.md) has its build command.
+- **What it rests on:** arithmetic on the record, no card touched: the September idle leakage laws
+  ([16-dvfs-and-leakage.md](16-dvfs-and-leakage.md)), the fitted heatsink model ([11-thermal-model.md](11-thermal-model.md),
+  [12-heat-management.md](12-heat-management.md)), aifoundry1 card 0's read-only guard samples, vendor θJA tables and
+  43 outside sources (numbered on the page). Its labels (`measured`, `model`, `inference`) follow the set's rules.
+- **Data and tools:** `docs/reports/data/2026-09-30-without-heatsink/`: `nohs_calc.py` (the model: package geometry,
+  bare θJA, idle power laws, the runaway condition θ·dP/dT < 1 with a Monte Carlo, transients, a lid thermocouple's
+  error budget) and its printout `nohs_calc.out`; `card0_guard.py`/`.out` (card 0's idle law at 300 MHz);
+  `make_page_data.py` (writes `page.json`, `--check`); the README.
+- **Commits:** `51b571e`.
+
 ## Cross-links between the reports
 
 - **2026-09-24, afternoon (`d04b29a`).** Every report got the byline clause "· part of the measurement reports",
