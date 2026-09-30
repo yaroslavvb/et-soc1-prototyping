@@ -87,6 +87,7 @@ before `</body>`. Private pages are listed but not mirrored.
 | Page | Space | Visibility | Repo file | Why |
 |---|---|---|---|---|
 | Notes of a conversation with David Kanter (R9, 20 Sep) | `f3533740-5ad9-45e1-927c-098dbbe5c210` | private | not mirrored | A personal memo quoting a private conversation; private and unlinked since 24 September (the owner's decision). The DVFS page and R9 describe it in words. |
+| AI Foundry lab dashboard (30 Sep: the three machines, four cards and their users, republished by `tools/lab/dashboard/update.sh` from a 10-minute cron job on aifoundry2) | `4406691d-54ff-4e6c-ba53-15aca104b74b` | private | not mirrored: the page is rendered from live data | It names lab users, so it stays private; the updater checks that before and after every deploy. The code and the page template are in `tools/lab/dashboard/` (README.md); the data never enters the repository |
 
 <!-- mirror:end -->
 
