@@ -6,7 +6,7 @@ running the lab taught us. This directory holds that brief; the page shows it.
 
 | File | What it is |
 |---|---|
-| `START.md` | The brief itself: one self-contained markdown document that a new user pastes into a coding agent (Claude Code or similar). Who the agent works for and its limits, the four cards, the rules with their reasons, a first-hour checklist with exact commands, the traps (symptom, cause, fix), how to measure so results hold, how to leave the lab clean, where to ask. About 3,400 words. |
+| `START.md` | The brief itself: one self-contained markdown document that a new user pastes into a coding agent (Claude Code or similar). Who the agent works for and its limits, the four cards, the rules with their reasons, a first-hour checklist with exact commands, the traps (symptom, cause, fix), how to measure so results hold, how to leave the lab clean, where to ask. About 3,600 words, including the steps for a Claude on the machine. |
 | `make_page_data.py` | Writes `docs/reports/data/2026-09-30-lab-start/brief.json` (START.md word for word, its sha256 and word count, and the page's card tiles). `--check` exits 1 if the JSON is stale. |
 | `README.md` | This file. |
 
