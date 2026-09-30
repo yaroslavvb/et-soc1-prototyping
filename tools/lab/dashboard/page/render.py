@@ -14,7 +14,9 @@ and meta.json. The output has no external script, style, font or image, and the 
   Tailscale login address anywhere in it, printing the JSON path of the match, never its text. The collector's check
   (DESIGN.md §6) is the real one; this one catches a data file from anywhere else.
 - --fixture moves every time in the data (keys ending in _ms or _at, ISO strings) by one offset, so that
-  generated_at is 4 minutes before now (or before --now-ms): a made-up fixture renders as fresh data.
+  generated_at is 4 minutes before now (or before --now-ms): a made-up fixture renders as fresh data. The clock times
+  written into its text (the headline, alert titles and details, card reasons: "DOWN since 12:47") move with them, in
+  the lab's zone, so the text agrees with the panels.
 - The page gets a build stamp (D._build: the render time and a hash of the page sources), shown in "About this page".
 
 Exit 0 when the page was written, 2 on a usage or input error, 3 on a privacy refusal."""
@@ -87,6 +89,39 @@ def shift_times(v, delta_ms, key=None):
     return v
 
 
+CLOCK = re.compile(r"(?<![\d:])([01]\d|2[0-3]):([0-5]\d)(?![\d:])")
+
+
+def shift_clock_text(data, delta_ms):
+    """--fixture: the HH:MM times in the fixture's text fields, moved by delta_ms in the lab's zone (a time later than
+    generated_at is taken as the day before). Changes data in place; call it before shift_times."""
+    tzname = (data.get("usage") or {}).get("tz") or (data.get("collector") or {}).get("lab_tz")
+    try:
+        from zoneinfo import ZoneInfo
+        tz = ZoneInfo(tzname)
+    except Exception:  # no zone name or no tz database: the renderer's own zone
+        tz = datetime.now().astimezone().tzinfo
+    gen = datetime.fromtimestamp(data["generated_ms"] / 1000, tz)
+
+    def one(m):
+        t = gen.replace(hour=int(m.group(1)), minute=int(m.group(2)), second=0, microsecond=0)
+        if t > gen + timedelta(minutes=1):
+            t -= timedelta(days=1)
+        return (t + timedelta(milliseconds=delta_ms)).astimezone(tz).strftime("%H:%M")
+
+    def fix(s):
+        return CLOCK.sub(one, s) if isinstance(s, str) else s
+    st = data.get("status") or {}
+    if "headline" in st:
+        st["headline"] = fix(st["headline"])
+    for a in data.get("alerts") or []:
+        if isinstance(a, dict):
+            a["title"], a["detail"] = fix(a.get("title")), fix(a.get("detail"))
+    for c in (data.get("cards") or {}).values():
+        if isinstance(c, dict) and isinstance(c.get("reasons"), list):
+            c["reasons"] = [fix(r) for r in c["reasons"]]
+
+
 def main(argv):
     args = [a for a in argv if not a.startswith("--")]
     flags = [a for a in argv if a.startswith("--")]
@@ -123,6 +158,7 @@ def main(argv):
         gen = data.get("generated_ms")
         if not isinstance(gen, (int, float)):
             usage("--fixture needs generated_ms in the data")
+        shift_clock_text(data, now_ms - 4 * 60 * 1000 - gen)
         data = shift_times(data, now_ms - 4 * 60 * 1000 - gen)
 
     parts = {}

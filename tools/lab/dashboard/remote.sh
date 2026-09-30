@@ -39,11 +39,15 @@ BOOT=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
 # The logind session this probe runs in (Tailscale SSH gives each command one), left out of the people counts.
 MYSESS=$(sed -n 's#.*/session-\([A-Za-z0-9]*\)\.scope.*#\1#p' /proc/self/cgroup 2>/dev/null | head -1)
 # The probe's own processes are left out of the process counts and categories too: its process session (everything
-# it starts) and its ancestors (the ssh or cron chain, and on aifoundry2 the collector itself).
+# it starts) and its ancestors: over ssh, the ssh server's chain; on aifoundry2 the collector's chain up to
+# DASH_ANC_STOP (update.sh, or cron's sh above it), and no further, so that a person who runs update.sh now from a
+# shell, an agent or tmux keeps those counted.
 MYSID=$(cut -d' ' -f6 /proc/$$/stat 2>/dev/null)
 ANC=" $$ "; _p=$PPID; _n=0
 while [ -n "$_p" ] && [ "$_p" -gt 1 ] 2>/dev/null && [ $_n -lt 30 ]; do
-  ANC="$ANC$_p "; _p=$(sed -n 's/^PPid:[[:space:]]*//p' "/proc/$_p/status" 2>/dev/null); _n=$((_n + 1))
+  ANC="$ANC$_p "
+  [ "$_p" = "${DASH_ANC_STOP:-}" ] && break
+  _p=$(sed -n 's/^PPid:[[:space:]]*//p' "/proc/$_p/status" 2>/dev/null); _n=$((_n + 1))
 done
 # Device processes by executable name (ps comm), never by command line, as tools/claims-v3/lib.sh does.
 DEV_COMM='_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$'
@@ -99,22 +103,36 @@ sec pts
 for p in /dev/pts/[0-9]*; do [ -e "$p" ] && stat -c '%u %U %X' "$p" 2>/dev/null; done
 sec procs
 # Per user: processes, device processes (counts), and what the processes are, as coarse categories (DESIGN.md §6):
-# agent (AI coding agents), build (compilers, linkers, make), sim (sys_emu), python, editor. The names are matched
-# here and never printed. Left out: the probe's own logind session (its cgroup scope), process session and ancestors.
-t 10 ps -eo pid=,sid=,uid=,user:32=,cgroup=,comm= | awk -v s="${MYSESS:-none}" -v sid="${MYSID:-none}" -v anc="$ANC" -v re="$DEV_COMM" '
+# agent (AI coding agents), build (compilers, linkers, make), sim (sys_emu), python, editor, shell (a shell, tmux or
+# screen). The names are matched here and never printed. Left out: the probe's own logind session (its cgroup scope),
+# process session and ancestors; and the user manager's own plumbing, which linger keeps running for an account nobody
+# is using (systemd --user and (sd-pam) in init.scope, and services such as dbus, pipewire and the xdg portals: every
+# .service unit under user@<uid>.service), unless it is a device process. What a person starts from a login or a tmux
+# pane (a tmux server is a .scope unit under user@<uid>.service, or stays in the login's session scope) is counted.
+# The cgroup column is given 512 characters: a column that is not the last is cut to its default width otherwise.
+# "sessage <id> <s>": the age of each logind session's oldest process, so that a session with no terminal that is
+# seconds old (an scp, an `ssh host cmd`) does not make its owner active.
+t 10 ps -eo pid=,sid=,uid=,etimes=,user:32=,cgroup:512=,comm= | awk -v s="${MYSESS:-none}" -v sid="${MYSID:-none}" -v anc="$ANC" -v re="$DEV_COMM" '
   function cat(c) {
     if (c ~ /^(claude|codex|aider|gemini|goose|cursor-agent|opencode|crush|qwen|cline)$/) return "agent"
     if (c ~ /^(cc1|cc1plus|cc1obj|as|ld|ld\.[a-z]+|lld|mold|collect2|make|gmake|cmake|ctest|ninja|meson|gcc|g\+\+|c\+\+|cc|clang|clang\+\+|clang-[0-9]+|rustc|cargo|ccache|riscv64-.*|riscv32-.*|x86_64-linux-.*)$/) return "build"
     if (c == "sys_emu") return "sim"
     if (c ~ /^(python|python[23]|python[23]\.[0-9]+|ipython|ipython3|jupyter.*)$/) return "python"
     if (c ~ /^(vi|vim|nvim|emacs|emacs-.*|nano|micro|hx|helix|kak|joe|mcedit|code-server)$/) return "editor"
+    if (c ~ /^(bash|sh|dash|zsh|fish|ksh|mksh|tcsh|csh|tmux.*|screen|SCREEN|mosh-server)$/) return "shell"
     return ""
   }
-  index($5, "/session-" s ".scope") || $2 == sid || index(anc, " " $1 " ") {next}
-  {c = $6; for (i = 7; i <= NF; i++) c = c " " $i
-   k = $3 " " $4; n[k]++; if (c ~ re) d[k]++; if (c == "Runner.Worker") ci++
+  index($6, "/session-" s ".scope") || $2 == sid || index(anc, " " $1 " ") {next}
+  {c = $7; for (i = 8; i <= NF; i++) c = c " " $i
+   if (c == "Runner.Worker") ci++
+   if ($3 < 1000 || $3 == 65534) next
+   if (match($6, /\/session-[^\/]*\.scope/)) {x = substr($6, RSTART + 9, RLENGTH - 15); if (!(x in age) || $4 + 0 > age[x]) age[x] = $4 + 0}
+   if (($6 ~ /\/user@[0-9]+\.service\/init\.scope$/ || $6 ~ /\/user@[0-9]+\.service\/.*\.service$/) && c !~ re) next
+   k = $3 " " $5; n[k]++; if (c ~ re) d[k]++
    x = cat(c); if (x != "" && !((k, x) in seen)) {seen[k, x] = 1; cats[k] = cats[k] (cats[k] == "" ? "" : ",") x}}
-  END {for (k in n) print "procs", k, n[k], d[k] + 0, (cats[k] == "" ? "-" : cats[k]); print "ci_jobs", ci + 0}'
+  END {for (k in n) print "procs", k, n[k], d[k] + 0, (cats[k] == "" ? "-" : cats[k])
+       for (x in age) print "sessage", x, age[x]
+       print "ci_jobs", ci + 0}'
 sec etwho
 # node, user, elapsed time and the program's name (the base name of its first argument, at most 15 characters, as
 # ps comm): the rest of the command line is cut off here, before the output leaves the host

@@ -371,9 +371,11 @@ for h, hb in hosts.items():
     hb["nodewatch"]["events_48h"] = [e for e in hb["nodewatch"].get("events_48h", []) if e["type"] in ("REBOOT", "START", "WARN")]
     hb.update(state="up", state_since_ms=None, down_since_ms=None, last_answer_ms=hb["last_ok_ms"],
               last_answer_at=hb["last_ok_at"], tailscale={"online": True, "last_seen_ms": None, "at_ms": ms(NOW)},
-              tailscale_last_seen_ms=None, rebooted_at_ms=None, reboot_planned=None, ci_jobs=0)
+              tailscale_last_seen_ms=None, rebooted_at_ms=None, reboot_planned=None, reboot_seen_ms=None,
+              reboot_after=None, reboot_first_seen=None, reboot_pending_before=None, ci_jobs=0)
 hosts["aifoundry1"].update(device_procs=1, device_people=1)
 hosts["aifoundry2"].update(device_procs=1, device_people=1, rebooted_at_ms=ms(t(30, 6, 2)), reboot_planned=True,
+                           reboot_seen_ms=ms(t(30, 6, 12)), reboot_first_seen=False, reboot_pending_before=True,
                            uptime_h=7.2)
 hosts["aifoundry2"]["nodewatch"]["events_48h"] = [{**at(t(30, 6, 2)), "type": "REBOOT", "what": "reboot"}]
 a3 = hosts["aifoundry3"]
@@ -444,12 +446,13 @@ def users(ivs):
     out = {}
     for x in ivs:
         e = out.setdefault(x["user"], {"held_s": 0.0, "node_s": 0.0, "runs": 0, "programs": {}, "first_ms": x["start_ms"],
-                                       "last_ms": x["end_ms"], "open": False})
+                                       "last_ms": x["end_ms"], "open": False, "open_ms": None})
         e["held_s"] = round(e["held_s"] + x["held_s"], 1)
         e["node_s"] = round(e["node_s"] + x["node_s"], 1)
         e["runs"] += x["runs"]
         e["last_ms"] = max(e["last_ms"], x["end_ms"])
-        e["open"] = e["open"] or x["open"]
+        if x["open"]:
+            e["open"], e["open_ms"] = True, min(e["open_ms"] or x["start_ms"], x["start_ms"])
         for p, n in x["programs"].items():
             e["programs"][p] = e["programs"].get(p, 0) + n
     return out
@@ -467,9 +470,11 @@ def daily(cid, today):
         if k == 1 and cid == "aifoundry1-c1":
             us = {"user-e": {"held_s": 420.0, "node_s": 400.0, "runs": 3}}
         if k > 1 and cid.startswith("aifoundry1"):
-            continue  # the logger began yesterday
-        if us:
-            out.append({"date": d.strftime("%Y-%m-%d"), "day_ms": ms(d), "users": us})
+            us = {}  # the logger began yesterday: these dates are not logged (logged_s 0)
+        began = t(24, 9, 0) if cid == "aifoundry2" else t(29, 15, 20)
+        day0 = d.replace(hour=0)
+        logged = max(0, min(86400, (min(NOW, day0 + timedelta(days=1)) - max(began, day0)).total_seconds()))
+        out.append({"date": d.strftime("%Y-%m-%d"), "day_ms": ms(d), "users": us, "logged_s": round(logged)})
     return out
 
 
@@ -483,8 +488,8 @@ for cid, ivs in cu.items():
     usage_cards[cid] = {"host": cid.split("-")[0], "logged": True, "stale": False, "intervals": ivs,
                         "activity_min": activity(ivs) if cid != "aifoundry1-c0" else [], "users": us,
                         "held_s": round(busy, 1), "node_s": round(sum(x["node_s"] for x in ivs), 1),
-                        "runs": sum(x["runs"] for x in ivs), "people": len(us), "now": now_,
-                        "daily": daily(cid, us),
+                        "runs": sum(x["runs"] for x in ivs), "people": len(us), "now": now_, "was_now": [],
+                        "merged_gap_s": None, "daily": daily(cid, us),
                         "since_check": {"since_ms": ms(ago(minutes=10)), "users": [x["user"] for x in now_],
                                         "runs": len(now_), "programs": {"sgemm_host": len(now_)}}}
 usage_cards["aifoundry3"] = {"host": "aifoundry3", "logged": False}
@@ -503,6 +508,8 @@ usage = {
                        "as_of_ms": ms(t(30, 12, 40)), "coverage_ms": []}},
     "cards": usage_cards,
     "logins": sorted({x["user"] for ivs in cu.values() for x in ivs} | {"user-e"}),
+    # the collector's colour slots (DESIGN.md §4.2): three, kept from run to run; everyone else is "others"
+    "colors": {"user-a": 0, "owner": 1, "user-c": 2},
 }
 
 # ---- people: everyone the same way; "doing" is the probe's coarse categories ----
@@ -524,7 +531,7 @@ people = [
                     "runs": 1, "last_ms": ms(U1), "open": True}],
      "device_procs": 1, "stale_hosts": [], "idle_min": 1},
     {"login": "user-a", "status": "active", "doing": ["agent"],
-     "hosts": {"aifoundry2": {"sessions": 1, "closing": 0, "ttys": 1, "idle_min": 12, "procs": 31, "status": "active",
+     "hosts": {"aifoundry2": {"sessions": 0, "closing": 0, "ttys": 2, "idle_min": 12, "procs": 31, "status": "active",
                               "doing": ["agent"]}},
      "card_holds": [], "cards_24h": [{"card": "aifoundry2", "held_s": usage_cards["aifoundry2"]["users"]["user-a"]["held_s"],
                                       "runs": 4, "last_ms": ms(t(29, 16, 31)), "open": False}],
@@ -541,13 +548,13 @@ people = [
      "hosts": {"aifoundry2": {"sessions": 0, "closing": 1, "ttys": 0, "idle_min": None, "procs": 7, "status": "processes only",
                               "doing": ["shell"]}},
      "card_holds": [], "cards_24h": [], "device_procs": 0, "stale_hosts": [], "idle_min": None},
-    {"login": "user-e", "status": "away", "doing": ["shell"],
+    {"login": "user-e", "status": "unknown", "doing": None,
      "hosts": {"aifoundry3": {"sessions": 1, "closing": 0, "ttys": 1, "idle_min": 2890, "stale": True, "procs": 12,
                               "status": "away", "doing": ["shell"]}},
-     "card_holds": [], "cards_24h": [], "device_procs": 0, "stale_hosts": ["aifoundry3"], "idle_min": 2890},
+     "card_holds": [], "cards_24h": [], "device_procs": 0, "stale_hosts": ["aifoundry3"], "idle_min": None},
 ]
 hosts["aifoundry1"]["logins"] = {"sessions": 4, "people": 3}
-hosts["aifoundry2"]["logins"] = {"sessions": 7, "people": 2}
+hosts["aifoundry2"]["logins"] = {"sessions": 6, "people": 2}
 
 
 # ---- alerts ----
@@ -576,11 +583,9 @@ alerts = [
           t(30, 13, 2), "et-who", host="aifoundry1", card="aifoundry1-c1"),
     alert("card:aifoundry2:held", "info", "card", "held by owner (sgemm_host) since 12:40", "/dev/et0_ops",
           t(30, 12, 42), "et-who", host="aifoundry2", card="aifoundry2"),
-    alert("host:aifoundry2:rebooted", "info", "host", "rebooted at 06:02", "a reboot was pending (kernel or package updates)",
+    alert("host:aifoundry2:rebooted", "info", "host", "rebooted at 06:02",
+          "a reboot was pending (kernel or package updates), and the machine answered until it",
           t(30, 6, 12), "boot id", host="aifoundry2"),
-    alert("host:aifoundry3:usage", "info", "host", "card-use logging not installed",
-          "et-usage is not on this machine, so the page cannot show who used its cards; install tools/lab/et-usage",
-          t(30, 9, 0), "et-usage", host="aifoundry3"),
     alert("host:aifoundry1:reboot", "info", "host", "reboot pending", "linux-image-7.0.0-34-generic, linux-modules-7.0.0-34-generic",
           t(28, 7, 54), "et-lab-health", host="aifoundry1"),
     alert("card:aifoundry1-c0:ce", "info", "card", "power or thermal events since the driver loaded",
@@ -602,8 +607,8 @@ data = {
     **at(NOW, "generated_at"),
     "collector": {"host": "aifoundry2", "code": "a1b46e9", "took_s": 7.9, "interval_min": 10, "cron_minute": 2,
                   "heartbeat_min": 60, "stale_after_min": 80, "min_deploy_gap_min": 10, "card_sample": "off",
-                  "lab_tz": "America/Los_Angeles", "errors": [], "fixture": True},
-    "status": {"level": "bad", "counts": {"bad": 1, "warn": 4, "info": 5, "known": 3},
+                  "lab_tz": "America/Los_Angeles", "maintainer": "owner", "errors": [], "fixture": True},
+    "status": {"level": "bad", "counts": {"bad": 1, "warn": 4, "info": 4, "known": 3, "old": 0},
                "headline": "1 problem: aifoundry3 DOWN since 12:47; 4 warnings"},
     "fingerprint": "3fa2c1d09e4b",
     "alerts": alerts,

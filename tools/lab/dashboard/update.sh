@@ -1,22 +1,25 @@
 #!/bin/bash
 # update.sh: the lab dashboard's updater (tools/lab/dashboard/DESIGN.md §3 and §7).
 #
-#   update.sh run                  what cron runs: collect, render, deploy if changed; quiet; exit 0 unless broken
+#   update.sh run                  what cron runs: check the space, collect, render, deploy if changed; quiet; exit 0
+#                                  unless broken, halted by this run, or the space is exposed
 #   update.sh now [--card-sample]  the same at once, always deploys; prints the headline, the alerts, the address
-#   update.sh status               last runs and deploy, HALT, the cron line, the space's visibility
+#   update.sh status               last runs and deploy, HALT, EXPOSED, the last halt, the cron line, the visibility
 #   update.sh --install-cron [--dry-run]     add the user crontab line (--dry-run: only print it)
 #   update.sh --uninstall-cron [--dry-run]   remove it
 #   update.sh ack <alert-id> [days] [note]   acknowledge an alert (default 7 days); update.sh unack <alert-id>
-#   update.sh resume               clear HALT once the space is private again
+#   update.sh resume               clear HALT once the space is private again (only a person clears a halt)
 #   update.sh sample-reset <card>  re-enable a card's telemetry sample after its timeout was looked at
 #   update.sh create-space         once: the first private deploy; records the space's uuid
 #
-# Files: ~/.cache/lab-dashboard/ (data.json, history, state, update.log, lock, HALT, deploy.state; mode 0700) and
-# ~/.config/lab-dashboard/ (space: the uuid; config.json; ack.json). Nothing is written inside the checkout.
-# Test hooks (never needed in normal use): LAB_DASH_CACHE, LAB_DASH_CONFIG (other directories), LAB_DASH_SPACESHEEP
-# (the spacesheep command), LAB_DASH_RENDER (the render command: <data.json> <out.html>), LAB_DASH_FETCH (a command
-# that prints the HTTP status, then the body, of an anonymous GET of its URL argument), LAB_DASH_COLLECT_ARGS
-# (extra collect.py arguments), LAB_DASH_CRONTAB (the crontab command).
+# Files: ~/.cache/lab-dashboard/ (data.json, history, state, update.log, lock, HALT, EXPOSED, halt.last, deploy.state;
+# mode 0700) and ~/.config/lab-dashboard/ (space: the uuid; config.json; ack.json). Nothing is written inside the
+# checkout. Test hooks (never needed in normal use): LAB_DASH_CACHE, LAB_DASH_CONFIG (other directories),
+# LAB_DASH_SPACESHEEP (the spacesheep command), LAB_DASH_RENDER (the render command: <data.json> <out.html>),
+# LAB_DASH_FETCH (a command that prints the HTTP status, then the body, of an anonymous GET of its URL argument),
+# LAB_DASH_COLLECT_ARGS (extra collect.py arguments), LAB_DASH_CRONTAB (the crontab command), LAB_DASH_REREAD_S (the
+# pause between the re-reads of a list that said "not private", 5 s), LAB_DASH_RECHECK_S (the second check after a
+# deploy, 45 s; 0 skips it). tests/guard_test.sh drives the guard with stubs.
 #
 # The whole body is the function main, called on the last line together with exit, so bash has read the entire
 # file before anything runs: an edit to this file while cron runs it cannot splice two versions (AGENT.md §6).
@@ -154,28 +157,43 @@ anon_check() {
   echo "sign-in bootstrap"; return 0
 }
 
-# vis_guard UUID PAGE: 0 private and not served anonymously; 1 NOT private (evidence); 2 could not verify.
-# Prints the reason ("NOT PRIVATE: spacesheep list says ..." when only the list said so).
-vis_guard() {
-  local uuid=$1 page=$2 vis res rc
-  vis=$(vis_list "$uuid")
-  case "$vis" in
-    private) ;;
-    failed|missing|unparsable) echo "unverified: the space is $vis in spacesheep list"; return 2 ;;
-    *) echo "NOT PRIVATE: spacesheep list says $vis"; return 1 ;;
+# vis_check UUID PAGE: one list read and one signed-out request, always both (DESIGN.md §3.3). Sets VIS (the list's
+# word), VIS_ROW (the space's row: id, visibility, updated_at), ANON (the request's verdict) and ANON_RC. Returns 0:
+# private, and the request got the sign-in bootstrap; 1: exposed (the request got the page, or the list says a
+# visibility other than private); 2: could not verify (the list failed, lacks the space or is unparsable, or the request
+# was inconclusive), and nothing says exposed.
+vis_check() {
+  local out
+  out=$(vis_list "$1" row); VIS=${out%%$'\t'*}; VIS_ROW=$(printf '%s' "$out" | cut -s -f2 | cut -c1-300)
+  ANON=$(anon_check "$1" "$2"); ANON_RC=$?
+  [ "$ANON_RC" -eq 1 ] && return 1   # the page (or a page) was served anonymously: exposed, whatever the list says
+  case "$VIS" in
+    private) [ "$ANON_RC" -eq 0 ] && return 0; return 2 ;;
+    failed|missing|unparsable) return 2 ;;
+    *) return 1 ;;
   esac
-  res=$(anon_check "$uuid" "$page"); rc=$?
-  [ $rc -eq 0 ] && { echo "private"; return 0; }
-  echo "$res"; return $rc
 }
 
-# confirm_exposure UUID PAGE WHAT: after one list read said "not private". Reads the list twice more, REREAD_S
-# (5 s) apart, logging each row (id, visibility, updated_at only), then makes the anonymous request. 0: exposure
-# confirmed or not ruled out (halt); 1: a misread (both re-reads private and the anonymous request got the sign-in
-# page): skip this run's deploy, do not halt. Twice on 30 Sep 2026 a single read said "public" for a private space.
+# share_private UUID: `spacesheep share UUID --visibility private`; prints "done" or "FAILED (exit N: ...)" and
+# returns its exit status. A no-op on a space that is already private.
+share_private() {
+  local out rc
+  out=$(timeout 60 "${SS[@]}" share "$1" --visibility private 2>&1 9>&-); rc=$?
+  if [ $rc -eq 0 ]; then echo done; else echo "FAILED (exit $rc: $(printf '%s' "$out" | tail -n 1 | tr -cd '[:print:]' | cut -c1-120))"; fi
+  return $rc
+}
+
+# confirm_exposure UUID PAGE WHAT ROW: after one list read (whose row is ROW) said "not private" while the signed-out
+# request did not get the page. Reads the list twice more, REREAD_S (5 s) apart, logging each row (id, visibility,
+# updated_at only), then makes the signed-out request again. 0: exposure confirmed or not ruled out (halt); 1: both
+# re-reads say private and the request gets the sign-in page: no halt and no deploy this run, and the space is set
+# private anyway (a no-op on a private space; the signed-out request cannot tell "signed_in" or "members" from
+# private, so the re-reads are the only evidence there). On 30 September 2026 the guard halted twice (14:42, 15:22)
+# on a read that said "public"; whether the space had really turned public after a deploy or the read was wrong is
+# not known (the later reads came after the halt had set it private), so the rows are logged to settle it.
 confirm_exposure() {
-  local uuid=$1 page=$2 what=$3 i out v res rc
-  log_line "visibility check: $what; row: $(vis_list "$uuid" row | cut -f2 | cut -c1-300)"
+  local uuid=$1 page=$2 what=$3 row=$4 i out v res rc sh
+  log_line "visibility check: $what; row: $row"
   for i in 1 2; do
     sleep "${LAB_DASH_REREAD_S:-5}"
     out=$(vis_list "$uuid" row); v=${out%%$'\t'*}
@@ -185,45 +203,68 @@ confirm_exposure() {
   res=$(anon_check "$uuid" "$page"); rc=$?
   log_line "visibility: anonymous request: $res"
   [ $rc -eq 0 ] || { CONFIRM_REASON="anonymous request: $res"; return 0; }
-  log_line "visibility misread once: spacesheep list said not private, then private twice, and the anonymous request got the sign-in page; no halt, this run does not deploy"
+  sh=$(share_private "$uuid")
+  log_line "visibility: one read said not private, then private twice, and the anonymous request got the sign-in page; no halt, this run does not deploy; set private again anyway: $sh"
   return 1
 }
 
-halt() {  # halt UUID REASON: set the space private again, stop deploying (auto-resume rules: halt_check)
-  local uuid=$1 reason=$2 now_s prev sticky=
-  now_s=$(date +%s)
-  timeout 60 "${SS[@]}" share "$uuid" --visibility private > /dev/null 2>&1 9>&-
-  prev=$(tail -n 1 "$CACHE/halt.times" 2>/dev/null)
-  { tail -n 19 "$CACHE/halt.times" 2>/dev/null; echo "$now_s"; } > "$CACHE/halt.times.tmp" && mv -f "$CACHE/halt.times.tmp" "$CACHE/halt.times"
+# halt UUID REASON: set the space private again (its exit status logged), write HALT and halt.last (the page shows the
+# last halt for 24 hours after a person resumes, §3.3), and stop deploying until a person runs update.sh resume.
+halt() {
+  local uuid=$1 reason=$2 sh
+  sh=$(share_private "$uuid")
   printf '%s %s\n' "$(stamp)" "$reason" > "$CACHE/HALT"
-  rm -f "$CACHE/HALT.verified"
-  if [[ $prev =~ ^[0-9]+$ ]] && [ $(( now_s - prev )) -lt 86400 ]; then
-    : > "$CACHE/HALT.sticky"; sticky="; a second halt within 24 h: it stays until a person runs update.sh resume"
-  fi
-  log_line "HALT: $reason; set the space private again; deploys stop$sticky"
+  { tail -n 19 "$CACHE/halt.times" 2>/dev/null; date +%s; } > "$CACHE/halt.times.tmp" && mv -f "$CACHE/halt.times.tmp" "$CACHE/halt.times"
+  python3 - "$CACHE/halt.last" "$reason" <<'EOF' 9>&-
+import json, os, sys, time
+p, reason = sys.argv[1], sys.argv[2]
+with open(p + ".tmp", "w") as f:
+    json.dump({"at": int(time.time()), "reason": reason[:300], "cleared_at": None, "cleared_by": None}, f)
+os.replace(p + ".tmp", p)
+EOF
+  case "$sh" in done) rm -f "$CACHE/EXPOSED" ;; *) printf '%s set private FAILED after: %s\n' "$(stamp)" "$reason" > "$CACHE/EXPOSED" ;; esac
+  log_line "HALT: $reason; set the space private again: $sh; deploys stop until a person runs update.sh resume"
 }
 
-# halt_check UUID PAGE: while HALT is set, each run checks the space. Two runs in a row that verify it private (the
-# list says private and a signed-out request gets the sign-in page) resume deploying, at most once in 24 hours; a
-# second halt within 24 hours (HALT.sticky) waits for a person. Prints what it did, for the deploy column of the log.
+# halt_check UUID PAGE: while HALT is set, every run checks the space (the list and the signed-out request). Exposed:
+# it sets the space private again (logged), and the run fails (exit 1) until the space is private. Private: it stays
+# halted; only a person's update.sh resume clears HALT (there is no automatic resume: every halt was confirmed first).
+# Prints what it found, for the deploy column of the log.
 halt_check() {
-  local uuid=$1 page=$2 vis res rc n last now_s
-  if [ -f "$CACHE/HALT.sticky" ]; then echo "HALT: a second halt within 24 h, a person must run update.sh resume"; return; fi
-  vis=$(vis_list "$uuid")
-  res=$(anon_check "$uuid" "$page"); rc=$?
-  if [ "$vis" != private ] || [ $rc -ne 0 ]; then
-    echo 0 > "$CACHE/HALT.verified"
-    echo "HALT: not verified private (list: $vis; anonymous request: $res)"; return
+  local uuid=$1 page=$2 rc sh
+  vis_check "$uuid" "$page"; rc=$?
+  if [ $rc -eq 1 ]; then
+    if sh=$(share_private "$uuid"); then
+      rm -f "$CACHE/EXPOSED"
+      log_line "HALT: the space was exposed (list: $VIS; row: $VIS_ROW; anonymous request: $ANON); set private again: $sh"
+      echo "HALT: was exposed (list: $VIS; anonymous request: $ANON); set private again: $sh; a person must run update.sh resume"; return 0
+    fi
+    printf '%s list: %s; anonymous request: %s; set private again: %s\n' "$(stamp)" "$VIS" "$ANON" "$sh" > "$CACHE/EXPOSED"
+    log_line "HALT: the space is still exposed (list: $VIS; row: $VIS_ROW; anonymous request: $ANON); set private again: $sh"
+    echo "HALT: STILL EXPOSED (list: $VIS; anonymous request: $ANON); set private again: $sh"; return 1
   fi
-  n=$(( $(cat "$CACHE/HALT.verified" 2>/dev/null || echo 0) + 1 )); echo "$n" > "$CACHE/HALT.verified"
-  if [ "$n" -lt 2 ]; then echo "HALT: verified private ($n of 2 runs)"; return; fi
-  now_s=$(date +%s); last=$(cat "$CACHE/autoresume.last" 2>/dev/null || echo 0)
-  if [[ $last =~ ^[0-9]+$ ]] && [ $(( now_s - last )) -lt 86400 ]; then
-    echo "HALT: verified private on 2 runs, but it auto-resumed within 24 h: a person must run update.sh resume"; return
+  rm -f "$CACHE/EXPOSED"
+  if [ $rc -eq 2 ]; then echo "HALT: visibility unverified (list: $VIS; anonymous request: $ANON); a person must run update.sh resume"; return 0; fi
+  echo "HALT: the space is private (list private, anonymous request got the sign-in page); a person must run update.sh resume"
+}
+
+# guard UUID PAGE WHEN: the visibility check of every run (before any deploy decision, whether or not the run
+# deploys), and again after each deploy. Sets GUARD to "private", "unverified: ...", "misread: ..." (no halt, and no
+# deploy this run) or "HALT: ..." (halted now), and VIS to the list's word (for the log line). Called directly, never in
+# $(...), so that both reach the caller.
+guard() {
+  local uuid=$1 page=$2 when=$3 rc
+  vis_check "$uuid" "$page"; rc=$?
+  case $rc in
+    0) GUARD=private; return 0 ;;
+    2) GUARD="unverified: list $VIS; anonymous request: $ANON"; return 0 ;;
+  esac
+  if [ "$ANON_RC" -eq 1 ]; then
+    halt "$uuid" "$when: $ANON (list: $VIS; row: $VIS_ROW)"; GUARD="HALT: $ANON"; return 0
   fi
-  rm -f "$CACHE/HALT" "$CACHE/HALT.verified"; echo "$now_s" > "$CACHE/autoresume.last"
-  log_line "auto-resume: the space verified private on 2 runs in a row (list private, anonymous request got the sign-in page)"
-  echo "HALT cleared by auto-resume; the next run deploys"
+  if confirm_exposure "$uuid" "$page" "$when, spacesheep list said $VIS" "$VIS_ROW"; then
+    halt "$uuid" "NOT PRIVATE $when: spacesheep list said $VIS; $CONFIRM_REASON"; GUARD="HALT: the space is $VIS"
+  else GUARD="misread: the list said $VIS, then private twice"; fi
 }
 
 cmd_run() {
@@ -239,13 +280,23 @@ cmd_run() {
     echo "another update is running; waiting up to 60 s for it"
     flock -w 60 9 || { echo "update.sh: still locked after 60 s" >&2; return 1; }
   fi
-  local t0 D rc fp heartbeat mingap last_t last_fp deploy uuid now_s out vres vrc hosts counts vis
+  local t0 D rc fp heartbeat mingap last_t last_fp deploy uuid now_s out hosts counts exposed halted_now
   t0=$(date +%s%N)
   D=$(mktemp -d "${TMPDIR:-/tmp}/lab-dashboard.XXXXXX")
   # shellcheck disable=SC2064
   trap "rm -rf '$D' '$D.render.log' '$D.deploy.log'; trap - RETURN" RETURN
   local -a cargs=(--quiet)
   [ "$mode" = now ] && cargs+=(--no-backoff --health)
+  # The local probe leaves its own ancestors out of the people counts up to this run's top process (remote.sh): this
+  # update.sh, or cron's sh above it; never further, so a person who runs update.sh now from a shell, an agent or tmux
+  # stays counted with them.
+  LAB_DASH_RUN_PID=$$
+  local pp
+  pp=$(ps -o ppid= -p "$PPID" 2>/dev/null | tr -d ' ')
+  if [ "$(ps -o comm= -p "$PPID" 2>/dev/null)" = sh ] && [ -n "$pp" ] && [ "$(ps -o comm= -p "$pp" 2>/dev/null)" = cron ]; then
+    LAB_DASH_RUN_PID=$PPID
+  fi
+  export LAB_DASH_RUN_PID
   local -a extra=()
   [ -n "${LAB_DASH_COLLECT_ARGS:-}" ] && read -r -a extra <<< "$LAB_DASH_COLLECT_ARGS"
   # fd 9 (the run lock) is closed for every child: one that lingered would hold the lock and stop every later run
@@ -268,10 +319,24 @@ cmd_run() {
   now_s=$(date +%s)
   { read -r last_t last_fp _ < "$CACHE/deploy.state"; } 2>/dev/null || { last_t=0; last_fp=; }
   render_page "$D"; rc=$?
-  deploy=
+  deploy= exposed=0 halted_now=0 VIS=- GUARD=
   uuid=$(space_uuid) || uuid=
   if [ -z "$uuid" ]; then deploy="skipped(no space configured)"
-  elif [ -f "$CACHE/HALT" ]; then deploy="skipped($(halt_check "$uuid" "$D/index.html"))"
+  elif [ -f "$CACHE/HALT" ]; then
+    out=$(halt_check "$uuid" "$D/index.html") || exposed=1
+    deploy="skipped($out)"
+  else
+    # every run, whether or not it deploys (a space that turned public between deploys is seen within one cron cycle):
+    # the list must say private and a signed-out request must get the sign-in page
+    guard "$uuid" "$D/index.html" "before a deploy"
+    case "$GUARD" in
+      private) ;;
+      unverified*) deploy="skipped(visibility $GUARD)" ;;
+      misread*) deploy="skipped(visibility $GUARD; not halted)" ;;
+      *) deploy="skipped($GUARD)"; halted_now=1; [ -f "$CACHE/EXPOSED" ] && exposed=1 ;;
+    esac
+  fi
+  if [ -n "$deploy" ]; then :
   elif [ $rc -eq 3 ]; then deploy="skipped(no render.py)"
   elif [ $rc -ne 0 ]; then deploy="skipped(render failed: $(tail -n 1 "$D.render.log" 2>/dev/null | cut -c1-80))"
   elif [ "$mode" != now ] && [ "$fp" = "$last_fp" ] && [ $(( now_s - ${last_t:-0} )) -lt $(( heartbeat * 60 - 120 )) ]; then
@@ -283,44 +348,46 @@ cmd_run() {
     deploy="skipped(changed, but the last deploy was at $(date -d "@$last_t" +%H:%M:%S); the next run deploys)"
   fi
   if [ -z "$deploy" ]; then
-    # before every deploy: the space must still be private, or no version with people's names goes out
-    vis=$(vis_list "$uuid")
-    case "$vis" in
-      private) ;;
-      failed|missing|unparsable) deploy="skipped(visibility unverified: spacesheep list $vis)" ;;
-      *) if confirm_exposure "$uuid" "$D/index.html" "before a deploy, spacesheep list said $vis"; then
-           halt "$uuid" "NOT PRIVATE before a deploy: spacesheep list said $vis; $CONFIRM_REASON"; deploy="skipped(HALT: the space is $vis)"
-         else deploy="skipped(visibility misread once: list said $vis, then private twice; not halted)"; fi ;;
-    esac
-  fi
-  if [ -z "$deploy" ]; then
     if out=$(timeout 180 "${SS[@]}" deploy "$D" --space "$uuid" -m "lab $(date +%H:%M)" --json 2> "$D.deploy.log" 9>&-); then
       printf '%s %s\n' "$now_s" "$fp" > "$CACHE/deploy.state"
       deploy="ok"
-      vres=$(vis_guard "$uuid" "$D/index.html"); vrc=$?
-      if [ $vrc -eq 1 ] && [[ $vres == "NOT PRIVATE: spacesheep list"* ]]; then
-        # only the list said so: read it again before halting (a misread halted the page twice on 30 Sep 2026)
-        if confirm_exposure "$uuid" "$D/index.html" "after a deploy, ${vres#NOT PRIVATE: }"; then
-          halt "$uuid" "$vres; $CONFIRM_REASON"; deploy="ok, then HALT($vres)"
-        else deploy="ok (visibility misread once after the deploy; not halted)"; fi
-      elif [ $vrc -eq 1 ]; then
-        halt "$uuid" "$vres"; deploy="ok, then HALT($vres)"
-      elif [ $vrc -eq 2 ]; then
-        deploy="ok (visibility $vres)"
-      fi
+      # right after the deploy, and again RECHECK_S (45 s) later: a deploy can change a space's visibility, and the
+      # first read after it may not show that yet
+      local pass wait
+      for pass in 1 2; do
+        if [ $pass = 2 ]; then
+          wait=${LAB_DASH_RECHECK_S:-45}
+          [[ $wait =~ ^[0-9]+$ ]] && [ "$wait" -gt 0 ] || break
+          [ "$mode" = now ] && echo "deployed; checking the space's visibility again in $wait s"
+          sleep "$wait"
+        fi
+        guard "$uuid" "$D/index.html" "$([ $pass = 1 ] && echo "after a deploy" || echo "$wait s after a deploy")"
+        case "$GUARD" in
+          private) ;;
+          unverified*) deploy="$deploy (visibility $GUARD)" ;;
+          misread*) deploy="$deploy (visibility $GUARD; not halted)" ;;
+          *) deploy="$deploy, then $GUARD"; halted_now=1; [ -f "$CACHE/EXPOSED" ] && exposed=1; break ;;
+        esac
+      done
     else
       deploy="FAILED($(tail -n 1 "$D.deploy.log" 2>/dev/null | tr -cd '[:print:]' | cut -c1-100))"
     fi
   fi
   local took
   took=$(awk -v a="$t0" -v b="$(date +%s%N)" 'BEGIN {printf "%.1f", (b - a) / 1e9}')
-  log_line "${mode/cron/run} took=${took}s hosts=$hosts alerts=$counts fp=$fp deploy=$deploy"
+  log_line "${mode/cron/run} took=${took}s hosts=$hosts alerts=$counts fp=$fp vis=$VIS deploy=$deploy"
   if [ "$mode" = now ]; then
     dj 'd["status"]["level"].upper() + "  " + d["status"]["headline"]'
     dj '"\n".join("  [%s] %s" % (a["level"], a["title"] if (a["host"] or a["card"] or "") in a["title"] else "%s: %s" % (a["card"] or a["host"] or a["scope"], a["title"])) for a in d["alerts"] if a["level"] in ("bad", "warn")) or "  no warnings"'
     echo "  hosts answering $hosts; deploy: $deploy; took ${took}s"
     [ -n "$uuid" ] && echo "  page: https://$uuid.spacesheep.app/ (private: open it signed in at spacesheep.dev)"
   fi
+  if [ $exposed = 1 ]; then
+    # nobody reads cron's output: the log, update.sh status (EXPOSED) and this exit status carry it
+    [ "$mode" = now ] && echo "update.sh: THE SPACE IS EXPOSED and could not be set private: $(cat "$CACHE/EXPOSED" 2>/dev/null); run update.sh status" >&2
+    return 1
+  fi
+  [ $halted_now = 1 ] && return 1   # a halt raised by this run: a person must look (update.sh status, then resume)
   case "$deploy" in FAILED*) return 1 ;; esac
   return 0
 }
@@ -339,15 +406,16 @@ cmd_status() {
   else
     echo "last deploy: never"
   fi
+  if [ -f "$CACHE/EXPOSED" ]; then echo "EXPOSED: $(cat "$CACHE/EXPOSED")   (set it private: spacesheep share <uuid> --visibility private)"; fi
   if [ -f "$CACHE/HALT" ]; then
     echo "HALT: $(cat "$CACHE/HALT")   (after checking the space: update.sh resume)"
-    if [ -f "$CACHE/HALT.sticky" ]; then echo "  a second halt within 24 h: no auto-resume"
-    else echo "  verified private on $(cat "$CACHE/HALT.verified" 2>/dev/null || echo 0) of the 2 runs in a row that auto-resume"; fi
   else echo "HALT: no"; fi
+  if [ -f "$CACHE/halt.last" ]; then echo "last halt: $(python3 -c 'import json,sys,time; h=json.load(open(sys.argv[1])); f=lambda t: time.strftime("%F %T", time.localtime(t)) if t else "-"; print("%s: %s; resumed %s by %s" % (f(h.get("at")), h.get("reason"), f(h.get("cleared_at")), h.get("cleared_by") or "-"))' "$CACHE/halt.last" 2>/dev/null)"; fi
   if "${CRONTAB[@]}" -l 2>/dev/null | grep -qF "$TAG"; then echo "cron: $("${CRONTAB[@]}" -l 2>/dev/null | grep -F "$TAG")"; else echo "cron: not installed (update.sh --install-cron)"; fi
   if uuid=$(space_uuid); then
     echo "space: $uuid"
-    echo "visibility: $(vis_list "$uuid")"
+    vis_check "$uuid" "$CACHE/nopage.html"
+    echo "visibility: list $VIS (row $VIS_ROW); anonymous request: $ANON"
   else
     echo "space: none configured (update.sh create-space)"
   fi
@@ -433,15 +501,31 @@ os.replace(p + ".tmp", p)
 EOF
 }
 
+# resume: a person clears HALT once the space is private: the list must say private and a signed-out request must not
+# get the page. halt.last keeps the halt and who cleared it, so the page shows it for 24 hours (DESIGN.md §3.3).
 cmd_resume() {
-  local uuid vis
+  local uuid rc
   [ -f "$CACHE/HALT" ] || { echo "not halted"; return 0; }
   uuid=$(space_uuid) || { rm -f "$CACHE/HALT"; echo "no space configured; HALT cleared"; return 0; }
-  vis=$(vis_list "$uuid")
-  if [ "$vis" != private ]; then echo "update.sh: the space is '$vis', not private: HALT stays" >&2; return 1; fi
-  rm -f "$CACHE/HALT" "$CACHE/HALT.sticky" "$CACHE/HALT.verified"
-  log_line "resume: HALT cleared by $(id -un); the space is private"
-  echo "HALT cleared; the space is private. The next run deploys."
+  vis_check "$uuid" "$CACHE/nopage.html"; rc=$?
+  if [ "$ANON_RC" -eq 1 ]; then echo "update.sh: the page is served to a signed-out request ($ANON): HALT stays" >&2; return 1; fi
+  if [ "$VIS" != private ]; then echo "update.sh: the space is '$VIS', not private: HALT stays" >&2; return 1; fi
+  [ $rc -eq 2 ] && echo "note: the signed-out request was inconclusive ($ANON); the list says private"
+  rm -f "$CACHE/HALT" "$CACHE/EXPOSED" "$CACHE/HALT.sticky" "$CACHE/HALT.verified" "$CACHE/autoresume.last"
+  python3 - "$CACHE/halt.last" "$(id -un)" <<'EOF' 9>&-
+import json, os, sys, time
+p, who = sys.argv[1], sys.argv[2]
+try:
+    h = json.load(open(p))
+except (OSError, ValueError):
+    h = {"at": None, "reason": None}
+h.update(cleared_at=int(time.time()), cleared_by=who)
+with open(p + ".tmp", "w") as f:
+    json.dump(h, f)
+os.replace(p + ".tmp", p)
+EOF
+  log_line "resume: HALT cleared by $(id -un); the space is private (anonymous request: $ANON)"
+  echo "HALT cleared; the space is private. The next run deploys, and the page notes the halt for 24 hours."
 }
 
 cmd_sample_reset() {
@@ -471,7 +555,7 @@ EOF
 }
 
 cmd_create_space() {
-  local uuid D out rc vres vrc
+  local uuid D out rc
   if uuid=$(space_uuid); then echo "a space is already configured: $uuid ($CONF/space)" >&2; return 1; fi
   exec 9>> "$CACHE/lock"
   flock -w 60 9 || { echo "update.sh: a run holds the lock" >&2; return 1; }
@@ -490,12 +574,9 @@ cmd_create_space() {
   [[ $uuid =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]] || { echo "update.sh: no uuid in the deploy's answer" >&2; return 1; }
   printf '%s\n' "$uuid" > "$CONF/space"; chmod 600 "$CONF/space"
   printf '%s %s\n' "$(date +%s)" "$(dj 'd["fingerprint"]')" > "$CACHE/deploy.state"
-  vres=$(vis_guard "$uuid" "$D/index.html"); vrc=$?
-  if [ $vrc -eq 1 ] && { [[ $vres != "NOT PRIVATE: spacesheep list"* ]] || confirm_exposure "$uuid" "$D/index.html" "after create-space, ${vres#NOT PRIVATE: }"; }; then
-    halt "$uuid" "$vres"
-  fi
-  log_line "create-space $uuid visibility: $vres"
-  echo "created the private space $uuid (recorded in $CONF/space); visibility check: $vres"
+  guard "$uuid" "$D/index.html" "after create-space"
+  log_line "create-space $uuid visibility: $GUARD"
+  echo "created the private space $uuid (recorded in $CONF/space); visibility check: $GUARD"
 }
 
 { main "$@"; exit $?; }

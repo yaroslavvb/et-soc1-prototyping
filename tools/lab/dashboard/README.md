@@ -14,10 +14,11 @@ health rules and the reasons behind each choice, is [DESIGN.md](DESIGN.md). This
 | `lab.json` | static facts: hosts, cards, firmware, clock policy, idle ranges, known conditions. No personal data, no access paths |
 | `page/` | the page and its `render.py` (see `page/README.md`); `update.sh` runs `page/render.py <data.json> <out.html>` |
 | `testdata/` | invented probe outputs (`raw-<host>.txt`, `tailscale.json`) for `collect.py --from-raw`; `run2/` and `run3/` are the two runs after it (a machine down, one unreachable, reboots) |
+| `tests/` | `test_collect.py` (the collector's rules and the probe's process filter, no host contacted) and `guard_test.sh <workdir>` (`update.sh`'s visibility guard against a stub spacesheep; nothing is deployed) |
 
 Everything collected lives outside the repository: `~/.cache/lab-dashboard/` (mode 0700: `data.json`,
-`history.jsonl`, `state.json`, `raw/<host>.txt`, `update.log`, `deploy.state`, `lock`, `collect.lock`, `HALT` and its
-companions `HALT.sticky`, `HALT.verified`, `halt.times`, `autoresume.last`) and
+`history.jsonl`, `state.json`, `raw/<host>.txt`, `update.log`, `deploy.state`, `lock`, `collect.lock`, `HALT`,
+`EXPOSED`, `halt.last`, `halt.times`) and
 `~/.config/lab-dashboard/` (`space` holds the space's uuid; `config.json`; `ack.json`; `crontab.bak`).
 
 ## Using it
@@ -32,13 +33,13 @@ tools/lab/dashboard/update.sh ack <alert-id> [days] [note]   # acknowledge an al
 tools/lab/dashboard/update.sh --install-cron       # the automatic refresh; --uninstall-cron removes it; --dry-run on either prints only
                                                    # (only the tagged line changes; a copy goes to ~/.config/lab-dashboard/crontab.bak)
 tools/lab/dashboard/update.sh sample-reset <card>  # re-enable a card's sample after a timeout was looked at
-tools/lab/dashboard/update.sh resume               # clear HALT once the space is private again
+tools/lab/dashboard/update.sh resume               # clear HALT once the space is private again (nothing else clears it)
 tools/lab/dashboard/update.sh create-space         # once: the first private deploy; records the uuid
 python3 tools/lab/dashboard/collect.py             # collect only (prints a summary); --help for its options
 ```
 
 From another machine: `ssh aifoundry2 claude/et-soc1-prototyping/tools/lab/dashboard/update.sh now`. Asking Claude in
-the aifoundry2 session ("refresh the lab dashboard", "why is aifoundry1 red?") works the same way: Claude runs
+the aifoundry2 session ("refresh the lab dashboard", "why does aifoundry1 show a problem?") works the same way: Claude runs
 `update.sh now` and answers from `~/.cache/lab-dashboard/data.json`. Alert ids (for `ack`) are in `data.json` and on
 the page, for example `host:aifoundry1:disk:/home`.
 
@@ -52,10 +53,16 @@ everywhere). Expect 30–60 versions a day, at most 144 on a day when a queue
 takes a card in bursts (DESIGN.md §3.2); the CLI cannot delete old versions, only the whole space.
 
 **Machine states.** Each machine is `up`, `DOWN` (no answer, and Tailscale on aifoundry2 says it is offline: a
-`bad` alert at once), `UNREACHABLE` (online on Tailscale, but ssh timed out or failed: a warning, `bad` from the second
-run) or `APPROVAL NEEDED`; a reboot (a new boot id) is shown for 24 hours, as a warning when no reboot was pending.
-A machine that is not up keeps its last data on the page, greyed and labelled "last known at 14:32"; its cards read
-`UNKNOWN: machine down`, and its people counts are unknown. Down and unreachable machines are tried every run.
+`bad` alert at once, "down since" Tailscale's last-seen time), `UNREACHABLE` (online on Tailscale, or its view not
+available, but ssh timed out or failed: a warning, `bad` from the second run; `PROBE FAILED` for aifoundry2's own
+probe) or `APPROVAL NEEDED`. A reboot (a new boot id) is shown for 24 hours: a note when a reboot was pending and the
+machine answered up to it, a warning when none was pending or when it came back from an outage ("rebooted at 15:07,
+after being down since 14:41"), and a note "whether it was planned is not known" when the collector had not seen an
+earlier boot (its first run, or right after an upgrade). A machine that is not up keeps its last data on the page,
+greyed and labelled "last known at 14:32" (its uptime too); its cards read `UNKNOWN: machine down`, its people's status
+is unknown and their counts are too, and its old alerts are listed as "last known data" without counting in the light.
+Down and unreachable machines are tried every run; a failure other than the approval prompt clears the approval
+back-off. A failed `tailscale status` is a collector warning (states then come from ssh alone).
 
 **When a machine shows "approval needed".** Tailscale SSH's check approval lasts about 12 hours. The collector
 recognises the prompt, stops its own ssh client, never keeps the URL, and then tries that host once an hour (`now`
@@ -116,16 +123,21 @@ run it by hand to see its usage (read `tools/ettelem/ettelem.cpp`).
 
 ## Privacy
 
-The page names lab users, so the space is private, is checked before every deploy (`spacesheep list` must say
-private, or nothing is deployed) and after it (the list again, and an anonymous request must get the sign-in
-bootstrap, never the page's hidden canary or title), and is never linked from a public page. A list that says "not
-private" is read twice more, 5 s apart, and the anonymous request made, before anything halts: if both re-reads say
-private and the request gets the sign-in page, the run logs "visibility misread once" (with the space's row: id,
-visibility, updated_at) and only skips its deploy (on 30 September one read said "public" twice for a private space).
-Otherwise, or if the page is served anonymously, `update.sh` sets the space private again, writes `HALT` and stops
-deploying. While halted, each run checks again; two runs in a row that verify the space private resume deploying, at
-most once a day, and a second halt within 24 hours stays until a person runs `update.sh resume`. The guard cannot
-see `spacesheep share --email`, which grants a person access while the space stays private. A person appears as a
+The page names lab users, so the space is private, and is never linked from a public page. Every run checks it,
+whether or not it deploys, and so does each deploy, right after and again 45 s later: `spacesheep list` must say
+private and an anonymous request must get the sign-in bootstrap, never the page's hidden canary or title (both are always
+made; a run deploys only when both pass). An anonymous request that gets the page halts at once. A list that says "not
+private" is read twice more, 5 s apart, and the anonymous request made again, before anything halts: if both re-reads
+say private and the request gets the sign-in page, the run logs it (with the space's rows: id, visibility, updated_at),
+skips its deploy and sets the space private anyway. To halt, `update.sh` sets the space private again (and logs whether
+that worked), writes `HALT` and stops deploying; nothing resumes by itself: a person runs `update.sh resume` after
+checking the space (it refuses while the list says anything but private or the page is served anonymously). While
+halted, every run checks again and sets the space private again if it is exposed; if that fails it writes `EXPOSED`
+and the run exits 1 until it works (`update.sh status` shows it). For 24 hours after a resume the page carries a warning
+that deploys were halted and why. Whether the two halts of 30 September (14:42, 15:22) were real exposures after a
+deploy or misreads of the list is not known: the later reads came after the halt had set the space private; the logged
+rows are there to settle it. The guard cannot see `spacesheep share --email`, which grants a person access while the
+space stays private. A person appears as a
 login name with session, terminal and process counts, idle time, card holds and card use (with program names, as
 `et-who` and `et-usage` show them to every user), and what they are doing in coarse categories (on a card, AI agent,
 building, simulator, Python, editor, shell only), worked out on the host from process names that never leave it;
@@ -145,12 +157,16 @@ python3 collect.py --out $T                                                     
 python3 collect.py --out $T --sample-dry                                               # the sample's gates, nothing run
 ```
 
+```
+python3 tests/test_collect.py                       # the collector's rules, the privacy patterns, the probe's process filter
+bash tests/guard_test.sh ~/claude/work/<topic>      # update.sh's visibility guard against stubs (32 checks)
+```
+
 `update.sh` reads test hooks from the environment, so its deploy logic can be exercised without deploying:
 `LAB_DASH_CACHE`, `LAB_DASH_CONFIG` (scratch directories), `LAB_DASH_SPACESHEEP` (a stub CLI), `LAB_DASH_RENDER`
 (a stub renderer), `LAB_DASH_FETCH` (a stub anonymous fetch that prints a status line, then a body),
 `LAB_DASH_CRONTAB` (a stub crontab), `LAB_DASH_COLLECT_ARGS` (extra `collect.py` options), `LAB_DASH_REREAD_S` (the
-guard's re-read pause, 5 s). With a stub spacesheep whose `list` answers a scripted sequence, the guard's paths were
-checked on 30 September: a misread (no halt, no deploy), a true exposure (halt, stays), the page served (halt), two
-verified runs (auto-resume), a second halt within 24 h (stays), a change within 10 minutes of a deploy (waits).
-Keep `LAB_DASH_CONFIG` pointed at a scratch directory with `{"card_sample": false}` for any test: the real
-`config.json` may switch the card sample on.
+guard's re-read pause, 5 s), `LAB_DASH_RECHECK_S` (the second check after a deploy, 45 s; 0 skips it).
+`tests/guard_test.sh` uses them for the guard's paths (DESIGN.md §3.3 lists its cases). Keep `LAB_DASH_CONFIG`
+pointed at a scratch directory with `{"card_sample": false}` for any test: the real `config.json` may switch the card
+sample on.

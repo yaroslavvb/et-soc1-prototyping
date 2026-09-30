@@ -71,6 +71,7 @@ RULES = {
     "die_warn_c": 90, "die_bad_c": 100,
     "hold_long_s": 2 * 3600,
     "active_min": 30, "away_min": 24 * 60,
+    "session_min_s": 60,  # a session with no terminal counts from this age (a copy or a one-off command does not)
     # card use (et-usage): the window the page shows, and at most this many bars per card in data.json (runs of one
     # login closer than a gap are merged, the gap doubling from 30 s until the count fits; the sums are kept)
     "usage_hours": 24, "usage_max_intervals": 500, "usage_merge_gap_s": 30,
@@ -94,6 +95,25 @@ PRIV_PATTERNS = [
                         r"|(?<![\w:])::(?:[0-9A-Fa-f]{1,4}:)*[0-9A-Fa-f]{1,4}(?![\w:])")),
     ("mac", re.compile(r"(?<![\w:])(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}(?![\w:])")),
 ]
+
+
+def render_patterns():
+    """page/render.py's last check (its PRIVACY list), which refuses a whole data.json on a match: the collector scrubs
+    and checks with those patterns too, after its own, so that render.py never refuses a file the collector wrote (on
+    30 September a program named 01.1.1.1 passed the collector, whose IPv4 pattern skips leading zeros, and stopped
+    every render for the day it stayed in the log). Returns (patterns, error)."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("lab_dashboard_render", os.path.join(HERE, "page", "render.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return [(str(name), rx) for name, rx in mod.PRIVACY], None
+    except Exception as e:  # the page's code missing or broken: the collector's own patterns only, and say so
+        return [], "page/render.py's privacy patterns could not be loaded (%s)" % type(e).__name__
+
+
+RENDER_PATTERNS, RENDER_PATTERNS_ERROR = render_patterns()
+PRIV_PATTERNS = PRIV_PATTERNS + RENDER_PATTERNS
 
 
 class Privacy:
@@ -221,7 +241,8 @@ def git_code():
     h = hashlib.sha256()
     for p in (os.path.join(HERE, "collect.py"), REMOTE_PATH):
         try:
-            h.update(open(p, "rb").read())
+            with open(p, "rb") as f:
+                h.update(f.read())
         except OSError:
             pass
     return (sha or "uncommitted") + ("+" + h.hexdigest()[:6] if dirty or not sha else "")
@@ -237,7 +258,9 @@ def classify_ssh_error(stderr, rc):
         return "approval needed"
     if re.search(r"Could not resolve hostname|Name or service not known|nodename nor servname", e):
         return "unknown host"
-    if re.search(r"Connection timed out|Operation timed out|timed out", e, re.I):
+    # "Timeout, server X not responding." is ssh's keepalive (ServerAliveInterval 5, CountMax 2): a machine that hangs
+    # in the middle of the probe
+    if re.search(r"Connection timed out|Operation timed out|timed out|Timeout, server .* not responding", e, re.I):
         return "timeout"
     if re.search(r"Connection refused|Permission denied|Host key verification failed", e):
         return "refused"
@@ -480,11 +503,21 @@ def p_temps(lines):
 
 
 # What people are doing: the probe's category keys (remote.sh, @@procs) and the page's words, in display order.
-# "on a card" comes from et-who and et-usage; "shell only" is a person with sessions or processes and none of these.
+# "on a card" comes from et-who and et-usage. When none of these: "shell" (shell only: a shell, tmux or screen, and
+# nothing of the above), else "other" (processes, none of them a shell or of the above).
 DOING = [("card", "on a card"), ("agent", "AI agent"), ("build", "building"), ("sim", "simulator"),
          ("python", "Python"), ("editor", "editor")]
 DOING_KEYS = {k for k, _ in DOING}
 SHELL_ONLY = "shell only"
+
+
+def doing_of(e):
+    """One host entry's categories for the page: the main ones (DOING order), else ["shell"] or ["other"]; None when
+    the probe said nothing (an older probe). An entry from before the probe reported shells counts as a shell."""
+    if e.get("doing") is None:
+        return None
+    d = [k for k, _ in DOING if k in e["doing"]]
+    return d or (["shell"] if e.get("shell", True) else ["other"])
 
 
 def prog_name(s):
@@ -498,10 +531,18 @@ def login_name(s):
     return s if LOGIN_RE.match(s) else "?"
 
 
+def usage_login(u):
+    """A login from et-usage for a sentence: its "?" is a node opened and closed between two of its scans (a few ms),
+    whose user it could not see (or, rarely, a login that fails the login rule)."""
+    return "an unseen user (?)" if u == "?" else u
+
+
 def p_people(secs, meta, now):
-    """Per login on this host: sessions (not closing), closing, ttys, idle_min, procs, device_procs and doing (the
-    probe's category keys). uid >= 1000 only; the probe's own session is left out. Returns (people, sessions count,
-    CI jobs)."""
+    """Per login on this host: sessions (not closing), closing, ttys, idle_min, procs, device_procs, doing (the
+    probe's category keys) and shell (a shell, tmux or screen runs). uid >= 1000 only; the probe's own session is left
+    out, and so is a session with no terminal whose processes are all younger than session_min_s (an scp, an `ssh
+    host cmd`, another collector's probe): it neither logs its owner in nor makes them active. Returns (people,
+    sessions count, CI jobs)."""
     probe = meta.get("probe_session")
     sess = []
     raw = "".join(secs.get("sessions", [])).strip()
@@ -510,6 +551,11 @@ def p_people(secs, meta, now):
             if str(s.get("session")) == str(probe):
                 continue
             sess.append(s)
+    ages = {}
+    for ln in secs.get("procs", []):
+        f = ln.split()
+        if f[:1] == ["sessage"] and len(f) >= 3:
+            ages[f[1]] = num(f[2], int)
     people = {}
 
     def ent(login):
@@ -519,6 +565,9 @@ def p_people(secs, meta, now):
     for s in sess:
         uid, user = s.get("uid"), str(s.get("user") or "")
         if not isinstance(uid, int) or uid < 1000 or uid == 65534 or not LOGIN_RE.match(user):
+            continue
+        age = ages.get(str(s.get("session")))
+        if s.get("state") != "closing" and not s.get("tty") and age is not None and age < RULES["session_min_s"]:
             continue
         uid_of[user] = uid
         e = ent(user)
@@ -558,7 +607,9 @@ def p_people(secs, meta, now):
         e["procs"] = n or 0
         e["device_procs"] = dv or 0
         if len(f) > 5:  # the categories ("-": none of them); an older probe printed no field (unknown)
-            e["doing"] = [k for k, _ in DOING if k in f[5].split(",") and k != "card"]
+            cats = f[5].split(",")
+            e["doing"] = [k for k, _ in DOING if k in cats and k != "card"]
+            e["shell"] = "shell" in cats
     nsess = sum(e["sessions"] + e["closing"] for e in people.values())
     return people, nsess, ci_jobs
 
@@ -829,7 +880,11 @@ class Collector:
         if not LOGIN_RE.match(self.owner):
             raise SystemExit("collect.py: owner login %r is not a login" % self.owner)
         self.priv = Privacy(self.owner)
-        self.errors = []
+        self.errors = [RENDER_PATTERNS_ERROR] if RENDER_PATTERNS_ERROR else []
+        # who maintains the dashboard (named on the page for readers who cannot run it): config.json's "maintainer",
+        # else the collector's own login
+        m = str(self.config.get("maintainer") or self.owner)
+        self.maintainer = m if LOGIN_RE.match(m) else self.owner
         self.this_host = socket.gethostname().split(".")[0]
         self.sample_enabled = bool(args.card_sample or args.sample_dry or self.config.get("card_sample"))
         every = self.config.get("card_sample_every_min", RULES["sample_every_min"])
@@ -907,6 +962,10 @@ class Collector:
                 self.tailscale = p_tailscale(ts_text, list(lab_hosts))
             except (ValueError, TypeError, AttributeError) as e:
                 self.errors.append("tailscale status: could not parse (%s)" % type(e).__name__)
+        elif not self.args.from_raw:
+            # without it a machine that does not answer can only be "unreachable", never DOWN: say so
+            self.errors.append("tailscale status failed: machine states come from ssh alone this run (a machine that "
+                               "does not answer shows as unreachable, never as down)")
         self.probe_wall_s = round(time.time() - t_start, 1)
         self.raw_results = results
         return self.build(results)
@@ -931,6 +990,11 @@ class Collector:
                       or ms(self.now) - hs["health_ms"] >= (HEALTH_EVERY_S - 120) * 1000)
         self.health_ran[h] = health
         p = {"DASH_TREE": hc.get("tree", "nekko"), "DASH_EXCLUDE_PCI": " ".join(excl), "DASH_HEALTH": int(health)}
+        if h == self.this_host:
+            # the local probe's ancestor walk stops at this run's top process (update.sh exports it; else this
+            # collector), so whoever started the run by hand stays counted with their shell, agent and tmux
+            top = os.environ.get("LAB_DASH_RUN_PID", "")
+            p["DASH_ANC_STOP"] = top if re.match(r"^[0-9]{1,9}$", top) else str(os.getpid())
         plan = self.plan_sample(h)
         if plan:
             c = self.lab["cards"][plan]
@@ -1004,8 +1068,10 @@ class Collector:
                 else:
                     if not skipped:
                         hs["fails_in_row"] = hs.get("fails_in_row", 0) + (0 if err == "approval needed" else 1)
-                        if err == "approval needed":
-                            hs["next_try_ms"] = ms(now + RULES["approval_retry_min"] * 60)
+                        # the hourly back-off is for the approval prompt only: any other failure (a timeout after an
+                        # approval, say) clears it, so a machine that stopped answering is tried every run
+                        hs["next_try_ms"] = (ms(now + RULES["approval_retry_min"] * 60) if err == "approval needed"
+                                             else None)
                     hs["error"] = err
                     hs["last_fail_ms"] = ms(now)
                     hs["took_ms"] = took
@@ -1024,6 +1090,7 @@ class Collector:
         status = self.status_view(alerts)
         hist_line = self.history_line(hosts, cards)
         history = self.history_view(hist_line)
+        usage["colors"] = self.login_colors(usage, cards, history)
         for h, hb in hosts.items():
             if (hb.get("nodewatch") or {}).get("present"):
                 hb["nodewatch"]["gaps_48h"] = history["hosts"][h]["gaps"]
@@ -1038,7 +1105,7 @@ class Collector:
                           "card_sample": ("dry" if self.args.sample_dry else
                                           "on (every %d min)" % self.sample_every_min if self.sample_enabled else "off"),
                           "halted": self.halt_reason(), "last_deploy": self.last_deploy(),
-                          "lab_tz": self.lab.get("tz"),
+                          "lab_tz": self.lab.get("tz"), "maintainer": self.maintainer,
                           "errors": [self.priv.scrub(e, 200) for e in self.errors]},
             "status": status,
             "fingerprint": None,
@@ -1071,6 +1138,16 @@ class Collector:
             return open(os.path.join(self.out, "HALT")).read().strip()[:200] or "halted"
         except OSError:
             return None
+
+    def halt_last(self):
+        """update.sh's halt.last: the last halt ({"at", "reason", "cleared_at", "cleared_by"}), or None"""
+        h = load_json(os.path.join(self.out, "halt.last"), None)
+        if not isinstance(h, dict):
+            return None
+        f = lambda v: v if isinstance(v, (int, float)) and not isinstance(v, bool) else None  # noqa: E731
+        who = str(h.get("cleared_by") or "")
+        return {"at": f(h.get("at")), "reason": self.priv.scrub(h.get("reason"), 200) if h.get("reason") else None,
+                "cleared_at": f(h.get("cleared_at")), "cleared_by": who if LOGIN_RE.match(who) else None}
 
     def last_deploy(self):
         try:
@@ -1105,6 +1182,12 @@ class Collector:
         disks = safe("disk", p_disk, secs.get("disk", [])) or []
         kernel = safe("kernel", p_kernel, secs.get("kernel", []), meta.get("kernel"))
         systemd = safe("systemd", p_systemd, secs.get("systemd", []))
+        # unit and package names are free text too (an instance name can hold an address): through the scrubber
+        if systemd:
+            systemd["failed"] = [self.priv.scrub(u, 120) for u in systemd["failed"]]
+        if kernel:
+            kernel["pending"] = [self.priv.scrub(x, 80) for x in kernel["pending"]]
+            kernel["running"] = self.priv.scrub(kernel["running"], 80)
         temps = safe("temps", p_temps, secs.get("temps", []))
         pp = safe("sessions", p_people, secs, meta, self.now)
         people, nsess, ci_jobs = pp if pp else ({}, None, None)
@@ -1213,8 +1296,9 @@ class Collector:
             "manifest": {k: manifest.get(k) for k in ("cpu", "et_soc1", "srcversion", "libetrt", "libdevicelayer")}
             if manifest else None,
             "ci_runner": dict(ci, jobs_now=ci_jobs) if ci else None,
+            # logged in: a login session (not closing) or an open terminal (a tmux pane counts)
             "logins": {"sessions": nsess, "people": len([p for p in people.values()
-                                                          if p["sessions"] + p["closing"] > 0])},
+                                                          if p["sessions"] > 0 or p["ttys"] > 0])},
             "nodewatch": {k: v for k, v in nodewatch.items()},
             "device_procs": sum(p["device_procs"] for p in people.values()) if pp else None,
             "device_people": len([u for u, p in people.items() if p["device_procs"]]) if pp else None,
@@ -1251,8 +1335,10 @@ class Collector:
                "coverage_ms": [[tms(a), tms(b)] for a, b in (x for x in (j.get("coverage") or [])
                                                              if isinstance(x, list) and len(x) == 2)
                                if f(a) is not None and f(b) is not None and b >= a],
-               "skipped": f(j.get("skipped")), "merged_gap_s": f(j.get("merged_gap_s")),
+               "skipped": f(j.get("skipped")), "merged_gap_s": None, "stopped_ms": tms(dm.get("stopped_at")),
+               "log_error": self.priv.scrub(j["error"], 120) if isinstance(j.get("error"), str) else None,
                "cards": {}, "unknown_cards": []}
+        dlog = j.get("daily_logged_s") if isinstance(j.get("daily_logged_s"), dict) else None
         by_num = {str(dn): cid for cid, dn in self.lab["hosts"][h]["cards"].items()}
         for n, cd in (j.get("cards") or {}).items():
             cid = by_num.get(str(n))
@@ -1264,35 +1350,63 @@ class Collector:
                 if not isinstance(iv, dict) or f(iv.get("start")) is None or f(iv.get("end")) is None:
                     continue
                 a, b = iv["start"], max(iv["start"], iv["end"])
+                # An interval is the union of one login's holds with gaps of up to --gap s merged (and up to the
+                # card's merged_gap_s when et-usage merged further), so its span counts those gaps. Every hold holds
+                # a node or the lock, so the time held is the union of node_s and lock_s: max(node_s, lock_s) when one
+                # contains the other (flock ... prog, a program without the lock, an unseen "?" open), which is the
+                # lab's pattern; the span only when et-usage gave neither.
+                nd, lk = f(iv.get("node_s")), f(iv.get("lock_s"))
+                held = min(b - a, max(nd or 0, lk or 0)) if (nd is not None or lk is not None) else b - a
                 ivs.append({"user": login_name(iv.get("user")), "start_ms": ms(a), "end_ms": ms(b),
-                            "held_s": round(b - a, 1), "node_s": round(f(iv.get("node_s")) or 0, 1),
+                            "held_s": round(held, 3), "node_s": round(min(b - a, nd or 0), 3),
                             "runs": int(f(iv.get("procs")) or 0), "programs": self.programs(iv.get("programs")),
                             "open": bool(iv.get("open")), "n": 1})
             ivs.sort(key=lambda x: x["start_ms"])
-            now = []
+            # Who holds it now: one entry per login and program that holds a node; flock and timeout (lock only)
+            # are part of that run, so they show only for a login that holds just the lock.
+            byu = {}
             for x in cd.get("now") or []:
                 if isinstance(x, dict) and f(x.get("start")) is not None:
-                    now.append({"user": login_name(x.get("user")), "comm": self.prog(x.get("comm")),
-                                "nodes": [nd for nd in (x.get("nodes") or []) if nd in ("mgmt", "ops")],
-                                "lock": bool(x.get("lock")), "start_ms": ms(x["start"])})
+                    byu.setdefault(login_name(x.get("user")), []).append(x)
+            now = []
+            for u, xs in byu.items():
+                node = [x for x in xs if [nd for nd in (x.get("nodes") or []) if nd in ("mgmt", "ops")]]
+                lock = any(x.get("lock") for x in xs)
+                first = min(f(x["start"]) for x in xs)
+                progs = {}
+                for x in sorted(node or xs[:1], key=lambda x: f(x["start"])):
+                    p = progs.setdefault(self.prog(x.get("comm")), {"nodes": set(), "start": f(x["start"])})
+                    p["nodes"] |= {nd for nd in (x.get("nodes") or []) if nd in ("mgmt", "ops")}
+                for comm, p in progs.items():
+                    now.append({"user": u, "comm": comm, "nodes": sorted(p["nodes"]), "lock": lock,
+                                "start_ms": ms(min(first, p["start"]))})
+            now.sort(key=lambda x: x["start_ms"])
             act = []
             for x in cd.get("activity") or []:
                 if isinstance(x, list) and len(x) >= 4 and all(f(v) is not None for v in x[:4]):
-                    act.append([ms(x[0]), round(x[1], 1), int(x[2] + x[3])])
+                    act.append([ms(x[0]), round(x[1], 1), int(x[2] + x[3])])  # [end of the span, its s, messages]
             daily = []
             for day, users in sorted((cd.get("daily") or {}).items())[-7:]:
                 if not re.match(r"^\d{4}-\d\d-\d\d$", str(day)) or not isinstance(users, dict):
                     continue
-                noon = dt.datetime.strptime(day, "%Y-%m-%d").replace(hour=12).timestamp()
                 us = {}
                 for u, v in users.items():
                     if isinstance(v, dict):
                         e = us.setdefault(login_name(u), {"held_s": 0, "node_s": 0, "runs": 0})
-                        e["held_s"] += round(f(v.get("held_s")) or 0, 1)
-                        e["node_s"] += round(f(v.get("node_s")) or 0, 1)
+                        e["held_s"] = round(e["held_s"] + (f(v.get("held_s")) or 0), 1)
+                        e["node_s"] = round(e["node_s"] + (f(v.get("node_s")) or 0), 1)
                         e["runs"] += int(f(v.get("runs")) or 0)
-                daily.append({"date": day, "day_ms": ms(noon), "users": us})
-            out["cards"][cid] = {"intervals": self.merge_intervals(ivs), "activity": act, "now": now, "daily": daily}
+                # et-usage lists all 7 dates, {} for a date with no use: logged_s (seconds the logger ran that date)
+                # tells "nobody" from "not logged"
+                lg = f((dlog or {}).get(day))
+                daily.append({"date": day, "day_ms": self.lab_noon_ms(day), "users": us,
+                              "logged_s": round(lg) if lg is not None else None})
+            mg = f(cd.get("merged_gap_s"))
+            mivs, mg2 = self.merge_intervals(ivs)
+            gap = max(x for x in (mg, mg2, 0) if x is not None) or None
+            out["cards"][cid] = {"intervals": mivs, "activity": act, "now": now, "daily": daily, "merged_gap_s": gap}
+            if gap and (out["merged_gap_s"] or 0) < gap:
+                out["merged_gap_s"] = gap
         if out["unknown_cards"]:
             self.errors.append("%s: et-usage reports card(s) %s, which lab.json does not list" % (
                 h, ", ".join(out["unknown_cards"])))
@@ -1313,8 +1427,9 @@ class Collector:
 
     def merge_intervals(self, ivs):
         """Merge one login's intervals closer than a gap, the gap doubling from usage_merge_gap_s, until at most
-        usage_max_intervals remain. The sums (held_s, node_s, runs, programs, n) are kept; the bar spans them all."""
-        gap = RULES["usage_merge_gap_s"]
+        usage_max_intervals remain. The sums (held_s, node_s, runs, programs, n) are kept; the bar spans them all.
+        Returns (intervals, the last gap used in s, or None when nothing was merged)."""
+        gap, used = RULES["usage_merge_gap_s"], None
         while len(ivs) > RULES["usage_max_intervals"] and gap <= 6 * 3600:
             out, last = [], {}
             for iv in ivs:
@@ -1322,7 +1437,7 @@ class Collector:
                 if p is not None and iv["start_ms"] - p["end_ms"] <= gap * 1000:
                     p["end_ms"] = max(p["end_ms"], iv["end_ms"])
                     for k in ("held_s", "node_s", "runs", "n"):
-                        p[k] = round(p[k] + iv[k], 1) if isinstance(p[k], float) else p[k] + iv[k]
+                        p[k] = round(p[k] + iv[k], 3) if isinstance(p[k], float) else p[k] + iv[k]
                     for k, v in iv["programs"].items():
                         p["programs"][k] = p["programs"].get(k, 0) + v
                     p["open"] = p["open"] or iv["open"]
@@ -1330,9 +1445,18 @@ class Collector:
                     p = dict(iv, programs=dict(iv["programs"]))
                     out.append(p)
                     last[iv["user"]] = p
-            ivs = out
+            ivs, used = out, gap
             gap *= 2
-        return ivs
+        return ivs, used
+
+    def lab_noon_ms(self, day):
+        """Noon of a date (YYYY-MM-DD) in the lab's zone (lab.json "tz"), else the collector's own zone."""
+        d = dt.datetime.strptime(day, "%Y-%m-%d").replace(hour=12)
+        try:
+            import zoneinfo
+            return ms(d.replace(tzinfo=zoneinfo.ZoneInfo(self.lab.get("tz"))).timestamp())
+        except Exception:  # no zone name, no tz database
+            return ms(d.timestamp())
 
     def usage_view(self, hosts, cards):
         """data.json's usage block: the last usage_hours up to this run, per host (the logger's state, coverage) and
@@ -1354,9 +1478,10 @@ class Collector:
             cov = [[max(a, s_ms), min(b, e_ms)] for a, b in (u.get("coverage_ms") or []) if b > s_ms and a < e_ms]
             H[h] = {"logger": u.get("logger"), "installed": u.get("installed"), "error": u.get("error"),
                     "stale": stale, "as_of_ms": as_of,
-                    "alive_ms": u.get("alive_ms"), "started_ms": u.get("started_ms"),
+                    "alive_ms": u.get("alive_ms"), "started_ms": u.get("started_ms"), "stopped_ms": u.get("stopped_ms"),
                     "logging_since_ms": u.get("logging_since_ms"), "coverage_ms": cov,
                     "logged_s": round(sum(b - a for a, b in cov) / 1000), "skipped": u.get("skipped"),
+                    "log_error": u.get("log_error"),
                     "merged_gap_s": u.get("merged_gap_s")}
         for cid, c in cards.items():
             h = c["host"]
@@ -1366,6 +1491,9 @@ class Collector:
             if not logged:
                 Cd[cid] = {"host": h, "logged": False}
                 continue
+            # a machine that did not answer this run: its last log is shown up to its last answer, and nothing in it
+            # is "now" (a hold open then may have ended since; the machine may be down)
+            old = bool(H.get(h, {}).get("stale"))
             ivs, users = [], {}
             for iv in cu.get("intervals") or []:
                 a, b = max(iv["start_ms"], s_ms), min(iv["end_ms"], e_ms)
@@ -1373,17 +1501,24 @@ class Collector:
                     continue
                 span = max(1, iv["end_ms"] - iv["start_ms"])
                 k = 1.0 if (a, b) == (iv["start_ms"], iv["end_ms"]) else (b - a) / span  # clipped at the window
-                x = dict(iv, start_ms=a, end_ms=b, held_s=round(iv["held_s"] * k, 1), node_s=round(iv["node_s"] * k, 1))
+                x = dict(iv, start_ms=a, end_ms=b, held_s=round(iv["held_s"] * k, 3), node_s=round(iv["node_s"] * k, 3),
+                         open=bool(iv["open"]) and not old)
+                if k != 1.0:  # the runs in the window too (a long bar merged from many runs can straddle its start)
+                    x["runs"] = max(1, round(iv["runs"] * k)) if iv["runs"] else 0
+                    x["programs"] = {p: max(1, round(n * k)) for p, n in iv["programs"].items()}
                 ivs.append(x)
                 e = users.setdefault(iv["user"], {"held_s": 0.0, "node_s": 0.0, "runs": 0, "programs": {},
-                                                  "first_ms": a, "last_ms": b, "open": False})
+                                                  "first_ms": a, "last_ms": b, "open": False, "open_ms": None})
                 e["held_s"] += x["held_s"]
                 e["node_s"] += x["node_s"]
-                e["runs"] += iv["runs"]
+                e["runs"] += x["runs"]
                 e["first_ms"], e["last_ms"] = min(e["first_ms"], a), max(e["last_ms"], b)
-                e["open"] = e["open"] or iv["open"]
-                for p, n in iv["programs"].items():
+                if x["open"]:
+                    e["open"], e["open_ms"] = True, min(e["open_ms"] or a, a)
+                for p, n in x["programs"].items():
                     e["programs"][p] = e["programs"].get(p, 0) + n
+            for x in ivs:
+                x["held_s"], x["node_s"] = round(x["held_s"], 1), round(x["node_s"], 1)
             for e in users.values():
                 e["held_s"], e["node_s"] = round(e["held_s"], 1), round(e["node_s"], 1)
                 e["programs"] = dict(sorted(e["programs"].items(), key=lambda kv: (-kv[1], kv[0]))[:8])
@@ -1410,12 +1545,14 @@ class Collector:
             logins.update(x["user"] for x in cu.get("now") or [])
             for d in cu.get("daily") or []:
                 logins.update(d["users"])
-            Cd[cid] = {"host": h, "logged": True, "stale": bool(H.get(h, {}).get("stale")),
+            Cd[cid] = {"host": h, "logged": True, "stale": old,
                        "intervals": ivs, "activity_min": act, "users": users,
-                       "held_s": round(min(busy / 1000, held_sum) if held_sum else busy / 1000, 1),
+                       "held_s": round(min(busy / 1000, held_sum), 1),
                        "node_s": round(sum(e["node_s"] for e in users.values()), 1),
-                       "runs": sum(e["runs"] for e in users.values()), "people": len(users),
-                       "now": cu.get("now") or [], "daily": cu.get("daily") or [],
+                       "runs": sum(e["runs"] for e in users.values()),
+                       "people": len([u for u in users if u != "?"]),  # "?": a run too short to see who
+                       "now": [] if old else (cu.get("now") or []), "was_now": (cu.get("now") or []) if old else [],
+                       "merged_gap_s": cu.get("merged_gap_s"), "daily": cu.get("daily") or [],
                        "since_check": {"since_ms": since, "users": sorted({iv["user"] for iv in recent}),
                                        "runs": sum(iv["runs"] for iv in recent), "programs": progs} if since else None}
         logins.discard("?")
@@ -1704,16 +1841,21 @@ class Collector:
 
     # -------------------------------------------------------------- liveness: is the machine itself up?
     def liveness(self, h, hs, fresh, err, skipped):
-        """The machine's state this run (DESIGN.md §5): up (the probe answered), down (no answer, and Tailscale says
+        """The machine's state this run (DESIGN.md §2.8): up (the probe answered), down (no answer, and Tailscale says
         the peer is offline), approval needed (Tailscale SSH's check), unreachable (no answer otherwise: timeout,
-        refused, ssh failed). Kept across runs in state.json with the times a page needs: when it went away (the
-        first failed run, or Tailscale's last-seen time when that is earlier), its last answer."""
+        refused, ssh failed). Kept across runs in state.json with the times a page needs: when it went away and its
+        last answer. For down, "since" is Tailscale's last-seen time from this run (never before the last answer), else
+        the first run that found it down; for the other states, the first run of that state in a row (an approval wait
+        before a crash is not part of the outage)."""
         now_ms = ms(self.now)
         ts = (self.tailscale or {}).get(h)
+        prev = hs.get("state")
         if ts is not None:
             hs["tailscale"] = {"online": ts["online"], "last_seen_ms": ts["last_seen_ms"], "at_ms": now_ms}
             if ts["last_seen_ms"]:
                 hs["ts_last_seen_ms"] = ts["last_seen_ms"]
+        else:
+            hs["tailscale"] = None  # no view of it this run: an older one is never quoted as current
         if fresh:
             state = "up"
         elif ts is not None and ts["online"] is False:
@@ -1727,31 +1869,43 @@ class Collector:
             hs.pop("first_fail_ms", None)
             hs["down_since_ms"] = None
         else:
-            first = hs.setdefault("first_fail_ms", now_ms)
-            since = first
-            seen = hs.get("ts_last_seen_ms")
-            if state == "down" and seen and seen < since:
-                since = seen  # Tailscale saw it go before this collector's first failed run
-            if hs.get("last_ok_ms"):
-                since = max(since, hs["last_ok_ms"])
-            hs["down_since_ms"] = since
-        if state != hs.get("state"):
-            hs["prev_state"] = hs.get("state")
+            hs.setdefault("first_fail_ms", now_ms)
+            kept = hs.get("down_since_ms") if prev == state else None
+            since = (ts["last_seen_ms"] or kept or now_ms) if state == "down" else (kept or now_ms)
+            last_ok = hs.get("last_ok_ms")
+            hs["down_since_ms"] = max(since, last_ok) if last_ok else since
+        if state != prev:
+            hs["prev_state"] = prev
             hs["state_since_ms"] = hs["down_since_ms"] if state != "up" else now_ms
         hs["state"] = state
 
     def detect_reboot(self, h, hs, fresh):
         """A reboot since the last answer: the boot id changed, or the uptime is shorter than the time since the last
-        answer. Recorded as an event with its time, planned when the last answer said a reboot was pending."""
+        answer. Recorded as an event with its time and boot id. Planned when the last answer said a reboot was pending
+        and the machine answered (or only waited for a Tailscale approval) up to it; after an outage (down or
+        unreachable before it came back) it is recorded with that outage, whatever was pending. With no earlier boot
+        of the machine (the collector's first run, or state from an older collector) and an uptime under 24 hours, the
+        reboot is recorded with planned unknown. Runs before liveness(), so hs["state"] is the last run's."""
         up_s, boot, last_ok = fresh.get("uptime_s"), fresh.get("boot"), hs.get("last_ok_ms")
         prev = hs.get("boot_id")
         prev8 = (hs.get("block") or {}).get("boot_id8")
         changed = bool(boot and ((prev and boot != prev) or (not prev and prev8 and boot[:8] != prev8)))
         short = bool(up_s is not None and last_ok and self.now - last_ok / 1000 > up_s + 60)
+        at = ms(self.now - up_s) if up_s is not None else ms(self.now)
         if changed or short:
-            planned = bool(((hs.get("block") or {}).get("kernel") or {}).get("reboot_pending"))
-            hs["reboot"] = {"at_ms": ms(self.now - up_s) if up_s is not None else ms(self.now), "planned": planned,
-                            "detected_ms": ms(self.now)}
+            st = hs.get("state")
+            outage = st in ("down", "unreachable")
+            pending = bool(((hs.get("block") or {}).get("kernel") or {}).get("reboot_pending"))
+            hs["reboot"] = {"at_ms": at, "planned": False if outage else pending, "detected_ms": ms(self.now),
+                            "boot": boot, "pending": pending,
+                            "after": {"state": st, "since_ms": hs.get("down_since_ms"), "last_ok_ms": last_ok}
+                            if outage else None}
+        elif up_s is not None and up_s < 24 * 3600 and boot:
+            rb = hs.get("reboot") or {}
+            same = (rb.get("boot") == boot) if rb.get("boot") else bool(rb.get("at_ms") and abs(rb["at_ms"] - at) < 600000)
+            if not same:
+                hs["reboot"] = {"at_ms": at, "planned": None, "detected_ms": ms(self.now), "boot": boot,
+                                "pending": None, "after": None, "first_seen": True}
 
     def host_view(self, h, hs, fresh):
         """The host block and its cards, fresh or from the last good run (stale)."""
@@ -1763,10 +1917,15 @@ class Collector:
                      "power_profile": None, "chrony": None, "health": None, "manifest": None, "ci_runner": None,
                      "logins": None, "nodewatch": {"present": False}, "device_procs": None, "ci_jobs": None}
         block = json.loads(json.dumps(block))
-        # a block saved by an older collector: without the account-specific parts it used to carry
+        # a block saved by an older collector: without the account-specific parts it used to carry (its nodewatch
+        # events included the collector account's own Claude and tmux ups and downs)
         block.pop("experiments", None)
+        nw = block.get("nodewatch") or {}
         for k in ("tmux", "claude", "linger", "user_manager"):
-            (block.get("nodewatch") or {}).pop(k, None)
+            nw.pop(k, None)
+        if "events_48h" in nw:
+            nw["events_48h"] = [e for e in (nw.get("events_48h") or []) if isinstance(e, dict)
+                                and e.get("type") in ("REBOOT", "START", "WARN")]
         block["reachable"] = bool(fresh)
         block["error"] = None if fresh else hs.get("error")
         block["last_ok_at"] = iso(hs["last_ok_ms"] / 1000) if hs.get("last_ok_ms") else None
@@ -1785,7 +1944,11 @@ class Collector:
         rb = hs.get("reboot") or {}
         recent = bool(rb.get("at_ms")) and ms(self.now) - rb["at_ms"] < 24 * 3600 * 1000
         block["rebooted_at_ms"] = rb.get("at_ms") if recent else None
-        block["reboot_planned"] = rb.get("planned") if recent else None
+        block["reboot_planned"] = rb.get("planned") if recent else None  # null: unknown (no earlier boot seen)
+        block["reboot_seen_ms"] = rb.get("detected_ms") if recent else None
+        block["reboot_after"] = rb.get("after") if recent else None  # the outage before it: state, since_ms, last_ok_ms
+        block["reboot_first_seen"] = bool(rb.get("first_seen")) if recent else None
+        block["reboot_pending_before"] = rb.get("pending") if recent else None
         if not fresh:
             block["stale"] = True
             block["as_of"] = block["last_ok_at"]
@@ -1822,10 +1985,11 @@ class Collector:
 
     # -------------------------------------------------------------- people
     def people_view(self, host_people, hosts, cards, usage):
-        """One entry per login seen on any host (sessions or processes) or holding a card. Everyone is listed the
-        same way, the collector's own login included."""
-        rank = {"active": 0, "idle": 1, "away": 2, "processes only": 3}
-        order = [k for k, _ in DOING] + ["shell"]
+        """One entry per login seen on any host (sessions, terminals or processes) or holding a card. Everyone is
+        listed the same way, the collector's own login included. A machine that did not answer this run keeps its last
+        entries, marked stale, and they never make the person's status, "doing", idle time or card holds current:
+        those come from the machines that answered; a person seen only on machines that did not answer is "unknown"."""
+        rank = {"active": 0, "idle": 1, "away": 2, "processes only": 3, "unknown": 4}
         merged = {}
 
         def person(login):
@@ -1833,56 +1997,67 @@ class Collector:
                                              "card_holds": [], "cards_24h": [], "device_procs": 0,
                                              "stale_hosts": []})
         for h, pl in host_people.items():
+            fresh = bool(hosts[h]["reachable"])
             for login, e in pl.items():
                 m = person(login)
-                m["hosts"][h] = {k: e.get(k) for k in ("sessions", "closing", "ttys", "idle_min", "procs")}
-                m["hosts"][h]["doing"] = list(e["doing"]) if e.get("doing") is not None else None
-                m["device_procs"] += e.get("device_procs", 0)
-                if not hosts[h]["reachable"]:
+                x = m["hosts"][h] = {k: e.get(k) for k in ("sessions", "closing", "ttys", "idle_min", "procs")}
+                x["doing"] = doing_of(e)
+                x["status"] = self.person_status(e)  # on this machine; "status" below is the person's best
+                if not fresh:
                     m["stale_hosts"].append(h)
-                    m["hosts"][h]["stale"] = True
-                st = self.person_status(e)
-                m["hosts"][h]["status"] = st  # on this machine; "status" below is the person's best
-                if st and (m["status"] is None or rank[st] < rank[m["status"]]):
-                    m["status"] = st
+                    x["stale"] = True
+                    continue
+                m["device_procs"] += e.get("device_procs", 0)
+                if x["status"] and (m["status"] is None or rank[x["status"]] < rank[m["status"]]):
+                    m["status"] = x["status"]
         for cid, c in cards.items():
+            old = bool(c.get("stale")) or not (hosts.get(c["host"]) or {}).get("reachable")
             for w in ((c.get("holder") or {}).get("who") or []):
                 if w["login"] in ("root", "?"):
                     continue
                 m = person(w["login"])
                 hd = m["hosts"].get(c["host"])
                 if hd is not None and hd.get("doing") is not None and "card" not in hd["doing"]:
-                    hd["doing"].insert(0, "card")
-                m.setdefault("holds_on", set()).add(c["host"])
+                    hd["doing"] = ["card"] + [k for k in hd["doing"] if k not in ("shell", "other")]
+                if not old:
+                    m.setdefault("holds_on", set()).add(c["host"])
                 same = next((x for x in m["card_holds"] if x["card"] == cid), None)
                 if same:  # the lock and the nodes of one card are one hold; the node holder names the program
                     same["etime_s"] = max(same["etime_s"] or 0, w.get("etime_s") or 0)
                     same["comm"] = same["comm"] or w.get("comm")
                     continue
                 m["card_holds"].append({"card": cid, "etime_s": w.get("etime_s"), "comm": w.get("comm"),
-                                        "since_ms": w.get("since_ms")})
+                                        "since_ms": w.get("since_ms"), "stale": old})
         for cid, cu in (usage.get("cards") or {}).items():
             for u, e in (cu.get("users") or {}).items():
                 if u in merged:
                     merged[u]["cards_24h"].append({"card": cid, "held_s": e["held_s"], "runs": e["runs"],
                                                    "last_ms": e["last_ms"], "open": e["open"]})
         for m in merged.values():
-            m["status"] = m["status"] or "processes only"
-            idles = [x["idle_min"] for x in m["hosts"].values() if x.get("idle_min") is not None]
+            live = {h: x for h, x in m["hosts"].items() if not x.get("stale")}
+            held_now = m.pop("holds_on", None)
+            if m["status"] is None:
+                m["status"] = "processes only" if (live or held_now) else "unknown"
+            idles = [x["idle_min"] for x in live.values() if x.get("idle_min") is not None]
             m["idle_min"] = min(idles) if idles else None
-            known = [x["doing"] for x in m["hosts"].values() if x.get("doing") is not None]
-            doing = {k for d in known for k in d}
-            if m.pop("holds_on", None):
+            known = [x["doing"] for x in live.values() if x.get("doing") is not None]
+            doing = {k for d in known for k in d if k in DOING_KEYS}
+            if held_now:
                 doing.add("card")
-            for x in m["hosts"].values():
-                if x.get("doing") is not None and not x["doing"]:
-                    x["doing"] = ["shell"]
-            m["doing"] = ([k for k in order if k in doing] or ["shell"]) if (known or doing) else None
+            if doing:
+                m["doing"] = [k for k, _ in DOING if k in doing]
+            elif known:
+                m["doing"] = ["shell"] if any("shell" in d for d in known) else ["other"]
+            else:
+                m["doing"] = ["card"] if held_now else None
             m["cards_24h"].sort(key=lambda x: -x["held_s"])
         return sorted(merged.values(), key=lambda m: (rank[m["status"]], m["login"]))
 
     def person_status(self, e):
-        if e.get("sessions", 0) == 0:
+        """active: a terminal used in the last active_min, or a session with no terminal (at least session_min_s old,
+        p_people); idle and away by the newest terminal use; processes only: no session and no terminal. A terminal
+        counts without a session: a tmux pane lives on after the login that opened it."""
+        if e.get("sessions", 0) == 0 and not e.get("ttys"):
             return "processes only" if (e.get("closing") or e.get("procs")) else None
         if e.get("notty_sessions"):
             return "active"
@@ -1911,6 +2086,16 @@ class Collector:
             self.add("collector:halt", "bad", "collector", "deploys halted: " + halt,
                      "update.sh stopped deploying after a visibility check failed; run update.sh status, then resume",
                      source="update.sh")
+        else:
+            # a halt a person resumed in the last 24 hours: nothing was deployed while it lasted, so this page is where
+            # readers learn that its space was (or may have been) readable without signing in
+            hl = self.halt_last()
+            if hl and hl.get("cleared_at") and self.now - hl["cleared_at"] < 24 * 3600:
+                self.add("collector:halt-recent", "warn", "collector", "deploys were halted at %s: the page's space may "
+                         "have been readable without signing in" % fmt_when(hl.get("at"), self.now),
+                         "%s. %s resumed at %s, after checking that the space is private." % (
+                             hl.get("reason") or "?", hl.get("cleared_by") or "a person",
+                             fmt_when(hl["cleared_at"], self.now)), source="update.sh")
         for e in self.errors:
             self.add("collector:parse:%s" % hashlib.sha256(e.encode()).hexdigest()[:8], "warn", "collector", e,
                      source="collect.py")
@@ -1919,6 +2104,7 @@ class Collector:
                      "card telemetry sampling is %s" % ("in dry mode" if self.args.sample_dry else "on"),
                      "at most one card per host per run, every %d min at most, behind every etiquette gate"
                      % self.sample_every_min, source="collect.py")
+        missing_usage = []
         for h, hb in hosts.items():
             st = not hb["reachable"]
             if st and hb.get("error") != NOT_PROBED:
@@ -1941,18 +2127,43 @@ class Collector:
                         det += "; next try %s" % hb["next_try_at"][11:16]
                     self.add("host:%s:reach" % h, "warn", "host-down", "%s: approval needed" % h, det, host=h,
                              source="ssh")
+                elif h == self.this_host:
+                    # the collector's own machine: no ssh is involved, and the machine is up (the collector runs on it)
+                    lvl = "bad" if hb.get("fails_in_row", 0) >= 2 else "warn"
+                    self.add("host:%s:reach" % h, lvl, "host-down", "%s: the local probe failed since %s: %s" % (
+                        h, since, err), "%s; the collector runs on this machine, so it is up, but the probe (bash, on "
+                        "this machine) did not finish: its data is the last known" % last, host=h, source="collect.py")
                 else:
                     ts = hb.get("tailscale") or {}
+                    now_ts = ts.get("at_ms") == ms(self.now)  # this run's view only, never an older one
                     lvl = "bad" if hb.get("fails_in_row", 0) >= 2 else "warn"
                     self.add("host:%s:reach" % h, lvl, "host-down", "%s unreachable since %s: %s" % (h, since, err),
                              "%s; %s" % (last, "Tailscale says it is online, so the machine is up but ssh did not answer"
-                                         if ts.get("online") else "Tailscale's view was not available"),
+                                         if now_ts and ts.get("online") else
+                                         "Tailscale's view was not available this run, so whether the machine is up is "
+                                         "not known"),
                              host=h, source="ssh")
             if hb.get("rebooted_at_ms"):
                 at = fmt_when(hb["rebooted_at_ms"] / 1000, self.now)
-                if hb.get("reboot_planned"):
+                after = hb.get("reboot_after") or {}
+                if after:
+                    was = "down" if after.get("state") == "down" else "unreachable"
+                    t0, t1 = after.get("since_ms") or after.get("last_ok_ms"), hb.get("reboot_seen_ms")
+                    gone = " (%s)" % fmt_dur((t1 - t0) / 1000) if t0 and t1 else ""
+                    self.add("host:%s:rebooted" % h, "warn", "host", "rebooted at %s, after being %s since %s%s" % (
+                        at, was, fmt_when(t0 / 1000, self.now) if t0 else "?", gone),
+                        "no answer from %s until %s, then a new boot: a crash, a hang or a power cut and a restart%s" % (
+                            fmt_when(t0 / 1000, self.now) if t0 else "?", fmt_when(t1 / 1000, self.now) if t1 else "?",
+                            " (a reboot was pending before it, but a planned reboot does not keep a machine away "
+                            "that long)" if hb.get("reboot_pending_before") else ""), host=h, source="boot id")
+                elif hb.get("reboot_planned") is None:
                     self.add("host:%s:rebooted" % h, "info", "host", "rebooted at %s" % at,
-                             "a reboot was pending (kernel or package updates)", host=h, source="boot id")
+                             "before the dashboard's first check of this boot: whether it was planned is not known",
+                             host=h, source="uptime")
+                elif hb.get("reboot_planned"):
+                    self.add("host:%s:rebooted" % h, "info", "host", "rebooted at %s" % at,
+                             "a reboot was pending (kernel or package updates), and the machine answered until it",
+                             host=h, source="boot id")
                 else:
                     self.add("host:%s:rebooted" % h, "warn", "host", "rebooted at %s, unplanned" % at,
                              "no reboot was pending at the last answer before it: a crash, a power cut or a person",
@@ -2036,13 +2247,11 @@ class Collector:
                 elif age > R["nodewatch_warn_min"]:
                     self.add("host:%s:nodewatch" % h, "warn", "host", "nodewatch's last heartbeat at %s" % last,
                              "%d min before this check" % age, host=h, source="nodewatch")
-            # the card-use logger (et-usage), from this run's answer only
+            # the card-use logger (et-usage), from this run's answer only ("not installed": one note for the lab, below)
             uh = (usage.get("hosts") or {}).get(h) or {}
             lg = uh.get("logger")
             if not st and lg == "not installed":
-                self.add("host:%s:usage" % h, "info", "host", "card-use logging not installed",
-                         "et-usage is not on this machine, so the page cannot show who used its cards; install "
-                         "tools/lab/et-usage (the logger et-usaged and the command et-usage)", host=h, source="et-usage")
+                missing_usage.append(h)
             elif not st and lg == "not running":
                 self.add("host:%s:usage" % h, "warn", "host", "card-use logger installed but not running",
                          "et-usage is installed, but its daemon has written no log and no state: "
@@ -2050,11 +2259,18 @@ class Collector:
             elif not st and lg == "stale":
                 self.add("host:%s:usage" % h, "warn", "host", "card-use logger stopped at %s" % (
                     fmt_when(uh["alive_ms"] / 1000, self.now) if uh.get("alive_ms") else "?"),
-                    "its state file is older than 3 minutes: card use since then is not logged; "
-                    "systemctl status et-usaged", host=h, source="et-usage")
+                    ("it was stopped (a clean stop, at %s)" % fmt_when(uh["stopped_ms"] / 1000, self.now)
+                     if uh.get("stopped_ms") else "it stopped answering (its state file is older than 3 minutes)") +
+                    ": card use since then is not logged; systemctl status et-usaged", host=h, source="et-usage")
             elif not st and lg == "error":
                 self.add("host:%s:usage" % h, "warn", "host", "et-usage failed: %s" % (uh.get("error") or "?"), None,
                          host=h, source="et-usage")
+        if missing_usage:
+            self.add("lab:usage-not-installed", "info", "lab", "card-use logging not installed on %s" % ", ".join(
+                missing_usage), "et-usage is not on %s, so the page cannot show who used %s cards over the day, only who "
+                "held them at each 10-minute check; install tools/lab/et-usage (the logger et-usaged and the command "
+                "et-usage)" % ("these machines" if len(missing_usage) > 1 else "this machine",
+                               "their" if len(missing_usage) > 1 else "its"), source="et-usage")
         # cards
         for cid, c in cards.items():
             h = c["host"]
@@ -2134,7 +2350,7 @@ class Collector:
                 if sc and sc.get("users"):
                     progs = ", ".join("%s ×%d" % kv for kv in sorted(sc["programs"].items(), key=lambda kv: -kv[1])[:3])
                     self.add("card:%s:used" % cid, "info", "card", "used since the last check by %s" % ", ".join(
-                        sc["users"]), progs or None, host=h, card=cid, source="et-usage")
+                        map(usage_login, sc["users"])), progs or None, host=h, card=cid, source="et-usage")
                 elif not cu.get("logged"):
                     act = c.get("activity") or {}
                     if act.get("used"):
@@ -2147,7 +2363,7 @@ class Collector:
                 us = sorted(cu["users"].items(), key=lambda kv: -kv[1]["last_ms"])
                 first = min(e["first_ms"] for _, e in us)
                 self.add("card:%s:used-24h" % cid, "warn", "card", "used in the last %d h by %s%s" % (
-                    RULES["usage_hours"], ", ".join(u for u, _ in us), note),
+                    RULES["usage_hours"], ", ".join(usage_login(u) for u, _ in us), note),
                     "; ".join("%s: %d run%s, %s held, last at %s" % (
                         u, e["runs"], "" if e["runs"] == 1 else "s", fmt_dur(e["held_s"]),
                         fmt_when(e["last_ms"] / 1000, self.now)) for u, e in us) +
@@ -2215,13 +2431,19 @@ class Collector:
                 hb["level"] = "warn"
 
     def status_view(self, alerts):
-        counts = {"bad": 0, "warn": 0, "info": 0, "known": 0}
+        """The light and the headline, from the current alerts only: known and acknowledged ones, and the old ones
+        (last known data of a machine that did not answer, marked stale), are counted apart and never named. The
+        headline always names a machine that is down, unreachable or waiting for an approval, whatever else is worse:
+        "1 problem: aifoundry1 /home 99% used; 1 warning: aifoundry3: approval needed"."""
+        counts = {"bad": 0, "warn": 0, "info": 0, "known": 0, "old": 0}
         for a in alerts:
             if a["known"] or a["ack"]:
                 counts["known"] += 1
+            elif a.get("stale"):
+                counts["old"] += 1
             else:
                 counts[a["level"]] += 1
-        live = [a for a in alerts if not (a["known"] or a["ack"])]
+        live = [a for a in alerts if not (a["known"] or a["ack"] or a.get("stale"))]
         level = "bad" if counts["bad"] else "warn" if counts["warn"] else "ok"
 
         def label(a):
@@ -2232,12 +2454,20 @@ class Collector:
             head = "All clear" + (" (%d known condition%s)" % (counts["known"], "" if counts["known"] == 1 else "s")
                                   if counts["known"] else "")
         else:
-            top = [a for a in live if a["level"] == level]
-            n = len(top)
-            word = ("problem" if level == "bad" else "warning") + ("" if n == 1 else "s")
-            head = "%d %s: %s" % (n, word, ", ".join(label(a) for a in top[:3])) + (", …" if n > 3 else "")
-            if level == "bad" and counts["warn"]:
-                head += "; %d warning%s" % (counts["warn"], "" if counts["warn"] == 1 else "s")
+            parts = []
+            for lv, word in (("bad", "problem"), ("warn", "warning")):
+                n = counts[lv]
+                if not n:
+                    continue
+                these = [a for a in live if a["level"] == lv]
+                down = [a for a in these if a["scope"] == "host-down"]
+                names = down + ([a for a in these if a["scope"] != "host-down"] if lv == level else [])
+                k = max(3, len(down)) if lv == level else len(down)
+                txt = "%d %s%s" % (n, word, "" if n == 1 else "s")
+                if names[:k]:
+                    txt += ": " + ", ".join(label(a) for a in names[:k]) + (", …" if n > k else "")
+                parts.append(txt)
+            head = "; ".join(parts)
         return {"level": level, "counts": counts, "headline": self.priv.scrub(head, 240)}
 
     # -------------------------------------------------------------- history (§1.7)
@@ -2326,6 +2556,13 @@ class Collector:
                             C[cid]["die_c"][j] = v["die"]
                         if v.get("w") is not None:
                             C[cid]["board_w"][j] = v["w"]
+        # the current slot shows the latest run, whatever an earlier run in the same slot found (a machine that
+        # answered at 14:42 and was found down by a hand run at 14:47 is down in the 14:40 slot, as the strip says)
+        ci = idx(current.get("t", 0))
+        if ci is not None:
+            for h, v in (current.get("h") or {}).items():
+                if h in H:
+                    H[h]["up"][ci] = v.get("up")
         for h in H:
             beats = H[h]["beats"]
             first = next((i for i, b in enumerate(beats) if b), None)
@@ -2342,6 +2579,54 @@ class Collector:
             H[h]["gaps"] = [{"from": iso(t0 + a * SLOT_S), "to": iso(t0 + b * SLOT_S), "min": (b - a) * 10}
                             for a, b in gaps][-20:]
         return {"t0_ms": t0 * 1000, "step_min": SLOT_S // 60, "n": SLOTS, "hosts": H, "cards": C}
+
+    COLOR_SLOTS = 3  # page/script.js LOGIN_COLORS: the three hues that stay apart for any pair, light and dark
+
+    def login_colors(self, usage, cards, history):
+        """{login: colour slot} for the logins with card use on this page (the last 24 hours, the 7 days, holders now,
+        the 48-hour holds), kept in state.json so that a colour follows its login from run to run (DESIGN.md §4.2): a
+        login keeps its slot while it appears at least once a week; a free slot goes to the login with the most card
+        time; when none is free, the slot of the login longest off the page is given up. Everyone else is "others"."""
+        now_ms = ms(self.now)
+        reg = self.state.setdefault("login_colors", {})
+        score = {}
+
+        def bump(u, v):
+            if isinstance(u, str) and u not in ("?", "root", "system") and LOGIN_RE.match(u):
+                score[u] = score.get(u, 0) + v
+        for cu in (usage.get("cards") or {}).values():
+            for u, e in (cu.get("users") or {}).items():
+                bump(u, 1e6 + (e.get("held_s") or 0) * 10)
+            for x in cu.get("now") or []:
+                bump(x.get("user"), 1e6)
+            for d in cu.get("daily") or []:
+                for u, e in (d.get("users") or {}).items():
+                    bump(u, (e or {}).get("held_s") or 0)
+        for c in cards.values():
+            for w in (c.get("holder") or {}).get("who") or []:
+                if not w.get("system"):
+                    bump(w.get("login"), 1e6)
+        for c in (history.get("cards") or {}).values():
+            for x in c.get("hold") or []:
+                if x and x != "system":
+                    bump(x, 1)
+        for u in [u for u, r in reg.items() if not isinstance(r, dict) or now_ms - (r.get("seen_ms") or 0)
+                  > HISTORY_KEEP_S * 1000 or not isinstance(r.get("slot"), int) or not 0 <= r["slot"] < self.COLOR_SLOTS]:
+            del reg[u]
+        for u in score:
+            if u in reg:
+                reg[u]["seen_ms"] = now_ms
+        used = {r["slot"] for r in reg.values()}
+        for u in sorted((u for u in score if u not in reg), key=lambda u: (-score[u], u)):
+            free = [k for k in range(self.COLOR_SLOTS) if k not in used]
+            if not free:
+                away = sorted((r["seen_ms"], v) for v, r in reg.items() if v not in score)
+                if not away:
+                    break
+                free = [reg.pop(away[0][1])["slot"]]
+            reg[u] = {"slot": free[0], "seen_ms": now_ms}
+            used.add(free[0])
+        return {u: reg[u]["slot"] for u in sorted(score) if u in reg}
 
     def append_history(self, line):
         p = os.path.join(self.out, "history.jsonl")
@@ -2366,15 +2651,16 @@ class Collector:
 
     def fingerprint(self, data):
         """A hash of the state worth a new version: what the page says, not how its numbers drift. Left out: load,
-        memory, ages, message counters and the used flag, telemetry times, session counts, doing categories, card
-        time and run counts, and error counts (their kinds stay). Card use enters coarsely (DESIGN.md §3.2): per card,
-        whether it is in use now and the set of logins that used it in the last 24 hours; per host, the logger's
+        memory, ages, message counters and the used flag, telemetry times, session counts, doing categories, people's
+        active/idle/away status, the wording of an ssh error (a steady outage flips between "timeout" and "no route"),
+        card time and run counts, and error counts (their kinds stay). Card use enters coarsely (DESIGN.md §3.2): per
+        card, whether it is in use now and the set of logins that used it in the last 24 hours; per host, the logger's
         state. So a new person on a card republishes the page at the next run; more runs by the same people do not."""
         m = {"hosts": {}, "cards": {}, "people": [], "alerts": []}
         uh = (data.get("usage") or {}).get("hosts") or {}
         uc = (data.get("usage") or {}).get("cards") or {}
         for h, hb in data["hosts"].items():
-            m["hosts"][h] = {"reachable": hb["reachable"], "error": hb.get("error"), "state": hb.get("state"),
+            m["hosts"][h] = {"reachable": hb["reachable"], "state": hb.get("state"),
                              "boot": hb.get("boot_id8"), "rebooted": hb.get("rebooted_at_ms"),
                              "warn": sorted(x["check"] for x in ((hb.get("health") or {}).get("lines") or [])
                                             if x["level"] == "WARN"),
@@ -2391,7 +2677,10 @@ class Collector:
                                "users_24h": sorted((uc.get(cid) or {}).get("users") or {}),
                                "sample": [bool(sm.get("disabled")), str(sm.get("result") or "").startswith("failed")]}
         for p in data["people"]:
-            m["people"].append([p["login"], p["status"], sorted(p["hosts"])])
+            # who is on the lab, and where they are logged in (a session or a terminal), from machines that answered:
+            # not their active, idle or away status, which crosses a threshold every half hour
+            m["people"].append([p["login"], sorted(h for h, x in (p.get("hosts") or {}).items() if not x.get("stale")
+                                                   and ((x.get("sessions") or 0) > 0 or (x.get("ttys") or 0) > 0))])
         m["alerts"] = sorted((a["id"], a["level"]) for a in data["alerts"] if not self.FP_VOLATILE.match(a["id"]))
         m["halted"] = data["collector"].get("halted")
         return hashlib.sha256(json.dumps(m, sort_keys=True).encode()).hexdigest()[:12]

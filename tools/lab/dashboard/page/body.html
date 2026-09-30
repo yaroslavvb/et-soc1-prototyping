@@ -1,5 +1,6 @@
 <style>
-/* The lab dashboard (tools/lab/dashboard/DESIGN.md §4). Colours are the template's tokens only. */
+/* The lab dashboard (tools/lab/dashboard/DESIGN.md §4). Colours are the template's tokens only: logins take --c7, --c3 and --c2
+   (script.js LOGIN_COLORS), card marks are ink, and the status tokens mean status only. */
 main{max-width:1280px}
 [hidden]{display:none!important}
 .muted{color:var(--muted)}
@@ -15,7 +16,7 @@ main{max-width:1280px}
 .lv-stale,.lv-unk{--dot:var(--muted);--tint:color-mix(in srgb,var(--muted) 14%,var(--surface));--edge:color-mix(in srgb,var(--muted) 50%,transparent)}
 .lv-excl{--dot:var(--ref);--tint:var(--surface);--edge:var(--border)}
 .lv-info{--dot:var(--c1);--tint:color-mix(in srgb,var(--c1) 9%,var(--surface));--edge:color-mix(in srgb,var(--c1) 35%,transparent)}
-.lv-held{--dot:var(--c5);--tint:color-mix(in srgb,var(--c5) 15%,var(--surface));--edge:color-mix(in srgb,var(--c5) 55%,transparent)}
+.lv-held{--dot:var(--ink);--tint:color-mix(in srgb,var(--ink) 7%,var(--surface));--edge:color-mix(in srgb,var(--ink) 42%,transparent)}
 .lv-fix{--dot:var(--c2);--tint:color-mix(in srgb,var(--c2) 12%,var(--surface));--edge:color-mix(in srgb,var(--c2) 50%,transparent)}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:0 9px 0 7px;border-radius:999px;font-size:.72rem;font-weight:650;
  letter-spacing:.045em;line-height:1.75;color:var(--ink);background:var(--tint);border:1px solid var(--edge);white-space:nowrap;
@@ -45,10 +46,19 @@ main{max-width:1280px}
 .mbox-sub{font-size:.8rem;color:var(--ink-2);margin-top:-4px}
 .cchip{display:grid;grid-template-columns:16px minmax(0,1fr) auto;align-items:center;gap:1px 8px;padding:7px 10px;border-radius:9px;
  background:color-mix(in srgb,var(--ink) 3%,var(--surface));border:1px solid var(--border);text-decoration:none;color:var(--ink);min-width:0}
+/* a status with its who and since (IN USE: login · program · since) gets a row of its own under the card's name */
+.cchip.long{grid-template-columns:16px minmax(0,1fr)}
+.cchip.long>.pill{grid-column:2;justify-self:start;white-space:normal;border-radius:12px;line-height:1.4;padding-top:1px;padding-bottom:1px}
+.cchip.long>.pill .pl{min-width:0;overflow-wrap:anywhere}
+.mbox.is-down,.mbox.is-away{border-color:var(--edge);border-left:4px solid var(--dot)}
+.mbox.is-down{background:var(--tint)}
+.pd-legend{display:flex;flex-wrap:wrap;align-items:center;gap:2px 14px;font-size:.78rem;color:var(--ink-2);margin:8px 0 0}
+.pd-legend .pdl{white-space:nowrap}
+.pd-legend .pdl .pd{margin-right:5px;vertical-align:0}
 .cchip:hover{border-color:var(--ink-2)}
 .cchip:focus-visible,.mbox-head a:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
 .cchip .cc-name{font-weight:600;font-size:.88rem;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px}
-.cchip .cc-temp{grid-column:2 / 4;font-size:.78rem;color:var(--ink-2)}
+.cchip .cc-temp{grid-column:2 / -1;font-size:.78rem;color:var(--ink-2)}
 .cchip .cc-temp .pill{margin-right:2px;vertical-align:1px}
 .cchip .cc-temp.old{font-style:italic}
 .mk{display:inline-block;vertical-align:-2px;overflow:visible;flex:none}
@@ -63,6 +73,7 @@ main{max-width:1280px}
 .pd.idle{border:1.5px solid var(--ink-2)}
 .pd.away{background:var(--muted);opacity:.55}
 .pd.procs{border:1.5px solid var(--muted);border-radius:2px}
+.pd.unk{border:1.5px dashed var(--muted)}
 .kpis{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px;margin:12px 0 6px}
 .kpi{padding:12px 14px}
 .kpi .val{font-variant-numeric:normal;font-size:1.35rem}
@@ -161,6 +172,8 @@ main{max-width:1280px}
 .hlines .hl-t{overflow-wrap:anywhere}
 .hlines li.WARN{background:color-mix(in srgb,var(--warn) 12%,transparent)}
 .mp.is-stale .vitals,.mp.is-stale .tiles{color:var(--ink-2)}
+/* the last known of a machine that is not answering: no colour that reads as current */
+.mp.is-stale .meter,.mp.is-stale .spark,.mp.is-stale .gauge,.mp.is-stale .strip48,.mp.is-stale .ct .pill{filter:grayscale(1);opacity:.6}
 /* people */
 #ptable td{vertical-align:middle}
 #ptable .pl-login{font-weight:600}
@@ -169,6 +182,7 @@ main{max-width:1280px}
 .dg.dg-card{color:var(--ink);border-color:var(--ink-2);font-weight:600}
 .logins.is-old .who{opacity:.6}
 #ptable .st{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+#ptable th{white-space:nowrap}
 #ptable .mh{display:block}
 /* last 48 hours */
 /* card use, last 24 hours */
@@ -182,7 +196,12 @@ main{max-width:1280px}
 .cu-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:10px 28px;margin:12px 0 4px}
 .cu-card{font-size:.88rem;min-width:0;overflow-wrap:anywhere}
 .cu-card .cu-sub{display:block;font-size:.8rem;color:var(--ink-2)}
-#cu-days td.cu-dc{min-width:74px}
+#cu-days{font-size:.84rem}
+#cu-days th,#cu-days td{padding:5px 6px}
+#cu-days th.cu-dl{white-space:nowrap;font-weight:600;color:var(--ink)}
+#cu-days td.cu-dc{min-width:62px}
+.cu-who{display:block;font-size:.74rem;color:var(--ink-2);overflow-wrap:anywhere}
+.cu-none{margin:6px 0 4px}
 .cu-dt{display:block;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cu-mini{display:flex;gap:1px;height:6px;border-radius:3px;overflow:hidden;background:color-mix(in srgb,var(--ink) 6%,var(--surface));margin-top:3px;max-width:120px}
 .cu-mini span{flex:none;height:100%}
@@ -201,6 +220,8 @@ main{max-width:1280px}
 .mult .mt{font-size:.8rem;color:var(--ink-2);margin:0 0 2px}
 .chart-sub{font-size:.8rem;color:var(--ink-2);margin:0 0 4px}
 .about p,.about li{max-width:880px}
+.about details.maint{margin:6px 0 10px}
+.about details.maint>summary{font-size:.92rem}
 .about h3{margin-top:18px}
 @media (max-width:1099px){
  .hostgrid{grid-template-columns:minmax(0,1fr)}
@@ -217,8 +238,25 @@ main{max-width:1280px}
  .hlines li{grid-template-columns:48px minmax(0,1fr)}
  .hlines .hl-t{grid-column:1 / 3}
  .light{font-size:.84rem}
- #ptable tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2px 12px}
- #ptable td:nth-child(3),#ptable td:nth-child(4),#ptable td:nth-child(6),#ptable td:nth-child(7){grid-column:1 / 3}
+ /* people: the login, its status and idle time on one line, then one line each for what they do, where, and their cards;
+    an empty cell says nothing and is left out */
+ #ptable.stack tr{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;padding:6px 0}
+ #ptable.stack td,#ptable.stack td.num{width:auto;padding:1px 0}
+ #ptable.stack td[data-label]::before{display:inline;margin-right:4px}
+ #ptable.stack td:nth-child(2)::before{content:none}
+ #ptable.stack td:nth-child(n+3){order:1}
+ #ptable.stack td:nth-child(5){order:0}
+ #ptable.stack td:nth-child(3),#ptable.stack td:nth-child(4),#ptable.stack td:nth-child(6),#ptable.stack td:nth-child(7){flex-basis:100%}
+ #ptable.stack td.none{display:none}
+ /* by person and card: one or two lines a row, not a block of seven */
+ #cu-table.stack tr{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 12px;padding:5px 0}
+ #cu-table.stack td,#cu-table.stack td.num{width:auto;padding:1px 0}
+ #cu-table.stack td[data-label]::before{display:inline;margin-right:4px}
+ #cu-table.stack td:nth-child(2)::before,#cu-table.stack td:nth-child(3)::before{content:none}
+ #cu-days th,#cu-days td{padding:4px 3px}
+ #cu-days{font-size:.74rem}
+ #cu-days td.cu-dc{min-width:0}
+ #cu-days .cu-mini{max-width:60px}
 }
 .dh-tools a.newuser{font-weight:650;border:1.5px solid var(--ink);border-radius:999px;padding:1px 10px;text-decoration:none}
 .dh-tools a.newuser:hover,.dh-tools a.newuser:focus-visible{background:var(--ink);color:var(--page)}
@@ -233,14 +271,15 @@ main{max-width:1280px}
  <p id="headline" class="dh-headline">—</p>
  <p class="byline dh-meta">Data as of <time id="asof">—</time> (<span id="age">—</span>) · <span id="cadence">checked every 10 min,
  republished on any change and at least every 60 min</span> · <span id="next-lead">next check about </span><span id="next">—</span></p>
- <div class="dh-tools"><div id="theme"></div><nav id="toclist" class="dh-tools" aria-label="Sections" style="margin:0"><a class="newuser" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener">New user? Start now</a><a href="#alerts">Alerts</a><a href="#card-use">Card use</a><a href="#machines">Machines</a><a href="#people">People</a><a href="#last-48-hours">Last 48 hours</a><a href="#how-to-update">How to update</a></nav></div>
+ <div class="dh-tools"><div id="theme"></div><nav id="toclist" class="dh-tools" aria-label="Sections" style="margin:0"><a class="newuser" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener">New user? Start now</a><a href="#alerts">Alerts</a><a href="#card-use">Card use</a><a href="#people">People</a><a href="#machines">Machines</a><a href="#last-48-hours">Last 48 hours</a></nav></div>
 </header>
 <div id="stale" class="banner lv-bad" hidden><b>The data is <span id="stale-age">old</span> old.</b> The page expects a new
 version at least every <span id="stale-hb">60 min</span>, so the collector on <span id="stale-host">aifoundry2</span>, its cron job or
-the deploy may have stopped. Check with <code>update.sh status</code> on that machine, or refresh by hand with
-<code>update.sh now</code> (<a href="#how-to-update">how</a>).</div>
+the deploy may have stopped: nothing on it is current. Tell <span id="stale-maint">its maintainer</span>, who can check it
+(<a href="#for-the-maintainer">for the maintainer</a>).</div>
 
 <div id="strip" class="strip" role="group" aria-label="The lab at a glance"></div>
+<div id="pd-legend" class="pd-legend"></div>
 <div id="kpis" class="kpis"></div>
 
 <h2 id="alerts">Alerts</h2>
@@ -249,9 +288,10 @@ the deploy may have stopped. Check with <code>update.sh status</code> on that ma
 <h2 id="card-use">Card use, last 24 hours</h2>
 <p class="small" id="cu-note">Who held each card, from the card-use logger on its machine (<code>et-usage</code>): a bar runs from a
 program's first open of the card's device nodes or lock to its last close, coloured by login (at least 2 px wide, so a run of
-seconds stays visible); the ticks under a bar are minutes in which the card's queues moved; hatched spans were not logged, which is
-not the same as idle. Hours in <span id="cu-zone">the lab's time</span>. Hover, tap or use the arrow keys on a bar for its login,
-times and programs.</p>
+seconds stays visible); one login's runs closer together than the drawing can separate share a light bar, with each run solid
+inside it, so a light stretch is not time held; the ticks under a bar are minutes in which the card's queues moved; hatched spans
+were not logged, which is not the same as idle. Hours in <span id="cu-zone">the lab's time</span>. Hover, tap or use the arrow
+keys on a bar for its login, times, time held and programs.</p>
 <div id="cu-legend"></div>
 <div id="cu-chart"></div>
 <div id="cu-extra">
@@ -262,25 +302,29 @@ times and programs.</p>
  <tbody></tbody>
 </table></div>
 <h3 id="card-use-7-days">The last 7 days</h3>
-<p class="small">Time held per card and day (the lab's dates), by login; hover a day for who.</p>
+<p class="small">Time held per card and day (the lab's dates), today first; each day names its busiest login, "+2" for two
+more (all of them, with their time, in the day's tooltip).</p>
 <div class="table-wrap"><table id="cu-days"></table></div>
 </div>
+
+<h2 id="people">People</h2>
+<p class="small" id="people-note">Everyone seen on a lab machine: logged in (a login session, or an open terminal such as a tmux
+pane), with processes running, or holding a card; an account's own background services (which linger keeps running for
+someone who is not there) are not counted. Active means a terminal used in the last 30 minutes, or a session with no terminal
+(an IDE's, say). "Doing" sorts their processes into coarse kinds on the machine itself (on a card, AI agent, building,
+simulator, Python, editor; else shell only, or other processes): no command, file or process name leaves the machine, except
+the name of a program holding a card, which <code>et-who</code> and <code>et-usage</code> show every user. A person seen only
+on machines that are not answering is "unknown".</p>
+<div class="table-wrap"><table id="ptable">
+ <thead><tr><th>Login</th><th>Status</th><th>Doing</th><th>Machines</th><th class="num">Idle</th><th>Card now</th><th>Card use, 24 h</th><th class="num">Processes</th></tr></thead>
+ <tbody></tbody>
+</table></div>
 
 <h2 id="machines">Machines and cards</h2>
 <p class="small">Each machine's vitals over the last 48 hours, then its cards. Card temperatures and power come from the newest
 experiment file on that machine or, when sampling is switched on, a 2-second live sample; the error counters are the driver's
 own, read from the host without touching the card. Click a card for every number and its source.</p>
 <div id="hostgrid" class="hostgrid"></div>
-
-<h2 id="people">People</h2>
-<p class="small" id="people-note">Everyone seen on a lab machine: logged in, with processes running, or holding a card. Active
-means a terminal used in the last 30 minutes. "Doing" sorts their processes into coarse kinds on the machine itself (on a card,
-AI agent, building, simulator, Python, editor, or shell only): no command, file or process name leaves the machine, except the
-name of a program holding a card, which <code>et-who</code> and <code>et-usage</code> show every user.</p>
-<div class="table-wrap"><table id="ptable">
- <thead><tr><th>Login</th><th>Status</th><th>Doing</th><th>Machines</th><th class="num">Idle</th><th>Card now</th><th>Card use, 24 h</th><th class="num">Processes</th></tr></thead>
- <tbody></tbody>
-</table></div>
 
 <h2 id="last-48-hours">Last 48 hours</h2>
 <p class="small">Whether each machine answered, one check every 10 minutes: down (Tailscale says it is offline) is not the same
@@ -307,18 +351,22 @@ node; a live card sample is off unless someone switches it on, and then waits fo
 <p>The page is private because it names the lab's users. For each person it shows a login name, session and process counts,
 idle time, coarse kinds of activity, card holds and card use with the programs' names; never commands, files, addresses or where
 anyone connects from. The collector's own account is listed like everyone else's.</p>
-<h3 id="how-to-update">How to update it</h3>
+<p>Something wrong or stale on this page? Tell <b id="ab-maint">the maintainer</b>, who runs the collector.</p>
+<details class="maint"><summary id="for-the-maintainer">For the maintainer (<span id="ab-maint2">the maintainer</span>): updating and checking it</summary>
 <ul>
  <li>On aifoundry2, in the checkout: <code>tools/lab/dashboard/update.sh now</code> collects, rebuilds and republishes at
  once; open tabs update within seconds. <code>update.sh now --card-sample</code> also takes a card telemetry sample, behind
- every rule of the card etiquette.</li>
- <li>From another machine: <code>ssh aifoundry2 claude/et-soc1-prototyping/tools/lab/dashboard/update.sh now</code>.</li>
- <li>Or ask Claude in the aifoundry2 session: "refresh the lab dashboard", "why is aifoundry1 amber?".</li>
+ every rule of the card etiquette. <code>update.sh status</code> shows the last runs and deploys, a halt, and whether the
+ space is private.</li>
+ <li>From another machine: <code>ssh aifoundry2 claude/et-soc1-prototyping/tools/lab/dashboard/update.sh now</code>; or ask
+ Claude in the aifoundry2 session to refresh the lab dashboard.</li>
  <li>A machine that shows "approval needed": run <code>ssh aifoundry1 true</code> (or aifoundry3) on aifoundry2, approve the
  address it prints, then <code>update.sh now</code>.</li>
- <li>Silence a known alert: <code>update.sh ack &lt;alert id&gt; [days] [note]</code> (the id is in each alert's detail);
- <code>update.sh status</code> shows the last runs and deploys.</li>
+ <li>Silence a known alert: <code>update.sh ack &lt;alert id&gt; [days] [note]</code> (the id is in each alert's detail).</li>
+ <li>After a halt (the space was, or may have been, readable without signing in): check the space, then
+ <code>update.sh resume</code>; nothing resumes deploying by itself.</li>
 </ul>
+</details>
 <h3 id="this-version">This version</h3>
 <p id="ab-version">—</p>
 <p id="ab-errors">—</p>
