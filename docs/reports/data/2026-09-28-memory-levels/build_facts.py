@@ -563,19 +563,20 @@ L3STEPFIX[('load_hit', 8)] = {'energy': _l3s[8]['energy'][:-len(_old)] + f"; {RS
 
 # ---------------------------------------------------------------- the routing order, measured (29 September)
 # Until 29 September the dimension order was not known, and the chip views drew every route x first. E56 ("nocr", hub
-# rung 32) measured it on aifoundry1's card 1 and, frozen, on aifoundry3: a request goes x first and a reply y first
-# (the chip tour's fact L104, copied below as chip:L104). l3.route now says so, and u.noc-hop no longer asks for it.
+# rung 32) measured it on aifoundry1's card 1 and, frozen, on aifoundry3 and aifoundry2: a request goes x first and a
+# reply y first (the chip tour's fact L104, copied below as chip:L104). l3.route now says so, and u.noc-hop no longer
+# asks for it.
 _r = row_of('l3', 'l3.route')
 _old = "whether a request turns x or y first, which of the nine router layers L3 traffic uses and how wide a link is are not documented in the drop."
 if not _r['statement'].endswith(_old):
     raise SystemExit('l3.route: its research statement changed; revisit it')
 FIX[('l3', 'l3.route')] = {
     'statement': _r['statement'][:-len(_old)] + "and in dimension order: a request goes x first, then y, and its reply y first, "
-                 "then x, back along the request's links (measured on aifoundry1 card 1 and aifoundry3 on 29 September, E56; "
-                 "chip:L104). Which of the nine router layers L3 traffic uses and how wide a link is are not documented in "
+                 "then x, back along the request's links (measured on aifoundry1 card 1, aifoundry3 and aifoundry2 on "
+                 "29 September, E56; chip:L104). Which of the nine router layers L3 traffic uses and how wide a link is are not documented in "
                  "the drop.",
     'source': _r['source'] + "; the order: docs/reports/data/2026-09-29-nocr (E56), the chip tour's fact L104",
-    'card': "aifoundry2, aifoundry3, aifoundry1-c1 (the order: aifoundry3 and aifoundry1 card 1)",
+    'card': "aifoundry2, aifoundry3, aifoundry1-c1",
     'note': "Until 29 September the order was not known and this page drew every route x first. E56 streamed tensor loads "
             "and stores between compute shires' scratchpads; that an L3 home's and a memory shire's replies take the same "
             "order is inferred."}

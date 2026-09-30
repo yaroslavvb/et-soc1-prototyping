@@ -6,13 +6,24 @@ off](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11) · numbers a
 **Sources:** R9 (David Kanter's statements, private notes), R3 (firmware source at `353f20e`, and since 27 September
 the cards' own builds, 0.20.0 and 0.18.0), R2 (open RTL at `b38a1a3`), E10 (the governor in action), E18 (the wake-up
 probe), E19 (an idle check after about 20.6 hours with no workload), E41 and E44 (the three-card check's meter chain and
-idle cycles), E51 (the DV2 development night of 28 September: **development, not validated**).
+idle cycles), E51 (the DV2 development night of 28 September, development data, and its frozen validation on the same
+card, 28–29 September).
 
 **Updated 2026-09-28.** This file had fallen behind [the page](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage)
 (its state of 27 September): the leakage shares are ranges, the correctness row is withdrawn, the timings and resting
 temperatures are the page's. The governor the cards run is not the `353f20e` source the loop section below describes:
 [14-card-behaviour.md](14-card-behaviour.md), "The clock governor, by firmware build", has the cards' own build, and
 the notes marked **0.20.0** below say where it changes an explanation here.
+
+**Updated 2026-09-29.** DV2's frozen validation (E51: a replication on aifoundry2, 28 September 20:45 PDT to
+29 September 16:57 PDT) is reduced. No dead band (TH3), launch and end latencies set by the Master Minion's heartbeat
+(TH4) and a residency counter that adds whole episodes (TH8) survived; "an idle exit is followed at once by the idle
+reset" (TH7) fell, once in 52. The owner's two questions stayed untested by the frozen rules: every step that fitted a
+rule fitted the mean and none the hottest sensor, but 7 of 9 separating runs is short of the 80% the rule asks
+(TH1); the perimeter held 800 MHz longer in each of 4 complete blocks, 1.16–1.52 times, where the test needs 6 (Q2). The
+build itself (TH2) is untested too. The card idled at 71–76 °C for most of the 20 hours, so its heating sessions ran
+only in an evening cool spell. The development notes below stand as development evidence, each with the validation's
+count beside it.
 
 In a conversation on 20 September 2026, David Kanter (MLCommons) described how a mature chip regulates its own
 power. The notes of that conversation are private (R9); what follows paraphrases his statements. Six of them are
@@ -65,7 +76,8 @@ Four consequences, all of which show up in the measurements:
   whatever its temperature, so idle readings are no evidence either way.) Its rest is not fixed: 62–74 °C on the days
   before, 66–67 °C on 27 September, and on the night of 28 September it swung between 59 and 72 °C on a
   10–30 minute scale, for reasons not established (the host's ACPI zones read constant, probably not live; its drive
-  read 43–47 °C and its CPU package 37–59 °C; E51, development). This is why the earlier work saw a card
+  read 43–47 °C and its CPU package 37–59 °C; E51, development); over DV2's 20 h validation (28–29 September) it read
+  59–76 °C, 71–76 °C in 327 of 378 idle cycles and never below 65 °C after 23:18 PDT. This is why the earlier work saw a card
   that "never changes clock". The test is `> 65` on a
   whole-degree reading, and E29 saw the clock lift to 700–800 MHz mid-burst below about 68 °C, so a measurement
   that must stay at 600 MHz preheats to about 76 °C.
@@ -85,7 +97,10 @@ compares the PMIC's instantaneous reading, not its average. The development nigh
 `353f20e`: every thermal episode shorter than a minute lasted k × 0.4053 s to within 1.43 ms (17 of 17, k = 0–3; 16
 on the idle card, 1 at a session start), 18 of the night's 20 thermal entries came after the SP's own idle line, all 57 climbs showed at most one
 700 MHz sample, and aifoundry2's throttle residency put it in the thermal state for 8.65 of its 9.23 days of uptime
-(development, not validated).
+(development). Its frozen validation found most of it again (51 idle entries after the idle call or an exit, 67 of 67
+one-call climbs) but left the build (TH2) untested: 44 of 46 idle loop intervals lay within 10.9 ms of the grid and the
+two longest, 20 and 21 periods, fell 21 and 17 ms short of it, outside the 15 ms tolerance, and it saw 16 of the 20
+descents its rule needs.
 
 ## The loop, as the card runs it
 
@@ -99,7 +114,7 @@ steps down; once the whole-degree reading is back at 65 °C the thermal test no 
 apart. (**0.20.0:** on the cards' build the down-steps are the thermal loop's, one point per 0.4 s while the mean reads
 66 or more; when it reads 65 the loop exits to the boot point, and on the next pass the power branch climbs straight back
 to 800 MHz. The missing dead band is the same; in E51's development runs 82 of 82 up-steps while hunting came from a
-reading of 66 or less, none from 67 or more.) Then, with the die settled at 66 °C, it stayed at 600 MHz for the last 4.5 s. Over the whole 7.4 s run it
+reading of 66 or less, none from 67 or more, and in its frozen validation 92 of 92 from 65 or less: TH3 survived.) Then, with the die settled at 66 °C, it stayed at 600 MHz for the last 4.5 s. Over the whole 7.4 s run it
 spent 5.6 s at the bottom point, 1.0 s at 700 MHz and 0.8 s at 800 MHz.
 
 **Most down-steps can be attributed**, and the mix is informative:
@@ -108,7 +123,7 @@ spent 5.6 s at the bottom point, 1.0 s at 700 MHz and 0.8 s at 800 MHz.
 |---|---|---|
 | Thermal only | 7 | die above 65 °C while the board drew 45–56 W, well under the limit |
 | Thermal and power together | 4 | random data at 800 MHz, up to 88 W |
-| Unattributed (reading ≤65 °C) | 7 | die 65 °C (once 64), board 34–56 W, so neither test fired on the values sampled. One (run 1, zeros, at 5.95 s: 800→600 MHz in a single step) looks like the boot-point reset; the other six are single-point steps in pairs 0.4–0.5 s apart, most likely thermal steps on passes where the service processor read 66 °C between our 10 Hz samples. Launches run back to back every 0.37–0.49 s, so every step is near a kernel boundary, which explains nothing. **0.20.0:** a pair 0.4–0.5 s apart is one loop period, and a 700→600 step at a reading of 65 is the loop's exit to the boot point (E51 development: the 700 MHz dwell of 26 of 26 descents lay in 0.3–0.7 s, median 0.5 s) |
+| Unattributed (reading ≤65 °C) | 7 | die 65 °C (once 64), board 34–56 W, so neither test fired on the values sampled. One (run 1, zeros, at 5.95 s: 800→600 MHz in a single step) looks like the boot-point reset; the other six are single-point steps in pairs 0.4–0.5 s apart, most likely thermal steps on passes where the service processor read 66 °C between our 10 Hz samples. Launches run back to back every 0.37–0.49 s, so every step is near a kernel boundary, which explains nothing. **0.20.0:** a pair 0.4–0.5 s apart is one loop period, and a 700→600 step at a reading of 65 is the loop's exit to the boot point (E51 development: the 700 MHz dwell of 26 of 26 descents lay in 0.3–0.7 s, median 0.5 s; its validation's 16 of 16 too) |
 | Power branch acting alone | **0** | on this card only random data at 700–800 MHz exceeds 65 W, and it takes the die through 65 °C within half a second |
 
 **It is slow to start.** The first clock change came a median 0.7 s after a block of launches began (0.14–2.01 s over
@@ -116,10 +131,12 @@ spent 5.6 s at the bottom point, 1.0 s at 700 MHz and 0.8 s at 800 MHz.
 sampling (about 160 ms a pass). The service processor hears of a kernel's start or end only at the master minion's
 heartbeat, about 1.05 s apart in the SP's own time (read from aifoundry3's 22 September ring; the source comment implies
 100 s), which fits; E51's development launches reached 800 MHz a median 0.9 s after the launch (at most 1.11 s, 14
-launches). Once moving, it changed the clock a median 0.4 s after the previous change (0.1–0.8 s for the middle 80%);
+launches), and its frozen validation's a median 0.67 s (at most 1.2 s, 22 launches), so TH4, the heartbeat's latency,
+survived. Once moving, it changed the clock a median 0.4 s after the previous change (0.1–0.8 s for the middle 80%);
 eight of E10's 18 up-steps (50 of 120 over both days) go straight from 600 to 800 MHz between two 100 ms samples, faster
 than one table point per pass. The `353f20e` source does not explain that; the cards' 0.20.0 governor climbs to the top
-point in one call (E51 development: 57 of 57 climbs showed at most one 700 MHz sample, 33 none).
+point in one call (E51 development: 57 of 57 climbs showed at most one 700 MHz sample, 33 none; its validation 67 of
+67, 44 none).
 
 ## Leakage suppression: present, tied off, undetectable
 
@@ -267,8 +284,17 @@ symptom is that it is slow. (Correction, 2026-09-25: the zero is not flashed. A 
   source is `ffca4cbb4` (= `cafe03fc3^`, 17 May 2024). In that governor the power guardband is used, throttle events
   are logged once per state change, a step-up climbs to the top point in one call, and the thermal response is the
   blocking loop above. E51's development data fit it and not `353f20e` (the 0.4053 s grid, thermal entries on an idle
-  card, the one-call climb); the frozen validation of that night's items has not run. The loop section above describes
+  card, the one-call climb); its frozen validation (28–29 September) left that theory (TH2) untested: two of its 46 idle
+  loop intervals fell 17–21 ms off the grid, and it saw 16 of the 20 descents it needs. The loop section above describes
   `353f20e`; [14-card-behaviour.md](14-card-behaviour.md) has the cards' build.
+- **Whether the governor acts on the mean or on the hottest sensor, by a registered test.** The source says the mean.
+  E51's frozen validation left TH1 untested: 7 of 9 separating runs fitted the mean where the rule asks for 80%, and 4
+  idle cycles separated the two where it asks for 5; none fitted the hottest sensor.
+- **Whether placement delays the first step on aifoundry2** (the owner's second question). In each of the validation's 4
+  complete blocks the perimeter held 800 MHz longer, 1.16–1.52 times, but 4 blocks give the log ratio a 99% interval of
+  [−0.11, 0.61], and the test needs 6. The card idled at 71–76 °C for most of the window, so the three
+  sessions the plan allows could start only in an evening cool spell, and each ended when the card no longer cooled
+  back to its 62 °C starting edge.
 
 ## Related
 
@@ -277,4 +303,4 @@ symptom is that it is slow. (Correction, 2026-09-25: the zero is not flashed. A 
   governor moving the clock.
 - [13-why-low-power.md](13-why-low-power.md): the operating points against an A100, term by term.
 - [03-experiments.md](03-experiments.md): E10, E18, E19, E21, the note on E10 re-analysed, and E51 (the DV2
-  development night of 28 September).
+  development night of 28 September and its frozen validation of 28–29 September).

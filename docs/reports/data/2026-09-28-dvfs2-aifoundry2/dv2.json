@@ -13392,5 +13392,487 @@
    "decision": "STOP",
    "what": "ALERT-MM-HANG: the DV2 queue stopped (build/claims-v3/STOP) and the night stop set (dv2/NIGHT-STOP)"
   }
- ]
+ ],
+ "validation": {
+  "label": "validation (DV2, aifoundry2, 28 Sep 20:45 PDT - 29 Sep 16:57 PDT): the frozen replication PREREG-VAL registered, as the frozen reducer decided it",
+  "card": "aifoundry2",
+  "file": "validation/verdicts-dv2val.json",
+  "queue": {
+   "start": "20:45:39",
+   "end": "16:56:46"
+  },
+  "items": {
+   "I1": {
+    "verdict": "INSUFFICIENT",
+    "clean_cycles": 334,
+    "hmax_sep": 4,
+    "out_stretches": 3,
+    "strong_h67": 1,
+    "hmean_viol": 0,
+    "rule": "PASS: >= 5 clean OUT cycles with high >= 66 over >= 3 OUT stretches and no clean IN cycle with mean <= 64; FAIL: >= 2 such IN cycles and they are >= 50% of the discriminating cycles"
+   },
+   "I2": {
+    "verdict": "PASS",
+    "enter": 51,
+    "exit": 52,
+    "rule": "PASS: >= 10 idle ENTERs and >= 10 idle EXITs, every ENTER prints 66, every EXIT <= 65; FAIL: any other"
+   },
+   "I3": {
+    "verdict": "FAIL",
+    "exits": 52,
+    "next_not_pidle": 1,
+    "rule": "PASS: >= 10 idle EXITs, each followed by a PIDLE as the next governor line, >= 90% within 0.30 s; FAIL: any other next line, or > 10% later than 0.30 s"
+   },
+   "I4": {
+    "verdict": "INSUFFICIENT",
+    "intervals": 46,
+    "k_ge_1": 17,
+    "off_grid": 2,
+    "rule": "PASS: >= 5 ENTER->EXIT intervals with k >= 1 and every interval within 0.015 s of k x 0.4053 s; FAIL: > 10% off that grid"
+   },
+   "I5": {
+    "verdict": "PASS",
+    "idle_enters": 51,
+    "rule": "PASS: >= 3 ENTERs whose previous governor line is a PIDLE or an EXIT, with no power_up, power_down or 'new OP' line within 30 s; FAIL: none while >= 3 cycle pairs show the mean rising from <= 64 to >= 66"
+   },
+   "I6": {
+    "verdict": "PASS",
+    "intervals": 6,
+    "outside_5ms": 0,
+    "rule": "PASS: >= 3 idle intervals with >= 1 completed episode, every one within 5 ms; FAIL: any more than 50 ms off, or > 10% outside 5 ms"
+   },
+   "G1-T": {
+    "verdict": "INSUFFICIENT",
+    "separating": 9,
+    "blocks": 5,
+    "fit_mean": 7,
+    "fit_max": 0,
+    "rule": "PASS: >= 6 separating runs over >= 3 blocks, >= 80% fit H-mean, <= 1 fits H-max; FAIL: >= 50% fit H-max"
+   },
+   "G1-H": {
+    "verdict": "PASS",
+    "holds": 17,
+    "blocks": 6,
+    "max_over_thr": 4,
+    "rule": "PASS: >= 3 runs over >= 2 blocks hold 800 MHz >= 1.0 s after a sample at 800 with the high >= 67; FAIL: >= 6 runs reach a high >= 67 at 800 MHz and none holds"
+   },
+   "G4-S": {
+    "verdict": "INSUFFICIENT",
+    "blocks": 4,
+    "L_mean": 0.248,
+    "ci99": [
+     -0.112,
+     0.607
+    ],
+    "rule": "PASS: the 99% CI of the block-mean L lies wholly above 0 (>= 6 blocks); FAIL: wholly within +-0.05"
+   },
+   "G4": {
+    "verdict": "NOT REGISTERED",
+    "blocks": 4,
+    "censored_runs": 2,
+    "L_mean": 0.248,
+    "ci99": [
+     -0.112,
+     0.607
+    ],
+    "L_P_mean": 0.219,
+    "L_pred": 0.28,
+    "band": 0.1,
+    "rule": "PASS: the 99% CI of the block-mean L lies inside L_pred +- b (>= 16 blocks); FAIL: wholly outside"
+   },
+   "G2-C": {
+    "verdict": "PASS",
+    "n": 67,
+    "le1": 67,
+    "none": 44,
+    "rule": ">= 20 climbs; >= 95% show 700 in <= 1 sample and >= 25% none"
+   },
+   "G2-D": {
+    "verdict": "INSUFFICIENT",
+    "n": 16,
+    "in_band": 16,
+    "dwell_median_s": 0.5,
+    "rule": ">= 20 descents 800->700->600; the 700 dwell in [0.3, 0.7] s in >= 90%"
+   },
+   "G2-U": {
+    "verdict": "PASS",
+    "n": 92,
+    "le_thr": 92,
+    "ge_thr2": 0,
+    "rule": ">= 20 up-steps; the preceding reading <= 66 in 100%, <= 65 in >= 80%, never >= 67"
+   },
+   "G3-L": {
+    "verdict": "PASS",
+    "n": 22,
+    "median_s": 0.67,
+    "max_s": 1.2,
+    "rule": ">= 10 launches; median in [0.4, 1.0] s and all <= 2.2 s"
+   },
+   "G3-I": {
+    "verdict": "PASS",
+    "n": 12,
+    "max_s": 1.09,
+    "rule": ">= 10 runs ending at 800 MHz with no trip; every kernel end -> 600 in [0, 1.6] s"
+   }
+  },
+  "theories": {
+   "TH1-busy": "untested (INSUFFICIENT)",
+   "TH1-idle": "untested (INSUFFICIENT)",
+   "TH2": "untested (INSUFFICIENT)",
+   "TH3": "survived",
+   "TH4": "survived",
+   "TH5": "not registered",
+   "Q2": "untested (INSUFFICIENT)",
+   "TH7": "fell",
+   "TH8": "survived"
+  },
+  "theory_items": {
+   "TH1-busy": [
+    "G1-T",
+    "G1-H"
+   ],
+   "TH1-idle": [
+    "I1"
+   ],
+   "TH2": [
+    "I4",
+    "I5",
+    "G2-C",
+    "G2-D"
+   ],
+   "TH3": [
+    "I2",
+    "G2-U"
+   ],
+   "TH4": [
+    "G3-L",
+    "G3-I"
+   ],
+   "TH5": [
+    "G4"
+   ],
+   "Q2": [
+    "G4-S"
+   ],
+   "TH7": [
+    "I3"
+   ],
+   "TH8": [
+    "I6"
+   ]
+  },
+  "idle": {
+   "cycles": 378,
+   "first": "20:45:39",
+   "last": "16:48:02",
+   "clean": 334,
+   "state": {
+    "IN": 318,
+    "OUT": 22
+   },
+   "mean": [
+    59,
+    76
+   ],
+   "hist": {
+    "59": 3,
+    "60": 2,
+    "61": 2,
+    "62": 5,
+    "63": 6,
+    "64": 6,
+    "65": 5,
+    "66": 4,
+    "67": 1,
+    "68": 6,
+    "69": 5,
+    "70": 6,
+    "71": 16,
+    "72": 36,
+    "73": 121,
+    "74": 112,
+    "75": 26,
+    "76": 16
+   },
+   "cool": {
+    "n": 12,
+    "from": "21:39",
+    "to": "23:18",
+    "mean": [
+     59,
+     62
+    ]
+   },
+   "after_cool_min": 65
+  },
+  "tries": {
+   "n": 75,
+   "started": 3,
+   "too_warm": 72,
+   "warm_c": [
+    63,
+    76
+   ],
+   "max_sessions": 3,
+   "start_max_c": 60
+  },
+  "sessions": [
+   {
+    "pass": "p6051",
+    "branch": "NAT-4",
+    "r0": 59,
+    "blocks": 1,
+    "start": "22:13",
+    "end": "22:30",
+    "status": "ok",
+    "launches": 9,
+    "launch_rc0": 9,
+    "g4_listed": 1,
+    "g4_measured": 0,
+    "end_why": "two consecutive edge time-outs"
+   },
+   {
+    "pass": "p6052",
+    "branch": "NAT-4",
+    "r0": 60,
+    "blocks": 2,
+    "start": "22:42",
+    "end": "23:06",
+    "status": "ok",
+    "launches": 13,
+    "launch_rc0": 13,
+    "g4_listed": 2,
+    "g4_measured": 1,
+    "end_why": "two consecutive edge time-outs"
+   },
+   {
+    "pass": "p6053",
+    "branch": "NAT-4",
+    "r0": 59,
+    "blocks": 4,
+    "start": "23:19",
+    "end": "23:56",
+    "status": "ok",
+    "launches": 30,
+    "launch_rc0": 30,
+    "g4_listed": 4,
+    "g4_measured": 3,
+    "end_why": "two consecutive edge time-outs"
+   }
+  ],
+  "launches": 52,
+  "launch_rc0": 52,
+  "q1": {
+   "window_s": [
+    -0.3,
+    0.6
+   ],
+   "separating": [
+    {
+     "session": "p6051",
+     "block": 1,
+     "name": "INT16@12",
+     "minions": 192,
+     "down_minus_mean": 0.2,
+     "down_minus_high": 4.0,
+     "fits_mean": true,
+     "fits_max": false
+    },
+    {
+     "session": "p6052",
+     "block": 1,
+     "name": "PER16@12",
+     "minions": 192,
+     "down_minus_mean": 1.01,
+     "down_minus_high": 4.91,
+     "fits_mean": false,
+     "fits_max": false
+    },
+    {
+     "session": "p6053",
+     "block": 1,
+     "name": "INT16@12",
+     "minions": 192,
+     "down_minus_mean": 0.1,
+     "down_minus_high": 4.6,
+     "fits_mean": true,
+     "fits_max": false
+    },
+    {
+     "session": "p6053",
+     "block": 1,
+     "name": "PER16@12",
+     "minions": 192,
+     "down_minus_mean": -1.2,
+     "down_minus_high": 4.3,
+     "fits_mean": false,
+     "fits_max": false
+    },
+    {
+     "session": "p6053",
+     "block": 1,
+     "name": "UNI32@4",
+     "minions": 128,
+     "down_minus_mean": 0.1,
+     "down_minus_high": 6.61,
+     "fits_mean": true,
+     "fits_max": false
+    },
+    {
+     "session": "p6053",
+     "block": 2,
+     "name": "INT16@12",
+     "minions": 192,
+     "down_minus_mean": 0.1,
+     "down_minus_high": 4.3,
+     "fits_mean": true,
+     "fits_max": false
+    },
+    {
+     "session": "p6053",
+     "block": 2,
+     "name": "B4C@32",
+     "minions": 128,
+     "down_minus_mean": 0.2,
+     "down_minus_high": 6.8,
+     "fits_mean": true,
+     "fits_max": false
+    },
+    {
+     "session": "p6053",
+     "block": 3,
+     "name": "INT16@12",
+     "minions": 192,
+     "down_minus_mean": 0.1,
+     "down_minus_high": 5.8,
+     "fits_mean": true,
+     "fits_max": false
+    },
+    {
+     "session": "p6053",
+     "block": 3,
+     "name": "B4C@32",
+     "minions": 128,
+     "down_minus_mean": 0.2,
+     "down_minus_high": 6.7,
+     "fits_mean": true,
+     "fits_max": false
+    }
+   ],
+   "blocks": [
+    [
+     "p6051",
+     1
+    ],
+    [
+     "p6052",
+     1
+    ],
+    [
+     "p6053",
+     1
+    ],
+    [
+     "p6053",
+     2
+    ],
+    [
+     "p6053",
+     3
+    ]
+   ],
+   "holds": 17,
+   "hold_blocks": 6,
+   "hold_max_over_thr": 4
+  },
+  "q2": {
+   "blocks": [
+    {
+     "session": "p6052",
+     "block": 1,
+     "minions": 192,
+     "int": "INT16@12",
+     "per": "PER16@12",
+     "t800_int": 5.414,
+     "t800_per": 6.414,
+     "censored_int": false,
+     "censored_per": false,
+     "final_candidate": true,
+     "L": 0.1695
+    },
+    {
+     "session": "p6053",
+     "block": 1,
+     "minions": 192,
+     "int": "INT16@12",
+     "per": "PER16@12",
+     "t800_int": 4.904,
+     "t800_per": 5.704,
+     "censored_int": false,
+     "censored_per": false,
+     "final_candidate": true,
+     "L": 0.1511
+    },
+    {
+     "session": "p6053",
+     "block": 2,
+     "minions": 192,
+     "int": "INT16@12",
+     "per": "PER16@12",
+     "t800_int": 4.603,
+     "t800_per": 7.012,
+     "censored_int": false,
+     "censored_per": true,
+     "final_candidate": true,
+     "L": 0.4209
+    },
+    {
+     "session": "p6053",
+     "block": 3,
+     "minions": 192,
+     "int": "INT16@12",
+     "per": "PER16@12",
+     "t800_int": 6.105,
+     "t800_per": 7.83,
+     "censored_int": false,
+     "censored_per": true,
+     "final_candidate": true,
+     "L": 0.2489
+    }
+   ],
+   "n": 4,
+   "L_mean": 0.2476,
+   "ci99": [
+    -0.112,
+    0.607
+   ],
+   "ratio": [
+    1.163,
+    1.523
+   ],
+   "L_P_mean": 0.2195,
+   "L_pred": 0.28,
+   "b": 0.1,
+   "g4s_min_blocks": 6
+  },
+  "i3_other": [
+   {
+    "next": "ENTER",
+    "dt_s": 0.0052
+   }
+  ],
+  "i4_off": [
+   {
+    "d_s": 8.4942,
+    "k": 21,
+    "resid_ms": -17.1
+   },
+   {
+    "d_s": 8.0854,
+    "k": 20,
+    "resid_ms": -20.6
+   }
+  ],
+  "i4_on_max_ms": 10.9
+ }
 }

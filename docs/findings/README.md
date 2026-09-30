@@ -118,17 +118,23 @@ Read [Terms](#terms) first.
    but 556–566 µs launched and waited for, most of it the runtime's 500 µs idle poll; two host-to-card DMA commands
    of one stream at once move half as much as one (E55, item 20, found where). → [03-experiments.md](03-experiments.md), E50;
    [05-claims.md](05-claims.md), "The host link"
-17. **The governor the cards run, and what it compares** (development, 28 September; not validated). The cards run
-   an older governor than the source first read: on aifoundry2 a thermal episode is a blocking loop of about 0.405 s
-   steps that acts on an idle card too, and a climb goes to 800 MHz in one call. It compares the whole-degree mean of
-   the 34 minion-shire sensors, not the hottest one: the clock held 800 MHz for over a second after the hottest sensor
-   read 67 °C in 12 of 12 runs. Placing 192 minions on the perimeter held 800 MHz 1.4 and at least 1.8 times as long
-   as in the interior (two blocks). aifoundry3's governor is latched by its zero TDP, aifoundry1's card 1's never
-   raises the clock, and nothing on those three cards limits the die's temperature (a 90–103 °C mean on aifoundry2,
-   26 September). aifoundry2's Master Minion hung that night; the management reset restored it at 08:32 the same
-   morning (the sysfs per-card reset had not).
-   Its frozen validation on the same card began at 20:45 PDT on 28 September (three heating sessions, seven placement
-   blocks, no hang); it is reduced after its idle cycles end, about 16:45 PDT on 29 September.
+17. **The governor the cards run, and what it compares** (development, 28 September, and a frozen validation on the
+   same card, 28–29 September). The source compares the whole-degree mean of the 34 minion-shire sensors, never the
+   hottest one, and the cards' build runs a blocking thermal loop of about 0.405 s steps that acts on an idle card too
+   and climbs to 800 MHz in one call. On aifoundry2 every step that fitted a rule fitted the mean: in the development
+   night's 12 runs and the validation's 17 the clock held 800 MHz for over a second after the hottest sensor read 67 °C
+   or more, and none of the validation's 9 runs that tell the rules apart stepped with the hottest sensor. Placed on the
+   perimeter, 192 minions held 800 MHz longer than in the interior in every block: 1.4 and at least 1.8 times in
+   development, 1.16–1.52 times in the validation's 4. The validation's verdicts: no dead band (TH3), the Master Minion's
+   heartbeat sets the latencies (TH4) and the residency counter adds whole episodes (TH8) survived; "an idle exit is
+   followed at once by the idle reset" (TH7) fell, once in 52; the mean against the hottest sensor (TH1), the build (TH2)
+   and placement (Q2) are untested: 7 of 9 separating runs fitted the mean where the rule asks for 80%, and 4 blocks of
+   the 6 needed, since the card idled at 71–76 °C for most of the 20 hours and its heating sessions could run only in
+   an evening cool spell. aifoundry3's
+   governor is latched by its zero TDP, aifoundry1's card 1's never raises the clock, and nothing on those three cards
+   limits the die's temperature (a 90–103 °C mean on aifoundry2, 26 September). aifoundry2's Master Minion hung in
+   development (28 September, 02:50 PDT); the management reset restored it at 08:32, and the validation's three heating
+   sessions ran without a hang.
    → [03-experiments.md](03-experiments.md), E51; [14-card-behaviour.md](14-card-behaviour.md)
 18. **Where the work sits changed the time to the thermal trip on aifoundry3; on card 1, short bursts PASS and the
    primary sustained test is INSUFFICIENT** (development on aifoundry3, 27 September; frozen validation on
@@ -150,27 +156,30 @@ Read [Terms](#terms) first.
    0.18.0 builds nothing limits the die once the clock is at 600 MHz. → [03-experiments.md](03-experiments.md), E53;
    [05-claims.md](05-claims.md), "The effect of overheating"; [`reports/data/2026-09-28-overheating/`](../reports/data/2026-09-28-overheating/README.md)
 20. **Two DMA commands collide only inside one stream, and a host write lands in the L3** (E55, 28–29 September,
-   pre-registered: development on aifoundry1's card 1, validation on aifoundry3). Two host-to-card commands in flight in
-   one stream move 0.488 [0.486, 0.491] of one at 2 × 64 MB on aifoundry3 (0.493 on card 1), a rate ratio of 0.484
-   over 1–64 MB; one command in each of two streams moves 1.012 [1.000, 1.025] of one. T35-S survived; a shared read
-   engine, the IOMMU, a fixed cost per overlap, a slow onset and a loss per element were refuted on both cards. After a
-   staged host copy 99.5% of a 4 MB buffer's lines read at L3 latency on aifoundry3 (99.9% on card 1), whether the L3
-   held them before or not, and no value read was wrong: a host write goes through its line's L3 home, which allocates
-   it (T34-A). → [03-experiments.md](03-experiments.md), E55; [`reports/data/2026-09-29-pcie2/`](../reports/data/2026-09-29-pcie2/README.md)
+   pre-registered: development on aifoundry1's card 1, validation on aifoundry3 and, as a third card, aifoundry2). Two
+   host-to-card commands in flight in one stream move 0.488 [0.486, 0.491] of one at 2 × 64 MB on aifoundry3 (0.496 on
+   aifoundry2, 0.493 on card 1), a rate ratio of 0.484 over 1–64 MB; one command in each of two streams moves 1.012
+   [1.000, 1.025] of one (1.014 on aifoundry2). T35-S survived; a shared read engine, the IOMMU, a fixed cost per
+   overlap, a slow onset and a loss per element were refuted on all three cards. After a staged host copy 99.5% of a
+   4 MB buffer's lines read at L3 latency on aifoundry3 (99.6% on aifoundry2, 99.9% on card 1), whether the L3 held them
+   before or not, and no value read was wrong: a host write goes through its line's L3 home, which allocates it (T34-A). → [03-experiments.md](03-experiments.md), E55; [`reports/data/2026-09-29-pcie2/`](../reports/data/2026-09-29-pcie2/README.md)
 21. **Read replies cross the mesh y first, write requests x first** (E56, the same cards and plan). Sets of 1 KB
    tensor-load streams that share one directed link only under y first fell to 0.54–0.77 of their bandwidth alone and
    those that share one only under x first held at 1.00; tensor stores showed the mirror (0.52–0.76 against 0.99–1.00),
-   the same on both cards. A reply retraces its request's route, and a shared link saturates near 92 GB/s. An ESR call
-   costs 1,556.9 + 35.9 cycles per mesh hop on aifoundry3, with an rms of 4.7 cycles against the frozen limit of 4, so
-   the placements were not decided there; on card 1 the master shire placed at (0,3), the firmware map's cell.
+   the same on all three cards to 0.003. A reply retraces its request's route, and a shared link saturates near
+   92 GB/s. An ESR call costs 1,556.9 + 35.9 cycles per mesh hop on aifoundry3 and 1,556.8 + 35.9 on aifoundry2, with
+   rms errors of 4.7 and 4.5 cycles against the frozen limit of 4, so the placements were not decided on either; on
+   card 1 the master shire placed at (0,3), the firmware map's cell.
    → [03-experiments.md](03-experiments.md), E56; [`reports/data/2026-09-29-nocr/`](../reports/data/2026-09-29-nocr/README.md)
-22. **The DRAM map holds, the L2 keeps TensorLoad lines, and the 128 B cap is unexplained** (E57, the same cards and
-   plan). The L50 map's bank and row split held in 15 of 15 conditions on both cards (a row that also differs in any of
-   PA[6–12] reads as a row hit, 20 cycles faster); PA[6–9] set the refresh phase on aifoundry3, so the refresh domain
-   is the controller there (not established on card 1). A second TensorLoad of the same 1 KB takes 199 cycles, an L2
-   hit. No registered theory of the shire's 128 B per cycle TensorLoad cap survives. Stride-256 scratchpad loads get
-   0.665 of stride 64's bandwidth and cost +41.9 (zeros) and +49.9 (random) pJ per 64 B more, which the waiting
-   minions' awake time explains. → [03-experiments.md](03-experiments.md), E57; [`reports/data/2026-09-29-memp2/`](../reports/data/2026-09-29-memp2/README.md)
+22. **The DRAM map mostly holds, the L2 keeps TensorLoad lines, and the 128 B cap is unexplained** (E57, the same
+   cards and plan). The L50 map's bank and row split held in 15 of 15 conditions on aifoundry3 and card 1 (a row that
+   also differs in any of PA[6–12] reads as a row hit, 20 cycles faster) and in 14 of 15 on aifoundry2, where two lines
+   that differ only in PA[17], a column bit in the map, read as a row conflict; PA[6–9] set the refresh phase on
+   aifoundry3 and aifoundry2, so the refresh domain is the controller there (not established on card 1). A second
+   TensorLoad of the same 1 KB takes 199 cycles, an L2 hit, on all three cards. No registered theory of the shire's
+   128 B per cycle TensorLoad cap survives. Stride-256 scratchpad loads get 0.665 of stride 64's bandwidth and, on
+   aifoundry3, cost +41.9 (zeros) and +49.9 (random) pJ per 64 B more, which the waiting minions' awake time explains;
+   on aifoundry2 the excess was not resolved (+31 to +36, intervals that include 0). → [03-experiments.md](03-experiments.md), E57; [`reports/data/2026-09-29-memp2/`](../reports/data/2026-09-29-memp2/README.md)
 23. **The rails are a first-order average of about one second, published one SP pass late** (E58, the same cards and
    plan). On aifoundry3 τ is 1.06 s on the minion rail, 1.01 s on SRAM and 1.04 s on the mesh rail, and the PMIC's board
    average 1.05 s with no lag; aifoundry1's card 1's SRAM rail averages over 0.54 s, its other rails 1.08 s. E27's
@@ -241,7 +250,7 @@ Four kinds of thing have IDs, and every claim cites them:
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
 | **Q1–Q66** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E59** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation running since that evening; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3; E59 the sparse parity solver on aifoundry3, 29 September, an engineering benchmark) | [03-experiments.md](03-experiments.md) |
+| **E1–E59** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation on 28–29 September; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3 (E55–E57 also on aifoundry2 as a third card); E59 the sparse parity solver on aifoundry3, 29 September, an engineering benchmark) | [03-experiments.md](03-experiments.md) |
 | **A1–A21** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused; A20 the session timeline; A21 the sparse parity page) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":

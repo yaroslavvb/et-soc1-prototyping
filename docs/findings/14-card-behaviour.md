@@ -7,10 +7,10 @@ and [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-l
 **Sources:** E5, E6 (telemetry and rails), E9 (the protocol), E10 (the governor), E12 (long runs), E20 and E21 (the
 second card, the three machines), E27 and E29 (the rails' filter, the meter traps), R3 (the firmware policy, and since
 27 September the cards' own firmware builds), E35–E46 (the three-card check's raw telemetry), E51 (the DV2 development
-night of 28 September, **development data, not validated**; its frozen validation has run since that evening), E54 (NV's
-source reading of the voltage-set command), E55–E58 (the pre-registered experiments of 28–29 September: the host
-link's concurrency and a host write's path, the mesh's routing order, the memory system's rung items, the rails'
-filter). For
+night of 28 September, development data, and its frozen validation on the same card, 28–29 September: TH3, TH4 and TH8
+survived, TH7 fell, and TH1, TH2 and Q2 stayed untested), E54 (NV's source reading of the voltage-set command), E55–E58
+(the pre-registered experiments of 28–29 September: the host link's concurrency and a host write's path, the mesh's
+routing order, the memory system's rung items, the rails' filter; E55–E57 also on aifoundry2 as a third card). For
 25 September: the aifoundry1 investigation and fix ([troubleshooting report](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting),
 [fix log](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix), evidence in
 [`docs/reports/data/2026-09-25-aifoundry1/`](../reports/data/2026-09-25-aifoundry1/README.md)), the read-only audit
@@ -36,14 +36,22 @@ exception): aifoundry2 ran a whole catalogue pass at a 90–103 °C mean with no
 28 September and took no kernel for almost six hours; the sysfs per-card reset did not recover it, and the management
 reset (`DM_CMD_RESET_ETSOC`) restored it at 08:32, with the owner's approval (next section).
 
-**Updated 2026-09-29.** (1) The mesh routes a read's reply **y first** and a write's request x first, on aifoundry3
-and aifoundry1's card 1; every route on the chip diagram assumed x first (E56; "Traps" below). (2) Two host-to-card
-copies in flight **on one stream** move half as much as one; one on each of two streams lose nothing (E55). (3) A
-host write lands in its line's L3 home, and a TensorLoad's lines stay in the L2 (E55, E57). (4) The rails' filter,
-measured per rail: 1.01–1.06 s on aifoundry3, but **0.54 s on card 1's SRAM rail** (E58; the telemetry table).
-(5) Two firmware hazards for anyone who sets a voltage: BL2 0.18.0 writes every NoC set to flash, and a failed set
-retries until the watchdog resets the card (section "Setting a rail's voltage"). (6) aifoundry2's Master Minion ran
-the DV2 validation's three heating sessions without a hang, and its idle die read 73–75 °C at night (the card table).
+**Updated 2026-09-29.** (1) The mesh routes a read's reply **y first** and a write's request x first, on all three
+cards (aifoundry3 and aifoundry1's card 1 at night, aifoundry2 that evening); every route on the chip diagram assumed x
+first (E56; "Traps" below). (2) Two host-to-card copies in flight **on one stream** move half as much as one; one on
+each of two streams lose nothing, on all three cards (E55). (3) A host write lands in its line's L3 home, and a
+TensorLoad's lines stay in the L2 (E55, E57). (4) The rails' filter, measured per rail: 1.01–1.06 s on aifoundry3, but
+**0.54 s on card 1's SRAM rail** (E58; the telemetry table). (5) Two firmware hazards for anyone who sets a voltage: BL2
+0.18.0 writes every NoC set to flash, and a failed set retries until the watchdog resets the card (section "Setting a
+rail's voltage"). (6) DV2's frozen validation on aifoundry2 ended at 16:57 PDT and was reduced (E51): no dead band
+(TH3), the Master Minion's heartbeat sets the latencies (TH4) and the residency counter adds whole episodes (TH8)
+survived; "an idle exit is followed at once by the idle reset" (TH7) fell, once in 52; the mean against the hottest
+sensor (TH1), the 0.20.0 loop (TH2) and placement (Q2) stayed untested: the card idled at 71–76 °C for most of the
+20 hours, so the heating sessions could start only in an evening cool spell and gave 4 of the 6 placement blocks and
+16 of the 20 descents the rules need, and 7 of 9 separating runs fitted the mean where the rule asks for 80% (the
+governor sections and the card table below). Its Master Minion ran the validation's three heating sessions without
+a hang. (7) On aifoundry2 two DRAM lines that differ only in PA[17], a column bit in the L50 map, read as a row
+conflict (E57; "Traps").
 
 ## aifoundry2's Master Minion hung on 28 September (02:50 PDT), and the management reset restored it (08:32)
 
@@ -76,7 +84,7 @@ the DV2 validation's three heating sessions without a hang, and its idle die rea
   an agent's. The SP's uptime and throttle residencies after the reset are not in the record. The DV2 validation
   (frozen) started on the restored card at 20:45:39 PDT the same day; its three heating sessions (22:13–23:56) ran 52
   launches, every one returning 0, 7 of them launched 0.49–0.58 s after the previous one ended as lift 2 was, and the
-  Master Minion did not hang (E51).
+  Master Minion did not hang (E51); the validation ended at 16:57 PDT on 29 September.
 - **Cause: not established.** The night's 43 launches before it, which all ran (probes, smokes, runs, and lifts
   launched 0.52–0.58 s after the previous one ended, four times), with 57 climbs and 26 full descents of the clock, did not hang
   (`raw/p*/launches.jsonl`). That this launch met the 800 → 600 MHz idle reset is a hypothesis, not a finding.
@@ -98,7 +106,10 @@ number in every firmware build: the integer mean of the **34 minion-shire sensor
 (the I/O shire's sensor is not in it), tested as `mean > 65`. No build has a per-sensor or hottest-sensor path to the
 clock. E51's development runs agree: in 12 of 12 runs the clock held 800 MHz for at least a second after the hottest
 sensor read 67 °C or more, and on an idle card whose mean read 64 °C while the hottest sensor read 66 °C the governor
-stayed out of its thermal state (development, not validated). How the governor responds beyond that depends on the
+stayed out of its thermal state. Its frozen validation (28–29 September, the same card) saw the same, in 17 runs over 6
+blocks (G1-H PASS), and no step near the hottest sensor's first 66 °C; but its test of the step's timing needed 80% of
+the runs that separate the two rules to fit the mean and got 7 of 9, and its idle test got 4 of the 5 cycles it needs,
+so by its rules the question is untested and the source is the answer. How the governor responds beyond that depends on the
 build, and the cards do not run the `353f20e` source this file first described: see "The clock governor, by firmware
 build" below. [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) has the `353f20e` loop in detail.
 
@@ -155,12 +166,12 @@ at each commit). The table is read from source; the entries marked *seen* have c
 
 | | `353f20e` (= `836a4ab`) | BL2 0.20.0: release 1.3.1, aifoundry2 and aifoundry3 (closest public source `ffca4cbb4` = `cafe03fc3^`, 17 May 2024) | BL2 0.18.0: release 1.2.0, aifoundry1's card 1 (closest `da192816a`, 27 March 2024) |
 |---|---|---|---|
-| When the thermal test acts | only while a kernel runs | **always, busy or idle** (*seen*: 18 of the 20 thermal entries of E51's night came after the SP's own idle line) | as 0.20.0 |
-| Thermal response | one table point down per pass | **a blocking loop**: one point down, sleep 1,000 ticks (about 0.40 s), read the mean again, repeat while it is above 65; meanwhile the power branch, the idle reset included, cannot act (*seen*: 17 of 17 idle episodes under 60 s lasted k × 0.4053 s to within 1.4 ms, k = 0–3, E51; E10's down-steps paired 0.4–0.5 s apart) | as 0.20.0 |
-| Leaving the thermal state | — | at a mean of 65 or less, to the boot point (600 MHz); on the next pass a busy card under the TDP **climbs to the top point in one call** (*seen*: 57 of 57 climbs showed at most one 700 MHz sample, E51) | as 0.20.0 |
+| When the thermal test acts | only while a kernel runs | **always, busy or idle** (*seen*: 18 of the 20 thermal entries of E51's night came after the SP's own idle line; in its validation 51 idle entries, I5 PASS) | as 0.20.0 |
+| Thermal response | one table point down per pass | **a blocking loop**: one point down, sleep 1,000 ticks (about 0.40 s), read the mean again, repeat while it is above 65; meanwhile the power branch, the idle reset included, cannot act (*seen*: 17 of 17 idle episodes under 60 s lasted k × 0.4053 s to within 1.4 ms, k = 0–3, E51; in its validation 44 of 46 within 10.9 ms, and the two longest, 20 and 21 periods, 17–21 ms short, so TH2 is untested; E10's down-steps paired 0.4–0.5 s apart) | as 0.20.0 |
+| Leaving the thermal state | — | at a mean of 65 or less, to the boot point (600 MHz); on the next pass a busy card under the TDP **climbs to the top point in one call** (*seen*: 57 of 57 climbs showed at most one 700 MHz sample, E51; 67 of 67 in its validation, G2-C PASS) | as 0.20.0 |
 | Power test | the PMIC's average | the PMIC's **instantaneous** reading; the loops exit on the average, the power-down loop at under 1.05 × TDP or at 300 MHz | as 0.20.0 |
 | Operating points | the flash VMIN table (600, 700, 800 MHz on aifoundry2) | the same table | **fixed 50 MHz steps between 300 and 700 MHz**, the voltage computed from the boot point |
-| Hysteresis | none | none: in above 65, out at 65 (*seen*: all 20 entry lines of E51 printed 66, all 20 exit lines 65) | none |
+| Hysteresis | none | none: in above 65, out at 65 (*seen*: all 20 entry lines of E51 printed 66, all 20 exit lines 65; in its validation 51 entries at 66, 52 exits at 65 or less, 92 up-steps from 65 or less: TH3 survived) | none |
 | The PMIC alarm (75 °C, 75 W) | a 300 MHz safe state | a safe state that never ends and sets the frequency register but not the PLL (source only) | a real 300 MHz safe state |
 
 aifoundry1's card 0 runs release 1.4.1 (BL2 0.21.2), whose governor acts only while a kernel runs (the card table).
@@ -169,8 +180,11 @@ What each card shows:
 - **aifoundry2 behaves as 0.20.0 predicts.** Its SP's throttle residency (a read-only management query, E51) put it in
   the thermal state for 747,342 s, 8.65 of its 9.23 days of uptime, with one stay of 2.1 days: whenever its rest is above
   65 °C it sits in the thermal loop at 600 MHz, and its idle reset waits. Every idle exit (20 of 20) was followed by the
-  SP's own idle line, 17 of them one pass later (0.119–0.131 s). (E51, development; the frozen validation has run since
-  28 September 20:45 PDT and is not yet reduced.)
+  SP's own idle line, 17 of them one pass later (0.119–0.131 s) (E51, development). In the frozen validation (28–29
+  September) 51 of 52 idle exits were, and one was followed 5 ms later by a new entry into the loop, so "an exit is
+  followed at once by the idle reset" (TH7) fell; the THERMAL_DOWN counter added whole episodes (6 intervals within
+  0.2 ms: TH8 survived), and the launch and end latencies fit the Master Minion's heartbeat (launch to 800 MHz a median
+  0.67 s, at most 1.2 s; kernel end to 600 MHz at most 1.09 s: TH4 survived).
 - **aifoundry3's governor is latched.** Under 0.20.0 its boot-time TDP of 0 W sends the first kernel after boot into a
   power-down loop that can never exit (the exit needs an average under 1.05 × 0 W, or 300 MHz, and the clock is already
   at the bottom point), so the power task spins; the first time the mean then passes 65 °C the thermal state is set and
@@ -321,8 +335,8 @@ check first that nobody holds the card (`et-who`).
 | Firmware release (BL / PMIC / minion) | 1.3.1 (0.20.0 / 1.5.0 / 0.23.0) | 1.3.1 (the same) | 1.4.1 (0.21.2 / 1.6.1 / 0.24.0) | 1.2.0 (0.18.0 / 1.3.0 / 0.22.0) |
 | TDP the driver reports | 65 W | 65 W | 65 W | 65 W |
 | **TDP the firmware uses** | **65 W** | **0 W**, set at every boot (below) | 65 W | 65 W |
-| Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C. In this chassis the die never read below 65 °C in the version-3 campaign (336,070 samples, 25–26 Sep), so it runs at 600 MHz unless it starts cold | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry); its governor is latched by the zero TDP: no governor line in its trace since 25 Sep (E41 TEL-G), and its throttle residencies all 0 after 2 d 8 h up (28 Sep; E51, development); it makes no thermal step at any temperature | firmware DVFS; **idles at 300 MHz** (`low_power`); its 0.21.x governor acts only while a kernel runs (firmware source, 27 Sep) | **600 MHz in all 318,667 samples of the three-card check (25–26 Sep)**, and in the SP's own minimum and maximum, although 9,461 were busy at 45–65 W at 64 °C or less and the mean reached 88 °C: its governor does not raise the clock (active power management off, or latched; asked the lab). Its build steps 50 MHz between 300 and 700 MHz, so it could never reach 800 |
-| Idle | 31–36 W at 73–80 °C (27 W cold); on the night of 28–29 Sep (DV2's idle watch) 73–75 °C and 31.4–32.5 W at 20:45–21:09 and 00:11–01:00 PDT, 59 °C and 25.4–25.6 W at 22:12 and 23:15–23:18 (idle cycles only; its heating sessions ran 22:13–23:56) | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz | 33–35 W at 600 MHz and 57–62 °C |
+| Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C. In this chassis the die never read below 65 °C in the version-3 campaign (336,070 samples, 25–26 Sep), and over DV2's 20 h validation (28–29 Sep) it idled at 71–76 °C in 327 of 378 cycles, so it runs at 600 MHz unless it starts cold | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry); its governor is latched by the zero TDP: no governor line in its trace since 25 Sep (E41 TEL-G), and its throttle residencies all 0 after 2 d 8 h up (28 Sep; E51, development); it makes no thermal step at any temperature | firmware DVFS; **idles at 300 MHz** (`low_power`); its 0.21.x governor acts only while a kernel runs (firmware source, 27 Sep) | **600 MHz in all 318,667 samples of the three-card check (25–26 Sep)**, and in the SP's own minimum and maximum, although 9,461 were busy at 45–65 W at 64 °C or less and the mean reached 88 °C: its governor does not raise the clock (active power management off, or latched; asked the lab). Its build steps 50 MHz between 300 and 700 MHz, so it could never reach 800 |
+| Idle | 31–36 W at 73–80 °C (27 W cold); on the night of 28–29 Sep (DV2's idle watch) 73–75 °C and 31.4–32.5 W at 20:45–21:09 and 00:11–01:00 PDT, 59 °C and 25.4–25.6 W at 22:12 and 23:15–23:18 (idle cycles only; its heating sessions ran 22:13–23:56); over the whole watch, to 16:48 on 29 Sep, 59–76 °C, 71–76 °C in 327 of 378 cycles, and never below 65 °C after 23:18 | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz | 33–35 W at 600 MHz and 57–62 °C |
 | Use it for | the main card | compare switching power over idle, never absolute watts | **nothing sustained: it overheats** (below) | anything; it peaked near 71 °C under the campaign's smoke blocks |
 | Version-3 campaign | yes | yes | excluded (amendment A4) | yes |
 
@@ -516,12 +530,12 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
   aifoundry2 or aifoundry3 is zstd-compressed and aifoundry1's `lto1` cannot read it, so build on the host that
   links. **Correction:** a note of the same morning said the toolchains differ and produce different code; they do
   not.
-- **Two host-to-card copies in flight on one stream move half as much as one** (E55, aifoundry3 and aifoundry1's
-  card 1, pre-registered). At 2 × 64 MB, DMA-only, they moved 0.488 of one at a time on aifoundry3 (the rate itself
-  0.484 over 1–64 MB), while one copy on each of two streams moved 1.012: nothing lost. Splitting a copy into
-  elements changes nothing. To overlap host-to-card copies, give each its own stream. Card to host does not collapse
-  (1.10 at 2 × 64 MB).
-- **Read data cross the mesh y first; write data x first** (E56, both cards, pre-registered). With flows chosen to
+- **Two host-to-card copies in flight on one stream move half as much as one** (E55, aifoundry3, aifoundry2 and
+  aifoundry1's card 1, pre-registered). At 2 × 64 MB, DMA-only, they moved 0.488 of one at a time on aifoundry3 and
+  0.496 on aifoundry2 (the rate itself 0.484 and 0.491 over 1–64 MB), while one copy on each of two streams moved 1.012
+  and 1.014: nothing lost. Splitting a copy into elements changes nothing. To overlap host-to-card copies, give each its
+  own stream. Card to host does not collapse (1.10 at 2 × 64 MB on both).
+- **Read data cross the mesh y first; write data x first** (E56, all three cards, pre-registered). With flows chosen to
   share one link under only one order, reads' replies collided only under y first and writes' requests only under
   x first, so a reply retraces its request's path. Until 29 September every route drawn on the chip diagram and on heat per
   mm, and E32's link-sharing counts, assumed x first for all traffic; both pages now draw read data y first, and under
@@ -529,11 +543,18 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
   0 / 22 / 32 / 55 / 72% under x first (`wire.json` `checks.link_sharing.<cfg>.shared_link_hop_fraction_yx`).
   Recompute a route's links before reasoning about contention. A
   directed link saturated near 92 GB/s.
-- **A host copy leaves its lines in the L3, and a TensorLoad leaves them in the L2** (E55, E57). After a staged host
-  copy, 99.5% of a buffer's lines read at L3 latency, whether the L3 held them before or not (a host write goes
-  through the line's L3 home, which allocates it); a second TensorLoad of the same 1 KB took 199 cycles, an L2 hit,
-  against 744 from the L3 and 1,344.5 for the first. A probe that means to time DRAM or the L3 must evict first
-  and time only fresh lines; a stream that reuses its buffer measures the L2 after its first pass.
+- **A host copy leaves its lines in the L3, and a TensorLoad leaves them in the L2** (E55, E57; aifoundry3 and aifoundry2,
+  as card 1 in development). After a staged host copy, 99.5–99.6% of a buffer's lines read at L3 latency, whether the L3
+  held them before or not (a host write goes through the line's L3 home, which allocates it); a second TensorLoad of the
+  same 1 KB took 199 cycles, an L2 hit, against 744–748 from the L3 and 1,342–1,345 for the first. A probe that means to
+  time DRAM or the L3 must evict first and time only fresh lines; a stream that reuses its buffer measures the L2 after
+  its first pass.
+- **aifoundry2's DRAM may not split rows and columns as the other cards do** (E57, 29 September, pre-registered). Two
+  lines of one row that differ only in PA[17], a column bit in the L50 map, read as a row conflict on aifoundry2 (0
+  cycles from the other-row reference, 48 trials), where aifoundry3 and card 1 read them as the same row (−21 cycles);
+  the other 14 conditions, and the bank bits, behaved as the map says. On 19 September the anatomy's one-bit flip of
+  PA[17] on the same card read as the same row (−12 cycles), by a different method, so why is not established. A probe
+  that relies on row hits within PA[13–17] should check that card first.
 - **aifoundry1's card 1's SRAM rail averages over 0.54 s, not about 1 s** (E58). Deconvolve each card's rails with its
   own τ (`tools/ettelem/deconv.py` has them), and do not compare card 1's SRAM rail split with another card's.
 
@@ -552,5 +573,5 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
   sensor.
 - [03-experiments.md](03-experiments.md): the standard protocol and every session's command; E51 is the DV2
   development night of 28 September (the governor's build, the mean against the hottest sensor, the Master Minion hang)
-  and its validation's status; E54 is NV (not yet run); E55–E58 are the pre-registered experiments of 28–29 September
-  behind this file's 29 September changes.
+  and its frozen validation's verdicts; E54 is NV (not yet run); E55–E58 are the pre-registered experiments of
+  28–29 September behind this file's 29 September changes.

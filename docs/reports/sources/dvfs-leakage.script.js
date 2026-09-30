@@ -497,7 +497,7 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
   ['The chip counts bus bits and execution-unit activity factors and computes its own power estimate on millisecond timescales.', 'not on this chip',
     'The loop reads the PMIC’s measured board power over I2C and the mean of the on-die PVT sensors. There is no activity counter anywhere in it, in the build the cards run (0.20.0), the older one or the September 2024 rewrite.'],
   ['Thermal sensors are part of the same loop, because leakage depends on temperature.', 'confirmed, and thermal has priority',
-    `The temperature test comes first: a mean above ${TC} °C starts a loop that locks the power tests out (<a href="#the-loop-as-built">§1</a>). It reads the mean of 34 sensors, never the hottest one, and on a development night the step followed that mean (<a href="#what-triggers-a-step-down-and-does-placement-delay-it">§8</a>, not yet validated). On aifoundry2, ${nOf(byAfter, 'thermal')} of the ${DOWN.length} down-steps in the seven cool-start runs were thermal only on the sample after the step (${nOf(byBefore, 'thermal')} on the sample before), and none was the power test alone.`],
+    `The temperature test comes first: a mean above ${TC} °C starts a loop that locks the power tests out (<a href="#the-loop-as-built">§1</a>). It reads the mean of 34 sensors, never the hottest one, and on aifoundry2 every step that fitted a rule fitted that mean, in a development night and in a frozen validation, though the validation had too few such runs for its registered test (<a href="#what-triggers-a-step-down-and-does-placement-delay-it">§8</a>). On aifoundry2, ${nOf(byAfter, 'thermal')} of the ${DOWN.length} down-steps in the seven cool-start runs were thermal only on the sample after the step (${nOf(byBefore, 'thermal')} on the sample before), and none was the power test alone.`],
   ['Cache data arrays sit behind leakage-suppression transistors; a lookup un-suppresses only the part it needs, at a small wake-up latency.', 'tied off in the open RTL',
     `The open RTL (Erbium, a later configuration of the same core, not the ET-SoC-1 chip) has per-minion sleep and isolation ports, tied off; no firmware line drives any power gating; and after 27 ms of idle no cache level shows a wake-up, on any of three cards (${V.wakeN}). Paired shifts on 22 September: ${w.levels.map(l => l.level + ' ' + sgn(l.paired_delta_cycles)).join(', ')} cycles; ${V.wakeV3}. The L2 shift comes from a slow no-idle baseline, and the DRAM ones from rows opening and closing.`],
   ['Leakage is typically 5–30% of a design’s power, about 20% common.', 'worse at idle; under load, not established',
@@ -993,8 +993,14 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
    chart title, caption and sentence here says so. The block holds one entry per card (D.dv2.cards); every chart reads its
    card from a selector that appears only when more than one card has such a night, so another card's night slots in. */
 const DV = D.dv2, DVC = CK.cardsIn(DV.cards);
+/* The frozen validation on aifoundry2 (D.dv2.validation, from validation/verdicts-dv2val.json and its raw records; absent
+   until it is reduced). Its verdicts are the frozen reducer's, copied; the page only words them. */
+const VAL = DV.validation || null;
+const VDATA = VAL ? [['val', 'validation (28–29 Sep)'], ['dev', 'development (28 Sep)']] : [['dev', 'development (28 Sep)']];
 const PDT = ms => new Date(ms - 7 * 3600e3).toISOString().slice(11, 16);      // PDT is UTC-7 in September (DV.tz)
 const hhmm = t => (t || '').slice(0, 5);
+const hhmmUp = t => { const [h, m, s] = t.split(':').map(Number), k = h * 60 + m + (s ? 1 : 0);   // HH:MM:SS -> the next whole minute
+  return String(Math.floor(k / 60) % 24).padStart(2, '0') + ':' + String(k % 60).padStart(2, '0'); };
 const PLACE = {B4C: 'the 4 central shires', INT16: '16 interior shires', PER16: '16 perimeter shires', UNI32: 'all 32 shires'};
 const placeOf = name => { const [g, n] = name.split('@'); return `${PLACE[g] || g}, ${n} minions each`; };
 const ucf = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -1013,9 +1019,12 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
   const tens = Z.filter(c => c.pass < 'p1100'), twos = Z.filter(c => c.pass >= 'p1100');
   V.dvIntro = `On the night of 27–28 September aifoundry2 ran the development half of a pre-registered design (DV2): ${Z.length} ` +
     `read-only watch cycles from ${hhmm(Z[0].time)} to ${hhmm(Z[Z.length - 1].time)} PDT and ${word(nat.length)} heating sessions. These runs ` +
-    `chose the parameters and the rules of a validation plan that was frozen afterwards; they test nothing, and every number in this ` +
-    `section is theirs. The validation began at 20:45 PDT on 28 September and is not yet reduced (the end of this section). The night ended with the card's Master Minion hung; ` +
-    `a management reset restored it at 08:32 that morning.`;
+    `chose the parameters and the rules of a validation plan that was frozen afterwards; they test nothing. ` +
+    (VAL ? `The frozen validation then replicated the design on the same card, from ${hhmm(VAL.queue.start)} PDT on 28 September to ` +
+      `${hhmmUp(VAL.queue.end)} on 29 September: its verdicts, not the night's numbers, are this section's answer (the summary below and the table ` +
+      `at the end), and the charts of the two questions show its runs beside the night's. `
+      : `The validation began at 20:45 PDT on 28 September and is not yet reduced (the end of this section). `) +
+    `The night ended with the card's Master Minion hung; a management reset restored it at 08:32 that morning.`;
   const and2 = xs => (xs.length > 1 ? xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1] : xs.join(''));
   const WHY = {'night stop': 'the night stop that ended the first session', 'slot passed': 'while a session held the card'};
   const skipBy = [...new Set(skip.map(c => c.reason))].map(r => `${and2(skip.filter(c => c.reason === r).map(c => c.slot))} ` +
@@ -1040,7 +1049,17 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
     `their steps came ${range(Math.min(...dmh), Math.max(...dmh), 1)} s after it. ` +
     (off.length ? `The ${off.length === 1 ? 'other' : 'others'} stepped ${off.map(r => f1(-r.down_minus_mean)).join(' and ')} s before our samples ` +
       `saw the mean at 66, which fits neither rule's window (the service processor reads the mean on its own pass, between our samples). ` : '') +
-    `The frozen rule asks for at least six such runs over at least three blocks, so as a count this falls short of a test; its direction is all the mean's.`;
+    `The frozen rule asks for at least six such runs over at least three blocks, so as a count this falls short of a test; its direction is all the mean's.` +
+    (VAL ? (() => { const vs = VAL.q1.separating, vm = vs.filter(r => r.fits_mean), vo = vs.filter(r => !r.fits_mean && !r.fits_max);
+      const dh = vs.map(r => r.down_minus_high), dm = vm.map(r => r.down_minus_mean);
+      return ` <b>The validation.</b> ${ucf(word(vs.length))} of its runs, in ${word(VAL.q1.blocks.length)} blocks, told the rules apart: ${word(vm.length)} stepped ` +
+        `${range(Math.min(...dm), Math.max(...dm), 1)} s after the mean first read 66, ` + (vo.length ? `${word(vo.length)} fitted neither window ` +
+        `(${vo.map(r => sgn(r.down_minus_mean, 1) + ' s').join(' and ')} from the mean's first 66), ` : '') +
+        `and none stepped near the hottest sensor's first 66: every step came ${range(Math.min(...dh), Math.max(...dh), 1)} s after it. ` +
+        `In ${word(VAL.q1.holds)} runs over ${word(VAL.q1.hold_blocks)} blocks the clock held 800 MHz for a second or more after the hottest sensor ` +
+        `read ${TC + 2} °C or more (up to ${TC + VAL.q1.hold_max_over_thr} °C), which a rule on the hottest sensor allows none of: G1-H passed. ` +
+        `G1-T did not: it asks for 80% of the separating runs to fit the mean, and ${vm.length} of ${vs.length} is ` +
+        `${f0(100 * vm.length / vs.length)}%. So by the frozen rules the question is untested; nothing in the validation points to the hottest sensor.`; })() : '');
   const ic = q.idle_separating[0], cyc = ic ? Z.find(z => z.pass === ic.pass) : null;
   const before = cyc ? L.crossings.filter(c => c.host_ms < cyc.t_ms) : [], after = cyc ? L.crossings.filter(c => c.host_ms > cyc.t_ms) : [];
   const passMs = median(V3.sp_pass_ms[DVC[0]].quiet_ms);
@@ -1048,7 +1067,9 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
     `${range(ic.high_min, ic.high_max, 0)} °C in all ${word(ic.samples)} samples of that watch cycle. The governor had left its loop at ` +
     `${before.length ? before[before.length - 1].time : '?'} and did not enter it again until ${after.length ? after[0].time : '?'} (its trace ring); ` +
     `a rule on the hottest shire would have entered within one pass, about ${f0(passMs)} ms. That is one such cycle; the validation asks for ` +
-    `five over three separate stretches.` : '';
+    `five over three separate stretches.` + (VAL ? ` Its ${f0(VAL.items.I1.clean_cycles)} clean watch cycles found ${word(VAL.items.I1.hmax_sep)}, over ` +
+      `${word(VAL.items.I1.out_stretches)} stretches, and ${VAL.items.I1.hmean_viol ? word(VAL.items.I1.hmean_viol) : 'none'} the other way (the governor in its loop with the mean at ` +
+      `${TC - 1} °C or less): I1 is short of its count, so the idle half of the question is untested too.` : '') : '';
   // Q2
   const g = N.q2, fin = g.blocks.filter(b => b.final_candidate && b.L != null), first = g.blocks.find(b => !b.final_candidate);
   const tx = (b, k) => (b['censored_' + k] ? 'at least ' : '') + f1(b['t800_' + k]) + ' s';
@@ -1064,7 +1085,14 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
     `placement runs they come from are the heat-placement experiment's development blocks (E52), in ` +
     `<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-28-heat-placement/">docs/reports/data/2026-09-28-heat-placement</a> ` +
     `(<code>reductions/dev-r3.json</code>). Two blocks give no confidence interval; the frozen test asks for the log ratio above zero at 99% over ` +
-    `at least ${word(g.g4s_min_blocks)} blocks.`;
+    `at least ${word(g.g4s_min_blocks)} blocks.` +
+    (VAL ? (() => { const v = VAL.q2, cen = v.blocks.filter(b => b.censored_per);
+      return ` <b>The validation</b> measured both placements in ${word(v.n)} blocks. In each the perimeter held 800 MHz longer, ` +
+        `${range(v.ratio[0], v.ratio[1], 2)} times as long as the interior` + (cen.length ? ` (in ${word(cen.length)} of them the perimeter run held to its ` +
+        `kernel's end, so at least that)` : '') + `; the mean log ratio is ${f2(v.L_mean)}. But ${word(v.n)} blocks put its 99% interval at ` +
+        `${sgn(v.ci99[0], 2)} to ${sgn(v.ci99[1], 2)}, which includes no difference at all, and the test needs ${word(v.g4s_min_blocks)}: G4-S is ` +
+        `short of its count, and the question is untested. Its direction is the development night's, and that of the heat-placement ` +
+        `experiment (E52), which timed the mean's rise to 66 °C on aifoundry3 and aifoundry1's card 1.`; })() : '');
   // the loop
   const th = L.thermal, en = th.filter(x => x.kind === 'ENTER'), ex = th.filter(x => x.kind === 'EXIT');
   const pr = a => [...new Set(a.map(x => x.T))].join(' and ');
@@ -1084,7 +1112,16 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
     ` came straight after the service processor had itself called the card idle: the thermal branch does not wait ` +
     `for a kernel. On the host's 10 Hz samples the heating runs agree: all ${b['G2-C'].le1} of ${b['G2-C'].n} climbs from 600 MHz passed 700 MHz in ` +
     `at most one sample, the one-call climb, and all ${b['G2-D'].in_band} of ${b['G2-D'].n} descents to 600 MHz spent 0.3–0.7 s at 700 MHz ` +
-    `(median ${f1(b['G2-D'].dwell_median_s)} s), one period.`;
+    `(median ${f1(b['G2-D'].dwell_median_s)} s), one period.` +
+    (VAL ? (() => { const I = VAL.items, x3 = VAL.i3_other[0], off = [...VAL.i4_off].sort((p, q) => p.k - q.k);
+      return ` <b>The validation</b> repeated most of this on the same card: all ${f0(I.I2.enter)} of its idle ENTER lines printed ${TC + 1} °C and ` +
+        `all ${f0(I.I2.exit)} EXIT lines ${TC} or less, and ${f0(I['G2-U'].n)} up-steps all came from a reading of ${TC} or less (no dead band: TH3 ` +
+        `survived). ${I.I4.intervals - I.I4.off_grid} of its ${I.I4.intervals} idle ENTER→EXIT intervals lay within ${f1(VAL.i4_on_max_ms)} ms of the grid, but ` +
+        `the two longest, ${off.map(o => o.k).join(' and ')} periods (${off.map(o => f1(o.d_s)).join(' and ')} s), ended ` +
+        `${off.map(o => f0(-o.resid_ms)).join(' and ')} ms short of it, outside the registered 15 ms, and it saw ${f0(I['G2-D'].n)} of the ` +
+        `20 descents its rule needs: the build (TH2) stays untested. ${ucf(word(I.I3.exits - I.I3.next_not_pidle))} of its ${I.I3.exits} idle EXITs were ` +
+        `followed by the idle reset; once, the next line was a new ENTER ${f0(1000 * x3.dt_s)} ms later, so TH7, “an EXIT is followed at once by ` +
+        `the idle reset”, fell.`; })() : '');
   // the rest
   const zm = Z.map(c => c.mean), lo = Z.find(c => c.mean === Math.min(...zm)), hi = Z.find(c => c.mean === Math.max(...zm));
   const cr = L.crossings, res = N.residency, good = res.vs_episodes.filter(x => Math.abs(x.diff_ms) < 5), bad = res.vs_episodes.filter(x => Math.abs(x.diff_ms) >= 5);
@@ -1104,21 +1141,107 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
   const P = DV.prereg, H = N.incident, l1 = H.lifts[0], l2 = H.lifts[1], h2 = H.lift2 || {};
   V.valG4 = `${f2(P.g4.L_pred)} ± ${f2(P.g4.b)} for the log ratio over at least ${word(P.g4.g4_min_blocks)} blocks; the prediction comes from ` +
     `aifoundry3's placement runs of 27 September, E52's development blocks, reduced in <code>docs/reports/data/2026-09-28-heat-placement/reductions/dev-r3.json</code>`;
-  V.valText = `The plan was frozen at about 03:15 PDT on 28 September, after the last development pass, as ` +
+  const plan = `The plan was frozen at about 03:15 PDT on 28 September, after the last development pass, as ` +
     `<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-28-dvfs2-aifoundry2/plan/PREREG-VAL.md">PREREG-VAL.md</a> ` +
     `(SHA-256 <code>${P.sha256.slice(0, 12)}…</code>); a lock file (SHA-256 <code>${P.lock_sha256.slice(0, 12)}…</code>) fixes the code, the numbers and ` +
     `the schedules it runs, and every pass refuses to start if any of them has changed. It tests the step's trigger, the placement effect's sign, ` +
     `the loop, the absent dead band, the latencies and the residency counter, on the idle card and in heating sessions, each with a pass and a ` +
-    `fail rule written before any validation data. Only aifoundry2's governor moves the clock (aifoundry3's is stuck, aifoundry1's card 1 does ` +
+    `fail rule written before any validation data; a theory survives if every item under it passes, falls if any fails, and is otherwise ` +
+    `untested. Only aifoundry2's governor moves the clock (aifoundry3's is stuck, aifoundry1's card 1 does ` +
     `not act), so the validation is a replication on the same card in a later session. The owner accepted the same-card replication and ` +
-    `chose the full schedule, idle watch and heating sessions (the Master Minion they need was restored at 08:32 on 28 September, below), ` +
-    `and it started on aifoundry2 at 20:45:39 PDT on 28 September, after the plan's earliest start of ` +
-    `${P.not_before.replace('2026-09-28T', '')}. Its NAT-4 replication ran the plan's limit of three heating sessions: p6051 (22:13–22:30 PDT, ` +
-    `one block of four runs), p6052 (22:42–23:06, two blocks) and p6053 (23:19–23:56, four blocks), seven complete placement blocks where G4-S ` +
-    `needs at least six. The Master Minion did not hang. The idle card read 73–75 °C from 20:45 to 21:09 PDT and 59 °C by 22:12, and ` +
-    `73–74 °C again from 00:11 to 01:00 with no session running. The read-only watch cycles go on ` +
-    `until about 16:45 PDT on 29 September, the end of the plan's 20-hour window, and the frozen reducer runs after that. <b>No item has a ` +
-    `verdict yet</b>, so every number in this section is still the development night's.`;
+    `chose the full schedule, idle watch and heating sessions (the Master Minion they need was restored at 08:32 on 28 September, below).`;
+  if (!VAL) {
+    V.valText = plan + ` It started on aifoundry2 at 20:45:39 PDT on 28 September and is not yet reduced: <b>no item has a verdict yet</b>, so ` +
+      `every number in this section is still the development night's.`;
+    V.valShort = 'The validation has not been reduced yet (the end of this section).';
+  } else {
+    const I = VAL.items, Q = VAL.q2, ss = VAL.sessions, id = VAL.idle, tr = VAL.tries, hist = id.hist;
+    const n7176 = Object.keys(hist).filter(t => +t >= 71 && +t <= 76).reduce((a, t) => a + hist[t], 0);
+    const th = VAL.theories, TW_ = t => (th[t] || '').split(' ')[0];
+    const surv = Object.keys(th).filter(t => TW_(t) === 'survived'), fell = Object.keys(th).filter(t => TW_(t) === 'fell');
+    const unt = Object.keys(th).filter(t => TW_(t) === 'untested');
+    const and2 = xs => (xs.length > 1 ? xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1] : xs.join(''));
+    V.valText = plan + ` It ran on aifoundry2 from ${VAL.queue.start} PDT on 28 September to ${VAL.queue.end} on 29 September: ` +
+      `${f0(id.cycles)} read-only watch cycles, one every 3 minutes from ${hhmm(id.first)} to ${hhmm(id.last)}, and ${word(tr.started)} heating ` +
+      `sessions, the plan's limit, each started only from an idle reading of ${tr.start_max_c} °C or less: ` +
+      ss.map(s => `${s.pass} (${s.start}–${s.end} PDT, from ${s.r0} °C, ${word(s.blocks)} block${s.blocks === 1 ? '' : 's'} begun)`).join(', ') + '. ' +
+      `Each session ended by its frozen stop rule, when the mean twice failed to fall back to the 62 °C starting edge within 300 s, and in each ` +
+      `one's last block one or both placement runs never launched, so ${word(ss.reduce((a, s) => a + s.g4_measured, 0))} blocks have both measured. ` +
+      `All ${VAL.launches} launches returned normally, and the Master Minion did not hang. The frozen reducer's verdicts, item by item, are in the ` +
+      `table; by theory: ${and2(surv)} survived, ${and2(fell)} fell, and ${and2(unt)} are untested. ` +
+      `<b>Why so much stayed untested.</b> The card idled hot. The idle mean read ${id.mean[0]}–${id.mean[1]} °C over the window, and ` +
+      `${f0(n7176)} of the ${f0(id.cycles)} cycles read 71–76 °C, well above the ${TC} °C threshold, so the governor sat in its thermal loop ` +
+      `(in ${f0(id.state.IN)} of the ${f0(id.cycles)} cycles) and seldom crossed the line at rest: ${word(I.I1.hmax_sep)} cycles could tell the mean from the hottest sensor ` +
+      `where I1 needs five. The only readings of 62 °C or less came in one evening spell, ${id.cool.from}–${id.cool.to} PDT ` +
+      `(${range(id.cool.mean[0], id.cool.mean[1], 0)} °C); after it the idle mean never read below ${id.after_cool_min} °C, and ${f0(tr.too_warm)} of the ` +
+      `${f0(tr.n)} tries to start a session found ${range(tr.warm_c[0], tr.warm_c[1], 0)} °C. All three sessions ran in that spell, and the warming ` +
+      `card ended each after ${and2(ss.map(s => word(s.blocks)))} blocks: ${word(Q.n)} complete placement blocks where G4-S needs ${word(Q.g4s_min_blocks)}, ` +
+      `${word(I['G1-T'].separating)} separating runs of which G1-T needed 80% to fit the mean, and ${f0(I['G2-D'].n)} descents where G2-D needs 20. (The count of ` +
+      `“seven complete placement blocks” given here while the validation ran was the session check's, which counts a block once both of its ` +
+      `placement runs are listed; the reducer needs both measured.)`;
+    const vo = VAL.q1.separating.filter(r => !r.fits_mean && !r.fits_max).map(r => Math.abs(r.down_minus_mean));
+    V.valShort = `Neither of the owner's two questions was settled by the frozen rules. The card idled at 71–76 °C for most of the 20 hours ` +
+      `(${f0(n7176)} of ${f0(id.cycles)} watch cycles), above the ${TC} °C threshold, so at rest it seldom crossed it, and the three ` +
+      `heating sessions the plan allows could start only in an evening cool spell and stopped when the warming card no longer cooled back to ` +
+      `their starting point. <b>Average or hottest?</b> Everything the validation saw points to the average: in ` +
+      `${word(VAL.q1.holds)} runs the clock held 800 MHz for a second or more after the hottest sensor read ${TC + 2} °C or more, which a rule on the ` +
+      `hottest sensor would not allow, and of the ${word(I['G1-T'].separating)} runs that could tell the two rules apart none stepped near the ` +
+      `hottest sensor's first 66 °C; but only ${word(I['G1-T'].fit_mean)} of the ${word(I['G1-T'].separating)} stepped inside the rule's window around ` +
+      `the mean's first 66` + (vo.length ? ` (the other ${word(vo.length)} ${range(Math.min(...vo), Math.max(...vo), 1)} s from it)` : '') +
+      `, where the rule asks for 80%, so the theory is untested, and the answer still rests on the firmware source (§1). ` +
+      `<b>Longer in some places?</b> In each of the ` +
+      `${word(Q.n)} complete blocks the perimeter held 800 MHz longer than the interior (${range(Q.ratio[0], Q.ratio[1], 2)} times as long), ` +
+      `but the test needs ${word(Q.g4s_min_blocks)} blocks, and ${word(Q.n)} leave the 99% interval wide enough to include no difference: ` +
+      `untested. <b>What did hold</b>, on the same card: the governor has no dead band (into its loop at a mean of ${TC + 1} °C, out at ${TC}), ` +
+      `a kernel's start and end reach it through the Master Minion's heartbeat (${f2(I['G3-L'].median_s)} s from launch to 800 MHz in the median), ` +
+      `and its thermal-state counter adds whole episodes; one registered statement fell: an exit from the loop is not always followed at ` +
+      `once by the idle reset (${I.I3.exits - I.I3.next_not_pidle} of ${I.I3.exits} were).`;
+    // the verdict table: one row per theory, its registered items with what each counted
+    const W = {survived: 'survived', fell: 'fell', untested: 'untested', not: 'not registered'};
+    const TXT = {'TH1-busy': ['the owner’s first question', 'on a busy card the first step down from 800 MHz follows the mean of the 34 shire sensors, not the hottest one'],
+      'TH1-idle': ['the owner’s first question', 'on an idle card, whether the governor is in its thermal loop follows the mean, not the hottest sensor'],
+      Q2: ['the owner’s second question', 'the same work on the 16 perimeter shires runs longer at 800 MHz before the first step than on the 16 interior ones'],
+      TH2: ['', 'the cards run BL2 0.20.0’s governor: a thermal loop that re-reads the mean every 0.4053 s, a one-call climb, no busy test'],
+      TH3: ['', `no dead band: into the loop at a mean of ${TC + 1} °C, out at ${TC}`],
+      TH4: ['', 'a kernel’s start and end reach the governor through the Master Minion’s heartbeat, which sets the latencies'],
+      TH7: ['', 'an exit from the loop on an idle card is followed at once by the idle reset'],
+      TH8: ['', 'the thermal-down residency counter adds each episode whole, when it ends'],
+      TH5: ['the size behind the second question', 'the placement effect is the size a heat-only model predicts']};
+    const x3 = VAL.i3_other[0];
+    const ITEM = {
+      'G1-T': x => `${x.separating} runs in ${x.blocks} blocks told the rules apart: ${x.fit_mean} fitted the mean, ${x.fit_max} the hottest sensor (80% must fit the mean)`,
+      'G1-H': x => `${x.holds} runs in ${x.blocks} blocks held 800 MHz for 1 s or more after the hottest sensor read ${TC + 2} °C or more (up to ${TC + x.max_over_thr})`,
+      I1: x => `${x.hmax_sep} clean idle cycles out of the loop with the hottest sensor at ${TC + 1} °C or more (5 needed, over ${x.out_stretches} stretches); ${x.hmean_viol} in it with the mean at ${TC - 1} or less`,
+      'G4-S': x => `${x.blocks} blocks (${Q.g4s_min_blocks} needed); log ratio ${f2(x.L_mean)}, 99% interval ${sgn(x.ci99[0], 2)} to ${sgn(x.ci99[1], 2)}`,
+      I4: x => `${x.intervals - x.off_grid} of ${x.intervals} idle intervals on the 0.4053 s grid, within 15 ms; ${x.off_grid} off it`,
+      I5: x => `${x.idle_enters} ENTERs on the idle card, straight after the idle call or an EXIT`,
+      'G2-C': x => `${x.n} climbs from 600 MHz, all with at most one 700 MHz sample (${x.none} with none)`,
+      'G2-D': x => `${x.n} descents, all 0.3–0.7 s at 700 MHz (median ${f1(x.dwell_median_s)} s); 20 needed`,
+      I2: x => `${x.enter} idle ENTERs printed ${TC + 1} °C, ${x.exit} EXITs ${TC} or less; none other`,
+      'G2-U': x => `${x.n} up-steps, all from a reading of ${TC} °C or less`,
+      'G3-L': x => `${x.n} launches reached 800 MHz after a median ${f2(x.median_s)} s, at most ${f1(x.max_s)} s`,
+      'G3-I': x => `${x.n} runs back at 600 MHz at most ${f2(x.max_s)} s after the kernel ended`,
+      I3: x => `${x.exits - x.next_not_pidle} of ${x.exits} idle EXITs followed by the idle reset; once a new ENTER came ${f0(1000 * x3.dt_s)} ms after one`,
+      I6: x => `${x.intervals} intervals with a finished episode, ${x.outside_5ms} outside 5 ms`,
+      G4: x => `L<sub>P</sub> ${f2(x.L_P_mean)} against ${f2(x.L_pred)} ± ${f2(x.band)}`};
+    const order = ['TH1-busy', 'TH1-idle', 'Q2', 'TH2', 'TH3', 'TH4', 'TH7', 'TH8', 'TH5'];
+    const vw = t => W[TW_(t)] || th[t];
+    const vc = t => ({survived: 'v-surv', fell: 'v-fell', untested: 'v-unt'})[TW_(t)] || 'v-nr';
+    const head = i => (I[i].verdict === 'NOT REGISTERED' ? `<b>${i}</b>, reported only` : `<b>${i}</b> ${I[i].verdict}`);
+    const t = document.getElementById('valtab');
+    t.innerHTML = '<thead><tr><th>Theory</th><th>Its registered items: what the validation counted</th><th>Verdict</th></tr></thead><tbody>' +
+      order.filter(k => th[k]).map(k => `<tr><td><b>${k}</b>${TXT[k][0] ? ` (${TXT[k][0]})` : ''}: ${TXT[k][1]}</td><td class="small">` +
+        VAL.theory_items[k].map(i => `${head(i)}: ${ITEM[i](I[i])}`).join('<br>') +
+        `</td><td class="lvl"><span class="chip ${vc(k)}">${vw(k)}</span></td></tr>`).join('') + '</tbody>';
+    CK.stackTable(t);
+    V.valCap = `The frozen reducer's verdicts (<code>tools/claims-v3/dv2v/reduce_val.py</code>) on the validation's ${f0(id.cycles)} watch cycles and ` +
+      `three sessions, from <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-28-dvfs2-aifoundry2/${VAL.file}">` +
+      `<code>${VAL.file}</code></a>. PASS, FAIL and INSUFFICIENT are each item's words. INSUFFICIENT means that neither rule was met: too few ` +
+      `qualifying cycles, runs or blocks (I1, G2-D, G4-S), or a count between the pass and the fail rule (G1-T: ${I['G1-T'].fit_mean} of ` +
+      `${I['G1-T'].separating} on the mean, where PASS needs 80% and FAIL half on the hottest sensor; I4: ${I.I4.off_grid} of ${I.I4.intervals} ` +
+      `intervals off the grid, where PASS needs none and FAIL more than 10%). Q1 and Q2 are the owner's questions; TH5 was reported, not registered (development ran two blocks ` +
+      `under the final settings where its readiness rule asked for four).`;
+  }
   const sr = H.kernel_log || [], last = sr[sr.length - 1], KL = H.kernel_log_last || {};
   const c1 = l1.calib || {}, c2 = l2.calib || {}, st = l1.stream || {};
   V.hangText = `In the last session's first run, lift 1 ran normally. A lift is a stream of short kernels on all 32 shires ` +
@@ -1219,15 +1342,20 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
   const frame = CK.frame('q1', {height: W => (W < 600 ? 340 : 320), minW: 280, maxW: 640, draw,
     label: 'One development run at 800 MHz: the minion clock, the 34-sensor mean and the hottest sensor, sample by sample, with the moments the two rules turn on'});
 
-  // the strip: every separating run's step, against each reading's first 66 °C
+  // the strip: every separating run's step, against each reading's first 66 °C: the validation's runs, or the night's
   legendHTML('q1s-leg', [{mark: 'dot', color: CK.card(card).color, label: 'one run that tells the rules apart'},
     {mark: 'shade', color: 'var(--ref)', op: 0.3, label: 'where a rule on that reading steps (−0.3 to +0.6 s)'}]);
+  let which = VDATA[0][0];
+  const Q1 = () => (which === 'val' ? VAL.q1 : DV.cards[card].q1), tag = () => (which === 'val' ? 'validation' : 'development');
+  const rname = r => (r.session ? `${r.session} block ${r.block}` : `Block ${r.block}`) + ` · ${r.name}`;
+  if (VDATA.length > 1) CK.seg('q1s-data', {label: 'Runs', options: VDATA, value: which, onChange: v => { which = v; strip.redraw(); capS(); }});
+  else document.getElementById('q1s-data').parentElement.style.display = 'none';
   function drawS(f) {
-    const S = DV.cards[card].q1.separating, W = f.W, H = f.H, svg = f.svg, L = 14, R = 14, B = 36, top = 4;
+    const S = Q1().separating, W = f.W, H = f.H, svg = f.svg, L = 14, R = 14, B = 36, top = 4;
     const vals = S.flatMap(r => [r.down_minus_mean, r.down_minus_high]).filter(v => v != null);
     const x = CK.lin(Math.min(-1.5, Math.floor(Math.min(...vals))), Math.ceil(Math.max(...vals)) + 0.5, L, W - R);
     const rows = [['down_minus_mean', 'after the mean first read 66 °C'], ['down_minus_high', 'after the hottest sensor first read 66 °C']];
-    const rh = (H - top - B) / 2, [w0, w1] = DV.cards[card].q1.window_s;
+    const rh = (H - top - B) / 2, [w0, w1] = Q1().window_s;
     const g = CK.el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, svg);
     for (const t of x.ticks(Math.max(3, Math.round((W - L - R) / 70)))) { CK.el('line', {x1: x(t), x2: x(t), y1: top, y2: H - B, class: 'grid-line'}, g); CK.txt(g, x(t), H - B + 16, sgn(t, 0), 'tick', 'middle'); }
     CK.el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
@@ -1243,7 +1371,7 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
       for (const p of pts) { for (let j = 0; ; j++) { const lane = j % 2 ? -(j + 1) / 2 : j / 2; if (last[lane] == null || p.px - last[lane] >= 12) { p.lane = lane; last[lane] = p.px; break; } } }
       for (const p of pts) {
         const m = CK.cardMark(svg, card, p.px, yc + p.lane * 10, 4.5);
-        CK.tip(f, m, `<b>Block ${p.r.block} · ${p.r.name}</b> (development): the step came ${sgn(p.r.down_minus_mean, 1)} s from the mean's first 66 °C ` +
+        CK.tip(f, m, `<b>${rname(p.r)}</b> (${tag()}): the step came ${sgn(p.r.down_minus_mean, 1)} s from the mean's first 66 °C ` +
           `and ${sgn(p.r.down_minus_high, 1)} s from the hottest sensor's` + (p.r.fits_mean ? '' : '; it fits neither window'));
         nodes.push(m);
       }
@@ -1251,25 +1379,33 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
     CK.keynav(f, nodes);
   }
   const strip = CK.frame('q1s', {height: 216, minW: 280, maxW: 640, draw: drawS,
-    label: 'For each development run that tells the two rules apart, the time from the mean’s first 66 °C to the step, and from the hottest sensor’s first 66 °C to the step'});
-  const S0 = DV.cards[card].q1;
-  document.getElementById('q1s-cap').textContent = `Each mark is one of the ${word(S0.separating.length)} runs, in ${word(S0.blocks.length)} blocks, in which the ` +
-    `hottest sensor read 66 °C at least 1.5 s before the mean did. A rule on a reading predicts the step inside that reading's shaded window; ` +
-    `the steps line up with the mean and come seconds after the hottest sensor. Development counts (the frozen rule needs six runs over three blocks).`;
+    label: 'For each run that tells the two rules apart (the frozen validation’s or the development night’s), the time from the mean’s first 66 °C to the step, and from the hottest sensor’s first 66 °C to the step'});
+  function capS() {
+    const S0 = Q1(), n = S0.separating.length, nm = S0.separating.filter(r => r.fits_mean).length;
+    document.getElementById('q1s-cap').textContent = `Each mark is one of the ${word(n)} runs, in ${word(S0.blocks.length)} blocks, in which the ` +
+      `hottest sensor read 66 °C at least 1.5 s before the mean did. A rule on a reading predicts the step inside that reading's shaded window; ` +
+      `the steps line up with the mean and come seconds after the hottest sensor. ` + (which === 'val'
+        ? `The frozen validation's runs: ${word(nm)} of ${word(n)} fit the mean and none the hottest sensor; G1-T needs 80% fitting the mean, so it is untested.`
+        : 'Development counts (the frozen rule needs six runs over three blocks).');
+  }
+  capS();
 })();
 
 /* V10 (§8, Q2): time at 800 MHz before the first step, interior against perimeter, per block, beside the placements' map. */
 (function () {
   const COL = {INT16: 'var(--c4)', PER16: 'var(--c7)'};
-  let card = DVC[0];
-  dvCard('q2-card', v => { card = v; frame.redraw(); });
+  let card = DVC[0], which = VDATA[0][0];
+  const Q2 = () => (which === 'val' ? VAL.q2 : DV.cards[card].q2), tag = () => (which === 'val' ? 'validation' : 'development');
+  dvCard('q2-card', v => { card = v; frame.redraw(); cap(); });
+  if (VDATA.length > 1) CK.seg('q2-data', {label: 'Blocks', options: VDATA, value: which, onChange: v => { which = v; frame.redraw(); cap(); }});
+  else document.getElementById('q2-data').parentElement.style.display = 'none';
   legendHTML('q2-leg', [{mark: 'shade', color: COL.INT16, op: 0.85, label: 'interior: 16 shires (INT16)'}, {mark: 'shade', color: COL.PER16, op: 0.85, label: 'perimeter: 16 shires (PER16)'},
     {mark: 'box', color: 'var(--ink-2)', hollow: true, label: 'held 800 MHz to the kernel’s end (at least)'}]);
   const P = DV.placements, grp = {};
   for (const k of ['INT16', 'PER16']) for (const s of P.groups[k]) grp['S' + s] = k;
   const B4 = new Set(P.groups.B4C.map(s => 'S' + s));
   function draw(f) {
-    const q = DV.cards[card].q2, W = f.W, H = f.H, svg = f.svg, wide = W >= 560;
+    const q = Q2(), W = f.W, H = f.H, svg = f.svg, wide = W >= 560;
     const mapS = wide ? 22 : 20, mapW = mapS * 6, mapH = mapS * 6;
     const mx = wide ? 8 : Math.round((W - mapW) / 2), my = 20;
     CK.txt(svg, wide ? mx : W / 2, 12, 'shires on the die (inferred grid)', 'lab', wide ? 'start' : 'middle');
@@ -1293,26 +1429,31 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
     const nodes = [];
     blocks.forEach((b, i) => {
       const y0 = T0 + i * rowH;
-      CK.txt(svg, L0, y0 + 12, `block ${b.block} · ${num(b.minions, 0)} minions` + (b.final_candidate ? '' : ' (dropped: both held)'), 'lab-strong');
+      CK.txt(svg, L0, y0 + 12, (b.session ? `${b.session} block ${b.block}` : `block ${b.block}`) + ` · ${num(b.minions, 0)} minions` + (b.final_candidate ? '' : ' (dropped: both held)'), 'lab-strong');
       [['int', 'INT16', b.int], ['per', 'PER16', b.per]].forEach(([k, grpK, name], j) => {
         const t = b['t800_' + k], cen = b['censored_' + k], yb = y0 + 18 + j * (barH + 4);
         const rect = CK.el('rect', {x: x(0), y: yb, width: Math.max(2, x(t) - x(0)), height: barH, rx: 3,
           fill: cen ? 'var(--surface)' : COL[grpK], stroke: COL[grpK], 'stroke-width': cen ? 2 : 0}, svg);
         if (cen) CK.el('polygon', {points: `${x(t) + 1},${yb} ${x(t) + 8},${yb + barH / 2} ${x(t) + 1},${yb + barH}`, fill: COL[grpK]}, svg);
         CK.txt(svg, x(t) + (cen ? 11 : 5), yb + barH - 2, (cen ? '≥ ' : '') + f1(t) + ' s', 'tick');
-        CK.tip(f, rect, `<b>Block ${b.block} · ${name}</b> (${placeOf(name)}; development): ${cen ? 'held 800 MHz to its kernel’s end, at least ' : ''}${f2(t)} s at 800 MHz before the first step`);
+        CK.tip(f, rect, `<b>${b.session ? b.session + ' block ' + b.block : 'Block ' + b.block} · ${name}</b> (${placeOf(name)}; ${tag()}): ${cen ? 'held 800 MHz to its kernel’s end, at least ' : ''}${f2(t)} s at 800 MHz before the first step`);
         nodes.push(rect);
       });
       if (b.L != null) CK.txt(svg, W - 4, y0 + 18 + barH + 6, '×' + f2(Math.exp(b.L)) + (b.censored_per || b.censored_int ? '+' : ''), 'lab-strong', 'end');
     });
     CK.keynav(f, nodes);
   }
-  const q = DV.cards[card].q2;
-  const frame = CK.frame('q2', {height: W => (W < 560 ? 176 + 36 + 62 * q.blocks.length : Math.max(190, 56 + 62 * q.blocks.length)), minW: 280, maxW: 640, draw,
-    label: 'Development: seconds at 800 MHz before the first step for interior and perimeter placement, block by block, beside a map of the two placements'});
-  document.getElementById('q2-cap').innerHTML = `Right-hand figures: perimeter over interior time, per block (+: the perimeter run held to its kernel's end, so at least that). ` +
-    `The map is the shire grid as inferred for the die frame (<code>tools/claims-v3/dv2/placements.json</code>); the governor sees neither, only the 34-sensor mean. ` +
-    `Mean log ratio over the ${word(q.n)} blocks under the final settings ${f2(q.L_mean)} (development; the frozen reducer gives ${f2(q.reducer_L_mean)}).`;
+  const frame = CK.frame('q2', {height: W => { const n = Q2().blocks.length; return W < 560 ? 176 + 36 + 62 * n : Math.max(190, 56 + 62 * n); }, minW: 280, maxW: 640, draw,
+    label: 'Seconds at 800 MHz before the first step for interior and perimeter placement, block by block (the frozen validation’s or the development night’s), beside a map of the two placements'});
+  function cap() {
+    const q = Q2();
+    document.getElementById('q2-cap').innerHTML = `Right-hand figures: perimeter over interior time, per block (+: the perimeter run held to its kernel's end, so at least that). ` +
+      `The map is the shire grid as inferred for the die frame (<code>tools/claims-v3/dv2/placements.json</code>); the governor sees neither, only the 34-sensor mean. ` +
+      (which === 'val' ? `The frozen validation's ${word(q.n)} blocks with both placements measured: mean log ratio ${f2(q.L_mean)}, 99% interval ` +
+          `${sgn(q.ci99[0], 2)} to ${sgn(q.ci99[1], 2)}; G4-S needs it wholly above zero over at least ${word(q.g4s_min_blocks)} blocks, so it is untested.`
+        : `Mean log ratio over the ${word(q.n)} blocks under the final settings ${f2(q.L_mean)} (development; the frozen reducer gives ${f2(q.reducer_L_mean)}).`);
+  }
+  cap();
 })();
 
 /* V11 (§8, the loop): every ENTER -> EXIT interval under a minute, against whole periods of the loop, and its residual. */

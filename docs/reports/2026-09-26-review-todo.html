@@ -20,15 +20,17 @@ code{background:var(--code);padding:.05rem .3rem;border-radius:4px;font-size:.88
 finding checked against the page text or the data before it was listed (the request is in
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/02-requests.md"><code>../findings/02-requests.md</code></a>). The live pages equalled their files on that day
 (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/MIRROR.md"><code>MIRROR.md</code></a>, "Last check").</p>
-<p><strong>Status, 29 September 2026 (12:50 PDT):</strong> 133 items: 107 done, 6 superseded by the version-3 results, 20 open (four
+<p><strong>Status, 30 September 2026 (13:05 PDT):</strong> 134 items: 108 done, 6 superseded by the version-3 results, 20 open (four
 of them the owner's, in part 0). The review of 26 September listed 110; the lab re-check of 27 September added 7, the
-major pass of 28–29 September (Q65) 9 more, and the sparse parity work (Q66, E59) its 6 next steps and the owner's call on its page.</p>
+major pass of 28–29 September (Q65) 9 more, the sparse parity work (Q66, E59) its 6 next steps and the owner's call on
+its page, and the third card's runs of 29 September one open result.</p>
 <ul>
 <li><strong>Part 0</strong> is for the owner. <strong>Part A</strong> changes published pages, so it waits for the next pass: edit the source
   named in MIRROR.md's "How each page is built", rebuild, run <code>check_page.sh</code>, deploy (MIRROR.md, "Deploying one
   page"), run <code>check-mirror.py</code>, and commit the page, its sources and this file together. <strong>Part B</strong> is
   repository-only work this pass did not reach. <strong>Part C</strong> is the card work and records that the major pass of
-  28–29 September (Q65) left: DV2's reduction, the third card's runs and two open results. <strong>Part D</strong> is the sparse
+  28–29 September (Q65) left: DV2's reduction and the third card's pcie2, nocr and memp2 (both done on 29 September),
+  tau on the third card, and the open results. <strong>Part D</strong> is the sparse
   parity solver's next steps (Q66, E59).</li>
 <li><strong>Reconciled on 27 September</strong> with the merge <code>0cfc742</code> (the three-card pages of 26 September, this review's chart
   and collapsible-depth passes, and E48 on the pages) and the review pass after it, then checked item by item against
@@ -99,7 +101,7 @@ major pass of 28–29 September (Q65) 9 more, and the sparse parity work (Q66, E
   a minute) is NV's first command that changes the card's state. The session's permission check refused it on
   28 September (predictions frozen in <code>4312253</code>; the read-only probe at 22:54 PDT found BL2 0.20.0 and the NoC at
   485 mV), so the owner runs it or allows it. The smoke and the development passes follow on aifoundry3, then the
-  validation on aifoundry2 after DV2 (part C).</p>
+  validation on aifoundry2 (DV2's validation there ended on 29 September; part C).</p>
 </li>
 <li>
 <p>☑ <strong>The sparse parity page is public</strong> (<code>et-soc1-sparse-parity</code>, space <code>a6212e3c…</code>): the owner made it public on
@@ -642,8 +644,10 @@ Many fix and cut items landed in the merge too; those are ticked below.</p>
 <h2 id="b-repository-only-work-not-done-in-this-pass">B. Repository-only work not done in this pass</h2>
 <h3 id="after-the-campaign-every-block-hashes-toolsclaims-v3">After the campaign (every block hashes <code>tools/claims-v3/</code>)</h3>
 <ul>
-<li>☐ <code>tools/claims-v3/lib.sh</code>, <strong>after DV2's validation ends</strong> (about 16:45 PDT, 29 September; <code>lib.sh</code> is in its
-  lock, <code>tools/claims-v3/dv2v/LOCK.sha256</code>):</li>
+<li>☐ <code>tools/claims-v3/lib.sh</code>, <strong>once the owner releases the heat-placement lock</strong> (DV2's validation, whose lock
+  also held it, ended at 16:57 PDT on 29 September; <code>lib.sh</code> and <code>queue.sh</code> stay in the heat-placement lock,
+  <code>tools/claims-v3/hp/prereg/PREREG.md</code>, whose <code>reduce.py --val</code> refuses to reproduce <code>val.json</code> on any changed byte;
+  whether to release it, or to keep the frozen bytes elsewhere for that check, is the owner's decision):</li>
 <li><code>:17–18</code>: aifoundry3 has system numpy, and all three hosts have a venv, since 25 September. Landed on
     27 September (<code>a745199</code>, the comment only) and reverted on 28 September by DV2's commit <code>8eb0e38</code>, which keeps
     <code>lib.sh</code> at the locked bytes (<code>d884e53</code>'s): re-apply <code>a745199</code>'s comment.</li>
@@ -681,10 +685,10 @@ Many fix and cut items landed in the merge too; those are ticked below.</p>
   run can take longer than <code>schedule.sh</code>'s <code>timeout 150</code>. Its first card run: aifoundry1's card 1, 28 Sep 23:56 PDT,
   every sub-test exit 0 (<code>data/2026-09-29-pcie2/run_pcie-r101/</code>).</li>
 <li>☐ The queues poll <code>et-who</code> less often, and scripts use <code>et-who --check</code>'s exit status instead of parsing its text
-  (<code>tools/lab/README.md</code>; <code>et-who --check</code> is installed on all three hosts since 28 September). After DV2's
-  validation: <code>queue.sh</code> and <code>lib.sh</code> are in its lock.</li>
-<li>☐ <code>V3_DRY</code> fails closed for agents: a marker file, or real runs only with an explicit <code>V3_REAL=1</code>. After DV2's
-  validation, for the same reason.</li>
+  (<code>tools/lab/README.md</code>; <code>et-who --check</code> is installed on all three hosts since 28 September). DV2's validation has
+  ended, but <code>queue.sh</code> and <code>lib.sh</code> are in the heat-placement lock too: with the <code>lib.sh</code> item above.</li>
+<li>☐ <code>V3_DRY</code> fails closed for agents: a marker file, or real runs only with an explicit <code>V3_REAL=1</code>. With the
+  <code>lib.sh</code> item above, for the same reason.</li>
 <li>☑ Commit the heat branch, with the firmware findings behind it (per-release governor behaviour, aifoundry3's
   latch at a 0 W TDP, card 1's fixed clock, the release-to-commit mapping) in <code>14-card-behaviour.md</code> and a
   <code>data/2026-09-27-heat-placement/</code> directory: source lines and commits only.
@@ -798,22 +802,47 @@ flagged the rest at the top of <code>../findings/README.md</code>.</p>
 </ul>
 <h2 id="c-card-work-and-its-records-after-the-major-pass-of-2829-september-q65">C. Card work and its records, after the major pass of 28–29 September (Q65)</h2>
 <ul>
-<li>☐ <strong>Reduce DV2's validation</strong> (E51) after its idle cycles end on aifoundry2, about 16:45 PDT on 29 September:
+<li>☑ <strong>Reduce DV2's validation</strong> (E51) after its idle cycles end on aifoundry2, about 16:45 PDT on 29 September:
   collect the passes and run <code>tools/claims-v3/dv2v/reduce_val.py</code> against the frozen <code>PREREG-VAL.md</code> (<code>e150ce16…</code>);
   then the DVFS page's §8, <code>14-card-behaviour.md</code> and E51. Until then nothing in its lock changes (AGENT.md §7).
-  After it: part B's <code>lib.sh</code> item, and its two items on <code>et-who --check</code> and <code>V3_DRY</code>.</li>
+  After it: part B's <code>lib.sh</code> item, and its two items on <code>et-who --check</code> and <code>V3_DRY</code>.
+  Done 29 Sep (<code>e4d894d</code>): the queue ended at 16:56:46 PDT, the lock checked OK before the reduction, and the frozen
+  reducer's verdicts are in <code>data/2026-09-28-dvfs2-aifoundry2/validation/</code> (<code>verdicts-dv2val.json</code>, README): TH3, TH4
+  and TH8 survived, TH7 fell (1 of 52 exits), TH1-busy, TH1-idle, TH2 and Q2 are untested (G1-T 7 of 9 on the mean
+  where 80% is needed, I1 4 of 5 cycles, G4-S 4 of 6 blocks). The records and pages on 30 September: E51 in
+  <code>03-experiments.md</code>, <code>05-claims.md</code>, <code>14-card-behaviour.md</code>, <code>16-dvfs-and-leakage.md</code>, the findings README,
+  <code>02-requests.md</code> (Q59, Q65), getting-started, the DVFS page's §8 (the verdicts table and the owner's two questions)
+  and the hub (§7's E51 row, the firmware note). Part B's three items stay open: <code>lib.sh</code> and <code>queue.sh</code> are also in
+  the heat-placement lock.</li>
 <li>☐ <strong>The third card:</strong> after DV2, run pcie2 (E55), nocr (E56), memp2 (E57) and tau (E58) on aifoundry2 under their
   frozen pre-registrations (tau only after the amendment its <code>PREREG.md</code> requires for aifoundry2: a heat step, its
   own start temperature, a D burst that does not starve its sampler and its own calibration, written before any
   aifoundry2 data), as a third card beside aifoundry1's card 1 and aifoundry3. Then NV's validation there
   (<code>tools/claims-v3/nv/schedule-val-aifoundry2.txt</code>), once its first write and development on aifoundry3 are done
-  (part 0).</li>
-<li>☐ <strong>memp2's R43 is open:</strong> no registered theory of the 128 B per cycle cap survives on either card (T43-B misses
-  7 conditions, Cc 5; <code>data/2026-09-29-memp2/README.md</code>). New theories need a new pre-registration.</li>
+  (part 0).
+  Partly done 29 Sep, 16:59–17:38 PDT (<code>b1198cb</code>, the frozen locks verified): pcie2 gave aifoundry3's verdicts (T35-S
+  and T34-A survived); nocr found read replies y first and write requests x first, as on the other two cards, and
+  T-DIRECT refuted by its rms rule (4.47 cycles); memp2 R33a FAIL (14 of 15), R33b and R36 PASS, R43 FAIL, E102's
+  bandwidth PASS and its energy not resolved, T102 FAIL (<code>data/2026-09-29-{pcie2,nocr,memp2}/README.md</code>). On the pages
+  30 September: the hub's rungs 31–36 and 43 and §7, the PCIe page's §5, the chip diagram (facts L104, L50,
+  <code>pcie.write-l3</code>, <code>pcie.conc</code>, <code>minion.tensor-cache-path</code> and its asks) and the memory levels (<code>l3.route</code>). Left: tau,
+  after its amendment, then NV's validation (part 0).</li>
+<li>☐ <strong>memp2's R43 is open:</strong> no registered theory of the 128 B per cycle cap survives on any of the three cards
+  (T43-B misses 7 conditions, Cc 5, on each; <code>data/2026-09-29-memp2/README.md</code>). New theories need a new
+  pre-registration.</li>
 <li>☐ <strong>nocr's R31 rule on aifoundry3:</strong> the ESR fit is 1,557 + 35.9 cycles per hop (r² 0.995) but its rms is 4.7
   cycles against the frozen rule's 4, so T-DIRECT is refuted there and the places that rest on it (P5–P7) are not
   decided on that card; in development on card 1 it survived. The frozen rule stands for this run: decide the places
-  with aifoundry2's run or a new pre-registration.</li>
+  with aifoundry2's run or a new pre-registration.
+  aifoundry2's run (29 Sep) refuted T-DIRECT too (1,556.8 + 35.9 cycles per hop, r² 0.996, rms 4.47), so only a new
+  pre-registration can decide the places by timing.</li>
+<li>☐ <strong>memp2 on the third card left two results open</strong> (<code>data/2026-09-29-memp2/val-aifoundry2/</code>): two lines that
+  differ only in PA[17], a column bit in the L50 map, read as a row conflict on aifoundry2 (R33a's condition <code>col</code>,
+  0 cycles from the other-row reference, 48 trials), where aifoundry3 and card 1 read one row (−21), and so did the
+  anatomy's one-bit flip of PA[17] on the same card on 19 September (−12 cycles); and the stride-256 energy excess was
+  not resolved there (+35.7 and +31.1 pJ per 64 B, 99% intervals that include 0, the die at 76–78 °C). A
+  service-processor readback of that card's ADDRMAP registers (the hub's rung 26) would settle the first; a new
+  pre-registered run the second.</li>
 </ul>
 <h2 id="d-sparse-parity-q66-e59-next-steps">D. Sparse parity (Q66, E59): next steps</h2>
 <p>E59 solved noisy sparse parity on aifoundry3's card on 29 September: L1 (512, 4, 0.3, 448) in 0.131 s, L2 (512, 4,
@@ -850,15 +879,17 @@ generation, the shire's bandwidth for streamed A (about 512 cycles per op at 32 
   best c, so no survivor log is needed. Not implemented; the full-scan time stays the primary metric (§2.8).</li>
 <li>☐ <strong>More cards.</strong> E59 ran on aifoundry3's card only (pinned at 600 MHz). Run <code>card_run.sh m5</code> and <code>energy.sh</code>
   with the same kernel (<code>.text</code> <code>3e14be32…</code>) on aifoundry1's card 1 (600 MHz; <code>card_run.sh</code> sets <code>ET_DEVICES=1</code> and
-  the shire1 lock; <code>/home</code> is nearly full, so keep one build; never card 0) and on aifoundry2 once DV2's validation
-  ends (about 16:45 PDT on 29 September; E29 saw its governor lift the clock to 700–800 MHz mid-burst below about
+  the shire1 lock; <code>/home</code> is nearly full, so keep one build; never card 0) and on aifoundry2, where DV2's validation
+  ended at 16:57 PDT on 29 September (E29 saw its governor lift the clock to 700–800 MHz mid-burst below about
   68 °C, <code>../findings/14-card-behaviour.md</code>, "The clock governor is thermal first", so record the clock with every
-  run). <code>energy.sh</code> refuses aifoundry2 unless <code>SPP_ALLOW_AIFOUNDRY2=1</code>: set it only after the DV2 lock ends.</li>
-<li>☐ <strong><code>lib.sh</code>'s device-process pattern, after DV2's lock ends</strong> (review R4, finding 8). <code>ps</code> truncates
+  run). <code>energy.sh</code> refuses aifoundry2 unless <code>SPP_ALLOW_AIFOUNDRY2=1</code>, a guard written for DV2's validation, which
+  has ended.</li>
+<li>☐ <strong><code>lib.sh</code>'s device-process pattern</strong> (review R4, finding 8). <code>ps</code> truncates
   <code>sparseparity_host</code> to <code>sparseparity_ho</code> (15 characters), which <code>DEV_COMM</code>'s <code>_host$</code> in
   <code>tools/claims-v3/lib.sh:57</code>, <code>tools/claims-v3/dv2/z2.sh:37</code> and <code>dv2lib.sh</code> never matches, so a campaign block
   would not count a running sparse parity host as a device process (the card lock and <code>et-who</code>'s node holders still
   protect the card). Add <code>^sparseparity_ho</code> to those patterns, as <code>workloads/sparseparity/energy.sh</code> already does.
-  <code>lib.sh</code> and <code>dv2/dv2lib.sh</code> are in DV2's lock (<code>tools/claims-v3/dv2v/LOCK.sha256</code>): with part B's <code>lib.sh</code> item.</li>
+  <code>lib.sh</code> waits with part B's <code>lib.sh</code> item (the heat-placement lock); <code>dv2/z2.sh</code> and <code>dv2lib.sh</code> were held only by
+  DV2's lock, which ended with its validation on 29 September.</li>
 </ul>
 </main></body></html>

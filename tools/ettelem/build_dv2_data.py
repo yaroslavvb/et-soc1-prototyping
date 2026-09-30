@@ -20,6 +20,10 @@ Inputs, all under --data:
   reductions/dv2-dev.json    tools/claims-v3/dv2/reduce_dv2.py --dev (the host bands, the decision log)
   reductions/dev-idle.json   tools/claims-v3/dv2v/reduce_val.py --dev (the frozen validation reducer on development data)
   plan/PREREG-VAL.md         the frozen validation plan (its SHA-256 is recomputed here and printed)
+  validation/                the frozen validation, run on aifoundry2 from 28 Sep 20:45 to 29 Sep 16:57 PDT (optional):
+                             verdicts-dv2val.json (tools/claims-v3/dv2v/reduce_val.py --data validation/raw), raw/ (the
+                             VZ cycles, the session tries nat-candidates.jsonl.gz and the NAT-4 sessions p6051-p6053) and
+                             the queue's log
 
 The governor's lines are read with the frozen reducer's own parser and SP-to-host mapping (reduce_val.collect,
 host_of; imported, not modified), over every ring dump of the night: the Z1 cycles' and the sessions'. Times of day
@@ -44,6 +48,13 @@ What the block holds (all per card, so another card's night slots in beside aifo
               calibration kernel against the host's clock readings, and the kernel log's SP runtime errors with
               wall times from incident/kernel_events.py
   prereg      the frozen validation plan: file, SHA-256, the lock's SHA-256, the frozen G4 numbers
+
+And, when validation/verdicts-dv2val.json exists, a top-level block `validation` (the frozen replication on aifoundry2):
+the reducer's verdict and counts per item and its per-theory summary, copied, never re-decided; the idle watch in brief
+(cycles, the mean's range, the governor's state); the session tries and the three NAT-4 sessions (window, start reading,
+blocks begun, blocks with both placements measured, launches, why each ended); for the owner's two questions the rows
+behind G1-T (each separating run's step against the mean's and the hottest sensor's first 66 C) and G4-S (each block's
+time at 800 MHz, interior and perimeter, and L); and the exceptions behind I3 and I4.
 """
 import argparse
 import datetime
@@ -470,6 +481,142 @@ def host_sensors(raw):
     return out
 
 
+# PREREG-VAL section 2: each theory and its registered items (the map reduce_val.theory_summary uses; checked below)
+TH_ITEMS = {"TH1-busy": ["G1-T", "G1-H"], "TH1-idle": ["I1"], "TH2": ["I4", "I5", "G2-C", "G2-D"], "TH3": ["I2", "G2-U"],
+            "TH4": ["G3-L", "G3-I"], "TH5": ["G4"], "Q2": ["G4-S"], "TH7": ["I3"], "TH8": ["I6"]}
+
+
+def validation(vdir, prereg):
+    """The frozen validation on aifoundry2 (PREREG-VAL), as the frozen reducer decided it: validation/verdicts-dv2val.json
+    and the committed raw records beside it. Nothing is re-decided here: the per-run and per-block rows only show what
+    the registered items counted, and each count is checked against the reducer's. None when not yet reduced."""
+    vj = os.path.join(vdir, "verdicts-dv2val.json")
+    if not os.path.exists(vj):
+        return None
+    V = json.load(open(vj))
+    raw = os.path.join(vdir, "raw")
+    it = V["items"]
+    assert RV.theory_summary(it) == V["theories"], "the verdicts file's theories are not the frozen reducer's"
+    for t, items in TH_ITEMS.items():
+        assert all(i in it for i in items), t
+    # the idle watch (VZ): the reducer's per-cycle rows; 'host' is aifoundry2's local time, PDT
+    pc = V["per_cycle"]
+    ms = [c["m"] for c in pc if c.get("m") is not None]
+    cool = [k for k, c in enumerate(pc) if c.get("m") is not None and c["m"] <= 62]   # the cycles at 62 C or less
+    # the NAT-4 sessions: the frozen block's own records
+    S = []
+    R = []
+    for d in sorted(glob.glob(os.path.join(raw, "p60[5-9][0-9]"))):
+        name = os.path.basename(d)
+        s, b = jload(os.path.join(d, "session.json")) or {}, jload(os.path.join(d, "block.json")) or {}
+        L = jl(os.path.join(d, "launches.jsonl"))
+        marks = jl(os.path.join(d, "marks.jsonl"))
+        runs_ = jl(os.path.join(d, "runs.jsonl"))
+        for r in runs_:
+            r["_session"] = name
+        R += runs_
+        planned = {}
+        for r in runs_:
+            if r.get("kind") == "T" and r.get("S") == prereg["g4"]["g4_S"] and (r.get("name") or "")[:5] in ("INT16", "PER16"):
+                planned.setdefault(r.get("block"), {})[r["name"][:5]] = RV.run_valid(r)
+        S.append({"pass": name, "branch": s.get("branch"), "r0": s.get("r0"), "blocks": s.get("blocks"),
+                  "start": hm(b["t0_ms"], False), "end": hm(b["t1_ms"], False), "status": b.get("status"),
+                  "launches": len(L), "launch_rc0": sum(1 for x in L if x.get("rc") == 0),
+                  # a block the session's queue check counted (both placement runs listed) against one the reducer can
+                  # use (both measured)
+                  "g4_listed": sum(1 for v in planned.values() if len(v) == 2),
+                  "g4_measured": sum(1 for v in planned.values() if len(v) == 2 and all(v.values())),
+                  "end_why": next((m.get("why") for m in marks if m.get("ev") == "session_end"), None)})
+    T = [r for r in R if r.get("kind") == "T" and RV.run_valid(r)]
+    ob = lambda r, k: (r.get("obs") or {}).get(k)   # noqa: E731
+    sec = lambda a, z: None if a is None or z is None else round((z - a) / 1000.0, 2)   # noqa: E731
+    # Q1 (G1-T, G1-H): the separating runs, and the holds at 800 MHz with the hottest sensor at thr + 2 or more
+    sep = [{"session": r["_session"], "block": r.get("block"), "name": r.get("name"), "minions": r.get("minions"),
+            "down_minus_mean": sec(ob(r, "t_m"), ob(r, "t_down")), "down_minus_high": sec(ob(r, "t_hi"), ob(r, "t_down")),
+            "fits_mean": bool(ob(r, "fits_mean")), "fits_max": bool(ob(r, "fits_max"))} for r in T if ob(r, "separating")]
+    g1 = it["G1-T"]
+    assert (len(sep), sum(x["fits_mean"] for x in sep), sum(x["fits_max"] for x in sep)) == \
+        (g1["separating"], g1["fit_mean"], g1["fit_max"]), "G1-T: the separating runs differ from the reducer's"
+    hold = [r for r in T if (ob(r, "g1h_max_over_thr") or 0) >= 2]
+    assert len(hold) == it["G1-H"]["holds"], "G1-H: the holds differ from the reducer's"
+    # Q2 (G4-S): per block, t800 = t_down - t_up (the obs' trip_s), or kernel end - t_up when the run held 800 MHz to
+    # its kernel's end (censored); a block with both runs censored is dropped (reduce_val.g_items, reproduced)
+    g = prereg["g4"]
+    blocks = {}
+    for r in T:
+        nm = r.get("name") or ""
+        if r.get("S") == g["g4_S"] and nm[:5] in ("INT16", "PER16") and nm.endswith("@%d" % g["g4_per"]):
+            blocks.setdefault((r["_session"], r.get("block")), {})[nm[:5]] = r
+    rows = []
+    for (sess, blk), v in sorted(blocks.items()):
+        i, p = v.get("INT16"), v.get("PER16")
+        if not (i and p):
+            continue
+
+        def t800(x):
+            if ob(x, "trip_s") is not None:
+                return ob(x, "trip_s"), False
+            return (ob(x, "t_end_ms") - ob(x, "t_up")) / 1000.0, True
+        ti, ci = t800(i)
+        tp, cp = t800(p)
+        if ci and cp:
+            continue
+        rows.append({"session": sess, "block": blk, "minions": i.get("minions"), "int": i.get("name"), "per": p.get("name"),
+                     "t800_int": round(ti, 3), "t800_per": round(tp, 3), "censored_int": ci, "censored_per": cp,
+                     "final_candidate": True, "L": round(math.log(tp / ti), 4)})
+    G4S = it["G4-S"]
+    assert len(rows) == G4S["blocks"] and abs(sum(x["L"] for x in rows) / len(rows) - G4S["L_mean"]) < 1e-3, "G4-S"
+    Ls = [x["L"] for x in rows]
+    # the exceptions: I3's EXIT not followed by the idle reset (an EXIT whose next line is a power line lies in a busy
+    # interval, which the reducer leaves out), and I4's idle intervals off the 0.4053 s grid (its resid_s list is the
+    # idle intervals')
+    i3x = [{"next": {"thermal_down": "ENTER", "thermal_idle": "EXIT"}.get(x["next"], x["next"]), "dt_s": x["dt_s"]}
+           for x in V["exit_next"] if x["next"] not in ("power_idle", "power_up", "power_down")]
+    assert len(i3x) == it["I3"]["next_not_pidle"], "I3"
+    tol = 0.015
+    res = it["I4"]["resid_s"]
+    off = sorted({x for x in res if abs(x) > tol})
+    i4x = [{"d_s": x["d_s"], "k": x["k"], "resid_ms": round(x["resid_s"] * 1000, 1)} for x in V["enter_exit"] if x["resid_s"] in off]
+    assert len(i4x) == it["I4"]["off_grid"], "I4"
+    tries = jl(os.path.join(raw, "nat-candidates.jsonl"))
+    warm = [int(x["why"].split(" is ")[1].split()[0]) for x in tries if not x.get("ok") and " (> " in (x.get("why") or "")]
+    ql = os.path.join(vdir, "queue-dv2val-aifoundry2.log")
+    q = [ln for ln in (gzip.open(ql + ".gz", "rt").read() if os.path.exists(ql + ".gz") else open(ql).read()
+                       if os.path.exists(ql) else "").splitlines() if " queue " in ln]
+    keep = ("verdict", "enter", "exit", "exits", "next_not_pidle", "intervals", "k_ge_1", "off_grid", "idle_enters",
+            "outside_5ms", "separating", "blocks", "fit_mean", "fit_max", "holds", "max_over_thr", "L_mean", "ci99",
+            "L_P_mean", "L_pred", "band", "censored_runs", "n", "le1", "none", "in_band", "dwell_median_s", "le_thr",
+            "ge_thr2", "median_s", "max_s", "clean_cycles", "hmax_sep", "out_stretches", "strong_h67", "hmean_viol", "rule")
+    return {"label": ("validation (DV2, aifoundry2, 28 Sep 20:45 PDT - 29 Sep 16:57 PDT): the frozen replication "
+                      "PREREG-VAL registered, as the frozen reducer decided it"),
+            "card": CARD, "file": "validation/verdicts-dv2val.json",
+            "queue": {"start": q[0][11:19] if q else None, "end": q[-1][11:19] if q else None},
+            "items": {k: {kk: (round(vv, 3) if isinstance(vv, float) else [round(x, 3) for x in vv] if kk == "ci99" else vv)
+                          for kk, vv in v.items() if kk in keep} for k, v in it.items()},
+            "theories": V["theories"], "theory_items": TH_ITEMS,
+            "idle": {"cycles": len(pc), "first": pc[0]["host"], "last": pc[-1]["host"],
+                     "clean": sum(1 for c in pc if c.get("clean")),
+                     "state": {k: sum(1 for c in pc if c.get("state") == k) for k in ("IN", "OUT")},
+                     "mean": [min(ms), max(ms)], "hist": {str(t): ms.count(t) for t in sorted(set(ms))},
+                     # the first and last cycle at 62 C or less, and the lowest reading after the last
+                     "cool": {"n": len(cool), "from": pc[cool[0]]["host"][:5], "to": pc[cool[-1]]["host"][:5],
+                              "mean": [min(pc[k]["m"] for k in cool), max(pc[k]["m"] for k in cool)]} if cool else None,
+                     "after_cool_min": min(c["m"] for c in pc[cool[-1] + 1:] if c.get("m") is not None) if cool else None},
+            "tries": {"n": len(tries), "started": sum(1 for x in tries if x.get("ok")), "too_warm": len(warm),
+                      "warm_c": [min(warm), max(warm)] if warm else None, "max_sessions": 3, "start_max_c": 60},
+            "sessions": S, "launches": sum(s["launches"] for s in S), "launch_rc0": sum(s["launch_rc0"] for s in S),
+            "q1": {"window_s": [-0.3, 0.6], "separating": sep, "blocks": sorted({(x["session"], x["block"]) for x in sep}),
+                   "holds": len(hold), "hold_blocks": len({(r["_session"], r.get("block")) for r in hold}),
+                   "hold_max_over_thr": max(ob(r, "g1h_max_over_thr") or 0 for r in hold) if hold else None},
+            "q2": {"blocks": rows, "n": len(rows), "L_mean": round(sum(Ls) / len(Ls), 4) if Ls else None,
+                   "ci99": [round(x, 3) for x in G4S["ci99"]] if G4S.get("ci99") else None,
+                   "ratio": [round(math.exp(min(Ls)), 3), round(math.exp(max(Ls)), 3)] if Ls else None,
+                   "L_P_mean": r1(it["G4"].get("L_P_mean"), 4), "L_pred": g["L_pred"], "b": g["b"],
+                   "g4s_min_blocks": g["g4s_min_blocks"]},
+            "i3_other": i3x, "i4_off": i4x,
+            "i4_on_max_ms": round(max(abs(x) for x in res if abs(x) <= tol) * 1000, 1) if res else None}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--data", required=True)
@@ -516,6 +663,9 @@ def main():
                       "frozen": "28 Sep 2026, about 03:15 PDT", "not_before": "2026-09-28T12:00 PDT",
                       "g4": {k: prereg["g4"][k] for k in ("L_pred", "b", "g4s_min_blocks", "g4_min_blocks", "g4_registered")}},
            "decisions": [{k: x.get(k) for k in ("t_ms", "decision", "what")} for x in dev.get("dev_log", [])]}
+    val = validation(os.path.join(a.data, "validation"), prereg)
+    if val:
+        out["validation"] = val
     path = a.out or os.path.join(a.data, "dv2.json")
     json.dump(out, open(path, "w"), indent=1)
     q, c2, L = card["q1"], card["q2"], card["lines"]
@@ -536,6 +686,20 @@ def main():
     print("Q2 blocks: " + "; ".join(f"b{b['block']} ({b['minions']}): INT {b['t800_int']}{'+' if b['censored_int'] else ''} PER {b['t800_per']}{'+' if b['censored_per'] else ''} L {b['L']}" for b in c2["blocks"]) +
           f"; L mean {c2['L_mean']} sd {c2['L_sd']} (reducer {c2['reducer_L_mean']}), L_P {c2['L_P_mean']}, ratio {c2['ratio']}")
     print(f"PREREG-VAL sha256 {out['prereg']['sha256']}; lock {out['prereg']['lock_sha256']}")
+    if val:
+        print("validation: " + ", ".join(f"{t} {v}" for t, v in val["theories"].items()))
+        print("  sessions: " + "; ".join(f"{s['pass']} {s['start']}-{s['end']} from {s['r0']} C, {s['blocks']} blocks begun, "
+                                         f"{s['g4_measured']} measured ({s['g4_listed']} listed), {s['launches']} launches, "
+                                         f"ended: {s['end_why']}" for s in val["sessions"]))
+        print("  Q1 separating: " + "; ".join(f"{x['session']} b{x['block']} {x['name']}: down-mean {x['down_minus_mean']}, "
+                                              f"down-high {x['down_minus_high']}" for x in val["q1"]["separating"]) +
+              f"; holds {val['q1']['holds']} in {val['q1']['hold_blocks']} blocks")
+        print("  Q2 blocks: " + "; ".join(f"{x['session']} b{x['block']}: INT {x['t800_int']}{'+' if x['censored_int'] else ''} "
+                                          f"PER {x['t800_per']}{'+' if x['censored_per'] else ''} L {x['L']}" for x in val["q2"]["blocks"]) +
+              f"; L mean {val['q2']['L_mean']}, 99% CI {val['q2']['ci99']}")
+        print(f"  idle: {val['idle']['cycles']} cycles {val['idle']['first']}-{val['idle']['last']}, mean {val['idle']['mean']}, "
+              f"cool {val['idle']['cool']}, after it >= {val['idle']['after_cool_min']}; tries {val['tries']}; "
+              f"I3 {val['i3_other']}; I4 {val['i4_off']} (the rest within {val['i4_on_max_ms']} ms)")
     for p in a.merge:
         d = json.load(open(p))
         d["dv2"] = out

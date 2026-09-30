@@ -291,23 +291,25 @@ commands in flight move less than one.</b></p>
 <p>A pre-registered follow-up, experiment E55 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">the
 hub's rungs 34 and 35</a>), asked why. Its rules were set in development on aifoundry1's card 1 (28 September,
 23:47–23:55 PDT), frozen (<code>tools/claims-v3/pcie2/PREREG.md</code>, sha256 <code>f632d6b3…</code>), and validated on
-aifoundry3 (29 September, 00:05–00:27 PDT, five passes). It timed two DMA-only copies per stream of 1, 4, 16 and 64 MB:
+aifoundry3 (29 September, 00:05–00:27 PDT, five passes), then run the same way on aifoundry2 as a third card that
+evening (16:59–17:21 PDT, five passes, after the DVFS validation there ended). It timed two DMA-only copies per stream of 1, 4, 16 and 64 MB:
 both commands in flight, one at a time, and one command in each of two streams. <b>Only two commands of one stream
-collide.</b> Two host-to-card commands in flight in one stream moved 0.49 of one at 64 MB (a rate ratio of 0.48 from the
-fit over 1–64 MB), and 0.49 again with each command split into eight DMA elements; one command in each of two streams
-moved 1.01 of one. A read engine or an IOMMU shared by the two commands would have halved that case too, so both are
+collide.</b> Two host-to-card commands in flight in one stream moved 0.49 of one at 64 MB on aifoundry3 (a rate ratio of 0.48 from
+the fit over 1–64 MB), and 0.49 again with each command split into eight DMA elements; one command in each of two
+streams moved 1.01 of one. aifoundry2 gave 0.50 (a rate ratio of 0.49), 0.50 with eight elements and 1.01. A read engine or an IOMMU shared by the two commands would have halved that case too, so both are
 refuted, and so are a fixed cost per overlapping command, a loss that sets in only after a long overlap, and a loss per
-element. Development on card 1 gave the same verdicts. So two streams move as much as one command alone, no more, and two
-commands in one stream move half as much. Card to host, two commands in flight moved 1.10 of one at 64 MB; at 1–16 MB
-the passes spread too wide to decide (0.78–0.94). Why one stream's two commands collide is not established.</p>
+element. Development on card 1 and the run on aifoundry2 gave the same verdicts. So two streams move as much as one command alone, no more, and two
+commands in one stream move half as much. Card to host, two commands in flight moved 1.10 of one at 64 MB on both cards; at 1–16 MB
+the passes spread too wide to decide on aifoundry3 (0.78–0.94), and on aifoundry2 two 4 MB commands moved 0.88 of one,
+below the 0.95 predicted, a prediction no account of the collision rests on. Why one stream's two commands collide is not established.</p>
 
 <h3 id="where-a-host-copy-lands">Where a host copy lands on the card</h3>
 <p>The same experiment asked where the bytes of a host-to-card copy are written: into the L3 slice that is each line's
 home, or past it to DRAM. A 4 MB buffer was written by the normal (staged) copy; then one hart on shire 0 timed the first
 load of 4,096 of its lines, one at a time, in a kernel launched without the L3 flush. Two references were timed the same
 way: every line from DRAM (a median of 304 cycles) and every line from the L3 (175 cycles). <b>A host write lands in the
-L3.</b> After the copy, 99.5% of the lines read at L3 latency on aifoundry3 (99.9% on card 1 in development), whether or
-not the L3 held the buffer when the host wrote it, and every value read was the one last written. The rival accounts,
+L3.</b> After the copy, 99.5% of the lines read at L3 latency on aifoundry3 and 99.6% on aifoundry2 (99.9% on card 1 in
+development), whether or not the L3 held the buffer when the host wrote it, and every value read was the one last written. The rival accounts,
 an L3 that updates only lines it already holds, and writes that go to DRAM with the L3's copy invalidated or left stale,
 are refuted. A kernel that reads a buffer the host has just copied therefore starts from the L3, not from DRAM; that was
 tested for a 4 MB buffer only. Data: <code>docs/reports/data/2026-09-29-pcie2/</code> (its README and
@@ -380,8 +382,8 @@ python3 scripts/build-report.py pcie-link docs/reports/data/2026-09-27-pcie/pcie
 </details>
 
 <details class="more"><summary>Version history and provenance</summary>
-<p class="small">First written 27 September 2026, from the runs of that afternoon; later that day, the staged path drawn against the hosts' memcpy (section 2) and the time of one launch or small copy split into its queued cost and the wait for the response thread (section 4); 28 September, the hosts' memory channels (section 2), read as a user the night before, where the page had said reading them needs root; 29 September, which commands collide and where a host copy lands (section 5), from E55; the page had left the first open. Every number on this page is
-computed by its script from <code>docs/reports/data/2026-09-27-pcie/pcie.json</code>, except section 5's two follow-ups, whose figures are quoted from <code>docs/reports/data/2026-09-29-pcie2/results.md</code> (aifoundry3) and <code>dev-aifoundry1-c1.md</code> (card 1, development), and the link figure's
+<p class="small">First written 27 September 2026, from the runs of that afternoon; later that day, the staged path drawn against the hosts' memcpy (section 2) and the time of one launch or small copy split into its queued cost and the wait for the response thread (section 4); 28 September, the hosts' memory channels (section 2), read as a user the night before, where the page had said reading them needs root; 29 September, which commands collide and where a host copy lands (section 5), from E55; the page had left the first open. 30 September: E55's third card, aifoundry2, in section 5. Every number on this page is
+computed by its script from <code>docs/reports/data/2026-09-27-pcie/pcie.json</code>, except section 5's two follow-ups, whose figures are quoted from <code>docs/reports/data/2026-09-29-pcie2/results.md</code> (aifoundry3 and aifoundry2) and <code>dev-aifoundry1-c1.md</code> (card 1, development), and the link figure's
 arithmetic (16 GT/s × 8 lanes × 128/130 ÷ 8, also in the data) and the runtime's and firmware's constants, which
 are cited to their source files above.</p>
 </details>

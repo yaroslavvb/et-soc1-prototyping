@@ -86,7 +86,7 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
 |---|---|---|
 | R1–R14 | resources that existed before any measurement: manuals, RTL, firmware source, papers, the machines | [`01-resources.md`](docs/findings/01-resources.md) |
 | Q1–Q66 | the owner's requests and what each produced (Q44–Q66: 25–28 September) | [`02-requests.md`](docs/findings/02-requests.md) |
-| E1–E59 | experiments: command, time, card, raw files. E35–E47 are the version-3 three-card check (25–26 September; its plan, results and raw data are in `docs/reports/data/2026-09-25-claims-v3/`), E48 the gathers and scatters on the same three cards (26 September), E49 the g3log race, reproduced without a card on 25 September, the fixed build checked on aifoundry3's card on 26 September, E50 the host link on the three cards (27 September), E51 DV2 on aifoundry2 (development 28 September; the frozen validation running since 20:45 PDT that day, reduced after about 16:45 PDT on 29 September), E52 the heat placement (27–28 September, development and a frozen validation), E53 the overheating experiments (28 September, pre-registered, aifoundry3 and aifoundry1's card 1), E54 NV, the mesh rail's voltage step (predictions frozen; its first write waits for the owner), E55–E58 the major pass's pcie2, nocr, memp2 and tau (28–29 September: developed on aifoundry1's card 1, validated on aifoundry3), E59 the sparse parity solver on aifoundry3's card (29 September, an engineering benchmark, not pre-registered) | [`03-experiments.md`](docs/findings/03-experiments.md) |
+| E1–E59 | experiments: command, time, card, raw files. E35–E47 are the version-3 three-card check (25–26 September; its plan, results and raw data are in `docs/reports/data/2026-09-25-claims-v3/`), E48 the gathers and scatters on the same three cards (26 September), E49 the g3log race, reproduced without a card on 25 September, the fixed build checked on aifoundry3's card on 26 September, E50 the host link on the three cards (27 September), E51 DV2 on aifoundry2 (development 28 September; the frozen validation from 20:45 PDT that day to 16:57 PDT on 29 September, reduced that evening), E52 the heat placement (27–28 September, development and a frozen validation), E53 the overheating experiments (28 September, pre-registered, aifoundry3 and aifoundry1's card 1), E54 NV, the mesh rail's voltage step (predictions frozen; its first write waits for the owner), E55–E58 the major pass's pcie2, nocr, memp2 and tau (28–29 September: developed on aifoundry1's card 1, validated on aifoundry3; E55–E57 also on aifoundry2 as a third card on the evening of 29 September), E59 the sparse parity solver on aifoundry3's card (29 September, an engineering benchmark, not pre-registered) | [`03-experiments.md`](docs/findings/03-experiments.md) |
 | A1–A21 | published artifacts: pages, images, tools, commits (A20 the session timeline, A21 the sparse parity page) | [`04-artifacts.md`](docs/findings/04-artifacts.md) |
 
 - **To answer a question:** the "where to look" table → the topic file (10–20) → the number in
@@ -132,7 +132,7 @@ builds the same `/opt/et` natively (the README's setup section). **Never run `pr
 
 | Card | Firmware | Clock policy | Notes |
 |---|---|---|---|
-| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | the main card; the git checkout is `~/claude/et-soc1-prototyping` here. Its Master Minion hung at 02:50 PDT on 28 Sep; the management reset restored it at 08:32 (owner-approved; the sysfs per-card reset had not), and it runs kernels again (14-card-behaviour.md). **Since 20:45 PDT on 28 Sep it runs DV2's validation**, whose idle cycles end about 16:45 PDT on 29 Sep: no other card work there until then |
+| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | the main card; the git checkout is `~/claude/et-soc1-prototyping` here. Its Master Minion hung at 02:50 PDT on 28 Sep; the management reset restored it at 08:32 (owner-approved; the sysfs per-card reset had not), and it runs kernels again (14-card-behaviour.md). DV2's validation ran there from 20:45 PDT on 28 Sep to 16:57 PDT on 29 Sep, then the third card's pcie2, nocr and memp2 (16:59–17:38) |
 | aifoundry3 | 1.3.1 | **pinned at 600 MHz**: a boot service sets a 0 W TDP at every boot, which also latches its governor (no step at any temperature) | compare switching power over idle, never absolute watts; about 1 host launch in 100 crashes at 1.08 s unless the program registers libetrt's log levels first (`registerRuntimeLogLevels()`, 14-card-behaviour.md) |
 | aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz, and its 0.21.x governor acts only while a kernel runs (firmware source) | **overheats (115–117 °C on the host on 25 Sep; its service processor's statistics still hold a 119 °C mean and a 123 °C sensor): no sustained work on it**; excluded from the campaign |
 | aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample since 25 Sep, cool or hot, busy or idle: its governor never raises the clock (off or latched; asked the lab) | fine; select a card on this host with `ET_DEVICES=<n>` |
@@ -218,8 +218,8 @@ their host program has its kernel's path compiled in. Each workload's `README.md
   queue runs, they are the way to build on another host (from a machine with a clone). gp-sdk kernels (`kernels/`)
   need `deploy-lab-gpsdk.sh`, which installs the patched gp-sdk `06605ab`.
 - After an rsync, build with `--clean-first`: rsync keeps the source's modification times.
-- **The DV2 validation lock (since 28 September, until that validation ends; it runs on aifoundry2 from 20:45 PDT on
-  28 September to about 16:45 PDT on 29 September, and is reduced after that).** `tools/claims-v3/dv2v/LOCK.sha256`
+- **The DV2 validation lock (28 September until that validation ended, at 16:57 PDT on 29 September on aifoundry2;
+  reduced that evening, `e4d894d`).** `tools/claims-v3/dv2v/LOCK.sha256`
   pins 19 files, and every validation pass runs `sha256sum -c` on it and refuses to start on any difference: in
   `tools/claims-v3/dv2v/` `block.sh`, `val.json`, `vn_check.py`, `reduce_val.py`, `prereg-val.json`; in
   `tools/claims-v3/dv2/` `block.sh`, `dv2lib.sh`, `dv2lib.py`, `dv2obs.py`, `sptrace_events.py`, `placements.json`,
@@ -230,7 +230,10 @@ their host program has its kernel's path compiled in. Each workload's `README.md
   the checkout that runs the validation that touches them, until it ends; run `sha256sum -c
   tools/claims-v3/dv2v/LOCK.sha256` after every merge. A merge of main once broke it (`a745199`, a comment in
   `lib.sh`): the branch `dvfs2` keeps `lib.sh` at the locked bytes (`d884e53`'s), so merging `dvfs2` into main reverts
-  that comment; re-apply `a745199`'s `lib.sh` comment after the validation.
+  that comment. The validation has ended, so this lock holds nothing back now, but `lib.sh` and `queue.sh` are also in
+  the heat-placement lock (`tools/claims-v3/hp/prereg/PREREG.md`), whose `reduce.py --val` refuses to reproduce
+  `val.json` on any changed byte: they stay as frozen, and `a745199`'s comment waits, until the owner decides about
+  that lock (`docs/reports/TODO.md`, part B).
 
 **Run one workload on a card by hand** (in the host's tree: the checkout on aifoundry2, `~/nekko` elsewhere):
 

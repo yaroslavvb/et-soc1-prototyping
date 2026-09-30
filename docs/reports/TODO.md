@@ -5,15 +5,17 @@ finding checked against the page text or the data before it was listed (the requ
 [`../findings/02-requests.md`](../findings/02-requests.md)). The live pages equalled their files on that day
 ([`MIRROR.md`](MIRROR.md), "Last check").
 
-**Status, 29 September 2026 (12:50 PDT):** 133 items: 107 done, 6 superseded by the version-3 results, 20 open (four
+**Status, 30 September 2026 (13:05 PDT):** 134 items: 108 done, 6 superseded by the version-3 results, 20 open (four
 of them the owner's, in part 0). The review of 26 September listed 110; the lab re-check of 27 September added 7, the
-major pass of 28–29 September (Q65) 9 more, and the sparse parity work (Q66, E59) its 6 next steps and the owner's call on its page.
+major pass of 28–29 September (Q65) 9 more, the sparse parity work (Q66, E59) its 6 next steps and the owner's call on
+its page, and the third card's runs of 29 September one open result.
 
 - **Part 0** is for the owner. **Part A** changes published pages, so it waits for the next pass: edit the source
   named in MIRROR.md's "How each page is built", rebuild, run `check_page.sh`, deploy (MIRROR.md, "Deploying one
   page"), run `check-mirror.py`, and commit the page, its sources and this file together. **Part B** is
   repository-only work this pass did not reach. **Part C** is the card work and records that the major pass of
-  28–29 September (Q65) left: DV2's reduction, the third card's runs and two open results. **Part D** is the sparse
+  28–29 September (Q65) left: DV2's reduction and the third card's pcie2, nocr and memp2 (both done on 29 September),
+  tau on the third card, and the open results. **Part D** is the sparse
   parity solver's next steps (Q66, E59).
 - **Reconciled on 27 September** with the merge `0cfc742` (the three-card pages of 26 September, this review's chart
   and collapsible-depth passes, and E48 on the pages) and the review pass after it, then checked item by item against
@@ -78,7 +80,7 @@ major pass of 28–29 September (Q65) 9 more, and the sparse parity work (Q66, E
   a minute) is NV's first command that changes the card's state. The session's permission check refused it on
   28 September (predictions frozen in `4312253`; the read-only probe at 22:54 PDT found BL2 0.20.0 and the NoC at
   485 mV), so the owner runs it or allows it. The smoke and the development passes follow on aifoundry3, then the
-  validation on aifoundry2 after DV2 (part C).
+  validation on aifoundry2 (DV2's validation there ended on 29 September; part C).
 
 - [x] **The sparse parity page is public** (`et-soc1-sparse-parity`, space `a6212e3c…`): the owner made it public on
   29 September (Q67), and the hub's link went out with it.
@@ -610,8 +612,10 @@ Many fix and cut items landed in the merge too; those are ticked below.
 
 ### After the campaign (every block hashes `tools/claims-v3/`)
 
-- [ ] `tools/claims-v3/lib.sh`, **after DV2's validation ends** (about 16:45 PDT, 29 September; `lib.sh` is in its
-  lock, `tools/claims-v3/dv2v/LOCK.sha256`):
+- [ ] `tools/claims-v3/lib.sh`, **once the owner releases the heat-placement lock** (DV2's validation, whose lock
+  also held it, ended at 16:57 PDT on 29 September; `lib.sh` and `queue.sh` stay in the heat-placement lock,
+  `tools/claims-v3/hp/prereg/PREREG.md`, whose `reduce.py --val` refuses to reproduce `val.json` on any changed byte;
+  whether to release it, or to keep the frozen bytes elsewhere for that check, is the owner's decision):
   - `:17–18`: aifoundry3 has system numpy, and all three hosts have a venv, since 25 September. Landed on
     27 September (`a745199`, the comment only) and reverted on 28 September by DV2's commit `8eb0e38`, which keeps
     `lib.sh` at the locked bytes (`d884e53`'s): re-apply `a745199`'s comment.
@@ -651,10 +655,10 @@ The heat code is frozen until its validation on aifoundry1's card 1 ends (about 
   run can take longer than `schedule.sh`'s `timeout 150`. Its first card run: aifoundry1's card 1, 28 Sep 23:56 PDT,
   every sub-test exit 0 (`data/2026-09-29-pcie2/run_pcie-r101/`).
 - [ ] The queues poll `et-who` less often, and scripts use `et-who --check`'s exit status instead of parsing its text
-  (`tools/lab/README.md`; `et-who --check` is installed on all three hosts since 28 September). After DV2's
-  validation: `queue.sh` and `lib.sh` are in its lock.
-- [ ] `V3_DRY` fails closed for agents: a marker file, or real runs only with an explicit `V3_REAL=1`. After DV2's
-  validation, for the same reason.
+  (`tools/lab/README.md`; `et-who --check` is installed on all three hosts since 28 September). DV2's validation has
+  ended, but `queue.sh` and `lib.sh` are in the heat-placement lock too: with the `lib.sh` item above.
+- [ ] `V3_DRY` fails closed for agents: a marker file, or real runs only with an explicit `V3_REAL=1`. With the
+  `lib.sh` item above, for the same reason.
 - [x] Commit the heat branch, with the firmware findings behind it (per-release governor behaviour, aifoundry3's
   latch at a 0 W TDP, card 1's fixed clock, the release-to-commit mapping) in `14-card-behaviour.md` and a
   `data/2026-09-27-heat-placement/` directory: source lines and commits only.
@@ -769,22 +773,47 @@ flagged the rest at the top of `../findings/README.md`.
 
 ## C. Card work and its records, after the major pass of 28–29 September (Q65)
 
-- [ ] **Reduce DV2's validation** (E51) after its idle cycles end on aifoundry2, about 16:45 PDT on 29 September:
+- [x] **Reduce DV2's validation** (E51) after its idle cycles end on aifoundry2, about 16:45 PDT on 29 September:
   collect the passes and run `tools/claims-v3/dv2v/reduce_val.py` against the frozen `PREREG-VAL.md` (`e150ce16…`);
   then the DVFS page's §8, `14-card-behaviour.md` and E51. Until then nothing in its lock changes (AGENT.md §7).
   After it: part B's `lib.sh` item, and its two items on `et-who --check` and `V3_DRY`.
+  Done 29 Sep (`e4d894d`): the queue ended at 16:56:46 PDT, the lock checked OK before the reduction, and the frozen
+  reducer's verdicts are in `data/2026-09-28-dvfs2-aifoundry2/validation/` (`verdicts-dv2val.json`, README): TH3, TH4
+  and TH8 survived, TH7 fell (1 of 52 exits), TH1-busy, TH1-idle, TH2 and Q2 are untested (G1-T 7 of 9 on the mean
+  where 80% is needed, I1 4 of 5 cycles, G4-S 4 of 6 blocks). The records and pages on 30 September: E51 in
+  `03-experiments.md`, `05-claims.md`, `14-card-behaviour.md`, `16-dvfs-and-leakage.md`, the findings README,
+  `02-requests.md` (Q59, Q65), getting-started, the DVFS page's §8 (the verdicts table and the owner's two questions)
+  and the hub (§7's E51 row, the firmware note). Part B's three items stay open: `lib.sh` and `queue.sh` are also in
+  the heat-placement lock.
 - [ ] **The third card:** after DV2, run pcie2 (E55), nocr (E56), memp2 (E57) and tau (E58) on aifoundry2 under their
   frozen pre-registrations (tau only after the amendment its `PREREG.md` requires for aifoundry2: a heat step, its
   own start temperature, a D burst that does not starve its sampler and its own calibration, written before any
   aifoundry2 data), as a third card beside aifoundry1's card 1 and aifoundry3. Then NV's validation there
   (`tools/claims-v3/nv/schedule-val-aifoundry2.txt`), once its first write and development on aifoundry3 are done
   (part 0).
-- [ ] **memp2's R43 is open:** no registered theory of the 128 B per cycle cap survives on either card (T43-B misses
-  7 conditions, Cc 5; `data/2026-09-29-memp2/README.md`). New theories need a new pre-registration.
+  Partly done 29 Sep, 16:59–17:38 PDT (`b1198cb`, the frozen locks verified): pcie2 gave aifoundry3's verdicts (T35-S
+  and T34-A survived); nocr found read replies y first and write requests x first, as on the other two cards, and
+  T-DIRECT refuted by its rms rule (4.47 cycles); memp2 R33a FAIL (14 of 15), R33b and R36 PASS, R43 FAIL, E102's
+  bandwidth PASS and its energy not resolved, T102 FAIL (`data/2026-09-29-{pcie2,nocr,memp2}/README.md`). On the pages
+  30 September: the hub's rungs 31–36 and 43 and §7, the PCIe page's §5, the chip diagram (facts L104, L50,
+  `pcie.write-l3`, `pcie.conc`, `minion.tensor-cache-path` and its asks) and the memory levels (`l3.route`). Left: tau,
+  after its amendment, then NV's validation (part 0).
+- [ ] **memp2's R43 is open:** no registered theory of the 128 B per cycle cap survives on any of the three cards
+  (T43-B misses 7 conditions, Cc 5, on each; `data/2026-09-29-memp2/README.md`). New theories need a new
+  pre-registration.
 - [ ] **nocr's R31 rule on aifoundry3:** the ESR fit is 1,557 + 35.9 cycles per hop (r² 0.995) but its rms is 4.7
   cycles against the frozen rule's 4, so T-DIRECT is refuted there and the places that rest on it (P5–P7) are not
   decided on that card; in development on card 1 it survived. The frozen rule stands for this run: decide the places
   with aifoundry2's run or a new pre-registration.
+  aifoundry2's run (29 Sep) refuted T-DIRECT too (1,556.8 + 35.9 cycles per hop, r² 0.996, rms 4.47), so only a new
+  pre-registration can decide the places by timing.
+- [ ] **memp2 on the third card left two results open** (`data/2026-09-29-memp2/val-aifoundry2/`): two lines that
+  differ only in PA[17], a column bit in the L50 map, read as a row conflict on aifoundry2 (R33a's condition `col`,
+  0 cycles from the other-row reference, 48 trials), where aifoundry3 and card 1 read one row (−21), and so did the
+  anatomy's one-bit flip of PA[17] on the same card on 19 September (−12 cycles); and the stride-256 energy excess was
+  not resolved there (+35.7 and +31.1 pJ per 64 B, 99% intervals that include 0, the die at 76–78 °C). A
+  service-processor readback of that card's ADDRMAP registers (the hub's rung 26) would settle the first; a new
+  pre-registered run the second.
 
 ## D. Sparse parity (Q66, E59): next steps
 
@@ -822,13 +851,15 @@ generation, the shire's bandwidth for streamed A (about 512 cycles per op at 32 
   best c, so no survivor log is needed. Not implemented; the full-scan time stays the primary metric (§2.8).
 - [ ] **More cards.** E59 ran on aifoundry3's card only (pinned at 600 MHz). Run `card_run.sh m5` and `energy.sh`
   with the same kernel (`.text` `3e14be32…`) on aifoundry1's card 1 (600 MHz; `card_run.sh` sets `ET_DEVICES=1` and
-  the shire1 lock; `/home` is nearly full, so keep one build; never card 0) and on aifoundry2 once DV2's validation
-  ends (about 16:45 PDT on 29 September; E29 saw its governor lift the clock to 700–800 MHz mid-burst below about
+  the shire1 lock; `/home` is nearly full, so keep one build; never card 0) and on aifoundry2, where DV2's validation
+  ended at 16:57 PDT on 29 September (E29 saw its governor lift the clock to 700–800 MHz mid-burst below about
   68 °C, `../findings/14-card-behaviour.md`, "The clock governor is thermal first", so record the clock with every
-  run). `energy.sh` refuses aifoundry2 unless `SPP_ALLOW_AIFOUNDRY2=1`: set it only after the DV2 lock ends.
-- [ ] **`lib.sh`'s device-process pattern, after DV2's lock ends** (review R4, finding 8). `ps` truncates
+  run). `energy.sh` refuses aifoundry2 unless `SPP_ALLOW_AIFOUNDRY2=1`, a guard written for DV2's validation, which
+  has ended.
+- [ ] **`lib.sh`'s device-process pattern** (review R4, finding 8). `ps` truncates
   `sparseparity_host` to `sparseparity_ho` (15 characters), which `DEV_COMM`'s `_host$` in
   `tools/claims-v3/lib.sh:57`, `tools/claims-v3/dv2/z2.sh:37` and `dv2lib.sh` never matches, so a campaign block
   would not count a running sparse parity host as a device process (the card lock and `et-who`'s node holders still
   protect the card). Add `^sparseparity_ho` to those patterns, as `workloads/sparseparity/energy.sh` already does.
-  `lib.sh` and `dv2/dv2lib.sh` are in DV2's lock (`tools/claims-v3/dv2v/LOCK.sha256`): with part B's `lib.sh` item.
+  `lib.sh` waits with part B's `lib.sh` item (the heat-placement lock); `dv2/z2.sh` and `dv2lib.sh` were held only by
+  DV2's lock, which ended with its validation on 29 September.

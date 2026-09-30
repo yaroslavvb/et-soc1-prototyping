@@ -33,7 +33,8 @@ falls if any fails, and is otherwise untested):
 
 **Theories:** TH3 (no hysteresis: enter at 66, exit at 65), TH4 (the launch and end latencies come from the Master
 Minion's heartbeat) and TH8 (the THERMAL_DOWN counter adds whole episodes) **survived**; TH7 (an idle exit is followed
-at once by the idle reset) **fell** (1 of 52); TH1-busy, TH1-idle, TH2 and Q2 are **untested** (INSUFFICIENT: too few
-qualifying cycles or blocks), though no run fitted the hottest shire (G1-T 0 of 9) and 17 holds at 800 MHz with a
-sensor >= 67 C passed G1-H. The card idled at 71-76 C for most of the window, so only three heating sessions could
+at once by the idle reset) **fell** (1 of 52); TH1-busy, TH1-idle, TH2 and Q2 are **untested** (INSUFFICIENT: neither
+rule met, by too few qualifying cycles, runs or blocks for I1, G2-D and G4-S, and by a count between the pass and the
+fail rule for G1-T, 7 of 9 against 80%, and I4, 2 of 46 off the grid), though no run fitted the hottest shire
+(G1-T 0 of 9) and 17 holds at 800 MHz with a sensor >= 67 C passed G1-H. The card idled at 71-76 C for most of the window, so only three heating sessions could
 start (the plan's maximum, below 60 C at night); the Master Minion did not hang in any of them.
