@@ -61,6 +61,12 @@ before `</body>`. Private pages are listed but not mirrored.
 | [aifoundry1 is fixed](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix) (25 Sep, the fix log) | `31e35ba7-36f4-486e-b6f3-687f7c7ad3a0` | public | `docs/reports/2026-09-25-aifoundry1-fix.html` | file |
 | [ET-SoC-1 review: the TODO list](https://spacesheep.dev/@yaroslavvb/et-soc1-review-todo) (26 Sep) | `1db405d2-34c6-45f0-b939-03b74d3d68b4` | public | `docs/reports/2026-09-26-review-todo.html` | file (rendered from docs/reports/TODO.md by scripts/build-todo-page.py; redeploy after every change to TODO.md) |
 
+### The lab, for newcomers
+
+| Page | Space | Visibility | Repo file | Deploy |
+|---|---|---|---|---|
+| [New user? Start now: the AI Foundry ET-SoC-1 lab](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start) (30 Sep: the brief a newcomer hands to their coding agent; its text is `docs/lab-start/START.md`; linked from the lab dashboard) | `7f665ca1-873b-4d0f-86b1-8ab15cd9ab25` | public | `docs/reports/2026-09-30-aifoundry-lab-start.html` | file |
+
 ### The session
 
 | Page | Space | Visibility | Repo file | Deploy |
@@ -115,6 +121,7 @@ once for mathjax-full).
 | Memory hierarchy, On-chip communication, Matmul efficiency and the Test drive's ladder, Sparse compute, Ridge points | the prose in the HTML; an `--embed` script rewrites only the embedded JSON | the commands in 04-artifacts.md, "Rebuilding the standalone pages" (memory hierarchy with `--v3 .../raw`, on-chip communication with `--v3 docs/reports/data/2026-09-25-claims-v3`; sparse compute reads the check by default), then `python3 scripts/paste-chartkit.py PAGE` | the energy data (04-artifacts.md A16) for the pages that read `manual.json` or `reruns.json` |
 | Spatial temperature brief, L2 mainline-starvation brief | the HTML, by hand | none (`python3 tools/ettelem/host_temp_fields.py --check docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html` tests the brief's two constants) | none |
 | The two aifoundry1 pages | the HTML, by hand (standalone) | none | the evidence is in `docs/reports/data/2026-09-25-aifoundry1/` |
+| New user? Start now (30 Sep) | `docs/lab-start/START.md` (the brief) and `sources/lab-start.*` | `python3 docs/lab-start/make_page_data.py` (writes `docs/reports/data/2026-09-30-lab-start/brief.json` from START.md), then `python3 scripts/build-report.py lab-start docs/reports/data/2026-09-30-lab-start/brief.json docs/reports/2026-09-30-aifoundry-lab-start.html` | none: the brief is edited by hand; push it before deploying, since the page links its raw file on GitHub |
 | Session timeline (27 Sep) | `sources/session-timeline.*` | `python3 tools/timeline/sanitize_extracts.py` (scans the seven committed extracts in `docs/reports/data/2026-09-27-session-timeline/` and exits 1 if anything private is left; with the local privacy table it first rewrites them with the page's redactions), `python3 tools/timeline/build_timeline_data.py` (writes `timeline.json` beside them), then `python3 scripts/build-report.py session-timeline docs/reports/data/2026-09-27-session-timeline/timeline.json docs/reports/2026-09-27-session-timeline.html` | the extracts themselves come from the session's transcripts and the lab machines' queue logs, which are not in the repository: `tools/timeline/README.md` gives the order of the extraction scripts and their environment variables |
 
 On 2026-09-25 each of the ten `build-report.py` steps above rebuilt its committed page byte for byte from the
