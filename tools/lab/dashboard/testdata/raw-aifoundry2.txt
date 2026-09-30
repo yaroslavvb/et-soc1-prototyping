@@ -1,0 +1,105 @@
+@@meta
+host aifoundry2
+now 1790797200 -0700
+uptime 1027800.00
+loadavg 0.90 0.60 0.50 2/890
+nproc 12
+boot 2b2b2b2b-0000-4000-8000-000000000002
+kernel 7.0.0-31-generic
+me owner 1001
+probe_session -
+tree yes
+@@mem
+MemTotal: 65634036
+MemAvailable: 61000000
+@@disk
+/ 982240026624 730856235008 201413275648
+/ 982240026624 730856235008 201413275648
+@@kernel
+@@systemd
+state degraded
+failed apport-coredump-hook@9-1234567-0.service
+@@temps
+coretemp Package_id_0 58000
+nvme Composite 43850
+@@sessions
+[{"session":"12318","uid":1001,"user":"owner","seat":null,"tty":"pts/5","state":"active","idle":true,"since":1},{"session":"12319","uid":1001,"user":"owner","seat":null,"tty":"pts/6","state":"active","idle":true,"since":2},{"session":"1078","uid":1001,"user":"owner","seat":null,"tty":"pts/2","state":"closing","idle":true,"since":3},{"session":"c1","uid":120,"user":"gdm","seat":"seat0","tty":"tty1","state":"active","idle":true,"since":4}]
+
+@@pts
+1001 owner 1790796900
+1001 owner 1790790000
+1001 owner 1790500000
+@@procs
+procs 1001 owner 60 0
+procs 1022 user-b 8 0
+procs 0 root 257 0
+ci_jobs 0
+@@etwho
+exit 0
+idle
+@@cards
+card 0000:02:00.0 excluded=0
+0000:02:00.0 devnum 0
+0000:02:00.0 vendor 0x1e0a
+0000:02:00.0 device 0xeb01
+0000:02:00.0 current_link_speed 16.0 GT/s PCIe
+0000:02:00.0 current_link_width 8
+0000:02:00.0 max_link_speed 16.0 GT/s PCIe
+0000:02:00.0 max_link_width 8
+0000:02:00.0 power_state D0
+0000:02:00.0 enable 1
+0000:02:00.0 ce DramCeEvent 0
+0000:02:00.0 ce ThermThrottleCeEvent 0
+0000:02:00.0 uce DramUceEvent 0
+0000:02:00.0 mgmt_sq 261442
+0000:02:00.0 ops_sq 22076
+0000:02:00.0 aer_card 0
+0000:02:00.0 aer_port 4 0000:00:01.1
+node et0_mgmt
+lockfile etsoc-shire0.lock root
+@@guard
+@@nodewatch
+present
+b 2026-09-30T11:4 -0700 10 0.30 59 4 5 1 6
+b 2026-09-30T11:5 -0700 10 0.20 59 4 5 1 6
+b 2026-09-30T12:0 -0700 2 0.20 59 4 5 1 6
+last 2026-09-30T12:01:01-0700 boot=2b2b2b2b user@=active linger=yes sessions=4/5 tmux=1 claude=6 load=0.20 memavail=59G
+ev 2026-09-30T11:08:01-0700 CLAUDE gone
+ev 2026-09-30T11:09:01-0700 CLAUDE up
+logins 5 2
+@@experiments
+      1 running queue.sh schedule-example-aifoundry2.txt
+our_device_procs 0
+last_log queue-example-aifoundry2.log 1790797100
+last_line 2026-09-30T12:38:20 [aifoundry2] block p4 begins
+@@telemetry
+file aifoundry2 marks 1790797100 claims-v3/aifoundry2/example/p4/marks.jsonl
+line {"t_ms":1790797100000,"ev":"end","die_c":74,"mhz":600}
+
+file aifoundry2 ettelem 1790797050 claims-v3/aifoundry2/example/p4/tel-heat.jsonl
+line {"t_ms":1790797050000,"took_ms":40,"since_reset_ms":-1,"board_w":35.50,"temp_c":{"pmic":63,"ioshire":[60,58,62],"minshire":[73,70,78]},"mhz":{"minion":600,"noc":400,"ddr":933}}
+
+file aifoundry1-c1 marks 1790668389 claims-v3/aifoundry1-c1/memp2/p202/marks.jsonl
+line {"t_ms":1790668389420,"die_c":56,"mhz":600}
+
+@@manifest
+cpu          11th Gen Intel(R) Core(TM) i5-11600 @ 2.80GHz, 12 threads, 63 GiB
+et_soc1      version=0.20.0 srcversion=47D26A305A0428B29FB7FC4
+sha256       f5d1bfb14038b103  /opt/et/lib/libetrt.so
+@@health
+INFO  host             aifoundry2 7.0.0-31-generic, up 285.5 h, 2026-09-30 12:40 PDT, run as owner
+OK    driver           et_soc1 0.20.0, srcversion 47D26A305A0428B29FB7FC4
+OK    card 0000:02:00.0 link 16.0 GT/s PCIe x8
+INFO  card 0000:02:00.0 kernel log: 11 card error events this boot (dmesg | grep 'Error Event')
+INFO  card 0000:02:00.0 kernel log: 9 refused second opens this boot
+INFO  card 0000:02:00.0 kernel log: enabled 2 times this boot (a card reset re-enables it)
+OK    locks            /run/lock/etsoc-shire0.lock present, owned by root
+OK    memory           58 of 63 GiB available
+OK    disk /           79% used
+WARN  systemd          degraded, 1 failed unit(s): apport-coredump-hook@9-1234567-0.service (systemctl --failed; 'starting' for days means plymouth is waiting: plymouth quit)
+OK    time             chrony synchronised
+OK    power            profile performance
+INFO  net enp7s0       no wired link (Wi-Fi only)
+INFO  logins           4 session(s): gdm, owner x2, owner (closing)
+@@health-exit 1
+@@end

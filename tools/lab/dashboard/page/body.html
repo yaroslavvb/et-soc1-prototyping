@@ -1,0 +1,302 @@
+<style>
+/* The lab dashboard (tools/lab/dashboard/DESIGN.md §4). Colours are the template's tokens only. */
+main{max-width:1280px}
+[hidden]{display:none!important}
+.muted{color:var(--muted)}
+/* visually hidden, read by screen readers */
+.vh{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.old-note{color:var(--ink-2);font-style:italic}
+.nowrap{white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+/* status tints: a level class sets --dot, --tint and --edge; text stays --ink */
+.lv-ok{--dot:var(--ok);--tint:color-mix(in srgb,var(--ok) 13%,var(--surface));--edge:color-mix(in srgb,var(--ok) 45%,transparent)}
+.lv-warn{--dot:var(--warn);--tint:color-mix(in srgb,var(--warn) 18%,var(--surface));--edge:color-mix(in srgb,var(--warn) 60%,transparent)}
+.lv-bad{--dot:var(--bad);--tint:color-mix(in srgb,var(--bad) 14%,var(--surface));--edge:color-mix(in srgb,var(--bad) 55%,transparent)}
+.lv-stale,.lv-unk{--dot:var(--muted);--tint:color-mix(in srgb,var(--muted) 14%,var(--surface));--edge:color-mix(in srgb,var(--muted) 50%,transparent)}
+.lv-excl{--dot:var(--ref);--tint:var(--surface);--edge:var(--border)}
+.lv-info{--dot:var(--c1);--tint:color-mix(in srgb,var(--c1) 9%,var(--surface));--edge:color-mix(in srgb,var(--c1) 35%,transparent)}
+.lv-ours{--dot:var(--c7);--tint:color-mix(in srgb,var(--c7) 12%,var(--surface));--edge:color-mix(in srgb,var(--c7) 45%,transparent)}
+.lv-held{--dot:var(--c5);--tint:color-mix(in srgb,var(--c5) 15%,var(--surface));--edge:color-mix(in srgb,var(--c5) 55%,transparent)}
+.lv-fix{--dot:var(--c2);--tint:color-mix(in srgb,var(--c2) 12%,var(--surface));--edge:color-mix(in srgb,var(--c2) 50%,transparent)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:0 9px 0 7px;border-radius:999px;font-size:.72rem;font-weight:650;
+ letter-spacing:.045em;line-height:1.75;color:var(--ink);background:var(--tint);border:1px solid var(--edge);white-space:nowrap;
+ max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--dot);flex:none}
+.pill .pl{font-weight:500;letter-spacing:0}
+/* header */
+.dh{margin:0 0 4px}
+.dh-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.dh-top h1{margin:0}
+.light{display:inline-flex;align-items:center;gap:10px;padding:5px 16px 5px 12px;border-radius:999px;font-weight:700;font-size:.92rem;
+ letter-spacing:.07em;color:var(--ink);background:var(--tint);border:1px solid var(--edge)}
+.light i{width:13px;height:13px;border-radius:50%;background:var(--dot);flex:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--dot) 22%,transparent)}
+.dh-headline{font-size:1.05rem;margin:12px 0 4px;max-width:920px}
+.dh-meta{margin:0}
+.dh-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px;margin:8px 0 0;font-size:.85rem}
+.dh-tools .ck-seg{font-size:.8rem}
+.dh-tools .ck-seg [role="radio"]{min-height:28px;padding:2px 11px}
+.banner{margin:14px 0 4px;padding:10px 14px;border-radius:10px;background:var(--tint);border:1px solid var(--edge);border-left-width:4px;font-size:.92rem}
+.banner[hidden]{display:none}
+/* overview strip */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;margin:20px 0 4px}
+.mbox{display:flex;flex-direction:column;gap:8px;min-width:0;padding:14px}
+.mbox-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mbox-head a{font-weight:700;font-size:1.1rem;color:var(--ink);text-decoration:none}
+.mbox-head a:hover{text-decoration:underline}
+.mbox-sub{font-size:.8rem;color:var(--ink-2);margin-top:-4px}
+.cchip{display:grid;grid-template-columns:16px minmax(0,1fr) auto;align-items:center;gap:1px 8px;padding:7px 10px;border-radius:9px;
+ background:color-mix(in srgb,var(--ink) 3%,var(--surface));border:1px solid var(--border);text-decoration:none;color:var(--ink);min-width:0}
+.cchip:hover{border-color:var(--ink-2)}
+.cchip:focus-visible,.mbox-head a:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
+.cchip .cc-name{font-weight:600;font-size:.88rem;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px}
+.cchip .cc-temp{grid-column:2 / 4;font-size:.78rem;color:var(--ink-2)}
+.cchip .cc-temp .pill{margin-right:2px;vertical-align:1px}
+.cchip .cc-temp.old{font-style:italic}
+.mk{display:inline-block;vertical-align:-2px;overflow:visible;flex:none}
+.cellsub{display:block;font-size:.74rem;color:var(--ink-2)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.8rem;overflow-wrap:anywhere}
+.logins{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.who{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;padding:1px 9px 1px 7px;border-radius:999px;border:1px solid var(--border);
+ color:var(--ink-2);background:var(--surface)}
+.who.me{color:var(--ink)}
+/* presence: filled = active, ring = idle, faint = away, square = processes only; always with a word nearby */
+.pd{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none;box-sizing:border-box}
+.pd.active{background:var(--ok)}
+.pd.idle{border:1.5px solid var(--ink-2)}
+.pd.away{background:var(--muted);opacity:.55}
+.pd.procs{border:1.5px solid var(--muted);border-radius:2px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px;margin:12px 0 6px}
+.kpi{padding:12px 14px}
+.kpi .val{font-variant-numeric:normal;font-size:1.35rem}
+.kpi .sub{margin-top:2px}
+/* alerts */
+.alist{display:flex;flex-direction:column;gap:6px}
+.al{margin:0;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.al.lv-bad,.al.lv-warn{border-left:4px solid var(--dot)}
+.al>summary{display:grid;grid-template-columns:128px minmax(110px,190px) minmax(0,1fr) auto;align-items:center;gap:4px 12px;padding:8px 12px;
+ list-style:none;color:var(--ink);font-size:.92rem}
+.al>summary::-webkit-details-marker{display:none}
+.al>summary:focus-visible{outline:2px solid var(--c1);outline-offset:2px;border-radius:9px}
+.al>summary>.pill{justify-self:start}
+.al .al-title{min-width:0;overflow-wrap:anywhere}
+.al .al-title::after{content:" \25B8";color:var(--muted);font-size:.8rem}
+.al[open] .al-title::after{content:" \25BE"}
+.al .al-since{font-size:.78rem;color:var(--ink-2);white-space:nowrap}
+.al .al-body{padding:0 12px 10px;font-size:.86rem;color:var(--ink-2)}
+.al .al-body p{margin:4px 0}
+.scope{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:var(--ink-2);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.al.minor>summary{padding:5px 12px;font-size:.86rem}
+.al.minor{border-color:var(--grid)}
+.alabel{font-size:.78rem;font-weight:600;color:var(--ink-2);letter-spacing:.05em;text-transform:uppercase;margin:14px 0 6px}
+.noalerts{display:flex;align-items:center;gap:10px;font-size:.95rem;margin:8px 0}
+.more-hint{color:var(--ink-2);font-size:.86rem}
+/* machines */
+.hostgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.mp{min-width:0;padding:14px 14px 10px;display:flex;flex-direction:column;gap:10px}
+.mp.focused,.ct.focused{outline:2px solid var(--c1);outline-offset:2px}
+.mp-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mp-head h3{margin:0;font-size:1.15rem}
+.mp-sub{font-size:.8rem;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-top:-4px}
+.mp-note{font-size:.84rem;padding:8px 10px;border-radius:8px;background:var(--tint);border:1px solid var(--edge)}
+.sect{font-size:.72rem;font-weight:650;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);margin:4px 0 -4px}
+.vitals{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+.vital{display:grid;grid-template-columns:84px minmax(0,1fr) minmax(0,42%);align-items:center;gap:0 10px;padding:5px 0;border-top:1px solid var(--grid);min-height:36px}
+.vital:first-child{border-top:0}
+.vital .vl{font-size:.78rem;color:var(--ink-2);line-height:1.3}
+.vital .vv{font-size:.88rem;line-height:1.3;font-variant-numeric:tabular-nums;min-width:0;overflow-wrap:anywhere}
+.vital .vsub{display:block;font-size:.74rem;color:var(--ink-2)}
+.vital .vs{min-width:0}
+.vital.wide .vv{grid-column:2 / 4}
+.meter{position:relative;height:8px;border-radius:4px;background:color-mix(in srgb,var(--m) 16%,var(--surface));--m:var(--ref)}
+.meter>span{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--m)}
+.meter.warn{--m:var(--warn)} .meter.bad{--m:var(--bad)}
+.spark .ck-plot{overflow:visible}
+.xh{stroke:var(--ink-2);stroke-width:1;shape-rendering:crispEdges}
+.xh-dot{stroke:var(--surface);stroke-width:1.5}
+.sp-line{fill:none;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.sp-base{stroke:var(--grid);stroke-width:1;shape-rendering:crispEdges}
+.tiles{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.ct{padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0;background:color-mix(in srgb,var(--ink) 2.5%,var(--surface))}
+.ct-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.ct-head b{font-size:.95rem}
+.ct-head .ct-id{font-size:.74rem;color:var(--ink-2)}
+.ct-head .pill:last-child{margin-left:auto}
+.ct.excl .ct-head b,.ct.excl .kv dd{color:var(--ink-2)}
+.ct-note{font-size:.8rem;color:var(--ink-2);margin:-2px 0 0}
+.gauge{margin:0}
+.g-read{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px;font-size:.8rem;color:var(--ink-2)}
+.g-read b{font-size:1.3rem;font-weight:650;color:var(--ink)}
+.g-track{position:relative;height:12px;border-radius:6px;background:color-mix(in srgb,var(--ink) 6%,var(--surface));margin:10px 0 3px}
+.g-zone{position:absolute;top:0;bottom:0}
+.g-zone.w{background:color-mix(in srgb,var(--warn) 32%,var(--surface))}
+.g-zone.b{background:color-mix(in srgb,var(--bad) 30%,var(--surface));border-radius:0 6px 6px 0}
+.g-band{position:absolute;top:3px;bottom:3px;background:color-mix(in srgb,var(--ink-2) 40%,transparent);border-radius:3px}
+.g-tick{position:absolute;top:100%;height:4px;width:1px;background:var(--ink-2)}
+.g-mark{position:absolute;top:-5px;bottom:-5px;width:4px;margin-left:-2px;background:var(--ink);border-radius:2px;box-shadow:0 0 0 2px var(--surface)}
+.g-scale{position:relative;height:15px;font-size:.7rem;color:var(--ink-2);font-variant-numeric:tabular-nums;margin:0 0 2px}
+.g-scale span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.g-scale span.first{transform:none} .g-scale span.last{transform:translateX(-100%)}
+.stale-data .g-mark{background:var(--muted)}
+.stale-data .g-read b{color:var(--ink-2)}
+.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:3px 12px;margin:0;font-size:.84rem;line-height:1.4}
+.kv dt{color:var(--ink-2)}
+.kv dd{margin:0;font-variant-numeric:tabular-nums;min-width:0;overflow-wrap:anywhere}
+.chip{vertical-align:1px}
+.chip.pol{color:var(--ink-2);border-color:var(--axis);font-size:.68rem;letter-spacing:.04em}
+.ok-mark{color:var(--ok);font-weight:700}
+.warn-text{font-weight:600}
+.strip48 .lab{font-size:.72rem}
+.ct-more,.hf-more{margin:0}
+.ct-more>summary,.hf-more>summary{font-size:.8rem}
+.dtab{font-size:.78rem;margin:6px 0 0}
+.dtab th,.dtab td{padding:3px 6px}
+.dtab td:first-child{color:var(--ink-2);width:34%}
+.dtab td+td{overflow-wrap:anywhere}
+.dtab .src{color:var(--muted);font-size:.7rem}
+.mp-foot{display:flex;flex-direction:column;gap:6px;font-size:.84rem;border-top:1px solid var(--grid);padding-top:8px}
+.mp-foot .fl{color:var(--ink-2);font-size:.74rem;font-weight:650;letter-spacing:.06em;text-transform:uppercase;margin-right:6px}
+.hlines{list-style:none;padding:0;margin:6px 0 0;font-size:.78rem}
+.hlines li{display:grid;grid-template-columns:52px 96px minmax(0,1fr);gap:0 8px;margin:0;padding:3px 0;border-top:1px solid var(--grid)}
+.hlines .hl-l{font-weight:650;font-size:.7rem;letter-spacing:.04em}
+.hlines .hl-l.WARN{color:var(--ink)} .hlines .hl-l.OK{color:var(--ok)} .hlines .hl-l.INFO{color:var(--ink-2)}
+.hlines .hl-c{color:var(--ink-2);overflow-wrap:anywhere}
+.hlines .hl-t{overflow-wrap:anywhere}
+.hlines li.WARN{background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.mp.is-stale .vitals,.mp.is-stale .tiles{color:var(--ink-2)}
+/* people */
+#ptable td{vertical-align:middle}
+#ptable .pl-login{font-weight:600}
+#ptable .you{font-size:.7rem;font-weight:650;color:var(--ink-2);border:1px solid var(--axis);border-radius:999px;padding:0 6px;margin-left:6px;letter-spacing:.04em}
+#ptable .st{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+#ptable .mh{display:block}
+.owner-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:12px;margin:10px 0}
+.owner-grid .card{min-width:0}
+.owner-grid h4{margin:0 0 8px;font-size:.95rem}
+.acct{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;align-items:center;padding:6px 0;border-top:1px solid var(--grid);font-size:.86rem}
+.acct:first-of-type{border-top:0}
+.acct .sub{grid-column:2;color:var(--ink-2);font-size:.8rem}
+.slist{list-style:none;padding:0;margin:0;font-size:.86rem}
+.slist li{margin:0;padding:6px 0;border-top:1px solid var(--grid);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center}
+.slist li:first-child{border-top:0}
+.slist .sm{grid-column:1 / 3;color:var(--ink-2);font-size:.78rem}
+.mtab{font-size:.84rem;margin:0}
+.mtab th,.mtab td{padding:4px 8px}
+/* last 48 hours */
+.tl-ours{fill:var(--c7)} .tl-other{fill:var(--c5)} .tl-used{fill:color-mix(in srgb,var(--ink-2) 50%,var(--surface))}
+.tl-free{fill:var(--axis)} .tl-track{fill:color-mix(in srgb,var(--ink) 4%,var(--surface))}
+.tl-up{fill:color-mix(in srgb,var(--ok) 60%,var(--surface))} .tl-approval{fill:color-mix(in srgb,var(--warn) 75%,var(--surface))}
+.tl-down{fill:var(--bad)} .tl-gap{fill:var(--muted)} .tl-nodata{fill:transparent}
+.tl-gone{fill:var(--c2)} .tl-nw{fill:color-mix(in srgb,var(--ok) 30%,var(--surface))}
+.tl-sep{stroke:var(--grid);stroke-width:1;shape-rendering:crispEdges}
+.tl-vgrid{stroke:var(--grid);stroke-width:1;shape-rendering:crispEdges}
+.ref-line{stroke:var(--ref);stroke-width:1;shape-rendering:crispEdges}
+.ser-line{fill:none;stroke-width:1.5;stroke-linejoin:round;opacity:.75}
+.charts2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,480px),1fr));gap:18px 28px;margin-top:18px}
+.charts2>div,.mult>div{min-width:0}
+.mult{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:10px 24px;margin-top:4px}
+.mult .mt{font-size:.8rem;color:var(--ink-2);margin:0 0 2px}
+.chart-sub{font-size:.8rem;color:var(--ink-2);margin:0 0 4px}
+.about p,.about li{max-width:880px}
+.about h3{margin-top:18px}
+@media (max-width:1099px){
+ .hostgrid{grid-template-columns:minmax(0,1fr)}
+ .mp .vitals{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));column-gap:28px}
+ .mp .vital:nth-child(2){border-top:0}
+ .mp .tiles{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+}
+@media (max-width:599px){
+ .al>summary{grid-template-columns:auto minmax(0,1fr);row-gap:2px}
+ .al .al-title{grid-column:1 / 3}
+ .al .al-since{grid-column:1 / 3}
+ .vital{grid-template-columns:78px minmax(0,1fr) minmax(0,38%)}
+ .mp .vital:nth-child(2){border-top:1px solid var(--grid)}
+ .hlines li{grid-template-columns:48px minmax(0,1fr)}
+ .hlines .hl-t{grid-column:1 / 3}
+ .light{font-size:.84rem}
+ #ptable tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2px 12px}
+ #ptable td:nth-child(3){grid-column:1 / 3}
+}
+.dh-tools a.newuser{font-weight:650;border:1.5px solid var(--ink);border-radius:999px;padding:1px 10px;text-decoration:none}
+.dh-tools a.newuser:hover,.dh-tools a.newuser:focus-visible{background:var(--ink);color:var(--page)}
+</style>
+
+<header class="dh">
+ <div class="dh-top">
+  <h1>AI Foundry lab</h1>
+  <span id="light" class="light lv-unk" role="status"><i aria-hidden="true"></i><b id="light-word">NO DATA</b></span>
+  <span id="fixture-pill" class="pill lv-fix" hidden><i aria-hidden="true"></i>MADE-UP DATA</span>
+ </div>
+ <p id="headline" class="dh-headline">—</p>
+ <p class="byline dh-meta">Data as of <time id="asof">—</time> (<span id="age">—</span>) · <span id="cadence">checked every 10 min,
+ republished on any change and at least every 60 min</span> · <span id="next-lead">next check about </span><span id="next">—</span></p>
+ <div class="dh-tools"><div id="theme"></div><a class="newuser" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener">New user? Start now</a><a href="#how-to-update">How to update</a><a href="#alerts">Alerts</a><a href="#people">People</a><a href="#last-48-hours">Last 48 hours</a></div>
+</header>
+<div id="stale" class="banner lv-bad" hidden><b>The data is <span id="stale-age">old</span> old.</b> The page expects a new
+version at least every <span id="stale-hb">60 min</span>, so the collector on <span id="stale-host">aifoundry2</span>, its cron job or
+the deploy may have stopped. Check with <code>update.sh status</code> on that machine, or refresh by hand with
+<code>update.sh now</code> (<a href="#how-to-update">how</a>).</div>
+
+<div id="strip" class="strip" role="group" aria-label="The lab at a glance"></div>
+<div id="kpis" class="kpis"></div>
+
+<h2 id="alerts">Alerts</h2>
+<div id="alert-list"></div>
+
+<h2 id="machines">Machines and cards</h2>
+<p class="small">Each machine's vitals over the last 48 hours, then its cards. Card temperatures and power come from the newest
+experiment file on that machine or, when sampling is switched on, a 2-second live sample; the error counters are the driver's
+own, read from the host without touching the card. Click a card for every number and its source.</p>
+<div id="hostgrid" class="hostgrid"></div>
+
+<h2 id="people">People</h2>
+<p class="small" id="people-note">Everyone seen on a lab machine (logged in, or with processes running), as a login name with
+session, terminal and process counts, idle time and card holds only.</p>
+<div class="table-wrap"><table id="ptable">
+ <thead><tr><th>Login</th><th>Status</th><th>Machines</th><th class="num">Idle</th><th>Card holds</th><th class="num">Processes</th></tr></thead>
+ <tbody></tbody>
+</table></div>
+<h3 id="your-sessions">Your sessions</h3>
+<div id="owner" class="owner-grid"></div>
+
+<h2 id="last-48-hours">Last 48 hours</h2>
+<p class="small">Who held each card and whether each machine answered, one check every 10 minutes. Hover, tap or use the arrow
+keys on a bar for its times.</p>
+<div id="tl-legend"></div>
+<div id="tl"></div>
+<div class="charts2">
+ <div><div class="chart-title">Die temperature</div><p class="chart-sub">Where a reading exists: an experiment file or a live sample</p><div id="leg-die"></div><div id="ch-die"></div></div>
+ <div><div class="chart-title">Board power</div><p class="chart-sub">Where a reading exists: an experiment file or a live sample</p><div id="leg-w"></div><div id="ch-w"></div></div>
+</div>
+<div class="chart-title" style="margin-top:18px">Sessions per machine</div>
+<div id="leg-sess"></div>
+<div id="ch-sess" class="mult"></div>
+
+<h2 id="about-this-page">About this page</h2>
+<div class="about">
+<p>A collector on <b id="ab-host">aifoundry2</b> reads the three machines every <span id="ab-iv">10</span> minutes, read-only and
+at low priority: <code>/proc</code>, the card driver's counters in sysfs, <code>et-who</code>, the lab's health check
+(<code>et-lab-health</code>, rev 3, sent over ssh), <code>et-lab-manifest</code>, nodewatch's logs, <code>claudes status</code>
+and the spacesheep session list. It bakes the result into this page and republishes it when something changed, and at least
+every <span id="ab-hb">60</span> minutes; an open tab reloads itself on each new version. It never opens a card's device
+node; a live card sample is off unless someone switches it on, and then waits for a free card.</p>
+<p>The page is private because it names the lab's users. For other people it shows only a login name, session and process
+counts, idle time and card holds; never commands, files, addresses or where anyone connects from.</p>
+<h3 id="how-to-update">How to update it</h3>
+<ul>
+ <li>On aifoundry2, in the checkout: <code>tools/lab/dashboard/update.sh now</code> collects, rebuilds and republishes at
+ once; open tabs update within seconds. <code>update.sh now --card-sample</code> also takes a card telemetry sample, behind
+ every rule of the card etiquette.</li>
+ <li>From another machine: <code>ssh aifoundry2 claude/et-soc1-prototyping/tools/lab/dashboard/update.sh now</code>.</li>
+ <li>Or ask Claude in the aifoundry2 session: "refresh the lab dashboard", "why is aifoundry1 amber?".</li>
+ <li>A machine that shows "approval needed": run <code>ssh aifoundry1 true</code> (or aifoundry3) on aifoundry2, approve the
+ address it prints, then <code>update.sh now</code>.</li>
+ <li>Silence a known alert: <code>update.sh ack &lt;alert id&gt; [days] [note]</code> (the id is in each alert's detail);
+ <code>update.sh status</code> shows the last runs and deploys.</li>
+</ul>
+<h3 id="this-version">This version</h3>
+<p id="ab-version">—</p>
+<p id="ab-errors">—</p>
+<p class="small">Design and code: <code>tools/lab/dashboard/DESIGN.md</code>.</p>
+</div>
+<div id="labdash-canary" hidden>lab-dashboard-private-canary</div>
+</main>

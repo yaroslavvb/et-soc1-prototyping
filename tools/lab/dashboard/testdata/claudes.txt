@@ -1,0 +1,13 @@
+account 1  owner@example.com     home ~/.claude      tmux work     login lapses Wed 28 Oct
+account 2  NOT LOGGED IN         home ~/.claude-2   tmux work2    login no credentials file
+
+pin 0a1b2c3d  account 1  work:main    running
+pin 4e5f6a7b  account 1  work:side    DOWN (claudes up restarts it)
+watchdog: cron runs 'claudes up' every minute, last at Wed 12:39:01
+
+work: 3 windows (created Wed Sep 23 15:29:21 2026) (attached)
+
+     PID  ACCT  KIND     TMUX              STARTED    COMMAND
+  100001  1     session  work:main         Wed 12:32  claude --resume 00000000-0000-0000-0000-000000000000 --remote-control
+  100002  1     server   work:rc           Wed 12:32  claude remote-control --name aifoundry2 --spawn=same-dir
+  100003  1     phone    work:rc           Wed 12:32  /opt/claude --print --sdk-url https://example.invalid/v1

@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "about": "Static facts for the lab dashboard (DESIGN.md §1.6): hosts, their cards, trees, card firmware and clock policy, known conditions. No personal data, no access paths: ssh targets other than the plain host names go in ~/.config/lab-dashboard/config.json. Card facts from docs/findings/14-card-behaviour.md and AGENT.md §4 (not collectable without opening the card).",
+  "owner_host": "aifoundry2",
+  "hosts": {
+    "aifoundry1": {"ssh": "aifoundry1", "tree": "nekko", "ettelem": "nekko/build/ettelem/ettelem",
+                   "cards": {"aifoundry1-c0": 0, "aifoundry1-c1": 1}},
+    "aifoundry2": {"ssh": "aifoundry2", "local": true, "tree": "claude/et-soc1-prototyping",
+                   "ettelem": "claude/et-soc1-prototyping/build/ettelem/ettelem", "cards": {"aifoundry2": 0}},
+    "aifoundry3": {"ssh": "aifoundry3", "tree": "nekko", "ettelem": "nekko/build/ettelem/ettelem",
+                   "cards": {"aifoundry3": 0}}
+  },
+  "cards": {
+    "aifoundry2": {"host": "aifoundry2", "devnum": 0, "pci": "0000:02:00.0", "label": "aifoundry2",
+                   "firmware": "1.3.1", "bl": "0.20.0", "pmic": "1.5.0", "minion": "0.23.0", "tdp_w": 65,
+                   "policy": "dvfs", "clock": "firmware DVFS 600–800 MHz; above 600 only below about 68 °C, so in practice 600",
+                   "idle_c": [71, 80], "idle_w": [31, 36], "note": "the main card"},
+    "aifoundry3": {"host": "aifoundry3", "devnum": 0, "pci": "0000:02:00.0", "label": "aifoundry3",
+                   "firmware": "1.3.1", "bl": "0.20.0", "pmic": "1.5.0", "minion": "0.23.0", "tdp_w": 0,
+                   "policy": "pinned", "clock": "pinned at 600 MHz (NoC 400) by the admin's boot guard (TDP 0 W)",
+                   "idle_c": [50, 57], "idle_w": [23.6, 25.1], "note": "compare switching power over idle, never absolute watts"},
+    "aifoundry1-c1": {"host": "aifoundry1", "devnum": 1, "pci": "0000:02:00.0", "label": "aifoundry1 card 1",
+                   "firmware": "1.2.0", "bl": "0.18.0", "pmic": "1.3.0", "minion": "0.22.0", "tdp_w": 65,
+                   "policy": "fixed", "clock": "600 MHz in every sample: its governor never raises the clock",
+                   "idle_c": [57, 62], "idle_w": [33, 35], "note": "select with ET_DEVICES=1"},
+    "aifoundry1-c0": {"host": "aifoundry1", "devnum": 0, "pci": "0000:01:00.0", "label": "aifoundry1 card 0",
+                   "firmware": "1.4.1", "bl": "0.21.2", "pmic": "1.6.1", "minion": "0.24.0", "tdp_w": 65,
+                   "policy": "dvfs", "clock": "firmware DVFS; idles at 300 MHz",
+                   "idle_c": null, "idle_w": [18.6, 18.8],
+                   "excluded": true, "note": "overheats; excluded from all work and never touched: driver counters only"}
+  },
+  "known": [
+    {"id": "card:aifoundry1-c0:ce", "note": "card 0 overheats: its power and thermal events are known (AGENT.md §4)"},
+    {"id": "card:aifoundry1-c0:ce-new", "note": "card 0 overheats: new corrected events are expected"},
+    {"id": "card:aifoundry1-c0:aer-port", "note": "card 0's root port logs about 4,000 corrected PCIe errors an hour; a reseat is pending"}
+  ]
+}
