@@ -89,9 +89,13 @@ for (let i = 0; i < MAXD; i++) {
 }
 
 /* ================= the animation clock: everything that moves runs on it, and Space stops it ================= */
+/* A frame that comes late (the page loading, a busy machine) moves things on by at most DTMAX: after a stall the motion
+   goes on from where it was, a little behind, rather than leaping ahead (80 ms until 30 September: the first frame of a
+   camera move that started while the page loaded leapt a whole stall's worth) */
+const DTMAX = 40;
 const CLK = {t: 0, on: true, last: 0, dt: 0, jobs: new Set()};
 (function loop(now) {
-  const dt = CLK.last ? Math.min(80, now - CLK.last) : 0; CLK.last = now; CLK.dt = dt;
+  const dt = CLK.last ? Math.min(DTMAX, now - CLK.last) : 0; CLK.last = now; CLK.dt = dt;
   if (CLK.on) CLK.t += dt;
   CLK.jobs.forEach(j => { try { j(); } catch (e) { CLK.jobs.delete(j); console.error(e); } });
   requestAnimationFrame(loop);
@@ -181,28 +185,6 @@ function fitAspect(r) {
   if (w / h > k) h = w / k; else w = h * k;
   return {x: r.x + r.w / 2 - w / 2, y: r.y + r.h / 2 - h / 2, w, h};
 }
-/* A tween on real time (the reader's own zoom) or on the animation clock (an access's or the tour's camera, which
-   Space stops). stop() true: a newer request came in; the tween stops where it is and resolves false. */
-function tween(ms, fn, clk, stop) {
-  return new Promise(res => {
-    let done = false;
-    const fin = ok => { if (done) return; done = true; if (ok) fn(1); res(ok); };
-    if (REDUCED || ms <= 0) return fin(true);
-    if (clk) {
-      let acc = 0;
-      const j = () => {
-        if (stop()) { CLK.jobs.delete(j); fin(false); return; }
-        if (CLK.on || clk.dead) acc += CLK.dt;
-        const p = Math.min(1, acc / ms); if (p >= 1) { CLK.jobs.delete(j); fin(true); } else fn(p);
-      };
-      CLK.jobs.add(j); return;
-    }
-    const t0 = performance.now();
-    const f = now => { if (done) return; if (stop()) { fin(false); return; } const p = Math.min(1, (now - t0) / ms); if (p >= 1) fin(true); else { fn(p); requestAnimationFrame(f); } };
-    requestAnimationFrame(f);
-    setTimeout(() => { if (!done) fin(!stop()); }, ms + 800);   // a hidden tab gets no frames
-  });
-}
 /* build scale `id` into LAYERS[d]; its builder fills AP[d] (anchor points, the parts by key, and zg: the part a zoom
    into each child grows from) */
 function buildLayer(d, id) {
@@ -285,8 +267,8 @@ const FS_BASE = {'t-sm': 17, 't-smb': 17, 't-mono': 17, 't-lab': 20, 't-labb': 2
 let refitT = 0;
 window.addEventListener('resize', () => { clearTimeout(refitT); refitT = setTimeout(() => LAYERS.forEach(L => { if (L.childNodes.length) measured(L, () => fitTexts(L)); }), 160); });
 function tgtRect(d, child) { return fitAspect(NODE(child).target(AP[d], SC().inst)); }
-const logL = child => { const nd = NODE(child); return Math.log(FR.w / (nd.tw || 260)); };
-/* while the camera moves between a view and the one inside it, the outer view's strokes keep their width on screen */
+/* while the camera moves between a view and the one inside it, the outer view's strokes keep their width on screen (rewritten
+   only when the scale has moved by 10%: every frame, it restyled every stroke) */
 function strokeKeeper(layer) {
   const list = [];
   layer.querySelectorAll('line, rect, path, circle, polygon, polyline').forEach(el => {
@@ -295,19 +277,19 @@ function strokeKeeper(layer) {
   });
   let last = 1;
   return {
-    set: k => { k = Math.max(1, k); if (Math.abs(k - last) < 0.004) return; last = k; list.forEach(([el, w]) => { el.style.strokeWidth = (w / k).toFixed(3) + 'px'; }); },
+    set: k => { k = Math.max(1, k); if (Math.abs(Math.log(k / last)) < 0.1 && !(k === 1 && last !== 1)) return; last = k; list.forEach(([el, w]) => { el.style.strokeWidth = (w / k).toFixed(3) + 'px'; }); },
     done: () => list.forEach(([el, , s0]) => { el.style.strokeWidth = s0; }),
   };
 }
-function ctxMark(layer, tgt) {
-  if (tgt) tgt.classList.add('ztgt');
-  let el = tgt;
-  if (!el) [...layer.children].forEach(s => { if (!s.classList.contains('fx') && !s.classList.contains('fxu')) s.classList.add('zdim'); });
-  while (el && el !== layer && el.parentNode) {
-    const p = el.parentNode;
-    [...p.children].forEach(s => { if (s !== el && !s.classList.contains('fx') && !s.classList.contains('fxu') && !s.classList.contains('zbd')) s.classList.add('zdim'); });
-    el = p;
-  }
+function ctxMark(layer, tgts) {
+  const skip = s => s.classList.contains('fx') || s.classList.contains('fxu') || s.classList.contains('zbd');
+  tgts = [].concat(tgts || []).filter(Boolean);
+  if (!tgts.length) { [...layer.children].forEach(s => { if (!skip(s)) s.classList.add('zdim'); }); return; }
+  const keep = new Set();
+  tgts.forEach(t => { t.classList.add('ztgt'); for (let el = t; el && el !== layer; el = el.parentNode) keep.add(el); });
+  tgts.forEach(t => {
+    for (let el = t; el && el !== layer && el.parentNode; el = el.parentNode) [...el.parentNode.children].forEach(s => { if (!keep.has(s) && !skip(s)) s.classList.add('zdim'); });
+  });
 }
 function ctxClear(layer) { layer.querySelectorAll('.zdim, .ztgt').forEach(e => e.classList.remove('zdim', 'ztgt')); }
 function dimLevel(layer) {
@@ -317,70 +299,209 @@ function dimLevel(layer) {
   return o > 0 && o <= 1 ? o : 1;
 }
 const CTX_LOW = 0.3;
-/* the step in flight between LAYERS[d] (outer) and LAYERS[d + 1] (inner, scale `child`): e = 0 shows the outer view */
+/* ---- the camera's legs ----
+   A move is one leg, or two: out to the deepest scale that the view shown and the target share, then in. A leg is one
+   pure zoom along a chain of scales (its root and the scales inside it, one inside the next), all drawn in the root's
+   coordinates: T[i] is where the chain's i-th scale's frame lies there (T[0] is the frame). The view V goes from V0 to
+   V1 with its width geometric in the leg's progress and its corners in step, so that the whole drawing moves straight
+   away from one point, or towards it: the camera neither turns nor changes pace at a scale it passes, and between two
+   legs it comes to rest. (Until 30 September each scale was a zoom of its own, timed by a nominal width up to 7.7 times
+   off on a log scale: the pace jumped at every scale passed, the pan turned there, and a move out and back in reversed
+   at full speed.) What each view shows follows from V alone, the same both ways:
+   - an inner view comes in over its part early (e 0.10-0.32; e: how far, on a log scale, V has gone from the outer
+     view's frame to the inner's), on the opaque backdrop of its frame, so that no frame is ever empty;
+   - an outer view stays until the inner, fully in, covers the screen (COV0: the share of V inside the inner's frame),
+     so that a scale passed off its centre leaves no empty margin;
+   - the outer view's labels go first (e 0.02-0.20), the inner's come last (e 0.62-0.88); a view the camera only passes
+     through shows none (.nolab: not painted at all) and keeps its context set back, so that nothing flickers up at the
+     camera's top speed;
+   - while the camera moves, labels lose their knockout halos (#mem.zmv): Blink rasterises a stroked glyph again at
+     every new scale, 50-85 ms a frame on an M5 Max (measured frame by frame in headless Chrome, 30 September). */
+const COV0 = 0.8, LMIN = 1;
+const cmpM = (V, M) => (!V ? M : !M ? V : [V[0] * M[0], V[0] * M[1] + V[1], V[0] * M[2] + V[2]]);
+/* rect A of an inner scale's coordinates, in its parent's, where the inner scale's frame lies at T */
+const inR = (T, A) => { const k = T.w / FR.w; return {x: T.x + (A.x - FR.x) * k, y: T.y + (A.y - FR.y) * k, w: A.w * k, h: A.h * k}; };
+/* how much of V lies inside T: the square root of the share of V's area */
+function cover(V, T) {
+  const w = Math.min(V.x + V.w, T.x + T.w) - Math.max(V.x, T.x), h = Math.min(V.y + V.h, T.y + T.h) - Math.max(V.y, T.y);
+  return w > 0 && h > 0 ? Math.sqrt(w * h / (V.w * V.h)) : 0;
+}
+/* the camera's curve over a leg: a cubic whose start speed is m (0: from rest, its top speed 1.5 times the mean; a leg
+   that takes over a moving camera starts at the speed it had) and whose end speed is 0 */
+const herm = (u, m) => m * (u * u * u - 2 * u * u + u) + 3 * u * u - 2 * u * u * u;
+const hermD = (u, m) => m * (3 * u * u - 4 * u + 1) + 6 * u - 6 * u * u;
+/* the view at progress p of a leg: a pure zoom (a plain pan when the two widths are equal) */
+const legAt = (G, p) => (Math.abs(Math.log(G.V1.w / G.V0.w)) < 1e-9 ? lerpR(G.V0, G.V1, p) : zoomR(G.V0, G.V1, p));
+/* the leg in flight: CUR.G, its progress p, and v, how fast the view's width changes (log units per ms; > 0 out) */
 let CUR = null, ZGEN = 0;
-async function zoomSeg(d, child, A, e0, e1, ms, efn, req, c0) {
-  const outer = LAYERS[d], inner = LAYERS[d + 1], B = FR, gen = ZGEN;
-  const tgt = AP[d].zg && AP[d].zg[child];
-  if (!CUR || CUR.d !== d || CUR.child !== child) CUR = {d, child, A, e: e0, c0: c0 == null ? 1 : c0};
-  CUR.dir = e1 > e0 ? 1 : -1;
-  const cc = CUR.c0;
-  const frame = e => {
-    const R = zoomR(A, B, e), Mo = rmap(A, R), Mi = rmap(B, R);
-    setT(outer, Mo); setT(inner, Mi);
-    outer.style.opacity = 1 - band(e, 0.86, 1);
-    inner.style.opacity = band(e, 0.1, 0.32);
-    outer.style.setProperty('--lab', (1 - band(e, 0.02, 0.2)).toFixed(3));
-    inner.style.setProperty('--lab', band(e, 0.62, 0.88).toFixed(3));
-    outer.style.setProperty('--ctx', lerp(cc, CTX_LOW, easeS(band(e, 0, 0.3))).toFixed(3));
-    return [Mo, Mi];
-  };
-  if (ms > 0 && !REDUCED) frame(e0);
-  outer.style.display = ''; inner.style.display = '';
+/* a leg over the chain path[a..] (the layers at those depths hold its scales, built) */
+function legNew(path, a) {
+  const G = {path: path.slice(), a, T: [FR], L: [LAYERS[a]], st: [null], keep: [null], c0: [1], mid: [false], also: null, end: 0};
+  for (let d = a + 1; d < path.length; d++) {
+    G.T.push(inR(G.T[G.T.length - 1], tgtRect(d - 1, path[d]))); G.L.push(LAYERS[d]);
+    G.st.push(null); G.keep.push(null); G.c0.push(1); G.mid.push(false);
+  }
+  return G;
+}
+/* the leg's views go on, hidden until drawn; each outer view is set back around the part the next one grows from (and,
+   at a scale passed between two legs, the part the other leg leaves or enters) */
+function legOpen(G, V) {
+  const n = G.L.length;
+  G.L.forEach((L, i) => {
+    if (!G.st[i]) { G.st[i] = {vis: null, op: -1, lab: -1, ctx: -1}; L.style.visibility = 'hidden'; L.style.display = ''; }
+    const outer = i + 1 < n;
+    L.classList.toggle('zout', outer);
+    ctxClear(L);
+    if (outer) {
+      ctxMark(L, [AP[G.a + i].zg[G.path[G.a + i + 1]], i === G.end && G.also ? AP[G.a + i].zg[G.also] : null]);
+      if (!G.keep[i]) G.keep[i] = strokeKeeper(L);
+    }
+  });
   LAYERS.forEach(l => l.classList.add('busy'));
-  outer.classList.add('zout'); ctxMark(outer, tgt);
-  const keep = strokeKeeper(outer);
-  keep.set(rmap(A, zoomR(A, B, e0))[0]);
-  let ok = false;
-  try {
-    ok = await tween(ms, p => {
-      const e = CUR.e = e0 + (e1 - e0) * efn(p), [Mo] = frame(e);
-      keep.set(Mo[0]);
-    }, req.o.clk || null, () => ZT !== req || gen !== ZGEN);
-  } finally { keep.done(); }
-  if (!ok || gen !== ZGEN) return false;
-  CUR = null;
+  legDraw(G, V);
+}
+/* one frame: each view's place, opacity, labels and context, from the view V (the root's coordinates) */
+function legDraw(G, V) {
+  const n = G.T.length, S = rmap(V, FR), e = [], cv = [];
+  G.V = V;
+  for (let i = 0; i + 1 < n; i++) {
+    const r = Math.log(G.T[i].w / G.T[i + 1].w);
+    e.push(r > 1e-6 ? clamp(Math.log(G.T[i].w / V.w) / r, 0, 1) : 1);
+    cv.push(cover(V, G.T[i + 1]));
+  }
+  for (let i = 0; i < n; i++) {
+    const L = G.L[i], st = G.st[i], outer = i + 1 < n;
+    const op = Math.min(i ? band(e[i - 1], 0.1, 0.32) : 1, outer ? 1 - band(cv[i], COV0, 1) * band(e[i], 0.32, 0.45) : 1);
+    const vis = op > 1e-3;
+    if (vis !== st.vis) { st.vis = vis; L.style.visibility = vis ? '' : 'hidden'; }
+    if (!vis) continue;
+    const M = cmpM(S, rmap(FR, G.T[i]));
+    setT(L, M);
+    if (Math.abs(op - st.op) > 1e-3 || (op >= 1) !== (st.op >= 1)) { st.op = op; L.style.opacity = op >= 1 ? 1 : op.toFixed(3); }
+    const lab = G.mid[i] ? 0 : Math.min(i ? band(e[i - 1], 0.62, 0.88) : 1, outer ? 1 - band(e[i], 0.02, 0.2) : 1);
+    if (Math.abs(lab - st.lab) > 2e-3 || (lab <= 0) !== (st.lab <= 0) || (lab >= 1) !== (st.lab >= 1)) {
+      st.lab = lab; L.classList.toggle('nolab', lab <= 0);
+      if (lab > 0 && lab < 1) L.style.setProperty('--lab', lab.toFixed(3)); else L.style.removeProperty('--lab');
+    }
+    if (outer) {
+      const cx = G.mid[i] ? CTX_LOW : lerp(G.c0[i], CTX_LOW, easeS(band(e[i], 0, 0.3)));
+      if (Math.abs(cx - st.ctx) > 2e-3) { st.ctx = cx; L.style.setProperty('--ctx', cx.toFixed(3)); }
+      if (G.keep[i]) G.keep[i].set(M[0]);
+    }
+  }
+}
+/* the leg ends at the view of chain index k: that view stays, at rest, and the others go */
+function legClose(G, k) {
+  G.keep.forEach(kp => kp && kp.done());
+  G.L.forEach((L, i) => {
+    L.classList.remove('zout', 'nolab'); ctxClear(L);
+    L.style.removeProperty('--lab'); L.style.removeProperty('--ctx'); L.style.visibility = '';
+    if (i === k) { setT(L, null); L.style.opacity = 1; L.style.display = ''; }
+    else { L.style.display = 'none'; L.style.opacity = 0; }
+  });
   LAYERS.forEach(l => l.classList.remove('busy'));
-  outer.classList.remove('zout'); ctxClear(outer);
-  [outer, inner].forEach(l => { l.style.removeProperty('--lab'); l.style.removeProperty('--ctx'); });
-  if (e1 >= 1) { outer.style.display = 'none'; setT(inner, null); inner.style.opacity = 1; Z.path = Z.path.slice(0, d + 1).concat([child]); }
-  else { inner.style.display = 'none'; setT(outer, null); outer.style.opacity = 1; Z.path = Z.path.slice(0, d + 1); }
+  Z.path = G.path.slice(0, G.a + k + 1);
+  if (CUR && CUR.G === G) CUR = null;
   scaleUI();
-  return true;
 }
-/* the zooms from path s to path t: out to their common scale, then in; each step's length on the log scale */
-function planFrom(s, t) {
-  let k = 0; while (k < s.length && k < t.length && s[k] === t[k]) k++;
-  const out = [];
-  for (let i = s.length - 1; i >= Math.max(k, 1); i--) out.push({dir: -1, d: i - 1, child: s[i], L: logL(s[i])});
-  for (let i = Math.max(k, 1); i < t.length; i++) out.push({dir: 1, d: i - 1, child: t[i], L: logL(t[i])});
-  return out;
+/* a leg in flight takes the camera on to the scale of depth j instead, from where it is: the chain grows up (j above
+   its root: the root becomes that scale) or down (the scales below its deepest one, not on the screen, are built along
+   path t). A view whose labels show keeps them; the others, but the one it ends at, are passed through. */
+function legRetarget(G, t, j, pass) {
+  if (j < G.a) {
+    const Ts = [FR];
+    for (let d = j + 1; d <= G.a; d++) Ts.push(inR(Ts[Ts.length - 1], tgtRect(d - 1, G.path[d])));
+    const R = Ts.pop(), up = G.a - j, map = A => inR(R, A);
+    G.T = Ts.concat(G.T.map(map)); G.V = map(G.V);
+    G.L = LAYERS.slice(j, G.a).concat(G.L);
+    G.st = Array(up).fill(null).concat(G.st); G.keep = Array(up).fill(null).concat(G.keep);
+    G.c0 = Array(up).fill(1).concat(G.c0); G.mid = Array(up).fill(true).concat(G.mid);
+    G.a = j;
+  }
+  if (j >= G.path.length) {
+    for (let d = G.path.length; d <= j; d++) {
+      buildLayer(d, t[d]);
+      G.T.push(inR(G.T[G.T.length - 1], tgtRect(d - 1, t[d]))); G.L.push(LAYERS[d]);
+      G.st.push(null); G.keep.push(null); G.c0.push(1); G.mid.push(true);
+    }
+    G.path = t.slice(0, j + 1);
+  }
+  G.end = j - G.a;
+  G.mid = G.mid.map((m, i) => (i === G.end ? !!pass : !(G.st[i] && G.st[i].vis && G.st[i].lab > 0)));
+  G.also = pass || null;
+  G.V0 = G.V; G.V1 = G.T[G.end];
 }
-const costOf = plan => plan.reduce((s, x) => s + x.L, 0);
-/* one ease over a whole chain of zooms: each step gets its slice of the curve */
-function chainSegs(plan, per, ez) {
-  const tot = costOf(plan) || 1, Tt = per * tot;
-  const inv = f => { let lo = 0, hi = 1; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (ez(m) < f) lo = m; else hi = m; } return (lo + hi) / 2; };
-  let acc = 0;
-  return plan.map(st => {
-    const f0 = acc / tot, f1 = (acc + st.L) / tot; acc += st.L;
-    const t0 = inv(f0), t1 = inv(f1);
-    return {ms: Tt * (t1 - t0), efn: p => Math.max(0, Math.min(1, (ez(t0 + p * (t1 - t0)) - f0) / (f1 - f0)))};
+/* the view nearest to where a stopped camera is, on a log scale */
+const legNearest = G => G.T.reduce((b, T, i) => (Math.abs(Math.log(T.w / G.V.w)) < Math.abs(Math.log(G.T[b].w / G.V.w)) ? i : b), 0);
+/* A timeline on real time (the reader's own zoom) or on the animation clock (an access's or the tour's camera, which
+   Space stops); fn(t) runs at once for t = 0, then every frame. stop() true: a newer request came in; the timeline stops
+   where it is and resolves false. A clock timeline whose token died goes on in real time, so that a stopped access never
+   leaves the camera halfway. A timeline that stopped for a newer request, in a frame it did not draw, leaves when it last
+   drew and this frame (HAND): the next one, started in the same frame, draws a whole frame's step at once, so that a
+   redirect never shows the same place twice (the chip tour's timeline of 28 September). */
+let HAND = null;
+function timeline(T, fn, clk, stop) {
+  return new Promise(res => {
+    let done = false;
+    const fin = ok => { if (!done) { done = true; res(ok); } };
+    const step = t => { try { fn(t); } catch (e) { console.error(e); fin(true); return true; } return false; };
+    const h = HAND && HAND.now === CLK.last ? HAND : null; HAND = null;
+    if (REDUCED || T <= 0) { step(T); return fin(true); }
+    const h0 = h ? Math.min(T, DTMAX, Math.max(0, h.now - h.prev)) : 0;
+    if (clk) {
+      let acc = h && (CLK.on || clk.dead) ? h0 : 0, drawn = CLK.last;
+      if (step(acc)) return;
+      const j = () => {
+        if (done) { CLK.jobs.delete(j); return; }
+        if (stop()) { CLK.jobs.delete(j); HAND = {prev: drawn, now: CLK.last}; fin(false); return; }
+        if (CLK.on || clk.dead) acc += CLK.dt;
+        const t = Math.min(T, acc); drawn = CLK.last;
+        if (step(t) || t >= T) { CLK.jobs.delete(j); fin(true); }
+      };
+      CLK.jobs.add(j); return;
+    }
+    // from the last frame's time, so that the first frame of a move (or of a redirected one) is a whole frame's step;
+    // each frame moves the time on by at most DTMAX
+    const t0 = h ? h.prev : CLK.last && performance.now() - CLK.last < 100 ? CLK.last : performance.now();
+    if (step(h0)) return;
+    let drawn = h ? h.now : t0, acc = h0;
+    const f = now => {
+      if (done) return;
+      if (stop()) { HAND = {prev: drawn, now}; fin(false); return; }
+      acc += Math.min(DTMAX, Math.max(0, now - drawn)); drawn = now;
+      const t = Math.min(T, acc);
+      if (step(t) || t >= T) fin(true); else requestAnimationFrame(f);
+    };
+    requestAnimationFrame(f);
+    setTimeout(() => { if (!done && !stop()) { step(T); fin(true); } }, T + 800);   // a hidden tab gets no frames
   });
 }
-/* The camera follows the latest request only; a request that comes in during a move redirects it from where it is.
-   o.clk: a token whose clock drives the move; o.ms: ms per unit of log scale (0: a cut); o.total: the whole move's
-   length; o.keepFx: an access's drawing stays. */
+/* a leg's run: its curve over T ms, from start speed m */
+async function legRun(G, T, m, clk, stop) {
+  const dl = Math.log(G.V1.w / G.V0.w), c = CUR = {G, p: 0, v: 0};
+  const ok = await timeline(T, tt => {
+    const u = T > 0 ? Math.min(1, tt / T) : 1, p = herm(u, m);
+    legDraw(G, legAt(G, p)); c.p = p; c.v = T > 0 ? dl * hermD(u, m) / T : 0;
+  }, clk, stop);
+  if (ok) legClose(G, G.end);
+  return ok;
+}
+/* the log length of the zoom from path[i]'s frame to path[j]'s: measured where the layers hold the path, else from
+   the scales' nominal widths (which serve only to share a capped move's time out) */
+function logLen(path, i, j) {
+  let s = 0;
+  for (let d = i + 1; d <= j; d++) {
+    let w = 0;
+    if (LAYERS[d - 1]._node === path[d - 1]) { try { w = tgtRect(d - 1, path[d]).w; } catch (_) { w = 0; } }
+    s += Math.log(FR.w / (w > 0 ? w : NODE(path[d]).tw || 260));
+  }
+  return s;
+}
+const cutOf = o => REDUCED || o.ms === 0 || o.total === 0;
+/* The camera follows the latest request only; a request that comes in during a move takes the camera over from where it
+   is, at the speed it had (a turn slows it to a stop first, 130 ms). o.clk: a token whose clock drives the move; o.ms:
+   ms per unit of log scale (0: a cut); o.total: the whole move's length; o.cap: its longest; o.keepFx: an access's
+   drawing stays. */
 let ZT = null, ZW = false, ZWAIT = [], ZN = 0;
 const zNow = () => (ZT ? ZT.t : Z.path);
 function goTo(t, o) {
@@ -394,39 +515,77 @@ async function zoomWorker() {
   const from = Z.path.slice(), hadFocus = svg.contains(document.activeElement), gen = ZGEN;
   let wantFocus = false;
   PIP.el.hidden = true;   // the mini-map shows the scale above the one shown: hidden while the camera moves (its place in the panel is kept)
+  svg.classList.add('zmv');
   try {
-    for (let guard = 0; ZT && guard < 32 && gen === ZGEN; guard++) {
-      const req = ZT, t = req.t;
-      if (req.o.focus) wantFocus = true;
-      let segs, redirect = false;
-      if (CUR) {
-        const base = Z.path.slice(0, CUR.d + 1), Ls = logL(CUR.child);
-        const pin = planFrom(base.concat([CUR.child]), t), pout = planFrom(base, t);
-        const cin = (1 - CUR.e) * Ls + costOf(pin), cout = CUR.e * Ls + costOf(pout);
-        const fwd = cin < cout - 1e-9 || (Math.abs(cin - cout) < 1e-9 && CUR.dir > 0);
-        segs = [{part: true, e1: fwd ? 1 : 0, L: Math.max(1e-3, fwd ? (1 - CUR.e) * Ls : CUR.e * Ls)}].concat(fwd ? pin : pout);
-        redirect = (fwd ? 1 : -1) === CUR.dir;
-      } else segs = planFrom(Z.path, t);
-      if (!segs.length) { if (ZT === req) ZT = null; break; }
-      const cost = costOf(segs);
-      const per = req.o.total ? req.o.total / Math.max(0.05, cost) : req.o.ms != null ? req.o.ms : req.o.clk ? (req.o.cap ? Math.min(580, req.o.cap / Math.max(0.05, cost)) : 580) : 480;
-      const sg = chainSegs(segs, per, redirect ? easeOutS : easeS);
-      let all = true;
-      for (let i = 0; i < segs.length; i++) {
-        const st = segs[i], s = sg[i];
-        const c0 = dimLevel(LAYERS[Z.path.length - 1]);
-        if (!req.o.keepFx) clearFx(); else clearDim();
-        let ok;
-        if (st.part) ok = await zoomSeg(CUR.d, CUR.child, CUR.A, CUR.e, st.e1, s.ms, s.efn, req);
-        else if (st.dir < 0) ok = await zoomSeg(st.d, st.child, tgtRect(st.d, st.child), 1, 0, s.ms, s.efn, req, 1);
-        else { buildLayer(st.d + 1, st.child); ok = await zoomSeg(st.d, st.child, tgtRect(st.d, st.child), 0, 1, s.ms, s.efn, req, c0); }
-        if (!ok) { all = false; break; }
+    for (let guard = 0; ZT && guard < 40 && gen === ZGEN; guard++) {
+      const req = ZT, t = req.t, o = req.o, clk = o.clk || null, stop = () => ZT !== req || gen !== ZGEN;
+      if (o.focus) wantFocus = true;
+      // the pace, ms per unit of log scale, set once for the whole move (out and in)
+      if (req.per == null) {
+        const P = CUR ? CUR.G.path : Z.path;
+        let k = 0; while (k < P.length && k < t.length && P[k] === t[k]) k++;
+        // (each leg at least LMIN long, as its time is: a move given a total takes that long)
+        const lm = c => (c > 1e-6 ? Math.max(c, LMIN) : 0);
+        const cost = Math.max(0.05, lm((CUR ? Math.abs(Math.log(CUR.G.V.w / FR.w)) : 0) + logLen(P, k - 1, P.length - 1)) + lm(logLen(t, k - 1, t.length - 1)));
+        req.per = cutOf(o) ? 0 : o.total ? o.total / cost : o.ms != null ? o.ms : clk ? (o.cap ? Math.min(580, o.cap / cost) : 580) : 480;
       }
-      if (all && ZT === req) ZT = null;
+      const c0 = dimLevel(LAYERS[Z.path.length - 1]);
+      if (!o.keepFx) clearFx(); else clearDim();
+      let G, m = 0;
+      if (CUR) {
+        // in flight: on along the chain it is on, to t's scale if the chain holds it (or t goes on below it), else to
+        // the scale where the two part, and in from there next time round
+        G = CUR.G;
+        const P = G.path;
+        let k = 0; while (k < P.length && k < t.length && P[k] === t[k]) k++;
+        const onIt = k === t.length || k === P.length, j = onIt ? t.length - 1 : k - 1;
+        const Vj = j >= G.a && j < P.length ? G.T[j - G.a] : null;
+        const out = Vj ? Vj.w > G.V.w : j < G.a;
+        // a turn: slow to a stop on the curve it is on first
+        if (!cutOf(o) && Math.abs(CUR.v) > 1e-6 && (CUR.v > 0) !== out) {
+          const c = CUR, dl = Math.log(G.V1.w / G.V0.w), p0 = c.p, pv = Math.abs(dl) > 1e-9 ? c.v / dl : 0, Tc = 130;
+          const ok = await timeline(Tc, tt => { const q = Math.min(1, tt / Tc); c.p = clamp(p0 + pv * Tc * (q - q * q / 2), 0, 1); legDraw(G, legAt(G, c.p)); }, clk, stop);
+          c.v = 0;
+          if (!ok || gen !== ZGEN) continue;
+        }
+        const v = CUR.v;
+        legRetarget(G, t, j, onIt ? null : t[j + 1]);
+        legOpen(G, G.V);
+        const dl = Math.log(G.V1.w / G.V0.w), cost = Math.max(Math.abs(dl), LMIN);
+        let T = req.per * cost;
+        if (v && Math.abs(dl) > 1e-9 && (v > 0) === (dl > 0) && T > 0) { m = v * T / dl; if (m > 2.5) { T = 2.5 * dl / v; m = 2.5; } }
+        if (!onIt) req.pass = {d: j, part: P[j + 1]};
+        const ok = await legRun(G, T, m, clk, stop);
+        if (ok && onIt && ZT === req) ZT = null;
+        continue;
+      }
+      // at rest on Z.path: out to the scale it shares with t, or in from it
+      const s = Z.path;
+      let k = 0; while (k < s.length && k < t.length && s[k] === t[k]) k++;
+      const b = k - 1;
+      if (s.length - 1 > b) {
+        G = legNew(s, b);
+        const n = G.L.length, pass = t.length - 1 > b;
+        G.mid = G.mid.map((_, i) => i > 0 && i < n - 1);
+        G.mid[0] = pass; G.end = 0; G.V0 = G.T[n - 1]; G.V1 = FR;
+        if (pass) { G.also = t[b + 1]; req.pass = {d: b, part: s[b + 1]}; }
+      } else if (t.length - 1 > b) {
+        for (let d = b + 1; d < t.length; d++) buildLayer(d, t[d]);
+        G = legNew(t, b);
+        const n = G.L.length, pass = req.pass && req.pass.d === b;
+        G.mid = G.mid.map((_, i) => i > 0 && i < n - 1);
+        G.mid[0] = !!pass; G.c0[0] = pass ? CTX_LOW : c0; G.end = n - 1; G.V0 = FR; G.V1 = G.T[n - 1];
+        if (pass) G.also = req.pass.part;
+      } else { if (ZT === req) ZT = null; break; }
+      legOpen(G, G.V0);
+      const ok = await legRun(G, req.per * Math.max(Math.abs(Math.log(G.V1.w / G.V0.w)), LMIN), 0, clk, stop);
+      if (ok && samePath(Z.path, t) && ZT === req) ZT = null;
     }
   } catch (e) { console.error(e); }
   if (gen !== ZGEN) return;   // the level changed under it: setLevel() has reset everything
   ZT = null; ZW = false;
+  if (CUR) { try { legClose(CUR.G, legNearest(CUR.G)); } catch (e) { console.error(e); } CUR = null; }
+  svg.classList.remove('zmv');
   if (!samePath(from, Z.path)) {
     select(null); scaleUI(); pipUpdate(); viewHash();
     $('pn-body').querySelectorAll('button[data-act="zoom"]').forEach(b => { const a = b.closest('.pn-act'); if (a) a.remove(); });
@@ -2738,14 +2897,18 @@ async function runFrom(tok, ctx, i, still, quick) {
       if (tok.endDone && j === sts.length - 1) { AC.still = false; AC.done = true; } else AC.still = true;
       renderBar(); playBtn(); return;
     }
-    if (j < sts.length - 1) await wait(tok, sts[j].hold != null ? sts[j].hold : HOLD);
+    if (j < sts.length - 1) {
+      const hd = sts[j].hold != null ? sts[j].hold : HOLD;
+      if (AC.p && AC.p.j === j) { AC.p.f1 = stepFrac(AC.p); AC.p.hold = CLK.t; AC.p.hd = Math.max(1, hd); }
+      await wait(tok, hd);
+    }
   }
   if (AC.tok === tok) { AC.done = true; renderBar(); playBtn(); }
 }
 const stageLine = html => { const s = String(html || ''); return /^[a-z0-9]{1,4}[:( …]/.test(s) ? s : s.charAt(0).toUpperCase() + s.slice(1); };
 function showStep(ctx, j) {
   const sts = stepsOf(ctx.k), st = sts[j];
-  AC.i = j; renderBar(); setCap(stageLine(st.say ? st.say(ctx) : st.name)); sub(accDef(ctx.k).cap()); ledgerOn(j); stepBox(ctx, j);
+  AC.i = j; AC.p = {j, t0: CLK.t, hold: null}; renderBar(); setCap(stageLine(st.say ? st.say(ctx) : st.name)); sub(accDef(ctx.k).cap()); ledgerOn(j); stepBox(ctx, j);
   $('st-live').textContent = `Step ${j + 1} of ${sts.length}: ${st.name}`;
 }
 function setCtx(ctx) { const d = Z.path.length - 1; ctx.d = d; ctx.fx = FX[d]; ctx.ap = AP[d]; }
@@ -4796,7 +4959,8 @@ async function setLevel(lv, o) {
   if (ZW) { ZW = false; const w = ZWAIT; ZWAIT = []; w.forEach(r => r()); }
   Z.lv = lv;
   SC().setInst();
-  LAYERS.forEach(L => { L.textContent = ''; L.style.display = 'none'; L.style.opacity = 0; setT(L, null); L.classList.remove('busy', 'zout'); L.style.removeProperty('--lab'); L.style.removeProperty('--ctx'); });
+  LAYERS.forEach(L => { L.textContent = ''; L.style.display = 'none'; L.style.opacity = 0; L.style.visibility = ''; setT(L, null); L.classList.remove('busy', 'zout', 'nolab'); L.style.removeProperty('--lab'); L.style.removeProperty('--ctx'); });
+  svg.classList.remove('zmv'); HAND = null;
   Z.path = [SC().root];
   buildLayer(0, SC().root); LAYERS[0].style.display = ''; LAYERS[0].style.opacity = 1;
   select(null); clearFx();
@@ -4954,38 +5118,83 @@ function resetCap() {
   setCap(stageLine(SC().head()));
   sub(HINT); $('cap-sub').classList.add('hint'); renderBar();
 }
+/* ---- the transport (on top of the stage): play, the arrows, and the scrubber: one segment per step of the access, or
+   per slide of the tour. The current segment fills as its step plays (the camera and the step's drawing, then the pause
+   after it); a click or a drag goes to a step (drawn at its end when paused). ---- */
+const SCRUB = {n: 0, drag: -1, pos: -1, names: []};
 function renderBar() {
-  const ol = $('stages'), had = focusIn(ol); ol.textContent = '';
-  const k = AC.k;
+  const k = AC.k, tr = $('scrub-track'), seg = $('stages'), lab = $('scrub-lab');
   $('stage').classList.toggle('playing', accOn() && CLK.on && !AC.still);
-  const chip = (num, name, cls, title, go, dv) => {
-    const li = document.createElement('li'), b = document.createElement('button');
-    if (/\bon\b/.test(cls)) { li.className = 'on'; b.setAttribute('aria-current', 'step'); }
-    b.type = 'button'; b.className = 'stg' + cls;
-    b.innerHTML = `<span class="sn">${num}</span><span class="st">${esc(name)}</span>${dv ? '<span class="dv" aria-hidden="true">▾</span>' : ''}`;
-    b.title = title; b.setAttribute('aria-label', title);
-    b.addEventListener('click', go);
-    li.appendChild(b); ol.appendChild(li);
-  };
-  ol.classList.remove('many');
-  if (!k) {
-    if (TOUR) TOUR.list.forEach((it, j) => { if (it.lv !== Z.lv) return; const nm = it.s.access ? accTitleOf(it.lv, it.s.access) + ' ▸' : it.s.name; chip(j + 1, nm, j < TOUR.i ? ' past' : j === TOUR.i ? ' on' : '', `Tour slide ${j + 1} of ${TOUR.list.length}: ${it.s.access ? 'the access ' + accTitleOf(it.lv, it.s.access) : it.s.name}`, () => tourGo(j)); });
-    else { const li = document.createElement('li'); li.className = 'stg-hint'; li.textContent = 'Pick an access above to see its steps here, or press Tour'; ol.appendChild(li); }
-    refocus(ol, had);
-    $('btn-prev').disabled = TOUR ? TOUR.i === 0 : false; $('btn-next').disabled = !!TOUR && TOUR.i === TOUR.list.length - 1;
-    return;
+  let n = 0, i = -1, names = [], dv = [], what = '', unit = 'Step';
+  if (k) { const sts = stepsOf(k); n = sts.length; i = AC.i; names = sts.map(s0 => s0.name); dv = sts.map(s0 => !!(s0.dive && s0.dive.length)); what = accTitle(k); }
+  else if (TOUR) { n = TOUR.list.length; i = TOUR.i; names = TOUR.list.map(slideName); unit = 'Slide'; what = 'Tour'; }
+  SCRUB.n = n; SCRUB.names = names; SCRUB.unit = unit; SCRUB.i = i;
+  if (seg.childElementCount !== n || seg.dataset.k !== (k || (TOUR ? 'tour' : ''))) {
+    seg.textContent = ''; seg.dataset.k = k || (TOUR ? 'tour' : '');
+    names.forEach((nm, j) => { const li = document.createElement('li'); li.title = `${unit} ${j + 1}: ${nm}${dv[j] ? ' (it has a circuit: V dives into it)' : ''}`; if (dv[j]) li.className = 'dv'; seg.appendChild(li); });
   }
-  const sts = stepsOf(k);
-  ol.classList.toggle('many', sts.length > 9);
-  sts.forEach((s, i) => chip(i + 1, s.name, i < AC.i ? ' past' : i === AC.i ? ' on' : '', `Step ${i + 1} of ${sts.length}: ${s.name}${s.dive ? ' (it has a circuit: V dives into it)' : ''}`, () => goStep(i), s.dive && s.dive.length));
-  refocus(ol, had);
-  $('btn-prev').disabled = AC.i === 0 && !(TOUR && TOUR.i > 0);
-  $('btn-next').disabled = AC.i === sts.length - 1 && !(TOUR && TOUR.i < TOUR.list.length - 1);
+  tr.classList.toggle('none', !n);
+  if (n) {
+    tr.setAttribute('aria-valuemax', n); tr.setAttribute('aria-valuenow', i + 1);
+    tr.setAttribute('aria-valuetext', `${unit} ${i + 1} of ${n}: ${names[i] || ''}`);
+    tr.setAttribute('aria-label', k ? `Steps of the access: ${what}` : 'Slides of the tour');
+    tr.tabIndex = 0;
+  } else { tr.removeAttribute('aria-valuetext'); tr.setAttribute('aria-valuemax', 1); tr.setAttribute('aria-valuenow', 1); tr.tabIndex = -1; }
+  scrubLabel();
+  SCRUB.pos = -1; scrubDraw();
+  $('btn-prev').disabled = k ? AC.i === 0 && !(TOUR && TOUR.i > 0) : TOUR ? TOUR.i === 0 : false;
+  $('btn-next').disabled = k ? AC.i === n - 1 && !(TOUR && TOUR.i < TOUR.list.length - 1) : !!TOUR && TOUR.i === TOUR.list.length - 1;
 }
+function scrubLabel() {
+  const lab = $('scrub-lab'), n = SCRUB.n, i = SCRUB.drag >= 0 ? SCRUB.drag : SCRUB.i;
+  if (!n) { lab.innerHTML = '<span class="hint0">Choose an access above, then press Play</span>'; return; }
+  lab.innerHTML = `<span class="sn">${i + 1}</span> / ${n} &#183; <b>${esc(SCRUB.names[i] || '')}</b>`;
+}
+/* how far the step shown has played, 0 to 1: its drawing (the camera and the step's animation, of unknown length) fills
+   towards 55%, then the pause after it (of known length) fills the rest */
+const stepFrac = P => (P.hold != null ? P.f1 + (1 - P.f1) * Math.min(1, (CLK.t - P.hold) / P.hd) : 0.55 * (1 - Math.exp(-(CLK.t - P.t0) / 1600)));
+/* where the playhead is, 0 to 1 */
+function scrubPos() {
+  const n = SCRUB.n; if (!n) return 0;
+  if (SCRUB.drag >= 0) return (SCRUB.drag + 0.5) / n;
+  if (AC.k) {
+    if (AC.done) return 1;
+    let f = 1;
+    const P = AC.p;
+    if (!AC.still && P && P.j === AC.i) f = stepFrac(P);
+    return (AC.i + f) / n;
+  }
+  return TOUR ? (TOUR.i + 1) / n : 0;
+}
+function scrubDraw() {
+  const p = scrubPos();
+  if (Math.abs(p - SCRUB.pos) < 5e-4) return;
+  SCRUB.pos = p;
+  const pc = (100 * p).toFixed(2) + '%';
+  $('scrub-fill').style.width = pc; $('scrub-knob').style.left = pc;
+}
+CLK.jobs.add(scrubDraw);
+{
+  const tr = $('scrub-track');
+  const idxAt = x => { const r = tr.getBoundingClientRect(); return clamp(Math.floor((x - r.left) / Math.max(1, r.width) * SCRUB.n), 0, SCRUB.n - 1); };
+  let act = false;
+  tr.addEventListener('pointerdown', e => {
+    if (!SCRUB.n || e.button > 0) return;
+    act = true; try { tr.setPointerCapture(e.pointerId); } catch (_) { /* no capture */ }
+    SCRUB.drag = idxAt(e.clientX); scrubLabel(); scrubDraw();
+  });
+  tr.addEventListener('pointermove', e => { if (!act) return; const i = idxAt(e.clientX); if (i !== SCRUB.drag) { SCRUB.drag = i; scrubLabel(); scrubDraw(); } });
+  tr.addEventListener('pointerup', () => { if (!act) return; act = false; const i = SCRUB.drag; SCRUB.drag = -1; if (i >= 0) { if (AC.k) goStep(i); else if (TOUR) tourGo(i); } scrubLabel(); scrubDraw(); });
+  tr.addEventListener('pointercancel', () => { act = false; SCRUB.drag = -1; scrubLabel(); scrubDraw(); });
+}
+const PLAYICON = {
+  Play: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 1.2 L11 6 L2.5 10.8 Z" fill="currentColor"/></svg>',
+  Pause: '<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="1.2" width="3" height="9.6" rx=".6" fill="currentColor"/><rect x="7" y="1.2" width="3" height="9.6" rx=".6" fill="currentColor"/></svg>',
+  Replay: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.2 3.2 A4.1 4.1 0 1 1 1.9 6.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M1.2 1.6 L3.6 3.4 L1.4 5.2 Z" fill="currentColor"/></svg>'};
 function playBtn() {
   const b = $('btn-play'), still = !!TOUR && !TOUR.list[TOUR.i].s.access;
   const t = AC.k ? (AC.done ? 'Replay' : (CLK.on && !AC.still ? 'Pause' : 'Play')) : still ? (CLK.on ? 'Pause' : 'Play') : 'Play';
-  b.textContent = t;
+  b.innerHTML = PLAYICON[t] + t;
   b.style.visibility = still ? 'hidden' : '';
   b.setAttribute('aria-label', t + ' (Space)');
   $('stage').classList.toggle('playing', accOn() && CLK.on && !AC.still);

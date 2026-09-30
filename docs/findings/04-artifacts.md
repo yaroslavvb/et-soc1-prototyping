@@ -680,6 +680,27 @@ The page for Q70: can a lab card run with its heatsink off, so that a sensor can
   `make_page_data.py` (writes `page.json`, `--check`); the README.
 - **Commits:** `51b571e`.
 
+## The camera and the details panel (30 September)
+
+For Q74–Q76: the memory levels and the chip diagram (the pages of 28 and 27 September) jumped in the middle of their
+camera moves. The diagnosis, the method and the numbers are in
+[`../reports/data/2026-09-30-page-motion/`](../reports/data/2026-09-30-page-motion/README.md); the tools in
+[`tools/pagemotion/`](../../tools/pagemotion/README.md).
+
+- **Memory levels** (`sources/memory-levels.*`): the camera moves in legs, each one pure zoom along a chain of scales
+  in its root's coordinates (no turn and no change of pace at a scale passed; the scales' real sizes replace the
+  nominal `tw`); two legs meet at rest; each view's fade, labels and context follow from where the camera is, an
+  outer view staying until the inner covers the screen; no text halos while moving (`#mem.zmv`), faded labels not
+  painted (`.nolab`), `text-rendering: geometricPrecision`, a 40 ms per-frame clock cap. The playback bar moved to the
+  top with a scrubber (one segment per step or tour slide; click or drag) and the keys beside it. All 28 accesses were
+  replayed with Dive on without a console error.
+- **Chip diagram** (`sources/chip-diagram.*`): its drive runs legs, easing once through every scale's rest view and
+  blending the turn there (`BLEND` 0.45); out and in meet at rest; the 40 ms cap. The details panel leads with a
+  plain-words line for each part (`LEADS`) and flow (`FLOWLEAD`); the technical paragraph, the numbers, the address
+  bits, the tables, the asks and the facts sit under "More detail and the sources", closed until the reader opens it
+  (remembered in `localStorage`); flow 5's title lost its experiment ID.
+- Both deployed on 30 September (the versions "Smooth camera: …"); the live pages equal their files.
+
 ## Cross-links between the reports
 
 - **2026-09-24, afternoon (`d04b29a`).** Every report got the byline clause "· part of the measurement reports",
@@ -973,3 +994,11 @@ one review of the set's structure, and wrote the plan (`PLAN2.md`); page owners 
   new titles and every one of the 18 spaces moved to a slug made from its title (the old URLs went to a sign-in
   page) for about seven minutes, until each was redeployed with `--slug <old slug>`. Pass the existing `--slug`
   whenever you pass `--title`, and check `spacesheep list` for the URLs afterwards.
+- **An animated page that "jumps": measure it frame by frame** (30 September) with `tools/pagemotion/`, one run at
+  a time, with a Chrome profile kept between runs (a fresh profile compiles GPU shaders at every first paint, 50–150 ms
+  spikes that a returning visitor does not see). Late frames and a camera path that turns or changes pace at a scale
+  both read as jumps; `kink.py` separates the two. Stroked text (knockout halos) re-rasterises at every scale of a
+  zoom: drop the stroke while the camera moves.
+- **The spacesheep viewer does not pass its `#…` into the page** (30 September): a link such as
+  `/@yaroslavvb/et-soc1-memory-levels#dram/load` opens the page's default view; the raw address
+  `https://<uuid>.spacesheep.app/#…` keeps it. Link to a view with the raw address.

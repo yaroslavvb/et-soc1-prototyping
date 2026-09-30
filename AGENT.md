@@ -330,6 +330,9 @@ lost). The repository and the home directories were intact.
    of an existing space keeps its slug, title and visibility (tested 25 Sep, 23:40). An older CLI (npm's latest was
    1.2.1 until then) may not. Never put the CLI's key in the repository.
 5. **Verify**: `spacesheep list` (visibility and address unchanged), then `python3 scripts/check-mirror.py --only <slug>`.
+   An animated page (the chip diagram, the memory levels): after a change to its motion, measure it frame by frame with
+   [`tools/pagemotion/`](tools/pagemotion/README.md) (late frames, and the camera's velocity from frame to frame),
+   before and after, one run at a time with a kept Chrome profile.
 6. **Commit** the page, its sources and data, and MIRROR.md together.
 
 A page written for one person, or one with sensitive content, stays private and is never mirrored here.

@@ -244,6 +244,15 @@ html.et-pres [data-ss-ui]{display:none!important}
 .pn-kick{color:var(--ink-2);font-size:.78em;text-transform:uppercase;letter-spacing:.06em;margin:0}
 .pn-title{font-size:1.35em;font-weight:650;line-height:1.2;margin:2px 0 6px}
 .pn-what{margin:0 0 8px}
+/* the lead: what a part or a flow is, in plain words; the rest under Details */
+.pn-lead{margin:0 0 10px;font-size:1.06em;line-height:1.45}
+.pn details.pn-det{margin:10px 0 4px;border-top:1px solid var(--border);padding-top:6px}
+.pn details.pn-det>summary{cursor:pointer;font-size:.9em;font-weight:600;color:var(--ink-2);padding:3px 0;list-style:none;display:flex;align-items:center;gap:7px}
+.pn details.pn-det>summary::-webkit-details-marker{display:none}
+.pn details.pn-det>summary::before{content:"";flex:none;width:0;height:0;border-left:6px solid currentColor;border-top:4.5px solid transparent;border-bottom:4.5px solid transparent;transition:transform .15s}
+.pn details.pn-det[open]>summary::before{transform:rotate(90deg)}
+.pn details.pn-det>summary:hover{color:var(--ink)}
+.pn details.pn-det[open]>summary{margin-bottom:6px}
 .pn-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:6px;margin:6px 0 8px}
 /* four tiles: two by two, never three and one */
 .pn-kpis:has(>:nth-child(4):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -443,7 +452,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 /* presenting, a range in a number column may break after its dash, so that the prose column keeps its width */
 #stage.present .legs td.num{white-space:normal}
 #stage.present .pn-fh,#stage.present .pn ul.facts,#stage.present .pn-foot{display:none}
-#stage.present .pn details.asks,#stage.present .pn .pn-act,#stage.present .pn .pn-more,#stage.present .pn .pn-what.small{display:none}
+#stage.present .pn details.pn-det,#stage.present .pn details.asks,#stage.present .pn .pn-act,#stage.present .pn .pn-more,#stage.present .pn .pn-what.small{display:none}
 /* a flow's table says it stage by stage: its prose goes (it would push the table out of the panel) */
 #stage.present .pn-scroll:has(.legs) .pn-what{display:none}
 #stage.present .pn-kpi b{font-size:1.45em}
@@ -1852,8 +1861,11 @@ function buildPip() {
 
 /* ================= the animation clock: everything that moves runs on it, and Space stops it ================= */
 const CLK = {t: 0, on: true, last: 0, dt: 0, jobs: new Set()};
+/* a frame that comes late (the page loading, a busy machine) moves things on by at most DTMAX: after a stall the motion
+   goes on from where it was, a little behind, rather than leaping ahead (80 ms until 30 September) */
+const DTMAX = 40;
 (function loop(now) {
-  const dt = CLK.last ? Math.min(80, now - CLK.last) : 0; CLK.last = now; CLK.dt = dt;   // dt: this frame, paused or not
+  const dt = CLK.last ? Math.min(DTMAX, now - CLK.last) : 0; CLK.last = now; CLK.dt = dt;   // dt: this frame, paused or not
   if (CLK.on) CLK.t += dt;
   CLK.jobs.forEach(j => { try { j(); } catch (e) { CLK.jobs.delete(j); console.error(e); } });
   requestAnimationFrame(loop);
@@ -2007,6 +2019,17 @@ const bandH = () => FOLD.R + PHV.extra;
 const pview = lv => (lv === 0 && PHV.flow ? Object.assign({}, PV[0], {h: PV[0].h + bandH()}) : PV[lv]);
 const viewM = r => { const k = 1000 / r.w; return [k, -k * r.x, -k * r.y]; };
 const cmpM = (V, M) => (!V ? M : !M ? V : [V[0] * M[0], V[0] * M[1] + V[1], V[0] * M[2] + V[2]]);
+const BLEND = 0.45;
+/* similarities [k, x, y]: the inverse, one applied to a rect, and a pure zoom from S0 to S1 (the scale geometric in p,
+   one point fixed; a pan when the scales are equal) */
+const simInv = S => [1 / S[0], -S[1] / S[0], -S[2] / S[0]];
+const simR = (S, A) => ({x: S[0] * A.x + S[1], y: S[0] * A.y + S[2], w: S[0] * A.w, h: S[0] * A.h});
+function simZoom(S0, S1, p) {
+  const r = S1[0] / S0[0];
+  if (Math.abs(Math.log(r)) < 1e-9) return [S0[0], lerp(S0[1], S1[1], p), lerp(S0[2], S1[2], p)];
+  const px = (S1[1] - r * S0[1]) / (1 - r), py = (S1[2] - r * S0[2]) / (1 - r), q = Math.pow(r, p);
+  return [S0[0] * q, px + q * (S0[1] - px), py + q * (S0[2] - py)];
+}
 /* the view r, on the layer at rest (the one shown) */
 function setView(r) { setT(LAYERS[Z.level], viewM(r)); }
 /* the box's shape (the tallest view's, the die's with its band while a flow or the tour plays): set when a flow or the
@@ -2114,9 +2137,10 @@ function segOpen(sg, req) {
     const li = LAYERS.indexOf(carry.closest('.lay')), m = /translate\(([-\d.]+),([-\d.]+)\)/.exec(carry.getAttribute('transform') || '');
     if (m && (li === lo || li === lo + 1)) { p0 = {x: +m[1], y: +m[2]}; inOuter = li === lo; cg = carry.cloneNode(true); svg.appendChild(cg); carry.style.visibility = 'hidden'; }
   }
-  const frame = e => {
-    // (on a phone the view, moving from one scale's to the next, is part of both transforms)
-    const R = zoomR(A, B, e), Mo = rmap(A, R), Mi = rmap(B, R), V = PH ? viewM(lerpR(pview(lo), pview(lo + 1), e)) : null;
+  const frame = (e, R0) => {
+    // (on a phone the view, moving from one scale's to the next, is part of both transforms); R0: where the target is
+    // on the screen, from the leg's one zoom (else the step's own)
+    const R = R0 || zoomR(A, B, e), Mo = rmap(A, R), Mi = rmap(B, R), V = PH ? viewM(lerpR(pview(lo), pview(lo + 1), e)) : null;
     setT(outer, cmpM(V, Mo)); setT(inner, cmpM(V, Mi));
     const oo = 1 - band(e, 0.86, 1), k = easeS(band(e, 0, 0.3)), so = outer.style;
     so.opacity = oo; so.visibility = oo > 0 ? '' : 'hidden';
@@ -2196,7 +2220,7 @@ function timeline(T, fn, clk, stop) {
     const step = t => { try { fn(t); } catch (e) { console.error(e); fin(true); return true; } return false; };
     const h = HAND && HAND.now === CLK.last ? HAND : null; HAND = null;
     if (REDUCED || T <= 0) { step(T); return fin(true); }
-    const h0 = h ? Math.min(T, Math.max(0, h.now - h.prev)) : 0;
+    const h0 = h ? Math.min(T, DTMAX, Math.max(0, h.now - h.prev)) : 0;
     if (clk) {
       let acc = h && (CLK.on || clk.dead) ? h0 : 0, drawn = CLK.last;
       if (step(acc)) return;
@@ -2209,14 +2233,16 @@ function timeline(T, fn, clk, stop) {
       };
       CLK.jobs.add(j); return;
     }
-    // from the last frame's time, so that the first frame of a move (or of a redirected one) is a whole frame's step
+    // from the last frame's time, so that the first frame of a move (or of a redirected one) is a whole frame's step;
+    // each frame moves the time on by at most DTMAX
     const t0 = h ? h.prev : CLK.last && performance.now() - CLK.last < 100 ? CLK.last : performance.now();
     if (step(h0)) return;
-    let drawn = t0;
+    let drawn = h ? h.now : t0, acc = h0;
     const f = now => {
       if (done) return;
       if (stop()) { HAND = {prev: drawn, now}; fin(false); return; }
-      const t = Math.min(T, Math.max(0, now - t0)); drawn = now;
+      acc += Math.min(DTMAX, Math.max(0, now - drawn)); drawn = now;
+      const t = Math.min(T, acc);
       if (step(t) || t >= T) fin(true); else requestAnimationFrame(f);
     };
     requestAnimationFrame(f);
@@ -2286,7 +2312,7 @@ async function zoomWorker() {
         const probe = planTo(t, req.o)[0];
         if (probe && probe.part && probe.dir * CUR.v < 0) {
           const Ls = CUR.lo === 0 ? LOGT : LOGM, v = CUR.v, e0 = CUR.e, Tc = 130, c = CUR;
-          const ok = await timeline(Tc, tt => { const q = tt / Tc, e = Math.max(0, Math.min(1, e0 + v * Tc * (q - q * q / 2) / Ls)); c.ctl.frame(e); c.e = e; }, clk, stop);
+          const ok = await timeline(Tc, tt => { const q = tt / Tc, e = Math.max(0, Math.min(1, e0 + v * Tc * (q - q * q / 2) / Ls)), R = c.Rof ? c.Rof(e) : null; c.ctl.frame(e, R); c.e = e; if (R) c.R = R; }, clk, stop);
           c.v = 0;
           if (!ok) continue;
         }
@@ -2313,7 +2339,6 @@ async function zoomWorker() {
         if (s.lo === 0 && !built[1]) { buildShire(s.sid); built[1] = s.sid; }
         else if (s.lo === 1 && !built[2] && (built[1] === s.sid || (Z.level >= 1 && Z.sid === s.sid && !built[1]))) { buildMinion(s.sid, s.nb, s.mi); built[2] = s.sid + ':' + s.nb + ':' + s.mi; }
       });
-      let a = 0; segs.forEach(s => { s.a = a; a += s.L; s.b = a; });
       if (segs[0].part && CUR && CUR.ctl) CUR.ctl.update(segs[0]);
       let ci = 0, ctl = segs[0].part && CUR ? CUR.ctl : null;
       const openSeg = s => {
@@ -2323,21 +2348,72 @@ async function zoomWorker() {
         }
         return segOpen(s, req);
       };
+      // The legs: the steps one way (in, or out) are one leg, eased once, and a leg out and a leg in meet at rest, where
+      // the move turns. A leg goes through the rest of every scale it passes (each drawn whole at its moment, as before),
+      // a pure zoom between two of them, and around each scale passed the two zooms blend (over BLEND of the shorter's log
+      // length), so that the camera turns there smoothly: until 30 September it turned at once, at its top speed, and a
+      // move out and back in reversed at full speed. K: the top view's transform when each scale of the leg rests; W: the
+      // rests the leg passes, in order, after where it starts.
+      const legs = [], legOf = [];
+      segs.forEach((s, i) => { const g = legs[legs.length - 1]; if (g && g.dir === s.dir) g.ix.push(i); else legs.push({dir: s.dir, ix: [i]}); });
+      let ca = 0;
+      legs.forEach((g, k) => { g.ix.forEach(i => { legOf[i] = g; }); g.cost = g.ix.reduce((t, i) => t + segs[i].L, 0); g.T0 = cost > 0 ? T * ca / cost : 0; ca += g.cost; g.T1 = cost > 0 ? T * ca / cost : T; g.m = k === 0 ? m : 0; });
+      const legPath = g => {
+        const ss = g.ix.map(i => segs[i]).sort((x, y) => x.lo - y.lo), K = [[1, 0, 0]];
+        g.a = ss[0].lo;
+        ss.forEach(s => {
+          const sid = s.part ? Z.sid : s.sid, nb = s.part ? Z.nb : s.nb, mi = s.part ? Z.mi : s.mi;
+          s.A = s.lo === 0 ? tileRect(sid) : minRect(nb, mi); s.B = s.lo === 0 ? SF : MF;
+          K.push(cmpM(rmap(s.A, s.B), K[K.length - 1]));
+        });
+        const first = segs[g.ix[0]];
+        g.K = K; g.Ge = g.dir > 0 ? K[K.length - 1] : K[0];
+        g.Gs = first.part && CUR && CUR.R ? cmpM(rmap(first.A, CUR.R), K[first.lo - g.a]) : g.dir > 0 ? K[0] : K[K.length - 1];
+        g.W = [g.Gs].concat(g.ix.map(i => K[segs[i].lo - g.a + (g.dir > 0 ? 1 : 0)])).map(S => ({S, l: Math.log(S[0])}));
+      };
+      // the top view's transform at progress p of leg g: its scale geometric in p, its place on the blended path
+      const legG = (g, p) => {
+        const W = g.W, n = W.length - 1, l = W[0].l + p * (W[n].l - W[0].l), dir = W[n].l >= W[0].l ? 1 : -1;
+        const on = i => simZoom(W[i].S, W[i + 1].S, Math.abs(W[i + 1].l - W[i].l) > 1e-9 ? (l - W[i].l) / (W[i + 1].l - W[i].l) : 1);
+        let i = 0; while (i < n - 1 && (l - W[i + 1].l) * dir > 0) i++;
+        let G = on(i);
+        for (let b = Math.max(1, i); b <= Math.min(n - 1, i + 1); b++) {
+          const w = BLEND * Math.min(Math.abs(W[b].l - W[b - 1].l), Math.abs(W[b + 1].l - W[b].l)), d = (l - W[b].l) * dir;
+          if (w > 1e-9 && Math.abs(d) < w) {
+            const x = (d + w) / (2 * w), beta = x * x * (3 - 2 * x), A = on(b - 1), B = on(b);
+            G = [A[0], lerp(A[1], B[1], beta), lerp(A[2], B[2], beta)];
+          }
+        }
+        return G;
+      };
+      // step s of leg g where the top view's transform is G: how far the step has gone (e), and where its target is
+      const stepAt = (g, s, G) => {
+        const j = s.lo - g.a, Kj = g.K[j], Kn = g.K[j + 1];
+        return {e: Math.max(0, Math.min(1, Math.log(G[0] / Kj[0]) / Math.log(Kn[0] / Kj[0]))), R: simR(cmpM(G, simInv(Kj)), s.A)};
+      };
       const drive = tt => {
-        const u = T > 0 ? Math.min(1, tt / T) : 1, d = cost * herm(u, m);
+        let kk = 0; while (kk < legs.length - 1 && tt >= legs[kk].T1 - 1e-9) kk++;
+        const gk = legs[kk], Tk = gk.T1 - gk.T0, u = Tk > 0 ? Math.min(1, Math.max(0, (tt - gk.T0) / Tk)) : 1, p = herm(u, gk.m);
+        const fin = tt >= T - 1e-9;
         while (ci < segs.length) {
-          const s = segs[ci];
+          const s = segs[ci], g = legOf[ci], last = ci === segs.length - 1;
           if (!ctl) ctl = openSeg(s);
-          if (u < 1 && d < s.b - 1e-9) break;
-          const last = ci === segs.length - 1;
+          if (!g.K) legPath(g);
+          if (g === gk) {
+            const G = legG(g, p), at = stepAt(g, s, G);
+            const reached = s.dir > 0 ? at.e >= 1 - 1e-7 : at.e <= 1e-7;
+            if (!reached || (last && !fin)) {
+              ctl.frame(at.e, at.R);
+              const dl = Math.log(g.Ge[0] / g.Gs[0]);
+              CUR = {lo: s.lo, e: at.e, dir: s.e1 > s.e0 ? 1 : -1, v: Tk > 0 ? dl * hermD(u, gk.m) / Tk : 0, ctl, R: at.R,
+                // where the target is for another e of this step, on the leg's path (a turn-back slows along it)
+                Rof: e => { const j = s.lo - g.a, lk = Math.log(g.K[j][0]) + e * Math.log(g.K[j + 1][0] / g.K[j][0]), q = Math.abs(dl) > 1e-9 ? (lk - Math.log(g.Gs[0])) / dl : 1; return stepAt(g, s, legG(g, q)).R; }};
+              break;
+            }
+          }
           ctl.close(s.e1, last, last ? req.o.arrive : null);
           ctl = null; ci++; CUR = null;
           if (!last && Z.level === 0 && req.o.atChip && !req.atChipDone) { req.atChipDone = true; req.o.atChip(); }
-        }
-        if (ci < segs.length && ctl) {
-          const s = segs[ci], p = s.b > s.a ? Math.max(0, (d - s.a) / (s.b - s.a)) : 1, e = s.e0 + (s.e1 - s.e0) * p;
-          ctl.frame(e);
-          CUR = {lo: s.lo, e, dir: s.e1 > s.e0 ? 1 : -1, v: (s.e1 > s.e0 ? 1 : -1) * cost * hermD(u, m) / Math.max(1, T), ctl};
         }
       };
       const ok = await timeline(T, drive, clk, stop);
@@ -2481,7 +2557,7 @@ function panel(html) {
 }
 /* scroll the panel (only the panel, never the page) so that el is in view */
 function pnReveal(el) {
-  const sc = $('pn-body'); if (!el || !sc.contains(el)) return;
+  const sc = $('pn-body'); if (!el || !sc.contains(el) || !el.getClientRects().length) return;
   const r = el.getBoundingClientRect(), s = sc.getBoundingClientRect();
   if (r.top < s.top + 4) sc.scrollTop += r.top - s.top - 8;
   else if (r.bottom > s.bottom - 4) sc.scrollTop += Math.min(r.bottom - s.bottom + 8, r.top - s.top - 8);
@@ -2588,12 +2664,68 @@ const COMPS = {
     act: `<a class="st-btn" href="${HUB}#ask-noc-docs" target="_blank" rel="noopener">The hub's list of asks ↗</a>`,
     all: true}),
 };
+/* The panel's first lines: what a part is and why it matters, for a reader new to chips. The numbers, how it works, the
+   address bits and the sources are under Details, closed until the reader opens it (the owner's ask of 30 September:
+   the top level readable by a beginner). */
+const LEADS = {
+  chip: () => `A processor made for machine learning. Instead of a few big cores it has ${n('minions')} small, simple ones, called minions, in blocks called shires; an on-chip network joins the shires, and memory chips sit beside it on the card. Click any part to see what it does, or pick a flow above to watch data move.`,
+  cshire: () => `A block of ${n('per_shire')} that share ${n('cache_mb')} of fast memory on the chip. The chip has ${n('cshires')} of these blocks, and they do the computing.`,
+  master: ctx => (ctx.cell && ctx.cell.r === 0 ? 'The shire that runs the chip\'s own firmware: it starts each program (a kernel) on the compute shires.'
+    : 'A spare shire, kept in reserve in case a manufacturing defect disables another one.'),
+  pcie: () => 'The chip\'s connection to the host computer: programs and their data arrive over this PCIe link.',
+  io: () => 'The chip\'s housekeeping: a few larger general-purpose cores, the processor that starts the chip and manages its power and clock speed, and its peripherals.',
+  memshire: () => 'One of the eight connections to the memory chips (DRAM) on the card. Memory is dealt out among the eight in turn, one 64-byte line each, so each serves an eighth of it.',
+  dram: () => `The card's main memory, ${n('dram_gb')} in chips beside the processor: large, but slow and costly to reach compared with the memory on the chip.`,
+  mesh: () => 'The on-chip network: a grid of stops that carries data between the shires. Each step across the grid, a hop, adds a little time.',
+  host: () => 'The computer the card is plugged into. It sends programs and data to the card over PCIe and starts them.',
+  meshstop: () => 'Where this shire joins the on-chip network: all its traffic to other shires passes through this one stop.',
+  banks: () => `The shire's shared memory, ${n('cache_mb')} in four banks. Part of it is this shire's cache (the L2), part a slice of a cache the whole chip shares (the L3), and part a scratchpad that programs manage themselves.`,
+  l2: () => 'The shire\'s own cache: where a core looks next when its private cache, the L1, does not have the data.',
+  l3: () => 'This shire\'s piece of a cache the whole chip shares. Each piece keeps a different share of memory, so a core usually finds a line in another shire\'s piece, across the network.',
+  scp: () => 'Scratchpad memory: fast memory on the chip that a program fills and reads itself, with no cache in between. Other shires can reach it too, a little slower for each hop.',
+  uc: () => 'Hardware that helps the cores coordinate: barriers (everyone waits until all have arrived), counters, interrupts and atomic operations.',
+  xbar: () => 'The switch inside the shire that connects its four groups of cores to its four cache banks.',
+  neigh: () => `A group of ${n('per_neigh')} that share one instruction cache and have fast links to each other.`,
+  minion: () => `One of the chip's small cores. It runs two threads at once, has a vector unit that works on ${n('lanes_n')} numbers at a time, and has its own small data cache.`,
+  hart: ctx => (ctx.t === 0 ? 'One of the minion\'s two threads (harts). This one can issue every instruction, the matrix (tensor) ones included.'
+    : 'The minion\'s second thread (hart). It can help load data for the matrix unit, but it cannot issue most matrix instructions.'),
+  vpu: () => `The minion's vector unit: ${n('lanes_n')} lanes side by side, each able to multiply and add every cycle. Vector code and the matrix (tensor) instructions both run on these lanes.`,
+  tensor: () => `Runs the matrix-multiply instructions, the heart of machine learning, on the vector unit's lanes. All the minions together sustain ${n('tflops')} TFLOP/s.`,
+  l1d: () => `The minion's own small data cache, ${n('l1_kb')}: the first and fastest place it looks for data. Part of it is set aside for the matrix instructions.`,
+  l1scp: () => 'The part of the minion\'s L1 cache set aside to hold a tile of a matrix for the matrix instructions.',
+  etlink: () => 'The minion\'s link to the shire\'s cache: requests for data its own cache does not hold go out here.',
+  fln: () => 'Direct links between neighbouring minions, for passing data quickly without going through the caches.',
+  inferred: () => 'Most of this drawing is documented or measured; a few parts are inferred. Here is each, and what would settle it.',
+};
+const FLOWLEAD = {
+  A: () => `A core needs data that none of the chip's caches holds. The request tries each cache in turn, crosses the chip to a memory connection, reads the memory chip and brings the data back: about ${n('lat_dram')} cycles in all.`,
+  B: () => 'The same load, found at each level of the memory in turn: how much longer, and how much more energy, each step further from the core costs.',
+  C: () => 'One core sends a short message straight to a core in another shire and waits for the answer; the further apart the shires, the longer the round trip.',
+  D: () => 'Handing results from one stage of a computation to the next: straight into the next shire\'s memory, or out to the memory chips and back. Straight across is much cheaper.',
+  E: () => 'Reading or writing scattered pieces of a table: how fast it goes depends on which level of memory the table fits in.',
+  F: () => 'How the host computer puts data and programs onto the card and starts them, and how long each part takes.',
+  G: () => 'One small step of a matrix multiplication, the core operation of machine learning, as the matrix unit runs it on every minion.',
+  H: () => 'The same matrix multiplication on different numbers: the chip runs just as fast, but random data draws more power than zeros, because more bits flip.',
+  I: () => 'When every core hammers the same memory location, the one cache bank that holds it becomes a bottleneck, and the shire it sits in can be starved.',
+  J: () => 'Adding up one value from every core and giving everyone the total: pairs combine, then pairs of pairs, up a tree and back down.',
+  K: () => `Getting one value from one core to all ${n('n1024')} minions: the four ways the chip offers, and what each costs.`,
+};
+/* Details: open or closed as the reader last left it */
+let DETOPEN = false;
+try { DETOPEN = localStorage.getItem('et-chip-details') === '1'; } catch (_) { /* no storage */ }
+const detBlock = html => `<details class="pn-det"${DETOPEN ? ' open' : ''}><summary>More detail and the sources</summary><div class="pn-det-b">${html}</div></details>`;
+$('pn-body').addEventListener('toggle', e => {
+  if (!e.target.matches || !e.target.matches('details.pn-det')) return;
+  DETOPEN = e.target.open;
+  try { localStorage.setItem('et-chip-details', DETOPEN ? '1' : '0'); } catch (_) { /* no storage */ }
+}, true);
 function showComp(key, ctx) {
-  const d = COMPS[key](ctx || {}), ids = COMPF[key] || [];
-  panel(`<p class="pn-kick">${esc(d.kick)}</p><p class="pn-title">${esc(d.title)}</p><p class="pn-what">${d.what}</p>`
-    + (d.kpis ? `<div class="pn-kpis">${d.kpis.join('')}</div>` : '') + (d.act ? `<div class="pn-act">${d.act}</div>` : '')
-    + (d.all ? ASKS.map(askHtml).join('') : asksBlock(key, false))
-    + topPage(ids) + (ids.length ? factsBlock(key) : ''));
+  const d = COMPS[key](ctx || {}), ids = COMPF[key] || [], lead = LEADS[key] ? LEADS[key](ctx || {}) : '';
+  const detail = `<p class="pn-what">${d.what}</p>` + (d.kpis ? `<div class="pn-kpis">${d.kpis.join('')}</div>` : '')
+    + (d.all ? ASKS.map(askHtml).join('') : asksBlock(key, false)) + topPage(ids) + (ids.length ? factsBlock(key) : '');
+  panel(`<p class="pn-kick">${esc(d.kick)}</p><p class="pn-title">${esc(d.title)}</p>`
+    + (lead ? `<p class="pn-lead">${lead}</p>` + (d.act ? `<div class="pn-act">${d.act}</div>` : '') + detBlock(detail)
+      : detail + (d.act ? `<div class="pn-act">${d.act}</div>` : '')));
 }
 function zoomInto(g) {
   const key = g._key, ctx = g._ctx;
@@ -3049,8 +3181,21 @@ function leg(i) {
   if (on) pnReveal(on);
 }
 function flowPanel(k, head, body) {
-  panel(`<p class="pn-kick">Flow ${ORDER.indexOf(k) + 1} of ${ORDER.length}<span class="pn-key"> · key ${KEYOF[k]}</span></p><p class="pn-title">${esc(head)}</p>${body}`
-    + asksBlock('flow:' + k, false) + topPage(COMPF['flow' + k]) + factsBlock('flow' + k, 'The facts this flow uses'));
+  const box = document.createElement('div'), det = [];
+  box.innerHTML = body;
+  // in their order: the prose and the tables, and the address's own controls (flow 1's requester and New address)
+  [...box.children].forEach(el => {
+    if (el.matches('p.pn-what, table.legs')) det.push(el);
+    else if (el.matches('.pn-act')) {
+      const tech = [...el.children].filter(x => x.matches('label, [data-act="newpa"]'));
+      if (tech.length) { const d = document.createElement('div'); d.className = 'pn-act'; tech.forEach(x => d.appendChild(x)); det.push(d); }
+      if (!el.children.length) el.remove();
+    }
+  });
+  det.forEach(el => el.remove());
+  const lead = FLOWLEAD[k] ? `<p class="pn-lead">${FLOWLEAD[k]()}</p>` : '';
+  panel(`<p class="pn-kick">Flow ${ORDER.indexOf(k) + 1} of ${ORDER.length}<span class="pn-key"> · key ${KEYOF[k]}</span></p><p class="pn-title">${esc(head)}</p>${lead}${box.innerHTML}`
+    + detBlock(det.map(el => el.outerHTML).join('') + asksBlock('flow:' + k, false) + topPage(COMPF['flow' + k]) + factsBlock('flow' + k, 'The facts this flow uses')));
 }
 const shireOfCamera = () => (Z.level >= 1 && SH[Z.sid] ? Z.sid : null);
 /* the requester of flows 1 and 2: the shire the camera shows, unless the address's L3 home is that shire or next to it
@@ -3351,7 +3496,7 @@ FLOWS.E = {
     const g = ST.gs === 'g', p = g ? 'g_' : 's_';
     const LN = [['L1', 'l1'], ['L2', 'l2'], ['own scratchpad', 'sp'], ['scratchpad 2 hops', 'rs'], ['DRAM', 'dr']].map(([nm, k]) => ({nm, k, c: V(p + k + '_c'), r: p + k + '_r', e: p + k + '_e'}));
     Object.assign(c, {rq, far, g, p, LN, SCALE: 0.9, lanes: {}});
-    flowPanel('E', g ? 'Gathers (E48)' : 'Scatters (E48)',
+    flowPanel('E', g ? 'Gathers' : 'Scatters',
       `<p class="pn-what">Both harts of ${n('n1024')} minions run the ${n('gs_8')} (${g ? 'fgw.ps' : 'its scatter twin, fscw.ps'}) on scattered lines of a table that fits one level: ${src('each visit\'s 64 elements fall on the 64 lines of one 4 KB tile, the tiles walked in scrambled order', 'gs-g-dram-256K gs-s-dram-256K')}. The lanes run at the measured cycles per instruction and count the instructions each has done; the bars are on a log scale, against the leader.</p>`
       + `<div class="pn-act"><button type="button" class="st-btn" data-act="gs" aria-pressed="${g}">Gathers</button><button type="button" class="st-btn" data-act="gs" aria-pressed="${!g}">Scatters</button></div>`
       + `<div class="lad" id="race">${LN.map((l, i) => `<div class="nm">${l.nm}</div><div class="tr" data-i="${i}"><u></u><s></s></div>`).join('')}</div>`

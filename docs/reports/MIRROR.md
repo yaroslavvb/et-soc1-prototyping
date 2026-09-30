@@ -187,7 +187,12 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-29, 02:30 PDT**, after the major pass (E55-E58 on the hub, the chip diagram's y-first reads and
+**Last check: 2026-09-30, 16:15 PDT**, after the memory levels' and the chip diagram's smooth camera, the memory levels'
+player bar and the chip diagram's beginner panel (Q74-Q76): both equal to their files; 31 of 32 mirrored public pages
+equal, exit 1 for work outside that pass: the hub (`et-soc1-limits-of-observability`) differs from its file, and the lab
+dashboard, listed here as private, is served publicly (its visibility is the owner's call).
+
+**Earlier check: 2026-09-29, 02:30 PDT**, after the major pass (E55-E58 on the hub, the chip diagram's y-first reads and
 host writes through the L3 homes, memory levels, PCIe, power and temperature's filter, DVFS's DV2 validation, heat per
 mm's NV and routes, the TODO page, the session timeline refreshed to 29 September, and the lab report's statuses):
 28 of 28 mirrored public pages equal to their files, no warnings, exit 0 (the session timeline listed since `6bbf0f3`).

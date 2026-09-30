@@ -64,6 +64,15 @@ html.et-pres [data-ss-ui]{display:none!important}
 .pn-kick{color:var(--ink-2);font-size:.78em;text-transform:uppercase;letter-spacing:.06em;margin:0}
 .pn-title{font-size:1.35em;font-weight:650;line-height:1.2;margin:2px 0 6px}
 .pn-what{margin:0 0 8px}
+/* the lead: what a part or a flow is, in plain words; the rest under Details */
+.pn-lead{margin:0 0 10px;font-size:1.06em;line-height:1.45}
+.pn details.pn-det{margin:10px 0 4px;border-top:1px solid var(--border);padding-top:6px}
+.pn details.pn-det>summary{cursor:pointer;font-size:.9em;font-weight:600;color:var(--ink-2);padding:3px 0;list-style:none;display:flex;align-items:center;gap:7px}
+.pn details.pn-det>summary::-webkit-details-marker{display:none}
+.pn details.pn-det>summary::before{content:"";flex:none;width:0;height:0;border-left:6px solid currentColor;border-top:4.5px solid transparent;border-bottom:4.5px solid transparent;transition:transform .15s}
+.pn details.pn-det[open]>summary::before{transform:rotate(90deg)}
+.pn details.pn-det>summary:hover{color:var(--ink)}
+.pn details.pn-det[open]>summary{margin-bottom:6px}
 .pn-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:6px;margin:6px 0 8px}
 /* four tiles: two by two, never three and one */
 .pn-kpis:has(>:nth-child(4):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -263,7 +272,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 /* presenting, a range in a number column may break after its dash, so that the prose column keeps its width */
 #stage.present .legs td.num{white-space:normal}
 #stage.present .pn-fh,#stage.present .pn ul.facts,#stage.present .pn-foot{display:none}
-#stage.present .pn details.asks,#stage.present .pn .pn-act,#stage.present .pn .pn-more,#stage.present .pn .pn-what.small{display:none}
+#stage.present .pn details.pn-det,#stage.present .pn details.asks,#stage.present .pn .pn-act,#stage.present .pn .pn-more,#stage.present .pn .pn-what.small{display:none}
 /* a flow's table says it stage by stage: its prose goes (it would push the table out of the panel) */
 #stage.present .pn-scroll:has(.legs) .pn-what{display:none}
 #stage.present .pn-kpi b{font-size:1.45em}
