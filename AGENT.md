@@ -165,7 +165,7 @@ reason:
 | Look first: `et-who`, `who`, `uptime`; hold card N's lock for your run (`flock -n /run/lock/etsoc-shire<N>.lock <cmd>`, which fails at once if someone holds it) | the management node is single-opener, and a second user of a card corrupts both measurements |
 | Never hold a device for more than 10 s: `timeout 10` on every launch (per device-opening process; release the card lock between sub-tests) | long holds block everyone else, and a card that hangs needs a power cycle only the lab admin can do |
 | Stop tools with Ctrl-C or a plain `kill`, never `kill -9` | a sampler killed mid-request poisons the card's management queue for the next user |
-| Never reset a card or change its TDP, clocks, firmware or driver | a software reset can hang a card, and a configuration change silently alters other people's runs |
+| Never reset a card, retrain or re-speed its PCIe link, or change its TDP, clocks, firmware or driver | a software reset can hang a card; a link retrain on aifoundry1 on 30 Sep hung the whole host until someone power-cycled it on site; a configuration change silently alters other people's runs |
 | Keep disk and memory small: sources only, `nice -j4` builds | the machines are shared, and aifoundry1's disk is nearly full |
 | An agent that only writes code never reaches a card: `V3_DRY=1`, then check `et-who` | on 25 September a code-only agent ran a real block because a `cd` in a backgrounded chain did not apply |
 

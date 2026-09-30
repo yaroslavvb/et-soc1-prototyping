@@ -60,6 +60,7 @@ before `</body>`. Private pages are listed but not mirrored.
 |---|---|---|---|---|
 | [What is broken on aifoundry1](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting) (25 Sep) | `a2d70512-f892-474e-aca6-0568176cb092` | public | `docs/reports/2026-09-25-aifoundry1-troubleshooting.html` | file |
 | [aifoundry1 is fixed](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix) (25 Sep, the fix log) | `31e35ba7-36f4-486e-b6f3-687f7c7ad3a0` | public | `docs/reports/2026-09-25-aifoundry1-fix.html` | file |
+| [A PCIe link retrain hung aifoundry1](https://spacesheep.dev/@yaroslavvb/aifoundry1-link-retrain-hang) (30 Sep, the incident and its lesson) | `11e77f93-1896-475f-b962-3418a3712006` | public | `docs/reports/2026-09-30-aifoundry1-link-retrain-hang.html` | file |
 | [ET-SoC-1 review: the TODO list](https://spacesheep.dev/@yaroslavvb/et-soc1-review-todo) (26 Sep) | `1db405d2-34c6-45f0-b939-03b74d3d68b4` | public | `docs/reports/2026-09-26-review-todo.html` | file (rendered from docs/reports/TODO.md by scripts/build-todo-page.py; redeploy after every change to TODO.md) |
 
 ### The lab, for newcomers

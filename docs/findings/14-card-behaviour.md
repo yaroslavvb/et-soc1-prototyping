@@ -429,6 +429,39 @@ nothing across cards. What compares cleanly is **switching power**: board power 
 power measured just before it, which cancels that card's leakage at that temperature. On that basis the two
 cards agree to 8%, and one scale factor removes even that. See [11-thermal-model.md](11-thermal-model.md).
 
+## Retraining a card's PCIe link hung aifoundry1 (30 September, 14:41 PDT)
+
+**Never retrain, re-speed or reset a card's PCIe link on a running host.** On 30 September, to learn whether the
+corrected-error flood on aifoundry1 card 0's link (about one a second at 16 GT/s since the 18 September boot) came
+from a marginal signal or from a lane or the slot, the owner ran, as root and with card 0 idle and locked, our
+"Gen3 test" (lab report U25): set the target speed of card 0's root port (`0000:00:01.0`) to 8 GT/s with `setpci`
+(Link Control 2) and retrain the link (Link Control, bit 5). Two readings at 16 GT/s a minute apart went through
+(76 corrected receiver errors at the root port, none at the card). At the retrain, 14:41:21, **the whole host**
+stopped: no more output, no Tailscale, no ARP on the LAN. It stayed down until Roman power-cycled the lab at about
+15:07 (all three machines were cycled together). Our plan had said a failed retrain would drop only card 0.
+
+What we know, read as our user after the boot:
+
+- No panic record: `systemd-pstore` found the persistent store empty at boot, so this looks like a hard hang,
+  not a kernel panic (`kernel.panic` is 0 on these hosts, so a panic would not reboot either). The previous
+  boot's kernel log needs root or the adm group: `journalctl -b -1 -k -o short-precise | tail -80` as root on
+  aifoundry1 is the next thing to read.
+- The root port has AER and DPC (downstream port containment) under OS control. Candidate causes, none tested:
+  the link failed to train at 8 GT/s and went down, DPC or AER recovery removed the card under the `et_soc1`
+  driver, and the driver or the CPU hung on the vanished device (a completion timeout on an MMIO access can
+  freeze an Intel host); or the 11th-generation CPU root port does not tolerate a speed change forced by
+  `setpci` on a Gen4 link.
+- After the cold power cycle card 0's link trained at 16 GT/s x8 and its root port counted **no** corrected
+  errors in the first minutes, where it had counted about one a second for twelve days: the flood may have been
+  a bad training at the 18 September boot, not the slot. Watch the count (`et-lab-health`, or
+  `grep RxErr /sys/bus/pci/devices/0000:00:01.0/aer_dev_correctable`) before concluding.
+
+Lessons: a link-level experiment is a host-level risk, so it needs someone on site and nobody else working on the
+host; the lab has no console or out-of-band access, so a hung host costs everyone until someone walks over; and a
+power cycle clears `/tmp` on every machine it hits (aifoundry2's 19 GB of working files since 28 September were
+lost; keep work in the home directory). The incident page:
+https://spacesheep.dev/@yaroslavvb/aifoundry1-link-retrain-hang
+
 ## Traps that cost time here
 
 - **`sparsity_host --budget` defaults to 8 seconds** on silicon and silently stops a longer run. Raise it for

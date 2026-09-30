@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aifoundry1 hung by a PCIe link retrain</title>
+<meta name="description" content="On 30 September 2026 a test that retrained aifoundry1 card 0's PCIe link to 8 GT/s hung the whole host until it was power-cycled on site: what happened, what we know, the candidate causes, and the lessons.">
+<style>
+:root{
+  color-scheme: light;
+  --page:#fafaf8; --surface:#ffffff; --sunk:#f2f1ec;
+  --ink:#1a1a1f; --ink-2:#52514a; --ink-3:#6b6a62;
+  --line:#e3e2db; --rule:#cfcec5;
+  --accent:#1f6fbf; --accent-soft:rgba(31,111,191,.12);
+  --warn:#9a6a10; --warn-soft:rgba(154,106,16,.12);
+  --good:#1f7a5a; --good-soft:rgba(31,122,90,.11);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --page:#111110; --surface:#1b1b19; --sunk:#262623;
+    --ink:#f2f1ec; --ink-2:#c3c2b7; --ink-3:#9a998f;
+    --line:#2f2f2c; --rule:#4a4a45;
+    --accent:#5a9be0; --accent-soft:rgba(90,155,224,.16);
+    --warn:#d6a040; --warn-soft:rgba(214,160,64,.14);
+    --good:#4fb38a; --good-soft:rgba(79,179,138,.13);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --page:#111110; --surface:#1b1b19; --sunk:#262623;
+  --ink:#f2f1ec; --ink-2:#c3c2b7; --ink-3:#9a998f;
+  --line:#2f2f2c; --rule:#4a4a45;
+  --accent:#5a9be0; --accent-soft:rgba(90,155,224,.16);
+  --warn:#d6a040; --warn-soft:rgba(214,160,64,.14);
+  --good:#4fb38a; --good-soft:rgba(79,179,138,.13);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);
+  font:18px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-synthesis-weight:none}
+main{max-width:52em;margin:0 auto;padding:40px clamp(16px,4vw,32px) 96px}
+h1,h2,h3{text-wrap:balance;letter-spacing:-.012em;margin:0}
+h1{font-size:clamp(28px,5.8vw,41px);line-height:1.16}
+h2{font-size:clamp(21px,3.6vw,26px);line-height:1.25;margin:0 0 10px}
+h3{font-size:19px;line-height:1.3;margin:30px 0 8px}
+p{margin:0 0 14px;max-width:38em}
+a{color:var(--accent);text-underline-offset:2px}
+section{margin-top:48px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
+.byline{color:var(--ink-2);font-size:14px;margin:10px 0 0}
+.lede{font-size:19px;line-height:1.55;margin:22px 0 0;max-width:37em}
+.small{color:var(--ink-2);font-size:14px}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+code{font-size:.86em;background:var(--sunk);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+pre{font-size:13.5px;line-height:1.5;background:var(--sunk);border:1px solid var(--line);border-radius:8px;
+  padding:12px 14px;margin:8px 0 14px;overflow-x:auto;white-space:pre;-webkit-overflow-scrolling:touch;max-width:100%}
+pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
+.cmd{display:flex;flex-direction:column;margin:8px 0 14px}
+.cmd pre{margin:0;border-top-right-radius:0}
+.copy{align-self:flex-end;margin:0 0 -1px;font:600 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  color:var(--ink-2);background:var(--sunk);border:1px solid var(--line);border-bottom:0;border-radius:6px 6px 0 0;padding:7px 12px;cursor:pointer;min-height:30px}
+.copy:hover{color:var(--ink)}
+.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:22px 0 0}
+nav.card b{display:block;font-size:14px;color:var(--ink-2);margin-bottom:4px}
+nav.card ol{margin:0;padding-left:22px;font-size:16px}
+nav.card li{margin:3px 0}
+.glance{display:grid;grid-template-columns:9.5em 1fr;gap:8px 16px;margin:0;font-size:16px;line-height:1.5}
+.glance dt{color:var(--ink-3);font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding-top:2px}
+.glance dd{margin:0}
+.callout{border-left:3px solid var(--warn);background:var(--warn-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:40em;font-size:16px}
+.callout p{margin:0 0 8px}.callout p:last-child{margin:0}
+.inf{display:inline-block;font:700 11px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--warn);border:1px solid currentColor;border-radius:999px;padding:0 7px;white-space:nowrap;vertical-align:2px}
+ol.steps{list-style:none;counter-reset:step;padding:0;margin:18px 0 0}
+ol.steps>li{counter-increment:step;position:relative;padding-left:44px;margin:0 0 26px}
+ol.steps>li::before{content:counter(step);position:absolute;left:0;top:1px;width:30px;height:30px;border-radius:50%;
+  background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center}
+ol.steps>li>b:first-child{display:block;margin-bottom:4px}
+ul.plain{margin:6px 0 14px;padding-left:22px;max-width:40em}
+ul.plain li{margin:0 0 8px}
+ul.plain ul{margin:6px 0 0;padding-left:20px}
+ul.plain ul li{margin:0 0 4px}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.45}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}
+th{color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--rule)}
+td.bad{background:var(--warn-soft)}
+td.bad strong{color:var(--warn)}
+tbody th{font-weight:600;color:var(--ink)}
+@media (max-width:640px){
+  table.stack thead{display:none}
+  table.stack,table.stack tbody,table.stack tr,table.stack td,table.stack tbody th{display:block;width:100%}
+  table.stack tr{border-bottom:1px solid var(--rule);padding:8px 0}
+  table.stack td,table.stack tbody th{border:0;padding:3px 6px}
+  table.stack td[data-label]::before{content:attr(data-label);display:block;font-size:12px;font-weight:600;color:var(--ink-3)}
+}
+h2,h3{scroll-margin-top:12px}
+.hlink{margin-left:8px;color:var(--ink-3);text-decoration:none;font-weight:400;opacity:0}
+h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
+@media (max-width:480px){
+  body{font-size:17px} .lede{font-size:18px}
+  ol.steps>li{padding-left:38px}
+  .glance{grid-template-columns:1fr;gap:2px}
+  .glance dd{margin-bottom:10px}
+}
+/* Collapsible depth: details.more (mapped from docs/reports/sources/report.template.html's chartkit CSS block) */
+details.more{margin:14px 0;border-left:3px solid var(--line);padding:2px 0 2px 12px}
+details.more>summary{cursor:pointer;color:var(--ink);font-weight:600;font-size:.95rem;list-style:none;padding:4px 0}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"\25B8\00a0";color:var(--ink-3)}
+details.more[open]>summary::before{content:"\25BE\00a0"}
+details.more>summary .more-hint{color:var(--ink-3);font-weight:400}
+details.more[open]>summary{margin-bottom:6px}
+</style>
+<script>
+/* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+   inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all.
+   (Copied from docs/reports/sources/chartkit.js's reveal() and its three listeners.) */
+(function () {
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+})();
+</script>
+</head>
+<body>
+<main>
+<p class="eyebrow">AI Foundry lab · Incident and lesson · 30 September 2026</p>
+<h1>A PCIe link retrain hung aifoundry1</h1>
+<p class="byline">From Yaroslav Bulatov's session on aifoundry2 · state at 15:35 PDT on 30 September · the lab's problem list: <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman#c28">C28</a></p>
+<p class="lede"><b>Never retrain, re-speed or reset a card's PCIe link on a running host.</b> At 14:41 PDT a test of aifoundry1 card 0's link, run as root, asked its root port to retrain at 8 GT/s, and the whole host stopped. It stayed down for 26 minutes, until Roman power-cycled the lab at about 15:07. All three machines came back on kernel 7.0.0-34, and all four cards work.</p>
+
+<section>
+<h2>What happened</h2>
+<p>aifoundry1 card 0's PCIe link had logged about one corrected receiver error a second at 16 GT/s since the host booted on 18 September. To tell a marginal signal from a bad lane or slot before an on-site visit, our lab plan proposed a “Gen3 test” (U25): set the target speed of card 0's root port, <code>0000:00:01.0</code>, to 8 GT/s and retrain the link for ten minutes, with card 0 idle and its lock held, then set it back. The plan said the worst case was card 0 dropping off the bus until the next reboot.</p>
+<p>The owner ran it as root at 14:40:21. Two readings at 16 GT/s a minute apart went through: the root port's corrected receiver-error count rose from 1,146,936 to 1,147,012 (76 in 60 s), and the card's own count stayed at 0. The next command, at 14:41:21, wrote Link Control 2 (target speed) and set the Retrain Link bit with <code>setpci</code>. Nothing came back. Within twenty seconds aifoundry1 left Tailscale and stopped answering ARP on the LAN; a read-only command of ours had run there at 14:41:20. Every session on it, both cards, its CI runner and its <code>/tmp</code> went with it.</p>
+<p>There is no console or out-of-band access to the lab machines, so nothing could restart it remotely. Roman power-cycled the lab in person at about 15:07; aifoundry1, aifoundry2 and aifoundry3 all rebooted within a minute of each other.</p>
+</section>
+
+<section>
+<h2>After the power cycle (checked read-only at 15:18–15:20)</h2>
+<ul>
+<li>All three hosts run kernel 7.0.0-34 with <code>et_soc1</code> 0.20.0, loaded at boot (on aifoundry1 for the first time since its fix of 25 September), boot to the text target, and report <code>running</code> with no queued jobs.</li>
+<li>All four cards are on the bus with their nodes; every link is at 16 GT/s x8; nobody holds a card.</li>
+<li>aifoundry1 card 0's driver error counters are all 0, and its root port has counted <b>no</b> corrected errors since the boot, where it had counted about one a second for twelve days. A cold power cycle may have retrained a link that trained badly on 18 September. That needs hours of watching before anyone concludes the slot is fine.</li>
+<li>aifoundry2's <code>/tmp</code> was cleared by the reboot, as it is at every boot: 19 GB of our working files since 28 September were lost (the repository and home directories are intact).</li>
+</ul>
+</section>
+
+<section>
+<h2>Why the host hung: candidates, none confirmed</h2>
+<ul>
+<li><b>A hard hang, not a panic.</b> The firmware's panic store was empty at the next boot (<code>systemd-pstore</code> found nothing to archive), so the kernel most likely did not panic. (It would not have rebooted anyway: <code>kernel.panic</code> is 0 on these hosts.)</li>
+<li><b>The link went down, and the host tripped over the vanished device.</b> The root port has AER and downstream port containment (DPC) under the kernel's control. If the link failed to train at 8 GT/s, DPC or AER recovery would take card 0 away from under the <code>et_soc1</code> driver, and an access to it could stall a CPU (on Intel hosts a completion timeout on a memory-mapped read can freeze the machine), or the driver's error path could deadlock.</li>
+<li><b>The platform does not take a forced speed change.</b> The 11th-generation Core CPU's PCIe 4.0 root port may not tolerate a speed change forced with <code>setpci</code> while a driver is bound, whatever the card does.</li>
+<li><b>Card 0 itself.</b> Its link was already marginal (the error flood), and it is the card that overheats; a retrain may have failed on the card's side.</li>
+</ul>
+<p>The previous boot's kernel log would narrow this down, but reading it needs root or the adm group: <code>journalctl -b -1 -k -o short-precise | tail -80</code> as root on aifoundry1.</p>
+</section>
+
+<section>
+<h2>Lessons</h2>
+<ul>
+<li><b>A link-level experiment is a host-level risk.</b> Treat retraining, re-speeding or resetting a PCIe link like a reboot: only with someone on site, a quiet host, and the users told. Our plan's “only card 0 is at risk” was wrong.</li>
+<li><b>No out-of-band access means every hang costs a trip.</b> An IP-KVM or a named on-site contact (request SH6) would have turned 26 minutes into two.</li>
+<li><b>A power cycle clears <code>/tmp</code> on every machine it touches.</b> Keep work in the home directory.</li>
+<li><b>Plans that change hardware state need a “what if the host goes” line</b>, not only a “what if the device goes” line.</li>
+</ul>
+<p class="small">Recorded in the repository: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/14-card-behaviour.md">docs/findings/14-card-behaviour.md</a> and the rules table of AGENT.md. Source of this page: <code>docs/reports/2026-09-30-aifoundry1-link-retrain-hang.html</code>.</p>
+</section>
+</main>
+</body>
+</html>
