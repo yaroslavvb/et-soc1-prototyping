@@ -21,6 +21,11 @@ traps) and `docs/findings/19-observability-and-the-unmetered.md` (what the meter
 work in `docs/findings/02-requests.md`, `03-experiments.md`, `04-artifacts.md` and `05-claims.md`, and commit the data
 under `docs/reports/data/<date>-<name>-<host>/`.
 
+**Working files go in the repository or in `~/claude/work/<topic>/` on aifoundry2, never only in `/tmp` or the session
+scratchpad** (`/tmp/claude-<uid>/…`, for throwaway files only): results, data, logs, briefs, specs, plans, cited
+screenshots and test runs. Every boot clears `/tmp`; the power cycle of 30 September lost about 19 GB of our working
+files that way. Subagent briefs name the persistent directory; long runs log under the home directory (AGENT.md §7).
+
 ## Where am I?
 
 | You are on | ET tooling | Build and run |

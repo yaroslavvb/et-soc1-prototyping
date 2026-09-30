@@ -291,6 +291,19 @@ bracketed pattern (`pgrep -af '[q]ueue.sh'`).
 when, on which card, with which command, plus the `et-lab-manifest` output. Register the experiment in 03, its
 numbers in 05, the request in 02, and any published artifact in 04 and MIRROR.md.
 
+**Working files: never only in `/tmp` (30 September).** Anything worth more than a few minutes of work (results, raw
+data, logs, briefs, specs, plans, screenshots you will cite, test runs) goes in the repository, committed, or in
+`~/claude/work/<topic>/` on aifoundry2 (persistent, outside the repository, not public), never only in `/tmp` or in the
+Claude session scratchpad (`/tmp/claude-<uid>/…`), which a reboot or a power cycle clears. Claude Code tells an agent
+to keep intermediate results in that scratchpad; here it is only for throwaway files (a render directory deleted right
+after, a lock). A subagent's brief names the persistent directory it writes to. A long run writes its log under the
+home directory (`build/` in the tree, or the topic's directory), since the harness keeps a background command's output
+in `/tmp` too. On aifoundry1 and aifoundry3 work stays in `~/nekko` and comes back to aifoundry2 or the repository;
+aifoundry1's `/home` is nearly full. Why: the power cycle of 30 September at about 15:07 PDT, after the link retrain
+of section 5 hung aifoundry1, cleared `/tmp` on all three machines, and with it about 19 GB of our agents' working
+files on aifoundry2 (an earlier copy kept what was there at 06:37 on 28 September; everything written after it was
+lost). The repository and the home directories were intact.
+
 ## 8. How to publish
 
 1. **Edit the source**, never generated HTML: `docs/reports/sources/<name>.{body.html,script.js,meta.json}` plus a

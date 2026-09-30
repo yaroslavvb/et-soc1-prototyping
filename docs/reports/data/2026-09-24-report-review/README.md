@@ -23,7 +23,8 @@ validation").
 | `tools/deploy_all.sh` | The redeploy: it refuses to overwrite a space whose live page differs from the version the review started from. Pass `--slug` together with `--title` on any update (see 04-artifacts.md, publishing notes). |
 
 The tools need Chrome's headless shell (Playwright's `chrome-headless-shell`, or the browser `CHROME_HEADLESS`
-names). `final_links.py` writes its output under `AUDIT_DIR` (default `/tmp/report-review`) and reads the page list
+names). `final_links.py` writes its output under `AUDIT_DIR` (default `~/claude/work/report-review` since 30 September,
+`/tmp/report-review` before, which a boot clears) and reads the page list
 from `AUDIT_DIR/manifest.tsv` if there is one, else from the committed `manifest.tsv` here; `deploy_all.sh` still
 reads `AUDIT_DIR`'s manifest and the pre-review live copies saved there.
 

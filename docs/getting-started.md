@@ -12,6 +12,10 @@ page, [`AGENT.md`](../AGENT.md) (the entry point for an agent) and `CLAUDE.md` c
 
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
+Work in progress that is not committed yet is in `~/claude/work/<topic>/` on aifoundry2, never only in `/tmp` or the
+Claude session scratchpad, which every boot clears: the power cycle of 30 September (about 15:07 PDT) cleared `/tmp`
+on all three machines, and about 19 GB of our agents' working files on aifoundry2 with it
+([`AGENT.md`](../AGENT.md) §7, "Working files").
 
 - **Sparse parity (Q66, E59): done on aifoundry3's card, 29 September (04:15–11:40 PDT).** Noisy sparse parity
   solved as an int8 tensor GEMM on 1,024 minions, checked by two closed-form checksums and a CPU oracle: L1

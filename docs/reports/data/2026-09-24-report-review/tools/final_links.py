@@ -2,10 +2,10 @@
 """Render all 18 finished pages and check every link: spacesheep slugs are public pages of the set, #anchors exist on
 the target page, GitHub repo paths exist in the working tree, in-page anchors resolve, nothing links the private brief.
 
-The rendered text and link lists go to $AUDIT_DIR/final/ (default /tmp/report-review/final/). The page list is
+The rendered text and link lists go to $AUDIT_DIR/final/ (default ~/claude/work/report-review/final/). The page list is
 $AUDIT_DIR/manifest.tsv if it exists, else the manifest.tsv committed next to this tools directory."""
 import json, os, re, subprocess, sys, urllib.parse
-A = os.environ.get("AUDIT_DIR", "/tmp/report-review")
+A = os.path.expanduser(os.environ.get("AUDIT_DIR", "~/claude/work/report-review"))   # /tmp/report-review until 30 Sep
 HERE = os.path.dirname(os.path.abspath(__file__))
 R = os.path.abspath(os.path.join(HERE, "..", "..", "..", "..", ".."))  # repo root
 MANIFEST = A + "/manifest.tsv" if os.path.exists(A + "/manifest.tsv") else os.path.join(HERE, "..", "manifest.tsv")
