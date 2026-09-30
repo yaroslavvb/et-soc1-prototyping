@@ -9,7 +9,9 @@
 # What it never does: open a /dev/et* node, read a card attribute outside DESIGN.md §2.4 (never
 # utilization_percent, resource*, config, and nothing but the link, err_stats and the root port's AER counters of a
 # card in DASH_EXCLUDE_PCI), write anything (except the optional sample's stamp file), call tmux, or read anyone's
-# files, command lines, groups or where they log in from (no RemoteHost, no `who -u`). Every command runs under
+# files, command lines, groups or where they log in from (no RemoteHost, no `who -u`). Process names (ps comm) are
+# turned into coarse categories here, on the host; only the categories leave it (DESIGN.md §6), except a card
+# holder's program name, which et-who and et-usage show to every user of the host anyway. Every command runs under
 # `timeout` with stdin from /dev/null, so one slow command costs its own section only and nothing reads this script
 # from stdin by mistake.
 #
@@ -36,50 +38,19 @@ TREE=$HOME/${DASH_TREE:-nekko}
 BOOT=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
 # The logind session this probe runs in (Tailscale SSH gives each command one), left out of the people counts.
 MYSESS=$(sed -n 's#.*/session-\([A-Za-z0-9]*\)\.scope.*#\1#p' /proc/self/cgroup 2>/dev/null | head -1)
+# The probe's own processes are left out of the process counts and categories too: its process session (everything
+# it starts) and its ancestors (the ssh or cron chain, and on aifoundry2 the collector itself).
+MYSID=$(cut -d' ' -f6 /proc/$$/stat 2>/dev/null)
+ANC=" $$ "; _p=$PPID; _n=0
+while [ -n "$_p" ] && [ "$_p" -gt 1 ] 2>/dev/null && [ $_n -lt 30 ]; do
+  ANC="$ANC$_p "; _p=$(sed -n 's/^PPid:[[:space:]]*//p' "/proc/$_p/status" 2>/dev/null); _n=$((_n + 1))
+done
 # Device processes by executable name (ps comm), never by command line, as tools/claims-v3/lib.sh does.
 DEV_COMM='_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$'
-# Our framework's runners and the workloads' own run scripts, which take a card lock per launch (bracketed, so the
-# pattern never matches the `timeout ... pgrep` that carries it).
+# The collector account's own framework runners and the workloads' run scripts, which take a card lock per launch:
+# only the card sample's "experiment" gate uses this (bracketed, so the pattern never matches the `timeout ... pgrep`
+# that carries it).
 FW_RE='[t]ools/claims-v3|[q]ueue\.sh|[r]un_passes|[s]eries\.sh|[c]ard_run|[e]nergy\.sh|[w]orkloads/[^ ]*/run_|[t]ools/ettelem/[A-Za-z0-9_]+\.sh|(^|[ /])[r]un_[A-Za-z0-9_]+\.(sh|py)'
-# fw_kind: reads one process's argv (one argument per line) and prints "running <kind> <what>" when the program it runs
-# is one of our runners: argv[0], or past wrappers (nice, timeout, flock, env, ...) and their operands, the script an
-# interpreter runs. Words elsewhere never count: a shell's -c text, or a pager, editor or grep naming a runner, is not one.
-FW_AWK='
-  {a[NR] = $0}
-  END {
-    n = NR; i = 1
-    while (i <= n) {
-      b = a[i]; sub(/.*\//, "", b)
-      if (b !~ /^(nice|ionice|timeout|flock|nohup|env|setsid|stdbuf|chrt|taskset)$/) break
-      i++
-      while (i <= n && (a[i] ~ /^-/ || a[i] ~ /=/ || a[i] ~ /^[0-9.]+[smhd]?$/ || a[i] ~ /\.lock$/ || a[i] ~ /^\/run\/lock\//)) {
-        if (a[i] == "-c" || a[i] == "--command") exit
-        i++
-      }
-    }
-    if (i > n) exit
-    b = a[i]; sub(/.*\//, "", b)
-    if (b ~ /^(bash|sh|dash|python3?|python3\.[0-9]+)$/) {
-      i++
-      while (i <= n && a[i] ~ /^-/) { if (a[i] ~ /^-[A-Za-z]*c[A-Za-z]*$/ || a[i] == "-m") exit; i++ }
-      if (i > n) exit
-    }
-    prog = a[i]; kind = ""
-    if (prog ~ /queue\.sh$/) kind = "queue.sh"
-    else if (prog ~ /run_passes/) kind = "run_passes"
-    else if (prog ~ /series\.sh$/) kind = "series.sh"
-    else if (prog ~ /card_run/) kind = "card_run"
-    else if (prog ~ /energy\.sh$/) kind = "energy.sh"
-    else if (prog ~ /tools\/claims-v3\//) {k = prog; sub(/.*tools\/claims-v3\//, "", k); kind = "claims-v3/" k}
-    else if (prog ~ /workloads\/[^\/]+\/run_/) {k = prog; sub(/.*workloads\//, "", k); kind = k}
-    else if (prog ~ /tools\/ettelem\/[A-Za-z0-9_]+\.sh$/) {k = prog; sub(/.*tools\//, "", k); kind = k}
-    else if (prog ~ /(^|\/)run_[A-Za-z0-9_]+\.(sh|py)$/) {k = prog; sub(/.*\//, "", k); kind = k}
-    if (kind == "") exit
-    what = ""
-    for (j = i + 1; j <= n; j++) if (a[j] ~ /\.(txt|sched)$/) {what = a[j]; sub(/.*\//, "", what); break}
-    gsub(/[^A-Za-z0-9._\/-]/, "", kind); gsub(/[^A-Za-z0-9._-]/, "", what)
-    print "running", substr(kind, 1, 60), substr(what, 1, 80)
-  }'
 [ -z "${ETLH:-}" ] && [ -r "${DASH_ETLH_FILE:-}" ] && ETLH=$(cat "$DASH_ETLH_FILE")
 
 sec meta
@@ -127,18 +98,42 @@ t 10 loginctl list-sessions -o json | head -c 65536; echo
 sec pts
 for p in /dev/pts/[0-9]*; do [ -e "$p" ] && stat -c '%u %U %X' "$p" 2>/dev/null; done
 sec procs
-# per user: processes, left out: this probe's own session (its cgroup scope); per user: device processes (counts only)
-t 10 ps -eo uid=,user:32=,comm=,cgroup= | awk -v s="${MYSESS:-none}" -v re="$DEV_COMM" '
-  index($0, "/session-" s ".scope") {next}
-  {n[$1 " " $2]++; if ($3 ~ re) d[$1 " " $2]++; if ($3 == "Runner.Worker") ci++}
-  END {for (k in n) print "procs", k, n[k], d[k] + 0; print "ci_jobs", ci + 0}'
-
+# Per user: processes, device processes (counts), and what the processes are, as coarse categories (DESIGN.md §6):
+# agent (AI coding agents), build (compilers, linkers, make), sim (sys_emu), python, editor. The names are matched
+# here and never printed. Left out: the probe's own logind session (its cgroup scope), process session and ancestors.
+t 10 ps -eo pid=,sid=,uid=,user:32=,cgroup=,comm= | awk -v s="${MYSESS:-none}" -v sid="${MYSID:-none}" -v anc="$ANC" -v re="$DEV_COMM" '
+  function cat(c) {
+    if (c ~ /^(claude|codex|aider|gemini|goose|cursor-agent|opencode|crush|qwen|cline)$/) return "agent"
+    if (c ~ /^(cc1|cc1plus|cc1obj|as|ld|ld\.[a-z]+|lld|mold|collect2|make|gmake|cmake|ctest|ninja|meson|gcc|g\+\+|c\+\+|cc|clang|clang\+\+|clang-[0-9]+|rustc|cargo|ccache|riscv64-.*|riscv32-.*|x86_64-linux-.*)$/) return "build"
+    if (c == "sys_emu") return "sim"
+    if (c ~ /^(python|python[23]|python[23]\.[0-9]+|ipython|ipython3|jupyter.*)$/) return "python"
+    if (c ~ /^(vi|vim|nvim|emacs|emacs-.*|nano|micro|hx|helix|kak|joe|mcedit|code-server)$/) return "editor"
+    return ""
+  }
+  index($5, "/session-" s ".scope") || $2 == sid || index(anc, " " $1 " ") {next}
+  {c = $6; for (i = 7; i <= NF; i++) c = c " " $i
+   k = $3 " " $4; n[k]++; if (c ~ re) d[k]++; if (c == "Runner.Worker") ci++
+   x = cat(c); if (x != "" && !((k, x) in seen)) {seen[k, x] = 1; cats[k] = cats[k] (cats[k] == "" ? "" : ",") x}}
+  END {for (k in n) print "procs", k, n[k], d[k] + 0, (cats[k] == "" ? "-" : cats[k]); print "ci_jobs", ci + 0}'
 sec etwho
-# node, user and elapsed time only: the command column is cut off here, before the output leaves the host
+# node, user, elapsed time and the program's name (the base name of its first argument, at most 15 characters, as
+# ps comm): the rest of the command line is cut off here, before the output leaves the host
 ew=$(t 10 et-who); ec=$?
 echo "exit $ec"
-printf '%s\n' "$ew" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/ {print "held", $1, $2, $4}'
+printf '%s\n' "$ew" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/ {p = $5; sub(/.*\//, "", p); gsub(/[^A-Za-z0-9._+-]/, "", p)
+  print "held", $1, $2, $4, (p == "" ? "-" : substr(p, 1, 15))}'
 printf '%s\n' "$ew" | grep -q '^No process holds' && echo "idle"
+
+sec usage
+# et-usage (tools/lab/et-usage): who held each card, from the logger's files, as one JSON object: the last 26 hours
+# (the page shows 24) and the daily totals of the last 7 days. Readable by every user, like et-who; "absent" until
+# the logger is installed on this host. The output is cut at 2 MB; "rc" is et-usage's exit status (124: timed out).
+if command -v et-usage >/dev/null 2>&1; then
+  t 20 nice -n 10 et-usage --json --since 26h | head -c 2000000 | tr -d '\r'; rc=${PIPESTATUS[0]}; echo
+  echo "rc $rc"
+else
+  echo "absent"
+fi
 
 sec cards
 # DESIGN.md §2.4: the driver's own counters in host memory. A card in DASH_EXCLUDE_PCI gets only what et-lab-health
@@ -177,70 +172,46 @@ nw=$HOME/nodewatch
 if [ -r "$nw/heartbeat.log" ]; then
   echo "present"
   # one row per ten-minute slot (the first 15 characters of the time): lines, max load, min memavail (G), max
-  # sessions (ours, all), min tmux alive, min Claude count. Nothing from the path[...] fields leaves the host.
+  # sessions (all users). Only these leave the host: nothing from the path[...] fields, and not the tmux, Claude and
+  # own-session columns, which are about the account that runs nodewatch.
   t 10 tail -n 2900 "$nw/heartbeat.log" | awk '
     {k = substr($1, 1, 15); off = substr($1, 20, 5)
-     ld = ""; mem = ""; so = ""; sa = ""; tm = ""; cl = ""
+     ld = ""; mem = ""; sa = ""
      for (i = 2; i <= NF; i++) {
        split($i, kv, "=")
        if (kv[1] == "load") ld = kv[2] + 0
        else if (kv[1] == "memavail") {m = kv[2]; sub(/G$/, "", m); mem = m + 0}
-       else if (kv[1] == "sessions") {split(kv[2], ss, "/"); so = ss[1] + 0; sa = ss[2] + 0}
-       else if (kv[1] == "tmux") tm = (kv[2] == "-" ? 0 : 1)
-       else if (kv[1] == "claude") {c = kv[2]; sub(/.*\(/, "", c); sub(/\).*/, "", c); cl = c + 0}
+       else if (kv[1] == "sessions") {split(kv[2], ss, "/"); sa = ss[2] + 0}
      }
-     if (!(k in n)) {order[++no] = k; offs[k] = off; ml[k] = -1; mm[k] = 1e9; mo[k] = -1; ma[k] = -1; mt[k] = 9; mc[k] = 1e9}
+     if (!(k in n)) {order[++no] = k; offs[k] = off; ml[k] = -1; mm[k] = 1e9; ma[k] = -1}
      n[k]++
      if (ld != "" && ld > ml[k]) ml[k] = ld
      if (mem != "" && mem < mm[k]) mm[k] = mem
-     if (so != "" && so > mo[k]) mo[k] = so
      if (sa != "" && sa > ma[k]) ma[k] = sa
-     if (tm != "" && tm < mt[k]) mt[k] = tm
-     if (cl != "" && cl < mc[k]) mc[k] = cl
      last = $0}
     END {
      for (i = 1; i <= no; i++) {k = order[i]
-       printf "b %s %s %d %s %s %s %s %s %s\n", k, offs[k], n[k], (ml[k] < 0 ? "-" : ml[k]), (mm[k] == 1e9 ? "-" : mm[k]),
-         (mo[k] < 0 ? "-" : mo[k]), (ma[k] < 0 ? "-" : ma[k]), (mt[k] == 9 ? "-" : mt[k]), (mc[k] == 1e9 ? "-" : mc[k])}
+       printf "b %s %s %d %s %s %s\n", k, offs[k], n[k], (ml[k] < 0 ? "-" : ml[k]), (mm[k] == 1e9 ? "-" : mm[k]), (ma[k] < 0 ? "-" : ma[k])}
      if (last != "") {
        split(last, f, " "); out = "last " f[1]
-       for (i = 2; i in f; i++) if (f[i] ~ /^(boot|user@|linger|sessions|load|memavail)=/) out = out " " f[i]
-         else if (f[i] ~ /^tmux=/) out = out " tmux=" (f[i] == "tmux=-" ? 0 : 1)
-         else if (f[i] ~ /^claude=/) {c = f[i]; sub(/.*\(/, "", c); sub(/\).*/, "", c); out = out " claude=" c}
+       for (i = 2; i in f; i++) if (f[i] ~ /^(boot|load|memavail)=/) out = out " " f[i]
+         else if (f[i] ~ /^sessions=/) {v = f[i]; sub(/^sessions=[^\/]*\//, "", v); out = out " sessions=" v}
        print out}}'
   if [ -r "$nw/events.log" ]; then
     since=$(date -d '-48 hours' +%FT%T)
-    # the time, the type and one word; LOGIN and LOGOUT only as counts (never from=, the machine/login or argv)
+    # the time, the type and one word for the host's own events; LOGIN and LOGOUT only as counts (never from=, the
+    # machine/login or argv)
     t 10 tail -n 5000 "$nw/events.log" | awk -v s="$since" '
       substr($1, 1, 19) < s {next}
       $2 == "LOGIN" {li++; next}
       $2 == "LOGOUT" {lo++; next}
-      $2 == "CLAUDE" || $2 == "TMUX" {print "ev", $1, $2, ($3 == "gone" || $4 == "gone" ? "gone" : "up"); next}
       $2 == "REBOOT" {print "ev", $1, $2, "reboot"; next}
       $2 == "START" {print "ev", $1, $2, "start"; next}
-      $2 == "LINGER" {w = $NF; gsub(/[^A-Za-z0-9-]/, "", w); print "ev", $1, $2, w; next}
-      $2 == "USER-MANAGER" {w = $6; gsub(/[^A-Za-z0-9-]/, "", w); print "ev", $1, $2, (w == "" ? "?" : w); next}
-      $2 == "SIGNAL" {w = $3; gsub(/[^A-Z0-9]/, "", w); print "ev", $1, $2, w; next}
       $2 == "WARN" {print "ev", $1, $2, "warn"; next}
       END {print "logins", li + 0, lo + 0}' | tail -n 200
   fi
 else
   echo "absent"
-fi
-
-sec experiments
-# pgrep runs alone first (an awk beside it in a pipe would match its own program text); then each candidate's argv,
-# NUL-separated in /proc so arguments keep their boundaries, is classified by the program it runs (FW_AWK)
-fwl=$(t 10 pgrep -u "$MYUID" -f "$FW_RE")
-for p in $fwl; do
-  [ "$p" = "$$" ] && continue
-  tr '\0' '\n' < "/proc/$p/cmdline" 2>/dev/null | head -n 64 | cut -c1-400 | awk "$FW_AWK"
-done | sort | uniq -c | head -20
-t 10 ps -eo uid=,comm= | awk -v me="$MYUID" -v re="$DEV_COMM" '$1 == me && $2 ~ re {n++} END {print "our_device_procs", n + 0}'
-lg=$(ls -t "$TREE"/build/claims-v3/*.log 2>/dev/null | head -1)
-if [ -n "$lg" ]; then
-  echo "last_log ${lg##*/} $(stat -c %Y "$lg")"
-  t 5 tail -n 400 "$lg" | grep -E 'begins|ends|queue ends|run.sh: done' | tail -n 1 | cut -c1-200 | sed 's/^/last_line /'
 fi
 
 sec telemetry

@@ -6,9 +6,9 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const ELL = '—';
-  const H = D.hosts || {}, C = D.cards || {}, P = Array.isArray(D.people) ? D.people : [], O = D.owner || {};
+  const H = D.hosts || {}, C = D.cards || {}, P = Array.isArray(D.people) ? D.people : [];
   const HI = D.history || {}, COL = D.collector || {};
-  const OWNER = O.login || (P.find(p => p && p.owner) || {}).login || null;
+  const U = (D.usage && typeof D.usage === 'object') ? D.usage : null, UH = (U && U.hosts) || {}, UC = (U && U.cards) || {};
   const STALE_MIN = +COL.stale_after_min || 80, IV_MIN = +COL.interval_min || 10, HB_MIN = +COL.heartbeat_min || 60;
   const natural = (a, b) => a.localeCompare(b, 'en', {numeric: true});
   const later = [];  // chart draws, run once the DOM they measure is in the page
@@ -67,6 +67,35 @@
     const hrs = Math.round(min / 60), d = Math.floor(hrs / 24), h = hrs % 24;
     return d + ' d' + (h ? ' ' + h + ' h' : '');
   }
+  /* Durations in seconds: "3 s", "4 min 10 s", then dur()'s "2 h 5 min". */
+  function durS(s) {
+    if (!isNum(s)) return ELL;
+    s = Math.max(0, s);
+    if (s < 1) return 'under 1 s';
+    if (s < 59.5) return Math.round(s) + ' s';
+    if (s < 600) { const r = Math.round(s), m = Math.floor(r / 60), x = r % 60; return m + ' min' + (x ? ' ' + x + ' s' : ''); }
+    return dur(s / 60);
+  }
+  /* Card use is drawn in the lab's own time zone (lab.json "tz", America/Los_Angeles), whatever the viewer's zone. */
+  const LTZ = (U && U.tz) || COL.lab_tz || null;
+  function labFmt(o) {
+    try { return new Intl.DateTimeFormat('en-GB', Object.assign({}, o, LTZ ? {timeZone: LTZ} : {})); } catch (_) { return new Intl.DateTimeFormat('en-GB', o); }
+  }
+  const L_HM = labFmt({hour: '2-digit', minute: '2-digit', hourCycle: 'h23'}), L_HMS = labFmt({hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'});
+  const L_H = labFmt({hour: 'numeric', hourCycle: 'h23'}), L_WD = labFmt({weekday: 'short'}), L_D = labFmt({day: 'numeric'});
+  const L_DAY = labFmt({year: 'numeric', month: '2-digit', day: '2-digit'}), L_DM = labFmt({weekday: 'short', day: 'numeric', month: 'short'});
+  let LZONE = '';
+  try {
+    const z = new Intl.DateTimeFormat('en-US', Object.assign({timeZoneName: 'short'}, LTZ ? {timeZone: LTZ} : {})).formatToParts(GEN || Date.now()).find(x => x.type === 'timeZoneName');
+    LZONE = z ? z.value : '';
+  } catch (_) { /* no zone name */ }
+  const labHour = ms => parseInt(L_H.format(ms), 10) % 24;
+  /* A time in the lab's zone: "13:12" on the data's own day, "Tue 13:12" before it; with seconds when asked. */
+  function lclock(ms, secs) {
+    if (!isNum(ms)) return ELL;
+    const t = (secs ? L_HMS : L_HM).format(ms);
+    return L_DAY.format(ms) === L_DAY.format(isNum(GEN) ? GEN : Date.now()) ? t : L_WD.format(ms) + ' ' + t;
+  }
   /* "2026-10-28" -> "28 Oct"; any other string as it is */
   const dateText = s => (/^\d{4}-\d\d-\d\d$/.test(String(s)) ? F_DM.format(new Date(s + 'T12:00:00')) : String(s));
   const agoText = ms => (!isNum(ms) ? ELL : Date.now() - ms < 45e3 ? 'just now' : dur((Date.now() - ms) / 6e4) + ' ago');
@@ -87,7 +116,7 @@
 
   /* ---- levels ---- */
   const LV = {ok: 'lv-ok', warn: 'lv-warn', bad: 'lv-bad', stale: 'lv-stale', unknown: 'lv-unk', excluded: 'lv-excl', info: 'lv-info',
-    ours: 'lv-ours', held: 'lv-held', free: 'lv-ok', missing: 'lv-bad'};
+    held: 'lv-held', free: 'lv-ok', missing: 'lv-bad'};
   const RANK = {bad: 3, warn: 2, info: 1, ok: 0};
   function pill(level, word, extra, title) {
     const p = E('span', 'pill ' + (LV[level] || 'lv-unk'), attrs(E('i'), {'aria-hidden': 'true'}), word, extra ? E('span', 'pl', extra) : null);
@@ -115,15 +144,58 @@
     CK.cardMark(svg, id, s / 2, s / 2, s * 0.3);
     return svg;
   }
-  const isOwner = login => !!login && login === OWNER;
+  /* ---- one colour per login, the same everywhere on the page (card use, the 48-hour rows, the tables). The six
+     series tokens in their fixed order go to the (at most six) logins with the most card time, in alphabetical order
+     among them, so a colour follows a name; everyone else is "others", in --ref. Names always travel with the colour:
+     legends, tooltips, labels and tables. ---- */
+  const SERIES = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c7)'];
+  const OTHER_COLOR = 'var(--ref)';
+  const USER_COLOR = (function () {
+    const score = {}, bump = (u, s) => { if (u && u !== '?') score[u] = (score[u] || 0) + s; };
+    for (const id in UC) {
+      const cu = UC[id] || {};
+      for (const [u, e] of Object.entries(cu.users || {})) bump(u, 1e6 + ((e && e.held_s) || 0) * 10);
+      for (const x of cu.now || []) bump(x.user, 1e6);
+      for (const d of cu.daily || []) for (const [u, e] of Object.entries(d.users || {})) bump(u, (e && e.held_s) || 0);
+    }
+    for (const id in C) for (const w of ((C[id] || {}).holder || {}).who || []) if (!w.system) bump(w.login, 1e6);
+    for (const id in (HI.cards || {})) for (const h of ((HI.cards[id] || {}).hold || [])) if (h && h !== 'system') bump(h, 1);
+    const top = Object.keys(score).sort((a, b) => score[b] - score[a] || natural(a, b)).slice(0, SERIES.length).sort(natural);
+    const m = {};
+    top.forEach((u, k) => { m[u] = SERIES[k]; });
+    return m;
+  })();
+  const userColor = u => USER_COLOR[u] || OTHER_COLOR;
+  const hasOthers = logins => logins.some(u => !USER_COLOR[u]);
+  function swatch(u, size) {
+    const s = size || 10, svg = CK.el('svg', {width: s, height: s, viewBox: `0 0 ${s} ${s}`, 'aria-hidden': 'true', class: 'mk'});
+    CK.el('rect', {x: 0, y: 0, width: s, height: s, rx: 2}, svg).style.fill = userColor(u);
+    return svg;
+  }
+  const DOING = {card: 'on a card', agent: 'AI agent', build: 'building', sim: 'simulator', python: 'Python', editor: 'editor', shell: 'shell only'};
+  const doingText = list => (Array.isArray(list) && list.length ? list.map(k => DOING[k] || k).join(', ') : null);
 
-  /* ---- a card's state: FREE, OURS, IN USE, EXCLUDED, NO DATA, MISSING ---- */
+  /* ---- a card's state: FREE, IN USE, EXCLUDED, NO DATA, MISSING ---- */
+  function holderOf(c) {
+    const who = (c.holder && Array.isArray(c.holder.who)) ? c.holder.who : [];
+    const w = who.find(x => /^\/dev\//.test(String(x.node || ''))) || who[0];  // the node holder names the program
+    return w ? Object.assign({}, w, w.system ? {login: null} : {}) : null;  // root or CI: "system or CI"
+  }
+  function holdSince(w) {
+    const t = isNum(w.since_ms) ? w.since_ms : isNum(w.etime_s) && isNum(GEN) ? GEN - w.etime_s * 1000 : null;
+    return t;
+  }
   function cardState(id) {
     const c = C[id] || {}, host = H[hostOfCard(id)] || {};
-    if (c.excluded) return {key: 'excluded', word: 'EXCLUDED', title: c.note || 'excluded from all work'};
+    const w = holderOf(c);
+    if (c.excluded && !w && host.reachable !== false) return {key: 'excluded', word: 'EXCLUDED', title: c.note || 'excluded from all work'};
     if (c.present === false) return {key: 'missing', word: 'MISSING', title: 'the driver has no bound device for this card'};
-    const who = (c.holder && Array.isArray(c.holder.who)) ? c.holder.who : [];
-    const w = who[0] ? Object.assign({}, who[0], who[0].system ? {login: null} : {}) : null;  // root or CI: "system or CI"
+    if (host.reachable === false && !PAGE_STALE) {
+      const seen = T(c, 'as_of') || T(host, 'last_ok_at'), st = stateOf(host);
+      const was = w ? 'held by ' + (w.login || 'system or CI') : c.excluded ? 'excluded' : 'free';
+      return {key: 'unknown', word: 'UNKNOWN:', extra: st === 'down' ? 'machine down' : st === 'approval needed' ? 'approval needed' : 'no answer', stale: true,
+        title: seen ? `last known at ${clock(seen)}: ${was}` : 'no data from this machine yet'};
+    }
     if (host.reachable === false || c.stale || PAGE_STALE) {
       const seen = (host.reachable === false || c.stale) ? (T(c, 'as_of') || T(host, 'last_ok_at')) : GEN;
       const was = w ? 'held by ' + (w.login || 'system or CI') : 'free';
@@ -131,11 +203,13 @@
         title: PAGE_STALE ? 'this page\'s data is ' + dur(ageMin()) + ' old' : 'the machine did not answer the latest check'};
     }
     if (w) {
-      const ours = w.ours || isOwner(w.login), t = isNum(w.etime_s) ? dur(w.etime_s / 60) : null;
-      if (ours) return {key: 'ours', word: 'OURS', extra: t, login: w.login};
-      return {key: 'held', word: 'IN USE', extra: (w.login || 'system or CI') + (t ? ' · ' + t : ''), login: w.login || null};
+      const t = holdSince(w);
+      return {key: c.excluded ? 'warn' : 'held', word: 'IN USE:', login: w.login || null,
+        extra: [w.login || 'system or CI', w.comm || null, t ? 'since ' + lclock(t) : null].filter(Boolean).join(' · '),
+        title: (c.excluded ? 'an excluded card in use; ' : '') + 'from et-who' + (w.from === 'et-usage' || isNum(w.since_ms) ? ' and et-usage' : '')};
     }
     if (c.holder && c.holder.held) return {key: 'held', word: 'IN USE'};
+    if (c.excluded) return {key: 'excluded', word: 'EXCLUDED', title: c.note || 'excluded from all work'};
     if (!c.holder || host.reachable !== true) return {key: 'unknown', word: 'NO DATA'};
     return {key: 'free', word: 'FREE'};
   }
@@ -162,9 +236,11 @@
   const pdClass = s => ({active: 'active', idle: 'idle', away: 'away', 'processes only': 'procs'}[s] || 'away');
   const presence = s => attrs(E('span', 'pd ' + pdClass(s)), {'aria-hidden': 'true'});
   function sortedPeople(list) {
-    return list.slice().sort((a, b) => (b.owner ? 1 : 0) - (a.owner ? 1 : 0) || (STATUS_RANK[a.status] ?? 9) - (STATUS_RANK[b.status] ?? 9)
-      || natural(String(a.login), String(b.login)));
+    return list.slice().sort((a, b) => (STATUS_RANK[a.status] ?? 9) - (STATUS_RANK[b.status] ?? 9) || natural(String(a.login), String(b.login)));
   }
+  /* Logged in on a machine: at least one session that is not closing. */
+  const loggedOn = (p, h) => !!(p && p.hosts && p.hosts[h] && isNum(p.hosts[h].sessions) && p.hosts[h].sessions > 0);
+  const loggedIn = p => Object.keys((p && p.hosts) || {}).some(h => loggedOn(p, h));
   const peopleOn = h => sortedPeople(P.filter(p => p && p.hosts && p.hosts[h]));
   function idleOf(p, h) {
     const hs = h ? [p.hosts[h]] : Object.values(p.hosts || {});
@@ -174,10 +250,10 @@
   /* A person's status on one machine (the collector's per-machine status), else their overall status. */
   const statusOn = (p, h) => (h && p.hosts && p.hosts[h] && p.hosts[h].status) || (h && p.hosts && p.hosts[h] ? 'processes only' : p.status);
   function personChip(p, h) {
-    const idle = idleOf(p, h), me = p.owner || isOwner(p.login), st = statusOn(p, h) || 'unknown';
-    const s = E('span', 'who' + (me ? ' me' : ''), presence(st), p.login, me ? ' (you)' : null,
-      E('span', 'vh', ', ' + st + (isNum(idle) ? ', idle ' + dur(idle) : '')));
-    s.title = st + (isNum(idle) ? ', idle ' + dur(idle) : '');
+    const idle = idleOf(p, h), st = statusOn(p, h) || 'unknown', dg = doingText(((p.hosts || {})[h] || {}).doing || p.doing);
+    const t = st + (isNum(idle) ? ', idle ' + dur(idle) : '') + (dg ? '; ' + dg : '');
+    const s = E('span', 'who', presence(st), p.login, E('span', 'vh', ', ' + t));
+    s.title = t;
     return s;
   }
 
@@ -387,8 +463,20 @@
   }
 
   /* ================= overview strip ================= */
+  /* The machine's own state (DESIGN.md §1.2): up, down (Tailscale: offline), unreachable, approval needed. */
+  const stateOf = x => (x && x.state) || (x && x.reachable === true ? 'up' : x && x.reachable === false ? 'unreachable' : 'no data');
+  const isUp = h => stateOf(H[h]) === 'up';
+  function statePill(x) {
+    const st = stateOf(x);
+    if (st === 'down') return pill('bad', 'DOWN', null, 'Tailscale says the machine is offline');
+    if (st === 'unreachable') return pill((x.fails_in_row || 0) >= 2 ? 'bad' : 'warn', 'UNREACHABLE', null, 'online on Tailscale, but ssh did not answer');
+    if (st === 'approval needed') return pill('warn', 'APPROVAL NEEDED', null, 'Tailscale SSH waits for a person to approve a check');
+    return null;
+  }
   function hostPill(h) {
     const al = alertsOfHost(h), b = count(al, 'bad'), w = count(al, 'warn'), x = H[h] || {};
+    const sp = statePill(x);
+    if (sp) return sp;
     if (b) return pill('bad', plural(b, 'PROBLEM', 'PROBLEMS'));
     if (w) return pill('warn', plural(w, 'WARNING', 'WARNINGS'));
     if (x.reachable === false) return pill('unknown', 'NO ANSWER');
@@ -396,10 +484,16 @@
     if (x.level === 'bad' || x.level === 'warn') return pill(x.level, x.level === 'bad' ? 'PROBLEM' : 'WARNING');
     return pill('ok', 'OK');
   }
+  /* "down since 14:33 (last answer 14:32; Tailscale last seen 14:33)" */
   function reachText(x) {
-    const why = x.error || 'no answer', last = T(x, 'last_ok_at') || T(x, 'as_of');
-    return [why, last ? ' · last data ' + clock(last) + ' (' : '', last ? agoSpan(last) : null, last ? ')' : ''];
+    const st = stateOf(x), since = isNum(x.down_since_ms) ? x.down_since_ms : T(x, 'state_since');
+    const last = isNum(x.last_answer_ms) ? x.last_answer_ms : T(x, 'last_ok_at') || T(x, 'as_of'), tsl = x.tailscale_last_seen_ms;
+    const word = st === 'down' ? 'down' : st === 'approval needed' ? 'approval needed' : 'unreachable';
+    const why = st === 'unreachable' && x.error ? ': ' + x.error : '';
+    const paren = [last ? 'last answer ' + clock(last) : 'no answer yet', st === 'down' && isNum(tsl) ? 'Tailscale last seen ' + clock(tsl) : null].filter(Boolean).join('; ');
+    return [word, since ? ' since ' + clock(since) : '', why, ' (', paren, ')'];
   }
+  const lastKnown = x => { const t = isNum(x.last_answer_ms) ? x.last_answer_ms : T(x, 'last_ok_at'); return t ? clock(t) : null; };
   function upText(x) { return isNum(x.uptime_h) ? 'up ' + dur(x.uptime_h * 60) : null; }
   function renderStrip() {
     const root = $('strip');
@@ -422,7 +516,10 @@
         box.append(chip);
       }
       const ppl = peopleOn(h);
-      box.append(E('div', 'logins', ppl.length ? ppl.map(p => personChip(p, h)) : E('span', 'small muted', 'nobody seen')));
+      if (!isUp(h) && H[h]) {
+        const lk = lastKnown(x);
+        box.append(E('div', 'logins is-old', E('span', 'small', 'People: unknown now' + (lk ? `; at ${lk}: ` : '')), lk ? (ppl.length ? ppl.map(p => personChip(p, h)) : E('span', 'small muted', 'nobody')) : null));
+      } else box.append(E('div', 'logins', ppl.length ? ppl.map(p => personChip(p, h)) : E('span', 'small muted', 'nobody seen')));
       root.append(box);
     }
   }
@@ -431,38 +528,47 @@
   function renderKpis() {
     const k = (lab, val, sub) => E('div', 'kpi card', E('div', 'lab', lab), E('div', 'val', val), E('div', 'sub', sub || ELL));
     const ans = HOSTS.filter(h => (H[h] || {}).reachable === true);
-    const miss = HOSTS.filter(h => (H[h] || {}).reachable !== true).map(h => h + ': ' + ((H[h] || {}).reachable === false ? (H[h] || {}).error || 'no answer' : 'no data'));
+    const miss = HOSTS.filter(h => (H[h] || {}).reachable !== true).map(h => { const x = H[h] || {}; return x.reachable === false ? `${h} ${stateOf(x).toUpperCase()}` + (isNum(x.down_since_ms) ? ` since ${clock(x.down_since_ms)}` : '') : h + ': no data'; });
     const usable = CARDS.filter(id => !(C[id] || {}).excluded);
-    const states = usable.map(cardState), free = states.filter(s => s.key === 'free').length;
-    const parts = [];
-    const ours = states.filter(s => s.key === 'ours').length, held = states.filter(s => s.key === 'held');
-    if (ours) parts.push(ours + ' ours');
-    if (held.length) parts.push(held.length + ' in use' + (held.length === 1 && held[0].login ? ' by ' + held[0].login : ''));
-    const unk = states.filter(s => s.key === 'unknown').length; if (unk) parts.push(unk + ' no data');
-    const excl = CARDS.length - usable.length; if (excl) parts.push(excl + ' excluded');
+    const states = CARDS.map(id => [id, cardState(id)]);
+    const inUse = states.filter(([id, s]) => s.word.startsWith('IN USE') && !(C[id] || {}).excluded);
+    const exclUsed = states.filter(([id, s]) => s.word.startsWith('IN USE') && (C[id] || {}).excluded);
+    const parts = inUse.map(([id, s]) => `${s.login || 'someone'} on ${cardName(id)}`);
+    exclUsed.forEach(([id, s]) => parts.push(`${s.login || 'someone'} on the excluded ${cardName(id)}`));
+    const unk = states.filter(([id, s]) => s.key === 'unknown' && !(C[id] || {}).excluded).length; if (unk) parts.push(unk + ' no data');
+    const excl = CARDS.length - usable.length; if (excl && !exclUsed.length) parts.push(excl + ' excluded');
     const b = count(LIVE, 'bad'), w = count(LIVE, 'warn'), inf = count(LIVE, 'info'), kn = ALERTS.length - LIVE.length;
-    const act = P.filter(p => p.status === 'active').length;
-    const others = ['idle', 'away', 'processes only'].map(s => [s, P.filter(p => p.status === s).length]).filter(x => x[1]).map(x => x[1] + ' ' + x[0]);
-    const runs = HOSTS.flatMap(h => (((H[h] || {}).experiments || {}).running || []).map(r => [h, r]));
-    const bm = (O.sessions || {}).by_machine || {};
-    const working = Object.values(bm).reduce((s, m) => s + (isNum(m.working) ? m.working : 0), 0);
-    const accts = ((O.claudes || {}).accounts) || [];
+    const upHosts = HOSTS.filter(h => (H[h] || {}).reachable !== false);
+    const logged = P.filter(p => upHosts.some(h => loggedOn(p, h))), act = P.filter(p => upHosts.some(h => statusOn(p, h) === 'active' && p.hosts && p.hosts[h]));
+    const perHost = HOSTS.map(h => {
+      if ((H[h] || {}).reachable === false) return `${h} unknown (${stateOf(H[h])})`;
+      return `${h} ${P.filter(p => loggedOn(p, h)).length}`;
+    });
+    const others = ['idle', 'away', 'processes only'].map(s => [s, P.filter(p => p.status === s).length]).filter(x => x[1])
+      .map(x => x[0] === 'processes only' ? `${x[1]} with processes only` : x[1] + ' ' + x[0]);
     $('kpis').append(
       k('Machines answering', `${ans.length} of ${HOSTS.length}`, miss.length ? miss.join('; ') : 'all answered the last check'),
-      k('Cards free', `${free} of ${usable.length}`, parts.join(' · ') || 'all free'),
+      k('People logged in', String(logged.length), perHost.join(' · ')),
+      k('Active now', String(act.length), 'a terminal used in the last 30 min' + (others.length ? '; ' + others.join(', ') : '')),
+      k('Cards in use now', `${inUse.length} of ${usable.length}`, parts.join(' · ') || 'all free'),
+      usageKpi(k),
       k('Alerts', b ? plural(b, 'problem') : w ? plural(w, 'warning') : 'none',
-        `${plural(b, 'problem')} · ${plural(w, 'warning')} · ${plural(inf, 'note')} · ${kn} known`),
-      k('People active now', String(act), P.length ? `of ${P.length} seen` + (others.length ? ': ' + others.join(', ') : '') : 'nobody seen'),
-      k('Our experiments', runs.length ? runs.length + ' running' : 'none running',
-        runs.length ? runs.map(([h, r]) => `${r.kind || 'run'} on ${h}`).join('; ') : lastEnded()),
-      k('Your Claude sessions', working + ' working',
-        (isNum((O.sessions || {}).needs_you) && O.sessions.needs_you ? `${O.sessions.needs_you} need${O.sessions.needs_you === 1 ? 's' : ''} you · ` : '') +
-        (accts.length ? `claudes: ${accts.filter(a => a.logged_in).length} of ${accts.length} logged in` : 'claudes: no data')));
+        `${plural(b, 'problem')} · ${plural(w, 'warning')} · ${plural(inf, 'note')} · ${kn} known`));
   }
-  function lastEnded() {
-    let best = null;
-    for (const h of HOSTS) { const l = (((H[h] || {}).experiments) || {}).last_log; const t = T(l, 'at'); if (l && t && (!best || t > best.t)) best = {t, h}; }
-    return best ? `last log line ${clock(best.t)} on ${best.h}` : 'no recent log';
+  function usageKpi(k) {
+    if (!U) return k('Card use, last 24 h', ELL, 'no card-use data');
+    const ids = CARDS.filter(id => (UC[id] || {}).logged);
+    const people = new Set(), notLogged = HOSTS.filter(h => !['running', 'stale'].includes((UH[h] || {}).logger));
+    let held = 0, cards = 0;
+    for (const id of ids) {
+      const cu = UC[id];
+      Object.keys(cu.users || {}).forEach(u => people.add(u));
+      if (isNum(cu.held_s) && cu.held_s > 0) { held += cu.held_s; cards++; }
+    }
+    const val = ids.length ? (people.size ? plural(people.size, 'person', 'people') : 'nobody') : 'not logged';
+    const sub = (ids.length ? `${durS(held)} held on ${plural(cards, 'card')}` : 'no machine logs card use yet') +
+      (notLogged.length && ids.length ? `; not logged on ${notLogged.join(', ')}` : '');
+    return k('Card use, last 24 h', val, sub);
   }
 
   /* ================= alerts ================= */
@@ -470,7 +576,7 @@
   function scopeOf(a) {
     if (a.card) return E('span', 'scope', markSvg(a.card, 12), cardName(a.card));
     if (a.host) return E('span', 'scope', a.host);
-    return E('span', 'scope', {owner: 'you', people: 'people', collector: 'the collector'}[a.scope] || a.scope || ELL);
+    return E('span', 'scope', {people: 'people', collector: 'the collector'}[a.scope] || a.scope || ELL);
   }
   function alertRow(a, minor) {
     const since = T(a, 'since');
@@ -525,11 +631,11 @@
     later.push(() => spark(sp2, {label: h + ' memory available', name: 'Memory available, GiB', lo: 0, hi: isNum(m.total_gib) ? m.total_gib : null,
       series: [{v: hs('mem_avail_gib'), color: 'var(--c1)', label: 'lowest in the slot'}]}));
     const lg = x.logins || {}, sp3 = E('div', 'vs');
-    const ownS = hs('sessions_owner'), allS = hs('sessions_all');
+    const allS = hs('sessions_all');
     out.append(vital('Sessions', isNum(lg.sessions) ? n0(lg.sessions) : ELL,
       isNum(lg.people) ? plural(lg.people, 'person', 'people') : null, sp3));
     later.push(() => spark(sp3, {label: h + ' login sessions', name: 'Login sessions', lo: 0, fmt: n0,
-      series: [{v: allS, color: 'var(--ink-2)', label: 'all, including the login screen'}, {v: ownS, color: 'var(--c7)', label: 'yours'}]}));
+      series: [{v: allS, color: 'var(--ink-2)', label: 'all, including the login screen'}]}));
     for (const dk of (Array.isArray(x.disks) ? x.disks : [])) {
       out.append(vital('Disk ' + dk.mount, isNum(dk.used_pct) ? n0(dk.used_pct) + '% used' : ELL,
         isNum(dk.free_gib) ? n0(dk.free_gib) + ' GiB free' : null, E('div', 'vs', isNum(dk.used_pct) ? meter(dk.used_pct, 85, 97) : null)));
@@ -606,7 +712,7 @@
     const tile = attrs(E('div', 'ct card' + (c.excluded ? ' excl' : '')), {'data-card': id, id: 'card-' + id});
     tile.append(E('div', 'ct-head', markSvg(id, 16), E('b', null, cardName(id, true)), E('span', 'ct-id', id), cardHealth(id), pill(st.key, st.word, st.extra, st.title)));
     if (c.excluded) tile.append(E('p', 'ct-note', 'Excluded (overheats): never touched; driver counters only.'));
-    else if (stale) tile.append(E('p', 'ct-note', host.reachable === false || c.stale ? 'Last known state: the machine did not answer the latest check.'
+    else if (stale) tile.append(E('p', 'ct-note', host.reachable === false || c.stale ? `Last known at ${lastKnown(host) || '?'}: the machine is ${stateOf(host) === 'down' ? 'down' : 'not answering'}; nothing below is current.`
       : `Last known state: this page's data is ${dur(ageMin())} old.`));
     tile.append(gauge(c, r, stale));
     const kv = E('dl', 'kv');
@@ -624,9 +730,16 @@
     const aer = c.aer || {};
     row('Root port', isNum(aer.port_per_h) ? `${n0(aer.port_per_h)} corrected errors/h` : ELL);
     tile.append(kv);
-    const strip = E('div', 'strip48');
-    tile.append(E('div', 'small muted', 'Held and used, last 48 hours'), strip);
-    later.push(() => activityStrip(strip, id));
+    const cu = UC[id] || {}, strip = E('div', 'strip48');
+    if (cu.logged) {
+      // the card's own lane of "Card use, last 24 hours", smaller
+      const a = focusLink(attrs(E('a', null, 'Card use'), {href: '#card-use'}), '#card-use');
+      tile.append(E('div', 'small muted', usageSentence(id, true), ' (', a, ')'), strip);
+      later.push(() => usageStrip(strip, id));
+    } else {
+      tile.append(E('div', 'small muted', 'Held at the 10-minute checks, last 48 hours', ' (', notLoggedText(hostOfCard(id)), ')'), strip);
+      later.push(() => activityStrip(strip, id));
+    }
     tile.append(cardDetails(id, c, r, sx, host));
     return tile;
   }
@@ -634,7 +747,8 @@
     const d = E('details', 'ct-more', E('summary', null, 'Every number and its source'));
     const er = c.errors || {}, fmtObj = o => (o && Object.keys(o).length ? Object.entries(o).map(([k, v]) => `${n0(v)} ${k}`).join(', ') : 'none');
     const kl = c.kernel_log || {}, act = c.activity || {}, aer = c.aer || {}, sm = c.sample || {}, gd = c.guard, l = c.link || {};
-    const who = ((c.holder || {}).who || []).map(w => `${(!w.system && w.login) || 'system or CI'} on ${w.node || '?'}${isNum(w.etime_s) ? ', ' + dur(w.etime_s / 60) : ''}`).join('; ');
+    const who = ((c.holder || {}).who || []).map(w => `${(!w.system && w.login) || 'system or CI'}${w.comm ? ' (' + w.comm + ')' : ''} on ${w.node || '?'}${isNum(w.etime_s) ? ', ' + dur(w.etime_s / 60) : ''}`).join('; ');
+    const cu = UC[id] || {}, lastIv = (cu.intervals || []).reduce((b, iv) => (!b || iv.end_ms > b.end_ms ? iv : b), null);
     const rows = [
       ['Firmware', [sx.firmware, sx.bl ? ` · BL ${sx.bl}` : '', sx.pmic ? ` · PMIC ${sx.pmic}` : '', sx.minion ? ` · minion ${sx.minion}` : ''], 'lab.json'],
       ['Clock policy', sx.clock, 'lab.json'],
@@ -651,7 +765,9 @@
         isNum(aer.port_per_h) ? ` (${n0(aer.port_per_h)}/h)` : ''], 'sysfs aer_dev_correctable'],
       ['Kernel log', isNum(kl.error_events) ? `${n0(kl.error_events)} error events, ${n0(kl.refused_opens)} refused second opens, enabled ${n0(kl.enables)} times in the last ${n1(kl.window_h)} h` : '', 'et-lab-health'],
       ['Message counters', isNum(act.mgmt) ? `mgmt ${n0(act.mgmt)}, ops ${n0(act.ops)}${act.used ? '; moved since the last check' : ''}` : '', 'sysfs *_vq_stats'],
-      ['Last used', T(act, 'last_used_at') ? [clock(T(act, 'last_used_at')), act.last_used_by ? ' by ' + act.last_used_by : ''] : '', 'collector'],
+      cu.logged ? ['Last used', lastIv ? [lastIv.open ? 'now' : lclock(lastIv.end_ms), ' by ', lastIv.user, ` (${LZONE || 'lab time'})`] : `not in the last ${U.hours || 24} h`, 'et-usage']
+        : ['Last used', T(act, 'last_used_at') ? [clock(T(act, 'last_used_at')), act.last_used_by ? ' by ' + act.last_used_by : ''] : '', 'collector'],
+      ['Card-use log', cu.logged ? `${usageSentence(id, true)}` : notLoggedText(hostOfCard(id)), 'et-usage'],
       ['Telemetry', r ? [isNum(r.die) ? `die ${n0(r.die)} °C` : '', isNum(r.dieMax) ? ` (max ${n0(r.dieMax)})` : '', isNum(r.pmic) ? `, PMIC ${n0(r.pmic)} °C` : '',
         isNum(r.w) ? `, ${n1(r.w)} W` : '', isNum(r.mhz) ? `, minion ${n0(r.mhz)} MHz` : '', isNum(r.noc) ? `, NoC ${n0(r.noc)}` : '', isNum(r.ddr) ? `, DDR ${n0(r.ddr)}` : '',
         ' at ', clock(r.at)] : 'none', r ? (SRC[r.source] || r.source) : ''],
@@ -666,17 +782,18 @@
   }
   const pendingSince = k => { const t = T(k, 'pending_since'); return t ? clock(t) : (k.pending_since || '?'); };
   function hostFooter(h) {
-    const x = H[h] || {}, f = E('div', 'mp-foot'), ex = x.experiments || {}, nw = x.nodewatch || {};
-    const runs = Array.isArray(ex.running) ? ex.running : [], ll = ex.last_log;
-    f.append(E('div', null, E('span', 'fl', 'Experiments'), runs.length ? ['running: ', runs.map(r => `${r.kind || 'run'} ${r.what || ''}`.trim() + (isNum(r.count) && r.count > 1 ? ` (×${r.count})` : '')).join(', ')] : 'none running',
-      ll && ll.line ? E('div', 'small', 'last log line: ', E('span', 'mono', ll.line), ll.file ? ` (${ll.file}, ` : ' (', agoSpan(T(ll, 'at')), ')') : null,
-      isNum(ex.others_device_procs) && ex.others_device_procs ? E('div', 'small', `${plural(ex.others_device_procs, 'device process', 'device processes')} of other users`) : null,
-      isNum(ex.ci_jobs) && ex.ci_jobs ? E('div', 'small', plural(ex.ci_jobs, 'CI job') + ' running') : null));
+    const x = H[h] || {}, f = E('div', 'mp-foot'), nw = x.nodewatch || {};
+    const here = P.filter(p => loggedOn(p, h)), act = here.filter(p => statusOn(p, h) === 'active');
+    const dp = x.device_procs, cij = x.ci_jobs;
+    if (x.reachable === false) f.append(E('div', null, E('span', 'fl', 'Now'), `unknown (${stateOf(x)})`, lastKnown(x) ? E('span', 'old-note', ` · at ${lastKnown(x)}: ${plural(here.length, 'person', 'people')} logged in`) : ''));
+    else f.append(E('div', null, E('span', 'fl', 'Now'), `${plural(here.length, 'person', 'people')} logged in`, here.length ? ` (${act.length} active)` : '',
+      isNum(dp) ? ` · ${dp ? plural(dp, 'device process', 'device processes') + (isNum(x.device_people) ? ` of ${plural(x.device_people, 'person', 'people')}` : '') : 'no device process'}` : '',
+      isNum(cij) ? ` · ${cij ? plural(cij, 'CI job') + ' running' : 'no CI job'}` : ''));
+    const uh = UH[h];
+    if (uh) f.append(E('div', null, E('span', 'fl', 'Card-use log'), loggerText(h)));
     if (nw && nw.present !== false && (nw.beat_at || isNum(nw.beat_age_min))) {
       const beat = T(nw, 'beat_at');
       f.append(E('div', null, E('span', 'fl', 'nodewatch'), 'heartbeat ', beat ? agoSpan(beat) : dur(nw.beat_age_min) + ' ago',
-        nw.tmux != null ? ` · tmux ${nw.tmux ? 'up' : 'none'}` : '', isNum(nw.claude) ? ` · ${plural(nw.claude, 'Claude process', 'Claude processes')}` : '',
-        nw.linger != null ? ` · linger ${nw.linger ? 'on' : 'off'}` : '',
         Array.isArray(nw.gaps_48h) && nw.gaps_48h.length ? ` · ${plural(nw.gaps_48h.length, 'gap')} in 48 h` : '',
         nw.logins_48h && isNum(nw.logins_48h.in) ? ` · ${plural(nw.logins_48h.in, 'login')} in 48 h` : ''));
     }
@@ -710,11 +827,12 @@
       sec.append(E('div', 'mp-sub', E('span', null, [upText(x), k.running ? ' · kernel ' + k.running : ''].filter(Boolean).join('') || ELL),
         k.reboot_pending ? pill('info', 'REBOOT PENDING', null, 'since ' + pendingSince(k)) : null));
       if (x.reachable === false) {
-        const nt = T(x, 'next_try_at');
-        sec.append(E('div', 'mp-note ' + (x.error === 'approval needed' ? 'lv-warn' : 'lv-bad'), E('b', null, 'No answer: '), reachText(x),
-          '. The numbers below are from then.', nt ? ` Next try about ${clock(nt)}.` : ''));
+        const nt = T(x, 'next_try_at'), st = stateOf(x), lk = lastKnown(x);
+        sec.append(E('div', 'mp-note ' + (st === 'down' || (x.fails_in_row || 0) >= 2 ? 'lv-bad' : 'lv-warn'), E('b', null, st === 'down' ? 'DOWN: ' : st === 'approval needed' ? 'Approval needed: ' : 'Unreachable: '), reachText(x),
+          '. ', lk ? `Everything below is the last known, at ${lk}, not the present.` : 'No data from this machine yet.', nt && st === 'approval needed' ? ` Next try about ${clock(nt)}.` : ''));
       }
-      sec.append(E('div', 'sect', 'Vitals'), vitals(h));
+      if (isNum(x.rebooted_at_ms)) sec.append(E('div', 'mp-note ' + (x.reboot_planned ? 'lv-info' : 'lv-warn'), E('b', null, 'Rebooted '), clock(x.rebooted_at_ms), x.reboot_planned ? ' (a reboot was pending).' : ', unplanned: no reboot was pending before it.'));
+      sec.append(E('div', 'sect', x.reachable === false && lastKnown(x) ? `Vitals (last known at ${lastKnown(x)})` : 'Vitals'), vitals(h));
       const cs = cardsOf(h);
       if (cs.length) sec.append(E('div', 'sect', cs.length > 1 ? 'Cards' : 'Card'), E('div', 'tiles', cs.map(cardTile)));
       sec.append(hostFooter(h));
@@ -748,44 +866,42 @@
     return runsOf(i => {
       const h = hold[i], u = used[i];
       if (h == null && u == null) return {key: 'nodata'};
-      if (h) return {key: isOwner(h) ? 'ours' : 'other', who: h};
+      if (h) return {key: 'held', who: h};
       if (u) return {key: 'used'};
       return {key: 'free'};
     });
   }
-  const HOME = O.host || COL.host || 'aifoundry2';  // the owner's home machine: where tmux and Claude must live (§5)
   function hostRuns(h) {
-    const up = series('hosts', h, 'up') || [], tmux = series('hosts', h, 'tmux'), cl = series('hosts', h, 'claude');
+    const up = series('hosts', h, 'up') || [];
     const load = series('hosts', h, 'beats') || series('hosts', h, 'load');  // heartbeats per slot, else any nodewatch value
     const beat = i => !!(load && isNum(load[i]) && load[i] > 0);
-    const home = h === HOME, hasNW = !!(load && load.some(v => isNum(v) && v > 0));
-    const hasTmux = home && !!(tmux && tmux.some(v => v === 1)), hasCl = home && !!(cl && cl.some(v => isNum(v) && v > 0));
+    const hasNW = !!(load && load.some(v => isNum(v) && v > 0));
     return runsOf(i => {
       const u = up[i];
       if (u === 1 || u === true) {
-        if ((hasTmux && tmux[i] === 0) || (hasCl && cl[i] === 0)) return {key: 'gone'};
         if (hasNW && !beat(i) && i < HN - 1) return {key: 'gap'};
         return {key: 'up'};
       }
       if (u === 'approval' || u === 2 || u === -1) return {key: 'approval'};
-      if (u === 0 || u === false) return {key: 'down'};
+      if (u === 3) return {key: 'down'};
+      if (u === 0 || u === false) return {key: 'noans'};
       if (beat(i)) return {key: 'nw'};  // no check by the collector in this slot, but nodewatch's heartbeat ran
       return {key: 'nodata'};
     });
   }
   const RUNTEXT = {
-    ours: r => `held by ${r.who} (you)`, other: r => `held by ${r.who}`, used: () => 'in use, with no holder at the check',
+    held: r => `held by ${r.who === 'system' ? 'system or CI' : r.who} at the check`, used: () => 'in use, with no holder at the check',
     free: () => 'free', nodata: () => 'no data (no check, or the machine did not answer)',
     up: () => 'answered', approval: () => 'no answer: Tailscale check approval needed', gap: () => 'answered; nodewatch heartbeat missing',
-    down: () => 'no answer', gone: () => 'answered, but your tmux or Claude was gone (nodewatch)',
-    nw: () => 'alive (nodewatch heartbeat; the collector did not check)',
+    down: () => 'machine down (Tailscale: offline)', noans: () => 'no answer: ssh timed out or failed (the machine may be up)', nw: () => 'alive (nodewatch heartbeat; the collector did not check)',
   };
   const THIN = {free: 1, up: 1, nw: 1};
   function runMark(f, r, xa, xb, y, hgt, label) {
     const g = CK.el('g', null, f.svg), w = Math.max(1, xb - xa);
     if (r.key !== 'nodata') {
       const thin = THIN[r.key], hh = thin ? 3 : hgt;
-      CK.el('rect', {class: 'tl-' + r.key, x: xa + (thin ? 0 : 0.5), y: y + (hgt - hh) / 2, width: Math.max(1, w - (thin ? 0 : 1)), height: hh, rx: thin ? 1 : 2}, g);
+      const bar = CK.el('rect', {class: 'tl-' + r.key, x: xa + (thin ? 0 : 0.5), y: y + (hgt - hh) / 2, width: Math.max(1, w - (thin ? 0 : 1)), height: hh, rx: thin ? 1 : 2}, g);
+      if (r.key === 'held') bar.style.fill = r.who === 'system' ? OTHER_COLOR : userColor(r.who);
     }
     CK.el('rect', {class: 'ck-hit', x: xa, y: y - 3, width: w, height: hgt + 6}, g);
     const end = r.b >= HN ? 'now' : clock(slotT(r.b));
@@ -797,117 +913,361 @@
   function renderPeople() {
     const t = $('ptable'), tb = t.tBodies[0];
     const list = sortedPeople(P);
-    if (!list.length) { tb.append(E('tr', null, attrs(E('td', null, 'Nobody was seen on any lab machine.'), {colspan: 6}))); return; }
+    if (!list.length) { tb.append(E('tr', null, attrs(E('td', null, 'Nobody was seen on any lab machine.'), {colspan: 8}))); return; }
     for (const p of list) {
-      const me = p.owner || isOwner(p.login), hs = p.hosts || {};
-      const idle = idleOf(p);
+      const hs = p.hosts || {}, idle = idleOf(p);
       const procs = Object.values(hs).reduce((s, x) => s + (x && isNum(x.procs) ? x.procs : 0), 0);
       const holds = Array.isArray(p.card_holds) ? p.card_holds : [];
+      const c24 = Array.isArray(p.cards_24h) ? p.cards_24h : [];
+      const dg = Array.isArray(p.doing) ? p.doing : null, many = Object.keys(hs).length > 1;
+      const held24 = c24.reduce((s, x) => s + (isNum(x.held_s) ? x.held_s : 0), 0);
       const tr = E('tr', null,
-        E('td', null, E('span', 'pl-login', p.login), me ? E('span', 'you', 'YOU') : null),
+        E('td', null, E('span', 'pl-login', p.login)),
         E('td', null, E('span', 'st', presence(p.status), p.status || ELL)),
+        E('td', null, dg && dg.length ? E('span', 'dgs', dg.map(k => E('span', 'dg' + (k === 'card' ? ' dg-card' : ''), DOING[k] || k))) : ELL),
         E('td', null, Object.keys(hs).sort(natural).map(h => {
           const x = hs[h] || {};
           const old = x.stale || (Array.isArray(p.stale_hosts) && p.stale_hosts.includes(h));
+          const dh = many ? doingText(x.doing) : null;
           return E('span', 'mh', E('b', null, h), ': ', plural(x.sessions || 0, 'session'), x.closing ? ` (${x.closing} closing)` : '',
-            isNum(x.ttys) ? `, ${plural(x.ttys, 'terminal')}` : '', old ? E('span', 'old-note', ' (old data)') : '');
+            isNum(x.ttys) ? `, ${plural(x.ttys, 'terminal')}` : '', dh ? ` · ${dh}` : '', old ? E('span', 'old-note', ' (old data)') : '');
         })),
         attrs(E('td', 'num', isNum(idle) ? dur(idle) : ELL), {'data-sort': isNum(idle) ? idle : 1e9}),
-        E('td', null, holds.length ? holds.map(hd => E('span', 'mh', markSvg(hd.card, 11), ' ', cardName(hd.card), isNum(hd.etime_s) ? ', ' + dur(hd.etime_s / 60) : '')) : ELL),
+        E('td', null, holds.length ? holds.map(hd => {
+          const since = isNum(hd.since_ms) ? hd.since_ms : isNum(hd.etime_s) && isNum(GEN) ? GEN - hd.etime_s * 1000 : null;
+          return E('span', 'mh', markSvg(hd.card, 11), ' ', cardName(hd.card), hd.comm ? ' · ' + hd.comm : '', since ? ' · since ' + lclock(since) : '',
+            !isUp(hostOfCard(hd.card)) ? E('span', 'old-note', ' (last known)') : '');
+        }) : ELL),
+        attrs(E('td', null, c24.length ? c24.map(x => E('span', 'mh', swatch(p.login), ' ', cardName(x.card), ': ', durS(x.held_s),
+          isNum(x.runs) ? `, ${plural(x.runs, 'run')}` : '')) : ELL), {'data-sort': held24}),
         attrs(E('td', 'num', n0(procs), p.device_procs ? E('span', 'cellsub', `${plural(p.device_procs, 'device process', 'device processes')}`) : null), {'data-sort': procs}));
       tb.append(tr);
     }
     CK.stackTable(t);
     CK.sortTable(t, {filter: list.length > 3, filterLabel: 'Filter people'});
   }
-  function renderOwner() {
-    const root = $('owner'), cl = O.claudes || {}, ss = O.sessions || {};
-    const c1 = E('div', 'card', E('h4', null, 'Claude logins ', E('span', 'small muted', '(claudes status)')));
-    for (const a of (Array.isArray(cl.accounts) ? cl.accounts : [])) {
-      const lapse = isNum(a.lapse_days) ? a.lapse_days : null;
-      const lv = !a.logged_in || a.wrong_account ? 'bad' : lapse != null && lapse <= 7 ? 'warn' : 'ok';
-      c1.append(E('div', 'acct', pill(lv, a.wrong_account ? 'WRONG ACCOUNT' : a.logged_in ? 'LOGGED IN' : 'LOGGED OUT'), E('span', null, E('b', null, 'Account ' + a.n),
-        a.lapses ? ` · login lapses ${dateText(a.lapses)}${lapse != null ? ' (in ' + plural(lapse, 'day') + ')' : ''}` : ''),
-        E('span', 'sub', [a.tmux ? `tmux ${a.tmux}` : '', a.server != null ? ` · server ${a.server ? 'up' : 'down'}` : '',
-          isNum(a.phones) ? ` · ${plural(a.phones, 'phone')}` : '', isNum(a.sessions) ? ` · ${plural(a.sessions, 'session')}` : '',
-          a.credentials_note ? ` · ${a.credentials_note}` : ''].join('').replace(/^ · /, ''))));
-    }
-    if (!(cl.accounts || []).length) c1.append(E('p', 'small muted', 'No claudes data.'));
-    const pins = Array.isArray(cl.pins) ? cl.pins : [];
-    if (pins.length) {
-      c1.append(E('div', 'acct', pill(pins.every(p => p.running) ? 'ok' : 'warn', plural(pins.filter(p => p.running).length, 'PIN') + ' UP'),
-        E('span', null, pins.map(p => `${p.window || p.id8} (account ${p.account}) ${p.running ? 'running' : 'down'}`).join(', '))));
-    }
-    const wd = cl.watchdog;
-    if (wd) {
-      const lr = T(wd, 'last_run'), age = lr ? (Date.now() - lr) / 6e4 : wd.age_min;
-      c1.append(E('div', 'acct', pill(!wd.on ? 'bad' : age != null && age > 5 + ageMin() ? 'warn' : 'ok', wd.on ? 'WATCHDOG ON' : 'WATCHDOG OFF'),
-        E('span', null, 'last run ', lr ? agoSpan(lr) : dur(wd.age_min) + ' ago')));
-    }
-    const tm = Array.isArray(cl.tmux) ? cl.tmux : [];
-    if (tm.length) {
-      c1.append(E('div', 'acct', pill('ok', plural(tm.length, 'TMUX SESSION', 'TMUX SESSIONS')),
-        E('span', null, tm.map(t => `${t.name}${isNum(t.windows) ? ' (' + plural(t.windows, 'window') + (t.attached ? ', attached' : '') + ')' : ''}`).join(', '))));
-    }
-    const home = O.host || COL.host || 'aifoundry2', nws = O.nodewatch || {};
-    for (const h of Object.keys(nws).sort((a, b) => (a === home ? -1 : b === home ? 1 : natural(a, b)))) {
-      const nw = nws[h] || {}, main = h === home;
-      const ok = !main || (nw.tmux && isNum(nw.claude) && nw.claude > 0), age = isNum(nw.beat_age_min) ? nw.beat_age_min : null;
-      const lv = nw.stale ? 'unknown' : !ok || (age != null && age > 30) ? 'bad' : age != null && age > 5 ? 'warn' : 'ok';  // §5's owner rules
-      c1.append(E('div', 'acct', pill(lv, main ? (ok ? 'TMUX UP' : 'TMUX OR CLAUDE GONE') : 'NODEWATCH'),
-        E('span', null, `${h}: tmux ${nw.tmux ? 'up' : 'none'}, ${plural(nw.claude || 0, 'Claude process', 'Claude processes')}, linger ${nw.linger ? 'on' : 'off'}` +
-          (isNum(nw.beat_age_min) ? `, heartbeat ${dur(nw.beat_age_min)} old` : '') + (nw.stale ? ' (old data)' : ''))));
-    }
-    if (T(cl, 'as_of')) c1.append(E('p', 'small muted', 'As of ', clock(T(cl, 'as_of')), '.'));
 
-    const c2 = E('div', 'card', E('h4', null, 'Claude sessions ', E('span', 'small muted', '(spacesheep)')));
-    const bm = ss.by_machine || {}, ms = Object.keys(bm).sort(natural);
-    if (ms.length) {
-      const cols = [['working', 'Working'], ['needs_you', 'Needs you'], ['idle', 'Idle'], ['done', 'Done']]
-        .filter(([k], j) => j === 0 || j === 2 || ms.some(m => isNum((bm[m] || {})[k])));
-      const t = E('table', 'mtab', E('thead', null, E('tr', null, E('th', null, 'Machine'), cols.map(([, l]) => E('th', 'num', l)), E('th', null, 'Last activity'))));
-      const tb = E('tbody');
-      for (const m of ms) {
-        const r = bm[m] || {};
-        tb.append(E('tr', null, E('td', null, m), cols.map(([k]) => E('td', 'num', n0(r[k] || 0))),
-          E('td', null, T(r, 'last_at') ? agoSpan(T(r, 'last_at')) : ELL)));
+  /* ================= card use, last 24 hours (et-usage) ================= */
+  const US0 = U && isNum(U.start_ms) ? U.start_ms : null, US1 = U && isNum(U.end_ms) ? U.end_ms : null;
+  const UHOURS = (U && isNum(U.hours)) ? U.hours : 24;
+  function loggerText(h) {
+    const uh = UH[h] || {}, lg = uh.logger, asof = uh.stale && isNum(uh.as_of_ms) ? ` (as of ${clock(uh.as_of_ms)})` : '';
+    if (lg === 'running') return 'running' + (isNum(uh.logging_since_ms) ? `, its log begins ${lclock(uh.logging_since_ms)}` : '') + asof;
+    if (lg === 'stale') return `stopped: last alive ${isNum(uh.alive_ms) ? lclock(uh.alive_ms) : '?'}` + asof;
+    if (lg === 'not installed') return 'not installed (et-usage)' + asof;
+    if (lg === 'not running') return 'installed, but its daemon has not run' + asof;
+    if (lg === 'error') return 'et-usage failed: ' + (uh.error || '?') + asof;
+    return 'no data' + (uh.stale ? ' (the machine has not answered)' : '');
+  }
+  function notLoggedText(h) {
+    const lg = (UH[h] || {}).logger;
+    if (lg === 'not installed') return `usage logging not installed on ${h}`;
+    if (lg === 'not running') return `the usage logger on ${h} has not run`;
+    if (lg === 'error') return `et-usage failed on ${h}`;
+    if (!U) return 'no card-use data';
+    return `no card-use data from ${h}`;
+  }
+  const pctOf = s => { const p = 100 * s / (UHOURS * 3600); return p <= 0 ? '0%' : p < 1 ? 'under 1%' : Math.round(p) + '%'; };
+  function progText(pr, k) {
+    const e = Object.entries(pr || {}).sort((a, b) => b[1] - a[1] || natural(a[0], b[0]));
+    if (!e.length) return null;
+    return e.slice(0, k || 3).map(([p, n]) => p + (n > 1 ? ' ×' + n : '')).join(', ') + (e.length > (k || 3) ? ', …' : '');
+  }
+  const usersOf = id => Object.entries((UC[id] || {}).users || {}).sort((a, b) => b[1].held_s - a[1].held_s || natural(a[0], b[0]));
+  /* "Last 24 h: held 2 h 10 min (9%) by user-a, user-b" */
+  function usageSentence(id, short) {
+    const cu = UC[id] || {}, us = usersOf(id);
+    if (!us.length) return `Last ${UHOURS} h: not used` + (cu.stale ? ' (old data)' : '');
+    const names = us.map(u => u[0]);
+    return `Last ${UHOURS} h: held ${durS(cu.held_s)} (${pctOf(cu.held_s)}) by ` + (short && names.length > 3 ? names.slice(0, 3).join(', ') + ` and ${names.length - 3} more` : names.join(', '));
+  }
+  /* Spans of the window not covered by the host's log, each with its reason. */
+  function gapsOf(h) {
+    const uh = UH[h] || {}, cov = (Array.isArray(uh.coverage_ms) ? uh.coverage_ms : []).filter(c => Array.isArray(c) && isNum(c[0]) && isNum(c[1]))
+      .map(c => [Math.max(US0, c[0]), Math.min(US1, c[1])]).filter(c => c[1] > c[0]).sort((a, b) => a[0] - b[0]);
+    const out = [];
+    let t = US0;
+    const why = (a, b) => {
+      if (a <= US0 + 1000 && (!isNum(uh.logging_since_ms) || uh.logging_since_ms >= b - 60e3)) return 'before its log begins';
+      if (b >= US1 - 1000 && uh.stale) {
+        const x = H[h] || {}, st = stateOf(x);
+        return st === 'down' ? `machine down since ${clock(isNum(x.down_since_ms) ? x.down_since_ms : uh.as_of_ms)}`
+          : `not known: the machine has not answered since ${clock(uh.as_of_ms)} (${st})`;
       }
-      t.append(tb);
-      c2.append(E('div', 'table-wrap', t));
-    } else c2.append(E('p', 'small muted', 'No session data.'));
-    if (T(ss, 'as_of')) c2.append(E('p', 'small muted', 'As of ', clock(T(ss, 'as_of')), '.'));
-
-    const c3 = E('div', 'card', E('h4', null, 'Sessions on the lab machines'));
-    const lab = Array.isArray(ss.lab) ? ss.lab : [];
-    const SLV = {working: 'ours', idle: 'unknown', done: 'excluded'};
-    if (lab.length) {
-      c3.append(E('ul', 'slist', lab.map(s => E('li', null, E('span', null, s.title || ELL), pill(SLV[s.state] || 'unknown', String(s.state || '?').toUpperCase()),
-        E('span', 'sm', [s.machine, s.model, isNum(s.turns) ? plural(s.turns, 'turn') : null, T(s, 'started_at') ? `started ${clock(T(s, 'started_at'))}` : null,
-          T(s, 'last_at') ? 'last ' : null].filter(Boolean).join(' · '), T(s, 'last_at') ? agoSpan(T(s, 'last_at')) : null)))));
-    } else c3.append(E('p', 'small muted', 'No sessions on the lab machines.'));
-    root.append(c1, c2, c3);
+      if (b >= US1 - 1000 && uh.logger === 'stale') return 'the logger stopped';
+      return 'the logger was not running';
+    };
+    for (const [a, b] of cov) { if (a - t > 60e3) out.push({a: t, b: a, why: why(t, a)}); t = Math.max(t, b); }
+    if (US1 - t > 60e3) out.push({a: t, b: US1, why: why(t, US1)});
+    return out;
+  }
+  /* A span "14:02–14:09" (or with seconds), the end's weekday only when it is another day. */
+  function spanText(a, b, secs, open) {
+    const f = secs ? L_HMS : L_HM;
+    const end = open ? 'now' : L_DAY.format(a) === L_DAY.format(b) ? f.format(b) : lclock(b, secs);
+    return lclock(a, secs) + '–' + end;
+  }
+  /* The intervals of one lane merged at the drawing's resolution: one login's bars closer than 3 px become one. */
+  function pixelGroups(ivs, x) {
+    const out = [], last = {};
+    for (const iv of (Array.isArray(ivs) ? ivs : []).slice().sort((a, b) => a.start_ms - b.start_ms)) {
+      if (!isNum(iv.start_ms) || !isNum(iv.end_ms)) continue;
+      const g = last[iv.user];
+      if (g && x(iv.start_ms) - x(g.b) < 3) {
+        g.b = Math.max(g.b, iv.end_ms); g.held_s += iv.held_s || 0; g.node_s += iv.node_s || 0; g.runs += iv.runs || 0;
+        g.n += iv.n || 1; g.open = g.open || !!iv.open;
+        for (const [p, n] of Object.entries(iv.programs || {})) g.programs[p] = (g.programs[p] || 0) + n;
+      } else {
+        const ng = {user: iv.user, a: iv.start_ms, b: iv.end_ms, held_s: iv.held_s || 0, node_s: iv.node_s || 0, runs: iv.runs || 0,
+          n: iv.n || 1, open: !!iv.open, programs: Object.assign({}, iv.programs || {})};
+        out.push(ng); last[iv.user] = ng;
+      }
+    }
+    return out;
+  }
+  function groupTip(gr, label) {
+    const secs = gr.b - gr.a < 600e3, pr = progText(gr.programs, 4);
+    const who = gr.user === '?' ? 'a login that is not a plain name' : gr.user;
+    const lines = [`<b>${esc(who)}</b> on ${esc(label)}`, esc(spanText(gr.a, gr.b, secs, gr.open)) + (gr.open ? ' (still held)' : '')];
+    if (gr.n > 1) lines.push(esc(`${plural(gr.n, 'hold')}, ${durS(gr.held_s)} held in all`));
+    else lines.push(esc(`held ${durS(gr.held_s)}`));
+    lines.push(esc(`device nodes open ${durS(gr.node_s)}; ${gr.runs ? plural(gr.runs, 'run') : 'the lock only'}`));
+    if (pr) lines.push('programs: ' + esc(pr));
+    return lines.join('<br>');
+  }
+  /* Text colour on a bar: --ink or --page, whichever contrasts more with the bar's colour in the current theme. */
+  function luminance(css) {
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none'; document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const f = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(v[0]) + 0.7152 * f(v[1]) + 0.0722 * f(v[2]);
+  }
+  function inkFor(color) {
+    const cr = (p, q) => (Math.max(p, q) + 0.05) / (Math.min(p, q) + 0.05), bg = luminance(color);
+    return cr(bg, luminance('var(--ink)')) >= cr(bg, luminance('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  /* One card's lane between x(US0) and x(US1) at y: the track, hatched spans not logged, activity ticks, one bar per
+     login's hold (at least 2 px wide, so a 3-second run stays visible). Returns the marks with tooltips, in time order. */
+  function drawLane(f, id, x, by, bh, label, mini) {
+    const h = hostOfCard(id), cu = UC[id] || {}, uh = UH[h] || {}, nodes = [];
+    const X0 = x(US0), X1 = x(US1);
+    CK.el('rect', {class: 'tl-track', x: X0, y: by, width: X1 - X0, height: bh, rx: 2}, f.svg);
+    if (!cu.logged) {
+      const g = CK.el('g', null, f.svg);
+      CK.el('rect', {class: 'cu-hatch', x: X0, y: by, width: X1 - X0, height: bh, rx: 2}, g);
+      const t = notLoggedText(h) + (uh.stale && isNum(uh.as_of_ms) ? ` (as of ${clock(uh.as_of_ms)})` : '');
+      if (!mini) {
+        const bg = CK.el('rect', {class: 'cu-textbg', x: X0 + 4, y: by + 1, width: 10, height: bh - 2, rx: 3}, g);
+        const tx = CK.txt(g, X0 + 10, by + bh / 2 + 4, t, 'lab');
+        let w = 0; try { w = tx.getComputedTextLength(); } catch (_) { w = 0; }
+        bg.setAttribute('width', Math.min(X1 - X0 - 8, (w > 0 ? w : 6.6 * t.length) + 12));
+      }
+      CK.el('rect', {class: 'ck-hit', x: X0, y: by - 3, width: X1 - X0, height: bh + 6}, g);
+      CK.tip(f, g, `<b>${esc(label)}</b><br>${esc(t)}`);
+      nodes.push([X0, g]);
+      return nodes.map(n => n[1]);
+    }
+    for (const gp of gapsOf(h)) {
+      const g = CK.el('g', null, f.svg), xa = x(gp.a), w = Math.max(2, x(gp.b) - xa);
+      CK.el('rect', {class: 'cu-hatch', x: xa, y: by, width: w, height: bh}, g);
+      CK.el('rect', {class: 'ck-hit', x: xa, y: by - 3, width: Math.max(6, w), height: bh + 6}, g);
+      CK.tip(f, g, `<b>${esc(label)}: not logged</b><br>${esc(spanText(gp.a, gp.b, false, false))} (${esc(durS((gp.b - gp.a) / 1000))})<br>${esc(gp.why)}`);
+      nodes.push([xa, g]);
+    }
+    const act = Array.isArray(cu.activity_min) ? cu.activity_min : [];
+    if (act.length) {
+      const ga = CK.el('g', {'aria-hidden': 'true', class: 'cu-act'}, f.svg);
+      for (const a of act) {
+        if (!Array.isArray(a) || !isNum(a[0])) continue;
+        const te = US0 + a[0] * 6e4, ta = te - (isNum(a[1]) ? a[1] : 60) * 1000, xa = x(Math.max(US0, ta));
+        CK.el('rect', {x: xa, y: by + bh + 2, width: Math.max(1, x(te) - xa), height: mini ? 2 : 3}, ga);
+      }
+    }
+    for (const gr of pixelGroups(cu.intervals, x)) {
+      const g = CK.el('g', null, f.svg), xa = x(gr.a), w = Math.max(2, x(gr.b) - xa), color = userColor(gr.user);
+      CK.el('rect', {x: xa, y: by, width: w, height: bh, rx: w > 6 ? 2 : 0}, g).style.fill = color;
+      if (!mini && w >= 0.62 * 12 * gr.user.length + 12) {
+        const tx = CK.txt(g, xa + 5, by + bh / 2 + 4, gr.user, 'cu-blab');
+        tx.style.fill = inkFor(color);
+        tx.setAttribute('aria-hidden', 'true');
+      }
+      const hw = Math.max(8, w);
+      CK.el('rect', {class: 'ck-hit', x: xa + w / 2 - hw / 2, y: by - 3, width: hw, height: bh + 6}, g);
+      CK.tip(f, g, groupTip(gr, label));
+      nodes.push([xa, g]);
+    }
+    nodes.sort((a, b) => a[0] - b[0]);
+    return nodes.map(n => n[1]);
+  }
+  function renderUsage() {
+    const chart = $('cu-chart');
+    fill('cu-zone', LZONE ? LZONE + ', the lab\'s time' : 'the lab\'s time');
+    if (!U || US0 == null || US1 == null || !(US1 > US0)) {
+      chart.append(E('p', 'small muted', 'No card-use data in this data file: the collector may be older than this page.'));
+      $('cu-extra').hidden = true;
+      return;
+    }
+    const ids = CARDS.slice();
+    const logins = (Array.isArray(U.logins) ? U.logins : []).filter(u => u && u !== '?');
+    const items = logins.filter(u => USER_COLOR[u]).map(u => ({key: u, label: u, color: userColor(u), mark: 'box'}));
+    if (hasOthers(logins) || ids.some(id => Object.keys((UC[id] || {}).users || {}).includes('?'))) items.push({key: '_others', label: 'others', color: OTHER_COLOR, mark: 'box'});
+    items.push({key: '_nolog', label: 'not logged', color: 'url(#cu-hatch)', mark: 'box'},
+      {key: '_act', label: 'card queues active (ticks)', color: 'var(--ink-2)', mark: 'line'},
+      {key: '_now', label: `now (${lclock(US1)})`, color: 'var(--ink)', mark: 'dash'});
+    CK.legend('cu-legend', items);
+    CK.frame(chart, {minW: 300, maxW: 1248, label: `Card use by login, last ${UHOURS} hours`,
+      height: W => 16 + ids.length * (W < 600 ? 46 : 36) + 30,
+      draw(f) {
+        const nar = f.narrow, L = nar ? 4 : 176, R = 10, Tp = 16, B = 30, rowH = nar ? 46 : 36, bh = 16;
+        const x = CK.lin(US0, US1, L, f.W - R);
+        const ga = CK.el('g', {'aria-hidden': 'true'}, f.svg), labs = [];
+        const every = nar ? 6 : 3;
+        for (let t = Math.ceil(US0 / 36e5) * 36e5; t <= US1; t += 36e5) {
+          const hr = labHour(t), major = hr % every === 0;
+          CK.el('line', {class: major ? 'tl-vgrid' : 'cu-minor', x1: x(t), x2: x(t), y1: major ? Tp - 4 : f.H - B, y2: f.H - B + (major ? 4 : 3)}, ga);
+          if (major) labs.push(CK.txt(ga, x(t), f.H - B + 18, hr === 0 ? `${L_WD.format(t)} ${L_D.format(t)}` : L_HM.format(t), hr === 0 ? 'lab-strong' : 'tick', 'middle'));
+        }
+        CK.inside(f, labs);
+        ids.forEach((id, k) => {
+          const y0 = Tp + k * rowH, by = nar ? y0 + 18 : y0 + 6, cu = UC[id] || {}, c = C[id] || {};
+          const lg = CK.el('g', {'aria-hidden': 'true'}, f.svg), name = cardName(id);
+          CK.cardMark(lg, id, nar ? 8 : 10, nar ? y0 + 9 : by + 6, 4);
+          CK.txt(lg, nar ? 18 : 22, nar ? y0 + 13 : by + 10, name + (nar && c.excluded ? ' (excluded)' : ''), c.excluded ? 'lab' : 'lab-strong');
+          if (!nar) CK.txt(lg, 22, by + 25, (c.excluded ? 'excluded · ' : '') + (cu.logged ? (usersOf(id).length ? `${durS(cu.held_s)} held` : 'not used') : 'not logged'), 'tick');
+          else if (cu.logged) CK.txt(lg, f.W - R - 8, y0 + 13, usersOf(id).length ? `${durS(cu.held_s)} held` : 'not used', 'tick', 'end');
+          CK.keynav(f, drawLane(f, id, x, by, bh, cardName(id), false));
+        });
+        const xn = x(US1);
+        CK.el('line', {class: 'cu-now', x1: xn, x2: xn, y1: Tp - 6, y2: f.H - B}, ga);
+        labs.length = 0;
+        labs.push(CK.txt(ga, xn, nar ? f.H - B + 18 : Tp - 6, 'now', nar ? 'lab-strong' : 'tick', 'end'));
+        CK.inside(f, labs);
+      }});
+    renderUsageCards(ids);
+    renderUsageTable(ids);
+    renderUsageDays(ids);
+  }
+  function usageStrip(host, id) {
+    if (US0 == null) { host.append(E('span', 'small muted', 'no card-use data')); return; }
+    CK.frame(host, {minW: 120, maxW: 900, height: 24, label: cardName(id) + ': card use, last ' + UHOURS + ' hours', draw(f) {
+      const x = CK.lin(US0, US1, 1, f.W - 1);
+      CK.keynav(f, drawLane(f, id, x, 3, 13, cardName(id), true));
+    }});
+  }
+  function renderUsageCards(ids) {
+    const root = $('cu-cards');
+    for (const id of ids) {
+      const cu = UC[id] || {}, h = hostOfCard(id), uh = UH[h] || {}, c = C[id] || {};
+      const head = E('b', null, markSvg(id, 13), ' ', cardName(id), c.excluded ? ' (excluded)' : '');
+      const div = E('div', 'cu-card');
+      if (!cu.logged) {
+        div.append(head, ': ', notLoggedText(h), '.', E('span', 'cu-sub', uh.stale && isNum(uh.as_of_ms) ? `As of ${clock(uh.as_of_ms)}, when ${h} last answered. ` : '',
+          'Last 48 hours below shows who held it at each 10-minute check.'));
+        root.append(div); continue;
+      }
+      const us = usersOf(id);
+      const main = us.length ? [`held ${durS(cu.held_s)} of the ${UHOURS} h (${pctOf(cu.held_s)}) by ${plural(us.length, 'person', 'people')}`,
+        `; busiest: ${us[0][0]} (${durS(us[0][1].held_s)}, ${plural(us[0][1].runs || 0, 'run')})`] : [`not used in the last ${UHOURS} h`];
+      const now = (cu.now || []).filter(x => x && x.user);
+      const sub = [];
+      if (now.length) sub.push('In use now: ' + now.map(x => `${x.user} · ${x.comm || '?'} · since ${lclock(x.start_ms)}`).join('; ') + '.');
+      const act = Array.isArray(cu.activity_min) ? cu.activity_min.length : 0;
+      if (act) sub.push(`Its queues moved in ${plural(act, 'minute')}.`);
+      const gaps = gapsOf(h), total = (US1 - US0) / 1000, logged = total - gaps.reduce((s, g) => s + (g.b - g.a) / 1000, 0);
+      if (gaps.length) sub.push(`Logged ${durS(logged)} of the ${UHOURS} h; not logged ${gaps.slice(0, 3).map(g => spanText(g.a, g.b, false, false) + ' (' + g.why + ')').join(', ')}${gaps.length > 3 ? ', …' : ''}.`);
+      else sub.push(`Logged the whole ${UHOURS} h.`);
+      if (cu.stale) sub.push(`As of ${clock(uh.as_of_ms)}, when ${h} last answered.`);
+      if (isNum(uh.merged_gap_s) && uh.merged_gap_s) sub.push(`Runs less than ${durS(uh.merged_gap_s)} apart are drawn as one.`);
+      div.append(head, ': ', ...main, '.', E('span', 'cu-sub', sub.join(' ')));
+      root.append(div);
+    }
+  }
+  function renderUsageTable(ids) {
+    const t = $('cu-table'), tb = t.tBodies[0], rows = [];
+    for (const id of ids) for (const [u, e] of usersOf(id)) rows.push([u, id, e]);
+    rows.sort((a, b) => b[2].held_s - a[2].held_s || natural(a[0], b[0]));
+    if (!rows.length) { tb.append(E('tr', null, attrs(E('td', null, `Nobody used a logged card in the last ${UHOURS} hours.`), {colspan: 7}))); CK.stackTable(t); return; }
+    for (const [u, id, e] of rows) {
+      tb.append(E('tr', null,
+        E('td', null, swatch(u), ' ', E('span', 'pl-login', u === '?' ? '? (not a plain login name)' : u)),
+        E('td', null, markSvg(id, 11), ' ', cardName(id)),
+        attrs(E('td', 'num', durS(e.held_s)), {'data-sort': e.held_s}),
+        attrs(E('td', 'num', pctOf(e.held_s)), {'data-sort': e.held_s}),
+        E('td', 'num', n0(e.runs || 0)),
+        E('td', null, progText(e.programs, 3) || ELL),
+        attrs(E('td', null, e.open ? `now (since ${lclock(e.first_ms)})` : lclock(e.last_ms)), {'data-sort': e.open ? 9e15 : e.last_ms})));
+    }
+    CK.stackTable(t);
+    CK.sortTable(t, {filter: rows.length > 6, filterLabel: 'Filter'});
+  }
+  function renderUsageDays(ids) {
+    const t = $('cu-days');
+    const days = [];
+    for (let k = 6; k >= 0; k--) { const d = US1 - k * 864e5; days.push({key: L_DAY.format(d), label: L_DM.format(d), ms: d}); }
+    const thead = E('thead', null, E('tr', null, E('th', null, 'Card'), days.map(d => E('th', null, d.label))));
+    const tb = E('tbody');
+    let max = 1;
+    const cell = {};
+    for (const id of ids) for (const d of ((UC[id] || {}).daily || [])) {
+      if (!isNum(d.day_ms)) continue;
+      const tot = Object.values(d.users || {}).reduce((s, e) => s + ((e && e.held_s) || 0), 0);
+      cell[id + '|' + L_DAY.format(d.day_ms)] = d; max = Math.max(max, tot);
+    }
+    for (const id of ids) {
+      const cu = UC[id] || {}, h = hostOfCard(id), uh = UH[h] || {};
+      const tr = E('tr', null, E('td', null, markSvg(id, 11), ' ', cardName(id)));
+      if (!cu.logged) {
+        tr.append(attrs(E('td', 'muted', notLoggedText(h)), {colspan: 7}));
+        tb.append(tr); continue;
+      }
+      const since = isNum(uh.logging_since_ms) ? uh.logging_since_ms : null;
+      for (const d of days) {
+        const e = cell[id + '|' + d.key];
+        if (!e) {
+          tr.append(E('td', 'cu-dc muted', since && d.key !== L_DAY.format(since) && d.ms < since ? 'not logged' : 'none'));
+          continue;
+        }
+        const us = Object.entries(e.users || {}).sort((a, b) => b[1].held_s - a[1].held_s);
+        const tot = us.reduce((s, x) => s + (x[1].held_s || 0), 0);
+        const bar = E('span', 'cu-mini');
+        for (const [u, x] of us) { const s = E('span'); s.style.width = Math.max(2, 100 * (x.held_s || 0) / max) + '%'; s.style.background = userColor(u); bar.append(s); }
+        const txt = us.map(([u, x]) => `${u} ${durS(x.held_s)}${isNum(x.runs) ? ' (' + plural(x.runs, 'run') + ')' : ''}`).join(', ');
+        tr.append(attrs(E('td', 'cu-dc', E('span', 'cu-dt', durS(tot)), bar, E('span', 'vh', ': ' + txt)), {title: txt, 'data-sort': tot}));
+      }
+      tb.append(tr);
+    }
+    t.append(thead, tb);
+    CK.stackTable(t);
   }
 
   /* ================= last 48 hours ================= */
   function renderTimeline() {
     if (!HN || HT0 == null) { $('tl').append(E('p', 'small muted', 'No history yet.')); return; }
-    const rows = [];
-    for (const id of CK.cardsIn(HI.cards || {})) rows.push({kind: 'card', id, label: cardName(id), runs: cardRuns(id)});
+    const rows = [], logged = [];
+    for (const id of CK.cardsIn(HI.cards || {})) {
+      if ((UC[id] || {}).logged) { logged.push(id); continue; }  // drawn from the usage log in Card use, above
+      rows.push({kind: 'card', id, label: cardName(id), runs: cardRuns(id)});
+    }
     for (const h of HOSTS) if (series('hosts', h, 'up')) rows.push({kind: 'host', id: h, label: h, runs: hostRuns(h)});
-    const col = k => `var(--c${k})`;
+    const kept = rows.filter(r => r.kind === 'card');
+    fill('tl-cards', logged.length ? (kept.length
+      ? `Cards with a card-use log (${logged.map(id => cardName(id)).join(', ')}) are in Card use, last 24 hours, above; the rows here show the others as held at each 10-minute check.`
+      : 'Every card has a card-use log: see Card use, last 24 hours, above. The rows here are the machines.')
+      : 'Card rows show who held each card at each 10-minute check (no machine logs card use yet).');
+    const holders = [...new Set(kept.flatMap(r => r.runs.filter(x => x.key === 'held').map(x => x.who)))].sort(natural);
     CK.legend('tl-legend', [
-      {key: 'ours', label: 'held by you', color: col(7), mark: 'box'},
-      {key: 'other', label: 'held by someone else', color: col(5), mark: 'box'},
-      {key: 'used', label: 'in use, no holder at the check', color: 'color-mix(in srgb,var(--ink-2) 50%,var(--surface))', mark: 'box'},
-      {key: 'free', label: 'free', color: 'var(--axis)', mark: 'line'},
+      ...holders.map(u => ({key: 'h:' + u, label: `held by ${u === 'system' ? 'system or CI' : u}`, color: u === 'system' ? OTHER_COLOR : userColor(u), mark: 'box'})),
+      ...(kept.length ? [{key: 'used', label: 'in use, no holder at the check', color: 'color-mix(in srgb,var(--ink-2) 50%,var(--surface))', mark: 'box'},
+        {key: 'free', label: 'free', color: 'var(--axis)', mark: 'line'}] : []),
       {key: 'up', label: 'machine answered', color: 'color-mix(in srgb,var(--ok) 60%,var(--surface))', mark: 'line'},
       {key: 'nw', label: 'alive (nodewatch only)', color: 'color-mix(in srgb,var(--ok) 30%,var(--surface))', mark: 'line'},
       {key: 'approval', label: 'approval needed', color: 'color-mix(in srgb,var(--warn) 75%,var(--surface))', mark: 'box'},
-      {key: 'down', label: 'no answer', color: 'var(--bad)', mark: 'box'},
-      {key: 'gone', label: `your tmux or Claude gone (${HOME})`, color: 'var(--c2)', mark: 'box'},
+      {key: 'down', label: 'machine down (Tailscale offline)', color: 'var(--bad)', mark: 'box'},
+      {key: 'noans', label: 'no answer (ssh)', color: 'color-mix(in srgb,var(--bad) 40%,var(--surface))', mark: 'box'},
       {key: 'gap', label: 'nodewatch gap', color: 'var(--muted)', mark: 'box'},
     ]);
-    const nCards = rows.filter(r => r.kind === 'card').length;
+    const nCards = kept.length;
     CK.frame('tl', {minW: 300, maxW: 1248, label: 'Cards and machines over the last 48 hours',
       height: W => 8 + rows.length * (W < 600 ? 34 : 24) + (nCards && nCards < rows.length ? 10 : 0) + 30,
       draw(f) {
@@ -972,13 +1332,13 @@
   function renderSessions() {
     const hs = HOSTS.filter(h => series('hosts', h, 'sessions_all'));
     if (!HN || !hs.length) { $('ch-sess').append(E('p', 'small muted', 'No session history.')); return; }
-    CK.legend('leg-sess', [{key: 'all', label: 'all, including the login screen', color: 'var(--ink-2)', mark: 'line'}, {key: 'own', label: 'yours', color: 'var(--c7)', mark: 'line'}]);
+    CK.legend('leg-sess', [{key: 'all', label: 'login sessions, all users, including the login screen', color: 'var(--ink-2)', mark: 'line'}]);
     const mx = Math.max(2, ...hs.flatMap(h => series('hosts', h, 'sessions_all').filter(isNum)));
     for (const h of hs) {
       const box = E('div', null, E('div', 'mt', h)), host = E('div');
       box.append(host);
       $('ch-sess').append(box);
-      const all = series('hosts', h, 'sessions_all'), own = series('hosts', h, 'sessions_owner');
+      const all = series('hosts', h, 'sessions_all');
       CK.frame(host, {height: 118, minW: 260, label: h + ': login sessions, last 48 hours', draw(f) {
         const L = 26, R = 10, Tp = 8, B = 26;
         const x = CK.lin(HT0, HEND, L, f.W - R), y = CK.lin(0, mx, f.H - B, Tp);
@@ -991,11 +1351,10 @@
           CK.el('path', {d, class: 'sp-line'}, f.svg).style.stroke = color;
         };
         line(all, 'all', 'var(--ink-2)');
-        line(own, 'own', 'var(--c7)');
         crossHover(f, {n: HN, x: xi, top: Tp, bottom: f.H - B, label: h + ' login sessions',
-          valid: i => isNum(all[i]) || (own && isNum(own[i])),
-          dots: i => [isNum(all[i]) ? [xi(i), y(all[i]), 'var(--ink-2)'] : null, own && isNum(own[i]) ? [xi(i), y(own[i]), 'var(--c7)'] : null],
-          html: i => `<b>${esc(h)}</b><br>${esc(slotLabel(i))}<br>all, including the login screen: ${esc(n0(all[i]))}<br>yours: ${esc(own ? n0(own[i]) : ELL)}`});
+          valid: i => isNum(all[i]),
+          dots: i => [isNum(all[i]) ? [xi(i), y(all[i]), 'var(--ink-2)'] : null],
+          html: i => `<b>${esc(h)}</b><br>${esc(slotLabel(i))}<br>login sessions, all users, including the login screen: ${esc(n0(all[i]))}`});
       }});
     }
   }
@@ -1053,9 +1412,9 @@
   renderStrip();
   renderKpis();
   renderAlerts();
+  renderUsage();
   renderHosts();
   renderPeople();
-  renderOwner();
   renderTimeline();
   readingsChart('die_c', 'ch-die', 'leg-die', {lo: 40, hi: 100, unit: '°C', label: 'Die temperature by card, last 48 hours', fmt: v => n0(v) + ' °C',
     refs: [{v: 65, label: '65 °C: the governor holds 600 MHz'}, {v: 90, label: '90 °C'}]});

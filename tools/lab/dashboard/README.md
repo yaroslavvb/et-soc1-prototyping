@@ -1,7 +1,9 @@
 # tools/lab/dashboard: the lab dashboard's collector and updater
 
-A private page on spacesheep.dev that shows the AI Foundry lab at a glance: the three machines, the four cards, the
-people using them and the owner's own sessions, refreshed every 10 minutes. The design, with the data model, the
+A private page on spacesheep.dev that shows the AI Foundry lab at a glance: the three machines and whether each is up,
+the four cards and who holds them, who is logged in and what they are doing, and who used each card in the last 24
+hours (from `et-usage`, `tools/lab/et-usage/`), refreshed every 10 minutes. It is the same for everyone: the account
+that runs the collector is one login among the others. The design, with the data model, the
 health rules and the reasons behind each choice, is [DESIGN.md](DESIGN.md). This file is the manual.
 
 | File | Role |
@@ -11,10 +13,11 @@ health rules and the reasons behind each choice, is [DESIGN.md](DESIGN.md). This
 | `update.sh` | collect, render, deploy when something changed, check that the space is still private, log; cron, acknowledgements |
 | `lab.json` | static facts: hosts, cards, firmware, clock policy, idle ranges, known conditions. No personal data, no access paths |
 | `page/` | the page and its `render.py` (see `page/README.md`); `update.sh` runs `page/render.py <data.json> <out.html>` |
-| `testdata/` | invented probe outputs (`raw-<host>.txt`, `claudes.txt`, `sessions.json`) for `collect.py --from-raw` |
+| `testdata/` | invented probe outputs (`raw-<host>.txt`, `tailscale.json`) for `collect.py --from-raw`; `run2/` and `run3/` are the two runs after it (a machine down, one unreachable, reboots) |
 
 Everything collected lives outside the repository: `~/.cache/lab-dashboard/` (mode 0700: `data.json`,
-`history.jsonl`, `state.json`, `raw/<host>.txt`, `update.log`, `deploy.state`, `lock`, `collect.lock`, `HALT`) and
+`history.jsonl`, `state.json`, `raw/<host>.txt`, `update.log`, `deploy.state`, `lock`, `collect.lock`, `HALT` and its
+companions `HALT.sticky`, `HALT.verified`, `halt.times`, `autoresume.last`) and
 `~/.config/lab-dashboard/` (`space` holds the space's uuid; `config.json`; `ack.json`; `crontab.bak`).
 
 ## Using it
@@ -40,11 +43,19 @@ the aifoundry2 session ("refresh the lab dashboard", "why is aifoundry1 red?") w
 the page, for example `host:aifoundry1:disk:/home`.
 
 **Cadence.** The cron line is `2-59/10 * * * * .../update.sh run` (minute 2 of every ten, off the minute boundary
-where nodewatch and the claudes watchdog run). A run deploys only when the fingerprint changed (a state change, not a
-drifting number) or the last deploy is 60 minutes old; `now` always deploys. The spacesheep viewer reloads open tabs
+where per-minute jobs run). A run deploys only when the fingerprint changed (a state change, not a drifting number:
+a machine down or back, a reboot, a card taken or freed, a new person on a card in the last 24 h) or the last deploy
+is 60 minutes old, and never twice within 10 minutes; `now` always deploys. The spacesheep viewer reloads open tabs
 on every deploy; the page reads STALE after 80 minutes without a new version. Runs never overlap: `run` exits at once
 if another run holds the lock, `now` waits up to 60 s. `et-lab-health` runs hourly on each host (`now` runs it
-everywhere). Expect 30–60 versions a day (DESIGN.md §3.2); the CLI cannot delete old versions, only the whole space.
+everywhere). Expect 30–60 versions a day, at most 144 on a day when a queue
+takes a card in bursts (DESIGN.md §3.2); the CLI cannot delete old versions, only the whole space.
+
+**Machine states.** Each machine is `up`, `DOWN` (no answer, and Tailscale on aifoundry2 says it is offline: a
+`bad` alert at once), `UNREACHABLE` (online on Tailscale, but ssh timed out or failed: a warning, `bad` from the second
+run) or `APPROVAL NEEDED`; a reboot (a new boot id) is shown for 24 hours, as a warning when no reboot was pending.
+A machine that is not up keeps its last data on the page, greyed and labelled "last known at 14:32"; its cards read
+`UNKNOWN: machine down`, and its people counts are unknown. Down and unreachable machines are tried every run.
 
 **When a machine shows "approval needed".** Tailscale SSH's check approval lasts about 12 hours. The collector
 recognises the prompt, stops its own ssh client, never keeps the URL, and then tries that host once an hour (`now`
@@ -56,9 +67,11 @@ host's last data stays on the page, marked stale, and nodewatch keeps its host h
 ## What it reads, and what it never does
 
 `remote.sh` reads `/proc`, the driver's sysfs counters (the list in DESIGN.md §2.4), `et-who` (the lab's
-`sudo -n et-holders`, the only privileged step), logind sessions, terminal idle times, process counts, nodewatch's
-logs, the newest experiment telemetry files in the host's tree, `et-lab-manifest`, and the repository's
-`et-lab-health` rev 3 (sent inside the probe, installed nowhere). One ssh per host per run, under `nice -n 10 ionice
+`sudo -n et-holders`, the only privileged step), `et-usage --json` (the card-use log, when installed), logind
+sessions, terminal idle times, process counts and categories (from `ps` comm, on the host), nodewatch's logs, the
+newest experiment telemetry files in the host's tree, `et-lab-manifest`, and the repository's `et-lab-health` rev 3
+(sent inside the probe, installed nowhere). On aifoundry2 the collector also reads `tailscale status --json`, keeping
+only each lab machine's online flag and last-seen time. One ssh per host per run, under `nice -n 10 ionice
 -c3`, every command under `timeout`; a run takes about 1–4 s of wall time for all three hosts.
 
 It never opens a `/dev/et*` node (checked with `strace` on aifoundry2), never reads `utilization_percent` (it syncs
@@ -85,7 +98,7 @@ reasons); a gate whose own command fails or times out fails:
 5. **binary**: the ettelem build is the host's own (`libDM.so` from `/opt/et/lib`, `deviceLayer` from `/opt/et`);
    with `ET_DEVICES`, also its own directory's CMake build, and both it and `/opt/et/lib/libdeviceLayer.a` contain
    `ET_DEVICES` (a stock device layer ignores the variable and would sample card 0);
-6. **experiment**: none of our runners (`tools/claims-v3`, `queue.sh`, `run_passes`, `series.sh`, `card_run`,
+6. **experiment**: none of the collector account's own runners (`tools/claims-v3`, `queue.sh`, `run_passes`, `series.sh`, `card_run`,
    `energy.sh`, `workloads/*/run_*`, `tools/ettelem/*.sh`, any `run_*.sh|py`) and none of our device processes;
 7. **others**: no other user's device process and no CI job (`Runner.Worker`);
 8. **people**: no other user active (a session that is not closing, with no terminal or one used in the last 30 min);
@@ -105,25 +118,39 @@ run it by hand to see its usage (read `tools/ettelem/ettelem.cpp`).
 
 The page names lab users, so the space is private, is checked before every deploy (`spacesheep list` must say
 private, or nothing is deployed) and after it (the list again, and an anonymous request must get the sign-in
-bootstrap, never the page's hidden canary or title), and is never linked from a public page. If a check finds the
-space not private or the page exposed, `update.sh` sets the space private again, writes `HALT` and stops deploying
-until a person runs `update.sh resume`. The guard cannot see `spacesheep share --email`, which grants a person access
-while the space stays private. Another person appears only as a login name with session, terminal
-and process counts, idle time and card holds; never their commands, files, groups or where they connect from. The
+bootstrap, never the page's hidden canary or title), and is never linked from a public page. A list that says "not
+private" is read twice more, 5 s apart, and the anonymous request made, before anything halts: if both re-reads say
+private and the request gets the sign-in page, the run logs "visibility misread once" (with the space's row: id,
+visibility, updated_at) and only skips its deploy (on 30 September one read said "public" twice for a private space).
+Otherwise, or if the page is served anonymously, `update.sh` sets the space private again, writes `HALT` and stops
+deploying. While halted, each run checks again; two runs in a row that verify the space private resume deploying, at
+most once a day, and a second halt within 24 hours stays until a person runs `update.sh resume`. The guard cannot
+see `spacesheep share --email`, which grants a person access while the space stays private. A person appears as a
+login name with session, terminal and process counts, idle time, card holds and card use (with program names, as
+`et-who` and `et-usage` show them to every user), and what they are doing in coarse categories (on a card, AI agent,
+building, simulator, Python, editor, shell only), worked out on the host from process names that never leave it;
+never their commands, files, groups or where they connect from. The
 collector scrubs free text (IP addresses, e-mail addresses, URLs, tailnet names, other people's home paths) and then
 refuses to write `data.json` at all (exit 3) if any such pattern remains anywhere. Nothing it collects goes into this
-repository; `lab.json` and `testdata/` hold only lab facts and invented people (`owner`, `user-a`, `user-b`). Other ssh targets
+repository; `lab.json` and `testdata/` hold only lab facts and invented people (`owner`, `user-a`, `user-b`) and invented Tailscale output. Other ssh targets
 than the plain host names go in `~/.config/lab-dashboard/config.json` (`{"ssh": {"aifoundry1": "..."}}`), never here.
 
 ## Testing
 
 ```
-python3 collect.py --from-raw testdata --out /tmp/t --now 1790797500 --owner owner   # the parsers and rules, no ssh
-python3 collect.py --out /tmp/t --no-sessions                          # a real collection into a scratch directory
-python3 collect.py --out /tmp/t --sample-dry --no-sessions             # the sample's gates, nothing run
+python3 collect.py --from-raw testdata --out $T --now 1790797500 --owner owner        # the parsers and rules, no ssh
+python3 collect.py --from-raw testdata/run2 --out $T --now 1790798100 --owner owner   # then: aifoundry1 down, aifoundry2
+python3 collect.py --from-raw testdata/run3 --out $T --now 1790798700 --owner owner   #   rebooted, aifoundry3 unreachable, ...
+python3 collect.py --out $T                                                            # a real collection into a scratch directory
+python3 collect.py --out $T --sample-dry                                               # the sample's gates, nothing run
 ```
 
 `update.sh` reads test hooks from the environment, so its deploy logic can be exercised without deploying:
 `LAB_DASH_CACHE`, `LAB_DASH_CONFIG` (scratch directories), `LAB_DASH_SPACESHEEP` (a stub CLI), `LAB_DASH_RENDER`
 (a stub renderer), `LAB_DASH_FETCH` (a stub anonymous fetch that prints a status line, then a body),
-`LAB_DASH_CRONTAB` (a stub crontab), `LAB_DASH_COLLECT_ARGS` (extra `collect.py` options).
+`LAB_DASH_CRONTAB` (a stub crontab), `LAB_DASH_COLLECT_ARGS` (extra `collect.py` options), `LAB_DASH_REREAD_S` (the
+guard's re-read pause, 5 s). With a stub spacesheep whose `list` answers a scripted sequence, the guard's paths were
+checked on 30 September: a misread (no halt, no deploy), a true exposure (halt, stays), the page served (halt), two
+verified runs (auto-resume), a second halt within 24 h (stays), a change within 10 minutes of a deploy (waits).
+Keep `LAB_DASH_CONFIG` pointed at a scratch directory with `{"card_sample": false}` for any test: the real
+`config.json` may switch the card sample on.

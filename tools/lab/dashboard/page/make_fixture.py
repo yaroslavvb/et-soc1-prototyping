@@ -3,15 +3,19 @@
 
     python3 tools/lab/dashboard/page/make_fixture.py [out.json]     (default: fixture.json beside this file)
 
-Everything about people here is invented: the logins are user-a (the owner) to user-e, the session titles and the
-schedule names are made up, and no address, e-mail or URL appears. Host names, card facts and firmware versions are
-the lab's public facts (AGENT.md §4). The scenario, at 13:12 PDT on 30 September 2026:
+Everything about people here is invented: the logins are owner (the collector's account, listed like anyone else)
+and user-a to user-e, the schedule names are made up, and no address, e-mail or URL appears. Host names, card facts and
+firmware versions are the lab's public facts (AGENT.md §4). The scenario, at 13:12 PDT on 30 September 2026:
 
-- aifoundry3 does not answer (Tailscale check approval needed) since 11:50, so its block is the 11:40 one, stale;
-- aifoundry1: its ZFS pool 95% full and /home 88% (et-lab-health WARNs), a pending reboot, card 1 held by user-c,
-  card 0 excluded with its known events;
-- aifoundry2: one failed unit, our queue running on its card, the owner's tmux and Claude alive;
-- the owner's second claudes login lapses in 5 days.
+- aifoundry3 is DOWN: Tailscale says it is offline since 12:47, its last answer was at 12:40, so its block is that
+  one, greyed; earlier it waited for a Tailscale approval overnight and did not answer ssh for 40 minutes at 09:20;
+  it has no card-use logger (et-usage absent);
+- aifoundry1: its ZFS pool 95% full and /home 88%, a pending reboot, card 1 held by user-c since 13:00 (an open hold);
+  its logger began at 15:20 yesterday and missed 03:10-04:07 (a driver reload); card 0, excluded, was used once, for
+  6 s, by user-d at 09:41 (a warning);
+- aifoundry2: one failed unit, rebooted at 06:02 (planned), the owner's queue on its card (about a hundred short runs
+  this morning, and a hold since 12:40), user-a's long runs and user-b's short ones yesterday; the logger restarted
+  02:10-02:55.
 
 render.py --fixture moves every time in it so that the data is 4 minutes old when the page is built."""
 import json
@@ -72,21 +76,25 @@ def noise(base, amp, i, period=37.0):
 # approval lapses (the host answered nothing to us) and the collector's own gap
 lapse = {
     "aifoundry1": [(t(30, 1, 10), t(30, 7, 30))],
-    "aifoundry3": [(t(30, 0, 50), t(30, 7, 10)), (t(30, 11, 50), NOW + timedelta(minutes=10))],
+    "aifoundry3": [(t(30, 0, 50), t(30, 7, 10))],
     "aifoundry2": [],
 }
 collector_gap = (t(29, 3, 20), t(29, 3, 50))  # three collector runs missing (a made-up gap)
-last_ok = {"aifoundry1": ago(minutes=2), "aifoundry2": ago(minutes=0), "aifoundry3": t(30, 11, 40)}
+last_ok = {"aifoundry1": ago(minutes=2), "aifoundry2": ago(minutes=0), "aifoundry3": t(30, 12, 40)}
 
 hist_hosts = {}
 threads = {"aifoundry1": 16, "aifoundry2": 12, "aifoundry3": 32}
 mem_total = {"aifoundry1": 31, "aifoundry2": 63, "aifoundry3": 125}
 for h in ("aifoundry1", "aifoundry2", "aifoundry3"):
-    up, load, mem, s_all, s_own, tmux, claude, warn = ([None] * N for _ in range(8))
+    up, load, mem, s_all, s_own, warn = ([None] * N for _ in range(6))
     for i in range(N):
         down = any(i in span(a, b) for a, b in lapse[h])
         if i in span(*collector_gap):
             up[i] = None
+        elif h == "aifoundry3" and slot_t[i] >= t(30, 12, 50):
+            up[i] = 3  # down: Tailscale says offline
+        elif h == "aifoundry3" and t(30, 9, 20) <= slot_t[i] < t(30, 10, 0):
+            up[i] = 0  # no answer: ssh timed out, Tailscale online
         else:
             up[i] = "approval" if down else 1
         # nodewatch's heartbeat keeps its own record while we cannot reach the host; it is fetched when we can,
@@ -100,8 +108,6 @@ for h in ("aifoundry1", "aifoundry2", "aifoundry3"):
             mem[i] = round(noise(57.5, 1.5, i, 53), 1)
             s_own[i] = 5 if i > 60 else 4
             s_all[i] = s_own[i] + (1 if 100 <= i <= 200 else 0)
-            tmux[i] = 1
-            claude[i] = 6 if i > 200 else 5
         elif h == "aifoundry1":
             busy = 9.0 if 40 <= i <= 46 or 170 <= i <= 175 else 0.0  # CI jobs
             load[i] = round(max(0.02, noise(0.5, 0.3, i) + busy), 2)
@@ -114,25 +120,24 @@ for h in ("aifoundry1", "aifoundry2", "aifoundry3"):
             s_own[i] = 1 if 40 <= i <= 60 else 0
             s_all[i] = s_own[i] + 1
         warn[i] = {"aifoundry1": 3, "aifoundry2": 1 if i >= idx(t(30, 9, 0)) else 0, "aifoundry3": 0}[h]
-    hist_hosts[h] = {"up": up, "load": load, "mem_avail_gib": mem, "sessions_all": s_all, "sessions_owner": s_own,
-                     "tmux": tmux, "claude": claude, "warn": warn}
+    hist_hosts[h] = {"up": up, "load": load, "mem_avail_gib": mem, "sessions_all": s_all, "warn": warn}
 
 # card series: holds, use, telemetry readings where an experiment file or a sample exists
 hist_cards = {}
 holds = {
     "aifoundry2": [(t(28, 20, 45) + timedelta(minutes=40 * k), t(28, 20, 45) + timedelta(minutes=40 * k + 28), "user-a")
-                   for k in range(30)] + [(t(29, 16, 59), t(29, 17, 38), "user-a"), (t(30, 12, 40), NOW + timedelta(minutes=10), "user-a")],
-    "aifoundry1-c1": [(t(29, 9, 0), t(29, 9, 40), "user-a"), (t(29, 10, 10), t(29, 11, 30), "user-a"),
-                      (t(29, 12, 0), t(29, 13, 0), "user-a"), (t(29, 15, 20), t(29, 15, 50), "user-b"),
+                   for k in range(30)] + [(t(29, 16, 59), t(29, 17, 38), "owner"), (t(30, 12, 40), NOW + timedelta(minutes=10), "owner")],
+    "aifoundry1-c1": [(t(29, 9, 0), t(29, 9, 40), "owner"), (t(29, 10, 10), t(29, 11, 30), "owner"),
+                      (t(29, 12, 0), t(29, 13, 0), "owner"), (t(29, 15, 20), t(29, 15, 50), "user-b"),
                       (t(30, 13, 0), NOW + timedelta(minutes=10), "user-c")],
-    "aifoundry3": [(t(29, 3, 0), t(29, 6, 0), "user-a"), (t(29, 18, 0), t(29, 18, 40), "user-e")],
+    "aifoundry3": [(t(29, 3, 0), t(29, 6, 0), "owner"), (t(29, 18, 0), t(29, 18, 40), "user-e")],
     "aifoundry1-c0": [],
 }
 for c, hs in holds.items():
     host = c.split("-")[0]
     hold, used, die, watts, ce = ([None] * N for _ in range(5))
     for i in range(N):
-        if hist_hosts[host]["up"][i] != 1:
+        if hist_hosts[host]["up"][i] != 1 or slot_t[i] > last_ok[host]:
             continue  # no run, or the host did not answer: unknown
         who = next((w for a, b, w in hs if i in span(a, b)), "")
         hold[i] = who
@@ -141,12 +146,12 @@ for c, hs in holds.items():
         if c == "aifoundry1-c0":
             ce[i] = 2 if i % 9 == 0 else 0
             continue
-        if who == "user-a":
+        if who == "owner":
             base = {"aifoundry2": 77, "aifoundry3": 70, "aifoundry1-c1": 66}[c]
             k = i - next(a_ for a_ in range(i, -1, -1) if hold[a_ - 1] != who or a_ == 0)  # slots into this hold
             die[i] = round(base + min(k, 4) * 1.5 + 1.5 * math.sin(i / 5.0))  # warms up, then wanders
             watts[i] = round(base / 2.0 + min(k, 3) * 1.2 + 0.8 * math.sin(i / 4.0), 1)
-        elif who == "" and c == "aifoundry2" and hold[i - 1] == "user-a":
+        elif who == "" and c == "aifoundry2" and hold[i - 1] == "owner":
             die[i] = 71  # the idle reading taken after a block
             watts[i] = 33.1
     hist_cards[c] = {"hold": hold, "used": used, "die_c": die, "board_w": watts, "ce_new": ce}
@@ -358,52 +363,192 @@ cards = {
     },
 }
 
-# ---- people and the owner ----
-people = [
-    {"login": "user-a", "owner": True, "status": "active",
-     "hosts": {"aifoundry2": {"sessions": 5, "closing": 1, "ttys": 12, "idle_min": 3, "procs": 214, "status": "active"},
-               "aifoundry1": {"sessions": 1, "closing": 0, "ttys": 1, "idle_min": 40, "procs": 9, "status": "idle"}},
-     "card_holds": [{"card": "aifoundry2", "etime_s": 272}], "device_procs": 0},
-    {"login": "user-c", "owner": False, "status": "active",
-     "hosts": {"aifoundry1": {"sessions": 1, "closing": 0, "ttys": 2, "idle_min": 1, "procs": 18, "status": "active"}},
-     "card_holds": [{"card": "aifoundry1-c1", "etime_s": 723}], "device_procs": 1},
-    {"login": "user-b", "owner": False, "status": "idle",
-     "hosts": {"aifoundry1": {"sessions": 2, "closing": 0, "ttys": 3, "idle_min": 187, "procs": 41, "status": "idle"}},
-     "card_holds": [], "device_procs": 0},
-    {"login": "user-d", "owner": False, "status": "processes only",
-     "hosts": {"aifoundry2": {"sessions": 1, "closing": 1, "ttys": 0, "idle_min": None, "procs": 7, "status": "processes only"}},
-     "card_holds": [], "device_procs": 0},
-    {"login": "user-e", "owner": False, "status": "away", "stale": True,
-     "hosts": {"aifoundry3": {"sessions": 1, "closing": 0, "ttys": 1, "idle_min": 2890, "procs": 12, "stale": True, "status": "away"}},
-     "card_holds": [], "device_procs": 0},
-]
+# ---- liveness, and what the collector no longer keeps (the account's own experiments, tmux, Claude) ----
+for h, hb in hosts.items():
+    hb.pop("experiments", None)
+    for k in ("tmux", "claude", "linger", "user_manager"):
+        hb["nodewatch"].pop(k, None)
+    hb["nodewatch"]["events_48h"] = [e for e in hb["nodewatch"].get("events_48h", []) if e["type"] in ("REBOOT", "START", "WARN")]
+    hb.update(state="up", state_since_ms=None, down_since_ms=None, last_answer_ms=hb["last_ok_ms"],
+              last_answer_at=hb["last_ok_at"], tailscale={"online": True, "last_seen_ms": None, "at_ms": ms(NOW)},
+              tailscale_last_seen_ms=None, rebooted_at_ms=None, reboot_planned=None, ci_jobs=0)
+hosts["aifoundry1"].update(device_procs=1, device_people=1)
+hosts["aifoundry2"].update(device_procs=1, device_people=1, rebooted_at_ms=ms(t(30, 6, 2)), reboot_planned=True,
+                           uptime_h=7.2)
+hosts["aifoundry2"]["nodewatch"]["events_48h"] = [{**at(t(30, 6, 2)), "type": "REBOOT", "what": "reboot"}]
+a3 = hosts["aifoundry3"]
+a3.update(error="timeout", **at(t(30, 12, 40), "last_ok_at"), **at(t(30, 12, 40), "as_of"), next_try_ms=None,
+          next_try_at=None, fails_in_row=3, state="down", state_since_ms=ms(t(30, 12, 47)),
+          down_since_ms=ms(t(30, 12, 47)), last_answer_ms=ms(t(30, 12, 40)), last_answer_at=iso(t(30, 12, 40)),
+          tailscale={"online": False, "last_seen_ms": ms(t(30, 12, 47)), "at_ms": ms(NOW)},
+          tailscale_last_seen_ms=ms(t(30, 12, 47)), device_procs=0, device_people=0)
+a3["nodewatch"].update(**at(t(30, 12, 39), "beat_at"))
+cards["aifoundry3"].update(**at(t(30, 12, 40), "as_of"))
+cards["aifoundry3"]["reasons"] = ["aifoundry3 DOWN since 12:47"]
 
-owner = {
-    "login": "user-a",
-    "claudes": {**at(ago(minutes=1), "as_of"), "accounts": [
-        {"n": 1, "logged_in": True, "lapses": "2026-10-28", "lapse_days": 28, "tmux": "claude", "server": True,
-         "phones": 1, "sessions": 3},
-        {"n": 2, "logged_in": True, "lapses": "2026-10-05", "lapse_days": 5, "tmux": "claude2", "server": True,
-         "phones": 0, "sessions": 1}],
-        "pins": [{"id8": "0a1b2c3d", "account": 1, "window": "main", "running": True},
-                 {"id8": "5e6f7a8b", "account": 2, "window": "review", "running": True}],
-        "watchdog": {"on": True, **at(ago(seconds=20), "last_run"), "age_min": 0.3}},
-    "sessions": {**at(ago(minutes=1), "as_of"),
-                 "by_machine": {"aifoundry2": {"working": 2, "idle": 3, "done": 1, **at(ago(minutes=1), "last_at")},
-                                "other": {"working": 1, "idle": 12, "done": 4, **at(ago(minutes=26), "last_at")}},
-                 "lab": [
-                     {"title": "Lab dashboard", "state": "working", "model": "claude-opus-5-5", "turns": 301,
-                      **at(t(30, 12, 34), "started_at"), **at(ago(minutes=1), "last_at"), "source": "claude-code"},
-                     {"title": "Queue watch for the third card", "state": "working", "model": "claude-opus-5-5",
-                      "turns": 88, **at(t(30, 9, 5), "started_at"), **at(ago(minutes=6), "last_at"),
-                      "source": "claude-code"},
-                     {"title": "Heat placement page review", "state": "idle", "model": "claude-opus-5-5",
-                      "turns": 142, **at(t(29, 19, 40), "started_at"), **at(t(30, 8, 12), "last_at"),
-                      "source": "claude-code"},
-                     {"title": "DV2 reduction", "state": "done", "model": "claude-opus-5-5", "turns": 57,
-                      **at(t(29, 17, 2), "started_at"), **at(t(29, 21, 30), "last_at"), "source": "claude-code"}]},
-    "nodewatch": {"aifoundry2": {"tmux": True, "claude": 6, "linger": True, "user_manager": "active", "beat_age_min": 0.4}},
+# the holders: et-who's line completed from et-usage (the program, the start of the hold)
+cards["aifoundry2"]["holder"] = {"held": True, "who": [
+    {"node": "/dev/et0_ops", "login": "owner", "etime_s": 1924, "comm": "sgemm_host", "since_ms": ms(t(30, 12, 40)), "system": False},
+    {"node": "lock:etsoc-shire0.lock", "login": "owner", "etime_s": 1924, "comm": "sgemm_host", "since_ms": ms(t(30, 12, 40)), "system": False}]}
+cards["aifoundry2"]["activity"]["last_used_by"] = "owner"
+cards["aifoundry2"]["reasons"] = []
+cards["aifoundry1-c1"]["holder"] = {"held": True, "who": [
+    {"node": "/dev/et1_ops", "login": "user-c", "etime_s": 724, "comm": "sgemm_host", "since_ms": ms(t(30, 13, 0)), "system": False}]}
+cards["aifoundry1-c1"]["reasons"] = []
+
+# ---- card use: et-usage's last 24 hours, as the collector keeps it (DESIGN.md §1.8) ----
+U0, U1 = NOW - timedelta(hours=24), NOW
+rnd2 = random.Random(7)
+
+
+def iv(user, a, b, progs, node=None, runs=1, open_=False, n=1):
+    held = (b - a).total_seconds()
+    return {"user": user, "start_ms": ms(a), "end_ms": ms(b), "held_s": round(held, 1),
+            "node_s": round(node if node is not None else held * 0.97, 1), "runs": runs, "programs": progs,
+            "open": open_, "n": n}
+
+
+cu = {"aifoundry2": [], "aifoundry1-c1": [], "aifoundry1-c0": []}
+# aifoundry2: user-a's long runs and user-b's short ones yesterday; the owner's queue: about a hundred short runs
+cu["aifoundry2"] += [iv("user-a", t(29, 14, 5), t(29, 14, 50), {"mmbench_launch": 3}, runs=3),
+                     iv("user-a", t(29, 16, 20), t(29, 16, 31), {"mmbench_launch": 1})]
+cu["aifoundry2"] += [iv("user-b", t(29, 20, 10) + timedelta(minutes=2.5 * k), t(29, 20, 10) + timedelta(minutes=2.5 * k, seconds=3 + k % 4),
+                        {"pcie_host": 1}) for k in range(12)]
+q = t(30, 6, 30)
+while q < t(30, 11, 0):
+    d = rnd2.uniform(3, 9)
+    cu["aifoundry2"].append(iv("owner", q, q + timedelta(seconds=d), {"sgemm_host": 1}))
+    q += timedelta(seconds=rnd2.uniform(150, 200))
+cu["aifoundry2"].append(iv("owner", t(30, 12, 40), U1, {"sgemm_host": 1}, open_=True))
+# aifoundry1 card 1: user-b this morning, user-c's open hold; card 0: user-d once, for 6 s
+cu["aifoundry1-c1"] += [iv("user-b", t(30, 9, 10) + timedelta(minutes=6 * k), t(30, 9, 10) + timedelta(minutes=6 * k + 2),
+                           {"pcie_host": 2}, runs=2) for k in range(5)]
+cu["aifoundry1-c1"] += [iv("user-e", t(29, 18, 2), t(29, 18, 9), {"ettelem": 1, "sgemm_host": 2}, runs=3)]
+cu["aifoundry1-c1"].append(iv("user-c", t(30, 13, 0), U1, {"sgemm_host": 1}, open_=True))
+cu["aifoundry1-c0"].append(iv("user-d", t(30, 9, 41, ) + timedelta(seconds=12), t(30, 9, 41) + timedelta(seconds=18), {"ettelem": 1}))
+coverage = {"aifoundry2": [[ms(U0), ms(t(30, 2, 10))], [ms(t(30, 2, 55)), ms(U1)]],
+            "aifoundry1": [[ms(t(29, 15, 20)), ms(t(30, 3, 10))], [ms(t(30, 4, 7)), ms(U1)]]}
+
+
+def activity(ivs):
+    out = set()
+    for x in ivs:
+        m = int((x["start_ms"] - ms(U0)) // 60000)
+        while ms(U0) + m * 60000 < x["end_ms"]:
+            out.add(m + 1)
+            m += 1
+    return [[m, 60.0, 200 + 37 * (m % 11)] for m in sorted(out) if m <= 1440]
+
+
+def users(ivs):
+    out = {}
+    for x in ivs:
+        e = out.setdefault(x["user"], {"held_s": 0.0, "node_s": 0.0, "runs": 0, "programs": {}, "first_ms": x["start_ms"],
+                                       "last_ms": x["end_ms"], "open": False})
+        e["held_s"] = round(e["held_s"] + x["held_s"], 1)
+        e["node_s"] = round(e["node_s"] + x["node_s"], 1)
+        e["runs"] += x["runs"]
+        e["last_ms"] = max(e["last_ms"], x["end_ms"])
+        e["open"] = e["open"] or x["open"]
+        for p, n in x["programs"].items():
+            e["programs"][p] = e["programs"].get(p, 0) + n
+    return out
+
+
+def daily(cid, today):
+    out = []
+    for k in range(6, -1, -1):
+        d = (NOW - timedelta(days=k)).replace(hour=12, minute=0, second=0)
+        us = {} if k else {u: {"held_s": e["held_s"], "node_s": e["node_s"], "runs": e["runs"]} for u, e in today.items()}
+        if k and cid == "aifoundry2":
+            us = {"owner": {"held_s": 3600.0 * (k % 3) + 610, "node_s": 3600.0 * (k % 3) + 580, "runs": 40 + 17 * k}}
+            if k in (2, 5):
+                us["user-a"] = {"held_s": 1500.0 + 300 * k, "node_s": 1450.0 + 300 * k, "runs": 4}
+        if k == 1 and cid == "aifoundry1-c1":
+            us = {"user-e": {"held_s": 420.0, "node_s": 400.0, "runs": 3}}
+        if k > 1 and cid.startswith("aifoundry1"):
+            continue  # the logger began yesterday
+        if us:
+            out.append({"date": d.strftime("%Y-%m-%d"), "day_ms": ms(d), "users": us})
+    return out
+
+
+usage_cards = {}
+for cid, ivs in cu.items():
+    ivs.sort(key=lambda x: x["start_ms"])
+    us = users(ivs)
+    busy = sum(x["held_s"] for x in ivs)
+    now_ = [{"user": x["user"], "comm": list(x["programs"])[0], "nodes": ["mgmt", "ops"], "lock": True,
+             "start_ms": x["start_ms"]} for x in ivs if x["open"]]
+    usage_cards[cid] = {"host": cid.split("-")[0], "logged": True, "stale": False, "intervals": ivs,
+                        "activity_min": activity(ivs) if cid != "aifoundry1-c0" else [], "users": us,
+                        "held_s": round(busy, 1), "node_s": round(sum(x["node_s"] for x in ivs), 1),
+                        "runs": sum(x["runs"] for x in ivs), "people": len(us), "now": now_,
+                        "daily": daily(cid, us),
+                        "since_check": {"since_ms": ms(ago(minutes=10)), "users": [x["user"] for x in now_],
+                                        "runs": len(now_), "programs": {"sgemm_host": len(now_)}}}
+usage_cards["aifoundry3"] = {"host": "aifoundry3", "logged": False}
+usage = {
+    "hours": 24, "start_ms": ms(U0), "end_ms": ms(U1), "tz": "America/Los_Angeles",
+    "hosts": {
+        "aifoundry1": {"logger": "running", "installed": True, "error": None, "stale": False, "as_of_ms": ms(ago(minutes=2)),
+                       "alive_ms": ms(ago(minutes=2, seconds=20)), "started_ms": ms(t(30, 4, 7)),
+                       "logging_since_ms": ms(t(29, 15, 20)), "coverage_ms": coverage["aifoundry1"],
+                       "logged_s": 77000, "skipped": 0, "merged_gap_s": None},
+        "aifoundry2": {"logger": "running", "installed": True, "error": None, "stale": False, "as_of_ms": ms(NOW),
+                       "alive_ms": ms(ago(seconds=30)), "started_ms": ms(t(30, 6, 3)),
+                       "logging_since_ms": ms(t(24, 9, 0)), "coverage_ms": coverage["aifoundry2"],
+                       "logged_s": 83700, "skipped": 0, "merged_gap_s": None},
+        "aifoundry3": {"logger": "not installed", "installed": False, "error": None, "stale": True,
+                       "as_of_ms": ms(t(30, 12, 40)), "coverage_ms": []}},
+    "cards": usage_cards,
+    "logins": sorted({x["user"] for ivs in cu.values() for x in ivs} | {"user-e"}),
 }
+
+# ---- people: everyone the same way; "doing" is the probe's coarse categories ----
+people = [
+    {"login": "owner", "status": "active", "doing": ["card", "agent", "build"],
+     "hosts": {"aifoundry2": {"sessions": 5, "closing": 1, "ttys": 12, "idle_min": 3, "procs": 214, "status": "active",
+                              "doing": ["card", "agent", "build"]},
+               "aifoundry1": {"sessions": 1, "closing": 0, "ttys": 1, "idle_min": 40, "procs": 9, "status": "idle",
+                              "doing": ["shell"]}},
+     "card_holds": [{"card": "aifoundry2", "etime_s": 1924, "comm": "sgemm_host", "since_ms": ms(t(30, 12, 40))}],
+     "cards_24h": [{"card": "aifoundry2", "held_s": usage_cards["aifoundry2"]["users"]["owner"]["held_s"],
+                    "runs": usage_cards["aifoundry2"]["users"]["owner"]["runs"], "last_ms": ms(U1), "open": True}],
+     "device_procs": 1, "stale_hosts": [], "idle_min": 3},
+    {"login": "user-c", "status": "active", "doing": ["card", "python", "editor"],
+     "hosts": {"aifoundry1": {"sessions": 1, "closing": 0, "ttys": 2, "idle_min": 1, "procs": 18, "status": "active",
+                              "doing": ["card", "python", "editor"]}},
+     "card_holds": [{"card": "aifoundry1-c1", "etime_s": 724, "comm": "sgemm_host", "since_ms": ms(t(30, 13, 0))}],
+     "cards_24h": [{"card": "aifoundry1-c1", "held_s": usage_cards["aifoundry1-c1"]["users"]["user-c"]["held_s"],
+                    "runs": 1, "last_ms": ms(U1), "open": True}],
+     "device_procs": 1, "stale_hosts": [], "idle_min": 1},
+    {"login": "user-a", "status": "active", "doing": ["agent"],
+     "hosts": {"aifoundry2": {"sessions": 1, "closing": 0, "ttys": 1, "idle_min": 12, "procs": 31, "status": "active",
+                              "doing": ["agent"]}},
+     "card_holds": [], "cards_24h": [{"card": "aifoundry2", "held_s": usage_cards["aifoundry2"]["users"]["user-a"]["held_s"],
+                                      "runs": 4, "last_ms": ms(t(29, 16, 31)), "open": False}],
+     "device_procs": 0, "stale_hosts": [], "idle_min": 12},
+    {"login": "user-b", "status": "idle", "doing": ["build", "sim"],
+     "hosts": {"aifoundry1": {"sessions": 2, "closing": 0, "ttys": 3, "idle_min": 187, "procs": 41, "status": "idle",
+                              "doing": ["build", "sim"]}},
+     "card_holds": [], "cards_24h": [{"card": "aifoundry1-c1", "held_s": usage_cards["aifoundry1-c1"]["users"]["user-b"]["held_s"],
+                                      "runs": 10, "last_ms": ms(t(30, 9, 36)), "open": False},
+                                     {"card": "aifoundry2", "held_s": usage_cards["aifoundry2"]["users"]["user-b"]["held_s"],
+                                      "runs": 12, "last_ms": ms(t(29, 20, 38)), "open": False}],
+     "device_procs": 0, "stale_hosts": [], "idle_min": 187},
+    {"login": "user-d", "status": "processes only", "doing": ["shell"],
+     "hosts": {"aifoundry2": {"sessions": 0, "closing": 1, "ttys": 0, "idle_min": None, "procs": 7, "status": "processes only",
+                              "doing": ["shell"]}},
+     "card_holds": [], "cards_24h": [], "device_procs": 0, "stale_hosts": [], "idle_min": None},
+    {"login": "user-e", "status": "away", "doing": ["shell"],
+     "hosts": {"aifoundry3": {"sessions": 1, "closing": 0, "ttys": 1, "idle_min": 2890, "stale": True, "procs": 12,
+                              "status": "away", "doing": ["shell"]}},
+     "card_holds": [], "cards_24h": [], "device_procs": 0, "stale_hosts": ["aifoundry3"], "idle_min": 2890},
+]
+hosts["aifoundry1"]["logins"] = {"sessions": 4, "people": 3}
+hosts["aifoundry2"]["logins"] = {"sessions": 7, "people": 2}
+
 
 # ---- alerts ----
 def alert(aid, level, scope, title, detail, since, source, host=None, card=None, known=False, ack=None):
@@ -412,57 +557,60 @@ def alert(aid, level, scope, title, detail, since, source, host=None, card=None,
 
 
 alerts = [
-    alert("host:aifoundry3:reach", "warn", "host", "Does not answer: Tailscale check approval needed",
-          "Its panel shows the last good data, greyed. Approve a check on aifoundry2 (ssh aifoundry3 true, then open "
-          "the address it prints), then run update.sh now. Until then the collector tries this host once an hour.",
-          t(30, 11, 50), "collector", host="aifoundry3"),
-    alert("host:aifoundry1:zfs:rpool", "warn", "host", "ZFS pool rpool 95% full",
+    alert("host:aifoundry3:reach", "bad", "host-down", "aifoundry3 DOWN since 12:47",
+          "last answer 12:40; Tailscale last seen 12:47: the machine is offline on the tailnet (powered off, crashed or "
+          "disconnected); ssh: timeout. Its panel shows the last known data.", t(30, 12, 50), "tailscale, ssh",
+          host="aifoundry3"),
+    alert("card:aifoundry1-c0:used-24h", "warn", "card", "used in the last 24 h by user-d; the card is excluded (overheats)",
+          "user-d: 1 run, 6 s held, last at 09:41; first at 09:41", t(30, 9, 50), "et-usage", host="aifoundry1",
+          card="aifoundry1-c0"),
+    alert("host:aifoundry1:zfs:rpool", "warn", "host", "pool rpool 95% full (ONLINE)",
           "rpool ONLINE, 95% used; 42 errors at the last scrub. / is 95% used, /home 88%.", t(28, 7, 54),
           "et-lab-health", host="aifoundry1"),
     alert("host:aifoundry1:disk:/home", "warn", "host", "/home 88% used", "et-lab-health warns at 85%.",
-          t(28, 7, 54), "et-lab-health", host="aifoundry1"),
-    alert("host:aifoundry2:systemd", "warn", "host", "1 failed unit",
+          t(28, 7, 54), "df", host="aifoundry1"),
+    alert("host:aifoundry2:systemd", "warn", "host", "1 failed unit(s)",
           "degraded: apport-coredump-hook@3-2211-1000.service (a crash report hook; clears at the next boot or with a "
-          "reset-failed by an admin)", t(30, 9, 2), "et-lab-health", host="aifoundry2"),
-    alert("owner:claudes:2:lapse", "warn", "owner", "claudes account 2: login lapses in 5 days",
-          "Lapses on 5 Oct. Log in again with claudes before then.", t(30, 0, 2), "claudes status"),
-    alert("card:aifoundry1-c1:held", "info", "card", "Held by user-c since 12:48", "/dev/et1_ops, 723 s",
-          t(30, 13, 0), "et-who", host="aifoundry1", card="aifoundry1-c1"),
-    alert("card:aifoundry2:experiment", "info", "card", "Our experiment running: queue.sh schedule-nocr-aifoundry2.txt",
-          "13:08:14 block nocr p4 begins", t(30, 12, 40), "pgrep", host="aifoundry2", card="aifoundry2"),
-    alert("host:aifoundry1:reboot", "info", "host", "Reboot pending since 25 Sep 16:38",
-          "linux-image-7.0.0-34-generic, linux-modules-7.0.0-34-generic", t(28, 7, 54), "et-lab-health",
-          host="aifoundry1"),
-    alert("host:aifoundry1:zfs-scrub", "info", "host", "ZFS: 42 errors at the last scrub", "rpool", t(28, 7, 54),
-          "et-lab-health", host="aifoundry1"),
-    alert("owner:sessions:working", "info", "owner", "3 Claude sessions working", "2 on aifoundry2, 1 on another machine",
-          t(30, 12, 34), "spacesheep sessions"),
-    alert("card:aifoundry1-c0:ce", "info", "card", "New corrected events: 2 ThermThrottleCeEvent",
-          "212 ThermThrottleCeEvent and 4 PmicCeEvent since boot", t(28, 7, 54), "sysfs err_stats",
-          host="aifoundry1", card="aifoundry1-c0", known="card 0 overheats; excluded (AGENT.md §4)"),
-    alert("card:aifoundry1-c0:aer-port", "info", "card", "Root port: 3,980 corrected PCIe errors an hour",
-          "1,140,744 since boot", t(28, 7, 54), "sysfs aer_dev_correctable", host="aifoundry1", card="aifoundry1-c0",
-          known="its root port logs about 4,000 corrected errors an hour"),
+          "reset-failed by an admin)", t(30, 9, 2), "systemctl", host="aifoundry2"),
+    alert("card:aifoundry1-c1:held", "info", "card", "held by user-c (sgemm_host) since 13:00", "/dev/et1_ops",
+          t(30, 13, 2), "et-who", host="aifoundry1", card="aifoundry1-c1"),
+    alert("card:aifoundry2:held", "info", "card", "held by owner (sgemm_host) since 12:40", "/dev/et0_ops",
+          t(30, 12, 42), "et-who", host="aifoundry2", card="aifoundry2"),
+    alert("host:aifoundry2:rebooted", "info", "host", "rebooted at 06:02", "a reboot was pending (kernel or package updates)",
+          t(30, 6, 12), "boot id", host="aifoundry2"),
+    alert("host:aifoundry3:usage", "info", "host", "card-use logging not installed",
+          "et-usage is not on this machine, so the page cannot show who used its cards; install tools/lab/et-usage",
+          t(30, 9, 0), "et-usage", host="aifoundry3"),
+    alert("host:aifoundry1:reboot", "info", "host", "reboot pending", "linux-image-7.0.0-34-generic, linux-modules-7.0.0-34-generic",
+          t(28, 7, 54), "et-lab-health", host="aifoundry1"),
+    alert("card:aifoundry1-c0:ce", "info", "card", "power or thermal events since the driver loaded",
+          "212 ThermThrottleCeEvent and 4 PmicCeEvent since boot", t(28, 7, 54), "et-lab-health",
+          host="aifoundry1", card="aifoundry1-c0", known="card 0 overheats: its power and thermal events are known (AGENT.md §4)"),
+    alert("card:aifoundry1-c0:aer-port", "info", "card", "root port corrected PCIe errors",
+          "1,140,744 since boot", t(28, 7, 54), "et-lab-health", host="aifoundry1", card="aifoundry1-c0",
+          known="card 0's root port logs about 4,000 corrected PCIe errors an hour; a reseat is pending"),
     alert("host:aifoundry1:power-profile", "info", "host", "CPU power profile balanced", "et-lab-health INFO",
           t(28, 7, 54), "et-lab-health", host="aifoundry1",
           ack={"note": "the lab's choice", **at(t(30, 9, 0), "at"), **at(t(30, 9, 0) + timedelta(days=7), "until")}),
 ]
+hosts["aifoundry3"]["level"] = "bad"
+hosts["aifoundry1"]["level"] = "warn"
+hosts["aifoundry2"]["level"] = "warn"
 
 data = {
     "schema": 1,
     **at(NOW, "generated_at"),
     "collector": {"host": "aifoundry2", "code": "a1b46e9", "took_s": 7.9, "interval_min": 10, "cron_minute": 2,
-                  "heartbeat_min": 60, "stale_after_min": 80, "card_sample": "off", "errors": [],
-                  "fixture": True},
-    "status": {"level": "warn", "counts": {"bad": 0, "warn": 5, "info": 5, "known": 3},
-               "headline": "5 warnings: aifoundry3 needs a Tailscale approval, aifoundry1's pool is 95% full and "
-                           "/home 88%, aifoundry2 has 1 failed unit, a claudes login lapses in 5 days"},
+                  "heartbeat_min": 60, "stale_after_min": 80, "min_deploy_gap_min": 10, "card_sample": "off",
+                  "lab_tz": "America/Los_Angeles", "errors": [], "fixture": True},
+    "status": {"level": "bad", "counts": {"bad": 1, "warn": 4, "info": 5, "known": 3},
+               "headline": "1 problem: aifoundry3 DOWN since 12:47; 4 warnings"},
     "fingerprint": "3fa2c1d09e4b",
     "alerts": alerts,
     "hosts": hosts,
     "cards": cards,
     "people": people,
-    "owner": owner,
+    "usage": usage,
     "history": {"t0_ms": ms(T0), "step_min": STEP, "n": N, "hosts": hist_hosts, "cards": hist_cards},
 }
 
