@@ -1,0 +1,376 @@
+#!/bin/bash
+# et-lab-start: start a new user of the AI Foundry ET-SoC-1 lab on this machine (30 Sep 2026, second version).
+# Run it as yourself: et-lab-start [--check | --dry-run] [--no-claude | --with-claude] [--no-clone]; --help says more.
+# Source and notes: tools/lab/et-lab-start and docs/lab-start/README.md in github.com/yaroslavvb/et-soc1-prototyping.
+# shellcheck disable=SC2016,SC2088  # '~' and '$HOME' in messages and in the PATH line are meant literally
+[ -n "${BASH_VERSION:-}" ] || { echo "et-lab-start: this is a bash script: run it as et-lab-start, or with bash" >&2; exit 2; }
+set -u
+set -o pipefail
+
+# The whole script is one function, called at the very end with stdin from /dev/null: bash has then read all of it,
+# so it also works fed through `bash -s` or a pipe, and nothing it runs can eat the caller's input.
+main() {
+REPO=https://github.com/yaroslavvb/et-soc1-prototyping
+PAGE=https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start
+# The brief's pattern (START.md step 2), matched on the whole command line: comm is cut at 15 characters, and a
+# queue run as `bash queue.sh` or a Python runner has comm bash or python3.
+PROCS='queue[.]sh|claims-v3|campaign[.]py|_host( |$)|ettelem|sys_emu|it_test|dev_mngt|powertop|mmbench|Runner[.]Worker'
+
+usage() {
+  cat <<'EOF'
+et-lab-start: start a new user of the AI Foundry ET-SoC-1 lab on this machine. Run it as yourself.
+  et-lab-start             look, set up what is missing, print the next steps and the rules; safe to run again
+  et-lab-start --check     only look (the cards, who uses them, the last 24 h, people, disk, your setup)
+  et-lab-start --dry-run   look, and print what the setup would do, without doing it
+  --no-claude              leave out Claude Code, its PATH line and the `claude` tmux session
+  --with-claude            on aifoundry1, install Claude Code too (about 230 MB per version on a disk that is
+                           nearly full: ask your person first); on the other machines it is installed by default
+  --no-clone               leave out the clone of the lab's repository
+  -h, --help               this text
+The setup: linger for your account, Claude Code in ~/.local/bin (the native installer), its PATH line in ~/.bashrc,
+a detached tmux session `claude` in ~, and a sparse clone of the lab's repository in ~/et-soc1-prototyping (only
+with 5 GB free; an existing directory is left as it is). It never opens a /dev/et* node, never runs a card program,
+never calls sudo itself (et-who uses its own fixed `sudo -n` rule), refuses to run as root, and writes only in your
+home directory, apart from the linger record loginctl keeps and tmux's socket.
+Exit 0 on success, 1 if a setup step failed (said on stderr), 2 on a bad option or a refusal.
+EOF
+}
+die() { local rc=$1; shift; printf 'et-lab-start: %s\n' "$*" >&2; exit "$rc"; }
+
+mode=setup; claude_opt=default; want_clone=1
+for a in "$@"; do
+  case $a in
+    --check) [ "$mode" = dry ] && die 2 "use --check or --dry-run, not both"; mode=check ;;
+    --dry-run) [ "$mode" = check ] && die 2 "use --check or --dry-run, not both"; mode=dry ;;
+    --no-claude) [ "$claude_opt" = with ] && die 2 "use --no-claude or --with-claude, not both"; claude_opt=no ;;
+    --with-claude) [ "$claude_opt" = no ] && die 2 "use --no-claude or --with-claude, not both"; claude_opt=with ;;
+    --no-clone) want_clone=0 ;;
+    -h|--help) usage; exit 0 ;;
+    *) die 2 "unknown option '$a' (see et-lab-start --help)" ;;
+  esac
+done
+
+uid=$(id -u) || die 2 "cannot tell who you are (id -u failed)"
+[ "$uid" -ne 0 ] || die 2 "refusing to run as root: run it as yourself, without sudo"
+me=$(id -un) || die 2 "cannot tell your login name (id -un failed)"
+case ${HOME:-} in /*) ;; *) die 2 "your HOME '${HOME:-}' is not an absolute path" ;; esac
+[ -d "$HOME" ] && [ -O "$HOME" ] || die 2 "your home directory '$HOME' is missing or not yours"
+pw_home=$(getent passwd "$me" | cut -d: -f6)
+PATH="$HOME/.local/bin:$PATH:/usr/local/bin:/usr/bin:/bin:/snap/bin"   # tmux is a snap on some hosts
+export PATH
+host=$(hostname -s 2>/dev/null || hostname)
+failed=0
+
+section() { printf '\n== %s\n' "$*"; }
+item() { printf '  %-16s %s\n' "$1" "$2"; }
+warn() { printf '  WARN  %s\n' "$*"; }
+indent() { sed 's/^/    /'; }
+have() { command -v "$1" >/dev/null 2>&1; }
+free_gb() { df -Pk "$HOME" 2>/dev/null | awk 'NR == 2 && $4 ~ /^[0-9]+$/ { printf "%d", $4 / 1048576 }'; }
+
+# Claude Code: installed by default, except on aifoundry1 (a download of about 230 MB per version, and the
+# auto-updater keeps several, on a /home that is 99% full and shared with the system), where it needs --with-claude.
+want_claude=1
+case $claude_opt in
+  no) want_claude=0 ;;
+  default) [ "$host" = aifoundry1 ] && want_claude=ask ;;
+esac
+
+# What we know of each machine's cards (AGENT.md §4, docs/findings/14-card-behaviour.md, 30 September 2026).
+# Prints "use|note" or "never|note" or "ask|note".
+card_fact() {
+  case "$1:$2" in
+    aifoundry1:0) echo "never|never use it: it overheats (115-117 °C after 10 minutes of short tests)" ;;
+    aifoundry1:1) echo "use|the card to use here: select it with ET_DEVICES=1; firmware 1.2.0; 600 MHz in every sample of 25-30 Sep, not rechecked since the power cycle of 30 Sep" ;;
+    aifoundry2:0) echo "use|firmware 1.3.1, DVFS 600-800 MHz (usually 600); a CI runner shares the host" ;;
+    aifoundry3:0) echo "use|firmware 1.3.1, pinned at 600 MHz, reaches 88 °C under load; a demo service may use it without the lock" ;;
+    *) echo "ask|a card this script does not know: ask the lab lead before using it" ;;
+  esac
+}
+
+printf 'et-lab-start on %s as %s, %s (%s)\n' "$host" "$me" "$(date '+%Y-%m-%d %H:%M %Z')" \
+  "$(case $mode in check) echo 'look only: nothing is changed' ;; dry) echo 'dry run: nothing is changed' ;;
+     *) echo 'look, then set up what is missing' ;; esac)"
+if [ -n "$pw_home" ] && [ "$HOME" != "$pw_home" ]; then
+  [ "$mode" = setup ] && die 2 "your HOME '$HOME' is not your home directory '$pw_home': run it with your own HOME"
+  warn "HOME is '$HOME', not your home directory '$pw_home': the setup would refuse to run"
+fi
+
+# ---------------------------------------------------------------- look
+section "The cards on $host"
+cards=""
+for f in /dev/et[0-9]*_ops; do         # the names only: a glob and a stat, never an open
+  [ -e "$f" ] || continue
+  n=${f#/dev/et}; n=${n%_ops}
+  case $n in ''|*[!0-9]*) continue ;; esac
+  cards="$cards $n"
+done
+# shellcheck disable=SC2086  # split on purpose: one card number per line
+cards=$(printf '%s\n' $cards | sort -n | tr '\n' ' ')
+use_n=""; ncards=0
+if [ -z "${cards// /}" ]; then
+  warn "no card nodes (/dev/et*_ops): this machine has no card, or its driver is not loaded; tell the lab admin"
+fi
+for n in $cards; do
+  fact=$(card_fact "$host" "$n"); kind=${fact%%|*}; note=${fact#*|}
+  lock=/run/lock/etsoc-shire$n.lock
+  item "card $n" "$note"
+  if [ -e "$lock" ]; then
+    item "" "lock $lock"
+  else
+    warn "card $n's lock $lock is missing: tell the lab admin, and do not create it yourself"
+  fi
+  [ "$kind" = use ] && [ -z "$use_n" ] && use_n=$n
+  ncards=$((ncards + 1))
+done
+case $host in
+  aifoundry1) item "" "aifoundry1: dev_mngt_service and et-powertop open card 0 even with -n 1: never run them here" ;;
+  aifoundry3) item "" "aifoundry3: the demo service takes no lock, so run et-who again after each run" ;;
+esac
+
+section "Who is using the cards now (et-who --check)"
+card_state=unknown
+if have et-who; then
+  out=$(timeout 20 et-who --check 2>&1); rc=$?
+  case $rc in
+    0) item free "no process holds a card node or lock (exit 0)"; card_state=free ;;
+    1) item held "(exit 1): wait or ask; never use a card someone holds"; printf '%s\n' "$out" | indent; card_state=held
+       if [ -n "$use_n" ] && [ "$ncards" -gt 1 ] \
+          && ! printf '%s\n' "$out" | grep -qE "^(/dev/et${use_n}_|lock:etsoc-shire${use_n}[.]lock)"; then
+         card_state="not held itself, but another card here is (the check counts every card): wait or ask"
+       fi ;;
+    *) warn "the check failed (exit $rc): never run a card without it; tell the lab admin"
+       [ -n "$out" ] && printf '%s\n' "$out" | indent ;;
+  esac
+else
+  warn "et-who is not installed here: never run a card without it; tell the lab admin"
+fi
+# Other users' card programs and queues, on the whole command line (never our own: awk runs as us).
+if psout=$(ps -eo uid=,user:32=,etime=,args= 2>/dev/null); then
+  runs=$(printf '%s\n' "$psout" | awk -v me="$uid" -v re="$PROCS" '$1 != me {
+      a = $0; sub(/^ *[^ ]+ +[^ ]+ +[^ ]+ +/, "", a); if (a ~ re) print $2, $3, substr(a, 1, 120) }')
+  if [ -n "$runs" ]; then
+    item "other runs" "card programs or queues of other users (ps): someone's run is active here"
+    printf '%s\n' "$runs" | head -20 | indent
+    [ "$card_state" = free ] && card_state="free, but others' runs are active: wait or ask"
+  else
+    item "other runs" "no card programs or queues of other users in ps"
+  fi
+else
+  warn "ps failed: cannot see other users' runs; wait or ask"
+  [ "$card_state" = free ] && card_state="unknown (ps failed)"
+fi
+if [ -n "$use_n" ]; then item verdict "card $use_n: $card_state"; fi
+
+section "Card use in the last 24 hours (et-usage)"
+if have et-usage; then
+  out=$(timeout 20 nice -n 10 et-usage 2>&1); rc=$?
+  lines=$(printf '%s\n' "$out" | wc -l)
+  printf '%s\n' "$out" | head -40 | indent
+  [ "$lines" -gt 40 ] && item "" "... $((lines - 40)) more lines: run et-usage"
+  [ "$rc" -eq 0 ] || warn "et-usage exited $rc"
+else
+  item et-usage "not installed on this machine yet"
+fi
+
+section "People here (by their processes: a Claude kept in tmux has no login session)"
+if [ -n "${psout:-}" ]; then
+  others=$(printf '%s\n' "$psout" | awk -v me="$uid" '$1 ~ /^[0-9]+$/ && $1 >= 1000 && $1 != 65534 && $1 != me { print $1 }' | sort -u | wc -l)
+  if [ "$others" -eq 1 ]; then item others "1 other person has processes here"
+  else item others "$others other people have processes here"; fi
+else
+  item others "unknown (ps failed)"
+fi
+if have loginctl; then
+  if sess=$(timeout 10 loginctl list-sessions --no-legend 2>&1); then
+    # SESSION UID USER SEAT TTY STATE ...: "closing" sessions have logged out but left processes running.
+    open=$(printf '%s\n' "$sess" | awk -v me="$uid" '$2 ~ /^[0-9]+$/ && $2 >= 1000 && $2 != 65534 && $2 != me && $0 !~ / closing / { print $2 }' | sort -u | wc -l)
+    item "" "$open other people logged in now (loginctl, which also sees ssh command sessions)"
+  else
+    warn "loginctl failed, so logins are not counted: $(printf '%s' "$sess" | head -1)"
+  fi
+fi
+item load "$(cut -d' ' -f1-3 /proc/loadavg 2>/dev/null) (1, 5 and 15 minutes)"
+
+section "Free space in your home directory"
+gb=$(free_gb)
+if [ -z "$gb" ]; then
+  warn "free space unknown (df failed): the Claude install and the clone are left out; ask your person"
+else
+  item "free in ~" "$gb GB"
+  [ "$gb" -lt 5 ] && warn "under 5 GB free: the clone is left out; ask your person before any download or build"
+fi
+[ "$host" = aifoundry1 ] && item "" "aifoundry1's disk is nearly full and shared with the system: keep builds small, delete what you make"
+
+# ---------------------------------------------------------------- set up
+case $mode in
+  check) section "Your setup here (look only)" ;;
+  dry) section "Setup (dry run: what it would do)" ;;
+  *) section "Setup" ;;
+esac
+missing=0
+st() { printf '  %-7s %s\n' "$1" "$2"; [ "$1" = missing ] && missing=1; return 0; }   # ok missing ask would done skip FAILED
+fail() { st FAILED "$*"; failed=1; }
+# A step that cannot run: in the setup it fails; --check and --dry-run say so where the setup would fail.
+blocked() { case $mode in setup) fail "$*" ;; dry) st would "FAIL: $*" ;; *) st missing "$*" ;; esac; }
+
+# 1. linger: keeps your user manager, and so tmux, running after your last login drops.
+if [ -e "/var/lib/systemd/linger/$me" ]; then
+  st ok "linger is on for $me"
+elif ! have loginctl; then blocked "linger: loginctl is missing; tell the lab admin"
+elif [ "$mode" = check ]; then st missing "linger (loginctl enable-linger $me)"
+elif [ "$mode" = dry ]; then st would "loginctl enable-linger $me"
+elif timeout 20 loginctl enable-linger --no-ask-password "$me" && [ -e "/var/lib/systemd/linger/$me" ]; then
+  st 'done' "linger turned on for $me"
+else
+  fail "loginctl enable-linger $me: tmux may stop when your last login drops; ask the lab admin"
+fi
+
+# 2. Claude Code, native install into ~/.local/bin.
+claude_bin=""
+if [ "$want_claude" != 0 ]; then
+  if have claude; then claude_bin=$(command -v claude)
+  elif [ -x "$HOME/.local/bin/claude" ]; then claude_bin=$HOME/.local/bin/claude; fi
+  if [ -n "$claude_bin" ]; then
+    st ok "Claude Code: $claude_bin"
+  elif [ "$want_claude" = ask ]; then
+    st ask "Claude Code is not installed: on aifoundry1 it takes about 230 MB per version on a nearly full disk; with your person's yes, run et-lab-start --with-claude"
+  elif ! have curl; then blocked "Claude Code: curl is missing; tell the lab admin"
+  elif [ -z "$gb" ]; then blocked "Claude Code: free space in ~ unknown (df failed); ask your person"
+  elif [ "$gb" -lt 1 ]; then blocked "Claude Code: under 1 GB free in ~; ask your person"
+  elif [ "$mode" = check ]; then st missing "Claude Code (curl -fsSL https://claude.ai/install.sh | bash)"
+  elif [ "$mode" = dry ]; then st would "install Claude Code into ~/.local/bin: download https://claude.ai/install.sh, then run it with bash"
+  else
+    st '...' "installing Claude Code (a download of about 230 MB, a minute or two)"
+    if inst=$(curl -fsSL --max-time 120 https://claude.ai/install.sh) && [ -n "$inst" ] \
+       && printf '%s\n' "$inst" | timeout --foreground 900 bash 2>&1 | indent \
+       && [ -x "$HOME/.local/bin/claude" ]; then
+      claude_bin=$HOME/.local/bin/claude; st 'done' "Claude Code installed: $claude_bin"
+    else
+      fail "Claude Code: the installer did not leave ~/.local/bin/claude; its output is above"
+    fi
+  fi
+
+  # 3. The PATH line, so a new shell (and the tmux session) finds claude. Only an uncommented line counts.
+  line='export PATH="$HOME/.local/bin:$PATH"'
+  rc_file=$HOME/.bashrc
+  if grep -qsE '^[^#]*PATH=.*/\.local/bin' "$rc_file"; then
+    st ok "~/.bashrc puts ~/.local/bin on PATH"
+  elif [ -e "$rc_file" ] && ! [ -O "$rc_file" ]; then blocked "~/.bashrc is not yours: left alone"
+  elif [ "$mode" = check ]; then st missing "the PATH line in ~/.bashrc ($line)"
+  elif [ "$mode" = dry ]; then st would "append to ~/.bashrc, on a line of its own: $line"
+  elif { [ ! -s "$rc_file" ] || [ -z "$(tail -c1 "$rc_file")" ] || printf '\n' >> "$rc_file"; } \
+       && printf '%s\n' "$line" >> "$rc_file"; then
+    st 'done' "appended to ~/.bashrc: $line"
+  else fail "could not append the PATH line to ~/.bashrc"; fi
+
+  # 4. A detached tmux session `claude` in ~ (the exact name: "=claude").
+  if ! have tmux; then blocked "tmux is not installed here: tell the lab admin"
+  elif tmux has-session -t '=claude' 2>/dev/null; then
+    st ok "tmux session 'claude' exists ($(command -v tmux))"
+  elif [ "$mode" = check ]; then st missing "tmux session 'claude' (tmux new-session -d -s claude -c ~)"
+  elif [ "$mode" = dry ]; then st would "tmux new-session -d -s claude -c ~"
+  elif timeout 20 tmux new-session -d -s claude -c "$HOME" && tmux has-session -t '=claude' 2>/dev/null; then
+    st 'done' "started a detached tmux session 'claude' in ~"
+  else
+    fail "could not start the tmux session 'claude'"
+  fi
+else
+  st skip "Claude Code, the PATH line and the tmux session (--no-claude)"
+fi
+
+# 5. A sparse clone of the lab's repository without the reports' raw data (about 35 MB; the full one is 380 MB).
+dest=$HOME/et-soc1-prototyping
+part=$HOME/.et-soc1-prototyping.partial        # cloned here, moved into place only when complete
+lockf=$HOME/.cache/et-lab-start.lock            # two setups at once would delete each other's partial clone
+if [ "$want_clone" = 0 ]; then
+  st skip "the clone (--no-clone)"
+elif [ -e "$dest" ]; then
+  st ok "~/et-soc1-prototyping exists (left as it is)"
+elif [ -z "$gb" ]; then blocked "the clone: free space in ~ unknown (df failed); ask your person"
+elif [ "$gb" -lt 5 ]; then blocked "the clone: only $gb GB free in ~, 5 GB needed; ask your person"
+elif ! have git; then blocked "the clone: git is missing; tell the lab admin"
+elif [ "$mode" = check ]; then st missing "the clone ~/et-soc1-prototyping"
+elif [ "$mode" = dry ]; then
+  [ -e "$part" ] && st would "rm -rf ~/.et-soc1-prototyping.partial (an earlier run's unfinished clone)"
+  st would "git clone --depth 1 --filter=blob:none --sparse $REPO ~/.et-soc1-prototyping.partial"
+  st would "cd ~/.et-soc1-prototyping.partial && git sparse-checkout set --no-cone '/*' '!/docs/reports/'"
+  st would "mv ~/.et-soc1-prototyping.partial ~/et-soc1-prototyping (under the lock ~/.cache/et-lab-start.lock)"
+else
+  st '...' "cloning $REPO (about 35 MB)"
+  mkdir -p "$HOME/.cache"
+  (
+    flock -n 9 || { echo "another et-lab-start is cloning: run et-lab-start again when it ends"; exit 3; }
+    rm -rf -- "$part"
+    GIT_TERMINAL_PROMPT=0 timeout --foreground 900 git clone -q --depth 1 --filter=blob:none --sparse "$REPO" "$part" \
+      && (cd "$part" && GIT_TERMINAL_PROMPT=0 timeout --foreground 900 git sparse-checkout set --no-cone '/*' '!/docs/reports/') \
+      && [ ! -e "$dest" ] && mv -- "$part" "$dest" && exit 0
+    rm -rf -- "$part"; exit 1
+  ) 9>"$lockf" 2>&1 | indent
+  rc=${PIPESTATUS[0]}
+  if [ "$rc" -eq 0 ]; then
+    st 'done' "cloned into ~/et-soc1-prototyping ($(du -sh "$dest" 2>/dev/null | cut -f1))"
+  elif [ "$rc" -eq 3 ]; then
+    fail "the clone: another et-lab-start is cloning (above)"
+  else
+    fail "the clone did not complete; nothing was left behind"
+  fi
+fi
+if [ "$mode" = check ] && [ "$missing" = 1 ]; then
+  printf '  Run et-lab-start (no options) to set up what is missing; --dry-run shows how.\n'
+fi
+
+# ---------------------------------------------------------------- next steps
+N=${use_n:-"<N>"}
+if [ "$want_claude" != 0 ]; then
+  section "Next: a Claude that lives on $host, driven from claude.ai/code (at your keyboard)"
+  if [ -z "$claude_bin" ] && [ "$want_claude" = ask ]; then
+    printf '  First, with your yes: et-lab-start --with-claude (Claude Code is not installed here yet).\n'
+  fi
+  if [ -e "$dest/docs/lab-start/START.md" ] || { [ "$mode" != setup ] && [ "$want_clone" = 1 ] && [ ! -e "$dest" ]; }; then
+    msg="Read ~/et-soc1-prototyping/docs/lab-start/START.md and follow it from step 4, running its blocks directly. My username is $me. You are on $host, card $N. Steps 1-3 are done."
+  else
+    msg="the prompt from $PAGE, with a first line saying that steps 1-3 are done on $host, card $N"
+  fi
+  cat <<EOF
+  1. On your computer: ssh -t $me@$host tmux attach -t claude
+     then run 'claude', approve the login link it prints in your browser, trust the folder, and /exit.
+     (Remote Control needs a claude.ai plan; without one, leave the Claude out: et-lab-start --no-claude.)
+  2. In the same tmux window: cd ~ && claude remote-control --name $me-$host
+     then detach with Ctrl-b d.
+  3. Open claude.ai/code (or the Claude app), pick the session $me-$host, and paste:
+     $msg
+     Keep the default permission mode, which asks before each command not yet allowed: allow read-only and
+     build commands with "don't ask again", and read every command that names a card lock.
+  To come back later: ssh -t $me@$host tmux attach -t claude
+  If there is no session (the machine rebooted), run et-lab-start again, then steps 2 and 3.
+EOF
+fi
+section "The five rules that matter most"
+cat <<EOF
+  1. Look before every run: et-who --check (exit 0 free, 1 held, 2 the check failed: stop and ask).
+  2. Run every program that opens a card under its lock, for at most 10 s:
+       ET_DEVICES=$N flock -n /run/lock/etsoc-shire$N.lock timeout 10 <cmd>
+  3. Never use aifoundry1's card 0: it overheats.
+  4. Stop any run at a 90 °C die mean.
+  5. Never kill -9 a process that holds a card (Ctrl-C or a plain kill), and never reset a card or retrain its
+     PCIe link (on 30 Sep a retrain hung all of aifoundry1): tell the lab admin.
+EOF
+if have et-usage; then
+  printf '  The lab logs card use here: et-usage shows who used which card when, naming users and programs,\n  never arguments or files.\n'
+else
+  printf '  Card use will be logged here once et-usage is installed.\n'
+fi
+printf '  The whole brief: docs/lab-start/START.md in the clone, or %s\n' "$PAGE"
+[ -z "$use_n" ] && printf '  (no card here that this script knows is for use: ask the lab lead which card, if any)\n'
+
+if [ "$failed" -ne 0 ]; then
+  printf '\net-lab-start: a setup step FAILED (above); fix it or ask, then run et-lab-start again.\n' >&2
+  exit 1
+fi
+exit 0
+}
+
+main "$@" </dev/null
+# shellcheck disable=SC2317  # main always exits; this exit is a guard in case that ever changes
+exit

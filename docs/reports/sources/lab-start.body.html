@@ -1,38 +1,4 @@
 <style>
-.setup { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: flex-end; margin: 14px 0 12px; }
-.setup label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--ink-2); }
-.setup input, .setup select { font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--surface);
-  border: 1px solid var(--axis); border-radius: 8px; padding: 6px 10px; min-height: 38px; width: min(240px, 100%); }
-.setup input:focus-visible, .setup select:focus-visible, .btn:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
-.setup .hint { font-size: 0.8rem; color: var(--muted); flex-basis: 100%; margin: 0; }
-.copybox { border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; background: var(--surface); }
-.copybox .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px;
-  border-bottom: 1px solid var(--border); }
-.copybox .bar .meta { flex: 1 1 220px; font-size: 0.84rem; color: var(--ink-2); }
-.copybox .bar .meta b { color: var(--ink); font-size: 0.95rem; }
-.btn { font: inherit; font-size: 0.92rem; font-weight: 600; border-radius: 999px; padding: 7px 16px; min-height: 38px;
-  cursor: pointer; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); }
-.btn.primary { background: var(--ink); color: var(--page); }
-.btn.small { font-size: 0.8rem; padding: 3px 12px; min-height: 30px; font-weight: 500; }
-.copystat { font-size: 0.84rem; color: var(--ok); min-width: 4em; }
-.copybox pre { margin: 0; border-radius: 0; max-height: 440px; overflow: auto; white-space: pre-wrap;
-  overflow-wrap: anywhere; font-size: 0.8rem; line-height: 1.5; background: var(--code-bg); }
-.alt { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px 0; font-size: 0.9rem; }
-.alt code { overflow-wrap: anywhere; }
-.brief { border-left: 3px solid var(--grid); padding-left: 16px; }
-.brief h3 { font-size: 1.12rem; margin: 30px 0 8px; }
-.brief h3:first-child { margin-top: 8px; }
-.brief .bnav ol { columns: 2 220px; column-gap: 24px; margin: 6px 0 0; padding-left: 1.4em; font-size: 0.92rem; }
-.brief .bnav li { margin: 3px 0; break-inside: avoid; }
-.brief pre { white-space: pre-wrap; overflow-wrap: anywhere; }
-.brief td code { overflow-wrap: anywhere; }
-.brief a, .brief code { overflow-wrap: anywhere; }
-.ph { background: color-mix(in srgb, var(--warn) 22%, transparent); border-radius: 3px; }
-.fill { background: color-mix(in srgb, var(--ok) 20%, transparent); border-radius: 3px; }
-@media (max-width: 599px) {
-  .brief { padding-left: 10px; }
-  .copybox pre { max-height: 360px; }
-}
 .lab { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 8px; }
 .lab .m { border: 1.5px solid var(--axis); border-radius: 12px; padding: 10px 12px 12px; background: var(--surface); min-width: 0; }
 .lab .m .h { font-weight: 700; font-size: 1.02rem; }
@@ -44,12 +10,38 @@
 .lab .cbox.off { border-style: dashed; background: transparent; opacity: 0.75; }
 .lab .cbox.off .n::after { content: " · do not use"; color: var(--bad); font-weight: 600; }
 .labnote { font-size: 0.84rem; color: var(--ink-2); margin: 4px 0 0; }
+.labnote code { white-space: nowrap; }
 ol.do { padding-left: 1.3em; }
 ol.do li { margin: 10px 0; }
 ol.do li b { display: block; }
-details.read { margin: 14px 0; }
-details.read > summary { cursor: pointer; font-weight: 600; }
-@media (max-width: 599px) { .lab { grid-template-columns: minmax(0, 1fr); } }
+.prompt { border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; background: var(--surface); margin: 14px 0 10px; }
+.prompt .bar { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); }
+.prompt label { display: block; font-weight: 600; font-size: 0.92rem; margin-bottom: 6px; }
+.prompt .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.prompt input { font: inherit; font-size: 1rem; color: var(--ink); background: var(--page); border: 1px solid var(--axis);
+  border-radius: 8px; padding: 6px 10px; min-height: 40px; width: 15em; max-width: 100%; box-sizing: border-box; }
+.prompt input[aria-invalid="true"] { border-color: var(--warn); }
+.prompt input:focus-visible, .btn:focus-visible, .prompt pre:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.prompt .hint { font-size: 0.82rem; color: var(--ink-2); margin: 6px 0 0; }
+.prompt .hint.bad { color: var(--ink); }
+.prompt .hint.bad::before { content: "\26A0\FE0E\00a0"; color: var(--warn); }
+.btn { font: inherit; font-size: 0.95rem; font-weight: 600; border-radius: 999px; padding: 7px 18px; min-height: 40px;
+  cursor: pointer; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); }
+.btn.primary { background: var(--ink); color: var(--page); }
+.copystat { font-size: 0.86rem; color: var(--ok); }
+.copystat:empty { display: none; }
+.prompt .meta { font-size: 0.8rem; color: var(--muted); padding: 6px 14px; border-bottom: 1px solid var(--border); }
+.prompt pre { margin: 0; border-radius: 0; max-height: 440px; overflow: auto; white-space: pre-wrap;
+  overflow-wrap: anywhere; font-size: 0.75rem; line-height: 1.5; background: var(--code-bg); }
+.prompt pre .ph { background: color-mix(in srgb, var(--warn) 24%, transparent); border-radius: 3px; }
+.prompt pre .fill { background: color-mix(in srgb, var(--ok) 22%, transparent); border-radius: 3px; }
+@media (max-width: 599px) {
+  .lab { grid-template-columns: minmax(0, 1fr); }
+  .prompt .bar { padding: 10px 12px; }
+  .prompt input { width: 100%; }
+  .prompt .row .btn { flex: 1 0 100%; }
+  .prompt pre { font-size: 0.78rem; max-height: 360px; }
+}
 </style>
 
 <h1>New user? Start now</h1>
@@ -61,48 +53,43 @@ for hours. You do three things below; the prompt at the end tells your coding ag
 
 <div class="lab" id="lab" role="img" aria-label="Three machines: aifoundry1 with card 0 (do not use) and card 1, aifoundry2 with card 0, aifoundry3 with card 0"></div>
 <p class="labnote">Each card is an ET-SoC-1 on PCIe: 1,088 small RISC-V cores. The machines are x86_64 Ubuntu 24.04,
-reached over the lab's Tailscale network.</p>
+reached over the lab's Tailscale network. The lab is starting to log card use on them (who, which program, when;
+never arguments or files), so that everyone can see when a card is free: <code>et-usage</code> shows it where it is
+installed.</p>
 
 <h2 id="what-you-do">What you do</h2>
 <ol class="do">
-  <li><b>Ask Roman for access.</b> Roman runs the lab. Ask him, on the AI Foundry Discord's #community-lab, for an
-  account on the lab machines, an invite to the lab's Tailscale network, and which machine and card to use.</li>
-  <li><b>Join Tailscale and log in once.</b> Accept the invite, install Tailscale, then run
-  <code>ssh &lt;you&gt;@aifoundryN</code> and approve the link it prints in your browser.</li>
-  <li><b>Give your agent the prompt.</b> Paste it into your coding agent (Claude Code on your laptop works). The
-  agent checks the machine, sets up a Claude that lives there in tmux with Remote Control, so you can drive it from
-  claude.ai/code or the Claude app, and keeps to the lab's rules. It hands you the links only you can approve and
-  asks before it touches a card.</li>
+  <li><b>Ask Roman for access.</b> Roman is the lab lead. Ask him, on the AI Foundry Discord's #community-lab, for an
+  account on the lab machines and an invite to the lab's Tailscale network.</li>
+  <li><b>Join Tailscale.</b> Accept the invite and install Tailscale. Later, approve in your browser the login links
+  your agent shows you.</li>
+  <li><b>Give your agent the prompt.</b> Type your username below, copy the prompt, and paste it into your coding
+  agent (Claude Code on your laptop works). The agent picks a free machine and card, sets up a Claude that lives there
+  with Remote Control (a few steps at your keyboard; Remote Control needs a claude.ai plan), runs a first test, and
+  asks you before it touches a card.</li>
 </ol>
 
 <h2 id="the-prompt">The prompt</h2>
-<div class="setup">
-  <label>Your login on the lab machines<input id="f-login" type="text" autocomplete="off" autocapitalize="off"
-    spellcheck="false" placeholder="e.g. alice" maxlength="32"></label>
-  <label>Your machine and card<select id="f-card"></select></label>
-  <p class="hint" data-role="hint">Optional. Anything left blank stays in angle brackets, and the agent asks you.</p>
-</div>
-<div class="copybox">
+<div class="prompt">
   <div class="bar">
-    <div class="meta" data-role="meta"><b>START.md</b> · the agent brief</div>
-    <button class="btn primary" type="button" data-role="copy">Copy for your agent</button>
-    <button class="btn" type="button" data-role="download">Download .md</button>
-    <span class="copystat" data-role="stat" aria-live="polite">&nbsp;</span>
+    <label for="f-login">Your username on the lab machines</label>
+    <div class="row">
+      <input id="f-login" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. alice"
+        maxlength="64" aria-describedby="login-hint">
+      <button class="btn primary" type="button" data-role="copy">Copy the prompt</button>
+      <span class="copystat" data-role="stat" aria-live="polite"></span>
+    </div>
+    <p class="hint" id="login-hint" data-role="hint">The username you were given. Leave it blank and your agent will ask.</p>
   </div>
-  <pre data-role="raw" tabindex="0" aria-label="The agent brief, as markdown"></pre>
+  <div class="meta" data-role="meta">The prompt</div>
+  <pre data-role="raw" tabindex="0" aria-label="The prompt for your coding agent"></pre>
 </div>
-<div class="alt"><span>Or point the agent at the current copy:</span>
-  <code data-role="alttext">Read https://raw.githubusercontent.com/yaroslavvb/et-soc1-prototyping/main/docs/lab-start/START.md and follow it.</code>
-  <button class="btn small" type="button" data-role="copyalt">Copy</button></div>
-<details class="read"><summary>Read the prompt here</summary>
-<p class="small">Highlighted: <span class="ph">&lt;placeholders&gt;</span> still to fill in, and <span class="fill">values
-you filled in</span>.</p>
-<div class="brief" id="brief-view"></div>
-</details>
 
 <p class="small">More: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">the ET-SoC-1
 reports</a> · <a href="https://github.com/yaroslavvb/et-soc1-prototyping">the repository</a>
 (<code>docs/lab-start/START.md</code> is the prompt's source). <b>Versions.</b> 30 September 2026: first edition,
-from the lab's notes of 23–30 September; the same day, cut to what a person must do, with the rest in the prompt,
-which gained the steps for a Claude that lives on the machine.</p>
+from the lab's notes of 23–30 September; the same day, cut to what a person does, with the rest in the prompt; then
+one prompt with only the username to fill in, the agent choosing the machine and card; then, after a review, the
+fourth edition: never retrain a card's link, people counted by their processes, the agent passing on Tailscale login
+links itself, and a hand-off message for the Claude on the machine.</p>
 </main>

@@ -4,8 +4,9 @@
     python3 docs/lab-start/make_page_data.py           # writes docs/reports/data/2026-09-30-lab-start/brief.json
     python3 docs/lab-start/make_page_data.py --check   # exit 1 if brief.json is stale
 
-The page (docs/reports/sources/lab-start.*) shows START.md verbatim in its copy box and renders the same text below
-it, so START.md is the only copy of the brief: edit it, run this, then rebuild the page (README.md here).
+The page (docs/reports/sources/lab-start.*) shows START.md verbatim in its one copy box, with the viewer's username
+filled into `<login>` (the only placeholder the page fills; `<host>` and `<N>` stay, for the agent's own choice), so
+START.md is the only copy of the prompt: edit it, run this, then rebuild the page (README.md here).
 The card tiles at the top of the page come from CARDS below (facts of 30 September 2026, from AGENT.md §4 and
 docs/findings/14-card-behaviour.md). No timestamps go into the output, so a rebuild with the same inputs is
 byte-identical."""
@@ -21,16 +22,21 @@ SRC = os.path.join(HERE, "START.md")
 OUT = os.path.join(ROOT, "docs", "reports", "data", "2026-09-30-lab-start", "brief.json")
 
 # One tile per card, in the chart toolkit's card ids (CK.card gives the colour). "use" is what a new user may do.
+# The agent, not the person, chooses among the usable ones (START.md, step 2).
 CARDS = [
     {"id": "aifoundry2", "host": "aifoundry2", "n": 0, "firmware": "1.3.1",
-     "clock": "firmware DVFS, usually 600 MHz", "note": "the main card; a CI runner shares it", "use": True},
+     "clock": "DVFS 600–800 MHz, usually 600", "note": "a CI runner shares the host", "use": True},
     {"id": "aifoundry3", "host": "aifoundry3", "n": 0, "firmware": "1.3.1",
      "clock": "pinned at 600 MHz", "note": "a demo service can use it without the lock", "use": True},
     {"id": "aifoundry1-c1", "host": "aifoundry1", "n": 1, "firmware": "1.2.0",
-     "clock": "600 MHz always", "note": "select with ET_DEVICES=1; the host's disk is nearly full", "use": True},
+     "clock": "600 MHz until 30 Sep, not rechecked since", "note": "select with ET_DEVICES=1; the host's disk is nearly full",
+     "use": True},
     {"id": "aifoundry1-c0", "host": "aifoundry1", "n": 0, "firmware": "1.4.1",
-     "clock": "idles at 300 MHz", "note": "overheats: nobody uses it", "use": False},
+     "clock": "idles at 300 MHz", "note": "overheats: 115–117 °C in 10 minutes", "use": False},
 ]
+
+
+FILLS = ["login"]  # the placeholders the page fills from its one field
 
 
 def build():
@@ -39,15 +45,22 @@ def build():
     for bad in ("</script", "<!--"):
         if bad in md.lower():
             raise SystemExit(f"START.md contains {bad!r}, which would break the page's inline script")
+    if "`<login>`" not in md.split("\n## ", 1)[0]:
+        raise SystemExit("START.md's opening lines (the person's own words) must name `<login>`, which the page fills")
+    m = re.search(r"^Version of ([^.,\n]+)", md, flags=re.M)
+    if not m:
+        raise SystemExit("START.md has no 'Version of <date>' line")
     words = len(md.split())
     prose = len(re.sub(r"```.*?```", "", md, flags=re.S).split())
     return {
         "source": "docs/lab-start/START.md",
         "md": md,
         "sha256": hashlib.sha256(md.encode("utf-8")).hexdigest(),
+        "version": m.group(1).strip(),
         "words": words,
         "words_prose": prose,
-        "placeholders": sorted(set(re.findall(r"<(login|host|N)>", md))),
+        "fills": FILLS,
+        "fill_count": {k: md.count(f"<{k}>") for k in FILLS},
         "cards": CARDS,
     }
 
