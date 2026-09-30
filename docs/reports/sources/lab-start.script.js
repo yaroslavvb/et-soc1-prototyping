@@ -8,16 +8,19 @@
   const slug = t => t.toLowerCase().replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, '').replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '').slice(0, 50);
 
-  /* ---- the card tiles, from the data */
-  const tiles = q('#cards4');
-  D.cards.forEach(c => {
-    const k = CK.card(c.id), d = document.createElement('div');
-    d.className = 'card' + (c.use ? '' : ' off');
-    d.style.setProperty('--c', k.color);
-    d.innerHTML = `<div class="nm">${esc(k.label)}<span class="tag ${c.use ? 'yes' : 'no'}">${c.use ? 'usable' : 'off limits'}</span></div>`
-      + `<div class="fw">firmware ${esc(c.firmware)}` + (c.use ? ` · lock <code>etsoc-shire${c.n}.lock</code>` : '') + '</div>'
-      + `<div class="ck">${esc(c.clock)}</div><div class="nt">${esc(c.note)}</div>`;
-    tiles.appendChild(d);
+  /* ---- the lab diagram: three machines, four cards, from the data */
+  const lab = q('#lab');
+  ['aifoundry1', 'aifoundry2', 'aifoundry3'].forEach(h => {
+    const m = document.createElement('div');
+    m.className = 'm';
+    const cards = D.cards.filter(c => c.host === h).sort((a, b) => a.n - b.n);
+    m.innerHTML = `<div class="h">${esc(h)}</div><div class="os">${cards.length === 1 ? 'one card' : cards.length + ' cards'}</div>`
+      + cards.map(c => {
+          const k = CK.card(c.id);
+          return `<div class="cbox${c.use ? '' : ' off'}" style="--c:${k.color}"><div class="n">card ${c.n}</div>`
+            + `<div class="d">firmware ${esc(c.firmware)} · ${esc(c.clock)}</div><div class="d">${esc(c.note)}</div></div>`;
+        }).join('');
+    lab.appendChild(m);
   });
 
   /* ---- the setup fields: login and card fill the brief's <login>, <host> and <N> */

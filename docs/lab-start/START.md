@@ -8,7 +8,7 @@ https://github.com/yaroslavvb/et-soc1-prototyping; if this one is more than a mo
 Your person fills these in. Ask about anything still in angle brackets.
 
 - Your person's login on the lab machines: `<login>`
-- The machine and card the lab lead gave them: `<host>`, card `<N>`
+- The machine and card the lab lead (Roman) gave them: `<host>`, card `<N>`
 - The card number is 0 on aifoundry2 and aifoundry3, and 1 on aifoundry1.
 - Jobs to leave alone: every job that is not yours.
 
@@ -108,9 +108,30 @@ ssh <login>@<host> 'bash -s' <<'EOF'
 EOF
 ```
 
-A remote command gets no `/opt/et/bin` on its PATH: keep the absolute paths below. If your person runs you on the
-lab machine itself, install the agent in their home directory without sudo, start it in `~`, run it inside tmux,
-run the blocks directly, and log out when done.
+A remote command gets no `/opt/et/bin` on its PATH: keep the absolute paths below.
+
+**1b. Give your person a Claude that lives on the machine** (recommended; skip it if they want you to work over ssh
+only). It runs in tmux, survives dropped connections, and your person drives it from claude.ai/code or the Claude
+app through Remote Control. Everything goes in their home directory; nothing needs sudo.
+
+```bash
+loginctl enable-linger "$(id -un)"     # else tmux dies when the last ssh login drops (it did on 23 Sep)
+command -v claude >/dev/null || [ -x ~/.local/bin/claude ] || curl -fsSL https://claude.ai/install.sh | bash
+grep -q 'HOME/.local/bin' ~/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+tmux has-session -t claude 2>/dev/null || tmux new-session -d -s claude -c ~
+```
+
+Then hand your person these three steps, which need them at a keyboard:
+
+1. `ssh -t <login>@<host> tmux attach -t claude`, then run `claude` once and approve the login link it prints in
+   their browser; then `/exit`.
+2. In the same tmux window: `cd ~ && claude remote-control --name <login>-<host>`, then detach with Ctrl-b d. Keep
+   the default permission mode, which asks before risky steps: the machine and its cards are shared.
+3. Open claude.ai/code (or the Claude app), pick the `<login>-<host>` session, and paste this brief into it. From
+   then on that Claude runs the blocks below directly on the host, without the ssh wrapper.
+
+To come back later: `ssh -t <login>@<host> tmux attach -t claude`. An idle Claude in tmux holds no card and may stay;
+what must stop when you finish is any process that holds a card or a lock.
 
 **2. Look.**
 
@@ -278,7 +299,8 @@ Kernel code that traps or hangs:
 - `du -sh ~/* | sort -h | tail`: delete only the builds and simulator logs you made, above all on aifoundry1; ask
   before deleting anything else.
 - Copy anything worth keeping out of `/tmp`, where agents often keep scratch files.
-- Log out and close the tmux sessions you started: some queues wait while another user is logged in.
+- Log out of ssh sessions you no longer need, and close tmux sessions you started for one job: some queues wait while
+  another user is logged in. The tmux session of step 1b may stay, idle.
 - Your person posts "released" in #community-lab.
 
 ## When something breaks, and where to ask
