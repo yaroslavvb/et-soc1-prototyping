@@ -12,3 +12,7 @@ result was recorded in it). Code: `workloads/pciebench` (`--test conc` sweeps, `
 survives, and T35-A, T35-BC (shared read engine or IOMMU), T35-E and T35-X are refuted. A host write lands in the L3:
 99.5% of lines read at L3 latency afterwards, with or without an earlier copy there, and no value is wrong (T34-A
 survives; B, C, D refuted).
+
+**Third card, aifoundry2 (29 Sep 16:59-17:21 PDT, after DV2's validation ended; `raw/aifoundry2/pcie2/`, p901 and
+p1-p5 under the frozen lock; `results.md` and `pcie2.json` now reduce all three cards):** the same verdicts as
+aifoundry3: T35-S and T34-A survive; T35-A, T35-BC, T35-E, T35-X and T34-B, -C, -D are refuted.

@@ -12,3 +12,8 @@ P9 T-YX survives and P8 T-XY, the chip diagram's assumption for every route, is 
 pairs on aifoundry3 (r² 0.995, rms 4.7 cycles; the "via a hub" model rms 62); by the frozen rule (rms <= 4 cycles)
 T-DIRECT is **refuted** on aifoundry3, so the places that rest on it (P5, P6, P7) are not decided there. In
 development on card 1 T-DIRECT survived and the master shire placed at (0,3), the firmware map's top grey cell.
+
+**Third card, aifoundry2 (29 Sep 17:35-17:38 PDT, after DV2's validation ended; `raw/aifoundry2/`, p9 smoke and
+p11-p13 with the frozen lock):** the same result. Read replies y first, write requests x first (P9 survived, P8, P10,
+P11, P12 refuted); R31 1,556.8 + 35.92 cycles per hop, r² 0.996, rms 4.47 cycles (the hub model 62.0), so T-DIRECT is
+refuted by the frozen rms rule on aifoundry2 as on aifoundry3.

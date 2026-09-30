@@ -18,3 +18,10 @@ time the new kernel paths ran in `sys_emu` (`sysemu.sh`: 18 runs, PASS).
 - R43 FAIL on both: no registered theory of the 128 B per cycle cap survives (T43-B misses 7 conditions, Cc 5).
 - E102 (reported): stride-256 reads get 0.665 of stride-64's bandwidth and cost +42 to +50 pJ per 64 B more (zeros,
   random), explained by the awake minions' longer time (T102).
+
+**Third card, aifoundry2 (29 Sep 17:22-17:34 PDT, after DV2's validation ended; `raw/aifoundry2/`, `val-aifoundry2/`,
+the frozen lock verified):** R33a FAIL (14 of 15 conditions as the L50 map predicts; aifoundry3 had 15 of 15), R33b
+PASS (the refresh domain is the controller), R33c INSUFFICIENT, R36 PASS (a second TensorLoad 199 cycles, an L2 hit),
+R43 FAIL (no theory of the 128 B/cycle cap survives), E102: bandwidth PASS (0.665), energy not resolved (+31 to +36 pJ
+per 64 B, intervals include 0, the card at 78 C busy), T102 FAIL. So on the two validation cards: T36 and the
+per-controller refresh hold on both; the L50 bank/row map holds on aifoundry3 and misses one condition on aifoundry2.
