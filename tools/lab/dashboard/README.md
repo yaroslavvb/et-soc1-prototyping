@@ -1,6 +1,6 @@
 # tools/lab/dashboard: the lab dashboard's collector and updater
 
-A private page on spacesheep.dev that shows the AI Foundry lab at a glance: the three machines and whether each is up,
+A public page on spacesheep.dev (the owner's decision of 30 September 2026) that shows the AI Foundry lab at a glance: the three machines and whether each is up,
 the four cards and who holds them, who is logged in and what they are doing, and who used each card in the last 24
 hours (from `et-usage`, `tools/lab/et-usage/`), refreshed every 10 minutes. It is the same for everyone: the account
 that runs the collector is one login among the others. The design, with the data model, the
@@ -10,7 +10,7 @@ health rules and the reasons behind each choice, is [DESIGN.md](DESIGN.md). This
 |---|---|
 | `collect.py` | the collector: probes the three hosts in parallel, parses, applies the privacy filter, derives alerts, history and a fingerprint, writes `data.json` |
 | `remote.sh` | the read-only probe run on each host (`bash -s` over ssh; locally on aifoundry2) |
-| `update.sh` | collect, render, deploy when something changed, check that the space is still private, log; cron, acknowledgements |
+| `update.sh` | collect, render, deploy when something changed, keep the space public (or, in the private mode, private), log; cron, acknowledgements |
 | `lab.json` | static facts: hosts, cards, firmware, clock policy, idle ranges, known conditions. No personal data, no access paths |
 | `page/` | the page and its `render.py` (see `page/README.md`); `update.sh` runs `page/render.py <data.json> <out.html>` |
 | `testdata/` | invented probe outputs (`raw-<host>.txt`, `tailscale.json`) for `collect.py --from-raw`; `run2/` and `run3/` are the two runs after it (a machine down, one unreachable, reboots) |
@@ -33,8 +33,8 @@ tools/lab/dashboard/update.sh ack <alert-id> [days] [note]   # acknowledge an al
 tools/lab/dashboard/update.sh --install-cron       # the automatic refresh; --uninstall-cron removes it; --dry-run on either prints only
                                                    # (only the tagged line changes; a copy goes to ~/.config/lab-dashboard/crontab.bak)
 tools/lab/dashboard/update.sh sample-reset <card>  # re-enable a card's sample after a timeout was looked at
-tools/lab/dashboard/update.sh resume               # clear HALT once the space is private again (nothing else clears it)
-tools/lab/dashboard/update.sh create-space         # once: the first private deploy; records the uuid
+tools/lab/dashboard/update.sh resume               # clear HALT (private mode: once the space is private again; nothing else clears it)
+tools/lab/dashboard/update.sh create-space         # once: the first deploy; records the uuid
 python3 tools/lab/dashboard/collect.py             # collect only (prints a summary); --help for its options
 ```
 
@@ -123,7 +123,14 @@ run it by hand to see its usage (read `tools/ettelem/ettelem.cpp`).
 
 ## Privacy
 
-The page names lab users, so the space is private, and is never linked from a public page. Every run checks it,
+**The page is public** by the owner's decision of 30 September 2026 ("AI Foundry pages should be public (stop making
+the dashboard private)"), although it names lab users. Every run reads the space's row in `spacesheep list` and, if it
+is not public (a deploy can change a space's visibility), shares it public again and logs it; a failed list skips that
+run's deploy. `update.sh status` names the mode. Because the page is public, the collector's rules below matter all the
+more: no addresses, command lines, file paths or connection sources, whatever the mode.
+
+`"visibility": "private"` in `~/.config/lab-dashboard/config.json` (or `LAB_DASH_VISIBILITY=private`, which wins) turns
+on the **private mode**, for a page that must not be public. Every run checks the space,
 whether or not it deploys, and so does each deploy, right after and again 45 s later: `spacesheep list` must say
 private and an anonymous request must get the sign-in bootstrap, never the page's hidden canary or title (both are always
 made; a run deploys only when both pass). An anonymous request that gets the page halts at once. A list that says "not
@@ -137,7 +144,10 @@ and the run exits 1 until it works (`update.sh status` shows it). For 24 hours a
 that deploys were halted and why. Whether the two halts of 30 September (14:42, 15:22) were real exposures after a
 deploy or misreads of the list is not known: the later reads came after the halt had set the space private; the logged
 rows are there to settle it. The guard cannot see `spacesheep share --email`, which grants a person access while the
-space stays private. A person appears as a
+space stays private. In the public mode a `HALT` left from the private mode stops the deploys (it never sets the space
+private) until `update.sh resume`, which clears it without a check.
+
+A person appears as a
 login name with session, terminal and process counts, idle time, card holds and card use (with program names, as
 `et-who` and `et-usage` show them to every user), and what they are doing in coarse categories (on a card, AI agent,
 building, simulator, Python, editor, shell only), worked out on the host from process names that never leave it;
@@ -159,7 +169,7 @@ python3 collect.py --out $T --sample-dry                                        
 
 ```
 python3 tests/test_collect.py                       # the collector's rules, the privacy patterns, the probe's process filter
-bash tests/guard_test.sh ~/claude/work/<topic>      # update.sh's visibility guard against stubs (32 checks)
+bash tests/guard_test.sh ~/claude/work/<topic>      # update.sh's visibility checks against stubs, both modes (50 checks)
 ```
 
 `update.sh` reads test hooks from the environment, so its deploy logic can be exercised without deploying:

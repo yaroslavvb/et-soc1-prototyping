@@ -885,6 +885,10 @@ class Collector:
         # else the collector's own login
         m = str(self.config.get("maintainer") or self.owner)
         self.maintainer = m if LOGIN_RE.match(m) else self.owner
+        # the space's visibility mode (update.sh exports it; DESIGN.md §3.3): public by the owner's decision of 30
+        # September 2026, private when config.json says so; the page's "About" says which
+        v = os.environ.get("LAB_DASH_VISIBILITY") or self.config.get("visibility") or "public"
+        self.visibility = v if v in ("public", "private") else None
         self.this_host = socket.gethostname().split(".")[0]
         self.sample_enabled = bool(args.card_sample or args.sample_dry or self.config.get("card_sample"))
         every = self.config.get("card_sample_every_min", RULES["sample_every_min"])
@@ -1105,7 +1109,7 @@ class Collector:
                           "card_sample": ("dry" if self.args.sample_dry else
                                           "on (every %d min)" % self.sample_every_min if self.sample_enabled else "off"),
                           "halted": self.halt_reason(), "last_deploy": self.last_deploy(),
-                          "lab_tz": self.lab.get("tz"), "maintainer": self.maintainer,
+                          "lab_tz": self.lab.get("tz"), "maintainer": self.maintainer, "visibility": self.visibility,
                           "errors": [self.priv.scrub(e, 200) for e in self.errors]},
             "status": status,
             "fingerprint": None,
@@ -2084,9 +2088,10 @@ class Collector:
         halt = self.halt_reason()
         if halt:
             self.add("collector:halt", "bad", "collector", "deploys halted: " + halt,
-                     "update.sh stopped deploying after a visibility check failed; run update.sh status, then resume",
-                     source="update.sh")
-        else:
+                     "update.sh stopped deploying after a visibility check failed; run update.sh status, then resume"
+                     if self.visibility != "public" else "a halt left from the private mode stops the deploys; the "
+                     "dashboard is public now, and update.sh resume clears it", source="update.sh")
+        elif self.visibility != "public":
             # a halt a person resumed in the last 24 hours: nothing was deployed while it lasted, so this page is where
             # readers learn that its space was (or may have been) readable without signing in
             hl = self.halt_last()

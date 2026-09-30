@@ -17,7 +17,8 @@ categories, reads each machine's card-use log (`et-usage`, `tools/lab/et-usage/`
 **What it is.** A collector on aifoundry2 reads the three hosts every 10 minutes (read-only: `/proc`, sysfs driver
 counters, `et-who`, `et-usage`, `et-lab-health`, `et-lab-manifest`, nodewatch's logs, and locally `tailscale status`
 for each machine's online flag), writes one JSON file under `~/.cache/lab-dashboard/`, bakes it into a single static page, and redeploys that
-page to a **private** spacesheep space when something changed (or at least every 60 minutes). The spacesheep viewer
+page to a spacesheep space, **public** by the owner's decision of 30 September 2026 (§3.3), when something changed
+(or at least every 60 minutes). The spacesheep viewer
 reloads open tabs on every deploy, so the page never fetches anything. `update.sh now` (or asking Claude) does the same
 at once.
 
@@ -58,7 +59,8 @@ that can be missing is `null` (never 0, never absent), and every block that came
   "generated_at": "2026-09-30T13:12:04-07:00", "generated_ms": 1790799124000,
   "collector": {"host": "aifoundry2", "code": "<git short sha of tools/lab/dashboard>", "took_s": 7.9,
                 "interval_min": 10, "cron_minute": 2, "heartbeat_min": 60, "stale_after_min": 80,
-                "card_sample": "off", "errors": ["aifoundry3: could not parse @@disk"]},
+                "card_sample": "off", "maintainer": "<login>", "visibility": "public",
+                "errors": ["aifoundry3: could not parse @@disk"]},
   "status": {"level": "warn", "counts": {"bad": 0, "warn": 3, "info": 7, "known": 4},
              "headline": "3 warnings: aifoundry1 /home 99% full, aifoundry1 pool 95% full, aifoundry2 1 failed unit"},
   "fingerprint": "3fa2c1d09e4b",
@@ -517,9 +519,9 @@ update.sh now [--card-sample]  # the same at once, always deploys, prints the he
 update.sh status               # last run and deploy, HALT, the cron line, the last 10 log lines, the space's visibility
 update.sh --install-cron       # add the user crontab line; --uninstall-cron removes it
 update.sh ack <alert-id> [days] [note]   # acknowledge an alert (default 7 days); unack <alert-id>
-update.sh resume               # clear HALT after a person checked the space's visibility
+update.sh resume               # clear HALT after a person checked the space's visibility (private mode)
 update.sh sample-reset <card>  # re-enable a card's sample after a timeout was looked at
-update.sh create-space         # once: first private deploy, records the uuid (for the main session)
+update.sh create-space         # once: the first deploy (public, or private in the private mode), records the uuid
 ```
 
 The whole script body is a `main` function called on the last line, so bash has parsed it all before it runs; an
@@ -534,14 +536,16 @@ AGENT.md §6). It sets `PATH` itself (`~/.local/bin` for `spacesheep` and `node`
 2. `timeout 120 nice -n 10 python3 collect.py` (exit 3, a privacy refusal, stops the run: nothing is rendered or
    deployed, and the log says which pattern matched, not the text).
 3. `python3 render.py ~/.cache/lab-dashboard/data.json $D/index.html`, where `D=$(mktemp -d)`.
-4. The visibility check (§3.3), every run: with `HALT` set, `halt_check`; otherwise the list and the signed-out
-   request, and no deploy unless the space is verified private.
+4. The visibility check (§3.3), every run. Public mode (the default): the list; a space that is not public is shared
+   public again; no deploy while the list fails. Private mode: with `HALT` set, `halt_check`; otherwise the list and
+   the signed-out request, and no deploy unless the space is verified private.
 5. Deploy decision: skip when there is no `~/.config/lab-dashboard/space` (log "no space configured"), when `HALT`
    exists, when the fingerprint equals the last deployed one and the last deploy is younger than `heartbeat_min` (60)
    less 2 minutes of slack, or, for `run`, when the last deploy is younger than `min_deploy_gap_min` (10) less 1
    minute: at most one deploy per cron cycle. `now` always deploys.
 6. `spacesheep deploy $D --space $UUID -m "lab HH:MM"`; no `--title`, `--slug` or `--visibility` on an update.
-7. The visibility guard after the deploy, and again 45 s later (§3.3).
+7. The visibility check after the deploy (public mode: once, right after; private mode: right after and again 45 s
+   later, §3.3).
 8. `rm -rf $D` (it also removes the `.spacesheep.json` the CLI leaves), append the log line, release the lock.
 
 The lock is fd 9 of `update.sh`; every child (collect, render, the spacesheep calls) runs with `9>&-`, so a child
@@ -580,9 +584,24 @@ A deploy failure (network, rate limit) is logged and retried by the next run; th
 - Every version keeps a copy of its data, login names included. Only deleting the space removes them; the README
   says so.
 
-### 3.3 The visibility guard and `HALT`
+### 3.3 Visibility: public by default; the private mode's guard and `HALT`
 
-The page names lab users, so its space must stay private. Every run, whether or not it deploys, checks it
+**The owner's decision (30 September 2026): the dashboard is public** ("AI Foundry pages should be public (stop making
+the dashboard private)"), although it names lab users. It is listed in `docs/reports/MIRROR.md` as public and not
+mirrored. The mode comes from `LAB_DASH_VISIBILITY`, else `"visibility"` in `~/.config/lab-dashboard/config.json`,
+else `public`; any other word refuses the run (exit 2, logged). `update.sh` exports it, and the collector puts it in
+`collector.visibility`, which "About this page" states.
+
+**Public mode.** Every run, whether or not it deploys, reads the space's row in `spacesheep list --json`
+(`keep_public`): public is kept; any other visibility (a deploy can change a space's visibility, in either direction)
+is shared public again with `spacesheep share $UUID --visibility public`, logged with the row and the share's outcome.
+A failed share is logged and the run goes on (a page not yet public exposes nothing; the next run tries again). A list
+that fails, lacks the space or is unparsable skips that run's deploy ("visibility unverified"). The same read follows
+each deploy once; a space that turns private later is found by the next run. No signed-out request is made and nothing
+halts; a `HALT` left from the private mode still stops the deploys (never setting the space private) until a person runs
+`update.sh resume`, which then checks nothing.
+
+**Private mode** (`"visibility": "private"`): for a page that must not be public. Every run, whether or not it deploys, checks it
 (`vis_check`): the space's row in `spacesheep list --json` must say `"visibility": "private"`, and a signed-out request to
 `https://$UUID.spacesheep.app/` with a browser user agent must contain `auth-request` and must not contain the page's
 canary (`lab-dashboard-private-canary`, a hidden element of `page/body.html`) or its `<title>` (the canary is the sturdy
@@ -621,7 +640,12 @@ shows `HALT`, `EXPOSED`, the last halt, and the list's row with the signed-out r
 
 Testing without spacesheep: `tests/guard_test.sh <workdir>` runs `update.sh` with a stub spacesheep whose list answers
 a scripted sequence, a stub signed-out fetch, a stub crontab, `LAB_DASH_REREAD_S=0` and `LAB_DASH_RECHECK_S=0` (1 for
-the delayed check), scratch `LAB_DASH_CACHE` and `LAB_DASH_CONFIG`, and the collector on `testdata/run3`. Its cases: a
+the delayed check), scratch `LAB_DASH_CACHE` and `LAB_DASH_CONFIG`, and the collector on `testdata/run3`. Its public
+cases: the default with no setting (two list reads, no signed-out request, no share, `status` names the mode); a private
+space (shared public, deployed, never set private); a deploy that turns it private (shared public right after); a
+failed list (no deploy); a failed share (deployed, retried next run); a `HALT` left from the private mode (no deploy,
+nothing set private, `resume`, then a deploy); `"visibility": "private"` in config.json (the guard runs, and halts on a
+public space); an invalid word (exit 2). Its private cases: a
 normal deploy; one "public" read then private twice (no halt, no deploy, set private, the triggering row logged); public
 twice (halt); `signed_in` then private (set private); public on every read (halt, no automatic resume after three
 verified runs, `resume`, then a deploy whose page carries the halt); the page served after a deploy (halt at once, no
@@ -630,19 +654,20 @@ page is served (halt); a space turned public between two unchanged runs (halt); 
 delayed check halts); a failed list (no deploy); a change 1 minute after a deploy (skipped by the 10-minute floor).
 
 What the guard cannot see: `spacesheep share --email` grants a person access while the space stays "private". Setting
-the space private again is a visibility change, which AGENT.md reserves for the owner; the guard does it only to this
-dashboard's own private space.
+a space's visibility is the owner's call (AGENT.md); `update.sh` only keeps this dashboard's own space in the mode the
+owner chose: public now, private only if config.json says so.
 
 ### 3.4 The log
 
 `~/.cache/lab-dashboard/update.log`, one line per run:
 
 ```
-2026-09-30T13:12:04-0700 run took=7.9s hosts=3/3 alerts=bad0/warn3/info7 fp=3fa2c1d09e4b vis=private deploy=skipped(unchanged; last 13:02)
+2026-09-30T13:12:04-0700 run took=7.9s hosts=3/3 alerts=bad0/warn3/info7 fp=3fa2c1d09e4b vis=public deploy=skipped(unchanged; last 13:02)
 ```
 
-`vis` is the list's word at this run's check; the guard's own lines (a visibility check with the space's row, the
-re-reads, a halt with the share's outcome, a resume) are logged as they happen.
+`vis` is the list's word at this run's last check; the checks' own lines (public mode: a space found not public, with
+its row and the share's outcome; private mode: a visibility check with the space's row, the re-reads, a halt with the
+share's outcome; a resume) are logged as they happen.
 
 ---
 
@@ -757,7 +782,8 @@ starting with `main{max-width:1280px}`, and a hidden SVG with the hatch pattern 
    line saying which cards are in "Card use" instead; a shared time axis in the lab's zone, tooltips (`CK.tip`) and
    keyboard focus (`CK.keynav`); under it small multiples of die temperature and board watts per card (points only
    where a reading exists) and of login sessions per machine.
-8. **About this page** (`h2`). Where the data comes from, the cadence, the privacy rules in two sentences, whom to
+8. **About this page** (`h2`). Where the data comes from, the cadence, the privacy rules in two sentences (public or
+   private, from `collector.visibility`), whom to
    tell when something is wrong (the maintainer: `config.json`'s `"maintainer"`, else the collector's login, as
    `collector.maintainer`), a collapsed "For the maintainer" with the commands of §7 (readers cannot run them: the
    header has no "How to update" link, and the STALE banner says whom to tell), and the collector's `code`, `took_s` and
@@ -842,10 +868,11 @@ Hard rules; the build pass implements each one and the README repeats them.
 
 **The page and the space**
 
-- The space is **private** (`--visibility private` at creation), checked after every deploy (§3.3). It is listed in
-  MIRROR.md's private table so `check-mirror.py` checks that it is not served anonymously; its page is never
-  mirrored into the repository.
-- The page names lab users, so it is never made public and never linked from a public page.
+- The space is **public** by the owner's decision of 30 September 2026, although the page names lab users (their login
+  names, activity and card use): every run keeps it public (§3.3). It is listed in MIRROR.md as public and not
+  mirrored: the page is rendered from live data, and the data never enters the repository. Being public is why the
+  rules below matter: the page carries no address, command line, file path or connection source, whatever the mode.
+  The private mode (§3.3) remains for a page that must not be public.
 
 **What is never collected** (the probe drops it on the host where possible, and the collector rejects it anyway)
 
@@ -930,7 +957,7 @@ state, raw outputs, log, the space uuid and any ssh overrides stay in `~/.cache/
    if present.
 5. `README.md`. Then the main session: `update.sh create-space`, the first deploys with the visibility guard, a check
    that an open viewer tab reloads on a CLI deploy (a changing build stamp), the first real card sample, the cron
-   line, MIRROR.md's private row, and the registers (a request in 02, an artifact in 04, `docs/lab-access.md`).
+   line, MIRROR.md's row, and the registers (a request in 02, an artifact in 04, `docs/lab-access.md`).
 
 ## 9. Left out, or for later
 

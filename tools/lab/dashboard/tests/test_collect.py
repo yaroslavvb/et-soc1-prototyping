@@ -50,7 +50,7 @@ def bare(now=1790800000.0, out=None):
     col.out = out or tempfile.mkdtemp(dir=WORK)
     col.config, col.acks, col.known = {}, {}, {}
     col.state = {"hosts": {}, "cards": {}, "alerts_since": {}}
-    col.owner, col.maintainer = "owner", "owner"
+    col.owner, col.maintainer, col.visibility = "owner", "owner", "public"
     col.priv = C.Privacy("owner")
     col.errors = []
     col.this_host = "aifoundry2"

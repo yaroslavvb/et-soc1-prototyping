@@ -448,6 +448,13 @@
     $('fixture-pill').hidden = !(COL.fixture || (D._build || {}).fixture);
     fill('ab-host', COL.host || 'aifoundry2'); fill('ab-iv', IV_MIN); fill('ab-hb', HB_MIN);
     fill('ab-maint', COL.maintainer || 'the maintainer'); fill('ab-maint2', COL.maintainer || 'the maintainer');
+    // the space's visibility mode (DESIGN.md §3.3): public by the owner's decision of 30 September 2026, or private
+    if (COL.visibility === 'public') {
+      fill('ab-vis', 'The page is public (the owner\u2019s decision, 30 September 2026) and names the lab\u2019s users.');
+      const hh = $('ab-halt-help'); if (hh) hh.hidden = true;
+    } else if (COL.visibility === 'private') {
+      fill('ab-vis', 'The page is private because it names the lab\u2019s users.');
+    }
     const b = D._build || {};
     fill('ab-version', `Data from ${clock(GEN)}${ZONE ? ' ' + ZONE : ''}, collected in ${isNum(COL.took_s) ? n1(COL.took_s) + ' s' : ELL}` +
       ` by collector code ${COL.code || ELL}; page built ${isNum(b.at_ms) ? clock(b.at_ms) : ELL} from page sources ${b.page || ELL}` +

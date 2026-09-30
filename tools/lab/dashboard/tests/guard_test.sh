@@ -1,14 +1,16 @@
 #!/bin/bash
-# guard_test.sh WORKDIR: the deploy guard of update.sh (DESIGN.md §3.3) against a stub spacesheep, a stub signed-out
-# fetch and a stub crontab. Nothing is deployed, shared or fetched for real, and the crontab is never touched. The
+# guard_test.sh WORKDIR: the visibility checks of update.sh (DESIGN.md §3.3), the private mode's guard (cases 1-12) and
+# the public mode, the default (cases 13-20), against a stub spacesheep, a stub signed-out fetch and a stub crontab.
+# Nothing is deployed, shared or fetched for real, and the crontab is never touched. The
 # collector runs on testdata/run3 (--from-raw), with the card sample off. WORKDIR (created; never /tmp on the lab,
 # whose /tmp a reboot clears) holds each case's cache, config, stubs and logs. Prints one line per check; exit 1 if
 # any failed.
 #
 # The stub list answers from a queue (stub/list.q, one word per line: private, public, signed_in, fail, garbage,
-# missing), else stub/list.default; `share` sets list.default to private unless stub/share.fail exists; `deploy`
-# copies the page and, with stub/deploy.flips, sets list.default to public. The stub fetch answers from stub/fetch.q,
-# else stub/fetch.default: bootstrap (the sign-in page), page (the page, with its canary), error, 403.
+# missing), else stub/list.default; `share` sets list.default to the visibility it is given unless stub/share.fail
+# exists; `deploy` copies the page and, with stub/deploy.flips, sets list.default to public (stub/deploy.flips_private:
+# private). The stub fetch answers from stub/fetch.q, else stub/fetch.default: bootstrap (the sign-in page), page (the
+# page, with its canary), error, 403. VISMODE: the LAB_DASH_VISIBILITY of a case (private unless set; "unset": none).
 set -u
 W=${1:?usage: guard_test.sh WORKDIR}
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
@@ -36,10 +38,12 @@ case "$1" in
     [ -e $S/deploy.fail ] && { echo "deploy failed" >&2; exit 1; }
     cp "$2/index.html" $S/last-deployed.html 2>/dev/null
     [ -e $S/deploy.flips ] && echo public > $S/list.default
+    [ -e $S/deploy.flips_private ] && echo private > $S/list.default
     printf '{"uuid":"%s","url":"https://x"}\n' $UUID ;;
   share)
     [ -e $S/share.fail ] && { echo "share failed: network" >&2; exit 1; }
-    echo private > $S/list.default; echo '{"ok":true}' ;;
+    [ "$3" = --visibility ] && [ -n "$4" ] || { echo "stub: share needs --visibility" >&2; exit 2; }
+    echo "$4" > $S/list.default; echo '{"ok":true}' ;;
   *) echo "stub: unknown $*" >&2; exit 2 ;;
 esac
 EOF
@@ -71,11 +75,13 @@ setup() {  # setup NAME: a fresh case: private space, sign-in bootstrap
   CASE=$1
 }
 U() {  # U ARGS...: update.sh with the stubs; sets RC
-  env -u CLAUDECODE STUB="$C/stub" TMPDIR="$C/tmp" LAB_DASH_CACHE="$C/cache" LAB_DASH_CONFIG="$C/conf" \
+  local -a vis=(LAB_DASH_VISIBILITY="${VISMODE:-private}"); NOUT=$((NOUT + 1))
+  [ "${VISMODE:-}" = unset ] && vis=(-u LAB_DASH_VISIBILITY)
+  env -u CLAUDECODE "${vis[@]}" STUB="$C/stub" TMPDIR="$C/tmp" LAB_DASH_CACHE="$C/cache" LAB_DASH_CONFIG="$C/conf" \
     LAB_DASH_SPACESHEEP="$W/bin/ss" LAB_DASH_FETCH="$W/bin/fetch" LAB_DASH_CRONTAB="$W/bin/crontab" \
     LAB_DASH_REREAD_S=0 LAB_DASH_RECHECK_S=${RECHECK:-0} \
     LAB_DASH_COLLECT_ARGS="--from-raw $HERE/testdata/run3 --now 1790798700 --owner owner" \
-    bash "$HERE/update.sh" "$@" > "$C/out.$((++NOUT))" 2>&1
+    bash "$HERE/update.sh" "$@" > "$C/out.$NOUT" 2>&1
   RC=$?
 }
 NOUT=0
@@ -189,6 +195,72 @@ cp "$C/cache/deploy.state" "$C/deploy.state.1"
 awk '{print $1, "000000000000"}' "$C/deploy.state.1" > "$C/cache/deploy.state"
 U run
 ok "the 10-minute floor" 'last | grep -q "the next run deploys" && [ $(n "ss deploy") = 1 ]'
+
+# ---- the public mode (the default since the owner's decision of 30 September 2026): no signed-out request, no halt;
+# a space that is not public is shared public again, before or after a deploy
+VISMODE=unset
+
+# 13. the default, with no setting anywhere: public; one list read before and one after the deploy, nothing else
+setup P_default
+echo public > "$C/stub/list.default"
+U now
+ok "deploys" '[ $RC = 0 ] && last | grep -q "deploy=ok$" && last | grep -q "vis=public"'
+ok "two list reads, no signed-out request, no share" '[ $(n "ss list") = 2 ] && [ $(n "fetch ") = 0 ] && [ $(n "ss share") = 0 ]'
+ok "the page says public" 'python3 -c "import json,sys; sys.exit(0 if json.load(open(sys.argv[1]))[\"collector\"][\"visibility\"] == \"public\" else 1)" "$C/cache/data.json"'
+U status
+ok "status names the mode" 'grep -q "^mode: public" "$C/out.$NOUT" && grep -q "^visibility: list public" "$C/out.$NOUT"'
+
+# 14. a private space (a deploy or a hand turned it): shared public again, then deployed; never halted
+setup P_private_space
+U now
+ok "set public, deployed, no halt" '[ $RC = 0 ] && [ $(n "ss share .* --visibility public") = 1 ] && [ ! -e "$C/cache/HALT" ] && [ $(n "ss deploy") = 1 ]'
+ok "logged with its row" 'grep -q "visibility before a deploy: the list said private (row: {\"id\":\"$UUID\",\"visibility\":\"private\"" "$C/cache/update.log" && grep -q "set public again: done" "$C/cache/update.log"'
+ok "never shared private" '[ $(n "ss share .* --visibility private") = 0 ]'
+
+# 15. a deploy that turns the space private: the check right after it shares it public again
+setup P_after_deploy
+echo public > "$C/stub/list.default"; : > "$C/stub/deploy.flips_private"
+U now
+ok "set public after the deploy" '[ $RC = 0 ] && [ $(n "ss share .* --visibility public") = 1 ] && last | grep -q "after it: visibility was private, set public: done"'
+
+# 16. the list fails: no deploy (it is not known that the space is the dashboard's), no share, no halt
+setup P_list_fail
+echo public > "$C/stub/list.default"; q fail
+U now
+ok "no deploy, no share, no halt" '[ $(n "ss deploy") = 0 ] && [ $(n "ss share") = 0 ] && [ ! -e "$C/cache/HALT" ] && last | grep -q "visibility unverified: list failed"'
+
+# 17. the share fails: the page is still deployed (a page not yet public exposes nothing), and every run tries again
+setup P_share_fail
+: > "$C/stub/share.fail"
+U now
+ok "deployed, the failure logged" '[ $RC = 0 ] && [ $(n "ss deploy") = 1 ] && grep -q "set public again: FAILED" "$C/cache/update.log"'
+U run
+ok "the next run tries again" '[ $(n "ss share") = 3 ]'
+
+# 18. a HALT left from the private mode: no deploy, no share, no signed-out request, until a person resumes
+setup P_halt_left
+echo public > "$C/stub/list.default"; echo "2026-09-30T15:22:09-0700 NOT PRIVATE before a deploy" > "$C/cache/HALT"
+U run
+ok "stays halted, nothing set private" '[ -e "$C/cache/HALT" ] && [ $(n "ss deploy") = 0 ] && [ $(n "ss share") = 0 ] && [ $(n "fetch ") = 0 ] && last | grep -q "HALT from the private mode"'
+ok "the page says so" 'python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if any(a[\"id\"]==\"collector:halt\" and \"public now\" in (a.get(\"detail\") or \"\") for a in d[\"alerts\"]) else 1)" "$C/cache/data.json"'
+U resume
+ok "resume clears it without a private check" '[ $RC = 0 ] && [ ! -e "$C/cache/HALT" ] && [ $(n "fetch ") = 0 ]'
+U now
+ok "the next run deploys" '[ $RC = 0 ] && last | grep -q "deploy=ok$"'
+
+# 19. config.json's "visibility": "private" turns the private guard on (the signed-out request is made)
+setup P_config_private
+echo '{"card_sample": false, "owner": "owner", "visibility": "private"}' > "$C/conf/config.json"
+U now
+ok "the private guard runs" '[ $RC = 0 ] && [ $(n "fetch ") = 2 ] && [ $(n "ss share") = 0 ] && last | grep -q "vis=private deploy=ok$"'
+echo public > "$C/stub/list.default"
+U run
+ok "and halts on a public space" '[ -e "$C/cache/HALT" ] && [ $(n "ss share .* --visibility private") -ge 1 ]'
+
+# 20. a visibility that is neither: refused, logged, nothing called
+setup P_invalid
+VISMODE=Public U run
+ok "refused with exit 2" '[ $RC = 2 ] && [ $(n "ss ") = 0 ] && last | grep -q "run refused: the visibility"'
 
 echo "guard_test: $PASSES passed, $FAILS failed ($W/cases)"
 [ $FAILS = 0 ]

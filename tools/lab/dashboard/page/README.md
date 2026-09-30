@@ -40,6 +40,8 @@ else parsed from the ISO string. A few optional fields beyond §1 are used when 
   the collector's own machine) and its times; without `state`, `reachable` decides;
 - `usage.colors`: each login's colour slot, kept by the collector (without it, the three logins with the most card
   time); `collector.maintainer`: whom the STALE banner and "About this page" tell readers to contact;
+  `collector.visibility` (`public`, the owner's decision of 30 September 2026, or `private`): what "About this page"
+  says about the page's visibility (the private mode's halt instructions are hidden on a public page);
 - `alerts[].stale`: an alert from the last known data of a machine not answering, listed but not counted;
 - `hosts.<h>.next_try_ms` (the next try after an approval failure), `people[].hosts.<h>.stale` (a count from old
   data), `collector.fixture` (shows the MADE-UP DATA pill).

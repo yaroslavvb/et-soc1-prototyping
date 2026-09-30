@@ -348,7 +348,7 @@ at low priority: <code>/proc</code>, the card driver's counters in sysfs, <code>
 nodewatch's logs, and on aifoundry2 whether Tailscale sees each machine online. It bakes the result into this page and republishes it when something changed, and at least
 every <span id="ab-hb">60</span> minutes; an open tab reloads itself on each new version. It never opens a card's device
 node; a live card sample is off unless someone switches it on, and then waits for a free card.</p>
-<p>The page is private because it names the lab's users. For each person it shows a login name, session and process counts,
+<p><span id="ab-vis">It names the lab's users.</span> For each person it shows a login name, session and process counts,
 idle time, coarse kinds of activity, card holds and card use with the programs' names; never commands, files, addresses or where
 anyone connects from. The collector's own account is listed like everyone else's.</p>
 <p>Something wrong or stale on this page? Tell <b id="ab-maint">the maintainer</b>, who runs the collector.</p>
@@ -356,15 +356,15 @@ anyone connects from. The collector's own account is listed like everyone else's
 <ul>
  <li>On aifoundry2, in the checkout: <code>tools/lab/dashboard/update.sh now</code> collects, rebuilds and republishes at
  once; open tabs update within seconds. <code>update.sh now --card-sample</code> also takes a card telemetry sample, behind
- every rule of the card etiquette. <code>update.sh status</code> shows the last runs and deploys, a halt, and whether the
- space is private.</li>
+ every rule of the card etiquette. <code>update.sh status</code> shows the last runs and deploys, a halt, and the
+ space's visibility.</li>
  <li>From another machine: <code>ssh aifoundry2 claude/et-soc1-prototyping/tools/lab/dashboard/update.sh now</code>; or ask
  Claude in the aifoundry2 session to refresh the lab dashboard.</li>
  <li>A machine that shows "approval needed": run <code>ssh aifoundry1 true</code> (or aifoundry3) on aifoundry2, approve the
  address it prints, then <code>update.sh now</code>.</li>
  <li>Silence a known alert: <code>update.sh ack &lt;alert id&gt; [days] [note]</code> (the id is in each alert's detail).</li>
- <li>After a halt (the space was, or may have been, readable without signing in): check the space, then
- <code>update.sh resume</code>; nothing resumes deploying by itself.</li>
+ <li id="ab-halt-help">After a halt (the private mode only: the space was, or may have been, readable without signing
+ in): check the space, then <code>update.sh resume</code>; nothing resumes deploying by itself.</li>
 </ul>
 </details>
 <h3 id="this-version">This version</h3>

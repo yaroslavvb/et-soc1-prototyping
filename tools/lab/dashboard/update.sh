@@ -2,15 +2,20 @@
 # update.sh: the lab dashboard's updater (tools/lab/dashboard/DESIGN.md §3 and §7).
 #
 #   update.sh run                  what cron runs: check the space, collect, render, deploy if changed; quiet; exit 0
-#                                  unless broken, halted by this run, or the space is exposed
+#                                  unless broken, halted by this run, or the space is exposed (private mode)
 #   update.sh now [--card-sample]  the same at once, always deploys; prints the headline, the alerts, the address
 #   update.sh status               last runs and deploy, HALT, EXPOSED, the last halt, the cron line, the visibility
 #   update.sh --install-cron [--dry-run]     add the user crontab line (--dry-run: only print it)
 #   update.sh --uninstall-cron [--dry-run]   remove it
 #   update.sh ack <alert-id> [days] [note]   acknowledge an alert (default 7 days); update.sh unack <alert-id>
-#   update.sh resume               clear HALT once the space is private again (only a person clears a halt)
+#   update.sh resume               clear HALT (private mode: once the space is private again; only a person clears it)
 #   update.sh sample-reset <card>  re-enable a card's telemetry sample after its timeout was looked at
-#   update.sh create-space         once: the first private deploy; records the space's uuid
+#   update.sh create-space         once: the first deploy; records the space's uuid
+#
+# Visibility (DESIGN.md §3.3): public by the owner's decision of 30 September 2026 ("AI Foundry pages should be public
+# (stop making the dashboard private)"): every run checks that the space is public and shares it public again if not.
+# "visibility": "private" in config.json (or LAB_DASH_VISIBILITY=private, which wins) turns on the private mode: the
+# guard that checks the space before and after every deploy and halts on exposure.
 #
 # Files: ~/.cache/lab-dashboard/ (data.json, history, state, update.log, lock, HALT, EXPOSED, halt.last, deploy.state;
 # mode 0700) and ~/.config/lab-dashboard/ (space: the uuid; config.json; ack.json). Nothing is written inside the
@@ -37,10 +42,28 @@ main() {
   TAG='# lab-dashboard'
   CRON_LINE="2-59/10 * * * * $HERE/update.sh run >/dev/null 2>&1 $TAG"
   EMOJI=$(printf '\360\237\224\254')   # the microscope
-  DESCRIPTION="Private: the AI Foundry lab's machines, cards and people, checked every 10 minutes"
   mkdir -p "$CACHE" "$CONF" && chmod 700 "$CACHE" "$CONF"
   local cmd=${1:-}
   [ $# -gt 0 ] && shift
+  # the visibility mode: LAB_DASH_VISIBILITY, else config.json's "visibility", else public (the owner's decision)
+  VISIBILITY=${LAB_DASH_VISIBILITY:-}
+  if [ -z "$VISIBILITY" ] && [ -f "$CONF/config.json" ]; then
+    VISIBILITY=$(python3 -c 'import json, sys; v = json.load(open(sys.argv[1])).get("visibility"); print(v if isinstance(v, str) else "")' \
+                 "$CONF/config.json" 2>/dev/null)
+  fi
+  VISIBILITY=${VISIBILITY:-public}
+  case "$VISIBILITY" in
+    public|private) ;;
+    *) echo "update.sh: the visibility must be public or private, not '$VISIBILITY' (LAB_DASH_VISIBILITY or config.json)" >&2
+       case "$cmd" in run|now) log_line "run refused: the visibility '$(printf '%s' "$VISIBILITY" | tr -cd '[:alnum:]_-' | cut -c1-20)' is neither public nor private (LAB_DASH_VISIBILITY or config.json)" ;; esac
+       return 2 ;;
+  esac
+  export LAB_DASH_VISIBILITY=$VISIBILITY   # the collector puts it on the page ("About this page")
+  if [ "$VISIBILITY" = private ]; then
+    DESCRIPTION="Private: the AI Foundry lab's machines, cards and people, checked every 10 minutes"
+  else
+    DESCRIPTION="The AI Foundry lab's machines, cards and people, checked every 10 minutes"
+  fi
   case "$cmd" in
     run) cmd_run cron "$@" ;;
     now) cmd_run now "$@" ;;
@@ -174,13 +197,31 @@ vis_check() {
   esac
 }
 
-# share_private UUID: `spacesheep share UUID --visibility private`; prints "done" or "FAILED (exit N: ...)" and
-# returns its exit status. A no-op on a space that is already private.
-share_private() {
+# share_vis UUID VISIBILITY: `spacesheep share UUID --visibility VISIBILITY`; prints "done" or "FAILED (exit N: ...)"
+# and returns its exit status. A no-op on a space that already has it. share_private UUID: the private one.
+share_vis() {
   local out rc
-  out=$(timeout 60 "${SS[@]}" share "$1" --visibility private 2>&1 9>&-); rc=$?
+  out=$(timeout 60 "${SS[@]}" share "$1" --visibility "$2" 2>&1 9>&-); rc=$?
   if [ $rc -eq 0 ]; then echo done; else echo "FAILED (exit $rc: $(printf '%s' "$out" | tail -n 1 | tr -cd '[:print:]' | cut -c1-120))"; fi
   return $rc
+}
+share_private() { share_vis "$1" private; }
+
+# keep_public UUID WHEN: the public mode's check (DESIGN.md §3.3), before and after each deploy. One list read: public
+# is kept; a space that is not public (a deploy can change a space's visibility) is shared public again, logged with
+# its row. Sets VIS (the list's word) and PUB: "public", "set public: done|FAILED (...)" (the run goes on: a page
+# that is not yet public exposes nothing, and the next run tries again) or "unverified: list failed|missing|unparsable"
+# (no deploy before it is known that the space is the dashboard's and readable).
+keep_public() {
+  local uuid=$1 when=$2 out row sh
+  out=$(vis_list "$uuid" row); VIS=${out%%$'\t'*}; row=$(printf '%s' "$out" | cut -s -f2 | cut -c1-300)
+  case "$VIS" in
+    public) PUB=public ;;
+    failed|missing|unparsable) PUB="unverified: list $VIS" ;;
+    *) sh=$(share_vis "$uuid" public)
+       log_line "visibility $when: the list said $VIS (row: $row); the dashboard is public (the owner's decision): set public again: $sh"
+       PUB="was $VIS, set public: $sh" ;;
+  esac
 }
 
 # confirm_exposure UUID PAGE WHAT ROW: after one list read (whose row is ROW) said "not private" while the signed-out
@@ -319,9 +360,17 @@ cmd_run() {
   now_s=$(date +%s)
   { read -r last_t last_fp _ < "$CACHE/deploy.state"; } 2>/dev/null || { last_t=0; last_fp=; }
   render_page "$D"; rc=$?
-  deploy= exposed=0 halted_now=0 VIS=- GUARD=
+  deploy= exposed=0 halted_now=0 VIS=- GUARD= PUB=
   uuid=$(space_uuid) || uuid=
   if [ -z "$uuid" ]; then deploy="skipped(no space configured)"
+  elif [ "$VISIBILITY" = public ]; then
+    if [ -f "$CACHE/HALT" ]; then
+      # a halt left from the private mode: no deploy until a person clears it (update.sh resume); never set private
+      deploy="skipped(HALT from the private mode: $(cut -d' ' -f2- "$CACHE/HALT" | tr -cd '[:print:]' | cut -c1-120); a person runs update.sh resume)"
+    else
+      keep_public "$uuid" "before a deploy"
+      case "$PUB" in unverified*) deploy="skipped(visibility $PUB)" ;; esac
+    fi
   elif [ -f "$CACHE/HALT" ]; then
     out=$(halt_check "$uuid" "$D/index.html") || exposed=1
     deploy="skipped($out)"
@@ -351,10 +400,17 @@ cmd_run() {
     if out=$(timeout 180 "${SS[@]}" deploy "$D" --space "$uuid" -m "lab $(date +%H:%M)" --json 2> "$D.deploy.log" 9>&-); then
       printf '%s %s\n' "$now_s" "$fp" > "$CACHE/deploy.state"
       deploy="ok"
+      case "$PUB" in public|"") ;; *) deploy="ok (before it: visibility $PUB)" ;; esac
       # right after the deploy, and again RECHECK_S (45 s) later: a deploy can change a space's visibility, and the
-      # first read after it may not show that yet
+      # first read after it may not show that yet. The public mode checks once, right after (a space that turns
+      # private later is found by the next run's check: a page hidden for 10 minutes exposes nothing).
       local pass wait
+      if [ "$VISIBILITY" = public ]; then
+        keep_public "$uuid" "after a deploy"
+        case "$PUB" in public) ;; *) deploy="$deploy (after it: visibility $PUB)" ;; esac
+      fi
       for pass in 1 2; do
+        [ "$VISIBILITY" = public ] && break
         if [ $pass = 2 ]; then
           wait=${LAB_DASH_RECHECK_S:-45}
           [[ $wait =~ ^[0-9]+$ ]] && [ "$wait" -gt 0 ] || break
@@ -380,7 +436,10 @@ cmd_run() {
     dj 'd["status"]["level"].upper() + "  " + d["status"]["headline"]'
     dj '"\n".join("  [%s] %s" % (a["level"], a["title"] if (a["host"] or a["card"] or "") in a["title"] else "%s: %s" % (a["card"] or a["host"] or a["scope"], a["title"])) for a in d["alerts"] if a["level"] in ("bad", "warn")) or "  no warnings"'
     echo "  hosts answering $hosts; deploy: $deploy; took ${took}s"
-    [ -n "$uuid" ] && echo "  page: https://$uuid.spacesheep.app/ (private: open it signed in at spacesheep.dev)"
+    if [ -n "$uuid" ]; then
+      if [ "$VISIBILITY" = public ]; then echo "  page: https://$uuid.spacesheep.app/ (public)"
+      else echo "  page: https://$uuid.spacesheep.app/ (private: open it signed in at spacesheep.dev)"; fi
+    fi
   fi
   if [ $exposed = 1 ]; then
     # nobody reads cron's output: the log, update.sh status (EXPOSED) and this exit status carry it
@@ -412,10 +471,16 @@ cmd_status() {
   else echo "HALT: no"; fi
   if [ -f "$CACHE/halt.last" ]; then echo "last halt: $(python3 -c 'import json,sys,time; h=json.load(open(sys.argv[1])); f=lambda t: time.strftime("%F %T", time.localtime(t)) if t else "-"; print("%s: %s; resumed %s by %s" % (f(h.get("at")), h.get("reason"), f(h.get("cleared_at")), h.get("cleared_by") or "-"))' "$CACHE/halt.last" 2>/dev/null)"; fi
   if "${CRONTAB[@]}" -l 2>/dev/null | grep -qF "$TAG"; then echo "cron: $("${CRONTAB[@]}" -l 2>/dev/null | grep -F "$TAG")"; else echo "cron: not installed (update.sh --install-cron)"; fi
+  echo "mode: $VISIBILITY$([ "$VISIBILITY" = public ] && echo " (the owner's decision; \"visibility\": \"private\" in config.json turns on the private guard)" || echo " (the private guard: checked before and after every deploy, HALT on exposure)")"
   if uuid=$(space_uuid); then
     echo "space: $uuid"
-    vis_check "$uuid" "$CACHE/nopage.html"
-    echo "visibility: list $VIS (row $VIS_ROW); anonymous request: $ANON"
+    if [ "$VISIBILITY" = public ]; then
+      local out; out=$(vis_list "$uuid" row)
+      echo "visibility: list ${out%%$'\t'*} (row $(printf '%s' "$out" | cut -s -f2 | cut -c1-300))"
+    else
+      vis_check "$uuid" "$CACHE/nopage.html"
+      echo "visibility: list $VIS (row $VIS_ROW); anonymous request: $ANON"
+    fi
   else
     echo "space: none configured (update.sh create-space)"
   fi
@@ -507,6 +572,13 @@ cmd_resume() {
   local uuid rc
   [ -f "$CACHE/HALT" ] || { echo "not halted"; return 0; }
   uuid=$(space_uuid) || { rm -f "$CACHE/HALT"; echo "no space configured; HALT cleared"; return 0; }
+  if [ "$VISIBILITY" = public ]; then
+    # a halt of the private mode, and the dashboard is public now: nothing to check before clearing it
+    rm -f "$CACHE/HALT" "$CACHE/EXPOSED" "$CACHE/HALT.sticky" "$CACHE/HALT.verified" "$CACHE/autoresume.last"
+    log_line "resume: HALT (from the private mode) cleared by $(id -un); the dashboard is public"
+    echo "HALT cleared; the dashboard is public (the owner's decision), and the next run deploys."
+    return 0
+  fi
   vis_check "$uuid" "$CACHE/nopage.html"; rc=$?
   if [ "$ANON_RC" -eq 1 ]; then echo "update.sh: the page is served to a signed-out request ($ANON): HALT stays" >&2; return 1; fi
   if [ "$VIS" != private ]; then echo "update.sh: the space is '$VIS', not private: HALT stays" >&2; return 1; fi
@@ -568,15 +640,19 @@ cmd_create_space() {
   trap "rm -rf '$D' '$D.render.log'; trap - RETURN" RETURN
   render_page "$D" || { echo "update.sh: render failed: $(cat "$D.render.log" 2>/dev/null)" >&2; return 1; }
   out=$(timeout 180 "${SS[@]}" deploy "$D" --title "AI Foundry lab" --slug aifoundry-lab-dashboard --emoji "$EMOJI" \
-        --description "$DESCRIPTION" --visibility private -m "lab first deploy" --json 9>&-) ||
+        --description "$DESCRIPTION" --visibility "$VISIBILITY" -m "lab first deploy" --json 9>&-) ||
     { echo "update.sh: deploy failed" >&2; return 1; }
   uuid=$(printf '%s' "$out" | python3 -c 'import json, sys; print(json.load(sys.stdin).get("uuid") or "")' 2>/dev/null)
   [[ $uuid =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]] || { echo "update.sh: no uuid in the deploy's answer" >&2; return 1; }
   printf '%s\n' "$uuid" > "$CONF/space"; chmod 600 "$CONF/space"
   printf '%s %s\n' "$(date +%s)" "$(dj 'd["fingerprint"]')" > "$CACHE/deploy.state"
-  guard "$uuid" "$D/index.html" "after create-space"
+  if [ "$VISIBILITY" = public ]; then
+    keep_public "$uuid" "after create-space"; GUARD=$PUB
+  else
+    guard "$uuid" "$D/index.html" "after create-space"
+  fi
   log_line "create-space $uuid visibility: $GUARD"
-  echo "created the private space $uuid (recorded in $CONF/space); visibility check: $GUARD"
+  echo "created the $VISIBILITY space $uuid (recorded in $CONF/space); visibility check: $GUARD"
 }
 
 { main "$@"; exit $?; }
