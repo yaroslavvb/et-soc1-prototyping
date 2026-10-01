@@ -1,0 +1,1625 @@
+#!/usr/bin/python3
+"""et-usaged: log every process that holds an ET-SoC-1 card on this host.
+
+Part of tools/lab/et-usage in the et-soc1-prototyping repository (see README.md there).
+
+How: inotify watches on the card nodes (/dev/et<N>_mgmt, /dev/et<N>_ops) and the card lock files
+(/run/lock/etsoc-shire<N>.lock, only for a card N that has a node) for open and close; on an event (after a 20 ms
+debounce; at most 10 scans a second, at most 10% of the time, and once a second for lock-only events) and every
+15 s, a scan of the /proc/<pid>/fd links finds who holds them. A lock-file fd counts only while it holds the lock
+(the "lock:" line of its fdinfo), so a process waiting in flock holds nothing. One JSON line per (process, card) hold
+goes to /var/log/et-usage/<local date>.jsonl when the hold ends, with heartbeats, the change of the driver's message
+counters, the current holders in /run/et-usage/now.json, and the open holds in /var/log/et-usage/open.json (written
+as "lost_end" holds by the next start if this process dies without SIGTERM).
+
+Never: open a /dev/et* node (inotify_add_watch and lstat do not open it), read a process's argv, environment or cwd
+(only /proc/<pid>/stat, the Uid line of status, comm, the fd links, the fdinfo of a lock-file fd, and maps: at start
+and after an open no scan explained, every process's maps are searched for the node paths and only a match is kept),
+read a card attribute other than devnum and {mgmt,ops}_vq_stats/msg_count (none at all of a card given to
+--skip-pci), or write to sysfs.
+
+Python 3 standard library only. Runs under systemd (et-usaged.service) as the et-usage user with CAP_SYS_PTRACE and
+CAP_DAC_READ_SEARCH (to read other users' fd links), or as any user for tests (it then sees only its own processes).
+"""
+
+import argparse
+import ctypes
+import fcntl
+import fnmatch
+import glob
+import json
+import os
+import pwd
+import re
+import select
+import shlex
+import signal
+import socket
+import stat
+import struct
+import sys
+import time
+import traceback
+
+FORMAT = 1
+NODE_KINDS = frozenset(('mgmt', 'ops'))
+
+IN_ATTRIB = 0x00000004
+IN_CLOSE_WRITE = 0x00000008
+IN_CLOSE_NOWRITE = 0x00000010
+IN_OPEN = 0x00000020
+IN_MOVED_FROM = 0x00000040
+IN_MOVED_TO = 0x00000080
+IN_CREATE = 0x00000100
+IN_DELETE = 0x00000200
+IN_DELETE_SELF = 0x00000400
+IN_MOVE_SELF = 0x00000800
+IN_Q_OVERFLOW = 0x00004000
+IN_IGNORED = 0x00008000
+IN_ONLYDIR = 0x01000000
+IN_DONT_FOLLOW = 0x02000000
+IN_CLOSE = IN_CLOSE_WRITE | IN_CLOSE_NOWRITE
+# On a node or lock file: open, close, and the self events that tell a node was removed or replaced. Never through a
+# symlink: /run/lock is world-writable.
+FILE_MASK = IN_OPEN | IN_CLOSE | IN_ATTRIB | IN_DELETE_SELF | IN_MOVE_SELF | IN_DONT_FOLLOW
+# On their directories (/dev, /run/lock): names created or removed only. Never IN_OPEN here: a directory watch
+# reports opens of every file in it (/dev/null...).
+DIR_MASK = IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO | IN_ONLYDIR
+
+DEV_RE = re.compile(r'et(\d+)_(mgmt|ops)')
+LOCK_RE = re.compile(r'etsoc-shire(\d+)\.lock')
+PCI_RE = re.compile(r'[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7]')
+SQ_RE = re.compile(rb'^\s*\S*SQ\d*:\s+(\d+)', re.M)   # submission queues (SQ*, HpSQ*), as the dashboard counts
+DELETED = ' (deleted)'
+MAX_TIMES = 2000          # event times kept per (card, kind) and batch; counts are always exact
+MAX_CARDS = 64            # card numbers watched at most
+MAX_HOLDS = 4096          # processes tracked as holders at most (a fork flood beyond it is counted, not tracked)
+NOW_MAX_HOLDS = 1000      # holds listed in now.json at most
+SCAN_DUTY = 0.1           # scans use at most this share of a core: a scan starts >= its last CPU time / 0.1 later
+LOCK_SCAN_GAP = 1.0       # events on lock files only start a scan at most once a second
+UNSEEN_GAP = 0.5          # unseen opens of a card less than this apart are one record...
+UNSEEN_SPAN = 60.0        # ... that spans at most this long
+UNSEEN_WAIT = 1.0         # a pending unseen record is written this long after its last close (a later one may join)
+MAX_MSG_RATE = 1e6        # driver messages a second above which a counter reading is garbage (a driver race)
+OPEN_EVERY = 1.0          # open.json rewritten at most this often on a change
+MB = 1024 * 1024
+MAPS_CHUNK = 256 * 1024   # /proc/<pid>/maps is read in pieces this big, never whole: vm.max_map_count is 1,048,576
+MAX_MAPS = 16 * MB        # on the lab hosts and a line can be 4 KB, so one process's maps can be GBs; read this far
+
+
+def boottime():
+    """Seconds since boot, counting suspend: the clock for intervals and schedules (a wall-clock step moves it not)."""
+    return time.clock_gettime(time.CLOCK_BOOTTIME)
+
+
+def r3(x):
+    return round(x, 3)
+
+
+def printable(s):
+    """s with each character that is not printable (control characters, escape, format and line separators) as '?':
+    program and user names go to the log, terminals and the dashboard."""
+    return ''.join(c if c.isprintable() else '?' for c in s)
+
+
+def read_bytes(path):
+    with open(path, 'rb') as f:
+        return f.read()
+
+
+def read_stat(pid):
+    """(comm, ppid, starttime in clock ticks) from /proc/<pid>/stat, or None when the process is gone."""
+    try:
+        s = read_bytes('/proc/%s/stat' % pid)
+        i = s.rindex(b')')
+        comm = printable(s[s.index(b'(') + 1:i].decode('utf-8', 'replace'))
+        rest = s[i + 2:].split()
+        return comm, int(rest[1]), int(rest[19])        # fields 4 (ppid) and 22 (starttime)
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def read_uid(pid):
+    """The real uid from /proc/<pid>/status, or None."""
+    try:
+        for line in read_bytes('/proc/%s/status' % pid).split(b'\n'):
+            if line.startswith(b'Uid:'):
+                return int(line.split()[1])
+    except (OSError, ValueError, IndexError):
+        pass
+    return None
+
+
+def read_comm(pid):
+    if not pid:
+        return ''
+    try:
+        return printable(read_bytes('/proc/%d/comm' % pid).decode('utf-8', 'replace').rstrip('\n'))
+    except OSError:
+        return ''
+
+
+def fd_locked(pid, fd):
+    """Whether fd of pid holds a lock on its file: its fdinfo has a "lock:" line for the flock holder and for every
+    process sharing that open file (flock -> timeout -> program), none for a process waiting in flock or holding the
+    file open unlocked. None when fdinfo cannot be read."""
+    try:
+        data = read_bytes('/proc/%s/fdinfo/%s' % (pid, fd))
+    except OSError:
+        return None
+    return data.startswith(b'lock:') or b'\nlock:' in data
+
+
+class Inotify:
+    """inotify through ctypes: inotify_init1, inotify_add_watch, inotify_rm_watch; events read with os.read."""
+
+    def __init__(self):
+        try:
+            libc = ctypes.CDLL('libc.so.6', use_errno=True)
+        except OSError:
+            libc = ctypes.CDLL(None, use_errno=True)
+        self._init1 = libc.inotify_init1
+        self._init1.argtypes = [ctypes.c_int]
+        self._init1.restype = ctypes.c_int
+        self._add = libc.inotify_add_watch
+        self._add.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32]
+        self._add.restype = ctypes.c_int
+        self._rm = libc.inotify_rm_watch
+        self._rm.argtypes = [ctypes.c_int, ctypes.c_int]
+        self._rm.restype = ctypes.c_int
+        fd = self._init1(os.O_NONBLOCK | os.O_CLOEXEC)
+        if fd < 0:
+            e = ctypes.get_errno()
+            raise OSError(e, 'inotify_init1: ' + os.strerror(e))
+        self.fd = fd
+
+    def add(self, path, mask):
+        # A path lookup and a permission check on the inode; it never opens the file or the device.
+        wd = self._add(self.fd, os.fsencode(path), mask)
+        if wd < 0:
+            e = ctypes.get_errno()
+            raise OSError(e, os.strerror(e), path)
+        return wd
+
+    def read(self, max_reads=64):
+        out = []
+        for _ in range(max_reads):
+            try:
+                buf = os.read(self.fd, 65536)
+            except BlockingIOError:
+                break
+            except InterruptedError:
+                continue
+            if not buf:
+                break
+            off, n = 0, len(buf)
+            while off + 16 <= n:
+                wd, mask, _cookie, ln = struct.unpack_from('iIII', buf, off)
+                name = buf[off + 16:off + 16 + ln].split(b'\0', 1)[0] if ln else b''
+                off += 16 + ln
+                out.append((wd, mask, name))
+        return out
+
+
+class Hold:
+    """One process holding (something of) one card."""
+    __slots__ = ('card', 'pid', 'pst', 'uid', 'user', 'comm', 'parent', 'nodes', 'lock', 'cur', 'start', 'seen',
+                 'late', 'pre', 'mapped')
+
+    def __init__(self, card, pid, pst, uid, user, comm, parent, start, late=False, pre=False):
+        self.card, self.pid, self.pst = card, pid, pst
+        self.uid, self.user, self.comm, self.parent = uid, user, comm, parent
+        self.nodes = set()      # nodes held at any time
+        self.lock = False       # held the lock at any time
+        self.cur = set()        # what it holds now: 'mgmt', 'ops', 'lock'
+        self.start = start
+        self.seen = start       # wall time of the last scan that saw it holding
+        self.late, self.pre, self.mapped = late, pre, False
+
+
+class Batch:
+    """The open and close events read since the last scan, per (card, kind)."""
+
+    def __init__(self):
+        self.nopen = {}
+        self.nclose = {}
+        self.opens = {}         # (card, kind) -> wall times (the first MAX_TIMES)
+        self.last_open = {}     # (card, kind) -> wall time of the last open (kept past MAX_TIMES)
+        self.closes = {}
+        self.card_first = {}    # card -> wall time of its first event
+        self.first_boot = None  # boottime of the first event (for the debounce)
+        self.first_node_b = None  # boottime of the first node event or overflow (lock-only batches wait longer)
+        self.overflow = False
+        self.carried = {}       # (card, kind) -> open times carried from the previous batch (set by account())
+
+    def add(self, ck, is_open, t, b):
+        n, ts = (self.nopen, self.opens) if is_open else (self.nclose, self.closes)
+        n[ck] = n.get(ck, 0) + 1
+        if is_open:
+            self.last_open[ck] = t
+        lst = ts.setdefault(ck, [])
+        if len(lst) < MAX_TIMES:
+            lst.append(t)
+        self.card_first.setdefault(ck[0], t)
+        if self.first_boot is None:
+            self.first_boot = b
+        if ck[1] != 'lock' and self.first_node_b is None:
+            self.first_node_b = b
+
+    def pending(self):
+        return self.first_boot is not None
+
+    def shift(self, d):
+        for ts in (self.opens, self.closes, self.carried):
+            for k in ts:
+                ts[k] = [x + d for x in ts[k]]
+        for k in self.card_first:
+            self.card_first[k] += d
+        for k in self.last_open:
+            self.last_open[k] += d
+
+
+class Daemon:
+    def __init__(self, a):
+        self.a = a
+        self.host = socket.gethostname()
+        try:
+            self.boot_id = read_bytes('/proc/sys/kernel/random/boot_id').decode().strip()
+        except OSError:
+            self.boot_id = ''
+        self.selfpid = os.getpid()
+        self.skip = a.skip_counters
+        self.skip_pci = a.skip_pci
+        self.known = {}         # path -> (card, kind): the watched paths, and node paths seen before
+        self.cardset = set()    # the cards that have a node now (a lock file counts only for one of them)
+        self.dev_dirs, self.lock_dirs = set(), set()
+        self.watch = {}         # path -> [wd, st_dev, st_ino] of the current inode
+        self.wds = {}           # wd -> path, for file watches (an old inode keeps its wd until IN_IGNORED)
+        self.dwds = {}          # wd -> directory
+        self.needles = []       # node basenames as bytes, to skip maps files quickly
+        self.holds = {}         # (pid, starttime, card) -> Hold
+        self.carry = {}         # (card, kind) -> {'o': [open times], 'n': int, 'g': int}, for one batch
+        self.pending = {}       # card -> an unseen record not written yet (a later one may join it)
+        self.batch = Batch()
+        self.ino = None
+        self.logins = {}        # uid -> (login, looked-up-at)
+        self.fd, self.fd_date, self.fd_path = None, None, None
+        self.counters = {}      # (card, pci) -> (boottime, mgmt, ops)
+        self.now_sig = None
+        self.open_sig = None
+        self.open_b = -1e9
+        self.open_dirty = False
+        self.stop_sig = None
+        self.want_maps = False
+        self.maps_at = -1e9
+        self.maps_due = None
+        self.reglob_at = None
+        self.scan_asap = False
+        self.errors = {}
+        self.retention_date = None
+        self.paused = None      # why records are not written (the log over --max-log-mb, the disk nearly full)
+        self.instance_fd = None
+        self.started = False
+        self.sees_all = None
+        self.started_at = time.time()
+        self.off = self.started_at - boottime()
+        self.last_scan_b = -1e9
+        self.last_scan_cpu = 0.0    # CPU seconds (user + system: the /proc reads) of the last scan
+        self.stats = {'scans': 0, 'events': 0, 'overflows': 0, 'unseen': 0, 'last_scan_ms': 0.0,
+                      'max_scan_ms': 0.0, 'last_scan_cpu_ms': 0.0, 'fd_truncated': 0, 'maps_truncated': 0,
+                      'holds_dropped': 0, 'dropped': 0}
+        self.stdout = a.stdout
+        self.run_dir = a.run_dir if (a.run_dir_given or not a.stdout) else None
+        self.verbose = a.verbose or a.foreground
+
+    # ---------------------------------------------------------------- output
+    def log(self, msg):
+        print('et-usaged: ' + msg, file=sys.stderr, flush=True)
+
+    def vlog(self, msg):
+        if self.verbose:
+            self.log(time.strftime('%H:%M:%S ') + msg)
+
+    def error(self, kind, msg):
+        """An error message at most once a minute per kind."""
+        b = boottime()
+        if b - self.errors.get(kind, -1e9) >= 60:
+            self.errors[kind] = b
+            self.log(msg)
+
+    def emit(self, rec):
+        line = json.dumps(rec, separators=(',', ':')) + '\n'
+        if self.stdout:
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            return
+        if self.paused:
+            self.stats['dropped'] += 1
+            return
+        t = rec.get('at', rec.get('end'))
+        date = time.strftime('%Y-%m-%d', time.localtime(t))
+        try:
+            if self.fd is None or date != self.fd_date:
+                self.close_log()
+                path = os.path.join(self.a.log_dir, date + '.jsonl')
+                self.fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT | os.O_CLOEXEC, 0o644)
+                self.fd_date, self.fd_path = date, path
+            os.write(self.fd, line.encode())
+        except OSError as e:
+            self.error('write', 'cannot write the log in %s: %s' % (self.a.log_dir, e))
+            self.close_log()
+
+    def close_log(self):
+        if self.fd is not None:
+            try:
+                os.close(self.fd)
+            except OSError:
+                pass
+        self.fd = self.fd_date = self.fd_path = None
+
+    def check_log_file(self):
+        """Reopen the day's file if someone removed it under us."""
+        if self.fd is not None:
+            try:
+                if os.fstat(self.fd).st_nlink == 0:
+                    self.close_log()
+            except OSError:
+                self.close_log()
+
+    def log_files(self):
+        """The daily files, oldest first, as [(name, size)]; None if the directory cannot be listed."""
+        try:
+            names = sorted(n for n in os.listdir(self.a.log_dir) if re.fullmatch(r'\d{4}-\d\d-\d\d\.jsonl', n))
+        except OSError as e:
+            self.error('retention', 'cannot list %s: %s' % (self.a.log_dir, e))
+            return None
+        out = []
+        for n in names:
+            try:
+                out.append((n, os.stat(os.path.join(self.a.log_dir, n)).st_size))
+            except OSError:
+                pass
+        return out
+
+    def remove_log_file(self, name, why):
+        try:
+            os.unlink(os.path.join(self.a.log_dir, name))
+            self.log('removed %s (%s)' % (name, why))
+            return True
+        except OSError as e:
+            self.error('retention', 'cannot remove %s: %s' % (name, e))
+            return False
+
+    def retention(self):
+        """Once a day: remove the daily files older than --keep-days, but never one of the newest --keep-days files,
+        so a clock far ahead (a bad RTC before chrony steps it) cannot empty the log."""
+        today = time.strftime('%Y-%m-%d')
+        if self.stdout or today == self.retention_date:
+            return
+        self.retention_date = today
+        cutoff = time.strftime('%Y-%m-%d', time.localtime(time.time() - self.a.keep_days * 86400))
+        files = self.log_files()
+        if not files:
+            return
+        newest = {n for n, _ in files[-self.a.keep_days:]}
+        for name, _ in files:
+            if name[:10] < cutoff and name not in newest:
+                self.remove_log_file(name, 'older than %d days' % self.a.keep_days)
+
+    def check_space(self):
+        """Every minute: keep the log directory under --max-log-mb, removing the oldest daily files (never today's,
+        never the one being written); if that is not enough, or the filesystem has less than --min-free-mb free,
+        write no records (they are counted in stats.dropped) until there is room. Low free space never removes a
+        file: the disk is shared (on aifoundry1 /var/log and /home are one ZFS pool, 95% full), and a user who fills
+        it must not erase the history, which is a few MB at most and would free nothing that matters."""
+        if self.stdout:
+            return
+        files = self.log_files()
+        if files is None:
+            return
+        try:
+            sv = os.statvfs(self.a.log_dir)
+            free = sv.f_bavail * sv.f_frsize
+        except OSError:
+            free = float('inf')
+        cap, floor = self.a.max_log_mb * MB, self.a.min_free_mb * MB
+        total = sum(s for _, s in files)
+        keep = {time.strftime('%Y-%m-%d'), self.fd_date, files[-1][0][:10] if files else None}
+        for name, size in files:
+            if total <= cap:
+                break
+            if name[:10] in keep:
+                continue
+            why = 'the log directory held %.0f MB, over --max-log-mb %g' % (total / MB, self.a.max_log_mb)
+            if self.remove_log_file(name, why):
+                total -= size
+                free += size
+        if total > cap:
+            why = 'the log directory holds %.0f MB (--max-log-mb %g)' % (total / MB, self.a.max_log_mb)
+        elif free < floor:
+            why = 'the filesystem of %s has %.0f MB free (--min-free-mb %g)' % (self.a.log_dir, free / MB,
+                                                                               self.a.min_free_mb)
+        else:
+            why = None
+        if why and not self.paused:
+            self.log('NOT WRITING RECORDS: %s; they are counted in now.json (stats.dropped) until there is room' % why)
+        elif self.paused and not why:
+            self.log('writing records again (%d dropped)' % self.stats['dropped'])
+        self.paused = why
+
+    def hold_entry(self, h, now=True):
+        kinds = h.cur if now else h.nodes | ({'lock'} if h.lock else set())
+        d = {'card': h.card, 'pid': h.pid, 'user': h.user, 'uid': h.uid, 'comm': h.comm, 'parent': h.parent,
+             'nodes': sorted(kinds & NODE_KINDS), 'lock': 'lock' in kinds, 'start': r3(h.start)}
+        for f in ('pre', 'late', 'mapped'):
+            if getattr(h, f):
+                d[f] = True
+        return d
+
+    def hold_record(self, h, end, cut=False):
+        rec = {'t': 'hold', 'v': FORMAT, 'card': h.card, 'pid': h.pid, 'user': h.user, 'uid': h.uid,
+               'comm': h.comm, 'parent': h.parent, 'nodes': sorted(h.nodes), 'lock': h.lock,
+               'start': r3(h.start), 'end': r3(max(end, h.start))}
+        if h.late:
+            rec['late'] = True
+        if h.pre:
+            rec['pre'] = True
+        if h.mapped:
+            rec['map'] = True
+        if cut:
+            rec['cut'] = True
+        return rec
+
+    def write_file(self, path, doc):
+        """Write a JSON document atomically (tmp + rename), mode 0644. True on success."""
+        tmp = path + '.tmp'
+        try:
+            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_CLOEXEC, 0o644)
+            try:
+                os.write(fd, (json.dumps(doc, separators=(',', ':')) + '\n').encode())
+            finally:
+                os.close(fd)
+            os.replace(tmp, path)
+            return True
+        except OSError as e:
+            self.error('write ' + path, 'cannot write %s: %s' % (path, e))
+            return False
+
+    def write_now(self, force=False):
+        self.open_dirty = True
+        if self.run_dir is None:
+            return
+        holds = sorted((self.hold_entry(h) for h in self.holds.values()),
+                       key=lambda d: (d['card'], d['start'], d['pid']))
+        sig = json.dumps(holds, sort_keys=True)
+        if not force and sig == self.now_sig:
+            return
+        doc = {'v': FORMAT, 'host': self.host, 'at': r3(time.time()), 'started_at': r3(self.started_at),
+               'pid': self.selfpid, 'boot': self.boot_id, 'cards': self.cards(), 'holds': holds[:NOW_MAX_HOLDS],
+               'sees_all': self.sees_all, 'stats': dict(self.stats)}
+        if len(holds) > NOW_MAX_HOLDS:
+            doc['holds_more'] = len(holds) - NOW_MAX_HOLDS
+        if self.paused:
+            doc['paused'] = self.paused
+        if self.write_file(os.path.join(self.run_dir, 'now.json'), doc):
+            self.now_sig = sig
+
+    def remove_now(self):
+        if self.run_dir is not None:
+            try:
+                os.unlink(os.path.join(self.run_dir, 'now.json'))
+            except OSError:
+                pass
+
+    # ---------------------------------------------------------------- open holds kept for a crash
+    def open_path(self):
+        return os.path.join(self.a.log_dir, 'open.json')
+
+    def write_open(self, force=False):
+        """The open holds, as the hold records they will be, in <log dir>/open.json: if this process dies without
+        SIGTERM (SIGKILL, the OOM killer, a host hang), the next start writes them with "lost_end": true and end =
+        this file's time. Rewritten on a change (at most once a second) and every minute."""
+        self.open_dirty = False             # first: the main loop waits on it (a busy loop otherwise, in --stdout)
+        if self.stdout or not self.started:
+            return
+        recs = []
+        for h in sorted(self.holds.values(), key=lambda h: (h.card, h.start, h.pid)):
+            r = self.hold_record(h, h.start)
+            del r['end']
+            recs.append(r)
+        sig = json.dumps(recs, sort_keys=True)
+        if not force and sig == self.open_sig:
+            return
+        doc = {'v': FORMAT, 'at': r3(time.time()), 'pid': self.selfpid, 'boot': self.boot_id, 'holds': recs,
+               'pending': [self.unseen_record(p) for _, p in sorted(self.pending.items())]}
+        if self.write_file(self.open_path(), doc):
+            self.open_sig = sig
+            self.open_b = boottime()
+
+    def remove_open(self):
+        if not self.stdout:
+            try:
+                os.unlink(self.open_path())
+            except OSError:
+                pass
+
+    def recover(self):
+        """The records of a previous run that died without SIGTERM, from its open.json: each hold it had open ends at
+        the file's time with "lost_end": true; its unseen records not written yet are written as they were."""
+        if self.stdout:
+            return []
+        path = self.open_path()
+        try:
+            doc = json.loads(read_bytes(path))
+        except FileNotFoundError:
+            return []
+        except (OSError, ValueError) as e:
+            self.log('ignoring %s: %s' % (path, e))
+            return []
+        num = (int, float)
+        if not (isinstance(doc, dict) and doc.get('v') == FORMAT and isinstance(doc.get('at'), num)):
+            self.log('ignoring %s: not a version %d file' % (path, FORMAT))
+            return []
+        out = []
+        for r in doc.get('holds') or []:
+            if (isinstance(r, dict) and r.get('t') == 'hold' and isinstance(r.get('card'), int)
+                    and isinstance(r.get('start'), num) and isinstance(r.get('user'), str)):
+                r = dict(r)
+                r['end'] = r3(max(float(doc['at']), float(r['start'])))
+                r['lost_end'] = True
+                out.append(r)
+        for r in doc.get('pending') or []:
+            if (isinstance(r, dict) and r.get('t') == 'hold' and isinstance(r.get('card'), int)
+                    and isinstance(r.get('start'), num) and isinstance(r.get('end'), num)):
+                out.append(r)
+        return out
+
+    def claim_log_dir(self):
+        """Only one et-usaged writes a log directory (an flock on <log dir>/.et-usaged.lock). Returns why not, or None.
+        Root never writes the service's directory: a file it made there, the service could not append to."""
+        if self.stdout:
+            return None
+        d = self.a.log_dir
+        try:
+            st = os.stat(d)
+        except OSError as e:
+            return 'cannot use the log directory %s: %s' % (d, e.strerror)
+        if os.geteuid() == 0 and st.st_uid != 0:
+            return ('refusing to write %s as root: it belongs to uid %d (the service\'s user). Start the service '
+                    '(systemctl start et-usaged), or use --once, or --stdout' % (d, st.st_uid))
+        try:
+            fd = os.open(os.path.join(d, '.et-usaged.lock'), os.O_RDONLY | os.O_CREAT | os.O_CLOEXEC, 0o644)
+        except OSError as e:
+            return 'cannot use the log directory %s: %s' % (d, e.strerror)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            os.close(fd)
+            return 'another et-usaged is writing %s (the service?): exiting' % d
+        self.instance_fd = fd
+        return None
+
+    def probe_access(self):
+        """Whether this process can read other users' fd links (so the scan sees every process): root, or
+        CAP_DAC_READ_SEARCH and CAP_SYS_PTRACE. Tried on pid 1."""
+        try:
+            dfd = os.open('/proc/1/fd', os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+        except OSError:
+            return False
+        try:
+            with os.scandir(dfd) as it:
+                for e in it:
+                    os.readlink(e.name, dir_fd=dfd)
+                    return True
+            return True
+        except OSError:
+            return False
+        finally:
+            os.close(dfd)
+
+    def cards(self):
+        return sorted({ck[0] for p, ck in self.known.items() if p in self.watch})
+
+    # ---------------------------------------------------------------- watches
+    def match_deleted(self, target):
+        """The card and kind of a link that reads '<path> (deleted)': a node or lock file removed while held."""
+        p = target[:-len(DELETED)]
+        r = self.known.get(p)
+        if r is not None:
+            return r
+        d, b = os.path.split(p)
+        if d in self.dev_dirs:
+            m = DEV_RE.fullmatch(b)
+            if m:
+                return int(m.group(1)), m.group(2)
+        if d in self.lock_dirs:
+            m = LOCK_RE.fullmatch(b)
+            if m and int(m.group(1)) in self.cardset:
+                return int(m.group(1)), 'lock'
+        return None
+
+    def reglob(self, watch=True):
+        """Find the nodes, and the lock files of the cards that have one; watch each current inode. Returns (added,
+        gone) paths. Lock names are never globbed: /run/lock is world-writable, and any user could make
+        etsoc-shire<N>.lock names (or symlinks) by the thousand. A path counts only if lstat says it is a regular
+        file (or, for a node, a character device), never a symlink."""
+        paths, sts = {}, {}
+        for g in self.a.dev_glob:
+            self.dev_dirs.add(os.path.dirname(g))
+            for p in glob.glob(g):
+                m = DEV_RE.fullmatch(os.path.basename(p))
+                if m:
+                    ck = (int(m.group(1)), m.group(2))
+                    st = self.lstat_ok(p, ck)
+                    if st is not None:
+                        paths[p], sts[p] = ck, st
+        cards = sorted({ck[0] for ck in paths.values()})
+        if len(cards) > MAX_CARDS:
+            self.error('cards', 'nodes of %d card numbers found: watching the first %d' % (len(cards), MAX_CARDS))
+            cards = cards[:MAX_CARDS]
+            paths = {p: ck for p, ck in paths.items() if ck[0] in set(cards)}
+        for g in self.a.lock_glob:
+            d, pat = os.path.split(g)
+            self.lock_dirs.add(d)
+            for card in cards:
+                name = 'etsoc-shire%d.lock' % card
+                if fnmatch.fnmatchcase(name, pat):
+                    p = os.path.join(d, name)
+                    st = self.lstat_ok(p, (card, 'lock'))
+                    if st is not None:
+                        paths[p], sts[p] = (card, 'lock'), st
+        self.cardset = set(cards)
+        added, gone, ok = [], [], set()
+        for p, ck in sorted(paths.items()):
+            st = sts[p]
+            self.known[p] = ck
+            ok.add(p)
+            if not watch:
+                self.watch[p] = [None, st.st_dev, st.st_ino]
+                continue
+            w = self.watch.get(p)
+            if w and (w[1], w[2]) == (st.st_dev, st.st_ino) and w[0] in self.wds:
+                continue
+            try:
+                wd = self.ino.add(p, FILE_MASK)
+            except OSError as e:
+                self.error('watch ' + p, 'cannot watch %s: %s' % (p, e))
+                ok.discard(p)
+                continue
+            self.watch[p] = [wd, st.st_dev, st.st_ino]
+            self.wds[wd] = p
+            added.append(p)
+        for p in sorted(self.watch):
+            if p not in ok:
+                # The old inode keeps its watch until IN_IGNORED: a process still holding it closes it there.
+                del self.watch[p]
+                gone.append(p)
+        # Forget lock paths no longer watched; node paths stay known (a held node's link reads '<path> (deleted)').
+        for p in [p for p, ck in self.known.items() if ck[1] == 'lock' and p not in self.watch]:
+            del self.known[p]
+        self.needles = sorted({os.path.basename(p).encode() for p, ck in self.known.items() if ck[1] != 'lock'})
+        if watch:
+            for d in sorted(self.dev_dirs | self.lock_dirs):
+                if d in self.dwds.values() or not os.path.isdir(d):
+                    continue
+                try:
+                    self.dwds[self.ino.add(d, DIR_MASK)] = d
+                except OSError as e:
+                    self.error('watch ' + d, 'cannot watch the directory %s: %s' % (d, e))
+        return added, gone
+
+    def lstat_ok(self, p, ck):
+        """lstat of a node or lock path (never follows a symlink, never opens), or None: missing, or not a regular
+        file (a node may also be a character device; a symlink or directory never counts)."""
+        try:
+            st = os.lstat(p)
+        except OSError:
+            return None
+        if stat.S_ISREG(st.st_mode) or (ck[1] != 'lock' and stat.S_ISCHR(st.st_mode)):
+            return st
+        self.error('type ' + p, 'not watching %s: not a regular file%s' % (p, '' if ck[1] == 'lock' else
+                                                                          ' or a device node'))
+        return None
+
+    def want_reglob(self, b, delay=0.2):
+        at = b + delay
+        if self.reglob_at is None or at < self.reglob_at:
+            self.reglob_at = at
+
+    def read_events(self):
+        evs = self.ino.read()
+        if not evs:
+            return
+        t, b = time.time(), boottime()
+        self.stats['events'] += len(evs)
+        for wd, mask, name in evs:
+            if mask & IN_Q_OVERFLOW:
+                self.batch.overflow = True
+                if self.batch.first_boot is None:
+                    self.batch.first_boot = b
+                if self.batch.first_node_b is None:
+                    self.batch.first_node_b = b
+                self.stats['overflows'] += 1
+                continue
+            p = self.wds.get(wd)
+            if p is not None:
+                ck = self.known.get(p)
+                if ck is not None:
+                    if mask & IN_OPEN:
+                        self.batch.add(ck, True, t, b)
+                    if mask & IN_CLOSE:
+                        self.batch.add(ck, False, t, b)
+                if mask & (IN_ATTRIB | IN_DELETE_SELF | IN_MOVE_SELF):
+                    self.want_reglob(b)
+                if mask & IN_IGNORED:
+                    del self.wds[wd]
+                    self.want_reglob(b)
+                continue
+            d = self.dwds.get(wd)
+            if d is not None:
+                if mask & IN_IGNORED:
+                    del self.dwds[wd]
+                    self.want_reglob(b, 1.0)
+                    continue
+                nm = os.fsdecode(name)
+                if d in self.dev_dirs and DEV_RE.fullmatch(nm):
+                    self.want_reglob(b)
+                elif d in self.lock_dirs:
+                    m = LOCK_RE.fullmatch(nm)
+                    if m and int(m.group(1)) in self.cardset:      # other names there are anyone's: ignored
+                        self.want_reglob(b)
+
+    # ---------------------------------------------------------------- the scan
+    def scan(self, maps=False):
+        """Every process's fd links (and, when asked, the maps of those with no match) against the watched paths.
+
+        Returns found {(pid, starttime): {card: {kinds}}} and info {(pid, starttime): (comm, ppid, uid, parent)};
+        uid and parent are read only for a process not already known as a holder. A process's fd table is streamed
+        and read up to --max-fds entries; holders beyond MAX_HOLDS that are not holders already are counted only."""
+        known = self.known
+        selfpid = str(self.selfpid)
+        max_fds = self.a.max_fds
+        holder_pids = {str(k[0]) for k in self.holds}
+        hits = {}
+        rest = []
+        dropped = 0
+        try:
+            procs = os.scandir('/proc')
+        except OSError as e:
+            self.error('proc', 'cannot list /proc: %s' % e)
+            return {}, {}
+        with procs:
+            for pe in procs:
+                name = pe.name
+                if not name.isdigit() or name == selfpid:
+                    continue
+                try:
+                    dfd = os.open('/proc/' + name + '/fd', os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+                except OSError:
+                    continue
+                got = None
+                try:
+                    with os.scandir(dfd) as fds:        # streamed: a million fds cost no memory
+                        n = 0
+                        for e in fds:
+                            n += 1
+                            if n > max_fds:
+                                self.stats['fd_truncated'] += 1
+                                self.error('fds', 'pid %s has more than %d open files: only its first %d were '
+                                                  'checked (--max-fds)' % (name, max_fds, max_fds))
+                                break
+                            try:
+                                target = os.readlink(e.name, dir_fd=dfd)
+                            except OSError:
+                                continue
+                            if target[:1] != '/':           # socket:[..], pipe:[..], anon_inode:..
+                                continue
+                            r = known.get(target)
+                            if r is None:
+                                if not target.endswith(DELETED):
+                                    continue
+                                r = self.match_deleted(target)
+                                if r is None:
+                                    continue
+                            if r[1] == 'lock' and fd_locked(name, e.name) is False:
+                                continue        # waiting in flock, or the file open without the lock: not a holder
+                            if got is None:
+                                got = set()
+                            got.add(r)
+                except OSError:
+                    pass
+                finally:
+                    os.close(dfd)
+                if got is not None:
+                    if len(hits) >= MAX_HOLDS and name not in holder_pids:
+                        dropped += 1
+                    else:
+                        hits[name] = got
+                elif maps:
+                    rest.append(name)
+        for name in rest:
+            r = self.maps_of(name)
+            if r:
+                if len(hits) >= MAX_HOLDS and name not in holder_pids:
+                    dropped += 1
+                else:
+                    hits[name] = r
+        if dropped:
+            self.stats['holds_dropped'] += dropped
+            self.error('holds', '%d more processes hold a card than the %d tracked: not logged' % (dropped, MAX_HOLDS))
+        found, info = {}, {}
+        for name, rs in hits.items():
+            st = read_stat(name)
+            if st is None:
+                continue
+            comm, ppid, pst = st
+            pid = int(name)
+            cards = {}
+            for card, kind in rs:
+                cards.setdefault(card, set()).add(kind)
+            key = (pid, pst)
+            found[key] = cards
+            if any((pid, pst, c) not in self.holds for c in cards):
+                info[key] = (comm, ppid, read_uid(name), read_comm(ppid))
+            else:
+                info[key] = (comm, ppid, None, None)
+        return found, info
+
+    def maps_of(self, pid):
+        """The (card, kind) of nodes mapped in /proc/<pid>/maps (a node can stay held through a mapping after its
+        fd is closed; the driver releases it only when the mapping goes). Streamed in MAPS_CHUNK pieces and read up
+        to MAX_MAPS bytes (counted in stats.maps_truncated): read whole, the maps of one user's process with 100,000
+        mappings of a long path took 200 MB, over the unit's MemoryMax, and every start sweeps the maps."""
+        if not self.needles:
+            return set()
+        try:
+            f = open('/proc/%s/maps' % pid, 'rb', buffering=0)
+        except OSError:
+            return set()
+        r = set()
+        tail, total = b'', 0
+        with f:
+            while True:
+                try:
+                    chunk = f.read(MAPS_CHUNK)
+                except OSError:
+                    chunk = b''
+                total += len(chunk)
+                data = tail + chunk
+                if chunk:
+                    cut = data.rfind(b'\n') + 1        # whole lines now; the cut line's start waits for the next piece
+                    data, tail = data[:cut], data[cut:]
+                    if len(tail) > MAPS_CHUNK:         # no maps line is this long (PATH_MAX is 4096)
+                        tail = b''
+                if data and any(n in data for n in self.needles):
+                    self.maps_lines(data, r)
+                if not chunk:
+                    break
+                if total >= MAX_MAPS:
+                    self.stats['maps_truncated'] += 1
+                    self.error('maps', 'pid %s maps more than %d MB: only its first %d MB were searched'
+                               % (pid, MAX_MAPS // MB, MAX_MAPS // MB))
+                    break
+        return r
+
+    def maps_lines(self, data, r):
+        for line in data.split(b'\n'):
+            parts = line.split(None, 5)
+            if len(parts) < 6:
+                continue
+            p = parts[5].decode('utf-8', 'replace')
+            m = self.known.get(p)
+            if m is None and p.endswith(DELETED):
+                m = self.match_deleted(p)
+            if m is not None and m[1] in NODE_KINDS:
+                r.add(m)
+
+    def login(self, uid):
+        if uid is None:
+            return '?'
+        hit = self.logins.get(uid)
+        b = boottime()
+        if hit and (hit[1] is None or b - hit[1] < 60):
+            return hit[0]
+        try:
+            name = printable(pwd.getpwuid(uid).pw_name)
+            self.logins[uid] = (name, None)
+        except (KeyError, OSError):
+            name = str(uid)
+            self.logins[uid] = (name, b)     # look again in a minute (an account made after we started)
+        return name
+
+    # ---------------------------------------------------------------- holds
+    def apply(self, found, info, batch, t, initial=False):
+        """Compare one scan with the holds we know: start new holds, end the ones that went, and account for node
+        opens no scan saw. Returns True if the set of holds changed."""
+        before = {k: set(h.cur) for k, h in self.holds.items()}
+        cur = {}
+        for (pid, pst), cards in found.items():
+            for card, kinds in cards.items():
+                cur[(pid, pst, card)] = set(kinds)
+        # A node holder whose fd went with no close event may still hold the node through a mapping.
+        for k, kinds in before.items():
+            miss = (kinds & NODE_KINDS) - cur.get(k, set())
+            if miss and not any(batch.nclose.get((k[2], m)) for m in miss):
+                got = self.mapped(k[0], k[1], k[2])
+                if got:
+                    cur.setdefault(k, set()).update(got)
+                    self.holds[k].mapped = True
+        unseen = {}
+        if not initial:
+            self.account(batch, before, cur, unseen)
+        changed = False
+        for k, kinds in cur.items():
+            h = self.holds.get(k)
+            if h is None:
+                pid, pst, card = k
+                inf = info.get((pid, pst))
+                if inf is None:
+                    continue
+                comm, ppid, uid, parent = inf
+                if uid is None:
+                    uid = read_uid(pid)
+                if parent is None:
+                    parent = read_comm(ppid)
+                if initial:
+                    start, late = self.started_at, False
+                else:
+                    start, late = self.start_time(card, kinds, batch, t)
+                h = Hold(card, pid, pst, uid, self.login(uid), comm, parent, start, late=late, pre=initial)
+                self.holds[k] = h
+                changed = True
+                self.vlog('card %d: %s %s (pid %d, parent %s) holds %s%s%s' % (
+                    card, h.user, comm, pid, parent, '+'.join(sorted(kinds)),
+                    ' (held at start)' if initial else '', ' (late)' if late else ''))
+            elif kinds != h.cur:
+                changed = True
+            h.cur = kinds
+            h.nodes |= kinds & NODE_KINDS
+            if 'lock' in kinds:
+                h.lock = True
+            h.seen = t
+            inf = info.get((k[0], k[1]))
+            if inf and inf[0] and inf[0] != h.comm:
+                h.comm = inf[0]          # it ran exec: keep the program it runs now
+                changed = True
+        for card, ent in unseen.items():
+            # a hint, not the user: every process holding this card's lock around the event belongs to one user
+            users = {h.user for k, h in self.holds.items() if k[2] == card
+                     and ('lock' in h.cur or 'lock' in before.get(k, ()))}
+            if len(users) == 1:
+                ent.append(users.pop())
+        for k in [k for k in self.holds if k not in cur]:
+            h = self.holds.pop(k)
+            end = self.end_time(h, batch, t)
+            self.emit(self.hold_record(h, end))
+            changed = True
+            self.vlog('card %d: %s %s (pid %d) ended after %.3f s' % (h.card, h.user, h.comm, h.pid, end - h.start))
+        for card in sorted(unseen):
+            n, s, e, kinds = unseen[card][:4]
+            self.stats['unseen'] += n
+            self.unseen_add(card, n, s, max(e, s), kinds, unseen[card][4] if len(unseen[card]) > 4 else None)
+            self.vlog('card %d: %d open(s) of %s that no scan saw' % (card, n, '+'.join(sorted(kinds))))
+        return changed
+
+    def unseen_record(self, p):
+        rec = {k: v for k, v in p.items() if not k.startswith('_')}
+        rec['start'], rec['end'] = r3(rec['start']), r3(rec['end'])
+        return rec
+
+    def unseen_add(self, card, n, s, e, kinds, hint):
+        """An unseen record, joined to the card's pending one when it follows it within UNSEEN_GAP (same hint, at
+        most UNSEEN_SPAN long): a poller or a queue of short runs writes one record a burst, not one a scan."""
+        p = self.pending.get(card)
+        if p is not None and (s - p['end'] > UNSEEN_GAP or p.get('lock_user') != hint
+                              or e - p['start'] > UNSEEN_SPAN):
+            self.emit(self.unseen_record(self.pending.pop(card)))
+            p = None
+        b = boottime()
+        if p is None:
+            p = {'t': 'hold', 'v': FORMAT, 'card': card, 'pid': None, 'user': '?', 'uid': None, 'comm': '?',
+                 'parent': '?', 'nodes': [], 'lock': False, 'start': s, 'end': e, 'unseen': True, 'opens': 0,
+                 '_first_b': b}
+            if hint is not None:
+                p['lock_user'] = hint
+            self.pending[card] = p
+        p['opens'] += n
+        p['start'] = min(p['start'], s)
+        p['end'] = max(p['end'], e)
+        p['nodes'] = sorted(set(p['nodes']) | set(kinds))
+        p['_due_b'] = min(b + UNSEEN_WAIT, p['_first_b'] + UNSEEN_SPAN)
+
+    def unseen_due(self):
+        return min((p['_due_b'] for p in self.pending.values()), default=None)
+
+    def flush_unseen(self, force=False):
+        b = boottime()
+        for card in sorted(self.pending):
+            if force or b >= self.pending[card]['_due_b']:
+                self.emit(self.unseen_record(self.pending.pop(card)))
+
+    def account(self, batch, before, cur, unseen):
+        """Node opens that no scan saw: per (card, node), with the batch's open (a) and close (c) event counts and
+        the holders that appeared (n) and went (g), a - n opens found no holder and c - g closes no holder that went;
+        min of the two opened and closed between two scans. The unmatched part of each count is carried into the
+        next batch once, for an event that happened while a scan was running. A node opens once at a time (the
+        driver answers EBUSY, which makes no event), so while one process holds it at both scans, a close and an open
+        of it are that process reopening it, not another run. Lock files are left out: every failed `flock -n`
+        opens and closes them."""
+        carry, self.carry = self.carry, {}
+        batch.carried = {ck: list(v.get('o', ())) for ck, v in carry.items()}
+        if batch.overflow:
+            return                  # the counts are incomplete: account nothing, carry nothing
+        newc, gonec, stay = {}, {}, set()
+        for k, kinds in cur.items():
+            for kind in (kinds & NODE_KINDS) - before.get(k, set()):
+                newc[(k[2], kind)] = newc.get((k[2], kind), 0) + 1
+            for kind in kinds & before.get(k, set()) & NODE_KINDS:
+                stay.add((k[2], kind))
+        for k, kinds in before.items():
+            for kind in (kinds & NODE_KINDS) - cur.get(k, set()):
+                gonec[(k[2], kind)] = gonec.get((k[2], kind), 0) + 1
+        cks = {ck for ck in list(batch.nopen) + list(batch.nclose) if ck[1] in NODE_KINDS}
+        cks |= set(carry) | set(newc) | set(gonec)
+        for ck in cks:
+            co = carry.get(ck, {})
+            own_n = batch.nopen.get(ck, 0)
+            opens_t = sorted(co.get('o', []) + batch.opens.get(ck, []))
+            a = own_n + len(co.get('o', ()))
+            n = newc.get(ck, 0) + co.get('n', 0)
+            c = batch.nclose.get(ck, 0)
+            g = gonec.get(ck, 0) + co.get('g', 0)
+            if ck in stay:
+                pairs = max(0, min(a - n, c - g))       # its holder's own close and reopen
+                a -= pairs
+                c -= pairs
+            u = max(0, min(a - n, c - g))
+            if u:
+                # A holder still there at the scan opened last, so the unmatched opens are the earliest ones.
+                closes_t = sorted(batch.closes.get(ck, []))
+                first = opens_t[0] if opens_t else (closes_t[0] if closes_t else time.time())
+                last_open = opens_t[min(u, len(opens_t)) - 1] if opens_t else first
+                after = [x for x in closes_t if x >= last_open]
+                end = after[0] if after else (closes_t[-1] if closes_t else first)
+                ent = unseen.setdefault(ck[0], [0, first, end, set()])
+                ent[0] = max(ent[0], u)
+                ent[1] = min(ent[1], first)
+                ent[2] = max(ent[2], end)
+                ent[3].add(ck[1])
+            nxt = {}
+            left_o = min(own_n, a - n - u)
+            if left_o > 0:
+                nxt['o'] = sorted(batch.opens.get(ck, []))[-left_o:][-100:]
+                self.want_maps = True       # an open with no holder found and no close: look in the maps
+            if n - a > 0:
+                nxt['n'] = min(newc.get(ck, 0), n - a)
+            if g - c > 0:
+                nxt['g'] = min(gonec.get(ck, 0), g - c)
+            if nxt:
+                self.carry[ck] = nxt
+
+    def start_time(self, card, kinds, batch, t):
+        """(start, late): when it opened the first of the nodes it holds: a node opens once at a time, so the one
+        holding it now opened it last (earlier opens in the batch, or carried from the one before, were others' quick
+        runs); else the first open of the lock (a program inherits the lock fd from flock: the lock's open is
+        flock's); else the card's first event in this batch; else the scan itself (a holder whose open no event
+        showed: late)."""
+        ts = []
+        for kind in kinds & NODE_KINDS:
+            x = batch.last_open.get((card, kind))
+            if x is None and batch.carried.get((card, kind)):
+                x = max(batch.carried[(card, kind)])
+            if x is not None:
+                ts.append(x)
+        if not ts:
+            for kind in kinds - NODE_KINDS:
+                ts += batch.opens.get((card, kind), [])[:1]
+        if ts:
+            return min(min(ts), t), False
+        f = batch.card_first.get(card)
+        if f is not None:
+            return min(f, t), False
+        return t, True
+
+    def end_time(self, h, batch, t):
+        """When it stopped holding: its own paths' close events after it was last seen; else the card's last close in
+        this batch (a process sharing a lock fd closes nothing itself); else the last scan that saw it."""
+        own = []
+        # A node fd is its own (one opener per node); a lock fd is usually shared (flock -> timeout -> prog) and
+        # closes only with its last sharer, so the lock's close counts only for a lock-only holder.
+        kinds = (h.cur & NODE_KINDS) or h.cur
+        for kind in kinds:
+            cs = [c for c in batch.closes.get((h.card, kind), ()) if c >= h.seen]
+            if cs:
+                own.append(min(cs))
+        if own:
+            end = max(own)
+        else:
+            cs = [c for (card, _k), lst in batch.closes.items() if card == h.card for c in lst if c >= h.seen]
+            end = max(cs) if cs else h.seen
+        return min(max(end, h.seen), t)
+
+    def mapped(self, pid, pst, card):
+        st = read_stat(pid)
+        if st is None or st[2] != pst:
+            return set()
+        return {kind for (c, kind) in self.maps_of(pid) if c == card}
+
+    def scan_gap(self):
+        """The least time between two scan starts: 1/--max-scan-rate, and 10 times the last scan's CPU time (a host
+        with 100,000 open files, or a user with a huge fd table, costs at most a tenth of a core). CPU time, not wall
+        time: on a busy host a scan at nice 10 waits longer for the CPU without costing more, and must not slow."""
+        return max(1.0 / self.a.max_scan_rate, self.last_scan_cpu / SCAN_DUTY)
+
+    def scan_due(self):
+        """The boottime the pending events may be scanned at, or None: node events after the debounce and the gap;
+        events on lock files only (every `flock -n` poll) at most once a second."""
+        bt = self.batch
+        gap = self.scan_gap()
+        if bt.first_node_b is not None:
+            return max(bt.first_node_b + self.a.debounce, self.last_scan_b + gap)
+        if bt.first_boot is not None:
+            return max(bt.first_boot + self.a.debounce, self.last_scan_b + max(gap, LOCK_SCAN_GAP))
+        if self.scan_asap:
+            return self.last_scan_b + gap
+        return None
+
+    def do_scan(self, batch=None):
+        self.check_clock()
+        if batch is None:
+            batch, self.batch = self.batch, Batch()
+        b0, c0 = boottime(), time.process_time()
+        maps = self.want_maps and b0 - self.maps_at >= self.a.maps_every
+        if maps:
+            self.maps_at = b0
+            self.want_maps = False
+        found, info = self.scan(maps=maps)
+        b1 = boottime()
+        ms = (b1 - b0) * 1000
+        self.last_scan_b = b0
+        self.last_scan_cpu = time.process_time() - c0
+        self.stats['scans'] += 1
+        self.stats['last_scan_ms'] = round(ms, 1)
+        self.stats['max_scan_ms'] = max(self.stats['max_scan_ms'], round(ms, 1))
+        self.stats['last_scan_cpu_ms'] = round(self.last_scan_cpu * 1000, 1)
+        self.check_clock(batch)          # a step while the scan ran moves this batch too
+        if self.apply(found, info, batch, time.time()):
+            self.write_now()
+        if self.want_maps and self.maps_due is None:
+            # an open with no holder and no close: sweep the maps soon, but not more often than --maps-every
+            self.maps_due = max(boottime() + 0.2, self.maps_at + self.a.maps_every)
+
+    # ---------------------------------------------------------------- counters
+    def read_sq(self, path):
+        try:
+            m = SQ_RE.findall(read_bytes(path))
+        except OSError:
+            return None
+        return sum(int(x) for x in m) if m else None
+
+    def counters_tick(self):
+        """The driver's submitted-message counters (host memory); an act record when either moved."""
+        if self.a.skip_all_counters:
+            return
+        t, b = time.time(), boottime()
+        seen = set()
+        for d in sorted(glob.glob(self.a.sysfs_glob)):
+            if os.path.basename(d).lower() in self.skip_pci:
+                continue                                   # never touch this card's sysfs, not even devnum
+            try:
+                card = int(read_bytes(d + '/devnum').strip())
+            except (OSError, ValueError):
+                continue
+            if card in self.skip:
+                continue                                   # never read this card's *_vq_stats
+            mg = self.read_sq(d + '/mgmt_vq_stats/msg_count')
+            op = self.read_sq(d + '/ops_vq_stats/msg_count')
+            if mg is None or op is None:
+                continue
+            key = (card, os.path.basename(d))
+            seen.add(key)
+            prev = self.counters.get(key)
+            self.counters[key] = (b, mg, op)
+            if prev is None:
+                continue
+            dm, do = mg - prev[1], op - prev[2]
+            s = b - prev[0]
+            if dm < 0 or do < 0:
+                self.log('card %d: the message counters went down (driver reloaded?): new baseline' % card)
+                continue
+            if max(dm, do) > MAX_MSG_RATE * max(s, 1.0):
+                # The driver frees the queue arrays before it removes their sysfs group (an MM reset): a read then
+                # can see garbage. Not activity: start again from this reading.
+                self.log('card %d: implausible counter change (mgmt +%d, ops +%d in %.0f s): new baseline'
+                         % (card, dm, do, s))
+                continue
+            if dm or do:
+                self.emit({'t': 'act', 'v': FORMAT, 'card': card, 'at': r3(t), 's': r3(s), 'mgmt': dm, 'ops': do})
+        for key in list(self.counters):
+            if key not in seen:
+                del self.counters[key]
+
+    # ---------------------------------------------------------------- time
+    def check_clock(self, *batches):
+        """A wall-clock step: move the open holds (and the pending events: the current batch, the given ones) with
+        it, so their lengths stay right; record it. Called before any wall time is taken in a loop pass."""
+        off = time.time() - boottime()
+        d = off - self.off
+        self.off = off
+        if abs(d) < 2.0:
+            return
+        for h in self.holds.values():
+            h.start += d
+            h.seen += d
+        self.started_at += d
+        for bt in (self.batch,) + batches:
+            bt.shift(d)
+        for v in self.carry.values():
+            if 'o' in v:
+                v['o'] = [x + d for x in v['o']]
+        for p in self.pending.values():
+            p['start'] += d
+            p['end'] += d
+        self.log('the wall clock stepped by %+.3f s; open holds moved with it' % d)
+        self.emit({'t': 'clock', 'v': FORMAT, 'at': r3(time.time()), 'step': r3(d)})
+        self.write_now(force=True)
+
+    # ---------------------------------------------------------------- main loop
+    def on_signal(self, signum, _frame):
+        if signum == signal.SIGHUP:
+            self.reglob_at = 0
+            self.scan_asap = True
+        else:
+            self.stop_sig = signum
+
+    def wake(self, ino_ready):
+        """After select returns: check the clock before anything takes a time, then read the events."""
+        self.check_clock()
+        if ino_ready:
+            self.read_events()
+
+    def run(self):
+        why = self.claim_log_dir()
+        if why:
+            self.log(why)
+            return 1
+        self.ino = Inotify()
+        self.started_at = time.time()
+        self.off = self.started_at - boottime()
+        os.umask(0o022)
+        self.sees_all = self.probe_access()
+        if not self.sees_all:
+            self.log('cannot read other users\' fd links (/proc/1/fd): only processes of uid %d are seen; the '
+                     'service needs CAP_SYS_PTRACE and CAP_DAC_READ_SEARCH' % os.geteuid())
+        lost = self.recover()
+        self.reglob()
+        self.retention()
+        self.check_space()
+        self.started = True
+        for rec in lost:            # before the start record: they belong to the run that died
+            self.emit(rec)
+        if lost:
+            self.log('the previous run died without SIGTERM: wrote %d of its records (holds "lost_end")' % len(lost))
+        self.remove_open()
+        watched = sorted(self.watch)
+        self.emit({'t': 'start', 'v': FORMAT, 'at': r3(self.started_at), 'host': self.host, 'boot': self.boot_id,
+                   'pid': self.selfpid, 'cards': self.cards(), 'watch': watched, 'sees_all': self.sees_all})
+        self.log('started (pid %d): watching %s' % (self.selfpid, ', '.join(watched) or 'nothing yet'))
+        found, info = self.scan(maps=True)
+        self.apply(found, info, Batch(), time.time(), initial=True)
+        self.last_scan_b = boottime()
+        self.stats['scans'] += 1
+        self.write_now(force=True)
+        self.write_open(force=True)
+        self.counters_tick()
+        if self.verbose:
+            for (card, pci), (_b, mg, op) in sorted(self.counters.items()):
+                self.vlog('card %d (%s): submitted messages mgmt %d, ops %d' % (card, pci, mg, op))
+            for card in sorted(self.skip):
+                self.vlog('card %d: counters not read (--skip-counters)' % card)
+            for pci in sorted(self.skip_pci):
+                self.vlog('%s: nothing read (--skip-pci)' % pci)
+        rfd, wfd = os.pipe2(os.O_NONBLOCK | os.O_CLOEXEC)
+        signal.set_wakeup_fd(wfd)
+        for s in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+            signal.signal(s, self.on_signal)
+        a = self.a
+        b = boottime()
+        every = min(60.0, a.act_every)
+        nxt = {'scan': b + a.scan_every, 'act': b + a.act_every, 'beat': b + a.beat_every, 'now': b + every,
+               'reglob': b + 60.0}
+        while self.stop_sig is None:
+            b = boottime()
+            due = list(nxt.values())
+            for x in (self.reglob_at, self.maps_due, self.scan_due(), self.unseen_due()):
+                if x is not None:
+                    due.append(x)
+            if self.open_dirty:
+                due.append(self.open_b + OPEN_EVERY)
+            timeout = max(0.0, min(due) - b)
+            try:
+                r, _, _ = select.select([self.ino.fd, rfd], [], [], timeout)
+            except InterruptedError:
+                continue
+            if rfd in r:
+                try:
+                    while os.read(rfd, 512):
+                        pass
+                except OSError:
+                    pass
+            if self.stop_sig is not None:
+                break
+            try:
+                self.wake(self.ino.fd in r)
+                b = boottime()
+                if b >= nxt['reglob'] or (self.reglob_at is not None and b >= self.reglob_at):
+                    self.reglob_at = None
+                    nxt['reglob'] = b + 60.0
+                    added, gone = self.reglob()
+                    if added or gone:
+                        self.log('watch changed: added %s; gone %s' % (added or '-', gone or '-'))
+                        self.emit({'t': 'watch', 'v': FORMAT, 'at': r3(time.time()), 'cards': self.cards(),
+                                   'watch': sorted(self.watch), 'added': added, 'gone': gone})
+                        self.scan_asap = True
+                        self.write_now(force=True)
+                if self.maps_due is not None and b >= self.maps_due:
+                    self.maps_due = None
+                    self.scan_asap = True
+                sd = self.scan_due()
+                if (sd is not None and b >= sd) or (b >= nxt['scan'] and b - self.last_scan_b >= self.scan_gap()):
+                    self.scan_asap = False
+                    self.do_scan()
+                    nxt['scan'] = boottime() + max(a.scan_every, self.last_scan_cpu / SCAN_DUTY)
+                self.flush_unseen()
+                if b >= nxt['act']:
+                    nxt['act'] = max(nxt['act'] + a.act_every, b + a.act_every / 2)
+                    self.counters_tick()
+                    self.retention()
+                    self.check_space()
+                if b >= nxt['beat']:
+                    nxt['beat'] = max(nxt['beat'] + a.beat_every, b + a.beat_every / 2)
+                    time.tzset()
+                    self.check_log_file()
+                    self.emit({'t': 'beat', 'v': FORMAT, 'at': r3(time.time()),
+                               'holding': len({k[0] for k in self.holds})})
+                if b >= nxt['now']:
+                    nxt['now'] = b + every
+                    self.write_now(force=True)
+                    self.write_open(force=True)
+                elif self.open_dirty and boottime() - self.open_b >= OPEN_EVERY:
+                    self.write_open()
+            except Exception:  # noqa: BLE001 -- one bad pass must not stop the log
+                self.error('loop', 'error (continuing):\n' + traceback.format_exc())
+        self.finish('SIG' + signal.Signals(self.stop_sig).name[3:])
+        return 0
+
+    def finish(self, why):
+        t = time.time()
+        self.flush_unseen(force=True)
+        for k in sorted(self.holds, key=lambda k: (self.holds[k].start, k)):
+            self.emit(self.hold_record(self.holds[k], t, cut=True))
+        self.holds.clear()
+        self.emit({'t': 'stop', 'v': FORMAT, 'at': r3(t), 'why': why})
+        self.remove_now()
+        self.remove_open()
+        self.close_log()
+        self.log('stopped (%s)' % why)
+
+    def once(self):
+        """One scan with no watches; print the holders and the counters. Writes nothing."""
+        self.sees_all = self.probe_access()
+        self.reglob(watch=False)
+        found, info = self.scan(maps=True)
+        self.apply(found, info, Batch(), time.time(), initial=True)
+        print('%s: watched paths: %s' % (self.host, ', '.join(sorted(self.known)) or 'none found'))
+        if not self.sees_all:
+            print('(as uid %d, which cannot read other users\' fd links: only its own processes are seen)'
+                  % os.geteuid())
+        if not self.holds:
+            print('No process holds a watched node or lock.')
+        else:
+            print('%-4s %-14s %-12s %8s  %-15s %s' % ('card', 'holds', 'user', 'pid', 'comm', 'parent'))
+            for h in sorted(self.holds.values(), key=lambda h: (h.card, h.pid)):
+                print('%-4d %-14s %-12s %8d  %-15s %s' % (h.card, '+'.join(sorted(h.cur)), h.user, h.pid, h.comm,
+                                                          h.parent))
+        self.counters_tick()
+        for (card, pci), (_b, mg, op) in sorted(self.counters.items()):
+            print('card %d (%s): submitted messages mgmt %d, ops %d' % (card, pci, mg, op))
+        if self.a.skip_all_counters:
+            print('counters not read: %s' % (self.a.defaults_error or 'skipped'))
+        for card in sorted(self.skip):
+            print('card %d: counters not read (--skip-counters)' % card)
+        for pci in sorted(self.skip_pci):
+            print('%s: nothing read (--skip-pci)' % pci)
+        return 0
+
+
+def parse_cards(s):
+    s = (s or '').strip()
+    if s.lower() in ('', 'none', '-'):
+        return frozenset()
+    try:
+        return frozenset(int(x) for x in s.split(',') if x.strip() != '')
+    except ValueError:
+        raise argparse.ArgumentTypeError('expected card numbers like 0 or 0,1, or none: %r' % s)
+
+
+def parse_pci(s):
+    s = (s or '').strip().lower()
+    if s in ('', 'none', '-'):
+        return frozenset()
+    out = set()
+    for x in s.split(','):
+        x = x.strip()
+        if not x:
+            continue
+        if not PCI_RE.fullmatch(x):
+            raise argparse.ArgumentTypeError('expected PCI addresses like 0000:01:00.0, or none: %r' % x)
+        out.add(x)
+    return frozenset(out)
+
+
+def positive(s):
+    v = float(s)
+    if v <= 0:
+        raise argparse.ArgumentTypeError('must be > 0')
+    return v
+
+
+def positive_int(s):
+    v = int(s)
+    if v <= 0:
+        raise argparse.ArgumentTypeError('must be > 0')
+    return v
+
+
+def nonnegative(s):
+    v = float(s)
+    if v < 0:
+        raise argparse.ArgumentTypeError('must be >= 0')
+    return v
+
+
+def defaults_words(path):
+    """The words of ET_USAGED_ARGS in a defaults file (shell syntax, as systemd's EnvironmentFile), or None when there
+    is no file. Raises OSError or ValueError when it cannot be read."""
+    try:
+        with open(path) as f:
+            text = f.read()
+    except FileNotFoundError:
+        return None
+    words = []
+    for line in text.splitlines():
+        m = re.match(r'\s*(?:export\s+)?ET_USAGED_ARGS=(.*)$', line)
+        if m:
+            words = shlex.split(' '.join(shlex.split(m.group(1))))      # the last assignment wins
+    return words
+
+
+def apply_defaults(a):
+    """The cards and PCI functions the host's defaults file skips are skipped by every run, not only by the service:
+    a manual --once or --foreground never reads a counter the host forbids. When the file exists but cannot be read,
+    no counter is read at all. Returns an error message or None."""
+    a.skip_all_counters = False
+    a.defaults_error = None
+    if not a.defaults or a.defaults == 'none':
+        return None
+    try:
+        words = defaults_words(a.defaults)
+        if not words:
+            return None
+        i = 0
+        while i < len(words):
+            w = words[i]
+            for opt, parse, attr in (('--skip-counters', parse_cards, 'skip_counters'),
+                                     ('--skip-pci', parse_pci, 'skip_pci')):
+                v = None
+                if w == opt:
+                    i += 1
+                    v = words[i]
+                elif w.startswith(opt + '='):
+                    v = w[len(opt) + 1:]
+                if v is not None:
+                    setattr(a, attr, getattr(a, attr) | parse(v))
+            i += 1
+    except (OSError, ValueError, IndexError, argparse.ArgumentTypeError) as e:
+        a.skip_all_counters = True
+        a.defaults_error = 'cannot read %s (%s): no card counter is read' % (a.defaults, e)
+        return a.defaults_error
+    return None
+
+
+def parse_args(argv=None):
+    p = argparse.ArgumentParser(
+        prog='et-usaged',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description='Log every process that holds an ET-SoC-1 card node or card lock on this host.',
+        epilog='''\
+Normally run by systemd (et-usaged.service) as the et-usage user, with the host's options from /etc/default/et-usaged
+(ET_USAGED_ARGS, e.g. "--skip-counters 0 --skip-pci 0000:01:00.0" on aifoundry1). Every run, the service's or a
+manual one, also skips the cards and PCI functions that file skips. Read the log with et-usage.
+
+examples:
+  sudo et-usaged --once                         # one scan: who holds a card now, and the counters; writes nothing
+  sudo et-usaged --foreground --stdout          # watch and print the records instead of writing files
+  et-usaged --foreground --dev-glob '/scratch/dev/et[0-9]*_*' --lock-glob '/scratch/lock/etsoc-shire*.lock' \\
+            --sysfs-glob '/scratch/sys/0000:*' --log-dir /scratch/log --run-dir /scratch/run --scan-every 2
+''')
+    p.add_argument('--dev-glob', action='append', metavar='GLOB',
+                   help='card nodes to watch (repeatable; names must match et<N>_mgmt or et<N>_ops); '
+                        'default /dev/et[0-9]*_mgmt and /dev/et[0-9]*_ops')
+    p.add_argument('--lock-glob', action='append', metavar='GLOB',
+                   help='card lock files (names etsoc-shire<N>.lock, only for a card N with a node); '
+                        'default /run/lock/etsoc-shire[0-9]*.lock')
+    p.add_argument('--sysfs-glob', default='/sys/bus/pci/drivers/ET/0000:*', metavar='GLOB',
+                   help='card sysfs directories (devnum, *_vq_stats/msg_count are read); default %(default)s')
+    p.add_argument('--log-dir', default='/var/log/et-usage', help='where the daily .jsonl files go (%(default)s)')
+    p.add_argument('--run-dir', default=None, help='where now.json goes (/run/et-usage)')
+    p.add_argument('--defaults', default='/etc/default/et-usaged', metavar='FILE',
+                   help='the host\'s defaults file: its --skip-counters and --skip-pci apply to every run '
+                        '(%(default)s; "none" to ignore it)')
+    p.add_argument('--skip-counters', type=parse_cards, default=frozenset(), metavar='N[,N]',
+                   help='cards whose *_vq_stats are never read')
+    p.add_argument('--skip-pci', type=parse_pci, default=frozenset(), metavar='ADDR[,ADDR]',
+                   help='PCI functions whose sysfs directory is never touched, not even devnum (aifoundry1: '
+                        '0000:01:00.0, card 0)')
+    p.add_argument('--scan-every', type=positive, default=15.0, metavar='S',
+                   help='the safety-net scan of /proc (%(default)s s)')
+    p.add_argument('--act-every', type=positive, default=60.0, metavar='S',
+                   help='the counter reading; also how often now.json and open.json are rewritten, at most 60 s '
+                        '(%(default)s s)')
+    p.add_argument('--beat-every', type=positive, default=600.0, metavar='S', help='heartbeat (%(default)s s)')
+    p.add_argument('--debounce', type=float, default=0.02, metavar='S',
+                   help='wait after an event before scanning (%(default)s s)')
+    p.add_argument('--max-scan-rate', type=positive, default=10.0, metavar='N',
+                   help='scans per second at most (%(default)s); also at most 10%% of the time')
+    p.add_argument('--maps-every', type=positive, default=10.0, metavar='S',
+                   help='a /proc/*/maps sweep at most this often, only after an open with no holder (%(default)s s)')
+    p.add_argument('--max-fds', type=positive_int, default=65536, metavar='N',
+                   help='fds read per process and scan at most (%(default)s)')
+    p.add_argument('--keep-days', type=positive_int, default=90, metavar='D',
+                   help='delete log files older (%(default)s), never one of the newest D')
+    p.add_argument('--max-log-mb', type=positive, default=500.0, metavar='MB',
+                   help='the log directory at most this big: the oldest days go, then records stop (%(default)g)')
+    p.add_argument('--min-free-mb', type=nonnegative, default=512.0, metavar='MB',
+                   help='write no records while the log\'s filesystem has less free than this; no file is removed '
+                        'for it (%(default)g)')
+    p.add_argument('--foreground', action='store_true',
+                   help='attached to a terminal: say what it sees on stderr (it never forks either way)')
+    p.add_argument('--stdout', action='store_true',
+                   help='print the records instead of writing log files (and no now.json unless --run-dir)')
+    p.add_argument('--verbose', '-v', action='store_true', help='say what it sees on stderr')
+    p.add_argument('--once', action='store_true', help='one scan: print the holders and counters, and exit')
+    a = p.parse_args(argv)
+    a.dev_glob = a.dev_glob or ['/dev/et[0-9]*_mgmt', '/dev/et[0-9]*_ops']
+    a.lock_glob = a.lock_glob or ['/run/lock/etsoc-shire[0-9]*.lock']
+    a.run_dir_given = a.run_dir is not None
+    if a.run_dir is None:
+        a.run_dir = '/run/et-usage'
+    a.skip_all_counters = False
+    a.defaults_error = None
+    return a
+
+
+def main(argv=None):
+    a = parse_args(argv)
+    err = apply_defaults(a)
+    d = Daemon(a)
+    if err:
+        d.log(err)
+    if a.once:
+        return d.once()
+    try:
+        return d.run()
+    except Exception:  # noqa: BLE001
+        d.log('fatal:\n' + traceback.format_exc())
+        if d.started:
+            try:
+                d.finish('error')
+            except Exception:  # noqa: BLE001
+                pass
+        return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())

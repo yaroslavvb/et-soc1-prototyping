@@ -1,0 +1,842 @@
+#!/usr/bin/python3
+"""et-usage: who used the ET-SoC-1 cards on this host, and when, from et-usaged's log.
+
+Part of tools/lab/et-usage in the et-soc1-prototyping repository (see README.md there). Any user may run it: it only
+reads /var/log/et-usage/*.jsonl and /run/et-usage/now.json (both world-readable). Python 3 standard library only.
+"""
+
+import argparse
+import bisect
+import datetime
+import json
+import os
+import re
+import socket
+import sys
+import time
+
+FORMAT = 1
+GAP_SPAN = 900.0        # a running daemon writes at least every 10 min; a longer silence ends a covered span
+FRESH = 180.0           # now.json rewritten within this: the daemon is running
+JSON_BUDGET = 200 * 1024  # --json output at most this big: intervals merged further, activity binned, lists cut
+MAX_READ_MB = 64.0      # the newest this many MB of the log are read at most (--max-read-mb)
+TYPES = ('start', 'stop', 'beat', 'hold', 'act', 'watch', 'clock')
+NUM = (int, float)
+
+EPILOG = '''\
+examples:
+  et-usage                        # the last 24 h per card: who, how long, which programs; who holds a card now
+  et-usage --since 7d --daily     # a week, with a line per day
+  et-usage --since 2h --card 0    # also 30m, 2026-09-30, "2026-09-30 14:00", or an epoch
+  et-usage --user alice
+  et-usage --raw --since 1h       # the log records themselves (JSON lines)
+  et-usage --json --since 26h     # one JSON object, for the lab dashboard
+
+What is logged: every process that holds a card node (/dev/et<N>_mgmt, /dev/et<N>_ops) or a card lock
+(/run/lock/etsoc-shire<N>.lock, while it holds the flock): its user, pid, program name (comm, 15 characters; never
+its arguments), parent program, and when. "?" is a process that opened and closed a node between two scans (a few
+ms): its user is unknown. Time outside the logger's coverage is "not logged", never "idle".
+'''
+
+
+# ---------------------------------------------------------------------------- time helpers
+def local_date(t):
+    return time.strftime('%Y-%m-%d', time.localtime(t))
+
+
+def add_days(date, n):
+    return (datetime.date.fromisoformat(date) + datetime.timedelta(days=n)).isoformat()
+
+
+def day_start(date):
+    y, m, d = (int(x) for x in date.split('-'))
+    return time.mktime((y, m, d, 0, 0, 0, 0, 0, -1))
+
+
+def parse_since(s, now):
+    s = s.strip()
+    m = re.fullmatch(r'(\d+(?:\.\d+)?)\s*(s|m|min|h|d|w)', s)
+    if m:
+        mult = {'s': 1, 'm': 60, 'min': 60, 'h': 3600, 'd': 86400, 'w': 7 * 86400}[m.group(2)]
+        return now - float(m.group(1)) * mult
+    if re.fullmatch(r'\d{9,}(\.\d+)?', s):
+        return float(s)
+    try:
+        dt = datetime.datetime.fromisoformat(s)
+    except ValueError:
+        raise argparse.ArgumentTypeError(
+            'cannot read --since %r: use 24h, 30m, 7d, an ISO date or time (2026-09-30, "2026-09-30 14:00") '
+            'or an epoch' % s)
+    return dt.timestamp()           # a time with no zone is local
+
+
+def fmt_t(t, now=None):
+    lt = time.localtime(t)
+    if now is not None and local_date(t) == local_date(now):
+        return time.strftime('%H:%M', lt)
+    return time.strftime('%a %d %b %H:%M', lt)
+
+
+def fmt_d(s):
+    s = int(round(s))
+    if s < 60:
+        return '%d s' % s
+    if s < 3600:
+        return '%d m %02d s' % (s // 60, s % 60)
+    if s < 86400:
+        return '%d h %02d m' % (s // 3600, s % 3600 // 60)
+    return '%d d %02d h' % (s // 86400, s % 86400 // 3600)
+
+
+def r3(x):
+    return round(x, 3)
+
+
+def printable(s):
+    """s with each character that is not printable (control characters, escape, format and line separators) as '?'."""
+    return ''.join(c if c.isprintable() else '?' for c in str(s))
+
+
+class Names:
+    """Program and user names, made printable once each and shared (the same few names recur in every record)."""
+
+    def __init__(self):
+        self.d = {}
+
+    def __call__(self, s):
+        v = self.d.get(s)
+        if v is None:
+            v = self.d[s] = sys.intern(printable(s))
+        return v
+
+
+# ---------------------------------------------------------------------------- interval helpers
+def union(ivs):
+    out = []
+    for s, e in sorted(ivs):
+        if out and s <= out[-1][1]:
+            if e > out[-1][1]:
+                out[-1][1] = e
+        else:
+            out.append([s, e])
+    return out
+
+
+def merge_gap(ivs, gap):
+    out = []
+    for s, e in ivs:                 # ivs sorted and disjoint (a union)
+        if out and s - out[-1][1] <= gap:
+            out[-1][1] = max(out[-1][1], e)
+        else:
+            out.append([s, e])
+    return out
+
+
+def measure(ivs):
+    return sum(e - s for s, e in ivs)
+
+
+def clip_measure(ivs, a, b):
+    return sum(max(0.0, min(e, b) - max(s, a)) for s, e in ivs if e > a and s < b)
+
+
+# ---------------------------------------------------------------------------- reading
+def rec_time(r):
+    t = r.get('at', r.get('end'))
+    return t if isinstance(t, NUM) and not isinstance(t, bool) else None
+
+
+def valid(r):
+    t = r['t']
+    if t == 'hold':
+        return (isinstance(r.get('card'), int) and isinstance(r.get('start'), NUM) and isinstance(r.get('end'), NUM)
+                and isinstance(r.get('user'), str))
+    if t == 'act':
+        return (isinstance(r.get('card'), int) and isinstance(r.get('at'), NUM) and isinstance(r.get('s'), NUM)
+                and isinstance(r.get('mgmt'), int) and isinstance(r.get('ops'), int))
+    return isinstance(r.get('at'), NUM)
+
+
+class Log:
+    """The records of the daily files in a date range, in file order (which is write order), streamed."""
+
+    def __init__(self, log_dir):
+        self.dir = log_dir
+        self.skipped = 0
+        self.error = None
+        self.truncated = False
+        try:
+            names = os.listdir(log_dir)
+        except FileNotFoundError:
+            names = []
+        except OSError as e:
+            names = []
+            self.error = '%s: %s' % (log_dir, e.strerror)
+        self.dates = sorted(n[:10] for n in names if re.fullmatch(r'\d{4}-\d\d-\d\d\.jsonl', n))
+
+    def path(self, date):
+        return os.path.join(self.dir, date + '.jsonl')
+
+    def parse(self, line):
+        """(record or None, counts as skipped)"""
+        if not line.strip():
+            return None, False
+        try:
+            r = json.loads(line)
+        except ValueError:
+            return None, True
+        return self.check(r)
+
+    @staticmethod
+    def check(r):
+        if not isinstance(r, dict) or r.get('v') != FORMAT or not isinstance(r.get('t'), str):
+            return None, True
+        if r['t'] not in TYPES:
+            return None, False          # a record type from a newer daemon of the same format: ignored
+        if not valid(r):
+            return None, True
+        return r, False
+
+    def parse_chunk(self, lines):
+        """The records of some lines: one json.loads of them all as an array (several times faster than a call per
+        line), or line by line when one of them is not a single JSON value."""
+        body = [x.strip() for x in lines]
+        body = [x for x in body if x]
+        try:
+            arr = json.loads(b'[' + b','.join(body) + b']')
+        except ValueError:
+            arr = None
+        if arr is None or len(arr) != len(body):
+            arr = []
+            for x in body:
+                try:
+                    arr.append(json.loads(x))
+                except ValueError:
+                    arr.append(None)
+        for r in arr:
+            r, bad = self.check(r)
+            if bad:
+                self.skipped += 1
+            elif r is not None:
+                yield r
+
+    def plan(self, lo, hi, budget_mb):
+        """The files of dates lo..hi to read, oldest first, as (date, offset): the newest first until budget_mb
+        (0: no limit) is used; the oldest file read may start at an offset (its newest part)."""
+        left = budget_mb * 1024 * 1024 if budget_mb > 0 else float('inf')
+        out = []
+        for date in reversed([d for d in self.dates if lo <= d <= hi]):
+            try:
+                size = os.path.getsize(self.path(date))
+            except OSError:
+                size = 0
+            if size <= left:
+                out.append((date, 0))
+                left -= size
+            else:
+                if left > 0:
+                    out.append((date, int(size - left)))
+                self.truncated = True
+                break
+        out.reverse()
+        return out
+
+    def read(self, plan, lines=False):
+        """Yield each record (or (record, line) pairs) of the planned files."""
+        for date, off in plan:
+            try:
+                f = open(self.path(date), 'rb')
+            except OSError as e:
+                self.error = '%s.jsonl: %s' % (date, e.strerror)
+                continue
+            with f:
+                if off:
+                    f.seek(off)
+                    f.readline()            # the rest of a line cut by the offset
+                if lines:
+                    for raw in f:
+                        r, bad = self.parse(raw)
+                        if bad:
+                            self.skipped += 1
+                        elif r is not None:
+                            yield r, raw.decode('utf-8', 'replace').rstrip('\n')
+                    continue
+                while True:
+                    chunk = f.readlines(4 * 1024 * 1024)
+                    if not chunk:
+                        break
+                    yield from self.parse_chunk(chunk)
+
+    def first_time(self):
+        """The time of the oldest record kept."""
+        for date in self.dates:
+            try:
+                with open(self.path(date), 'rb') as f:
+                    for i, raw in enumerate(f):
+                        r, _ = self.parse(raw)
+                        if r is not None and rec_time(r) is not None:
+                            return rec_time(r)
+                        if i > 1000:
+                            break
+            except OSError:
+                continue
+        return None
+
+
+def read_now(run_dir):
+    try:
+        with open(os.path.join(run_dir, 'now.json'), 'rb') as f:
+            d = json.loads(f.read())
+        if isinstance(d, dict) and d.get('v') == FORMAT and isinstance(d.get('at'), NUM):
+            return d
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+# ---------------------------------------------------------------------------- the model
+class H:
+    """A hold, from a record or from now.json."""
+    __slots__ = ('card', 'user', 'pid', 'comm', 'node', 'lock', 's', 'e', 'open', 'key', 'n', 'hint', 'lost')
+
+    def __init__(self, card, user, pid, comm, node, lock, s, e, open_=False, n=1, hint=None, lost=False):
+        self.card, self.user, self.pid, self.comm = card, user, pid, comm
+        self.node, self.lock, self.s, self.e, self.open = node, lock, s, e, open_
+        self.n = n                                   # processes it stands for (an unseen record: its opens)
+        self.hint = hint                             # an unseen record's lock_user
+        self.lost = lost                             # its end was lost (the daemon died): lost_end
+        self.key = (pid, comm) if pid is not None else None      # None: an unseen record, a run of its own
+
+
+class Coverage:
+    """The spans the daemon was running, folded record by record: from each start to its stop; a start with no stop
+    before it, or a silence of more than 15 minutes (plus a forward clock step recorded in between), ends a span at
+    the last record."""
+
+    def __init__(self):
+        self.spans = []
+        self.cur = self.last = None
+
+    def add(self, r, t):
+        tt = r['t']
+        if tt == 'start':
+            if self.cur is not None:
+                self.spans.append((self.cur, self.last))
+            self.cur = self.last = t
+            return
+        allow = GAP_SPAN
+        if tt == 'clock':
+            st = r.get('step')
+            if isinstance(st, NUM) and not isinstance(st, bool) and st > 0:
+                allow += st                 # the clock jumped ahead: the records jump with it
+        if self.cur is None:
+            self.cur = self.last = t
+        elif t - self.last > allow:
+            self.spans.append((self.cur, self.last))
+            self.cur = self.last = t
+        else:
+            self.last = max(self.last, t)
+        if tt == 'stop':
+            self.spans.append((self.cur, self.last))
+            self.cur = None
+
+    def result(self, nowj, state, now):
+        """The spans; a running daemon's last span goes on to now if its last record is under 15 minutes old (a
+        daemon that wrote nothing for longer was not logging, even if it runs again)."""
+        spans = list(self.spans)
+        if self.cur is not None:
+            end = self.last
+            if state == 'running' and now - self.last <= GAP_SPAN:
+                end = max(end, now)
+            elif nowj is not None and float(nowj['at']) - self.last <= GAP_SPAN:
+                end = max(end, float(nowj['at']))
+            spans.append((self.cur, end))
+        elif state == 'running' and not spans:
+            spans.append((float(nowj.get('started_at', nowj['at'])), now))     # a log it cannot read
+        return union(spans)
+
+
+def load(args, now, since, nowj, state, log):
+    """Read the log once, streamed: the holds, the coverage, the activity in the window, the cards, and facts
+    about the daemon."""
+    today = local_date(now)
+    lo = add_days(min(local_date(since), add_days(today, -6)), -1)
+    plan = log.plan(lo, add_days(today, 1), args.max_read_mb)
+    name = Names()
+    m = {'holds': [], 'activity': {}, 'cards': set(), 'started': None, 'rec_host': None, 'last_t': None,
+         'last': None, 'first_read': None}
+    cov = Coverage()
+    holds, activity, cards = m['holds'], m['activity'], m['cards']
+    for r in log.read(plan):
+        t = rec_time(r)
+        tt = r['t']
+        if t is not None:
+            cov.add(r, t)
+            if m['first_read'] is None:
+                m['first_read'] = t
+            if m['last_t'] is None or t > m['last_t']:
+                m['last_t'] = t
+        m['last'] = r
+        if tt == 'hold':
+            card = r['card']
+            cards.add(card)
+            unseen = bool(r.get('unseen'))
+            n = r.get('opens', 1) if unseen else 1
+            pid = r.get('pid') if isinstance(r.get('pid'), int) else None
+            hint = r.get('lock_user') if unseen and isinstance(r.get('lock_user'), str) else None
+            s, e = float(r['start']), float(r['end'])
+            holds.append(H(card, name(r['user']), pid, name(str(r.get('comm', '?'))), bool(r.get('nodes')),
+                           bool(r.get('lock')), s, max(e, s), n=n if isinstance(n, int) else 1,
+                           hint=name(hint) if hint is not None else None, lost=bool(r.get('lost_end'))))
+        elif tt == 'act':
+            cards.add(r['card'])
+            if since <= r['at'] <= now:
+                activity.setdefault(r['card'], []).append([r3(r['at']), r3(r['s']), r['mgmt'], r['ops']])
+        elif tt in ('start', 'watch'):
+            if isinstance(r.get('cards'), list):
+                cards |= {c for c in r['cards'] if isinstance(c, int) and not isinstance(c, bool)}
+            if tt == 'start':
+                m['started'] = r['at']
+                if isinstance(r.get('host'), str):
+                    m['rec_host'] = r['host']
+    m['coverage'] = cov.result(nowj, state, now)
+    return m
+
+
+def holds_of(logged, nowj, state, now, name):
+    """The logged holds (a "lost_end" hold written again as a real one, after a crash, counts once) and, while the
+    daemon runs or from a stale now.json, the holds open now."""
+    real = {(h.card, h.pid, r3(h.s)) for h in logged if not h.lost and h.pid is not None}
+    hs, lost = [], {}
+    for h in logged:
+        if h.lost:
+            k = (h.card, h.pid, r3(h.s))
+            if k in real:
+                continue
+            if k in lost and lost[k].e >= h.e:
+                continue
+            lost[k] = h
+        else:
+            hs.append(h)
+    hs += lost.values()
+    keys = {(h.card, h.pid, r3(h.s)) for h in hs}
+    if nowj is not None and state != 'absent':
+        end = now if state == 'running' else float(nowj['at'])
+        for d in nowj.get('holds') or []:
+            try:
+                card, s = int(d['card']), float(d['start'])
+            except (KeyError, TypeError, ValueError):
+                continue
+            pid = d.get('pid') if isinstance(d.get('pid'), int) else None
+            if (card, pid, r3(s)) in keys:
+                continue                       # it ended between our reading now.json and the log
+            hs.append(H(card, name(str(d.get('user', '?'))), pid, name(str(d.get('comm', '?'))), bool(d.get('nodes')),
+                        bool(d.get('lock')), s, max(end, s), open_=(state == 'running')))
+    return hs
+
+
+def summarize(hs, a, b):
+    """Totals of some holds over [a, b]."""
+    c = [(max(h.s, a), min(h.e, b), h) for h in hs if h.e >= a and h.s <= b]
+    all_u = union([(s, e) for s, e, _ in c])
+    node_u = union([(s, e) for s, e, h in c if h.node])
+    lock_u = union([(s, e) for s, e, h in c if h.lock])
+    return c, all_u, node_u, lock_u
+
+
+def programs_of(hs):
+    """Node-holding processes by comm; lock-only holders' comm when no process held a node."""
+    node = {h.key or id(h): h for h in hs if h.node}
+    use = node or {h.key or id(h): h for h in hs}
+    progs = {}
+    for h in use.values():
+        progs[h.comm] = progs.get(h.comm, 0) + h.n
+    runs = sum(h.n for h in node.values())
+    return dict(sorted(progs.items(), key=lambda kv: (-kv[1], kv[0]))), runs
+
+
+def hints_of(hs):
+    """The lock_user hints of unseen holds, with their opens."""
+    out = {}
+    for h in hs:
+        if h.hint is not None:
+            out[h.hint] = out.get(h.hint, 0) + h.n
+    return dict(sorted(out.items(), key=lambda kv: (-kv[1], kv[0])))
+
+
+def cut_programs(progs, n):
+    if len(progs) <= n:
+        return progs
+    items = list(progs.items())
+    out = dict(items[:n])
+    out['(others)'] = sum(k for _, k in items[n:])
+    return out
+
+
+def user_intervals(c, all_u, node_u, lock_u, gap, user, nprog):
+    merged = merge_gap(all_u, gap)
+    starts = [m[0] for m in merged]
+    buckets = [[] for _ in merged]
+    for s, e, h in c:
+        buckets[max(0, bisect.bisect_right(starts, s) - 1)].append(h)
+    out = []
+    for (a, b), hs in zip(merged, buckets):
+        progs, runs = programs_of(hs)
+        iv = {'user': user, 'start': r3(a), 'end': r3(b), 'node_s': r3(clip_measure(node_u, a, b)),
+              'lock_s': r3(clip_measure(lock_u, a, b)), 'procs': runs, 'programs': cut_programs(progs, nprog)}
+        if any(h.open for h in hs):
+            iv['open'] = True
+        if any(h.lost for h in hs):
+            iv['lost_end'] = True
+        hints = hints_of(hs)
+        if len(hints) == 1:
+            iv['lock_user'] = next(iter(hints))
+        out.append(iv)
+    return out
+
+
+def bin_activity(act, bin_s):
+    """[at, s, mgmt, ops] entries summed per bin_s of time: [the bin's last at, total s, mgmt, ops]."""
+    if not bin_s:
+        return act
+    out = {}
+    for at, s, mg, op in act:
+        k = int(at // bin_s)
+        o = out.get(k)
+        if o is None:
+            out[k] = [at, s, mg, op]
+        else:
+            o[0] = max(o[0], at)
+            o[1] = r3(o[1] + s)
+            o[2] += mg
+            o[3] += op
+    return [out[k] for k in sorted(out)]
+
+
+def analyze(args):
+    now = args.now if args.now is not None else time.time()
+    since = min(args.since_t, now)
+    nowj = read_now(args.run_dir)
+    log = Log(args.log_dir)
+    if nowj is not None and now - float(nowj['at']) <= FRESH:
+        state = 'running'
+    elif nowj is not None or log.dates:
+        state = 'stale'
+    else:
+        state = 'absent'
+    today = local_date(now)
+    name = Names()
+    m = load(args, now, since, nowj, state, log)
+    host = printable((nowj or {}).get('host') or m['rec_host'] or socket.gethostname())
+    daemon = {'state': state,
+              'alive_at': r3(float(nowj['at'])) if nowj else (r3(m['last_t']) if m['last_t'] is not None else None),
+              'started_at': r3(float(nowj['started_at'])) if nowj and isinstance(nowj.get('started_at'), NUM)
+              else (r3(m['started']) if m['started'] is not None else None)}
+    if state != 'running' and m['last'] is not None and m['last']['t'] == 'stop':
+        daemon['stopped_at'] = r3(m['last']['at'])
+    if nowj and nowj.get('paused'):
+        daemon['paused'] = printable(nowj['paused'])
+    first = log.first_time()
+    if first is None and nowj is not None:
+        first = nowj.get('started_at')
+    cov_all = m['coverage']
+    cov = [[r3(max(s, since)), r3(min(e, now))] for s, e in cov_all if e >= since and s <= now and min(e, now) >
+           max(s, since)]
+    hs = holds_of(m['holds'], nowj, state, now, name)
+    if args.user:
+        hs = [h for h in hs if h.user == args.user]
+    cards = set(m['cards'])
+    if nowj:
+        cards |= {c for c in nowj.get('cards') or [] if isinstance(c, int)}
+        cards |= {h.card for h in hs}
+    if args.card is not None:
+        cards = {args.card}
+    dates = [add_days(today, -k) for k in range(6, -1, -1)]
+    bounds = [day_start(d) for d in dates] + [day_start(add_days(today, 1))]
+    by_cu = {}
+    for h in hs:
+        by_cu.setdefault((h.card, h.user), []).append(h)
+    base = {}
+    for card in sorted(cards):
+        users = sorted(u for c, u in by_cu if c == card)
+        per_user = {}
+        per_day = {}                # (user, day index) -> the user's holds that overlap that day
+        all_cards_u, node_cards_u = [], []
+        for u in users:
+            uh = by_cu[(card, u)]
+            for h in uh:
+                i = max(0, bisect.bisect_right(bounds, h.s) - 1)
+                j = min(len(dates) - 1, bisect.bisect_right(bounds, h.e) - 1)
+                for k in range(i, j + 1):
+                    per_day.setdefault((u, k), []).append(h)
+            c, all_u, node_u, lock_u = summarize(uh, since, now)
+            if not c:
+                continue
+            per_user[u] = (c, all_u, node_u, lock_u)
+            all_cards_u += all_u
+            node_cards_u += node_u
+        users_out = {}
+        for u, (c, all_u, node_u, lock_u) in per_user.items():
+            progs, runs = programs_of([h for _, _, h in c])
+            users_out[u] = {'held_s': r3(measure(all_u)), 'node_s': r3(measure(node_u)), 'runs': runs,
+                            'programs': progs, 'first': r3(min(s for s, _, _ in c)),
+                            'last': r3(max(e for _, e, _ in c)), 'lock_s': r3(measure(lock_u))}
+            hints = hints_of([h for _, _, h in c])
+            if hints:
+                users_out[u]['lock_users'] = hints
+        users_out = dict(sorted(users_out.items(), key=lambda kv: (-kv[1]['held_s'], kv[0])))
+        nowl = []
+        if state == 'running':
+            for d in nowj.get('holds') or []:
+                if d.get('card') == card and (not args.user or d.get('user') == args.user):
+                    e = {k: d.get(k) for k in ('user', 'pid', 'comm', 'parent', 'nodes', 'lock', 'start')}
+                    for k in ('user', 'comm', 'parent'):
+                        if isinstance(e[k], str):
+                            e[k] = name(e[k])
+                    nowl.append(e)
+        daily = {}
+        for k, date in enumerate(dates):
+            a, b = bounds[k], min(bounds[k + 1], now)
+            dd = {}
+            if b > a:
+                for u in users:
+                    c, all_u, node_u, _ = summarize(per_day.get((u, k), []), a, b)
+                    if c:
+                        _, runs = programs_of([h for _, _, h in c])
+                        dd[u] = {'held_s': r3(measure(all_u)), 'node_s': r3(measure(node_u)), 'runs': runs}
+            daily[date] = dict(sorted(dd.items(), key=lambda kv: (-kv[1]['held_s'], kv[0])))
+        act = sorted(m['activity'].get(card, []))
+        base[card] = (per_user, users_out, act, nowl, daily,
+                      {'held_s': r3(measure(union(all_cards_u))), 'node_s': r3(measure(union(node_cards_u)))})
+
+    def build(gap, bin_s, nprog, nnow):
+        out_cards = {}
+        for card, (per_user, users_out, act, nowl, daily, tot) in base.items():
+            intervals = []
+            for u, (c, all_u, node_u, lock_u) in per_user.items():
+                intervals += user_intervals(c, all_u, node_u, lock_u, gap, u, nprog)
+            intervals.sort(key=lambda iv: (iv['start'], iv['user']))
+            uo = {u: dict(x, programs=cut_programs(x['programs'], nprog)) for u, x in users_out.items()}
+            co = {'intervals': intervals, 'activity': bin_activity(act, bin_s), 'users': uo,
+                  'held_s': tot['held_s'], 'node_s': tot['node_s'], 'now': nowl[:nnow], 'daily': daily}
+            if len(nowl) > nnow:
+                co['now_more'] = len(nowl) - nnow
+            if gap != args.gap:
+                co['merged_gap_s'] = gap
+            if bin_s:
+                co['activity_bin_s'] = bin_s
+            out_cards[str(card)] = co
+        out = {'v': FORMAT, 'host': host, 'now': r3(now), 'since': r3(since), 'daemon': daemon,
+               'logging_since': r3(first) if isinstance(first, NUM) else None, 'coverage': cov,
+               'cards': out_cards, 'skipped': log.skipped, 'gap_s': args.gap, 'logged_s': r3(measure(cov)),
+               'daily_logged_s': {d: r3(clip_measure(cov_all, day_start(d), min(day_start(add_days(d, 1)), now)))
+                                  for d in dates}}
+        if gap != args.gap:
+            out['merged_gap_s'] = gap
+        if log.truncated and m['first_read'] is not None:
+            out['truncated_before'] = r3(m['first_read'])
+        if log.error:
+            out['error'] = log.error
+        return out
+
+    # Fit the output in JSON_BUDGET: merge intervals across longer gaps, bin the activity, then cut long lists.
+    gap, bin_s, nprog, nnow = args.gap, 0, 1000, 1000
+    out = build(gap, bin_s, nprog, nnow)
+    if not args.json:
+        return out
+    for _ in range(40):
+        if len(json.dumps(out, separators=(',', ':'))) <= JSON_BUDGET:
+            break
+        iv = sum(len(json.dumps(c['intervals'])) for c in out['cards'].values())
+        ac = sum(len(json.dumps(c['activity'])) for c in out['cards'].values())
+        if iv >= ac and gap < 86400:
+            gap = min(86400.0, max(gap * 2, 60.0))
+        elif ac > 0 and bin_s < 86400:
+            bin_s = 300 if not bin_s else bin_s * 3
+        elif gap < 86400:
+            gap = min(86400.0, max(gap * 2, 60.0))
+        elif nprog > 5 or nnow > 10:
+            nprog, nnow = max(5, nprog // 4), max(10, nnow // 4)
+        else:
+            break
+        out = build(gap, bin_s, nprog, nnow)
+    return out
+
+
+# ---------------------------------------------------------------------------- output
+def raw(args):
+    now = args.now if args.now is not None else time.time()
+    since = min(args.since_t, now)
+    log = Log(args.log_dir)
+    n = 0
+    plan = log.plan(add_days(local_date(since), -1), add_days(local_date(now), 1), 0)
+    for r, line in log.read(plan, lines=True):
+        if r['t'] == 'hold':
+            if r['end'] < since or r['start'] > now:
+                continue
+        else:
+            t = rec_time(r)
+            if t is None or not since <= t <= now:
+                continue
+        if args.card is not None and r['t'] in ('hold', 'act') and r['card'] != args.card:
+            continue
+        if args.user and (r['t'] == 'act' or (r['t'] == 'hold' and r['user'] != args.user)):
+            continue
+        print(line)
+        n += 1
+    if log.error:
+        print('et-usage: ' + log.error, file=sys.stderr)
+        return 1
+    return 0
+
+
+def human(o, args):
+    now, since = o['now'], o['since']
+    window = now - since
+    w = []
+    tz = time.strftime('%Z', time.localtime(now))
+    w.append('Card use on %s, %s to %s %s (%s).' % (printable(o['host']), fmt_t(since), fmt_t(now), tz,
+                                                     fmt_d(window)))
+    d = o['daemon']
+    if d['state'] == 'running':
+        w.append('Logger: running since %s; logging since %s.' % (
+            fmt_t(d['started_at']) if d['started_at'] else '?',
+            fmt_t(o['logging_since']) if o['logging_since'] else '?'))
+        if d.get('paused'):
+            w.append('Logger: NOT WRITING RECORDS: %s.' % d['paused'])
+    elif d['state'] == 'stale':
+        last = d.get('stopped_at') or d.get('alive_at')
+        w.append('Logger: NOT RUNNING%s. Card use after that is not logged%s.' % (
+            (' (stopped %s)' if d.get('stopped_at') else ' (last heard from %s)') % fmt_t(last) if last else '',
+            '; logging since %s' % fmt_t(o['logging_since']) if o['logging_since'] else ''))
+    else:
+        w.append('Logger: absent (no log in %s and no %s/now.json): card use on this host is not logged.' % (
+            args.log_dir, args.run_dir))
+    if o.get('error'):
+        w.append('Cannot read the whole log: %s.' % o['error'])
+    if o.get('truncated_before'):
+        w.append('Read only the newest %g MB of the log (--max-read-mb): records before %s were not read.' % (
+            args.max_read_mb, fmt_t(o['truncated_before'])))
+    logged = o['logged_s']
+    if window > 0 and logged < window - 1:
+        holes = []
+        t = since
+        for a, b in o['coverage'] + [[now, now]]:
+            if a - t > 1:
+                holes.append((t, a))
+            t = max(t, b)
+        txt = ', '.join('%s-%s' % (fmt_t(a), fmt_t(b, a)) for a, b in holes[:4]) + (', ...' if len(holes) > 4 else '')
+        w.append('Logged %s of the window (%.0f%%); not logged: %s.' % (fmt_d(logged), 100 * logged / window, txt))
+    if o['skipped']:
+        w.append('(%d unreadable or other-version log line(s) skipped.)' % o['skipped'])
+    if not o['cards']:
+        w.append('')
+        w.append('No card known to the logger on this host.')
+    unseen = lost = False
+    for card, c in o['cards'].items():
+        w.append('')
+        if c['held_s'] <= 0 and not c['users']:
+            w.append('Card %s: not held by %s in the window.' % (card, printable(args.user or 'anyone')))
+        else:
+            share = ['%.1f%% of the window' % (100 * c['held_s'] / window)] if window > 0 else []
+            if logged > 0 and window - logged > 1:
+                share.append('%.1f%% of the logged time' % (100 * c['held_s'] / logged))
+            w.append('Card %s: held %s%s; a node open %s.' % (
+                card, fmt_d(c['held_s']), ' (%s)' % ', '.join(share) if share else '', fmt_d(c['node_s'])))
+            rows = [('user', 'held', 'share', 'node open', 'runs', 'programs')]
+            for u, x in c['users'].items():
+                unseen = unseen or u == '?'
+                progs = ', '.join('%s x%d' % (printable(p), k) if k > 1 else printable(p)
+                                  for p, k in list(x['programs'].items())[:4])
+                if len(x['programs']) > 4:
+                    progs += ', ...'
+                if x.get('lock_users'):
+                    progs += ' (under the lock of %s)' % ', '.join(printable(h) for h in x['lock_users'])
+                rows.append((printable(u), fmt_d(x['held_s']),
+                             '%.1f%%' % (100 * x['held_s'] / window) if window > 0 else '-',
+                             fmt_d(x['node_s']), str(x['runs']), progs))
+            widths = [max(len(r[i]) for r in rows) for i in range(5)]
+            for r in rows:
+                w.append('  ' + '  '.join(r[i].ljust(widths[i]) if i in (0,) else r[i].rjust(widths[i])
+                                          for i in range(5)) + '  ' + r[5])
+            lost = lost or any(iv.get('lost_end') for iv in c['intervals'])
+        if d['state'] == 'running':
+            if c['now']:
+                for h in c['now']:
+                    what = '+'.join((h.get('nodes') or []) + (['lock'] if h.get('lock') else [])) or '?'
+                    w.append('  Now: %s runs %s (pid %s, parent %s), holding %s, since %s (%s).' % (
+                        printable(h['user']), printable(h['comm']), h['pid'], printable(h.get('parent') or '?'),
+                        what, fmt_t(h['start'], now), fmt_d(now - h['start'])))
+                if c.get('now_more'):
+                    w.append('  Now: and %d more process(es).' % c['now_more'])
+            else:
+                w.append('  Now: free.')
+        else:
+            w.append('  Now: unknown (the logger is not running).')
+        if c['activity']:
+            mg = sum(a[2] for a in c['activity'])
+            op = sum(a[3] for a in c['activity'])
+            w.append('  Driver messages submitted in the window: mgmt %d, ops %d (in %d minute(s) with any).' % (
+                mg, op, len(c['activity'])))
+        if c.get('merged_gap_s'):
+            w.append('  (intervals merged across gaps of up to %g s)' % c['merged_gap_s'])
+        if args.daily:
+            w.append('  By day (held time per user):')
+            for date, us in c['daily'].items():
+                cov = o['daily_logged_s'].get(date, 0)
+                txt = ', '.join('%s %s' % (printable(u), fmt_d(x['held_s'])) for u, x in us.items()) or '-'
+                w.append('    %s  %s  (logged %s)' % (
+                    time.strftime('%a %d %b', time.localtime(day_start(date))), txt, fmt_d(cov)))
+    if unseen:
+        w.append('')
+        w.append('"?": a process that opened and closed a node between two scans (a few ms); its user is unknown.')
+    if lost:
+        w.append('A hold open when the logger died (no clean stop) ends where the logger last recorded it.')
+    print('\n'.join(w))
+
+
+def main(argv=None):
+    p = argparse.ArgumentParser(
+        prog='et-usage', formatter_class=argparse.RawDescriptionHelpFormatter,
+        description='Who used the ET-SoC-1 cards on this host and when, from the et-usaged log.', epilog=EPILOG)
+    p.add_argument('--since', default=None, metavar='WHEN',
+                   help='start of the window: 24h (default), 30m, 7d, an ISO date or time, or an epoch')
+    p.add_argument('--card', type=int, metavar='N', help='only card N')
+    p.add_argument('--user', metavar='LOGIN', help='only this user')
+    p.add_argument('--daily', action='store_true', help='also a line per day for the last 7 days')
+    g = p.add_mutually_exclusive_group()
+    g.add_argument('--raw', action='store_true', help='print the log records (JSON lines) of the window')
+    g.add_argument('--json', action='store_true', help='print one JSON object (the dashboard\'s input)')
+    p.add_argument('--gap', type=float, default=5.0, metavar='S',
+                   help='merge a user\'s intervals separated by at most S seconds (default 5)')
+    p.add_argument('--max-read-mb', type=float, default=MAX_READ_MB, metavar='MB',
+                   help='read at most the newest MB of the log, 0 for all (default %g; --json then says '
+                        'truncated_before)' % MAX_READ_MB)
+    p.add_argument('--log-dir', default='/var/log/et-usage', help=argparse.SUPPRESS)
+    p.add_argument('--run-dir', default='/run/et-usage', help=argparse.SUPPRESS)
+    p.add_argument('--now', type=float, default=None, help=argparse.SUPPRESS)     # for tests
+    args = p.parse_args(argv)
+    now = args.now if args.now is not None else time.time()
+    try:
+        args.since_t = parse_since(args.since or '24h', now)
+    except argparse.ArgumentTypeError as e:
+        p.error(str(e))
+    if args.gap < 0:
+        p.error('--gap must be >= 0')
+    if args.max_read_mb < 0:
+        p.error('--max-read-mb must be >= 0')
+    if args.raw:
+        return raw(args)
+    o = analyze(args)
+    if args.json:
+        sys.stdout.write(json.dumps(o, separators=(',', ':')) + '\n')
+    else:
+        human(o, args)
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except BrokenPipeError:
+        sys.exit(0)

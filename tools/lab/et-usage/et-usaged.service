@@ -1,0 +1,53 @@
+# /etc/systemd/system/et-usaged.service -- installed by tools/lab/et-usage/install.sh
+# Logs every process that holds an ET-SoC-1 card node or card lock (tools/lab/et-usage/README.md).
+#
+# Runs as the et-usage system user (install.sh makes it), not root, with only the two capabilities the scan needs:
+# CAP_DAC_READ_SEARCH (other users' /proc/<pid>/fd and fdinfo directories) and CAP_SYS_PTRACE (their fd links,
+# fdinfo and maps). The inotify watches need neither (the nodes and lock files are world-readable). Not DynamicUser=:
+# it would put LogsDirectory= under /var/log/private (0700), which the users et-usage serves cannot read.
+# After install, the daemon's start record and now.json say "sees_all": true if it can read every process
+# (install.sh checks); `grep Cap /proc/$(systemctl show -p MainPID --value et-usaged)/status` shows the capabilities.
+#
+# Do NOT add PrivateDevices=, DevicePolicy=, DeviceAllow= or ProtectClock= (which implies DeviceAllow=char-rtc r):
+# a device allow-list also refuses inotify_add_watch on /dev/et* (the watch checks read permission on the inode),
+# and PrivateDevices hides the real nodes. Do NOT add ProtectProc= or ProcSubset=: the scan needs every process.
+
+[Unit]
+Description=Log which processes hold the ET-SoC-1 cards (et-usaged)
+After=systemd-tmpfiles-setup.service
+# A crash loop stops after 10 starts in 10 minutes instead of filling the log with start/stop records.
+StartLimitIntervalSec=600
+StartLimitBurst=10
+
+[Service]
+Type=simple
+User=et-usage
+Group=et-usage
+EnvironmentFile=-/etc/default/et-usaged
+ExecStart=/usr/local/sbin/et-usaged $ET_USAGED_ARGS
+Restart=on-failure
+RestartSec=5
+Nice=10
+IOSchedulingClass=idle
+UMask=0022
+NoNewPrivileges=yes
+AmbientCapabilities=CAP_SYS_PTRACE CAP_DAC_READ_SEARCH
+CapabilityBoundingSet=CAP_SYS_PTRACE CAP_DAC_READ_SEARCH
+ProtectSystem=strict
+LogsDirectory=et-usage
+LogsDirectoryMode=0755
+ReadWritePaths=/var/log/et-usage
+RuntimeDirectory=et-usage
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=no
+ProtectHome=yes
+PrivateTmp=yes
+PrivateNetwork=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX
+MemoryMax=64M
+
+[Install]
+WantedBy=multi-user.target

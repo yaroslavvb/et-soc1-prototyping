@@ -7,6 +7,9 @@ aifoundry3 - AI Foundry lab machine with 1 ET-SoC-1 card (driver et_soc1 0.20.0)
 
 * Several accounts use this card. Each device node can be open in ONE process at a time.
   Who is using the card: et-who (in scripts: et-who --check)
+* Card use is logged (who, which program, when; never arguments or files). Last 24 hours: et-usage
+* New here? et-lab-start checks this machine and sets up your account (no sudo);
+  the prompt for your coding agent: https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start
 * Reserve the card for a run:  flock /run/lock/etsoc-shire0.lock <command>   (CI jobs use this lock)
 * These commands change the card for every user: reset, trace level, telemetry stats reset (ettelem --reset-ms),
   temperature thresholds, TDP, frequency, active power management.

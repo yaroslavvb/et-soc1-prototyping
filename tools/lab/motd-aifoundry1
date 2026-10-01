@@ -11,6 +11,9 @@ aifoundry1 - AI Foundry lab machine with 2 ET-SoC-1 cards (driver et_soc1 0.20.0
   heat sink and airflow have been checked.
 
 * Each device node can be open in ONE process at a time. Who is using a card: et-who (in scripts: et-who --check)
+* Card use is logged (who, which program, when; never arguments or files). Last 24 hours: et-usage
+* New here? et-lab-start checks this machine and sets up your account (no sudo);
+  the prompt for your coding agent: https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start
 * Reserve card N for a run:  flock /run/lock/etsoc-shire<N>.lock <command>
 * /opt/et/bin/dev_mngt_service and et-powertop open BOTH cards' management nodes, even with -n <N>: run them only
   when both cards are free. Programs built here against /opt/et honour ET_DEVICES=<n> (open only card n).
