@@ -136,6 +136,16 @@ Since 26 September most pages' data also carry the version-3 check's three cards
 generators; the commands, in order, are in 04-artifacts.md, "Rebuilding the version-3 data", and on that day each
 reproduced its file in the tree byte for byte.
 
+## The GitHub Pages mirror
+
+Since 1 October 2026 (the owner's request: the chip diagram mirrored to GitHub Pages, where links with `#anchors` and
+`?flow=` work directly), the two interactive pages are also served from branch `gh-pages`:
+https://yaroslavvb.github.io/et-soc1-prototyping/ (an index), `chip-diagram/` and `memory-levels/`. The branch is
+generated: `tools/publish-gh-pages.sh` builds it from the committed pages of HEAD (with `docs/reports/ladder-img/`)
+and force-pushes one fresh commit, so run it after each deploy of either page and never edit the branch by hand
+(`--dry-run` builds into `~/claude/work/gh-pages-site` only). The spacesheep pages stay canonical; the mirror
+carries the commit it was built from in its index.
+
 ## Deploying one page
 
 The rules behind each line are in 04-artifacts.md, "Publishing notes, learned the hard way".
