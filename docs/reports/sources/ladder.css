@@ -1,0 +1,155 @@
+/* ================= ladder.css: the Up bar, the zoom rows, the levels outside the chip and the copied circuits (1 October 2026) =================
+   Moved out of chip-diagram.body.html; a page's body pulls it into a <style> with an include line. */
+/* ---- the Up bar above the drawing (30 September): the wide button out, the breadcrumb, the scale readout ---- */
+.upbar{flex:none;display:flex;align-items:center;gap:6px 10px;min-width:0;contain:layout style}
+.st-btn.up{flex:0 1 auto;min-width:min(30%,16em);max-width:50%;min-height:40px;text-align:left;display:flex;align-items:center;gap:8px;overflow:hidden;
+  font-weight:600;background:color-mix(in srgb,var(--c1) 9%,var(--surface));border-color:color-mix(in srgb,var(--c1) 45%,var(--border))}
+.st-btn.up .up-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.st-btn.up .up-s{color:var(--ink-2);font-weight:400;white-space:nowrap}
+.st-btn.up.dis{background:var(--surface);border-color:var(--border);font-weight:400}
+.crumbs{flex:1 1 auto;min-width:min(25%,13em);display:flex;align-items:center;gap:2px;overflow:hidden;white-space:nowrap;font-size:clamp(.76rem,.25vw + .66rem,.98rem)}
+.crumbs button{font:inherit;background:none;border:1px solid transparent;border-radius:6px;color:var(--ink);padding:3px 5px;cursor:pointer;min-height:30px;white-space:nowrap}
+.crumbs button:hover{border-color:var(--border);background:var(--surface)}
+.crumbs button[aria-current="location"]{font-weight:650;cursor:default;border-color:transparent;background:none}
+.crumbs button.nx{color:var(--ink-2);font-style:italic}
+.pmz{flex:none;display:flex;gap:3px}
+.pmz button{font:inherit;font-size:clamp(.8rem,.25vw + .7rem,1rem);font-weight:650;min-width:2.1em;min-height:30px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+.pmz button:hover{border-color:var(--ink-2)}
+.pmz button.dis{opacity:.35;cursor:default}
+.crumbs .sep{color:var(--ink-2);padding:0 1px}
+.crumbs button:focus-visible,.pmz button:focus-visible,.crumb-menu button:focus-visible,.zpill button:focus-visible{outline:3px solid var(--c1);outline-offset:1px}
+.scale-ro{flex:0 0 auto;contain:layout paint style;color:var(--ink-2);font-size:clamp(.74rem,.22vw + .64rem,.94rem);white-space:nowrap;font-variant-numeric:tabular-nums;max-width:40%;overflow:hidden;text-overflow:ellipsis;min-width:9.5em;text-align:right}
+.scale-ro b{color:var(--ink);font-weight:600}
+/* a narrow desktop (900-1180 px wide, the panel beside the drawing): the Up label keeps its destination; its size
+   suffix goes (the readout and the button's name have it) and the readout takes only its width */
+@media (min-width:900px) and (max-width:1180px){.st-btn.up .up-s{display:none}.scale-ro{min-width:0}}
+.scale-ro .inf{text-decoration:underline dotted var(--muted);text-underline-offset:3px}
+.scale-ro.mv{color:var(--ink)}
+.scale-ro.jump{font-size:clamp(.9rem,.5vw + .7rem,1.3rem);font-weight:650;color:var(--ink)}
+.crumb-menu{position:absolute;left:0;top:0;z-index:8;display:flex;flex-direction:column;min-width:12em;max-height:70%;overflow:auto;background:var(--surface);
+  border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:4px}
+.crumb-menu[hidden]{display:none}
+.crumb-menu button{font:inherit;font-size:.9rem;text-align:left;background:none;border:0;border-radius:6px;color:var(--ink);padding:6px 10px;cursor:pointer;min-height:36px}
+.crumb-menu button:hover{background:var(--page)}
+/* a touch screen's strip under the drawing: the selected part's name with "Zoom in" and "Details", else a hint. Since
+   the review of 1 Oct it sits under the drawing, never over it: a pill beside the part covered its neighbours, and a
+   double-tap meant for one of them landed on the pill */
+.zstrip{display:none}
+#stage.touch .zstrip{display:flex;align-items:center;flex:none;min-height:46px;gap:6px;min-width:0}
+#stage.touch.present .zstrip{display:none}
+.zs-hint{font-size:.85rem;color:var(--ink-2)}
+.zpill{display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0}
+.zpill[hidden]{display:none}
+.zpill:not([hidden]) + .zs-hint{display:none}
+.zs-name{flex:1 1 auto;min-width:0;font-weight:600;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zpill .st-btn{flex:none;min-height:40px;font-size:.92rem}
+/* the panel's zoom row: the zooms of the part or scale, directly under its lead */
+.pn-zoom{margin:4px 0 10px;display:flex;flex-direction:column;gap:5px}
+.pn-zoom .zr{display:flex;flex-wrap:wrap;gap:5px 6px;align-items:center}
+.pn-zoom .zl{font-size:.86em;color:var(--ink-2);margin-right:2px}
+.pn-zoom .st-btn{font-size:.88em;min-height:32px;white-space:normal;text-align:left;line-height:1.2}
+.pn-zoom .st-btn.pri{background:color-mix(in srgb,var(--c1) 12%,var(--surface));border-color:color-mix(in srgb,var(--c1) 55%,var(--border));font-weight:600}
+.pn-zoom .st-btn .dc{font-weight:400;color:var(--ink-2);font-size:.9em}
+.pn-zoom .nz{font-size:.88em;color:var(--ink-2);margin:0}
+.pn-zoom.flash{animation:zflash 1.2s ease-out}
+@keyframes zflash{0%{background:color-mix(in srgb,var(--c2) 25%,transparent)}100%{background:transparent}}
+@media (prefers-reduced-motion: reduce){.pn-zoom.flash{animation:none}}
+.pn-kick .pn-sz{text-transform:none;letter-spacing:0}
+.pn-cred{font-size:.84em;color:var(--ink-2);margin:4px 0 6px}
+#stage.offchip .pn-foot{display:none}
+.kd.outside{color:color-mix(in srgb,var(--c4) 70%,var(--ink));border-color:var(--c4)}
+.kd.generic{color:var(--ink-2);border-color:var(--ink-2);border-style:dotted}
+.kd.owner{color:color-mix(in srgb,var(--c5) 70%,var(--ink));border-color:var(--c5)}
+.kd.hypothesis{color:color-mix(in srgb,var(--warn) 55%,var(--ink));border-color:var(--warn);border-style:dashed}
+.kd.unknown{color:var(--ink-2);border-color:var(--ink-2);border-style:dashed}
+.kd.erbium{color:var(--ink-2);border-color:var(--border);font-weight:500}
+/* ---- the levels outside the chip (30 September): their type, their parts, the night sky ---- */
+#chip .o-t{font-size:32px;font-weight:700;fill:var(--ink)}
+#chip .o-l{font-size:21px;font-weight:600;fill:var(--ink)}
+#chip .o-s{font-size:18px;fill:var(--ink-2)}
+#chip .o-cr{font-size:16px;fill:var(--ink-2)}
+#chip .o-tag{font-size:16px;font-weight:600;fill:currentColor}
+#chip .otl{color:var(--ink-2)}
+#chip .ohalo{paint-order:stroke;stroke:var(--page);stroke-width:5px;stroke-linejoin:round}
+#chip.zmv .ohalo{stroke:none}
+#chip .sbar .sb{fill:none;stroke:var(--ink);stroke-width:2.5}
+#chip .hotr{fill:transparent;stroke:transparent;stroke-width:2.5}
+#chip .comp:hover .hotr,#chip .comp:focus-visible .hotr{stroke:var(--c1)}
+#chip .ophoto .hotr{stroke:var(--c2);stroke-dasharray:8 6;stroke-width:3}
+#chip .mk{fill:none;stroke:var(--c2);stroke-width:3}
+#chip .lay.sky .mk{stroke:#ffd27a}
+#chip .lay.sky .o-t,#chip .lay.sky .o-l{fill:#eef2fb}
+#chip .lay.sky .o-s,#chip .lay.sky .o-cr{fill:#bcc6dc}
+#chip .lay.sky .otl{color:#bcc6dc}
+#chip .lay.sky .ohalo{stroke:#070b17}
+#chip .lay.sky .sbar .sb{stroke:#eef2fb}
+#chip .lay.sky .ring{stroke:#ffd27a}
+#chip .ghost{fill:none;stroke:#8fa0c8;stroke-width:2;stroke-dasharray:8 8}
+#chip .univ{fill:#1d2a4f;stroke:#cfd8ff;stroke-width:3}
+#chip .univ2{fill:#101a35;stroke:none}
+#chip .cmbr{fill:none;stroke:#f2a65a;stroke-width:12;stroke-opacity:.75}
+#chip .lani{fill:#14203f;stroke:#8fa0c8;stroke-width:2}
+#chip .flowl{fill:none;stroke:#6f86c4;stroke-width:1.5;stroke-opacity:.8}
+#chip .gal{fill:#e7ecff}
+#chip .orb{fill:none;stroke:#5b6787;stroke-width:1.5}
+#chip .voy{fill:none;stroke:#ffd27a;stroke-width:2.5}
+#chip .ocean{fill:#173a6b;stroke:#8fb3f0;stroke-width:2}
+#chip .land{fill:#5d8a5a;stroke:#9cc596;stroke-width:.6;vector-effect:non-scaling-stroke}
+#chip .kidbox{fill:transparent;stroke:#e0a23a;stroke-width:2.5;stroke-dasharray:8 6}
+#chip .map .st{fill:color-mix(in srgb,var(--c3) 13%,var(--page));stroke:color-mix(in srgb,var(--ink-2) 55%,var(--page));stroke-width:1;vector-effect:non-scaling-stroke}
+#chip .st.hl{fill:color-mix(in srgb,var(--c1) 24%,var(--page));stroke:var(--c1);stroke-width:1.6;vector-effect:non-scaling-stroke}
+#chip .arc{fill:none;stroke:var(--c2);stroke-width:3;stroke-dasharray:2 7;stroke-linecap:round}
+#chip .inset{fill:var(--surface);stroke:var(--c2);stroke-width:2.5;stroke-dasharray:8 6}
+#chip .floor{fill:color-mix(in srgb,var(--ink-2) 6%,var(--page));stroke:var(--ink-2);stroke-width:2;stroke-dasharray:10 8}
+#chip .rackp{fill:var(--c2);fill-opacity:.35;stroke:var(--c2);stroke-width:2}
+#chip .pcb{fill:color-mix(in srgb,var(--c3) 10%,var(--page));stroke:var(--ink-2);stroke-width:2}
+#chip .cool,#chip .psu{fill:color-mix(in srgb,var(--ink-2) 12%,var(--page));stroke:var(--ink-2);stroke-width:2}
+#chip .dimm{fill:color-mix(in srgb,var(--c4) 30%,var(--page));stroke:var(--c4);stroke-width:1.2}
+#chip .cardedge{fill:var(--c1);stroke:var(--c1);stroke-width:1.5}
+#chip .cardface{fill:color-mix(in srgb,var(--c3) 22%,var(--page));stroke:var(--c1);stroke-width:2.5}
+#chip .lead{fill:none;stroke:var(--ink-2);stroke-width:1.5;stroke-dasharray:4 5}
+#chip .pkgb{fill:color-mix(in srgb,var(--c3) 12%,var(--page));stroke:var(--ink-2);stroke-width:2}
+#chip .diedash{fill:color-mix(in srgb,var(--c1) 10%,transparent);stroke:var(--c1);stroke-width:2.5;stroke-dasharray:9 6}
+#chip .ball{fill:color-mix(in srgb,var(--c5) 55%,var(--page))}
+/* ---- the memory levels' drawings inside the chip (circuitkit.js, 30 September): their type, tags, wires, transistors
+   and gates, as on that page; every label knocks out what runs under it (--kb), and no label is stroked while the
+   camera moves ---- */
+.pn-badge{margin:0 0 6px}
+.pn .cav{color:var(--ink-2);font-style:italic;font-size:.9em}
+#chip .t-smb{font-size:17px;font-weight:600;fill:var(--ink)}
+#chip .t-net{font-size:19px;font-weight:600;fill:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important}
+#chip .t-mono{font-size:17px;fill:var(--ink-2);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important}
+#chip .t-q{font-size:26px;font-weight:700;fill:color-mix(in srgb,var(--warn) 55%,var(--ink))}
+#chip .lay.ckt text{paint-order:stroke;stroke:var(--kb,var(--page));stroke-width:4px;stroke-linejoin:round}
+#chip .lay.ckt text.halo{stroke:var(--kb,var(--page));stroke-width:6px}
+#chip .lay.ckt .tg text{stroke:var(--surface)}
+#chip.zmv .lay text{stroke:none!important}
+#chip .tg rect{fill:var(--surface);stroke-width:1.6}
+#chip .tg.documented rect{stroke:var(--c1)}
+#chip .tg.generic rect{stroke:var(--ink-2);stroke-dasharray:2 4}
+#chip .tg.unknown rect{stroke:var(--warn);stroke-dasharray:7 5}
+#chip .tg.derived rect{stroke:var(--c7);stroke-dasharray:5 3}
+#chip .tg text{font-size:17px;font-weight:600}
+#chip .tg.documented text{fill:var(--c1)}
+#chip .tg.generic text{fill:var(--ink-2)}
+#chip .tg.unknown text{fill:color-mix(in srgb,var(--warn) 55%,var(--ink))}
+#chip .tg.derived text{fill:var(--c7)}
+#chip .w{fill:none;stroke:var(--ink-2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#chip .w.thin{stroke-width:1.25}
+#chip .w.bus{stroke-width:4}
+#chip .rail{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+#chip .jn{fill:var(--ink-2)}
+#chip .mos .ch{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+#chip .mos .gt{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+#chip .mos .bub{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+#chip .cellq{fill:var(--c3);fill-opacity:.12;stroke:var(--c3);stroke-width:1.25}
+#chip .gate{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+#chip .lvl{fill:var(--c2)}
+#chip .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
+/* a phone's view of an outside level is its middle 760 units: the type larger, never under 11 px */
+#stage.ph #chip .lay.oscn .o-t{font-size:38px}
+#stage.ph #chip .lay.oscn .o-l{font-size:27px}
+#stage.ph #chip .lay.oscn .o-s,#stage.ph #chip .lay.oscn .o-cr{font-size:24px}
+#stage.ph #chip .lay.oscn .o-tag{font-size:21px}
+#chip{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+#stage{touch-action:manipulation}
