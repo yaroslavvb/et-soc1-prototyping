@@ -2,8 +2,9 @@
 """zoom_static.py PAGE.html : the chip diagram's size and privacy checks (DESIGN §6.2 T9 and T10; the ladder's DESIGN
 §5.1 and §5.4 T9, T10, since 1 Oct 2026), on the built page and its folder (ladder-img/ beside it: the images and the
 lazily fetched data). Prints PASS or FAIL lines; the exit code is the number of failures.
-  T9  the built HTML at most 1.5 MB, its script at most 780 KB (700 before the ladder's inner scales, the ring and the
-      two-state electronics), its embedded data at most 600 KB, the lazy data (ladder-img/ladder-data.json) at most
+  T9  the built HTML at most 1.5 MB, its script at most 840 KB (700 before the ladder's inner scales, the ring and the
+      two-state electronics; 780 before the owner's second update of 1 Oct, whose textbook constructions, so that every
+      part reaches a transistor, add about 36 KB of drawing code), its embedded data at most 600 KB, the lazy data (ladder-img/ladder-data.json) at most
       400 KB and as the page's manifest says, the images at most 300 KB in all, each WebP at most 1000 px wide
   T10 no IPv4-like string in the page or the image manifest; no street address, house number, ZIP code or listing link
       for Studio 45, in the page or its data; no latitude or longitude; the rack photo's sha256 equals the manifest's
@@ -34,7 +35,7 @@ data = m.group(1)
 D = json.loads(data)
 script = html[m.end():html.index('</script>', m.end())]
 ok(len(html.encode()) <= 1.5e6, f'T9 the page is {len(html.encode()) / 1e6:.2f} MB (at most 1.5)')
-ok(len(script.encode()) <= 780e3, f'T9 its script is {len(script.encode()) / 1e3:.0f} KB (at most 780)')
+ok(len(script.encode()) <= 840e3, f'T9 its script is {len(script.encode()) / 1e3:.0f} KB (at most 840)')
 ok(len(data.encode()) <= 600e3, f'T9 its data is {len(data.encode()) / 1e3:.0f} KB (at most 600)')
 lz_path = os.path.join(img_dir, 'ladder-data.json')
 lz = open(lz_path, encoding='utf-8').read() if os.path.exists(lz_path) else ''

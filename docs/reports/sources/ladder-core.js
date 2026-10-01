@@ -216,9 +216,10 @@ function mkStep(P, d, dir) {
    side in their parent's drawing glide instead */
 function routeSteps(P, T, o) {
   // different roots (only the ring has a root of its own): one wrap step joins the ring to the top of the ladder, or to
-  // the Planck length at the bottom of a branch
+  // a scale deep in a branch (since the owner's second update of 1 Oct: Up from the ring lands on an atom of the chip; +
+  // at the Planck length goes round to the ring)
   if (P[0].id !== T[0].id) {
-    const top = [{id: 'beyond'}], low = Q => Q[Q.length - 1].id === PLANCK;
+    const top = [{id: 'beyond'}], low = Q => Q.length > 1;
     if (isWrap(P)) return low(T) ? [wrapStep(P, T)] : [wrapStep(P, top)].concat(routeSteps(top, T, o));
     if (isWrap(T)) return low(P) ? [wrapStep(P, T)] : routeSteps(P, top, o).concat([wrapStep(top, T)]);
   }
@@ -250,7 +251,10 @@ function wrapStep(F, T) {
 }
 function openWrap(s, req) {
   const R = built(s.ring, 0), O = built(s.other, s.other.length - 1), bd = BANDS.jump;
-  const ap = R._ap, head = s.other[0].id === 'beyond', mk = head ? ap.headBox : ap.tailBox;
+  // (the other end: the top of the ladder, beyond, grows from the ring's head; the Planck length from the tail's tip; an
+  // atom, where Up from the ring lands, from the atom's tick: review of 1 Oct, every path starts at beyond, so the head
+  // is the path of length one)
+  const ap = R._ap, tip = s.other[s.other.length - 1].id, head = s.other.length === 1, mk = head ? ap.headBox : tip === PLANCK ? ap.tailBox : ap.atomBox || ap.tailBox;
   // the other's frame drawn into its mark on the ring at its smallest (an eighth of the ring's view at most), the ring
   // zoomed in on the mark by as much at the other's rest
   const B = frameOf(s.other[s.other.length - 1]), A = fitTo(mk || {x: 0, y: 0, w: 100, h: 100}, B.w / B.h), Q = rmap(A, B);
@@ -267,7 +271,7 @@ function openWrap(s, req) {
     // the marker: along the arc from the head to the tail's tip (the way Up goes round), drawn as far as it has run
     // (across the mouth only between the ring and the Planck length: from the head to the tail's tip going in, back again
     // going out)
-    if (run) { const f = head ? 0 : clamp(s.toRing ? 1 - q : q, 0, 1); run.style.strokeDashoffset = (runL * (1 - f)).toFixed(1) + 'px'; }
+    if (run) { const f = head ? 0 : clamp(s.toRing ? 1 - q : q, 0, 1), rl = tip === PLANCK ? ap.runLenPl || runL : runL; run.style.strokeDashoffset = (runL - rl * f).toFixed(1) + 'px'; }
     svg.classList.toggle('skyon', !!(oo > 0.5 ? R._sky : O._sky));
     readout(s, q);
   };
@@ -285,8 +289,8 @@ function openWrap(s, req) {
       hereL.style.opacity = 1; hereL.style.visibility = '';
       if (run) run.style.strokeDashoffset = runL + 'px';
       Z.path = here.slice();
-      // in from the ring: which way back in was taken (Up takes the other one next time round)
-      if (!isWrap(here) && typeof pageExits === 'function') { const x = pageExits().find(x0 => samePath(x0.path(), here)); if (x) LASTEXIT = x.id; }
+      // in from the ring: the reader came round (the landing scale's panel says so, and offers the way back)
+      WRAPIN = isWrap(here) ? null : pkeys(here);
       bindTrio(Z.path);
       setT(hereL, restMat());
       if (last) { if (arrive) arrive(); svg.querySelectorAll(':scope > g.lay').forEach(l => l.classList.remove('busy')); }
@@ -758,8 +762,7 @@ function zoomFocus(from) {
   const L = restLayer(); if (!L) return null;
   // arrived by a neighbour link: the link back to the shire left, so that Tab and Enter return
   const nbk = NBRBACK; NBRBACK = null;
-  const fi = pinfo(from);
-  if (nbk && Z.level === 1 && fi.level === 1 && fi.sid === nbk.sid && AP[1].nbr && AP[1].nbr[nbk.dir]) return AP[1].nbr[nbk.dir];
+  if (nbk && L._ap.nbr && L._ap.nbr[nbk.dir] && L._ap.nbr[nbk.dir].isConnected) return L._ap.nbr[nbk.dir];
   if (from.length > Z.path.length && samePath(from.slice(0, Z.path.length), Z.path)) {
     const s = L._ap.zs[pk(from[Z.path.length])]; if (s && s.g && s.g.isConnected) return s.g;
   }
@@ -879,25 +882,28 @@ function defKid(P) {
   return k && NODES[k.id] ? k : null;
 }
 /* ---- the wrap (1 Oct 2026, the owner: "when I zoom out to observable universe, I get elementary particles, quarks ...
-   and then maybe I end up in one of the computing transistor units ... or one of the memory units"): the ring of sizes,
-   p.wrap, is a root of its own. Up from the top of the ladder (beyond) goes to the ring; Up from the ring goes in at the
-   Planck length under one of the page's ways back in (pageExits: a memory cell or a compute gate), and every Up after
-   that climbs: quark, proton, nucleus, atom, crystal, channel, fin, FinFET, the cell or the gate, and on up through the
-   page's own scales. + runs the loop backwards: from the Planck length to the ring, from the ring to beyond. A move onto
-   or off the ring is a cross-fade with a marker running along the ring (a wrap step), never a zoom through space. ---- */
+   and then maybe I end up in one of the computing transistor units ... or one of the memory units"; and at 09:00: "I
+   want to reappear again as an atom ... make sure it loops"): the ring of sizes, p.wrap, is a root of its own. Up from
+   the top of the ladder (beyond) goes to the ring; Up from the ring goes in as one fixed atom of the chip, the page's
+   first way back in (pageExits: a silicon atom in a transistor of the multiply-add), and every Up after that climbs the
+   crystal, the channel, the fin, the FinFET, its gate and on up through the page's own scales, out to the top and round
+   again. + runs the loop backwards: from the atom down to the Planck length, round to the ring, and from the ring to
+   beyond. A move onto or off the ring is a cross-fade with a marker running along the ring (a wrap step), never a zoom
+   through space. ---- */
 const WRAP = 'p.wrap', PLANCK = 'p.planck';
 const isWrap = P => P.length === 1 && P[0].id === WRAP;
-let LASTEXIT = null;
-/* the way back in that Up takes from the ring: the other one from last time round, the page's first the first time */
+/* the path of the scale the camera last came to from the ring (its panel says so and offers the way back round) */
+let WRAPIN = null;
+/* the way back in that Up takes from the ring: always the page's first (the owner, 1 Oct 09:00: "I want to reappear
+   again as an atom. Pick some point in the compute hierarchy which is deep ... and make sure it loops"): one fixed atom,
+   so that Up, pressed for ever, goes round the same loop; the others are offered in the ring's panel */
 function upExit() {
   const xs = typeof pageExits === 'function' ? pageExits() : [];
-  if (!xs.length) return null;
-  const i = xs.findIndex(x => x.id === LASTEXIT);
-  return xs[i < 0 ? 0 : (i + 1) % xs.length];
+  return xs.length ? xs[0] : null;
 }
-/* the path from P down its default chain to the Planck length (a way back in from the ring) */
+/* the path from P down its default chain to the scale id (a way back in from the ring: an atom) */
 function chainTo(P, id) { let Q = P.slice(); for (let i = 0; i < 60 && Q[Q.length - 1].id !== id; i++) { const k = defKid(Q); if (!k) return null; Q = Q.concat([k]); } return Q[Q.length - 1].id === id ? Q : null; }
-/* Up from P: its parent; at the top of the ladder, the ring; on the ring, in at the Planck length */
+/* Up from P: its parent; at the top of the ladder, the ring; on the ring, in again as an atom of the chip */
 function upOf(P) {
   if (isWrap(P)) { const x = upExit(); return x ? x.path() : null; }
   if (P.length > 1) return P.slice(0, -1);
@@ -943,10 +949,10 @@ function scaleUI(force) {
     b.innerHTML = '<span class="up-t">Top of the ladder</span>';
     setDis(b, true); b.setAttribute('aria-label', 'Top of the ladder'); b.title = '';
   } else if (isWrap(P)) {
-    // the ring: Up goes round it, in at the Planck length (the readout shows no size: the ring is a picture)
+    // the ring: Up goes round it, in again as an atom (the readout shows no size: the ring is a picture)
     const x = upExit();
-    b.innerHTML = `<span class="up-t">↑ Round the ring: in at the Planck length</span>`;
-    setDis(b, false); b.setAttribute('aria-label', `Round the ring: in at the Planck length, then up ${x ? 'through ' + x.lab : ''}`); b.title = 'Round the ring (Backspace or −)';
+    b.innerHTML = `<span class="up-t">↑ Round the ring: in again as an atom</span>`;
+    setDis(b, false); b.setAttribute('aria-label', `Round the ring: in again as an atom${x ? ', ' + x.lab : ''}`); b.title = 'Round the ring (Backspace or −)';
   } else {
     const par = U[U.length - 1], sz = sizeOf(par);
     if (egg(par)) {
@@ -1115,6 +1121,8 @@ function readout(s, e) {
 /* after a move: announce the scale, and (unless a flow or the tour holds the panel) show where the camera is */
 function arrived() {
   const P = Z.path, el = P[P.length - 1];
+  // (the note "you came round the ring" stays only on the scale the wrap landed on, until the camera leaves it)
+  if (WRAPIN && WRAPIN !== pkeys(P)) WRAPIN = null;
   $('stage').classList.toggle('offchip', Z.level < 0 || Z.level > 2);
   $('cap-scale').textContent = `Scale: ${nameOf(el)}, ${sizeWords(sizeOf(el))}`;
   // off the page's own scales, the deep zoom's facts are fetched now if they have not been
@@ -1129,10 +1137,12 @@ const DIRV = {N: [0, -1], S: [0, 1], W: [-1, 0], E: [1, 0]};
 const DIRRC = {N: [-1, 0], S: [1, 0], W: [0, -1], E: [0, 1]};
 function arrowNav(dir) {
   const P = zNow().path, el = P[P.length - 1];
-  if (el.id === 'shire') {
-    const sid = +el.k, c = shCell(sid); if (!c) return false;
+  // a cell of the die (a shire, a memory shire, the PCIe or the I/O shire): to the neighbour that way, as its edge link
+  // does (since the owner's second update of 1 Oct the memory, PCIe and I/O shires have their links too)
+  const c = typeof cellOfEl === 'function' ? cellOfEl(el) : null;
+  if (c) {
     const n0 = BYDIE[(c.r + DIRRC[dir][0]) + ',' + (c.c + DIRRC[dir][1])];
-    if (n0) { goNeighbour({cell: n0, dir}, sid); return true; }
+    if (n0) { goNeighbour({cell: n0, dir}, c); return true; }
     return false;
   }
   const sib = sibInDir(P, dir);
@@ -1148,7 +1158,9 @@ function sibInDir(P, dir) {
   const c0 = {x: me.r.x + me.r.w / 2, y: me.r.y + me.r.h / 2}, [vx, vy] = DIRV[dir];
   let best = null, bs = Infinity;
   Object.entries(zs).forEach(([key, s]) => {
-    const el = elOf(key); if (el.id !== P[d].id || key === pk(P[d])) return;
+    // (siblings are instances of one scale, a shire's minions, a vector unit's lanes; a part's own key on a scale without
+    // instances, lib.finfet:pun, is the same drawing seen from another part: not a sibling)
+    const el = elOf(key); if (el.id !== P[d].id || key === pk(P[d]) || !NODES[el.id] || !NODES[el.id].parse) return;
     const dx = s.r.x + s.r.w / 2 - c0.x, dy = s.r.y + s.r.h / 2 - c0.y, along = dx * vx + dy * vy, perp = Math.abs(dx * vy - dy * vx);
     if (along <= 1e-6 || perp > along) return;
     const sc = along + 2 * perp; if (sc < bs) { bs = sc; best = el; }

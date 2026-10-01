@@ -600,6 +600,15 @@ neighbourhood, the core, the vector unit and its lanes, the tensor sequencer, th
 drawings built from what the documents say. And the compute path goes all the way down: a vector lane's fused
 multiply-add, its compressor tree of 17 partial products, one column of it, a 4:2 compressor, a full adder, an XOR gate
 in transistors, then the device.</p>
+<p>Every part leads further in. Where the chip's own circuit is not published (all of its gate-level design), a block
+opens onto the construction the textbooks give, labelled "textbook construction": the multiply-add's adder is a
+Kogge-Stone prefix tree, its aligner and normaliser shifters of multiplexers, its partial products a radix-4 Booth
+encoder's, its leading-zero count a tree of small cells; register files, decoders, queues, counters, comparators,
+control logic of standard cells, a phase-locked loop, error correction, a ROM, a sense amplifier and a clock gate are
+drawn the same way. Each goes down to a gate drawn as transistors (NAND, NOR, AND-OR-INVERT, XOR, an inverter, a
+multiplexer), and every gate to the FinFET, its fin, its channel and the silicon atoms; the DRAM's parts go to the DRAM
+cell's own transistor instead. Sideways, the memory shires, the PCIe shire and the I/O shire have the shires' edge
+links, so every move to a neighbour has its way back.</p>
 <p>The device is drawn at TSMC N7's published numbers (the chip is made in TSMC's 7 nm, N7 by WikiChip's account): the
 FinFET with its gates 57 nm apart and its fins 30 nm apart in a cell 240 nm tall; a fin in section, 6 nm wide and 52 nm
 tall, under its gate stack of hafnium oxide and work-function metal; the channel under the gate, 16.5 nm long, about
@@ -664,7 +673,9 @@ scale).</li>
 fin 6 by 52 nm, the gate 16.5 nm, the channel 257,000 atoms); on down to a silicon atom, its nucleus, a proton, a quark
 and the Planck length, with an electron, a dopant atom and a DRAM cell beside them; the electronics drawn in two states
 (the switch, or G); every transistor-level drawing leads on into the device; and Esperanto's and N7's facts placed scale
-by scale.</li>
+by scale. Later the same day: every part leads further in, through textbook constructions where the chip's own circuit
+is not published, down to a transistor and its atoms; and the memory, PCIe and I/O shires got the shires' edge links,
+each with its way back.</li>
 </ul>
 
 <h2 id="related">Related reports</h2>

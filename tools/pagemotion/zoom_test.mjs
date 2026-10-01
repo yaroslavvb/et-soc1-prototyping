@@ -7,8 +7,10 @@
 //      a part with none, selects it and shows the panel's zoom row); then the Up button comes back
 //   T2 a click (tap) selects and never moves the camera; on touch the pill shows
 //   T3 Up from the deepest default scale (since 1 Oct the Planck length) to the top, one level a press; then round the
-//      ring of sizes (the wrap) and in again at the Planck length; the breadcrumb back down; the "…" menu
-//   T4 a shire's edge links, by click (tap), Enter and the arrow keys; a glide between shires
+//      ring of sizes (the wrap) and in again as an atom of the multiply-add (the owner's second update, 1 Oct 09:00);
+//      Up from it to the die; the breadcrumb back down; the "…" menu
+//   T4 a shire's edge links, by click (tap), Enter and the arrow keys; a glide between shires; since the owner's second
+//      update, the memory, PCIe and I/O shires' links too, each with its link back (T4b)
 //   T5 the dive: + from the top of the ladder to the bottom of the default chain (the Planck length), every step
 //      arriving, the readout monotone, every visible layer's scale within [1/30, 30]; then + round the ring back to the
 //      top; then one breadcrumb click back to the chip
@@ -16,14 +18,24 @@
 //   T7 reduced motion: a zoom is a cut
 //   T11 accessibility: every part's label says what Enter does; the Up button and the crumbs have names; the scale is
 //      announced on arrival
-//   T12 the wrap: the ring's two ways back in, Up taking the compute gate first and the memory cell the next time
-//      round; each lands at the Planck length of its branch and Up climbs that branch
+//   T12 the wrap: the ring's ways back in (an atom of the multiply-add, which Up always takes; an atom of a 6T memory
+//      cell; the Planck length under the first atom); each lands where it says and Up climbs its branch; the landing
+//      panel says the reader came round, and offers the way back
 //   T14 the easter egg (the owner, 1 Oct 07:25): no level above the rack is named in the page's text, the breadcrumb,
 //      the Up button or the panel at the rack or below; pressing Up from the rack still reaches them
 //   T15 the two-state electronics: G, the drawing's switch and the panel's button switch the state; it holds from the
 //      fin into the channel; switching runs no script per frame
 //   T16 the dive by double-clicks (a double-tap on a phone): from the die, each scale's part for the next scale of the
 //      default chain, down to a quark
+//   T17 the loop (the owner, 1 Oct 09:00: "make sure it loops"): Up pressed again and again from the die goes out past
+//      the observable universe, round the ring and in as one atom, twice, the same atom each time, and on round
+//   T18 the navigation graph ("make sure all the things navigate"): every scale reached from the top and the ring by
+//      any exit; every zoom has a seat; every cell of the die has its four edge links and each its link back; every
+//      sideways glide has its glide back; every scale reaches the die and the die reaches every scale (no one-way exit)
+//   T19 no dead ends ("make sure in all the places I eventually go all the way down to the lowest transistor level and
+//      then I go down to the atoms"): every part from the rack down zooms somewhere (but the few that are not the
+//      ET-SoC-1's, listed); from every scale zoom-ins reach a transistor (a FinFET, or a DRAM cell's on its own process)
+//      and then an atom; and a vector add, by double-clicks, from the chip down through a textbook adder to an atom
 import { open, sleep } from './cdp.mjs';
 const args = process.argv.slice(2), PAGE = args.find(a => !a.startsWith('--')), PHONE = args.includes('--phone');
 const ONLY = (args.find(a => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
@@ -58,7 +70,9 @@ T.T1 = async b => {
     const parts = await b.ev('window.__chipTest.parts()');
     const byKey = new Map(); parts.forEach(p => { const l = byKey.get(p.key) || []; l.push(p); byKey.set(p.key, l); });
     for (const [key, list] of byKey) {
-      const p = list.find(q => q.kid) ? list.filter(q => q.kid)[Math.floor(list.filter(q => q.kid).length / 2)] : list[0];
+      const p0 = list.find(q => q.kid) ? list.filter(q => q.kid)[Math.floor(list.filter(q => q.kid).length / 2)] : list[0];
+      // (parts of one kind with one label, a DRAM bank's twelve mats: the first of them is the one found by its label)
+      const p = parts.find(q => q.label === p0.label) || p0;
       s = await goScene(b, sc); await scrollStage(b);
       const pt = await hitPoint(b, p.label);
       if (!ok(!!pt, `T1 ${sc} · ${key}: reachable`, p.label)) continue;
@@ -133,10 +147,11 @@ T.T3 = async b => {
   ok(/not further out in space/.test(pn) && /Round the ring/.test(s.up), 'T3 the ring says it is not a place; Up goes round it', s.up);
   await b.ev(`document.getElementById('up').click()`); await sleep(40); await b.idle(15000);
   s = await b.state();
-  ok(s.node === 'p.planck', 'T3 Up from the ring: in at the Planck length', s.path.split('/').slice(-3).join('/'));
-  // and up again to the die: 19 presses through the compute gate
+  ok(s.node === 'p.atom' && /lib\.xor\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(s.path), 'T3 Up from the ring: in again as an atom of the multiply-add', s.path.split('/').slice(-6).join('/'));
+  // and up again to the die: 15 presses (the crystal, the channel, the fin, the FinFET, the XOR, the full adder, the 4:2,
+  // the column, the tree, the multiply-add, the lane, the vector unit, the minion, the shire, the chip)
   let m = 0; for (; m < 30 && s.node !== 'die'; m++) { await b.ev(`document.getElementById('up').click()`); await sleep(40); await b.idle(15000); s = await b.state(); }
-  ok(s.node === 'die' && m === 19, `T3 from the Planck length up to the die: ${m} presses (19 by the compute gate)`, s.path.split('/').slice(-2).join('/'));
+  ok(s.node === 'die' && m === 15, `T3 from the atom up to the die: ${m} presses (15)`, s.path.split('/').slice(-2).join('/'));
   // the breadcrumb: back down to the chip in one click, then to the deepest crumb is the default chain's next crumb
   await b.load(PAGE, '?at=' + rel.slice(di).join('/'), 1100); await b.idle(10000);
   const crumbs = await b.ev(`[...document.querySelectorAll('#crumbs button')].map(x => ({t: x.textContent, ci: x.dataset.ci, name: x.getAttribute('aria-label') || x.textContent}))`);
@@ -337,25 +352,41 @@ T.T11 = async b => {
 T.T12 = async b => {
   let s = await goScene(b, 'p.wrap');
   const xs = await b.ev('window.__chipTest.exits()');
-  ok(xs.length === 2 && xs.every(x => /p\.planck$/.test(x.path)), 'T12 the ring has two ways back in, each to a Planck length', xs.map(x => x.id).join(', '));
+  ok(xs.length === 3 && /lib\.xor\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(xs[0].path) && /lib\.sram6t\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(xs[1].path) && /p\.atom\/p\.nucleus\/p\.nucleon\/p\.quark\/p\.planck$/.test(xs[2].path),
+    'T12 the ring\'s ways back in: an atom of the multiply-add, an atom of a 6T cell, the Planck length under the first', xs.map(x => x.id).join(', '));
   const parts = (await b.ev('window.__chipTest.parts()')).filter(p => /^exit-/.test(p.key));
-  ok(parts.length === (b.touch ? 0 : 2), `T12 the ways back in are parts of the drawing${b.touch ? ' (a phone: in the panel)' : ''}`, parts.map(p => p.label).join(' | '));
+  ok(parts.length === (b.touch ? 0 : 3), `T12 the ways back in are parts of the drawing${b.touch ? ' (a phone: in the panel)' : ''}`, parts.map(p => p.label).join(' | '));
   const pb = await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].map(x => x.textContent)`);
-  ok(pb.filter(t => /^Through /.test(t)).length === 2, 'T12 the panel offers both ways back in', pb.join(' | '));
-  ok(await b.ev('window.__chipTest.upExit()') === 'compute', 'T12 Up takes the compute gate first');
+  ok(pb.filter(t => /^An atom|^The tail/.test(t)).length === 3, 'T12 the panel offers the three ways back in', pb.join(' | '));
+  ok(await b.ev('window.__chipTest.upExit()') === 'compute', 'T12 Up takes the atom of the multiply-add');
   const up = async () => { await b.ev(`document.getElementById('up').click()`); await sleep(40); await b.idle(15000); return b.state(); };
   const climb = async n => { const seen = []; for (let i = 0; i < n; i++) seen.push((await up()).node); return seen; };
   s = await up();
-  ok(s.path === xs[0].path, 'T12 Up from the ring lands on the compute branch\'s Planck length', s.path.split('/').slice(-4).join('/'));
-  // + at the Planck length goes round the ring again; Up then takes the other way in
-  await b.key('+'); await sleep(40); await b.idle(15000); s = await b.state();
-  ok(s.path === 'p.wrap' && await b.ev('window.__chipTest.upExit()') === 'memory', 'T12 the next time round, Up takes the memory cell', s.path);
+  ok(s.path === xs[0].path, 'T12 Up from the ring lands on the atom of the multiply-add', s.path.split('/').slice(-4).join('/'));
+  const pn = await b.ev(`document.getElementById('pn-body').textContent`);
+  ok(/You came round the ring/.test(pn) && /Back to the ring/.test(pn) && await b.ev('window.__chipTest.wrapin()') === s.path, 'T12 its panel says the reader came round, and offers the way back', pn.slice(0, 160));
+  // + from the atom goes down to the Planck length and round to the ring (the loop backwards); Up from the ring lands on the
+  // same atom again (one fixed point)
+  for (let i = 0; i < 5; i++) { await b.key('+'); await sleep(40); await b.idle(15000); }
+  s = await b.state();
+  ok(s.path === 'p.wrap', 'T12 + from that atom: the nucleus, a proton, a quark, the Planck length, round to the ring', s.path);
   s = await up();
-  ok(s.path === xs[1].path, 'T12 Up from the ring lands on the memory branch\'s Planck length', s.path.split('/').slice(-4).join('/'));
-  let seen = await climb(9);
-  ok(seen[8] === 'lib.sram6t' && seen.includes('lib.finfet'), 'T12 Up climbs the memory branch: the FinFET, then the 6T cell', seen.join(' '));
-  await goScene(b, 'p.wrap'); await up(); seen = await climb(9);
-  ok(seen[8] === 'lib.xor', 'T12 Up climbs the compute branch: the FinFET, then the XOR gate', seen.join(' '));
+  ok(s.path === xs[0].path, 'T12 Up from the ring again: the same atom', s.path.split('/').slice(-3).join('/'));
+  let seen = await climb(5);
+  ok(seen.join(' ') === 'lib.si lib.channel lib.fin lib.finfet lib.xor', 'T12 Up climbs the compute branch: the crystal, the channel, the fin, the FinFET, the XOR gate', seen.join(' '));
+  // the other ways in, from the panel
+  await goScene(b, 'p.wrap');
+  await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].find(x => /^An atom of a 6T/.test(x.textContent)).click()`); await sleep(40); await b.idle(15000);
+  s = await b.state();
+  ok(s.path === xs[1].path, 'T12 the panel\'s memory-cell way in lands on its atom', s.path.split('/').slice(-4).join('/'));
+  seen = await climb(5);
+  ok(seen[4] === 'lib.sram6t' && seen[3] === 'lib.finfet', 'T12 Up climbs the memory branch: the FinFET, then the 6T cell', seen.join(' '));
+  await goScene(b, 'p.wrap');
+  await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].find(x => /^The tail/.test(x.textContent)).click()`); await sleep(40); await b.idle(15000);
+  s = await b.state();
+  ok(s.path === xs[2].path, 'T12 the panel\'s tail way in lands on the Planck length', s.path.split('/').slice(-3).join('/'));
+  seen = await climb(4);
+  ok(seen.join(' ') === 'p.quark p.nucleon p.nucleus p.atom', 'T12 Up climbs from the Planck length: a quark, a proton, the nucleus, the atom', seen.join(' '));
 };
 
 /* the easter egg: the names of the levels above the rack */
@@ -427,6 +458,132 @@ T.T16 = async b => {
     n++;
   }
   ok(n === qi - di, `T16 from the die to a quark in ${n} double-${b.touch ? 'taps' : 'clicks'}`);
+};
+
+/* the cells of the die beside the shires: a memory shire, the PCIe and the I/O shire, each with its four edge links;
+   from a shire to each and back by its links (click or tap, Enter, the arrow keys) */
+T.T4b = async b => {
+  const C = await (async () => { await goScene(b, 'die'); return b.ev('window.__chipTest.cells()'); })();
+  const bad = [], OPP = {N: 'S', S: 'N', W: 'E', E: 'W'}, by = new Map(C.map(c => [c.cell, c]));
+  C.forEach(c => { Object.entries(c.want).forEach(([d, n]) => { if (!c.have[d] || c.have[d].cell !== n) bad.push(`${c.cell} ${d}: ${n}`); }); Object.entries(c.have).forEach(([d, h]) => { const o = by.get(h.cell); if (o && (!o.have[OPP[d]] || o.have[OPP[d]].cell !== c.cell)) bad.push(`${c.cell} ${d} → ${h.cell}: no way back`); }); });
+  ok(C.length === 44 && !bad.length, `T4b every cell of the die with a scale (${C.length}) has a link to each neighbour, and each its link back`, bad.slice(0, 6).join(' | '));
+  const nav = async (from, lab, how, want) => {
+    await goScene(b, from); await scrollStage(b);
+    const sel = `[...document.querySelectorAll('#chip .lay .nbr')].filter(g => g.getClientRects().length).find(g => g.getAttribute('aria-label') === ${JSON.stringify(lab)})`;
+    const bx = await b.box('js:' + sel);
+    if (!ok(!!bx, `T4b ${from}: a link "${lab}"`)) return null;
+    let die = false;
+    if (how === 'click') await b.click(bx.x, bx.y); else if (how === 'tap') await b.tap(bx.x, bx.y);
+    else { await b.ev(`(${sel}).focus()`); await b.key(how === 'enter' ? 'Enter' : {north: 'ArrowUp', south: 'ArrowDown', west: 'ArrowLeft', east: 'ArrowRight'}[/, (\w+)$/.exec(lab)[1]]); }
+    for (let i = 0; i < 60; i++) { const st = await b.state(); if (st.visible.some(x => x.node === 'die')) die = true; if (!st.zooming && i > 2) break; await sleep(25); }
+    await b.idle(9000);
+    const s = await b.state();
+    ok(s.path.endsWith('die/' + want) && !die, `T4b ${from} → ${want} by ${how}: a glide, no die`, s.path.split('/').slice(-2).join('/'));
+    return s;
+  };
+  const pairs = [['shire:24', 'Go to memory shire 0, west', 'memshire:0', 'Go to shire 24, east', 'shire:24'], ['memshire:0', 'Go to memory shire 1, south', 'memshire:1', 'Go to memory shire 0, north', 'memshire:0'],
+    ['shire:32', 'Go to PCIe shire, east', 'pcie', 'Go to master shire, west', 'shire:32'], ['pcie', 'Go to I/O shire, east', 'io', 'Go to PCIe shire, west', 'pcie'],
+    ['io', 'Go to shire 28, south', 'shire:28', 'Go to I/O shire, north', 'io'], ['shire:7', 'Go to memory shire 7, east', 'memshire:7', 'Go to shire 7, west', 'shire:7']];
+  for (const [a, la, x, lb, back] of pairs) {
+    for (const how of b.touch ? ['tap'] : ['click', 'enter', 'arrow']) {
+      const s1 = await nav(a, la, how, x); if (!s1) continue;
+      if (how !== 'click' && how !== 'tap') { const f = await b.ev(`document.activeElement && document.activeElement.classList.contains('nbr') ? document.activeElement.getAttribute('aria-label') : null`); ok(f === lb, `T4b ${a} → ${x} by ${how}: focus on the link back`, f); }
+      await nav(x, lb, how, back);
+    }
+  }
+};
+
+/* the loop: Up, again and again, from the die */
+T.T17 = async b => {
+  await goScene(b, 'die');
+  const atoms = [], ringAt = []; let n = 0, s = await b.state(), last = s.path, stuck = 0;
+  for (; n < 120 && atoms.length < 2; n++) {
+    await b.ev(`document.getElementById('up').click()`); await sleep(30); await b.idle(15000);
+    s = await b.state();
+    if (s.path === last) stuck++;
+    last = s.path;
+    if (s.node === 'p.wrap') ringAt.push(n + 1);
+    if (s.node === 'p.atom') atoms.push({n: n + 1, path: s.path});
+  }
+  ok(!stuck, 'T17 every Up press moved the camera', String(stuck));
+  ok(atoms.length === 2 && ringAt.length === 2 && ringAt[0] === atoms[0].n - 1 && ringAt[1] === atoms[1].n - 1, `T17 Up from the die: past the top, the ring, an atom (press ${atoms[0] && atoms[0].n}), and round again (press ${atoms[1] && atoms[1].n})`, JSON.stringify({ringAt, atoms: atoms.map(a => a.n)}));
+  ok(atoms.length === 2 && atoms[0].path === atoms[1].path && /vpu\.lane:0\/vpu\.lane\.fma\/.*lib\.channel\/lib\.si\/p\.atom$/.test(atoms[0].path), 'T17 both times the same atom: a silicon atom in a transistor of lane 0\'s multiply-add', atoms[0] ? atoms[0].path.split('/').slice(-8).join('/') : '');
+  ok(atoms.length === 2 && atoms[1].n - atoms[0].n === 37, `T17 one lap is ${atoms.length === 2 ? atoms[1].n - atoms[0].n : '?'} presses (37: 15 up to the die, 21 to the top, the ring, the atom)`);
+};
+
+/* the navigation graph, built in the page (window.__chipTest.graph) */
+const FLOOR = new Set(['p.atom', 'p.electron', 'p.nucleus', 'p.nucleon', 'p.quark', 'p.planck', 'p.wrap']);
+const DEVICE = new Set(['lib.finfet', 'lib.fin', 'lib.gate', 'lib.channel', 'lib.si', 'p.dopant', 'lib.dramcell']);
+const EXT = new Set(['host · cpu', 'host · dimms', 'host · psu', 'card · vrm', 'card · ltm', 'card · dip', 'die · inferred']);
+let GRAPH = null;
+const graph = async b => { if (!GRAPH) { await goScene(b, 'die'); GRAPH = await b.ev('window.__chipTest.graph()'); } return GRAPH; };
+T.T18 = async b => {
+  const G = await graph(b), by = new Map(G.map(s => [s.id, s]));
+  ok(G.length >= 90 && !G.some(s => s.err), `T18 ${G.length} scales reached from the top and the ring, each drawn`, G.filter(s => s.err).map(s => s.id + ': ' + s.err).slice(0, 3).join(' | '));
+  const noseat = [];
+  G.forEach(s => (s.parts || []).forEach(p => { if ((p.kid || p.go) && !p.seat) noseat.push(`${s.id} · ${p.key} → ${p.kid || p.go}`); }));
+  G.forEach(s => (s.kids || []).forEach(k => { if (!k.seat) noseat.push(`${s.id} → ${k.kid}`); }));
+  ok(!noseat.length, 'T18 every zoom, a part\'s or a scale\'s own, has its seat to zoom into', noseat.slice(0, 6).join(' | '));
+  const bottom = G.filter(s => s.here).map(s => s.id);
+  ok(!bottom.length, 'T18 no scale says "the bottom of this branch"', bottom.join(' '));
+  const side1 = [], miss = [];
+  G.forEach(s => Object.entries(s.side || {}).forEach(([d, v]) => { if (v.missing) miss.push(`${s.id} ${d}: ${v.missing}`); if (v.back === false) side1.push(`${s.path.split('/').pop()} ${d} → ${v.to}`); }));
+  ok(!miss.length, 'T18 every cell of the die reached has a link to each neighbour', miss.slice(0, 6).join(' | '));
+  ok(!side1.length, 'T18 every sideways glide (the arrow keys between siblings) has its glide back', side1.slice(0, 6).join(' | '));
+  // the graph of scales: every exit an edge; no one-way exit means every scale reaches the die and the die every scale
+  const id = p => p.split('/').pop().split(':')[0], E = new Map(G.map(s => [s.id, new Set()]));
+  G.forEach(s => {
+    const add = t => { if (t && by.has(t)) E.get(s.id).add(t); };
+    (s.parts || []).forEach(p => add(p.id || (p.go && id(p.go)) || (p.up && p.up)));
+    (s.kids || []).forEach(k => add(k.id)); add(s.up && id(s.up)); add(s.next && id(s.next));
+    Object.values(s.side || {}).forEach(v => add(v.to && v.to !== 'die' ? id(v.to) : v.to));
+  });
+  const reach = (from, edges) => { const seen = new Set([from]), Q = [from]; while (Q.length) { const x = Q.shift(); (edges.get(x) || []).forEach(t => { if (!seen.has(t)) { seen.add(t); Q.push(t); } }); } return seen; };
+  const R = new Map(G.map(s => [s.id, new Set()])); E.forEach((ts, f) => ts.forEach(t => R.get(t).add(f)));
+  const fromDie = reach('die', E), toDie = reach('die', R);
+  const notFrom = G.filter(s => !fromDie.has(s.id)).map(s => s.id), notTo = G.filter(s => !toDie.has(s.id)).map(s => s.id);
+  ok(!notFrom.length, 'T18 the die reaches every scale', notFrom.join(' '));
+  ok(!notTo.length, 'T18 every scale reaches the die (no one-way exit, no trap)', notTo.join(' '));
+  // a zoom in is undone by Up: a part's or a scale's zoom from A lands on a path whose parent is A; a path of its own (the
+  // card's edge) passes A on its way, so Up climbs back through it; only the ring's ways in do not (the loop)
+  const oneway = [];
+  G.forEach(s => (s.parts || []).forEach(p => { if (p.go && s.id !== 'p.wrap' && !p.go.startsWith(s.path + '/')) oneway.push(`${s.id} · ${p.key}`); }));
+  ok(!oneway.length, 'T18 every path of its own starts from where its part is, so Up comes back', oneway.join(' | '));
+};
+T.T19 = async b => {
+  const G = await graph(b), by = new Map(G.map(s => [s.id, s]));
+  const dead = [], ext = [];
+  G.forEach(s => { if (s.egg || FLOOR.has(s.id)) return; (s.parts || []).forEach(p => { if (p.ext) ext.push(`${s.id} · ${p.key}`); else if (!p.kid && !p.go && !p.up) dead.push(`${s.id} · ${p.key}`); }); });
+  ok(!dead.length, `T19 every part from the rack down leads further in (${G.filter(s => !s.egg && !FLOOR.has(s.id)).reduce((n, s) => n + s.parts.length, 0)} parts)`, dead.slice(0, 8).join(' | '));
+  ok(ext.every(e => EXT.has(e)), `T19 the parts that do not, ${[...new Set(ext)].length}, are not the ET-SoC-1's (the host's processor, memory and supply; the card's regulators and switches; the die's key)`, [...new Set(ext)].filter(e => !EXT.has(e)).join(' | '));
+  const kidsOf = s => [...new Set((s.parts || []).filter(p => p.id).map(p => p.id).concat((s.kids || []).map(k => k.id)).concat((s.parts || []).filter(p => p.go).map(p => p.go.split('/').pop().split(':')[0])))];
+  const reach = (from, goal) => { const seen = new Set([from]), Q = [from]; while (Q.length) { const x = Q.shift(); if (goal(x)) return true; const s = by.get(x); if (!s) continue; kidsOf(s).forEach(k => { if (!seen.has(k)) { seen.add(k); Q.push(k); } }); } return false; };
+  const noT = [], noA = [];
+  G.forEach(s => { if (FLOOR.has(s.id)) return; if (!DEVICE.has(s.id) && !reach(s.id, x => x === 'lib.finfet' || x === 'lib.dramcell')) noT.push(s.id); if (!reach(s.id, x => x === 'p.atom')) noA.push(s.id); });
+  ok(!noT.length, `T19 from every scale (${G.filter(s => !FLOOR.has(s.id) && !DEVICE.has(s.id)).length} above the device) zoom-ins reach a transistor`, noT.join(' '));
+  ok(!noA.length, 'T19 and from every scale zoom-ins reach an atom', noA.join(' '));
+  // the DRAM's transistors are its own process's: never the N7 FinFET
+  const dramT = ['dram', 'dram.bank', 'dram.cell', 'lib.dramcell'].filter(i => by.has(i) && reach(i, x => x === 'lib.finfet'));
+  ok(!dramT.length, 'T19 the DRAM (its own process) leads to its cell\'s transistor, never to the N7 FinFET', dramT.join(' '));
+  // the owner's case: a vector add, by double-clicks, down to an atom
+  const chain = [['shire', 'cshire'], ['minion', 'minion'], ['vpu', 'vpu'], ['vpu.lane', 'vpu.lane'], ['vpu.lane.fma', 'vpu.lane.fma'], ['lib.adder', 'fmaadd'], ['lib.aoi21', 'pfx1'],
+    ['lib.finfet', 'onefet'], ['lib.fin', 'devring'], ['lib.channel', 'thefin'], ['lib.si', 'lattice'], ['p.atom', 'oneatom']];
+  await goScene(b, 'die');
+  let n = 0;
+  for (const [want, key] of chain) {
+    await scrollStage(b);
+    const parts = await b.ev('window.__chipTest.parts()');
+    const p = parts.filter(q => q.key === key && q.kid && q.kid.split(':')[0] === want)[0] || parts.filter(q => q.kid && q.kid.split(':')[0] === want)[0];
+    if (!ok(!!p, `T19 the vector add: a part leads to ${want}`, parts.map(q => q.key).slice(0, 10).join(' '))) break;
+    const pt = await hitPoint(b, p.label);
+    if (!ok(!!pt, `T19 the vector add: the part for ${want} can be ${b.touch ? 'tapped' : 'clicked'}`, p.label)) break;
+    if (b.touch) await b.dtap(pt.x, pt.y); else await b.dblclick(pt.x, pt.y);
+    await sleep(80); await b.idle(15000);
+    const s = await b.state();
+    if (!ok(s.node === want, `T19 the vector add, double-${b.touch ? 'tap' : 'click'} ${n + 1}: into ${want}`, s.path.split('/').slice(-2).join('/'))) break;
+    n++;
+  }
+  ok(n === chain.length, `T19 a vector add from the chip to a silicon atom in ${n} double-${b.touch ? 'taps' : 'clicks'}, through a textbook adder`);
 };
 
 const b = await open(PHONE ? {w: 390, h: 844, dpr: 3, touch: true} : {w: 1280, h: 800, dpr: 1});

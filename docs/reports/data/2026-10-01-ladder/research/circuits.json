@@ -1,0 +1,414 @@
+{
+ "meta": {
+  "written": "2026-10-01",
+  "by": "research/build_circuits.py",
+  "what": "textbook constructions below the chip's blocks: facts, scales, facts for existing scales"
+ },
+ "facts": [
+  {
+   "id": "tb.gates",
+   "statement": "A static CMOS gate pairs a pull-up network of PMOS transistors with a complementary pull-down network of NMOS transistors: a NOR has its PMOS in series and its NMOS in parallel, a NAND the reverse, and a compound gate such as AND-OR-INVERT combines series and parallel transistors in one stage.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 1 (CMOS logic) and ch. 9 (combinational circuits)"
+  },
+  {
+   "id": "tb.prefix",
+   "statement": "A parallel-prefix adder computes for each bit a generate g = a·b and a propagate p = a XOR b, combines them in a tree of carry cells (G = Gi + Pi·Gj, P = Pi·Pj) of log2 n levels, and forms each sum bit as p XOR the carry into it; a ripple-carry adder instead passes the carry through all n bits one after another.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (addition: tree adders); I. Koren, Computer Arithmetic Algorithms, 2nd ed. (A K Peters, 2002), ch. 5"
+  },
+  {
+   "id": "tb.kogge",
+   "statement": "In the Kogge-Stone prefix tree, level k combines every position with the one 2^k places below it, so that n bits need log2 n levels, each cell driving at most two others.",
+   "kind": "generic",
+   "source": "P. M. Kogge and H. S. Stone, \"A Parallel Algorithm for the Efficient Solution of a General Class of Recurrence Equations\", IEEE Transactions on Computers C-22(8), 1973, pp. 786-793; N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11"
+  },
+  {
+   "id": "tb.shifter",
+   "statement": "A logarithmic (barrel) shifter shifts n bits by any amount in log2 n stages: stage k is a row of 2:1 multiplexers, one per bit, that pass each bit straight on or take the bit 2^k places away, as bit k of the shift amount says.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (shifters)"
+  },
+  {
+   "id": "tb.booth",
+   "statement": "Radix-4 (modified) Booth recoding looks at overlapping triples of multiplier bits (bits 2i+1, 2i and 2i-1) and makes each partial product 0, +X, +2X, -X or -2X, halving the number of partial products to add; each bit of a partial product is a multiplexer choosing x(j) or x(j-1), followed by an XOR with the sign.",
+   "kind": "generic",
+   "source": "A. D. Booth, \"A Signed Binary Multiplication Technique\", Quarterly Journal of Mechanics and Applied Mathematics 4(2), 1951; O. L. MacSorley, \"High-Speed Arithmetic in Binary Computers\", Proceedings of the IRE 49(1), 1961; I. Koren, Computer Arithmetic Algorithms, 2nd ed. (A K Peters, 2002), ch. 6; N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (multiplication)"
+  },
+  {
+   "id": "tb.booth.table",
+   "statement": "The radix-4 Booth table: multiplier bits 000 give 0, 001 and 010 give +X, 011 gives +2X, 100 gives -2X, 101 and 110 give -X, and 111 gives 0.",
+   "kind": "generic",
+   "source": "I. Koren, Computer Arithmetic Algorithms, 2nd ed. (A K Peters, 2002), ch. 6; N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11"
+  },
+  {
+   "id": "tb.lzd",
+   "statement": "A leading-zero counter for n bits is a tree of log2 n levels: each leaf takes two bits, and each node takes the count of its left half if that half holds a 1, else the count of its right half with one more bit set.",
+   "kind": "generic",
+   "source": "V. G. Oklobdzija, \"An Algorithmic and Novel Design of a Leading Zero Detector Circuit: Comparison with Logic Synthesis\", IEEE Transactions on VLSI Systems 2(1), 1994, pp. 124-128"
+  },
+  {
+   "id": "tb.lza",
+   "statement": "A leading-zero anticipator predicts the normalisation shift of a floating-point sum from the adder's operands, in parallel with the addition; its prediction can be one position off, which a final one-bit correction fixes.",
+   "kind": "generic",
+   "source": "M. S. Schmookler and K. J. Nowka, \"Leading Zero Anticipation and Detection: A Comparison of Methods\", Proceedings of the 15th IEEE Symposium on Computer Arithmetic (ARITH-15), 2001, pp. 7-12"
+  },
+  {
+   "id": "tb.decoder",
+   "statement": "An n-to-2^n decoder has one AND gate per output, fed by each address bit or its complement; a memory's row decoder predecodes groups of two or three address bits first and drives each selected row through a buffer.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 12 (SRAM row circuitry: decoders)"
+  },
+  {
+   "id": "tb.regfile",
+   "statement": "A register file keeps each bit in a latch or a multi-ported memory cell; a write decodes its address to enable one row (through a clock gate or a write wordline), and each read port picks one row per bit through a multiplexer tree or a read wordline and bitline.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 12 (multiported register files)"
+  },
+  {
+   "id": "tb.icg",
+   "statement": "An integrated clock gate latches the enable while the clock is high and ANDs it with the clock: a block whose enable is low gets no clock edges, so its flip-flops and clock wires do not switch.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 10 (sequential circuits) and ch. 5 (power: clock gating)"
+  },
+  {
+   "id": "tb.stdcell",
+   "statement": "Logic synthesis maps a block's register-transfer-level description onto a library of standard cells (inverters, NAND, NOR, AND-OR-INVERT and XOR gates, multiplexers, flip-flops, clock gates), typically a few hundred kinds of cell of one height, placed in rows.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 14 (design methodology and tools: standard-cell design)"
+  },
+  {
+   "id": "tb.counter",
+   "statement": "A binary counter is a register and an incrementer: a chain of half adders adds one, each half adder's sum an XOR of its bit and the carry in and its carry an AND of the two.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (counters)"
+  },
+  {
+   "id": "tb.compare",
+   "statement": "An equality comparator XNORs each pair of bits and combines the results in a tree of NAND and NOR gates: the output is 1 only when every pair agrees.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (comparators)"
+  },
+  {
+   "id": "tb.fifo",
+   "statement": "A first-in, first-out queue is a small memory addressed by a write pointer and a read pointer, two counters; comparing the pointers tells a full queue from an empty one.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 12 (serial-access memories: queues)"
+  },
+  {
+   "id": "tb.pll",
+   "statement": "A phase-locked loop multiplies a reference clock: a phase-frequency detector compares the reference with the output divided by N, a charge pump and loop filter turn the difference into a control voltage, and a voltage-controlled oscillator, often a ring of an odd number of inverters, settles at N times the reference.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 13 (clocks: PLLs and DLLs)"
+  },
+  {
+   "id": "tb.ecc",
+   "statement": "A single-error-correcting, double-error-detecting (SECDED) code adds check bits, each the XOR of a subset of the data bits; recomputed on a read, they give a syndrome that is zero for no error, names the flipped bit for one error and flags two; 64 data bits need 8 check bits, a (72, 64) code.",
+   "kind": "generic",
+   "source": "R. W. Hamming, \"Error Detecting and Error Correcting Codes\", Bell System Technical Journal 29(2), 1950; M. Y. Hsiao, \"A Class of Optimal Minimum Odd-Weight-Column SEC-DED Codes\", IBM Journal of Research and Development 14(4), 1970; N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (coding)"
+  },
+  {
+   "id": "tb.rom",
+   "statement": "A NOR ROM stores each bit as a transistor present or absent where a wordline crosses a bitline: the bitlines are precharged high, and when a row rises its transistors pull their bitlines low.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 12 (read-only memory)"
+  },
+  {
+   "id": "tb.senseamp",
+   "statement": "A latch-type SRAM sense amplifier is two cross-coupled inverters with a tail NMOS switched by a sense-enable signal: it turns a bitline difference of tens of millivolts into full logic levels; precharge PMOS transistors equalise the bitlines between reads.",
+   "kind": "generic",
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 12 (SRAM column circuitry: sense amplifiers); J. Rabaey, A. Chandrakasan and B. Nikolić, Digital Integrated Circuits: A Design Perspective, 2nd ed. (Prentice Hall, 2003), ch. 12"
+  },
+  {
+   "id": "tb.fma",
+   "statement": "A fused multiply-add computes a x b + c with one rounding: Booth-recoded partial products reduced by a tree of carry-save adders, the addend aligned by a shifter in parallel, one wide addition, a leading-zero count, a normalising shift and a rounding increment.",
+   "kind": "generic",
+   "source": "R. K. Montoye, E. Hokenek and S. L. Runyon, \"Design of the IBM RISC System/6000 Floating-Point Execution Unit\", IBM Journal of Research and Development 34(1), 1990, pp. 59-70; I. Koren, Computer Arithmetic Algorithms, 2nd ed. (A K Peters, 2002), ch. 7"
+  },
+  {
+   "id": "size.lib.nor2",
+   "statement": "NOR gate: about 240 nm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "about 3 gate pitches (171 nm) wide in a 240 nm-tall N7 cell, like the NAND; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.aoi21",
+   "statement": "AND-OR-INVERT gate: about 300 nm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "about 4 gate pitches wide (inference); an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.shifter",
+   "statement": "Shifter (stages of multiplexers): about 20 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "a 64-bit shifter is 6 rows of 64 multiplexers, each about 0.3 µm wide; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.lzd",
+   "statement": "A leading-zero counter: about 5 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "a 64-bit counter is about 60 small cells in six levels; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.decoder",
+   "statement": "Decoder: about 3 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "a 7-to-128 row decoder spans the 128 rows of an array, a few µm; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.regfile",
+   "statement": "Register file: about 40 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "like the core's integer register file: 4,096 latch bits with their ports; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.logic",
+   "statement": "Control logic: standard cells: about 20 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "a control block of a few thousand cells at 0.1-0.3 µm² each; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.counter",
+   "statement": "Counter: about 3 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "an 8- to 40-bit counter: a few dozen cells; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.cmpeq",
+   "statement": "Equality comparator: about 2 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "a 23-bit comparator: 23 XNORs and a small tree; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.fifo",
+   "statement": "Queue (first in, first out): about 20 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "a few entries of a cache line or a request, with their pointers; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.pll",
+   "statement": "A phase-locked loop (PLL): about 100 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "on the order of 100 µm across, like the shire's clock generation (size.shire.clock); an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.ecc",
+   "statement": "Error correction (SECDED): about 10 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "the XOR trees of a 72-bit code: a few hundred gates; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  },
+  {
+   "id": "size.lib.rom",
+   "statement": "A read-only memory (ROM): about 20 µm across, the width of the view that frames it (an order of magnitude).",
+   "kind": "inferred",
+   "source": "the ladder's textbook constructions (research/build_circuits.py)",
+   "note": "a small table of coefficients: a few thousand bits; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+  }
+ ],
+ "nodes": {
+  "lib.nor2": {
+   "name": "NOR gate",
+   "short": "NOR gate",
+   "blurb": "Out is 1 only when both inputs are 0: two p-type transistors in series pull it up, two n-type side by side pull it down. With the NAND, any logic can be built from it.",
+   "m": 2.4e-07,
+   "kind": "inferred",
+   "f": "size.lib.nor2",
+   "facts": [
+    "tb.gates",
+    "size.lib.nor2"
+   ]
+  },
+  "lib.aoi21": {
+   "name": "AND-OR-INVERT gate",
+   "short": "AOI gate",
+   "blurb": "One stage of transistors that computes not (A·B + C): cheaper and faster than an AND, an OR and an inverter. A fast adder's carry cells are made of these.",
+   "m": 3e-07,
+   "kind": "inferred",
+   "f": "size.lib.aoi21",
+   "facts": [
+    "tb.gates",
+    "tb.prefix",
+    "size.lib.aoi21"
+   ]
+  },
+  "lib.shifter": {
+   "name": "Shifter (stages of multiplexers)",
+   "short": "Shifter",
+   "blurb": "Moves a number left or right by any number of places in a few steps: each stage shifts by 1, 2, 4, ... places or not. The multiply-add uses one to line up the numbers it adds and another to normalise the result.",
+   "m": 2e-05,
+   "kind": "inferred",
+   "f": "size.lib.shifter",
+   "facts": [
+    "tb.shifter",
+    "size.lib.shifter"
+   ]
+  },
+  "lib.lzd": {
+   "name": "A leading-zero counter",
+   "short": "Leading zeros",
+   "blurb": "Counts the zeros before the first 1 of a number, in a tree of small cells: it tells the normaliser how far to shift a sum so that its first digit is a 1.",
+   "m": 5e-06,
+   "kind": "inferred",
+   "f": "size.lib.lzd",
+   "facts": [
+    "tb.lzd",
+    "tb.lza",
+    "size.lib.lzd"
+   ]
+  },
+  "lib.decoder": {
+   "name": "Decoder",
+   "short": "Decoder",
+   "blurb": "Turns an address into one raised line: 3 bits pick one of 8 rows, 7 bits one of 128. Every memory and register file has one for its rows.",
+   "m": 3e-06,
+   "kind": "inferred",
+   "f": "size.lib.decoder",
+   "facts": [
+    "tb.decoder",
+    "size.lib.decoder"
+   ]
+  },
+  "lib.regfile": {
+   "name": "Register file",
+   "short": "Register file",
+   "blurb": "A small, fast memory with several doors: rows of latches, a decoder that picks the row to write, and multiplexers that read one row out per port. Processors keep their registers in these.",
+   "m": 4e-05,
+   "kind": "inferred",
+   "f": "size.lib.regfile",
+   "facts": [
+    "tb.regfile",
+    "size.lib.regfile"
+   ]
+  },
+  "lib.logic": {
+   "name": "Control logic: standard cells",
+   "short": "Logic cells",
+   "blurb": "What any block of control logic is made of when its own netlist is not published: flip-flops that hold its state and a few kinds of gate that compute the next state, all from a library of standard cells.",
+   "m": 2e-05,
+   "kind": "inferred",
+   "f": "size.lib.logic",
+   "facts": [
+    "tb.stdcell",
+    "size.lib.logic"
+   ]
+  },
+  "lib.counter": {
+   "name": "Counter",
+   "short": "Counter",
+   "blurb": "A register that adds one to itself on every clock (or every event): flip-flops and a chain of half adders. Barrier counters, credit counters and performance counters are all of this kind.",
+   "m": 3e-06,
+   "kind": "inferred",
+   "f": "size.lib.counter",
+   "facts": [
+    "tb.counter",
+    "size.lib.counter"
+   ]
+  },
+  "lib.cmpeq": {
+   "name": "Equality comparator",
+   "short": "Comparator",
+   "blurb": "Says whether two numbers are equal: an XNOR gate per bit, then a tree of gates that is 1 only if every bit agreed. A cache uses one per way to find its hit.",
+   "m": 2e-06,
+   "kind": "inferred",
+   "f": "size.lib.cmpeq",
+   "facts": [
+    "tb.compare",
+    "size.lib.cmpeq"
+   ]
+  },
+  "lib.fifo": {
+   "name": "Queue (first in, first out)",
+   "short": "Queue",
+   "blurb": "Where requests wait their turn: a small register file, a counter that points where the next one is written, another where the next one is read, and a compare that says full or empty.",
+   "m": 2e-05,
+   "kind": "inferred",
+   "f": "size.lib.fifo",
+   "facts": [
+    "tb.fifo",
+    "size.lib.fifo"
+   ]
+  },
+  "lib.pll": {
+   "name": "A phase-locked loop (PLL)",
+   "short": "PLL",
+   "blurb": "Makes a fast clock from a slow, steady one: it compares the two, and nudges an oscillator (a ring of inverters) until its output, divided down, matches the reference.",
+   "m": 0.0001,
+   "kind": "inferred",
+   "f": "size.lib.pll",
+   "facts": [
+    "tb.pll",
+    "size.lib.pll"
+   ]
+  },
+  "lib.ecc": {
+   "name": "Error correction (SECDED)",
+   "short": "ECC",
+   "blurb": "Extra check bits stored with the data, each the parity of some of the bits: on a read they show whether a bit flipped, which one, so it can be put right, and whether two did.",
+   "m": 1e-05,
+   "kind": "inferred",
+   "f": "size.lib.ecc",
+   "facts": [
+    "tb.ecc",
+    "size.lib.ecc"
+   ]
+  },
+  "lib.rom": {
+   "name": "A read-only memory (ROM)",
+   "short": "ROM",
+   "blurb": "A table fixed when the chip is made: a transistor where a bit is 0, none where it is 1. The vector unit's transcendental functions read their coefficients from small tables like this.",
+   "m": 2e-05,
+   "kind": "inferred",
+   "f": "size.lib.rom",
+   "facts": [
+    "tb.rom",
+    "size.lib.rom"
+   ]
+  },
+  "lib.adder": {
+   "short": "Adder"
+  },
+  "lib.booth": {
+   "short": "Booth encoder"
+  },
+  "lib.icg": {
+   "short": "Clock gate"
+  }
+ },
+ "more": {
+  "lib.adder": [
+   "tb.prefix",
+   "tb.kogge"
+  ],
+  "lib.booth": [
+   "tb.booth",
+   "tb.booth.table"
+  ],
+  "lib.icg": [
+   "tb.icg"
+  ],
+  "lib.senseamp": [
+   "tb.senseamp"
+  ],
+  "vpu.lane.fma": [
+   "tb.fma"
+  ],
+  "lib.nand2": [
+   "tb.gates"
+  ],
+  "lib.inverter": [
+   "tb.gates"
+  ]
+ }
+}

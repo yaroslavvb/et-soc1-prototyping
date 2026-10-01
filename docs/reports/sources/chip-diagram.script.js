@@ -458,9 +458,10 @@ function buildShire(L, ap, sid) {
    frame's edge and its hit area turns with it. */
 const DIRNAME = {N: 'north', S: 'south', W: 'west', E: 'east'}, DIRBACK = {N: 'S', S: 'N', W: 'E', E: 'W'};
 function nbrLinks(L, P, NB, fr) {
-  const G = E('g', {class: 'nbrs'}, L), {X, Y, W} = fr;
-  // CSS px per drawing unit in the shire's view (the hit area's minimum is set in CSS px)
-  const bw = $('svgwrap').clientWidth || innerWidth - 32, pxu = Math.max(0.2, bw / (PH ? PV[1].w : VB.w)), need = (TOUCH ? 44 : 28) / pxu;
+  const G = E('g', {class: 'nbrs'}, L), {X, Y, W} = fr, H = fr.H || W;
+  // CSS px per drawing unit in the shire's view (the hit area's minimum is set in CSS px; a memory, PCIe or I/O shire's
+  // view is its own, fr.vw)
+  const bw = $('svgwrap').clientWidth || innerWidth - 32, pxu = Math.max(0.1, bw / (fr.vw || (PH ? PV[1].w : VB.w))), need = (TOUCH ? 44 : 28) / pxu;
   const meas = [];
   NB.forEach(([c, s, at]) => {
     const g = E('g', {class: 'nbr', tabindex: 0, role: 'link', 'data-comp': 'nbr', 'aria-label': `Go to ${cellName(c)}, ${DIRNAME[s]}`}, G);
@@ -483,9 +484,9 @@ function nbrLinks(L, P, NB, fr) {
       const padX = 10, h = Math.max(th + 8, need), w = Math.max(tw + 2 * padX, need);
       let ry = y0 + th / 2 - h / 2;
       // never over the frame's words: the north link may reach into the frame's empty top margin, the south one stops
-      // at the frame
-      if (s === 'N') ry = Math.min(ry, Y + 20 - h);
-      if (s === 'S') ry = Math.max(ry, Y + W + 2);
+      // at the frame (links set in a grid under the frame, fr.free, keep their own rows)
+      if (s === 'N' && !fr.free) ry = Math.min(ry, Y + 20 - h);
+      if (s === 'S' && !fr.free) ry = Math.max(ry, Y + H + 2);
       Object.entries({x: x0 + tw / 2 - w / 2, y: ry, width: w, height: h}).forEach(([k, v]) => hit.setAttribute(k, v.toFixed(1)));
     });
   } finally { if (d0 === 'none') { L.style.display = d0; L.style.visibility = v0; } }
@@ -501,10 +502,11 @@ function nbrEl(c) {
   if ((c.type === 'pcie' || c.type === 'io') && NODES[c.type]) return {id: c.type};
   return null;
 }
-function goNeighbour(ctx, fromSid) {
+function goNeighbour(ctx, from) {
   const c = ctx.cell; if (!c) return;
-  const el = nbrEl(c), from = fromSid != null ? fromSid : Z.sid;
-  if (el) { if (el.id === 'shire') NBRBACK = {sid: from, dir: DIRBACK[ctx.dir]}; userNav(pathOf({level: 0}).concat([el]), {pan: true}); return; }
+  const el = nbrEl(c);
+  // (focus lands on the link back, the one pointing the other way: every cell's scene has its links since 1 Oct)
+  if (el) { NBRBACK = {dir: DIRBACK[ctx.dir]}; userNav(pathOf({level: 0}).concat([el]), {pan: true}); return; }
   userNav(pathOf({level: 0})).then(() => { if (Z.level !== 0 || !c.g) return; select(c.g); showComp(c.type, {cell: c}, {g: c.g}); scaleUI(); if (svg.contains(document.activeElement) || document.activeElement === document.body) c.g.focus({preventScroll: true}); });
 }
 let NBRBACK = null;
@@ -897,15 +899,21 @@ node('minion', {parse: k => { const q = String(k).split('.').map(Number); return
   size: () => scSize('minion'), frame: () => MF,
   build: (L, ap, p) => buildMinion(L, ap, p.sid, p.nb, p.mi),
   here: (p, P) => showComp('minion', {}, {here: P})});
-/* the ways back in from the ring of sizes (ladder-core.js, the wrap): a compute gate, an XOR of the multiply-add in lane 0
-   of minion 0 of shire 0, and a memory cell, a 6T cell of shire 0's cache at the memory levels' example address; Up
-   from the ring takes the compute gate first, then the other one each time round */
+/* the ways back in from the ring of sizes (ladder-core.js, the wrap). The owner, 1 Oct 09:00: "When I zoom out all the way
+   to the top ... I want to reappear again as an atom. Pick some point in the compute hierarchy which is deep, which goes
+   all the way down to the atoms, and make sure it loops." Up from the ring always lands on one atom: a silicon atom in
+   the channel of a FinFET of an XOR gate, in a full adder of a 4:2 compressor in the multiply-add's tree, lane 0 of the
+   vector unit of minion 0, shire 0; climbing out goes up that path to the die, the rack and round again. The ring's panel
+   also offers an atom of a memory cell (a 6T cell of shire 0's cache) and the Planck length under the first atom. */
+const COMPUTE0 = () => pathOf({level: 2, sid: 0, nb: 0, mi: 0}).concat([{id: 'vpu'}, {id: 'vpu.lane', k: '0'}]);
 function pageExits() {
   return [
-    {id: 'compute', lab: 'a compute gate (an XOR in the multiply-add of lane 0, minion 0, shire 0)', short: 'a compute gate: an XOR of the multiply-add',
-      path: () => chainTo(pathOf({level: 2, sid: 0, nb: 0, mi: 0}).concat([{id: 'vpu'}, {id: 'vpu.lane', k: '0'}]), PLANCK)},
-    {id: 'memory', lab: 'a memory cell (a 6T SRAM cell of shire 0\'s cache)', short: 'a memory cell: a 6T cell of the shire cache',
-      path: () => chainTo(pathOf({level: 1, sid: 0}).concat([{id: 'shire.bank', k: String(L2X().bank)}]), PLANCK)},
+    {id: 'compute', lab: 'a silicon atom in a transistor of the multiply-add (lane 0 of minion 0, shire 0)', short: 'an atom of the multiply-add',
+      path: () => chainTo(COMPUTE0(), 'p.atom')},
+    {id: 'memory', lab: 'a silicon atom in a memory cell (a 6T SRAM cell of shire 0\'s cache)', short: 'an atom of a 6T memory cell',
+      path: () => chainTo(pathOf({level: 1, sid: 0}).concat([{id: 'shire.bank', k: String(L2X().bank)}]), 'p.atom')},
+    {id: 'planck', lab: 'the Planck length, under that atom of the multiply-add', short: 'the tail: the Planck length',
+      path: () => chainTo(COMPUTE0(), PLANCK)},
   ];
 }
 /*@include ladder-outer.js*/
@@ -913,7 +921,46 @@ function pageExits() {
 /*@include ladder-mem.js*/
 /*@include chip-diagram.blocks.js*/
 /*@include ladder-inner.js*/
+/*@include ladder-circuits.js*/
 DIE = OUT_IDS.length;
+/* ---- every cell of the die has its edge links (the owner, 1 Oct 09:00: "I can go right all the way to the memory module
+   but then there is no left arrow to go back"): the memory shires, the PCIe shire and the I/O shire get the shire's
+   four links (to the neighbour that way, or "die edge"), so every sideways move has its way back. On a wide screen
+   they sit round the frame, whose view is widened for them; on a phone, in a grid under it, in type at least 11 px. ---- */
+/* the die cell a scale stands for: a shire (32 and 33 the master and the spare), a memory shire, the PCIe or the I/O shire */
+function cellOfEl(el) {
+  if (!el) return null;
+  if (el.id === 'shire') return shCell(+el.k) || null;
+  if (el.id === 'memshire') return MSC[+String(el.k).split('.')[0]] || null;
+  if (el.id === 'pcie' || el.id === 'io') return CELLS.find(c => c.type === el.id) || null;
+  return null;
+}
+const CELLV = {x: MLF.x - 123, y: MLF.y - 40, w: 1510, h: 854};
+function cellLinks(L, ap, P) {
+  const c = cellOfEl(P[P.length - 1]); if (!c) return;
+  ap.nbr = {};
+  const X = MLF.x, Y = MLF.y, W = MLF.w, H = MLF.h, NB = [];
+  const v = viewOf(P[P.length - 1]), bw = $('svgwrap').clientWidth || innerWidth - 32, fs = PH ? Math.max(40, Math.ceil(11.5 * v.w / Math.max(200, bw))) : 19;
+  const need = PH ? Math.max(fs * 1.6, (TOUCH ? 44 : 28) * v.w / Math.max(200, bw)) : 0;
+  const ARR = {N: '↑', S: '↓', W: '←', E: '→'};
+  [[-1, 0, 'N'], [1, 0, 'S'], [0, -1, 'W'], [0, 1, 'E']].forEach(([dr, dc, s], i) => {
+    const n = BYDIE[(c.r + dr) + ',' + (c.c + dc)], lab = n ? cellName(n) : 'die edge';
+    let at;
+    if (PH) at = {x: X + 16 + (i % 2) * (W / 2), y: Y + H + 30 + fs + Math.floor(i / 2) * need, t: `${ARR[s]} ${lab}`, a: 'start', sz: fs};
+    else if (s === 'N') at = {x: X + W / 2, y: Y - 13, t: (n ? '↑ ' : '') + lab, a: 'middle'};
+    else if (s === 'S') at = {x: X + W / 2, y: Y + H + 29, t: (n ? '↓ ' : '') + lab, a: 'middle'};
+    else if (s === 'W') at = {x: X - 26, y: Y + H / 2, t: (n ? '← ' : '') + lab, a: 'middle', rot: -90};
+    else at = {x: X + W + 26, y: Y + H / 2, t: (n ? '→ ' : '') + lab, a: 'middle', rot: 90};
+    if (!n) { const t = T(L, at.x, at.y, at.t, 't-sm edgelab', at.a); if (at.sz) phSize(t, at.sz); if (at.rot) t.setAttribute('transform', `rotate(${at.rot} ${at.x} ${at.y})`); return; }
+    NB.push([n, s, at]);
+  });
+  nbrLinks(L, ap, NB, {X, Y, W, H, vw: v.w, free: PH});
+}
+['memshire', 'pcie', 'io'].forEach(id => {
+  const N0 = NODES[id], b0 = N0.build;
+  N0.view = () => (PH ? MLV : CELLV);
+  N0.build = (L, ap, p, P, d) => { b0(L, ap, p, P, d); cellLinks(L, ap, P.slice(0, d + 1)); };
+});
 Z.path = pathOf({level: 0});
 
 /* ================= details panel ================= */
@@ -3313,7 +3360,7 @@ function prose(again) {
   const lk = id => `<a href="#facts" data-f="${id}" class="num">${id}</a>`;
   const SETTLED = f => /^(Superseded|Settled) 2[79] Sep/.test(f.note || '');   // an inferred fact settled since: by the firmware's map (27 Sep) or E56 (29 Sep) (build_facts.py, AMEND, AMEND2)
   $('honest-text').innerHTML = `<p>The page rests on ${fs.length} facts: <b>${meas.length} measured</b>, ${of('spec').length} from the specification (the datasheet, the Programmer's Reference Manual, the core-et documents and the firmware and runtime source), ${of('derived').length} derived from others and <b>${of('inferred').length} inferred</b>${KINDS9.slice(4).filter(k => of(k).length).map(k => `, ${of(k).length} ${KWORD[k]}`).join('')}. Of the measured facts, ${mc(3)} hold on all three lab cards (aifoundry2, aifoundry3 and aifoundry1 card 1), ${mc(2)} on two and ${mc(1)} on one, mostly aifoundry2${mc(0) ? `; ${mc(0)} ${mc(0) === 1 ? 'names' : 'name'} no card` : ''}. Every table here is at ${n('mhz')}, where a warm card sits.</p>`
-    + `<p>The zoom past the chip and into its parts (30 September and 1 October) adds ${dzf.length} facts of its own: ${dzk.map(([k, c]) => `${c} ${KWORD[k]}`).join(', ')}. The sizes of the chip's parts from the shire down are estimates; the levels outside the chip rest on the vendor's documents and the lab's own records; the device on TSMC N7's published numbers and Esperanto's papers (Hot Chips 33, IEEE Micro 2022); the atom and below on CODATA, NIST and the Particle Data Group.</p>`
+    + `<p>The zoom past the chip and into its parts (30 September and 1 October) adds ${dzf.length} facts of its own: ${dzk.map(([k, c]) => `${c} ${KWORD[k]}`).join(', ')}. The sizes of the chip's parts from the shire down are estimates; the levels outside the chip rest on the vendor's documents and the lab's own records; the circuits inside the blocks, where the chip's own are not published, on the textbooks (Weste and Harris, Rabaey, Koren, and the papers each construction cites), and say so; the device on TSMC N7's published numbers and Esperanto's papers (Hot Chips 33, IEEE Micro 2022); the atom and below on CODATA, NIST and the Particle Data Group.</p>`
     + `<p>What the drawing assumes, and what the second version (27 September) and the measurements of 29 September settled:</p><ul>`
     + `<li><b>Where the compute shires are</b> is measured: all ${n('pairs496')} shire pairs fit a constant plus ${n('hop_cyc')} per hop of Manhattan distance on the logical map (${lk('mesh.shortest-paths')}). <b>How that map sits on the die</b> was inferred (${lk('mesh.orientation')}, ${lk('L33')}, ${lk('L34')}); it is now the firmware's own: the "default Shire Virtual ID Map, based on the NOC spec", renamed as the boot firmware renames the shires, matches the measured map in ${n('fw_pairs')} pair distances with no rotation or mirror (${lk('fw.map-match')}; fact ${lk('L37')}, which compared the map before the renaming, is superseded). Still open: whether the silicon has this handedness or the published die plot's, its mirror (${lk('die.handedness')}, ${lk('L24')}).</li>`
     + `<li><b>The four cells without a compute shire</b>: the firmware's maps name them, the master (shire 32) in the north cell, the spare (33) in the south one, PCIe and then I/O east of the master (${lk('fw.grey-cells')}). They are drawn solid now. Timing a counter read on shire 32 from every compute shire confirms the master's cell on a card: E56 did so on 29 September, and it placed shire 32 in the firmware's cell on aifoundry1 card 1 and decided nothing on aifoundry3 or aifoundry2 (the asks below).</li>`
@@ -3443,6 +3490,58 @@ window.__chipTest = {
   // how long each scale of a path takes to draw (a layer drawn again; for the build budget, DESIGN §5.3)
   buildTimes: s => { const P = atPath(s); if (!P) return null; return P.map((el, d) => { const L = layerAt(P, d), t0 = performance.now(); buildInto(L, P, d); return [el.id, +(performance.now() - t0).toFixed(1), L.querySelectorAll('*').length]; }); },
   eggFacts: () => [...eggFacts()], exits: () => pageExits().map(x => ({id: x.id, path: pkeys(x.path())})), upExit: () => (upExit() || {}).id, ston: () => STON,
+  wrapin: () => WRAPIN,
+  /* the navigation graph (the owner, 1 Oct 09:00: "make sure all the things navigate ... no dead ends"): every scale
+     reached from the top of the ladder and from the ring by any exit, one path per scale, each with its exits: its parts'
+     zooms (and whether each has a seat to zoom into), its own zooms, Up, +, the sideways moves (the edge links of a cell
+     of the die, else the arrow keys' glides, with whether the glide back returns) and the paths of its own (the ring's
+     ways in, the card's edge). Built off screen; the layers it made are dropped after. */
+  graph: () => {
+    const out = [], seen = new Set(), Q = [[{id: 'beyond'}], [{id: WRAP}]], OPP = {N: 'S', S: 'N', W: 'E', E: 'W'};
+    const push = P => { if (!P || !P.length) return; const id = P[P.length - 1].id; if (!seen.has(id)) { seen.add(id); Q.push(P); } };
+    Q.forEach(P => seen.add(P[P.length - 1].id));
+    const seatOk = P => { try { for (let d = 1; d < P.length; d++) if (!seatOf(P, d)) return false; return true; } catch (_) { return false; } };
+    while (Q.length && out.length < 400) {
+      const P = Q.shift(), el = P[P.length - 1], d = P.length - 1;
+      let L; try { L = built(P, d); } catch (e) { out.push({id: el.id, path: pkeys(P), err: String(e)}); continue; }
+      const parts = [...L.querySelectorAll('.comp')].map(g => {
+        const k = kidOf(g), go = g._go ? g._go() : null;
+        const r = {key: g._key, label: g.getAttribute('aria-label'), ext: !!g._ext};
+        if (go) { r.go = pkeys(go); r.seat = seatOk(go); push(go); }
+        else if (k && k.up) r.up = k.up;
+        else if (k) { const C = P.concat([k]); r.kid = pk(k); r.id = k.id; r.seat = seatOk(C); if (r.seat) push(C); }
+        return r;
+      });
+      const kids = kidsOf(P).map(k => { const C = P.concat([k]); const ok = seatOk(C); if (ok) push(C); return {kid: pk(k), id: k.id, seat: ok}; });
+      const U = upOf(P), N = nextOf(P); push(U); push(N);
+      const side = {};
+      const c = cellOfEl(el);
+      if (c) {
+        const nb = L._ap.nbr || {};
+        Object.entries(nb).forEach(([dir, g]) => { const e2 = nbrEl(g._ctx.cell); side[dir] = {to: e2 ? pk(e2) : 'die', cell: cellName(g._ctx.cell)}; if (e2) push(pathOf({level: 0}).concat([e2])); });
+        ['N', 'S', 'W', 'E'].forEach(dir => { const n0 = BYDIE[(c.r + DIRRC[dir][0]) + ',' + (c.c + DIRRC[dir][1])]; if (n0 && !side[dir]) side[dir] = {missing: cellName(n0)}; });
+      } else if (P.length > 1) {
+        ['N', 'S', 'W', 'E'].forEach(dir => { const S1 = sibInDir(P, dir); if (S1) { const B = sibInDir(S1, OPP[dir]); side[dir] = {to: pk(S1[S1.length - 1]), back: !!B && samePath(B, P)}; } });
+        // and every sibling's glides, not only this one's (a shire's 32 minions, a vector unit's 8 lanes, ...)
+        const Lp = layerAt(P, d - 1), zs = Lp._built ? Lp._ap.zs : {};
+        Object.keys(zs).filter(k => elOf(k).id === el.id && NODES[el.id].parse).forEach(k => {
+          const S0 = P.slice(0, d).concat([elOf(k)]);
+          ['N', 'S', 'W', 'E'].forEach(dir => { const S1 = sibInDir(S0, dir); if (!S1) return; const B = sibInDir(S1, OPP[dir]); if (!(B && samePath(B, S0))) side['sib ' + k + ' ' + dir] = {to: pk(S1[S1.length - 1]), back: false}; });
+        });
+      }
+      out.push({id: el.id, path: pkeys(P), depth: d, egg: egg(el), parts, kids: kids, up: U ? pkeys(U) : null, next: N ? pkeys(N) : null, side, here: (() => { try { return zoomRowHere(P).includes('bottom of this branch'); } catch (_) { return null; } })()});
+    }
+    prune();
+    return out;
+  },
+  /* every cell of the die with a scale of its own, and its edge links (the ways sideways and back) */
+  cells: () => CELLS.map(c => {
+    const el = nbrEl(c); if (!el) return null;
+    const P = pathOf({level: 0}).concat([el]), L = built(P, P.length - 1), nb = L._ap.nbr || {};
+    const want = {}; ['N', 'S', 'W', 'E'].forEach(dir => { const n0 = BYDIE[(c.r + DIRRC[dir][0]) + ',' + (c.c + DIRRC[dir][1])]; if (n0) want[dir] = cellName(n0); });
+    const have = {}; Object.entries(nb).forEach(([dir, g]) => { have[dir] = {cell: cellName(g._ctx.cell), label: g.getAttribute('aria-label'), visible: !!g.getBBox}; });
+    return {cell: cellName(c), path: pk(el), want, have};
+  }).filter(Boolean),
 };
 /* a read-only view of the state, for the page's tests (headless Chrome) */
 window.__chipState = () => ({level: Z.level, sid: Z.sid, nb: Z.nb, mi: Z.mi, flow: FL.k, stage: FL.i, done: FL.done, still: FL.still,

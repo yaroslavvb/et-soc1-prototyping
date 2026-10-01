@@ -780,6 +780,19 @@ what the repository needs of it.
   (257,000 atoms), the crystal and its band gap, an atom, its nucleus, a proton, a quark, the Planck length, with an
   electron, a phosphorus dopant and a DRAM cell beside them. The gate switch (G) draws the device on and off; the
   inverter's input and a stored bit switch too.
+- **The owner's second update (Q90, 09:00)**: every sideways move has its way back (the memory, PCIe and I/O shires got
+  the shire's edge links: all 44 cells of the die link to each neighbour, and each link has its link back; the arrow keys
+  too); the loop (Up from the ring lands on one fixed atom, a silicon atom in the channel of a FinFET of an XOR in a full
+  adder of the compressor tree of lane 0's multiply-add, and Up from it climbs to the chip, the rack and round again;
+  the ring's panel also offers an atom of a 6T cell and the Planck length); completeness (`ladder-circuits.js`: 17
+  textbook constructions, each labelled "textbook construction · this chip's own circuit: not published", down to a gate
+  drawn as transistors; every part of the chip's drawings leads further in, the few that are not the ET-SoC-1's, the
+  host's processor, memory and supply and the card's regulators and switches, say so). The data:
+  `docs/reports/data/2026-10-01-ladder/research/build_circuits.py`. The tests: `zoom_test.mjs` T4b (every cell's links
+  and their ways back, by click, Enter and the arrow keys), T17 (the loop: Up from the die passes the ring twice and
+  lands on the same atom), T18 (the navigation graph: every scale reached, every zoom with a seat, no one-way exit) and
+  T19 (no dead ends: every part zooms in, every scale reaches a transistor and then an atom; a vector add by
+  double-clicks from the chip to an atom).
 
 ## Cross-links between the reports
 

@@ -21,7 +21,7 @@ def kinks(tag):
     return out
 tags = sys.argv[1:]
 S = {t: summ(t) for t in tags}; K = {t: kinks(t) for t in tags}
-keys = sorted(set(k for t in tags for k in S[t]), key=lambda k: ['A', 'H', 'K', 'tour', 'up', 'dive', 'wrap'].index(k) if k in ['A', 'H', 'K', 'tour', 'up', 'dive', 'wrap'] else 99)
+keys = sorted(set(k for t in tags for k in S[t]), key=lambda k: ['A', 'H', 'K', 'tour', 'up', 'dive', 'vtree', 'wrap', 'vadd', 'side'].index(k) if k in ['A', 'H', 'K', 'tour', 'up', 'dive', 'vtree', 'wrap', 'vadd', 'side'] else 99)
 print(f"{'run':6s} " + ' | '.join(f"{t:>38s}" for t in tags))
 for k in keys:
     row = []

@@ -11,6 +11,8 @@ Inputs (research/, each with the script that wrote it):
   particles.json  (build_particles.py)  the atom to the Planck length, the wrap, the early universe, 93 facts
   studio45.json   (build_studio45.py)   Studio 45, Bernal Heights and 29th Street, from the owner's words and public data
   bernal-geo.json (simplify_bernal_geo.py) the Bernal Heights map and 29th Street's profile, simplified
+  circuits.json   (build_circuits.py)   the textbook constructions below the chip's blocks (the owner's second update
+                  of 1 Oct: every part reaches a transistor), their facts, scales and the facts they add to others
 
 Output, ladder.json:
   nodes    the new scales and the corrected ones: name, short name, a beginner's lead (blurb), size in metres with its
@@ -41,6 +43,7 @@ PROC = json.load(open(os.path.join(R, 'process.json')))
 PART = json.load(open(os.path.join(R, 'particles.json')))
 S45 = json.load(open(os.path.join(R, 'studio45.json')))
 GEO = json.load(open(os.path.join(R, 'bernal-geo.json')))
+CIR = json.load(open(os.path.join(R, 'circuits.json')))
 
 facts = {}
 
@@ -65,6 +68,8 @@ for e in PART['epochs'] + [PART['stardust']]:
     for i, f in enumerate(e['facts']):
         add(f'{e["id"]}.{i + 1}', f['text'], f['kind'], f['source'], None, f.get('note'))
 for f in S45['facts']:
+    add(f['id'], f['statement'], f['kind'], f['source'], f.get('url'), f.get('note'))
+for f in CIR['facts']:
     add(f['id'], f['statement'], f['kind'], f['source'], f.get('url'), f.get('note'))
 # the arithmetic of the particles' derived and inferred facts whose research gave none (DESIGN §2.4)
 HOW = {
@@ -171,6 +176,11 @@ nodes = {
 for k in EGG:
     if k in nodes:
         nodes[k]['egg'] = True
+# the textbook constructions (research/circuits.json): their scales, and a short name for those inside.json names
+for k, v in CIR['nodes'].items():
+    if k in nodes:
+        raise SystemExit(f'circuits.json redefines the scale {k}')
+    nodes[k] = v
 # what the chip's existing scales gain (DESIGN §4.1, §4.4): the process and Esperanto's facts, scale by scale
 more = {
     'die': ['et.process', 'et.process-n7', 'et.transistors', 'et.die-area', 'et.masks', 'et.density', 'et.sram-bytes', 'et.cores', 'et.power', 'et.leakage', 'et.leak-double',
@@ -192,6 +202,8 @@ more = {
     'lib.xor': ['el.switch'],
     'dram.cell': ['el.dram-cell', 'el.dram-leak'],
 }
+for k, fl in CIR['more'].items():
+    more[k] = more.get(k, []) + [f for f in fl if f not in more.get(k, [])]
 
 # ---- the numbers the new drawings print: key -> (fact, the text as it occurs in the fact[, the text drawn])
 NUM = {
@@ -284,7 +296,7 @@ def build():
     for eid, key, lab in EPOCHS:
         e = next(x for x in PART['epochs'] if x['id'] == eid)
         eps.append({'id': eid, 'lab': lab, 'num': key, 'T_K': e.get('temperature_K'), 't_s': e.get('time_s')})
-    out = {'meta': {'written': '2026-10-01', 'by': 'build_ladder.py', 'inputs': ['research/process.json', 'research/particles.json', 'research/studio45.json', 'research/bernal-geo.json'],
+    out = {'meta': {'written': '2026-10-01', 'by': 'build_ladder.py', 'inputs': ['research/process.json', 'research/particles.json', 'research/studio45.json', 'research/bernal-geo.json', 'research/circuits.json'],
                     'egg': 'the levels above the rack are an easter egg (the owner, 1 Oct 2026 07:25 PDT): no written hierarchy names them; a reader finds them by pressing Up',
                     'kinds': KINDS},
            'nodes': nodes, 'more': more, 'facts': facts, 'num': num, 'ring': {'ticks': ring, 'epochs': eps},

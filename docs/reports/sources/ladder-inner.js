@@ -758,13 +758,17 @@ onode('p.wrap', {kid: null, pv: () => opv(), build: (L, ap) => {
   T(L, mm.x, mm.y, `the middle: ${on('ring_mid')}`, 'o-s ohalo', 'middle', onf('ring_mid'));
   // the mouth: the head (the observable universe) meets the tail's tip (the Planck length); the marker runs across it
   // (each mark an eighth of the frame wide: the other scene grows from it, and the ring is never zoomed more than 8 times)
-  const tl = at(1.616255e-35), mk = VB.w / 16;
+  const tl = at(1.616255e-35), mk = VB.w / 16, am = at(2.352e-10);
   ap.headBox = {x: hd.x - mk, y: hd.y - mk * VB.h / VB.w, w: 2 * mk, h: 2 * mk * VB.h / VB.w};
   ap.tailBox = {x: tl.x - mk, y: tl.y - mk * VB.h / VB.w, w: 2 * mk, h: 2 * mk * VB.h / VB.w};
-  const run = E('path', {class: 'rrun', d: `M${hd.x},${hd.y} A${G.r},${G.r} 0 0 0 ${tl.x},${tl.y}`, 'pointer-events': 'none'}, L);
-  const runLen = 2 * Math.PI * G.r * 16 / 360 + 4;
+  // (since the owner's second update of 1 Oct, Up from the ring lands on an atom: the marker runs from the head across the
+  // mouth, then up the tail to the atom's tick, where the atom grows from)
+  ap.atomBox = {x: am.x - mk, y: am.y - mk * VB.h / VB.w, w: 2 * mk, h: 2 * mk * VB.h / VB.w};
+  const run = E('path', {class: 'rrun', d: `M${hd.x},${hd.y} A${G.r},${G.r} 0 0 0 ${tl.x},${tl.y} A${G.r},${G.r} 0 0 0 ${am.x},${am.y}`, 'pointer-events': 'none'}, L);
+  const runPl = 2 * Math.PI * G.r * 16 / 360, runLen = runPl + 2 * Math.PI * G.r * Math.abs(ringAng(1.616255e-35) - ringAng(2.352e-10)) / (2 * Math.PI) + 4;
   run.setAttribute('stroke-dasharray', `${runLen} ${runLen}`); run.style.strokeDashoffset = runLen + 'px';
-  ap.run = run; ap.runLen = runLen;
+  ap.run = run; ap.runLen = runLen; ap.runLenPl = runPl + 4;
+  S(E('circle', {cx: am.x, cy: am.y, r: 9, 'pointer-events': 'none'}, L), {fill: '#ffd27a', stroke: '#1d2540', strokeWidth: 2});
   T(L, hd.x + 18, hd.y - 18, 'the observable universe', 'o-s ohalo', 'start');
   T(L, tl.x - 18, tl.y - 18, 'the Planck length', 'o-s ohalo', 'end');
   // looking out is looking back: the epochs, as times and temperatures, never as sizes
@@ -781,9 +785,12 @@ onode('p.wrap', {kid: null, pv: () => opv(), build: (L, ap) => {
   // the ways back in: Up takes the one marked
   const xs = typeof pageExits === 'function' ? pageExits() : [], up = upExit();
   const bx = ex, by = sy + (PH ? 70 : 72);
-  T(L, bx, by, 'In again, at the Planck length:', 'o-l');
+  T(L, bx, by, 'In again:', 'o-l');
   xs.forEach((x, i) => {
-    const g = opart(L, 'exit-' + x.id, `In through ${x.lab}`, {title: `In through ${x.lab}`, kick: 'Ring of sizes · a way back in', lead: 'From the Planck length up again: a quark, a proton, a nucleus, an atom, the crystal, a channel, a fin, a FinFET, and then ' + x.lab + ', on up to the chip.', facts: ['p.wrap.1']}, {id: PLANCK});
+    const tip = x.path()[x.path().length - 1];
+    const g = opart(L, 'exit-' + x.id, `In again: ${x.lab}`, {title: `In again: ${x.lab}`, kick: 'Ring of sizes · a way back in', lead: tip.id === PLANCK
+      ? 'In at the tail\'s tip, the Planck length, under that atom: Up climbs a quark, a proton, a nucleus and the atom, then on up to the chip.'
+      : `In as ${x.lab}: Up climbs from there through the crystal, the channel, the fin, the FinFET and its gate, on up to the chip, and round again.`, facts: ['p.wrap.1']}, {id: tip.id});
     g._go = x.path;
     const yy = by + 16 + i * (PH ? 50 : 44), w = PH ? 600 : 460;
     S(E('rect', {class: 'shape exitb', x: bx - 6, y: yy, width: w, height: PH ? 42 : 36, rx: 18}, g), {});
@@ -797,7 +804,7 @@ function ringHere(P) {
   const s = OSC['p.wrap'] || {}, xs = typeof pageExits === 'function' ? pageExits() : [], up = upExit();
   const facts = (s.facts || []).filter(f => F[f]);
   const isUp = x => !!(up && x.id === up.id);
-  const rows = `<div class="pn-zoom">${zrow('In again:', xs.map(x => zbtn(x.path(), `Through ${x.lab}`, isUp(x), isUp(x) ? '(Up)' : '')))}${zrow('', [zbtn([{id: 'beyond'}], '? (+)', false, '')])}</div>`;
+  const rows = `<div class="pn-zoom">${zrow('In again:', xs.map(x => zbtn(x.path(), capFirst(x.short), isUp(x), isUp(x) ? '(Up)' : '')))}${zrow('', [zbtn([{id: 'beyond'}], '? (+)', false, '')])}</div>`;
   panel(`<p class="pn-kick">${hereKick(P)}</p><p class="pn-title">The ring of sizes: a picture, not a place</p><p class="pn-lead">${esc(s.blurb || '')}</p>` + rows
     + '<p class="pn-cred">The idea: Sheldon Glashow’s uroboros, as drawn by Joel Primack and Nancy Ellen Abrams, <i>The View from the Center of the Universe</i> (2006); this drawing is the page’s own.</p>'
     + detBlock((facts.length ? `<p class="pn-h pn-fh">The facts (${facts.length}): point at one for its source</p><ul class="facts">${facts.map(factLi).join('')}</ul>` : '') + lazyNote(s.facts)));

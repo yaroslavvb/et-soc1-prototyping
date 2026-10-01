@@ -72,9 +72,11 @@ function blockScene(id, L, ap, p, P, o) {
       const r = Math.floor(i / cols), c = i % cols, x = X0 + c * (bw + gw), yy = y1 + r * (bh + gh), s1 = sc(k);
       const cap = Math.max(1, Math.min(3, Math.floor((bh - 50) / LH))), all = wrapW(firstClause(s1.blurb, cap * wrapAt), wrapAt);
       const lines = all.slice(0, cap); if (all.length > cap) lines[cap - 1] = lines[cap - 1].replace(/[,;:.]?\s*\S*$/, '…');
-      const has = !!NODES[k], nm = String(s1.name || k).replace(/\s*\(.*$/, '');
+      // (since 1 Oct a part with no scale of its own leads to a textbook construction, ladder-circuits.js LINKS: it is drawn
+      // as a part with a zoom too)
+      const lk = typeof LINKS !== 'undefined' && LINKS[id] ? LINKS[id][k] : undefined, has = !!NODES[k] || (lk != null && lk !== false), nm = String(s1.name || k).replace(/\s*\(.*$/, '');
       ipart(L, ap, k, x, yy, bw, bh, has ? CC.logic : 'var(--ink-2)', nm.length < bw / 11 ? nm : s1.short && s1.short.length < bw / 11 ? s1.short : wrapW(nm, Math.floor(bw / 11))[0],
-        {node: k, kid: has ? {id: k} : null, sub: lines, fo: has ? 0.12 : 0.06, opts: has ? null : madeOf(k), lh: LH, ty: 40});
+        {node: k, kid: NODES[k] ? {id: k} : null, sub: lines, fo: has ? 0.12 : 0.06, opts: has ? null : madeOf(k), lh: LH, ty: 40});
     });
   }
   if (see.length) {

@@ -9,13 +9,13 @@
    "research/asks.json",
    "../../sources/limits-of-observability.data.json (the hub rows the asks link to)"
   ],
-  "n_facts": 1044,
+  "n_facts": 1077,
   "kinds": {
    "derived": 131,
    "measured": 214,
    "spec": 291,
-   "inferred": 173,
-   "generic": 67,
+   "inferred": 186,
+   "generic": 87,
    "unknown": 17,
    "outside": 144,
    "owner": 2,
@@ -8354,7 +8354,8 @@
     "e-tfma-fp32",
     "e-tfma-fp32-zeros",
     "e-flip-model",
-    "in.vpu.lane.fma.6"
+    "in.vpu.lane.fma.6",
+    "tb.fma"
    ],
    "kids": [
     "vpu.lane.fma.booth",
@@ -9493,7 +9494,8 @@
     "el.switch",
     "el.rails",
     "el.dynamic",
-    "n7.cells"
+    "n7.cells",
+    "tb.gates"
    ],
    "kids": [],
    "see": [
@@ -9515,7 +9517,8 @@
    "facts": [
     "in.lib.nand2.1",
     "el.switch",
-    "el.rails"
+    "el.rails",
+    "tb.gates"
    ],
    "kids": [],
    "see": [
@@ -9636,7 +9639,7 @@
   },
   "lib.booth": {
    "name": "Booth encoder and partial-product selector",
-   "short": "Booth encoder and partia…",
+   "short": "Booth encoder",
    "blurb": "Looks at three overlapping bits of the multiplier and chooses 0, +/-1 or +/-2 times the multiplicand for that row: two multiplier bits per row instead of one.",
    "parent": "lib",
    "m": 5e-07,
@@ -9644,7 +9647,9 @@
    "note": "order of magnitude",
    "facts": [
     "in.lib.booth.1",
-    "in.lib.booth.2"
+    "in.lib.booth.2",
+    "tb.booth",
+    "tb.booth.table"
    ],
    "kids": [],
    "see": [
@@ -9658,14 +9663,16 @@
   },
   "lib.adder": {
    "name": "Fast (parallel-prefix) adder",
-   "short": "Fast",
+   "short": "Adder",
    "blurb": "Adding 64-bit numbers quickly means not waiting for a carry to ripple through 64 positions: prefix adders compute all the carries in about six levels of logic.",
    "parent": "lib",
    "m": 3e-05,
    "kind": "inferred",
    "note": "a 64-bit adder: tens of um (order of magnitude)",
    "facts": [
-    "in.lib.adder.1"
+    "in.lib.adder.1",
+    "tb.prefix",
+    "tb.kogge"
    ],
    "kids": [],
    "see": [
@@ -9739,7 +9746,8 @@
    "facts": [
     "ml:l3:g.icg",
     "ml:l1:l1.icg-cells",
-    "ml:l1:g.latch-write"
+    "ml:l1:g.latch-write",
+    "tb.icg"
    ],
    "kids": [],
    "see": [
@@ -9802,7 +9810,8 @@
    "note": "about 4 SRAM columns wide (inference)",
    "facts": [
     "ml:scp:scp.g-read-data",
-    "ml:dram:gen.sense"
+    "ml:dram:gen.sense",
+    "tb.senseamp"
    ],
    "kids": [],
    "see": [
@@ -11109,6 +11118,164 @@
    ],
    "egg": true,
    "out": true
+  },
+  "lib.nor2": {
+   "name": "NOR gate",
+   "short": "NOR gate",
+   "blurb": "Out is 1 only when both inputs are 0: two p-type transistors in series pull it up, two n-type side by side pull it down. With the NAND, any logic can be built from it.",
+   "m": 2.4e-07,
+   "kind": "inferred",
+   "f": "size.lib.nor2",
+   "facts": [
+    "tb.gates",
+    "size.lib.nor2"
+   ]
+  },
+  "lib.aoi21": {
+   "name": "AND-OR-INVERT gate",
+   "short": "AOI gate",
+   "blurb": "One stage of transistors that computes not (A·B + C): cheaper and faster than an AND, an OR and an inverter. A fast adder's carry cells are made of these.",
+   "m": 3e-07,
+   "kind": "inferred",
+   "f": "size.lib.aoi21",
+   "facts": [
+    "tb.gates",
+    "tb.prefix",
+    "size.lib.aoi21"
+   ]
+  },
+  "lib.shifter": {
+   "name": "Shifter (stages of multiplexers)",
+   "short": "Shifter",
+   "blurb": "Moves a number left or right by any number of places in a few steps: each stage shifts by 1, 2, 4, ... places or not. The multiply-add uses one to line up the numbers it adds and another to normalise the result.",
+   "m": 2e-05,
+   "kind": "inferred",
+   "f": "size.lib.shifter",
+   "facts": [
+    "tb.shifter",
+    "size.lib.shifter"
+   ]
+  },
+  "lib.lzd": {
+   "name": "A leading-zero counter",
+   "short": "Leading zeros",
+   "blurb": "Counts the zeros before the first 1 of a number, in a tree of small cells: it tells the normaliser how far to shift a sum so that its first digit is a 1.",
+   "m": 5e-06,
+   "kind": "inferred",
+   "f": "size.lib.lzd",
+   "facts": [
+    "tb.lzd",
+    "tb.lza",
+    "size.lib.lzd"
+   ]
+  },
+  "lib.decoder": {
+   "name": "Decoder",
+   "short": "Decoder",
+   "blurb": "Turns an address into one raised line: 3 bits pick one of 8 rows, 7 bits one of 128. Every memory and register file has one for its rows.",
+   "m": 3e-06,
+   "kind": "inferred",
+   "f": "size.lib.decoder",
+   "facts": [
+    "tb.decoder",
+    "size.lib.decoder"
+   ]
+  },
+  "lib.regfile": {
+   "name": "Register file",
+   "short": "Register file",
+   "blurb": "A small, fast memory with several doors: rows of latches, a decoder that picks the row to write, and multiplexers that read one row out per port. Processors keep their registers in these.",
+   "m": 4e-05,
+   "kind": "inferred",
+   "f": "size.lib.regfile",
+   "facts": [
+    "tb.regfile",
+    "size.lib.regfile"
+   ]
+  },
+  "lib.logic": {
+   "name": "Control logic: standard cells",
+   "short": "Logic cells",
+   "blurb": "What any block of control logic is made of when its own netlist is not published: flip-flops that hold its state and a few kinds of gate that compute the next state, all from a library of standard cells.",
+   "m": 2e-05,
+   "kind": "inferred",
+   "f": "size.lib.logic",
+   "facts": [
+    "tb.stdcell",
+    "size.lib.logic"
+   ]
+  },
+  "lib.counter": {
+   "name": "Counter",
+   "short": "Counter",
+   "blurb": "A register that adds one to itself on every clock (or every event): flip-flops and a chain of half adders. Barrier counters, credit counters and performance counters are all of this kind.",
+   "m": 3e-06,
+   "kind": "inferred",
+   "f": "size.lib.counter",
+   "facts": [
+    "tb.counter",
+    "size.lib.counter"
+   ]
+  },
+  "lib.cmpeq": {
+   "name": "Equality comparator",
+   "short": "Comparator",
+   "blurb": "Says whether two numbers are equal: an XNOR gate per bit, then a tree of gates that is 1 only if every bit agreed. A cache uses one per way to find its hit.",
+   "m": 2e-06,
+   "kind": "inferred",
+   "f": "size.lib.cmpeq",
+   "facts": [
+    "tb.compare",
+    "size.lib.cmpeq"
+   ]
+  },
+  "lib.fifo": {
+   "name": "Queue (first in, first out)",
+   "short": "Queue",
+   "blurb": "Where requests wait their turn: a small register file, a counter that points where the next one is written, another where the next one is read, and a compare that says full or empty.",
+   "m": 2e-05,
+   "kind": "inferred",
+   "f": "size.lib.fifo",
+   "facts": [
+    "tb.fifo",
+    "size.lib.fifo"
+   ]
+  },
+  "lib.pll": {
+   "name": "A phase-locked loop (PLL)",
+   "short": "PLL",
+   "blurb": "Makes a fast clock from a slow, steady one: it compares the two, and nudges an oscillator (a ring of inverters) until its output, divided down, matches the reference.",
+   "m": 0.0001,
+   "kind": "inferred",
+   "f": "size.lib.pll",
+   "facts": [
+    "tb.pll",
+    "size.lib.pll"
+   ]
+  },
+  "lib.ecc": {
+   "name": "Error correction (SECDED)",
+   "short": "ECC",
+   "blurb": "Extra check bits stored with the data, each the parity of some of the bits: on a read they show whether a bit flipped, which one, so it can be put right, and whether two did.",
+   "m": 1e-05,
+   "kind": "inferred",
+   "f": "size.lib.ecc",
+   "facts": [
+    "tb.ecc",
+    "size.lib.ecc"
+   ]
+  },
+  "lib.rom": {
+   "name": "A read-only memory (ROM)",
+   "short": "ROM",
+   "blurb": "A table fixed when the chip is made: a transistor where a bit is 0, none where it is 1. The vector unit's transcendental functions read their coefficients from small tables like this.",
+   "m": 2e-05,
+   "kind": "inferred",
+   "f": "size.lib.rom",
+   "facts": [
+    "tb.rom",
+    "size.lib.rom"
+   ]
   }
  },
  "geo": {
@@ -13819,8 +13986,8 @@
  },
  "lazy": {
   "url": "ladder-img/ladder-data.json",
-  "n": 740,
-  "bytes": 332134,
-  "sha256": "c41b26236ea16b7e31e9e7439eb9ab85400929cc6ddfc774956085513f017f8e"
+  "n": 773,
+  "bytes": 347117,
+  "sha256": "efae6ce65989e822795e4ed111ce68183949d7f8fff71a0789982efd1ca3a7c7"
  }
 }

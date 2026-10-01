@@ -740,7 +740,10 @@ function showScene(P) {
   // a scene drawn in two states (1 Oct): the panel's switch beside the drawing's (G)
   const L = LYR.get(pkeys(P)), st = L && L._states;
   const sw = st ? `<div class="pn-act"><button type="button" class="st-btn" data-act="state" aria-pressed="${STON}">${esc(st.btn[STON ? 1 : 0])}</button></div>` : '';
-  panel(`<p class="pn-kick">${hereKick(P)}</p><p class="pn-title">${esc(nameOf(el))}</p>` + (blurb ? `<p class="pn-lead">${esc(blurb)}</p>` : '')
+  // came round the ring (the wrap): where the reader now is, and the way back (only after the wrap: the easter egg is
+  // never named in advance)
+  const came = WRAPIN && WRAPIN === pkeys(P) ? `<p class="pn-lead pn-came">↻ You came round the ring of sizes: past the observable universe, back to the smallest things, and ${el.id === 'p.atom' ? 'in as one atom of this chip: a silicon atom in the channel of one of its transistors' : `in at ${esc(toOf(el))}, under an atom of this chip`}. Up climbs from here to the chip and on round the loop.</p><div class="pn-zoom">${zrow('', [zbtn([{id: WRAP}], '↻ Back to the ring of sizes', false, '')])}</div>` : '';
+  panel(`<p class="pn-kick">${hereKick(P)}</p><p class="pn-title">${esc(nameOf(el))}</p>` + came + (blurb ? `<p class="pn-lead">${esc(blurb)}</p>` : '')
     + sw + zoomRowHere(P) + im + (det ? detBlock(det) : ''));
   if (st) $('pn-body').querySelectorAll('button[data-act="state"]').forEach(b => { b._lab = st.btn; });
 }

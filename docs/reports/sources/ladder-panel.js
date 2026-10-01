@@ -27,7 +27,9 @@ function zoomRowPart(g, title) {
   if (other.length) rows.push(zrow(k ? 'Also:' : 'Zoom in:', other.map(x => zbtn(x.to, x.lab, !k && x === other[0]))));
   if (made.length) rows.push(zrow('Made of:', made.map(x => zbtn(x.to, x.lab, false))));
   const none = !k && !ex.length;
-  return `<div class="pn-zoom">${none ? `<p class="nz">No closer drawing of ${esc(title || 'this part')}: this is as far in as the page goes here.</p>` : rows.join('')}</div>`;
+  // (since 1 Oct every part of the chip leads further in; what is left without a zoom is not the ET-SoC-1's: the host's
+  // processor, the card's regulators, the die's key)
+  return `<div class="pn-zoom">${none ? `<p class="nz">${g._ext ? 'Not a part of the ET-SoC-1: the page draws the chip’s own parts, down to their transistors and atoms.' : `No closer drawing of ${esc(title || 'this part')}.`}</p>` : rows.join('')}</div>`;
 }
 function zoomRowHere(P) {
   const ks = kidsOf(P), d = defKid(P), rows = [];
@@ -35,7 +37,7 @@ function zoomRowHere(P) {
   else if (P[P.length - 1].id === PLANCK && NODES[WRAP]) rows.push(zrow('', [zbtn(nextOf(P), '? (+)', false, '')]));
   else if (!isWrap(P)) rows.push('<p class="nz">The bottom of this branch: nothing smaller is drawn here.</p>');
   const U = upOf(P);
-  if (U && isWrap(P)) rows.push(zrow('', [zbtn(U, '↑ Round the ring: in at the Planck length', false, '(Backspace)')]));
+  if (U && isWrap(P)) rows.push(zrow('', [zbtn(U, '↑ Round the ring: in again as an atom', false, '(Backspace)')]));
   else if (U) rows.push(zrow('', [zbtn(U, egg(U[U.length - 1]) ? '↑ Zoom out: ?' : `↑ Zoom out to ${toOf(U[U.length - 1])}`, false, '(Backspace)')]));
   return `<div class="pn-zoom">${rows.join('')}</div>`;
 }
