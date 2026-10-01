@@ -22,7 +22,12 @@ nav.toc-line li{display:inline}
 nav.toc-line li+li::before{content:" · ";color:var(--muted)}
 .kpis{margin-top:10px}
 .tl-hint{font-size:.8rem;color:var(--muted);margin:2px 0 6px}
-#tl svg,#tl-detail svg{touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+/* the timeline frames: the browser keeps vertical scrolling (pan-y) and the script does the rest (gestures()). The
+   script consumes every sideways swipe and sideways wheel gesture itself, so none reaches the browser to go back a
+   page. overscroll-behavior-x: contain sits on the SVG, as in the reusable timeline component, and not on the frames'
+   scroller (.ck-plot, which never scrolls here): there, in Chrome, it latched a diagonal swipe to that scroller and the
+   page did not scroll at all (tools/timeline/README.md, "Gestures") */
+#tl svg,#tl-detail svg{touch-action:pan-y;overscroll-behavior-x:contain;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 #tl svg.dragging,#tl-detail svg.dragging{cursor:grabbing}
 #tl-detail{margin-top:4px}
 .hl-list{list-style:none;padding:0;margin:10px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;max-width:none}
@@ -78,9 +83,9 @@ details.human-time p,details.human-time li{font-size:.8rem}
 }
 </style>
 <h1>The session timeline</h1>
-<p class="byline">19–29 September 2026, all times Pacific (PDT) · built from the session’s transcripts, the lab machines’ queue logs and the repository · data and tools in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline"><span id="l-range">19–30 September 2026</span>, all times Pacific (PDT) · built from the session’s transcripts, the lab machines’ queue logs and the repository · data and tools in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
-<p class="lede">One Claude Code session ran the ET-SoC-1 work for a week. It started with the owner’s first message at <b>09:19 on
+<p class="lede">One Claude Code session ran the ET-SoC-1 work for <span id="l-days">eleven days</span>. It started with the owner’s first message at <b>09:19 on
 Saturday 19 September</b> and this snapshot ends at <b id="l-end"></b>. Four things happened at once, and the chart below
 puts them on one time axis. <b>The owner</b> sent <b id="l-n"></b> messages. <b>The agents</b> were the main agent and
 <b id="l-agents"></b> subagents, most of them started by <b id="l-wf"></b> workflow runs. <b>The cards</b> were four ET-SoC-1 cards in three lab
@@ -90,9 +95,12 @@ for the lab lead appears without its name, content or link.</p>
 <nav class="toc-line" aria-label="Contents"><b>Contents:</b> <ol id="toclist"><li><a href="#timeline">1. The week on one time axis</a></li><li><a href="#highlights">2. Highlights</a></li><li><a href="#asked">3. What the owner asked</a></li><li><a href="#totals">4. The totals</a></li><li><a href="#method">5. How it was counted</a></li></ol></nav>
 
 <h2 id="timeline">1. The week on one time axis</h2>
-<p class="small">Zoom with the buttons, <b>Ctrl or ⌘ with the scroll wheel</b> or a <b>pinch</b>; pan by <b>dragging</b>, with
-Shift and the wheel or with the arrows. The numbered flags are the highlights of <a href="#highlights">§2</a>: click one to
-zoom there. Hover, tap or tab to any mark for its details; on the time axis ← → pan, + − zoom and 0 shows the whole week.</p>
+<p class="small"><b>On a phone:</b> swipe sideways to move along the time axis (it glides on when you let go),
+pinch to zoom, and swipe up or down to scroll the page. <b>With a mouse or trackpad:</b> drag or swipe sideways to move,
+<b>Ctrl or ⌘ with the wheel</b> or a trackpad pinch to zoom where the pointer is, and Shift with the wheel to move. The
+buttons zoom and move too. Tap, hover or tab to a mark for its details; the numbered flags are the highlights of
+<a href="#highlights">§2</a>: tap a flag to read it and tap it again, or click it, to zoom there. On the time axis,
+← → move, + − zoom and 0 shows it all.</p>
 <div class="tl-wrap">
 <div class="tl-bar o-zoom">
  <div class="controls" id="tl-zoom" role="group" aria-label="Zoom and pan"></div>
@@ -123,11 +131,13 @@ zoom there. Hover, tap or tab to any mark for its details; on the time axis ← 
 <ol class="hl-list" id="hl-list"></ol>
 
 <h2 id="asked">3. What the owner asked</h2>
-<p class="small">Every message of the week, in order: what was asked, as a summary of at most 12 words that describes the
+<p class="small">Every message of the session, in order: what was asked, as a summary of at most 12 words that describes the
 message without quoting it. The time, the kind of message and its request number in the knowledge base are small labels;
-the estimate of the time spent reading and writing it is smaller still. Click a message to see it on the timeline.</p>
+the estimate of the time spent reading and writing it is smaller still. Click a message to see it on the timeline. The
+owner’s messages to the neighbor session follow the list, apart from its totals.</p>
 <div id="asked-filter" class="ck-controls"></div>
 <div id="asked-list"></div>
+<div id="asked-nb"></div>
 
 <h2 id="totals">4. The totals</h2>
 <div class="kpis">

@@ -2,17 +2,34 @@
    computed from it. Times are seconds since Sat 19 Sep 2026 00:00 PDT (UTC-7; no DST change that week), so a day is
    86 400 s and clock time is t mod 86 400.
    The timeline is one CK frame holding the four tracks on one x scale; the subagent detail is a second frame on the
-   same scale. The view (S.v) is shared: buttons, Ctrl/⌘ + wheel, pinch, drag and the axis's keys change it, and
-   both frames redraw on the next animation frame, drawing only what is in view. Charts use the shared toolkit CK
+   same scale. The view (S.v) is shared: buttons, swipes, drags, pinches, the wheel and the axis's keys change it, and
+   both frames redraw on the next animation frame, drawing only what is in view. While a gesture, its momentum or a
+   zoom animation runs, a frame is drawn fast: each series as one path, with no tooltips or keyboard stops; the full
+   drawing, a node per mark, follows when it ends (see gestures()). Charts use the shared toolkit CK
    (docs/reports/sources/chartkit.js): tooltips by pointer, touch and keyboard, one tab stop per group of marks,
    template colour tokens only. */
 const DAY = 86400, DN = D.meta.days, FULL = D.meta.full;
 const HU = D.human, MA = D.main, AG = D.agents, CA = D.cards, AR = D.artifacts, TO = D.tokens, HL = D.highlights;
-const num = CK.fmt.num;
+const NB = D.neighbors && D.neighbors.sessions && D.neighbors.sessions.length ? D.neighbors : null;   // other sessions' lanes
+/* CK.fmt.num's output, with one Intl.NumberFormat per format kept (toLocaleString builds one per call, which made
+   number formatting the largest cost of a redraw) */
+const NF = new Map();
+const num = (v, dp) => {
+  if (v == null || !isFinite(v)) return '—';
+  const auto = dp == null;
+  if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+  const k = (auto ? 'a' : 'f') + dp;
+  let nf = NF.get(k);
+  if (!nf) NF.set(k, nf = new Intl.NumberFormat('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp}));
+  const s = nf.format(Number(v));
+  return /[1-9]/.test(s) ? s.replace('-', '−') : s.replace('-', '');
+};
 const pad2 = n => String(n).padStart(2, '0');
 const hm = t => { const s = ((Math.floor(t) % DAY) + DAY) % DAY; return pad2(Math.floor(s / 3600)) + ':' + pad2(Math.floor(s % 3600 / 60)); };
 const dayOf = t => Math.floor(t / DAY);
-const when = t => `${DN[dayOf(t)] || ''} Sep ${hm(t)}`;
+// the month of day index d (19 September is day 0; the snapshot of 1 October adds day 12)
+const MO = d => (+String(DN[d] || '').split(' ')[1] < 19 ? 'Oct' : 'Sep'), MOL = d => (MO(d) === 'Oct' ? 'October' : 'September');
+const when = t => `${DN[dayOf(t)] || ''} ${MO(dayOf(t))} ${hm(t)}`;
 const span = (a, b) => (dayOf(a) === dayOf(b) || (b % DAY === 0 && dayOf(b) === dayOf(a) + 1) ? `${when(a)}–${b % DAY === 0 && dayOf(b) > dayOf(a) ? '24:00' : hm(b)}` : `${when(a)} – ${when(b)}`);
 const dur = s => (s < 90 ? `${Math.round(s)} s` : s < 5400 ? `${Math.round(s / 60)} min` : s < 2 * 86400 ? `${num(s / 3600, 1)} h` : `${num(s / 86400, 1)} days`);
 const hrs = (h, dp) => `${num(h, dp == null ? 1 : dp)} h`;
@@ -71,6 +88,8 @@ const INU = CA.inuse, INV = unrle(INU.rle);
 const PAGES = AR.pages;
 const DEP = AR.deploys.map(d => ({t: d[0], p: d[1], nw: d[2], ok: d[3]})).sort((a, b) => a.t - b.t);
 const COM = AR.commits.map(c => ({t: c[0], sha: c[1], sub: c[2], ses: c[3], br: c[4], files: c[5]})).sort((a, b) => a.t - b.t);
+// the hosts down (a hang, or the power cycle), drawn over their cards' lanes: [[card indices], s, e, kind, title, text]
+const HOSTEV = NB && NB.hosts ? NB.hosts.map(h => ({cards: h[0], s: h[1], e: h[2], kind: h[3], title: h[4], text: h[5]})) : [];
 function byMinute(arr) { const m = new Map(); for (const o of arr) { const k = Math.floor(o.t / 60); if (!m.has(k)) m.set(k, []); m.get(k).push(o); } return [...m.values()].map(v => ({t: v[0].t, items: v})); }
 const DEPM = byMinute(DEP), COMM = byMinute(COM);
 const SUBIV = {workflow: [], tool: []};
@@ -83,11 +102,17 @@ const TOT_SESSION = D.meta.snapshot_end - D.meta.session_start;
 (function () {
   const W = D.who, at = AG.totals, ct = CA.totals;
   const WD = {Sat: 'Saturday', Sun: 'Sunday', Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday'};
-  const ed = DN[dayOf(D.meta.snapshot_end)].split(' ');
-  setH('l-end', `${hm(D.meta.snapshot_end)} on ${WD[ed[0]]} ${ed[1]} September`);
+  const ed = DN[dayOf(D.meta.snapshot_end)].split(' '), oct = +ed[1] < 19;
+  setH('l-end', `${hm(D.meta.snapshot_end)} on ${WD[ed[0]]} ${ed[1]} ${oct ? 'October' : 'September'}`);
+  setH('l-range', oct ? `19 September – ${ed[1]} October 2026` : `19–${ed[1]} September 2026`);
   setH('l-n', HU.totals.n); setH('l-agents', num(at.agents, 0)); setH('l-wf', at.workflow_runs);
   setH('l-dep', AR.totals.deploys); setH('l-com', AR.commits.filter(c => c[0] >= D.meta.session_start).length);
   setH('l-wall', `${num(TOT_SESSION / 3600, 0)} hours (${num(TOT_SESSION / DAY, 1)} days)`);
+  const nd = Math.round(TOT_SESSION / DAY), words = ['', 'one day', 'two days', 'three days', 'four days', 'five days', 'six days', 'a week',
+    'eight days', 'nine days', 'ten days', 'eleven days', 'twelve days', 'thirteen days', 'two weeks'];
+  setH('l-days', words[nd] || `${nd} days`);
+  if (NB) document.querySelector('p.lede').insertAdjacentHTML('beforeend', ` On 30 September a second session on the lab’s machine, <b>the neighbor session</b>, ran the link test that hung ` +
+    `aifoundry1 and then investigated the hang; it has a lane of its own, and a red band marks each host that was down.`);
   const bc = HU.totals.by_category;
   setH('k-human', `${HU.totals.n} messages`);
   setH('k-human-sub', `${bc.request} requests, ${bc.correction} corrections, ${bc['approval/answer']} approvals or answers, ${bc.question} questions, ${bc.status} status checks ` +
@@ -112,24 +137,54 @@ function clampV(a, b) {
   if (a + s > FULL[1]) a = FULL[1] - s;
   return [a, a + s];
 }
-let raf = 0, anim = 0, animating = false, gestureTimer = 0, lastDetail = 0;
-/* While a drag, pinch or wheel gesture or a zoom animation runs, the timeline is redrawn without its tooltips and
-   keyboard stops (TIP, NAV below), and the subagent detail at most every 150 ms; a full redraw follows 160 ms after
-   the gesture's last move, and at an animation's last frame. */
-function gesture() { S.fast = true; clearTimeout(gestureTimer); gestureTimer = setTimeout(() => { S.fast = false; redrawAll(true); }, 160); }
+let raf = 0, anim = 0, animating = false, gestureTimer = 0, lastDetail = 0, inertia = 0;
+/* While a swipe, drag, pinch or wheel gesture, its momentum or a zoom animation runs, the timeline is drawn fast (each
+   series one path, no tooltips or keyboard stops: TIP, NAV and PB below); a full redraw follows 160 ms after the
+   gesture's last move, and at an animation's last frame. */
+let gestureGen = 0;
+function gesture() {   // the full redraw waits for 160 ms without a move, then for the browser to be idle (input first)
+  S.fast = true; clearTimeout(gestureTimer);
+  const gen = ++gestureGen, full = () => { if (gen === gestureGen && !inertia) { S.fast = false; redrawAll(true); } };
+  gestureTimer = setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(full, {timeout: 250}) : full()), 160);
+}
 function setView(a, b, fromGesture) { S.v = clampV(a, b); if (fromGesture) gesture(); if (!raf) raf = requestAnimationFrame(() => { raf = 0; redrawAll(); }); }
-const TIP = (f, n, h, o) => (S.drawFast ? n : CK.tip(f, n, h, o));
+// a tooltip: html is a string, or () => string for one built only when the frame is drawn in full
+const TIP = (f, n, h, o) => (S.drawFast ? n : CK.tip(f, n, typeof h === 'function' && !(o && o.live) ? h() : h, o));
 const NAV = (f, nodes, o) => (S.drawFast ? null : CK.keynav(f, nodes, o));
+const stopMotion = () => { cancelAnimationFrame(anim); cancelAnimationFrame(inertia); anim = inertia = 0; animating = false; };
 function animateTo(a, b) {
   const [a0, b0] = S.v, [a1, b1] = clampV(a, b);
-  cancelAnimationFrame(anim);
-  if (CK.reduced) { animating = false; setView(a1, b1); return; }
-  const t0 = performance.now(), T = 380;
+  stopMotion();
+  if (CK.reduced) { setView(a1, b1); return; }
+  // zoom in the log of the span and pan linearly, so a zoom from the whole week into an hour moves evenly
+  const t0 = performance.now(), s0 = b0 - a0, s1 = b1 - a1, c0 = (a0 + b0) / 2, c1 = (a1 + b1) / 2;
+  const T = Math.min(700, 380 + 60 * Math.abs(Math.log2(s1 / s0)));
   animating = true;
   const step = now => { const k = Math.min(1, (now - t0) / T), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
     if (k >= 1) animating = false;
-    setView(a0 + (a1 - a0) * e, b0 + (b1 - b0) * e); if (k < 1) anim = requestAnimationFrame(step); };
+    const sp = s0 * Math.pow(s1 / s0, e), c = c0 + (c1 - c0) * e;
+    setView(c - sp / 2, c + sp / 2); if (k < 1) anim = requestAnimationFrame(step); };
   anim = requestAnimationFrame(step);
+}
+/* A fast frame's path: every rect, mark or line of one series in one <path>. With merge, a rect that touches or overlaps
+   the one before it on the same row (a run of sub-pixel intervals) extends it instead of adding its own. */
+function PB(merge) {
+  let d = '', q = null;
+  const f1 = v => Math.round(v * 10) / 10;
+  const put = r => { d += `M${f1(r[0])} ${f1(r[1])}h${f1(r[2])}v${f1(r[3])}h${f1(-r[2])}z`; };
+  return {
+    rect(x, y, w, h) {
+      if (!(w > 0 && h > 0)) return;
+      if (merge && q && q[1] === y && q[3] === h && x <= q[0] + q[2] + 0.5 && x >= q[0]) { q[2] = Math.max(q[2], x + w - q[0]); return; }
+      if (q) put(q);
+      q = [x, y, w, h];
+      if (!merge) { put(q); q = null; }
+    },
+    line(x1, y1, x2, y2) { d += `M${f1(x1)} ${f1(y1)}L${f1(x2)} ${f1(y2)}`; },
+    circle(cx, cy, r) { d += `M${f1(cx - r)} ${f1(cy)}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0z`; },
+    diamond(cx, cy, r) { d += `M${f1(cx)} ${f1(cy - r)}l${r} ${r}l${-r} ${r}l${-r} ${-r}z`; },
+    flush(g, style) { if (q) { put(q); q = null; } if (d) sty(CK.el('path', {d, 'aria-hidden': 'true'}, g), style); d = ''; },
+  };
 }
 const zoomBy = k => { const c = (S.v[0] + S.v[1]) / 2, h = (S.v[1] - S.v[0]) * k / 2; animateTo(c - h, c + h); };
 const panBy = k => { const d = (S.v[1] - S.v[0]) * k; animateTo(S.v[0] + d, S.v[1] + d); };
@@ -140,7 +195,7 @@ function redrawAll(full) {
   S.drawFast = !full && (S.fast || animating);
   if (main) main.redraw();
   if (!animating) S.focus = null;
-  if (detail && S.sub) { const now = performance.now(); if (!S.drawFast || now - lastDetail > 150) { lastDetail = now; detail.redraw(); } }
+  if (detail && S.sub) { const now = performance.now(); if (!S.drawFast || now - lastDetail > 45) { lastDetail = now; detail.redraw(); } }
   S.drawFast = false;
   readout(); pressed();
 }
@@ -160,8 +215,12 @@ function layout(W) {
   const nar = W < 600, L = nar ? 66 : 164, R = nar ? 8 : 16, rows = {}; let y = 0;
   const add = (k, h) => { rows[k] = {y, h}; y += h; };
   add('axis', 40); add('hl', 30); y += 2;
-  add('hH', 18); add('human', S.v[1] - S.v[0] <= 2 * DAY ? 30 + 3 * ASK_ROW : 30); y += 8;
-  add('hA', 18); add('main', 18); y += 4; add('conc', nar ? 52 : 66); y += 8;
+  add('hH', 18); add('human', S.v[1] - S.v[0] <= 2 * DAY ? 30 + 3 * ASK_ROW : 30);
+  if (NB) add('humanNb', 18);   // the owner's messages to the neighbor session(s)
+  y += 8;
+  add('hA', 18); add('main', 18);
+  if (NB) { y += 2; NB.sessions.forEach((n, k) => add('nb' + k, 20)); }
+  y += 4; add('conc', nar ? 52 : 66); y += 8;
   add('hC', 18); CA.ids.forEach((id, k) => add('card' + k, 17)); y += 4; add('inuse', nar ? 30 : 36); y += 8;
   add('hR', 18);
   if (S.perPage) PAGES.forEach((p, k) => add('page' + k, 13)); else add('deploys', 30);
@@ -169,53 +228,126 @@ function layout(W) {
   return {nar, L, R, rows, H: y};
 }
 
-/* ---------- gestures: drag and pinch to pan and zoom, Ctrl/⌘ + wheel to zoom, Shift + wheel to pan ---------- */
-function gestures(f) {
-  const svg = f.svg, pts = new Map();
-  let drag = null, pinch = null, moved = false, suppress = false;
-  const px = ev => ev.clientX - svg.getBoundingClientRect().left;
-  svg.addEventListener('pointerdown', ev => {
-    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
-    suppress = false; pts.set(ev.pointerId, px(ev));
-    if (pts.size === 1) { drag = {p: px(ev), v: S.v.slice(), id: ev.pointerId}; moved = false; }
-    else if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = {d: Math.abs(a - b) || 1, c: (a + b) / 2, v: S.v.slice()}; drag = null; }
-  });
-  svg.addEventListener('pointermove', ev => {
-    if (!pts.has(ev.pointerId)) return;
-    pts.set(ev.pointerId, px(ev));
-    const pw = f.W - f.L - f.R;
-    if (pinch && pts.size >= 2) {
-      const [a, b] = [...pts.values()], d = Math.abs(a - b) || 1, c = (a + b) / 2, s0 = pinch.v[1] - pinch.v[0], s1 = s0 * pinch.d / d;
-      const tc = pinch.v[0] + (pinch.c - f.L) / pw * s0, a0 = tc - (c - f.L) / pw * s1;
-      moved = true; setView(a0, a0 + s1, true); return;
-    }
-    if (drag && ev.pointerId === drag.id) {
-      const dx = px(ev) - drag.p;
-      if (!moved && Math.abs(dx) < 5) return;
-      if (!moved) { moved = true; svg.classList.add('dragging'); try { svg.setPointerCapture(ev.pointerId); } catch (_) { /* no capture */ } }
-      const sp = (drag.v[1] - drag.v[0]) / pw; setView(drag.v[0] - dx * sp, drag.v[1] - dx * sp, true);
-    }
-  });
-  const end = ev => {
-    pts.delete(ev.pointerId); if (pts.size < 2) pinch = null;
-    if (drag && ev.pointerId === drag.id) { drag = null; svg.classList.remove('dragging'); }
-    if (moved) suppress = true;
+/* ---------- gestures ----------
+   Touch: a vertical swipe scrolls the page natively (the frames' touch-action is pan-y); a swipe that starts sideways
+   pans the timeline and keeps going when the finger lifts (momentum); two fingers pinch-zoom about their midpoint and
+   pan with it. The direction is decided once, after 8 px of movement, so a diagonal or vertical swipe never also pans.
+   A tap shows the mark's details, pinned until the next tap (a second tap on a highlight's flag zooms there), and never
+   pans; a touch that turns into a scroll shows nothing. Lifting one finger of a pinch carries on as a one-finger drag,
+   and a release anywhere (the listeners for it are on window) ends the gesture. Several of these follow the lessons of
+   the reusable session-timeline component (spacesheep.dev/@yaroslavvb/scrollable-session-timeline, LESSONS.md §5).
+   Mouse: drag to pan; hover for details; click a flag to zoom.
+   Wheel: Ctrl/⌘ + wheel (also how Chrome delivers a trackpad pinch) zooms about the pointer; a trackpad's sideways
+   swipe (deltaX) or Shift + wheel pans; a vertical wheel scrolls the page. A wheel gesture keeps the axis of its first
+   event, as the browser latches a scroll, so a page scroll that drifts sideways never starts a pan. The frames stop
+   horizontal overscroll (overscroll-behavior-x: contain, in the body's CSS), so a sideways swipe never goes back a page.
+   Every change goes through setView, which redraws once per animation frame. */
+const SLOP = {touch: 8, pen: 6, mouse: 4};   // px before a press is a drag (the component uses 6; a finger's tap can wander 6)
+const plotW = f => f.W - f.L - f.R;
+function panPx(f, dx) { const sp = (S.v[1] - S.v[0]) / plotW(f); setView(S.v[0] + dx * sp, S.v[1] + dx * sp, true); }
+function zoomAt(f, p, k) {   // zoom by k about the pixel p: the time under p stays under p
+  const q = Math.max(f.L, Math.min(f.W - f.R, p)), s0 = S.v[1] - S.v[0], tc = S.v[0] + (q - f.L) / plotW(f) * s0;
+  const s1 = Math.max(MINSPAN, Math.min(FULL[1] - FULL[0], s0 * k)), a = tc - (q - f.L) / plotW(f) * s1;
+  setView(a, a + s1, true);
+}
+function fling(f, samples, tEnd) {   // momentum after a touch pan: the release speed, decaying with a 325 ms time constant
+  const q = samples.filter(v => tEnd - v[0] < 100);
+  if (q.length < 2) return;
+  let v = (q[q.length - 1][1] - q[0][1]) / Math.max(8, q[q.length - 1][0] - q[0][0]);   // px per ms
+  if (Math.abs(v) < 0.25) return;
+  v = Math.max(-6, Math.min(6, v));
+  let last = performance.now();
+  const step = now => {
+    const dt = Math.min(48, now - last); last = now;
+    const before = S.v[0];
+    panPx(f, -v * dt); v *= Math.exp(-dt / 325);
+    inertia = Math.abs(v) < 0.02 || S.v[0] === before ? 0 : requestAnimationFrame(step);
   };
-  svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);
-  svg.addEventListener('click', ev => { if (suppress) { ev.stopPropagation(); ev.preventDefault(); suppress = false; } }, true);
-  svg.addEventListener('wheel', ev => {
-    const pw = f.W - f.L - f.R, horiz = Math.abs(ev.deltaX) > Math.abs(ev.deltaY);
-    const unit = ev.deltaMode === 1 ? 16 : ev.deltaMode === 2 ? 400 : 1;
-    if (ev.ctrlKey || ev.metaKey) {
-      ev.preventDefault(); cancelAnimationFrame(anim);
-      const k = Math.exp(Math.max(-0.6, Math.min(0.6, ev.deltaY * unit * 0.0025)));
-      const p = Math.max(f.L, Math.min(f.W - f.R, px(ev))), tc = f.x.inv(p), sp = (S.v[1] - S.v[0]) * k, a = tc - (p - f.L) / pw * sp;
-      setView(a, a + sp, true);
-    } else if (horiz || ev.shiftKey) {
-      ev.preventDefault(); cancelAnimationFrame(anim);
-      const d = (horiz ? ev.deltaX : ev.deltaY) * unit, sp = (S.v[1] - S.v[0]) / pw;
-      setView(S.v[0] + d * sp, S.v[1] + d * sp, true);
+  inertia = requestAnimationFrame(step);
+}
+function gestures(f) {
+  const svg = f.svg, pts = new Map();   // pointerId -> {x, y, x0, y0, cx, cy, t0, type, target}
+  let mode = null, pinch = null, samples = [], eatClick = false, lastTouch = 0, wg = {axis: null, t: -1e9};
+  const px = ev => ev.clientX - svg.getBoundingClientRect().left;
+  // two fingers: their distance, floored at 24 px so a two-finger tap cannot divide by nothing, and their midpoint
+  const two = () => { const [a, b] = [...pts.values()]; return {d: Math.max(24, Math.hypot(a.x - b.x, a.y - b.y)), c: (a.x + b.x) / 2, v: S.v.slice()}; };
+  const tipNode = t => { for (let n = t; n && n !== svg; n = n.parentNode) if (n._ckTip) return n; return null; };
+  // capture: the timeline decides first, before a mark's own tooltip handler (CK.tip pins a touch at pointerdown)
+  svg.addEventListener('pointerdown', ev => {
+    if (!ev.isTrusted) return;   // a tap sent on by tap() below, for the mark's tooltip
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    eatClick = false;
+    if (inertia || animating) stopMotion();
+    if (ev.pointerType === 'touch') { ev.stopPropagation(); lastTouch = Date.now(); }
+    const x = px(ev);
+    pts.set(ev.pointerId, {x, y: ev.clientY, x0: x, y0: ev.clientY, cx: ev.clientX, cy: ev.clientY, t0: performance.now(), type: ev.pointerType, target: ev.target});
+    if (pts.size === 1) { mode = 'pending'; samples = []; }
+    else if (pts.size === 2) { pinch = two(); mode = 'pinch'; svg.classList.add('dragging'); }
+  }, true);
+  svg.addEventListener('pointermove', ev => {
+    const p = pts.get(ev.pointerId);
+    if (!p) return;
+    p.x = px(ev); p.y = ev.clientY;
+    if (mode === 'pinch') {
+      if (pts.size < 2) return;
+      const {d, c} = two(), s0 = pinch.v[1] - pinch.v[0];
+      const s1 = Math.max(MINSPAN, Math.min(FULL[1] - FULL[0], s0 * pinch.d / d)), tc = pinch.v[0] + (pinch.c - f.L) / plotW(f) * s0;
+      const a0 = tc - (c - f.L) / plotW(f) * s1;
+      setView(a0, a0 + s1, true);
+      return;
     }
+    if (mode === 'pending') {
+      const dx = p.x - p.x0, dy = p.y - p.y0;
+      if (Math.hypot(dx, dy) < (SLOP[p.type] || 6)) return;
+      // decided once: a sideways start pans; any other start is the page's (the browser scrolls it and cancels this pointer)
+      if (p.type !== 'mouse' && Math.abs(dx) < 1.2 * Math.abs(dy)) { mode = 'page'; return; }
+      mode = 'pan'; p.lx = p.x0; svg.classList.add('dragging');
+      try { svg.setPointerCapture(ev.pointerId); } catch (_) { /* no capture */ }
+    }
+    if (mode === 'pan') {
+      const dx = p.x - p.lx; p.lx = p.x;
+      if (dx) panPx(f, -dx);
+      samples.push([ev.timeStamp, p.x]); if (samples.length > 12) samples.shift();
+    }
+  });
+  const tap = p => {   // a touch that did not move: the mark's details, or a second tap on a flag zooms there
+    const n = tipNode(p.target);
+    if (n && n.hasAttribute('data-hl') && f.pinned === n && n._go) { CK.hide(f); n._go(); return; }
+    p.target.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true, cancelable: true, composed: true, pointerType: 'touch',
+      isPrimary: true, pointerId: 1e6, clientX: p.cx, clientY: p.cy}));
+  };
+  const end = ev => {
+    const p = pts.get(ev.pointerId);
+    if (!p) return;
+    pts.delete(ev.pointerId);
+    if (mode === 'pinch') {
+      eatClick = true;
+      if (pts.size === 1) { const q = [...pts.values()][0]; q.lx = q.x; mode = 'pan'; samples = []; pinch = null; }   // the pinch-to-drag handoff
+      else if (!pts.size) { mode = null; pinch = null; svg.classList.remove('dragging'); }
+      return;
+    }
+    if (mode === 'pan') {
+      svg.classList.remove('dragging'); eatClick = true;
+      if (ev.type === 'pointerup' && p.type !== 'mouse') fling(f, samples, ev.timeStamp);
+    } else if (mode === 'pending' && ev.type === 'pointerup' && p.type === 'touch' && performance.now() - p.t0 < 700) tap(p);
+    if (!pts.size) mode = null;
+  };
+  window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end);   // a release outside ends it too
+  // a click after a drag, a pinch or any touch is not a click on a mark (a touch tap was handled above)
+  svg.addEventListener('click', ev => { if (eatClick || Date.now() - lastTouch < 900) { ev.stopPropagation(); ev.preventDefault(); eatClick = false; } }, true);
+  svg.addEventListener('wheel', ev => {
+    const unit = ev.deltaMode === 1 ? 16 : ev.deltaMode === 2 ? 400 : 1, dx = ev.deltaX * unit, dy = ev.deltaY * unit;
+    if (ev.ctrlKey || ev.metaKey) {
+      ev.preventDefault(); if (inertia || animating) stopMotion();
+      zoomAt(f, px(ev), Math.exp(Math.max(-0.6, Math.min(0.6, dy * 0.0025))));
+      wg = {axis: 'zoom', t: ev.timeStamp};
+      return;
+    }
+    if (ev.timeStamp - wg.t > 240 || wg.axis === 'zoom') wg.axis = Math.abs(dx) > Math.abs(dy) || (ev.shiftKey && dy) ? 'x' : 'y';
+    wg.t = ev.timeStamp;
+    if (wg.axis !== 'x') return;   // the page's scroll
+    ev.preventDefault(); if (inertia || animating) stopMotion();
+    panPx(f, Math.abs(dx) >= Math.abs(dy) ? dx : dy);
   }, {passive: false});
 }
 
@@ -227,14 +359,25 @@ function drawTimeAxis(f, x, y, h, W, L, R, bottom) {
     for (let d = Math.max(0, dayOf(S.v[0])); d <= Math.min(DN.length - 1, dayOf(S.v[1] - 1)); d++) {
       const a = Math.max(d * DAY, S.v[0]), b = Math.min((d + 1) * DAY, S.v[1]);
       if (x(b) - x(a) < (nar ? 40 : 56)) continue;
-      labs.push(CK.txt(g, (x(a) + x(b)) / 2, y + 14, nar || x(b) - x(a) < 80 ? DN[d] : `${DN[d]} Sep`, 'lab-strong', 'middle'));
+      labs.push(CK.txt(g, (x(a) + x(b)) / 2, y + 14, nar || x(b) - x(a) < 80 ? DN[d] : `${DN[d]} ${MO(d)}`, 'lab-strong', 'middle'));
     }
   }
   if (tk.step < DAY) for (const t of tk) labs.push(CK.txt(g, x(t), bottom ? y + 16 : y + 31, hm(t), 'tick', 'middle'));
   else if (bottom) for (const t of tk) labs.push(CK.txt(g, x(t) + 4, y + 16, DN[dayOf(t)] || '', 'tick', 'start'));
   lineEl(g, L, bottom ? y + 2 : y + h - 2, W - R, bottom ? y + 2 : y + h - 2, {stroke: 'var(--axis)', strokeWidth: '1px'});
-  CK.inside(f, labs);
+  keepIn(f, labs);
   return tk;
+}
+// CK.inside, but with estimated widths (0.6 em a character) in a fast frame, which must not force a layout
+function keepIn(f, labs) {
+  if (!S.drawFast) return CK.inside(f, labs);
+  for (const t of labs) {
+    const w = 7.2 * t.textContent.length, a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x');
+    const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+    if (x0 < 2) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', 2); }
+    else if (x0 + w > f.W - 2) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', f.W - 2); }
+  }
+  return labs;
 }
 function gridAndDays(f, g, x, y0, y1, tk) {
   for (let d = Math.max(0, dayOf(S.v[0])); d <= dayOf(S.v[1]); d++) {
@@ -287,7 +430,7 @@ function mainBusyAt(t) { return BUSY.some(b => b.s <= t && t <= b.e); }
 const halo = n => sty(n, {paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: '3px', strokeLinejoin: 'round'});
 const DEPD = DEP.slice().sort((a, b) => a.nw - b.nw || a.t - b.t);   // updates first, so a first publish is never hidden
 function drawMain(f) {
-  const Y = layout(f.W), {L, R, rows, nar} = Y, W = f.W, svg = f.svg;
+  const Y = layout(f.W), {L, R, rows, nar} = Y, W = f.W, svg = f.svg, fast = S.drawFast;
   const want = S.focus; if (want) f.refocus = null;
   f.L = L; f.R = R;
   const x = CK.lin(S.v[0], S.v[1], L, W - R), X = t => Math.max(L - 6, Math.min(W - R + 6, x(t)));
@@ -317,15 +460,13 @@ function drawMain(f) {
   }
   spreadX(items, gap, L + 8, W - R - 8);
   const fr = Math.min(9.5, gap / 2 - 0.3);
-  const hov = [];
   items.forEach(o => {
     const cx = o.x, g = CK.el('g', {'data-hl': o.i}, ui), many = o.ids.length > 1;
     const xs = o.xs || [o.x0], lines = [];
     xs.forEach(xt => {
       lineEl(bg, xt, hr.y + hr.h - 7, xt, hr.y + hr.h, {stroke: 'var(--ink-2)', strokeWidth: '1px'});
-      lines.push(sty(lineEl(plot, xt, hr.y + hr.h, xt, y1, {stroke: 'var(--ink-2)', strokeWidth: '1px', strokeDasharray: '2 3'}), {display: 'none'}));
+      if (!fast) lines.push(sty(lineEl(plot, xt, hr.y + hr.h, xt, y1, {stroke: 'var(--ink-2)', strokeWidth: '1px', strokeDasharray: '2 3'}), {display: 'none'}));
     });
-    hov.push(lines);
     const xm = many ? (xs[0] + xs[xs.length - 1]) / 2 : o.x0;
     if (Math.abs(cx - xm) > 1) lineEl(g, cx, hr.y + 20, xm, hr.y + hr.h - 7, {stroke: 'var(--ink-2)', strokeWidth: '1px'});
     if (many) {
@@ -339,19 +480,21 @@ function drawMain(f) {
     g.style.cursor = 'pointer';
     const view = many ? [Math.min(...o.ids.map(k => HL[k].a)), Math.max(...o.ids.map(k => HL[k].b))] : null;
     const go = () => { S.focus = `[data-hl="${o.i}"]`; animateTo(...(many ? [view[0] - 1800, view[1] + 1800] : hlView(HL[o.i]))); };
-    CK.tip(f, g, many ? `<b>Highlights ${o.lab}</b><br>` + o.ids.map(k => `${k + 1}. ${esc(HL[k].title)} (${when(HL[k].t)})`).join('<br>') + '<br><i>Click, or press Enter, to zoom to them.</i>'
-      : `<b>${o.i + 1}. ${esc(HL[o.i].title)}</b><br>${span(HL[o.i].a, HL[o.i].b)}<br>${esc(HL[o.i].caption)}<br><i>Click, or press Enter, to zoom here.</i>`, {role: 'button'});
+    g._go = go;
+    if (fast) { g.setAttribute('tabindex', '-1'); hlNodes.push(g); return; }   // focusable, for the zoom it asked for
+    CK.tip(f, g, many ? `<b>Highlights ${o.lab}</b><br>` + o.ids.map(k => `${k + 1}. ${esc(HL[k].title)} (${when(HL[k].t)})`).join('<br>') + '<br><i>Click, press Enter or tap again to zoom to them.</i>'
+      : `<b>${o.i + 1}. ${esc(HL[o.i].title)}</b><br>${span(HL[o.i].a, HL[o.i].b)}<br>${esc(HL[o.i].caption)}<br><i>Click, press Enter or tap again to zoom here.</i>`, {role: 'button'});
     const show = on => lines.forEach(l => { l.style.display = on ? '' : 'none'; });
     g.addEventListener('pointerenter', () => show(true)); g.addEventListener('pointerleave', () => show(false));
     g.addEventListener('focus', () => show(true)); g.addEventListener('blur', () => show(false));
-    g.addEventListener('click', go); g._go = go;
+    g.addEventListener('click', go);
     hlNodes.push(g);
   });
-  CK.keynav(f, hlNodes, {onEnter: n => n._go()});
+  NAV(f, hlNodes, {onEnter: n => n._go()});
 
-  // the axis as a keyboard control: arrows pan, + and − zoom, 0 or Home shows the week
-  const ax = rect(ui, L, 0, W - L - R, rows.axis.h, 'transparent', {class: 'ck-hit', 'data-axis': ''});
-  CK.tip(f, ax, () => `<b>Time axis</b>: ${span(S.v[0], S.v[1])}<br>← → pan · + − zoom · 0 the whole week`);
+  // the axis as a keyboard control: arrows pan, + and − zoom, 0 or Home shows the whole span
+  const ax = rect(ui, L, 0, W - L - R, rows.axis.h, 'transparent', {class: 'ck-hit', 'data-axis': '', tabindex: '0'});
+  if (!fast) CK.tip(f, ax, () => `<b>Time axis</b>: ${span(S.v[0], S.v[1])}<br>← → pan · + − zoom · 0 the whole span`);
   ax.addEventListener('keydown', ev => {
     const k = ev.key; let did = true;
     S.focus = '[data-axis]';
@@ -370,7 +513,7 @@ function drawMain(f) {
   };
   head('hH', 'HUMAN', `${HU.totals.n} messages · a mark per message; what was asked shows under it when zoomed in to two days or less, and in its details · faint bar: estimated reading and typing time · shaded: engagement sessions`);
   head('hA', 'AGENTS', 'the main agent: solid, active (events under 3 min apart); tint, waiting inside a turn; dotted, watching its workflows (idle) · below: subagents busy at once');
-  head('hC', 'CARDS', 'one lane per card, each interval a measurement; outlined: development runs, from the transcripts · below: cards in use, 0 to 4');
+  head('hC', 'CARDS', 'one lane per card, each interval a measurement; outlined: development runs, from the transcripts · red: the host down · below: cards in use, 0 to 4');
   head('hR', 'ARTIFACTS', (S.perPage ? 'deploys: ● first publish, ○ update' : 'deploys: a bar per minute, its height the number of pages; a dot marks a first publish') +
     ' · commits: tall tick, this session; short tick, another session');
   // the session's start and the snapshot's end
@@ -384,65 +527,99 @@ function drawMain(f) {
   const hu = rows.human, hy = hu.y + 15;
   CK.txt(gut, 2, hy + 4, nar ? 'owner' : 'the owner', 'lab');
   const gS = CK.el('g', {}, plot), sesNodes = [];
-  for (const s of SES) {
-    if (!vis(s.s, s.e)) continue;
-    const n = rect(gS, X(s.s), hu.y + 1, Math.max(3, X(s.e) - X(s.s)), hu.h - 2, mixT('var(--ink)', 9), {rx: 3});
-    TIP(f, n, `<b>Engagement session ${s.i + 1}</b>: ${span(s.s, s.e)}<br>${s.n} message${s.n > 1 ? 's' : ''}; estimated active ${dur(s.act)}` +
-      `${s.actp < s.act - 1 ? ` (${dur(s.actp)} with pasted text not counted as typing)` : ''}<br>the session starts when its first message was being read and written (estimate)`);
-    sesNodes.push(n);
-  }
-  const gB = CK.el('g', {'aria-hidden': 'true'}, plot);
-  for (const m of MSG) { if (vis(m.t - m.act, m.t)) sty(rect(gB, X(m.t - m.act), hy - 2, Math.max(1.5, X(m.t) - X(m.t - m.act)), 4, 'var(--ink-2)', {rx: 1}), {opacity: 0.22}); }
-  const gM = CK.el('g', {}, plot), mNodes = [];
-  for (const m of MSG) {
-    if (!vis(m.t, m.t)) continue;
-    const g = CK.el('g', {}, gM), cx = x(m.t);
-    CK.el('circle', {cx, cy: hy, r: 8, class: 'ck-hit'}, g);
-    humanMark(g, m.cat, cx, hy);
-    TIP(f, g, msgTip(m)); mNodes.push(g);
+  const gB = CK.el('g', {'aria-hidden': 'true'}, plot), gM = CK.el('g', {}, plot), mNodes = [];
+  if (fast) {
+    const ps = PB(true), pa = PB(true), pm = [PB(), PB(), PB(), PB(), PB()];
+    for (const s of SES) if (vis(s.s, s.e)) ps.rect(X(s.s), hu.y + 1, Math.max(3, X(s.e) - X(s.s)), hu.h - 2);
+    ps.flush(gS, {fill: mixT('var(--ink)', 9)});
+    for (const m of MSG) if (vis(m.t - m.act, m.t)) pa.rect(X(m.t - m.act), hy - 2, Math.max(1.5, X(m.t) - X(m.t - m.act)), 4);
+    pa.flush(gB, {fill: 'var(--ink-2)', opacity: 0.22});
+    for (const m of MSG) if (vis(m.t, m.t)) markPath(pm, m.cat, x(m.t), hy, 1);
+    flushMarks(pm, gM);
+  } else {
+    for (const s of SES) {
+      if (!vis(s.s, s.e)) continue;
+      const n = rect(gS, X(s.s), hu.y + 1, Math.max(3, X(s.e) - X(s.s)), hu.h - 2, mixT('var(--ink)', 9), {rx: 3});
+      TIP(f, n, () => `<b>Engagement session ${s.i + 1}</b>: ${span(s.s, s.e)}<br>${s.n} message${s.n > 1 ? 's' : ''}; estimated active ${dur(s.act)}` +
+        `${s.actp < s.act - 1 ? ` (${dur(s.actp)} with pasted text not counted as typing)` : ''}<br>the session starts when its first message was being read and written (estimate)`);
+      sesNodes.push(n);
+    }
+    for (const m of MSG) { if (vis(m.t - m.act, m.t)) sty(rect(gB, X(m.t - m.act), hy - 2, Math.max(1.5, X(m.t) - X(m.t - m.act)), 4, 'var(--ink-2)', {rx: 1}), {opacity: 0.22}); }
+    for (const m of MSG) {
+      if (!vis(m.t, m.t)) continue;
+      const g = CK.el('g', {}, gM), cx = x(m.t);
+      CK.el('circle', {cx, cy: hy, r: 8, class: 'ck-hit'}, g);
+      humanMark(g, m.cat, cx, hy);
+      TIP(f, g, () => msgTip(m)); mNodes.push(g);
+    }
   }
   // what was asked: when two days or less are in view, each message's summary under the marks, starting at its mark
   // (a hairline joins them), the rows taken in turn and each summary cut to end before the next one in its row; a
   // summary with too little room stays in the mark's details and in §3's list
   if (S.v[1] - S.v[0] <= 2 * DAY) {
-    const gL = CK.el('g', {'aria-hidden': 'true'}, plot), right = W - R - 4, vm = MSG.filter(m => vis(m.t, m.t));
+    const gL = CK.el('g', {'aria-hidden': 'true'}, plot), right = W - R - 4, vm = MSG.filter(m => vis(m.t, m.t)), hair = PB();
     vm.forEach((m, k) => {
       const r = k % 3, x0 = x(m.t) - 3, stop = k + 3 < vm.length ? x(vm[k + 3].t) - 13 : right;
       const w = Math.min(360, stop - x0, m.sum.length * 6.9 + 4);
       if (w < 44) return;
       const ly = hu.y + 30 + 12 + r * ASK_ROW;
-      lineEl(gL, x(m.t), hy + 6, x(m.t), ly - 10, {stroke: 'var(--axis)', strokeWidth: '1px'});
-      halo(sty(CK.txt(gL, x0, ly, trunc(m.sum, w), 'tick'), {fill: 'var(--ink)', fontSize: '12.5px', fontWeight: 500}));
+      hair.line(x(m.t), hy + 6, x(m.t), ly - 10);
+      const lab = sty(CK.txt(gL, x0, ly, trunc(m.sum, w), 'tick'), {fill: 'var(--ink)', fontSize: '12.5px', fontWeight: 500});
+      if (!fast) halo(lab);
     });
+    hair.flush(gL, {stroke: 'var(--axis)', strokeWidth: '1px', fill: 'none'});
   }
   NAV(f, mNodes); NAV(f, sesNodes);
+  // the owner's messages to the neighbor session(s), on a row of their own (smaller marks)
+  if (NB) {
+    const r = rows.humanNb, cy = r.y + 9, gN = CK.el('g', {}, plot), nNodes = [];
+    CK.txt(gut, 2, cy + 4, nar ? '→ nbr' : 'to the neighbor', 'lab');
+    if (fast) { const pm = [PB(), PB(), PB(), PB(), PB()]; NB.sessions.forEach(nb => nb.msgs.forEach(m => { if (vis(m[0], m[0])) markPath(pm, m[1], x(m[0]), cy, 0.8); })); flushMarks(pm, gN); }
+    else NB.sessions.forEach(nb => nb.msgs.forEach(m => {
+      if (!vis(m[0], m[0])) return;
+      const g = CK.el('g', {}, gN), cx = x(m[0]);
+      CK.el('circle', {cx, cy, r: 7, class: 'ck-hit'}, g);
+      sty(humanMark(g, m[1], cx, cy), {transform: `translate(${cx}px, ${cy}px) scale(0.8) translate(${-cx}px, ${-cy}px)`});
+      TIP(f, g, () => `<b style="font-size:1.06em">${esc(m[3])}</b><br>${when(m[0])} · ${HU.cats[m[1]]} · to ${esc(nb.name)}` +
+        `<br><span style="font-size:.8em;color:var(--muted)">${KINDLAB[HU.kinds[m[2]]] || ''}; a summary, as for the main session’s messages; not counted in this page’s totals</span>`);
+      nNodes.push(g);
+    }));
+    NAV(f, nNodes);
+  }
 
   // AGENTS: the main agent (tint: busy; solid: active; dotted: watching its own workflows, counted idle)
   const mr = rows.main;
   CK.txt(gut, 2, mr.y + 13, nar ? 'main' : 'main agent', 'lab');
-  const gm = CK.el('g', {}, plot), bNodes = [];
-  let si = 0;
-  for (const b of BUSY) {
-    if (!vis(b.s, b.e)) continue;
-    const g = CK.el('g', {}, gm), a = X(b.s), w = Math.max(2, X(b.e) - a);
-    rect(g, a, mr.y + 2, w, mr.h - 4, mixT('var(--c7)', 32), {rx: 2});
-    while (si < STRICT.length && STRICT[si][1] < b.s) si++;
-    for (let j = si; j < STRICT.length && STRICT[j][0] <= b.e; j++) {
-      const s = Math.max(STRICT[j][0], b.s), e = Math.min(STRICT[j][1], b.e);
-      if (e > s && vis(s, e)) rect(g, X(s), mr.y + 2, Math.max(1, X(e) - X(s)), mr.h - 4, 'var(--c7)', {'aria-hidden': 'true'});
+  const gm = CK.el('g', {}, plot), bNodes = [], wNodes = [];
+  if (fast) {
+    const pt = PB(true), pa = PB(true), pwt = PB();
+    for (const b of BUSY) if (vis(b.s, b.e)) pt.rect(X(b.s), mr.y + 2, Math.max(2, X(b.e) - X(b.s)), mr.h - 4);
+    for (const [s0, e0] of STRICT) if (vis(s0, e0)) pa.rect(X(s0), mr.y + 2, Math.max(1, X(e0) - X(s0)), mr.h - 4);
+    for (const [a, b] of WATCH) if (vis(a, b)) pwt.line(X(a), mr.y + mr.h / 2, X(b), mr.y + mr.h / 2);
+    pt.flush(gm, {fill: mixT('var(--c7)', 32)}); pa.flush(gm, {fill: 'var(--c7)'});
+    pwt.flush(gm, {stroke: COL.main, strokeWidth: '2px', strokeDasharray: '1.5 3', strokeLinecap: 'round', fill: 'none'});
+  } else {
+    let si = 0;
+    for (const b of BUSY) {
+      if (!vis(b.s, b.e)) continue;
+      const g = CK.el('g', {}, gm), a = X(b.s), w = Math.max(2, X(b.e) - a);
+      rect(g, a, mr.y + 2, w, mr.h - 4, mixT('var(--c7)', 32), {rx: 2});
+      while (si < STRICT.length && STRICT[si][1] < b.s) si++;
+      for (let j = si; j < STRICT.length && STRICT[j][0] <= b.e; j++) {
+        const s = Math.max(STRICT[j][0], b.s), e = Math.min(STRICT[j][1], b.e);
+        if (e > s && vis(s, e)) rect(g, X(s), mr.y + 2, Math.max(1, X(e) - X(s)), mr.h - 4, 'var(--c7)', {'aria-hidden': 'true'});
+      }
+      TIP(f, g, () => busyTip(b)); bNodes.push(g);
     }
-    TIP(f, g, busyTip(b)); bNodes.push(g);
+    for (const [a, b] of WATCH) {
+      if (!vis(a, b)) continue;
+      const g = CK.el('g', {}, gm);
+      CK.el('rect', {x: X(a), y: mr.y + 2, width: Math.max(4, X(b) - X(a)), height: mr.h - 4, class: 'ck-hit'}, g);
+      lineEl(g, X(a), mr.y + mr.h / 2, X(b), mr.y + mr.h / 2, {stroke: COL.main, strokeWidth: '2px', strokeDasharray: '1.5 3', strokeLinecap: 'round'});
+      TIP(f, g, () => watchTip(a, b)); wNodes.push(g);
+    }
   }
-  NAV(f, bNodes);
-  const wNodes = [];
-  for (const [a, b] of WATCH) {
-    if (!vis(a, b)) continue;
-    const g = CK.el('g', {}, gm);
-    CK.el('rect', {x: X(a), y: mr.y + 2, width: Math.max(4, X(b) - X(a)), height: mr.h - 4, class: 'ck-hit'}, g);
-    lineEl(g, X(a), mr.y + mr.h / 2, X(b), mr.y + mr.h / 2, {stroke: COL.main, strokeWidth: '2px', strokeDasharray: '1.5 3', strokeLinecap: 'round'});
-    TIP(f, g, watchTip(a, b)); wNodes.push(g);
-  }
-  NAV(f, wNodes);
+  NAV(f, bNodes); NAV(f, wNodes);
   // usage limits: a marker over the main agent's row (the subagent lane below says so in its tooltip)
   const limNodes = [];
   MA.limits.forEach(([t, kind]) => {
@@ -450,10 +627,44 @@ function drawMain(f) {
     const g = CK.el('g', {}, plot);
     lineEl(g, x(t), mr.y, x(t), mr.y + mr.h + 3, {stroke: 'var(--bad)', strokeWidth: '1.6px', strokeDasharray: '3 2'});
     sty(CK.el('polygon', {points: `${x(t) - 5},${mr.y - 1} ${x(t) + 5},${mr.y - 1} ${x(t)},${mr.y + 7}`}, g), {fill: 'var(--bad)'});
+    if (fast) return;
     CK.el('rect', {x: x(t) - 6, y: mr.y - 2, width: 12, height: mr.h + 6, class: 'ck-hit'}, g);
     CK.tip(f, g, `<b>⚠ Usage limit reached</b> (${kind}), ${when(t)}<br>the agents stopped until it reset`); limNodes.push(g);
   });
-  CK.keynav(f, limNodes);
+  NAV(f, limNodes);
+
+  // AGENTS: the neighbor session(s), another Claude session on the lab's own machine, from its transcripts: its busy
+  // time (grey), its subagents (the thin bar under it) and its key events (a marker each; red for the host down)
+  if (NB) NB.sessions.forEach((nb, k) => {
+    const r = rows['nb' + k], gN = CK.el('g', {}, plot), nNodes = [], eNodes = [];
+    CK.txt(gut, 2, r.y + 14, nar ? 'neighbor' : 'neighbor session', 'lab');
+    if (fast) {
+      const ps = PB(true), pb = PB(true);
+      for (const [a, b] of nb.sub) if (vis(a, b)) ps.rect(X(a), r.y + r.h - 6, Math.max(1, X(b) - X(a)), 3);
+      for (const [a, b] of nb.busy) if (vis(a, b)) pb.rect(X(a), r.y + 3, Math.max(2, X(b) - X(a)), r.h - 11);
+      ps.flush(gN, {fill: mixT('var(--c4)', 75)}); pb.flush(gN, {fill: 'var(--ref)'});
+    } else {
+      for (const [a, b] of nb.sub) if (vis(a, b)) rect(gN, X(a), r.y + r.h - 6, Math.max(1, X(b) - X(a)), 3, mixT('var(--c4)', 75), {'aria-hidden': 'true'});
+      for (const [a, b] of nb.busy) {
+        if (!vis(a, b)) continue;
+        const n = rect(gN, X(a), r.y + 3, Math.max(2, X(b) - X(a)), r.h - 11, 'var(--ref)', {rx: 2});
+        TIP(f, n, () => `<b>${esc(nb.name)}: busy</b> ${span(a, b)} (${dur(b - a)})<br>${esc(nb.title)}` +
+          `<br>its subagents busy in this span: ${dur(overlap(nb.sub, a, b))} of agent time`); nNodes.push(n);
+      }
+    }
+    NAV(f, nNodes);
+    nb.events.forEach(([t, e, kind, title, text]) => {
+      if (!vis(t, e > t ? e : t)) return;
+      const g = CK.el('g', {}, plot), cx = x(t), red = kind === 'hang' || kind === 'power';
+      if (e > t) rect(g, X(t), r.y + r.h - 2, Math.max(1, X(e) - X(t)), 2, red ? 'var(--bad)' : 'var(--ink-2)', {'aria-hidden': 'true'});
+      if (red) sty(CK.el('polygon', {points: `${cx - 5},${r.y} ${cx + 5},${r.y} ${cx},${r.y + 8}`}, g), {fill: 'var(--bad)', stroke: 'var(--page)', strokeWidth: '1px'});
+      else sty(CK.el('polygon', {points: `${cx},${r.y} ${cx + 4.5},${r.y + 4.5} ${cx},${r.y + 9} ${cx - 4.5},${r.y + 4.5}`}, g), {fill: 'var(--ink)', stroke: 'var(--page)', strokeWidth: '1px'});
+      if (fast) return;
+      CK.el('rect', {x: cx - 7, y: r.y - 1, width: 14, height: r.h, class: 'ck-hit'}, g);
+      CK.tip(f, g, `<b>${esc(title)}</b>, ${e > t ? span(t, e) : when(t)}<br>${esc(text)}`); eNodes.push(g);
+    });
+    NAV(f, eNodes);
+  });
 
   // AGENTS: subagents busy at once, stacked: workflow agents, Agent-tool agents and forks, then the agents that failed or
   // ended on an error. The scale follows the agents that did not fail; failed starts above it are clipped and the
@@ -481,9 +692,10 @@ function drawMain(f) {
   if (!nar) CK.txt(gut, 2, cr.y + 30, 'busy at once', 'tick');
   if (B.length) {
     const area = (lo, hi) => {
-      let d = `M${X(B[0][0]).toFixed(1)},${yc(lo(B[0])).toFixed(1)}`;
-      for (const b of B) d += `L${X(b[0]).toFixed(1)},${yc(hi(b)).toFixed(1)}L${X(b[1]).toFixed(1)},${yc(hi(b)).toFixed(1)}`;
-      for (let k = B.length - 1; k >= 0; k--) d += `L${X(B[k][1]).toFixed(1)},${yc(lo(B[k])).toFixed(1)}L${X(B[k][0]).toFixed(1)},${yc(lo(B[k])).toFixed(1)}`;
+      const r1 = v => Math.round(v * 10) / 10;
+      let d = `M${r1(X(B[0][0]))},${r1(yc(lo(B[0])))}`;
+      for (const b of B) d += `L${r1(X(b[0]))},${r1(yc(hi(b)))}L${r1(X(b[1]))},${r1(yc(hi(b)))}`;
+      for (let k = B.length - 1; k >= 0; k--) d += `L${r1(X(B[k][1]))},${r1(yc(lo(B[k])))}L${r1(X(B[k][0]))},${r1(yc(lo(B[k])))}`;
       return d + 'Z';
     };
     sty(CK.el('path', {d: area(() => 0, b => b[2])}, plot), {fill: COL.wf, shapeRendering: 'crispEdges'});
@@ -495,25 +707,27 @@ function drawMain(f) {
       halo(CK.txt(plot, tx + 6, cr.y + 10, `${topAll} (failed starts clipped)`, 'tick', 'start'));
     }
   }
-  const cross = sty(CK.el('line', {x1: 0, x2: 0, y1: cr.y, y2: base}, plot), {stroke: 'var(--ink)', strokeWidth: '1px', display: 'none', pointerEvents: 'none'});
-  const hitC = rect(svg, L, cr.y, pw, cr.h, 'transparent', {class: 'ck-hit'});
   const track = (hit, ln) => {
     hit.addEventListener('pointermove', ev => { const p = ev.clientX - svg.getBoundingClientRect().left; f.cx = p; ln.setAttribute('x1', p); ln.setAttribute('x2', p); ln.style.display = ''; });
     hit.addEventListener('pointerleave', () => { f.cx = null; ln.style.display = 'none'; });
     hit.addEventListener('focus', () => { f.cx = null; });
   };
-  track(hitC, cross);
-  CK.tip(f, hitC, () => {
-    if (f.cx == null) {  // keyboard: the peaks of the window in view
-      let pk = -1, pi = i0, po = -1, poi = i0;
-      for (let j = i0; j < i1; j++) { if (CW[j] + CT[j] > pk) { pk = CW[j] + CT[j]; pi = j; } if (OW[j] + OT[j] > po) { po = OW[j] + OT[j]; poi = j; } }
-      return `<b>Subagents busy at once</b>, ${span(S.v[0], S.v[1])}<br>peak ${Math.max(0, po)}${po > 0 ? ` at ${when(C0 + poi * 60)}` : ''}, not counting agents that failed` +
-        `${pk > po ? `; ${pk} with them, at ${when(C0 + pi * 60)}` : ''}<br>move the pointer over the chart for any minute`;
-    }
-    const t = x.inv(f.cx), j = Math.floor((t - C0) / 60), ow = OW[j] || 0, ot = OT[j] || 0, cf = CF[j] || 0, n = ow + ot + cf, run = runningAt(t);
-    return `<b>${when(t)}</b><br>${n} subagent${n === 1 ? '' : 's'} busy: ${ow} workflow agent${ow === 1 ? '' : 's'}, ${ot} Agent-tool agent${ot === 1 ? '' : 's'} or forks` +
-      `${cf ? `, and ${cf} that failed or ended on an error` : ''}<br>main agent ${mainBusyAt(t) ? 'busy' : 'idle'}${run.length ? `<br>workflow running: ${run.map(esc).join(', ')}` : ''}${limitNear(t)}`;
-  });
+  if (!fast) {
+    const cross = sty(CK.el('line', {x1: 0, x2: 0, y1: cr.y, y2: base}, plot), {stroke: 'var(--ink)', strokeWidth: '1px', display: 'none', pointerEvents: 'none'});
+    const hitC = rect(svg, L, cr.y, pw, cr.h, 'transparent', {class: 'ck-hit'});
+    track(hitC, cross);
+    CK.tip(f, hitC, () => {
+      if (f.cx == null) {  // keyboard: the peaks of the window in view
+        let pk = -1, pi = i0, po = -1, poi = i0;
+        for (let j = i0; j < i1; j++) { if (CW[j] + CT[j] > pk) { pk = CW[j] + CT[j]; pi = j; } if (OW[j] + OT[j] > po) { po = OW[j] + OT[j]; poi = j; } }
+        return `<b>Subagents busy at once</b>, ${span(S.v[0], S.v[1])}<br>peak ${Math.max(0, po)}${po > 0 ? ` at ${when(C0 + poi * 60)}` : ''}, not counting agents that failed` +
+          `${pk > po ? `; ${pk} with them, at ${when(C0 + pi * 60)}` : ''}<br>move the pointer over the chart for any minute`;
+      }
+      const t = x.inv(f.cx), j = Math.floor((t - C0) / 60), ow = OW[j] || 0, ot = OT[j] || 0, cf = CF[j] || 0, n = ow + ot + cf, run = runningAt(t);
+      return `<b>${when(t)}</b><br>${n} subagent${n === 1 ? '' : 's'} busy: ${ow} workflow agent${ow === 1 ? '' : 's'}, ${ot} Agent-tool agent${ot === 1 ? '' : 's'} or forks` +
+        `${cf ? `, and ${cf} that failed or ended on an error` : ''}<br>main agent ${mainBusyAt(t) ? 'busy' : 'idle'}${run.length ? `<br>workflow running: ${run.map(esc).join(', ')}` : ''}${limitNear(t)}`;
+    });
+  }
 
   // CARDS: one lane each, coloured by card (or by experiment family); development runs outlined, under the rest
   const cNodes = [];
@@ -522,44 +736,74 @@ function drawMain(f) {
     rect(bg, L, r.y + 1, pw, r.h - 2, mixT(c.color, 7));
     CK.cardMark(gut, id, nar ? 7 : 9, cy, 4);
     CK.txt(gut, nar ? 16 : 20, cy + 4, nar ? c.short : c.label, 'lab');
-    for (const pass of [0, 1]) for (const q of CIV) {
-      if (q.c !== k || (q.f === DEVF) !== (pass === 0) || !vis(q.s, q.e)) continue;
-      const w = Math.max(1.5, X(q.e) - X(q.s)), dev = q.f === DEVF;
-      const n = rect(plot, X(q.s), r.y + 2, w, r.h - 4, dev ? famFill(q.f, S.cardMode === 'card' ? c.color : null) : S.cardMode === 'card' ? c.color : FAMCOL[q.f]);
-      if (dev) sty(n, {stroke: S.cardMode === 'card' ? c.color : 'var(--ink-2)', strokeWidth: '1px'});
-      else if (w > 5) sty(n, {stroke: 'var(--page)', strokeWidth: '1px'});
-      TIP(f, n, cardTip(q)); nodes.push(n);
+    if (fast) {   // one path per fill: the development runs, then the wide intervals (a page-coloured edge) and the narrow ones
+      const P = new Map(), get = (key, style) => { if (!P.has(key)) P.set(key, {p: PB(key[0] === 'n'), style}); return P.get(key).p; };
+      for (const pass of [0, 1]) for (const q of CIV) {
+        if (q.c !== k || (q.f === DEVF) !== (pass === 0) || !vis(q.s, q.e)) continue;
+        const w = Math.max(1.5, X(q.e) - X(q.s)), dev = q.f === DEVF, fill = S.cardMode === 'card' ? c.color : FAMCOL[q.f];
+        if (dev) get('dev', {fill: famFill(q.f, S.cardMode === 'card' ? c.color : null), stroke: S.cardMode === 'card' ? c.color : 'var(--ink-2)', strokeWidth: '1px'}).rect(X(q.s), r.y + 2, w, r.h - 4);
+        else get((w > 5 ? 'w' : 'n') + fill, w > 5 ? {fill, stroke: 'var(--page)', strokeWidth: '1px'} : {fill}).rect(X(q.s), r.y + 2, w, r.h - 4);
+      }
+      for (const {p, style} of P.values()) p.flush(plot, style);
+    } else {
+      for (const pass of [0, 1]) for (const q of CIV) {
+        if (q.c !== k || (q.f === DEVF) !== (pass === 0) || !vis(q.s, q.e)) continue;
+        const w = Math.max(1.5, X(q.e) - X(q.s)), dev = q.f === DEVF;
+        const n = rect(plot, X(q.s), r.y + 2, w, r.h - 4, dev ? famFill(q.f, S.cardMode === 'card' ? c.color : null) : S.cardMode === 'card' ? c.color : FAMCOL[q.f]);
+        if (dev) sty(n, {stroke: S.cardMode === 'card' ? c.color : 'var(--ink-2)', strokeWidth: '1px'});
+        else if (w > 5) sty(n, {stroke: 'var(--page)', strokeWidth: '1px'});
+        TIP(f, n, () => cardTip(q)); nodes.push(n);
+      }
+      nodes.sort((a, b) => +a.getAttribute('x') - +b.getAttribute('x'));
     }
-    nodes.sort((a, b) => +a.getAttribute('x') - +b.getAttribute('x'));
     cNodes.push(nodes);
   });
   cNodes.forEach(n => NAV(f, n));
+  // the hosts down: hung (aifoundry1 after its link retrain) or switched off (the power cycle), over their cards' lanes
+  const hNodes = [];
+  HOSTEV.forEach(h => {
+    if (!vis(h.s, h.e)) return;
+    h.cards.forEach(k => {
+      const r = rows['card' + k], a = X(h.s), w = Math.max(3, X(h.e) - a), g = CK.el('g', {}, plot);
+      sty(rect(g, a, r.y + 1, w, r.h - 2, mixT('var(--bad)', h.kind === 'hang' ? 22 : 45)), {stroke: 'var(--bad)', strokeWidth: '1px'});
+      if (fast) return;
+      CK.el('rect', {x: a - 3, y: r.y, width: w + 6, height: r.h, class: 'ck-hit'}, g);
+      CK.tip(f, g, `<b>${esc(h.title)}</b>: ${span(h.s, h.e)} (${dur(h.e - h.s)})<br>${esc(h.text)}`); hNodes.push(g);
+    });
+  });
+  NAV(f, hNodes);
   // cards in use, 0 to 4: the bar's height is the count (faint lines at 1, 2 and 3)
   const ur = rows.inuse, ub = ur.y + ur.h - 1, uh = ur.h - 6;
   for (const n of [1, 2, 3]) lineEl(bg, L, ub - n / 4 * uh, W - R, ub - n / 4 * uh, {stroke: 'var(--grid)', strokeWidth: '1px', strokeDasharray: '1 3'});
-  let t = INU.start;
-  for (const [n, cnt] of INU.rle) {
-    const s = t, e = t + cnt * INU.step; t = e;
-    if (!n || !vis(s, e)) continue;
-    rect(plot, X(s), ub - n / 4 * uh, Math.max(1, X(e) - X(s)), n / 4 * uh, INUSE_FILL[n]);
+  {
+    const pu = [null, PB(true), PB(true), PB(true), PB(true)];
+    let t = INU.start;
+    for (const [n, cnt] of INU.rle) {
+      const s = t, e = t + cnt * INU.step; t = e;
+      if (!n || !vis(s, e)) continue;
+      pu[n].rect(X(s), ub - n / 4 * uh, Math.max(1, X(e) - X(s)), n / 4 * uh);
+    }
+    for (const n of [1, 2, 3, 4]) pu[n].flush(plot, {fill: INUSE_FILL[n]});
   }
   lineEl(bg, L, ub - uh, W - R, ub - uh, {stroke: 'var(--grid)', strokeWidth: '1px', strokeDasharray: '3 3'});
   lineEl(bg, L, ub, W - R, ub, {stroke: 'var(--axis)', strokeWidth: '1px'});
   if (nar) halo(CK.txt(svg, L + 3, ub - uh + 11, '4', 'tick'));
   else { CK.txt(gut, L - 6, ub - uh + 4, '4', 'tick', 'end'); CK.txt(gut, L - 6, ub - uh / 2 + 4, '2', 'tick', 'end'); CK.txt(gut, L - 6, ub, '0', 'tick', 'end'); }
   CK.txt(gut, 2, ur.y + 14, nar ? 'in use' : 'cards in use', 'lab');
-  const crossU = sty(CK.el('line', {x1: 0, x2: 0, y1: ur.y, y2: ub}, plot), {stroke: 'var(--ink)', strokeWidth: '1px', display: 'none', pointerEvents: 'none'});
-  const hitU = rect(svg, L, ur.y, pw, ur.h, 'transparent', {class: 'ck-hit'});
-  track(hitU, crossU);
-  CK.tip(f, hitU, () => {
-    if (f.cx == null) {
-      const mins = [0, 0, 0, 0, 0]; let tt = INU.start;
-      for (const [n, cnt] of INU.rle) { const s = tt, e = tt + cnt * 60; tt = e; mins[n] += Math.max(0, Math.min(e, S.v[1]) - Math.max(s, S.v[0])) / 60; }
-      return `<b>Cards in use</b>, ${span(S.v[0], S.v[1])}<br>` + [4, 3, 2, 1].filter(n => mins[n] > 0).map(n => `${n} card${n > 1 ? 's' : ''}: ${dur(mins[n] * 60)}`).join('<br>');
-    }
-    const tt = x.inv(f.cx), j = Math.floor((tt - INU.start) / 60), n = INV[j] || 0, at = cardsAt(tt);
-    return `<b>${when(tt)}</b><br>${n} card${n === 1 ? '' : 's'} in use${at.length ? '<br>' + at.join('<br>') : ''}`;
-  });
+  if (!fast) {
+    const crossU = sty(CK.el('line', {x1: 0, x2: 0, y1: ur.y, y2: ub}, plot), {stroke: 'var(--ink)', strokeWidth: '1px', display: 'none', pointerEvents: 'none'});
+    const hitU = rect(svg, L, ur.y, pw, ur.h, 'transparent', {class: 'ck-hit'});
+    track(hitU, crossU);
+    CK.tip(f, hitU, () => {
+      if (f.cx == null) {
+        const mins = [0, 0, 0, 0, 0]; let tt = INU.start;
+        for (const [n, cnt] of INU.rle) { const s = tt, e = tt + cnt * 60; tt = e; mins[n] += Math.max(0, Math.min(e, S.v[1]) - Math.max(s, S.v[0])) / 60; }
+        return `<b>Cards in use</b>, ${span(S.v[0], S.v[1])}<br>` + [4, 3, 2, 1].filter(n => mins[n] > 0).map(n => `${n} card${n > 1 ? 's' : ''}: ${dur(mins[n] * 60)}`).join('<br>');
+      }
+      const tt = x.inv(f.cx), j = Math.floor((tt - INU.start) / 60), n = INV[j] || 0, at = cardsAt(tt);
+      return `<b>${when(tt)}</b><br>${n} card${n === 1 ? '' : 's'} in use${at.length ? '<br>' + at.join('<br>') : ''}`;
+    });
+  }
 
   // ARTIFACTS: deploys, one row of counts per minute or one lane per page
   const dNodes = [];
@@ -571,43 +815,69 @@ function drawMain(f) {
       const lab = p.short.length > maxc ? p.short.slice(0, maxc - 1) + '…' : p.short;
       sty(CK.txt(gut, L - 8, cy + 4, lab, 'lab', 'end'), {fontSize: '11px'});
     });
-    for (const d of DEPD) {
-      if (!vis(d.t, d.t)) continue;
-      const r = rows['page' + d.p], cy = r.y + r.h / 2, g = CK.el('g', {}, plot);
-      CK.el('circle', {cx: x(d.t), cy, r: 6, class: 'ck-hit'}, g);
-      const c = CK.el('circle', {cx: x(d.t), cy, r: d.nw ? 3.8 : 3.2}, g);
-      sty(c, d.nw ? {fill: 'var(--ink)', stroke: 'var(--page)', strokeWidth: '1px'} : {fill: 'var(--page)', stroke: 'var(--ink)', strokeWidth: '1.5px'});
-      TIP(f, g, depTip(d)); dNodes.push(g);
+    if (fast) {
+      const pn = PB(), pu = PB();
+      for (const d of DEPD) { if (!vis(d.t, d.t)) continue; const cy = rows['page' + d.p].y + rows['page' + d.p].h / 2; (d.nw ? pn : pu).circle(x(d.t), cy, d.nw ? 3.8 : 3.2); }
+      pu.flush(plot, {fill: 'var(--page)', stroke: 'var(--ink)', strokeWidth: '1.5px'}); pn.flush(plot, {fill: 'var(--ink)', stroke: 'var(--page)', strokeWidth: '1px'});
+    } else {
+      for (const d of DEPD) {
+        if (!vis(d.t, d.t)) continue;
+        const r = rows['page' + d.p], cy = r.y + r.h / 2, g = CK.el('g', {}, plot);
+        CK.el('circle', {cx: x(d.t), cy, r: 6, class: 'ck-hit'}, g);
+        const c = CK.el('circle', {cx: x(d.t), cy, r: d.nw ? 3.8 : 3.2}, g);
+        sty(c, d.nw ? {fill: 'var(--ink)', stroke: 'var(--page)', strokeWidth: '1px'} : {fill: 'var(--page)', stroke: 'var(--ink)', strokeWidth: '1.5px'});
+        TIP(f, g, () => depTip(d)); dNodes.push(g);
+      }
+      dNodes.sort((a, b) => +a.firstChild.getAttribute('cx') - +b.firstChild.getAttribute('cx'));
     }
-    dNodes.sort((a, b) => +a.firstChild.getAttribute('cx') - +b.firstChild.getAttribute('cx'));
   } else {
     const r = rows.deploys, maxN = Math.max(...DEPM.map(g => g.items.length)), bh = r.h - 8;
     CK.txt(gut, 2, r.y + 16, 'deploys', 'lab');
+    const pbar = PB(), pdot = PB();
     for (const g0 of DEPM) {
       if (!vis(g0.t, g0.t)) continue;
-      const n = g0.items.length, h = Math.max(4, n / maxN * bh), g = CK.el('g', {}, plot);
+      const n = g0.items.length, h = Math.max(4, n / maxN * bh);
+      if (fast) { pbar.rect(x(g0.t) - 1.5, r.y + r.h - 2 - h, 3, h); if (g0.items.some(d => d.nw)) pdot.circle(x(g0.t), r.y + r.h - 2 - h - 3.5, 2.8); continue; }
+      const g = CK.el('g', {}, plot);
       CK.el('rect', {x: x(g0.t) - 4, y: r.y, width: 8, height: r.h, class: 'ck-hit'}, g);
       rect(g, x(g0.t) - 1.5, r.y + r.h - 2 - h, 3, h, 'var(--ink)', {rx: 1});
       if (g0.items.some(d => d.nw)) sty(CK.el('circle', {cx: x(g0.t), cy: r.y + r.h - 2 - h - 3.5, r: 2.8}, g), {fill: 'var(--ink)'});
-      TIP(f, g, listTip(`<b>${n} deploy${n > 1 ? 's' : ''}</b> ${when(g0.t)}`, g0.items,
+      TIP(f, g, () => listTip(`<b>${n} deploy${n > 1 ? 's' : ''}</b> ${when(g0.t)}`, g0.items,
         d => `${d.nw ? '● ' : '○ '}${PAGES[d.p].private ? esc(PAGES[d.p].title) : esc(PAGES[d.p].short)}`, 8));
       dNodes.push(g);
     }
+    pbar.flush(plot, {fill: 'var(--ink)'}); pdot.flush(plot, {fill: 'var(--ink)'});
   }
   NAV(f, dNodes);
   // commits: a tall tick for this session, a short one for another session
   const co = rows.commits, kNodes = [];
   CK.txt(gut, S.perPage ? L - 8 : 2, co.y + 12, 'commits', 'lab', S.perPage ? 'end' : 'start');
+  const pc = [PB(), PB()];
   for (const g0 of COMM) {
     if (!vis(g0.t, g0.t)) continue;
-    const g = CK.el('g', {}, plot), other = g0.items[0].ses !== 0;
+    const other = g0.items[0].ses !== 0;
+    if (fast) { pc[other ? 1 : 0].rect(x(g0.t) - 1.5, other ? co.y + co.h / 2 : co.y + 1, 3, other ? co.h / 2 - 1 : co.h - 2); continue; }
+    const g = CK.el('g', {}, plot);
     CK.el('rect', {x: x(g0.t) - 4, y: co.y, width: 8, height: co.h, class: 'ck-hit'}, g);
     rect(g, x(g0.t) - 1.5, other ? co.y + co.h / 2 : co.y + 1, 3, other ? co.h / 2 - 1 : co.h - 2, other ? 'var(--muted)' : 'var(--ink-2)');
-    TIP(f, g, comTip(g0)); kNodes.push(g);
+    TIP(f, g, () => comTip(g0)); kNodes.push(g);
   }
+  pc[0].flush(plot, {fill: 'var(--ink-2)'}); pc[1].flush(plot, {fill: 'var(--muted)'});
   NAV(f, kNodes);
 
-  if (want) { const n = svg.querySelector(want); if (n) n.focus(); }
+  if (want) { const n = svg.querySelector(want); if (n) n.focus({preventScroll: true}); }
+}
+// the owner's marks in a fast frame: one path per category (dot, diamond, box, ring, bar), scaled by k
+function markPath(pm, cat, cx, cy, k) {
+  const p = pm[cat] || pm[0];
+  if (cat === 1) p.diamond(cx, cy, 5 * k);
+  else if (cat === 2) p.rect(cx - 3.8 * k, cy - 3.8 * k, 7.6 * k, 7.6 * k);
+  else if (cat === 3) p.circle(cx, cy, 3.8 * k);
+  else if (cat === 4) p.rect(cx - 1.3 * k, cy - 6 * k, 2.6 * k, 12 * k);
+  else p.circle(cx, cy, 4.2 * k);
+}
+function flushMarks(pm, g) {
+  pm.forEach((p, c) => p.flush(g, c === 3 ? {fill: 'var(--page)', stroke: 'var(--ink)', strokeWidth: '2px'} : {fill: 'var(--ink)', stroke: 'var(--page)', strokeWidth: '1px'}));
 }
 function humanMark(g, cat, cx, cy) {
   const ink = 'var(--ink)';
@@ -652,24 +922,32 @@ function drawDetail(f) {
     sty(lab, {fontSize: '11px'}).setAttribute('aria-hidden', 'true');
     const hit = CK.el('rect', nar ? {x: 0, y: g.y, width: L + 2 + 6.2 * name.length, height: 13, class: 'ck-hit'} : {x: 0, y: g.y, width: L - 4, height: Math.max(14, g.h), class: 'ck-hit'}, gut);
     const st = w ? Object.entries(w.states).map(([s2, n]) => `${n} ${s2}`).join(', ') : '';
-    TIP(f, hit, w ? `<b>${esc(name)}</b>${w.status === 'running' ? ' (still running at the snapshot)' : w.status === 'killed' ? ' (stopped)' : ''}` +
+    TIP(f, hit, () => w ? `<b>${esc(name)}</b>${w.status === 'running' ? ' (still running at the snapshot)' : w.status === 'killed' ? ' (stopped)' : ''}` +
       `${w.summary ? `<br>${esc(w.summary)}` : ''}<br>${span(w.s, w.e)}<br>${w.agents} agents: ${st}` +
       `<br>${num(w.busy_min / 60, 1)} agent-hours busy · ${tok(w.tokens.total)} tokens${w.phases.length ? `<br>phases: ${w.phases.map(esc).join(' → ')}` : ''}`
       : `<b>${esc(name)}</b><br>${g.n} agents started with the Agent tool, and their forks`);
     gNodes.push(hit);
   });
   const gi = {}; DL.gs.forEach(g => { gi[g.i] = g; });
+  const PF = {}, pf = c => PF[c] || (PF[c] = {thin: PB(), busy: PB()});   // a fast frame: two paths per colour
   for (const a of AGR) {
     const g = gi[a.g]; if (!g || !vis(a.s, a.e)) continue;
     const cy = g.y + g.top + 3 + a.lane * lh + lh / 2, c = a.st === 'failed' || a.st === 'error' || a.st === 'killed' ? COL.fail : a.kind === 'workflow' ? COL.wf : COL.tool;
+    if (S.drawFast) {
+      const q2 = pf(c);
+      if (lh >= 2) q2.thin.rect(X(a.s), cy - 0.6, Math.max(1, X(a.e) - X(a.s)), 1.2);
+      for (const q of a.iv) if (vis(q[0], q[1])) q2.busy.rect(X(q[0]), cy - Math.min(1.3, lh / 2), Math.max(1.2, X(q[1]) - X(q[0])), Math.min(2.6, lh));
+      continue;
+    }
     const n = CK.el('g', {}, plot);
     CK.el('rect', {x: X(a.s) - 2, y: cy - Math.max(1.5, lh), width: Math.max(6, X(a.e) - X(a.s) + 4), height: Math.max(3, 2 * lh), class: 'ck-hit'}, n);
     if (lh >= 2) sty(rect(n, X(a.s), cy - 0.6, Math.max(1, X(a.e) - X(a.s)), 1.2, c), {opacity: 0.45});
     for (const q of a.iv) if (vis(q[0], q[1])) rect(n, X(q[0]), cy - Math.min(1.3, lh / 2), Math.max(1.2, X(q[1]) - X(q[0])), Math.min(2.6, lh), c);
-    TIP(f, n, `<b>${esc(a.label)}</b>${a.phase ? ` · ${esc(a.phase)}` : ''}<br>${esc(wfName(a))}<br>${span(a.s, a.e)} · busy ${dur(a.busy * 60)}` +
+    TIP(f, n, () => `<b>${esc(a.label)}</b>${a.phase ? ` · ${esc(a.phase)}` : ''}<br>${esc(wfName(a))}<br>${span(a.s, a.e)} · busy ${dur(a.busy * 60)}` +
       `<br>${a.st} · ${tok(a.tok)} tokens (${tok(a.otok)} output) · ${num(a.tools, 0)} tool calls`);
     aNodes.push(n);
   }
+  for (const c in PF) { PF[c].thin.flush(plot, {fill: c, opacity: 0.45}); PF[c].busy.flush(plot, {fill: c}); }
   NAV(f, gNodes); NAV(f, aNodes);
 }
 
@@ -691,7 +969,7 @@ const presetBtns = [];
   presetBtns.push(button(z, 'Whole week', () => animateTo(...FULL), {view: FULL}));
   const d = document.getElementById('tl-days');
   const lab = document.createElement('span'); lab.className = 'tl-lab'; lab.textContent = 'Day:'; d.appendChild(lab);
-  DN.forEach((n, i) => presetBtns.push(button(d, n, () => animateTo(...dayView(i)), {view: clampV(...dayView(i)), aria: `Show ${n} September`})));
+  DN.forEach((n, i) => presetBtns.push(button(d, n, () => animateTo(...dayView(i)), {view: clampV(...dayView(i)), aria: `Show ${n} ${MOL(i)}`})));
   const sp = document.getElementById('tl-spans');
   const lab2 = document.createElement('span'); lab2.className = 'tl-lab'; lab2.textContent = 'Spans:'; sp.appendChild(lab2);
   const H = t => HL.find(h => h.title.indexOf(t) >= 0);
@@ -701,8 +979,10 @@ const presetBtns = [];
     ['Claims check v3, four cards to three', [H('Claims check v3 begins').a, H('v3 campaign').b]],
     ['The last queue and the pause', [H('Gathers and scatters').a - 3600, H('The weekly limit').b]],
     ['Chip diagram, heat and DV2', [H('Chip diagram and this timeline').a, H('A major pass').a]],
-    ['The major pass', [H('A major pass').a, FULL[1]]],
-  ];
+    ['The major pass', [H('A major pass').a, 10 * DAY + 3 * 3600]],
+    ['Sparse parity, DV2’s verdicts, a third card', [10 * DAY + 3.5 * 3600, 10 * DAY + 18.5 * 3600]],
+    ['Dashboard, new users and the hang', [11 * DAY + 12.5 * 3600, FULL[1]]],
+  ].filter(([, v]) => v[0] < FULL[1] && v[1] > FULL[0] && v[1] > v[0]);
   spans.forEach(([t, v]) => presetBtns.push(button(sp, t, () => animateTo(...v), {view: clampV(...v)})));
   const tgs = document.getElementById('tg-sub'), tgp = document.getElementById('tg-pages'), det = document.getElementById('tl-detail'), detLeg = document.getElementById('tl-detail-leg');
   tgs.addEventListener('click', () => {
@@ -734,6 +1014,7 @@ const SW = {
   step: n => `<rect x="3" y="${10 - 2.5 * n}" width="12" height="${2.5 * n}" style="fill:${INUSE_FILL[n]}"/>`,
   bar: '<rect x="7.5" y="3" width="3" height="7" rx="1" style="fill:var(--ink)"/>',
   barDot: '<rect x="7.5" y="5" width="3" height="5" rx="1" style="fill:var(--ink)"/><circle cx="9" cy="2" r="2" style="fill:var(--ink)"/>',
+  down: `<rect x="3.5" y="0.5" width="11" height="9" style="fill:${mixT('var(--bad)', 30)};stroke:var(--bad);stroke-width:1"/>`,
 };
 function legend(host, items) {
   CK.legend(host, items.map(it => Object.assign({mark: 'box'}, it)));
@@ -744,7 +1025,8 @@ const famLegend = () => CA.families.map((fm, i) => (i === DEVF ? {key: fm.key, l
   : {key: fm.key, label: fm.short || fm.label, mark: 'box', color: FAMCOL[i]}));
 function legendCards() {
   const items = S.cardMode === 'card' ? CK.cardLegend(CA.ids).concat([{key: 'dev', label: 'development run, from the transcripts (outlined)', sw: SW.dev('var(--c1)')}]) : famLegend();
-  legend('leg-cards', items.concat([1, 2, 3, 4].map(n => ({key: 'u' + n, label: n === 1 ? 'cards in use: 1' : String(n), sw: SW.step(n)}))));
+  legend('leg-cards', items.concat(HOSTEV.length ? [{key: 'down', label: 'the host down: hung, or power-cycled', sw: SW.down}] : [])
+    .concat([1, 2, 3, 4].map(n => ({key: 'u' + n, label: n === 1 ? 'cards in use: 1' : String(n), sw: SW.step(n)}))));
 }
 function legendArt() {
   legend('leg-art', (S.perPage ? [{key: 'n', label: 'first publish', mark: 'dot', color: 'var(--ink)'}, {key: 'u', label: 'update', mark: 'ring', color: 'var(--ink)'}]
@@ -756,13 +1038,16 @@ legend('leg-human', [
   {key: 'a', label: 'approval or answer', mark: 'box', color: 'var(--ink)'}, {key: 'q', label: 'question', mark: 'ring', color: 'var(--ink)'},
   {key: 's', label: 'status', mark: 'line', color: 'var(--ink)'},
   {key: 'act', label: 'estimated reading + typing', mark: 'box', color: mixT('var(--ink-2)', 55)},
-  {key: 'ses', label: 'engagement session', mark: 'box', color: mixT('var(--ink)', 14)}]);
+  {key: 'ses', label: 'engagement session', mark: 'box', color: mixT('var(--ink)', 14)}]
+  .concat(NB ? [{key: 'nbm', label: 'the row below: messages to the neighbor session (smaller marks)', mark: 'dot', color: 'var(--ink-2)'}] : []));
 legend('leg-agents', [
   {key: 'ma', label: 'main agent active', color: COL.main}, {key: 'mb', label: 'main agent waiting inside a turn', color: mixT('var(--c7)', 32)},
   {key: 'mw', label: 'main agent watching its workflows (idle)', sw: SW.dotted},
   {key: 'wf', label: 'workflow agents busy', color: COL.wf}, {key: 'tl', label: 'Agent-tool agents and forks busy', color: COL.tool},
   {key: 'fl', label: 'agents that failed or ended on an error', color: COL.fail},
-  {key: 'lim', label: 'usage limit reached', mark: 'dash', color: 'var(--bad)'}]);
+  {key: 'lim', label: 'usage limit reached', mark: 'dash', color: 'var(--bad)'}]
+  .concat(NB ? [{key: 'nb', label: 'neighbor session busy', color: 'var(--ref)'}, {key: 'nbs', label: 'its subagents busy', color: mixT('var(--c4)', 75)},
+    {key: 'nbe', label: 'its key events (red: the host down)', mark: 'diamond', color: 'var(--ink)'}] : []));
 legend('tl-detail-leg', [{key: 'w', label: 'workflow agent busy', color: COL.wf}, {key: 't', label: 'Agent-tool agent or fork busy', color: COL.tool},
   {key: 'f', label: 'failed, ended on an error or stopped', color: COL.fail}, {key: 'i', label: 'thin line: running, not busy', mark: 'line', color: 'var(--ink-2)'}]);
 legendCards(); legendArt();
@@ -779,7 +1064,8 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
   setH('tl-cap', `All times PDT. The data ends at the snapshot, ${when(D.meta.snapshot_end)} (shaded after it); ${running === 0 ? 'no workflow was' : running === 1 ? 'one workflow was' : `${running} workflows were`} ` +
     `still running then. Card work before the session (on 18 September) is left out. The owner’s bars and sessions are estimates (rule in <a href="#method">§5</a>). ` +
     `Subagent counts are per minute: an agent counts in a minute if any of its busy time falls in it. The lane’s scale follows the agents that did not fail; ` +
-    `agents that failed or ended on an error (${PKM.started_in_it} of the ${PK} in the minute the usage limit hit on 20 September started in that minute) are drawn on top, and cut at the top of the lane.`);
+    `agents that failed or ended on an error (${PKM.started_in_it} of the ${PK} in the minute the usage limit hit on 20 September started in that minute) are drawn on top, and cut at the top of the lane.` +
+    (NB ? ` The neighbor session’s lanes come from its own transcripts (<a href="#method">§5</a>); its time is not in this page’s totals.` : ''));
 })();
 
 /* ---------- highlights list ---------- */
@@ -811,11 +1097,22 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
     '<circle cx="7" cy="7" r="3.8" fill="var(--page)" stroke="var(--ink)" stroke-width="2"/>', '<rect x="5.7" y="1" width="2.6" height="12"/>'];
   const days = [];
   MSG.forEach(m => { const d = dayOf(m.t); if (!days.length || days[days.length - 1][0] !== d) days.push([d, []]); days[days.length - 1][1].push(m); });
-  host.innerHTML = days.map(([d, ms]) => `<section class="ask-day" data-day="${d}"><h3>${DN[d]} September <span class="ask-n">${ms.length} message${ms.length > 1 ? 's' : ''}</span></h3><ol class="ask-list">` +
+  host.innerHTML = days.map(([d, ms]) => `<section class="ask-day" data-day="${d}"><h3>${DN[d]} ${MOL(d)} <span class="ask-n">${ms.length} message${ms.length > 1 ? 's' : ''}</span></h3><ol class="ask-list">` +
     ms.map(m => `<li data-cat="${m.cat}"><button type="button" data-t="${m.t}"><svg class="ask-mark" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="var(--ink)">${MARK[m.cat] || MARK[0]}</svg>` +
       `<span class="ask-sum">${esc(m.sum)}</span><span class="ask-meta">${hm(m.t)} · ${esc(HU.cats[m.cat])}${m.rid ? ` · ${esc(m.rid)}` : ''}${m.kind === 'talk' ? ' · from a page’s Talk tab' : ''}` +
       `<span class="ask-est"> · about ${dur(m.act)} to read and write</span></span></button></li>`).join('') + '</ol></section>').join('');
   host.addEventListener('click', e => {
+    const b = e.target.closest('button[data-t]'); if (!b) return;
+    const t = +b.dataset.t; animateTo(t - 3 * 3600, t + 3 * 3600);
+    document.getElementById('timeline').scrollIntoView({block: 'start', behavior: CK.reduced ? 'auto' : 'smooth'});
+  });
+  // the owner's messages to the neighbor session(s): after the list, apart from its totals and its filter
+  const hnb = document.getElementById('asked-nb');
+  if (hnb && NB) hnb.innerHTML = NB.sessions.map(nb => `<section class="ask-day ask-nb"><h3>To ${esc(nb.name)}, 30 September ` +
+    `<span class="ask-n">${nb.msgs.length} message${nb.msgs.length === 1 ? '' : 's'}</span></h3><ol class="ask-list">` +
+    nb.msgs.map(m => `<li><button type="button" data-t="${m[0]}"><svg class="ask-mark" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="var(--ink-2)">${MARK[m[1]] || MARK[0]}</svg>` +
+      `<span class="ask-sum">${esc(m[3])}</span><span class="ask-meta">${hm(m[0])} · ${esc(HU.cats[m[1]])} · to ${esc(nb.name)}</span></button></li>`).join('') + '</ol></section>').join('');
+  if (hnb) hnb.addEventListener('click', e => {
     const b = e.target.closest('button[data-t]'); if (!b) return;
     const t = +b.dataset.t; animateTo(t - 3 * 3600, t + 3 * 3600);
     document.getElementById('timeline').scrollIntoView({block: 'start', behavior: CK.reduced ? 'auto' : 'smooth'});
@@ -946,7 +1243,7 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
     const tot = days.map(d => SER.reduce((s, q) => s + ((q[3](d) || {})[meas] || 0), 0)), mx = Math.max(...tot) * 1.12 || 1;
     const x = CK.lin(-0.5, days.length - 0.5, L, f.W - R), y = CK.lin(0, mx, f.H - B, T);
     CK.axes(f, {x, y, L, R, T, B, xt: days.map((d, i) => i), xfmt: i => (nar ? DN[i].slice(4) : DN[i]), yfmt: v => tokAx(v),
-      xl: nar ? 'September (PDT)' : null, yl: `${MEAS.find(m => m[0] === meas)[1]} per day (PDT)`});
+      xl: nar ? (MO(DN.length - 1) === 'Oct' ? 'September–October (PDT)' : 'September (PDT)') : null, yl: `${MEAS.find(m => m[0] === meas)[1]} per day (PDT)`});
     const bw = Math.min(56, (x(1) - x(0)) * 0.62), nodes = [], labs = [];
     days.forEach((d, i) => {
       let acc = 0;
@@ -954,7 +1251,7 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
         const v = ((q[3](d) || {})[meas] || 0); if (!v) return;
         const n = rect(f.svg, x(i) - bw / 2, y(acc + v), bw, Math.max(0.5, y(acc) - y(acc + v)), q[2]);
         sty(n, {stroke: 'var(--page)', strokeWidth: '1px'});
-        CK.tip(f, n, `<b>${DN[i]} Sep</b> · ${q[1]}<br>${MEAS.find(m => m[0] === meas)[1]}: ${num(v, 0)} (${tok(v)})`); nodes.push(n); acc += v;
+        CK.tip(f, n, `<b>${DN[i]} ${MO(i)}</b> · ${q[1]}<br>${MEAS.find(m => m[0] === meas)[1]}: ${num(v, 0)} (${tok(v)})`); nodes.push(n); acc += v;
       });
       if (acc && (!nar || acc >= 0.25 * mx)) labs.push(CK.txt(f.svg, x(i), y(acc) - 5, nar ? tokAx(acc) : tok(acc), 'tick', 'middle'));
     });
@@ -1006,7 +1303,7 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
       if (!nar) CK.txt(g, f.W - R + 12, y + 34, `${num(d.card_h, 1)} card-h · ${d.deploys} deploys`, 'tick');
       const hit = CK.el('rect', {x: 0, y, width: f.W, height: rh - 4, class: 'ck-hit'}, g);
       hit.style.cursor = 'pointer';
-      CK.tip(f, hit, `<b>${d.label} September</b><br>${d.human_n} messages, estimated active ${num(d.human_active_min, 0)} min<br>main agent busy ${hrs(d.main_busy_h)}; subagents ${num(d.sub_agent_h, 1)} agent-h, up to ${d.peak_sub_ok} at once${d.peak_sub > d.peak_sub_ok ? ` (${d.peak_sub} counting failed starts)` : ''}` +
+      CK.tip(f, hit, `<b>${d.label} ${MOL(d.day)}</b><br>${d.human_n} messages, estimated active ${num(d.human_active_min, 0)} min<br>main agent busy ${hrs(d.main_busy_h)}; subagents ${num(d.sub_agent_h, 1)} agent-h, up to ${d.peak_sub_ok} at once${d.peak_sub > d.peak_sub_ok ? ` (${d.peak_sub} counting failed starts)` : ''}` +
         `<br>cards ${num(d.card_h, 1)} card-h · ${d.deploys} deploys · ${d.commits} commits<br>${tok(d.tokens_main + d.tokens_sub)} tokens<br><i>Click or press Enter to open this day in the timeline.</i>`, {role: 'button'});
       const go = () => { animateTo(...dayView(d.day)); document.getElementById('timeline').scrollIntoView({block: 'start', behavior: CK.reduced ? 'auto' : 'smooth'}); };
       hit.addEventListener('click', go); hit._go = go;
@@ -1067,12 +1364,21 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
         `): the tool returned no result or could not reach the host, and the page was then created afresh. ` : '') +
     `Commits are the repository’s history on every branch: ${AR.totals.commits} in all, ${inSession} of them after the session began. ` +
     `Two other Claude sessions also committed to the repository, one on 24 September and one on the evening of 26 September (PDT), which also deployed pages. Their deploys are not in these transcripts, so they appear here only through their commits.`,
+    ...(NB ? NB.sessions.map(nb => `<b>The neighbor session.</b> On 30 September the owner started ${esc(nb.title.replace(/^another/, 'a second'))}. ` +
+      `Its lane is drawn from its own transcripts, with the rules above: its main agent is busy while its events are under 3 minutes apart or a tool call is in flight ` +
+      `(${hrs(nb.busy_h, 2)} by the snapshot), and the thin bar under it is when any of its ${nb.agents} subagents was busy (${num(nb.agent_h, 1)} agent-hours in ${nb.workflow_runs} workflow runs). ` +
+      `The owner’s ${nb.msgs.length} messages to it are summaries written for this page, like the main session’s, and are not in its totals. ` +
+      `Its key events come from its transcript, the hosts’ own boot records and the lesson in <code>docs/findings/14-card-behaviour.md</code>: ` +
+      `the link test at 14:41, the hang, the power cycle at about 15:07 (all three hosts down, then back, a red band on each of their cards’ lanes) and the investigation after it; ` +
+      `a deploy of a public page and a commit it made are events too. Its other ${nb.deploys.other} deploys (of pages this page does not name) and its ${num(nb.tokens / 1e6, 0)} million tokens are counted nowhere else on the page, ` +
+      `and its commits are the short ticks marked as the neighbor session’s.`) : []),
     `<b>Tokens.</b> Every assistant reply in a transcript carries the usage fields the API returned with it: uncached input, cache writes, cache reads and output, which includes thinking. ` +
     `A reply streamed over several lines is counted once, and a reply that a fork copied from its parent counts only for the parent. Days are PDT, by the reply’s first line.`,
     `<b>Privacy.</b> This page is public. It shows the owner’s messages only as short summaries in its own words. It names no other person, except two published authors whose work the public reports cite: ` +
     `in the title of The Horace experiment, named after the author of the blog post it reproduces, and in the labels and commit subjects of the heat-per-mm check of a wire-energy figure (Q63). ` +
     `It shows no credentials or access paths, and does not say which account can do what on the lab machines. ` +
-    `One report written for the lab lead appears only as “a report for the lab lead”, without its content or link. The pages outside the report set share one lane.`,
+    `One report written for the lab lead appears only as “a report for the lab lead”, without its content or link. The pages outside the report set share one lane.` +
+    (NB ? ' The neighbor session’s workflows and agents are not named (they served that report and fixes to the machines), and its messages appear only as summaries.' : ''),
   ];
   document.getElementById('method-list').innerHTML = items.map(x => `<li>${x}</li>`).join('');
 })();

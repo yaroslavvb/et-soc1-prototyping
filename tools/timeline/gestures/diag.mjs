@@ -1,0 +1,15 @@
+import {launch, sleep} from './cdp.mjs';
+const [, , file, sx, sy] = process.argv;
+const pg = await launch();
+await pg.setViewport({w: 390, h: 844, dsf: 3, mobile: true, touch: true, cpu: 1});
+await pg.goto('file://' + file); await sleep(1500);
+await pg.eval(`(() => { S.v = clampV(${8 * 86400 + 6 * 3600}, ${10 * 86400}); redrawAll(true); document.getElementById('tl').scrollIntoView({block: 'start'}); window.scrollBy(0, -60);
+  window.__ev = []; for (const t of ['pointerdown', 'pointermove', 'pointercancel', 'pointerup']) document.addEventListener(t, e => __ev.push(t[7] + (e.isTrusted ? '' : '*')), true); })()`);
+await sleep(400);
+const r = await pg.eval(`(() => { const b = document.querySelector('#tl svg').getBoundingClientRect(); return {x: b.left, y: b.top, w: b.width}; })()`);
+const y0 = r.y + (await pg.eval(`layout(main.W).rows.conc.y`)) + 20, x0 = r.x + r.w * 0.3;
+const y1 = await pg.eval('scrollY');
+await pg.touchPath(Array.from({length: 14}, (_, i) => [x0 + i * (+sx), y0 - i * (+sy)]), 16);
+await sleep(800);
+console.log(file.split('/').slice(-2).join('/'), 'step', sx, sy, 'dy', (await pg.eval('scrollY')) - y1, 'events', (await pg.eval('__ev.join("")')));
+await pg.close();

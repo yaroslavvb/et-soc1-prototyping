@@ -1,11 +1,12 @@
 # tools/timeline: the session-timeline page
 
 These scripts build [A week with the ET-SoC-1: the session timeline](https://spacesheep.dev/@yaroslavvb/et-soc1-session-timeline)
-(`docs/reports/2026-09-27-session-timeline.html`): the session's week on one time axis, with the owner's messages,
-the main agent and its subagents, the four cards, and every deploy and commit.
+(`docs/reports/2026-09-27-session-timeline.html`): the session, from 19 September, on one time axis, with the owner's
+messages, the main agent and its subagents, a neighbor session's lane (another Claude session on the lab's machine, from
+30 September), the four cards and the hosts down, and every deploy and commit.
 
 The pipeline has two halves. The **extraction** reads the session's Claude Code transcripts and the lab machines' queue
-logs. Those are not in the repository, so only the owner's machine can run it. The **build** needs only the seven
+logs. Those are not in the repository, so only the owner's machine can run it. The **build** needs only the eight
 extracts committed in `docs/reports/data/2026-09-27-session-timeline/`, so any checkout can rebuild the page.
 
 ## The scripts, in order
@@ -18,9 +19,10 @@ extracts committed in `docs/reports/data/2026-09-27-session-timeline/`, so any c
 | 4 | `extract_card_calls.py` | the main transcript | `card_calls.json`: the main agent's own commands that ran a program on a card (development and debug runs) |
 | 5 | `build_cards.py` | `$TIMELINE_DIR/hostlogs/<host>/*.log` (copies of the claims-v3 queue and smoke logs), the committed `block.json` files, the earlier experiments' data files, `docs/findings/03-experiments.md` | `cards.json`: every interval in which a card was held by a measurement |
 | 6 | `scan_spacesheep.py` | every transcript | `work/spacesheep_calls.jsonl`: every Bash call that mentions spacesheep or a deploy script, with its result |
-| 7 | `build_artifacts.py` | `work/spacesheep_calls.jsonl`, `docs/reports/MIRROR.md`, `spacesheep versions` of each MIRROR page (cached in `work/versions/`), `git log --all` | `artifacts.json`: every deploy, share and visibility change, and every commit |
-| 8 | `sanitize_extracts.py` | the extracts, after they are copied to the data folder | rewrites them in place with the page's redactions, then scans them; exits 1 on any hit |
-| 9 | `build_timeline_data.py` | the seven extracts in the data folder | `timeline.json`, which the page draws; the highlights and their captions are computed here |
+| 7 | `extract_neighbors.py` | the transcripts of the sessions in `$TIMELINE_NEIGHBORS` (and their subagents'), `docs/reports/MIRROR.md`, `git log` | `neighbors.json`: each neighbor's busy intervals, its subagents' busy time, the owner's messages to it (summaries from its `NEIGHBOR_SUMMARIES`, never the text), its key events (its `EVENTS`, plus its deploys of public pages and its commits), and the hosts down (`HOSTS`: the link-retrain hang and the power cycle of 30 Sep); `work/neighbor_deploys.json`: all its deploys, private spaces too (never copied to the data folder) |
+| 8 | `build_artifacts.py` | `work/spacesheep_calls.jsonl`, `work/neighbor_deploys.json`, `docs/reports/MIRROR.md`, `spacesheep versions` of each MIRROR page (cached in `work/versions/`), `git log --all` | `artifacts.json`: every deploy, share and visibility change, and every commit; a version in a page's history that a neighbor deployed is not counted as this session's |
+| 9 | `sanitize_extracts.py` | the extracts, after they are copied to the data folder | rewrites them in place with the page's redactions, then scans them; exits 1 on any hit |
+| 10 | `build_timeline_data.py` | the eight extracts in the data folder (`neighbors.json` is optional) | `timeline.json`, which the page draws; the highlights and their captions are computed here |
 
 `paths.py` holds every path the scripts use. The page itself is `docs/reports/sources/session-timeline.*`, assembled by
 `scripts/build-report.py`.
@@ -30,19 +32,21 @@ extracts committed in `docs/reports/data/2026-09-27-session-timeline/`, so any c
 On the owner's machine (aifoundry2), from the repository root:
 
 ```bash
-export TIMELINE_DIR=/path/to/a/scratch/folder          # copy the lab machines' queue logs to $TIMELINE_DIR/hostlogs/<host>/ first
+export TIMELINE_DIR=~/claude/work/et-soc1-timeline     # not /tmp; copy the lab machines' queue logs to $TIMELINE_DIR/hostlogs/<host>/ first
 export TIMELINE_DV2V_BUILD=$TIMELINE_DIR/dvfs2/claims-v3   # a copy of the claims-v3 build folder that holds the DV2 validation
 export TIMELINE_CUTOFF=$(date -u +%Y-%m-%dT%H:%M:00Z)   # the snapshot
-export TIMELINE_SKIP=<this refresh's own workflow or agent id>   # its commands only search for spacesheep calls
+export TIMELINE_SKIP=<this refresh's own workflow or agent ids, comma-separated>   # their commands only search for spacesheep calls
+export TIMELINE_NEIGHBORS=97db24ee-042f-547a-86c0-e1444e260a06   # the default; none for no neighbor lane
 python3 tools/timeline/extract_main.py
 python3 tools/timeline/extract_agents.py
 python3 tools/timeline/tokens_by_time.py
 python3 tools/timeline/extract_card_calls.py
 python3 tools/timeline/build_cards.py
 python3 tools/timeline/scan_spacesheep.py
+python3 tools/timeline/extract_neighbors.py             # before build_artifacts.py, which reads its work/neighbor_deploys.json
 python3 tools/timeline/build_artifacts.py
 D=docs/reports/data/2026-09-27-session-timeline
-for f in human main_agent agents cards artifacts tokens_by_time card_calls; do cp "$TIMELINE_DIR/$f.json" $D/; done
+for f in human main_agent agents cards artifacts tokens_by_time card_calls neighbors; do cp "$TIMELINE_DIR/$f.json" $D/; done
 python3 tools/timeline/sanitize_extracts.py            # must print "privacy scan: clean"
 python3 tools/timeline/build_timeline_data.py
 python3 scripts/build-report.py session-timeline $D/timeline.json docs/reports/2026-09-27-session-timeline.html
@@ -57,7 +61,8 @@ queue and smoke logs, and the DV2 queue logs of the build folder the validation 
 `queue-dv2val-*.log`), which is also the folder to copy for `TIMELINE_DV2V_BUILD`.
 
 Before the first step, give every new owner message a summary in `extract_main.py`'s `SUMMARIES` (keyed by the UTC
-second it was sent). The script prints the ones it has no summary for as `unsummarised`. A summary says what was
+second it was sent), and every owner message to a neighbor one in `extract_neighbors.py`'s `NEIGHBOR_SUMMARIES`. The
+scripts print the ones they have no summary for as `unsummarised` (a neighbor's is then left off the page). A summary says what was
 asked, in at most 12 words and the third person, and never quotes the message. When a new stretch of the week needs a
 highlight, add it to `HL` in `build_timeline_data.py`, and add its page links to `HL_LINKS`, which may only name
 public pages.
@@ -70,9 +75,10 @@ To rebuild the page from the committed extracts, only the `D=` line and the last
 |---|---|---|
 | `TIMELINE_TRANSCRIPTS` | the Claude Code project folder of the checkout's parent directory | the Claude Code project folder with the session's transcripts |
 | `TIMELINE_SESSION` | `ed6d06d5-de26-4323-94f1-0dc808eafbda` | the session id |
-| `TIMELINE_DIR` | `$TMPDIR/et-soc1-timeline` | the working folder: the extracts, `hostlogs/`, `work/` |
+| `TIMELINE_DIR` | `~/claude/work/et-soc1-timeline` (until 30 September `$TMPDIR/et-soc1-timeline`, which a boot clears) | the working folder: the extracts, `hostlogs/`, `work/` |
 | `TIMELINE_CUTOFF` | none (now) | ISO time of the snapshot; transcript lines, card calls, spacesheep calls and blocks after it are left out. `extract_agents.py` has no cutoff: it reads to the end, and the page's snapshot is the later of the two |
-| `TIMELINE_SKIP` | none | comma-separated parts of transcript paths that `scan_spacesheep.py` skips (the refresh's own run) |
+| `TIMELINE_SKIP` | none | comma-separated parts of transcript paths that `scan_spacesheep.py` skips (the refresh's own run: a workflow's `wf_…` id, or an Agent-tool agent's `agent-<id>`) |
+| `TIMELINE_NEIGHBORS` | `97db24ee-042f-547a-86c0-e1444e260a06` | comma-separated ids of other Claude Code sessions in the same project folder that get a lane of their own (`extract_neighbors.py`); `none` for none. The same privacy rules apply: summaries only, no workflow or agent names, no private page named |
 | `TIMELINE_PRIVATE` | `~/.config/et-soc1-timeline/private.json` | the local privacy table (below); never committed. `none` lets `extract_agents.py` and `build_artifacts.py` run without one |
 | `TIMELINE_HP_BUILD` | the heat-placement data's `raw/` | where aifoundry2's two heat-placement sessions' `hp/a2` blocks are |
 | `TIMELINE_DV2V_BUILD` | `build/claims-v3` of this checkout | claims-v3 build folders (separated by `:`) with DV2 validation (`dv2v`) blocks that are not committed yet |
@@ -108,3 +114,34 @@ page must not show, so it stays out of the repository (keep it readable only by 
 `extract_agents.py` and `build_artifacts.py` stop, unless `TIMELINE_PRIVATE=none`; `sanitize_extracts.py` and
 `build_timeline_data.py` still run on the committed extracts, which have passed the scan, and check them against the
 fixed list only.
+
+## Gestures: what the page does, and what we measured
+
+The two timeline frames take their gestures in `gestures()` (the page's script); the checks are in `gestures/`
+(`suite.mjs`: synthesized touch and wheel input in the page checker's headless Chrome, phones at 390×844 and 360×740
+with DPR 3 and a 4× CPU throttle, and a 1280×800 desktop; its README lists the rest).
+
+- **Vertical page scroll stays native** (`touch-action: pan-y` on the frames). A touch decides its direction once,
+  after 8 px: sideways pans the timeline (with momentum after the finger lifts); anything steeper is left to the page.
+  Before, a diagonal swipe did both: the timeline lurched while the page scrolled.
+- **A touch shows a tooltip only on a tap** (CK.tip pins at pointerdown, so the frames catch the touch first and send
+  the tap on). Before, every vertical scroll that started on a mark left its tooltip pinned. A second tap on a
+  highlight's flag zooms there; a mouse click still zooms at once.
+- **A wheel gesture keeps the axis of its first event**, as Chrome latches a scroll: a page scroll that drifts
+  sideways never starts a pan. Ctrl/⌘ + wheel (a trackpad pinch) zooms about the pointer; deltaX and Shift + wheel pan.
+- **`overscroll-behavior-x: contain` on the SVG, never on the frames' scroller.** `.ck-plot` is a scroll container
+  that never scrolls here; with `contain` on it, Chrome latched a diagonal swipe to it and the page did not scroll at
+  all (measured: 0 px instead of about 175). On the SVG, as the reusable component has it, it is harmless; the
+  back-swipe is stopped by the page consuming sideways input itself (`preventDefault` on a sideways wheel gesture).
+- **From the reusable component's lessons** (spacesheep.dev/@yaroslavvb/scrollable-session-timeline, `LESSONS.md` §5,
+  published 30 Sep 23:25 UTC): the two-finger distance is floored at 24 px (`hypot`), lifting one finger of a pinch
+  carries on as a one-finger drag, the release listeners are on `window`, pointer capture is taken only once a drag
+  starts, `pointerdown` is never filtered by target, and tooltips and keyboard stops wait for the gesture's end. Two
+  deliberate differences: a touch's slop is 8 px with the direction decided once (the component's 6 px, measured
+  sideways, turned a 6 px tap wobble into a pan here), and a wheel gesture keeps its first event's axis rather than
+  arbitrating each event (per event, a trackpad scroll that drifted sideways scrolled the page, then panned).
+- **Fast frames.** A redraw built every mark as a node with a tooltip, whose text used `toLocaleString` (an
+  `Intl.NumberFormat` per call) and a DOMParser per node: 27 ms a frame at a two-day view and about 200 ms at the
+  whole span on the throttled phone. While a gesture, its momentum or a zoom animation runs, each series is now one
+  path with no tooltips, and the full drawing follows when the browser is idle: 7-10 ms a frame at two days, about 20
+  at the whole span. Zoom animations interpolate the span in log space, so a deep zoom moves evenly.

@@ -13,10 +13,12 @@ OUT = os.path.join(paths.ensure_tl(), 'work')
 os.makedirs(OUT, exist_ok=True)
 
 files = [paths.MAIN, paths.PRE]
-files += sorted(glob.glob(os.path.join(P, MAIN, 'subagents', '*.jsonl')))
 # skip the timeline's own runs, whose commands only search for spacesheep calls: the first build's workflow and, in
-# $TIMELINE_SKIP (comma-separated parts of a path), a later refresh's own transcripts
+# $TIMELINE_SKIP (comma-separated parts of a path), a later refresh's own transcripts, whether a workflow's agents or
+# an Agent-tool agent (subagents/agent-<id>.jsonl)
 SKIP = ['wf_e5cc1787-8ed'] + [x for x in os.environ.get('TIMELINE_SKIP', '').split(',') if x]
+files += [f for f in sorted(glob.glob(os.path.join(P, MAIN, 'subagents', '*.jsonl')))
+          if not any(k in f for k in SKIP)]
 files += [f for f in sorted(glob.glob(os.path.join(P, MAIN, 'subagents', 'workflows', '**', '*.jsonl'), recursive=True))
           if not any(k in f for k in SKIP)]
 CUTOFF = paths.CUTOFF   # ISO time: calls after it are left out (the page's snapshot)

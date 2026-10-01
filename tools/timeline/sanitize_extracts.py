@@ -150,7 +150,7 @@ def public_spaces():
     a, b = txt.find('<!-- mirror:begin -->'), txt.find('<!-- mirror:end -->')
     for line in txt[a:b].splitlines():
         cells = [c.strip() for c in line.strip().strip('|').split('|')]
-        if len(cells) >= 3 and cells[2] == 'public':
+        if len(cells) >= 3 and re.match(r'public\b', cells[2]):   # 'public', or 'public (deployed private at ..., made public ...)'
             ok.update(UUID.findall(cells[1]))
     return ok
 

@@ -20,6 +20,9 @@ what the page withholds; README.md gives the whole pipeline):
   tokens_by_time.json tokens_by_time.py    tokens per PDT day, main agent vs subagents (by kind)
   card_calls.json     extract_card_calls.py the main agent's own commands that ran a program on a card (development
                                            and debug runs, which left no timestamped data file)
+  neighbors.json      extract_neighbors.py  the neighbor sessions (other Claude sessions on the lab's machine, from 30 Sep):
+                                           their busy time, the owner's messages to them (summaries), their key events,
+                                           and the hosts down (the link-retrain hang and the power cycle); optional
 
 agents.json's own 'main' block was computed from an earlier main_agent.json, before loops that only watched the
 agent's workflows counted as idle: the page takes the main agent's busy intervals from main_agent.json (and only the
@@ -46,6 +49,7 @@ DD = sys.argv[1] if len(sys.argv) > 1 else paths.DATA_DIR
 L = lambda f: sanitize_tree(json.load(open(os.path.join(DD, f))))
 H, M, A, C, R, TK, CC = (L('human.json'), L('main_agent.json'), L('agents.json'), L('cards.json'), L('artifacts.json'),
                          L('tokens_by_time.json'), L('card_calls.json'))
+N = L('neighbors.json') if os.path.exists(os.path.join(DD, 'neighbors.json')) else {'sessions': [], 'hosts': []}
 sanitize_agents(A)
 sanitize_artifacts(R)
 
@@ -75,7 +79,8 @@ def rel(ts):
 def clock(t):
     d = int(t // DAY)
     s = int(t % DAY)
-    return f'{DAYS[d] if 0 <= d < len(DAYS) else "?"} Sep {s // 3600:02d}:{s % 3600 // 60:02d}'
+    mon = (T0 + datetime.timedelta(days=d)).strftime('%b')   # Sep, and Oct from day 12 (1 October)
+    return f'{DAYS[d] if 0 <= d < len(DAYS) else "?"} {mon} {s // 3600:02d}:{s % 3600 // 60:02d}'
 
 
 def union(iv):
@@ -111,7 +116,7 @@ out = {'meta': {
     'agents_snapshot': rel(A['generated']),
     'generated': {'human': H['generated_utc'], 'main': M['generated_utc'], 'agents': A['generated'],
                   'cards': C['generated'], 'artifacts': R['generated'], 'tokens': TK['generated'],
-                  'card_calls': CC['generated']},
+                  'card_calls': CC['generated'], 'neighbors': N.get('generated')},
 }}
 
 # ------------------------------------------------------------------ human
@@ -288,7 +293,7 @@ FAMS = [  # family groups, in time order; members are cards.json families; 'dev'
     ('dv2', 'DV2: the governor and heat, development on aifoundry2 (28 Sep)', ['DV2: the governor and heat, development (28 Sep)']),
     ('oh', 'The effect of overheating, E53, on aifoundry3 and aifoundry1 card 1 (28 Sep)', ['The effect of overheating, E53 (28 Sep)']),
     ('dv2v', 'DV2: the validation on aifoundry2 under the frozen plan (28–29 Sep)', ['DV2: the governor and heat, validation (28-29 Sep)']),
-    ('mp', 'The major pass: E55–E58, development on aifoundry1 card 1, validation on aifoundry3 (28–29 Sep)',
+    ('mp', 'The major pass: E55–E58, development on aifoundry1 card 1, validation on aifoundry3 (28–29 Sep); E55–E57 on aifoundry2, the third card (29 Sep)',
      ['The major pass: E55-E58 (28-29 Sep)']),
     ('smoke', 'Claims check v3: smoke tests', ['Claims check v3: smoke tests (25-26 Sep)']),
     ('dev', 'Development and debug runs, from the transcripts (no data file)', []),
@@ -458,10 +463,13 @@ for d in R['deploys']:
 for k, pg in enumerate(pages):
     pg['deploys'] = sum(1 for x in deploys if x[1] == k)
     pg['first'] = min((x[0] for x in deploys if x[1] == k), default=pg['first'])
-SESS = ['this session', 'another session', 'none recorded']
+SESS = ['this session', 'another session', 'none recorded', 'the neighbor session']
+NB_SHAS = {sha for n in N['sessions'] for sha in n.get('commits', [])}
 commits = []
 for c in R['commits']:
     sess = 'this session' if c['claude_session'] == 'this session' else ('another session' if 'another' in c['claude_session'] else 'none recorded')
+    if c['sha'] in NB_SHAS:
+        sess = 'the neighbor session'
     br = next((b for b in ('main', 'origin/main') if b in c['branches']), c['branches'][0] if c['branches'] else '')
     br = 'another session’s branch' if br.startswith('other-session') else br
     commits.append([rel(c['ts']), c['sha'], subj(c['subject']), SESS.index(sess), br, c['files']])
@@ -474,6 +482,21 @@ out['artifacts'] = {
     'rules': R['rules']['deploy'] + '; an unconfirmed deploy followed within 10 min by a first publish of the same page is '
                                     'a failed attempt and is not counted',
     'note': R['deploys_not_in_transcripts']['note'],
+}
+
+# ------------------------------------------------------------------ the neighbor sessions and the hosts down
+out['neighbors'] = {
+    'cols': {'msgs': ['t', 'category', 'kind', 'summary'], 'events': ['t', 'e', 'kind', 'title', 'text'],
+             'hosts': ['cards', 's', 'e', 'kind', 'title', 'text']},
+    'sessions': [{'name': n['name'], 'title': n['title'], 's': rel(n['first']), 'e': rel(n['last']),
+                  'busy': [[rel(a), rel(b)] for a, b in n['busy']], 'sub': [[rel(a), rel(b)] for a, b in n['sub']],
+                  'busy_h': n['busy_h'], 'agent_h': n['agent_h'], 'agents': n['agents'], 'workflow_runs': n['workflow_runs'],
+                  'tokens': n['tokens']['total'], 'deploys': n['deploys'], 'commits': n['commits'],
+                  'msgs': [[rel(m['ts']), CATS.index(m['category']), KINDS.index(m['kind']), m['summary']] for m in n['messages']],
+                  'events': [[rel(e['t']), rel(e['e'] or e['t']), e['kind'], e['title'], e['text']] for e in n['events']]}
+                 for n in N['sessions']],
+    'hosts': [[[CARD_IDS.index(c) for c in h['cards']], rel(h['s']), rel(h['e']), h['kind'], h['title'], h['text']] for h in N['hosts']],
+    'rule': N.get('rule', ''),
 }
 
 # ------------------------------------------------------------------ per day
@@ -558,7 +581,7 @@ for i, n in enumerate(vals):
         else:
             four_runs.append([t, t + 60])
 lim = [l for l in out['main']['limits'] if l[1] == 'weekly limit']
-lim_t = lim[-2][0] if len(lim) >= 2 else lim[-1][0]
+lim_t = next(l[0] for l in lim if day_of(l[0]) == 7)   # the first weekly limit of 26 Sep (another hit on 29 Sep: below)
 pause_end = T(27, '11:00')
 pause_cards = max(r[2] for r in civ if lim_t <= r[2] <= pause_end)
 pause_other = sorted(c[0] for c in commits if lim_t <= c[0] <= pause_end and c[3] == SESS.index('another session'))
@@ -674,10 +697,13 @@ tl_wf = next(w for w in WF if w['name'] == 'session-timeline-into-repo')
 tl_repo_t = commit_t('The session timeline in the repository')
 tl_repo_dep = deploys_of('et-soc1-session-timeline', major_t)
 dv2v_nat = sorted([r for r in dv2v if r[2] - r[1] >= 30], key=lambda r: r[1])   # the replication sessions (17-38 min)
+dv2v_red = next((c[0] for c in commits if c[2].startswith('E51 DV2 validation reduced')), None)
 nv_t = commit_t('NV (the owner')
 # a call's end: when its readings were in (the probe 22:53:45-22:54:02, the PCIe runner 23:55:35-23:56:09)
 nv_probe = min(rel(c[1]) for c in CC['calls'] if c[2] == 'aifoundry3' and c[3] == 'dev_mngt_service' and rel(c[0]) >= major_t)
-mp = [r for r in civ if FAMK[r[3]] == 'mp']
+mp_all = [r for r in civ if FAMK[r[3]] == 'mp']
+mp = [r for r in mp_all if CARD_IDS[r[0]] != 'aifoundry2']        # the night of 28-29 Sep
+mp3 = [r for r in mp_all if CARD_IDS[r[0]] == 'aifoundry2']       # the third card, 29 Sep after DV2
 mp_dev = [r for r in mp if CARD_IDS[r[0]] == 'aifoundry1-c1']
 mp_val = [r for r in mp if CARD_IDS[r[0]] == 'aifoundry3']
 mp_built = commit_t("The major pass's lab experiments")
@@ -873,15 +899,18 @@ HL = [
                  + f' and {lab_labels[-1]}{lab_next}; another of {tl_wf["agents"]} moves this page and its tools into the '
                  f'repository, with a privacy scan of its data (commit {clock(tl_repo_t)[-5:]}, live at '
                  f'{clock(tl_repo_dep[0])[-5:]}).'),
-    dict(t=dv2v_nat[0][1], a=min(r[1] for r in dv2v) - 600, b=snap_all, track='cards', title='DV2 validation: three sessions',
-         caption=f'The DV2 validation on aifoundry2 has run under its frozen plan since {clock(min(r[1] for r in dv2v))[-5:]} '
-                 f'on 28 Sep: a read-only temperature reading every 3 minutes ({len(dv2v_read)} by the snapshot; the idle '
-                 'card read 73–75 °C at night), and a heating session only when the card is cool enough. '
+    dict(t=dv2v_nat[0][1], a=min(r[1] for r in dv2v) - 600, b=(dv2v_red if dv2v_red else snap_all) + 600, track='cards',
+         title='DV2 validation: sessions and verdicts',
+         caption=f'The DV2 validation on aifoundry2 ran under its frozen plan from {clock(min(r[1] for r in dv2v))[-5:]} on 28 Sep: '
+                 'a read-only temperature reading every 3 minutes, and a heating session only when the card was cool enough. '
                  f'{len(dv2v_nat)} replication sessions ran, '
                  + ', '.join(f'{clock(r[1])[-5:]}–{clock(r[2])[-5:]}' for r in dv2v_nat[:-1])
-                 + f' and {clock(dv2v_nat[-1][1])[-5:]}–{clock(dv2v_nat[-1][2])[-5:]}, each starting at 59–60 °C, with '
-                 '1, 2 and 4 complete test blocks (the queue log); the Master Minion, which hung on the development '
-                 'night, kept taking work. The readings go on until about 16:45 on 29 Sep; the reduction comes after.'),
+                 + f' and {clock(dv2v_nat[-1][1])[-5:]}–{clock(dv2v_nat[-1][2])[-5:]} on 28 Sep, each starting at 59–60 °C, with '
+                 '1, 2 and 4 complete test blocks; the Master Minion, which hung on the development night, kept taking work. '
+                 f'No session started after that; the readings ({len(dv2v_read)}) went on until the plan’s 20-hour window closed '
+                 f'at {clock(max(r[2] for r in dv2v))[-5:]} on {DAYS[day_of(max(r[2] for r in dv2v))]} Sep.'
+                 + (f' Reduced at {clock(dv2v_red)[-5:]}: TH3, TH4 and TH8 survived and TH7 fell (1 of 52); TH1, TH2 and Q2 '
+                    'stayed untested, with no run that fits the hottest shire.' if dv2v_red else '')),
     dict(t=nv_t, a=nv_probe - 600, b=nv_t + 900, track='artifacts', title='NV: the NoC validation, frozen and waiting',
          caption=f'The NoC validation the owner asked for (E54): does the mesh’s energy per bit·mm follow its 0.485 V '
                  'supply, as heat per mm’s answer to Q63 assumed? A read-only probe of aifoundry3 at '
@@ -905,19 +934,259 @@ HL = [
                  'with a time constant of 1.01–1.06 s on every rail of aifoundry3 (0.54 s on card 1’s SRAM rail). The '
                  f'PCIe runner’s first card run since its lock fix, at {clock(pcie_fix_run)[-5:]}, exits cleanly.'),
 ]
+def commit_at(prefix):
+    """the time of the first commit whose subject starts with prefix, or None"""
+    return next((c[0] for c in commits if c[2].startswith(prefix)), None)
+
+
+def msg_at(rx):
+    m = msg_of(rx)
+    return m[0][0] if m else None
+
+
+def wf_named(rx):
+    return [w for w in WF if re.search(rx, w['name'])]
+
+
+def page_at(slug, after=0):
+    return next((x[0] for x in sorted(deploys) if x[1] == pidx.get(slug, -1) and x[0] >= after), None)
+
+
+hm_ = lambda t: clock(t)[-5:]
 if sp_req is not None and sp_res is not None:
+    sp_wfs = wf_named(r'^sparse-parity-')
+    sp_m1, sp_m4, sp_m5 = (commit_at('Sparse parity on the card: M1'), commit_at('Sparse parity M4 on the card'),
+                           commit_at('Sparse parity M5 on the card'))
+    sp_pub = commit_at('The sparse parity page is public')
+    sp_page = page_first.get('et-soc1-sparse-parity')
+    sp_end = max([t for t in (sp_pub, sp_page, sp_wfs[-1]['e'] if sp_wfs else None) if t] or [snap_all])
     HL.append(dict(
-        t=sp_build['s'] if sp_build else sp_res['s'], a=sp_req - 300, b=snap_all + 300, track='agents',
-        title='Sparse parity: research, then a build',
-        caption=f'At {clock(sp_req)[-5:]} the owner queues the next task: a sparse-parity solver that uses the chip’s '
+        t=sp_build['s'] if sp_build else sp_res['s'], a=sp_req - 300, b=sp_end + 600, track='agents',
+        title='Sparse parity: from research to the card',
+        caption=f'At {hm_(sp_req)} on 28 Sep the owner queues the next task: a sparse-parity solver that uses the chip’s '
                 'thousand cores, prototyped at toy sizes first and then scaled to the whole chip. A workflow of '
-                f'{sp_res["agents"]} agents ({clock(sp_res["s"])[-5:]}–{clock(sp_res["e"])[-5:]}, no card) surveys the '
-                'literature, maps the problem onto the chip and tries CPU toys: the design finds a noisy sparse parity by '
-                'exhaustive correlation, computed as int8 tensor matrix products, and its critique puts the honest '
-                'gain at about 2–5× a tuned 8-core host and 5–10× less energy.'
-                + (f' From {clock(sp_build["s"])[-5:]} on {DAYS[day_of(sp_build["s"])]} Sep a second workflow builds '
-                   'the CPU reference and the first kernel.' if sp_build else '')
-                + f' The data ends at the snapshot, {clock(snap_all)[-5:]} on {DAYS[day_of(snap_all)]} Sep.'))
+                f'{sp_res["agents"]} agents ({hm_(sp_res["s"])}–{hm_(sp_res["e"])}, no card) surveys the literature, maps the '
+                'problem onto the chip and designs it: a noisy sparse parity found by exhaustive correlation, computed as int8 '
+                f'tensor products. {len(sp_wfs) - 1} more workflows ({sum(w["agents"] for w in sp_wfs[1:])} agents) build and tune it'
+                + (f'. On the card, M1 at {hm_(sp_m1)} on 29 Sep solves L1 and L2 with exact checksums, about 5× one CPU core' if sp_m1 else '')
+                + (f'; M4 at {hm_(sp_m4)} runs 8–9× one core and 1.0–1.6× six tuned AVX-512 threads' if sp_m4 else '')
+                + (f'; M5 at {hm_(sp_m5)}, a two-stage screen, solves L2 in 0.323 s and (256,5) in 1.52 s (1.6× and 1.2× six tuned '
+                   'threads at equal loss), at 5.0, 16.6 and 89 J a solve, 2.5–7.7× below the CPU package’s assumed energy' if sp_m5 else '')
+                + (f'. The page went out at {hm_(sp_page)} and was made public at {hm_(sp_pub)} (Q67).' if sp_page and sp_pub else '.')))
+# 29 September, afternoon: the DV2 validation's end (above), then a third card
+if mp3:
+    third_t = commit_at('Third card')
+    HL.append(dict(
+        t=min(r[1] for r in mp3), a=min(r[1] for r in mp3) - 900, b=(third_t or max(r[2] for r in mp3)) + 900, track='cards',
+        title='A third card for E55–E57',
+        caption=f'With the DV2 validation over, aifoundry2 ran three of the major pass’s experiments as a third card, '
+                f'{hm_(min(r[1] for r in mp3))}–{hm_(max(r[2] for r in mp3))} on 29 Sep ({len(mp3)} passes, smoke tests first): '
+                'E55 pcie2, E57 memp2 and E56 nocr, under the frozen plans. The two-copy results held (T35-S, T34-A), read '
+                'replies go y first there too, the tensor reload and per-controller refresh hold, and the DRAM map misses one '
+                'condition on this card' + (f' (commit {hm_(third_t)}).' if third_t else '.') + ' E58 tau was not repeated on it.'))
+# 29 September evening to 30 September: the weekly limit, then a new account
+lim29 = [l for l in out['main']['limits'] if l[1] == 'weekly limit' and day_of(l[0]) == 10]
+resume_t = msg_at(r'^Asks the session to continue')
+if lim29 and resume_t:
+    HL.append(dict(
+        t=lim29[0][0], a=lim29[0][0] - 900, b=resume_t + 900, track='agents', title='The weekly limit, again',
+        caption=f'At {hm_(lim29[0][0])} on 29 Sep the account reached its weekly usage limit again, which would reset on '
+                f'4 October: the agents stopped mid-task. The session stood still until {hm_(resume_t)} on 30 Sep, when the '
+                'owner continued it on a new account and asked for the unfinished work to go on with agents in parallel.'))
+q70 = next((m[0] for m in msgs if m[6] == 'Q70'), None)
+hs_page = page_first.get('et-soc1-without-heatsink')
+if q70 and hs_page:
+    hs_wf = wf_named(r'^no-heatsink-')
+    HL.append(dict(
+        t=hs_page, a=q70 - 600, b=hs_page + 900, track='artifacts', title='Running without the heatsink (Q70)',
+        caption=f'At {hm_(q70)} on 29 Sep the owner asks whether a card can run without its heatsink, with a sensor or '
+                'a thermal camera pointed at the chip. Two research agents start at once and stop at the weekly limit; on '
+                f'30 Sep {len(hs_wf)} workflows ({sum(w["agents"] for w in hs_wf)} agents) build, review and finish the report: '
+                'a model on the record (leakage, the fitted heatsink, a Monte Carlo of the bare package, card 0’s guard '
+                'samples) and 43 outside sources. A bare card at 600 MHz almost never settles (1 of 3,600 draws), a sensor '
+                'would see a plated lid at nearly one temperature, and a thermocouple taped to the heatsink’s base is the '
+                f'safe way to read the package. The page goes out at {hm_(hs_page)}, cross-linked from four others.'))
+q71 = next((m[0] for m in msgs if m[6] == 'Q71'), None)
+dash_wf = wf_named(r'^lab-dashboard$')
+if q71 and dash_wf:
+    dash_t = commit_at('The AI Foundry lab dashboard')
+    d_all = msg_at(r'^Dashboard for everyone')
+    d_down = msg_at(r'^aifoundry1 is down but the dashboard')
+    HL.append(dict(
+        t=dash_t or dash_wf[0]['e'], a=q71 - 600, b=max(t for t in (dash_t, d_down, dash_wf[0]['e']) if t) + 900, track='artifacts',
+        title='The lab dashboard',
+        caption=f'At {hm_(q71)} the owner asks for a live view of the lab: the three machines, the four cards and the people '
+                f'using them. {dash_wf[0]["agents"]} agents build a collector (the lab tools, who is logged in, their Claude '
+                'and spacesheep sessions, and a card sample that is off by default) and an updater that republishes the page '
+                'on every change and every 10 minutes' + (f' (commit {hm_(dash_t)})' if dash_t else '') + '. The page was '
+                'published private, and made public that afternoon (below).'
+                + (f' At {hm_(d_all)} the owner asks for a view for everyone, with each card’s use over 24 hours' if d_all else '')
+                + (f', and at {hm_(d_down)} for each machine’s own state, since aifoundry1 was down and the page did not show it.' if d_down else '.')))
+q72 = next((m[0] for m in msgs if m[6] == 'Q72'), None)
+ls_page = page_first.get('aifoundry-lab-start')
+if q72 and ls_page:
+    ls_wf = wf_named(r'^lab-onboarding-page$')
+    q73 = next((m[0] for m in msgs if m[6] == 'Q73'), None)
+    again = msg_at(r'^New-user page again')
+    ls_4 = commit_at('New user? Start now, fourth edition')
+    HL.append(dict(
+        t=ls_page, a=q72 - 600, b=max(t for t in (ls_page, again, ls_4) if t) + 900, track='artifacts', title='New user? Start now',
+        caption=f'At {hm_(q72)} the owner asks for a “New user? Start now” page: self-contained instructions a newcomer hands '
+                'to their coding agent, from the week’s lessons. '
+                + (f'{ls_wf[0]["agents"]} agents write it; ' if ls_wf else '')
+                + f'it goes out public at {hm_(ls_page)}.'
+                + (f' At {hm_(q73)} the owner asks for it much shorter: only what the person must do, and a diagram of the three '
+                   'machines and four cards' if q73 else '')
+                + (f'; at {hm_(again)}, for one prompt with only a name to fill in' if again else '')
+                + (f'. The fourth edition, with an onboarding script a new user runs as themselves, is committed at {hm_(ls_4)}.' if ls_4 else '.')))
+use_t = msg_at(r'^Dashboard for everyone')
+use_ag = [r for r in agents if re.search(r'usage logger', r['label'] or '')]
+if use_t and use_ag:
+    use_wf = wf_named(r'^et-usage')
+    HL.append(dict(
+        t=use_ag[0]['s'], a=use_t - 600, b=max([r['e'] for r in use_ag] + [w['e'] for w in use_wf]) + 600, track='agents',
+        title='Logging who uses the cards',
+        caption=f'At {hm_(use_t)} the owner asks to log who uses each card, for every user old and new, so that the dashboard '
+                'can show the last 24 hours: an agent builds a card-usage logger '
+                f'({hm_(use_ag[0]["s"])}–{hm_(use_ag[0]["e"])})'
+                + (f', and a workflow of {use_wf[0]["agents"]} agents reviews it and its installation on the machines '
+                   + (f'from {hm_(use_wf[0]["s"])} (still running at the snapshot).' if use_wf[0]['status'] == 'running'
+                      else f'({hm_(use_wf[0]["s"])}–{hm_(use_wf[0]["e"])}).')
+                   if use_wf else '.')))
+low_t = msg_at(r'^Heatsink: how low can the clock go')
+low_wf = wf_named(r'^heatsink-low-clock')
+if low_t and low_wf:
+    low_c = commit_at("The heatsink page's low-clock envelope")
+    low_dep = page_at('et-soc1-without-heatsink', low_c - 300) if low_c else None
+    HL.append(dict(
+        t=low_dep or low_wf[0]['s'], a=low_t - 300, b=max(low_dep or 0, low_wf[0]['e'], low_t) + 600, track='artifacts',
+        title='How low can the clock go? (Q81)',
+        caption=f'At {hm_(low_t)} on 30 Sep the owner asks how far down the clock can go, 100 MHz or even 10 MHz, to run a '
+                'card without its heatsink under the thermal camera: the envelope of what is possible. A workflow of '
+                f'{low_wf[0]["agents"]} agents studies it '
+                + (f'from {hm_(low_wf[0]["s"])} (still running at the snapshot).' if low_wf[0]['status'] == 'running' else
+                   f'({hm_(low_wf[0]["s"])}–{hm_(low_wf[0]["e"])}): notes on the firmware’s clocks, outside sources, '
+                   'a power and imaging model, reviewed for physics, sources and the reader.')
+                + (f' The answer is in the heatsink page at {hm_(low_dep)}: 100 MHz is the lowest clock the firmware can set '
+                   '(10 MHz cannot be set), and at 100 MHz a card still idles at 19–24 W, so a bare card settles only with a '
+                   'fan or a blower, and only from some cold starts. A camera through a taped lid would see a coarse pattern '
+                   'with lock-in; the recommended route keeps the heatsink and reads the chip’s own sensor with lock-in. The '
+                   'measurement plan is pre-registered, not run.' if low_dep else '')))
+# 30 September, evening, to 1 October: the logger installed and the dashboard public; the driver race reported; a departed
+# user's checkpoints deleted; the memory levels' level tabs; the chip diagram's powers of ten
+inst_t = commit_at('The card-usage logger, installed on all three hosts')
+dash2_t = commit_at("Lab dashboard: the card-use logger's final format")
+if inst_t and dash2_t:
+    _inst = next(c[2] for c in commits if c[2].startswith('The card-usage logger, installed on all three hosts'))
+    _m = re.search(r'\((\d+) Sep (\d\d):(\d\d)\)', _inst)   # the install's own time, in the subject (30 Sep 20:54)
+    inst_at = T(int(_m.group(1)), f'{_m.group(2)}:{_m.group(3)}') if _m else inst_t
+    use_rev, dash_rev = wf_named(r'^et-usage-review$'), wf_named(r'^dashboard-v2-review$')
+    dash_live = page_at('aifoundry-lab-dashboard', dash2_t)
+    nb_public = next((m[0] for n in out['neighbors']['sessions'] for m in n['msgs'] if m[3].startswith('Asks for public lab pages')), None)
+    nb_fix = next((e for n in out['neighbors']['sessions'] for e in n['events'] if e[2] == 'fix' and 'dashboard' in e[3]), None)
+    HL.append(dict(
+        t=inst_at, a=inst_at - 900, b=(dash_live or dash2_t) + 900, track='artifacts',
+        title='The logger installed, the dashboard public',
+        caption=f'At {hm_(inst_at)} on 30 Sep the card-usage logger goes onto all three machines'
+                + (f', after {use_rev[0]["agents"]} agents reviewed it for security, card safety and correctness '
+                   f'({hm_(use_rev[0]["s"])}–{hm_(use_rev[0]["e"])})' if use_rev else '')
+                + ': a small service that records which user’s program holds each card, so that the dashboard can draw each '
+                'card’s use over 24 hours. The dashboard’s rewrite'
+                + (f', reviewed by {dash_rev[0]["agents"]} agents for privacy, the machines’ liveness, the card-use data and '
+                   'the reader,' if dash_rev else '')
+                + f' is committed at {hm_(dash2_t)}' + (f' and live at {hm_(dash_live)}' if dash_live else '')
+                + ': the same view for everyone, who is logged in and doing what, each card’s use and each machine’s own state. '
+                'It is public'
+                + (f', as the owner told the neighbor session at {hm_(nb_public)}' if nb_public else '')
+                + (f'; at {hm_(nb_fix[0])} the neighbor had stopped its updater from making the page private again.' if nb_fix else '.')))
+race_t = msg_at(r'^Limits reset: continue')
+race_ag = [r for r in agents if re.match(r'Driver race', r['label'] or '')]
+if race_t and race_ag:
+    lim30 = [l[0] for l in out['main']['limits'] if l[1] == 'session limit' and day_of(l[0]) == 11 and l[0] < race_t]
+    race_dep = page_at('lab-report', race_ag[0]['s'])
+    HL.append(dict(
+        t=race_ag[0]['s'], a=(lim30[0] if lim30 else race_t) - 600, b=max(race_ag[0]['e'], race_dep or 0) + 600, track='agents',
+        title='The driver race reported (Q86)',
+        caption=(f'At {hm_(lim30[0])} on 30 Sep the account reached its session limit, and the agents stopped mid-task. ' if lim30 else '')
+                + f'At {hm_(race_t)}, after the reset, the owner continues the session with many agents in parallel, and asks for '
+                'the driver race that the logger’s review had found to be reported upstream and in the report for the lab lead: '
+                'the card’s queue counters, which any user can read, are walked without a lock, so a read during a card reset can '
+                f'return garbage. An agent ({hm_(race_ag[0]["s"])}–{hm_(race_ag[0]["e"])}) adds it to that report’s requests'
+                + (f' (republished at {hm_(race_dep)})' if race_dep else '')
+                + ' and drafts the upstream issue for the owner to file: a public version, and the full analysis with a patch to '
+                'send to the driver’s maintainers privately.'))
+ck_t = msg_at(r"^Free aifoundry1's disk")
+ck_c = commit_at("aifoundry1's disk is no longer full")
+if ck_t and ck_c:
+    ck_ag = [r for r in agents if re.match(r'Update texts after the aifoundry1 cleanup', r['label'] or '')]
+    ck_dep = page_at('aifoundry-lab-start', ck_t)
+    HL.append(dict(
+        t=ck_t + 120, a=ck_t - 600, b=max(ck_c, ck_dep or 0) + 600, track='human',
+        title='A departed user’s checkpoints deleted (Q87)',
+        caption=f'At {hm_(ck_t)} on 30 Sep the owner asks to free aifoundry1’s disk, which was nearly full, by deleting a '
+                'departed user’s large public model checkpoints, which can be downloaded again. After a dry run, at 22:25 the '
+                '27 checkpoints of 1 GB or more are deleted (118 GB of public models): /home goes from 99% to 72% full, and '
+                'the pool from 95% to 71%.'
+                + (f' An agent updates the texts that still called the disk nearly full ({hm_(ck_ag[0]["s"])}–{hm_(ck_ag[0]["e"])})'
+                   if ck_ag else ' The texts that still called the disk nearly full are updated')
+                + (f', the New user page is republished at {hm_(ck_dep)}' if ck_dep else '')
+                + f', and the record is committed at {hm_(ck_c)}.'))
+ml_t = msg_at(r'^Memory levels: smooth zoom in and out')
+ml_c1 = commit_at('Memory levels: level tabs and taps zoom smoothly')
+ml_c2 = commit_at('Memory levels: the three reviews of the smooth level moves fixed')
+ml_dep = page_at('et-soc1-memory-levels', ml_c2 - 300) if ml_c2 else None
+if ml_t and ml_dep:
+    ml_wf1, ml_wf2 = wf_named(r'^memory-levels-smooth-zoom$'), wf_named(r'^memory-levels-tabs-port$')
+    HL.append(dict(
+        t=ml_dep, a=ml_t - 600, b=ml_dep + 900, track='artifacts', title='Memory levels: the level tabs zoom (Q82)',
+        caption=f'At {hm_(ml_t)} on 30 Sep the owner asks the memory-levels page to zoom smoothly, out and back in, when a '
+                'level tab or a part is tapped, on phones too, as the arrow keys do on a desktop.'
+                + (f' A first build ({hm_(ml_wf1[0]["s"])}–{hm_(ml_wf1[0]["e"])}) is redone on the smoother camera that had '
+                   'just replaced the page’s own' if ml_wf1 else '')
+                + (f': from {hm_(ml_wf2[0]["s"])} a workflow of {ml_wf2[0]["agents"]} agents ports it' if ml_wf2 else '')
+                + (f' (commit {hm_(ml_c1)})' if ml_c1 else '')
+                + f', reviews it on a phone, on a desktop for the keyboard and screen readers, and in code, and fixes what the '
+                f'reviews found ({hm_(ml_c2)} on 1 Oct). Live at {hm_(ml_dep)}: a level tab or a tap glides out to the common '
+                'scale and back in to the chosen level.'))
+cz_t = msg_at(r'^Chip diagram: double-click anything to zoom in')
+cz_m = commit_at("Merge the chip diagram's deep zoom")
+cz_dep = page_at('et-soc1-chip-diagram', cz_m - 300) if cz_m else None
+if cz_t and cz_dep:
+    cz_wf = [w for w in wf_named(r'^chip-diagram-powers-of-ten$') if w['status'] != 'killed']
+    cz_1a, cz_1b, cz_23 = (commit_at('Chip diagram: the path camera'), commit_at('Chip diagram: the Up bar'),
+                           commit_at('Chip diagram: the deep zoom, from beyond'))
+    HL.append(dict(
+        t=cz_dep, a=cz_t - 600, b=cz_dep + 900, track='artifacts', title='The chip diagram’s powers of ten (Q85)',
+        caption=f'At {hm_(cz_t)} on 30 Sep, with a photo of the lab’s rack, the owner asks the chip diagram to zoom like the '
+                'powers of ten: double-click any part to zoom in, a wide button to go up, out past the card to the rack, the '
+                'city, the Earth and the galaxies, and in to the circuits.'
+                + (f' A workflow of {cz_wf[0]["agents"]} agents ({hm_(cz_wf[0]["s"])}–{hm_(cz_wf[0]["e"])}) builds it in phases' if cz_wf else ' It is built in phases')
+                + (f' (a path camera at {hm_(cz_1a)}' if cz_1a else ' (')
+                + (f', the Up bar and glides between shires at {hm_(cz_1b)}' if cz_1b else '')
+                + (f', the outer and inner scales at {hm_(cz_23)} on 1 Oct' if cz_23 else '')
+                + '), then reviews it for facts, interaction, visuals and code and fixes what the reviews found. Merged and live '
+                f'at {hm_(cz_dep)}: a ladder of 33 scales, from beyond the observable universe through the Local Group, the '
+                'Earth, San Francisco, the lab, the rack and the card to the die, and inside it to the 6T cell, the latch, the '
+                'full adder, the FinFET and the silicon crystal; 131 of 131 tours pass on a desktop and a phone.'))
+# 30 September, 14:41-15:24: the link retrain hang and the power cycle (the neighbor session's lane)
+NBEV = {e[2]: e for n in out['neighbors']['sessions'] for e in n['events'] if e[2] in ('test', 'power', 'probe')}
+nb_page = next((e for n in out['neighbors']['sessions'] for e in n['events'] if e[2] == 'page' and 'retrain' in e[3]), None)
+nb_commit = next((e for n in out['neighbors']['sessions'] for e in n['events'] if e[2] == 'commit'), None)
+if 'test' in NBEV and 'power' in NBEV:
+    t_test, t_pow = NBEV['test'][0], NBEV['power'][0]
+    HL.append(dict(
+        t=t_test, a=t_test - 900, b=(nb_commit[0] if nb_commit else NBEV['power'][1]) + 900, track='cards',
+        title='The link retrain hang and the power cycle',
+        caption=f'At {hm_(t_test)} on 30 Sep the owner’s session (the neighbor session, in a lane of its own) ran the link '
+                'test from the lab report on aifoundry1 card 0: a retrain of its PCIe link at 8 GT/s. The whole host hung, '
+                f'both cards with it, until the lab lead power-cycled all three machines at about {hm_(t_pow + 30)}. The '
+                'reboot of aifoundry2 stopped this session and the neighbor and cleared /tmp there: about 19 GB of working '
+                'files, this timeline’s working folder among them, so working files now stay out of /tmp.'
+                + (f' Back at {hm_(NBEV["probe"][0])}, the neighbor read the boot records and the link’s counters (a hard hang, not '
+                   'a panic)' if 'probe' in NBEV else '')
+                + (f', published the incident page at {hm_(nb_page[0])}' if nb_page else '')
+                + (f' and committed the lesson at {hm_(nb_commit[0])}: never retrain or re-speed a card’s link on a running host.'
+                   if nb_commit else '.')))
 HL.sort(key=lambda h: h['t'])
 # the published pages each highlight produced or changed (slug, then an optional #anchor); only pages the page list shows
 # as public: the report for the lab lead and the pages outside the set are never linked
@@ -952,12 +1221,29 @@ HL_LINKS = {
                                           'et-soc1-matmul-efficiency', 'et-soc1-sparse-compute'],
     'Heat per mm: the 2× gap (Q63)': ['et-soc1-heat-per-mm#dally-node'],
     'A major pass, and this timeline in the repository': ['et-soc1-review-todo'],
-    'DV2 validation: three sessions': ['et-soc1-dvfs-leakage#what-triggers-a-step-down-and-does-placement-delay-it'],
+    'DV2 validation: sessions and verdicts': ['et-soc1-dvfs-leakage#what-triggers-a-step-down-and-does-placement-delay-it'],
     'NV: the NoC validation, frozen and waiting': ['et-soc1-heat-per-mm#dally-node'],
     'Four experiments, developed and validated': ['et-soc1-limits-of-observability#improve', 'et-soc1-pcie-link',
                                                   'et-soc1-chip-diagram'],
+    'Sparse parity: from research to the card': ['et-soc1-sparse-parity'],
+    'A third card for E55–E57': ['et-soc1-pcie-link', 'et-soc1-chip-diagram', 'et-soc1-memory-levels'],
+    'Running without the heatsink (Q70)': ['et-soc1-without-heatsink'],
+    'New user? Start now': ['aifoundry-lab-start'],
+    'How low can the clock go? (Q81)': ['et-soc1-without-heatsink'],
+    'The link retrain hang and the power cycle': ['aifoundry1-link-retrain-hang'],
+    'The lab dashboard': ['aifoundry-lab-dashboard'],
+    'The logger installed, the dashboard public': ['aifoundry-lab-dashboard'],
+    'A departed user’s checkpoints deleted (Q87)': ['aifoundry-lab-start'],
+    'Memory levels: the level tabs zoom (Q82)': ['et-soc1-memory-levels'],
+    'The chip diagram’s powers of ten (Q85)': ['et-soc1-chip-diagram'],
+    # the dashboard is linked since it became public (30 Sep, the owner's word; MIRROR.md lists it public); the report for
+    # the lab lead is never linked, so the driver race's highlight has no link
 }
 _pub = {pg['key']: pg['title'] for pg in pages if not pg['private']}
+for pg in R['pages']:   # the public pages MIRROR.md lists that this session did not deploy (a neighbor's incident page)
+    if pg.get('in_mirror') and not pg.get('private') and pg.get('slug') and pg['key'] == pg['slug'] and pg['key'] not in _pub \
+            and pg.get('visibility_now', 'public') == 'public' and not pg['key'].startswith(('outside', 'other-', 'lab-report')):
+        _pub[pg['key']] = pg['title']
 _unknown = sorted(set(HL_LINKS) - {h['title'] for h in HL})
 if _unknown:
     raise SystemExit(f'HL_LINKS names highlights that do not exist: {_unknown}')

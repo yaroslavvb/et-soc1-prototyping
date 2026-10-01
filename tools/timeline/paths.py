@@ -5,17 +5,20 @@ variable, so the scripts run from any checkout (tools/timeline/README.md lists t
                         project folder of the checkout's parent directory, where the session ran)
   TIMELINE_SESSION      the session id (default ed6d06d5-de26-4323-94f1-0dc808eafbda)
   TIMELINE_DIR          the working folder the extraction scripts write their extracts to (default
-                        $TMPDIR/et-soc1-timeline); build_cards.py reads the lab machines' copied queue logs from its
-                        hostlogs/<host>/ and build_artifacts.py keeps its work/ files there
+                        ~/claude/work/et-soc1-timeline, which survives a reboot; until 30 Sep 2026 it was
+                        $TMPDIR/et-soc1-timeline, which a boot clears); build_cards.py reads the lab machines' copied
+                        queue logs from its hostlogs/<host>/ and build_artifacts.py keeps its work/ files there
   TIMELINE_PRIVATE      the local privacy table, never committed (default ~/.config/et-soc1-timeline/private.json);
                         extract_agents.py and build_artifacts.py stop without one unless it is set to none
   TIMELINE_CUTOFF       an ISO time: the snapshot; transcript lines after it are ignored
+  TIMELINE_NEIGHBORS    comma-separated ids of other Claude Code sessions in the same project folder whose work the page
+                        shows in a lane of its own (extract_neighbors.py; default 97db24ee-042f-547a-86c0-e1444e260a06,
+                        the session of 30 Sep that ran the link test; none for no neighbor lane)
   TIMELINE_REPO         the repository (default: the checkout this file is in)
 """
 import json
 import os
 import re
-import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.environ.get('TIMELINE_REPO') or os.path.join(HERE, '..', '..'))
@@ -31,7 +34,10 @@ PRE = os.path.join(PROJ, PRE_SID + '.jsonl')
 SUB = os.path.join(PROJ, SID, 'subagents')
 WFJSON = os.path.join(PROJ, SID, 'workflows')
 
-TL = os.path.expanduser(os.environ.get('TIMELINE_DIR') or os.path.join(tempfile.gettempdir(), 'et-soc1-timeline'))
+_NB = os.environ.get('TIMELINE_NEIGHBORS', '97db24ee-042f-547a-86c0-e1444e260a06')
+NEIGHBORS = [] if _NB.strip().lower() in ('', 'none') else [x.strip() for x in _NB.split(',') if x.strip()]
+
+TL = os.path.expanduser(os.environ.get('TIMELINE_DIR') or '~/claude/work/et-soc1-timeline')
 PRIVATE_TABLE = os.path.expanduser(os.environ.get('TIMELINE_PRIVATE', '~/.config/et-soc1-timeline/private.json'))
 CUTOFF = os.environ.get('TIMELINE_CUTOFF')
 

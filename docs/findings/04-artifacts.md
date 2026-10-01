@@ -615,23 +615,41 @@ list of files). `enercat.json` is unchanged (the 13-instruction first catalogue 
 (`b0669cbd-6132-4ac6-b35a-9b928a2ef926`, public): the session's week on one time axis, with the owner's requests as
 summaries, the main agent and its subagents, the four cards, and every deploy and commit. Until 28 September its page
 and tools lived outside the repository (MIRROR.md's check of 17:37 PDT warned about it); at the owner's request (Q65)
-they were committed in `6bbf0f3` (28 Sep 21:52 PDT), refreshed to 21:15 PDT, and the live page redeployed.
+they were committed in `6bbf0f3` (28 Sep 21:52 PDT), refreshed to 21:15 PDT, and the live page redeployed. It was
+refreshed again to 29 September, and on 1 October, for the owner's request Q83, to the snapshot of 1 Oct 02:26 PDT: 151
+messages, 912 subagents in 65 workflow runs, 330 deploys and 200 commits from 19 September, with highlights to 52 (the
+logger installed and the dashboard public, the driver race reported, a departed user's checkpoints deleted, the low
+clock's answer, the memory levels' level tabs, the chip diagram's powers of ten). That refresh added the neighbor
+session's lane (the session of 30 September that ran the link test which hung aifoundry1, with its messages as
+summaries, its key events and the hosts down) and new gestures, after the reusable component's lessons
+(spacesheep.dev/@yaroslavvb/scrollable-session-timeline): vertical page scrolling stays native over the chart, a touch
+or a wheel gesture keeps the axis it starts with, a sideways swipe pans with momentum, a pinch and Ctrl/⌘ + wheel zoom
+about the fingers or the pointer, a tap shows a tooltip and a second tap on a flag zooms there, and frames are drawn as
+one path per series while a gesture runs (`tools/timeline/README.md`, "Gestures").
 
 - **Page:** `docs/reports/2026-09-27-session-timeline.html`, built by `scripts/build-report.py session-timeline` from
   `docs/reports/sources/session-timeline.*` and `docs/reports/data/2026-09-27-session-timeline/timeline.json` (the
   build line is in MIRROR.md, "How each page is built").
-- **Data:** the seven extracts in `docs/reports/data/2026-09-27-session-timeline/` (`human.json`, `main_agent.json`,
-  `agents.json`, `tokens_by_time.json`, `card_calls.json`, `cards.json`, `artifacts.json`), from which any checkout
+- **Data:** the eight extracts in `docs/reports/data/2026-09-27-session-timeline/` (`human.json`, `main_agent.json`,
+  `agents.json`, `tokens_by_time.json`, `card_calls.json`, `cards.json`, `artifacts.json`, and since 1 October
+  `neighbors.json`, the neighbor session's lane), from which any checkout
   rebuilds the page. The owner's messages appear as hand-written summaries, never their text.
 - **Tools:** [`tools/timeline/`](../../tools/timeline/README.md). The extraction (`extract_main.py`,
   `extract_agents.py`, `tokens_by_time.py`, `extract_card_calls.py`, `build_cards.py`, `scan_spacesheep.py`,
-  `build_artifacts.py`) reads the session's transcripts and the lab machines' queue logs, which are not in the
+  `extract_neighbors.py`, `build_artifacts.py`) reads the session's transcripts and the lab machines' queue logs, which are not in the
   repository, so only the owner's machine runs it; `paths.py` holds every path, set by environment variables. The build
   (`sanitize_extracts.py`, then `build_timeline_data.py`) needs only the committed extracts.
 - **The privacy scan:** `sanitize_extracts.py` rewrites the extracts with the page's redactions from a local privacy
   table (never committed) and fails on anything AGENT.md §10 excludes (privilege words, access terms, addresses, keys,
   e-mail addresses, local paths, a space that MIRROR.md does not list as public); `build_timeline_data.py` refuses to
   write `timeline.json` while it fails.
+- **Gesture checks:** `tools/timeline/gestures/` (`suite.mjs` and its helpers; Node, no packages) drive the page in the
+  page checker's headless Chrome with synthesized touch and wheel input on two phones and a desktop. On the page of
+  1 October: a vertical swipe over the chart scrolls the page 310 px and leaves the view, a 45° swipe scrolls the page,
+  a sideways swipe pans and glides on, a pinch zooms, a tap on a flag pins its tooltip and a second tap zooms; on the
+  desktop a vertical wheel scrolls the page, deltaX and Shift + wheel pan, Ctrl + wheel zooms about the pointer (22 s
+  of drift); rAF p95 16.8 ms on the 4× throttled phone. Pass the page as an absolute path (the suite opens
+  `file://` + the argument).
 
 ## A21 — Sparse parity on the ET-SoC-1 (29 September)
 

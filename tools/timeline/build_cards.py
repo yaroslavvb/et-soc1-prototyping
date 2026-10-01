@@ -18,7 +18,8 @@ Sources, in order of authority:
      files in a claims-v3 build folder, $TIMELINE_DV2V_BUILD, until they are committed; its queue log, source 1, adds the
      replication sessions' own lines)
   6. 28-29 Sep, the major pass: E55 pcie2, E56 nocr, E57 memp2 and E58 tau, development on aifoundry1 card 1 and
-     validation on aifoundry3, from their queue and series logs (source 1; their smoke passes count with them)
+     validation on aifoundry3, from their queue and series logs (source 1; their smoke passes count with them); on
+     29 Sep 16:59-17:38 E55-E57 ran again on aifoundry2, the third card, after the DV2 validation (its logs are local)
 A queue that is still running at the snapshot ($TIMELINE_CUTOFF, else now) has its open pass closed at the snapshot;
 a block that began after the snapshot is left out.
 All times: log lines are the lab machines' local time (UTC-7, PDT); epoch ms elsewhere. Output in PDT.
@@ -56,7 +57,7 @@ V3_E = {'mem': 'E35', 'lat': 'E36', 'mmb': 'E37', 'abla': 'E38', 'ablb': 'E39', 
         'pcie2': 'E55', 'nocr': 'E56', 'memp2': 'E57', 'tau': 'E58'}
 # the major pass's four experiments (28-29 Sep): development on aifoundry1 card 1, validation on aifoundry3
 MP = ('pcie2', 'nocr', 'memp2', 'tau')
-MP_ROLE = {'aifoundry1-c1': 'development', 'aifoundry3': 'validation'}
+MP_ROLE = {'aifoundry1-c1': 'development', 'aifoundry3': 'validation', 'aifoundry2': 'third card'}   # aifoundry2: 29 Sep, after DV2
 V3_NAME = {'mem': 'V3-MEM memory anatomy, cycle window, wake-up probe', 'lat': 'V3-LAT latency and bandwidth sweeps',
            'mmb': 'V3-MMB matmul benchmark', 'abla': 'V3-ABL-A tensor-unit energy', 'ablb': 'V3-ABL-B sparse compute',
            'x5': 'V3-X5 two launch temperatures', 'tel': 'V3-TEL meter chain', 'wire': 'V3-WIRE heat per mm',
@@ -705,7 +706,8 @@ out = {
                                  'VZ readings every 3 min; a session starts only below the plan\'s temperature: three '
                                  'NAT-4 sessions ran, 22:13-23:56)',
                          'mp': 'the major pass, 28 Sep 23:47 - 29 Sep 01:06: E55 pcie2, E56 nocr, E57 memp2 and E58 tau, '
-                               'development on aifoundry1 card 1, then validation on aifoundry3 (with their smoke passes)',
+                               'development on aifoundry1 card 1, then validation on aifoundry3 (with their smoke passes); '
+                               'on 29 Sep 16:59-17:38 E55-E57 again on aifoundry2, the third card, after DV2',
                          'oh': 'E53 the effect of overheating on aifoundry3 and aifoundry1 card 1, 28 Sep 10:11-12:05 (two pre-registered experiments)'}},
     'cards': [{'id': c, 'host': c.split('-')[0], 'label': {'aifoundry2': 'aifoundry2', 'aifoundry3': 'aifoundry3',
                                                             'aifoundry1-c0': 'aifoundry1 card 0', 'aifoundry1-c1': 'aifoundry1 card 1'}[c],

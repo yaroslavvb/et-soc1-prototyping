@@ -164,6 +164,34 @@ SUMMARIES = {
  '2026-09-29T01:38:03': ("Heat per mm: a light cyan background.", 'correction', None),
  '2026-09-29T03:41:01': ("Asks for a major pass: lab fixes, NoC validation, to-do, timeline committed.", 'request', None),
  '2026-09-29T04:14:32': ("Next: prototype a sparse-parity solver, toy sizes first, then scalable on-chip.", 'request', None),
+ '2026-09-29T20:25:32': ("Asks to make the sparse-parity page public, and new pages by default.", 'request', 'Q67'),
+ '2026-09-29T21:38:43': ("Heat per mm: asks for a white background instead of cyan.", 'correction', 'Q68'),
+ '2026-09-29T21:44:05': ("Heat per mm: changes its mind, back to the cyan background.", 'correction', 'Q69'),
+ '2026-09-30T00:30:31': ("Asks whether a card can run without its heatsink; a report.", 'request', 'Q70'),
+ '2026-09-30T19:41:01': ("Asks the session to continue.", 'status', None),
+ '2026-09-30T19:41:09': ("Asks the agent to try again.", 'status', None),
+ '2026-09-30T19:42:13': ("Quota renewed on a new account; continue with parallel agents.", 'status', None),
+ '2026-09-30T19:47:03': ("Asks the agent to listen for messages sent from the pages.", 'request', None),
+ '2026-09-30T19:51:22': ("Asks for an auto-refreshing dashboard of the lab's machines, cards and users.", 'request', 'Q71'),
+ '2026-09-30T20:22:17': ("Asks for a New user? Start now page for newcomers' agents.", 'request', 'Q72'),
+ '2026-09-30T21:08:51': ("The new-user page should be concise: minimal steps and a diagram.", 'correction', 'Q73'),
+ '2026-09-30T21:24:14': ("New-user page again: one prompt, no machine choice, just a name.", 'correction', 'Q77'),
+ '2026-09-30T21:29:33': ("Dashboard for everyone: users, card use over 24 hours, a usage log.", 'request', 'Q78'),
+ '2026-09-30T21:58:13': ("aifoundry1 is down but the dashboard misses it; show machine status.", 'correction', 'Q79'),
+ '2026-09-30T22:22:17': ("Asks for the status.", 'status', None),
+ '2026-09-30T22:22:57': ("Resume lost work; keep results where a reboot cannot erase them.", 'request', 'Q80'),
+ '2026-09-30T22:23:27': ("Finish all requested work, with many agents in parallel.", 'request', None),
+ '2026-09-30T22:34:34': ("Heatsink: how low can the clock go, 100 or 10 MHz?", 'request', 'Q81'),
+ '2026-09-30T22:34:46': ("Asks to fold those lessons into the page itself.", 'request', 'Q81'),
+ '2026-09-30T22:40:30': ("Then refresh the timeline page, with the neighbor session's debugging.", 'request', 'Q83'),
+ '2026-09-30T22:44:28': ("Memory levels: smooth zoom in and out, also when tapping on phones.", 'request', 'Q82'),
+ '2026-09-30T22:50:34': ("Refresh the timeline; scrolling must work well on phones and Chrome.", 'request', 'Q83'),
+ '2026-09-30T22:56:09': ("Report the Talk listener's time limit to the spacesheep team.", 'request', 'Q84'),
+ '2026-09-30T23:25:17': ("Chip diagram: double-click anything to zoom in; a wide button zooms out.", 'request', 'Q85'),
+ '2026-09-30T23:26:14': ("Chip diagram: the shire arrows should navigate between shires.", 'request', 'Q85'),
+ '2026-10-01T03:49:21': ("Limits reset: continue with many agents; report the driver race upstream.", 'request', 'Q86'),
+ '2026-10-01T05:23:25': ("Free aifoundry1's disk: delete a departed user's large public checkpoints.", 'request', 'Q87'),
+ '2026-10-01T05:24:19': ("Approves deleting the largest checkpoints; they can be downloaded again.", 'approval/answer', 'Q87'),
 }
 
 
@@ -314,7 +342,9 @@ with open(MAIN) as f:
         if t == 'queue-operation' and e.get('operation') == 'enqueue':
             c = e.get('content')
             if isinstance(c, str):
-                enqueue_ts.setdefault(c[:200], ts)
+                # the latest enqueue of this text: a text sent again later (the Talk skill's prompt, 28 and 30 Sep)
+                # must not take the first one's time
+                enqueue_ts[c[:200]] = ts
             last_enqueue_ts = ts
         elif t == 'queue-operation' and e.get('operation') == 'remove' and e.get('reason') == 'absorbed_mid_turn':
             c = e.get('content')

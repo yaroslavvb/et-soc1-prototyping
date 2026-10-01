@@ -498,13 +498,22 @@ def space_versions(u):
     return sorted(rows)
 
 
-vers_added = []
+# the neighbor sessions' own deploys (extract_neighbors.py): their versions are not this session's
+try:
+    NEIGHBOR_DEPLOYS = [(d['uuid'], datetime.datetime.fromisoformat(d['ts'].replace('Z', '+00:00')))
+                        for d in json.load(open(os.path.join(TL, 'work', 'neighbor_deploys.json'))) if d.get('uuid')]
+except (OSError, ValueError):
+    NEIGHBOR_DEPLOYS = []
+vers_added, vers_neighbor = [], 0
 for u in sorted(mirror):
     vs = space_versions(u)
     if not vs:
         continue
     p = page_for(u)
     have = [datetime.datetime.fromisoformat(o['ts']) for o in out_deploys if o['page'] == p['key']]
+    have += [t for nu, t in NEIGHBOR_DEPLOYS if nu == u]
+    vers_neighbor += sum(1 for t, _, _ in vs if VERS_FROM <= t <= VERS_TO and any(nu == u and abs((t - nt).total_seconds()) <= 180
+                                                                              for nu, nt in NEIGHBOR_DEPLOYS))
     for i, (t, vid, msg) in enumerate(vs):
         if not (VERS_FROM <= t <= VERS_TO):
             continue
@@ -518,7 +527,8 @@ for u in sorted(mirror):
         out_deploys.append(o)
         vers_added.append(o)
 out_deploys.sort(key=lambda o: o['ts'])
-print(f'version history: {len(vers_added)} deploys added (no transcript deploy within 3 min)', file=sys.stderr)
+print(f'version history: {len(vers_added)} deploys added (no transcript deploy within 3 min); {vers_neighbor} left out '
+      f'as a neighbor session\'s (work/neighbor_deploys.json)', file=sys.stderr)
 
 # visibility timeline per page: record changes only
 vis_changes = []
@@ -571,7 +581,8 @@ for br in branches:
         continue
     shas = subprocess.run(['git', '-C', REPO, 'rev-list', br], capture_output=True, text=True).stdout.split()
     branch_sets[br] = set(shas)
-THIS_SESSION = 'session_01Hcd8Dn7o898BaSoSKpTor4'
+# the session's Claude-Session trailers: its first account, then the account it continued on from 30 September 12:41
+THIS_SESSION = ('session_01Hcd8Dn7o898BaSoSKpTor4', 'session_01PPEsvPNUJPL3VFGFH5ERdD')
 commits = []
 file2title = {os.path.basename(mp['repo_file']): (mp['slug'], mp['title']) for mp in mirror.values()
               if mp.get('repo_file') and not mp.get('private')}
@@ -587,7 +598,7 @@ for chunk in log.split('\x1e')[1:]:
     sess = sess.strip()
     commits.append(dict(sha=sha[:7], ts=d.isoformat(timespec='seconds'), subject=short, files=len(fl),
                         branches=sorted(br.replace('origin/claude/', 'other-session-branch:') for br, ss in branch_sets.items() if sha in ss),
-                        claude_session=('this session' if THIS_SESSION in sess else 'another session' if sess else 'none recorded'),
+                        claude_session=('this session' if any(k in sess for k in THIS_SESSION) else 'another session' if sess else 'none recorded'),
                         touches_page=bool(pagefiles),
                         pages=[file2title.get(os.path.basename(f), (None, os.path.basename(f)))[0] or os.path.basename(f) for f in pagefiles]))
 commits.sort(key=lambda c: c['ts'])
