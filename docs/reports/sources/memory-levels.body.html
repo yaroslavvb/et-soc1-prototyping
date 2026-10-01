@@ -50,7 +50,7 @@ html.et-pres [data-ss-ui]{display:none!important}
 .st-body{display:grid;grid-template-columns:minmax(0,1fr) var(--pnw);gap:14px;min-height:0;min-width:0}
 .st-view{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;gap:4px}
 .st-svg{position:relative;flex:1 1 auto;min-height:0;min-width:0}
-#mem{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+#mem{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;transform-origin:0 0}
 /* ---- the address strip: the example's physical address and the fields this level reads from it ---- */
 .addr{display:flex;flex-wrap:nowrap;align-items:center;gap:3px 10px;font-size:clamp(.74rem,.25vw + .64rem,.95rem);color:var(--ink-2);min-height:26px;line-height:1.3;min-width:0;white-space:nowrap}
 .addr .flds{display:flex;flex-wrap:nowrap;align-items:center;gap:3px 10px;min-width:0;flex:0 1 auto;overflow:hidden;
@@ -80,6 +80,7 @@ html.et-pres [data-ss-ui]{display:none!important}
 .pip{flex:none;align-self:flex-end;display:flex;align-items:flex-end;gap:8px;margin:6px 12px 0;width:min(calc(100% - 24px),330px);border-radius:8px;overflow:hidden;cursor:pointer;
   background:var(--page);border:1px solid var(--border)}
 .pip[hidden]{display:none}
+.pip.zmove{opacity:.45}
 .pip svg{display:block;width:58%;height:auto;flex:none}
 .pip .pip-cap{display:block;font-size:.78rem;color:var(--ink-2);padding:4px 8px 6px 0;line-height:1.3}
 .pip:hover{border-color:var(--ink-2)}
@@ -236,6 +237,7 @@ html.et-pres [data-ss-ui]{display:none!important}
 #mem .lay.busy{pointer-events:none}
 #mem .lay text,#mem .lay .pk,#mem .lay .co{opacity:var(--lab,1)}
 #mem .lay .zdim{opacity:var(--ctx,1)!important;transition:none!important;filter:none!important}
+#mem .lay text.zdim{opacity:calc(var(--ctx,1) * var(--lab,1))!important}
 /* while the camera moves (#mem.zmv) labels have no knockout halos: Blink rasterises a stroked glyph again at every new
    scale (50-85 ms a frame, measured 30 Sep); a view whose labels are faded out (.nolab) does not paint them at all */
 #mem.zmv .lay text{stroke:none!important}
@@ -364,6 +366,12 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
   .addr,.addr .flds{flex-wrap:wrap;white-space:normal}
   .addr .flds{overflow:visible;-webkit-mask-image:none;mask-image:none}
   .pip{width:auto;max-width:calc(100% - 24px)}
+  /* the mini-map under the scale control, just below the drawing (pipHome) */
+  #stage.pip-under .pip{align-self:auto;margin:8px 0 0;width:min(100%,320px);max-width:100%}
+  /* the rows above the drawing keep the tallest level's height (rowsKeep), their contents at the top */
+  #acc-row,.addr{align-content:flex-start}
+  /* a double tap on the drawing does not zoom the page (pinching still does) */
+  .st-svg{touch-action:manipulation}
   .st-bar{flex-wrap:wrap}
   .scrub{flex:1 1 100%;order:-1;padding:0 2px 2px}
   .bar-sep{display:none}
@@ -507,15 +515,20 @@ textbook circuit drawn as an illustration, or <b>unknown</b>, in which case it n
 
 <h2 id="use">How to use it</h2>
 <ul>
-<li><b>Levels</b>: the tabs above the drawing, or the keys 1 to 5 (L1, L2, L3, scratchpad, DRAM). The address bar
-keeps the view (<code>#l2</code>, <code>#l1/dcache</code>, <code>#l1/load-hit/4</code>, <code>#l2/load-hit/9/cell</code>),
-so a link opens the same view.</li>
+<li><b>Levels</b>: the tabs above the drawing, or the keys 1 to 5 (L1, L2, L3, scratchpad, DRAM). The camera
+travels between levels, so the new level is always seen inside the old one, or the old inside the new: out of the
+minion into its shire (the L2), out of the shire into the chip (the L3, the scratchpad and the DRAM draw the same map
+and cross-fade over it), and back in. The tab of the level shown, while zoomed in, goes back out to its top. The
+address bar keeps the view (<code>#l2</code>, <code>#l1/dcache</code>, <code>#l1/load-hit/4</code>,
+<code>#l2/load-hit/9/cell</code>), so a link opens the same view.</li>
 <li><b>Click</b> any part (or Tab to it and press Space) for what it is, its numbers with their units and card
 coverage, and its facts with their sources; point at a number to see its source. A dashed part is unknown and its
 panel names the ask; a dotted part is a generic circuit.</li>
-<li><b>Zoom</b> with the scale control under the details (−, the scales of this branch, +), the + and − keys, a double
-click or Enter on a part; Backspace zooms out. Past the second scale, a small map in the details panel, above the
-legend, shows the scale above with the part you are in ringed: click it to go back up.</li>
+<li><b>Zoom</b> with the scale control under the details (−, the scales of this branch, +), the + and − keys, a second
+click or a double click on a part, or Enter; Backspace zooms out. Every change of view is one smooth move, out to the
+scale the two views share and in again; a new address or requester that moves the part you are in goes out to where
+the change shows and back in. Past the second scale, a small map above the legend (on a phone, under the scale
+control) shows the scale above with the part you are in ringed: click or tap it to go back up.</li>
 <li><b>Accesses</b>: the buttons beside the tabs, or <kbd>[</kbd> and <kbd>]</kbd>. Each access is a row of
 <b>steps</b> under the drawing: click one, or step with the Left and Right arrows. <b>Space</b> pauses everything that
 moves, the camera included; stepping while paused shows each step's end state.</li>
@@ -526,8 +539,11 @@ down to the transistors, plays the circuit, and comes back up.</li>
 an arrow jumps a slide, Q (or End tour) ends the tour; Esc does not. <b>Present</b> (F) goes full screen, or fills the page's frame where full
 screen is not allowed. P hides the panel, D switches light and dark. From the address: <code>?theme=light</code>,
 <code>?panel=off</code>, <code>?dive=on</code>, <code>?tour=1</code> or <code>?tour=all</code>.</li>
-<li><b>On a phone</b> the drawing keeps a readable size and scrolls sideways, from its left edge. <b>Fit to screen</b>,
-beside the example address, shows the whole level at once, in small text; pinching enlarges it.</li>
+<li><b>On a phone</b> one tap on a part shows its details and, if it holds a smaller scale, zooms into it; a tap on a
+level tab zooms smoothly to that level. The drawing keeps a readable size and scrolls sideways, from its left edge;
+every move of the camera scrolls it too, to the part it zooms into, and ends on the new view's title (zooming in) or on
+the part it came from (zooming out). <b>Fit to screen</b>, beside the example address, shows the whole level at once,
+in small text (the drawing zooms between the two sizes); pinching enlarges it.</li>
 </ul>
 
 <h2 id="instead-of-sram">SRAM or not: what each level is built from</h2>
@@ -573,6 +589,11 @@ every report, what the instruments cannot see, and <a href="https://spacesheep.d
 
 <h2 id="sources">Sources</h2>
 <div id="sources-text"><p>The list of sources is written when the page's script runs.</p></div>
+<p class="small">Versions: published 28 September 2026; 29 September, the routes as measured (replies y first);
+30 September, a smoother camera (each move one or two eased zooms) and the playback bar on top; 30 September, level
+tabs and taps zoom smoothly: every change of view, a level tab included, is a camera move out to the scale the two
+views share and in again, one tap on a phone zooms into a part, and the drawing's sideways scroll moves with the
+camera.</p>
 <p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
 </div>
 </main>
