@@ -40,6 +40,7 @@ const CKT = (ENV => {
   // the DRAM level's instance, which some of its parts' texts read (here, the memory levels' example address)
   const I5 = () => Object.assign({}, INST.dram(), {req: 0});
   const FR = {x: -172, y: -74, w: 1264, h: 774};   // every copied scale is drawn in this frame
+  let SUBLH = 21;   // the pitch of the lines under a part's title (build sets it)
   let BAP = null;   // the anchor points of the layer being built
   /* getBBox needs the layer rendered: a hidden layer is shown, invisible, while it is measured */
   function measured(L, fn) {
@@ -48,7 +49,8 @@ const CKT = (ENV => {
     try { fn(); } finally { if (d0 === 'none') { L.style.display = d0; L.style.visibility = v0; } }
   }
   /* the badges of a part: [['documented', 'structure'], ['generic', 'circuit'], ['unknown', 'the macro inside']] */
-  const badges = list => list.map(([k, t]) => `<span class="kd ${k === 'documented' ? 'spec' : k}">${esc(k === 'unknown' ? 'unknown · asked' : k === 'documented' ? 'spec' : k)}</span>${t ? ` <span class="cav">${esc(t)}</span>` : ''}`).join(' ');
+  // (the chip page's copy: a caveat that only repeats the badge's word, "spec spec", is left out; review of 1 Oct)
+  const badges = list => list.map(([k, t]) => { const w = k === 'unknown' ? 'unknown · asked' : k === 'documented' ? 'spec' : k; return `<span class="kd ${k === 'documented' ? 'spec' : k}">${esc(w)}</span>${t && t !== w ? ` <span class="cav">${esc(t)}</span>` : ''}`; }).join(' ');
 
 /* ---- the drawing kit ---- */
 // kickAs: memory-levels.script.js at 1980ebb, lines 3336-3336
@@ -104,7 +106,10 @@ function part(parent, key, x, y, w, h, col, title, o) {
   if (o.child) { g.setAttribute('data-child', o.child); if (o.cur !== false && BAP && (o.cur || !BAP.zg[o.child])) BAP.zg[o.child] = g; }
   const ty = o.ty || 28;
   if (title) T(g, o.center ? x + w / 2 : x + 12, y + ty, title, o.tcls || 't-labb', o.center ? 'middle' : 'start', o.f);
-  (o.sub || []).forEach((s, i) => { const L0 = typeof s === 'string' ? {t: s} : s; T(g, o.center ? x + w / 2 : x + 12, y + ty + 23 + i * 21, L0.t, L0.c || 't-sm', o.center ? 'middle' : 'start', L0.f); });
+  // (the chip page's copy: o.lh, a line pitch for the lines under the title, else 1.2 times the small type's size
+  // where the page sets it, never under the memory levels' 21; review of 1 Oct)
+  const lh = o.lh || Math.max(21, SUBLH);
+  (o.sub || []).forEach((s, i) => { const L0 = typeof s === 'string' ? {t: s} : s; T(g, o.center ? x + w / 2 : x + 12, y + ty + 23 + i * lh, L0.t, L0.c || 't-sm', o.center ? 'middle' : 'start', L0.f); });
   return g;
 }
 // tagPill: memory-levels.script.js at 1980ebb, lines 725-731
@@ -391,7 +396,7 @@ function buildCell(L, ap, o) {
   ap.T = {p1, p2, p3, cm1, cm2, wd1, wd2, sp1, sp2, sn1, sn2, st, hm1, hm2, ...c6};
   ap.nodes = {BL: {x: BL, y: 300}, BLB: {x: BLB, y: 300}, BL2: {x: B2, y: 300}, BLB2: {x: BB2, y: 300}, SO: {x: 240, y: DLY}, SOB: {x: 420, y: DLY}, OUT: {x: 670, y: DLY}};
   ap.wave = {x: 700, y: 488, w: 380, h: 202};
-  (o.note || []).forEach((t, i) => T(L, -150, 664 + i * 22, t, 't-sm', 'start', o.noteF));
+  (o.note || []).forEach((t, i) => T(L, -150, 664 + i * Math.max(22, SUBLH), t, 't-sm', 'start', o.noteF));
   ap.gs = {pre: gp, wl: gw, cell: gc, mux: gm, wd: gd, sa: gs, olat: go, half: gh};
 }
 // buildPanel: memory-levels.script.js at 1980ebb, lines 1506-1588
@@ -1593,6 +1598,9 @@ const L3P = {
 
   /* ---- the adapter: a copied scene drawn into one of the chip page's layers ---- */
   function build(fn, L, ap, inst, parts) {
+    // the small type's size where the page is now (a short or narrow screen sets it larger): the lines under a part's
+    // title are set 1.2 times that apart
+    try { const t = E('text', {class: 't-sm'}, L); SUBLH = Math.round(1.2 * (parseFloat(getComputedStyle(t).fontSize) || 17)); t.remove(); } catch (_) { SUBLH = 21; }
     BAP = ap; ap.zg = {}; ap.parts = {};
     try { fn(L, ap, inst); } finally { BAP = null; }
     L.classList.add('ckt');

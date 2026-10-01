@@ -35,7 +35,7 @@ SKIP = {'lib', 'inferred'}
 # short names for the breadcrumb (else the name up to its first parenthesis or comma)
 SHORT = {
     'beyond': 'Beyond', 'universe': 'Universe', 'laniakea': 'Laniakea', 'localgroup': 'Local Group', 'milkyway': 'Milky Way',
-    'stars': 'Nearby stars', 'solar': 'Solar System', 'moon': 'Earth–Moon', 'earth': 'Earth', 'us': 'US', 'california': 'California',
+    'stars': 'Nearest stars', 'solar': 'Solar System', 'moon': 'Earth–Moon', 'earth': 'Earth', 'us': 'US', 'california': 'California',
     'bayarea': 'Bay Area', 'sf': 'San Francisco', 'studio45': 'Studio 45', 'rack': 'Rack', 'host': 'Host', 'card': 'Card',
     'package': 'Package', 'die': 'Chip', 'shire': 'Shire', 'minion': 'Minion',
     'lib.cmp42': '4:2 compressor', 'lib.xor': 'XOR gate', 'lib.fa': 'Full adder', 'lib.finfet': 'FinFET', 'lib.fin': 'Fin',
@@ -54,7 +54,7 @@ ONUM = {
     'lg_m33': ('out.localgroup.3', '3 million light-years'), 'lg_lmc': ('out.localgroup.3', '160,000'),
     'lg_size': ('out.localgroup.1', '10 million light-years'), 'mw_sun': ('out.milkyway.2', '26,000 light-years'),
     'mw_size': ('out.milkyway.1', '100,000 light-years'), 'st_prox': ('out.stars.1', '4.2 light-years'),
-    'so_earth': ('out.solar.1', '8.32 min'), 'so_nep': ('out.solar.2', '30.2 au'), 'so_nep_h': ('out.solar.2', '4.18 h'),
+    'so_earth': ('out.solar.1', '8.32 min'), 'so_nep': ('out.solar.2', '30.07 au'), 'so_nep_h': ('out.solar.2', '4.17 h'),
     'so_voy': ('out.solar.3', '173 au'), 'mo_dist': ('out.moon.1', '0.3844 million km'), 'mo_light': ('out.moon.2', '1.28 s'),
     'ea_r': ('out.earth.1', '6,371'), 'ea_eq': ('out.earth.2', '134 ms'), 'us_sfny': ('out.us.2', '20.2 ms'),
     'us_sfny_km': ('out.us.2', '4,129 km'), 'ca_ns': ('out.california.2', '1060 km'), 'ca_ms': ('out.california.2', '5.19 ms'),
@@ -179,7 +179,7 @@ def build(ALL, ml_keys_extra=(), ml_num_keys=()):
              'm': lv.get('size_m'), 'kind': sk, 'note': lv.get('size_note'), 'facts': ids, 'notes': notes, 'frame_m': lv.get('frame_m'),
              'zoom_from_inner': lv.get('zoom_from_inner'), 'child': lv.get('child'), 'light': lv.get('light'), 'out': True}
         if img:
-            s['img'] = {k: img[k] for k in ('file', 'px', 'crop_px', 'credit', 'licence', 'px_per_mm', 'hotspots_px', 'geometry', 'source_url', 'note') if k in img}
+            s['img'] = {k: img[k] for k in ('file', 'px', 'crop_px', 'credit', 'licence', 'licence_url', 'px_per_mm', 'hotspots_px', 'geometry', 'source_url', 'note') if k in img}
         if lv.get('size_m'):
             word = {'estimate': ' (an estimate)', 'assumed': ' (a frame chosen for the picture, assumed)'}.get(lv.get('size_kind'), '')
             s['f'] = add_fact(f'size.{lid}', f'{lv["name"]}: about {fmt_m(lv["size_m"])} across{word}. ' + (lv.get('size_note') or ''),

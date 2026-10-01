@@ -46,10 +46,11 @@ Sizes in metres. "Frame" is a suggested view width for the camera; "x" is the zo
 | milkyway | The Milky Way | 9.46e20 (100,000 ly) | outside source (NASA) | 1.28e21 | 6,800 | NASA/JPL artist's concept |
 | localgroup | The Local Group (Andromeda) | 9.46e22 (10 Mly) | outside source (NASA) | 1.04e23 | 81 | drawn map + GALEX Andromeda |
 | laniakea | Laniakea | 4.94e24 (160 Mpc) | outside source (Tully et al. 2014) | 5.9e24 | 57 | drawn, schematic |
-| universe | The observable universe | 8.74e26 (93 Gly) | derived (Planck 2018 parameters) | 9.6e26 | 162 | drawn + WMAP map |
+| universe | The observable universe | 8.74e26 (92 Gly) | derived (Planck 2018 parameters) | 9.6e26 | 162 | drawn + WMAP map |
 | beyond | Beyond (speculative) | unknown | hypothesis | 2.6e27 | 2.7 | drawn, marked speculative |
 
-"Andromeda Cluster" is taken as the Local Group; "meta universe" as the observable universe plus one speculative level.
+"Andromeda Cluster" is taken as the Local Group (there is no Andromeda cluster; the Local Group panel says so);
+"meta universe" as the observable universe plus one speculative level, which the page names as the owner's word.
 
 **For the camera.** Five steps are long: Studio 45 to San Francisco (x720), Earth to the Moon's orbit (x60), the
 Moon's orbit to the Solar System (x12,000), the Solar System to the nearest stars (x17,000) and on to the galaxy
@@ -68,11 +69,13 @@ markings are not recorded. The datasheet has no thermal ratings. Light crosses t
 is 50 cm of light.
 
 **Card.** ET-PCIe Dev Card V3: 6.6 x 4.4 in (167.6 x 111.8 mm), x16 card edge carrying x8 Gen 4 (measured on all four
-lab cards: 16 GT/s x8; DMA 12.5-12.6 GB/s to the card, E50). Four LPDDR4X packages, 256 bits, 32 GB (spec peak
-136.5 GB/s; tensor loads measured at 75 GB/s). 12 V in, at most 7.3 A / 88 W (p. 5); highest draw on record 87.8 W;
+lab cards: 16 GT/s x8; DMA 12.5-12.6 GB/s to the card, E50). Four LPDDR4X packages, 256 bits, 32 GB (peak 119.5 GB/s
+on these cards, whose firmware runs the DRAM at 3,733 MT/s on every card (dram.rate-card, dram.peak-card); the
+datasheet's 4,266 MT/s would give 136.5 GB/s; tensor loads measured at 75 GB/s). 12 V in, at most 7.3 A / 88 W (p. 5); highest draw on record 87.8 W;
 idle 19-36 W by card. The cores run at about 0.52 V at 600 MHz (E9): 23 times below 12 V, so 23 times the current.
 The TI TPSM831D31 (3 phases up to 120 A for the cores, 1 phase 40 A for the network): **its four phases are the four
-"R15" inductors on the photo** (a nice thing to point at). LTM4680 (SRAM, 60 A), FS1406s (other rails), LTC4218
+"R15" inductors on the photo** (inferred; a nice thing to point at): three of them feed the cores, the fourth the
+on-chip network. LTM4680 (SRAM, 60 A), FS1406s (other rails), LTC4218
 hot-swap with a 1 mΩ sense resistor, ATSAMD20 "PMIC micro" (reads the 12 V input and three regulators). eMMC (a
 Kingston part on the photo, U17), FTDI UART-USB (U28), DIP switches, JTAG, fan header P1. **Not recorded: the lab
 cards' heatsinks and fans** (the heatsink page, §1); the vendor photo shows the card bare, with SK hynix DRAM (a
@@ -85,7 +88,8 @@ Gigabyte Z590 AORUS MASTER** (read from this host's world-readable DMI table, /s
 board name, BIOS F5; no card access, no sudo), an ATX board of 30.5 x 24.4 cm (Gigabyte). aifoundry1's and
 aifoundry3's boards were not read (that needs a Tailscale login); their BIOS versions F5/F6 follow Gigabyte's naming,
 and the photo shows AORUS boards. The host CPUs are Intel 14 nm with 20 PCIe 4.0 lanes, the i7-11700K rated 125 W
-(i5-11600 65 W): the whole ET card's 88 W maximum is below the bigger CPU's rating. Host memcpy 17.4 / 9.2 / 21.4
+base power and up to 251 W in turbo (PL2; i5-11600 65 W base): the whole ET card's 88 W maximum is below the bigger
+CPU's base power and about a third of its turbo peak. An ATX supply is 150 x 86 x 140 mm (the ATX12V design guide). Host memcpy 17.4 / 9.2 / 21.4
 GB/s. The frame size (~45 cm) is an estimate.
 
 **Rack.** The owner's photo: a chrome wire shelving rack, about ten open-frame machines on two shelves (five a
@@ -94,13 +98,12 @@ MSI MPG A750GF supplies, a "KVM#8" label and a keyboard on the shelf above. Abou
 not recorded). **Which machines are the lab's three is not recorded.** (Four of the supplies carry a sticker of the
 E.T. film's moon-and-bicycle silhouette. It might mark the ET machines, but that is a guess: ask, do not print it.)
 
-**Studio 45.** Public sources describe a Studio 45 in San Francisco as a co-working space "for people who make real
-things for a living", with a fabrication shop, opened in December 2021 (SF Station's launch listing; a CoworkingCafe
-listing), home to the SF Hardware Meetup's demo nights (Luma event pages). **No
-public page links AI Foundry, Ainekko or Esperanto to it**: the lab being there is the owner's statement. Those
-listings show the street address, so the page cites them by name only, without links, and never marks a position on
-the SF map (the camera lands on the city's usual centre point). Its size is not recorded (a listing mentions an event
-space for 50-200 people): the 20 m frame is an assumption, and the drawing is labelled schematic.
+**Studio 45.** The page gives only the owner's word: the lab's room, in San Francisco, is called Studio 45. **No
+public page links AI Foundry, Ainekko or Esperanto to it.** Public listings and event pages describe the venue, but
+they show its street address, and after the facts review of 1 October the page cites none of them: it adds nothing
+to the zoom and would make the place easy to find (AGENT.md §10). The page never marks a position on the SF map: the
+Studio 45 inset sits beside the city's outline, off the map. Its size is not recorded: the 20 m frame is an
+assumption, and the drawing is labelled schematic.
 
 **San Francisco.** 46.92 sq mi (121.51 km²) of land, so about 11 km across (Wikipedia from the Census); fibre at
 c/1.4682 (Corning SMF-28e+) is 4.90 µs per km: 54 µs across the city, some 32,000 ticks of the chip's clock.
@@ -121,7 +124,8 @@ equator in 134 ms, 80 million ticks.
 
 **Earth and the Moon (optional).** 384,400 km (NASA): 1.28 s for light, 770 million ticks.
 
-**Solar System.** Neptune's semimajor axis 4,514.953 million km (NASA fact sheet; 30.2 au by it): light 4.2 h; to
+**Solar System.** Neptune's semimajor axis 30.07 au, about 4,498 million km (NASA fact sheet's orbital parameters:
+30.06896348 AU; the same sheet's 4,514.953 x 10^6 km is 30.18 au, a different epoch's elements): light 4.2 h; to
 Earth 8.3 min. **Voyager 1 reaches one light-day from Earth on 18 November 2026** (NASA), seven weeks after this
 page: a timely beginner fact.
 
@@ -130,10 +134,13 @@ page: a timely beginner fact.
 **Milky Way.** About 100,000 light-years across, at least 100 billion stars (NASA): the chip's 24 billion transistors
 are about one per four stars. The Sun is about 26,000 ly from the centre, in the Orion Spur. The NASA picture is an
 artist's concept (say so). Its geometry was measured: it has the same artwork and framing as ESO's annotated version
-(eso1339e; correlation 0.977 at scale 1, no shift), whose distance rings put the frame at about 135,400 ly and the Sun
+(eso1339e; correlation 0.977 at scale 1, no shift), whose distance rings put the frame at about 135,400 ly (the builder's own measurement: inferred) and the Sun
 at (0.500, 0.691) of the square: the page can draw its own "you are here" and scale bar.
 
-**Local Group.** More than 30 galaxies over nearly 10 million light-years (NASA Imagine the Universe). Andromeda 2.5
+**Local Group.** More than 30 galaxies over nearly 10 million light-years (NASA Imagine the Universe); counted to
+today's faint dwarfs, 134 members within a megaparsec and 5.11 Mpc (17 million ly) across (Wikipedia, "Local Group",
+read 1 Oct 2026). There is no "Andromeda cluster": Andromeda is a galaxy, which with the Milky Way leads this group;
+the nearest true cluster, Virgo (about 1,300 galaxies, 54 million ly away), lies further out inside Laniakea. Andromeda 2.5
 million ly away, 260,000 ly across (NASA/JPL PIA15416 caption); M33 3 million ly; the LMC 160,000 ly. The collision
 once dated to ~4.5 billion years is now about 50% within 10 billion years and under 2% within 5 (Sawala et al.,
 Nature Astronomy 2025, "No certainty of a Milky Way-Andromeda collision").
@@ -218,10 +225,10 @@ Table 10-1 p. 34, §9.1) and ET-PCIe-Dev-Card-V3.pdf (pp. 1-5, 8, 10), both in g
 from the main checkout's `external/et-man`, read-only). The host's DMI table (aifoundry2, 30 Sep 2026).
 
 Outside: BIPM SI Brochure (c); IAU 2012 B2 (au), IAU 2015 B2 (pc); Corning SMF-28e+ product sheet (group index
-1.4682); Gigabyte Z590 AORUS MASTER specifications; Intel Core i7-11700K / i5-11600 specifications; Wikipedia: San
-Francisco, San Francisco Bay Area, Geography of California, Contiguous United States; Business Wire, Esperanto
-release of 1 May 2023; SF Station "Studio 45 Launch" and a CoworkingCafe listing (by name only); Luma "136th SF
-Hardware Meetup @ Studio 45" (by title only); NASA NSSDCA Earth, Moon and Neptune fact sheets; NASA "Where are
+1.4682); Gigabyte Z590 AORUS MASTER specifications; Intel Core i7-11700K / i5-11600 specifications (the 11700K's 251 W PL2 as cpu-monkey.com and techreviewer.com
+list it); Intel ATX12V Power Supply Design Guide; Wikipedia: San Francisco, San Francisco Bay Area, Geography of
+California, Contiguous United States, Local Group, Virgo Cluster; Business Wire, Esperanto
+release of 1 May 2023; NASA NSSDCA Earth, Moon and Neptune fact sheets; NASA "Where are
 Voyager 1 and Voyager 2 now?"; NASA Hubble, Proxima Centauri microlensing prediction; NASA "Beyond Our Solar System"
 poster; NASA/JPL-Caltech ssc2008-10b / PIA10748 and ESO eso1339e; NASA Imagine the Universe, The Local Group; NASA/JPL
 PIA15416; NASA Hubble Messier 33; NASA APOD 2013-05-28; Sawala et al., Nature Astronomy (2025); Tully et al., Nature

@@ -2,7 +2,7 @@
  "meta": {
   "built": "2026-09-30",
   "by": "build_inside.py",
-  "worktree": "/home/yaroslavvb/claude/et-soc1-chipzoom (branch chipzoom)",
+  "worktree": "the repository this file is in",
   "what": "What is inside every part the chip diagram lets a reader select, as a tree down to circuit components, the FinFET, its fin and the silicon crystal.",
   "roots": [
    "die",
@@ -12,8 +12,8 @@
   "n_facts": 395,
   "fact_labels": {
    "spec": 206,
-   "inferred": 6,
-   "derived": 39,
+   "inferred": 11,
+   "derived": 34,
    "measured": 59,
    "generic": 63,
    "unknown": 10,
@@ -328,8 +328,8 @@
     },
     {
      "text": "If every slot holds one 512-bit flit, one router buffers 8 x 4 x 512 = 16,384 bits, about 147,000 bits over the nine layers of one stop.",
-     "label": "derived",
-     "source": "arithmetic on L105; the flit width is an estimate (SYNTHESIS.md row \"Flit width\", unknown)"
+     "label": "inferred",
+     "source": "arithmetic on L105 with an estimated flit width (SYNTHESIS.md row \"Flit width\", unknown): inferred, the weakest of its inputs"
     },
     {
      "text": "Router input buffers are flip-flop or register-file arrays (textbook).",
@@ -1675,8 +1675,8 @@
     },
     {
      "text": "If each 512 x 144 macro holds 512 x 128 data bits (8 KB) plus ECC, the 32 KB cache is four macros, 16 per shire.",
-     "label": "derived",
-     "source": "arithmetic on l1.icache-sram and neigh.composition (the 128 + 16 split is an assumption)"
+     "label": "inferred",
+     "source": "arithmetic on l1.icache-sram and neigh.composition; the 128 + 16 split is an assumption, so the result is inferred"
     }
    ],
    "children": [],
@@ -2113,8 +2113,8 @@
     },
     {
      "text": "64 x 64 = 4,096 storage latches per minion; at about 10 transistors each, some 41,000 transistors before the read multiplexers.",
-     "label": "derived",
-     "source": "arithmetic on intpipe_rf.v and the latch count of l1:g.latch-cell"
+     "label": "inferred",
+     "source": "arithmetic on intpipe_rf.v and the latch count of l1:g.latch-cell; the 10 transistors per latch are assumed, so the total is inferred"
     }
    ],
    "children": [],
@@ -4001,9 +4001,9 @@
    "blurb": "Controllers that read the temperature sensors, process detectors and voltage monitors spread over the die.",
    "facts": [
     {
-     "text": "36 process detectors and 36 temperature sensors (one each per minion shire and the I/O shire) and 8 voltage-monitor blocks of up to 16 sense points (128 in all), read through five PVT controllers.",
+     "text": "36 process detectors and 36 temperature sensors (one each per minion shire and the I/O shire) and 8 voltage-monitor blocks of up to 16 sense points (128 in all), read through five PVT controllers. (The manual's own count does not add up: 34 minion shires and the I/O shire make 35, and it does not say where the 36th sensor sits.)",
      "label": "spec",
-     "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.17-18 (§1.6, Table 1-6)"
+     "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.17-18 (§1.6, Table 1-6: \"36 sensors. 1 PD in each minion/IO-Shire\")"
     },
     {
      "text": "35 temperature sensors on the die (34 minion shires + the I/O shire, one per tile of the 6x6 grid except PCIe), 12-bit (0.061 C) in hardware; the host sees one 34-shire mean in whole degrees plus peak-hold extremes.",
@@ -5258,8 +5258,8 @@
    "facts": [
     {
      "text": "6 nm x 20 nm x 45 nm = 5,400 nm3 at 50 atoms per nm3 is about 270,000 silicon atoms.",
-     "label": "derived",
-     "source": "arithmetic on the fin and gate estimates above and the atomic density below"
+     "label": "inferred",
+     "source": "arithmetic on the fin and gate estimates above (inferred: the fin's 6 nm width and 45 nm height, the 20 nm gate length) and the atomic density below; a number built on inferred inputs is inferred"
     }
    ],
    "children": [
@@ -5290,8 +5290,8 @@
     },
     {
      "text": "Across a 6 nm fin whose sidewalls are (110) planes (the usual orientation on a (100) wafer, an assumption), the (220) planes are a / sqrt(8) = 0.192 nm apart: about 31 planes of atoms.",
-     "label": "derived",
-     "source": "arithmetic on the lattice parameter"
+     "label": "inferred",
+     "source": "arithmetic on the lattice parameter, the inferred 6 nm fin and the assumed (110) sidewalls: inferred"
     }
    ],
    "children": []

@@ -1,6 +1,9 @@
 
   /* ---- the adapter: a copied scene drawn into one of the chip page's layers ---- */
   function build(fn, L, ap, inst, parts) {
+    // the small type's size where the page is now (a short or narrow screen sets it larger): the lines under a part's
+    // title are set 1.2 times that apart
+    try { const t = E('text', {class: 't-sm'}, L); SUBLH = Math.round(1.2 * (parseFloat(getComputedStyle(t).fontSize) || 17)); t.remove(); } catch (_) { SUBLH = 21; }
     BAP = ap; ap.zg = {}; ap.parts = {};
     try { fn(L, ap, inst); } finally { BAP = null; }
     L.classList.add('ckt');

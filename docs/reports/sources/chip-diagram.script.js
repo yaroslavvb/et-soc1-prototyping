@@ -342,12 +342,14 @@ function buildShire(L, ap, sid) {
     // on a phone the side neighbours' names run up the frame's edges, above their links (the view is the frame's width)
     if (s === 'W') { if (c) mlink(fr, X, Y + W / 2, X - 24, Y + W / 2); at = PH ? {x: X - 10, y: Y + W / 2 - 14, t: lab, a: 'start', rot: -90, sz: SK} : {x: X - 30, y: Y + W / 2 + 6, t: lab + (c ? ' ←' : ''), a: 'end'}; P.edge.W = {x: X - 24, y: Y + W / 2}; }
     if (s === 'E') { if (c) mlink(fr, X + W, Y + W / 2, X + W + 24, Y + W / 2); at = PH ? {x: X + W + 10, y: Y + W / 2 - 14, t: lab, a: 'end', rot: 90, sz: SK} : {x: X + W + 30, y: Y + W / 2 + 6, t: (c ? '→ ' : '') + lab, a: 'start'}; P.edge.E = {x: X + W + 24, y: Y + W / 2}; }
-    if (!c) { const t = T(fr, at.x, at.y, at.t, 't-sm', at.a); if (at.sz) phSize(t, at.sz); if (at.rot) t.setAttribute('transform', `rotate(${at.rot} ${at.x} ${at.y})`); return; }
+    if (!c) { const t = T(fr, at.x, at.y, at.t, 't-sm edgelab', at.a); if (at.sz) phSize(t, at.sz); if (at.rot) t.setAttribute('transform', `rotate(${at.rot} ${at.x} ${at.y})`); return; }
     NB.push([c, s, at]);
   });
+  // (the key and the edge labels hide while the camera glides to a neighbour: the two shires' would overlap)
+  const kg = E('g', {class: 'shkey'}, fr);
   if (PH) {
     // key, in a row under the frame
-    const kx = X, ky = Y + W + 64;
+    const kx = X, ky = Y + W + 64, fr = kg;
     T(fr, kx, ky, 'Key', 't-labb');
     S(E('line', {x1: kx + 62, y1: ky - 7, x2: kx + 98, y2: ky - 7}, fr), {stroke: 'var(--c4)', strokeWidth: 5, strokeLinecap: 'round'});
     S(E('line', {x1: kx + 282, y1: ky - 22, x2: kx + 282, y2: ky + 16}, fr), {stroke: 'var(--ink-2)', strokeWidth: 2.5});
@@ -355,7 +357,7 @@ function buildShire(L, ap, sid) {
       .forEach(([x, ls, f]) => phSize(T2(fr, x, ky, ls, 't-sm', 'start', f), SK));
   } else {
     // key, in the left margin
-    const kx = VB.x + 14, ky = Y + 440;
+    const kx = VB.x + 14, ky = Y + 440, fr = kg;
     T(fr, kx, ky, 'Key', 't-labb');
     S(E('line', {x1: kx, y1: ky + 24, x2: kx + 36, y2: ky + 24}, fr), {stroke: 'var(--c4)', strokeWidth: 5, strokeLinecap: 'round'});
     T2(fr, kx + 46, ky + 30, ['fast local', 'network edge'], 't-sm');
@@ -946,15 +948,39 @@ function built(P, d) {
 }
 function buildInto(L, P, d) {
   const el = P[d], N0 = NODES[el.id];
-  L.textContent = ''; ctxClear(L);
+  L.textContent = ''; ctxClear(L); L._sky = false;
   const ap = L._ap = {zs: {}};
   N0.build(L, ap, prm(el), P, d);
   if (typeof chipSeats === 'function') chipSeats(L, ap, el);
   if (L.classList.contains('ckt')) CKT.hitAreas(L);
+  if (TOUCH && !N0.out) minHits(L, P, d);
   L._fx = ap.fx && ap.fx.parentNode === L ? ap.fx : E('g', {class: 'fx', 'pointer-events': 'none'}, L);
   L._built = true;
   ariaFix(L);
   bindTrio(P);
+}
+/* On a touch screen a thin part gets a transparent hit area at least 24 CSS px across its thin side, as far as that
+   covers no other part (review of 1 Oct: in the circuits some parts were 6-15 px on one side, hard to tap) */
+function minHits(L, P, d) {
+  const v = viewOf(P[d]), wr = $('svgwrap'), bw = wr.clientWidth || innerWidth - 32, bh = wr.clientHeight || innerHeight / 2;
+  const pxu = PH ? bw / v.w : Math.min(bw / VB.w, bh / VB.h) * VB.w / v.w;
+  if (!(pxu > 0)) return;
+  const need = 24 / pxu, comps = [...L.querySelectorAll('.comp')], box = new Map();
+  const bb = g => { if (g._box) return g._box; try { const r = g.getBBox(); return r.width || r.height ? {x: r.x, y: r.y, w: r.width, h: r.height} : null; } catch (_) { return null; } };
+  const run = () => comps.forEach(g => { const b = bb(g); if (b) box.set(g, b); });
+  if (CKT && CKT.kit && CKT.kit.measured) CKT.kit.measured(L, run); else run();
+  const hit = (a, b) => Math.min(a.x + a.w, b.x + b.w) > Math.max(a.x, b.x) + 0.5 && Math.min(a.y + a.h, b.y + b.h) > Math.max(a.y, b.y) + 0.5;
+  comps.forEach(g => {
+    const b = box.get(g); if (!b || Math.min(b.w, b.h) >= need) return;
+    for (const f of [1, 0.6, 0.3]) {
+      const ex = b.w < need ? (need - b.w) / 2 * f : 0, ey = b.h < need ? (need - b.h) / 2 * f : 0;
+      const r = {x: b.x - ex, y: b.y - ey, w: b.w + 2 * ex, h: b.h + 2 * ey};
+      if ([...box].some(([o, ob]) => o !== g && !o.contains(g) && !g.contains(o) && hit(r, ob))) continue;
+      const e = E('rect', {class: 'hit', x: r.x, y: r.y, width: r.w, height: r.h, fill: 'transparent', 'pointer-events': 'all'});
+      g.insertBefore(e, g.firstChild);
+      return;
+    }
+  });
 }
 /* every part says what Enter does: zoom in where it has a scale of its own, else its details (a screen reader hears the
    same rule everywhere) */
@@ -968,11 +994,14 @@ function ariaFix(L) {
 const TRIO = ['die', 'shire', 'minion'];
 function bindTrio(P) {
   const d = P.findIndex(e => e.id === 'die'); if (d < 0) return;
+  const fx0 = FX[0];
   for (let i = 0; i < 3; i++) {
     const el = P[d + i]; if (!el || el.id !== TRIO[i]) break;
     const L = LYR.get(pkeys(P.slice(0, d + i + 1)));
     if (L && L._built) { LAYERS[i] = L; AP[i] = L._ap; FX[i] = L._fx; }
   }
+  // the band's fold (a phone) watches the die's flow drawing: a new one is watched instead
+  if (FX[0] !== fx0 && foldObs) watchFold();
 }
 /* after a move: the layers off the path go (the die's, and the shire's and minion's the flows hold, stay hidden) */
 function prune(keep) {
@@ -1135,7 +1164,7 @@ function openStep(s, req) {
     if (m && (cl === outer || cl === inner)) { p0 = {x: +m[1], y: +m[2]}; inOuter = cl === outer; cg = carry.cloneNode(true); svg.appendChild(cg); carry.style.visibility = 'hidden'; }
   }
   // style writes only when a value changed (a frame's custom properties restyle the layer)
-  const st = {oo: -1, io: -1, ol: '', il: '', nol: null, nil: null};
+  const st = {oo: -1, io: -1, ol: '', il: '', nol: null, nil: null, sky: null};
   const setLab = (L, v, k) => { const nl = v <= 0; if (nl !== st[k]) { st[k] = nl; L.classList.toggle('nolab', nl); } };
   const frame = (e, R0) => {
     // R0: where the target is (in the drawing's units, before the view), from the leg's one zoom (else the step's own)
@@ -1160,6 +1189,9 @@ function openStep(s, req) {
     inner.style.setProperty('--lab', il.toFixed(3)); setLab(inner, il, 'nil');
     inner.style.setProperty('--ctx', String(CTX_LOW));
     if (oo > 0) keep.set(Mo[0]);
+    // the whole box is night sky while the view mostly shown is in space (CSS #chip.skyon): between two levels in
+    // space throughout, from Earth to the US until the globe fades (the colour itself fades, CSS)
+    const sky = !!(oo > 0.5 && e < 0.9 ? outer._sky : inner._sky); if (sky !== st.sky) { st.sky = sky; svg.classList.toggle('skyon', sky); }
     if (cg) {
       const M = cmpM(V, inOuter ? Mo : Mi), q = {x: M[0] * p0.x + M[1], y: M[0] * p0.y + M[2]};
       if (V) cg.setAttribute('transform', `translate(${q.x.toFixed(1)},${q.y.toFixed(1)}) scale(${V[0].toFixed(4)})`); else at(cg, q);
@@ -1211,6 +1243,7 @@ function openPan(s, req) {
     readout(s, q);
   };
   ctxClear(L1); ctxClear(L2); clearDim();
+  L1.classList.add('pan'); L2.classList.add('pan');
   frame(0);
   L1.style.display = ''; L2.style.display = ''; L1.style.opacity = 1; L2.style.opacity = 1;
   svg.querySelectorAll(':scope > g.lay').forEach(l => l.classList.add('busy'));
@@ -1221,6 +1254,7 @@ function openPan(s, req) {
       const to = e1 >= 0.5, here = to ? L2 : L1, gone = to ? L1 : L2;
       frame(to ? 1 : 0);
       gone.style.display = 'none'; ctxClear(gone); gone.style.removeProperty('--lab'); here.style.removeProperty('--lab');
+      L1.classList.remove('pan'); L2.classList.remove('pan');
       Z.path = (to ? s.T : s.P).slice();
       bindTrio(Z.path);
       setT(here, restMat());
@@ -1332,12 +1366,13 @@ const warpD = (g, p) => {   // d(log position)/dp
 };
 async function zoomWorker() {
   const from = Z.path.slice(), fromKey = zkey(), hadFocus = svg.contains(document.activeElement);
-  let wantFocus = false;
+  let wantFocus = false, wantPanel = false;
   svg.classList.add('zmv'); pillOff(); menuOff();
   try {
     for (let guard = 0; ZT && guard < 40; guard++) {
       const req = ZT, t = req.t, stop = () => ZT !== req, clk = req.o.clk || null;
       if (req.o.focus) wantFocus = true;
+      if (req.o.pfocus) wantPanel = true;
       // a glide in flight is not turned: it lands where it is nearer, at once
       if (CUR && CUR.s.pan) { try { CUR.ctl.close(CUR.e >= 0.5 ? 1 : 0, true, null); } catch (e) { console.error(e); } CUR = null; }
       // turned back while moving: slow to a stop first (130 ms), then plan from rest
@@ -1370,7 +1405,13 @@ async function zoomWorker() {
       // images a scale shows are decoded before the camera enters it
       const imgs = [];
       steps.forEach(s => { if (!s.pan && s.dir > 0) { const N0 = NODES[s.P[s.o + 1].id]; if (N0.imgs) imgs.push(...N0.imgs(prm(s.P[s.o + 1]))); } });
-      if (imgs.length && !REDUCED) { await imgReady(imgs); if (ZT !== req) continue; }
+      // (at most 300 ms, and not past a newer request: a slow or stalled image pops in later, as on the way out; review
+      // of 1 Oct: with no limit the camera froze and queued every press until the decode settled)
+      if (imgs.length && !REDUCED) {
+        const t0 = performance.now();
+        await Promise.race([imgReady(imgs), new Promise(r => { const tick = () => (ZT !== req || performance.now() - t0 > 300 ? r() : setTimeout(tick, 25)); tick(); })]);
+        if (ZT !== req) continue;
+      }
       // going on the same way: start at the speed the camera has
       let m = 0;
       if (steps[0].part && CUR && !steps[0].pan) {
@@ -1472,13 +1513,30 @@ async function zoomWorker() {
   if (CUR) { try { CUR.ctl.close(CUR.e >= 0.5 ? 1 : 0, true, null); } catch (e) { console.error(e); } CUR = null; }
   svg.classList.remove('zmv');
   prune(PANKEEP ? new Set([PANKEEP]) : null); PANKEEP = null;
-  readout(null); scaleUI();
+  skyBg();
+  readout(null);
   if (fromKey !== zkey()) {
-    select(null); scaleUI(true); arrived(from);
-    if (hadFocus || wantFocus) { const f = zoomFocus(from); if (f) f.focus({preventScroll: true}); }
-  }
+    select(null);
+    // the panel, the crumbs and the prefetch after the frame the camera lands in (review of 1 Oct: built inside it,
+    // they made the last frame of every move a long one); __chipState reports the move until they are done
+    const fin = () => {
+      UIP = false;
+      if (ZW) return;   // a newer move took over: its own end does this
+      // (the code that awaited the move may have selected a part already, a neighbour link's cell: its panel and its
+      // focus stand)
+      const late = !!SEL;
+      scaleUI(true); arrived(from);
+      if (late) return;
+      if (hadFocus || wantFocus) { const f = zoomFocus(from); if (f) f.focus({preventScroll: true}); }
+      if (wantPanel) { const b = $('pn-body').querySelector('.pn-zoom button'); (b || $('pn-body')).focus({preventScroll: true}); }
+    };
+    if (REDUCED) fin(); else { UIP = true; setTimeout(fin, 0); }
+  } else scaleUI();
   const w = ZWAIT; ZWAIT = []; w.forEach(r => r());
 }
+let UIP = false;
+/* at rest, the box is night sky where the level shown is in space */
+function skyBg() { const L = restLayer(); svg.classList.toggle('skyon', !!(L && L._sky)); }
 /* images a scene shows, decoded before the camera enters it (a first frame never waits for a decode) */
 const IMGDONE = new Set();
 function imgReady(list) {
@@ -1509,7 +1567,9 @@ function userNav(t, o) {
   if (k) { FL.tok.dead = true; if (FOLLOW) setFollow(false, true); }
   return goTo(t, Object.assign({focus: svg.contains(document.activeElement), user: true}, o || {})).then(() => {
     if (!k || FL.k !== k || ZW) return;
-    if (Z.level < 0 || Z.level > 2) return;   // the flow waits off the chip's three scales (its stage resumes on a step)
+    // the flow waits off the chip's three scales, paused (Play or a step brings the camera back to its stage; review of
+    // 1 Oct: its clock ran on, with nothing to show)
+    if (Z.level < 0 || Z.level > 2) { if (CLK.on && !done) { CLK.on = false; playBtn(); renderBar(); } return; }
     if (done) startFlow(k, FL.i, {still: true, keep: true, done: true});
     else restartStage();
   });
@@ -1607,13 +1667,16 @@ function scaleUI(force) {
     b.innerHTML = `<span class="up-t">↑ Zoom out to ${esc(toOf(par))}</span>` + (sz && sz.m > 0 ? `<span class="up-s">· ${esc(sizeTxt(sz))}</span>` : '');
     setDis(b, false); b.setAttribute('aria-label', `Zoom out to ${toOf(par)}, ${sizeWords(sz)}`); b.title = 'Zoom out one level (Backspace or −)';
   }
-  crumbsUI(P);
+  // the readout first: the crumbs fold to the width it leaves them (review of 1 Oct: measured before it, the crumbs
+  // overflowed and clipped the + button)
   if (!ZW) roRest();
+  crumbsUI(P);
 }
 function crumbsUI(P) {
   const nav = $('crumbs'), fi = document.activeElement && nav.contains(document.activeElement) ? document.activeElement.dataset.ci : null;
+  P = P || zNow().path;
   const nx = defKid(P);
-  const draw = fold => {
+  const draw = (fold, noNext) => {
     nav.textContent = '';
     const add = (tag, cls, txt, o) => { const e = H(tag, Object.assign({class: cls || ''}, o || {}), nav); e.textContent = txt; return e; };
     if (fold > 0) {
@@ -1627,47 +1690,67 @@ function crumbsUI(P) {
       if (cur) bt.setAttribute('aria-current', 'location');
       if (!cur) add('span', 'sep', '›', {'aria-hidden': 'true'});
     });
-    if (nx) { add('span', 'sep', '›', {'aria-hidden': 'true'}); add('button', 'nx', shortOf(nx), {type: 'button', 'data-ci': 'next', title: `Zoom into ${toOf(nx)} (+)`, 'aria-label': `Zoom into ${toOf(nx)}`}); }
-    const mi = add('button', 'pm', '−', {type: 'button', 'data-ci': 'minus', 'aria-label': 'Zoom out (minus key)', title: 'Zoom out (−, Backspace)'});
-    add('button', 'pm', '+', {type: 'button', 'data-ci': 'plus', 'aria-label': 'Zoom in (plus key)', title: 'Zoom in (+)'});
-    setDis(mi, P.length <= 1);
+    if (nx && !noNext) { add('span', 'sep', '›', {'aria-hidden': 'true'}); add('button', 'nx', shortOf(nx), {type: 'button', 'data-ci': 'next', title: `Zoom into ${toOf(nx)} (+)`, 'aria-label': `Zoom into ${toOf(nx)}`}); }
   };
-  // the outer crumbs fold into the "…" menu until the rest fits (the current one and the buttons always show): drawn
-  // once whole, measured once, drawn again folded (two layouts, whatever the depth)
+  // the outer crumbs fold into the "…" menu until the rest fits (the current one always shows; − and + sit outside the
+  // crumbs, never clipped): drawn whole, measured, drawn folded by the measured widths, then folded one more while it
+  // still overflows (review of 1 Oct: an estimate alone left the last crumbs clipped)
   draw(0);
-  const avail = nav.clientWidth, need = nav.scrollWidth;
-  if (need > avail + 1) {
-    const w = {}; nav.querySelectorAll('[data-ci]').forEach(e => { w[e.dataset.ci] = e.getBoundingClientRect().width + 14; });
-    let fold = 0, cut = 0; const more = 40;
+  const over = () => nav.scrollWidth > nav.clientWidth + 1;
+  if (over()) {
+    const avail = nav.clientWidth, need = nav.scrollWidth, kids = [...nav.children], w = {};
+    // a crumb folded frees its own width, its separator's and the gaps between them
+    kids.forEach((e, j) => { const ci = e.dataset.ci; if (ci != null && /^\d+$/.test(ci)) { const sp = kids[j + 1]; w[ci] = e.getBoundingClientRect().width + (sp && sp.classList.contains('sep') ? sp.getBoundingClientRect().width + 4 : 2); } });
+    let fold = 0, cut = 0; const more = 34;
     while (fold < P.length - 1 && need - cut + more > avail) { cut += w[String(fold)] || 0; fold++; }
     draw(fold);
+    while (fold < P.length - 1 && over()) draw(++fold);
+    // still too wide: the next crumb goes (the + button and the panel offer it)
+    if (over() && nx) draw(fold, true);
   }
   plusUI(P);
   if (fi) { const e = nav.querySelector(`[data-ci="${fi}"]`); if (e) e.focus({preventScroll: true}); }
 }
-/* the + button: on while the selected part or the scale has something inside to zoom into */
+/* the − and + buttons: − off at the top of the ladder; + on while the selected part or the scale has something inside
+   to zoom into */
 function plusUI(P) {
-  const pl = $('crumbs').querySelector('[data-ci="plus"]'); if (!pl) return;
+  const pl = $('pmz').querySelector('[data-ci="plus"]'), mi = $('pmz').querySelector('[data-ci="minus"]');
   const k = SEL && SEL.isConnected ? kidOf(SEL) : null;
   setDis(pl, !defKid(P) && !(k && !k.up));
+  setDis(mi, P.length <= 1);
 }
+/* A click with the mouse leaves no focus on the Up bar (Space would press the button again instead of pausing a
+   flow); the button is blurred before the camera moves, since the bar is redrawn for the new target. A crumb takes no
+   double-click: the crumbs are redrawn for the new target on the first click, so a second would land on another
+   crumb (review of 1 Oct); a second tap within 400 ms is ignored the same way. */
+const blurClick = (e, b) => { if (e.detail > 0 && b && b.contains(document.activeElement)) document.activeElement.blur(); };
+let CRUMBT = -1e9, CRUMBPT = '';
+$('crumbs').addEventListener('pointerdown', e => { CRUMBPT = e.pointerType; });
 $('crumbs').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || isDis(b)) return;
+  if (e.detail > 1 || (e.detail > 0 && CRUMBPT === 'touch' && e.timeStamp - CRUMBT < 400)) return;
+  CRUMBT = e.timeStamp;
   const ci = b.dataset.ci, P = zNow().path;
   if (ci === 'more') { menuToggle(b); return; }
-  if (ci === 'minus') { zoomBy(-1); return; }
-  if (ci === 'plus') { zoomBy(1); return; }
+  blurClick(e, b);
   if (ci === 'next') { const k = defKid(P); if (k) userNav(P.concat([k])); return; }
   const i = +ci; if (i < P.length - 1) userNav(P.slice(0, i + 1));
 });
-$('up').addEventListener('click', e => { if (!isDis(e.currentTarget)) zoomBy(-1); });
+$('pmz').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || isDis(b)) return;
+  blurClick(e, b);
+  zoomBy(b.dataset.ci === 'minus' ? -1 : 1);
+});
+$('up').addEventListener('click', e => { const b = e.currentTarget; blurClick(e, b); if (!isDis(b)) zoomBy(-1); });
+/* the crumbs fold again when the bar's width changes (a window resized, the panel shown or hidden) */
+try { let upW = 0, upT = 0; new ResizeObserver(es => { const w = Math.round(es[0].contentRect.width); if (w === upW) return; upW = w; cancelAnimationFrame(upT); upT = requestAnimationFrame(() => crumbsUI()); }).observe($('upbar')); } catch (_) { /* no observer: the crumbs fold on the next move */ }
 /* the "…" menu: the folded crumbs, outermost first */
 function menuToggle(b) {
   const m = $('crumb-menu');
   if (!m.hidden) { menuOff(); return; }
   const P = zNow().path; m.textContent = '';
   P.slice(0, b._fold).forEach((el, i) => {
-    const it = H('button', {type: 'button', role: 'menuitem', 'data-ci': String(i)}, m);
+    const it = H('button', {type: 'button', role: 'menuitem', tabindex: '-1', 'data-ci': String(i)}, m);
     it.textContent = nameOf(el) + (sizeOf(el) && sizeOf(el).m > 0 ? ' · ' + sizeTxt(sizeOf(el)) : '');
   });
   const wr = $('svgwrap').getBoundingClientRect(), br = b.getBoundingClientRect();
@@ -1679,14 +1762,14 @@ function menuOff(refocus) {
   const m = $('crumb-menu'); if (m.hidden) return;
   m.hidden = true; const b = $('crumbs').querySelector('.more'); if (b) { b.setAttribute('aria-expanded', 'false'); if (refocus) b.focus({preventScroll: true}); }
 }
-$('crumb-menu').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.ci; menuOff(); userNav(zNow().path.slice(0, i + 1)); });
+$('crumb-menu').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || e.detail > 1) return; const i = +b.dataset.ci; menuOff(e.detail === 0); userNav(zNow().path.slice(0, i + 1)); });
 $('crumb-menu').addEventListener('keydown', e => {
   if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); menuOff(true); return; }
-  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-    e.preventDefault(); e.stopPropagation();
-    const bs = [...$('crumb-menu').querySelectorAll('button')], i = bs.indexOf(document.activeElement);
-    const j = (i + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length; bs[j].focus();
-  }
+  // Tab leaves the menu: it closes, and focus goes on from its "…" button
+  if (e.key === 'Tab') { menuOff(true); return; }
+  const bs = [...$('crumb-menu').querySelectorAll('button')], i = bs.indexOf(document.activeElement);
+  const j = e.key === 'ArrowDown' ? (i + 1) % bs.length : e.key === 'ArrowUp' ? (i - 1 + bs.length) % bs.length : e.key === 'Home' ? 0 : e.key === 'End' ? bs.length - 1 : -1;
+  if (j >= 0) { e.preventDefault(); e.stopPropagation(); bs[j].focus(); }
 });
 document.addEventListener('pointerdown', e => { if (!$('crumb-menu').hidden && !e.target.closest('#crumb-menu, #crumbs .more')) menuOff(); }, true);
 /* the readout: at rest, the scale's size; while the camera moves, the size it passes, log-linearly through each step
@@ -1701,7 +1784,7 @@ function roSet(html, cls, plain) {
 }
 function roRest() {
   const P = Z.path, el = P[P.length - 1], sz = sizeOf(el);
-  roSet(`<b>${esc(shortOf(el))}</b> · ${sizeHtml(sz)}`);
+  roSet(sizeHtml(sz));
   $('scale-ro').removeAttribute('aria-hidden');
 }
 const smoother = x => x * x * x * (x * (x * 6 - 15) + 10);
@@ -1714,7 +1797,7 @@ function readout(s, e) {
   const t = performance.now(); if (e < 1 && t - ROT < 100 && ROCLS.indexOf('mv') >= 0) return; ROT = t;
   const w = s.kind === 'jump' ? smoother(clamp(e, 0, 1)) : clamp(e, 0, 1), m = Math.exp(lerp(Math.log(so.m), Math.log(si.m), w));
   if (ROCLS.indexOf('mv') < 0) $('scale-ro').setAttribute('aria-hidden', 'true');
-  roSet(`${pow10(m)} · ${fmtLen(m, 2)}`, 'mv' + (s.kind === 'jump' ? ' jump' : ''), true);
+  roSet(`${fmtLen(m, 2)} · ${pow10(m)}`, 'mv' + (s.kind === 'jump' ? ' jump' : ''), true);
 }
 /* after a move: announce the scale, and (unless a flow or the tour holds the panel) show where the camera is */
 function arrived() {
@@ -1722,7 +1805,7 @@ function arrived() {
   $('stage').classList.toggle('offchip', Z.level < 0 || Z.level > 2);
   $('cap-scale').textContent = `Scale: ${nameOf(el)}, ${sizeWords(sizeOf(el))}`;
   prefetch();
-  if (!FL.k && !TOUR) showHere();
+  if (!FL.k && !TOUR && !SEL) showHere();
 }
 /* ---- the chip's three scales as nodes: the die (its frame the die itself; the packages and the host around it are
    part of its view), a shire (SF) and a minion (MF), each built as before. Since 30 September the master and spare
@@ -2112,36 +2195,33 @@ function zoomInto(g) {
 }
 /* a click or a tap selects (since 30 September a click never moves the camera: with every part zoomable, a second
    click that zoomed would turn reading into flying) */
-function activate(g) { select(g); showPart(g); scaleUI(); clearTimeout(PILLT); if (TOUCH) PILLT = setTimeout(() => { if (SEL === g && !ZW) pillFor(g); }, 380); }
-/* (the pill shows once a second tap can no longer come: it never lands under the finger of a double-tap) */
+function activate(g) { select(g); showPart(g); scaleUI(); if (TOUCH) pillFor(g); }
 let PILLT = 0;
-/* ---- touch: our own double-tap (two taps on one part within 350 ms and 30 px; #chip has touch-action:
-   manipulation, so the browser's own double-tap zoom is off on the drawing while pinch-zoom of the page works), and a
-   "Zoom in" pill beside the selected part ---- */
-let TAP = null, TOUCHUP = 0;
+/* ---- touch: our own double-tap (two taps on one part, the second touch within 400 ms of the first lift and 30 px of
+   it, timed by the events' own time stamps: a long frame between the taps does not break it; #chip has touch-action:
+   manipulation, so the browser's own double-tap zoom is off on the drawing while pinch-zoom of the page works), and
+   the strip under the drawing with the selected part's "Zoom in" ---- */
+let TAP = null, TOUCHUP = 0, TDOWN = 0;
+svg.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') TDOWN = e.timeStamp; });
 svg.addEventListener('pointerup', e => {
   if (e.pointerType !== 'touch') return;
-  const now = performance.now(); TOUCHUP = now;
+  TOUCHUP = performance.now();
   const g = e.target.closest && e.target.closest('.comp');
   if (!g || !svg.contains(g)) { TAP = null; return; }
-  if (TAP && TAP.g === g && now - TAP.t < 350 && Math.hypot(e.clientX - TAP.x, e.clientY - TAP.y) < 30) { TAP = null; zoomInto(g); return; }
-  TAP = {g, t: now, x: e.clientX, y: e.clientY};
+  if (TAP && TAP.g === g && TDOWN - TAP.t < 400 && TDOWN >= TAP.t && Math.hypot(e.clientX - TAP.x, e.clientY - TAP.y) < 30) { TAP = null; zoomInto(g); return; }
+  TAP = {g, t: e.timeStamp, x: e.clientX, y: e.clientY};
 });
 function pillFor(g) {
   const pl = $('zpill');
-  if (!TOUCH || !g || ZW || !g.isConnected || $('stage').classList.contains('present')) { pl.hidden = true; return; }
-  const k = kidOf(g);
+  if (!TOUCH || !g || ZW || !g.isConnected || $('stage').classList.contains('present')) { pillOff(); return; }
+  const k = kidOf(g), t = $('pn-body').querySelector('.pn-title');
   $('zpill-in').hidden = !k; $('zpill-in').textContent = k && k.up ? 'Go out ▸' : 'Zoom in ▸';
-  const r = g.getBoundingClientRect(), w = $('svgwrap').getBoundingClientRect();
+  pl.querySelector('.zs-name').textContent = t ? t.textContent : '';
   pl.hidden = false;
-  const pw = pl.offsetWidth, ph = pl.offsetHeight;
-  const x = clamp(r.left - w.left + r.width / 2 - pw / 2, 4, Math.max(4, w.width - pw - 4));
-  let y = r.bottom - w.top + 6; if (y + ph > w.height - 4) y = r.top - w.top - ph - 6;
-  pl.style.left = x + 'px'; pl.style.top = clamp(y, 4, Math.max(4, w.height - ph - 4)) + 'px';
 }
 function pillOff() { clearTimeout(PILLT); $('zpill').hidden = true; }
 $('zpill-in').addEventListener('click', () => { if (SEL) zoomInto(SEL); });
-$('zpill-det').addEventListener('click', () => { pillOff(); const p = $('panel'); if (p) p.scrollIntoView({behavior: REDUCED ? 'auto' : 'smooth', block: 'start'}); });
+$('zpill-det').addEventListener('click', () => { const p = $('panel'); if (p) p.scrollIntoView({behavior: REDUCED ? 'auto' : 'smooth', block: 'start'}); });
 $('zpill').addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); pillOff(); if (SEL) SEL.focus({preventScroll: true}); } });
 svg.addEventListener('click', e => {
   const l = e.target.closest && e.target.closest('.nbr'); if (l && svg.contains(l)) { pillOff(); goNeighbour(l._ctx); return; }
@@ -2158,9 +2238,16 @@ svg.addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); zoomInto(g); }
   else if (e.key === ' ' && !flowOn()) { e.preventDefault(); e.stopPropagation(); select(g); showPart(g); scaleUI(); }
 });
+/* a zoom started below the drawing (a phone's panel, under the stage): the drawing scrolls into view first, so that the
+   move is seen (review of 1 Oct) */
+function stageIntoView() {
+  const r = $('svgwrap').getBoundingClientRect(), vis = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
+  if (vis < Math.min(r.height, innerHeight) * 0.6) $('upbar').scrollIntoView({block: 'start', behavior: REDUCED ? 'auto' : 'smooth'});
+}
 $('pn-body').addEventListener('click', e => {
   const b = e.target.closest('button[data-act]'); if (!b) return;
-  if (b.dataset.act === 'go') userNav(pathFrom(b.dataset.to));
+  // pressed from the keyboard: after the move, focus goes to the new panel's zoom row (it is rebuilt on arrival)
+  if (b.dataset.act === 'go') { stageIntoView(); userNav(pathFrom(b.dataset.to), {pfocus: e.detail === 0}); }
   else if (ACTS[b.dataset.act]) ACTS[b.dataset.act](b);
 });
 
@@ -4291,12 +4378,14 @@ document.addEventListener('keydown', e => {
   const inStage = inView && ($('stage').contains(tg) || tg === document.body || tg === document.documentElement);
   if (!inStage) return;
   const onControl = tg.closest && tg.closest('button, a, li.fact, summary, [role="button"]:not(.comp)');
+  const onDraw = svg.contains(tg) || tg === document.body || tg === document.documentElement;
   const presenting = !!TOUR || PRES || !!fsEl();
   switch (e.key) {
     // the arrows: with no flow or tour on the stage and not presenting, to the scale or part that way (a shire's
     // neighbour, a minion beside this one); otherwise, and PageDown and PageUp always (a presenter's clicker), stages
-    case 'ArrowRight': e.preventDefault(); if (navKeys()) arrowNav('E'); else next(e.shiftKey); break;
-    case 'ArrowLeft': e.preventDefault(); if (navKeys()) arrowNav('W'); else prev(e.shiftKey); break;
+    // (with no flow on the stage, an arrow on a focused button or in the panel does what it does there: review of 1 Oct)
+    case 'ArrowRight': if (!navKeys()) { e.preventDefault(); next(e.shiftKey); } else if (onDraw) { e.preventDefault(); arrowNav('E'); } break;
+    case 'ArrowLeft': if (!navKeys()) { e.preventDefault(); prev(e.shiftKey); } else if (onDraw) { e.preventDefault(); arrowNav('W'); } break;
     case 'PageDown': e.preventDefault(); next(e.shiftKey); break;
     case 'PageUp': e.preventDefault(); prev(e.shiftKey); break;
     case ' ': case 'Spacebar': {
@@ -4325,8 +4414,8 @@ document.addEventListener('keydown', e => {
     // a presenter's clicker: F5 (and Shift+F5) is its "start the slideshow" button, never a reload mid-talk; some send
     // Up and Down for back and forward
     case 'F5': if (presenting) { e.preventDefault(); if (!TOUR) startTour(TLAST >= STEPS.length - 1 ? 0 : TLAST); } break;
-    case 'ArrowDown': if (presenting) { e.preventDefault(); next(e.shiftKey); } else if (navKeys() && tg !== document.body && tg !== document.documentElement) { e.preventDefault(); arrowNav('S'); } break;
-    case 'ArrowUp': if (presenting) { e.preventDefault(); prev(e.shiftKey); } else if (navKeys() && tg !== document.body && tg !== document.documentElement) { e.preventDefault(); arrowNav('N'); } break;
+    case 'ArrowDown': if (presenting) { e.preventDefault(); next(e.shiftKey); } else if (navKeys() && svg.contains(tg)) { e.preventDefault(); arrowNav('S'); } break;
+    case 'ArrowUp': if (presenting) { e.preventDefault(); prev(e.shiftKey); } else if (navKeys() && svg.contains(tg)) { e.preventDefault(); arrowNav('N'); } break;
     default: {
       const i = '1234567890'.indexOf(e.key);
       if (i >= 0 && e.key.length === 1) pickFlow(ORDER[i]);
@@ -4369,11 +4458,18 @@ function prose() {
   // the asks: what would settle each inferred part, and the hub's row that asks for it
   const BADGE = {settled: '<span class="kd measured">settled</span>', nearly: '<span class="kd spec">nearly settled</span>', confirm: '<span class="kd spec">to confirm</span>'};
   $('asktab').querySelector('tbody').innerHTML = ASKS.map(a => `<tr><td data-label="Part"><b>${esc(a.part)}</b>${BADGE[askState(a)] ? ' ' + BADGE[askState(a)] : ''}</td><td data-label="What is inferred">${esc(a.what_is_inferred)}</td><td data-label="What would settle it" class="small">${esc(a.what_settles_it)}</td><td data-label="Ask">${askLinks(a).join('<br>') || esc(a.ask_detail || '')}</td></tr>`).join('');
-  // every fact
-  const tb = document.querySelector('#facttab tbody');
-  tb.innerHTML = Object.keys(F).sort().map(id => { const f = F[id];
-    return `<tr><td data-label="Fact"><code>${esc(id)}</code></td><td data-label="Statement">${esc(f.statement)}${f.url ? ` <a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.page)}</a>` : ''}</td><td data-label="Kind"><span class="kd ${f.kind}">${KWORD[f.kind] || f.kind}</span></td><td data-label="Cards">${esc(cardsTxt(f))}</td><td data-label="Source" class="small">${esc(f.source)}</td></tr>`; }).join('');
-  CK.sortTable('facttab', {filter: true, filterLabel: 'Filter facts'});
+  // every fact: the table is built when the reader comes near it (review of 1 Oct: built at load and skipped by
+  // content-visibility, its 800-odd rows still cost one long layout some 1.5 s after load, inside a ?flow= link's first
+  // move)
+  const tab = $('facttab');
+  const build = () => {
+    if (tab._built) return; tab._built = true;
+    tab.querySelector('tbody').innerHTML = Object.keys(F).sort().map(id => { const f = F[id];
+      return `<tr><td data-label="Fact"><code>${esc(id)}</code></td><td data-label="Statement">${esc(f.statement)}${f.url ? ` <a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.page)}</a>` : ''}</td><td data-label="Kind"><span class="kd ${f.kind}">${KWORD[f.kind] || f.kind}</span></td><td data-label="Cards">${esc(cardsTxt(f))}</td><td data-label="Source" class="small">${esc(f.source)}</td></tr>`; }).join('');
+    CK.sortTable('facttab', {filter: true, filterLabel: 'Filter facts'});
+  };
+  try { const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); build(); } }, {rootMargin: '1500px 0px'}); io.observe(tab.closest('.table-wrap') || tab); } catch (_) { build(); }
+  if (/^#facts?\b/.test(location.hash)) build();
 }
 
 /* ================= start ================= */
@@ -4382,7 +4478,12 @@ function prose() {
 buildPip();
 /* the phone's drawing on or off (PH): the stage's class, the box's shape, the view, and the band's fold whenever a flow
    draws in the band (packets, trails, glows and pulses come and go too often to be worth a look) */
-let foldObs = null;
+var foldObs = null;   // (var: bindTrio may run before this line)
+function watchFold() {
+  if (!foldObs) return;
+  foldObs.disconnect();
+  if (FX[0]) foldObs.observe(FX[0], {childList: true, subtree: true});
+}
 function phApply() {
   $('stage').classList.toggle('ph', PH);
   svg.setAttribute('preserveAspectRatio', PH ? 'xMidYMin meet' : 'xMidYMid meet');
@@ -4391,7 +4492,7 @@ function phApply() {
   if (!PH) { svg.style.aspectRatio = ''; svg.setAttribute('viewBox', `${VB.x} ${VB.y} ${VB.w} ${VB.h}`); if (!ZW) setView(); return; }
   phBox();
   const busy = n => n.nodeType !== 1 || n.tagName === 'circle' || /\b(pk|trail|glow)\b/.test(n.getAttribute('class') || '');
-  try { foldObs = new MutationObserver(ms => { if (ms.some(m => [...m.addedNodes, ...m.removedNodes].some(n => !busy(n)))) foldSoon(); }); foldObs.observe(FX[0], {childList: true, subtree: true}); } catch (_) { /* no observer */ }
+  try { foldObs = new MutationObserver(ms => { if (ms.some(m => [...m.addedNodes, ...m.removedNodes].some(n => !busy(n)))) foldSoon(); }); watchFold(); } catch (_) { /* no observer */ }
 }
 /* The window crosses PH (a phone turned, a window resized): the tour or flow that played stops, a move in flight lands,
    and every scale on the camera's path is drawn again for the new shape, where the camera is (a cut); the other scales
@@ -4408,10 +4509,13 @@ function phSwitch() {
       phGeom();
       LYR.forEach(L => { L._built = false; });
       Z.path.forEach((_, d) => buildInto(layerAt(Z.path, d), Z.path, d));
+      // the die's, the shire's and the minion's layers that the flows draw in are drawn anew too, on the camera's path
+      // or not (review of 1 Oct: above the die, the die's stayed stale, and the band's fold watched its old drawing)
+      [0, 1, 2].forEach(i => { const L = LAYERS[i]; if (L && L._path && !L._built && LYR.get(L._key) === L) buildInto(L, L._path, L._depth); });
       prune(); bindTrio(Z.path);
       const L = restLayer(); if (L) { L.style.display = ''; L.style.opacity = 1; }
       PIP.svg.textContent = ''; PIP.tiles = {}; buildPip();
-      phApply(); setView(); scaleUI(true); showHere(); resetCap(); fitCap();
+      phApply(); setView(); skyBg(); scaleUI(true); showHere(); resetCap(); fitCap();
     });
   }, 250);
 }
@@ -4450,7 +4554,7 @@ window.__chipTest = {
 };
 /* a read-only view of the state, for the page's tests (headless Chrome) */
 window.__chipState = () => ({level: Z.level, sid: Z.sid, nb: Z.nb, mi: Z.mi, flow: FL.k, stage: FL.i, done: FL.done, still: FL.still,
-  clockOn: CLK.on, clock: Math.round(CLK.t), follow: FOLLOW, zooming: ZW, pip: !PIP.el.hidden, pres: PRES, tour: TOUR ? TOUR.i : null,
+  clockOn: CLK.on, clock: Math.round(CLK.t), follow: FOLLOW, zooming: ZW || UIP, pip: !PIP.el.hidden, pres: PRES, tour: TOUR ? TOUR.i : null,
   transform: [0, 1, 2].map(i => LAYERS[i].getAttribute('transform')), shown: [0, 1, 2].map(i => LAYERS[i].style.display !== 'none'),
   // the path camera (30 September): the path shown, its depth, and every layer shown with its scale on the screen
   path: pkeys(Z.path), depth: Z.path.length - 1, die: DIE,

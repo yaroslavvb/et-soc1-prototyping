@@ -8,7 +8,17 @@ Sources (all public domain):
   - Natural Earth 1:110m land, ne_110m_land.geojson (naturalearthdata.com; "All versions of Natural Earth raster +
     vector map data found on this website are in the public domain"), from github.com/nvkelso/natural-earth-vector.
 
-Output: ../outside-geo.json, and preview PNGs in ./geo/preview-*.png.
+Inputs, fetched into ./geo/ (or a folder named by GEO_DIR; not committed, 70 MB), and unzipped there:
+  https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_county_500k.zip
+      sha256 99d6597b1fc7767deef62e01d28d8b5dcbd578e151855f7dc0d173cbf5bf0868
+  https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_state_5m.zip
+      sha256 0f606018e81fe99a204d08aa7ac1f8d00516143ddc95900b79eeecfee65da8c3
+  https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson
+      sha256 9e0729ee253ca7d7a5c4ae9395fb1902264c5377c52e224d13dd85010e2835d9 (the copy of 30 Sep 2026)
+  mkdir -p geo && cd geo && curl -O <each URL> && unzip -d cb_2023_us_county_500k cb_2023_us_county_500k.zip &&
+  unzip -d cb_2023_us_state_5m cb_2023_us_state_5m.zip && sha256sum -c <the three lines above>
+
+Output: outside-geo.json beside this script, and preview PNGs in the inputs' folder (preview-*.png).
 Units: kilometres on the projection plane, x east, y SOUTH (SVG's y runs down), origin at each map's centre.
 No point on these maps marks the lab or any street address: only the outlines and two city centres (SF, NYC).
 """
@@ -20,7 +30,7 @@ import sys
 sys.setrecursionlimit(100000)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-GEO = os.path.join(HERE, 'geo')
+GEO = os.environ.get('GEO_DIR') or os.path.join(HERE, 'geo')
 R = 6371.0  # km, NASA's volumetric mean radius (nssdc Earth fact sheet)
 
 
@@ -272,11 +282,11 @@ def gc(a, b):
     return 2 * R * math.asin(math.sqrt(h))
 out['meta']['sf_nyc_great_circle_km'] = round(gc(SF_C, NYC_C), 1)
 
-with open(os.path.join(HERE, '..', 'outside-geo.json'), 'w') as f:
+with open(os.path.join(HERE, 'outside-geo.json'), 'w') as f:
     json.dump(out, f, separators=(',', ':'))
 for k in ('sf', 'bayarea', 'california', 'us', 'earth'):
     v = out[k]
     L = len(v.get('path', '')) + sum(len(x['path']) for x in v.get('counties', []) + v.get('states', []))
     print(k, 'path chars', L, 'bbox', v.get('bbox_km'))
 print('SF-NYC great circle km', out['meta']['sf_nyc_great_circle_km'])
-print('file bytes', os.path.getsize(os.path.join(HERE, '..', 'outside-geo.json')))
+print('file bytes', os.path.getsize(os.path.join(HERE, 'outside-geo.json')))

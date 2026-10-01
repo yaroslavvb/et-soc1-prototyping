@@ -50,8 +50,13 @@ function inode(id, o) {
   }, o));
 }
 const n0 = v => (v == null || isNaN(v) ? 0 : v);
-/* a scale's name inside a sentence: "the fused multiply-add unit", but "LRAM block 1", "XOR / XNOR gate" */
-const inName = t => String(t).replace(/^(The|A|An) /, m => m.toLowerCase()).replace(/^([A-Z])([a-z])/, (m, a, b) => a.toLowerCase() + b);
+/* a scale's name inside a sentence: "the fused multiply-add unit", "the vector unit", but "LRAM block 1", "XOR / XNOR
+   gate", "the FinFET transistor" (a word with capitals inside keeps them; a name with no article and no number gets
+   "the": review of 1 Oct) */
+const inName = t => {
+  const s0 = String(t).replace(/^(The|A|An|One) /, m => m.toLowerCase()).replace(/^([A-Z])([a-z]+)(?=[\s,]|$)/, (m, a, b) => (/^(Booth|Wallace)$/.test(a + b) ? m : a.toLowerCase() + b));
+  return /^(the|a|an|one) /.test(s0) || /\d\s*$/.test(s0) ? s0 : 'the ' + s0;
+};
 const L1X = () => CKT.INST.l1(), L2X = () => CKT.INST.l2(), DRX = () => CKT.INST.dram();
 
 /* ---- the L1 data cache: latch RAM on the minion rail ---- */
@@ -106,13 +111,15 @@ inode('shire.meshstop.xing', {build: (L, ap) => CKT.build(CKT.buildL2Xing, L, ap
 
 /* ---- the mesh: one hop, its wire, a repeater ---- */
 inode('mesh', {name: () => 'One mesh hop', short: () => 'Hop', to: () => 'one mesh hop',
+  // (its size is one hop's wire, the tile pitch, not the whole mesh's: review of 1 Oct)
+  size: () => ({m: 3.72e-3, kind: 'inferred', f: 'chip.hop-pitch'}),
   build: (L, ap) => {
     CKT.build(CKT.buildMeshHop, L, ap, {}, CKT.parts.l3);
     if (ap.repBox) { ap.zs['mesh.link.wire'] = {r: ap.repBox, g: ap.zg.rep || null}; if (ap.zg.rep) ap.zg.rep._kid = {id: 'mesh.link.wire'}; }
   },
   seat: (ap, p, pel, Lp) => meshSeat(Lp),
   def: () => ({id: 'mesh.link.wire'}), kids: () => [{id: 'mesh.link.wire'}]});
-inode('mesh.link.wire', {name: () => 'A link bit: a repeater and a level shifter', short: () => 'Repeater',
+inode('mesh.link.wire', {name: () => 'A link bit: a repeater and a level shifter', short: () => 'Wire and repeater', to: () => 'a link bit',
   build: (L, ap) => CKT.build(CKT.buildL3Wire, L, ap, {}, CKT.parts.l3)});
 /* the hop's seat on the die: a link between two compute shires in the middle of the grid (shire 21 to shire 13) */
 function meshSeat(Lp) {
@@ -139,6 +146,8 @@ inode('memshire.phy', {parse: k => dk(k), name: p => `The DRAM PHY of memory shi
   def: p => ({id: 'memshire.phy.dq', k: String(p.ms)}), kids: p => [{id: 'memshire.phy.dq', k: String(p.ms)}]});
 inode('memshire.phy.dq', {parse: k => dk(k), build: (L, ap, p) => CKT.build(CKT.buildDQ, L, ap, dinst({ms: p.ms}), CKT.parts.dram)});
 inode('dram', {parse: k => dk(k), name: p => `LPDDR4X channel ${p.ch} of memory shire ${p.ms}`, short: p => `Channel ${p.ch}`, to: p => `channel ${p.ch}`,
+  // (zoomed in from a memory shire the size grows: say why; review of 1 Oct)
+  blurb: () => `${(ISC.dram || {}).blurb || ''} The size here grows: the channel’s memory is in a package beside the chip, larger than the memory shire on the die that drives it.`,
   build: (L, ap, p) => {
     CKT.build(CKT.buildChan, L, ap, dinst({ms: p.ms, ch: p.ch}), CKT.parts.dram);
     mlSibs(L, ap, 'dbanks', c => (ap.bank[c.i] ? {el: {id: 'dram.bank', k: `${p.ms}.${p.ch}.${c.i}`}, seat: ap.bank[c.i].box} : null));
@@ -187,9 +196,15 @@ function showMLPart(g) {
   const d = CKT.partText(g);
   if (!d) { showNodePart(Object.assign(g, {_info: {title: (g.getAttribute('aria-label') || '').replace(/[:.].*$/, ''), lead: ''}})); return; }
   const P = layerPath(g) || Z.path, el = P[P.length - 1];
+  // a beginner's line above the zoom row, as the chip's own parts have (LEADS): the tree's line for the scale the part
+  // opens, else the first sentence of its text, whose rest stays under Details (review of 1 Oct: 133 kinds of part
+  // showed only a title and badges)
+  const k = kidOf(g), kb = k && !k.up && ISC[k.id] ? ISC[k.id].blurb : '';
+  const ss = String(d.what || '').split(/(?<=[.!?])\s+(?=[A-Z(])/);
+  const lead = kb ? esc(kb) : ss[0] || '', rest = kb ? d.what : ss.slice(1).join(' ');
   panel(`<p class="pn-kick">${esc(d.kick || shortOf(el))}</p><p class="pn-title">${esc(d.title || '')}</p>`
-    + (d.badge ? `<p class="pn-badge">${d.badge}</p>` : '') + zoomRowPart(g, d.title)
-    + detBlock(`<p class="pn-what">${d.what}</p>` + (d.kpis.length ? `<div class="pn-kpis">${d.kpis.join('')}</div>` : '')));
+    + (lead ? `<p class="pn-lead">${lead}</p>` : '') + zoomRowPart(g, d.title)
+    + detBlock((d.badge ? `<p class="pn-badge">${d.badge}</p>` : '') + (rest ? `<p class="pn-what">${rest}</p>` : '') + (d.kpis.length ? `<div class="pn-kpis">${d.kpis.join('')}</div>` : '')));
 }
 
 /* ================= the block scenes, and the compute ladder down to the silicon crystal (Phase 3b) =================
@@ -213,7 +228,7 @@ function wrapW(t, n) {
 /* a part of the drawings drawn here: its panel from the tree (title, lead, facts) unless given; its zoom, its seat */
 function ipart(L, ap, key, x, y, w, h, col, title, o) {
   o = o || {};
-  const g = KT.part(L, key, x, y, w, h, col, title, {sub: o.sub, kind: o.kind, ctx: o.ctx, center: o.center, fo: o.fo, tcls: o.tcls, ty: o.ty, label: o.label});
+  const g = KT.part(L, key, x, y, w, h, col, title, {sub: o.sub, kind: o.kind, ctx: o.ctx, center: o.center, fo: o.fo, tcls: o.tcls, ty: o.ty, label: o.label, lh: o.lh});
   const s0 = sc(o.node || key);
   g._info = o.info || {title: s0.name || title, lead: s0.blurb || '', facts: s0.facts || [], kick: o.kick};
   if (o.kid) { g._kid = o.kid; ap.zs[pk(o.kid)] = {r: o.seat || {x, y, w, h}, g, tr: o.tr}; }
@@ -243,18 +258,24 @@ function blockScene(id, L, ap, p, P, o) {
     }
     y += bh + 26;
   }
-  const H = (see.length ? 560 : 676) - y, n = kids.length;
+  // (review of 1 Oct: at 1024 x 768 the type is 21 units and the lines, 21 apart, touched and ran into the boxes'
+  // right edges: the text wraps for that size, a line is 25 units, a box shows at most three lines, the rest is in its
+  // panel, and the boxes share the card's height)
+  const H = (see.length ? 560 : 650) - y, n = kids.length, LH = 25, CW = 11.6;
   if (n) {
     const cols = n <= 3 ? n : n <= 4 ? 2 : n <= 6 ? 3 : 4, rows = Math.ceil(n / cols), gw = 18, gh = 18;
-    const bw = (W - gw * (cols - 1)) / cols, need = 56 + 21 * Math.max(...kids.map(k => wrapW(sc(k).blurb, Math.max(18, Math.floor(bw / 9.6))).length));
-    const bh = Math.min(240, need, (H - gh * (rows - 1)) / rows);
+    const bw = (W - gw * (cols - 1)) / cols, wrapAt = Math.max(16, Math.floor((bw - 24) / CW));
+    // the boxes as tall as their text needs (title and up to three lines), the group centred in the card's free height
+    const most = Math.min(3, Math.max(1, ...kids.map(k => wrapW(firstClause(sc(k).blurb), wrapAt).length)));
+    const bh = Math.min(260, (H - gh * (rows - 1)) / rows, 50 + 23 + LH * most + 22);
+    const y1 = y + Math.max(0, (H - rows * bh - gh * (rows - 1)) * 0.4);
     kids.forEach((k, i) => {
-      const r = Math.floor(i / cols), c = i % cols, x = X0 + c * (bw + gw), yy = y + r * (bh + gh), s1 = sc(k);
-      const cap = Math.max(1, Math.floor((bh - 46) / 21)), all = wrapW(s1.blurb, Math.max(18, Math.floor(bw / 9.6)));
+      const r = Math.floor(i / cols), c = i % cols, x = X0 + c * (bw + gw), yy = y1 + r * (bh + gh), s1 = sc(k);
+      const cap = Math.max(1, Math.min(3, Math.floor((bh - 50) / LH))), all = wrapW(firstClause(s1.blurb), wrapAt);
       const lines = all.slice(0, cap); if (all.length > cap) lines[cap - 1] = lines[cap - 1].replace(/[,;:.]?\s*\S*$/, '…');
       const has = !!NODES[k], nm = String(s1.name || k).replace(/\s*\(.*$/, '');
       ipart(L, ap, k, x, yy, bw, bh, has ? CC.logic : 'var(--ink-2)', nm.length < bw / 11 ? nm : s1.short && s1.short.length < bw / 11 ? s1.short : wrapW(nm, Math.floor(bw / 11))[0],
-        {node: k, kid: has ? {id: k} : null, sub: lines, fo: has ? 0.12 : 0.06, opts: has ? null : madeOf(k)});
+        {node: k, kid: has ? {id: k} : null, sub: lines, fo: has ? 0.12 : 0.06, opts: has ? null : madeOf(k), lh: LH, ty: 40});
     });
   }
   if (see.length) {
@@ -396,7 +417,8 @@ bnode('fma.tree.col', {draw: (L, ap) => {
     if (lv.pass) { const px = 60 + lv.n * 230; KT.wire(L, [[px + 40, lv.y - 14], [px + 40, lv.y + 100]], 'thin'); KTT(L, px + 52, lv.y + 40, 'a bit passes', 't-sm'); }
     KTT(L, -150, lv.y + 44, ['17 → 9', '9 → 5', '5 → 3', '3 → 2'][li], 't-smb');
   });
-  KTT(L, -150, 676, 'each 4:2 takes a carry in from the column on its right and sends one to the column on its left (cout); its own carry goes down a column to the left', 't-sm');
+  KTT(L, -150, 652, 'each 4:2 takes a carry in from the column on its right and sends one to the column on its left (cout);', 't-sm');
+  KTT(L, -150, 678, 'its own carry goes down a column to the left', 't-sm');
   ap.zs['lib.cmp42'] = {r: {x: 60, y: 110, w: 170, h: 74}, g: first};
 }, def: () => ({id: 'lib.cmp42'}), kids: () => [{id: 'lib.cmp42'}, {id: 'lib.fa'}]});
 /* the 4:2 compressor: two full adders, as the RTL's r42cmp computes it */
@@ -448,8 +470,8 @@ bnode('lib.fa', {draw: (L, ap) => {
   const tb = KT.comp(L, 'fatable', {}, 'The full adder’s truth table');
   tb._info = {title: 'The truth table', lead: 'Every combination of the three input bits and what the adder gives: the sum is 1 when an odd number of inputs are 1, the carry when two or more are.', facts: sc('lib.fa').facts};
   const tx = 760, ty = 470;
-  KTT(tb, tx, ty, 'a b cin │ sum carry', 't-mono');
-  for (let i = 0; i < 8; i++) { const a = i >> 2 & 1, b = i >> 1 & 1, c = i & 1, s0 = a ^ b ^ c, cy = (a + b + c) >= 2 ? 1 : 0; KTT(tb, tx, ty + 24 + i * 22, `${a} ${b}  ${c}  │  ${s0}     ${cy}`, 't-mono'); }
+  KTT(tb, tx, ty, 'a b cin | sum carry', 't-mono');
+  for (let i = 0; i < 8; i++) { const a = i >> 2 & 1, b = i >> 1 & 1, c = i & 1, s0 = a ^ b ^ c, cy = (a + b + c) >= 2 ? 1 : 0; KTT(tb, tx, ty + 24 + i * 22, `${a} ${b}  ${c}  |  ${s0}     ${cy}`, 't-mono'); }
   tb._box = {x: tx - 8, y: ty - 20, w: 220, h: 210};
   ap.zs['lib.xor'] = {r: {x: 160, y: 60, w: 110, h: 100}, g: gx, tr: 'jump'};
 }, def: () => ({id: 'lib.xor'}), kids: () => [{id: 'lib.xor'}]});
@@ -486,7 +508,7 @@ bnode('lib.xor', {draw: (L, ap) => {
   gi._box = {x: -110, y: 90, w: 130, h: 160};
   ap.zs['lib.inverter'] = {r: gi._box, g: gi};
   const tb = KT.comp(L, 'xtable', {}, 'The XOR’s truth table'); tb._info = {title: 'XOR', lead: sc('lib.xor').blurb, facts: sc('lib.xor').facts};
-  KTT(tb, 760, 380, 'A B │ OUT', 't-mono'); [[0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 0]].forEach((r, i) => KTT(tb, 760, 404 + i * 22, `${r[0]} ${r[1]} │  ${r[2]}`, 't-mono'));
+  KTT(tb, 760, 380, 'A B | OUT', 't-mono'); [[0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 0]].forEach((r, i) => KTT(tb, 760, 404 + i * 22, `${r[0]} ${r[1]} |  ${r[2]}`, 't-mono'));
   tb._box = {x: 752, y: 360, w: 130, h: 136};
 }, def: () => ({id: 'lib.finfet'}), kids: () => [{id: 'lib.finfet'}, {id: 'lib.inverter'}]});
 /* the inverter and the NAND: the simplest gates */
@@ -513,8 +535,8 @@ function gateScene(L, ap, which) {
   }
   ipart(L, ap, 'onefet', nTop.x - 22, nTop.y - 36, 44, 72, 'var(--c2)', '', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, tr: 'jump', fo: 0.1, label: 'One transistor'});
   const tb = KT.comp(L, 'gtable', {}, 'The truth table'); tb._info = {title: 'The truth table', lead: sc(nand ? 'lib.nand2' : 'lib.inverter').blurb, facts: sc(nand ? 'lib.nand2' : 'lib.inverter').facts};
-  if (nand) { KTT(tb, 760, 300, 'A B │ OUT', 't-mono'); [[0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]].forEach((r, i) => KTT(tb, 760, 324 + i * 22, `${r[0]} ${r[1]} │  ${r[2]}`, 't-mono')); }
-  else { KTT(tb, 760, 300, 'IN │ OUT', 't-mono'); KTT(tb, 760, 324, ' 0 │  1', 't-mono'); KTT(tb, 760, 346, ' 1 │  0', 't-mono'); }
+  if (nand) { KTT(tb, 760, 300, 'A B | OUT', 't-mono'); [[0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]].forEach((r, i) => KTT(tb, 760, 324 + i * 22, `${r[0]} ${r[1]} |  ${r[2]}`, 't-mono')); }
+  else { KTT(tb, 760, 300, 'IN | OUT', 't-mono'); KTT(tb, 760, 324, ' 0 |  1', 't-mono'); KTT(tb, 760, 346, ' 1 |  0', 't-mono'); }
   tb._box = {x: 752, y: 280, w: 130, h: 136};
   KTT(L, -150, 640, nand ? 'P-type transistors conduct when their gate is 0, N-type when it is 1: one network always pulls OUT up or down' : 'a 0 in turns the PMOS on and the NMOS off: OUT is pulled to VDD; a 1 does the opposite', 't-sm');
 }
@@ -591,7 +613,7 @@ bnode('lib.fin', {draw: (L, ap) => {
 }, def: () => ({id: 'lib.channel'}), kids: () => [{id: 'lib.channel'}]});
 /* the channel: the strip of fin under the gate, seen from the side; a patch of its atoms */
 bnode('lib.channel', {draw: (L, ap) => {
-  KT.frame(L, {title: 'The channel: the fin under the gate, from the side', sub: `about 6 × 20 × 45 nm: some ${on('ch_at')} silicon atoms (derived); the gate about ${on('lg')} long`, subf: `${onf('ch_at')} ${onf('lg')}`,
+  KT.frame(L, {title: 'The channel: the fin under the gate, from the side', sub: `about 6 × 20 × 45 nm: some ${on('ch_at')} silicon atoms (inferred); the gate about ${on('lg')} long`, subf: `${onf('ch_at')} ${onf('lg')}`,
     col: CC.logic, tags: [['unknown', 'sizes: inferred']]});
   const k = 11, lg = 20 * k, h = 45 * k, x0 = 460 - lg / 2, y0 = 120;
   const gsd = KT.comp(L, 'sd', {}, 'The source and the drain');
@@ -650,6 +672,10 @@ bnode('die.metal', {draw: (L, ap) => {
   KT.frame(L, {title: 'The die in section: transistors, then the wiring', sub: `the finest wires ${on('m_pitch')} apart (TSMC N7); ${on('masks')} make the chip; heights not to scale`, subf: `${onf('m_pitch')} ${onf('masks')}`,
     col: CC.logic, tags: [['unknown', 'layer count: not published'], ['documented', 'pitch: outside source']]});
   const gt = ipart(L, ap, 'fets', -150, 560, 1220, 90, 'var(--c3)', 'the transistors (fins and gates)', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, ty: 52, fo: 0.2});
+  // a row of fins under their gates, as a glyph (the FinFET scene has them to scale)
+  for (let x = 560; x < 1040; x += 26) S(E('rect', {x, y: 596, width: 7, height: 34, 'pointer-events': 'none'}, gt), {fill: 'var(--c3)', fillOpacity: 0.7});
+  S(E('rect', {x: 548, y: 586, width: 500, height: 12, rx: 2, 'pointer-events': 'none'}, gt), {fill: 'var(--c1)', fillOpacity: 0.45});
+  KTT(L, -150, 680, 'drawn face up, the bumps on top: in the package the die is flipped, face down on its bumps', 't-sm');
   let y = 540;
   const layers = [[6, 10, 12, 'M0-M4: the finest wires'], [3, 18, 22, 'middle layers'], [3, 30, 40, 'thick top layers: power and long wires (how many: not published)']];
   const gw = KT.comp(L, 'wires', {}, 'The wiring stack: copper wires in insulator, vias between');
@@ -660,12 +686,13 @@ bnode('die.metal', {draw: (L, ap) => {
       for (let x = -140; x < 1060; x += pitch * 1.6) S(E('rect', {x, y, width: pitch * 0.8, height: hgt}, gw), {fill: 'var(--c5)', fillOpacity: 0.55});
       if (i % 2) for (let x = -140 + pitch * 0.4; x < 1060; x += pitch * 6.4) S(E('rect', {x, y: y + hgt, width: 3, height: 22}, gw), {fill: 'var(--c5)'});
     }
-    KTT(L, 1080, y + 10, lab, 't-sm', 'end');
+    KTT(L, 1080, y + 10, lab, 't-sm halo', 'end');
   });
   gw._box = {x: -150, y, w: 1220, h: 540 - y};
   const gp = KT.comp(L, 'bumps', {}, 'The bumps that join the die to the package');
   gp._info = {title: 'The bumps', lead: 'On top of the wiring, small solder bumps join the die, face down, to the package: more than 30,000 of them.', facts: (sc('package') || {}).facts || []};
-  for (let x = -100; x < 1060; x += 120) S(E('circle', {cx: x, cy: y - 40, r: 26}, gp), {fill: 'var(--ink-2)', fillOpacity: 0.35, stroke: 'var(--ink-2)', strokeWidth: 1.5});
+  for (let x = -100; x < 1000; x += 120) S(E('circle', {cx: x, cy: y - 40, r: 26}, gp), {fill: 'var(--ink-2)', fillOpacity: 0.35, stroke: 'var(--ink-2)', strokeWidth: 1.5});
+  KTT(gp, 1080, y - 34, 'bumps', 't-sm', 'end');
   gp._box = {x: -150, y: y - 70, w: 1220, h: 60};
 }, seat: (ap, p, pel, Lp) => ({r: {x: DW * 0.45, y: DH * 0.45, w: DW * 0.1, h: DH * 0.06}, g: partBox(Lp, 'chip') ? partBox(Lp, 'chip').g : null, tr: 'jump'}),
 def: () => ({id: 'lib.finfet'}), kids: () => [{id: 'lib.finfet'}]});
@@ -697,7 +724,7 @@ bnode('lib.mux2', {draw: (L, ap) => {
   KT.wire(L, [[460, 170], [600, 170], [600, 430], [460, 430]]); KT.wire(L, [[600, 300], [760, 300]]); KT.jn(L, 600, 300); KT.netLab(L, 768, 306, 'OUT');
   ipart(L, ap, 'onefet', 378, 186, 44, 48, 'var(--c2)', '', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, tr: 'jump', fo: 0.1, label: 'One transistor'});
   const tb = KT.comp(L, 'mtable', {}, 'What the multiplexer does'); tb._info = {title: 'The multiplexer', lead: sc('lib.mux2').blurb, facts: sc('lib.mux2').facts};
-  KTT(tb, 840, 280, 'S │ OUT', 't-mono'); KTT(tb, 840, 304, '0 │  A', 't-mono'); KTT(tb, 840, 326, '1 │  B', 't-mono');
+  KTT(tb, 840, 280, 'S | OUT', 't-mono'); KTT(tb, 840, 304, '0 |  A', 't-mono'); KTT(tb, 840, 326, '1 |  B', 't-mono');
   tb._box = {x: 832, y: 260, w: 120, h: 80};
   KTT(L, -150, 640, 'a transmission gate passes both a 0 and a 1 fully: the NMOS passes zeros well, the PMOS ones', 't-sm');
 }, def: () => ({id: 'lib.finfet'}), kids: () => [{id: 'lib.finfet'}]});

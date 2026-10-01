@@ -40,6 +40,7 @@ const CKT = (ENV => {
   // the DRAM level's instance, which some of its parts' texts read (here, the memory levels' example address)
   const I5 = () => Object.assign({}, INST.dram(), {req: 0});
   const FR = {x: -172, y: -74, w: 1264, h: 774};   // every copied scale is drawn in this frame
+  let SUBLH = 21;   // the pitch of the lines under a part's title (build sets it)
   let BAP = null;   // the anchor points of the layer being built
   /* getBBox needs the layer rendered: a hidden layer is shown, invisible, while it is measured */
   function measured(L, fn) {
@@ -48,5 +49,6 @@ const CKT = (ENV => {
     try { fn(); } finally { if (d0 === 'none') { L.style.display = d0; L.style.visibility = v0; } }
   }
   /* the badges of a part: [['documented', 'structure'], ['generic', 'circuit'], ['unknown', 'the macro inside']] */
-  const badges = list => list.map(([k, t]) => `<span class="kd ${k === 'documented' ? 'spec' : k}">${esc(k === 'unknown' ? 'unknown · asked' : k === 'documented' ? 'spec' : k)}</span>${t ? ` <span class="cav">${esc(t)}</span>` : ''}`).join(' ');
+  // (the chip page's copy: a caveat that only repeats the badge's word, "spec spec", is left out; review of 1 Oct)
+  const badges = list => list.map(([k, t]) => { const w = k === 'unknown' ? 'unknown · asked' : k === 'documented' ? 'spec' : k; return `<span class="kd ${k === 'documented' ? 'spec' : k}">${esc(w)}</span>${t && t !== w ? ` <span class="cav">${esc(t)}</span>` : ''}`; }).join(' ');
 

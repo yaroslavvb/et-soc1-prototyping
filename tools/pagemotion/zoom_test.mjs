@@ -244,8 +244,9 @@ T.T7 = async b => {
     await sleep(60);
     const s = await r.state();
     ok(s.path.endsWith('die/' + p.kid) && !s.zooming, 'T7 reduced motion: a zoom is a cut', s.path);
-    const ro = await r.ev(`document.getElementById('scale-ro').textContent`);
-    ok(/Shire/.test(ro), 'T7 the readout is at the new scale', ro);
+    // (since 1 Oct the readout gives the size only; the current crumb names the scale)
+    const ro = await r.ev(`document.getElementById('scale-ro').textContent + ' | ' + ((document.querySelector('#crumbs [aria-current]') || {}).textContent || '')`);
+    ok(/3\.7 mm/.test(ro) && /Shire/.test(ro), 'T7 the readout and the current crumb are at the new scale', ro);
     ok(!r.errs.length, 'T7 no console errors', r.errs.slice(0, 3).join(' | '));
   } finally { await r.close(); }
 };

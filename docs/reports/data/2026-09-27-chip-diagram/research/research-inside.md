@@ -125,7 +125,7 @@ Read from `docs/reports/sources/chip-diagram.script.js` at 1980ebb: `buildChip` 
 
 ## 2. The tree
 
-130 nodes under two roots: `die` (the parts, as the page's three layers nest them, plus the chip-wide power, clock and wiring that no layer draws yet) and `lib` (the shared circuit components each part is made of, down to the silicon crystal). Facts: 395, labelled spec 206, generic 63, measured 59, derived 39, outside 12, unknown 10, inferred 6. Each node gives its size, a beginner's line or three, its facts with their labels and sources (a `[chip:...]` or `[ml:...]` tag names the fact in the pages' data, which carries the full source), what it is made of, and what the memory-levels page already draws for it. The machine-readable copy is `inside.json` beside this file.
+130 nodes under two roots: `die` (the parts, as the page's three layers nest them, plus the chip-wide power, clock and wiring that no layer draws yet) and `lib` (the shared circuit components each part is made of, down to the silicon crystal). Facts: 395, labelled spec 206, generic 63, measured 59, derived 34, outside 12, inferred 11, unknown 10. Each node gives its size, a beginner's line or three, its facts with their labels and sources (a `[chip:...]` or `[ml:...]` tag names the fact in the pages' data, which carries the full source), what it is made of, and what the memory-levels page already draws for it. The machine-readable copy is `inside.json` beside this file.
 
 ### The ET-SoC-1 die `die`
 **Size:** 2.57 cm (inferred: about 25.6-25.8 mm east-west by 22.1-22.2 mm north-south, scaled from Esperanto's die plot to 570 mm2 (chip.die-dims))  
@@ -194,7 +194,7 @@ A small switch. Packets arrive on its input ports, wait in short queues, and an 
 Short queues at each input where packets wait their turn. Each port has four slots (virtual channels), so one blocked packet does not stop the others.
 
 - Routers have 8 ports (H, E, S, W, N, I, J, K) with 4 VC slots each. *(spec [chip:L105]; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b rows 'Main-NoC layers', 'Router ports and VCs', 'Error protection' (etsoc_shire_other_esr.h:3877-3981; ... (full source in inside.json and the pages' data))*
-- If every slot holds one 512-bit flit, one router buffers 8 x 4 x 512 = 16,384 bits, about 147,000 bits over the nine layers of one stop. *(derived; arithmetic on L105; the flit width is an estimate (SYNTHESIS.md row "Flit width", unknown))*
+- If every slot holds one 512-bit flit, one router buffers 8 x 4 x 512 = 16,384 bits, about 147,000 bits over the nine layers of one stop. *(inferred; arithmetic on L105 with an estimated flit width (SYNTHESIS.md row "Flit width", unknown): inferred, the weakest of its inputs)*
 - Router input buffers are flip-flop or register-file arrays (textbook). *(generic [ml:l3:g.router]; textbook (Dally and Towles, Principles and Practices of Interconnection Networks))*
 
 **Made of (see):** `lib.flipflop`
@@ -566,7 +566,7 @@ Holds the program's instructions for all eight minions. Its tags sit with the mi
 - A neighbourhood is 8 minions sharing a 32 KB L1 instruction cache (128 sets × 4 ways × 64 B), two L0 micro-I-caches (each shared by 4 minions, 16 fully associative 512-bit entries) and a 12-counter PMU. *(spec [chip:neigh.composition]; external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.11-13 (§2.1.2); external/et-man/ET Minion Overview.pdf, pdf p.3 (slide 4))*
 - Contrast at the same level: the neighbourhood's instruction-cache data RAM (mbi) is 'saduls0g4l1p512x144m4b1...', the same 1PUHD macro family as the shire cache's data panels, which the spec calls 'SRAM memory panels'; the PRM calls the SADULS family SRAMs, and the neighbourhood document says its memory cells must sit in an HV region. Its bitcell is as unknown as the shire cache's. *(spec [ml:l1:l1.icache-sram]; external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf pdf p.51 Table 14 (icache_ram (mbi)), pdf p.48 §2.14.5; external/et-man/ET Programmer's Reference Manual.pdf ... (full source in inside.json and the pages' data))*
 - The memory cells of the I-cache data RAMs need an HV region while the neighbourhood is LV, so the data RAMs were moved into the Shire Channel; an L1 I-cache hit takes around ten cycles. *(spec; external/core-et/docs/Neighborhood-ICache-Description.pdf, pdf p.16 (§4.2-4.3))*
-- If each 512 x 144 macro holds 512 x 128 data bits (8 KB) plus ECC, the 32 KB cache is four macros, 16 per shire. *(derived; arithmetic on l1.icache-sram and neigh.composition (the 128 + 16 split is an assumption))*
+- If each 512 x 144 macro holds 512 x 128 data bits (8 KB) plus ECC, the 32 KB cache is four macros, 16 per shire. *(inferred; arithmetic on l1.icache-sram and neigh.composition; the 128 + 16 split is an assumption, so the result is inferred)*
 
 **Made of (see):** `lib.sram6t`
 
@@ -668,7 +668,7 @@ Fetches instructions from the shared instruction cache, keeps a small buffer per
 The 32 integer registers of each thread: 64 entries of 64 bits, built from latches, with two read ports and one write port.
 
 - intpipe_rf instantiates rf_latch_2r_1w with WIDTH = 64 (XREG_SIZE) and ENTRIES = 2 threads x 32: a latch register file, 2 read ports and 1 write port. *(spec, Erbium RTL; external/core-et/rtl/shire/minion/intpipe/intpipe_rf.v:43-50)*
-- 64 x 64 = 4,096 storage latches per minion; at about 10 transistors each, some 41,000 transistors before the read multiplexers. *(derived; arithmetic on intpipe_rf.v and the latch count of l1:g.latch-cell)*
+- 64 x 64 = 4,096 storage latches per minion; at about 10 transistors each, some 41,000 transistors before the read multiplexers. *(inferred; arithmetic on intpipe_rf.v and the latch count of l1:g.latch-cell; the 10 transistors per latch are assumed, so the total is inferred)*
 
 **Made of (see):** `lib.latch`, `lib.mux2`, `lib.icg`  
 **Reuse:** memory-levels scene `l1`, scale `lram/row/latch`, `buildL1Block`, `buildL1Row`, `drawReadTree`, `buildLatchCell`: the same latch register-file pattern as the L1 data array (per-row clock gates, latch rows, a read mux tree); a new instance with 64 rows and two read trees
@@ -1232,7 +1232,7 @@ Phase-locked loops that multiply the 24 and 100 MHz reference oscillators up to 
 
 Controllers that read the temperature sensors, process detectors and voltage monitors spread over the die.
 
-- 36 process detectors and 36 temperature sensors (one each per minion shire and the I/O shire) and 8 voltage-monitor blocks of up to 16 sense points (128 in all), read through five PVT controllers. *(spec; external/et-man/ET Programmer's Reference Manual.pdf, pdf p.17-18 (§1.6, Table 1-6))*
+- 36 process detectors and 36 temperature sensors (one each per minion shire and the I/O shire) and 8 voltage-monitor blocks of up to 16 sense points (128 in all), read through five PVT controllers. (The manual's own count does not add up: 34 minion shires and the I/O shire make 35, and it does not say where the 36th sensor sits.) *(spec; external/et-man/ET Programmer's Reference Manual.pdf, pdf p.17-18 (§1.6, Table 1-6: "36 sensors. 1 PD in each minion/IO-Shire"))*
 - 35 temperature sensors on the die (34 minion shires + the I/O shire, one per tile of the 6x6 grid except PCIe), 12-bit (0.061 C) in hardware; the host sees one 34-shire mean in whole degrees plus peak-hold extremes. *(spec [chip-research:temp-sensors]; docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html headline tiles; docs/findings/05-claims.md:331)*
 
 ##### Peripherals, root of trust, 4 MB cache `io.periph`
@@ -1606,7 +1606,7 @@ A wall of crystalline silicon about 6 nm thick and some 50 nm tall, standing up 
 
 The strip of fin under the gate, about 6 by 20 by 45 nm, where the current flows: a few hundred thousand silicon atoms.
 
-- 6 nm x 20 nm x 45 nm = 5,400 nm3 at 50 atoms per nm3 is about 270,000 silicon atoms. *(derived; arithmetic on the fin and gate estimates above and the atomic density below)*
+- 6 nm x 20 nm x 45 nm = 5,400 nm3 at 50 atoms per nm3 is about 270,000 silicon atoms. *(inferred; arithmetic on the fin and gate estimates above (inferred: the fin's 6 nm width and 45 nm height, the 20 nm gate length) and the atomic density below; a number built on inferred inputs is inferred)*
 
 **Inside:** `lib.si`
 
@@ -1617,7 +1617,7 @@ Silicon atoms in a diamond lattice: each bonded to four neighbours at the corner
 
 - Silicon lattice parameter a = 0.5431 nm. *(outside; NIST CODATA 2018: lattice parameter of silicon a = 543.1020511 pm (at 22.5 C in vacuum), https://physics.nist.gov/cgi-bin/cuu/Value?asil)*
 - Diamond cubic: 8 atoms per cubic cell gives 8 / 0.5431^3 nm3 = 50 atoms per nm3 (5.0 x 10^22 per cm3); nearest neighbours are sqrt(3)/4 x a = 0.235 nm apart. *(derived; arithmetic on the lattice parameter)*
-- Across a 6 nm fin whose sidewalls are (110) planes (the usual orientation on a (100) wafer, an assumption), the (220) planes are a / sqrt(8) = 0.192 nm apart: about 31 planes of atoms. *(derived; arithmetic on the lattice parameter)*
+- Across a 6 nm fin whose sidewalls are (110) planes (the usual orientation on a (100) wafer, an assumption), the (220) planes are a / sqrt(8) = 0.192 nm apart: about 31 planes of atoms. *(inferred; arithmetic on the lattice parameter, the inferred 6 nm fin and the assumed (110) sidewalls: inferred)*
 
 
 ## 3. What the memory-levels page can give each part, and how

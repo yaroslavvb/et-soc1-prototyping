@@ -137,11 +137,8 @@ L.append({
           f'one tick light goes {C * T_CLK * 100:.0f} cm.', S['si'] + '; the clock: ' + S['cb14'] + ':338', 'derived'),
     ],
     'light': light(die_w),
-    'image': {'file': 'card.webp', 'crop_px': [275, 161, 467, 356],
-              'credit': 'Esperanto Technologies, "PCIe Dev Card (V3)" (ET-PCIe-Dev-Card-V3.pdf, p. 2), '
-                        'published in github.com/aifoundry-org/et-man',
-              'licence': 'Apache License 2.0 (the et-man repository\'s LICENSE)',
-              'note': 'The same file as the card level: crop the lid in the page (SVG viewBox or CSS), no extra bytes.'},
+    # (no image: the level is drawn from Fig. 9-1; the card level's photo shows the lid)
+    'image': None,
     'draw': 'Drawn SVG from Fig. 9-1: top view (45.0 mm body, 44.8 mm lid), a cut-away side view (lid, TIM, die, '
             'bumps, substrate 1.6 mm, balls 0.50 mm, 3.95 mm total) and the bottom view\'s ball grid at its 0.80 mm '
             'pitch (depopulated as in the figure; the exact map is there). The die (25.6 x 22.2 mm) as a dashed '
@@ -164,13 +161,17 @@ L.append({
         F('6.6 x 4.4 in (167.6 x 111.8 mm); a PCIe x16 card edge carrying an x8 PCIe Gen 4 link; the chip soldered '
           'down, no socket.', S['card'] + ', pp. 1 and 3', 'spec'),
         F('On all four lab cards the link runs at 16 GT/s on 8 lanes: 15.75 GB/s each way after coding. Measured '
-          'host-to-card DMA: 12.5-12.6 GB/s; card to host 10.4-10.5 GB/s.', S['claims'] + ':550-552 (E50)', 'measured'),
+          'host-to-card DMA: 12.5-12.6 GB/s; card to host 10.4-10.5 GB/s.',
+          S['hosts'] + ' (the link speed and width of all four cards); ' + S['claims'] + ':550-552 (E50: the DMA rates, '
+          'on three cards)', 'measured'),
         F('Four LPDDR4X memory packages, 256 bits wide in all (16 channels of 16 bits), 32 GB: each package serves '
           'two of the chip\'s eight memory shires.', S['facts'] + ' (L47, dram.channels); ' + S['card'] + ', p. 1',
           'spec'),
-        F(f'Peak memory rate: 256 bits x 4,266 MT/s = {256 * 4266e6 / 8 / 1e9:.1f} GB/s. Tensor loads from memory '
-          'have been measured at 75 GB/s.', S['facts'] + ' (L47: 4,266 Mb/s per pin); ' + S['claims'] + ':155 (E15)',
-          'derived'),
+        F(f'Peak memory rate on these cards: 256 bits x 3,733 MT/s = {256 * 3733e6 / 8 / 1e9:.1f} GB/s, the firmware\'s '
+          f'933 MHz mode, which every lab card runs; the datasheet\'s 4,266 MT/s would give {256 * 4266e6 / 8 / 1e9:.1f} '
+          'GB/s. Tensor loads from memory have been measured at 75 GB/s.',
+          S['facts'] + ' (dram.rate-card: the firmware hard-codes 3,733 MT/s on every card; dram.peak-card; L47: the '
+          'datasheet\'s 4,266 Mb/s per pin); ' + S['claims'] + ':155 (E15)', 'derived'),
         F('Each memory package is about 15 mm square on the vendor photo, which shows SK hynix parts (a second photo '
           'in the same document shows Micron parts). Which maker\'s DRAM the lab cards carry is not recorded.',
           S['card'] + ', pp. 2, 8 and 10 (photos)', 'inferred'),
@@ -194,13 +195,15 @@ L.append({
           'the card bare.', S['hs'] + ', section 1 ("Not recorded")', 'note'),
         F(f'A signal in the board\'s copper travels at about half the speed of light (c/√εr, εr ≈ 4 for FR-4), so '
           f'crossing the card takes about {si_time(card_w / V_PCB)}: two-thirds of a 600 MHz clock tick.',
-          'physics: a buried trace\'s delay is √εr / c; εr = 4 is ASSUMED (typical FR-4 is 3.8-4.5)', 'derived'),
+          'physics: a buried trace\'s delay is √εr / c; εr = 4 is ASSUMED (typical FR-4 is 3.8-4.5), so the result is '
+          'inferred', 'inferred'),
     ],
     'light': light(card_w, pcb=True),
     'image': {'file': 'card.webp', 'px': [720, 479], 'bytes': 75178, 'px_per_mm': 4.296,
               'credit': 'Esperanto Technologies, "PCIe Dev Card (V3)" (ET-PCIe-Dev-Card-V3.pdf, p. 2), '
                         'published in github.com/aifoundry-org/et-man',
               'licence': 'Apache License 2.0 (the et-man repository\'s LICENSE)',
+              'licence_url': 'https://github.com/aifoundry-org/et-man/blob/main/LICENSE',
               'note': 'The vendor\'s photo of a dev card (SK hynix DRAM, no heatsink), not a lab card; transparent '
                       'background. The photo\'s lid measures 44.8 mm at this scale, which checks the 6.6 in width.',
               'hotspots_px': {'lid (the package)': [275, 161, 467, 356],
@@ -237,20 +240,23 @@ L.append({
         F('Each card\'s 8-lane PCIe 4.0 link goes straight to a root port on the CPU, which has 20 PCIe 4.0 lanes.',
           S['hosts'] + ' (root_port 00:01.x, the CPU\'s own PCIe ports on this platform: inferred); Intel, Core '
           'i7-11700K specifications (intel.com)', 'measured, inferred, spec'),
-        F('The host CPUs are made in Intel\'s 14 nm process; the i7-11700K is rated at 125 W base power (the i5-11600 '
-          'at 65 W). The whole ET card, at most 88 W, draws less than the bigger CPU\'s rating.',
-          'Intel, Core i7-11700K and Core i5-11600 specifications (intel.com); ' + S['card'] + ', p. 5', 'spec'),
+        F('The host CPUs are made in Intel\'s 14 nm process; the i7-11700K is rated at 125 W base power and may draw '
+          'up to 251 W in turbo (its PL2), the i5-11600 at 65 W base. The whole ET card, at most 88 W, draws less than '
+          'the bigger CPU\'s base power, and about a third of its turbo peak.',
+          'Intel, Core i7-11700K and Core i5-11600 specifications (intel.com: 125 W and 65 W base power); the '
+          'i7-11700K\'s 251 W maximum turbo power (PL2) as listed by cpu-monkey.com and techreviewer.com; '
+          + S['card'] + ', p. 5', 'spec'),
         F('The host copies memory at 17.4 / 9.2 / 21.4 GB/s (aifoundry2 / 3 / 1); a program\'s staged copy to the '
           'card is limited by both that and the link: 5.2-7.8 GB/s.', S['claims'] + ':553 (E50)', 'measured'),
         F('The owner\'s photo shows open-air frames with tower coolers and EVGA and MSI power supplies; several '
           'boards carry Gigabyte AORUS logos.', 'the owner\'s rack photo (30 Sep 2026)', 'inferred'),
+        F('A standard ATX power supply is 150 mm wide, 86 mm high and 140 mm deep.',
+          'Intel, ATX12V Power Supply Design Guide (version 2.x), physical dimensions of the standard ATX12V supply',
+          'outside source'),
     ],
     'light': light(host_w),
-    'image': {'file': 'rack.webp', 'crop_px': [180, 185, 490, 495],
-              'credit': 'Photo: the page\'s author, the lab\'s rack (2026); machine labels blurred',
-              'licence': 'the author\'s own photo, used on his page at his request; no open licence stated',
-              'note': 'A crop of the rack photo (one machine, with the MSI supply); which machines are the lab\'s is '
-                      'not recorded, so the crop is labelled "one of the rack\'s machines".'},
+    # (no image: the level is a drawing of an ATX board; the rack level's photo shows the machines)
+    'image': None,
     'draw': 'Drawn SVG, top view, to scale: an ATX board 305 x 244 mm (ATX spec; aifoundry2\'s board is exactly '
             'this) with the CPU socket and a tower cooler, four DIMM slots, the PCIe slots, and the ET card '
             '(167.6 x 111.8 mm) standing in a slot, drawn edge-on with a side elevation inset; an ATX power supply '
@@ -299,19 +305,12 @@ room_w = 20.0
 L.append({
     'id': 'studio45', 'name': 'Studio 45', 'parent': 'sf', 'optional': False,
     'size_m': room_w, 'frame_m': 25.0, 'size_kind': 'assumed',
-    'size_note': 'The room\'s size is not recorded; 20 m is an order-of-magnitude frame. Public listings give an '
-                 'event space for 50-200 people.',
-    'blurb': 'The rack stands in Studio 45, a San Francisco workspace for people who build hardware. Light crosses a '
+    'size_note': 'The room\'s size is not recorded; 20 m is an order-of-magnitude frame.',
+    'blurb': 'The rack stands in Studio 45, the room in San Francisco where the lab\'s machines are. Light crosses a '
              f'room like this in about {si_time(room_w / C, 2)}, some {room_w / C / T_CLK:.0f} of the chip\'s clock '
              'ticks.',
     'facts': [
-        F('The owner calls the lab\'s room Studio 45.', 'the owner (30 Sep 2026)', 'owner'),
-        F('Public listings describe Studio 45 as a San Francisco co-working space "for people who make real things for '
-          'a living", with a fabrication shop, opened in December 2021.',
-          'SF Station, "Studio 45 Launch" event listing (December 2021); the CoworkingCafe listing of Studio 45. Cited '
-          'by name only, without links: both listings show the street address', 'outside source'),
-        F('It hosts the SF Hardware Meetup\'s monthly demo nights.',
-          'Luma event page "136th SF Hardware Meetup @ Studio 45 | Demo Night" (cited by title only: event pages show the address)', 'outside source'),
+        F('The owner calls the lab\'s room, in San Francisco, Studio 45.', 'the owner (30 Sep 2026)', 'owner'),
         F('No public page ties AI Foundry\'s lab to Studio 45; the page gives only the name and the city, never an '
           'address or a position on the map.', 'AGENT.md §10; the owner\'s instruction for this level', 'note'),
     ],
@@ -415,8 +414,7 @@ L.append({
         F('The lower 48 states: 4,509 km on the longest great circle inside them, 2,660 km north to south, '
           '8.08 million km².', 'Wikipedia, "Contiguous United States"', 'outside source'),
         F(f'San Francisco to New York: {sfnyc / 1e3:,.0f} km on a great circle, {si_time(sfnyc / C)} for light in vacuum, '
-          f'{si_time(sfnyc / V_FIBRE)} in fibre. Real cables are longer and routers add delay, so a real round trip '
-          'takes several times the straight-line figure.',
+          f'{si_time(sfnyc / V_FIBRE)} in fibre. Real cables are longer than the great circle, and routers add delay.',
           'derived from the two city centres (37.7749 N 122.4194 W; 40.7128 N 74.0060 W) on a 6,371 km sphere; '
           + S['corning'], 'derived'),
     ],
@@ -478,20 +476,20 @@ L.append({
 })
 
 # ------------------------------------------------------------------ 12. the Solar System
-nep = 4514.953e9
+nep = 30.06896348 * AU   # NSSDCA Neptune fact sheet, orbital parameters: semimajor axis (AU)
 voy = 86400 * C
 L.append({
     'id': 'solar', 'name': 'The Solar System', 'parent': 'stars', 'optional': False,
     'size_m': 2 * nep, 'frame_m': 1.1e13, 'size_kind': 'outside source',
-    'size_note': f'Neptune\'s orbit: semimajor axis 4,514.953 million km ({nep / AU:.1f} au), so about '
+    'size_note': f'Neptune\'s orbit: semimajor axis {nep / AU:.2f} au ({nep / 1e9:,.0f} million km), so about '
                  f'{2 * nep / 1e12:.1f} x 10^12 m across.',
     'blurb': f'Sunlight takes {si_time(AU / C, 2)} to reach Earth and about {si_time(nep / C, 2)} to reach Neptune. In '
              'November 2026 Voyager 1, the farthest spacecraft, will be a full light-day away.',
     'facts': [
         F(f'Earth orbits at 1 au, {si_time(AU / C)} from the Sun at the speed of light.', S['iau_au'] + '; ' + S['si'],
           'derived'),
-        F(f'Neptune\'s semimajor axis: 4,514.953 million km ({nep / AU:.1f} au); sunlight reaches it in '
-          f'{si_time(nep / C)}.', S['nasa_nep'], 'outside source'),
+        F(f'Neptune\'s semimajor axis: {nep / AU:.2f} au ({nep / 1e9:,.0f} million km); sunlight reaches it in '
+          f'{si_time(nep / C)}.', S['nasa_nep'] + ' (orbital parameters: semimajor axis 30.06896348 AU)', 'outside source'),
         F(f'Voyager 1 reaches one light-day from Earth (25.9 billion km, {voy / AU:.0f} au) on 18 November 2026: a '
           'command sent then takes a day to arrive and the answer another day.',
           'NASA, "Where are Voyager 1 and Voyager 2 now?" (science.nasa.gov/mission/voyager/'
@@ -500,8 +498,8 @@ L.append({
     'light': light(2 * nep),
     'image': None,
     'draw': 'Drawn SVG: the Sun and the eight planets\' orbits as circles to scale (semimajor axes from NASA\'s '
-            'fact sheets: Mercury 0.387, Venus 0.723, Earth 1, Mars 1.524, Jupiter 5.20, Saturn 9.57, Uranus 19.17, '
-            'Neptune 30.18 au by those sheets\' 10^6 km values), planets as labelled dots (not to scale: say so), '
+            'fact sheets: Mercury 0.387, Venus 0.723, Earth 1, Mars 1.524, Jupiter 5.20, Saturn 9.57, Uranus 19.17 au '
+            'by those sheets\' 10^6 km values, Neptune 30.07 au by its sheet\'s semimajor axis in au), planets as labelled dots (not to scale: say so), '
             'an arrow off the frame "Voyager 1: 173 au, one light-day". Scale bar 5 au.',
     'child': {'id': 'moon', 'note': 'Earth\'s position on its 1 au orbit (for the zoom, the angle is arbitrary)'},
 })
@@ -533,7 +531,7 @@ mw_frame = 135_400 * LY
 L.append({
     'id': 'milkyway', 'name': 'The Milky Way', 'parent': 'localgroup', 'optional': False,
     'size_m': mw, 'frame_m': mw_frame, 'size_kind': 'outside source',
-    'size_note': 'About 100,000 light-years across (NASA). The picture\'s square spans about 135,000 light-years.',
+    'size_note': 'About 100,000 light-years across (NASA).',
     'blurb': 'Our galaxy: at least 100 billion stars in a disc about 100,000 light-years across. The ET-SoC-1 has '
              'about a quarter as many transistors as the galaxy has stars.',
     'facts': [
@@ -544,6 +542,9 @@ L.append({
           'NASA/JPL-Caltech/R. Hurt (SSC/Caltech), ssc2008-10b caption; ESO eso1339e (annotated)', 'outside source'),
         F('More than 24 billion transistors on the chip against at least 100 billion stars: about one transistor for '
           'every four stars.', S['facts'] + ' (chip.process); NASA (above)', 'derived'),
+        F('The picture\'s square spans about 135,000 light-years: the page\'s builder measured it against ESO\'s '
+          'annotated copy of the same artwork (eso1339e), whose distance rings are 9.45 px per 1,000 light-years.',
+          'the builder\'s own measurement (outside.json, image geometry); ESO eso1339e', 'inferred'),
     ],
     'light': light(mw),
     'image': {'file': 'milkyway.webp', 'px': [480, 480], 'bytes': os.path.getsize(
@@ -572,8 +573,11 @@ L.append({
     'id': 'localgroup', 'name': 'The Local Group (Andromeda)', 'parent': 'laniakea', 'optional': False,
     'size_m': lg, 'frame_m': 1.1e7 * LY, 'size_kind': 'outside source',
     'size_note': 'Its galaxies are spread over a diameter of nearly 10 million light-years (NASA).',
-    'blurb': 'The Milky Way\'s neighbourhood: more than 30 galaxies, led by the Milky Way and Andromeda. The light we '
-             'see from Andromeda left it 2.5 million years ago.',
+    'blurb': 'The Milky Way\'s neighbourhood: dozens of galaxies (more than 130 are now known, most of them faint '
+             'dwarfs), led by the Milky Way and Andromeda. The light we see from Andromeda left it 2.5 million years '
+             'ago. There is no "Andromeda cluster": Andromeda is a galaxy, and it and the Milky Way lead this small '
+             'group. True clusters, such as Virgo with over a thousand galaxies, are larger, and lie further out '
+             'inside Laniakea.',
     'facts': [
         F('More than 30 galaxies spread over a diameter of nearly 10 million light-years.',
           'NASA, Imagine the Universe!, "The Local Group of Galaxies" (imagine.gsfc.nasa.gov/features/cosmic/'
@@ -587,6 +591,16 @@ L.append({
         F('A collision with Andromeda, long predicted for about 4.5 billion years from now, now looks about a coin '
           'flip within 10 billion years, and under 2% within 5 billion.',
           'T. Sawala et al., Nature Astronomy (2025), "No certainty of a Milky Way-Andromeda collision"',
+          'outside source'),
+        F('More than 130 members are now known within a megaparsec of the group\'s centre (134 in one count), most of '
+          'them faint dwarf galaxies; counted that way the group is about 5.1 Mpc (17 million light-years) across.',
+          'Wikipedia, "Local Group" (read 1 Oct 2026): "a current total of 134 members is known within 1 megaparsec", '
+          '"most of which are dwarf galaxies", "a total diameter of 5.11 megaparsecs (17 million light-years)"',
+          'outside source'),
+        F('A galaxy cluster is far larger than a group: the nearest big one, the Virgo Cluster, about 54 million '
+          'light-years away, has about 1,300 (possibly up to 2,000) galaxies. The Local Group belongs to the Virgo '
+          'Supercluster, which is part of Laniakea.',
+          'Wikipedia, "Virgo Cluster" and "Local Group" (read 1 Oct 2026); Tully et al. 2014 (Laniakea, below)',
           'outside source'),
     ],
     'light': light(m31),
@@ -661,7 +675,7 @@ L.append({
                  f'billion ly radius, from Planck 2018\'s parameters (H0 {H0}, Ωm {Om}, ΩΛ {OL}, radiation from '
                  f'T = 2.7255 K, Neff 3.046).',
     'blurb': 'Everything whose light has had time to reach us since the Big Bang, 13.8 billion years ago: a sphere '
-             'about 93 billion light-years across, larger than 13.8 billion because space has stretched while the '
+             'about 92 billion light-years across, larger than 13.8 billion because space has stretched while the '
              'light travelled.',
     'facts': [
         F(f'Age {age:.2f} billion years by these parameters (Planck 2018: 13.787 ± 0.020).',
@@ -684,7 +698,7 @@ L.append({
                       'map.gsfc.nasa.gov/media/121238/)',
         'note': 'A map of the whole sky (Mollweide projection): the inside of the sphere, not a view from outside. '
                 'Transparent outside the ellipse.'},
-    'draw': 'Drawn SVG: a circle 93 billion ly across with "you are here" at the centre, a thin shell at the edge '
+    'draw': 'Drawn SVG: a circle 92 billion ly across with "you are here" at the centre, a thin shell at the edge '
             'labelled "the cosmic microwave background (380,000 years after the Big Bang)", and the WMAP map as an '
             'inset labelled "the whole sky as we see it". Scale bar 10 billion ly (comoving).',
     'child': {'id': 'laniakea', 'note': 'a dot at the centre (Laniakea is ~1/180 of the diameter)'},
@@ -696,7 +710,8 @@ L.append({
     'size_m': None, 'frame_m': 3 * univ, 'size_kind': 'unknown',
     'size_note': 'Unknown. The frame is only a picture size.',
     'blurb': 'Space almost certainly goes on past the edge of what we can see, but how far is unknown. Some theories '
-             'go further and propose many universes, a multiverse: a hypothesis, not an observation.',
+             'go further and propose many universes, a multiverse: a hypothesis, not an observation. (This level is the page\'s '
+             'reading of the owner\'s "meta universe".)',
     'facts': [
         F('Measured space is flat to within a fraction of a percent (Ω_K = 0.001 ± 0.002), which suggests the '
           'universe extends well past the observable part.', 'Planck 2018 results VI (abstract), A&A 641, A6 (2020)',

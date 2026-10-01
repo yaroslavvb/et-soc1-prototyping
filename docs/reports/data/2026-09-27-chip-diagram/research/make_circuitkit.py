@@ -113,6 +113,28 @@ def keep_entries(text, name, keep):
     return head + '= {\n' + '\n'.join('\n'.join(ls) for k, ls in ents if k in want) + '\n};' + tail
 
 
+# the chip page's changes to the copies (each must match once; the review of 1 Oct 2026): the lines under a part's
+# title, and a scene's notes, are set at 1.2 times the small type's size where the page sets it larger (SUBLH, set by
+# build() in circuitkit.tail.js), never closer than the memory levels' own pitch; a part may give its own (o.lh)
+PATCHES = [
+    ("  (o.sub || []).forEach((s, i) => { const L0 = typeof s === 'string' ? {t: s} : s; T(g, o.center ? x + w / 2 : x + 12, y + ty + 23 + i * 21, L0.t, L0.c || 't-sm', o.center ? 'middle' : 'start', L0.f); });",
+     "  // (the chip page's copy: o.lh, a line pitch for the lines under the title, else 1.2 times the small type's size\n"
+     "  // where the page sets it, never under the memory levels' 21; review of 1 Oct)\n"
+     "  const lh = o.lh || Math.max(21, SUBLH);\n"
+     "  (o.sub || []).forEach((s, i) => { const L0 = typeof s === 'string' ? {t: s} : s; T(g, o.center ? x + w / 2 : x + 12, y + ty + 23 + i * lh, L0.t, L0.c || 't-sm', o.center ? 'middle' : 'start', L0.f); });"),
+    ("  (o.note || []).forEach((t, i) => T(L, -150, 664 + i * 22, t, 't-sm', 'start', o.noteF));",
+     "  (o.note || []).forEach((t, i) => T(L, -150, 664 + i * Math.max(22, SUBLH), t, 't-sm', 'start', o.noteF));"),
+]
+
+
+def patched(text):
+    for a, b in PATCHES:
+        if text.count(a) != 1:
+            raise SystemExit('a patch to the copies no longer matches once: ' + a[:80])
+        text = text.replace(a, b)
+    return text
+
+
 HEAD = open(os.path.join(HERE, 'circuitkit.head.js')).read()
 TAIL = open(os.path.join(HERE, 'circuitkit.tail.js')).read()
 body = '\n\n'.join([
@@ -122,5 +144,6 @@ body = '\n\n'.join([
     '/* ---- the chains\' scenes ---- */\n' + take(CHAINS),
     '/* ---- the parts\' texts (each part\'s panel) ---- */\n' + take([p for p in PARTS if p != 'L3P']) + '\n' + keep_entries(take(['L3P']), 'L3P', L3KEEP),
 ])
+body = patched(body)
 open(OUT, 'w').write(HEAD + body + '\n' + TAIL)
 print('wrote', OUT, len(HEAD + body + TAIL), 'bytes from', REV)

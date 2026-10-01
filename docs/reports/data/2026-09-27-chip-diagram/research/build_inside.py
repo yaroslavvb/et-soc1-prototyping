@@ -158,8 +158,9 @@ N('shire.meshstop.router.buf', 'shire.meshstop.router', 'Input buffers (virtual 
   '''Short queues at each input where packets wait their turn. Each port has four slots (virtual channels), so one
   blocked packet does not stop the others.''',
   [cf('L105', 'Routers have 8 ports (H, E, S, W, N, I, J, K) with 4 VC slots each.'),
-   D('If every slot holds one 512-bit flit, one router buffers 8 x 4 x 512 = 16,384 bits, about 147,000 bits over the nine '
-     'layers of one stop.', 'arithmetic on L105; the flit width is an estimate (SYNTHESIS.md row "Flit width", unknown)'),
+   I('If every slot holds one 512-bit flit, one router buffers 8 x 4 x 512 = 16,384 bits, about 147,000 bits over the nine '
+     'layers of one stop.', 'arithmetic on L105 with an estimated flit width (SYNTHESIS.md row "Flit width", unknown): '
+     'inferred, the weakest of its inputs'),
    mf('l3:g.router', 'Router input buffers are flip-flop or register-file arrays (textbook).')],
   see=['lib.flipflop'])
 
@@ -393,8 +394,8 @@ N('shire.neigh.icache', 'shire.neigh', 'Instruction cache (32 KB)', 1.2e-4, 'inf
   [cf('neigh.composition'), mf('l1:l1.icache-sram'),
    S('The memory cells of the I-cache data RAMs need an HV region while the neighbourhood is LV, so the data RAMs were '
      'moved into the Shire Channel; an L1 I-cache hit takes around ten cycles.', ICDESC + ', pdf p.16 (§4.2-4.3)'),
-   D('If each 512 x 144 macro holds 512 x 128 data bits (8 KB) plus ECC, the 32 KB cache is four macros, 16 per shire.',
-     'arithmetic on l1.icache-sram and neigh.composition (the 128 + 16 split is an assumption)')],
+   I('If each 512 x 144 macro holds 512 x 128 data bits (8 KB) plus ECC, the 32 KB cache is four macros, 16 per shire.',
+     'arithmetic on l1.icache-sram and neigh.composition; the 128 + 16 split is an assumption, so the result is inferred')],
   see=['lib.sram6t'])
 
 N('shire.neigh.l0', 'shire.neigh', 'L0 micro instruction caches (two)', 8e-5, 'inferred',
@@ -490,8 +491,9 @@ N('core.irf', 'core', 'Integer register file', 4e-5, 'inferred',
   write port.''',
   [S('intpipe_rf instantiates rf_latch_2r_1w with WIDTH = 64 (XREG_SIZE) and ENTRIES = 2 threads x 32: a latch register '
      'file, 2 read ports and 1 write port. ' + ERBIUM, RTL + 'shire/minion/intpipe/intpipe_rf.v:43-50'),
-   D('64 x 64 = 4,096 storage latches per minion; at about 10 transistors each, some 41,000 transistors before the read '
-     'multiplexers.', 'arithmetic on intpipe_rf.v and the latch count of l1:g.latch-cell')],
+   I('64 x 64 = 4,096 storage latches per minion; at about 10 transistors each, some 41,000 transistors before the read '
+     'multiplexers.', 'arithmetic on intpipe_rf.v and the latch count of l1:g.latch-cell; the 10 transistors per latch '
+     'are assumed, so the total is inferred')],
   see=['lib.latch', 'lib.mux2', 'lib.icg'],
   reuse=R('l1', 'lram/row/latch', ['buildL1Block', 'buildL1Row', 'drawReadTree', 'buildLatchCell'], 'the same latch register-file pattern as the L1 data array (per-row clock gates, latch rows, a read mux tree); a new instance with 64 rows and two read trees'))
 
@@ -835,7 +837,9 @@ N('io.pll', 'io', 'Clock generators (PLL0-PLL4)', 1e-4, 'inferred', 'a PLL is on
 N('io.pvt', 'io', 'PVT controllers (five)', 1e-4, 'inferred', 'order of magnitude',
   '''Controllers that read the temperature sensors, process detectors and voltage monitors spread over the die.''',
   [S('36 process detectors and 36 temperature sensors (one each per minion shire and the I/O shire) and 8 voltage-monitor '
-     'blocks of up to 16 sense points (128 in all), read through five PVT controllers.', PRM + ', pdf p.17-18 (§1.6, Table 1-6)'),
+     'blocks of up to 16 sense points (128 in all), read through five PVT controllers. (The manual\'s own count does '
+     'not add up: 34 minion shires and the I/O shire make 35, and it does not say where the 36th sensor sits.)',
+     PRM + ', pdf p.17-18 (§1.6, Table 1-6: "36 sensors. 1 PD in each minion/IO-Shire")'),
    cr('temp-sensors')])
 
 N('io.periph', 'io', 'Peripherals, root of trust, 4 MB cache', 1e-3, 'inferred', 'order of magnitude',
@@ -1069,8 +1073,9 @@ N('lib.fin', 'lib.finfet', 'The fin (cross-section)', 5e-8, 'inferred',
 N('lib.channel', 'lib.fin', 'Channel (the silicon under the gate)', 6e-9, 'inferred', 'the fin\'s width, about 6 nm (inference)',
   '''The strip of fin under the gate, about 6 by 20 by 45 nm, where the current flows: a few hundred thousand silicon
   atoms.''',
-  [D('6 nm x 20 nm x 45 nm = 5,400 nm3 at 50 atoms per nm3 is about 270,000 silicon atoms.',
-     'arithmetic on the fin and gate estimates above and the atomic density below')], kind='material')
+  [I('6 nm x 20 nm x 45 nm = 5,400 nm3 at 50 atoms per nm3 is about 270,000 silicon atoms.',
+     'arithmetic on the fin and gate estimates above (inferred: the fin\'s 6 nm width and 45 nm height, the 20 nm '
+     'gate length) and the atomic density below; a number built on inferred inputs is inferred')], kind='material')
 
 N('lib.si', 'lib.channel', 'Silicon crystal', 5.43e-10, 'outside', 'one cubic unit cell: 0.543 nm (NIST CODATA)',
   '''Silicon atoms in a diamond lattice: each bonded to four neighbours at the corners of a tetrahedron. A 6 nm fin is
@@ -1078,8 +1083,9 @@ N('lib.si', 'lib.channel', 'Silicon crystal', 5.43e-10, 'outside', 'one cubic un
   [O('Silicon lattice parameter a = 0.5431 nm.', CODATA),
    D('Diamond cubic: 8 atoms per cubic cell gives 8 / 0.5431^3 nm3 = 50 atoms per nm3 (5.0 x 10^22 per cm3); nearest '
      'neighbours are sqrt(3)/4 x a = 0.235 nm apart.', 'arithmetic on the lattice parameter'),
-   D('Across a 6 nm fin whose sidewalls are (110) planes (the usual orientation on a (100) wafer, an assumption), the '
-     '(220) planes are a / sqrt(8) = 0.192 nm apart: about 31 planes of atoms.', 'arithmetic on the lattice parameter')],
+   I('Across a 6 nm fin whose sidewalls are (110) planes (the usual orientation on a (100) wafer, an assumption), the '
+     '(220) planes are a / sqrt(8) = 0.192 nm apart: about 31 planes of atoms.', 'arithmetic on the lattice parameter, '
+     'the inferred 6 nm fin and the assumed (110) sidewalls: inferred')],
   kind='material')
 
 # =====================================================================================================================
@@ -1112,7 +1118,7 @@ def depth(i):
 
 doc = {
     'meta': {
-        'built': '2026-09-30', 'by': 'build_inside.py', 'worktree': WT + ' (branch chipzoom)',
+        'built': '2026-09-30', 'by': 'build_inside.py', 'worktree': 'the repository this file is in',
         'what': 'What is inside every part the chip diagram lets a reader select, as a tree down to circuit components, the FinFET, its fin and the silicon crystal.',
         'roots': roots, 'n_nodes': len(ORDER), 'n_facts': sum(counts.values()), 'fact_labels': counts,
         'labels': {

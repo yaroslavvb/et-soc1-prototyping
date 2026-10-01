@@ -1008,10 +1008,15 @@ for i, f in DZ['facts'].items():
     facts[i] = f
 # the page reads a fact's statement, kind, source, note, page link, cards and caveat: the other fields (kept in the
 # research files) stay out of the page's data, as do empty ones (30 Sep: the page carries 700-odd facts now)
+# (the chip's own facts also keep topic, value and unit: the memory levels' build_facts.py copies them for the facts it
+# imports, chip:mesh.grid, L40 and the others; review of 1 Oct 2026. Build order: this file reads the memory levels'
+# facts.json and that page's build reads this one; both are fixed points, see MIRROR.md)
 KEEP = ('statement', 'kind', 'source', 'note', 'url', 'page', 'cards', 'cards_txt', 'card', 'caveat')
+KEEP_CHIP = KEEP + ('topic', 'value', 'unit')
 for i, f in list(facts.items()):
-    g = {k: f[k] for k in KEEP if f.get(k) not in (None, [], '')}
-    if f.get('set') in ('deep zoom', 'memory-levels'):
+    dz = f.get('set') in ('deep zoom', 'memory-levels')
+    g = {k: f[k] for k in (KEEP if dz else KEEP_CHIP) if f.get(k) not in (None, [], '')}
+    if dz:
         g['dz'] = 1
     facts[i] = g
 kinds = {}
