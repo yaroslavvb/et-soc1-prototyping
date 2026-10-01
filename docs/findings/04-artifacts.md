@@ -720,7 +720,7 @@ in the session's work directory, `~/claude/work/chipzoom/`) was written and revi
 - **The levels** (`sources/chip-diagram.outside.js`, `sources/circuitkit.js`, `sources/chip-diagram.inside.js`; the
   data in `data/2026-09-27-chip-diagram/research/`: `inside.json`, `outside.json`, `outside-geo.json`, their builders
   and write-ups, `deepzoom.py`, `make_circuitkit.py`, `make_rack_photo.py`): 18 levels above the die (maps from the US
-  Census and Natural Earth, NASA's images, the vendor's card photo, the owner's rack photo with nine machine labels
+  Census and Natural Earth, NASA's images, the vendor's card photo, the owner's rack photo with ten machine labels
   blurred, Studio 45 named but not placed), and below it the memory levels' drawings (copied by `make_circuitkit.py`,
   the memory-levels page untouched), logical drawings of the blocks built from the tree's data, and a hand-drawn compute
   path from a lane's fused multiply-add to the silicon crystal. Every number a drawing prints is checked against its
@@ -729,6 +729,10 @@ in the session's work directory, `~/claude/work/chipzoom/`) was written and revi
   MIRROR.md's row says so. Not deployed from the branch.
 - **Tests** (`tools/pagemotion/zoom_test.mjs`, T1-T7, T9, T11; `zoom_static.py`, T9 and T10) and motion
   (`drive.mjs`): in the commit messages.
+- **Final check (1 October)**: rebuilt from sources byte for byte; a scripted tour with real input on a desktop and a
+  phone (three part types and the mesh double-clicked, two dives to a transistor, Up pressed 29 times to the top and
+  back down, the four edge arrows of shire 20) passed 131 of 131 checks each. It fixed block boxes that ended on a
+  colon ("lanes:"), two image credits that ran past the drawing's edge, and a legible port label in the rack photo.
 
 ## Cross-links between the reports
 

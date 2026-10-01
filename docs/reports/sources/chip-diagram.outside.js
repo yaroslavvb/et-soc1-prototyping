@@ -75,7 +75,8 @@ function sbar(L, x, y, len, label, fids) {
   T(g, x + len + 10, y + 2, label, 'o-s ohalo', 'start', fids);
   return g;
 }
-/* an image's credit under it (on a phone, where the drawing is narrow, only in the panel's "You are here") */
+/* an image's credit under it (on a phone, where the drawing is narrow, only in the panel's "You are here"); one line of at
+   most about 130 characters, or it runs past the drawing's right edge (final check, 1 Oct: the card's and Earth's did) */
 const ocredit = (L, t, y) => (PH ? null : T(L, 140, Math.min(y || 698, 698), t, 'o-cr'));
 /* a part of an outside level: its panel's title, lead and facts (g._info) and, if it leads to a scale, that scale */
 function opart(parent, key, label, info, kid) {
@@ -353,7 +354,7 @@ onode('earth', {kid: 'us', img: ['earth.webp'], build: (L, ap) => {
   oimg(gp, 'earth.webp', ix, iy, iw, iw, {clip: 'url(#ofdisc)'});
   E('rect', {class: 'shape hotr', x: ix, y: iy, width: iw, height: iw, rx: iw / 2}, gp); E('rect', {class: 'ring', x: ix - 5, y: iy - 5, width: iw + 10, height: iw + 10, rx: iw / 2 + 5}, gp);
   if (!PH) T(gp, ix + iw / 2, iy - 12, 'the Blue Marble (NASA, a composite)', 'o-cr', 'middle');
-  ocredit(L, 'Land: Natural Earth 1:110m (public domain), orthographic at 38 N 100 W. Image: NASA Goddard, The Blue Marble, a composite of MODIS satellite images (public domain).', 712);
+  ocredit(L, 'Land: Natural Earth 1:110m, orthographic at 38 N 100 W. Image: NASA Goddard, The Blue Marble, a composite. Both public domain.', 712);
   sbar(L, 140, PH ? 680 : 664, 2000 * k, '2,000 km');
 }});
 /* ---- the maps: the US, California, the Bay Area, San Francisco (US Census outlines, public domain) ---- */
@@ -566,7 +567,7 @@ onode('card', {kid: 'package', img: ['card.webp'], build: (L, ap) => {
   T2(L, 140, CARDPH.y + CARDPH.h + 30, PH ? ['Its parts: the lid, the four memory packages,', 'the core regulator and its inductors, the SRAM', 'regulator, the boot switches, the card edge.']
     : ['Click a part: the lid, the four memory packages, the core regulator and its four inductors,', 'the SRAM regulator, the boot switches, the card edge.'], 'o-s', 'start', null, 1.15);
   sbar(L, 140, 650, 50 * 4.296 * CPX, '5 cm');
-  ocredit(L, 'Photo: Esperanto Technologies, PCIe Dev Card (V3), in github.com/aifoundry-org/et-man (Apache-2.0, its LICENSE file): the vendor’s card, not a lab card', 690);
+  ocredit(L, 'Photo: Esperanto Technologies, PCIe Dev Card (V3), github.com/aifoundry-org/et-man (Apache-2.0): the vendor’s card, not a lab card', 690);
 }});
 /* ---- the package: Fig. 9-1 of the datasheet, drawn ---- */
 const PKK = 7.6;   // units per mm

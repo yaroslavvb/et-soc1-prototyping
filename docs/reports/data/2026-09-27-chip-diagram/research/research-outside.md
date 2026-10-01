@@ -9,7 +9,7 @@ facts with their source and kind, image, drawing plan, where the next level in s
 ## Files (written in the session's work directory, ~/claude/work/chipzoom/; since the build of 30 September the
 scripts and the JSON are in this directory, the images in `docs/reports/chip-diagram-img/` under short names: rack.webp,
 card.webp, earth.webp, milkyway.webp, andromeda.webp, cmb.webp; the rack photo's redaction has nine labels since the
-design's review, see make_rack_photo.py)
+design's review and ten since the final check of 1 October, see make_rack_photo.py)
 
 | File | What |
 |---|---|

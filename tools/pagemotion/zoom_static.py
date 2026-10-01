@@ -6,7 +6,7 @@ failures.
       16 KB; the page's 1.5 MB is the budget that matters, data and script share it), its embedded data at most 750 KB, the images at most
       300 KB in all, each WebP at most 1000 px wide
   T10 no IPv4-like string in the page or the image manifest; no street address or listing link for Studio 45; the
-      rack photo's sha256 equals the manifest's (from make_rack_photo.py, nine labels blurred); no EXIF, XMP or ICC
+      rack photo's sha256 equals the manifest's (from make_rack_photo.py, ten labels blurred); no EXIF, XMP or ICC
       in any image; the San Francisco map marks no point but the usual city centre"""
 import hashlib
 import json
@@ -56,7 +56,7 @@ addr = [x for x in s45 if re.search(r'\b\d{2,5}\s+[A-Z][a-z]+\s+(St|Street|Ave|A
 ok(not addr, 'T10 no street address beside Studio 45', addr[0][:120] if addr else '')
 links = re.findall(r'https?://[^\s"\'<>)]*(?:sfstation|coworkingcafe|lu\.ma|luma)[^\s"\'<>)]*', html, re.I)
 ok(not links, 'T10 no link to a listing that shows the address', ' '.join(links[:3]))
-# the rack photo is the nine-label copy
+# the rack photo is the ten-label copy (since 1 Oct)
 man = D.get('img', {})
 for f in imgs:
     h = hashlib.sha256(open(os.path.join(img_dir, f), 'rb').read()).hexdigest()

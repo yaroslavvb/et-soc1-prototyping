@@ -2,7 +2,7 @@
 """Make the page copy of the owner's rack photo (30 Sep 2026).
 
 rack-photo-original.webp (1500x1429, no EXIF/GPS, sRGB ICC; outside the repository) -> docs/reports/chip-diagram-img/rack.webp:
-  1. redact the machines' tape labels (nine since 30 Sep) (host names and what look like LAN IP addresses; AGENT.md section 10 keeps
+  1. redact the machines' tape labels (ten since 1 Oct) (host names and what look like LAN IP addresses; AGENT.md section 10 keeps
      IPs and access details out of public pages): each box is pixelated and blurred so no character survives;
   2. crop the 53-px black band on the left edge;
   3. resize to 1000 px wide (Lanczos), a light 0.5-px Gaussian blur (the carpet's texture is what costs bytes);
@@ -28,6 +28,8 @@ LABELS = [
     (810, 733, 897, 848),    # lower shelf: frame name
     (1050, 925, 1120, 978),  # lower shelf's front rail, under the 650 GS supply: a host-name strip (added 30 Sep, the
                              # design's review: legible in the original, only blurred by the downscale in the first copy)
+    (50, 672, 118, 708),     # upper shelf, front left: a "KVM #" port label (added 1 Oct, the final check: legible in the
+                             # page copy, and the page says the machine labels are blurred)
 ]
 
 

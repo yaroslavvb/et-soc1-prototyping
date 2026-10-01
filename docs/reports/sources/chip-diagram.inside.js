@@ -217,7 +217,12 @@ function showMLPart(g) {
    gives them; facts from core-et's Erbium RTL carry that caveat. */
 const KT = CKT.kit, CC = CKT.COL;
 const sc = id => ISC[id] || {};
-const firstClause = t => { const s0 = String(t || '').split(/(?<=[.;:])\s/)[0]; return s0.length > 96 ? s0.slice(0, 94).replace(/\s+\S*$/, '') + '…' : s0; };
+/* a node's first sentence, cut at a word to at most `max` characters with "…" (final check, 1 Oct: cutting at the first
+   colon or semicolon left 30 boxes ending "lanes:", "One block:"; a wide box now shows as much as its lines hold) */
+const firstClause = (t, max = 96) => {
+  const s = String(t || ''), m = /^.*?[.!?](?=\s|$)/.exec(s), s0 = m ? m[0] : s;
+  return s0.length > max ? s0.slice(0, max - 1).replace(/\s+\S*$/, '').replace(/[\s,;:]+$/, '') + '…' : s0;
+};
 /* words wrapped into lines of at most n characters */
 function wrapW(t, n) {
   const out = []; let cur = '';
@@ -266,12 +271,12 @@ function blockScene(id, L, ap, p, P, o) {
     const cols = n <= 3 ? n : n <= 4 ? 2 : n <= 6 ? 3 : 4, rows = Math.ceil(n / cols), gw = 18, gh = 18;
     const bw = (W - gw * (cols - 1)) / cols, wrapAt = Math.max(16, Math.floor((bw - 24) / CW));
     // the boxes as tall as their text needs (title and up to three lines), the group centred in the card's free height
-    const most = Math.min(3, Math.max(1, ...kids.map(k => wrapW(firstClause(sc(k).blurb), wrapAt).length)));
+    const most = Math.min(3, Math.max(1, ...kids.map(k => wrapW(firstClause(sc(k).blurb, 3 * wrapAt), wrapAt).length)));
     const bh = Math.min(260, (H - gh * (rows - 1)) / rows, 50 + 23 + LH * most + 22);
     const y1 = y + Math.max(0, (H - rows * bh - gh * (rows - 1)) * 0.4);
     kids.forEach((k, i) => {
       const r = Math.floor(i / cols), c = i % cols, x = X0 + c * (bw + gw), yy = y1 + r * (bh + gh), s1 = sc(k);
-      const cap = Math.max(1, Math.min(3, Math.floor((bh - 50) / LH))), all = wrapW(firstClause(s1.blurb), wrapAt);
+      const cap = Math.max(1, Math.min(3, Math.floor((bh - 50) / LH))), all = wrapW(firstClause(s1.blurb, cap * wrapAt), wrapAt);
       const lines = all.slice(0, cap); if (all.length > cap) lines[cap - 1] = lines[cap - 1].replace(/[,;:.]?\s*\S*$/, '…');
       const has = !!NODES[k], nm = String(s1.name || k).replace(/\s*\(.*$/, '');
       ipart(L, ap, k, x, yy, bw, bh, has ? CC.logic : 'var(--ink-2)', nm.length < bw / 11 ? nm : s1.short && s1.short.length < bw / 11 ? s1.short : wrapW(nm, Math.floor(bw / 11))[0],
