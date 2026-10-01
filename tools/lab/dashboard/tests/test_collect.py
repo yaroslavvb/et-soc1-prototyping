@@ -9,7 +9,8 @@ timeout is a timeout; a machine's DOWN time is its own; a reboot after an outage
 back-off never hides another failure; people's status, "doing" and holds come from machines that answered; a terminal
 logs a person in, a seconds-old session with no terminal does not; lingering user managers are not people; the headline
 names a machine that is not up and never counts old data; the fingerprint ignores ssh wording and idle crossings; the
-current history slot is the latest run; login colours stay with their logins."""
+current history slot is the latest run; login colours stay with their logins; et-usage's final format (a lost end, lock
+hints, a pause, a cut log, a busy log's cut lists) maps onto the page's fields."""
 import argparse
 import importlib.util
 import json
@@ -317,6 +318,69 @@ class Colors(unittest.TestCase):
         self.assertEqual(len(b), 3)  # three slots; the fourth login is "others"
         c = col.login_colors(self.usage({"dana": 1}), {}, {"cards": {}})  # a new login takes an absent login's slot
         self.assertIn("dana", c)
+
+
+class Usage(unittest.TestCase):
+    """et-usage's final format (v 1 with the review fixes), from the testdata's real et-usage --json output
+    (testdata/make_usage.py) and, for the fields only a very busy log makes, a hand-made answer."""
+
+    def block(self, path, host, now):
+        with open(os.path.join(DASH, "testdata", path)) as f:
+            up = C.p_usage(C.sections(f.read())["usage"])
+        col = bare(now=now)
+        return col, col.usage_block(host, up)
+
+    def test_lost_end_and_lock_hints(self):
+        col, u = self.block("run3/raw-aifoundry1.txt", "aifoundry1", 1790798700.0)
+        ivs = u["cards"]["aifoundry1-c1"]["intervals"]
+        self.assertTrue(any(iv.get("lost_end") and iv["user"] == "user-a" for iv in ivs))  # the power loss
+        self.assertEqual({iv.get("lock_user") for iv in ivs if iv["user"] == "?"} - {None}, {"user-a", "owner"})
+        self.assertNotIn("lock_user", [k for iv in ivs if iv["user"] != "?" for k in iv])
+        self.assertEqual(u["cards"]["aifoundry1-c1"]["unseen_lock"], ["user-a", "owner"])
+        self.assertEqual(u["logger"], "running")
+        # "bad user!" fails the login rule, and its program name is an address: neither leaves the collector
+        self.assertNotIn("bad user!", json.dumps(u))
+        self.assertNotIn("10.0.0.7", json.dumps(u))
+
+    def test_paused_and_cut(self):
+        col, u = self.block("raw-aifoundry2.txt", "aifoundry2", 1790797500.0)
+        self.assertEqual(u["logger"], "running")
+        self.assertEqual(u["paused"], "low free space, 310 MB free")   # without the log directory's path
+        self.assertTrue(u["truncated_before_ms"])
+        col.state["hosts"]["aifoundry2"] = {"usage": u, "last_ok_ms": C.ms(col.now)}
+        hosts = {"aifoundry2": {"reachable": True}}
+        cards = {cid: {"host": h} for cid, h in (("aifoundry2", "aifoundry2"),)}
+        view = col.usage_view(hosts, cards)
+        self.assertEqual(view["hosts"]["aifoundry2"]["paused"], u["paused"])
+        col.derive_alerts({"aifoundry2": {"reachable": True, "state": "up"}}, {}, [], view)
+        self.assertEqual(col.alerts["host:aifoundry2:usage"]["level"], "warn")
+        self.assertIn("paused", col.alerts["host:aifoundry2:usage"]["title"])
+        self.assertIn("since", col.alerts["host:aifoundry2:usage"]["detail"])   # since the last record
+        self.assertEqual(col.alerts["host:aifoundry2:usage-cut"]["level"], "info")
+
+    def test_stale_after_a_pause(self):
+        col, u = self.block("run3/raw-aifoundry2.txt", "aifoundry2", 1790798700.0)
+        self.assertEqual((u["logger"], u["paused"]), ("stale", "low free space, 310 MB free"))
+        self.assertEqual(u["merged_gap_s"], 60)   # the whole log read: over 200 KB, merged by et-usage
+
+    def test_a_busy_logs_cut_lists(self):
+        j = {"v": 1, "host": "aifoundry2", "now": 1790797200.0, "since": 1790703600.0,
+             "daemon": {"state": "running", "alive_at": 1790797190.0, "started_at": 1790700000.0},
+             "logging_since": 1790700000.0, "coverage": [[1790703600.0, 1790797200.0]], "merged_gap_s": 3600.0,
+             "cards": {"0": {"intervals": [{"user": "alice", "start": 1790790000.0, "end": 1790793600.0, "node_s": 900.0,
+                                            "lock_s": 900.0, "procs": 40,
+                                            "programs": {"a": 9, "b": 8, "c": 7, "d": 6, "e": 5, "(others)": 5}}],
+                             "activity": [[1790796900.0, 240.0, 3, 900]], "activity_bin_s": 900,
+                             "users": {}, "held_s": 900.0, "node_s": 900.0, "now_more": 7, "merged_gap_s": 3600.0,
+                             "now": [{"user": "alice", "pid": 1, "comm": "a", "parent": "timeout", "nodes": ["ops"],
+                                      "lock": True, "start": 1790797000.0}], "daily": {}}}}
+        u = bare(now=1790797500.0).usage_block("aifoundry2", {"installed": True, "json": j})
+        c = u["cards"]["aifoundry2"]
+        self.assertEqual((c["now_more"], c["activity_bin_s"], c["merged_gap_s"]), (7, 900, 3600))
+        self.assertEqual(list(c["intervals"][0]["programs"])[-1], "(others)")   # kept, and last
+        self.assertEqual(c["intervals"][0]["programs"]["(others)"], 5)
+        self.assertEqual(c["activity"], [[1790796900000, 240.0, 903]])
+        self.assertEqual(C.top_programs({"p%d" % k: 10 - k for k in range(10)}, 8)["(others)"], 3)
 
 
 if __name__ == "__main__":

@@ -1013,10 +1013,13 @@
   const UHOURS = (U && isNum(U.hours)) ? U.hours : 24;
   function loggerText(h) {
     const uh = UH[h] || {}, lg = uh.logger, sk = (isNum(uh.skipped) && uh.skipped > 0 ? `; ${plural(uh.skipped, 'unreadable log line')} skipped` : '') +
-      (uh.log_error ? `; could not read part of its log (${uh.log_error})` : '');
+      (uh.log_error ? `; could not read part of its log (${uh.log_error})` : '') +
+      (isNum(uh.truncated_before_ms) ? `; read only from ${lclock(uh.truncated_before_ms)} (the log is larger than et-usage reads at once)` : '');
     const asof = (uh.stale && isNum(uh.as_of_ms) ? ` (as of ${clock(uh.as_of_ms)})` : '') + sk;
+    if (lg === 'running' && uh.paused) return `paused: ${uh.paused}; it runs, but writes no records until there is room` + asof;
     if (lg === 'running') return 'running' + (isNum(uh.logging_since_ms) ? `, its log begins ${lclock(uh.logging_since_ms)}` : '') + asof;
-    if (lg === 'stale') return (isNum(uh.stopped_ms) ? `stopped at ${lclock(uh.stopped_ms)} (a clean stop)` : `stopped: last alive ${isNum(uh.alive_ms) ? lclock(uh.alive_ms) : '?'}`) + asof;
+    if (lg === 'stale') return (isNum(uh.stopped_ms) ? `stopped at ${lclock(uh.stopped_ms)} (a clean stop)` : `stopped: last alive ${isNum(uh.alive_ms) ? lclock(uh.alive_ms) : '?'}`) +
+      (uh.paused ? `, while paused: ${uh.paused}` : '') + asof;
     if (lg === 'not installed') return 'not installed (et-usage)' + asof;
     if (lg === 'not running') return 'installed, but its daemon has not run' + asof;
     if (lg === 'error') return 'et-usage failed: ' + (uh.error || '?') + asof;
@@ -1031,10 +1034,14 @@
     return `no card-use data from ${h}`;
   }
   const pctOf = s => { const p = 100 * s / (UHOURS * 3600); return p <= 0 ? '0%' : p < 1 ? 'under 1%' : Math.round(p) + '%'; };
+  /* "sgemm_host ×12, pcie_host"; et-usage's "(others)" (a long list cut to its largest entries) always comes last */
   function progText(pr, k) {
-    const e = Object.entries(pr || {}).sort((a, b) => b[1] - a[1] || natural(a[0], b[0]));
-    if (!e.length) return null;
-    return e.slice(0, k || 3).map(([p, n]) => p + (n > 1 ? ' ×' + n : '')).join(', ') + (e.length > (k || 3) ? ', …' : '');
+    const all = Object.entries(pr || {}), oth = all.filter(([p]) => p === '(others)');
+    const e = all.filter(([p]) => p !== '(others)').sort((a, b) => b[1] - a[1] || natural(a[0], b[0]));
+    if (!e.length && !oth.length) return null;
+    const more = e.length > (k || 3);
+    return e.slice(0, k || 3).map(([p, n]) => p + (n > 1 ? ' ×' + n : '')).join(', ') +
+      (oth.length && !more ? (e.length ? ', ' : '') + 'others ×' + oth[0][1] : more ? ', …' : '');
   }
   /* et-usage's "?": a node opened and closed between two of its scans (a few ms), so it could not see whose process
      it was (the collector also writes "?" for a login that fails the login rule). Never counted as a person. */
@@ -1055,13 +1062,15 @@
     const out = [];
     let t = US0;
     const why = (a, b) => {
+      if (isNum(uh.truncated_before_ms) && b <= uh.truncated_before_ms + 60e3) return 'not read: the log is larger than et-usage reads at once';
       if (a <= US0 + 1000 && (!isNum(uh.logging_since_ms) || uh.logging_since_ms >= b - 60e3)) return 'before its log begins';
       if (b >= US1 - 1000 && uh.stale) {
         const x = H[h] || {}, st = stateOf(x);
         return st === 'down' ? `machine down since ${clock(isNum(x.down_since_ms) ? x.down_since_ms : uh.as_of_ms)}`
           : `not known: the machine has not answered since ${clock(uh.as_of_ms)} (${st})`;
       }
-      if (b >= US1 - 1000 && uh.logger === 'stale') return 'the logger stopped';
+      if (b >= US1 - 1000 && uh.logger === 'stale') return 'the logger stopped' + (uh.paused ? ` while paused: ${uh.paused}` : '');
+      if (b >= US1 - 1000 && uh.paused) return `the logger is paused: ${uh.paused}`;
       return 'the logger was not running';
     };
     for (const [a, b] of cov) { if (a - t > 60e3) out.push({a: t, b: a, why: why(t, a)}); t = Math.max(t, b); }
@@ -1082,11 +1091,12 @@
       const g = last[iv.user];
       if (g && x(iv.start_ms) - x(g.b) < 3) {
         g.b = Math.max(g.b, iv.end_ms); g.held_s += iv.held_s || 0; g.node_s += iv.node_s || 0; g.runs += iv.runs || 0;
-        g.n += iv.n || 1; g.open = g.open || !!iv.open; g.ivs.push(iv);
+        g.n += iv.n || 1; g.open = g.open || !!iv.open; g.lost = g.lost || !!iv.lost_end; g.ivs.push(iv);
+        if (g.lock !== iv.lock_user) g.lock = null;
         for (const [p, n] of Object.entries(iv.programs || {})) g.programs[p] = (g.programs[p] || 0) + n;
       } else {
         const ng = {user: iv.user, a: iv.start_ms, b: iv.end_ms, held_s: iv.held_s || 0, node_s: iv.node_s || 0, runs: iv.runs || 0,
-          n: iv.n || 1, open: !!iv.open, programs: Object.assign({}, iv.programs || {}), ivs: [iv]};
+          n: iv.n || 1, open: !!iv.open, lost: !!iv.lost_end, lock: iv.lock_user || null, programs: Object.assign({}, iv.programs || {}), ivs: [iv]};
         out.push(ng); last[iv.user] = ng;
       }
     }
@@ -1098,6 +1108,8 @@
     const secs = gr.b - gr.a < 600e3, pr = progText(gr.programs, 4), sh = heldShare(gr);
     const lines = [`<b>${esc(whoName(gr.user))}</b> on ${esc(label)}`, esc(spanText(gr.a, gr.b, secs, gr.open)) + (gr.open ? ' (still held)' : '')];
     if (gr.user === '?') lines.push(esc(WHO_UNSEEN));
+    if (gr.user === '?' && gr.lock) lines.push(esc(`the card's lock was held by ${gr.lock} at the time (a hint, not proof)`));
+    if (gr.lost) lines.push(esc('its end is approximate: the logger died while it was held, so it ends where the logger last saw it'));
     if (gr.n > 1) lines.push(esc(`${plural(gr.n, 'hold')}, ${durS(gr.held_s)} held in all` + (sh < 0.9 ? ` (${Math.max(1, Math.round(100 * sh))}% of the span; drawn light, each run solid)` : '')));
     else lines.push(esc(`held ${durS(gr.held_s)}`));
     lines.push(esc(`device nodes open ${durS(gr.node_s)}; ${gr.runs ? plural(gr.runs, gr.user === '?' ? 'open' : 'run') : 'the lock only'}`));
@@ -1177,6 +1189,8 @@
         bar.style.fillOpacity = '0.28';
         for (const iv of gr.ivs || []) {
           const ia = x(iv.start_ms), iw = Math.max(1, x(iv.end_ms) - ia), ish = heldShare({a: iv.start_ms, b: iv.end_ms, held_s: iv.held_s});
+          // a span merged from many runs (by et-usage or the collector, in a busy log) is not a run: it stays light
+          if (ish < 0.9 && ((iv.n || 1) > 1 || (iv.runs || 0) > 1)) continue;
           const m = CK.el('rect', {x: ia, y: ry, width: iw, height: hh}, g);
           m.style.fill = color; if (ish < 0.9) m.style.fillOpacity = String(Math.max(0.45, ish).toFixed(2));
         }
@@ -1276,14 +1290,18 @@
       const now = (cu.now || []).filter(x => x && x.user), was = cu.stale ? (cu.was_now || []).filter(x => x && x.user) : [];
       const sub = [];
       const holdText = x => `${whoName(x.user)} · ${x.comm || '?'} · since ${lclock(x.start_ms)}`;
-      if (now.length) sub.push('In use now: ' + now.map(holdText).join('; ') + '.');
+      const more = !cu.stale && isNum(cu.now_more) && cu.now_more > 0 ? `; and ${plural(cu.now_more, 'more hold')} not listed` : '';
+      if (now.length) sub.push('In use now: ' + now.map(holdText).join('; ') + more + '.');
       if (was.length) sub.push(`Held when ${h} last answered (${clock(uh.as_of_ms)}): ` + was.map(holdText).join('; ') + '; whether it still is, is unknown.');
       const act = Array.isArray(cu.activity_min) ? cu.activity_min.length : 0;
-      if (act) sub.push(`Its queues moved in ${plural(act, 'minute')}.`);
+      const bin = isNum(cu.activity_bin_s) && cu.activity_bin_s > 60 ? cu.activity_bin_s : 0;
+      if (act) sub.push(bin ? `Its queues moved in ${plural(act, durS(bin) + ' period')} (et-usage summed a busy log's minutes).` : `Its queues moved in ${plural(act, 'minute')}.`);
       const gaps = gapsOf(h), total = (US1 - US0) / 1000, logged = total - gaps.reduce((s, g) => s + (g.b - g.a) / 1000, 0);
       if (gaps.length) sub.push(`Logged ${durS(logged)} of the ${UHOURS} h; not logged ${gaps.slice(0, 3).map(g => spanText(g.a, g.b, false, false) + ' (' + g.why + ')').join(', ')}${gaps.length > 3 ? ', …' : ''}.`);
       else sub.push(`Logged the whole ${UHOURS} h.`);
       if (cu.stale) sub.push(`As of ${clock(uh.as_of_ms)}, when ${h} last answered.`);
+      const lk = Array.isArray(cu.unseen_lock) ? cu.unseen_lock : [];
+      if (unseen && lk.length) sub.push(`Unseen (?) opens were made while ${lk.join(', ')} held its lock (a hint about whose they were).`);
       const mg = isNum(cu.merged_gap_s) ? cu.merged_gap_s : uh.merged_gap_s;
       if (isNum(mg) && mg) sub.push(`A busy log: one login's runs less than ${durS(mg)} apart are drawn as one bar (the times held are the runs' own).`);
       div.append(head, ': ', ...main, '.', E('span', 'cu-sub', sub.join(' ')));
@@ -1302,7 +1320,7 @@
         attrs(E('td', 'num', durS(e.held_s)), {'data-sort': e.held_s}),
         attrs(E('td', 'num', pctOf(e.held_s)), {'data-sort': e.held_s}),
         E('td', 'num', n0(e.runs || 0)),
-        E('td', null, (u !== '?' && progText(e.programs, 3)) || ELL),
+        E('td', null, (u !== '?' ? progText(e.programs, 3) : (UC[id] || {}).unseen_lock && UC[id].unseen_lock.length ? `lock held by ${UC[id].unseen_lock.join(', ')} (a hint)` : null) || ELL),
         attrs(E('td', null, e.open ? `now (since ${lclock(isNum(e.open_ms) ? e.open_ms : e.first_ms)})` : lclock(e.last_ms)), {'data-sort': e.open ? 9e15 : e.last_ms})));
     }
     CK.stackTable(t);

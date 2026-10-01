@@ -537,6 +537,27 @@ def usage_login(u):
     return "an unseen user (?)" if u == "?" else u
 
 
+def top_programs(progs, n=8):
+    """{program: count} cut to its n most frequent names, the rest summed under "(others)" (last)"""
+    others = progs.get("(others)", 0)
+    top = sorted(((k, v) for k, v in progs.items() if k != "(others)"), key=lambda kv: (-kv[1], kv[0]))
+    others += sum(v for _, v in top[n:])
+    return dict(top[:n] + ([("(others)", others)] if others else []))
+
+
+def paused_text(s):
+    """et-usaged's reason for writing no records (et-usage --json's daemon.paused), as a short phrase without the
+    log directory's path: low free space on its filesystem, or the log at its size cap."""
+    s = str(s or "")
+    m = re.search(r"has (\d+) MB free", s)
+    if m:
+        return "low free space, %s MB free" % m.group(1)
+    m = re.search(r"holds (\d+) MB", s)
+    if m:
+        return "its log is at its size cap, %s MB" % m.group(1)
+    return "see journalctl -u et-usaged on the host"
+
+
 def p_people(secs, meta, now):
     """Per login on this host: sessions (not closing), closing, ttys, idle_min, procs, device_procs, doing (the
     probe's category keys) and shell (a shell, tmux or screen runs). uid >= 1000 only; the probe's own session is left
@@ -1340,8 +1361,15 @@ class Collector:
                                                              if isinstance(x, list) and len(x) == 2)
                                if f(a) is not None and f(b) is not None and b >= a],
                "skipped": f(j.get("skipped")), "merged_gap_s": None, "stopped_ms": tms(dm.get("stopped_at")),
-               "log_error": self.priv.scrub(j["error"], 120) if isinstance(j.get("error"), str) else None,
+               # et-usage's "<log dir or file>: <strerror>": the reason only, no path
+               "log_error": self.priv.scrub(j["error"].rsplit(": ", 1)[-1], 120) if isinstance(j.get("error"), str)
+               else None,
+               # not writing records (low free space, the size cap): the daemon runs, but nothing is logged
+               "paused": paused_text(dm["paused"]) if dm.get("paused") else None,
+               # the log was larger than et-usage's read budget: nothing before this time was read (no coverage)
+               "truncated_before_ms": tms(j.get("truncated_before")),
                "cards": {}, "unknown_cards": []}
+        top_gap = f(j.get("merged_gap_s"))
         dlog = j.get("daily_logged_s") if isinstance(j.get("daily_logged_s"), dict) else None
         by_num = {str(dn): cid for cid, dn in self.lab["hosts"][h]["cards"].items()}
         for n, cd in (j.get("cards") or {}).items():
@@ -1361,10 +1389,17 @@ class Collector:
                 # lab's pattern; the span only when et-usage gave neither.
                 nd, lk = f(iv.get("node_s")), f(iv.get("lock_s"))
                 held = min(b - a, max(nd or 0, lk or 0)) if (nd is not None or lk is not None) else b - a
-                ivs.append({"user": login_name(iv.get("user")), "start_ms": ms(a), "end_ms": ms(b),
-                            "held_s": round(held, 3), "node_s": round(min(b - a, nd or 0), 3),
-                            "runs": int(f(iv.get("procs")) or 0), "programs": self.programs(iv.get("programs")),
-                            "open": bool(iv.get("open")), "n": 1})
+                u = login_name(iv.get("user"))
+                x = {"user": u, "start_ms": ms(a), "end_ms": ms(b),
+                     "held_s": round(held, 3), "node_s": round(min(b - a, nd or 0), 3),
+                     "runs": int(f(iv.get("procs")) or 0), "programs": self.programs(iv.get("programs")),
+                     "open": bool(iv.get("open")), "n": 1}
+                if iv.get("lost_end"):
+                    x["lost_end"] = True   # a hold whose end was lost when the logger died: ends at its last sight
+                lu = login_name(iv.get("lock_user")) if u == "?" and iv.get("lock_user") else "?"
+                if lu != "?":
+                    x["lock_user"] = lu    # a hint: the login whose lock covered all of these unseen opens
+                ivs.append(x)
             ivs.sort(key=lambda x: x["start_ms"])
             # Who holds it now: one entry per login and program that holds a node; flock and timeout (lock only)
             # are part of that run, so they show only for a login that holds just the lock.
@@ -1385,6 +1420,12 @@ class Collector:
                     now.append({"user": u, "comm": comm, "nodes": sorted(p["nodes"]), "lock": lock,
                                 "start_ms": ms(min(first, p["start"]))})
             now.sort(key=lambda x: x["start_ms"])
+            now_more = int(f(cd.get("now_more")) or 0)   # holds now beyond those et-usage listed (a cut list)
+            # unseen opens made while one login held the card's lock (et-usage's users["?"].lock_users): a hint
+            lus = ((cd.get("users") or {}).get("?") or {}).get("lock_users")
+            unseen_lock = [u for u, _ in sorted(((login_name(k), v) for k, v in lus.items() if f(v) is not None),
+                                                key=lambda kv: (-kv[1], kv[0])) if u != "?"][:5] \
+                if isinstance(lus, dict) else []
             act = []
             for x in cd.get("activity") or []:
                 if isinstance(x, list) and len(x) >= 4 and all(f(v) is not None for v in x[:4]):
@@ -1407,8 +1448,11 @@ class Collector:
                               "logged_s": round(lg) if lg is not None else None})
             mg = f(cd.get("merged_gap_s"))
             mivs, mg2 = self.merge_intervals(ivs)
-            gap = max(x for x in (mg, mg2, 0) if x is not None) or None
-            out["cards"][cid] = {"intervals": mivs, "activity": act, "now": now, "daily": daily, "merged_gap_s": gap}
+            gap = max(x for x in (mg, mg2, top_gap, 0) if x is not None) or None
+            out["cards"][cid] = {"intervals": mivs, "activity": act, "now": now, "daily": daily, "merged_gap_s": gap,
+                                 # each activity entry sums this many seconds' worth of minutes (et-usage binned them)
+                                 "activity_bin_s": f(cd.get("activity_bin_s")), "now_more": now_more,
+                                 "unseen_lock": unseen_lock}
             if gap and (out["merged_gap_s"] or 0) < gap:
                 out["merged_gap_s"] = gap
         if out["unknown_cards"]:
@@ -1422,12 +1466,17 @@ class Collector:
 
     def programs(self, p):
         """{program: count}, names as ps comm, at most 8 names (the most frequent)"""
-        out = {}
+        out, others = {}, 0
         for k, v in (p.items() if isinstance(p, dict) else []):
             if isinstance(v, (int, float)) and not isinstance(v, bool):
+                if k == "(others)":   # et-usage cut a long list to its largest entries plus "(others)"
+                    others += int(v)
+                    continue
                 k = self.prog(k)
                 out[k] = out.get(k, 0) + int(v)
-        return dict(sorted(out.items(), key=lambda kv: (-kv[1], kv[0]))[:8])
+        if others:
+            out["(others)"] = others
+        return top_programs(out)
 
     def merge_intervals(self, ivs):
         """Merge one login's intervals closer than a gap, the gap doubling from usage_merge_gap_s, until at most
@@ -1445,6 +1494,10 @@ class Collector:
                     for k, v in iv["programs"].items():
                         p["programs"][k] = p["programs"].get(k, 0) + v
                     p["open"] = p["open"] or iv["open"]
+                    if iv.get("lost_end"):
+                        p["lost_end"] = True
+                    if p.get("lock_user") != iv.get("lock_user"):
+                        p.pop("lock_user", None)   # a hint only when every merged run names the same login
                 else:
                     p = dict(iv, programs=dict(iv["programs"]))
                     out.append(p)
@@ -1486,7 +1539,8 @@ class Collector:
                     "logging_since_ms": u.get("logging_since_ms"), "coverage_ms": cov,
                     "logged_s": round(sum(b - a for a, b in cov) / 1000), "skipped": u.get("skipped"),
                     "log_error": u.get("log_error"),
-                    "merged_gap_s": u.get("merged_gap_s")}
+                    "merged_gap_s": u.get("merged_gap_s"), "paused": u.get("paused"),
+                    "truncated_before_ms": u.get("truncated_before_ms")}
         for cid, c in cards.items():
             h = c["host"]
             u = (self.state["hosts"].get(h, {}).get("usage") or {})
@@ -1525,7 +1579,7 @@ class Collector:
                 x["held_s"], x["node_s"] = round(x["held_s"], 1), round(x["node_s"], 1)
             for e in users.values():
                 e["held_s"], e["node_s"] = round(e["held_s"], 1), round(e["node_s"], 1)
-                e["programs"] = dict(sorted(e["programs"].items(), key=lambda kv: (-kv[1], kv[0]))[:8])
+                e["programs"] = top_programs(e["programs"])
             # the card's busy time: the union of all logins' intervals (two logins at once count once)
             busy, cur = 0, None
             for iv in sorted(ivs, key=lambda x: x["start_ms"]):
@@ -1553,10 +1607,14 @@ class Collector:
                        "intervals": ivs, "activity_min": act, "users": users,
                        "held_s": round(min(busy / 1000, held_sum), 1),
                        "node_s": round(sum(e["node_s"] for e in users.values()), 1),
-                       "runs": sum(e["runs"] for e in users.values()),
+                       # runs of logins seen; an unseen "?" record counts node opens, too short to see whose
+                       "runs": sum(e["runs"] for u, e in users.items() if u != "?"),
+                       "unseen_opens": (users.get("?") or {}).get("runs", 0),
                        "people": len([u for u in users if u != "?"]),  # "?": a run too short to see who
                        "now": [] if old else (cu.get("now") or []), "was_now": (cu.get("now") or []) if old else [],
-                       "merged_gap_s": cu.get("merged_gap_s"), "daily": cu.get("daily") or [],
+                       "now_more": cu.get("now_more") or 0, "unseen_lock": cu.get("unseen_lock") or [],
+                       "merged_gap_s": cu.get("merged_gap_s"), "activity_bin_s": cu.get("activity_bin_s"),
+                       "daily": cu.get("daily") or [],
                        "since_check": {"since_ms": since, "users": sorted({iv["user"] for iv in recent}),
                                        "runs": sum(iv["runs"] for iv in recent), "programs": progs} if since else None}
         logins.discard("?")
@@ -2266,10 +2324,22 @@ class Collector:
                     fmt_when(uh["alive_ms"] / 1000, self.now) if uh.get("alive_ms") else "?"),
                     ("it was stopped (a clean stop, at %s)" % fmt_when(uh["stopped_ms"] / 1000, self.now)
                      if uh.get("stopped_ms") else "it stopped answering (its state file is older than 3 minutes)") +
+                    (", while paused: %s" % uh["paused"] if uh.get("paused") else "") +
                     ": card use since then is not logged; systemctl status et-usaged", host=h, source="et-usage")
+            elif not st and lg == "running" and uh.get("paused"):
+                cov = uh.get("coverage_ms") or []
+                self.add("host:%s:usage" % h, "warn", "host", "card-use logger paused: %s" % uh["paused"],
+                         "et-usaged runs but writes no records until there is room (it never deletes a log file for "
+                         "free space)%s; df -h /var/log" % (
+                             ": card use since %s is not logged" % fmt_when(cov[-1][1] / 1000, self.now)
+                             if cov and cov[-1][1] < ms(self.now) - 15 * 60000 else ""), host=h, source="et-usage")
             elif not st and lg == "error":
                 self.add("host:%s:usage" % h, "warn", "host", "et-usage failed: %s" % (uh.get("error") or "?"), None,
                          host=h, source="et-usage")
+            if not st and uh.get("truncated_before_ms"):
+                self.add("host:%s:usage-cut" % h, "info", "host", "card-use log read only from %s" % fmt_when(
+                    uh["truncated_before_ms"] / 1000, self.now), "the log is larger than et-usage reads at once (64 MB, "
+                    "newest first): card use before then is not shown", host=h, source="et-usage")
         if missing_usage:
             self.add("lab:usage-not-installed", "info", "lab", "card-use logging not installed on %s" % ", ".join(
                 missing_usage), "et-usage is not on %s, so the page cannot show who used %s cards over the day, only who "
@@ -2710,8 +2780,9 @@ class Collector:
                     fmt_when(hb["last_ok_ms"] / 1000, self.now) if hb.get("last_ok_ms") else "never"))
         for cid, cu in ((data.get("usage") or {}).get("cards") or {}).items():
             if cu.get("logged"):
-                print("  %-14s last %d h: held %s by %d login(s), %d run(s)%s" % (
+                print("  %-14s last %d h: held %s by %d login(s), %d run(s)%s%s" % (
                     cid, data["usage"]["hours"], fmt_dur(cu["held_s"]), cu["people"], cu["runs"],
+                    " and %d unseen open(s)" % cu["unseen_opens"] if cu.get("unseen_opens") else "",
                     "; in use now by %s" % ", ".join(sorted({x["user"] for x in cu["now"]})) if cu.get("now") else ""))
         for a in data["alerts"]:
             if a["level"] in ("bad", "warn"):

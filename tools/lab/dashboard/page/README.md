@@ -34,7 +34,12 @@ else parsed from the ISO string. A few optional fields beyond §1 are used when 
   or failed), `"approval"` (or `2`) a pending Tailscale approval, `null` no run;
 - `people[].hosts.<h>.status` and `.doing`: the person's status and categories on that machine;
 - `usage` (§1.8): the "Card use, last 24 hours" section, the card tiles' lanes and the people's card use; without it the
-  section says so and the 48-hour card rows are drawn for every card;
+  section says so and the 48-hour card rows are drawn for every card. From et-usage's final format: a host's `paused`
+  (the logger runs but writes nothing: said in its "Card-use log" line and as the reason of the hatched span up to now)
+  and `truncated_before_ms` (the span before it is hatched "not read"); an interval's `lost_end` and a `"?"`
+  interval's `lock_user` (in its tooltip); a card's `unseen_lock` (the `"?"` row of the table, and the card's note),
+  `now_more` ("and N more holds not listed") and `activity_bin_s` (activity in bins, not minutes); `"(others)"` in
+  programs, always last. A bar merged from many runs (et-usage's `merged_gap_s`, or the collector's) stays light;
 - `hosts.<h>.state`, `down_since_ms`, `last_answer_ms`, `tailscale_last_seen_ms`, `rebooted_at_ms`, `reboot_after`,
   `reboot_planned` (`null`: not known): the machine's own state (DOWN, UNREACHABLE, APPROVAL NEEDED, PROBE FAILED for
   the collector's own machine) and its times; without `state`, `reachable` decides;
@@ -91,7 +96,10 @@ bash $T/check_page.sh /tmp/lab.html; DARK=1 bash $T/check_page.sh /tmp/lab.html;
 bash $T/shot.sh /tmp/lab.html /tmp/lab 1280; bash $T/shot.sh /tmp/lab.html /tmp/lab-phone 390
 ```
 
-On 30 September 2026, after the review fixes, the fixture, the three testdata runs, the card-use scenarios, a privacy
+On the evening of 30 September 2026, with the page public and the logger's final format (testdata runs with a pause,
+a cut log, a crash's lost end, lock hints, a merged busy log and a stale logger), the fixture, the three testdata runs
+(as collected, and moved to the present with `--fixture`) and a real collection with the logger running on all three
+machines passed `check_page.sh` at 1280 and 390 px, light and `DARK=1`. Earlier that day, after the review fixes, the fixture, the three testdata runs, the card-use scenarios, a privacy
 injection, the real probe outputs of that afternoon and a migration of the live state passed `check_page.sh` at 1280
 and 390 px, light and `DARK=1`. Earlier the same day the fixture page, and variants with a stale file, two card problems, a data file with only
 `generated_at`, and one with every block `null`, passed `check_page.sh` at 1280 and 390 px in light, `DARK=1` and

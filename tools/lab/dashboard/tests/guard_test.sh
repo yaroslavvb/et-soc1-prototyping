@@ -237,11 +237,13 @@ ok "deployed, the failure logged" '[ $RC = 0 ] && [ $(n "ss deploy") = 1 ] && gr
 U run
 ok "the next run tries again" '[ $(n "ss share") = 3 ]'
 
-# 18. a HALT left from the private mode: no deploy, no share, no signed-out request, until a person resumes
+# 18. a HALT left from the private mode: no deploy and no signed-out request until a person resumes; the run still
+# checks that the space is public (and, after the halt set it private, shares it public again)
 setup P_halt_left
-echo public > "$C/stub/list.default"; echo "2026-09-30T15:22:09-0700 NOT PRIVATE before a deploy" > "$C/cache/HALT"
+echo private > "$C/stub/list.default"; echo "2026-09-30T15:22:09-0700 NOT PRIVATE before a deploy" > "$C/cache/HALT"
 U run
-ok "stays halted, nothing set private" '[ -e "$C/cache/HALT" ] && [ $(n "ss deploy") = 0 ] && [ $(n "ss share") = 0 ] && [ $(n "fetch ") = 0 ] && last | grep -q "HALT from the private mode"'
+ok "stays halted, nothing set private" '[ -e "$C/cache/HALT" ] && [ $(n "ss deploy") = 0 ] && [ $(n "ss share .* --visibility private") = 0 ] && [ $(n "fetch ") = 0 ] && last | grep -q "HALT from the private mode"'
+ok "the space is checked, and kept public" '[ $(n "ss list") = 1 ] && [ $(n "ss share .* --visibility public") = 1 ] && last | grep -q "vis=private"'
 ok "the page says so" 'python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if any(a[\"id\"]==\"collector:halt\" and \"public now\" in (a.get(\"detail\") or \"\") for a in d[\"alerts\"]) else 1)" "$C/cache/data.json"'
 U resume
 ok "resume clears it without a private check" '[ $RC = 0 ] && [ ! -e "$C/cache/HALT" ] && [ $(n "fetch ") = 0 ]'

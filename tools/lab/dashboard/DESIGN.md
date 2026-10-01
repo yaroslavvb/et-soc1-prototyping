@@ -36,7 +36,7 @@ off unless it is switched on, and the main session takes the first real sample.
 | `update.sh` | collect, render, deploy only if changed, check visibility, log, lock; `now`, `status`, `ack`, cron install |
 | `page/body.html`, `page/script.js`, `page/meta.json` | the page source (no personal data) |
 | `page/fixture.json`, `page/make_fixture.py` | a complete data file with made-up people and card use, for `check_page` and page work, and its generator |
-| `testdata/raw-aifoundry{1,2,3}.txt`, `testdata/tailscale.json`, `testdata/run2/`, `testdata/run3/` | made-up `remote.sh` and `tailscale status --json` outputs for `collect.py --from-raw` (parser tests without ssh); `run2` and `run3` are the two runs after, for the liveness cases (§2.8) |
+| `testdata/raw-aifoundry{1,2,3}.txt`, `testdata/tailscale.json`, `testdata/run2/`, `testdata/run3/` | made-up `remote.sh` and `tailscale status --json` outputs for `collect.py --from-raw` (parser tests without ssh); `run2` and `run3` are the two runs after, for the liveness cases (§2.8). Their `@@usage` sections are real `et-usage --json` output, made by `testdata/make_usage.py` from the logs of et-usage's own test suite laid out over an invented day (a crash's `lost_end`, lock hints, a pause, a cut log, a busy log merged, a stale daemon) |
 
 Everything collected about people lives outside the repository: `~/.cache/lab-dashboard/` (data, history, state,
 log; mode 0700) and `~/.config/lab-dashboard/` (the space uuid, overrides, acknowledgements). Nothing in the
@@ -238,15 +238,19 @@ cut to the window `[generated - 24 h, generated]`:
  "colors": {"owner": 0, "user-a": 1},
  "hosts": {"aifoundry2": {"logger": "running", "installed": true, "error": null, "stale": false, "as_of_ms": ...,
                           "alive_ms": ..., "started_ms": ..., "logging_since_ms": ..., "coverage_ms": [[a, b], ...],
-                          "stopped_ms": null, "logged_s": 83700, "skipped": 0, "merged_gap_s": null}},
+                          "stopped_ms": null, "logged_s": 83700, "skipped": 0, "merged_gap_s": null,
+                          "paused": null, "truncated_before_ms": null}},
  "cards": {"aifoundry2": {"host": "aifoundry2", "logged": true, "stale": false,
    "intervals": [{"user": "user-a", "start_ms": ..., "end_ms": ..., "held_s": 2700.0, "node_s": 2690.2, "runs": 3,
-                  "programs": {"mmbench_launch": 3}, "open": false, "n": 1}],
+                  "programs": {"mmbench_launch": 3}, "open": false, "n": 1},
+                 {"user": "?", ..., "lock_user": "user-a"}, {"user": "owner", ..., "lost_end": true}],
    "activity_min": [[812.0, 60.0, 571]],
    "users": {"user-a": {"held_s": 3360.0, "node_s": 3300.1, "runs": 4, "programs": {...}, "first_ms": ..., "last_ms": ...,
                         "open": false, "open_ms": null}},
-   "held_s": 5880.3, "node_s": 5700.2, "runs": 111, "people": 3, "merged_gap_s": null,
+   "held_s": 5880.3, "node_s": 5700.2, "runs": 111, "unseen_opens": 40, "people": 3, "merged_gap_s": null,
+   "activity_bin_s": null, "unseen_lock": ["user-a"],
    "now": [{"user": "owner", "comm": "sgemm_host", "nodes": ["mgmt", "ops"], "lock": true, "start_ms": ...}], "was_now": [],
+   "now_more": 0,
    "daily": [{"date": "2026-09-30", "day_ms": ..., "logged_s": 56400, "users": {"user-a": {"held_s": ..., "node_s": ..., "runs": 4}}}],
    "since_check": {"since_ms": ..., "users": ["owner"], "runs": 3, "programs": {"sgemm_host": 3}}},
   "aifoundry3": {"host": "aifoundry3", "logged": false}}}
@@ -258,22 +262,34 @@ cut to the window `[generated - 24 h, generated]`:
   the page is given up. Everyone else is "others" (§4.2).
 - `logger`: `running`, `stale` (the daemon's state file is older than 3 minutes), `not running` (installed, no log and
   no state), `not installed` (no `et-usage` on the host), `error` (it failed, timed out or printed something else), or
-  `no data` (no answer yet). A card is `logged` when its host's logger is `running` or `stale`.
+  `no data` (no answer yet). A card is `logged` when its host's logger is `running` or `stale`. `paused`: why a
+  running (or stale) logger writes no records (et-usage's `daemon.paused`, the daemon's reason without its log
+  directory's path: "low free space, 310 MB free" or "its log is at its size cap, 500 MB"); it keeps every file, and
+  its coverage ends at its last record. `truncated_before_ms`: et-usage's `truncated_before`, when its log was larger
+  than it reads at once (64 MB, newest first): nothing before it was read, so it is outside the coverage.
 - `coverage_ms`: the spans the logger was running, cut to the window. Time outside them is "not logged", never idle;
   for a machine that no longer answers, the time since its last answer is outside them too.
 - `intervals`: per card and login, et-usage's merged holds (5 s gap), clipped to the window (sums and runs scaled). A
   card with more than 500 is merged further, per login, the gap doubling from 30 s, keeping the sums (`n` counts the
   merged holds); `merged_gap_s` (per card, and the largest on the host) is the larger of that gap and et-usage's own
-  (its per-card `merged_gap_s`, over 2,000 intervals). `held_s` is the time held inside the bar, not its span (which
+  (its `merged_gap_s`, top level and per card, set when its output would pass 200 KB). `held_s` is the time held
+  inside the bar, not its span (which
   counts the merged gaps): `max(node_s, lock_s)` of et-usage's interval, as every hold holds a node or the lock and
   one contains the other in the lab's patterns. `runs` counts node-holding processes (et-usage's `procs`; for `"?"`
   the opens). `"?"`: et-usage's unseen holds (a node opened and closed between two of its scans, user unknown) and
-  logins that fail the login rule; never counted as a person. `activity_min`: minutes (from `start_ms`) in which the card's queue
-  message counters moved, with the interval and the message count.
-- `held_s`: the card's busy time, the union of all logins' intervals; `users`: per login totals over the window;
+  logins that fail the login rule; never counted as a person. A `"?"` interval's `lock_user` is et-usage's hint (the
+  login whose lock covered all its opens; kept through a merge only when every merged run names it), and
+  `unseen_lock` lists the logins of the card's `users["?"].lock_users` (most opens first): hints, never people.
+  `lost_end`: one of its holds lost its end when the logger died (it ends where the logger last saw it). `programs`:
+  at most 8 names, the rest (and et-usage's own `"(others)"`, from a cut list) summed under `"(others)"`, last.
+  `activity_min`: minutes (from `start_ms`) in which the card's queue message counters moved, with the interval and
+  the message count; `activity_bin_s`: set when et-usage summed them in bins of that many seconds (a busy log).
+- `held_s`: the card's busy time, the union of all logins' intervals; `runs`: the logins' runs, and
+  `unseen_opens` the `"?"` opens apart; `users`: per login totals over the window;
   `daily`: the 7 last dates (the host's), by login, with `logged_s` (et-usage's `daily_logged_s`: 0 is "not
   logged", never "nobody"); `now`: who holds it now, one entry per login and node-holding program (flock and timeout
-  fold into it), only while the logger is running and the machine answered this run; `was_now`: the same list as of
+  fold into it), only while the logger is running and the machine answered this run (`now_more`: holds et-usage left
+  off a cut list); `was_now`: the same list as of
   the last answer of a machine that did not answer (its intervals are then never `open`); `open_ms`: the start of a
   login's open bar; `stopped_ms`: et-usage's `stopped_at` (a clean stop); `since_check`: who used it after the
   previous run.
@@ -598,8 +614,8 @@ is shared public again with `spacesheep share $UUID --visibility public`, logged
 A failed share is logged and the run goes on (a page not yet public exposes nothing; the next run tries again). A list
 that fails, lacks the space or is unparsable skips that run's deploy ("visibility unverified"). The same read follows
 each deploy once; a space that turns private later is found by the next run. No signed-out request is made and nothing
-halts; a `HALT` left from the private mode still stops the deploys (never setting the space private) until a person runs
-`update.sh resume`, which then checks nothing.
+halts; a `HALT` left from the private mode still stops the deploys (the check above still runs, and never sets the
+space private) until a person runs `update.sh resume`, which then checks nothing.
 
 **Private mode** (`"visibility": "private"`): for a page that must not be public. Every run, whether or not it deploys, checks it
 (`vis_check`): the space's row in `spacesheep list --json` must say `"visibility": "private"`, and a signed-out request to
@@ -644,7 +660,7 @@ the delayed check), scratch `LAB_DASH_CACHE` and `LAB_DASH_CONFIG`, and the coll
 cases: the default with no setting (two list reads, no signed-out request, no share, `status` names the mode); a private
 space (shared public, deployed, never set private); a deploy that turns it private (shared public right after); a
 failed list (no deploy); a failed share (deployed, retried next run); a `HALT` left from the private mode (no deploy,
-nothing set private, `resume`, then a deploy); `"visibility": "private"` in config.json (the guard runs, and halts on a
+the space still checked and shared public, never private; `resume`, then a deploy); `"visibility": "private"` in config.json (the guard runs, and halts on a
 public space); an invalid word (exit 2). Its private cases: a
 normal deploy; one "public" read then private twice (no halt, no deploy, set private, the triggering row logged); public
 twice (halt); `signed_in` then private (set private); public on every read (halt, no automatic resume after three
@@ -849,7 +865,7 @@ experiment file's.
 |---|---|---|---|
 | collector | privacy refusal; `HALT` set | a parse error; a host skipped for back-off; `tailscale status` failed; a halt a person resumed in the last 24 hours (`collector:halt-recent`: the space was, or may have been, readable without signing in) | card sampling on |
 | host reach | down (Tailscale: offline), from the first run; unreachable 2 runs in a row | unreachable once; "approval needed" | |
-| host | disk or pool ≥ 97%; nodewatch heartbeat older than 30 min while the host answers | any et-lab-health WARN not known or acknowledged (disk ≥ 85%, degraded systemd, pool state, lock file, driver); memory available < 10%; load per thread > 1.5; nodewatch heartbeat older than 5 min; a reboot that was not planned (no reboot pending at the answer before it), or one after an outage (down or unreachable before it came back, whatever was pending), for 24 h; the card-use logger stopped (`stale`), installed but not running, or failing | reboot pending; a planned reboot, or one before the collector's first check of that boot, for 24 h; card-use logging not installed (one note for the lab, naming the machines); ZFS scrub errors; CI runner jobs running; each INFO health line worth showing |
+| host | disk or pool ≥ 97%; nodewatch heartbeat older than 30 min while the host answers | any et-lab-health WARN not known or acknowledged (disk ≥ 85%, degraded systemd, pool state, lock file, driver); memory available < 10%; load per thread > 1.5; nodewatch heartbeat older than 5 min; a reboot that was not planned (no reboot pending at the answer before it), or one after an outage (down or unreachable before it came back, whatever was pending), for 24 h; the card-use logger stopped (`stale`), paused (writing no records: low free space or its size cap), installed but not running, or failing | reboot pending; a planned reboot, or one before the collector's first check of that boot, for 24 h; card-use logging not installed (one note for the lab, naming the machines); the card-use log read only in part (`usage-cut`: over et-usage's read budget); ZFS scrub errors; CI runner jobs running; each INFO health line worth showing |
 | card | missing from the bus; uncorrected events (new); link down; a live die ≥ 100 °C; the sample disabled (a timeout, a kill, or a sample cut off: §2.6) | link below its maximum; new corrected events since the last run; a live die ≥ 90 °C; held by the same process over 2 h; any hold of an excluded card (aifoundry1 card 0), now (`held`) or in the last 24 hours (`used-24h`) | held (who, which program, since when); used since the last check (who, programs, from the usage log where there is one); the aifoundry1 card 0 conditions (known) |
 
 A card's level is its worst alert (`excluded` for aifoundry1 card 0, `unknown` when its host did not answer); a

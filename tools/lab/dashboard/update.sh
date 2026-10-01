@@ -364,11 +364,12 @@ cmd_run() {
   uuid=$(space_uuid) || uuid=
   if [ -z "$uuid" ]; then deploy="skipped(no space configured)"
   elif [ "$VISIBILITY" = public ]; then
+    # every run, whether or not it deploys: the space must be public (the owner's decision), or it is shared public
+    keep_public "$uuid" "before a deploy"
     if [ -f "$CACHE/HALT" ]; then
       # a halt left from the private mode: no deploy until a person clears it (update.sh resume); never set private
       deploy="skipped(HALT from the private mode: $(cut -d' ' -f2- "$CACHE/HALT" | tr -cd '[:print:]' | cut -c1-120); a person runs update.sh resume)"
     else
-      keep_public "$uuid" "before a deploy"
       case "$PUB" in unverified*) deploy="skipped(visibility $PUB)" ;; esac
     fi
   elif [ -f "$CACHE/HALT" ]; then

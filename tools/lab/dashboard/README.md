@@ -13,7 +13,7 @@ health rules and the reasons behind each choice, is [DESIGN.md](DESIGN.md). This
 | `update.sh` | collect, render, deploy when something changed, keep the space public (or, in the private mode, private), log; cron, acknowledgements |
 | `lab.json` | static facts: hosts, cards, firmware, clock policy, idle ranges, known conditions. No personal data, no access paths |
 | `page/` | the page and its `render.py` (see `page/README.md`); `update.sh` runs `page/render.py <data.json> <out.html>` |
-| `testdata/` | invented probe outputs (`raw-<host>.txt`, `tailscale.json`) for `collect.py --from-raw`; `run2/` and `run3/` are the two runs after it (a machine down, one unreachable, reboots) |
+| `testdata/` | invented probe outputs (`raw-<host>.txt`, `tailscale.json`) for `collect.py --from-raw`; `run2/` and `run3/` are the two runs after it (a machine down, one unreachable, reboots). The `@@usage` sections are real `et-usage --json` output: `testdata/make_usage.py <scratch>` makes them from the logs that `tools/lab/et-usage/test/test_et_usage.py --dir <scratch> --keep` leaves, laid out over an invented day |
 | `tests/` | `test_collect.py` (the collector's rules and the probe's process filter, no host contacted) and `guard_test.sh <workdir>` (`update.sh`'s visibility guard against a stub spacesheep; nothing is deployed) |
 
 Everything collected lives outside the repository: `~/.cache/lab-dashboard/` (mode 0700: `data.json`,
@@ -144,8 +144,8 @@ and the run exits 1 until it works (`update.sh status` shows it). For 24 hours a
 that deploys were halted and why. Whether the two halts of 30 September (14:42, 15:22) were real exposures after a
 deploy or misreads of the list is not known: the later reads came after the halt had set the space private; the logged
 rows are there to settle it. The guard cannot see `spacesheep share --email`, which grants a person access while the
-space stays private. In the public mode a `HALT` left from the private mode stops the deploys (it never sets the space
-private) until `update.sh resume`, which clears it without a check.
+space stays private. In the public mode a `HALT` left from the private mode stops the deploys (each run still keeps the
+space public, never private) until `update.sh resume`, which clears it without a check.
 
 A person appears as a
 login name with session, terminal and process counts, idle time, card holds and card use (with program names, as
@@ -169,7 +169,7 @@ python3 collect.py --out $T --sample-dry                                        
 
 ```
 python3 tests/test_collect.py                       # the collector's rules, the privacy patterns, the probe's process filter
-bash tests/guard_test.sh ~/claude/work/<topic>      # update.sh's visibility checks against stubs, both modes (50 checks)
+bash tests/guard_test.sh ~/claude/work/<topic>      # update.sh's visibility checks against stubs, both modes (51 checks)
 ```
 
 `update.sh` reads test hooks from the environment, so its deploy logic can be exercised without deploying:
