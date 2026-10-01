@@ -204,6 +204,8 @@ html.et-pres [data-ss-ui]{display:none!important}
 .toast{position:absolute;left:50%;top:56px;transform:translateX(-50%);z-index:6;max-width:min(720px,calc(100% - 24px));background:var(--surface);color:var(--ink);
   border:1px solid var(--border);border-radius:10px;padding:10px 14px;box-shadow:0 8px 28px rgba(0,0,0,.2);font-size:clamp(.85rem,.3vw + .72rem,1.05rem);line-height:1.4}
 .toast[hidden]{display:none}
+/* a toast lets taps through to what it covers (the level tabs, on a phone), but for its buttons */
+.toast{pointer-events:none}.toast .tb{pointer-events:auto}
 .toast p{margin:0 0 6px}
 .toast .tb{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .toast kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--border);border-radius:4px;padding:0 5px;background:var(--page)}
@@ -243,6 +245,14 @@ html.et-pres [data-ss-ui]{display:none!important}
 #mem.zmv .lay text{stroke:none!important}
 #mem .lay.nolab text,#mem .lay.nolab .pk,#mem .lay.nolab .co{visibility:hidden}
 #mem .lay.zout .ring{opacity:0}
+/* where the camera is, over a long move (WH in the script): a pill on the drawing's top-left, outside its sideways
+   scroll, shown as the drawing's labels fade; it takes no room (the stage's 4 px gap given back) and no taps */
+.zwhere{position:relative;z-index:3;height:0;margin-bottom:-4px;pointer-events:none;opacity:0;will-change:opacity}
+.zwhere>span{position:absolute;left:8px;top:8px;display:block;max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:clamp(.8rem,.25vw + .72rem,1rem);line-height:1.35;padding:3px 11px;border-radius:999px;color:var(--ink-2);
+  background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--border);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.zwhere>span>span.on{color:var(--ink);font-weight:650}
+.zwhere i{font-style:normal;margin:0 6px;color:var(--muted)}
 .t-id{font-size:32px;font-weight:650;fill:var(--ink);font-variant-numeric:tabular-nums}
 .t-lab{font-size:20px;fill:var(--ink-2)}
 .t-labb{font-size:20px;font-weight:600;fill:var(--ink)}
@@ -333,7 +343,9 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
 #asktab th:nth-child(1){width:19%}#asktab th:nth-child(2){width:35%}#asktab th:nth-child(3){width:22%}#asktab th:nth-child(4){width:12%}#asktab th:nth-child(5){width:12%}
 .prose .kd{font-size:.74rem}
 /* touch: every control at least 44 x 44 px */
-@media (pointer: coarse){.st-btn,.zc button,.tabs [role="tab"],.addr .st-btn{min-height:44px}.zc button.pm{min-width:44px}}
+@media (pointer: coarse){.st-btn,.zc button,.tabs [role="tab"],.addr .st-btn{min-height:44px}.zc button.pm{min-width:44px}
+  /* quick taps on the controls do not zoom the page (pinching still does) */
+  #tabs,#zc,#bar,.pip,.addr,#acc-row{touch-action:manipulation}}
 /* ---- narrow windows and phones: the stage stacks and the page scrolls; the drawing keeps a readable size, its text
    set as on a short screen, and scrolls sideways in its own box, from its left edge; "Fit to screen" (.fitted) fits it
    to the width, its text then small ---- */
@@ -470,6 +482,7 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
 <div class="st-body" id="stage-view" role="tabpanel" aria-labelledby="tab-l1">
   <div class="st-view">
     <div class="addr" id="addr" aria-label="The example address"></div>
+    <div class="zwhere" id="zwhere" aria-hidden="true"><span></span></div>
     <div class="st-svg" id="svgwrap"><svg id="mem" role="group" aria-label="Diagram of the level. Every part is a button: Tab to it and press Space for its details, Enter to zoom into it." xmlns="http://www.w3.org/2000/svg"></svg></div>
     <div class="kbd-hint" id="kbd-hint" hidden title="Then F presents, Space pauses and the arrows step">Click here, then press <kbd>F</kbd></div>
   </div>
@@ -518,7 +531,9 @@ textbook circuit drawn as an illustration, or <b>unknown</b>, in which case it n
 <li><b>Levels</b>: the tabs above the drawing, or the keys 1 to 5 (L1, L2, L3, scratchpad, DRAM). The camera
 travels between levels, so the new level is always seen inside the old one, or the old inside the new: out of the
 minion into its shire (the L2), out of the shire into the chip (the L3, the scratchpad and the DRAM draw the same map
-and cross-fade over it), and back in. The tab of the level shown, while zoomed in, goes back out to its top. The
+and cross-fade over it), and back in. While the drawing's labels are too small or too large to read, a small label
+at its top left names the scales on the way, the one the camera is at in bold. The tab of the level shown, while
+zoomed in, goes back out to its top. The
 address bar keeps the view (<code>#l2</code>, <code>#l1/dcache</code>, <code>#l1/load-hit/4</code>,
 <code>#l2/load-hit/9/cell</code>), so a link opens the same view.</li>
 <li><b>Click</b> any part (or Tab to it and press Space) for what it is, its numbers with their units and card

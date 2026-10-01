@@ -384,6 +384,8 @@ html.et-pres [data-ss-ui]{display:none!important}
 .toast{position:absolute;left:50%;top:56px;transform:translateX(-50%);z-index:6;max-width:min(720px,calc(100% - 24px));background:var(--surface);color:var(--ink);
   border:1px solid var(--border);border-radius:10px;padding:10px 14px;box-shadow:0 8px 28px rgba(0,0,0,.2);font-size:clamp(.85rem,.3vw + .72rem,1.05rem);line-height:1.4}
 .toast[hidden]{display:none}
+/* a toast lets taps through to what it covers (the level tabs, on a phone), but for its buttons */
+.toast{pointer-events:none}.toast .tb{pointer-events:auto}
 .toast p{margin:0 0 6px}
 .toast .tb{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .toast kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--border);border-radius:4px;padding:0 5px;background:var(--page)}
@@ -423,6 +425,14 @@ html.et-pres [data-ss-ui]{display:none!important}
 #mem.zmv .lay text{stroke:none!important}
 #mem .lay.nolab text,#mem .lay.nolab .pk,#mem .lay.nolab .co{visibility:hidden}
 #mem .lay.zout .ring{opacity:0}
+/* where the camera is, over a long move (WH in the script): a pill on the drawing's top-left, outside its sideways
+   scroll, shown as the drawing's labels fade; it takes no room (the stage's 4 px gap given back) and no taps */
+.zwhere{position:relative;z-index:3;height:0;margin-bottom:-4px;pointer-events:none;opacity:0;will-change:opacity}
+.zwhere>span{position:absolute;left:8px;top:8px;display:block;max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:clamp(.8rem,.25vw + .72rem,1rem);line-height:1.35;padding:3px 11px;border-radius:999px;color:var(--ink-2);
+  background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--border);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.zwhere>span>span.on{color:var(--ink);font-weight:650}
+.zwhere i{font-style:normal;margin:0 6px;color:var(--muted)}
 .t-id{font-size:32px;font-weight:650;fill:var(--ink);font-variant-numeric:tabular-nums}
 .t-lab{font-size:20px;fill:var(--ink-2)}
 .t-labb{font-size:20px;font-weight:600;fill:var(--ink)}
@@ -513,7 +523,9 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
 #asktab th:nth-child(1){width:19%}#asktab th:nth-child(2){width:35%}#asktab th:nth-child(3){width:22%}#asktab th:nth-child(4){width:12%}#asktab th:nth-child(5){width:12%}
 .prose .kd{font-size:.74rem}
 /* touch: every control at least 44 x 44 px */
-@media (pointer: coarse){.st-btn,.zc button,.tabs [role="tab"],.addr .st-btn{min-height:44px}.zc button.pm{min-width:44px}}
+@media (pointer: coarse){.st-btn,.zc button,.tabs [role="tab"],.addr .st-btn{min-height:44px}.zc button.pm{min-width:44px}
+  /* quick taps on the controls do not zoom the page (pinching still does) */
+  #tabs,#zc,#bar,.pip,.addr,#acc-row{touch-action:manipulation}}
 /* ---- narrow windows and phones: the stage stacks and the page scrolls; the drawing keeps a readable size, its text
    set as on a short screen, and scrolls sideways in its own box, from its left edge; "Fit to screen" (.fitted) fits it
    to the width, its text then small ---- */
@@ -650,6 +662,7 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
 <div class="st-body" id="stage-view" role="tabpanel" aria-labelledby="tab-l1">
   <div class="st-view">
     <div class="addr" id="addr" aria-label="The example address"></div>
+    <div class="zwhere" id="zwhere" aria-hidden="true"><span></span></div>
     <div class="st-svg" id="svgwrap"><svg id="mem" role="group" aria-label="Diagram of the level. Every part is a button: Tab to it and press Space for its details, Enter to zoom into it." xmlns="http://www.w3.org/2000/svg"></svg></div>
     <div class="kbd-hint" id="kbd-hint" hidden title="Then F presents, Space pauses and the arrows step">Click here, then press <kbd>F</kbd></div>
   </div>
@@ -698,7 +711,9 @@ textbook circuit drawn as an illustration, or <b>unknown</b>, in which case it n
 <li><b>Levels</b>: the tabs above the drawing, or the keys 1 to 5 (L1, L2, L3, scratchpad, DRAM). The camera
 travels between levels, so the new level is always seen inside the old one, or the old inside the new: out of the
 minion into its shire (the L2), out of the shire into the chip (the L3, the scratchpad and the DRAM draw the same map
-and cross-fade over it), and back in. The tab of the level shown, while zoomed in, goes back out to its top. The
+and cross-fade over it), and back in. While the drawing's labels are too small or too large to read, a small label
+at its top left names the scales on the way, the one the camera is at in bold. The tab of the level shown, while
+zoomed in, goes back out to its top. The
 address bar keeps the view (<code>#l2</code>, <code>#l1/dcache</code>, <code>#l1/load-hit/4</code>,
 <code>#l2/load-hit/9/cell</code>), so a link opens the same view.</li>
 <li><b>Click</b> any part (or Tab to it and press Space) for what it is, its numbers with their units and card
@@ -1325,7 +1340,7 @@ const D = {"meta":{"built_from":["research/facts-l1.json","research/facts-l2.jso
    same frame (FR); zooming into a part grows that part's box (with the frame's aspect, centred on it) into the frame.
    Each access is a list of steps; a step plays at one scale and, with Dive on, goes down to the circuit it switches and
    back. Keys: 1-5 levels, [ ] accesses, Left/Right steps, Shift+Left/Right tour slides, Space pauses, + and - zoom,
-   Enter zooms into a part, Backspace out, C follow, V dive, T tour (Shift+T every level), Q or Esc ends the tour,
+   Enter zooms into a part, Backspace out, C follow, V dive, T tour (Shift+T every level), Q ends the tour (Esc does not),
    F presents, P panel, D light and dark. URL: #<level>[/<access>[/<step>[/<scale>]]], ?theme=, ?panel=off, ?dive=on,
    ?tour=1|all.
 
@@ -1341,10 +1356,13 @@ const D = {"meta":{"built_from":["research/facts-l1.json","research/facts-l2.jso
    bindRoot); every level's root keeps its own layer (RL), drawn while the page is idle (prebuildIdle). A change of the
    example is the camera's too: at rest the worker draws the old layers again in place, or first goes out to the scale
    that shows the change and back in (freshen, req.via). A click or a tap takes PER_TAP ms per unit of log scale, the
-   whole move within SPAN; the keys keep their pace (480 ms per unit), an access and the tour theirs, on the clock that
-   Space stops. A request during a move redirects it from where it is, never queued; under prefers-reduced-motion
-   every move is a cut. On a phone the drawing's sideways scroll is part of the camera (winPlan), the rows above the
-   drawing keep the tallest level's height (rowsKeep), and the mini-map sits under the scale control (pipHome). */
+   whole move within SPAN, and so do the level keys 1-5 and the tab list's arrows; the scale keys (+, -, Enter,
+   Backspace) keep their pace (480 ms per unit), an access and the tour theirs, on the clock that Space stops. A request
+   during a move redirects it from where it is, never queued; under prefers-reduced-motion every move is a cut. On a
+   phone the drawing's sideways scroll is part of the camera (winPlan), the rows above the drawing keep the tallest
+   level's height (rowsKeep), and the mini-map sits under the scale control (pipHome). Over a long move the drawing's
+   labels fade (none is legible halfway through a zoom twenty times over), and a pill on its top-left names the scales
+   of the way, the one the camera is at in bold (where). */
 (function () {
 'use strict';
 let SRC_HTML = '';
@@ -1725,11 +1743,13 @@ function nestEl(ap, kOut, kIn) {
   return (ap.parts.shire || []).find(g => g._ctx && g._ctx.id === id);
 }
 /* level lv's root, in its own layer (RL): drawn unless it is drawn already with the current instance. A level the
-   camera only passes through (the L2, between the L1 and a chip level) takes the example address first. Returns true
-   when it drew it. */
-function ensureRoot(lv) {
+   camera only passes through (pass: the L2, between the L1 and a chip level, as restLeg says) takes the example
+   address first; the level a move leaves keeps the drawing on screen (30 September: inferred from Z.lv and Z.dlv, the
+   test also matched the level left, whose example was reset and its drawing redrawn at the tap). Returns true when it
+   drew it. */
+function ensureRoot(lv, pass) {
   const L = rootIn(lv);
-  if (lv !== Z.lv && lv !== Z.dlv && RANK[lv] > 0) withLv(lv, () => SCENES[lv].setInst());
+  if (pass && RANK[lv] > 0) withLv(lv, () => SCENES[lv].setInst());
   if (L._lv === lv && L._node === SCENES[lv].root && L._ap && L._ap.key === drawKey(lv)) return false;
   buildInto(L, lv, SCENES[lv].root);
   if (L === LAYERS[0]) { AP[0] = L._ap; FX[0] = L._fx; }
@@ -1749,14 +1769,18 @@ function layerFor(key) {
   if (LAYERS[d]._node !== id || LAYERS[d]._lv !== lv) buildLayer(d, id);
   return LAYERS[d];
 }
+/* A leg's views are parallel arrays: the scale (keys), where its frame lies in the leg's root (T), its layer (L) and
+   drawing (ap), what was last written to the layer (st), the stroke keeper of an outer view (keep), the context it
+   starts from (c0), and whether the camera only passes it (mid). legPut inserts one at index i. */
+const legNew = o => Object.assign({keys: [], T: [], L: [], ap: [], st: [], keep: [], c0: [], mid: [], also: null, end: 0}, o);
+function legPut(G, i, key, L, T, mid) {
+  G.keys.splice(i, 0, key); G.T.splice(i, 0, T); G.L.splice(i, 0, L); G.ap.splice(i, 0, L._ap);
+  G.st.splice(i, 0, null); G.keep.splice(i, 0, null); G.c0.splice(i, 0, 1); G.mid.splice(i, 0, !!mid);
+}
 /* a leg over a chain of scales, outermost first (their layers built) */
 function legOf(keys) {
-  const G = {keys: [], T: [], L: [], ap: [], st: [], keep: [], c0: [], mid: [], also: null, end: 0};
-  keys.forEach((k, i) => {
-    const L = layerFor(k);
-    G.T.push(i ? inR(G.T[i - 1], fitAspect(nestRect(G.ap[i - 1], keys[i - 1], k))) : FR);
-    G.keys.push(k); G.L.push(L); G.ap.push(L._ap); G.st.push(null); G.keep.push(null); G.c0.push(1); G.mid.push(false);
-  });
+  const G = legNew();
+  keys.forEach((k, i) => legPut(G, i, k, layerFor(k), i ? inR(G.T[i - 1], fitAspect(nestRect(G.ap[i - 1], keys[i - 1], k))) : FR));
   return G;
 }
 /* the cross-fade from chip level X's root to Y's: Y's frame lies at T in X's coordinates, the two maps in register
@@ -1766,8 +1790,9 @@ function fadeLeg(X, Y) {
   const a = RL[X]._ap.map, b = RL[Y]._ap.map, k = a.C / b.C;
   const T = {x: a.X0 + (FR.x - b.X0) * k, y: a.Y0 + (FR.y - b.Y0) * k, w: FR.w * k, h: FR.h * k};
   if (RL[X].nextSibling !== RL[Y]) RL[X].after(RL[Y]);
-  return {fade: true, keys: [jk(X, SCENES[X].root), jk(Y, SCENES[Y].root)], T: [FR, T], L: [RL[X], RL[Y]], ap: [RL[X]._ap, RL[Y]._ap],
-    st: [null, null], keep: [null, null], c0: [1, 1], mid: [false, false], also: null, end: 1};
+  const G = legNew({fade: true, end: 1});
+  legPut(G, 0, jk(X, SCENES[X].root), RL[X], FR); legPut(G, 1, jk(Y, SCENES[Y].root), RL[Y], T);
+  return G;
 }
 /* the leg's views go on, hidden until drawn; each outer view is set back around the part the next one grows from (and,
    at a scale passed between two legs, the part the other leg leaves or enters) */
@@ -1788,11 +1813,14 @@ function legOpen(G, V) {
   allLays().forEach(l => l.classList.add('busy'));
   legDraw(G, V);
 }
-/* one frame: each view's place, opacity, labels and context, from the view V (the root's coordinates) */
-function legDraw(G, V) {
+/* one frame: each view's place, opacity, labels and context, from the view V (the root's coordinates); rem: the ms
+   left in the leg, when a timeline draws it */
+function legDraw(G, V, rem) {
   const n = G.T.length, S = rmap(V, FR), op = [], lab = [], e = [];
+  let lm = 0;   // how legible the drawing's labels are: the most legible view's
   G.V = V;
-  if (G.win) winDraw(G.win, V);
+  if (G.win && G.win.g !== SCRL.geom) winReplan(G);   // (the window changed size during the move)
+  if (G.win) winDraw(G.win, V, rem);
   if (G.fade) {
     // a cross-fade: the level reached comes in over the level left, whose labels go first; its own come last
     const r = Math.log(G.T[1].w / G.T[0].w), f = Math.abs(r) > 1e-6 ? clamp(Math.log(V.w / G.T[0].w) / r, 0, 1) : 1;
@@ -1819,6 +1847,7 @@ function legDraw(G, V) {
     setT(L, M);
     if (Math.abs(o - st.op) > 1e-3 || (o >= 1) !== (st.op >= 1)) { st.op = o; L.style.opacity = o >= 1 ? 1 : o.toFixed(3); }
     const lb = G.mid[i] ? 0 : lab[i];
+    lm = Math.max(lm, lb * Math.min(1, o));
     if (Math.abs(lb - st.lab) > 2e-3 || (lb <= 0) !== (st.lab <= 0) || (lb >= 1) !== (st.lab >= 1)) {
       st.lab = lb; L.classList.toggle('nolab', lb <= 0);
       if (lb > 0 && lb < 1) L.style.setProperty('--lab', lb.toFixed(3)); else L.style.removeProperty('--lab');
@@ -1832,6 +1861,7 @@ function legDraw(G, V) {
       if (G.keep[i]) G.keep[i].set(M[0]);
     }
   }
+  if (WH.on) whereDraw(G, 1 - band(lm, 0.35, 0.85));
 }
 /* the leg ends at the view of chain index k: that view stays, at rest, and the others go; at another level's root, the
    drawing is that level's from now on */
@@ -1861,18 +1891,14 @@ function legRetarget(G, full, Q, ci, pass) {
     const add = full.slice(off + ci, off), Ls = add.map(layerFor), Ts = [FR], up = add.length;
     for (let i = 1; i <= up; i++) Ts.push(inR(Ts[i - 1], fitAspect(nestRect(Ls[i - 1]._ap, add[i - 1], i < up ? add[i] : G.keys[0]))));
     const R = Ts.pop(), map = A => inR(R, A);
-    G.T = Ts.concat(G.T.map(map)); G.V = map(G.V);
-    G.keys = add.concat(G.keys); G.L = Ls.concat(G.L); G.ap = Ls.map(L => L._ap).concat(G.ap);
-    G.st = Array(up).fill(null).concat(G.st); G.keep = Array(up).fill(null).concat(G.keep);
-    G.c0 = Array(up).fill(1).concat(G.c0); G.mid = Array(up).fill(true).concat(G.mid);
+    G.T = G.T.map(map); G.V = map(G.V);
+    add.forEach((key, i) => legPut(G, i, key, Ls[i], Ts[i], true));
     ci = 0;
   }
   for (let x = off + G.keys.length; ci >= G.keys.length && x < Q.length; x++) {
-    const key = Q[x], id = kId(key), d = pathIn(Z.dlv, id).length - 1;
+    const key = Q[x], id = kId(key), d = pathIn(Z.dlv, id).length - 1, n = G.keys.length;
     buildLayer(d, id);
-    G.T.push(inR(G.T[G.T.length - 1], fitAspect(nestRect(G.ap[G.ap.length - 1], G.keys[G.keys.length - 1], key))));
-    G.keys.push(key); G.L.push(LAYERS[d]); G.ap.push(AP[d]);
-    G.st.push(null); G.keep.push(null); G.c0.push(1); G.mid.push(true);
+    legPut(G, n, key, LAYERS[d], inR(G.T[n - 1], fitAspect(nestRect(G.ap[n - 1], G.keys[n - 1], key))), true);
   }
   G.end = Math.min(ci, G.keys.length - 1);
   G.mid = G.mid.map((m, i) => (i === G.end ? !!pass : !(G.st[i] && G.st[i].vis && G.st[i].lab > 0)));
@@ -1884,11 +1910,13 @@ const legNearest = G => G.T.reduce((b, T, i) => (Math.abs(Math.log(T.w / G.V.w))
 
 /* ---- a narrow window (a phone): the drawing keeps a readable size and scrolls sideways in #svgwrap. The scroll is
    part of the camera (30 September; before, a move often played beside the window): over each leg the window follows
-   a part of the view, from where the reader left it (over the leg's first fifth, on a log scale): a leg in follows the
+   a part of the view, eased from where the reader left it: a leg in follows the
    view it reaches, from its left edge, and ends on its title; a leg out follows the view it leaves, from its left edge
    while it is wider than the window and centred once it is narrower, and ends on the part it came from; a leg that hands
    over to another (the part it goes into next) turns to that part over its second half; a cross-fade keeps the window
-   on the same place of the map. A swipe during a move hands the scroll back to the reader. ---- */
+   on the same place of the map. A sideways swipe during a move hands the scroll back to the reader; a page swipe does
+   not. The window eases onto that plan (winDraw), never faster than WIN_V px per ms but to land on it by the leg's
+   end. ---- */
 const WRAP = $('svgwrap');
 /* user: the reader swiped during the move; sl: the scroll the reader sees, kept from its events and the camera's own
    writes, and geom the window's size, kept until a resize or Fit (a move reads neither from the layout: at 4x CPU
@@ -1896,17 +1924,36 @@ const WRAP = $('svgwrap');
    shift of the drawing (a CSS transform, from base, the scroll the move began at), and the scroll takes it when the
    camera stops (winCommit): written every frame, the scroll halved the frame rate on a phone at a quarter of the speed
    (30 fps against 60, measured 30 September). */
-const SCRL = {user: false, sl: 0, geom: undefined, base: null};
+const SCRL = {user: false, sl: 0, geom: undefined, base: null, v: 0};
 function winCommit() {
+  SCRL.v = 0;
   if (SCRL.base == null) return;
   SCRL.base = null; svg.style.transform = ''; WRAP.scrollLeft = SCRL.sl;
 }
-['touchmove', 'wheel'].forEach(ev => WRAP.addEventListener(ev, () => { if (ZW) { SCRL.user = true; winCommit(); } }, {passive: true}));
+/* the reader takes the window: a swipe more sideways than down, past a few px, or a sideways wheel (30 September: any
+   touch did, and a page swipe during a move left its end scrolled sideways, the new view's title off the screen) */
+const userWin = () => { if (ZW) { SCRL.user = true; winCommit(); } };
+let TS = null;
+WRAP.addEventListener('touchstart', e => { const t = e.touches[0]; TS = e.touches.length === 1 && t ? {x: t.clientX, y: t.clientY} : null; }, {passive: true});
+WRAP.addEventListener('touchmove', e => {
+  const t = e.touches[0]; if (!TS || !t || e.touches.length > 1) return;
+  const dx = Math.abs(t.clientX - TS.x), dy = Math.abs(t.clientY - TS.y);
+  if (dx > 6 && dx > dy) { TS = null; userWin(); }
+}, {passive: true});
+WRAP.addEventListener('wheel', e => { if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) userWin(); }, {passive: true});
 WRAP.addEventListener('scroll', () => {
-  if (SCRL.base != null && WRAP.scrollLeft !== SCRL.base) { SCRL.user = true; SCRL.base = null; svg.style.transform = ''; }   // the reader scrolled
+  // the reader scrolled the window while the camera moved it: theirs, from where they saw it
+  if (SCRL.base != null && WRAP.scrollLeft !== SCRL.base) {
+    const d = WRAP.scrollLeft - SCRL.base;
+    SCRL.user = true; SCRL.base = null; SCRL.v = 0; svg.style.transform = ''; WRAP.scrollLeft = SCRL.sl + d;
+  }
   if (SCRL.base == null) SCRL.sl = WRAP.scrollLeft;
 }, {passive: true});
-window.addEventListener('resize', () => { SCRL.geom = undefined; });
+/* The window changed size during a move (a phone turned, Fit to screen, presenting): the move's plan was for the old
+   one (30 September: it went on shifting a drawing that no longer scrolled, off the screen for up to 0.9 s). The window
+   stays where it was shown, and the move plans it again from there */
+function winReplan(G) { if (G && G.win) { winCommit(); G.win = winPlan(G); } }
+window.addEventListener('resize', () => { SCRL.geom = undefined; if (CUR) winReplan(CUR.G); });
 /* the window in the frame's units: px per unit, its width, its left edge's range; null when the drawing fits */
 function scrollGeom() {
   if (SCRL.geom !== undefined) return SCRL.geom;
@@ -1918,8 +1965,9 @@ function scrollGeom() {
   return SCRL.geom;
 }
 function winPlan(G) {
-  const g = scrollGeom(); if (!g || SCRL.user) return null;
-  const V0 = G.V, V1 = G.V1, n = G.L.length, e = G.end, W = {g, V0, V1, wx0: g.x0 + SCRL.sl / g.px, S: null, A: null, c: null, last: null};
+  // (none while Fit's own animation of the drawing runs: the shift would show only when that ends)
+  const g = scrollGeom(); if (!g || SCRL.user || (svg.getAnimations && svg.getAnimations().length)) return null;
+  const V0 = G.V, V1 = G.V1, n = G.L.length, e = G.end, W = {g, V0, V1, wx0: g.x0 + SCRL.sl / g.px, S: null, A: null, c: null, last: SCRL.sl, x: SCRL.sl, t: 0, P: null};
   try {
     if (G.fade) W.c = V0.x + (W.wx0 + g.wv / 2 - FR.x) * V0.w / FR.w;   // the place of the map under the window's centre
     else {
@@ -1928,32 +1976,100 @@ function winPlan(G) {
       const r = G.also && G.alsoAt == null && nestRect(G.ap[e], G.keys[e], G.also);
       if (r) W.A = inR(G.T[e], r);
     }
-  } catch (err) { console.error(err, G.keys, e, G.also); }
+  } catch (err) { console.error(err); W.S = W.A = null; W.c = null; }
   return W;
 }
 /* the window's left edge (frame units) that shows rect R (the root's coordinates) at the view V: centred on it while it
    is narrower than the window, else from its left edge; left: always from its left edge (a leg in: the edge moves one
    way only, to the new view's title) */
 const winOn = (g, R, V, left) => { const k = FR.w / V.w, rx = FR.x + (R.x - V.x) * k, rw = R.w * k, m = FR.x - VB.x; return rx - m - (left ? 0 : Math.max(0, (g.wv - rw - 2 * m) / 2)); };
-function winDraw(W, V) {
+/* The window follows its plan (P, in px of scroll) as a critically damped spring of time constant WIN_T ms that also
+   takes the plan's own speed (so that it trails nothing while the plan moves steadily); it gathers speed by at most
+   WIN_A px/ms per ms, up to WIN_V px per ms, or to the pace that still reaches the plan by the leg's end (rem ms from
+   now), where it lands on it. Its speed (SCRL.v) carries over from one leg to the next one that takes the camera over.
+   (30 September: the window took the plan at once, blended in from the reader's place over the leg's first fifth on a
+   log scale; a short or redirected leg, entered at speed, covered that in two to four frames, up to 150 px a frame on
+   a phone, there and back.) */
+const WIN_T = 70, WIN_V = 1.5, WIN_A = 0.015;
+function winDraw(W, V, rem) {
   if (SCRL.user) return;
-  const g = W.g, r = Math.log(W.V1.w / W.V0.w), q = Math.abs(r) > 1e-9 ? clamp(Math.log(V.w / W.V0.w) / r, 0, 1) : 1;
+  const g = W.g;
   let x = W.c != null ? FR.x + (W.c - V.x) * FR.w / V.w - g.wv / 2 : W.S ? winOn(g, W.S, V, W.in) : W.wx0;
-  if (W.A) x = lerp(x, winOn(g, W.A, V), easeS(band(q, 0.5, 1)));
-  x = lerp(W.wx0, x, easeS(band(q, 0, 0.2)));
-  const sl = Math.round((clamp(x, g.x0, g.xMax) - g.x0) * g.px);
+  if (W.A) {
+    const r = Math.log(W.V1.w / W.V0.w), q = Math.abs(r) > 1e-9 ? clamp(Math.log(V.w / W.V0.w) / r, 0, 1) : 1;
+    x = lerp(x, winOn(g, W.A, V), easeS(band(q, 0.5, 1)));
+  }
+  const top = (g.xMax - g.x0) * g.px, P = (clamp(x, g.x0, g.xMax) - g.x0) * g.px;
+  const now = performance.now(), dt = W.t ? clamp(now - W.t, 0, DTMAX) : 0, vP = dt > 0 && W.P != null ? (P - W.P) / dt : 0;
+  W.t = now; W.P = P;
+  if (rem === 0) { W.x = P; SCRL.v = 0; }
+  else if (dt > 0) {
+    const w = 1 / WIN_T, vmax = Math.max(WIN_V, rem > 0 ? 1.2 * Math.abs(P - W.x) / rem : 0);
+    let v = SCRL.v, p = W.x;
+    for (let left = dt; left > 1e-6; left -= 8) {   // (8 ms steps: stable at any frame time)
+      const h = Math.min(8, left), pt = P - vP * (left - h);
+      let u = clamp(v + (w * w * (pt - p) + 2 * w * (vP - v)) * h, -vmax, vmax);
+      if (Math.abs(u) > Math.abs(v) && u * v >= 0) u = v + clamp(u - v, -WIN_A * h, WIN_A * h);   // (gathering speed; braking is free)
+      v = u; p += v * h;
+    }
+    W.x = clamp(p, 0, top); SCRL.v = W.x === p ? v : 0;
+  }
+  const sl = Math.round(W.x);
   if (sl === W.last) return;
   W.last = SCRL.sl = sl;
   if (SCRL.base == null) SCRL.base = WRAP.scrollLeft;
   svg.style.transform = sl === SCRL.base ? '' : `translateX(${SCRL.base - sl}px)`;
 }
 
+/* ---- where the camera is (30 September). A zoom between two levels is twenty times over, and halfway through it no
+   label of either view can be read (the outer one's are five times their size and cut, the inner one's a fifth); a
+   move between the L1 and a chip level showed none for 0.9-1.2 s of 1.6-1.9, on a phone whose caption and scale
+   control are below the fold. Over a move that crosses levels or passes a scale, a pill on the drawing's top-left
+   names the scales of the way, the one the camera is nearest in bold; it shows as the drawing's labels fade (the
+   complement of the most legible view's), so that it never covers a title that can be read. ---- */
+const WH = {el: $('zwhere'), on: false, keys: [], els: [], cur: -1, op: 0};
+function whereOp(a) {
+  a = Math.round(clamp(a, 0, 1) * 50) / 50;
+  if (a !== WH.op) { WH.op = a; WH.el.style.opacity = a ? String(a) : ''; }
+}
+/* a new request: the way from the scale the camera is at (or nearest, in flight) to the target */
+function whereRoute(req) {
+  WH.on = false; whereOp(0);
+  if (cutOf(req.o)) return;
+  const G = CUR && CUR.G, ck = G ? G.keys[legNearest(G)] : Z.path.length ? jk(Z.dlv, Z.path[Z.path.length - 1]) : null;
+  if (!ck) return;
+  const cl = kLv(ck), A = (G ? G.keys.map(kLv) : [Z.dlv]).concat(req.lv).find(l => RANK[l] === 0) || 'l3';
+  const P = canon(cl, pathIn(cl, kId(ck)), A), Q = canon(req.lv, req.t, A);
+  let k = 0; while (k < P.length && k < Q.length && P[k] === Q[k]) k++;
+  const r = P.slice(Math.max(k - 1, 0)).reverse().concat(Q.slice(k));
+  // (a move turned on a leg between levels shows it too, the camera being far from the scale it is nearest)
+  if (r.length < 3 && new Set(r.concat(G ? G.keys : []).map(kLv)).size < 2) return;
+  const box = WH.el.firstElementChild; box.textContent = '';
+  let pl = null;
+  WH.els = r.map((key, i) => {
+    const lv = kLv(key), nd = SCENES[lv].scales[kId(key)];
+    if (i) box.appendChild(document.createElement('i')).textContent = '›';
+    const e = box.appendChild(document.createElement('span'));
+    e.textContent = (lv !== pl ? SCENES[lv].short + ' ' : '') + (nd.short || nd.name); pl = lv;
+    return e;
+  });
+  WH.keys = r; WH.cur = -1; WH.on = true;
+}
+/* a frame: a, how much the pill shows; the scale the camera is nearest, in bold */
+function whereDraw(G, a) {
+  whereOp(a);
+  const i = WH.keys.indexOf(G.keys[legNearest(G)]);
+  if (i >= 0 && i !== WH.cur) { if (WH.cur >= 0) WH.els[WH.cur].classList.remove('on'); WH.els[i].classList.add('on'); WH.cur = i; }
+}
+const whereOff = () => { WH.on = false; whereOp(0); };
+
 /* A timeline on real time (the reader's own zoom) or on the animation clock (an access's or the tour's camera, which
    Space stops); fn(t) runs at once for t = 0, then every frame. stop() true: a newer request came in; the timeline stops
    where it is and resolves false. A clock timeline whose token died goes on in real time, so that a stopped access never
    leaves the camera halfway. A timeline that stopped for a newer request, in a frame it did not draw, leaves when it last
    drew and this frame (HAND): the next one, started in the same frame, draws a whole frame's step at once, so that a
-   redirect never shows the same place twice (the chip tour's timeline of 28 September). */
+   redirect never shows the same place twice (the chip tour's timeline of 28 September). Reduced motion switched on
+   during a move ends it at once. */
 let HAND = null;
 function timeline(T, fn, clk, stop) {
   return new Promise(res => {
@@ -1969,6 +2085,7 @@ function timeline(T, fn, clk, stop) {
       const j = () => {
         if (done) { CLK.jobs.delete(j); return; }
         if (stop()) { CLK.jobs.delete(j); HAND = {prev: drawn, now: CLK.last}; fin(false); return; }
+        if (REDUCED) { CLK.jobs.delete(j); step(T); fin(true); return; }
         if (CLK.on || clk.dead) acc += CLK.dt;
         const t = Math.min(T, acc); drawn = CLK.last;
         if (step(t) || t >= T) { CLK.jobs.delete(j); fin(true); }
@@ -1983,6 +2100,7 @@ function timeline(T, fn, clk, stop) {
     const f = now => {
       if (done) return;
       if (stop()) { HAND = {prev: drawn, now}; fin(false); return; }
+      if (REDUCED) { step(T); fin(true); return; }
       acc += Math.min(DTMAX, Math.max(0, now - drawn)); drawn = now;
       const t = Math.min(T, acc);
       if (step(t) || t >= T) fin(true); else requestAnimationFrame(f);
@@ -1996,7 +2114,7 @@ async function legRun(G, T, m, clk, stop) {
   const dl = Math.log(G.V1.w / G.V0.w), c = CUR = {G, p: 0, v: 0};
   const ok = await timeline(T, tt => {
     const u = T > 0 ? Math.min(1, tt / T) : 1, p = herm(u, m);
-    legDraw(G, legAt(G, p)); c.p = p; c.v = T > 0 ? dl * hermD(u, m) / T : 0;
+    legDraw(G, legAt(G, p), T - tt); c.p = p; c.v = T > 0 ? dl * hermD(u, m) / T : 0;
   }, clk, stop);
   if (ok) legClose(G, G.end);
   return ok;
@@ -2004,10 +2122,16 @@ async function legRun(G, T, m, clk, stop) {
 /* the log length of the zoom from scale kOut's frame to kIn's, one inside the other: measured where a layer holds
    kOut, else from the scales' nominal widths (which serve only to share a capped move's time out) */
 function stepLen(kOut, kIn) {
-  const X = kLv(kOut);
-  if (X !== kLv(kIn)) return Math.log(FR.w / fitAspect(RANK[X] === 1 ? {x: 0, y: 0, w: 56, h: 34} : {x: 0, y: 0, w: 62, h: 62}).w);
-  const id = kId(kOut), L = X === Z.dlv ? LAYERS[pathIn(X, id).length - 1] : RL[X];
+  const X = kLv(kOut), id = kId(kOut);
   let w = 0;
+  if (X !== kLv(kIn)) {
+    // into another level: the minion's box in the L2's shire, or the requester's tile on a chip level's map (68 units
+    // on the L3's, 60 on the scratchpad's, 56 on the DRAM's), as drawn; the nominal sizes until it is
+    const R = RL[X];
+    if (R._lv === X && R._node === id && R._ap) { try { w = fitAspect(nestRect(R._ap, kOut, kIn)).w; } catch (_) { w = 0; } }
+    return Math.log(FR.w / (w > 0 ? w : fitAspect(RANK[X] === 1 ? {x: 0, y: 0, w: 56, h: 34} : {x: 0, y: 0, w: 62, h: 62}).w));
+  }
+  const L = X === Z.dlv ? LAYERS[pathIn(X, id).length - 1] : RL[X];
   if (L && L._lv === X && L._node === id && L._ap) { try { w = fitAspect(nestRect(L._ap, kOut, kIn)).w; } catch (_) { w = 0; } }
   return Math.log(FR.w / (w > 0 ? w : SCENES[X].scales[kId(kIn)].tw || 260));
 }
@@ -2083,20 +2207,33 @@ function goTo(t, o) {
 /* the camera at rest: resolves when the move under way (if any) ends */
 const camRest = () => (ZW ? new Promise(res => ZWAIT.push(res)) : Promise.resolve());
 /* the pace of a move, ms per unit of log scale, set once for the whole move (out and in; by way of req.via, out to the
-   scale that shows a change of the example and back in to req.t) */
+   scale that shows a change of the example and back in to req.t). The length is from where the camera is: in flight,
+   on the chain P of the leg's deepest scale, against P[k - 1], the scale P shares with the target (30 September: it
+   was taken from the leg's root, so that a move turned back down its own way near the root was paced as one unit, 450
+   ms per unit, and took 2.4-2.7 s back to the L1 against 1.5 s from rest). The chip level of the chains is the one
+   flight() and restLeg() take, the leg's own first (else a move's cross-fade could go uncounted). */
 function paceOf(req) {
   const o = req.o;
   if (cutOf(o)) return 0;
   const G = CUR && CUR.G, dk = G ? G.keys[G.keys.length - 1] : null, cl = dk ? kLv(dk) : Z.dlv;
-  const A = [cl, req.lv].concat(G ? G.keys.map(kLv) : []).find(l => RANK[l] === 0) || 'l3';
+  const A = (G ? G.keys.map(kLv) : [Z.dlv]).concat(req.lv).find(l => RANK[l] === 0) || 'l3';
   const P = canon(cl, dk ? pathIn(cl, kId(dk)) : Z.path, A), Q = canon(req.lv, req.t, A), Vi = req.via ? canon(req.lv, req.via, A) : null;
   const M = Vi || Q;
   let k = 0; while (k < P.length && k < M.length && P[k] === M[k]) k++;
   // (each leg at least LMIN long, as its time is: a move given a total takes that long; a cross-fade is one leg)
   const lm = c => (c > 1e-6 ? Math.max(c, LMIN) : 0);
-  const out = (G ? Math.abs(Math.log(G.V.w / FR.w)) : 0) + jlen(P, k - 1, P.length - 1);
-  const inn = Vi ? jlen(Q, Vi.length - 1, Q.length - 1) : jlen(Q, k - 1, Q.length - 1);
-  const cost = Math.max(0.05, lm(out) + (k ? 0 : LMIN) + lm(inn));
+  let out = jlen(P, k - 1, P.length - 1), inn = jlen(M, k - 1, M.length - 1), fade = !k;
+  if (G && G.fade) { out = 0; fade = true; inn = jlen(M, 0, M.length - 1); }
+  else if (G) {
+    // log units below the leg's root (P[off]): the camera (c), and P[k - 1] (at; P's top when the chains share no scale)
+    const off = P.length - G.keys.length, c = Math.log(FR.w / G.V.w), s = Math.max(k - 1, 0);
+    if (off >= 0 && P[off] === G.keys[0]) {
+      const at = s >= off ? Math.log(FR.w / G.T[s - off].w) : -jlen(P, s, off);
+      if (c >= at || !k) out = c - at; else { out = 0; inn += at - c; }
+    } else out += Math.abs(c);
+  }
+  if (Vi) inn += jlen(Q, Vi.length - 1, Q.length - 1);
+  const cost = Math.max(0.05, lm(out) + (fade ? LMIN : 0) + lm(inn));
   return o.total ? o.total / cost : o.ms != null ? o.ms : o.clk ? (o.cap ? Math.min(580, o.cap / cost) : 580)
     : o.span ? clamp(PER_TAP * cost, SPAN[0], o.spanMax || SPAN[1]) / cost : 480;
 }
@@ -2108,7 +2245,7 @@ async function zoomWorker() {
   try {
     for (let guard = 0; ZT && guard < 40 && gen === ZGEN; guard++) {
       const req = ZT, o = req.o, clk = o.clk || null, stop = () => ZT !== req || gen !== ZGEN;
-      if (req !== seen) { seen = req; pn0 = PNG; SCRL.user = false; }
+      if (req !== seen) { seen = req; pn0 = PNG; SCRL.user = false; whereRoute(req); }
       if (o.focus) wantFocus = true;
       // at rest in the request's level: the drawing shows the current instance, or the camera first goes out to show it
       if (!CUR && Z.dlv === req.lv) {
@@ -2138,7 +2275,7 @@ async function zoomWorker() {
   if (gen !== ZGEN) return;   // the level was drawn at once under it (setLevel), which has reset everything
   ZT = null; ZW = false;
   if (CUR) { try { legClose(CUR.G, legNearest(CUR.G)); } catch (e) { console.error(e); } CUR = null; }
-  svg.classList.remove('zmv'); winCommit();
+  svg.classList.remove('zmv'); winCommit(); whereOff();
   if (Z.dlv !== Z.lv || !Z.path.length) drawRoot();   // not expected: the drawing takes the reader's level at once
   const moved = from.lv !== Z.dlv || !samePath(from.path, Z.path);
   if (moved || rebuilt) {
@@ -2146,9 +2283,15 @@ async function zoomWorker() {
     if (!(SEL && SEL.isConnected && LAYERS[Z.path.length - 1].contains(SEL))) select(null);
     scaleUI(); viewHash();
     if (rebuilt) addrUI();
-    // a panel's zoom buttons name parts of the view left (a new level's panel is its own, and so is a part's picked since)
-    if (lvn === LVN && PNG === pn0) $('pn-body').querySelectorAll('button[data-act="zoom"]').forEach(b => { const a = b.closest('.pn-act'); if (a) a.remove(); });
-    if (moved && (hadFocus || wantFocus)) { const f = zoomFocus(from); if (f) f.focus({preventScroll: true}); }
+    // a panel's zoom buttons name parts of the view left (a new level's panel is its own, and so is that of a part picked
+    // since in the view reached)
+    if (lvn === LVN && !(PNG !== pn0 && SEL)) $('pn-body').querySelectorAll('button[data-act="zoom"]').forEach(b => { const a = b.closest('.pn-act'); if (a) a.remove(); });
+    // the focus the move took from the drawing comes back to it, unless the reader has put it elsewhere since (30
+    // September: a level move lasts 1-1.5 s, a tour's up to 3.2, and its end took the focus back from a button)
+    const a = document.activeElement;
+    if (moved && (hadFocus || wantFocus) && (!a || a === document.body || (svg.contains(a) && !LAYERS[Z.path.length - 1].contains(a)))) {
+      const f = zoomFocus(from); if (f) f.focus({preventScroll: true});
+    }
   }
   pipHold(false); pipUpdate();   // every move ends with the mini-map of where it ends (one that ends where it began too)
   const w = ZWAIT; ZWAIT = []; w.forEach(r => r());
@@ -2205,11 +2348,13 @@ function restLeg(req, t, c0) {
   } else {
     const A = !RANK[sl] ? sl : !RANK[tl] ? tl : 'l3';
     P = canon(sl, s, A); Q = canon(tl, t, A);
-    // every level's root the move crosses, drawn before it starts (not halfway, a long task on a slow phone)
-    [...new Set(P.concat(Q).map(kLv))].forEach(lv => { if (lv !== sl) ensureRoot(lv); });
   }
   let k = 0; while (k < P.length && k < Q.length && P[k] === Q[k]) k++;
   const b = k - 1;
+  // every level's root the move crosses, drawn before it starts (not halfway, a long task on a slow phone), and only
+  // those (30 September: an L1-L2 move drew the L3's map too, 15-30 ms at the tap on a phone); a level between the two
+  // is passed through, and takes the example address
+  if (sl !== tl && b >= 0) new Set(P.slice(b).concat(Q.slice(b)).map(kLv)).forEach(lv => { if (lv !== sl) ensureRoot(lv, lv !== tl); });
   if (P.length - 1 > b) {
     const G = legOf(P.slice(b)), n = G.L.length, pass = Q.length - 1 > b;
     G.mid = G.mid.map((_, i) => i > 0 && i < n - 1);
@@ -2229,19 +2374,30 @@ function restLeg(req, t, c0) {
   }
   return null;
 }
-/* after a zoom, focus the part zoomed out of, else the first part of the new view */
+/* after a zoom, focus the part zoomed out of (out to an outer level's root, the part the level left sits in: the L1's
+   neighbourhood in the L2's shire, the requester's tile on a chip level's map), else the first part of the new view */
 function zoomFocus(from) {
   const d = Z.path.length - 1, L = LAYERS[d];
   if (from.lv === Z.dlv && from.path.length > Z.path.length) { const g = AP[d].zg[from.path[d + 1]]; if (g) return g; }
+  if (from.lv !== Z.dlv && !d && RANK[from.lv] > RANK[Z.dlv]) {
+    let g = null;
+    try { g = nestEl(AP[0], jk(Z.dlv, Z.path[0]), jk(from.lv, SCENES[from.lv].root)); } catch (_) { g = null; }
+    g = g && g.closest && g.closest('.comp');
+    if (g && L.contains(g)) return g;
+  }
   return L.querySelector('.comp');
 }
+/* the leg in flight dropped (a level drawn at once under it): its outer views' strokes take back their widths (30
+   September: a level's root is kept and drawn again only when stale, and kept the widths written halfway) */
+function legAbort() { if (CUR) { CUR.G.keep.forEach(kp => kp && kp.done()); CUR = null; } }
 /* the reader's level drawn at its root at once (the page's start, a link, reduced motion) */
 function drawRoot() {
+  legAbort();
   allLays().forEach(L => {
     L.style.display = 'none'; L.style.opacity = 0; L.style.visibility = ''; setT(L, null); ctxClear(L);
     L.classList.remove('busy', 'zout', 'nolab'); L.style.removeProperty('--lab'); L.style.removeProperty('--ctx');
   });
-  svg.classList.remove('zmv'); winCommit(); HAND = null; CUR = null;
+  svg.classList.remove('zmv'); winCommit(); whereOff(); HAND = null;
   bindRoot(Z.lv); ensureRoot(Z.lv); parkRoots();
   Z.path = [SC().root];
   LAYERS[0].style.display = ''; LAYERS[0].style.opacity = 1;
@@ -2573,6 +2729,7 @@ function badges(list) {
 }
 function showPart(key, ctx) {
   const P = SC().parts[key]; if (!P) { console.error('no part ' + key); return; }
+  PNG++;   // (a part picked during a move, in the view it reaches, keeps its zoom buttons when it ends: zoomWorker)
   const d = P(ctx || {}), keys = (PARTSF[Z.lv] && PARTSF[Z.lv][d.facts || key]) || [];
   panel(`<p class="pn-kick">${esc(d.kick)}</p><p class="pn-title">${esc(d.title)}</p>`
     + (d.badge ? `<p class="pn-badge">${badges(d.badge)}</p>` : '')
@@ -6659,13 +6816,15 @@ function levelState(lv, o) {
   renderBar(); playBtn();
   if (!o.noHash) setHash(lv);
   $('lvl-live').textContent = 'Level: ' + SC().title;
+  // the mini-map showed a scale of the level left, and a click on it would zoom the new one: gone until the camera stops
+  PIP.el.hidden = true; pipHold(false);
 }
 /* a level drawn at once, at its root: the page's start, a link, and every level change under reduced motion */
 async function setLevel(lv, o) {
   o = o || {};
   if (!SCENES[lv]) return;
   if (Z.lv === lv && Z.dlv === lv && Z.path.length && !ZW && !o.force) { if (!o.noHash) setHash(lv); return; }
-  ZGEN++; ZT = null; CUR = null;
+  ZGEN++; ZT = null; legAbort();
   if (ZW) { ZW = false; const w = ZWAIT; ZWAIT = []; w.forEach(r => r()); }
   levelState(lv, o);
   drawRoot();
@@ -6681,12 +6840,20 @@ function moveLevel(lv, o) {
   o = o || {};
   if (!SCENES[lv]) return Promise.resolve();
   if (Z.lv === lv) {
-    if (o.path) return userNav(o.path, o.cam || TAP);
-    if (zNow().length > 1) return userNav([SC().root], o.cam || TAP);
+    // (a tour ends, as at another level's key: the camera leaves its slide)
+    const to = o.path || (zNow().length > 1 ? [SC().root] : null);
+    if (to) { if (TOUR) endTour(); return userNav(to, o.cam || TAP); }
     if (!o.noHash) setHash(lv);
     return camRest();
   }
-  if (REDUCED || !STARTED) return setLevel(lv, o).then(() => (o.path ? goTo(o.path, {ms: 0}) : null));
+  if (REDUCED || !STARTED) {
+    // a cut: the focus on a part of the level left goes to the part of the new view it lies in, or its first
+    const focus = STARTED && svg.contains(document.activeElement), from = {lv: Z.dlv, path: Z.path.slice()};
+    return setLevel(lv, o).then(() => (o.path ? goTo(o.path, {ms: 0}) : null)).then(() => {
+      const a = document.activeElement;
+      if (focus && (!a || a === document.body)) { const f = zoomFocus(from); if (f) f.focus({preventScroll: true}); }
+    });
+  }
   hideTip();
   const focus = svg.contains(document.activeElement);
   levelState(lv, o);
@@ -7058,6 +7225,7 @@ const ACTS = {
   newpa: () => {
     if (SC().newAddr) SC().newAddr(); else ADDR.pa = mkPA(Math.floor(Math.random() * 32), Math.floor(Math.random() * 2 ** 20)) + D.addr.offset;
     if (AC.k) startAccess(AC.k, 0); else instView();
+    prebuildIdle(true);
   },
   // the requester (L3, scratchpad, DRAM): a shire's details panel moves it; the drawing and a running access follow
   req: b => {
@@ -7065,6 +7233,7 @@ const ACTS = {
     const sel = SEL && SEL._key, sctx = SEL && SEL._ctx;
     if (AC.k) startAccess(AC.k, AC.i, {still: AC.still || !CLK.on});
     else { instView(); showPart(sel || 'overview', sctx); }
+    prebuildIdle(true);
     toast(`<p>The requester is now shire ${id}.</p>`, 2500);
   },
   // the L3's zero-line toggle: with it on, a load's data phase skips the data macros (the zero bit)
@@ -7078,6 +7247,7 @@ const ACTS = {
   // box, with everything under it, follows at the same pace (30 September: a cut before)
   fit: b => {
     const w = $('svgwrap'), on = !w.classList.contains('fitted');
+    if (CUR) CUR.G.win = null;   // (a move under way: the window stays put from here, winReplan)
     winCommit();
     const r0 = svg.getBoundingClientRect(), h0 = w.getBoundingClientRect().height;
     [svg, w].forEach(x => { if (x.getAnimations) x.getAnimations().forEach(a => a.cancel()); });
@@ -7227,14 +7397,19 @@ const phClass = () => $('stage').classList.toggle('ph', mqOn(PHQ));
 phClass(); try { matchMedia(PHQ).addEventListener('change', phClass); } catch (_) { /* an old browser: as loaded */ }
 pipHome(); try { matchMedia('(max-width: 899px)').addEventListener('change', () => { pipHome(); rowsKeep(); }); } catch (_) { /* as loaded */ }
 /* the other levels' roots, drawn while the page is idle, one at a time, so that a move to a level does not first wait
-   for its drawing (a long task at the tap, 80-130 ms on a phone at a quarter of the speed) */
-function prebuildIdle() {
+   for its drawing (a long task at the tap, 80-130 ms on a phone at a quarter of the speed). Again after a new example
+   address or requester (inst: each takes the example first, as it will when the camera goes there), the last run only */
+let PBN = 0;
+function prebuildIdle(inst) {
   const ric = window.requestIdleCallback ? (f => window.requestIdleCallback(f, {timeout: 4000})) : (f => setTimeout(f, 300));
-  const todo = LEVELS.slice();
+  const todo = LEVELS.slice(), n = ++PBN;
   const one = () => {
+    if (n !== PBN) return;
     if (ZW || accOn() || TOUR) { setTimeout(() => ric(one), 1500); return; }
     const lv = todo.shift(); if (!lv) return;
-    if (lv !== Z.dlv) { try { ensureRoot(lv); RL[lv].style.display = 'none'; parkRoots(); } catch (e) { console.error(e); } }
+    if (lv !== Z.dlv && lv !== Z.lv) {
+      try { if (inst) withLv(lv, () => SCENES[lv].setInst()); ensureRoot(lv); RL[lv].style.display = 'none'; parkRoots(); } catch (e) { console.error(e); }
+    }
     ric(one);
   };
   setTimeout(() => ric(one), 1200);
