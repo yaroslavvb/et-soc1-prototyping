@@ -1,0 +1,1079 @@
+{
+ "meta": {
+  "built": "2026-09-30, build_outside.py",
+  "order": "inside out: package, card, host, rack, Studio 45, San Francisco, Bay Area, (California), US, Earth, (Earth-Moon), Solar System, (nearest stars), Milky Way, Local Group, Laniakea, observable universe, beyond. Levels marked optional bridge long steps; the owner's named levels are all required.",
+  "clock_hz": 600000000.0,
+  "clock_source": "docs/findings/14-card-behaviour.md:338 (the lab cards' usual minion clock)",
+  "fibre_group_index": 1.4682,
+  "fibre_source": "Corning SMF-28e+ optical fibre, product information sheet: effective group index 1.4676 at 1310 nm, 1.4682 at 1550 nm (copy at https://img-en.fs.com/file/datasheet/corning-smf-28eplus-33175.pdf)",
+  "kinds": [
+   "measured",
+   "spec",
+   "derived",
+   "inferred",
+   "estimate",
+   "assumed",
+   "outside source",
+   "owner",
+   "hypothesis",
+   "note"
+  ],
+  "files": {
+   "geometry": "outside-geo.json (map outlines in km: sf, bayarea, california, us, earth)",
+   "images": [
+    "rack.webp",
+    "card.webp",
+    "earth.webp",
+    "milkyway.webp",
+    "andromeda.webp",
+    "cmb.webp"
+   ]
+  },
+  "privacy": "Studio 45 by name and city only; no address, no coordinates, no map marker; the rack photo's host-name and address labels blurred."
+ },
+ "levels": [
+  {
+   "id": "package",
+   "name": "The package",
+   "parent": "card",
+   "optional": false,
+   "size_m": 0.045,
+   "frame_m": 0.06,
+   "size_kind": "spec",
+   "size_note": "45.0 x 45.0 mm body (datasheet Fig. 9-1, p. 33).",
+   "blurb": "The chip itself is a thin slab of silicon about 2.6 cm across, mounted face down under this metal lid. The package fans its tens of thousands of microscopic connections out to 2,494 solder balls, big enough to solder onto the card.",
+   "facts": [
+    {
+     "text": "A 45.0 x 45.0 mm flip-chip ball-grid array with a 44.8 mm lid, at most 3.95 mm tall, with 2,494 solder balls of 0.50 mm diameter.",
+     "source": "Esperanto, ET-SoC-1 Preliminary Datasheet Rev 1.0 (github.com/aifoundry-org/et-man), Fig. 9-1, p. 33 (also the heatsink feasibility page, docs/reports/sources/esperanto-without-heatsink.body.html, section 1)",
+     "kind": "spec"
+    },
+    {
+     "text": "Most balls sit on a 0.80 mm grid; the drawing also dimensions a central region at 0.90-0.96 mm spacing. Columns are numbered 1-53 and rows lettered A-BR (skipping I, O, Q, S, X, Z), with many positions left empty: 2,494 balls in all.",
+     "source": "Esperanto, ET-SoC-1 Preliminary Datasheet Rev 1.0 (github.com/aifoundry-org/et-man), Fig. 9-1 (dimensions read off the bottom view)",
+     "kind": "spec"
+    },
+    {
+     "text": "More than 30,000 bumps join the die to the package substrate: the substrate fans them out to the 2,494 balls, about 12 bumps per ball.",
+     "source": "D. Ditzel, \"Esperanto ET-SoC-1\", Hot Chips 33 (2021), slides, as cited on the heatsink page (docs/reports/sources/esperanto-without-heatsink.body.html, section 1, ref [3])",
+     "kind": "spec"
+    },
+    {
+     "text": "Under the lid: a die of 570 mm^2, about 25.6 x 22.2 mm. Where it sits under the lid is not documented; the drawing centres it.",
+     "source": "docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.die-area, chip.die-dims)",
+     "kind": "inferred"
+    },
+    {
+     "text": "TSMC 7 nm, more than 24 billion transistors.",
+     "source": "docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process; Hot Chips 33, IEEE Micro 2022)",
+     "kind": "spec"
+    },
+    {
+     "text": "The vendor photo's lid reads \"ET-SoC-1 ... A0 ... 2217 ES TT TAIWAN\": in the datasheet's scheme a date code (2217), an engineering sample (ES), assembled in Taiwan. \"TT\" is not explained there. The lab cards' own markings are not recorded.",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 2 (photo); Esperanto, ET-SoC-1 Preliminary Datasheet Rev 1.0 (github.com/aifoundry-org/et-man), Table 10-1, p. 34",
+     "kind": "inferred"
+    },
+    {
+     "text": "The datasheet gives no thermal ratings for the package (section 9.1 is a placeholder).",
+     "source": "Esperanto, ET-SoC-1 Preliminary Datasheet Rev 1.0 (github.com/aifoundry-org/et-man), §9.1",
+     "kind": "spec"
+    },
+    {
+     "text": "Light crosses the die (25.6 mm) in 0.085 ns, about a twentieth of one 600 MHz clock tick; in one tick light goes 50 cm.",
+     "source": "BIPM, The International System of Units (SI Brochure, 9th ed., 2019): c = 299 792 458 m/s exactly; the clock: docs/findings/14-card-behaviour.md:338",
+     "kind": "derived"
+    }
+   ],
+   "light": {
+    "distance_m": 0.0256,
+    "vacuum_s": 8.539240837072693e-11,
+    "vacuum": "0.0854 ns",
+    "cycles_600MHz_vacuum": 0.051235445022436155
+   },
+   "image": {
+    "file": "card.webp",
+    "crop_px": [
+     275,
+     161,
+     467,
+     356
+    ],
+    "credit": "Esperanto Technologies, \"PCIe Dev Card (V3)\" (ET-PCIe-Dev-Card-V3.pdf, p. 2), published in github.com/aifoundry-org/et-man",
+    "licence": "Apache License 2.0 (the et-man repository's LICENSE)",
+    "note": "The same file as the card level: crop the lid in the page (SVG viewBox or CSS), no extra bytes."
+   },
+   "draw": "Drawn SVG from Fig. 9-1: top view (45.0 mm body, 44.8 mm lid), a cut-away side view (lid, TIM, die, bumps, substrate 1.6 mm, balls 0.50 mm, 3.95 mm total) and the bottom view's ball grid at its 0.80 mm pitch (depopulated as in the figure; the exact map is there). The die (25.6 x 22.2 mm) as a dashed rectangle under the lid, labelled \"position assumed\". Scale bar: 10 mm. The lid photo crop can fade in as the camera arrives.",
+   "child": {
+    "id": "chip",
+    "box_mm": [
+     9.7,
+     11.4,
+     35.3,
+     33.6
+    ],
+    "note": "the die, centred under the 45 mm body (assumed)"
+   },
+   "zoom_from_inner": 2.344
+  },
+  {
+   "id": "card",
+   "name": "The PCIe card",
+   "parent": "host",
+   "optional": false,
+   "size_m": 0.1676,
+   "frame_m": 0.19,
+   "size_kind": "spec",
+   "size_note": "6.6 x 4.4 in (167.6 x 111.8 mm), the dev card's assembly drawing (p. 3).",
+   "blurb": "A circuit board about 17 by 11 cm that plugs into the computer. Around the chip sit four memory chips holding its 32 GB, and the regulators that turn the computer's 12 volts into the half a volt its cores run on.",
+   "facts": [
+    {
+     "text": "6.6 x 4.4 in (167.6 x 111.8 mm); a PCIe x16 card edge carrying an x8 PCIe Gen 4 link; the chip soldered down, no socket.",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), pp. 1 and 3",
+     "kind": "spec"
+    },
+    {
+     "text": "On all four lab cards the link runs at 16 GT/s on 8 lanes: 15.75 GB/s each way after coding. Measured host-to-card DMA: 12.5-12.6 GB/s; card to host 10.4-10.5 GB/s.",
+     "source": "docs/findings/05-claims.md:550-552 (E50)",
+     "kind": "measured"
+    },
+    {
+     "text": "Four LPDDR4X memory packages, 256 bits wide in all (16 channels of 16 bits), 32 GB: each package serves two of the chip's eight memory shires.",
+     "source": "docs/reports/data/2026-09-27-chip-diagram/facts.json (L47, dram.channels); Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 1",
+     "kind": "spec"
+    },
+    {
+     "text": "Peak memory rate: 256 bits x 4,266 MT/s = 136.5 GB/s. Tensor loads from memory have been measured at 75 GB/s.",
+     "source": "docs/reports/data/2026-09-27-chip-diagram/facts.json (L47: 4,266 Mb/s per pin); docs/findings/05-claims.md:155 (E15)",
+     "kind": "derived"
+    },
+    {
+     "text": "Each memory package is about 15 mm square on the vendor photo, which shows SK hynix parts (a second photo in the same document shows Micron parts). Which maker's DRAM the lab cards carry is not recorded.",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), pp. 2, 8 and 10 (photos)",
+     "kind": "inferred"
+    },
+    {
+     "text": "Power arrives as 12 V at the card edge: at most 7.3 A, 88 W. The highest draw on record is 87.8 W; the cards idle at about 19-36 W, depending on the card and its temperature.",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 5 (power tree); docs/findings/14-card-behaviour.md:138, 339",
+     "kind": "spec, measured"
+    },
+    {
+     "text": "The cores run at about 0.52 V at 600 MHz, 23 times lower than the 12 V input, so the current is about 23 times higher: a Texas Instruments TPSM831D31 supplies the cores (3 phases, up to 120 A) and the on-chip network (1 phase, 40 A). Its four phases are the four large inductors marked \"R15\" on the photo.",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 1 (key voltage regulators) and p. 2 (photo); docs/findings/05-claims.md:34 (E9)",
+     "kind": "spec, measured, inferred"
+    },
+    {
+     "text": "An Analog Devices LTM4680 module (up to 60 A) supplies the SRAM rail; smaller FS1406 regulators the memory, PCIe, I/O and other rails; an LTC4218 hot-swap switch with a 1 mΩ sense resistor measures the card's input current for the power readings.",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), pp. 1, 4",
+     "kind": "spec"
+    },
+    {
+     "text": "A small microcontroller (Microchip ATSAMD20, the \"PMIC micro\") reads the 12 V input and three regulators (cores, network, SRAM); the other rails have set points only.",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 4 (block diagram); docs/reports/data/2026-09-27-chip-diagram/facts.json (board.meters)",
+     "kind": "spec, measured"
+    },
+    {
+     "text": "Also on the board: 64 GB of eMMC flash (a Kingston part on the photo), an FTDI UART-to-USB bridge, JTAG, DIP switches that set the boot options, and a fan header (P1).",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), pp. 1-3",
+     "kind": "spec, inferred"
+    },
+    {
+     "text": "Which heatsink the lab cards carry, and whether each has a fan, is not recorded; the vendor photo shows the card bare.",
+     "source": "the heatsink feasibility page, docs/reports/sources/esperanto-without-heatsink.body.html, section 1 (\"Not recorded\")",
+     "kind": "note"
+    },
+    {
+     "text": "A signal in the board's copper travels at about half the speed of light (c/√εr, εr ≈ 4 for FR-4), so crossing the card takes about 1.12 ns: two-thirds of a 600 MHz clock tick.",
+     "source": "physics: a buried trace's delay is √εr / c; εr = 4 is ASSUMED (typical FR-4 is 3.8-4.5)",
+     "kind": "derived"
+    }
+   ],
+   "light": {
+    "distance_m": 0.1676,
+    "vacuum_s": 5.590534235521029e-10,
+    "vacuum": "0.559 ns",
+    "cycles_600MHz_vacuum": 0.3354320541312617,
+    "pcb_s": 1.1181068471042057e-09,
+    "pcb": "1.12 ns",
+    "cycles_600MHz_pcb": 0.6708641082625234
+   },
+   "image": {
+    "file": "card.webp",
+    "px": [
+     720,
+     479
+    ],
+    "bytes": 75178,
+    "px_per_mm": 4.296,
+    "credit": "Esperanto Technologies, \"PCIe Dev Card (V3)\" (ET-PCIe-Dev-Card-V3.pdf, p. 2), published in github.com/aifoundry-org/et-man",
+    "licence": "Apache License 2.0 (the et-man repository's LICENSE)",
+    "note": "The vendor's photo of a dev card (SK hynix DRAM, no heatsink), not a lab card; transparent background. The photo's lid measures 44.8 mm at this scale, which checks the 6.6 in width.",
+    "hotspots_px": {
+     "lid (the package)": [
+      275,
+      161,
+      467,
+      356
+     ],
+     "LPDDR4X U11": [
+      164,
+      167,
+      231,
+      234
+     ],
+     "LPDDR4X U20": [
+      164,
+      286,
+      231,
+      353
+     ],
+     "LPDDR4X U12": [
+      511,
+      170,
+      578,
+      237
+     ],
+     "LPDDR4X U21": [
+      511,
+      286,
+      578,
+      353
+     ],
+     "TPSM831D31 and its four inductors (cores, network)": [
+      253,
+      24,
+      461,
+      117
+     ],
+     "LTM4680 (SRAM rail)": [
+      487,
+      65,
+      557,
+      132
+     ],
+     "DIP switches (boot options)": [
+      619,
+      141,
+      674,
+      388
+     ],
+     "PCIe card edge": [
+      196,
+      455,
+      662,
+      479
+     ]
+    }
+   },
+   "draw": "The photo, with SVG hotspots over it (the boxes above, in the 720 x 479 copy's pixels; 4.30 px per mm) and a 5 cm scale bar. Heatsink: not drawn as a fact; at most a dashed outline marked \"heatsink (which one is not recorded)\".",
+   "child": {
+    "id": "package",
+    "box_px": [
+     275,
+     161,
+     467,
+     356
+    ],
+    "box_mm": [
+     64.0,
+     37.5,
+     108.7,
+     82.9
+    ]
+   },
+   "zoom_from_inner": 3.167
+  },
+  {
+   "id": "host",
+   "name": "The host computer",
+   "parent": "rack",
+   "optional": false,
+   "size_m": 0.45,
+   "frame_m": 0.5,
+   "size_kind": "estimate",
+   "size_note": "An open frame holding an ATX board (30.5 x 24.4 cm) and its power supply: about 45 cm across (estimate from the photo; the frames' make is not recorded).",
+   "blurb": "An ordinary desktop PC built on an open frame instead of in a case. The card sits in one of its slots and gets its programs, its data and its power from it.",
+   "facts": [
+    {
+     "text": "The lab's three hosts: aifoundry1, an Intel Core i7-11700K (8 cores) with 128 GB; aifoundry2, a Core i5-11600 (6 cores) with 64 GB; aifoundry3, an i7-11700K with 32 GB on a single memory channel.",
+     "source": "docs/findings/14-card-behaviour.md:348; the et-lab-manifest records",
+     "kind": "measured"
+    },
+    {
+     "text": "aifoundry2's motherboard is a Gigabyte Z590 AORUS MASTER, an ATX board of 30.5 x 24.4 cm. The other two hosts' BIOS versions (F5, F6) follow Gigabyte's naming, but their board models are not recorded.",
+     "source": "the host's DMI table (/sys/devices/virtual/dmi/id, read 30 Sep 2026); Gigabyte, Z590 AORUS MASTER specifications (gigabyte.com); docs/findings/14-card-behaviour.md:348",
+     "kind": "measured, spec, inferred"
+    },
+    {
+     "text": "aifoundry1 holds two ET cards, the other hosts one each.",
+     "source": "docs/reports/data/2026-09-27-pcie/hosts.txt",
+     "kind": "measured"
+    },
+    {
+     "text": "Each card's 8-lane PCIe 4.0 link goes straight to a root port on the CPU, which has 20 PCIe 4.0 lanes.",
+     "source": "docs/reports/data/2026-09-27-pcie/hosts.txt (root_port 00:01.x, the CPU's own PCIe ports on this platform: inferred); Intel, Core i7-11700K specifications (intel.com)",
+     "kind": "measured, inferred, spec"
+    },
+    {
+     "text": "The host CPUs are made in Intel's 14 nm process; the i7-11700K is rated at 125 W base power (the i5-11600 at 65 W). The whole ET card, at most 88 W, draws less than the bigger CPU's rating.",
+     "source": "Intel, Core i7-11700K and Core i5-11600 specifications (intel.com); Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 5",
+     "kind": "spec"
+    },
+    {
+     "text": "The host copies memory at 17.4 / 9.2 / 21.4 GB/s (aifoundry2 / 3 / 1); a program's staged copy to the card is limited by both that and the link: 5.2-7.8 GB/s.",
+     "source": "docs/findings/05-claims.md:553 (E50)",
+     "kind": "measured"
+    },
+    {
+     "text": "The owner's photo shows open-air frames with tower coolers and EVGA and MSI power supplies; several boards carry Gigabyte AORUS logos.",
+     "source": "the owner's rack photo (30 Sep 2026)",
+     "kind": "inferred"
+    }
+   ],
+   "light": {
+    "distance_m": 0.45,
+    "vacuum_s": 1.5010384283916843e-09,
+    "vacuum": "1.5 ns",
+    "cycles_600MHz_vacuum": 0.9006230570350106
+   },
+   "image": {
+    "file": "rack.webp",
+    "crop_px": [
+     180,
+     185,
+     490,
+     495
+    ],
+    "credit": "Photo: the page's author, the lab's rack (2026); machine labels blurred",
+    "licence": "the author's own photo, used on his page at his request; no open licence stated",
+    "note": "A crop of the rack photo (one machine, with the MSI supply); which machines are the lab's is not recorded, so the crop is labelled \"one of the rack's machines\"."
+   },
+   "draw": "Drawn SVG, top view, to scale: an ATX board 305 x 244 mm (ATX spec; aifoundry2's board is exactly this) with the CPU socket and a tower cooler, four DIMM slots, the PCIe slots, and the ET card (167.6 x 111.8 mm) standing in a slot, drawn edge-on with a side elevation inset; an ATX power supply 150 x 86 x 140 mm beside it. Scale bar 10 cm. The photo crop can cross-fade in from the rack level.",
+   "child": {
+    "id": "card",
+    "note": "the card in the board's first x16 slot (drawn; the slot used on each host is not recorded beyond its root port)"
+   },
+   "zoom_from_inner": 2.632
+  },
+  {
+   "id": "rack",
+   "name": "The rack",
+   "parent": "studio45",
+   "optional": false,
+   "size_m": 1.5,
+   "frame_m": 1.8,
+   "size_kind": "estimate",
+   "size_note": "About 1.5 m wide: five open frames side by side on each shelf (estimate from the photo; common wire-shelving widths are 48-72 in). The rack's make and size are not recorded.",
+   "blurb": "A wire shelving rack holding about ten open-frame machines on two shelves. The lab's three machines, with their four ET cards, are among them; which ones is not recorded.",
+   "facts": [
+    {
+     "text": "About ten open-frame machines on two shelves, five to a shelf, some partly hidden.",
+     "source": "the owner's rack photo (30 Sep 2026), counted",
+     "kind": "inferred"
+    },
+    {
+     "text": "The lab's machines are in this rack; which three of them is not recorded.",
+     "source": "the owner (30 Sep 2026)",
+     "kind": "owner"
+    },
+    {
+     "text": "Power supplies read on the photo: EVGA 650 GS and 1000 GS, MSI MPG A750GF (650, 1,000 and 750 W).",
+     "source": "the owner's rack photo",
+     "kind": "inferred"
+    },
+    {
+     "text": "A \"KVM#8\" label and a keyboard on the shelf above: one keyboard and screen are shared between machines.",
+     "source": "the owner's rack photo",
+     "kind": "inferred"
+    },
+    {
+     "text": "Light crosses the rack in 5 ns, about 3 of the chip's clock ticks at 600 MHz.",
+     "source": "BIPM, The International System of Units (SI Brochure, 9th ed., 2019): c = 299 792 458 m/s exactly",
+     "kind": "derived"
+    },
+    {
+     "text": "In the page's copy of the photo the machines' tape labels are blurred: they carry host names and network addresses, which the repository keeps out of public pages.",
+     "source": "AGENT.md §10",
+     "kind": "note"
+    }
+   ],
+   "light": {
+    "distance_m": 1.5,
+    "vacuum_s": 5.0034614279722804e-09,
+    "vacuum": "5 ns",
+    "cycles_600MHz_vacuum": 3.002076856783368
+   },
+   "image": {
+    "file": "rack.webp",
+    "px": [
+     1000,
+     988
+    ],
+    "bytes": 145682,
+    "credit": "Photo: the page's author (the repository's owner), 2026; machine labels blurred",
+    "licence": "the author's own photo, used on his page at his request; no open licence stated",
+    "note": "From rack-photo-original.webp (1500 x 1429, no EXIF or GPS): 9 tape labels pixelated, the 53-px black band on the left cropped, resized to 1000 px, WebP q70, no EXIF/XMP/ICC. make_rack_photo.py."
+   },
+   "draw": "The photo. A scale bar would be an estimate: if drawn, label it \"about 50 cm (estimated)\". Optional: a dashed outline on the machine used for the host crop, labelled \"one of the rack's machines\".",
+   "child": {
+    "id": "host",
+    "box_px": [
+     180,
+     185,
+     490,
+     495
+    ],
+    "note": "illustrative: not known to be a lab machine"
+   },
+   "zoom_from_inner": 3.6
+  },
+  {
+   "id": "studio45",
+   "name": "Studio 45",
+   "parent": "sf",
+   "optional": false,
+   "size_m": 20.0,
+   "frame_m": 25.0,
+   "size_kind": "assumed",
+   "size_note": "The room's size is not recorded; 20 m is an order-of-magnitude frame. Public listings give an event space for 50-200 people.",
+   "blurb": "The rack stands in Studio 45, a San Francisco workspace for people who build hardware. Light crosses a room like this in about 67 ns, some 40 of the chip's clock ticks.",
+   "facts": [
+    {
+     "text": "The owner calls the lab's room Studio 45.",
+     "source": "the owner (30 Sep 2026)",
+     "kind": "owner"
+    },
+    {
+     "text": "Public listings describe Studio 45 as a San Francisco co-working space \"for people who make real things for a living\", with a fabrication shop, opened in December 2021.",
+     "source": "SF Station, \"Studio 45 Launch\" event listing (December 2021); the CoworkingCafe listing of Studio 45. Cited by name only, without links: both listings show the street address",
+     "kind": "outside source"
+    },
+    {
+     "text": "It hosts the SF Hardware Meetup's monthly demo nights.",
+     "source": "Luma event page \"136th SF Hardware Meetup @ Studio 45 | Demo Night\" (cited by title only: event pages show the address)",
+     "kind": "outside source"
+    },
+    {
+     "text": "No public page ties AI Foundry's lab to Studio 45; the page gives only the name and the city, never an address or a position on the map.",
+     "source": "AGENT.md §10; the owner's instruction for this level",
+     "kind": "note"
+    }
+   ],
+   "light": {
+    "distance_m": 20.0,
+    "vacuum_s": 6.671281903963041e-08,
+    "vacuum": "66.7 ns",
+    "cycles_600MHz_vacuum": 40.02769142377824
+   },
+   "image": null,
+   "draw": "A schematic floor (not a plan of the real room: its layout is not recorded, and none is drawn): a grey floor rectangle 20 x 12 m labelled \"schematic\", the rack to scale (1.5 x 0.6 m) and a 1.7 m person for scale. Scale bar 5 m. No venue photo (none is openly licensed).",
+   "child": {
+    "id": "rack",
+    "note": "the rack, drawn to scale; its place in the room is not recorded"
+   },
+   "zoom_from_inner": 13.889
+  },
+  {
+   "id": "sf",
+   "name": "San Francisco",
+   "parent": "bayarea",
+   "optional": false,
+   "size_m": 11000.0,
+   "frame_m": 18000,
+   "size_kind": "derived",
+   "size_note": "√(121.51 km² of land) = 11.0 km; the city's outline, islands included, spans 16.4 x 17.2 km on the Census map.",
+   "blurb": "The city is about 11 km across. A signal in an optical fibre crosses it in about 54 µs; in that time the chip's clock ticks some 32,000 times.",
+   "facts": [
+    {
+     "text": "Land area 46.92 sq mi (121.51 km²); 873,965 people at the 2020 census.",
+     "source": "Wikipedia, \"San Francisco\" (from the US Census Bureau)",
+     "kind": "outside source"
+    },
+    {
+     "text": "Light in glass fibre travels at c/1.4682 = 204,190 km/s, about 4.90 µs per km: two-thirds of its speed in vacuum.",
+     "source": "Corning SMF-28e+ optical fibre, product information sheet: effective group index 1.4676 at 1310 nm, 1.4682 at 1550 nm (copy at https://img-en.fs.com/file/datasheet/corning-smf-28eplus-33175.pdf)",
+     "kind": "derived"
+    },
+    {
+     "text": "Across the city (11 km): 36.8 µs for light in vacuum, 54 µs in fibre.",
+     "source": "BIPM, The International System of Units (SI Brochure, 9th ed., 2019): c = 299 792 458 m/s exactly; Corning SMF-28e+ optical fibre, product information sheet: effective group index 1.4676 at 1310 nm, 1.4682 at 1550 nm (copy at https://img-en.fs.com/file/datasheet/corning-smf-28eplus-33175.pdf)",
+     "kind": "derived"
+    },
+    {
+     "text": "Esperanto Technologies, which designed the ET-SoC-1, was based in Mountain View, about 50 km to the south.",
+     "source": "Business Wire, Esperanto press release of 1 May 2023 (general-purpose SDK): \"Esperanto is headquartered in Mountain View, California\"",
+     "kind": "outside source"
+    }
+   ],
+   "light": {
+    "distance_m": 11023.15744240279,
+    "vacuum_s": 3.676929538501862e-05,
+    "vacuum": "36.8 µs",
+    "cycles_600MHz_vacuum": 22061.57723101117,
+    "fibre_s": 5.398467948428434e-05,
+    "fibre": "54 µs",
+    "cycles_600MHz_fibre": 32390.807690570604
+   },
+   "image": null,
+   "draw": "outside-geo.json \"sf\": the city and county outline from the Census 1:500,000 file (public domain), Farallon Islands left out; units km, local projection. Scale bar 2 km. The camera arrives at the city's centre (sf_centre, the usual city-centre point), NEVER at the lab's location.",
+   "child": {
+    "id": "studio45",
+    "note": "drawn as a small square at the city's centre, labelled \"Studio 45 (not to scale; position not shown)\""
+   },
+   "zoom_from_inner": 720.0
+  },
+  {
+   "id": "bayarea",
+   "name": "The Bay Area",
+   "parent": "california",
+   "optional": false,
+   "size_m": 219000.0,
+   "frame_m": 240000,
+   "size_kind": "derived",
+   "size_note": "The nine counties span 204 x 219 km on the Census outlines.",
+   "blurb": "Nine counties around San Francisco Bay, about 200 km from end to end. A fibre signal takes about a millisecond to cross them: some 640,000 of the chip's clock ticks.",
+   "facts": [
+    {
+     "text": "Nine counties (Alameda, Contra Costa, Marin, Napa, San Francisco, San Mateo, Santa Clara, Solano, Sonoma); 6,966 sq mi (18,040 km²) of land; 7.77 million people in 2020.",
+     "source": "Wikipedia, \"San Francisco Bay Area\"",
+     "kind": "outside source"
+    },
+    {
+     "text": "Across the region (219 km): 731 µs in vacuum, 1.07 ms in fibre.",
+     "source": "BIPM, The International System of Units (SI Brochure, 9th ed., 2019): c = 299 792 458 m/s exactly; Corning SMF-28e+ optical fibre, product information sheet: effective group index 1.4676 at 1310 nm, 1.4682 at 1550 nm (copy at https://img-en.fs.com/file/datasheet/corning-smf-28eplus-33175.pdf)",
+     "kind": "derived"
+    },
+    {
+     "text": "Esperanto designed the ET-SoC-1 in Mountain View, in Santa Clara County, within this map.",
+     "source": "Business Wire, Esperanto press release of 1 May 2023",
+     "kind": "outside source"
+    }
+   ],
+   "light": {
+    "distance_m": 219160.0,
+    "vacuum_s": 0.00073103907103627,
+    "vacuum": "731 µs",
+    "cycles_600MHz_vacuum": 438623.442621762,
+    "fibre_s": 0.0010733115640954515,
+    "fibre": "1.07 ms",
+    "cycles_600MHz_fibre": 643986.9384572709
+   },
+   "image": null,
+   "draw": "outside-geo.json \"bayarea\": nine county outlines (Census 1:500,000, public domain), San Francisco highlighted; the bay's water is the gap between them. Scale bar 50 km. Optional label: Mountain View.",
+   "child": {
+    "id": "sf",
+    "box_km": [
+     -27.59,
+     4.11,
+     -11.23,
+     21.34
+    ]
+   },
+   "zoom_from_inner": 13.333
+  },
+  {
+   "id": "california",
+   "name": "California",
+   "parent": "us",
+   "optional": true,
+   "size_m": 1060000.0,
+   "frame_m": 1150000,
+   "size_kind": "derived",
+   "size_note": "908 x 1060 km on the equal-area map (Census 1:5,000,000).",
+   "blurb": "The state is about 1,000 km from north to south. A fibre signal runs its length in about five thousandths of a second.",
+   "facts": [
+    {
+     "text": "Area 163,696 sq mi (423,970 km²).",
+     "source": "Wikipedia, \"Geography of California\"",
+     "kind": "outside source"
+    },
+    {
+     "text": "North to south on the map: 1060 km, 5.19 ms in fibre.",
+     "source": "outside-geo.json (Census outlines); Corning SMF-28e+ optical fibre, product information sheet: effective group index 1.4676 at 1310 nm, 1.4682 at 1550 nm (copy at https://img-en.fs.com/file/datasheet/corning-smf-28eplus-33175.pdf)",
+     "kind": "derived"
+    }
+   ],
+   "light": {
+    "distance_m": 1059780.0,
+    "vacuum_s": 0.003535045568090976,
+    "vacuum": "3.54 ms",
+    "cycles_600MHz_vacuum": 2121027.3408545856,
+    "fibre_s": 0.00519015390307117,
+    "fibre": "5.19 ms",
+    "cycles_600MHz_fibre": 3114092.341842702
+   },
+   "image": null,
+   "draw": "outside-geo.json \"california\" (Census 1:5,000,000, public domain), with the Bay Area's frame (bayarea_bbox_km) as a rectangle. Scale bar 200 km. Optional level: the zoom from the Bay Area (x5) and on to the US (x4) is smooth without it too.",
+   "child": {
+    "id": "bayarea",
+    "box_km": [
+     -349.14,
+     -189.87,
+     -151.32,
+     32.17
+    ]
+   },
+   "zoom_from_inner": 4.792
+  },
+  {
+   "id": "us",
+   "name": "The United States",
+   "parent": "earth",
+   "optional": false,
+   "size_m": 4509000,
+   "frame_m": 5000000,
+   "size_kind": "outside source",
+   "size_note": "The longest great circle inside the lower 48 states: 2,802 mi (4,509 km), Florida to Washington.",
+   "blurb": "From coast to coast about 4,500 km. A signal in a fibre from San Francisco to New York takes about 20 ms one way even on a perfectly straight cable: 12 million clock ticks of the chip.",
+   "facts": [
+    {
+     "text": "The lower 48 states: 4,509 km on the longest great circle inside them, 2,660 km north to south, 8.08 million km².",
+     "source": "Wikipedia, \"Contiguous United States\"",
+     "kind": "outside source"
+    },
+    {
+     "text": "San Francisco to New York: 4,129 km on a great circle, 13.8 ms for light in vacuum, 20.2 ms in fibre. Real cables are longer and routers add delay, so a real round trip takes several times the straight-line figure.",
+     "source": "derived from the two city centres (37.7749 N 122.4194 W; 40.7128 N 74.0060 W) on a 6,371 km sphere; Corning SMF-28e+ optical fibre, product information sheet: effective group index 1.4676 at 1310 nm, 1.4682 at 1550 nm (copy at https://img-en.fs.com/file/datasheet/corning-smf-28eplus-33175.pdf)",
+     "kind": "derived"
+    }
+   ],
+   "light": {
+    "distance_m": 4129100.0000000005,
+    "vacuum_s": 0.013773195054826898,
+    "vacuum": "13.8 ms",
+    "cycles_600MHz_vacuum": 8263917.032896139,
+    "fibre_s": 0.02022180497949685,
+    "fibre": "20.2 ms",
+    "cycles_600MHz_fibre": 12133082.98769811
+   },
+   "image": null,
+   "draw": "outside-geo.json \"us\": the 48 states and DC (Census 1:5,000,000, public domain), Albers equal-area, California highlighted, San Francisco and New York as dots joined by the great-circle arc (its label: the fibre time). Scale bar 1,000 km.",
+   "child": {
+    "id": "california",
+    "box_km": [
+     -2350.11,
+     -2457.38,
+     -1643.01,
+     -1245.59
+    ]
+   },
+   "zoom_from_inner": 4.348
+  },
+  {
+   "id": "earth",
+   "name": "Earth",
+   "parent": "moon",
+   "optional": false,
+   "size_m": 12742000.0,
+   "frame_m": 15000000.0,
+   "size_kind": "outside source",
+   "size_note": "Mean diameter 12,742 km (twice NASA's volumetric mean radius, 6,371.000 km).",
+   "blurb": "Earth is 12,742 km across. Light could circle it in 134 ms: in that time the chip's clock ticks 80 million times.",
+   "facts": [
+    {
+     "text": "Volumetric mean radius 6,371.000 km; equatorial radius 6,378.137 km.",
+     "source": "NASA NSSDCA, Earth Fact Sheet, https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html",
+     "kind": "outside source"
+    },
+    {
+     "text": "Around the equator (40,075 km): 134 ms for light, 196 ms in fibre.",
+     "source": "NASA NSSDCA, Earth Fact Sheet, https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html; BIPM, The International System of Units (SI Brochure, 9th ed., 2019): c = 299 792 458 m/s exactly; Corning SMF-28e+ optical fibre, product information sheet: effective group index 1.4676 at 1310 nm, 1.4682 at 1550 nm (copy at https://img-en.fs.com/file/datasheet/corning-smf-28eplus-33175.pdf)",
+     "kind": "derived"
+    }
+   ],
+   "light": {
+    "distance_m": 40075016.68557849,
+    "vacuum_s": 0.13367586680775834,
+    "vacuum": "134 ms",
+    "cycles_600MHz_vacuum": 80205520.084655,
+    "fibre_s": 0.1962629076471508,
+    "fibre": "196 ms",
+    "cycles_600MHz_fibre": 117757744.58829047
+   },
+   "image": {
+    "file": "earth.webp",
+    "px": [
+     400,
+     400
+    ],
+    "bytes": 19288,
+    "credit": "NASA Goddard Space Flight Center, \"The Blue Marble\" (Visible Earth record 57723, globe_west): image by Reto Stöckli; enhancements by Robert Simmon; MODIS data",
+    "licence": "public domain (NASA imagery is generally not subject to copyright in the US; NASA asks to be credited as the source)",
+    "source_url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57723/globe_west_2048.jpg",
+    "note": "North America centred; the disc fills about 88% of the square (measure it in the page)."
+   },
+   "draw": "Either the photo, or outside-geo.json \"earth\": Natural Earth 1:110m land on an orthographic globe centred on 38 N 100 W (public domain), drawn in km with the globe's circle as the ocean: the US bbox is given for the zoom (us_bbox_km). Recommended: the drawn globe for the camera (exact scale, the US outline lines up), cross-fading to the photo at rest. Scale bar 2,000 km.",
+   "child": {
+    "id": "us",
+    "box_km": [
+     -2005.59,
+     -1433.64,
+     2464.78,
+     1338.64
+    ]
+   },
+   "zoom_from_inner": 3.0
+  },
+  {
+   "id": "moon",
+   "name": "Earth and the Moon",
+   "parent": "solar",
+   "optional": true,
+   "size_m": 768800000.0,
+   "frame_m": 900000000.0,
+   "size_kind": "outside source",
+   "size_note": "The Moon's orbit: semimajor axis 384,400 km, so about 769,000 km across.",
+   "blurb": "The Moon is 384,400 km away. Light takes 1.28 s to get there: 770 million ticks of the chip's clock.",
+   "facts": [
+    {
+     "text": "The Moon's semimajor axis: 0.3844 million km.",
+     "source": "NASA NSSDCA, Moon Fact Sheet, https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
+     "kind": "outside source"
+    },
+    {
+     "text": "Earth to the Moon: 1.28 s for light.",
+     "source": "NASA NSSDCA, Moon Fact Sheet, https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html; BIPM, The International System of Units (SI Brochure, 9th ed., 2019): c = 299 792 458 m/s exactly",
+     "kind": "derived"
+    }
+   ],
+   "light": {
+    "distance_m": 384400000.0,
+    "vacuum_s": 1.2822203819416964,
+    "vacuum": "1.28 s",
+    "cycles_600MHz_vacuum": 769332229.1650178
+   },
+   "image": null,
+   "draw": "Drawn SVG: Earth (12,742 km) and the Moon (3,474.8 km, NASA Moon fact sheet) to scale on its orbit circle. Scale bar 100,000 km. Optional: it bridges a 60x step.",
+   "child": {
+    "id": "earth",
+    "note": "Earth at the centre"
+   },
+   "zoom_from_inner": 60.0
+  },
+  {
+   "id": "solar",
+   "name": "The Solar System",
+   "parent": "stars",
+   "optional": false,
+   "size_m": 9029906000000.0,
+   "frame_m": 11000000000000.0,
+   "size_kind": "outside source",
+   "size_note": "Neptune's orbit: semimajor axis 4,514.953 million km (30.2 au), so about 9.0 x 10^12 m across.",
+   "blurb": "Sunlight takes 8.3 min to reach Earth and about 4.2 h to reach Neptune. In November 2026 Voyager 1, the farthest spacecraft, will be a full light-day away.",
+   "facts": [
+    {
+     "text": "Earth orbits at 1 au, 8.32 min from the Sun at the speed of light.",
+     "source": "IAU 2012 Resolution B2: 1 au = 149 597 870 700 m exactly; BIPM, The International System of Units (SI Brochure, 9th ed., 2019): c = 299 792 458 m/s exactly",
+     "kind": "derived"
+    },
+    {
+     "text": "Neptune's semimajor axis: 4,514.953 million km (30.2 au); sunlight reaches it in 4.18 h.",
+     "source": "NASA NSSDCA, Neptune Fact Sheet, https://nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html",
+     "kind": "outside source"
+    },
+    {
+     "text": "Voyager 1 reaches one light-day from Earth (25.9 billion km, 173 au) on 18 November 2026: a command sent then takes a day to arrive and the answer another day.",
+     "source": "NASA, \"Where are Voyager 1 and Voyager 2 now?\" (science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/)",
+     "kind": "outside source"
+    }
+   ],
+   "light": {
+    "distance_m": 9029906000000.0,
+    "vacuum_s": 30120.524246143643,
+    "vacuum": "8.37 h",
+    "cycles_600MHz_vacuum": 18072314547686.184
+   },
+   "image": null,
+   "draw": "Drawn SVG: the Sun and the eight planets' orbits as circles to scale (semimajor axes from NASA's fact sheets: Mercury 0.387, Venus 0.723, Earth 1, Mars 1.524, Jupiter 5.20, Saturn 9.57, Uranus 19.17, Neptune 30.18 au by those sheets' 10^6 km values), planets as labelled dots (not to scale: say so), an arrow off the frame \"Voyager 1: 173 au, one light-day\". Scale bar 5 au.",
+   "child": {
+    "id": "moon",
+    "note": "Earth's position on its 1 au orbit (for the zoom, the angle is arbitrary)"
+   },
+   "zoom_from_inner": 12222.222
+  },
+  {
+   "id": "stars",
+   "name": "The nearest stars",
+   "parent": "milkyway",
+   "optional": true,
+   "size_m": 1.89214609451616e+17,
+   "frame_m": 1.89214609451616e+17,
+   "size_kind": "assumed",
+   "size_note": "A 20-light-year frame around the Sun (a choice, not an object).",
+   "blurb": "The nearest star after the Sun, Proxima Centauri, is 4.2 light-years away: its light left it more than four years ago.",
+   "facts": [
+    {
+     "text": "Proxima Centauri is 4.2 light-years from the Sun.",
+     "source": "NASA, \"Proxima Centauri microlensing prediction\" (science.nasa.gov/asset/hubble/proxima-centauri-microlensing-prediction)",
+     "kind": "outside source"
+    },
+    {
+     "text": "One light-year is 9.46 × 10^15 m, about 1,050 times the width of Neptune's orbit.",
+     "source": "IAU: 1 light-year = c x one Julian year (365.25 d) = 9.4607 x 10^15 m",
+     "kind": "derived"
+    }
+   ],
+   "light": {
+    "distance_m": 3.973506798483936e+16,
+    "vacuum_s": 132541920.0,
+    "vacuum": "4.2 years",
+    "cycles_600MHz_vacuum": 7.9525152e+16
+   },
+   "image": null,
+   "draw": "Drawn SVG: the Sun at the centre, Proxima/Alpha Centauri at 4.2 ly as a labelled dot, a 4.2 ly circle; other stars only if sourced. Scale bar 5 ly. Optional: it bridges a 10^8 step (Solar System to galaxy).",
+   "child": {
+    "id": "solar",
+    "note": "the Sun at the centre"
+   },
+   "zoom_from_inner": 17201.328
+  },
+  {
+   "id": "milkyway",
+   "name": "The Milky Way",
+   "parent": "localgroup",
+   "optional": false,
+   "size_m": 9.4607304725808e+20,
+   "frame_m": 1.2809829059874403e+21,
+   "size_kind": "outside source",
+   "size_note": "About 100,000 light-years across (NASA). The picture's square spans about 135,000 light-years.",
+   "blurb": "Our galaxy: at least 100 billion stars in a disc about 100,000 light-years across. The ET-SoC-1 has about a quarter as many transistors as the galaxy has stars.",
+   "facts": [
+    {
+     "text": "A spiral galaxy about 100,000 light-years across, with at least 100 billion stars.",
+     "source": "NASA, \"Beyond Our Solar System\" poster (science.nasa.gov/resource/beyond-our-solar-system-poster-version-a/)",
+     "kind": "outside source"
+    },
+    {
+     "text": "The Sun is about 26,000 light-years from the centre, in a small arm called the Orion Spur.",
+     "source": "NASA/JPL-Caltech/R. Hurt (SSC/Caltech), ssc2008-10b caption; ESO eso1339e (annotated)",
+     "kind": "outside source"
+    },
+    {
+     "text": "More than 24 billion transistors on the chip against at least 100 billion stars: about one transistor for every four stars.",
+     "source": "docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process); NASA (above)",
+     "kind": "derived"
+    }
+   ],
+   "light": {
+    "distance_m": 9.4607304725808e+20,
+    "vacuum_s": 3155760000000.0,
+    "vacuum": "100,000 years",
+    "cycles_600MHz_vacuum": 1.893456e+21
+   },
+   "image": {
+    "file": "milkyway.webp",
+    "px": [
+     480,
+     480
+    ],
+    "bytes": 8382,
+    "credit": "NASA/JPL-Caltech/R. Hurt (SSC/Caltech), \"Our Milky Way Gets a Makeover\" (artist's concept, PIA10748)",
+    "licence": "JPL image use policy: \"may be used for any purpose without prior permission\"; credit \"NASA/JPL-Caltech\"",
+    "source_url": "https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia10/pia10748/PIA10748.jpg",
+    "geometry": {
+     "ly_per_px_at_480": 282.1,
+     "frame_ly": 135400,
+     "sun_frac": [
+      0.5,
+      0.691
+     ],
+     "centre_frac": [
+      0.5,
+      0.495
+     ],
+     "how": "same artwork and framing as ESO's annotated eso1339e (correlation 0.977 at scale 1.0, no shift); its distance rings, centred on the Sun, are 9.45 px per 1,000 ly on the 1280 px screen image; the Sun is marked at (640, 884) of 1280."
+    },
+    "note": "An artist's concept, not a photograph: nobody has seen the galaxy from outside. Say so on the page."
+   },
+   "draw": "The picture with an SVG overlay: a \"You are here\" ring at the Sun (sun_frac), a line to the centre labelled \"26,000 ly\", and a 20,000 ly scale bar (70.9 px on the 480 px copy).",
+   "child": {
+    "id": "stars",
+    "at_frac": [
+     0.5,
+     0.691
+    ]
+   },
+   "zoom_from_inner": 6770.0
+  },
+  {
+   "id": "localgroup",
+   "name": "The Local Group (Andromeda)",
+   "parent": "laniakea",
+   "optional": false,
+   "size_m": 9.4607304725808e+22,
+   "frame_m": 1.040680351983888e+23,
+   "size_kind": "outside source",
+   "size_note": "Its galaxies are spread over a diameter of nearly 10 million light-years (NASA).",
+   "blurb": "The Milky Way's neighbourhood: more than 30 galaxies, led by the Milky Way and Andromeda. The light we see from Andromeda left it 2.5 million years ago.",
+   "facts": [
+    {
+     "text": "More than 30 galaxies spread over a diameter of nearly 10 million light-years.",
+     "source": "NASA, Imagine the Universe!, \"The Local Group of Galaxies\" (imagine.gsfc.nasa.gov/features/cosmic/local_group_info.html)",
+     "kind": "outside source"
+    },
+    {
+     "text": "Andromeda (M31) is about 2.5 million light-years away and spans 260,000 light-years.",
+     "source": "NASA/JPL-Caltech, PIA15416 caption (science.nasa.gov/photojournal/andromeda)",
+     "kind": "outside source"
+    },
+    {
+     "text": "The Triangulum galaxy (M33), the third largest member, is about 3 million light-years away; the Large Magellanic Cloud, a satellite of ours, about 160,000.",
+     "source": "NASA, Hubble Messier catalogue, M33; NASA APOD, 28 May 2013 (the Large Cloud of Magellan)",
+     "kind": "outside source"
+    },
+    {
+     "text": "A collision with Andromeda, long predicted for about 4.5 billion years from now, now looks about a coin flip within 10 billion years, and under 2% within 5 billion.",
+     "source": "T. Sawala et al., Nature Astronomy (2025), \"No certainty of a Milky Way-Andromeda collision\"",
+     "kind": "outside source"
+    }
+   ],
+   "light": {
+    "distance_m": 2.3651826181452e+22,
+    "vacuum_s": 78894000000000.0,
+    "vacuum": "2,500,000 years",
+    "cycles_600MHz_vacuum": 4.7336399999999995e+22
+   },
+   "image": {
+    "file": "andromeda.webp",
+    "px": [
+     480,
+     357
+    ],
+    "bytes": 19302,
+    "credit": "NASA/JPL-Caltech, Galaxy Evolution Explorer (GALEX), \"Andromeda\" (PIA15416), ultraviolet",
+    "licence": "JPL image use policy: \"may be used for any purpose without prior permission\"; credit \"NASA/JPL-Caltech\"",
+    "source_url": "https://d2pn8kiwq2w21t.cloudfront.net/images/jpegPIA15416.width-1024.jpg",
+    "note": "An ultraviolet mosaic, so bluer than to the eye; no scale bar on the photo (its framing in light-years is not given)."
+   },
+   "draw": "Drawn SVG map (the zoom target): the Milky Way and Andromeda 2.5 Mly apart, M33 near Andromeda, the Magellanic Clouds at the Milky Way, dwarf galaxies as unlabelled dots only if sourced; a 1 Mly scale bar. The Andromeda photo as an inset at M31's position.",
+   "child": {
+    "id": "milkyway",
+    "note": "the Milky Way on the map"
+   },
+   "zoom_from_inner": 81.241
+  },
+  {
+   "id": "laniakea",
+   "name": "Laniakea",
+   "parent": "universe",
+   "optional": false,
+   "size_m": 4.937084130386188e+24,
+   "frame_m": 5.924500956463425e+24,
+   "size_kind": "outside source",
+   "size_note": "160 Mpc across if taken as round (Tully et al. 2014): 522 million light-years.",
+   "blurb": "The Local Group is one small part of a supercluster of about 100,000 galaxies, about 520 million light-years across. Its name is Hawaiian for \"immeasurable heaven\".",
+   "facts": [
+    {
+     "text": "A region about 160 Mpc (520 million light-years) across, holding about 10^17 times the Sun's mass, defined by where galaxies' motions flow inward; \"lani\" means heaven and \"akea\" spacious, immeasurable.",
+     "source": "R. B. Tully, H. Courtois, Y. Hoffman, D. Pomarède, \"The Laniakea supercluster of galaxies\", Nature 513, 71-73 (2014), arXiv:1409.0880",
+     "kind": "outside source"
+    },
+    {
+     "text": "About 100,000 galaxies.",
+     "source": "NRAO press release, 3 Sep 2014 (public.nrao.edu/news/supercluster-gbt/)",
+     "kind": "outside source"
+    }
+   ],
+   "light": {
+    "distance_m": 4.937084130386188e+24,
+    "vacuum_s": 1.646834000869424e+16,
+    "vacuum": "522,000,000 years",
+    "cycles_600MHz_vacuum": 9.881004005216543e+24
+   },
+   "image": null,
+   "draw": "Drawn SVG, schematic: a soft irregular outline 160 Mpc across (label \"shape simplified\"), flow lines converging on the Great Attractor region, the Local Group as a dot near the edge. No published map is openly licensed. Scale bar 100 million ly.",
+   "child": {
+    "id": "localgroup",
+    "note": "a dot near the edge"
+   },
+   "zoom_from_inner": 56.929
+  },
+  {
+   "id": "universe",
+   "name": "The observable universe",
+   "parent": "beyond",
+   "optional": false,
+   "size_m": 8.738988638177877e+26,
+   "frame_m": 9.612887501995665e+26,
+   "size_kind": "derived",
+   "size_note": "Twice the comoving distance to the particle horizon: 14.16 Gpc = 46.2 billion ly radius, from Planck 2018's parameters (H0 67.66, Ωm 0.3111, ΩΛ 0.6889, radiation from T = 2.7255 K, Neff 3.046).",
+   "blurb": "Everything whose light has had time to reach us since the Big Bang, 13.8 billion years ago: a sphere about 93 billion light-years across, larger than 13.8 billion because space has stretched while the light travelled.",
+   "facts": [
+    {
+     "text": "Age 13.79 billion years by these parameters (Planck 2018: 13.787 ± 0.020).",
+     "source": "Planck Collaboration, \"Planck 2018 results. VI. Cosmological parameters\", A&A 641, A6 (2020), Table 2",
+     "kind": "outside source"
+    },
+    {
+     "text": "Radius 46.2 billion light-years (comoving), diameter 8.7 × 10^26 m.",
+     "source": "derived from the Planck 2018 parameters (this script)",
+     "kind": "derived"
+    },
+    {
+     "text": "The oldest light we can see, the cosmic microwave background, left its source about 380,000 years after the Big Bang; it now has a temperature of 2.7255 K.",
+     "source": "NASA/WMAP Science Team (the nine-year map's caption); D. J. Fixsen, ApJ 707, 916 (2009)",
+     "kind": "outside source"
+    },
+    {
+     "text": "The observable universe is about 3 × 10^28 times wider than the chip's 25.6 mm die.",
+     "source": "derived: the die from facts.json (chip.die-dims)",
+     "kind": "derived"
+    }
+   ],
+   "light": null,
+   "image": {
+    "file": "cmb.webp",
+    "px": [
+     400,
+     200
+    ],
+    "bytes": 22734,
+    "credit": "NASA / WMAP Science Team, \"Nine Year Microwave Sky\" (WMAP 2012)",
+    "licence": "public domain (NASA)",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/ed/WMAP_2012.png (from map.gsfc.nasa.gov/media/121238/)",
+    "note": "A map of the whole sky (Mollweide projection): the inside of the sphere, not a view from outside. Transparent outside the ellipse."
+   },
+   "draw": "Drawn SVG: a circle 93 billion ly across with \"you are here\" at the centre, a thin shell at the edge labelled \"the cosmic microwave background (380,000 years after the Big Bang)\", and the WMAP map as an inset labelled \"the whole sky as we see it\". Scale bar 10 billion ly (comoving).",
+   "child": {
+    "id": "laniakea",
+    "note": "a dot at the centre (Laniakea is ~1/180 of the diameter)"
+   },
+   "zoom_from_inner": 162.256
+  },
+  {
+   "id": "beyond",
+   "name": "Beyond what we can see (speculative)",
+   "parent": null,
+   "optional": false,
+   "size_m": null,
+   "frame_m": 2.621696591453363e+27,
+   "size_kind": "unknown",
+   "size_note": "Unknown. The frame is only a picture size.",
+   "blurb": "Space almost certainly goes on past the edge of what we can see, but how far is unknown. Some theories go further and propose many universes, a multiverse: a hypothesis, not an observation.",
+   "facts": [
+    {
+     "text": "Measured space is flat to within a fraction of a percent (Ω_K = 0.001 ± 0.002), which suggests the universe extends well past the observable part.",
+     "source": "Planck 2018 results VI (abstract), A&A 641, A6 (2020)",
+     "kind": "outside source"
+    },
+    {
+     "text": "One analysis puts the whole universe at more than 251 times the volume of our Hubble sphere (99% level), under its model assumptions.",
+     "source": "M. Vardanyan, R. Trotta, J. Silk, \"Applications of Bayesian model averaging to the curvature and size of the Universe\", MNRAS 413, L91-L95 (2011), arXiv:1101.5476",
+     "kind": "outside source"
+    },
+    {
+     "text": "Eternal inflation and the string-theory \"landscape\" suggest many separate universes. Nothing observed so far confirms or rules this out.",
+     "source": "A. H. Guth, \"Eternal inflation and its implications\", J. Phys. A 40, 6811 (2007), arXiv:hep-th/0702178",
+     "kind": "hypothesis"
+    }
+   ],
+   "light": null,
+   "image": null,
+   "draw": "Drawn SVG, clearly marked \"speculative\": our observable sphere as one small circle among a few dashed, fading ones; no scale bar (a note: \"size unknown\").",
+   "child": {
+    "id": "universe",
+    "note": "our observable universe, one circle"
+   },
+   "zoom_from_inner": 2.727
+  }
+ ]
+}

@@ -29,8 +29,11 @@ async function hitPoint(b, label) {
     const g = [...document.querySelectorAll('#chip .comp')].find(g => g.getAttribute('aria-label') === ${JSON.stringify(label)} && g.getClientRects().length);
     if (!g) return null;
     const r = g.getBoundingClientRect();
-    for (const [fx, fy] of [[.5, .5], [.3, .5], [.7, .5], [.5, .3], [.5, .7], [.2, .2], [.8, .8], [.2, .8], [.8, .2], [.1, .5], [.9, .5]]) {
-      const x = r.left + r.width * fx, y = r.top + r.height * fy, e = document.elementFromPoint(x, y);
+    const pts = [[.5, .5], [.3, .5], [.7, .5], [.5, .3], [.5, .7], [.2, .2], [.8, .8], [.2, .8], [.8, .2], [.1, .5], [.9, .5], [.5, .02], [.02, .5], [.98, .5], [.5, .98], [.15, .15]].map(([fx, fy]) => [r.left + r.width * fx, r.top + r.height * fy]);
+    // then the middles of the part's own shapes (a part drawn as dots, bonds or contacts between other parts)
+    [...g.querySelectorAll('rect, circle, path, line, ellipse, polygon, text')].slice(0, 60).forEach(c => { const q = c.getBoundingClientRect(); if (q.width || q.height) pts.push([q.left + q.width / 2, q.top + q.height / 2]); });
+    for (const [x, y] of pts) {
+      const e = document.elementFromPoint(x, y);
       if (e && g.contains(e) && x > 0 && y > 0 && x < innerWidth && y < innerHeight) return {x, y};
     }
     return null; })()`);
@@ -79,7 +82,7 @@ T.T2 = async b => {
     await scrollStage(b);
     const pt = await hitPoint(b, p.label); if (!ok(!!pt, `T2 ${sc}: a part to click`, p.label)) continue;
     if (b.touch) await b.tap(pt.x, pt.y); else await b.click(pt.x, pt.y);
-    await sleep(500);
+    await sleep(700);
     s = await b.state();
     ok(s.path === base && JSON.stringify(s.visible) === tf && !s.zooming, `T2 ${sc}: a ${b.touch ? 'tap' : 'click'} does not move the camera`, s.path);
     ok(s.sel === p.label && !!s.panel, `T2 ${sc}: it selects and the panel shows it`, `${s.sel} | ${s.panel}`);
@@ -155,7 +158,10 @@ T.T4 = async b => {
           ok(maxSh === 2 && !die, `T4 shire ${sid} → ${tgt} by ${how}: a glide (two shires shown, no die)`, JSON.stringify({maxSh, die}));
           if (how !== 'click' && how !== 'tap') ok(new RegExp(`Go to (shire ${sid}|master shire|spare shire),`).test(back || ''), `T4 shire ${sid} → ${tgt}: focus on the link back`, back);
         } else {
-          ok(s.level === 0 && !!s.sel, `T4 shire ${sid} → ${lab} by ${how}: die, cell selected`, `${s.sel} | panel: ${s.panel}`);
+          // a memory shire, the PCIe or the I/O shire: a glide to its own scale (since the scales inside the die)
+          const want = /memory shire (\d+)/.exec(lab) ? 'memshire:' + /memory shire (\d+)/.exec(lab)[1] : /PCIe/.test(lab) ? 'pcie' : /I\/O/.test(lab) ? 'io' : null;
+          ok(want ? s.path.endsWith('die/' + want) : s.level === 0 && !!s.sel, `T4 shire ${sid} → ${lab} by ${how}: ${want || 'die, cell selected'}`, s.path.split('/').slice(-2).join('/'));
+          if (want) ok(!die, `T4 shire ${sid} → ${want} by ${how}: a glide (no die)`, JSON.stringify({maxSh, die}));
         }
       }
     }
@@ -217,6 +223,14 @@ T.T6 = async b => {
   let s = await b.state();
   for (let i = 0; i < 40 && s.tour != null && s.tour < 16; i++) { await b.key('ArrowRight', 8); await sleep(200); await b.idle(15000); s = await b.state(); }
   ok(s.tour === 16, 'T6 the tour steps to its end', String(s.tour));
+  // a flow started far from the chip (San Francisco, or the silicon lattice) brings the camera back to it
+  for (const q of ['?at=sf', '?at=' + (await b.ev('window.__chipTest.defPath()')).split('/').slice(18).join('/')]) {
+    await b.load(PAGE, q, 1500); await b.idle(10000);
+    await b.key('1'); await sleep(400);
+    let t0 = Date.now(); while (Date.now() - t0 < 12000) { const st = await b.state(); if (!st.zooming && st.path === await b.ev('window.__chipTest.want()')) break; await sleep(100); }
+    s = await b.state();
+    ok(s.flow === 'A' && s.path === await b.ev('window.__chipTest.want()'), `T6 flow 1 started from ${q.slice(4, 30)}… comes to its stage`, s.path.split('/').slice(-2).join('/'));
+  }
 };
 
 T.T7 = async b => {
@@ -229,11 +243,30 @@ T.T7 = async b => {
     if (r.touch) await r.dtap(pt.x, pt.y); else await r.dblclick(pt.x, pt.y);
     await sleep(60);
     const s = await r.state();
-    ok(s.path === 'die/' + p.kid && !s.zooming, 'T7 reduced motion: a zoom is a cut', s.path);
+    ok(s.path.endsWith('die/' + p.kid) && !s.zooming, 'T7 reduced motion: a zoom is a cut', s.path);
     const ro = await r.ev(`document.getElementById('scale-ro').textContent`);
     ok(/Shire/.test(ro), 'T7 the readout is at the new scale', ro);
     ok(!r.errs.length, 'T7 no console errors', r.errs.slice(0, 3).join(' | '));
   } finally { await r.close(); }
+};
+
+/* T9 (the part run in a browser): with the images folder missing, a photo level loads with no script error and says
+   "photo not loaded"; with it, the images load (zoom_static.py checks sizes, the manifest and privacy) */
+T.T9 = async b => {
+  const { mkdtempSync, copyFileSync } = await import('node:fs');
+  const { resolve, join } = await import('node:path');
+  const d = mkdtempSync(resolve(process.env.ZT_TMP || '/home/yaroslavvb/claude/work/chipzoom/tests', 'noimg-'));
+  copyFileSync(PAGE, join(d, 'page.html'));
+  const n0 = b.errs.length;
+  await b.load(join(d, 'page.html'), '?at=rack', 2500); await b.idle(10000); await sleep(600);
+  const said = await b.ev(`[...document.querySelectorAll('#chip .lay text')].some(t => t.textContent === 'photo not loaded' && t.getClientRects().length)`);
+  const exc = b.errs.slice(n0).filter(e => /^EXC|^console\.error/.test(e));
+  ok(said, 'T9 no images folder: the rack says "photo not loaded"');
+  ok(!exc.length, 'T9 no images folder: no script error', exc.slice(0, 2).join(' | '));
+  b.errs.splice(n0);   // the missing files' own load errors are expected here
+  await b.load(PAGE, '?at=rack', 2500); await b.idle(10000); await sleep(600);
+  const loaded = await b.ev(`(() => { const im = document.querySelector('#chip .lay image'); return im ? im.getBBox().width > 0 && !document.querySelector('#chip .lay text') ? true : [...document.querySelectorAll('#chip .lay text')].every(t => t.textContent !== 'photo not loaded') : false; })()`);
+  ok(loaded, 'T9 with the folder: the photo loads');
 };
 
 T.T11 = async b => {

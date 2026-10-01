@@ -1,6 +1,9 @@
 <style>
 main{max-width:none;padding:0}
 .prose{max-width:940px;margin:0 auto;padding:28px 16px 72px}
+/* the text under the stage (its fact table has some 800 rows since the deep zoom) is laid out and painted only when
+   it is near the screen: the camera's frames never pay for it */
+.prose>.table-wrap,.prose>#summary-text,.prose>#honest-text{content-visibility:auto;contain-intrinsic-size:auto 1200px}
 /* ---- the stage: one screen at 1920x1080 and 1280x720, nothing inside it scrolls but the details list ---- */
 #stage{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:7px;height:100vh;height:100dvh;min-height:560px;
   padding:10px 16px;background:var(--page);color:var(--ink);overflow:hidden;position:relative;
@@ -22,7 +25,7 @@ html.et-pres [data-ss-ui]{display:none!important}
 .st-btn{font:inherit;font-size:clamp(.8rem,.32vw + .66rem,1.05rem);background:var(--surface);color:var(--ink);border:1px solid var(--border);
   border-radius:8px;padding:4px 12px;min-height:34px;cursor:pointer;white-space:nowrap;line-height:1.2}
 .st-btn:hover{border-color:var(--ink-2)}
-.st-btn[aria-pressed="true"],.zc button[aria-pressed="true"]{background:color-mix(in srgb,var(--c1) 16%,var(--surface));border-color:var(--c1);color:var(--ink);font-weight:650}
+.st-btn[aria-pressed="true"]{background:color-mix(in srgb,var(--c1) 16%,var(--surface));border-color:var(--c1);color:var(--ink);font-weight:650}
 .st-btn.tog[aria-pressed]{display:inline-flex;align-items:center;gap:7px;font-weight:400}
 .st-btn.tog[aria-pressed]::before{content:"";width:7px;height:7px;border-radius:50%;flex:none;box-sizing:border-box;border:1.5px solid var(--ink-2)}
 .st-btn.tog[aria-pressed="true"]{background:var(--surface);border-color:var(--ink-2);color:var(--ink)}
@@ -34,12 +37,12 @@ html.et-pres [data-ss-ui]{display:none!important}
 .st-btn .k{display:inline-block;margin-right:6px;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .st-btn[aria-pressed="true"] .k{color:color-mix(in srgb,var(--c1) 65%,var(--ink))}
 .w-play{min-width:5.2em}.w-tour{min-width:6.4em}.w-fs{min-width:6.6em}
-.st-btn:focus-visible,.pn button:focus-visible,.pn a:focus-visible,.pn select:focus-visible,.pn summary:focus-visible,.zc button:focus-visible,.stg:focus-visible,.pip:focus-visible,.toast button:focus-visible{outline:3px solid var(--c1);outline-offset:2px}
+.st-btn:focus-visible,.pn button:focus-visible,.pn a:focus-visible,.pn select:focus-visible,.pn summary:focus-visible,.stg:focus-visible,.pip:focus-visible,.toast button:focus-visible{outline:3px solid var(--c1);outline-offset:2px}
 .st-body{display:grid;grid-template-columns:minmax(0,1fr) var(--pnw);gap:14px;min-height:0;min-width:0}
 .st-view{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;gap:6px}
 .st-svg{position:relative;flex:1 1 auto;min-height:0;min-width:0}
 /* ---- the Up bar above the drawing (30 September): the wide button out, the breadcrumb, the scale readout ---- */
-.upbar{flex:none;display:flex;align-items:center;gap:6px 10px;min-width:0}
+.upbar{flex:none;display:flex;align-items:center;gap:6px 10px;min-width:0;contain:layout style}
 .st-btn.up{flex:0 0 auto;min-width:min(40%,26em);max-width:60%;min-height:40px;text-align:left;display:flex;align-items:center;gap:8px;overflow:hidden;
   font-weight:600;background:color-mix(in srgb,var(--c1) 9%,var(--surface));border-color:color-mix(in srgb,var(--c1) 45%,var(--border))}
 .st-btn.up .up-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
@@ -54,7 +57,7 @@ html.et-pres [data-ss-ui]{display:none!important}
 .crumbs button.pm.dis{opacity:.35;cursor:default}
 .crumbs .sep{color:var(--ink-2);padding:0 1px}
 .crumbs button:focus-visible,.crumb-menu button:focus-visible,.zpill button:focus-visible{outline:3px solid var(--c1);outline-offset:1px}
-.scale-ro{flex:0 0 auto;color:var(--ink-2);font-size:clamp(.74rem,.22vw + .64rem,.94rem);white-space:nowrap;font-variant-numeric:tabular-nums;max-width:40%;overflow:hidden;text-overflow:ellipsis}
+.scale-ro{flex:0 0 auto;contain:layout paint style;color:var(--ink-2);font-size:clamp(.74rem,.22vw + .64rem,.94rem);white-space:nowrap;font-variant-numeric:tabular-nums;max-width:40%;overflow:hidden;text-overflow:ellipsis}
 .scale-ro b{color:var(--ink);font-weight:600}
 .scale-ro .inf{text-decoration:underline dotted var(--muted);text-underline-offset:3px}
 .scale-ro.mv{color:var(--ink)}
@@ -81,15 +84,103 @@ html.et-pres [data-ss-ui]{display:none!important}
 @keyframes zflash{0%{background:color-mix(in srgb,var(--c2) 25%,transparent)}100%{background:transparent}}
 @media (prefers-reduced-motion: reduce){.pn-zoom.flash{animation:none}}
 .pn-kick .pn-sz{text-transform:none;letter-spacing:0}
+.pn-cred{font-size:.84em;color:var(--ink-2);margin:4px 0 6px}
+#stage.offchip .pn-foot{display:none}
+.kd.outside{color:color-mix(in srgb,var(--c4) 70%,var(--ink));border-color:var(--c4)}
+.kd.generic{color:var(--ink-2);border-color:var(--ink-2);border-style:dotted}
+.kd.owner{color:color-mix(in srgb,var(--c5) 70%,var(--ink));border-color:var(--c5)}
+.kd.hypothesis{color:color-mix(in srgb,var(--warn) 55%,var(--ink));border-color:var(--warn);border-style:dashed}
+.kd.unknown{color:var(--ink-2);border-color:var(--ink-2);border-style:dashed}
+.kd.erbium{color:var(--ink-2);border-color:var(--border);font-weight:500}
+/* ---- the levels outside the chip (30 September): their type, their parts, the night sky ---- */
+#chip .o-t{font-size:32px;font-weight:700;fill:var(--ink)}
+#chip .o-l{font-size:21px;font-weight:600;fill:var(--ink)}
+#chip .o-s{font-size:18px;fill:var(--ink-2)}
+#chip .o-cr{font-size:16px;fill:var(--ink-2)}
+#chip .o-tag{font-size:16px;font-weight:600;fill:currentColor}
+#chip .otl{color:var(--ink-2)}
+#chip .ohalo{paint-order:stroke;stroke:var(--page);stroke-width:5px;stroke-linejoin:round}
+#chip.zmv .ohalo{stroke:none}
+#chip .sbar .sb{fill:none;stroke:var(--ink);stroke-width:2.5}
+#chip .hotr{fill:transparent;stroke:transparent;stroke-width:2.5}
+#chip .comp:hover .hotr,#chip .comp:focus-visible .hotr{stroke:var(--c1)}
+#chip .ophoto .hotr{stroke:var(--c2);stroke-dasharray:8 6;stroke-width:3}
+#chip .mk{fill:none;stroke:var(--c2);stroke-width:3}
+#chip .lay.sky .mk{stroke:#ffd27a}
+#chip .lay.sky .o-t,#chip .lay.sky .o-l{fill:#eef2fb}
+#chip .lay.sky .o-s,#chip .lay.sky .o-cr{fill:#bcc6dc}
+#chip .lay.sky .otl{color:#bcc6dc}
+#chip .lay.sky .ohalo{stroke:#070b17}
+#chip .lay.sky .sbar .sb{stroke:#eef2fb}
+#chip .lay.sky .ring{stroke:#ffd27a}
+#chip .ghost{fill:none;stroke:#8fa0c8;stroke-width:2;stroke-dasharray:8 8}
+#chip .univ{fill:#1d2a4f;stroke:#cfd8ff;stroke-width:3}
+#chip .univ2{fill:#101a35;stroke:none}
+#chip .cmbr{fill:none;stroke:#f2a65a;stroke-width:12;stroke-opacity:.75}
+#chip .lani{fill:#14203f;stroke:#8fa0c8;stroke-width:2}
+#chip .flowl{fill:none;stroke:#6f86c4;stroke-width:1.5;stroke-opacity:.8}
+#chip .gal{fill:#e7ecff}
+#chip .orb{fill:none;stroke:#5b6787;stroke-width:1.5}
+#chip .voy{fill:none;stroke:#ffd27a;stroke-width:2.5}
+#chip .ocean{fill:#173a6b;stroke:#8fb3f0;stroke-width:2}
+#chip .land{fill:#5d8a5a;stroke:#9cc596;stroke-width:.6;vector-effect:non-scaling-stroke}
+#chip .kidbox{fill:transparent;stroke:#e0a23a;stroke-width:2.5;stroke-dasharray:8 6}
+#chip .map .st{fill:color-mix(in srgb,var(--c3) 13%,var(--page));stroke:color-mix(in srgb,var(--ink-2) 55%,var(--page));stroke-width:1;vector-effect:non-scaling-stroke}
+#chip .st.hl{fill:color-mix(in srgb,var(--c1) 24%,var(--page));stroke:var(--c1);stroke-width:1.6;vector-effect:non-scaling-stroke}
+#chip .arc{fill:none;stroke:var(--c2);stroke-width:3;stroke-dasharray:2 7;stroke-linecap:round}
+#chip .inset{fill:var(--surface);stroke:var(--c2);stroke-width:2.5;stroke-dasharray:8 6}
+#chip .floor{fill:color-mix(in srgb,var(--ink-2) 6%,var(--page));stroke:var(--ink-2);stroke-width:2;stroke-dasharray:10 8}
+#chip .rackp{fill:var(--c2);fill-opacity:.35;stroke:var(--c2);stroke-width:2}
+#chip .pcb{fill:color-mix(in srgb,var(--c3) 10%,var(--page));stroke:var(--ink-2);stroke-width:2}
+#chip .cool,#chip .psu{fill:color-mix(in srgb,var(--ink-2) 12%,var(--page));stroke:var(--ink-2);stroke-width:2}
+#chip .dimm{fill:color-mix(in srgb,var(--c4) 30%,var(--page));stroke:var(--c4);stroke-width:1.2}
+#chip .cardedge{fill:var(--c1);stroke:var(--c1);stroke-width:1.5}
+#chip .cardface{fill:color-mix(in srgb,var(--c3) 22%,var(--page));stroke:var(--c1);stroke-width:2.5}
+#chip .lead{fill:none;stroke:var(--ink-2);stroke-width:1.5;stroke-dasharray:4 5}
+#chip .pkgb{fill:color-mix(in srgb,var(--c3) 12%,var(--page));stroke:var(--ink-2);stroke-width:2}
+#chip .diedash{fill:color-mix(in srgb,var(--c1) 10%,transparent);stroke:var(--c1);stroke-width:2.5;stroke-dasharray:9 6}
+#chip .ball{fill:color-mix(in srgb,var(--c5) 55%,var(--page))}
+/* ---- the memory levels' drawings inside the chip (circuitkit.js, 30 September): their type, tags, wires, transistors
+   and gates, as on that page; every label knocks out what runs under it (--kb), and no label is stroked while the
+   camera moves ---- */
+.pn-badge{margin:0 0 6px}
+.pn .cav{color:var(--ink-2);font-style:italic;font-size:.9em}
+#chip .t-smb{font-size:17px;font-weight:600;fill:var(--ink)}
+#chip .t-net{font-size:19px;font-weight:600;fill:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important}
+#chip .t-mono{font-size:17px;fill:var(--ink-2);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important}
+#chip .t-q{font-size:26px;font-weight:700;fill:color-mix(in srgb,var(--warn) 55%,var(--ink))}
+#chip .lay.ckt text{paint-order:stroke;stroke:var(--kb,var(--page));stroke-width:4px;stroke-linejoin:round}
+#chip .lay.ckt text.halo{stroke:var(--kb,var(--page));stroke-width:6px}
+#chip .lay.ckt .tg text{stroke:var(--surface)}
+#chip.zmv .lay text{stroke:none!important}
+#chip .tg rect{fill:var(--surface);stroke-width:1.6}
+#chip .tg.documented rect{stroke:var(--c1)}
+#chip .tg.generic rect{stroke:var(--ink-2);stroke-dasharray:2 4}
+#chip .tg.unknown rect{stroke:var(--warn);stroke-dasharray:7 5}
+#chip .tg.derived rect{stroke:var(--c7);stroke-dasharray:5 3}
+#chip .tg text{font-size:17px;font-weight:600}
+#chip .tg.documented text{fill:var(--c1)}
+#chip .tg.generic text{fill:var(--ink-2)}
+#chip .tg.unknown text{fill:color-mix(in srgb,var(--warn) 55%,var(--ink))}
+#chip .tg.derived text{fill:var(--c7)}
+#chip .w{fill:none;stroke:var(--ink-2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#chip .w.thin{stroke-width:1.25}
+#chip .w.bus{stroke-width:4}
+#chip .rail{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+#chip .jn{fill:var(--ink-2)}
+#chip .mos .ch{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+#chip .mos .gt{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+#chip .mos .bub{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+#chip .cellq{fill:var(--c3);fill-opacity:.12;stroke:var(--c3);stroke-width:1.25}
+#chip .gate{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+#chip .lvl{fill:var(--c2)}
+#chip .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
+/* a phone's view of an outside level is its middle 760 units: the type larger, never under 11 px */
+#stage.ph #chip .lay.oscn .o-t{font-size:38px}
+#stage.ph #chip .lay.oscn .o-l{font-size:27px}
+#stage.ph #chip .lay.oscn .o-s,#stage.ph #chip .lay.oscn .o-cr{font-size:24px}
+#stage.ph #chip .lay.oscn .o-tag{font-size:21px}
 #chip{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;touch-action:manipulation}
-/* ---- the scale control: always there, under the details panel, right-aligned (where maps keep their zoom) ---- */
-.zc{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:3px}
-.zc button{font:inherit;font-size:clamp(.76rem,.25vw + .66rem,.98rem);min-height:30px;padding:2px 9px;border-radius:8px;cursor:pointer;
-  background:var(--surface);color:var(--ink);border:1px solid var(--border);line-height:1.15;white-space:nowrap}
-.zc button:hover{border-color:var(--ink-2)}
-.zc button.pm{font-size:1.1em;font-weight:600;min-width:2.1em}
-.zc button:disabled,.zc button.dis{opacity:.35;cursor:default}
-.zc .zlab{font-size:clamp(.72rem,.2vw + .64rem,.86rem);color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;margin-right:6px}
 /* ---- the small picture of the die: a flow's stage on the die while the camera is inside a shire or a minion ---- */
 .pip{position:absolute;bottom:8px;right:8px;z-index:3;width:clamp(180px,20%,300px);border-radius:8px;overflow:hidden;cursor:pointer;
   background:var(--surface);border:1px solid var(--border);box-shadow:0 6px 20px rgba(0,0,0,.18)}
@@ -559,7 +650,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 <div id="srctip" role="tooltip"></div>
 </section>
 <div class="prose">
-<p class="byline">27 September 2026, second version the same day, the broadcast flow 28 September, the routes as measured 29 September (replies y first, on three cards) · every number is a fact with a source: a repository file and field, a manual page, or a source line · the chip's facts: <a href="#facts">the table below</a>, built in the repository's docs/reports/data/2026-09-27-chip-diagram · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline">27 September 2026, second version the same day, the broadcast flow 28 September, the routes as measured 29 September (replies y first, on three cards), the zoom from the universe down 30 September · every number is a fact with a source: a repository file and field, a manual page, or a source line · the chip's facts: <a href="#facts">the table below</a>, built in the repository's docs/reports/data/2026-09-27-chip-diagram · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">A schematic of Esperanto's ET-SoC-1 that you can click through: the die with its mesh of shires, a shire with its
 cache and minions, a minion with its vector unit, whose lanes also run the tensor instructions. Eleven animated flows show where data goes and what it costs,
@@ -570,10 +661,17 @@ with the latency, bandwidth, energy and heat measured on the lab's cards, the ho
 <li><b>Click</b> any part (or Tab to it and press Space) for what it is, its numbers with their units and card coverage,
 a link to the report that measured them, and, where the drawing infers something, what would settle it. Point at a
 number to see its source; from the keyboard, Tab to a fact in the details list.</li>
-<li><b>Zoom</b> with the scale control under the details (−, Chip, Shire, Minion, +, or the + and − keys): it is always there, so you can go back in as well as out; a second press while the camera moves goes on to the next scale. A double click, a second click, or Enter on a shire or
-a minion zooms into it; Backspace zooms out. Inside a shire, the names at its four edges ("→ shire 28", "↓ shire 29")
-are links: click one (or Tab to it and press Enter) to go to that neighbour; a neighbour that is not a compute shire
-(the PCIe or I/O shire, the master, a memory shire) is shown selected on the die.</li>
+<li><b>Zoom in</b> with a double-click on a part (a double-tap on a touch screen, or the <b>Zoom in</b> pill that a tap
+shows beside it), Enter on a focused part, the + key, or the zoom buttons under the part's text in the details panel.
+A click only selects. A part with no closer drawing says so in the panel and offers the zooms it has.</li>
+<li><b>Zoom out</b> with the wide <b>↑ Zoom out</b> button above the drawing, Backspace or the − key, all the way to the
+top of the ladder. Beside it, the breadcrumb jumps to any level (the outer ones fold into its "…" menu), and the
+readout gives the size of what you see, in metres and as a power of ten. A second press while the camera moves goes
+one further.</li>
+<li><b>Sideways.</b> Inside a shire, the names at its four edges ("→ shire 28", "↓ shire 29") are links: click one (or
+Tab to it and press Enter) to glide sideways to that shire, memory shire, PCIe or I/O shire. With no flow or tour on
+the stage, the arrow keys do the same, and in a minion, a memory shire or any scale with neighbours glide to the one
+that way.</li>
 <li><b>Flows</b> 1 to 9, 0 and B animate a load that misses to DRAM, the latency ladder, TensorSend across the mesh, the
 relay against DRAM, gathers and scatters, the host over PCIe (timed on three cards), a matmul on the tensor unit, the
 same matmul's watts and heat on different data, one hot line stopping a shire, the allreduce tree, and one value
@@ -590,11 +688,50 @@ key jumps to a slide; Q or End tour ends the tour, and T picks it up where it wa
 lose their dotted underline and the pointer hides when it rests. F (or Present) goes full screen. Where the page's frame forbids that, the stage fills the frame
 instead and offers the browser's own full screen (F11) and a presenter window, a copy of this page in a window of its
 own where F works. P hides the details panel, D switches light and dark. The same from the address:
-<code>?theme=light</code>, <code>?panel=off</code>, <code>?flow=7</code>, <code>?tour=1</code>. The stage fits one screen from 1280 × 720
+<code>?theme=light</code>, <code>?panel=off</code>, <code>?flow=7</code>, <code>?tour=1</code>, and any level with <code>?at=</code>
+(<code>?at=sf</code>, <code>?at=shire:20/minion:20.1.3</code>). The stage fits one screen from 1280 × 720
 up. On a phone the drawing fits the screen's width: the die with its packages at the chip's scale, a shire or a minion
-at theirs (a tap on a shire or a minion zooms into it), and a flow's charts under the die. A minion's labels are small
-there: pinch to enlarge them, or tap a part for its details.</li>
+at theirs, and a flow's charts under the die. The levels outside the chip show their middle, with larger type. A
+minion's labels, and those of the circuits inside it, are small there: pinch to enlarge them, or tap a part for its
+details.</li>
 </ul>
+
+<h2 id="ladder">From the universe to the atom</h2>
+<p>Since 30 September the zoom goes on past the chip in both directions, at the owner's request. Out from the die: the package under its lid,
+the PCIe card (the vendor's photo), a host computer (an ATX board drawn to scale), the rack of open-frame machines the
+lab's hosts stand in (the owner's photo, its machines' labels blurred), Studio 45, the San Francisco workspace where the
+rack stands (a schematic: the room's layout is not recorded, and its position in the city is not shown), San Francisco,
+the Bay Area, California and the United States (US Census outlines), Earth (Natural Earth's land on a globe), Earth and
+the Moon, the Solar System, the nearest stars, the Milky Way (NASA's artist's concept: nobody has photographed it from
+outside), the Local Group with Andromeda (the owner's "Andromeda Cluster"), the Laniakea supercluster, the observable
+universe, and, marked speculative, what may lie beyond it. Every level says what light, or a signal in a fibre, takes to
+cross it, counted in ticks of the chip's 600 MHz clock.</p>
+<p>In from the die, every part opens. The memory system goes down as the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels">anatomy
+of a memory access</a> draws it (its drawings are reused here): the L1 data cache to an LRAM block, a row and one latch's
+transistors; the shire cache to a bank, a sub-bank, an SRAM panel and a 6T cell; a mesh hop to its wire and repeaters;
+a memory shire to its PHY and a DQ driver; the DRAM to a bank and its 1T1C cell. The blocks whose insides are described
+but not drawn by Esperanto (the mesh stop and its router, the crossbar, the UC block, a neighbourhood, the core, the
+vector unit and its lanes, the tensor sequencer, the PCIe and I/O shires) are logical drawings built from what the
+documents say, each part with its text and what it is made of. And the compute path goes all the way down: a vector
+lane's fused multiply-add, its compressor tree of 17 partial products, one column of it, a 4:2 compressor, a full adder,
+an XOR gate in transistors, the FinFET at TSMC N7's published pitches, a fin in section, the channel under the gate, and
+one cell of the silicon crystal. The die in section (transistors, the wiring stack, the bumps) opens from the chip's own
+panel. Press + from the top of the ladder and the default path runs from beyond the observable universe to the silicon
+lattice: 33 levels and some 36 powers of ten.</p>
+<p>The camera moves between levels in three ways. Where one level is drawn inside the other (the maps, the rack in the
+room, the lid on the card) it zooms smoothly. Where the ratio is huge, or the two pictures are of different kinds, it
+makes a "powers of ten" jump: it zooms into a marked box while the next level grows out of it, and the readout sweeps
+the decades in between (from the city to the room, from the galaxy to the nearest stars). Between
+neighbouring shires it glides sideways. Each level's facts, with their kinds and sources, are in its details panel and
+in the table below; the images' credits are under them and in the panel.</p>
+<p class="small">Honesty notes. Sizes from the shire down are estimates (marked ≈): no floorplan of the chip's inside is
+published, so the blocks are logical drawings, and the circuits are textbook circuits (each says so) tied to this chip by
+its documents' counts and names. Facts read from core-et's Erbium-branch RTL carry that caveat: the same Minion core
+lineage in a later configuration, not confirmed to match the silicon. TSMC's N7 pitches are published; this chip's own
+cells and layer count are not. The rack photo is the page author's own, with the machines' tape labels blurred (they carry host names and
+network addresses); which three machines are the lab's is not recorded, so the host shown is "one of the rack's
+machines". The card photo is the vendor's (Apache-2.0), not a lab card. The beyond level is a hypothesis, not an
+observation.</p>
 
 <h2 id="summary">What the diagram shows</h2>
 <div id="summary-text"><p>The text version of the diagram is written when the page's script runs.</p></div>
@@ -612,6 +749,19 @@ everything else the instruments cannot see.</p>
 <p>The facts behind the diagram, the panels and the captions, with their kind, the cards they were measured on and their
 source. Sort by any column or filter the rows.</p>
 <div class="table-wrap wide"><table id="facttab" class="stack"><thead><tr><th>Fact</th><th>Statement</th><th>Kind</th><th>Cards</th><th>Source</th></tr></thead><tbody></tbody></table></div>
+
+<h2 id="versions">Versions</h2>
+<ul>
+<li><b>27 September 2026</b>: the die, a shire and a minion, ten flows and the tour; a second version the same day.</li>
+<li><b>28 September</b>: the broadcast flow (B).</li>
+<li><b>29 September</b>: the routes as measured on three cards (a reply goes y first, back along its request's links), where
+a host copy lands, the DRAM address map.</li>
+<li><b>30 September</b>: the zoom out to the universe (the powers-of-ten ladder above the die) and in to the circuits
+(the caches' cells and the DRAM's, a vector lane's adder down to a FinFET and the silicon crystal), double-click to zoom
+into any part, the wide ↑ Zoom out button and the breadcrumb above the drawing, the panel's zoom buttons, the shires' edge
+arrows as links that glide to the neighbouring shire, and a smoother camera (one ease per move, blended through each
+scale).</li>
+</ul>
 
 <h2 id="related">Related reports</h2>
 <ul>

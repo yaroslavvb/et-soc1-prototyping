@@ -18,6 +18,9 @@ packages to install. On a Mac, headless Chrome rasterises on the real GPU (ANGLE
 | `sheet.py RUN.json CASTDIR OUT` | a contact sheet of each camera move from a screencast |
 | `shot.mjs PAGE HASH OUT.png [W H DPR WAIT JS]` | a screenshot after optional JS (phone widths emulate touch) |
 | `ui_test.mjs PAGE` | the memory levels' player bar driven by real key and mouse events |
+| `cdp.mjs` | a small DevTools driver for the tests below: open (desktop or touch phone, dark, reduced motion, CPU slowdown), load, real mouse, touch and key events, screenshots |
+| `zoom_test.mjs PAGE [--phone] [--only=T1,T4] [--scenes=a,b]` | the chip diagram's zoom tests (its DESIGN §6.2): T1 a double-click (double-tap) on one part of every kind in each scene, then Up; T2 a click selects without moving; T3 Up to the top and the breadcrumb; T4 the shires' edge links (click, Enter, arrows; each a glide); T5 + from the top of the ladder to the silicon lattice, every layer's scale in [1/30, 30]; T6 every stage of every flow lands where it wants the camera, the tour, a flow started far from the chip; T7 reduced motion; T9 the page without its images folder; T11 labels, names, announcements, focus. Scenes are `?at=` paths |
+| `zoom_static.py PAGE` | the chip diagram's size and privacy checks (T9, T10): the page, script, data and image budgets; no IPv4-like string, no street address or listing link for Studio 45, the images' sha256 against the manifest, no EXIF/XMP/ICC |
 
 ```bash
 cd tools/pagemotion
@@ -28,3 +31,19 @@ python3 summ.py run.json && python3 kink.py run.json
 
 Headless frame times depend on the machine and on what else runs: compare before and after on the same machine,
 one run at a time, with the same profile, and repeat a run before believing a single late frame.
+
+What the chip diagram's deep zoom taught (30 September; runs in `~/claude/work/chipzoom/motion/` on aifoundry2):
+
+- **Slow the CPU before believing a page is smooth.** At normal speed every build had under 1.5% late frames; with
+  `CPU=4` the same build had 50–80%, and the causes were invisible without it. Compare against the page before the
+  change with the same flow, interleaving the runs (A, B, A, B): one run of each is not enough at `CPU=4`.
+- **A text readout that changes every frame lays out its bar every frame.** The scale readout cost a slowed flow about
+  a third of its frames; updating it ten times a second (and at the end of the move) brought it back to the base page.
+- **A long table below the stage costs every frame**, even far off screen, once the stage relayouts each frame:
+  `content-visibility: auto` on the table's wrapper (with `contain-intrinsic-size`) removed that cost (800 rows: 50–64%
+  late frames slowed, 16–20% with it). One price seen in this headless Chrome: its page-content agent
+  (`blink.mojom.AIPageContentAgent`, about 1.2–1.7 s after load) forces one layout of the skipped content, a single
+  100 ms frame at normal speed. A trace with `TRACE_CATS=...,disabled-by-default-devtools.timeline.invalidationTracking`
+  names what invalidates layout and from which line.
+- **`pkill -f PATTERN` from a shell whose own command line contains PATTERN kills that shell** (exit 144): stop runs by
+  their process id.
