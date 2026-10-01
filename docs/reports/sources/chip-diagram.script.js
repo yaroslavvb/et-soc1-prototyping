@@ -37,6 +37,8 @@
 let SRC_HTML = '';
 try { SRC_HTML = '<!doctype html>\n' + document.documentElement.outerHTML; } catch (_) { /* no DOM access */ }
 const F = D.facts, N = D.num, COMPF = D.comp, LAY = D.layout, ASKS = D.asks || [], RUNGS = D.rungs || {};
+Object.entries(F).forEach(([k, f]) => { f.id = k; if (!f.cards) f.cards = []; });   // (the data leaves both out)
+const KINDS9 = ['measured', 'spec', 'derived', 'inferred', 'outside', 'generic', 'owner', 'hypothesis', 'unknown'];
 const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
@@ -192,11 +194,12 @@ svg.setAttribute('viewBox', `${VB.x} ${VB.y} ${VB.w} ${VB.h}`);
 svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 /* the callouts' soft shadow (its strength is set by the theme, CSS #co-sh feDropShadow) */
 { const f = E('filter', {id: 'co-sh', x: '-10%', y: '-20%', width: '120%', height: '160%'}, E('defs', {}, svg)); E('feDropShadow', {dx: 0, dy: 2, stdDeviation: 3, 'flood-color': '#000'}, f); }
-const LAYERS = [0, 1, 2].map(i => E('g', {class: 'lay', 'data-level': i}, svg));
-LAYERS[1].style.display = 'none'; LAYERS[2].style.display = 'none';
-LAYERS[1].style.opacity = 0; LAYERS[2].style.opacity = 0;   // hidden views start transparent: a zoom fades them in
+/* LAYERS[0..2]: the die's, the shire's and the minion's layers, where the flows draw (the camera keeps them bound to
+   the path, bindTrio; until a shire or a minion is built, an empty layer stands in); FX[i] the flows' drawing in each,
+   AP[i] its anchor points */
+const LAYERS = [0, 1, 2].map(i => { const g = E('g', {class: 'lay', 'data-level': i}, svg); g.style.display = 'none'; g.style.opacity = 0; return g; });
 const FX = [null, null, null];
-const AP = [{}, {}, {}];                                // anchor points of the flows, per layer
+const AP = [{}, {}, {}];
 
 function comp(parent, key, ctx, label) {
   const g = E('g', {class: 'comp dimmable', tabindex: 0, role: 'button', 'aria-label': label, 'data-comp': key}, parent);
@@ -215,8 +218,7 @@ function boxShape(g, x, y, w, h, col, o) {
 /* a mesh link or a link to a neighbour: one colour and width everywhere (CSS .mlink) */
 const mlink = (parent, x1, y1, x2, y2) => E('line', {class: 'mlink', x1, y1, x2, y2}, parent);
 
-function buildChip() {
-  const L = LAYERS[0];
+function buildChip(L, ap) {
   // LPDDR4X packages off the die, two per side (datasheet Fig. 2-6, fact L23). Two memory shires share each package;
   // which two is not documented, so the pairing of neighbours is inferred and the packages are dashed (dram.pkg-pairing)
   const PKG = {};
@@ -242,7 +244,7 @@ function buildChip() {
       T2(g, cx, cy + 10, ['four 16-bit', 'channels'], 't-sm t-fit', 'middle', 'L47');
     }
   });
-  AP[0].pkg = PKG;
+  ap.pkg = PKG;
   // the die: its outline is the component "chip", a quiet frame; its caption is a figure caption, not a title
   const gd = comp(L, 'chip', {}, 'The ET-SoC-1 die: details');
   S(E('rect', {class: 'shape', x: 0, y: 0, width: DW, height: DH, rx: 10}, gd), {fill: 'var(--surface)', stroke: 'color-mix(in srgb, var(--ink-2) 55%, var(--surface))', strokeWidth: 2.5});
@@ -257,11 +259,11 @@ function buildChip() {
   boxShape(gh, hx, hy, hw, hh, 'var(--ink-2)', {fo: 0});
   T(gh, hx + hw / 2, hy + (PH ? 56 : 54), 'Host', 't-mid', 'middle').style.fontSize = (PH ? FS0 : 22) + 'px';
   phSize(T(gh, hx - 14, ly - 12, `PCIe Gen4 x8 · ${N.pcie_h2d.t} GB/s to the card`, 't-sm halo', 'end', 'pcie.h2d pcie.negotiated'), FS0);
-  AP[0].host = [{x: hx + 4, y: ly}, {x: pc.sx, y: ly}, {x: pc.sx, y: pc.sy}];
-  AP[0].hostBox = {x: hx, y: hy, w: hw, h: hh, ly};
+  ap.host = [{x: hx + 4, y: ly}, {x: pc.sx, y: ly}, {x: pc.sx, y: pc.sy}];
+  ap.hostBox = {x: hx, y: hy, w: hw, h: hh, ly};
   // mesh links and stops, under the translucent tiles (visual only: the tiles take the clicks)
   const LG = E('g', {class: 'dimmable links', 'pointer-events': 'none'}, L);
-  AP[0].links = LG;
+  ap.links = LG;
   CELLS.forEach(a => CELLS.forEach(b => {
     if (a !== b && hops(a, b) === 1 && (a.lx < b.lx || a.ly < b.ly)) mlink(LG, a.sx, a.sy, b.sx, b.sy);
   }));
@@ -269,6 +271,8 @@ function buildChip() {
   // the tiles: the four cells without a compute shire are named by the firmware's map (fact fw.grey-cells)
   CELLS.forEach(c => {
     const g = comp(L, c.type, {cell: c}, tileLabel(c)); c.g = g;
+    if (c.type === 'cshire') ap.zs['shire:' + c.id] = {r: tileRect(c.id), g};
+    if (c.type === 'master') ap.zs['shire:' + (c.r === 0 ? 32 : 33)] = {r: {x: c.x + INS, y: c.y + INS, w: c.w - 2 * INS, h: c.h - 2 * INS}, g};
     boxShape(g, c.x + INS, c.y + INS, c.w - 2 * INS, c.h - 2 * INS, COL[c.type], {fo: c.type === 'cshire' ? 0.14 : 0.12});
     const x0 = c.x + INS + (PH ? 6 : 9), y0 = c.y + INS, tw = c.w - 2 * INS - 9;
     // (on a phone the labels are larger: a memory shire's number sits under its mesh stop, the master and spare shires
@@ -298,7 +302,7 @@ function buildChip() {
   const ti = phSize(T(gi, DW - 10, rb, PH ? 'what is inferred ›' : 'inferred · what would settle it ›', 't-sm', 'end'), FS0);
   // the dashed sample sits just left of its words (measured once drawn)
   try { const tl = ti.getComputedTextLength(); if (tl > 0) { const sl = gi.querySelector('line'); sl.setAttribute('x2', DW - 10 - tl - 10); sl.setAttribute('x1', DW - 10 - tl - 46); } } catch (_) { /* not rendered */ }
-  FX[0] = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
+  ap.fx = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
 }
 function tileLabel(c) {
   if (c.type === 'cshire') return `Shire ${c.id}, compute shire. Space for details; Enter zooms in.`;
@@ -308,33 +312,44 @@ function tileLabel(c) {
 }
 
 /* ---- a shire, zoomed in: a logical block diagram (no floorplan of the inside is published; fact L114) ---- */
-function buildShire(sid) {
-  const L = LAYERS[1]; L.textContent = ''; AP[1] = {min: {}, minG: {}, bank: [], lane: [], nbx: []};
-  const P = AP[1], cell = SH[sid], X = SF.x, Y = SF.y, W = SF.w;
+function buildShire(L, ap, sid) {
+  Object.assign(ap, {min: {}, minG: {}, bank: [], lane: [], nbx: []});
+  const P = ap, cell = shCell(sid), X = SF.x, Y = SF.y, W = SF.w;
   P.sid = sid;
   // an opaque backdrop the size of the frame: while the camera zooms, nothing of the view behind shows through
   S(E('rect', {class: 'zbd', x: X, y: Y, width: W, height: W, rx: 14, 'pointer-events': 'none'}, L), {fill: 'var(--page)'});
   const fr = E('g', {}, L);
   S(E('rect', {x: X, y: Y, width: W, height: W, rx: 14}, fr), {fill: 'var(--c1)', fillOpacity: 0.05, stroke: 'var(--c1)', strokeWidth: 2.5});
-  T(fr, X + 22, Y + 40, `Shire ${sid}`, 't-big');
+  T(fr, X + 22, Y + 40, sid === 32 ? 'Shire 32 · master' : sid === 33 ? 'Shire 33 · spare' : `Shire ${sid}`, 't-big');
+  // the master and spare are minion shires like the others (the firmware's map names their cells): the same drawing
+  if (sid >= 32) T(fr, X + 22, Y + 64, 'the same design as a compute shire', 't-sm', 'start', 'fw.grey-cells chip.minion-shires');
   // (on a phone, the words around the frame are a little larger: SK units)
   const SK = 24.5;
   phSize(T(fr, X + W - 22, Y + 38, `map (${cell.lx}, ${cell.ly}) · ${N.per_shire.t}`, 't-sm', 'end', 'mesh.logical-map shire.composition'), SK);
-  // mesh neighbours, in die orientation
+  // mesh neighbours, in die orientation. Each one's name is a link to it (the owner's request of 30 September: "those
+  // should be clickable"): a compute shire's opens that shire, any other cell's goes to the die with that cell
+  // selected (goNeighbour). The links are drawn last (nbrLinks, below), so that Tab reaches the shire's parts first;
+  // "die edge" stays plain text
   const nb = [[-1, 0, 'N'], [1, 0, 'S'], [0, -1, 'W'], [0, 1, 'E']].map(([dr, dc, s]) => [BYDIE[(cell.r + dr) + ',' + (cell.c + dc)], s]);
-  P.edge = {};
+  P.edge = {}; P.nbr = {};
+  const NB = [];
   nb.forEach(([c, s]) => {
     const lab = c ? cellName(c) : 'die edge';
-    if (s === 'N') { if (c) mlink(fr, X + W / 2, Y, X + W / 2, Y - 24); phSize(T(fr, X + W / 2 + 12, Y - 18, (c ? '↑ ' : '') + lab, 't-sm'), SK); P.edge.N = {x: X + W / 2, y: Y - 24}; }
-    if (s === 'S') { if (c) mlink(fr, X + W / 2, Y + W, X + W / 2, Y + W + 24); phSize(T(fr, X + W / 2 + 12, Y + W + 30, (c ? '↓ ' : '') + lab, 't-sm'), SK); P.edge.S = {x: X + W / 2, y: Y + W + 24}; }
+    // where the label goes, its text, its anchor and (on a phone, the side labels) its rotation
+    let at = null;
+    if (s === 'N') { if (c) mlink(fr, X + W / 2, Y, X + W / 2, Y - 24); at = {x: X + W / 2 + 12, y: Y - 18, t: (c ? '↑ ' : '') + lab, a: 'start', sz: SK}; P.edge.N = {x: X + W / 2, y: Y - 24}; }
+    if (s === 'S') { if (c) mlink(fr, X + W / 2, Y + W, X + W / 2, Y + W + 24); at = {x: X + W / 2 + 12, y: Y + W + 30, t: (c ? '↓ ' : '') + lab, a: 'start', sz: SK}; P.edge.S = {x: X + W / 2, y: Y + W + 24}; }
     // on a phone the side neighbours' names run up the frame's edges, above their links (the view is the frame's width)
-    const sideLab = (x, y, str, rot) => { const t = phSize(T(fr, x, y, str, 't-sm', rot < 0 ? 'start' : 'end'), SK); t.setAttribute('transform', `rotate(${rot} ${x} ${y})`); };
-    if (s === 'W') { if (c) mlink(fr, X, Y + W / 2, X - 24, Y + W / 2); if (PH) sideLab(X - 10, Y + W / 2 - 14, lab, -90); else T(fr, X - 30, Y + W / 2 + 6, lab + (c ? ' ←' : ''), 't-sm', 'end'); P.edge.W = {x: X - 24, y: Y + W / 2}; }
-    if (s === 'E') { if (c) mlink(fr, X + W, Y + W / 2, X + W + 24, Y + W / 2); if (PH) sideLab(X + W + 10, Y + W / 2 - 14, lab, 90); else T(fr, X + W + 30, Y + W / 2 + 6, (c ? '→ ' : '') + lab, 't-sm'); P.edge.E = {x: X + W + 24, y: Y + W / 2}; }
+    if (s === 'W') { if (c) mlink(fr, X, Y + W / 2, X - 24, Y + W / 2); at = PH ? {x: X - 10, y: Y + W / 2 - 14, t: lab, a: 'start', rot: -90, sz: SK} : {x: X - 30, y: Y + W / 2 + 6, t: lab + (c ? ' ←' : ''), a: 'end'}; P.edge.W = {x: X - 24, y: Y + W / 2}; }
+    if (s === 'E') { if (c) mlink(fr, X + W, Y + W / 2, X + W + 24, Y + W / 2); at = PH ? {x: X + W + 10, y: Y + W / 2 - 14, t: lab, a: 'end', rot: 90, sz: SK} : {x: X + W + 30, y: Y + W / 2 + 6, t: (c ? '→ ' : '') + lab, a: 'start'}; P.edge.E = {x: X + W + 24, y: Y + W / 2}; }
+    if (!c) { const t = T(fr, at.x, at.y, at.t, 't-sm edgelab', at.a); if (at.sz) phSize(t, at.sz); if (at.rot) t.setAttribute('transform', `rotate(${at.rot} ${at.x} ${at.y})`); return; }
+    NB.push([c, s, at]);
   });
+  // (the key and the edge labels hide while the camera glides to a neighbour: the two shires' would overlap)
+  const kg = E('g', {class: 'shkey'}, fr);
   if (PH) {
     // key, in a row under the frame
-    const kx = X, ky = Y + W + 64;
+    const kx = X, ky = Y + W + 64, fr = kg;
     T(fr, kx, ky, 'Key', 't-labb');
     S(E('line', {x1: kx + 62, y1: ky - 7, x2: kx + 98, y2: ky - 7}, fr), {stroke: 'var(--c4)', strokeWidth: 5, strokeLinecap: 'round'});
     S(E('line', {x1: kx + 282, y1: ky - 22, x2: kx + 282, y2: ky + 16}, fr), {stroke: 'var(--ink-2)', strokeWidth: 2.5});
@@ -342,7 +357,7 @@ function buildShire(sid) {
       .forEach(([x, ls, f]) => phSize(T2(fr, x, ky, ls, 't-sm', 'start', f), SK));
   } else {
     // key, in the left margin
-    const kx = VB.x + 14, ky = Y + 440;
+    const kx = VB.x + 14, ky = Y + 440, fr = kg;
     T(fr, kx, ky, 'Key', 't-labb');
     S(E('line', {x1: kx, y1: ky + 24, x2: kx + 36, y2: ky + 24}, fr), {stroke: 'var(--c4)', strokeWidth: 5, strokeLinecap: 'round'});
     T2(fr, kx + 46, ky + 30, ['fast local', 'network edge'], 't-sm');
@@ -419,6 +434,7 @@ function buildShire(sid) {
       boxShape(g, p.x, p.y, p.w, p.h, 'var(--c1)', {fo: 0.22, rx: 6});
       T(g, p.x + p.w / 2, p.y + 30, 'M' + m, 't-labb', 'middle');
       P.min[k + ':' + m] = p; P.minG[k + ':' + m] = g;
+      ap.zs[`minion:${sid}.${k}.${m}`] = {r: {x: p.x, y: p.y, w: p.w, h: p.h}, g};
     }
     // tree edges of the fast local network, drawn over the minions' edges (fact L115); each edge's ends are kept, so
     // that the allreduce (flow 0) recolours the edge itself
@@ -433,13 +449,70 @@ function buildShire(sid) {
     P['ch' + k] = {x: nx + nw / 2, y: ny + 6};
     P.nbx[k] = {x: nx, y: ny, w: nw, h: nh};
   }
-  FX[1] = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
+  nbrLinks(L, P, NB, {X, Y, W});
+  ap.fx = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
 }
+/* The four edge labels of a shire as links to the neighbouring cells. Each is a group (role link, Tab and Enter) with
+   the label and a transparent hit area padded to about 44 CSS px on a touch screen and 28 with a mouse (as large as
+   the room outside the frame allows, and never over the frame's own words); a side label on a phone runs up the
+   frame's edge and its hit area turns with it. */
+const DIRNAME = {N: 'north', S: 'south', W: 'west', E: 'east'}, DIRBACK = {N: 'S', S: 'N', W: 'E', E: 'W'};
+function nbrLinks(L, P, NB, fr) {
+  const G = E('g', {class: 'nbrs'}, L), {X, Y, W} = fr;
+  // CSS px per drawing unit in the shire's view (the hit area's minimum is set in CSS px)
+  const bw = $('svgwrap').clientWidth || innerWidth - 32, pxu = Math.max(0.2, bw / (PH ? PV[1].w : VB.w)), need = (TOUCH ? 44 : 28) / pxu;
+  const meas = [];
+  NB.forEach(([c, s, at]) => {
+    const g = E('g', {class: 'nbr', tabindex: 0, role: 'link', 'data-comp': 'nbr', 'aria-label': `Go to ${cellName(c)}, ${DIRNAME[s]}`}, G);
+    g._key = 'nbr'; g._ctx = {cell: c, dir: s};
+    if (at.rot) g.setAttribute('transform', `rotate(${at.rot} ${at.x} ${at.y})`);
+    const hit = E('rect', {class: 'nbr-hit', rx: 6}, g);
+    const t = T(g, at.x, at.y, at.t, 't-sm', at.a);
+    if (at.sz) phSize(t, at.sz);
+    P.nbr[s] = g;
+    meas.push({g, hit, t, s, at});
+  });
+  // the hit areas need the labels' measured size: the layer is shown, invisible, while they are measured
+  const d0 = L.style.display, v0 = L.style.visibility;
+  if (d0 === 'none') { L.style.visibility = 'hidden'; L.style.display = ''; }
+  try {
+    meas.forEach(({hit, t, s, at}) => {
+      let b = null; try { b = t.getBBox(); } catch (_) { b = null; }
+      const fs = parseFloat(at.sz || 17), tw = b && b.width ? b.width : at.t.length * fs * 0.56, th = b && b.height ? b.height : fs * 1.25;
+      const x0 = b && b.width ? b.x : at.a === 'end' ? at.x - tw : at.x, y0 = b && b.height ? b.y : at.y - fs;
+      const padX = 10, h = Math.max(th + 8, need), w = Math.max(tw + 2 * padX, need);
+      let ry = y0 + th / 2 - h / 2;
+      // never over the frame's words: the north link may reach into the frame's empty top margin, the south one stops
+      // at the frame
+      if (s === 'N') ry = Math.min(ry, Y + 20 - h);
+      if (s === 'S') ry = Math.max(ry, Y + W + 2);
+      Object.entries({x: x0 + tw / 2 - w / 2, y: ry, width: w, height: h}).forEach(([k, v]) => hit.setAttribute(k, v.toFixed(1)));
+    });
+  } finally { if (d0 === 'none') { L.style.display = d0; L.style.visibility = v0; } }
+}
+/* A neighbour link followed (or an arrow key): the camera glides sideways to that cell's own scale (a compute shire,
+   the master or the spare, a memory shire, the PCIe or the I/O shire), two layers side by side as on the die; the
+   first day of the links (30 September, before the path camera) went out to the die and back in. Focus lands on the
+   link back. */
+function nbrEl(c) {
+  if (c.type === 'cshire') return {id: 'shire', k: String(c.id)};
+  if (c.type === 'master') return {id: 'shire', k: String(c.r === 0 ? 32 : 33)};
+  if (c.type === 'memshire' && NODES.memshire) return {id: 'memshire', k: String(c.id)};
+  if ((c.type === 'pcie' || c.type === 'io') && NODES[c.type]) return {id: c.type};
+  return null;
+}
+function goNeighbour(ctx, fromSid) {
+  const c = ctx.cell; if (!c) return;
+  const el = nbrEl(c), from = fromSid != null ? fromSid : Z.sid;
+  if (el) { if (el.id === 'shire') NBRBACK = {sid: from, dir: DIRBACK[ctx.dir]}; userNav(pathOf({level: 0}).concat([el]), {pan: true}); return; }
+  userNav(pathOf({level: 0})).then(() => { if (Z.level !== 0 || !c.g) return; select(c.g); showComp(c.type, {cell: c}, {g: c.g}); scaleUI(); if (svg.contains(document.activeElement) || document.activeElement === document.body) c.g.focus({preventScroll: true}); });
+}
+let NBRBACK = null;
 
 /* ---- a minion, zoomed in ---- */
-function buildMinion(sid, nb, mi) {
-  const L = LAYERS[2]; L.textContent = ''; AP[2] = {regs: [[], []], units: [], scp: []};
-  const P = AP[2], X = MF.x, Y = MF.y, W = MF.w, H = MF.h, h0 = sid * 64 + (nb * 8 + mi) * 2;
+function buildMinion(L, ap, sid, nb, mi) {
+  Object.assign(ap, {regs: [[], []], units: [], scp: []});
+  const P = ap, X = MF.x, Y = MF.y, W = MF.w, H = MF.h, h0 = sid * 64 + (nb * 8 + mi) * 2;
   S(E('rect', {class: 'zbd', x: X, y: Y, width: W, height: H, rx: 14, 'pointer-events': 'none'}, L), {fill: 'var(--page)'});
   const fr = E('g', {}, L);
   S(E('rect', {x: X, y: Y, width: W, height: H, rx: 14}, fr), {fill: 'var(--c1)', fillOpacity: 0.04, stroke: 'var(--c1)', strokeWidth: 2.5});
@@ -537,7 +610,7 @@ function buildMinion(sid, nb, mi) {
   T(gf, tx + 16, Y + 690, 'Fast local network', 't-labb');
   T(gf, tx + 16, Y + 716, `${N.ts_fln.t} round trip on tree edges`, 't-sm t-fit', 'start', 'ts-rt-fln');
   P.fln = {x: tx + tw - 110, y: Y + 700};
-  FX[2] = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
+  ap.fx = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
 }
 
 /* ---- the small picture of the die: what a stage on the die looks like while the camera is inside ---- */
@@ -645,8 +718,6 @@ function popIn(el) {
 }
 
 /* ================= the camera ================= */
-const Z = {level: 0, sid: null, nb: 0, mi: 0};
-let LASTSID = 0, LASTNB = 0, LASTMI = 0;
 const lerp = (a, b, t) => a + (b - a) * t;
 const lerpR = (A, B, t) => ({x: lerp(A.x, B.x, t), y: lerp(A.y, B.y, t), w: lerp(A.w, B.w, t), h: lerp(A.h, B.h, t)});
 /* a sine in and out, for what eases in the view (a trail, a glow): its top speed is 1.57 times its mean */
@@ -657,7 +728,7 @@ const setT = (g, m) => { if (m) g.setAttribute('transform', `matrix(${m[0]},0,0,
 /* a pure zoom: the frame's width moves geometrically (a steady rate on a log scale) and its place with it, so the
    point where the two frames coincide stays put */
 const zoomR = (A, B, e) => { const w = A.w * Math.pow(B.w / A.w, e); return lerpR(A, B, (w - A.w) / (B.w - A.w)); };
-const tileRect = sid => { const c = SH[sid]; return {x: c.x + INS, y: c.y + INS, w: c.w - 2 * INS, h: c.h - 2 * INS}; };
+const tileRect = sid => { const c = SH[sid] || MSH[sid]; return {x: c.x + INS, y: c.y + INS, w: c.w - 2 * INS, h: c.h - 2 * INS}; };
 const minRect = (nb, mi) => { const p = AP[1].min[nb + ':' + mi]; return {x: p.x, y: p.y, w: p.w, h: p.h}; };
 /* a point of an inner view in its parent's coordinates: where a packet sits once the zoom has shrunk its view */
 const mapOut = (A, B, p) => ({x: A.x + (p.x - B.x) * A.w / B.w, y: A.y + (p.y - B.y) * A.w / B.w});
@@ -734,8 +805,8 @@ function simZoom(S0, S1, p) {
   const px = (S1[1] - r * S0[1]) / (1 - r), py = (S1[2] - r * S0[2]) / (1 - r), q = Math.pow(r, p);
   return [S0[0] * q, px + q * (S0[1] - px), py + q * (S0[2] - py)];
 }
-/* the view r, on the layer at rest (the one shown) */
-function setView(r) { setT(LAYERS[Z.level], viewM(r)); }
+/* the view of the scale at rest, on its layer (a phone's box changed) */
+function setView() { const L = restLayer(); if (L) setT(L, restMat()); }
 /* the box's shape (the tallest view's, the die's with its band while a flow or the tour plays): set when a flow or the
    tour starts or stops, and when a flow's charts outgrow the band; never during a zoom */
 function phBox() {
@@ -745,7 +816,7 @@ function phBox() {
   const hw = Math.max(...[0, 1, 2].map(lv => { const r = pview(lv); return r.h / r.w; }));
   const H = (1000 * hw).toFixed(1), ar = `1000 / ${H}`;
   if (ar !== PHV.ar) { PHV.ar = ar; svg.style.aspectRatio = ar; svg.setAttribute('viewBox', `0 0 1000 ${H}`); }
-  if (!ZW) setView(pview(Z.level));
+  if (!ZW) setView();
 }
 /* The charts a flow draws right of the die (the band, BAND), and the callouts that stand there, fold under the die on
    a phone, into the band the box keeps for them: each part scaled by K, in one column where it fits at FOLD.K, else in
@@ -799,116 +870,410 @@ function bandFold() {
 }
 let foldT = 0;
 function foldSoon() { if (!foldT) foldT = requestAnimationFrame(() => { foldT = 0; bandFold(); }); }
-/* the step in flight between two views, left partway by a newer request: the next plan goes on from there */
+/* ================= the path camera (30 September 2026) =================
+   One engine for a ladder of any depth (the owner's "zoom out ... all the way to the meta universe" and "double-click
+   ... until I get individual circuit components"). The camera rests on a path of scale nodes from the root down
+   (Z.path); each scale is a scene drawn in its own coordinates in a layer of its own. A move is a list of steps, each
+   between a scale and one inside it: out to the deepest scale the two paths share, then in (or, between two siblings
+   side by side in their parent's drawing, a sideways glide). The steps one way form a leg, eased once, which goes
+   through the rest of every scale it passes and turns smoothly there (the blend of the chip's camera of 30 September,
+   BLEND). Every frame is computed in the coordinates of the step it is in (at most one map from a neighbouring scale),
+   never in the root's: 36 orders of magnitude from the universe to the silicon lattice do not fit one coordinate
+   system, in doubles or in the browser's float32 transforms. Three kinds of step: nest (the inner scale drawn inside
+   the outer, which zooms smoothly; as since 27 September), jump (a "powers of ten" cut: the outer zooms some 8 times
+   into a marker while the inner grows into it and the two cross-fade; the readout sweeps the true ratio) and pan. */
 let CUR = null;
-/* One zoom segment between LAYERS[lo] (the outer view) and LAYERS[lo + 1] (the inner one): e = 0 shows the outer view,
-   e = 1 the inner. A semantic zoom, the same both ways:
+const ID = [1, 0, 0];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+/* the root of the ladder down to the die (empty until the outside levels arrive); DIE: the die's depth */
+const OUT_IDS = [];
+let DIE = 0;
+/* the scale nodes by id: {name(p), short(p), size(p), frame(p), view(p), pv(p), build(L, ap, p, P, d), tr, def(p),
+   kids(p), parse(k)} */
+const NODES = {};
+const node = (id, o) => { NODES[id] = Object.assign({id, tr: 'nest'}, o); return NODES[id]; };
+const pk = el => el.id + (el.k != null && el.k !== '' ? ':' + el.k : '');
+const pkeys = P => P.map(pk).join('/');
+const samePath = (a, b) => a.length === b.length && a.every((x, i) => pk(x) === pk(b[i]));
+const prm = el => { const N0 = NODES[el.id]; return N0 && N0.parse ? N0.parse(el.k) : {}; };
+const elOf = s => { const i = s.indexOf(':'); return i < 0 ? {id: s} : {id: s.slice(0, i), k: s.slice(i + 1)}; };
+/* the die, a shire and a minion as a path (the flows' and the tour's views stay {level, sid, nb, mi}) */
+function pathOf(w) {
+  const P = OUT_IDS.map(id => ({id})).concat([{id: 'die'}]);
+  if (w.level >= 1) P.push({id: 'shire', k: String(w.sid)});
+  if (w.level >= 2) P.push({id: 'minion', k: `${w.sid}.${w.nb}.${w.mi}`});
+  return P;
+}
+/* what a path is in the flows' terms: level -1 above the die, 0-2 the die, a shire, a minion, 3 any other scale on the
+   chip; the shire and minion it is in */
+function pinfo(P) {
+  const o = {path: P, depth: P.length - 1, level: -1, sid: null, nb: null, mi: null};
+  const d = P.findIndex(e => e.id === 'die');
+  if (d < 0) return o;
+  const lv = P.length - 1 - d, sh = P[d + 1], mn = P[d + 2];
+  if (sh && sh.id === 'shire') o.sid = +sh.k;
+  if (mn && mn.id === 'minion') { const q = String(mn.k).split('.').map(Number); o.nb = q[1]; o.mi = q[2]; }
+  o.level = lv === 0 ? 0 : lv === 1 && sh.id === 'shire' ? 1 : lv === 2 && sh.id === 'shire' && mn.id === 'minion' ? 2 : 3;
+  return o;
+}
+let LASTSID = 0, LASTNB = 0, LASTMI = 0;
+const Z = {path: [{id: 'die'}]};
+Object.defineProperties(Z, {
+  level: {get: () => pinfo(Z.path).level},
+  sid: {get: () => { const i = pinfo(Z.path); return i.sid != null ? i.sid : LASTSID; }},
+  nb: {get: () => { const i = pinfo(Z.path); return i.nb != null ? i.nb : LASTNB; }},
+  mi: {get: () => { const i = pinfo(Z.path); return i.mi != null ? i.mi : LASTMI; }},
+});
+/* ---- layers: one per scale on a path, keyed by the path to it; LAYERS[0..2] the die's, the shire's and the
+   minion's (the flows draw there), AP and FX theirs ---- */
+const LYR = new Map();
+function layerAt(P, d) {
+  const key = pkeys(P.slice(0, d + 1));
+  let L = LYR.get(key);
+  if (!L) {
+    L = E('g', {class: 'lay', 'data-depth': d, 'data-level': d - DIE, 'data-node': P[d].id});
+    L.style.display = 'none'; L.style.opacity = 0;   // hidden views start transparent: a zoom fades them in
+    const after = [...svg.querySelectorAll(':scope > g.lay')].find(x => +x.dataset.depth > d);
+    svg.insertBefore(L, after || null);
+    L._key = key; L._el = P[d]; L._path = P.slice(0, d + 1); L._depth = d; L._built = false; L._ap = {zs: {}};
+    LYR.set(key, L);
+  }
+  return L;
+}
+/* the layer of P[d], built (a scale is drawn once per path to it; a move off the path drops it, prune()) */
+function built(P, d) {
+  const L = layerAt(P, d);
+  if (!L._built) buildInto(L, P, d);
+  return L;
+}
+function buildInto(L, P, d) {
+  const el = P[d], N0 = NODES[el.id];
+  L.textContent = ''; ctxClear(L); L._sky = false;
+  const ap = L._ap = {zs: {}};
+  N0.build(L, ap, prm(el), P, d);
+  if (typeof chipSeats === 'function') chipSeats(L, ap, el);
+  if (L.classList.contains('ckt')) CKT.hitAreas(L);
+  if (TOUCH && !N0.out) minHits(L, P, d);
+  L._fx = ap.fx && ap.fx.parentNode === L ? ap.fx : E('g', {class: 'fx', 'pointer-events': 'none'}, L);
+  L._built = true;
+  ariaFix(L);
+  bindTrio(P);
+}
+/* On a touch screen a thin part gets a transparent hit area at least 24 CSS px across its thin side, as far as that
+   covers no other part (review of 1 Oct: in the circuits some parts were 6-15 px on one side, hard to tap) */
+function minHits(L, P, d) {
+  const v = viewOf(P[d]), wr = $('svgwrap'), bw = wr.clientWidth || innerWidth - 32, bh = wr.clientHeight || innerHeight / 2;
+  const pxu = PH ? bw / v.w : Math.min(bw / VB.w, bh / VB.h) * VB.w / v.w;
+  if (!(pxu > 0)) return;
+  const need = 24 / pxu, comps = [...L.querySelectorAll('.comp')], box = new Map();
+  const bb = g => { if (g._box) return g._box; try { const r = g.getBBox(); return r.width || r.height ? {x: r.x, y: r.y, w: r.width, h: r.height} : null; } catch (_) { return null; } };
+  const run = () => comps.forEach(g => { const b = bb(g); if (b) box.set(g, b); });
+  if (CKT && CKT.kit && CKT.kit.measured) CKT.kit.measured(L, run); else run();
+  const hit = (a, b) => Math.min(a.x + a.w, b.x + b.w) > Math.max(a.x, b.x) + 0.5 && Math.min(a.y + a.h, b.y + b.h) > Math.max(a.y, b.y) + 0.5;
+  comps.forEach(g => {
+    const b = box.get(g); if (!b || Math.min(b.w, b.h) >= need) return;
+    for (const f of [1, 0.6, 0.3]) {
+      const ex = b.w < need ? (need - b.w) / 2 * f : 0, ey = b.h < need ? (need - b.h) / 2 * f : 0;
+      const r = {x: b.x - ex, y: b.y - ey, w: b.w + 2 * ex, h: b.h + 2 * ey};
+      if ([...box].some(([o, ob]) => o !== g && !o.contains(g) && !g.contains(o) && hit(r, ob))) continue;
+      const e = E('rect', {class: 'hit', x: r.x, y: r.y, width: r.w, height: r.h, fill: 'transparent', 'pointer-events': 'all'});
+      g.insertBefore(e, g.firstChild);
+      return;
+    }
+  });
+}
+/* every part says what Enter does: zoom in where it has a scale of its own, else its details (a screen reader hears the
+   same rule everywhere) */
+function ariaFix(L) {
+  L.querySelectorAll('.comp').forEach(g => {
+    const l0 = g.getAttribute('aria-label') || '', base = l0.replace(/(\.\s*Space for details; Enter zooms in\.?|:\s*details(; Enter zooms in)?\.?|; Enter zooms in\.?)\s*$/, '');
+    const k = kidOf(g);
+    g.setAttribute('aria-label', base + (k ? (k.up ? '. Space for details; Enter goes out to it.' : '. Space for details; Enter zooms in.') : ': details'));
+  });
+}
+const TRIO = ['die', 'shire', 'minion'];
+function bindTrio(P) {
+  const d = P.findIndex(e => e.id === 'die'); if (d < 0) return;
+  const fx0 = FX[0];
+  for (let i = 0; i < 3; i++) {
+    const el = P[d + i]; if (!el || el.id !== TRIO[i]) break;
+    const L = LYR.get(pkeys(P.slice(0, d + i + 1)));
+    if (L && L._built) { LAYERS[i] = L; AP[i] = L._ap; FX[i] = L._fx; }
+  }
+  // the band's fold (a phone) watches the die's flow drawing: a new one is watched instead
+  if (FX[0] !== fx0 && foldObs) watchFold();
+}
+/* after a move: the layers off the path go (the die's, and the shire's and minion's the flows hold, stay hidden) */
+function prune(keep) {
+  const on = new Set(Z.path.map((_, i) => pkeys(Z.path.slice(0, i + 1))));
+  LYR.forEach((L, key) => {
+    if (on.has(key) || LAYERS.includes(L) || (keep && keep.has(L))) { if (!on.has(key)) { L.style.display = 'none'; L.style.opacity = 0; } return; }
+    L.remove(); LYR.delete(key);
+  });
+}
+const restLayer = () => LYR.get(pkeys(Z.path));
+/* ---- frames, seats and views ----
+   frame: the box in a scale's own units that its seat in the parent's drawing grows into; view: the scale's rest view
+   (desktop: the drawing's frame VB unless the node says; a phone: its own view, pv) */
+const frameOf = el => NODES[el.id].frame(prm(el));
+const PVIEW = {die: 0, shire: 1, minion: 2};
+function viewOf(el) {
+  const N0 = NODES[el.id], p = prm(el);
+  if (!PH) return N0.view ? N0.view(p) : VB;
+  if (PVIEW[el.id] != null) return pview(PVIEW[el.id]);
+  if (N0.pv) return N0.pv(p);
+  // a phone: the rest view letterboxed into the box's shape, at its top (the box is the tallest of the trio's views)
+  const v = N0.view ? N0.view(p) : VB, hw = phHW();
+  return v.h / v.w <= hw ? {x: v.x, y: v.y, w: v.w, h: v.w * hw} : {x: v.x + v.w / 2 - v.h / hw / 2, y: v.y, w: v.h / hw, h: v.h};
+}
+const phHW = () => Math.max(...[0, 1, 2].map(lv => { const r = pview(lv); return r.h / r.w; }));
+const isVB = r => r === VB || (Math.abs(r.x - VB.x) < 1e-9 && Math.abs(r.y - VB.y) < 1e-9 && Math.abs(r.w - VB.w) < 1e-9);
+/* the transform that shows view r on the screen: a phone's (viewM, 1000 units wide), else r fitted to the frame VB */
+const vmat = r => (PH ? viewM(r) : isVB(r) ? null : rmap(r, VB));
+const restMat = () => vmat(viewOf(Z.path[Z.path.length - 1]));
+/* a box with aspect k (width / height), centred on r and covering it */
+function fitTo(r, k) {
+  let w = r.w, h = r.h;
+  if (Math.abs(w / h - k) < 1e-6) return r;
+  if (w / h > k) h = w / k; else w = h * k;
+  return {x: r.x + r.w / 2 - w / 2, y: r.y + r.h / 2 - h / 2, w, h};
+}
+/* where P[d] sits in the drawing of P[d - 1]: the part its builder registered (ap.zs, by the child's key), else the
+   node's own rule */
+function seatOf(P, d) {
+  const Lp = built(P, d - 1), s = Lp._ap.zs[pk(P[d])];
+  if (s) return s;
+  const N0 = NODES[P[d].id];
+  const r = N0.seat ? N0.seat(Lp._ap, prm(P[d]), P[d - 1], Lp) : null;
+  return !r ? null : r.r ? r : {r, g: null};
+}
+const sizeOf = el => { const N0 = NODES[el.id]; return N0.size ? N0.size(prm(el)) : null; };
+/* ---- the steps of a move ---- */
+function mkStep(P, d, dir) {
+  const st = seatOf(P, d);
+  if (!st) throw new Error('no seat for ' + pkeys(P.slice(0, d + 1)));
+  const B = frameOf(P[d]);
+  let A = fitTo(st.r, B.w / B.h), kind = st.tr || NODES[P[d].id].tr || 'nest';
+  // a seat so small that the inner scale would be drawn at under a twenty-eighth of its own size: a "powers of ten"
+  // jump from a box an eighth of the parent's view around it, so that no layer shown is ever scaled beyond [1/30, 30]
+  // (float32 transforms, sub-pixel drawings); the chip's own steps (a shire's minion is 17 times) stay nests
+  if (B.w / A.w > 28) { const vw = viewOf(P[d - 1]).w, w = vw / 8, c = {x: A.x + A.w / 2, y: A.y + A.h / 2}; A = {x: c.x - w / 2, y: c.y - w * B.h / B.w / 2, w, h: w * B.h / B.w}; kind = 'jump'; }
+  const Q = rmap(A, B), lq = Math.log(Q[0]);
+  // a jump's time: its drawn zoom plus a little for the decades it skips (the readout sweeps them)
+  const so = sizeOf(P[d - 1]), si = sizeOf(P[d]);
+  const tru = so && si && so.m > 0 && si.m > 0 ? Math.log(so.m / si.m) : lq;
+  const L = kind === 'jump' ? lq + 0.15 * Math.max(0, tru - lq) : lq;
+  return {o: d - 1, P: P.slice(0, d + 1), dir, e0: dir > 0 ? 0 : 1, e1: dir > 0 ? 1 : 0, A, B, Q, lq, L, kind, tgt: st.g || null, so, si};
+}
+/* the steps from the scale P (at rest) to T: out to the deepest scale they share, then in; o.pan: two siblings side by
+   side in their parent's drawing glide instead */
+function routeSteps(P, T, o) {
+  let k = 0; while (k < P.length && k < T.length && pk(P[k]) === pk(T[k])) k++;
+  if (o && o.pan && P.length === T.length && k === P.length - 1 && k >= 1) { const ps = panStep(P, T); if (ps) return [ps]; }
+  const out = [];
+  for (let d = P.length - 1; d >= k; d--) out.push(mkStep(P, d, -1));
+  for (let d = Math.max(1, k); d < T.length; d++) out.push(mkStep(T, d, 1));
+  return out;
+}
+const costOf = ss => ss.reduce((c, s) => c + s.L, 0);
+/* two siblings side by side: the camera glides from one to the other at their scale, the parent not shown */
+function panStep(P, T) {
+  const d = P.length - 1, s1 = seatOf(P, d), s2 = seatOf(T, d);
+  if (!s1 || !s2) return null;
+  const B1 = frameOf(P[d]), B2 = frameOf(T[d]), A1 = fitTo(s1.r, B1.w / B1.h), A2 = fitTo(s2.r, B2.w / B2.h);
+  const dist = Math.hypot(A2.x + A2.w / 2 - A1.x - A1.w / 2, A2.y + A2.h / 2 - A1.y - A1.h / 2) / A1.w;
+  if (dist > 1.6) return null;
+  const Q1 = rmap(A1, B1), Q2 = rmap(A2, B2);
+  return {pan: true, o: d - 1, P, T, dir: 1, e0: 0, e1: 1, A1, A2, B1, B2, Q1, Q2, dist, L: 0.6, kind: 'pan'};
+}
+/* the plan: the steps from the view shown, or from partway through the step in flight (forwards or back, whichever is
+   shorter), to the target; which views are only passed through */
+function planTo(t, o) {
+  let steps;
+  if (CUR && !CUR.s.pan) {
+    const s = CUR.s, Ls = s.L;
+    const Pin = s.P, Pout = s.P.slice(0, -1);
+    const pin = routeSteps(Pin, t, null), pout = routeSteps(Pout, t, null);
+    const cin = (1 - CUR.e) * Ls + costOf(pin), cout = CUR.e * Ls + costOf(pout);
+    const fwd = cin < cout - 1e-9 || (Math.abs(cin - cout) < 1e-9 && CUR.dir > 0);
+    steps = [Object.assign({}, s, {part: true, dir: fwd ? 1 : -1, e0: CUR.e, e1: fwd ? 1 : 0, L: Math.max(1e-3, fwd ? (1 - CUR.e) * Ls : CUR.e * Ls)})].concat(fwd ? pin : pout);
+  } else steps = routeSteps(Z.path, t, o);
+  steps.forEach((s, i) => {
+    // the outer view sits at e = 0: where a zoom in starts, or where a zoom out ends
+    const startMid = i > 0, endMid = i < steps.length - 1;
+    s.midOut = s.dir > 0 ? startMid : endMid;
+    s.midIn = s.dir > 0 ? endMid : startMid;
+    // the establishing shot rests its eye on the chip: the chip is shown there, set back, not passed through
+    if (o.atChip && s.P[s.o].id === 'die') s.midOut = false;
+    if (s.dir < 0 && !s.midOut) s.end = i === steps.length - 1 ? (o.c1 || FULL) : (o.chipEnd || FULL);
+  });
+  return steps;
+}
+/* A step's look (the chip's semantic zoom of 27 September, the same both ways):
    - the outer view's labels go first (none is ever seen blown up), and its context is set back (to 0.3) while the
      target grows into the frame; the target itself comes up to full strength;
-   - the inner view, on an opaque backdrop the size of its frame, comes in over the target early (e 0.10-0.32), so
-     that the tile turns into the view inside it and no frame is ever empty;
-   - the outer view's context stays, set back, until the zoom has pushed it off the screen (e 0.86-1);
-   - the inner view's labels come last, once they are readable (e 0.62-0.88).
-   A view the camera only passes through (sg.midOut, sg.midIn: the shire on the way from the chip to a minion) shows
-   no labels and keeps its context set back, so that it does not flicker up at the camera's top speed. A view the
-   camera rests at starts from how it looks (a tour step's or a flow's dimming, measured) or ends at the look it will
-   have (sg.end), so that nothing brightens for a moment. */
-function segOpen(sg, req) {
-  const lo = sg.lo, outer = LAYERS[lo], inner = LAYERS[lo + 1], B = lo === 0 ? SF : MF;
-  const A = lo === 0 ? tileRect(Z.sid) : minRect(Z.nb, Z.mi);
-  const tgt = lo === 0 ? (SH[Z.sid] && SH[Z.sid].g) : (AP[1].minG && AP[1].minG[Z.nb + ':' + Z.mi]);
-  const P = {midOut: !!sg.midOut, midIn: !!sg.midIn};
+   - nest: the inner view, on an opaque backdrop the size of its frame, comes in over the target early (e 0.10-0.32),
+     so that the tile turns into the view inside it and no frame is ever empty; the outer view's context stays, set
+     back, until the zoom has pushed it off the screen (e 0.86-1), or until the inner covers the screen (a scale passed
+     off its centre);
+   - jump: the two views cross-fade around the middle (in 0.40-0.65, out 0.55-0.80);
+   - the inner view's labels come last, once they are readable (e 0.62-0.88; a jump's 0.80-0.95).
+   A view the camera only passes through (s.midOut, s.midIn) shows no labels (not painted, .nolab) and keeps its context
+   set back, so that it does not flicker up at the camera's top speed. A view the camera rests at starts from how it
+   looks (a tour step's or a flow's dimming, measured) or ends at the look it will have (s.end). */
+const COV0 = 0.8;
+function cover(V, T) {
+  const w = Math.min(V.x + V.w, T.x + T.w) - Math.max(V.x, T.x), h = Math.min(V.y + V.h, T.y + T.h) - Math.max(V.y, T.y);
+  return w > 0 && h > 0 ? Math.sqrt(w * h / (V.w * V.h)) : 0;
+}
+const BANDS = {nest: {ii: [0.1, 0.32], oo: [0.86, 1], li: [0.62, 0.88]}, jump: {ii: [0.4, 0.65], oo: [0.55, 0.8], li: [0.8, 0.95]}};
+/* the shire and minion last entered: the scale control and the flows aim there */
+function visited(P) {
+  const i = pinfo(P);
+  if (i.sid != null) LASTSID = i.sid;
+  if (i.mi != null) { LASTNB = i.nb; LASTMI = i.mi; }
+}
+function openStep(s, req) {
+  if (s.pan) return openPan(s, req);
+  if (s.dir > 0) visited(s.P);
+  const outer = built(s.P, s.o), inner = built(s.P, s.o + 1), A = s.A, B = s.B, bd = BANDS[s.kind] || BANDS.nest;
+  const tgt = s.tgt;
+  const vo = viewOf(s.P[s.o]), vi = viewOf(s.P[s.o + 1]);
+  const P = {midOut: !!s.midOut, midIn: !!s.midIn};
   let rest = FULL, tRest = FULL, his = [];
   const sibs = ctxList(outer, tgt);
   if (P.midOut) rest = tRest = {o: CTX_LOW, s: 1};
-  else if (sg.dir > 0) {
+  else if (s.dir > 0) {
     // the view the camera leaves, as it looks now (measured before any of the zoom's marks go on)
     const looks = sibs.map(lookOf);
     rest = looks.reduce((m, l) => (l.o < m.o ? l : m), FULL);
     tRest = lookOf(tgt);
-    his = sibs.filter((s, i) => looks[i].o > rest.o + 0.1);
+    his = sibs.filter((x, i) => looks[i].o > rest.o + 0.1);
     clearDim();
-  } else rest = tRest = sg.end || FULL;
+  } else rest = tRest = s.end || FULL;
   ctxClear(outer); ctxClear(inner);
-  sibs.forEach(s => s.classList.add('zdim')); his.forEach(s => s.classList.add('zhi'));
+  sibs.forEach(x => x.classList.add('zdim')); his.forEach(x => x.classList.add('zhi'));
   if (tgt) tgt.classList.add('ztgt');
-  if (P.midIn) ctxList(inner, null).forEach(s => s.classList.add('zdim'));
+  if (P.midIn) ctxList(inner, null).forEach(x => x.classList.add('zdim'));
   const keep = strokeKeeper(outer);
   // a flow's packet rides the zoom at its own size, above both views, so that it never fades out between two legs
   let cg = null, p0 = null, inOuter = false;
   const carry = req.o.carry;
   if (carry && carry.isConnected && !REDUCED && !(req.o.total === 0)) {
-    const li = LAYERS.indexOf(carry.closest('.lay')), m = /translate\(([-\d.]+),([-\d.]+)\)/.exec(carry.getAttribute('transform') || '');
-    if (m && (li === lo || li === lo + 1)) { p0 = {x: +m[1], y: +m[2]}; inOuter = li === lo; cg = carry.cloneNode(true); svg.appendChild(cg); carry.style.visibility = 'hidden'; }
+    const cl = carry.closest('.lay'), m = /translate\(([-\d.]+),([-\d.]+)\)/.exec(carry.getAttribute('transform') || '');
+    if (m && (cl === outer || cl === inner)) { p0 = {x: +m[1], y: +m[2]}; inOuter = cl === outer; cg = carry.cloneNode(true); svg.appendChild(cg); carry.style.visibility = 'hidden'; }
   }
+  // style writes only when a value changed (a frame's custom properties restyle the layer)
+  const st = {oo: -1, io: -1, ol: '', il: '', nol: null, nil: null, sky: null};
+  const setLab = (L, v, k) => { const nl = v <= 0; if (nl !== st[k]) { st[k] = nl; L.classList.toggle('nolab', nl); } };
   const frame = (e, R0) => {
-    // (on a phone the view, moving from one scale's to the next, is part of both transforms); R0: where the target is
-    // on the screen, from the leg's one zoom (else the step's own)
-    const R = R0 || zoomR(A, B, e), Mo = rmap(A, R), Mi = rmap(B, R), V = PH ? viewM(lerpR(pview(lo), pview(lo + 1), e)) : null;
+    // R0: where the target is (in the drawing's units, before the view), from the leg's one zoom (else the step's own)
+    const R = R0 || zoomR(A, B, e), Mo = rmap(A, R), Mi = rmap(B, R);
+    const V = vmat(isVB(vo) && isVB(vi) ? VB : lerpR(vo, vi, e));
     setT(outer, cmpM(V, Mo)); setT(inner, cmpM(V, Mi));
-    const oo = 1 - band(e, 0.86, 1), k = easeS(band(e, 0, 0.3)), so = outer.style;
-    so.opacity = oo; so.visibility = oo > 0 ? '' : 'hidden';
-    inner.style.opacity = band(e, 0.1, 0.32);
-    so.setProperty('--lab', P.midOut ? '0' : (1 - band(e, 0.02, 0.2)).toFixed(3));
+    let oo = 1 - band(e, bd.oo[0], bd.oo[1]);
+    // a nest passed off its centre: the outer view goes once the inner, fully in, covers the screen
+    if (s.kind !== 'jump' && e > 0.32) { const scr = simR(simInv(Mi), isVB(vo) && isVB(vi) ? VB : lerpR(vo, vi, e)), cv = cover(scr, B); if (cv > COV0) oo = Math.min(oo, 1 - band(cv, COV0, 1) * band(e, 0.32, 0.45)); }
+    const k = easeS(band(e, 0, 0.3)), so = outer.style;
+    if (Math.abs(oo - st.oo) > 1e-4) { st.oo = oo; so.opacity = oo; so.visibility = oo > 0 ? '' : 'hidden'; }
+    const io = band(e, bd.ii[0], bd.ii[1]);
+    if (Math.abs(io - st.io) > 1e-4) { st.io = io; inner.style.opacity = io; }
+    const ol = P.midOut ? 0 : 1 - band(e, 0.02, 0.2), il = P.midIn ? 0 : band(e, bd.li[0], bd.li[1]);
+    so.setProperty('--lab', ol.toFixed(3)); setLab(outer, ol, 'nol');
     so.setProperty('--ctx', lerp(rest.o, CTX_LOW, k).toFixed(3));
     so.setProperty('--sat', lerp(rest.s, 1, k).toFixed(3));
     so.setProperty('--ctxh', lerp(1, CTX_LOW, k).toFixed(3));
     so.setProperty('--tgt', lerp(tRest.o, 1, k).toFixed(3));
     so.setProperty('--tsat', lerp(tRest.s, 1, k).toFixed(3));
     outer.classList.toggle('zsat', (rest.s < 0.999 || tRest.s < 0.999) && k < 0.999);
-    inner.style.setProperty('--lab', P.midIn ? '0' : band(e, 0.62, 0.88).toFixed(3));
+    inner.style.setProperty('--lab', il.toFixed(3)); setLab(inner, il, 'nil');
     inner.style.setProperty('--ctx', String(CTX_LOW));
     if (oo > 0) keep.set(Mo[0]);
+    // the whole box is night sky while the view mostly shown is in space (CSS #chip.skyon): between two levels in
+    // space throughout, from Earth to the US until the globe fades (the colour itself fades, CSS)
+    const sky = !!(oo > 0.5 && e < 0.9 ? outer._sky : inner._sky); if (sky !== st.sky) { st.sky = sky; svg.classList.toggle('skyon', sky); }
     if (cg) {
       const M = cmpM(V, inOuter ? Mo : Mi), q = {x: M[0] * p0.x + M[1], y: M[0] * p0.y + M[2]};
       if (V) cg.setAttribute('transform', `translate(${q.x.toFixed(1)},${q.y.toFixed(1)}) scale(${V[0].toFixed(4)})`); else at(cg, q);
     }
+    readout(s, e);
   };
   // the first frame goes on before either view is shown: a view un-hidden at full size and full opacity would be
   // painted for one frame
-  frame(sg.e0);
+  frame(s.e0);
   outer.style.display = ''; inner.style.display = '';
-  LAYERS.forEach(l => l.classList.add('busy'));
+  svg.querySelectorAll(':scope > g.lay').forEach(l => l.classList.add('busy'));
   outer.classList.add('zout');
   return {
-    lo, P, frame,
+    s, P, frame,
     /* a plan redirected mid-step: what the views on either side are now (only the flags change) */
-    update: s => { P.midOut = !!s.midOut; P.midIn = !!s.midIn; },
+    update: x => { P.midOut = !!x.midOut; P.midIn = !!x.midIn; },
     close: (e1, last, arrive) => {
       frame(e1);
       if (cg) { cg.remove(); carry.style.visibility = ''; }
       keep.done();
-      outer.classList.remove('zout'); outer.style.visibility = '';
+      outer.classList.remove('zout', 'nolab'); inner.classList.remove('nolab'); outer.style.visibility = '';
       const inIn = e1 >= 1, here = inIn ? inner : outer, gone = inIn ? outer : inner;
       gone.style.display = 'none'; ctxClear(gone);
-      setT(here, null); here.style.opacity = 1;
-      Z.level = inIn ? lo + 1 : lo;
-      if (PH) { setView(pview(Z.level)); if (Z.level === 0) foldSoon(); }
+      here.style.opacity = 1;
+      Z.path = inIn ? s.P.slice() : s.P.slice(0, -1);
+      bindTrio(Z.path);
+      setT(here, restMat());
+      if (PH && Z.level === 0) foldSoon();
       // the view the camera rests at loses the zoom's marks (the dimming that the step puts on arrives in the same
       // frame, arrive()); a view passed through keeps them for the next step
-      if (last) { if (arrive) arrive(); ctxClear(here); LAYERS.forEach(l => l.classList.remove('busy')); }
+      if (last) { if (arrive) arrive(); ctxClear(here); svg.querySelectorAll(':scope > g.lay').forEach(l => l.classList.remove('busy')); }
       scaleUI();
     },
   };
 }
-/* the zooms from a view s to a view t: out while s is deeper than the target or beside it, then in; each step's length
-   on the log scale (a tile to a shire's frame, a minion's box to a minion's frame) */
-const LOGT = Math.log(SF.w / (TILE - 2 * INS)), LOGM = Math.log(MF.w / 66);
-function viewsTo(s, t) {
-  const out = [s]; let v = s;
-  while (v.level > 0 && (v.level > t.level || v.sid !== t.sid || (v.level === 2 && (v.nb !== t.nb || v.mi !== t.mi)))) { v = Object.assign({}, v, {level: v.level - 1}); out.push(v); }
-  while (v.level < t.level) { v = {level: v.level + 1, sid: t.sid, nb: t.nb, mi: t.mi}; out.push(v); }
-  return out;
+/* a glide between two siblings: both views at one scale, side by side as in their parent's drawing (which is not
+   shown); their labels dip to 0.4 on the way */
+function openPan(s, req) {
+  visited(s.T);
+  const L1 = built(s.P, s.o + 1), L2 = built(s.T, s.o + 1);
+  const v1 = viewOf(s.P[s.o + 1]), v2 = viewOf(s.T[s.o + 1]);
+  const End = cmpM(s.Q2, simInv(s.Q1));   // the first view's transform when the second rests
+  const M21 = cmpM(s.Q1, simInv(s.Q2));   // the second's coordinates in the first's
+  const frame = q => {
+    const M1 = simZoom(ID, End, q), M2 = cmpM(M1, M21), V = vmat(isVB(v1) && isVB(v2) ? VB : lerpR(v1, v2, q));
+    setT(L1, cmpM(V, M1)); setT(L2, cmpM(V, M2));
+    const lab = (1 - 0.6 * Math.sin(Math.PI * clamp(q, 0, 1))).toFixed(3);
+    L1.style.setProperty('--lab', lab); L2.style.setProperty('--lab', lab);
+    readout(s, q);
+  };
+  ctxClear(L1); ctxClear(L2); clearDim();
+  L1.classList.add('pan'); L2.classList.add('pan');
+  frame(0);
+  L1.style.display = ''; L2.style.display = ''; L1.style.opacity = 1; L2.style.opacity = 1;
+  svg.querySelectorAll(':scope > g.lay').forEach(l => l.classList.add('busy'));
+  PANKEEP = L1;
+  return {
+    s, frame, update: () => {},
+    close: (e1, last, arrive) => {
+      const to = e1 >= 0.5, here = to ? L2 : L1, gone = to ? L1 : L2;
+      frame(to ? 1 : 0);
+      gone.style.display = 'none'; ctxClear(gone); gone.style.removeProperty('--lab'); here.style.removeProperty('--lab');
+      L1.classList.remove('pan'); L2.classList.remove('pan');
+      Z.path = (to ? s.T : s.P).slice();
+      bindTrio(Z.path);
+      setT(here, restMat());
+      if (last) { if (arrive) arrive(); svg.querySelectorAll(':scope > g.lay').forEach(l => l.classList.remove('busy')); }
+      scaleUI();
+    },
+  };
 }
-const costOfViews = vs => { let c = 0; for (let i = 1; i < vs.length; i++) c += Math.min(vs[i].level, vs[i - 1].level) === 0 ? LOGT : LOGM; return c; };
+let PANKEEP = null;
 /* The camera's curve: one ease over the whole move, so that a zoom from the chip to a minion accelerates once and
    slows once, with no stop at the shire. A cubic whose start speed is m (0: from rest, its top speed 1.5 times the
    mean; a move redirected on its way starts at the speed it had) and whose end speed is 0. */
 const herm = (u, m) => m * (u * u * u - 2 * u * u + u) + 3 * u * u - 2 * u * u * u;
 const hermD = (u, m) => m * (3 * u * u - 4 * u + 1) + 6 * u - 6 * u * u;
 /* a move's length: per ms for each unit of log scale, but a long move (the chip to a minion and further) is
-   compressed, so that no move takes much more than 1.7 s (2.5 s from a minion to one in another shire) */
+   compressed, so that no move takes much more than 1.7 s (2.5 s from a minion to one in another shire); since 30
+   September a reader's move is capped at 4.5 s (the universe to the die is 17 steps), a single jump at 1.1 s */
 const moveMs = (cost, per) => { const t = per * cost; return cost <= 3 ? t : per * 3 + (t - per * 3) * 0.32; };
+const MOVECAP = 4500, JUMPCAP = 1100;
 /* a timeline on real time (the reader's own zoom) or on the animation clock (a flow's or the tour's camera, which
    Space stops); fn(t) runs at once for t = 0, then every frame. stop() true: a newer request came in; the timeline
    stops where it is and resolves false. A clock timeline whose token died goes on in real time, so that a stopped
@@ -955,164 +1320,184 @@ function timeline(T, fn, clk, stop) {
 }
 /* The camera follows the latest request only: rapid presses never queue a chain of animations, and a request that
    comes in during a move redirects it from where it is, forwards or back, at the speed it had (a reversal slows to a
-   stop first, 130 ms), with no jump. goTo() resolves once the view reaches the latest target. o.clk: a token whose
-   clock (the pausable one) drives the move; o.ms: milliseconds per unit of log scale (0 for a cut); o.total: the whole
-   move's length instead; o.keepFx: a flow's drawing rides it; o.carry: a flow's packet rides it; o.c1: the look the
-   view ends at when the move ends on a zoom out (a step that dims it); o.arrive: run in the frame the camera
-   arrives in (a step's highlight, so that it lands with no flash); o.atChip: the camera rests its eye on the chip
-   halfway through an out-and-in move and this runs there (a flow's establishing shot). */
+   stop first, 130 ms), with no jump. goTo() resolves once the view reaches the latest target. The target is a path,
+   or a view of the flows' kind ({level, sid, nb, mi}). o.clk: a token whose clock (the pausable one) drives the move;
+   o.ms: milliseconds per unit of log scale (0 for a cut); o.total: the whole move's length instead; o.keepFx: a flow's
+   drawing rides it; o.carry: a flow's packet rides it; o.c1: the look the view ends at when the move ends on a zoom out
+   (a step that dims it); o.arrive: run in the frame the camera arrives in (a step's highlight, so that it lands with no
+   flash); o.atChip: the camera rests its eye on the chip halfway through an out-and-in move and this runs there (a
+   flow's establishing shot); o.pan: a sibling beside this scale is reached by a glide. */
 let ZT = null, ZW = false, ZWAIT = [], ZN = 0;
-const zkey = () => Z.level + ':' + Z.sid + ':' + Z.nb + ':' + Z.mi;
+const zkey = () => pkeys(Z.path);
 /* where the camera is going, else where it is: + and - step from there, so that a second press is never lost */
-const zNow = () => (ZT ? ZT.t : Z);
+const zNow = () => pinfo(ZT ? ZT.t : Z.path);
 function goTo(t, o) {
   o = o || {};
-  const z = zNow();
-  const tt = {level: t.level || 0, sid: t.sid == null ? (z.sid == null ? LASTSID : z.sid) : t.sid, nb: t.nb || 0, mi: t.mi || 0};
+  let tp;
+  if (Array.isArray(t)) tp = t.slice();
+  else { const z = zNow(); tp = pathOf({level: t.level || 0, sid: t.sid == null ? (z.sid == null ? LASTSID : z.sid) : t.sid, nb: t.nb || 0, mi: t.mi || 0}); }
   // the same target again while the camera is on its way there (a stage stepped mid-move): the move goes on as it is
-  const same = ZW && ZT && ZT.t.level === tt.level && (tt.level < 1 || ZT.t.sid === tt.sid) && (tt.level < 2 || (ZT.t.nb === tt.nb && ZT.t.mi === tt.mi));
+  const same = ZW && ZT && samePath(ZT.t, tp);
   if (same && !o.total && o.ms !== 0) { if (o.focus) ZT.o.focus = true; ['arrive', 'c1'].forEach(k => { if (o[k]) ZT.o[k] = o[k]; }); return new Promise(res => ZWAIT.push(res)); }
-  ZT = {t: tt, o, n: ++ZN};
-  return new Promise(res => { ZWAIT.push(res); if (!ZW) { ZW = true; zoomWorker(); } });
+  ZT = {t: tp, o, n: ++ZN};
+  return new Promise(res => { ZWAIT.push(res); if (!ZW) { ZW = true; zoomWorker(); } scaleUI(); });
 }
-/* the plan: the segments from the view shown, or from partway through the step in flight (forwards or back, whichever
-   is shorter), to the target; which views are only passed through */
-function planTo(t, o) {
-  const segs = [], cur = {level: Z.level, sid: Z.sid, nb: Z.nb, mi: Z.mi};
-  let vs;
-  if (CUR) {
-    const Ls = CUR.lo === 0 ? LOGT : LOGM;
-    const vIn = {level: CUR.lo + 1, sid: Z.sid, nb: Z.nb, mi: Z.mi}, vOut = {level: CUR.lo, sid: Z.sid, nb: Z.nb, mi: Z.mi};
-    const pin = viewsTo(vIn, t), pout = viewsTo(vOut, t);
-    const cin = (1 - CUR.e) * Ls + costOfViews(pin), cout = CUR.e * Ls + costOfViews(pout);
-    const fwd = cin < cout - 1e-9 || (Math.abs(cin - cout) < 1e-9 && CUR.dir > 0);
-    segs.push({part: true, lo: CUR.lo, dir: fwd ? 1 : -1, e0: CUR.e, e1: fwd ? 1 : 0, L: Math.max(1e-3, fwd ? (1 - CUR.e) * Ls : CUR.e * Ls)});
-    vs = fwd ? pin : pout;
-  } else vs = viewsTo(cur, t);
-  for (let i = 1; i < vs.length; i++) {
-    const a = vs[i - 1], b = vs[i], dir = b.level > a.level ? 1 : -1, lo = Math.min(a.level, b.level), inn = dir > 0 ? b : a;
-    segs.push({lo, dir, e0: dir > 0 ? 0 : 1, e1: dir > 0 ? 1 : 0, L: lo === 0 ? LOGT : LOGM, sid: inn.sid, nb: inn.nb, mi: inn.mi});
-  }
-  segs.forEach((s, i) => {
-    // the outer view sits at e = 0: where a zoom in starts, or where a zoom out ends
-    const startMid = i > 0, endMid = i < segs.length - 1;
-    s.midOut = s.dir > 0 ? startMid : endMid;
-    s.midIn = s.dir > 0 ? endMid : startMid;
-    // the establishing shot rests its eye on the chip: the chip is shown there, set back, not passed through
-    if (o.atChip && s.lo === 0) s.midOut = false;
-    if (s.dir < 0 && !s.midOut) s.end = i === segs.length - 1 ? (o.c1 || FULL) : (o.chipEnd || FULL);
-  });
-  return segs;
+/* the warp of a leg whose steps take time out of proportion to their zoom (a jump: its readout sweeps the decades it
+   skips): progress p (0-1) shares the leg's time by each step's cost, and maps to the leg's log position piecewise */
+function legWarp(g) {
+  const W = g.W, n = W.length - 1;
+  g.span = W[n].l - W[0].l;
+  const ws = g.sOf.map(s => Math.max(1e-9, s.L)), C = ws.reduce((a, b) => a + b, 0);
+  g.cw = ws.map(w => w / C);
+  g.uniform = g.sOf.every(s => s.kind !== 'jump');
 }
+const warpL = (g, p) => {   // progress -> log position along the leg
+  const W = g.W, n = W.length - 1;
+  if (g.uniform) return W[0].l + p * g.span;
+  let c = 0;
+  for (let i = 0; i < n; i++) { const w = g.cw[i]; if (p <= c + w || i === n - 1) { const f = w > 0 ? (i === n - 1 ? (p - c) / w : clamp((p - c) / w, 0, 1)) : 1; return W[i].l + f * (W[i + 1].l - W[i].l); } c += w; }
+  return W[n].l;
+};
+const warpD = (g, p) => {   // d(log position)/dp
+  if (g.uniform) return g.span;
+  const W = g.W, n = W.length - 1; let c = 0;
+  for (let i = 0; i < n; i++) { const w = g.cw[i]; if (p <= c + w || i === n - 1) return w > 0 ? (W[i + 1].l - W[i].l) / w : 0; c += w; }
+  return g.span;
+};
 async function zoomWorker() {
-  const from = {level: Z.level, sid: Z.sid, nb: Z.nb, mi: Z.mi}, fromKey = zkey(), hadFocus = svg.contains(document.activeElement);
-  let wantFocus = false;
+  const from = Z.path.slice(), fromKey = zkey(), hadFocus = svg.contains(document.activeElement);
+  let wantFocus = false, wantPanel = false;
+  svg.classList.add('zmv'); pillOff(); menuOff();
   try {
     for (let guard = 0; ZT && guard < 40; guard++) {
       const req = ZT, t = req.t, stop = () => ZT !== req, clk = req.o.clk || null;
       if (req.o.focus) wantFocus = true;
+      if (req.o.pfocus) wantPanel = true;
+      // a glide in flight is not turned: it lands where it is nearer, at once
+      if (CUR && CUR.s.pan) { try { CUR.ctl.close(CUR.e >= 0.5 ? 1 : 0, true, null); } catch (e) { console.error(e); } CUR = null; }
       // turned back while moving: slow to a stop first (130 ms), then plan from rest
       if (CUR && CUR.ctl && Math.abs(CUR.v) > 2e-4 && !REDUCED && req.o.total !== 0 && req.o.ms !== 0) {
         const probe = planTo(t, req.o)[0];
         if (probe && probe.part && probe.dir * CUR.v < 0) {
-          const Ls = CUR.lo === 0 ? LOGT : LOGM, v = CUR.v, e0 = CUR.e, Tc = 130, c = CUR;
-          const ok = await timeline(Tc, tt => { const q = tt / Tc, e = Math.max(0, Math.min(1, e0 + v * Tc * (q - q * q / 2) / Ls)), R = c.Rof ? c.Rof(e) : null; c.ctl.frame(e, R); c.e = e; if (R) c.R = R; }, clk, stop);
+          const Ls = CUR.s.lq, v = CUR.v, e0 = CUR.e, Tc = 130, c = CUR;
+          const ok = await timeline(Tc, tt => { const q = tt / Tc, e = clamp(e0 + v * Tc * (q - q * q / 2) / Ls, 0, 1), R = c.Rof ? c.Rof(e) : null; c.ctl.frame(e, R); c.e = e; if (R) c.R = R; }, clk, stop);
           c.v = 0;
           if (!ok) continue;
         }
       }
       // a step left at its very end (a turn-back slowed to a stop there): the camera is at that view
       if (CUR && CUR.ctl && (CUR.e <= 1e-3 || CUR.e >= 1 - 1e-3)) { CUR.ctl.close(CUR.e < 0.5 ? 0 : 1, true, null); CUR = null; }
-      const segs = planTo(t, req.o);
-      if (!segs.length) { if (ZT === req) ZT = null; break; }
+      let steps;
+      try { steps = planTo(t, req.o); } catch (e) { console.error(e); if (ZT === req) ZT = null; break; }
+      if (!steps.length) { if (ZT === req) ZT = null; break; }
       if (!req.o.keepFx) clearFx(true); else clearDim();
-      const cost = segs.reduce((s, x) => s + x.L, 0);
-      let T = req.o.total != null ? req.o.total : moveMs(cost, req.o.ms != null ? req.o.ms : 480);
+      // every scale the move enters is built before it starts (a build is a layout of a whole drawing: mid-move it
+      // would be a late frame)
+      try { steps.forEach(s0 => { if (s0.pan) { built(s0.P, s0.o + 1); built(s0.T, s0.o + 1); } else { built(s0.P, s0.o); built(s0.P, s0.o + 1); } }); } catch (e) { console.error(e); }
+      const cost = costOf(steps);
+      const user = !clk && req.o.total == null;
+      const pan = steps.length === 1 && steps[0].pan;
+      let T = req.o.total != null ? req.o.total : pan ? 380 + 260 * steps[0].dist : moveMs(cost, req.o.ms != null ? req.o.ms : 480);
+      if (user && !pan) { T = Math.min(T, MOVECAP); if (steps.every(s => s.kind === 'jump')) T = Math.min(T, JUMPCAP * steps.length); T = Math.max(T, 110 * steps.length); }
+      // a flow's or the tour's camera that starts off the chip's three scales (the reader had gone out to the universe
+      // or down to the atom) comes back within the reader's cap; within the three its pace is as it was
+      else if (!pan && req.o.total == null && steps.some(s => !TRIO.includes(s.P[s.P.length - 1].id))) T = Math.min(T, MOVECAP);
+      // images a scale shows are decoded before the camera enters it
+      const imgs = [];
+      steps.forEach(s => { if (!s.pan && s.dir > 0) { const N0 = NODES[s.P[s.o + 1].id]; if (N0.imgs) imgs.push(...N0.imgs(prm(s.P[s.o + 1]))); } });
+      // (at most 300 ms, and not past a newer request: a slow or stalled image pops in later, as on the way out; review
+      // of 1 Oct: with no limit the camera froze and queued every press until the decode settled)
+      if (imgs.length && !REDUCED) {
+        const t0 = performance.now();
+        await Promise.race([imgReady(imgs), new Promise(r => { const tick = () => (ZT !== req || performance.now() - t0 > 300 ? r() : setTimeout(tick, 25)); tick(); })]);
+        if (ZT !== req) continue;
+      }
       // going on the same way: start at the speed the camera has
       let m = 0;
-      if (segs[0].part && CUR) {
-        const v = segs[0].dir * CUR.v;
+      if (steps[0].part && CUR && !steps[0].pan) {
+        const v = steps[0].dir * CUR.v;
         if (v > 1e-5 && T > 0) { m = v * T / cost; if (m > 2.5) { T = 2.5 * cost / v; m = 2.5; } }
       }
-      // the views the move enters are built before it starts, where they are not on the screen (no build mid-move)
-      const built = {};
-      segs.forEach(s => {
-        if (s.part || s.dir < 0) return;
-        const L = LAYERS[s.lo + 1];
-        if (L.style.display !== 'none') return;
-        if (s.lo === 0 && !built[1]) { buildShire(s.sid); built[1] = s.sid; }
-        else if (s.lo === 1 && !built[2] && (built[1] === s.sid || (Z.level >= 1 && Z.sid === s.sid && !built[1]))) { buildMinion(s.sid, s.nb, s.mi); built[2] = s.sid + ':' + s.nb + ':' + s.mi; }
-      });
-      if (segs[0].part && CUR && CUR.ctl) CUR.ctl.update(segs[0]);
-      let ci = 0, ctl = segs[0].part && CUR ? CUR.ctl : null;
-      const openSeg = s => {
-        if (s.dir > 0) {
-          if (s.lo === 0) { if (built[1] !== s.sid) buildShire(s.sid); built[1] = null; Z.sid = s.sid; LASTSID = s.sid; }
-          else { const key = s.sid + ':' + s.nb + ':' + s.mi; if (built[2] !== key) buildMinion(s.sid, s.nb, s.mi); built[2] = null; Z.nb = s.nb; Z.mi = s.mi; LASTNB = s.nb; LASTMI = s.mi; }
-        }
-        return segOpen(s, req);
-      };
-      // The legs: the steps one way (in, or out) are one leg, eased once, and a leg out and a leg in meet at rest, where
-      // the move turns. A leg goes through the rest of every scale it passes (each drawn whole at its moment, as before),
-      // a pure zoom between two of them, and around each scale passed the two zooms blend (over BLEND of the shorter's log
-      // length), so that the camera turns there smoothly: until 30 September it turned at once, at its top speed, and a
-      // move out and back in reversed at full speed. K: the top view's transform when each scale of the leg rests; W: the
-      // rests the leg passes, in order, after where it starts.
+      // the legs: the steps one way (in, or out) are one leg, eased once, and a leg out and a leg in meet at rest, where
+      // the move turns
       const legs = [], legOf = [];
-      segs.forEach((s, i) => { const g = legs[legs.length - 1]; if (g && g.dir === s.dir) g.ix.push(i); else legs.push({dir: s.dir, ix: [i]}); });
+      steps.forEach((s, i) => { const g = legs[legs.length - 1]; if (g && !g.pan && !s.pan && g.dir === s.dir) g.ix.push(i); else legs.push({dir: s.dir, ix: [i], pan: !!s.pan}); });
       let ca = 0;
-      legs.forEach((g, k) => { g.ix.forEach(i => { legOf[i] = g; }); g.cost = g.ix.reduce((t, i) => t + segs[i].L, 0); g.T0 = cost > 0 ? T * ca / cost : 0; ca += g.cost; g.T1 = cost > 0 ? T * ca / cost : T; g.m = k === 0 ? m : 0; });
+      legs.forEach((g, k) => { g.ix.forEach(i => { legOf[i] = g; }); g.cost = g.ix.reduce((c, i) => c + steps[i].L, 0); g.T0 = cost > 0 ? T * ca / cost : 0; ca += g.cost; g.T1 = cost > 0 ? T * ca / cost : T; g.m = k === 0 ? m : 0; });
+      if (steps[0].part && CUR && CUR.ctl) CUR.ctl.update(steps[0]);
+      let ci = 0, ctl = steps[0].part && CUR ? CUR.ctl : null;
+      const startR = steps[0].part && CUR ? CUR.R : null;
+      // a leg's waypoints, each a view at rest (or the start, partway) in the coordinates of a scale on it (d): the
+      // leg's log position l, with the rests at the scales' log scale; a frame interpolates between two of them, in the
+      // coordinates of the outer of the two (at most one map, through one step)
       const legPath = g => {
-        const ss = g.ix.map(i => segs[i]).sort((x, y) => x.lo - y.lo), K = [[1, 0, 0]];
-        g.a = ss[0].lo;
-        ss.forEach(s => {
-          const sid = s.part ? Z.sid : s.sid, nb = s.part ? Z.nb : s.nb, mi = s.part ? Z.mi : s.mi;
-          s.A = s.lo === 0 ? tileRect(sid) : minRect(nb, mi); s.B = s.lo === 0 ? SF : MF;
-          K.push(cmpM(rmap(s.A, s.B), K[K.length - 1]));
-        });
-        const first = segs[g.ix[0]];
-        g.K = K; g.Ge = g.dir > 0 ? K[K.length - 1] : K[0];
-        g.Gs = first.part && CUR && CUR.R ? cmpM(rmap(first.A, CUR.R), K[first.lo - g.a]) : g.dir > 0 ? K[0] : K[K.length - 1];
-        g.W = [g.Gs].concat(g.ix.map(i => K[segs[i].lo - g.a + (g.dir > 0 ? 1 : 0)])).map(S => ({S, l: Math.log(S[0])}));
+        const ss = g.ix.map(i => steps[i]), byO = ss.slice().sort((x, y) => x.o - y.o);
+        g.a = byO[0].o; g.st = byO; g.lam = [0];
+        byO.forEach((s, j) => g.lam.push(g.lam[j] + s.lq));
+        const first = ss[0];
+        let W0;
+        if (first.part && startR) { const M = rmap(first.A, startR); W0 = {d: first.o, M, l: g.lam[first.o - g.a] + Math.log(M[0])}; }
+        else if (g.dir > 0) W0 = {d: g.a, M: ID, l: 0};
+        else W0 = {d: g.a + byO.length, M: ID, l: g.lam[byO.length]};
+        g.W = [W0].concat(ss.map(s => { const r = s.o - g.a + (g.dir > 0 ? 1 : 0); return {d: g.a + r, M: ID, l: g.lam[r]}; }));
+        g.sOf = ss;
+        legWarp(g);
       };
-      // the top view's transform at progress p of leg g: its scale geometric in p, its place on the blended path
-      const legG = (g, p) => {
-        const W = g.W, n = W.length - 1, l = W[0].l + p * (W[n].l - W[0].l), dir = W[n].l >= W[0].l ? 1 : -1;
-        const on = i => simZoom(W[i].S, W[i + 1].S, Math.abs(W[i + 1].l - W[i].l) > 1e-9 ? (l - W[i].l) / (W[i + 1].l - W[i].l) : 1);
+      // a layer's transform at depth d1 as the transform of the layer at d2 (|d1 - d2| <= 1), through the step between
+      const reD = (g, M, d1, d2) => {
+        if (d1 === d2) return M;
+        if (d2 === d1 - 1) return cmpM(M, g.st[d2 - g.a].Q);
+        if (d2 === d1 + 1) return cmpM(M, simInv(g.st[d1 - g.a].Q));
+        throw new Error(`no map from depth ${d1} to ${d2}`);
+      };
+      const on = (g, i, l) => {
+        const a = g.W[i], b = g.W[i + 1], d = Math.min(a.d, b.d), dl = b.l - a.l;
+        return {d, M: simZoom(reD(g, a.M, a.d, d), reD(g, b.M, b.d, d), Math.abs(dl) > 1e-9 ? (l - a.l) / dl : 1)};
+      };
+      // the view at log position l of leg g: its scale geometric in l, its place on the blended path (around each rest
+      // the two zooms blend over BLEND of the shorter's log length, in that rest's own coordinates)
+      const legG = (g, l) => {
+        const W = g.W, n = W.length - 1, dir = W[n].l >= W[0].l ? 1 : -1;
         let i = 0; while (i < n - 1 && (l - W[i + 1].l) * dir > 0) i++;
-        let G = on(i);
+        let G = on(g, i, l);
         for (let b = Math.max(1, i); b <= Math.min(n - 1, i + 1); b++) {
-          const w = BLEND * Math.min(Math.abs(W[b].l - W[b - 1].l), Math.abs(W[b + 1].l - W[b].l)), d = (l - W[b].l) * dir;
-          if (w > 1e-9 && Math.abs(d) < w) {
-            const x = (d + w) / (2 * w), beta = x * x * (3 - 2 * x), A = on(b - 1), B = on(b);
-            G = [A[0], lerp(A[1], B[1], beta), lerp(A[2], B[2], beta)];
+          const w = BLEND * Math.min(Math.abs(W[b].l - W[b - 1].l), Math.abs(W[b + 1].l - W[b].l)), dd = (l - W[b].l) * dir;
+          if (w > 1e-9 && Math.abs(dd) < w) {
+            const x = (dd + w) / (2 * w), beta = x * x * (3 - 2 * x), A = on(g, b - 1, l), B = on(g, b, l), d = W[b].d;
+            const SA = reD(g, A.M, A.d, d), SB = reD(g, B.M, B.d, d);
+            G = {d, M: [SA[0], lerp(SA[1], SB[1], beta), lerp(SA[2], SB[2], beta)]};
           }
         }
         return G;
       };
-      // step s of leg g where the top view's transform is G: how far the step has gone (e), and where its target is
+      // step s of leg g where the leg's view is G: how far the step has gone (e), and where its target is
+      // (a frame more than one scale away from the step, as a cut's single frame is, has passed it or not reached it)
       const stepAt = (g, s, G) => {
-        const j = s.lo - g.a, Kj = g.K[j], Kn = g.K[j + 1];
-        return {e: Math.max(0, Math.min(1, Math.log(G[0] / Kj[0]) / Math.log(Kn[0] / Kj[0]))), R: simR(cmpM(G, simInv(Kj)), s.A)};
+        if (G.d > s.o + 1) return {e: 1, R: null};
+        if (G.d < s.o) return {e: 0, R: null};
+        const Mo = reD(g, G.M, G.d, s.o); return {e: clamp(Math.log(Mo[0]) / s.lq, 0, 1), R: simR(Mo, s.A)};
       };
       const drive = tt => {
         let kk = 0; while (kk < legs.length - 1 && tt >= legs[kk].T1 - 1e-9) kk++;
-        const gk = legs[kk], Tk = gk.T1 - gk.T0, u = Tk > 0 ? Math.min(1, Math.max(0, (tt - gk.T0) / Tk)) : 1, p = herm(u, gk.m);
+        const gk = legs[kk], Tk = gk.T1 - gk.T0, u = Tk > 0 ? clamp((tt - gk.T0) / Tk, 0, 1) : 1, p = herm(u, gk.m);
         const fin = tt >= T - 1e-9;
-        while (ci < segs.length) {
-          const s = segs[ci], g = legOf[ci], last = ci === segs.length - 1;
-          if (!ctl) ctl = openSeg(s);
-          if (!g.K) legPath(g);
-          if (g === gk) {
-            const G = legG(g, p), at = stepAt(g, s, G);
-            const reached = s.dir > 0 ? at.e >= 1 - 1e-7 : at.e <= 1e-7;
-            if (!reached || (last && !fin)) {
-              ctl.frame(at.e, at.R);
-              const dl = Math.log(g.Ge[0] / g.Gs[0]);
-              CUR = {lo: s.lo, e: at.e, dir: s.e1 > s.e0 ? 1 : -1, v: Tk > 0 ? dl * hermD(u, gk.m) / Tk : 0, ctl, R: at.R,
-                // where the target is for another e of this step, on the leg's path (a turn-back slows along it)
-                Rof: e => { const j = s.lo - g.a, lk = Math.log(g.K[j][0]) + e * Math.log(g.K[j + 1][0] / g.K[j][0]), q = Math.abs(dl) > 1e-9 ? (lk - Math.log(g.Gs[0])) / dl : 1; return stepAt(g, s, legG(g, q)).R; }};
-              break;
+        while (ci < steps.length) {
+          const s = steps[ci], g = legOf[ci], last = ci === steps.length - 1;
+          if (!ctl) ctl = openStep(s, req);
+          if (s.pan) {
+            if (g === gk && (u < 1 || (last && !fin))) { ctl.frame(p); CUR = {s, e: p, dir: 1, v: 0, ctl}; break; }
+          } else {
+            if (!g.W) legPath(g);
+            if (g === gk) {
+              const G = legG(g, warpL(g, p)), at = stepAt(g, s, G);
+              const reached = s.dir > 0 ? at.e >= 1 - 1e-7 : at.e <= 1e-7;
+              if (!reached || (last && !fin)) {
+                ctl.frame(at.e, at.R);
+                CUR = {s, e: at.e, dir: s.e1 > s.e0 ? 1 : -1, v: Tk > 0 ? warpD(g, p) * hermD(u, gk.m) / Tk : 0, ctl, R: at.R,
+                  // where the target is for another e of this step, on the leg's path (a turn-back slows along it)
+                  Rof: e => stepAt(g, s, legG(g, g.lam[s.o - g.a] + e * s.lq)).R};
+                break;
+              }
             }
           }
           ctl.close(s.e1, last, last ? req.o.arrive : null);
@@ -1126,77 +1511,399 @@ async function zoomWorker() {
   } catch (e) { console.error(e); }
   ZT = null; ZW = false;
   if (CUR) { try { CUR.ctl.close(CUR.e >= 0.5 ? 1 : 0, true, null); } catch (e) { console.error(e); } CUR = null; }
+  svg.classList.remove('zmv');
+  prune(PANKEEP ? new Set([PANKEEP]) : null); PANKEEP = null;
+  skyBg();
+  readout(null);
   if (fromKey !== zkey()) {
-    select(null); scaleUI();
-    // a "Zoom into" button in the panel has done its job
-    $('pn-body').querySelectorAll('button[data-act="zoom"], button[data-act="zoomm"]').forEach(b => { const a = b.closest('.pn-act'); if (a) a.remove(); });
-    if (hadFocus || wantFocus) { const f = zoomFocus(from); if (f) f.focus({preventScroll: true}); }
-  }
+    select(null);
+    // the panel, the crumbs and the prefetch after the frame the camera lands in (review of 1 Oct: built inside it,
+    // they made the last frame of every move a long one); __chipState reports the move until they are done
+    const fin = () => {
+      UIP = false;
+      if (ZW) return;   // a newer move took over: its own end does this
+      // (the code that awaited the move may have selected a part already, a neighbour link's cell: its panel and its
+      // focus stand)
+      const late = !!SEL;
+      scaleUI(true); arrived(from);
+      if (late) return;
+      if (hadFocus || wantFocus) { const f = zoomFocus(from); if (f) f.focus({preventScroll: true}); }
+      if (wantPanel) { const b = $('pn-body').querySelector('.pn-zoom button'); (b || $('pn-body')).focus({preventScroll: true}); }
+    };
+    if (REDUCED) fin(); else { UIP = true; setTimeout(fin, 0); }
+  } else scaleUI();
   const w = ZWAIT; ZWAIT = []; w.forEach(r => r());
 }
-/* after a zoom, focus the part zoomed out of (a shire, a minion), else the first part of the new view */
+let UIP = false;
+/* at rest, the box is night sky where the level shown is in space */
+function skyBg() { const L = restLayer(); svg.classList.toggle('skyon', !!(L && L._sky)); }
+/* images a scene shows, decoded before the camera enters it (a first frame never waits for a decode) */
+const IMGDONE = new Set();
+function imgReady(list) {
+  const todo = list.filter(u => u && !IMGDONE.has(u));
+  if (!todo.length) return Promise.resolve();
+  return Promise.all(todo.map(u => { const im = new Image(); im.src = u; return (im.decode ? im.decode() : Promise.resolve()).then(() => IMGDONE.add(u), () => IMGDONE.add(u)); }));
+}
+/* after a zoom, focus the part zoomed out of, else the first part of the new view */
 function zoomFocus(from) {
-  const L = LAYERS[Z.level];
-  if (Z.level < from.level) {
-    if (Z.level === 0 && SH[from.sid] && SH[from.sid].g) return SH[from.sid].g;
-    if (Z.level === 1) { const m = [...L.querySelectorAll('.comp[data-comp="minion"]')].find(g => g._ctx.nb === from.nb && g._ctx.mi === from.mi); if (m) return m; }
+  const L = restLayer(); if (!L) return null;
+  // arrived by a neighbour link: the link back to the shire left, so that Tab and Enter return
+  const nbk = NBRBACK; NBRBACK = null;
+  const fi = pinfo(from);
+  if (nbk && Z.level === 1 && fi.level === 1 && fi.sid === nbk.sid && AP[1].nbr && AP[1].nbr[nbk.dir]) return AP[1].nbr[nbk.dir];
+  if (from.length > Z.path.length && samePath(from.slice(0, Z.path.length), Z.path)) {
+    const s = L._ap.zs[pk(from[Z.path.length])]; if (s && s.g && s.g.isConnected) return s.g;
   }
+  // a glide to a sibling: its part in the same place, else the first part
   return L.querySelector('.comp');
 }
 /* the reader's own zoom: while a flow plays, the camera stops following it (stepping a stage turns it back on),
    and the flow's stage is drawn again where the camera now is */
-function userNav(t) {
-  hideTip();
+function userNav(t, o) {
+  hideTip(); pillOff(); menuOff();
   // a flow, playing or finished, stays: its stage is drawn again at the new scale (a finished one as its last stage's
   // end state, still finished), so the arrows keep stepping its stages
   const k = FL.k, done = FL.done;
   if (k) { FL.tok.dead = true; if (FOLLOW) setFollow(false, true); }
-  return goTo(t, {focus: svg.contains(document.activeElement)}).then(() => {
+  return goTo(t, Object.assign({focus: svg.contains(document.activeElement), user: true}, o || {})).then(() => {
     if (!k || FL.k !== k || ZW) return;
+    // the flow waits off the chip's three scales, paused (Play or a step brings the camera back to its stage; review of
+    // 1 Oct: its clock ran on, with nothing to show)
+    if (Z.level < 0 || Z.level > 2) { if (CLK.on && !done) { CLK.on = false; playBtn(); renderBar(); } return; }
     if (done) startFlow(k, FL.i, {still: true, keep: true, done: true});
     else restartStage();
   });
 }
-/* where the scale control goes: the shire shown (or being zoomed to), else the one selected, else the last one visited */
-/* where the flow is, when a flow is on and its stage is inside a shire */
-function flowAim() {
-  if (!FL.k || !FL.ctx) return null;
-  try { const w = FLOWS[FL.k].stages[FL.i].where(FL.ctx); return w.sid != null && SH[w.sid] ? w : null; } catch (_) { return null; }
+/* an HTML element (E makes SVG ones) */
+const H = (tag, attrs, parent) => { const e = document.createElement(tag); Object.entries(attrs || {}).forEach(([k, v]) => { if (v != null) e.setAttribute(k, v); }); if (parent) parent.appendChild(e); return e; };
+/* ---- names and sizes of the scales ---- */
+const nameOf = el => { const N0 = NODES[el.id]; return N0 ? N0.name(prm(el)) : el.id; };
+const shortOf = el => { const N0 = NODES[el.id]; return N0 && N0.short ? N0.short(prm(el)) : nameOf(el); };
+/* the name inside a sentence ("Zoom out to the chip", "Zoom into shire 20") */
+const toOf = el => { const N0 = NODES[el.id]; return N0 && N0.to ? N0.to(prm(el)) : nameOf(el).replace(/^The /, 'the '); };
+/* a path from its string (?at=, the panel's buttons): elements by '/', each id or id:params */
+const pathFrom = s => String(s || '').split('/').filter(Boolean).map(elOf);
+/* a length for a reader: the unit that keeps it between 1 and 1,000 (light-years beyond a tenth of one) */
+const LY = 9.4607304725808e15;
+function fmtLen(m, sig) {
+  sig = sig || 3;
+  const r = (v, u) => { const t = Number(v.toPrecision(sig)); return (t >= 1000 ? t.toLocaleString('en-US', {maximumFractionDigits: 0}) : String(t)) + ' ' + u; };
+  if (!(m > 0)) return '';
+  if (m >= 0.1 * LY) { const y = m / LY; return y >= 1e9 ? r(y / 1e9, 'billion ly') : y >= 1e6 ? r(y / 1e6, 'million ly') : r(y, 'ly'); }
+  if (m >= 1e12) return r(m / 1e12, 'billion km');
+  if (m >= 1e9) return r(m / 1e9, 'million km');
+  if (m >= 1000) return r(m / 1000, 'km');
+  if (m >= 1) return r(m, 'm');
+  if (m >= 0.1) return r(m * 100, 'cm');
+  if (m >= 1e-3) return r(m * 1e3, 'mm');
+  if (m >= 1e-6) return r(m * 1e6, 'µm');
+  return r(m * 1e9, 'nm');
 }
-function aimShire() {
-  const z = zNow();
-  if (z.level >= 1) return z.sid;
-  if (SEL && SEL._key === 'cshire') return SEL._ctx.cell.id;
-  const w = flowAim(); if (w) return w.sid;
-  return LASTSID;
+const SUP = {'-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹'};
+const pow10 = m => '10' + String(Math.floor(Math.log10(m) + 1e-9)).split('').map(c => SUP[c]).join('') + ' m';
+/* a scale's size as the Up bar and the panel print it: ≈ for an inference or an estimate */
+const APPROX = new Set(['inferred', 'unknown']);
+const sizeTxt = sz => (sz && sz.m > 0 ? (APPROX.has(sz.kind) ? '≈ ' + fmtLen(sz.m, 2) : fmtLen(sz.m)) : '');
+const sizeWords = sz => (sz && sz.m > 0 ? (APPROX.has(sz.kind) ? 'about ' + fmtLen(sz.m, 2) : fmtLen(sz.m)) + ' across' : 'size unknown');
+const sizeHtml = sz => (!sz || !(sz.m > 0) ? '<span>size unknown</span>'
+  : `<span class="${APPROX.has(sz.kind) ? 'inf ' : ''}num"${sz.f ? ` data-f="${esc(sz.f)}"` : ''}>${esc(sizeTxt(sz))}</span> · ${pow10(sz.m)}`);
+/* ---- what a part zooms into ---- */
+/* the scale a part's double-click enters: a scale inside the one it is drawn in ({id, k}), or {up: id}, a scale further
+   out that the part stands for (the host beside the die); null: no closer drawing */
+/* the other zooms a part offers, by its key: [{lab, to: path, made}] (filled in by the scales below the shire) */
+const OPTS = {};
+const KIDS = {
+  cshire: c => ({id: 'shire', k: String(c.cell.id)}),
+  master: c => ({id: 'shire', k: String(c.cell.r === 0 ? 32 : 33)}),
+  minion: c => (c.mi != null ? {id: 'minion', k: `${c.sid}.${c.nb}.${c.mi}`} : null),
+};
+function kidOf(g) {
+  if (!g) return null;
+  if (g._kid !== undefined) return g._kid;
+  const f = KIDS[g._key], k = f ? f(g._ctx || {}, g) : null;
+  return k && (k.up ? NODES[k.up] : NODES[k.id]) ? k : null;
 }
-function aimMinion(sid) {
-  const z = zNow();
-  if (z.level === 2 && z.sid === sid) return [z.nb, z.mi];
-  if (SEL && SEL._key === 'minion' && SEL._ctx.mi != null) return [SEL._ctx.nb, SEL._ctx.mi];
-  const w = flowAim(); if (w && w.sid === sid && w.level === 2) return [w.nb, w.mi];
-  return [LASTNB, LASTMI];
+/* the path of the scale a part is drawn in */
+const layerPath = g => { const L = g && g.closest && g.closest('g.lay'); return L && L._path ? L._path : null; };
+/* the path to a scale further out, by its id (the host from the die) */
+const upPath = id => { const P = zNow().path, i = P.findIndex(e => e.id === id); return i >= 0 ? P.slice(0, i + 1) : null; };
+/* the default child of the scale at the end of P (the + key, the breadcrumb's next crumb) */
+function defKid(P) {
+  const el = P[P.length - 1], N0 = NODES[el.id];
+  const k = N0 && N0.def ? N0.def(prm(el), P) : null;
+  return k && NODES[k.id] ? k : null;
 }
-function scaleTo(level) {
-  if (level < 0 || level > 2) return;
-  if (level === 0) return userNav({level: 0});
-  const sid = aimShire();
-  if (level === 1) return userNav({level: 1, sid});
-  const [nb, mi] = aimMinion(sid);
-  return userNav({level: 2, sid, nb, mi});
+/* the scales a scene offers to zoom into, the default first */
+function kidsOf(P) {
+  const el = P[P.length - 1], N0 = NODES[el.id], d = defKid(P);
+  const ks = (N0 && N0.kids ? N0.kids(prm(el), P) : []).filter(k => k && NODES[k.id]);
+  if (d && !ks.some(k => pk(k) === pk(d))) ks.unshift(d);
+  return ks;
 }
-const zoomBy = d => scaleTo(zNow().level + d);
-/* a button that has nothing to do (the last stage's Next, + at a minion): marked disabled (aria-disabled, dimmed) but
-   kept focusable, so that the keyboard's focus never falls to the page and a repeated Enter does nothing */
+function zoomBy(d) {
+  const P = zNow().path;
+  if (d < 0) { if (P.length > 1) return userNav(P.slice(0, -1)); return; }
+  // in: the selected part's own scale, else the scale's default child
+  if (SEL && SEL.isConnected) { const lp = layerPath(SEL), k = kidOf(SEL); if (k && !k.up && lp && samePath(lp, P)) return userNav(P.concat([k])); }
+  const k = defKid(P); if (k) return userNav(P.concat([k]));
+}
+/* a button that has nothing to do (the last stage's Next, the Up bar at the top): marked disabled (aria-disabled,
+   dimmed) but kept focusable, so that the keyboard's focus never falls to the page and a repeated Enter does nothing */
 function setDis(b, dis) { b.setAttribute('aria-disabled', String(!!dis)); b.classList.toggle('dis', !!dis); }
 const isDis = b => b.getAttribute('aria-disabled') === 'true';
-function scaleUI() {
-  const sid = aimShire(), [nb, mi] = aimMinion(sid), lv = zNow().level;
-  [0, 1, 2].forEach(l => $('z-' + l).setAttribute('aria-pressed', String(lv === l)));
-  $('z-1').textContent = `Shire ${sid}`; $('z-1').title = `Shire ${sid} (${Z.level === 1 ? 'shown' : 'zoom in'})`;
-  $('z-2').textContent = `Minion ${mi}`; $('z-2').title = `Minion ${mi} of neighbourhood ${nb}, shire ${sid}`;
-  setDis($('z-in'), lv >= 2); setDis($('z-out'), lv <= 0);
-  $('cap-scale').textContent = Z.level === 0 ? 'Scale: the chip' : Z.level === 1 ? `Scale: shire ${Z.sid}` : `Scale: minion ${Z.mi}, neighbourhood ${Z.nb}, shire ${Z.sid}`;
+/* ---- the Up bar: the wide button, the breadcrumb and the readout (drawn for where the camera is going) ---- */
+let UPKEY = '';
+function scaleUI(force) {
+  const P = zNow().path, key = pkeys(P) + '|' + PH;
+  plusUI(P);
+  if (!force && key === UPKEY) return;
+  UPKEY = key;
+  const b = $('up');
+  if (P.length <= 1) {
+    b.innerHTML = '<span class="up-t">Top of the ladder: nothing is known beyond this</span>';
+    setDis(b, true); b.setAttribute('aria-label', 'Top of the ladder: nothing is known beyond this'); b.title = '';
+  } else {
+    const par = P[P.length - 2], sz = sizeOf(par);
+    b.innerHTML = `<span class="up-t">↑ Zoom out to ${esc(toOf(par))}</span>` + (sz && sz.m > 0 ? `<span class="up-s">· ${esc(sizeTxt(sz))}</span>` : '');
+    setDis(b, false); b.setAttribute('aria-label', `Zoom out to ${toOf(par)}, ${sizeWords(sz)}`); b.title = 'Zoom out one level (Backspace or −)';
+  }
+  // the readout first: the crumbs fold to the width it leaves them (review of 1 Oct: measured before it, the crumbs
+  // overflowed and clipped the + button)
+  if (!ZW) roRest();
+  crumbsUI(P);
+}
+function crumbsUI(P) {
+  const nav = $('crumbs'), fi = document.activeElement && nav.contains(document.activeElement) ? document.activeElement.dataset.ci : null;
+  P = P || zNow().path;
+  const nx = defKid(P);
+  const draw = (fold, noNext) => {
+    nav.textContent = '';
+    const add = (tag, cls, txt, o) => { const e = H(tag, Object.assign({class: cls || ''}, o || {}), nav); e.textContent = txt; return e; };
+    if (fold > 0) {
+      const mb = add('button', 'more', '…', {type: 'button', 'aria-haspopup': 'menu', 'aria-expanded': 'false', 'aria-label': `${fold} levels further out`, 'data-ci': 'more'});
+      mb._fold = fold; add('span', 'sep', '›', {'aria-hidden': 'true'});
+    }
+    P.forEach((el, i) => {
+      if (i < fold) return;
+      const cur = i === P.length - 1;
+      const bt = add('button', '', shortOf(el), {type: 'button', 'data-ci': String(i), title: nameOf(el)});
+      if (cur) bt.setAttribute('aria-current', 'location');
+      if (!cur) add('span', 'sep', '›', {'aria-hidden': 'true'});
+    });
+    if (nx && !noNext) { add('span', 'sep', '›', {'aria-hidden': 'true'}); add('button', 'nx', shortOf(nx), {type: 'button', 'data-ci': 'next', title: `Zoom into ${toOf(nx)} (+)`, 'aria-label': `Zoom into ${toOf(nx)}`}); }
+  };
+  // the outer crumbs fold into the "…" menu until the rest fits (the current one always shows; − and + sit outside the
+  // crumbs, never clipped): drawn whole, measured, drawn folded by the measured widths, then folded one more while it
+  // still overflows (review of 1 Oct: an estimate alone left the last crumbs clipped)
+  draw(0);
+  const over = () => nav.scrollWidth > nav.clientWidth + 1;
+  if (over()) {
+    const avail = nav.clientWidth, need = nav.scrollWidth, kids = [...nav.children], w = {};
+    // a crumb folded frees its own width, its separator's and the gaps between them
+    kids.forEach((e, j) => { const ci = e.dataset.ci; if (ci != null && /^\d+$/.test(ci)) { const sp = kids[j + 1]; w[ci] = e.getBoundingClientRect().width + (sp && sp.classList.contains('sep') ? sp.getBoundingClientRect().width + 4 : 2); } });
+    let fold = 0, cut = 0; const more = 34;
+    while (fold < P.length - 1 && need - cut + more > avail) { cut += w[String(fold)] || 0; fold++; }
+    draw(fold);
+    while (fold < P.length - 1 && over()) draw(++fold);
+    // still too wide: the next crumb goes (the + button and the panel offer it)
+    if (over() && nx) draw(fold, true);
+  }
+  plusUI(P);
+  if (fi) { const e = nav.querySelector(`[data-ci="${fi}"]`); if (e) e.focus({preventScroll: true}); }
+}
+/* the − and + buttons: − off at the top of the ladder; + on while the selected part or the scale has something inside
+   to zoom into */
+function plusUI(P) {
+  const pl = $('pmz').querySelector('[data-ci="plus"]'), mi = $('pmz').querySelector('[data-ci="minus"]');
+  const k = SEL && SEL.isConnected ? kidOf(SEL) : null;
+  setDis(pl, !defKid(P) && !(k && !k.up));
+  setDis(mi, P.length <= 1);
+}
+/* A click with the mouse leaves no focus on the Up bar (Space would press the button again instead of pausing a
+   flow); the button is blurred before the camera moves, since the bar is redrawn for the new target. A crumb takes no
+   double-click: the crumbs are redrawn for the new target on the first click, so a second would land on another
+   crumb (review of 1 Oct); a second tap within 400 ms is ignored the same way. */
+const blurClick = (e, b) => { if (e.detail > 0 && b && b.contains(document.activeElement)) document.activeElement.blur(); };
+let CRUMBT = -1e9, CRUMBPT = '';
+$('crumbs').addEventListener('pointerdown', e => { CRUMBPT = e.pointerType; });
+$('crumbs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || isDis(b)) return;
+  if (e.detail > 1 || (e.detail > 0 && CRUMBPT === 'touch' && e.timeStamp - CRUMBT < 400)) return;
+  CRUMBT = e.timeStamp;
+  const ci = b.dataset.ci, P = zNow().path;
+  if (ci === 'more') { menuToggle(b); return; }
+  blurClick(e, b);
+  if (ci === 'next') { const k = defKid(P); if (k) userNav(P.concat([k])); return; }
+  const i = +ci; if (i < P.length - 1) userNav(P.slice(0, i + 1));
+});
+$('pmz').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || isDis(b)) return;
+  blurClick(e, b);
+  zoomBy(b.dataset.ci === 'minus' ? -1 : 1);
+});
+$('up').addEventListener('click', e => { const b = e.currentTarget; blurClick(e, b); if (!isDis(b)) zoomBy(-1); });
+/* the crumbs fold again when the bar's width changes (a window resized, the panel shown or hidden) */
+try { let upW = 0, upT = 0; new ResizeObserver(es => { const w = Math.round(es[0].contentRect.width); if (w === upW) return; upW = w; cancelAnimationFrame(upT); upT = requestAnimationFrame(() => crumbsUI()); }).observe($('upbar')); } catch (_) { /* no observer: the crumbs fold on the next move */ }
+/* the "…" menu: the folded crumbs, outermost first */
+function menuToggle(b) {
+  const m = $('crumb-menu');
+  if (!m.hidden) { menuOff(); return; }
+  const P = zNow().path; m.textContent = '';
+  P.slice(0, b._fold).forEach((el, i) => {
+    const it = H('button', {type: 'button', role: 'menuitem', tabindex: '-1', 'data-ci': String(i)}, m);
+    it.textContent = nameOf(el) + (sizeOf(el) && sizeOf(el).m > 0 ? ' · ' + sizeTxt(sizeOf(el)) : '');
+  });
+  const wr = $('svgwrap').getBoundingClientRect(), br = b.getBoundingClientRect();
+  m.style.left = Math.max(0, br.left - wr.left) + 'px'; m.style.top = '4px';
+  m.hidden = false; b.setAttribute('aria-expanded', 'true');
+  const f = m.querySelector('button'); if (f) f.focus({preventScroll: true});
+}
+function menuOff(refocus) {
+  const m = $('crumb-menu'); if (m.hidden) return;
+  m.hidden = true; const b = $('crumbs').querySelector('.more'); if (b) { b.setAttribute('aria-expanded', 'false'); if (refocus) b.focus({preventScroll: true}); }
+}
+$('crumb-menu').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || e.detail > 1) return; const i = +b.dataset.ci; menuOff(e.detail === 0); userNav(zNow().path.slice(0, i + 1)); });
+$('crumb-menu').addEventListener('keydown', e => {
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); menuOff(true); return; }
+  // Tab leaves the menu: it closes, and focus goes on from its "…" button
+  if (e.key === 'Tab') { menuOff(true); return; }
+  const bs = [...$('crumb-menu').querySelectorAll('button')], i = bs.indexOf(document.activeElement);
+  const j = e.key === 'ArrowDown' ? (i + 1) % bs.length : e.key === 'ArrowUp' ? (i - 1 + bs.length) % bs.length : e.key === 'Home' ? 0 : e.key === 'End' ? bs.length - 1 : -1;
+  if (j >= 0) { e.preventDefault(); e.stopPropagation(); bs[j].focus(); }
+});
+document.addEventListener('pointerdown', e => { if (!$('crumb-menu').hidden && !e.target.closest('#crumb-menu, #crumbs .more')) menuOff(); }, true);
+/* the readout: at rest, the scale's size; while the camera moves, the size it passes, log-linearly through each step
+   (a jump sweeps the decades it skips mostly in its middle) */
+let ROTXT = '', ROCLS = '';
+/* (while the camera moves the readout changes every frame: plain text, and its class only when it changes) */
+let ROT = 0;
+function roSet(html, cls, plain) {
+  const r = $('scale-ro');
+  if (html !== ROTXT) { ROTXT = html; if (plain) r.textContent = html; else r.innerHTML = html; }
+  const c = 'scale-ro' + (cls ? ' ' + cls : ''); if (c !== ROCLS) { ROCLS = c; r.className = c; }
+}
+function roRest() {
+  const P = Z.path, el = P[P.length - 1], sz = sizeOf(el);
+  roSet(sizeHtml(sz));
+  $('scale-ro').removeAttribute('aria-hidden');
+}
+const smoother = x => x * x * x * (x * (x * 6 - 15) + 10);
+function readout(s, e) {
+  if (!s) { roRest(); return; }
+  const so = s.pan ? null : s.so, si = s.pan ? null : s.si;
+  if (!so || !si || !(so.m > 0) || !(si.m > 0)) return;
+  // the moving readout changes about ten times a second, not every frame: each change is a layout of the bar, which
+  // on a slow phone costs a frame its deadline, and nobody reads a number that changes faster
+  const t = performance.now(); if (e < 1 && t - ROT < 100 && ROCLS.indexOf('mv') >= 0) return; ROT = t;
+  const w = s.kind === 'jump' ? smoother(clamp(e, 0, 1)) : clamp(e, 0, 1), m = Math.exp(lerp(Math.log(so.m), Math.log(si.m), w));
+  if (ROCLS.indexOf('mv') < 0) $('scale-ro').setAttribute('aria-hidden', 'true');
+  roSet(`${fmtLen(m, 2)} · ${pow10(m)}`, 'mv' + (s.kind === 'jump' ? ' jump' : ''), true);
+}
+/* after a move: announce the scale, and (unless a flow or the tour holds the panel) show where the camera is */
+function arrived() {
+  const P = Z.path, el = P[P.length - 1];
+  $('stage').classList.toggle('offchip', Z.level < 0 || Z.level > 2);
+  $('cap-scale').textContent = `Scale: ${nameOf(el)}, ${sizeWords(sizeOf(el))}`;
+  prefetch();
+  if (!FL.k && !TOUR && !SEL) showHere();
+}
+/* ---- the chip's three scales as nodes: the die (its frame the die itself; the packages and the host around it are
+   part of its view), a shire (SF) and a minion (MF), each built as before. Since 30 September the master and spare
+   shires (32 and 33, from the firmware's map) open too: the same block diagram, a minion shire like the others ---- */
+const SCD = D.scales || {};
+/* a scale's size for the readout and the Up bar: its subject's width in metres, with the fact and its kind */
+const SIZE0 = {die: {m: 0.0257, kind: 'inferred', f: 'chip.die-dims'}, shire: {m: 0.00372, kind: 'inferred', f: 'chip.hop-pitch'}, minion: {m: 0.0005, kind: 'inferred'}};
+const scSize = id => { const s = SCD[id]; return s && s.m > 0 ? {m: s.m, kind: s.kind, f: s.f || null} : SIZE0[id] || null; };
+const MSH = {};   // the master (32) and spare (33) cells, by the shire number the firmware gives them
+CELLS.forEach(c => { if (c.type === 'master') MSH[c.r === 0 ? 32 : 33] = c; });
+const shCell = sid => SH[sid] || MSH[sid];
+const isShire = sid => !!shCell(sid);
+node('die', {name: () => 'The chip', short: () => 'Chip', to: () => 'the chip', size: () => scSize('die'),
+  frame: () => ({x: 0, y: 0, w: DW, h: DH}), build: (L, ap) => buildChip(L, ap),
+  def: () => ({id: 'shire', k: String(isShire(LASTSID) ? LASTSID : 0)}),
+  kids: () => [{id: 'shire', k: '32'}],
+  here: (p, P) => showComp('chip', {}, {here: P})});
+node('shire', {parse: k => ({sid: +k}), name: p => (p.sid === 32 ? 'Shire 32, the master' : p.sid === 33 ? 'Shire 33, the spare' : `Shire ${p.sid}`),
+  short: p => `Shire ${p.sid}`, to: p => `shire ${p.sid}`, size: () => scSize('shire'), frame: () => SF,
+  build: (L, ap, p) => buildShire(L, ap, p.sid),
+  def: p => ({id: 'minion', k: `${p.sid}.${LASTSID === p.sid ? LASTNB : 0}.${LASTSID === p.sid ? LASTMI : 0}`}),
+  here: (p, P) => { const c = shCell(p.sid); showComp(c.type === 'master' ? 'master' : 'cshire', {cell: c}, {here: P}); }});
+node('minion', {parse: k => { const q = String(k).split('.').map(Number); return {sid: q[0], nb: q[1], mi: q[2]}; },
+  name: p => `Minion ${p.mi} · neighbourhood ${p.nb} · shire ${p.sid}`, short: p => `Minion ${p.mi}`, to: p => `minion ${p.mi} of neighbourhood ${p.nb}`,
+  size: () => scSize('minion'), frame: () => MF,
+  build: (L, ap, p) => buildMinion(L, ap, p.sid, p.nb, p.mi),
+  here: (p, P) => showComp('minion', {}, {here: P})});
+/*@include chip-diagram.outside.js*/
+/*@include circuitkit.js*/
+/*@include chip-diagram.inside.js*/
+DIE = OUT_IDS.length;
+Z.path = pathOf({level: 0});
+/* ---- the arrow keys with no flow or tour on the stage (and not presenting): in a shire, to the neighbour that way
+   (as its edge link does); in any scale with siblings side by side (a minion), a glide to the one that way; elsewhere
+   the keyboard's focus moves to the nearest part that way ---- */
+const DIRV = {N: [0, -1], S: [0, 1], W: [-1, 0], E: [1, 0]};
+const DIRRC = {N: [-1, 0], S: [1, 0], W: [0, -1], E: [0, 1]};
+function arrowNav(dir) {
+  const P = zNow().path, el = P[P.length - 1];
+  if (el.id === 'shire') {
+    const sid = +el.k, c = shCell(sid); if (!c) return false;
+    const n0 = BYDIE[(c.r + DIRRC[dir][0]) + ',' + (c.c + DIRRC[dir][1])];
+    if (n0) { goNeighbour({cell: n0, dir}, sid); return true; }
+    return false;
+  }
+  const sib = sibInDir(P, dir);
+  if (sib) { userNav(sib, {pan: true}); return true; }
+  return focusDir(dir);
+}
+/* the sibling of P's last scale whose seat in the parent's drawing lies that way (within 45 degrees), nearest first */
+function sibInDir(P, dir) {
+  if (P.length < 2) return null;
+  const d = P.length - 1, Lp = layerAt(P, d - 1);
+  if (!Lp._built) return null;
+  const zs = Lp._ap.zs, me = zs[pk(P[d])]; if (!me) return null;
+  const c0 = {x: me.r.x + me.r.w / 2, y: me.r.y + me.r.h / 2}, [vx, vy] = DIRV[dir];
+  let best = null, bs = Infinity;
+  Object.entries(zs).forEach(([key, s]) => {
+    const el = elOf(key); if (el.id !== P[d].id || key === pk(P[d])) return;
+    const dx = s.r.x + s.r.w / 2 - c0.x, dy = s.r.y + s.r.h / 2 - c0.y, along = dx * vx + dy * vy, perp = Math.abs(dx * vy - dy * vx);
+    if (along <= 1e-6 || perp > along) return;
+    const sc = along + 2 * perp; if (sc < bs) { bs = sc; best = el; }
+  });
+  return best ? P.slice(0, d).concat([best]) : null;
+}
+/* the keyboard's focus to the nearest part that way, from the focused part (else from the middle of the drawing) */
+function focusDir(dir) {
+  const L = restLayer(); if (!L) return false;
+  const parts = [...L.querySelectorAll('.comp, .nbr')].filter(g => g.getClientRects().length);
+  if (!parts.length) return false;
+  const a = document.activeElement, from = a && L.contains(a) && parts.includes(a) ? a : null;
+  const ctr = r => ({x: r.left + r.width / 2, y: r.top + r.height / 2});
+  const sv = svg.getBoundingClientRect(), c0 = from ? ctr(from.getBoundingClientRect()) : {x: sv.left + sv.width / 2, y: sv.top + sv.height / 2};
+  const [vx, vy] = DIRV[dir];
+  let best = null, bs = Infinity;
+  parts.forEach(g => {
+    if (g === from) return;
+    const c = ctr(g.getBoundingClientRect()), dx = c.x - c0.x, dy = c.y - c0.y, along = dx * vx + dy * vy, perp = Math.abs(dx * vy - dy * vx);
+    if (from && (along <= 1 || perp > 2 * along)) return;
+    const sc = Math.max(0, along) + 2 * perp; if (sc < bs) { bs = sc; best = g; }
+  });
+  if (!best) return false;
+  best.focus({preventScroll: true});
+  return true;
+}
+/* ?at=<path> (read once at load; the viewer drops #hash): elements by '/', each id or id:params. An id of a scale
+   above the die alone expands to the ladder down to it (?at=sf); a path under the die starts from the die
+   (?at=shire:20/minion:20.1.3). Tests start anywhere with it. */
+function atPath(s) {
+  const els = pathFrom(s); if (!els.length || !els.every(e => NODES[e.id])) return null;
+  const oi = OUT_IDS.indexOf(els[0].id);
+  let P;
+  if (oi >= 0) P = OUT_IDS.slice(0, oi).map(id => ({id})).concat(els);
+  else if (els[0].id === 'die') P = OUT_IDS.map(id => ({id})).concat(els);
+  else P = pathOf({level: 0}).concat(els);
+  // every scale on the way must have its seat in the one above it
+  try { for (let d = 1; d < P.length; d++) if (!seatOf(P, d)) return null; } catch (_) { return null; }
+  return P;
 }
 
 /* ================= details panel ================= */
@@ -1205,6 +1912,7 @@ let SEL = null;
 function select(g) {
   if (SEL) { SEL.classList.remove('sel'); if (SEL._hiSel) { SEL.classList.remove('hi'); SEL._hiSel = false; } }
   SEL = g;
+  if (!g) pillOff();
   if (g) { g.classList.add('sel'); if (!g.classList.contains('hi')) { g.classList.add('hi'); g._hiSel = true; } }
 }
 const CARDNAME = {a2: 'aifoundry2', a3: 'aifoundry3', a1c1: 'aifoundry1 card 1'};
@@ -1217,9 +1925,9 @@ function cardsTxt(f) {
 function factLi(id) {
   const f = F[id]; if (!f) { console.error('no fact ' + id); return ''; }
   const cd = cardsTxt(f);
-  return `<li class="fact" tabindex="0" data-f="${id}" data-src="1" aria-describedby="srctip"><span>${esc(f.statement)}</span><span class="meta"><span class="kd ${f.kind}">${f.kind}</span>`
+  return `<li class="fact" tabindex="0" data-f="${id}" data-src="1" aria-describedby="srctip"><span>${esc(f.statement)}</span><span class="meta"><span class="kd ${f.kind}">${KWORD[f.kind] || f.kind}</span>${f.caveat === 'erbium-rtl' ? '<span class="kd erbium">Erbium RTL</span>' : ''}`
     + (cd ? `<span class="cd">${esc(cd)}</span>` : '')
-    + (f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.page)} ↗</a>` : '<span>no published page yet</span>')
+    + (f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.page)} ↗</a>` : f.dz ? '' : '<span>no published page yet</span>')
     + `<span class="fid">${esc(id)}</span></span></li>`;
 }
 /* words (not a number) whose source is a fact: underlined, with the source on hover */
@@ -1282,8 +1990,7 @@ const COMPS = {
   cshire: ctx => { const c = ctx.cell, hi = homeInfo(c);
     return {kick: 'Compute shire', title: `Shire ${c.id}`,
       what: `One of the ${n('cshires')} compute shires: ${n('neigh')} of ${n('per_neigh')}, ${n('cache_mb')} of SRAM and one mesh stop. On the measured map it sits at (${c.lx}, ${c.ly}); on this die view, row ${c.r}, column ${c.c}, as in the firmware's NoC-spec map. Its L3 slice homes the lines with PA[10:6] = ${c.id}, which memory shire ${cn(hi.ms, 'L43 dram.memshire-select')} serves, ${cn(hi.h, 'mesh.logical-map L40')} ${hi.h === 1 ? 'hop' : 'hops'} away.`,
-      kpis: [kpi(cn(hi.mean, 'mesh.logical-map l3.home', 2), `mean hops to the ${n('cshires')} L3 slices`), kpi(cn(V('lat_l3_a') + V('lat_l3_b') * hi.mean, 'l3.latency mesh.logical-map', 0), 'L3 hit from here by the model, cycles'), K('flb', 'shire barrier, 32 minions')],
-      act: Z.level === 0 ? `<button type="button" class="st-btn" data-act="zoom" data-sid="${c.id}">Zoom into shire ${c.id}</button><span class="small">${TOUCH ? 'or tap it' : 'or double-click it'}</span>` : ''};
+      kpis: [kpi(cn(hi.mean, 'mesh.logical-map l3.home', 2), `mean hops to the ${n('cshires')} L3 slices`), kpi(cn(V('lat_l3_a') + V('lat_l3_b') * hi.mean, 'l3.latency mesh.logical-map', 0), 'L3 hit from here by the model, cycles'), K('flb', 'shire barrier, 32 minions')]};
   },
   master: ctx => { const north = ctx.cell.r === 0;
     return {kick: north ? 'Master shire' : 'Spare shire', title: north ? `Master shire (${N.master_id.t})` : `Spare shire (${N.spare_id.t})`,
@@ -1337,8 +2044,7 @@ const COMPS = {
   minion: ctx => { const at1 = ctx.mi != null, sid = at1 ? ctx.sid : Z.sid, nb = at1 ? ctx.nb : Z.nb, mi = at1 ? ctx.mi : Z.mi, h0 = sid * 64 + (nb * 8 + mi) * 2;
     return {kick: 'Minion', title: `Minion ${mi} · neighbourhood ${nb}`,
       what: `A dual-threaded (${n('harts')}), in-order, single-issue RV64IMFC core with a vector unit of ${n('lanes')}, whose FMA and int8 multiply-add units also run the tensor instructions (a sequencer in the vector unit drives them), and a ${n('l1_kb')} L1 data cache. Its harts are ${cn(h0, 'chip.harts', 0)} and ${cn(h0 + 1, 'chip.harts', 0)}. An awake minion costs ${n('awake')}.`,
-      kpis: [kpi(n('vecpeak'), 'per cycle, fp32 peak, vector or tensor'), K('awake', 'awake, one hart')],
-      act: at1 && Z.level === 1 ? `<button type="button" class="st-btn" data-act="zoomm" data-nb="${nb}" data-mi="${mi}">Zoom into minion ${mi}</button><span class="small">${TOUCH ? 'or tap it' : 'or double-click it'}</span>` : ''};
+      kpis: [kpi(n('vecpeak'), 'per cycle, fp32 peak, vector or tensor'), K('awake', 'awake, one hart')]};
   },
   hart: ctx => ({kick: 'Minion', title: `Hart ${ctx.t}`,
     what: ctx.t === 0 ? `Hart 0 may issue every tensor instruction. Each hart has ${n('vregs')} (f0–f31).`
@@ -1423,36 +2129,125 @@ $('pn-body').addEventListener('toggle', e => {
   DETOPEN = e.target.open;
   try { localStorage.setItem('et-chip-details', DETOPEN ? '1' : '0'); } catch (_) { /* no storage */ }
 }, true);
-function showComp(key, ctx) {
+/* ---- the panel's zoom row (30 September: "when I double-click on a component, maybe it can display below it and
+   give me extra options to zoom in"): directly under a part's lead, the scale its double-click enters, then what it is
+   made of and the other zooms it offers; after a zoom, the scene's "You are here" entry with the zooms inside it ---- */
+const capFirst = s => String(s).charAt(0).toUpperCase() + String(s).slice(1);
+const dcHint = () => (TOUCH ? '(double-tap)' : '(double-click)');
+const zbtn = (path, label, pri, hint) => `<button type="button" class="st-btn${pri ? ' pri' : ''}" data-act="go" data-to="${esc(pkeys(path))}">${esc(label)}${hint ? ` <span class="dc">${esc(hint)}</span>` : ''}</button>`;
+const zrow = (lab, btns) => (btns.length ? `<div class="zr">${lab ? `<span class="zl">${esc(lab)}</span>` : ''}${btns.slice(0, 6).join('')}${btns.length > 6 ? `<details class="zmore"><summary>more…</summary><div class="zr">${btns.slice(6).join('')}</div></details>` : ''}</div>` : '');
+function zoomRowPart(g, title) {
+  const P = layerPath(g) || Z.path, k = kidOf(g), rows = [];
+  if (k && k.up) { const up = upPath(k.up); if (up) rows.push(zrow('', [zbtn(up, `Go to ${toOf({id: k.up})} (zooms out)`, true, dcHint())])); }
+  else if (k) rows.push(zrow('Zoom in:', [zbtn(P.concat([k]), capFirst(toOf(k)), true, dcHint())]));
+  const ex = g._opts ? g._opts(P) : OPTS[g._key] ? OPTS[g._key](g._ctx || {}, P, g) : [];
+  const made = ex.filter(x => x.made), other = ex.filter(x => !x.made);
+  if (other.length) rows.push(zrow(k ? 'Also:' : 'Zoom in:', other.map(x => zbtn(x.to, x.lab, !k && x === other[0]))));
+  if (made.length) rows.push(zrow('Made of:', made.map(x => zbtn(x.to, x.lab, false))));
+  const none = !k && !ex.length;
+  return `<div class="pn-zoom">${none ? `<p class="nz">No closer drawing of ${esc(title || 'this part')}: this is as far in as the page goes here.</p>` : rows.join('')}</div>`;
+}
+function zoomRowHere(P) {
+  const ks = kidsOf(P), d = defKid(P), rows = [];
+  if (ks.length) rows.push(zrow('Zoom into:', ks.map(k => zbtn(P.concat([k]), capFirst(toOf(k)), d && pk(k) === pk(d), d && pk(k) === pk(d) ? '(+)' : ''))));
+  else rows.push('<p class="nz">The bottom of this branch: nothing smaller is drawn here.</p>');
+  if (P.length > 1) rows.push(zrow('', [zbtn(P.slice(0, -1), `↑ Zoom out to ${toOf(P[P.length - 2])}`, false, '(Backspace)')]));
+  return `<div class="pn-zoom">${rows.join('')}</div>`;
+}
+function hereKick(P) { return `You are here · <span class="pn-sz">${sizeHtml(sizeOf(P[P.length - 1]))}</span>`; }
+function flashZoomRow() {
+  const z = $('pn-body').querySelector('.pn-zoom'); if (!z) return;
+  z.classList.remove('flash'); void z.offsetWidth; z.classList.add('flash'); pnReveal(z);
+}
+function showComp(key, ctx, o) {
+  o = o || {};
   const d = COMPS[key](ctx || {}), ids = COMPF[key] || [], lead = LEADS[key] ? LEADS[key](ctx || {}) : '';
   const detail = `<p class="pn-what">${d.what}</p>` + (d.kpis ? `<div class="pn-kpis">${d.kpis.join('')}</div>` : '')
     + (d.all ? ASKS.map(askHtml).join('') : asksBlock(key, false)) + topPage(ids) + (ids.length ? factsBlock(key) : '');
-  panel(`<p class="pn-kick">${esc(d.kick)}</p><p class="pn-title">${esc(d.title)}</p>`
-    + (lead ? `<p class="pn-lead">${lead}</p>` + (d.act ? `<div class="pn-act">${d.act}</div>` : '') + detBlock(detail)
-      : detail + (d.act ? `<div class="pn-act">${d.act}</div>` : '')));
+  const zr = o.here ? zoomRowHere(o.here) : o.g ? zoomRowPart(o.g, d.title) : '';
+  const kick = o.here ? hereKick(o.here) : esc(d.kick);
+  panel(`<p class="pn-kick">${kick}</p><p class="pn-title">${esc(d.title)}</p>`
+    + (lead ? `<p class="pn-lead">${lead}</p>` + zr + (d.act ? `<div class="pn-act">${d.act}</div>` : '') + detBlock(detail)
+      : zr + detail + (d.act ? `<div class="pn-act">${d.act}</div>` : '')));
 }
+/* a part's panel: its key's text (COMPS, LEADS) or, for the scales' parts, the tree's (showNodePart) */
+function showPart(g) {
+  if (g._mlp) showMLPart(g);
+  else if (g._info) showNodePart(g);
+  else if (COMPS[g._key]) showComp(g._key, g._ctx, {g});
+  else if (typeof showNodePart === 'function') showNodePart(g);
+}
+/* where the camera rests: the scale's own panel with the zooms inside it */
+function showHere() {
+  const P = Z.path, el = P[P.length - 1], N0 = NODES[el.id];
+  if (N0 && N0.here) N0.here(prm(el), P);
+  else if (typeof showScene === 'function') showScene(P);
+}
+/* a double-click, a double-tap, Enter, or the pill: into the part's own scale; a part with none is selected, its panel
+   brought into view at the zoom row, which says so and offers what it has */
 function zoomInto(g) {
-  const key = g._key, ctx = g._ctx;
-  if (key === 'cshire' && Z.level === 0) { select(g); showComp(key, ctx); userNav({level: 1, sid: ctx.cell.id}); return true; }
-  if (key === 'minion' && Z.level === 1 && ctx.mi != null) { select(g); showComp(key, ctx); userNav({level: 2, sid: Z.sid, nb: ctx.nb, mi: ctx.mi}); return true; }
-  return false;
+  const k = kidOf(g), P = layerPath(g) || Z.path;
+  select(g); showPart(g); pillOff();
+  if (!k) { flashZoomRow(); return false; }
+  if (k.up) { const up = upPath(k.up); if (up) userNav(up); return !!up; }
+  userNav(P.concat([k]));
+  return true;
 }
-function activate(g) {
-  const zoomable = (g._key === 'cshire' && Z.level === 0) || (g._key === 'minion' && Z.level === 1 && g._ctx.mi != null);
-  if (zoomable && (SEL === g || TOUCH)) { zoomInto(g); return; }   // a second click zooms in; on a touch screen, a tap
-  select(g); showComp(g._key, g._ctx); scaleUI();
-}
-svg.addEventListener('click', e => { const g = e.target.closest && e.target.closest('.comp'); if (g && svg.contains(g)) activate(g); });
-svg.addEventListener('dblclick', e => { const g = e.target.closest && e.target.closest('.comp'); if (g && svg.contains(g) && SEL !== g) zoomInto(g); });
-svg.addEventListener('keydown', e => {
-  const g = e.target.closest && e.target.closest('.comp'); if (!g) return;
-  if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); if (!zoomInto(g)) { select(g); showComp(g._key, g._ctx); } }
-  else if (e.key === ' ' && !flowOn()) { e.preventDefault(); e.stopPropagation(); select(g); showComp(g._key, g._ctx); scaleUI(); }
+/* a click or a tap selects (since 30 September a click never moves the camera: with every part zoomable, a second
+   click that zoomed would turn reading into flying) */
+function activate(g) { select(g); showPart(g); scaleUI(); if (TOUCH) pillFor(g); }
+let PILLT = 0;
+/* ---- touch: our own double-tap (two taps on one part, the second touch within 400 ms of the first lift and 30 px of
+   it, timed by the events' own time stamps: a long frame between the taps does not break it; #chip has touch-action:
+   manipulation, so the browser's own double-tap zoom is off on the drawing while pinch-zoom of the page works), and
+   the strip under the drawing with the selected part's "Zoom in" ---- */
+let TAP = null, TOUCHUP = 0, TDOWN = 0;
+svg.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') TDOWN = e.timeStamp; });
+svg.addEventListener('pointerup', e => {
+  if (e.pointerType !== 'touch') return;
+  TOUCHUP = performance.now();
+  const g = e.target.closest && e.target.closest('.comp');
+  if (!g || !svg.contains(g)) { TAP = null; return; }
+  if (TAP && TAP.g === g && TDOWN - TAP.t < 400 && TDOWN >= TAP.t && Math.hypot(e.clientX - TAP.x, e.clientY - TAP.y) < 30) { TAP = null; zoomInto(g); return; }
+  TAP = {g, t: e.timeStamp, x: e.clientX, y: e.clientY};
 });
+function pillFor(g) {
+  const pl = $('zpill');
+  if (!TOUCH || !g || ZW || !g.isConnected || $('stage').classList.contains('present')) { pillOff(); return; }
+  const k = kidOf(g), t = $('pn-body').querySelector('.pn-title');
+  $('zpill-in').hidden = !k; $('zpill-in').textContent = k && k.up ? 'Go out ▸' : 'Zoom in ▸';
+  pl.querySelector('.zs-name').textContent = t ? t.textContent : '';
+  pl.hidden = false;
+}
+function pillOff() { clearTimeout(PILLT); $('zpill').hidden = true; }
+$('zpill-in').addEventListener('click', () => { if (SEL) zoomInto(SEL); });
+$('zpill-det').addEventListener('click', () => { const p = $('panel'); if (p) p.scrollIntoView({behavior: REDUCED ? 'auto' : 'smooth', block: 'start'}); });
+$('zpill').addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); pillOff(); if (SEL) SEL.focus({preventScroll: true}); } });
+svg.addEventListener('click', e => {
+  const l = e.target.closest && e.target.closest('.nbr'); if (l && svg.contains(l)) { pillOff(); goNeighbour(l._ctx); return; }
+  const g = e.target.closest && e.target.closest('.comp'); if (g && svg.contains(g)) activate(g); else pillOff();
+});
+svg.addEventListener('dblclick', e => {
+  if (performance.now() - TOUCHUP < 600) return;   // a double-tap was handled on its pointerup
+  const g = e.target.closest && e.target.closest('.comp'); if (g && svg.contains(g)) zoomInto(g);
+});
+svg.addEventListener('keydown', e => {
+  const l = e.target.closest && e.target.closest('.nbr');
+  if (l && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); goNeighbour(l._ctx); return; }
+  const g = e.target.closest && e.target.closest('.comp'); if (!g) return;
+  if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); zoomInto(g); }
+  else if (e.key === ' ' && !flowOn()) { e.preventDefault(); e.stopPropagation(); select(g); showPart(g); scaleUI(); }
+});
+/* a zoom started below the drawing (a phone's panel, under the stage): the drawing scrolls into view first, so that the
+   move is seen (review of 1 Oct) */
+function stageIntoView() {
+  const r = $('svgwrap').getBoundingClientRect(), vis = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
+  if (vis < Math.min(r.height, innerHeight) * 0.6) $('upbar').scrollIntoView({block: 'start', behavior: REDUCED ? 'auto' : 'smooth'});
+}
 $('pn-body').addEventListener('click', e => {
   const b = e.target.closest('button[data-act]'); if (!b) return;
-  if (b.dataset.act === 'zoom') userNav({level: 1, sid: +b.dataset.sid});
-  else if (b.dataset.act === 'zoomm') userNav({level: 2, sid: Z.sid, nb: +b.dataset.nb, mi: +b.dataset.mi});
+  // pressed from the keyboard: after the move, focus goes to the new panel's zoom row (it is rebuilt on arrival)
+  if (b.dataset.act === 'go') { stageIntoView(); userNav(pathFrom(b.dataset.to), {pfocus: e.detail === 0}); }
   else if (ACTS[b.dataset.act]) ACTS[b.dataset.act](b);
 });
 
@@ -3335,15 +4130,15 @@ function endTour() {
 }
 /* T and the Tour button: the tour picks up where it was left (from the start once it had reached its end) */
 const toggleTour = () => { if (TOUR) { endTour(); stopFlow(); } else startTour(TLAST >= STEPS.length - 1 ? 0 : TLAST); };
-const HINT = TOUCH ? 'Tap a shire, then a minion, to zoom in · pinch to enlarge'
-  : 'Space pauses · ← → stages · + − zoom · double-click zooms in · F presents · P panel · C follow · T tour';
+const HINT = TOUCH ? 'Tap a part for details · double-tap it or Zoom in to go inside · ↑ Zoom out above the drawing'
+  : 'Double-click a part to zoom in · ↑ or Backspace zooms out · arrows: next shire · Space pauses · F presents · T tour';
 function resetCap() {
   CAPFLOW = false;
   if ($('stage').classList.contains('present')) {
     setKick('ET-SoC-1'); setCap(STEPS[0].cap()); sub(STEPS[0].sub()); renderBar(); return;
   }
   setKick('Explore');
-  setCap(`${TOUCH ? 'Tap' : 'Click'} any part of the chip, zoom with the scale control, pick one of eleven flows, or press Tour to step through it all in ${STEPS.length} steps.`);
+  setCap(`${TOUCH ? 'Tap' : 'Click'} any part for its details, ${TOUCH ? 'double-tap' : 'double-click'} to zoom into it, pick one of eleven flows, or press Tour to step through it all in ${STEPS.length} steps.`);
   sub(HINT); $('cap-sub').classList.add('hint'); renderBar();
 }
 /* the stage bar: the active flow's stages, the current one marked; in the tour on a still step, the tour's still
@@ -3536,7 +4331,9 @@ function back() {
   if (PRES) { setPres(false); return; }
   if (TOUR || fsEl()) return;
   if (FL.k) { stopFlow(); return; }
-  if (zNow().level) zoomBy(-1);
+  if (!$('crumb-menu').hidden) { menuOff(true); return; }
+  if (!$('zpill').hidden) { pillOff(); return; }
+  if (zNow().path.length > 1) zoomBy(-1);
 }
 /* a flow's button or key: in the tour, its tour step (the tour goes on from there); else the flow on its own */
 function pickFlow(k) {
@@ -3558,14 +4355,14 @@ $('btn-panel').addEventListener('click', () => togglePanel());
 $('btn-next').addEventListener('click', e => { if (!isDis(e.currentTarget)) next(false); });
 $('btn-prev').addEventListener('click', e => { if (!isDis(e.currentTarget)) prev(false); });
 $('btn-follow').addEventListener('click', () => setFollow(!FOLLOW));
-$('z-in').addEventListener('click', e => { if (!isDis(e.currentTarget)) zoomBy(1); });
-$('z-out').addEventListener('click', e => { if (!isDis(e.currentTarget)) zoomBy(-1); });
-[0, 1, 2].forEach(l => $('z-' + l).addEventListener('click', () => scaleTo(l)));
 PIP.el.addEventListener('click', () => { setFollow(true); });
 PIP.el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFollow(true); } });
 /* on a narrow screen the stage is taller than the window (the panel stacks under the drawing): there the keys act while
    the drawing or the playback bar is in view, not while the reader is down in the panel */
 const inMid = el => { const r = el.getBoundingClientRect(); return r.bottom > window.innerHeight * 0.4 && r.top < window.innerHeight * 0.6; };
+/* the arrows move the camera or the focus (not the stages) when no flow or tour is on the stage and the page is not
+   presenting */
+const navKeys = () => !FL.k && !TOUR && !PRES && !fsEl();
 const stageInView = () => window.matchMedia('(max-width: 899px)').matches ? inMid($('svgwrap')) || inMid($('bar')) : inMid($('stage'));
 /* a Space that paused must not also press the focused button when the key comes up (a button clicks on keyup) */
 let SPACE_EATEN = false;
@@ -3581,10 +4378,16 @@ document.addEventListener('keydown', e => {
   const inStage = inView && ($('stage').contains(tg) || tg === document.body || tg === document.documentElement);
   if (!inStage) return;
   const onControl = tg.closest && tg.closest('button, a, li.fact, summary, [role="button"]:not(.comp)');
+  const onDraw = svg.contains(tg) || tg === document.body || tg === document.documentElement;
   const presenting = !!TOUR || PRES || !!fsEl();
   switch (e.key) {
-    case 'ArrowRight': case 'PageDown': e.preventDefault(); next(e.shiftKey); break;
-    case 'ArrowLeft': case 'PageUp': e.preventDefault(); prev(e.shiftKey); break;
+    // the arrows: with no flow or tour on the stage and not presenting, to the scale or part that way (a shire's
+    // neighbour, a minion beside this one); otherwise, and PageDown and PageUp always (a presenter's clicker), stages
+    // (with no flow on the stage, an arrow on a focused button or in the panel does what it does there: review of 1 Oct)
+    case 'ArrowRight': if (!navKeys()) { e.preventDefault(); next(e.shiftKey); } else if (onDraw) { e.preventDefault(); arrowNav('E'); } break;
+    case 'ArrowLeft': if (!navKeys()) { e.preventDefault(); prev(e.shiftKey); } else if (onDraw) { e.preventDefault(); arrowNav('W'); } break;
+    case 'PageDown': e.preventDefault(); next(e.shiftKey); break;
+    case 'PageUp': e.preventDefault(); prev(e.shiftKey); break;
     case ' ': case 'Spacebar': {
       // Space on a control presses it, except where pressing it would restart what Space should pause: the active
       // flow's own button, a stage button, and, while a flow plays, a summary or a fact in the panel
@@ -3605,14 +4408,14 @@ document.addEventListener('keydown', e => {
     case '+': case '=': e.preventDefault(); zoomBy(1); break;
     case '-': case '_': e.preventDefault(); zoomBy(-1); break;
     case 'Escape': back(); break;
-    case 'Backspace': if (zNow().level) { e.preventDefault(); zoomBy(-1); } break;
+    case 'Backspace': if (zNow().path.length > 1) { e.preventDefault(); zoomBy(-1); } break;
     case 'Home': if (FL.k) { e.preventDefault(); goStage(0); } else if (TOUR) { e.preventDefault(); tourGo(0); } else if (presenting) e.preventDefault(); break;
     case 'End': if (FL.k) { e.preventDefault(); goStage(FLOWS[FL.k].stages.length - 1); } else if (TOUR) { e.preventDefault(); tourGo(STEPS.length - 1); } else if (presenting) e.preventDefault(); break;
     // a presenter's clicker: F5 (and Shift+F5) is its "start the slideshow" button, never a reload mid-talk; some send
     // Up and Down for back and forward
     case 'F5': if (presenting) { e.preventDefault(); if (!TOUR) startTour(TLAST >= STEPS.length - 1 ? 0 : TLAST); } break;
-    case 'ArrowDown': if (presenting) { e.preventDefault(); next(e.shiftKey); } break;
-    case 'ArrowUp': if (presenting) { e.preventDefault(); prev(e.shiftKey); } break;
+    case 'ArrowDown': if (presenting) { e.preventDefault(); next(e.shiftKey); } else if (navKeys() && svg.contains(tg)) { e.preventDefault(); arrowNav('S'); } break;
+    case 'ArrowUp': if (presenting) { e.preventDefault(); prev(e.shiftKey); } else if (navKeys() && svg.contains(tg)) { e.preventDefault(); arrowNav('N'); } break;
     default: {
       const i = '1234567890'.indexOf(e.key);
       if (i >= 0 && e.key.length === 1) pickFlow(ORDER[i]);
@@ -3629,11 +4432,14 @@ function prose() {
     `<p><b>The flows.</b> (1) A load that misses every cache: ${n('lat_l1')} cycles would have been an L1 hit and ${n('lat_l2')} an L2 hit; the L3 home is PA[10:6] and costs ${n('lat_l3_a')} + ${n('lat_l3_b')}; the memory shire is PA[8:6] and adds ${n('lat_ms_a')} + ${n('lat_ms_b')} cycles per hop; a typical DRAM load takes ${n('lat_dram')}, of which ${n('lat_dram_chip')} are the DRAM chip. (2) The ladder adds the read buffer (${n('lat_rb')}), the own scratchpad (${n('lat_scp')}) and another shire's scratchpad (${n('lat_rs_a')} + ${n('lat_rs_b')} per hop). (3) TensorSend: ${n('ts_a')} cycles plus ${n('ts_b')} per hop, round trip. (4) The relay: ${n('rl_e_next')} pJ/B to the next shire against ${n('rl_e_dram')} through DRAM (${n('rl_x')} less). (5) Gathers from scattered lines: ${n('g_l1_r')}, ${n('g_l2_r')}, ${n('g_rs_r')} and ${n('g_dr_r')} G elements/s from L1, L2, a scratchpad two hops away and DRAM. (6) The host over PCIe, timed on three cards: ${n('pcie_h2d')} GB/s to the card and ${n('pcie_d2h')} back by DMA (${n('pcie_h2d_pct')} and ${n('pcie_d2h_pct')} of the link), ${n('pcie_stg_rng')} GB/s for a program's staged copies, whose lines land in their L3 homes (${n('pcie_l3pct')} then read at L3 latency); an empty kernel costs the card ${n('pcie_b2b_rng')} queued, while one launch waited for takes ${n('pcie_launch_rng')}, most of it the runtime's ${n('poll500')} idle poll. (7) A matmul step: TensorLoad ${n('tl_l2')} cycles, TensorFMA ${n('tfma_tenb')}, ${n('mm_op')} per op with the next load hidden. (8) The Horace runs of the matmul (${n('w_tflops')} TFLOP/s, timed from the host) on zeros, ones and random data: ${n('w_zeros')}, ${n('w_ones')} and ${n('w_randn')} W at the board at the launch temperature; random data reaches 90 °C in ${n('race_rand')} s, zeros never. (9) One hot line: fair shares (${n('hot_host')} for the host shire), and 22 requesters stop the host shire's own loads (${n('hot22')}). (0) The allreduce tree: ${n('ar1024')} for all ${n('n1024')} minions, against ${n('chipbar')} cycles for a chip barrier. (B) One value to every minion, four ways: the hardware tree (TensorBroadcast down the allreduce's tree) has it everywhere within the allreduce's ${n('ar1024')} (${n('ar_us')}) for 32 B and ${n('bc_1k', 'cycles')} (${n('bc_1k_us')}) for 1 KB, the broadcast half never timed alone; a relay hands a buffer from shire to shire at ${n('rl_e_next')} pJ/B a hand-off, where every shire reading its own copy from DRAM pays ${n('e_dram')} pJ per byte; one line that every minion loads costs each shire one request to its home, but hammered with atomics it is the hot line of flow 9; and every kernel launch is itself a broadcast of one 64-byte message, ${n('pcie_b2b_rng')} for an empty kernel queued on 32 shires.</p>`,
   ].join('');
   // what is measured, specified, derived and inferred
-  const fs = Object.values(F), of = k => fs.filter(f => f.kind === k), meas = of('measured');
+  // (the deep zoom's facts, 30 September, are counted apart: they describe the world around the chip and the circuits)
+  const fs = Object.values(F).filter(f => !f.dz), of = k => fs.filter(f => f.kind === k), meas = of('measured');
+  const dzf = Object.values(F).filter(f => f.dz), dzk = KINDS9.map(k => [k, dzf.filter(f => f.kind === k).length]).filter(x => x[1]);
   const mc = k => meas.filter(f => f.cards.length === k).length;
   const lk = id => `<a href="#facts" data-f="${id}" class="num">${id}</a>`;
   const SETTLED = f => /^(Superseded|Settled) 2[79] Sep/.test(f.note || '');   // an inferred fact settled since: by the firmware's map (27 Sep) or E56 (29 Sep) (build_facts.py, AMEND, AMEND2)
-  $('honest-text').innerHTML = `<p>The page rests on ${fs.length} facts: <b>${meas.length} measured</b>, ${of('spec').length} from the specification (the datasheet, the Programmer's Reference Manual, the core-et documents and the firmware and runtime source), ${of('derived').length} derived from others and <b>${of('inferred').length} inferred</b>. Of the measured facts, ${mc(3)} hold on all three lab cards (aifoundry2, aifoundry3 and aifoundry1 card 1), ${mc(2)} on two and ${mc(1)} on one, mostly aifoundry2${mc(0) ? `; ${mc(0)} ${mc(0) === 1 ? 'names' : 'name'} no card` : ''}. Every table here is at ${n('mhz')}, where a warm card sits.</p>`
+  $('honest-text').innerHTML = `<p>The page rests on ${fs.length} facts: <b>${meas.length} measured</b>, ${of('spec').length} from the specification (the datasheet, the Programmer's Reference Manual, the core-et documents and the firmware and runtime source), ${of('derived').length} derived from others and <b>${of('inferred').length} inferred</b>${KINDS9.slice(4).filter(k => of(k).length).map(k => `, ${of(k).length} ${KWORD[k]}`).join('')}. Of the measured facts, ${mc(3)} hold on all three lab cards (aifoundry2, aifoundry3 and aifoundry1 card 1), ${mc(2)} on two and ${mc(1)} on one, mostly aifoundry2${mc(0) ? `; ${mc(0)} ${mc(0) === 1 ? 'names' : 'name'} no card` : ''}. Every table here is at ${n('mhz')}, where a warm card sits.</p>`
+    + `<p>The zoom beyond the chip and into its parts (30 September) adds ${dzf.length} facts of its own: ${dzk.map(([k, c]) => `${c} ${KWORD[k]}`).join(', ')}. The sizes of the chip's parts from the shire down are estimates; the outside levels' facts are public references (NASA, the US Census, Planck, Tully et al.), the vendor's documents, and the lab's own records.</p>`
     + `<p>What the drawing assumes, and what the second version (27 September) and the measurements of 29 September settled:</p><ul>`
     + `<li><b>Where the compute shires are</b> is measured: all ${n('pairs496')} shire pairs fit a constant plus ${n('hop_cyc')} per hop of Manhattan distance on the logical map (${lk('mesh.shortest-paths')}). <b>How that map sits on the die</b> was inferred (${lk('mesh.orientation')}, ${lk('L33')}, ${lk('L34')}); it is now the firmware's own: the "default Shire Virtual ID Map, based on the NOC spec", renamed as the boot firmware renames the shires, matches the measured map in ${n('fw_pairs')} pair distances with no rotation or mirror (${lk('fw.map-match')}; fact ${lk('L37')}, which compared the map before the renaming, is superseded). Still open: whether the silicon has this handedness or the published die plot's, its mirror (${lk('die.handedness')}, ${lk('L24')}).</li>`
     + `<li><b>The four cells without a compute shire</b>: the firmware's maps name them, the master (shire 32) in the north cell, the spare (33) in the south one, PCIe and then I/O east of the master (${lk('fw.grey-cells')}). They are drawn solid now. Timing a counter read on shire 32 from every compute shire confirms the master's cell on a card: E56 did so on 29 September, and it placed shire 32 in the firmware's cell on aifoundry1 card 1 and decided nothing on aifoundry3 or aifoundry2 (the asks below).</li>`
@@ -3652,31 +4458,45 @@ function prose() {
   // the asks: what would settle each inferred part, and the hub's row that asks for it
   const BADGE = {settled: '<span class="kd measured">settled</span>', nearly: '<span class="kd spec">nearly settled</span>', confirm: '<span class="kd spec">to confirm</span>'};
   $('asktab').querySelector('tbody').innerHTML = ASKS.map(a => `<tr><td data-label="Part"><b>${esc(a.part)}</b>${BADGE[askState(a)] ? ' ' + BADGE[askState(a)] : ''}</td><td data-label="What is inferred">${esc(a.what_is_inferred)}</td><td data-label="What would settle it" class="small">${esc(a.what_settles_it)}</td><td data-label="Ask">${askLinks(a).join('<br>') || esc(a.ask_detail || '')}</td></tr>`).join('');
-  // every fact
-  const tb = document.querySelector('#facttab tbody');
-  tb.innerHTML = Object.keys(F).sort().map(id => { const f = F[id];
-    return `<tr><td data-label="Fact"><code>${esc(id)}</code></td><td data-label="Statement">${esc(f.statement)}${f.url ? ` <a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.page)}</a>` : ''}</td><td data-label="Kind"><span class="kd ${f.kind}">${f.kind}</span></td><td data-label="Cards">${esc(cardsTxt(f))}</td><td data-label="Source" class="small">${esc(f.source)}</td></tr>`; }).join('');
-  CK.sortTable('facttab', {filter: true, filterLabel: 'Filter facts'});
+  // every fact: the table is built when the reader comes near it (review of 1 Oct: built at load and skipped by
+  // content-visibility, its 800-odd rows still cost one long layout some 1.5 s after load, inside a ?flow= link's first
+  // move)
+  const tab = $('facttab');
+  const build = () => {
+    if (tab._built) return; tab._built = true;
+    tab.querySelector('tbody').innerHTML = Object.keys(F).sort().map(id => { const f = F[id];
+      return `<tr><td data-label="Fact"><code>${esc(id)}</code></td><td data-label="Statement">${esc(f.statement)}${f.url ? ` <a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.page)}</a>` : ''}</td><td data-label="Kind"><span class="kd ${f.kind}">${KWORD[f.kind] || f.kind}</span></td><td data-label="Cards">${esc(cardsTxt(f))}</td><td data-label="Source" class="small">${esc(f.source)}</td></tr>`; }).join('');
+    CK.sortTable('facttab', {filter: true, filterLabel: 'Filter facts'});
+  };
+  try { const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); build(); } }, {rootMargin: '1500px 0px'}); io.observe(tab.closest('.table-wrap') || tab); } catch (_) { build(); }
+  if (/^#facts?\b/.test(location.hash)) build();
 }
 
 /* ================= start ================= */
-buildChip();
+/* the camera rests on the die: its layer built and shown */
+{ const L = built(Z.path, Z.path.length - 1); L.style.display = ''; L.style.opacity = 1; bindTrio(Z.path); }
 buildPip();
 /* the phone's drawing on or off (PH): the stage's class, the box's shape, the view, and the band's fold whenever a flow
    draws in the band (packets, trails, glows and pulses come and go too often to be worth a look) */
-let foldObs = null;
+var foldObs = null;   // (var: bindTrio may run before this line)
+function watchFold() {
+  if (!foldObs) return;
+  foldObs.disconnect();
+  if (FX[0]) foldObs.observe(FX[0], {childList: true, subtree: true});
+}
 function phApply() {
   $('stage').classList.toggle('ph', PH);
   svg.setAttribute('preserveAspectRatio', PH ? 'xMidYMin meet' : 'xMidYMid meet');
   if (foldObs) { foldObs.disconnect(); foldObs = null; }
   Object.assign(PHV, {flow: false, extra: 0, ar: ''});
-  if (!PH) { svg.style.aspectRatio = ''; svg.setAttribute('viewBox', `${VB.x} ${VB.y} ${VB.w} ${VB.h}`); if (!ZW) setT(LAYERS[Z.level], null); return; }
+  if (!PH) { svg.style.aspectRatio = ''; svg.setAttribute('viewBox', `${VB.x} ${VB.y} ${VB.w} ${VB.h}`); if (!ZW) setView(); return; }
   phBox();
   const busy = n => n.nodeType !== 1 || n.tagName === 'circle' || /\b(pk|trail|glow)\b/.test(n.getAttribute('class') || '');
-  try { foldObs = new MutationObserver(ms => { if (ms.some(m => [...m.addedNodes, ...m.removedNodes].some(n => !busy(n)))) foldSoon(); }); foldObs.observe(FX[0], {childList: true, subtree: true}); } catch (_) { /* no observer */ }
+  try { foldObs = new MutationObserver(ms => { if (ms.some(m => [...m.addedNodes, ...m.removedNodes].some(n => !busy(n)))) foldSoon(); }); watchFold(); } catch (_) { /* no observer */ }
 }
-/* The window crosses PH (a phone turned, a window resized): the die is drawn again for the new shape, at the chip's
-   scale; the tour or flow that played stops. A shire or a minion is drawn anew at each zoom into it. */
+/* The window crosses PH (a phone turned, a window resized): the tour or flow that played stops, a move in flight lands,
+   and every scale on the camera's path is drawn again for the new shape, where the camera is (a cut); the other scales
+   built are drawn anew when the camera next enters them. */
 let phT = 0;
 function phSwitch() {
   clearTimeout(phT);
@@ -3684,12 +4504,18 @@ function phSwitch() {
     if (mqOn(PHQ) === PH) return;
     if (TOUR) endTour();
     stopFlow(); select(null);
-    goTo({level: 0}, {total: 0}).then(() => {
+    goTo(Z.path.slice(), {total: 0}).then(() => {
       if (mqOn(PHQ) === PH || ZW) return;
       phGeom();
-      LAYERS[0].textContent = ''; buildChip();
+      LYR.forEach(L => { L._built = false; });
+      Z.path.forEach((_, d) => buildInto(layerAt(Z.path, d), Z.path, d));
+      // the die's, the shire's and the minion's layers that the flows draw in are drawn anew too, on the camera's path
+      // or not (review of 1 Oct: above the die, the die's stayed stale, and the band's fold watched its old drawing)
+      [0, 1, 2].forEach(i => { const L = LAYERS[i]; if (L && L._path && !L._built && LYR.get(L._key) === L) buildInto(L, L._path, L._depth); });
+      prune(); bindTrio(Z.path);
+      const L = restLayer(); if (L) { L.style.display = ''; L.style.opacity = 1; }
       PIP.svg.textContent = ''; PIP.tiles = {}; buildPip();
-      phApply(); scaleUI(); showComp('chip', {}); resetCap(); fitCap();
+      phApply(); setView(); skyBg(); scaleUI(true); showHere(); resetCap(); fitCap();
     });
   }, 250);
 }
@@ -3699,9 +4525,9 @@ try { matchMedia(PHQ).addEventListener('change', phSwitch); } catch (_) { /* an 
    a touch screen that cannot go full screen offers no Present button */
 if (FRAMED) document.documentElement.classList.add('et-framed');
 if (TOUCH) { $('stage').classList.add('touch'); if (!fsOK()) $('stage').classList.add('nofs'); }
-scaleUI();
+scaleUI(true);
 prose();
-showComp('chip', {});
+showHere();
 resetCap();
 playBtn();
 try {
@@ -3711,11 +4537,31 @@ try {
   const f = q.get('flow'); if (f && '1234567890'.includes(f) && f.length === 1) startFlow(ORDER['1234567890'.indexOf(f)], 0, {intro: true});
   else if (f && f.toLowerCase() === 'b') startFlow('K', 0, {intro: true});
   else if (q.get('tour') === '1') startTour(0);
+  else if (q.get('at')) { const P = atPath(q.get('at')); if (P) goTo(P, {total: 0}).then(() => { scaleUI(true); showHere(); }); else console.warn('?at=: no such scale', q.get('at')); }
 } catch (_) { /* no URL flags */ }
 if (window.__ET_PRESENTER) { setTimeout(() => toast('<p><b>Presenter window.</b> Press <kbd>F</kbd> for full screen; <kbd>T</kbd> starts the tour.</p>', 9000), 300); }
 fitCap();
+/* for the page's tests: the parts of the scale shown, with what each zooms into, and the stage a flow wants shown */
+window.__chipTest = {
+  parts: () => { const L = restLayer(); return L ? [...L.querySelectorAll('.comp')].filter(g => g.getClientRects().length).map(g => {
+    const k = kidOf(g), r = g.getBoundingClientRect();
+    return {key: g._key, label: g.getAttribute('aria-label'), kid: k ? (k.up ? 'up:' + k.up : pk(k)) : null, x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height};
+  }) : []; },
+  want: () => { try { return FL.k ? pkeys(pathOf(FLOWS[FL.k].stages[FL.i].where(FL.ctx))) : null; } catch (_) { return null; } },
+  nstages: () => (FL.k ? FLOWS[FL.k].stages.length : 0),
+  nodes: () => Object.keys(NODES),
+  defPath: () => { let P = Z.path.slice(); for (let i = 0; i < 60; i++) { const k = defKid(P); if (!k) break; P = P.concat([k]); } return pkeys(P); },
+};
 /* a read-only view of the state, for the page's tests (headless Chrome) */
 window.__chipState = () => ({level: Z.level, sid: Z.sid, nb: Z.nb, mi: Z.mi, flow: FL.k, stage: FL.i, done: FL.done, still: FL.still,
-  clockOn: CLK.on, clock: Math.round(CLK.t), follow: FOLLOW, zooming: ZW, pip: !PIP.el.hidden, pres: PRES, tour: TOUR ? TOUR.i : null,
-  transform: [0, 1, 2].map(i => LAYERS[i].getAttribute('transform')), shown: [0, 1, 2].map(i => LAYERS[i].style.display !== 'none')});
+  clockOn: CLK.on, clock: Math.round(CLK.t), follow: FOLLOW, zooming: ZW || UIP, pip: !PIP.el.hidden, pres: PRES, tour: TOUR ? TOUR.i : null,
+  transform: [0, 1, 2].map(i => LAYERS[i].getAttribute('transform')), shown: [0, 1, 2].map(i => LAYERS[i].style.display !== 'none'),
+  // the path camera (30 September): the path shown, its depth, and every layer shown with its scale on the screen
+  path: pkeys(Z.path), depth: Z.path.length - 1, die: DIE,
+  visible: [...svg.querySelectorAll(':scope > g.lay')].filter(l => l.style.display !== 'none').map(l => {
+    const m = /matrix\(([-\d.e]+)/.exec(l.getAttribute('transform') || ''); return {depth: +l.dataset.depth, node: l.dataset.node, k: m ? +m[1] : 1, op: l.style.opacity}; }),
+  step: CUR ? {kind: CUR.s.kind, e: +CUR.e.toFixed(4), o: CUR.s.o} : null,
+  scale_m: (sizeOf(Z.path[Z.path.length - 1]) || {}).m || null, node: Z.path[Z.path.length - 1].id,
+  sel: SEL ? SEL.getAttribute('aria-label') : null, panel: ($('pn-body').querySelector('.pn-title') || {}).textContent || '',
+  up: $('up').textContent, upDisabled: isDis($('up')), pill: !$('zpill').hidden});
 })();

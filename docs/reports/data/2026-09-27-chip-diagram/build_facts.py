@@ -44,6 +44,16 @@ dev-aifoundry1-c1/memp2.json (AMEND2, AMEND3). Since the evening of 29 September
 aifoundry2 (run after the DVFS validation there ended), comes in too: its nocr summary.json, pcie2.json's
 cards.aifoundry2 and ../2026-09-29-memp2/val-aifoundry2/memp2.json, where R33a missed one condition (PA[17]).
 
+The deep zoom (30 Sep, the owner's request: zoom out to the universe and in to the circuits; DESIGN.md of the
+session in ~/claude/work/chipzoom) adds, through research/deepzoom.py: research/inside.json (what is inside every
+part, down to the silicon crystal; build_inside.py), research/outside.json (the 18 levels from the package to "beyond
+what we can see"; build_outside.py) and research/outside-geo.json (map outlines; make_geo.py); the image manifest of
+../../chip-diagram-img/ (sha256; make_rack_photo.py makes rack.webp from the original kept outside the repository);
+and the memory levels' facts and numbers that ../../sources/circuitkit.js cites (make_circuitkit.py copies that
+page's drawings). Output blocks: scales, geo, img, mlnum, mladdr, onum (the numbers the new drawings print, each
+checked against its fact), outside; facts gain in.*, out.*, size.* and ml:* ids, and the page's facts carry only the
+fields it reads.
+
 Output, facts.json:
   facts  the facts the page uses, by id, with one page link field (`url`, a spacesheep URL, or null), the lab cards
          each one covers (`cards`: a2, a3, a1c1) and, for the CARDS entries, the text shown for them (`cards_txt`)
@@ -979,7 +989,36 @@ for a in ASKS:
     for i in a['facts']:
         assert i in ALL, (a['part'], i)
     used.update(a['facts'])
+# ---- the deep zoom (30 Sep 2026, the owner's request: zoom out to the universe, in to the circuit components):
+# the scale nodes, their facts (in.*, out.*, size.*), the map outlines, the image manifest, and the memory-levels
+# facts and numbers that the tree cites and the drawings copied from that page print (research/deepzoom.py says how)
+import sys
+sys.path.insert(0, R)
+import deepzoom  # noqa: E402
+CKT = os.path.join(HERE, '..', '..', 'sources', 'circuitkit.js')
+ckt = open(CKT).read() if os.path.exists(CKT) else ''
+# the memory-levels numbers the copied drawings print (mlnt('…'), mlnf('…'), mln('…')) and the facts they cite by id
+ML_NUM = sorted(set(re.findall(r"\b(?:nt|nf|n|K)\('([A-Za-z0-9_]+)'", ckt)))
+ML_FIDS = sorted(set(m.group(0) for m in re.finditer(r"\b(?:l1|l2|l3|scp|dram|g):[a-z0-9][A-Za-z0-9_.\-]*[A-Za-z0-9]", ckt)))
+DZ = deepzoom.build(ALL, ML_FIDS, ML_NUM)
+used.update(DZ['used_chip'])
 facts = {i: norm(ALL[i]) for i in sorted(used)}
+for i, f in DZ['facts'].items():
+    assert i not in facts, i
+    facts[i] = f
+# the page reads a fact's statement, kind, source, note, page link, cards and caveat: the other fields (kept in the
+# research files) stay out of the page's data, as do empty ones (30 Sep: the page carries 700-odd facts now)
+# (the chip's own facts also keep topic, value and unit: the memory levels' build_facts.py copies them for the facts it
+# imports, chip:mesh.grid, L40 and the others; review of 1 Oct 2026. Build order: this file reads the memory levels'
+# facts.json and that page's build reads this one; both are fixed points, see MIRROR.md)
+KEEP = ('statement', 'kind', 'source', 'note', 'url', 'page', 'cards', 'cards_txt', 'card', 'caveat')
+KEEP_CHIP = KEEP + ('topic', 'value', 'unit')
+for i, f in list(facts.items()):
+    dz = f.get('set') in ('deep zoom', 'memory-levels')
+    g = {k: f[k] for k in (KEEP if dz else KEEP_CHIP) if f.get(k) not in (None, [], '')}
+    if dz:
+        g['dz'] = 1
+    facts[i] = g
 kinds = {}
 for f in facts.values():
     kinds[f['kind']] = kinds.get(f['kind'], 0) + 1
@@ -989,6 +1028,7 @@ out = {
                             '../../sources/limits-of-observability.data.json (the hub rows the asks link to)'],
              'n_facts': len(facts), 'kinds': kinds, 'n_num': len(num), 'et_platform_head': '836a4ab'},
     'facts': facts, 'num': num, 'comp': COMP, 'layout': layout, 'asks': ASKS, 'rungs': RUNGS,
+    'scales': DZ['scales'], 'geo': DZ['geo'], 'img': DZ['img'], 'mlnum': DZ['ml_num'], 'mladdr': DZ['ml_addr'], 'onum': DZ['onum'], 'outside': DZ['outside_meta'],
 }
 p = os.path.join(HERE, 'facts.json')
 json.dump(out, open(p, 'w'), indent=1, ensure_ascii=False)

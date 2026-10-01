@@ -79,10 +79,26 @@ def render_math(html):
 
 body, n_math = render_math(body)
 
+# A page's script may pull in another file of sources/ with a line /*@include name.js*/ (the chip diagram's deep zoom,
+# 30 Sep 2026: its outside levels and the circuit kit copied from the memory levels); the file is inserted in place,
+# so it shares the page script's scope. A missing file stops the build.
+INCLUDE = re.compile(r"^[ \t]*/\*@include ([\w.\-]+)\*/[ \t]*$", re.M)
+
+
+def includes(js):
+    def one(m):
+        f = os.path.join(S, m.group(1))
+        if not os.path.exists(f):
+            raise SystemExit(f"{name}.script.js includes {m.group(1)}, which is not in docs/reports/sources/")
+        return open(f).read()
+    return INCLUDE.sub(one, js)
+
+
+script = includes(open(os.path.join(S, name + ".script.js")).read())
 html = (tpl.replace("__CHARTKIT__", open(os.path.join(S, "chartkit.js")).read())
         .replace("__TITLE__", meta["title"]).replace("__DESC__", meta["description"])
         .replace("__BODY__", body)
         .replace("__DATA__", json.dumps(data, separators=(",", ":")))
-        .replace("__SCRIPT__", open(os.path.join(S, name + ".script.js")).read()))
+        .replace("__SCRIPT__", script))
 open(out, "w").write(html)
 print("wrote", out, len(html), "bytes" + (f", {n_math} equations rendered to SVG" if n_math else ""))

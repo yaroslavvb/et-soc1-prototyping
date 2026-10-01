@@ -701,6 +701,39 @@ camera moves. The diagnosis, the method and the numbers are in
   (remembered in `localStorage`); flow 5's title lost its experiment ID.
 - Both deployed on 30 September (the versions "Smooth camera: …"); the live pages equal their files.
 
+## The deep zoom (30 September, branch `chipzoom`, not yet deployed)
+
+For Q77, the owner's requests about the chip diagram: double-click everything that can be selected, a wide button up
+the hierarchy, zoom out to the rack, Studio 45, San Francisco, the US, Earth, the Milky Way, "the Andromeda Cluster"
+and "the meta universe", zoom in to circuit components, and the shires' edge arrows as links. The design (DESIGN.md
+in the session's work directory, `~/claude/work/chipzoom/`) was written and reviewed first; it is followed here.
+
+- **The shires' arrows** (`5985d6d`): each edge label is a link (role link, Tab, Enter, a 44 px hit area on touch).
+  Since the path camera, a compute shire, the master or spare, a memory shire, the PCIe or the I/O shire is reached by
+  a sideways glide (two layers side by side, about 0.65 s); the arrow keys do the same when no flow or tour is on.
+- **The path camera** (`6e17b89`, a pure refactor checked against the camera of the morning: identical frame counts
+  and late frames on flows 1, 8 and B, the velocity kinks within 0.5 points): the camera rests on a path of scales and
+  computes every frame in the coordinates of the step it is in, so 36 powers of ten fit; nest, jump and pan steps.
+- **The controls** (`8567a9e`): the Up bar (a wide "↑ Zoom out to …" button, the breadcrumb with a "…" menu, a scale
+  readout), click selects and double-click (double-tap, Enter, +) zooms, a "Zoom in" pill on touch, the panel's zoom
+  row and its "You are here" entry, `?at=`.
+- **The levels** (`sources/chip-diagram.outside.js`, `sources/circuitkit.js`, `sources/chip-diagram.inside.js`; the
+  data in `data/2026-09-27-chip-diagram/research/`: `inside.json`, `outside.json`, `outside-geo.json`, their builders
+  and write-ups, `deepzoom.py`, `make_circuitkit.py`, `make_rack_photo.py`): 18 levels above the die (maps from the US
+  Census and Natural Earth, NASA's images, the vendor's card photo, the owner's rack photo with ten machine labels
+  blurred, Studio 45 named but not placed), and below it the memory levels' drawings (copied by `make_circuitkit.py`,
+  the memory-levels page untouched), logical drawings of the blocks built from the tree's data, and a hand-drawn compute
+  path from a lane's fused multiply-add to the silicon crystal. Every number a drawing prints is checked against its
+  fact by the build (`ONUM`, `INUM`, the memory levels' numbers imported as `ml:`). Kinds: one vocabulary of nine.
+- **Deploy form**: a folder (`index.html` and `chip-diagram-img/`, six WebP images loaded only near their levels);
+  MIRROR.md's row says so. Not deployed from the branch.
+- **Tests** (`tools/pagemotion/zoom_test.mjs`, T1-T7, T9, T11; `zoom_static.py`, T9 and T10) and motion
+  (`drive.mjs`): in the commit messages.
+- **Final check (1 October)**: rebuilt from sources byte for byte; a scripted tour with real input on a desktop and a
+  phone (three part types and the mesh double-clicked, two dives to a transistor, Up pressed 29 times to the top and
+  back down, the four edge arrows of shire 20) passed 131 of 131 checks each. It fixed block boxes that ended on a
+  colon ("lanes:"), two image credits that ran past the drawing's edge, and a legible port label in the rack photo.
+
 ## Cross-links between the reports
 
 - **2026-09-24, afternoon (`d04b29a`).** Every report got the byline clause "· part of the measurement reports",
