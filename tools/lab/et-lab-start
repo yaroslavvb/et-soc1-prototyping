@@ -1,5 +1,5 @@
 #!/bin/bash
-# et-lab-start: start a new user of the AI Foundry ET-SoC-1 lab on this machine (30 Sep 2026, second version).
+# et-lab-start: start a new user of the AI Foundry ET-SoC-1 lab on this machine (30 Sep 2026, third version).
 # Run it as yourself: et-lab-start [--check | --dry-run] [--no-claude | --with-claude] [--no-clone]; --help says more.
 # Source and notes: tools/lab/et-lab-start and docs/lab-start/README.md in github.com/yaroslavvb/et-soc1-prototyping.
 # shellcheck disable=SC2016,SC2088  # '~' and '$HOME' in messages and in the PATH line are meant literally
@@ -23,8 +23,7 @@ et-lab-start: start a new user of the AI Foundry ET-SoC-1 lab on this machine. R
   et-lab-start --check     only look (the cards, who uses them, the last 24 h, people, disk, your setup)
   et-lab-start --dry-run   look, and print what the setup would do, without doing it
   --no-claude              leave out Claude Code, its PATH line and the `claude` tmux session
-  --with-claude            on aifoundry1, install Claude Code too (about 230 MB per version on a disk that is
-                           nearly full: ask your person first); on the other machines it is installed by default
+  --with-claude            install Claude Code: the default on every machine (kept for older instructions)
   --no-clone               leave out the clone of the lab's repository
   -h, --help               this text
 The setup: linger for your account, Claude Code in ~/.local/bin (the native installer), its PATH line in ~/.bashrc,
@@ -68,13 +67,11 @@ indent() { sed 's/^/    /'; }
 have() { command -v "$1" >/dev/null 2>&1; }
 free_gb() { df -Pk "$HOME" 2>/dev/null | awk 'NR == 2 && $4 ~ /^[0-9]+$/ { printf "%d", $4 / 1048576 }'; }
 
-# Claude Code: installed by default, except on aifoundry1 (a download of about 230 MB per version, and the
-# auto-updater keeps several, on a /home that is 99% full and shared with the system), where it needs --with-claude.
+# Claude Code: installed by default on every machine, given 1 GB free in ~ (about 230 MB per version, and the
+# auto-updater keeps several). Until 30 Sep 2026 aifoundry1 needed --with-claude, because its /home was 99% full;
+# the option is still accepted, and means the default.
 want_claude=1
-case $claude_opt in
-  no) want_claude=0 ;;
-  default) [ "$host" = aifoundry1 ] && want_claude=ask ;;
-esac
+[ "$claude_opt" = no ] && want_claude=0
 
 # What we know of each machine's cards (AGENT.md §4, docs/findings/14-card-behaviour.md, 30 September 2026).
 # Prints "use|note" or "never|note" or "ask|note".
@@ -200,7 +197,7 @@ else
   item "free in ~" "$gb GB"
   [ "$gb" -lt 5 ] && warn "under 5 GB free: the clone is left out; ask your person before any download or build"
 fi
-[ "$host" = aifoundry1 ] && item "" "aifoundry1's disk is nearly full and shared with the system: keep builds small, delete what you make"
+[ "$host" = aifoundry1 ] && item "" "aifoundry1's /home is one pool with the system, and it filled up once (Sep 2026): keep builds small, delete what you make"
 
 # ---------------------------------------------------------------- set up
 case $mode in
@@ -209,7 +206,7 @@ case $mode in
   *) section "Setup" ;;
 esac
 missing=0
-st() { printf '  %-7s %s\n' "$1" "$2"; [ "$1" = missing ] && missing=1; return 0; }   # ok missing ask would done skip FAILED
+st() { printf '  %-7s %s\n' "$1" "$2"; [ "$1" = missing ] && missing=1; return 0; }   # ok missing would done skip FAILED
 fail() { st FAILED "$*"; failed=1; }
 # A step that cannot run: in the setup it fails; --check and --dry-run say so where the setup would fail.
 blocked() { case $mode in setup) fail "$*" ;; dry) st would "FAIL: $*" ;; *) st missing "$*" ;; esac; }
@@ -233,8 +230,6 @@ if [ "$want_claude" != 0 ]; then
   elif [ -x "$HOME/.local/bin/claude" ]; then claude_bin=$HOME/.local/bin/claude; fi
   if [ -n "$claude_bin" ]; then
     st ok "Claude Code: $claude_bin"
-  elif [ "$want_claude" = ask ]; then
-    st ask "Claude Code is not installed: on aifoundry1 it takes about 230 MB per version on a nearly full disk; with your person's yes, run et-lab-start --with-claude"
   elif ! have curl; then blocked "Claude Code: curl is missing; tell the lab admin"
   elif [ -z "$gb" ]; then blocked "Claude Code: free space in ~ unknown (df failed); ask your person"
   elif [ "$gb" -lt 1 ]; then blocked "Claude Code: under 1 GB free in ~; ask your person"
@@ -324,9 +319,6 @@ fi
 N=${use_n:-"<N>"}
 if [ "$want_claude" != 0 ]; then
   section "Next: a Claude that lives on $host, driven from claude.ai/code (at your keyboard)"
-  if [ -z "$claude_bin" ] && [ "$want_claude" = ask ]; then
-    printf '  First, with your yes: et-lab-start --with-claude (Claude Code is not installed here yet).\n'
-  fi
   if [ -e "$dest/docs/lab-start/START.md" ] || { [ "$mode" != setup ] && [ "$want_clone" = 1 ] && [ ! -e "$dest" ]; }; then
     msg="Read ~/et-soc1-prototyping/docs/lab-start/START.md and follow it from step 4, running its blocks directly. My username is $me. You are on $host, card $N. Steps 1-3 are done."
   else

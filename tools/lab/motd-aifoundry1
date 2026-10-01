@@ -28,7 +28,8 @@ aifoundry1 - AI Foundry lab machine with 2 ET-SoC-1 cards (driver et_soc1 0.20.0
 * Host programs: register the runtime's log levels first in main (a race in libetrt crashes about one launch
   in 100 at 1.08 s otherwise): see registerRuntimeLogLevels() in github.com/yaroslavvb/et-soc1-prototyping.
 * A GitHub Actions runner (nekkoai/hf-hackathon) runs on this machine and can use the cards.
-* The disk is nearly full (ZFS pool 95%). Keep one copy of each large model; delete what you do not use.
+* /home and the system share one ZFS pool, which filled up in September (71% used on 30 Sep 2026, 130 GB free).
+  Keep one copy of each large model; delete what you do not use.
 * /tmp is cleared at every boot: keep your work in your home directory.
 * Crash dumps of your programs: coredumpctl list ; coredumpctl gdb <pid>
 * Machine facts to record with a measurement: et-lab-manifest.  Health check (read-only): et-lab-health

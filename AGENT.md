@@ -166,7 +166,7 @@ reason:
 | Never hold a device for more than 10 s: `timeout 10` on every launch (per device-opening process; release the card lock between sub-tests) | long holds block everyone else, and a card that hangs needs a power cycle only the lab admin can do |
 | Stop tools with Ctrl-C or a plain `kill`, never `kill -9` | a sampler killed mid-request poisons the card's management queue for the next user |
 | Never reset a card, retrain or re-speed its PCIe link, or change its TDP, clocks, firmware or driver | a software reset can hang a card; a link retrain on aifoundry1 on 30 Sep hung the whole host until someone power-cycled it on site; a configuration change silently alters other people's runs |
-| Keep disk and memory small: sources only, `nice -j4` builds | the machines are shared, and aifoundry1's disk is nearly full |
+| Keep disk and memory small: sources only, `nice -j4` builds | the machines are shared, and aifoundry1's `/home` is one pool with the system that filled up once (99% until 30 September; 116 GB free since) |
 | An agent that only writes code never reaches a card: `V3_DRY=1`, then check `et-who` | on 25 September a code-only agent ran a real block because a `cd` in a backgrounded chain did not apply |
 
 ## 6. The traps, in brief
@@ -299,10 +299,11 @@ to keep intermediate results in that scratchpad; here it is only for throwaway f
 after, a lock). A subagent's brief names the persistent directory it writes to. A long run writes its log under the
 home directory (`build/` in the tree, or the topic's directory), since the harness keeps a background command's output
 in `/tmp` too. On aifoundry1 and aifoundry3 work stays in `~/nekko` and comes back to aifoundry2 or the repository;
-aifoundry1's `/home` is nearly full. Why: the power cycle of 30 September at about 15:07 PDT, after the link retrain
-of section 5 hung aifoundry1, cleared `/tmp` on all three machines, and with it about 19 GB of our agents' working
-files on aifoundry2 (an earlier copy kept what was there at 06:37 on 28 September; everything written after it was
-lost). The repository and the home directories were intact.
+aifoundry1's `/home` shares one pool with the system (99% full until 30 September, 116 GB free since). Why: the
+power cycle of 30 September at about 15:07 PDT, after the link retrain of section 5 hung aifoundry1, cleared `/tmp`
+on all three machines, and with it about 19 GB of our agents' working files on aifoundry2 (an earlier copy kept
+what was there at 06:37 on 28 September; everything written after it was lost). The repository and the home
+directories were intact.
 
 ## 8. How to publish
 

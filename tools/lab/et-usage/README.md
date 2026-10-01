@@ -68,7 +68,7 @@ one a second.
   today's). If today's file alone is over it, or the log's filesystem has under `--min-free-mb` (512 MB) free, the
   daemon writes no records until there is room (`now.json` says `"paused"`, and counts them in `stats.dropped`). Low
   free space never removes a file: the disk is shared (on aifoundry1 `/var/log` and `/home` are one ZFS pool, 95%
-  full), and a user who fills it must not erase the history.
+  full until 30 September 2026), and a user who fills it must not erase the history.
 
 ## Privacy
 

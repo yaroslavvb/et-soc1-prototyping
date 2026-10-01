@@ -7,7 +7,7 @@ the lab's Discord posts, and a yes before the first run on a card.
 
 Everything below is the lab's brief for you, my coding agent.
 
-Version of 30 September 2026 (PDT), fourth edition. The current copy is `docs/lab-start/START.md` in
+Version of 30 September 2026 (PDT), fourth edition, revised in the evening. The current copy is `docs/lab-start/START.md` in
 https://github.com/yaroslavvb/et-soc1-prototyping; if this one is more than a month old, read that one instead.
 
 ## Your person, the machine and the card
@@ -30,7 +30,8 @@ You may, without asking: run `et-who`, `et-usage`, `et-lab-start`, `uptime`, `ps
 
 Ask your person first: before the first card run of each session, before any run of more than one process, and
 before anything shared, such as a long detached job, a drain of a card's queue (see Traps), or any download, install
-or pip package over 100 MB on aifoundry1 (Claude Code included), whose disk is nearly full and shared with the system.
+or pip package over 1 GB on aifoundry1 (a model, a dataset, a container image), whose disk is one pool shared with
+the system and filled up once (it has had room since 30 September).
 
 Never do these; if one seems needed, stop and tell your person, who asks the lab admin:
 
@@ -53,7 +54,7 @@ services, posts on the AI Foundry Discord, and anything for the lab admin.
 |---|---|---|---|---|---|
 | aifoundry2 | 1.3.1 | DVFS 600–800 MHz, above 600 only below about 68 °C, so usually 600 | 31–36 W hot, 27 W cold | some traffic starves its meter; a CI runner shares it | a first or second choice (step 2); ask before power work: comparable runs there start from a die at about 76 °C |
 | aifoundry3 | 1.3.1 | pinned at 600 MHz (NoC 400) at every boot; no thermal step | 23.6 W at 50 °C; about 25 W at 55–57 °C since 25 Sep | reaches 88 °C under load, nothing slows it; a demo service can use the card without the lock | a first or second choice; switching power over idle, never absolute watts |
-| aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample of 25–30 Sep; not rechecked since the power cycle of 30 Sep: read `mhz.minion` | 33–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; disk 99% full; a CI runner shares the host | the third choice (step 2) |
+| aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample of 25–30 Sep; not rechecked since the power cycle of 30 Sep: read `mhz.minion` | 33–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | the third choice (step 2) |
 | aifoundry1 card 0 | 1.4.1 | idles at 300 MHz | 18.6–18.8 W | overheats: 115–117 °C after 10 minutes of short tests | nothing |
 
 Nothing on these cards limits the die temperature: aifoundry2 once ran at a 90–103 °C mean and nothing tripped.
@@ -144,7 +145,7 @@ Then:
 1. Of the free cards of aifoundry2 and aifoundry3 (card 0 on each), take the one whose machine has the fewest other
    people with processes (the third line: `who` and `loginctl` miss a Claude kept in tmux); where `et-usage` is
    installed, prefer the card used less over the last 24 hours; on a tie, aifoundry3.
-2. Else aifoundry1's card 1 (`ET_DEVICES=1`), if free: never its card 0, and its disk is nearly full.
+2. Else aifoundry1's card 1 (`ET_DEVICES=1`), if free: never its card 0.
 3. Else no card is free: take the first reachable machine in the order aifoundry3, aifoundry2, aifoundry1, do only
    step 3 there (builds and the simulator wait), and look again at most once a minute. After 30 minutes, tell your
    person.
@@ -157,10 +158,9 @@ without their OK.
 
 **3. Set up on `<host>`.** A Claude that lives on the machine runs in tmux, survives dropped connections, and your
 person drives it from claude.ai/code or the Claude app through Remote Control, which needs a claude.ai plan. Set it
-up unless your person has no plan or wants you to work over ssh only; on aifoundry1, ask first (Claude Code takes
-about 230 MB per version). If `et-lab-start` is installed on `<host>`, run it: it does what is missing of this step,
-is safe to run again, and prints the next steps (`--no-claude` leaves Claude out; on aifoundry1 it installs Claude
-only with `--with-claude`). If not, run the two blocks below, without the Claude lines if Claude is not wanted.
+up unless your person has no plan or wants you to work over ssh only. If `et-lab-start` is installed on `<host>`,
+run it: it does what is missing of this step, is safe to run again, and prints the next steps (`--no-claude` leaves
+Claude out). If not, run the two blocks below, without the Claude lines if Claude is not wanted.
 Everything goes in the home directory; nothing needs sudo.
 
 ```bash

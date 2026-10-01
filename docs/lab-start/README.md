@@ -80,7 +80,7 @@ et-lab-start             # look, set up what is missing, print the next steps an
 et-lab-start --check     # only look; changes nothing
 et-lab-start --dry-run   # look, and print what the setup would do, without doing it
 --no-claude              # leave out Claude Code, its PATH line and the `claude` tmux session
---with-claude            # on aifoundry1, install Claude Code too (ask the person first); elsewhere it is the default
+--with-claude            # install Claude Code: the default everywhere since 30 Sep (kept for older instructions)
 --no-clone               # leave out the clone
 -h, --help
 ```
@@ -96,9 +96,9 @@ et-lab-start --dry-run   # look, and print what the setup would do, without doin
   5 GB, or "unknown" when `df` fails, which leaves out the install and the clone; a note on aifoundry1's disk).
 - **Set up**, each step only if missing: `loginctl enable-linger` for oneself (checked by
   `/var/lib/systemd/linger/<login>`); Claude Code by the native installer (`curl -fsSL https://claude.ai/install.sh
-  | bash`, downloaded first, then run) into `~/.local/bin`, with 1 GB free, and on aifoundry1 only with
-  `--with-claude` (about 230 MB per version, and the auto-updater keeps several, on a `/home` that is 99% full and
-  shared with `/`; the brief asks the person first); the PATH line in `~/.bashrc` (only an uncommented assignment
+  | bash`, downloaded first, then run) into `~/.local/bin`, with 1 GB free, on every machine (the second version
+  installed it on aifoundry1 only with `--with-claude`, while that `/home` was 99% full; the option is still
+  accepted and means the default); the PATH line in `~/.bashrc` (only an uncommented assignment
   counts as present; a newline is added first if the file does not end in one); a detached tmux session `claude` in
   `~` (exact name, `=claude`; `/snap/bin` is added to PATH, where tmux is a snap); a sparse clone of the repository
   into `~/et-soc1-prototyping` with the same commands as START.md step 3, only with 5 GB free, made in
@@ -140,7 +140,10 @@ stub `git`, lets a second run started 0.5 s later exit 3 ("another et-lab-start 
 completes. `strace -f` of `--check` and `--dry-run` shows no open of a `/dev/et*` node or a card lock. `bash -n` and
 ShellCheck 0.11.0 pass. The setup path itself (linger, the installer, tmux, the clone) runs the same commands as
 START.md step 3 but has not been run by the script yet: the first new user's run, or a run as a test account, is its
-first. Install, as root, on each host:
+first. The third version (30 September, evening), after aifoundry1's `/home` went from 99% to 72% used (116 GB
+free) when a departed user's public model checkpoints were deleted at the owner's word, installs Claude Code there by
+default too and words aifoundry1's disk note as history; `bash -n`, ShellCheck, and `--check` and `--dry-run` on
+aifoundry2 (as a file) and aifoundry1 (through `bash -s`) were rerun. Install, as root, on each host:
 `install -o root -g root -m 0755 tools/lab/et-lab-start /usr/local/bin/et-lab-start.new && mv -f
 /usr/local/bin/et-lab-start.new /usr/local/bin/et-lab-start`; roll back by removing it.
 

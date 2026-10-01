@@ -67,7 +67,7 @@ its kernel's path compiled in.
 | Host | Tree | Build | Notes |
 |---|---|---|---|
 | aifoundry3 | `~/nekko` (a copy, no git) | the commands below | card idle; `sys_emu` at `/opt/et/bin/sys_emu`; built and tested there on 29 September |
-| aifoundry1 | `~/nekko` | the same | **card 1 only**: `card_run.sh` sets `ET_DEVICES=1` and `etsoc-shire1.lock`; `/home` is 99% full, so keep only this build |
+| aifoundry1 | `~/nekko` | the same | **card 1 only**: `card_run.sh` sets `ET_DEVICES=1` and `etsoc-shire1.lock`; `/home` shares one pool with the system (99% full until 30 Sep, 116 GB free since), so keep builds small |
 | aifoundry2 | the git checkout, `~/claude/et-soc1-prototyping` | `cmake` and `make` as below, in the checkout | **not before the DV2 validation ends (about 17:00 PDT on 29 September)**: no builds, no `*_host` or `sys_emu` process until then |
 
 From a clone (on aifoundry2 the checkout itself), copy the sources to aifoundry1 or aifoundry3 the way

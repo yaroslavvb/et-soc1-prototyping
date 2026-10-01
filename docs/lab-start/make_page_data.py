@@ -29,7 +29,7 @@ CARDS = [
     {"id": "aifoundry3", "host": "aifoundry3", "n": 0, "firmware": "1.3.1",
      "clock": "pinned at 600 MHz", "note": "a demo service can use it without the lock", "use": True},
     {"id": "aifoundry1-c1", "host": "aifoundry1", "n": 1, "firmware": "1.2.0",
-     "clock": "600 MHz until 30 Sep, not rechecked since", "note": "select with ET_DEVICES=1; the host's disk is nearly full",
+     "clock": "600 MHz until 30 Sep, not rechecked since", "note": "select with ET_DEVICES=1; a CI runner shares the host",
      "use": True},
     {"id": "aifoundry1-c0", "host": "aifoundry1", "n": 0, "firmware": "1.4.1",
      "clock": "idles at 300 MHz", "note": "overheats: 115–117 °C in 10 minutes", "use": False},

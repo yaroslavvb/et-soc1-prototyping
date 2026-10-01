@@ -14,11 +14,11 @@ over ssh, as our user) found every installed file equal to this directory, `et-l
 | `et-who` | `/usr/local/bin/et-who` | 0755 root | 27 Sep: `--check` added (installed 28 Sep, all three) | what users run: `sudo -n et-holders`. `et-who --check` is for scripts (below) |
 | `et-lab-health` | `/usr/local/bin/et-lab-health` | 0755 root | 28 Sep rev 3 (installed 30 Sep, all three) | a read-only health check of the host and its cards (below) |
 | `et-reset` | `/usr/local/bin/et-reset` | **0750 root:sudo** | 28 Sep (installed 30 Sep, all three) | a checked management reset of one card, for root and the sudo group (below) |
-| `et-lab-start` | `/usr/local/bin/et-lab-start` | 0755 root | 30 Sep (installed 16:10, all three) | onboarding, run by a new user as themselves: looks (cards, `et-who`, `et-usage`, people by process, disk), sets up what is missing (linger, Claude Code, a `claude` tmux session, a sparse clone), prints the Remote Control steps and the rules; `--check`, `--dry-run`; no sudo, never opens a card ([docs/lab-start/README.md](../../docs/lab-start/README.md)) |
+| `et-lab-start` | `/usr/local/bin/et-lab-start` | 0755 root | 30 Sep, third version: Claude Code installs by default on aifoundry1 too (installed 22:38, all three; the first at 16:10) | onboarding, run by a new user as themselves: looks (cards, `et-who`, `et-usage`, people by process, disk), sets up what is missing (linger, Claude Code, a `claude` tmux session, a sparse clone), prints the Remote Control steps and the rules; `--check`, `--dry-run`; no sudo, never opens a card ([docs/lab-start/README.md](../../docs/lab-start/README.md)) |
 | `et-usage/` | `/usr/local/sbin/et-usaged` (the service `et-usaged`, user `et-usage`, two capabilities), `/usr/local/bin/et-usage`, `/etc/default/et-usaged`, logs in `/var/log/et-usage/` (readable by every user) | 0755 root | 30 Sep (installed 20:54, all three; aifoundry1 with `--skip-counters 0 --skip-pci 0000:01:00.0`) | the card-usage logger: which process of which user holds each card's nodes or lock, from when to when, by inotify and `/proc`, never opening a card; `et-usage` prints the last 24 hours, `--json` feeds the lab dashboard ([et-usage/README.md](et-usage/README.md)) |
 | `et-lab-manifest` | `/usr/local/bin/et-lab-manifest` | 0755 root | 25 Sep, unchanged | prints the machine facts a measurement should record ([lab-access.md](../../docs/lab-access.md)) |
 | `60-labfix-et-who` | `/etc/update-motd.d/60-labfix-et-who` | 0755 root | 25 Sep, unchanged | the login banner's live part: what `et-holders` prints |
-| `motd-aifoundry1`, `-2`, `-3` | `/etc/motd` on that host | 0644 root | 30 Sep: two lines on card-use logging and `et-lab-start` (installed 30 Sep 20:58, all three; the 27 Sep text otherwise) | the login banner's fixed part: the machine's cards, clocks and rules |
+| `motd-aifoundry1`, `-2`, `-3` | `/etc/motd` on that host | 0644 root | 30 Sep: two lines on card-use logging and `et-lab-start` (installed 20:58, all three), and aifoundry1's disk line after the cleanup (installed 22:38; the 27 Sep text otherwise) | the login banner's fixed part: the machine's cards, clocks and rules |
 
 Three more files from 25 September are one-liners, described here rather than kept as files (all present on the
 three hosts on 28 September):
@@ -94,9 +94,10 @@ sudoers rule above. A run as `nobody` itself needs root to try, and waits for th
 ### The daily timer (not installed yet; lab report U18)
 
 A oneshot service as `nobody` and a daily timer. `SuccessExitStatus=1` because the check exits 1 whenever it
-prints a WARN (aifoundry1 does every day: card 0's events, the 95% pool); without it the unit would fail and leave
-the system "degraded". `SupplementaryGroups=systemd-journal` lets it read the system journal for the journal line;
-leave it out and that line reads "not checked". Its output goes to the journal: `journalctl -u et-lab-health`.
+prints a WARN (aifoundry1 does every day: card 0's events, and until 30 September its 95% pool); without it the
+unit would fail and leave the system "degraded". `SupplementaryGroups=systemd-journal` lets it read the system
+journal for the journal line; leave it out and that line reads "not checked". Its output goes to the journal:
+`journalctl -u et-lab-health`.
 
 ```
 # /etc/systemd/system/et-lab-health.service
