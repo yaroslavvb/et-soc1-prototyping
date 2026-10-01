@@ -1,0 +1,2667 @@
+{
+ "meta": {
+  "written": "2026-10-01",
+  "by": "build_ladder.py",
+  "inputs": [
+   "research/process.json",
+   "research/particles.json",
+   "research/studio45.json",
+   "research/bernal-geo.json"
+  ],
+  "egg": "the levels above the rack are an easter egg (the owner, 1 Oct 2026 07:25 PDT): no written hierarchy names them; a reader finds them by pressing Up",
+  "kinds": [
+   "measured",
+   "spec",
+   "derived",
+   "inferred",
+   "outside",
+   "generic",
+   "owner",
+   "hypothesis",
+   "unknown"
+  ]
+ },
+ "nodes": {
+  "lib.finfet": {
+   "name": "FinFET transistor",
+   "short": "FinFET",
+   "m": 5.7e-08,
+   "kind": "outside",
+   "f": "n7.cpp",
+   "blurb": "The switch everything is made of. A voltage on the gate decides whether current flows: at 0 V the path along the fin is shut; at the supply rail (0.517 V on a minion) the gate's field pulls a thin sheet of electrons into the fin, and current flows from source to drain. The gate drapes over the fins on three sides.",
+   "facts": [
+    "el.switch",
+    "el.rails",
+    "n7.cpp",
+    "n7.fin-pitch",
+    "n7.two-fin",
+    "n7.cells",
+    "n7.generation",
+    "n7.litho",
+    "n7.features",
+    "n7.vt-options",
+    "n7.vt-abs",
+    "n7.ss",
+    "n7.dibl",
+    "el.off-not-off",
+    "el.ss-80c",
+    "el.finfet-why",
+    "et.nominal-075",
+    "et.sweet-spot",
+    "et.v-minion",
+    "el.half-energy",
+    "et.leak-per-tr",
+    "et.leakage",
+    "et.leak-double",
+    "n7.contacts-co",
+    "dope.n-sd",
+    "dope.p-sd",
+    "n7.density-hd",
+    "n7.hpc"
+   ]
+  },
+  "lib.fin": {
+   "name": "The fin, in section",
+   "short": "Fin",
+   "m": 5.2e-08,
+   "kind": "outside",
+   "f": "n7.fin-height",
+   "blurb": "A wall of crystalline silicon 6 nm thick and 52 nm tall, tapered with a rounded top; fins stand 30 nm apart. The gate wraps over three sides, so it holds the channel shut tightly: that is why fins replaced flat transistors.",
+   "note": "N7's fin: 6 nm wide and 52 nm tall (WikiChip Fuse on TSMC's IEDM 2016 paper); the earlier drawing's 6-7 by 45-50 nm, inferred from 10 nm-class sections, is superseded",
+   "facts": [
+    "n7.fin-width",
+    "n7.fin-height",
+    "n7.fin-pitch",
+    "n7.weff",
+    "el.finfet-why",
+    "gate.hfo2",
+    "gate.eot",
+    "gate.metals",
+    "gate.undoped-vt",
+    "gate.cap-fin",
+    "n7.contacts-co",
+    "cmp.tsmc10",
+    "cmp.intel10",
+    "cmp.gf7"
+   ]
+  },
+  "lib.gate": {
+   "name": "Gate stack",
+   "short": "Gate stack",
+   "m": 1.65e-08,
+   "kind": "outside",
+   "f": "n7.leff",
+   "blurb": "The gate: a metal electrode on an insulating layer only a few atoms thick (hafnium oxide on a thin silicon oxide), wrapped over the top and both sides of the fin. Its metal's work function sets the voltage at which the transistor turns on.",
+   "note": "effective gate length about 16.5 nm (N7, Dick James on IEDM 2016); the earlier 20 nm (IRDS, 7 nm-class) is superseded",
+   "facts": [
+    "n7.leff",
+    "gate.hfo2",
+    "gate.eot",
+    "gate.metals",
+    "gate.undoped-vt",
+    "gate.cap-fin",
+    "n7.generation",
+    "n7.vt-options"
+   ]
+  },
+  "lib.channel": {
+   "name": "Channel (the silicon under the gate)",
+   "short": "Channel",
+   "m": 1.65e-08,
+   "kind": "outside",
+   "f": "n7.leff",
+   "blurb": "The strip of fin under the gate, 16.5 nm long, where the current flows: about 257,000 silicon atoms and almost no dopant atoms. Off, it is nearly empty of free electrons; on, the gate pulls in about a hundred.",
+   "note": "the channel's length, the effective gate length of N7: 16.5 nm; the channel is 6 nm wide and 52 nm tall",
+   "facts": [
+    "n7.leff",
+    "dope.count-channel",
+    "si.planes-width",
+    "el.channel-electrons",
+    "el.off-channel",
+    "el.off-not-off",
+    "et.leak-per-tr",
+    "n7.ss",
+    "n7.dibl",
+    "si.ni",
+    "si.mobility",
+    "dope.channel",
+    "dope.levels",
+    "gate.undoped-vt",
+    "p.atom.9",
+    "p.dopant.7",
+    "p.atom.10"
+   ]
+  },
+  "lib.si": {
+   "name": "Silicon crystal",
+   "short": "Silicon crystal",
+   "m": 5.431e-10,
+   "kind": "outside",
+   "f": "si.lattice",
+   "blurb": "Silicon atoms in a diamond lattice, each bonded to four neighbours. Every outer electron is held in a bond; freeing one takes 1.12 eV, 43 times the thermal energy at room temperature, so pure silicon barely conducts. A transistor's electrons come from its doped source instead.",
+   "facts": [
+    "si.lattice",
+    "si.density",
+    "si.planes-width",
+    "si.bandgap",
+    "el.kt",
+    "si.ni",
+    "dope.donor-acceptor",
+    "si.mobility",
+    "p.atom.7",
+    "p.atom.8",
+    "p.atom.6"
+   ]
+  },
+  "lib.dramcell": {
+   "name": "A DRAM cell, in section",
+   "short": "DRAM cell",
+   "m": 1e-07,
+   "kind": "inferred",
+   "f": "size.lib.dramcell",
+   "blurb": "A DRAM bit is charge on one tiny capacitor, reached through one transistor. With no circuit to restore it, the charge leaks away, so every row is read and rewritten every 32 ms. Drawn generically: the card's DRAM is made on a DRAM process, not TSMC N7, and its generation is not known.",
+   "facts": [
+    "el.dram-cell",
+    "el.dram-leak",
+    "size.lib.dramcell",
+    "el.sram-electrons",
+    "et.v-other"
+   ]
+  },
+  "p.atom": {
+   "name": "A silicon atom",
+   "short": "Atom",
+   "m": 2.352e-10,
+   "kind": "derived",
+   "f": "size.p.atom",
+   "blurb": "One of the crystal's atoms: a tiny nucleus with 14 electrons around it. Only the outer four take part in bonds and in electronics; the other ten sit deep inside, held 20 to 300 times more tightly.",
+   "facts": [
+    "size.p.atom",
+    "p.atom.1",
+    "p.atom.2",
+    "p.atom.3",
+    "p.atom.4",
+    "p.atom.5",
+    "p.atom.6",
+    "p.atom.7",
+    "p.atom.8",
+    "p.atom.9",
+    "p.atom.10",
+    "p.atom.11",
+    "p.core.1",
+    "p.core.2",
+    "p.core.3",
+    "p.core.4",
+    "si.atom"
+   ]
+  },
+  "p.dopant": {
+   "name": "A dopant atom: phosphorus in the crystal",
+   "short": "Dopant atom",
+   "m": 2.352e-10,
+   "kind": "derived",
+   "f": "size.p.atom",
+   "blurb": "A foreign atom in a silicon atom's place. Phosphorus brings five outer electrons, one more than the bonds need, and that spare electron is free to carry current; boron brings three, leaving a gap (a hole) that carries current the other way. This is how a transistor's source and drain are made to conduct.",
+   "facts": [
+    "p.dopant.1",
+    "p.dopant.2",
+    "p.dopant.3",
+    "p.dopant.4",
+    "p.dopant.5",
+    "p.dopant.6",
+    "p.dopant.7",
+    "dope.n-sd",
+    "dope.p-sd",
+    "dope.donor-acceptor",
+    "dope.count-sd",
+    "el.kt"
+   ]
+  },
+  "p.nucleus": {
+   "name": "The silicon-28 nucleus",
+   "short": "Nucleus",
+   "m": 8.06e-15,
+   "kind": "derived",
+   "f": "size.p.nucleus",
+   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: a thirty-thousandth of the atom's width but 99.97% of its mass. Nothing in a chip ever touches it.",
+   "facts": [
+    "size.p.nucleus",
+    "p.nucleus.1",
+    "p.nucleus.2",
+    "p.nucleus.3",
+    "p.nucleus.4",
+    "p.nucleus.5",
+    "p.nucleus.6",
+    "p.nucleus.7",
+    "p.nucleus.8",
+    "si.nucleus",
+    "p.atom.11"
+   ]
+  },
+  "p.nucleon": {
+   "name": "A proton",
+   "short": "Proton",
+   "m": 1.6815e-15,
+   "kind": "outside",
+   "f": "p.nucleon.1",
+   "blurb": "A proton is three quarks (up, up, down) held by gluons; a neutron is up, down, down. Unlike the electron, it has a real size, because it is a bound state, and most of its mass is the energy of what goes on inside.",
+   "facts": [
+    "p.nucleon.1",
+    "p.nucleon.2",
+    "p.nucleon.3",
+    "p.nucleon.4",
+    "p.nucleon.5",
+    "p.nucleon.6",
+    "p.nucleon.7",
+    "p.nucleon.8"
+   ]
+  },
+  "p.quark": {
+   "name": "A quark",
+   "short": "Quark",
+   "m": 8.6e-19,
+   "kind": "outside",
+   "f": "p.quark.1",
+   "bound": {
+    "txt": "< 4.3 × 10⁻¹⁹ m",
+    "words": "no size measured: a radius under 4.3 × 10⁻¹⁹ m"
+   },
+   "blurb": "As far as any experiment can tell, a quark is a point. The disc here is only the limit: if a quark has a size, it is smaller than this, under a two-thousandth of the proton. Quarks are never found alone; pull one out and the energy makes new quarks.",
+   "facts": [
+    "p.quark.1",
+    "p.quark.2",
+    "p.quark.3",
+    "p.quark.4",
+    "p.quark.5",
+    "p.quark.6",
+    "p.quark.7",
+    "p.quark.8"
+   ]
+  },
+  "p.electron": {
+   "name": "An electron",
+   "short": "Electron",
+   "m": 4e-20,
+   "kind": "outside",
+   "f": "p.electron.2",
+   "bound": {
+    "txt": "< 2 × 10⁻²⁰ m",
+    "words": "no size measured: a radius under 2 × 10⁻²⁰ m"
+   },
+   "blurb": "The particle that carries every current in the chip. Its charge and mass are known to 10 digits, but no experiment has found any size: as far as we know it is a point. The 'cloud' of the atom is where the electron is likely to be, not the electron itself.",
+   "facts": [
+    "p.electron.1",
+    "p.electron.2",
+    "p.electron.3",
+    "p.electron.4",
+    "p.electron.5",
+    "p.electron.6",
+    "p.electron.7",
+    "el.electron"
+   ]
+  },
+  "p.planck": {
+   "name": "The Planck length",
+   "short": "Planck length",
+   "m": 1.616255e-35,
+   "kind": "outside",
+   "f": "p.planck.1",
+   "blurb": "The length built from gravity, quantum mechanics and the speed of light. Here, physicists expect space and time themselves to need a quantum description that nobody has yet; whether anything can be smaller is unknown. Between the quark's limit and here lie 16 powers of ten that no experiment has reached.",
+   "facts": [
+    "p.planck.1",
+    "p.planck.2",
+    "p.planck.3",
+    "p.planck.4",
+    "p.planck.5"
+   ]
+  },
+  "p.wrap": {
+   "name": "The ring of sizes",
+   "short": "Ring of sizes",
+   "m": null,
+   "kind": "unknown",
+   "f": null,
+   "conceptual": true,
+   "blurb": "This is not further out in space. The ring is a picture of every size at once, the smallest joined to the largest; the links across it are physics, not distance. Looking far out is looking back in time, to an early universe that was a sea of quarks.",
+   "facts": [
+    "p.wrap.1",
+    "p.wrap.2",
+    "p.wrap.3",
+    "p.wrap.4",
+    "p.wrap.5",
+    "p.wrap.6",
+    "p.wrap.7",
+    "p.wrap.8",
+    "ring.mid",
+    "e.cmb.1",
+    "e.cmb.2",
+    "e.cmb.3",
+    "e.cmb.4",
+    "e.cmb.5",
+    "e.cmb.6",
+    "e.qcd.1",
+    "e.qcd.2",
+    "e.qcd.3",
+    "e.qcd.4",
+    "e.qcd.5",
+    "e.qcd.6",
+    "e.stars.1",
+    "e.stars.2",
+    "e.stars.3",
+    "e.stars.4",
+    "e.bbn.1",
+    "e.bbn.2",
+    "e.bbn.3",
+    "e.bbn.4",
+    "e.bbn.5",
+    "e.bbn.6",
+    "e.ew.1",
+    "e.ew.2",
+    "e.ew.3",
+    "e.planck.1",
+    "e.planck.2"
+   ],
+   "egg": true
+  },
+  "bernal": {
+   "name": "Bernal Heights",
+   "short": "Bernal Heights",
+   "m": 2200.0,
+   "kind": "derived",
+   "f": "b.2",
+   "blurb": "Bernal Heights, a hill neighbourhood of about 26,000 people in south-east San Francisco. The hill is red chert: quartz, silicon dioxide, from the shells of plankton that lived 100 to 200 million years ago. Refined, the same silicon is the die. Light crosses the neighbourhood in 7.3 µs, about 4,400 of the chip's clock ticks.",
+   "facts": [
+    "b.1",
+    "b.2",
+    "b.3",
+    "b.4",
+    "b.5",
+    "b.6",
+    "b.7",
+    "b.8",
+    "b.9"
+   ],
+   "egg": true
+  },
+  "st29": {
+   "name": "29th Street",
+   "short": "29th Street",
+   "m": 1293.0,
+   "kind": "derived",
+   "f": "st.1",
+   "blurb": "29th Street, 1.3 km long, drops about 95 m from the hills of Noe Valley to the flats where the Mission meets Bernal Heights. Light runs its length in 4.3 µs, about 2,600 ticks of the chip's clock.",
+   "facts": [
+    "st.1",
+    "st.2",
+    "st.3",
+    "s45.1"
+   ],
+   "egg": true
+  },
+  "studio45": {
+   "name": "Studio 45",
+   "short": "Studio 45",
+   "m": 37.0,
+   "kind": "derived",
+   "f": "s45.6",
+   "blurb": "Studio 45, a co-working space and workshop for people who build hardware: the lab's rack is here. Light crosses the building in 123 ns, 74 ticks of the chip's clock.",
+   "note": "the building at its address, about 37 m deep and 9 m wide (DataSF building footprints); where the rack stands in it is not recorded",
+   "facts": [
+    "s45.1",
+    "s45.2",
+    "s45.3",
+    "s45.4",
+    "s45.5",
+    "s45.6",
+    "s45.7",
+    "s45.8"
+   ],
+   "egg": true
+  }
+ },
+ "more": {
+  "die": [
+   "et.process",
+   "et.process-n7",
+   "et.transistors",
+   "et.die-area",
+   "et.masks",
+   "et.density",
+   "et.sram-bytes",
+   "et.cores",
+   "et.power",
+   "et.leakage",
+   "et.leak-double",
+   "n7.start",
+   "n7.litho",
+   "n7.vs-n16",
+   "n7.density-hd",
+   "el.dynamic"
+  ],
+  "package": [
+   "et.package"
+  ],
+  "minion": [
+   "et.sweet-spot",
+   "et.lib-04",
+   "et.one-plane",
+   "et.v-minion",
+   "el.half-energy",
+   "et.cdyn-target",
+   "et.cdyn-measured",
+   "et.electrons-per-cycle",
+   "et.tr-per-minion",
+   "et.ops-per-ghz",
+   "et.tensor-512",
+   "et.vt-area",
+   "et.custom-sram",
+   "et.range"
+  ],
+  "shire": [
+   "et.shire-supplies",
+   "et.sram-nominal",
+   "et.per-shire-v",
+   "et.custom-sram"
+  ],
+  "shire.neigh": [
+   "et.wires-slow",
+   "et.icache"
+  ],
+  "mesh": [
+   "et.v-noc"
+  ],
+  "memshire": [
+   "et.v-other"
+  ],
+  "vpu.lane": [
+   "et.trans-rom"
+  ],
+  "die.metal": [
+   "n7.mmp",
+   "n7.metal-layers",
+   "n7.cu-co-liner",
+   "n7.contacts-co",
+   "wire.cu",
+   "n7.litho"
+  ],
+  "lib.sram6t": [
+   "el.sram-electrons",
+   "el.sram-node",
+   "n7.sram-hd",
+   "n7.sram-dims",
+   "n7.sram-vmin",
+   "et.sram-nominal",
+   "et.v-sram",
+   "et.custom-sram"
+  ],
+  "lib.latch": [
+   "el.sram-electrons",
+   "et.one-plane",
+   "et.custom-sram",
+   "et.v-minion"
+  ],
+  "lib.flipflop": [
+   "et.flip-reg",
+   "el.bus-bit",
+   "el.dynamic"
+  ],
+  "lib.inverter": [
+   "el.switch",
+   "el.rails",
+   "el.dynamic",
+   "n7.cells"
+  ],
+  "lib.nand2": [
+   "el.switch",
+   "el.rails"
+  ],
+  "lib.xor": [
+   "el.switch"
+  ],
+  "dram.cell": [
+   "el.dram-cell",
+   "el.dram-leak"
+  ]
+ },
+ "facts": {
+  "et.process": {
+   "statement": "The ET-SoC-1 is made in TSMC 7 nm.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "quote": "\"The Esperanto supercomputer on a chip has been fabricated in TSMC 7-nm technology and contains over 24 billion transistors.\" (p. 37)"
+  },
+  "et.process-n7": {
+   "statement": "WikiChip names the process as TSMC N7 (the first-generation 7 nm, not N7+ with EUV); Esperanto's papers say only \"TSMC 7 nm\".",
+   "kind": "outside",
+   "source": "D. Schor, \"A Look At The ET-SoC-1, Esperanto's Massively Multi-Core RISC-V Approach To AI\", WikiChip Fuse, 16 May 2021 (public 10 Jul 2021); read via the Internet Archive capture of 10 Jul 2021 (the site refuses connections)",
+   "url": "https://fuse.wikichip.org/news/4911/a-look-at-the-et-soc-1-esperantos-massively-multi-core-risc-v-approach-to-ai/",
+   "note": "Whether the silicon is N7 or the IP-compatible N7P (same design rules) is not published.",
+   "quote": "\"Physically, the chip is fabricated on TSMC's N7 process technology.\""
+  },
+  "et.transistors": {
+   "statement": "Over 24 billion transistors.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "note": "WikiChip (May 2021, before Hot Chips) gave 23.8 billion: \"packing 23.8 billion transistors\".",
+   "quote": "\"The ET-SoC-1 chip is implemented in TSMC 7-nm technology using over 24 billion transistors.\" (p. 31); Hot Chips 33 slide 20: \"24 billion transistors\""
+  },
+  "et.die-area": {
+   "statement": "Die area 570 mm².",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "quote": "\"It has a die area of 570 mm2 and uses 89 mask layers.\" (p. 37); slide 20: \"Die-area: 570 mm2\""
+  },
+  "et.masks": {
+   "statement": "89 mask layers: 89 photolithography steps define the wafer, from fins up to the top metal.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "quote": "\"uses 89 mask layers\" (p. 37)"
+  },
+  "et.package": {
+   "statement": "The package is 45 x 45 mm, with 2,494 balls to the board and over 30,000 bumps to the die.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), \"Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip\", Hot Chips 33 slides, 24 Aug 2021",
+   "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
+   "quote": "\"Package: 45x45mm with 2494 balls to PCB, over 30,000 bumps to die\" (slide 20)"
+  },
+  "et.sram-bytes": {
+   "statement": "Over 160 million bytes of on-die SRAM (caches and scratchpads).",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), \"Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip\", Hot Chips 33 slides, 24 Aug 2021",
+   "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
+   "note": "The datasheet's 140 MB is the 35 shire caches alone (repository fact chip.sram-total). Adding the 1,088 minion L1s (4 KiB) and 136 neighbourhood I-caches (32 KiB) gives about 156 million bytes; the rest (Maxion L1s, tags, ECC, buffers) is not itemised anywhere (inference).",
+   "quote": "\"Over 160 million bytes of on-die SRAM used for caches and scratchpad memory\" (slide 20)"
+  },
+  "et.cores": {
+   "statement": "1,088 ET-Minion cores, 4 ET-Maxion cores and 1 service processor: 1,093 RISC-V cores.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), \"Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip\", Hot Chips 33 slides, 24 Aug 2021",
+   "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
+   "quote": "\"1088 energy-efficient ET-Minion 64-bit RISC-V in-order cores each with a vector/tensor unit\" / \"4 high-performance ET-Maxion 64-bit RISC-V out-of-order cores\" (slide 2); \"1 RISC-V service processor\" (slide 20)"
+  },
+  "et.range": {
+   "statement": "Operating range: ET-Minions 300 MHz to 2 GHz (typical 500 MHz to 1.5 GHz expected); the cards here run 600-800 MHz.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), \"Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip\", Hot Chips 33 slides, 24 Aug 2021",
+   "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
+   "quote": "\"OPERATING RANGE: 300 MHz TO 2 GHz\" (slide 7); \"Typical operation 500 MHz to 1.5 GHz expected\" (slide 20)"
+  },
+  "et.power": {
+   "statement": "Typical power under 20 W, adjustable from 10 to 60+ W in software.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), \"Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip\", Hot Chips 33 slides, 24 Aug 2021",
+   "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
+   "quote": "\"Power typically < 20 watts, can be adjusted for 10 to 60+ watts under SW control\" (slide 20)"
+  },
+  "et.shire-supplies": {
+   "statement": "Each minion shire has its own low-voltage supply inputs, so its voltage can be trimmed against threshold-voltage variation and for DVFS.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), \"Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip\", Hot Chips 33 slides, 24 Aug 2021",
+   "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
+   "quote": "\"Each Minion Shire has independent low voltage power supply inputs that can be finely adjusted to mitigate Vt variation effects and enable DVFS\" (slide 20)"
+  },
+  "et.nominal-075": {
+   "statement": "0.75 V is \"the nominal voltage in 7 nm\" (Esperanto); TSMC's N7 core transistors are designed around it.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "quote": "\"Reducing the operating voltage to 0.75 V, the nominal voltage in 7 nm, would result in 164 W, still way too high.\" (p. 33)"
+  },
+  "et.sweet-spot": {
+   "statement": "Esperanto's chosen region: minions between 300 and 500 mV, near the best energy efficiency (0.3 V gave 20x the efficiency of the highest voltage in their model).",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "note": "The voltage curve is modelled, with cores re-synthesised at each voltage (repository R6).",
+   "quote": "\"Esperanto's sweet spot for achieving best performance will usually be for operating our ET-Minions between 300 and 500 mV, that is, nearest the best energy efficiency points.\" (p. 33)"
+  },
+  "et.lib-04": {
+   "statement": "The standard-cell libraries were re-characterised at 0.4 V for the timing tools; the pipeline has very few gates per stage to keep MHz up at low voltage.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "quote": "\"The core uses an in-order pipeline optimized to have very few gates per pipeline stage to improve megahertz when operated at low voltages. For timing and other CAD tools, we had libraries recharacterized at 0.4 V.\" (p. 33)"
+  },
+  "et.one-plane": {
+   "statement": "The whole minion, its 4 KB L1 included, is on one low-voltage power plane.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "quote": "\"To simplify physical design, the entire ET-Minion, including its 4-KB L1 caches, operates on a single low-voltage power plane.\" (p. 33)"
+  },
+  "et.custom-sram": {
+   "statement": "Esperanto designed its own low-voltage memory cells instead of TSMC's standard SRAM for the minion: larger cells that work far below nominal voltage, around 400 mV. (The repository finds the minion L1 and register files are latch arrays.)",
+   "kind": "outside",
+   "source": "D. Schor, \"A Look At The ET-SoC-1, Esperanto's Massively Multi-Core RISC-V Approach To AI\", WikiChip Fuse, 16 May 2021 (public 10 Jul 2021); read via the Internet Archive capture of 10 Jul 2021 (the site refuses connections)",
+   "url": "https://fuse.wikichip.org/news/4911/a-look-at-the-et-soc-1-esperantos-massively-multi-core-risc-v-approach-to-ai/",
+   "note": "Art Swift (Esperanto CEO) quoted by WikiChip. Repository: the L1 is an LRAM latch array (memory-levels fact l1:l1.lram-model and research-inside.md).",
+   "quote": "\"Esperanto has gone further and designed its own custom SRAM instead of using TSMC's standard SRAM offering. The cells, while physically larger, can stably operate at considerably lower voltage - far below nominal. 'When I talk about low voltage operations, I really mean operating at much lower than nominal voltages. So, if nominal is 0.75 V or so, we are operating on the order of 400 mV,' Swift said.\""
+  },
+  "et.sram-nominal": {
+   "statement": "The shire's four 1 MB SRAM banks run near the process-nominal voltage, for density; the mesh has its own low-voltage domain.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "quote": "\"These SRAM banks operate near the process-nominal supply voltage to allow higher density than the smaller caches within each core.\" / \"Shires are connected to each other via an on-chip mesh interconnect operated on its own low-voltage domain.\" (p. 35)"
+  },
+  "et.wires-slow": {
+   "statement": "7 nm wires are slow, so minions were grouped in eights (neighbourhoods) before wire length became a problem.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "quote": "\"Physical design plays an important role in chip architecture as 7-nm wires are relatively slow. We found it convenient to group eight ET-Minion cores together before wire length became a problem.\" (p. 34)"
+  },
+  "et.cdyn-target": {
+   "statement": "Esperanto's target: 10 mW per minion at 1 GHz and 0.425 V, i.e. 0.04 nF switched per cycle (vs 2.2 nF for a 3 GHz x86 core).",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), \"Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip\", Hot Chips 33 slides, 24 Aug 2021",
+   "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
+   "quote": "\"10mW ET-Minion core (~10W for 1K cores) 0.01 W 1 GHz 0.425v 0.04nF\" (slide 5); \"Power (Watts) = Cdynamic x Voltage2 x Frequency + Leakage\""
+  },
+  "et.ops-per-ghz": {
+   "statement": "Each minion peaks at 128 int8 operations per cycle (128 GOPS per GHz); 16 fp32 or 32 fp16 operations per cycle.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), \"Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip\", Hot Chips 33 slides, 24 Aug 2021",
+   "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
+   "quote": "\"Each ET-Minion can deliver peak of 128 Int8 GOPS per GHz\"; \"16 32-bit single precision operations per cycle\"; \"32 16-bit half precision operations per cycle\" (slide 7)"
+  },
+  "et.tensor-512": {
+   "statement": "A tensor instruction runs for up to 512 cycles while the integer pipeline sleeps.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "quote": "\"Esperanto added new tensor instructions that utilize the full vector width every cycle and run for up to 512 cycles.\" / \"During these long tensor instructions, the RISC-V integer pipeline is put to sleep\" (pp. 33-34)"
+  },
+  "et.trans-rom": {
+   "statement": "The transcendental unit is ROM-based, trading area for low power.",
+   "kind": "outside",
+   "source": "D. Schor, \"A Look At The ET-SoC-1, Esperanto's Massively Multi-Core RISC-V Approach To AI\", WikiChip Fuse, 16 May 2021 (public 10 Jul 2021); read via the Internet Archive capture of 10 Jul 2021 (the site refuses connections)",
+   "url": "https://fuse.wikichip.org/news/4911/a-look-at-the-et-soc-1-esperantos-massively-multi-core-risc-v-approach-to-ai/",
+   "quote": "\"The trans unit is ROM-based, favoring lower power over silicon.\""
+  },
+  "et.vt-area": {
+   "statement": "In Esperanto's minion plot (drawn roughly to scale) the vector/tensor unit takes far more area than the integer pipeline.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), same title, IEEE Micro 42(3), May/June 2022, pp. 31-38 (hosted by Esperanto)",
+   "url": "https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf",
+   "quote": "\"you can see that the vector/tensor unit takes far more area than the integer pipeline\" (p. 33, Figure 2)"
+  },
+  "et.icache": {
+   "statement": "Eight minions share one 32 KB instruction cache.",
+   "kind": "spec",
+   "source": "D. Ditzel et al. (Esperanto), \"Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip\", Hot Chips 33 slides, 24 Aug 2021",
+   "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
+   "quote": "\"Instruction Cache 32 KB shared\" (slide 8)"
+  },
+  "et.density": {
+   "statement": "Average density 24 billion / 570 mm² = 42 million transistors per mm², 46% of N7's densest logic (91.2 MTr/mm²): SRAM periphery, analog (PLLs, PHYs), I/O and wiring take the rest.",
+   "kind": "derived",
+   "source": "arithmetic on et.transistors, et.die-area and n7.density-hd",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "quote": "24e9 / 570 mm² = 42.1e6 per mm²; 42.1 / 91.2 = 0.46"
+  },
+  "et.tr-per-minion": {
+   "statement": "At most about 15 million transistors per minion: what is left after the shire caches' bitcells (35 x 4 MiB x 6 transistors = 7.0 billion), shared over 1,088 minions; the true count is lower because the rest also holds the mesh, memory shires, PHYs, PCIe and Maxions.",
+   "kind": "inferred",
+   "source": "arithmetic on et.transistors and chip.sram-total (repository)",
+   "note": "Assumes 6-transistor cells for the shire caches (the bitcell is not documented: memory-levels u.bitcell). No floorplan below the shire is published.",
+   "quote": "(24e9 - 35 x 4 x 2^20 x 8 x 6) / 1088 = 15.6e6"
+  },
+  "et.v-minion": {
+   "statement": "Minion rail: 0.517 V at 600 MHz on die (0.568 V at 700, 0.618 V at 800); firmware limits 0.40-0.62 V.",
+   "kind": "measured",
+   "source": "repository: docs/findings/16-dvfs-and-leakage.md:20; docs/findings/05-claims.md:26-27, 41",
+   "quote": "\"Three operating points: 600 MHz at 0.517 V, 700 at 0.568, 800 at 0.618.\" (16-dvfs-and-leakage.md)"
+  },
+  "et.v-sram": {
+   "statement": "SRAM rail (shire-cache arrays): 0.703-0.707 V on die; firmware limits 0.66-0.85 V.",
+   "kind": "measured",
+   "source": "repository: chip facts volt.sram; memory-levels l2:l2.voltage.idle, l2:l2.voltage.limits"
+  },
+  "et.v-noc": {
+   "statement": "Mesh rail: 0.485 V set point, 0.483-0.486 V on die.",
+   "kind": "measured",
+   "source": "repository: chip facts mesh.voltage, L101"
+  },
+  "et.v-other": {
+   "statement": "Other rails on die: DDR (memory shires) 0.76-0.77 V, Maxion 0.58-0.59 V, I/O shire 0.75 V, PCIe shire 0.75 V; LPDDR4X VDDQ 1.1 V, VDDQLP 0.64 V.",
+   "kind": "measured",
+   "source": "repository: chip facts volt.other"
+  },
+  "et.per-shire-v": {
+   "statement": "Per-shire minion-rail voltage at idle: 513-522 mV across the 34 minion shires.",
+   "kind": "measured",
+   "source": "repository: chip facts L123 (docs/findings/05-claims.md:41)"
+  },
+  "et.leakage": {
+   "statement": "Leakage on aifoundry2 at 80 °C: 20-29 W, 55-80% of an idle card and 31-45% of a 64 W random-data matmul; it rises 0.65 W per °C (fit: 23.3 W x exp((T-80)/36)).",
+   "kind": "measured",
+   "source": "repository: docs/findings/16-dvfs-and-leakage.md (Kanter table row \"Leakage is typically 5-30%\"); docs/research/why-low-power.md \"What this card measures\"",
+   "quote": "\"Fitted: 12.6 W fixed + 23.3 W x exp((T - 80)/36) of leakage\" (why-low-power.md)"
+  },
+  "et.leak-double": {
+   "statement": "By that fit, leakage doubles every 25 °C.",
+   "kind": "derived",
+   "source": "arithmetic on et.leakage: 36 °C x ln 2",
+   "quote": "36 x 0.693 = 24.95 °C"
+  },
+  "et.leak-per-tr": {
+   "statement": "Spread over 24 billion transistors, 23 W of leakage is about 1 nW each: roughly 1.4-1.9 nA, about 10 billion electrons a second through every transistor that is \"off\".",
+   "kind": "derived",
+   "source": "arithmetic on et.leakage and et.transistors",
+   "note": "An average over every kind of transistor and rail: SRAM, logic, analog; the leakage is not split by rail.",
+   "quote": "23.3 W / 24e9 = 0.97 nW; at 0.52-0.705 V that is 1.4-1.9 nA = 0.9e10-1.2e10 electrons/s"
+  },
+  "et.cdyn-measured": {
+   "statement": "Measured switched capacitance per minion: 0.168 nF on random fp32 matmul (0.064 on ones, 0.012 on zeros), against the 0.04 nF target.",
+   "kind": "measured",
+   "source": "repository: docs/research/why-low-power.md \"What this card measures\"",
+   "quote": "\"Cdynamic = P/(V^2 f): 0.012, 0.064 and 0.168 nF against the slide's 0.04 nF target\""
+  },
+  "et.electrons-per-cycle": {
+   "statement": "Each cycle of a minion on random fp32 matmul moves about 87 pC from the 0.517 V supply: 540 million electrons per minion per cycle (45 pJ).",
+   "kind": "derived",
+   "source": "arithmetic on et.cdyn-measured and et.v-minion",
+   "quote": "Q = C V = 0.168 nF x 0.517 V = 86.9 pC; / 1.602e-19 C = 5.4e8; E = C V^2 = 44.9 pJ"
+  },
+  "et.flip-reg": {
+   "statement": "Clocking one register bit in the tensor unit costs 3.18 fJ (fitted on aifoundry2): at 0.517 V that is an effective 11.9 fF charged, about 38,000 electrons from the supply.",
+   "kind": "derived",
+   "source": "repository: docs/energy-manual/03-instructions.md \"Where the tensor unit's energy goes: per flip\" (ffclk 3.179 fJ)",
+   "note": "Treats each clocking event as one full charge from the supply (E = C V^2); the effective capacitance includes the clock wiring and buffers that drive the flip-flop, not only the flip-flop.",
+   "quote": "C = E / V^2 = 3.179 fJ / 0.517^2 = 11.9 fF; Q = C V = 6.1 fC = 38,400 electrons"
+  },
+  "n7.start": {
+   "statement": "TSMC started N7 volume production in April 2018; first products include the Apple A12, Kirin 980, Snapdragon 855 and AMD Zen 2.",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "quote": "\"TSMC started mass production of their 7-nanometer node in April 2018. Since then we have seen a number of high-profile processors that make use of the technology including the Apple A12 and A12X, the Kirin 980, and soon Qualcomm's Snapdragon 855 and AMD Zen 2.\""
+  },
+  "n7.generation": {
+   "statement": "N7 is TSMC's 4th-generation FinFET and 5th-generation high-k metal gate: gate-last, with two gate-oxide thicknesses (thin for core logic, thick for I/O).",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "note": "What the two oxides are used for (core vs I/O transistors) is the usual meaning of \"dual gate oxide\"; TSMC does not say (generic).",
+   "quote": "\"This is a fourth-generation FinFET, fifth-generation HKMG, gate-last, dual gate oxide process.\""
+  },
+  "n7.litho": {
+   "statement": "N7 is patterned with 193 nm immersion (DUV) light, no EUV: fins by self-aligned quadruple patterning, gates and M0-M4 by double patterning.",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "quote": "\"For the 7-nanometer process, deep ultraviolet (DUV) 193 nm ArF Immersion lithography continues to be used.\" Design rules: Fin 30 SAQP; Poly 57 SADP; M0-M4 40 SADP; M5-M9 76 Single."
+  },
+  "n7.vs-n16": {
+   "statement": "TSMC: N7 gives about 30% more speed, 55% less power or 3x the logic density of its 16 nm.",
+   "kind": "outside",
+   "source": "TSMC, \"7nm Technology\" (N7/N6 platform page)",
+   "url": "https://www.tsmc.com/english/dedicatedFoundry/technology/platform_DCE_N7_N6",
+   "note": "The IEDM 2016 paper said 35-40% speed or >65% power and >3.3x routed gate density (ew-iedm16, dj-iedm16).",
+   "quote": "\"delivers up to a 30% speed improvement, a 55% power saving, and a 3 times logic density improvement over 16nm (N16) technology\""
+  },
+  "n7.fin-pitch": {
+   "statement": "Fin pitch 30 nm (fins patterned by self-aligned quadruple patterning).",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "note": "Also Wikipedia, \"7 nm process\" (TSMC N7 fin pitch 30 nm).",
+   "quote": "Transistor Profile table: \"Fin Pitch | 36 nm | 30 nm | 0.83x\" (10 nm, 7 nm); design rules \"Fin | 30 | SAQP\""
+  },
+  "n7.fin-width": {
+   "statement": "Fin width 6 nm (the same as TSMC 10 nm).",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "note": "Fins are tapered, wider at the base, with rounded tops (Siliconics on Intel 14 nm: \"Vertical fins! But still rounded fin tops\"; Intel 10 nm: \"fin width 5-15 nm, ~7 nm at half height\"); WikiChip does not say at what height its 6 nm is measured.",
+   "quote": "Transistor Profile table: \"Fin Width | 6 nm | 6 nm | 1.00x\""
+  },
+  "n7.fin-height": {
+   "statement": "Fin height 52 nm (42 nm at TSMC 10 nm): taller fins carry more current per footprint.",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "note": "The height of fin standing above the isolation oxide, as these tables quote it (not stated explicitly).",
+   "quote": "Transistor Profile table: \"Fin Height | 42 nm | 52 nm | 1.24x\"; \"Continuing to scale the fin width gives you a narrower channel while increasing the height to maintain a good effective width is done in order to improve the short channel characteristics and subthreshold slope\""
+  },
+  "n7.weff": {
+   "statement": "One fin gives about 110 nm of channel width: the gate wraps both 52 nm sides and the 6 nm top. N7 has over twice N16's effective width.",
+   "kind": "derived",
+   "source": "C. Hu, ch. 7 (the rule) with n7.fin-height and n7.fin-width",
+   "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch7.pdf",
+   "quote": "Hu: \"The channel width, W, is the sum of twice the fin height and the width of the fin.\" 2 x 52 + 6 = 110 nm. WikiChip: \"Compared to N16, N7 has over twice the effective channel width.\""
+  },
+  "n7.cpp": {
+   "statement": "Contacted gate pitch 57 nm in the dense cells (64 nm in the 7.5-track high-performance cells).",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "note": "WikiChip: \"while at IEDM TSMC reported slightly more aggressive pitches, the numbers shown in this article are the actual pitches used in their standard cells\"; Dick James speculated 54 nm from the IEDM paper.",
+   "quote": "\"For the transistor, the gate pitch has been further scaled down to 57 nm, however, the interconnect pitch halted at the 40 nm point in order to keep patterning at the SADP point.\" Flavors table: Gate Pitch 57 nm (low power) / 64 nm (high performance)"
+  },
+  "n7.leff": {
+   "statement": "Effective gate length about 16.5 nm: the length of channel the gate controls, between source and drain.",
+   "kind": "outside",
+   "source": "D. James (TechInsights/Chipworks), \"IEDM 2016 - Setting the Stage for 7.5 nm\", Solid State Technology \"Real Chips\" blog, 18 Jan 2017 (on S.-Y. Wu et al. (TSMC), \"A 7nm CMOS platform technology featuring 4th generation FinFET transistors with a 0.027um2 high density 6-T SRAM cell for mobile SoC applications\", IEDM 2016, paper 2.6)",
+   "url": "https://sst.semiconductor-digest.com/chipworks_real_chips_blog/2017/01/18/iedm-2016-setting-the-stage-for-75-nm/",
+   "note": "The physical (drawn) gate length is not published; comparable: TSMC 10 nm minimum Lg ~25 nm, Intel 10 nm 18 nm (Siliconics).",
+   "quote": "\"fifth-generation HKMG gate-last, dual gate oxide process ... effective gate length (leff) centered around 16.5 nm\""
+  },
+  "n7.ss": {
+   "statement": "Subthreshold swing about 65 mV per decade: below threshold, each 65 mV less on the gate cuts the current tenfold (the room-temperature limit is 60).",
+   "kind": "outside",
+   "source": "D. James (TechInsights/Chipworks), \"IEDM 2016 - Setting the Stage for 7.5 nm\", Solid State Technology \"Real Chips\" blog, 18 Jan 2017 (on S.-Y. Wu et al. (TSMC), \"A 7nm CMOS platform technology featuring 4th generation FinFET transistors with a 0.027um2 high density 6-T SRAM cell for mobile SoC applications\", IEDM 2016, paper 2.6)",
+   "url": "https://sst.semiconductor-digest.com/chipworks_real_chips_blog/2017/01/18/iedm-2016-setting-the-stage-for-75-nm/",
+   "quote": "\"Sub-threshold swing has been pushed down to ~65mV/decade, and DIBL is ~40 mV/V\""
+  },
+  "n7.dibl": {
+   "statement": "Drain-induced barrier lowering about 40 mV/V: raising the drain voltage by 1 V lowers the threshold by about 40 mV.",
+   "kind": "outside",
+   "source": "D. James (TechInsights/Chipworks), \"IEDM 2016 - Setting the Stage for 7.5 nm\", Solid State Technology \"Real Chips\" blog, 18 Jan 2017 (on S.-Y. Wu et al. (TSMC), \"A 7nm CMOS platform technology featuring 4th generation FinFET transistors with a 0.027um2 high density 6-T SRAM cell for mobile SoC applications\", IEDM 2016, paper 2.6)",
+   "url": "https://sst.semiconductor-digest.com/chipworks_real_chips_blog/2017/01/18/iedm-2016-setting-the-stage-for-75-nm/",
+   "quote": "\"DIBL is ~40 mV/V\""
+  },
+  "n7.vt-options": {
+   "statement": "Four threshold-voltage options spanning about 200 mV, set by different gate metals (faster but leakier, or slower and tighter).",
+   "kind": "outside",
+   "source": "D. James (TechInsights/Chipworks), \"IEDM 2016 - Setting the Stage for 7.5 nm\", Solid State Technology \"Real Chips\" blog, 18 Jan 2017 (on S.-Y. Wu et al. (TSMC), \"A 7nm CMOS platform technology featuring 4th generation FinFET transistors with a 0.027um2 high density 6-T SRAM cell for mobile SoC applications\", IEDM 2016, paper 2.6)",
+   "url": "https://sst.semiconductor-digest.com/chipworks_real_chips_blog/2017/01/18/iedm-2016-setting-the-stage-for-75-nm/",
+   "note": "The absolute threshold voltages are not published (unknown); which options the ET-SoC-1 uses is not published either.",
+   "quote": "\"four device Vt options with a range of ~200 mV\"; WikiChip: \"Different multi-Vt devices were developed for this process with a Vt range of around 200 mV.\""
+  },
+  "n7.vt-abs": {
+   "statement": "N7's absolute threshold voltages are not published. Running at 0.4-0.52 V and libraries characterised at 0.4 V imply the minion's transistors switch with a few hundred millivolts or less of threshold: near-threshold operation.",
+   "kind": "unknown",
+   "source": "open question; the inputs are et.lib-04, et.sweet-spot, et.v-minion"
+  },
+  "n7.mmp": {
+   "statement": "Metal pitch 40 nm for M0 to M4 (so the finest wires are about 20 nm wide), 76 nm for M5 to M9, 124 nm for M10, 720 nm for M11-M12.",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "note": "The IEDM paper as Dick James read it: \"1x metal pitch is 40 nm for M0 to M4, and M5 - M9 are 1.9x (76 nm)\". Line width ~half the pitch is the usual layout (generic).",
+   "quote": "Design rules: \"M0 | 40 | SADP\", \"M1-M4 | 40 | SADP | 1x\", \"M5-M9 | 76 | Single | 1.9x\", \"M10 | 124 | Single | 3.1x\", \"M11, M12 | 720 | Single | 18x\""
+  },
+  "n7.metal-layers": {
+   "statement": "The interconnect is a stack of about a dozen copper layers in low-k insulator: TSMC's paper says 12 layers; WikiChip's design rules list M0-M12. How many the ET-SoC-1 uses is not published.",
+   "kind": "outside",
+   "source": "D. James (TechInsights/Chipworks), \"IEDM 2016 - Setting the Stage for 7.5 nm\", Solid State Technology \"Real Chips\" blog, 18 Jan 2017 (on S.-Y. Wu et al. (TSMC), \"A 7nm CMOS platform technology featuring 4th generation FinFET transistors with a 0.027um2 high density 6-T SRAM cell for mobile SoC applications\", IEDM 2016, paper 2.6)",
+   "url": "https://sst.semiconductor-digest.com/chipworks_real_chips_blog/2017/01/18/iedm-2016-setting-the-stage-for-75-nm/",
+   "note": "GlobalFoundries' 7 nm (IEDM 2017): \"up to 17 metal layers\" (siliconics).",
+   "quote": "\"193 nm immersion lithography, dual raised source/drain epi, a novel contact technique, and a 12-layer copper/low-k interconnect stack\""
+  },
+  "n7.contacts-co": {
+   "statement": "Contacts to source and drain are cobalt: TSMC replaced tungsten with cobalt fill in the trench contacts, halving their resistance.",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "note": "WikiChip shows MSS Corp's element map of the Apple A12 (N7) with cobalt contacts.",
+   "quote": "\"Like Intel, TSMC introduced cobalt fill at the trench contact, replacing the tungsten contact. This has the effect of reducing the resistance at that area by 50%.\"; Dick James (2022): \"both TSMC and Samsung have cobalt contacts in their 7- and 5-nm products.\""
+  },
+  "n7.cu-co-liner": {
+   "statement": "The finest copper wires have a cobalt liner and cap (TSMC since 16FF's M1-M3, every generation since, including N5): the cobalt keeps copper atoms from migrating.",
+   "kind": "outside",
+   "source": "P. Singer with D. James (TechInsights), \"Intel 4 Process Drops Cobalt Interconnect, Goes with Tried and Tested Copper with Cobalt Liner/Cap\", Semiconductor Digest, 1 Oct 2022",
+   "url": "https://www.semiconductor-digest.com/intel-4-process-drops-cobalt-interconnect-goes-with-tried-and-tested-copper-with-cobalt-liner-cap/",
+   "note": "\"keeps copper atoms from migrating\" paraphrases the electromigration benefit the article attributes to cobalt (Intel: \"improved electromigration (EM) 5 - 10x\").",
+   "quote": "\"When we looked at the Apple A9 the following year, in TSMC's 16FF process, the M1 - M3 layers had Co liners and caps\" / \"And in fact, it has been used in the minimum pitch metals every generation since then, including the N5\""
+  },
+  "n7.cells": {
+   "statement": "Standard cells are 240 nm tall (high density, 6 tracks, 8 fin pitches, 57 nm gate pitch) or 300 nm (high performance, 7.5 tracks, 10 fin pitches, 64 nm gate pitch); a 360 nm 9-track variant also exists.",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "note": "Which library the ET-SoC-1 uses is not published; the RTL names cell families HDBULT08 and HDBULT11 (memory-levels fact l1:l1.icg-cells, an open question l1:l1.u-library).",
+   "quote": "\"TSMC 7-nanometer comes in two variations - low power and high performance. Those cells are 240 nm and 300 nm tall respectively.\" Flavors: \"240 nm 8-fin x 30 nm\" / \"300 nm 10-fin x 30 nm\"; Tracks 6 T / 7.5 T"
+  },
+  "n7.two-fin": {
+   "statement": "In the 240 nm dense cell each transistor typically has 2 fins (Angstronomics' \"2-fin\" N7 cell).",
+   "kind": "outside",
+   "source": "SkyJuice, \"The Truth of TSMC 5nm\", Angstronomics, 2022",
+   "url": "https://www.angstronomics.com/p/the-truth-of-tsmc-5nm",
+   "note": "8 fin pitches per cell: about 2 active fins for the PMOS row and 2 for the NMOS row, the rest under the power rails and the gap (generic layout).",
+   "quote": "N7 2-fin descriptor \"H240g57\" (H240 = 240nm cell height, g57 = 57nm contacted gate pitch)"
+  },
+  "n7.density-hd": {
+   "statement": "Densest logic: about 91.2 million transistors per mm² (high-performance cells about 65).",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "quote": "\"The dense cells come at around 91.2 MTr/mm² while the less dense, high-performance cells, are calculated at around 65 MTr/mm².\""
+  },
+  "n7.sram-hd": {
+   "statement": "High-density 6-transistor SRAM bitcell: 0.027 µm² (TSMC's IEDM 2016 headline).",
+   "kind": "outside",
+   "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
+   "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
+   "note": "WikiChip's 7 nm table leaves TSMC's high-performance (high-current) cell blank: not published.",
+   "quote": "\"Here, the 7-nanometer high-density SRAM bitcell is 0.027 µm², making it the second-densest cell reported to date. On the current FinFET processes, the bitcells are largely fin-quantized.\""
+  },
+  "n7.sram-dims": {
+   "statement": "A 0.027 µm² cell fits 2 gate pitches by 8 fin pitches: about 114 x 240 nm, one fin per transistor in the densest cell.",
+   "kind": "inferred",
+   "source": "arithmetic on n7.cpp and n7.fin-pitch",
+   "note": "A layout reading, not a published drawing. The one-fin-per-transistor (1:1:1) arrangement is the usual high-density cell (generic). Which bitcell the ET-SoC-1's macros use is not documented (memory-levels u.bitcell).",
+   "quote": "0.114 µm x 0.240 µm = 0.0274 µm²"
+  },
+  "n7.sram-vmin": {
+   "statement": "TSMC's 256 Mbit N7 SRAM test chip read and wrote down to 0.5 V.",
+   "kind": "outside",
+   "source": "D. Manners, \"7nm processes at IEDM\", Electronics Weekly, 20 Oct 2016 (republished by Design & Reuse), on the TSMC IEDM 2016 paper 2.6",
+   "url": "https://www.design-reuse.com/news/3017-7nm-processes-at-iedm/",
+   "note": "The ET-SoC-1 runs its shire-cache arrays at 0.705 V (et.v-sram).",
+   "quote": "\"a fully functional, low-voltage 256Mb SRAM test chip with full read/write functionality down to 0.5V, and the smallest SRAM cells ever reported (0.027um2)\""
+  },
+  "n7.features": {
+   "statement": "TSMC's list of what makes N7: an optimised fin width and profile, raised source/drain epitaxy that strains the channel, a novel contact process, and copper/low-k wiring.",
+   "kind": "outside",
+   "source": "D. Manners, \"7nm processes at IEDM\", Electronics Weekly, 20 Oct 2016 (republished by Design & Reuse), on the TSMC IEDM 2016 paper 2.6",
+   "url": "https://www.design-reuse.com/news/3017-7nm-processes-at-iedm/",
+   "quote": "\"an advanced patterning technique used with 193nm immersion lithography, an optimized fin width and profile, a raised source/drain epitaxial process that strains the transistor channel and reduces parasitics, a novel contact process, and a copper/low-k interconnect scheme featuring different metal pitches and stacks.\""
+  },
+  "n7.hpc": {
+   "statement": "TSMC's symposium: N7 gives +33% performance at the same leakage as N16FFC, or 58% less leakage at the same drive.",
+   "kind": "outside",
+   "source": "T. Dillinger, \"Top 10 Updates from the TSMC Technology Symposium, Part II\", SemiWiki, 23 Mar 2017",
+   "url": "https://semiwiki.com/semiconductor-manufacturers/tsmc/6676-top-10-updates-from-the-tsmc-technology-symposium-part-ii/",
+   "quote": "\"N7 will provide a +33% performance boost at the same I_off compared to N16FFC, or a -58% I_off leakage reduction at the same I_on.\""
+  },
+  "cmp.gf7": {
+   "statement": "GlobalFoundries' 7 nm (IEDM 2017): fin pitch 30 nm, gate pitch 56 nm, metal pitch 40 nm, four work-function metals for each of N and P; active fin about 41 nm tall and 6 nm wide; cobalt contacts; up to 17 metal layers.",
+   "kind": "outside",
+   "source": "D. James (Siliconics), \"A Quick Look at 14-nm and 10-nm\", AVS Joint Users Group, July 2018 (JTG718-4)",
+   "url": "https://nccavs-usergroups.avs.org/wp-content/uploads/JTG2018/JTG718-4-James-Siliconics.pdf",
+   "quote": "\"IEDM 2017 paper states FP 30 nm, CGP 56 nm, MMP 40 nm, quad-WF NFETs & PFETs\"; \"Active fin height ~41 nm, width ~6 nm, gate width ~ 88 nm\"; \"Co contacts, up to 17 metal layers\" (slide 25)"
+  },
+  "cmp.intel10": {
+   "statement": "Intel 10 nm: fin height 46-53 nm, fin width 5-15 nm from top to bottom (about 7 nm at half height); punch-through stopper by solid-source diffusion; 4-6 work-function metals; cobalt M0 and M1.",
+   "kind": "outside",
+   "source": "D. James (Siliconics), \"A Quick Look at 14-nm and 10-nm\", AVS Joint Users Group, July 2018 (JTG718-4)",
+   "url": "https://nccavs-usergroups.avs.org/wp-content/uploads/JTG2018/JTG718-4-James-Siliconics.pdf",
+   "quote": "\"Fin height up from 34 to 42 to 53 nm, (IEDM17 46 nm) fin width 5 - 15 nm, ~7 nm at half height.\" / \"Solid-source diffusion punch-stopper used again\" / \"Gate stack looks similar, 5th generation HKMG but 4 - 6 WFs\" / \"Cobalt M0 & M1 (with Ru?), Co cap on M2 - M5\" (slides 12-13)"
+  },
+  "cmp.tsmc10": {
+   "statement": "TSMC 10 nm (Apple A11): fin pitch about 33 nm, fin width about 6 nm, gate height about 44 nm; fins visibly tapered.",
+   "kind": "outside",
+   "source": "D. James (Siliconics), \"A Quick Look at 14-nm and 10-nm\", AVS Joint Users Group, July 2018 (JTG718-4)",
+   "url": "https://nccavs-usergroups.avs.org/wp-content/uploads/JTG2018/JTG718-4-James-Siliconics.pdf",
+   "quote": "\"SAQP minimum fin pitch ~33 nm, fin width ~6 nm, functional gate height ~44 nm, gate width ~95 nm\" (slide 18); \"Fin taper\" (slide 17 label)"
+  },
+  "gate.hfo2": {
+   "statement": "The gate insulator is hafnium oxide (HfO2, relative permittivity ~24, six times SiO2's 3.9) on a thin SiO2 interfacial layer: as good as 1 nm of SiO2 electrically, but thick enough that electrons cannot tunnel through.",
+   "kind": "generic",
+   "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 7 (author's free chapter)",
+   "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch7.pdf",
+   "note": "TSMC does not publish N7's stack or its thicknesses.",
+   "quote": "\"HfO2 has a relative dielectric constant (k) of ~24, six times larger than that of SiO2. A 6 nm thick HfO2 film is equivalent to 1 nm thick SiO2 ... These problems are minimized by inserting a thin SiO2 interfacial layer between the silicon substrate and the high-k dielectric.\""
+  },
+  "gate.eot": {
+   "statement": "Equivalent oxide thickness under 1 nm is typical of FinFETs of this generation (0.7 nm in a 15 nm-gate research FinFET); N7's is not published.",
+   "kind": "outside",
+   "source": "X. Zhang, \"Simulation-based Study of Super-steep Retrograde Doped Bulk FinFET Technology and 6T-SRAM Yield\", UC Berkeley EECS Technical Report UCB/EECS-2016-3, 5 Jan 2016",
+   "url": "https://www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-3.pdf",
+   "note": "A simulation study's parameters, not a TSMC figure.",
+   "quote": "Table 1.1, nominal FinFET design: \"Lgate (nm) 15\", \"EOT (nm) 0.7\", \"HSi (nm) 40\", \"WSi (nm) 8\""
+  },
+  "gate.metals": {
+   "statement": "Gate metals: since the first high-k gates (45 nm), the n-type gate uses TiAl and the p-type TiN on HfO2, deposited into the trench left by a removed dummy polysilicon gate and filled with W or Al; their work functions (about 4.1 and 4.85 eV) set the threshold.",
+   "kind": "generic",
+   "source": "C. Zhao and J. Xiang, \"Atomic Layer Deposition (ALD) of Metal Gates for CMOS\", Applied Sciences 9 (2019) 2388",
+   "url": "https://doi.org/10.3390/app9112388",
+   "note": "Industry practice, not a TSMC N7 disclosure; multi-Vt options come from different work-function metal stacks (four per polarity in GF 7 nm, cmp.gf7).",
+   "quote": "\"In the 45 nm node, the first generation of the high-k/metal gate technology for mass production, dual metal/single high-k stack was used. The metal gate for nMOS was TiAl, and that for pMOS was TiN, integrated with HfO2 dielectric by a gate last process ... To fill the gap, a conductive metal such as Al or W was deposited.\" / \"The PVD TiAl and PVD TiN in gate stacks with HfO2 show EWF around 4.1 eV and 4.85 eV.\""
+  },
+  "gate.undoped-vt": {
+   "statement": "In a FinFET with an undoped channel the threshold voltage is set mainly by the gate metal's work function, not by dopants in the channel.",
+   "kind": "generic",
+   "source": "C. Zhao and J. Xiang, \"Atomic Layer Deposition (ALD) of Metal Gates for CMOS\", Applied Sciences 9 (2019) 2388",
+   "url": "https://doi.org/10.3390/app9112388",
+   "quote": "\"The relation between Vt and the work function of the gate electrode for FinFETs with undoped channel is different to that for the planar MOSFETs. For planar devices, there are plenty of charges to form inversion. For undoped FinFETs, much less charges are available.\""
+  },
+  "gate.cap-fin": {
+   "statement": "One fin's gate is a capacitor of roughly 60-90 aF (0.06-0.09 fF): 110 nm of wrapped width by 16.5 nm of length at an equivalent oxide of 0.7-1 nm.",
+   "kind": "inferred",
+   "source": "arithmetic on n7.weff, n7.leff and gate.eot",
+   "note": "Oxide capacitance only; the real gate also has overlap and fringe capacitance to the contacts (adds), and quantum effects that thin the inversion charge (subtracts).",
+   "quote": "C = 3.9 x 8.854e-12 F/m / EOT x (110 nm x 16.5 nm) = 63 aF at 1 nm, 90 aF at 0.7 nm"
+  },
+  "dope.channel": {
+   "statement": "The channel inside the fin is left undoped or lightly doped: the gate surrounds it on three sides, so there is no need for heavy doping.",
+   "kind": "generic",
+   "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 7 (author's free chapter)",
+   "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch7.pdf",
+   "quote": "\"There is no need for heavy doping in the channel to reduce Wdep. This leads to low vertical field and less impurity scattering; as a result the mobility is higher\""
+  },
+  "dope.levels": {
+   "statement": "Fin doping in bulk FinFETs: about 1e18 cm^-3 with a conventional implant, about 1e16 with a super-steep retrograde profile; a punch-through stopper of 2.5-5e18 at the base of the fin blocks leakage under the channel.",
+   "kind": "outside",
+   "source": "X. Zhang, \"Simulation-based Study of Super-steep Retrograde Doped Bulk FinFET Technology and 6T-SRAM Yield\", UC Berkeley EECS Technical Report UCB/EECS-2016-3, 5 Jan 2016",
+   "url": "https://www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-3.pdf",
+   "note": "TCAD study values; TSMC's profile is not published. Intel 10 nm uses a solid-source diffusion punch-stopper (cmp.intel10).",
+   "quote": "\"If a bulk-silicon wafer is used as the substrate, heavy doping is needed at the base of the fins to suppress off-state leakage current (Ioff). However, a conventional doping process results in dopants within the fin (channel region), on the order of 1 x 10^18 cm^-3.\" Table 1.1: Nfin 1e18 (control) / 1e16 (SSR); Nfin,peak 2.5e18 / 5e18; NSD 2e20"
+  },
+  "dope.n-sd": {
+   "statement": "NMOS source and drain: phosphorus-doped silicon grown epitaxially, up to 1.75e21 P atoms per cm³ (about 3% of the atoms), of which only about 1.3e20 are electrically active.",
+   "kind": "outside",
+   "source": "X. Li, A. Dube, Z. Ye, S. Sharma, Y. Kim, S. Chu (Applied Materials), \"Selective Epitaxial Si:P Film for nMOSFET Application: High Phosphorous Concentration and High Tensile Strain\", ECS/SMEQ joint meeting, Cancun, Oct 2014 (abstract)",
+   "url": "https://ecs.confex.com/ecs/226/webprogram/Paper40706.html",
+   "note": "Applied Materials' research film (2014), representative of FinFET Si:P source/drain epitaxy; TSMC's values are not published.",
+   "quote": "\"total [P] by SIMS in HS Si:P epitaxial film is 1.75E+21 at/cc (~ 3 at.% in silicon)\"; \"only ~1.3E+20 at/cc phosphorous atoms are electrically active\""
+  },
+  "dope.p-sd": {
+   "statement": "PMOS source and drain: boron-doped silicon-germanium, with boron above 1e20 per cm³ (patent ranges run to about 2e20 and beyond); the larger germanium atoms squeeze the channel, which speeds holes.",
+   "kind": "outside",
+   "source": "Qualcomm, US patent 9,564,518 B2, \"Method and apparatus for source-drain junction formation in a FinFET with in-situ doping\" (priority 24 Sep 2014)",
+   "url": "https://patents.google.com/patent/US9564518B2/en",
+   "note": "A patent range, not a product measurement. The strain statement is generic: TSMC calls its epitaxy one \"that strains the transistor channel\" (n7.features).",
+   "quote": "\"one example range of boron concentration that may be used in forming a SiGeB epi layer ... may span from, for example, less than 1E20 at/cm3 and may encompass, for example, greater than 2E20 at/cm3.\""
+  },
+  "dope.donor-acceptor": {
+   "statement": "Dopants work by valence: phosphorus or arsenic (5 outer electrons) gives one free electron (a donor); boron (3) leaves a hole (an acceptor). Freeing the extra electron takes only about 50 meV, about twice kT at room temperature, so dopants are almost all ionised.",
+   "kind": "generic",
+   "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 1 (author's free chapter)",
+   "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch1-3.pdf",
+   "quote": "\"group V elements such as As ... bring five valence electrons with each atom. While four electrons are shared with the neighboring Si atoms, the fifth electron may escape to become a mobile electron, leaving behind a positive As ion.\" / \"it takes the donor ionization energy (about 50 meV) to free the extra electron\""
+  },
+  "dope.count-channel": {
+   "statement": "A channel 6 x 16.5 x 52 nm holds about 257,000 silicon atoms but only 0.05 to 5 dopant atoms (at 1e16 to 1e18 per cm³): often none. That is why random dopant fluctuation would wreck such a device if it relied on channel doping.",
+   "kind": "derived",
+   "source": "arithmetic on n7.fin-width, n7.leff, n7.fin-height, si.density and dope.levels",
+   "note": "Uses Leff for the length; the drawn gate is a little longer.",
+   "quote": "V = 6 x 16.5 x 52 = 5,148 nm³ = 5.15e-18 cm³; x 5.0e22 = 2.57e5 Si atoms; x 1e16 = 0.05, x 1e17 = 0.5, x 1e18 = 5.1 dopant atoms"
+  },
+  "dope.count-sd": {
+   "statement": "At 1.75e21 per cm³ the source and drain hold 1.75 phosphorus atoms per cubic nanometre, one atom in 30.",
+   "kind": "derived",
+   "source": "arithmetic on dope.n-sd and si.density",
+   "quote": "1.75e21 cm^-3 x 1e-21 cm³/nm³ = 1.75 /nm³; / 49.9 Si per nm³ = 3.5%"
+  },
+  "si.lattice": {
+   "statement": "Silicon is a diamond-cubic crystal with a 0.5431 nm cube; every atom bonds to four neighbours 0.235 nm away.",
+   "kind": "outside",
+   "source": "NIST, CODATA 2022 recommended values, \"lattice parameter of silicon\"",
+   "url": "https://physics.nist.gov/cgi-bin/cuu/Value?asil",
+   "note": "Bond length a x sqrt(3)/4 = 0.2352 nm (derived).",
+   "quote": "\"5.431 020 511(89) x 10^-10 m\" (CODATA 2022); Hu ch. 1: \"each and every silicon atom has four other silicon atoms as its nearest neighbor atoms\""
+  },
+  "si.density": {
+   "statement": "5 x 10^22 silicon atoms per cm³: 50 per cubic nanometre.",
+   "kind": "outside",
+   "source": "Ioffe Institute, NSM Archive, \"Basic parameters of Silicon (Si)\" (read via the mirror at www-f9.ijs.si)",
+   "url": "https://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html",
+   "note": "8 / a³ = 49.94 per nm³ (derived).",
+   "quote": "\"Number of atoms in 1 cm3: 5*10^22\"; \"Lattice constant: 5.431 A\"; \"Dielectric constant: 11.7\"; \"Crystal structure: Diamond\""
+  },
+  "si.planes-width": {
+   "statement": "Across a 6 nm fin there are about 31 planes of atoms (11 unit cells); along a 16.5 nm channel about 86 planes (30 unit cells); up a 52 nm fin about 383 planes (96 unit cells).",
+   "kind": "derived",
+   "source": "arithmetic on si.lattice, n7.fin-width, n7.leff, n7.fin-height",
+   "note": "Assumes the usual orientation: a (100) wafer, the channel along <110>, so fin sidewalls are (110) planes (an assumption; TSMC does not say).",
+   "quote": "(220) planes a/sqrt(8) = 0.192 nm apart: 6/0.192 = 31, 16.5/0.192 = 86; (400) planes a/4 = 0.136 nm apart: 52/0.136 = 383"
+  },
+  "si.bandgap": {
+   "statement": "Silicon's band gap is 1.12 eV at room temperature (1.11 eV at the card's 80 °C): an electron needs that much energy to leave a bond and conduct.",
+   "kind": "outside",
+   "source": "Ioffe Institute, NSM Archive, \"Band structure and carrier concentration of Silicon (Si)\" (read via the mirror at www-f9.ijs.si; ioffe.ru served a self-signed certificate)",
+   "url": "https://www.ioffe.ru/SVA/NSM/Semicond/Si/bandstr.html",
+   "note": "At 353 K the formula gives 1.110 eV (derived).",
+   "quote": "\"Energy gap 1.12 eV\"; \"Eg = 1.17 - 4.73*10^-4*T^2/(T+636) (eV)\"; Hu ch. 1: \"This band gap is 1.12 eV for Si.\""
+  },
+  "si.ni": {
+   "statement": "Pure silicon has only about 1e10 free electrons per cm³ at room temperature (about 4e11 at 80 °C): in one 5,148 nm³ channel that is 0.00000005 electrons. Every carrier that conducts comes from the gate's field and the doped source and drain.",
+   "kind": "outside",
+   "source": "Ioffe Institute, NSM Archive, \"Band structure and carrier concentration of Silicon (Si)\" (read via the mirror at www-f9.ijs.si; ioffe.ru served a self-signed certificate)",
+   "url": "https://www.ioffe.ru/SVA/NSM/Semicond/Si/bandstr.html",
+   "note": "At 80 °C: ni x (T/300)^1.5 x exp(-Eg/2kT ratio) = about 42x, 4e11 cm^-3 (derived); the count in a channel: 1e10 x 5.15e-18 = 5e-8.",
+   "quote": "\"Intrinsic carrier concentration 1*10^10 cm-3\"; Hu: \"ni at room temperature is roughly 10^10 cm^-3 for Si\""
+  },
+  "si.mobility": {
+   "statement": "In pure silicon electrons move about 3 times more easily than holes (mobility up to 1,400 vs 450 cm²/V·s); electrons saturate at about 8e6 cm/s, so crossing a 16.5 nm channel takes about 0.2 ps.",
+   "kind": "outside",
+   "source": "Ioffe Institute, NSM Archive, \"Electrical properties of Silicon (Si)\" (read via the mirror at www-f9.ijs.si)",
+   "url": "https://www.ioffe.ru/SVA/NSM/Semicond/Si/electric.html",
+   "note": "Transit time 16.5e-7 cm / 8e6 cm/s = 0.21 ps (derived), against a 1.67 ns cycle at 600 MHz.",
+   "quote": "\"Mobility electrons <=1400 cm2 V-1s-1\"; \"Mobility holes <=450 cm2 V-1s-1\"; Hu ch. 6: \"It is known that vsat is 8 x 10^6 cm/s for electrons and 6 x 10^6 cm/s for holes.\""
+  },
+  "si.atom": {
+   "statement": "A silicon atom: 14 protons and 14 electrons, 4 of them valence electrons shared in bonds; 92.2% of silicon is silicon-28 (14 neutrons), 4.7% Si-29, 3.1% Si-30.",
+   "kind": "outside",
+   "source": "NIST, \"Atomic Weights and Isotopic Compositions for Silicon\"",
+   "url": "https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=Si",
+   "quote": "\"28Si 0.922 23(19)\", \"29Si 0.046 85(8)\", \"30Si 0.030 92(11)\"; Hu ch. 1: \"Silicon is a group IV element in the periodic table and has four valence electrons.\""
+  },
+  "si.nucleus": {
+   "statement": "The silicon-28 nucleus has a charge radius of 3.12 fm (3.12 x 10^-15 m): about 75,000 times smaller than the 0.235 nm bond.",
+   "kind": "outside",
+   "source": "K. Koenig et al., \"Nuclear charge radii of silicon isotopes\", arXiv:2309.02037, Table 1 (28Si from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99 (2013) 69-95)",
+   "url": "https://arxiv.org/abs/2309.02037",
+   "note": "0.235 nm / 3.12 fm = 75,300 (derived).",
+   "quote": "28Si charge radius \"3.1224 (24)\" fm (Table 1, from Angeli and Marinova 2013)"
+  },
+  "el.switch": {
+   "statement": "A MOSFET is a voltage-controlled switch: the gate voltage decides whether current flows between source and drain. Above threshold the gate's field pulls a thin layer of electrons (the inversion layer) to the fin's surfaces, connecting source to drain.",
+   "kind": "generic",
+   "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 6 (author's free chapter)",
+   "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch6-1.pdf",
+   "quote": "\"At the most basic level, a MOSFET may be thought of as an on-off switch ... The gate voltage determines whether a current flows between the drain and source or not.\" / \"When Vg is equal to Vdd ... an inversion layer is present\""
+  },
+  "el.off-not-off": {
+   "statement": "\"Off\" is not totally off: below the threshold the current falls only tenfold per 60 mV x eta (65 mV in N7). This subthreshold current is the leakage.",
+   "kind": "generic",
+   "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 7 (author's free chapter)",
+   "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch7.pdf",
+   "quote": "\"At room temperature, the function exp(qVgs/kT) changes by 10 for every 60 mV change in Vgs, therefore exp(qVgs/ηkT) changes by 10 for every η x 60 mV ... η x 60 mV is called the subthreshold swing\" (section 7.2 \"Subthreshold Current - 'Off' Is Not Totally 'Off'\")"
+  },
+  "el.ss-80c": {
+   "statement": "The swing scales with absolute temperature: the 59.5 mV/decade limit at 300 K is 70 mV at the card's 80 °C, and N7's 65 becomes about 77, one reason leakage climbs when the chip is hot.",
+   "kind": "derived",
+   "source": "C. Hu eq. 7.2.6 (S proportional to T) with n7.ss and NIST k, e",
+   "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch7.pdf",
+   "note": "Leakage also rises because the threshold voltage drops with temperature (generic); the measured total doubles every 25 °C (et.leak-double).",
+   "quote": "kT/q x ln 10 = 59.5 mV at 300 K, 70.1 mV at 353 K; 65 x 353/300 = 76.5 mV"
+  },
+  "el.finfet-why": {
+   "statement": "Why fins: a thin body with gates on several sides leaves no leakage path far from a gate, so the gate holds the channel shut better and transistors can be shorter, leak less and drive more.",
+   "kind": "generic",
+   "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 7 (author's free chapter)",
+   "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch7.pdf",
+   "quote": "\"very thin so that no leakage path is far from one of the gates ... For these reasons, a multigate MOSFET can have shorter Lg, lower Ioff, and larger Ion than a single-gate MOSFET.\" / \"A tall FinFET has the advantage of providing a large W and therefore large Ion while occupying a small footprint.\""
+  },
+  "el.dynamic": {
+   "statement": "Every switching cycle moves a charge C x Vdd from the supply into a node and dumps it to ground: dynamic power = k C Vdd² f. Halving the voltage quarters the energy per switch; this is the whole of Esperanto's low-voltage argument.",
+   "kind": "generic",
+   "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 6 (author's free chapter)",
+   "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch6-1.pdf",
+   "quote": "\"In each switching cycle, a charge CVdd is transferred from the power supply to the load, C. ... P_dynamic = Vdd x average current = kCVdd^2 f ... Power consumption can be reduced by lowering Vdd and by minimizing all capacitances\""
+  },
+  "el.kt": {
+   "statement": "Thermal energy kT is 25.9 meV at room temperature (30.4 meV at 80 °C): the band gap is about 43 kT, so thermal agitation alone frees almost no electrons; the dopants' 50 meV is only 2 kT, so they are all ionised.",
+   "kind": "derived",
+   "source": "NIST k and e (CODATA 2022)",
+   "url": "https://physics.nist.gov/cgi-bin/cuu/Value?k",
+   "quote": "k = 1.380649e-23 J/K, e = 1.602176634e-19 C: kT/e = 25.85 mV (300 K), 30.43 mV (353 K); 1.12 / 0.02585 = 43"
+  },
+  "el.electron": {
+   "statement": "The charge of one electron is 1.602176634 x 10^-19 C (exact by definition), so 1 fC is 6,242 electrons.",
+   "kind": "outside",
+   "source": "NIST, CODATA 2022 recommended values, \"elementary charge\"",
+   "url": "https://physics.nist.gov/cgi-bin/cuu/Value?e",
+   "quote": "\"1.602 176 634 x 10^-19 C (exact)\""
+  },
+  "el.channel-electrons": {
+   "statement": "When a single fin is on at the minion's 0.517 V, its channel holds only about 85-120 electrons (with an assumed 0.3 V threshold); at N7's nominal 0.75 V, about 180-250.",
+   "kind": "inferred",
+   "source": "arithmetic on gate.cap-fin, et.v-minion and an assumed threshold",
+   "note": "Vt of 0.3 V is an assumption (n7.vt-abs is unknown); the count is a gate-oxide-capacitor estimate, ignoring quantum and fringe effects.",
+   "quote": "Q = C_gate x (Vgs - Vt): 63-90 aF x 0.217 V = 13.6-19.5 aC = 85-122 electrons; x 0.45 V = 176-253"
+  },
+  "el.sram-node": {
+   "statement": "A 6T SRAM bit is held as a voltage on two tiny nodes. Each node is roughly 0.1-0.3 fF (the gates of the other inverter's two 1-fin transistors plus three drains and a few tens of nanometres of wire); at the 0.705 V SRAM rail that is about 440-1,300 electrons, roughly a thousand.",
+   "kind": "inferred",
+   "source": "arithmetic on gate.cap-fin, n7.sram-dims, et.v-sram",
+   "note": "No source publishes an N7 storage-node capacitance; the range is built from two fin gates (~0.13-0.18 fF) plus drain and wire capacitance. The cross-coupled inverters keep restoring it, so it needs no refresh (memory-levels l2:l2.seq.no-refresh.01). In the minion's latch arrays at 0.517 V the same capacitance holds about 320-970 electrons.",
+   "quote": "Q = C V: 0.1 fF x 0.705 V = 0.07 fC = 440 e; 0.2 fF = 880 e; 0.3 fF = 1,320 e"
+  },
+  "el.dram-cell": {
+   "statement": "A DRAM bit is charge on one capacitor: modern cells (2019-2022 generations) are under 10 fF, heading to 6-7. At about 1-1.1 V that is roughly 45,000-70,000 electrons for a full cell; the sense amplifier sees half of that against the half-voltage bitline.",
+   "kind": "inferred",
+   "source": "arithmetic on TechInsights' cell capacitance and the LPDDR4X array voltage (assumed about VDD2 = 1.1 V)",
+   "url": "https://www.techinsights.com/blog/dram-scaling-trend-and-beyond",
+   "note": "The card's LPDDR4X die (Micron) and its generation are not known (memory-levels dram.org.part); the array voltage is an assumption. A DRAM cell holds about 50 times more electrons than an SRAM node, because it has no circuit to restore it and must survive 32 ms between refreshes.",
+   "quote": "TechInsights: \"D1z and D1a cell capacitances are now lower than 10 fF/cell\". Q = 7-10 fF x 1.0-1.1 V = 7-11 fC = 44,000-69,000 electrons"
+  },
+  "el.dram-leak": {
+   "statement": "To lose no more than a tenth of 60,000 electrons in a 32 ms refresh window a DRAM cell may leak only about 190,000 electrons a second: 30 femtoamps, about 50,000 times less than the average transistor's leakage on this chip.",
+   "kind": "inferred",
+   "source": "arithmetic on el.dram-cell, the JEDEC LPDDR4 32 ms refresh window (memory-levels dram:gen.refresh) and et.leak-per-tr",
+   "note": "The tenth is an illustrative margin, not a JEDEC figure.",
+   "quote": "6,000 e / 0.032 s = 1.9e5 e/s = 3.0e-14 A; vs 1.4-1.9 nA per transistor: 1.4e-9 / 3.0e-14 = 47,000"
+  },
+  "el.bus-bit": {
+   "statement": "Toggling one operand-word bit outside the tensor unit costs 15.5 fJ: an effective 58 fF of wire and drivers at 0.517 V, about 190,000 electrons; wires, not transistors, hold most of the switched charge.",
+   "kind": "derived",
+   "source": "repository: docs/energy-manual/03-instructions.md (bus 15.539 fJ)",
+   "note": "Same E = C V^2 convention as et.flip-reg; a toggle that only discharges draws nothing from the supply, so this is an upper bound on C.",
+   "quote": "C = 15.539 fJ / 0.517² = 58 fF; Q = 30 fC = 188,000 electrons"
+  },
+  "wire.cu": {
+   "statement": "Copper is face-centred cubic, 0.3615 nm cube, resistivity 16.78 nΩ·m in bulk: a 20 nm-wide M0-M4 wire is about 78 copper atoms across, thin enough that surface scattering raises its resistance well above bulk.",
+   "kind": "outside",
+   "source": "Wikipedia, \"Copper\" (infobox)",
+   "url": "https://en.wikipedia.org/wiki/Copper",
+   "note": "78 atoms: 20 nm / (0.3615/sqrt 2 = 0.256 nm nearest-neighbour distance) (derived); the size-effect remark is generic.",
+   "quote": "\"a = 361.50 pm (at 20 °C)\"; \"16.78 nΩ·m (at 20 °C)\""
+  },
+  "p.atom.1": {
+   "statement": "Silicon has 14 electrons: 2 in the first shell, 8 in the second and 4 in the third (ground configuration 1s2 2s2 2p6 3s2 3p2).",
+   "kind": "outside",
+   "source": "NIST Atomic Spectra Database, Ground levels and ionization energies, spectra Si I to Si XIV, physics.nist.gov/cgi-bin/ASD/ie.pl (read 1 Oct 2026)"
+  },
+  "p.atom.2": {
+   "statement": "Removing the outer four electrons one at a time costs 8.15, 16.35, 33.49 and 45.14 eV; the fifth, the first of the inner ten, costs 166.8 eV, and the last (1s) electron 2,673 eV.",
+   "kind": "outside",
+   "source": "NIST Atomic Spectra Database, Ground levels and ionization energies, spectra Si I to Si XIV, physics.nist.gov/cgi-bin/ASD/ie.pl (read 1 Oct 2026)"
+  },
+  "p.atom.3": {
+   "statement": "The four outer (valence) electrons each pair with an electron of a neighbouring atom: four covalent bonds pointing to the corners of a tetrahedron, which is what builds the diamond-cubic crystal.",
+   "kind": "generic",
+   "source": "S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)"
+  },
+  "p.atom.4": {
+   "statement": "In the crystal neighbouring atoms are 0.235 nm apart, and there are 49.9 atoms in every cubic nanometre (5.0 x 10^22 per cm3).",
+   "kind": "derived",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)",
+   "note": "sqrt(3)/4 x 0.5431 nm = 0.2352 nm; 8 atoms per cubic cell / (0.5431 nm)^3 = 49.9 per nm^3"
+  },
+  "p.atom.5": {
+   "statement": "Breaking the crystal into free atoms costs 4.63 eV per atom: about 2.3 eV per bond, since each atom shares four bonds and each bond has two ends.",
+   "kind": "generic",
+   "source": "C. Kittel, Introduction to Solid State Physics, 8th ed. (Wiley, 2005), ch. 3, Table 1 (cohesive energies): Si 4.63 eV per atom"
+  },
+  "p.atom.6": {
+   "statement": "Natural silicon is 92.22% silicon-28, 4.69% silicon-29 and 3.09% silicon-30; its standard atomic weight is 28.084-28.086.",
+   "kind": "outside",
+   "source": "NIST, Atomic Weights and Isotopic Compositions for Silicon, physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=Si (read 1 Oct 2026)"
+  },
+  "p.atom.7": {
+   "statement": "Band gap 1.12 eV at 300 K: an electron needs that much energy to leave its bond and move freely. The thermal energy kT at 300 K is 25.85 meV, 43 times smaller.",
+   "kind": "outside",
+   "source": "Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others; NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)",
+   "note": "kT derived from the Boltzmann constant (exact)"
+  },
+  "p.atom.8": {
+   "statement": "So pure silicon at room temperature has only about 10^10 free electrons per cm3: one for every 5 x 10^12 atoms.",
+   "kind": "derived",
+   "source": "Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others; NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
+  },
+  "p.atom.9": {
+   "statement": "A FinFET channel of about 6 x 16.5 x 52 nm holds about 257,000 silicon atoms and, on average, 5 x 10^-8 thermally freed electrons: none. The transistor conducts only when the gate voltage pulls electrons in from the heavily doped source.",
+   "kind": "inferred",
+   "source": "the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si); Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others",
+   "note": "the channel's size is the chip page's inference (TSMC does not publish N7's); the conduction picture is the textbook MOSFET (Sze ch. 6)"
+  },
+  "p.atom.10": {
+   "statement": "With more than 24 billion transistors and about 257,000 atoms per fin's channel, the chip's channels hold at least 6 x 10^15 silicon atoms: about 0.3 micrograms if each transistor has one fin, about a microgram if three. That is all the silicon that actually switches.",
+   "kind": "inferred",
+   "source": "the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si); docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process): TSMC 7 nm, more than 24 billion transistors (Esperanto, Hot Chips 33 and IEEE Micro 2022)",
+   "note": "the transistor count is Esperanto's; fins per transistor and N7's channel size are not published, so this is an order of magnitude"
+  },
+  "p.atom.11": {
+   "statement": "Its share of the crystal (a sphere of radius 118 pm) is about 32,000 times wider than its nucleus.",
+   "kind": "derived",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm",
+   "note": "a sphere of radius 117.6 pm (half the 0.2352 nm neighbour distance) against the nucleus's 3.64 fm radius (1.2 fm x 28^(1/3)): 117.6 / 0.00364 = 32,300"
+  },
+  "p.dopant.1": {
+   "statement": "Phosphorus and arsenic are donors in silicon: the spare electron is held by only 0.045 eV (P) or 0.054 eV (As). Boron is an acceptor, at 0.045 eV.",
+   "kind": "outside",
+   "source": "Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others"
+  },
+  "p.dopant.2": {
+   "statement": "Those energies are only about 2 kT at room temperature (2 kT = 52 meV), so nearly every dopant atom has given up (or taken) its electron.",
+   "kind": "generic",
+   "source": "S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors); NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
+  },
+  "p.dopant.3": {
+   "statement": "In a TSMC FinFET patent, the n-type source/drain is epitaxial silicon or silicon carbide with phosphorus (Si:P, SiCP), which pulls the channel under tension; the p-type source/drain is silicon-germanium (10-40% germanium in the first layer, 20-80% in the second) doped with boron (5 x 10^20 to 10^22 per cm3 in the second layer), which squeezes the channel.",
+   "kind": "outside",
+   "source": "TSMC, US Patent 11,107,923 B2, \"Source/drain regions of FinFET devices and methods of forming same\" (priority 14 Jun 2019), description (a patent's embodiments, not a statement about N7)",
+   "note": "a patent's embodiments; TSMC does not say which apply to N7. Tension speeds electrons and compression speeds holes."
+  },
+  "p.dopant.4": {
+   "statement": "TSMC's IEDM 2016 7 nm paper describes epitaxially raised sources and drains that strain the channel, and a contact structure designed to reduce resistance.",
+   "kind": "outside",
+   "source": "C. Edwards, \"7nm finFET process techniques lead IEDM lineup\", Tech Design Forums, 24 Oct 2016 (on S.-Y. Wu et al., TSMC, IEDM 2016 paper 2.6)"
+  },
+  "p.dopant.5": {
+   "statement": "10^21 dopant atoms per cm3 is one per cubic nanometre, among 50 silicon atoms: about 1 atom in 50. At 10^22, one in 5.",
+   "kind": "derived",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)",
+   "note": "10^21 per cm^3 = 1 per nm^3; silicon has 49.9 atoms per nm^3 (p.atom.4)"
+  },
+  "p.dopant.6": {
+   "statement": "So much doping is needed at the contacts: a metal on lightly doped silicon forms a barrier (a Schottky barrier); heavy doping makes it thin enough for electrons to tunnel through. For 7 nm-class technology a contact resistivity below 2 x 10^-9 ohm cm2 is the stated goal.",
+   "kind": "outside",
+   "source": "IBM, US Patent 10,431,502 B1, \"Maskless epitaxial growth of phosphorus-doped Si and boron-doped SiGe (Ge) for advanced source/drain contact\" (priority 16 Apr 2018), background; S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)"
+  },
+  "p.dopant.7": {
+   "statement": "The same patent dopes the wells under the fins at 10^16 to 10^18 per cm3. At those levels a 6 x 16.5 x 52 nm channel would hold on average 0.05 to 5.1 dopant atoms, among some 257,000 silicon atoms: a handful at most, and their random number and place would make every transistor different. FinFET channels are therefore left nearly undoped and the threshold voltage is set by the gate metal instead.",
+   "kind": "inferred",
+   "source": "TSMC, US Patent 11,107,923 B2, \"Source/drain regions of FinFET devices and methods of forming same\" (priority 14 Jun 2019), description (a patent's embodiments, not a statement about N7); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si); S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)",
+   "note": "whether N7 dopes its channels, and how much, is not published (unknown); the count is arithmetic on an inferred volume and the patent's well range"
+  },
+  "p.core.1": {
+   "statement": "The 1s pair sits about 3.9 pm from the nucleus and the 2s and 2p eight about 21 pm: the outer four, around 118 pm, are some 5 to 30 times farther out.",
+   "kind": "derived",
+   "source": "E. Clementi and D. L. Raimondi, \"Atomic screening constants from SCF functions\", J. Chem. Phys. 38, 2686 (1963): Si Zeff 1s 13.575, 2p 9.945 (as tabulated in Wikipedia, \"Effective nuclear charge\"); NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)",
+   "note": "hydrogen-like estimate with effective nuclear charges; good for the nodeless 1s and 2p orbitals"
+  },
+  "p.core.2": {
+   "statement": "The 1s electrons feel almost the full nuclear charge (an effective 13.6 of 14); the 3p electrons feel only 4.3, because the inner ten stand in between.",
+   "kind": "outside",
+   "source": "E. Clementi and D. L. Raimondi, \"Atomic screening constants from SCF functions\", J. Chem. Phys. 38, 2686 (1963): Si Zeff 1s 13.575, 2p 9.945 (as tabulated in Wikipedia, \"Effective nuclear charge\")"
+  },
+  "p.core.3": {
+   "statement": "The innermost electron of a silicon atom is bound by 2,673 eV, more than 300 times an outer electron's 8.15 eV.",
+   "kind": "outside",
+   "source": "NIST Atomic Spectra Database, Ground levels and ionization energies, spectra Si I to Si XIV, physics.nist.gov/cgi-bin/ASD/ie.pl (read 1 Oct 2026)"
+  },
+  "p.core.4": {
+   "statement": "An electron in an atom is not a little ball on an orbit: the shells are clouds of probability, and the radii here are where each cloud is densest.",
+   "kind": "generic",
+   "source": "S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)"
+  },
+  "p.nucleus.1": {
+   "statement": "Silicon-28: 14 protons and 14 neutrons, stable.",
+   "kind": "outside",
+   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021))"
+  },
+  "p.nucleus.2": {
+   "statement": "Nuclear radius R = R0 A^(1/3) with R0 about 1.2 fm: for A = 28, R = 3.64 fm, about 7.3 fm across.",
+   "kind": "generic",
+   "source": "K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm"
+  },
+  "p.nucleus.3": {
+   "statement": "Measured rms charge radius 3.1224 +/- 0.0024 fm.",
+   "kind": "outside",
+   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021))"
+  },
+  "p.nucleus.4": {
+   "statement": "The nucleus holds 99.97% of the atom's mass; the 14 electrons, 0.027%.",
+   "kind": "derived",
+   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf)"
+  },
+  "p.nucleus.5": {
+   "statement": "Its density is about 2.3 x 10^17 kg per m3: a teaspoon (5 mL) of nuclear matter would weigh about 1.1 billion tonnes.",
+   "kind": "derived",
+   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm"
+  },
+  "p.nucleus.6": {
+   "statement": "If the nucleus were a 1 cm marble, the atom's share of the crystal would be about 320 m across: an atom is almost all empty space.",
+   "kind": "derived",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm",
+   "note": "the 32,000 ratio of p.atom.11 applied to a 1 cm marble: 1 cm x 32,300 = 323 m"
+  },
+  "p.nucleus.7": {
+   "statement": "Binding energy 8.448 MeV per nucleon, 237 MeV in all: the nucleus weighs 0.9% less than its 28 separate parts (E = mc^2).",
+   "kind": "outside",
+   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021))"
+  },
+  "p.nucleus.8": {
+   "statement": "That is about a million times the energy of the outer electrons (8.15 eV) or of a chemical bond (about 2.3 eV): why chemistry, and electronics, never change a nucleus.",
+   "kind": "derived",
+   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); NIST Atomic Spectra Database, Ground levels and ionization energies, spectra Si I to Si XIV, physics.nist.gov/cgi-bin/ASD/ie.pl (read 1 Oct 2026); C. Kittel, Introduction to Solid State Physics, 8th ed. (Wiley, 2005), ch. 3, Table 1 (cohesive energies): Si 4.63 eV per atom"
+  },
+  "p.nucleon.1": {
+   "statement": "Proton rms charge radius 0.84075 +/- 0.00064 fm.",
+   "kind": "outside",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf)"
+  },
+  "p.nucleon.2": {
+   "statement": "Older electron-scattering measurements gave about 0.88 fm; muonic-hydrogen spectroscopy gave 0.84 fm, the 'proton radius puzzle'. The Particle Data Group still notes that the two kinds of measurement are not averaged.",
+   "kind": "outside",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf)"
+  },
+  "p.nucleon.3": {
+   "statement": "Proton mass 938.272 MeV/c^2, neutron 939.565 MeV/c^2: each about 1836 times an electron's.",
+   "kind": "outside",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf)"
+  },
+  "p.nucleon.4": {
+   "statement": "Quark content: proton uud, neutron udd. Charges +2/3 e for up and -1/3 e for down give +1 and 0.",
+   "kind": "outside",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf); Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: quarks (pdg.lbl.gov/2026/tables/rpp2026-sum-quarks.pdf)"
+  },
+  "p.nucleon.5": {
+   "statement": "A free neutron decays in 878.3 +/- 0.4 s on average; bound in silicon-28 it is stable.",
+   "kind": "outside",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf); IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021))"
+  },
+  "p.nucleon.6": {
+   "statement": "The neutron has no charge, but its charge is spread unevenly: its mean-square charge radius is negative (-0.1155 fm^2), meaning a positive core and a negative outer part.",
+   "kind": "outside",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf)"
+  },
+  "p.nucleon.7": {
+   "statement": "No proton has ever been seen to decay: its lifetime exceeds 2.4 x 10^34 years for the decay to a positron and a pion (the universe is 1.4 x 10^10 years old).",
+   "kind": "outside",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf); Particle Data Group (2026), review 2, Astrophysical Constants and Parameters (D. E. Groom, D. Scott, rev. Aug 2025), Table 2.1"
+  },
+  "p.nucleon.8": {
+   "statement": "Each silicon-28 atom holds 42 up and 42 down quarks (84 in all); a 6 x 16.5 x 52 nm channel's ~257,000 atoms hold some 22 million quarks and 3.6 million electrons.",
+   "kind": "inferred",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si)",
+   "note": "the per-atom count is arithmetic (derived); the channel count rests on the inferred channel size"
+  },
+  "p.quark.1": {
+   "statement": "Upper limit on the effective quark radius: 4.3 x 10^-19 m (95% confidence), from electron-proton collisions at HERA.",
+   "kind": "outside",
+   "source": "ZEUS Collaboration, \"Limits on the effective quark radius from inclusive ep scattering at HERA\", Phys. Lett. B 757, 468 (2016), arXiv:1604.01280"
+  },
+  "p.quark.2": {
+   "statement": "The proton is at least 1,955 times wider than a quark could be.",
+   "kind": "derived",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); ZEUS Collaboration, \"Limits on the effective quark radius from inclusive ep scattering at HERA\", Phys. Lett. B 757, 468 (2016), arXiv:1604.01280"
+  },
+  "p.quark.3": {
+   "statement": "Masses (MS-bar at 2 GeV): up 2.16 +/- 0.07 MeV, down 4.70 +/- 0.07 MeV. Two ups and a down add to 9.0 MeV: 1% of the proton's 938.3 MeV.",
+   "kind": "derived",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: quarks (pdg.lbl.gov/2026/tables/rpp2026-sum-quarks.pdf); Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf)",
+   "note": "quark masses depend on the scheme and scale they are quoted at; the simple sum is an illustration"
+  },
+  "p.quark.4": {
+   "statement": "A lattice-QCD breakdown of the proton's mass: the quarks' masses (through the quark condensate, u, d and s) give 9%, the quarks' energy of motion 33%, the gluon field's energy 37%, and the 'trace anomaly' 23%.",
+   "kind": "outside",
+   "source": "Y.-B. Yang et al. (chiQCD), \"Proton mass decomposition from the QCD energy momentum tensor\", Phys. Rev. Lett. 121, 212001 (2018), arXiv:1808.08677"
+  },
+  "p.quark.5": {
+   "statement": "Lattice QCD computes the proton's and neutron's masses from the quark and gluon theory, matching experiment.",
+   "kind": "outside",
+   "source": "S. Duerr et al., \"Ab initio determination of light hadron masses\", Science 322, 1224 (2008), arXiv:0906.3599"
+  },
+  "p.quark.6": {
+   "statement": "Gluons carry the strong force between quarks; they are massless in theory (a mass of a few MeV is not excluded) and come in eight colour states.",
+   "kind": "outside",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: gauge and Higgs bosons, gluon (pdg.lbl.gov/2026/tables/rpp2026-sum-gauge-higgs-bosons.pdf); Particle Data Group (2026), review 15, Quark Model (C. Amsler, V. Crede et al., rev. Aug 2025), sec. 15.1-15.2"
+  },
+  "p.quark.7": {
+   "statement": "Colour is believed to be permanently confined: only colourless combinations (three quarks, or a quark and an antiquark) exist on their own.",
+   "kind": "outside",
+   "source": "Particle Data Group (2026), review 15, Quark Model (C. Amsler, V. Crede et al., rev. Aug 2025), sec. 15.1-15.2"
+  },
+  "p.quark.8": {
+   "statement": "Squeezing quarks into 0.84 fm gives them energies around hbar c / r = 235 MeV each: why most of a proton's mass is energy rather than quark mass.",
+   "kind": "inferred",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf)",
+   "note": "an uncertainty-principle estimate, order of magnitude only"
+  },
+  "p.electron.1": {
+   "statement": "Charge -1.602176634 x 10^-19 C, exactly (it defines the coulomb since 2019); mass 9.1094 x 10^-31 kg = 0.51100 MeV/c^2.",
+   "kind": "outside",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
+  },
+  "p.electron.2": {
+   "statement": "A radius limit below 2 x 10^-20 m, from contact-interaction searches at LEP at the 10 TeV scale.",
+   "kind": "outside",
+   "source": "G. Gabrielse group (Northwestern Center for Fundamental Physics), \"Limit on Electron Substructure\", cfp.physics.northwestern.edu/gabrielse-group/electron-substructure.html, citing D. Bourilkov, Phys. Rev. D 64, 071701(R) (2001) for the LEP contact-interaction limit"
+  },
+  "p.electron.3": {
+   "statement": "Its magnetic moment is measured to about 1 part in 10^13 ((g-2)/2 = 0.00115965218062(12)) and agrees with the theory of a point particle; an electron made of smaller parts would spoil that agreement.",
+   "kind": "outside",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf); G. Gabrielse group (Northwestern Center for Fundamental Physics), \"Limit on Electron Substructure\", cfp.physics.northwestern.edu/gabrielse-group/electron-substructure.html, citing D. Bourilkov, Phys. Rev. D 64, 071701(R) (2001) for the LEP contact-interaction limit"
+  },
+  "p.electron.4": {
+   "statement": "The electron is round: its electric dipole moment is below 4.1 x 10^-30 e cm (PDG 2026), so its charge sits within 4.1 x 10^-32 m of its centre (dipole moment divided by its charge).",
+   "kind": "derived",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf)",
+   "note": "the dipole limit divided by the charge: 4.1 x 10^-30 e cm / e = 4.1 x 10^-30 cm = 4.1 x 10^-32 m"
+  },
+  "p.electron.5": {
+   "statement": "The 'classical electron radius', 2.818 fm, is a length built from its charge and mass, not its size.",
+   "kind": "outside",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
+  },
+  "p.electron.6": {
+   "statement": "Stable: its lifetime exceeds 6.6 x 10^28 years.",
+   "kind": "outside",
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf)"
+  },
+  "p.electron.7": {
+   "statement": "Every coulomb that flows through the chip is 6.24 x 10^18 electrons.",
+   "kind": "derived",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)",
+   "note": "1 C / 1.602176634 x 10^-19 C = 6.2415 x 10^18"
+  },
+  "p.planck.1": {
+   "statement": "Planck length 1.616255 x 10^-35 m; Planck time 5.391247 x 10^-44 s.",
+   "kind": "outside",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
+  },
+  "p.planck.2": {
+   "statement": "Max Planck introduced these natural units of length, mass, time and temperature in 1899.",
+   "kind": "outside",
+   "source": "M. Planck, \"Ueber irreversible Strahlungsvorgaenge\", Sitzungsberichte der Koeniglich Preussischen Akademie der Wissenschaften zu Berlin (1899), pp. 440-480 (natural units of length, mass, time and temperature)"
+  },
+  "p.planck.3": {
+   "statement": "The quark's radius limit is 3 x 10^16 times the Planck length: some 16 powers of ten that no experiment has probed.",
+   "kind": "derived",
+   "source": "ZEUS Collaboration, \"Limits on the effective quark radius from inclusive ep scattering at HERA\", Phys. Lett. B 757, 468 (2016), arXiv:1604.01280; NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
+  },
+  "p.planck.4": {
+   "statement": "Whether the Planck length is a smallest possible length is an open question: thought experiments and several approaches to quantum gravity suggest a minimal length, and none is confirmed.",
+   "kind": "hypothesis",
+   "source": "S. Hossenfelder, \"Minimal length scale scenarios for quantum gravity\", Living Rev. Relativ. 16, 2 (2013), arXiv:1203.6191"
+  },
+  "p.planck.5": {
+   "statement": "From the Planck length to the observable universe's diameter is 61.7 powers of ten.",
+   "kind": "derived",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond)",
+   "note": "log10(8.74 x 10^26 m / 1.616 x 10^-35 m) = 61.7"
+  },
+  "p.wrap.1": {
+   "statement": "Joel Primack and Nancy Ellen Abrams, adapting an idea of Sheldon Glashow (Nobel 1979), drew the 'Cosmic Uroboros': the tip of the tail is the Planck length, the head is the cosmic horizon, about 60 powers of ten apart.",
+   "kind": "outside",
+   "source": "J. R. Primack and N. E. Abrams, The View from the Center of the Universe (Riverhead, 2006), ch. 6, \"What Size is the Universe? The Cosmic Uroboros\" (chapter text: ncatlab.org/nlab/files/PrimackSizeOfUniverse.pdf); S. L. Glashow's cosmic uroboros, as credited by Primack and Abrams (ch. 6, note 4): first version reproduced in T. Ferris, New York Times Magazine, 26 Sep 1982, p. 38; see also S. L. Glashow with B. Bova, Interactions (Warner Books, 1988), ch. 14 (not read directly)"
+  },
+  "p.wrap.2": {
+   "statement": "Their first meaning: gravity, negligible from bacteria to atoms, becomes strong again at the tail's tip, so it may link the largest and smallest sizes (a hope of quantum gravity and string theory, not yet tested).",
+   "kind": "hypothesis",
+   "source": "J. R. Primack and N. E. Abrams, The View from the Center of the Universe (Riverhead, 2006), ch. 6, \"What Size is the Universe? The Cosmic Uroboros\" (chapter text: ncatlab.org/nlab/files/PrimackSizeOfUniverse.pdf)"
+  },
+  "p.wrap.3": {
+   "statement": "Their second meaning: at the very beginning of the Big Bang the largest scale, the horizon, was not much larger than the smallest; the serpent's body filled in as the universe expanded.",
+   "kind": "hypothesis",
+   "source": "J. R. Primack and N. E. Abrams, The View from the Center of the Universe (Riverhead, 2006), ch. 6, \"What Size is the Universe? The Cosmic Uroboros\" (chapter text: ncatlab.org/nlab/files/PrimackSizeOfUniverse.pdf)",
+   "note": "the horizon's growth from near-Planck size rests on extrapolating known physics back to the Planck time"
+  },
+  "p.wrap.4": {
+   "statement": "Looking out is looking back: the farthest light we can see, the cosmic microwave background, left 380,000 years after the Big Bang; before that the universe was hot, dense and opaque.",
+   "kind": "outside",
+   "source": "NASA Science, Physics of the Cosmos, \"Big Bang and the Evolution of the Universe\", science.nasa.gov/astrophysics/programs/physics-of-the-cosmos/big-bang-and-the-evolution-of-the-universe/ (read 1 Oct 2026); NASA Science, \"Cosmic History\", science.nasa.gov/universe/overview/ (read 1 Oct 2026)"
+  },
+  "p.wrap.5": {
+   "statement": "The early universe is 'the poor man's accelerator' (Zel'dovich): its first minutes reached energies that test particle physics.",
+   "kind": "outside",
+   "source": "G. Leconte-Chevillard, \"'The poor man's accelerator', or how the primordial universe became a testing ground for particle physics\", Synthese 207 (2026), doi:10.1007/s11229-026-05476-2"
+  },
+  "p.wrap.6": {
+   "statement": "Example: the helium made in the first three minutes limited how many kinds of neutrino could exist (Steigman, Schramm and Gunn, 1977); collider measurements of the Z boson later counted 2.996 +/- 0.007.",
+   "kind": "outside",
+   "source": "G. Steigman, D. N. Schramm, J. E. Gunn, \"Cosmological limits to the number of massive leptons\", Phys. Lett. B 66, 202 (1977); G. Leconte-Chevillard, \"'The poor man's accelerator', or how the primordial universe became a testing ground for particle physics\", Synthese 207 (2026), doi:10.1007/s11229-026-05476-2; Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf)"
+  },
+  "p.wrap.7": {
+   "statement": "On a logarithmic scale the middle of the whole ladder, between the Planck length and the observable universe, is 0.12 mm: about the size of a minion's 4 KB L1 data cache or one SRAM panel of the shire cache in this chip.",
+   "kind": "derived",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si)",
+   "note": "the two chip sizes are the chip page's order-of-magnitude inferences"
+  },
+  "p.wrap.8": {
+   "statement": "Primack and Abrams place human size near the centre of the uroboros, with their round numbers (10^-33 cm to 10^28 cm).",
+   "kind": "outside",
+   "source": "J. R. Primack and N. E. Abrams, The View from the Center of the Universe (Riverhead, 2006), ch. 6, \"What Size is the Universe? The Cosmic Uroboros\" (chapter text: ncatlab.org/nlab/files/PrimackSizeOfUniverse.pdf)"
+  },
+  "e.cmb.1": {
+   "statement": "Last scattering at redshift z* = 1089.92 +/- 0.25, age 372.6 +/- 1.0 thousand years (Planck 2018 base model).",
+   "kind": "outside",
+   "source": "Particle Data Group (2026), review 2, Astrophysical Constants and Parameters (D. E. Groom, D. Scott, rev. Aug 2025), Table 2.1; Planck Collaboration, \"Planck 2018 results. VI. Cosmological parameters\", A&A 641, A6 (2020)"
+  },
+  "e.cmb.2": {
+   "statement": "Then the universe was 1 + z* = 1091 times hotter than the CMB's 2.7255 K today: 2,973 K, cool enough for electrons and nuclei to form atoms.",
+   "kind": "derived",
+   "source": "Particle Data Group (2026), review 2, Astrophysical Constants and Parameters (D. E. Groom, D. Scott, rev. Aug 2025), Table 2.1; D. J. Fixsen, \"The temperature of the cosmic microwave background\", ApJ 707, 916 (2009); NASA Science, \"Cosmic History\", science.nasa.gov/universe/overview/ (read 1 Oct 2026)",
+   "note": "2.7255 K x (1 + 1089.92) = 2,973 K"
+  },
+  "e.cmb.3": {
+   "statement": "The region that is now our observable universe was then 85 million light-years across.",
+   "kind": "derived",
+   "source": "Particle Data Group (2026), review 2, Astrophysical Constants and Parameters (D. E. Groom, D. Scott, rev. Aug 2025), Table 2.1; the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond)",
+   "note": "today's comoving diameter divided by 1 + z*"
+  },
+  "e.cmb.4": {
+   "statement": "Its temperature varied by about 1 part in 100,000 from place to place (COBE): the seeds that grew into galaxies.",
+   "kind": "outside",
+   "source": "NASA Science, \"COBE's Top Discoveries\", science.nasa.gov/mission/cobe/science/ (read 1 Oct 2026); NASA Science, \"Cosmic History\", science.nasa.gov/universe/overview/ (read 1 Oct 2026)"
+  },
+  "e.cmb.5": {
+   "statement": "That light is still all around: about 411 CMB photons in every cubic centimetre of space, at 2.7255 K.",
+   "kind": "outside",
+   "source": "Particle Data Group (2026), review 2, Astrophysical Constants and Parameters (D. E. Groom, D. Scott, rev. Aug 2025), Table 2.1; D. J. Fixsen, \"The temperature of the cosmic microwave background\", ApJ 707, 916 (2009)"
+  },
+  "e.cmb.6": {
+   "statement": "In the leading theory, inflation, those seeds began as quantum fluctuations on sub-atomic scales, stretched to the size of galaxies: the smallest scales shaping the largest. Planck's measurements fit simple inflation models; inflation is not proven.",
+   "kind": "hypothesis",
+   "source": "Planck Collaboration, \"Planck 2018 results. X. Constraints on inflation\", A&A 641, A10 (2020), arXiv:1807.06211"
+  },
+  "e.bbn.1": {
+   "statement": "Deuterium, helium-3, helium-4 and lithium-7 were made at the end of the first three minutes, once the temperature fell to about 0.1 MeV (1.2 billion K); nuclear reactions were fixed by about 180 s.",
+   "kind": "outside",
+   "source": "Particle Data Group (2026), review 24, Big Bang Nucleosynthesis (B. D. Fields, P. Molaro, S. Sarkar, rev. Aug 2025), sec. 24.1-24.2"
+  },
+  "e.bbn.2": {
+   "statement": "Primordial helium is 24.5% of the ordinary matter by mass (Yp = 0.2448 +/- 0.0033). No silicon was made: nuclei heavier than lithium do not form in significant amounts.",
+   "kind": "outside",
+   "source": "Particle Data Group (2026), review 2, Astrophysical Constants and Parameters (D. E. Groom, D. Scott, rev. Aug 2025), Table 2.1; Particle Data Group (2026), review 24, Big Bang Nucleosynthesis (B. D. Fields, P. Molaro, S. Sarkar, rev. Aug 2025), sec. 24.1-24.2"
+  },
+  "e.bbn.3": {
+   "statement": "The region that is now our observable universe was then about 200 light-years across.",
+   "kind": "derived",
+   "source": "Particle Data Group (2026), review 22, Big-Bang Cosmology (K. A. Olive, J. A. Peacock, rev. Aug 2025), sec. 22.3.2 (eq. 22.44, table of N(T)) and 22.3.6 (baryogenesis); the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond)",
+   "note": "entropy conservation, a T g*s^(1/3) constant, with g*s = 3.91 after electron-positron annihilation"
+  },
+  "e.bbn.4": {
+   "statement": "There are about 1.66 billion CMB photons for every proton or neutron (eta = 6.04 x 10^-10).",
+   "kind": "derived",
+   "source": "Particle Data Group (2026), review 2, Astrophysical Constants and Parameters (D. E. Groom, D. Scott, rev. Aug 2025), Table 2.1; Particle Data Group (2026), review 24, Big Bang Nucleosynthesis (B. D. Fields, P. Molaro, S. Sarkar, rev. Aug 2025), sec. 24.1-24.2",
+   "note": "1 / eta = 1 / 6.04 x 10^-10 = 1.66 x 10^9"
+  },
+  "e.bbn.5": {
+   "statement": "The universe holds matter and almost no antimatter: in the standard reading, matter outnumbered antimatter by a tiny margin early on, and the leftover makes every proton and neutron, including the chip's.",
+   "kind": "inferred",
+   "source": "Particle Data Group (2026), review 22, Big-Bang Cosmology (K. A. Olive, J. A. Peacock, rev. Aug 2025), sec. 22.3.2 (eq. 22.44, table of N(T)) and 22.3.6 (baryogenesis); Particle Data Group (2026), review 24, Big Bang Nucleosynthesis (B. D. Fields, P. Molaro, S. Sarkar, rev. Aug 2025), sec. 24.1-24.2",
+   "note": "the standard reading of the baryon asymmetry (eta) in PDG review 22, sec. 22.3.6; why it arose is the next fact"
+  },
+  "e.bbn.6": {
+   "statement": "Why there was a margin at all (baryogenesis) is unknown: it needs baryon-number violation, C and CP violation and a departure from equilibrium, and several mechanisms are viable.",
+   "kind": "unknown",
+   "source": "Particle Data Group (2026), review 22, Big-Bang Cosmology (K. A. Olive, J. A. Peacock, rev. Aug 2025), sec. 22.3.2 (eq. 22.44, table of N(T)) and 22.3.6 (baryogenesis)"
+  },
+  "e.qcd.1": {
+   "statement": "Above about 156.5 MeV (1.8 x 10^12 K) quarks and gluons are not bound into protons and neutrons: a quark-gluon plasma. Lattice QCD puts the crossover at 156.5 +/- 1.5 MeV.",
+   "kind": "outside",
+   "source": "A. Bazavov et al. (HotQCD), \"Chiral crossover in QCD at zero and non-zero chemical potentials\", Phys. Lett. B 795, 15 (2019), arXiv:1812.08235; Particle Data Group (2026), review 22, Big-Bang Cosmology (K. A. Olive, J. A. Peacock, rev. Aug 2025), sec. 22.3.2 (eq. 22.44, table of N(T)) and 22.3.6 (baryogenesis)"
+  },
+  "e.qcd.2": {
+   "statement": "The universe cooled through it 14-24 microseconds after the Big Bang.",
+   "kind": "derived",
+   "source": "Particle Data Group (2026), review 22, Big-Bang Cosmology (K. A. Olive, J. A. Peacock, rev. Aug 2025), sec. 22.3.2 (eq. 22.44, table of N(T)) and 22.3.6 (baryogenesis); A. Bazavov et al. (HotQCD), \"Chiral crossover in QCD at zero and non-zero chemical potentials\", Phys. Lett. B 795, 15 (2019), arXiv:1812.08235",
+   "note": "PDG eq. 22.44 with N = 51.25 just above and 17.25 just below the transition"
+  },
+  "e.qcd.3": {
+   "statement": "The region that is now our observable universe was then about 3,700 to 5,300 times the Earth-Sun distance across (under a tenth of a light-year).",
+   "kind": "derived",
+   "source": "Particle Data Group (2026), review 22, Big-Bang Cosmology (K. A. Olive, J. A. Peacock, rev. Aug 2025), sec. 22.3.2 (eq. 22.44, table of N(T)) and 22.3.6 (baryogenesis); the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond)",
+   "note": "entropy conservation (a T g*s^(1/3) constant) from today's 8.74 x 10^26 m, 2.7255 K and g*s = 3.91 back to 156.5 MeV, with g*s between 69/4 (hadrons) and 205/4 (quarks and gluons): 5.6-8.0 x 10^14 m, 3,700-5,300 au"
+  },
+  "e.qcd.4": {
+   "statement": "At that temperature a typical particle's wavelength, hbar c / kT = 1.26 fm, is the size of a proton: the universe's 'microscope' and the proton's size meet.",
+   "kind": "derived",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); A. Bazavov et al. (HotQCD), \"Chiral crossover in QCD at zero and non-zero chemical potentials\", Phys. Lett. B 795, 15 (2019), arXiv:1812.08235; Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf)",
+   "note": "an order-of-magnitude comparison"
+  },
+  "e.qcd.5": {
+   "statement": "The protons and neutrons in the chip's nuclei first formed in this transition; billions of years later, stars built them into silicon.",
+   "kind": "inferred",
+   "source": "Particle Data Group (2026), review 22, Big-Bang Cosmology (K. A. Olive, J. A. Peacock, rev. Aug 2025), sec. 22.3.2 (eq. 22.44, table of N(T)) and 22.3.6 (baryogenesis); J. A. Johnson, \"Populating the periodic table: Nucleosynthesis of the elements\", Science 363, 474 (2019)",
+   "note": "protons and neutrons formed at the QCD crossover (e.qcd.1-2); silicon is made in stars (e.stars.1)"
+  },
+  "e.qcd.6": {
+   "statement": "The LHC recreates this plasma by colliding lead nuclei, at temperatures more than 100,000 times the centre of the Sun.",
+   "kind": "outside",
+   "source": "CERN press release, \"Quark Matter 2017: understanding the early universe\", 9 Feb 2017, home.cern"
+  },
+  "e.ew.1": {
+   "statement": "The Standard Model's electroweak crossover, when the Higgs field takes its value, is at 159.5 +/- 1.5 GeV (lattice).",
+   "kind": "outside",
+   "source": "M. D'Onofrio and K. Rummukainen, \"Standard model cross-over on the lattice\", Phys. Rev. D 93, 025003 (2016), arXiv:1508.07161"
+  },
+  "e.ew.2": {
+   "statement": "That was about 9 picoseconds after the Big Bang, when the region that is now our observable universe was about 3 times the Earth-Sun distance across.",
+   "kind": "derived",
+   "source": "Particle Data Group (2026), review 22, Big-Bang Cosmology (K. A. Olive, J. A. Peacock, rev. Aug 2025), sec. 22.3.2 (eq. 22.44, table of N(T)) and 22.3.6 (baryogenesis); M. D'Onofrio and K. Rummukainen, \"Standard model cross-over on the lattice\", Phys. Rev. D 93, 025003 (2016), arXiv:1508.07161; the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond)",
+   "note": "PDG eq. 22.44 with all Standard Model particles, N = 106.75"
+  },
+  "e.ew.3": {
+   "statement": "In the Standard Model the electron and the quarks get their masses from the Higgs field. The electron's mass sets the size of every atom (the Bohr radius is inversely proportional to it), and so the size of the chip's transistors.",
+   "kind": "generic",
+   "source": "Particle Data Group (2026), review 22, Big-Bang Cosmology (K. A. Olive, J. A. Peacock, rev. Aug 2025), sec. 22.3.2 (eq. 22.44, table of N(T)) and 22.3.6 (baryogenesis); NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
+  },
+  "e.planck.1": {
+   "statement": "Planck time 5.391247 x 10^-44 s: before it, known physics cannot describe the universe.",
+   "kind": "outside",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
+  },
+  "e.planck.2": {
+   "statement": "What happened at or before the Planck time, and whether 'before' means anything, is unknown.",
+   "kind": "unknown",
+   "source": "S. Hossenfelder, \"Minimal length scale scenarios for quantum gravity\", Living Rev. Relativ. 16, 2 (2013), arXiv:1203.6191"
+  },
+  "e.stars.1": {
+   "statement": "Silicon is made in massive stars, by oxygen burning late in their lives, and spread by their supernova explosions; exploding white dwarfs make some too.",
+   "kind": "outside",
+   "source": "J. A. Johnson, \"Populating the periodic table: Nucleosynthesis of the elements\", Science 363, 474 (2019); S. E. Woosley, A. Heger, T. A. Weaver, \"The evolution and explosion of massive stars\", Rev. Mod. Phys. 74, 1015 (2002)"
+  },
+  "e.stars.2": {
+   "statement": "The Sun and its planets formed from gas already enriched by earlier stars; the oldest solids in the Solar System are 4,567.30 +/- 0.16 million years old.",
+   "kind": "outside",
+   "source": "J. N. Connelly et al., \"The absolute chronology and thermal processing of solids in the solar protoplanetary disk\", Science 338, 651 (2012); J. R. Primack and N. E. Abrams, The View from the Center of the Universe (Riverhead, 2006), ch. 6, \"What Size is the Universe? The Cosmic Uroboros\" (chapter text: ncatlab.org/nlab/files/PrimackSizeOfUniverse.pdf)"
+  },
+  "e.stars.3": {
+   "statement": "Silicon is the second most abundant element in Earth's crust, more than 25% by weight.",
+   "kind": "outside",
+   "source": "L. A. Corathers (USGS), \"Mineral resource of the month: silicon\", Geotimes (2003), usgs.gov/publications/mineral-resource-month-silicon"
+  },
+  "e.stars.4": {
+   "statement": "So the silicon atoms in the chip's fins were forged in stars of the Milky Way more than 4.6 billion years ago, from protons and neutrons formed in the first 20 microseconds: a physical link between the ladder's top and bottom.",
+   "kind": "inferred",
+   "source": "J. A. Johnson, \"Populating the periodic table: Nucleosynthesis of the elements\", Science 363, 474 (2019); J. N. Connelly et al., \"The absolute chronology and thermal processing of solids in the solar protoplanetary disk\", Science 338, 651 (2012); A. Bazavov et al. (HotQCD), \"Chiral crossover in QCD at zero and non-zero chemical potentials\", Phys. Lett. B 795, 15 (2019), arXiv:1812.08235",
+   "note": "e.stars.1 (silicon from massive stars and supernovae), e.stars.2 (the Solar System from enriched gas, 4,567 million years ago) and e.qcd.5"
+  },
+  "s45.1": {
+   "statement": "The lab's rack stands in Studio 45, the owner's name for the place, which is on 29th Street in Bernal Heights, San Francisco.",
+   "kind": "owner",
+   "source": "the owner, 1 Oct 2026"
+  },
+  "s45.2": {
+   "statement": "Studio 45 is a co-working and event space for people who build physical things: \"space, tools, and resources for the hardware community\".",
+   "kind": "outside",
+   "source": "Studio 45's own website and event listings (read 1 Oct 2026; not linked here: their pages give the street address)"
+  },
+  "s45.3": {
+   "statement": "It has two floors of co-working space, a wood shop, 3D printers, a metal CNC mill, a laser cutter and a 4 x 8 ft three-axis CNC router, with assembly space in a street-level warehouse and courtyard.",
+   "kind": "outside",
+   "source": "Studio 45's own website and event listings (read 1 Oct 2026; not linked here: their pages give the street address)"
+  },
+  "s45.4": {
+   "statement": "It opened with a launch party on 9 December 2021, as \"San Francisco's newest co-working space for people who make real things for a living\".",
+   "kind": "outside",
+   "source": "SF Station, event listing \"Studio 45 Launch\" (9 Dec 2021; not linked here: it gives the street address)"
+  },
+  "s45.5": {
+   "statement": "It describes itself as a coworking space for the hardware community \"at the intersection of The Mission and Bernal Heights\", and hosts the monthly SF Hardware Meetup.",
+   "kind": "outside",
+   "source": "SF Hardware Meetup event listings (2025-2026; not linked here: they give the street address)"
+  },
+  "s45.6": {
+   "statement": "The building at its address is about 37 m deep and 9 m wide (325 m² on the ground) and 6 to 8 m tall: two storeys.",
+   "kind": "derived",
+   "source": "City and County of San Francisco, DataSF (Open Data Commons PDDL), Building Footprints (ynuv-fyni; a 2010 3D model split at parcel lines)",
+   "note": "Length and width of the footprint polygon and its roof heights (median 6.0 m, highest 8.3 m), read by the venue's public address; only these dimensions were kept. The courtyard and event spaces may reach onto neighbouring lots. Where in the building the rack stands is not recorded."
+  },
+  "s45.7": {
+   "statement": "Light crosses the building's 37 m in 123 ns: 74 ticks of the chip's 600 MHz clock.",
+   "kind": "derived",
+   "source": "the building's length (s45.6) divided by the speed of light; the 600 MHz clock of the lab's cards",
+   "note": "37 m / 299,792,458 m/s = 123.4 ns; x 600 MHz = 74.1"
+  },
+  "s45.8": {
+   "statement": "A 4 x 8 ft CNC router cuts a 1.22 x 2.44 m sheet: the size of the bed drawn here.",
+   "kind": "derived",
+   "source": "the venue's \"4'x8' 3-axis CNC with a tool changer\" (s45.3) in metres",
+   "note": "4 ft = 1.219 m, 8 ft = 2.438 m"
+  },
+  "b.1": {
+   "statement": "Bernal Heights is a residential hill neighbourhood in south-eastern San Francisco, south of the Mission, bounded by Cesar Chavez Street (north), San Jose Avenue (west), US 101 (east) and I-280 (south).",
+   "kind": "outside",
+   "source": "Wikipedia, \"Bernal Heights, San Francisco\" (read 1 Oct 2026, citing UCSC Critical Sustainabilities); SF Chronicle, 29 Aug 2021",
+   "url": "https://en.wikipedia.org/wiki/Bernal_Heights,_San_Francisco"
+  },
+  "b.2": {
+   "statement": "Its area is 2.79 km², 2.3% of the city's land, about 2.2 km east to west and 2.0 km north to south.",
+   "kind": "derived",
+   "source": "City and County of San Francisco, DataSF (Open Data Commons PDDL), Analysis Neighborhoods (j2bu-swwd)",
+   "note": "Area and extent of the \"Bernal Heights\" polygon on the San Francisco map's projection (equirectangular at 37.76 N); 2.79 / 121.51 km² of land = 2.3%."
+  },
+  "b.3": {
+   "statement": "About 26,140 people live there (2012-2016), some 3% of the city.",
+   "kind": "outside",
+   "source": "SF Planning, \"San Francisco Neighborhoods: Socio-Economic Profiles, American Community Survey 2012-2016\" (Sept 2018), p. 10",
+   "note": "26,140 of 873,965 (2020 census) is 3.0%. Wikipedia gives 25,125 for 2019 (city-data.com)."
+  },
+  "b.4": {
+   "statement": "The hill's summit is 142 m (466 ft) above sea level, about half the height of Mount Davidson, the city's highest point (283 m).",
+   "kind": "derived",
+   "source": "USGS 3DEP 1 m lidar elevation model (flown 4 Mar 2023, NAVD88) through the USGS Elevation Point Query Service; SF Planning, Conditional Use Authorization 2010.0306C (466 ft)",
+   "url": "https://epqs.nationalmap.gov/",
+   "note": "The highest ground within 80 m of the GNIS summit point (GNIS 1658039): 141.99 m. Other published values: 433 ft (1958) and \"475+ ft\" (USGS 7.5' topo, NGVD29)."
+  },
+  "b.5": {
+   "statement": "Bernal Heights Park covers the hilltop: 26.3 acres (10.7 ha), with a 50-foot telecommunications tower at the top.",
+   "kind": "outside",
+   "source": "City and County of San Francisco, DataSF (Open Data Commons PDDL), Recreation and Parks Properties (gtr9-ntp6); Wikipedia, \"Bernal Heights Summit\" (SF Planning)",
+   "url": "https://en.wikipedia.org/wiki/Bernal_Heights_Summit"
+  },
+  "b.6": {
+   "statement": "The hill is folded layers of red radiolarian chert: microcrystalline quartz, silicon dioxide, made from the silica shells of plankton 0.5 to 1.5 mm across that settled on the deep-sea floor 200 to 100 million years ago.",
+   "kind": "outside",
+   "source": "National Park Service, Golden Gate National Recreation Area, \"Chert FAQ\"; Wikipedia, \"Bernal Heights Summit\" and \"Chert\"",
+   "url": "https://www.nps.gov/goga/learn/education/chert-faq.htm"
+  },
+  "b.7": {
+   "statement": "Silicon for chips is refined from silica, silicon dioxide like the hill's quartz: reduced to silicon metal, then purified into the \"ultra-high-purity\" polysilicon of semiconductor grade.",
+   "kind": "outside",
+   "source": "USGS, Mineral Commodity Summaries 2025, Silicon",
+   "url": "https://pubs.usgs.gov/periodicals/mcs2025/mcs2025-silicon.pdf"
+  },
+  "b.8": {
+   "statement": "Light crosses the neighbourhood's 2.2 km in 7.3 µs: 4,403 ticks of the chip's clock.",
+   "kind": "derived",
+   "source": "the neighbourhood's width (b.2) divided by the speed of light; the cards' 600 MHz clock",
+   "note": "2,200 m / c = 7.34 µs; x 600 MHz = 4403"
+  },
+  "b.9": {
+   "statement": "It is named after José Cornelio Bernal, who received the Rancho Rincon de las Salinas y Potrero Viejo land grant in 1839.",
+   "kind": "outside",
+   "source": "Wikipedia, \"Bernal Heights, San Francisco\" (read 1 Oct 2026)",
+   "url": "https://en.wikipedia.org/wiki/Bernal_Heights,_San_Francisco"
+  },
+  "st.1": {
+   "statement": "29th Street is 1.29 km long. It runs east from Diamond Street, at the foot of Diamond Heights, through Noe Valley to Mission Street, where the Mission meets Bernal Heights.",
+   "kind": "derived",
+   "source": "City and County of San Francisco, DataSF (Open Data Commons PDDL), Streets - Active and Retired (3psu-pn9h, Public Works centrelines)",
+   "note": "The sum of its nine centreline segments: 1,293 m. (Not 29th Avenue, in the Richmond and Sunset.)"
+  },
+  "st.2": {
+   "statement": "It falls about 95 m along its length, from 126 m above sea level at Diamond Street to about 30 m at its east end; the steepest part is the top, 34 m down in the first 140 m (about 24%).",
+   "kind": "derived",
+   "source": "USGS 3DEP 1 m lidar elevation model through the Elevation Point Query Service, sampled every 40 m along the street",
+   "url": "https://epqs.nationalmap.gov/",
+   "note": "research/epqs_29th.out: 28 samples, distances and heights only"
+  },
+  "st.3": {
+   "statement": "Light runs the street's length in 4.31 µs: 2,588 ticks of the chip's clock.",
+   "kind": "derived",
+   "source": "the street's length (st.1) divided by the speed of light; the cards' 600 MHz clock",
+   "note": "1,293 m / c = 4.313 µs; x 600 MHz = 2588"
+  },
+  "el.rails": {
+   "statement": "In CMOS logic a 0 is the ground rail, 0 V, and a 1 is the supply rail: here 0.517 V on a minion at 600 MHz. A gate at 0 V turns an n-type transistor off; a gate at the rail turns it on.",
+   "kind": "generic",
+   "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 6 (author's free chapter); the minion rail measured on this chip (et.v-minion)",
+   "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch6-1.pdf"
+  },
+  "el.off-channel": {
+   "statement": "An \"off\" transistor still lets about 10 billion electrons a second through, but each crosses its 16.5 nm channel in about 0.2 ps, so at any instant its channel holds on average 0.002 electrons.",
+   "kind": "derived",
+   "source": "arithmetic on et.leak-per-tr (10 billion electrons a second) and si.mobility (0.2 ps to cross the channel)",
+   "note": "10^10 per second x 0.2 x 10^-12 s = 0.002. An average over every transistor on the chip; a given off transistor leaks more or less."
+  },
+  "el.half-energy": {
+   "statement": "At the minion rail's 0.517 V each switch costs (0.517 / 0.75)² = 0.48 of what it would at N7's nominal 0.75 V: half the energy, since the energy goes as the voltage squared.",
+   "kind": "derived",
+   "source": "arithmetic on et.v-minion, et.nominal-075 and el.dynamic (E = C V²)"
+  },
+  "el.sram-electrons": {
+   "statement": "A 6T SRAM bit holds roughly a thousand electrons (440-1,300) on its storage node at the 0.705 V SRAM rail; a latch bit of the minion's L1 at 0.517 V holds about 320-970.",
+   "kind": "inferred",
+   "source": "arithmetic on gate.cap-fin, n7.sram-dims, et.v-sram and et.v-minion (el.sram-node)",
+   "note": "No N7 storage-node capacitance is published: 0.1-0.3 fF is assumed (el.sram-node). The inverters restore the charge all the time, so it needs no refresh."
+  },
+  "size.p.nucleus": {
+   "statement": "The silicon-28 nucleus is about 8.1 fm across: a uniform sphere with its measured rms charge radius of 3.1224 fm has a radius of 4.03 fm. (The rule R = 1.2 fm x 28^(1/3) gives 7.3 fm across; a nucleus has a soft edge, so any size is a convention.)",
+   "kind": "derived",
+   "source": "arithmetic on p.nucleus.3 (the measured rms charge radius) and p.nucleus.2 (the 1.2 A^(1/3) rule)",
+   "note": "sqrt(5/3) x 3.1224 fm = 4.031 fm; x 2 = 8.06 fm"
+  },
+  "size.p.atom": {
+   "statement": "One silicon atom takes about 0.235 nm in the crystal: the distance between neighbours, sqrt(3)/4 x 0.5431 nm.",
+   "kind": "derived",
+   "source": "arithmetic on si.lattice (CODATA 2022 lattice parameter)",
+   "note": "the distance between neighbouring atoms in the crystal, sqrt(3)/4 x a = 0.2352 nm (a from CODATA 2022); each atom's share is a sphere of radius 117.6 pm. Measured covalent radius 111 pm (Cordero 2008)."
+  },
+  "size.lib.dramcell": {
+   "statement": "A DRAM cell of the 2019-2022 generations is roughly 0.1 µm across (an order of magnitude: about 6 F² at a feature size of 15-20 nm); the card's DRAM generation is not known.",
+   "kind": "inferred",
+   "source": "the memory levels' DRAM cell (dram.cell, inside.json); TechInsights, DRAM scaling trend (el.dram-cell)",
+   "url": "https://www.techinsights.com/blog/dram-scaling-trend-and-beyond",
+   "note": "Order of magnitude only: the cell is about 6 F², F the half-pitch of its generation; its capacitor is far taller than it is wide."
+  },
+  "ring.mid": {
+   "statement": "On a logarithmic scale the middle of all sizes, between the Planck length (1.6 x 10^-35 m) and the observable universe (8.7 x 10^26 m), is 0.12 mm: about a minion's L1 data cache.",
+   "kind": "derived",
+   "source": "arithmetic on p.planck.1 and the observable universe's diameter (out.universe.2): the square root of their product (p.wrap.7)"
+  }
+ },
+ "num": {
+  "n7_cpp": {
+   "t": "57 nm",
+   "f": "n7.cpp"
+  },
+  "n7_fp": {
+   "t": "30 nm",
+   "f": "n7.fin-pitch"
+  },
+  "n7_cell": {
+   "t": "240 nm",
+   "f": "n7.cells"
+  },
+  "n7_fw": {
+   "t": "6 nm",
+   "f": "n7.fin-width"
+  },
+  "n7_fh": {
+   "t": "52 nm",
+   "f": "n7.fin-height"
+  },
+  "n7_lg": {
+   "t": "16.5 nm",
+   "f": "n7.leff"
+  },
+  "n7_weff": {
+   "t": "110 nm",
+   "f": "n7.weff"
+  },
+  "n7_ss": {
+   "t": "65 mV per decade",
+   "f": "n7.ss"
+  },
+  "v_min": {
+   "t": "0.517 V",
+   "f": "et.v-minion"
+  },
+  "v_sram": {
+   "t": "0.703-0.707 V",
+   "f": "et.v-sram"
+  },
+  "v_noc": {
+   "t": "0.485 V",
+   "f": "et.v-noc"
+  },
+  "v_0": {
+   "t": "0 V",
+   "f": "el.rails"
+  },
+  "ch_at": {
+   "t": "257,000",
+   "f": "dope.count-channel"
+  },
+  "ch_dop": {
+   "t": "0.05 to 5 dopant atoms",
+   "f": "dope.count-channel"
+  },
+  "ch_e": {
+   "t": "85-120 electrons",
+   "f": "el.channel-electrons"
+  },
+  "leak_e": {
+   "t": "10 billion electrons a second",
+   "f": "et.leak-per-tr"
+  },
+  "off_e": {
+   "t": "0.002 electrons",
+   "f": "el.off-channel"
+  },
+  "cross_t": {
+   "t": "0.2 ps",
+   "f": "si.mobility"
+  },
+  "hfo2": {
+   "t": "HfO₂",
+   "f": "gate.hfo2"
+  },
+  "k24": {
+   "t": "k ≈ 24",
+   "f": "gate.hfo2"
+  },
+  "tial": {
+   "t": "TiAl",
+   "f": "gate.metals"
+  },
+  "tin": {
+   "t": "TiN",
+   "f": "gate.metals"
+  },
+  "wf": {
+   "t": "about 4.1 and 4.85 eV",
+   "f": "gate.metals"
+  },
+  "v_nom": {
+   "t": "0.75 V",
+   "f": "et.nominal-075"
+  },
+  "dop_sd": {
+   "t": "1.75 × 10²¹",
+   "f": "dope.n-sd"
+  },
+  "gap": {
+   "t": "1.12 eV",
+   "f": "si.bandgap"
+  },
+  "kt": {
+   "t": "25.9 meV",
+   "f": "el.kt"
+  },
+  "kt43": {
+   "t": "about 43 kT",
+   "f": "el.kt"
+  },
+  "dop_e": {
+   "t": "about 50 meV",
+   "f": "dope.donor-acceptor"
+  },
+  "si_la": {
+   "t": "0.5431 nm",
+   "f": "si.lattice"
+  },
+  "si_bd": {
+   "t": "0.235 nm",
+   "f": "si.lattice"
+  },
+  "si_pw": {
+   "t": "about 31 planes",
+   "f": "si.planes-width"
+  },
+  "ni": {
+   "t": "10¹⁰ free electrons per cm³",
+   "f": "si.ni"
+  },
+  "sram_e": {
+   "t": "roughly a thousand electrons",
+   "f": "el.sram-electrons"
+  },
+  "latch_e": {
+   "t": "about 320-970",
+   "f": "el.sram-electrons"
+  },
+  "dram_e": {
+   "t": "45,000-70,000 electrons",
+   "f": "el.dram-cell"
+  },
+  "dram_ms": {
+   "t": "32 ms",
+   "f": "el.dram-leak"
+  },
+  "dram_fa": {
+   "t": "30 femtoamps",
+   "f": "el.dram-leak"
+  },
+  "reg_e": {
+   "t": "38,000 electrons",
+   "f": "et.flip-reg"
+  },
+  "bus_e": {
+   "t": "190,000 electrons",
+   "f": "el.bus-bit"
+  },
+  "cyc_e": {
+   "t": "540 million electrons",
+   "f": "et.electrons-per-cycle"
+  },
+  "half": {
+   "t": "0.48",
+   "f": "el.half-energy"
+  },
+  "at_shells": {
+   "t": "2 in the first shell, 8 in the second and 4 in the third",
+   "f": "p.atom.1"
+  },
+  "at_14": {
+   "t": "14 electrons",
+   "f": "p.atom.1"
+  },
+  "at_ion": {
+   "t": "8.15",
+   "f": "p.atom.2"
+  },
+  "at_ion5": {
+   "t": "166.8 eV",
+   "f": "p.atom.2"
+  },
+  "at_nn": {
+   "t": "0.235 nm",
+   "f": "size.p.atom"
+  },
+  "at_32k": {
+   "t": "about 32,000 times",
+   "f": "p.atom.11"
+  },
+  "nu_pn": {
+   "t": "14 protons and 14 neutrons",
+   "f": "p.nucleus.1"
+  },
+  "nu_rms": {
+   "t": "3.1224",
+   "f": "p.nucleus.3"
+  },
+  "nu_mass": {
+   "t": "99.97%",
+   "f": "p.nucleus.4"
+  },
+  "nu_size": {
+   "t": "about 8.1 fm",
+   "f": "size.p.nucleus"
+  },
+  "nu_bind": {
+   "t": "8.448 MeV per nucleon",
+   "f": "p.nucleus.7"
+  },
+  "pr_r": {
+   "t": "0.84075",
+   "f": "p.nucleon.1"
+  },
+  "pr_m": {
+   "t": "938.272 MeV",
+   "f": "p.nucleon.3"
+  },
+  "pr_uud": {
+   "t": "uud",
+   "f": "p.nucleon.4"
+  },
+  "pr_1pc": {
+   "t": "1% of the proton",
+   "f": "p.quark.3"
+  },
+  "qk_b": {
+   "t": "4.3 × 10⁻¹⁹ m",
+   "f": "p.quark.1"
+  },
+  "qk_u": {
+   "t": "2.16",
+   "f": "p.quark.3"
+  },
+  "qk_d": {
+   "t": "4.70",
+   "f": "p.quark.3"
+  },
+  "qk_1955": {
+   "t": "1,955 times",
+   "f": "p.quark.2"
+  },
+  "el_b": {
+   "t": "2 × 10⁻²⁰ m",
+   "f": "p.electron.2"
+  },
+  "el_q": {
+   "t": "1.602176634 × 10⁻¹⁹ C",
+   "f": "p.electron.1"
+  },
+  "pl_l": {
+   "t": "1.616255 × 10⁻³⁵ m",
+   "f": "p.planck.1"
+  },
+  "pl_16": {
+   "t": "16 powers of ten",
+   "f": "p.planck.3"
+  },
+  "pl_617": {
+   "t": "61.7 powers of ten",
+   "f": "p.planck.5"
+  },
+  "dp_p": {
+   "t": "0.045 eV",
+   "f": "p.dopant.1"
+  },
+  "dp_50": {
+   "t": "about 1 atom in 50",
+   "f": "p.dopant.5"
+  },
+  "ring_mid": {
+   "t": "0.12 mm",
+   "f": "ring.mid"
+  },
+  "ep_cmb": {
+   "t": "372,600 years",
+   "f": "e.cmb.1"
+  },
+  "ep_cmbT": {
+   "t": "2,973 K",
+   "f": "e.cmb.2"
+  },
+  "ep_bbn": {
+   "t": "about 3 minutes",
+   "f": "e.bbn.1"
+  },
+  "ep_qcd": {
+   "t": "14-24 microseconds",
+   "f": "e.qcd.2"
+  },
+  "ep_qcdT": {
+   "t": "156.5 MeV",
+   "f": "e.qcd.1"
+  },
+  "ep_ew": {
+   "t": "9 picoseconds",
+   "f": "e.ew.2"
+  },
+  "ep_pl": {
+   "t": "5.4 × 10⁻⁴⁴ s",
+   "f": "e.planck.1"
+  },
+  "ep_sun": {
+   "t": "4,567 million years",
+   "f": "e.stars.2"
+  },
+  "b_area": {
+   "t": "2.79 km²",
+   "f": "b.2"
+  },
+  "b_sum": {
+   "t": "142 m",
+   "f": "b.4"
+  },
+  "b_park": {
+   "t": "10.7 ha",
+   "f": "b.5"
+  },
+  "b_pop": {
+   "t": "26,140",
+   "f": "b.3"
+  },
+  "b_light": {
+   "t": "7.3 µs",
+   "f": "b.8"
+  },
+  "st_len": {
+   "t": "1.29 km",
+   "f": "st.1"
+  },
+  "st_top": {
+   "t": "126 m",
+   "f": "st.2"
+  },
+  "st_bot": {
+   "t": "about 30 m",
+   "f": "st.2"
+  },
+  "st_drop": {
+   "t": "about 95 m",
+   "f": "st.2"
+  },
+  "st_light": {
+   "t": "4.31 µs",
+   "f": "st.3"
+  },
+  "s45_l": {
+   "t": "37 m",
+   "f": "s45.6"
+  },
+  "s45_w": {
+   "t": "9 m",
+   "f": "s45.6"
+  },
+  "s45_h": {
+   "t": "6 to 8 m",
+   "f": "s45.6"
+  },
+  "s45_cnc": {
+   "t": "4 × 8 ft",
+   "f": "s45.3"
+  },
+  "s45_light": {
+   "t": "123 ns",
+   "f": "s45.7"
+  }
+ },
+ "ring": {
+  "ticks": [
+   {
+    "id": "p.planck",
+    "m": 1.616255e-35,
+    "f": "p.planck.1"
+   },
+   {
+    "id": "p.quark",
+    "m": 8.6e-19,
+    "f": "p.quark.1"
+   },
+   {
+    "id": "p.nucleon",
+    "m": 1.6815e-15,
+    "f": "p.nucleon.1"
+   },
+   {
+    "id": "p.atom",
+    "m": 2.352e-10,
+    "f": "size.p.atom"
+   },
+   {
+    "id": "lib.fin",
+    "m": 6e-09,
+    "f": "n7.fin-width"
+   },
+   {
+    "id": "l1d",
+    "m": 0.00012,
+    "f": "ring.mid"
+   },
+   {
+    "id": "die",
+    "m": 0.0257,
+    "f": null
+   },
+   {
+    "id": "studio45",
+    "m": 37.0,
+    "f": "s45.6"
+   },
+   {
+    "id": "earth",
+    "m": 12742000.0,
+    "f": null
+   },
+   {
+    "id": "solar",
+    "m": 9000000000000.0,
+    "f": null
+   },
+   {
+    "id": "milkyway",
+    "m": 9.46e+20,
+    "f": null
+   },
+   {
+    "id": "universe",
+    "m": 8.738988638177877e+26,
+    "f": null
+   }
+  ],
+  "epochs": [
+   {
+    "id": "e.cmb",
+    "lab": "the oldest light",
+    "num": "ep_cmb",
+    "T_K": 2973.0,
+    "t_s": 11758361760000.0
+   },
+   {
+    "id": "e.bbn",
+    "lab": "the first nuclei",
+    "num": "ep_bbn",
+    "T_K": 1200000000.0,
+    "t_s": 180
+   },
+   {
+    "id": "e.qcd",
+    "lab": "quarks become protons",
+    "num": "ep_qcd",
+    "T_K": 1820000000000.0,
+    "t_s": 1.9e-05
+   },
+   {
+    "id": "e.ew",
+    "lab": "particles get their masses",
+    "num": "ep_ew",
+    "T_K": 1900000000000000.0,
+    "t_s": 9.1e-12
+   },
+   {
+    "id": "e.planck",
+    "lab": "the Planck time",
+    "num": "ep_pl",
+    "T_K": null,
+    "t_s": 5.391247e-44
+   }
+  ]
+ },
+ "geo": {
+  "bernal": {
+   "meta": {
+    "projection": "local equirectangular at 37.76 N, 122.44 W, km, x east, y south (as outside-geo.json \"sf\")",
+    "sources": [
+     "DataSF Analysis Neighborhoods (j2bu-swwd), ODC-PDDL",
+     "DataSF Streets - Active and Retired (3psu-pn9h), ODC-PDDL",
+     "DataSF Recreation and Parks Properties (gtr9-ntp6), ODC-PDDL",
+     "USGS GNIS 1658039; USGS 3DEP 1 m DEM (EPQS), lidar of 4 Mar 2023"
+    ],
+    "privacy": "Outlines and the whole of 29th Street only; the one point is the hill's summit, a public landmark. No address, block or point of the studio.",
+    "simplified": "clipped to x -0.35..4.05, y 0.35..3.85 km; Douglas-Peucker 4 m; rounded to 1 m (simplify_bernal_geo.py)"
+   },
+   "bernal": {
+    "path": "M3.199,1.186L3.174,1.287L3.188,1.292L3.203,1.361L3.159,1.529L3.137,1.565L3.148,1.642L3.113,1.765L3.058,1.863L3.056,1.885L3.041,1.892L2.942,2.064L2.909,2.139L2.896,2.257L2.909,2.287L2.906,2.369L2.913,2.43L2.909,2.45L2.892,2.45L2.794,2.489L2.792,2.55L2.782,2.6L2.756,2.669L2.713,2.738L2.642,2.812L2.508,2.915L2.305,3.039L2.252,3.067L2.115,3.105L2.052,3.112L1.805,3.107L1.727,3.113L1.51,3.153L1.358,3.164L1.269,3.16L1.196,3.148L1.052,3.112L1.221,2.896L1.016,2.785L1.005,2.771L1.173,2.622L1.266,2.522L1.311,2.463L1.343,2.398L1.364,2.336L1.382,2.248L1.394,2.238L1.384,2.231L1.402,2.154L1.459,1.979L1.469,1.969L1.468,1.954L1.515,1.795L1.524,1.786L1.52,1.775L1.557,1.647L1.557,1.614L1.59,1.576L1.635,1.42L1.641,1.396L1.636,1.321L2.109,1.306L2.122,1.311L2.134,1.306L2.205,1.309L2.213,1.304L2.302,1.302L2.315,1.306L2.326,1.301L2.494,1.296L2.507,1.301L2.58,1.294L2.589,1.299L2.598,1.294L2.659,1.292L2.668,1.297L2.677,1.292L2.738,1.29L2.751,1.295L2.76,1.29L2.823,1.289L2.961,1.23L3.203,1.17Z",
+    "bbox_km": [
+     1.005,
+     1.17,
+     3.203,
+     3.164
+    ],
+    "size_km": [
+     2.2,
+     1.99
+    ],
+    "area_km2": 2.79
+   },
+   "neighbours": {
+    "West of Twin Peaks": {
+     "path": "M0.35,2.209L0.325,2.227L0.251,2.25L0.239,2.259L0.222,2.285L0.22,2.309L0.231,2.411L0.211,2.486L0.213,2.509L0.234,2.544L0.31,2.602L0.329,2.629L0.336,2.668L0.329,2.685L0.313,2.699L0.29,2.705L0.189,2.672L0.149,2.674L0.122,2.684L0.101,2.701L0.061,2.772L0.006,2.796L0.038,2.797L0.141,2.844L0.366,2.905L0.375,2.902L0.434,2.915L0.44,2.922L0.448,2.919L0.507,2.933L0.515,2.941L0.526,2.937L0.598,2.953L0.618,2.968L0.633,2.964L0.666,2.983L0.312,3.188L0.039,3.315L0.045,3.323L0.173,3.432L0.27,3.488L0.35,3.547Z",
+     "c": [
+      -0.038,
+      3.002
+     ]
+    },
+    "Twin Peaks": {
+     "path": "M0.35,0.363L0.288,0.419L0.293,0.398L0.262,0.427L0.2,0.381L0.195,0.374L0.201,0.35L0.091,0.35L0.102,0.498L0.1,0.508L0.09,0.513L0.031,0.52L0.003,0.531L0.03,0.531L0.115,0.681L0.159,0.726L0.197,0.797L0.219,0.822L0.222,0.847L0.25,0.848L0.299,1.091L0.294,1.103L0.302,1.11L0.312,1.174L0.35,1.242Z",
+     "c": [
+      -0.192,
+      0.617
+     ]
+    },
+    "Potrero Hill": {
+     "path": "M4.05,0.35L4.05,0.838L3.823,0.855L3.832,0.981L3.568,1.002L3.475,1.037L3.287,1.05L3.272,1.069L3.264,1.17L3.255,1.162L3.184,1.175L3.225,1.014L3.219,1.008L3.221,0.962L3.252,0.84L3.255,0.806L3.226,0.426L3.202,0.35Z",
+     "c": [
+      3.609,
+      0.672
+     ]
+    },
+    "Portola": {
+     "path": "M3.107,3.008L3.251,3.347L3.322,3.547L3.391,3.85L1.936,3.85L1.898,3.733L2.245,3.619L2.181,3.422L2.095,3.456L2.034,3.47L1.869,3.437L1.803,3.442L1.799,3.433L1.822,3.188L1.815,3.176L1.801,3.17L1.742,3.173L1.604,3.215L1.608,3.135L1.727,3.113L1.805,3.107L2.052,3.112L2.115,3.105L2.252,3.067L2.454,2.951L2.642,2.812L2.681,2.775L2.742,2.694L2.772,2.631L2.792,2.55L2.794,2.489L2.892,2.45L2.909,2.45L2.906,2.465L2.921,2.622L2.949,2.723L3.033,2.859Z",
+     "c": [
+      2.635,
+      3.356
+     ]
+    },
+    "Outer Mission": {
+     "path": "M0.35,3.85L0.35,3.547L0.27,3.488L0.173,3.432L0.045,3.323L0.039,3.315L0.312,3.188L0.798,2.906L1.005,2.771L1.016,2.785L1.221,2.896L0.808,3.415L0.765,3.477L0.632,3.634L0.503,3.85Z",
+     "c": [
+      0.397,
+      3.413
+     ]
+    },
+    "Noe Valley": {
+     "path": "M1.272,0.384L1.285,0.542L1.278,0.553L1.285,0.562L1.298,0.721L1.292,0.73L1.299,0.739L1.311,0.897L1.305,0.907L1.313,0.92L1.318,0.984L1.312,0.997L1.32,1.009L1.325,1.073L1.319,1.086L1.327,1.098L1.332,1.162L1.325,1.175L1.334,1.186L1.339,1.251L1.326,1.277L1.331,1.341L1.339,1.353L1.505,1.34L1.556,1.327L1.636,1.321L1.641,1.396L1.635,1.42L1.59,1.576L1.557,1.614L1.557,1.647L1.52,1.775L1.524,1.786L1.515,1.795L1.468,1.954L1.469,1.969L0.664,2.027L0.624,2.01L0.593,2.012L0.582,1.871L0.587,1.857L0.39,1.872L0.392,1.924L0.406,2.01L0.402,2.036L0.385,2.053L0.388,2.045L0.369,1.99L0.343,1.944L0.31,1.903L0.219,1.824L0.204,1.823L0.199,1.809L0.041,1.69L0.008,1.635L0.112,1.642L0.112,1.663L0.12,1.678L0.15,1.709L0.177,1.729L0.231,1.74L0.232,1.758L0.254,1.797L0.329,1.849L0.35,1.857L0.35,1.242L0.312,1.174L0.302,1.11L0.294,1.103L0.299,1.091L0.25,0.848L0.222,0.847L0.219,0.822L0.197,0.797L0.159,0.726L0.115,0.681L0.03,0.531L0.003,0.531L0.031,0.52L0.196,0.496L0.193,0.457L1.265,0.375Z",
+     "c": [
+      0.621,
+      1.22
+     ]
+    },
+    "Mission": {
+     "path": "M3.202,0.35L3.226,0.426L3.255,0.806L3.252,0.84L3.221,0.962L3.219,1.008L3.225,1.014L3.184,1.175L2.961,1.23L2.823,1.289L2.76,1.29L2.751,1.295L2.738,1.29L2.677,1.292L2.668,1.297L2.659,1.292L2.598,1.294L2.589,1.299L2.58,1.294L2.519,1.296L2.507,1.301L2.494,1.296L2.326,1.301L2.315,1.306L2.213,1.304L2.205,1.309L2.134,1.306L2.122,1.311L2.109,1.306L1.93,1.311L1.915,1.316L1.903,1.312L1.734,1.32L1.644,1.318L1.556,1.327L1.505,1.34L1.339,1.353L1.331,1.341L1.326,1.277L1.339,1.251L1.334,1.186L1.325,1.175L1.332,1.162L1.327,1.098L1.319,1.086L1.325,1.073L1.32,1.009L1.312,0.997L1.318,0.984L1.313,0.92L1.305,0.907L1.311,0.897L1.299,0.739L1.292,0.73L1.298,0.721L1.285,0.562L1.278,0.553L1.285,0.542L1.272,0.384L1.265,0.375L1.269,0.35Z",
+     "c": [
+      2.245,
+      0.818
+     ]
+    },
+    "Glen Park": {
+     "path": "M0.35,1.857L0.329,1.849L0.254,1.797L0.232,1.758L0.231,1.74L0.177,1.729L0.15,1.709L0.12,1.678L0.112,1.663L0.112,1.642L0.008,1.635L0.041,1.69L0.199,1.809L0.204,1.823L0.219,1.824L0.31,1.903L0.343,1.944L0.369,1.99L0.388,2.045L0.385,2.053L0.402,2.036L0.406,2.01L0.392,1.924L0.39,1.872L0.587,1.857L0.582,1.871L0.593,2.012L0.624,2.01L0.664,2.027L1.469,1.969L1.459,1.979L1.402,2.154L1.384,2.231L1.394,2.238L1.382,2.248L1.364,2.336L1.343,2.398L1.311,2.463L1.266,2.522L1.173,2.622L1.005,2.771L0.897,2.846L0.666,2.983L0.633,2.964L0.618,2.968L0.598,2.953L0.526,2.937L0.515,2.941L0.507,2.933L0.448,2.919L0.44,2.922L0.434,2.915L0.375,2.902L0.366,2.905L0.141,2.844L0.038,2.797L0.006,2.796L0.061,2.772L0.101,2.701L0.122,2.684L0.149,2.674L0.189,2.672L0.29,2.705L0.313,2.699L0.329,2.685L0.337,2.654L0.329,2.629L0.31,2.602L0.234,2.544L0.219,2.525L0.211,2.486L0.231,2.411L0.222,2.285L0.251,2.25L0.325,2.227L0.35,2.209Z",
+     "c": [
+      0.463,
+      2.336
+     ]
+    },
+    "Excelsior": {
+     "path": "M1.408,3.163L1.51,3.153L1.608,3.135L1.604,3.215L1.742,3.173L1.801,3.17L1.815,3.176L1.822,3.188L1.799,3.433L1.803,3.442L1.869,3.437L2.034,3.47L2.095,3.456L2.181,3.422L2.245,3.619L1.898,3.733L1.936,3.85L0.503,3.85L0.632,3.634L0.765,3.477L0.808,3.415L1.052,3.112L1.196,3.148L1.269,3.16Z",
+     "c": [
+      1.357,
+      3.541
+     ]
+    },
+    "Castro/Upper Market": {
+     "path": "M1.269,0.35L1.265,0.375L0.193,0.457L0.196,0.496L0.1,0.508L0.091,0.35L0.201,0.35L0.195,0.374L0.2,0.381L0.262,0.427L0.293,0.398L0.288,0.419L0.35,0.363L0.35,0.35Z",
+     "c": [
+      0.471,
+      0.393
+     ]
+    },
+    "Bernal Heights": {
+     "path": "M3.199,1.186L3.174,1.287L3.188,1.292L3.203,1.361L3.159,1.529L3.137,1.565L3.148,1.642L3.113,1.765L3.058,1.863L3.056,1.885L3.041,1.892L2.942,2.064L2.909,2.139L2.896,2.257L2.909,2.287L2.906,2.369L2.913,2.43L2.909,2.45L2.892,2.45L2.794,2.489L2.792,2.55L2.782,2.6L2.756,2.669L2.713,2.738L2.642,2.812L2.508,2.915L2.305,3.039L2.252,3.067L2.115,3.105L2.052,3.112L1.805,3.107L1.727,3.113L1.51,3.153L1.358,3.164L1.269,3.16L1.196,3.148L1.052,3.112L1.221,2.896L1.016,2.785L1.005,2.771L1.173,2.622L1.266,2.522L1.311,2.463L1.343,2.398L1.364,2.336L1.382,2.248L1.394,2.238L1.384,2.231L1.402,2.154L1.459,1.979L1.469,1.969L1.468,1.954L1.515,1.795L1.524,1.786L1.52,1.775L1.557,1.647L1.557,1.614L1.59,1.576L1.635,1.42L1.641,1.396L1.636,1.321L2.109,1.306L2.122,1.311L2.134,1.306L2.205,1.309L2.213,1.304L2.302,1.302L2.315,1.306L2.326,1.301L2.494,1.296L2.507,1.301L2.58,1.294L2.589,1.299L2.598,1.294L2.659,1.292L2.668,1.297L2.677,1.292L2.738,1.29L2.751,1.295L2.76,1.29L2.823,1.289L2.961,1.23L3.203,1.17Z",
+     "c": [
+      2.139,
+      2.184
+     ]
+    },
+    "Bayview Hunters Point": {
+     "path": "M4.05,3.85L3.391,3.85L3.322,3.547L3.251,3.347L3.072,2.93L2.949,2.723L2.934,2.68L2.921,2.622L2.906,2.465L2.913,2.43L2.906,2.369L2.909,2.287L2.896,2.257L2.909,2.139L2.942,2.064L3.041,1.892L3.056,1.885L3.058,1.863L3.113,1.765L3.148,1.642L3.137,1.565L3.159,1.529L3.203,1.361L3.188,1.292L3.174,1.287L3.203,1.17L3.255,1.162L3.264,1.17L3.277,1.057L3.287,1.05L3.475,1.037L3.568,1.002L3.832,0.981L3.823,0.855L4.05,0.838Z",
+     "c": [
+      3.577,
+      2.378
+     ]
+    }
+   },
+   "park": {
+    "path": "M2.179,1.71L2.199,1.717L2.201,1.749L2.243,1.745L2.244,1.761L2.335,1.754L2.337,1.79L2.354,1.805L2.403,1.812L2.433,1.835L2.461,1.821L2.484,1.821L2.617,1.88L2.627,1.896L2.626,1.915L2.61,1.937L2.586,1.947L2.488,1.953L2.41,1.968L2.248,1.944L2.227,1.951L2.19,1.976L2.121,1.981L2.079,1.993L2.081,2.006L2.12,1.994L2.188,1.989L2.166,1.992L2.165,2.007L2.145,2.006L2.145,1.998L2.133,1.997L2.133,2.005L2.111,2.004L2.111,2.011L2.078,2.008L2.077,2.017L2.017,2.017L2.002,2.009L2.007,2L1.988,1.99L1.996,1.976L1.965,1.96L2.004,1.885L2.041,1.904L2.047,1.887L2.012,1.869L2.047,1.801L2.077,1.816L2.151,1.672L2.191,1.687ZM2.147,1.861L2.148,1.906L2.218,1.905L2.217,1.859ZM2.42,1.981L2.419,1.986L2.407,1.985L2.408,1.98ZM2.365,1.974L2.365,1.979L2.353,1.978L2.353,1.972ZM2.475,1.97L2.475,1.975L2.463,1.974ZM2.529,1.965L2.517,1.969L2.517,1.964ZM2.312,1.964L2.312,1.969L2.3,1.968L2.3,1.962ZM2.585,1.96L2.584,1.966L2.572,1.965L2.572,1.96Z",
+    "acres": 26.3,
+    "ha": 10.66
+   },
+   "summit": {
+    "xy_km": [
+     2.127,
+     1.892
+    ],
+    "ground_m": 142.0,
+    "ground_ft": 466
+   },
+   "roads": {
+    "Cesar Chavez St": "M3.335,1.179L3.275,1.181L3.264,1.17M3.335,1.179L3.277,1.167L3.264,1.17L3.254,1.178L3.224,1.18L3.022,1.226L2.955,1.242L2.929,1.252L2.922,1.249M3.264,1.17L3.255,1.162L3.23,1.164L3.063,1.208L2.961,1.23L2.925,1.243L2.922,1.249L2.916,1.258L2.837,1.292L2.823,1.289M2.922,1.249L2.91,1.248L2.823,1.289L2.811,1.3L2.76,1.301L2.751,1.295M2.823,1.289L2.76,1.29L2.751,1.295L2.739,1.301L2.678,1.303L2.668,1.297M2.751,1.295L2.738,1.29L2.677,1.292L2.668,1.297L2.66,1.303L2.599,1.304L2.589,1.299M2.668,1.297L2.659,1.292L2.598,1.294L2.589,1.299L2.58,1.305L2.519,1.307L2.507,1.301M2.589,1.299L2.58,1.294L2.507,1.301L2.495,1.308L2.327,1.312L2.315,1.306M2.507,1.301L2.494,1.296L2.326,1.301L2.315,1.306L2.302,1.312L2.213,1.314L2.205,1.309M2.315,1.306L2.213,1.304L2.205,1.309L2.196,1.315L2.134,1.317L2.122,1.311M2.205,1.309L2.134,1.306L2.122,1.311L2.109,1.317L1.928,1.322L1.915,1.316M2.122,1.311L2.109,1.306L1.93,1.311L1.915,1.316L1.898,1.323L1.746,1.327L1.734,1.32M1.915,1.316L1.831,1.314L1.734,1.32L1.719,1.327L1.636,1.331L1.56,1.337L1.54,1.333M1.734,1.32L1.644,1.318L1.54,1.333L1.339,1.353M3.929,1.134L3.844,1.14L3.755,1.147L3.335,1.179",
+    "San Jose Ave": "M1.491,1.878L1.468,1.954L1.469,1.969L1.473,1.978L1.457,2.035L1.42,2.152L1.403,2.23L1.394,2.238M1.469,1.969L1.459,1.979L1.412,2.125L1.394,2.187L1.384,2.231L1.394,2.238L1.401,2.248L1.382,2.341L1.36,2.405L1.327,2.473L1.28,2.534L1.187,2.635L1.016,2.785L0.917,2.855L0.847,2.899L0.768,2.946M1.394,2.238L1.382,2.248L1.364,2.336L1.343,2.398L1.311,2.463L1.266,2.522L1.173,2.622L1.066,2.72L0.933,2.82L0.797,2.906M1.563,1.604L1.569,1.614L1.568,1.65L1.533,1.777L1.524,1.786M1.563,1.604L1.544,1.695L1.52,1.775L1.524,1.786L1.526,1.798L1.479,1.957L1.469,1.969M1.524,1.786L1.515,1.795L1.491,1.878",
+    "US 101": "M3.355,3.808L3.264,3.509L3.216,3.381L3.187,3.326L3.055,3.012L2.868,2.621L2.831,2.5L2.816,2.378M3.073,1.681L3.093,1.624L3.246,0.999L3.265,0.906L3.271,0.8M2.822,2.26L2.835,2.159L2.877,2.03L2.923,1.945L3.038,1.768L3.073,1.681M2.822,2.26L2.814,2.312L2.816,2.378",
+    "I-280": "M3.795,1.888L3.948,1.699L4.035,1.564M3.175,2.638L3.304,2.533L3.42,2.409L3.795,1.888M2.492,2.961L2.77,2.825L3.044,2.714L3.175,2.638M2.193,3.109L2.344,3.043L2.492,2.961M1.357,3.185L1.513,3.175L1.729,3.134L1.806,3.128L2.053,3.134L2.119,3.127L2.193,3.109M0.701,3.107L0.766,3.098L0.848,3.096L0.914,3.102L1.192,3.169L1.267,3.182L1.357,3.185M0.006,3.369L0.219,3.274L0.377,3.215L0.701,3.107",
+    "Mission St": "M0.623,3.65L0.584,3.715L0.561,3.754L0.529,3.807M1.915,1.316L1.835,1.471L1.802,1.536L1.768,1.602L1.756,1.625L1.68,1.775L1.628,1.877L1.61,1.91L1.585,1.96L1.575,1.98L1.55,2.028L1.508,2.11L1.487,2.153L1.443,2.237L1.413,2.308L1.411,2.353L1.403,2.512L1.386,2.587L1.366,2.662L1.345,2.739L1.249,2.86M1.345,2.739L1.249,2.86L1.221,2.896M1.249,2.86L1.221,2.896L1.196,2.927M1.221,2.896L1.196,2.927L0.94,3.253L0.941,3.26L0.879,3.34L0.869,3.344M0.94,3.253L0.869,3.344L0.868,3.353L0.863,3.351M0.869,3.344L0.863,3.351L0.863,3.36L0.816,3.42L0.808,3.422M0.863,3.351L0.808,3.415L0.808,3.422L0.807,3.431L0.775,3.472L0.765,3.477M0.808,3.422L0.765,3.477L0.721,3.53L0.671,3.59L0.664,3.599L0.623,3.65",
+    "Cortland Ave": "M1.783,2.251L1.796,2.258L1.832,2.276L1.883,2.302L1.953,2.315L2.01,2.322L2.064,2.328L2.119,2.335L2.182,2.343L2.236,2.348L2.291,2.343L2.346,2.337L2.357,2.335L2.404,2.3L2.462,2.256L2.484,2.24L2.517,2.243L2.573,2.247L2.593,2.248L2.627,2.251L2.682,2.255L2.735,2.259L2.79,2.264L2.845,2.268L2.903,2.272M1.508,2.11L1.605,2.159L1.683,2.199L1.734,2.226L1.783,2.251",
+    "Bernal Heights Blvd": "M2.64,1.885L2.638,1.916L2.617,1.941L2.599,1.951L2.49,1.96L2.416,1.974L2.253,1.951L2.197,1.981M2.073,2.001L2.042,1.995L2.026,1.976L2.017,1.953L2.02,1.934L2.042,1.914L2.055,1.889L2.054,1.855L2.065,1.837L2.098,1.816L2.117,1.796L2.129,1.768L2.145,1.755L2.165,1.756L2.286,1.798L2.376,1.846L2.413,1.845L2.437,1.825L2.463,1.816L2.485,1.816L2.64,1.885M2.532,2.069L2.541,2.058L2.574,2.05L2.631,2.03L2.671,2.024L2.686,2.008M2.64,1.885L2.67,1.882L2.692,1.899M2.197,1.981L2.121,1.988L2.073,2.001"
+   },
+   "st29": {
+    "path": "M1.68,1.775L1.584,1.781L1.524,1.786L1.373,1.797L1.172,1.813L0.977,1.827L0.782,1.842L0.587,1.857L0.473,1.866L0.39,1.872",
+    "length_km": 1.293,
+    "profile_m": [
+     [
+      0,
+      126.1
+     ],
+     [
+      41,
+      117.7
+     ],
+     [
+      83,
+      107.1
+     ],
+     [
+      140,
+      92.2
+     ],
+     [
+      198,
+      84.1
+     ],
+     [
+      247,
+      78.3
+     ],
+     [
+      296,
+      72.0
+     ],
+     [
+      345,
+      65.8
+     ],
+     [
+      394,
+      61.6
+     ],
+     [
+      443,
+      58.1
+     ],
+     [
+      491,
+      53.9
+     ],
+     [
+      540,
+      49.7
+     ],
+     [
+      589,
+      47.0
+     ],
+     [
+      638,
+      45.1
+     ],
+     [
+      687,
+      42.9
+     ],
+     [
+      736,
+      40.7
+     ],
+     [
+      785,
+      39.3
+     ],
+     [
+      825,
+      38.5
+     ],
+     [
+      865,
+      37.5
+     ],
+     [
+      906,
+      36.5
+     ],
+     [
+      946,
+      35.5
+     ],
+     [
+      986,
+      35.2
+     ],
+     [
+      1037,
+      33.6
+     ],
+     [
+      1087,
+      31.8
+     ],
+     [
+      1138,
+      30.4
+     ],
+     [
+      1199,
+      29.4
+     ],
+     [
+      1247,
+      30.4
+     ],
+     [
+      1295,
+      31.7
+     ]
+    ],
+    "cross": [
+     {
+      "name": "Diamond St",
+      "d_m": 0
+     },
+     {
+      "name": "Zircon Pl",
+      "d_m": 83
+     },
+     {
+      "name": "Castro St",
+      "d_m": 198
+     },
+     {
+      "name": "Noe St",
+      "d_m": 394
+     },
+     {
+      "name": "Sanchez St",
+      "d_m": 589
+     },
+     {
+      "name": "Church St",
+      "d_m": 785
+     },
+     {
+      "name": "Dolores St",
+      "d_m": 986
+     },
+     {
+      "name": "San Jose Ave",
+      "d_m": 1138
+     },
+     {
+      "name": "Tiffany Ave",
+      "d_m": 1199
+     },
+     {
+      "name": "Mission St",
+      "d_m": 1295
+     }
+    ]
+   }
+  }
+ }
+}

@@ -752,6 +752,35 @@ in the session's work directory, `~/claude/work/chipzoom/`) was written and revi
   back down, the four edge arrows of shire 20) passed 131 of 131 checks each. It fixed block boxes that ended on a
   colon ("lanes:"), two image credits that ran past the drawing's edge, and a legible port label in the rack photo.
 
+## The shared ladder, part 1 (1 October, branch `ladder`, not yet deployed)
+
+The owner's request of 1 October (Q88): make the chip diagram and the memory levels consistent, give the memory levels
+the Up button and the same scales, go down to transistors, atoms and quarks, close the ladder into a circle past the
+observable universe, place Studio 45 on 29th Street in Bernal Heights, research TSMC N7 and the ET-SoC-1, and fill in the
+electronics; and at 07:25 (Q89): everything above the rack is an easter egg, never named in advance. Part 1 builds the
+shared modules and the chip diagram's use of them; the memory levels move onto them next. The design is in the work
+directory (`~/claude/work/ladder/DESIGN.md`); the data's README (`docs/reports/data/2026-10-01-ladder/README.md`) keeps
+what the repository needs of it.
+
+- **Shared include files** (`docs/reports/sources/`): `ladder-core.js` (the path camera, the Up bar, breadcrumb and
+  readout, the wrap, the easter egg, the two-state switch, the lazy data), `ladder-panel.js` (zoom rows, gestures,
+  tooltips), `ladder-outer.js` (the levels outside the chip), `ladder-mem.js` (the memory chains as scales),
+  `ladder-inner.js` (the circuits, the device at N7, the atom to the Planck length, the ring), `ladder.css`; the chip's
+  own `chip-diagram.blocks.js`. `scripts/build-report.py` expands nested and CSS includes and refuses a name declared
+  twice at the top level and a page without the core's hooks.
+- **The data**: `docs/reports/data/2026-10-01-ladder/` (`build_ladder.py`, `ladder.json`; the research on N7, Esperanto,
+  the particles and Studio 45 with their builders). The chip's deep-zoom facts are fetched after the first paint from
+  `docs/reports/ladder-img/ladder-data.json` (the images folder, renamed from `chip-diagram-img/`), which keeps the page
+  at 1.31 MB.
+- **What a reader sees**: Up past the rack only says "?" and goes on to Studio 45 (a 37 by 9 m building, schematic), a
+  side view of 29th Street, Bernal Heights (DataSF's outlines; the whole street, no point on it) and the city, and on to
+  the universe; past the top, a ring of sizes ("a picture, not a place"), then in again at the Planck length and up
+  through a quark, a proton, a nucleus, an atom, the crystal, the channel, the fin and the FinFET into a compute gate or
+  a 6T cell. Down from the die: the FinFET at N7's pitches, the fin 6 by 52 nm under its gate stack, the channel 16.5 nm
+  (257,000 atoms), the crystal and its band gap, an atom, its nucleus, a proton, a quark, the Planck length, with an
+  electron, a phosphorus dopant and a DRAM cell beside them. The gate switch (G) draws the device on and off; the
+  inverter's input and a stored bit switch too.
+
 ## Cross-links between the reports
 
 - **2026-09-24, afternoon (`d04b29a`).** Every report got the byline clause "· part of the measurement reports",

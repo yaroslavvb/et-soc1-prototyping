@@ -7,12 +7,12 @@
    maps, the rack in the room, the lid on the card) or a jump (a "powers of ten" cut: the camera zooms some 3-8 times
    into a marked box while the child grows out of it and the two cross-fade; the readout sweeps the true ratio).
    Every number a drawing prints is a fact's (D.onum, asserted in the build); the images load only when the camera
-   comes near them (the folder chip-diagram-img/ beside the page) and are decoded before the camera enters. */
+   comes near them (the folder ladder-img/ beside the page) and are decoded before the camera enters. */
 const OSC = D.scales || {}, OGEO = D.geo || {}, ONUM = D.onum || {}, IMGS = D.img || {};
-const IMGDIR = 'chip-diagram-img/';
+const IMGDIR = 'ladder-img/';
 const on = k => (ONUM[k] ? ONUM[k].t : '?');
 const onf = k => (ONUM[k] ? ONUM[k].f : '');
-const OUTL = ['beyond', 'universe', 'laniakea', 'localgroup', 'milkyway', 'stars', 'solar', 'moon', 'earth', 'us', 'california', 'bayarea', 'sf', 'studio45', 'rack', 'host', 'card', 'package'];
+const OUTL = ['beyond', 'universe', 'laniakea', 'localgroup', 'milkyway', 'stars', 'solar', 'moon', 'earth', 'us', 'california', 'bayarea', 'sf', 'bernal', 'st29', 'studio45', 'rack', 'host', 'card', 'package'];
 OUT_IDS.push(...OUTL);
 const rc = (x, y, w, h) => ({x, y, w, h});
 const cR = (cx, cy, r) => ({x: cx - r, y: cy - r, w: 2 * r, h: 2 * r});
@@ -61,9 +61,9 @@ function otitle(L, title, tag, sub, subf) {
   const g = E('g', {class: 'otl'}, L);
   T(g, 140, -40, title, 'o-t');
   if (tag) {
-    const fw = PH ? 12.6 : 9.6, w = Math.round(tag.length * fw + 26), x = 880 - w, y = PH ? 690 : -62;
-    S(E('rect', {x, y, width: w, height: PH ? 34 : 28, rx: 14}, g), {fill: 'none', stroke: 'currentColor', strokeWidth: 1.5});
-    T(g, x + w / 2, y + (PH ? 25 : 20), tag, 'o-tag', 'middle');
+    const fw = PH ? 14.2 : 9.6, w = Math.round(tag.length * fw + 26), x = 880 - w, y = PH ? 690 : -62;
+    S(E('rect', {x, y, width: w, height: PH ? 38 : 28, rx: 14}, g), {fill: 'none', stroke: 'currentColor', strokeWidth: 1.5});
+    T(g, x + w / 2, y + (PH ? 27 : 20), tag, 'o-tag', 'middle');
   }
   if (sub) owrap(g, 140, PH ? -6 : -12, sub, 'o-s', 'start', subf);
   return g;
@@ -137,15 +137,15 @@ function fitMap(bb, A) {
 const MAPA = rc(140, 10, 740, 660);   // the area a map fills (under its title)
 /* San Francisco's map leaves the right-hand column to the Studio 45 inset, so that the inset is off the map: the
    camera's dive into it never lands on a place in the city (review of 1 Oct) */
-const MAPAS = () => ({sf: PH ? rc(132, 20, 520, 650) : rc(140, 20, 560, 650)});
+const MAPAS = () => ({sf: rc(140, 20, 740, 650)});
 const geoFit = id => fitMap(OGEO[id].bbox_km, MAPAS()[id] || MAPA);
 const geoSeat = (childId, bbParent, fp) => seatMap(VB, (() => { const f = geoFit(childId); return kmR(OGEO[childId].bbox_km, f.k, f.x0, f.y0, f.X, f.Y); })(), kmR(bbParent, fp.k, fp.x0, fp.y0, fp.X, fp.Y));
 function onode(id, o) {
   const s = OSC[id] || {};
   return node(id, Object.assign({
     name: () => s.name || id, short: () => s.short || id, to: () => (s.name || id).replace(/^The /, 'the '),
-    size: () => (s.m > 0 ? {m: s.m, kind: s.kind, f: s.f || null} : {m: null, kind: 'unknown', f: s.f || null}),
-    frame: () => VB, pv: () => opv(), out: true,
+    size: () => scSz(s) || {m: null, kind: 'unknown', f: s.f || null},
+    frame: () => VB, pv: () => opv(), out: true, egg: !!s.egg,
     def: () => (o.kid ? {id: o.kid} : null), kids: () => (o.kid ? [{id: o.kid}] : []),
     imgs: () => (o.img || []).map(f => IMGDIR + f),
   }, o));
@@ -420,59 +420,162 @@ onode('bayarea', {kid: 'sf', build: (L, ap) => {
   ap.zs.sf = {r: geoSeat('sf', ge.sf_bbox_km, f), g: gs};
   sbar(L, 640, 660, 50 * f.k, '50 km');
 }});
-onode('sf', {kid: 'studio45', build: (L, ap) => {
+/* ---- San Francisco: the city's outline, and in it the neighbourhood the owner names (1 Oct 2026: "Studio 45 is
+   located on 29th Street, in Bernal Heights"): the camera nests into Bernal Heights' outline. No point, block or
+   address of the studio is drawn on any map (AGENT.md §10): the street and the neighbourhood only. ---- */
+const BERN = OGEO.bernal || null;
+// the Bernal Heights level's frame (km on the San Francisco map's projection): the neighbourhood and the whole of 29th
+// Street, which runs west into Noe Valley, with room for the neighbours' names
+if (BERN) BERN.bbox_km = [0.1, 0.75, 3.6, 3.45];
+onode('sf', {kid: 'bernal', build: (L, ap) => {
   const ge = OGEO.sf, {f, m} = mapScene(L, ap, 'sf', {sub: `about 11 km across: ${on('sf_us')} in fibre`, subf: onf('sf_us')});
   const g = opart(L, 'city', 'San Francisco: details', {title: 'San Francisco', kick: 'San Francisco · part', lead: (OSC.sf || {}).blurb, facts: ofx('sf', 1, 2, 3, 4)});
   g.appendChild(m); E('path', {class: 'st hl', d: ge.path}, m);
   mapRing(g, ge.bbox_km, f);
-  // Studio 45 as an inset beside the map, off it: its position in the city is not shown (AGENT.md §10)
-  const ib = {x: PH ? 686 : 712, y: 250, w: 168, h: 112};
-  S(E('line', {x1: ib.x - 12, y1: 40, x2: ib.x - 12, y2: 640, 'pointer-events': 'none'}, L), {stroke: 'var(--border)', strokeWidth: 2, strokeDasharray: '4 6'});
-  const gs = opart(L, 'to45', 'Studio 45, position not shown: zoom in', kidInfo('studio45'), {id: 'studio45'});
-  S(E('rect', {class: 'shape inset', x: ib.x, y: ib.y, width: ib.w, height: ib.h, rx: 6}, gs), {});
-  E('rect', {class: 'ring', x: ib.x - 5, y: ib.y - 5, width: ib.w + 10, height: ib.h + 10, rx: 9}, gs);
-  // a room, as a glyph: not its plan
-  S(E('rect', {x: ib.x + 54, y: ib.y + 14, width: 60, height: 34, rx: 2, 'pointer-events': 'none'}, gs), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 1.5});
-  S(E('rect', {x: ib.x + 78, y: ib.y + 28, width: 10, height: 5, 'pointer-events': 'none'}, gs), {fill: 'var(--c2)'});
-  T(gs, ib.x + ib.w / 2, ib.y + 74, 'Studio 45', 'o-l', 'middle'); T(gs, ib.x + ib.w / 2, ib.y + 98, 'not on the map', 'o-s', 'middle');
-  T2(L, ib.x, ib.y + ib.h + 34, PH ? ['in the city;', 'where is', 'not shown'] : ['the room is in the city;', 'where is not shown'], 'o-s', 'start', null, 1.2);
-  ap.zs.studio45 = {r: ib, g: gs, tr: 'jump'};
+  if (BERN) {
+    const gb = opart(L, 'tobernal', 'Bernal Heights: zoom in', kidInfo('bernal'), {id: 'bernal'});
+    E('path', {class: 'st hood', d: BERN.bernal.path}, mapG(gb, f.k, f.x0, f.y0, f.X, f.Y));
+    const br = kmR(BERN.bernal.bbox_km, f.k, f.x0, f.y0, f.X, f.Y);
+    E('rect', {class: 'ring', x: br.x - 6, y: br.y - 6, width: br.w + 12, height: br.h + 12, rx: 8}, gb);
+    // (a hit area of about 44 px on a phone: the neighbourhood is small on this map)
+    S(E('circle', {cx: br.x + br.w / 2, cy: br.y + br.h / 2, r: Math.max(48, br.w * 0.6), 'pointer-events': 'all'}, gb), {fill: 'transparent'});
+    T(gb, br.x + br.w + 12, br.y + br.h / 2 + 7, 'Bernal Heights', 'o-l ohalo');
+    ap.zs.bernal = {r: geoSeat('bernal', BERN.bbox_km, f), g: gb};
+  }
   sbar(L, 440, 650, 2 * f.k, '2 km');
 }});
-/* ---- Studio 45: a schematic floor, the rack to scale ---- */
-const SK45 = 34;   // units per metre
-const RK = {x: 430, y: 300, w: 1.5 * SK45, h: 0.6 * SK45};
+/* ---- Bernal Heights (DataSF's outlines, simplified; research/bernal-geo.json of the ladder's data): the hill and its
+   park, the roads that bound it, the neighbours, and 29th Street drawn whole, never a point on it ---- */
+const BROADS = {'Cesar Chavez St': [0.6, -14], 'San Jose Ave': [0.35, 22], 'US 101': [0.55, 22], 'I-280': [0.45, 26], 'Mission St': [0.62, 22], 'Cortland Ave': [0.5, 24]};
+/* the middle of a path's points (km), for a label */
+function pathAt(d, t) { const pts = (d.match(/-?[\d.]+,-?[\d.]+/g) || []).map(p => p.split(',').map(Number)); if (!pts.length) return null; return pts[Math.min(pts.length - 1, Math.floor(t * pts.length))]; }
+onode('bernal', {kid: 'st29', build: (L, ap) => {
+  const B = BERN, {f, m} = mapScene(L, ap, 'bernal', {sub: `${on('b_area')} on a hill, its summit ${on('b_sum')} high`, subf: `${onf('b_area')} ${onf('b_sum')}`});
+  const P = c => ({x: f.X + f.k * (c[0] - f.x0), y: f.Y + f.k * (c[1] - f.y0)}), inF = c => c && c[0] > B.bbox_km[0] + 0.15 && c[0] < B.bbox_km[2] - 0.15 && c[1] > B.bbox_km[1] + 0.1 && c[1] < B.bbox_km[3] - 0.1;
+  // the neighbours, in thin lines with their names
+  const gn = opart(L, 'neigh', 'The neighbouring neighbourhoods: details', {title: 'Its neighbours', kick: 'Bernal Heights · part', lead: 'The city\'s analysis neighbourhoods around Bernal Heights: the Mission to the north, Noe Valley and Glen Park to the west, the Excelsior and Portola to the south, Bayview to the east.', facts: ['b.1']});
+  const mn = mapG(gn, f.k, f.x0, f.y0, f.X, f.Y);
+  Object.entries(B.neighbours).forEach(([nm, n]) => { if (nm !== 'Bernal Heights') E('path', {class: 'nbh', d: n.path}, mn); });
+  gn.insertBefore(mn, gn.firstChild); gn._box = {x: f.X, y: f.Y, w: f.k * (B.bbox_km[2] - B.bbox_km[0]), h: f.k * (B.bbox_km[3] - B.bbox_km[1])};
+  Object.entries(B.neighbours).forEach(([nm, n]) => { if (nm !== 'Bernal Heights' && inF(n.c)) { const q = P(n.c); T(gn, q.x, q.y, nm.replace('Bayview Hunters Point', 'Bayview').replace('Castro/Upper Market', 'Castro'), 'o-s nbl', 'middle'); } });
+  // Bernal Heights itself
+  const gb = opart(L, 'hood', 'Bernal Heights: details', {title: 'Bernal Heights', kick: 'Bernal Heights · part', lead: (OSC.bernal || {}).blurb, facts: ['b.1', 'b.2', 'b.3', 'b.9']});
+  E('path', {class: 'st hl', d: B.bernal.path}, mapG(gb, f.k, f.x0, f.y0, f.X, f.Y));
+  mapRing(gb, B.bernal.bbox_km, f);
+  // the park and the summit (the one point drawn: a public landmark)
+  const gp = opart(L, 'hill', 'The hill and its park: details', {title: 'The hill: red chert', kick: 'Bernal Heights · part', lead: 'The hill is folded layers of red chert: quartz, silicon dioxide, from the shells of plankton that settled on the sea floor 200 to 100 million years ago. Refined, the same silicon is the die.', facts: ['b.4', 'b.5', 'b.6', 'b.7']});
+  E('path', {class: 'park', d: B.park.path}, mapG(gp, f.k, f.x0, f.y0, f.X, f.Y));
+  const sm = P(B.summit.xy_km);
+  E('path', {class: 'summit', d: `M${sm.x - 9},${sm.y + 7}L${sm.x},${sm.y - 9}L${sm.x + 9},${sm.y + 7}Z`}, gp);
+  T(gp, sm.x + 14, sm.y - 8, `summit ${on('b_sum')}`, 'o-s ohalo', 'start', onf('b_sum'));
+  T(gp, sm.x + 14, sm.y + 16, `park ${on('b_park')}`, 'o-s ohalo', 'start', onf('b_park'));
+  S(E('circle', {cx: sm.x, cy: sm.y, r: 40, 'pointer-events': 'all'}, gp), {fill: 'transparent'});
+  E('circle', {class: 'ring', cx: sm.x, cy: sm.y, r: 30}, gp);
+  // the roads that bound it, and its main street
+  const gr = E('g', {class: 'roads', 'pointer-events': 'none'}, L), mr = mapG(gr, f.k, f.x0, f.y0, f.X, f.Y);
+  Object.entries(B.roads).forEach(([nm, d]) => { E('path', {class: 'road', d}, mr); const at = BROADS[nm], c = at && pathAt(d, at[0]); if (c && inF(c) && !PH) { const q = P(c); T(gr, q.x, q.y + at[1], nm, 'o-s ohalo road-l', 'middle'); } });
+  // 29th Street, the whole of it: the jump into its side view
+  const gs = opart(L, 'to29', '29th Street: zoom in', kidInfo('st29'), {id: 'st29'});
+  const ms = mapG(gs, f.k, f.x0, f.y0, f.X, f.Y);
+  E('path', {class: 'st29h', d: B.st29.path}, ms); E('path', {class: 'st29', d: B.st29.path}, ms);
+  const sp = (B.st29.path.match(/-?[\d.]+,-?[\d.]+/g) || []).map(p => P(p.split(',').map(Number)));
+  const sx0 = Math.min(...sp.map(q => q.x)), sx1 = Math.max(...sp.map(q => q.x)), sy = sp.reduce((a, q) => a + q.y, 0) / sp.length;
+  E('rect', {class: 'ring', x: sx0 - 10, y: sy - 22, width: sx1 - sx0 + 20, height: 44, rx: 10}, gs);
+  T(gs, (sx0 + sx1) / 2, sy - 18, '29th Street', 'o-l ohalo', 'middle');
+  gs._box = {x: sx0 - 10, y: sy - 22, w: sx1 - sx0 + 20, h: 44};
+  ap.zs.st29 = {r: lineSeat(ST29X[0], ST29X[1], ST29Y(), sx0, sx1, sy), g: gs, tr: 'jump'};
+  sbar(L, PH ? 150 : 640, PH ? 600 : 650, 0.5 * f.k, '500 m');
+  owrap(L, 140, PH ? 652 : 690, 'the street is drawn whole: where on it the studio is, is not shown', 'o-s', 'start', null, 40);
+}});
+/* the rect in the parent where a child drawn in VB goes so that its line from cx0 to cx1 at height cy lands on the
+   parent's line from px0 to px1 at py (a map's street becoming the side view's street) */
+function lineSeat(cx0, cx1, cy, px0, px1, py) { const k = (px1 - px0) / (cx1 - cx0); return {x: px0 - k * (cx0 - VB.x), y: py - k * (cy - VB.y), w: k * VB.w, h: k * VB.h}; }
+/* ---- 29th Street: a side view, not a map. Its height along its length (USGS lidar, every 40 m), the vertical scale
+   stretched and labelled so, the cross streets as ticks; no stretch of it marked, and Studio 45 in an inset beside the
+   drawing, never at a point on the street ---- */
+const ST29X = [140, 880], ST29Y = () => (PH ? 330 : 380);
+onode('st29', {kid: 'studio45', build: (L, ap) => {
+  const B = BERN.st29, pr = B.profile_m, len = pr[pr.length - 1][0], X0 = ST29X[0], W = ST29X[1] - ST29X[0];
+  obd(L, false);
+  otitle(L, '29th Street', 'side view, heights stretched', `${on('st_len')} long, it falls ${on('st_drop')}; light runs it in ${on('st_light')}`, `${onf('st_len')} ${onf('st_drop')} ${onf('st_light')}`);
+  const Y0 = PH ? 400 : 600, kz = PH ? 1.9 : 2.8, kx = W / len, xm = d => X0 + d * kx, ym = h => Y0 - h * kz;
+  const g = opart(L, 'street', '29th Street, in profile: details', {title: '29th Street, in profile', kick: '29th Street · part', lead: (OSC.st29 || {}).blurb, facts: ['st.1', 'st.2', 'st.3']});
+  const line = pr.map(([d, h], i) => `${i ? 'L' : 'M'}${xm(d).toFixed(1)},${ym(h).toFixed(1)}`).join('');
+  E('path', {class: 'ground', d: `${line}L${xm(len)},${Y0}L${X0},${Y0}Z`}, g);
+  E('path', {class: 'st29', d: line}, g);
+  E('rect', {class: 'ring', x: X0 - 8, y: ym(150) - 8, width: W + 16, height: Y0 - ym(150) + 16, rx: 10}, g);
+  E('line', {class: 'sea', x1: X0, y1: Y0, x2: X0 + W, y2: Y0}, L);
+  T(L, X0 + W + 10, Y0 + 6, 'sea level', 'o-s');
+  T(g, xm(0) + 6, ym(pr[0][1]) - 12, on('st_top'), 'o-s ohalo', 'start', onf('st_top'));
+  T(g, xm(len) - 4, ym(pr[pr.length - 1][1]) - 14, on('st_bot'), 'o-s ohalo', 'end', onf('st_bot'));
+  // the hill's summit, for comparison: a level line
+  E('line', {class: 'sumln', x1: X0, y1: ym(142), x2: X0 + W, y2: ym(142)}, L);
+  T(L, X0 + W, ym(142) - 10, `Bernal Heights' summit, ${on('b_sum')}`, 'o-s', 'end', onf('b_sum'));
+  // the cross streets, ticks along the street with their names
+  const gc = E('g', {class: 'xst', 'pointer-events': 'none'}, L);
+  B.cross.forEach((c, i) => {
+    const x = xm(c.d_m), h = pr.reduce((a, q) => (Math.abs(q[0] - c.d_m) < Math.abs(a[0] - c.d_m) ? q : a))[1], y = ym(h);
+    E('line', {class: 'xtick', x1: x, y1: y - 6, x2: x, y2: y + 6}, gc);
+    const t = T(gc, x + 4, Y0 + 24, c.name, 'o-s', 'start'); t.setAttribute('transform', `rotate(${PH ? 62 : 40} ${x + 4} ${Y0 + 24})`);
+  });
+  T(L, X0, PH ? Y0 + 182 : Y0 + 100, `heights drawn ${(kz / kx).toFixed(1)} times their scale`, 'o-s');
+  // Studio 45, beside the drawing (its place on the street is not shown): the jump's seat
+  const ib = PH ? {x: 520, y: Y0 + 210, w: 340, h: 120} : {x: 940, y: 240, w: 230, h: 124};
+  const gs = opart(L, 'to45', 'Studio 45, on 29th Street: zoom in', kidInfo('studio45'), {id: 'studio45'});
+  S(E('rect', {class: 'shape inset', x: ib.x, y: ib.y, width: ib.w, height: ib.h, rx: 6}, gs), {});
+  E('rect', {class: 'ring', x: ib.x - 5, y: ib.y - 5, width: ib.w + 10, height: ib.h + 10, rx: 9}, gs);
+  S(E('rect', {x: ib.x + ib.w / 2 - 36, y: ib.y + 14, width: 72, height: 30, rx: 2, 'pointer-events': 'none'}, gs), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 1.5});
+  T(gs, ib.x + ib.w / 2, ib.y + 74, 'Studio 45', 'o-l', 'middle'); T(gs, ib.x + ib.w / 2, ib.y + 100, 'on 29th Street', 'o-s', 'middle');
+  T2(L, PH ? 140 : ib.x, PH ? ib.y + 30 : ib.y + ib.h + 30, ['its place on the street', 'is not shown'], 'o-s', 'start', null, 1.2);
+  ap.zs.studio45 = {r: ib, g: gs, tr: 'jump'};
+}});
+/* ---- Studio 45: the building at its address in plan and in section, schematic, to scale (DataSF's footprint, 37 by
+   9 m); the rack to scale, its place in the building not recorded ---- */
+const SK45 = 19;   // units per metre
+const S45P = {x: 150, y: 60, w: 37 * SK45, h: 9 * SK45};
+const RK = {x: S45P.x + 22 * SK45, y: S45P.y + 5 * SK45, w: 1.5 * SK45, h: 0.6 * SK45};
 onode('studio45', {kid: 'rack', build: (L, ap) => {
   obd(L, false);
-  otitle(L, 'Studio 45', 'schematic', 'the lab’s room in San Francisco, as the owner calls it', 'out.studio45.1');
-  const fl = {x: 170, y: 90, w: 20 * SK45, h: 12 * SK45};
-  const g = opart(L, 'room', 'The room: details', {title: 'Studio 45', kick: 'Studio 45 · part', lead: (OSC.studio45 || {}).blurb, facts: ofx('studio45', 1)});
-  S(E('rect', {class: 'shape floor', x: fl.x, y: fl.y, width: fl.w, height: fl.h, rx: 4}, g), {});
-  E('rect', {class: 'ring', x: fl.x - 6, y: fl.y - 6, width: fl.w + 12, height: fl.h + 12, rx: 8}, g);
-  // the walls stay drawn while the camera dives to the rack, until the rack's photo covers the screen (review of 1 Oct:
-  // the room, set back with the other parts, had gone a third of the way in)
-  S(E('rect', {x: fl.x, y: fl.y, width: fl.w, height: fl.h, rx: 4, 'pointer-events': 'none'}, L), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 2, strokeDasharray: '10 8'});
-  owrap(g, fl.x + 16, fl.y + 30, 'a room of about 20 m (assumed): its layout is not recorded', 'o-s');
-  // furniture of common sizes, to scale, faint: what a room like this holds, not where this one's stands
-  const gf = opart(L, 'furn', 'Benches and a table, illustrative: details', {title: 'Illustrative furniture', kick: 'Studio 45 · scale',
-    lead: 'Workbenches of a common size (2 by 0.8 m) and a table, drawn to the room’s scale to show what a metre looks like here. They are not this room’s furniture: its layout is not recorded.', facts: ofx('studio45', 1)});
-  const fur = [[fl.x + 40, fl.y + 70, 2, 0.8], [fl.x + 40 + 2.2 * SK45, fl.y + 70, 2, 0.8], [fl.x + 40, fl.y + fl.h - 70 - 0.8 * SK45, 2, 0.8], [fl.x + fl.w - 120 - 2.4 * SK45, fl.y + fl.h - 50 - 1.2 * SK45, 2.4, 1.2]];
-  fur.forEach(([x, y, w, h]) => S(E('rect', {x, y, width: w * SK45, height: h * SK45, rx: 2}, gf), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 1.5, strokeOpacity: 0.55}));
-  E('rect', {class: 'ring', x: fl.x + 34, y: fl.y + 64, width: 4.4 * SK45, height: 0.8 * SK45 + 12, rx: 6}, gf);
-  T(gf, fl.x + 40, fl.y + 70 + 0.8 * SK45 + 24, 'illustrative benches, 2 m long: not this room’s', 'o-s');
-  const gp = opart(L, 'person', 'A person, for scale: details', {title: 'A person, for scale', kick: 'Studio 45 · scale', lead: 'Seen from above, a person takes about half a metre. Light crosses a room like this in about 67 ns: some 40 ticks of the chip’s clock.', facts: ofx('studio45', 1)});
-  // (the marker fades with the labels: zoomed into the rack it would grow into a large disc)
-  S(E('circle', {class: 'olab', cx: RK.x + 120, cy: RK.y + 40, r: 0.25 * SK45}, gp), {fill: 'var(--ink-2)', fillOpacity: 0.45});
-  S(E('circle', {cx: RK.x + 120, cy: RK.y + 40, r: 24}, gp), {fill: 'transparent'});
-  E('circle', {class: 'ring', cx: RK.x + 120, cy: RK.y + 40, r: 16}, gp);
-  T(gp, RK.x + 148, RK.y + 46, 'a person, for scale', 'o-s');
+  otitle(L, 'Studio 45', 'schematic, to scale', `a co-working space and workshop for hardware, ${on('s45_l')} by ${on('s45_w')}; light crosses it in ${on('s45_light')}`, `${onf('s45_l')} ${onf('s45_light')}`);
+  const fl = S45P;
+  const g = opart(L, 'bldg', 'The building: details', {title: 'Studio 45', kick: 'Studio 45 · part', lead: (OSC.studio45 || {}).blurb, facts: ['s45.2', 's45.3', 's45.4', 's45.5', 's45.6', 's45.7']});
+  S(E('rect', {class: 'shape floor', x: fl.x, y: fl.y, width: fl.w, height: fl.h, rx: 3}, g), {});
+  E('rect', {class: 'ring', x: fl.x - 6, y: fl.y - 6, width: fl.w + 12, height: fl.h + 12, rx: 7}, g);
+  // the walls stay drawn while the camera dives to the rack, until the rack's photo covers the screen
+  S(E('rect', {x: fl.x, y: fl.y, width: fl.w, height: fl.h, rx: 3, 'pointer-events': 'none'}, L), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 2, strokeDasharray: '10 8'});
+  T(g, fl.x + 14, fl.y + 28, 'in plan: what is where inside is not recorded', 'o-s');
+  T(g, fl.x + 14, fl.y + fl.h - 14, `${on('s45_l')} deep`, 'o-s', 'start', onf('s45_l'));
+  // in section: two storeys, 6 to 8 m tall
+  const sy = PH ? 470 : 470, sh = 7 * SK45, gsct = opart(L, 'section', 'The building in section: details', {title: 'Two storeys', kick: 'Studio 45 · part', lead: 'Two floors of co-working space over a street-level warehouse and courtyard, with a wood shop: the building is 6 to 8 m tall.', facts: ['s45.3', 's45.6']});
+  S(E('rect', {class: 'shape floor', x: fl.x, y: sy - sh, width: fl.w, height: sh, rx: 2}, gsct), {});
+  S(E('line', {x1: fl.x, y1: sy - sh / 2, x2: fl.x + fl.w, y2: sy - sh / 2, 'pointer-events': 'none'}, gsct), {stroke: 'var(--ink-2)', strokeWidth: 1.5, strokeDasharray: '6 6'});
+  S(E('line', {x1: fl.x - 30, y1: sy, x2: fl.x + fl.w + 30, y2: sy, 'pointer-events': 'none'}, gsct), {stroke: 'var(--ink)', strokeWidth: 2.5});
+  E('rect', {class: 'ring', x: fl.x - 6, y: sy - sh - 6, width: fl.w + 12, height: sh + 12, rx: 6}, gsct);
+  T(gsct, fl.x + 14, sy - sh + 26, 'co-working upstairs', 'o-s'); T(gsct, fl.x + 14, sy - 14, 'street-level warehouse, shop and courtyard', 'o-s');
+  T(gsct, PH ? fl.x + fl.w - 10 : fl.x + fl.w + 12, PH ? sy - sh - 12 : sy - sh / 2 + 6, `${on('s45_h')} tall`, 'o-s', PH ? 'end' : 'start', onf('s45_h'));
+  // a person and the CNC router's bed, to scale
+  const gp = opart(L, 'person', 'A person, for scale: details', {title: 'A person, for scale', kick: 'Studio 45 · scale', lead: 'A person 1.7 m tall, drawn to the building\'s scale: light crosses the building in 123 ns, 74 ticks of the chip\'s clock.', facts: ['s45.7']});
+  const px = fl.x + 30 * SK45, ph = 1.7 * SK45;
+  S(E('circle', {cx: px, cy: sy - ph + 3.5, r: 3.5}, gp), {fill: 'var(--ink-2)'}); S(E('rect', {x: px - 3, y: sy - ph + 7, width: 6, height: ph - 7, rx: 2}, gp), {fill: 'var(--ink-2)'});
+  S(E('circle', {cx: px, cy: sy - ph / 2, r: 22, 'pointer-events': 'all'}, gp), {fill: 'transparent'}); E('circle', {class: 'ring', cx: px, cy: sy - ph / 2, r: 24}, gp);
+  T(gp, PH ? px - 14 : px + 14, sy - ph - 8, 'a person, 1.7 m', 'o-s ohalo', PH ? 'end' : 'start');
+  const gk = opart(L, 'cnc', 'The CNC router\'s bed: details', {title: 'A 4 × 8 ft CNC router', kick: 'Studio 45 · tools', lead: 'The shop\'s three-axis CNC router cuts a 4 by 8 foot sheet: 1.22 by 2.44 m, drawn here to the building\'s scale.', facts: ['s45.3', 's45.8']});
+  const cx = fl.x + 6 * SK45, cy = fl.y + 3 * SK45;
+  S(E('rect', {class: 'shape cncb', x: cx, y: cy, width: 2.44 * SK45, height: 1.22 * SK45, rx: 1}, gk), {});
+  E('rect', {class: 'ring', x: cx - 5, y: cy - 5, width: 2.44 * SK45 + 10, height: 1.22 * SK45 + 10, rx: 4}, gk);
+  S(E('rect', {x: cx - 12, y: cy - 12, width: 2.44 * SK45 + 24, height: 1.22 * SK45 + 24, 'pointer-events': 'all'}, gk), {fill: 'transparent'});
+  T(gk, cx, cy + 1.22 * SK45 + 22, `${on('s45_cnc')} CNC bed`, 'o-s', 'start', onf('s45_cnc'));
+  // the rack: to scale, its place in the building not recorded
   const gr = opart(L, 'torack', 'The rack: zoom in', kidInfo('rack'), {id: 'rack'});
-  S(E('circle', {cx: RK.x + RK.w / 2, cy: RK.y + RK.h / 2, r: 46, 'pointer-events': 'all'}, gr), {fill: 'transparent'});
+  S(E('circle', {cx: RK.x + RK.w / 2, cy: RK.y + RK.h / 2, r: 40, 'pointer-events': 'all'}, gr), {fill: 'transparent'});
   S(E('rect', {class: 'shape rackp', x: RK.x, y: RK.y, width: RK.w, height: RK.h, rx: 2}, gr), {});
   E('rect', {class: 'ring', x: RK.x - 6, y: RK.y - 6, width: RK.w + 12, height: RK.h + 12, rx: 5}, gr);
-  if (PH) T2(gr, RK.x, RK.y - 40, ['the rack (to scale;', 'its place is not recorded)'], 'o-s', 'start', null, 1.15); else T(gr, RK.x, RK.y - 12, 'the rack (to scale; its place is not recorded)', 'o-s');
-  ap.zs.rack = {r: seatMap(VB, RACKPHf(), RK), g: gr};
-  sbar(L, 170, 560, 5 * SK45, '5 m');
+  if (PH) T2(gr, RK.x - 10, RK.y + 44, ['the rack (to scale;', 'its place is not recorded)'], 'o-s', 'middle', null, 1.15);
+  else T(gr, RK.x + RK.w / 2, RK.y + 40, 'the rack (to scale; its place is not recorded)', 'o-s', 'middle');
+  // (the rack is small in the building: a powers-of-ten jump from a box an eighth of the view around it, so that no
+  // layer is ever scaled past 30 times, on a phone either)
+  ap.zs.rack = {r: markBox(RK.x + RK.w / 2, RK.y + RK.h / 2), g: gr, tr: 'jump'};
+  sbar(L, 150, PH ? 560 : 560, 5 * SK45, '5 m');
 }});
 /* ---- the rack: the owner's photo, its machines' labels blurred ---- */
 const RKS = 0.69;   // units per pixel of the 1000 x 988 copy (a phone: 0.66, lower, under the wrapped line)
@@ -622,11 +725,10 @@ KIDS.host = () => ({up: 'host'});
 function showNodePart(g) {
   const i = g._info || {}, P = layerPath(g) || Z.path, el = P[P.length - 1];
   const facts = (i.facts || []).filter(f => F[f]);
-  const det = (facts.length ? `<p class="pn-h pn-fh">The facts (${facts.length}): point at one for its source</p><ul class="facts">${facts.map(factLi).join('')}</ul>` : '');
+  const det = (facts.length ? `<p class="pn-h pn-fh">The facts (${facts.length}): point at one for its source</p><ul class="facts">${facts.map(factLi).join('')}</ul>` : '') + lazyNote(i.facts);
   panel(`<p class="pn-kick">${esc(i.kick || shortOf(el) + ' · part')}</p><p class="pn-title">${esc(i.title || '')}</p>`
     + (i.lead ? `<p class="pn-lead">${i.lead}</p>` : '') + zoomRowPart(g, i.title) + (det ? detBlock(det) : ''));
 }
-const KWORD = {measured: 'measured', spec: 'spec', derived: 'derived', inferred: 'inferred', outside: 'outside source', generic: 'textbook', owner: 'the owner’s word', hypothesis: 'speculative', unknown: 'unknown'};
 function showScene(P) {
   const el = P[P.length - 1], s = OSC[el.id] || {}, N0 = NODES[el.id];
   const blurb = N0 && N0.blurb ? N0.blurb(prm(el)) : s.blurb;
@@ -634,9 +736,13 @@ function showScene(P) {
   const im = s.img ? `<p class="pn-cred">Image: ${esc(s.img.credit)} · ${s.img.licence_url ? `<a href="${esc(s.img.licence_url)}" target="_blank" rel="noopener">${esc(s.img.licence)} ↗</a>` : esc(s.img.licence)}</p>` : '';
   const det = (s.note ? `<p class="pn-what"><b>Its size:</b> ${esc(s.note)}</p>` : '') + (s.notes || []).map(t => `<p class="pn-what">${esc(t)}</p>`).join('')
     + (s.erbium ? '<p class="pn-what"><span class="kd erbium">Erbium RTL</span> Some facts here come from core-et’s RTL on its Erbium branch: the same Minion core lineage as the ET-SoC-1, in a later configuration; that the silicon matches it is not confirmed.</p>' : '')
-    + (facts.length ? `<p class="pn-h pn-fh">The facts (${facts.length}): point at one for its source</p><ul class="facts">${facts.map(factLi).join('')}</ul>` : '');
+    + (facts.length ? `<p class="pn-h pn-fh">The facts (${facts.length}): point at one for its source</p><ul class="facts">${facts.map(factLi).join('')}</ul>` : '') + lazyNote(s.facts);
+  // a scene drawn in two states (1 Oct): the panel's switch beside the drawing's (G)
+  const L = LYR.get(pkeys(P)), st = L && L._states;
+  const sw = st ? `<div class="pn-act"><button type="button" class="st-btn" data-act="state" aria-pressed="${STON}">${esc(st.btn[STON ? 1 : 0])}</button></div>` : '';
   panel(`<p class="pn-kick">${hereKick(P)}</p><p class="pn-title">${esc(nameOf(el))}</p>` + (blurb ? `<p class="pn-lead">${esc(blurb)}</p>` : '')
-    + zoomRowHere(P) + im + (det ? detBlock(det) : ''));
+    + sw + zoomRowHere(P) + im + (det ? detBlock(det) : ''));
+  if (st) $('pn-body').querySelectorAll('button[data-act="state"]').forEach(b => { b._lab = st.btn; });
 }
 /* images of the levels near the camera are fetched ahead (two levels either way), and decoded before it enters one */
 function prefetch() {

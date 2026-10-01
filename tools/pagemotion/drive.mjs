@@ -26,7 +26,8 @@ try {
   await send('Page.addScriptToEvaluateOnNewDocument', {source: readFileSync(new URL(process.env.REC || './recorder.js', import.meta.url), 'utf8') + (process.env.PRE || '')});
   if (process.env.TRACE) await send('Tracing.start', {transferMode: 'ReportEvents', traceConfig: {includedCategories: (process.env.TRACE_CATS || 'devtools.timeline,disabled-by-default-devtools.timeline,v8,cc,gpu,toplevel').split(',')}});
   if (process.env.CAST) await send('Page.startScreencast', {format: 'jpeg', quality: 80, everyNthFrame: 1});
-  const url = 'file://' + resolve(page) + (hash || '');
+  // (a page on a local server, http://..., as it is: its lazily fetched data then loads, which file:// forbids)
+  const url = (/^https?:/.test(page) ? page : 'file://' + resolve(page)) + (hash || '');
   await send('Page.navigate', {url});
   const ev = async e => (await send('Runtime.evaluate', {expression: e, returnByValue: true, awaitPromise: true})).result.value;
   const t0 = Date.now(); let st = null, lastStep = '';

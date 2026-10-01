@@ -19,7 +19,8 @@ const zbtn = (path, label, pri, hint) => `<button type="button" class="st-btn${p
 const zrow = (lab, btns) => (btns.length ? `<div class="zr">${lab ? `<span class="zl">${esc(lab)}</span>` : ''}${btns.slice(0, 6).join('')}${btns.length > 6 ? `<details class="zmore"><summary>more…</summary><div class="zr">${btns.slice(6).join('')}</div></details>` : ''}</div>` : '');
 function zoomRowPart(g, title) {
   const P = layerPath(g) || Z.path, k = kidOf(g), rows = [];
-  if (k && k.up) { const up = upPath(k.up); if (up) rows.push(zrow('', [zbtn(up, `Go to ${toOf({id: k.up})} (zooms out)`, true, dcHint())])); }
+  if (g._go) rows.push(zrow('Go in:', [zbtn(g._go(), capFirst(String(g.getAttribute('aria-label') || '').replace(/[.:].*$/, '')), true, dcHint())]));
+  else if (k && k.up) { const up = upPath(k.up); if (up) rows.push(zrow('', [zbtn(up, `Go to ${toOf({id: k.up})} (zooms out)`, true, dcHint())])); }
   else if (k) rows.push(zrow('Zoom in:', [zbtn(P.concat([k]), capFirst(toOf(k)), true, dcHint())]));
   const ex = g._opts ? g._opts(P) : OPTS[g._key] ? OPTS[g._key](g._ctx || {}, P, g) : [];
   const made = ex.filter(x => x.made), other = ex.filter(x => !x.made);
@@ -31,8 +32,11 @@ function zoomRowPart(g, title) {
 function zoomRowHere(P) {
   const ks = kidsOf(P), d = defKid(P), rows = [];
   if (ks.length) rows.push(zrow('Zoom into:', ks.map(k => zbtn(P.concat([k]), capFirst(toOf(k)), d && pk(k) === pk(d), d && pk(k) === pk(d) ? '(+)' : ''))));
-  else rows.push('<p class="nz">The bottom of this branch: nothing smaller is drawn here.</p>');
-  if (P.length > 1) rows.push(zrow('', [zbtn(P.slice(0, -1), `↑ Zoom out to ${toOf(P[P.length - 2])}`, false, '(Backspace)')]));
+  else if (P[P.length - 1].id === PLANCK && NODES[WRAP]) rows.push(zrow('', [zbtn(nextOf(P), '? (+)', false, '')]));
+  else if (!isWrap(P)) rows.push('<p class="nz">The bottom of this branch: nothing smaller is drawn here.</p>');
+  const U = upOf(P);
+  if (U && isWrap(P)) rows.push(zrow('', [zbtn(U, '↑ Round the ring: in at the Planck length', false, '(Backspace)')]));
+  else if (U) rows.push(zrow('', [zbtn(U, egg(U[U.length - 1]) ? '↑ Zoom out: ?' : `↑ Zoom out to ${toOf(U[U.length - 1])}`, false, '(Backspace)')]));
   return `<div class="pn-zoom">${rows.join('')}</div>`;
 }
 function hereKick(P) { return `You are here · <span class="pn-sz">${sizeHtml(sizeOf(P[P.length - 1]))}</span>`; }
@@ -58,6 +62,7 @@ function showHere() {
 function zoomInto(g) {
   const k = kidOf(g), P = layerPath(g) || Z.path;
   select(g); showPart(g); pillOff();
+  if (g._go) { userNav(g._go()); return true; }
   if (!k) { flashZoomRow(); return false; }
   if (k.up) { const up = upPath(k.up); if (up) userNav(up); return !!up; }
   userNav(P.concat([k]));
@@ -118,6 +123,7 @@ $('pn-body').addEventListener('click', e => {
   const b = e.target.closest('button[data-act]'); if (!b) return;
   // pressed from the keyboard: after the move, focus goes to the new panel's zoom row (it is rebuilt on arrival)
   if (b.dataset.act === 'go') { stageIntoView(); userNav(pathFrom(b.dataset.to), {pfocus: e.detail === 0}); }
+  else if (b.dataset.act === 'state') stateToggle();
   else if (ACTS[b.dataset.act]) ACTS[b.dataset.act](b);
 });
 
@@ -125,9 +131,9 @@ $('pn-body').addEventListener('click', e => {
 const tip = $('srctip');
 function tipHtml(ids, srcOnly) {
   return ids.split(/\s+/).filter(Boolean).map(id => {
-    const f = F[id]; if (!f) return '';
+    const f = F[id]; if (!f) return LAZY.st === 'failed' ? `<div>${esc(id)}: source not loaded</div>` : LAZY.st === 'done' ? '' : `<div>${esc(id)}: loading the source…</div>`;
     const cd = cardsTxt(f);
-    return `<div><b>${esc(f.kind)}</b> · ${esc(id)}${cd ? ' · ' + esc(cd) : ''}`
+    return `<div><b>${esc(KWORD[f.kind] || f.kind)}</b>${CAVW[f.caveat] ? ' · ' + CAVW[f.caveat] : ''} · ${esc(id)}${cd ? ' · ' + esc(cd) : ''}`
       + (srcOnly ? '' : `<span class="s">${esc(f.statement)}</span>`)
       + `<span class="s"><b>Source:</b> ${esc(f.source)}</span>${f.note ? `<span class="s"><b>Note:</b> ${esc(f.note)}</span>` : ''}</div>`;
   }).join('<hr>');

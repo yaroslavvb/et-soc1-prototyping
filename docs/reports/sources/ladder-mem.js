@@ -50,8 +50,8 @@ function inode(id, o) {
   const s = ISC[id] || {};
   return node(id, Object.assign({
     name: () => s.name || id, short: () => s.short || id, to: () => inName(s.name && s.name.length <= 34 ? s.name : s.short || id),
-    size: () => (s.m > 0 ? {m: s.m, kind: s.kind, f: s.f || null} : null),
-    frame: () => MLF, view: () => MLV, inside: true,
+    size: () => scSz(s),
+    frame: () => MLF, view: () => MLV, inside: true, egg: !!s.egg,
   }, o));
 }
 const n0 = v => (v == null || isNaN(v) ? 0 : v);

@@ -10,7 +10,13 @@
    chip defines them before the include): the drawing's svg, VB, PH, TOUCH, REDUCED, the clock (CLK, DTMAX), the
    view helpers (lerp, rmap, setT, cmpM, simZoom, ...), the trio of layers the page animates in (bindTrio, LAYERS,
    pinfo, pathOf, TRIO, PVIEW, pview), and the page's reactions to a move (clearFx, clearDim, select, showHere,
-   prefetch, FL, TOUR, playBtn, renderBar, startFlow, restartStage, setFollow, FOLLOW, goNeighbour, shCell, BYDIE). */
+   prefetch, FL, TOUR, playBtn, renderBar, startFlow, restartStage, setFollow, FOLLOW, goNeighbour, shCell, BYDIE).
+   Since 1 October it also holds the wrap (the ring of sizes), the easter egg's "?" (the levels above the rack), the
+   two-state electronics (stateSwitch, stateToggle) and the lazily fetched data (lazyData). The hooks every page that
+   includes it must define (build-report.py refuses a page without them): pageExits() the ways back in from the ring,
+   [{id, lab, short, path()}]; pageBusy() true while a flow or an access holds the stage; pageLazy(ok) the lazy data has
+   arrived (or failed): redraw what showed it. */
+/*@hooks pageExits pageBusy pageLazy*/
 /* ================= the path camera (30 September 2026) =================
    One engine for a ladder of any depth (the owner's "zoom out ... all the way to the meta universe" and "double-click
    ... until I get individual circuit components"). The camera rests on a path of scale nodes from the root down
@@ -209,6 +215,13 @@ function mkStep(P, d, dir) {
 /* the steps from the scale P (at rest) to T: out to the deepest scale they share, then in; o.pan: two siblings side by
    side in their parent's drawing glide instead */
 function routeSteps(P, T, o) {
+  // different roots (only the ring has a root of its own): one wrap step joins the ring to the top of the ladder, or to
+  // the Planck length at the bottom of a branch
+  if (P[0].id !== T[0].id) {
+    const top = [{id: 'beyond'}], low = Q => Q[Q.length - 1].id === PLANCK;
+    if (isWrap(P)) return low(T) ? [wrapStep(P, T)] : [wrapStep(P, top)].concat(routeSteps(top, T, o));
+    if (isWrap(T)) return low(P) ? [wrapStep(P, T)] : routeSteps(P, top, o).concat([wrapStep(top, T)]);
+  }
   let k = 0; while (k < P.length && k < T.length && pk(P[k]) === pk(T[k])) k++;
   if (o && o.pan && P.length === T.length && k === P.length - 1 && k >= 1) { const ps = panStep(P, T); if (ps) return [ps]; }
   const out = [];
@@ -227,11 +240,65 @@ function panStep(P, T) {
   const Q1 = rmap(A1, B1), Q2 = rmap(A2, B2);
   return {pan: true, o: d - 1, P, T, dir: 1, e0: 0, e1: 1, A1, A2, B1, B2, Q1, Q2, dist, L: 0.6, kind: 'pan'};
 }
+/* a wrap step, between the ring and a scale of the ladder (the top, beyond, or the Planck length at the bottom of a
+   branch): the ring's layer and the other's cross-fade, as in a jump, the other growing out of (or shrinking into) its
+   mark on the ring, the head for the top and the tail's tip for the Planck length; a marker runs along the ring's arc
+   (a stroke-dashoffset in the ring's own drawing). Its own leg, like a glide. */
+function wrapStep(F, T) {
+  const ring = isWrap(F) ? F : T, other = isWrap(F) ? T : F;
+  return {wrap: true, kind: 'wrap', F, T, ring, other, toRing: isWrap(T), dir: 1, e0: 0, e1: 1, L: 2.6, o: 0, P: other.slice(), dist: 0};
+}
+function openWrap(s, req) {
+  const R = built(s.ring, 0), O = built(s.other, s.other.length - 1), bd = BANDS.jump;
+  const ap = R._ap, head = s.other[0].id === 'beyond', mk = head ? ap.headBox : ap.tailBox;
+  // the other's frame drawn into its mark on the ring at its smallest (an eighth of the ring's view at most), the ring
+  // zoomed in on the mark by as much at the other's rest
+  const B = frameOf(s.other[s.other.length - 1]), A = fitTo(mk || {x: 0, y: 0, w: 100, h: 100}, B.w / B.h), Q = rmap(A, B);
+  const vr = viewOf(s.ring[0]), vo = viewOf(s.other[s.other.length - 1]);
+  const run = ap.run || null, runL = ap.runLen || 1;
+  const frame = q => {
+    // e: 0 the ring at rest, 1 the other at rest
+    const e = s.toRing ? 1 - q : q, R0 = zoomR(A, B, e), Mo = rmap(A, R0), Mi = rmap(B, R0);
+    const V = vmat(isVB(vr) && isVB(vo) ? VB : lerpR(vr, vo, e));
+    setT(R, cmpM(V, Mo)); setT(O, cmpM(V, Mi));
+    const oo = 1 - band(e, bd.oo[0], bd.oo[1]), io = band(e, bd.ii[0], bd.ii[1]);
+    R.style.opacity = oo; R.style.visibility = oo > 0 ? '' : 'hidden'; O.style.opacity = io;
+    R.style.setProperty('--lab', (1 - band(e, 0.02, 0.2)).toFixed(3)); O.style.setProperty('--lab', band(e, bd.li[0], bd.li[1]).toFixed(3));
+    // the marker: along the arc from the head to the tail's tip (the way Up goes round), drawn as far as it has run
+    // (across the mouth only between the ring and the Planck length: from the head to the tail's tip going in, back again
+    // going out)
+    if (run) { const f = head ? 0 : clamp(s.toRing ? 1 - q : q, 0, 1); run.style.strokeDashoffset = (runL * (1 - f)).toFixed(1) + 'px'; }
+    svg.classList.toggle('skyon', !!(oo > 0.5 ? R._sky : O._sky));
+    readout(s, q);
+  };
+  ctxClear(R); ctxClear(O); clearDim();
+  frame(0);
+  R.style.display = ''; O.style.display = '';
+  svg.querySelectorAll(':scope > g.lay').forEach(l => l.classList.add('busy'));
+  return {
+    s, frame, update: () => {},
+    close: (e1, last, arrive) => {
+      const to = e1 >= 0.5;
+      frame(to ? 1 : 0);
+      const here = (to ? s.T : s.F), hereL = isWrap(here) ? R : O, gone = hereL === R ? O : R;
+      gone.style.display = 'none'; ctxClear(gone); gone.style.removeProperty('--lab'); hereL.style.removeProperty('--lab');
+      hereL.style.opacity = 1; hereL.style.visibility = '';
+      if (run) run.style.strokeDashoffset = runL + 'px';
+      Z.path = here.slice();
+      // in from the ring: which way back in was taken (Up takes the other one next time round)
+      if (!isWrap(here) && typeof pageExits === 'function') { const x = pageExits().find(x0 => samePath(x0.path(), here)); if (x) LASTEXIT = x.id; }
+      bindTrio(Z.path);
+      setT(hereL, restMat());
+      if (last) { if (arrive) arrive(); svg.querySelectorAll(':scope > g.lay').forEach(l => l.classList.remove('busy')); }
+      scaleUI();
+    },
+  };
+}
 /* the plan: the steps from the view shown, or from partway through the step in flight (forwards or back, whichever is
    shorter), to the target; which views are only passed through */
 function planTo(t, o) {
   let steps;
-  if (CUR && !CUR.s.pan) {
+  if (CUR && !CUR.s.pan && !CUR.s.wrap) {
     const s = CUR.s, Ls = s.L;
     const Pin = s.P, Pout = s.P.slice(0, -1);
     const pin = routeSteps(Pin, t, null), pout = routeSteps(Pout, t, null);
@@ -245,7 +312,7 @@ function planTo(t, o) {
     s.midOut = s.dir > 0 ? startMid : endMid;
     s.midIn = s.dir > 0 ? endMid : startMid;
     // the establishing shot rests its eye on the chip: the chip is shown there, set back, not passed through
-    if (o.atChip && s.P[s.o].id === 'die') s.midOut = false;
+    if (o.atChip && !s.wrap && s.P[s.o].id === 'die') s.midOut = false;
     if (s.dir < 0 && !s.midOut) s.end = i === steps.length - 1 ? (o.c1 || FULL) : (o.chipEnd || FULL);
   });
   return steps;
@@ -276,6 +343,7 @@ function visited(P) {
 }
 function openStep(s, req) {
   if (s.pan) return openPan(s, req);
+  if (s.wrap) return openWrap(s, req);
   if (s.dir > 0) visited(s.P);
   const outer = built(s.P, s.o), inner = built(s.P, s.o + 1), A = s.A, B = s.B, bd = BANDS[s.kind] || BANDS.nest;
   const tgt = s.tgt;
@@ -414,7 +482,7 @@ const hermD = (u, m) => m * (3 * u * u - 4 * u + 1) + 6 * u - 6 * u * u;
    compressed, so that no move takes much more than 1.7 s (2.5 s from a minion to one in another shire); since 30
    September a reader's move is capped at 4.5 s (the universe to the die is 17 steps), a single jump at 1.1 s */
 const moveMs = (cost, per) => { const t = per * cost; return cost <= 3 ? t : per * 3 + (t - per * 3) * 0.32; };
-const MOVECAP = 4500, JUMPCAP = 1100;
+const MOVECAP = 4500, JUMPCAP = 1100, WRAPCAP = 1500;
 /* a timeline on real time (the reader's own zoom) or on the animation clock (a flow's or the tour's camera, which
    Space stops); fn(t) runs at once for t = 0, then every frame. stop() true: a newer request came in; the timeline
    stops where it is and resolves false. A clock timeline whose token died goes on in real time, so that a stopped
@@ -514,8 +582,8 @@ async function zoomWorker() {
       const req = ZT, t = req.t, stop = () => ZT !== req, clk = req.o.clk || null;
       if (req.o.focus) wantFocus = true;
       if (req.o.pfocus) wantPanel = true;
-      // a glide in flight is not turned: it lands where it is nearer, at once
-      if (CUR && CUR.s.pan) { try { CUR.ctl.close(CUR.e >= 0.5 ? 1 : 0, true, null); } catch (e) { console.error(e); } CUR = null; }
+      // a glide or a wrap in flight is not turned: it lands where it is nearer, at once
+      if (CUR && (CUR.s.pan || CUR.s.wrap)) { try { CUR.ctl.close(CUR.e >= 0.5 ? 1 : 0, true, null); } catch (e) { console.error(e); } CUR = null; }
       // turned back while moving: slow to a stop first (130 ms), then plan from rest
       if (CUR && CUR.ctl && Math.abs(CUR.v) > 2e-4 && !REDUCED && req.o.total !== 0 && req.o.ms !== 0) {
         const probe = planTo(t, req.o)[0];
@@ -534,18 +602,18 @@ async function zoomWorker() {
       if (!req.o.keepFx) clearFx(true); else clearDim();
       // every scale the move enters is built before it starts (a build is a layout of a whole drawing: mid-move it
       // would be a late frame)
-      try { steps.forEach(s0 => { if (s0.pan) { built(s0.P, s0.o + 1); built(s0.T, s0.o + 1); } else { built(s0.P, s0.o); built(s0.P, s0.o + 1); } }); } catch (e) { console.error(e); }
+      try { steps.forEach(s0 => { if (s0.wrap) { built(s0.ring, 0); built(s0.other, s0.other.length - 1); } else if (s0.pan) { built(s0.P, s0.o + 1); built(s0.T, s0.o + 1); } else { built(s0.P, s0.o); built(s0.P, s0.o + 1); } }); } catch (e) { console.error(e); }
       const cost = costOf(steps);
       const user = !clk && req.o.total == null;
       const pan = steps.length === 1 && steps[0].pan;
       let T = req.o.total != null ? req.o.total : pan ? 380 + 260 * steps[0].dist : moveMs(cost, req.o.ms != null ? req.o.ms : 480);
-      if (user && !pan) { T = Math.min(T, MOVECAP); if (steps.every(s => s.kind === 'jump')) T = Math.min(T, JUMPCAP * steps.length); T = Math.max(T, 110 * steps.length); }
+      if (user && !pan) { T = Math.min(T, MOVECAP); if (steps.every(s => s.kind === 'jump')) T = Math.min(T, JUMPCAP * steps.length); if (steps.every(s => s.wrap)) T = Math.min(T, WRAPCAP * steps.length); T = Math.max(T, 110 * steps.length); }
       // a flow's or the tour's camera that starts off the chip's three scales (the reader had gone out to the universe
       // or down to the atom) comes back within the reader's cap; within the three its pace is as it was
       else if (!pan && req.o.total == null && steps.some(s => !TRIO.includes(s.P[s.P.length - 1].id))) T = Math.min(T, MOVECAP);
       // images a scale shows are decoded before the camera enters it
       const imgs = [];
-      steps.forEach(s => { if (!s.pan && s.dir > 0) { const N0 = NODES[s.P[s.o + 1].id]; if (N0.imgs) imgs.push(...N0.imgs(prm(s.P[s.o + 1]))); } });
+      steps.forEach(s => { if (!s.pan && !s.wrap && s.dir > 0) { const N0 = NODES[s.P[s.o + 1].id]; if (N0.imgs) imgs.push(...N0.imgs(prm(s.P[s.o + 1]))); } });
       // (at most 300 ms, and not past a newer request: a slow or stalled image pops in later, as on the way out; review
       // of 1 Oct: with no limit the camera froze and queued every press until the decode settled)
       if (imgs.length && !REDUCED) {
@@ -562,7 +630,7 @@ async function zoomWorker() {
       // the legs: the steps one way (in, or out) are one leg, eased once, and a leg out and a leg in meet at rest, where
       // the move turns
       const legs = [], legOf = [];
-      steps.forEach((s, i) => { const g = legs[legs.length - 1]; if (g && !g.pan && !s.pan && g.dir === s.dir) g.ix.push(i); else legs.push({dir: s.dir, ix: [i], pan: !!s.pan}); });
+      steps.forEach((s, i) => { const g = legs[legs.length - 1], solo = !!(s.pan || s.wrap); if (g && !g.pan && !solo && g.dir === s.dir) g.ix.push(i); else legs.push({dir: s.dir, ix: [i], pan: solo}); });
       let ca = 0;
       legs.forEach((g, k) => { g.ix.forEach(i => { legOf[i] = g; }); g.cost = g.ix.reduce((c, i) => c + steps[i].L, 0); g.T0 = cost > 0 ? T * ca / cost : 0; ca += g.cost; g.T1 = cost > 0 ? T * ca / cost : T; g.m = k === 0 ? m : 0; });
       if (steps[0].part && CUR && CUR.ctl) CUR.ctl.update(steps[0]);
@@ -625,7 +693,7 @@ async function zoomWorker() {
         while (ci < steps.length) {
           const s = steps[ci], g = legOf[ci], last = ci === steps.length - 1;
           if (!ctl) ctl = openStep(s, req);
-          if (s.pan) {
+          if (s.pan || s.wrap) {
             if (g === gk && (u < 1 || (last && !fin))) { ctl.frame(p); CUR = {s, e: p, dir: 1, v: 0, ctl}; break; }
           } else {
             if (!g.W) legPath(g);
@@ -738,16 +806,52 @@ function fmtLen(m, sig) {
   if (m >= 0.1) return r(m * 100, 'cm');
   if (m >= 1e-3) return r(m * 1e3, 'mm');
   if (m >= 1e-6) return r(m * 1e6, 'µm');
-  return r(m * 1e9, 'nm');
+  if (m >= 1e-10) return r(m * 1e9, 'nm');
+  // (since 1 Oct the ladder goes on down: the atom in picometres, the nucleus and the proton in femtometres, then powers
+  // of ten)
+  if (m >= 1e-12) return r(m * 1e12, 'pm');
+  if (m >= 1e-16) return r(m * 1e15, 'fm');
+  const e = Math.floor(Math.log10(m) + 1e-9), mt = Number((m / Math.pow(10, e)).toPrecision(sig));
+  return `${mt} × 10${String(e).split('').map(c => SUP[c]).join('')} m`;
 }
 const SUP = {'-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹'};
 const pow10 = m => '10' + String(Math.floor(Math.log10(m) + 1e-9)).split('').map(c => SUP[c]).join('') + ' m';
 /* a scale's size as the Up bar and the panel print it: ≈ for an inference or an estimate */
 const APPROX = new Set(['inferred', 'unknown']);
-const sizeTxt = sz => (sz && sz.m > 0 ? (APPROX.has(sz.kind) ? '≈ ' + fmtLen(sz.m, 2) : fmtLen(sz.m)) : '');
-const sizeWords = sz => (sz && sz.m > 0 ? (APPROX.has(sz.kind) ? 'about ' + fmtLen(sz.m, 2) : fmtLen(sz.m)) + ' across' : 'size unknown');
-const sizeHtml = sz => (!sz || !(sz.m > 0) ? '<span>size unknown</span>'
-  : `<span class="${APPROX.has(sz.kind) ? 'inf ' : ''}num"${sz.f ? ` data-f="${esc(sz.f)}"` : ''}>${esc(sizeTxt(sz))}</span> · ${pow10(sz.m)}`);
+/* one word for each kind of fact, the same on both pages (DESIGN §3.3: the chip printed "spec", the memory levels
+   "documented"; 1 Oct) and a caveat's words */
+const KWORD = {measured: 'measured', spec: 'documented', derived: 'model', inferred: 'inference', outside: 'outside source', generic: 'textbook', owner: 'the owner’s word', hypothesis: 'speculative', unknown: 'unknown · asked'};
+const CAVW = {'erbium-rtl': 'Erbium RTL', 'spec-v1.1': 'spec v1.1', reimpl: 're-implementation RTL'};
+/* (since 1 Oct a size may be a bound, a quark's or an electron's: no size measured, "< 4.3 × 10⁻¹⁹ m"; and the ring
+   of sizes has none: it is a picture, "↻ conceptual link") */
+const sizeTxt = sz => (!sz ? '' : sz.conceptual ? '↻ conceptual link' : sz.bound ? sz.bound.txt : sz.m > 0 ? (APPROX.has(sz.kind) ? '≈ ' + fmtLen(sz.m, 2) : fmtLen(sz.m)) : '');
+const sizeWords = sz => (!sz ? 'size unknown' : sz.conceptual ? 'a picture of all sizes, not a place' : sz.bound ? sz.bound.words
+  : sz.m > 0 ? (APPROX.has(sz.kind) ? 'about ' + fmtLen(sz.m, 2) : fmtLen(sz.m)) + ' across' : 'size unknown');
+const sizeHtml = sz => (!sz ? '<span>size unknown</span>' : sz.conceptual ? '<span class="ro-ring">↻ conceptual link</span>'
+  : sz.bound ? `<span class="num"${sz.f ? ` data-f="${esc(sz.f)}"` : ''}>${esc(sz.bound.txt)}</span> · no size measured`
+  : !(sz.m > 0) ? '<span>size unknown</span>'
+  : `<span class="${APPROX.has(sz.kind) ? 'inf ' : ''}num"${sz.f ? ` data-f="${esc(sz.f)}"` : ''}>${esc(sizeTxt(sz))}</span>${ro10(sz.m)}`);
+/* the readout's power of ten after a length, unless the length is written as one (below a tenth of a femtometre) */
+function ro10(m) { return m >= 1e-16 ? ' · ' + pow10(m) : ''; }
+/* a scale's size from its record in the data (D.scales): metres, kind and fact, a bound, or none (the ring) */
+const scSz = s => (!s ? null : s.conceptual ? {m: null, kind: 'unknown', conceptual: true} : s.m > 0 ? {m: s.m, kind: s.kind, f: s.f || null, bound: s.bound || null} : null);
+/* ---- the easter egg (the owner, 1 Oct 2026, 07:25): the levels above the rack are never named in advance. A scale
+   flagged egg (D.scales) shows its own name once the camera is there, but the Up button, the breadcrumb, its menu and
+   the panel's "zoom out" call a level of the egg further out "?" ---- */
+const egg = el => !!(el && NODES[el.id] && NODES[el.id].egg);
+/* the facts no list in the page may show in advance: those of the easter egg's levels (their own facts and sizes, unless
+   a level outside the egg cites them too), and any whose statement names one of its levels */
+function eggFacts() {
+  const S0 = D.scales || {}, eggF = new Set(), pub = new Set(), names = [];
+  Object.entries(S0).forEach(([id, s]) => {
+    (s.facts || []).concat(s.f ? [s.f] : []).forEach(f => (s.egg ? eggF : pub).add(f));
+    if (s.egg) [s.name, s.short].forEach(t => { if (t && t.length > 3) names.push(String(t).replace(/\s*\(.*$/, '').replace(/^The /, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')); });
+  });
+  pub.forEach(f => eggF.delete(f));
+  const rx = names.length ? new RegExp('\\b(' + [...new Set(names)].join('|') + ')\\b') : null;
+  if (rx) Object.entries(F).forEach(([id, f]) => { if (rx.test(f.statement || '')) eggF.add(id); });
+  return eggF;
+}
 /* ---- what a part zooms into ---- */
 /* the scale a part's double-click enters: a scale inside the one it is drawn in ({id, k}), or {up: id}, a scale further
    out that the part stands for (the host beside the die); null: no closer drawing */
@@ -774,6 +878,37 @@ function defKid(P) {
   const k = N0 && N0.def ? N0.def(prm(el), P) : null;
   return k && NODES[k.id] ? k : null;
 }
+/* ---- the wrap (1 Oct 2026, the owner: "when I zoom out to observable universe, I get elementary particles, quarks ...
+   and then maybe I end up in one of the computing transistor units ... or one of the memory units"): the ring of sizes,
+   p.wrap, is a root of its own. Up from the top of the ladder (beyond) goes to the ring; Up from the ring goes in at the
+   Planck length under one of the page's ways back in (pageExits: a memory cell or a compute gate), and every Up after
+   that climbs: quark, proton, nucleus, atom, crystal, channel, fin, FinFET, the cell or the gate, and on up through the
+   page's own scales. + runs the loop backwards: from the Planck length to the ring, from the ring to beyond. A move onto
+   or off the ring is a cross-fade with a marker running along the ring (a wrap step), never a zoom through space. ---- */
+const WRAP = 'p.wrap', PLANCK = 'p.planck';
+const isWrap = P => P.length === 1 && P[0].id === WRAP;
+let LASTEXIT = null;
+/* the way back in that Up takes from the ring: the other one from last time round, the page's first the first time */
+function upExit() {
+  const xs = typeof pageExits === 'function' ? pageExits() : [];
+  if (!xs.length) return null;
+  const i = xs.findIndex(x => x.id === LASTEXIT);
+  return xs[i < 0 ? 0 : (i + 1) % xs.length];
+}
+/* the path from P down its default chain to the Planck length (a way back in from the ring) */
+function chainTo(P, id) { let Q = P.slice(); for (let i = 0; i < 60 && Q[Q.length - 1].id !== id; i++) { const k = defKid(Q); if (!k) return null; Q = Q.concat([k]); } return Q[Q.length - 1].id === id ? Q : null; }
+/* Up from P: its parent; at the top of the ladder, the ring; on the ring, in at the Planck length */
+function upOf(P) {
+  if (isWrap(P)) { const x = upExit(); return x ? x.path() : null; }
+  if (P.length > 1) return P.slice(0, -1);
+  return P[0].id === 'beyond' && NODES[WRAP] ? [{id: WRAP}] : null;
+}
+/* + from P with nothing selected: the default child; round the ring from the Planck length, and from the ring to the top */
+function nextOf(P) {
+  if (isWrap(P)) return NODES.beyond ? [{id: 'beyond'}] : null;
+  if (P[P.length - 1].id === PLANCK && NODES[WRAP]) return [{id: WRAP}];
+  const k = defKid(P); return k ? P.concat([k]) : null;
+}
 /* the scales a scene offers to zoom into, the default first */
 function kidsOf(P) {
   const el = P[P.length - 1], N0 = NODES[el.id], d = defKid(P);
@@ -783,10 +918,14 @@ function kidsOf(P) {
 }
 function zoomBy(d) {
   const P = zNow().path;
-  if (d < 0) { if (P.length > 1) return userNav(P.slice(0, -1)); return; }
+  if (d < 0) { const U = upOf(P); if (U) return userNav(U); return; }
   // in: the selected part's own scale, else the scale's default child
-  if (SEL && SEL.isConnected) { const lp = layerPath(SEL), k = kidOf(SEL); if (k && !k.up && lp && samePath(lp, P)) return userNav(P.concat([k])); }
-  const k = defKid(P); if (k) return userNav(P.concat([k]));
+  if (SEL && SEL.isConnected) {
+    const lp = layerPath(SEL), k = kidOf(SEL);
+    if (SEL._go && lp && samePath(lp, P)) return userNav(SEL._go());   // a way back in from the ring: a path of its own
+    if (k && !k.up && lp && samePath(lp, P)) return userNav(P.concat([k]));
+  }
+  const N = nextOf(P); if (N) return userNav(N);
 }
 /* a button that has nothing to do (the last stage's Next, the Up bar at the top): marked disabled (aria-disabled,
    dimmed) but kept focusable, so that the keyboard's focus never falls to the page and a repeated Enter does nothing */
@@ -799,39 +938,69 @@ function scaleUI(force) {
   plusUI(P);
   if (!force && key === UPKEY) return;
   UPKEY = key;
-  const b = $('up');
-  if (P.length <= 1) {
-    b.innerHTML = '<span class="up-t">Top of the ladder: nothing is known beyond this</span>';
-    setDis(b, true); b.setAttribute('aria-label', 'Top of the ladder: nothing is known beyond this'); b.title = '';
+  const b = $('up'), U = upOf(P);
+  if (!U) {
+    b.innerHTML = '<span class="up-t">Top of the ladder</span>';
+    setDis(b, true); b.setAttribute('aria-label', 'Top of the ladder'); b.title = '';
+  } else if (isWrap(P)) {
+    // the ring: Up goes round it, in at the Planck length (the readout shows no size: the ring is a picture)
+    const x = upExit();
+    b.innerHTML = `<span class="up-t">↑ Round the ring: in at the Planck length</span>`;
+    setDis(b, false); b.setAttribute('aria-label', `Round the ring: in at the Planck length, then up ${x ? 'through ' + x.lab : ''}`); b.title = 'Round the ring (Backspace or −)';
   } else {
-    const par = P[P.length - 2], sz = sizeOf(par);
-    b.innerHTML = `<span class="up-t">↑ Zoom out to ${esc(toOf(par))}</span>` + (sz && sz.m > 0 ? `<span class="up-s">· ${esc(sizeTxt(sz))}</span>` : '');
-    setDis(b, false); b.setAttribute('aria-label', `Zoom out to ${toOf(par)}, ${sizeWords(sz)}`); b.title = 'Zoom out one level (Backspace or −)';
+    const par = U[U.length - 1], sz = sizeOf(par);
+    if (egg(par)) {
+      // a level of the easter egg further out: never named in advance
+      b.innerHTML = '<span class="up-t">↑ ?</span>';
+      setDis(b, false); b.setAttribute('aria-label', 'Zoom out: ?'); b.title = 'Zoom out one level (Backspace or −)';
+    } else {
+      b.innerHTML = `<span class="up-t">↑ Zoom out to ${esc(toOf(par))}</span>` + (sz && (sz.m > 0 || sz.bound) ? `<span class="up-s">· ${esc(sizeTxt(sz))}</span>` : '');
+      setDis(b, false); b.setAttribute('aria-label', `Zoom out to ${toOf(par)}, ${sizeWords(sz)}`); b.title = 'Zoom out one level (Backspace or −)';
+    }
   }
   // the readout first: the crumbs fold to the width it leaves them (review of 1 Oct: measured before it, the crumbs
   // overflowed and clipped the + button)
   if (!ZW) roRest();
   crumbsUI(P);
 }
+/* the crumbs of a path: one per scale, except that a run of the easter egg's levels further out than the current one is
+   one "?" crumb (it goes to the nearest of them) */
+function crumbItems(P) {
+  const out = [];
+  P.forEach((el, i) => {
+    const cur = i === P.length - 1;
+    if (egg(el) && !cur) {
+      const last = out[out.length - 1];
+      if (last && last.egg) { last.ci = i; return; }
+      out.push({ci: i, t: '?', title: 'Further out: press to see', egg: true});
+      return;
+    }
+    out.push({ci: i, t: (isWrap(P) ? '↻ ' : '') + shortOf(el), title: nameOf(el), cur});
+  });
+  return out;
+}
 function crumbsUI(P) {
   const nav = $('crumbs'), fi = document.activeElement && nav.contains(document.activeElement) ? document.activeElement.dataset.ci : null;
   P = P || zNow().path;
-  const nx = defKid(P);
+  const N = nextOf(P), nx = N ? N[N.length - 1] : null, items = crumbItems(P);
   const draw = (fold, noNext) => {
     nav.textContent = '';
     const add = (tag, cls, txt, o) => { const e = H(tag, Object.assign({class: cls || ''}, o || {}), nav); e.textContent = txt; return e; };
     if (fold > 0) {
       const mb = add('button', 'more', '…', {type: 'button', 'aria-haspopup': 'menu', 'aria-expanded': 'false', 'aria-label': `${fold} levels further out`, 'data-ci': 'more'});
-      mb._fold = fold; add('span', 'sep', '›', {'aria-hidden': 'true'});
+      mb._items = items.slice(0, fold); add('span', 'sep', '›', {'aria-hidden': 'true'});
     }
-    P.forEach((el, i) => {
-      if (i < fold) return;
-      const cur = i === P.length - 1;
-      const bt = add('button', '', shortOf(el), {type: 'button', 'data-ci': String(i), title: nameOf(el)});
-      if (cur) bt.setAttribute('aria-current', 'location');
-      if (!cur) add('span', 'sep', '›', {'aria-hidden': 'true'});
+    items.forEach((it, j) => {
+      if (j < fold) return;
+      const bt = add('button', it.egg ? 'egg' : '', it.t, {type: 'button', 'data-ci': String(it.ci), 'data-ii': String(j), title: it.title, 'aria-label': it.egg ? 'Further out: ?' : null});
+      if (it.cur) bt.setAttribute('aria-current', 'location');
+      if (!it.cur) add('span', 'sep', '›', {'aria-hidden': 'true'});
     });
-    if (nx && !noNext) { add('span', 'sep', '›', {'aria-hidden': 'true'}); add('button', 'nx', shortOf(nx), {type: 'button', 'data-ci': 'next', title: `Zoom into ${toOf(nx)} (+)`, 'aria-label': `Zoom into ${toOf(nx)}`}); }
+    if (nx && !noNext) {
+      add('span', 'sep', '›', {'aria-hidden': 'true'});
+      const e = egg(nx);
+      add('button', 'nx', e || nx.id === WRAP ? '?' : shortOf(nx), {type: 'button', 'data-ci': 'next', title: e || nx.id === WRAP ? 'Zoom in (+)' : `Zoom into ${toOf(nx)} (+)`, 'aria-label': e || nx.id === WRAP ? 'Zoom in: ?' : `Zoom into ${toOf(nx)}`});
+    }
   };
   // the outer crumbs fold into the "…" menu until the rest fits (the current one always shows; − and + sit outside the
   // crumbs, never clipped): drawn whole, measured, drawn folded by the measured widths, then folded one more while it
@@ -841,11 +1010,11 @@ function crumbsUI(P) {
   if (over()) {
     const avail = nav.clientWidth, need = nav.scrollWidth, kids = [...nav.children], w = {};
     // a crumb folded frees its own width, its separator's and the gaps between them
-    kids.forEach((e, j) => { const ci = e.dataset.ci; if (ci != null && /^\d+$/.test(ci)) { const sp = kids[j + 1]; w[ci] = e.getBoundingClientRect().width + (sp && sp.classList.contains('sep') ? sp.getBoundingClientRect().width + 4 : 2); } });
+    kids.forEach((e, j) => { const ii = e.dataset.ii; if (ii != null) { const sp = kids[j + 1]; w[ii] = e.getBoundingClientRect().width + (sp && sp.classList.contains('sep') ? sp.getBoundingClientRect().width + 4 : 2); } });
     let fold = 0, cut = 0; const more = 34;
-    while (fold < P.length - 1 && need - cut + more > avail) { cut += w[String(fold)] || 0; fold++; }
+    while (fold < items.length - 1 && need - cut + more > avail) { cut += w[String(fold)] || 0; fold++; }
     draw(fold);
-    while (fold < P.length - 1 && over()) draw(++fold);
+    while (fold < items.length - 1 && over()) draw(++fold);
     // still too wide: the next crumb goes (the + button and the panel offer it)
     if (over() && nx) draw(fold, true);
   }
@@ -857,8 +1026,8 @@ function crumbsUI(P) {
 function plusUI(P) {
   const pl = $('pmz').querySelector('[data-ci="plus"]'), mi = $('pmz').querySelector('[data-ci="minus"]');
   const k = SEL && SEL.isConnected ? kidOf(SEL) : null;
-  setDis(pl, !defKid(P) && !(k && !k.up));
-  setDis(mi, P.length <= 1);
+  setDis(pl, !nextOf(P) && !(k && !k.up));
+  setDis(mi, !upOf(P));
 }
 /* A click with the mouse leaves no focus on the Up bar (Space would press the button again instead of pausing a
    flow); the button is blurred before the camera moves, since the bar is redrawn for the new target. A crumb takes no
@@ -874,7 +1043,7 @@ $('crumbs').addEventListener('click', e => {
   const ci = b.dataset.ci, P = zNow().path;
   if (ci === 'more') { menuToggle(b); return; }
   blurClick(e, b);
-  if (ci === 'next') { const k = defKid(P); if (k) userNav(P.concat([k])); return; }
+  if (ci === 'next') { const N = nextOf(P); if (N) userNav(N); return; }
   const i = +ci; if (i < P.length - 1) userNav(P.slice(0, i + 1));
 });
 $('pmz').addEventListener('click', e => {
@@ -890,9 +1059,11 @@ function menuToggle(b) {
   const m = $('crumb-menu');
   if (!m.hidden) { menuOff(); return; }
   const P = zNow().path; m.textContent = '';
-  P.slice(0, b._fold).forEach((el, i) => {
-    const it = H('button', {type: 'button', role: 'menuitem', tabindex: '-1', 'data-ci': String(i)}, m);
-    it.textContent = nameOf(el) + (sizeOf(el) && sizeOf(el).m > 0 ? ' · ' + sizeTxt(sizeOf(el)) : '');
+  (b._items || []).forEach(x => {
+    const it = H('button', {type: 'button', role: 'menuitem', tabindex: '-1', 'data-ci': String(x.ci)}, m);
+    // (the easter egg's levels stay unnamed here too: "?")
+    const el = P[x.ci], sz = el && !x.egg ? sizeOf(el) : null;
+    it.textContent = x.egg ? '?' : nameOf(el) + (sz && (sz.m > 0 || sz.bound) ? ' · ' + sizeTxt(sz) : '');
   });
   const wr = $('svgwrap').getBoundingClientRect(), br = b.getBoundingClientRect();
   m.style.left = Math.max(0, br.left - wr.left) + 'px'; m.style.top = '4px';
@@ -931,6 +1102,7 @@ function roRest() {
 const smoother = x => x * x * x * (x * (x * 6 - 15) + 10);
 function readout(s, e) {
   if (!s) { roRest(); return; }
+  if (s.wrap) { if (ROCLS.indexOf('mv') < 0) $('scale-ro').setAttribute('aria-hidden', 'true'); roSet('↻ round the ring: a conceptual link', 'mv ring', true); return; }
   const so = s.pan ? null : s.so, si = s.pan ? null : s.si;
   if (!so || !si || !(so.m > 0) || !(si.m > 0)) return;
   // the moving readout changes about ten times a second, not every frame: each change is a layout of the bar, which
@@ -938,13 +1110,15 @@ function readout(s, e) {
   const t = performance.now(); if (e < 1 && t - ROT < 100 && ROCLS.indexOf('mv') >= 0) return; ROT = t;
   const w = s.kind === 'jump' ? smoother(clamp(e, 0, 1)) : clamp(e, 0, 1), m = Math.exp(lerp(Math.log(so.m), Math.log(si.m), w));
   if (ROCLS.indexOf('mv') < 0) $('scale-ro').setAttribute('aria-hidden', 'true');
-  roSet(`${fmtLen(m, 2)} · ${pow10(m)}`, 'mv' + (s.kind === 'jump' ? ' jump' : ''), true);
+  roSet(`${fmtLen(m, 2)}${ro10(m)}`, 'mv' + (s.kind === 'jump' ? ' jump' : ''), true);
 }
 /* after a move: announce the scale, and (unless a flow or the tour holds the panel) show where the camera is */
 function arrived() {
   const P = Z.path, el = P[P.length - 1];
   $('stage').classList.toggle('offchip', Z.level < 0 || Z.level > 2);
   $('cap-scale').textContent = `Scale: ${nameOf(el)}, ${sizeWords(sizeOf(el))}`;
+  // off the page's own scales, the deep zoom's facts are fetched now if they have not been
+  if (Z.level < 0 || Z.level > 2) lazyData();
   prefetch();
   if (!FL.k && !TOUR && !SEL) showHere();
 }
@@ -1006,6 +1180,7 @@ function focusDir(dir) {
    (?at=shire:20/minion:20.1.3). Tests start anywhere with it. */
 function atPath(s) {
   const els = pathFrom(s); if (!els.length || !els.every(e => NODES[e.id])) return null;
+  if (els[0].id === WRAP) return els.length === 1 ? [{id: WRAP}] : null;
   const oi = OUT_IDS.indexOf(els[0].id);
   let P;
   if (oi >= 0) P = OUT_IDS.slice(0, oi).map(id => ({id})).concat(els);
@@ -1015,3 +1190,67 @@ function atPath(s) {
   try { for (let d = 1; d < P.length; d++) if (!seatOf(P, d)) return null; } catch (_) { return null; }
   return P;
 }
+/* ---- the two-state electronics (DESIGN §4.2; the owner: "the goal is to learn more about electronics"): a scene drawn
+   in two states, its .st-a and .st-b groups (the gate at 0 V or at the rail, a bit holding 0 or 1, a DRAM cell charged
+   or after its refresh window), switched for the whole page by the svg's class st-on: a 250 ms CSS fade, no script per
+   frame. The switch is a button in the drawing (.stsw, role switch), the panel's button, and the G key; the state
+   holds from one scene to the next (zooming from the fin into the channel keeps the gate on). ---- */
+let STON = false;
+function stateSet(on) {
+  STON = !!on;
+  svg.classList.toggle('st-on', STON);
+  svg.querySelectorAll('.stsw').forEach(b => { b.setAttribute('aria-checked', String(STON)); const t = b.querySelector('.stsw-t'); if (t && b._lab) t.textContent = b._lab[STON ? 1 : 0]; });
+  $('pn-body').querySelectorAll('button[data-act="state"]').forEach(b => { b.setAttribute('aria-pressed', String(STON)); if (b._lab) b.textContent = b._lab[STON ? 1 : 0]; });
+  const L = restLayer(), st = L && L._states;
+  if (st) $('pn-live').textContent = st.say ? st.say[STON ? 1 : 0] : '';
+}
+const stateToggle = () => stateSet(!STON);
+/* a scene's switch in its drawing at (x, y): a pill with the state it is in and what pressing it does */
+function stateSwitch(L, x, y, st, o) {
+  o = o || {};
+  const g = E('g', {class: 'stsw', role: 'switch', tabindex: '0', 'aria-checked': String(STON), 'aria-label': st.lab, transform: `translate(${x},${y})`}, L);
+  const w = o.w || 300, h = o.h || 46;
+  E('rect', {class: 'stsw-hit', x: -6, y: -6, width: w + 12, height: h + 12, rx: (h + 12) / 2}, g);
+  E('rect', {class: 'stsw-bg', x: 0, y: 0, width: w, height: h, rx: h / 2}, g);
+  E('circle', {class: 'stsw-k', cx: h / 2, cy: h / 2, r: h / 2 - 6}, g);
+  const t = T(g, h + 10, h / 2 + 7, st.btn[STON ? 1 : 0], 'stsw-t');
+  g._lab = st.btn;
+  L._states = st;
+  return g;
+}
+svg.addEventListener('click', e => { const b = e.target.closest && e.target.closest('.stsw'); if (b && svg.contains(b)) { e.stopPropagation(); stateToggle(); } }, true);
+svg.addEventListener('keydown', e => { const b = e.target.closest && e.target.closest('.stsw'); if (b && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); stateToggle(); } }, true);
+/* ---- the lazy data (DESIGN §2.4, §5.1): the deep zoom's facts (the circuits', the levels', the device's, the particles')
+   live in a file beside the page, D.lazy.url (ladder-img/ladder-data.json), fetched once, at idle after the first paint,
+   or at once if the camera leaves the page's own scales first. Until they arrive a source tooltip and a fact list say
+   "loading the sources…"; a failed fetch (the page opened without its folder) leaves every drawing and says "sources not
+   loaded". The page's hook pageLazy(ok) redraws what showed them. ---- */
+const LAZY = {st: D.lazy ? 'idle' : 'done', cbs: []};
+let LAZYLI = 0;
+/* a fact list's one line for its facts still on their way (factLi gives it once per list: the panel is drawn in one go) */
+/* a panel's line for facts not there yet: "loading the sources…", or "sources not loaded" */
+const lazyNote = ids => ((ids || []).some(f => !F[f]) && LAZY.st !== 'done' ? `<p class="pn-what lz">${LAZY.st === 'failed' ? 'Sources not loaded: the page\'s data folder is missing.' : 'Loading the sources…'}</p>` : '');
+const lazyLi = t => { const now = performance.now(); if (now - LAZYLI < 50) return ''; LAZYLI = now; return `<li class="fact lz"><span>${esc(t)}</span></li>`; };
+function lazyData(cb) {
+  if (LAZY.st === 'done' || LAZY.st === 'failed') { if (cb) cb(); return; }
+  if (cb) LAZY.cbs.push(cb);
+  if (LAZY.st === 'loading') return;
+  LAZY.st = 'loading';
+  const fin = ok => {
+    LAZY.st = ok ? 'done' : 'failed';
+    const c = LAZY.cbs; LAZY.cbs = [];
+    c.forEach(f => { try { f(); } catch (e) { console.error(e); } });
+    if (typeof pageLazy === 'function') { try { pageLazy(ok); } catch (e) { console.error(e); } }
+  };
+  try {
+    fetch(D.lazy.url).then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))).then(d => { Object.assign(F, d.facts || {}); fin(true); }, () => fin(false));
+  } catch (_) { fin(false); }
+}
+/* at idle after the first paint, and only while the camera rests and nothing plays (pageBusy: a flow or the tour), so
+   that parsing the file never takes a moving frame's time; the scales that need the facts fetch them on arrival */
+function lazyIdle() {
+  if (LAZY.st !== 'idle') return;
+  if (ZW || (typeof pageBusy === 'function' && pageBusy())) { setTimeout(lazyIdle, 1500); return; }
+  lazyData();
+}
+try { (window.requestIdleCallback || (f => setTimeout(f, 1200)))(lazyIdle, {timeout: 2500}); } catch (_) { setTimeout(lazyIdle, 1200); }

@@ -48,7 +48,7 @@ The deep zoom (30 Sep, the owner's request: zoom out to the universe and in to t
 session in ~/claude/work/chipzoom) adds, through research/deepzoom.py: research/inside.json (what is inside every
 part, down to the silicon crystal; build_inside.py), research/outside.json (the 18 levels from the package to "beyond
 what we can see"; build_outside.py) and research/outside-geo.json (map outlines; make_geo.py); the image manifest of
-../../chip-diagram-img/ (sha256; make_rack_photo.py makes rack.webp from the original kept outside the repository);
+../../ladder-img/ (sha256; make_rack_photo.py makes rack.webp from the original kept outside the repository);
 and the memory levels' facts and numbers that ../../sources/circuitkit.js cites (make_circuitkit.py copies that
 page's drawings). Output blocks: scales, geo, img, mlnum, mladdr, onum (the numbers the new drawings print, each
 checked against its fact), outside; facts gain in.*, out.*, size.* and ml:* ids, and the page's facts carry only the
@@ -66,6 +66,7 @@ Output, facts.json:
   asks   research/asks.json as is; rungs: the hub rows they link to ({id: {rung, what, status}})
 """
 import glob
+import hashlib
 import json
 import os
 import re
@@ -1014,7 +1015,7 @@ for i, f in DZ['facts'].items():
 KEEP = ('statement', 'kind', 'source', 'note', 'url', 'page', 'cards', 'cards_txt', 'card', 'caveat')
 KEEP_CHIP = KEEP + ('topic', 'value', 'unit')
 for i, f in list(facts.items()):
-    dz = f.get('set') in ('deep zoom', 'memory-levels')
+    dz = f.get('set') in ('deep zoom', 'memory-levels', 'ladder')
     g = {k: f[k] for k in (KEEP if dz else KEEP_CHIP) if f.get(k) not in (None, [], '')}
     if dz:
         g['dz'] = 1
@@ -1029,7 +1030,17 @@ out = {
              'n_facts': len(facts), 'kinds': kinds, 'n_num': len(num), 'et_platform_head': '836a4ab'},
     'facts': facts, 'num': num, 'comp': COMP, 'layout': layout, 'asks': ASKS, 'rungs': RUNGS,
     'scales': DZ['scales'], 'geo': DZ['geo'], 'img': DZ['img'], 'mlnum': DZ['ml_num'], 'mladdr': DZ['ml_addr'], 'onum': DZ['onum'], 'outside': DZ['outside_meta'],
+    'ring': DZ['ring'],
 }
+# the deep zoom's facts (the circuits', the levels', the device's and the particles', and the memory levels' that the
+# copied drawings cite) are fetched by the page at idle after its first paint, from the folder beside it (DESIGN §2.4,
+# §5.1: the page within 1.5 MB): docs/reports/ladder-img/ladder-data.json; the page's own facts stay in it
+LAZY = {i: f for i, f in facts.items() if f.get('dz')}
+out['facts'] = {i: f for i, f in facts.items() if not f.get('dz')}
+lz = json.dumps({'meta': {'what': 'the chip diagram\'s deep-zoom facts, fetched by the page (build_facts.py)', 'n': len(LAZY)}, 'facts': LAZY}, separators=(',', ':'), ensure_ascii=False)
+LZP = os.path.join(HERE, '..', '..', 'ladder-img', 'ladder-data.json')
+open(LZP, 'w').write(lz)
+out['lazy'] = {'url': 'ladder-img/ladder-data.json', 'n': len(LAZY), 'bytes': len(lz.encode()), 'sha256': hashlib.sha256(lz.encode()).hexdigest()}
 p = os.path.join(HERE, 'facts.json')
 json.dump(out, open(p, 'w'), indent=1, ensure_ascii=False)
 print('wrote', p, len(facts), 'facts', kinds, len(num), 'numbers')

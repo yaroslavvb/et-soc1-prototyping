@@ -50,5 +50,5 @@ const CKT = (ENV => {
   }
   /* the badges of a part: [['documented', 'structure'], ['generic', 'circuit'], ['unknown', 'the macro inside']] */
   // (the chip page's copy: a caveat that only repeats the badge's word, "spec spec", is left out; review of 1 Oct)
-  const badges = list => list.map(([k, t]) => { const w = k === 'unknown' ? 'unknown · asked' : k === 'documented' ? 'spec' : k; return `<span class="kd ${k === 'documented' ? 'spec' : k}">${esc(w)}</span>${t && t !== w ? ` <span class="cav">${esc(t)}</span>` : ''}`; }).join(' ');
+  const badges = list => list.map(([k, t]) => { const w = k === 'unknown' ? 'unknown · asked' : k; return `<span class="kd ${k === 'documented' ? 'spec' : k}">${esc(w)}</span>${t && t !== w ? ` <span class="cav">${esc(t)}</span>` : ''}`; }).join(' ');
 

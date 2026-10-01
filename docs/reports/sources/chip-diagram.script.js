@@ -897,6 +897,17 @@ node('minion', {parse: k => { const q = String(k).split('.').map(Number); return
   size: () => scSize('minion'), frame: () => MF,
   build: (L, ap, p) => buildMinion(L, ap, p.sid, p.nb, p.mi),
   here: (p, P) => showComp('minion', {}, {here: P})});
+/* the ways back in from the ring of sizes (ladder-core.js, the wrap): a compute gate, an XOR of the multiply-add in lane 0
+   of minion 0 of shire 0, and a memory cell, a 6T cell of shire 0's cache at the memory levels' example address; Up
+   from the ring takes the compute gate first, then the other one each time round */
+function pageExits() {
+  return [
+    {id: 'compute', lab: 'a compute gate (an XOR in the multiply-add of lane 0, minion 0, shire 0)', short: 'a compute gate: an XOR of the multiply-add',
+      path: () => chainTo(pathOf({level: 2, sid: 0, nb: 0, mi: 0}).concat([{id: 'vpu'}, {id: 'vpu.lane', k: '0'}]), PLANCK)},
+    {id: 'memory', lab: 'a memory cell (a 6T SRAM cell of shire 0\'s cache)', short: 'a memory cell: a 6T cell of the shire cache',
+      path: () => chainTo(pathOf({level: 1, sid: 0}).concat([{id: 'shire.bank', k: String(L2X().bank)}]), PLANCK)},
+  ];
+}
 /*@include ladder-outer.js*/
 /*@include circuitkit.js*/
 /*@include ladder-mem.js*/
@@ -917,14 +928,16 @@ function select(g) {
 const CARDNAME = {a2: 'aifoundry2', a3: 'aifoundry3', a1c1: 'aifoundry1 card 1'};
 function cardsTxt(f) {
   if (f.cards_txt) return f.cards_txt;
-  if (f.cards.length === 3) return 'three cards';
-  if (f.cards.length) return f.cards.map(c => CARDNAME[c]).join(', ');
+  const cs = f.cards || [];
+  if (cs.length === 3) return 'three cards';
+  if (cs.length) return cs.map(c => CARDNAME[c]).join(', ');
   return f.kind === 'measured' ? (f.card || 'card not recorded') : '';
 }
 function factLi(id) {
-  const f = F[id]; if (!f) { console.error('no fact ' + id); return ''; }
+  // (a fact of the deep zoom not yet fetched, or not fetched at all: its place says so, once per list: lazyLi)
+  const f = F[id]; if (!f) { if (LAZY.st === 'idle' || LAZY.st === 'loading') return lazyLi('loading the sources…'); if (LAZY.st === 'failed') return lazyLi('sources not loaded'); console.error('no fact ' + id); return ''; }
   const cd = cardsTxt(f);
-  return `<li class="fact" tabindex="0" data-f="${id}" data-src="1" aria-describedby="srctip"><span>${esc(f.statement)}</span><span class="meta"><span class="kd ${f.kind}">${KWORD[f.kind] || f.kind}</span>${f.caveat === 'erbium-rtl' ? '<span class="kd erbium">Erbium RTL</span>' : ''}`
+  return `<li class="fact" tabindex="0" data-f="${id}" data-src="1" aria-describedby="srctip"><span>${esc(f.statement)}</span><span class="meta"><span class="kd ${f.kind}">${KWORD[f.kind] || f.kind}</span>${CAVW[f.caveat] ? `<span class="kd erbium">${CAVW[f.caveat]}</span>` : ''}`
     + (cd ? `<span class="cd">${esc(cd)}</span>` : '')
     + (f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.page)} ↗</a>` : f.dz ? '' : '<span>no published page yet</span>')
     + `<span class="fid">${esc(id)}</span></span></li>`;
@@ -2979,7 +2992,7 @@ function endTour() {
 /* T and the Tour button: the tour picks up where it was left (from the start once it had reached its end) */
 const toggleTour = () => { if (TOUR) { endTour(); stopFlow(); } else startTour(TLAST >= STEPS.length - 1 ? 0 : TLAST); };
 const HINT = TOUCH ? 'Tap a part for details · double-tap it or Zoom in to go inside · ↑ Zoom out above the drawing'
-  : 'Double-click a part to zoom in · ↑ or Backspace zooms out · arrows: next shire · Space pauses · F presents · T tour';
+  : 'Double-click a part to zoom in · ↑ or Backspace zooms out · arrows: next shire · G switches · Space pauses · F presents · T tour';
 function resetCap() {
   CAPFLOW = false;
   if ($('stage').classList.contains('present')) {
@@ -3181,7 +3194,7 @@ function back() {
   if (FL.k) { stopFlow(); return; }
   if (!$('crumb-menu').hidden) { menuOff(true); return; }
   if (!$('zpill').hidden) { pillOff(); return; }
-  if (zNow().path.length > 1) zoomBy(-1);
+  if (upOf(zNow().path)) zoomBy(-1);
 }
 /* a flow's button or key: in the tour, its tour step (the tour goes on from there); else the flow on its own */
 function pickFlow(k) {
@@ -3249,6 +3262,8 @@ document.addEventListener('keydown', e => {
     case 'f': case 'F': e.preventDefault(); present(); break;
     case 'p': case 'P': e.preventDefault(); togglePanel(); break;
     case 'd': case 'D': e.preventDefault(); toggleTheme(); break;
+    // G: the two-state electronics (1 Oct): the gate at 0 V or at the rail, a bit 0 or 1, a DRAM cell just written or later
+    case 'g': case 'G': e.preventDefault(); stateToggle(); break;
     case 'c': case 'C': e.preventDefault(); setFollow(!FOLLOW); break;
     case 't': case 'T': e.preventDefault(); toggleTour(); break;
     case 'q': case 'Q': if (TOUR) { e.preventDefault(); endTour(); stopFlow(); } break;
@@ -3256,7 +3271,7 @@ document.addEventListener('keydown', e => {
     case '+': case '=': e.preventDefault(); zoomBy(1); break;
     case '-': case '_': e.preventDefault(); zoomBy(-1); break;
     case 'Escape': back(); break;
-    case 'Backspace': if (zNow().path.length > 1) { e.preventDefault(); zoomBy(-1); } break;
+    case 'Backspace': if (upOf(zNow().path)) { e.preventDefault(); zoomBy(-1); } break;
     case 'Home': if (FL.k) { e.preventDefault(); goStage(0); } else if (TOUR) { e.preventDefault(); tourGo(0); } else if (presenting) e.preventDefault(); break;
     case 'End': if (FL.k) { e.preventDefault(); goStage(FLOWS[FL.k].stages.length - 1); } else if (TOUR) { e.preventDefault(); tourGo(STEPS.length - 1); } else if (presenting) e.preventDefault(); break;
     // a presenter's clicker: F5 (and Shift+F5) is its "start the slideshow" button, never a reload mid-talk; some send
@@ -3272,8 +3287,17 @@ document.addEventListener('keydown', e => {
 });
 
 /* ================= the text below the stage ================= */
-function prose() {
-  $('summary-text').innerHTML = [
+/* (1 Oct) the deep zoom's facts arrive after the first paint (ladder-core.js, lazyData): the panel shown, the count of
+   facts by kind and the facts table are drawn again with them */
+/* the core's hooks (ladder-core.js): a flow or the tour holds the stage */
+function pageBusy() { return flowOn() || !!TOUR; }
+function pageLazy(ok) {
+  // (failed, the panel says so: "sources not loaded")
+  if (!ZW) { if (SEL && SEL.isConnected) showPart(SEL); else if (!FL.k && !TOUR) showHere(); }
+  if (ok) prose(true);
+}
+function prose(again) {
+  if (!again) $('summary-text').innerHTML = [
     `<p><b>The chip.</b> The ET-SoC-1 has ${n('cores')} RISC-V cores on a ${n('die_mm2')} mm² die in TSMC ${n('process')}: ${n('minions')} minions in ${n('shires')} shires, ${n('maxions')} and a service processor. The diagram draws the die (width and height from a published die plot) with ${n('cshires')} compute shires, the master (${n('master_id')}) and spare (${n('spare_id')}) shires, the PCIe and I/O shires, and ${n('memshires').toLowerCase()} memory shires, on an ${n('grid86')} mesh of ${n('stops')} stops. The compute shires sit where measured distances put them, and the firmware's NoC-spec map, once its boot-time renaming is applied, puts every one in the same cell (${n('fw_pairs')} pair distances). Each mesh hop adds ${n('hop_cyc')} (${n('hop_ns')}) to a round trip and is about ${n('hop_mm')} of wire. Off the die, four LPDDR4X packages hold ${n('channels')} channels of ${n('ch_bits')}, ${n('dram_gb')}; the chip streams ${n('dram_bw')} GB/s from them against ${n('dram_peak')} GB/s peak at their ${n('mts')} MT/s. The host links through the PCIe shire: Gen4 x8, trained at ${n('pcie_neg')} on every card, ${n('pcie_h2d')} GB/s to the card by DMA. The fp32 matmul at ${n('tflops')} TFLOP/s draws ${n('mmw')} at the board on the three cards, ${n('perw')} GFLOP/s per watt.</p>`,
     `<p><b>A shire.</b> ${n('neigh')} of ${n('per_neigh')} share ${n('cache_mb')} of SRAM in ${n('banks')}. The cards run mode M0: ${n('scp_mb')} of scratchpad that any shire can address, ${n('l2_kb')} of L2 private to the shire, and a ${n('l3_mb')} slice of the chip's ${n('l3_chip')} L3. The shire meets the mesh at one stop, and inside a neighbourhood minions talk fastest along the tree edges of the fast local network (${n('ts_fln')} round trip, against ${n('ts_xbar')} cycles for other pairs).</p>`,
     `<p><b>A minion.</b> ${n('harts')}, in-order and single-issue, a vector unit of ${n('lanes')} and a ${n('l1_kb')} L1 data cache, of which the firmware makes ${n('l1_scp')} a tensor scratchpad and leaves each hart ${n('l1_hart')}. The tensor instructions are no separate unit: state machines in the vector unit run them on its lanes' FMA and int8 multiply-add units, so the tensor peak (${n('peak32')}, ${n('peak16')} or ${n('peak8')} operations per cycle) is the lanes' peak. On ${n('n1024')} minions at ${n('mhz')} they sustain ${n('tflops')} TFLOP/s fp32.</p>`,
@@ -3281,13 +3305,15 @@ function prose() {
   ].join('');
   // what is measured, specified, derived and inferred
   // (the deep zoom's facts, 30 September, are counted apart: they describe the world around the chip and the circuits)
+  // (the easter egg's facts, 1 Oct: neither counted nor listed here; they show in their levels' panels once there)
+  const EGF = eggFacts();
   const fs = Object.values(F).filter(f => !f.dz), of = k => fs.filter(f => f.kind === k), meas = of('measured');
-  const dzf = Object.values(F).filter(f => f.dz), dzk = KINDS9.map(k => [k, dzf.filter(f => f.kind === k).length]).filter(x => x[1]);
+  const dzf = Object.entries(F).filter(([id, f]) => f.dz && !EGF.has(id)).map(x => x[1]), dzk = KINDS9.map(k => [k, dzf.filter(f => f.kind === k).length]).filter(x => x[1]);
   const mc = k => meas.filter(f => f.cards.length === k).length;
   const lk = id => `<a href="#facts" data-f="${id}" class="num">${id}</a>`;
   const SETTLED = f => /^(Superseded|Settled) 2[79] Sep/.test(f.note || '');   // an inferred fact settled since: by the firmware's map (27 Sep) or E56 (29 Sep) (build_facts.py, AMEND, AMEND2)
   $('honest-text').innerHTML = `<p>The page rests on ${fs.length} facts: <b>${meas.length} measured</b>, ${of('spec').length} from the specification (the datasheet, the Programmer's Reference Manual, the core-et documents and the firmware and runtime source), ${of('derived').length} derived from others and <b>${of('inferred').length} inferred</b>${KINDS9.slice(4).filter(k => of(k).length).map(k => `, ${of(k).length} ${KWORD[k]}`).join('')}. Of the measured facts, ${mc(3)} hold on all three lab cards (aifoundry2, aifoundry3 and aifoundry1 card 1), ${mc(2)} on two and ${mc(1)} on one, mostly aifoundry2${mc(0) ? `; ${mc(0)} ${mc(0) === 1 ? 'names' : 'name'} no card` : ''}. Every table here is at ${n('mhz')}, where a warm card sits.</p>`
-    + `<p>The zoom beyond the chip and into its parts (30 September) adds ${dzf.length} facts of its own: ${dzk.map(([k, c]) => `${c} ${KWORD[k]}`).join(', ')}. The sizes of the chip's parts from the shire down are estimates; the outside levels' facts are public references (NASA, the US Census, Planck, Tully et al.), the vendor's documents, and the lab's own records.</p>`
+    + `<p>The zoom past the chip and into its parts (30 September and 1 October) adds ${dzf.length} facts of its own: ${dzk.map(([k, c]) => `${c} ${KWORD[k]}`).join(', ')}. The sizes of the chip's parts from the shire down are estimates; the levels outside the chip rest on the vendor's documents and the lab's own records; the device on TSMC N7's published numbers and Esperanto's papers (Hot Chips 33, IEEE Micro 2022); the atom and below on CODATA, NIST and the Particle Data Group.</p>`
     + `<p>What the drawing assumes, and what the second version (27 September) and the measurements of 29 September settled:</p><ul>`
     + `<li><b>Where the compute shires are</b> is measured: all ${n('pairs496')} shire pairs fit a constant plus ${n('hop_cyc')} per hop of Manhattan distance on the logical map (${lk('mesh.shortest-paths')}). <b>How that map sits on the die</b> was inferred (${lk('mesh.orientation')}, ${lk('L33')}, ${lk('L34')}); it is now the firmware's own: the "default Shire Virtual ID Map, based on the NOC spec", renamed as the boot firmware renames the shires, matches the measured map in ${n('fw_pairs')} pair distances with no rotation or mirror (${lk('fw.map-match')}; fact ${lk('L37')}, which compared the map before the renaming, is superseded). Still open: whether the silicon has this handedness or the published die plot's, its mirror (${lk('die.handedness')}, ${lk('L24')}).</li>`
     + `<li><b>The four cells without a compute shire</b>: the firmware's maps name them, the master (shire 32) in the north cell, the spare (33) in the south one, PCIe and then I/O east of the master (${lk('fw.grey-cells')}). They are drawn solid now. Timing a counter read on shire 32 from every compute shire confirms the master's cell on a card: E56 did so on 29 September, and it placed shire 32 in the firmware's cell on aifoundry1 card 1 and decided nothing on aifoundry3 or aifoundry2 (the asks below).</li>`
@@ -3303,6 +3329,14 @@ function prose() {
     + `<li><b>The broadcast (flow B, 28 September)</b> measures nothing new either: it draws the allreduce ladder (its 1 KB rows read from the version-3 raw files, ${lk('bc.allreduce-1kb')}), the relay, the hot line's passes and the launch timings, with the firmware source for the launch's own multicast (${lk('bc.launch-multicast')}). What was not measured is said on its stages: the tree's broadcast half on its own and the tree's energy (${lk('bc.half')}), a relay's time to reach every shire, every minion loading one line at once (${lk('bc.one-request')}), and the launch's multicast apart from the rest of a launch (${lk('bc.launch-31')}).</li></ul>`
     + `<p>The inferred facts still open:</p><ul>${of('inferred').filter(f => !SETTLED(f)).map(f => `<li>${esc(f.statement)} <span class="small">(${lk(f.id)})</span></li>`).join('')}</ul>`
     + `<p>Inferred before and settled since, by the firmware's map (27 September) or by a measurement (29 September); each fact's note says what is left:</p><ul>${of('inferred').filter(SETTLED).map(f => `<li>${esc(f.statement)} <span class="small">(${lk(f.id)}: ${esc(f.note)})</span></li>`).join('')}</ul>`;
+  // how many electrons (1 Oct, DESIGN §4.3): the electronics in one table, from the ladder's numbers (D.onum) and, once
+  // they arrive, their facts' kinds
+  const EL = [['An "off" transistor\'s channel, at any instant', 'off_e'], ['An "on" transistor\'s channel, at the minion rail', 'ch_e'],
+    ['An SRAM bit, on its storage node', 'sram_e'], ['Clocking one register bit of the tensor unit', 'reg_e'], ['A DRAM bit', 'dram_e'],
+    ['Toggling one bus bit outside the tensor unit', 'bus_e'], ['One cycle of a minion on random fp32 matmul', 'cyc_e'], ['Leaking through an "off" transistor, every second', 'leak_e']];
+  $('eltab').querySelector('tbody').innerHTML = EL.filter(([, k]) => ONUM[k]).map(([lab, k]) => { const f = F[onf(k)];
+    return `<tr><td data-label="What">${esc(lab)}</td><td data-label="Electrons"><span class="num" data-f="${esc(onf(k))}">${esc(on(k))}</span></td><td data-label="Kind">${f ? `<span class="kd ${f.kind}">${KWORD[f.kind]}</span>` : '<span class="small">loading…</span>'}</td></tr>`; }).join('');
+  if (again) { const tb = $('facttab'); if (tb._built) { tb._built = false; tb._again = true; tb.querySelector('tbody').innerHTML = ''; tb._build(); } return; }
   // the asks: what would settle each inferred part, and the hub's row that asks for it
   const BADGE = {settled: '<span class="kd measured">settled</span>', nearly: '<span class="kd spec">nearly settled</span>', confirm: '<span class="kd spec">to confirm</span>'};
   $('asktab').querySelector('tbody').innerHTML = ASKS.map(a => `<tr><td data-label="Part"><b>${esc(a.part)}</b>${BADGE[askState(a)] ? ' ' + BADGE[askState(a)] : ''}</td><td data-label="What is inferred">${esc(a.what_is_inferred)}</td><td data-label="What would settle it" class="small">${esc(a.what_settles_it)}</td><td data-label="Ask">${askLinks(a).join('<br>') || esc(a.ask_detail || '')}</td></tr>`).join('');
@@ -3312,10 +3346,13 @@ function prose() {
   const tab = $('facttab');
   const build = () => {
     if (tab._built) return; tab._built = true;
-    tab.querySelector('tbody').innerHTML = Object.keys(F).sort().map(id => { const f = F[id];
+    lazyData();   // (the deep zoom's facts join the table when they arrive: pageLazy)
+    const EG2 = eggFacts();   // (again when the deep zoom's facts arrive: their statements are read then)
+    tab.querySelector('tbody').innerHTML = Object.keys(F).filter(id => !EG2.has(id)).sort().map(id => { const f = F[id];
       return `<tr><td data-label="Fact"><code>${esc(id)}</code></td><td data-label="Statement">${esc(f.statement)}${f.url ? ` <a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.page)}</a>` : ''}</td><td data-label="Kind"><span class="kd ${f.kind}">${KWORD[f.kind] || f.kind}</span></td><td data-label="Cards">${esc(cardsTxt(f))}</td><td data-label="Source" class="small">${esc(f.source)}</td></tr>`; }).join('');
-    CK.sortTable('facttab', {filter: true, filterLabel: 'Filter facts'});
+    if (!tab._again) CK.sortTable('facttab', {filter: true, filterLabel: 'Filter facts'});
   };
+  tab._build = build;
   try { const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); build(); } }, {rootMargin: '1500px 0px'}); io.observe(tab.closest('.table-wrap') || tab); } catch (_) { build(); }
   if (/^#facts?\b/.test(location.hash)) build();
 }
@@ -3393,12 +3430,19 @@ fitCap();
 window.__chipTest = {
   parts: () => { const L = restLayer(); return L ? [...L.querySelectorAll('.comp')].filter(g => g.getClientRects().length).map(g => {
     const k = kidOf(g), r = g.getBoundingClientRect();
-    return {key: g._key, label: g.getAttribute('aria-label'), kid: k ? (k.up ? 'up:' + k.up : pk(k)) : null, x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height};
+    return {key: g._key, label: g.getAttribute('aria-label'), kid: g._go ? 'go:' + pkeys(g._go()) : k ? (k.up ? 'up:' + k.up : pk(k)) : null, x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height};
   }) : []; },
   want: () => { try { return FL.k ? pkeys(pathOf(FLOWS[FL.k].stages[FL.i].where(FL.ctx))) : null; } catch (_) { return null; } },
   nstages: () => (FL.k ? FLOWS[FL.k].stages.length : 0),
   nodes: () => Object.keys(NODES),
   defPath: () => { let P = Z.path.slice(); for (let i = 0; i < 60; i++) { const k = defKid(P); if (!k) break; P = P.concat([k]); } return pkeys(P); },
+  // (1 Oct) the easter egg's facts, the ways back in from the ring, and the two-state switch's state
+  // the largest scale a layer takes in each step of the default chain from the top (a step's zoom times its inner view's)
+  stepScales: () => { const T = (() => { let P = [{id: 'beyond'}]; for (let i = 0; i < 80; i++) { const k = defKid(P); if (!k) break; P = P.concat([k]); } return P; })();
+    return routeSteps([{id: 'beyond'}], T).map(s0 => { const vi = vmat(viewOf(s0.P[s0.P.length - 1])), vo = vmat(viewOf(s0.P[s0.P.length - 2])); return {to: s0.P[s0.P.length - 1].id, kind: s0.kind, k: +(s0.Q[0] * (vi ? vi[0] : 1)).toFixed(1), kin: +((vo ? vo[0] : 1) / s0.Q[0]).toFixed(3)}; }); },
+  // how long each scale of a path takes to draw (a layer drawn again; for the build budget, DESIGN §5.3)
+  buildTimes: s => { const P = atPath(s); if (!P) return null; return P.map((el, d) => { const L = layerAt(P, d), t0 = performance.now(); buildInto(L, P, d); return [el.id, +(performance.now() - t0).toFixed(1), L.querySelectorAll('*').length]; }); },
+  eggFacts: () => [...eggFacts()], exits: () => pageExits().map(x => ({id: x.id, path: pkeys(x.path())})), upExit: () => (upExit() || {}).id, ston: () => STON,
 };
 /* a read-only view of the state, for the page's tests (headless Chrome) */
 window.__chipState = () => ({level: Z.level, sid: Z.sid, nb: Z.nb, mi: Z.mi, flow: FL.k, stage: FL.i, done: FL.done, still: FL.still,

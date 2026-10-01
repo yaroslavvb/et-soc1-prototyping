@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Make the page copy of the owner's rack photo (30 Sep 2026).
 
-rack-photo-original.webp (1500x1429, no EXIF/GPS, sRGB ICC; outside the repository) -> docs/reports/chip-diagram-img/rack.webp:
+rack-photo-original.webp (1500x1429, no EXIF/GPS, sRGB ICC; outside the repository) -> docs/reports/ladder-img/rack.webp:
   1. redact the machines' tape labels (ten since 1 Oct) (host names and what look like LAN IP addresses; AGENT.md section 10 keeps
      IPs and access details out of public pages): each box is pixelated and blurred so no character survives;
   2. crop the 53-px black band on the left edge;
@@ -15,7 +15,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 # the original is not in the repository (it shows the labels this script blurs): its path comes from the environment
 SRC = os.environ.get('RACK_ORIGINAL') or sys.exit('set RACK_ORIGINAL to the original photo (kept outside the repository)')
-OUT = os.path.join(HERE, '..', '..', '..', 'chip-diagram-img', 'rack.webp')
+OUT = os.path.join(HERE, '..', '..', '..', 'ladder-img', 'rack.webp')
 # label boxes in the original's pixel coordinates (x0, y0, x1, y1), found by inspection
 LABELS = [
     (165, 215, 222, 318),    # left upright of the upper shelf: name + address

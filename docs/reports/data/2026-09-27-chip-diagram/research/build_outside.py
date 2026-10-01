@@ -16,7 +16,7 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GEO = json.load(open(os.path.join(HERE, 'outside-geo.json')))
-IMG = os.path.join(HERE, '..', '..', '..', 'chip-diagram-img')   # the page's images, beside the built page
+IMG = os.path.join(HERE, '..', '..', '..', 'ladder-img')   # the page's images, beside the built page
 
 C = 299_792_458.0                 # m/s, exact (SI)
 N_FIBRE = 1.4682                  # group index, Corning SMF-28e+ at 1550 nm

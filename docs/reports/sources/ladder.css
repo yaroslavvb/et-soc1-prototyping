@@ -150,6 +150,55 @@
 #stage.ph #chip .lay.oscn .o-t{font-size:38px}
 #stage.ph #chip .lay.oscn .o-l{font-size:27px}
 #stage.ph #chip .lay.oscn .o-s,#stage.ph #chip .lay.oscn .o-cr{font-size:24px}
-#stage.ph #chip .lay.oscn .o-tag{font-size:21px}
+#stage.ph #chip .lay.oscn .o-tag{font-size:24px}
 #chip{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;touch-action:manipulation}
 #stage{touch-action:manipulation}
+/* ---- the shared ladder (1 October 2026): the levels between the city and the rack, the device, the atom and below, the
+   ring of sizes, the two-state electronics and the easter egg's "?" ---- */
+.crumbs button.egg{font-weight:700;color:var(--ink-2);letter-spacing:.05em}
+.scale-ro.ring,.scale-ro .ro-ring{color:var(--ink);font-weight:600}
+#chip .hood,#chip .map .st.hood{fill:color-mix(in srgb,var(--c2) 26%,var(--page));stroke:var(--c2);stroke-width:1.6;vector-effect:non-scaling-stroke}
+#chip .nbh{fill:none;stroke:color-mix(in srgb,var(--ink-2) 45%,var(--page));stroke-width:1;vector-effect:non-scaling-stroke}
+#chip .nbl{fill:color-mix(in srgb,var(--ink-2) 80%,var(--page))}
+#chip .park{fill:color-mix(in srgb,var(--c3) 30%,var(--page));stroke:var(--c3);stroke-width:1;vector-effect:non-scaling-stroke}
+#chip .summit{fill:var(--c3);stroke:var(--ink);stroke-width:1.5}
+#chip .road{fill:none;stroke:color-mix(in srgb,var(--ink-2) 60%,var(--page));stroke-width:1.6;vector-effect:non-scaling-stroke}
+#chip .road-l{font-style:italic}
+#chip .st29{fill:none;stroke:var(--c2);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+#chip .st29h{fill:none;stroke:transparent;stroke-width:26;pointer-events:stroke;vector-effect:non-scaling-stroke}
+#chip .ground{fill:color-mix(in srgb,var(--c3) 16%,var(--page));stroke:none}
+#chip .sea{stroke:var(--ink-2);stroke-width:1.5;stroke-dasharray:6 6}
+#chip .sumln{stroke:var(--c3);stroke-width:1.5;stroke-dasharray:3 6}
+#chip .xtick{stroke:var(--ink);stroke-width:2}
+#chip .cncb{fill:color-mix(in srgb,var(--c1) 22%,var(--page));stroke:var(--c1);stroke-width:1.5}
+#chip .rrun{fill:none;stroke:#ffd27a;stroke-width:6;stroke-linecap:round}
+#chip .exitb{fill:color-mix(in srgb,#ffd27a 12%,transparent);stroke:#ffd27a;stroke-width:1.5}
+#chip .lay.sky .rticks text{fill:#dfe6f7}
+/* the inner scenes' type: a title, body, labels and small notes; on a phone the picture's column is 760 units wide, so
+   every size here is at least 11 px on a 390 px screen */
+#chip .i-t{font-size:30px;font-weight:700;fill:var(--ink)}
+#chip .i-s{font-size:18px;fill:var(--ink-2)}
+#chip .i-l{font-size:19px;font-weight:600;fill:var(--ink)}
+#chip .i-n{font-size:17px;fill:var(--ink-2)}
+#chip .inotes .i-l{fill:var(--ink)}
+#chip .inotes .ist{fill:var(--ink)}
+#stage.ph #chip .lay.inr .i-t{font-size:32px}
+#stage.ph #chip .lay.inr .i-s,#stage.ph #chip .lay.inr .i-l{font-size:25px}
+#stage.ph #chip .lay.inr .i-n,#stage.ph #chip .lay.inr .tg text{font-size:24px}
+/* the two-state electronics: the gate at 0 V or at the rail, a bit 0 or 1, a DRAM cell just written or 32 ms later;
+   one class on the drawing switches every scene's two drawn states with a 250 ms fade, and no script per frame */
+#chip .st-a,#chip .st-b{transition:opacity .25s}
+#chip .st-b{opacity:0}
+#chip.st-on .st-a{opacity:0}
+#chip.st-on .st-b{opacity:1}
+@media (prefers-reduced-motion: reduce){#chip .st-a,#chip .st-b{transition:none}}
+#chip .stsw{cursor:pointer}
+#chip .stsw:focus{outline:none}
+#chip .stsw-hit{fill:transparent}
+#chip .stsw-bg{fill:var(--surface);stroke:var(--c2);stroke-width:2}
+#chip .stsw-k{fill:var(--ink-2);transition:transform .25s}
+#chip.st-on .stsw-k{fill:var(--c2)}
+#chip .stsw-t{font-size:18px;font-weight:600;fill:var(--ink)}
+#stage.ph #chip .stsw-t{font-size:25px}
+#chip .stsw:focus-visible .stsw-bg,#chip .stsw:hover .stsw-bg{stroke-width:3.5}
+.pn-act .st-btn[data-act="state"]{margin:2px 0 8px}

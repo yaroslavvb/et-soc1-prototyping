@@ -9,7 +9,7 @@ Inputs, beside this file:
   outside-geo.json  the map outlines in km (make_geo.py, from the US Census and Natural Earth files, public domain)
   ../../2026-09-28-memory-levels/facts.json   the memory-levels page's facts and numbers: imported, prefixed ml:,
                     exactly those the tree cites and the copied drawings (sources/circuitkit.js) print
-  ../../../chip-diagram-img/*.webp   the six images (sha256 into the manifest; the page checks nothing at run time,
+  ../../../ladder-img/*.webp   the six images (sha256 into the manifest; the page checks nothing at run time,
                     the build refuses a manifest that does not match)
 
 Kinds: one vocabulary of nine (DESIGN §4.2): measured, spec, derived, inferred, outside, generic, owner, hypothesis,
@@ -24,7 +24,13 @@ import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..', '..'))
-IMG = os.path.join(ROOT, 'docs', 'reports', 'chip-diagram-img')
+IMG = os.path.join(ROOT, 'docs', 'reports', 'ladder-img')
+LADDER = os.path.join(ROOT, 'docs', 'reports', 'data', '2026-10-01-ladder', 'ladder.json')
+# facts the ladder's corrections supersede (DESIGN §4.5): the fin inferred as 6-7 by 45-50 nm, the 20 nm gate, the
+# 270,000-atom channel, and the room "in San Francisco" (now Studio 45 on 29th Street, s45.1)
+SUPERSEDED = ['in.lib.fin.3', 'in.lib.gate.1', 'in.lib.channel.1', 'out.studio45.1']
+# the levels above the rack: an easter egg (the owner, 1 Oct 2026 07:25 PDT); no written hierarchy names them
+EGG_OUT = ['beyond', 'universe', 'laniakea', 'localgroup', 'milkyway', 'stars', 'solar', 'moon', 'earth', 'us', 'california', 'bayarea', 'sf', 'studio45']
 KINDS = ['measured', 'spec', 'derived', 'inferred', 'outside', 'generic', 'owner', 'hypothesis', 'unknown']
 # weakest first: a compound kind takes the first of these it contains
 WEAK = ['hypothesis', 'unknown', 'inferred', 'derived', 'generic', 'outside', 'owner', 'spec', 'measured']
@@ -71,9 +77,9 @@ INUM = {
     'fma_st': ('in.vpu.lane.fma.1', '7 stages'), 'pp17': ('in.vpu.lane.fma.booth.2', '17 partial products'),
     'pp33': ('in.vpu.lane.fma.booth.2', '33 bits'), 'tree_tr': ('in.vpu.lane.fma.tree.2', '14,000 transistors'),
     'fa_tr': ('in.lib.fa.1', '28 transistors'), 'xor_tr': ('in.lib.xor.1', '8-12 transistors'), 'nand_tr': ('in.lib.nand2.1', '4 transistors'),
-    'gate_p': ('in.lib.finfet.1', '57 nm'), 'fin_p': ('in.lib.finfet.1', '30 nm'), 'fin_w': ('in.lib.fin.3', '6-7 nm'),
-    'fin_h': ('in.lib.fin.3', '45-50 nm'), 'lg': ('in.lib.gate.1', '20 nm'), 'si_a': ('in.lib.si.1', '0.5431 nm'),
-    'si_nn': ('in.lib.si.2', '0.235 nm'), 'si_pl': ('in.lib.si.3', '31 planes'), 'ch_at': ('in.lib.channel.1', '270,000'),
+    'gate_p': ('n7.cpp', '57 nm'), 'fin_p': ('n7.fin-pitch', '30 nm'), 'fin_w': ('n7.fin-width', '6 nm'),
+    'fin_h': ('n7.fin-height', '52 nm'), 'lg': ('n7.leff', '16.5 nm'), 'si_a': ('in.lib.si.1', '0.5431 nm'),
+    'si_nn': ('in.lib.si.2', '0.235 nm'), 'si_pl': ('in.lib.si.3', '31 planes'), 'ch_at': ('dope.count-channel', '257,000'),
     'm_pitch': ('in.die.metal.2', '40 nm'), 'masks': ('chip.process', '89 mask layers'),
 }
 # nodes the tree does not have that the page draws: a column of the compressor tree, between the tree and one 4:2
@@ -200,6 +206,38 @@ def build(ALL, ml_keys_extra=(), ml_num_keys=()):
         raise SystemExit('the copied drawings cite memory-levels facts that do not exist: ' + ', '.join(gone[:20]))
     for key in sorted(ml_need):
         facts['ml:' + key] = ml_fact(key)
+    # ---- the shared ladder (1 Oct 2026, docs/reports/data/2026-10-01-ladder/ladder.json): the scales from the atom down to
+    # the Planck length, the ring of sizes, Bernal Heights and 29th Street, Studio 45 revised, the device corrected to
+    # TSMC N7's published numbers, and the process and electronics facts placed scale by scale (DESIGN §4)
+    LD = json.load(open(LADDER))
+    for fid in SUPERSEDED:
+        facts.pop(fid, None)
+    for fid, f in LD['facts'].items():
+        if fid in facts:
+            raise SystemExit(f'ladder fact {fid} collides with the chip\'s')
+        u = f.get('url')
+        facts[fid] = {'id': fid, 'statement': f['statement'], 'kind': f['kind'], 'source': f['source'], 'note': f.get('note'), 'url': u,
+                      'page': (re.sub(r'^www\.', '', u.split('/')[2]) if u else None), 'cards': [], 'set': 'ladder'}
+    for nid, n in LD['nodes'].items():
+        s0 = scales.get(nid, {})
+        old_f = s0.get('f')
+        s0.update({k: n[k] for k in ('name', 'short', 'blurb', 'm', 'kind', 'f', 'facts') if k in n})
+        for k in ('note', 'egg', 'bound', 'conceptual'):
+            if k in n:
+                s0[k] = n[k]
+        if nid in ('bernal', 'st29', 'studio45'):
+            s0['out'] = True
+        if old_f and old_f != s0.get('f') and old_f.startswith('size.'):
+            facts.pop(old_f, None)
+        scales[nid] = s0
+    for nid, fl in LD['more'].items():
+        if nid not in scales:
+            raise SystemExit(f'the ladder adds facts to {nid}, which is not a scale')
+        scales[nid]['facts'] = scales[nid].get('facts', []) + [f for f in fl if f not in scales[nid].get('facts', [])]
+    for k in EGG_OUT:
+        scales[k]['egg'] = True
+    for s1 in scales.values():
+        s1['facts'] = [f for f in s1.get('facts', []) if f not in SUPERSEDED]
     # ---- the image manifest
     img = {}
     for fn in sorted(os.listdir(IMG)):
@@ -224,7 +262,14 @@ def build(ALL, ml_keys_extra=(), ml_num_keys=()):
         onum[k] = {'t': t.replace(' x ', ' × '), 'f': fid}
     geo = {k: v for k, v in GEO.items() if k != 'meta'}
     geo['meta'] = {k: GEO['meta'][k] for k in ('units', 'sources', 'privacy', 'sf_nyc_great_circle_km') if k in GEO['meta']}
-    return {'facts': facts, 'scales': scales, 'geo': geo, 'img': img, 'ml_num': ml_num, 'used_chip': used_chip, 'onum': onum, 'ml_addr': MLD.get('addr'),
+    for k, v in LD['num'].items():
+        if k in onum and onum[k] != v:
+            raise SystemExit(f'the ladder\'s number {k} collides with the chip\'s: {onum[k]} against {v}')
+        if v['f'] not in facts:
+            raise SystemExit(f'the ladder\'s number {k}: no fact {v["f"]}')
+        onum[k] = v
+    geo['bernal'] = LD['geo']['bernal']
+    return {'facts': facts, 'scales': scales, 'geo': geo, 'img': img, 'ml_num': ml_num, 'used_chip': used_chip, 'onum': onum, 'ml_addr': MLD.get('addr'), 'ring': LD['ring'],
             'outside_meta': {k: OUT['meta'].get(k) for k in ('clock_hz', 'clock_source', 'fibre_group_index', 'fibre_source', 'privacy')}}
 
 
