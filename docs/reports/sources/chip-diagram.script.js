@@ -3534,6 +3534,47 @@ window.__chipTest = {
     prune();
     return out;
   },
+  /* every scene by the path to it, not one per scale (part 1b, the owner's "make sure in all the places I eventually go
+     all the way down"): a depth-first walk of zoom-ins (parts, a scale's own zooms, paths of their own) from the die and
+     from the rack, one path per shape (the ids along it; a cell of the die by its instance), each with its parts, what
+     each leads to and whether its seat is there in this drawing. A scale met again with the same parts is not walked
+     again (dup). Layers are dropped as the walk leaves them. */
+  walk: o => {
+    o = o || {};
+    const out = [], sig = new Map(), shapes = new Set(), MAX = o.max || 6000, T0 = [LAYERS.slice(), AP.slice(), FX.slice()], PRE = new Set(LYR.keys());
+    const shapeOf = P => P.map(e => (/^(shire|memshire|memshire\.phy|memshire\.phy\.dq)$/.test(e.id) ? pk(e) : e.id)).join('/');
+    const drop = P => { const key = pkeys(P); if (Z.path.length >= P.length && samePath(Z.path.slice(0, P.length), P)) return; const L = LYR.get(key); if (L && !T0[0].includes(L)) { L.remove(); LYR.delete(key); } };
+    const seat1 = C => { try { return !!seatOf(C, C.length - 1); } catch (_) { return false; } };
+    const seatAll = C => { try { for (let d = 1; d < C.length; d++) if (!seatOf(C, d)) return false; return true; } catch (_) { return false; } };
+    const visit = P => {
+      const shape = shapeOf(P);
+      if (shapes.has(shape) || out.length >= MAX) return;
+      shapes.add(shape);
+      const d = P.length - 1, el = P[d];
+      let L; try { L = built(P, d); } catch (e) { out.push({shape, path: pkeys(P), id: el.id, err: String(e)}); return; }
+      const next = [];
+      const parts = [...L.querySelectorAll('.comp')].map(g => {
+        const k = kidOf(g), go = g._go ? g._go() : null, r = {key: g._key, ext: !!g._ext, mos: g.querySelectorAll('g.mos').length};
+        if (go) { r.go = go.map(e => e.id).join('/'); r.to = go[go.length - 1].id; r.seat = seatAll(go); next.push(go); }
+        else if (k && k.up) r.up = k.up;
+        else if (k) { const C = P.concat([k]); r.to = k.id; r.seat = seat1(C); if (r.seat) next.push(C); }
+        return r;
+      });
+      const kids = kidsOf(P).map(k => { const C = P.concat([k]), s = seat1(C); if (s) next.push(C); return {to: k.id, seat: s}; });
+      const s = JSON.stringify(parts.map(p => [p.key, p.to || '', p.up || '', p.ext ? 1 : 0]).sort()) + '|' + kids.map(k => k.to).join(',');
+      const dup = sig.has(el.id) && sig.get(el.id) === s;
+      if (!sig.has(el.id)) sig.set(el.id, s);
+      out.push({shape, path: pkeys(P), id: el.id, egg: egg(el), dup, mos: L.querySelectorAll('g.mos').length, parts, kids});
+      if (!dup) next.forEach(C => visit(C));
+      drop(P);
+    };
+    (o.roots || ['die', 'rack']).forEach(r => { const P = r === 'die' ? pathOf({level: 0}) : upPath(r) || (() => { const i = OUT_IDS.indexOf(r); return i >= 0 ? OUT_IDS.slice(0, i + 1).map(id => ({id})) : null; })(); if (P) visit(P); });
+    // (building rebinds the trio of layers the flows draw in: they go back to what they were, and the rest is dropped)
+    [0, 1, 2].forEach(i => { LAYERS[i] = T0[0][i]; AP[i] = T0[1][i]; FX[i] = T0[2][i]; });
+    LYR.forEach((L, key) => { if (!PRE.has(key) && !T0[0].includes(L)) { L.remove(); LYR.delete(key); } });
+    bindTrio(Z.path); prune();
+    return out;
+  },
   /* every cell of the die with a scale of its own, and its edge links (the ways sideways and back) */
   cells: () => CELLS.map(c => {
     const el = nbrEl(c); if (!el) return null;

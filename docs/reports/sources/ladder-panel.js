@@ -27,9 +27,9 @@ function zoomRowPart(g, title) {
   if (other.length) rows.push(zrow(k ? 'Also:' : 'Zoom in:', other.map(x => zbtn(x.to, x.lab, !k && x === other[0]))));
   if (made.length) rows.push(zrow('Made of:', made.map(x => zbtn(x.to, x.lab, false))));
   const none = !k && !ex.length;
-  // (since 1 Oct every part of the chip leads further in; what is left without a zoom is not the ET-SoC-1's: the host's
-  // processor, the card's regulators, the die's key)
-  return `<div class="pn-zoom">${none ? `<p class="nz">${g._ext ? 'Not a part of the ET-SoC-1: the page draws the chip’s own parts, down to their transistors and atoms.' : `No closer drawing of ${esc(title || 'this part')}.`}</p>` : rows.join('')}</div>`;
+  // (since 1 Oct every part leads further in, since part 1b the host's and the card's too; what is left without a zoom
+  // is the die's key, a legend)
+  return `<div class="pn-zoom">${none ? `<p class="nz">${g._ext ? 'A key to the drawing, not a part of the chip: there is nothing inside it to zoom into.' : `No closer drawing of ${esc(title || 'this part')}.`}</p>` : rows.join('')}</div>`;
 }
 function zoomRowHere(P) {
   const ks = kidsOf(P), d = defKid(P), rows = [];

@@ -223,10 +223,11 @@ bnode('lib.finfet', {pv: () => IVIEW(), draw: (L, ap) => {
   const rows = [1.5, 2.5, 5.5, 6.5], W = gp * (ng - 0.6);
   const gc = ipt(L, ap, 'cell', 'One standard cell row: 240 nm tall', {title: 'A standard-cell row', lead: 'Logic is built from cells of one height laid in rows: in N7\'s densest library a cell is 240 nm tall, 8 fin pitches, with room for two fins of p-type transistors on top and two of n-type below.', facts: ['n7.cells', 'n7.two-fin', 'n7.density-hd'], box: {x: x0 - 10, y: y0, w: W + 20, h: ch}});
   S(E('rect', {x: x0 - 10, y: y0, width: W + 20, height: ch, rx: 4}, gc), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 1.5, strokeDasharray: '7 6'});
-  const gf = ipt(L, ap, 'fins', 'The fins: walls of silicon the current runs along', {node: 'lib.fin', box: {x: x0, y: y0, w: W, h: ch}});
-  rows.forEach(r => S(E('rect', {x: x0, y: y0 + r * fp - fw / 2, width: W, height: fw}, gf), {fill: 'var(--c3)', fillOpacity: 0.6}));
   const gk = ipt(L, ap, 'contacts', 'Source and drain contacts', {title: 'Source and drain', lead: 'Between the gates, metal contacts land on the fins: one side is the source, the other the drain. In N7 they are cobalt, which halved their resistance.', facts: ['n7.contacts-co', 'dope.n-sd', 'dope.p-sd'], box: {x: x0, y: y0, w: W, h: ch}});
   for (let j = 0; j < ng - 1; j++) [[0.9, 3.1], [4.9, 7.1]].forEach(([a, b]) => S(E('rect', {x: x0 + gp * j + lg / 2 + 0.12 * gp, y: y0 + a * fp, width: gp - lg - 0.24 * gp, height: (b - a) * fp, rx: 3}, gk), {fill: 'var(--c5)', fillOpacity: 0.2, stroke: 'var(--c5)', strokeWidth: 1.2}));
+  // (part 1b: the fins over the contacts, so that a tap on a fin between the gates finds the fin on a phone)
+  const gf = ipt(L, ap, 'fins', 'The fins: walls of silicon the current runs along', {node: 'lib.fin', box: {x: x0, y: y0, w: W, h: ch}});
+  rows.forEach(r => S(E('rect', {x: x0, y: y0 + r * fp - fw / 2, width: W, height: fw}, gf), {fill: 'var(--c3)', fillOpacity: 0.6}));
   const gg = ipt(L, ap, 'gates', 'The gates: lines of metal over the fins', {node: 'lib.gate', box: {x: x0, y: y0 - 8, w: W, h: ch + 16}});
   for (let j = 0; j < ng; j++) S(E('rect', {x: x0 + gp * j - lg / 2, y: y0 - 8, width: lg, height: ch + 16, rx: 2}, gg), {fill: 'var(--c1)', fillOpacity: 0.45, stroke: 'var(--c1)', strokeWidth: 1.5});
   // one n-type transistor: the gate over the two lower fins; on, the fins under its gate fill with electrons
@@ -457,7 +458,7 @@ libLink('lib.sram6t', {cell: FET, sa: FET, pre: FET, wd: FET, mux: FET, wl: INV,
 libLink('l1d.cmp', {xnors: {id: 'lib.xor'}}, [{id: 'lib.xor'}]);
 libLink('mesh.link.wire', {rep1: INV, rep2: INV, lsin: INV, ls: FET, sync: {id: 'lib.flipflop'}}, [INV, FET, {id: 'lib.flipflop'}]);
 libLink('shire.meshstop.xing', {ls: FET, lvin: INV, sync: {id: 'lib.flipflop'}, fifo: {id: 'lib.flipflop'}}, [FET, INV, {id: 'lib.flipflop'}]);
-libLink('memshire.phy.dq', {drv: FET, predrv: INV, rx: FET}, [FET, INV]);
+libLink('memshire.phy.dq', {drv: FET, predrv: INV, rx: {id: 'lib.diffamp'}}, [FET, INV, {id: 'lib.diffamp'}]);
 libLink('dram.cell', {cellA: {id: 'lib.dramcell'}, cellB: {id: 'lib.dramcell'}}, [{id: 'lib.dramcell'}]);
 /* the minion's default way down is now the compute ladder: the vector unit, a lane, its multiply-add */
 NODES.minion.def = () => ({id: 'vpu'});

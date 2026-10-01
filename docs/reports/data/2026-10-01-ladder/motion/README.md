@@ -61,3 +61,29 @@ layout), on the base page as on this one (`vtree`). No console errors in any run
 
 `build-times-u2e.txt`: the new scales (the textbook constructions and the cells' links) each draw in 1 to 5 ms, with 38
 to 183 nodes; the deepest path, from the top to the Planck length, keeps 5,629 nodes in the drawing (budget 6,000).
+
+## Part 1b: the last dead ends (1 October, afternoon)
+
+The candidate `p1b6` (nine more scenes: a PCIe lane, a differential pair, a crossbar, rounding, copper wiring, a copper
+atom, a buck converter, a power transistor and a boot pin; the fins drawn over the contacts) against `9318844`, the
+commit before it (`base`; the build of that commit), with `run1b.sh`: the flows A, H and K and the vector add as above,
+and three new paths by Enter on a part and Backspace back out: `lane` (a PCIe lane, its CTLE, the input pair, the fin,
+the channel, the crystal and an atom), `reg` (the card's core regulator, a buck converter, its power transistor, the
+crystal, an atom) and `wire` (the wiring stack, a copper wire, a copper atom, an electron). One run of each, one at a
+time; `p1b-*-summ.txt` and `p1b-*-kink.txt`.
+
+| Run | base, 1x | part 1b, 1x | base, 4x | part 1b, 4x |
+|---|---|---|---|---|
+| A | 1 of 241 late, max 33 ms | 1 of 241, 33 ms | 23 of 219 (10.5%), 117 ms | 29 of 212 (13.7%), 117 ms |
+| H | 0 of 206, 17 ms | 0 of 206, 17 ms | 31 of 175 (17.7%), 167 ms | 28 of 178 (15.7%), 167 ms |
+| K | 1 of 429, 33 ms | 1 of 429, 33 ms | 76 of 351 (21.7%), 117 ms | 84 of 345 (24.3%), 117 ms |
+| vadd | 8 of 766 (1.0%), 67 ms | 11 of 764 (1.4%), 67 ms | 112 of 660 (17.0%), 300 ms | 110 of 661 (16.6%), 283 ms |
+| lane | - | 5 of 741 (0.7%), 33 ms | - | 65 of 677 (9.6%), 283 ms |
+| reg | - | 0 of 506, 17 ms | - | 17 of 487 (3.5%), 483 ms |
+| wire | - | 1 of 279, 33 ms | - | 19 of 261 (7.3%), 200 ms |
+
+The flows' velocity profiles are the base's (the largest frame-to-frame change at most 12.1% of peak at 1x, the base's
+13.8%), and the vector add's matches the base move for move; at 4x both pages drop
+frames alike, run to run. The new paths' late frames at 1x are first frames of a move; at 4x the 483 ms frame of `reg`
+is the page's first, the card's photo decoded on arrival, before any move. The new scales draw in 1-3 ms each
+(`build-times-p1b.txt`, three times each). No console errors in any run.

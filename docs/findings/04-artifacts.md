@@ -793,6 +793,23 @@ what the repository needs of it.
   lands on the same atom), T18 (the navigation graph: every scale reached, every zoom with a seat, no one-way exit) and
   T19 (no dead ends: every part zooms in, every scale reaches a transistor and then an atom; a vector add by
   double-clicks from the chip to an atom).
+- **Part 1b, completeness (Q90, afternoon)**: a walk of every scene by its path (`__chipTest.walk()`: 316 paths of 86
+  scales, 2,863 parts from the rack down; part 1's check had looked at one path per scale) found six parts with no zoom
+  at all (the host's processor, memory and supply, the card's core and SRAM regulators and its boot switches), four
+  zooms from a block straight to the FinFET with no gate drawn in transistors between (the wiring stack's wires and
+  bumps, the PLL's charge pump and loop filter) and blocks standing in for whole circuits (a PCIe lane opened an
+  inverter, the crossbars a 2:1 multiplexer, the multiply-add's rounding the adder, the DQ pin's receiver a FinFET).
+  Nine scenes close them (`ladder-circuits.js`): a PCIe lane as a SerDes, block by block (eight lanes, each with its
+  way sideways), a differential pair and the CTLE made of it, a crossbar of multiplexers and arbiters, rounding to
+  nearest even, copper wiring in section and a copper atom, a buck converter, a trench power transistor (the
+  regulators' own, never the N7 FinFET), and a boot-strap pin with the chip's receiver and flip-flop; the PLL's pump and
+  filter are drawn as transistors; the host's parts open the constructions they share with the chip's, each panel saying
+  it is not the ET-SoC-1's. Only the die's key, a legend, has no zoom. The data: `research/build_circuits.py` (45 more
+  facts, among them PCIe 4.0's equalisers and loss budget, the card's TPSM831D31 and LTM4680, the chip's 11 boot-pin
+  bits, copper's atom and free electrons, Intel 14 nm's pitches). The tests: `zoom_test.mjs` T20 (every scene by its
+  path: every part leads in with its seat in that drawing, every zoom to a transistor comes from a drawing in
+  transistors, every scale reaches a transistor and an atom, the DRAM's and the regulators' chains never reach the N7
+  FinFET) and T19's double-click chains for a PCIe lane, the boot switches and the core regulator.
 
 ## Cross-links between the reports
 

@@ -109,7 +109,7 @@ bnode('vpu.lane', {parse: k => ({lane: +k}), name: p => `Lane ${p.lane} of the v
   draw: (L, ap, p, P) => blockScene('vpu.lane', L, ap, p, P, {title: `Lane ${p.lane} of the vector unit`}), def: () => ({id: 'vpu.lane.fma'}), kids: () => [{id: 'vpu.lane.fma'}]});
 bnode('tensor', {draw: (L, ap, p, P) => blockScene('tensor', L, ap, p, P), seat: (ap, p, pel, Lp) => partBox(Lp, 'tensor'), def: () => ({id: 'lib.latch'})});
 bnode('pcie', {draw: (L, ap, p, P) => blockScene('pcie', L, ap, p, P), seat: (ap, p, pel, Lp) => cellSeat(Lp, 'pcie'), def: () => ({id: 'pcie.phy'})});
-bnode('pcie.phy', {draw: (L, ap, p, P) => blockScene('pcie.phy', L, ap, p, P, {inst: {n: 8, id: 'pcie.lane', el: () => ({id: 'pcie.lane'}), title: i => `lane ${i}`, sub: () => '16 GT/s', h: 120}})});
+bnode('pcie.phy', {draw: (L, ap, p, P) => blockScene('pcie.phy', L, ap, p, P, {inst: {n: 8, id: 'pcie.lane', el: i => ({id: 'pcie.lane', k: String(i)}), title: i => `lane ${i}`, sub: () => '16 GT/s', h: 120}})});
 bnode('io', {draw: (L, ap, p, P) => blockScene('io', L, ap, p, P), seat: (ap, p, pel, Lp) => cellSeat(Lp, 'io')});
 function cellSeat(Lp, type) { const c = CELLS.find(x => x.type === type); return c ? {r: {x: c.x + INS, y: c.y + INS, w: c.w - 2 * INS, h: c.h - 2 * INS}, g: c.g || null} : null; }
 Object.assign(KIDS, {

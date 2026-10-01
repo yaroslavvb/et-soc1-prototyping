@@ -33,9 +33,13 @@
 //      any exit; every zoom has a seat; every cell of the die has its four edge links and each its link back; every
 //      sideways glide has its glide back; every scale reaches the die and the die reaches every scale (no one-way exit)
 //   T19 no dead ends ("make sure in all the places I eventually go all the way down to the lowest transistor level and
-//      then I go down to the atoms"): every part from the rack down zooms somewhere (but the few that are not the
-//      ET-SoC-1's, listed); from every scale zoom-ins reach a transistor (a FinFET, or a DRAM cell's on its own process)
-//      and then an atom; and a vector add, by double-clicks, from the chip down through a textbook adder to an atom
+//      then I go down to the atoms"): every part from the rack down zooms somewhere (but the die's key, a legend); from
+//      every scale zoom-ins reach a transistor (a FinFET, a DRAM cell's or a power transistor's on its own process) and
+//      then an atom; by double-clicks, a vector add from the chip through a textbook adder to an atom, and (part 1b) a
+//      PCIe lane, the card's boot switches and its core regulator down to an atom
+//   T20 (part 1b) every scene by its path (window.__chipTest.walk): every part of every drawing leads in, its seat there
+//      in that drawing; every zoom to a transistor comes from a drawing in transistors; every scale reaches a transistor
+//      and an atom; the DRAM's and the regulators' chains never reach the N7 FinFET; the walk leaves no layer behind
 import { open, sleep } from './cdp.mjs';
 const args = process.argv.slice(2), PAGE = args.find(a => !a.startsWith('--')), PHONE = args.includes('--phone');
 const ONLY = (args.find(a => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
@@ -512,9 +516,15 @@ T.T17 = async b => {
 };
 
 /* the navigation graph, built in the page (window.__chipTest.graph) */
-const FLOOR = new Set(['p.atom', 'p.electron', 'p.nucleus', 'p.nucleon', 'p.quark', 'p.planck', 'p.wrap']);
-const DEVICE = new Set(['lib.finfet', 'lib.fin', 'lib.gate', 'lib.channel', 'lib.si', 'p.dopant', 'lib.dramcell']);
-const EXT = new Set(['host · cpu', 'host · dimms', 'host · psu', 'card · vrm', 'card · ltm', 'card · dip', 'die · inferred']);
+const FLOOR = new Set(['p.atom', 'p.cu', 'p.electron', 'p.nucleus', 'p.nucleon', 'p.quark', 'p.planck', 'p.wrap']);
+const DEVICE = new Set(['lib.finfet', 'lib.fin', 'lib.gate', 'lib.channel', 'lib.si', 'p.dopant', 'lib.dramcell', 'lib.powerfet']);
+// the transistors: the N7 FinFET, a DRAM cell's own (a DRAM process) and a regulator's power transistor (since part 1b)
+const TRANS = new Set(['lib.finfet', 'lib.dramcell', 'lib.powerfet']), ATOM = new Set(['p.atom', 'p.cu']);
+// (part 1b) the one part with no zoom: the die's key, a legend of the drawing, not a part of the chip
+const EXT = new Set(['die · inferred']);
+// a zoom straight to a transistor from a drawing not made of transistors: only where the drawing is a section that shows
+// the transistors themselves (the die's bottom layer, the contact under a wire)
+const SECT = new Set(['die.metal · fets', 'lib.wire · contact']);
 let GRAPH = null;
 const graph = async b => { if (!GRAPH) { await goScene(b, 'die'); GRAPH = await b.ev('window.__chipTest.graph()'); } return GRAPH; };
 T.T18 = async b => {
@@ -555,35 +565,84 @@ T.T19 = async b => {
   const dead = [], ext = [];
   G.forEach(s => { if (s.egg || FLOOR.has(s.id)) return; (s.parts || []).forEach(p => { if (p.ext) ext.push(`${s.id} · ${p.key}`); else if (!p.kid && !p.go && !p.up) dead.push(`${s.id} · ${p.key}`); }); });
   ok(!dead.length, `T19 every part from the rack down leads further in (${G.filter(s => !s.egg && !FLOOR.has(s.id)).reduce((n, s) => n + s.parts.length, 0)} parts)`, dead.slice(0, 8).join(' | '));
-  ok(ext.every(e => EXT.has(e)), `T19 the parts that do not, ${[...new Set(ext)].length}, are not the ET-SoC-1's (the host's processor, memory and supply; the card's regulators and switches; the die's key)`, [...new Set(ext)].filter(e => !EXT.has(e)).join(' | '));
+  ok(ext.every(e => EXT.has(e)), `T19 the parts that do not, ${[...new Set(ext)].length}: only the die's key, a legend (since part 1b the host's processor, memory and supply and the card's regulators and switches lead in too)`, [...new Set(ext)].filter(e => !EXT.has(e)).join(' | '));
   const kidsOf = s => [...new Set((s.parts || []).filter(p => p.id).map(p => p.id).concat((s.kids || []).map(k => k.id)).concat((s.parts || []).filter(p => p.go).map(p => p.go.split('/').pop().split(':')[0])))];
   const reach = (from, goal) => { const seen = new Set([from]), Q = [from]; while (Q.length) { const x = Q.shift(); if (goal(x)) return true; const s = by.get(x); if (!s) continue; kidsOf(s).forEach(k => { if (!seen.has(k)) { seen.add(k); Q.push(k); } }); } return false; };
   const noT = [], noA = [];
-  G.forEach(s => { if (FLOOR.has(s.id)) return; if (!DEVICE.has(s.id) && !reach(s.id, x => x === 'lib.finfet' || x === 'lib.dramcell')) noT.push(s.id); if (!reach(s.id, x => x === 'p.atom')) noA.push(s.id); });
+  G.forEach(s => { if (FLOOR.has(s.id)) return; if (!DEVICE.has(s.id) && !reach(s.id, x => TRANS.has(x))) noT.push(s.id); if (!reach(s.id, x => ATOM.has(x))) noA.push(s.id); });
   ok(!noT.length, `T19 from every scale (${G.filter(s => !FLOOR.has(s.id) && !DEVICE.has(s.id)).length} above the device) zoom-ins reach a transistor`, noT.join(' '));
   ok(!noA.length, 'T19 and from every scale zoom-ins reach an atom', noA.join(' '));
   // the DRAM's transistors are its own process's: never the N7 FinFET
   const dramT = ['dram', 'dram.bank', 'dram.cell', 'lib.dramcell'].filter(i => by.has(i) && reach(i, x => x === 'lib.finfet'));
   ok(!dramT.length, 'T19 the DRAM (its own process) leads to its cell\'s transistor, never to the N7 FinFET', dramT.join(' '));
   // the owner's case: a vector add, by double-clicks, down to an atom
-  const chain = [['shire', 'cshire'], ['minion', 'minion'], ['vpu', 'vpu'], ['vpu.lane', 'vpu.lane'], ['vpu.lane.fma', 'vpu.lane.fma'], ['lib.adder', 'fmaadd'], ['lib.aoi21', 'pfx1'],
-    ['lib.finfet', 'onefet'], ['lib.fin', 'devring'], ['lib.channel', 'thefin'], ['lib.si', 'lattice'], ['p.atom', 'oneatom']];
-  await goScene(b, 'die');
+  const DEV5 = [['lib.finfet', 'onefet'], ['lib.fin', 'devring'], ['lib.channel', 'thefin'], ['lib.si', 'lattice'], ['p.atom', 'oneatom']];
+  await dclickChain(b, 'die', 'the vector add', [['shire', 'cshire'], ['minion', 'minion'], ['vpu', 'vpu'], ['vpu.lane', 'vpu.lane'], ['vpu.lane.fma', 'vpu.lane.fma'], ['lib.adder', 'fmaadd'], ['lib.aoi21', 'pfx1']].concat(DEV5),
+    'from the chip to a silicon atom, through a textbook adder');
+  // (part 1b) the places that stopped short before: a PCIe lane, the card's boot switches and its core regulator
+  await dclickChain(b, 'die', 'a PCIe lane', [['pcie', 'pcie'], ['pcie.phy', 'pcie.phy'], ['pcie.lane', 'pcie.lane'], ['lib.diffamp', 'ctle'], ['lib.finfet', 'pair']].concat(DEV5.slice(1)),
+    'from the chip through a SerDes lane and its equaliser to a silicon atom');
+  await dclickChain(b, 'card:board', 'the boot switches', [['lib.strap', 'dip'], ['lib.inverter', 'rx']].concat(DEV5), 'from the card\'s DIP switches through the chip\'s input receiver to a silicon atom');
+  await dclickChain(b, 'card:board', 'the core regulator', [['lib.buck', 'vrm'], ['lib.powerfet', 'hs'], ['lib.si', 'cell'], ['p.atom', 'oneatom']], 'from the card\'s regulator through its power transistor to a silicon atom');
+};
+/* double-clicks (double-taps) down a chain of [scale, part key] from a scene, each into the scale it names */
+async function dclickChain(b, from, name, chain, what) {
+  await goScene(b, from);
   let n = 0;
   for (const [want, key] of chain) {
     await scrollStage(b);
     const parts = await b.ev('window.__chipTest.parts()');
     const p = parts.filter(q => q.key === key && q.kid && q.kid.split(':')[0] === want)[0] || parts.filter(q => q.kid && q.kid.split(':')[0] === want)[0];
-    if (!ok(!!p, `T19 the vector add: a part leads to ${want}`, parts.map(q => q.key).slice(0, 10).join(' '))) break;
+    if (!ok(!!p, `T19 ${name}: a part leads to ${want}`, parts.map(q => q.key).slice(0, 10).join(' '))) break;
     const pt = await hitPoint(b, p.label);
-    if (!ok(!!pt, `T19 the vector add: the part for ${want} can be ${b.touch ? 'tapped' : 'clicked'}`, p.label)) break;
+    if (!ok(!!pt, `T19 ${name}: the part for ${want} can be ${b.touch ? 'tapped' : 'clicked'}`, p.label)) break;
     if (b.touch) await b.dtap(pt.x, pt.y); else await b.dblclick(pt.x, pt.y);
     await sleep(80); await b.idle(15000);
     const s = await b.state();
-    if (!ok(s.node === want, `T19 the vector add, double-${b.touch ? 'tap' : 'click'} ${n + 1}: into ${want}`, s.path.split('/').slice(-2).join('/'))) break;
+    if (!ok(s.node === want, `T19 ${name}, double-${b.touch ? 'tap' : 'click'} ${n + 1}: into ${want}`, s.path.split('/').slice(-2).join('/'))) break;
     n++;
   }
-  ok(n === chain.length, `T19 a vector add from the chip to a silicon atom in ${n} double-${b.touch ? 'taps' : 'clicks'}, through a textbook adder`);
+  ok(n === chain.length, `T19 ${name} in ${n} double-${b.touch ? 'taps' : 'clicks'}: ${what}`);
+}
+/* (part 1b) every scene by its path, not one per scale: window.__chipTest.walk() follows every zoom-in from the die and
+   from the rack, one path per shape (the scales along it; a cell of the die by its instance), and reports each scene's
+   parts, what each leads to, whether its seat is there in that drawing, and how many transistors each drawing shows */
+T.T20 = async b => {
+  await goScene(b, 'die');
+  const n0 = await b.ev(`document.querySelectorAll('#chip > g.lay').length`);
+  const W = await b.ev('window.__chipTest.walk()');
+  const n1 = await b.ev(`document.querySelectorAll('#chip > g.lay').length`);
+  const ids = new Set(W.map(s => s.id));
+  ok(W.length >= 300 && ids.size >= 85 && !W.some(s => s.err), `T20 ${W.length} scenes by path (${ids.size} scales, ${W.filter(s => !s.dup).length} drawn anew), each drawn`, W.filter(s => s.err).map(s => s.path.split('/').slice(-2).join('/') + ': ' + s.err).slice(0, 3).join(' | '));
+  ok(n1 === n0, `T20 the walk leaves no layer behind (${n0} before, ${n1} after)`);
+  const dead = new Set(), noseat = new Set(), ext = new Set(), skip = new Set();
+  let nparts = 0;
+  W.forEach(s => {
+    if (s.err || s.egg || FLOOR.has(s.id)) return;
+    s.parts.forEach(p => {
+      nparts++;
+      const k = `${s.id} · ${p.key}`;
+      if (p.ext) ext.add(k); else if (!p.to && !p.up) dead.add(k); else if (p.to && !p.seat) noseat.add(`${k} → ${p.to} @ ${s.shape.split('/').slice(-3).join('/')}`);
+      if (TRANS.has(p.to) && !DEVICE.has(s.id) && !(s.mos >= 2 || p.mos >= 1 || SECT.has(k))) skip.add(`${k} → ${p.to}`);
+    });
+    s.kids.filter(x => !x.seat).forEach(x => noseat.add(`${s.id} (its own zoom) → ${x.to}`));
+  });
+  ok(!dead.size, `T20 every part of every scene from the rack down leads further in (${nparts} parts on ${W.filter(s => !s.egg && !FLOOR.has(s.id)).length} scenes)`, [...dead].slice(0, 8).join(' | '));
+  ok([...ext].every(e => EXT.has(e)), `T20 the only part without a zoom is the die's key, a legend`, [...ext].filter(e => !EXT.has(e)).join(' | '));
+  ok(!noseat.size, 'T20 in every drawing every zoom has its seat there (not only in the first drawing of a scale)', [...noseat].slice(0, 6).join(' | '));
+  ok(!skip.size, 'T20 every zoom to a transistor comes from a drawing in transistors (a gate, a cell, an amplifier): no block jumps straight to the FinFET', [...skip].slice(0, 8).join(' | '));
+  const E = new Map();
+  W.forEach(s => { if (s.err) return; const e = E.get(s.id) || new Set(); s.parts.forEach(p => p.to && e.add(p.to)); s.kids.forEach(k => e.add(k.to)); E.set(s.id, e); });
+  const reach = (from, goal) => { const seen = new Set([from]), Q = [from]; while (Q.length) { const x = Q.shift(); if (goal(x)) return true; (E.get(x) || []).forEach(t => { if (!seen.has(t)) { seen.add(t); Q.push(t); } }); } return false; };
+  const noT = [], noA = [];
+  E.forEach((_, id) => { if (FLOOR.has(id)) return; if (!DEVICE.has(id) && !reach(id, x => TRANS.has(x))) noT.push(id); if (!reach(id, x => ATOM.has(x))) noA.push(id); });
+  ok(!noT.length, `T20 from every scale zoom-ins reach a transistor (${[...E.keys()].filter(i => !FLOOR.has(i) && !DEVICE.has(i)).length} scales above the devices)`, noT.join(' '));
+  ok(!noA.length, 'T20 and an atom', noA.join(' '));
+  // each transistor on its own process: the DRAM's and the regulators' never lead to the N7 FinFET
+  const wrong = ['dram.cell', 'lib.dramcell', 'lib.powerfet'].filter(i => E.has(i) && reach(i, x => x === 'lib.finfet'));
+  ok(!wrong.length, 'T20 a DRAM cell\'s and a power transistor\'s chains never reach the N7 FinFET', wrong.join(' '));
+  const want = ['pcie.lane', 'lib.diffamp', 'lib.xbar', 'lib.round', 'lib.wire', 'p.cu', 'lib.buck', 'lib.powerfet', 'lib.strap'];
+  ok(want.every(i => ids.has(i)), 'T20 the scenes part 1b added are reached by zoom-ins: ' + want.join(', '), want.filter(i => !ids.has(i)).join(' '));
 };
 
 const b = await open(PHONE ? {w: 390, h: 844, dpr: 3, touch: true} : {w: 1280, h: 800, dpr: 1});

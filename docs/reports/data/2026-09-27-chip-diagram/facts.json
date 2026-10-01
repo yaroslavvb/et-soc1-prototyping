@@ -9,15 +9,15 @@
    "research/asks.json",
    "../../sources/limits-of-observability.data.json (the hub rows the asks link to)"
   ],
-  "n_facts": 1077,
+  "n_facts": 1108,
   "kinds": {
-   "derived": 131,
+   "derived": 135,
    "measured": 214,
-   "spec": 291,
-   "inferred": 186,
-   "generic": 87,
-   "unknown": 17,
-   "outside": 144,
+   "spec": 293,
+   "inferred": 193,
+   "generic": 97,
+   "unknown": 18,
+   "outside": 151,
    "owner": 2,
    "hypothesis": 5
   },
@@ -9161,7 +9161,14 @@
    "kind": "inferred",
    "note": "order of magnitude",
    "facts": [
-    "in.pcie.lane.1"
+    "in.pcie.lane.1",
+    "tb.serdes",
+    "pcie.gen4.eq",
+    "pcie.gen4.loss",
+    "pcie.gen4.ui",
+    "tb.strongarm",
+    "tb.bangbang",
+    "tb.ctle"
    ],
    "kids": [],
    "see": [
@@ -9811,7 +9818,7 @@
    "facts": [
     "ml:scp:scp.g-read-data",
     "ml:dram:gen.sense",
-    "tb.senseamp"
+    "tb.strongarm"
    ],
    "kids": [],
    "see": [
@@ -9895,18 +9902,25 @@
    "f": "size.lib.dram1t1c"
   },
   "lib.wire": {
-   "name": "On-chip wire",
-   "short": "On-chip wire",
-   "blurb": "A copper line embedded in insulator. Its capacitance, about 0.2 fF per micrometre, must be charged every time the signal changes; on long wires that costs more energy than the logic.",
+   "name": "Copper wiring, in section",
+   "short": "Copper wire",
+   "blurb": "The chip's finest wires are copper, about 20 nm wide and 40 nm apart, wrapped in a thin cobalt liner so that copper atoms do not wander; cobalt contacts take them down to the transistors.",
    "parent": "lib",
-   "m": 4e-08,
-   "kind": "outside",
+   "m": 3e-07,
+   "kind": "inferred",
    "note": "the minimum metal pitch of TSMC N7, 40 nm: the finest wires are about 20 nm wide",
    "facts": [
     "in.lib.wire.1",
     "in.lib.wire.2",
     "in.lib.wire.3",
-    "mesh-bit-mm-free"
+    "mesh-bit-mm-free",
+    "n7.mmp",
+    "wire.cu",
+    "n7.cu-co-liner",
+    "n7.contacts-co",
+    "n7.metal-layers",
+    "cu.free",
+    "size.lib.wire.view"
    ],
    "kids": [],
    "see": [
@@ -9915,7 +9929,7 @@
    "zoom_to": null,
    "nk": "circuit",
    "erbium": false,
-   "f": "size.lib.wire"
+   "f": "size.lib.wire.view"
   },
   "lib.repeater": {
    "name": "Repeater",
@@ -11275,6 +11289,103 @@
    "facts": [
     "tb.rom",
     "size.lib.rom"
+   ]
+  },
+  "lib.diffamp": {
+   "name": "A differential amplifier",
+   "short": "Differential pair",
+   "blurb": "Two matched transistors that share one current: the higher input takes more of it. It amplifies the difference between two wires and ignores what they share, which is how a receiver hears a weak signal through noise.",
+   "m": 1e-06,
+   "kind": "inferred",
+   "f": "size.lib.diffamp",
+   "facts": [
+    "tb.diffpair",
+    "tb.ctle",
+    "size.lib.diffamp"
+   ]
+  },
+  "lib.xbar": {
+   "name": "A crossbar switch",
+   "short": "Crossbar",
+   "blurb": "Connects any input to any output for one cycle: a multiplexer per output picks the input its arbiter chose. In the chip it is 512 bits wide, so it is mostly wires.",
+   "m": 0.0001,
+   "kind": "inferred",
+   "f": "size.lib.xbar",
+   "facts": [
+    "tb.xbar",
+    "size.lib.xbar"
+   ]
+  },
+  "lib.round": {
+   "name": "Rounding",
+   "short": "Rounding",
+   "blurb": "The exact product and sum are longer than a float can keep: three extra bits say whether the kept part rounds up by one at its last place, to the nearest value, a tie to the even one.",
+   "m": 5e-06,
+   "kind": "inferred",
+   "f": "size.lib.round",
+   "facts": [
+    "tb.round",
+    "tb.fma",
+    "size.lib.round"
+   ]
+  },
+  "lib.buck": {
+   "name": "A buck converter (a switching regulator)",
+   "short": "Buck converter",
+   "blurb": "How 12 volts becomes half a volt without burning the rest as heat: two transistors connect an inductor to 12 V or to ground, hundreds of thousands of times a second, and the inductor and a capacitor smooth the pulses into a steady supply.",
+   "m": 0.02,
+   "kind": "inferred",
+   "f": "size.lib.buck",
+   "facts": [
+    "tb.buck",
+    "card.tpsm",
+    "card.ltm",
+    "buck.duty",
+    "card.stages",
+    "size.lib.buck"
+   ]
+  },
+  "lib.powerfet": {
+   "name": "A power transistor, in section",
+   "short": "Power transistor",
+   "blurb": "A switch for tens of amps: thousands of small transistor cells side by side, each passing current straight down through the silicon from its source on top to the drain underneath.",
+   "m": 5e-06,
+   "kind": "inferred",
+   "f": "size.lib.powerfet",
+   "facts": [
+    "tb.powerfet",
+    "card.stages",
+    "dope.donor-acceptor",
+    "size.lib.powerfet"
+   ]
+  },
+  "lib.strap": {
+   "name": "A boot switch and its pin",
+   "short": "Boot pin",
+   "blurb": "A switch on the card holds one of the chip's pins at 0 or lets a resistor pull it to 1; when the chip comes out of reset it reads the pin and starts accordingly.",
+   "m": 0.02,
+   "kind": "inferred",
+   "f": "size.lib.strap",
+   "facts": [
+    "tb.strap",
+    "card.dip",
+    "et.bootpins",
+    "size.lib.strap"
+   ]
+  },
+  "p.cu": {
+   "name": "A copper atom",
+   "short": "Copper atom",
+   "blurb": "Copper: 29 electrons around a nucleus of 29 protons. In the metal each atom gives its one outer electron to a shared sea that flows when a voltage pushes it: that is the current in every wire of the chip.",
+   "m": 2.556e-10,
+   "kind": "derived",
+   "f": "size.p.cu",
+   "facts": [
+    "p.cu.1",
+    "p.cu.2",
+    "cu.free",
+    "size.p.cu",
+    "wire.cu"
    ]
   }
  },
@@ -13874,6 +13985,86 @@
   "s45_light": {
    "t": "123 ns",
    "f": "s45.7"
+  },
+  "pcie_gt": {
+   "t": "16 GT/s",
+   "f": "pcie.gen4.ui"
+  },
+  "pcie_ui": {
+   "t": "62.5 ps",
+   "f": "pcie.gen4.ui"
+  },
+  "pcie_loss": {
+   "t": "28 dB at 8 GHz",
+   "f": "pcie.gen4.loss"
+  },
+  "pcie_ffe": {
+   "t": "3-tap",
+   "f": "pcie.gen4.eq"
+  },
+  "pcie_dfe": {
+   "t": "2-tap",
+   "f": "pcie.gen4.eq"
+  },
+  "buck_d": {
+   "t": "about 4%",
+   "f": "buck.duty"
+  },
+  "buck_12": {
+   "t": "12 V",
+   "f": "buck.duty"
+  },
+  "tps_a": {
+   "t": "up to 120 A",
+   "f": "card.tpsm"
+  },
+  "tps_f": {
+   "t": "350-700 kHz",
+   "f": "card.tpsm"
+  },
+  "ltm_a": {
+   "t": "single 60 A",
+   "f": "card.ltm"
+  },
+  "cu_29": {
+   "t": "29 electrons",
+   "f": "p.cu.1"
+  },
+  "cu_shells": {
+   "t": "2, 8, 18 and 1",
+   "f": "p.cu.1"
+  },
+  "cu_ion": {
+   "t": "7.726 eV",
+   "f": "p.cu.1"
+  },
+  "cu_n": {
+   "t": "8.47 × 10²⁸ free electrons per m³",
+   "f": "cu.free"
+  },
+  "cu_iso": {
+   "t": "69.15% copper-63",
+   "f": "p.cu.2"
+  },
+  "cu_78": {
+   "t": "about 78 copper atoms across",
+   "f": "wire.cu"
+  },
+  "m_w20": {
+   "t": "about 20 nm wide",
+   "f": "n7.mmp"
+  },
+  "m_p40": {
+   "t": "40 nm",
+   "f": "n7.mmp"
+  },
+  "i14_fp": {
+   "t": "fins 42 nm apart",
+   "f": "host.intel14"
+  },
+  "boot_11": {
+   "t": "11 bits",
+   "f": "et.bootpins"
   }
  },
  "outside": {
@@ -13986,8 +14177,8 @@
  },
  "lazy": {
   "url": "ladder-img/ladder-data.json",
-  "n": 773,
-  "bytes": 347117,
-  "sha256": "efae6ce65989e822795e4ed111ce68183949d7f8fff71a0789982efd1ca3a7c7"
+  "n": 804,
+  "bytes": 361729,
+  "sha256": "ebb8f3cd7157112a86e29f2854ce314fb98e1662b462ff383cfb10e464776471"
  }
 }

@@ -242,6 +242,11 @@ NUM = {
     'st_len': ('st.1', '1.29 km'), 'st_top': ('st.2', '126 m'), 'st_bot': ('st.2', 'about 30 m'), 'st_drop': ('st.2', 'about 95 m'), 'st_light': ('st.3', '4.31 µs'),
     's45_l': ('s45.6', '37 m'), 's45_w': ('s45.6', '9 m wide', '9 m'), 's45_h': ('s45.6', '6 to 8 m'), 's45_cnc': ('s45.3', '4 x 8 ft', '4 × 8 ft'), 's45_light': ('s45.7', '123 ns'),
 }
+# the textbook constructions' numbers (research/circuits.json, part 1b)
+for k, v in CIR.get('num', {}).items():
+    if k in NUM:
+        raise SystemExit(f'circuits.json redefines the number {k}')
+    NUM[k] = tuple(v)
 # the ring's ticks: a scale and the fact of its size (the drawing places each at its size's log)
 RING = [('p.planck', 1.616255e-35, 'p.planck.1'), ('p.quark', 8.6e-19, 'p.quark.1'), ('p.nucleon', 1.6815e-15, 'p.nucleon.1'), ('p.atom', 2.352e-10, 'size.p.atom'),
         ('lib.fin', 6e-9, 'n7.fin-width'), ('l1d', 1.2e-4, 'ring.mid'), ('die', 0.0257, None), ('studio45', 37.0, 's45.6'), ('earth', 1.2742e7, None),
