@@ -406,6 +406,15 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 #chip .lay .ztgt{opacity:var(--tgt,1)!important;transition:none!important;filter:none!important}
 #chip .lay.zsat .ztgt{filter:saturate(var(--tsat,1))!important}
 #chip .lay.zout .ring{opacity:0}
+/* a shire's edge labels are links to its neighbours (30 September): link-coloured, underlined on hover and focus */
+#chip .nbr{cursor:pointer}
+#chip .nbr:focus{outline:none}
+#chip .nbr text{fill:color-mix(in srgb,var(--c1) 72%,var(--ink));transition:fill .2s}
+#chip .nbr:hover text,#chip .nbr:focus-visible text{text-decoration:underline;fill:var(--ink)}
+#chip .nbr-hit{fill:transparent;stroke:none}
+#chip .nbr:hover .nbr-hit{fill:color-mix(in srgb,var(--c1) 9%,transparent)}
+#chip .nbr:focus-visible .nbr-hit{stroke:var(--c1);stroke-width:3}
+#stage.present #chip .nbr:hover text{text-decoration:none}
 #pipsvg .pt.hi{stroke-width:6}
 .t-id{font-size:32px;font-weight:650;fill:var(--ink);font-variant-numeric:tabular-nums}
 .t-lab{font-size:20px;fill:var(--ink-2)}
@@ -696,7 +705,9 @@ with the latency, bandwidth, energy and heat measured on the lab's cards, the ho
 a link to the report that measured them, and, where the drawing infers something, what would settle it. Point at a
 number to see its source; from the keyboard, Tab to a fact in the details list.</li>
 <li><b>Zoom</b> with the scale control under the details (−, Chip, Shire, Minion, +, or the + and − keys): it is always there, so you can go back in as well as out; a second press while the camera moves goes on to the next scale. A double click, a second click, or Enter on a shire or
-a minion zooms into it; Backspace zooms out.</li>
+a minion zooms into it; Backspace zooms out. Inside a shire, the names at its four edges ("→ shire 28", "↓ shire 29")
+are links: click one (or Tab to it and press Enter) to go to that neighbour; a neighbour that is not a compute shire
+(the PCIe or I/O shire, the master, a memory shire) is shown selected on the die.</li>
 <li><b>Flows</b> 1 to 9, 0 and B animate a load that misses to DRAM, the latency ladder, TensorSend across the mesh, the
 relay against DRAM, gathers and scatters, the host over PCIe (timed on three cards), a matmul on the tensor unit, the
 same matmul's watts and heat on different data, one hot line stopping a shire, the allreduce tree, and one value
@@ -1616,17 +1627,24 @@ function buildShire(sid) {
   // (on a phone, the words around the frame are a little larger: SK units)
   const SK = 24.5;
   phSize(T(fr, X + W - 22, Y + 38, `map (${cell.lx}, ${cell.ly}) · ${N.per_shire.t}`, 't-sm', 'end', 'mesh.logical-map shire.composition'), SK);
-  // mesh neighbours, in die orientation
+  // mesh neighbours, in die orientation. Each one's name is a link to it (the owner's request of 30 September: "those
+  // should be clickable"): a compute shire's opens that shire, any other cell's goes to the die with that cell
+  // selected (goNeighbour). The links are drawn last (nbrLinks, below), so that Tab reaches the shire's parts first;
+  // "die edge" stays plain text
   const nb = [[-1, 0, 'N'], [1, 0, 'S'], [0, -1, 'W'], [0, 1, 'E']].map(([dr, dc, s]) => [BYDIE[(cell.r + dr) + ',' + (cell.c + dc)], s]);
-  P.edge = {};
+  P.edge = {}; P.nbr = {};
+  const NB = [];
   nb.forEach(([c, s]) => {
     const lab = c ? cellName(c) : 'die edge';
-    if (s === 'N') { if (c) mlink(fr, X + W / 2, Y, X + W / 2, Y - 24); phSize(T(fr, X + W / 2 + 12, Y - 18, (c ? '↑ ' : '') + lab, 't-sm'), SK); P.edge.N = {x: X + W / 2, y: Y - 24}; }
-    if (s === 'S') { if (c) mlink(fr, X + W / 2, Y + W, X + W / 2, Y + W + 24); phSize(T(fr, X + W / 2 + 12, Y + W + 30, (c ? '↓ ' : '') + lab, 't-sm'), SK); P.edge.S = {x: X + W / 2, y: Y + W + 24}; }
+    // where the label goes, its text, its anchor and (on a phone, the side labels) its rotation
+    let at = null;
+    if (s === 'N') { if (c) mlink(fr, X + W / 2, Y, X + W / 2, Y - 24); at = {x: X + W / 2 + 12, y: Y - 18, t: (c ? '↑ ' : '') + lab, a: 'start', sz: SK}; P.edge.N = {x: X + W / 2, y: Y - 24}; }
+    if (s === 'S') { if (c) mlink(fr, X + W / 2, Y + W, X + W / 2, Y + W + 24); at = {x: X + W / 2 + 12, y: Y + W + 30, t: (c ? '↓ ' : '') + lab, a: 'start', sz: SK}; P.edge.S = {x: X + W / 2, y: Y + W + 24}; }
     // on a phone the side neighbours' names run up the frame's edges, above their links (the view is the frame's width)
-    const sideLab = (x, y, str, rot) => { const t = phSize(T(fr, x, y, str, 't-sm', rot < 0 ? 'start' : 'end'), SK); t.setAttribute('transform', `rotate(${rot} ${x} ${y})`); };
-    if (s === 'W') { if (c) mlink(fr, X, Y + W / 2, X - 24, Y + W / 2); if (PH) sideLab(X - 10, Y + W / 2 - 14, lab, -90); else T(fr, X - 30, Y + W / 2 + 6, lab + (c ? ' ←' : ''), 't-sm', 'end'); P.edge.W = {x: X - 24, y: Y + W / 2}; }
-    if (s === 'E') { if (c) mlink(fr, X + W, Y + W / 2, X + W + 24, Y + W / 2); if (PH) sideLab(X + W + 10, Y + W / 2 - 14, lab, 90); else T(fr, X + W + 30, Y + W / 2 + 6, (c ? '→ ' : '') + lab, 't-sm'); P.edge.E = {x: X + W + 24, y: Y + W / 2}; }
+    if (s === 'W') { if (c) mlink(fr, X, Y + W / 2, X - 24, Y + W / 2); at = PH ? {x: X - 10, y: Y + W / 2 - 14, t: lab, a: 'start', rot: -90, sz: SK} : {x: X - 30, y: Y + W / 2 + 6, t: lab + (c ? ' ←' : ''), a: 'end'}; P.edge.W = {x: X - 24, y: Y + W / 2}; }
+    if (s === 'E') { if (c) mlink(fr, X + W, Y + W / 2, X + W + 24, Y + W / 2); at = PH ? {x: X + W + 10, y: Y + W / 2 - 14, t: lab, a: 'end', rot: 90, sz: SK} : {x: X + W + 30, y: Y + W / 2 + 6, t: (c ? '→ ' : '') + lab, a: 'start'}; P.edge.E = {x: X + W + 24, y: Y + W / 2}; }
+    if (!c) { const t = T(fr, at.x, at.y, at.t, 't-sm', at.a); if (at.sz) phSize(t, at.sz); if (at.rot) t.setAttribute('transform', `rotate(${at.rot} ${at.x} ${at.y})`); return; }
+    NB.push([c, s, at]);
   });
   if (PH) {
     // key, in a row under the frame
@@ -1729,8 +1747,56 @@ function buildShire(sid) {
     P['ch' + k] = {x: nx + nw / 2, y: ny + 6};
     P.nbx[k] = {x: nx, y: ny, w: nw, h: nh};
   }
+  nbrLinks(L, P, NB, {X, Y, W});
   FX[1] = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
 }
+/* The four edge labels of a shire as links to the neighbouring cells. Each is a group (role link, Tab and Enter) with
+   the label and a transparent hit area padded to about 44 CSS px on a touch screen and 28 with a mouse (as large as
+   the room outside the frame allows, and never over the frame's own words); a side label on a phone runs up the
+   frame's edge and its hit area turns with it. */
+const DIRNAME = {N: 'north', S: 'south', W: 'west', E: 'east'}, DIRBACK = {N: 'S', S: 'N', W: 'E', E: 'W'};
+function nbrLinks(L, P, NB, fr) {
+  const G = E('g', {class: 'nbrs'}, L), {X, Y, W} = fr;
+  // CSS px per drawing unit in the shire's view (the hit area's minimum is set in CSS px)
+  const bw = $('svgwrap').clientWidth || innerWidth - 32, pxu = Math.max(0.2, bw / (PH ? PV[1].w : VB.w)), need = (TOUCH ? 44 : 28) / pxu;
+  const meas = [];
+  NB.forEach(([c, s, at]) => {
+    const g = E('g', {class: 'nbr', tabindex: 0, role: 'link', 'data-comp': 'nbr', 'aria-label': `Go to ${cellName(c)}, ${DIRNAME[s]}`}, G);
+    g._key = 'nbr'; g._ctx = {cell: c, dir: s};
+    if (at.rot) g.setAttribute('transform', `rotate(${at.rot} ${at.x} ${at.y})`);
+    const hit = E('rect', {class: 'nbr-hit', rx: 6}, g);
+    const t = T(g, at.x, at.y, at.t, 't-sm', at.a);
+    if (at.sz) phSize(t, at.sz);
+    P.nbr[s] = g;
+    meas.push({g, hit, t, s, at});
+  });
+  // the hit areas need the labels' measured size: the layer is shown, invisible, while they are measured
+  const d0 = L.style.display, v0 = L.style.visibility;
+  if (d0 === 'none') { L.style.visibility = 'hidden'; L.style.display = ''; }
+  try {
+    meas.forEach(({hit, t, s, at}) => {
+      let b = null; try { b = t.getBBox(); } catch (_) { b = null; }
+      const fs = parseFloat(at.sz || 17), tw = b && b.width ? b.width : at.t.length * fs * 0.56, th = b && b.height ? b.height : fs * 1.25;
+      const x0 = b && b.width ? b.x : at.a === 'end' ? at.x - tw : at.x, y0 = b && b.height ? b.y : at.y - fs;
+      const padX = 10, h = Math.max(th + 8, need), w = Math.max(tw + 2 * padX, need);
+      let ry = y0 + th / 2 - h / 2;
+      // never over the frame's words: the north link may reach into the frame's empty top margin, the south one stops
+      // at the frame
+      if (s === 'N') ry = Math.min(ry, Y + 20 - h);
+      if (s === 'S') ry = Math.max(ry, Y + W + 2);
+      Object.entries({x: x0 + tw / 2 - w / 2, y: ry, width: w, height: h}).forEach(([k, v]) => hit.setAttribute(k, v.toFixed(1)));
+    });
+  } finally { if (d0 === 'none') { L.style.display = d0; L.style.visibility = v0; } }
+}
+/* A neighbour link followed: a compute shire opens that shire (out to the die and back in); the master and spare shires,
+   a memory shire, the PCIe and the I/O shire have no inside drawn yet, so the camera goes to the die with that cell
+   selected and its details shown */
+function goNeighbour(ctx) {
+  const c = ctx.cell; if (!c) return;
+  if (c.type === 'cshire') { NBRBACK = {sid: Z.sid, dir: DIRBACK[ctx.dir]}; userNav({level: 1, sid: c.id}); return; }
+  userNav({level: 0}).then(() => { if (Z.level !== 0 || !c.g) return; select(c.g); showComp(c.type, {cell: c}); scaleUI(); if (svg.contains(document.activeElement) || document.activeElement === document.body) c.g.focus({preventScroll: true}); });
+}
+let NBRBACK = null;
 
 /* ---- a minion, zoomed in ---- */
 function buildMinion(sid, nb, mi) {
@@ -2433,6 +2499,9 @@ async function zoomWorker() {
 /* after a zoom, focus the part zoomed out of (a shire, a minion), else the first part of the new view */
 function zoomFocus(from) {
   const L = LAYERS[Z.level];
+  // arrived by a neighbour link: the link back to the shire left, so that Tab and Enter return
+  const nbk = NBRBACK; NBRBACK = null;
+  if (nbk && Z.level === 1 && from.level === 1 && from.sid === nbk.sid && AP[1].nbr && AP[1].nbr[nbk.dir]) return AP[1].nbr[nbk.dir];
   if (Z.level < from.level) {
     if (Z.level === 0 && SH[from.sid] && SH[from.sid].g) return SH[from.sid].g;
     if (Z.level === 1) { const m = [...L.querySelectorAll('.comp[data-comp="minion"]')].find(g => g._ctx.nb === from.nb && g._ctx.mi === from.mi); if (m) return m; }
@@ -2738,9 +2807,14 @@ function activate(g) {
   if (zoomable && (SEL === g || TOUCH)) { zoomInto(g); return; }   // a second click zooms in; on a touch screen, a tap
   select(g); showComp(g._key, g._ctx); scaleUI();
 }
-svg.addEventListener('click', e => { const g = e.target.closest && e.target.closest('.comp'); if (g && svg.contains(g)) activate(g); });
+svg.addEventListener('click', e => {
+  const l = e.target.closest && e.target.closest('.nbr'); if (l && svg.contains(l)) { goNeighbour(l._ctx); return; }
+  const g = e.target.closest && e.target.closest('.comp'); if (g && svg.contains(g)) activate(g);
+});
 svg.addEventListener('dblclick', e => { const g = e.target.closest && e.target.closest('.comp'); if (g && svg.contains(g) && SEL !== g) zoomInto(g); });
 svg.addEventListener('keydown', e => {
+  const l = e.target.closest && e.target.closest('.nbr');
+  if (l && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); goNeighbour(l._ctx); return; }
   const g = e.target.closest && e.target.closest('.comp'); if (!g) return;
   if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); if (!zoomInto(g)) { select(g); showComp(g._key, g._ctx); } }
   else if (e.key === ' ' && !flowOn()) { e.preventDefault(); e.stopPropagation(); select(g); showComp(g._key, g._ctx); scaleUI(); }

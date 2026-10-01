@@ -226,6 +226,15 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 #chip .lay .ztgt{opacity:var(--tgt,1)!important;transition:none!important;filter:none!important}
 #chip .lay.zsat .ztgt{filter:saturate(var(--tsat,1))!important}
 #chip .lay.zout .ring{opacity:0}
+/* a shire's edge labels are links to its neighbours (30 September): link-coloured, underlined on hover and focus */
+#chip .nbr{cursor:pointer}
+#chip .nbr:focus{outline:none}
+#chip .nbr text{fill:color-mix(in srgb,var(--c1) 72%,var(--ink));transition:fill .2s}
+#chip .nbr:hover text,#chip .nbr:focus-visible text{text-decoration:underline;fill:var(--ink)}
+#chip .nbr-hit{fill:transparent;stroke:none}
+#chip .nbr:hover .nbr-hit{fill:color-mix(in srgb,var(--c1) 9%,transparent)}
+#chip .nbr:focus-visible .nbr-hit{stroke:var(--c1);stroke-width:3}
+#stage.present #chip .nbr:hover text{text-decoration:none}
 #pipsvg .pt.hi{stroke-width:6}
 .t-id{font-size:32px;font-weight:650;fill:var(--ink);font-variant-numeric:tabular-nums}
 .t-lab{font-size:20px;fill:var(--ink-2)}
@@ -516,7 +525,9 @@ with the latency, bandwidth, energy and heat measured on the lab's cards, the ho
 a link to the report that measured them, and, where the drawing infers something, what would settle it. Point at a
 number to see its source; from the keyboard, Tab to a fact in the details list.</li>
 <li><b>Zoom</b> with the scale control under the details (−, Chip, Shire, Minion, +, or the + and − keys): it is always there, so you can go back in as well as out; a second press while the camera moves goes on to the next scale. A double click, a second click, or Enter on a shire or
-a minion zooms into it; Backspace zooms out.</li>
+a minion zooms into it; Backspace zooms out. Inside a shire, the names at its four edges ("→ shire 28", "↓ shire 29")
+are links: click one (or Tab to it and press Enter) to go to that neighbour; a neighbour that is not a compute shire
+(the PCIe or I/O shire, the master, a memory shire) is shown selected on the die.</li>
 <li><b>Flows</b> 1 to 9, 0 and B animate a load that misses to DRAM, the latency ladder, TensorSend across the mesh, the
 relay against DRAM, gathers and scatters, the host over PCIe (timed on three cards), a matmul on the tensor unit, the
 same matmul's watts and heat on different data, one hot line stopping a shire, the allreduce tree, and one value
