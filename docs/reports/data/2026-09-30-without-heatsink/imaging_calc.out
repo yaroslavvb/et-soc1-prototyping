@@ -1,0 +1,410 @@
+
+==============================================================================================================
+A. Inputs
+==============================================================================================================
+grid: matches docs/reports/data/2026-09-28-heat-placement/heat.json
+lid plate mm 0.957 / 1.11 / 1.29; die mm 0.472 / 0.63 / 0.757
+down path R" (bumps + substrate + board film) K cm2/W: 5.7 / 10.8 / 20   (nohs_calc.py G: 5-20)
+1-D die-to-heatsink-base resistance over the die area, C/W: 0.0546 / 0.102 / 0.136   (the fitted Foster chain's two fast stages, which sit between die and base: R1+R2 = 0.156 C/W, 11-thermal-model.md:29-31; the rest of the difference is spreading, which the spectral model has)
+switching power per shire on die at 600 MHz, fp32 randn TensorFMA, W: 0.608 / 0.677 / 0.75
+  x f*V^2, voltage floor: 600 MHz 1.0000, 300 MHz 0.2963, 100 MHz 0.0988, 50 MHz 0.0494, 25 MHz 0.0247, 10 MHz 0.0099
+  x f*V^2, voltage fixed: 600 MHz 1.0000, 300 MHz 0.5000, 100 MHz 0.1667, 50 MHz 0.0833, 25 MHz 0.0417, 10 MHz 0.0167
+other kernels per shire at 600 MHz (x of fp32 randn): int8 randn 0.37, fp32 ones 0.39, zeros 0.07 (+9.98, +10.7, +1.9 W of +27.1: camera plan table 2e; 12-heat-management.md)
+camera at 60 mm: 0.164 / 0.165 / 0.167 mm/px; a shire is 22.3 / 22.5 / 22.7 px across; ROI 1.86 mm = 124 / 126 / 129 px; NETD 24.5 / 29.4 / 34.6 mK; 25 Hz; drift allowance x4
+check against the plan 2c: sigma per quadrature per pixel, 35 mK, 1,800 s = 0.233 mK (plan: 0.233)
+sensors: 4.68 / 5.91 / 7.3 readings/s; raw-code noise 0.0201 / 0.0404 / 0.0936 C (ASSUMED); whole degrees 0.289 C
+
+==============================================================================================================
+B. The layered conduction model
+==============================================================================================================
+lateral period 24 pitches = 89.3 mm, 288 x 288 samples of 0.310 mm
+checkerboard     : 16 shires vs 16; commutated with its complement; contrast = on ROI minus its reference ROIs, averaged over 8 pair(s)
+one shire        : 1 shires vs 0; S21 on/off; contrast = on ROI minus its reference ROIs, averaged over 1 pair(s)
+2x2 block moving : 4 shires vs 4; NE block <-> SW block, commutated (the MAP pair); contrast = on ROI minus its reference ROIs, averaged over 4 pair(s)
+half die         : 18 shires vs 14; west half <-> east half, commutated; contrast = on ROI minus its reference ROIs, averaged over 5 pair(s)
+self-checks: q = 0 mode equals the series-parallel resistances; f -> 0 equals steady state: ok
+single 1 W shire, steady, excess at the transistor plane at r = 2 / 10 / 20 mm over that at 40 mm (C):
+  (a) delidded die, air above (still), cooled through the boar 2 mm 2.18 / 2.72 / 3.45 | 10 mm 0.406 / 0.643 / 0.887 | 20 mm 0.0736 / 0.161 / 0.264
+  (b) lid top, heatsink off, still air                         2 mm 0.829 / 0.998 / 1.15 | 10 mm 0.192 / 0.235 / 0.272 | 20 mm 0.0638 / 0.0826 / 0.0994
+  (c) transistor plane = the 34 sensors, heatsink on           2 mm 0.593 / 0.766 / 0.921 | 10 mm 0.0832 / 0.101 / 0.126 | 20 mm 0.0262 / 0.0332 / 0.0444
+  nohs_calc.py G's thin-sheet K0 model on the same draws (heatsink off, die + lid over the down path, decay 17.1 / 23.7 / 32.3 mm), also over 40 mm: 2 mm 0.655 / 0.746 / 0.836 | 10 mm 0.22 / 0.276 / 0.328 | 20 mm 0.0789 / 0.111 / 0.139
+
+==============================================================================================================
+C. Contrast per watt per shire, steady (mK per W per shire; difference image unless "state")
+==============================================================================================================
+Contrast = mean over the pattern's pairs of (ROI of an active shire - mean ROI of its reference shires).
+For a commutated pattern the difference image (state A - state B) has twice one state's contrast.
+view                                                           observed             checkerboard                one shire         2x2 block moving                 half die
+(a) delidded die, air above (still), cooled through the board  surface  1.06e+03 / 1.39e+03 / 1.88e+03 1.22e+03 / 1.54e+03 / 2e+03 2.87e+03 / 3.65e+03 / 4.58e+03 1.98e+04 / 2.48e+04 / 3.17e+04
+(a) delidded die, air above (still), cooled through the board  sensors  1.55e+03 / 1.91e+03 / 2.42e+03 1.45e+03 / 1.79e+03 / 2.26e+03 3.1e+03 / 3.87e+03 / 4.8e+03 2.01e+04 / 2.52e+04 / 3.22e+04
+(a) delidded die, fan air above, cooled through the board      surface  1.06e+03 / 1.39e+03 / 1.88e+03 1.22e+03 / 1.54e+03 / 1.99e+03 2.86e+03 / 3.64e+03 / 4.55e+03 1.97e+04 / 2.46e+04 / 3.15e+04
+(a) delidded die, fan air above, cooled through the board      sensors  1.55e+03 / 1.91e+03 / 2.42e+03 1.45e+03 / 1.79e+03 / 2.26e+03 3.1e+03 / 3.86e+03 / 4.77e+03 2e+04 / 2.5e+04 / 3.19e+04
+(a) delidded die under an IR-window liquid cooler (reference:  surface  964 / 1.24e+03 / 1.67e+03 888 / 1.11e+03 / 1.47e+03 1.48e+03 / 1.93e+03 / 2.56e+03 5.68e+03 / 8.33e+03 / 1.21e+04
+(a) delidded die under an IR-window liquid cooler (reference:  sensors  1.47e+03 / 1.77e+03 / 2.17e+03 1.15e+03 / 1.37e+03 / 1.71e+03 1.75e+03 / 2.19e+03 / 2.82e+03 6.29e+03 / 8.85e+03 / 1.27e+04
+(b) lid top, heatsink off, still air                           surface         46.4 / 65.2 / 104          139 / 165 / 208          531 / 603 / 685 4.89e+03 / 5.55e+03 / 6.19e+03
+(b) lid top, heatsink off, still air                           sensors  1.15e+03 / 1.42e+03 / 1.73e+03     782 / 991 / 1.19e+03 1.29e+03 / 1.58e+03 / 1.85e+03 6.98e+03 / 8e+03 / 9.07e+03
+(b) lid top, heatsink off, fan                                 surface         46.4 / 65.2 / 104          139 / 165 / 208          530 / 602 / 684 4.88e+03 / 5.54e+03 / 6.17e+03
+(b) lid top, heatsink off, fan                                 sensors  1.15e+03 / 1.42e+03 / 1.73e+03     782 / 991 / 1.19e+03 1.29e+03 / 1.58e+03 / 1.85e+03 6.96e+03 / 7.99e+03 / 9.05e+03
+(c) transistor plane = the 34 sensors, heatsink on             sensors  1.15e+03 / 1.42e+03 / 1.72e+03     750 / 961 / 1.17e+03 1.09e+03 / 1.41e+03 / 1.7e+03 4.65e+03 / 5.84e+03 / 6.9e+03
+a single live frame shows checkerboard x0.5, one shire x1, 2x2 block moving x0.5, half die x0.5 of these (the ripple on the chip-wide bump, which the difference image removes)
+
+==============================================================================================================
+D. Lock-in: the difference image's amplitude at f_mod over its steady value (medians; 5th-95th for 1 Hz)
+==============================================================================================================
+view                                                           pattern               0.1 Hz    0.25 Hz     0.5 Hz       1 Hz       2 Hz       5 Hz   1 Hz 5-95
+(a) delidded die, air above (still), cooled through the board  checkerboard           0.999      0.998      0.998      0.995      0.983      0.920   0.993 / 0.995 / 0.996
+(a) delidded die, air above (still), cooled through the board  one shire              0.988      0.962      0.923      0.859      0.764      0.583   0.831 / 0.859 / 0.879
+(a) delidded die, air above (still), cooled through the board  2x2 block moving       0.951      0.862      0.764      0.645      0.508      0.318   0.601 / 0.645 / 0.686
+(a) delidded die, air above (still), cooled through the board  half die               0.904      0.742      0.580      0.413      0.268      0.128   0.361 / 0.413 / 0.465
+(a) delidded die, fan air above, cooled through the board      checkerboard           0.999      0.998      0.998      0.995      0.983      0.920   0.993 / 0.995 / 0.996
+(a) delidded die, fan air above, cooled through the board      one shire              0.989      0.962      0.924      0.860      0.764      0.584   0.832 / 0.86 / 0.88
+(a) delidded die, fan air above, cooled through the board      2x2 block moving       0.952      0.863      0.766      0.647      0.509      0.320   0.605 / 0.647 / 0.688
+(a) delidded die, fan air above, cooled through the board      half die               0.906      0.744      0.582      0.415      0.270      0.129   0.362 / 0.415 / 0.466
+(a) delidded die under an IR-window liquid cooler (reference:  checkerboard           1.000      1.000      0.999      0.997      0.986      0.932   0.995 / 0.997 / 0.998
+(a) delidded die under an IR-window liquid cooler (reference:  one shire              0.999      0.994      0.981      0.949      0.882      0.717   0.922 / 0.949 / 0.972
+(a) delidded die under an IR-window liquid cooler (reference:  2x2 block moving       0.997      0.982      0.947      0.880      0.764      0.531   0.816 / 0.88 / 0.935
+(a) delidded die under an IR-window liquid cooler (reference:  half die               0.992      0.958      0.886      0.768      0.598      0.342   0.653 / 0.768 / 0.871
+(b) lid top, heatsink off, still air                           checkerboard           0.992      0.986      0.985      0.985      0.976      0.913   0.979 / 0.985 / 0.991
+(b) lid top, heatsink off, still air                           one shire              0.982      0.947      0.897      0.817      0.697      0.474   0.784 / 0.817 / 0.848
+(b) lid top, heatsink off, still air                           2x2 block moving       0.938      0.842      0.735      0.601      0.454      0.251   0.566 / 0.601 / 0.635
+(b) lid top, heatsink off, still air                           half die               0.901      0.753      0.602      0.432      0.270      0.112   0.403 / 0.432 / 0.457
+(b) lid top, heatsink off, fan                                 checkerboard           0.992      0.986      0.985      0.985      0.976      0.913   0.979 / 0.985 / 0.991
+(b) lid top, heatsink off, fan                                 one shire              0.982      0.947      0.897      0.818      0.697      0.474   0.784 / 0.818 / 0.848
+(b) lid top, heatsink off, fan                                 2x2 block moving       0.939      0.842      0.736      0.602      0.455      0.251   0.567 / 0.602 / 0.635
+(b) lid top, heatsink off, fan                                 half die               0.901      0.754      0.604      0.433      0.270      0.113   0.404 / 0.433 / 0.457
+(c) transistor plane = the 34 sensors, heatsink on             checkerboard           1.000      1.000      0.999      0.997      0.990      0.947   0.996 / 0.997 / 0.998
+(c) transistor plane = the 34 sensors, heatsink on             one shire              0.998      0.994      0.985      0.966      0.925      0.814   0.957 / 0.966 / 0.972
+(c) transistor plane = the 34 sensors, heatsink on             2x2 block moving       0.986      0.962      0.928      0.873      0.786      0.621   0.851 / 0.873 / 0.893
+(c) transistor plane = the 34 sensors, heatsink on             half die               0.950      0.876      0.788      0.667      0.524      0.343   0.613 / 0.667 / 0.707
+thermal diffusion length sqrt(alpha/(pi f)), mm: 0.1 Hz Si 14.7 / 16.1 / 16.9 Cu 19; 1 Hz Si 4.66 / 5.08 / 5.35 Cu 6; 5 Hz Si 2.08 / 2.27 / 2.39 Cu 2.7
+
+==============================================================================================================
+E. Transient check against the heat-placement MAP measurement (heatsink on)
+==============================================================================================================
+MAP value matches docs/reports/data/2026-09-28-heat-placement/heat.json
+MAP value matches docs/reports/data/2026-09-28-heat-placement/val.json
+Stehfest inversion (N = 14) reproduces the steady state at t = 1e5 s: ok
+model, I/O at (0,4): 4 shires at 0.52 / 0.594 / 0.668 W on die, NE minus SW at 4.5-6.5 s after the step: 0.324 / 0.433 / 0.52 C (steady: 0.328 / 0.439 / 0.526 C)
+model, I/O at (0,5): 4 shires at 0.52 / 0.594 / 0.668 W on die, NE minus SW at 4.5-6.5 s after the step: 0.336 / 0.45 / 0.541 C (steady: 0.343 / 0.457 / 0.548 C)
+measured, aifoundry3 (dev): 0.67 C [0.37, 0.97] (99 % CI, whole-degree readings)
+measured, aifoundry1 card 1 (val): 0.97 C [0.52, 1.41] (99 % CI, whole-degree readings)
+where the I/O sensor sits in its tile is not known; steady model with it at the tile's centre / 3/4 of the way toward the block / at the tile's edge next to the block:
+  I/O at (0,4): 0.455 / 0.599 / 0.765 C (medians); 5-95 % at the edge 0.574 / 0.765 / 0.934
+  I/O at (0,5): 0.473 / 0.621 / 0.788 C (medians); 5-95 % at the edge 0.59 / 0.788 / 0.954
+  and with TIM1 in the lowest / highest third of its range (0.0793 / 0.258 K cm2/W), sensor at the centre of (0,4): 0.404 / 0.458 C (medians)
+  The measurement sits at or above the model: the model's contrasts with the heatsink on are, if anything, low.
+
+==============================================================================================================
+F. Noise: what a shire's contrast must beat
+==============================================================================================================
+camera, one frame per pixel (live view): NETD 24.5 / 29.4 / 34.6 mK
+camera, difference image 1 s per state, shire ROI: 2.46 / 2.97 / 3.48 mK
+camera, lock-in    60 s, per quadrature, shire ROI: 0.321 / 0.387 / 0.454 mK
+camera, lock-in   600 s, per quadrature, shire ROI: 0.101 / 0.122 / 0.144 mK
+camera, lock-in  3600 s, per quadrature, shire ROI: 0.0414 / 0.05 / 0.0586 mK
+sensor raw codes, lock-in    60 s, per quadrature: 1.5 / 2.98 / 6.9 mK; whole degrees: 19.5 / 21.7 / 24.4 mK
+sensor raw codes, lock-in   600 s, per quadrature: 0.474 / 0.944 / 2.18 mK; whole degrees: 6.17 / 6.86 / 7.71 mK
+sensor raw codes, lock-in  3600 s, per quadrature: 0.193 / 0.385 / 0.891 mK; whole degrees: 2.52 / 2.8 / 3.15 mK
+criterion: a shire is seen when its contrast is 3 times the noise of an ROI pair (sqrt 2 x one ROI); SNR 5 instead takes 2.8 times as long
+camera thresholds, K x sqrt 2 x the ROI noise above, mK (median [5-95]): diff 1 s/state 13 [10-15]; lock-in 60 s 1.6 [1.4-1.9]; lock-in 600 s 0.52 [0.43-0.61]; lock-in 3600 s 0.21 [0.18-0.25]; the 1 s threshold applies to the settled contrast, the lock-in ones to the fundamental's amplitude, (2/pi) x the difference image's amplitude at f_mod (section D), which is a fraction of the settled contrast
+
+==============================================================================================================
+G. Least power per shire, least clock, and the time to see each pattern
+==============================================================================================================
+IR-window cooler: window x oil-film transmission 0.566 / 0.685 / 0.829 (ASSUMED), so the coated die reads at 0.518 / 0.634 / 0.769 of its contrast
+Least switching power per shire (mW), 5 / 50 / 95 %; and the least clock (MHz, median) for fp32 randn TensorFMA with the voltage lowered to its floor | clock only
+-- (a) delidded die, black-coated, still air
+   checkerboard:
+      live frame: 98.9 / 137 / 190 mW -> 202 | 120 MHz
+      diff 1 s/state: 7 / 9.79 / 13.5 mW -> 14.4 | 8.52 MHz
+      lock-in 60 s: 1.44 / 2.01 / 2.77 mW -> 2.96 | 1.75 MHz
+      lock-in 600 s: 0.455 / 0.636 / 0.876 mW -> 0.934 | 0.554 MHz
+      lock-in 3600 s: 0.186 / 0.26 / 0.358 mW -> 0.381 | 0.226 MHz
+   one shire:
+      live frame: 46.2 / 61.9 / 83.8 mW -> 91.9 | 54.4 MHz
+      diff 1 s/state: 6.55 / 8.84 / 11.9 mW -> 13 | 7.69 MHz
+      lock-in 60 s: 1.44 / 1.98 / 2.64 mW -> 2.93 | 1.74 MHz
+      lock-in 600 s: 0.429 / 0.58 / 0.779 mW -> 0.859 | 0.509 MHz
+      lock-in 3600 s: 0.175 / 0.237 / 0.318 mW -> 0.35 | 0.208 MHz
+   2x2 block moving:
+      live frame: 39.6 / 52.5 / 69.7 mW -> 78.1 | 46.3 MHz
+      diff 1 s/state: 2.82 / 3.73 / 4.96 mW -> 5.56 | 3.29 MHz
+      lock-in 60 s: 0.755 / 1.01 / 1.31 mW -> 1.52 | 0.902 MHz
+      lock-in 600 s: 0.194 / 0.256 / 0.337 mW -> 0.382 | 0.226 MHz
+      lock-in 3600 s: 0.0791 / 0.104 / 0.138 mW -> 0.156 | 0.0925 MHz
+   half die:
+      live frame: 5.71 / 7.73 / 10.1 mW -> 11.5 | 6.84 MHz
+      diff 1 s/state: 0.41 / 0.549 / 0.722 mW -> 0.821 | 0.487 MHz
+      lock-in 60 s: 0.152 / 0.196 / 0.247 mW -> 0.293 | 0.174 MHz
+      lock-in 600 s: 0.0302 / 0.0395 / 0.0507 mW -> 0.0591 | 0.035 MHz
+      lock-in 3600 s: 0.0123 / 0.0161 / 0.0207 mW -> 0.0241 | 0.0143 MHz
+-- (a) delidded die, black-coated, fan
+   checkerboard:
+      live frame: 98.9 / 137 / 190 mW -> 202 | 120 MHz
+      diff 1 s/state: 7.01 / 9.8 / 13.5 mW -> 14.4 | 8.53 MHz
+      lock-in 60 s: 1.44 / 2.01 / 2.77 mW -> 2.96 | 1.75 MHz
+      lock-in 600 s: 0.455 / 0.636 / 0.876 mW -> 0.934 | 0.554 MHz
+      lock-in 3600 s: 0.186 / 0.26 / 0.358 mW -> 0.381 | 0.226 MHz
+   one shire:
+      live frame: 46.3 / 62 / 83.9 mW -> 92.1 | 54.5 MHz
+      diff 1 s/state: 6.56 / 8.86 / 11.9 mW -> 13 | 7.71 MHz
+      lock-in 60 s: 1.45 / 1.98 / 2.64 mW -> 2.93 | 1.74 MHz
+      lock-in 600 s: 0.43 / 0.581 / 0.78 mW -> 0.86 | 0.509 MHz
+      lock-in 3600 s: 0.176 / 0.237 / 0.318 mW -> 0.351 | 0.208 MHz
+   2x2 block moving:
+      live frame: 39.9 / 52.7 / 70 mW -> 78.3 | 46.4 MHz
+      diff 1 s/state: 2.84 / 3.75 / 4.97 mW -> 5.59 | 3.31 MHz
+      lock-in 60 s: 0.757 / 1.01 / 1.31 mW -> 1.52 | 0.903 MHz
+      lock-in 600 s: 0.194 / 0.256 / 0.338 mW -> 0.383 | 0.227 MHz
+      lock-in 3600 s: 0.0793 / 0.105 / 0.138 mW -> 0.156 | 0.0927 MHz
+   half die:
+      live frame: 5.77 / 7.79 / 10.2 mW -> 11.6 | 6.87 MHz
+      diff 1 s/state: 0.413 / 0.553 / 0.726 mW -> 0.824 | 0.488 MHz
+      lock-in 60 s: 0.153 / 0.196 / 0.247 mW -> 0.294 | 0.174 MHz
+      lock-in 600 s: 0.0305 / 0.0397 / 0.0509 mW -> 0.0593 | 0.0352 MHz
+      lock-in 3600 s: 0.0124 / 0.0162 / 0.0208 mW -> 0.0242 | 0.0144 MHz
+-- (a) delidded die, bare silicon, fan
+   checkerboard:
+      live frame: 188 / 476 / 1.31e+03 mW -> 494 | 417 MHz
+      diff 1 s/state: 13.4 / 33.6 / 92.9 mW -> 50.4 | 29.9 MHz
+      lock-in 60 s: 2.75 / 6.91 / 19.1 mW -> 10.4 | 6.14 MHz
+      lock-in 600 s: 0.869 / 2.18 / 6.03 mW -> 3.27 | 1.94 MHz
+      lock-in 3600 s: 0.355 / 0.891 / 2.46 mW -> 1.34 | 0.791 MHz
+   one shire:
+      live frame: 86.8 / 215 / 581 mW -> 313 | 190 MHz
+      diff 1 s/state: 12.4 / 30.7 / 82.6 mW -> 46 | 27.3 MHz
+      lock-in 60 s: 2.74 / 6.81 / 18.3 mW -> 10.2 | 6.03 MHz
+      lock-in 600 s: 0.805 / 2.01 / 5.42 mW -> 3.02 | 1.79 MHz
+      lock-in 3600 s: 0.328 / 0.822 / 2.21 mW -> 1.23 | 0.731 MHz
+   2x2 block moving:
+      live frame: 75 / 183 / 488 mW -> 273 | 162 MHz
+      diff 1 s/state: 5.33 / 13 / 35 mW -> 19.5 | 11.5 MHz
+      lock-in 60 s: 1.44 / 3.51 / 9.22 mW -> 5.24 | 3.11 MHz
+      lock-in 600 s: 0.36 / 0.887 / 2.36 mW -> 1.33 | 0.788 MHz
+      lock-in 3600 s: 0.147 / 0.362 / 0.964 mW -> 0.543 | 0.322 MHz
+   half die:
+      live frame: 11 / 26.7 / 71.6 mW -> 40.7 | 24.1 MHz
+      diff 1 s/state: 0.787 / 1.9 / 5.14 mW -> 2.91 | 1.72 MHz
+      lock-in 60 s: 0.277 / 0.673 / 1.73 mW -> 1.02 | 0.603 MHz
+      lock-in 600 s: 0.0563 / 0.135 / 0.361 mW -> 0.207 | 0.123 MHz
+      lock-in 3600 s: 0.023 / 0.0552 / 0.147 mW -> 0.0846 | 0.0501 MHz
+-- (a) delidded die, black-coated, IR-window cooler
+   checkerboard:
+      live frame: 153 / 220 / 327 mW -> 315 | 192 MHz
+      diff 1 s/state: 10.9 / 15.8 / 23.2 mW -> 23.2 | 13.8 MHz
+      lock-in 60 s: 2.24 / 3.23 / 4.77 mW -> 4.78 | 2.83 MHz
+      lock-in 600 s: 0.706 / 1.02 / 1.51 mW -> 1.51 | 0.893 MHz
+      lock-in 3600 s: 0.288 / 0.417 / 0.615 mW -> 0.616 | 0.365 MHz
+   one shire:
+      live frame: 85.6 / 123 / 180 mW -> 184 | 109 MHz
+      diff 1 s/state: 12.1 / 17.5 / 25.7 mW -> 26.2 | 15.5 MHz
+      lock-in 60 s: 2.54 / 3.67 / 5.34 mW -> 5.48 | 3.25 MHz
+      lock-in 600 s: 0.784 / 1.14 / 1.67 mW -> 1.7 | 1.01 MHz
+      lock-in 3600 s: 0.32 / 0.466 / 0.68 mW -> 0.694 | 0.411 MHz
+   2x2 block moving:
+      live frame: 94.1 / 144 / 214 mW -> 216 | 128 MHz
+      diff 1 s/state: 6.7 / 10.2 / 15.2 mW -> 15.4 | 9.13 MHz
+      lock-in 60 s: 1.49 / 2.19 / 3.25 mW -> 3.35 | 1.99 MHz
+      lock-in 600 s: 0.436 / 0.665 / 0.992 mW -> 1 | 0.595 MHz
+      lock-in 3600 s: 0.178 / 0.271 / 0.405 mW -> 0.409 | 0.243 MHz
+   half die:
+      live frame: 19.6 / 33.5 / 53.7 mW -> 49.9 | 29.6 MHz
+      diff 1 s/state: 1.39 / 2.38 / 3.83 mW -> 3.56 | 2.11 MHz
+      lock-in 60 s: 0.34 / 0.545 / 0.848 mW -> 0.829 | 0.491 MHz
+      lock-in 600 s: 0.0913 / 0.156 / 0.249 mW -> 0.233 | 0.138 MHz
+      lock-in 3600 s: 0.0373 / 0.0637 / 0.102 mW -> 0.0952 | 0.0564 MHz
+-- (b) lid top, taped, still air
+   checkerboard:
+      live frame: 1.98e+03 / 3.14e+03 / 4.89e+03 mW -> >600 | >600 MHz
+      diff 1 s/state: 140 / 223 / 345 mW -> 320 | 198 MHz
+      lock-in 60 s: 29 / 46.5 / 72.5 mW -> 69.4 | 41.1 MHz
+      lock-in 600 s: 9.13 / 14.6 / 22.7 mW -> 21.8 | 12.9 MHz
+      lock-in 3600 s: 3.73 / 5.96 / 9.27 mW -> 8.89 | 5.27 MHz
+   one shire:
+      live frame: 478 / 623 / 833 mW -> 576 | 556 MHz
+      diff 1 s/state: 67.7 / 88.8 / 119 mW -> 134 | 79.2 MHz
+      lock-in 60 s: 15.4 / 20.3 / 27.4 mW -> 30.7 | 18.2 MHz
+      lock-in 600 s: 4.48 / 5.88 / 7.88 mW -> 8.84 | 5.24 MHz
+      lock-in 3600 s: 1.83 / 2.4 / 3.22 mW -> 3.61 | 2.14 MHz
+   2x2 block moving:
+      live frame: 278 / 348 / 446 mW -> 413 | 303 MHz
+      diff 1 s/state: 19.7 / 24.8 / 31.7 mW -> 36.6 | 21.7 MHz
+      lock-in 60 s: 5.43 / 6.9 / 8.96 mW -> 10.3 | 6.13 MHz
+      lock-in 600 s: 1.35 / 1.72 / 2.2 mW -> 2.53 | 1.5 MHz
+      lock-in 3600 s: 0.553 / 0.7 / 0.897 mW -> 1.03 | 0.613 MHz
+   half die:
+      live frame: 30.6 / 37.8 / 48.2 mW -> 56.2 | 33.3 MHz
+      diff 1 s/state: 2.16 / 2.69 / 3.45 mW -> 4 | 2.37 MHz
+      lock-in 60 s: 0.737 / 0.925 / 1.19 mW -> 1.38 | 0.818 MHz
+      lock-in 600 s: 0.154 / 0.196 / 0.244 mW -> 0.289 | 0.171 MHz
+      lock-in 3600 s: 0.063 / 0.0799 / 0.0996 mW -> 0.118 | 0.0699 MHz
+-- (b) lid top, taped, fan
+   checkerboard:
+      live frame: 1.98e+03 / 3.14e+03 / 4.89e+03 mW -> >600 | >600 MHz
+      diff 1 s/state: 140 / 223 / 345 mW -> 320 | 198 MHz
+      lock-in 60 s: 29 / 46.5 / 72.5 mW -> 69.4 | 41.1 MHz
+      lock-in 600 s: 9.13 / 14.6 / 22.7 mW -> 21.8 | 12.9 MHz
+      lock-in 3600 s: 3.73 / 5.96 / 9.27 mW -> 8.9 | 5.27 MHz
+   one shire:
+      live frame: 479 / 623 / 834 mW -> 576 | 556 MHz
+      diff 1 s/state: 67.7 / 88.8 / 119 mW -> 134 | 79.2 MHz
+      lock-in 60 s: 15.4 / 20.3 / 27.4 mW -> 30.7 | 18.2 MHz
+      lock-in 600 s: 4.48 / 5.88 / 7.88 mW -> 8.84 | 5.24 MHz
+      lock-in 3600 s: 1.83 / 2.4 / 3.22 mW -> 3.61 | 2.14 MHz
+   2x2 block moving:
+      live frame: 278 / 348 / 446 mW -> 413 | 303 MHz
+      diff 1 s/state: 19.7 / 24.8 / 31.7 mW -> 36.6 | 21.7 MHz
+      lock-in 60 s: 5.44 / 6.9 / 8.96 mW -> 10.3 | 6.13 MHz
+      lock-in 600 s: 1.36 / 1.72 / 2.2 mW -> 2.53 | 1.5 MHz
+      lock-in 3600 s: 0.553 / 0.701 / 0.897 mW -> 1.03 | 0.613 MHz
+   half die:
+      live frame: 30.7 / 37.8 / 48.3 mW -> 56.4 | 33.4 MHz
+      diff 1 s/state: 2.17 / 2.69 / 3.45 mW -> 4.01 | 2.37 MHz
+      lock-in 60 s: 0.737 / 0.925 / 1.19 mW -> 1.38 | 0.819 MHz
+      lock-in 600 s: 0.154 / 0.196 / 0.244 mW -> 0.289 | 0.171 MHz
+      lock-in 3600 s: 0.0631 / 0.08 / 0.0997 mW -> 0.118 | 0.07 MHz
+-- (b) lid top, bare plating, fan
+   checkerboard:
+      live frame: 2.67e+04 / 9.16e+04 / 2.83e+05 mW -> >600 | >600 MHz
+      diff 1 s/state: 1.89e+03 / 6.51e+03 / 2.03e+04 mW -> >600 | >600 MHz
+      lock-in 60 s: 391 / 1.35e+03 / 4.26e+03 mW -> >600 | >600 MHz
+      lock-in 600 s: 123 / 425 / 1.34e+03 mW -> 472 | 383 MHz
+      lock-in 3600 s: 50.2 / 173 / 546 mW -> 264 | 156 MHz
+   one shire:
+      live frame: 5.83e+03 / 1.8e+04 / 5.06e+04 mW -> >600 | >600 MHz
+      diff 1 s/state: 824 / 2.57e+03 / 7.2e+03 mW -> >600 | >600 MHz
+      lock-in 60 s: 188 / 587 / 1.65e+03 mW -> 556 | 519 MHz
+      lock-in 600 s: 54.5 / 169 / 475 mW -> 255 | 151 MHz
+      lock-in 3600 s: 22.3 / 69.1 / 194 mW -> 104 | 61.6 MHz
+   2x2 block moving:
+      live frame: 3.35e+03 / 1.02e+04 / 2.73e+04 mW -> >600 | >600 MHz
+      diff 1 s/state: 238 / 726 / 1.95e+03 mW -> >600 | >600 MHz
+      lock-in 60 s: 65.7 / 201 / 550 mW -> 298 | 177 MHz
+      lock-in 600 s: 16.5 / 49.9 / 134 mW -> 73.4 | 43.5 MHz
+      lock-in 3600 s: 6.73 / 20.4 / 54.8 mW -> 29.9 | 17.8 MHz
+   half die:
+      live frame: 369 / 1.1e+03 / 3.06e+03 mW -> >600 | >600 MHz
+      diff 1 s/state: 26.1 / 78.4 / 218 mW -> 118 | 69.8 MHz
+      lock-in 60 s: 8.86 / 26.3 / 72.1 mW -> 39.1 | 23.2 MHz
+      lock-in 600 s: 1.87 / 5.57 / 15.4 mW -> 8.26 | 4.89 MHz
+      lock-in 3600 s: 0.764 / 2.27 / 6.29 mW -> 3.37 | 2 MHz
+
+Lock-in time to see each shire (SNR 3), fp32 randn TensorFMA, median [5-95 %] seconds, best f_mod, at least 20 periods and 10 s ("10" = 10 s or less); voltage at its floor (clock only in brackets for 100 and 10 MHz)
+-- (a) delidded die, black-coated, still air
+   checkerboard      600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-12] (10)
+   one shire         600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-15] (10)
+   2x2 block moving  600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-10] (10)
+   half die          600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-10] (10)
+-- (a) delidded die, black-coated, fan
+   checkerboard      600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-12] (10)
+   one shire         600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-15] (10)
+   2x2 block moving  600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-10] (10)
+   half die          600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-10] (10)
+-- (a) delidded die, bare silicon, fan
+   checkerboard      600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-20] | 25: 10.6 [10-80] | 10: 64.2 [10-5e+02] (22.7)
+   one shire         600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-21] | 25: 14.5 [10-73] | 10: 62.1 [14-4e+02] (24.9)
+   2x2 block moving  600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-11] | 25: 10 [10-27] | 10: 23.3 [10-95] (13.4)
+   half die          600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-20] (10)
+-- (a) delidded die, black-coated, IR-window cooler
+   checkerboard      600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 14 [10-32] (10)
+   one shire         600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 20 [11-42] (10)
+   2x2 block moving  600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10.1 [10-20] (10)
+   half die          600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-10] (10)
+-- (b) lid top, taped, still air
+   checkerboard      600: 10 [10-10] | 300: 10 [10-10] | 100: 28.8 [11-73] (10.4) | 50: 115 [43-2.9e+02] | 25: 455 [1.7e+02-1.1e+03] | 10: 2.84e+03 [1.1e+03-7.2e+03] (998)
+   one shire         600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-19] (10) | 50: 27.1 [19-45] | 25: 81.3 [49-1.6e+02] | 10: 468 [2.6e+02-9.2e+02] (178)
+   2x2 block moving  600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-13] | 25: 20 [15-28] | 10: 64.1 [40-88] (33)
+   half die          600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-10] (10)
+-- (b) lid top, taped, fan
+   checkerboard      600: 10 [10-10] | 300: 10 [10-10] | 100: 28.8 [11-73] (10.4) | 50: 115 [43-2.9e+02] | 25: 455 [1.7e+02-1.1e+03] | 10: 2.84e+03 [1.1e+03-7.2e+03] (998)
+   one shire         600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-19] (10) | 50: 27.1 [19-45] | 25: 81.3 [49-1.6e+02] | 10: 468 [2.6e+02-9.3e+02] (178)
+   2x2 block moving  600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-13] | 25: 20 [15-28] | 10: 64.2 [40-88] (33)
+   half die          600: 10 [10-10] | 300: 10 [10-10] | 100: 10 [10-10] (10) | 50: 10 [10-10] | 25: 10 [10-10] | 10: 10 [10-10] (10)
+-- (b) lid top, bare plating, fan
+   checkerboard      600: 244 [20-2.2e+03] | 300: 2.78e+03 [2.2e+02-2.5e+04] | 100: 2.5e+04 [1.9e+03-2.2e+05] (8.79e+03) | 50: 1e+05 [7.8e+03-8.9e+05] | 25: 4e+05 [3.1e+04-3.5e+06] | 10: 2.5e+06 [1.9e+05-2.2e+07] (8.79e+05)
+   one shire         600: 44.7 [10-3e+02] | 300: 432 [53-3.4e+03] | 100: 3.89e+03 [4.1e+02-3.1e+04] (1.36e+03) | 50: 1.55e+04 [1.6e+03-1.2e+05] | 25: 6.22e+04 [6.5e+03-5e+05] | 10: 3.89e+05 [4.1e+04-3.1e+06] (1.36e+05)
+   2x2 block moving  600: 14.1 [10-40] | 300: 59.6 [16-2.7e+02] | 100: 322 [55-2.4e+03] (140) | 50: 1.29e+03 [1.7e+02-9.8e+03] | 25: 5.16e+03 [5.6e+02-3.9e+04] | 10: 3.22e+04 [3.5e+03-2.4e+05] (1.13e+04)
+   half die          600: 10 [10-10] | 300: 10 [10-20] | 100: 20 [10-66] (16.6) | 50: 40 [20-1.7e+02] | 25: 93.3 [32-4.7e+02] | 10: 408 [80-3e+03] (200)
+
+Contrast in a 1 s-per-state difference image, fp32 randn, median mK x emissivity (what the camera reads), voltage at its floor:
+   (a) delidded die, black-coated, still air            checkerboard: 881 87.1 8.71 | one shire: 966 95.4 9.54 | 2x2 block moving: 2.28e+03 225 22.5 | half die: 1.54e+04 1.52e+03 152   (600 / 100 / 10 MHz)
+   (a) delidded die, black-coated, fan                  checkerboard: 881 87 8.7 | one shire: 965 95.3 9.53 | 2x2 block moving: 2.27e+03 224 22.4 | half die: 1.53e+04 1.51e+03 151   (600 / 100 / 10 MHz)
+   (a) delidded die, bare silicon, fan                  checkerboard: 251 24.8 2.48 | one shire: 278 27.4 2.74 | 2x2 block moving: 647 63.9 6.39 | half die: 4.41e+03 435 43.5   (600 / 100 / 10 MHz)
+   (a) delidded die, black-coated, IR-window cooler     checkerboard: 528 52.1 5.21 | one shire: 474 46.8 4.68 | 2x2 block moving: 828 81.8 8.18 | half die: 3.6e+03 355 35.5   (600 / 100 / 10 MHz)
+   (b) lid top, taped, still air                        checkerboard: 36.8 3.63 0.363 | one shire: 94.6 9.35 0.935 | 2x2 block moving: 343 33.9 3.39 | half die: 3.17e+03 313 31.3   (600 / 100 / 10 MHz)
+   (b) lid top, taped, fan                              checkerboard: 36.8 3.63 0.363 | one shire: 94.6 9.34 0.934 | 2x2 block moving: 342 33.8 3.38 | half die: 3.16e+03 312 31.2   (600 / 100 / 10 MHz)
+   (b) lid top, bare plating, fan                       checkerboard: 1.35 0.133 0.0133 | one shire: 3.23 0.319 0.0319 | 2x2 block moving: 11.7 1.16 0.116 | half die: 106 10.4 1.04   (600 / 100 / 10 MHz)
+
+(c) The on-die sensors.  Contrast at the transistor plane per W per shire (mK/W); least power per shire (mW) and least clock (MHz, median, voltage at its floor) with per-shire raw codes (a rebuilt BL2): settled states 1 s each | lock-in 1 min | 10 min | 1 h
+   (c) transistor plane = the 34 sensors, heats checkerboard      1.15e+03 / 1.42e+03 / 1.72e+03 mK/W | 71.5 mW 105 MHz | 14.5 mW 21.2 MHz | 4.58 mW 6.72 MHz | 1.87 mW 2.74 MHz
+   (c) transistor plane = the 34 sensors, heats one shire         750 / 961 / 1.17e+03 mK/W | 107 mW 155 MHz | 22 mW 32 MHz | 6.85 mW 9.98 MHz | 2.79 mW 4.07 MHz
+   (c) transistor plane = the 34 sensors, heats 2x2 block moving  1.09e+03 / 1.41e+03 / 1.7e+03 mK/W | 73 mW 107 MHz | 16.1 mW 23.4 MHz | 4.77 mW 6.99 MHz | 1.95 mW 2.86 MHz
+   (c) transistor plane = the 34 sensors, heats half die          4.65e+03 / 5.84e+03 / 6.9e+03 mK/W | 17.5 mW 26 MHz | 4.55 mW 6.79 MHz | 1.19 mW 1.76 MHz | 0.487 mW 0.719 MHz
+   (b) lid top, heatsink off, fan               checkerboard      1.15e+03 / 1.42e+03 / 1.73e+03 mK/W | 71.4 mW 104 MHz | 14.5 mW 21.2 MHz | 4.58 mW 6.7 MHz | 1.87 mW 2.74 MHz
+   (b) lid top, heatsink off, fan               one shire         782 / 991 / 1.19e+03 mK/W | 104 mW 152 MHz | 21.7 mW 31.5 MHz | 6.7 mW 9.76 MHz | 2.74 mW 3.98 MHz
+   (b) lid top, heatsink off, fan               2x2 block moving  1.29e+03 / 1.58e+03 / 1.85e+03 mK/W | 64.8 mW 95.3 MHz | 15.2 mW 22.3 MHz | 4.27 mW 6.28 MHz | 1.74 mW 2.56 MHz
+   (b) lid top, heatsink off, fan               half die          6.96e+03 / 7.99e+03 / 9.05e+03 mK/W | 12.7 mW 18.5 MHz | 3.8 mW 5.62 MHz | 0.874 mW 1.29 MHz | 0.357 mW 0.525 MHz
+   (a) delidded die, fan air above, cooled thro checkerboard      1.55e+03 / 1.91e+03 / 2.42e+03 mK/W | 55.6 mW 80.4 MHz | 11.3 mW 16.3 MHz | 3.57 mW 5.16 MHz | 1.46 mW 2.11 MHz
+   (a) delidded die, fan air above, cooled thro one shire         1.45e+03 / 1.79e+03 / 2.26e+03 mK/W | 58.8 mW 86.5 MHz | 12.8 mW 18.6 MHz | 3.81 mW 5.59 MHz | 1.55 mW 2.28 MHz
+   (a) delidded die, fan air above, cooled thro 2x2 block moving  3.1e+03 / 3.86e+03 / 4.77e+03 mK/W | 27.3 mW 40.7 MHz | 7.11 mW 10.5 MHz | 1.82 mW 2.72 MHz | 0.743 mW 1.11 MHz
+   (a) delidded die, fan air above, cooled thro half die          2e+04 / 2.5e+04 / 3.19e+04 mK/W | 4.18 mW 6.29 MHz | 1.44 mW 2.15 MHz | 0.291 mW 0.442 MHz | 0.119 mW 0.18 MHz
+   stock firmware, I/O sensor at (0,4), block beside it vs far corner, lock-in   60 s: 115 / 140 / 177 mW per shire -> 211 MHz (floor)
+   stock firmware, I/O sensor at (0,4), block beside it vs far corner, lock-in  600 s: 36.3 / 44.3 / 56 mW per shire -> 66.6 MHz (floor)
+   stock firmware, I/O sensor at (0,4), block beside it vs far corner, lock-in 3600 s: 14.8 / 18.1 / 22.9 mW per shire -> 27.2 MHz (floor)
+   stock firmware, I/O sensor at (0,5), block beside it vs far corner, lock-in   60 s: 110 / 134 / 170 mW per shire -> 203 MHz (floor)
+   stock firmware, I/O sensor at (0,5), block beside it vs far corner, lock-in  600 s: 34.9 / 42.4 / 53.8 mW per shire -> 64.1 MHz (floor)
+   stock firmware, I/O sensor at (0,5), block beside it vs far corner, lock-in 3600 s: 14.3 / 17.3 / 22 mW per shire -> 26.1 MHz (floor)
+   (whole-degree readings average below one degree only while the die wanders across degree steps; a steady die needs a deliberate slow dither of the chip's power)
+   quantiser, stock, 600 MHz, steady die: swing 496 mK p-p on 1000 mK steps, run 10 s, raw noise 20 mK: seen (effective SNR >= 3) at 16 % of mean positions; effective SNR 10/50/90 % 0.0 / 0.0 / 6.5; gain 10/50/90 % 0.00 / 0.96 / 2.02, within 25 % at 4 % [model]
+   quantiser, stock, 600 MHz, steady die: swing 496 mK p-p on 1000 mK steps, run 10 s, raw noise 90 mK: seen (effective SNR >= 3) at 54 % of mean positions; effective SNR 10/50/90 % 0.4 / 3.8 / 24.9; gain 10/50/90 % 0.00 / 1.02 / 2.02, within 25 % at 12 % [model]
+   quantiser, stock, 600 MHz, 2 C dither: swing 496 mK p-p on 1000 mK steps, run 146 s, raw noise 20 mK: seen (effective SNR >= 3) at 100 % of mean positions; effective SNR 10/50/90 % 29.5 / 33.4 / 38.5; gain 10/50/90 % 0.99 / 1.00 / 1.01, within 25 % at 100 % [model]
+   quantiser, stock, 600 MHz, 2 C dither: swing 496 mK p-p on 1000 mK steps, run 146 s, raw noise 90 mK: seen (effective SNR >= 3) at 100 % of mean positions; effective SNR 10/50/90 % 23.2 / 26.5 / 30.3; gain 10/50/90 % 0.99 / 1.00 / 1.01, within 25 % at 100 % [model]
+   quantiser, stock, 100 MHz, floor, steady die: swing 49 mK p-p on 1000 mK steps, run 261 s, raw noise 20 mK: seen (effective SNR >= 3) at 12 % of mean positions; effective SNR 10/50/90 % 0.0 / 0.0 / 8.0; gain 10/50/90 % 0.00 / 0.00 / 2.05, within 25 % at 0 % [model]
+   quantiser, stock, 100 MHz, floor, steady die: swing 49 mK p-p on 1000 mK steps, run 261 s, raw noise 90 mK: seen (effective SNR >= 3) at 40 % of mean positions; effective SNR 10/50/90 % 0.0 / 1.6 / 7.7; gain 10/50/90 % 0.00 / 0.09 / 3.68, within 25 % at 8 % [model]
+   quantiser, stock, 100 MHz, floor, 2 C dither: swing 49 mK p-p on 1000 mK steps, run 261 s, raw noise 20 mK: seen (effective SNR >= 3) at 100 % of mean positions; effective SNR 10/50/90 % 4.2 / 5.2 / 6.8; gain 10/50/90 % 0.95 / 0.99 / 1.06, within 25 % at 100 % [model]
+   quantiser, stock, 100 MHz, floor, 2 C dither: swing 49 mK p-p on 1000 mK steps, run 261 s, raw noise 90 mK: seen (effective SNR >= 3) at 98 % of mean positions; effective SNR 10/50/90 % 3.4 / 3.9 / 4.4; gain 10/50/90 % 0.93 / 0.99 / 1.05, within 25 % at 100 % [model]
+   quantiser, raw codes, a 9 mK swing, steady die: swing 9 mK p-p on 61 mK steps, run 600 s, raw noise 20 mK: seen (effective SNR >= 3) at 100 % of mean positions; effective SNR 10/50/90 % 7.6 / 9.0 / 11.0; gain 10/50/90 % 0.78 / 1.00 / 1.20, within 25 % at 96 % [model]
+   quantiser, raw codes, a 9 mK swing, steady die: swing 9 mK p-p on 61 mK steps, run 600 s, raw noise 90 mK: seen (effective SNR >= 3) at 20 % of mean positions; effective SNR 10/50/90 % 2.3 / 2.6 / 3.2; gain 10/50/90 % 0.89 / 1.02 / 1.10, within 25 % at 100 % [model]
+   (the stock firmware's mean cannot see a commutated pattern at all, and its high is anonymous)
+
+==============================================================================================================
+H. Summary: least clock (MHz, median over draws) for fp32 randn TensorFMA, voltage at its floor | clock only
+==============================================================================================================
+Columns: one live frame; a difference image of two settled states, 1 s (25 frames) of each; lock-in 1 min, 10 min, 1 h.  "<0.01" = below 10 kHz; ">600" = not at 600 MHz.  Other kernels need 1/x the power: int8 randn or fp32 ones x0.37-0.39, so about 2.6 times the clock.  Only the mean switching power per shire counts, so "clock only" is also a duty cycle at 600 MHz: x MHz = the kernel busy x/600 of the time.
+surface                                              pattern                 live frame   diff 1 s/state     lock-in 60 s    lock-in 600 s   lock-in 3600 s
+(a) delidded die, black-coated, still air            checkerboard               202|120        14.4|8.52        2.96|1.75      0.934|0.554      0.381|0.226
+(a) delidded die, black-coated, still air            one shire                91.9|54.4          13|7.69        2.93|1.74      0.859|0.509       0.35|0.208
+(a) delidded die, black-coated, still air            2x2 block moving         78.1|46.3        5.56|3.29       1.52|0.902      0.382|0.226     0.156|0.0925
+(a) delidded die, black-coated, still air            half die                 11.5|6.84      0.821|0.487      0.293|0.174     0.0591|0.035    0.0241|0.0143
+(a) delidded die, black-coated, fan                  checkerboard               202|120        14.4|8.53        2.96|1.75      0.934|0.554      0.381|0.226
+(a) delidded die, black-coated, fan                  one shire                92.1|54.5          13|7.71        2.93|1.74       0.86|0.509      0.351|0.208
+(a) delidded die, black-coated, fan                  2x2 block moving         78.3|46.4        5.59|3.31       1.52|0.903      0.383|0.227     0.156|0.0927
+(a) delidded die, black-coated, fan                  half die                 11.6|6.87      0.824|0.488      0.294|0.174    0.0593|0.0352    0.0242|0.0144
+(a) delidded die, bare silicon, fan                  checkerboard               494|417        50.4|29.9        10.4|6.14        3.27|1.94       1.34|0.791
+(a) delidded die, bare silicon, fan                  one shire                  313|190          46|27.3        10.2|6.03        3.02|1.79       1.23|0.731
+(a) delidded die, bare silicon, fan                  2x2 block moving           273|162        19.5|11.5        5.24|3.11       1.33|0.788      0.543|0.322
+(a) delidded die, bare silicon, fan                  half die                 40.7|24.1        2.91|1.72       1.02|0.603      0.207|0.123    0.0846|0.0501
+(a) delidded die, black-coated, IR-window cooler     checkerboard               315|192        23.2|13.8        4.78|2.83       1.51|0.893      0.616|0.365
+(a) delidded die, black-coated, IR-window cooler     one shire                  184|109        26.2|15.5        5.48|3.25         1.7|1.01      0.694|0.411
+(a) delidded die, black-coated, IR-window cooler     2x2 block moving           216|128        15.4|9.13        3.35|1.99          1|0.595      0.409|0.243
+(a) delidded die, black-coated, IR-window cooler     half die                 49.9|29.6        3.56|2.11      0.829|0.491      0.233|0.138    0.0952|0.0564
+(b) lid top, taped, still air                        checkerboard             >600|>600          320|198        69.4|41.1        21.8|12.9        8.89|5.27
+(b) lid top, taped, still air                        one shire                  576|556         134|79.2        30.7|18.2        8.84|5.24        3.61|2.14
+(b) lid top, taped, still air                        2x2 block moving           413|303        36.6|21.7        10.3|6.13         2.53|1.5       1.03|0.613
+(b) lid top, taped, still air                        half die                 56.2|33.3           4|2.37       1.38|0.818      0.289|0.171     0.118|0.0699
+(b) lid top, taped, fan                              checkerboard             >600|>600          320|198        69.4|41.1        21.8|12.9         8.9|5.27
+(b) lid top, taped, fan                              one shire                  576|556         134|79.2        30.7|18.2        8.84|5.24        3.61|2.14
+(b) lid top, taped, fan                              2x2 block moving           413|303        36.6|21.7        10.3|6.13         2.53|1.5       1.03|0.613
+(b) lid top, taped, fan                              half die                 56.4|33.4        4.01|2.37       1.38|0.819      0.289|0.171       0.118|0.07
+(b) lid top, bare plating, fan                       checkerboard             >600|>600        >600|>600        >600|>600          472|383          264|156
+(b) lid top, bare plating, fan                       one shire                >600|>600        >600|>600          556|519          255|151         104|61.6
+(b) lid top, bare plating, fan                       2x2 block moving         >600|>600        >600|>600          298|177        73.4|43.5        29.9|17.8
+(b) lid top, bare plating, fan                       half die                 >600|>600         118|69.8        39.1|23.2        8.26|4.89           3.37|2
+(c) sensors, heatsink on, raw codes (new BL2)        checkerboard                                    105             21.2             6.72             2.74
+(c) sensors, heatsink on, raw codes (new BL2)        one shire                                       155               32             9.98             4.07
+(c) sensors, heatsink on, raw codes (new BL2)        2x2 block moving                                107             23.4             6.99             2.86
+(c) sensors, heatsink on, raw codes (new BL2)        half die                                         26             6.79             1.76            0.719
+(c) stock firmware, I/O sensor at (0,4)              2x2 block moving                                                 211             66.6             27.2
+(c) stock firmware, I/O sensor at (0,5)              2x2 block moving                                                 203             64.1             26.1
+
+wrote docs/reports/data/2026-09-30-without-heatsink/imaging_calc.json

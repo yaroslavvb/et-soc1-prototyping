@@ -1,0 +1,201 @@
+
+==============================================================================================================
+A. Idle rails against die temperature (E44 cooling cycles, 600 MHz, samples >= 8 s after the heater)
+==============================================================================================================
+aifoundry3: 26718 idle samples in 31 bins, 54-84 C; set-points minion/SRAM/NoC 525/700/485 mV (reg_mv)  [measured, E44: docs/reports/data/2026-09-25-claims-v3/raw/aifoundry3/idle/p1-p3]
+  board     best T_L  30 C: P_fix  15.45 W, A(80 C) 21.89 W, rms 0.050 W | T_L within 10% of best rms 28-30 C: P_fix 15.45 .. 16.36 W | at 56 C 25.29 W, slope 0.328 W/C, dlnP/dT 0.0130 /C
+  minion    best T_L  32 C: P_fix   1.73 W, A(80 C) 12.60 W, rms 0.037 W | T_L within 10% of best rms 30-34 C: P_fix 1.23 .. 2.24 W | at 56 C  7.68 W, slope 0.186 W/C, dlnP/dT 0.0242 /C
+  sram      best T_L  40 C: P_fix   0.29 W, A(80 C)  3.39 W, rms 0.007 W | T_L within 10% of best rms 40-45 C: P_fix -0.01 .. 0.29 W | at 56 C  2.15 W, slope 0.047 W/C, dlnP/dT 0.0216 /C
+  noc       best T_L  32 C: P_fix   0.30 W, A(80 C)  4.44 W, rms 0.012 W | T_L within 10% of best rms 32-34 C: P_fix 0.13 .. 0.30 W | at 56 C  2.40 W, slope 0.065 W/C, dlnP/dT 0.0273 /C
+  unmetered best T_L  16 C: P_fix  12.61 W, A(80 C)  1.99 W, rms 0.014 W | T_L within 10% of best rms 16-16 C: P_fix 12.61 .. 12.61 W | at 56 C 13.05 W, slope 0.028 W/C, dlnP/dT 0.0021 /C
+aifoundry2: 26724 idle samples in 17 bins, 67-83 C; set-points minion/SRAM/NoC 520/705/485 mV (reg_mv)  [measured, E44: docs/reports/data/2026-09-25-claims-v3/raw/aifoundry2/idle/p1-p3]
+  board     best T_L  36 C: P_fix  12.25 W, A(80 C) 23.70 W, rms 0.049 W | T_L within 10% of best rms 32-40 C: P_fix 9.98 .. 14.51 W | at 56 C 24.42 W, slope 0.338 W/C, dlnP/dT 0.0138 /C
+  minion    best T_L  36 C: P_fix   0.58 W, A(80 C) 12.79 W, rms 0.029 W | T_L within 10% of best rms 32-40 C: P_fix -0.65 .. 1.80 W | at 56 C  7.14 W, slope 0.182 W/C, dlnP/dT 0.0255 /C
+  sram      best T_L  45 C: P_fix  -0.95 W, A(80 C)  3.45 W, rms 0.009 W | T_L within 10% of best rms 34-60 C: P_fix -1.97 .. -0.20 W | at 56 C  1.07 W, slope 0.045 W/C, dlnP/dT 0.0419 /C
+  noc       best T_L  36 C: P_fix  -0.04 W, A(80 C)  4.46 W, rms 0.011 W | T_L within 10% of best rms 30-40 C: P_fix -0.47 .. 0.60 W | at 56 C  2.25 W, slope 0.064 W/C, dlnP/dT 0.0283 /C
+  unmetered best T_L  30 C: P_fix  12.58 W, A(80 C)  3.10 W, rms 0.024 W | T_L within 10% of best rms 22-50 C: P_fix 10.86 .. 13.27 W | at 56 C 13.97 W, slope 0.046 W/C, dlnP/dT 0.0033 /C
+Reading (inference): dynamic power does not follow die temperature, so the clock-dependent idle power D of a rail is at most the part of its idle law that does not follow temperature, P_fix. P_fix depends on the form of the leakage law (all three fit the 30 C span about equally):
+  aifoundry3 minion: exp: rms 0.0370 W, P_fix 1.73 (band 1.23 .. 2.24) | arr: rms 0.0355 W, P_fix 3.20 (band 2.84 .. 3.53) | T2arr: rms 0.0356 W, P_fix 3.00 (band 2.61 .. 3.35)
+  aifoundry3 sram  : exp: rms 0.0067 W, P_fix 0.29 (band -0.01 .. 0.29) | arr: rms 0.0063 W, P_fix 0.70 (band 0.63 .. 0.76) | T2arr: rms 0.0064 W, P_fix 0.69 (band 0.55 .. 0.75)
+  aifoundry2 minion: exp: rms 0.0287 W, P_fix 0.58 (band -0.65 .. 1.80) | arr: rms 0.0283 W, P_fix 2.47 (band 0.96 .. 3.40) | T2arr: rms 0.0283 W, P_fix 2.20 (band 0.59 .. 3.40)
+  aifoundry2 sram  : exp: rms 0.0091 W, P_fix -0.95 (band -1.97 .. -0.20) | arr: rms 0.0090 W, P_fix -0.26 (band -0.97 .. 0.14) | T2arr: rms 0.0090 W, P_fix -0.34 (band -1.11 .. 0.14)
+=> bound on D at 600 MHz (union of the three forms): minion rail aifoundry3 <= 3.53 W, aifoundry2 <= 3.40 W; SRAM rail aifoundry3 <= 0.76 W, aifoundry2 <= 0.14 W
+unmetered W per rail W (E46 fit, docs/reports/sources/limits-of-observability.data.json power.fit): aifoundry2 minion 0.188, SRAM 0.034, NoC 0.291; aifoundry3 minion 0.181, SRAM 0.043, NoC 0.294
+
+==============================================================================================================
+B. aifoundry2's idle reset (E51): 800 MHz -> 600 MHz on an idle card, board power just before and just after
+==============================================================================================================
+19 idle-reset events in 434 E51 pass directories  [measured: docs/reports/data/2026-09-28-dvfs2-aifoundry2/(validation/)raw/p*/tel-*.jsonl.gz]
+  2026-09-28-dvfs2-aifoundry2/raw/p4001/tel-smoke.jsonl.gz: reset 0.65 s after the kernel ended; 3 + 8 samples; board 33.79 -> 26.60 W (step 7.19); die 62 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6038/tel-11.jsonl.gz: reset 0.76 s after the kernel ended; 4 + 8 samples; board 35.19 -> 27.65 W (step 7.54); die 65 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6038/tel-12.jsonl.gz: reset 0.89 s after the kernel ended; 5 + 8 samples; board 35.25 -> 27.73 W (step 7.52); die 65 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6038/tel-14.jsonl.gz: reset 0.72 s after the kernel ended; 4 + 8 samples; board 35.22 -> 31.43 W (step 3.79); die 65 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6038/tel-15.jsonl.gz: reset 0.97 s after the kernel ended; 6 + 8 samples; board 35.19 -> 27.72 W (step 7.47); die 65 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6038/tel-16.jsonl.gz: reset 1.10 s after the kernel ended; 7 + 9 samples; board 34.54 -> 27.25 W (step 7.29); die 64 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6038/tel-4.jsonl.gz: reset 0.64 s after the kernel ended; 3 + 8 samples; board 35.18 -> 27.49 W (step 7.69); die 64 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6038/tel-4.jsonl.gz: reset 0.71 s after the kernel ended; 4 + 9 samples; board 35.12 -> 27.49 W (step 7.63); die 64 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6038/tel-6.jsonl.gz: reset 0.73 s after the kernel ended; 4 + 9 samples; board 35.19 -> 27.80 W (step 7.39); die 64 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6038/tel-7.jsonl.gz: reset 0.69 s after the kernel ended; 3 + 8 samples; board 35.30 -> 27.70 W (step 7.60); die 65 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6038/tel-smoke.jsonl.gz: reset 0.85 s after the kernel ended; 5 + 8 samples; board 33.47 -> 26.34 W (step 7.13); die 61 C
+  2026-09-28-dvfs2-aifoundry2/raw/p6041/tel-smoke.jsonl.gz: reset 1.03 s after the kernel ended; 7 + 9 samples; board 33.35 -> 26.07 W (step 7.28); die 61 C
+  2026-09-28-dvfs2-aifoundry2/validation/raw/p6051/tel-2.jsonl.gz: reset 1.01 s after the kernel ended; 7 + 9 samples; board 34.79 -> 27.26 W (step 7.53); die 64 C
+  2026-09-28-dvfs2-aifoundry2/validation/raw/p6051/tel-smoke.jsonl.gz: reset 0.97 s after the kernel ended; 6 + 8 samples; board 33.22 -> 26.10 W (step 7.12); die 60 C
+  2026-09-28-dvfs2-aifoundry2/validation/raw/p6052/tel-1.jsonl.gz: reset 1.00 s after the kernel ended; 7 + 8 samples; board 34.01 -> 26.70 W (step 7.31); die 62 C
+  2026-09-28-dvfs2-aifoundry2/validation/raw/p6052/tel-2.jsonl.gz: reset 0.90 s after the kernel ended; 5 + 8 samples; board 34.55 -> 27.02 W (step 7.53); die 63 C
+  2026-09-28-dvfs2-aifoundry2/validation/raw/p6052/tel-2.jsonl.gz: reset 0.72 s after the kernel ended; 4 + 8 samples; board 34.94 -> 27.34 W (step 7.60); die 64 C
+  2026-09-28-dvfs2-aifoundry2/validation/raw/p6052/tel-3.jsonl.gz: reset 0.62 s after the kernel ended; 3 + 8 samples; board 35.10 -> 27.70 W (step 7.40); die 64 C
+  2026-09-28-dvfs2-aifoundry2/validation/raw/p6052/tel-smoke.jsonl.gz: reset 1.03 s after the kernel ended; 7 + 8 samples; board 33.62 -> 26.44 W (step 7.18); die 61 C
+step: median 7.40 W, range 3.79 .. 7.69 W, bootstrap 95% of the median 7.28 .. 7.53 W; die 60-65 C (median 64)
+on-die voltages (median): minion 619 -> 519 mV (x1.1927), SRAM 830 -> 704 mV (x1.1790); NoC unchanged
+aifoundry2 idle rails at 600 MHz in the same files (>= 8 s after a kernel): 60 C: board 25.89, minion 7.86, SRAM 1.21 W (n 49); 61 C: board 26.31, minion 8.08, SRAM 1.28 W (n 68); 62 C: board 26.68, minion 8.29, SRAM 1.34 W (n 44); 63 C: board 27.02, minion 8.48, SRAM 1.40 W (n 11245); 64 C: board 27.45, minion 8.69, SRAM 1.48 W (n 10031); 65 C: board 27.80, minion 8.86, SRAM 1.52 W (n 925); 66 C: board 28.17, minion 9.04, SRAM 1.58 W (n 1343)
+E44 laws extrapolated to 64 C (their bins start at 67 C): minion 8.78 W, SRAM 1.47 W
+
+==============================================================================================================
+C. A and B together: the voltage exponent of leakage (P_leak ~ V^n) and the clock-dependent idle power D
+==============================================================================================================
+idle rails at 600 MHz at 64 C (E51 idle samples): minion 8.58 W, SRAM 1.46 W; delivery loss k_minion 0.188, k_SRAM 0.034; SRAM D_s ~ U(0, 0.14) W
+the relation the step fixes (median step, D_s = 0): D_m on aifoundry2 -> the leakage exponent n: 0.0 W -> 2.81, 0.5 W -> 2.76, 1.0 W -> 2.70, 1.5 W -> 2.64, 2.0 W -> 2.57, 2.5 W -> 2.49, 3.0 W -> 2.39, 3.5 W -> 2.28, 4.0 W -> 2.15
+draws that reproduce the step with 0 <= D_m <= P_m: 24110 of 40000: n 1.09 / 1.91 / 2.71, D_m 0.896 / 4.68 / 6.06 W
+... and also D_m <= 3.40 W (section A, aifoundry2, union of the forms): 6796: n 2.26 / 2.55 / 2.82 (2.5/50/97.5 %), D_m 0.164 / 2.15 / 3.35 W
+=> registered leakage exponent band (inference from measured A and B): n in [2.26, 2.82], central 2.55. FinFET textbook (tools/claims-v3/nv/DESIGN.md s3): 1.5-2.4; DIBL-only with the O11 figures (40 mV/V, 65 mV/dec) at 0.52 V: 1.74
+   leakage power factor minion 525 -> 400 mV: x0.465 .. x0.540 (central x0.500); under the rival band n 1.4 .. 2.26: x0.540 .. x0.683
+   leakage power factor SRAM 700 -> 660 mV: x0.847 .. x0.875 (central x0.861); under the rival band n 1.4 .. 2.26: x0.875 .. x0.921
+transferred to aifoundry3 (6796 joint draws): D_m 0.283 / 2.09 / 3.2 W, n 2.3 / 2.55 / 2.79
+CROSS-PREDICTION (registered): the D_m that Stage A measures on aifoundry3 fixes the n that Stage B must find: 0.0 W -> n 2.81, 0.5 W -> n 2.76, 1.0 W -> n 2.70, 1.5 W -> n 2.64, 2.0 W -> n 2.56, 2.5 W -> n 2.48, 3.0 W -> n 2.38, 3.5 W -> n 2.26 (+-0.05 from the step's spread and the 0.92-0.99 transfer)
+
+==============================================================================================================
+D. Stage A predictions: aifoundry3, clock only (set-points 525/700/485 mV), idle, die at T_ref
+==============================================================================================================
+TH-C0 (null): no clock-dependent idle power: |board step| <= 0.3 W at every level
+TH-CS (the record): step = (1 - f/600) [(1 + k_m) D_m + (1 + k_s) D_s] with 0 < D <= P_fix; NoC rail 0; unmetered k_m dP_m + k_s dP_s
+   largest 100 MHz board step allowed if the leakage law is exp  : 2.46 W
+   largest 100 MHz board step allowed if the leakage law is arr  : 4.14 W
+   largest 100 MHz board step allowed if the leakage law is T2arr: 3.95 W
+TH-CL (rival): a clock-dependent idle power larger than any form of the idle law allows: the 100 MHz board step > 4.14 W
+  600 -> 400 MHz (TH-CS, joint draws), the fall in W: board 0.245 / 0.956 / 1.43; minion rail 0.0945 / 0.697 / 1.07; SRAM 0.0122 / 0.13 / 0.241; NoC 0; unmetered 0.0227 / 0.131 / 0.199
+  600 -> 300 MHz (TH-CS, joint draws), the fall in W: board 0.367 / 1.43 / 2.14; minion rail 0.142 / 1.05 / 1.6; SRAM 0.0184 / 0.195 / 0.362; NoC 0; unmetered 0.034 / 0.197 / 0.299
+  600 -> 200 MHz (TH-CS, joint draws), the fall in W: board 0.49 / 1.91 / 2.85; minion rail 0.189 / 1.39 / 2.14; SRAM 0.0245 / 0.26 / 0.482; NoC 0; unmetered 0.0453 / 0.263 / 0.398
+  600 -> 100 MHz (TH-CS, joint draws), the fall in W: board 0.612 / 2.39 / 3.57; minion rail 0.236 / 1.74 / 2.67; SRAM 0.0306 / 0.325 / 0.603; NoC 0; unmetered 0.0566 / 0.329 / 0.498
+  (aifoundry3 idle board at 56 C by its E44 law: 25.29 W; the largest allowed 100 MHz step is 16% of it)
+  under TH-CS the step does not depend on the die temperature, and the slope dP/dT is the same at every clock (aifoundry3 board at 56 C: 0.328 W/C)
+
+==============================================================================================================
+E. Stage B predictions: aifoundry3 at 100 MHz, idle, die at 56 C; minion then SRAM set-points stepped down
+==============================================================================================================
+at 600 MHz, 525/700 mV, 56 C (E44 laws): minion 7.68 W, SRAM 2.15 W, board 25.29 W
+TH-VS (the record, section C): leakage ~ V^n, n in [2.26, 2.82]; TH-VD (FinFET DIBL, rival): n in [1.4, 2.26); TH-VX (steeper): n > 2.82; TH-V0 (null, the reading does not follow the set-point): n <= 0.5
+  100 MHz, minion 525 mV, SRAM 700: minion rail 5.01 / 5.94 / 7.45 W; board 21.7 / 22.9 / 24.7 W
+  100 MHz, minion 500 mV, SRAM 700: minion rail 4.48 / 5.26 / 6.5 W; board 21.1 / 22.1 / 23.6 W
+  100 MHz, minion 475 mV, SRAM 700: minion rail 3.98 / 4.63 / 5.64 W; board 20.5 / 21.3 / 22.6 W
+  100 MHz, minion 450 mV, SRAM 700: minion rail 3.52 / 4.04 / 4.86 W; board 19.9 / 20.7 / 21.7 W
+  100 MHz, minion 425 mV, SRAM 700: minion rail 3.08 / 3.5 / 4.15 W; board 19.4 / 20 / 20.8 W
+  100 MHz, minion 400 mV, SRAM 700: minion rail 2.68 / 3.01 / 3.51 W; board 18.9 / 19.4 / 20.1 W
+  100 MHz, minion 400 mV, SRAM 700: SRAM rail 1.55 / 1.83 / 2.12 W; board 18.9 / 19.4 / 20.1 W
+  100 MHz, minion 400 mV, SRAM 680: SRAM rail 1.44 / 1.7 / 1.97 W; board 18.8 / 19.3 / 19.9 W
+  100 MHz, minion 400 mV, SRAM 660: SRAM rail 1.34 / 1.57 / 1.82 W; board 18.7 / 19.2 / 19.8 W
+  under TH-VD n = 1.8: board at 100 MHz, 400/660 mV: 20.26 W
+  under TH-V0 n = 0: board at 100 MHz, 400/660 mV: 23.18 W
+=> lowest settable point (100 MHz, 400/660 mV) at 56 C: board 18.7 / 19.2 / 19.8 W against 25.29 W at 600 MHz (22 / 24 / 26 % less); minion rail 2.68 / 3.01 / 3.51 W, SRAM rail 1.34 / 1.57 / 1.82 W
+   C-METER (board change per minion-rail change while only the minion set-point moves): a true meter gives 1 + k_m = 1.181; a meter reading the current at a fixed voltage gives (1 + k_m) n/(n - 1) = 1.83 .. 2.11 over the n band; registered pass band [0.9, 1.6]
+   compare (measured, different card and firmware): aifoundry1 card 0 idles at 300 MHz, 400/660 mV: 17.97 W at 62 C (card0_guard.out); minion 4.11, SRAM 0.88, NoC 2.75 W
+
+==============================================================================================================
+F. The bare card at the low point (nohs_calc.py imported: its model, ranges and functions)
+==============================================================================================================
+nohs_calc.py reproduces nohs_calc.out: yes
+board / SoC power and board slope at 56 C, per scenario (SoC = board - off-die, off-die = nohs P_OFF less the regulator-loss cut):
+  600 MHz, 525/700 mV (the card as it is)                            board 25.29 W, SoC 17.79-20.79 W, slope 0.328 W/C (at 80 C 0.730)
+  clock only, 100 MHz, 525/700 mV, D at its largest                  board 21.15 W, SoC 14.21-17.21 W, slope 0.328 W/C (at 80 C 0.730)
+  100 MHz, 400/660 mV, small D, steep n (D_m 0.28 W, n 2.84)         board 19.44 W, SoC 12.74-15.74 W, slope 0.202 W/C (at 80 C 0.466)
+  100 MHz, 400/660 mV, central (D_m 2.09 W, n 2.42)                  board 19.18 W, SoC 12.54-15.54 W, slope 0.215 W/C (at 80 C 0.494)
+  100 MHz, 400/660 mV, large D, shallow n (D_m 3.20 W, n 2.36)       board 18.71 W, SoC 12.15-15.15 W, slope 0.218 W/C (at 80 C 0.498)
+  100 MHz, 400/660 mV, rival TH-VD n = 1.8, D best fit               board 20.26 W, SoC 13.48-16.48 W, slope 0.238 W/C (at 80 C 0.541)
+largest theta_JA (SoC basis, C/W) with any stable idle equilibrium | with one at or below 70 C (best case Ta 22, off-die high, slope share 0.80 .. worst Ta 30, off-die low, share 0.95):
+  600 MHz, 525/700 mV (the card as it is)                            any: 1.55 .. 2.14 | <= 70 C: 1.52 .. 2.14
+  clock only, 100 MHz, 525/700 mV, D at its largest                  any: 1.77 .. 2.54 | <= 70 C: 1.76 .. 2.54
+  100 MHz, 400/660 mV, small D, steep n (D_m 0.28 W, n 2.84)         any: 2.18 .. 3.10 | <= 70 C: 2.08 .. 3.07
+  100 MHz, 400/660 mV, central (D_m 2.09 W, n 2.42)                  any: 2.16 .. 3.09 | <= 70 C: 2.08 .. 3.07
+  100 MHz, 400/660 mV, large D, shallow n (D_m 3.20 W, n 2.36)       any: 2.19 .. 3.15 | <= 70 C: 2.12 .. 3.14
+  100 MHz, 400/660 mV, rival TH-VD n = 1.8, D best fit               any: 2.01 .. 2.85 | <= 70 C: 1.95 .. 2.84
+bare theta_JA classes (nohs_calc B, physics 5/50/95 %): still 4.43 / 5.41 / 6.52, fan 1-2.5 m/s 2.26 / 2.94 / 3.78; ranges carried forward (4.0, 12.0) and (2.0, 7.0)
+  a blower at 3-6 m/s (ASSUMED speed; nohs_calc formulas): theta_JA 1.82 / 2.37 / 3.03 C/W (the board path, theta_JB 1-3 C/W, sets the floor); its board-to-air resistance R_BA 1.14 / 1.61 / 2.31 C/W
+Monte Carlo as nohs_calc D (theta log-uniform, Ta 22-30, off-die and slope share in range; 600 draws per row): share with a stable equilibrium, share with it <= 70 C, T_eq 5/50/95 %
+  600 MHz, 525/700 mV (the card as it is)                            still : equilibrium    0% (0 of 600); <= 70 C    0%; T_eq none
+  600 MHz, 525/700 mV (the card as it is)                            fan   : equilibrium    0% (1 of 600); <= 70 C    0%; T_eq 61.7 / 61.7 / 61.7
+  600 MHz, 525/700 mV (the card as it is)                            blower: equilibrium    4% (22 of 600); <= 70 C    3%; T_eq 56.6 / 64.6 / 73
+  clock only, 100 MHz, 525/700 mV, D at its largest                  still : equilibrium    0% (0 of 600); <= 70 C    0%; T_eq none
+  clock only, 100 MHz, 525/700 mV, D at its largest                  fan   : equilibrium    6% (33 of 600); <= 70 C    6%; T_eq 53.5 / 61 / 67.4
+  clock only, 100 MHz, 525/700 mV, D at its largest                  blower: equilibrium   29% (175 of 600); <= 70 C   29%; T_eq 46.8 / 57 / 66.1
+  100 MHz, 400/660 mV, small D, steep n (D_m 0.28 W, n 2.84)         still : equilibrium    0% (0 of 600); <= 70 C    0%; T_eq none
+  100 MHz, 400/660 mV, small D, steep n (D_m 0.28 W, n 2.84)         fan   : equilibrium   24% (147 of 600); <= 70 C   21%; T_eq 50.8 / 59.9 / 74.7
+  100 MHz, 400/660 mV, small D, steep n (D_m 0.28 W, n 2.84)         blower: equilibrium   70% (423 of 600); <= 70 C   65%; T_eq 48.2 / 57.8 / 71.6
+  100 MHz, 400/660 mV, central (D_m 2.09 W, n 2.42)                  still : equilibrium    0% (0 of 600); <= 70 C    0%; T_eq none
+  100 MHz, 400/660 mV, central (D_m 2.09 W, n 2.42)                  fan   : equilibrium   20% (120 of 600); <= 70 C   18%; T_eq 47.8 / 60.7 / 71.8
+  100 MHz, 400/660 mV, central (D_m 2.09 W, n 2.42)                  blower: equilibrium   68% (406 of 600); <= 70 C   64%; T_eq 46.1 / 57.3 / 69.9
+  100 MHz, 400/660 mV, large D, shallow n (D_m 3.20 W, n 2.36)       still : equilibrium    0% (0 of 600); <= 70 C    0%; T_eq none
+  100 MHz, 400/660 mV, large D, shallow n (D_m 3.20 W, n 2.36)       fan   : equilibrium   19% (114 of 600); <= 70 C   18%; T_eq 47.7 / 57.2 / 69.6
+  100 MHz, 400/660 mV, large D, shallow n (D_m 3.20 W, n 2.36)       blower: equilibrium   68% (408 of 600); <= 70 C   65%; T_eq 45.6 / 56.4 / 69.9
+  100 MHz, 400/660 mV, rival TH-VD n = 1.8, D best fit               still : equilibrium    0% (0 of 600); <= 70 C    0%; T_eq none
+  100 MHz, 400/660 mV, rival TH-VD n = 1.8, D best fit               fan   : equilibrium   16% (94 of 600); <= 70 C   13%; T_eq 50.4 / 60 / 72.9
+  100 MHz, 400/660 mV, rival TH-VD n = 1.8, D best fit               blower: equilibrium   52% (311 of 600); <= 70 C   48%; T_eq 48.8 / 58 / 73.1
+POWER-ON: cold start at 600 MHz idle for the host boot (30-90 s) + 20-60 s to set the low point, then the low point to 30 min; 300 draws each: peak die C, die C at 30 min, share whose peak stays below 80 C (the stop) and whose end is <= 70 C
+  100 MHz, 400/660 mV, central (D_m 2.09 W, n 2.42) | still : peak 150 / 150 / 150 C; at 30 min 150 / 150 / 150 C; peak < 80: 0%; end <= 70: 0%; both: 0%
+  100 MHz, 400/660 mV, central (D_m 2.09 W, n 2.42) | fan   : peak 59.8 / 150 / 150 C; at 30 min 54.3 / 150 / 150 C; peak < 80: 25%; end <= 70: 22%; both: 21%
+  100 MHz, 400/660 mV, central (D_m 2.09 W, n 2.42) | blower: peak 54 / 74.5 / 150 C; at 30 min 52.2 / 72.9 / 150 C; peak < 80: 54%; end <= 70: 45%; both: 44%
+
+==============================================================================================================
+G. Detection: a same-temperature idle step's noise on aifoundry3 (E44 idle tails), and what the passes resolve
+==============================================================================================================
+93 null steps: board SD 35 mW per step, minion rail SD 7 mW (its ~1 s filter smooths it)  [measured noise, E44 aifoundry3 idle tails]
+  mean of 2 steps (up and down in 1 passes): SE 25 mW; a step of 74 mW is 3 SE
+  mean of 4 steps (up and down in 2 passes): SE 17 mW; a step of 52 mW is 3 SE
+  mean of 8 steps (up and down in 4 passes): SE 12 mW; a step of 37 mW is 3 SE
+
+==============================================================================================================
+I. The load item (A3) and the low-point dwell (B-DWELL): predictions
+==============================================================================================================
+switching power over idle on aifoundry3 at 600 MHz, 525 mV, 1,024 minions (measured, E20: dvfs.json cards.patterns, launch at 55.8 C): random normal 24.86 W, ones 9.68 W, zeros 1.89 W
+TH-E1 (energy per operation fixed at fixed voltage): switching power scales as f; at a lower voltage as f V^2
+  600 MHz, 525 mV: random normal 24.86 W, ones  9.68 W
+  300 MHz, 525 mV: random normal 12.43 W, ones  4.84 W
+  100 MHz, 525 mV: random normal  4.14 W, ones  1.61 W
+  100 MHz, 400 mV: random normal 2.41 W in all, 75 mW per compute shire (32); ones 0.94 W
+  heatsink on, 100 MHz, 400/660 mV, central (D_m 2.09 W, n 2.42): settles at 45.2 C (ambient 22 C, theta_eff 1.34 C/W, board basis); board 17.23 W, slope there 0.148 W/C
+  heatsink on, 100 MHz, 400/660 mV, central (D_m 2.09 W, n 2.42): settles at 47.5 C (ambient 28 C, theta_eff 1.11 C/W, board basis); board 17.59 W, slope there 0.160 W/C
+
+==============================================================================================================
+H. The schedule (plan arithmetic; timings ASSUMED from NV DESIGN.md s6 and nv.json timing_s)
+==============================================================================================================
+Stage 0 (read-only): 1.4 min of card time
+segment (set, read-back, two windows) 26 s; a pass of 9 segments 3.9 min
+Stage A: quieting and checks 0.6 min, probe 2.6, 4 passes 18.6, load 1.9, hot 10.3, restore 0.3: 34 min of card time (22 min without the optional load and hot items)
+Stage B: first write 0.5 min, minion ladder down and up 5.3, SRAM ladder 2.1, dwell at the lowest point 10, restore 0.4: 18 min of card time
+writes: SET_FREQUENCY about 51: each also re-locks the NoC PLL at 400 MHz (stock CLI); SET_MODULE_VOLTAGE 17; SET_MODULE_ACTIVE_POWER_MANAGEMENT 2
+
+==============================================================================================================
+J. The gap between two sampler windows: how much the die moves before the after-window starts
+==============================================================================================================
+  gap 2 s: the die moves 0.144 C per W of SoC step by the after-window; with the board slope 0.328 W/C the step reads 4.7% large (each direction; up and down steps do not cancel it)
+  gap 3 s: the die moves 0.162 C per W of SoC step by the after-window; with the board slope 0.328 W/C the step reads 5.3% large (each direction; up and down steps do not cancel it)
+  gap 4 s: the die moves 0.175 C per W of SoC step by the after-window; with the board slope 0.328 W/C the step reads 5.7% large (each direction; up and down steps do not cancel it)
+  heatsink on, 600 MHz, 525/700 mV (the card as it is): settles at 56.0 C (ambient 22 C), board 25.29 W
+  heatsink on, 600 MHz, 525/700 mV (the card as it is): settles at 56.0 C (ambient 28 C), board 25.29 W
+  heatsink on, clock only, 100 MHz, 525/700 mV, D at its largest: settles at 47.0 C (ambient 22 C), board 18.60 W
+  heatsink on, clock only, 100 MHz, 525/700 mV, D at its largest: settles at 49.2 C (ambient 28 C), board 19.16 W
+
+==============================================================================================================
+K. The envelope model (lowclock_calc.py, its JSON) restated as Stage A and B predictions, beside this plan's
+==============================================================================================================
+Stage A, the 600 -> f idle board step on aifoundry3 (the envelope model: only the fitted clock tree follows the clock; T-independent), against this plan's TH-CS joint draws (section D):
+  600 -> 400 MHz: envelope model 0.43 / 0.74 / 0.97 W
+  600 -> 300 MHz: envelope model 0.64 / 1.11 / 1.46 W
+  600 -> 200 MHz: envelope model 0.86 / 1.49 / 1.95 W
+  600 -> 100 MHz: envelope model 1.07 / 1.86 / 2.43 W
+  (its aifoundry3 clock tree at 600 MHz, minion + SRAM with their regulator loss: 1.28 / 2.20 / 2.87 W; x5/6 = 1.07 / 1.83 / 2.39 W)
+Stage B, the minion leakage exponent (B-N): envelope model kappa 2.00 / 2.49 / 2.93 per volt -> equivalent n over 525..400 mV: 1.92 / 2.15 / 2.35; leakage factor 525 -> 400 mV x0.592 / x0.557 / x0.527
+   this plan (section C): n 2.26 .. 2.82, central 2.55; overlap of the two: 2.26 .. 2.35
+Stage B, the SRAM exponent (B-NS): envelope model SRAM leakage at 660 over 704 mV x0.769 / x0.836 / x0.878 (a wide prior, held only by the SRAM rail's part of the 800 MHz step) -> equivalent n_SRAM 2.0 / 2.8 / 4.1; this plan assumes n_SRAM = n
+Stage B, the lowest settable point (B-LOW) at 56 C: envelope model 19.57 / 19.90 / 20.21 W (its 60 C values 20.53 / 20.86 / 21.17 W less 0.96 W, interpolated with its median slopes at 40 and 60 C, T_L 28.9 C); board slope at 56 C 0.224 W/C
+   this plan (section E): 18.7 / 19.2 / 19.8 W; registered B-LOW band [18.4, 20.1] W
+   (both models start from the same 600 MHz law: envelope model 25.29 W at 56 C, this plan 25.29 W)
+done

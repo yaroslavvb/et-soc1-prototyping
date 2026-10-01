@@ -20,7 +20,7 @@ ol.srcs li:target { background: var(--code-bg); border-radius: 6px; }
 .reading .card p { margin: 6px 0 0; }
 .reading .verdict { font-weight: 650; }
 .verdict.yes { color: var(--ok); } .verdict.no { color: var(--bad); }
-.opt-feas { font-weight: 600; white-space: nowrap; }
+.opt-feas { font-weight: 600; }
 .opt-feas.now { color: var(--ok); } .opt-feas.no { color: var(--bad); }
 #otable td:first-child { font-variant-numeric: tabular-nums; font-weight: 650; }
 .tcell small { display: block; color: var(--ink-2); font-size: 0.74rem; }
@@ -29,19 +29,25 @@ ol.srcs li:target { background: var(--code-bg); border-radius: 6px; }
 #vtable td:first-child, #wtable td:first-child, #itable td:first-child { font-weight: 600; }
 #vtable tr.ours td { color: var(--ink-2); }
 h3.srch { margin-top: 22px; }
+.kpis { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.kpi .val { font-size: 1.35rem; }
+@media (min-width: 700px) { .kpis .kpi .lab { min-height: 3.9em; } }
 </style>
 
 <h1>Feasibility of running the ET-SoC-1 without its heatsink</h1>
-<p class="byline">30 September 2026 · a feasibility study from the cards' measured record, the vendor's documents, a
-Monte Carlo model of the bare package and published outside work; no card was touched · part of the
+<p class="byline">30 September 2026, with a section on slower clocks added that evening · a feasibility study from the
+cards' measured record, the vendor's documents and firmware, Monte Carlo models of the bare package and published
+outside work; no card was touched · part of the
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede"><b>No: a lab card cannot run without its heatsink at 600 MHz</b>, the clock three of the four cards
-run at. <b>Taping a thermocouple to the heatsink base, heatsink on, is feasible, cheap and safe with the card off;
+run at, <b>nor at 100 MHz, the lowest clock its firmware can set</b>: a slower clock removes little of the heat, which
+is mostly leakage and power no minion clock drives. <b>Taping a thermocouple to the heatsink base, heatsink on, is feasible, cheap and safe with the card off;
 pointing a sensor at the bare chip is not.</b> The proposal was to measure the chip's temperature with a sensor of our
 own, either taped to the heatsink or pointed straight at the chip with the heatsink off. This page works out whether a
 card can run bare in the lab, what a sensor would see if it did, and which ways of adding a physical temperature are
-safe.</p>
+safe. Section 5, added at the owner's request, works out how low the clock can go, what a slow card draws, whether it
+holds bare, and what a thermal camera would see of where the computation runs.</p>
 
 <h3 id="two-readings">The proposal, read two ways</h3>
 <div class="reading">
@@ -50,15 +56,16 @@ safe.</p>
 <p class="verdict">Soldered into a groove in the lid: only with the lab's consent, at moderate risk.</p>
 <p>Either logs a physical temperature independent of the host and its whole-degree sensor mean; the lid groove is where
 Intel measures case temperature. Each measures one point, not a map (options 2 and 3 in
-<a href="#options">section 5</a>).</p></div>
+<a href="#options">section 6</a>).</p></div>
 <div class="card"><b>The heatsink off, a sensor pointed at the chip</b>
-<p class="verdict no">Not feasible in a lab host.</p>
+<p class="verdict no">Not as a running setup, at any clock the firmware can set.</p>
 <p>The card cannot hold a temperature without its heatsink (<a href="#runaway">section 2</a>). In the model, bare
 aifoundry2 passes 90 °C <span data-v="offStill"></span> after a cold power-on at idle in still air (card 1 in
 <span data-v="offC1"></span>), and with a fan in <span data-v="offFan"></span> <span class="kind">model</span>
-(<a href="#heating">section 3</a>). What a sensor would see is a lid at nearly one temperature
-(<a href="#sensor-view">section 4</a>). The only view of the chip worth that risk is of a delidded die on a card set
-aside for it.</p></div>
+(<a href="#heating">section 3</a>). A single frame shows a lid at nearly one temperature
+(<a href="#sensor-view">section 4</a>). At 100 MHz, with a fan, a short look with lock-in is possible in some
+power-ons, behind an automatic power cut and after the measurement plan (<a href="#slow-clocks">section 5</a>). A
+shire-scale view of a running chip needs a delidded die on a card set aside for it.</p></div>
 </div>
 
 <div class="card answers" id="the-answers">
@@ -84,11 +91,31 @@ throttled itself kept running, and two burned out within a second, one with no p
 protection reacted too slowly <span class="cite">[<a href="#src-6">6</a>]</span>; Intel requires a tripped Atom 330's supply to be turned off within 500 ms
 <span class="cite">[<a href="#src-7">7</a>]</span>. The one marginal case is aifoundry1 card 0 idling at 300 MHz, and any kernel lifts it to 600 MHz; on
 25 September its release 1.4.1 firmware did step it back to 300 MHz after it read 115–117 °C, by a path not established
-<span class="cite">[<a href="#src-r3">R3</a>]</span>. <a class="more-link" href="#runaway">Sections 2–3</a>, <a class="more-link" href="#others-bare">6.1</a></dd>
+<span class="cite">[<a href="#src-r3">R3</a>]</span>. <a class="more-link" href="#runaway">Sections 2–3</a>, <a class="more-link" href="#others-bare">7.1</a></dd>
+<dt>Would a much slower clock, 100 or even 10 MHz, let it run bare?</dt>
+<dd><b>No, not as a running setup.</b> The firmware can set 100 MHz, six times slower; nothing lower without a new boot
+loader or a debugger <span class="kind">from source</span>. At 100 MHz with the voltages left as they are, aifoundry2's
+idle at a 60 °C die falls by only <span data-v="lcAClk"></span> from <span data-v="lcAIdle"></span> (the measurement
+plan's model, which allows other forms of the leakage law, gives <span data-v="lcAClkPlan"></span> on aifoundry3), since
+most of it is leakage and power no minion clock drives; at the firmware's lowest voltages, with the NoC slowed too, it is
+<span data-v="lcALeft"></span>, and 10 MHz would take only <span data-v="lcA10"></span> more
+<span class="kind">model</span>. To settle below 85 °C there, a bare card needs a thermal resistance of
+<span data-v="lcATh"></span> or less. The bare package has 4–12 °C/W in still air, where no draw settles, and 2–7 °C/W
+with a fan, where <span data-v="lcABestFan"></span> of draws settle on aifoundry2 and aifoundry3, a share that mostly
+reflects that assumed range <span class="kind">model</span>. A 3–6 m/s blower <span class="kind">assumed</span> would hold
+an idle temperature in <span data-v="lcBlowEq"></span> of draws, but the measurement plan's model brings only
+<span data-v="lcBlowPon"></span> of cold power-ons through its gate, which asks for 80% <span class="kind">model, untested</span>.
+A slow clock buys little time: the card idles at 600 MHz while the host boots and the low point is set, so a bare
+aifoundry2 at 100 MHz then has <span data-v="lcAWin"></span> before the plan's 75 °C stop
+<span class="kind">model, boot assumed</span>. <a class="more-link" href="#slow-clocks">Section 5</a></dd>
 <dt>What would a sensor pointed at the chip see?</dt>
-<dd>One temperature. With the heatsink off, the lid, and the die beneath it, spread heat sideways over
+<dd><b>In a single frame, one temperature.</b> With the heatsink off, the lid, and the die beneath it, spread heat sideways over
 <span data-v="ansSpread"></span> mm <span class="kind">model</span>, about the width of the die, while the shires sit 3.7 mm apart: a 1 W hot
-shire would lift the lid by only about <span data-v="ansBump"></span> °C over a broad patch <span class="kind">model</span>. The lid is
+shire would lift the lid by only about <span data-v="ansBump"></span> °C over a broad patch <span class="kind">model</span>.
+Switching a pattern of work against its complement and averaging the images in step with it (lock-in) does bring
+patterns out of a taped lid: at 100 MHz and the lowest voltages, a single shire and the coarse patterns within about
+10 s and a checkerboard in about <span data-v="lcAChk"></span> <span class="kind">model</span>. That fits the minute or
+so a fan leaves in the better power-ons, not still air (<a href="#lc-camera">section 5.4</a>). The lid is
 plated metal, which an infrared camera reads low and mostly as reflections of the room unless it is taped: a study of
 processor thermography put a metal package's emissivity at about 0.01 and covered the surface with masking tape of
 emissivity 0.92 <span class="cite">[<a href="#src-8">8</a>]</span>. The lab's planned camera sees 8–14 µm, where sapphire, fused silica and Czochralski silicon
@@ -104,17 +131,24 @@ temperature itself, and only with the lab's consent and at moderate risk, use In
 thermocouple soldered into a groove cut in the lid's centre <span class="cite">[<a href="#src-9">9</a>]</span>; calibrated, it reads the lid to about
 <span data-v="ansTc"></span> °C <span class="kind">model</span>. Put emissivity tape wherever the camera looks. The natural moment is the
 on-site check of aifoundry1 card 0's cooling that the lab-problems page already requests (SH1). For where the heat goes,
-use the thermal-camera plan's view of the back of the board with the on-die voltage map. A shire-scale thermal image
+use the thermal-camera plan's view of the back of the board with the on-die voltage map. To see where the work runs,
+the chip's own 34 sensors are the safe camera: with the heatsink on they see the same contrast between neighbouring
+shires as with it off <span class="kind">model</span>. On the stock firmware the host gets one usable sensor, the I/O
+shire's, which with lock-in and a slow dither of the chip's power sees a block of shires beside it; a map of every shire
+needs a rebuilt, signed boot loader, which the cards have never run <span class="kind">model, inference</span>
+(<a href="#lc-ranked">section 5.5</a>).
+A shire-scale thermal image
 needs a delidded card that may be lost, an infrared-window cooler and a mid-wave camera, as in the published setups:
-weeks and thousands of dollars <span class="kind">estimate</span>. <a class="more-link" href="#options">Section 5</a></dd>
+weeks and thousands of dollars <span class="kind">estimate</span>. <a class="more-link" href="#options">Section 6</a></dd>
 </dl>
 </div>
 
 <div class="kpis">
-  <div class="card kpi"><div class="lab">The largest thermal resistance at which an idle 600 MHz card still settles <span class="kind">model</span></div><div class="val" data-v="k1"></div><div class="sub" data-v="k1s"></div></div>
-  <div class="card kpi"><div class="lab">Monte Carlo draws in which a bare 600 MHz card settles at idle <span class="kind">model</span></div><div class="val" data-v="k2"></div><div class="sub" data-v="k2s"></div></div>
-  <div class="card kpi"><div class="lab">Bare aifoundry2, cold power-on to 90 °C at idle (median) <span class="kind">model</span></div><div class="val" data-v="k3"></div><div class="sub" data-v="k3s"></div></div>
-  <div class="card kpi"><div class="lab">How far heat spreads sideways with the heatsink off <span class="kind">model</span></div><div class="val" data-v="k4"></div><div class="sub" data-v="k4s"></div></div>
+  <div class="card kpi"><div class="lab">Largest thermal resistance at which an idle 600 MHz card settles <span class="kind">model</span></div><div class="val" data-v="k1"></div><div class="sub" data-v="k1s"></div></div>
+  <div class="card kpi"><div class="lab">Draws in which a bare 600 MHz card settles at idle <span class="kind">model</span></div><div class="val" data-v="k2"></div><div class="sub" data-v="k2s"></div></div>
+  <div class="card kpi"><div class="lab">Bare aifoundry2: cold power-on to 90 °C at idle, median <span class="kind">model</span></div><div class="val" data-v="k3"></div><div class="sub" data-v="k3s"></div></div>
+  <div class="card kpi"><div class="lab">How far heat spreads sideways, heatsink off <span class="kind">model</span></div><div class="val" data-v="k4"></div><div class="sub" data-v="k4s"></div></div>
+  <div class="card kpi"><div class="lab">Thermal resistance a bare card needs at 100 MHz and the lowest voltages <span class="kind">model</span></div><div class="val" data-v="k5"></div><div class="sub" data-v="k5s"></div></div>
 </div>
 
 <details class="more" id="request"><summary>The owner's request (29 September 2026, 17:30 PDT), verbatim</summary>
@@ -134,7 +168,12 @@ dP/dT; below 1 a temperature can settle, at 1 or above it cannot. The <i>Foster 
 fitted to aifoundry2 with its heatsink. The <i>decay length</i> is the distance over which a hot spot's excess
 temperature falls by a factor of e (2.7) sideways. <i>LWIR</i> and <i>MWIR</i>: long-wave (8–14 µm) and mid-wave
 (3–5 µm) infrared. <i>Delidding</i>: removing the lid to expose the die. <i>Cards</i>: aifoundry2, aifoundry3 and
-aifoundry1 card 1 run at 600 MHz; aifoundry1 card 0 idles at 300 MHz and 399 mV. Numbers carry their kind where it
+aifoundry1 card 1 run at 600 MHz; aifoundry1 card 0 idles at 300 MHz and 399 mV on the die. The <i>minion clock</i>:
+the one clock the 32 compute shires and the master shire run on. The <i>floor voltages</i>: the lowest the firmware
+accepts, 400 mV on the minion rail and 660 mV on the SRAM rail. A <i>look</i>: the seconds a bare card leaves between
+the low clock being set and the measurement plan's 75 °C stop. <i>Lock-in</i>: switching a pattern of work on and off at a fixed rate and averaging the
+images in step with it, which removes everything that does not follow the switching. <i>θ<sub>85</sub></i>: the largest
+thermal resistance at which the die still settles at or below 85 °C. Numbers carry their kind where it
 matters: <span class="kind">measured</span> on our cards, <span class="kind">from source</span> read from a vendor
 document or an outside source, <span class="kind">derived</span> arithmetic on those, <span class="kind">fitted</span>,
 <span class="kind">model</span> (5th–95th percentile of the Monte Carlo unless stated), <span class="kind">assumed</span>,
@@ -310,8 +349,9 @@ reading <span class="kind">assumed</span>. By then the bare die, in still air, i
 <span data-v="bootA2"></span> on aifoundry2 and <span data-v="bootC1"></span> on card 1. From there to 90 °C:
 <span data-v="bootWin"></span> So in still air bare aifoundry2 would allow one load of about
 <span data-v="burstA2"></span> per power cycle, and card 1 about <span data-v="burstC1"></span>
-<span class="kind">model, boot assumed</span>. The die keeps heating between loads, so no modulated run fits, and short of shutting the
-whole host down nothing switches the card off; no remote power-on is recorded either.</p>
+<span class="kind">model, boot assumed</span>. The die keeps heating throughout, so only a short modulated run fits: lock-in of a
+pattern against its complement through a taped lid needs about 10 s at 600 MHz (<a href="#lc-camera">section 5.4</a>). Short
+of shutting the whole host down nothing switches the card off, and no remote power-on is recorded either.</p>
 <details class="more"><summary>The die at the end of the host boot, and the seconds left to 90 °C, per card</summary>
 <div class="table-wrap"><table id="btable"></table></div>
 <p class="small">Each row: 300 draws; the card idles through a boot of 30–90 s, then the load starts. “Already past 90”:
@@ -325,7 +365,9 @@ that resolves shires is of a delidded die under an infrared-transparent cooler, 
 as in the published setups, a mid-wave camera; in the long-wave band of the lab's camera it needs a germanium,
 zinc-selenide or similar window and a coolant that transmits there, for which a thin mineral-oil film is the untested
 candidate (section 4.2). A thermocouple on the lid adds one accurate
-point, not a picture.</p>
+point, not a picture. All of this is about a single frame: a pattern of work switched against its complement and read
+by lock-in does show through a taped lid, coarse patterns within seconds at 600 MHz <span class="kind">model</span>
+(<a href="#lc-camera">section 5.4</a>).</p>
 <div class="chart" id="decay"></div>
 <p class="small">How far a hot spot spreads sideways (decay length, 5th–95th percentile, log scale), against the 3.7 mm
 spacing of the shires and the die's 22–26 mm width <span class="kind">model</span>. A view resolves single shires only
@@ -355,10 +397,10 @@ estimates about 3.7 mm), short enough to show structure, but the heatsink covers
 infrared shortens the length to <span data-v="dDelid"></span> mm, or <span data-v="dLock"></span> mm with 5–10 Hz lock-in
 excitation: that resolves single shires. Every published cooler of this kind that states its band was imaged by a
 mid-wave camera or microscope, at 3–5, 3.4–5.1 or 2.5–5.1 µm, with mineral oil or a fluorinated liquid as the coolant,
-and sapphire where a window is named (section 6.4). The lab's planned camera, the
+and sapphire where a window is named (section 7.4). The lab's planned camera, the
 Thermal Master P3, sees long-wave infrared, 8–14 µm, at 25 Hz <span class="cite">[<a href="#src-r13">R13</a>]</span>,
 where sapphire and fused silica fail, Czochralski silicon transmits poorly and fluorinated coolants likely absorb; it
-would need one of the windows and a coolant of section 4.2, a combination none of the setups in section 6.4 used. Realistically this is
+would need one of the windows and a coolant of section 4.2, a combination none of the setups in section 7.4 used. Realistically this is
 a job for a mid-wave camera.</li>
 <li><b>Long-wave without a window.</b> KIT opens the package and cools the bare silicon from behind, “through the PCB”,
 with a Peltier element <span class="cite">[<a href="#src-8">8</a>]</span>, imaging the exposed silicon from above with an 8–14 µm camera <span class="cite">[<a href="#src-16">16</a>]</span>; a UC Riverside group does the same
@@ -422,11 +464,302 @@ such a layer absorbs across 8–14 µm is not known <span class="kind">inference
 error is about 0.1 °C under a plenum of less than 500 µm and up to 43 °C for a 2 mm channel, where the film is
 “effectively opaque” <span class="cite">[<a href="#src-31">31</a>]</span>.</p>
 
-<h2 id="options">5. What would work, ranked</h2>
+<h2 id="slow-clocks">5. Slower clocks: how low can it go, and does it help?</h2>
+<p><b>Answer.</b> The lowest minion clock the firmware can set is <b>100 MHz</b>, six times slower than 600 MHz. Nothing
+lower can be set without new firmware, and 10 MHz would save only <span data-v="lcA10"></span> more than 100 MHz
+<span class="kind">from source; model</span>. A slower clock barely changes what a bare card has to shed: most of its
+idle power is leakage, which the voltage and the die's temperature set, and power that no minion clock drives. On
+aifoundry2 at a 60 °C die, 600 → 100 MHz with the voltages left as they are removes <span data-v="lcAClk"></span> of
+<span data-v="lcAIdle"></span>; the firmware's lowest voltages and a slower NoC bring the card down to
+<span data-v="lcALeft"></span> <span class="kind">model</span>. <b>Even there, no clock holds a bare card:</b> settling
+below 85 °C needs a thermal resistance of <span data-v="lcATh"></span> or less. In still air no draw settles at any
+clock; with a fan on the bare lid <span data-v="lcABestFan"></span> of draws do on aifoundry2 and aifoundry3, a share set
+mostly by the assumed range of the fan's cooling; with a 3–6 m/s blower the measurement plan's model brings
+<span data-v="lcBlowPon"></span> of cold power-ons through its gate, which asks for 80% <span class="kind">model</span>.
+A slow clock buys little time, since the card idles at 600 MHz until the host is up and the low point is set, and it
+costs signal: the heat that marks where the work runs falls with the clock. Through a taped lid at 100 MHz, lock-in
+shows a single shire or a coarse pattern within about 10 s and a checkerboard in about <span data-v="lcAChk"></span>,
+inside the look a fan leaves in the better power-ons <span class="kind">model</span>; such a look is possible only
+behind an automatic power cut and after the measurement plan of section 5.6. The views that hold a temperature are
+with the heatsink on, the chip's own sensors read with lock-in (one usable sensor on the stock firmware; a per-shire map
+needs a rebuilt boot loader), or a delidded die under a cooler.</p>
+<details class="more" id="request-lc"><summary>The owner's question (30 September 2026, about 15:45 PDT), verbatim</summary>
+<blockquote class="owner">“For the heat sink issue, can you double-check that maybe I can run it much lower frequency,
+like how low can I go? Can I go at 100 MHz? So, um, yeah, find some other alternatives. I want to consider maybe doing
+something extreme, like 10 MHz, and get the envelope of what's possible. Ideally, I would run at the slower speed, maybe
+10 times slower, but I would be able to run it without the heat sink and point the thermal camera and [see the]
+arrange[ment] of the computation.”</blockquote>
+</details>
+
+<h3 id="lc-settable">5.1 What the firmware can set</h3>
+<ul>
+<li><b>One clock drives all the minions.</b> Every firmware build boots the minion shires, the 32 compute shires and the
+master shire, on one “step clock”, a PLL in the service processor, at 600 MHz, and turns the per-shire PLLs off; the
+shire caches and the master minion run on the same clock, and which clock the spare shire gets is not established
+<span class="cite">[<a href="#src-r15">R15</a>]</span> <span class="kind">from source</span>. The management command
+<code>DM_CMD_SET_FREQUENCY</code> reprograms that PLL and changes no voltage <span class="kind">from source</span>. It
+accepts only a frequency that is an exact entry of the PLL's mode table, and below 300 MHz the table has 100, 125, 150,
+166, 175, 200, 225, 250 and 275 MHz; 100 MHz is mode 62, a 1,100 MHz oscillator divided by 11
+<span class="kind">from source, current tables</span> <span class="kind">inference for the lab's builds</span>. aifoundry3's boot service
+already sends it (<code>-f 600,400</code>) at every boot <span class="cite">[<a href="#src-r15">R15</a>]</span>
+<span class="kind">measured</span>.</li>
+<li><b>Nothing below 100 MHz.</b> No table entry, management command or boot-loader path reaches a lower clock (the
+minion-debug commands' memory writes reach only DRAM, a kernel stack and trace buffers), and the two other inputs a
+shire can select, the PLL's bypass and the shire mux's reference position, are 100 MHz as well
+<span class="cite">[<a href="#src-r15">R15</a>]</span> <span class="kind">from source</span>. The hardware's divider
+field would allow it: 10 MHz needs a post-divider of 107 at the tables' lowest oscillator frequency and up to 400 at
+their highest, against a 9-bit field <span class="kind">derived, <code>pll_modes.py</code></span>. But only a new signed
+boot loader, which the lab's cards have never run, or a debugger could program one. Esperanto's slides give the minions
+an operating range of “300 MHz TO 2 GHz” <span class="cite">[<a href="#src-3">3</a>]</span>, and the PLL vendor's generic
+brief gives an output of “4MHz - 6GHz” and a “Divider Range 1-256” <span class="cite">[<a href="#src-44">44</a>]</span>:
+the floor is this chip's tables, not the PLL's design <span class="kind">inference</span>.</li>
+<li><b>The voltages.</b> <code>DM_CMD_SET_MODULE_VOLTAGE</code> sets each rail on its own. Builds 0.20.0 and later accept
+a minion rail of 400–620 mV, an SRAM rail of 660–850 mV and a NoC rail of 400–600 mV; 0.18.0 (card 1) checks nothing
+and writes every NoC setting to flash <span class="cite">[<a href="#src-r15">R15</a>]</span>
+<span class="kind">from source</span>. The firmware's “safe state” names 300 MHz at 400 mV on the minions and 660 mV on
+the SRAM, constants marked “TODO: to be removed and replaced with vmin lut value” (650 mV on the SRAM in 0.20.0, below
+that build's own 660 mV check): a lookup, not a validated operating point
+<span class="cite">[<a href="#src-r15">R15</a>]</span> <span class="kind">from source</span>. Card 0 idles near it, at
+300 MHz and 399 mV on the die: 17.97 W at a 62 °C die (<code>card0_guard.py</code>) <span class="kind">measured</span>.
+aifoundry2 runs 600 MHz at 517–519 mV on the die (517 with a kernel running, 518–519 idle)
+<span class="cite">[<a href="#src-r7">R7</a>]</span>, and aifoundry2's and aifoundry3's SRAM rails are set 40–45 mV
+above that rail's floor <span class="kind">measured, from source</span>. Esperanto puts the minions' “sweet spot”
+“between 300 and 500 mV”, a modelled figure <span class="cite">[<a href="#src-4">4</a>]</span>; no published SRAM floor was found, and SRAM's
+energy-optimal voltage sits about 100 mV above logic's <span class="cite">[<a href="#src-45">45</a>]</span>. The regulator
+is not the limit: the module that feeds the minion and NoC rails <span class="cite">[<a href="#src-r15">R15</a>]</span>
+is specified down to 0.25 V <span class="cite">[<a href="#src-46">46</a>]</span>.</li>
+<li><b>Which card.</b> Only the firmware's governor ties voltage to clock, and only at the points of each card's
+operating-point table (aifoundry2 has been seen at 600, 700 and 800 MHz <span class="cite">[<a href="#src-r7">R7</a>]</span>;
+no card's full table has been read). On
+aifoundry2 the governor would put 600 MHz back at its next idle or when its thermal loop exits; aifoundry3's governor
+is latched, so a clock set there stays, barring the race below (the plan starts from a freshly booted card); card 1's
+voltages must never be set; card 0 is excluded. So aifoundry3 is the
+card for any trial <span class="cite">[<a href="#src-r15">R15</a>, <a href="#src-r16">R16</a>]</span>
+<span class="kind">from source, inference</span>.</li>
+<li><b>Not established.</b> No lab card has run below 300 MHz, beyond the microseconds each PLL change spends bypassed at
+100 MHz. At 100 MHz the master minion's handshakes with the compute minions take six times longer, while its timeouts
+for them, 5–10 ticks of a wall-clock timer, do not stretch: about 52–105 ms if a tick is the 10.5 ms that the measured
+1.05 s heartbeat implies <span class="kind">inference</span>. Reading the source also turned up a race: the clock
+command and the governor's loop reprogram the same PLL with no lock between them, and the command's task can interrupt
+the governor's anywhere, so a clock set while a governor loop runs, even during the loop's own voltage change, can be
+overwritten by the governor's stale target. The current source still has it
+<span class="cite">[<a href="#src-r16">R16</a>]</span> <span class="kind">from source, each step</span>
+<span class="kind">inference: the window can be hit</span> <span class="kind">never seen on a card</span>.</li>
+</ul>
+<p>The rest of this section compares three voltage policies <span class="kind">assumed</span>. <b>Voltages left</b>:
+the clock command alone, so the rails stay at the card's 600 MHz values (518 mV minion and 704 mV SRAM on aifoundry2).
+<b>Floor</b>: minion 400 mV and SRAM 660 mV at and below 300 MHz, the safe state's pair (398 and 660 mV on the die in the
+model); at 400 MHz a straight line to the card's 600 MHz point gives 438 mV and 675 mV, and what is safe there is not
+established. <b>Floor + NoC</b>: the floor, with the NoC also at 200 MHz and 400 mV (398 mV on the die in the model),
+values the firmware accepts but the vendor's operating-point validator stops short of (485 mV), so untested
+<span class="cite">[<a href="#src-r15">R15</a>]</span>.</p>
+
+<h3 id="lc-power">5.2 What a slow card draws, and the floor no clock removes</h3>
+<p>The envelope model (<code>lowclock_calc.py</code>) splits each card's idle power, rail by rail, into what the minion
+clock drives, leakage, and what neither touches. A fit to one card's cooling runs leaves the clock's share wide open, so
+the model shares one minion clock tree across the three 600 MHz cards (same design, scaled by V²), and it fixes how
+leakage falls with voltage from two anchors in the record. aifoundry2 idles at 35.0 W at 800 MHz (a 64–65 °C die)
+against 28.1 W at 600 MHz (63–68 °C), compared through its idle law at 64.5 °C, with its SRAM rail stepping from 704 to
+830 mV along with the clock; and card 0's minion rail draws 4.09 W at 300 MHz and 0.399 V against aifoundry2's 8.30 W
+at 600 MHz and 0.519 V, both at 62 °C, on chips whose NoC rails agree within 2% <span class="kind">measured</span>. Only
+<span data-v="lcAcc"></span> of the prior draws pass both anchors and the rail fits, and the anchors pull against each
+other: card 0's firmware state may not be a pure change of clock and voltage <span class="kind">model, inference</span>. The fit gives a minion clock
+tree of <span data-v="lcD"></span> on the die at 600 MHz, minion leakage at 398 mV <span data-v="lcG"></span> of its
+value at 518 mV, and SRAM leakage at 660 mV <span data-v="lcGs"></span> of its value at 704 mV
+<span class="kind">fitted</span>; transistor physics alone, from N7's drain-induced barrier lowering, “DIBL is ~40 mV/V”
+<span class="cite">[<a href="#src-47">47</a>]</span>, would give 0.65 <span class="kind">derived</span>. The clock tree's
+size rests on the exponential form of the leakage law in temperature: Arrhenius forms fit the same cooling runs and leave
+up to about 3.5 W of the minion rail that does not follow temperature <span class="cite">[<a href="#src-r16">R16</a>]</span>
+<span class="kind">fitted</span>, which Stage A of the measurement plan would settle. A clock cuts only the dynamic term,
+“P = Cf V² + Pstatic” <span class="cite">[<a href="#src-48">48</a>]</span>. At a 60 °C die aifoundry2's idle
+<span data-v="lcDecA2"></span> <span class="kind">model</span>.</p>
+<div class="ck-controls"><div id="lccard"></div><div id="lcload"></div></div>
+<div id="lcleg"></div>
+<div class="chart" id="lcchart"></div>
+<p class="small" id="lccap"></p>
+<div class="table-wrap wide"><table id="lctable"></table></div>
+<p class="small" id="lctnote"></p>
+<ul>
+<li><b>100 MHz with the voltages left</b> removes only the idle clock tree, <span data-v="lcBclk"></span>, and leaves
+the rise of idle power with temperature where it was, <span data-v="lcBslope"></span> <span class="kind">model</span>.</li>
+<li><b>The floor voltages</b> remove <span data-v="lcBfloor"></span> more, and the NoC at 200 MHz and 400 mV another
+<span data-v="lcBnoc"></span>. That leaves <span data-v="lcBleft"></span>, of which about <span data-v="lcBsoc"></span>
+is on the die, and the die's power rises by <span data-v="lcBdslope"></span> <span class="kind">model</span>.</li>
+<li><b>10 MHz</b>, if it could be set, would remove <span data-v="lcB10"></span> more at the board: nine tenths of the
+<span data-v="lcCT100"></span> of minion and SRAM clock tree left on the die at 100 MHz and the floor voltages, with its
+regulators' loss <span class="kind">model</span>.</li>
+<li><b>The floor no clock removes</b>, with the clock taken to zero: <span data-v="lcBzero"></span>
+<span class="kind">model</span>.</li>
+<li><b>Under load</b> the clock matters more. A random-data pattern on 16 shires adds <span data-v="lcBload"></span>
+<span class="kind">model</span>: the load stops mattering, the idle floor does not.</li>
+</ul>
+<details class="more"><summary>Against Esperanto's own measurement, and Intel's 10 MHz chip</summary>
+<p>The only published breakdown found is Esperanto's: an idle card at 20.0 W, with 5.8 W on the minions, 1.6 W on the
+NoC and 1.7 W on the SRAM, clock and temperature not given <span class="cite">[<a href="#src-49">49</a>]</span>.
+aifoundry2's model has a 5.8 W minion rail at a 46 °C die, where its NoC rail is 1.75 W, its SRAM rail 0.91 W against
+Esperanto's 1.7, and the card 21.5 W <span class="kind">model</span>. 46 °C lies below every measured point of
+aifoundry2 (62–84 °C), so these are its fitted laws extrapolated. Intel's Claremont ran from
+“1.1V/741MHz/445mW to 380mV/10MHz/1.5mW”, its leakage growing from 3% to 50% of its power on the way: it reached
+10 MHz by lowering the voltage with the clock <span class="cite">[<a href="#src-50">50</a>]</span>.</p>
+</details>
+
+<h3 id="lc-bare">5.3 Does a slow card hold bare?</h3>
+<p><b>Not in still air or with an ordinary fan, at any clock; a strong blower is marginal.</b> The lower panel of the
+chart above gives θ<sub>85</sub>, the largest thermal resistance at which the die settles at or below 85 °C, on the
+SoC's own power. <span data-v="lcThRise"></span>, while the bare package offers 4–12 °C/W in still air and 2–7 °C/W with
+a fan <span class="kind">model</span>.</p>
+<ul>
+<li><b>Still air:</b> no draw settles below 85 °C, at any clock, settable or not, on any card, under any voltage policy
+<span class="kind">model</span>.</li>
+<li><b>A fan on the bare lid:</b> the best settable point, 100 MHz at the floors with the NoC lowered, settles in
+<span data-v="lcFanBest"></span>. No clock, settable or not, reaches 90% of draws <span class="kind">model</span>.</li>
+<li><b>A blower</b> of 3–6 m/s <span class="kind">assumed</span> would bring the package to <span data-v="lcBlowTh"></span>,
+the board path setting the floor. At aifoundry3's lowest settable point the measurement plan's model then gives
+<span data-v="lcBlow"></span> <span class="cite">[<a href="#src-r16">R16</a>]</span> <span class="kind">model</span>.</li>
+<li><b>With the heatsink</b> every clock settles at idle. Under a sustained random-data pattern on 16 shires
+<span data-v="lcSinkEnv"></span> <span class="kind">model</span>.</li>
+<li><b>An IR-window cooler</b> on a delidded die holds every clock, at about 27–30 °C <span class="kind">model</span>.</li>
+</ul>
+<p><span class="lead-in">What a slow clock buys: a little time, and only with a fan.</span> A bare card is powered
+whenever its host is, so it idles at 600 MHz through the host's boot (30–90 s, as in section 3.1), and setting the low
+point (power management off, the voltages, the clock) takes another 20–60 s at that idle
+<span class="kind">assumed</span>. At the end of the boot the die is already at <span data-v="lcBootT"></span>. The look
+that is left, from the low point being set to the measurement plan's software stop at a 75 °C die, with the pattern
+running on aifoundry2 <span class="kind">model</span>:</p>
+<div class="table-wrap"><table id="lcwtable"></table></div>
+<p class="small" id="lcwnote"></p>
+
+<h3 id="lc-camera">5.4 What the camera would see</h3>
+<p>The imaging model (<code>imaging_calc.py</code>) is a layered conduction model of the die, its paste, the lid and the
+heatsink over the substrate and board, with the work spread evenly over each active shire's 3.7 mm tile, and four
+patterns of fp32 random-data work: a checkerboard of 16 shires against its complement, one shire switched on and off, a
+2×2 block moving between two corners, and the west half against the east half. The camera is the lab's Thermal Master
+P3 (noise-equivalent temperature 24–35 mK, 25 frames a second) at 60 mm, where a shire spans about 22 pixels
+<span class="cite">[<a href="#src-r13">R13</a>]</span>. A pattern counts as seen at three times the noise of a pair of
+shire-sized regions <span class="kind">model</span>. Only the switching power per shire sets the signal:
+<span data-v="lcPshire"></span> <span class="kind">model</span>. The view matters more than the clock:</p>
+<div class="table-wrap wide"><table id="lcctable"></table></div>
+<p class="small">The contrast of each pattern in a difference image of two settled states, in mK, at 600 / 100 / 10 MHz,
+the voltage at its floor below 600 MHz (aifoundry2's voltages) <span class="kind">model</span>. For the camera it is
+what the camera reads, the temperature contrast times the surface's emissivity, taken as 0.90–0.95 for black paint,
+0.74–0.92 for polyimide or masking tape on the lid and 0.01–0.1 for the bare plating <span class="kind">assumed</span>
+<span class="cite">[<a href="#src-r13">R13</a>, <a href="#src-8">8</a>]</span>, and through an IR-window cooler also the
+window's and the oil film's transmission, <span data-v="lcTau"></span> <span class="kind">assumed</span>. For the sensors
+it is the true contrast at the transistors (10 MHz not computed). <span data-v="lcThr"></span>
+<span class="kind">model</span>.</p>
+<div class="ck-controls"><div id="lcipat"></div></div>
+<div id="lcileg"></div>
+<div class="chart" id="lcimg"></div>
+<p class="small" id="lcicap"></p>
+<ul>
+<li><b>A taped lid, heatsink off.</b> The lid (copper, <span class="kind">assumed</span>) spreads the heat:
+<span data-v="lcLidCut"></span> <span class="kind">model</span>. <span data-v="lcLidLook"></span>
+<span class="kind">model</span>. Bare plating is 10–100 times worse, mostly reflecting the room
+<span class="cite">[<a href="#src-8">8</a>]</span>: tape it.</li>
+<li><b>A delidded die</b>, coated black: <span data-v="lcDieLook"></span> <span class="kind">model</span>. Bare
+silicon, whose emissivity is uncertain (0.1–0.7 <span class="kind">assumed</span>), needs
+<span data-v="lcDieSi"></span>. An IR-window cooler adds no contrast; it keeps the die alive, and the camera then reads
+the die through the window and the coolant film <span class="kind">model, transmission assumed</span>.</li>
+<li><b>The chip's own 34 sensors, heatsink on,</b> see the same contrast between neighbouring shires as with the heatsink
+off, about 1.4 K per watt per shire for a checkerboard, because the lid does the spreading, not the heatsink
+<span class="kind">model</span>. The one spatial measurement on record, a 4-shire block beside the I/O shire against the
+far corner with the heatsink on, read 0.67 °C on aifoundry3 (99% interval 0.37–0.97) and 0.97 °C on card 1 (0.52–1.41),
+in whole-degree readings <span class="kind">measured</span> (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-28-heat-placement">the heat-placement study</a>),
+against the model's steady <span data-v="lcMap"></span>: the intervals take in the model's values, and its contrasts
+are, if anything, low. Read shire by shire, as raw codes, the sensors would show every pattern within 10 s at every
+settable clock, and down to about 7–10 MHz with 10 minutes of lock-in <span class="kind">model; raw-code noise
+assumed</span>, provided the codes' own noise (0.02–0.09 °C assumed) dithers their 0.061 °C steps; at the low end of that
+range the amplitude read varies by about ±20% with the starting temperature (10th–90th percentile)
+<span class="kind">model</span>. But
+the stock firmware gives the host only a whole-degree mean, an anonymous peak and the I/O shire's own sensor
+<span class="cite">[<a href="#src-r3">R3</a>]</span>, and a per-shire readout needs a rebuilt boot loader. The I/O
+shire's sensor alone sees a 2×2 block beside it, and its whole-degree readings average below a degree only while the
+die's temperature crosses degree steps: <span data-v="lcStock"></span> <span class="kind">model</span>. Thermal maps have
+been almost fully reconstructed from a minimal number of on-die sensors <span class="cite">[<a href="#src-51">51</a>]</span>;
+this chip has one per shire.</li>
+<li><b>Lock-in.</b> Switch a pattern against its complement at 0.25–1 Hz. For the checkerboard and the moving 2×2 block
+the total power stays constant, so the mean temperature, the governor and the leakage stay put, and the contrast
+doubles; the half die (18 shires against 14) and one shire switched on and off also move the mean. The thermal
+diffusion length in silicon is about 16 mm at 0.1 Hz and about 5 mm at 1 Hz <span class="kind">model</span>: slow
+modulation keeps the signal, while the 5–10 Hz that sections 4 and 7.4 assume sharpens the image at the cost of signal.
+On a bare card the die keeps heating through the look (<a href="#heating">section 3</a>), so the states must be taken
+in an A-B-B-A order and the slow rise removed with a polynomial fit before the difference; the times here assume a
+steady scene with a 4-fold allowance for drift <span class="kind">inference</span>. Lock-in detects heat sources “of a few µW
+corresponding to a local temperature modulation of a few µK”, and “permanently existing heat sources in the device,
+which are not affected by the trigger signal, do not appear in the lock-in thermogram”
+<span class="cite">[<a href="#src-29">29</a>]</span>; activating firmware functions periodically has located hardware
+blocks “at the die level on a modern SoC” <span class="cite">[<a href="#src-52">52</a>]</span>, and a cooled camera reached 35 µK
+after 16 minutes <span class="cite">[<a href="#src-53">53</a>]</span>. Any run longer than 10 s needs the owner's
+approval: the lab caps a device hold at 10 s.</li>
+</ul>
+
+<h3 id="lc-ranked">5.5 The alternatives, ranked</h3>
+<p>For the owner's aim, seeing where the computation runs, from the safest to the most drastic:</p>
+<div class="table-wrap wide"><table id="lcotable">
+<thead><tr><th class="num">#</th><th>Alternative</th><th>What it would show <span class="kind">model</span></th><th>Holds a temperature?</th><th>Risk</th><th>Needs</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Keep the heatsink; use the chip's 34 sensors as a coarse camera, with lock-in of a pattern against its complement</td><td>Stock firmware: a 2×2 block beside the I/O shire, reliably only with a slow dither of the chip's power over whole degrees, in <span data-v="lcOpt1"></span>. With each shire's raw reading: every pattern within 10 s at every settable clock, at one pixel per shire</td><td>yes for the stock 2×2 pattern and for runs of 10 s or less; a sustained 16-shire pattern only at <span data-v="lcOpt1Sink"></span> (5.3)</td><td>none on the stock path; a rebuilt boot loader has never run on the cards</td><td>the owner's approval for runs over 10 s; for the per-shire map, a boot loader built and signed to report it (the same image could carry clocks below 100 MHz, which would save only about 0.2 W)</td></tr>
+<tr><td>2</td><td>Keep the heatsink; the camera on the back of the board, with lock-in (the thermal-camera plan's view)</td><td>coarse patterns, blurred by the substrate and board; not modelled here <span class="kind">inference</span></td><td>yes</td><td>none</td><td>the camera on site</td></tr>
+<tr><td>3</td><td>Short looks at a bare, taped lid at 100 MHz and the floor voltages, after the measurement plan, behind a latching mains cut at 80 °C, with forced air and someone on site</td><td>one shire, a half die or a moving 2×2 block within 10 s, a checkerboard in about <span data-v="lcAChk"></span>, at a small fraction of a bare die's shire-to-shire contrast</td><td>no; with a fan, <span data-v="lcOpt3Look"></span>; with a blower, <span data-v="lcBlowPon"></span> of power-ons pass the plan's gate, which asks for 80%</td><td>moderate: the card, and a host that may hang if the cut is on its 12 V; taking aifoundry3's heatsink off resets its fitted thermal constants and takes the demo card out of service</td><td>Stages A and B of the plan; the owner, the lab lead and the gates of section 5.6</td></tr>
+<tr><td>4</td><td>A delidded card under an IR-window cooler, at any clock</td><td>every pattern within 10 s at 100 MHz and above, steadily, through the window and coolant film; for the lab's 8–14 µm camera, a germanium or zinc-selenide window and a coolant that transmits there (section 4.2)</td><td>yes, at about 27–30 °C</td><td>the card, if delidding fails</td><td>a card that may be lost; weeks; thousands of dollars</td></tr>
+<tr><td>5</td><td>A delidded card, coated black, at 100 MHz and the floor voltages, with a fan, in short looks</td><td>single shires in a difference image of two 1 s states; every pattern within 10 s</td><td>no better than a bare lid <span class="kind">inference</span></td><td>high: the card</td><td>a card that may be lost, AI Foundry's consent, the power cut of 3</td></tr>
+<tr><td>6</td><td>Below 100 MHz (25 or 10 MHz)</td><td>nothing the 100 MHz point does not; it saves about 0.2 W more</td><td>no</td><td>a firmware image never run on the cards</td><td>a new signed boot loader (the same kind of image option 1's per-shire map needs) or a debugger</td></tr>
+</tbody></table></div>
+<p class="small">Bare looks, settling and lock-in times are the envelope and imaging models' (sections 5.3–5.4); the
+blower figures are the measurement plan's model <span class="cite">[<a href="#src-r16">R16</a>]</span>. Option 1's
+stock path and option 2 fit the lab as it is; 4 and 5 need a card set aside, as in section 6. Options 1 and 6 both
+hinge on whether the cards accept a rebuilt, signed boot loader, which has never been tried.</p>
+
+<h3 id="lc-plan">5.6 The measurement plan, in brief</h3>
+<p>The record already predicts most of the answer, but two numbers decide the bare verdict and neither has been
+measured: how much idle power the clock drives, and how steeply leakage falls with voltage. A plan to measure both,
+heatsink on, is written out in full in
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-30-without-heatsink/LOWCLOCK-PLAN.md">LOWCLOCK-PLAN.md</a>
+<span class="cite">[<a href="#src-r16">R16</a>]</span>. It is a design: nothing in it has run, and every stage needs the
+owner's go-ahead and the lab lead's consent, Stage B and the bare step each separately.</p>
+<ul>
+<li><b>The card is aifoundry3</b>: its latched governor leaves a set clock alone, its boot service already runs the clock
+command and restores 600 MHz after any host reboot, it is a single-card host, and its firmware checks voltage ranges
+and does not write them to flash. It is also the lab's demo card.</li>
+</ul>
+<details class="more"><summary>The stages and the safety rules</summary>
+<ul>
+<li><b>Stage 0</b>, read-only (about 20 minutes): identity, the card's operating-point table (stop if 100–400 MHz are in
+it), and whether a kernel has run since boot. The lab lead stops the demo service first.</li>
+<li><b>Stage A</b>, heatsink on (<span data-v="lcPlanA"></span>): power management off, then the minion clock
+stepped 600 → 400, 300, 200 and 100 MHz at the card's own voltages, in four passes in a Latin-square order, with a
+checked kernel launch verifying each clock by its work rate. The step 600 → 100 MHz is predicted at
+<span data-v="lcPlanStep"></span> <span class="kind">model</span>.</li>
+<li><b>Stage B</b> (<span data-v="lcPlanB"></span>; a separate approval): at 100 MHz, the minion rail 525 → 400 → 525 mV and
+the SRAM rail 700 → 660 → 700 mV, then 10 minutes at 400/660 mV, predicted at <span data-v="lcPlanLow"></span> at a 56 °C
+die <span class="kind">model</span>. Its first write sets the value already there, to test the write path. Its leakage
+exponent decides between the plan's model and this page's.</li>
+<li><b>Safety</b>: a hard-coded list of the only values that may be written; stop rules on the driver's error counters,
+which any user can read, and on the kernel log; the restore puts the voltage back before the clock; during Stage B
+someone who can power-cycle aifoundry3 within about 30 minutes, after a link retrain hung another host on 30 September.</li>
+</ul>
+</details>
+<ul>
+<li><b>The bare step</b> runs only if the measurements agree with the models and the model, re-run with them, gives at
+least 80% of power-ons that stay below an 80 °C stop and settle at or below 70 °C. It needs someone on site, a
+thermocouple on the lid with its own logger, an automatic mains cut at 80 °C that stays off until reset by hand, blower
+airflow, and a software stop at 75 °C. On today's predictions no cooling class passes: <span data-v="lcPlanPon"></span>
+<span class="kind">model</span>. Taking aifoundry3's heatsink off and refitting it resets the thermal constants fitted
+with it, and takes the demo card out of service meanwhile.</li>
+<li><b>Two firmware hazards</b> turned up in the design, both read from source and never seen on a card: a clock missing
+from the operating-point table makes a running governor loop log an error on every pass, and the firmware sends each
+error to the host as an event; and the race of section 5.1. The plan avoids both, and the race is a report for the
+firmware's maintainers.</li>
+</ul>
+
+<h2 id="options">6. What would work, ranked</h2>
 <p><b>Answer.</b> Keep the heatsink, and tape a thermocouple to its base during a visit already needed, never between it
 and the lid. For the case temperature as Intel defines it, and only with the lab's consent and at moderate risk, solder
 one into a groove in the lid. Put emissivity tape wherever the camera looks. Anything that takes the heatsink off for good belongs
-on a card set aside for it, on a bench, not in a lab host.</p>
+on a card set aside for it, on a bench, not in a lab host. A slower clock does not change this (section 5). The safe way
+to see where the work runs is the chip's own sensors, heatsink on, read with lock-in: on the stock firmware that is one
+sensor beside the I/O shire, and a per-shire map needs a rebuilt boot loader. A short bare look at 100 MHz is possible
+only with forced air, in some power-ons, behind an automatic power cut and after the measurement plan.</p>
 <div class="table-wrap wide"><table id="otable"></table></div>
 <p class="small" data-v="prereq"></p>
 <p><b>Who does what.</b> AI Foundry's people do all physical work on site; the lab admin powers hosts down and up; the
@@ -448,7 +781,7 @@ fitted constant we rely on. Cutting its lid is a permanent change, and destructi
 AI Foundry's consent. The full camera plan's line (under E-T20) that “aifoundry1's two are unusable” is out of
 date <span class="cite">[<a href="#src-r13">R13</a>]</span>.</p>
 
-<h2 id="others">6. What others have done</h2>
+<h2 id="others">7. What others have done</h2>
 <p><b>Answer.</b> The outside record agrees with the model. Lidded packages of this size are rated at 5.4–7.9 °C/W with
 no heatsink in still air (section 2.1). In published bare runs a processor that throttled itself kept running, and two
 burned out within a second, one with no protection and one whose board-level protection reacted too slowly; Intel
@@ -457,7 +790,7 @@ Case temperature is measured with a thermocouple in a groove in the lid, not und
 opened chips under infrared-transparent coolers imaged in the mid-wave band, or cooled through the board and imaged in
 the long-wave. Esperanto publishes no temperature limit for this chip.</p>
 
-<h3 id="others-bare">6.1 Running a processor without its heatsink</h3>
+<h3 id="others-bare">7.1 Running a processor without its heatsink</h3>
 <ul>
 <li><b>Tom's Hardware, 2001.</b> The site pulled the heatsinks off running processors <span class="cite">[<a href="#src-6">6</a>]</span>. An Athlon 1400, a bare
 die with no thermal protection (Socket A dies were exposed <span class="cite">[<a href="#src-34">34</a>]</span>), burned out: “In less than a second Athlon 1400
@@ -484,7 +817,7 @@ mean <span class="cite">[<a href="#src-r3">R3</a>]</span>, and nothing short of 
 package's 12–17 J/K (section 3) <span class="kind">inference</span>.</li>
 </ul>
 
-<h3 id="others-tcase">6.2 Measuring case temperature</h3>
+<h3 id="others-tcase">7.2 Measuring case temperature</h3>
 <ul>
 <li><b>Intel.</b> “The measurement location for TC is the geometric center of the IHS”: the method cuts a groove in the
 lid, lays an “Omega, 36 gauge, ‘T’ Type” thermocouple in it and solders it at 150 ± 3 °C <span class="cite">[<a href="#src-9">9</a>]</span>. This is option 3,
@@ -495,7 +828,7 @@ option 2 tapes the thermocouple to the heatsink's base or fins, outside the join
 in a groove in the heatsink base, in the joint.</li>
 </ul>
 
-<h3 id="others-refit">6.3 Taking a heatsink off, and delidding</h3>
+<h3 id="others-refit">7.3 Taking a heatsink off, and delidding</h3>
 <ul>
 <li><b>Refitting.</b> AMD's guidance for its FPGA packages: a heatsink without thermal interface material “is not
 sufficient”; the pressure should be “20 to 50 PSI”, “the same for both lidded and lidless”, with four-corner mounting
@@ -510,7 +843,7 @@ components” <span class="cite">[<a href="#src-38">38</a>]</span>. A bare-die p
 bare die against 9.50 lidded <span class="cite">[<a href="#src-2">2</a>]</span>.</li>
 </ul>
 
-<h3 id="others-imaging">6.4 Imaging a working die</h3>
+<h3 id="others-imaging">7.4 Imaging a working die</h3>
 <p>Published power maps of working processors, and what each took <span class="kind">from source</span>:</p>
 <div class="table-wrap wide"><table id="itable">
 <thead><tr><th>Group</th><th>Chip, window, coolant</th><th>Camera band</th><th>Heat removed, accuracy</th></tr></thead>
@@ -527,7 +860,7 @@ a few µW corresponding to a local temperature modulation of a few µK”; it wo
 review notes that the mid-wave gives better spatial resolution <span class="cite">[<a href="#src-29">29</a>]</span>. This page's lock-in decay lengths
 (section 4) assume 5–10 Hz.</p>
 
-<h3 id="others-esperanto">6.5 Esperanto's own public numbers</h3>
+<h3 id="others-esperanto">7.5 Esperanto's own public numbers</h3>
 <ul>
 <li><b>Hot Chips 33 (2021).</b> TSMC 7 nm, 570 mm²; “Power typically &lt; 20 watts, can be adjusted for 10 to 60+ watts
 under SW control”; a 45 × 45 mm package with 2,494 balls and over 30,000 bumps; target cards “must be air-cooled”, and
@@ -538,7 +871,7 @@ projections based on gate-level simulations” <span class="cite">[<a href="#src
 <li><b>Not found:</b> any public junction-temperature limit, throttling or thermal-trip specification.</li>
 </ul>
 
-<h2 id="other-pages">7. What our other pages already say</h2>
+<h2 id="other-pages">8. What our other pages already say</h2>
 <ul>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating">The effect of overheating</a>: at 600 MHz
 nothing limits the die on the cards' builds; the DRAM beside it has no thermometer and a fixed refresh; one swing to
@@ -557,13 +890,18 @@ heatsink on.</li>
 sensors, and why the host sees one mean.</li>
 </ul>
 
-<h2 id="method">8. Method and caveats</h2>
-<p>Every number on this page comes from the cards' own record, the vendor's documents, the owner's thermal-camera
-plan, the model published with this page or the outside sources numbered at the end, and carries its kind where it
+<h2 id="method">9. Method and caveats</h2>
+<p>Every number on this page comes from the cards' own record, the vendor's documents and firmware source, the owner's
+thermal-camera plan, the models published with this page or the outside sources numbered at the end, and carries its kind where it
 matters (the terms at the top). All of it is arithmetic on the record; no card was used. The outside sources were read, not reproduced, and their
 caveats are listed with them. The model, <code>nohs_calc.py</code>, draws each uncertain
 input from its range (uniformly, or log-uniformly for the resistances and the board's conductance) and reports the 5th,
-50th and 95th percentiles; its seed is fixed, and its full printout is published beside it.</p>
+50th and 95th percentiles; its seed is fixed, and its full printout is published beside it. Section 5 rests on two more
+models built the same way: the envelope model, <code>lowclock_calc.py</code> (2,000 draws), which takes each card's
+metered rails apart and re-runs the bare package's steady state, its window after the host boots and the heatsink's at
+every clock and voltage policy, and the imaging model, <code>imaging_calc.py</code> (240 draws), a layered conduction
+model of the die, lid, heatsink, substrate and board with the camera's and the sensors' noise. The measurement plan's
+own predictions come from <code>lc_plan_calc.py</code>, which imports <code>nohs_calc.py</code>.</p>
 <details class="more"><summary>Which inputs are measured, and which are estimates</summary>
 <ul>
 <li><b>Measured or fitted on our cards:</b> each card's idle power law and idle point; card 0's power at 300 MHz
@@ -580,20 +918,42 @@ effective θ of about 3.8–7.8 °C/W in still air and 1.9–3.8 °C/W with a fa
 <li><b>The laws are extrapolated.</b> They were fitted up to 82–85 °C. Bare, the loop gain passes 1 inside that range,
 so the verdict does not rest on the extrapolation; the times to 120 °C, the powers at 116 °C, card 1's 75 W point near 99 °C,
 card 0's law above 64 °C and the with-heatsink threshold of 98.7 °C do.</li>
+<li><b>Section 5 adds:</b> the three voltage policies, and what is safe at 400 MHz and for the NoC at 400 mV; one minion
+clock tree shared by the three cards (scaled by V²); leakage's fall with voltage, fitted to two anchors on different
+cards and firmware (aifoundry2's 800 MHz idle, card 0's 300 MHz rails), which pull against each other; the SRAM's,
+held only by its part of the 800 MHz step; the imaging model's die and lid thicknesses, paste resistances, emissivities,
+camera noise and its 4-fold drift allowance, an IR-window cooler's window and coolant transmission, and the stock
+sensor's dither; the blower's 3–6 m/s; the 20–60 s to set a low point after the host boots. The chip's behaviour below
+300 MHz is not established at all.</li>
 </ul>
 </details>
-<p><b>What would change the answer.</b> A bare θ<sub>JA</sub> below 1.2–2.2 °C/W, which only a heatsink provides. A much
-flatter leakage law, like card 0's at 300 MHz, where the card is marginal <span class="kind">model</span>. A firmware limit
-that acts at 600 MHz, or a relay on the card's 12 V, which would make short bare runs survivable but not informative.</p>
+<p><b>What would change the answer.</b> A bare θ<sub>JA</sub> below θ<sub>85</sub>, the largest resistance at which an
+idle die settles at or below 85 °C: <span data-v="lcBar600"></span> °C/W at 600 MHz, which only a heatsink provides; at
+100 MHz with the floor voltages and the NoC lowered the bar rises to <span data-v="lcBar100"></span> °C/W, within reach
+of a 3–6 m/s blower
+(1.8–3.0 °C/W) in steady state, though not through the plan's power-on gate, and not of still air or an ordinary fan
+<span class="kind">model</span>. A much flatter leakage law:
+card 0's at 300 MHz and 399 mV, where the card is marginal, or leakage falling with voltage more steeply than the
+envelope model has it, which Stage B of the measurement plan would measure <span class="kind">model</span>. A firmware
+limit that acts at 600 MHz, or an automatic power cut, which would make short bare runs survivable; with lock-in through
+a taped lid, a short run at a slow clock would also be informative (section 5.4).</p>
 <p><b>Data and reproduction.</b> Everything is in
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-30-without-heatsink">docs/reports/data/2026-09-30-without-heatsink</a>:
 the model (<code>nohs_calc.py</code>, its printout <code>nohs_calc.out</code>), card 0's analysis
-(<code>card0_guard.py</code>, <code>card0_guard.out</code>), and this page's data (<code>make_page_data.py</code>,
-<code>page.json</code>).</p>
+(<code>card0_guard.py</code>, <code>card0_guard.out</code>), section 5's models (<code>lowclock_calc.py</code> and
+<code>imaging_calc.py</code>, each with its printout and JSON; <code>lc_plan_calc.py</code> and its printout), the firmware's
+PLL tables and voltage limits decoded (<code>pll_modes.py</code>, <code>pll_modes.out</code>), the firmware notes
+(<code>LOWCLOCK-FIRMWARE.md</code>), the measurement plan (<code>LOWCLOCK-PLAN.md</code>), the outside research behind
+sources [44]–[53] with its quotes (<code>LOWCLOCK-OUTSIDE.md</code>), and this page's data
+(<code>make_page_data.py</code>, <code>page.json</code>).</p>
 <pre><code>V=docs/reports/data/2026-09-30-without-heatsink
 python3 $V/nohs_calc.py > $V/nohs_calc.out        # the model, seed 20260929 (about 3 minutes)
 python3 $V/card0_guard.py > $V/card0_guard.out    # card 0's idle power at 300 MHz, from the guard samples
-python3 $V/make_page_data.py                      # page.json: checks nohs_calc.out, adds the trajectories
+python3 $V/imaging_calc.py --json $V/imaging_calc.json > $V/imaging_calc.out       # imaging model (about 8 minutes)
+python3 $V/lowclock_calc.py --json $V/lowclock_calc.json > $V/lowclock_calc.out    # envelope model, after imaging
+python3 $V/lc_plan_calc.py > $V/lc_plan_calc.out  # the plan's predictions, after the envelope model
+python3 $V/pll_modes.py > $V/pll_modes.out        # the firmware's PLL modes and voltage limits
+python3 $V/make_page_data.py                      # page.json: checks the printouts, adds the trajectories
 python3 scripts/build-report.py esperanto-without-heatsink $V/page.json docs/reports/2026-09-30-esperanto-without-heatsink.html</code></pre>
 
 <h2 id="sources">Sources</h2>
@@ -613,8 +973,8 @@ with line numbers as of 30 September 2026.</p>
 <br><span class="used">Used: the Foster chain, its intercepts, the load in the heatsink trajectory.</span></li>
 <li id="src-r6"><b>[R6]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/12-heat-management.md">docs/findings/12-heat-management.md</a>, lines 20 and 28.
 <br><span class="used">Used: 80 → 90 °C with the heatsink in 19–26 s (random normal) and 107–167 s (ones); the matmul's 27.2 W.</span></li>
-<li id="src-r7"><b>[R7]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/16-dvfs-and-leakage.md">docs/findings/16-dvfs-and-leakage.md</a>, lines 187–191.
-<br><span class="used">Used: the metered rails at aifoundry2's idle point.</span></li>
+<li id="src-r7"><b>[R7]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/16-dvfs-and-leakage.md">docs/findings/16-dvfs-and-leakage.md</a>, lines 39 and 185–191.
+<br><span class="used">Used: the metered rails at aifoundry2's idle point; its operating points, 600 MHz at 0.517 V, 700 at 0.568 and 800 at 0.618.</span></li>
 <li id="src-r8"><b>[R8]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/19-observability-and-the-unmetered.md">docs/findings/19-observability-and-the-unmetered.md</a>, lines 36, 51–53 and 67.
 <br><span class="used">Used: the unmetered power and its split, the regulator loss.</span></li>
 <li id="src-r9"><b>[R9]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-28-overheating/analysis">docs/reports/data/2026-09-28-overheating/analysis</a>: <code>idle_vs_temp.txt</code> lines 1–24 and <code>runaway.txt</code> lines 1–4.
@@ -629,21 +989,27 @@ with line numbers as of 30 September 2026.</p>
 <br><span class="used">Used: the P3's band and rate; the lid decay lengths it estimated (target 9); E-T20 and its line on aifoundry1's cards; polyimide tape (pitfall 10); open questions 4 and 6; the heatsink as the state behind the 107 against 162–167 s scatter (§1).</span></li>
 <li id="src-r14"><b>[R14]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md">docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md</a>, lines 841–849.
 <br><span class="used">Used: card 0 is excluded from the campaign.</span></li>
+<li id="src-r15"><b>[R15]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-30-without-heatsink/LOWCLOCK-FIRMWARE.md">docs/reports/data/2026-09-30-without-heatsink/LOWCLOCK-FIRMWARE.md</a>: the firmware notes, each fact with its file and line in <a href="https://github.com/aifoundry-org/et-platform">et-platform</a> (BL2 0.18.0, 0.20.0 and 0.21.0, the PLL mode tables, the PMIC driver) or the manuals, with <code>pll_modes.py</code> decoding the tables (§0–§3, §6–§7).
+<br><span class="used">Used: the minions' one step clock and its 33-shire mask; what <code>DM_CMD_SET_FREQUENCY</code> accepts, 100 MHz as mode 62, nothing below, and the minion-debug commands' reach; the dividers' headroom; each rail's accepted range, 0.18.0's missing check and flash write; the safe state and its TODO; the governor on each card; the regulator module.</span></li>
+<li id="src-r16"><b>[R16]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-30-without-heatsink/LOWCLOCK-PLAN.md">docs/reports/data/2026-09-30-without-heatsink/LOWCLOCK-PLAN.md</a>: the low-clock measurement plan (design only, not run), with its predictions from <code>lc_plan_calc.py</code>; §0, §2.2, §3, §4.4, §5, §7–§9.
+<br><span class="used">Used: the card and why; the stages, their card time and predictions; the safety rules and the bare step's gates; the blower's θ<sub>JA</sub> and power-on odds; the Arrhenius forms' room for the clock tree (its section A); the event flood and the race between the clock command and the governor, why the command can interrupt the governor, and the race at the current source.</span></li>
 </ol>
 <h3 class="srch" id="outside-sources">Outside sources</h3>
 <p class="small">Numbered in order of first citation, each with what the page uses from it. Read in September 2026.
 Caveats: the Edmund Optics prices come from search-result listings, since Edmund's pages block automated fetching; the
 full Hamann et al. paper was not read, so IBM's camera band is not confirmed (its windows and a companion paper point to the mid-wave); the
-20 W at 0.4 V figure for ET-SoC-1 is from a modelled study, not a measurement.</p>
+20 W at 0.4 V figure for ET-SoC-1 is from a modelled study, not a measurement. Sources [44]–[53] were added with
+section 5 on 30 September, numbered in order of first citation there: [44] is a generic product brief, not this chip's
+PLL; [47] summarises TSMC's paper at second hand; [49]'s figures are read off a bar chart.</p>
 <ol class="srcs" id="outside-list">
 <li id="src-1"><b>[1]</b> AMD, <i>UltraScale and UltraScale+ FPGAs Packaging and Pinouts</i>, UG575 v1.22 (10 March 2026), chapters 7, 10–11: <a href="https://docs.amd.com/v/u/en-US/ug575-ultrascale-pkg-pinout">docs.amd.com/v/u/en-US/ug575-ultrascale-pkg-pinout</a> (PDF: <a href="https://docs.amd.com/api/khub/documents/GnuVZDIoTcrlIuu8Aok5XQ/content">docs.amd.com/api/khub/documents/GnuVZDIoTcrlIuu8Aok5XQ/content</a>).
 <br><span class="used">Used: Table 10-1’s θJA with no heatsink and its conditions; no thermocouple between package and heatsink; thermal paste, 20–50 psi, removal by twisting at 40–60 °C (Laird's advice for phase-change material, quoted in chapter 11) and the solvent wipe of chapter 11; chapter 7's warning that washing solvents can compromise the lid adhesive.</span></li>
 <li id="src-2"><b>[2]</b> Microchip, <i>PolarFire FPGA Packaging and Pin Descriptions</i>, UG0722, Table 9-1: <a href="https://ww1.microchip.com/downloads/aemDocuments/documents/FPGA/ProductDocuments/PackagingSpecifications/polarfire_fpga_packaging_and_pin_descriptions_ug0722_v12.pdf">ww1.microchip.com/downloads/aemDocuments/documents/FPGA/ProductDocuments/PackagingSpecifications/polarfire_fpga_packaging_and_pin_descriptions_ug0722_v12.pdf</a>.
 <br><span class="used">Used: the MPF500T-FCG1152’s θJA in still air, at 1.0 and at 2.5 m/s; the MPF300T in its 29 mm package, lidded (9.50 °C/W) and as a bare die (11.21 °C/W).</span></li>
 <li id="src-3"><b>[3]</b> D. Ditzel, Esperanto ET-SoC-1, Hot Chips 33 (2021), slides: <a href="https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf">hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf</a>.
-<br><span class="used">Used: the process and die area, the power figures, the package, “must be air-cooled”, the ~60 W card budget.</span></li>
+<br><span class="used">Used: the process and die area, the power figures, the package, “must be air-cooled”, the ~60 W card budget; the minions' “OPERATING RANGE: 300 MHz TO 2 GHz” (slide 7).</span></li>
 <li id="src-4"><b>[4]</b> D. Ditzel et al., IEEE Micro (2022): <a href="https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf">www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf</a>.
-<br><span class="used">Used: about 20 W at around 0.4 V, a modelled figure; the Hot Chips performance numbers as gate-level projections.</span></li>
+<br><span class="used">Used: about 20 W at around 0.4 V, a modelled figure; the Hot Chips performance numbers as gate-level projections; the minions' sweet spot “between 300 and 500 mV”, also modelled.</span></li>
 <li id="src-5"><b>[5]</b> Esperanto, products page: <a href="https://www.esperanto.ai/products/">www.esperanto.ai/products/</a>.
 <br><span class="used">Used: “Full set of monitoring sensors”.</span></li>
 <li id="src-6"><b>[6]</b> Tom’s Hardware (Pabst), “Hot Spot” (2001), pages 3–6: <a href="https://www.tomshardware.com/reviews/hot-spot,365-3.html">www.tomshardware.com/reviews/hot-spot,365-3.html</a> (also 365-4, 365-5 and 365-6).
@@ -693,7 +1059,7 @@ full Hamann et al. paper was not read, so IBM's camera band is not confirmed (it
 <li id="src-28"><b>[28]</b> Topsil, HiTran application note (October 2013): <a href="https://www.topsil.com/wp-content/uploads/2023/05/hitran_application_note_october2013.pdf">www.topsil.com/wp-content/uploads/2023/05/hitran_application_note_october2013.pdf</a>.
 <br><span class="used">Used: the lattice absorption at 9 and 11–16 µm.</span></li>
 <li id="src-29"><b>[29]</b> O. Breitenstein et al., lock-in thermography, ASM 2011: <a href="https://www-old.mpi-halle.mpg.de/mpi/publi/pdf/10496_11.pdf">www-old.mpi-halle.mpg.de/mpi/publi/pdf/10496_11.pdf</a>.
-<br><span class="used">Used: lock-in modulation, its µW and µK sensitivity, backside inspection through 100–400 µm at 1–25 Hz; silicon’s doping-dependent transmission; the mid-wave’s resolution.</span></li>
+<br><span class="used">Used: lock-in modulation, its µW and µK sensitivity, backside inspection through 100–400 µm at 1–25 Hz; silicon’s doping-dependent transmission; the mid-wave’s resolution; that heat sources the trigger does not affect do not appear in a lock-in image.</span></li>
 <li id="src-30"><b>[30]</b> Wikipedia, “Mulling (spectroscopy)”: <a href="https://en.wikipedia.org/wiki/Mulling_(spectroscopy)">en.wikipedia.org/wiki/Mulling_(spectroscopy)</a>.
 <br><span class="used">Used: Fluorolube’s carbon–fluorine absorptions from 1300 to 400 cm⁻¹; a mull pressed between salt plates.</span></li>
 <li id="src-31"><b>[31]</b> Hom et al. (Stanford, with AMD), ITHERM 2012: <a href="https://nanoheat.stanford.edu/wp-content/uploads/2012/09/ITHERM2012_Lewis_FINAL.pdf">nanoheat.stanford.edu/wp-content/uploads/2012/09/ITHERM2012_Lewis_FINAL.pdf</a>.
@@ -722,6 +1088,26 @@ full Hamann et al. paper was not read, so IBM's camera band is not confirmed (it
 <br><span class="used">Used: the SC5600 at 2.5–5.1 µm; the 1 mm oil channel between sapphire windows; oil as the thermal interface.</span></li>
 <li id="src-43"><b>[43]</b> US 10,175,705 B2 (Brown University): <a href="https://patents.google.com/patent/US10175705B2/en">patents.google.com/patent/US10175705B2/en</a>.
 <br><span class="used">Used: oil at 5 m/s and 20 °C; about 90% of the heat upward.</span></li>
+<li id="src-44"><b>[44]</b> Movellus, HPDPLL product brief (TSMC 7 nm): <a href="https://anysilicon.com/wp-content/uploads/2020/06/Movellus-HPDPLL-Product-Brief3.pdf">anysilicon.com/wp-content/uploads/2020/06/Movellus-HPDPLL-Product-Brief3.pdf</a>.
+<br><span class="used">Used: “Output Frequency 4MHz - 6GHz”, for the vendor's generic PLL; the brief does not describe the ET-SoC-1's instance.</span></li>
+<li id="src-45"><b>[45]</b> R. G. Dreslinski, M. Wieckowski, D. Blaauw, D. Sylvester and T. Mudge, “Near-Threshold Computing: Reclaiming Moore's Law Through Energy Efficient Integrated Circuits”, Proceedings of the IEEE 98(2) (2010): <a href="https://doi.org/10.1109/JPROC.2009.2034764">doi.org/10.1109/JPROC.2009.2034764</a> (copy read: <a href="https://courses.grainger.illinois.edu/CS534/fa2021/reading_list/5a.pdf">courses.grainger.illinois.edu/CS534/fa2021/reading_list/5a.pdf</a>).
+<br><span class="used">Used: SRAMs have an energy-optimal voltage “by approximately 100 mV” higher than processors'.</span></li>
+<li id="src-46"><b>[46]</b> Texas Instruments, TPSM831D31 product page: <a href="https://www.ti.com/product/TPSM831D31">www.ti.com/product/TPSM831D31</a>.
+<br><span class="used">Used: “Output voltage range: 0.25 V to 1.52 V”, for the module that feeds the minion and NoC rails.</span></li>
+<li id="src-47"><b>[47]</b> Chipworks, “IEDM 2016 – Setting the Stage for 7/5 nm”, Solid State Technology (18 January 2017), a summary of S.-Y. Wu et al., IEDM 2016 (<a href="https://doi.org/10.1109/IEDM.2016.7838333">doi.org/10.1109/IEDM.2016.7838333</a>, not read): <a href="https://sst.semiconductor-digest.com/chipworks_real_chips_blog/2017/01/18/iedm-2016-setting-the-stage-for-75-nm/">sst.semiconductor-digest.com/chipworks_real_chips_blog/2017/01/18/iedm-2016-setting-the-stage-for-75-nm/</a>.
+<br><span class="used">Used: TSMC N7's “DIBL is ~40 mV/V”, a secondary source.</span></li>
+<li id="src-48"><b>[48]</b> E. Le Sueur and G. Heiser, “Dynamic Voltage and Frequency Scaling: The Laws of Diminishing Returns”, USENIX HotPower '10: <a href="https://www.trustworthy.systems/publications/nicta_full_text/4158.pdf">www.trustworthy.systems/publications/nicta_full_text/4158.pdf</a>.
+<br><span class="used">Used: “P = Cf V² + Pstatic”: the clock cuts only the dynamic term.</span></li>
+<li id="src-49"><b>[49]</b> D. Ditzel, “Real World Results using Thousands of RISC-V Cores for AI and Beyond”, RISC-V Summit (13 December 2022), slides: <a href="https://hosted-files.sched.co/riscvsummit2022/f3/Esperanto%20Ditzel%20-%20Thousands%20of%20RISC-V%20Cores%20for%20AI%20and%20Beyond%20for%20RISC-V%20Summit2022.pdf">hosted-files.sched.co/riscvsummit2022 (Esperanto Ditzel, Thousands of RISC-V Cores for AI and Beyond)</a>.
+<br><span class="used">Used: slide 14's idle card, 20.0 W, with 5.8 W on the minions, 1.6 W on the NoC and 1.7 W on the SRAM, read off its bar chart; it gives no clock or temperature.</span></li>
+<li id="src-50"><b>[50]</b> G. Ruhl et al. (Intel), “An IA-32 Processor with a Wide Voltage Operating Range in 32nm CMOS”, Hot Chips 24 (2012): <a href="https://old.hotchips.org/wp-content/uploads/hc_archives/hc24/HC24-6-Tech-Scalability/HC24.29.625-IA-23-Wide-Ruhl-Intel_2012_NTV_iA.pdf">old.hotchips.org/wp-content/uploads/hc_archives/hc24/HC24-6-Tech-Scalability/HC24.29.625-IA-23-Wide-Ruhl-Intel_2012_NTV_iA.pdf</a>.
+<br><span class="used">Used: “1.1V/741MHz/445mW to 380mV/10MHz/1.5mW”; “Leakage power scales from 3% @1.1V to 50% @ 0.38V”.</span></li>
+<li id="src-51"><b>[51]</b> R. Cochran and S. Reda, “Spectral techniques for high-resolution thermal characterization with limited sensor data”, DAC 2009: <a href="https://doi.org/10.1145/1629911.1630037">doi.org/10.1145/1629911.1630037</a> (abstract via OpenAlex).
+<br><span class="used">Used: a chip's thermal state reconstructed almost fully from a few sensors, on a 16-core processor.</span></li>
+<li id="src-52"><b>[52]</b> M. Kögel et al., “Lock-in Thermography for the Localization of Security Hard Blocks on SoC Devices”, ISTFA 2023, pp. 352–359: <a href="https://doi.org/10.31399/asm.cp.istfa2023p0352">doi.org/10.31399/asm.cp.istfa2023p0352</a> (abstract: <a href="https://dl.asminternational.org/istfa/proceedings-abstract/ISTFA2023/84741/352/28617">dl.asminternational.org/istfa/proceedings-abstract/ISTFA2023/84741/352/28617</a>).
+<br><span class="used">Used: firmware functions activated periodically, located “at the die level on a modern SoC”; the abstract does not name the SoC or say whether it was opened.</span></li>
+<li id="src-53"><b>[53]</b> S. Huth, O. Breitenstein, A. Huber, D. Dantz, U. Lambert and F. Altmann, “Lock-In IR-Thermography – A Novel Tool for Material and Device Characterization”, Solid State Phenomena 82–84 (2002): <a href="https://doi.org/10.4028/www.scientific.net/ssp.82-84.741">doi.org/10.4028/www.scientific.net/ssp.82-84.741</a> (copy: <a href="https://www-old.mpi-halle.mpg.de/mpi/publi/pdf/540_02.pdf">www-old.mpi-halle.mpg.de/mpi/publi/pdf/540_02.pdf</a>).
+<br><span class="used">Used: “35 µK (effective value) after 16 min”, with a cooled camera.</span></li>
 </ol>
 
 <h2 id="related-reports">Related reports</h2>
@@ -736,5 +1122,9 @@ full Hamann et al. paper was not read, so IBM's camera band is not confirmed (it
 <li><a href="https://spacesheep.dev/@yaroslavvb/heat-aware-compiler">A compiler that knows where the fan is</a> — a pitch (22 September), not a measurement report: the case for a thermally aware compiler, citing ET-SoC-1 measurements.</li>
 </ul>
 <p class="small"><b>Versions.</b> 30 September 2026: first edition, with a citation check of every outside source and a
-review of the page applied before publication.</p>
+review of the page applied before publication. 30 September 2026, evening: the low-clock envelope added at the owner's
+request (section 5: how low the clock can go, what a slow card draws, whether it holds bare, what a camera would see,
+the alternatives ranked and a measurement plan), with the envelope and imaging models, the firmware notes and the plan
+published beside the page, outside sources [44]–[53], and the answers, the options and what would change the answer
+updated to match; sections 5–8 became 6–9.</p>
 </main>

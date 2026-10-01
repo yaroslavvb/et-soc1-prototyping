@@ -133,6 +133,146 @@ const p595 = (p, f) => p[0] == null ? 'never' : p[2] == null ? `${f(p[0])} to ne
     `all-ones one in ${rng(hs.ones_80_90_s[0], hs.ones_80_90_s[1], f0)} s ${ref('R6')}.`;
 })();
 
+/* ---------- section 5's numbers: D.lowclock (lowclock_calc.py, imaging_calc.py and lc_plan_calc.py, read by make_page_data.py) ---------- */
+const LC = D.lowclock;
+const pct = v => `${f0(100 * v)}%`;
+const m595 = (p, f, u) => (f(p[0]) === f(p[2]) ? `${f(p[1])}${u || ''}` : `${f(p[1])}${u || ''} (${rng(p[0], p[2], f)})`);   // "1.8 W (1.0–2.5)"
+const lcPt = (c, pol, f) => ((LC.pts[c] || {})[pol] || []).find(r => r.f === f);
+const lcWin = (c, air, load, f, pol) => LC.window[`${c}|${air}|${load}|${f}|${pol}`];
+(function () {
+  const A2 = LC.answers.aifoundry2, P = LC.plan, X = LC.imgx;
+  const th100 = c => lcPt(c, 'floor+NoC', 100).idle.th85, th600 = c => lcPt(c, 'boot', 600).idle.th85;
+  const look = (c, air, f, pol) => lcWin(c, air, 'pattern', f, pol);
+  V.lcA10 = `${f2(A2.ten_MHz_more[1])} W`;
+  V.lcAClk = `${rng(A2.clock_only_100[0], A2.clock_only_100[2], f1)} W (median ${f1(A2.clock_only_100[1])})`;
+  V.lcAIdle = `${f1(A2.idle600_60C[1])} W`;
+  V.lcAClkPlan = `${rng(P.step_100_plan[0], P.step_100_plan[2], f1)} W`;
+  V.lcALeft = `${f1(A2.left_100_floorNoC[1])} W (${rng(A2.left_100_floorNoC[0], A2.left_100_floorNoC[2], f1)})`;
+  V.lcATh = `about ${f1(th100('aifoundry2')[1])} °C/W (${rng(Math.min(th100('aifoundry2')[0], th100('aifoundry3')[0]), Math.max(th100('aifoundry2')[2], th100('aifoundry3')[2]), f1)} on aifoundry2 and aifoundry3)`;
+  const best = c => lcPt(c, 'floor+NoC', 100).idle.fan;
+  const b2 = best('aifoundry2'), b3 = best('aifoundry3');
+  V.lcABestFan = pct(b2) === pct(b3) ? pct(b2) : `${pct(Math.min(b2, b3))}–${pct(Math.max(b2, b3))}`;
+  V.lcBlowEq = `${f0(P.equilibrium_central_pct.blower)}%`;
+  V.lcBlowPon = `${f0(P.power_on_central.blower.both)}%`;
+  const wf = look('aifoundry2', 'fan', 100, 'floor+NoC'), ws = look('aifoundry2', 'still', 100, 'floor+NoC');
+  V.lcAWin = `a median of ${f0(wf.look['75'][1])} s with a fan, and none in ${pct(wf.none['75'])} of power-ons; in still air ` +
+    `none in ${pct(ws.none['75'])} of power-ons`;
+  V.lcAChk = `${f0(LC.lockin.lid_tape.checkerboard['100'][1])} s`;
+  V.k5 = `≤ ${f1(th100('aifoundry2')[1])} °C/W`;
+  V.k5s = `at the floor voltages with the NoC lowered (aifoundry2); 600 MHz needs ≤ ${f1(th600('aifoundry2')[1])}. A fan on the bare lid ` +
+    `gives 2–7 °C/W, so ${V.lcABestFan} of draws settle; none in still air`;
+  // 5.2
+  const an = LC.anchors;
+  V.lcAcc = `${f1(100 * an.accept_frac)}%`;
+  V.lcD = `${f2(an.D_minion_W[1])} W (${rng(an.D_minion_W[0], an.D_minion_W[2], f2)})`;
+  V.lcG = `${f2(an.G_minion_398mV[1])} (${rng(an.G_minion_398mV[0], an.G_minion_398mV[2], f2)})`;
+  V.lcGs = `${f2(an.G_sram_660mV[1])} (${rng(an.G_sram_660mV[0], an.G_sram_660mV[2], f2)})`;
+  const dc = LC.decomp['aifoundry2|60'];
+  V.lcDecA2 = `of ${f1(dc.board[1])} W is ${f1(dc.fixed[1])} W that no minion clock or voltage touches (the service processor, ` +
+    `PCIe, the memory shires and DRAM, the NoC, the board and the regulators' losses), ${f1(dc.leak[1])} W of minion and SRAM leakage, and ` +
+    `${f1(dc.clock_tree[1])} W of clock tree, ${pct(dc.clock_tree[1] / dc.board[1])} (the minion's and the SRAM's, with their regulators' ` +
+    `loss; the minion's alone is ${f2(an.D_minion_W[1])} W on the die)`;
+  V.lcBclk = V.lcAClk;
+  const p600 = lcPt('aifoundry2', 'boot', 600), p100 = lcPt('aifoundry2', 'boot', 100);
+  V.lcBslope = p600.dP60[1] === p100.dP60[1] ? `${num(p600.dP60[1], 3)} W/°C at the board at a 60 °C die, at both clocks`
+    : `${num(p600.dP60[1], 3)} W/°C at the board at 600 MHz and ${num(p100.dP60[1], 3)} at 100 MHz, at a 60 °C die`;
+  V.lcBfloor = `${rng(A2.voltage_floor_more[0], A2.voltage_floor_more[2], f1)} W (median ${f1(A2.voltage_floor_more[1])})`;
+  V.lcBnoc = `${rng(A2.noc_more[0], A2.noc_more[2], f1)} W (median ${f1(A2.noc_more[1])})`;
+  V.lcBleft = V.lcALeft;
+  V.lcBsoc = `${f0(LC.floor['aifoundry2|floor+NoC'].soc60[1])} W`;
+  V.lcBdslope = `${f2(A2.dPdT_soc_100_floorNoC[1])} W/°C instead of ${f2(A2.dPdT_soc_600[1])}`;
+  V.lcB10 = `${rng(A2.ten_MHz_more[0], A2.ten_MHz_more[2], f2)} W (median ${f2(A2.ten_MHz_more[1])})`;
+  V.lcCT100 = `${f2(LC.ct_left_100[1])} W (${rng(LC.ct_left_100[0], LC.ct_left_100[2], f2)})`;
+  const fl = k => LC.floor['aifoundry2|' + k];
+  V.lcBzero = `on aifoundry2 at a 60 °C die, ${f1(fl('boot').board60[1])} W with the voltages left, ${f1(fl('floor').board60[1])} W ` +
+    `at the floors and ${f1(fl('floor+NoC').board60[1])} W with the NoC lowered as well (${f1(fl('boot').board25[1])}, ` +
+    `${f1(fl('floor').board25[1])} and ${f1(fl('floor+NoC').board25[1])} W at a 25 °C die, the fitted laws extrapolated 30 °C below ` +
+    `the measured 54–85 °C). Taking the clock to zero removes ${pct(fl('boot').frac60[1])} of the 600 MHz idle (100 MHz removes ` +
+    `${pct(A2.clock_only_100[1] / A2.idle600_60C[1])}); the floors and the NoC take that to ${pct(fl('floor+NoC').frac60[1])}`;
+  const ld = A2.load16_board;
+  V.lcBload = `${f1(ld['600|boot'][1])} W at the board at 600 MHz (${rng(ld['600|boot'][0], ld['600|boot'][2], f1)}), ` +
+    `${f1(ld['100|boot'][1])} W at 100 MHz with the voltages left and ${f1(ld['100|floor'][1])} W at the floors`;
+  // 5.3
+  const th = (c, pol, f) => lcPt(c, pol, f).idle.th85[1];
+  V.lcThRise = `On aifoundry2 at idle it rises from about ${f2(th('aifoundry2', 'boot', 600))} °C/W at 600 MHz to ` +
+    `${f2(th('aifoundry2', 'floor', 100))} at 100 MHz at the floor voltages and ${f2(th('aifoundry2', 'floor+NoC', 100))} with the NoC ` +
+    `lowered too`;
+  const fb = c => pct(lcPt(c, 'floor+NoC', 100).idle.fan);
+  const net = c => pct(lcPt(c, 'floor+NoC', 100).idle.fan_net), te = LC.theta_eff_fan;
+  V.lcFanBest = `${V.lcABestFan} of draws on aifoundry2 and aifoundry3 and ${fb('aifoundry1-c1')} on card 1 (${fb('aifoundry1-c0')} on ` +
+    `card 0, which is excluded). It needs a thermal resistance of at most ${m595(th100('aifoundry2'), f2, ' °C/W')} ` +
+    `on aifoundry2, on the SoC's share of the power in a 25 °C room, against ${f2(p600.idle.th85[1])} °C/W at 600 MHz. The share mostly ` +
+    `reflects the assumed 2–7 °C/W: on the transient model's own network, which gives a fan ${rng(te[0], te[2], f1)} °C/W and also counts ` +
+    `the board's heating by the off-die power, ${net('aifoundry2')} of aifoundry2's draws settle`;
+  V.lcBlowTh = `a θ<sub>JA</sub> of ${rng(P.blower_theta[0], P.blower_theta[2], f1)} °C/W (median ${f1(P.blower_theta[1])})`;
+  V.lcBlow = `a stable idle temperature in ${f0(P.equilibrium_central_pct.blower)}% of draws (${f0(P.equilibrium_rival_pct.blower)}% under ` +
+    `the rival leakage law, n = 1.8), but only ${f0(P.power_on_central.blower.both)}% of cold power-ons that stay below an 80 °C stop and ` +
+    `end at or below 70 °C (with an ordinary fan ${f0(P.power_on_central.fan.both)}%, in still air ${f0(P.power_on_central.still.both)}%), ` +
+    `the board's path to the air taken from the same formulas (${rng(P.blower_rba[0], P.blower_rba[2], f1)} °C/W)`;
+  const env = (c, pol) => LC.envelope[`${c}|heatsink|pattern|${pol}`].hi90;
+  V.lcSinkEnv = `at least 90% of draws settle at ${env('aifoundry2', 'floor')} MHz or below at the floor voltages on aifoundry2 and at ` +
+    `${env('aifoundry3', 'floor')} MHz or below on aifoundry3 (${env('aifoundry1-c1', 'floor')} MHz on card 1, whose voltages must not be ` +
+    `set); with the voltages left, at ${env('aifoundry3', 'boot')} MHz or below on aifoundry3 and at no settable clock on aifoundry2 ` +
+    `(${pct(p100.pattern.heatsink)} at 100 MHz)`;
+  V.lcSinkA2 = pct(p100.pattern.heatsink);
+  const be = LC.window['aifoundry2|still|boot_end'], bf = LC.window['aifoundry2|fan|boot_end'];
+  V.lcBootT = `a median ${f0(be.T[1])} °C (${rng(be.T[0], be.T[2], f0)}) in still air and ${f0(bf.T[1])} °C with a fan, and at or ` +
+    `above 85 °C in ${pct(be.ge85)} and ${pct(bf.ge85)} of draws (section 3.1's figures come from the same model with its own draws)`;
+  // 5.4
+  const ps = X.p_shire_mW;
+  V.lcPshire = `about ${f2(ps['600|boot'] / 1000)} W on an active shire's die at 600 MHz, falling with f·V² to ${f2(ps['300|boot'] / 1000)} W ` +
+    `at 300 MHz with the voltages left, ${f2(ps['300|floor'] / 1000)} W at 300 MHz at the floor and ${num(ps['100|floor'] / 1000, 3)} W at ` +
+    `100 MHz at the floor`;
+  V.lcTau = `${rng(X.tau_window[0], X.tau_window[2], f2)} (median ${f2(X.tau_window[1])})`;
+  const thr = X.threshold_mK;
+  V.lcThr = `To be seen, a contrast must exceed about ${f0(thr['diff 1 s/state'][1])} mK in a difference image of two 1 s states. With ` +
+    `lock-in it is the pattern's modulated amplitude, a fraction of these settled contrasts, that must exceed about ` +
+    `${f1(thr['lock-in 60 s'][1])} mK after a minute, ${f2(thr['lock-in 600 s'][1])} mK after 10 minutes and ${f2(thr['lock-in 3600 s'][1])} mK ` +
+    `after an hour. Each threshold is three times the noise of a pair of shire regions and includes a 4-fold allowance for drift`;
+  const C = X.contrast_mK, LQ = LC.least_clock, LK = LC.lockin;
+  const g3 = v => (v >= 1000 ? num(v, 0) : v >= 100 ? f0(v) : v >= 10 ? num(v, 2 - Math.floor(Math.log10(v))) : num(v, 2 - Math.floor(Math.log10(v))));
+  V.lcLidCut = `a checkerboard reads ${g3(C.lid_tape.checkerboard[0])} mK on the taped lid against ${g3(C.die_coated.checkerboard[0])} on a ` +
+    `coated die, and a half die ${g3(C.lid_tape['half die'][0])} against ${g3(C.die_coated['half die'][0])} mK, at 600 MHz`;
+  const mins = s_ => (s_ < 120 ? `${f0(s_)} s` : `${f0(s_ / 60)} minutes`);
+  V.lcLidLook = `A difference image of two 1 s states shows a checkerboard down to about ${f0(LQ.lid_tape.checkerboard['diff 1 s/state'])} MHz ` +
+    `and one shire down to about ${f0(LQ.lid_tape['one shire']['diff 1 s/state'])} MHz; below that it takes lock-in. At 100 MHz at the floor a ` +
+    `checkerboard takes a median ${f0(LK.lid_tape.checkerboard['100'][1])} s of lock-in and the other patterns 10 s or less; at 10 MHz a ` +
+    `checkerboard would take about ${mins(LK.lid_tape.checkerboard['10'][1])} and one shire about ${mins(LK.lid_tape['one shire']['10'][1])}`;
+  const all10 = k => Object.values(LK[k]).every(d => d['10'][1] <= 10.0001);
+  V.lcDieLook = `${g3(C.die_coated.checkerboard[0])} mK for a checkerboard at 600 MHz; a difference image of two 1 s states shows a ` +
+    `checkerboard down to about ${f0(LQ.die_coated.checkerboard['diff 1 s/state'])} MHz, and lock-in shows ` +
+    (all10('die_coated') ? 'every pattern within 10 s even at 10 MHz' : `every pattern within 10 s down to ${Math.min(...Object.values(LK.die_coated).map(d => +Object.keys(d).filter(f => d[f][1] <= 10.0001).sort((a, b) => a - b)[0]))} MHz`);
+  V.lcDieSi = `about ${f0(LQ.die_si.checkerboard['diff 1 s/state'])} MHz for the same checkerboard image`;
+  const mp = X.map_steady_C;
+  V.lcMap = `${f2(Math.min(...mp.centre))}–${f2(Math.max(...mp.centre))} °C with the sensor at its tile's centre and ` +
+    `${f2(Math.min(...mp.edge))}–${f2(Math.max(...mp.edge))} °C at the tile's edge`;
+  const Q = X.quantiser, q = (k, r, d) => Q[`${k}|${r}|${d}`];
+  const seenR = (k, d) => `${pct(Math.min(q(k, 0.02, d).frac_seen, q(k, 0.09, d).frac_seen))}–${pct(Math.max(q(k, 0.02, d).frac_seen, q(k, 0.09, d).frac_seen))}`;
+  V.lcStock = `on a steady die, a 10 s look at 600 MHz shows the block at only ${seenR('stock, 600 MHz', 'steady die')} of starting ` +
+    `temperatures within a degree, and the ${f0(X.stock_lockin_100_s)} s lock-in at 100 MHz at the floor at ${seenR('stock, 100 MHz, floor', 'steady die')} ` +
+    `(raw sensor noise 0.02–0.09 °C). A slow dither of the chip's power over two degrees, about ${f0(q('stock, 600 MHz', 0.02, '2 C dither').T_s / 2)} s ` +
+    `a cycle, restores it at ${seenR('stock, 100 MHz, floor', '2 C dither')} of them, in about ${f0(q('stock, 600 MHz', 0.02, '2 C dither').T_s)} s at ` +
+    `600 MHz and ${f0(q('stock, 100 MHz, floor', 0.02, '2 C dither').T_s)} s at 100 MHz`;
+  // 5.5
+  V.lcOpt1 = `about ${f0(q('stock, 600 MHz', 0.02, '2 C dither').T_s)} s at 600 MHz and ${f0(q('stock, 100 MHz, floor', 0.02, '2 C dither').T_s)} s ` +
+    `at 100 MHz at the floor (a steady die shows it in only some 10 s looks)`;
+  V.lcOpt1Sink = `${env('aifoundry2', 'floor')} MHz or less at the floor voltages on aifoundry2 (${env('aifoundry3', 'floor')} MHz on aifoundry3)`;
+  V.lcOpt3Look = `a look of a median ${f0(wf.look['75'][1])} s before the 75 °C stop, none in ${pct(wf.none['75'])} of power-ons`;
+  // 5.6
+  V.lcPlanA = `${f0(P.stageA_min[0])} minutes of card time, ${f0(P.stageA_min[1])} without the optional items`;
+  V.lcPlanB = `${f0(P.stageB_min)} minutes of card time`;
+  V.lcPlanStep = `${rng(P.step_100_plan[0], P.step_100_plan[2], f1)} W by the plan's model and ${rng(P.step_100_envelope[0], P.step_100_envelope[2], f1)} W ` +
+    `by this page's (5th–95th percentiles), of aifoundry3's ${f1(LC.decomp['aifoundry3|56'] ? LC.decomp['aifoundry3|56'].board[1] : 25.3)} W idle ` +
+    `at 56 °C`;
+  V.lcPlanLow = `${rng(P.low_point_56C_plan[0], P.low_point_56C_plan[2], f1)} W`;
+  V.lcPlanPon = `${f0(P.power_on_central.blower.both)}% with a 3–6 m/s blower, ${f0(P.power_on_central.fan.both)}% with an ordinary ` +
+    `fan, ${f0(P.power_on_central.still.both)}% in still air`;
+  // 9
+  const r2 = (a_, b_) => `${f1(Math.min(a_[0], b_[0]))}–${f1(Math.max(a_[2], b_[2]))}`;
+  V.lcBar600 = r2(th600('aifoundry2'), th600('aifoundry3'));
+  V.lcBar100 = r2(th100('aifoundry2'), th100('aifoundry3'));
+})();
+
 document.querySelectorAll('[data-v]').forEach(e => {
   const k = e.getAttribute('data-v');
   if (V[k] == null) { console.error('esperanto-without-heatsink: no value for ' + k); return; }
@@ -358,7 +498,7 @@ const vline = (g, x, y0, y1, style) => CK.el('line', {x1: x, x2: x, y1: y0, y2: 
   function cap() {
     const C = TR.cases[load], at = (k, s) => C[k].p50[TR.t.indexOf(s)];
     $('trajcap').innerHTML = `aifoundry2 from a cold power-on at room temperature, ${f0(TR.n)} draws per line ` +
-      `(seed ${TR.seed}) ${kind('model')}. Bare: the two-node model with the input ranges of section 8. With the heatsink: the Foster chain ` +
+      `(seed ${TR.seed}) ${kind('model')}. Bare: the two-node model with the input ranges of section 9. With the heatsink: the Foster chain ` +
       `fitted on aifoundry2 ${ref('R5')}, driven by its fitted idle law${load === 'idle' ? '' : ` plus the fitted model's ${f1(TR.sink_load_board_w)} W of board power for the random-data matmul on 1,024 minions ${ref('R6')}`}, ` +
       `from its two fitted intercepts, 22.8–28.0 °C. The load starts at power-on, before a real host could launch anything; the grey band ` +
       `is the ${TR.boot_window_s[0]}–${TR.boot_window_s[1]} s this page assumes the host takes to boot. The model stops at ${f0(CAP)} °C: ` +
@@ -446,7 +586,7 @@ const vline = (g, x, y0, y1, style) => CK.el('line', {x1: x, x2: x, y1: y0, y2: 
 (function () {
   let h = `<thead><tr><th class="num">#</th><th>Option</th><th>Feasible</th><th>Risk</th><th>Cost, time (rough estimate)</th><th>What it measures that we cannot now</th><th>Who does it</th></tr></thead><tbody>`;
   D.options.forEach(o => {
-    const fc = o.feasible === 'now' ? 'now' : o.feasible === 'no' ? 'no' : '';
+    const fc = o.feasible === 'now' ? 'now' : /^no/.test(o.feasible) ? 'no' : '';
     h += `<tr><td>${o.rank}</td><td>${esc(o.option)}</td><td><span class="opt-feas ${fc}">${esc(o.feasible)}</span></td><td>${esc(o.risk)}</td>` +
       `<td>${o.cost === '—' ? '—' : `${esc(o.cost)}; ${esc(o.time)}`}</td><td>${esc(o.measures)}</td><td>${esc(o.who)}</td></tr>`;
   });
@@ -455,4 +595,242 @@ const vline = (g, x, y0, y1, style) => CK.el('line', {x1: x, x2: x, y1: y0, y2: 
 })();
 
 /* ---------- the static tables in the body (vendor θJA, IR windows, imaging setups): stack them on phones ---------- */
-['vtable', 'wtable', 'itable'].forEach(id => { if ($(id)) CK.stackTable($(id)); });
+['vtable', 'wtable', 'itable', 'lcotable'].forEach(id => { if ($(id)) CK.stackTable($(id)); });
+
+/* ---------- section 5.4: the contrast table (imaging_calc.out, read by make_page_data.py) ---------- */
+(function () {
+  const C = LC.imgx.contrast_mK, S = LC.imgx.sensors_mK, PT = ['checkerboard', 'one shire', '2x2 block moving', 'half die'];
+  const g = v => (v == null ? '—' : v >= 1000 ? num(v, 0) : v >= 100 ? f0(v) : v >= 10 ? (Math.round(v * 10) / 10 >= 100 ? f0(v) : num(v, 1).replace(/\.0$/, ''))
+    : v >= 1 ? num(v, 2).replace(/0$/, '') : num(v, 2 - Math.floor(Math.log10(v))));
+  const rows = [['Delidded die, coated black', p => C.die_coated[p]], ['Delidded die, coated, under an IR-window cooler', p => C.die_win[p]],
+    ['Lid, heatsink off, taped', p => C.lid_tape[p]], ['Lid, heatsink off, bare plating', p => C.lid_bare[p]],
+    ['The 34 on-die sensors, heatsink on', p => [S['600'][p], S['100'][p], null]]];
+  let h = '<thead><tr><th>View</th><th class="num">Checkerboard</th><th class="num">One shire</th><th class="num">2×2 block, moving</th>' +
+    '<th class="num">Half die</th></tr></thead><tbody>';
+  rows.forEach(([name, get]) => { h += `<tr><td>${esc(name)}</td>` + PT.map(p => `<td class="num">${get(p).map(g).join(' / ')}</td>`).join('') + '</tr>'; });
+  $('lcctable').innerHTML = h + '</tbody>';
+  CK.stackTable($('lcctable'));
+})();
+
+/* ---------- section 5.2–5.3: idle power and the cooling it needs, against the minion clock (D.lowclock) ---------- */
+(function () {
+  const STY = {
+    boot: {label: 'voltages left (the clock command alone)', color: 'var(--ref)', dash: '6 4', w: 2},
+    floor: {label: 'floor voltages (400 / 660 mV at 300 MHz and below)', color: 'var(--ink-2)', w: 2},
+    'floor+NoC': {label: 'floor voltages, and the NoC at 200 MHz / 400 mV', color: 'var(--ink)', w: 2.5}};
+  const POL = LC.policies, CLK = LC.clocks.slice().sort((a, b) => a - b), SETT = new Set(LC.settable);
+  const B = D.bare;
+  let card = 'aifoundry2', load = 'idle';
+  // a policy's points from 10 to 600 MHz; the floor policies' 600 MHz point is the card's own (the voltages are not lowered there)
+  const series = (c, pol) => CLK.map(f => lcPt(c, pol, f) || (f === 600 ? lcPt(c, 'boot', 600) : null)).filter(Boolean);
+  const pw = r => (load === 'idle' ? r.P['60'] : r.P16);
+  const th = r => r[load].th85;
+  const LOADS = {idle: 'idle', pattern: 'random data on 16 shires'};
+  CK.seg('lccard', {label: 'Card', options: LC.cards.map(c => [c, CK.card(c).label]), value: card,
+    onChange: v => { card = v; fr.redraw(); table(); caption(); }});
+  CK.seg('lcload', {label: 'Load', options: [['idle', 'idle'], ['pattern', 'random data on 16 shires']], value: load,
+    onChange: v => { load = v; fr.redraw(); caption(); }});
+  CK.legend('lcleg', POL.map(p => ({key: p, label: STY[p].label, color: STY[p].color, mark: 'line', dash: STY[p].dash}))
+    .concat([{key: 'fan', label: 'bare, fan (2–7 °C/W, outlined)', color: COND.fan.color, mark: 'dash'},
+             {key: 'still', label: 'bare, still air (4–12 °C/W, shaded)', color: `color-mix(in srgb, ${COND.still.color} 35%, transparent)`, mark: 'box'},
+             {key: 'sink', label: 'its heatsink (board basis)', color: COND.sink.color, mark: 'dash'}]));
+  const fr = CK.frame('lcchart', {label: 'Board power at a 60 °C die, and the largest thermal resistance that settles at or below 85 °C, against the minion clock',
+    height: w => (w < 600 ? 560 : 600), draw(f) {
+    const L = 50, R = 14, T1 = 28, gap = 64, Bm = 40, W = f.W, H = f.H;
+    const h1 = Math.round((H - T1 - gap - Bm) * 0.46), B1 = T1 + h1, T2 = B1 + gap, B2 = H - Bm;
+    const x = CK.log(8, 760, L, W - R), xt = f.narrow ? [10, 25, 100, 300, 600] : [10, 25, 50, 100, 200, 300, 600];
+    const S = POL.map(p => ({p, pts: series(card, p)}));
+    const vals = S.flatMap(s => s.pts.flatMap(r => [pw(r)[0], pw(r)[2]]));
+    const lo = Math.floor(Math.min(...vals) - 1), hi = Math.ceil(Math.max(...vals) + 1);
+    const y1 = CK.lin(lo, hi, B1, T1), y2 = CK.log(0.7, 15, B2, T2);
+    // not settable: below 100 MHz no PLL mode exists
+    const gz = CK.el('g', {}, f.svg);
+    [[T1, B1], [T2, B2]].forEach(([a, b]) => { const r = CK.el('rect', {x: L, y: a, width: x(100) - L, height: b - a}, gz); r.style.fill = 'var(--grid)'; r.style.opacity = 0.55; });
+    CK.axes(f, {x, y: y1, L, R, T: T1, B: H - B1, xt, xfmt: v => '', yl: `board power at a 60 °C die, W (${LOADS[load]})`});
+    CK.axes(f, {x, y: y2, L, R, T: T2, B: Bm, xt, yt: [1, 1.5, 2, 3, 5, 10, 15], yfmt: v => (v % 1 ? f1(v) : f0(v)), xl: 'minion clock, MHz (log scale)',
+      yl: 'θ that settles at or below 85 °C, °C/W (log scale)'});
+    const g = CK.el('g', {}, f.svg);
+    TXT(g, (L + x(100)) / 2, T1 + 14, f.narrow ? 'no PLL mode' : 'not settable: no PLL mode', 'tick', 'middle');
+    // the bare bands and the heatsink, in the lower panel
+    // still air as a fill, the fan as an outline, so that their overlap (4-7 C/W) makes no third colour
+    { const r = B.range_still, e = CK.el('rect', {x: L, y: y2(Math.min(r[1], 15)), width: W - R - L, height: y2(r[0]) - y2(Math.min(r[1], 15))}, g);
+      e.style.fill = COND.still.color; e.style.opacity = 0.14; }
+    { const r = B.range_fan, e = CK.el('rect', {x: L + 1, y: y2(r[1]), width: W - R - L - 2, height: y2(r[0]) - y2(r[1])}, g);
+      e.style.fill = 'none'; e.style.stroke = COND.fan.color; e.style.strokeWidth = 1.5; e.style.strokeDasharray = '5 3'; }
+    TXT(g, W - R - 4, y2(12) + 13, 'bare, still air', 'lab', 'end');
+    TXT(g, x(100) + 4, y2(3.4) + 4, 'bare, fan', 'lab', 'start');
+    const ts = D.cards[card].theta_sink, tsm = Math.sqrt(ts[0] * ts[1]);
+    const sl = CK.el('line', {x1: L, x2: W - R, y1: y2(tsm), y2: y2(tsm)}, g);
+    sl.style.stroke = COND.sink.color; sl.style.strokeWidth = 2; sl.style.strokeDasharray = '6 4';
+    TXT(g, W - R - 4, y2(tsm) + 14, f.narrow ? `heatsink, ${rng(ts[0], ts[1], f1)}` : `its heatsink, ${rng(ts[0], ts[1], f1)} °C/W`, 'tick', 'end');
+    // each policy: the 5th–95th band, then the median; dashed where not settable (below 100 MHz)
+    S.forEach(({p, pts}) => {
+      [[y1, pw], [y2, th]].forEach(([yy, get]) => {
+        const up = pts.map(r => [r.f, get(r)[2]]), dn = pts.map(r => [r.f, get(r)[0]]).reverse();
+        const band = CK.el('path', {d: CK.path(up.concat(dn), x, yy) + ' Z'}, g);
+        band.style.fill = STY[p].color; band.style.opacity = 0.10; band.style.stroke = 'none';
+      });
+    });
+    S.forEach(({p, pts}) => {
+      [[y1, pw], [y2, th]].forEach(([yy, get]) => {
+        const sett = pts.filter(r => r.f >= 100), not = pts.filter(r => r.f <= 100);
+        [[sett, STY[p].dash || null, 1], [not, '2 3', 0.75]].forEach(([seg, dash, op]) => {
+          if (seg.length < 2) return;
+          const e = CK.el('path', {d: CK.path(seg.map(r => [r.f, get(r)[1]]), x, yy), class: 'ln'}, g);
+          e.style.stroke = STY[p].color; e.style.strokeWidth = STY[p].w; e.style.opacity = op;
+          if (dash) e.style.strokeDasharray = dash;
+        });
+        pts.filter(r => SETT.has(r.f)).forEach(r => {
+          const c = CK.el('circle', {cx: x(r.f), cy: yy(get(r)[1]), r: 3.5}, g);
+          c.style.fill = STY[p].color; c.style.stroke = 'var(--page)'; c.style.strokeWidth = 1.5;
+        });
+      });
+    });
+    // direct labels in the upper panel, at 200 MHz: the top line above, the two floor lines above and below their pair
+    const at = (p, f) => pw(series(card, p).find(r => r.f === f))[1];
+    const lx = x(200);
+    const put = (p, yy, txt) => { const e = TXT(g, lx, yy, txt, 'lab', 'middle'); e.classList.add('halo'); };
+    put('boot', y1(at('boot', 200)) - 7, 'voltages left');
+    put('floor', y1(at('floor', 200)) - 7, 'floor');
+    put('floor+NoC', y1(at('floor+NoC', 200)) + 16, 'floor + NoC');
+    // a column per clock: the tooltip gives every policy's numbers there
+    const nodes = [];
+    CLK.forEach((fq, i) => {
+      const xl = i === 0 ? L : (x(CLK[i - 1]) + x(fq)) / 2, xr = i === CLK.length - 1 ? W - R : (x(fq) + x(CLK[i + 1])) / 2;
+      const hit = CK.el('rect', {x: xl, y: T1, width: xr - xl, height: B2 - T1, class: 'ck-hit'}, g);
+      CK.tip(f, hit, () => `<b>${fq} MHz</b>${SETT.has(fq) ? '' : ' (not settable)'}, ${esc(CK.card(card).label)}, ${LOADS[load]}<br>` +
+        POL.map(p => { const r = series(card, p).find(q => q.f === fq); if (!r) return '';
+          const s = r[load];
+          return `<b>${esc(STY[p].label)}</b>: ${f1(pw(r)[1])} W (${rng(pw(r)[0], pw(r)[2], f1)}) at the board; settles at or below 85 °C ` +
+            `with θ ≤ ${f2(th(r)[1])} °C/W; bare: ${pct(s.still)} of draws in still air, ${pct(s.fan)} with a fan; with its heatsink ${pct(s.heatsink)}`; })
+          .filter(Boolean).join('<br>'));
+      nodes.push(hit);
+    });
+    CK.keynav(f, nodes);
+  }});
+  function caption() {
+    $('lccap').innerHTML = `${esc(CK.card(card).label)}, ${LOADS[load]} ${kind('model')}. Upper panel: board power at a 60 °C die ` +
+      `(median, band 5th–95th percentile). Lower panel: θ<sub>85</sub>, the largest thermal resistance (on the SoC's share of the power, ` +
+      `a 25 °C room) at which the die settles at or below 85 °C, against what bare cooling gives (still air shaded, a fan outlined): ` +
+      `the part of a band above a line is cooling that cannot hold the card, the part below it can. Dots: settable clocks; below 100 MHz the lines are dotted, since no PLL mode exists there. The heatsink's line is its ` +
+      `effective θ at the card's idle point, on board power. From <code>lowclock_calc.py</code>, ${f0(LC.draws)} draws.` +
+      (card === 'aifoundry1-c1' ? ' Card 1\'s floor lines are for comparison only: its firmware has no voltage range check and writes NoC settings to flash, so its voltages must not be set.' : '');
+  }
+  // the table of operating points, for the chosen card
+  const ROWS = [[600, 'boot'], [400, 'floor'], [300, 'floor'], [100, 'boot'], [100, 'floor'], [100, 'floor+NoC'], [10, 'floor+NoC']];
+  function table() {
+    const name = (r, pol) => `${r.f} MHz, ${f0(r.mV[0])} / ${f0(r.mV[1])} mV${pol === 'floor+NoC' ? `, NoC ${f0(r.noc[0])} MHz / ${f0(r.noc[1])} mV` : ''}` +
+      (SETT.has(r.f) ? '' : ' (not settable)');
+    let h = `<thead><tr><th>Minion clock, minion / SRAM voltage</th><th class="num">Idle board at a 60 °C die, W</th><th class="num">Rise, W/°C</th>` +
+      `<th class="num">With 16 shires of random data, W</th><th class="num">Settles bare at idle: still air / fan</th><th class="num">With its heatsink: idle / 16 shires</th>` +
+      `<th class="num">θ<sub>85</sub> at idle, °C/W</th></tr></thead><tbody>`;
+    ROWS.forEach(([fq, pol]) => {
+      const r = lcPt(card, pol, fq); if (!r) return;
+      h += `<tr><td>${esc(name(r, pol))}${/forbidden/.test(r.status) ? '<small> (forbidden on this card: no range check, NoC writes go to flash)</small>' : ''}</td>` +
+        `<td class="num">${m595(r.P['60'], f1)}</td><td class="num">${num(r.dP60[1], 3)}</td><td class="num">${f1(r.P16[1])}</td>` +
+        `<td class="num">${pct(r.idle.still)} / ${pct(r.idle.fan)}</td><td class="num">${pct(r.idle.heatsink)} / ${pct(r.pattern.heatsink)}</td>` +
+        `<td class="num">${m595(r.idle.th85, f2)}</td></tr>`;
+    });
+    $('lctable').innerHTML = h + '</tbody>';
+    CK.stackTable($('lctable'));
+    $('lctnote').innerHTML = `${esc(CK.card(card).label)} ${kind('model')}: medians, with the 5th–95th percentile in brackets; “settles” = the ` +
+      `share of ${f0(LC.draws)} draws whose die settles below 85 °C. The rise is the board's per degree at 60 °C. 600 MHz is the card's own ` +
+      `point; “floor” rows hold minion 400 mV (398 on the die) and SRAM 660 mV, the 10 MHz row cannot be set. Card 0, excluded, idles at ` +
+      `300 MHz and 399 mV: ${f1(lcPt('aifoundry1-c0', 'floor', 300).P['60'][1])} W at 60 °C in the model, and settles with a fan in ` +
+      `${pct(lcPt('aifoundry1-c0', 'floor', 300).idle.fan)} of draws.`;
+  }
+  table(); caption();
+})();
+
+/* ---------- section 5.3: the look after the host boots, aifoundry2 with the pattern running ---------- */
+(function () {
+  const ROWS = [[600, 'boot', '600 MHz, its own voltages'], [400, 'floor', '400 MHz, 438 mV'], [300, 'floor', '300 MHz, floor voltages'],
+    [200, 'floor', '200 MHz, floor voltages'], [100, 'boot', '100 MHz, voltages left'], [100, 'floor', '100 MHz, floor voltages'],
+    [100, 'floor+NoC', '100 MHz, floor voltages and NoC']];
+  const sec = v => (v == null ? '30 min or more' : `${f0(v)} s`);
+  const cell = w => { const t = w.look['75'];
+    return `<td class="tcell num">${t[1] == null ? 'over 30 min' : `${f0(t[1])} s`}<small>${sec(t[0])} to ${sec(t[2])}</small>` +
+      `<small>none left: ${pct(w.none['75'])}</small><small>set at boot, to 85 °C: ${w.t85[1] == null ? 'never' : `${f0(w.t85[1])} s`}</small></td>`; };
+  let h = `<thead><tr><th>aifoundry2, the pattern running</th><th class="num">Still air</th><th class="num">Fan</th></tr></thead><tbody>`;
+  ROWS.forEach(([fq, pol, name]) => {
+    h += `<tr><td>${esc(name)}</td>${['still', 'fan'].map(a => cell(lcWin('aifoundry2', a, 'pattern', fq, pol))).join('')}</tr>`;
+  });
+  $('lcwtable').innerHTML = h + '</tbody>';
+  CK.stackTable($('lcwtable'));
+  const a3 = (a, fq, pol) => lcWin('aifoundry3', a, 'pattern', fq, pol);
+  const w80 = (a, fq, pol) => lcWin('aifoundry2', a, 'pattern', fq, pol);
+  $('lcwnote').innerHTML = `The look: seconds from the low point being set to a die of 75 °C, the plan's software stop, with random data on ` +
+    `16 shires; median, then the 5th–95th percentile, and the share of power-ons that reach the stop before the point is set ` +
+    `(at 600 MHz nothing needs setting) ${kind('model')}. The host boots for 30–90 s and the point takes 20–60 s to set, both at ` +
+    `600 MHz idle ${kind('assumed')}. To the plan's 80 °C relay a fan leaves a median ` +
+    `${f0(w80('fan', 100, 'floor+NoC').look['80'][1])} s at 100 MHz with the floors and the NoC lowered (none in ${pct(w80('fan', 100, 'floor+NoC').none['80'])}). ` +
+    `“Set at boot”: the seconds to 85 °C had the point been set the instant the host came up, which nothing in the lab can do. ` +
+    `aifoundry3 is close: at 100 MHz with the floors and the NoC lowered a fan leaves a median ${f0(a3('fan', 100, 'floor+NoC').look['75'][1])} s ` +
+    `(none in ${pct(a3('fan', 100, 'floor+NoC').none['75'])}), still air none in ${pct(a3('still', 100, 'floor+NoC').none['75'])}.`;
+})();
+
+/* ---------- section 5.4: how long the camera needs to see a pattern, against the clock ---------- */
+(function () {
+  const VIEWS = [
+    {k: 'die_coated', label: 'delidded die, coated black', color: 'var(--c1)'},
+    {k: 'die_si', label: 'delidded die, bare silicon', color: 'var(--c7)', dash: '6 3'},
+    {k: 'lid_tape', label: 'lid, heatsink off, taped', color: 'var(--c3)'},
+    {k: 'lid_bare', label: 'lid, heatsink off, bare plating', color: 'var(--c4)', dash: '6 3'}];
+  const PATS = [['checkerboard', 'checkerboard'], ['one shire', 'one shire'], ['2x2 block moving', '2×2 block, moving'], ['half die', 'half die']];
+  const CLK = Object.keys(LC.lockin.die_coated.checkerboard).map(Number).sort((a, b) => a - b);
+  const FLOOR = 10, YMAX = 3e6;
+  let pat = 'checkerboard';
+  CK.seg('lcipat', {label: 'Pattern', options: PATS, value: pat, onChange: v => { pat = v; fr.redraw(); }});
+  CK.legend('lcileg', VIEWS.map(v => ({key: v.k, label: v.label, color: v.color, mark: 'line', dash: v.dash}))
+    .concat([{key: 'win', label: 'taped lid only: the look a bare card leaves, still air to fan', color: 'color-mix(in srgb, var(--ink-2) 30%, transparent)', mark: 'box'}]));
+  // the look after boot (aifoundry2, the pattern running, the point set 20-60 s after the boot, to the 75 C stop), floor voltages
+  // below 600 MHz: still air (median) to fan (median); a median of 0 s sits on the axis
+  const WIN = [[600, 'boot'], [400, 'floor'], [300, 'floor'], [200, 'floor'], [100, 'floor']]
+    .map(([fq, pol]) => ({f: fq, still: lcWin('aifoundry2', 'still', 'pattern', fq, pol).look['75'][1], fan: lcWin('aifoundry2', 'fan', 'pattern', fq, pol).look['75'][1]}));
+  const TICK = {10: '10 s', 60: '1 min', 600: '10 min', 3600: '1 h', 86400: '1 day', 864000: '10 days'};
+  const fr = CK.frame('lcimg', {label: 'Lock-in time to see the pattern against the minion clock, per view', height: w => (w < 600 ? 360 : 390), draw(f) {
+    const L = 58, R = 14, T = 26, Bm = 40, W = f.W, H = f.H;
+    const x = CK.log(8, 760, L, W - R), y = CK.log(3, YMAX, H - Bm, T);
+    const gz = CK.el('g', {}, f.svg);
+    const z = CK.el('rect', {x: L, y: T, width: x(100) - L, height: H - Bm - T}, gz); z.style.fill = 'var(--grid)'; z.style.opacity = 0.55;
+    const fl = CK.el('rect', {x: L, y: y(FLOOR), width: W - R - L, height: H - Bm - y(FLOOR)}, gz); fl.style.fill = 'var(--grid)'; fl.style.opacity = 0.45;
+    CK.axes(f, {x, y, L, R, T, B: Bm, xt: f.narrow ? [10, 25, 100, 300, 600] : [10, 25, 50, 100, 200, 300, 600], yt: Object.keys(TICK).map(Number), yfmt: v => TICK[v] || '',
+      xl: 'minion clock, MHz (log scale)', yl: 'lock-in time to see the pattern (log scale)'});
+    const g = CK.el('g', {}, f.svg);
+    TXT(g, (L + x(100)) / 2, T + 14, f.narrow ? 'no PLL mode' : 'not settable', 'tick', 'middle');
+    TXT(g, W - R - 4, y(FLOOR) + 18, '10 s or less', 'tick', 'end');
+    // the bare card's window: a band from still air to fan
+    const cl = v => Math.max(v, 3);
+    const up = WIN.map(r => [r.f, cl(Math.max(r.fan, r.still))]), dn = WIN.map(r => [r.f, cl(Math.min(r.fan, r.still))]).reverse();
+    const wb = CK.el('path', {d: CK.path(up.concat(dn), x, y) + ' Z'}, g);
+    wb.style.fill = 'var(--ink-2)'; wb.style.opacity = 0.3; wb.style.stroke = 'none';
+    // each view's median; points at the 10 s floor are an upper bound, nudged apart so overlapping lines stay visible
+    VIEWS.forEach((v, i) => {
+      const d = LC.lockin[v.k][pat], off = (i - 1.5) * 4.5;
+      const yy = t => (t <= FLOOR + 1e-9 ? y(FLOOR) - 3 + off : y(Math.min(t, YMAX)));
+      const pts = CLK.map(fq => [x(fq), yy(d[fq][1])]);
+      const e = CK.el('path', {d: pts.map((p, j) => (j ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '), class: 'ln'}, g);
+      e.style.stroke = v.color; e.style.strokeWidth = 2; if (v.dash) e.style.strokeDasharray = v.dash;
+      pts.forEach(([px, py]) => { const c = CK.el('circle', {cx: px, cy: py, r: 3.5}, g); c.style.fill = v.color; c.style.stroke = 'var(--page)'; c.style.strokeWidth = 1.5; });
+    });
+    const dur = s => s == null ? 'beyond the range' : s <= FLOOR + 1e-9 ? '10 s or less' : s < 120 ? `${f0(s)} s` : s < 7200 ? `${f0(s / 60)} min` : s < 172800 ? `${f1(s / 3600)} h` : `${f0(s / 86400)} days`;
+    const nodes = [];
+    CLK.forEach((fq, i) => {
+      const xl = i === 0 ? L : (x(CLK[i - 1]) + x(fq)) / 2, xr = i === CLK.length - 1 ? W - R : (x(fq) + x(CLK[i + 1])) / 2;
+      const hit = CK.el('rect', {x: xl, y: T, width: xr - xl, height: H - Bm - T, class: 'ck-hit'}, g);
+      const w = WIN.find(r => r.f === fq);
+      CK.tip(f, hit, () => `<b>${fq} MHz</b>${fq < 100 ? ' (not settable)' : ''}, ${esc(PATS.find(p => p[0] === pat)[1])}: lock-in time, median (5th–95th)<br>` +
+        VIEWS.map(v => { const t = LC.lockin[v.k][pat][fq]; return `${esc(v.label)}: ${dur(t[1])} (${dur(t[0])} to ${dur(t[2])})`; }).join('<br>') +
+        (w ? `<br>taped lid only: a bare aifoundry2 leaves a look of ${f0(w.still)} s in still air and ${f0(w.fan)} s with a fan (median), from setting the point to the 75 °C stop` : ''));
+      nodes.push(hit);
+    });
+    CK.keynav(f, nodes);
+  }});
+  $('lcicap').innerHTML = `Lock-in time for the pattern to show at three times the noise, median over the imaging model's draws, ` +
+    `with fp32 random data and the voltage at its floor below 600 MHz ${kind('model')}; the best modulation frequency, at least 20 ` +
+    `periods and 10 s. A point on the grey floor means 10 s or less; points there are spread apart a little so that each line shows. ` +
+    `Grey band, for the taped lid only: the look a bare aifoundry2 leaves, with the pattern running, from setting the point to the ` +
+    `plan's 75 °C stop (median, still air to fan; section 5.3) ${kind('model')}; a median of none sits on the axis. A view can be ` +
+    `taken bare where its line lies inside or below the band. A delidded die has no lid's heat capacity, so its look would be ` +
+    `shorter still. Not shown: the chip's own sensors with the heatsink on, which need no window (section 5.4).`;
+})();
