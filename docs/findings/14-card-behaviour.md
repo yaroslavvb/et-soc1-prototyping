@@ -464,6 +464,7 @@ https://spacesheep.dev/@yaroslavvb/aifoundry1-link-retrain-hang
 
 ## Traps that cost time here
 
+- **A card's queue counters race with its resets (30 September, from the driver source).** The world-readable sysfs files `mgmt_vq_stats/*` and `ops_vq_stats/*` (`msg_count` and its siblings) walk the driver's queue tables with no lock, and et-driver 0.20.0 (the same as upstream's latest, 836a4ab) shows them before it builds the tables and removes them after it frees them. A read during a card reset can return garbage (a jump of trillions of messages); one during a driver load can crash the reader. Tools that read them (our usage logger, the dashboard) discard impossible jumps; never poll them in a tight loop, and never read `utilization_percent`. Reported on the Requests for Roman page (C29, CF13); the upstream issue is drafted ([02-requests.md](02-requests.md), Q86).
 - **`sparsity_host --budget` defaults to 8 seconds** on silicon and silently stops a longer run. Raise it for
   anything past 8 s.
 - **`pgrep -f` over `ssh` matches itself.** The processes that run a remote command carry the whole command in
