@@ -36,9 +36,52 @@ html.et-pres [data-ss-ui]{display:none!important}
 .w-play{min-width:5.2em}.w-tour{min-width:6.4em}.w-fs{min-width:6.6em}
 .st-btn:focus-visible,.pn button:focus-visible,.pn a:focus-visible,.pn select:focus-visible,.pn summary:focus-visible,.zc button:focus-visible,.stg:focus-visible,.pip:focus-visible,.toast button:focus-visible{outline:3px solid var(--c1);outline-offset:2px}
 .st-body{display:grid;grid-template-columns:minmax(0,1fr) var(--pnw);gap:14px;min-height:0;min-width:0}
-.st-view{position:relative;min-height:0;min-width:0}
-.st-svg{position:relative;height:100%;min-height:0;min-width:0}
-#chip{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+.st-view{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;gap:6px}
+.st-svg{position:relative;flex:1 1 auto;min-height:0;min-width:0}
+/* ---- the Up bar above the drawing (30 September): the wide button out, the breadcrumb, the scale readout ---- */
+.upbar{flex:none;display:flex;align-items:center;gap:6px 10px;min-width:0}
+.st-btn.up{flex:0 0 auto;min-width:min(40%,26em);max-width:60%;min-height:40px;text-align:left;display:flex;align-items:center;gap:8px;overflow:hidden;
+  font-weight:600;background:color-mix(in srgb,var(--c1) 9%,var(--surface));border-color:color-mix(in srgb,var(--c1) 45%,var(--border))}
+.st-btn.up .up-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.st-btn.up .up-s{color:var(--ink-2);font-weight:400;white-space:nowrap}
+.st-btn.up.dis{background:var(--surface);border-color:var(--border);font-weight:400}
+.crumbs{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:2px;overflow:hidden;white-space:nowrap;font-size:clamp(.76rem,.25vw + .66rem,.98rem)}
+.crumbs button{font:inherit;background:none;border:1px solid transparent;border-radius:6px;color:var(--ink);padding:3px 5px;cursor:pointer;min-height:30px;white-space:nowrap}
+.crumbs button:hover{border-color:var(--border);background:var(--surface)}
+.crumbs button[aria-current="location"]{font-weight:650;cursor:default;border-color:transparent;background:none}
+.crumbs button.nx{color:var(--ink-2);font-style:italic}
+.crumbs button.pm{font-weight:650;min-width:2em;border-color:var(--border);background:var(--surface)}
+.crumbs button.pm.dis{opacity:.35;cursor:default}
+.crumbs .sep{color:var(--ink-2);padding:0 1px}
+.crumbs button:focus-visible,.crumb-menu button:focus-visible,.zpill button:focus-visible{outline:3px solid var(--c1);outline-offset:1px}
+.scale-ro{flex:0 0 auto;color:var(--ink-2);font-size:clamp(.74rem,.22vw + .64rem,.94rem);white-space:nowrap;font-variant-numeric:tabular-nums;max-width:40%;overflow:hidden;text-overflow:ellipsis}
+.scale-ro b{color:var(--ink);font-weight:600}
+.scale-ro .inf{text-decoration:underline dotted var(--muted);text-underline-offset:3px}
+.scale-ro.mv{color:var(--ink)}
+.scale-ro.jump{font-size:clamp(.9rem,.5vw + .7rem,1.3rem);font-weight:650;color:var(--ink)}
+.crumb-menu{position:absolute;left:0;top:0;z-index:8;display:flex;flex-direction:column;min-width:12em;max-height:70%;overflow:auto;background:var(--surface);
+  border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:4px}
+.crumb-menu[hidden]{display:none}
+.crumb-menu button{font:inherit;font-size:.9rem;text-align:left;background:none;border:0;border-radius:6px;color:var(--ink);padding:6px 10px;cursor:pointer;min-height:36px}
+.crumb-menu button:hover{background:var(--page)}
+/* the touch screen's "Zoom in" pill beside the selected part */
+.zpill{position:absolute;z-index:5;display:flex;gap:6px;padding:4px;border-radius:12px;background:color-mix(in srgb,var(--surface) 92%,transparent);
+  border:1px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,.16)}
+.zpill[hidden]{display:none}
+.zpill .st-btn{min-height:40px;font-size:.92rem}
+/* the panel's zoom row: the zooms of the part or scale, directly under its lead */
+.pn-zoom{margin:4px 0 10px;display:flex;flex-direction:column;gap:5px}
+.pn-zoom .zr{display:flex;flex-wrap:wrap;gap:5px 6px;align-items:center}
+.pn-zoom .zl{font-size:.86em;color:var(--ink-2);margin-right:2px}
+.pn-zoom .st-btn{font-size:.88em;min-height:32px;white-space:normal;text-align:left;line-height:1.2}
+.pn-zoom .st-btn.pri{background:color-mix(in srgb,var(--c1) 12%,var(--surface));border-color:color-mix(in srgb,var(--c1) 55%,var(--border));font-weight:600}
+.pn-zoom .st-btn .dc{font-weight:400;color:var(--ink-2);font-size:.9em}
+.pn-zoom .nz{font-size:.88em;color:var(--ink-2);margin:0}
+.pn-zoom.flash{animation:zflash 1.2s ease-out}
+@keyframes zflash{0%{background:color-mix(in srgb,var(--c2) 25%,transparent)}100%{background:transparent}}
+@media (prefers-reduced-motion: reduce){.pn-zoom.flash{animation:none}}
+.pn-kick .pn-sz{text-transform:none;letter-spacing:0}
+#chip{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;touch-action:manipulation}
 /* ---- the scale control: always there, under the details panel, right-aligned (where maps keep their zoom) ---- */
 .zc{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:3px}
 .zc button{font:inherit;font-size:clamp(.76rem,.25vw + .66rem,.98rem);min-height:30px;padding:2px 9px;border-radius:8px;cursor:pointer;
@@ -356,7 +399,10 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   #stage:fullscreen .pn-scroll,#stage.pres .pn-scroll{max-height:none}
   .pn-scroll{max-height:70vh}
   .st-cap,#stage.nopanel .st-cap{grid-template-columns:minmax(0,1fr)}
-  .zc{justify-content:flex-start;flex-wrap:wrap}
+  .upbar{flex-wrap:wrap;gap:4px 8px}
+  .st-btn.up{flex:1 1 100%;max-width:none;min-height:44px}
+  .crumbs{flex:1 1 auto}
+  .scale-ro{max-width:55%}
   #cap{min-height:0}
   #cap-sub{white-space:normal}
 }
@@ -388,7 +434,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .st-btn{padding:3px 8px}
   .st-btn .k{margin-right:4px}
   .w-play{min-width:4.6em}.w-tour{min-width:5.2em}.w-fs{min-width:5.8em}
-  .st-row .lab2,.zc .zlab{display:none}
+  .st-row .lab2{display:none}
   .st-title .t-long{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
   .st-title .t-short{display:inline}
 }
@@ -441,7 +487,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 </style>
 
 <section id="stage" aria-label="Interactive schematic of the ET-SoC-1">
-<nav class="skip" aria-label="Skip links"><a href="#bar">Skip to playback</a><a href="#z-0">Skip to the scale control</a><a href="#pn-body">Skip to the details</a></nav>
+<nav class="skip" aria-label="Skip links"><a href="#bar">Skip to playback</a><a href="#up">Skip to zoom out</a><a href="#pn-body">Skip to the details</a></nav>
 <div class="st-head">
   <div class="st-title"><h1><span class="t-long">The ET-SoC-1, interactively</span><span class="t-short" aria-hidden="true">ET-SoC-1</span></h1></div>
   <div class="st-row" role="group" aria-label="Data flows">
@@ -461,8 +507,16 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 </div>
 <div class="st-body">
   <div class="st-view">
-    <div class="st-svg" id="svgwrap"><svg id="chip" role="group" aria-label="Schematic of the ET-SoC-1 die. Every part is a button: Tab to it and press Space for its details, Enter to zoom into a shire or a minion." xmlns="http://www.w3.org/2000/svg"></svg></div>
-    <div class="kbd-hint" id="kbd-hint" hidden title="Then F presents, Space pauses and the arrows step">Click here, then press <kbd>F</kbd></div>
+    <div class="upbar" id="upbar">
+      <button type="button" class="st-btn up" id="up" title="Zoom out one level (Backspace or −)"><span class="up-t">↑ Zoom out</span></button>
+      <nav class="crumbs" id="crumbs" aria-label="Scale"></nav>
+      <span class="scale-ro" id="scale-ro"></span>
+    </div>
+    <div class="st-svg" id="svgwrap"><svg id="chip" role="group" aria-label="Schematic of the ET-SoC-1, from the universe down to the silicon. Every part is a button: Tab to it and press Space for its details, Enter to zoom into it." xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="kbd-hint" id="kbd-hint" hidden title="Then F presents, Space pauses and the arrows step">Click here, then press <kbd>F</kbd></div>
+      <div class="zpill" id="zpill" hidden role="group" aria-label="The selected part"><button type="button" class="st-btn" id="zpill-in">Zoom in ▸</button><button type="button" class="st-btn" id="zpill-det">Details ↓</button></div>
+      <div class="crumb-menu" id="crumb-menu" hidden role="menu" aria-label="Levels further out"></div>
+    </div>
     <div class="pip" id="pip" hidden role="button" tabindex="0" aria-label="The flow's stage on the die: follow the flow again"><svg id="pipsvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg><span class="pip-cap" id="pip-cap">On the die · click to return</span></div>
   </div>
   <aside class="pn" id="panel" aria-label="Details">
@@ -498,14 +552,6 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
     <p id="cap-sub" class="hint">Space pauses · ← → stages · + − zoom · F presents · P panel · C follow</p>
   </div>
   <div class="cap-side">
-    <div class="zc" role="group" aria-label="Scale: zoom out, chip, shire, minion, zoom in">
-      <span class="zlab" aria-hidden="true">Scale</span>
-      <button type="button" class="pm" id="z-out" aria-label="Zoom out (minus key)" title="Zoom out (−, Backspace)">&#8722;</button>
-      <button type="button" data-z="0" id="z-0" aria-pressed="true" title="The whole chip">Chip</button>
-      <button type="button" data-z="1" id="z-1" aria-pressed="false" title="A shire">Shire</button>
-      <button type="button" data-z="2" id="z-2" aria-pressed="false" title="A minion">Minion</button>
-      <button type="button" class="pm" id="z-in" aria-label="Zoom in (plus key)" title="Zoom in (+)">+</button>
-    </div>
     <div class="vh" id="cap-scale" aria-live="polite">Scale: the chip</div>
   </div>
 </div>
