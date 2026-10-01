@@ -3052,6 +3052,7 @@ function resetCap() {
 /* the stage bar: the active flow's stages, the current one marked; in the tour on a still step, the tour's still
    steps (Chip, Shires, ... Summary); each is a button */
 function renderBar() {
+  lnkSoon();   // (a flow, a stage, a pause or the tour changed: the address follows; chip-diagram.links.js)
   const ol = $('stages'), had = focusIn(ol); ol.textContent = '';
   const k = FL.k;
   $('stage').classList.toggle('playing', flowOn() && CLK.on && !FL.still);
@@ -3333,6 +3334,8 @@ document.addEventListener('keydown', e => {
   }
 });
 
+/*@include chip-diagram.links.js*/
+
 /* ================= the text below the stage ================= */
 /* (1 Oct) the deep zoom's facts arrive after the first paint (ladder-core.js, lazyData): the panel shown, the count of
    facts by kind and the facts table are drawn again with them */
@@ -3466,7 +3469,8 @@ try {
   const q = new URLSearchParams(location.search);
   setTheme(q.get('theme'));
   if (q.get('panel') === 'off') togglePanel(false);
-  const f = q.get('flow'); if (f && '1234567890'.includes(f) && f.length === 1) startFlow(ORDER['1234567890'.indexOf(f)], 0, {intro: true});
+  const f = q.get('flow'); if (lnkStart()) { /* the address's #flow=, #tour= or #at= wins (chip-diagram.links.js) */ }
+  else if (f && '1234567890'.includes(f) && f.length === 1) startFlow(ORDER['1234567890'.indexOf(f)], 0, {intro: true});
   else if (f && f.toLowerCase() === 'b') startFlow('K', 0, {intro: true});
   else if (q.get('tour') === '1') startTour(0);
   else if (q.get('at')) { const P = atPath(q.get('at')); if (P) goTo(P, {total: 0}).then(() => { scaleUI(true); showHere(); }); else console.warn('?at=: no such scale', q.get('at')); }

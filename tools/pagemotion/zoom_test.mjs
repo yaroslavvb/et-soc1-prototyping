@@ -40,6 +40,14 @@
 //   T20 (part 1b) every scene by its path (window.__chipTest.walk): every part of every drawing leads in, its seat there
 //      in that drawing; every zoom to a transistor comes from a drawing in transistors; every scale reaches a transistor
 //      and an atom; the DRAM's and the regulators' chains never reach the N7 FinFET; the walk leaves no layer behind
+//   T21 links (1 Oct, the owner: "individual clicks like data->watts come with anchors"): each flow's button (1-9, 0, B)
+//      writes #flow=<key>-<name> and the page opened with it plays that flow; a key and the tour's slides (#tour=N, a
+//      flow's slide its flow's); a flow held at a stage (&stage=N) opens held there; the scale at rest (#at=, a deep
+//      circuit, the rack, a shire, a level of the easter egg named alone) opens at the same place; a hashchange takes the
+//      stage there by a move; fragments that name nothing warn and open the first view; #facts stays; Copy link (a
+//      mocked clipboard, Enter, the spacesheep and GitHub Pages addresses, the forbidden clipboard's selected link);
+//      reduced motion; in a frame (an http page) only ss-hash is posted, and a new fragment in the frame's src moves the
+//      camera without a reload
 import { open, sleep } from './cdp.mjs';
 const args = process.argv.slice(2), PAGE = args.find(a => !a.startsWith('--')), PHONE = args.includes('--phone');
 const ONLY = (args.find(a => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
@@ -643,6 +651,173 @@ T.T20 = async b => {
   ok(!wrong.length, 'T20 a DRAM cell\'s and a power transistor\'s chains never reach the N7 FinFET', wrong.join(' '));
   const want = ['pcie.lane', 'lib.diffamp', 'lib.xbar', 'lib.round', 'lib.wire', 'p.cu', 'lib.buck', 'lib.powerfet', 'lib.strap'];
   ok(want.every(i => ids.has(i)), 'T20 the scenes part 1b added are reached by zoom-ins: ' + want.join(', '), want.filter(i => !ids.has(i)).join(' '));
+};
+
+/* T21 links (1 Oct, the owner: "make sure individual clicks like data->watts come with anchors so that I can share link to
+   specific experiment"): the address follows the stage (chip-diagram.links.js) and opens it again */
+T.T21 = async b => {
+  const VIEWER = /^#[A-Za-z0-9_.=%&/-]*$/;   // what spacesheep's viewer mirrors into its own address
+  const LET = {1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H', 9: 'I', 0: 'J', b: 'K'};
+  const NAME = {1: 'load-to-dram', 2: 'latency-ladder', 3: 'tensorsend', 4: 'relay', 5: 'gathers', 6: 'host-and-pcie', 7: 'matmul', 8: 'data-watts', 9: 'hot-line', 0: 'allreduce', b: 'broadcast'};
+  // a new document each time (a navigation that changes only the fragment would not load the page again)
+  const fresh = async (q, wait = 1500) => { await b.send('Page.navigate', {url: 'about:blank'}); await sleep(120); await b.load(PAGE, q, wait); await b.idle(15000); };
+  const hash = () => b.ev('location.hash');
+  const press = async sel => { const bx = await b.box(sel); if (!bx) return false; if (b.touch) await b.tap(bx.x, bx.y); else await b.click(bx.x, bx.y); return true; };
+  const short = p => String(p).split('/').slice(-2).join('/');
+  const {identifier} = await b.send('Page.addScriptToEvaluateOnNewDocument', {source: "window.__warns = []; (() => { const w = console.warn; console.warn = function (...a) { window.__warns.push(a.map(String).join(' ')); return w.apply(this, a); }; })();"});
+  try {
+    await fresh('');
+    const D0 = (await b.state()).path;
+    ok(await hash() === '' && await b.ev('window.__chipLinks.anchor()') === '', 'T21 the first view (the die) has no fragment');
+    // every flow by its button: its address, and the page opened with that address plays the same flow
+    for (const k of '1234567890b') {
+      await fresh('');
+      await press(`[data-flow="${LET[k]}"]`); await sleep(700);
+      const h = await hash(), want = `#flow=${k}-${NAME[k]}`;
+      ok(h === want && VIEWER.test(h), `T21 flow ${k}'s button writes ${want}`, h);
+      await fresh(h);
+      const s = await b.state();
+      ok(s.flow === LET[k] && !s.done && await hash() === h, `T21 opened with ${want}: flow ${k} plays, the address left as it is`, JSON.stringify([s.flow, s.stage, s.done]));
+    }
+    // a flow's key, and the tour (its still slides, and a flow's slide, which gives the flow's own address)
+    await fresh('');
+    await b.key('3'); await sleep(700);
+    ok(await hash() === '#flow=3-tensorsend', 'T21 the key 3 writes #flow=3-tensorsend', await hash());
+    await fresh('#tour=1');
+    let s = await b.state();
+    ok(s.tour === 0 && await hash() === '#tour=1', 'T21 #tour=1 opens the tour', String(s.tour));
+    await b.key('ArrowRight', 8); await sleep(700);
+    ok(await hash() === '#tour=2', 'T21 the tour\'s next slide writes #tour=2', await hash());
+    await b.key('1'); await sleep(900);
+    s = await b.state();
+    ok(s.tour === 6 && s.flow === 'A' && await hash() === '#flow=1-load-to-dram', 'T21 the tour\'s slide of flow 1 writes #flow=1-load-to-dram', `${s.tour} ${s.flow} ${await hash()}`);
+    await fresh('#tour=2');
+    s = await b.state();
+    ok(s.tour === 1 && !s.flow, 'T21 #tour=2 opens the tour at its second slide', String(s.tour));
+    // a flow held at a stage (paused, then stepped): &stage=, and it opens there, held; playing again drops it
+    await fresh('#flow=8');
+    await b.ev(`document.getElementById('btn-play').click()`); await sleep(500);
+    s = await b.state();
+    let h = await hash();
+    ok(h === `#flow=8-data-watts&stage=${s.stage + 1}` && VIEWER.test(h), 'T21 flow 8 paused writes its stage', h);
+    await b.key('ArrowRight'); await sleep(900); await b.idle(15000);
+    s = await b.state(); h = await hash();
+    ok(h === `#flow=8-data-watts&stage=${s.stage + 1}` && s.still, 'T21 stepped while paused: the next stage', h);
+    const held = s.stage;
+    await fresh(h);
+    s = await b.state();
+    ok(s.flow === 'H' && s.stage === held && s.still && await hash() === h, `T21 opened with ${h}: flow 8 held at stage ${held + 1}`, JSON.stringify([s.flow, s.stage, s.still]));
+    await b.ev(`document.getElementById('btn-play').click()`); await sleep(700);
+    ok(await hash() === '#flow=8-data-watts', 'T21 playing on drops the stage', await hash());
+    // the scale the camera rests on (each reached by the Up button), and the page opened with it at the same place
+    const DEEP = 'shire:0/minion:0.0.0/vpu/vpu.lane:0/vpu.lane.fma/vpu.lane.fma.tree/fma.tree.col/lib.cmp42/lib.fa/lib.xor';
+    for (const [from, name, want] of [[DEEP + '/lib.finfet', 'a deep circuit (an XOR gate in transistors)', '#at=' + DEEP.replace(/:/g, '%3A')],
+      ['host', 'the rack', '#at=rack'], ['shire:20/minion:20.1.3', 'a shire', '#at=shire%3A20'], ['rack', 'a level of the easter egg (only its own name)', '#at=studio45']]) {
+      await fresh('?at=' + from);
+      await b.ev(`document.getElementById('up').click()`); await sleep(80); await b.idle(15000); await sleep(900);
+      s = await b.state(); h = await hash();
+      ok(h === want && VIEWER.test(h), `T21 ${name}: the camera at rest writes ${want}`, `${h} at ${short(s.path)}`);
+      await fresh(h);
+      const s2 = await b.state();
+      ok(s2.path === s.path && await hash() === h, `T21 ${name}: opened with it, the same place`, short(s2.path));
+    }
+    // the fragment changed (the viewer forwards the outer address's): the stage goes there, the camera by a move
+    await fresh('');
+    const moveTo = async (frag, cond, what) => {
+      await b.ev(`location.hash = ${JSON.stringify(frag)}`);
+      let moved = false;
+      for (let i = 0; i < 30 && !moved; i++) { await sleep(40); moved = (await b.state()).zooming; }
+      await b.idle(15000); await sleep(300);
+      const st = await b.state();
+      ok(cond(st, moved), `T21 a hashchange to ${frag}: ${what}`, JSON.stringify({at: short(st.path), flow: st.flow, tour: st.tour, moved}));
+    };
+    await moveTo('#at=shire%3A9', (st, mv) => mv && st.path === D0 + '/shire:9', 'the camera moves there (a move, not a cut)');
+    await moveTo('#flow=3', st => st.flow === 'C' && !st.done, 'flow 3 plays');
+    await moveTo('#tour=4', st => st.tour === 3 && !st.flow, 'the tour, at its fourth slide');
+    await moveTo('#at=rack', (st, mv) => mv && st.tour == null && !st.flow && st.node === 'rack', 'the tour ends, the camera moves to the rack');
+    ok(await hash() === '#at=rack', 'T21 after a hashchange the address is left as it is', await hash());
+    // fragments that name nothing: a console warning, the first view, and the address says what is shown
+    const nerr = b.errs.length;
+    for (const f of ['#flow=zz', '#at=no/such/scale', '#tour=99', '#at=shire%3A99', '#stage=2']) {
+      await fresh(f); await sleep(500);
+      s = await b.state();
+      const w = await b.ev('window.__warns.length');
+      ok(!s.flow && s.tour == null && s.path === D0 && w > 0 && await hash() === '', `T21 ${f}: a warning, the first view, the address cleared`, JSON.stringify({flow: s.flow, tour: s.tour, at: short(s.path), warns: w, hash: await hash()}));
+    }
+    await fresh('#flow=8&stage=99'); await sleep(500);
+    s = await b.state();
+    ok(s.flow === 'H' && !s.still && await b.ev('window.__warns.length') > 0 && await hash() === '#flow=8-data-watts', 'T21 #flow=8&stage=99: a warning, flow 8 from its start, the address corrected', JSON.stringify([s.flow, s.stage, await hash()]));
+    await moveTo('#at=nowhere', (st) => st.path === D0 && !st.flow, 'a warning, back to the first view');
+    ok(b.errs.length === nerr, 'T21 no error from any of them', b.errs.slice(nerr).join(' | '));
+    // #facts (the page's own anchor) still opens the facts table, and is left alone
+    await fresh('#facts'); await sleep(800);
+    const facts = await b.ev(`document.querySelectorAll('#facttab tbody tr').length`);
+    ok(await hash() === '#facts' && facts > 100 && await b.ev('window.__warns.length') === 0, 'T21 #facts opens the facts table and stays', `${await hash()} ${facts} rows`);
+    // Copy link: a mocked clipboard (headless Chrome may refuse the real one); the keyboard; the hosts; the fallback
+    await fresh('#flow=8');
+    const mock = good => `(() => { window.__copied = null; Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText: t => ${good ? '(window.__copied = t, Promise.resolve())' : 'Promise.reject(new Error("blocked by the frame"))'}}}); ${good ? '' : 'document.execCommand = () => false;'} return true; })()`;
+    await b.ev(mock(true));
+    await b.ev(`document.getElementById('btn-link').scrollIntoView({block: 'center'})`); await sleep(200);
+    const lay = await b.ev(`(() => { const r = document.getElementById('btn-link').getBoundingClientRect(); return {l: Math.round(r.left), r: Math.round(r.right), h: Math.round(r.height), iw: innerWidth, sw: document.documentElement.scrollWidth}; })()`);
+    ok(lay.l >= 0 && lay.r <= lay.iw && lay.h >= 28 && lay.sw <= lay.iw, `T21 Copy link shows, inside the window (${b.W} px wide)`, JSON.stringify(lay));
+    await press('#btn-link'); await sleep(400);
+    let c = await b.ev(`({copied: window.__copied, href: location.href, label: document.getElementById('btn-link').textContent})`);
+    const base = c.href.split('#')[0], want8 = base + '#flow=8-data-watts';
+    ok(c.copied === want8 && c.label === 'Copied', 'T21 Copy link copies the address of what is shown and says "Copied"', JSON.stringify(c));
+    await b.ev(`(window.__copied = null, document.getElementById('btn-link').focus(), true)`); await b.key('Enter'); await sleep(400);
+    ok(await b.ev('window.__copied') === want8, 'T21 Copy link from the keyboard (Enter)', await b.ev('window.__copied'));
+    const u1 = await b.ev(`window.__chipLinks.url('6cfdea5c-a598-438e-bd1a-613093ede523.spacesheep.app')`), u2 = await b.ev(`window.__chipLinks.url('yaroslavvb.github.io')`);
+    ok(u1 === 'https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=8-data-watts', 'T21 on spacesheep the link is the viewer\'s address', u1);
+    ok(u2 === want8, 'T21 on GitHub Pages (or any other host) it is the page\'s own address', u2);
+    await b.ev(mock(false));
+    await b.ev(`document.activeElement && document.activeElement.blur && document.activeElement.blur()`);
+    await press('#btn-link'); await sleep(400);
+    c = await b.ev(`(() => { const p = document.querySelector('.lnk-pop'), i = document.getElementById('lnk-in'); if (!p || !i) return null; const r = p.getBoundingClientRect();
+      return {shown: !p.hidden && r.width > 0, value: i.value, focus: document.activeElement === i, sel: [i.selectionStart, i.selectionEnd], say: p.querySelector('label').textContent, l: Math.round(r.left), r: Math.round(r.right), iw: innerWidth}; })()`);
+    ok(!!c && c.shown && c.value === want8 && c.focus && c.sel[0] === 0 && c.sel[1] === want8.length && (b.touch ? /press and hold/.test(c.say) : /^Copy with (Ctrl|⌘)-C$/.test(c.say)) && c.l >= 0 && c.r <= c.iw,
+      'T21 the clipboard forbidden: the link shown selected, with how to copy it, inside the window', JSON.stringify(c));
+    await b.key('Escape'); await sleep(200);
+    c = await b.ev(`({hidden: document.querySelector('.lnk-pop').hidden, focus: document.activeElement && document.activeElement.id, flow: window.__chipState().flow})`);
+    ok(c.hidden && c.focus === 'btn-link' && c.flow === 'H', 'T21 Escape closes it, the focus back on Copy link (the flow plays on)', JSON.stringify(c));
+    // reduced motion: an address opens at once, and a hashchange is a cut
+    const r = await open(b.touch ? {w: 390, h: 844, dpr: 3, touch: true, reduced: true} : {w: 1280, h: 800, dpr: 1, reduced: true});
+    try {
+      await r.load(PAGE, '#at=shire%3A5', 1500);
+      let rs = await r.state();
+      ok(rs.path === D0 + '/shire:5' && !rs.zooming, 'T21 reduced motion: #at=shire%3A5 opens there', short(rs.path));
+      await r.ev(`location.hash = '#at=rack'`); await sleep(120);
+      rs = await r.state();
+      ok(rs.node === 'rack' && !rs.zooming && await r.ev('location.hash') === '#at=rack', 'T21 reduced motion: a hashchange is a cut', short(rs.path));
+      ok(!r.errs.length, 'T21 reduced motion: no console errors', r.errs.slice(0, 3).join(' | '));
+    } finally { await r.close(); }
+    // in a frame (as spacesheep's viewer shows it; the page on a server): each new fragment posted to the parent as
+    // ss-hash, nothing else; the viewer's forward (the frame's src with a new fragment) moves the camera, no reload
+    if (/^https?:/.test(PAGE)) {
+      // (the viewer stands in a document of the page's own origin, one of its images: the frame's state can be read)
+      await b.send('Page.navigate', {url: new URL('ladder-img/milkyway.webp', PAGE).href}); await sleep(400);
+      await b.ev(`(() => { document.documentElement.innerHTML = '<head></head><body style="margin:0"></body>'; window.__msgs = []; addEventListener('message', e => window.__msgs.push(e.data));
+        const f = document.createElement('iframe'); f.id = 'fr'; f.style.cssText = 'border:0;display:block;width:${b.W}px;height:${b.H}px'; f.src = ${JSON.stringify(PAGE)}; document.body.appendChild(f); return true; })()`);
+      const F = `document.getElementById('fr').contentWindow`;
+      const fidle = async () => { for (let i = 0; i < 150; i++) { await sleep(100); if (await b.ev(`!!(${F}.__chipState) && !${F}.__chipState().zooming`)) return; } };
+      for (let i = 0; i < 80; i++) { await sleep(100); if (await b.ev(`!!(${F}.__chipState)`)) break; }
+      await fidle(); await sleep(400);
+      const fb = await b.ev(`(() => { const e = ${F}.document.querySelector('[data-flow="H"]'), q = e.getBoundingClientRect(), f = document.getElementById('fr').getBoundingClientRect(); return {x: f.left + q.left + q.width / 2, y: f.top + q.top + q.height / 2}; })()`);
+      if (b.touch) await b.tap(fb.x, fb.y); else await b.click(fb.x, fb.y);
+      await sleep(800);
+      let m = await b.ev('window.__msgs');
+      ok(m.some(x => x && x.type === 'ss-hash' && x.hash === '#flow=8-data-watts'), 'T21 framed: flow 8\'s button posts #flow=8-data-watts to the viewer', JSON.stringify(m));
+      await b.ev(`(() => { const f = document.getElementById('fr'); f.contentWindow.__t21 = 1; f.src = f.src.split('#')[0] + '#at=shire%3A9'; return true; })()`);
+      let moved = false;
+      for (let i = 0; i < 40 && !moved; i++) { await sleep(40); moved = await b.ev(`${F}.__chipState().zooming`); }
+      await fidle(); await sleep(300);
+      const fs = await b.ev(`({mark: ${F}.__t21, path: ${F}.__chipState().path, flow: ${F}.__chipState().flow})`);
+      ok(fs.mark === 1 && moved && fs.path === D0 + '/shire:9' && !fs.flow, 'T21 framed: the viewer\'s forward of #at=shire%3A9 stops the flow and moves the camera there (no reload)', JSON.stringify({mark: fs.mark, moved, at: short(fs.path), flow: fs.flow}));
+      await b.ev(`${F}.document.getElementById('up').click()`); await sleep(100); await fidle(); await sleep(900);
+      m = await b.ev('window.__msgs');
+      ok(m.length && m[m.length - 1].hash === '#', 'T21 framed: back at the die (the first view), the viewer is told to clear its fragment', JSON.stringify(m.slice(-2)));
+      ok(m.every(x => x && x.type === 'ss-hash' && Object.keys(x).length === 2 && VIEWER.test(x.hash)), `T21 framed: nothing but ss-hash is posted, each a fragment the viewer mirrors (${m.length} messages)`, JSON.stringify(m.slice(0, 8)));
+    } else console.log('  (T21 framed: skipped, the page is not on a server)');
+  } finally { await b.send('Page.removeScriptToEvaluateOnNewDocument', {identifier}); }
 };
 
 const b = await open(PHONE ? {w: 390, h: 844, dpr: 3, touch: true} : {w: 1280, h: 800, dpr: 1});

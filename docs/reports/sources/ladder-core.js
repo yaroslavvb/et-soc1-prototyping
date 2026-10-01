@@ -1129,6 +1129,8 @@ function arrived() {
   if (Z.level < 0 || Z.level > 2) lazyData();
   prefetch();
   if (!FL.k && !TOUR && !SEL) showHere();
+  // (a page's optional hook: the chip diagram's address follows the camera once it rests)
+  if (typeof pageArrived === 'function') pageArrived();
 }
 /* ---- the arrow keys with no flow or tour on the stage (and not presenting): in a shire, to the neighbour that way
    (as its edge link does); in any scale with siblings side by side (a minion), a glide to the one that way; elsewhere

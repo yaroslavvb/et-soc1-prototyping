@@ -535,6 +535,18 @@ html.et-pres [data-ss-ui]{display:none!important}
 .cap-kick{display:flex;align-items:center;gap:6px 14px;min-height:18px;flex-wrap:wrap}
 #cap-k{font-size:clamp(12px,.3vw + 8px,14px);color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .cap-side{min-width:0;padding-top:1px}
+/* Copy link (1 Oct): the address of what the stage shows, at the top of the panel's column under the bar (a phone: under
+   the caption); where the frame forbids the clipboard, the link shown selected above the button */
+.lnk{position:relative;display:flex;justify-content:flex-end}
+.lnk-b{min-height:30px;padding:2px 10px;min-width:6.4em;font-size:clamp(.76rem,.22vw + .66rem,.92rem);color:var(--ink-2)}
+.lnk-b.done{color:var(--ink);border-color:var(--ok)}
+.lnk-pop{position:absolute;right:0;bottom:calc(100% + 6px);z-index:8;width:min(460px,calc(100vw - 48px));box-sizing:border-box;background:var(--surface);
+  color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:8px 10px;box-shadow:0 8px 28px rgba(0,0,0,.2)}
+.lnk-pop[hidden]{display:none}
+.lnk-pop label{display:block;font-size:.85rem;color:var(--ink-2);margin:0 0 4px}
+.lnk-pop input{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--page);color:var(--ink)}
+.lnk-ta{position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;font-size:16px;pointer-events:none}
+#stage.pres .lnk,#stage:fullscreen .lnk{display:none}
 .dots{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .dots:empty{display:none}
 .dots button{width:8px;height:8px;border-radius:50%;background:var(--grid);display:block;border:0;padding:0;cursor:pointer}
@@ -913,6 +925,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   </div>
   <div class="cap-side">
     <div class="vh" id="cap-scale" aria-live="polite">Scale: the chip</div>
+    <div class="lnk" id="lnk"><button type="button" class="st-btn lnk-b" id="btn-link" title="Copy a link to what the diagram shows now: the flow, the tour's slide or the scale">Copy link</button><span class="vh lnk-say" role="status"></span></div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -966,6 +979,14 @@ up. On a phone the drawing fits the screen's width: the die with its packages at
 at theirs, and a flow's charts under the die. The levels outside the chip show their middle, with larger type. A
 minion's labels, and those of the circuits inside it, are small there: pinch to enlarge them, or tap a part for its
 details.</li>
+<li><b>Links.</b> The address follows what the stage shows, so that a link opens the same thing: a flow as
+<code>#flow=8-data-watts</code> (the key alone works too, <code>#flow=8</code>), with <code>&amp;stage=3</code> while you hold
+it at a stage (paused, or stepped while paused); a still slide of the tour as <code>#tour=3</code>; and with nothing
+playing, the scale the camera rests on, as <code>?at=</code> names it (<code>#at=rack</code>,
+<code>#at=shire%3A20/minion%3A20.1.3</code>). On spacesheep it shows in your own address bar. <b>Copy link</b>, under
+the details panel (on a phone, under the caption), copies the link to what is shown; where the page's frame forbids the
+clipboard it shows the link selected, to copy with Ctrl-C. Such a link wins over <code>?flow=</code>, <code>?tour=</code>
+and <code>?at=</code>, and changing it in the address bar takes the stage there.</li>
 </ul>
 
 <h2 id="ladder">From the rack to the quarks</h2>
@@ -1069,6 +1090,8 @@ is not published, down to a transistor and its atoms; and the memory, PCIe and I
 each with its way back. Last, a walk of every scene by its path closed the remaining gaps: a PCIe lane, the crossbars,
 the rounding, the copper wiring and its atom, the card's regulators and boot switches, and the host's parts now lead
 down to a transistor drawn as such and its atoms.</li>
+<li><b>1 October, links</b>: each flow and each scale has an address you can copy (Copy link): the address follows the
+flow, its held stage, the tour's slide or the scale shown, and opening it goes there.</li>
 </ul>
 
 <h2 id="related">Related reports</h2>
@@ -3634,6 +3657,8 @@ function arrived() {
   if (Z.level < 0 || Z.level > 2) lazyData();
   prefetch();
   if (!FL.k && !TOUR && !SEL) showHere();
+  // (a page's optional hook: the chip diagram's address follows the camera once it rests)
+  if (typeof pageArrived === 'function') pageArrived();
 }
 /* ---- the arrow keys with no flow or tour on the stage (and not presenting): in a shire, to the neighbour that way
    (as its edge link does); in any scale with siblings side by side (a minion), a glide to the one that way; elsewhere
@@ -10591,6 +10616,7 @@ function resetCap() {
 /* the stage bar: the active flow's stages, the current one marked; in the tour on a still step, the tour's still
    steps (Chip, Shires, ... Summary); each is a button */
 function renderBar() {
+  lnkSoon();   // (a flow, a stage, a pause or the tour changed: the address follows; chip-diagram.links.js)
   const ol = $('stages'), had = focusIn(ol); ol.textContent = '';
   const k = FL.k;
   $('stage').classList.toggle('playing', flowOn() && CLK.on && !FL.still);
@@ -10872,6 +10898,175 @@ document.addEventListener('keydown', e => {
   }
 });
 
+/* ================= links (1 Oct 2026): an address for what the stage shows =================
+   The owner: "Make sure individual clicks like data->watts come with anchors so that I can share link to specific
+   experiment." The #fragment follows the stage (history.replaceState, never a new entry): #flow=8-data-watts (a flow:
+   its key 1-9, 0 or b, then its name; #flow=8 opens it too), &stage=3 while a flow is held at a stage (paused, or
+   stepped while paused), #tour=3 on the tour's still slides, and with nothing playing the scale the camera rests on as
+   ?at= names it, #at=shire%3A20/minion%3A20.1.3 (above the rack only the level shown: the easter egg's rule), written
+   once the camera rests. The die, the first view, has none. In a frame each new fragment is posted to the viewer as
+   ss-hash (the only message), which spacesheep mirrors into the reader's address; the viewer forwards the outer
+   fragment in, and a hashchange goes there as any move does. At load the fragment wins over ?flow=, ?tour=, ?at=; one
+   that names nothing warns and is ignored (the address then says what is shown); any other (#facts) is left alone.
+   Copy link copies spacesheep's address of the page (the frame's origin is no address to share), elsewhere this one's;
+   where the frame forbids the clipboard, the link is shown selected. Hooks: lnkStart() at load, lnkSoon() in
+   renderBar, pageArrived() in the core's arrived(). */
+var LNK = {ready: false, last: '', t: 0, q: false, bad: false, sayT: 0, pop: null};   // (var: the hooks may run first)
+const LNK_HOME = 'https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram';
+const lnkSlug = k => FLOWS[k].title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+// (the viewer takes letters, digits and _ . = % & / - only)
+const lnkEnc = s => encodeURIComponent(s).replace(/[!'()*~]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+/* the shortest ?at= path that atPath takes back to P: from the die down, else from the deepest level of the ladder */
+function lnkPath(P) {
+  const tries = [], d = P.findIndex(e => e.id === 'die'), D0 = pathOf({level: 0});
+  if (isWrap(P)) tries.push(WRAP);
+  if (d >= 0 && d < D0.length && samePath(P.slice(0, d + 1), D0)) tries.push(d === P.length - 1 ? 'die' : pkeys(P.slice(d + 1)));
+  for (let i = P.length - 1; i >= 0; i--) if (OUT_IDS.includes(P[i].id) && P.slice(0, i).every((e, j) => pk(e) === OUT_IDS[j])) tries.push(pkeys(P.slice(i)));
+  tries.push(pkeys(P));
+  return tries.find(s => { try { const Q = atPath(s); return !!Q && samePath(Q, P); } catch (_) { return false; } }) || null;
+}
+/* (the first view has no anchor, unless the address's query asks for something else) */
+function lnkAt(P) {
+  if (samePath(P, pathOf({level: 0}))) return LNK.q ? 'at=die' : '';
+  const s = lnkPath(P);
+  return s ? 'at=' + s.split('/').map(lnkEnc).join('/') : '';
+}
+const lnkFlow = (k, i, held) => `flow=${KEYOF[k].toLowerCase()}-${lnkSlug(k)}` + (held ? '&stage=' + (i + 1) : '');
+function lnkAnchor() {
+  const tf = TOUR && STEPS[TOUR.i] ? STEPS[TOUR.i].flow : null;
+  if (TOUR && !(tf && FL.k === tf)) return 'tour=' + (TOUR.i + 1);
+  if (FL.k) return lnkFlow(FL.k, FL.i, !FL.done && (FL.still || !CLK.on));
+  return lnkAt(zNow().path);
+}
+/* a fragment's fields; null for one not of these forms */
+function lnkFields(h) {
+  const s = String(h || '').replace(/^#/, ''), o = {};
+  if (!/^(flow|tour|at|stage)=/i.test(s)) return null;
+  s.split('&').forEach(kv => {
+    const i = kv.indexOf('='), k = (i < 0 ? kv : kv.slice(0, i)).toLowerCase();
+    if (k in o) return;
+    try { o[k] = decodeURIComponent(i < 0 ? '' : kv.slice(i + 1)); } catch (_) { o[k] = '\u0000'; }
+  });
+  return o;
+}
+/* what it asks for: {flow, i, held}, {tour}, {at}; {bad} when it names nothing; fix: a bad stage, the flow from its start */
+function lnkAsk(o) {
+  if (o.flow != null) {
+    const v = String(o.flow).toLowerCase(), m = /^([0-9b])(?:-[a-z0-9-]*)?$/.exec(v);
+    const k = m ? (m[1] === 'b' ? 'K' : ORDER['1234567890'.indexOf(m[1])]) : ORDER.split('').find(x => lnkSlug(x) === v);
+    if (!k || !FLOWS[k]) return {bad: `#flow=${o.flow}: no such flow (1-9, 0 or b)`};
+    if (o.stage == null) return {flow: k};
+    const n = /^\d{1,2}$/.test(o.stage) ? +o.stage : 0;
+    if (n >= 1 && n <= FLOWS[k].stages.length) return {flow: k, i: n - 1, held: true};
+    console.warn(`#stage=${o.stage}: flow ${KEYOF[k]} has stages 1 to ${FLOWS[k].stages.length}; it plays from its start`);
+    return {flow: k, fix: true};
+  }
+  if (o.tour != null) { const n = /^\d{1,2}$/.test(o.tour) ? +o.tour : 0; return n >= 1 && n <= STEPS.length ? {tour: n - 1} : {bad: `#tour=${o.tour}: the tour has steps 1 to ${STEPS.length}`}; }
+  if (o.at != null) { let P = null; try { P = o.at ? atPath(o.at) : null; } catch (_) { P = null; } return P ? {at: P} : {bad: `#at=${o.at}: no such scale`}; }
+  return {bad: '#stage= alone names no flow'};
+}
+const lnkOf = r => (r.flow ? lnkFlow(r.flow, r.i, r.held) : r.tour != null ? 'tour=' + (r.tour + 1) : lnkAt(r.at));
+/* go there: at load at once (as the query does), on a hashchange by the reader's own kind of move */
+function lnkGo(r, smooth) {
+  if (r.flow && !r.held) { pickFlow(r.flow); return; }
+  if (r.flow) { if (TOUR) endTour(); if (FOLLOW_AUTO) setFollow(true); startFlow(r.flow, r.i, {still: true}); return; }
+  if (r.tour != null) { if (TOUR) tourGo(r.tour); else startTour(r.tour); return; }
+  if (TOUR) endTour();
+  if (FL.k) stopFlow();
+  if (smooth) userNav(r.at);
+  else goTo(r.at, {total: 0}).then(() => { scaleUI(true); showHere(); });
+}
+/* write the address (and tell the viewer); the camera's place waits until it rests, a flow's or the tour's does not */
+function lnkWrite() {
+  clearTimeout(LNK.t); LNK.t = 0;
+  if (!LNK.ready) return;
+  if (!FL.k && !TOUR && (ZW || UIP)) { LNK.t = setTimeout(lnkWrite, 300); return; }
+  const a = lnkAnchor(); if (a === LNK.last) return;
+  LNK.last = a;
+  const h = a ? '#' + a : '';
+  try { history.replaceState(history.state, '', location.pathname + location.search + h); } catch (_) { /* no history */ }
+  if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h || '#'}, '*'); } catch (_) { /* no parent */ } }
+}
+function lnkSoon(ms) { if (!LNK || !LNK.ready) return; clearTimeout(LNK.t); LNK.t = setTimeout(lnkWrite, ms || 150); }
+function pageArrived() { lnkSoon(400); }   // (a run of quick moves writes once)
+/* at load, before the query's flags (true: the fragment was applied, and they are not); what the address asked for is
+   what it says already, so nothing is written until the reader changes something */
+function lnkStart() {
+  try {
+    const q = new URLSearchParams(location.search), o = lnkFields(location.hash);
+    LNK.q = ['flow', 'tour', 'at'].some(n => q.get(n));
+    let r = o ? lnkAsk(o) : null;
+    if (r && r.bad) { console.warn(r.bad + '; the page opens as it would without it'); LNK.bad = true; r = null; }
+    if (r && r.fix) LNK.bad = true;
+    if (r) lnkGo(r, false);
+    // (after the query's flow, tour or move has started)
+    queueMicrotask(() => { LNK.ready = true; if (LNK.bad) { LNK.last = '\u0000'; lnkSoon(); } else LNK.last = lnkAnchor(); });
+    return !!r;
+  } catch (e) { console.warn('links: ' + e); LNK.ready = true; return false; }
+}
+window.addEventListener('hashchange', () => {
+  if (!LNK.ready) return;
+  const o = lnkFields(location.hash); if (!o) return;
+  let r = lnkAsk(o), fix = !!r.fix;
+  if (r.bad) { console.warn(r.bad + '; back to the first view'); r = {at: pathOf({level: 0})}; fix = true; }
+  LNK.last = fix ? '\u0000' : lnkOf(r);   // (the address says it already, unless it named nothing)
+  if (lnkOf(r) !== lnkAnchor()) lnkGo(r, true);
+  if (fix) lnkSoon();
+});
+/* ---- Copy link ---- */
+function lnkUrl(host) {
+  const a = lnkAnchor(), h = a ? '#' + a : '';
+  return /(^|\.)spacesheep\.(app|dev)$/.test(host == null ? location.hostname : host) ? LNK_HOME + h : location.href.split('#')[0] + h;
+}
+function lnkSay(t) {
+  const b = $('btn-link'), s = $('lnk').querySelector('.lnk-say');
+  s.textContent = t; b.textContent = t === 'Copied' ? t : 'Copy link'; b.classList.toggle('done', t === 'Copied');
+  clearTimeout(LNK.sayT); LNK.sayT = setTimeout(() => { b.textContent = 'Copy link'; b.classList.remove('done'); s.textContent = ''; }, 2000);
+}
+/* the async clipboard where the frame allows it, else the copy command on a selected text */
+function lnkClip(t, cb) {
+  const exec = () => {
+    const a = document.activeElement, ta = H('textarea', {readonly: '', 'aria-hidden': 'true', tabindex: '-1', class: 'lnk-ta'}, document.body);
+    ta.value = t; ta.focus({preventScroll: true}); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
+    ta.remove(); if (a && a.focus) a.focus({preventScroll: true});
+    return ok;
+  };
+  let allowed = true;
+  try { const fp = document.permissionsPolicy || document.featurePolicy; if (fp && fp.allowsFeature) allowed = fp.allowsFeature('clipboard-write'); } catch (_) { /* no policy API */ }
+  const cl = navigator.clipboard;
+  if (!(allowed && cl && cl.writeText && window.isSecureContext)) { cb(exec()); return; }
+  let p; try { p = cl.writeText(t); } catch (_) { p = Promise.reject(new Error('clipboard')); }
+  Promise.resolve(p).then(() => cb(true), () => cb(exec()));
+}
+/* the clipboard forbidden: the link shown selected above the button */
+function lnkPop(url) {
+  let p = LNK.pop;
+  if (!p) {
+    p = LNK.pop = H('div', {class: 'lnk-pop', role: 'group', 'aria-label': 'The link'}, $('lnk'));
+    H('label', {for: 'lnk-in'}, p);
+    const i = H('input', {id: 'lnk-in', type: 'text', readonly: '', spellcheck: 'false', autocomplete: 'off'}, p);
+    i.addEventListener('keydown', e => { if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); lnkPopOff(true); } else if (e.key === 'Tab') lnkPopOff(false); });
+    i.addEventListener('copy', () => setTimeout(() => { lnkPopOff(true); lnkSay('Copied'); }, 0));
+    document.addEventListener('pointerdown', e => { if (!p.hidden && !(e.target.closest && e.target.closest('#lnk'))) lnkPopOff(false); }, true);
+  }
+  const mac = /Mac|iPhone|iPad|iPod/.test((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '');
+  const say = TOUCH ? 'Selected: press and hold it to copy' : `Copy with ${mac ? '⌘' : 'Ctrl'}-C`, i = p.querySelector('input');
+  p.querySelector('label').textContent = say; $('lnk').querySelector('.lnk-say').textContent = say;
+  i.value = url; p.hidden = false;
+  i.focus({preventScroll: true}); i.select(); try { i.setSelectionRange(0, url.length); } catch (_) { /* selected */ }
+}
+function lnkPopOff(refocus) { const p = LNK.pop; if (!p || p.hidden) return; p.hidden = true; if (refocus) $('btn-link').focus({preventScroll: true}); }
+$('btn-link').addEventListener('click', () => {
+  lnkWrite();   // (the address bar too, if it waited for the camera)
+  const url = lnkUrl();
+  lnkPopOff(false);
+  lnkClip(url, ok => { if (ok) lnkSay('Copied'); else lnkPop(url); });
+});
+/* for the page's tests */
+window.__chipLinks = {anchor: () => lnkAnchor(), url: host => lnkUrl(host)};
+
+
 /* ================= the text below the stage ================= */
 /* (1 Oct) the deep zoom's facts arrive after the first paint (ladder-core.js, lazyData): the panel shown, the count of
    facts by kind and the facts table are drawn again with them */
@@ -11005,7 +11200,8 @@ try {
   const q = new URLSearchParams(location.search);
   setTheme(q.get('theme'));
   if (q.get('panel') === 'off') togglePanel(false);
-  const f = q.get('flow'); if (f && '1234567890'.includes(f) && f.length === 1) startFlow(ORDER['1234567890'.indexOf(f)], 0, {intro: true});
+  const f = q.get('flow'); if (lnkStart()) { /* the address's #flow=, #tour= or #at= wins (chip-diagram.links.js) */ }
+  else if (f && '1234567890'.includes(f) && f.length === 1) startFlow(ORDER['1234567890'.indexOf(f)], 0, {intro: true});
   else if (f && f.toLowerCase() === 'b') startFlow('K', 0, {intro: true});
   else if (q.get('tour') === '1') startTour(0);
   else if (q.get('at')) { const P = atPath(q.get('at')); if (P) goTo(P, {total: 0}).then(() => { scaleUI(true); showHere(); }); else console.warn('?at=: no such scale', q.get('at')); }
