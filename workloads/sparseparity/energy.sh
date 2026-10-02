@@ -10,7 +10,9 @@
 # M1's cost, as card_run.sh m4 and data/2026-09-29-aifoundry3-card-m4/f5-b); a whole (256,5) solve is f5h0 + f5h1
 # (tools/energy_reduce.py combine, which refuses anything but one instance's slices 0..N-1). Run it from the tree's
 # root on the card's host, only with the owner's go-ahead. It refuses aifoundry2 (its DV2 validation treats a
-# sampler or a *_host process as foreign) unless SPP_ALLOW_AIFOUNDRY2=1; there only the stubs' --dry runs.
+# sampler or a *_host process as foreign) unless SPP_ALLOW_AIFOUNDRY2=1; there only the stubs' --dry runs. That card
+# is out of service since 2 October 2026 (its cooling failed): never set SPP_ALLOW_AIFOUNDRY2. On aifoundry1 it uses
+# card 1 only.
 # These are the first card runs with --reps > 1 (L1: 44 launches at 7.3 per second): run l2 (14 launches, or a smoke
 # run of `l2 --reps 3`) before l1.
 #
@@ -94,7 +96,7 @@ case "$BUILD" in /*) ;; *) BUILD=$ROOT/$BUILD ;; esac
 HOST_BIN=$BUILD/host/sparseparity_host
 H=$(hostname)
 LOCK=/run/lock/etsoc-shire0.lock
-if [ "$H" = aifoundry1 ]; then export ET_DEVICES=1; LOCK=/run/lock/etsoc-shire1.lock; fi   # card 0 overheats
+if [ "$H" = aifoundry1 ]; then export ET_DEVICES=1; LOCK=/run/lock/etsoc-shire1.lock; fi   # card 1 only (card 0 is not used here)
 OUT=${OUT:-build/sparseparity-energy/$H-$WHAT-$(date +%Y%m%d-%H%M%S)${DRY:+-dry}}
 case "$OUT" in /*) ;; *) OUT=$ROOT/$OUT ;; esac
 PY=python3; [ -x "$HOME/nekko/.venv/bin/python3" ] && PY=$HOME/nekko/.venv/bin/python3       # numpy (lib.sh's venv)

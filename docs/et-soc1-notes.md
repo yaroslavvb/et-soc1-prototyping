@@ -100,7 +100,10 @@ What this means for kernels:
 - **Count on the clock varying, on aifoundry2.** Its firmware's "managed power" DVFS governor (65 W TDP) moves the
   minion clock between 600 and 800 MHz (three points: 600, 700, 800) on a die below about 65 °C. aifoundry3 is held at
   600 MHz (a boot service sets a 0 W TDP at every boot, which latches its governor), and aifoundry1's card 1 read
-  600 MHz in every sample since 25 September ([14-card-behaviour.md](findings/14-card-behaviour.md)). On-chip latencies are fixed in cycles; L3 and DRAM latencies are fixed in ns.
+  600 MHz in every sample since 25 September; aifoundry1's card 0 (firmware 1.4.1, in service again since its fan was
+  replaced on 2 October 2026) idles at 300 MHz between kernels and its governor steps the clock only while a kernel
+  runs, so its idle brackets and its bursts sit at different operating points
+  ([14-card-behaviour.md](findings/14-card-behaviour.md)). On-chip latencies are fixed in cycles; L3 and DRAM latencies are fixed in ns.
   Time with wall clock as well as `hpmcounter3`.
 - **Avoid concurrent PMU reads.** When both harts read `hpmcounter3` at once, one can get a wrong value (erratum 1.23).
 

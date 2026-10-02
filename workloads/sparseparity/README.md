@@ -67,8 +67,8 @@ its kernel's path compiled in.
 | Host | Tree | Build | Notes |
 |---|---|---|---|
 | aifoundry3 | `~/nekko` (a copy, no git) | the commands below | card idle; `sys_emu` at `/opt/et/bin/sys_emu`; built and tested there on 29 September |
-| aifoundry1 | `~/nekko` | the same | **card 1 only**: `card_run.sh` sets `ET_DEVICES=1` and `etsoc-shire1.lock`; `/home` shares one pool with the system (99% full until 30 Sep, 116 GB free since), so keep builds small |
-| aifoundry2 | the git checkout, `~/claude/et-soc1-prototyping` | `cmake` and `make` as below, in the checkout | **not before the DV2 validation ends (about 17:00 PDT on 29 September)**: no builds, no `*_host` or `sys_emu` process until then |
+| aifoundry1 | `~/nekko` | the same | **`card_run.sh` and `energy.sh` use card 1 only**: they set `ET_DEVICES=1` and `etsoc-shire1.lock` (card 0, in service again since its fan was replaced on 2 October 2026, takes `ET_DEVICES=0` and `etsoc-shire0.lock` by hand); `/home` shares one pool with the system (99% full until 30 Sep, 116 GB free since), so keep builds small |
+| aifoundry2 | the git checkout, `~/claude/et-soc1-prototyping` | `cmake` and `make` as below, in the checkout | **not before the DV2 validation ends (about 17:00 PDT on 29 September)**: no builds, no `*_host` or `sys_emu` process until then; **its card is out of service since 2 October 2026** (its cooling failed): run nothing on it |
 
 From a clone (on aifoundry2 the checkout itself), copy the sources to aifoundry1 or aifoundry3 the way
 `scripts/deploy-lab.sh` does, then build there:
@@ -183,19 +183,25 @@ it by construction: a `TOUCH_ALL` after every `TensorWait` that precedes a vecto
 
 **The card rules** (AGENT.md §5; 14-card-behaviour.md, "Traps"):
 - only with the owner's go-ahead and a named card: aifoundry3's card (idle, but its demo can launch without the
-  lock: check `et-who` before and after), or aifoundry1's card 1 (`ET_DEVICES=1`); aifoundry2 only after its DV2
-  validation ends, and aifoundry1's card 0 never (it overheats);
-- every device-opening process runs as `flock -n /run/lock/etsoc-shire<N>.lock timeout 10 …`, releases the lock
-  before the next, and is stopped with a plain `kill`, never `kill -9`;
+  lock: check `et-who` before and after), or either of aifoundry1's cards with `ET_DEVICES=<N>` and
+  `etsoc-shire<N>.lock` (`card_run.sh` and `energy.sh` use card 1 only there; card 0 overheated until its fan was
+  replaced on 2 October 2026 and is in service again since, but these scripts do not select it); never aifoundry2's
+  card, out of service since 2 October 2026 (its cooling failed);
+- on aifoundry1 `et-who --check` counts both cards (exit 1 if anyone holds either): a check for one card looks for
+  that card's own lines (`/dev/et<N>_…`, `lock:etsoc-shire<N>.lock`) and stops on exit 2;
+- every device-opening process runs as `ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 …` (on
+  aifoundry1 `ET_DEVICES` keeps it off the other card), releases the lock before the next, and is stopped
+  with a plain `kill`, never `kill -9`;
 - save `et-lab-manifest` with the data; build into your own directory; never reset a card or change its settings.
 
-`card_run.sh` does all of this per step: it waits for `et-who --check` to show a free card, runs each step as one
-locked, `timeout 10` process with `--records-out`, compares the JSON with the step's expected result, stops at the
-first surprise (resume with `--from STEP`), and after a step whose plan does not cover every candidate it re-runs the
-full oracle offline on the saved records (`--verify-records`, no device). Look first, then run:
+`card_run.sh` does all of this per step: it waits for `et-who --check` to show a free card (on aifoundry1 both
+cards: it waits while either is held), runs each step as one locked, `timeout 10` process with `--records-out`,
+compares the JSON with the step's expected result, stops at the first surprise (resume with `--from STEP`), and after
+a step whose plan does not cover every candidate it re-runs the full oracle offline on the saved records
+(`--verify-records`, no device). Look first, then run:
 
 ```bash
-cd ~/nekko                                                    # aifoundry3 or aifoundry1 (the checkout on aifoundry2)
+cd ~/nekko                                                    # aifoundry3 or aifoundry1 (never aifoundry2)
 bash workloads/sparseparity/card_run.sh list                  # every step, its expectation and its modelled time
 bash workloads/sparseparity/card_run.sh m1 --dry              # the same plans with --dry: no device, no lock
 et-who                                                        # nobody on the card
@@ -252,8 +258,8 @@ A card run can also be checked hart by hart against the CPU reference, through M
 
 ```bash
 python3 workloads/sparseparity/tools/planner.py plan --n 512 --k 4 --m 448 --shire-mask 0x1 --mps 32 --topm 0 --out $D/l1.wl
-flock -n /run/lock/etsoc-shire0.lock timeout 10 build/sparseparity-f/host/sparseparity_host --n 512 --k 4 --eta 0.3 \
-    --m 448 --seed 1 --plan $D/l1.wl --out $D/l1.card --records-out $D/l1.rec > $D/l1.json
+ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 build/sparseparity-f/host/sparseparity_host \
+    --n 512 --k 4 --eta 0.3 --m 448 --seed 1 --plan $D/l1.wl --out $D/l1.card --records-out $D/l1.rec > $D/l1.json
 python3 workloads/sparseparity/tools/sptest.py card --bin build/sparseparity-f-cpu --threads 4 --plan $D/l1.wl \
     --out $D/l1.card --inst 512,4,0.3,448,1                    # no device: spref on the same work list, field by field
 ```
@@ -430,7 +436,8 @@ held for one SP pass, which a 20 Hz sampler only lengthens, 0.255 to 0.296 s, E5
 host process with `--reps R --oracle sample` (every launch read back and checked against the first), its CPU time
 taken by bash's `times`; idles 10 s; stops the sampler; releases the lock; reduces. About 30 s per run: the lock
 about 27 s, the card's ops node at most 10 s. It refuses aifoundry2 (the DV2 validation treats a sampler or a
-`*_host` process as foreign) unless `SPP_ALLOW_AIFOUNDRY2=1`; there only the stubs' `--dry` runs.
+`*_host` process as foreign) unless `SPP_ALLOW_AIFOUNDRY2=1`; there only the stubs' `--dry` runs. Its card is out
+of service since 2 October 2026 (its cooling failed): do not set that variable. On aifoundry1 it uses card 1 only.
 
 | Preset | Launches | Burst | Launch (29 Sep) |
 |---|---|---|---|

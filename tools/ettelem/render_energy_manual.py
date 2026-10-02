@@ -803,7 +803,7 @@ def main():
     v2 = lambda h, k: 100 * ((RM[h][k] / RM[REF][k]) ** 2 - 1)
     xr = [h for h in order(X5) if isinstance(X5.get(h), dict) and X5[h].get("fp32_randn") and X5[h]["fp32_randn"]["ci"][0] > 0]
     s = ["# 8. Card-to-card variation\n",
-         f"Every catalogue and rerun table in sections 2 to 5 was measured on {NC} cards with the same binaries, in the version-3 check of 26 September: aifoundry2 and aifoundry3 (firmware 1.3.1; aifoundry3 pinned at 600 MHz by its 0 W TDP) and aifoundry1's card 1 (firmware 1.2.0). The hot line of section 6 is aifoundry2 and aifoundry3 only (23 September). aifoundry1's card 0 overheats and is left out (docs/findings/14-card-behaviour.md).\n",
+         f"Every catalogue and rerun table in sections 2 to 5 was measured on {NC} cards with the same binaries, in the version-3 check of 26 September: aifoundry2 and aifoundry3 (firmware 1.3.1; aifoundry3 pinned at 600 MHz by its 0 W TDP) and aifoundry1's card 1 (firmware 1.2.0). The hot line of section 6 is aifoundry2 and aifoundry3 only (23 September). aifoundry1's card 0, which overheated then (its fan was replaced on 2 October 2026), is left out (docs/findings/14-card-behaviour.md).\n",
          "| Comparison | " + col(lambda h: f"{name(h)} / aifoundry2") + " |", "|---|" + "---|" * len(OC),
          f"| Instruction and byte energies, {XC[OC[0]]['n']} catalogue entries, 3 passes each, each card at its own die temperature | " + col(lambda h: f"median **{f(XC[h]['median'], 3)}**, 10th–90th percentile {f(XC[h]['p10'], 3)}–{f(XC[h]['p90'], 3)}, range {f(ratios(h)[0])}–{f(ratios(h)[-1])}") + " |",
          "| The same, per instruction and per byte (medians) | " + col(lambda h: f"{f(med(ratios(h, False)), 3)} and {f(med(ratios(h, True)), 3)}") + " |",
@@ -836,7 +836,7 @@ def main():
         CLK = VI.get("clocks", {})
         for i, line in enumerate(txt):
             if line.startswith("| 8 | **Card-to-card variation** |"):
-                txt[i] = (f"| 8 | **Card-to-card variation** | every table on {and_list(name(h) for h in CARDS)}; aifoundry1's card 0 overheats and is left out"
+                txt[i] = (f"| 8 | **Card-to-card variation** | every table on {and_list(name(h) for h in CARDS)}; aifoundry1's card 0, which overheated then (its fan was replaced on 2 October 2026), is left out"
                           " | measured here (the version-3 check, 26 September 2026) |")
             if "the minion rail reads" in line and CLK:
                 j = line.index("the minion rail reads")

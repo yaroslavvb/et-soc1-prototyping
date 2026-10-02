@@ -14,11 +14,11 @@ over ssh, as our user) found every installed file equal to this directory, `et-l
 | `et-who` | `/usr/local/bin/et-who` | 0755 root | 27 Sep: `--check` added (installed 28 Sep, all three) | what users run: `sudo -n et-holders`. `et-who --check` is for scripts (below) |
 | `et-lab-health` | `/usr/local/bin/et-lab-health` | 0755 root | 28 Sep rev 3 (installed 30 Sep, all three) | a read-only health check of the host and its cards (below) |
 | `et-reset` | `/usr/local/bin/et-reset` | **0750 root:sudo** | 28 Sep (installed 30 Sep, all three) | a checked management reset of one card, for root and the sudo group (below) |
-| `et-lab-start` | `/usr/local/bin/et-lab-start` | 0755 root | 30 Sep, third version: Claude Code installs by default on aifoundry1 too (installed 22:38, all three; the first at 16:10) | onboarding, run by a new user as themselves: looks (cards, `et-who`, `et-usage`, people by process, disk), sets up what is missing (linger, Claude Code, a `claude` tmux session, a sparse clone), prints the Remote Control steps and the rules; `--check`, `--dry-run`; no sudo, never opens a card ([docs/lab-start/README.md](../../docs/lab-start/README.md)) |
+| `et-lab-start` | `/usr/local/bin/et-lab-start` | 0755 root | installed: the 30 Sep third version (Claude Code installs by default on aifoundry1 too; installed 22:38, all three; the first at 16:10), which still calls aifoundry1's card 0 `never` (it overheats) and aifoundry2's card usable. This directory's copy is the 2 Oct fourth version (`--card N`, down cards left out, per-card verdicts; aifoundry1's card 0 usable again, aifoundry2's card never), **not installed yet** | onboarding, run by a new user as themselves: looks (cards, `et-who`, `et-usage`, people by process, disk), sets up what is missing (linger, Claude Code, a `claude` tmux session, a sparse clone), prints the Remote Control steps and the rules; `--check`, `--dry-run`; no sudo, never opens a card ([docs/lab-start/README.md](../../docs/lab-start/README.md)) |
 | `et-usage/` | `/usr/local/sbin/et-usaged` (the service `et-usaged`, user `et-usage`, two capabilities), `/usr/local/bin/et-usage`, `/etc/default/et-usaged`, logs in `/var/log/et-usage/` (readable by every user) | 0755 root | 30 Sep (installed 20:54, all three; aifoundry1 with `--skip-counters 0 --skip-pci 0000:01:00.0`) | the card-usage logger: which process of which user holds each card's nodes or lock, from when to when, by inotify and `/proc`, never opening a card; `et-usage` prints the last 24 hours, `--json` feeds the lab dashboard ([et-usage/README.md](et-usage/README.md)) |
 | `et-lab-manifest` | `/usr/local/bin/et-lab-manifest` | 0755 root | 25 Sep, unchanged | prints the machine facts a measurement should record ([lab-access.md](../../docs/lab-access.md)) |
 | `60-labfix-et-who` | `/etc/update-motd.d/60-labfix-et-who` | 0755 root | 25 Sep, unchanged | the login banner's live part: what `et-holders` prints |
-| `motd-aifoundry1`, `-2`, `-3` | `/etc/motd` on that host | 0644 root | 30 Sep: two lines on card-use logging and `et-lab-start` (installed 20:58, all three), and aifoundry1's disk line after the cleanup (installed 22:38; the 27 Sep text otherwise) | the login banner's fixed part: the machine's cards, clocks and rules |
+| `motd-aifoundry1`, `-2`, `-3` | `/etc/motd` on that host | 0644 root | 30 Sep: two lines on card-use logging and `et-lab-start` (installed 20:58, all three), and aifoundry1's disk line after the cleanup (installed 22:38; the 27 Sep text otherwise). The installed banners predate 2 Oct: aifoundry1's card 0 back in service and aifoundry2's card out of service are in this directory's `motd-aifoundry1` and `motd-aifoundry2` but **not installed yet** | the login banner's fixed part: the machine's cards, clocks and rules |
 
 Three more files from 25 September are one-liners, described here rather than kept as files (all present on the
 three hosts on 28 September):
@@ -61,7 +61,7 @@ any `/dev/et*` path; it only stats them), and takes 0.2–0.35 s. It reports:
   --audit`, a pending reboot, systemd state with the failed units' names, chrony, the CPU power profile, the wired
   link, the CI runners, the login sessions and, with read access to the system journal, its size and boots kept.
 
-Rev 3 (28 September, not installed yet) fixes two wrong lines of rev 2 and makes it safe to run from a timer:
+Rev 3 (28 September; installed on all three hosts on 30 September) fixes two wrong lines of rev 2 and makes it safe to run from a timer:
 
 - **Logins.** Rev 2 listed `who`'s users, and `who` reads utmp, which has no entry for a session without a terminal
   (a Tailscale SSH command, for one): on aifoundry3 it printed "nobody logged in" while `uptime` counted 3 users.
@@ -179,11 +179,11 @@ kernel lines. The reset path itself has not run. Install (each host, as root, af
 
 ## The banners
 
-Each `motd-<host>` states that machine's cards, firmware and clock behaviour as of 27 September, the one-opener
-rule with `et-who`, the card lock, the commands that change a card for every user, the never-`kill -9` rule with the
-one-line drain, the host-program crash fix, `/tmp` being cleared at boot, `coredumpctl`, and the two lab tools. They
-are the lab's text once the lab adopts them; after any change to a card, a runner or a service, update the file
-here first, then the host.
+Each `motd-<host>` states that machine's cards, firmware and clock behaviour as of 27 September (aifoundry1's and
+aifoundry2's card notes as of 2 October, not installed yet), the one-opener rule with `et-who`, the card lock, the
+commands that change a card for every user, the never-`kill -9` rule with the one-line drain, the host-program crash
+fix, `/tmp` being cleared at boot, `coredumpctl`, and the two lab tools. They are the lab's text once the lab adopts
+them; after any change to a card, a runner or a service, update the file here first, then the host.
 
 ## Installing a change
 

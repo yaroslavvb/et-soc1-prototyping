@@ -82,8 +82,9 @@ only each lab machine's online flag and last-seen time. One ssh per host per run
 -c3`, every command under `timeout`; a run takes about 1–4 s of wall time for all three hosts.
 
 It never opens a `/dev/et*` node (checked with `strace` on aifoundry2), never reads `utilization_percent` (it syncs
-queue pointers from the card), never reads anything of aifoundry1's card 0 but its link, `err_stats` and its root
-port's error count, never writes on a host (except the sample's stamp file), never calls `tmux`, and never runs
+queue pointers from the card), never reads anything of a card `lab.json` marks `excluded` (aifoundry1's card 0 until
+2 October 2026; aifoundry2's card since then, out of service) but its link, `err_stats` and its root port's error
+count, never writes on a host (except the sample's stamp file), never calls `tmux`, and never runs
 `spacesheep update`. The card activity flag counts only the submission queues (`SQ*`, `HpSQ*`): the completion
 queues also count the card's own asynchronous events, so they move with nobody using the card.
 

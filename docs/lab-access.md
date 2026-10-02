@@ -1,11 +1,11 @@
 # Lab machine accounts
 
-The AI Foundry lab machines are x86_64 Ubuntu 24.04 boxes on the lab's Tailscale tailnet (updated 2026-09-29):
+The AI Foundry lab machines are x86_64 Ubuntu 24.04 boxes on the lab's Tailscale tailnet (updated 2026-10-02):
 
 | Machine | ET-SoC-1 cards | Device nodes |
 |---|---|---|
-| `aifoundry1` | 2: card 0 (firmware 1.4.1; **overheats under load, do not run sustained work on it**) and card 1 (firmware 1.2.0; its clock stays at 600 MHz) | `/dev/et0_{mgmt,ops}`, `/dev/et1_{mgmt,ops}` |
-| `aifoundry2` | 1 (firmware 1.3.1) | `/dev/et0_{mgmt,ops}` |
+| `aifoundry1` | 2: card 0 (firmware 1.4.1; back in service since 2 October 2026, when its broken fan was replaced: from 25 September until then it overheated under load and took no sustained work) and card 1 (firmware 1.2.0; its clock stays at 600 MHz); select one with `ET_DEVICES=<n>` and take its lock, `etsoc-shire<n>.lock` | `/dev/et0_{mgmt,ops}`, `/dev/et1_{mgmt,ops}` |
+| `aifoundry2` | 1 (firmware 1.3.1; **out of service since 2 October 2026**: its cooling failed, and idle it heats until it drops off the PCIe bus; the machine itself is up) | `/dev/et0_{mgmt,ops}` |
 | `aifoundry3` | 1 (firmware 1.3.1; pinned at 600 MHz at every boot) | `/dev/et0_{mgmt,ops}` |
 
 How the four cards and the three hosts differ, and what that does to measurements, is in
@@ -74,7 +74,9 @@ that `tailscale status` shows) as its `HostName` in `~/.ssh/config` on aifoundry
   the lines that start with `/dev/et` or `lock:`, and never parse the sentence plain `et-who` prints when nothing is
   held. Since 28 September (installed on all three hosts; source in [`tools/lab/`](../tools/lab/README.md)) it has
   **`et-who --check`**: it prints only the holders and exits 0 if nothing is held, 1 if a node or lock is held (your
-  own lock included), 2 if the check failed. Scripts should use its exit status.
+  own lock included), 2 if the check failed. Scripts should use its exit status. On aifoundry1 it counts both cards,
+  and since 2 October 2026 both are in use (one person per card): a script for one card looks for that card's own
+  lines (`/dev/et<N>_…`, `lock:etsoc-shire<N>.lock`) in its output, and stops on exit 2.
 - **Card locks.** `flock /run/lock/etsoc-shire<N>.lock <command>` reserves card N for the length of the command
   (aifoundry1 has `etsoc-shire0.lock` and `etsoc-shire1.lock`, the others `etsoc-shire0.lock`). The lock is advisory:
   it protects you only from tools that take it too. The `tools/claims-v3` blocks hold it, and aifoundry3's clock
@@ -86,16 +88,16 @@ that `tailscale status` shows) as its `HostName` in `~/.ssh/config` on aifoundry
 - **`et-lab-health`** is a read-only health check of the machine: the driver version and the module for each
   installed kernel, each card's PCIe link and the error counters the driver keeps, device-node modes, holders,
   aifoundry3's clock-guard marker, disk and ZFS use, packages, systemd, time, power profile and CI runners. One line
-  per check (`OK`, `WARN`, `INFO`); exit 1 if anything warns. It never opens a card. The hosts run rev 2 (installed
-  28 September). Rev 3, written on 28 September and **not installed yet**, lists logins from logind's sessions (rev 2
-  missed sessions without a terminal), counts the journal's boots without the header line, and is safe to run from a
-  timer; its daily timer (a oneshot service as `nobody`, once a day, output in `journalctl -u et-lab-health`) is
-  written in `tools/lab/README.md` and not installed either. Installing them is an admin step that waits for the
-  owner's go-ahead.
-- **`et-reset`** (28 September; written and dry-tested, **not installed**) is a checked management reset of one card,
-  for the lab admin: it refuses while anyone holds any card, takes every card's lock on the host, logs the reset,
-  and succeeds only when the driver has re-added the card. Agents never run it: a reset is the lab admin's
-  ([AGENT.md](../AGENT.md) §5).
+  per check (`OK`, `WARN`, `INFO`); exit 1 if anything warns. It never opens a card. The hosts run rev 3 since
+  30 September (rev 2 from 28 September; [`tools/lab/`](../tools/lab/README.md) records the installs). Rev 3 lists
+  logins from logind's sessions (rev 2 missed sessions without a terminal), counts the journal's boots without the
+  header line, and is safe to run from a timer; its daily timer (a oneshot service as `nobody`, once a day, output in
+  `journalctl -u et-lab-health`) is written in `tools/lab/README.md` and not installed yet. Installing it is an admin
+  step that waits for the owner's go-ahead.
+- **`et-reset`** (28 September; installed on all three hosts on 30 September, mode 0750 root:sudo) is a checked
+  management reset of one card, for the lab admin: it refuses while anyone holds any card, takes every card's lock
+  on the host, logs the reset, and succeeds only when the driver has re-added the card. Agents never run it: a reset
+  is the lab admin's ([AGENT.md](../AGENT.md) §5).
 - **`/tmp` is cleared at every boot.** Keep work, logs and agents' scratch files in your home directory.
 - **Core dumps** of your programs are kept: `coredumpctl list`, then `coredumpctl gdb <pid>`.
 - **Time** is kept by chrony (several NTP sources), so timestamps agree across the machines.
@@ -119,9 +121,10 @@ fixes, each logged on the host):
 
 The same four on aifoundry2 and aifoundry3, and the report's other items (the `et-reset` install, a pool scrub, the
 daily health timer, the reboots, card 0's link test, aifoundry3's login-service item), wait for the owner
-([`reports/TODO.md`](reports/TODO.md), part 0). In our own account only, the firmware notifier and wireplumber are
-masked in the user service manager on all three hosts on 28 September, and the notifier's timer on aifoundry2 and
-aifoundry3 (aifoundry1 has none since U20 disabled the snap); other accounts are unchanged.
+([`reports/TODO.md`](reports/TODO.md), part 0); of these, `et-reset` was installed on all three hosts on
+30 September. In our own account only, the firmware notifier and wireplumber are masked in the user service manager
+on all three hosts on 28 September, and the notifier's timer on aifoundry2 and aifoundry3 (aifoundry1 has none
+since U20 disabled the snap); other accounts are unchanged.
 
 ## Sharing the cards
 

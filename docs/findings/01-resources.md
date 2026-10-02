@@ -94,7 +94,9 @@ were registered on 25 September as E33 and E34 in [03-experiments.md](03-experim
 ## R5 — The card and the lab
 
 `aifoundry2`, one ET-SoC-1 PCIe card, 1,088 minion cores (1,024 usable for these workloads across 32 compute
-shires), 32 GB LPDDR4X, in a desktop chassis. Reached over Tailscale SSH.
+shires), 32 GB LPDDR4X, in a desktop chassis. Reached over Tailscale SSH. Its card is out of service since 2 October
+2026: its cooling failed, and idle it heats until it drops off the PCIe bus (14-card-behaviour.md); the machine
+itself is up.
 
 - **Authoritative for:** everything measured. Note that it is *one* card in *one* chassis: the thermal
   resistance in [11-thermal-model.md](11-thermal-model.md) is a property of this installation, not of the chip.
@@ -172,7 +174,9 @@ aifoundry2, name them by their full tailnet names, or `ssh` goes over the LAN ([
   (aifoundry2, aifoundry3 and aifoundry1's card 1), E35–E46 and E48.
 - **Not authoritative for:** anything about aifoundry1's silicon before 25 September 2026. Its cards could not be
   opened until then (E21; fixed that day, 14-card-behaviour.md). Since then card 1 (firmware 1.2.0) ran the
-  version-3 campaign and E48; card 0 (firmware 1.4.1) overheats under load and is excluded.
+  version-3 campaign and E48; card 0 (firmware 1.4.1) overheated under load and was excluded (A4) until its fan was
+  replaced on 2 October 2026. It is back in service; this work's only measurement of it since the repair is the check
+  right after it (idle 49 °C, 52–53 °C under sgemm bursts; 14-card-behaviour.md).
 - **Caveat that matters:** aifoundry3 is **not** a drop-in replacement for aifoundry2. It idles about 25 °C cooler,
   and its governor holds it at 600 MHz because a boot service sets its TDP to 0 W at every boot (E21, corrected
   2026-09-25 in 14-card-behaviour.md); how fast it sheds heat over minutes was not measured.

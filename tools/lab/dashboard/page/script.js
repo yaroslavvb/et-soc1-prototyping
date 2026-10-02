@@ -750,7 +750,7 @@
     const stale = st.key === 'unknown';
     const tile = attrs(E('div', 'ct card' + (c.excluded ? ' excl' : '')), {'data-card': id, id: 'card-' + id});
     tile.append(E('div', 'ct-head', markSvg(id, 16), E('b', null, cardName(id, true)), E('span', 'ct-id', id), cardHealth(id), pill(st.key, st.word, st.extra, st.title)));
-    if (c.excluded) tile.append(E('p', 'ct-note', 'Excluded (overheats): never touched; driver counters only.'));
+    if (c.excluded) tile.append(E('p', 'ct-note', 'Excluded (out of service): never touched; driver counters only.'));
     else if (stale) tile.append(E('p', 'ct-note', host.reachable === false || c.stale ? (lastKnown(host) ? `Last known at ${lastKnown(host)}: the machine is ${stateOf(host) === 'down' ? 'down' : 'not answering'}; nothing below is current.`
       : `No data from this machine yet: it is ${stateOf(host) === 'down' ? 'down' : 'not answering'}.`)
       : `Last known state: this page's data is ${dur(ageMin())} old.`));

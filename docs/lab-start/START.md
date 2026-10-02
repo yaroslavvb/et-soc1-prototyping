@@ -58,7 +58,7 @@ services, posts on the AI Foundry Discord, and anything for the lab admin.
 | aifoundry2 | 1.3.1 | DVFS 600–800 MHz, usually 600 | rises with its temperature | **out of service since 2 October**: its cooling failed, it heats up even at idle (138 °C on 2 Oct) and drops off the PCIe bus | nothing, until this brief or the lab lead says it is back (after a reboot it looks healthy for about an hour while it heats up) |
 | aifoundry3 | 1.3.1 | pinned at 600 MHz (NoC 400) at every boot; no thermal step | 23.6 W at 50 °C; about 25 W at 55–57 °C since 25 Sep | reaches 88 °C under load, nothing slows it; a demo service can use the card without the lock | a first or second choice; switching power over idle, never absolute watts |
 | aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample of 25–30 Sep; not rechecked since the power cycle of 30 Sep: read `mhz.minion` | 31–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | a second choice (step 2) |
-| aifoundry1 card 0 | 1.4.1 | idles at 300 MHz; sgemm runs as fast as on card 1 | 19–20 W | needs `ET_DEVICES=0` and `etsoc-shire0.lock`; its fan was replaced on 2 Oct: 49 °C idle, 52–56 °C under 8 minutes of sgemm | a second choice (step 2) |
+| aifoundry1 card 0 | 1.4.1 | idles at 300 MHz; sgemm runs as fast as on card 1 | 19–20 W | needs `ET_DEVICES=0` and `etsoc-shire0.lock`; its fan was replaced on 2 Oct: 49 °C idle, 52–53 °C (hottest 56 °C) under 8 minutes of sgemm | a second choice (step 2) |
 
 Nothing on these cards limits the die temperature: aifoundry2's card reached 138 °C on 2 October and nothing tripped.
 The lab dashboard shows every machine, its cards, who is using them and each card's temperature, live:

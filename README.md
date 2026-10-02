@@ -132,11 +132,14 @@ scripts/vm make run-hello SIM_PARAMS="-vpurf_warn"
 
 This adds the simulator's A0-errata checker to a run.
 
-On a lab machine with a card and the et-platform stack installed:
+On a lab machine with a card and the et-platform stack installed (aifoundry3 as written: aifoundry2's card is out of
+service since 2 October 2026, and on aifoundry1 a program needs `ET_DEVICES=<N>` and card N's lock,
+[`docs/lab-start/START.md`](docs/lab-start/START.md), rule 3). Never deploy while a `tools/claims-v3` queue runs on
+the host ([AGENT.md](AGENT.md) §7).
 
 ```bash
-scripts/deploy-lab-gpsdk.sh aifoundry2        # from a clone: sources, the lab's patched gp-sdk, a nice -j4 build
-ssh aifoundry2                                # then, in ~/nekko on the host:
+scripts/deploy-lab-gpsdk.sh aifoundry3        # from a clone: sources, the lab's patched gp-sdk, a nice -j4 build
+ssh aifoundry3                                # then, in ~/nekko on the host:
 et-who                                        # nobody on the card? (and ask first: AGENT.md §5)
 flock -n /run/lock/etsoc-shire0.lock timeout 10 make run-hello DEVICE=silicon
 ```

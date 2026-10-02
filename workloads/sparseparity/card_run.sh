@@ -11,14 +11,16 @@
 # and planner on that build, so every A/B pair runs one binary. --build and --out may be absolute, or relative to the
 # tree's root (the directory two levels above this script).
 #
-# Run it from the tree's root on the card's host (~/nekko on aifoundry1 and aifoundry3, the checkout on aifoundry2),
-# only with the owner's go-ahead for that card. Every step is one host process run as
+# Run it from the tree's root on the card's host (~/nekko on aifoundry1 and aifoundry3; never on aifoundry2, whose
+# card is out of service since 2 October 2026), only with the owner's go-ahead for that card. Every step is one host
+# process run as
 #     flock -n /run/lock/etsoc-shire<N>.lock timeout 10 sparseparity_host ... --records-out <step>.rec
 # so the lock is held for one process at a time and released between steps, and no process holds the device for
 # more than 10 s (the host itself launches only while its timeout ends by 9 s). Before every step the script checks
-# `et-who --check` and waits up to 5 minutes for a free card. On aifoundry1 it uses card 1 (ET_DEVICES=1,
-# etsoc-shire1.lock); card 0 overheats. It stops at the first step whose result is not the expected one (a
-# negative control must FAIL on its checksums and pass everything else), so a person can look before going on.
+# `et-who --check` and waits up to 5 minutes for a free card (on aifoundry1 the check counts both cards, so it waits
+# while either is held). On aifoundry1 it uses card 1 (ET_DEVICES=1, etsoc-shire1.lock); card 0 is not used here.
+# It stops at the first step whose result is not the expected one (a negative control must FAIL on its checksums and
+# pass everything else), so a person can look before going on.
 # After a step whose plan does not cover every candidate, the full per-minion oracle runs offline on the saved
 # records (--verify-records: no device, no lock, no timeout); stage m4 also runs it, at the end, on its full-coverage
 # M4 steps (the closed forms do not check the lane maxima, the best or the tie flag the new epilogue computes).

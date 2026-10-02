@@ -2410,7 +2410,7 @@ class Collector:
                           self.now - w["etime_s"] if w.get("etime_s") is not None else None)
                     since = fmt_when(t0, self.now) if t0 else None
                     prog = (" (%s)" % w["comm"]) if w.get("comm") else ""
-                    # any hold of an excluded card is a warning: it overheats, and nobody is to use it
+                    # any hold of an excluded card is a warning: it is out of service, and nobody is to use it
                     self.add("card:%s:held" % cid, "warn" if excl else "info", "card", "held by %s%s%s%s" % (
                         who, prog, " since %s" % since if since else "", note), w["node"], host=h, card=cid,
                         source="et-who" if w.get("from") != "et-usage" else "et-usage")

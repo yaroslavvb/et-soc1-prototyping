@@ -4,11 +4,16 @@ aifoundry2 - AI Foundry lab machine with 1 ET-SoC-1 card (driver et_soc1 0.20.0)
   The card runs its firmware's own clock/power governor (TDP 65 W); it reaches 800 MHz only from a cool start,
   and in this chassis its die rarely cools below 65 C, so it usually runs at 600 MHz.
 
+  OUT OF SERVICE since 2026-10-02: the card's cooling failed. Idle, it heats until it drops off the PCIe bus
+  (138 C at 12:02 on 2 Oct; nothing on the card stops it). Run nothing on the card until the lab says it is
+  fixed, even when it is back on the bus (after a reset it looks healthy for about an hour while it heats).
+  The machine itself is up; new users set up on aifoundry3 or aifoundry1.
+
 * Each device node can be open in ONE process at a time. Who is using the card: et-who (in scripts: et-who --check)
 * Card use is logged (who, which program, when; never arguments or files). Last 24 hours: et-usage
-* New here? et-lab-start checks this machine and sets up your account (no sudo);
+* New here? Set up on aifoundry3 or aifoundry1 (et-lab-start there), not on this machine;
   the prompt for your coding agent: https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start
-* Reserve the card for a run:  flock /run/lock/etsoc-shire0.lock <command>
+* Reserve the card for a run (when it is back in service):  flock /run/lock/etsoc-shire0.lock <command>
 * These commands change the card for every user: reset, trace level, telemetry stats reset (ettelem --reset-ms),
   temperature thresholds, TDP, frequency, active power management.
 * Stop tools and samplers with Ctrl-C or plain kill, never kill -9: a request cut off mid-way leaves a

@@ -56,8 +56,10 @@ files that way. Subagent briefs name the persistent directory; long runs log und
 - The machines are `ssh aifoundry1|2|3` (Tailscale SSH in check mode, user `yaroslavvb`: a person must approve the
   login URL it prints; an agent hands it over and waits). See `docs/lab-access.md`.
 - Four cards: aifoundry2 and aifoundry3 have one each, aifoundry1 two (select one with `ET_DEVICES=<n>` there).
-  **aifoundry1's card 0 overheats: no sustained work on it.** aifoundry3 is pinned at 600 MHz by a boot service.
-  Their differences: `docs/findings/14-card-behaviour.md`.
+  **Since 2 October 2026 aifoundry2's card is out of service** (its cooling failed: idle, it heats to a 138 °C mean and
+  drops off the PCIe bus): run nothing on it; the machine itself is up. **aifoundry1's card 0 is back in service** since
+  the same day (its broken fan was replaced; from 25 September until then it overheated and took no sustained work).
+  aifoundry3 is pinned at 600 MHz by a boot service. Their differences: `docs/findings/14-card-behaviour.md`.
 - The hosts' `/opt/et` is **older** than the simulator's: GCC 15.1, no gp-sdk launchers and no Erbium bits, and not
   the same runtime on every host (aifoundry2 stock `353f20e`, aifoundry3 a patched `libetrt.so`, aifoundry1 a fork
   build).
@@ -72,7 +74,7 @@ files that way. Subagent briefs name the persistent directory; long runs log und
   While they run, never rebuild a build directory their blocks use (`lib.sh` lists them) and never run
   `scripts/deploy-lab*.sh` against that host: both write into `~/nekko`, which the blocks use on every host (AGENT.md §7).
 - **Etiquette. The cards are shared, and the user set these rules:**
-  - Ask which machine to use, and stay off machines other sessions are using.
+  - Ask which machine to use, and stay off cards other sessions are using (aifoundry1: one person per card).
   - Check for other users before touching a card: `et-who` (who holds each card's nodes and lock), `who`, `uptime`,
     `ps`. Hold the card's lock for the run: `flock -n /run/lock/etsoc-shire<N>.lock <cmd>`.
   - Never hold a device for more than 10 s. Wrap runs in `timeout 10`; the sgemm host also stops launching after `--budget`.

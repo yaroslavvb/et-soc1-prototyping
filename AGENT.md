@@ -102,7 +102,7 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   `docs/reports/data/2026-09-23-energy-manual/manual.json` (since 26 September built from the version-3 check's three
   cards; 04-artifacts.md, A16). Edit the builders, never that markdown; the README, the rest of 00, 07 and 09 are
   written by hand.
-- **Known stale spots (2026-09-29).** Where a page and `docs/findings/` differ, the page holds. The pages carry each
+- **Known stale spots (2026-10-02).** Where a page and `docs/findings/` differ, the page holds. The pages carry each
   tested claim's three-card result (26 September; every claim with the items that test it:
   `docs/reports/data/2026-09-25-claims-v3/results/pagemap.md`), and `05-claims.md` gives the three-card values in
   "Version 3: the three-card check"; the topic files (10–19; 20-heat-per-mm.md has the third run) and README.md were
@@ -119,7 +119,16 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   its service processor's standing statistics (a 119 °C mean, a 123 °C sensor), not only the host's 115–117 °C of
   25 September; E51 and E52 recorded the sensors' mean and anonymous peak-holds, not a series per sensor; aifoundry2's
   catalogue launches at a 90–103 °C mean checked no arithmetic (the hottest checked launch is mmbench's, at 97 °C); the
-  SRAM rail is 0.70–0.75 V by card. Otherwise trust 14-card-behaviour.md and this file.
+  SRAM rail is 0.70–0.75 V by card. Otherwise trust 14-card-behaviour.md and this file. Since 2 October 2026
+  (aifoundry1's card 0 back in service after its fan was replaced; aifoundry2's card out of service, its cooling
+  failed), text that forbids card 0 because it overheats, or treats aifoundry2's card as the main card or the one to run
+  on, is stale. Two kinds of text stay as they are: the dated record of 25 September to 2 October, and the frozen or
+  pre-registered experiment code (`tools/claims-v3/*`, `workloads/pciebench`), whose card-0 refusals stay;
+  `workloads/sparseparity`'s scripts also use only card 1 on aifoundry1. The workload READMEs' `aifoundry2` commands
+  reproduce that card's September data and wait until it is back in service. On 2 October the `et-lab-start` installed
+  in `/usr/local/bin` on the three hosts was still the 30 September third version, and the installed `/etc/motd`
+  banners predated 2 October (both need root to update): where they differ from `docs/lab-start/START.md`, the brief
+  holds.
 
 ## 4. The machines
 
@@ -128,14 +137,14 @@ command is prefixed with `scripts/vm`. On any other Ubuntu 24.04 box, `scripts/c
 builds the same `/opt/et` natively (the README's setup section). **Never run `provision-vm.sh` on a lab machine**: its
 `/opt/et` is the lab's. `sys_emu` is functional only: it checks correctness, never speed.
 
-**The lab.** Three x86_64 Ubuntu 24.04 machines on AI Foundry's Tailscale tailnet, four cards:
+**The lab.** Three x86_64 Ubuntu 24.04 machines on AI Foundry's Tailscale tailnet, four cards, three in service since 2 October 2026 (aifoundry2's is out):
 
 | Card | Firmware | Clock policy | Notes |
 |---|---|---|---|
-| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | the main card; the git checkout is `~/claude/et-soc1-prototyping` here. Its Master Minion hung at 02:50 PDT on 28 Sep; the management reset restored it at 08:32 (owner-approved; the sysfs per-card reset had not), and it runs kernels again (14-card-behaviour.md). DV2's validation ran there from 20:45 PDT on 28 Sep to 16:57 PDT on 29 Sep, then the third card's pcie2, nocr and memp2 (16:59–17:38) |
+| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | **out of service since 2 Oct**: its cooling failed. It dropped off the PCIe bus while idle on 1 Oct (09:42); after a full (cold) reset at 10:53 on 2 Oct it heated, idle and with nothing on it, from 45 °C to a 138 °C mean (134 W) in 69 minutes and dropped off again, and no firmware cut-off acted (`docs/reports/data/2026-10-02-idle-runaway-aifoundry2/`). After a full reset it looks healthy for about an hour while it heats. Run nothing on it until the lab fixes the air reaching it. Until then it was the main card. The machine is up, and the git checkout is `~/claude/et-soc1-prototyping` here. Its Master Minion hung at 02:50 PDT on 28 Sep; the management reset restored it at 08:32 (owner-approved; the sysfs per-card reset had not), and it ran kernels again (14-card-behaviour.md). DV2's validation ran there from 20:45 PDT on 28 Sep to 16:57 PDT on 29 Sep, then the third card's pcie2, nocr and memp2 (16:59–17:38) |
 | aifoundry3 | 1.3.1 | **pinned at 600 MHz**: a boot service sets a 0 W TDP at every boot, which also latches its governor (no step at any temperature) | compare switching power over idle, never absolute watts; about 1 host launch in 100 crashes at 1.08 s unless the program registers libetrt's log levels first (`registerRuntimeLogLevels()`, 14-card-behaviour.md) |
-| aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz, and its 0.21.x governor acts only while a kernel runs (firmware source) | **overheats (115–117 °C on the host on 25 Sep; its service processor's statistics still hold a 119 °C mean and a 123 °C sensor): no sustained work on it**; excluded from the campaign |
-| aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample since 25 Sep, cool or hot, busy or idle: its governor never raises the clock (off or latched; asked the lab) | fine; select a card on this host with `ET_DEVICES=<n>` |
+| aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz, and its 0.21.x governor acts only while a kernel runs (firmware source) | **back in service since 2 Oct**, when its broken fan was replaced: 49 °C idle (hottest sensor 53 °C), 52–53 °C (hottest 56 °C) under 8 minutes of sgemm bursts, cooler than card 1 under the same test (59–60 °C, hottest 63 °C; `docs/reports/data/2026-10-02-fan-fix-aifoundry1/`). From 25 Sep until then it overheated (115–117 °C on the host on 25 Sep; its service processor's statistics held a 119 °C mean and a 123 °C sensor) and took no sustained work; excluded from the campaign |
+| aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample since 25 Sep, cool or hot, busy or idle: its governor never raises the clock (off or latched; asked the lab) | fine; select a card on this host with `ET_DEVICES=<n>` and take its lock, `etsoc-shire<n>.lock` (one person per card) |
 
 The hosts also differ in CPU, RAM and ET runtime build, which matters for host-side timing:
 [14-card-behaviour.md](docs/findings/14-card-behaviour.md#the-lab-machines-and-their-four-cards-are-not-interchangeable).
@@ -161,7 +170,7 @@ reason:
 
 | Rule | Why |
 |---|---|
-| Ask which machine (and card) to use; stay off machines other sessions use | the cards are shared with other people, CI runners (aifoundry1, aifoundry2), a demo (aifoundry3) and our own campaign queues |
+| Ask which machine (and card) to use; stay off cards other sessions use (aifoundry1: one person per card) | the cards are shared with other people, CI runners (aifoundry1, aifoundry2), a demo (aifoundry3) and our own campaign queues |
 | Look first: `et-who`, `who`, `uptime`; hold card N's lock for your run (`flock -n /run/lock/etsoc-shire<N>.lock <cmd>`, which fails at once if someone holds it) | the management node is single-opener, and a second user of a card corrupts both measurements |
 | Never hold a device for more than 10 s: `timeout 10` on every launch (per device-opening process; release the card lock between sub-tests) | long holds block everyone else, and a card that hangs needs a power cycle only the lab admin can do |
 | Stop tools with Ctrl-C or a plain `kill`, never `kill -9` | a sampler killed mid-request poisons the card's management queue for the next user |
@@ -235,7 +244,7 @@ their host program has its kernel's path compiled in. Each workload's `README.md
   `val.json` on any changed byte: they stay as frozen, and `a745199`'s comment waits, until the owner decides about
   that lock (`docs/reports/TODO.md`, part B).
 
-**Run one workload on a card by hand** (in the host's tree: the checkout on aifoundry2, `~/nekko` elsewhere):
+**Run one workload on a card by hand** (in the host's tree, `~/nekko` on aifoundry3 and aifoundry1; aifoundry2's card is out of service):
 
 ```bash
 cmake -S workloads/sgemm -B build/sgemm-mine -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && nice cmake --build build/sgemm-mine -j4
@@ -244,8 +253,11 @@ et-lab-manifest > build/sgemm-mine/manifest.txt   # the machine facts, saved wit
 flock -n /run/lock/etsoc-shire0.lock timeout 10 build/sgemm-mine/host/sgemm_host -n 512 --reps 3
 ```
 
-On aifoundry1, add `ET_DEVICES=1` before the program and take `etsoc-shire1.lock` (card 1; never sustained work on
-card 0). The telemetry client builds the same way (`cmake -S tools/ettelem -B build/<dir> …`); build it on each host,
+On aifoundry1, add `ET_DEVICES=<n>` before the program and take `etsoc-shire<n>.lock` for the card `<n>` you were
+given (1 or 0; card 0 is back in service since its fan was replaced on 2 October 2026, and the other card may be
+someone else's: one person per card). There `et-who` and `et-who --check` count both cards, so look for your card's own
+lines (`/dev/et<n>_…`, `lock:etsoc-shire<n>.lock`). aifoundry2's card is out of service since 2 October: run this on
+aifoundry3 or aifoundry1. The telemetry client builds the same way (`cmake -S tools/ettelem -B build/<dir> …`); build it on each host,
 so that on aifoundry1 it honours `ET_DEVICES`. `tools/etcfg/` is one C file: `gcc -O2 -I/opt/et/include -o etcfg
 tools/etcfg/etcfg.c`.
 
@@ -376,8 +388,10 @@ copy it here too.
    (`~/claude/et-soc1-prototyping` on aifoundry2, `~/nekko` on aifoundry1 and aifoundry3). Keep the brackets: over
    `ssh` an unbracketed `pgrep -f` matches its own command line, because the processes that run a remote command
    carry the whole command (Tailscale SSH's `tailscaled be-child ssh … --cmd=<the command>`, and `bash -c`). In a
-   script, use `et-who --check` (installed on all three hosts since 28 September: exit 0 free, 1 held, 2 failed), or
-   keep only `et-who`'s lines that start with `/dev/et` or `lock:`.
+   script, use `et-who --check` (installed on all three hosts since 28 September: exit 0 free, 1 held, 2 failed; on
+   aifoundry1 it counts both cards, and since 2 October 2026 other people use card 0 too, so a script for one card
+   looks for its own card's lines, `/dev/et<N>_…` or `lock:etsoc-shire<N>.lock`, and stops on exit 2), or keep only
+   `et-who`'s lines that start with `/dev/et` or `lock:`.
 5. Ask the owner what to work on, which machine and card you may use, and whether any running queue must be left
    alone (assume it must).
 6. Ask a person for the steps only a person can do, when you reach them: the Tailscale approval, `spacesheep login`,

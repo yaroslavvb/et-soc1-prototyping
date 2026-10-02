@@ -5,10 +5,11 @@ aifoundry1 - AI Foundry lab machine with 2 ET-SoC-1 cards (driver et_soc1 0.20.0
   Clocks as of 2026-09-27: card 1 read 600 MHz in every sample since 25 Sep, cool or hot (its DVFS appears to be
   off); card 0 idles at 300 MHz and its governor acts only while a kernel runs.
 
-  WARNING, card 0 OVERHEATS under load: on 2026-09-25 about ten minutes of short test launches took its die to
-  115-117 C (card 1 stayed near 70 C), and the driver counted 18 board-power (75 W) and 10 thermal-throttle
-  events (cat /sys/bus/pci/devices/0000:01:00.0/err_stats/ce_count). Do not run work on card 0 until its fan,
-  heat sink and airflow have been checked.
+  Card 0 is in service again since 2026-10-02: its fan was found broken and replaced. Since then it idles at
+  49 C and held 52-53 C (hottest sensor 56 C) under 8 minutes of sgemm (card 1: 59-60 C, hottest 63 C). Before
+  that, on 2026-09-25, ten minutes of short test launches took it to 115-117 C. Two people can work here at once,
+  one per card: select yours with ET_DEVICES=<n> and take etsoc-shire<n>.lock; et-who --check counts both cards,
+  so look for your card's lines.
 
 * Each device node can be open in ONE process at a time. Who is using a card: et-who (in scripts: et-who --check)
 * Card use is logged (who, which program, when; never arguments or files). Last 24 hours: et-usage

@@ -58,8 +58,9 @@ Read [Terms](#terms) first.
 7. **The gotcha if you use these machines.** aifoundry3's firmware reports a TDP of **0 W** (a boot service sets
    it at every boot), which makes the governor's step-up test unreachable and holds the card at 600 MHz for as long
    as it stays at zero. The driver reports the nameplate 65 W on every machine, so nothing on the host notices.
-   aifoundry1's two cards work since 25 September 2026, on two more firmware releases, and its card 0 overheats
-   under load. → [14-card-behaviour.md](14-card-behaviour.md)
+   aifoundry1's two cards work since 25 September 2026, on two more firmware releases; its card 0 overheated under
+   load until its fan was replaced on 2 October 2026, and is back in service. aifoundry2's card is out of service since
+   2 October (its cooling failed: idle, it heats until it drops off the PCIe bus). → [14-card-behaviour.md](14-card-behaviour.md)
 8. **The sharpest edge on the chip.** One contended global atomic is shared out fairly, to within half a percent,
    and takes the entire memory path of the shire that hosts it to **zero** — 384 operations, then nothing, for as
    long as the hammering lasts. It takes 21–24 remote requesters (20 leave the host at 98.9%, 24 stop it), under one shire's worth. The vendor's errata
@@ -277,7 +278,8 @@ tools/ettelem/finish_horace.sh     # no card needed: re-runs the Horace line (E9
 ```
 
 Every other experiment gives its own command in [03-experiments.md](03-experiments.md). Re-running on a card
-needs `aifoundry2`, the build in `build/`, and an idle machine; see [14-card-behaviour.md](14-card-behaviour.md)
+needs aifoundry2's card (out of service since 2 October 2026, its cooling failed: until the lab fixes it these runs
+cannot be repeated on the same card), the build in `build/`, and an idle machine; see [14-card-behaviour.md](14-card-behaviour.md)
 for the traps and [AGENT.md](../../AGENT.md) §5 for the etiquette.
 
 ## What is *not* established
