@@ -1,0 +1,141 @@
+<style>
+main>p,main>ul,main>ol,main>h1,main>h2,main>.links{max-width:900px}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:14px 0 6px}
+.links a{display:block;border:1px solid var(--axis);border-radius:10px;padding:9px 12px;background:var(--surface);color:inherit;text-decoration:none}
+.links a b{display:block}.links a span{font-size:.86rem;color:var(--ink-2)}
+.links a:hover,.links a:focus-visible{border-color:var(--c1)}
+table.kv{border-collapse:collapse;margin:8px 0 14px;font-size:.92rem}
+table.kv th,table.kv td{padding:5px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+table.kv td.num,table.kv th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.commits{font-size:.84rem}
+table.commits td:first-child{font-family:var(--mono,ui-monospace,monospace);white-space:nowrap}
+table.commits td:nth-child(2){white-space:nowrap;color:var(--ink-2)}
+.where{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--axis);border-radius:999px;padding:1px 8px;color:var(--ink-2);margin-right:4px}
+</style>
+
+<h1>AI Foundry lab, 2 October 2026: what changed</h1>
+<p class="byline">9:45 to 15:45 PDT · the lab's maintenance session on aifoundry2 · every change below is a commit in
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping">the repository</a></p>
+
+<p class="lede">The lab dashboard now shows every machine and card live, once a second, and keeps hour, day and week
+history. aifoundry2's card was watched through a whole idle thermal runaway to 138 °C, and the curve explained; its
+card is out of service until its cooling is fixed. aifoundry1's card 0 had a broken fan; it was replaced, tested, and the
+card is back in service. New users now start in three steps: create their own account as root once, start Claude on
+the lab machine as themselves, give it one line.</p>
+
+<div class="links">
+  <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard"><b>Lab dashboard</b><span>The main starting point: machines, cards, people, live.</span></a>
+  <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history"><b>History</b><span>Temperatures, card power, CPU and memory: hour, day, week.</span></a>
+  <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start"><b>New user? Start here</b><span>Three steps, each saying where it runs.</span></a>
+  <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman"><b>Requests for Roman</b><span>Known problems and what the lab lead is asked to do.</span></a>
+</div>
+
+<h2 id="live">1. The live dashboard</h2>
+<ul>
+  <li><b>A watcher on each machine</b> (a user service that comes back by itself after a reboot) streams one reading a
+  second: CPU per thread, memory, disk, the host's temperatures, the busiest processes, and for each card its PCIe link,
+  its lock, who holds it, and its die temperature. Tested: killed, it restarts within 2 s; it came back by itself after
+  aifoundry2's two reboots.</li>
+  <li><b>Card temperature once a second.</b> A 4 ms read through the card's management node, made only while nobody
+  holds any card on that machine. A program that opens the node in that same 4 ms, about 1 start in 100, gets
+  "busy" and retries.</li>
+  <li><b>Card state in real time.</b> FREE, IN USE (login and program) and LINK DOWN now come from that stream while it
+  is under 10 seconds old, marked "live". Before, they came from a check every 10 minutes that republishes at most every
+  10 minutes, which is why aifoundry3's card still showed as held at 15:35 after its user had finished.</li>
+  <li><b>History.</b> Each machine also records a reading every 5 s on its own disk, so a reboot loses only the minutes
+  it is down; the <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history">history page</a> (hour, day, week)
+  is rebuilt every 5 minutes and opens from a machine's temperature panel or a 48-hour chart.</li>
+  <li><b>The page itself.</b> A "Start here" row (new users, known problems, the chip diagram, the reports); a dark
+  live console; much less explanatory text; no theme selector. Two fixes: the monitor's own 4 ms reads had shown up as
+  an "unseen" person holding every card all day, and they had made every idle card look "used".</li>
+</ul>
+
+<h2 id="aifoundry2">2. aifoundry2's card: an idle thermal runaway</h2>
+<p>A plain reboot left the card off the PCIe bus; the full reset (PCI, cold), which cuts the slot's power, brought it
+back. Then, with the machine idle and nobody using the card, it heated until it failed again:</p>
+<table class="kv">
+  <thead><tr><th>Time</th><th class="num">Die mean</th><th class="num">Hottest</th><th class="num">Board power</th></tr></thead>
+  <tbody>
+    <tr><td>10:53, boot</td><td class="num">45 °C</td><td class="num">46 °C</td><td class="num">22 W</td></tr>
+    <tr><td>11:15</td><td class="num">85 °C</td><td class="num">87 °C</td><td class="num">39 W</td></tr>
+    <tr><td>11:49</td><td class="num">95 °C</td><td class="num">97 °C</td><td class="num">48 W</td></tr>
+    <tr><td>11:58</td><td class="num">105 °C</td><td class="num">108 °C</td><td class="num">61 W</td></tr>
+    <tr><td>12:02:01, then off the bus</td><td class="num">138 °C</td><td class="num">144 °C</td><td class="num">134 W</td></tr>
+  </tbody>
+</table>
+<p>The shape is a thermal runaway. The idle card's power grows with its temperature (13.6 W plus a leakage part that
+doubles every 23 °C), and its cooling only just fails to keep up: it sheds heat into air at about 51 °C, where
+aifoundry3's identical card, on the same board and slot, sees about 31 °C. Heating and cooling come within 0.1 W of each
+other near 97 °C, which is the slow crawl in the middle; past it nothing on the card stops the climb. Air 3 °C cooler
+would hold it near 81 °C, so the fix is the air reaching this card, on site. The card is out of service until then. Data
+and the fit are in <code>docs/reports/data/2026-10-02-idle-runaway-aifoundry2/</code>; the Requests for Roman page has
+the visit steps (the card's fan cable, a watched test, a desk-fan test, a card swap).</p>
+
+<h2 id="aifoundry1">3. aifoundry1's card 0: fan replaced, back in service</h2>
+<table class="kv">
+  <thead><tr><th></th><th>Card 0 before</th><th>Card 0 after</th><th>Card 1, same test</th></tr></thead>
+  <tbody>
+    <tr><td>Idle</td><td>65 °C, hot spot 123 °C</td><td>49 °C, hottest 53 °C</td><td>53 °C, hottest 55 °C</td></tr>
+    <tr><td>8 min of sgemm bursts</td><td>98–102 °C, then 115–117 °C (25 Sep, lighter test)</td><td>52–53 °C, hottest 56 °C</td><td>59–60 °C, hottest 63 °C</td></tr>
+  </tbody>
+</table>
+<p>The owner put it back in service. The new-user brief, the repository's guides and the dashboard were updated; an
+independent review of the repository found 31 places that still called card 0 unusable or aifoundry2 the main card,
+all changed (dated history kept).</p>
+
+<h2 id="new-users">4. New users: three steps</h2>
+<ol>
+  <li><span class="where">Your computer</span> One ssh as the lab's shared root creates the person's own account (no
+  password, no sudo) and logs out. Root is used for nothing else.</li>
+  <li><span class="where">Your computer</span> One ssh as the new account installs Claude Code, fetches the lab's brief,
+  starts Claude in a tmux session on the lab machine, and attaches the terminal to it.</li>
+  <li><span class="where">Claude, on the lab machine</span> One line: "Read ~/lab-start.md and follow it." Claude picks
+  a free card on that machine, runs the first-hour tests, and asks before it touches a card.</li>
+</ol>
+<p>The brief went through nine editions today: aifoundry2's card out, card 0 back in, a check that looks only at your
+own card (two people can share aifoundry1, one per card), several people starting at once, and the root-first start.
+Two independent reviews (61 and 8 confirmed findings) were applied; the commands were tested against stand-ins and,
+for the user step, live on aifoundry3.</p>
+
+<h2 id="open">5. Open items</h2>
+<ul>
+  <li><b>Needs root:</b> the updated onboarding script <code>et-lab-start</code> and the two machines' new login
+  banners are staged in the maintainer's home directory on each machine; installing them is one command per machine.</li>
+  <li><b>aifoundry2's card:</b> the cooling fix on site (Requests for Roman, SH5).</li>
+  <li><b>The monitor's once-a-second card check</b> runs the lab's <code>et-who</code>, which uses a fixed sudo rule, so
+  each machine logs a sudo line every second; a lighter check would be quieter.</li>
+  <li><b>Signed-out viewers:</b> in a signed-out test browser the dashboard's live streams did not appear; to confirm
+  with a real signed-out visit.</li>
+  <li><b>spacesheep.dev:</b> a published link was slow to show the new version; reported to the spacesheep team, with
+  timings (measured on this page).</li>
+</ul>
+
+<h2 id="commits">Commits</h2>
+<table class="kv commits">
+  <thead><tr><th>Commit</th><th>PDT</th><th>What</th></tr></thead>
+  <tbody>
+    <tr><td>d2fd6e8</td><td>09:45</td><td>The live collector: one reading a second per machine</td></tr>
+    <tr><td>b587a82</td><td>10:01</td><td>The dashboard's live section, from spacesheep streams</td></tr>
+    <tr><td>6880491</td><td>10:11</td><td>Top processes fold, disk, host temperatures, card die temperature</td></tr>
+    <tr><td>1754701</td><td>10:22</td><td>Card temperature once a second, only while no one holds a card</td></tr>
+    <tr><td>514e11b</td><td>10:24</td><td>The dark live console</td></tr>
+    <tr><td>0b154b7</td><td>10:43</td><td>The history page: hour, day, week</td></tr>
+    <tr><td>a051bd7</td><td>10:55</td><td>Card notes: a warm reboot does not bring a card back; the full reset does</td></tr>
+    <tr><td>ad1e961</td><td>12:02</td><td>Data: aifoundry2's idle runaway</td></tr>
+    <tr><td>bd732ee</td><td>12:18</td><td>The runaway explained (leakage against cooling, a tipping point)</td></tr>
+    <tr><td>566f4d7</td><td>13:13</td><td>A card counts as used only when its work queue moved</td></tr>
+    <tr><td>1674298</td><td>13:26</td><td>aifoundry1 card 0 after its fan was replaced</td></tr>
+    <tr><td>d124ef0</td><td>13:31</td><td>New-user brief: card 0 back in service; a check for one card</td></tr>
+    <tr><td>607a44e</td><td>14:04</td><td>New-user brief after an independent review (61 findings)</td></tr>
+    <tr><td>51e2da3</td><td>14:23</td><td>The repository's card state, everywhere (31 findings)</td></tr>
+    <tr><td>85bbfbd</td><td>14:37</td><td>Dashboard: Start here</td></tr>
+    <tr><td>8648e80</td><td>14:45</td><td>Dashboard: the monitor's reads no longer show as an "unseen" person</td></tr>
+    <tr><td>1b2a119</td><td>15:00</td><td>New-user brief: a first login as root</td></tr>
+    <tr><td>99ce816</td><td>15:23</td><td>Dashboard: concise text</td></tr>
+    <tr><td>6485f69</td><td>15:36</td><td>New-user page: three steps, each saying where it runs</td></tr>
+    <tr><td>1c1c484</td><td>15:41</td><td>Dashboard: card state in real time</td></tr>
+  </tbody>
+</table>
+<p class="small">Smaller commits in between: the dashboard's quick links, history links, theme and Reports changes, and
+the fifth to eighth editions of the brief. The full list is the repository's history for 2 October.</p>
+</main>
