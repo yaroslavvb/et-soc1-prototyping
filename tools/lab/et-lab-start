@@ -1,6 +1,6 @@
 #!/bin/bash
-# et-lab-start: start a new user of the AI Foundry ET-SoC-1 lab on this machine (30 Sep 2026, third version).
-# Run it as yourself: et-lab-start [--check | --dry-run] [--no-claude | --with-claude] [--no-clone]; --help says more.
+# et-lab-start: start a new user of the AI Foundry ET-SoC-1 lab on this machine (2 Oct 2026, fourth version).
+# Run it as yourself: et-lab-start [--check | --dry-run] [--card N] [--no-claude | --with-claude] [--no-clone]; --help says more.
 # Source and notes: tools/lab/et-lab-start and docs/lab-start/README.md in github.com/yaroslavvb/et-soc1-prototyping.
 # shellcheck disable=SC2016,SC2088  # '~' and '$HOME' in messages and in the PATH line are meant literally
 [ -n "${BASH_VERSION:-}" ] || { echo "et-lab-start: this is a bash script: run it as et-lab-start, or with bash" >&2; exit 2; }
@@ -25,6 +25,8 @@ et-lab-start: start a new user of the AI Foundry ET-SoC-1 lab on this machine. R
   --no-claude              leave out Claude Code, its PATH line and the `claude` tmux session
   --with-claude            install Claude Code: the default on every machine (kept for older instructions)
   --no-clone               leave out the clone of the lab's repository
+  --card N                 the card you chose (START.md step 2): the verdict and the hand-off name it; without it,
+                           on a machine with more than one card the hand-off leaves the card as <N> for you to fill
   -h, --help               this text
 The setup: linger for your account, Claude Code in ~/.local/bin (the native installer), its PATH line in ~/.bashrc,
 a detached tmux session `claude` in ~, and a sparse clone of the lab's repository in ~/et-soc1-prototyping (only
@@ -36,9 +38,14 @@ EOF
 }
 die() { local rc=$1; shift; printf 'et-lab-start: %s\n' "$*" >&2; exit "$rc"; }
 
-mode=setup; claude_opt=default; want_clone=1
-for a in "$@"; do
+mode=setup; claude_opt=default; want_clone=1; want_card=""
+while [ $# -gt 0 ]; do
+  a=$1; shift
   case $a in
+    --card) [ $# -gt 0 ] || die 2 "--card needs a card number"; want_card=$1; shift
+            case $want_card in ''|*[!0-9]*) die 2 "--card takes a card number, not '$want_card'" ;; esac ;;
+    --card=*) want_card=${a#--card=}
+            case $want_card in ''|*[!0-9]*) die 2 "--card takes a card number, not '$want_card'" ;; esac ;;
     --check) [ "$mode" = dry ] && die 2 "use --check or --dry-run, not both"; mode=check ;;
     --dry-run) [ "$mode" = check ] && die 2 "use --check or --dry-run, not both"; mode=dry ;;
     --no-claude) [ "$claude_opt" = with ] && die 2 "use --no-claude or --with-claude, not both"; claude_opt=no ;;
@@ -108,10 +115,24 @@ use_n=""; ncards=0; usable=""
 if [ -z "${cards// /}" ]; then
   warn "no card nodes (/dev/et*_ops): this machine has no card, or its driver is not loaded; tell the lab admin"
 fi
+# A card that fell off the PCIe bus keeps its /dev node: read its link from sysfs (a read, never an open).
+card_link() {
+  local d
+  for d in /sys/bus/pci/drivers/ET/0000:*; do
+    [ "$(cat "$d/devnum" 2>/dev/null)" = "$1" ] && { cat "$d/current_link_speed" 2>/dev/null || echo "?"; return; }
+  done
+  echo "?"
+}
 for n in $cards; do
   fact=$(card_fact "$host" "$n"); kind=${fact%%|*}; note=${fact#*|}
   lock=/run/lock/etsoc-shire$n.lock
+  link=$(card_link "$n")
   item "card $n" "$note"
+  case $link in
+    Unknown|"?"|"") warn "card $n is DOWN (its PCIe link reads '$link': it fell off the bus): never use it; tell the lab admin"
+                    kind=down ;;
+    *) item "" "link $link" ;;
+  esac
   if [ -e "$lock" ]; then
     item "" "lock $lock"
   else
@@ -122,11 +143,18 @@ for n in $cards; do
 done
 # The order to take free cards in (START.md step 2): on aifoundry1 card 1, then card 0; elsewhere by number.
 pref=$cards; [ "$host" = aifoundry1 ] && pref="1 0"
+if [ -n "$want_card" ]; then
+  case " $usable " in
+    *" $want_card "*) pref=$want_card ;;
+    *) warn "card $want_card is not a card to use on $host (see the card list above)"; pref="" ;;
+  esac
+fi
 for n in $pref; do case " $usable " in *" $n "*) [ -z "$use_n" ] && use_n=$n ;; esac; done
 held_card() { printf '%s\n' "$out" | grep -qE "^(/dev/et${1}_|lock:etsoc-shire${1}[.]lock)"; }
 case $host in
   aifoundry1) item "" "aifoundry1: dev_mngt_service and et-powertop open both cards even with -n: never run them here"
               item "" "aifoundry1: two people can work here at once, one per card; a program that ignores ET_DEVICES opens both cards" ;;
+  aifoundry2) warn "aifoundry2: its card is out of service since 2 Oct 2026 (its cooling failed): new users work on aifoundry3 or aifoundry1" ;;
   aifoundry3) item "" "aifoundry3: the demo service takes no lock, so run et-who again after each run" ;;
 esac
 
@@ -135,7 +163,8 @@ card_state=unknown
 if have et-who; then
   out=$(timeout 20 et-who --check 2>&1); rc=$?
   case $rc in
-    0) item free "no process holds a card node or lock (exit 0)"; card_state=free ;;
+    0) item free "no process holds a card node or lock (exit 0)"; card_state=free
+       [ -n "$use_n" ] || card_state="none: no card here to use" ;;
     1) item held "(exit 1): someone holds a card here; never use a card someone holds"; printf '%s\n' "$out" | indent
        card_state=held
        if [ "$ncards" -gt 1 ]; then   # the check counts every card: look for a usable card with no line of its own
@@ -153,23 +182,29 @@ fi
 # Other users' card programs and queues, on the whole command line (never our own: awk runs as us).
 if psout=$(ps -eo uid=,pid=,user:32=,etime=,args= 2>/dev/null); then
   runs=$(printf '%s\n' "$psout" | awk -v me="$uid" -v re="$PROCS" '$1 != me {
-      a = $0; sub(/^ *[^ ]+ +[^ ]+ +[^ ]+ +[^ ]+ +/, "", a); if (a ~ re) print $3, $2, $4, substr(a, 1, 120) }')
+      a = $0; sub(/^ *[^ ]+ +[^ ]+ +[^ ]+ +[^ ]+ +/, "", a); if (a ~ re) print $2, $3, $4, substr(a, 1, 120) }')
+  # Simulator runs never touch a card: they are no one's card run.
+  runs=$(printf '%s\n' "$runs" | grep -vE -- '--sysemu|--mode=sysemu|sys_emu' || true)
   # On a machine with more than one card, a program that et-who lists on another card is not in the way of ours.
   if [ -n "$runs" ] && [ -n "$use_n" ] && [ "$ncards" -gt 1 ] && [ -n "${out:-}" ]; then
     other=$(printf '%s\n' "$out" | grep -vE "^(/dev/et${use_n}_|lock:etsoc-shire${use_n}[.]lock)" | awk '{ print $3 }')
+    # and the shells that started them (a Claude runs each command in a bash -c whose line names the program)
+    other=$(ps -eo pid=,ppid= 2>/dev/null | awk -v o=" $(printf '%s ' $other)" '{ pp[$1] = $2 }
+      END { n = split(o, a, " "); for (i = 1; i <= n; i++) { p = a[i]; while (p > 1 && !(p in seen)) { seen[p] = 1; print p; p = pp[p] } } }')
     runs=$(printf '%s\n' "$runs" | while read -r pid rest; do
+      case $rest in *queue.sh*|*claims-v3*|*campaign.py*|*Runner.Worker*) printf '%s %s\n' "$pid" "$rest"; continue ;; esac
       case " $(printf '%s ' $other) " in *" $pid "*) ;; *) printf '%s %s\n' "$pid" "$rest" ;; esac; done)
   fi
   if [ -n "$runs" ]; then
     item "other runs" "card programs or queues of other users (ps): someone's run is active here"
     printf '%s\n' "$runs" | head -20 | indent
-    [ "$card_state" = free ] && card_state="free, but others' runs are active: wait or ask"
+    case $card_state in free*) card_state="not free: others' runs are active (above): wait or ask" ;; esac
   else
     item "other runs" "no card programs or queues of other users in ps"
   fi
 else
   warn "ps failed: cannot see other users' runs; wait or ask"
-  [ "$card_state" = free ] && card_state="unknown (ps failed)"
+  case $card_state in free*) card_state="unknown (ps failed)" ;; esac
 fi
 if [ -n "$use_n" ]; then item verdict "card $use_n: $card_state"; fi
 
@@ -330,8 +365,15 @@ if [ "$mode" = check ] && [ "$missing" = 1 ]; then
 fi
 
 # ---------------------------------------------------------------- next steps
-N=${use_n:-"<N>"}
-if [ "$want_claude" != 0 ]; then
+# The card the agent chose (--card) wins; on a machine with more than one card, without --card, leave it for the
+# agent to fill: the card this script would pick now may not be the one chosen in START.md step 2.
+if [ -n "$want_card" ] && [ -n "$use_n" ]; then N=$use_n
+elif [ -n "$use_n" ] && [ "$ncards" -le 1 ]; then N=$use_n
+else N="<N>"; fi
+if [ "$want_claude" != 0 ] && [ -z "$usable" ]; then
+  section "Next"
+  printf '  No card on %s is for use: set up on aifoundry3 or aifoundry1 instead (START.md step 2).\n' "$host"
+elif [ "$want_claude" != 0 ]; then
   section "Next: a Claude that lives on $host, driven from claude.ai/code (at your keyboard)"
   if [ -e "$dest/docs/lab-start/START.md" ] || { [ "$mode" != setup ] && [ "$want_clone" = 1 ] && [ ! -e "$dest" ]; }; then
     msg="Read ~/et-soc1-prototyping/docs/lab-start/START.md and follow it from step 4, running its blocks directly. My username is $me. You are on $host, card $N. Steps 1-3 are done."

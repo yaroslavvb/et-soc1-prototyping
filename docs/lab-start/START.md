@@ -7,8 +7,8 @@ the lab's Discord posts, and a yes before the first run on a card.
 
 Everything below is the lab's brief for you, my coding agent.
 
-Version of 2 October 2026 (PDT), sixth edition: aifoundry1's card 0 is back in service (its fan was replaced);
-aifoundry2's card is out of service; a check for one card; the lab's live monitor. The current copy is `docs/lab-start/START.md` in
+Version of 2 October 2026, 14:30 PDT, seventh edition: aifoundry1's card 0 is back in service (its fan was
+replaced); aifoundry2's card is out of service; a check for one card; several people starting at once. The current copy is `docs/lab-start/START.md` in
 https://github.com/yaroslavvb/et-soc1-prototyping; if this one is more than a month old, read that one instead.
 
 ## Your person, the machine and the card
@@ -27,7 +27,8 @@ installed, it shows who used which card when, naming users and programs, never a
 
 You may, without asking: run `et-who`, `et-usage`, `et-lab-start`, `uptime`, `ps`, `df`, `et-lab-health`,
 `et-lab-manifest`, `dmesg` and `coredumpctl`; clone, edit, build and simulate in your person's home directory, with
-`nice` and `-j4`. Builds and the simulator wait while step 2's check shows someone else's run on the machine.
+`nice` and `-j4`. Builds and the simulator wait while another person's card program or queue runs on the machine
+(one that `et-who` lists, on any card); other people's builds, simulator runs and idle shells do not hold them up.
 
 Ask your person first: before the first card run of each session, before any run of more than one process, and
 before anything shared, such as a long detached job, a drain of a card's queue (see Traps), or any download, install
@@ -54,7 +55,7 @@ services, posts on the AI Foundry Discord, and anything for the lab admin.
 
 | Card | Firmware | Clock | Idle | Watch for | Use it for |
 |---|---|---|---|---|---|
-| aifoundry2 | 1.3.1 | DVFS 600–800 MHz, usually 600 | rises with its temperature | **out of service since 2 October**: its cooling failed, it heats up even at idle (138 °C on 2 Oct) and drops off the PCIe bus | nothing, until the lab dashboard shows it working again |
+| aifoundry2 | 1.3.1 | DVFS 600–800 MHz, usually 600 | rises with its temperature | **out of service since 2 October**: its cooling failed, it heats up even at idle (138 °C on 2 Oct) and drops off the PCIe bus | nothing, until this brief or the lab lead says it is back (after a reboot it looks healthy for about an hour while it heats up) |
 | aifoundry3 | 1.3.1 | pinned at 600 MHz (NoC 400) at every boot; no thermal step | 23.6 W at 50 °C; about 25 W at 55–57 °C since 25 Sep | reaches 88 °C under load, nothing slows it; a demo service can use the card without the lock | a first or second choice; switching power over idle, never absolute watts |
 | aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample of 25–30 Sep; not rechecked since the power cycle of 30 Sep: read `mhz.minion` | 31–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | a second choice (step 2) |
 | aifoundry1 card 0 | 1.4.1 | idles at 300 MHz; sgemm runs as fast as on card 1 | 19–20 W | needs `ET_DEVICES=0` and `etsoc-shire0.lock`; its fan was replaced on 2 Oct: 49 °C idle, 52–56 °C under 8 minutes of sgemm | a second choice (step 2) |
@@ -138,40 +139,49 @@ A remote command gets no `/opt/et/bin` on its PATH: keep the absolute paths belo
 before the ssh; leave out a machine that does not answer, since it may be down:
 
 ```bash
-hostname; et-who --check; echo "card check exit $?"; ls /dev/et*_ops 2>/dev/null || echo "no card here: it is down"
+hostname; et-who --check; echo "card check exit $?"
+for d in /sys/bus/pci/drivers/ET/0000:*; do [ -e "$d/devnum" ] && echo "card $(cat "$d/devnum"): link $(cat "$d/current_link_speed")"; done
 ps -eo user:32=,etime=,args= | awk -v me="$(id -un)" '$1 != me && /queue[.]sh|claims-v3|campaign[.]py|_host( |$)|ettelem|sys_emu|it_test|dev_mngt|powertop|mmbench|Runner[.]Worker/ { n++; print substr($0, 1, 200) } END { if (!n) print "no card programs of other users" }'
 ps -eo uid=,user:32= | awk '$1 >= 1000 && $1 != 65534 { print $2 }' | sort | uniq -c   # people with processes here
 uptime; df -h ~ | tail -1
-if command -v et-usage >/dev/null; then et-usage; else echo "et-usage: not installed here"; fi
+if command -v et-usage >/dev/null; then et-usage --since 30m; else echo "et-usage: not installed here"; fi
 ```
 
-Where `et-lab-start` is installed, `et-lab-start --check` shows the same and changes nothing. A card is free when the
-check exits 0, its card is listed (`/dev/et<N>_ops`: `et-who` cannot see a card that is down), and the second line
-finds no card program of another user, even when `et-who` shows the card free.
-Then:
+Where `et-lab-start` is installed, `et-lab-start --check` shows much the same and changes nothing, but its card notes
+and its choice of card may be out of date: decide by this step. Card `<N>` of a machine is free when all of these hold:
 
-1. aifoundry3's card (card 0), if free. aifoundry2's card is out of service: leave it out even if it looks free.
-2. Else one of aifoundry1's two cards that is free, card 1 first (`ET_DEVICES=1`), else card 0 (`ET_DEVICES=0`). On
-   aifoundry1 a card is free when `et-who --check` exits 0 or 1 and lists no line for that card (rule 2), and the
-   second line shows no card program of another user, or only programs that `et-who` lists on the other card.
+- its link is up: the second line shows a speed for it, not `Unknown` (a card that fell off the bus keeps its
+  `/dev` node, and `et-who` cannot see that it is down);
+- `et-who --check` exits 0, or exits 1 with no line for card `<N>` (`/dev/et<N>_…` or `lock:etsoc-shire<N>.lock`):
+  on aifoundry1 that means someone holds its other card;
+- the third line shows no queue (`queue.sh`, `claims-v3`, `campaign.py`, `Runner.Worker`: a queue can take either
+  card between its runs) and no other card program of another user, except those `et-who` lists on the other card,
+  the shells that started them, and simulator runs (`--sysemu`, `--mode=sysemu`, `sys_emu`);
+- nobody has claimed it: `et-usage --since 30m --card <N>` shows no other user on it (rows for `yaroslavvb`'s
+  `ettelem` and for `?` are the lab's live monitor), and your person sees no "using `<host>` card `<N>`" post in
+  #community-lab without a "released" after it.
 
-Several new people may start at the same time, and every run in this brief takes under 10 s, so a held card is
-usually free again within a minute: look again before moving on. Two people can work on aifoundry1 at once, one per card.
-3. Else no card is free: take the first reachable machine in the order aifoundry3, aifoundry2, aifoundry1, do only
-   step 3 there (builds and the simulator wait), and look again at most once a minute. After 30 minutes, tell your
-   person.
+Several new people may start at the same time. A card that someone holds or has claimed is theirs, even though their
+runs are short: take the next free card in this order, now.
+
+1. aifoundry3's card (card 0). aifoundry2's card is out of service: never choose it, even if it looks free.
+2. aifoundry1's card 1 (`ET_DEVICES=1`), else its card 0 (`ET_DEVICES=0`). Two people can work on aifoundry1 at
+   once, one per card.
+3. If no card is free, look again in a minute, at most once a minute; meanwhile do only step 3 on the first reachable
+   machine of aifoundry3 and aifoundry1 (never aifoundry2). After 30 minutes, tell your person.
 4. If step 1 reached no machine, stop: your person asks the lab lead.
 
 Where the banner (`/etc/motd`) differs from this brief, follow the brief. Tell your person which machine and card
-you chose, and why; they post "using `<host>`" in #community-lab on the AI Foundry Discord. If card `<N>` is held
-later, look again after a few minutes, at most once a minute, or ask your person; do not move to another card
+you chose, and why; they post "using `<host>` card `<N>`" in #community-lab on the AI Foundry Discord. If card `<N>`
+is held later, look again after a few minutes, at most once a minute, or ask your person; do not move to another card
 without their OK.
 
 **3. Set up on `<host>`.** A Claude that lives on the machine runs in tmux, survives dropped connections, and your
 person drives it from claude.ai/code or the Claude app through Remote Control, which needs a claude.ai plan. Set it
 up unless your person has no plan or wants you to work over ssh only. If `et-lab-start` is installed on `<host>`,
 run it: it does what is missing of this step, is safe to run again, and prints the next steps (`--no-claude` leaves
-Claude out). If not, run the two blocks below, without the Claude lines if Claude is not wanted.
+Claude out). Its card notes, verdict and the message it prints may name another card or be out of date: always hand
+over the message of hand-off step 3 below, with the card you chose in step 2. If not, run the two blocks below, without the Claude lines if Claude is not wanted.
 Everything goes in the home directory; nothing needs sudo.
 
 ```bash
@@ -210,7 +220,8 @@ stop when you finish is any process that holds a card or a lock.
 The clone's `CLAUDE.md` and `AGENT.md` are the owner's standing instructions. Where they differ from this brief,
 this brief wins. Do not commit or push to the clone, deploy pages, or run `scripts/deploy-lab*.sh`,
 `scripts/check-mirror.py` or `tools/claims-v3` queues. If you run on the host, start the agent in `~`, not in the
-clone, so the clone's `CLAUDE.md` does not load as your instructions.
+clone. Claude Code still loads the clone's `CLAUDE.md` once it reads a file there; where it differs from this brief,
+this brief wins.
 
 **4. Simulator smoke, no card.** It passes 3 tests in about 110 s: give it a 5-minute tool timeout, or start it
 detached (rule 10). It writes its logs into the directory it runs in, so run it in a run directory.
@@ -224,6 +235,7 @@ honours `ET_DEVICES` (checked on 30 September); aifoundry3's ignores it, which i
 
 ```bash
 cd ~/runs/first-hour
+[ "$(hostname)" != aifoundry2 ] || { echo "aifoundry2's card is out of service: stop"; exit 1; }
 [ "$(hostname)" != aifoundry1 ] || grep -aqw ET_DEVICES /opt/et/bin/it_test_code_loading || { echo "ignores ET_DEVICES: stop"; exit 1; }
 o=$(et-who --check); [ $? -le 1 ] && ! printf '%s\n' "$o" | grep -qE '^(/dev/et<N>_|lock:etsoc-shire<N>[.]lock)' || { echo "card <N> is held, or the check failed: stop"; printf '%s\n' "$o"; exit 1; }
 ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie
@@ -248,6 +260,7 @@ harmless. The simulator checks correctness, never speed.
 ```bash
 cd ~/et-soc1-prototyping
 R=~/runs/first-hour; mkdir -p $R
+[ "$(hostname)" != aifoundry2 ] || { echo "aifoundry2's card is out of service: stop"; exit 1; }
 [ "$(hostname)" != aifoundry1 ] || grep -aqw ET_DEVICES build/sgemm-mine/host/sgemm_host || { echo "ignores ET_DEVICES: stop"; exit 1; }
 et-lab-manifest > $R/manifest.txt; date > $R/when.txt
 o=$(et-who --check); [ $? -le 1 ] && ! printf '%s\n' "$o" | grep -qE '^(/dev/et<N>_|lock:etsoc-shire<N>[.]lock)' || { echo "card <N> is held, or the check failed: stop"; printf '%s\n' "$o"; exit 1; }
@@ -267,6 +280,7 @@ cd ~/et-soc1-prototyping
 cmake -S tools/ettelem -B build/ettelem-mine -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev
 nice cmake --build build/ettelem-mine -j4
 R=~/runs/first-hour
+[ "$(hostname)" != aifoundry2 ] || { echo "aifoundry2's card is out of service: stop"; exit 1; }
 [ "$(hostname)" != aifoundry1 ] || grep -aqw ET_DEVICES build/ettelem-mine/ettelem || { echo "ignores ET_DEVICES: stop"; exit 1; }
 o=$(et-who --check); [ $? -le 1 ] && ! printf '%s\n' "$o" | grep -qE '^(/dev/et<N>_|lock:etsoc-shire<N>[.]lock)' || { echo "card <N> is held, or the check failed: stop"; printf '%s\n' "$o"; exit 1; }
 ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 \
