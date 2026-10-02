@@ -955,7 +955,9 @@ A click only selects. A part with no closer drawing says so in the panel and off
 <li><b>Zoom out</b> with the wide <b>↑ Zoom out</b> button above the drawing, Backspace or the − key: out past the
 package, the card and its host to the rack the lab's machines stand in. Beside it, the breadcrumb jumps to any level
 (the outer ones fold into its "…" menu), and the readout gives the size of what you see, in metres and as a power of
-ten. A second press while the camera moves goes one further. Past the rack the button only says "?".</li>
+ten. A second press while the camera moves goes one further. Past the rack the button only says "?". Keep pressing and
+the zoom goes round a loop, always outward: past the largest scale it comes back at the smallest, the Planck length, and
+climbs from there through a quark, a proton and an atom to the chip again (+ goes round the other way).</li>
 <li><b>Switch</b> (G): the transistor-level drawings have two states, drawn both ways: the gate at 0 V or at the minion
 rail's 0.517 V (the FinFET, its fin and its channel fill with electrons), an inverter's input 0 or 1, a stored bit 0
 or 1, a DRAM cell just written or 32 ms later. Press the switch in the drawing, the panel's button or G.</li>
@@ -1103,6 +1105,7 @@ down to a transistor drawn as such and its atoms.</li>
 flow, its held stage, the tour's slide or the scale shown, and opening it goes there.</li>
 <li><b>1 October, speed</b>: the replay plays at 1× or 2× (the button beside Play, or S), and a link to a flow or the
 tour played at 2× opens at 2× (<code>&amp;speed=2</code>).</li>
+<li><b>1 October, evening</b>: Up past the top goes straight to the Planck length; the loop runs one way.</li>
 </ul>
 
 <h2 id="related">Related reports</h2>
@@ -2555,11 +2558,12 @@ function foldSoon() { if (!foldT) foldT = requestAnimationFrame(() => { foldT = 
    view helpers (lerp, rmap, setT, cmpM, simZoom, ...), the trio of layers the page animates in (bindTrio, LAYERS,
    pinfo, pathOf, TRIO, PVIEW, pview), and the page's reactions to a move (clearFx, clearDim, select, showHere,
    prefetch, FL, TOUR, playBtn, renderBar, startFlow, restartStage, setFollow, FOLLOW, goNeighbour, shCell, BYDIE).
-   Since 1 October it also holds the wrap (the ring of sizes), the easter egg's "?" (the levels above the rack), the
-   two-state electronics (stateSwitch, stateToggle) and the lazily fetched data (lazyData). The hooks every page that
-   includes it must define (build-report.py refuses a page without them): pageExits() the ways back in from the ring,
-   [{id, lab, short, path()}]; pageBusy() true while a flow or an access holds the stage; pageLazy(ok) the lazy data has
-   arrived (or failed): redraw what showed it. */
+   Since 1 October it also holds the loop (Up past the top to the Planck length) and the ring of sizes, the easter egg's
+   "?" (the levels above the rack), the two-state electronics (stateSwitch, stateToggle) and the lazily fetched data
+   (lazyData). The hooks every page that includes it must define (build-report.py refuses a page without them):
+   pageExits() the ways back in from the ring, [{id, lab, short, path()}] (the one that ends at the Planck length is
+   where Up from the top lands); pageBusy() true while a flow or an access holds the stage; pageLazy(ok) the lazy data
+   has arrived (or failed): redraw what showed it. */
 /*@hooks pageExits pageBusy pageLazy*/
 /* ================= the path camera (30 September 2026) =================
    One engine for a ladder of any depth (the owner's "zoom out ... all the way to the meta universe" and "double-click
@@ -2757,15 +2761,22 @@ function mkStep(P, d, dir) {
   return {o: d - 1, P: P.slice(0, d + 1), dir, e0: dir > 0 ? 0 : 1, e1: dir > 0 ? 1 : 0, A, B, Q, lq, L, kind, tgt: st.g || null, so, si};
 }
 /* the steps from the scale P (at rest) to T: out to the deepest scale they share, then in; o.pan: two siblings side by
-   side in their parent's drawing glide instead */
+   side in their parent's drawing glide instead. The top and a Planck length are one loop step apart (never a zoom through
+   60 orders of magnitude), and a crossing pressed for but not yet made (LOOPX) goes round the loop */
 function routeSteps(P, T, o) {
+  if (loopPair(P, T)) return [loopStep(P, T)];
+  const X = LOOPX;
+  if (X && X.dir < 0 && isPrefix(T, X.B)) return routeDirect(P, topPath(), o).concat([loopStep(topPath(), X.B)], routeDirect(X.B, T, o));
+  if (X && X.dir > 0) return routeDirect(P, X.B, o).concat([loopStep(X.B, topPath())], routeDirect(topPath(), T, o));
+  return routeDirect(P, T, o);
+}
+function routeDirect(P, T, o) {
   // different roots (only the ring has a root of its own): one wrap step joins the ring to the top of the ladder, or to
-  // a scale deep in a branch (since the owner's second update of 1 Oct: Up from the ring lands on an atom of the chip; +
-  // at the Planck length goes round to the ring)
+  // a scale deep in a branch (the ring's ways back in; Up from the ring lands on the Planck length, + goes to the top)
   if (P[0].id !== T[0].id) {
     const top = [{id: 'beyond'}], low = Q => Q.length > 1;
-    if (isWrap(P)) return low(T) ? [wrapStep(P, T)] : [wrapStep(P, top)].concat(routeSteps(top, T, o));
-    if (isWrap(T)) return low(P) ? [wrapStep(P, T)] : routeSteps(P, top, o).concat([wrapStep(top, T)]);
+    if (isWrap(P)) return low(T) ? [wrapStep(P, T)] : [wrapStep(P, top)].concat(routeDirect(top, T, o));
+    if (isWrap(T)) return low(P) ? [wrapStep(P, T)] : routeDirect(P, top, o).concat([wrapStep(top, T)]);
   }
   let k = 0; while (k < P.length && k < T.length && pk(P[k]) === pk(T[k])) k++;
   if (o && o.pan && P.length === T.length && k === P.length - 1 && k >= 1) { const ps = panStep(P, T); if (ps) return [ps]; }
@@ -2793,17 +2804,28 @@ function wrapStep(F, T) {
   const ring = isWrap(F) ? F : T, other = isWrap(F) ? T : F;
   return {wrap: true, kind: 'wrap', F, T, ring, other, toRing: isWrap(T), dir: 1, e0: 0, e1: 1, L: 2.6, o: 0, P: other.slice(), dist: 0};
 }
+/* the loop's step, between the top and a Planck length: a wrap step with the Planck length's scene in the ring's part.
+   Going Up the top shrinks into the Planck length's mark while that scene comes in from 8 times its size: both only
+   shrink, as in any zoom out; + runs it backwards. s.ro: the readout's two sizes; s.note: the note over the drawing. */
+function loopStep(F, T) {
+  const up = isTop(F), ring = up ? T : F, other = up ? F : T, ends = loopEnds(), a = up ? ends.big : ends.small, b = up ? ends.small : ends.big;
+  return {wrap: true, loop: true, ldir: up ? -1 : 1, kind: 'wrap', F, T, ring, other, toRing: up, dir: 1, e0: 0, e1: 1, L: 2.6, Lf: 2.6, o: 0, P: other.slice(), dist: 0,
+    ro: '↻ round the loop' + (a && b ? `: ${pow10(a.m)} → ${pow10(b.m)}` : ''), note: '↻ Round the loop' + (a && b ? `: from ${toOf(a.el)} to ${toOf(b.el)}` : '')};
+}
 function openWrap(s, req) {
-  const R = built(s.ring, 0), O = built(s.other, s.other.length - 1), bd = BANDS.jump;
+  const R = built(s.ring, s.ring.length - 1), O = built(s.other, s.other.length - 1), bd = BANDS.jump;
   // (the other end: the top of the ladder, beyond, grows from the ring's head; the Planck length from the tail's tip; an
-  // atom, where Up from the ring lands, from the atom's tick: review of 1 Oct, every path starts at beyond, so the head
-  // is the path of length one)
-  const ap = R._ap, tip = s.other[s.other.length - 1].id, head = s.other.length === 1, mk = head ? ap.headBox : tip === PLANCK ? ap.tailBox : ap.atomBox || ap.tailBox;
+  // atom, a way back in, from the atom's tick: review of 1 Oct, every path starts at beyond, so the head is the path of
+  // length one. The loop's top: from the Planck length's own mark, loopAt, else the middle of its view)
+  const ap = R._ap, tip = s.other[s.other.length - 1].id, head = s.other.length === 1, vr = viewOf(s.ring[s.ring.length - 1]);
+  const B = frameOf(s.other[s.other.length - 1]), lw = vr.w / 8, la = ap.loopAt || {x: vr.x + vr.w / 2, y: vr.y + vr.h / 2};
+  const mk = s.loop ? {x: la.x - lw / 2, y: la.y - lw * B.h / B.w / 2, w: lw, h: lw * B.h / B.w} : head ? ap.headBox : tip === PLANCK ? ap.tailBox : ap.atomBox || ap.tailBox;
   // the other's frame drawn into its mark on the ring at its smallest (an eighth of the ring's view at most), the ring
   // zoomed in on the mark by as much at the other's rest
-  const B = frameOf(s.other[s.other.length - 1]), A = fitTo(mk || {x: 0, y: 0, w: 100, h: 100}, B.w / B.h), Q = rmap(A, B);
-  const vr = viewOf(s.ring[0]), vo = viewOf(s.other[s.other.length - 1]);
-  const run = ap.run || null, runL = ap.runLen || 1;
+  const A = fitTo(mk || {x: 0, y: 0, w: 100, h: 100}, B.w / B.h), Q = rmap(A, B);
+  const vo = viewOf(s.other[s.other.length - 1]);
+  const run = s.loop ? null : ap.run || null, runL = ap.runLen || 1;
+  if (s.loop) loopNote(s.note);
   const frame = q => {
     // e: 0 the ring at rest, 1 the other at rest
     const e = s.toRing ? 1 - q : q, R0 = zoomR(A, B, e), Mo = rmap(A, R0), Mi = rmap(B, R0);
@@ -2828,13 +2850,15 @@ function openWrap(s, req) {
     close: (e1, last, arrive) => {
       const to = e1 >= 0.5;
       frame(to ? 1 : 0);
-      const here = (to ? s.T : s.F), hereL = isWrap(here) ? R : O, gone = hereL === R ? O : R;
+      const here = (to ? s.T : s.F), hereL = samePath(here, s.ring) ? R : O, gone = hereL === R ? O : R;
       gone.style.display = 'none'; ctxClear(gone); gone.style.removeProperty('--lab'); hereL.style.removeProperty('--lab');
       hereL.style.opacity = 1; hereL.style.visibility = '';
       if (run) run.style.strokeDashoffset = runL + 'px';
       Z.path = here.slice();
-      // in from the ring: the reader came round (the landing scale's panel says so, and offers the way back)
-      WRAPIN = isWrap(here) ? null : pkeys(here);
+      // came round (the landing scale's panel says so and offers the ring); the loop crossed
+      WRAPIN = isWrap(here) || here.length === 1 ? null : pkeys(here); WRAPVIA = s.loop ? 'loop' : 'ring';
+      if (s.loop && to && LOOPX && LOOPX.dir === s.ldir) LOOPX = null;
+      if (s.loop) loopNote(null, REDUCED ? 2600 : 1300);
       bindTrio(Z.path);
       setT(hereL, restMat());
       if (last) { if (arrive) arrive(); svg.querySelectorAll(':scope > g.lay').forEach(l => l.classList.remove('busy')); }
@@ -2846,7 +2870,9 @@ function openWrap(s, req) {
    shorter), to the target; which views are only passed through */
 function planTo(t, o) {
   let steps;
-  if (CUR && !CUR.s.pan && !CUR.s.wrap) {
+  // (the loop's step in flight, pressed on the same way round: the rest of it, then on from its far end)
+  if (CUR && CUR.s.loop) steps = [Object.assign({}, CUR.s, {part: true, e0: CUR.e, L: Math.max(1e-3, (1 - CUR.e) * CUR.s.Lf)})].concat(routeDirect(CUR.s.T, t, null));
+  else if (CUR && !CUR.s.pan && !CUR.s.wrap) {
     const s = CUR.s, Ls = s.L;
     const Pin = s.P, Pout = s.P.slice(0, -1);
     const pin = routeSteps(Pin, t, null), pout = routeSteps(Pout, t, null);
@@ -3090,6 +3116,8 @@ const zkey = () => pkeys(Z.path);
 const zNow = () => pinfo(ZT ? ZT.t : Z.path);
 function goTo(t, o) {
   o = o || {};
+  // (a crossing of the loop not yet made is kept only by Up and +: zoomBy)
+  if (!o.loopx) LOOPX = null;
   let tp;
   if (Array.isArray(t)) tp = t.slice();
   else { const z = zNow(); tp = pathOf({level: t.level || 0, sid: t.sid == null ? (z.sid == null ? LASTSID : z.sid) : t.sid, nb: t.nb || 0, mi: t.mi || 0}); }
@@ -3130,8 +3158,13 @@ async function zoomWorker() {
       const req = ZT, t = req.t, stop = () => ZT !== req, clk = req.o.clk || null;
       if (req.o.focus) wantFocus = true;
       if (req.o.pfocus) wantPanel = true;
-      // a glide or a wrap in flight is not turned: it lands where it is nearer, at once
-      if (CUR && (CUR.s.pan || CUR.s.wrap)) { try { CUR.ctl.close(CUR.e >= 0.5 ? 1 : 0, true, null); } catch (e) { console.error(e); } CUR = null; }
+      // a glide or a wrap in flight is not turned: it lands where it is nearer, at once (a loop's step pressed on the
+      // same way round goes on: planTo)
+      if (CUR && (CUR.s.pan || CUR.s.wrap) && !(CUR.s.loop && LOOPX && LOOPX.dir === CUR.s.ldir)) {
+        const to = CUR.e >= 0.5;
+        if (CUR.s.loop && !to) LOOPX = null;
+        try { CUR.ctl.close(to ? 1 : 0, true, null); } catch (e) { console.error(e); } CUR = null;
+      }
       // turned back while moving: slow to a stop first (130 ms), then plan from rest
       if (CUR && CUR.ctl && Math.abs(CUR.v) > 2e-4 && !REDUCED && req.o.total !== 0 && req.o.ms !== 0) {
         const probe = planTo(t, req.o)[0];
@@ -3150,7 +3183,7 @@ async function zoomWorker() {
       if (!req.o.keepFx) clearFx(true); else clearDim();
       // every scale the move enters is built before it starts (a build is a layout of a whole drawing: mid-move it
       // would be a late frame)
-      try { steps.forEach(s0 => { if (s0.wrap) { built(s0.ring, 0); built(s0.other, s0.other.length - 1); } else if (s0.pan) { built(s0.P, s0.o + 1); built(s0.T, s0.o + 1); } else { built(s0.P, s0.o); built(s0.P, s0.o + 1); } }); } catch (e) { console.error(e); }
+      try { steps.forEach(s0 => { if (s0.wrap) { built(s0.ring, s0.ring.length - 1); built(s0.other, s0.other.length - 1); } else if (s0.pan) { built(s0.P, s0.o + 1); built(s0.T, s0.o + 1); } else { built(s0.P, s0.o); built(s0.P, s0.o + 1); } }); } catch (e) { console.error(e); }
       const cost = costOf(steps);
       const user = !clk && req.o.total == null;
       const pan = steps.length === 1 && steps[0].pan;
@@ -3245,7 +3278,8 @@ async function zoomWorker() {
           const s = steps[ci], g = legOf[ci], last = ci === steps.length - 1;
           if (!ctl) ctl = openStep(s, req);
           if (s.pan || s.wrap) {
-            if (g === gk && (u < 1 || (last && !fin))) { ctl.frame(p); CUR = {s, e: p, dir: 1, v: 0, ctl}; break; }
+            // (the rest of a loop's step goes on from where it was, at its speed)
+            if (g === gk && (u < 1 || (last && !fin))) { const q = s.part ? s.e0 + p * (1 - s.e0) : p; ctl.frame(q); CUR = {s, e: q, dir: 1, v: s.loop && Tk > 0 ? s.L * hermD(u, gk.m) / Tk : 0, ctl}; break; }
           } else {
             if (!g.W) legPath(g);
             if (g === gk) {
@@ -3428,39 +3462,69 @@ function defKid(P) {
   const k = N0 && N0.def ? N0.def(prm(el), P) : null;
   return k && NODES[k.id] ? k : null;
 }
-/* ---- the wrap (1 Oct 2026, the owner: "when I zoom out to observable universe, I get elementary particles, quarks ...
-   and then maybe I end up in one of the computing transistor units ... or one of the memory units"; and at 09:00: "I
-   want to reappear again as an atom ... make sure it loops"): the ring of sizes, p.wrap, is a root of its own. Up from
-   the top of the ladder (beyond) goes to the ring; Up from the ring goes in as one fixed atom of the chip, the page's
-   first way back in (pageExits: a silicon atom in a transistor of the multiply-add), and every Up after that climbs the
-   crystal, the channel, the fin, the FinFET, its gate and on up through the page's own scales, out to the top and round
-   again. + runs the loop backwards: from the atom down to the Planck length, round to the ring, and from the ring to
-   beyond. A move onto or off the ring is a cross-fade with a marker running along the ring (a wrap step), never a zoom
-   through space. ---- */
+/* ---- the loop and the ring (1 Oct 2026, the owner: "when I zoom out to observable universe, I get elementary particles,
+   quarks ..."; 09:00: "make sure it loops"; 17:10: "When zooming up, skip this slide [the ring] ... directly go at the
+   lowest level ... The loop should always go in one direction"). Up from the top (beyond) goes straight to the Planck
+   length under one fixed atom of the chip (upExit), one loop step (loopStep), and every Up after that climbs a quark, a
+   proton, the nucleus, the atom and on up the page's scales to the top and round again: 40 presses a lap, none zooming
+   in. + runs it backwards, from any Planck length to the top. The ring of sizes (p.wrap, a root of its own) is off the
+   loop: reached by its address and the top's panel (the Planck length's after coming round); from it Up goes to the
+   Planck length and + to the top, and its panel offers the ways back in. Moves onto or off it are wrap steps. ---- */
 const WRAP = 'p.wrap', PLANCK = 'p.planck';
 const isWrap = P => P.length === 1 && P[0].id === WRAP;
-/* the path of the scale the camera last came to from the ring (its panel says so and offers the way back round) */
-let WRAPIN = null;
-/* the way back in that Up takes from the ring: always the page's first (the owner, 1 Oct 09:00: "I want to reappear
-   again as an atom. Pick some point in the compute hierarchy which is deep ... and make sure it loops"): one fixed atom,
-   so that Up, pressed for ever, goes round the same loop; the others are offered in the ring's panel */
+/* the top of the ladder (its root, beyond) and a Planck length (the bottom of a branch): the loop's two ends */
+const topPath = () => (NODES.beyond ? [{id: 'beyond'}] : null);
+const isTop = P => P.length === 1 && P[0].id === 'beyond';
+const atPlanck = P => P.length > 1 && P[P.length - 1].id === PLANCK;
+const loopPair = (P, T) => (isTop(P) && atPlanck(T)) || (isTop(T) && atPlanck(P));
+const isPrefix = (T, B) => T.length <= B.length && samePath(T, B.slice(0, T.length));
+/* the path the camera last came round to (from the ring, or round the loop: WRAPVIA): its panel says so */
+let WRAPIN = null, WRAPVIA = 'ring';
+/* a crossing of the loop pressed for and not yet made: {dir: -1 Up, 1 +, B: the Planck length it joins} */
+let LOOPX = null;
+/* where Up from the top (and the ring) lands: the page's way back in that ends at a Planck length, under one fixed atom
+   (the owner, 09:00: "Pick some point in the compute hierarchy which is deep"), so that Up for ever goes one loop */
 function upExit() {
   const xs = typeof pageExits === 'function' ? pageExits() : [];
-  return xs.length ? xs[0] : null;
+  return xs.find(x => { const P = x.path(); return P && atPlanck(P); }) || null;
 }
 /* the path from P down its default chain to the scale id (a way back in from the ring: an atom) */
 function chainTo(P, id) { let Q = P.slice(); for (let i = 0; i < 60 && Q[Q.length - 1].id !== id; i++) { const k = defKid(Q); if (!k) return null; Q = Q.concat([k]); } return Q[Q.length - 1].id === id ? Q : null; }
-/* Up from P: its parent; at the top of the ladder, the ring; on the ring, in again as an atom of the chip */
+/* Up from P: its parent; at the top of the ladder and on the ring, round to the Planck length */
 function upOf(P) {
-  if (isWrap(P)) { const x = upExit(); return x ? x.path() : null; }
   if (P.length > 1) return P.slice(0, -1);
-  return P[0].id === 'beyond' && NODES[WRAP] ? [{id: WRAP}] : null;
+  if (!isTop(P) && !isWrap(P)) return null;
+  const x = upExit(); return x ? x.path() : null;
 }
-/* + from P with nothing selected: the default child; round the ring from the Planck length, and from the ring to the top */
+/* + from P with nothing selected: the default child; from a Planck length (round the loop) or the ring, the top */
 function nextOf(P) {
-  if (isWrap(P)) return NODES.beyond ? [{id: 'beyond'}] : null;
-  if (P[P.length - 1].id === PLANCK && NODES[WRAP]) return [{id: WRAP}];
+  if (isWrap(P) || atPlanck(P)) return topPath();
   const k = defKid(P); return k ? P.concat([k]) : null;
+}
+/* the loop's ends: the first scale under the top with a size (the observable universe) and the Planck length */
+function loopEnds() {
+  let P = topPath(), big = null;
+  for (let i = 0; P && i < 4 && !big; i++) { const el = P[P.length - 1], sz = sizeOf(el); if (sz && sz.m > 0) big = {el, m: sz.m}; else { const k = defKid(P); if (!k) break; P = P.concat([k]); } }
+  const pl = {id: PLANCK}, sz = NODES[PLANCK] ? sizeOf(pl) : null;
+  return {big, small: sz && sz.m > 0 ? {el: pl, m: sz.m} : null};
+}
+/* the loop's note in the middle of the drawing, from its step's start until a moment after it lands (loopNote(null,
+   ms)); a status, read out too */
+let LOOPN = null, LOOPT = 0;
+function loopNote(t, ms) {
+  const wr = $('svgwrap'); if (!wr) return;
+  if (!LOOPN) {
+    LOOPN = H('div', {class: 'loopnote', role: 'status'}, wr);
+    LOOPN.style.cssText = 'position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);z-index:5;width:max-content;max-width:calc(100% - 32px);box-sizing:border-box;pointer-events:none;'
+      + 'background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:7px 16px;box-shadow:0 6px 22px rgba(0,0,0,.3);'
+      + 'font-size:clamp(.84rem,.3vw + .72rem,1.05rem);font-weight:600;line-height:1.35;text-align:center;opacity:0' + (REDUCED ? '' : ';transition:opacity .3s');
+  }
+  clearTimeout(LOOPT);
+  const off = () => { LOOPN.style.opacity = '0'; LOOPT = setTimeout(() => { LOOPN.hidden = true; }, REDUCED ? 0 : 320); };
+  if (t == null) { if (!LOOPN.hidden) LOOPT = setTimeout(off, ms || 0); return; }
+  LOOPN.textContent = t; LOOPN.hidden = false;
+  void LOOPN.offsetWidth; LOOPN.style.opacity = '1';
+  LOOPT = setTimeout(off, 6000);
 }
 /* the scales a scene offers to zoom into, the default first */
 function kidsOf(P) {
@@ -3471,14 +3535,18 @@ function kidsOf(P) {
 }
 function zoomBy(d) {
   const P = zNow().path;
-  if (d < 0) { const U = upOf(P); if (U) return userNav(U); return; }
+  // (a press across the loop leaves a crossing to make until the camera makes it; one back across cancels it)
+  const cross = (dir, B) => { LOOPX = LOOPX && LOOPX.dir === -dir ? null : {dir, B}; }, lx = {loopx: true};
+  if (d < 0) { const U = upOf(P); if (!U) return; if (isTop(P)) cross(-1, U); return userNav(U, lx); }
   // in: the selected part's own scale, else the scale's default child
   if (SEL && SEL.isConnected) {
     const lp = layerPath(SEL), k = kidOf(SEL);
     if (SEL._go && lp && samePath(lp, P)) return userNav(SEL._go());   // a way back in from the ring: a path of its own
     if (k && !k.up && lp && samePath(lp, P)) return userNav(P.concat([k]));
   }
-  const N = nextOf(P); if (N) return userNav(N);
+  const N = nextOf(P); if (!N) return;
+  if (atPlanck(P)) cross(1, P);
+  return userNav(N, lx);
 }
 /* a button that has nothing to do (the last stage's Next, the Up bar at the top): marked disabled (aria-disabled,
    dimmed) but kept focusable, so that the keyboard's focus never falls to the page and a repeated Enter does nothing */
@@ -3496,14 +3564,14 @@ function scaleUI(force) {
     b.innerHTML = '<span class="up-t">Top of the ladder</span>';
     setDis(b, true); b.setAttribute('aria-label', 'Top of the ladder'); b.title = '';
   } else if (isWrap(P)) {
-    // the ring: Up goes round it, in again as an atom (the readout shows no size: the ring is a picture)
+    // the ring: Up goes round it to the Planck length (the readout shows no size: the ring is a picture)
     const x = upExit();
-    b.innerHTML = `<span class="up-t">↑ Round the ring: in again as an atom</span>`;
-    setDis(b, false); b.setAttribute('aria-label', `Round the ring: in again as an atom${x ? ', ' + x.lab : ''}`); b.title = 'Round the ring (Backspace or −)';
+    b.innerHTML = `<span class="up-t">↑ Round the ring: the Planck length</span>`;
+    setDis(b, false); b.setAttribute('aria-label', `Round the ring: ${x ? x.lab : 'the Planck length'}`); b.title = 'Round the ring (Backspace or −)';
   } else {
     const par = U[U.length - 1], sz = sizeOf(par);
-    if (egg(par)) {
-      // a level of the easter egg further out: never named in advance
+    if (egg(par) || isTop(P)) {
+      // a level of the easter egg further out: never named in advance (nor, from the top, the loop's turn)
       b.innerHTML = '<span class="up-t">↑ ?</span>';
       setDis(b, false); b.setAttribute('aria-label', 'Zoom out: ?'); b.title = 'Zoom out one level (Backspace or −)';
     } else {
@@ -3655,7 +3723,7 @@ function roRest() {
 const smoother = x => x * x * x * (x * (x * 6 - 15) + 10);
 function readout(s, e) {
   if (!s) { roRest(); return; }
-  if (s.wrap) { if (ROCLS.indexOf('mv') < 0) $('scale-ro').setAttribute('aria-hidden', 'true'); roSet('↻ round the ring: a conceptual link', 'mv ring', true); return; }
+  if (s.wrap) { if (ROCLS.indexOf('mv') < 0) $('scale-ro').setAttribute('aria-hidden', 'true'); roSet(s.loop ? s.ro : '↻ round the ring: a conceptual link', 'mv ring', true); return; }
   const so = s.pan ? null : s.so, si = s.pan ? null : s.si;
   if (!so || !si || !(so.m > 0) || !(si.m > 0)) return;
   // the moving readout changes about ten times a second, not every frame: each change is a layout of the bar, which
@@ -3842,12 +3910,12 @@ node('minion', {parse: k => { const q = String(k).split('.').map(Number); return
   size: () => scSize('minion'), frame: () => MF,
   build: (L, ap, p) => buildMinion(L, ap, p.sid, p.nb, p.mi),
   here: (p, P) => showComp('minion', {}, {here: P})});
-/* the ways back in from the ring of sizes (ladder-core.js, the wrap). The owner, 1 Oct 09:00: "When I zoom out all the way
-   to the top ... I want to reappear again as an atom. Pick some point in the compute hierarchy which is deep, which goes
-   all the way down to the atoms, and make sure it loops." Up from the ring always lands on one atom: a silicon atom in
-   the channel of a FinFET of an XOR gate, in a full adder of a 4:2 compressor in the multiply-add's tree, lane 0 of the
-   vector unit of minion 0, shire 0; climbing out goes up that path to the die, the rack and round again. The ring's panel
-   also offers an atom of a memory cell (a 6T cell of shire 0's cache) and the Planck length under the first atom. */
+/* the ways back in from the ring of sizes (ladder-core.js, the loop and the ring). The owner, 1 Oct 09:00: "When I zoom out
+   all the way to the top ... I want to reappear again as an atom. Pick some point in the compute hierarchy which is deep,
+   which goes all the way down to the atoms, and make sure it loops." One silicon atom in the channel of a FinFET of an XOR
+   gate, in a full adder of a 4:2 compressor in the multiply-add's tree, lane 0 of the vector unit of minion 0, shire 0.
+   Since 17:10 Up from the top (and from the ring) lands on the Planck length under it (the entry that ends there) and
+   climbs through it to the die, the rack and round again. The ring's panel also offers the atom and a memory cell's. */
 const COMPUTE0 = () => pathOf({level: 2, sid: 0, nb: 0, mi: 0}).concat([{id: 'vpu'}, {id: 'vpu.lane', k: '0'}]);
 function pageExits() {
   return [
@@ -4601,9 +4669,11 @@ function showScene(P) {
   // a scene drawn in two states (1 Oct): the panel's switch beside the drawing's (G)
   const L = LYR.get(pkeys(P)), st = L && L._states;
   const sw = st ? `<div class="pn-act"><button type="button" class="st-btn" data-act="state" aria-pressed="${STON}">${esc(st.btn[STON ? 1 : 0])}</button></div>` : '';
-  // came round the ring (the wrap): where the reader now is, and the way back (only after the wrap: the easter egg is
-  // never named in advance)
-  const came = WRAPIN && WRAPIN === pkeys(P) ? `<p class="pn-lead pn-came">↻ You came round the ring of sizes: past the observable universe, back to the smallest things, and ${el.id === 'p.atom' ? 'in as one atom of this chip: a silicon atom in the channel of one of its transistors' : `in at ${esc(toOf(el))}, under an atom of this chip`}. Up climbs from here to the chip and on round the loop.</p><div class="pn-zoom">${zrow('', [zbtn([{id: WRAP}], '↻ Back to the ring of sizes', false, '')])}</div>` : '';
+  // came round the loop (Up from the top) or from the ring: where the reader now is, and the ring (only after coming
+  // round: the easter egg is never named in advance)
+  const came = !(WRAPIN && WRAPIN === pkeys(P)) ? '' : WRAPVIA === 'loop'
+    ? `<p class="pn-lead pn-came">↻ You came round the loop: past the observable universe, the largest scale, back to the smallest, ${esc(toOf(el))}, under one atom of this chip. Up climbs from here through ${esc(P.slice(Math.max(1, P.length - 5), -1).reverse().map(toOf).join(', ').replace(/, ([^,]*)$/, ' and $1'))}, on up to the chip and round again.</p>${NODES[WRAP] ? `<div class="pn-zoom">${zrow('', [zbtn([{id: WRAP}], '↻ The ring of sizes: every size at once', false, '')])}</div>` : ''}`
+    : `<p class="pn-lead pn-came">↻ You came round the ring of sizes: past the observable universe, back to the smallest things, and ${el.id === 'p.atom' ? 'in as one atom of this chip: a silicon atom in the channel of one of its transistors' : `in at ${esc(toOf(el))}, under an atom of this chip`}. Up climbs from here to the chip and on round the loop.</p><div class="pn-zoom">${zrow('', [zbtn([{id: WRAP}], '↻ Back to the ring of sizes', false, '')])}</div>`;
   panel(`<p class="pn-kick">${hereKick(P)}</p><p class="pn-title">${esc(nameOf(el))}</p>` + came + (blurb ? `<p class="pn-lead">${esc(blurb)}</p>` : '')
     + sw + zoomRowHere(P) + im + (det ? detBlock(det) : ''));
   if (st) $('pn-body').querySelectorAll('button[data-act="state"]').forEach(b => { b._lab = st.btn; });
@@ -7345,6 +7415,8 @@ bnode('p.planck', {pv: () => IVIEW(), draw: (L, ap) => {
   KTT(gu, x + 34, (ua + ub) / 2 + 6, `unexplored: ${on('pl_16')}`, 'i-l');
   gu._box = {x: x + 18, y: ua, w: PH ? 300 : 420, h: ub - ua};
   mark(Math.log10(1.616255e-35), `the Planck length, ${on('pl_l')}`, onf('pl_l'), 'var(--c7)');
+  // (the loop, ladder-core.js: Up from the top of the ladder shrinks it into this mark)
+  ap.loopAt = {x, y: yl(Math.log10(1.616255e-35))};
   inotes(L, lay, [
     {t: 'The floor', h: 1},
     {t: 'Here gravity, quantum mechanics and the speed of light meet: space and time themselves would need a quantum description that nobody has yet.', f: 'p.planck.1 p.planck.4'},
@@ -7470,8 +7542,8 @@ onode('p.wrap', {kid: null, pv: () => opv(), build: (L, ap) => {
   const tl = at(1.616255e-35), mk = VB.w / 16, am = at(2.352e-10);
   ap.headBox = {x: hd.x - mk, y: hd.y - mk * VB.h / VB.w, w: 2 * mk, h: 2 * mk * VB.h / VB.w};
   ap.tailBox = {x: tl.x - mk, y: tl.y - mk * VB.h / VB.w, w: 2 * mk, h: 2 * mk * VB.h / VB.w};
-  // (since the owner's second update of 1 Oct, Up from the ring lands on an atom: the marker runs from the head across the
-  // mouth, then up the tail to the atom's tick, where the atom grows from)
+  // (a way back in to an atom: the marker runs from the head across the mouth, then up the tail to the atom's tick, where
+  // the atom grows from; since 1 Oct evening Up from the ring takes the tail's tip, the Planck length)
   ap.atomBox = {x: am.x - mk, y: am.y - mk * VB.h / VB.w, w: 2 * mk, h: 2 * mk * VB.h / VB.w};
   const run = E('path', {class: 'rrun', d: `M${hd.x},${hd.y} A${G.r},${G.r} 0 0 0 ${tl.x},${tl.y} A${G.r},${G.r} 0 0 0 ${am.x},${am.y}`, 'pointer-events': 'none'}, L);
   const runPl = 2 * Math.PI * G.r * 16 / 360, runLen = runPl + 2 * Math.PI * G.r * Math.abs(ringAng(1.616255e-35) - ringAng(2.352e-10)) / (2 * Math.PI) + 4;
@@ -8646,11 +8718,13 @@ function zoomRowPart(g, title) {
 function zoomRowHere(P) {
   const ks = kidsOf(P), d = defKid(P), rows = [];
   if (ks.length) rows.push(zrow('Zoom into:', ks.map(k => zbtn(P.concat([k]), capFirst(toOf(k)), d && pk(k) === pk(d), d && pk(k) === pk(d) ? '(+)' : ''))));
-  else if (P[P.length - 1].id === PLANCK && NODES[WRAP]) rows.push(zrow('', [zbtn(nextOf(P), '? (+)', false, '')]));
+  else if (atPlanck(P) && nextOf(P)) rows.push(zrow('', [zbtn(nextOf(P), '? (+)', false, '')]));
   else if (!isWrap(P)) rows.push('<p class="nz">The bottom of this branch: nothing smaller is drawn here.</p>');
   const U = upOf(P);
-  if (U && isWrap(P)) rows.push(zrow('', [zbtn(U, '↑ Round the ring: in again as an atom', false, '(Backspace)')]));
-  else if (U) rows.push(zrow('', [zbtn(U, egg(U[U.length - 1]) ? '↑ Zoom out: ?' : `↑ Zoom out to ${toOf(U[U.length - 1])}`, false, '(Backspace)')]));
+  if (U && isWrap(P)) rows.push(zrow('', [zbtn(U, '↑ Round the ring: the Planck length', false, '(Backspace)')]));
+  else if (U) rows.push(zrow('', [zbtn(U, egg(U[U.length - 1]) || isTop(P) ? '↑ Zoom out: ?' : `↑ Zoom out to ${toOf(U[U.length - 1])}`, false, '(Backspace)')]));
+  // (the top, the last level of the easter egg: the ring of sizes, off the loop since 1 Oct evening, by its link)
+  if (isTop(P) && NODES[WRAP]) rows.push(zrow('', [zbtn([{id: WRAP}], '↻ The ring of sizes: every size at once', false, '')]));
   return `<div class="pn-zoom">${rows.join('')}</div>`;
 }
 function hereKick(P) { return `You are here · <span class="pn-sz">${sizeHtml(sizeOf(P[P.length - 1]))}</span>`; }
@@ -11286,7 +11360,7 @@ window.__chipTest = {
   // (1 Oct) the easter egg's facts, the ways back in from the ring, and the two-state switch's state
   // the largest scale a layer takes in each step of the default chain from the top (a step's zoom times its inner view's)
   stepScales: () => { const T = (() => { let P = [{id: 'beyond'}]; for (let i = 0; i < 80; i++) { const k = defKid(P); if (!k) break; P = P.concat([k]); } return P; })();
-    return routeSteps([{id: 'beyond'}], T).map(s0 => { const vi = vmat(viewOf(s0.P[s0.P.length - 1])), vo = vmat(viewOf(s0.P[s0.P.length - 2])); return {to: s0.P[s0.P.length - 1].id, kind: s0.kind, k: +(s0.Q[0] * (vi ? vi[0] : 1)).toFixed(1), kin: +((vo ? vo[0] : 1) / s0.Q[0]).toFixed(3)}; }); },
+    return routeDirect([{id: 'beyond'}], T).map(s0 => { const vi = vmat(viewOf(s0.P[s0.P.length - 1])), vo = vmat(viewOf(s0.P[s0.P.length - 2])); return {to: s0.P[s0.P.length - 1].id, kind: s0.kind, k: +(s0.Q[0] * (vi ? vi[0] : 1)).toFixed(1), kin: +((vo ? vo[0] : 1) / s0.Q[0]).toFixed(3)}; }); },
   // how long each scale of a path takes to draw (a layer drawn again; for the build budget, DESIGN §5.3)
   buildTimes: s => { const P = atPath(s); if (!P) return null; return P.map((el, d) => { const L = layerAt(P, d), t0 = performance.now(); buildInto(L, P, d); return [el.id, +(performance.now() - t0).toFixed(1), L.querySelectorAll('*').length]; }); },
   eggFacts: () => [...eggFacts()], exits: () => pageExits().map(x => ({id: x.id, path: pkeys(x.path())})), upExit: () => (upExit() || {}).id, ston: () => STON,

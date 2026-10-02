@@ -6,32 +6,39 @@
 //   T1 every part: a double-click (double-tap) on one part of each kind, in each scene, enters its own scale (or, for
 //      a part with none, selects it and shows the panel's zoom row); then the Up button comes back
 //   T2 a click (tap) selects and never moves the camera; on touch the pill shows
-//   T3 Up from the deepest default scale (since 1 Oct the Planck length) to the top, one level a press; then round the
-//      ring of sizes (the wrap) and in again as an atom of the multiply-add (the owner's second update, 1 Oct 09:00);
-//      Up from it to the die; the breadcrumb back down; the "…" menu
+//   T3 Up from the deepest default scale (since 1 Oct the Planck length) to the top, one level a press; at the top Up
+//      says only "?", and (since 1 Oct evening) goes round the loop straight to the same Planck length: one cross-fade,
+//      the readout from 10²⁶ to 10⁻³⁵ m, a note, nothing zoomed in; its panel says so and offers the ring of sizes; Up
+//      from there through a quark, a proton, the nucleus and the atom to the die; the breadcrumb back down; the "…" menu
 //   T4 a shire's edge links, by click (tap), Enter and the arrow keys; a glide between shires; since the owner's second
 //      update, the memory, PCIe and I/O shires' links too, each with its link back (T4b)
 //   T5 the dive: + from the top of the ladder to the bottom of the default chain (the Planck length), every step
-//      arriving, the readout monotone, every visible layer's scale within [1/30, 30]; then + round the ring back to the
-//      top; then one breadcrumb click back to the chip
+//      arriving, the readout monotone, every visible layer's scale within [1/30, 30]; then + round the loop straight
+//      back to the top (one cross-fade, not by the ring); then one breadcrumb click back to the chip
 //   T6 the flows: every stage of every flow lands where it wants the camera
-//   T7 reduced motion: a zoom is a cut
+//   T7 reduced motion: a zoom is a cut, and so is the loop (Up at the top) and a move off the ring
 //   T11 accessibility: every part's label says what Enter does; the Up button and the crumbs have names; the scale is
 //      announced on arrival
-//   T12 the wrap: the ring's ways back in (an atom of the multiply-add, which Up always takes; an atom of a 6T memory
-//      cell; the Planck length under the first atom); each lands where it says and Up climbs its branch; the landing
-//      panel says the reader came round, and offers the way back
+//   T12 the ring of sizes, off the loop since 1 Oct evening: #at=p.wrap opens it, and the top's panel and the Planck
+//      length's (after coming round) link to it, but no Up or + leads there; its ways back in (an atom of the
+//      multiply-add; an atom of a 6T memory cell; the Planck length under the first atom, which its Up takes, while +
+//      goes to the top) each land where they say and Up climbs their branch; the landing panel says the reader came
+//      round, and offers the way back
 //   T14 the easter egg (the owner, 1 Oct 07:25): no level above the rack is named in the page's text, the breadcrumb,
 //      the Up button or the panel at the rack or below; pressing Up from the rack still reaches them
 //   T15 the two-state electronics: G, the drawing's switch and the panel's button switch the state; it holds from the
 //      fin into the channel; switching runs no script per frame
 //   T16 the dive by double-clicks (a double-tap on a phone): from the die, each scale's part for the next scale of the
 //      default chain, down to a quark
-//   T17 the loop (the owner, 1 Oct 09:00: "make sure it loops"): Up pressed again and again from the die goes out past
-//      the observable universe, round the ring and in as one atom, twice, the same atom each time, and on round
+//   T17 the loop (the owner, 1 Oct 09:00: "make sure it loops"; 17:10: "The loop should always go in one direction"):
+//      Up pressed again and again from the die goes out past the top straight to the Planck length, then a quark, a
+//      proton, the nucleus and the same atom, and round again, three times; every lap the same 40 presses; every press
+//      one level out (the top's: round to the Planck length), never by the ring; no press zooms in (no layer grows on
+//      the screen)
 //   T18 the navigation graph ("make sure all the things navigate"): every scale reached from the top and the ring by
 //      any exit; every zoom has a seat; every cell of the die has its four edge links and each its link back; every
-//      sideways glide has its glide back; every scale reaches the die and the die reaches every scale (no one-way exit)
+//      sideways glide has its glide back; every scale reaches the die and the die reaches every scale (no one-way exit;
+//      the ring by the top's panel link, the only way to it besides its address)
 //   T19 no dead ends ("make sure in all the places I eventually go all the way down to the lowest transistor level and
 //      then I go down to the atoms"): every part from the rack down zooms somewhere (but the die's key, a legend); from
 //      every scale zoom-ins reach a transistor (a FinFET, a DRAM cell's or a power transistor's on its own process) and
@@ -78,6 +85,32 @@ async function hitPoint(b, label) {
     return null; })()`);
 }
 async function scrollStage(b) { if (b.touch) await b.ev(`(() => { const r = document.getElementById('upbar').getBoundingClientRect(); window.scrollTo(0, Math.max(0, r.top + scrollY - 8)); })()`); await sleep(120); }
+/* a move, sampled until the camera rests (call it right after the press): the layers it showed (node@depth), the kinds
+   of its steps, the readouts on the way, the loop's note while it showed, every layer whose scale on the screen grew
+   between two samples (a zoom in), every scale outside [1/30, 30] and every transform that is not a scale and a shift */
+async function sampleMove(b, max = 15000) {
+  const t0 = Date.now(), last = new Map(), o = {layers: new Set(), kinds: new Set(), ro: new Set(), note: '', grew: [], bad: [], nonsc: []};
+  for (let j = 0; Date.now() - t0 < max; j++) {
+    const q = await b.ev(`(() => { const s = window.__chipState(), n = document.querySelector('.loopnote');
+      return {s, ro: document.getElementById('scale-ro').textContent, note: n && !n.hidden && +getComputedStyle(n).opacity > 0.05 ? n.textContent : '',
+        tf: [...document.querySelectorAll('#chip > g.lay')].filter(l => l.style.display !== 'none').map(l => l.getAttribute('transform') || '').filter(t => t && !/^matrix\\([-\\d.e]+,0,0,[-\\d.e]+,[-\\d.e]+,[-\\d.e]+\\)$/.test(t))}; })()`);
+    const s = q.s;
+    if (s.step) o.kinds.add(s.step.kind);
+    if (s.zooming) o.ro.add(q.ro);
+    if (q.note) o.note = q.note;
+    o.nonsc.push(...q.tf);
+    s.visible.forEach(v => {
+      const key = v.node + '@' + v.depth, k0 = last.get(key);
+      o.layers.add(key);
+      if (k0 != null && v.k > k0 * 1.005) o.grew.push(`${key} ${k0.toFixed(3)}→${v.k.toFixed(3)}`);
+      if (v.k > 30 || v.k < 1 / 30) o.bad.push(`${s.path.split('/').pop()}:${key}:${v.k.toFixed(3)}`);
+      last.set(key, v.k);
+    });
+    if (!s.zooming && j > 1) break;
+    await sleep(12);
+  }
+  return o;
+}
 
 T.T1 = async b => {
   for (const sc of SCENES) {
@@ -154,21 +187,28 @@ T.T3 = async b => {
     if (!ok(s2.path === parent.join('/'), `T3 Up ${n + 1}: to ${parent[parent.length - 1]}`, s2.path)) break;
   }
   ok(n === depth, `T3 Up pressed ${n} times for a depth of ${depth}`);
-  // at the top the button is never disabled: it goes round the ring of sizes (the wrap, 1 Oct)
+  // at the top the button is never disabled: it says only "?" and goes round the loop (since 1 Oct evening, the owner:
+  // "When zooming up, skip this slide [the ring] ... it should directly go at the lowest level")
   s = await b.state();
-  ok(!s.upDisabled && /\?/.test(s.up), 'T3 at the top, Up says only "?" (the easter egg)', s.up);
-  await b.ev(`document.getElementById('up').click()`); await sleep(40); await b.idle(15000);
+  ok(!s.upDisabled && /^↑ \?$/.test(s.up.trim()), 'T3 at the top, Up says only "?" (the easter egg)', s.up);
+  const pt = await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].map(x => x.textContent + ' → ' + x.dataset.to)`);
+  ok(pt.some(t => /^↑ Zoom out: \?/.test(t)) && pt.some(t => /ring of sizes.* → p\.wrap$/.test(t)), 'T3 the top\'s panel: "Zoom out: ?" too, and a link to the ring of sizes', pt.join(' | '));
+  await b.ev(`document.getElementById('up').click()`);
+  const mv = await sampleMove(b); await b.idle(15000);
   s = await b.state();
-  const ro = await b.ev(`document.getElementById('scale-ro').textContent`), pn = await b.ev(`document.getElementById('pn-body').textContent`);
-  ok(s.path === 'p.wrap' && /conceptual link/.test(ro), 'T3 Up past the top: the ring of sizes, no size but "conceptual link"', `${s.path} | ${ro}`);
-  ok(/not further out in space/.test(pn) && /Round the ring/.test(s.up), 'T3 the ring says it is not a place; Up goes round it', s.up);
-  await b.ev(`document.getElementById('up').click()`); await sleep(40); await b.idle(15000);
-  s = await b.state();
-  ok(s.node === 'p.atom' && /lib\.xor\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(s.path), 'T3 Up from the ring: in again as an atom of the multiply-add', s.path.split('/').slice(-6).join('/'));
-  // and up again to the die: 15 presses (the crystal, the channel, the fin, the FinFET, the XOR, the full adder, the 4:2,
-  // the column, the tree, the multiply-add, the lane, the vector unit, the minion, the shire, the chip)
-  let m = 0; for (; m < 30 && s.node !== 'die'; m++) { await b.ev(`document.getElementById('up').click()`); await sleep(40); await b.idle(15000); s = await b.state(); }
-  ok(s.node === 'die' && m === 15, `T3 from the atom up to the die: ${m} presses (15)`, s.path.split('/').slice(-2).join('/'));
+  ok(s.path === deep, 'T3 Up past the top: straight to the Planck length the climb started from (the loop\'s, under the atom of the multiply-add)', s.path.split('/').slice(-3).join('/'));
+  ok([...mv.kinds].join() === 'wrap' && [...mv.layers].sort().join(' ') === `beyond@0 p.planck@${depth}`, 'T3 one step, a cross-fade of the two ends: nothing between them drawn, the ring not shown', `${[...mv.kinds]} | ${[...mv.layers].join(' ')}`);
+  ok([...mv.ro].some(r => /round the loop: 10²⁶ m → 10⁻³⁵ m/.test(r)), 'T3 the readout on the way: from 10²⁶ m to 10⁻³⁵ m', [...mv.ro].join(' | '));
+  ok(/Round the loop: from the observable universe to the Planck length/.test(mv.note), 'T3 a note over the drawing: from the observable universe to the Planck length', mv.note);
+  ok(!mv.grew.length && !mv.bad.length, 'T3 the step only zooms out: neither end grows on the screen, both within [1/30, 30]', mv.grew.concat(mv.bad).slice(0, 3).join(' | '));
+  const pn = await b.ev(`document.getElementById('pn-body').textContent`), ro = await b.ev(`document.getElementById('scale-ro').textContent`);
+  ok(/You came round the loop/.test(pn) && /The ring of sizes/.test(pn) && /10⁻³⁵ m/.test(ro), 'T3 its panel says the reader came round, and offers the ring of sizes; the readout at rest gives the Planck length', `${ro} | ${pn.slice(0, 140)}`);
+  // and up again to the die: 19 presses (a quark, a proton, the nucleus, the atom, the crystal, the channel, the fin, the
+  // FinFET, the XOR, the full adder, the 4:2, the column, the tree, the multiply-add, the lane, the vector unit, the
+  // minion, the shire, the chip)
+  let m = 0; const seen = [];
+  for (; m < 30 && s.node !== 'die'; m++) { await b.ev(`document.getElementById('up').click()`); await sleep(40); await b.idle(15000); s = await b.state(); seen.push(s.node); }
+  ok(s.node === 'die' && m === depth - di && seen.slice(0, 4).join(' ') === 'p.quark p.nucleon p.nucleus p.atom', `T3 from the Planck length up to the die: ${m} presses (${depth - di}), through a quark, a proton, the nucleus and the atom`, seen.slice(0, 5).join(' '));
   // the breadcrumb: back down to the chip in one click, then to the deepest crumb is the default chain's next crumb
   await b.load(PAGE, '?at=' + rel.slice(di).join('/'), 1100); await b.idle(10000);
   const crumbs = await b.ev(`[...document.querySelectorAll('#crumbs button')].map(x => ({t: x.textContent, ci: x.dataset.ci, name: x.getAttribute('aria-label') || x.textContent}))`);
@@ -254,11 +294,11 @@ T.T5 = async b => {
   }
   ok(steps === deep.length - 1 && deep[deep.length - 1] === 'p.planck', `T5 every step arrived (${steps}), down to the Planck length`);
   ok(mono, 'T5 the scale falls at every step');
-  // + at the Planck length goes round the ring, and + on the ring to the top: the loop inward
-  await b.key('+'); await watch(); await b.idle(15000); s = await b.state();
-  ok(s.path === 'p.wrap', 'T5 + at the Planck length: the ring of sizes', s.path);
-  await b.key('+'); await watch(); await b.idle(15000); s = await b.state();
-  ok(s.path === root, 'T5 + on the ring: the top of the ladder again', s.path);
+  // + at the Planck length goes round the loop straight to the top (since 1 Oct evening, not by the ring): the loop inward
+  await b.key('+'); const mv = await sampleMove(b); await b.idle(15000); s = await b.state();
+  bad.push(...mv.bad); nonsc.push(...mv.nonsc);
+  ok(s.path === root && [...mv.kinds].join() === 'wrap' && [...mv.layers].sort().join(' ') === `${root}@0 p.planck@${deep.length - 1}`, 'T5 + at the Planck length: straight to the top of the ladder, one cross-fade (the ring not shown)', `${s.path} | ${[...mv.kinds]} | ${[...mv.layers].join(' ')}`);
+  ok([...mv.ro].some(r => /round the loop: 10⁻³⁵ m → 10²⁶ m/.test(r)) && /Round the loop: from the Planck length to the observable universe/.test(mv.note), 'T5 on the way the readout goes from 10⁻³⁵ m to 10²⁶ m, and the note says so', `${[...mv.ro].join(' | ')} | ${mv.note}`);
   ok(!bad.length, 'T5 every visible layer within [1/30, 30]', bad.slice(0, 5).join(' '));
   ok(!nonsc.length, 'T5 every layer transform is a scale and a translation', nonsc.slice(0, 3).join(' '));
   const t0 = Date.now();
@@ -317,7 +357,11 @@ T.T7 = async b => {
     await r.load(PAGE, '?at=beyond', 1500);
     await r.ev(`document.getElementById('up').click()`); await sleep(60);
     const w = await r.state();
-    ok(w.path === 'p.wrap' && !w.zooming, 'T7 reduced motion: the wrap is a cut too', w.path);
+    ok(/\/p\.planck$/.test(w.path) && !w.zooming, 'T7 reduced motion: the loop (Up at the top, to the Planck length) is a cut too', w.path.split('/').slice(-2).join('/'));
+    await r.load(PAGE, '?at=p.wrap', 1500);
+    await r.ev(`document.getElementById('up').click()`); await sleep(60);
+    const w2 = await r.state();
+    ok(/\/p\.planck$/.test(w2.path) && !w2.zooming, 'T7 reduced motion: off the ring (Up) is a cut', w2.path.split('/').slice(-2).join('/'));
     ok(!r.errs.length, 'T7 no console errors', r.errs.slice(0, 3).join(' | '));
   } finally { await r.close(); }
 };
@@ -367,7 +411,12 @@ T.T11 = async b => {
 };
 
 T.T12 = async b => {
+  // the ring opens by its address (the query and, since the links of 1 Oct, the fragment)
   let s = await goScene(b, 'p.wrap');
+  ok(s.path === 'p.wrap', 'T12 ?at=p.wrap opens the ring of sizes', s.path);
+  await b.send('Page.navigate', {url: 'about:blank'}); await sleep(120); await b.load(PAGE, '#at=p.wrap', 1500); await b.idle(10000);
+  s = await b.state();
+  ok(s.path === 'p.wrap' && await b.ev('location.hash') === '#at=p.wrap', 'T12 #at=p.wrap opens the ring of sizes', `${s.path} ${await b.ev('location.hash')}`);
   const xs = await b.ev('window.__chipTest.exits()');
   ok(xs.length === 3 && /lib\.xor\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(xs[0].path) && /lib\.sram6t\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(xs[1].path) && /p\.atom\/p\.nucleus\/p\.nucleon\/p\.quark\/p\.planck$/.test(xs[2].path),
     'T12 the ring\'s ways back in: an atom of the multiply-add, an atom of a 6T cell, the Planck length under the first', xs.map(x => x.id).join(', '));
@@ -375,23 +424,37 @@ T.T12 = async b => {
   ok(parts.length === (b.touch ? 0 : 3), `T12 the ways back in are parts of the drawing${b.touch ? ' (a phone: in the panel)' : ''}`, parts.map(p => p.label).join(' | '));
   const pb = await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].map(x => x.textContent)`);
   ok(pb.filter(t => /^An atom|^The tail/.test(t)).length === 3, 'T12 the panel offers the three ways back in', pb.join(' | '));
-  ok(await b.ev('window.__chipTest.upExit()') === 'compute', 'T12 Up takes the atom of the multiply-add');
+  ok(await b.ev('window.__chipTest.upExit()') === 'planck', 'T12 Up (from the top, and from the ring) takes the Planck length under the atom of the multiply-add');
   const up = async () => { await b.ev(`document.getElementById('up').click()`); await sleep(40); await b.idle(15000); return b.state(); };
   const climb = async n => { const seen = []; for (let i = 0; i < n; i++) seen.push((await up()).node); return seen; };
   s = await up();
-  ok(s.path === xs[0].path, 'T12 Up from the ring lands on the atom of the multiply-add', s.path.split('/').slice(-4).join('/'));
+  ok(s.path === xs[2].path, 'T12 Up from the ring lands on the Planck length under that atom', s.path.split('/').slice(-3).join('/'));
   const pn = await b.ev(`document.getElementById('pn-body').textContent`);
   ok(/You came round the ring/.test(pn) && /Back to the ring/.test(pn) && await b.ev('window.__chipTest.wrapin()') === s.path, 'T12 its panel says the reader came round, and offers the way back', pn.slice(0, 160));
-  // + from the atom goes down to the Planck length and round to the ring (the loop backwards); Up from the ring lands on the
-  // same atom again (one fixed point)
-  for (let i = 0; i < 5; i++) { await b.key('+'); await sleep(40); await b.idle(15000); }
-  s = await b.state();
-  ok(s.path === 'p.wrap', 'T12 + from that atom: the nucleus, a proton, a quark, the Planck length, round to the ring', s.path);
+  // the ring is off the loop: + from the Planck length goes to the top, and Up from the top to the Planck length
+  await b.key('+'); await sleep(40); await b.idle(15000); s = await b.state();
+  ok(s.path === 'beyond', 'T12 + from the Planck length: the top of the ladder, not the ring', s.path);
   s = await up();
-  ok(s.path === xs[0].path, 'T12 Up from the ring again: the same atom', s.path.split('/').slice(-3).join('/'));
+  ok(s.path === xs[2].path, 'T12 Up from the top: the Planck length again, not the ring', s.path.split('/').slice(-3).join('/'));
+  // the links to it: the Planck length's panel after coming round, and the top's panel
+  await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].find(x => x.dataset.to === 'p.wrap').click()`); await sleep(40); await b.idle(15000);
+  s = await b.state();
+  ok(s.path === 'p.wrap', 'T12 the Planck length\'s panel, after coming round the loop, links to the ring', s.path);
+  await goScene(b, 'beyond');
+  const tb = await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].filter(x => x.dataset.to === 'p.wrap').map(x => x.textContent)`);
+  ok(tb.length === 1 && /ring of sizes/.test(tb[0]), 'T12 the top\'s panel links to the ring of sizes', tb.join(' | '));
+  await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].find(x => x.dataset.to === 'p.wrap').click()`); await sleep(40); await b.idle(15000);
+  s = await b.state();
+  ok(s.path === 'p.wrap', 'T12 and goes there', s.path);
+  await b.key('+'); await sleep(40); await b.idle(15000); s = await b.state();
+  ok(s.path === 'beyond', 'T12 + on the ring: the top', s.path);
+  // the other ways in, from the ring's panel
+  await goScene(b, 'p.wrap');
+  await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].find(x => /^An atom of the multiply/.test(x.textContent)).click()`); await sleep(40); await b.idle(15000);
+  s = await b.state();
+  ok(s.path === xs[0].path, 'T12 the panel\'s compute way in lands on the atom of the multiply-add', s.path.split('/').slice(-4).join('/'));
   let seen = await climb(5);
   ok(seen.join(' ') === 'lib.si lib.channel lib.fin lib.finfet lib.xor', 'T12 Up climbs the compute branch: the crystal, the channel, the fin, the FinFET, the XOR gate', seen.join(' '));
-  // the other ways in, from the panel
   await goScene(b, 'p.wrap');
   await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].find(x => /^An atom of a 6T/.test(x.textContent)).click()`); await sleep(40); await b.idle(15000);
   s = await b.state();
@@ -510,22 +573,32 @@ T.T4b = async b => {
   }
 };
 
-/* the loop: Up, again and again, from the die */
+/* the loop: Up, again and again, from the die (each move sampled: no layer may grow on the screen) */
 T.T17 = async b => {
   await goScene(b, 'die');
-  const atoms = [], ringAt = []; let n = 0, s = await b.state(), last = s.path, stuck = 0;
-  for (; n < 120 && atoms.length < 2; n++) {
-    await b.ev(`document.getElementById('up').click()`); await sleep(30); await b.idle(15000);
+  const xs = await b.ev('window.__chipTest.exits()'), PL = xs.find(x => x.id === 'planck').path, AT = xs.find(x => x.id === 'compute').path;
+  const lands = [], planckAt = [], ring = [], grew = [], wrong = [];
+  let s = await b.state(), prev = s.path, stuck = 0, n = 0;
+  for (; n < 140 && planckAt.length < 3; n++) {
+    await b.ev(`document.getElementById('up').click()`);
+    const mv = await sampleMove(b); await b.idle(15000);
     s = await b.state();
-    if (s.path === last) stuck++;
-    last = s.path;
-    if (s.node === 'p.wrap') ringAt.push(n + 1);
-    if (s.node === 'p.atom') atoms.push({n: n + 1, path: s.path});
+    if (s.path === prev) stuck++;
+    const top = !prev.includes('/'), want = top ? PL : prev.split('/').slice(0, -1).join('/');
+    if (s.path !== want) wrong.push(`press ${n + 1}: ${prev.split('/').pop()} → ${s.path.split('/').pop()}`);
+    if (mv.grew.length) grew.push(`press ${n + 1} (${prev.split('/').pop()} → ${s.node}): ${mv.grew.slice(0, 2).join(', ')}`);
+    if (s.node === 'p.wrap' || mv.layers.has('p.wrap@0')) ring.push(n + 1);
+    if (s.path === PL) planckAt.push(n + 1);
+    lands.push(s.path); prev = s.path;
   }
   ok(!stuck, 'T17 every Up press moved the camera', String(stuck));
-  ok(atoms.length === 2 && ringAt.length === 2 && ringAt[0] === atoms[0].n - 1 && ringAt[1] === atoms[1].n - 1, `T17 Up from the die: past the top, the ring, an atom (press ${atoms[0] && atoms[0].n}), and round again (press ${atoms[1] && atoms[1].n})`, JSON.stringify({ringAt, atoms: atoms.map(a => a.n)}));
-  ok(atoms.length === 2 && atoms[0].path === atoms[1].path && /vpu\.lane:0\/vpu\.lane\.fma\/.*lib\.channel\/lib\.si\/p\.atom$/.test(atoms[0].path), 'T17 both times the same atom: a silicon atom in a transistor of lane 0\'s multiply-add', atoms[0] ? atoms[0].path.split('/').slice(-8).join('/') : '');
-  ok(atoms.length === 2 && atoms[1].n - atoms[0].n === 37, `T17 one lap is ${atoms.length === 2 ? atoms[1].n - atoms[0].n : '?'} presses (37: 15 up to the die, 21 to the top, the ring, the atom)`);
+  ok(planckAt.length === 3 && planckAt[0] === 21 && !ring.length, `T17 Up from the die: out past the top straight to the Planck length (press ${planckAt[0]}), and round again (presses ${planckAt.slice(1).join(' and ')}), never by the ring`, JSON.stringify({planckAt, ring}));
+  const laps = planckAt.slice(1).map((p, i) => p - planckAt[i]);
+  ok(laps.length === 2 && laps.every(l => l === 40), `T17 every lap the same number of presses: ${laps.join(', ')} (40: a quark, a proton, the nucleus, the atom, on up to the top, and round)`);
+  const after = planckAt.slice(0, 2).map(p => lands.slice(p, p + 4).map(x => x.split('/').pop()).join(' '));
+  ok(after.length === 2 && after.every(x => x === 'p.quark p.nucleon p.nucleus p.atom') && planckAt.slice(0, 2).every(p => lands[p + 3] === AT), 'T17 every lap from the Planck length: a quark, a proton, the nucleus and the same atom of the multiply-add', after.join(' | '));
+  ok(!wrong.length, `T17 every press one level out, the top's round the loop to the Planck length (${n} presses)`, wrong.slice(0, 4).join(' | '));
+  ok(!grew.length, 'T17 no press zooms in: no layer ever grows on the screen, the loop\'s step included', grew.slice(0, 4).join(' | '));
 };
 
 /* the navigation graph, built in the page (window.__chipTest.graph) */
@@ -561,6 +634,16 @@ T.T18 = async b => {
     (s.kids || []).forEach(k => add(k.id)); add(s.up && id(s.up)); add(s.next && id(s.next));
     Object.values(s.side || {}).forEach(v => add(v.to && v.to !== 'die' ? id(v.to) : v.to));
   });
+  // the ring of sizes is off the loop (1 Oct evening): no Up or + leads to it, its Up and + lead to the Planck length and
+  // the top, the top's Up goes round to the Planck length, and the top's panel links to it (read from the panel: an edge)
+  const toRing = G.filter(s => s.id !== 'p.wrap' && [s.up, s.next].some(x => x && id(x) === 'p.wrap')).map(s => s.id);
+  ok(!toRing.length, 'T18 no scale\'s Up or + leads to the ring of sizes', toRing.join(' '));
+  const RG = by.get('p.wrap'), TP = by.get('beyond');
+  ok(!!RG && id(RG.up || '') === 'p.planck' && RG.next === 'beyond' && !!TP && id(TP.up || '') === 'p.planck', 'T18 the ring\'s Up goes to the Planck length and its + to the top; the top\'s Up round the loop to the Planck length', `${RG && RG.up} | ${RG && RG.next} | ${TP && TP.up}`);
+  await goScene(b, 'beyond');
+  const link = await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].some(x => x.dataset.to === 'p.wrap')`);
+  ok(link, 'T18 the top\'s panel links to the ring of sizes');
+  if (link && E.has('beyond') && E.has('p.wrap')) E.get('beyond').add('p.wrap');
   const reach = (from, edges) => { const seen = new Set([from]), Q = [from]; while (Q.length) { const x = Q.shift(); (edges.get(x) || []).forEach(t => { if (!seen.has(t)) { seen.add(t); Q.push(t); } }); } return seen; };
   const R = new Map(G.map(s => [s.id, new Set()])); E.forEach((ts, f) => ts.forEach(t => R.get(t).add(f)));
   const fromDie = reach('die', E), toDie = reach('die', R);

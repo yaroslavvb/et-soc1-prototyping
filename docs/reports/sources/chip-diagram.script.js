@@ -904,12 +904,12 @@ node('minion', {parse: k => { const q = String(k).split('.').map(Number); return
   size: () => scSize('minion'), frame: () => MF,
   build: (L, ap, p) => buildMinion(L, ap, p.sid, p.nb, p.mi),
   here: (p, P) => showComp('minion', {}, {here: P})});
-/* the ways back in from the ring of sizes (ladder-core.js, the wrap). The owner, 1 Oct 09:00: "When I zoom out all the way
-   to the top ... I want to reappear again as an atom. Pick some point in the compute hierarchy which is deep, which goes
-   all the way down to the atoms, and make sure it loops." Up from the ring always lands on one atom: a silicon atom in
-   the channel of a FinFET of an XOR gate, in a full adder of a 4:2 compressor in the multiply-add's tree, lane 0 of the
-   vector unit of minion 0, shire 0; climbing out goes up that path to the die, the rack and round again. The ring's panel
-   also offers an atom of a memory cell (a 6T cell of shire 0's cache) and the Planck length under the first atom. */
+/* the ways back in from the ring of sizes (ladder-core.js, the loop and the ring). The owner, 1 Oct 09:00: "When I zoom out
+   all the way to the top ... I want to reappear again as an atom. Pick some point in the compute hierarchy which is deep,
+   which goes all the way down to the atoms, and make sure it loops." One silicon atom in the channel of a FinFET of an XOR
+   gate, in a full adder of a 4:2 compressor in the multiply-add's tree, lane 0 of the vector unit of minion 0, shire 0.
+   Since 17:10 Up from the top (and from the ring) lands on the Planck length under it (the entry that ends there) and
+   climbs through it to the die, the rack and round again. The ring's panel also offers the atom and a memory cell's. */
 const COMPUTE0 = () => pathOf({level: 2, sid: 0, nb: 0, mi: 0}).concat([{id: 'vpu'}, {id: 'vpu.lane', k: '0'}]);
 function pageExits() {
   return [
@@ -3523,7 +3523,7 @@ window.__chipTest = {
   // (1 Oct) the easter egg's facts, the ways back in from the ring, and the two-state switch's state
   // the largest scale a layer takes in each step of the default chain from the top (a step's zoom times its inner view's)
   stepScales: () => { const T = (() => { let P = [{id: 'beyond'}]; for (let i = 0; i < 80; i++) { const k = defKid(P); if (!k) break; P = P.concat([k]); } return P; })();
-    return routeSteps([{id: 'beyond'}], T).map(s0 => { const vi = vmat(viewOf(s0.P[s0.P.length - 1])), vo = vmat(viewOf(s0.P[s0.P.length - 2])); return {to: s0.P[s0.P.length - 1].id, kind: s0.kind, k: +(s0.Q[0] * (vi ? vi[0] : 1)).toFixed(1), kin: +((vo ? vo[0] : 1) / s0.Q[0]).toFixed(3)}; }); },
+    return routeDirect([{id: 'beyond'}], T).map(s0 => { const vi = vmat(viewOf(s0.P[s0.P.length - 1])), vo = vmat(viewOf(s0.P[s0.P.length - 2])); return {to: s0.P[s0.P.length - 1].id, kind: s0.kind, k: +(s0.Q[0] * (vi ? vi[0] : 1)).toFixed(1), kin: +((vo ? vo[0] : 1) / s0.Q[0]).toFixed(3)}; }); },
   // how long each scale of a path takes to draw (a layer drawn again; for the build budget, DESIGN §5.3)
   buildTimes: s => { const P = atPath(s); if (!P) return null; return P.map((el, d) => { const L = layerAt(P, d), t0 = performance.now(); buildInto(L, P, d); return [el.id, +(performance.now() - t0).toFixed(1), L.querySelectorAll('*').length]; }); },
   eggFacts: () => [...eggFacts()], exits: () => pageExits().map(x => ({id: x.id, path: pkeys(x.path())})), upExit: () => (upExit() || {}).id, ston: () => STON,
