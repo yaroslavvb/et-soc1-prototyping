@@ -1686,15 +1686,14 @@ class Collector:
                        "root_port": d.get("root_port")}
                 if port is not None:
                     cs["aer_port"], cs["aer_port_ms"] = port, ms(self.now)
-            # activity: the submission-queue counters moved since the last run, net of our own sample
+            # activity: the ops submission-queue counter moved since the last run. Only ops: since 2 Oct 2026 the
+            # live collector (tools/lab/live) reads every free card's temperature once a second through the
+            # management queue, so mgmt traffic no longer means anyone used the card; real work always goes through
+            # ops. Our own telemetry sample is management-only, so there is nothing of ours to subtract.
             activity = None
             if d and not d["excluded"]:
-                sq = (num(a.get("mgmt_sq"), int) or 0) + (num(a.get("ops_sq"), int) or 0)
+                sq = num(a.get("ops_sq"), int) or 0
                 own = 0
-                if sample and sample.get("ran") and self.sample_plan.get(h) == cid:
-                    r = sample["ran"]
-                    if r.get("before") is not None and r.get("after") is not None:
-                        own = max(0, r["after"] - r["before"])
                 used = None
                 if cs.get("sq") is not None and cs.get("boot") == meta.get("boot") and sq >= cs["sq"]:
                     used = (sq - cs["sq"] - own) > 0
