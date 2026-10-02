@@ -811,6 +811,63 @@ what the repository needs of it.
   transistors, every scale reaches a transistor and an atom, the DRAM's and the regulators' chains never reach the N7
   FinFET) and T19's double-click chains for a PCIe lane, the boot switches and the core regulator.
 
+## The shared ladder, part 2: the memory levels (1 October, branch `ladder`, not yet deployed)
+
+The owner's request of 1 October (Q88), its easter egg (Q89) and its second update (Q90) on "Anatomy of a memory
+access, interactively" (`docs/reports/sources/memory-levels.*`): the chip diagram's Up bar, breadcrumb and readout, the
+same scales outward and inward, the loop, a way back from every move and no dead end, consistent with the chip diagram.
+
+- **Two cameras, one ladder** (`memory-levels.ladder.js`, `.nodes.js`, `.links.js`, `.hand.js`): the levels keep their own
+  camera for their scenes (tabs, the 28 accesses and Dive, the phone's sideways window, the cross-fades between the maps);
+  the chip diagram's path camera runs beside it in a scope of its own, on its own SVG over the same box, for every scale
+  outside them, and the two hand over at rest on a scene both draw with the levels' own builder (the pictures coincide
+  to the pixel; on a phone the same sideways window). The design's one camera (D2) was set aside: the levels' camera cannot
+  span 45 decades, and a port of the accesses, Dive and the phone window risked the smoothness the owner had asked for;
+  its fallback (the outer and inner scales only on the chip page) would not have met the request.
+- **What a reader sees**: ↑ from the L1's minion goes out to the L2's shire, the chip level's map, the package, the card,
+  the host, the rack and then "?" (the easter egg, as on the chip, up to the ring of sizes and round again: Up from the
+  ring lands on an atom of the reader's level's own cell, the L2's 6T cell, the L1's latch, the DRAM's cell through the
+  DRAM process's transistor, never N7's). + and double-clicks go down every part: the levels' own scales where they draw
+  one, else the chip diagram's scene for it (the textbook constructions, the block scenes), down to a transistor, its fin
+  and channel, the crystal, an atom, its nucleus, a proton, a quark and the Planck length. A click selects and a
+  double-click (a double-tap) zooms, as on the chip; a part's panel has the chip's shape (its lead, where its double-click
+  goes, the rest folded); after a move, "You are here". One word for each kind of fact; the vector unit and the
+  TensorLoad unit coloured as logic, the map's cells without a compute shire labelled. On a phone the accesses keep one row,
+  the address one line (fields ▾) and Fit to screen sits in the Up bar: the drawing starts 32 px higher than before.
+- **Tests** (`tools/pagemotion/`): `ml_ladder_test.mjs` (Up level by level to the package and the rack, + from the top to
+  the Planck length and round, reduced motion, the ring's ways in per level, the easter egg, the two states, the loop, the
+  navigation graph, no dead ends over a walk of every scene, the hand-over by crumb, tab and Play, a part of the levels'
+  drawings double-clicked into the ladder's scale, the names against the chip diagram at ten shared places, the
+  hand-over under quick input, the panel on the ladder's copies of the levels' scenes; desktop and phone),
+  `ml_access_test.mjs` (all 28 accesses with Dive play to their end, go out to the package and come back to play
+  again), `ui_test.mjs` (the player bar, as before); `zoom_static.py` checks the memory levels too (their budgets:
+  2.0 MB, script 1,050 KB, data 800 KB). Results on the final build: `ml_ladder_test.mjs` 108 of 108 on the desktop and
+  on a phone, `ml_access_test.mjs --dive` 28 of 28, `ui_test.mjs` as before; the chip diagram's `zoom_test.mjs` 667 of
+  667 and 504 of 504, its pictures unchanged to the pixel; `zoom_static.py` 0 failed on both (the memory levels 1.90 MB,
+  script 1,016 KB); `check_page.sh` OK, light and dark; the other 15 pages rebuild byte for byte.
+- **The levels' own suites of 30 September** (the level moves: 43 runs of the porter's and the reviewers' suites, the
+  keys, the accesses, the tour, races, the phone's taps and swipes, fuzzers and a leak test) on the new page against the
+  committed one (`docs/reports/data/2026-10-01-ladder/motion/regress-p2.txt`): the same but where the page changed by
+  design (no mini-map: the Up bar replaces it; a tap selects and a double-tap zooms, as on the chip; no scale control).
+  Found and fixed on the way: `__memState().zooming` did not count the ladder's moves, so a test waiting for rest could
+  look in the middle of a hand-over; a tab clicked while a move of the ladder waited for the levels' camera lost its
+  level to it; under reduced motion a link left the stage with the ladder; and the ladder's copy of a levels' scene that
+  is not their place (another bank, another shire) kept the panel of the place left (T7, T23, T24).
+- **Motion** (`docs/reports/data/2026-10-01-ladder/motion/README.md`, part 2): the levels' own camera moves as before
+  (the access `#dram/load` and the level moves: 0 late frames of 625 and 447 at 1x on both pages, the same velocity
+  kinks; at 4x both pages drop frames alike); the chip diagram's flows are the base's frame for frame; the new flows (Up
+  from the L3's map to the rack and back, + from the L2's cell to an atom and back) have no late frame of 357 and 470 at
+  1x since the take-over got two frames of its own (before, the hand-over's move began with a jump, 58% of its top speed
+  in one frame). First load on a phone profile at 4x CPU: first paint +7%, DOMContentLoaded +13% (the design's ±10% is
+  missed by 3 points: 0.73 MB more to parse, of which the ladder's start-up takes 30-45 ms).
+- **Not done**: the levels' maps are not turned to the die's orientation, and the minions' order in a neighbourhood is
+  the levels' own (DESIGN B0: the names are the chip's, T13; the colours follow the chip's roles, the vector and
+  TensorLoad units as logic, but are not checked hue by hue); on a phone, the ladder's copy of a levels'
+  scene that is not their example (another bank, another shire) has no sideways window of its own; links between the
+  two pages that carry a place wait on the viewer (below).
+- **Links between the two pages that carry a place** (DESIGN §3.8) were not made: the spacesheep viewer passes neither
+  `?at=` nor `#at=` into the page it frames (checked on the public pages, 1 October).
+
 ## Cross-links between the reports
 
 - **2026-09-24, afternoon (`d04b29a`).** Every report got the byline clause "· part of the measurement reports",

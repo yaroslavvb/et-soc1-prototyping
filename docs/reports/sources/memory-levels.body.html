@@ -51,6 +51,18 @@ html.et-pres [data-ss-ui]{display:none!important}
 .st-view{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;gap:4px}
 .st-svg{position:relative;flex:1 1 auto;min-height:0;min-width:0}
 #mem{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;transform-origin:0 0}
+/*@include ladder.css*/
+/* ---- the shared ladder (1 October 2026, part 2): the chip diagram's path camera draws in its own SVG (#chip), stacked
+   over the levels' drawing in the same box; one of the two holds the stage (#stage.lad-on: the ladder's) ---- */
+.ladwrap{position:absolute;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;z-index:1;overflow:hidden}
+#stage.lad-on .ladwrap{visibility:visible;pointer-events:auto}
+#stage.lad-on #svgwrap{visibility:hidden}
+#stage.lad-on #zwhere{display:none}
+.cmwrap{position:relative;height:0;z-index:8}
+.cmwrap .crumb-menu{top:4px}
+.upbar{min-height:34px}
+/* the levels' buttons are flex boxes: the panel's zoom buttons keep the space before their key hint */
+.pn-zoom .st-btn{display:inline-block}
 /* ---- the address strip: the example's physical address and the fields this level reads from it ---- */
 .addr{display:flex;flex-wrap:nowrap;align-items:center;gap:3px 10px;font-size:clamp(.74rem,.25vw + .64rem,.95rem);color:var(--ink-2);min-height:26px;line-height:1.3;min-width:0;white-space:nowrap}
 .addr .flds{display:flex;flex-wrap:nowrap;align-items:center;gap:3px 10px;min-width:0;flex:0 1 auto;overflow:hidden;
@@ -317,6 +329,7 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
 #stage.present .legs,#stage.present .lad{font-size:1em}
 #stage.present .pn-fh,#stage.present .pn ul.facts,#stage.present .pn-foot{display:none}
 #stage.present .pn details.asks,#stage.present .pn .pn-act,#stage.present .pn .pn-more,#stage.present .pn .small{display:none}
+#stage.present .pn details.pn-det,#stage.present .pn .pn-zoom{display:none}
 #stage.present .num[data-f]{text-decoration:none;cursor:default}
 #stage.present #cap-sub.hint{visibility:hidden}
 #stage.present .st-title .t-long{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
@@ -399,6 +412,22 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
   #cap-sub{white-space:normal}
   .kbd-hint{top:40px}
 }
+/* the shared ladder on a phone (1 Oct, DESIGN §3.9): the drawing's top no lower than before the Up bar came: the accesses
+   in one row that scrolls sideways, the address in one line with its fields folded (fields ▾), Fit to screen in the Up
+   bar's second row */
+.addr .flt,.upbar .fit{display:none}
+@media (max-width:899px){
+  #acc-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;scrollbar-width:none}
+  #acc-row::-webkit-scrollbar{display:none}
+  #acc-row .st-btn{flex:none}
+  .addr .flds{display:none}
+  #addr.open .flds{display:flex}
+  .addr .flt{display:inline-flex}
+  .addr,.addr .flds{row-gap:4px}
+  .upbar .fit{display:inline-flex;order:4;min-height:30px;padding:2px 8px}
+  .upbar .crumbs{flex-basis:40%}
+  #stage.lad-on .upbar .fit{visibility:hidden}
+}
 /* a phone: the scrubber on a row of its own, the playback buttons under it (Present, where it shows, last) */
 @media (max-width:600px){
   .st-bar{gap:6px 5px}
@@ -448,7 +477,7 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
 </style>
 
 <section id="stage" aria-label="Interactive diagrams of each level of the ET-SoC-1's memory system">
-<nav class="skip" aria-label="Skip links"><a href="#bar">Skip to playback</a><a href="#zc">Skip to the scale control</a><a href="#pn-body">Skip to the details</a></nav>
+<nav class="skip" aria-label="Skip links"><a href="#bar">Skip to playback</a><a href="#up">Skip to zoom out</a><a href="#pn-body">Skip to the details</a></nav>
 <div class="st-head">
   <div class="st-title"><h1><span class="t-long">Anatomy of a memory access, interactively</span><span class="t-short" aria-hidden="true">Memory access</span></h1></div>
   <div class="tabs" role="tablist" aria-label="Level of the memory system" id="tabs">
@@ -482,8 +511,18 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
 <div class="st-body" id="stage-view" role="tabpanel" aria-labelledby="tab-l1">
   <div class="st-view">
     <div class="addr" id="addr" aria-label="The example address"></div>
+    <div class="upbar" id="upbar">
+      <button type="button" class="st-btn up" id="up" title="Zoom out one level (Backspace or −)"><span class="up-t">↑ Zoom out</span></button>
+      <nav class="crumbs" id="crumbs" aria-label="Scale"></nav>
+      <span class="pmz" id="pmz"><button type="button" class="pm" data-ci="minus" aria-label="Zoom out (minus key)" title="Zoom out (−, Backspace)">−</button><button type="button" class="pm" data-ci="plus" aria-label="Zoom in (plus key)" title="Zoom in (+)">+</button></span>
+      <span class="scale-ro" id="scale-ro"></span>
+      <button type="button" class="st-btn fit" id="fitbtn" aria-pressed="false" title="The whole level at the screen's width (small text); again: a readable size, scrolling sideways" aria-label="Fit to screen">Fit</button>
+    </div>
+    <div class="cmwrap"><div class="crumb-menu" id="crumb-menu" hidden role="menu" aria-label="Levels further out"></div></div>
     <div class="zwhere" id="zwhere" aria-hidden="true"><span></span></div>
     <div class="st-svg" id="svgwrap"><svg id="mem" role="group" aria-label="Diagram of the level. Every part is a button: Tab to it and press Space for its details, Enter to zoom into it." xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="ladwrap" id="ladwrap"><svg id="chip" role="group" aria-label="The ladder of scales around the memory levels, from the rack down to the atom. Every part is a button: Tab to it and press Space for its details, Enter to zoom into it." xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="zstrip" id="zstrip"><div class="zpill" id="zpill" hidden role="group" aria-label="The selected part"><span class="zs-name"></span><button type="button" class="st-btn" id="zpill-in">Zoom in ▸</button><button type="button" class="st-btn" id="zpill-det">Details ↓</button></div><span class="zs-hint">Tap a part for its details; double-tap it to zoom in.</span></div>
     <div class="kbd-hint" id="kbd-hint" hidden title="Then F presents, Space pauses and the arrows step">Click here, then press <kbd>F</kbd></div>
   </div>
   <aside class="pn" id="panel" aria-label="Details">
@@ -506,10 +545,9 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
     <div class="cap-kick"><span id="cap-k" aria-live="polite">Explore</span><div class="dots" id="dots" role="group" aria-label="Tour slides"></div></div>
     <p id="cap" aria-live="polite">Pick a level, click any part, or press Tour.</p>
     <p id="st-live" class="vh" aria-live="polite">No access is playing.</p>
-    <p id="cap-sub" class="hint">1–5 levels · [ ] accesses · Space pauses · ← → steps · + − zoom · V dive · F presents · P panel · C follow</p>
+    <p id="cap-sub" class="hint">1–5 levels · [ ] accesses · Space pauses · ← → steps · double-click zooms in, ↑ zooms out · G switches · V dive · T tour</p>
   </div>
   <div class="cap-side">
-    <div class="zc" id="zc" role="group" aria-label="Scale"></div>
     <div class="vh" id="cap-scale" aria-live="polite"></div>
     <div class="vh" id="lvl-live" aria-live="polite"></div>
   </div>
@@ -539,11 +577,17 @@ address bar keeps the view (<code>#l2</code>, <code>#l1/dcache</code>, <code>#l1
 <li><b>Click</b> any part (or Tab to it and press Space) for what it is, its numbers with their units and card
 coverage, and its facts with their sources; point at a number to see its source. A dashed part is unknown and its
 panel names the ask; a dotted part is a generic circuit.</li>
-<li><b>Zoom</b> with the scale control under the details (−, the scales of this branch, +), the + and − keys, a second
-click or a double click on a part, or Enter; Backspace zooms out. Every change of view is one smooth move, out to the
-scale the two views share and in again; a new address or requester that moves the part you are in goes out to where
-the change shows and back in. Past the second scale, a small map above the legend (on a phone, under the scale
-control) shows the scale above with the part you are in ringed: click or tap it to go back up.</li>
+<li><b>Zoom</b> with the bar above the drawing, the chip diagram's: <b>↑</b> goes out one scale (from a level's top to
+the level outside it, the L1's minion into the L2's shire, the shire into the chip's map, and from the map on out to the
+package, the card, the host computer and the rack), the breadcrumb beside it goes to any scale on the way, − and + step
+out and in (+ into the part you picked, else the scale's usual next one), and the readout gives the size of what you
+see. A double click on a part, or Enter, zooms into it; Backspace zooms out. Every part leads further in: a part with a
+drawing of its own here opens it; any other opens the chip diagram's drawing of it, a textbook construction where the
+chip's own circuit is not published (each says so), and every way in ends at a transistor (TSMC's 7 nm FinFET, or the
+DRAM's own cell), its fin and channel, the silicon crystal, an atom, its nucleus, a proton and a quark. G switches the
+transistor's gate, or a cell's bit, between its two states. Every change of view is one smooth move, out to the scale
+the two views share and in again; a new address or requester that moves the part you are in goes out to where the
+change shows and back in.</li>
 <li><b>Accesses</b>: the buttons beside the tabs, or <kbd>[</kbd> and <kbd>]</kbd>. Each access is a row of
 <b>steps</b> under the drawing: click one, or step with the Left and Right arrows. <b>Space</b> pauses everything that
 moves, the camera included; stepping while paused shows each step's end state.</li>
@@ -554,10 +598,11 @@ down to the transistors, plays the circuit, and comes back up.</li>
 an arrow jumps a slide, Q (or End tour) ends the tour; Esc does not. <b>Present</b> (F) goes full screen, or fills the page's frame where full
 screen is not allowed. P hides the panel, D switches light and dark. From the address: <code>?theme=light</code>,
 <code>?panel=off</code>, <code>?dive=on</code>, <code>?tour=1</code> or <code>?tour=all</code>.</li>
-<li><b>On a phone</b> one tap on a part shows its details and, if it holds a smaller scale, zooms into it; a tap on a
-level tab zooms smoothly to that level. The drawing keeps a readable size and scrolls sideways, from its left edge;
+<li><b>On a phone</b> one tap on a part shows its details, with a Zoom in button under the drawing; a double tap zooms
+into it; a tap on a level tab zooms smoothly to that level. The drawing keeps a readable size and scrolls sideways, from its left edge;
 every move of the camera scrolls it too, to the part it zooms into, and ends on the new view's title (zooming in) or on
-the part it came from (zooming out). <b>Fit to screen</b>, beside the example address, shows the whole level at once,
+the part it came from (zooming out). The example address's fields fold under <b>fields ▾</b>. <b>Fit to screen</b>, in
+the bar above the drawing, shows the whole level at once,
 in small text (the drawing zooms between the two sizes); pinching enlarges it.</li>
 </ul>
 
@@ -608,7 +653,9 @@ every report, what the instruments cannot see, and <a href="https://spacesheep.d
 30 September, a smoother camera (each move one or two eased zooms) and the playback bar on top; 30 September, level
 tabs and taps zoom smoothly: every change of view, a level tab included, is a camera move out to the scale the two
 views share and in again, one tap on a phone zooms into a part, and the drawing's sideways scroll moves with the
-camera.</p>
+camera; 1 October, the chip diagram's Up bar, breadcrumb and readout on this page too, out from the chip's map to the
+package, the card and the rack, and in from every part to a transistor and its atoms (the chip diagram's scales, drawn
+here by the same code), a click that selects and a double click that zooms, as there.</p>
 <p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
 </div>
 </main>

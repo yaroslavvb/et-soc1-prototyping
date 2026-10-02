@@ -60,15 +60,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 .pn-kick{color:var(--ink-2);font-size:.78em;text-transform:uppercase;letter-spacing:.06em;margin:0}
 .pn-title{font-size:1.35em;font-weight:650;line-height:1.2;margin:2px 0 6px}
 .pn-what{margin:0 0 8px}
-/* the lead: what a part or a flow is, in plain words; the rest under Details */
-.pn-lead{margin:0 0 10px;font-size:1.06em;line-height:1.45}
-.pn details.pn-det{margin:10px 0 4px;border-top:1px solid var(--border);padding-top:6px}
-.pn details.pn-det>summary{cursor:pointer;font-size:.9em;font-weight:600;color:var(--ink-2);padding:3px 0;list-style:none;display:flex;align-items:center;gap:7px}
-.pn details.pn-det>summary::-webkit-details-marker{display:none}
-.pn details.pn-det>summary::before{content:"";flex:none;width:0;height:0;border-left:6px solid currentColor;border-top:4.5px solid transparent;border-bottom:4.5px solid transparent;transition:transform .15s}
-.pn details.pn-det[open]>summary::before{transform:rotate(90deg)}
-.pn details.pn-det>summary:hover{color:var(--ink)}
-.pn details.pn-det[open]>summary{margin-bottom:6px}
 .pn-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:6px;margin:6px 0 8px}
 /* four tiles: two by two, never three and one */
 .pn-kpis:has(>:nth-child(4):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -192,42 +183,6 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 #srctip .s{color:var(--ink-2);display:block;margin-top:4px;overflow-wrap:anywhere}
 /* ---- the SVG: one type scale (ids 32/650, titles 30/700, part names 24 and 20/600, labels 20, notes 17) and one
    stroke scale (set in the script) ---- */
-#chip text,#pipsvg text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;text-rendering:geometricPrecision}
-#chip .comp{cursor:pointer}
-#chip .comp:focus{outline:none}
-#chip .ring{fill:none;stroke:var(--ink);stroke-width:5;opacity:0;pointer-events:none;transition:opacity .25s,stroke .25s}
-#chip .comp:focus-visible .ring{opacity:1;stroke-dasharray:none}
-#chip .comp.sel .ring{opacity:.9;stroke-dasharray:none;stroke:var(--c2)}
-#chip .comp:hover .shape{stroke-width:3.5}
-#chip .comp .shape{transition:opacity .3s}
-#chip .comp text{transition:fill .3s}
-#chip .shape.quiet{stroke-opacity:0;transition:stroke-opacity .2s,opacity .3s}
-#chip .comp:hover .shape.quiet,#chip .comp:focus-visible .shape.quiet{stroke-opacity:.7}
-/* set back, not switched off: less opacity taken away, colour drained instead; changes fade */
-#chip .dimmable{transition:opacity .3s cubic-bezier(.4,0,.2,1),filter .3s cubic-bezier(.4,0,.2,1)}
-#chip.dimming .dimmable:not(.hi){opacity:.35;filter:saturate(.15)}
-#chip.fdim .dimmable:not(.hi){opacity:.55;filter:saturate(.3)}
-/* dimmed parts stay visible on a dark page (and on a projector) */
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #chip.dimming .dimmable:not(.hi){opacity:.45}:root:not([data-theme="light"]) #chip.fdim .dimmable:not(.hi){opacity:.6}}
-:root[data-theme="dark"] #chip.dimming .dimmable:not(.hi){opacity:.45}
-:root[data-theme="dark"] #chip.fdim .dimmable:not(.hi){opacity:.6}
-#chip .hi .shape{stroke-width:4}
-#chip .lay.busy{pointer-events:none}
-/* the zoom (script: segOpen): labels of a view fade by --lab, the outer view's context by --ctx (--sat its colour, --ctxh
-   what stood out), the target (the tile or minion entered or left) by --tgt: all start from how the view looked */
-#chip .lay text,#chip .lay .mstop,#chip .lay .pk,#chip .lay .co,#chip .lay .band{opacity:var(--lab,1)}
-#chip .lay .zdim{opacity:var(--ctx,1)!important;transition:none!important;filter:none!important}
-#chip .lay.zsat .zdim{filter:saturate(var(--sat,1))!important}
-#chip .lay .zdim.zhi{opacity:var(--ctxh,1)!important;filter:none!important}
-#chip .lay .ztgt{opacity:var(--tgt,1)!important;transition:none!important;filter:none!important}
-#chip .lay.zsat .ztgt{filter:saturate(var(--tsat,1))!important}
-#chip .lay.zout .ring{opacity:0}
-#chip .lay .olab{opacity:var(--lab,1)}
-/* the levels in space: the whole drawing box is night sky while the camera rests there or moves between two of them
-   (review of 1 Oct: on a wide window the page's colour showed at the sides, and flashed through every jump) */
-#chip{transition:background-color .35s}
-#chip.skyon{background-color:#070b17;border-radius:14px}
-@media (prefers-reduced-motion: reduce){#chip{transition:none}}
 /* a glide between two shires: their keys and edge labels would overlap in the gap, so they hide (review of 1 Oct) */
 #chip .shkey,#chip .nbrs,#chip .edgelab{transition:opacity .2s}
 #chip .lay.pan .shkey,#chip .lay.pan .nbrs,#chip .lay.pan .edgelab{opacity:0!important}
@@ -362,28 +317,12 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   #stage:fullscreen .pn-scroll,#stage.pres .pn-scroll{max-height:none}
   .pn-scroll{max-height:70vh}
   .st-cap,#stage.nopanel .st-cap{grid-template-columns:minmax(0,1fr)}
-  .upbar{flex-wrap:wrap;gap:4px 8px}
-  .st-btn.up{flex:1 1 100%;max-width:none;min-height:44px}
-  .crumbs{flex:1 1 auto}
-  .scale-ro{max-width:55%}
-  /* presenting on a narrow screen: the Up button and the readout only, in one row (the drawing keeps its height) */
-  #stage.pres .crumbs,#stage.pres .pmz,#stage:fullscreen .crumbs,#stage:fullscreen .pmz{display:none}
-  #stage.pres .st-btn.up,#stage:fullscreen .st-btn.up{flex:1 1 0;min-width:0}
   #cap{min-height:0}
   #cap-sub{white-space:normal}
 }
 /* a phone: the playback buttons in one row (Present, where it shows, after the stages), the stages in rows of three
    of one width */
 @media (max-width:600px){
-  /* the Up bar in two rows: the Up button (its label wraps, the size goes: the readout beside it has it) and the
-     readout; then the crumbs with − and + (review of 1 Oct: at 360 px the label and the readout were cut) */
-  .st-btn.up{flex:1 1 0;min-width:52%;padding:4px 10px}
-  .st-btn.up .up-t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2}
-  .st-btn.up .up-s{display:none}
-  .scale-ro{order:1;min-width:0;max-width:44%;white-space:normal;text-align:right;line-height:1.25}
-  .scale-ro.jump{font-size:1rem}
-  .crumbs{order:2;flex:1 1 60%}
-  .pmz{order:3}
   .st-bar{gap:6px 5px}
   .st-bar .st-btn{padding:3px 10px}
   .w-play{min-width:4.2em}.w-tour{min-width:4.8em}

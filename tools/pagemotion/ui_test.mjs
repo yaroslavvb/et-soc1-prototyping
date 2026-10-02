@@ -2,9 +2,11 @@
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import { mkdtempSync, rmSync } from 'node:fs';
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', port = 9700 + Math.floor(Math.random() * 90);
-const udd = mkdtempSync(resolve(process.env.TMPDIR, 'zd-ui-'));
-const ch = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${udd}`, '--window-size=1280,800', 'about:blank'], {stdio: 'ignore'});
+import { tmpdir } from 'node:os';
+import { CHROME } from './cdp.mjs';   // (since 1 Oct the installed Chrome or Chromium of cdp.mjs, a Mac's or Linux's)
+const port = 9700 + Math.floor(Math.random() * 90);
+const udd = mkdtempSync(resolve(process.env.TMPDIR || tmpdir(), 'zd-ui-'));
+const ch = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${udd}`, '--window-size=1280,800', '--no-sandbox', 'about:blank'], {stdio: 'ignore'});
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let tl; for (let i = 0; i < 80 && !tl; i++) { await sleep(100); try { tl = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find(t => t.type === 'page'); } catch (_) {} }
 const ws = new WebSocket(tl.webSocketDebuggerUrl); await new Promise(r => ws.onopen = r);

@@ -39,7 +39,14 @@
    phone the drawing's sideways scroll is part of the camera (winPlan), the rows above the drawing keep the tallest
    level's height (rowsKeep), and the mini-map sits under the scale control (pipHome). Over a long move the drawing's
    labels fade (none is legible halfway through a zoom twenty times over), and a pill on its top-left names the scales
-   of the way, the one the camera is at in bold (where). */
+   of the way, the one the camera is at in bold (where).
+
+   Since 1 October 2026 (the shared ladder, part 2) the page also hosts the chip diagram's path camera, in a scope of
+   its own (memory-levels.ladder.js, included after this one): the Up bar, the breadcrumb and the readout are the
+   chip's, outward from a chip level's map to the package, the card, the rack and on, inward from the levels' deepest
+   drawings to the transistor and the atom, and every part with no scale of its own here leads into one of the
+   ladder's. This scope gives it its drawings and its camera's moves through MLB, and calls it through MLH. */
+let MLB = null, MLH = null;
 (function () {
 'use strict';
 let SRC_HTML = '';
@@ -399,6 +406,9 @@ let CUR = null, ZGEN = 0;
    between two chip levels (their chains share no scale) it goes out to the map, cross-fades to the other level's,
    held in register, and goes in. ---- */
 const RANK = {l3: 0, scp: 0, dram: 0, l2: 1, l1: 2};
+/* the chip level whose map the L2's shire and the L1's minion are in: the last one visited (the shared ladder: the Up
+   bar goes out from the L2 to it, and the ladder may enter the L2 from any of the three maps) */
+let CHIPV = 'l3';
 const jk = (lv, id) => lv + ':' + id, kLv = k => k.slice(0, k.indexOf(':')), kId = k => k.slice(k.indexOf(':') + 1);
 function canon(lv, path, A) {
   const pre = RANK[lv] === 2 ? [jk(A, SCENES[A].root), jk('l2', SCENES.l2.root)] : RANK[lv] === 1 ? [jk(A, SCENES[A].root)] : [];
@@ -715,7 +725,7 @@ function whereRoute(req) {
   if (cutOf(req.o)) return;
   const G = CUR && CUR.G, ck = G ? G.keys[legNearest(G)] : Z.path.length ? jk(Z.dlv, Z.path[Z.path.length - 1]) : null;
   if (!ck) return;
-  const cl = kLv(ck), A = (G ? G.keys.map(kLv) : [Z.dlv]).concat(req.lv).find(l => RANK[l] === 0) || 'l3';
+  const cl = kLv(ck), A = (G ? G.keys.map(kLv) : [Z.dlv]).concat(req.lv).find(l => RANK[l] === 0) || CHIPV;
   const P = canon(cl, pathIn(cl, kId(ck)), A), Q = canon(req.lv, req.t, A);
   let k = 0; while (k < P.length && k < Q.length && P[k] === Q[k]) k++;
   const r = P.slice(Math.max(k - 1, 0)).reverse().concat(Q.slice(k));
@@ -876,6 +886,7 @@ let ZT = null, ZW = false, ZWAIT = [], ZN = 0, LVN = 0, PNG = 0, ANN_SCALE = fal
 const zNow = () => (ZT && ZT.lv === Z.lv ? ZT.t : Z.dlv === Z.lv && Z.path.length ? Z.path : [SC().root]);
 function goTo(t, o) {
   o = o || {};
+  if (MLH && !o.hand) MLH.mlMove();   // (a hand-over still on its way gives way to a move not its own: memory-levels.hand.js)
   const same = ZW && ZT && ZT.lv === Z.lv && samePath(ZT.t, t) && !(CUR && CUR.G.keys.some(movedKey));
   if (same && !o.total && o.ms !== 0) { if (o.focus) ZT.o.focus = true; return new Promise(res => ZWAIT.push(res)); }
   ZT = {t: t.slice(), o, n: ++ZN, lv: Z.lv};
@@ -893,7 +904,7 @@ function paceOf(req) {
   const o = req.o;
   if (cutOf(o)) return 0;
   const G = CUR && CUR.G, dk = G ? G.keys[G.keys.length - 1] : null, cl = dk ? kLv(dk) : Z.dlv;
-  const A = (G ? G.keys.map(kLv) : [Z.dlv]).concat(req.lv).find(l => RANK[l] === 0) || 'l3';
+  const A = (G ? G.keys.map(kLv) : [Z.dlv]).concat(req.lv).find(l => RANK[l] === 0) || CHIPV;
   const P = canon(cl, dk ? pathIn(cl, kId(dk)) : Z.path, A), Q = canon(req.lv, req.t, A), Vi = req.via ? canon(req.lv, req.via, A) : null;
   const M = Vi || Q;
   let k = 0; while (k < P.length && k < M.length && P[k] === M[k]) k++;
@@ -963,6 +974,9 @@ async function zoomWorker() {
     // a panel's zoom buttons name parts of the view left (a new level's panel is its own, and so is that of a part picked
     // since in the view reached)
     if (lvn === LVN && !(PNG !== pn0 && SEL)) $('pn-body').querySelectorAll('button[data-act="zoom"]').forEach(b => { const a = b.closest('.pn-act'); if (a) a.remove(); });
+    // (since 1 Oct: after a reader's move, with no access playing and no part picked, "You are here", as on the chip
+    // diagram: the scale's name, its lead and its zooms; at a level's top the level's own panel with its zooms)
+    if (moved && MLH && !accOn() && !TOUR && !(SEL && SEL.isConnected) && !(PNG !== pn0)) MLH.here(lvn !== LVN);
     // the focus the move took from the drawing comes back to it, unless the reader has put it elsewhere since (30
     // September: a level move lasts 1-1.5 s, a tour's up to 3.2, and its end took the focus back from a button)
     const a = document.activeElement;
@@ -982,7 +996,7 @@ async function flight(req, t, clk, stop, gen) {
   if (G.fade) ci = kLv(G.keys[0]) === req.lv ? 0 : 1;
   else {
     const dk = G.keys[G.keys.length - 1], dl = kLv(dk);
-    const A = G.keys.map(kLv).find(l => RANK[l] === 0) || (RANK[req.lv] === 0 ? req.lv : 'l3');
+    const A = G.keys.map(kLv).find(l => RANK[l] === 0) || (RANK[req.lv] === 0 ? req.lv : CHIPV);
     full = canon(dl, pathIn(dl, kId(dk)), A); Q = canon(req.lv, t, A);
     const off = full.length - G.keys.length;
     // (a scale the current instance has moved, another bank, is not the one the target names)
@@ -1023,7 +1037,7 @@ function restLeg(req, t, c0) {
     if (s.length < 2) { const G = fadeLeg(sl, tl); G.V0 = FR; G.V1 = G.T[1]; return G; }
     P = s.map(id => jk(sl, id)); Q = [P[0]];
   } else {
-    const A = !RANK[sl] ? sl : !RANK[tl] ? tl : 'l3';
+    const A = !RANK[sl] ? sl : !RANK[tl] ? tl : CHIPV;
     P = canon(sl, s, A); Q = canon(tl, t, A);
   }
   let k = 0; while (k < P.length && k < Q.length && P[k] === Q[k]) k++;
@@ -1083,6 +1097,8 @@ function drawRoot() {
    scale. o: {span: true} for a click or a tap (the keys keep their pace) */
 function userNav(t, o) {
   hideTip();
+  // (the shared ladder holds the stage: back to this level first, then the move; a panel's zoom button, say)
+  if (MLH && MLH.on()) return MLH.home().then(() => (MLH.on() ? null : userNav(t, o)));
   const k = AC.k, done = AC.done;
   if (k) { AC.tok.dead = true; if (FOLLOW) setFollow(false, true); }
   return goTo(t, Object.assign({focus: svg.contains(document.activeElement)}, o)).then(() => {
@@ -1101,60 +1117,23 @@ function scaleTo(i, o) {
   const b = branch(); if (i < 0 || i >= b.length) return;
   return userNav(b.slice(0, i + 1), o);
 }
-const zoomBy = (dd, o) => scaleTo(zNow().length - 1 + dd, o);
+const zoomBy = (dd, o) => (MLH ? MLH.zoomBy(dd) : scaleTo(zNow().length - 1 + dd, o));
 const TAP = {span: true};
 function scaleUI() {
-  const zc = $('zc'), had = focusIn(zc), b = branch(), cur = zNow().length - 1;
-  zc.textContent = '';
-  const btn = (html, cls, title, go, pressed, dis) => {
-    const e = document.createElement('button'); e.type = 'button'; if (cls) e.className = cls; e.innerHTML = html; e.title = title;
-    if (pressed != null) e.setAttribute('aria-pressed', String(pressed)); if (dis) e.disabled = true;
-    e.addEventListener('click', go); zc.appendChild(e); return e;
-  };
-  const lab = document.createElement('span'); lab.className = 'zlab'; lab.setAttribute('aria-hidden', 'true'); lab.textContent = 'Scale'; zc.appendChild(lab);
-  btn('&#8722;', 'pm', 'Zoom out (−, Backspace)', () => zoomBy(-1, TAP), null, cur <= 0).setAttribute('aria-label', 'Zoom out (minus key)');
-  const shown = b.slice(0, Math.min(b.length, cur + 2)), crumbs = [];
-  shown.forEach((id, i) => {
-    const nd = NODE(id);
-    if (i) { const s = document.createElement('span'); s.className = 'sep'; s.setAttribute('aria-hidden', 'true'); s.textContent = '›'; zc.appendChild(s); crumbs.push(s); }
-    const e = btn(esc(nd.short || nd.name), i > cur ? 'nx' : '', nd.name + (i === cur ? ' (shown)' : i > cur ? ' (zoom in)' : ''), () => scaleTo(i, TAP), i === cur);
-    e.dataset.i = i; crumbs.push(e);
-  });
-  btn('+', 'pm', 'Zoom in (+)', () => zoomBy(1, TAP), null, cur >= b.length - 1).setAttribute('aria-label', 'Zoom in (plus key)');
-  fitZc(zc, crumbs, cur);
-  refocus(zc, had);
-  // between levels the level is announced (lvl-live); the scale once the drawing is the reader's level's, where it is
-  // announced once even while an access's camera follows it (ANN_SCALE: a level change)
+  // (since 1 Oct the shared ladder's Up bar, breadcrumb and readout show the place: MLH.sync)
+  if (MLH) MLH.sync();
   if (Z.dlv !== Z.lv || !Z.path.length) return;
-  const nd = NODE(Z.path[Z.path.length - 1]), txt = 'Scale: ' + (nd.label ? nd.label(SC().inst) : nd.name);
-  if ((ANN_SCALE || !(accOn() && FOLLOW)) && $('cap-scale').textContent !== txt) $('cap-scale').textContent = txt;   // an access's own camera is not announced
+  const nd0 = NODE(Z.path[Z.path.length - 1]), txt0 = 'Scale: ' + (nd0.label ? nd0.label(SC().inst) : nd0.name);
+  if ((ANN_SCALE || !(accOn() && FOLLOW)) && $('cap-scale').textContent !== txt0) $('cap-scale').textContent = txt0;
   ANN_SCALE = false;
 }
-
-/* one row, always: first the label and the separators go, then the outer crumbs fold into "…" (− still reaches them) */
-function fitZc(zc, crumbs, cur) {
-  zc.classList.remove('tight');
-  const rows = () => new Set([...zc.children].filter(e => e.offsetParent && e.getClientRects().length).map(e => { const r = e.getBoundingClientRect(); return Math.round((r.top + r.bottom) / 16); })).size;
-  if (!zc.offsetParent || rows() <= 1) return;
-  zc.classList.add('tight');
-  if (rows() > 1) { const nx = zc.querySelector('button.nx'); if (nx) { nx.hidden = true; const s = nx.previousElementSibling; if (s && s.classList.contains('sep')) s.hidden = true; } }
-  let k = 1, ell = null;
-  while (rows() > 1) {
-    const bt = crumbs.find(e => e.tagName === 'BUTTON' && +e.dataset.i === k);
-    if (!bt || k >= cur) break;
-    bt.hidden = true;
-    if (!ell) { ell = document.createElement('span'); ell.className = 'ell'; ell.textContent = '…'; ell.setAttribute('aria-hidden', 'true'); bt.before(ell); }
-    k++;
-  }
-}
-window.addEventListener('resize', () => { clearTimeout(fitZcT); fitZcT = setTimeout(scaleUI, 150); });
-let fitZcT = 0;
 /* ---- the context mini-map: the scale above the one shown, with the part the camera is in ringed ---- */
 const PIP = {el: $('pip'), svg: $('pipsvg')};
 function pipUpdate() {
   const d = Z.path.length - 1;
   legendUI();
-  if (d < 2 || ZW || Z.dlv !== Z.lv) { PIP.el.hidden = true; pipHold(false); return; }
+  // (since 1 Oct the shared Up bar and breadcrumb go out: the mini-map that did is not drawn)
+  if (MLH || d < 2 || ZW || Z.dlv !== Z.lv) { PIP.el.hidden = true; pipHold(false); return; }
   const src0 = LAYERS[d - 1], s = PIP.svg; s.textContent = '';
   s.setAttribute('viewBox', `${FR.x} ${FR.y} ${FR.w} ${FR.h}`);
   const cl = src0.cloneNode(true);
@@ -1179,7 +1158,7 @@ function pipHold(on) { PIP.el.classList.toggle('zmove', !!on && !PIP.el.hidden);
    panel is on the screen and keeps it */
 function pipHome() {
   const under = mqOn('(max-width: 899px)') && !$('stage').classList.contains('pres') && !fsEl();
-  if (under && PIP.el.previousElementSibling !== $('zc')) $('zc').after(PIP.el);
+  if (under && $('zc') && PIP.el.previousElementSibling !== $('zc')) $('zc').after(PIP.el);
   else if (!under && PIP.el.nextElementSibling !== $('pn-foot')) $('pn-foot').before(PIP.el);
   $('stage').classList.toggle('pip-under', under);
   SCRL.geom = undefined;   // (presenting, full screen and the window's width change the drawing's box)
@@ -1339,7 +1318,8 @@ function cardsTxt(f) {
   return f.kind === 'measured' ? 'card not recorded' : '';
 }
 const LVNAME = {l1: 'L1', l2: 'L2', l3: 'L3', scp: 'Scratchpad', dram: 'DRAM', chip: 'Chip tour'};
-const KLAB = {spec: 'spec', measured: 'measured', derived: 'derived', generic: 'generic', unknown: 'unknown · asked'};
+/* one word for each kind, the chip diagram's (since 1 Oct: the shared ladder's KWORD, DESIGN §3.3) */
+const KLAB = {spec: 'documented', measured: 'measured', derived: 'model', generic: 'textbook', unknown: 'unknown · asked'};
 const CAV = {reimpl: 're-implementation RTL', 'spec-v1.1': 'spec v1.1'};
 function kindChip(f) {
   return `<span class="kd ${f.kind}">${KLAB[f.kind]}</span>` + (f.caveat ? ` <span class="cav">${CAV[f.caveat]}</span>` : '');
@@ -1408,16 +1388,24 @@ function showPart(key, ctx) {
   const P = SC().parts[key]; if (!P) { console.error('no part ' + key); return; }
   PNG++;   // (a part picked during a move, in the view it reaches, keeps its zoom buttons when it ends: zoomWorker)
   const d = P(ctx || {}), keys = (PARTSF[Z.lv] && PARTSF[Z.lv][d.facts || key]) || [];
+  // (since 1 Oct the chip's zoom row under the title: where a double-click on the part goes, the shared ladder's scale for
+  // a part with none here)
+  const zr = MLH && SEL && SEL._key === key && SEL.isConnected && svg.contains(SEL) ? MLH.zoomRowML(SEL, d.title) : '';
+  // (since 1 Oct the chip diagram's shape, DESIGN §3.3: the first sentence as the lead, the zoom row and the part's own
+  // buttons under it, the rest under "More detail and the sources", which stays open or shut as the reader left it)
+  const ss = String(d.what || '').split(/(?<=[.!?])\s+(?=[A-Z(<])/), lead = ss[0] || '', rest = ss.slice(1).join(' ');
+  const det = (rest ? `<p class="pn-what">${rest}</p>` : '') + (d.kpis ? `<div class="pn-kpis">${d.kpis.join('')}</div>` : '')
+    + (d.extra || '') + asksBlock(keys) + topPage(keys) + factsBlock(keys);
   panel(`<p class="pn-kick">${esc(d.kick)}</p><p class="pn-title">${esc(d.title)}</p>`
     + (d.badge ? `<p class="pn-badge">${badges(d.badge)}</p>` : '')
-    + `<p class="pn-what">${d.what}</p>`
-    + (d.kpis ? `<div class="pn-kpis">${d.kpis.join('')}</div>` : '') + (d.act ? `<div class="pn-act">${d.act}</div>` : '')
-    + (d.extra || '') + asksBlock(keys) + topPage(keys) + factsBlock(keys));
+    + (lead ? `<p class="pn-lead">${lead}</p>` : '') + zr + (d.act ? `<div class="pn-act">${d.act}</div>` : '')
+    + (det ? (MLH ? MLH.detBlock(det) : det) : ''));
 }
 /* o: {span: true} for a click or a tap (the keys keep their pace). A part with its own instance (another bank) takes it;
    the camera draws it (freshen) before it zooms in */
 function zoomInto(g, o) {
-  const child = g.getAttribute('data-child'); if (!child) return false;
+  const child = g.getAttribute('data-child');
+  if (!child) { if (!MLH) return false; select(g); showPart(g._key, g._ctx); return MLH.zoomML(g); }
   const c = g._ctx;
   if (c.inst) Object.assign(SC().inst, c.inst);
   select(null); showPart(g._key, g._ctx);
@@ -1429,13 +1417,26 @@ function zoomInto(g, o) {
    click, and a reader who taps a map expects to go into what they tapped; one tap on the mini-map, the scale control
    or a level tab comes back out) */
 function activate(g) {
-  if (g.getAttribute('data-child') && (SEL === g || TOUCHSCR)) { zoomInto(g, TAP); return; }
+  // (since 1 Oct a click or a tap only selects, as on the chip diagram: a double-click, a double-tap, Enter or the Zoom-in
+  // pill zooms in; with every part leading somewhere, a second click that zoomed turned reading into flying)
   select(g); showPart(g._key, g._ctx);
+  if (TOUCHSCR && MLH) MLH.pillFor(g);
 }
 /* a part of the reader's level (while the camera moves between levels, the drawing may still be the other's) */
 const ownPart = g => { const L = g.closest('g.lay'); return !!L && L._lv === Z.lv && svg.contains(g); };
 svg.addEventListener('click', e => { const g = e.target.closest && e.target.closest('.comp'); if (g && ownPart(g)) activate(g); });
-svg.addEventListener('dblclick', e => { const g = e.target.closest && e.target.closest('.comp'); if (g && ownPart(g) && !TOUCHSCR) zoomInto(g, TAP); });
+svg.addEventListener('dblclick', e => { if (performance.now() - TUP < 600) return; const g = e.target.closest && e.target.closest('.comp'); if (g && ownPart(g)) zoomInto(g, TAP); });
+/* a touch screen's double-tap (the chip's: two taps on one part, the second within 400 ms of the first and 30 px of it) */
+let TAPG = null, TUP = 0, TDN = 0;
+svg.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') TDN = e.timeStamp; });
+svg.addEventListener('pointerup', e => {
+  if (e.pointerType !== 'touch') return;
+  TUP = performance.now();
+  const g = e.target.closest && e.target.closest('.comp');
+  if (!g || !ownPart(g)) { TAPG = null; return; }
+  if (TAPG && TAPG.g === g && TDN - TAPG.t < 400 && TDN >= TAPG.t && Math.hypot(e.clientX - TAPG.x, e.clientY - TAPG.y) < 30) { TAPG = null; zoomInto(g, TAP); return; }
+  TAPG = {g, t: e.timeStamp, x: e.clientX, y: e.clientY};
+});
 svg.addEventListener('keydown', e => {
   const g = e.target.closest && e.target.closest('.comp'); if (!g || !ownPart(g)) return;
   if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); if (!zoomInto(g)) { select(g); showPart(g._key, g._ctx); } }
@@ -1450,7 +1451,14 @@ $('pn-body').addEventListener('click', e => {
 const tip = $('srctip');
 function tipHtml(ids, srcOnly) {
   return ids.split(/\s+/).filter(Boolean).map(id => {
-    const f = F[id]; if (!f) return '';
+    const f = F[id];
+    if (!f) {
+      const g = MLH && MLH.fact(id); if (!g) return '';
+      const cd = cardsTxt(Object.assign({cards: []}, g));
+      return `<div><b>${esc(MLH.kword(g.kind))}</b>${MLH.cavw(g.caveat) ? ' · ' + MLH.cavw(g.caveat) : ''} · ${esc(id)}${cd ? ' · ' + esc(cd) : ''}`
+        + (srcOnly ? '' : `<span class="s">${esc(g.statement)}</span>`)
+        + `<span class="s"><b>Source:</b> ${esc(g.source)}</span>${g.note ? `<span class="s"><b>Note:</b> ${esc(g.note)}</span>` : ''}</div>`;
+    }
     const cd = cardsTxt(f);
     return `<div><b>${esc(KLAB[f.kind])}</b> · ${esc(LVNAME[f.level])} · ${esc(f.id)}${cd ? ' · ' + esc(cd) : ''}${f.caveat ? ' · ' + CAV[f.caveat] : ''}`
       + (srcOnly ? '' : `<span class="s">${esc(f.statement)}</span>`)
@@ -2439,8 +2447,8 @@ function buildL1Minion(L, ap, inst) {
   const gr = part(L, 'rq', 588, 360, 150, 130, COL.logic, 'replay', {sub: [{t: 'queue: ' + nt('l1_rq').replace(' entries', ''), f: nf('l1_rq')}]});
   ap.rqSlots = [];
   for (let i = 0; i < 8; i++) ap.rqSlots.push(S(E('rect', {x: 600 + (i % 4) * 33, y: 426 + Math.floor(i / 4) * 28, width: 27, height: 22, rx: 3, 'pointer-events': 'none'}, gr), {fill: 'var(--c1)', fillOpacity: 0.15, stroke: 'var(--c1)', strokeWidth: 1.25}));
-  part(L, 'vpu', -136, 516, 340, 116, COL.aux, 'VPU · 8 lanes', {sub: [{t: `a ${nt('l1_vpu')} port: one register row a cycle`, f: nf('l1_vpu')}, 'reads the scratchpad directly']});
-  part(L, 'tl', 224, 516, 340, 116, COL.aux, 'TensorLoad unit', {sub: ['TL0: into scratchpad rows', 'TL1: into the VPU\'s buffer', {t: `${nt('l1_tl4')} in flight`, f: nf('l1_tl4')}]});
+  part(L, 'vpu', -136, 516, 340, 116, COL.logic, 'VPU · 8 lanes', {sub: [{t: `a ${nt('l1_vpu')} port: one register row a cycle`, f: nf('l1_vpu')}, 'reads the scratchpad directly']});
+  part(L, 'tl', 224, 516, 340, 116, COL.logic, 'TensorLoad unit', {sub: ['TL0: into scratchpad rows', 'TL1: into the VPU\'s buffer', {t: `${nt('l1_tl4')} in flight`, f: nf('l1_tl4')}]});
   part(L, 'ports', 588, 516, 160, 116, COL.xing, 'ports', {sub: ['fill · evict · miss', 'to the', 'neighbourhood']});
   part(L, 'nbr', 800, 380, 270, 290, COL.xing, 'neighbourhood', {sub: ['Miss / Evict flops', 'arbiters', 'bank FIFOs: VC FIFOs', 'with level shifters', {t: '→ the L2 (key 2)', c: 't-smb'}]});
   ap.port = {x: 748, y: 595}; ap.nbr = {x: 935, y: 520}; ap.vpu = {x: 34, y: 560}; ap.tl = {x: 394, y: 560};
@@ -3365,6 +3373,8 @@ const accKick = k => (TOUR ? `Tour ${TOUR.i + 1} / ${TOUR.list.length} · ` : ''
 function startAccess(k, i, o) {
   o = o || {};
   const def = accDef(k); if (!def) return;
+  // (the shared ladder holds the stage, out in the universe or down at an atom: the camera comes back to the level first)
+  if (MLH && MLH.on()) { MLH.home().then(() => { if (!MLH.on()) startAccess(k, i, o); }); return; }
   i = clamp(i || 0, 0, def.steps.length - 1);
   AC.tok.dead = true; clearFx();
   const tok = {dead: false, k, ff: false, endDone: !!o.done};
@@ -3578,6 +3588,8 @@ const routeR = (a, b) => xyRoute(a, b, false) || xyRoute(a, b, true) || [a, b];
 /* the chip-wide mean hop count of a line's home from a requester (the average over the 32 homes) */
 const meanHops = r => Object.values(SHC).reduce((s, c) => s + hopsC(r, c), 0) / 32;
 const MAPF = 'chip:mesh.logical-map chip:L40';
+/* where each chip level draws its map: the cell size C and the origin (X0, Y0) of logical (0, -1) */
+const MAPG = {l3: {C: 74, X0: -150, Y0: 22}, scp: {C: 66, X0: -150, Y0: 96}, dram: {C: 62, X0: -150, Y0: 86}};
 
 /* The map, cell size C from (X0, Y0). o.tile(c) decorates a tile: {key, ctx, child, cur, hi, sub, label}. The anchor
    points go to ap.P[ckey] (the mesh stop) and ap.B[ckey] (the tile). o.pkg: the LPDDR4X packages beyond the memory
@@ -3605,7 +3617,7 @@ function chipMap(L, ap, o) {
   // the tiles
   CELLS.forEach(c => {
     const b = ap.B[ckey(c)], d = (o.tile && o.tile(c)) || {};
-    const col = c.type === 'cshire' ? COL.logic : c.type === 'memshire' ? COL.store : 'var(--ink-2)';
+    const col = c.type === 'cshire' ? COL.logic : c.type === 'memshire' ? COL.store : c.name && c.name !== 'no compute shire' ? COL.aux : 'var(--ink-2)';
     const lab = c.type === 'cshire' ? `Shire ${c.id}` : c.type === 'memshire' ? `Memory shire ${c.id}` : `A cell without a compute shire (${c.name})`;
     const g = part(L, d.key || (c.type === 'cshire' ? 'shire' : c.type === 'memshire' ? 'memshire' : 'grey'), b.x, b.y, b.w, b.h, col, '',
       {ctx: Object.assign({id: c.id, cell: c}, d.ctx || {}), child: d.child || null, cur: d.cur, fo: d.fo != null ? d.fo : c.type === 'grey' ? 0.04 : 0.1, label: d.label || lab, rx: 5});
@@ -3613,6 +3625,9 @@ function chipMap(L, ap, o) {
     // a memory shire's 'MS' and number, stacked above and left of its mesh stop: the links cross the tile at the stop's
     // height and, in the bottom row, come down to the stop from the tile above, so neither line runs through the text
     else if (c.type === 'memshire') { const ny = ap.P[ckey(c)].y - 4; T(g, b.x + 7, ny - 17, 'MS', 't-smb'); T(g, b.x + 7, ny, String(c.id), d.hi ? 't-labb' : 't-smb'); }
+    // (since 1 Oct the cells without a compute shire say what they are, as on the chip diagram's die: the master or the
+    // spare shire, the I/O or the PCIe shire; which is which is not measured)
+    else if (c.name && c.name !== 'no compute shire') { const two = /master/.test(c.name) ? ['master', 'or spare'] : ['I/O or', 'PCIe']; T(g, b.x + 6, b.y + 20, two[0], 't-sm'); T(g, b.x + 6, b.y + 38, two[1], 't-sm'); }
     (d.marks || []).forEach((m, i) => mapMark(g, b, m, i));
     if (d.hi) S(E('rect', {x: b.x - 1, y: b.y - 1, width: b.w + 2, height: b.h + 2, rx: 6, 'pointer-events': 'none'}, g), {fill: 'none', stroke: 'var(--c2)', strokeWidth: 4});
   });
@@ -3847,7 +3862,7 @@ function buildL3Chip(L, ap, inst) {
   const R = SHC[inst.req], H = SHC[inst.home], hh = hopsC(R, H);
   frame(L, {title: `Chip · the L3: ${nt('l3_mb')} in 32 slices`, f: nf('l3_mb'), sub: 'the measured map of the mesh; a line lives in the slice of its home shire, PA[10:6]', subf: MAPF + ' l3:l3.homes',
     tags: [['documented', 'measured: the map, the route order']]});
-  chipMap(L, ap, {C: 74, X0: -150, Y0: 22, tile: c => c.type === 'cshire'
+  chipMap(L, ap, {C: MAPG.l3.C, X0: MAPG.l3.X0, Y0: MAPG.l3.Y0, tile: c => c.type === 'cshire'
     ? {marks: [c.id === inst.home ? 'H' : null, c.id === inst.req ? 'R' : null].filter(Boolean), hi: c.id === inst.home || c.id === inst.req, child: c.id === inst.home ? 'home' : null, cur: c.id === inst.home}
     : c.type === 'memshire' ? {marks: c.id === inst.ms ? ['M'] : [], fo: 0.06} : {}});
   // the request's route R -> H, x first (measured, l3.route), and the first hop to zoom into
@@ -4344,7 +4359,7 @@ function buildScpChip(L, ap, inst) {
   frame(L, {title: `Chip · ${nt('scp_80')} of scratchpad`, f: nf('scp_80'), sub: `${nt('scp_size')} in every shire, addressable by any agent; the address names the shire`, subf: nf('scp_size') + ' scp:scp.what',
     tags: [['documented', 'measured, spec']]});
   scpFmt(L, ap, -150, 12, 1228, inst.pa);
-  chipMap(L, ap, {C: 66, X0: -150, Y0: 96, tile: c => c.type === 'cshire'
+  chipMap(L, ap, {C: MAPG.scp.C, X0: MAPG.scp.X0, Y0: MAPG.scp.Y0, tile: c => c.type === 'cshire'
     ? {marks: [c.id === inst.req ? 'R' : null, inst.remote && c.id === inst.shire ? 'T' : null].filter(Boolean), hi: c.id === inst.req || c.id === inst.shire,
       child: c.id === inst.shire ? 'shire' : null, cur: c.id === inst.shire}
     : {fo: 0.04}});
@@ -4817,7 +4832,7 @@ function buildDramChip(L, ap, inst) {
   const R = SHC[inst.req], H = SHC[inst.home], M = MSC[inst.ms], h1 = hopsC(R, H), h2 = hopsC(H, M);
   frame(L, {title: `Card and chip · ${nt('dr_gb')} of LPDDR4X`, f: nf('dr_gb'), sub: `8 memory shires drive ${nt('dr_ch')} of 16 bits at ${nt('dr_mts')}`, subf: 'dram:dram.topo.memshires ' + nf('dr_mts'),
     tags: [['unknown', '? package pairing · asked'], ['documented', 'measured, spec']]});
-  chipMap(L, ap, {C: 62, X0: -150, Y0: 86, pkg: 56, tile: c => c.type === 'cshire'
+  chipMap(L, ap, {C: MAPG.dram.C, X0: MAPG.dram.X0, Y0: MAPG.dram.Y0, pkg: 56, tile: c => c.type === 'cshire'
     ? {marks: [c.id === inst.home ? 'H' : null, c.id === inst.req ? 'R' : null].filter(Boolean), hi: c.id === inst.home || c.id === inst.req, fo: 0.07}
     : c.type === 'memshire' ? {marks: c.id === inst.ms ? ['M'] : [], hi: c.id === inst.ms, child: c.id === inst.ms ? 'ms' : null, cur: c.id === inst.ms} : {fo: 0.03}});
   const P = routeP(ap, H, M);
@@ -5448,20 +5463,25 @@ function legendUI() {
     + '<span><i style="border-color:var(--c4)"></i>interconnect</span><span><i style="border-color:var(--c5)"></i>crossing</span>' + bands;
   const f = $('pn-foot'); if (f && f.innerHTML !== html) f.innerHTML = html;
 }
-function addrUI() { $('addr').innerHTML = addrHtml(SC()); rowsKeep(); }
+function addrUI() { $('addr').innerHTML = addrHtml(SC()); $('addr').classList.toggle('open', FLDS); rowsKeep(); }
+/* a phone: the address's fields shown (fields ▴) or folded (fields ▾) */
+let FLDS = false;
 function addrHtml(sc) {
   const pa = sc.pa ? sc.pa() : ADDR.pa, f = sc.addrFields(pa);
   return `<span>example line</span><span class="pa" data-f="${sc.paF || 'dram:dram.addr.region'}" title="${sc.pa ? 'a scratchpad line' : 'a DRAM-region line'}">${hexPA(pa)}</span>`
     + '<span class="flds">' + f.map(([nm, b, v, fid, hi]) => `<span class="fld${hi ? ' hi' : ''}" data-f="${fid}">${esc(nm)}${b ? ` <span>${esc(b)}</span>` : ''}${v !== '' ? ` <b>${esc(String(v))}</b>` : ''}</span>`).join('') + '</span>'
-    + (f.length ? '<button type="button" class="st-btn" data-act="newpa">New address</button>' : '')
-    + `<button type="button" class="st-btn fit" data-act="fit" aria-pressed="${$('svgwrap').classList.contains('fitted')}" title="The whole level at the screen's width (small text); again: a readable size, scrolling sideways">Fit to screen</button>`;
+    // (on a phone the fields fold under "fields ▾", so that the address takes one line; DESIGN §3.9, 1 Oct)
+    + (f.length ? `<button type="button" class="st-btn flt" data-act="flds" aria-expanded="${FLDS}" title="The address's fields this level reads">fields ${FLDS ? '▴' : '▾'}</button>` : '')
+    + (f.length ? '<button type="button" class="st-btn" data-act="newpa">New address</button>' : '');
 }
 /* A narrow window (the stage stacks): the rows above the drawing, the accesses and the address, keep the height of the
    tallest level's, so that a level change does not move the drawing up or down under the camera (30 September: they
    differ by up to 60 px at 390 px wide). Measured on a hidden copy of each row, every level's contents in turn. */
 const ROWS = {};
 function rowsKeep() {
-  [['acc-row', accRowHtml], ['addr', addrHtml]].forEach(([id, html]) => {
+  // (since 1 Oct the accesses keep one row on a phone, scrolling sideways, and the address one line with its fields
+  // folded: only the address's height is kept)
+  [['addr', addrHtml]].forEach(([id, html]) => {
     const el = $(id);
     if (!mqOn('(max-width: 899px)') || !el.parentNode) { el.style.minHeight = ''; ROWS[id] = null; return; }
     const hs = LEVELS.map(lv => withLv(lv, () => html(SCENES[lv]))), w = el.parentNode.clientWidth, key = w + '|' + hs.join('|');
@@ -5485,6 +5505,7 @@ function levelState(lv, o) {
   if (TOUR && !o.keepTour) endTour();
   killAccess(); AC.k = null; AC.done = false; AC.still = false; liveCap(true);
   Z.lv = lv;
+  if (RANK[lv] === 0) CHIPV = lv;
   SC().setInst();
   select(null); clearFx();
   tabsUI(); accButtonsUI(); addrUI();
@@ -5500,6 +5521,7 @@ function levelState(lv, o) {
 async function setLevel(lv, o) {
   o = o || {};
   if (!SCENES[lv]) return;
+  if (MLH && !o.hand) MLH.mlMove();
   if (Z.lv === lv && Z.dlv === lv && Z.path.length && !ZW && !o.force) { if (!o.noHash) setHash(lv); return; }
   ZGEN++; ZT = null; legAbort();
   if (ZW) { ZW = false; const w = ZWAIT; ZWAIT = []; w.forEach(r => r()); }
@@ -5516,6 +5538,7 @@ let STARTED = false;
 function moveLevel(lv, o) {
   o = o || {};
   if (!SCENES[lv]) return Promise.resolve();
+  if (MLH && MLH.on()) return MLH.toLevel(lv, o.path);
   if (Z.lv === lv) {
     // (a tour ends, as at another level's key: the camera leaves its slide)
     const to = o.path || (zNow().length > 1 ? [SC().root] : null);
@@ -5526,7 +5549,7 @@ function moveLevel(lv, o) {
   if (REDUCED || !STARTED) {
     // a cut: the focus on a part of the level left goes to the part of the new view it lies in, or its first
     const focus = STARTED && svg.contains(document.activeElement), from = {lv: Z.dlv, path: Z.path.slice()};
-    return setLevel(lv, o).then(() => (o.path ? goTo(o.path, {ms: 0}) : null)).then(() => {
+    return setLevel(lv, o).then(() => (o.path ? goTo(o.path, {ms: 0, hand: o.hand}) : null)).then(() => {
       const a = document.activeElement;
       if (focus && (!a || a === document.body)) { const f = zoomFocus(from); if (f) f.focus({preventScroll: true}); }
     });
@@ -5579,6 +5602,9 @@ function setHash(lv, acc, step, scale) {
 }
 async function applyHash(h, o) {
   const p = parseHash(h); if (!p) return false;
+  // (the shared ladder holds the stage: its camera first goes to the link's level and hands the stage back, as a tab's
+  // does; under reduced motion a cut)
+  if (MLH && MLH.on()) await MLH.toLevel(p.lv);
   await setLevel(p.lv, {noHash: true, force: p.lv !== Z.lv || !Z.path.length});
   const sc = SCENES[p.lv];
   const scale = p.scale && sc.scales[p.scale] ? p.scale : null;
@@ -5646,6 +5672,8 @@ async function tourGo(i, o) {
   if (TOUR.tok) TOUR.tok.dead = true;
   const tok = TOUR.tok = {dead: false};
   select(null);
+  // (the shared ladder holds the stage: the camera comes back to the level first)
+  if (MLH && MLH.on()) { await MLH.home(); if (!TOUR || TOUR.i !== i || tok.dead) return; }
   // another level: the controls switch now, and the camera goes there on the tour's clock, on to the slide's scale (or
   // its access's first step) in the same move
   if (it.lv !== Z.lv) moveLevel(it.lv, {keepTour: true, cam: CLK.on ? {clk: tok, cap: 3200} : {total: 600}});
@@ -5687,8 +5715,8 @@ function endTour() {
   if (AC.k) { setKick(accKick(AC.k)); CAPACC = true; renderBar(); playBtn(); } else resetCap();
 }
 const toggleTour = all => { if (TOUR) { endTour(); stopAccess(); } else startTour(all, 0); };
-const HINT = TOUCHSCR ? 'Tap a part for its details; one that holds a smaller scale zooms in · swipe the drawing sideways, or Fit to screen'
-  : '1–5 levels · [ ] accesses · Space pauses · ← → steps · + − zoom · V dive · F presents · P panel · C follow · T tour';
+const HINT = TOUCHSCR ? 'Tap a part for its details; double-tap it to zoom in · ↑ zooms out · swipe the drawing sideways, or Fit'
+  : '1–5 levels · [ ] accesses · Space pauses · ← → steps · double-click zooms in, ↑ zooms out · G switches · V dive · T tour';
 function resetCap() {
   CAPACC = false;
   setKick(`${SC().title} · explore`);
@@ -5777,6 +5805,7 @@ function playBtn() {
   $('stage').classList.toggle('playing', accOn() && CLK.on && !AC.still);
 }
 function playPause() {
+  if (MLH && MLH.on() && (AC.k || !TOUR)) { MLH.home().then(() => { if (!MLH.on()) playPause(); }); return; }
   if (!AC.k) {
     if (TOUR && !TOUR.list[TOUR.i].s.access) { CLK.on = !CLK.on; playBtn(); return; }
     const k = SC().lastAcc || (SC().accOrder[0] || [])[0]; if (k) startAccess(k, 0);
@@ -5882,7 +5911,7 @@ function back() {
   if (PRES) { setPres(false); return; }
   if (TOUR || fsEl()) return;
   if (AC.k) { stopAccess(); return; }
-  if (zNow().length > 1) zoomBy(-1);
+  if (MLH ? MLH.canUp() : zNow().length > 1) zoomBy(-1);
 }
 const ACTS = {
   zoom: b => {
@@ -5922,7 +5951,9 @@ const ACTS = {
   // a narrow window: the drawing keeps a readable size, scrolling sideways from its left edge; Fit fits it to the width.
   // The drawing zooms from where it is drawn (mid-zoom too: a second tap starts from there) to its new size, and its
   // box, with everything under it, follows at the same pace (30 September: a cut before)
+  flds: () => { FLDS = !FLDS; addrUI(); const b = $('addr').querySelector('[data-act="flds"]'); if (b) b.focus({preventScroll: true}); },
   fit: b => {
+    b = b || $('fitbtn');
     const w = $('svgwrap'), on = !w.classList.contains('fitted');
     if (CUR) CUR.G.win = null;   // (a move under way: the window stays put from here, winReplan)
     winCommit();
@@ -5946,6 +5977,8 @@ $('btn-next').addEventListener('click', () => next(false));
 $('btn-prev').addEventListener('click', () => prev(false));
 $('btn-follow').addEventListener('click', () => setFollow(!FOLLOW));
 $('btn-dive').addEventListener('click', () => setDive(!DIVE));
+/* Fit to screen (a phone): in the Up bar's second row since 1 Oct */
+$('fitbtn').addEventListener('click', e => ACTS.fit(e.currentTarget));
 PIP.el.addEventListener('click', () => zoomBy(-1, TAP));
 PIP.el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); zoomBy(-1); } });
 $('stage').addEventListener('click', e => { const b = e.target.closest && e.target.closest('button, summary, li.fact'); if (b && e.detail > 0) b.blur(); });
@@ -5963,7 +5996,9 @@ document.addEventListener('keydown', e => {
   if (!inStage) return;
   if (tg.closest && tg.closest('#tabs') && /^(ArrowLeft|ArrowRight|Home|End)$/.test(e.key)) return;   // the tab list's own keys
   const onControl = tg.closest && tg.closest('button, a, li.fact, summary, [role="button"]:not(.comp)');
+  if (MLH && MLH.onKey(e)) return;
   switch (e.key) {
+    case 'g': case 'G': if (MLH) { e.preventDefault(); MLH.stateToggle(); } break;
     case 'ArrowRight': case 'PageDown': e.preventDefault(); next(e.shiftKey); break;
     case 'ArrowLeft': case 'PageUp': e.preventDefault(); prev(e.shiftKey); break;
     case ' ': case 'Spacebar': {
@@ -5984,7 +6019,7 @@ document.addEventListener('keydown', e => {
     case '+': case '=': e.preventDefault(); zoomBy(1); break;
     case '-': case '_': e.preventDefault(); zoomBy(-1); break;
     case 'Escape': back(); break;
-    case 'Backspace': if (zNow().length > 1) { e.preventDefault(); zoomBy(-1); } break;
+    case 'Backspace': if (MLH ? MLH.canUp() : zNow().length > 1) { e.preventDefault(); zoomBy(-1); } break;
     case 'Home': if (AC.k) { e.preventDefault(); goStep(0); } else if (TOUR) { e.preventDefault(); tourGo(0); } break;
     case 'End': if (AC.k) { e.preventDefault(); goStep(stepsOf(AC.k).length - 1); } break;
     default: {
@@ -6064,6 +6099,81 @@ function prose() {
     + `<li><b>The engine</b> is the chip tour's (docs/reports/sources/chip-diagram.script.js), copied on 27 September 2026 and generalised to a tree of scales.</li></ul>`;
 }
 
+/* ================= the bridge to the shared ladder (memory-levels.ladder.js, 1 October 2026) =================
+   The chip diagram's path camera, in its own scope, draws the levels' scenes with their own builders (the same code, the
+   same example address) and asks this camera to move or to take the stage back. */
+/* a scene drawn by a builder into a layer of the ladder's camera (as buildInto, without an access's marks) */
+function buildWith(fn, L, ap, inst, parts, lv) {
+  ap.zg = ap.zg || {}; ap.parts = ap.parts || {}; ap.inst = inst;
+  const run = () => { BAP = ap; try { fn(L, ap, inst); } finally { BAP = null; } };
+  if (lv) withLv(lv, run); else run();
+  L.classList.add('ckt');
+  L.querySelectorAll('.comp').forEach(g => { if (g._mlp === undefined) { g._mlp = parts || null; g._mlv = lv || null; g._noKids = true; } });
+  measured(L, () => { ringAll(L); fitTexts(L); kbTexts(L); });
+}
+/* fn run with level lv's example taken as inst (a builder that reads its level's example finds this one) */
+function withInst(lv, inst, fn) { const sc = SCENES[lv], a = sc.inst; sc.inst = inst; try { return fn(); } finally { sc.inst = a; } }
+/* level lv's scale id drawn into the ladder's layer L, for the example (patched: another bank, another shire) */
+function buildScene(L, ap, lv, id, patch) {
+  const sc = SCENES[lv], inst = Object.assign({}, sc.inst, patch || {});
+  ap.id = id; ap.key = drawKey(lv);
+  withInst(lv, inst, () => buildWith((L2, ap2, i2) => sc.scales[id].build(L2, ap2, i2), L, ap, inst, sc.parts, lv));
+  L._mlLv = lv; L._mlId = id;
+}
+/* a part drawn in strokes only gets a transparent hit area under its strokes (circuitkit.js's, for the ladder's copies) */
+function hitAreas(L) {
+  const comps = [...L.querySelectorAll('.comp')], box = new Map();
+  measured(L, () => comps.forEach(g => {
+    let b = g._box;
+    if (!b) { try { const r = g.getBBox(); if (r.width && r.height) b = {x: r.x, y: r.y, w: r.width, h: r.height}; } catch (_) { /* not rendered */ } }
+    if (b) box.set(g, b);
+  }));
+  const ov = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+  comps.forEach((g, i) => {
+    const b = box.get(g);
+    if (!b || g.querySelector(':scope > rect.shape, :scope > rect.hit')) return;
+    if (comps.slice(0, i).some(o => box.get(o) && !o.contains(g) && ov(b, box.get(o)) > 0.2 * box.get(o).w * box.get(o).h)) return;
+    const r = E('rect', {class: 'hit', x: b.x, y: b.y, width: b.w, height: b.h, fill: 'transparent', 'pointer-events': 'all'});
+    g.insertBefore(r, g.firstChild);
+  });
+}
+/* a part's panel text from its level's parts (kick, title, badges, what, kpis), for the ladder's copy of a scene */
+function partText(g) {
+  const P = g._mlp && g._mlp[g._key]; if (!P) return null;
+  let d; try { d = g._mlv ? withLv(g._mlv, () => P(g._ctx || {})) : P(g._ctx || {}); } catch (e) { console.error(e); return null; }
+  return {kick: d.kick, title: d.title, badge: d.badge ? badges(d.badge) : '', what: d.what || '', kpis: d.kpis || []};
+}
+/* the camera to level lv's path (o.ms 0: a cut; o.V: the chip level whose map it goes through): a level's move, the
+   hand-over's own (hand: it does not cancel the hand-over that asked for it) */
+function mlGo(lv, path, o) {
+  o = o || {};
+  if (o.V && RANK[o.V] === 0) CHIPV = o.V;
+  const cam0 = Object.assign(o.ms === 0 ? {ms: 0} : o.key ? {} : {span: true}, {hand: true});
+  if (lv !== Z.lv) return moveLevel(lv, {path, cam: cam0, hand: true});
+  return userNav(path, cam0);
+}
+/* the stage back from the ladder's camera at level lv's path, drawn at once (the ladder's camera shows the same) */
+async function showAt(lv, path, V) {
+  if (V && RANK[V] === 0) CHIPV = V;
+  if (lv !== Z.lv || Z.dlv !== Z.lv || !Z.path.length) await setLevel(lv, {force: true, hand: true});
+  if (!samePath(Z.path, path)) await goTo(path, {ms: 0, hand: true});
+}
+MLB = {VB, FR, CLK, DTMAX, SCENES, LEVELS, COL, DASH, get Z() { return Z; }, zNow, pathIn, withLv, withInst, mapGeom: lv => MAPG[lv], zoomInto: g => zoomInto(g, TAP),
+  overview: () => showPart('overview'),
+  buildWith, buildScene, hitAreas, partText, goTo: mlGo, showAt, rest: camRest, sel: () => SEL, hideTip, accOn,
+  // the ladder took the stage: an access playing waits, paused, until the camera is back (Play brings it back)
+  onLadder: on => { if (on && accOn() && CLK.on) { CLK.on = false; playBtn(); renderBar(); } PIP.el.hidden = true; },
+  // the reader moved with the ladder's controls: an access stops following (as with the levels' own zoom)
+  stopFollow: () => { if (AC.k && FOLLOW) setFollow(false, true); },
+  INST: {l1: () => Object.assign({}, SCENES.l1.inst), l2: () => Object.assign({panel: 0}, SCENES.l2.inst), dram: () => Object.assign({}, SCENES.dram.inst)},
+  parts: {l1: SCENES.l1.parts, l2: SCENES.l2.parts, l3: SCENES.l3.parts, scp: SCENES.scp.parts, dram: SCENES.dram.parts},
+  builders: {buildL1Cache, buildL1Block, buildL1Row, buildL1Latch, buildL1Cmp, buildL2Bank, buildL2Sub, buildL2Panel, buildL2Cell, buildL2Xing, buildWire, buildL3Wire,
+    buildMeshHop: (L, ap, o) => buildHop(L, ap, Object.assign({title: 'One mesh hop, up close', sub: 'from a shire’s cache bank to the next shire’s port; a reply comes back the same way',
+      bank: 0, lane: 'PA[7:6]', laneF: 'l3:l3.lane', to: 'the next shire’s port'}, o || {})),
+    buildMS, buildChan, buildDBank, buildDCell, buildPHY, buildDQ},
+  kit: {comp, part, boxShape, tagPill, frame, railBand, wire, jn, netLab, rail, gnd, mosV, mosH, invSym, andSym, mux2, flopSym, icgSym, T, measured, ringAll, fitTexts, kbTexts,
+    setBAP: ap => { BAP = ap; }}};
+
 /* ================= start ================= */
 LEVELS.forEach(lv => SCENES[lv].setInst());
 // the page's gutters in a frame (CSS html.et-framed: spacesheep's comment tab covers the frame's left edge on a phone);
@@ -6103,7 +6213,7 @@ prose();
   // neither a view nor a section is replaced
   let sec = null;
   if (!done && h.length > 1) { try { sec = document.getElementById(decodeURIComponent(h.slice(1))); } catch (_) { /* a malformed hash */ } }
-  if (!done) await setLevel('l1', {noHash: !h || h === '#' || !!sec, force: true});
+  if (!done) await setLevel('l1', {noHash: !h || h === '#' || !!sec || /^#at=/.test(h), force: true});
   if (sec) { try { sec.scrollIntoView({block: 'start'}); } catch (_) { /* no layout */ } }
   if (q && q.get('tour')) { const all = q.get('tour') === 'all', lst = tourList(all); startTour(all, Math.max(0, lst.findIndex(it => it.lv === Z.lv))); }
   if (window.__ET_PRESENTER) setTimeout(() => toast('<p><b>Presenter window.</b> Press <kbd>F</kbd> for full screen; <kbd>T</kbd> starts the tour.</p>', 9000), 300);
@@ -6111,6 +6221,13 @@ prose();
   STARTED = true; prebuildIdle();
 })();
 /* a read-only view of the state, for the page's tests (headless Chrome) */
+// (since 1 Oct: zooming while either camera moves, the levels' or the shared ladder's, a hand-over on its way included, so
+// that a test waiting for the camera to rest waits for both; ladder: the ladder's state, read only when asked for, so
+// that a recorder reading the levels' state every frame does no more work than before)
 window.__memState = () => ({lv: Z.lv, dlv: Z.dlv, path: Z.path.slice(), acc: AC.k, step: AC.i, done: AC.done, still: AC.still, clockOn: CLK.on,
-  follow: FOLLOW, dive: DIVE, zooming: ZW, tour: TOUR ? TOUR.i : null, pip: !PIP.el.hidden, hash: location.hash});
+  follow: FOLLOW, dive: DIVE, zooming: ZW || !!(MLH && MLH.moving()), tour: TOUR ? TOUR.i : null, pip: !PIP.el.hidden, hash: location.hash,
+  get ladder() { try { return MLH ? MLH.state() : null; } catch (e) { return {error: String(e)}; } }});
 })();
+/* the shared ladder: the chip diagram's path camera, the scales outside the chip and inside the transistor, the textbook
+   constructions, and the hand-over between the two cameras (1 October 2026) */
+/*@include memory-levels.ladder.js*/

@@ -109,9 +109,13 @@ def includes(text, stack=(), ext=('.js',)):
 def top_names(js):
     """The names a script declares at its top level: function, class, const, let and var declarations at column 0 at
     the shallowest bracket depth any has, with every declarator of a const/let/var list and the names in a destructuring pattern. A light scanner:
-    it skips strings, template literals, comments and regular expressions while it counts brackets. Returns
-    [(name, line)]."""
+    it skips strings, template literals, comments and regular expressions while it counts brackets. Since 1 Oct 2026
+    (the memory levels host the shared ladder in a scope of its own beside their own) each name comes with its scope,
+    the position of the innermost bracket around it (-1: none), and the scopes of the /*@hooks ...*/ comments are
+    returned too. Returns ([(name, line, scope)], {hooks comment position: scope})."""
     out, n, i, depth, prev, line = [], len(js), 0, 0, ';', 1
+    opens = []      # the positions of the brackets open at i
+    hooks = {}      # a /*@hooks ...*/ comment's position: its scope
     decl = re.compile(r'(?:async[ \t]+)?function\*?[ \t]+([A-Za-z_$][\w$]*)|class[ \t]+([A-Za-z_$][\w$]*)|(?:const|let|var)[ \t]+')
     ident = re.compile(r'[A-Za-z_$][\w$]*')
     want = False   # in a const/let/var list: the next declarator's name follows
@@ -150,17 +154,17 @@ def top_names(js):
             m = decl.match(js, i)
             if m:
                 if m.group(1) or m.group(2):
-                    out.append((m.group(1) or m.group(2), line, depth)); i = m.end(); prev = 'a'; continue
+                    out.append((m.group(1) or m.group(2), line, depth, opens[-1] if opens else -1)); i = m.end(); prev = 'a'; continue
                 i = m.end(); want = True; inlist = True; d0 = depth
         if want and depth == d0:
             i = skip_ws(i)
             if i < n and js[i] in '{[':
                 names, i = pattern(i)
-                out.extend((nm, line, d0) for nm in names)
+                out.extend((nm, line, d0, opens[-1] if opens else -1) for nm in names)
             else:
                 mm = ident.match(js, i)
                 if mm:
-                    out.append((mm.group(0), line, d0)); i = mm.end()
+                    out.append((mm.group(0), line, d0, opens[-1] if opens else -1)); i = mm.end()
             want = False; prev = 'a'; continue
         if c == '\n':
             line += 1
@@ -197,6 +201,8 @@ def top_names(js):
         if c == '/' and i + 1 < n and js[i + 1] == '/':
             j = js.find('\n', i); i = n if j < 0 else j; continue
         if c == '/' and i + 1 < n and js[i + 1] == '*':
+            if js.startswith('/*@hooks ', i):
+                hooks[i] = opens[-1] if opens else -1
             j = js.find('*/', i + 2); line += js.count('\n', i, n if j < 0 else j); i = n if j < 0 else j + 2; continue
         if c == '/' and prev in '(,=:[!&|?{};+-*%<>~^':
             i += 1; cls = False
@@ -210,9 +216,11 @@ def top_names(js):
                 i += 1
             i += 1; prev = 'a'; continue
         if c in '([{':
-            depth += 1
+            depth += 1; opens.append(i)
         elif c in ')]}':
             depth -= 1
+            if opens:
+                opens.pop()
         elif c == ',' and depth == d0 and inlist:
             want = True
         elif c == ';' and depth == d0:
@@ -225,30 +233,37 @@ def top_names(js):
                 i += len(w); continue
             prev = c
         i += 1
-    # the top level: the shallowest depth a declaration at column 0 is at (a page script wrapped in (() => { ... })()
-    # declares its names two brackets deep; a closure's own names, deeper, are its own)
-    top = min((d for _, _, d in out), default=0)
-    return [(nm, ln) for nm, ln, d in out if d == top]
+    # each scope's names apart: a page script wrapped in (() => { ... })() declares its names two brackets deep, a
+    # closure's own names (circuitkit's), deeper, are its own, and the memory levels' two scopes (their own and the
+    # ladder's, 1 Oct 2026) each theirs
+    return [(nm, ln, sc) for nm, ln, d, sc in out], hooks
+
+
+def guard(script):
+    """The include guard (1 Oct 2026): a name declared twice in one scope of the expanded script (a second const or let
+    stops the page when it loads, and a second function silently replaces the first: the includes share the scope they
+    are included in), and the shared ladder's hooks (ladder-core.js, /*@hooks ...*/) not declared in the scope the core
+    is included in. Returns the problems, [] when there are none (tools/pagemotion/guard_test.py plants both)."""
+    names, hscope = top_names(script)
+    seen, dup = {}, []
+    for nm, ln, sc in names:
+        if (sc, nm) in seen:
+            dup.append(f"a name is declared twice at the top level of the page script and its includes: {nm} (lines {seen[(sc, nm)]} and {ln} of the expanded script)")
+        else:
+            seen[(sc, nm)] = ln
+    HOOKS = re.compile(r"/\*@hooks ([^*]*)\*/")
+    need = [(h, hscope.get(m.start(), -1)) for m in HOOKS.finditer(script) for h in m.group(1).split()]
+    miss = [h for h, sc in need if (sc, h) not in seen]
+    if miss:
+        dup.append(f"the page does not define the hooks the shared ladder calls: {', '.join(miss)}")
+    return dup
 
 
 script = includes(open(os.path.join(S, name + ".script.js")).read())
-# a name declared twice at the top level: a second const or let stops the page when it loads, and a second function
-# silently replaces the first (the includes share the page script's scope, so this guards them; 1 Oct 2026)
 if USED:
-    seen, dup = {}, []
-    for nm, ln in top_names(script):
-        if nm in seen:
-            dup.append(f"{nm} (lines {seen[nm]} and {ln} of the expanded script)")
-        else:
-            seen[nm] = ln
-    if dup:
-        raise SystemExit(f"{name}: a name is declared twice at the top level of the page script and its includes:\n  " + "\n  ".join(dup))
-    # the shared ladder's hooks: every one the core names must be declared by the page (ladder-core.js, /*@hooks ...*/)
-    HOOKS = re.compile(r"/\*@hooks ([^*]*)\*/")
-    need = [h for m in HOOKS.finditer(script) for h in m.group(1).split()]
-    miss = [h for h in need if h not in seen]
-    if miss:
-        raise SystemExit(f"{name}: the page does not define the hooks the shared ladder calls: {', '.join(miss)}")
+    problems = guard(script)
+    if problems:
+        raise SystemExit(f"{name}: " + "\n  ".join(problems))
 body = includes(body, ext=('.css',))
 html = (tpl.replace("__CHARTKIT__", open(os.path.join(S, "chartkit.js")).read())
         .replace("__TITLE__", meta["title"]).replace("__DESC__", meta["description"])

@@ -13,7 +13,12 @@ lazily fetched data). Prints PASS or FAIL lines; the exit code is the number of 
       (from make_rack_photo.py, ten labels blurred); no EXIF, XMP or ICC in any image; the maps mark no point but the
       usual city centres and the hill's summit; the AI Plumbers event (asked of the owner) is not on the page
   T14 the easter egg (the owner, 1 Oct 2026, 07:25): no level above the rack is named in the page's static text (its
-      markup outside scripts and styles) or its description"""
+      markup outside scripts and styles) or its description
+Since 1 Oct 2026 (the shared ladder, part 2) it also checks the memory levels' page, which carries the ladder's data in
+its D.ladder block: T10 and T14 the same, T9 with the memory levels' budgets (the page at most 2.0 MB, its script at most
+1,050 KB and its data at most 800 KB: the page hosts the chip diagram's path camera beside its own, with the ladder's
+outer and inner scales and the textbook constructions, about 460 KB of shared code, and the ladder's scales, maps and
+cited facts, about 235 KB; it was 1.17 MB before)."""
 import hashlib
 import json
 import os
@@ -36,9 +41,13 @@ m = re.search(r'const D = (\{.*?\});\n', html, re.S)
 data = m.group(1)
 D = json.loads(data)
 script = html[m.end():html.index('</script>', m.end())]
-ok(len(html.encode()) <= 1.5e6, f'T9 the page is {len(html.encode()) / 1e6:.2f} MB (at most 1.5)')
-ok(len(script.encode()) <= 900e3, f'T9 its script is {len(script.encode()) / 1e3:.0f} KB (at most 900)')
-ok(len(data.encode()) <= 600e3, f'T9 its data is {len(data.encode()) / 1e3:.0f} KB (at most 600)')
+ML = 'ladder' in D   # the memory levels' page: the ladder's data in D.ladder
+if ML:
+    D = D['ladder']
+B_PAGE, B_SCRIPT, B_DATA = (2.0e6, 1050e3, 800e3) if ML else (1.5e6, 900e3, 600e3)
+ok(len(html.encode()) <= B_PAGE, f'T9 the page is {len(html.encode()) / 1e6:.2f} MB (at most {B_PAGE / 1e6:.1f})')
+ok(len(script.encode()) <= B_SCRIPT, f'T9 its script is {len(script.encode()) / 1e3:.0f} KB (at most {B_SCRIPT / 1e3:.0f})')
+ok(len(data.encode()) <= B_DATA, f'T9 its data is {len(data.encode()) / 1e3:.0f} KB (at most {B_DATA / 1e3:.0f})')
 lz_path = os.path.join(img_dir, 'ladder-data.json')
 lz = open(lz_path, encoding='utf-8').read() if os.path.exists(lz_path) else ''
 ok(bool(lz) and len(lz.encode()) <= 400e3, f'T9 the lazy data is {len(lz.encode()) / 1e3:.0f} KB (at most 400)')
@@ -57,8 +66,10 @@ except ImportError:
     ok(False, 'T10 Pillow is needed to read the images\' metadata')
 # no IPv4-like strings (version strings like 1.2.3.4 would be listed: none are expected)
 # (a manual's section numbers, "\u00a72.1.3.1" in the data, are not addresses)
+# (nor the end of a range of them, "\u00a71.4.2.1-1.4.2.3": the memory levels' Shire Cache Specification citations)
 ips = sorted(set(m.group(0) for m in re.finditer(r'(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])', html)
-                 if not re.search(r'(u00a7|§|section |sec\. )\d?$', html[max(0, m.start() - 8):m.start() + 1])))
+                 if not re.search(r'(u00a7|§|section |sec\. )\d?$', html[max(0, m.start() - 8):m.start() + 1])
+                 and not re.search(r'(u00a7|§)[\d.]+-$', html[max(0, m.start() - 24):m.start()])))
 ok(not ips, 'T10 no IPv4-like string in the page', ' '.join(ips[:8]))
 ok(not re.search(r'\b10\.\d+\.\d+\.\d+\b|\b192\.168\.\d+\.\d+\b|\b100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.\d+\.\d+\b', html), 'T10 no private or Tailscale address')
 # Studio 45: no street address, no links to its listings

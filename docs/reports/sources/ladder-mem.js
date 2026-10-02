@@ -187,13 +187,15 @@ Object.assign(KIDS, {
 });
 /* the seats of those scales in the chip's own drawings (the die's and the shire's parts) */
 function chipSeats(L, ap, el) {
-  if (el.id === 'die') {
+  // (the chip's own die: on the memory levels the die is a level's map, whose seats its node gives; a seat already given
+  // stays)
+  if (el.id === 'die' && CELLS.length) {
     CELLS.forEach(c => { if (c.type === 'memshire' && c.g) ap.zs['memshire:' + c.id] = {r: {x: c.x + INS, y: c.y + INS, w: c.w - 2 * INS, h: c.h - 2 * INS}, g: c.g}; });
     L.querySelectorAll('.comp[data-comp="dram"]').forEach(g => { const ms = g._ctx.ms; const r = dramSeat(ap, {ms: ms[0]}); if (r) ap.zs[`dram:${ms[0]}.${DRX().ch}`] = {r, g}; });
     ap.zs.mesh = meshSeat(L);
   }
   if (el.id === 'shire') {
-    (ap.bank || []).forEach((b, i) => { const pb = partBox(L, 'banks', c => c.bank === i); ap.zs['shire.bank:' + i] = {r: b.box, g: pb ? pb.g : null}; });
+    (ap.bank || []).forEach((b, i) => { const pb = partBox(L, 'banks', c => c.bank === i); if (!ap.zs['shire.bank:' + i]) ap.zs['shire.bank:' + i] = {r: b.box, g: pb ? pb.g : null}; });
   }
 }
 /* a part of a copied drawing: its panel from the copy's parts texts, with the tree's zoom row */

@@ -15,7 +15,8 @@
    two-state electronics (stateSwitch, stateToggle) and the lazily fetched data (lazyData). The hooks every page that
    includes it must define (build-report.py refuses a page without them): pageExits() the ways back in from the ring,
    [{id, lab, short, path()}]; pageBusy() true while a flow or an access holds the stage; pageLazy(ok) the lazy data has
-   arrived (or failed): redraw what showed it. */
+   arrived (or failed): redraw what showed it. A page may also define pageNav(t, o), through which userNav sends every
+   move (the memory levels: memory-levels.hand.js). */
 /*@hooks pageExits pageBusy pageLazy*/
 /* ================= the path camera (30 September 2026) =================
    One engine for a ladder of any depth (the owner's "zoom out ... all the way to the meta universe" and "double-click
@@ -772,6 +773,9 @@ function zoomFocus(from) {
 /* the reader's own zoom: while a flow plays, the camera stops following it (stepping a stage turns it back on),
    and the flow's stage is drawn again where the camera now is */
 function userNav(t, o) {
+  // (a page with a second camera, the memory levels' own for their own scenes, routes every move of the ladder's
+  // controls through its hook, pageNav, which hands the stage between the two: memory-levels.hand.js)
+  if (typeof pageNav === 'function') return pageNav(t, o);
   hideTip(); pillOff(); menuOff();
   // a flow, playing or finished, stays: its stage is drawn again at the new scale (a finished one as its last stage's
   // end state, still finished), so the arrows keep stepping its stages
@@ -868,7 +872,9 @@ const KIDS = {
 function kidOf(g) {
   if (!g) return null;
   if (g._kid !== undefined) return g._kid;
-  const f = KIDS[g._key], k = f ? f(g._ctx || {}, g) : null;
+  // (a part of the memory levels' own drawings, drawn on their page: its key may be one of the chip's with another
+  // meaning, so only its own table leads it anywhere, memory-levels.links.js)
+  const f = g._noKids ? null : KIDS[g._key], k = f ? f(g._ctx || {}, g) : null;
   return k && (k.up ? NODES[k.up] : NODES[k.id]) ? k : null;
 }
 /* the path of the scale a part is drawn in */

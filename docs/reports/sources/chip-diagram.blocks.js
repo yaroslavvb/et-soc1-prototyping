@@ -1,6 +1,8 @@
 /* ================= chip-diagram.blocks.js: the chip's block scenes and its compute chain (1 October 2026) =================
    Split from chip-diagram.inside.js (30 September): the logical drawings of the blocks no floorplan shows, and a
-   vector lane's multiply-add down to one column of its compressor tree. The chip page only. */
+   vector lane's multiply-add down to one column of its compressor tree. The chip page's, and since 1 Oct (the shared
+   ladder, part 2) the memory levels' too: their parts open the same block scenes (a crossbar, the UC, the core, the
+   vector unit, the tensor unit, the PCIe and I/O shires), and the textbook constructions draw with its helpers. */
 /* ================= the block scenes, and the compute ladder down to the silicon crystal (Phase 3b) =================
    A block of the chip whose inside is described but not published as a floorplan (a router, a crossbar, a core, the
    vector unit and its lanes, the tensor sequencer, the PCIe and I/O shires) is drawn from the tree's data: its parts as

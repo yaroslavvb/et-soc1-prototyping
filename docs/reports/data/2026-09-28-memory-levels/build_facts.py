@@ -1738,6 +1738,22 @@ out = {
     'facts': FACTS, 'steps': STEPS, 'num': num, 'parts': PARTS, 'asks': ASKS, 'rungs': RUNGS,
     'layout': layout, 'addr': addr, 'conflicts': CONFLICTS,
 }
+# ---- the shared ladder (1 Oct 2026, part 2: the memory levels host the chip diagram's path camera,
+# sources/memory-levels.ladder.js): the scales from the observable universe to the Planck length, the maps' outlines,
+# the images' manifest, the numbers the outer scenes print, the ring of sizes and the lazily fetched facts, as the
+# chip diagram's build wrote them (its facts.json; read after it is built); and the chip's own facts those scales cite
+# by id (the rest of the ladder's facts are fetched from ladder-img/ladder-data.json, shared by both pages)
+LAD = {k: CHIP[k] for k in ('scales', 'geo', 'img', 'onum', 'outside', 'ring', 'lazy') if k in CHIP}
+cited = set()
+for sc in LAD.get('scales', {}).values():
+    if sc.get('f'):
+        cited.add(sc['f'])
+    cited.update(sc.get('facts') or [])
+LAD['facts'] = {i: CHIP['facts'][i] for i in sorted(cited) if i in CHIP['facts']}
+LAD['num'] = {}
+out['ladder'] = LAD
+out['meta']['built_from'].append('../2026-09-27-chip-diagram/facts.json (.scales, .geo, .img, .onum, .outside, .ring, .lazy and the facts '
+                                 'they cite: the shared ladder)')
 p = os.path.join(HERE, 'facts.json')
 json.dump(out, open(p, 'w'), indent=None, separators=(',', ':'), ensure_ascii=False)
 print('wrote', p, os.path.getsize(p), 'bytes;', len(FACTS), 'facts', {lv: counts[lv] for lv in LEVELS}, len(num), 'numbers,',

@@ -87,3 +87,50 @@ The flows' velocity profiles are the base's (the largest frame-to-frame change a
 frames alike, run to run. The new paths' late frames at 1x are first frames of a move; at 4x the 483 ms frame of `reg`
 is the page's first, the card's photo decoded on arrival, before any move. The new scales draw in 1-3 ms each
 (`build-times-p1b.txt`, three times each). No console errors in any run.
+
+## Part 2: the memory levels (1 October, evening)
+
+The memory levels on the shared ladder (`p2m`: the final build but for the hand-over's start, below) against the
+committed pages of `65a06da` (`base`), served over http from the work directory, one run at a time on aifoundry2
+(16:35-17:01, no other tests running), 1280 by 800 at DPR 1, at CPU 1x and under 4x CPU throttling, with `all-p2.sh`
+(`run-p2.sh` for the memory levels, `runchip-p2.sh` for the chip diagram); `p2-*-summ.txt`, `p2-*-kink.txt`, and
+`p2-compare.txt` from `compare-p2.py`.
+
+| Run | What it does |
+|---|---|
+| load | the access `#dram/load`, the levels' own camera following it (the check of 30 September) |
+| tabs | the level keys 5, 2, 1, 3, 4 and 1: the cross-fades between the maps, the moves out and in between levels |
+| out | (the new page only) Up five times from the L3's map: the package (the path camera takes the stage), the card, the host, the rack and "?"; then + five times back in, to the map (the levels' camera takes it back) |
+| in | (the new page only) + five times from the L2's 6T cell (the path camera takes the stage): the transistor, the fin, the channel, the crystal, an atom; then Up five times back to the cell |
+| A, H, K | the chip diagram's flows, as in part 1 (its page changed only in where its CSS sits, and draws the same to the pixel; the tour run records no camera frames on either page, as in part 1) |
+
+Frames during camera motion (late: over 25 ms; kink: the largest frame-to-frame change of the camera's velocity, as a
+share of the move's top speed):
+
+| Run | base, 1x | part 2, 1x | base, 4x | part 2, 4x |
+|---|---|---|---|---|
+| load | 0 of 625 late, kink 10.7% | 0 of 625, 11.0% | 136 of 486 (28.0%) | 139 of 484 (28.7%) |
+| tabs | 0 of 445 | 0 of 447 | 34 of 408 (8.3%) | 40 of 402 (10.0%) |
+| out | - | 1 of 354, 58.3% | - | 18 of 340 (5.3%) |
+| in | - | 1 of 467, 37.5% | - | 19 of 448 (4.2%) |
+| A | 1 of 241, 11.9% | 1 of 241, 11.9% | 25 of 217 (11.5%) | 25 of 217 (11.5%) |
+| H | 0 of 206, 12.4% | 0 of 206, 12.2% | 26 of 180 (14.4%) | 21 of 184 (11.4%) |
+| K | 1 of 429, 12.4% | 1 of 429, 12.1% | 77 of 354 (21.8%) | 78 of 351 (22.2%) |
+
+The levels' own camera moves as before: the access and the level moves have the same frames and the same kinks at 1x,
+and at 4x both pages drop frames alike. The chip diagram's flows are the base's frame for frame. The new flows' one late
+frame at 1x, and their largest kinks, were the hand-over's: the path camera's take-over of the stage (its drawing of the
+same picture, 4-21 ms, `take.mjs`) and its move's first frame fell in one frame, so that the move
+began with a jump, 58% (out) and 37% (in) of its top speed in one frame, where the chip's own Up from the die eases in
+from 0.3 px a frame. The final build (`p2n`) gives the take-over two frames of its own, the same picture, before its
+move: its out and in flows at 1x have no late frame, and their first moves' kinks are 15.7% and 10.3%; the largest left,
+22.8%, is the path camera's own move from the package to the card, as on the chip (`p2-oi-p2n-c1-*`, `outin-p2.sh`). The
+final build's full runs (`mlp2n`, 17:01-17:10) are not shown: two other sessions' tests were running on the machine by
+then, and its load flow at 4x dropped 35% of its frames against the 28-29% of both quiet runs.
+
+First load (`firstload.mjs`: a phone profile, 390 by 844 at DPR 3, CPU 4x, five interleaved runs of each page, a fresh
+profile each, medians; `p2-firstload-*.txt`): the memory levels' first paint 236 → 252 ms (+7%), DOMContentLoaded 1,000 →
+1,133 ms (+13%); the chip diagram's +6% and +0.6%. The memory levels' page carries 0.73 MB more (the ladder's code and
+its scales, maps and facts); the ladder's own start-up takes 30-45 ms of the difference at 4x (`p2-loadtm.txt`, a build
+with markers), the parse of the larger script the rest. The design's gate (±10%) is met by the first paint and missed by
+DOMContentLoaded, by 3 points.

@@ -1,0 +1,109 @@
+The memory levels' regression suites of 30 September (the level moves: the porter's and the two reviewers' suites), run
+on 1 Oct 2026 on the committed page (base, 65a06da) and on part 2's page (p2m; the final page, p2n, differs from it only
+in the hand-over's start, and its rerun of the third stream, the fuzzers, the leak test, the phone suite and the smoke
+tests, 17 runs, gave the same results: regress-fuzz-p2.sh). regress-p2.sh runs them in three streams (the phone at 4x
+CPU, the desktop, the fuzzers): 43 runs in about 21 minutes on aifoundry2. Per run: the exit code (the last run's: five
+base runs were rerun after a missing helper file), the failed checks (FAIL, BAD or MISMATCH lines, and the invariants
+broken in the run's JSON record), by kind, numbers written N.
+
+fuzz-1            base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+fuzz-2            base: exit 0, 0 failed
+                  p2m:  exit 0, 1 failed {'pip false at depth N': 1}
+fuzz-3            base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+fuzzkb-1          base: exit 0, 2 failed {'unselected tab inv=[]': 2}
+                  p2m:  exit 0, 2 failed {'unselected tab inv=[]': 2}
+kb                base: exit 0, 0 failed
+                  p2m:  exit 0, 33 failed {'(record) pip false at depth N': 33}
+fuzzkb-2          base: exit 0, 3 failed {'unselected tab inv=[]': 3}
+                  p2m:  exit 0, 3 failed {'unselected tab inv=[]': 3}
+tabs390           base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+fuzzkb-3          base: exit 0, 1 failed {'unselected tab inv=[]': 1}
+                  p2m:  exit 0, 1 failed {'unselected tab inv=[]': 1}
+acc-l1            base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+parts390          base: exit 0, 0 failed
+                  p2m:  exit 1, 2 failed {'hash  lN/minion sl N': 1, 'harness error (TypeError: Cannot read properties of null)': 1}
+fuzzp-11          base: exit 0, 0 failed
+                  p2m:  exit 0, 3 failed {'harness error (TypeError: Cannot read properties of null)': 3}
+parts360          base: exit 0, 0 failed
+                  p2m:  exit 1, 2 failed {'hash  lN/minion sl N': 1, 'harness error (TypeError: Cannot read properties of null)': 1}
+fuzzp-22          base: exit 0, 0 failed
+                  p2m:  exit 0, 2 failed {'harness error (TypeError: Cannot read properties of null)': 2}
+acc-l2            base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+fuzzp-33          base: exit 0, 0 failed
+                  p2m:  exit 0, 8 failed {'harness error (TypeError: Cannot read properties of null)': 8}
+fuzz2-d           base: exit 0, 0 failed
+                  p2m:  exit 0, 1 failed {'pip false at depth N': 1}
+acc-l3            base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+fuzz2-p           base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+fuzz3-d           base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+fuzz3-p           base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+bar               base: exit 1, 1 failed {'harness error (TypeError: Cannot read properties of null)': 1}
+                  p2m:  exit 0, 6 failed {'BN New address twice, N ms apart: MISMATCH {"bank":"N","sub":"N"': 6}
+acc-scp           base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+bar2              base: exit 0, 0 failed
+                  p2m:  exit 0, 6 failed {'BN New address twice, N ms apart: MISMATCH {"bank":"N","sub":"N"': 6}
+leak              base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+swipe             base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+phone             base: exit 0, 1 failed {'FAIL Fit to screen tapped twice: the drawing zooms, no frame jum': 1}
+                  p2m:  exit 1, 3 failed {'FAIL one tap on the data cache zooms into it and shows its detai': 1, 'FAIL one tap on a part with no smaller scale selects it (no zoom': 1, 'FAIL a tap on bank N while the move to the LN ends is taken: it ': 1}
+smoke-d           base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+smoke-p           base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+acc-dram          base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+race              base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+race2             base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+race3             base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+escesc-Escape     base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+escesc-Backspace  base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+escesc--          base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+tabs360           base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+during            base: exit 0, 0 failed
+                  p2m:  exit 0, 4 failed {'(record) pip false at depth N': 4}
+tour              base: exit 0, 0 failed
+                  p2m:  exit 0, 14 failed {'(record) pip false at depth N': 14}
+bar-desk          base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+newpa             base: exit 0, 0 failed
+                  p2m:  exit 0, 2 failed {'(record) pip false at depth N': 2}
+misc              base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+remote            base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+keypace           base: exit 0, 0 failed
+                  p2m:  exit 0, 0 failed
+
+What differs, and why (all by design):
+- "pip false at depth N" (kb, during, tour, newpa and some fuzzer bursts): the suites' invariant that the levels'
+  mini-map of the scale above shows when the camera is two or more scales deep. The page no longer draws it: the Up bar
+  names the scale outside and goes there, as on the chip diagram.
+- phone (3), parts390 and parts360 (their P1, and the harness's null tap that follows), bar's B6 (MISMATCH: two taps at
+  the L2 meant to zoom two scales deep): one tap zoomed on the committed page; now a tap selects and a double-tap zooms,
+  as on the chip diagram. (bar's B6 never ran on the base: the base run stopped at B5 on a harness error.)
+- fuzzp-11, -22, -33 (harness errors in bursts with "scale"): the phone fuzzer taps the scale control #zc, which is gone
+  (the breadcrumb and the Up bar replace it); no invariant broken.
+- "unselected tab" (fuzzkb): the keyboard focus left on a tab not selected; the same on the base page.
+The fault the suites found: on the build before the fix, fuzz3-d's burst 8 broke six invariants (the fuzzer looked in
+the middle of a hand-over, which __memState().zooming did not count; tracing it found a tab clicked during a waiting
+move of the ladder losing its level). Fixed: zooming counts both cameras and the hand-over, and a move asked of the
+levels' camera cancels a hand-over on its way (ml_ladder_test.mjs T23).

@@ -153,12 +153,15 @@ const hideTip = () => { tip.style.display = 'none'; };
    focus still shows them. The pointer itself hides after 2 s without moving (CSS #stage.present.idle). */
 const tipOK = t => !($('stage').classList.contains('present') && $('stage').contains(t));
 let idleT = 0;
-document.addEventListener('pointermove', () => {
-  const st = $('stage'); st.classList.remove('idle'); clearTimeout(idleT);
-  idleT = setTimeout(() => { if (st.classList.contains('present')) st.classList.add('idle'); }, 2000);
-}, {passive: true});
-document.addEventListener('pointerover', e => { const t = e.target.closest && e.target.closest('[data-f]'); if (t && tipOK(t)) showTip(t); else hideTip(); });
-document.addEventListener('focusin', e => { const t = e.target.closest && e.target.closest('[data-f]'); if (t) showTip(t); else hideTip(); });
-document.addEventListener('focusout', hideTip);
-window.addEventListener('scroll', hideTip, {passive: true});
+// (a page whose own handlers show the sources, the memory levels', sets PAGE_TIPS false: they find a fact of either)
+if (typeof PAGE_TIPS === 'undefined' || PAGE_TIPS) {
+  document.addEventListener('pointermove', () => {
+    const st = $('stage'); st.classList.remove('idle'); clearTimeout(idleT);
+    idleT = setTimeout(() => { if (st.classList.contains('present')) st.classList.add('idle'); }, 2000);
+  }, {passive: true});
+  document.addEventListener('pointerover', e => { const t = e.target.closest && e.target.closest('[data-f]'); if (t && tipOK(t)) showTip(t); else hideTip(); });
+  document.addEventListener('focusin', e => { const t = e.target.closest && e.target.closest('[data-f]'); if (t) showTip(t); else hideTip(); });
+  document.addEventListener('focusout', hideTip);
+  window.addEventListener('scroll', hideTip, {passive: true});
+}
 
