@@ -426,12 +426,7 @@
       $('light').className = 'light ' + (LV[lvl] || 'lv-unk');
       fill('light-word', word);
     }
-    const t = $('asof');
-    t.textContent = clock(GEN) + (ZONE ? ' ' + ZONE : '');
-    if (isNum(GEN)) t.setAttribute('datetime', new Date(GEN).toISOString());
-    fill('age', agoText(GEN));
-    $('next-lead').textContent = stale ? 'next check: ' : 'next check about ';
-    fill('next', stale ? 'unknown, the collector may be stopped' : clock(nextCheck(Date.now())));
+    // the "Data as of ..." line was removed (2 Oct 2026): the stale banner below is the only age notice
     $('stale').hidden = !stale;
     if (stale) { fill('stale-age', dur(age)); fill('stale-hb', dur(HB_MIN)); fill('stale-host', COL.host || 'aifoundry2'); fill('stale-maint', COL.maintainer || 'its maintainer'); }
   }
@@ -1287,17 +1282,9 @@
       const more = !cu.stale && isNum(cu.now_more) && cu.now_more > 0 ? `; and ${plural(cu.now_more, 'more hold')} not listed` : '';
       if (now.length) sub.push('In use now: ' + now.map(holdText).join('; ') + more + '.');
       if (was.length) sub.push(`Held when ${h} last answered (${clock(uh.as_of_ms)}): ` + was.map(holdText).join('; ') + '; whether it still is, is unknown.');
-      const act = Array.isArray(cu.activity_min) ? cu.activity_min.length : 0;
-      const bin = isNum(cu.activity_bin_s) && cu.activity_bin_s > 60 ? cu.activity_bin_s : 0;
-      if (act) sub.push(bin ? `Its queues moved in ${plural(act, durS(bin) + ' period')} (et-usage summed a busy log's minutes).` : `Its queues moved in ${plural(act, 'minute')}.`);
-      const gaps = gapsOf(h), total = (US1 - US0) / 1000, logged = total - gaps.reduce((s, g) => s + (g.b - g.a) / 1000, 0);
-      if (gaps.length) sub.push(`Logged ${durS(logged)} of the ${UHOURS} h; not logged ${gaps.slice(0, 3).map(g => spanText(g.a, g.b, false, false) + ' (' + g.why + ')').join(', ')}${gaps.length > 3 ? ', …' : ''}.`);
-      else sub.push(`Logged the whole ${UHOURS} h.`);
+      const gaps = gapsOf(h);   // concise (2 Oct 2026): only what is missing; queue ticks and bar merging are in the chart
+      if (gaps.length) sub.push(`Not logged: ${gaps.slice(0, 3).map(g => spanText(g.a, g.b, false, false) + ' (' + g.why + ')').join(', ')}${gaps.length > 3 ? ', …' : ''}.`);
       if (cu.stale) sub.push(`As of ${clock(uh.as_of_ms)}, when ${h} last answered.`);
-      const lk = Array.isArray(cu.unseen_lock) ? cu.unseen_lock : [];
-      if (unseen && lk.length) sub.push(`Unseen (?) opens were made while ${lk.join(', ')} held its lock (a hint about whose they were).`);
-      const mg = isNum(cu.merged_gap_s) ? cu.merged_gap_s : uh.merged_gap_s;
-      if (isNum(mg) && mg) sub.push(`A busy log: one login's runs less than ${durS(mg)} apart are drawn as one bar (the times held are the runs' own).`);
       div.append(head, ': ', ...main, '.', E('span', 'cu-sub', sub.join(' ')));
       root.append(div);
     }
@@ -1373,10 +1360,8 @@
     }
     for (const h of HOSTS) if (series('hosts', h, 'up')) rows.push({kind: 'host', id: h, label: h, runs: hostRuns(h)});
     const kept = rows.filter(r => r.kind === 'card');
-    fill('tl-cards', logged.length ? (kept.length
-      ? `Cards with a card-use log (${logged.map(id => cardName(id)).join(', ')}) are in Card use, last 24 hours, above; the rows here show the others as held at each 10-minute check.`
-      : 'Every card has a card-use log: see Card use, last 24 hours, above. The rows here are the machines.')
-      : 'Card rows show who held each card at each 10-minute check (no machine logs card use yet).');
+    fill('tl-cards', logged.length ? (kept.length ? `Cards with a card-use log (${logged.map(id => cardName(id)).join(', ')}) are in Card use, above.` : '')
+      : 'Card rows show who held each card at each check.');
     const holders = [...new Set(kept.flatMap(r => r.runs.filter(x => x.key === 'held').map(x => x.who)))].sort(natural);
     CK.legend('tl-legend', [
       ...holders.map(u => ({key: 'h:' + u, label: `held by ${u === 'system' ? 'system or CI' : u}`, color: u === 'system' ? OTHER_COLOR : userColor(u), mark: 'box'})),

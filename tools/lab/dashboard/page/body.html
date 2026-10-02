@@ -271,8 +271,6 @@ main{max-width:1280px}
   <span id="fixture-pill" class="pill lv-fix" hidden><i aria-hidden="true"></i>MADE-UP DATA</span>
  </div>
  <p id="headline" class="dh-headline">—</p>
- <p class="byline dh-meta">Data as of <time id="asof">—</time> (<span id="age">—</span>) · <span id="cadence">checked every 10 min,
- republished on any change and at least every 60 min</span> · <span id="next-lead">next check about </span><span id="next">—</span></p>
  <div class="dh-tools"><nav id="toclist" class="dh-tools" aria-label="Sections" style="margin:0"><a class="newuser" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener">New user? Start here</a><a href="#start-here">Start here</a><a href="#reports">Reports</a><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram" target="_blank" rel="noopener">Chip diagram</a><a href="#live">Live</a><a href="#alerts">Alerts</a><a href="#card-use">Card use</a><a href="#people">People</a><a href="#machines">Machines</a><a href="#last-48-hours">Last 48 hours</a></nav></div>
 </header>
 <div id="stale" class="banner lv-bad" hidden><b>The data is <span id="stale-age">old</span> old.</b> The page expects a new
@@ -285,16 +283,13 @@ the deploy may have stopped: nothing on it is current. Tell <span id="stale-main
 <div id="kpis" class="kpis"></div>
 
 <h2 id="start-here">Start here</h2>
-<p class="small">This page is the lab's main starting point: what is happening on the machines now, and where everything else lives.</p>
 <div class="sh-grid">
- <a class="sh-card" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener"><b>New to the lab?</b><span>One prompt for your coding agent: it picks a free card, sets you up and runs a first test.</span></a>
- <a class="sh-card" href="#live"><b>What is happening now</b><span>Live CPU, memory, disk and card temperatures of the three machines, every second; click a temperature panel for its hour, day or week.</span></a>
- <a class="sh-card" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman" target="_blank" rel="noopener"><b>Known problems</b><span>What trips people up, what is fixed, and the requests for the lab lead.</span></a>
- <a class="sh-card" href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram" target="_blank" rel="noopener"><b>Chip diagram</b><span>The ET-SoC-1 interactively: click through the die, a shire and a minion, and watch data flows.</span></a>
- <a class="sh-card" href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability" target="_blank" rel="noopener"><b>The reports</b><span>The observability hub: every measurement behind the chip's power, heat and speed.</span></a>
+ <a class="sh-card" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener"><b>New to the lab?</b><span>One prompt for your coding agent.</span></a>
+ <a class="sh-card" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman" target="_blank" rel="noopener"><b>Known problems</b><span>What trips people up, and the requests for the lab lead.</span></a>
+ <a class="sh-card" href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram" target="_blank" rel="noopener"><b>Chip diagram</b><span>The ET-SoC-1, interactively.</span></a>
+ <a class="sh-card" href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability" target="_blank" rel="noopener"><b>The reports</b><span>The observability hub.</span></a>
 </div>
 <h3 id="reports">Observability reports: four reading paths</h3>
-<p class="small">The same four paths as the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#start" target="_blank" rel="noopener">hub's own &ldquo;Start here&rdquo;</a>; the hub has the contents and the chip in brief.</p>
 <div class="rp-list">
 <details class="rp"><summary><span class="q">A. Why is this chip low power, and what does a FLOP cost?</span> <span class="who">For a newcomer, about 45 minutes.</span></summary><ol><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power" target="_blank" rel="noopener">Why is the ET-SoC-1 low power?</a> <span class="rf">the equation measured term by term, against an A100</span></li><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment" target="_blank" rel="noopener">The Horace experiment</a>, §1, §3, §6 <span class="rf">why the data, not the FLOPs, sets the watts</span></li><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual" target="_blank" rel="noopener">The energy manual</a>, §1–§3 <span class="rf">the card at rest, awake, per instruction</span></li><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage" target="_blank" rel="noopener">The DVFS loop and its leakage</a>, §1–§2, §5 <span class="rf">the governor, and what leakage costs</span></li></ol></details>
 <details class="rp"><summary><span class="q">B. Writing fast kernels.</span> <span class="who">For a programmer.</span></summary><ol><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive" target="_blank" rel="noopener">Test drive</a> <span class="rf">the toolchain, the simulator, a first SGEMM</span> <span class="base">18 Sep baseline</span></li><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency" target="_blank" rel="noopener">Matmul efficiency</a> <span class="rf">the tensor unit near its peak</span> <span class="base">18 Sep baseline; energies from three cards</span></li><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy" target="_blank" rel="noopener">Memory hierarchy</a> <span class="rf">latency and bandwidth of every level</span> <span class="base">18 Sep baseline; energies from the energy manual</span></li><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points" target="_blank" rel="noopener">Ridge points</a> <span class="rf">how much work per byte each level needs</span></li><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication" target="_blank" rel="noopener">On-chip communication</a> <span class="rf">the mesh, messages, trees, and the TensorSend trap</span> <span class="base">18 Sep baseline; energies from the energy manual</span></li><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay" target="_blank" rel="noopener">Hand it to the next shire</a> <span class="rf">relaying between shires instead of DRAM</span></li><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line" target="_blank" rel="noopener">One hot line stops a shire</a> <span class="rf">contended atomics, and what to do instead</span></li><li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute" target="_blank" rel="noopener">Sparse compute</a> <span class="rf">what the tensor unit does with zeros</span> <span class="base">18 Sep baseline; power from three cards</span></li></ol></details>
@@ -317,11 +312,6 @@ details.rp .rf{color:var(--ink-2,#555)}details.rp .rf::before{content:"— "}det
 </style>
 
 <h2 id="live">Live</h2>
-<p class="small">Each machine streams a reading every second (<code>tools/lab/live/live-collector.py</code>): CPU per thread, load,
-memory, disk, temperatures (CPU package, NVMe drive, network chip and each ET card's die), its cards' PCIe links and
-locks, and the busiest processes by name. A card's temperature is read through its management node, which admits one
-process at a time, so the collector reads it (in about 4 ms) only while nobody holds a card on that machine; while
-someone does, the page shows the last reading. The small line beside each card is its last 48 hours (dashed: 95 °C).</p>
 <style>
 /* the live console: dark and glowing in either theme (the owner asked for a sci-fi look, 2 Oct 2026) */
 .lv-console{--bg:#060a13;--panel:#0a1322;--edge:rgba(56,189,248,.28);--cy:#22d3ee;--mg:#c084fc;--am:#fbbf24;--rd:#fb4f6b;--gr:#34d399;
@@ -411,12 +401,7 @@ someone does, the page shows the last reading. The small line beside each card i
 <div id="alert-list"></div>
 
 <h2 id="card-use">Card use, last 24 hours</h2>
-<p class="small" id="cu-note">Who held each card, from the card-use logger on its machine (<code>et-usage</code>): a bar runs from a
-program's first open of the card's device nodes or lock to its last close, coloured by login (at least 2 px wide, so a run of
-seconds stays visible); one login's runs closer together than the drawing can separate share a light bar, with each run solid
-inside it, so a light stretch is not time held; the ticks under a bar are minutes in which the card's queues moved; hatched spans
-were not logged, which is not the same as idle. Hours in <span id="cu-zone">the lab's time</span>. Hover, tap or use the arrow
-keys on a bar for its login, times, time held and programs.</p>
+<p class="small" id="cu-note">A bar runs from a program's first open of a card to its last close, coloured by login; hatched spans were not logged. <span id="cu-zone">Lab time</span>. Hover a bar for its details.</p>
 <div id="cu-legend"></div>
 <div id="cu-chart"></div>
 <div id="cu-extra">
@@ -427,39 +412,27 @@ keys on a bar for its login, times, time held and programs.</p>
  <tbody></tbody>
 </table></div>
 <h3 id="card-use-7-days">The last 7 days</h3>
-<p class="small">Time held per card and day (the lab's dates), today first; each day names its busiest login, "+2" for two
-more (all of them, with their time, in the day's tooltip).</p>
 <div class="table-wrap"><table id="cu-days"></table></div>
 </div>
 
 <h2 id="people">People</h2>
-<p class="small" id="people-note">Everyone seen on a lab machine: logged in (a login session, or an open terminal such as a tmux
-pane), with processes running, or holding a card; an account's own background services (which linger keeps running for
-someone who is not there) are not counted. Active means a terminal used in the last 30 minutes, or a session with no terminal
-(an IDE's, say). "Doing" sorts their processes into coarse kinds on the machine itself (on a card, AI agent, building,
-simulator, Python, editor; else shell only, or other processes): no command, file or process name leaves the machine, except
-the name of a program holding a card, which <code>et-who</code> and <code>et-usage</code> show every user. A person seen only
-on machines that are not answering is "unknown".</p>
+<p class="small" id="people-note">Everyone logged in, running processes or holding a card. &ldquo;Doing&rdquo; is a coarse kind of activity: no commands or files leave the machine.</p>
 <div class="table-wrap"><table id="ptable">
  <thead><tr><th>Login</th><th>Status</th><th>Doing</th><th>Machines</th><th class="num">Idle</th><th>Card now</th><th>Card use, 24 h</th><th class="num">Processes</th></tr></thead>
  <tbody></tbody>
 </table></div>
 
 <h2 id="machines">Machines and cards</h2>
-<p class="small">Each machine's vitals over the last 48 hours, then its cards. Card temperatures and power come from the newest
-experiment file on that machine or, when sampling is switched on, a 2-second live sample; the error counters are the driver's
-own, read from the host without touching the card. Click a card for every number and its source.</p>
+<p class="small">Click a card for every number and its source.</p>
 <div id="hostgrid" class="hostgrid"></div>
 
 <h2 id="last-48-hours">Last 48 hours</h2>
-<p class="small">Whether each machine answered, one check every 10 minutes: down (Tailscale says it is offline) is not the same
-as no answer (ssh timed out or failed) or a wait for a Tailscale approval. <span id="tl-cards">—</span> Hover, tap or use the arrow
-keys on a bar for its times.</p>
+<p class="small">One check every 10 minutes. <span id="tl-cards">—</span> Hover a bar for its times.</p>
 <div id="tl-legend"></div>
 <div id="tl"></div>
 <div class="charts2">
- <div><div class="chart-title"><a class="hl" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history#v=week" target="_blank" rel="noopener">Die temperature &#8599;</a></div><p class="chart-sub">Where a reading exists: an experiment file or a live sample · <a class="hl" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history#v=day" target="_blank" rel="noopener">every 5 s in the history: hour, day, week &#8599;</a></p><div id="leg-die"></div><div id="ch-die"></div></div>
- <div><div class="chart-title"><a class="hl" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history#v=week" target="_blank" rel="noopener">Board power &#8599;</a></div><p class="chart-sub">Where a reading exists: an experiment file or a live sample · <a class="hl" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history#v=day" target="_blank" rel="noopener">every 5 s in the history: hour, day, week &#8599;</a></p><div id="leg-w"></div><div id="ch-w"></div></div>
+ <div><div class="chart-title"><a class="hl" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history#v=week" target="_blank" rel="noopener">Die temperature &#8599;</a></div><div id="leg-die"></div><div id="ch-die"></div></div>
+ <div><div class="chart-title"><a class="hl" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history#v=week" target="_blank" rel="noopener">Board power &#8599;</a></div><div id="leg-w"></div><div id="ch-w"></div></div>
 </div>
 <div class="chart-title" style="margin-top:18px">Sessions per machine</div>
 <div id="leg-sess"></div>
@@ -467,15 +440,11 @@ keys on a bar for its times.</p>
 
 <h2 id="about-this-page">About this page</h2>
 <div class="about">
-<p>A collector on <b id="ab-host">aifoundry2</b> reads the three machines every <span id="ab-iv">10</span> minutes, read-only and
-at low priority: <code>/proc</code>, the card driver's counters in sysfs, <code>et-who</code>, the lab's health check
-(<code>et-lab-health</code>, rev 3, sent over ssh), <code>et-lab-manifest</code>, the card-use log (<code>et-usage</code>),
-nodewatch's logs, and on aifoundry2 whether Tailscale sees each machine online. It bakes the result into this page and republishes it when something changed, and at least
-every <span id="ab-hb">60</span> minutes; an open tab reloads itself on each new version. It never opens a card's device
-node; a live card sample is off unless someone switches it on, and then waits for a free card.</p>
-<p><span id="ab-vis">It names the lab's users.</span> For each person it shows a login name, session and process counts,
-idle time, coarse kinds of activity, card holds and card use with the programs' names; never commands, files, addresses or where
-anyone connects from. The collector's own account is listed like everyone else's.</p>
+<p>A collector on <b id="ab-host">aifoundry2</b> reads the three machines every <span id="ab-iv">10</span> minutes, read-only
+(<code>/proc</code>, sysfs counters, <code>et-who</code>, <code>et-lab-health</code>, <code>et-usage</code>) and republishes when something
+changed, at least every <span id="ab-hb">60</span> minutes; an open tab reloads itself. It never opens a card's device node.</p>
+<p><span id="ab-vis">It names the lab's users.</span> Per person: login, session and process counts, idle time, coarse activity,
+card holds and use; never commands, files, addresses or where anyone connects from.</p>
 <p>Something wrong or stale on this page? Tell <b id="ab-maint">the maintainer</b>, who runs the collector.</p>
 <details class="maint"><summary id="for-the-maintainer">For the maintainer (<span id="ab-maint2">the maintainer</span>): updating and checking it</summary>
 <ul>
