@@ -1,71 +1,164 @@
 /* live.js: the dashboard's live section, drawn from the spacesheep streams aifoundry/<host> (one JSON line a second
-   from tools/lab/live/live-collector.py on each machine). window.ss exists only when the page is open on spacesheep.dev. */
+   from tools/lab/live/live-collector.py on each machine). window.ss exists only when the page is open on spacesheep.dev.
+   Each card is built once and updated in place, so an open "Top processes" fold stays open; its rows slide to their
+   new places, ordered by a smoothed CPU share so they do not swap places every second.
+   Temperatures: the host's sensors stream live; the ET card's own die temperature is invisible to Linux, so it comes
+   from the dashboard's gated ettelem sample in D (every 30 minutes, only when the card is free), drawn over 48 hours. */
 (function () {
   var HOSTS = ["aifoundry1", "aifoundry2", "aifoundry3"];
-  var grid = document.getElementById("live-grid"), sel = document.getElementById("live-sel");
-  var topT = document.getElementById("live-top"), note = document.getElementById("live-state");
+  var grid = document.getElementById("live-grid"), note = document.getElementById("live-state");
   if (!grid) return;
-  var last = {}, hist = {}, stat = {};
+  var ROW_H = 22, TOP_N = 8, EMA = 0.35, KEEP = 300;
+  var TS = [["cpu", "CPU", "var(--c1,#3b82c4)"], ["nvme", "NVMe", "var(--c3,#7c5cc4)"], ["nic", "NIC", "var(--c2,#2f9e8f)"]];
+  var HIST = (typeof D !== "undefined" && D.history) || {}, CARDS = (typeof D !== "undefined" && D.cards) || {};
+  var last = {}, hist = {}, ui = {};
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function gb(mb) { return (mb / 1024).toFixed(mb >= 10240 ? 0 : 1); }
   function age(h) { var v = last[h]; return v ? (Date.now() - v.t) / 1000 : Infinity; }
-  function spark(points) {
-    if (!points.length) return "";
-    var w = 160, hgt = 28, n = points.length, d = "";
-    points.forEach(function (p, i) { d += (i ? "L" : "M") + (n < 2 ? 0 : (i * w / (n - 1))).toFixed(1) + "," + (hgt - p * hgt / 100).toFixed(1); });
-    return '<svg class="lv-spark" viewBox="0 0 ' + w + ' ' + hgt + '" preserveAspectRatio="none" aria-hidden="true"><path d="' + d + '"/></svg>';
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+
+  function build(h) {
+    var c = el("div", "lv-card off");
+    c.innerHTML = '<div class="lv-head"><b>' + h + '</b><span class="lv-dot"></span><span class="lv-age">not streaming</span></div>' +
+      '<div class="lv-body"><div class="lv-row"><span class="lv-big">–</span><span class="small lv-sub"></span></div>' +
+      '<div class="lv-cores" aria-label="CPU per thread"></div><svg class="lv-spark" viewBox="0 0 160 28" preserveAspectRatio="none" aria-hidden="true"><path/></svg>' +
+      '<div class="lv-row small lv-mem"></div><div class="lv-row small lv-disk"></div>' +
+      '<div class="lv-temps"><div class="lv-row small lv-tleg"></div><svg class="lv-tspark" viewBox="0 0 160 34" preserveAspectRatio="none" aria-hidden="true"></svg>' +
+      '<div class="lv-die small"></div></div>' +
+      '<div class="lv-row lv-cards"></div>' +
+      '<details class="lv-topd"><summary>Top processes</summary><div class="lv-top"></div></details></div>';
+    grid.appendChild(c);
+    ui[h] = { card: c, rows: {}, ema: {},
+      dot: c.querySelector(".lv-dot"), age: c.querySelector(".lv-age"), big: c.querySelector(".lv-big"), sub: c.querySelector(".lv-sub"),
+      cores: c.querySelector(".lv-cores"), spark: c.querySelector(".lv-spark path"), mem: c.querySelector(".lv-mem"),
+      cards: c.querySelector(".lv-cards"), top: c.querySelector(".lv-top"), disk: c.querySelector(".lv-disk"),
+      tleg: c.querySelector(".lv-tleg"), tsvg: c.querySelector(".lv-tspark"), die: c.querySelector(".lv-die") };
+    drawDie(h);
   }
-  function card(h) {
-    var v = last[h], a = age(h), live = a < 5;
-    var head = '<div class="lv-head"><b>' + h + '</b><span class="lv-dot' + (live ? " on" : a < 60 ? " stale" : "") + '"></span><span class="lv-age">' +
-      (v ? (live ? "live" : "last reading " + Math.round(a) + " s ago") : "not streaming") + "</span></div>";
-    if (!v) return '<div class="lv-card off">' + head + '<p class="small">No live data from this machine yet.</p></div>';
-    var cores = (v.cpu || []).map(function (c) { return '<i style="height:' + Math.max(2, c) + '%" title="' + c + '%"></i>'; }).join("");
+
+  function path(vals, w, hgt, lo, hi, bridge) {  // SVG path; a run of more than `bridge` nulls breaks the line
+    var n = vals.length, d = "", pen = false, gap = 0;
+    vals.forEach(function (v, i) {
+      if (v == null) { if (++gap > (bridge || 0)) pen = false; return; }
+      gap = 0;
+      var x = n < 2 ? 0 : i * w / (n - 1), y = hgt - (Math.max(lo, Math.min(hi, v)) - lo) * hgt / (hi - lo);
+      d += (pen ? "L" : "M") + x.toFixed(1) + "," + y.toFixed(1); pen = true;
+    });
+    return d;
+  }
+
+  /* the ET card(s) of host h: last die sample and a 48-hour line from D.history.cards (10-minute steps) */
+  function drawDie(h) {
+    var u = ui[h], keys = Object.keys(CARDS).filter(function (k) { return k === h || k.indexOf(h + "-") === 0; });
+    var html = "";
+    keys.forEach(function (k) {
+      var t = (CARDS[k] || {}).telemetry || {}, n = k === h ? 0 : k.slice(h.length + 2);
+      var ser = ((HIST.cards || {})[k] || {}).die_c || [];
+      if (t.die_c == null && !ser.some(function (x) { return x != null; })) {
+        html += '<div class="lv-dierow"><span>card ' + esc(n) + ' die: no reading</span></div>'; return;
+      }
+      var lo = 30, hi = 130, mx = Math.max.apply(null, ser.filter(function (x) { return x != null; }).concat([t.die_c || 0]));
+      var hot = t.die_c >= 95 ? " hot" : "";
+      var when = t.at_ms ? new Date(t.at_ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "?";
+      var ago = t.at_ms ? Math.round((Date.now() - t.at_ms) / 60000) : null;
+      html += '<div class="lv-dierow"><span class="lv-dieval' + hot + '">card ' + esc(n) + " die " + (t.die_c == null ? "?" : t.die_c + " °C") + "</span>" +
+        '<svg class="lv-diespark" viewBox="0 0 120 16" preserveAspectRatio="none" role="img" aria-label="die temperature, last 48 hours, peak ' + mx + ' °C"><title>die temperature, last 48 h (peak ' + mx + ' °C); dashed: 95 °C</title>' +
+        '<path class="lv-die95" d="M0,' + (16 - (95 - lo) * 16 / (hi - lo)).toFixed(1) + 'H120"/><path d="' + path(ser, 120, 16, lo, hi, 6) + '"/></svg>' +
+        '<span class="muted" title="Linux cannot read the die temperature without opening the card, so this is the dashboard\'s sample, taken every 30 min when the card is free">sampled ' + when + (ago != null && ago > 40 ? " (" + (ago >= 120 ? Math.round(ago / 60) + " h" : ago + " min") + " ago)" : "") + "</span></div>";
+    });
+    u.die.innerHTML = html;
+  }
+
+  function updateTop(h, v) {
+    var u = ui[h], seen = {};
+    (v.top || []).forEach(function (r) {  // [user, comm, pid, cpu, rss_mb]
+      var k = r[0] + "|" + r[1] + "|" + r[2];
+      seen[k] = r;
+      u.ema[k] = u.ema[k] == null ? r[3] : u.ema[k] + EMA * (r[3] - u.ema[k]);
+    });
+    Object.keys(u.ema).forEach(function (k) { if (!seen[k]) { u.ema[k] *= 1 - EMA; if (u.ema[k] < 0.05) delete u.ema[k]; } });
+    var order = Object.keys(u.ema).sort(function (a, b) { return u.ema[b] - u.ema[a]; }).slice(0, TOP_N);
+    var keep = {};
+    order.forEach(function (k, i) {
+      keep[k] = 1;
+      var row = u.rows[k];
+      if (!row) {
+        var p = k.split("|");
+        row = el("div", "lv-tr entering", '<span class="lv-cpu"></span><span class="lv-user">' + esc(p[0]) + '</span><code class="lv-proc">' + esc(p[1]) + "</code>");
+        row.style.transform = "translateY(" + (i * ROW_H) + "px)";
+        u.top.appendChild(row); u.rows[k] = row;
+        requestAnimationFrame(function () { row.classList.remove("entering"); });
+      }
+      row.style.transform = "translateY(" + (i * ROW_H) + "px)";
+      var pct = seen[k] ? seen[k][3] : 0;
+      row.firstChild.textContent = pct.toFixed(pct < 10 ? 1 : 0) + "%";
+      row.firstChild.style.setProperty("--w", Math.min(100, pct) + "%");
+    });
+    Object.keys(u.rows).forEach(function (k) {
+      if (keep[k]) return;
+      var row = u.rows[k]; delete u.rows[k];
+      row.classList.add("leaving");
+      setTimeout(function () { row.remove(); }, 400);
+    });
+    u.top.style.height = (Math.max(order.length, 1) * ROW_H) + "px";
+  }
+
+  function update(h) {
+    var u = ui[h], v = last[h], a = age(h), live = a < 5;
+    u.card.className = "lv-card" + (v ? "" : " off");
+    u.dot.className = "lv-dot" + (live ? " on" : a < 60 ? " stale" : "");
+    u.age.textContent = v ? (live ? "live" : "last reading " + Math.round(a) + " s ago") : "not streaming";
+    if (!v) return;
+    u.big.textContent = v.cpu_all.toFixed(0) + "%";
+    u.sub.textContent = "CPU, " + (v.cpu || []).length + " threads · load " + (v.load || []).join(" ");
+    var cpu = v.cpu || [];
+    while (u.cores.children.length < cpu.length) u.cores.appendChild(el("i"));
+    while (u.cores.children.length > cpu.length) u.cores.lastChild.remove();
+    cpu.forEach(function (x, i) { u.cores.children[i].style.height = Math.max(2, x) + "%"; u.cores.children[i].title = x + "%"; });
+    var pts = (hist[h] || []).map(function (x) { return x.cpu_all; }), n = pts.length, d = "";
+    pts.forEach(function (p, i) { d += (i ? "L" : "M") + (n < 2 ? 0 : i * 160 / (n - 1)).toFixed(1) + "," + (28 - p * 28 / 100).toFixed(1); });
+    u.spark.setAttribute("d", d);
     var m = v.mem || {}, used = m.total_mb ? 100 * m.used_mb / m.total_mb : 0;
-    var cards = (v.cards || []).map(function (c) {
+    u.mem.innerHTML = "memory " + gb(m.used_mb) + " of " + gb(m.total_mb) + ' GB<span class="lv-bar"><i style="width:' + used.toFixed(0) + '%"></i></span>';
+    u.disk.innerHTML = (v.disk || []).map(function (d) {
+      var tot = d.used_gb + d.free_gb, pct = tot ? 100 * d.used_gb / tot : 0;
+      return '<span>disk <code>' + esc(d.mount) + "</code> " + d.used_gb.toFixed(0) + " GB used, " + d.free_gb.toFixed(0) + ' GB free<span class="lv-bar' + (pct > 90 ? " full" : "") + '"><i style="width:' + pct.toFixed(0) + '%"></i></span></span>';
+    }).join(" ");
+    var tp = v.temps || {}, hs = hist[h] || [], all = [], lo, hi;
+    hs.forEach(function (x) { TS.forEach(function (s) { var q = (x.temps || {})[s[0]]; if (q != null) all.push(q); }); });
+    if (all.length) {
+      lo = Math.floor(Math.min.apply(null, all) / 5) * 5 - 5; hi = Math.ceil(Math.max.apply(null, all) / 5) * 5 + 5;
+      u.tsvg.innerHTML = TS.map(function (s) {
+        return '<path style="stroke:' + s[2] + '" d="' + path(hs.map(function (x) { return (x.temps || {})[s[0]]; }), 160, 34, lo, hi) + '"/>';
+      }).join("");
+    }
+    u.tleg.innerHTML = TS.filter(function (s) { return tp[s[0]] != null; }).map(function (s) {
+      return '<span class="lv-tk" style="--k:' + s[2] + '">' + s[1] + " " + tp[s[0]].toFixed(0) + " °C</span>";
+    }).join("") + (hs.length > 1 && all.length ? '<span class="muted">last ' + Math.max(1, Math.round((hs[hs.length - 1].t - hs[0].t) / 60000)) +
+      " min, scale " + lo + "–" + hi + " °C</span>" : "");
+    u.cards.innerHTML = (v.cards || []).map(function (c) {
       var cls = c.ok === false ? "bad" : c.held ? "busy" : "ok";
       return '<span class="lv-chip ' + cls + '">card ' + c.n + ": " + esc(c.link) + (c.ok === false ? "" : c.held ? " · in use" : " · free") + "</span>";
     }).join(" ");
-    return '<div class="lv-card">' + head +
-      '<div class="lv-row"><span class="lv-big">' + v.cpu_all.toFixed(0) + '%</span><span class="small">CPU, ' + (v.cpu || []).length +
-      " threads · load " + (v.load || []).join(" ") + "</span></div>" +
-      '<div class="lv-cores" aria-label="per-thread CPU">' + cores + "</div>" + spark((hist[h] || []).map(function (x) { return x.cpu_all; })) +
-      '<div class="lv-row small">memory ' + gb(m.used_mb) + " of " + gb(m.total_mb) + ' GB<span class="lv-bar"><i style="width:' + used.toFixed(0) + '%"></i></span></div>' +
-      '<div class="lv-row">' + cards + "</div></div>";
   }
-  function topRows() {
-    var which = sel ? sel.value : "all", rows = [];
-    HOSTS.forEach(function (h) {
-      if ((which === "all" || which === h) && last[h] && age(h) < 60) (last[h].top || []).forEach(function (r) { rows.push([h].concat(r)); });
-    });
-    rows.sort(function (a, b) { return b[4] - a[4] || b[5] - a[5]; });
-    rows = rows.slice(0, which === "all" ? 25 : 15);
-    var head = "<thead><tr>" + (which === "all" ? "<th>Machine</th>" : "") + "<th>User</th><th>Process</th><th>PID</th><th>CPU %</th><th>Memory MB</th></tr></thead>";
-    var body = rows.map(function (r) {
-      return "<tr>" + (which === "all" ? "<td>" + r[0] + "</td>" : "") + "<td>" + esc(r[1]) + "</td><td><code>" + esc(r[2]) + "</code></td><td>" + r[3] +
-        '</td><td class="num">' + r[4].toFixed(1) + '</td><td class="num">' + r[5] + "</td></tr>";
-    }).join("");
-    return head + "<tbody>" + (body || '<tr><td colspan="6" class="small">No live data yet.</td></tr>') + "</tbody>";
-  }
-  function render() {
-    grid.innerHTML = HOSTS.map(card).join("");
-    if (topT) topT.innerHTML = topRows();
-    var n = HOSTS.filter(function (h) { return age(h) < 5; }).length;
-    if (note) note.textContent = n + " of " + HOSTS.length + " machines streaming";
+
+  HOSTS.forEach(build);
+  function tick() {
+    HOSTS.forEach(update);
+    if (note) note.textContent = HOSTS.filter(function (h) { return age(h) < 5; }).length + " of " + HOSTS.length + " machines streaming";
   }
   if (!(window.ss && window.ss.stream)) {
     if (note) note.textContent = "Live data appears when this page is open on spacesheep.dev.";
-    render();
+    tick();
     return;
   }
   HOSTS.forEach(function (h) {
-    window.ss.stream("aifoundry/" + h).keep(120).draw(function (v, history, st) {
-      if (v) last[h] = v;
+    window.ss.stream("aifoundry/" + h).keep(KEEP).draw(function (v, history) {
+      if (v && (!last[h] || v.t !== last[h].t)) { last[h] = v; updateTop(h, v); }
       hist[h] = (history || []).map(function (x) { return x && x.v ? x.v : x; }).filter(function (x) { return x && typeof x.cpu_all === "number"; });
-      stat[h] = st;
+      update(h);
     });
   });
-  if (sel) sel.addEventListener("change", render);
-  render();
-  setInterval(render, 1000);
+  tick();
+  setInterval(tick, 1000);
 })();

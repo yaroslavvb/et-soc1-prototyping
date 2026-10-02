@@ -4,7 +4,9 @@
 Read-only and unprivileged: /proc, /sys and /proc/locks only. It never opens an ET-SoC-1 device node, never takes a
 card lock, and never reads another user's command line (only the 15-character process name the kernel shows to all),
 Each line: {"host", "t" (ms), "up_s", "cpu": [per-core %], "cpu_all", "load": [1, 5, 15], "mem": {...},
-"top": [[user, comm, pid, cpu%, rss_mb], ...], "nproc", "cards": [{"n", "pci", "link", "ok", "held"}]}.
+"top": [[user, comm, pid, cpu%, rss_mb], ...], "nproc", "cards": [{"n", "pci", "link", "ok", "held"}],
+"disk": [{"mount", "used_gb", "free_gb"}] for / and /home,
+"temps": {"cpu", "nvme", "nic"} (°C from hwmon; the ET card's own temperature is not visible to Linux)}.
 """
 import json
 import os
@@ -75,6 +77,22 @@ def mem():
             "swap_used_mb": round((m.get("SwapTotal", 0) - m.get("SwapFree", 0)) / 1024)}
 
 
+def disk():
+    """/ and, when it is a separate filesystem, /home. On ZFS (aifoundry1) the free space is the pool's, shared."""
+    out, devs = [], set()
+    for m in ("/", "/home"):
+        try:
+            st, dev = os.statvfs(m), os.stat(m).st_dev
+        except OSError:
+            continue
+        if dev in devs:
+            continue
+        devs.add(dev)
+        out.append({"mount": m, "used_gb": round((st.f_blocks - st.f_bfree) * st.f_frsize / 1e9, 1),
+                    "free_gb": round(st.f_bavail * st.f_frsize / 1e9, 1)})
+    return out
+
+
 def lock_inodes():
     """inodes of files that hold a POSIX or flock lock right now"""
     held = set()
@@ -90,6 +108,50 @@ def lock_inodes():
     except (OSError, ValueError, IndexError):
         pass
     return held
+
+
+# hwmon sensors worth a graph: (key, hwmon name, label). acpitz is left out: on all three boards it reads constants
+# (16.8 and 27.8 °C).
+SENSORS = [("cpu", "coretemp", "Package id 0"), ("nvme", "nvme", "Composite"), ("nic", "enp7s0", "MAC Temperature")]
+
+
+def find_sensors():
+    """key -> path of its temp*_input, found once"""
+    out = {}
+    base = "/sys/class/hwmon"
+    try:
+        mons = sorted(os.listdir(base))
+    except OSError:
+        return out
+    for m in mons:
+        d = f"{base}/{m}"
+        try:
+            name = open(f"{d}/name").read().strip()
+            files = sorted(f for f in os.listdir(d) if f.startswith("temp") and f.endswith("_input"))
+        except OSError:
+            continue
+        for key, want_name, want in SENSORS:
+            if key in out or name != want_name:
+                continue
+            for f in files:
+                try:
+                    label = open(f"{d}/{f[:-6]}_label").read().strip()
+                except OSError:
+                    label = ""
+                if want in (label, f):
+                    out[key] = f"{d}/{f}"
+                    break
+    return out
+
+
+def temps(paths):
+    out = {}
+    for k, p in paths.items():
+        try:
+            out[k] = round(int(open(p).read()) / 1000.0, 1)
+        except (OSError, ValueError):
+            pass
+    return out
 
 
 def cards():
@@ -126,6 +188,8 @@ def cards():
 def main():
     prev_cpu, prev_p, prev_t = cpu_times(), procs(), time.monotonic()
     card_state, card_at = cards(), 0.0
+    disk_state = disk()
+    sensors = find_sensors()
     while True:
         time.sleep(EVERY)
         now = time.monotonic()
@@ -145,13 +209,14 @@ def main():
                 top.append([user(uid), comm, pid, round(pct, 1), round(rss * PAGE_MB)])
         top.sort(key=lambda r: (-r[3], -r[4]))
         if now - card_at >= 5:
-            card_state, card_at = cards(), now
+            card_state, card_at, disk_state = cards(), now, disk()
         line = {
             "host": HOST, "t": int(time.time() * 1000),
             "up_s": int(float(open("/proc/uptime").read().split()[0])),
             "cpu": per, "cpu_all": round(sum(per) / max(len(per), 1), 1),
             "load": [round(x, 2) for x in os.getloadavg()], "mem": mem(),
             "top": top[:TOP_N], "nproc": len(cur_p), "cards": card_state,
+            "disk": disk_state, "temps": temps(sensors),
         }
         sys.stdout.write(json.dumps(line, separators=(",", ":")) + "\n")
         sys.stdout.flush()
