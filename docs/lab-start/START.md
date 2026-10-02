@@ -7,7 +7,7 @@ the lab's Discord posts, and a yes before the first run on a card.
 
 Everything below is the lab's brief for you, my coding agent.
 
-Version of 30 September 2026 (PDT), fourth edition, revised in the evening. The current copy is `docs/lab-start/START.md` in
+Version of 2 October 2026 (PDT), fifth edition: aifoundry2's card is out of service; the lab's live monitor. The current copy is `docs/lab-start/START.md` in
 https://github.com/yaroslavvb/et-soc1-prototyping; if this one is more than a month old, read that one instead.
 
 ## Your person, the machine and the card
@@ -40,7 +40,8 @@ Never do these; if one seems needed, stop and tell your person, who asks the lab
 - change a card's TDP, clocks, thresholds, power management, voltages, trace level, telemetry statistics
   (`ettelem --reset-ms`), firmware, driver or `/opt/et`;
 - use sudo or root, or change any system setting;
-- use any card but card `<N>` on `<host>`; never aifoundry1's card 0, which overheats;
+- use any card but card `<N>` on `<host>`; never aifoundry1's card 0, which overheats; never aifoundry2's card, which
+  is out of service (below);
 - run `/opt/et/bin/dev_mngt_service` or `et-powertop` on aifoundry1: they open card 0 even with `-n 1`;
 - `kill -9` a process that holds a card, or touch another user's processes or files;
 - put a secret on an ssh command line: every user on the host can read a remote command in full with `ps`.
@@ -52,12 +53,14 @@ services, posts on the AI Foundry Discord, and anything for the lab admin.
 
 | Card | Firmware | Clock | Idle | Watch for | Use it for |
 |---|---|---|---|---|---|
-| aifoundry2 | 1.3.1 | DVFS 600–800 MHz, above 600 only below about 68 °C, so usually 600 | 31–36 W hot, 27 W cold | some traffic starves its meter; a CI runner shares it | a first or second choice (step 2); ask before power work: comparable runs there start from a die at about 76 °C |
+| aifoundry2 | 1.3.1 | DVFS 600–800 MHz, usually 600 | rises with its temperature | **out of service since 2 October**: its cooling failed, it heats up even at idle (138 °C on 2 Oct) and drops off the PCIe bus | nothing, until the lab dashboard shows it working again |
 | aifoundry3 | 1.3.1 | pinned at 600 MHz (NoC 400) at every boot; no thermal step | 23.6 W at 50 °C; about 25 W at 55–57 °C since 25 Sep | reaches 88 °C under load, nothing slows it; a demo service can use the card without the lock | a first or second choice; switching power over idle, never absolute watts |
 | aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample of 25–30 Sep; not rechecked since the power cycle of 30 Sep: read `mhz.minion` | 33–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | the third choice (step 2) |
 | aifoundry1 card 0 | 1.4.1 | idles at 300 MHz | 18.6–18.8 W | overheats: 115–117 °C after 10 minutes of short tests | nothing |
 
-Nothing on these cards limits the die temperature: aifoundry2 once ran at a 90–103 °C mean and nothing tripped.
+Nothing on these cards limits the die temperature: aifoundry2's card reached 138 °C on 2 October and nothing tripped.
+The lab dashboard shows every machine, its cards, who is using them and each card's temperature, live:
+https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard (its History button has the last hour, day and week).
 Every host has driver 0.20.0 and RISC-V GCC 15.1 in `/opt/et`, but a different runtime build.
 
 ## The rules, with the why
@@ -66,7 +69,8 @@ Every host has driver 0.20.0 and RISC-V GCC 15.1 in `/opt/et`, but a different r
    between blocks. Why: two users on one card corrupt both runs, and your heat changes the next person's run.
 2. **Look before every run** with `et-who --check`: exit 0 free, 1 held (your own lock included), 2 check failed.
    Never parse the sentence plain `et-who` prints. On exit 2, stop and tell your person; never run a card without
-   the check. On aifoundry1 it counts both cards, so a holder on card 0 also gives exit 1: show your person the
+   the check. A holder named `ettelem` owned by `yaroslavvb` is the lab's live monitor, which reads each free card's
+   temperature for about 4 ms a second and stays off a card while anyone holds its lock: check again a second later. On aifoundry1 it counts both cards, so a holder on card 0 also gives exit 1: show your person the
    `et-who` output and wait. Why: each device node opens in one process at a time.
 3. **Run every device-opening process under the card lock, capped at 10 s:**
    `ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 <cmd>`. `-n` fails at once instead of
@@ -131,7 +135,7 @@ A remote command gets no `/opt/et/bin` on its PATH: keep the absolute paths belo
 before the ssh; leave out a machine that does not answer, since it may be down:
 
 ```bash
-hostname; et-who --check; echo "card check exit $?"
+hostname; et-who --check; echo "card check exit $?"; ls /dev/et*_ops 2>/dev/null || echo "no card here: it is down"
 ps -eo user:32=,etime=,args= | awk -v me="$(id -un)" '$1 != me && /queue[.]sh|claims-v3|campaign[.]py|_host( |$)|ettelem|sys_emu|it_test|dev_mngt|powertop|mmbench|Runner[.]Worker/ { n++; print substr($0, 1, 200) } END { if (!n) print "no card programs of other users" }'
 ps -eo uid=,user:32= | awk '$1 >= 1000 && $1 != 65534 { print $2 }' | sort | uniq -c   # people with processes here
 uptime; df -h ~ | tail -1
@@ -139,13 +143,15 @@ if command -v et-usage >/dev/null; then et-usage; else echo "et-usage: not insta
 ```
 
 Where `et-lab-start` is installed, `et-lab-start --check` shows the same and changes nothing. A card is free when the
-check exits 0 and the second line finds no card program of another user, even when `et-who` shows the card free.
+check exits 0, its card is listed (`/dev/et<N>_ops`: `et-who` cannot see a card that is down), and the second line
+finds no card program of another user, even when `et-who` shows the card free.
 Then:
 
-1. Of the free cards of aifoundry2 and aifoundry3 (card 0 on each), take the one whose machine has the fewest other
-   people with processes (the third line: `who` and `loginctl` miss a Claude kept in tmux); where `et-usage` is
-   installed, prefer the card used less over the last 24 hours; on a tie, aifoundry3.
+1. aifoundry3's card (card 0), if free. aifoundry2's card is out of service: leave it out even if it looks free.
 2. Else aifoundry1's card 1 (`ET_DEVICES=1`), if free: never its card 0.
+
+Several new people may start at the same time, and every run in this brief takes under 10 s, so a held card is
+usually free again within a minute: look again before moving on.
 3. Else no card is free: take the first reachable machine in the order aifoundry3, aifoundry2, aifoundry1, do only
    step 3 there (builds and the simulator wait), and look again at most once a minute. After 30 minutes, tell your
    person.
@@ -277,9 +283,9 @@ another). Copy their patterns; do not run their runners, which are written for t
 | Symptom | Cause | Fix |
 |---|---|---|
 | a locked command exits 1 with no output, or exits 124 | `flock -n` found the card taken; `timeout` stopped the run at 10 s | `et-who`, then wait or ask; never retry in a loop |
-| "Device or resource busy" | another process holds the node | `et-who`, then wait |
+| "Device or resource busy" | another process holds the node; about 1 start in 100, the lab's live monitor reading the temperature at that moment | `et-who`; if it lists nothing, retry once after a second; else wait |
 | `who`, `loginctl` or `et-lab-health` shows nobody logged in, yet the machine is busy | ssh commands leave no `who` record, and a Claude kept in tmux has no login session | count people by their processes (step 2) |
-| every program dies with `std::bad_function_call` on opening the card | a killed tool left a stale reply | with your person's OK, on aifoundry2 or aifoundry3 only, drain once: `et-who --check && flock -n /run/lock/etsoc-shire0.lock timeout 10 /opt/et/bin/dev_mngt_service -m DM_CMD_GET_MODULE_POWER -n 0 -u 5000`; on aifoundry1, stop and tell your person |
+| every program dies with `std::bad_function_call` on opening the card | a killed tool left a stale reply | with your person's OK, on aifoundry3 only, drain once: `et-who --check && flock -n /run/lock/etsoc-shire0.lock timeout 10 /opt/et/bin/dev_mngt_service -m DM_CMD_GET_MODULE_POWER -n 0 -u 5000`; on aifoundry1, stop and tell your person |
 | SIGSEGV (exit 139) 1.08 s in, about 1 run in 100, aifoundry3 | the runtime's logging race | rule 5; with an old binary, repeat the launch |
 | every launch fails: `KernelLaunchCmIfaceMulticastFailed`, or "Perhaps the Master Minion is hanged?" | the card is wedged, often by a TensorSend or credit wait with no partner | stop; tell your person, for the lab admin. In kernels, poll `fccnb` with a bailout |
 | `pgrep -f` or `pkill -f` over ssh matches itself | the remote command line holds the pattern | bracket it (`'[m]y_run.sh'`); kill by PID |

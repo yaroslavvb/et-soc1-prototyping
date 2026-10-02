@@ -7,7 +7,7 @@
 The page (docs/reports/sources/lab-start.*) shows START.md verbatim in its one copy box, with the viewer's username
 filled into `<login>` (the only placeholder the page fills; `<host>` and `<N>` stay, for the agent's own choice), so
 START.md is the only copy of the prompt: edit it, run this, then rebuild the page (README.md here).
-The card tiles at the top of the page come from CARDS below (facts of 30 September 2026, from AGENT.md §4 and
+The card tiles at the top of the page come from CARDS below (facts of 2 October 2026, from AGENT.md §4 and
 docs/findings/14-card-behaviour.md). No timestamps go into the output, so a rebuild with the same inputs is
 byte-identical."""
 import hashlib
@@ -25,7 +25,8 @@ OUT = os.path.join(ROOT, "docs", "reports", "data", "2026-09-30-lab-start", "bri
 # The agent, not the person, chooses among the usable ones (START.md, step 2).
 CARDS = [
     {"id": "aifoundry2", "host": "aifoundry2", "n": 0, "firmware": "1.3.1",
-     "clock": "DVFS 600–800 MHz, usually 600", "note": "a CI runner shares the host", "use": True},
+     "clock": "DVFS 600–800 MHz, usually 600", "note": "out of service since 2 Oct: overheats at idle, drops off the bus",
+     "use": False},
     {"id": "aifoundry3", "host": "aifoundry3", "n": 0, "firmware": "1.3.1",
      "clock": "pinned at 600 MHz", "note": "a demo service can use it without the lock", "use": True},
     {"id": "aifoundry1-c1", "host": "aifoundry1", "n": 1, "firmware": "1.2.0",
