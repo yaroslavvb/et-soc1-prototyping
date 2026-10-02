@@ -340,24 +340,26 @@ someone does, the page shows the last reading. The small line beside each card i
 .lv-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--cy),var(--mg));box-shadow:0 0 8px var(--cy);transition:width .7s}
 .lv-bar.full i{background:linear-gradient(90deg,var(--am),var(--rd));box-shadow:0 0 8px var(--rd)}
 .lv-meter .val{color:var(--tx)}
-.lv-chip{font:11px var(--mono);letter-spacing:.06em;padding:3px 8px;border-radius:4px;border:1px solid;text-transform:uppercase}
+.lv-cards{flex-direction:column;align-items:flex-start}.lv-chip{white-space:nowrap;font:11px var(--mono);letter-spacing:.06em;padding:3px 8px;border-radius:4px;border:1px solid;text-transform:uppercase}
 .lv-chip.ok{border-color:rgba(52,211,153,.6);color:var(--gr);box-shadow:0 0 10px rgba(52,211,153,.18)}
 .lv-chip.busy{border-color:rgba(251,191,36,.7);color:var(--am);box-shadow:0 0 10px rgba(251,191,36,.2)}
 .lv-chip.bad{border-color:var(--rd);color:var(--rd);font-weight:700;box-shadow:0 0 12px rgba(251,79,107,.35);animation:lv-alarm 1.2s steps(2) infinite}
 @keyframes lv-alarm{50%{background:rgba(251,79,107,.15)}}
 .lv-temps{margin:8px 0 2px;padding:6px 7px 4px;border-radius:6px;background:rgba(3,8,16,.55);box-shadow:inset 0 0 0 1px rgba(56,189,248,.12)}
-.lv-tleg{font:11px var(--mono);gap:10px!important;margin:0 0 3px!important}
-.lv-tk{display:inline-flex;align-items:center;gap:4px;color:var(--tx)}.lv-tk::before{content:"";width:10px;height:3px;border-radius:2px;background:var(--k);box-shadow:0 0 5px var(--k)}
+.lv-tleg{font:11px var(--mono);min-height:34px;align-content:flex-start;gap:10px!important;margin:0 0 3px!important}
+.lv-tk{display:inline-flex;align-items:center;gap:4px;color:var(--tx)}.lv-tk.stale{color:var(--mu)}.lv-tk::before{content:"";width:10px;height:3px;border-radius:2px;background:var(--k);box-shadow:0 0 5px var(--k)}
 .lv-tspark{width:100%;height:46px;display:block;background:linear-gradient(rgba(56,189,248,.07) 1px,transparent 1px) 0 0/100% 11.5px}
 .lv-tspark path{fill:none;stroke-width:1.6;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 2.5px currentColor)}
 .lv-die{font:11px var(--mono)}
-.lv-dierow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-top:4px}
-.lv-dieval{font-weight:700;color:#fff}.lv-dieval.hot,.lv-tk.hot{color:var(--rd);text-shadow:0 0 8px var(--rd);font-weight:700}
+.lv-dierow{display:grid;grid-template-columns:auto minmax(30px,1fr) minmax(0,auto);align-items:center;gap:8px;margin-top:4px}
+.lv-dierow>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lv-dieval{font-weight:700;color:#fff}.lv-dieval.hot,.lv-tk.hot{color:var(--rd);text-shadow:0 0 8px var(--rd);font-weight:700}
 .lv-diespark{width:100%;height:16px}.lv-diespark path{fill:none;stroke:var(--k,var(--rd));stroke-width:1.5;vector-effect:non-scaling-stroke}
 .lv-diespark path.lv-die95{stroke:var(--rd);stroke-width:1;stroke-dasharray:3 3;opacity:.6}
 .lv-topd{margin-top:8px;border-top:1px dashed var(--edge);padding-top:6px}
 .lv-topd>summary{cursor:pointer;font:11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cy);list-style:revert}
-.lv-top{position:relative;margin-top:6px;transition:height .4s ease}
+/* a fixed window of 7 rows (the rest scroll), so the card never changes size as processes come and go */
+.lv-top{height:154px;overflow-y:auto;margin-top:6px;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(56,189,248,.35) transparent}
+.lv-top-in{position:relative}
 .lv-tr{position:absolute;left:0;right:0;height:22px;display:grid;grid-template-columns:56px 84px 1fr;align-items:center;gap:6px;font:11.5px var(--mono);transition:transform .45s ease,opacity .4s ease}
 .lv-tr.entering,.lv-tr.leaving{opacity:0}
 .lv-cpu{font-variant-numeric:tabular-nums;text-align:right;color:#fff;background:linear-gradient(90deg,rgba(34,211,238,.35) var(--w,0%),transparent var(--w,0%));border-radius:3px;padding:0 4px}

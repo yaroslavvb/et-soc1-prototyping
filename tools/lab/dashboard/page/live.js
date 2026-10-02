@@ -9,7 +9,7 @@
   var HOSTS = ["aifoundry1", "aifoundry2", "aifoundry3"];
   var grid = document.getElementById("live-grid"), note = document.getElementById("live-state");
   if (!grid) return;
-  var ROW_H = 22, TOP_N = 8, EMA = 0.35, KEEP = 300;
+  var ROW_H = 22, TOP_N = 12, EMA = 0.35, KEEP = 300;
   var TS = [["cpu", "CPU", "#22d3ee"], ["nvme", "NVMe", "#34d399"], ["nic", "NIC", "#fbbf24"]];
   var CARD_COL = ["#fb4f6b", "#c084fc"];
   var HIST = (typeof D !== "undefined" && D.history) || {}, CARDS = (typeof D !== "undefined" && D.cards) || {};
@@ -28,12 +28,12 @@
       '<div class="lv-temps"><div class="lv-row small lv-tleg"></div><svg class="lv-tspark" viewBox="0 0 160 34" preserveAspectRatio="none" aria-hidden="true"></svg>' +
       '<div class="lv-die small"></div></div>' +
       '<div class="lv-row lv-cards"></div>' +
-      '<details class="lv-topd"><summary>Top processes</summary><div class="lv-top"></div></details></div>';
+      '<details class="lv-topd"><summary>Top processes</summary><div class="lv-top"><div class="lv-top-in"></div></div></details></div>';
     grid.appendChild(c);
     ui[h] = { card: c, rows: {}, ema: {},
       dot: c.querySelector(".lv-dot"), age: c.querySelector(".lv-age"), sub: c.querySelector(".lv-sub"), gauges: c.querySelector(".lv-gauges"), g: {},
       cores: c.querySelector(".lv-cores"), spark: c.querySelector(".lv-spark path"), mem: c.querySelector(".lv-mem"),
-      cards: c.querySelector(".lv-cards"), top: c.querySelector(".lv-top"), disk: c.querySelector(".lv-disk"),
+      cards: c.querySelector(".lv-cards"), top: c.querySelector(".lv-top-in"), disk: c.querySelector(".lv-disk"),
       tleg: c.querySelector(".lv-tleg"), tsvg: c.querySelector(".lv-tspark"), die: c.querySelector(".lv-die") };
     drawDie(h, null);
   }
@@ -177,6 +177,8 @@
       ser.push(["card " + c.n, CARD_COL[i % CARD_COL.length], function (x) {
         var q = cardOf(x, c.n); return q && q.temp && Math.abs(x.t - q.temp.at) < 3000 ? q.temp.die_c : null; }]);
     });
+    var stale = {};
+    (v.cards || []).forEach(function (c) { if (c.temp && !fresh(c)) { stale["card " + c.n] = 1; } });
     ser.forEach(function (s) { tp[s[0]] = s[2](v); hs.forEach(function (x) { var q = s[2](x); if (q != null) all.push(q); }); });
     if (all.length) {
       lo = Math.floor(Math.min.apply(null, all) / 5) * 5 - 5; hi = Math.ceil(Math.max.apply(null, all) / 5) * 5 + 5;
@@ -184,8 +186,11 @@
         return '<path style="stroke:' + s[1] + ';color:' + s[1] + '" d="' + path(hs.map(s[2]), 160, 34, lo, hi, 3) + '"/>';
       }).join("");
     }
-    u.tleg.innerHTML = ser.filter(function (s) { return tp[s[0]] != null; }).map(function (s) {
-      return '<span class="lv-tk' + (/^card/.test(s[0]) && tp[s[0]] >= 95 ? " hot" : "") + '" style="--k:' + s[1] + '">' + s[0] + " " + tp[s[0]].toFixed(0) + " °C</span>";
+    // every series keeps its legend entry (a card in use shows its last reading, greyed), so the legend never re-wraps
+    (v.cards || []).forEach(function (c) { if (stale["card " + c.n]) tp["card " + c.n] = c.temp.die_c; });
+    u.tleg.innerHTML = ser.map(function (s) {
+      var q = tp[s[0]], cls = stale[s[0]] ? " stale" : /^card/.test(s[0]) && q >= 95 ? " hot" : "";
+      return '<span class="lv-tk' + cls + '" style="--k:' + s[1] + '">' + s[0] + " " + (q == null ? "–" : q.toFixed(0) + " °C") + "</span>";
     }).join("") + (hs.length > 1 && all.length ? '<span class="muted">last ' + Math.max(1, Math.round((hs[hs.length - 1].t - hs[0].t) / 60000)) +
       " min, scale " + lo + "–" + hi + " °C</span>" : "");
     drawDie(h, v);
