@@ -462,6 +462,20 @@ power cycle clears `/tmp` on every machine it hits (aifoundry2's 19 GB of workin
 lost; keep work in the home directory). The incident page:
 https://spacesheep.dev/@yaroslavvb/aifoundry1-link-retrain-hang
 
+## aifoundry2's card dropped off the bus while idle (1 October, 09:42 PDT)
+
+At 09:42 on 1 October aifoundry2's card stopped answering on PCIe while nothing used it: both ends of the link
+logged corrected receiver errors, then the link went down for good (configuration space read all ones, the root
+port saw no receiver). It stayed down until a full-reset power cycle at 06:45 on 2 October
+(`echo pci > /sys/kernel/reboot/type`, mode cold, then a reboot: the chipset drops the supply's main rails, which
+power-cycles the slot); a plain warm reboot keeps the slot powered. **The card's temperature follows the host's CPU
+load, not its own work**: 63–67 °C while the host was busy, 70 °C idle in the evening, 82–83 °C idle from 02:30 on
+1 October (idle power up from 29 to 37.5 W), and it failed minutes after the host went idle again; aifoundry3's card,
+on the same Gigabyte Z590 AORUS MASTER board in the same slot, stayed at 54–57 °C. The chassis fans most likely
+follow the CPU temperature (no fan speeds are visible from Linux). Fix on site: the BIOS fan settings (Smart Fan 5:
+Fan Stop off, a floor of at least 50%), copied from aifoundry3 (lab report SH5). Until then, a host that sits idle
+lets this card overheat, and no firmware cut-off stops it.
+
 ## Traps that cost time here
 
 - **A card's queue counters race with its resets (30 September, from the driver source).** The world-readable sysfs files `mgmt_vq_stats/*` and `ops_vq_stats/*` (`msg_count` and its siblings) walk the driver's queue tables with no lock, and et-driver 0.20.0 (the same as upstream's latest, 836a4ab) shows them before it builds the tables and removes them after it frees them. A read during a card reset can return garbage (a jump of trillions of messages); one during a driver load can crash the reader. Tools that read them (our usage logger, the dashboard) discard impossible jumps; never poll them in a tight loop, and never read `utilization_percent`. Reported on the Requests for Roman page (C29, CF13); the upstream issue is drafted ([02-requests.md](02-requests.md), Q86).
