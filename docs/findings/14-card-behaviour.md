@@ -395,7 +395,12 @@ After any driver change, the discriminating check is `cat /sys/module/et_soc1/ve
 Right after them it read 115–117 °C with nothing running and drew 66–71 W at 600 MHz (leakage at that temperature),
 until its firmware dropped it to 300 MHz and it cooled from 104 to 78 °C in eight minutes. Card 1 beside it peaked
 at about 71 °C under the same smokes. It is a cooling fault (fan, heat sink or airflow) that the 300 MHz low-power idle
-hides. Do not run sustained work on it. The machine's login banner says so, and the campaign excludes it (A4). The
+hides. Do not run sustained work on it. The machine's login banner says so, and the campaign excludes it (A4). **Its fan was found broken and replaced on site on 2 October** (host up 12:59). After the repair it idled at
+49 °C (hottest sensor 53 °C, 19.6 W) against 65 °C with a 123 °C hot spot before, and 8 minutes of sgemm bursts (8 s
+of `-n 1024` under the lock, then 2.5 s free, 44 bursts) held it at 52–53 °C, hottest 56 °C; card 1 beside it, the
+same test just before, settled at 59–60 °C, hottest 63 °C. Readings are the live collector's, taken in the gaps
+(`docs/reports/data/2026-10-02-fan-fix-aifoundry1/`). Whether to open card 0 to other users again is the owner's
+decision; until then the rules above stand. The
 same card's PCIe link also logs about one corrected receive error per second at its root port, at a rate that
 changes from boot to boot. It does not stop the card, but link replays can add DMA latency. A reseat is pending. Since
 25 September the kernel log for that link is rate-limited, and the error counters still count.
