@@ -287,41 +287,86 @@ the deploy may have stopped: nothing on it is current. Tell <span id="stale-main
 memory, disk, temperatures (CPU package, NVMe drive, network chip and each ET card's die), its cards' PCIe links and
 locks, and the busiest processes by name. A card's temperature is read through its management node, which admits one
 process at a time, so the collector reads it (in about 4 ms) only while nobody holds a card on that machine; while
-someone does, the page shows the last reading. The small line beside each card is its last 48 hours (dashed: 95 °C).
-<span id="live-state">—</span></p>
+someone does, the page shows the last reading. The small line beside each card is its last 48 hours (dashed: 95 °C).</p>
 <style>
-.live-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:10px 0 14px}
-.lv-card{border:1px solid var(--line,#ddd);border-radius:10px;padding:10px 12px;background:var(--surface,#fff)}
-.lv-card.off{opacity:.6}
-.lv-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.lv-dot{width:9px;height:9px;border-radius:50%;background:#999}.lv-dot.on{background:#1f9d55}.lv-dot.stale{background:#d69e2e}
-.lv-age{font-size:13px;color:var(--ink-2,#666)}
-.lv-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0}
-.lv-big{font-size:24px;font-weight:700}
-.lv-cores{display:flex;align-items:flex-end;gap:1px;height:34px;margin:4px 0}
-.lv-cores i{flex:1;background:#3b82c4;min-height:2px;border-radius:1px}
-.lv-spark{width:100%;height:28px;display:block}.lv-spark path{fill:none;stroke:#3b82c4;stroke-width:1.5}
-.lv-bar{display:inline-block;width:90px;height:7px;background:#e5e5e5;border-radius:4px;overflow:hidden}.lv-bar i{display:block;height:100%;background:#7c5cc4}
-.lv-chip{font-size:12.5px;padding:2px 7px;border-radius:999px;border:1px solid #ccc}
-.lv-chip.ok{border-color:#1f9d55;color:#1f9d55}.lv-chip.busy{border-color:#d69e2e;color:#b7791f}.lv-chip.bad{border-color:#c53030;color:#c53030;font-weight:600}
-.lv-bar{margin-left:6px;vertical-align:middle}.lv-bar.full i{background:#c53030}
-.lv-temps{margin:6px 0 2px}
-.lv-tk{display:inline-flex;align-items:center;gap:4px}.lv-tk::before{content:"";width:10px;height:3px;border-radius:2px;background:var(--k)}
-.lv-tspark{width:100%;height:34px;display:block}.lv-tspark path{fill:none;stroke-width:1.5;vector-effect:non-scaling-stroke}
-.lv-dierow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-top:3px}
-.lv-dieval{font-weight:600}.lv-dieval.hot,.lv-tk.hot{color:#c53030;font-weight:600}
-.lv-diespark{width:100%;height:16px}.lv-diespark path{fill:none;stroke:var(--k,#c53030);stroke-width:1.5;vector-effect:non-scaling-stroke}
-.lv-diespark path.lv-die95{stroke:#c53030;stroke-width:1;stroke-dasharray:3 3;opacity:.6}
-.lv-topd{margin-top:6px;border-top:1px solid var(--line,#ddd);padding-top:4px}
-.lv-topd>summary{cursor:pointer;font-size:13px;color:var(--accent,#1f6fbf);list-style:revert}
-.lv-top{position:relative;margin-top:4px;transition:height .4s ease}
-.lv-tr{position:absolute;left:0;right:0;height:22px;display:grid;grid-template-columns:56px 84px 1fr;align-items:center;gap:6px;font-size:12.5px;transition:transform .45s ease,opacity .4s ease}
+/* the live console: dark and glowing in either theme (the owner asked for a sci-fi look, 2 Oct 2026) */
+.lv-console{--bg:#060a13;--panel:#0a1322;--edge:rgba(56,189,248,.28);--cy:#22d3ee;--mg:#c084fc;--am:#fbbf24;--rd:#fb4f6b;--gr:#34d399;
+  --tx:#d6ecff;--mu:#6f8aab;--mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+  position:relative;overflow:hidden;margin:10px 0 16px;padding:14px;border-radius:14px;color:var(--tx);
+  background:radial-gradient(ellipse at 20% -10%,rgba(34,211,238,.13),transparent 55%),radial-gradient(ellipse at 90% 110%,rgba(192,132,252,.12),transparent 55%),
+    linear-gradient(rgba(56,189,248,.05) 1px,transparent 1px) 0 0/100% 22px,linear-gradient(90deg,rgba(56,189,248,.05) 1px,transparent 1px) 0 0/22px 100%,var(--bg);
+  box-shadow:0 0 0 1px var(--edge),0 10px 40px rgba(2,8,23,.45)}
+.lv-console::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
+.lv-console::before{content:"";position:absolute;left:0;right:0;height:80px;top:-80px;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(34,211,238,.07),transparent);animation:lv-sweep 7s linear infinite}
+@keyframes lv-sweep{to{top:100%}}
+.lv-bar-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font:600 12px/1 var(--mono);letter-spacing:.18em;
+  color:var(--cy);text-transform:uppercase;padding:2px 2px 12px;border-bottom:1px solid var(--edge);margin-bottom:12px;text-shadow:0 0 8px rgba(34,211,238,.6)}
+.lv-bar-top #live-state{color:var(--mu);letter-spacing:.08em;text-shadow:none}
+.live-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px;position:relative;z-index:1}
+.lv-card{position:relative;padding:12px 13px;border-radius:10px;background:linear-gradient(180deg,rgba(15,30,52,.92),rgba(8,16,30,.92));
+  border:1px solid var(--edge);box-shadow:inset 0 0 24px rgba(34,211,238,.06);transition:opacity .4s}
+.lv-card::before,.lv-card::after{content:"";position:absolute;width:14px;height:14px;border:2px solid var(--cy);opacity:.75;filter:drop-shadow(0 0 4px var(--cy))}
+.lv-card::before{top:-1px;left:-1px;border-right:0;border-bottom:0;border-top-left-radius:10px}
+.lv-card::after{bottom:-1px;right:-1px;border-left:0;border-top:0;border-bottom-right-radius:10px}
+.lv-card.off{opacity:.45}
+.lv-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-family:var(--mono)}
+.lv-head b{font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#fff;text-shadow:0 0 10px rgba(34,211,238,.55)}
+.lv-dot{width:9px;height:9px;border-radius:50%;background:var(--mu)}
+.lv-dot.on{background:var(--gr);box-shadow:0 0 0 0 rgba(52,211,153,.7);animation:lv-pulse 1.6s infinite}
+.lv-dot.stale{background:var(--am);box-shadow:0 0 8px var(--am)}
+@keyframes lv-pulse{70%{box-shadow:0 0 0 7px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.lv-age{font-size:11px;color:var(--mu);letter-spacing:.12em;text-transform:uppercase;margin-left:auto}
+.lv-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:5px 0}
+.lv-console .small,.lv-console .muted{color:var(--mu)}
+.lv-console code{background:rgba(56,189,248,.1);color:var(--cy);border-radius:3px;padding:0 4px}
+.lv-sub{font:11px var(--mono);color:var(--mu);letter-spacing:.04em}
+.lv-gauges{display:flex;gap:4px;flex-wrap:wrap;justify-content:space-around;margin:2px 0 4px}
+.lv-g{position:relative;width:76px;text-align:center;font-family:var(--mono)}
+.lv-g svg{width:76px;height:70px;display:block;overflow:visible}
+.lv-g .tr{fill:none;stroke:rgba(111,138,171,.22);stroke-width:7;stroke-linecap:round}
+.lv-g .va{fill:none;stroke:var(--gc,var(--cy));stroke-width:7;stroke-linecap:round;filter:drop-shadow(0 0 4px var(--gc,var(--cy)));
+  transition:stroke-dasharray .7s cubic-bezier(.2,.8,.2,1),stroke .7s}
+.lv-g .tick{stroke:var(--rd);stroke-width:2}
+.lv-g .num{position:absolute;left:0;right:0;top:22px;font-size:17px;font-weight:700;color:#fff;text-shadow:0 0 8px var(--gc,var(--cy))}
+.lv-g .num small{font-size:10px;font-weight:400;color:var(--mu)}
+.lv-g .lab{font-size:9.5px;letter-spacing:.16em;color:var(--mu);text-transform:uppercase;margin-top:-10px}
+.lv-cores{display:flex;align-items:flex-end;gap:2px;height:38px;margin:6px 0 2px;padding:3px;border-radius:6px;background:rgba(3,8,16,.55);box-shadow:inset 0 0 0 1px rgba(56,189,248,.12)}
+.lv-cores i{flex:1;min-height:2px;border-radius:2px 2px 0 0;background:linear-gradient(0deg,var(--cy),var(--mg));box-shadow:0 0 6px rgba(34,211,238,.55);transition:height .6s cubic-bezier(.2,.8,.2,1)}
+.lv-spark{width:100%;height:26px;display:block}.lv-spark path{fill:none;stroke:var(--cy);stroke-width:1.5;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px var(--cy))}
+.lv-meter{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px;font:11px var(--mono);color:var(--mu);margin:4px 0}
+.lv-meter .lbl{letter-spacing:.14em;text-transform:uppercase}
+.lv-bar{display:block;height:6px;border-radius:3px;background:rgba(111,138,171,.18);overflow:hidden}
+.lv-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--cy),var(--mg));box-shadow:0 0 8px var(--cy);transition:width .7s}
+.lv-bar.full i{background:linear-gradient(90deg,var(--am),var(--rd));box-shadow:0 0 8px var(--rd)}
+.lv-meter .val{color:var(--tx)}
+.lv-chip{font:11px var(--mono);letter-spacing:.06em;padding:3px 8px;border-radius:4px;border:1px solid;text-transform:uppercase}
+.lv-chip.ok{border-color:rgba(52,211,153,.6);color:var(--gr);box-shadow:0 0 10px rgba(52,211,153,.18)}
+.lv-chip.busy{border-color:rgba(251,191,36,.7);color:var(--am);box-shadow:0 0 10px rgba(251,191,36,.2)}
+.lv-chip.bad{border-color:var(--rd);color:var(--rd);font-weight:700;box-shadow:0 0 12px rgba(251,79,107,.35);animation:lv-alarm 1.2s steps(2) infinite}
+@keyframes lv-alarm{50%{background:rgba(251,79,107,.15)}}
+.lv-temps{margin:8px 0 2px;padding:6px 7px 4px;border-radius:6px;background:rgba(3,8,16,.55);box-shadow:inset 0 0 0 1px rgba(56,189,248,.12)}
+.lv-tleg{font:11px var(--mono);gap:10px!important;margin:0 0 3px!important}
+.lv-tk{display:inline-flex;align-items:center;gap:4px;color:var(--tx)}.lv-tk::before{content:"";width:10px;height:3px;border-radius:2px;background:var(--k);box-shadow:0 0 5px var(--k)}
+.lv-tspark{width:100%;height:46px;display:block;background:linear-gradient(rgba(56,189,248,.07) 1px,transparent 1px) 0 0/100% 11.5px}
+.lv-tspark path{fill:none;stroke-width:1.6;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 2.5px currentColor)}
+.lv-die{font:11px var(--mono)}
+.lv-dierow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-top:4px}
+.lv-dieval{font-weight:700;color:#fff}.lv-dieval.hot,.lv-tk.hot{color:var(--rd);text-shadow:0 0 8px var(--rd);font-weight:700}
+.lv-diespark{width:100%;height:16px}.lv-diespark path{fill:none;stroke:var(--k,var(--rd));stroke-width:1.5;vector-effect:non-scaling-stroke}
+.lv-diespark path.lv-die95{stroke:var(--rd);stroke-width:1;stroke-dasharray:3 3;opacity:.6}
+.lv-topd{margin-top:8px;border-top:1px dashed var(--edge);padding-top:6px}
+.lv-topd>summary{cursor:pointer;font:11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cy);list-style:revert}
+.lv-top{position:relative;margin-top:6px;transition:height .4s ease}
+.lv-tr{position:absolute;left:0;right:0;height:22px;display:grid;grid-template-columns:56px 84px 1fr;align-items:center;gap:6px;font:11.5px var(--mono);transition:transform .45s ease,opacity .4s ease}
 .lv-tr.entering,.lv-tr.leaving{opacity:0}
-.lv-cpu{font-variant-numeric:tabular-nums;text-align:right;background:linear-gradient(90deg,rgba(59,130,196,.22) var(--w,0%),transparent var(--w,0%));border-radius:3px;padding:0 4px}
-.lv-user{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2,#555)}
-.lv-proc{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv-cpu{font-variant-numeric:tabular-nums;text-align:right;color:#fff;background:linear-gradient(90deg,rgba(34,211,238,.35) var(--w,0%),transparent var(--w,0%));border-radius:3px;padding:0 4px}
+.lv-user{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mg)}
+.lv-proc{font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none!important;color:var(--tx)!important}
+@media (prefers-reduced-motion:reduce){.lv-console::before,.lv-dot.on,.lv-chip.bad{animation:none}}
 </style>
-<div id="live-grid" class="live-grid"></div>
+<div class="lv-console"><div class="lv-bar-top"><span>&#9670; AI Foundry lab // live telemetry</span><span id="live-state">—</span></div>
+<div id="live-grid" class="live-grid"></div></div>
 
 
 <h2 id="alerts">Alerts</h2>

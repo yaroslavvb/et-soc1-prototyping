@@ -10,8 +10,8 @@
   var grid = document.getElementById("live-grid"), note = document.getElementById("live-state");
   if (!grid) return;
   var ROW_H = 22, TOP_N = 8, EMA = 0.35, KEEP = 300;
-  var TS = [["cpu", "CPU", "var(--c1,#3b82c4)"], ["nvme", "NVMe", "var(--c3,#7c5cc4)"], ["nic", "NIC", "var(--c2,#2f9e8f)"]];
-  var CARD_COL = ["#c53030", "#7c3aed"];
+  var TS = [["cpu", "CPU", "#22d3ee"], ["nvme", "NVMe", "#34d399"], ["nic", "NIC", "#fbbf24"]];
+  var CARD_COL = ["#fb4f6b", "#c084fc"];
   var HIST = (typeof D !== "undefined" && D.history) || {}, CARDS = (typeof D !== "undefined" && D.cards) || {};
   var last = {}, hist = {}, ui = {};
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -22,16 +22,16 @@
   function build(h) {
     var c = el("div", "lv-card off");
     c.innerHTML = '<div class="lv-head"><b>' + h + '</b><span class="lv-dot"></span><span class="lv-age">not streaming</span></div>' +
-      '<div class="lv-body"><div class="lv-row"><span class="lv-big">–</span><span class="small lv-sub"></span></div>' +
+      '<div class="lv-body"><div class="lv-gauges"></div><div class="lv-sub"></div>' +
       '<div class="lv-cores" aria-label="CPU per thread"></div><svg class="lv-spark" viewBox="0 0 160 28" preserveAspectRatio="none" aria-hidden="true"><path/></svg>' +
-      '<div class="lv-row small lv-mem"></div><div class="lv-row small lv-disk"></div>' +
+      '<div class="lv-mem"></div><div class="lv-disk"></div>' +
       '<div class="lv-temps"><div class="lv-row small lv-tleg"></div><svg class="lv-tspark" viewBox="0 0 160 34" preserveAspectRatio="none" aria-hidden="true"></svg>' +
       '<div class="lv-die small"></div></div>' +
       '<div class="lv-row lv-cards"></div>' +
       '<details class="lv-topd"><summary>Top processes</summary><div class="lv-top"></div></details></div>';
     grid.appendChild(c);
     ui[h] = { card: c, rows: {}, ema: {},
-      dot: c.querySelector(".lv-dot"), age: c.querySelector(".lv-age"), big: c.querySelector(".lv-big"), sub: c.querySelector(".lv-sub"),
+      dot: c.querySelector(".lv-dot"), age: c.querySelector(".lv-age"), sub: c.querySelector(".lv-sub"), gauges: c.querySelector(".lv-gauges"), g: {},
       cores: c.querySelector(".lv-cores"), spark: c.querySelector(".lv-spark path"), mem: c.querySelector(".lv-mem"),
       cards: c.querySelector(".lv-cards"), top: c.querySelector(".lv-top"), disk: c.querySelector(".lv-disk"),
       tleg: c.querySelector(".lv-tleg"), tsvg: c.querySelector(".lv-tspark"), die: c.querySelector(".lv-die") };
@@ -47,6 +47,34 @@
       d += (pen ? "L" : "M") + x.toFixed(1) + "," + y.toFixed(1); pen = true;
     });
     return d;
+  }
+
+  /* a 270° ring gauge; frac 0..1; mark (0..1) draws a red tick, e.g. 95 °C on a die gauge */
+  var ARC = "M21.7,78.3 A40,40 0 1 1 78.3,78.3";
+  function gauge(u, key, label, mark) {
+    if (u.g[key]) return u.g[key];
+    var g = el("div", "lv-g"), tick = "";
+    if (mark != null) {
+      var a = (135 + 270 * mark) * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+      tick = '<line class="tick" x1="' + (50 + 34 * c).toFixed(1) + '" y1="' + (50 + 34 * s).toFixed(1) + '" x2="' + (50 + 46 * c).toFixed(1) + '" y2="' + (50 + 46 * s).toFixed(1) + '"/>';
+    }
+    g.innerHTML = '<svg viewBox="0 0 100 92" aria-hidden="true"><path class="tr" d="' + ARC + '" pathLength="100"/><path class="va" d="' + ARC +
+      '" pathLength="100" stroke-dasharray="0 100"/>' + tick + '</svg><div class="num">–</div><div class="lab">' + esc(label) + "</div>";
+    u.gauges.appendChild(g);
+    u.g[key] = { el: g, va: g.querySelector(".va"), num: g.querySelector(".num") };
+    return u.g[key];
+  }
+  function setGauge(x, frac, html, color) {
+    frac = Math.max(0, Math.min(1, frac || 0));
+    x.va.setAttribute("stroke-dasharray", (frac * 100).toFixed(1) + " 100");
+    x.el.style.setProperty("--gc", color);
+    x.num.innerHTML = html;
+  }
+  function loadCol(p) { return p < 60 ? "var(--cy)" : p < 85 ? "var(--am)" : "var(--rd)"; }
+  function tempCol(c) { return c < 70 ? "var(--cy)" : c < 90 ? "var(--am)" : "var(--rd)"; }
+  function meter(lbl, pct, val, full) {
+    return '<div class="lv-meter"><span class="lbl">' + lbl + '</span><span class="lv-bar' + (full ? " full" : "") + '"><i style="width:' +
+      pct.toFixed(0) + '%"></i></span><span class="val">' + val + "</span></div>";
   }
 
   function fresh(c) { return c && c.temp && c.temp.at && Date.now() - c.temp.at < 5000 ? c.temp : null; }
@@ -121,8 +149,15 @@
     u.dot.className = "lv-dot" + (live ? " on" : a < 60 ? " stale" : "");
     u.age.textContent = v ? (live ? "live" : "last reading " + Math.round(a) + " s ago") : "not streaming";
     if (!v) return;
-    u.big.textContent = v.cpu_all.toFixed(0) + "%";
-    u.sub.textContent = "CPU, " + (v.cpu || []).length + " threads · load " + (v.load || []).join(" ");
+    var m = v.mem || {}, used = m.total_mb ? 100 * m.used_mb / m.total_mb : 0;
+    setGauge(gauge(u, "cpu", "CPU"), v.cpu_all / 100, v.cpu_all.toFixed(0) + "<small>%</small>", loadCol(v.cpu_all));
+    setGauge(gauge(u, "mem", "Memory"), used / 100, used.toFixed(0) + "<small>%</small>", loadCol(used));
+    (v.cards || []).forEach(function (c) {
+      var t = c.temp, x = gauge(u, "card" + c.n, "Card " + c.n + " die", (95 - 20) / 110);
+      if (t && t.die_c != null) setGauge(x, (t.die_c - 20) / 110, t.die_c + "<small>°C</small>", fresh(c) ? tempCol(t.die_c) : "var(--mu)");
+      else setGauge(x, 0, c.ok === false ? '<small style="color:var(--rd)">DOWN</small>' : "–", "var(--mu)");
+    });
+    u.sub.textContent = (v.cpu || []).length + " threads · load " + (v.load || []).join(" ") + " · up " + Math.floor((v.up_s || 0) / 86400) + "d " + Math.floor((v.up_s || 0) % 86400 / 3600) + "h";
     var cpu = v.cpu || [];
     while (u.cores.children.length < cpu.length) u.cores.appendChild(el("i"));
     while (u.cores.children.length > cpu.length) u.cores.lastChild.remove();
@@ -130,12 +165,11 @@
     var pts = (hist[h] || []).map(function (x) { return x.cpu_all; }), n = pts.length, d = "";
     pts.forEach(function (p, i) { d += (i ? "L" : "M") + (n < 2 ? 0 : i * 160 / (n - 1)).toFixed(1) + "," + (28 - p * 28 / 100).toFixed(1); });
     u.spark.setAttribute("d", d);
-    var m = v.mem || {}, used = m.total_mb ? 100 * m.used_mb / m.total_mb : 0;
-    u.mem.innerHTML = "memory " + gb(m.used_mb) + " of " + gb(m.total_mb) + ' GB<span class="lv-bar"><i style="width:' + used.toFixed(0) + '%"></i></span>';
+    u.mem.innerHTML = meter("mem", used, gb(m.used_mb) + " / " + gb(m.total_mb) + " GB", used > 90);
     u.disk.innerHTML = (v.disk || []).map(function (d) {
       var tot = d.used_gb + d.free_gb, pct = tot ? 100 * d.used_gb / tot : 0;
-      return '<span>disk <code>' + esc(d.mount) + "</code> " + d.used_gb.toFixed(0) + " GB used, " + d.free_gb.toFixed(0) + ' GB free<span class="lv-bar' + (pct > 90 ? " full" : "") + '"><i style="width:' + pct.toFixed(0) + '%"></i></span></span>';
-    }).join(" ");
+      return meter(d.mount === "/" ? "disk" : d.mount, pct, d.free_gb.toFixed(0) + " GB free", pct > 90);
+    }).join("");
     var tp = {}, hs = hist[h] || [], all = [], lo, hi;
     // series: [label, colour, value of reading x]; the card lines take a reading only if it was read within 3 s of x
     var ser = TS.map(function (s) { return [s[1], s[2], function (x) { return (x.temps || {})[s[0]]; }]; });
@@ -147,7 +181,7 @@
     if (all.length) {
       lo = Math.floor(Math.min.apply(null, all) / 5) * 5 - 5; hi = Math.ceil(Math.max.apply(null, all) / 5) * 5 + 5;
       u.tsvg.innerHTML = ser.map(function (s) {
-        return '<path style="stroke:' + s[1] + '" d="' + path(hs.map(s[2]), 160, 34, lo, hi, 3) + '"/>';
+        return '<path style="stroke:' + s[1] + ';color:' + s[1] + '" d="' + path(hs.map(s[2]), 160, 34, lo, hi, 3) + '"/>';
       }).join("");
     }
     u.tleg.innerHTML = ser.filter(function (s) { return tp[s[0]] != null; }).map(function (s) {
