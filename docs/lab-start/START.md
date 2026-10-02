@@ -7,7 +7,8 @@ the lab's Discord posts, and a yes before the first run on a card.
 
 Everything below is the lab's brief for you, my coding agent.
 
-Version of 2 October 2026 (PDT), fifth edition: aifoundry2's card is out of service; the lab's live monitor. The current copy is `docs/lab-start/START.md` in
+Version of 2 October 2026 (PDT), sixth edition: aifoundry1's card 0 is back in service (its fan was replaced);
+aifoundry2's card is out of service; a check for one card; the lab's live monitor. The current copy is `docs/lab-start/START.md` in
 https://github.com/yaroslavvb/et-soc1-prototyping; if this one is more than a month old, read that one instead.
 
 ## Your person, the machine and the card
@@ -40,9 +41,9 @@ Never do these; if one seems needed, stop and tell your person, who asks the lab
 - change a card's TDP, clocks, thresholds, power management, voltages, trace level, telemetry statistics
   (`ettelem --reset-ms`), firmware, driver or `/opt/et`;
 - use sudo or root, or change any system setting;
-- use any card but card `<N>` on `<host>`; never aifoundry1's card 0, which overheats; never aifoundry2's card, which
-  is out of service (below);
-- run `/opt/et/bin/dev_mngt_service` or `et-powertop` on aifoundry1: they open card 0 even with `-n 1`;
+- use any card but card `<N>` on `<host>`; never aifoundry2's card, which is out of service (below);
+- run `/opt/et/bin/dev_mngt_service` or `et-powertop` on aifoundry1: they open both cards even with `-n`, and would
+  break the run of whoever uses the other card;
 - `kill -9` a process that holds a card, or touch another user's processes or files;
 - put a secret on an ssh command line: every user on the host can read a remote command in full with `ps`.
 
@@ -55,8 +56,8 @@ services, posts on the AI Foundry Discord, and anything for the lab admin.
 |---|---|---|---|---|---|
 | aifoundry2 | 1.3.1 | DVFS 600–800 MHz, usually 600 | rises with its temperature | **out of service since 2 October**: its cooling failed, it heats up even at idle (138 °C on 2 Oct) and drops off the PCIe bus | nothing, until the lab dashboard shows it working again |
 | aifoundry3 | 1.3.1 | pinned at 600 MHz (NoC 400) at every boot; no thermal step | 23.6 W at 50 °C; about 25 W at 55–57 °C since 25 Sep | reaches 88 °C under load, nothing slows it; a demo service can use the card without the lock | a first or second choice; switching power over idle, never absolute watts |
-| aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample of 25–30 Sep; not rechecked since the power cycle of 30 Sep: read `mhz.minion` | 33–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | the third choice (step 2) |
-| aifoundry1 card 0 | 1.4.1 | idles at 300 MHz | 18.6–18.8 W | overheats: 115–117 °C after 10 minutes of short tests | nothing |
+| aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample of 25–30 Sep; not rechecked since the power cycle of 30 Sep: read `mhz.minion` | 31–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | a second choice (step 2) |
+| aifoundry1 card 0 | 1.4.1 | idles at 300 MHz; sgemm runs as fast as on card 1 | 19–20 W | needs `ET_DEVICES=0` and `etsoc-shire0.lock`; its fan was replaced on 2 Oct: 49 °C idle, 52–56 °C under 8 minutes of sgemm | a second choice (step 2) |
 
 Nothing on these cards limits the die temperature: aifoundry2's card reached 138 °C on 2 October and nothing tripped.
 The lab dashboard shows every machine, its cards, who is using them and each card's temperature, live:
@@ -69,13 +70,15 @@ Every host has driver 0.20.0 and RISC-V GCC 15.1 in `/opt/et`, but a different r
    between blocks. Why: two users on one card corrupt both runs, and your heat changes the next person's run.
 2. **Look before every run** with `et-who --check`: exit 0 free, 1 held (your own lock included), 2 check failed.
    Never parse the sentence plain `et-who` prints. On exit 2, stop and tell your person; never run a card without
-   the check. A holder named `ettelem` owned by `yaroslavvb` is the lab's live monitor, which reads each free card's
-   temperature for about 4 ms a second and stays off a card while anyone holds its lock: check again a second later. On aifoundry1 it counts both cards, so a holder on card 0 also gives exit 1: show your person the
-   `et-who` output and wait. Why: each device node opens in one process at a time.
+   the check. **Check only your card:** on aifoundry1, which has two cards, `et-who --check` exits 1 when anyone holds
+   either card, so the blocks below look for your card's lines (`/dev/et<N>_…` or `lock:etsoc-shire<N>.lock`) in its
+   output, and stop on exit 2. A holder named `ettelem` owned by `yaroslavvb` is the lab's live monitor, which reads each free card's
+   temperature for about 4 ms a second and stays off a card while anyone holds its lock: check again a second later. Why: each device node opens in one process at a time.
 3. **Run every device-opening process under the card lock, capped at 10 s:**
    `ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 <cmd>`. `-n` fails at once instead of
    waiting. `ET_DEVICES` selects the card on aifoundry1 and is ignored elsewhere. Only programs built on aifoundry1
-   against its `/opt/et` honour it; check with `grep -aqw ET_DEVICES <binary>` before the first run there. Exit 1
+   against its `/opt/et` honour it; check with `grep -aqw ET_DEVICES <binary>` before the first run there, for either
+   card: a program that ignores it opens both cards and breaks the other card's user. Exit 1
    with no output means the lock was taken; exit 124 means `timeout` stopped the program at 10 s. Either way, stop
    and run `et-who`. Release the lock between sub-tests. Why: long holds block everyone. The lock is advisory, and
    aifoundry3's demo does not take it, so run `et-who` again after each run.
@@ -148,10 +151,12 @@ finds no card program of another user, even when `et-who` shows the card free.
 Then:
 
 1. aifoundry3's card (card 0), if free. aifoundry2's card is out of service: leave it out even if it looks free.
-2. Else aifoundry1's card 1 (`ET_DEVICES=1`), if free: never its card 0.
+2. Else one of aifoundry1's two cards that is free, card 1 first (`ET_DEVICES=1`), else card 0 (`ET_DEVICES=0`). On
+   aifoundry1 a card is free when `et-who --check` exits 0 or 1 and lists no line for that card (rule 2), and the
+   second line shows no card program of another user, or only programs that `et-who` lists on the other card.
 
 Several new people may start at the same time, and every run in this brief takes under 10 s, so a held card is
-usually free again within a minute: look again before moving on.
+usually free again within a minute: look again before moving on. Two people can work on aifoundry1 at once, one per card.
 3. Else no card is free: take the first reachable machine in the order aifoundry3, aifoundry2, aifoundry1, do only
    step 3 there (builds and the simulator wait), and look again at most once a minute. After 30 minutes, tell your
    person.
@@ -215,12 +220,13 @@ mkdir -p ~/runs/first-hour && cd ~/runs/first-hour && nice /opt/et/bin/it_test_c
 ```
 
 **5. Card smoke, under 1 s.** Ask your person for a yes first. Run it from the same directory. aifoundry1's copy
-honours `ET_DEVICES` (checked on 30 September); aifoundry2 and aifoundry3 ignore it.
+honours `ET_DEVICES` (checked on 30 September); aifoundry3's ignores it, which is fine there (one card).
 
 ```bash
 cd ~/runs/first-hour
-[ <N> = 0 ] || grep -aqw ET_DEVICES /opt/et/bin/it_test_code_loading || { echo "ignores ET_DEVICES: stop"; exit 1; }
-et-who --check && ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie
+[ "$(hostname)" != aifoundry1 ] || grep -aqw ET_DEVICES /opt/et/bin/it_test_code_loading || { echo "ignores ET_DEVICES: stop"; exit 1; }
+o=$(et-who --check); [ $? -le 1 ] && ! printf '%s\n' "$o" | grep -qE '^(/dev/et<N>_|lock:etsoc-shire<N>[.]lock)' || { echo "card <N> is held, or the check failed: stop"; printf '%s\n' "$o"; exit 1; }
+ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie
 echo "exit $?"; et-who
 ```
 
@@ -242,9 +248,10 @@ harmless. The simulator checks correctness, never speed.
 ```bash
 cd ~/et-soc1-prototyping
 R=~/runs/first-hour; mkdir -p $R
-[ <N> = 0 ] || grep -aqw ET_DEVICES build/sgemm-mine/host/sgemm_host || { echo "ignores ET_DEVICES: stop"; exit 1; }
+[ "$(hostname)" != aifoundry1 ] || grep -aqw ET_DEVICES build/sgemm-mine/host/sgemm_host || { echo "ignores ET_DEVICES: stop"; exit 1; }
 et-lab-manifest > $R/manifest.txt; date > $R/when.txt
-et-who --check && ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 \
+o=$(et-who --check); [ $? -le 1 ] && ! printf '%s\n' "$o" | grep -qE '^(/dev/et<N>_|lock:etsoc-shire<N>[.]lock)' || { echo "card <N> is held, or the check failed: stop"; printf '%s\n' "$o"; exit 1; }
+ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 \
   build/sgemm-mine/host/sgemm_host -n 512 --reps 3 > $R/out.txt 2>&1
 echo "exit $?"; cat $R/out.txt; et-who
 ```
@@ -260,8 +267,9 @@ cd ~/et-soc1-prototyping
 cmake -S tools/ettelem -B build/ettelem-mine -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev
 nice cmake --build build/ettelem-mine -j4
 R=~/runs/first-hour
-[ <N> = 0 ] || grep -aqw ET_DEVICES build/ettelem-mine/ettelem || { echo "ignores ET_DEVICES: stop"; exit 1; }
-et-who --check && ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 \
+[ "$(hostname)" != aifoundry1 ] || grep -aqw ET_DEVICES build/ettelem-mine/ettelem || { echo "ignores ET_DEVICES: stop"; exit 1; }
+o=$(et-who --check); [ $? -le 1 ] && ! printf '%s\n' "$o" | grep -qE '^(/dev/et<N>_|lock:etsoc-shire<N>[.]lock)' || { echo "card <N> is held, or the check failed: stop"; printf '%s\n' "$o"; exit 1; }
+ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 \
   build/ettelem-mine/ettelem sample --seconds 5 --every-ms 100 > $R/idle.jsonl
 echo "exit $?"; et-who
 ```

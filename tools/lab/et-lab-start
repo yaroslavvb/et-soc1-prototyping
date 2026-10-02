@@ -73,12 +73,12 @@ free_gb() { df -Pk "$HOME" 2>/dev/null | awk 'NR == 2 && $4 ~ /^[0-9]+$/ { print
 want_claude=1
 [ "$claude_opt" = no ] && want_claude=0
 
-# What we know of each machine's cards (AGENT.md §4, docs/findings/14-card-behaviour.md, 30 September 2026).
+# What we know of each machine's cards (AGENT.md §4, docs/findings/14-card-behaviour.md, 2 October 2026).
 # Prints "use|note" or "never|note" or "ask|note".
 card_fact() {
   case "$1:$2" in
-    aifoundry1:0) echo "never|never use it: it overheats (115-117 °C after 10 minutes of short tests)" ;;
-    aifoundry1:1) echo "use|the card to use here: select it with ET_DEVICES=1; firmware 1.2.0; 600 MHz in every sample of 25-30 Sep, not rechecked since the power cycle of 30 Sep" ;;
+    aifoundry1:0) echo "use|select it with ET_DEVICES=0; firmware 1.4.1, idles at 300 MHz; its fan was replaced on 2 Oct (49 °C idle, 52-56 °C under 8 minutes of sgemm)" ;;
+    aifoundry1:1) echo "use|select it with ET_DEVICES=1; firmware 1.2.0; 600 MHz in every sample of 25-30 Sep, not rechecked since the power cycle of 30 Sep" ;;
     aifoundry2:0) echo "never|out of service since 2 Oct: its cooling failed; it overheats even at idle and drops off the PCIe bus" ;;
     aifoundry3:0) echo "use|firmware 1.3.1, pinned at 600 MHz, reaches 88 °C under load; a demo service may use it without the lock" ;;
     *) echo "ask|a card this script does not know: ask the lab lead before using it" ;;
@@ -104,7 +104,7 @@ for f in /dev/et[0-9]*_ops; do         # the names only: a glob and a stat, neve
 done
 # shellcheck disable=SC2086  # split on purpose: one card number per line
 cards=$(printf '%s\n' $cards | sort -n | tr '\n' ' ')
-use_n=""; ncards=0
+use_n=""; ncards=0; usable=""
 if [ -z "${cards// /}" ]; then
   warn "no card nodes (/dev/et*_ops): this machine has no card, or its driver is not loaded; tell the lab admin"
 fi
@@ -117,11 +117,16 @@ for n in $cards; do
   else
     warn "card $n's lock $lock is missing: tell the lab admin, and do not create it yourself"
   fi
-  [ "$kind" = use ] && [ -z "$use_n" ] && use_n=$n
+  [ "$kind" = use ] && usable="$usable $n"
   ncards=$((ncards + 1))
 done
+# The order to take free cards in (START.md step 2): on aifoundry1 card 1, then card 0; elsewhere by number.
+pref=$cards; [ "$host" = aifoundry1 ] && pref="1 0"
+for n in $pref; do case " $usable " in *" $n "*) [ -z "$use_n" ] && use_n=$n ;; esac; done
+held_card() { printf '%s\n' "$out" | grep -qE "^(/dev/et${1}_|lock:etsoc-shire${1}[.]lock)"; }
 case $host in
-  aifoundry1) item "" "aifoundry1: dev_mngt_service and et-powertop open card 0 even with -n 1: never run them here" ;;
+  aifoundry1) item "" "aifoundry1: dev_mngt_service and et-powertop open both cards even with -n: never run them here"
+              item "" "aifoundry1: two people can work here at once, one per card; a program that ignores ET_DEVICES opens both cards" ;;
   aifoundry3) item "" "aifoundry3: the demo service takes no lock, so run et-who again after each run" ;;
 esac
 
@@ -131,10 +136,13 @@ if have et-who; then
   out=$(timeout 20 et-who --check 2>&1); rc=$?
   case $rc in
     0) item free "no process holds a card node or lock (exit 0)"; card_state=free ;;
-    1) item held "(exit 1): wait or ask; never use a card someone holds"; printf '%s\n' "$out" | indent; card_state=held
-       if [ -n "$use_n" ] && [ "$ncards" -gt 1 ] \
-          && ! printf '%s\n' "$out" | grep -qE "^(/dev/et${use_n}_|lock:etsoc-shire${use_n}[.]lock)"; then
-         card_state="not held itself, but another card here is (the check counts every card): wait or ask"
+    1) item held "(exit 1): someone holds a card here; never use a card someone holds"; printf '%s\n' "$out" | indent
+       card_state=held
+       if [ "$ncards" -gt 1 ]; then   # the check counts every card: look for a usable card with no line of its own
+         for n in $pref; do
+           case " $usable " in *" $n "*) ;; *) continue ;; esac
+           if ! held_card "$n"; then use_n=$n; card_state="free (only another card here is held)"; break; fi
+         done
        fi ;;
     *) warn "the check failed (exit $rc): never run a card without it; tell the lab admin"
        [ -n "$out" ] && printf '%s\n' "$out" | indent ;;
@@ -143,9 +151,15 @@ else
   warn "et-who is not installed here: never run a card without it; tell the lab admin"
 fi
 # Other users' card programs and queues, on the whole command line (never our own: awk runs as us).
-if psout=$(ps -eo uid=,user:32=,etime=,args= 2>/dev/null); then
+if psout=$(ps -eo uid=,pid=,user:32=,etime=,args= 2>/dev/null); then
   runs=$(printf '%s\n' "$psout" | awk -v me="$uid" -v re="$PROCS" '$1 != me {
-      a = $0; sub(/^ *[^ ]+ +[^ ]+ +[^ ]+ +/, "", a); if (a ~ re) print $2, $3, substr(a, 1, 120) }')
+      a = $0; sub(/^ *[^ ]+ +[^ ]+ +[^ ]+ +[^ ]+ +/, "", a); if (a ~ re) print $3, $2, $4, substr(a, 1, 120) }')
+  # On a machine with more than one card, a program that et-who lists on another card is not in the way of ours.
+  if [ -n "$runs" ] && [ -n "$use_n" ] && [ "$ncards" -gt 1 ] && [ -n "${out:-}" ]; then
+    other=$(printf '%s\n' "$out" | grep -vE "^(/dev/et${use_n}_|lock:etsoc-shire${use_n}[.]lock)" | awk '{ print $3 }')
+    runs=$(printf '%s\n' "$runs" | while read -r pid rest; do
+      case " $(printf '%s ' $other) " in *" $pid "*) ;; *) printf '%s %s\n' "$pid" "$rest" ;; esac; done)
+  fi
   if [ -n "$runs" ]; then
     item "other runs" "card programs or queues of other users (ps): someone's run is active here"
     printf '%s\n' "$runs" | head -20 | indent
@@ -343,7 +357,8 @@ cat <<EOF
   1. Look before every run: et-who --check (exit 0 free, 1 held, 2 the check failed: stop and ask).
   2. Run every program that opens a card under its lock, for at most 10 s:
        ET_DEVICES=$N flock -n /run/lock/etsoc-shire$N.lock timeout 10 <cmd>
-  3. Never use aifoundry1's card 0: it overheats.
+  3. Use only your card. On aifoundry1 (two cards) et-who --check counts both: look for your card's own lines
+     (/dev/et${N}_..., lock:etsoc-shire${N}.lock) and run only programs that honour ET_DEVICES.
   4. Stop any run at a 90 °C die mean.
   5. Never kill -9 a process that holds a card (Ctrl-C or a plain kill), and never reset a card or retrain its
      PCIe link (on 30 Sep a retrain hung all of aifoundry1): tell the lab admin.

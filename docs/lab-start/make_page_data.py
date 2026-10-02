@@ -33,7 +33,8 @@ CARDS = [
      "clock": "600 MHz until 30 Sep, not rechecked since", "note": "select with ET_DEVICES=1; a CI runner shares the host",
      "use": True},
     {"id": "aifoundry1-c0", "host": "aifoundry1", "n": 0, "firmware": "1.4.1",
-     "clock": "idles at 300 MHz", "note": "overheats: 115–117 °C in 10 minutes", "use": False},
+     "clock": "idles at 300 MHz", "note": "select with ET_DEVICES=0; fan replaced 2 Oct: 52–56 °C under load",
+     "use": True},
 ]
 
 
