@@ -90,6 +90,7 @@ before `</body>`. Private pages are listed but not mirrored.
 
 | Page | Space | Visibility | Repo file | Why |
 |---|---|---|---|---|
+| aifoundry2 power cycle: instructions for the owner's Intel agent (1 Oct, made by another session) | `d8070e18-98fb-467c-aa57-a1b243723442` | private | not mirrored | Operational instructions for the owner's own agent, with access details: never public (AGENT.md §10). It went out public on 1 Oct at 14:13 PDT though its own description says private; the next check-mirror run warned, and it was set private at about 17:55 the same day |
 | Notes of a conversation with David Kanter (R9, 20 Sep) | `f3533740-5ad9-45e1-927c-098dbbe5c210` | private | not mirrored | A personal memo quoting a private conversation; private and unlinked since 24 September (the owner's decision). The DVFS page and R9 describe it in words. |
 
 <!-- mirror:end -->
