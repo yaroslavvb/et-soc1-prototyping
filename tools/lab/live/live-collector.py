@@ -9,7 +9,11 @@ lock on this machine (`et-who --check` exit 0) and the card's link is up, so it 
 Each line: {"host", "t" (ms), "up_s", "cpu": [per-core %], "cpu_all", "load": [1, 5, 15], "mem": {...},
 "top": [[user, comm, pid, cpu%, rss_mb], ...], "nproc", "cards": [{"n", "pci", "link", "ok", "held", "temp": {"die_c", "die_max_c", "pmic_c", "board_w", "at"}}],
 "disk": [{"mount", "used_gb", "free_gb"}] for / and /home,
-"temps": {"cpu", "nvme", "nic"} (°C from hwmon; the ET card's own temperature is not visible to Linux)}.
+"temps": {"cpu", "nvme", "nic"}.
+Every LIVE_HIST_EVERY seconds (5) it also appends a compact record to ~/live/history/<UTC date>.jsonl on this machine's
+disk, for the history page (tools/lab/history/build.py); files older than LIVE_HIST_DAYS (9) are deleted.
+Record: {"t", "cpu", "mem", "load", "temps": {...}, "cards": [{"n", "ok", "held", "die", "max", "w"}]} (die/max/w only
+from a reading under 5 s old) (°C from hwmon; the ET card's own temperature is not visible to Linux)}.
 """
 import json
 import os
@@ -22,6 +26,9 @@ import time
 HOST = socket.gethostname().split(".")[0]
 TOP_N = int(os.environ.get("LIVE_TOP", "12"))
 EVERY = float(os.environ.get("LIVE_EVERY", "1"))
+HIST_EVERY = float(os.environ.get("LIVE_HIST_EVERY", "5"))
+HIST_DAYS = int(os.environ.get("LIVE_HIST_DAYS", "9"))
+HIST_DIR = os.path.expanduser(os.environ.get("LIVE_HIST_DIR", "~/live/history"))
 CARD_EVERY = float(os.environ.get("LIVE_CARD_EVERY", "1"))
 ETTELEM = os.path.expanduser(os.environ.get("LIVE_ETTELEM", "~/live/ettelem-build/ettelem"))
 TICK = os.sysconf("SC_CLK_TCK")
@@ -242,6 +249,33 @@ class CardTemps:
                 return
 
 
+def record(line):
+    """append one compact history record; never let a disk problem stop the stream"""
+    now_ms = line["t"]
+    cs = []
+    for c in line["cards"]:
+        r = {"n": c["n"], "ok": c["ok"], "held": c["held"]}
+        t = c.get("temp")
+        if t and now_ms - t.get("at", 0) < 5000:
+            r.update(die=t.get("die_c"), max=t.get("die_max_c"), w=t.get("board_w"))
+        cs.append(r)
+    m = line["mem"]
+    rec = {"t": now_ms, "cpu": line["cpu_all"], "mem": round(100.0 * m["used_mb"] / max(m["total_mb"], 1), 1),
+           "load": line["load"][0], "temps": line.get("temps", {}), "cards": cs}
+    try:
+        os.makedirs(HIST_DIR, exist_ok=True)
+        day = time.strftime("%Y-%m-%d", time.gmtime(now_ms / 1000))
+        with open(f"{HIST_DIR}/{day}.jsonl", "a") as f:
+            f.write(json.dumps(rec, separators=(",", ":")) + "\n")
+        if time.gmtime(now_ms / 1000).tm_min == 0:  # once an hour or so: drop old days
+            cut = time.strftime("%Y-%m-%d", time.gmtime(now_ms / 1000 - HIST_DAYS * 86400))
+            for fn in os.listdir(HIST_DIR):
+                if fn.endswith(".jsonl") and fn[:10] < cut:
+                    os.remove(f"{HIST_DIR}/{fn}")
+    except OSError:
+        pass
+
+
 def main():
     prev_cpu, prev_p, prev_t = cpu_times(), procs(), time.monotonic()
     card_state, card_at = cards(), 0.0
@@ -249,6 +283,7 @@ def main():
     ctemp = CardTemps()
     sensors = find_sensors()
     due = time.monotonic()
+    hist_at = 0.0
     while True:
         due += EVERY  # a fixed cadence: the tick's own work does not stretch it
         time.sleep(max(0.0, due - time.monotonic()))
@@ -283,6 +318,9 @@ def main():
         }
         sys.stdout.write(json.dumps(line, separators=(",", ":")) + "\n")
         sys.stdout.flush()
+        if now - hist_at >= HIST_EVERY - 0.2:
+            hist_at = now
+            record(line)
         prev_cpu, prev_p, prev_t = cur_cpu, cur_p, now
 
 
