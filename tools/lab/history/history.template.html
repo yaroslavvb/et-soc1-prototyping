@@ -134,8 +134,13 @@ const D = __DATA__;
       cross.setAttribute("x1", X(i)); cross.setAttribute("x2", X(i)); cross.setAttribute("visibility", "visible");
       tip.innerHTML = "<b>" + fmtT(t0 + i * step, v) + "</b><br>" + (b.up[i] ? S.map(s => `<span style="color:${s.col}">${s.label}</span> ${s.ys[i] == null ? "–" : s.ys[i] + unit}`).join("<br>") : "nothing recorded");
       tip.hidden = false;
-      const bx = box.getBoundingClientRect(), left = e.clientX - bx.left + 14;
-      tip.style.left = Math.min(left, bx.width - tip.offsetWidth - 4) + "px"; tip.style.top = "26px";
+      // beside the pointer, never over it: to its right, else to its left; on a screen too narrow for either, under
+      // the plot
+      const bx = box.getBoundingClientRect(), px = e.clientX - bx.left, tw = tip.offsetWidth, gap = 18;
+      let left = px + gap;
+      if (left + tw > bx.width) left = px - gap - tw;
+      if (left < 0) { tip.style.left = "0px"; tip.style.top = (r.bottom - bx.top + 4) + "px"; }
+      else { tip.style.left = left + "px"; tip.style.top = "26px"; }
     });
     svg.addEventListener("pointerleave", () => { cross.setAttribute("visibility", "hidden"); tip.hidden = true; });
   }
