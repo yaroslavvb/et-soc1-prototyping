@@ -200,7 +200,8 @@
     drawDie(h, v);
     u.cards.innerHTML = (v.cards || []).map(function (c) {
       var cls = c.ok === false ? "bad" : c.held ? "busy" : "ok";
-      return '<span class="lv-chip ' + cls + '">card ' + c.n + ": " + esc(c.link) + (c.ok === false ? "" : c.held ? " · in use" : " · free") + "</span>";
+      var who = (c.holders || []).map(function (x) { return x[0] + " (" + x[1] + ")"; }).join(", ");
+      return '<span class="lv-chip ' + cls + '">card ' + c.n + ": " + esc(c.link) + (c.ok === false ? "" : c.held ? " · in use" + (who ? " by " + esc(who) : "") : " · free") + "</span>";
     }).join(" ");
   }
 
@@ -216,7 +217,11 @@
   }
   HOSTS.forEach(function (h) {
     window.ss.stream("aifoundry/" + h).keep(KEEP).draw(function (v, history) {
-      if (v && (!last[h] || v.t !== last[h].t)) { last[h] = v; updateTop(h, v); }
+      if (v && (!last[h] || v.t !== last[h].t)) {
+        last[h] = v; updateTop(h, v);
+        // the main dashboard (script.js) shows each card's state from this reading while it is fresh
+        document.dispatchEvent(new CustomEvent("lab-live", {detail: {host: h, t: v.t, cards: v.cards || []}}));
+      }
       hist[h] = (history || []).map(function (x) { return x && x.v ? x.v : x; }).filter(function (x) { return x && typeof x.cpu_all === "number"; });
       update(h);
     });

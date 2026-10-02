@@ -198,8 +198,27 @@
     const t = isNum(w.since_ms) ? w.since_ms : isNum(w.etime_s) && isNum(GEN) ? GEN - w.etime_s * 1000 : null;
     return t;
   }
+  /* Live card state (since 2 Oct 2026): live.js passes each machine's per-second reading (tools/lab/live), with every
+     card's link, lock and holders; while it is under LIVE_FRESH_MS old it overrides the 10-minute check's state. */
+  const LIVEC = {}, LIVE_FRESH_MS = 10e3;
+  function liveOf(id) {
+    const x = LIVEC[id];
+    return x && Date.now() - x.t < LIVE_FRESH_MS ? x : null;
+  }
   function cardState(id) {
     const c = C[id] || {}, host = H[hostOfCard(id)] || {};
+    const lv = liveOf(id);
+    if (lv) {
+      const live = 'live, from the machine every second';
+      if (lv.ok === false) return {key: 'missing', word: 'LINK DOWN', extra: 'live', title: live + ': the card does not answer on PCIe'};
+      if (lv.held) {
+        const hs = Array.isArray(lv.holders) ? lv.holders : [];
+        return {key: c.excluded ? 'warn' : 'held', word: 'IN USE:', login: hs.length ? hs[0][0] : null,
+          extra: [hs.map(x => x[0] + ' · ' + x[1]).join(', ') || null, 'live'].filter(Boolean).join(' · '), title: live};
+      }
+      if (c.excluded) return {key: 'excluded', word: 'EXCLUDED', title: c.note || 'excluded from all work'};
+      if (lv.held === false) return {key: 'free', word: 'FREE', extra: 'live', title: live};
+    }
     const w = holderOf(c);
     if (c.excluded && !w && host.reachable !== false) return {key: 'excluded', word: 'EXCLUDED', title: c.note || 'excluded from all work'};
     if (c.present === false) return {key: 'missing', word: 'MISSING', title: 'the driver has no bound device for this card'};
@@ -235,14 +254,19 @@
     return null;
   }
   function reading(c) {
-    const t = (c && c.telemetry) || null;
+    // the live monitor's reading (once a second while the card is free) when it is newer than the 10-minute check's
+    const id = c ? CARDS.find(k => C[k] === c) : null, lt = id && LIVEC[id] && LIVEC[id].temp;
+    const t0 = (c && c.telemetry) || null, at0 = t0 ? T(t0, 'at') : null;
+    if (lt && isNum(lt.die_c) && isNum(lt.at) && !(isNum(at0) && at0 >= lt.at))
+      return {die: lt.die_c, dieMax: lt.die_max_c, pmic: lt.pmic_c, w: lt.board_w, at: lt.at, source: 'live', from: 'the live monitor, once a second'};
+    const t = t0;
     if (!t || t.source === 'none' || (t.die_c == null && t.board_w == null)) return null;
     let at = T(t, 'at');
     if (at == null && isNum(t.age_min) && isNum(GEN)) at = GEN - t.age_min * 6e4;
     return {die: t.die_c, dieMax: t.die_max_c, pmic: t.pmic_c, w: t.board_w, mhz: t.minion_mhz, noc: t.noc_mhz, ddr: t.ddr_mhz,
       at, source: t.source, from: t.from};
   }
-  const SRC = {live: 'live sample', experiment: 'experiment file'};
+  const SRC = {live: 'live reading', experiment: 'experiment file'};
 
   /* ---- people ---- */
   const STATUS_RANK = {active: 0, idle: 1, 'processes only': 2, away: 3, unknown: 4};
@@ -1473,6 +1497,25 @@
     later.splice(0).forEach(fn => fn());
     if (/^#(focus|card)=/.test(location.hash)) focusOn(location.hash, false);
   }
+  // a new live reading redraws the card tiles only when some card's state changed (or a reading went stale)
+  let liveSig = '', liveDrawn = 0, liveLater = null;
+  function liveChanged() {
+    const sig = CARDS.map(id => { const x = liveOf(id); return x ? [id, x.ok, x.held, JSON.stringify(x.holders || []),
+      x.temp && isNum(x.temp.die_c) ? x.temp.die_c : ''].join(':') : id + ':-'; }).join('|');
+    if (sig === liveSig) return;
+    const wait = 1e3 - (Date.now() - liveDrawn);   // at most one redraw a second; a state change waits at most that
+    if (wait > 0) { if (!liveLater) liveLater = setTimeout(() => { liveLater = null; liveChanged(); }, wait); return; }
+    liveSig = sig; liveDrawn = Date.now(); renderLive();
+  }
+  document.addEventListener('lab-live', e => {
+    const d = e.detail || {};
+    for (const lc of d.cards || []) {
+      const id = CARDS.find(k => hostOfCard(k) === d.host && (C[k] || {}).devnum === lc.n);
+      if (id) LIVEC[id] = {t: d.t, ok: lc.ok, held: lc.held, holders: lc.holders, temp: lc.temp || (LIVEC[id] || {}).temp || null};
+    }
+    liveChanged();
+  });
+  setInterval(liveChanged, 5e3);
   function tick() {
     const st = ageMin() > STALE_MIN;
     if (st !== PAGE_STALE) { PAGE_STALE = st; renderLive(); }

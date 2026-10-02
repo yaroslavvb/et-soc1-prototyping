@@ -7,7 +7,9 @@ asked for on 2 Oct 2026: every LIVE_CARD_EVERY seconds (1) it reads each card's 
 (about 4 ms of every second holding the management node, which admits one opener), and only while nobody holds any card node or
 lock on this machine (`et-who --check` exit 0) and the card's link is up, so it never locks a user out.
 Each line: {"host", "t" (ms), "up_s", "cpu": [per-core %], "cpu_all", "load": [1, 5, 15], "mem": {...},
-"top": [[user, comm, pid, cpu%, rss_mb], ...], "nproc", "cards": [{"n", "pci", "link", "ok", "held", "temp": {"die_c", "die_max_c", "pmic_c", "board_w", "at"}}],
+"top": [[user, comm, pid, cpu%, rss_mb], ...], "nproc", "cards": [{"n", "pci", "link", "ok", "held", "holders": [[login, program], ...],
+"temp": {"die_c", "die_max_c", "pmic_c", "board_w", "at"}}] ("held" and "holders" every second, from the lock table and
+et-who; a program is argv[0]'s base name, as ps shows it, never its arguments),
 "disk": [{"mount", "used_gb", "free_gb"}] for / and /home,
 "temps": {"cpu", "nvme", "nic"}.
 Every LIVE_HIST_EVERY seconds (5) it also appends a compact record to ~/live/history/<UTC date>.jsonl on this machine's
@@ -18,6 +20,7 @@ from a reading under 5 s old) (°C from hwmon; the ET card's own temperature is 
 import json
 import os
 import pwd
+import re
 import socket
 import subprocess
 import sys
@@ -198,6 +201,36 @@ def cards():
     return out
 
 
+HOLDER = re.compile(r"^(?:/dev/et(\d+)_\w+|lock:etsoc-shire(\d+)\.lock)\s+(\S+)\s+\d+\s+\S+\s+(\S+)")
+WRAPPERS = {"flock", "timeout", "bash", "sh", "env", "nice", "setsid", "nohup"}
+
+
+def holders():
+    """(et-who --check's exit status: 0 free, 1 held, 2 failed; card n -> [[login, program], ...]). A card's programs
+    are those holding its device nodes when there are any, else its lock's holders (flock, timeout ...)."""
+    try:
+        r = subprocess.run(["et-who", "--check"], capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        return 2, {}
+    seen = {}
+    for line in r.stdout.splitlines():
+        m = HOLDER.match(line)
+        if not m:
+            continue
+        n = int(m.group(1) or m.group(2))
+        prog = os.path.basename(m.group(4))[:32]
+        seen.setdefault(n, []).append((m.group(3), prog, m.group(1) is not None))
+    out = {}
+    for n, hs in seen.items():
+        pick = ([h for h in hs if h[2] and h[1] not in WRAPPERS] + [h for h in hs if not h[2] and h[1] not in WRAPPERS]) or hs
+        uniq = []
+        for u, prog, _ in pick:
+            if [u, prog] not in uniq:
+                uniq.append([u, prog])
+        out[n] = uniq[:3]
+    return r.returncode, out
+
+
 class CardTemps:
     """card n -> its last reading. `ettelem temp` is never killed (a sampler killed mid-request poisons the management
     queue): a run that has not finished after half a second is collected on a later tick, and nothing new starts
@@ -205,14 +238,6 @@ class CardTemps:
 
     def __init__(self):
         self.last, self.proc = {}, None
-
-    @staticmethod
-    def free():
-        try:
-            return subprocess.run(["et-who", "--check"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                  timeout=5).returncode == 0
-        except (OSError, subprocess.TimeoutExpired):
-            return False
 
     def collect(self, wait):
         n, p = self.proc
@@ -231,12 +256,13 @@ class CardTemps:
         p.stdout.close()
         return True
 
-    def tick(self, cards_now):
+    def tick(self, cards_now, free):
+        """free: et-who --check exited 0 this tick (nobody holds any card node or lock on this machine)"""
         if self.proc and not self.collect(0):
             return
         due = [c["n"] for c in cards_now if c["ok"] and c["n"] is not None and
                time.time() * 1000 - (self.last.get(c["n"]) or {}).get("at", 0) >= CARD_EVERY * 1000 - 300]
-        if not due or not os.access(ETTELEM, os.X_OK) or not self.free():
+        if not due or not os.access(ETTELEM, os.X_OK) or not free:
             return  # someone holds a card node or lock on this machine: no reading this time
         for n in due:
             env = dict(os.environ, ET_DEVICES=str(n), LD_LIBRARY_PATH="/opt/et/lib")
@@ -305,7 +331,19 @@ def main():
         top.sort(key=lambda r: (-r[3], -r[4]))
         if now - card_at >= 5:
             card_state, card_at, disk_state = cards(), now, disk()
-        ctemp.tick(card_state)
+        # who holds each card, every second: the lock table (no privilege) and et-who (node holders too); et-who
+        # only while some card answers, and before any temperature read, which it gates
+        rc, hold = (holders() if any(c["ok"] for c in card_state) else (None, {}))
+        locked = lock_inodes()
+        for c in card_state:
+            try:
+                lk = os.stat(f"/run/lock/etsoc-shire{c['n']}.lock").st_ino in locked
+            except OSError:
+                lk = None
+            hs = hold.get(c["n"], [])
+            c["held"] = bool(lk or hs) if (lk is not None or rc in (0, 1)) else None
+            c["holders"] = hs if rc in (0, 1) else None
+        ctemp.tick(card_state, rc == 0)
         for c in card_state:
             c["temp"] = ctemp.last.get(c["n"])
         line = {
