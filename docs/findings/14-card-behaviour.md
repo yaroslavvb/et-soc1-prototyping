@@ -477,7 +477,11 @@ At 09:42 on 1 October aifoundry2's card stopped answering on PCIe while nothing 
 logged corrected receiver errors, then the link went down for good (configuration space read all ones, the root
 port saw no receiver). It stayed down until a full-reset power cycle at 06:45 on 2 October
 (`echo pci > /sys/kernel/reboot/type`, mode cold, then a reboot: the chipset drops the supply's main rails, which
-power-cycles the slot); a plain warm reboot keeps the slot powered. **The card's temperature follows the host's CPU
+power-cycles the slot); a plain warm reboot keeps the slot powered. Confirmed again on 2 October: a plain
+`systemctl reboot` at 10:47 left the card off the bus (no device at all under root port 00:1b.0), and the full reset at
+10:53 brought it back at 16 GT/s x8. **To recover a card that fell off the bus, always the full reset, as root:**
+`echo cold > /sys/kernel/reboot/mode; echo pci > /sys/kernel/reboot/type; systemctl reboot` (the setting lasts one boot).
+After that boot the idle card heated from 45 to 55 °C in its first two minutes (the live collector's records). **The card's temperature follows the host's CPU
 load, not its own work**: 63–67 °C while the host was busy, 70 °C idle in the evening, 82–83 °C idle from 02:30 on
 1 October (idle power up from 29 to 37.5 W), and it failed minutes after the host went idle again; aifoundry3's card,
 on the same Gigabyte Z590 AORUS MASTER board in the same slot, stayed at 54–57 °C. The chassis fans most likely
