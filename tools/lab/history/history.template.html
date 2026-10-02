@@ -142,7 +142,7 @@ const D = __DATA__;
 
   const root = document.getElementById("hosts"), boxes = {};
   HOSTS.forEach(h => {
-    const s = document.createElement("section"); s.className = "host";
+    const s = document.createElement("section"); s.className = "host"; s.id = h;
     s.innerHTML = `<h2>${h}<span class="dot"></span><span class="state"></span></h2><div class="charts">` +
       ["temps", "power", "load"].map(k => `<div><div class="ct">${{temps: "Temperatures °C", power: "Card power W", load: "CPU and memory %"}[k]}</div><div class="chart" data-k="${k}"></div></div>`).join("") + "</div>";
     root.appendChild(s);
@@ -157,7 +157,7 @@ const D = __DATA__;
       boxes[h].sec.querySelector(".state").textContent = live ? "live" : last ? "last record " + new Date(last).toLocaleString([], {hour: "2-digit", minute: "2-digit", month: "short", day: "numeric"}) : "no records yet";
     });
   }
-  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { view = b.dataset.v; history.replaceState(null, "", "#v=" + view); render(); });
+  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { view = b.dataset.v; history.replaceState(null, "", "#v=" + view + ((location.hash.match(/&h=aifoundry\d/) || [""])[0])); render(); });
 
   // live: append the streams' readings to the views while the page is open (hour: 5 s buckets; day and week: the
   // current bucket's mean is not updated, but new buckets are added as time passes)
@@ -196,6 +196,9 @@ const D = __DATA__;
   }
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(render, 150); });
   render();
+  // deep links from the dashboard: #v=day&h=aifoundry2 opens that range and scrolls to that machine
+  const want = (location.hash.match(/h=(aifoundry\d)/) || [])[1];
+  if (want && boxes[want]) { boxes[want].sec.scrollIntoView({block: "start"}); boxes[want].sec.style.boxShadow = "0 0 0 2px var(--cy),inset 0 0 30px rgba(34,211,238,.08)"; }
 })();
 </script>
 </body>

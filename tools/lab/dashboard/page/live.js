@@ -11,6 +11,7 @@
   if (!grid) return;
   var ROW_H = 22, TOP_N = 12, EMA = 0.35, KEEP = 300;
   var TS = [["cpu", "CPU", "#22d3ee"], ["nvme", "NVMe", "#34d399"], ["nic", "NIC", "#fbbf24"]];
+  var HISTORY = "https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history";
   var CARD_COL = ["#fb4f6b", "#c084fc"];
   var HIST = (typeof D !== "undefined" && D.history) || {}, CARDS = (typeof D !== "undefined" && D.cards) || {};
   var last = {}, hist = {}, ui = {};
@@ -25,11 +26,14 @@
       '<div class="lv-body"><div class="lv-gauges"></div><div class="lv-sub"></div>' +
       '<div class="lv-cores" aria-label="CPU per thread"></div><svg class="lv-spark" viewBox="0 0 160 28" preserveAspectRatio="none" aria-hidden="true"><path/></svg>' +
       '<div class="lv-mem"></div><div class="lv-disk"></div>' +
-      '<div class="lv-temps"><div class="lv-row small lv-tleg"></div><svg class="lv-tspark" viewBox="0 0 160 34" preserveAspectRatio="none" aria-hidden="true"></svg>' +
+      '<div class="lv-temps" role="link" tabindex="0" title="Open this machine\'s history: hour, day, week"><span class="lv-open">HISTORY &#8599;</span><div class="lv-row small lv-tleg"></div><svg class="lv-tspark" viewBox="0 0 160 34" preserveAspectRatio="none" aria-hidden="true"></svg>' +
       '<div class="lv-die small"></div></div>' +
       '<div class="lv-row lv-cards"></div>' +
       '<details class="lv-topd"><summary>Top processes</summary><div class="lv-top"><div class="lv-top-in"></div></div></details></div>';
     grid.appendChild(c);
+    var tb = c.querySelector(".lv-temps"), go = function () { window.open(HISTORY + "#v=hour&h=" + h, "_blank", "noopener"); };
+    tb.addEventListener("click", go);
+    tb.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
     ui[h] = { card: c, rows: {}, ema: {},
       dot: c.querySelector(".lv-dot"), age: c.querySelector(".lv-age"), sub: c.querySelector(".lv-sub"), gauges: c.querySelector(".lv-gauges"), g: {},
       cores: c.querySelector(".lv-cores"), spark: c.querySelector(".lv-spark path"), mem: c.querySelector(".lv-mem"),

@@ -259,6 +259,11 @@ main{max-width:1280px}
  #cu-days .cu-mini{max-width:60px}
 }
 .dh-tools a.newuser{font-weight:650;border:1.5px solid var(--ink);border-radius:999px;padding:1px 10px;text-decoration:none}
+.histlink{margin-left:auto;font-weight:650;font-size:15px;text-decoration:none;padding:5px 13px;border-radius:999px;color:#04111d;
+  background:linear-gradient(90deg,#22d3ee,#c084fc);box-shadow:0 0 14px rgba(34,211,238,.45);white-space:nowrap}
+.histlink:hover,.histlink:focus-visible{filter:brightness(1.1);box-shadow:0 0 20px rgba(34,211,238,.7)}
+.chart-title a.hl,.chart-sub a.hl{color:inherit;text-decoration:none}.chart-title a.hl:hover{text-decoration:underline}
+.chart-sub a.hl{color:var(--accent);white-space:nowrap}
 .dh-tools a.newuser:hover,.dh-tools a.newuser:focus-visible{background:var(--ink);color:var(--page)}
 </style>
 
@@ -266,6 +271,7 @@ main{max-width:1280px}
  <div class="dh-top">
   <h1>AI Foundry lab</h1>
   <span id="light" class="light lv-unk" role="status"><i aria-hidden="true"></i><b id="light-word">NO DATA</b></span>
+  <a class="histlink" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history" target="_blank" rel="noopener" title="Temperatures, card power, CPU and memory of every machine: the last hour, day or week">&#128200; History: hour · day · week</a>
   <span id="fixture-pill" class="pill lv-fix" hidden><i aria-hidden="true"></i>MADE-UP DATA</span>
  </div>
  <p id="headline" class="dh-headline">—</p>
@@ -345,7 +351,9 @@ someone does, the page shows the last reading. The small line beside each card i
 .lv-chip.busy{border-color:rgba(251,191,36,.7);color:var(--am);box-shadow:0 0 10px rgba(251,191,36,.2)}
 .lv-chip.bad{border-color:var(--rd);color:var(--rd);font-weight:700;box-shadow:0 0 12px rgba(251,79,107,.35);animation:lv-alarm 1.2s steps(2) infinite}
 @keyframes lv-alarm{50%{background:rgba(251,79,107,.15)}}
-.lv-temps{margin:8px 0 2px;padding:6px 7px 4px;border-radius:6px;background:rgba(3,8,16,.55);box-shadow:inset 0 0 0 1px rgba(56,189,248,.12)}
+.lv-temps{cursor:pointer;transition:box-shadow .2s;margin:8px 0 2px;padding:6px 7px 4px;border-radius:6px;background:rgba(3,8,16,.55);box-shadow:inset 0 0 0 1px rgba(56,189,248,.12)}
+.lv-temps:hover{box-shadow:inset 0 0 0 1px var(--cy),0 0 12px rgba(34,211,238,.25)}
+.lv-temps .lv-open{float:right;font:10px var(--mono);letter-spacing:.12em;color:var(--cy);opacity:.75}.lv-temps:hover .lv-open{opacity:1}
 .lv-tleg{font:11px var(--mono);min-height:34px;align-content:flex-start;gap:10px!important;margin:0 0 3px!important}
 .lv-tk{display:inline-flex;align-items:center;gap:4px;color:var(--tx)}.lv-tk.stale{color:var(--mu)}.lv-tk::before{content:"";width:10px;height:3px;border-radius:2px;background:var(--k);box-shadow:0 0 5px var(--k)}
 .lv-tspark{width:100%;height:46px;display:block;background:linear-gradient(rgba(56,189,248,.07) 1px,transparent 1px) 0 0/100% 11.5px}
@@ -422,8 +430,8 @@ keys on a bar for its times.</p>
 <div id="tl-legend"></div>
 <div id="tl"></div>
 <div class="charts2">
- <div><div class="chart-title">Die temperature</div><p class="chart-sub">Where a reading exists: an experiment file or a live sample</p><div id="leg-die"></div><div id="ch-die"></div></div>
- <div><div class="chart-title">Board power</div><p class="chart-sub">Where a reading exists: an experiment file or a live sample</p><div id="leg-w"></div><div id="ch-w"></div></div>
+ <div><div class="chart-title"><a class="hl" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history#v=week" target="_blank" rel="noopener">Die temperature &#8599;</a></div><p class="chart-sub">Where a reading exists: an experiment file or a live sample · <a class="hl" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history#v=day" target="_blank" rel="noopener">every 5 s in the history: hour, day, week &#8599;</a></p><div id="leg-die"></div><div id="ch-die"></div></div>
+ <div><div class="chart-title"><a class="hl" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history#v=week" target="_blank" rel="noopener">Board power &#8599;</a></div><p class="chart-sub">Where a reading exists: an experiment file or a live sample · <a class="hl" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history#v=day" target="_blank" rel="noopener">every 5 s in the history: hour, day, week &#8599;</a></p><div id="leg-w"></div><div id="ch-w"></div></div>
 </div>
 <div class="chart-title" style="margin-top:18px">Sessions per machine</div>
 <div id="leg-sess"></div>
