@@ -181,3 +181,11 @@ guard's re-read pause, 5 s), `LAB_DASH_RECHECK_S` (the second check after a depl
 `tests/guard_test.sh` uses them for the guard's paths (DESIGN.md §3.3 lists its cases). Keep `LAB_DASH_CONFIG`
 pointed at a scratch directory with `{"card_sample": false}` for any test: the real `config.json` may switch the card
 sample on.
+
+## The "Start here" section (2 October 2026)
+
+The dashboard is the lab's main starting point: its "Start here" section links the new-user page, the live section, the
+lab problems report and the observability hub, and carries the hub's four reading paths (A-D) as collapsed lists. The
+paths are a copy of the hub's own `#start` block (`et-soc1-limits-of-observability`), written into
+`page/body.html`: when the hub's paths change, change both. The history page is reached by clicking a machine's live
+temperature panel or a 48-hour chart title; there is no separate History button.
