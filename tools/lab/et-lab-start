@@ -376,9 +376,9 @@ if [ "$want_claude" != 0 ] && [ -z "$usable" ]; then
 elif [ "$want_claude" != 0 ]; then
   section "Next: a Claude that lives on $host, driven from claude.ai/code (at your keyboard)"
   if [ -e "$dest/docs/lab-start/START.md" ] || { [ "$mode" != setup ] && [ "$want_clone" = 1 ] && [ ! -e "$dest" ]; }; then
-    msg="Read ~/et-soc1-prototyping/docs/lab-start/START.md and follow it from step 4, running its blocks directly. My username is $me. You are on $host, card $N. Steps 1-3 are done."
+    msg="Read ~/et-soc1-prototyping/docs/lab-start/START.md and follow it."
   else
-    msg="the prompt from $PAGE, with a first line saying that steps 1-3 are done on $host, card $N"
+    msg="Read ~/lab-start.md and follow it. (Step 2 of $PAGE fetches that file.)"
   fi
   cat <<EOF
   1. On your computer: ssh -t $me@$host tmux attach -t claude
