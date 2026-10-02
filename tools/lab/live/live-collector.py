@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """live-collector.py: one JSON line per second describing this lab machine, for `spacesheep stream --run`.
 
-Read-only and unprivileged: /proc, /sys and /proc/locks only. It never opens an ET-SoC-1 device node, never takes a
-card lock, and never reads another user's command line (only the 15-character process name the kernel shows to all),
+Read-only: /proc, /sys and /proc/locks. It never takes a card lock and never reads another user's command line (only
+the 15-character process name the kernel shows to all). The one exception to "never touch a card", which the owner
+asked for on 2 Oct 2026: every LIVE_CARD_EVERY seconds (1) it reads each card's temperature with `ettelem temp`
+(about 4 ms of every second holding the management node, which admits one opener), and only while nobody holds any card node or
+lock on this machine (`et-who --check` exit 0) and the card's link is up, so it never locks a user out.
 Each line: {"host", "t" (ms), "up_s", "cpu": [per-core %], "cpu_all", "load": [1, 5, 15], "mem": {...},
-"top": [[user, comm, pid, cpu%, rss_mb], ...], "nproc", "cards": [{"n", "pci", "link", "ok", "held"}],
+"top": [[user, comm, pid, cpu%, rss_mb], ...], "nproc", "cards": [{"n", "pci", "link", "ok", "held", "temp": {"die_c", "die_max_c", "pmic_c", "board_w", "at"}}],
 "disk": [{"mount", "used_gb", "free_gb"}] for / and /home,
 "temps": {"cpu", "nvme", "nic"} (°C from hwmon; the ET card's own temperature is not visible to Linux)}.
 """
@@ -12,12 +15,15 @@ import json
 import os
 import pwd
 import socket
+import subprocess
 import sys
 import time
 
 HOST = socket.gethostname().split(".")[0]
 TOP_N = int(os.environ.get("LIVE_TOP", "12"))
 EVERY = float(os.environ.get("LIVE_EVERY", "1"))
+CARD_EVERY = float(os.environ.get("LIVE_CARD_EVERY", "1"))
+ETTELEM = os.path.expanduser(os.environ.get("LIVE_ETTELEM", "~/live/ettelem-build/ettelem"))
 TICK = os.sysconf("SC_CLK_TCK")
 PAGE_MB = os.sysconf("SC_PAGE_SIZE") / 1048576.0
 users = {}
@@ -185,13 +191,67 @@ def cards():
     return out
 
 
+class CardTemps:
+    """card n -> its last reading. `ettelem temp` is never killed (a sampler killed mid-request poisons the management
+    queue): a run that has not finished after half a second is collected on a later tick, and nothing new starts
+    until it has."""
+
+    def __init__(self):
+        self.last, self.proc = {}, None
+
+    @staticmethod
+    def free():
+        try:
+            return subprocess.run(["et-who", "--check"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                  timeout=5).returncode == 0
+        except (OSError, subprocess.TimeoutExpired):
+            return False
+
+    def collect(self, wait):
+        n, p = self.proc
+        try:
+            p.wait(timeout=wait)
+        except subprocess.TimeoutExpired:
+            return False
+        self.proc = None
+        try:
+            v = json.loads(p.stdout.read().strip().splitlines()[-1])
+            if p.returncode == 0 and "die_c" in v:
+                self.last[n] = {k: v.get(k) for k in ("die_c", "die_max_c", "pmic_c", "board_w")}
+                self.last[n]["at"] = v["t_ms"]
+        except (ValueError, IndexError, KeyError, OSError):
+            pass
+        p.stdout.close()
+        return True
+
+    def tick(self, cards_now):
+        if self.proc and not self.collect(0):
+            return
+        due = [c["n"] for c in cards_now if c["ok"] and c["n"] is not None and
+               time.time() * 1000 - (self.last.get(c["n"]) or {}).get("at", 0) >= CARD_EVERY * 1000 - 300]
+        if not due or not os.access(ETTELEM, os.X_OK) or not self.free():
+            return  # someone holds a card node or lock on this machine: no reading this time
+        for n in due:
+            env = dict(os.environ, ET_DEVICES=str(n), LD_LIBRARY_PATH="/opt/et/lib")
+            try:
+                self.proc = (n, subprocess.Popen([ETTELEM, "temp"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                                 stdin=subprocess.DEVNULL, env=env, text=True))
+            except OSError:
+                return
+            if not self.collect(0.5):
+                return
+
+
 def main():
     prev_cpu, prev_p, prev_t = cpu_times(), procs(), time.monotonic()
     card_state, card_at = cards(), 0.0
     disk_state = disk()
+    ctemp = CardTemps()
     sensors = find_sensors()
+    due = time.monotonic()
     while True:
-        time.sleep(EVERY)
+        due += EVERY  # a fixed cadence: the tick's own work does not stretch it
+        time.sleep(max(0.0, due - time.monotonic()))
         now = time.monotonic()
         cur_cpu, cur_p = cpu_times(), procs()
         dt = max(now - prev_t, 1e-3)
@@ -210,6 +270,9 @@ def main():
         top.sort(key=lambda r: (-r[3], -r[4]))
         if now - card_at >= 5:
             card_state, card_at, disk_state = cards(), now, disk()
+        ctemp.tick(card_state)
+        for c in card_state:
+            c["temp"] = ctemp.last.get(c["n"])
         line = {
             "host": HOST, "t": int(time.time() * 1000),
             "up_s": int(float(open("/proc/uptime").read().split()[0])),

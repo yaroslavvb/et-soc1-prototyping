@@ -330,6 +330,15 @@ LD_LIBRARY_PATH=/opt/et/lib build/ettelem/ettelem config           # the firmwar
 On aifoundry1, prefix `ET_DEVICES=<n>` to address card n (below). `ettelem config` opens the management node, so
 check first that nobody holds the card (`et-who`).
 
+**The live dashboard reads every card's temperature once a second (since 2 October 2026, the owner's decision).**
+`tools/lab/live/live-collector.py` runs `ettelem temp` (two management requests, about 4 ms including process start)
+on each card whose link is up, and only while `et-who --check` finds no holder of any card node or lock on that
+machine, so it never locks a user out. The management node admits one opener (the driver returns EBUSY to a second
+one, `et-soc1-pcie.c` `esperanto_pcie_mgmt_open`), and the runtime's default device layer opens only the ops node,
+so ordinary card programs never collide with it. A tool that opens the management node (ettelem, `dev_mngt_service`,
+et-powertop, the dashboard's 30-minute sample, a reset) and starts in one of those 4 ms windows gets EBUSY: retry it.
+Take the card lock before starting such a tool and the collector stays off the card for as long as you hold it.
+
 | | aifoundry2 | aifoundry3 | aifoundry1 card 0 | aifoundry1 card 1 |
 |---|---|---|---|---|
 | Firmware release (BL / PMIC / minion) | 1.3.1 (0.20.0 / 1.5.0 / 0.23.0) | 1.3.1 (the same) | 1.4.1 (0.21.2 / 1.6.1 / 0.24.0) | 1.2.0 (0.18.0 / 1.3.0 / 0.22.0) |

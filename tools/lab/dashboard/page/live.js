@@ -2,14 +2,16 @@
    from tools/lab/live/live-collector.py on each machine). window.ss exists only when the page is open on spacesheep.dev.
    Each card is built once and updated in place, so an open "Top processes" fold stays open; its rows slide to their
    new places, ordered by a smoothed CPU share so they do not swap places every second.
-   Temperatures: the host's sensors stream live; the ET card's own die temperature is invisible to Linux, so it comes
-   from the dashboard's gated ettelem sample in D (every 30 minutes, only when the card is free), drawn over 48 hours. */
+   Temperatures: the host's sensors stream live, and so do the cards' die temperatures: the collector reads them once a
+   second with `ettelem temp` while nobody holds a card on that machine. While a card is held (or its link is down)
+   the page falls back to the last reading, and to the dashboard's 30-minute sample in D; the 48-hour line is D's. */
 (function () {
   var HOSTS = ["aifoundry1", "aifoundry2", "aifoundry3"];
   var grid = document.getElementById("live-grid"), note = document.getElementById("live-state");
   if (!grid) return;
   var ROW_H = 22, TOP_N = 8, EMA = 0.35, KEEP = 300;
   var TS = [["cpu", "CPU", "var(--c1,#3b82c4)"], ["nvme", "NVMe", "var(--c3,#7c5cc4)"], ["nic", "NIC", "var(--c2,#2f9e8f)"]];
+  var CARD_COL = ["#c53030", "#7c3aed"];
   var HIST = (typeof D !== "undefined" && D.history) || {}, CARDS = (typeof D !== "undefined" && D.cards) || {};
   var last = {}, hist = {}, ui = {};
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -33,7 +35,7 @@
       cores: c.querySelector(".lv-cores"), spark: c.querySelector(".lv-spark path"), mem: c.querySelector(".lv-mem"),
       cards: c.querySelector(".lv-cards"), top: c.querySelector(".lv-top"), disk: c.querySelector(".lv-disk"),
       tleg: c.querySelector(".lv-tleg"), tsvg: c.querySelector(".lv-tspark"), die: c.querySelector(".lv-die") };
-    drawDie(h);
+    drawDie(h, null);
   }
 
   function path(vals, w, hgt, lo, hi, bridge) {  // SVG path; a run of more than `bridge` nulls breaks the line
@@ -47,24 +49,34 @@
     return d;
   }
 
-  /* the ET card(s) of host h: last die sample and a 48-hour line from D.history.cards (10-minute steps) */
-  function drawDie(h) {
+  function fresh(c) { return c && c.temp && c.temp.at && Date.now() - c.temp.at < 5000 ? c.temp : null; }
+  function cardOf(v, n) { return ((v && v.cards) || []).filter(function (c) { return String(c.n) === String(n); })[0]; }
+  function ago(ms) { var s = Math.round((Date.now() - ms) / 1000); return s < 120 ? s + " s" : s < 7200 ? Math.round(s / 60) + " min" : Math.round(s / 3600) + " h"; }
+
+  /* the ET card(s) of host h: the live die temperature when there is one, else the last reading; the 48-hour line
+     from D.history.cards (10-minute steps) */
+  function drawDie(h, v) {
     var u = ui[h], keys = Object.keys(CARDS).filter(function (k) { return k === h || k.indexOf(h + "-") === 0; });
     var html = "";
     keys.forEach(function (k) {
       var t = (CARDS[k] || {}).telemetry || {}, n = k === h ? 0 : k.slice(h.length + 2);
-      var ser = ((HIST.cards || {})[k] || {}).die_c || [];
-      if (t.die_c == null && !ser.some(function (x) { return x != null; })) {
+      var ser = ((HIST.cards || {})[k] || {}).die_c || [], c = cardOf(v, n), lt = fresh(c), note;
+      if (lt) note = "live · hottest " + lt.die_max_c + " °C · " + lt.board_w.toFixed(0) + " W";
+      else if (c && c.temp && c.temp.at) {
+        t = { die_c: c.temp.die_c, at_ms: c.temp.at };
+        note = "read " + ago(c.temp.at) + " ago" + (c.ok === false ? " (link down)" : c.held ? " (card in use)" : "");
+      }
+      if (!lt && !note && t.die_c == null && !ser.some(function (x) { return x != null; })) {
         html += '<div class="lv-dierow"><span>card ' + esc(n) + ' die: no reading</span></div>'; return;
       }
       var lo = 30, hi = 130, mx = Math.max.apply(null, ser.filter(function (x) { return x != null; }).concat([t.die_c || 0]));
-      var hot = t.die_c >= 95 ? " hot" : "";
+      var cur = lt ? lt.die_c : t.die_c, hot = cur >= 95 ? " hot" : "";
       var when = t.at_ms ? new Date(t.at_ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "?";
-      var ago = t.at_ms ? Math.round((Date.now() - t.at_ms) / 60000) : null;
-      html += '<div class="lv-dierow"><span class="lv-dieval' + hot + '">card ' + esc(n) + " die " + (t.die_c == null ? "?" : t.die_c + " °C") + "</span>" +
-        '<svg class="lv-diespark" viewBox="0 0 120 16" preserveAspectRatio="none" role="img" aria-label="die temperature, last 48 hours, peak ' + mx + ' °C"><title>die temperature, last 48 h (peak ' + mx + ' °C); dashed: 95 °C</title>' +
+      var mins = t.at_ms ? Math.round((Date.now() - t.at_ms) / 60000) : null;
+      html += '<div class="lv-dierow"><span class="lv-dieval' + hot + '">card ' + esc(n) + " die " + (cur == null ? "?" : cur + " °C") + "</span>" +
+        '<svg class="lv-diespark" style="--k:' + CARD_COL[keys.indexOf(k) % CARD_COL.length] + '" viewBox="0 0 120 16" preserveAspectRatio="none" role="img" aria-label="die temperature, last 48 hours, peak ' + mx + ' °C"><title>die temperature, last 48 h (peak ' + mx + ' °C); dashed: 95 °C</title>' +
         '<path class="lv-die95" d="M0,' + (16 - (95 - lo) * 16 / (hi - lo)).toFixed(1) + 'H120"/><path d="' + path(ser, 120, 16, lo, hi, 6) + '"/></svg>' +
-        '<span class="muted" title="Linux cannot read the die temperature without opening the card, so this is the dashboard\'s sample, taken every 30 min when the card is free">sampled ' + when + (ago != null && ago > 40 ? " (" + (ago >= 120 ? Math.round(ago / 60) + " h" : ago + " min") + " ago)" : "") + "</span></div>";
+        '<span class="muted">' + (note || "sampled " + when + (mins != null && mins > 40 ? " (" + ago(t.at_ms) + " ago)" : "")) + "</span></div>";
     });
     u.die.innerHTML = html;
   }
@@ -124,18 +136,25 @@
       var tot = d.used_gb + d.free_gb, pct = tot ? 100 * d.used_gb / tot : 0;
       return '<span>disk <code>' + esc(d.mount) + "</code> " + d.used_gb.toFixed(0) + " GB used, " + d.free_gb.toFixed(0) + ' GB free<span class="lv-bar' + (pct > 90 ? " full" : "") + '"><i style="width:' + pct.toFixed(0) + '%"></i></span></span>';
     }).join(" ");
-    var tp = v.temps || {}, hs = hist[h] || [], all = [], lo, hi;
-    hs.forEach(function (x) { TS.forEach(function (s) { var q = (x.temps || {})[s[0]]; if (q != null) all.push(q); }); });
+    var tp = {}, hs = hist[h] || [], all = [], lo, hi;
+    // series: [label, colour, value of reading x]; the card lines take a reading only if it was read within 3 s of x
+    var ser = TS.map(function (s) { return [s[1], s[2], function (x) { return (x.temps || {})[s[0]]; }]; });
+    (v.cards || []).forEach(function (c, i) {
+      ser.push(["card " + c.n, CARD_COL[i % CARD_COL.length], function (x) {
+        var q = cardOf(x, c.n); return q && q.temp && Math.abs(x.t - q.temp.at) < 3000 ? q.temp.die_c : null; }]);
+    });
+    ser.forEach(function (s) { tp[s[0]] = s[2](v); hs.forEach(function (x) { var q = s[2](x); if (q != null) all.push(q); }); });
     if (all.length) {
       lo = Math.floor(Math.min.apply(null, all) / 5) * 5 - 5; hi = Math.ceil(Math.max.apply(null, all) / 5) * 5 + 5;
-      u.tsvg.innerHTML = TS.map(function (s) {
-        return '<path style="stroke:' + s[2] + '" d="' + path(hs.map(function (x) { return (x.temps || {})[s[0]]; }), 160, 34, lo, hi) + '"/>';
+      u.tsvg.innerHTML = ser.map(function (s) {
+        return '<path style="stroke:' + s[1] + '" d="' + path(hs.map(s[2]), 160, 34, lo, hi, 3) + '"/>';
       }).join("");
     }
-    u.tleg.innerHTML = TS.filter(function (s) { return tp[s[0]] != null; }).map(function (s) {
-      return '<span class="lv-tk" style="--k:' + s[2] + '">' + s[1] + " " + tp[s[0]].toFixed(0) + " °C</span>";
+    u.tleg.innerHTML = ser.filter(function (s) { return tp[s[0]] != null; }).map(function (s) {
+      return '<span class="lv-tk' + (/^card/.test(s[0]) && tp[s[0]] >= 95 ? " hot" : "") + '" style="--k:' + s[1] + '">' + s[0] + " " + tp[s[0]].toFixed(0) + " °C</span>";
     }).join("") + (hs.length > 1 && all.length ? '<span class="muted">last ' + Math.max(1, Math.round((hs[hs.length - 1].t - hs[0].t) / 60000)) +
       " min, scale " + lo + "–" + hi + " °C</span>" : "");
+    drawDie(h, v);
     u.cards.innerHTML = (v.cards || []).map(function (c) {
       var cls = c.ok === false ? "bad" : c.held ? "busy" : "ok";
       return '<span class="lv-chip ' + cls + '">card ' + c.n + ": " + esc(c.link) + (c.ok === false ? "" : c.held ? " · in use" : " · free") + "</span>";

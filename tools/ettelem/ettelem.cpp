@@ -9,6 +9,9 @@
 //                                                   stats (and sends the PMIC its stats reset) every R ms and tags
 //                                                   each sample with its window; whether that makes avg a window
 //                                                   mean is untested.
+//   ettelem temp                                   one line: die temperature (minion shires: avg, high), PMIC
+//                                                   temperature, board power. Two requests, then it closes the node:
+//                                                   tools/lab/live/live-collector.py runs it once a second on a free card.
 //   ettelem config                                 static governor inputs: TDP (W), SW temperature
 //                                                   threshold (C), power state, current minion clock and voltage
 //   ettelem loglevel debug|info                     SP log level (DM_CMD_SET_DM_TRACE_CONFIG). At debug the SP logs one
@@ -175,15 +178,33 @@ int sample(Dm& d, double seconds, int everyMs, int resetMs) {
   return 0;
 }
 
+// One reading for the live dashboard. It ignores SIGTERM and SIGINT: a sampler killed mid-request poisons the
+// management queue (above), and this one finishes in a few tens of milliseconds anyway.
+int temp(Dm& d) {
+  const long long ms = epochMs();
+  current_temperature_t t;
+  module_power_t p;
+  const bool okT = d.get(DM_CMD_GET_MODULE_CURRENT_TEMPERATURE, t), okP = d.get(DM_CMD_GET_MODULE_POWER, p);
+  std::printf("{\"t_ms\":%lld,\"took_ms\":%lld", ms, epochMs() - ms);
+  if (okT) std::printf(",\"die_c\":%d,\"die_max_c\":%d,\"pmic_c\":%u", t.minshire_avg, t.minshire_high, t.pmic_sys);
+  if (okP) std::printf(",\"board_w\":%.2f", p.power / 100.0);
+  std::printf("}\n");
+  return okT ? 0 : 1;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
   if (argc < 2) {
-    std::fprintf(stderr, "usage: ettelem sample [--seconds T] [--every-ms M] [--reset-ms R] | config | loglevel debug|info"
+    std::fprintf(stderr, "usage: ettelem sample [--seconds T] [--every-ms M] [--reset-ms R] | temp | config | loglevel debug|info"
                          " | sptrace <out.bin>\n");
     return 2;
   }
   const std::string cmd = argv[1];
+  if (cmd == "temp") {
+    std::signal(SIGTERM, SIG_IGN);
+    std::signal(SIGINT, SIG_IGN);
+  }
   try {
     Dm d;
     if (cmd == "sample") {
@@ -196,6 +217,7 @@ int main(int argc, char** argv) {
       }
       return sample(d, seconds, everyMs, resetMs);
     }
+    if (cmd == "temp") return temp(d);
     if (cmd == "config") return config(d);
     if (cmd == "loglevel" && argc == 3) {
       const uint32_t level = !std::strcmp(argv[2], "debug") ? 4 : 3;  // trace_string_event: INFO 3, DEBUG 4
