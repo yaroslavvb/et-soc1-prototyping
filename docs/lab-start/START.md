@@ -1,13 +1,15 @@
 # Set me up in the AI Foundry ET-SoC-1 lab
 
-I am a new user of the AI Foundry ET-SoC-1 lab, and my username on the lab machines is `<login>`. Please set me up
+I am a new user of the AI Foundry ET-SoC-1 lab, and my username on the lab machines is `<login>` (if that
+account does not exist yet, step 1 creates it, and only that, as root). Please set me up
 and run a first test, following the brief below. Choose the machine and card yourself, as it says. Ask me only for
 what only I can do: approving login links in my browser, a few steps at my keyboard to start a Claude on the machine,
 the lab's Discord posts, and a yes before the first run on a card.
 
 Everything below is the lab's brief for you, my coding agent.
 
-Version of 2 October 2026, 14:30 PDT, seventh edition: aifoundry1's card 0 is back in service (its fan was
+Version of 2 October 2026, 15:30 PDT, eighth edition: a new person with only the shared root login creates their own
+account first (step 1); aifoundry1's card 0 is back in service (its fan was
 replaced); aifoundry2's card is out of service; a check for one card; several people starting at once. The current copy is `docs/lab-start/START.md` in
 https://github.com/yaroslavvb/et-soc1-prototyping; if this one is more than a month old, read that one instead.
 
@@ -41,7 +43,9 @@ Never do these; if one seems needed, stop and tell your person, who asks the lab
   a link retrain hung all of aifoundry1 until someone power-cycled the lab on site;
 - change a card's TDP, clocks, thresholds, power management, voltages, trace level, telemetry statistics
   (`ettelem --reset-ms`), firmware, driver or `/opt/et`;
-- use sudo or root, or change any system setting;
+- use sudo or root, or change any system setting. The one exception is step 1's creation of your person's own account on
+  a machine where it does not exist yet: only that block, only from your person's own computer, never from a Claude on
+  a lab machine, and never after step 1;
 - use any card but card `<N>` on `<host>`; never aifoundry2's card, which is out of service (below);
 - run `/opt/et/bin/dev_mngt_service` or `et-powertop` on aifoundry1: they open both cards even with `-n`, and would
   break the run of whoever uses the other card;
@@ -122,8 +126,60 @@ timeout 600 ssh -o StrictHostKeyChecking=accept-new <login>@aifoundry2 true > ai
 If the log shows a login.tailscale.com link, give it to your person to approve in their browser, and wait for the
 exit line; exit 0 means the machine is reachable. Tailscale asks again after its check period (12 hours by
 default): treat a later link the same way. If the link answers 404, your person signs out of
-login.tailscale.com and signs in, and you retry. "Policy does not permit" can mean the account does not exist there
-yet: leave that machine out.
+login.tailscale.com and signs in, and you retry.
+
+**Check the name first.** Before you put `<login>` into any command, check that it is only lowercase letters, digits,
+`-` and `_`, starts with a letter, and is at most 32 characters. If not, stop and ask your person for another name.
+Never put anything else into a command.
+
+**If the login says "policy does not permit" for `<login>` (any capitalization), the account does not exist on that
+machine yet.** (Tailscale gives that same message for any user that does not exist.) New people are given the lab's
+shared `root` login at first, and asked to make their own local user at once and use only that from then on, so that
+nobody steps on anyone else's work. Create the account on each machine whose login log shows that message; a machine
+where the login worked already has your person's account, so do not run the block there. This is the only thing you
+ever do as root. First tell your person, in these words, and wait for a yes: "I need to log in as the lab's shared
+root once on each machine, only to create your account. The link you will approve says root; that is expected." Then
+log in as `root` the same way, in the background:
+
+```bash
+timeout 600 ssh -o StrictHostKeyChecking=accept-new -o ControlMaster=no -o ControlPath=none root@aifoundry2 true > aifoundry2-root.log 2>&1 < /dev/null; echo "exit $?" >> aifoundry2-root.log
+```
+
+Your person approves the link it prints, as before. If the root login also says "policy does not permit", stop and do not
+retry: your person asks the lab lead for tailnet access. When it succeeds (exit 0), send this block, once per machine
+(`<host>` is that machine here, not a chosen one), with the same approval:
+
+```bash
+timeout 600 ssh -o ControlMaster=no -o ControlPath=none root@<host> 'bash -s' <<'EOF'
+u='<login>'
+[[ $u =~ ^[a-z][a-z0-9_-]{0,31}$ ]] || { echo "bad username: lowercase letters, digits, - and _"; exit 1; }
+if id "$u" >/dev/null 2>&1; then
+  born=$(stat -c %W "/home/$u" 2>/dev/null || echo 0)
+  echo "EXISTS: $(id "$u"); home made $(( $(date +%s) - born )) s ago, $(ls -A "/home/$u" 2>/dev/null | wc -l) entries"
+  exit 3
+fi
+adduser --quiet --disabled-password --comment "" --shell /bin/bash "$u" </dev/null || { echo "ADDUSER FAILED: no account made"; exit 4; }
+echo "created: $(id "$u")"
+for d in /dev/et*; do [ -e "$d" ] || continue
+  if runuser -u "$u" -- test -r "$d" -a -w "$d"; then echo "$d: read/write ok"; else echo "$d: NO ACCESS"; fi; done
+EOF
+```
+
+It creates a normal account with no password and no sudo: logins go through Tailscale SSH, so no key is needed. Success
+is a `created:` line and no `NO ACCESS` line. On `NO ACCESS`, exit 4 or any other output, stop and tell your person, who
+asks the lab admin: do not fix it yourself. Exit 1 ("bad username") means ask for another name. Exit 3 means the name is
+taken: carry on only if the home directory was made less than 1800 s ago and has at most 4 entries (you made it a moment
+ago); otherwise it is someone else's, so stop, ask your person for another name, and never log in as it. Run nothing
+else as root, not even to fix something: root is shared by everyone, and a mistake there spoils other people's work.
+When the block has run on each machine, never use `root` again: log in as `<login>` with the first command of this step
+(a new link to approve). A machine counts as reached only when that login works. If it still says "policy does not
+permit" with the account in place, a tailnet admin has to allow the account in the tailnet's SSH rules: leave that
+machine out and tell your person, who asks the lab lead; stop altogether only if no machine works.
+
+**If the login works on the first try**, check that the account is your person's own: ask them once, "Is `<login>` an
+account you made or were given? Yes or no", when its home directory (`ls -A ~`) holds more than dotfiles. If no, stop
+and ask for another name: anyone on the tailnet can log in as any existing lab account, so a name another person
+already has would put you in their files.
 
 Send each block below as one command, so that its `cd` and variables carry through to its last line:
 

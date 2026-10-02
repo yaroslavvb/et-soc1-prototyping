@@ -46,6 +46,14 @@ itself**: when a login prints the URL, it has to hand the URL to a person and wa
 Accounts made this way have no password, so they cannot use `sudo`. Whether anyone gets `sudo` is the lab admin's
 decision.
 
+**Self-service (since 2 October 2026).** A new person who has joined the tailnet can also log in as `root` on each
+machine (Tailscale SSH, with its check URL), and is asked to make their own account at once and use only that from then
+on, so that nobody steps on anyone else's work. The "New user? Start here" brief automates exactly that for their coding
+agent (step 1, "If `<login>` does not exist on a machine yet"): one block, run as root, that validates the name,
+refuses a name already taken, runs `adduser --disabled-password` (no password, no `sudo`, as `scripts/add-lab-user.sh`
+does) and checks `/dev/et*` access, and then never uses root again. The shared `root` login itself is the lab admin's
+decision.
+
 ## First login
 
 1. Accept the Tailscale invite and install Tailscale on your laptop.

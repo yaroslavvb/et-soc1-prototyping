@@ -22,9 +22,9 @@
 
   /* ---- the one field: a username fills <login>; anything else leaves the placeholder, and says why */
   const inp = q('#f-login'), hint = q('[data-role=hint]'), raw = q('[data-role=raw]'), meta = q('[data-role=meta]');
-  /* Ubuntu's default for new accounts: lowercase, starting with a letter or "_". System accounts such as root are
+  /* Ubuntu's default for new accounts: lowercase letters, digits, - and _, starting with a letter (the same rule as START.md's account block). System accounts such as root are
      refused: the prompt would send the agent in as them. */
-  const LOGIN = /^[a-z_][a-z0-9_.-]{0,31}$/;
+  const LOGIN = /^[a-z][a-z0-9_-]{0,31}$/;
   const SYSTEM = /^(root|toor|daemon|bin|sys|sync|games|man|lp|mail|news|uucp|proxy|www-data|backup|list|irc|nobody|sshd|syslog|messagebus|systemd-.*)$/;
   const HINT = hint.textContent;
   const PH = /<(login)>/g;
@@ -37,7 +37,7 @@
     hint.classList.toggle('bad', !ok);
     hint.textContent = ok ? HINT
       : sys ? 'Use your own username, not a system account such as root: the prompt keeps <login> for now.'
-      : 'Lowercase letters, digits, "_", "-" and "." only, starting with a letter or "_", up to 32: the prompt keeps <login> for now.';
+      : 'Lowercase letters, digits, "_" and "-" only, starting with a letter, up to 32: the prompt keeps <login> for now.';
     text = login ? D.md.replace(PH, () => login) : D.md;
     raw.innerHTML = esc(D.md).replace(/&lt;login&gt;/g,
       () => login ? `<span class="fill">${esc(login)}</span>` : '<span class="ph">&lt;login&gt;</span>');
