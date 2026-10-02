@@ -271,7 +271,7 @@ main{max-width:1280px}
  <p id="headline" class="dh-headline">—</p>
  <p class="byline dh-meta">Data as of <time id="asof">—</time> (<span id="age">—</span>) · <span id="cadence">checked every 10 min,
  republished on any change and at least every 60 min</span> · <span id="next-lead">next check about </span><span id="next">—</span></p>
- <div class="dh-tools"><div id="theme"></div><nav id="toclist" class="dh-tools" aria-label="Sections" style="margin:0"><a class="newuser" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener">New user? Start here</a><a href="#alerts">Alerts</a><a href="#card-use">Card use</a><a href="#people">People</a><a href="#machines">Machines</a><a href="#last-48-hours">Last 48 hours</a></nav></div>
+ <div class="dh-tools"><div id="theme"></div><nav id="toclist" class="dh-tools" aria-label="Sections" style="margin:0"><a class="newuser" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener">New user? Start here</a><a href="#live">Live</a><a href="#alerts">Alerts</a><a href="#card-use">Card use</a><a href="#people">People</a><a href="#machines">Machines</a><a href="#last-48-hours">Last 48 hours</a></nav></div>
 </header>
 <div id="stale" class="banner lv-bad" hidden><b>The data is <span id="stale-age">old</span> old.</b> The page expects a new
 version at least every <span id="stale-hb">60 min</span>, so the collector on <span id="stale-host">aifoundry2</span>, its cron job or
@@ -281,6 +281,32 @@ the deploy may have stopped: nothing on it is current. Tell <span id="stale-main
 <div id="strip" class="strip" role="group" aria-label="The lab at a glance"></div>
 <div id="pd-legend" class="pd-legend"></div>
 <div id="kpis" class="kpis"></div>
+
+<h2 id="live">Live</h2>
+<p class="small">Each machine streams a reading every second (<code>tools/lab/live/live-collector.py</code>): CPU per thread, load,
+memory, its cards' PCIe links and locks, and the busiest processes by name. Other people's processes show as “another user”.
+<span id="live-state">—</span></p>
+<style>
+.live-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:10px 0 14px}
+.lv-card{border:1px solid var(--line,#ddd);border-radius:10px;padding:10px 12px;background:var(--surface,#fff)}
+.lv-card.off{opacity:.6}
+.lv-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.lv-dot{width:9px;height:9px;border-radius:50%;background:#999}.lv-dot.on{background:#1f9d55}.lv-dot.stale{background:#d69e2e}
+.lv-age{font-size:13px;color:var(--ink-2,#666)}
+.lv-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0}
+.lv-big{font-size:24px;font-weight:700}
+.lv-cores{display:flex;align-items:flex-end;gap:1px;height:34px;margin:4px 0}
+.lv-cores i{flex:1;background:#3b82c4;min-height:2px;border-radius:1px}
+.lv-spark{width:100%;height:28px;display:block}.lv-spark path{fill:none;stroke:#3b82c4;stroke-width:1.5}
+.lv-bar{display:inline-block;width:90px;height:7px;background:#e5e5e5;border-radius:4px;overflow:hidden}.lv-bar i{display:block;height:100%;background:#7c5cc4}
+.lv-chip{font-size:12.5px;padding:2px 7px;border-radius:999px;border:1px solid #ccc}
+.lv-chip.ok{border-color:#1f9d55;color:#1f9d55}.lv-chip.busy{border-color:#d69e2e;color:#b7791f}.lv-chip.bad{border-color:#c53030;color:#c53030;font-weight:600}
+.live-top label{font-weight:600;margin-right:6px}
+#live-top td.num{text-align:right;font-variant-numeric:tabular-nums}
+</style>
+<div id="live-grid" class="live-grid"></div>
+<div class="live-top"><label for="live-sel">Live top:</label><select id="live-sel"><option value="all">All three machines</option><option value="aifoundry1">aifoundry1</option><option value="aifoundry2">aifoundry2</option><option value="aifoundry3">aifoundry3</option></select>
+<div class="table-wrap"><table id="live-top"></table></div></div>
 
 <h2 id="alerts">Alerts</h2>
 <div id="alert-list"></div>

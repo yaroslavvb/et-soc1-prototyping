@@ -162,7 +162,7 @@ def main(argv):
         data = shift_times(data, now_ms - 4 * 60 * 1000 - gen)
 
     parts = {}
-    for name in ("body.html", "script.js", "meta.json"):
+    for name in ("body.html", "script.js", "meta.json", "live.js"):
         parts[name] = open(os.path.join(HERE, name), encoding="utf-8").read()
     meta = json.loads(parts["meta.json"])
     src_hash = hashlib.sha256("\0".join(parts[n] for n in sorted(parts)).encode()).hexdigest()[:8]
@@ -179,7 +179,7 @@ def main(argv):
         "DESC": html.escape(meta["description"]),
         "BODY": parts["body.html"],
         "DATA": js,
-        "SCRIPT": parts["script.js"],
+        "SCRIPT": parts["script.js"] + "\n" + parts["live.js"],
     }
     seen = set()
 
@@ -190,6 +190,8 @@ def main(argv):
     page = re.sub(r"__(CHARTKIT|TITLE|DESC|BODY|DATA|SCRIPT)__", put, tpl)
     if seen != set(subst):
         usage("the template lacks " + ", ".join(sorted(set(subst) - seen)))
+    # the live section reads these spacesheep streams (one per machine); the viewer provides window.ss
+    page = page.replace("<meta charset=\"utf-8\">", "<meta charset=\"utf-8\">\n<meta name=\"ss-streams\" content=\"aifoundry/*\">", 1)
     tmp = out + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(page)
