@@ -619,6 +619,8 @@ def p_people(secs, meta, now):
             if not s.get("tty"):
                 e["notty_sessions"] += 1
     newest = {}
+    root_ttys = sum(1 for ln in secs.get("pts", []) if ln.split()[:1] == ["0"])
+    meta["root_ttys"] = root_ttys
     for ln in secs.get("pts", []):
         f = ln.split()
         if len(f) < 3:
@@ -664,10 +666,30 @@ def p_etwho(lines):
         elif f[:1] == ["held"] and len(f) >= 3:
             login = f[2] if LOGIN_RE.match(f[2]) else "?"
             d["held"].append({"node": f[1], "login": login, "etime_s": etime_s(f[3]) if len(f) > 3 else None,
-                              "comm": prog_name(f[4]) if len(f) > 4 and f[4] != "-" else None})
+                              "comm": prog_name(f[4]) if len(f) > 4 and f[4] != "-" else None,
+                              "kind": f[5] if len(f) > 5 and f[5] in ("ci", "root") else None})
         elif f[:1] == ["idle"]:
             d["idle"] = True
     d["ok"] = d["exit"] == 0 and (d["idle"] or bool(d["held"]))
+    return d
+
+
+def p_opens(lines):
+    """the opens section (remote.sh): et-opens's log summed per card, user, program, parent and node. state: absent
+    (no tracer), ok, error"""
+    d = {"state": "absent", "rows": []}
+    for ln in lines:
+        f = ln.split()
+        if f[:1] == ["open"] and len(f) >= 9 and f[1].isdigit():
+            n, a, b = num(f[6], int), num(f[7], int), num(f[8], int)
+            user = f[2] if (LOGIN_RE.match(f[2]) or f[2] == "lab-monitor") else "?"
+            d["rows"].append({"card": int(f[1]), "user": user, "comm": prog_name(f[3]), "pcomm": prog_name(f[4]) if f[4] != "-" else None,
+                              "node": f[5] if f[5] in ("mgmt", "ops") else "?", "n": n or 0,
+                              "first_ms": ms(a) if a else None, "last_ms": ms(b) if b else None})
+        elif f[:1] == ["opens-ok"]:
+            d["state"] = "ok"
+        elif f[:1] == ["error"]:
+            d["state"] = "error"
     return d
 
 
@@ -1251,6 +1273,8 @@ class Collector:
                                                           "error": "could not parse the usage section"})
         else:
             usage = {"logger": "no data", "installed": None, "error": "the probe has no usage section"}
+        if isinstance(usage, dict):
+            usage["opens"] = safe("opens", p_opens, secs.get("opens", [])) if "opens" in secs else None
         tel = safe("telemetry", p_telemetry, secs.get("telemetry", [])) or {}
         manifest = safe("manifest", p_manifest, secs.get("manifest", []))
         health_exit = (secs.get("health_exit") or [None])[0]
@@ -1348,6 +1372,7 @@ class Collector:
             "device_procs": sum(p["device_procs"] for p in people.values()) if pp else None,
             "device_people": len([u for u, p in people.items() if p["device_procs"]]) if pp else None,
             "ci_jobs": ci_jobs,
+            "root_ttys": meta.get("root_ttys"),
             "etwho_ok": etwho.get("ok"),
             "host_now": host_now, "tz": meta.get("tz"),
         }
@@ -1558,6 +1583,7 @@ class Collector:
             as_of = hs.get("last_ok_ms")
             cov = [[max(a, s_ms), min(b, e_ms)] for a, b in (u.get("coverage_ms") or []) if b > s_ms and a < e_ms]
             H[h] = {"logger": u.get("logger"), "installed": u.get("installed"), "error": u.get("error"),
+                    "tracer": ((u.get("opens") or {}).get("state") if isinstance(u.get("opens"), dict) else None) or "absent",
                     "stale": stale, "as_of_ms": as_of,
                     "alive_ms": u.get("alive_ms"), "started_ms": u.get("started_ms"), "stopped_ms": u.get("stopped_ms"),
                     "logging_since_ms": u.get("logging_since_ms"), "coverage_ms": cov,
@@ -1627,7 +1653,10 @@ class Collector:
             logins.update(x["user"] for x in cu.get("now") or [])
             for d in cu.get("daily") or []:
                 logins.update(d["users"])
+            ops = (u.get("opens") or {}) if isinstance(u.get("opens"), dict) else {}
+            dn = (self.lab.get("cards", {}).get(cid) or {}).get("devnum")
             Cd[cid] = {"host": h, "logged": True, "stale": old,
+                       "opens": [r for r in ops.get("rows", []) if r.get("card") == dn] if ops.get("state") == "ok" else None,
                        "intervals": ivs, "activity_min": act, "users": users,
                        "held_s": round(min(busy / 1000, held_sum), 1),
                        "node_s": round(sum(e["node_s"] for e in users.values()), 1),
@@ -1767,7 +1796,8 @@ class Collector:
                 since = ms(host_now - x["etime_s"]) if x.get("etime_s") is not None else None
                 who.append({"node": x["node"], "login": x["login"], "etime_s": x["etime_s"],
                             "comm": self.prog(x["comm"]) if x.get("comm") else None,
-                            "since_ms": since, "system": x["login"] == "root"})
+                            "since_ms": since, "system": x["login"] == "root",
+                            "ci": x.get("kind") == "ci", "shared_root": x.get("kind") == "root"})
         if unow is not None:
             for u in unow:
                 same = [w for w in who if w["login"] == u["user"]]
@@ -2166,6 +2196,16 @@ class Collector:
 
     def derive_alerts(self, hosts, cards, people, usage):
         R = RULES
+        # a login as root, the shared login (since 2 Oct 2026 new people get it to create their own account): ptys owned
+        # by root on the host; a nudge, so that card use stays attributable to a person
+        for h, hb in (hosts or {}).items():
+            n = (hb or {}).get("root_ttys") if isinstance(hb, dict) else None
+            if n:
+                self.add("host:%s:root-login" % h, "warn", "host",
+                         "%d terminal%s logged in as root, the shared login" % (n, "" if n == 1 else "s"),
+                         "root is for creating your own account only: work done as root cannot be told apart from other "
+                         "people's, on the cards or in the card-use log. Each person uses their own account (New user? "
+                         "Start here, step 1).", host=h, source="collect.py")
         halt = self.halt_reason()
         if halt:
             self.add("collector:halt", "bad", "collector", "deploys halted: " + halt,
@@ -2429,14 +2469,18 @@ class Collector:
             note = "; the card is excluded%s" % (" (%s)" % why if why else "") if excl else ""
             if not st:
                 for w in ((c.get("holder") or {}).get("who") or []):
-                    who = "system or CI" if w.get("system") else w["login"]
+                    who = ("the CI runner" if w.get("ci") else "root, the shared login" if w.get("shared_root")
+                           else "system or CI") if w.get("system") else w["login"]
                     t0 = (w["since_ms"] / 1000 if w.get("since_ms") else
                           self.now - w["etime_s"] if w.get("etime_s") is not None else None)
                     since = fmt_when(t0, self.now) if t0 else None
                     prog = (" (%s)" % w["comm"]) if w.get("comm") else ""
                     # any hold of an excluded card is a warning: it is out of service, and nobody is to use it
-                    self.add("card:%s:held" % cid, "warn" if excl else "info", "card", "held by %s%s%s%s" % (
-                        who, prog, " since %s" % since if since else "", note), w["node"], host=h, card=cid,
+                    shared = bool(w.get("shared_root"))
+                    self.add("card:%s:held" % cid, "warn" if (excl or shared) else "info", "card", "held by %s%s%s%s" % (
+                        who, prog, " since %s" % since if since else "", note),
+                        w["node"] + ("; card work as root cannot be told apart from other people's: each person uses "
+                                     "their own account (New user? Start here)" if shared else ""), host=h, card=cid,
                         source="et-who" if w.get("from") != "et-usage" else "et-usage")
                     age = self.now - t0 if t0 else None
                     if age and age > R["hold_long_s"]:

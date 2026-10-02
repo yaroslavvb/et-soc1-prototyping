@@ -192,7 +192,8 @@
   function holderOf(c) {
     const who = (c.holder && Array.isArray(c.holder.who)) ? c.holder.who : [];
     const w = who.find(x => /^\/dev\//.test(String(x.node || ''))) || who[0];  // the node holder names the program
-    return w ? Object.assign({}, w, w.system ? {login: null} : {}) : null;  // root or CI: "system or CI"
+    // root: the CI runner, or someone on the shared root login (the probe tells them apart); else "system or CI"
+    return w ? Object.assign({}, w, w.system ? {login: w.ci ? 'CI runner' : w.shared_root ? 'root (shared login)' : null} : {}) : null;
   }
   function holdSince(w) {
     const t = isNum(w.since_ms) ? w.since_ms : isNum(w.etime_s) && isNum(GEN) ? GEN - w.etime_s * 1000 : null;
@@ -801,7 +802,7 @@
     const d = E('details', 'ct-more', E('summary', null, 'Every number and its source'));
     const er = c.errors || {}, fmtObj = o => (o && Object.keys(o).length ? Object.entries(o).map(([k, v]) => `${n0(v)} ${k}`).join(', ') : 'none');
     const kl = c.kernel_log || {}, act = c.activity || {}, aer = c.aer || {}, sm = c.sample || {}, gd = c.guard, l = c.link || {};
-    const who = ((c.holder || {}).who || []).map(w => `${(!w.system && w.login) || 'system or CI'}${w.comm ? ' (' + w.comm + ')' : ''} on ${w.node || '?'}${isNum(w.etime_s) ? ', ' + dur(w.etime_s / 60) : ''}`).join('; ');
+    const who = ((c.holder || {}).who || []).map(w => `${(!w.system && w.login) || (w.ci ? 'CI runner' : w.shared_root ? 'root (shared login)' : 'system or CI')}${w.comm ? ' (' + w.comm + ')' : ''} on ${w.node || '?'}${isNum(w.etime_s) ? ', ' + dur(w.etime_s / 60) : ''}`).join('; ');
     const cu = UC[id] || {}, lastIv = (cu.intervals || []).reduce((b, iv) => (!b || iv.end_ms > b.end_ms ? iv : b), null);
     const rows = [
       ['Firmware', [sx.firmware, sx.bl ? ` · BL ${sx.bl}` : '', sx.pmic ? ` · PMIC ${sx.pmic}` : '', sx.minion ? ` · minion ${sx.minion}` : ''], 'lab.json'],
@@ -1058,7 +1059,7 @@
   }
   /* et-usage's "?": a node opened and closed between two of its scans (a few ms), so it could not see whose process
      it was (the collector also writes "?" for a login that fails the login rule). Never counted as a person. */
-  const whoName = u => (u === '?' ? 'unseen (?)' : u);
+  const whoName = u => (u === '?' ? 'unseen (?)' : u === 'root' ? 'root (shared login or CI)' : u);
   const WHO_UNSEEN = 'a node opened and closed between two of the logger\'s scans (a few ms): whose process it was is unknown';
   const usersOf = id => Object.entries((UC[id] || {}).users || {}).sort((a, b) => b[1].held_s - a[1].held_s || natural(a[0], b[0]));
   /* "Last 24 h: held 2 h 10 min (9%) by user-a, user-b" */
@@ -1250,6 +1251,36 @@
     renderUsageCards(ids);
     renderUsageTable(ids);
     renderUsageDays(ids);
+    renderOpens(ids);
+  }
+  /* Unseen opens, and the open tracer (tools/lab/et-usage/et-opens, root): it names every open of a card node, however
+     short, so that nothing is "unseen". Until it runs on a machine, one line says what unseen means there. */
+  const opener = r => r.user === 'root' ? (/^(Runner\.|runsvc)/.test(r.pcomm || '') ? 'CI runner' : 'root (shared login)') : r.user;
+  function renderOpens(ids) {
+    const host = $('cu-opens');
+    if (!host) return;
+    const traced = HOSTS.filter(h => (UH[h] || {}).tracer === 'ok');
+    const unseen = ids.reduce((s, id) => s + ((UC[id] || {}).unseen_opens || 0), 0);
+    const untraced = HOSTS.filter(h => (UH[h] || {}).logger && (UH[h] || {}).tracer !== 'ok');
+    if (untraced.length) host.append(E('p', 'small', `Unseen (?): a program that opened a card for a few milliseconds, too short for the `
+      + `card-use log to see whose it was${unseen ? ` (${n0(unseen)} in the last ${UHOURS} h)` : ''}; nearly all are the lab's own `
+      + `temperature monitor. ${traced.length ? 'On ' + untraced.join(', ') + ', the' : 'The'} open tracer (et-opens, which the lab admin installs) would name every one.`));
+    if (!traced.length) return;
+    const rows = [], mon = [];
+    for (const id of ids) for (const r of (UC[id] || {}).opens || []) (r.user === 'lab-monitor' ? mon : rows).push([id, r]);
+    host.append(E('h3', null, 'Every open, named'));
+    const t = E('table', 'cu-opens'), tb = E('tbody');
+    t.append(E('thead', null, E('tr', null, E('th', null, 'Card'), E('th', null, 'Who'), E('th', null, 'Program (its parent)'),
+      E('th', null, 'Node'), E('th', 'num', 'Opens'), E('th', null, 'First'), E('th', null, 'Last'))));
+    rows.sort((a, b) => (b[1].last_ms || 0) - (a[1].last_ms || 0));
+    for (const [id, r] of rows) tb.append(E('tr', null, E('td', null, markSvg(id, 11), ' ', cardName(id)), E('td', null, opener(r)),
+      E('td', null, (r.comm || '?') + (r.pcomm ? ' (' + r.pcomm + ')' : '')), E('td', null, r.node), E('td', 'num', n0(r.n)),
+      E('td', null, isNum(r.first_ms) ? lclock(r.first_ms) : ELL), E('td', null, isNum(r.last_ms) ? lclock(r.last_ms) : ELL)));
+    if (!rows.length) tb.append(E('tr', null, attrs(E('td', null, `No opens in the last ${UHOURS} h but the lab's monitor's.`), {colspan: 7})));
+    t.append(tb);
+    host.append(E('div', 'table-wrap', t));
+    if (mon.length) host.append(E('p', 'small muted', `The lab's temperature monitor: ${n0(mon.reduce((s, x) => s + x[1].n, 0))} reads of `
+      + `${plural(new Set(mon.map(x => x[0])).size, 'card')} in the last ${UHOURS} h (about 4 ms each).`));
   }
   /* The chart runs from the log's start to now: the log (et-usage, every 10 minutes) ends at US1, and from there to now
      the live stream's holds are drawn as they happen (LIVE_IV), while this page is open. */

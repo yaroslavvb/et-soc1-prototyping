@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""et-opens: name every open of an ET-SoC-1 card node, as it happens. Runs as root (systemd: et-opens.service).
+
+Why: et-usaged sees an open through inotify and then scans /proc for the opener; a program that opens and closes a
+node between two scans (a few milliseconds: a telemetry read, a failed start) is logged as "?" ("unseen"), with no
+user. This traces the openat() system call in the kernel with bpftrace, so the user and program are known at the
+moment of the open, however short it is.
+
+Writes one JSON line per open to /var/log/et-opens/<UTC date>.jsonl (0644, readable by every user, like et-who and
+et-usage): {"t": epoch s, "uid", "user", "pid", "comm" (the kernel's 15-character process name), "ppid", "pcomm"
+(the parent's name, which tells a CI runner's job from a login's), "node" ("/dev/et0_mgmt" ...)}. Never arguments,
+environment or files. The lab's own once-a-second temperature monitor (process name "lab-monitor") is counted, not
+logged one by one: one line a minute per node, {"comm": "lab-monitor", "count": n, "first", "last"}. Files older
+than ET_OPENS_DAYS (9) days are deleted.
+
+    et-opens                 run (root; bpftrace must be installed: it is on aifoundry1, 2 and 3)
+    ET_OPENS_BPFTRACE=cmd    a stand-in for bpftrace (tests: a script that prints bpftrace's lines)
+    ET_OPENS_DIR=dir         where to write (default /var/log/et-opens)
+"""
+import json
+import os
+import pwd
+import shlex
+import signal
+import subprocess
+import sys
+import time
+
+DIR = os.environ.get("ET_OPENS_DIR", "/var/log/et-opens")
+DAYS = int(os.environ.get("ET_OPENS_DAYS", "9"))
+MONITOR = "lab-monitor"
+# The kernel side: every openat() whose path starts with /dev/et (the card nodes; nothing else is printed).
+PROG = r'''
+tracepoint:syscalls:sys_enter_openat
+/ strncmp(str(args->filename), "/dev/et", 7) == 0 /
+{
+  printf("%d\t%d\t%d\t%s\t%s\t%s\n", uid, pid, curtask->real_parent->tgid, comm, curtask->real_parent->comm,
+         str(args->filename));
+}
+'''
+users = {}
+
+
+def user(uid):
+    if uid not in users:
+        try:
+            users[uid] = pwd.getpwuid(uid).pw_name
+        except KeyError:
+            users[uid] = str(uid)
+    return users[uid]
+
+
+def main():
+    os.makedirs(DIR, mode=0o755, exist_ok=True)
+    os.umask(0o022)
+    cmd = shlex.split(os.environ["ET_OPENS_BPFTRACE"]) if os.environ.get("ET_OPENS_BPFTRACE") else ["bpftrace", "-q", "-e", PROG]
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=sys.stderr, text=True, bufsize=1)
+    signal.signal(signal.SIGTERM, lambda *_: p.terminate())
+    mon = {}            # node -> [count, first, last] of the monitor's opens this minute
+    mon_min = None
+    day, f = None, None
+    last_prune = 0.0
+
+    def out(rec):
+        nonlocal day, f, last_prune
+        d = time.strftime("%Y-%m-%d", time.gmtime(rec["t"]))
+        if d != day:
+            if f:
+                f.close()
+            day, f = d, open(os.path.join(DIR, d + ".jsonl"), "a")
+        f.write(json.dumps(rec, separators=(",", ":")) + "\n")
+        f.flush()
+        if rec["t"] - last_prune > 3600:
+            last_prune = rec["t"]
+            cut = time.strftime("%Y-%m-%d", time.gmtime(rec["t"] - DAYS * 86400))
+            for fn in os.listdir(DIR):
+                if fn.endswith(".jsonl") and fn[:10] < cut:
+                    os.remove(os.path.join(DIR, fn))
+
+    def flush_monitor():
+        for node, (n, a, b) in sorted(mon.items()):
+            out({"t": a, "comm": MONITOR, "node": node, "count": n, "first": a, "last": b})
+        mon.clear()
+
+    for line in p.stdout:
+        t = round(time.time(), 3)
+        parts = line.rstrip("\n").split("\t")   # tabs: a process name can hold spaces
+        if len(parts) != 6 or not parts[0].isdigit():
+            continue          # bpftrace's own messages ("Attaching 1 probe...")
+        uid, pid, ppid, comm, pcomm, node = int(parts[0]), int(parts[1]), int(parts[2]), parts[3], parts[4], parts[5]
+        if not node.startswith("/dev/et"):
+            continue
+        minute = int(t // 60)
+        if mon and minute != mon_min:
+            flush_monitor()
+        if comm == MONITOR:
+            mon_min = minute
+            e = mon.setdefault(node, [0, t, t])
+            e[0] += 1
+            e[2] = t
+            continue
+        out({"t": t, "uid": uid, "user": user(uid), "pid": pid, "comm": comm, "ppid": ppid, "pcomm": pcomm,
+             "node": node})
+    flush_monitor()
+    if f:
+        f.close()
+    sys.exit(p.wait())
+
+
+if __name__ == "__main__":
+    main()

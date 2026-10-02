@@ -1,0 +1,20 @@
+# et-opens.service: names every open of an ET-SoC-1 card node (user, program, parent), as it happens, with bpftrace,
+# so that card use is never "unseen" (tools/lab/et-usage/et-opens; the log is /var/log/et-opens/<UTC date>.jsonl).
+# Install (root): install -m 0755 et-opens /usr/local/sbin/et-opens; install -m 0644 et-opens.service
+# /etc/systemd/system/; systemctl daemon-reload; systemctl enable --now et-opens
+[Unit]
+Description=Name every open of an ET-SoC-1 card node (bpftrace)
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/et-opens
+Restart=always
+RestartSec=10
+Nice=10
+# a tracer, not a gate: the opens it watches never wait for it
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

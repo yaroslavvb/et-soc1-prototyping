@@ -138,10 +138,55 @@ sec etwho
 # ps comm): the rest of the command line is cut off here, before the output leaves the host
 ew=$(t 10 et-who); ec=$?
 echo "exit $ec"
+# a root holder is the CI runner when one of its ancestors is the runner, else someone on the shared root login: the
+# sixth field (ci, root or -), from /proc/<pid>/stat's process names and parents only
 printf '%s\n' "$ew" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/ {p = $5; sub(/.*\//, "", p); gsub(/[^A-Za-z0-9._+-]/, "", p)
-  print "held", $1, $2, $4, (p == "" ? "-" : substr(p, 1, 15))}'
+  print "held", $1, $2, $4, (p == "" ? "-" : substr(p, 1, 15)), $3}' | while read -r tag node user et prog pid; do
+  kind=-
+  if [ "$user" = root ]; then
+    kind=root; p=$pid; i=0
+    while [ -n "$p" ] && [ "$p" -gt 1 ] 2>/dev/null && [ $i -lt 20 ] && [ -r "/proc/$p/stat" ]; do
+      st=$(cat "/proc/$p/stat" 2>/dev/null) || break
+      c=${st#*(}; c=${c%)*}
+      case $c in Runner.Worker|Runner.Listener|runsvc.sh) kind=ci; break ;; esac
+      p=$(printf '%s' "${st##*) }" | awk '{print $2}'); i=$((i + 1))
+    done
+  fi
+  echo "$tag $node $user $et $prog $kind"
+done
 printf '%s\n' "$ew" | grep -q '^No process holds' && echo "idle"
 
+sec opens
+# et-opens (tools/lab/et-usage/et-opens, root, when installed): every open of a card node, named as it happens; here
+# summed over the last 26 hours per card, user, program and parent (the lab's own monitor as one line per card)
+if [ -d /var/log/et-opens ]; then
+  t 20 nice -n 10 python3 - <<'PYOPENS' 2>/dev/null || echo "error"
+import glob, json, os, re, time
+cut = time.time() - 26 * 3600
+agg = {}
+for fn in sorted(glob.glob("/var/log/et-opens/*.jsonl"))[-3:]:
+    with open(fn, errors="replace") as f:
+        for line in f:
+            try:
+                r = json.loads(line)
+            except ValueError:
+                continue
+            t = r.get("last") or r.get("t") or 0
+            m = re.match(r"^/dev/et(\d+)_(mgmt|ops)$", str(r.get("node", "")))
+            if t < cut or not m:
+                continue
+            mon = r.get("comm") == "lab-monitor"
+            k = (m.group(1), "lab-monitor" if mon else str(r.get("user", "?")), str(r.get("comm", "?"))[:15].replace(" ", "_"),
+                 "-" if mon else str(r.get("pcomm", "?"))[:15].replace(" ", "_"), m.group(2))
+            e = agg.setdefault(k, [0, t, t])
+            e[0] += int(r.get("count", 1)); e[1] = min(e[1], r.get("first", t)); e[2] = max(e[2], t)
+for (card, user, comm, pcomm, node), (n, a, b) in sorted(agg.items()):
+    print("open", card, user, comm, pcomm, node, n, int(a), int(b))
+print("opens-ok")
+PYOPENS
+else
+  echo "absent"
+fi
 sec usage
 # et-usage (tools/lab/et-usage): who held each card, from the logger's files, as one JSON object: the last 26 hours
 # (the page shows 24) and the daily totals of the last 7 days. Readable by every user, like et-who; "absent" until

@@ -33,7 +33,11 @@ HIST_EVERY = float(os.environ.get("LIVE_HIST_EVERY", "5"))
 HIST_DAYS = int(os.environ.get("LIVE_HIST_DAYS", "9"))
 HIST_DIR = os.path.expanduser(os.environ.get("LIVE_HIST_DIR", "~/live/history"))
 CARD_EVERY = float(os.environ.get("LIVE_CARD_EVERY", "1"))
-ETTELEM = os.path.expanduser(os.environ.get("LIVE_ETTELEM", "~/live/ettelem-build/ettelem"))
+# the temperature reader: a copy of ettelem named lab-monitor, so that the open tracer (tools/lab/et-usage/et-opens)
+# and et-usage show the lab's monitor by name; the build's own ettelem if the copy is missing
+ETTELEM = os.path.expanduser(os.environ.get("LIVE_ETTELEM", "~/live/lab-monitor"))
+if not os.access(ETTELEM, os.X_OK):
+    ETTELEM = os.path.expanduser("~/live/ettelem-build/ettelem")
 TICK = os.sysconf("SC_CLK_TCK")
 PAGE_MB = os.sysconf("SC_PAGE_SIZE") / 1048576.0
 users = {}
@@ -201,8 +205,29 @@ def cards():
     return out
 
 
-HOLDER = re.compile(r"^(?:/dev/et(\d+)_\w+|lock:etsoc-shire(\d+)\.lock)\s+(\S+)\s+\d+\s+\S+\s+(\S+)")
+HOLDER = re.compile(r"^(?:/dev/et(\d+)_\w+|lock:etsoc-shire(\d+)\.lock)\s+(\S+)\s+(\d+)\s+\S+\s+(\S+)")
 WRAPPERS = {"flock", "timeout", "bash", "sh", "env", "nice", "setsid", "nohup"}
+
+
+CI_COMMS = {"Runner.Worker", "Runner.Listener", "runsvc.sh"}
+
+
+def root_kind(pid):
+    """a card holder running as root: 'CI runner' when one of its ancestors is the CI runner, else 'root (shared login)'
+    (people get the shared root login to create their own account); /proc/<pid>/stat's names and parents only"""
+    p = pid
+    for _ in range(20):
+        try:
+            st = open(f"/proc/{p}/stat").read()
+        except OSError:
+            break
+        comm = st[st.index("(") + 1:st.rindex(")")]
+        if comm in CI_COMMS:
+            return "CI runner"
+        p = int(st[st.rindex(")") + 2:].split()[1])
+        if p <= 1:
+            break
+    return "root (shared login)"
 
 
 def holders():
@@ -218,8 +243,9 @@ def holders():
         if not m:
             continue
         n = int(m.group(1) or m.group(2))
-        prog = os.path.basename(m.group(4))[:32]
-        seen.setdefault(n, []).append((m.group(3), prog, m.group(1) is not None))
+        prog = os.path.basename(m.group(5))[:32]
+        who = root_kind(int(m.group(4))) if m.group(3) == "root" else m.group(3)
+        seen.setdefault(n, []).append((who, prog, m.group(1) is not None))
     out = {}
     for n, hs in seen.items():
         pick = ([h for h in hs if h[2] and h[1] not in WRAPPERS] + [h for h in hs if not h[2] and h[1] not in WRAPPERS]) or hs

@@ -222,3 +222,36 @@ span, a silence, a crash, a hang and a clock step, daily across midnight, time z
 daemons, a busy day, the 200 KB bound on one and two cards, `lock_user`, `lost_end`, escapes in names, 42 MB of log
 and the read budget); the unit file (`User=`, the two capabilities, `systemd-analyze verify`) and
 `install.sh --check-source`.
+
+## et-opens: naming every open (2 October 2026)
+
+et-usaged sees each open of a card node (inotify) and then scans `/proc` for the opener; a program that opens and closes
+a node between two scans is logged as `?`, "unseen". On 2 October every unseen open of the last 24 hours on all three
+machines was a management-node open of under 10 ms with no lock: the lab's own once-a-second temperature monitor
+(`tools/lab/live`, about 3,600 an hour per card), the dashboard's sampler trying a card that was down, and test runs;
+none touched the ops node (no card work was unseen).
+
+`et-opens` (this directory; root, `et-opens.service`) traces `openat()` of `/dev/et*` with bpftrace, which all three
+machines have, and writes one line per open to `/var/log/et-opens/<UTC date>.jsonl` (0644): time, user, pid, program,
+parent (a CI runner's job has `Runner.Worker` there; a person on the shared root login, their shell), node. The
+monitor's reader is named `lab-monitor` and is counted per minute instead of logged per open. The dashboard's probe
+(`dashboard/remote.sh`, section `opens`) sums the last 26 hours, and the card-use section lists every open by who and
+what ("Every open, named"); without the tracer, one line says what "unseen" means.
+
+Install (root, on each machine; the files are staged in the maintainer's `~/live/`): first check that the probe
+attaches, for 5 s:
+
+```
+bpftrace -q -e 'tracepoint:syscalls:sys_enter_openat / strncmp(str(args->filename), "/dev/et", 7) == 0 / { printf("%d\t%d\t%d\t%s\t%s\t%s\n", uid, pid, curtask->real_parent->tgid, comm, curtask->real_parent->comm, str(args->filename)); }' & sleep 5; kill %1
+```
+
+(it prints a line per open: the monitor's reads, about one a second per free card), then:
+
+```
+install -m 0755 ~yaroslavvb/live/et-opens /usr/local/sbin/et-opens
+install -m 0644 ~yaroslavvb/live/et-opens.service /etc/systemd/system/et-opens.service
+systemctl daemon-reload && systemctl enable --now et-opens && sleep 5 && tail -3 /var/log/et-opens/*.jsonl
+```
+
+Tested here with a stand-in for bpftrace (the parsing, the monitor's per-minute lines, the file modes); the bpftrace
+program itself needs root to check, hence the first command.

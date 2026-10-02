@@ -193,3 +193,11 @@ under a temporary name and rename it into place (`install -m <mode> <file> <dest
 so a script that runs the tool at that moment sees either the old or the new file. Run `et-who`, `et-who --check`
 and `et-lab-health` as an unprivileged user afterwards, and compare `md5sum` of each installed file with this
 directory.
+
+## Root logins and who uses the cards (2 October 2026)
+
+- `root-notice.sh`: install as `/etc/profile.d/zz-lab-root-notice.sh` (0644 root). At an interactive root login it says
+  that root is the shared login, only for creating your own account (the new-user page's step 1).
+- The dashboard tells a card held by root apart: under the CI runner (`Runner.Worker` among its ancestors) it is "CI
+  runner", otherwise "root (shared login)", which raises a warning; a terminal logged in as root raises one too.
+- `et-usage/et-opens`: names every open of a card node, so that nothing is "unseen" (et-usage/README.md).
