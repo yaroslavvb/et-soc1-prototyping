@@ -1,22 +1,21 @@
 // node drive.mjs <page.html> <hash> <out.json> [width height dpr] [maxSeconds]
-import { spawn } from 'node:child_process';
 import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 const [page, hash, outp, W = '1280', H = '800', DPR = '2', MAXS = '150'] = process.argv.slice(2);
-const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const port = 9300 + Math.floor(Math.random() * 600);
+// (the installed Chrome or Chromium cdp.mjs finds, a Mac's or Linux's; CHROME overrides it: code review of 1 Oct)
+import { startChrome } from './cdp.mjs';
 const udd = process.env.UDD || mkdtempSync(resolve(process.env.TMPDIR || tmpdir(), 'zd-chrome-'));
-const args = ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${udd}`, `--window-size=${W},${H}`, `--force-device-scale-factor=${DPR}`,
+const args = ['--headless=new', `--window-size=${W},${H}`, `--force-device-scale-factor=${DPR}`,
   '--no-first-run', '--no-default-browser-check', '--disable-background-timer-throttling', '--disable-renderer-backgrounding',
   '--disable-backgrounding-occluded-windows', '--hide-scrollbars', ...(process.env.CHROME_FLAGS ? process.env.CHROME_FLAGS.split(' ') : []), 'about:blank'];
-const ch = spawn(CHROME, args, {stdio: 'ignore'});
+let ch = null;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let ws, idc = 0; const pend = new Map();
 const send = (method, params = {}) => new Promise((res, rej) => { const id = ++idc; pend.set(id, {res, rej}); ws.send(JSON.stringify({id, method, params})); });
 try {
-  let tl = null;
-  for (let i = 0; i < 100 && !tl; i++) { await sleep(100); try { const l = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json(); tl = l.find(t => t.type === 'page'); } catch (_) {} }
+  // (Chrome on a port of its own: cdp.mjs startChrome)
+  const S = await startChrome(args, udd); ch = S.ch; const tl = S.tl;
   if (!tl) throw new Error('no page target');
   ws = new WebSocket(tl.webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
@@ -51,4 +50,4 @@ try {
   if (process.env.TRACE) { const p = new Promise(r => { tdone = r; }); await send('Tracing.end'); await p; writeFileSync(process.env.TRACE, JSON.stringify({traceEvents: TEV})); process.stderr.write(`trace ${TEV.length} events\n`); }
   process.stderr.write(`saved ${outp} (${(out.length / 1e6).toFixed(1)} MB) in ${((Date.now() - t0) / 1000).toFixed(1)} s; state ${JSON.stringify(st)}\n`);
 } catch (e) { console.error(e); process.exitCode = 1; }
-finally { try { ws && ws.close(); } catch (_) {} ch.kill('SIGTERM'); await sleep(300); if (!process.env.UDD) { try { rmSync(udd, {recursive: true, force: true}); } catch (_) {} } }
+finally { try { ws && ws.close(); } catch (_) {} ch && ch.kill('SIGTERM'); await sleep(300); if (!process.env.UDD) { try { rmSync(udd, {recursive: true, force: true}); } catch (_) {} } }

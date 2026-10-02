@@ -140,11 +140,14 @@
 #chip .tg.generic rect{stroke:var(--ink-2);stroke-dasharray:2 4}
 #chip .tg.unknown rect{stroke:var(--warn);stroke-dasharray:7 5}
 #chip .tg.derived rect{stroke:var(--c7);stroke-dasharray:5 3}
+/* (review of 1 Oct: the Planck length's "a smallest length? open" had no rule: no border, and black text in dark mode) */
+#chip .tg.hypothesis rect{stroke:var(--warn);stroke-dasharray:3 3}
 #chip .tg text{font-size:17px;font-weight:600}
 #chip .tg.documented text{fill:var(--c1)}
 #chip .tg.generic text{fill:var(--ink-2)}
 #chip .tg.unknown text{fill:color-mix(in srgb,var(--warn) 55%,var(--ink))}
 #chip .tg.derived text{fill:var(--c7)}
+#chip .tg.hypothesis text{fill:color-mix(in srgb,var(--warn) 55%,var(--ink))}
 #chip .w{fill:none;stroke:var(--ink-2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #chip .w.thin{stroke-width:1.25}
 #chip .w.bus{stroke-width:4}
@@ -198,20 +201,22 @@
 #stage.ph #chip .lay.inr .i-n,#stage.ph #chip .lay.inr .tg text{font-size:24px}
 /* the two-state electronics: the gate at 0 V or at the rail, a bit 0 or 1, a DRAM cell just written or 32 ms later;
    one class on the drawing switches every scene's two drawn states with a 250 ms fade, and no script per frame */
-#chip .st-a,#chip .st-b{transition:opacity .25s}
-#chip .st-b{opacity:0}
-#chip.st-on .st-a{opacity:0}
-#chip.st-on .st-b{opacity:1}
-@media (prefers-reduced-motion: reduce){#chip .st-a,#chip .st-b{transition:none}}
-#chip .stsw{cursor:pointer}
-#chip .stsw:focus{outline:none}
-#chip .stsw-hit{fill:transparent}
-#chip .stsw-bg{fill:var(--surface);stroke:var(--c2);stroke-width:2}
-#chip .stsw-k{fill:var(--ink-2);transition:transform .25s}
-#chip.st-on .stsw-k{fill:var(--c2)}
-#chip .stsw-t{font-size:18px;font-weight:600;fill:var(--ink)}
-#stage.ph #chip .stsw-t{font-size:25px}
-#chip .stsw:focus-visible .stsw-bg,#chip .stsw:hover .stsw-bg{stroke-width:3.5}
+#chip .st-a,#chip .st-b,#mem .st-a,#mem .st-b{transition:opacity .25s}
+#chip .st-b,#mem .st-b{opacity:0}
+#chip.st-on .st-a,#mem.st-on .st-a{opacity:0}
+#chip.st-on .st-b,#mem.st-on .st-b{opacity:1}
+@media (prefers-reduced-motion: reduce){#chip .st-a,#chip .st-b,#mem .st-a,#mem .st-b{transition:none}}
+/* the memory levels: while an access is chosen its waveforms take the place of the stored-bit box (1 Oct) */
+#stage.accsel .bitst,#stage.accsel .stsw{display:none}
+#chip .stsw,#mem .stsw{cursor:pointer}
+#chip .stsw:focus,#mem .stsw:focus{outline:none}
+#chip .stsw-hit,#mem .stsw-hit{fill:transparent}
+#chip .stsw-bg,#mem .stsw-bg{fill:var(--surface);stroke:var(--c2);stroke-width:2}
+#chip .stsw-k,#mem .stsw-k{fill:var(--ink-2);transition:transform .25s}
+#chip.st-on .stsw-k,#mem.st-on .stsw-k{fill:var(--c2)}
+#chip .stsw-t,#mem .stsw-t{font-size:18px;font-weight:600;fill:var(--ink)}
+#stage.ph #chip .stsw-t,#stage.ph #mem .stsw-t{font-size:25px}
+#chip .stsw:focus-visible .stsw-bg,#chip .stsw:hover .stsw-bg,#mem .stsw:focus-visible .stsw-bg,#mem .stsw:hover .stsw-bg{stroke-width:3.5}
 .pn-act .st-btn[data-act="state"]{margin:2px 0 8px}
 /* ---- the path camera's look (moved from the chip diagram's page on 1 October 2026, part 2: the memory levels host the
    same camera): its parts, the zoom's fades, the night sky ---- */
@@ -242,10 +247,19 @@
 #chip .lay .zdim{opacity:var(--ctx,1)!important;transition:none!important;filter:none!important}
 #chip .lay.zsat .zdim{filter:saturate(var(--sat,1))!important}
 #chip .lay .zdim.zhi{opacity:var(--ctxh,1)!important;filter:none!important}
+/* (review of 1 Oct) a label drawn straight into a layer is context too, but fades with the labels, as on the memory levels'
+   own camera: never seen blown up at the context's 30%; and a two-state scene's other state stays hidden while it is
+   context (the "on" electrons showed in the channel during every move with the gate off) */
+#chip .lay text.zdim{opacity:calc(var(--ctx,1) * var(--lab,1))!important}
+#chip:not(.st-on) .lay .st-b.zdim,#chip.st-on .lay .st-a.zdim{opacity:0!important}
+/* a view whose labels are faded out (.nolab) does not paint them at all (the memory levels' rule of 30 Sep) */
+#chip .lay.nolab text,#chip .lay.nolab .pk,#chip .lay.nolab .co{visibility:hidden}
 #chip .lay .ztgt{opacity:var(--tgt,1)!important;transition:none!important;filter:none!important}
 #chip .lay.zsat .ztgt{filter:saturate(var(--tsat,1))!important}
 #chip .lay.zout .ring{opacity:0}
 #chip .lay .olab{opacity:var(--lab,1)}
+#chip .lay .mlside{opacity:var(--lab,1)}
+#chip .lay .mlside.zdim{opacity:calc(var(--ctx,1) * var(--lab,1))!important}
 /* the levels in space: the whole drawing box is night sky while the camera rests there or moves between two of them
    (review of 1 Oct: on a wide window the page's colour showed at the sides, and flashed through every jump) */
 #chip{transition:background-color .35s}

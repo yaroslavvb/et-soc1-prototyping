@@ -84,13 +84,18 @@ function mlCut(P) {
 /* ---- the scenes the levels draw: one node per scale of theirs; built by their builder into the path camera's layer,
    with their example (and the instance the path names), every part with a data-child seated for the scale it opens ---- */
 const MLSC = {};   // node id -> [level, scale id]
+/* a phone: the levels' frame whole, letterboxed into the box's shape (the chip diagram's fit) */
+function mlFit() { const v = MFR, hw = PV[0].h / PV[0].w; return v.h / v.w <= hw ? {x: v.x, y: v.y, w: v.w, h: v.w * hw} : {x: v.x + v.w / 2 - v.h / hw / 2, y: v.y, w: v.h / hw, h: v.h}; }
 function mnode(id, lv, sid, o) {
   MLSC[id] = [lv, sid];
   const s0 = (D.scales || {})[id] || {};
   return node(id, Object.assign({
     name: () => s0.name || ML.SCENES[lv].scales[sid].name, short: () => s0.short || ML.SCENES[lv].scales[sid].short,
     to: () => inName(s0.name || ML.SCENES[lv].scales[sid].name),
-    size: () => scSz(o.sizeOf ? (D.scales || {})[o.sizeOf] : s0), frame: () => MFR, view: () => mlView(), pv: () => mlView(), inside: true, mlv: true,
+    // (a phone: the levels' own window where the scene is their example's, the camera handing over there; another
+    // instance's, another bank or shire, is the ladder's alone, and is fitted whole: review of 1 Oct, its parts were cut
+    // off and could not be scrolled to)
+    size: () => scSz(o.sizeOf ? (D.scales || {})[o.sizeOf] : s0), frame: () => MFR, view: () => mlView(), pv: (p, el) => (el && el.k != null && pk(el) !== pk(mlEl(lv, sid)) ? mlFit() : mlView()), inside: true, mlv: true,
   }, o, {build: (L, ap, p, P, d) => {
     const patch = o.patch ? o.patch(p, P) : {};
     ML.buildScene(L, ap, lv, sid, patch);
@@ -115,11 +120,17 @@ function mlSeats(L, ap, lv, sid, P, patch) {
   });
 }
 const PARSE_LV = k => ({lv: CHIPLV.includes(k) ? k : chipV()});
+const DIESIDE = ['homebox', 'fit', 'mean', 'byhome', 'fmt', 'own', 'remote', 'size', 'fmt1', 'relay', 'model', 'typical', 'rate', 'energy', 'addrmap'];
 /* the chip: the map of a chip level (its frame the cells of the die; its packages around it on the DRAM's) */
 node('die', {parse: PARSE_LV, name: () => 'The chip', short: () => 'Chip', to: () => 'the chip', size: () => scSz((D.scales || {}).die),
   frame: p => { const g = ML.mapGeom(p.lv); return {x: g.X0, y: g.Y0, w: 6 * g.C, h: 8 * g.C}; },
   view: () => mlView(), pv: () => mlView(), mlv: true,
-  build: (L, ap, p, P, d) => { ML.buildScene(L, ap, p.lv, 'chip', {}); mlSeats(L, ap, p.lv, 'chip', P.slice(0, d + 1), {}); dieSeats(L, ap, p, P.slice(0, d + 1)); },
+  build: (L, ap, p, P, d) => {
+    ML.buildScene(L, ap, p.lv, 'chip', {}); mlSeats(L, ap, p.lv, 'chip', P.slice(0, d + 1), {}); dieSeats(L, ap, p, P.slice(0, d + 1));
+    // the boxes of numbers and the charts beside the map fade with the labels when the camera leaves the map (review of 1
+    // Oct: on the way out to the package they shrank into the die's box and the chart spilled over the ball grid)
+    DIESIDE.forEach(k => L.querySelectorAll(`.comp[data-comp="${k}"]`).forEach(g => g.classList.add('mlside')));
+  },
   seat: (ap, p, pel, Lp) => (pel.id === 'package' && Lp._ap.zs.die ? Lp._ap.zs.die : null),
   def: p => mlEl(p.lv, ML.SCENES[p.lv].scales.chip.def, p.lv),
   here: () => mlHere()});
@@ -127,6 +138,12 @@ node('die', {parse: PARSE_LV, name: () => 'The chip', short: () => 'Chip', to: (
 mnode('shire', 'l2', 'shire', {parse: k => ({sid: +k}), name: p => (p.sid === 32 ? 'Shire 32, the master' : p.sid === 33 ? 'Shire 33, the spare' : `Shire ${p.sid}`), short: p => `Shire ${p.sid}`, to: p => `shire ${p.sid}`,
   size: () => scSz((D.scales || {}).shire),
   seat: (ap, p, pel, Lp) => (pel.id === 'die' && Lp._ap.B && Lp._ap.B['s' + p.sid] ? {r: Lp._ap.B['s' + p.sid], g: tileOf(Lp, p.sid)} : null),
+  // (another shire's copy says its number in the title; the example's keeps the levels' own title, so that the two
+  // cameras' pictures still coincide at a hand-over: review of 1 Oct, every copy read "Shire")
+  after: (L, ap, p) => {
+    const ex = mlEl('l2', 'shire'); if (!ex || p.sid === +ex.k) return;
+    const t = L.querySelector('.frm > text.t-big'); if (t && /^Shire\b/.test(t.textContent)) t.textContent = t.textContent.replace(/^Shire\b/, `Shire ${p.sid}`);
+  },
   def: () => mlEl('l2', 'bank'), here: () => mlHere()});
 /* the L1's minion: minion:R.n.m in the L2's shire (the example is minion 0 of neighbourhood 0) */
 mnode('minion', 'l1', 'minion', {parse: k => { const q = String(k).split('.').map(Number); return {sid: q[0], nb: q[1] || 0, mi: q[2] || 0}; },
@@ -164,10 +181,15 @@ mnode('scp.vmin', 'scp', 'vmin', {sizeOf: 'shire.panel', name: () => 'The SRAM\'
 /* ---- the shared chains (ladder-mem.js) drawn here with the levels' own builders: their view is the levels' (mlView); the
    6T cell and a mesh hop take the drawing of the level whose chain they are on (the L3's and the scratchpad's cells and
    hops are the levels' own variants) ---- */
+// (a phone: another instance than the example's, another bank or memory shire, is the ladder's alone and fitted whole,
+// as the levels' own scales above: review of 1 Oct)
+const CHAINLV = {'l1d.block': ['l1', 'lram'], 'shire.bank': ['l2', 'bank'], 'shire.subbank': ['l2', 'sub'], 'shire.panel': ['l2', 'panel'], memshire: ['dram', 'ms'],
+  dram: ['dram', 'chan'], 'dram.bank': ['dram', 'dbank'], 'memshire.phy': ['dram', 'phy'], 'memshire.phy.dq': ['dram', 'dq']};
 ['l1d', 'l1d.block', 'l1d.row', 'lib.latch', 'l1d.cmp', 'shire.bank', 'shire.subbank', 'shire.panel', 'lib.sram6t', 'shire.meshstop.xing', 'mesh', 'mesh.link.wire',
   'memshire', 'memshire.phy', 'memshire.phy.dq', 'dram', 'dram.bank', 'dram.cell'].forEach(id => {
   const N0 = NODES[id]; if (!N0) { console.error('memory levels: no scale ' + id); return; }
-  N0.view = () => mlView(); N0.pv = () => mlView(); N0.mlv = true;
+  const c = CHAINLV[id];
+  N0.view = () => mlView(); N0.pv = (p, el) => (c && el && el.k != null && pk(el) !== pk(mlEl(c[0], c[1])) ? mlFit() : mlView()); N0.mlv = true;
   N0.here = () => mlHere();
 });
 const chainOf = P => (P.some(e => e.id === 'l3.home' || (e.id === 'die' && e.k === 'l3' && P.some(x => x.id === 'mesh'))) ? 'l3' : P.some(e => /^scp\./.test(e.id) || (e.id === 'die' && e.k === 'scp' && P.some(x => x.id === 'mesh'))) ? 'scp' : null);

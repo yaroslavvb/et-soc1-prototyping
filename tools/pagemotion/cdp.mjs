@@ -2,7 +2,7 @@
 // touch, keys), evaluation, screenshots. No packages: Node's own WebSocket and fetch.
 //   const b = await open({w, h, dpr, touch, dark, reduced, udd, cpu}); await b.load(page, query); ... await b.close();
 import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { tmpdir, homedir } from 'node:os';
 
@@ -10,16 +10,31 @@ const CANDIDATES = [process.env.CHROME, resolve(homedir(), '.cache/ms-playwright
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome'].filter(Boolean);
 export const CHROME = CANDIDATES.find(p => existsSync(p));
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
+/* Chrome on a port of its own choosing (--remote-debugging-port=0; it writes the port into DevToolsActivePort in its
+   profile): a random port can be another Chrome's (four suites at once, another session's tests, a Chrome left over),
+   and the test then drove that browser's page and was sent its old log entries (a 404 of a page that was not under test
+   failed a "no error" check: 1 Oct 2026). args: the flags and URL besides these two; {ch, port, tl: the page target} */
+export async function startChrome(args, udd, tries = 100) {
+  const pf = resolve(udd, 'DevToolsActivePort');
+  rmSync(pf, {force: true});
+  const ch = spawn(CHROME, ['--remote-debugging-port=0', `--user-data-dir=${udd}`, ...args], {stdio: 'ignore'});
+  let port = 0, tl = null;
+  for (let i = 0; i < tries && !tl; i++) {
+    await sleep(100);
+    try {
+      if (!port) port = +readFileSync(pf, 'utf8').split('\n')[0] || 0;
+      if (port) tl = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find(t => t.type === 'page');
+    } catch (_) { /* not up */ }
+  }
+  return {ch, port, tl};
+}
 
 export async function open(o = {}) {
   const W = o.w || 1280, H = o.h || 800, DPR = o.dpr || 1;
-  const port = 9500 + Math.floor(Math.random() * 400);
   const udd = o.udd || mkdtempSync(resolve(process.env.TMPDIR || tmpdir(), 'zt-chrome-'));
-  const args = ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${udd}`, `--window-size=${W},${H}`, '--no-first-run',
+  const args = ['--headless=new', `--window-size=${W},${H}`, '--no-first-run',
     '--no-default-browser-check', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--hide-scrollbars', '--no-sandbox', 'about:blank'];
-  const ch = spawn(CHROME, args, {stdio: 'ignore'});
-  let tl = null;
-  for (let i = 0; i < 100 && !tl; i++) { await sleep(100); try { tl = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find(t => t.type === 'page'); } catch (_) { /* not up */ } }
+  const {ch, tl} = await startChrome(args, udd);
   if (!tl) throw new Error('no Chrome page target (CHROME=' + CHROME + ')');
   const ws = new WebSocket(tl.webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });

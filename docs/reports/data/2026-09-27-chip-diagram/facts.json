@@ -9692,7 +9692,7 @@
    "f": "size.lib.adder"
   },
   "lib.latch": {
-   "name": "Latch (the L1's storage cell)",
+   "name": "Latch (drawn as the L1's storage cell)",
    "short": "Latch",
    "blurb": "A bit of memory made of logic: two inverters in a loop hold the value, and a clocked switch lets a new value in while the clock is high. The minion's caches and register files are made of these.",
    "parent": "lib",
@@ -10030,7 +10030,7 @@
    "parent": "lib.finfet",
    "m": 1.65e-08,
    "kind": "outside",
-   "note": "effective gate length about 16.5 nm (N7, Dick James on IEDM 2016); the earlier 20 nm (IRDS, 7 nm-class) is superseded",
+   "note": "effective gate length about 16.5 nm (N7: Dick James on TSMC's IEDM 2016 paper)",
    "facts": [
     "n7.leff",
     "gate.hfo2",
@@ -10055,7 +10055,7 @@
    "parent": "lib.finfet",
    "m": 5.2e-08,
    "kind": "outside",
-   "note": "N7's fin: 6 nm wide and 52 nm tall (WikiChip Fuse on TSMC's IEDM 2016 paper); the earlier drawing's 6-7 by 45-50 nm, inferred from 10 nm-class sections, is superseded",
+   "note": "N7's fin: 6 nm wide and 52 nm tall (WikiChip Fuse, on the pitches of TSMC's production cells, VLSI 2019; it notes that TSMC's IEDM 2016 paper gave slightly tighter ones)",
    "facts": [
     "n7.fin-width",
     "n7.fin-height",
@@ -10904,7 +10904,7 @@
   "p.atom": {
    "name": "A silicon atom",
    "short": "Atom",
-   "blurb": "One of the crystal's atoms: a tiny nucleus with 14 electrons around it. Only the outer four take part in bonds and in electronics; the other ten sit deep inside, held 20 to 300 times more tightly.",
+   "blurb": "One of the crystal's atoms: a tiny nucleus with 14 electrons around it. Only the outer four take part in bonds and in electronics; the other ten sit deep inside, bound about 12 to 230 times more tightly.",
    "m": 2.352e-10,
    "kind": "derived",
    "f": "size.p.atom",
@@ -10953,7 +10953,7 @@
   "p.nucleus": {
    "name": "The silicon-28 nucleus",
    "short": "Nucleus",
-   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: a thirty-thousandth of the atom's width but 99.97% of its mass. Nothing in a chip ever touches it.",
+   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: some 29,000 times narrower than the atom, but 99.97% of its mass. Nothing in a chip ever touches it.",
    "m": 8.06e-15,
    "kind": "derived",
    "f": "size.p.nucleus",
@@ -11051,7 +11051,7 @@
   "p.wrap": {
    "name": "The ring of sizes",
    "short": "Ring of sizes",
-   "blurb": "This is not further out in space. The ring is a picture of every size at once, the smallest joined to the largest; the links across it are physics, not distance. Looking far out is looking back in time, to an early universe that was a sea of quarks.",
+   "blurb": "This is not further out in space. The ring is a picture of every size at once, the smallest joined to the largest; the links across it are physics, not distance. Looking far out is looking back in time, as far as the oldest light; before it, physics tells of an early universe that was a sea of quarks.",
    "m": null,
    "kind": "unknown",
    "f": null,
@@ -11099,7 +11099,7 @@
   "bernal": {
    "name": "Bernal Heights",
    "short": "Bernal Heights",
-   "blurb": "Bernal Heights, a hill neighbourhood of about 26,000 people in south-east San Francisco. The hill is red chert: quartz, silicon dioxide, from the shells of plankton that lived 100 to 200 million years ago. Refined, the same silicon is the die. Light crosses the neighbourhood in 7.3 µs, about 4,400 of the chip's clock ticks.",
+   "blurb": "Bernal Heights, a hill neighbourhood of about 26,000 people in south-east San Francisco. The hill is red chert: quartz, silicon dioxide, from the shells of plankton that lived 100 to 200 million years ago. Refined, silica like this is what chip silicon is made from. Light crosses the neighbourhood in 7.3 µs, about 4,400 of the chip's clock ticks.",
    "m": 2200.0,
    "kind": "derived",
    "f": "b.2",
@@ -11282,7 +11282,7 @@
   "lib.rom": {
    "name": "A read-only memory (ROM)",
    "short": "ROM",
-   "blurb": "A table fixed when the chip is made: a transistor where a bit is 0, none where it is 1. The vector unit's transcendental functions read their coefficients from small tables like this.",
+   "blurb": "A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit's transcendental functions read their coefficients from small tables like this.",
    "m": 2e-05,
    "kind": "inferred",
    "f": "size.lib.rom",
@@ -13654,6 +13654,10 @@
    "t": "65 mV per decade",
    "f": "n7.ss"
   },
+  "n7_ss_mv": {
+   "t": "65 mV",
+   "f": "n7.ss"
+  },
   "v_min": {
    "t": "0.517 V",
    "f": "et.v-minion"
@@ -13755,7 +13759,7 @@
    "f": "el.sram-electrons"
   },
   "latch_e": {
-   "t": "about 320-970",
+   "t": "about 320-970 electrons",
    "f": "el.sram-electrons"
   },
   "dram_e": {
@@ -13806,8 +13810,8 @@
    "t": "0.235 nm",
    "f": "size.p.atom"
   },
-  "at_32k": {
-   "t": "about 32,000 times",
+  "at_29k": {
+   "t": "about 29,000 times",
    "f": "p.atom.11"
   },
   "nu_pn": {
@@ -13866,6 +13870,10 @@
    "t": "2 × 10⁻²⁰ m",
    "f": "p.electron.2"
   },
+  "el_edm": {
+   "t": "4.1 × 10⁻³² m",
+   "f": "p.electron.4"
+  },
   "el_q": {
    "t": "1.602176634 × 10⁻¹⁹ C",
    "f": "p.electron.1"
@@ -13889,6 +13897,14 @@
   "dp_50": {
    "t": "about 1 atom in 50",
    "f": "p.dopant.5"
+  },
+  "sd_29": {
+   "t": "one atom in 29",
+   "f": "dope.count-sd"
+  },
+  "sd_13": {
+   "t": "one of every thirteen",
+   "f": "dope.count-sd"
   },
   "ring_mid": {
    "t": "0.12 mm",
@@ -14178,7 +14194,7 @@
  "lazy": {
   "url": "ladder-img/ladder-data.json",
   "n": 804,
-  "bytes": 361729,
-  "sha256": "ebb8f3cd7157112a86e29f2854ce314fb98e1662b462ff383cfb10e464776471"
+  "bytes": 365276,
+  "sha256": "6487b005f421fdccbcd5bd49965ae5d68d30b2a69dcac8626f94a36afce107be"
  }
 }

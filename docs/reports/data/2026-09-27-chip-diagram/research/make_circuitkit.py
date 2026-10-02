@@ -2,7 +2,11 @@
 """Write docs/reports/sources/circuitkit.js: the memory-levels page's drawing kit, its circuit drawings and the scenes
 of its L1, shire-cache, mesh and DRAM chains, copied for the chip diagram's deep zoom (30 Sep 2026, DESIGN §3.3, D8).
 
-    python3 docs/reports/data/2026-09-27-chip-diagram/research/make_circuitkit.py
+    python3 docs/reports/data/2026-09-27-chip-diagram/research/make_circuitkit.py [--check]
+
+--check (1 Oct 2026, the code review): exits 1 if circuitkit.js is not what this script writes, the provenance lines
+(the commit and line numbers each copy was read at) aside, so that a change to the memory levels' kit that the copy
+lacks is found; it writes nothing.
 
 Each copied declaration keeps its text and is preceded by a line naming where it came from (memory-levels.script.js
 at the commit it was read at, lines a-b). They are wrapped in one closure, so that the copies' names (comp, part,
@@ -115,13 +119,11 @@ def keep_entries(text, name, keep):
 
 # the chip page's changes to the copies (each must match once; the review of 1 Oct 2026): the lines under a part's
 # title, and a scene's notes, are set at 1.2 times the small type's size where the page sets it larger (SUBLH, set by
-# build() in circuitkit.tail.js), never closer than the memory levels' own pitch; a part may give its own (o.lh)
+# build() in circuitkit.tail.js), never closer than the memory levels' own pitch (a part's own, o.lh, the memory levels'
+# kit keeps too since the code review of 1 Oct)
 PATCHES = [
-    ("  (o.sub || []).forEach((s, i) => { const L0 = typeof s === 'string' ? {t: s} : s; T(g, o.center ? x + w / 2 : x + 12, y + ty + 23 + i * 21, L0.t, L0.c || 't-sm', o.center ? 'middle' : 'start', L0.f); });",
-     "  // (the chip page's copy: o.lh, a line pitch for the lines under the title, else 1.2 times the small type's size\n"
-     "  // where the page sets it, never under the memory levels' 21; review of 1 Oct)\n"
-     "  const lh = o.lh || Math.max(21, SUBLH);\n"
-     "  (o.sub || []).forEach((s, i) => { const L0 = typeof s === 'string' ? {t: s} : s; T(g, o.center ? x + w / 2 : x + 12, y + ty + 23 + i * lh, L0.t, L0.c || 't-sm', o.center ? 'middle' : 'start', L0.f); });"),
+    ("  const lh = o.lh || 21;",
+     "  const lh = o.lh || Math.max(21, SUBLH);"),
     ("  (o.note || []).forEach((t, i) => T(L, -150, 664 + i * 22, t, 't-sm', 'start', o.noteF));",
      "  (o.note || []).forEach((t, i) => T(L, -150, 664 + i * Math.max(22, SUBLH), t, 't-sm', 'start', o.noteF));"),
 ]
@@ -145,5 +147,14 @@ body = '\n\n'.join([
     '/* ---- the parts\' texts (each part\'s panel) ---- */\n' + take([p for p in PARTS if p != 'L3P']) + '\n' + keep_entries(take(['L3P']), 'L3P', L3KEEP),
 ])
 body = patched(body)
-open(OUT, 'w').write(HEAD + body + '\n' + TAIL)
-print('wrote', OUT, len(HEAD + body + TAIL), 'bytes from', REV)
+NEW = HEAD + body + '\n' + TAIL
+if '--check' in __import__('sys').argv:
+    PROV = re.compile(r'^// [A-Za-z0-9_]+: memory-levels\.script\.js at \S+, lines \d+-\d+$', re.M)
+    old = open(OUT).read() if os.path.exists(OUT) else ''
+    if PROV.sub('', old) != PROV.sub('', NEW):
+        import difflib
+        d = [l for l in difflib.unified_diff(PROV.sub('', old).split('\n'), PROV.sub('', NEW).split('\n'), 'circuitkit.js', 'as written now', n=0, lineterm='')]
+        print('circuitkit.js is stale (the provenance lines aside):\n' + '\n'.join(d[:40])); raise SystemExit(1)
+    print('circuitkit.js is current (the provenance lines aside)'); raise SystemExit(0)
+open(OUT, 'w').write(NEW)
+print('wrote', OUT, len(NEW), 'bytes from', REV)

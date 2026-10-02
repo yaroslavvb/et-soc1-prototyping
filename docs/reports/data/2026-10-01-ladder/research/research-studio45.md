@@ -1,6 +1,7 @@
 > Redacted for the repository (1 Oct 2026): links to the venue's pages, listings and the press release are removed
-> (each shows the street address). Facts for the page are in `studio45.json` (build_studio45.py), which leaves out the
-> AI Plumbers event until the owner answers (DESIGN Q1).
+> (each shows the street address). Facts for the page are in `studio45.json` (build_studio45.py). Redacted again on
+> 1 Oct 2026 (the fact review's privacy point, until the owner answers): a paragraph on an event at the venue, the
+> place on the street narrowed to blocks, and the lot's size and zoning.
 
 # Studio 45, Bernal Heights and 29th Street: research for the ladder
 
@@ -31,33 +32,21 @@ never the studio's.
 | It is run as part of Informal Spaces, which runs "hardware-friendly coworking and makerspaces" in Oakland (Uptown and Jack London Square), San Francisco (Bernal Heights) and Mountain View. Its event calendar is "Studio 45 - informal spaces SF". | Deep Tech Week, organisation page "Informal Spaces"; Luma calendar (link not given here: the page shows the street address) | outside |
 | It hosts the monthly SF Hardware Meetup ("a hardware community of 10,500+ builders who meet monthly"; the 129th meetup was there on 15 Jan 2026, the 2025 Hardware Holiday Party had 600 attendees), hardware pitch nights and SF Design Week open studios (Design Soup, 8 June 2023). | Luma (link not given here: the page shows the street address), (link not given here: the page shows the street address); (link not given here: the page shows the street address) event page; (link not given here: the page shows the street address) | outside |
 
-**The venue's tie to AI Foundry is public. This corrects the chip-diagram research of 30 Sep, which said no public
-page linked them.** Ainekko's press release launching AI Foundry (GlobeNewswire, 22 October 2025, dateline Santa
-Clara) says Ainekko would host "the AI Plumbers Unconference: San Francisco Edition on Saturday, October 25 from
-9 AM to 5 PM" at an address on 29th St. The Luma listing, hosted by AIFoundry.org (link not given here: the page shows the street address), gives the
-same address and lists a talk called "Introducing ET-SOC - the fully open source manycore platform". It was part
-of the Linux Foundation's #OpenSourceAIWeek. Neither page names "Studio 45": the match is by address, so the
-fact's kind is **inference**. It is a good fact for the page: *the chip on this page was presented to the public in
-this building on 25 Oct 2025.* Cite it as "Ainekko press release, 22 Oct 2025; AIFoundry.org event listing", and
-do not reproduce the address.
+*(A paragraph on a public event at the venue is redacted here until the owner answers question 1 below.)*
 
 **The building (the city's open data).** The building on the venue's lot has a footprint of about **37 m by 9 m**
 (325 m²) in DataSF's Building Footprints, which come from a 2010 Pictometry 3D model split at parcel lines. Its
 roof height above the ground is **6.0 m at the median and 8.3 m at the highest point**: a two-storey building, as
-the website says. The lot is about 47 m by 9 m (400 m², DataSF Parcels). Its zoning is the **Mission Bernal
-Neighborhood Commercial District**: even the zoning name joins the Mission and Bernal. Kind: outside (DataSF, ODC
-PDDL), with the dimensions derived by me from the polygons. Caveat: the footprint covers the one lot at the
+the website says. Kind: outside (DataSF, ODC PDDL), with the dimensions derived by me from the polygons. Caveat: the footprint covers the one lot at the
 listed address. The website's "courtyard" and four event spaces may reach onto neighbouring lots, and that is
 not known. If the page uses the size, say "the building at its address, about 37 m deep and 9 m wide". That
 replaces the current level's "20 m, assumed" with a sourced number. Where the rack stands inside is still not
 recorded.
 
-**The two neighbourhood maps disagree, which is a real fact.** The city's Analysis Neighborhoods (Health and
-Housing, the boundary set Planning uses for its neighbourhood profiles) put the venue's lot, and the east end of
-29th Street, in **Bernal Heights**. The city's address register (EAS) says Bernal Heights too. Public Works' street
-file tags the same stretch with the Planning/Realtor neighbourhood **"Inner Mission"**. Wikipedia and Planning's
-profiles bound Bernal on the west by San Jose Avenue, and the street's east end lies east of it. So the owner's
-"Bernal Heights" and the studio's own "intersection of The Mission and Bernal Heights" are both right.
+**The neighbourhood maps disagree at the edges, which is a real fact.** The city's Analysis Neighborhoods (the
+boundary set Planning uses for its neighbourhood profiles) and its street file do not always give a street the same
+neighbourhood, so the owner's "Bernal Heights" and the studio's own "intersection of The Mission and Bernal
+Heights" are both right. (Which stretch of the street is in which is left out here: it would narrow the place.)
 
 ## 2. Bernal Heights
 
@@ -76,18 +65,15 @@ profiles bound Bernal on the west by San Jose Avenue, and the street's east end 
 
 ## 3. 29th Street
 
-- **The whole street is 1.29 km long** and runs west to east. It starts at Diamond St, at the foot of Diamond Heights, runs
-  through Noe Valley (1,022 m) and a corner of Glen Park (115 m), and ends at its east end in Bernal Heights
-  (156 m, by the Analysis Neighborhoods). Its blocks, from the west, end at Zircon Pl, Castro, Noe, Sanchez, Church,
-  Dolores and San Jose Ave. East of San Jose Ave come its last two short blocks, the 156 m in Bernal Heights
-  (DataSF Streets, Public Works centrelines; `studio45/st29.json`). Kind: derived from outside data. Do not confuse it with 29th *Avenue* in the
+- **The whole street is 1.29 km long** and runs west to east, from Diamond St, at the foot of Diamond Heights,
+  through Noe Valley to the flats where the Mission meets Bernal Heights (DataSF Streets, Public Works centrelines;
+  `studio45/st29.json`). Kind: derived from outside data. Do not confuse it with 29th *Avenue* in the
   Richmond and Sunset, which the same street file also lists under "29TH".
 - **It falls about 95 m:** from 126 m at its west end to about 30 m at its east end. The steepest part is the top:
   34 m of drop in its first 140 m, about 24%. These are from the USGS 3DEP 1 m DEM, sampled every 40 m by
-  `studio45/epqs_29th.py`; the output in `epqs_29th.out` gives distances and heights only. The hill's summit
-  stands about 110 m above the street's east end.
-- **Privacy note for the drawing.** The owner's two facts, "29th Street" and "Bernal Heights", already narrow the
-  place to that 156 m stretch at the street's east end. Do not narrow it further. Draw the whole street, put no
+  `studio45/epqs_29th.py`; the output in `epqs_29th.out` gives distances and heights only.
+- **Privacy note for the drawing.** The owner's two facts, "29th Street" and "Bernal Heights", are all the page
+  says of the place. Do not narrow it further. Draw the whole street, put no
   dot, block highlight or arrow on it, and keep the studio as an inset beside the drawing. Never put it at a
   point. This is the rule the SF level already follows ("the Studio 45 inset sits beside the city's outline").
   The camera should never zoom onto a position on the street.
@@ -105,7 +91,7 @@ level can get a sourced size:
 | sf (existing) | 11 km | 18 km | x5.1 | as now, plus the Bernal Heights outline filled lightly. The camera now zooms into Bernal's outline, about 3.9 km south of the centre. That is a neighbourhood, which the owner's words allow. | unchanged |
 | **bernal** (new) | 2.2 km (derived) | 3.5 km | x2.2 | The DataSF outlines: Bernal filled, its neighbours in thin grey lines with names. The four boundary roads labelled (Cesar Chavez St, San Jose Ave, US 101, I-280), plus Mission St, Cortland Ave and Bernal Heights Blvd. The park (10.7 ha) in green with a summit mark at "142 m". **29th Street drawn whole**, in the accent colour and labelled. Scale bar 500 m. Data are in `studio45/bernal-geo.json` (299 KB raw; simplify before use) with a preview in `preview-bernal.png`. | "Bernal Heights, a hill neighbourhood of 26,000 people in south-east San Francisco. The hill is red chert, rock made of quartz (silicon dioxide) from the shells of plankton that lived 100 to 200 million years ago. Light crosses the neighbourhood in 7.3 µs, about 4,400 of the chip's clock ticks." |
 | **st29** (new, optional) | 1.29 km (derived) | 1.6 km | x36 | **A side view, not a map.** The street's elevation profile (`epqs_29th.out`) falls from 126 m at Diamond St to 30 m at its east end, with the vertical scale stretched and labelled as such. The cross streets are ticks along the top. A dashed level line shows Bernal's summit at 142 m for comparison. The stretch's neighbourhoods (Noe Valley, Glen Park, Bernal Heights) are shown as bands under the profile. The Studio 45 inset sits **beside** the profile, labelled "on 29th Street, in Bernal Heights (its place on the street not shown)". | "29th Street, 1.3 km long, drops about 95 m from Noe Valley's hills to the flats where the Mission meets Bernal Heights. Light runs its length in 4.3 µs, about 2,600 ticks." |
-| studio45 (existing, revised) | **37 m** (the building at its address, DataSF; it was "20 m, assumed") | 45 m | x25 | A schematic section and plan, labelled schematic: a two-storey box of 37 x 9 m with a 6-8 m roof, "co-working upstairs, a street-level warehouse and courtyard, a wood shop". The 4 x 8 ft CNC (1.22 x 2.44 m) and a 1.7 m person are drawn to scale, and the rack (1.5 m) is placed inside with the label "its place in the building not recorded". Scale bar 5 m. Still no photograph: none is openly licensed. | "Studio 45, a co-working space and workshop for people who build hardware. The lab's rack is here. AI Foundry introduced this chip's open-source platform at an event in this building on 25 Oct 2025. Light crosses the building in 123 ns, 74 clock ticks." |
+| studio45 (existing, revised) | **37 m** (the building at its address, DataSF; it was "20 m, assumed") | 45 m | x25 | A schematic section and plan, labelled schematic: a two-storey box of 37 x 9 m with a 6-8 m roof, "co-working upstairs, a street-level warehouse and courtyard, a wood shop". The 4 x 8 ft CNC (1.22 x 2.44 m) and a 1.7 m person are drawn to scale, and the rack (1.5 m) is placed inside with the label "its place in the building not recorded". Scale bar 5 m. Still no photograph: none is openly licensed. | "Studio 45, a co-working space and workshop for people who build hardware. The lab's rack is here. Light crosses the building in 123 ns, 74 clock ticks." |
 | rack (existing) | 1.5 m | 1.8 m | (as now) | unchanged | unchanged |
 
 If st29 is left out, the bernal level zooms straight to the studio at x78. That is still shorter than today's x720.
@@ -119,7 +105,6 @@ Light and clock ticks (c exact; fibre group index 1.4682; chip clock 600 MHz; al
 | Bernal Heights, 2.2 km | 7.34 µs | 4,403 | 10.77 µs | 6,465 |
 | 29th Street, 1,293 m | 4.31 µs | 2,588 | 6.33 µs | 3,799 |
 | The building, 37 m | 123 ns | 74 | 181 ns | 109 |
-| Summit above the street's east end, ~110 m | 367 ns | 220 | 539 ns | 323 |
 
 ## 5. Electronics tie-ins (the owner's goal: learn how electronics works)
 
@@ -139,7 +124,7 @@ Light and clock ticks (c exact; fibre group index 1.4682; chip clock 600 MHz; al
 4. **The light-and-ticks line** (above) carries the chip's 600 MHz clock out to the neighbourhood, as the
    existing levels do.
 5. **The building is a hardware shop.** A 4 x 8 ft CNC, laser cutter and 3D printers make the step from atoms to
-   products concrete. The ET-SoC-1's open platform was presented there (the inference above).
+   products concrete.
 
 ## 6. Files (in the session's work directory; in the repository: make_bernal_geo.py, simplify_bernal_geo.py, the two EPQS scripts and their outputs, bernal-geo.json, build_studio45.py, studio45.json)
 
@@ -153,13 +138,13 @@ Light and clock ticks (c exact; fibre group index 1.4682; chip clock 600 MHz; al
 | `studio45/mcs2025-silicon.pdf` | USGS Mineral Commodity Summaries 2025, Silicon. |
 | `studio45/wiki-*.txt` | Wikipedia wikitext of the articles cited (Bernal Heights; Bernal Heights Summit; List of hills in SF; Chert). |
 
-The building's footprint and lot sizes were read from DataSF by the venue's public address, and only the
-dimensions were kept. No file here stores the address or its position.
+The building's footprint was read from DataSF by the venue's public address, and only its dimensions were kept.
+No file here stores the address or its position.
 
 ## 7. Open questions for the owner
 
-1. May the page say that AI Foundry's AI Plumbers Unconference (25 Oct 2025) was held at Studio 45? It is public,
-   but it is an inference by address.
+1. May the page name a public event held at the venue (the redacted paragraph above; the note in the session's
+   work directory)? It is public, but it is an inference by address.
 2. May the page give the building's size (37 x 9 m, from city data)? It is harmless, but it describes the
    building itself.
 3. Where in the building is the rack (which floor, the warehouse or a studio)? And is "the lab's room" one of the
@@ -179,14 +164,9 @@ Tech Jobs for Good, "129th SF Hardware Meetup @ Studio 45 | CES in SF" (15 Jan 2
 organisation "Informal Spaces" (link not given here: the page shows the street address); Anson Design (Substack), "The
 secret to a thriving design business".
 
-AI Foundry at the venue: Ainekko, "Ainekko Launches AI Foundry, Bringing Open-Source Principles and 'Do-Ocracy' to
-AI Hardware", GlobeNewswire, 22 Oct 2025 (link not given here: the page shows the street address); AIFoundry.org,
-"AI Plumbers Unconference: San Francisco Edition" (link not given here: the page shows the street address).
-
 City data (City and County of San Francisco, DataSF, all Open Data Commons PDDL): Analysis Neighborhoods
 (j2bu-swwd); Streets - Active and Retired (3psu-pn9h); Recreation and Parks Properties (gtr9-ntp6); Building
-Footprints (ynuv-fyni; from a 2010 Pictometry model, split at parcels, 2017); Parcels - Active and Retired
-(acdm-wktn); Addresses with Units - Enterprise Addressing System (ramy-di5m). SF Planning, *San Francisco
+Footprints (ynuv-fyni; from a 2010 Pictometry model, split at parcels, 2017). SF Planning, *San Francisco
 Neighborhoods Socio-Economic Profiles, American Community Survey 2012-2016* (Sept 2018).
 
 USGS: 3DEP 1 m DEM through the Elevation Point Query Service (epqs.nationalmap.gov; lidar of 4 Mar 2023); GNIS

@@ -1,14 +1,13 @@
 // node shot.mjs <page.html or url> <hash> <out.png> [w h dpr] [waitMs] [js] [fullPage]
-import { spawn } from 'node:child_process';
 import { writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 const [page, hash, outp, W = '1280', H = '800', DPR = '1', WAIT = '2500', JS = '', FULL = ''] = process.argv.slice(2);
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', port = 9900 + Math.floor(Math.random() * 90);
-const udd = process.env.UDD || mkdtempSync(resolve(process.env.TMPDIR, 'zd-shot-'));
+import { tmpdir } from 'node:os';
+import { startChrome } from './cdp.mjs';   // (a Mac's or Linux's Chrome, or CHROME: code review of 1 Oct; on a port of its own)
+const udd = process.env.UDD || mkdtempSync(resolve(process.env.TMPDIR || tmpdir(), 'zd-shot-'));
 const flags = process.env.DARK ? ['--force-dark-mode', '--blink-settings=preferredColorScheme=0'] : [];
-const ch = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${udd}`, `--window-size=${W},${H}`, '--hide-scrollbars', ...flags, 'about:blank'], {stdio: 'ignore'});
+const {ch, tl} = await startChrome(['--headless=new', `--window-size=${W},${H}`, '--hide-scrollbars', ...flags, 'about:blank'], udd, 80);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-let tl; for (let i = 0; i < 80 && !tl; i++) { await sleep(100); try { tl = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find(t => t.type === 'page'); } catch (_) {} }
 const ws = new WebSocket(tl.webSocketDebuggerUrl); await new Promise(r => ws.onopen = r);
 let id = 0; const pend = new Map(), errs = [];
 ws.onmessage = m => { const d = JSON.parse(m.data); if (d.method === 'Runtime.exceptionThrown') errs.push(d.params.exceptionDetails.exception ? d.params.exceptionDetails.exception.description : d.params.exceptionDetails.text); if (d.method === 'Runtime.consoleAPICalled' && d.params.type === 'error') errs.push(d.params.args.map(a => a.value || a.description).join(' ')); if (pend.has(d.id)) { pend.get(d.id)(d); pend.delete(d.id); } };

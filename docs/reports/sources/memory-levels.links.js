@@ -65,10 +65,6 @@ links('scp.panel', Object.assign({}, LINKS['shire.panel']));
 /* the Vmin inset: a chart of the SRAM's trims and the rails; a trim row opens the cell it trims, a rail its wiring */
 links('scp.vmin', Object.assign({rm: 'lib.sram6t', railSram: RAIL, railMin: RAIL, railMesh: RAIL, rail750: RAIL}, keys(['axis', 'railRange', 'why'])));
 /* the 6T cell and the latch are the levels' own scenes here (their camera shows them, with their accesses' animations):
-   the ladder's copy of them, which the hand-over shows for a moment, is drawn as theirs, without the chip diagram's
-   stored-bit box and its switch (ladder-inner.js's bitStates); the two states are the transistor's, its fin's and its
-   channel's below */
-['lib.sram6t', 'lib.latch'].forEach(id => {
-  const N0 = NODES[id], b0 = N0.build;
-  N0.build = (L, ap, p, P, d) => { b0(L, ap, p, P, d); L.querySelectorAll('.bitst, .stsw').forEach(e => e.remove()); L._states = null; };
-});
+   since the reviews of 1 Oct both cameras draw the chip diagram's stored-bit box and its switch on them (ladder-inner.js's
+   bitStates; on the levels' own layers memory-levels.hand.js's mlStates), at the same place, so that the hand-over still
+   shows the same picture; while an access is chosen the box gives its place to the access's waveforms (#stage.accsel) */

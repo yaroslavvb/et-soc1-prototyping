@@ -59,7 +59,8 @@ html.et-pres [data-ss-ui]{display:none!important}
 #stage.lad-on #svgwrap{visibility:hidden}
 #stage.lad-on #zwhere{display:none}
 .cmwrap{position:relative;height:0;z-index:8}
-.cmwrap .crumb-menu{top:4px}
+/* (the review of 1 Oct: 70% of the zero-height wrapper left a 10 px box) */
+.cmwrap .crumb-menu{top:4px;max-height:min(420px,60vh)}
 .upbar{min-height:34px}
 /* the levels' buttons are flex boxes: the panel's zoom buttons keep the space before their key hint */
 .pn-zoom .st-btn{display:inline-block}
@@ -545,7 +546,7 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
     <div class="cap-kick"><span id="cap-k" aria-live="polite">Explore</span><div class="dots" id="dots" role="group" aria-label="Tour slides"></div></div>
     <p id="cap" aria-live="polite">Pick a level, click any part, or press Tour.</p>
     <p id="st-live" class="vh" aria-live="polite">No access is playing.</p>
-    <p id="cap-sub" class="hint">1–5 levels · [ ] accesses · Space pauses · ← → steps · double-click zooms in, ↑ zooms out · G switches · V dive · T tour</p>
+    <p id="cap-sub" class="hint">1–5 levels · [ ] accesses · Space pauses · ← → steps · double-click zooms in, Backspace zooms out · G switches · V dive · T tour</p>
   </div>
   <div class="cap-side">
     <div class="vh" id="cap-scale" aria-live="polite"></div>
@@ -583,13 +584,14 @@ package, the card, the host computer and the rack), the breadcrumb beside it goe
 out and in (+ into the part you picked, else the scale's usual next one), and the readout gives the size of what you
 see. A double click on a part, or Enter, zooms into it; Backspace zooms out. Every part leads further in: a part with a
 drawing of its own here opens it; any other opens the chip diagram's drawing of it, a textbook construction where the
-chip's own circuit is not published (each says so), and every way in ends at a transistor (TSMC's 7 nm FinFET, or the
-DRAM's own cell), its fin and channel, the silicon crystal, an atom, its nucleus, a proton and a quark. G switches the
+chip's own circuit is not published (each says so), and every way in ends at a transistor (TSMC's 7 nm FinFET, with its
+fin and channel, or the DRAM's own cell, on a DRAM process), then the silicon crystal, an atom, its nucleus, a proton and a quark. G switches the
 transistor's gate, or a cell's bit, between its two states. Every change of view is one smooth move, out to the scale
 the two views share and in again; a new address or requester that moves the part you are in goes out to where the
 change shows and back in.</li>
 <li><b>Accesses</b>: the buttons beside the tabs, or <kbd>[</kbd> and <kbd>]</kbd>. Each access is a row of
-<b>steps</b> under the drawing: click one, or step with the Left and Right arrows. <b>Space</b> pauses everything that
+<b>steps</b> in the player bar above the drawing: click one on its track, or step with the Left and Right arrows (with
+no access chosen, the arrows glide to the neighbouring shire, bank or minion). <b>Space</b> pauses everything that
 moves, the camera included; stepping while paused shows each step's end state.</li>
 <li><b>Follow</b> (C): the camera follows the access from scale to scale. Turn it off, or zoom yourself, and the camera
 stays: a step at another scale then marks its place. <b>Dive</b> (V): on the steps that have a circuit, the camera goes

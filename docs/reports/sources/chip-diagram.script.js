@@ -465,7 +465,9 @@ function nbrLinks(L, P, NB, fr) {
   const bw = $('svgwrap').clientWidth || innerWidth - 32, pxu = Math.max(0.1, bw / (fr.vw || (PH ? PV[1].w : VB.w))), need = (TOUCH ? 44 : 28) / pxu;
   const meas = [];
   NB.forEach(([c, s, at]) => {
-    const g = E('g', {class: 'nbr', tabindex: 0, role: 'link', 'data-comp': 'nbr', 'aria-label': `Go to ${cellName(c)}, ${DIRNAME[s]}`}, G);
+    // (a link turned along a side of the frame is drawn as a pill: review of 1 Oct, the way back from a memory shire was a
+    // small label easy to miss)
+    const g = E('g', {class: 'nbr' + (at.rot ? ' side' : ''), tabindex: 0, role: 'link', 'data-comp': 'nbr', 'aria-label': `Go to ${cellName(c)}, ${DIRNAME[s]}`}, G);
     g._key = 'nbr'; g._ctx = {cell: c, dir: s};
     if (at.rot) g.setAttribute('transform', `rotate(${at.rot} ${at.x} ${at.y})`);
     const hit = E('rect', {class: 'nbr-hit', rx: 6}, g);
@@ -911,14 +913,17 @@ node('minion', {parse: k => { const q = String(k).split('.').map(Number); return
    Since 17:10 Up from the top (and from the ring) lands on the Planck length under it (the entry that ends there) and
    climbs through it to the die, the rack and round again. The ring's panel also offers the atom and a memory cell's. */
 const COMPUTE0 = () => pathOf({level: 2, sid: 0, nb: 0, mi: 0}).concat([{id: 'vpu'}, {id: 'vpu.lane', k: '0'}]);
+/* the loop's fixed point, in words (the landing panel's, the visual review of 1 Oct: name where the reader is) */
+const CWHERE = 'a silicon atom in the channel of a FinFET of an XOR gate, in a full adder of a 4:2 compressor in the multiply-add\'s multiplier tree (lane 0 of minion 0, shire 0)';
 function pageExits() {
   return [
     {id: 'compute', lab: 'a silicon atom in a transistor of the multiply-add (lane 0 of minion 0, shire 0)', short: 'an atom of the multiply-add',
-      path: () => chainTo(COMPUTE0(), 'p.atom')},
-    {id: 'memory', lab: 'a silicon atom in a memory cell (a 6T SRAM cell of shire 0\'s cache)', short: 'an atom of a 6T memory cell',
+      where: CWHERE, path: () => chainTo(COMPUTE0(), 'p.atom')},
+    {id: 'memory', lab: 'a silicon atom in a memory cell of shire 0\'s L2 (drawn as a textbook 6T cell)', short: 'an atom of an L2 memory cell',
+      where: 'a silicon atom in the channel of a FinFET of a memory cell of shire 0\'s L2 (drawn as a textbook 6T cell)',
       path: () => chainTo(pathOf({level: 1, sid: 0}).concat([{id: 'shire.bank', k: String(L2X().bank)}]), 'p.atom')},
     {id: 'planck', lab: 'the Planck length, under that atom of the multiply-add', short: 'the tail: the Planck length',
-      path: () => chainTo(COMPUTE0(), PLANCK)},
+      where: CWHERE, path: () => chainTo(COMPUTE0(), PLANCK)},
   ];
 }
 /*@include ladder-outer.js*/
@@ -3046,7 +3051,7 @@ function endTour() {
 /* T and the Tour button: the tour picks up where it was left (from the start once it had reached its end) */
 const toggleTour = () => { if (TOUR) { endTour(); stopFlow(); } else startTour(TLAST >= STEPS.length - 1 ? 0 : TLAST); };
 const HINT = TOUCH ? 'Tap a part for details · double-tap it or Zoom in to go inside · ↑ Zoom out above the drawing'
-  : 'Double-click a part to zoom in · ↑ or Backspace zooms out · arrows: next shire · G switches · Space pauses · F presents · T tour';
+  : 'Double-click a part to zoom in · Backspace zooms out · arrows: next shire · G switches · Space pauses · F presents · T tour';
 function resetCap() {
   CAPFLOW = false;
   if ($('stage').classList.contains('present')) {
@@ -3442,7 +3447,7 @@ function prose(again) {
 
 /* ================= start ================= */
 /* the camera rests on the die: its layer built and shown */
-{ const L = built(Z.path, Z.path.length - 1); L.style.display = ''; L.style.opacity = 1; bindTrio(Z.path); }
+{ const L = built(Z.path, Z.path.length - 1); L.style.display = ''; L.style.opacity = 1; bindTrio(Z.path); ariaLayers(); }   // (a layer is hidden from screen readers until it rests on the stage: ladder-core.js)
 buildPip();
 /* the phone's drawing on or off (PH): the stage's class, the box's shape, the view, and the band's fold whenever a flow
    draws in the band (packets, trails, glows and pulses come and go too often to be worth a look) */
@@ -3482,6 +3487,7 @@ function phSwitch() {
       [0, 1, 2].forEach(i => { const L = LAYERS[i]; if (L && L._path && !L._built && LYR.get(L._key) === L) buildInto(L, L._path, L._depth); });
       prune(); bindTrio(Z.path);
       const L = restLayer(); if (L) { L.style.display = ''; L.style.opacity = 1; }
+      ariaLayers();
       PIP.svg.textContent = ''; PIP.tiles = {}; buildPip();
       phApply(); setView(); skyBg(); scaleUI(true); showHere(); resetCap(); fitCap();
     });

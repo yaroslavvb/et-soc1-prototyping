@@ -660,15 +660,15 @@
     "memshire",
     "dram"
    ],
-   "statement": "Other rails on die: DDR (memory shires) 0.76-0.77 V, Maxion 0.58-0.59 V, I/O shire 0.75 V, PCIe shire 0.75 V; LPDDR4X VDDQ 1.1 V, VDDQLP 0.64 V.",
+   "statement": "Other rails on die: DDR (memory shires) 0.76-0.77 V, Maxion 0.58-0.59 V, I/O shire 0.75 V, PCIe shire 0.75 V. The DRAM's own two rails have set points only (no reading on die): 1.1 V (the card's \"VDDQ\", the LPDDR4X's VDD2 core supply) and 0.64 V (the card's VDDQLP, the LPDDR4X's I/O VDDQ).",
    "value": null,
    "unit": "V",
    "kind": "measured",
    "label": "measured",
-   "source": "repository: chip facts volt.other",
+   "source": "repository: chip facts volt.other; memory levels dram.pwr.rails (the rails' names)",
    "url": null,
    "quote": null,
-   "note": null,
+   "note": "volt.other gives these two as set points (1,100 and 640 mV) read from the power controller, with no on-die value; the memory levels' dram.pwr.rails names them: VDD_Q is the LPDDR4X's VDDQ/VDD2 core supply, VDD_QLP its I/O VDDQ.",
    "repo_fact": "chip:volt.other"
   },
   {
@@ -729,7 +729,7 @@
    "levels": [
     "finfet"
    ],
-   "statement": "Spread over 24 billion transistors, 23 W of leakage is about 1 nW each: roughly 1.4-1.9 nA, about 10 billion electrons a second through every transistor that is \"off\".",
+   "statement": "Spread over 24 billion transistors, the 23 W of leakage fitted at 80 °C is about 1 nW each on average: roughly 1.4-1.9 nA, about 10 billion electrons a second per transistor (an average over every kind, threshold voltage and state, not what any one \"off\" transistor passes).",
    "value": 1.0,
    "unit": "nW per transistor",
    "kind": "derived",
@@ -952,7 +952,7 @@
    "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
    "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
    "quote": "\"For the transistor, the gate pitch has been further scaled down to 57 nm, however, the interconnect pitch halted at the 40 nm point in order to keep patterning at the SADP point.\" Flavors table: Gate Pitch 57 nm (low power) / 64 nm (high performance)",
-   "note": "WikiChip: \"while at IEDM TSMC reported slightly more aggressive pitches, the numbers shown in this article are the actual pitches used in their standard cells\"; Dick James speculated 54 nm from the IEDM paper.",
+   "note": "WikiChip: \"while at IEDM TSMC reported slightly more aggressive pitches, the numbers shown in this article are the actual pitches used in their standard cells\"; the IEDM paper does not state it: Dick James reports Scotten Jones's guess of 54 nm, the same as Intel 10 nm.",
    "repo_fact": null
   },
   {
@@ -1313,14 +1313,14 @@
    "levels": [
     "gate"
    ],
-   "statement": "The gate insulator is hafnium oxide (HfO2, relative permittivity ~24, six times SiO2's 3.9) on a thin SiO2 interfacial layer: as good as 1 nm of SiO2 electrically, but thick enough that electrons cannot tunnel through.",
+   "statement": "The gate insulator is hafnium oxide (HfO2, relative permittivity ~24, six times SiO2's 3.9) on a thin SiO2 interfacial layer: as good as 1 nm of SiO2 electrically, but a much thicker barrier, so the electrons that tunnel through it are several orders of magnitude fewer.",
    "value": 24,
    "unit": "relative permittivity",
    "kind": "generic",
    "label": "outside source (generic)",
    "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 7 (author's free chapter)",
    "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch7.pdf",
-   "quote": "\"HfO2 has a relative dielectric constant (k) of ~24, six times larger than that of SiO2. A 6 nm thick HfO2 film is equivalent to 1 nm thick SiO2 ... These problems are minimized by inserting a thin SiO2 interfacial layer between the silicon substrate and the high-k dielectric.\"",
+   "quote": "\"HfO2 has a relative dielectric constant (k) of ~24, six times larger than that of SiO2. A 6 nm thick HfO2 film is equivalent to 1 nm thick SiO2 ... the HfO2 film presents a much thicker (albeit lower) tunneling barrier to the electrons and holes. The consequence is that the leakage current through HfO2 is several orders of magnitude smaller than that through SiO2 ... These problems are minimized by inserting a thin SiO2 interfacial layer between the silicon substrate and the high-k dielectric.\"",
    "note": "TSMC does not publish N7's stack or its thicknesses.",
    "repo_fact": null
   },
@@ -1452,7 +1452,7 @@
    "levels": [
     "finfet"
    ],
-   "statement": "PMOS source and drain: boron-doped silicon-germanium, with boron above 1e20 per cm³ (patent ranges run to about 2e20 and beyond); the larger germanium atoms squeeze the channel, which speeds holes.",
+   "statement": "PMOS source and drain: boron-doped silicon-germanium, with boron of the order of 1e20 per cm³ (a patent's range runs from below 1e20 to above 2e20); the larger germanium atoms squeeze the channel, which speeds holes.",
    "value": 2e+20,
    "unit": "cm^-3 (order of)",
    "kind": "outside",
@@ -1504,14 +1504,14 @@
    "levels": [
     "finfet"
    ],
-   "statement": "At 1.75e21 per cm³ the source and drain hold 1.75 phosphorus atoms per cubic nanometre, one atom in 30.",
+   "statement": "At 1.75e21 per cm³ the source and drain hold 1.75 phosphorus atoms per cubic nanometre, one atom in 29; only about one of every thirteen of them (1.3e20 per cm³) is electrically active and gives its electron.",
    "value": 1.75,
    "unit": "P atoms per nm³",
    "kind": "derived",
    "label": "model",
    "source": "arithmetic on dope.n-sd and si.density",
    "url": null,
-   "quote": "1.75e21 cm^-3 x 1e-21 cm³/nm³ = 1.75 /nm³; / 49.9 Si per nm³ = 3.5%",
+   "quote": "1.75e21 cm^-3 x 1e-21 cm³/nm³ = 1.75 /nm³; / 49.9 Si per nm³ = 3.5% (1 in 28.5); 1.3e20 / 1.75e21 = 7.4% (1 in 13.5)",
    "note": null,
    "repo_fact": null
   },
@@ -1644,7 +1644,7 @@
    "levels": [
     "nucleus"
    ],
-   "statement": "The silicon-28 nucleus has a charge radius of 3.12 fm (3.12 x 10^-15 m): about 75,000 times smaller than the 0.235 nm bond.",
+   "statement": "The silicon-28 nucleus has a charge radius of 3.12 fm (3.12 x 10^-15 m): about 8.1 fm across, some 29,000 times narrower than the 0.235 nm an atom takes in the crystal.",
    "value": 3.1224,
    "unit": "fm",
    "kind": "outside",
@@ -1652,7 +1652,7 @@
    "source": "K. Koenig et al., \"Nuclear charge radii of silicon isotopes\", arXiv:2309.02037, Table 1 (28Si from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99 (2013) 69-95)",
    "url": "https://arxiv.org/abs/2309.02037",
    "quote": "28Si charge radius \"3.1224 (24)\" fm (Table 1, from Angeli and Marinova 2013)",
-   "note": "0.235 nm / 3.12 fm = 75,300 (derived).",
+   "note": "A uniform sphere with that rms radius has radius sqrt(5/3) x 3.1224 = 4.03 fm, 8.06 fm across; 0.2352 nm / 8.06 fm = 29,200 (derived).",
    "repo_fact": null
   },
   {
@@ -1731,7 +1731,7 @@
     "gate",
     "minion"
    ],
-   "statement": "Every switching cycle moves a charge C x Vdd from the supply into a node and dumps it to ground: dynamic power = k C Vdd² f. Halving the voltage quarters the energy per switch; this is the whole of Esperanto's low-voltage argument.",
+   "statement": "Every switching cycle moves a charge C x Vdd from the supply into a node and dumps it to ground: dynamic power = k C Vdd² f. Halving the voltage quarters the energy per switch, which is why lowering the voltage saves so much.",
    "value": null,
    "unit": null,
    "kind": "generic",

@@ -74,9 +74,9 @@ for f in CIR['facts']:
 # the arithmetic of the particles' derived and inferred facts whose research gave none (DESIGN §2.4)
 HOW = {
     'p.atom.4': 'sqrt(3)/4 x 0.5431 nm = 0.2352 nm; 8 atoms per cubic cell / (0.5431 nm)^3 = 49.9 per nm^3',
-    'p.atom.11': 'a sphere of radius 117.6 pm (half the 0.2352 nm neighbour distance) against the nucleus\'s 3.64 fm radius (1.2 fm x 28^(1/3)): 117.6 / 0.00364 = 32,300',
+    'p.atom.11': 'the 0.2352 nm neighbour distance against the nucleus\'s 8.06 fm diameter (a uniform sphere with the measured rms charge radius, size.p.nucleus): 0.2352 nm / 8.06 fm = 29,200',
     'p.dopant.5': '10^21 per cm^3 = 1 per nm^3; silicon has 49.9 atoms per nm^3 (p.atom.4)',
-    'p.nucleus.6': 'the 32,000 ratio of p.atom.11 applied to a 1 cm marble: 1 cm x 32,300 = 323 m',
+    'p.nucleus.6': 'the 29,000 ratio of p.atom.11 applied to a 1 cm marble: 1 cm x 29,200 = 292 m',
     'p.electron.4': 'the dipole limit divided by the charge: 4.1 x 10^-30 e cm / e = 4.1 x 10^-30 cm = 4.1 x 10^-32 m',
     'p.electron.7': '1 C / 1.602176634 x 10^-19 C = 6.2415 x 10^18',
     'p.planck.5': 'log10(8.74 x 10^26 m / 1.616 x 10^-35 m) = 61.7',
@@ -94,12 +94,12 @@ for k, v in HOW.items():
 HU6 = 'C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 6 (author\'s free chapter)'
 add('el.rails', 'In CMOS logic a 0 is the ground rail, 0 V, and a 1 is the supply rail: here 0.517 V on a minion at 600 MHz. A gate at 0 V turns an n-type transistor off; a gate at the rail turns it on.',
     'generic', HU6 + '; the minion rail measured on this chip (et.v-minion)', 'https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch6-1.pdf')
-add('el.off-channel', 'An "off" transistor still lets about 10 billion electrons a second through, but each crosses its 16.5 nm channel in about 0.2 ps, so at any instant its channel holds on average 0.002 electrons.',
+add('el.off-channel', 'On average (the chip\'s leakage at 80 °C shared over its transistors) an "off" transistor still lets about 10 billion electrons a second through, but each crosses its 16.5 nm channel in about 0.2 ps, so at any instant its channel holds on average 0.002 electrons.',
     'derived', 'arithmetic on et.leak-per-tr (10 billion electrons a second) and si.mobility (0.2 ps to cross the channel)',
     note='10^10 per second x 0.2 x 10^-12 s = 0.002. An average over every transistor on the chip; a given off transistor leaks more or less.')
 add('el.half-energy', 'At the minion rail\'s 0.517 V each switch costs (0.517 / 0.75)² = 0.48 of what it would at N7\'s nominal 0.75 V: half the energy, since the energy goes as the voltage squared.',
     'derived', 'arithmetic on et.v-minion, et.nominal-075 and el.dynamic (E = C V²)')
-add('el.sram-electrons', 'A 6T SRAM bit holds roughly a thousand electrons (440-1,300) on its storage node at the 0.705 V SRAM rail; a latch bit of the minion\'s L1 at 0.517 V holds about 320-970.',
+add('el.sram-electrons', 'A 6T SRAM bit holds roughly a thousand electrons (440-1,300) on its storage node at the 0.705 V SRAM rail; a latch bit of the minion\'s L1 at 0.517 V holds about 320-970 electrons.',
     'inferred', 'arithmetic on gate.cap-fin, n7.sram-dims, et.v-sram and et.v-minion (el.sram-node)',
     note='No N7 storage-node capacitance is published: 0.1-0.3 fF is assumed (el.sram-node). The inverters restore the charge all the time, so it needs no refresh.')
 add('size.p.nucleus', 'The silicon-28 nucleus is about 8.1 fm across: a uniform sphere with its measured rms charge radius of 3.1224 fm has a radius of 4.03 fm. (The rule R = 1.2 fm x 28^(1/3) gives 7.3 fm across; a nucleus has a soft edge, so any size is a convention.)',
@@ -126,12 +126,12 @@ nodes = {
                              'et.leak-per-tr', 'et.leakage', 'et.leak-double', 'n7.contacts-co', 'dope.n-sd', 'dope.p-sd', 'n7.density-hd', 'n7.hpc']},
     'lib.fin': {'name': 'The fin, in section', 'short': 'Fin', 'm': 5.2e-8, 'kind': 'outside', 'f': 'n7.fin-height',
                 'blurb': 'A wall of crystalline silicon 6 nm thick and 52 nm tall, tapered with a rounded top; fins stand 30 nm apart. The gate wraps over three sides, so it holds the channel shut tightly: that is why fins replaced flat transistors.',
-                'note': 'N7\'s fin: 6 nm wide and 52 nm tall (WikiChip Fuse on TSMC\'s IEDM 2016 paper); the earlier drawing\'s 6-7 by 45-50 nm, inferred from 10 nm-class sections, is superseded',
+                'note': 'N7\'s fin: 6 nm wide and 52 nm tall (WikiChip Fuse, on the pitches of TSMC\'s production cells, VLSI 2019; it notes that TSMC\'s IEDM 2016 paper gave slightly tighter ones)',
                 'facts': ['n7.fin-width', 'n7.fin-height', 'n7.fin-pitch', 'n7.weff', 'el.finfet-why', 'gate.hfo2', 'gate.eot', 'gate.metals', 'gate.undoped-vt', 'gate.cap-fin',
                           'n7.contacts-co', 'cmp.tsmc10', 'cmp.intel10', 'cmp.gf7']},
     'lib.gate': {'name': 'Gate stack', 'short': 'Gate stack', 'm': 1.65e-8, 'kind': 'outside', 'f': 'n7.leff',
                  'blurb': 'The gate: a metal electrode on an insulating layer only a few atoms thick (hafnium oxide on a thin silicon oxide), wrapped over the top and both sides of the fin. Its metal\'s work function sets the voltage at which the transistor turns on.',
-                 'note': 'effective gate length about 16.5 nm (N7, Dick James on IEDM 2016); the earlier 20 nm (IRDS, 7 nm-class) is superseded',
+                 'note': 'effective gate length about 16.5 nm (N7: Dick James on TSMC\'s IEDM 2016 paper)',
                  'facts': ['n7.leff', 'gate.hfo2', 'gate.eot', 'gate.metals', 'gate.undoped-vt', 'gate.cap-fin', 'n7.generation', 'n7.vt-options']},
     'lib.channel': {'name': 'Channel (the silicon under the gate)', 'short': 'Channel', 'm': 1.65e-8, 'kind': 'outside', 'f': 'n7.leff',
                     'blurb': 'The strip of fin under the gate, 16.5 nm long, where the current flows: about 257,000 silicon atoms and almost no dopant atoms. Off, it is nearly empty of free electrons; on, the gate pulls in about a hundred.',
@@ -158,12 +158,12 @@ nodes = {
                    'bound': {'txt': '< 2 × 10⁻²⁰ m', 'words': 'no size measured: a radius under 2 × 10⁻²⁰ m'}, 'blurb': pl('p.electron'), 'facts': pf('p.electron') + ['el.electron']},
     'p.planck': {'name': 'The Planck length', 'short': 'Planck length', 'm': 1.616255e-35, 'kind': 'outside', 'f': 'p.planck.1', 'blurb': pl('p.planck'), 'facts': pf('p.planck')},
     'p.wrap': {'name': 'The ring of sizes', 'short': 'Ring of sizes', 'm': None, 'kind': 'unknown', 'f': None, 'conceptual': True,
-               'blurb': 'This is not further out in space. The ring is a picture of every size at once, the smallest joined to the largest; the links across it are physics, not distance. Looking far out is looking back in time, to an early universe that was a sea of quarks.',
+               'blurb': 'This is not further out in space. The ring is a picture of every size at once, the smallest joined to the largest; the links across it are physics, not distance. Looking far out is looking back in time, as far as the oldest light; before it, physics tells of an early universe that was a sea of quarks.',
                'facts': pf('p.wrap') + ['ring.mid'] + [f'e.cmb.{i}' for i in range(1, 7)] + [f'e.qcd.{i}' for i in range(1, 7)] + [f'e.stars.{i}' for i in range(1, 5)]
                + [f'e.bbn.{i}' for i in range(1, 7)] + [f'e.ew.{i}' for i in range(1, 4)] + ['e.planck.1', 'e.planck.2']},
     # ---- outer (DESIGN §4.6), an easter egg with everything above the rack
     'bernal': {'name': 'Bernal Heights', 'short': 'Bernal Heights', 'm': 2200.0, 'kind': 'derived', 'f': 'b.2',
-               'blurb': 'Bernal Heights, a hill neighbourhood of about 26,000 people in south-east San Francisco. The hill is red chert: quartz, silicon dioxide, from the shells of plankton that lived 100 to 200 million years ago. Refined, the same silicon is the die. Light crosses the neighbourhood in 7.3 µs, about 4,400 of the chip\'s clock ticks.',
+               'blurb': 'Bernal Heights, a hill neighbourhood of about 26,000 people in south-east San Francisco. The hill is red chert: quartz, silicon dioxide, from the shells of plankton that lived 100 to 200 million years ago. Refined, silica like this is what chip silicon is made from. Light crosses the neighbourhood in 7.3 µs, about 4,400 of the chip\'s clock ticks.',
                'facts': ['b.1', 'b.2', 'b.3', 'b.4', 'b.5', 'b.6', 'b.7', 'b.8', 'b.9']},
     'st29': {'name': '29th Street', 'short': '29th Street', 'm': 1293.0, 'kind': 'derived', 'f': 'st.1',
              'blurb': '29th Street, 1.3 km long, drops about 95 m from the hills of Noe Valley to the flats where the Mission meets Bernal Heights. Light runs its length in 4.3 µs, about 2,600 ticks of the chip\'s clock.',
@@ -209,7 +209,7 @@ for k, fl in CIR['more'].items():
 NUM = {
     # the device
     'n7_cpp': ('n7.cpp', '57 nm'), 'n7_fp': ('n7.fin-pitch', '30 nm'), 'n7_cell': ('n7.cells', '240 nm'), 'n7_fw': ('n7.fin-width', '6 nm'),
-    'n7_fh': ('n7.fin-height', '52 nm'), 'n7_lg': ('n7.leff', '16.5 nm'), 'n7_weff': ('n7.weff', '110 nm'), 'n7_ss': ('n7.ss', '65 mV per decade'),
+    'n7_fh': ('n7.fin-height', '52 nm'), 'n7_lg': ('n7.leff', '16.5 nm'), 'n7_weff': ('n7.weff', '110 nm'), 'n7_ss': ('n7.ss', '65 mV per decade'), 'n7_ss_mv': ('n7.ss', '65 mV'),
     'v_min': ('et.v-minion', '0.517 V'), 'v_sram': ('et.v-sram', '0.703-0.707 V'), 'v_noc': ('et.v-noc', '0.485 V'), 'v_0': ('el.rails', '0 V'),
     'ch_at': ('dope.count-channel', '257,000'), 'ch_dop': ('dope.count-channel', '0.05 to 5 dopant atoms'),
     'ch_e': ('el.channel-electrons', '85-120 electrons'), 'leak_e': ('et.leak-per-tr', '10 billion electrons a second'),
@@ -219,20 +219,20 @@ NUM = {
     'gap': ('si.bandgap', '1.12 eV'), 'kt': ('el.kt', '25.9 meV'), 'kt43': ('el.kt', 'about 43 kT'), 'dop_e': ('dope.donor-acceptor', 'about 50 meV'),
     'si_la': ('si.lattice', '0.5431 nm'), 'si_bd': ('si.lattice', '0.235 nm'), 'si_pw': ('si.planes-width', 'about 31 planes'),
     'ni': ('si.ni', '1e10 free electrons per cm³', '10¹⁰ free electrons per cm³'),
-    'sram_e': ('el.sram-electrons', 'roughly a thousand electrons'), 'latch_e': ('el.sram-electrons', 'about 320-970'),
+    'sram_e': ('el.sram-electrons', 'roughly a thousand electrons'), 'latch_e': ('el.sram-electrons', 'about 320-970 electrons'),
     'dram_e': ('el.dram-cell', '45,000-70,000 electrons'), 'dram_ms': ('el.dram-leak', '32 ms'), 'dram_fa': ('el.dram-leak', '30 femtoamps'),
     'reg_e': ('et.flip-reg', '38,000 electrons'), 'bus_e': ('el.bus-bit', '190,000 electrons'), 'cyc_e': ('et.electrons-per-cycle', '540 million electrons'),
     'half': ('el.half-energy', '0.48'),
     # the atom and below
     'at_shells': ('p.atom.1', '2 in the first shell, 8 in the second and 4 in the third'), 'at_14': ('p.atom.1', '14 electrons'),
-    'at_ion': ('p.atom.2', '8.15'), 'at_ion5': ('p.atom.2', '166.8 eV'), 'at_nn': ('size.p.atom', '0.235 nm'), 'at_32k': ('p.atom.11', 'about 32,000 times'),
+    'at_ion': ('p.atom.2', '8.15'), 'at_ion5': ('p.atom.2', '166.8 eV'), 'at_nn': ('size.p.atom', '0.235 nm'), 'at_29k': ('p.atom.11', 'about 29,000 times'),
     'nu_pn': ('p.nucleus.1', '14 protons and 14 neutrons'), 'nu_rms': ('p.nucleus.3', '3.1224'), 'nu_mass': ('p.nucleus.4', '99.97%'),
     'nu_size': ('size.p.nucleus', 'about 8.1 fm'), 'nu_bind': ('p.nucleus.7', '8.448 MeV per nucleon'),
     'pr_r': ('p.nucleon.1', '0.84075'), 'pr_m': ('p.nucleon.3', '938.272 MeV'), 'pr_uud': ('p.nucleon.4', 'uud'), 'pr_1pc': ('p.quark.3', '1% of the proton'),
     'qk_b': ('p.quark.1', '4.3 x 10^-19 m', '4.3 × 10⁻¹⁹ m'), 'qk_u': ('p.quark.3', '2.16'), 'qk_d': ('p.quark.3', '4.70'), 'qk_1955': ('p.quark.2', '1,955 times'),
-    'el_b': ('p.electron.2', '2 x 10^-20 m', '2 × 10⁻²⁰ m'), 'el_q': ('p.electron.1', '1.602176634 x 10^-19 C', '1.602176634 × 10⁻¹⁹ C'),
+    'el_b': ('p.electron.2', '2 x 10^-20 m', '2 × 10⁻²⁰ m'), 'el_edm': ('p.electron.4', '4.1 x 10^-32 m', '4.1 × 10⁻³² m'), 'el_q': ('p.electron.1', '1.602176634 x 10^-19 C', '1.602176634 × 10⁻¹⁹ C'),
     'pl_l': ('p.planck.1', '1.616255 x 10^-35 m', '1.616255 × 10⁻³⁵ m'), 'pl_16': ('p.planck.3', '16 powers of ten'), 'pl_617': ('p.planck.5', '61.7 powers of ten'),
-    'dp_p': ('p.dopant.1', '0.045 eV'), 'dp_50': ('p.dopant.5', 'about 1 atom in 50'),
+    'dp_p': ('p.dopant.1', '0.045 eV'), 'dp_50': ('p.dopant.5', 'about 1 atom in 50'), 'sd_29': ('dope.count-sd', 'one atom in 29'), 'sd_13': ('dope.count-sd', 'one of every thirteen'),
     'ring_mid': ('ring.mid', '0.12 mm'),
     'ep_cmb': ('e.cmb.1', '372.6 +/- 1.0 thousand years', '372,600 years'), 'ep_cmbT': ('e.cmb.2', '2,973 K'), 'ep_bbn': ('e.bbn.1', 'about 180 s', 'about 3 minutes'),
     'ep_qcd': ('e.qcd.2', '14-24 microseconds'), 'ep_qcdT': ('e.qcd.1', '156.5 MeV'), 'ep_ew': ('e.ew.2', '9 picoseconds'), 'ep_pl': ('e.planck.1', '5.391247 x 10^-44 s', '5.4 × 10⁻⁴⁴ s'),

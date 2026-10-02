@@ -210,6 +210,8 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 #chip .nbr text{fill:color-mix(in srgb,var(--c1) 72%,var(--ink));transition:fill .2s}
 #chip .nbr:hover text,#chip .nbr:focus-visible text{text-decoration:underline;fill:var(--ink)}
 #chip .nbr-hit{fill:transparent;stroke:none}
+#chip .nbr.side .nbr-hit{fill:var(--surface);stroke:color-mix(in srgb,var(--c1) 55%,var(--border));stroke-width:1.5}
+#chip .nbr.side text{font-weight:600}
 #chip .nbr:hover .nbr-hit{fill:color-mix(in srgb,var(--c1) 9%,transparent)}
 #chip .nbr:focus-visible .nbr-hit{stroke:var(--c1);stroke-width:3}
 #stage.present #chip .nbr:hover text{text-decoration:none}
@@ -485,7 +487,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
     <p id="cap-sub" class="hint">Space pauses · ← → stages · + − zoom · F presents · P panel · C follow</p>
   </div>
   <div class="cap-side">
-    <div class="vh" id="cap-scale" aria-live="polite">Scale: the chip</div>
+    <div class="vh" id="cap-scale" aria-live="polite">Scale: The chip, about 26 mm across</div>
     <div class="lnk" id="lnk"><button type="button" class="st-btn lnk-b" id="btn-link" title="Copy a link to what the diagram shows now: the flow, the tour's slide or the scale">Copy link</button><span class="vh lnk-say" role="status"></span></div>
   </div>
 </div>
@@ -588,7 +590,8 @@ they share with the chip's, each saying it is not the ET-SoC-1's. Only the die's
 links, so every move to a neighbour has its way back.</p>
 <p>The device is drawn at TSMC N7's published numbers (the chip is made in TSMC's 7 nm, N7 by WikiChip's account): the
 FinFET with its gates 57 nm apart and its fins 30 nm apart in a cell 240 nm tall; a fin in section, 6 nm wide and 52 nm
-tall, under its gate stack of hafnium oxide and work-function metal; the channel under the gate, 16.5 nm long, about
+tall, under a gate stack of hafnium oxide and work-function metal (the industry's practice: TSMC does not publish N7's);
+the channel under the gate, 16.5 nm long, about
 257,000 silicon atoms and almost no dopant atoms; and one cell of the silicon crystal with its band gap. Below that the
 ladder goes on: one silicon atom with its fourteen electrons, its nucleus of 14 protons and 14 neutrons, a proton's
 three quarks, a quark with no measured size, and the Planck length, where known physics stops. Beside them: an
@@ -596,7 +599,8 @@ electron, a phosphorus dopant atom, the DRAM cell, a copper atom of the wiring a
 regulators.</p>
 <p><b>The electronics.</b> The scenes of the device say how it works, with this chip's own numbers where the repository
 has them: the gate at 0 V or at the minion rail's 0.517 V (the switch, or G), about 85-120 electrons in an "on" channel
-and 0.002 on average in an "off" one, which still lets some 10 billion a second leak through; roughly a thousand
+and 0.002 on average in an "off" one, which still lets some 10 billion a second leak through (an average: the chip's
+leakage at 80 °C shared over its transistors); roughly a thousand
 electrons on an SRAM bit's node, 45,000-70,000 in a DRAM cell, which leaks and must be refreshed every 32 ms; the band
 gap that keeps pure silicon an insulator; and the energy of a switch, which goes as the voltage squared, the whole of
 the chip's low-voltage design. Numbers that are estimates say so and carry their assumptions.</p>
@@ -661,6 +665,11 @@ flow, its held stage, the tour's slide or the scale shown, and opening it goes t
 <li><b>1 October, speed</b>: the replay plays at 1× or 2× (the button beside Play, or S), and a link to a flow or the
 tour played at 2× opens at 2× (<code>&amp;speed=2</code>).</li>
 <li><b>1 October, evening</b>: Up past the top goes straight to the Planck length; the loop runs one way.</li>
+<li><b>1 October, late</b>: four reviews' fixes: the landing after the loop says it is no journey through space and names
+the atom it lands under; facts corrected (an Alexander phase detector's early and late, an atom's inner electrons'
+binding, the nucleus's size against the atom's, the source's active dopants, PCIe's eleven presets, a few attributions);
+the sense amplifier, the multiplexer, the adder's carries, the ROM and the decoder drawn right; the stored bit's box clear
+of the 6T cell; labels fade during moves; the side links of the memory, PCIe and I/O shires drawn as pills.</li>
 </ul>
 
 <h2 id="related">Related reports</h2>

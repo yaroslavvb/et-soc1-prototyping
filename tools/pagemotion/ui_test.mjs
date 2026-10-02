@@ -1,14 +1,11 @@
 // node ui_test.mjs page.html: drive the transport with real input events and check the state after each action
-import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { CHROME } from './cdp.mjs';   // (since 1 Oct the installed Chrome or Chromium of cdp.mjs, a Mac's or Linux's)
-const port = 9700 + Math.floor(Math.random() * 90);
+import { startChrome } from './cdp.mjs';   // (since 1 Oct the installed Chrome or Chromium of cdp.mjs, a Mac's or Linux's, on a port of its own)
 const udd = mkdtempSync(resolve(process.env.TMPDIR || tmpdir(), 'zd-ui-'));
-const ch = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${udd}`, '--window-size=1280,800', '--no-sandbox', 'about:blank'], {stdio: 'ignore'});
+const {ch, tl} = await startChrome(['--headless=new', '--window-size=1280,800', '--no-sandbox', 'about:blank'], udd, 80);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-let tl; for (let i = 0; i < 80 && !tl; i++) { await sleep(100); try { tl = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find(t => t.type === 'page'); } catch (_) {} }
 const ws = new WebSocket(tl.webSocketDebuggerUrl); await new Promise(r => ws.onopen = r);
 let id = 0; const pend = new Map(), errs = [];
 ws.onmessage = m => { const d = JSON.parse(m.data); if (d.method === 'Runtime.exceptionThrown') errs.push(d.params.exceptionDetails.exception ? d.params.exceptionDetails.exception.description : d.params.exceptionDetails.text); if (d.method === 'Runtime.consoleAPICalled' && d.params.type === 'error') errs.push(d.params.args.map(a => a.value || a.description).join(' ')); if (pend.has(d.id)) { pend.get(d.id)(d); pend.delete(d.id); } };

@@ -463,7 +463,7 @@ onode('bernal', {kid: 'st29', build: (L, ap) => {
   E('path', {class: 'st hl', d: B.bernal.path}, mapG(gb, f.k, f.x0, f.y0, f.X, f.Y));
   mapRing(gb, B.bernal.bbox_km, f);
   // the park and the summit (the one point drawn: a public landmark)
-  const gp = opart(L, 'hill', 'The hill and its park: details', {title: 'The hill: red chert', kick: 'Bernal Heights · part', lead: 'The hill is folded layers of red chert: quartz, silicon dioxide, from the shells of plankton that settled on the sea floor 200 to 100 million years ago. Refined, the same silicon is the die.', facts: ['b.4', 'b.5', 'b.6', 'b.7']});
+  const gp = opart(L, 'hill', 'The hill and its park: details', {title: 'The hill: red chert', kick: 'Bernal Heights · part', lead: 'The hill is folded layers of red chert: quartz, silicon dioxide, from the shells of plankton that settled on the sea floor 200 to 100 million years ago. Refined, silica like this is what chip silicon is made from.', facts: ['b.4', 'b.5', 'b.6', 'b.7']});
   E('path', {class: 'park', d: B.park.path}, mapG(gp, f.k, f.x0, f.y0, f.X, f.Y));
   const sm = P(B.summit.xy_km);
   E('path', {class: 'summit', d: `M${sm.x - 9},${sm.y + 7}L${sm.x},${sm.y - 9}L${sm.x + 9},${sm.y + 7}Z`}, gp);
@@ -512,20 +512,30 @@ onode('st29', {kid: 'studio45', build: (L, ap) => {
   E('line', {class: 'sumln', x1: X0, y1: ym(142), x2: X0 + W, y2: ym(142)}, L);
   T(L, X0 + W, ym(142) - 10, `Bernal Heights' summit, ${on('b_sum')}`, 'o-s', 'end', onf('b_sum'));
   // the cross streets, ticks along the street with their names
-  const gc = E('g', {class: 'xst', 'pointer-events': 'none'}, L);
+  // (a name is written only where it has room after the last one written, the street's two ends always; the others
+  // keep their ticks: review of 1 Oct, Diamond St and Zircon Pl, and San Jose, Tiffany and Mission, ran into each other)
+  const gc = E('g', {class: 'xst', 'pointer-events': 'none'}, L), GAP = PH ? 34 : 56, n = B.cross.length;
+  const xs = B.cross.map(c => xm(c.d_m)), named = new Set([0, n - 1]);
+  let last = xs[0];
+  for (let i = 1; i < n - 1; i++) if (xs[i] - last >= GAP && xs[n - 1] - xs[i] >= GAP) { named.add(i); last = xs[i]; }
   B.cross.forEach((c, i) => {
-    const x = xm(c.d_m), h = pr.reduce((a, q) => (Math.abs(q[0] - c.d_m) < Math.abs(a[0] - c.d_m) ? q : a))[1], y = ym(h);
+    const x = xs[i], h = pr.reduce((a, q) => (Math.abs(q[0] - c.d_m) < Math.abs(a[0] - c.d_m) ? q : a))[1], y = ym(h);
     E('line', {class: 'xtick', x1: x, y1: y - 6, x2: x, y2: y + 6}, gc);
-    const t = T(gc, x + 4, Y0 + 24, c.name, 'o-s', 'start'); t.setAttribute('transform', `rotate(${PH ? 62 : 40} ${x + 4} ${Y0 + 24})`);
+    if (!named.has(i)) return;
+    // (on a phone the names run straight down from their ticks: the street's east end is the frame's edge)
+    const ax = PH ? x - 6 : x + 4, t = T(gc, ax, Y0 + 24, c.name, 'o-s', 'start');
+    t.setAttribute('transform', `rotate(${PH ? 90 : 40} ${ax} ${Y0 + 24})`);
   });
-  T(L, X0, PH ? Y0 + 182 : Y0 + 100, `heights drawn ${(kz / kx).toFixed(1)} times their scale`, 'o-s');
+  // (on a wide screen above the plot, at the summit line's left end: under the plot it ran into the street names)
+  T(L, X0, ym(142) - (PH ? 48 : 10), `heights drawn ${(kz / kx).toFixed(1)} times their scale`, 'o-s');
   // Studio 45, beside the drawing (its place on the street is not shown): the jump's seat
-  const ib = PH ? {x: 520, y: Y0 + 210, w: 340, h: 120} : {x: 940, y: 240, w: 230, h: 124};
+  // (on a phone above the scene's tag pill, which the inset had covered: review of 1 Oct)
+  const ib = PH ? {x: 520, y: Y0 + 186, w: 340, h: 100} : {x: 940, y: 240, w: 230, h: 124}, iy = PH ? [8, 66, 90] : [14, 74, 100];
   const gs = opart(L, 'to45', 'Studio 45, on 29th Street: zoom in', kidInfo('studio45'), {id: 'studio45'});
   S(E('rect', {class: 'shape inset', x: ib.x, y: ib.y, width: ib.w, height: ib.h, rx: 6}, gs), {});
   E('rect', {class: 'ring', x: ib.x - 5, y: ib.y - 5, width: ib.w + 10, height: ib.h + 10, rx: 9}, gs);
-  S(E('rect', {x: ib.x + ib.w / 2 - 36, y: ib.y + 14, width: 72, height: 30, rx: 2, 'pointer-events': 'none'}, gs), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 1.5});
-  T(gs, ib.x + ib.w / 2, ib.y + 74, 'Studio 45', 'o-l', 'middle'); T(gs, ib.x + ib.w / 2, ib.y + 100, 'on 29th Street', 'o-s', 'middle');
+  S(E('rect', {x: ib.x + ib.w / 2 - 36, y: ib.y + iy[0], width: 72, height: 30, rx: 2, 'pointer-events': 'none'}, gs), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 1.5});
+  T(gs, ib.x + ib.w / 2, ib.y + iy[1], 'Studio 45', 'o-l', 'middle'); T(gs, ib.x + ib.w / 2, ib.y + iy[2], 'on 29th Street', 'o-s', 'middle');
   T2(L, PH ? 140 : ib.x, PH ? ib.y + 30 : ib.y + ib.h + 30, ['its place on the street', 'is not shown'], 'o-s', 'start', null, 1.2);
   ap.zs.studio45 = {r: ib, g: gs, tr: 'jump'};
 }});
@@ -546,12 +556,12 @@ onode('studio45', {kid: 'rack', build: (L, ap) => {
   T(g, fl.x + 14, fl.y + 28, 'in plan: what is where inside is not recorded', 'o-s');
   T(g, fl.x + 14, fl.y + fl.h - 14, `${on('s45_l')} deep`, 'o-s', 'start', onf('s45_l'));
   // in section: two storeys, 6 to 8 m tall
-  const sy = PH ? 470 : 470, sh = 7 * SK45, gsct = opart(L, 'section', 'The building in section: details', {title: 'Two storeys', kick: 'Studio 45 · part', lead: 'Two floors of co-working space over a street-level warehouse and courtyard, with a wood shop: the building is 6 to 8 m tall.', facts: ['s45.3', 's45.6']});
+  const sy = PH ? 470 : 470, sh = 7 * SK45, gsct = opart(L, 'section', 'The building in section: details', {title: 'Two storeys', kick: 'Studio 45 · part', lead: 'The building at its address has two storeys and is 6 to 8 m tall. The venue lists two floors of co-working space, a street-level warehouse and courtyard and a wood shop; how they fit in this building, and whether the venue reaches onto its neighbours, is not known.', facts: ['s45.3', 's45.6']});
   S(E('rect', {class: 'shape floor', x: fl.x, y: sy - sh, width: fl.w, height: sh, rx: 2}, gsct), {});
   S(E('line', {x1: fl.x, y1: sy - sh / 2, x2: fl.x + fl.w, y2: sy - sh / 2, 'pointer-events': 'none'}, gsct), {stroke: 'var(--ink-2)', strokeWidth: 1.5, strokeDasharray: '6 6'});
   S(E('line', {x1: fl.x - 30, y1: sy, x2: fl.x + fl.w + 30, y2: sy, 'pointer-events': 'none'}, gsct), {stroke: 'var(--ink)', strokeWidth: 2.5});
   E('rect', {class: 'ring', x: fl.x - 6, y: sy - sh - 6, width: fl.w + 12, height: sh + 12, rx: 6}, gsct);
-  T(gsct, fl.x + 14, sy - sh + 26, 'co-working upstairs', 'o-s'); T(gsct, fl.x + 14, sy - 14, 'street-level warehouse, shop and courtyard', 'o-s');
+  T(gsct, fl.x + 14, sy - sh + 26, 'upper storey', 'o-s'); T(gsct, fl.x + 14, sy - 14, 'street level (the venue: a warehouse and shop)', 'o-s');
   T(gsct, PH ? fl.x + fl.w - 10 : fl.x + fl.w + 12, PH ? sy - sh - 12 : sy - sh / 2 + 6, `${on('s45_h')} tall`, 'o-s', PH ? 'end' : 'start', onf('s45_h'));
   // a person and the CNC router's bed, to scale
   const gp = opart(L, 'person', 'A person, for scale: details', {title: 'A person, for scale', kick: 'Studio 45 · scale', lead: 'A person 1.7 m tall, drawn to the building\'s scale: light crosses the building in 123 ns, 74 ticks of the chip\'s clock.', facts: ['s45.7']});
@@ -742,9 +752,12 @@ function showScene(P) {
   const sw = st ? `<div class="pn-act"><button type="button" class="st-btn" data-act="state" aria-pressed="${STON}">${esc(st.btn[STON ? 1 : 0])}</button></div>` : '';
   // came round the loop (Up from the top) or from the ring: where the reader now is, and the ring (only after coming
   // round: the easter egg is never named in advance)
+  // (the fact review of 1 Oct: the arrival says it is not a journey through space, and names the fixed point in the
+  // exit's own words, x.where: a DRAM cell's atom is not one of this chip's transistors)
+  const cx = WRAPIN && WRAPIN === pkeys(P) ? exitAt(P) : null, at = cx ? cx.where || cx.lab : 'an atom of this chip';
   const came = !(WRAPIN && WRAPIN === pkeys(P)) ? '' : WRAPVIA === 'loop'
-    ? `<p class="pn-lead pn-came">↻ You came round the loop: past the observable universe, the largest scale, back to the smallest, ${esc(toOf(el))}, under one atom of this chip. Up climbs from here through ${esc(P.slice(Math.max(1, P.length - 5), -1).reverse().map(toOf).join(', ').replace(/, ([^,]*)$/, ' and $1'))}, on up to the chip and round again.</p>${NODES[WRAP] ? `<div class="pn-zoom">${zrow('', [zbtn([{id: WRAP}], '↻ The ring of sizes: every size at once', false, '')])}</div>` : ''}`
-    : `<p class="pn-lead pn-came">↻ You came round the ring of sizes: past the observable universe, back to the smallest things, and ${el.id === 'p.atom' ? 'in as one atom of this chip: a silicon atom in the channel of one of its transistors' : `in at ${esc(toOf(el))}, under an atom of this chip`}. Up climbs from here to the chip and on round the loop.</p><div class="pn-zoom">${zrow('', [zbtn([{id: WRAP}], '↻ Back to the ring of sizes', false, '')])}</div>`;
+    ? `<p class="pn-lead pn-came">↻ Past the top, round the loop. Not further out in space: as in Glashow's uroboros, the largest size is joined to the smallest only as a picture. You are at ${esc(toOf(el))}, under ${esc(at)}. Up climbs from here through ${esc(climbWords(P, 4))}, on up to the chip and round again.</p>${NODES[WRAP] ? `<div class="pn-zoom">${zrow('', [zbtn([{id: WRAP}], '↻ The ring of sizes: every size at once', false, '')])}</div>` : ''}`
+    : `<p class="pn-lead pn-came">↻ You came round the ring of sizes: past the observable universe, back to the smallest things, and ${el.id === PLANCK ? `in at the Planck length, under ${esc(at)}` : `in as ${esc(at)}`}. Up climbs from here through ${esc(climbWords(P, 4))}, on up to the chip and round again.</p><div class="pn-zoom">${zrow('', [zbtn([{id: WRAP}], '↻ Back to the ring of sizes', false, '')])}</div>`;
   panel(`<p class="pn-kick">${hereKick(P)}</p><p class="pn-title">${esc(nameOf(el))}</p>` + came + (blurb ? `<p class="pn-lead">${esc(blurb)}</p>` : '')
     + sw + zoomRowHere(P) + im + (det ? detBlock(det) : ''));
   if (st) $('pn-body').querySelectorAll('button[data-act="state"]').forEach(b => { b._lab = st.btn; });

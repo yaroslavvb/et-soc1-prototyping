@@ -257,6 +257,7 @@ function buildInto(L, lv, id) {
   L._fx = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
   L._node = id; L._lv = lv; L._ap = ap;
   measured(L, () => { ringAll(L); fitTexts(L); kbTexts(L); });
+  if (MLH) MLH.ariaML(L);   // (every part says what Enter does, the chip's rule: memory-levels.hand.js)
 }
 /* getBBox needs the layer rendered: a hidden layer is shown, invisible, while it is measured */
 function measured(L, fn) {
@@ -1123,7 +1124,8 @@ function scaleUI() {
   // (since 1 Oct the shared ladder's Up bar, breadcrumb and readout show the place: MLH.sync)
   if (MLH) MLH.sync();
   if (Z.dlv !== Z.lv || !Z.path.length) return;
-  const nd0 = NODE(Z.path[Z.path.length - 1]), txt0 = 'Scale: ' + (nd0.label ? nd0.label(SC().inst) : nd0.name);
+  // (since 1 Oct the shared ladder's words, the scale's name and size, as the chip diagram and the ladder's scales say it)
+  const nd0 = NODE(Z.path[Z.path.length - 1]), txt0 = MLH ? MLH.capScale() : 'Scale: ' + (nd0.label ? nd0.label(SC().inst) : nd0.name);
   if ((ANN_SCALE || !(accOn() && FOLLOW)) && $('cap-scale').textContent !== txt0) $('cap-scale').textContent = txt0;
   ANN_SCALE = false;
 }
@@ -1198,7 +1200,10 @@ function part(parent, key, x, y, w, h, col, title, o) {
   if (o.child) { g.setAttribute('data-child', o.child); if (o.cur !== false && BAP && (o.cur || !BAP.zg[o.child])) BAP.zg[o.child] = g; }
   const ty = o.ty || 28;
   if (title) T(g, o.center ? x + w / 2 : x + 12, y + ty, title, o.tcls || 't-labb', o.center ? 'middle' : 'start', o.f);
-  (o.sub || []).forEach((s, i) => { const L0 = typeof s === 'string' ? {t: s} : s; T(g, o.center ? x + w / 2 : x + 12, y + ty + 23 + i * 21, L0.t, L0.c || 't-sm', o.center ? 'middle' : 'start', L0.f); });
+  // (o.lh: a line pitch for the lines under the title, else 21; the chip diagram's blocks give theirs, and since the
+  // code review of 1 Oct this kit, drawing them for the shared ladder here, keeps it as the chip's copy does)
+  const lh = o.lh || 21;
+  (o.sub || []).forEach((s, i) => { const L0 = typeof s === 'string' ? {t: s} : s; T(g, o.center ? x + w / 2 : x + 12, y + ty + 23 + i * lh, L0.t, L0.c || 't-sm', o.center ? 'middle' : 'start', L0.f); });
   return g;
 }
 /* the corner tags of a frame, right-aligned on the title's line: [{kind, text}] */
@@ -5715,10 +5720,29 @@ function endTour() {
   if (AC.k) { setKick(accKick(AC.k)); CAPACC = true; renderBar(); playBtn(); } else resetCap();
 }
 const toggleTour = all => { if (TOUR) { endTour(); stopAccess(); } else startTour(all, 0); };
-const HINT = TOUCHSCR ? 'Tap a part for its details; double-tap it to zoom in · ↑ zooms out · swipe the drawing sideways, or Fit'
-  : '1–5 levels · [ ] accesses · Space pauses · ← → steps · double-click zooms in, ↑ zooms out · G switches · V dive · T tour';
+// (review of 1 Oct: "↑ zooms out" read as the Up arrow key, which does nothing on the page; the button and Backspace do)
+const HINT = TOUCHSCR ? 'Tap a part for its details; double-tap it to zoom in · the ↑ Zoom out button goes out · swipe the drawing sideways, or Fit'
+  : '1–5 levels · [ ] accesses · Space pauses · ← → steps · double-click zooms in, Backspace zooms out · G switches · V dive · T tour';
+/* while the shared ladder holds the stage the caption is the chip diagram's Explore line, not the level's (review of 1
+   Oct: at the universe it still said "L1 data cache · explore", and on a phone offered a swipe and Fit the ladder's
+   scenes do not have); an access kept meanwhile keeps its own caption */
+const HINT_LAD = TOUCHSCR ? 'Tap a part for its details; double-tap it to zoom in · the ↑ Zoom out button goes out · 1–5 or a tab: back to a level'
+  : 'Double-click a part to zoom in · Backspace zooms out · ← → glide sideways · 1–5 or a tab: back to a level · G switches';
+/* the caption after a hand-over, once both cameras rest: fitting it forces a layout of the page, about a frame's work at
+   4x, which made the hand-over's first frame late (measured, 1 Oct) */
+let CAPT = 0;
+function capSoon() {
+  clearTimeout(CAPT);
+  const go = () => { if (ZW || (MLH && MLH.moving())) { CAPT = setTimeout(go, 100); return; } if (!CAPACC && !TOUR) resetCap(); };
+  CAPT = setTimeout(go, 50);
+}
 function resetCap() {
   CAPACC = false;
+  if (MLH && MLH.on()) {
+    setKick('Explore');
+    setCap('Click any part for its details, double-click to zoom into it, or pick a level above to watch its accesses play.');
+    sub(HINT_LAD); $('cap-sub').classList.add('hint'); renderBar(); return;
+  }
   setKick(`${SC().title} · explore`);
   setCap(stageLine(SC().head()));
   sub(HINT); $('cap-sub').classList.add('hint'); renderBar();
@@ -5730,6 +5754,7 @@ const SCRUB = {n: 0, drag: -1, pos: -1, names: []};
 function renderBar() {
   const k = AC.k, tr = $('scrub-track'), seg = $('stages'), lab = $('scrub-lab');
   $('stage').classList.toggle('playing', accOn() && CLK.on && !AC.still);
+  $('stage').classList.toggle('accsel', !!k);   // (the stored-bit box gives its place to an access's waveforms)
   let n = 0, i = -1, names = [], dv = [], what = '', unit = 'Step';
   if (k) { const sts = stepsOf(k); n = sts.length; i = AC.i; names = sts.map(s0 => s0.name); dv = sts.map(s0 => !!(s0.dive && s0.dive.length)); what = accTitle(k); }
   else if (TOUR) { n = TOUR.list.length; i = TOUR.i; names = TOUR.list.map(slideName); unit = 'Slide'; what = 'Tour'; }
@@ -6161,8 +6186,11 @@ async function showAt(lv, path, V) {
 MLB = {VB, FR, CLK, DTMAX, SCENES, LEVELS, COL, DASH, get Z() { return Z; }, zNow, pathIn, withLv, withInst, mapGeom: lv => MAPG[lv], zoomInto: g => zoomInto(g, TAP),
   overview: () => showPart('overview'),
   buildWith, buildScene, hitAreas, partText, goTo: mlGo, showAt, rest: camRest, sel: () => SEL, hideTip, accOn,
+  // (1 Oct, the reviews: an access selected, playing or not, and the tour hold the arrows; the example's key, to draw a
+  // copy again when it has changed)
+  accK: () => AC.k, tourOn: () => !!TOUR, drawKey, zw: () => ZW, viewHash,
   // the ladder took the stage: an access playing waits, paused, until the camera is back (Play brings it back)
-  onLadder: on => { if (on && accOn() && CLK.on) { CLK.on = false; playBtn(); renderBar(); } PIP.el.hidden = true; },
+  onLadder: on => { if (on && accOn() && CLK.on) { CLK.on = false; playBtn(); renderBar(); } PIP.el.hidden = true; if (!CAPACC && !TOUR) capSoon(); },
   // the reader moved with the ladder's controls: an access stops following (as with the levels' own zoom)
   stopFollow: () => { if (AC.k && FOLLOW) setFollow(false, true); },
   INST: {l1: () => Object.assign({}, SCENES.l1.inst), l2: () => Object.assign({panel: 0}, SCENES.l2.inst), dram: () => Object.assign({}, SCENES.dram.inst)},
@@ -6219,6 +6247,8 @@ prose();
   if (window.__ET_PRESENTER) setTimeout(() => toast('<p><b>Presenter window.</b> Press <kbd>F</kbd> for full screen; <kbd>T</kbd> starts the tour.</p>', 9000), 300);
   fitCap();
   STARTED = true; prebuildIdle();
+  // (the level's panel at load has its zoom row, as after a tab: the shared ladder's "You are here"; review of 1 Oct)
+  if (MLH && !AC.k && !TOUR && !(SEL && SEL.isConnected) && Z.path.length === 1) MLH.here(true);
 })();
 /* a read-only view of the state, for the page's tests (headless Chrome) */
 // (since 1 Oct: zooming while either camera moves, the levels' or the shared ladder's, a hand-over on its way included, so

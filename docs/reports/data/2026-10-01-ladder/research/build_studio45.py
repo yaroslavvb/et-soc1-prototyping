@@ -9,9 +9,9 @@ url (only where the URL carries no address), note (the arithmetic or the caveat)
 
 Privacy (AGENT.md §10 and the owner's words, which give only the street and the neighbourhood): no statement, source,
 URL or note may carry a house number, a block, a point or coordinates of the studio, or a link to a listing that
-shows its address. The script refuses a number before "29th", a ZIP code, a latitude or longitude, and the listing
-sites' domains. The AI Plumbers event at the venue (Ainekko's release of 22 Oct 2025) waits for the owner's answer
-(DESIGN Q1) and is not here.
+shows its address. The script refuses a number before "29th", a ZIP code, a latitude or longitude, the listing
+sites' domains and any link but the public-data sources'. Events at the venue wait for the owner's answer (DESIGN
+Q1) and are not here.
 """
 import json
 import os
@@ -77,9 +77,9 @@ fact('b.4', 'The hill\'s summit is 142 m (466 ft) above sea level, about half th
 fact('b.5', 'Bernal Heights Park covers the hilltop: 26.3 acres (10.7 ha), with a 50-foot telecommunications tower at the top.',
      'outside', DATASF + ', Recreation and Parks Properties (gtr9-ntp6); Wikipedia, "Bernal Heights Summit" (SF Planning)',
      url='https://en.wikipedia.org/wiki/Bernal_Heights_Summit')
-fact('b.6', 'The hill is folded layers of red radiolarian chert: microcrystalline quartz, silicon dioxide, made from the silica shells of plankton 0.5 to 1.5 mm across that settled on the deep-sea floor 200 to 100 million years ago.',
-     'outside', 'National Park Service, Golden Gate National Recreation Area, "Chert FAQ"; Wikipedia, "Bernal Heights Summit" and "Chert"',
-     url='https://www.nps.gov/goga/learn/education/chert-faq.htm')
+fact('b.6', 'The hill is folded layers of red radiolarian chert: microcrystalline quartz, silicon dioxide, made from the silica shells of plankton about a millimetre across (0.5 to 1.5 mm) that settled on the deep-sea floor 200 to 100 million years ago.',
+     'outside', 'National Park Service, Presidio of San Francisco, "Chert" (the shells "0.5 to 1.5 mm"); Golden Gate National Recreation Area, "Chert FAQ" ("0.5-1 mm"); Wikipedia, "Bernal Heights Summit" and "Chert"',
+     url='https://www.nps.gov/prsf/learn/nature/chert.htm')
 fact('b.7', 'Silicon for chips is refined from silica, silicon dioxide like the hill\'s quartz: reduced to silicon metal, then purified into the "ultra-high-purity" polysilicon of semiconductor grade.',
      'outside', 'USGS, Mineral Commodity Summaries 2025, Silicon',
      url='https://pubs.usgs.gov/periodicals/mcs2025/mcs2025-silicon.pdf')
@@ -106,7 +106,7 @@ fact('st.3', f'Light runs the street\'s length in {t * 1e6:.2f} µs: {n:,.0f} ti
 BAD = [(re.compile(r'\b\d{1,5}\s+29th\b', re.I), 'a house number before 29th'),
        (re.compile(r'\b941\d\d\b'), 'a ZIP code'),
        (re.compile(r'\b3[67]\.\d{3,}|\b-?12[12]\.\d{3,}'), 'a latitude or longitude'),
-       (re.compile(r'luma\.com|lu\.ma|sfstation\.com|coworkingcafe|globenewswire|workatthestudio', re.I), 'a listing that gives the address')]
+       (re.compile(r'luma\.com|lu\.ma|sfstation\.com|coworkingcafe|globenewswire|eventcreate|https?://(?!(?:[a-z0-9-]+\.)*(?:wikipedia\.org|nps\.gov|usgs\.gov|sfgov\.org|sf\.gov|sfplanning\.org|datasf\.org|data\.sfgov\.org|epqs\.nationalmap\.gov|census\.gov|naturalearthdata\.com|ucsc\.edu|sfchronicle\.com)\b)', re.I), 'a link other than the public-data sources (a listing could give the address)')]
 for f in F:
     for field in ('statement', 'source', 'url', 'note'):
         v = f.get(field) or ''

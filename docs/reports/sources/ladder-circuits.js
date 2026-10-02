@@ -91,7 +91,7 @@ bnode('lib.aoi21', {draw: (L, ap) => gate2(L, ap, 'aoi'), def: () => ({id: 'lib.
 
 /* ---- a fast adder: Kogge and Stone's parallel prefix, 8 bits drawn (the 64-bit one has three more levels) ---- */
 bnode('lib.adder', {draw: (L, ap) => {
-  KT.frame(L, {title: 'A fast adder: a Kogge-Stone prefix tree', sub: '8 bits drawn: every carry at once, in log₂ n levels of carry cells, instead of one bit after another', subf: 'tb.prefix', col: CC.logic, tags: GT});
+  KT.frame(L, {title: 'A fast adder, drawn as a prefix tree', sub: '8 bits drawn: every carry at once, in log₂ n levels of carry cells, instead of one bit after another', subf: 'tb.prefix', col: CC.logic, tags: GT});
   const X = i => 950 - i * 140, y0 = 70, ys = [196, 290, 384], yS = 470;
   for (let i = 0; i < 8; i++) KTT(L, X(i), 52, `a${i} b${i}`, 't-sm', 'middle');
   const gp = cgrp(L, ap, 'pg', 'Generate and propagate: per bit, g = a·b and p = a ⊕ b', {x: X(7) - 50, y: y0, w: X(0) - X(7) + 100, h: 56}, 'lib.xor', {info: {title: 'Generate and propagate', lead: 'For each bit: generate g = a AND b (this bit makes a carry by itself) and propagate p = a XOR b (this bit passes a carry on). An XOR and a NAND with an inverter per bit.', facts: ['tb.prefix']}});
@@ -109,8 +109,14 @@ bnode('lib.adder', {draw: (L, ap) => {
     KTT(L, -150, y + 6, `${sp} apart`, 't-smb');
   });
   const gs = cgrp(L, ap, 'sum', 'The sums: each bit is p ⊕ the carry from the bits to its right', {x: X(7) - 50, y: yS, w: X(0) - X(7) + 100, h: 56}, 'lib.xor', {info: {title: 'The sum bits', lead: 'Each sum bit is its propagate p XOR the carry coming in from all the bits to its right, which the tree has just computed: one more XOR per bit.', facts: ['tb.prefix']}});
-  for (let i = 0; i < 8; i++) { KT.wire(L, [[X(i), ys[2] + 22], [X(i), yS]]); boxG(gs, X(i) - 44, yS, 88, 56, `s${i}`); }
-  KTT(L, X(0) + 50, 52, '← cin', 't-sm');
+  // (review of 1 Oct: each sum took its own column's carry, the carry out of its bit; it takes the carry into it, the
+  // column to its right's, and bit 0 the carry in; the leftmost column's is the carry out)
+  for (let i = 0; i < 8; i++) {
+    if (i) KT.wire(L, [[X(i - 1), ys[2] + 22], [X(i - 1), ys[2] + 40], [X(i) - 22, yS - 14], [X(i) - 22, yS]], 'thin');
+    boxG(gs, X(i) - 44, yS, 88, 56, `s${i}`);
+  }
+  KT.wire(L, [[X(0) + 66, 62], [X(0) + 66, yS + 28], [X(0) + 44, yS + 28]], 'thin'); KTT(L, X(0) + 58, 52, 'cin', 't-sm');
+  KT.wire(L, [[X(7), ys[2] + 22], [X(7), ys[2] + 40], [X(7) - 60, ys[2] + 40]], 'thin'); KTT(L, X(7) - 66, ys[2] + 46, 'cout', 't-sm', 'end');
   cnote(L, ['a ripple-carry adder waits for each carry in turn, n steps; this tree takes log₂ n levels: 3 for the 8 bits drawn, 6 for 64 bits',
     'P. Kogge and H. Stone, IEEE Trans. Computers, 1973; the ET-SoC-1\'s own adders are not published: a textbook construction'], 628, 'tb.prefix tb.kogge');
 }, def: () => ({id: 'lib.aoi21'}), kids: () => [{id: 'lib.aoi21'}, {id: 'lib.xor'}]});
@@ -191,7 +197,7 @@ bnode('lib.lzd', {draw: (L, ap) => {
 
 /* ---- a decoder: n address bits pick one of 2ⁿ rows (3 to 8 drawn) ---- */
 bnode('lib.decoder', {draw: (L, ap) => {
-  KT.frame(L, {title: 'A decoder: 3 bits pick one of 8 rows', sub: 'one AND gate per row, fed by each bit or its complement; the row\'s driver raises its line', subf: 'tb.decoder', col: CC.logic, tags: GT});
+  KT.frame(L, {title: 'A decoder: 3 bits pick one of 8 rows', sub: 'a NAND per row, fed by each bit or its complement, then an inverting driver: an AND, which raises the row\'s line', subf: 'tb.decoder', col: CC.logic, tags: GT});
   const gi = cgrp(L, ap, 'inv', 'The inverters: each address bit and its complement', {x: -150, y: 40, w: 230, h: 220}, 'lib.inverter');
   const rx = [140, 200, 260, 320, 380, 440];
   [0, 1, 2].forEach(b => {
@@ -200,10 +206,10 @@ bnode('lib.decoder', {draw: (L, ap) => {
     KT.wire(L, [[30, y + 36], [rx[2 * b + 1], y + 36]]);
   });
   rx.forEach(x => KT.wire(L, [[x, 70], [x, 620]], 'thin'));
-  const ga = cgrp(L, ap, 'ands', 'The row gates: one 3-input AND per row (a NAND and an inverter)', {x: 500, y: 40, w: 120, h: 590}, 'lib.nand2');
+  const ga = cgrp(L, ap, 'ands', 'The row gates: a 3-input NAND per row (with the inverting driver after it, an AND)', {x: 500, y: 40, w: 120, h: 590}, 'lib.nand2');
   const gd = cgrp(L, ap, 'drv', 'The row drivers: wide inverters that raise the selected line', {x: 650, y: 40, w: 160, h: 590}, 'lib.inverter');
   for (let r = 0; r < 8; r++) {
-    const y = 70 + r * 72, a = KT.andSym(ga, 520, y, {w: 50, h: 46});
+    const y = 70 + r * 72, a = nandSym(ga, 520, y, {w: 50, h: 46});   // (review of 1 Oct: an AND then an inverting driver lowered the row)
     [0, 1, 2].forEach(b => { const bit = r >> (2 - b) & 1, x = rx[2 * b + (bit ? 0 : 1)]; KT.jn(L, x, y - 12 + b * 12); KT.wire(L, [[x, y - 12 + b * 12], [520, y - 12 + b * 12]], 'thin'); });
     KT.wire(L, [[a.out.x, y], [672, y]]); KT.invSym(gd, 690, y, {s: 16}); KT.wire(L, [[716, y], [840, y]]); KT.netLab(L, 846, y + 6, `row ${r}`);
   }
@@ -241,7 +247,7 @@ bnode('lib.icg', {draw: (L, ap) => {
   const wx = x => 60 + x * 64, wv = (y, bits) => { let d = `M${wx(0)},${y + (bits[0] ? 0 : 30)}`; bits.forEach((b, i) => { d += ` L${wx(i)},${y + (b ? 0 : 30)} L${wx(i + 1)},${y + (b ? 0 : 30)}`; }); E('path', {class: 'w', d}, L); };
   const CK = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], EN = [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], GK = CK.map((c, i) => (c && EN[i - 1 >= 0 ? i - 1 : 0] ? 1 : 0));
   [['CLK', CK, 450], ['EN', EN, 510], ['GCLK', GK, 570]].forEach(([t, b, y]) => { KTT(L, -40, y + 24, t, 't-sm', 'end'); wv(y, b); });
-  cnote(L, ['the multiply-add\'s first stage gates its operands\' clock this way: a zero operand costs almost nothing', 'Weste and Harris, CMOS VLSI Design, ch. 10'], 650, 'tb.icg in.vpu.lane.fma.1');
+  cnote(L, ['the multiply-add\'s first stage clock-gates its operands while the unit is idle; and a lane whose operand is zero gets no valid bit, so it clocks nothing', 'Weste and Harris, CMOS VLSI Design, ch. 10; the VPU specification; the zero gating from core-et\'s RTL (Erbium branch)'], 650, 'tb.icg in.vpu.lane.fma.1 e-tfma-fp32-zeros');
 }, def: () => ({id: 'lib.latch'}), kids: () => [{id: 'lib.latch'}, {id: 'lib.nand2'}]});
 
 /* ---- control logic: what any block whose netlist is not published is made of, at the gate level ---- */
@@ -363,17 +369,18 @@ bnode('lib.ecc', {draw: (L, ap) => {
 
 /* ---- a read-only memory: a transistor where a 0 is stored ---- */
 bnode('lib.rom', {draw: (L, ap) => {
-  KT.frame(L, {title: 'A read-only memory (NOR ROM)', sub: '4 words of 4 bits drawn: precharged bitlines; a transistor where a bit is 0 pulls its line down when its row rises', subf: 'tb.rom', col: CC.store, tags: GT});
+  KT.frame(L, {title: 'A read-only memory (NOR ROM)', sub: '4 words of 4 bits drawn: precharged bitlines; a transistor where a bit is 1 pulls its line down when its row rises, and an inverter reads the 1', subf: 'tb.rom', col: CC.store, tags: GT});
   const bx = c => 300 + c * 150, wy = r => 180 + r * 100, DATA = [[1, 0, 1, 1], [0, 1, 1, 0], [1, 1, 0, 1], [0, 0, 1, 0]];
   const gp = cgrp(L, ap, 'pre', 'The precharge: a PMOS per bitline pulls it high before each read', {x: bx(0) - 40, y: 60, w: bx(3) - bx(0) + 80, h: 80}, 'lib.finfet', {tr: 'jump'});
   for (let c = 0; c < 4; c++) { KT.mosV(gp, bx(c), 100, {p: true, lead: 30}); KT.wire(L, [[bx(c), 130], [bx(c), 560]]); KTT(L, bx(c) + 8, 552, `bit ${c}`, 't-sm'); }
   KT.rail(L, bx(0) - 60, bx(3) + 60, 70, '');
   const gd = cgrp(L, ap, 'dec', 'The row decoder: the address raises one wordline', {x: -150, y: 150, w: 240, h: 360}, 'lib.decoder');
   boxG(gd, -140, 160, 200, 340, 'row decoder');
-  const gc = cgrp(L, ap, 'cells', 'The cells: a transistor where the stored bit is 0, none where it is 1', {x: bx(0) - 70, y: wy(0) - 40, w: bx(3) - bx(0) + 140, h: wy(3) - wy(0) + 80}, 'lib.finfet', {tr: 'jump'});
+  const gc = cgrp(L, ap, 'cells', 'The cells: a transistor where the stored bit is 1, none where it is 0', {x: bx(0) - 70, y: wy(0) - 40, w: bx(3) - bx(0) + 140, h: wy(3) - wy(0) + 80}, 'lib.finfet', {tr: 'jump'});
   for (let r = 0; r < 4; r++) {
     KT.wire(L, [[60, wy(r)], [bx(3) + 50, wy(r)]], 'thin'); KTT(L, 66, wy(r) - 8, `word ${r}`, 't-sm');
-    for (let c = 0; c < 4; c++) if (!DATA[r][c]) { const m = KT.mosV(gc, bx(c) - 44, wy(r) + 40, {lead: 18}); KT.wire(gc, [[m.gate.x, m.gate.y], [m.gate.x, wy(r)]]); KT.jn(gc, m.gate.x, wy(r)); KT.wire(gc, [[m.x, m.top.y], [m.x, wy(r) + 6], [bx(c), wy(r) + 6]]); KT.jn(gc, bx(c), wy(r) + 6); KT.gnd(gc, m.x, m.bot.y + 10); }
+    for (let c = 0; c < 4; c++) if (DATA[r][c]) {   // (review of 1 Oct: a transistor at a 0 and an output inverter read the complement)
+ const m = KT.mosV(gc, bx(c) - 44, wy(r) + 40, {lead: 18}); KT.wire(gc, [[m.gate.x, m.gate.y], [m.gate.x, wy(r)]]); KT.jn(gc, m.gate.x, wy(r)); KT.wire(gc, [[m.x, m.top.y], [m.x, wy(r) + 6], [bx(c), wy(r) + 6]]); KT.jn(gc, bx(c), wy(r) + 6); KT.gnd(gc, m.x, m.bot.y + 10); }
   }
   const go = cgrp(L, ap, 'out', 'The outputs: an inverter per bitline gives the bit', {x: bx(0) - 40, y: 566, w: bx(3) - bx(0) + 80, h: 70}, 'lib.inverter');
   for (let c = 0; c < 4; c++) KT.invSym(go, bx(c) + 14, 600, {s: 16});
@@ -386,13 +393,20 @@ bnode('lib.senseamp', {draw: (L, ap) => {
   KT.rail(L, 160, 700, 40, 'VDD'); KT.rail(L, 160, 700, 600, 'GND');
   const gl = cgrp(L, ap, 'pair', 'The cross-coupled pair: two inverters, each driving the other\'s input', {x: 230, y: 110, w: 380, h: 330}, 'lib.inverter',
     {info: {title: 'The cross-coupled inverters', lead: 'Two inverters in a loop, like an SRAM cell\'s: once the tail switch fires, whichever side starts a little lower is pulled to 0 and the other to 1.', facts: ['tb.senseamp']}});
-  const pl = KT.mosV(gl, 300, 170, {p: true, lead: 30}), pr = KT.mosV(gl, 540, 170, {p: true, lead: 30, flip: true}), nl = KT.mosV(gl, 300, 370, {lead: 30}), nr = KT.mosV(gl, 540, 370, {lead: 30, flip: true});
+  // (review of 1 Oct: both cross wires ran along the bitlines' row, so BL and BL̄ looked shorted, and the gate columns
+  // stopped short of the PMOS gates. As in the 6T cell: each inverter's two gates face inwards, joined in a column, and
+  // each output crosses to the other's column off the bitlines' row, hopping over its own)
+  const pl = KT.mosV(gl, 300, 170, {p: true, lead: 30, flip: true}), pr = KT.mosV(gl, 540, 170, {p: true, lead: 30}), nl = KT.mosV(gl, 300, 370, {lead: 30, flip: true}), nr = KT.mosV(gl, 540, 370, {lead: 30});
   KT.wire(L, [[300, 40], [300, pl.top.y]]); KT.wire(L, [[540, 40], [540, pr.top.y]]);
   KT.wire(L, [[300, pl.bot.y], [300, nl.top.y]]); KT.wire(L, [[540, pr.bot.y], [540, nr.top.y]]);
-  KT.wire(L, [[300, 270], [430, 270], [pr.gate.x + 0, 200], [pr.gate.x, nr.gate.y]], 'thin'); KT.wire(L, [[540, 270], [410, 270], [pl.gate.x, 200], [pl.gate.x, nl.gate.y]], 'thin');
+  const LB = pl.gate.x, RB = pr.gate.x;
+  KT.wire(L, [[LB, pl.gate.y], [LB, nl.gate.y]], 'thin'); KT.wire(L, [[RB, pr.gate.y], [RB, nr.gate.y]], 'thin');
+  E('path', {class: 'w thin', d: `M300,232 H${LB - 7} A7,7 0 0 1 ${LB + 7},232 H${RB}`}, L);
+  E('path', {class: 'w thin', d: `M540,308 H${RB + 7} A7,7 0 0 0 ${RB - 7},308 H${LB}`}, L);
+  KT.jn(L, 300, 232); KT.jn(L, RB, 232); KT.jn(L, 540, 308); KT.jn(L, LB, 308);
   KT.jn(L, 300, 270); KT.jn(L, 540, 270);
   KT.wire(L, [[300, nl.bot.y], [300, 470], [540, 470], [540, nr.bot.y]]);
-  cpart(L, ap, 'tail', 380, 470, 80, 90, 'var(--c2)', '', 'lib.finfet', {label: 'The tail switch: SAE fires the amplifier', tr: 'jump', info: {title: 'The tail switch', lead: 'One NMOS under the pair: while it is off the amplifier waits; when the sense-enable (SAE) turns it on, the pair resolves in a few tens of picoseconds.', facts: ['tb.senseamp']}});
+  cpart(L, ap, 'tail', 380, 470, 80, 90, 'var(--c2)', '', 'lib.finfet', {label: 'The tail switch: SAE fires the amplifier', tr: 'jump', info: {title: 'The tail switch', lead: 'One NMOS under the pair: while it is off the amplifier waits; when the sense-enable (SAE) turns it on, the cross-coupled pair amplifies the small difference on the bitlines to a full 0 and 1.', facts: ['tb.senseamp']}});
   const tn = KT.mosV(L, 420, 515, {lead: 30}); KT.wire(L, [[420, 470], [420, tn.top.y]]); KT.wire(L, [[420, tn.bot.y], [420, 600]]); KT.netLab(L, tn.gate.x - 8, tn.gate.y + 6, 'SAE', 'end');
   KT.wire(L, [[300, 270], [120, 270]]); KT.netLab(L, 112, 276, 'BL', 'end'); KT.wire(L, [[540, 270], [760, 270]]); KT.netLab(L, 768, 276, 'BL̄');
   cpart(L, ap, 'pre', 640, 330, 300, 110, 'var(--c5)', 'precharge', 'lib.finfet', {sub: ['PMOS hold both bitlines', 'high between reads'], ty: 40, tr: 'jump', info: {title: 'Precharge and equalise', lead: 'Between reads, PMOS transistors hold both bitlines at the supply and short them together, so that a read starts from equal voltages.', facts: ['tb.senseamp']}});
@@ -426,7 +440,7 @@ bnode('pcie.lane', {parse: k => ({lane: +k}), name: p => `Lane ${p.lane} of the 
   cpart(L, ap, 'ser', -70, yT, 210, h, CC.logic, 'serialiser', 'lib.mux2', {sub: ['a tree of 2:1', 'multiplexers'], ty: 40, info: {title: 'The serialiser', lead: 'Turns a parallel word into one stream of bits: a tree of 2:1 multiplexers, each level running at twice the rate of the one before, the last at the full bit rate.', facts: ['tb.serdes']}});
   arrowR(L, 140, yT + 55, 190);
   cpart(L, ap, 'ffe', 190, yT, 230, h, CC.logic, 'FIR equaliser', 'lib.flipflop', {sub: [{t: `${on('pcie_ffe')}: the bit before,`, f: onf('pcie_ffe')}, 'this one and the one after'], ty: 40,
-    info: {title: 'The transmit equaliser', lead: 'Sends each bit together with small, inverted copies of its neighbours (held in flip-flops), so that the bits the wire smears arrive sharp: the receiver picks one of ten presets during training.', facts: ['pcie.gen4.eq', 'tb.serdes']}});
+    info: {title: 'The transmit equaliser', lead: 'Sends each bit together with small, inverted copies of its neighbours (held in flip-flops), so that the bits the wire smears arrive sharp: the receiver picks one of eleven presets (P0 to P10) during training.', facts: ['pcie.gen4.eq', 'tb.serdes']}});
   arrowR(L, 420, yT + 55, 470);
   cpart(L, ap, 'drv', 470, yT, 230, h, CC.logic, 'driver', 'lib.inverter', {sub: ['slices of big inverters', 'onto two wires'], ty: 40,
     info: {title: 'The driver', lead: 'Pushes the bits onto a pair of wires, one the inverse of the other: in a voltage-mode driver, many slices of large inverters in parallel, their resistance matched to the line\'s, some of them steered by the equaliser.', facts: ['tb.serdes']}});
@@ -516,7 +530,7 @@ bnode('lib.round', {draw: (L, ap) => {
   KTT(L, bx(8) + 20, y0 - 12, 'guard, round', 't-sm'); KTT(L, bx(10) + 30, y0 - 12, 'the rest: their OR is S, sticky', 't-sm');
   const gs = cgrp(L, ap, 'sticky', 'The sticky bit: an OR tree over all the bits past R', {x: bx(10) + 20, y: 150, w: 260, h: 110}, 'lib.nor2',
     {info: {title: 'The sticky bit', lead: 'Is anything at all left beyond R? A tree of NOR and NAND gates ORs every remaining bit into one: S.', facts: ['tb.round']}});
-  norSym(gs, bx(10) + 110, 205, {w: 70, h: 64}); for (let i = 0; i < 6; i++) KT.wire(L, [[bx(10) + 46 + i * 40, y0 + 42], [bx(10) + 110, 186 + i * 7]], 'thin');
+  KT.andSym(gs, bx(10) + 110, 205, {or: true, w: 70, h: 64}); for (let i = 0; i < 6; i++) KT.wire(L, [[bx(10) + 46 + i * 40, y0 + 42], [bx(10) + 110, 186 + i * 7]], 'thin');
   KTT(L, bx(10) + 200, 211, '→ S', 't-net');
   const gd = cgrp(L, ap, 'decide', 'The decision: round up when G and (R or S or L)', {x: 380, y: 290, w: 330, h: 130}, 'lib.aoi21',
     {info: {title: 'The decision', lead: 'Round up when G is 1 and any of R, S or the last kept bit L is 1: one compound gate (an OR-AND-INVERT, the AND-OR-INVERT\'s twin) and an inverter. G = 1 with R = S = 0 is a tie: it rounds up only if L is 1, so the result ends even.', facts: ['tb.round']}});
@@ -566,7 +580,7 @@ bnode('lib.wire', {draw: (L, ap) => {
   S(E('rect', {x: -150, y: 520, width: 1230, height: 90, rx: 4, 'pointer-events': 'none'}, L), {fill: 'var(--c3)', fillOpacity: 0.18, stroke: 'none'});
   S(E('rect', {x: xw(1) - 10, y: 520, width: wM + 20, height: 90}, gk), {fill: 'var(--c3)', fillOpacity: 0.45, stroke: 'var(--c3)', strokeWidth: 1.5});
   KTT(L, xw(1) + wM + 30, 560, 'cobalt contact on a source', 't-sm'); KTT(L, 1070, 600, 'the transistors', 't-sm', 'end');
-  cnote(L, [`a wire this thin is about 78 copper atoms across: electrons bounce off its walls, so it resists more than bulk copper would`, 'TSMC N7 pitches: WikiChip; the liner: TSMC; the stack\'s heights are not published'], 650, `wire.cu ${onf('m_p40')} n7.cu-co-liner`);
+  cnote(L, [`a wire this thin is about 78 copper atoms across: electrons bounce off its walls, so it resists more than bulk copper would`, 'TSMC N7 pitches: WikiChip; the cobalt liner: TechInsights (Semiconductor Digest); the stack\'s heights are not published'], 650, `wire.cu ${onf('m_p40')} n7.cu-co-liner`);
 }, def: () => ({id: 'p.cu'}), kids: () => [{id: 'p.cu'}, {id: 'lib.finfet'}]});
 
 /* ---- a copper atom: 29 electrons, one of them given to the metal ---- */
@@ -676,7 +690,7 @@ bnode('lib.strap', {draw: (L, ap) => {
   KT.wire(L, [[490, 260], [640, 260]]); KT.jn(L, 560, 260); KT.wire(L, [[560, 260], [560, 200]]); diodeUp(L, 560, 180); KT.wire(L, [[560, 172], [560, 140]]); KTT(L, 576, 160, 'protection', 't-sm');
   KT.wire(L, [[560, 260], [560, 320]]); diodeUp(L, 560, 338); KT.wire(L, [[560, 348], [560, 370]]); KT.gnd(L, 560, 380);
   const gr = cgrp(L, ap, 'rx', 'The input receiver: an inverter with hysteresis (a Schmitt trigger)', {x: 630, y: 210, w: 130, h: 100}, 'lib.inverter',
-    {info: {title: 'The input receiver', lead: 'An inverter with two extra transistors that give it hysteresis (a Schmitt trigger): it switches at a higher voltage going up than coming down, so a slow or bouncing edge from a switch gives one clean change.', facts: ['tb.strap']}});
+    {info: {title: 'The input receiver', lead: 'A Schmitt trigger: in the textbook CMOS circuit six transistors, an inverter\'s stack doubled and two more that feed the output back. That gives it hysteresis: it switches at a higher voltage going up than coming down, so a slow or bouncing edge from a switch gives one clean change.', facts: ['tb.strap']}});
   const iv = KT.invSym(gr, 670, 260, {s: 26}); E('path', {class: 'w', d: 'M662,268 h8 v-14 h8 M666,254 h8 v14 h8', 'stroke-width': 1.5}, gr);
   KT.wire(L, [[iv.out.x, 260], [790, 260]]);
   const gf = cgrp(L, ap, 'ff', 'The flip-flop that holds the pin\'s level from the end of reset', {x: 780, y: 200, w: 150, h: 130}, 'lib.flipflop',

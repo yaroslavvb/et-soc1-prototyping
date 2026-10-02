@@ -17,7 +17,10 @@
    pageExits() the ways back in from the ring, [{id, lab, short, path()}] (the one that ends at the Planck length is
    where Up from the top lands); pageBusy() true while a flow or an access holds the stage; pageLazy(ok) the lazy data
    has arrived (or failed): redraw what showed it. A page may also define pageNav(t, o), through which userNav sends every
-   move (the memory levels: memory-levels.hand.js). */
+   move (the memory levels: memory-levels.hand.js), and, since the reviews of 1 Oct evening, pageArrived() after each
+   arrival, pageHere() the path a press of Up, + or − is reckoned from, pageSelKid(P) a part of the page's own drawing
+   selected, pageBack(P) the place the reader went Up from (+ comes back), pageState(on) the two states on the page's own
+   drawing, and pageSide(P) the panel's sideways buttons (each looked up with typeof: a page without one is unchanged). */
 /*@hooks pageExits pageBusy pageLazy*/
 /* ================= the path camera (30 September 2026) =================
    One engine for a ladder of any depth (the owner's "zoom out ... all the way to the meta universe" and "double-click
@@ -80,7 +83,7 @@ function layerAt(P, d) {
   const key = pkeys(P.slice(0, d + 1));
   let L = LYR.get(key);
   if (!L) {
-    L = E('g', {class: 'lay', 'data-depth': d, 'data-level': d - DIE, 'data-node': P[d].id});
+    L = E('g', {class: 'lay', 'data-depth': d, 'data-level': d - DIE, 'data-node': P[d].id, 'aria-hidden': 'true'});
     L.style.display = 'none'; L.style.opacity = 0;   // hidden views start transparent: a zoom fades them in
     const after = [...svg.querySelectorAll(':scope > g.lay')].find(x => +x.dataset.depth > d);
     svg.insertBefore(L, after || null);
@@ -170,7 +173,7 @@ function viewOf(el) {
   const N0 = NODES[el.id], p = prm(el);
   if (!PH) return N0.view ? N0.view(p) : VB;
   if (PVIEW[el.id] != null) return pview(PVIEW[el.id]);
-  if (N0.pv) return N0.pv(p);
+  if (N0.pv) return N0.pv(p, el);
   // a phone: the rest view letterboxed into the box's shape, at its top (the box is the tallest of the trio's views)
   const v = N0.view ? N0.view(p) : VB, hw = phHW();
   return v.h / v.w <= hw ? {x: v.x, y: v.y, w: v.w, h: v.w * hw} : {x: v.x + v.w / 2 - v.h / hw / 2, y: v.y, w: v.h / hw, h: v.h};
@@ -799,7 +802,11 @@ function zoomFocus(from) {
   const nbk = NBRBACK; NBRBACK = null;
   if (nbk && L._ap.nbr && L._ap.nbr[nbk.dir] && L._ap.nbr[nbk.dir].isConnected) return L._ap.nbr[nbk.dir];
   if (from.length > Z.path.length && samePath(from.slice(0, Z.path.length), Z.path)) {
-    const s = L._ap.zs[pk(from[Z.path.length])]; if (s && s.g && s.g.isConnected) return s.g;
+    const ck = pk(from[Z.path.length]), s = L._ap.zs[ck]; if (s && s.g && s.g.isConnected) return s.g;
+    // (a seat drawn without its part, the minion's vector unit: the part that leads there; review of 1 Oct, the focus
+    // fell to the first part, "Hart 0")
+    const g = [...L.querySelectorAll('.comp')].find(x => { const k = kidOf(x); return k && !k.up && pk(k) === ck; });
+    if (g) return g;
   }
   // a glide to a sibling: its part in the same place, else the first part
   return L.querySelector('.comp');
@@ -861,7 +868,7 @@ const pow10 = m => '10' + String(Math.floor(Math.log10(m) + 1e-9)).split('').map
 const APPROX = new Set(['inferred', 'unknown']);
 /* one word for each kind of fact, the same on both pages (DESIGN §3.3: the chip printed "spec", the memory levels
    "documented"; 1 Oct) and a caveat's words */
-const KWORD = {measured: 'measured', spec: 'documented', derived: 'model', inferred: 'inference', outside: 'outside source', generic: 'textbook', owner: 'the owner’s word', hypothesis: 'speculative', unknown: 'unknown · asked'};
+const KWORD = {measured: 'measured', spec: 'documented', derived: 'model', inferred: 'inference', outside: 'outside source', generic: 'textbook', owner: 'the owner’s word', hypothesis: 'speculative', unknown: 'unknown'};
 const CAVW = {'erbium-rtl': 'Erbium RTL', 'spec-v1.1': 'spec v1.1', reimpl: 're-implementation RTL'};
 /* (since 1 Oct a size may be a bound, a quark's or an electron's: no size measured, "< 4.3 × 10⁻¹⁹ m"; and the ring
    of sizes has none: it is a picture, "↻ conceptual link") */
@@ -949,16 +956,25 @@ function upExit() {
 }
 /* the path from P down its default chain to the scale id (a way back in from the ring: an atom) */
 function chainTo(P, id) { let Q = P.slice(); for (let i = 0; i < 60 && Q[Q.length - 1].id !== id; i++) { const k = defKid(Q); if (!k) return null; Q = Q.concat([k]); } return Q[Q.length - 1].id === id ? Q : null; }
+/* the page's way back in that lands on P (the landing panel names its fixed point in the exit's own words, x.where:
+   the fact review of 1 Oct, a DRAM cell's atom is not "of this chip" and a shire's cell is drawn as, not known as, 6T) */
+function exitAt(P) {
+  const xs = typeof pageExits === 'function' ? pageExits() : [];
+  return xs.find(x => { const Q = x.path(); return Q && samePath(Q, P); }) || null;
+}
+/* the n scales above P, nearest first, in words: "a quark, a proton, the nucleus and the atom" */
+const climbWords = (P, n) => P.slice(Math.max(1, P.length - 1 - n), -1).reverse().map(toOf).join(', ').replace(/, ([^,]*)$/, ' and $1');
 /* Up from P: its parent; at the top of the ladder and on the ring, round to the Planck length */
 function upOf(P) {
   if (P.length > 1) return P.slice(0, -1);
   if (!isTop(P) && !isWrap(P)) return null;
   const x = upExit(); return x ? x.path() : null;
 }
-/* + from P with nothing selected: the default child; from a Planck length (round the loop) or the ring, the top */
+/* + from P with nothing selected: the default child (or, on a page that remembers it, pageBack, the place the reader
+   went Up from: Up then + comes back); from a Planck length (round the loop) or the ring, the top */
 function nextOf(P) {
   if (isWrap(P) || atPlanck(P)) return topPath();
-  const k = defKid(P); return k ? P.concat([k]) : null;
+  const k = (typeof pageBack === 'function' && pageBack(P)) || defKid(P); return k ? P.concat([k]) : null;
 }
 /* the loop's ends: the first scale under the top with a size (the observable universe) and the Planck length */
 function loopEnds() {
@@ -992,12 +1008,17 @@ function kidsOf(P) {
   if (d && !ks.some(k => pk(k) === pk(d))) ks.unshift(d);
   return ks;
 }
-function zoomBy(d) {
-  const P = zNow().path;
+function zoomBy(d, o) {
+  // (a page with a camera of its own reckons where a press starts, pageHere: the place its camera holds or is going to,
+  // or the target of a move between the two cameras still on its way; review of 1 Oct, the memory levels: quick presses
+  // were reckoned from the place left, and absorbed)
+  const P = (typeof pageHere === 'function' && pageHere()) || zNow().path;
   // (a press across the loop leaves a crossing to make until the camera makes it; one back across cancels it)
-  const cross = (dir, B) => { LOOPX = LOOPX && LOOPX.dir === -dir ? null : {dir, B}; }, lx = {loopx: true};
+  const cross = (dir, B) => { LOOPX = LOOPX && LOOPX.dir === -dir ? null : {dir, B}; }, lx = Object.assign({loopx: true}, o || {});
   if (d < 0) { const U = upOf(P); if (!U) return; if (isTop(P)) cross(-1, U); return userNav(U, lx); }
-  // in: the selected part's own scale, else the scale's default child
+  // in: the selected part's own scale (a part of the page's own drawing first: pageSelKid), else the scale's default child
+  const pk0 = typeof pageSelKid === 'function' ? pageSelKid(P) : null;
+  if (pk0) return userNav(pk0, o);
   if (SEL && SEL.isConnected) {
     const lp = layerPath(SEL), k = kidOf(SEL);
     if (SEL._go && lp && samePath(lp, P)) return userNav(SEL._go());   // a way back in from the ring: a path of its own
@@ -1042,6 +1063,10 @@ function scaleUI(force) {
   // overflowed and clipped the + button)
   if (!ZW) roRest();
   crumbsUI(P);
+  // the Up label keeps its destination whole: the size beside it goes where the two do not fit (review of 1 Oct: "Zoom
+  // out to the silicon cryst…" at 1280 px; the readout and the button's name give the size)
+  const ut = b.querySelector('.up-t'), us = b.querySelector('.up-s');
+  if (ut && us && ut.scrollWidth > ut.clientWidth + 1) us.style.display = 'none';
 }
 /* the crumbs of a path: one per scale, except that a run of the easter egg's levels further out than the current one is
    one "?" crumb (it goes to the nearest of them) */
@@ -1195,6 +1220,9 @@ function readout(s, e) {
 /* after a move: announce the scale, and (unless a flow or the tour holds the panel) show where the camera is */
 function arrived() {
   const P = Z.path, el = P[P.length - 1];
+  // (only the scale at rest is read out: Chrome keeps the names of a display:none SVG group in the accessibility tree,
+  // and a deep link builds the easter egg's levels; review of 1 Oct)
+  ariaLayers();
   // (the note "you came round the ring" stays only on the scale the wrap landed on, until the camera leaves it)
   if (WRAPIN && WRAPIN !== pkeys(P)) WRAPIN = null;
   $('stage').classList.toggle('offchip', Z.level < 0 || Z.level > 2);
@@ -1206,6 +1234,7 @@ function arrived() {
   // (a page's optional hook: the chip diagram's address follows the camera once it rests)
   if (typeof pageArrived === 'function') pageArrived();
 }
+function ariaLayers() { const R = restLayer(); LYR.forEach(l => { if (l === R) l.removeAttribute('aria-hidden'); else l.setAttribute('aria-hidden', 'true'); }); }
 /* ---- the arrow keys with no flow or tour on the stage (and not presenting): in a shire, to the neighbour that way
    (as its edge link does); in any scale with siblings side by side (a minion), a glide to the one that way; elsewhere
    the keyboard's focus moves to the nearest part that way ---- */
@@ -1291,6 +1320,8 @@ function stateSet(on) {
   $('pn-body').querySelectorAll('button[data-act="state"]').forEach(b => { b.setAttribute('aria-pressed', String(STON)); if (b._lab) b.textContent = b._lab[STON ? 1 : 0]; });
   const L = restLayer(), st = L && L._states;
   if (st) $('pn-live').textContent = st.say ? st.say[STON ? 1 : 0] : '';
+  // (a page's own drawing with the same switches: the memory levels' latch and cell; review of 1 Oct)
+  if (typeof pageState === 'function') pageState(STON);
 }
 const stateToggle = () => stateSet(!STON);
 /* a scene's switch in its drawing at (x, y): a pill with the state it is in and what pressing it does */

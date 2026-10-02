@@ -183,7 +183,9 @@ const FL = {k: null, i: 0, tok: {dead: true}, ctx: null, done: false, still: fal
 const TOUR = null;
 const FOLLOW = false;
 const setFollow = () => {}, startFlow = () => {}, restartStage = () => {}, playBtn = () => {}, renderBar = () => {};
-const flowOn = () => false;
+/* (an access holds the stage as a flow does on the chip: Space on a part of the ladder's drawing does not pick the part
+   while one is on; review of 1 Oct) */
+const flowOn = () => ML.accOn();
 const foldSoon = () => {}, watchFold = () => {};
 const foldObs = null;
 const goNeighbour = () => {};
@@ -274,7 +276,7 @@ const CKT = (() => {
 /* the core's hooks: the ways back in from the ring (the reader's level's own cell: DESIGN §1.6), a level's access holds
    the stage, the lazy facts arrived */
 function pageExits() { return ringExits(); }
-function pageBusy() { return ML.accOn(); }
+function pageBusy() { return ML.accOn() || ML.zw(); }   // (and while their camera moves: the lazy fetch and parse waits; code review of 1 Oct)
 function pageLazy() { if (!ZW && ON && !SEL) showHere(); }
 /*@include ladder-core.js*/
 /*@include ladder-outer.js*/

@@ -46,7 +46,7 @@ python3 build_ladder.py && python3 build_ladder.py --check
   fin is 6 by 52 nm and its effective gate length 16.5 nm (WikiChip Fuse; Dick James on TSMC's IEDM 2016 paper).
 - Privacy (AGENT.md §10, and the owner's words, which give only the street and the neighbourhood): no house number, block,
   point or coordinates of the studio, no ZIP code, no link to a listing that gives its address, nothing in the map called a
-  studio; the AI Plumbers event held at the venue waits for the owner's answer.
+  studio; anything about events at the venue waits for the owner's answer.
 - Textbook, and said so: where the ET-SoC-1's own circuit is not published (all of its gate-level design), a block opens
   onto the construction the textbooks give, tagged "textbook construction" and "this chip's own circuit: not published";
   every such scale leads on to a gate drawn as transistors, the FinFET at N7's pitches, its fin and channel, and the
@@ -124,3 +124,42 @@ from the address) nor `#at=` (kept in the outer address, not forwarded into the 
 the page it frames, so a link could not land at the same scale. Both pages read `?at=` (and the memory levels `#at=`)
 when opened directly.
 
+
+## Part 3: the four reviews of 1 October evening, fixed
+
+Four reviews of 290cb9c (facts, consistency and interaction, visuals, navigation and code) were checked one by one and
+the real findings fixed; main (the loop of UPDATE 3, links, replay speed) was merged first, so that both pages run the
+same ladder-core.js. What changed in this directory's data:
+
+- `research/build_circuits.py`: the bang-bang (Alexander) phase detector's early and late were reversed (an edge sample
+  equal to the bit before means the change had not yet come: the clock is early); PCIe 3.0 and 4.0 define eleven
+  transmitter presets, P0 to P10 (Teledyne LeCroy, 10 Nov 2014; MathWorks' page says ten).
+- `research/build_particles.py`: the inner electrons' binding is the X-Ray Data Booklet's core levels (Si 1s 1839 eV,
+  some 230 times an outer electron's 8.15; 2s and 2p 150 and 99 eV), not the ionisation energies of stripped ions
+  (2,673 eV is the last electron of Si¹³⁺); the atom against its nucleus is one ratio, diameter to diameter, about 29,000
+  (0.2352 nm against the 8.06 fm the page draws); the channel's facts cite N7's published fin and gate (process.json)
+  and the dense cells' two fins; the oldest light "about 380,000 years (372,600 in Planck's fit)"; the electron's mass
+  sets the atoms' spacing, not the transistors' size; the chip's silicon "more than 4,567 million years ago", its protons
+  formed "some 14 to 24 microseconds" after the Big Bang; Kittel's table, Krane's rule, Steigman, Schramm and Gunn, and
+  Leconte-Chevillard marked as not read for the page (their values as widely quoted, or the Crossref record).
+- `research/build_process.py`: the DRAM's 1.1 V and 0.64 V rails are set points, not on-die readings, and named as the
+  card's "VDDQ" (the LPDDR4X's VDD2) and VDDQLP (its I/O VDDQ); the leakage per transistor is an average at 80 °C; the
+  54 nm gate pitch was Scotten Jones's guess, which Dick James reports; HfO₂ cuts the tunnelling leak by orders of
+  magnitude rather than stopping it; the source and drain hold one phosphorus atom in 29, only one in thirteen of them
+  active (Applied Materials); the PMOS source's boron spans the patent's range; dynamic power without the overclaim.
+- `research/build_studio45.py`, `research-studio45.md`: the chert's 0.5-1.5 mm is the Presidio page's (the Chert FAQ
+  says 0.5-1 mm); the guard refuses any link but the public-data sources' (no site or slug spelled out); the research
+  note no longer narrows the studio to blocks, gives the lot's size and zoning, or describes an event at the venue (until
+  the owner answers). Earlier commits of this branch, and of main since f6cd2cf, still hold the old note.
+- `build_ladder.py`: the Bernal Heights lead says chip silicon is refined from silica like the hill's (not from the hill);
+  the fin's and the gate's notes cite WikiChip's production pitches and Dick James without an "earlier drawing" readers
+  never saw; the latch's electrons have their unit; new numbers for the drawings (65 mV, the dopants' one in 29 and one
+  in thirteen, the electron's 4.1 × 10⁻³² m).
+
+Not done in this round, each said where it stands: the circuit scenes on a phone are still drawn whole at about 5-7 px
+type (a phone layout or a sideways window for the textbook constructions is a design of its own); the camera math and the
+panel helpers the memory levels' scope repeats (the code review's ladder-base.js and a free-name check in the build) are
+not moved; the levels' maps are not yet in the die's orientation (DESIGN B0), so the arrows go to other neighbours than
+on the chip diagram; the memory levels write and read `#at=` but have no Copy link button, and their scenes no drawn edge
+links (the panel's "Next to it" row moves sideways); the breadcrumbs' fold loop is unchanged (a width cache made the
+folding depend on the history).

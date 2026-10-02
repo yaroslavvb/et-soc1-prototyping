@@ -1437,7 +1437,7 @@ Adding 64-bit numbers quickly means not waiting for a carry to ripple through 64
 
 **Made of (see):** `lib.fa`, `lib.nand2`
 
-#### Latch (the L1's storage cell) `lib.latch`
+#### Latch (drawn as the L1's storage cell) `lib.latch`
 **Size:** 500 nm (inferred: about 8-10 gate pitches wide in a 240 nm cell: about 0.1-0.15 um2 (inference))
 
 A bit of memory made of logic: two inverters in a loop hold the value, and a clocked switch lets a new value in while the clock is high. The minion's caches and register files are made of these.

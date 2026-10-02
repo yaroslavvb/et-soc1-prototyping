@@ -68,7 +68,7 @@
    "kind": "outside",
    "f": "n7.fin-height",
    "blurb": "A wall of crystalline silicon 6 nm thick and 52 nm tall, tapered with a rounded top; fins stand 30 nm apart. The gate wraps over three sides, so it holds the channel shut tightly: that is why fins replaced flat transistors.",
-   "note": "N7's fin: 6 nm wide and 52 nm tall (WikiChip Fuse on TSMC's IEDM 2016 paper); the earlier drawing's 6-7 by 45-50 nm, inferred from 10 nm-class sections, is superseded",
+   "note": "N7's fin: 6 nm wide and 52 nm tall (WikiChip Fuse, on the pitches of TSMC's production cells, VLSI 2019; it notes that TSMC's IEDM 2016 paper gave slightly tighter ones)",
    "facts": [
     "n7.fin-width",
     "n7.fin-height",
@@ -93,7 +93,7 @@
    "kind": "outside",
    "f": "n7.leff",
    "blurb": "The gate: a metal electrode on an insulating layer only a few atoms thick (hafnium oxide on a thin silicon oxide), wrapped over the top and both sides of the fin. Its metal's work function sets the voltage at which the transistor turns on.",
-   "note": "effective gate length about 16.5 nm (N7, Dick James on IEDM 2016); the earlier 20 nm (IRDS, 7 nm-class) is superseded",
+   "note": "effective gate length about 16.5 nm (N7: Dick James on TSMC's IEDM 2016 paper)",
    "facts": [
     "n7.leff",
     "gate.hfo2",
@@ -175,7 +175,7 @@
    "m": 2.352e-10,
    "kind": "derived",
    "f": "size.p.atom",
-   "blurb": "One of the crystal's atoms: a tiny nucleus with 14 electrons around it. Only the outer four take part in bonds and in electronics; the other ten sit deep inside, held 20 to 300 times more tightly.",
+   "blurb": "One of the crystal's atoms: a tiny nucleus with 14 electrons around it. Only the outer four take part in bonds and in electronics; the other ten sit deep inside, bound about 12 to 230 times more tightly.",
    "facts": [
     "size.p.atom",
     "p.atom.1",
@@ -224,7 +224,7 @@
    "m": 8.06e-15,
    "kind": "derived",
    "f": "size.p.nucleus",
-   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: a thirty-thousandth of the atom's width but 99.97% of its mass. Nothing in a chip ever touches it.",
+   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: some 29,000 times narrower than the atom, but 99.97% of its mass. Nothing in a chip ever touches it.",
    "facts": [
     "size.p.nucleus",
     "p.nucleus.1",
@@ -323,7 +323,7 @@
    "kind": "unknown",
    "f": null,
    "conceptual": true,
-   "blurb": "This is not further out in space. The ring is a picture of every size at once, the smallest joined to the largest; the links across it are physics, not distance. Looking far out is looking back in time, to an early universe that was a sea of quarks.",
+   "blurb": "This is not further out in space. The ring is a picture of every size at once, the smallest joined to the largest; the links across it are physics, not distance. Looking far out is looking back in time, as far as the oldest light; before it, physics tells of an early universe that was a sea of quarks.",
    "facts": [
     "p.wrap.1",
     "p.wrap.2",
@@ -370,7 +370,7 @@
    "m": 2200.0,
    "kind": "derived",
    "f": "b.2",
-   "blurb": "Bernal Heights, a hill neighbourhood of about 26,000 people in south-east San Francisco. The hill is red chert: quartz, silicon dioxide, from the shells of plankton that lived 100 to 200 million years ago. Refined, the same silicon is the die. Light crosses the neighbourhood in 7.3 µs, about 4,400 of the chip's clock ticks.",
+   "blurb": "Bernal Heights, a hill neighbourhood of about 26,000 people in south-east San Francisco. The hill is red chert: quartz, silicon dioxide, from the shells of plankton that lived 100 to 200 million years ago. Refined, silica like this is what chip silicon is made from. Light crosses the neighbourhood in 7.3 µs, about 4,400 of the chip's clock ticks.",
    "facts": [
     "b.1",
     "b.2",
@@ -568,7 +568,7 @@
   "lib.rom": {
    "name": "A read-only memory (ROM)",
    "short": "ROM",
-   "blurb": "A table fixed when the chip is made: a transistor where a bit is 0, none where it is 1. The vector unit's transcendental functions read their coefficients from small tables like this.",
+   "blurb": "A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit's transcendental functions read their coefficients from small tables like this.",
    "m": 2e-05,
    "kind": "inferred",
    "f": "size.lib.rom",
@@ -1038,9 +1038,10 @@
    "source": "repository: chip facts mesh.voltage, L101"
   },
   "et.v-other": {
-   "statement": "Other rails on die: DDR (memory shires) 0.76-0.77 V, Maxion 0.58-0.59 V, I/O shire 0.75 V, PCIe shire 0.75 V; LPDDR4X VDDQ 1.1 V, VDDQLP 0.64 V.",
+   "statement": "Other rails on die: DDR (memory shires) 0.76-0.77 V, Maxion 0.58-0.59 V, I/O shire 0.75 V, PCIe shire 0.75 V. The DRAM's own two rails have set points only (no reading on die): 1.1 V (the card's \"VDDQ\", the LPDDR4X's VDD2 core supply) and 0.64 V (the card's VDDQLP, the LPDDR4X's I/O VDDQ).",
    "kind": "measured",
-   "source": "repository: chip facts volt.other"
+   "source": "repository: chip facts volt.other; memory levels dram.pwr.rails (the rails' names)",
+   "note": "volt.other gives these two as set points (1,100 and 640 mV) read from the power controller, with no on-die value; the memory levels' dram.pwr.rails names them: VDD_Q is the LPDDR4X's VDDQ/VDD2 core supply, VDD_QLP its I/O VDDQ."
   },
   "et.per-shire-v": {
    "statement": "Per-shire minion-rail voltage at idle: 513-522 mV across the 34 minion shires.",
@@ -1060,7 +1061,7 @@
    "quote": "36 x 0.693 = 24.95 °C"
   },
   "et.leak-per-tr": {
-   "statement": "Spread over 24 billion transistors, 23 W of leakage is about 1 nW each: roughly 1.4-1.9 nA, about 10 billion electrons a second through every transistor that is \"off\".",
+   "statement": "Spread over 24 billion transistors, the 23 W of leakage fitted at 80 °C is about 1 nW each on average: roughly 1.4-1.9 nA, about 10 billion electrons a second per transistor (an average over every kind, threshold voltage and state, not what any one \"off\" transistor passes).",
    "kind": "derived",
    "source": "arithmetic on et.leakage and et.transistors",
    "note": "An average over every kind of transistor and rail: SRAM, logic, analog; the leakage is not split by rail.",
@@ -1151,7 +1152,7 @@
    "kind": "outside",
    "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
    "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
-   "note": "WikiChip: \"while at IEDM TSMC reported slightly more aggressive pitches, the numbers shown in this article are the actual pitches used in their standard cells\"; Dick James speculated 54 nm from the IEDM paper.",
+   "note": "WikiChip: \"while at IEDM TSMC reported slightly more aggressive pitches, the numbers shown in this article are the actual pitches used in their standard cells\"; the IEDM paper does not state it: Dick James reports Scotten Jones's guess of 54 nm, the same as Intel 10 nm.",
    "quote": "\"For the transistor, the gate pitch has been further scaled down to 57 nm, however, the interconnect pitch halted at the 40 nm point in order to keep patterning at the SADP point.\" Flavors table: Gate Pitch 57 nm (low power) / 64 nm (high performance)"
   },
   "n7.leff": {
@@ -1303,12 +1304,12 @@
    "quote": "\"SAQP minimum fin pitch ~33 nm, fin width ~6 nm, functional gate height ~44 nm, gate width ~95 nm\" (slide 18); \"Fin taper\" (slide 17 label)"
   },
   "gate.hfo2": {
-   "statement": "The gate insulator is hafnium oxide (HfO2, relative permittivity ~24, six times SiO2's 3.9) on a thin SiO2 interfacial layer: as good as 1 nm of SiO2 electrically, but thick enough that electrons cannot tunnel through.",
+   "statement": "The gate insulator is hafnium oxide (HfO2, relative permittivity ~24, six times SiO2's 3.9) on a thin SiO2 interfacial layer: as good as 1 nm of SiO2 electrically, but a much thicker barrier, so the electrons that tunnel through it are several orders of magnitude fewer.",
    "kind": "generic",
    "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 7 (author's free chapter)",
    "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch7.pdf",
    "note": "TSMC does not publish N7's stack or its thicknesses.",
-   "quote": "\"HfO2 has a relative dielectric constant (k) of ~24, six times larger than that of SiO2. A 6 nm thick HfO2 film is equivalent to 1 nm thick SiO2 ... These problems are minimized by inserting a thin SiO2 interfacial layer between the silicon substrate and the high-k dielectric.\""
+   "quote": "\"HfO2 has a relative dielectric constant (k) of ~24, six times larger than that of SiO2. A 6 nm thick HfO2 film is equivalent to 1 nm thick SiO2 ... the HfO2 film presents a much thicker (albeit lower) tunneling barrier to the electrons and holes. The consequence is that the leakage current through HfO2 is several orders of magnitude smaller than that through SiO2 ... These problems are minimized by inserting a thin SiO2 interfacial layer between the silicon substrate and the high-k dielectric.\""
   },
   "gate.eot": {
    "statement": "Equivalent oxide thickness under 1 nm is typical of FinFETs of this generation (0.7 nm in a 15 nm-gate research FinFET); N7's is not published.",
@@ -1364,7 +1365,7 @@
    "quote": "\"total [P] by SIMS in HS Si:P epitaxial film is 1.75E+21 at/cc (~ 3 at.% in silicon)\"; \"only ~1.3E+20 at/cc phosphorous atoms are electrically active\""
   },
   "dope.p-sd": {
-   "statement": "PMOS source and drain: boron-doped silicon-germanium, with boron above 1e20 per cm³ (patent ranges run to about 2e20 and beyond); the larger germanium atoms squeeze the channel, which speeds holes.",
+   "statement": "PMOS source and drain: boron-doped silicon-germanium, with boron of the order of 1e20 per cm³ (a patent's range runs from below 1e20 to above 2e20); the larger germanium atoms squeeze the channel, which speeds holes.",
    "kind": "outside",
    "source": "Qualcomm, US patent 9,564,518 B2, \"Method and apparatus for source-drain junction formation in a FinFET with in-situ doping\" (priority 24 Sep 2014)",
    "url": "https://patents.google.com/patent/US9564518B2/en",
@@ -1386,10 +1387,10 @@
    "quote": "V = 6 x 16.5 x 52 = 5,148 nm³ = 5.15e-18 cm³; x 5.0e22 = 2.57e5 Si atoms; x 1e16 = 0.05, x 1e17 = 0.5, x 1e18 = 5.1 dopant atoms"
   },
   "dope.count-sd": {
-   "statement": "At 1.75e21 per cm³ the source and drain hold 1.75 phosphorus atoms per cubic nanometre, one atom in 30.",
+   "statement": "At 1.75e21 per cm³ the source and drain hold 1.75 phosphorus atoms per cubic nanometre, one atom in 29; only about one of every thirteen of them (1.3e20 per cm³) is electrically active and gives its electron.",
    "kind": "derived",
    "source": "arithmetic on dope.n-sd and si.density",
-   "quote": "1.75e21 cm^-3 x 1e-21 cm³/nm³ = 1.75 /nm³; / 49.9 Si per nm³ = 3.5%"
+   "quote": "1.75e21 cm^-3 x 1e-21 cm³/nm³ = 1.75 /nm³; / 49.9 Si per nm³ = 3.5% (1 in 28.5); 1.3e20 / 1.75e21 = 7.4% (1 in 13.5)"
   },
   "si.lattice": {
    "statement": "Silicon is a diamond-cubic crystal with a 0.5431 nm cube; every atom bonds to four neighbours 0.235 nm away.",
@@ -1446,11 +1447,11 @@
    "quote": "\"28Si 0.922 23(19)\", \"29Si 0.046 85(8)\", \"30Si 0.030 92(11)\"; Hu ch. 1: \"Silicon is a group IV element in the periodic table and has four valence electrons.\""
   },
   "si.nucleus": {
-   "statement": "The silicon-28 nucleus has a charge radius of 3.12 fm (3.12 x 10^-15 m): about 75,000 times smaller than the 0.235 nm bond.",
+   "statement": "The silicon-28 nucleus has a charge radius of 3.12 fm (3.12 x 10^-15 m): about 8.1 fm across, some 29,000 times narrower than the 0.235 nm an atom takes in the crystal.",
    "kind": "outside",
    "source": "K. Koenig et al., \"Nuclear charge radii of silicon isotopes\", arXiv:2309.02037, Table 1 (28Si from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99 (2013) 69-95)",
    "url": "https://arxiv.org/abs/2309.02037",
-   "note": "0.235 nm / 3.12 fm = 75,300 (derived).",
+   "note": "A uniform sphere with that rms radius has radius sqrt(5/3) x 3.1224 = 4.03 fm, 8.06 fm across; 0.2352 nm / 8.06 fm = 29,200 (derived).",
    "quote": "28Si charge radius \"3.1224 (24)\" fm (Table 1, from Angeli and Marinova 2013)"
   },
   "el.switch": {
@@ -1483,7 +1484,7 @@
    "quote": "\"very thin so that no leakage path is far from one of the gates ... For these reasons, a multigate MOSFET can have shorter Lg, lower Ioff, and larger Ion than a single-gate MOSFET.\" / \"A tall FinFET has the advantage of providing a large W and therefore large Ion while occupying a small footprint.\""
   },
   "el.dynamic": {
-   "statement": "Every switching cycle moves a charge C x Vdd from the supply into a node and dumps it to ground: dynamic power = k C Vdd² f. Halving the voltage quarters the energy per switch; this is the whole of Esperanto's low-voltage argument.",
+   "statement": "Every switching cycle moves a charge C x Vdd from the supply into a node and dumps it to ground: dynamic power = k C Vdd² f. Halving the voltage quarters the energy per switch, which is why lowering the voltage saves so much.",
    "kind": "generic",
    "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 6 (author's free chapter)",
    "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch6-1.pdf",
@@ -1571,7 +1572,7 @@
   "p.atom.5": {
    "statement": "Breaking the crystal into free atoms costs 4.63 eV per atom: about 2.3 eV per bond, since each atom shares four bonds and each bond has two ends.",
    "kind": "generic",
-   "source": "C. Kittel, Introduction to Solid State Physics, 8th ed. (Wiley, 2005), ch. 3, Table 1 (cohesive energies): Si 4.63 eV per atom"
+   "source": "C. Kittel, Introduction to Solid State Physics, 8th ed. (Wiley, 2005), ch. 3, Table 1 (cohesive energies): Si 4.63 eV per atom (the table's value as widely quoted; the book not read for this page)"
   },
   "p.atom.6": {
    "statement": "Natural silicon is 92.22% silicon-28, 4.69% silicon-29 and 3.09% silicon-30; its standard atomic weight is 28.084-28.086.",
@@ -1592,20 +1593,20 @@
   "p.atom.9": {
    "statement": "A FinFET channel of about 6 x 16.5 x 52 nm holds about 257,000 silicon atoms and, on average, 5 x 10^-8 thermally freed electrons: none. The transistor conducts only when the gate voltage pulls electrons in from the heavily doped source.",
    "kind": "inferred",
-   "source": "the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si); Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others",
-   "note": "the channel's size is the chip page's inference (TSMC does not publish N7's); the conduction picture is the textbook MOSFET (Sze ch. 6)"
+   "source": "process.json beside this file: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others",
+   "note": "the channel: N7's published fin, 6 x 52 nm, and effective gate length, 16.5 nm (process.json n7.fin-width, n7.fin-height, n7.leff); the conduction picture is the textbook MOSFET (Sze ch. 6)"
   },
   "p.atom.10": {
-   "statement": "With more than 24 billion transistors and about 257,000 atoms per fin's channel, the chip's channels hold at least 6 x 10^15 silicon atoms: about 0.3 micrograms if each transistor has one fin, about a microgram if three. That is all the silicon that actually switches.",
+   "statement": "With more than 24 billion transistors and about 257,000 atoms in each fin's channel, the chip's channels hold at least 6 x 10^15 silicon atoms: about 0.3 micrograms at one fin per transistor, about 0.6 at the dense cells' two. That is all the silicon that actually switches.",
    "kind": "inferred",
-   "source": "the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si); docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process): TSMC 7 nm, more than 24 billion transistors (Esperanto, Hot Chips 33 and IEEE Micro 2022)",
-   "note": "the transistor count is Esperanto's; fins per transistor and N7's channel size are not published, so this is an order of magnitude"
+   "source": "process.json beside this file: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process): TSMC 7 nm, more than 24 billion transistors (Esperanto, Hot Chips 33 and IEEE Micro 2022)",
+   "note": "the transistor count is Esperanto's; the channel is N7's published fin and effective gate length (process.json); dense cells have about two fins per transistor (process.json n7.two-fin, Angstronomics); how many fins each of this chip's transistors has is not published, so this is an order of magnitude"
   },
   "p.atom.11": {
-   "statement": "Its share of the crystal (a sphere of radius 118 pm) is about 32,000 times wider than its nucleus.",
+   "statement": "Its share of the crystal, 0.235 nm across, is about 29,000 times wider than its nucleus (about 8.1 fm across).",
    "kind": "derived",
-   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm",
-   "note": "a sphere of radius 117.6 pm (half the 0.2352 nm neighbour distance) against the nucleus's 3.64 fm radius (1.2 fm x 28^(1/3)): 117.6 / 0.00364 = 32,300"
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021))",
+   "note": "the 0.2352 nm neighbour distance against the nucleus's 8.06 fm diameter (a uniform sphere with the measured rms charge radius, size.p.nucleus): 0.2352 nm / 8.06 fm = 29,200"
   },
   "p.dopant.1": {
    "statement": "Phosphorus and arsenic are donors in silicon: the spare electron is held by only 0.045 eV (P) or 0.054 eV (As). Boron is an acceptor, at 0.045 eV.",
@@ -1657,9 +1658,10 @@
    "source": "E. Clementi and D. L. Raimondi, \"Atomic screening constants from SCF functions\", J. Chem. Phys. 38, 2686 (1963): Si Zeff 1s 13.575, 2p 9.945 (as tabulated in Wikipedia, \"Effective nuclear charge\")"
   },
   "p.core.3": {
-   "statement": "The innermost electron of a silicon atom is bound by 2,673 eV, more than 300 times an outer electron's 8.15 eV.",
+   "statement": "In the silicon atom the 1s pair is bound by about 1,839 eV, some 230 times an outer electron's 8.15 eV; the 2s and 2p eight by about 150 and 99 eV, 12 to 18 times. (The 2,673 eV of the ionisation table is the cost of the last electron of an ion already stripped of the other thirteen.)",
    "kind": "outside",
-   "source": "NIST Atomic Spectra Database, Ground levels and ionization energies, spectra Si I to Si XIV, physics.nist.gov/cgi-bin/ASD/ie.pl (read 1 Oct 2026)"
+   "source": "Lawrence Berkeley National Laboratory, X-Ray Data Booklet, section 1.1, Table 1-1, Electron binding energies (xdb.lbl.gov/Section1/Table_1-1.pdf, read 1 Oct 2026): Si K 1s 1839, L1 2s 149.7, L2 2p1/2 99.82, L3 2p3/2 99.42 eV; NIST Atomic Spectra Database, Ground levels and ionization energies, spectra Si I to Si XIV, physics.nist.gov/cgi-bin/ASD/ie.pl (read 1 Oct 2026)",
+   "note": "core-level binding energies of the solid (X-Ray Data Booklet; relative to the Fermi level, which changes them by a few eV) against the free atom's first ionisation energy: 1839 / 8.15 = 226, 99.42 / 8.15 = 12.2"
   },
   "p.core.4": {
    "statement": "An electron in an atom is not a little ball on an orbit: the shells are clouds of probability, and the radii here are where each cloud is densest.",
@@ -1674,7 +1676,7 @@
   "p.nucleus.2": {
    "statement": "Nuclear radius R = R0 A^(1/3) with R0 about 1.2 fm: for A = 28, R = 3.64 fm, about 7.3 fm across.",
    "kind": "generic",
-   "source": "K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm"
+   "source": "K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm (the textbook rule as widely quoted; the book not read for this page)"
   },
   "p.nucleus.3": {
    "statement": "Measured rms charge radius 3.1224 +/- 0.0024 fm.",
@@ -1689,13 +1691,13 @@
   "p.nucleus.5": {
    "statement": "Its density is about 2.3 x 10^17 kg per m3: a teaspoon (5 mL) of nuclear matter would weigh about 1.1 billion tonnes.",
    "kind": "derived",
-   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm"
+   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm (the textbook rule as widely quoted; the book not read for this page)"
   },
   "p.nucleus.6": {
-   "statement": "If the nucleus were a 1 cm marble, the atom's share of the crystal would be about 320 m across: an atom is almost all empty space.",
+   "statement": "If the nucleus were a 1 cm marble, the atom's share of the crystal would be about 290 m across: an atom is almost all empty space.",
    "kind": "derived",
-   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm",
-   "note": "the 32,000 ratio of p.atom.11 applied to a 1 cm marble: 1 cm x 32,300 = 323 m"
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021))",
+   "note": "the 29,000 ratio of p.atom.11 applied to a 1 cm marble: 1 cm x 29,200 = 292 m"
   },
   "p.nucleus.7": {
    "statement": "Binding energy 8.448 MeV per nucleon, 237 MeV in all: the nucleus weighs 0.9% less than its 28 separate parts (E = mc^2).",
@@ -1705,7 +1707,7 @@
   "p.nucleus.8": {
    "statement": "That is about a million times the energy of the outer electrons (8.15 eV) or of a chemical bond (about 2.3 eV): why chemistry, and electronics, never change a nucleus.",
    "kind": "derived",
-   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); NIST Atomic Spectra Database, Ground levels and ionization energies, spectra Si I to Si XIV, physics.nist.gov/cgi-bin/ASD/ie.pl (read 1 Oct 2026); C. Kittel, Introduction to Solid State Physics, 8th ed. (Wiley, 2005), ch. 3, Table 1 (cohesive energies): Si 4.63 eV per atom"
+   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); NIST Atomic Spectra Database, Ground levels and ionization energies, spectra Si I to Si XIV, physics.nist.gov/cgi-bin/ASD/ie.pl (read 1 Oct 2026); C. Kittel, Introduction to Solid State Physics, 8th ed. (Wiley, 2005), ch. 3, Table 1 (cohesive energies): Si 4.63 eV per atom (the table's value as widely quoted; the book not read for this page)"
   },
   "p.nucleon.1": {
    "statement": "Proton rms charge radius 0.84075 +/- 0.00064 fm.",
@@ -1870,19 +1872,19 @@
    "note": "the horizon's growth from near-Planck size rests on extrapolating known physics back to the Planck time"
   },
   "p.wrap.4": {
-   "statement": "Looking out is looking back: the farthest light we can see, the cosmic microwave background, left 380,000 years after the Big Bang; before that the universe was hot, dense and opaque.",
+   "statement": "Looking out is looking back: the farthest light we can see, the cosmic microwave background, left about 380,000 years after the Big Bang (372,600 years in the Planck satellite's fit); before that the universe was hot, dense and opaque.",
    "kind": "outside",
-   "source": "NASA Science, Physics of the Cosmos, \"Big Bang and the Evolution of the Universe\", science.nasa.gov/astrophysics/programs/physics-of-the-cosmos/big-bang-and-the-evolution-of-the-universe/ (read 1 Oct 2026); NASA Science, \"Cosmic History\", science.nasa.gov/universe/overview/ (read 1 Oct 2026)"
+   "source": "NASA Science, Physics of the Cosmos, \"Big Bang and the Evolution of the Universe\", science.nasa.gov/astrophysics/programs/physics-of-the-cosmos/big-bang-and-the-evolution-of-the-universe/ (read 1 Oct 2026); NASA Science, \"Cosmic History\", science.nasa.gov/universe/overview/ (read 1 Oct 2026); Particle Data Group (2026), review 2, Astrophysical Constants and Parameters (D. E. Groom, D. Scott, rev. Aug 2025), Table 2.1"
   },
   "p.wrap.5": {
    "statement": "The early universe is 'the poor man's accelerator' (Zel'dovich): its first minutes reached energies that test particle physics.",
    "kind": "outside",
-   "source": "G. Leconte-Chevillard, \"'The poor man's accelerator', or how the primordial universe became a testing ground for particle physics\", Synthese 207 (2026), doi:10.1007/s11229-026-05476-2"
+   "source": "G. Leconte-Chevillard, \"'The poor man's accelerator', or how the primordial universe became a testing ground for particle physics\", Synthese 207 (2026), doi:10.1007/s11229-026-05476-2 (its Crossref record; the paper not read for this page)"
   },
   "p.wrap.6": {
    "statement": "Example: the helium made in the first three minutes limited how many kinds of neutrino could exist (Steigman, Schramm and Gunn, 1977); collider measurements of the Z boson later counted 2.996 +/- 0.007.",
    "kind": "outside",
-   "source": "G. Steigman, D. N. Schramm, J. E. Gunn, \"Cosmological limits to the number of massive leptons\", Phys. Lett. B 66, 202 (1977); G. Leconte-Chevillard, \"'The poor man's accelerator', or how the primordial universe became a testing ground for particle physics\", Synthese 207 (2026), doi:10.1007/s11229-026-05476-2; Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf)"
+   "source": "G. Steigman, D. N. Schramm, J. E. Gunn, \"Cosmological limits to the number of massive leptons\", Phys. Lett. B 66, 202 (1977) (as cited in the review literature; the paper not read for this page); G. Leconte-Chevillard, \"'The poor man's accelerator', or how the primordial universe became a testing ground for particle physics\", Synthese 207 (2026), doi:10.1007/s11229-026-05476-2 (its Crossref record; the paper not read for this page); Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf)"
   },
   "p.wrap.7": {
    "statement": "On a logarithmic scale the middle of the whole ladder, between the Planck length and the observable universe, is 0.12 mm: about the size of a minion's 4 KB L1 data cache or one SRAM panel of the shire cache in this chip.",
@@ -2006,7 +2008,7 @@
    "note": "PDG eq. 22.44 with all Standard Model particles, N = 106.75"
   },
   "e.ew.3": {
-   "statement": "In the Standard Model the electron and the quarks get their masses from the Higgs field. The electron's mass sets the size of every atom (the Bohr radius is inversely proportional to it), and so the size of the chip's transistors.",
+   "statement": "In the Standard Model the electron and the quarks get their masses from the Higgs field. The electron's mass sets the size of every atom (the Bohr radius is inversely proportional to it), and so how far apart the atoms of the chip's transistors sit.",
    "kind": "generic",
    "source": "Particle Data Group (2026), review 22, Big-Bang Cosmology (K. A. Olive, J. A. Peacock, rev. Aug 2025), sec. 22.3.2 (eq. 22.44, table of N(T)) and 22.3.6 (baryogenesis); NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
   },
@@ -2036,7 +2038,7 @@
    "source": "L. A. Corathers (USGS), \"Mineral resource of the month: silicon\", Geotimes (2003), usgs.gov/publications/mineral-resource-month-silicon"
   },
   "e.stars.4": {
-   "statement": "So the silicon atoms in the chip's fins were forged in stars of the Milky Way more than 4.6 billion years ago, from protons and neutrons formed in the first 20 microseconds: a physical link between the ladder's top and bottom.",
+   "statement": "So the silicon atoms in the chip's fins were forged in stars of the Milky Way more than 4,567 million years ago, from protons and neutrons formed some 14 to 24 microseconds after the Big Bang: a physical link between the ladder's top and bottom.",
    "kind": "inferred",
    "source": "J. A. Johnson, \"Populating the periodic table: Nucleosynthesis of the elements\", Science 363, 474 (2019); J. N. Connelly et al., \"The absolute chronology and thermal processing of solids in the solar protoplanetary disk\", Science 338, 651 (2012); A. Bazavov et al. (HotQCD), \"Chiral crossover in QCD at zero and non-zero chemical potentials\", Phys. Lett. B 795, 15 (2019), arXiv:1812.08235",
    "note": "e.stars.1 (silicon from massive stars and supernovae), e.stars.2 (the Solar System from enriched gas, 4,567 million years ago) and e.qcd.5"
@@ -2116,10 +2118,10 @@
    "url": "https://en.wikipedia.org/wiki/Bernal_Heights_Summit"
   },
   "b.6": {
-   "statement": "The hill is folded layers of red radiolarian chert: microcrystalline quartz, silicon dioxide, made from the silica shells of plankton 0.5 to 1.5 mm across that settled on the deep-sea floor 200 to 100 million years ago.",
+   "statement": "The hill is folded layers of red radiolarian chert: microcrystalline quartz, silicon dioxide, made from the silica shells of plankton about a millimetre across (0.5 to 1.5 mm) that settled on the deep-sea floor 200 to 100 million years ago.",
    "kind": "outside",
-   "source": "National Park Service, Golden Gate National Recreation Area, \"Chert FAQ\"; Wikipedia, \"Bernal Heights Summit\" and \"Chert\"",
-   "url": "https://www.nps.gov/goga/learn/education/chert-faq.htm"
+   "source": "National Park Service, Presidio of San Francisco, \"Chert\" (the shells \"0.5 to 1.5 mm\"); Golden Gate National Recreation Area, \"Chert FAQ\" (\"0.5-1 mm\"); Wikipedia, \"Bernal Heights Summit\" and \"Chert\"",
+   "url": "https://www.nps.gov/prsf/learn/nature/chert.htm"
   },
   "b.7": {
    "statement": "Silicon for chips is refined from silica, silicon dioxide like the hill's quartz: reduced to silicon metal, then purified into the \"ultra-high-purity\" polysilicon of semiconductor grade.",
@@ -2264,9 +2266,9 @@
    "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 13 (I/O and high-speed links); no ET source describes the PHY's circuits"
   },
   "pcie.gen4.eq": {
-   "statement": "PCIe 4.0 at 16 GT/s: the transmitter has a 3-tap feed-forward equaliser (one tap before the bit, one after) with ten presets that the receiver asks for during link training; the reference receiver has a continuous-time linear equaliser with seven settings and a 2-tap decision-feedback equaliser.",
+   "statement": "PCIe 4.0 at 16 GT/s: the transmitter has a 3-tap feed-forward equaliser (one tap before the bit, one after) with eleven presets (P0 to P10, as since PCIe 3.0) that the receiver asks for during link training; the reference receiver has a continuous-time linear equaliser with seven settings and a 2-tap decision-feedback equaliser.",
    "kind": "outside",
-   "source": "MathWorks, SerDes Toolbox documentation, \"PCIe4 Transmitter/Receiver IBIS-AMI Model\" (after the PCI Express Base Specification 4.0)",
+   "source": "MathWorks, SerDes Toolbox documentation, \"PCIe4 Transmitter/Receiver IBIS-AMI Model\" (after the PCI Express Base Specification 4.0); the eleven presets: Teledyne LeCroy, \"PCIe 3.0 Dynamic Link EQ: De-Emphasis, Preshoot, Cursors, and Presets\" (blog, 10 November 2014: PCI-SIG packaged \"11 sets of cursor coefficients ... as presets\"; MathWorks' page says ten)",
    "note": "https://www.mathworks.com/help/serdes/ug/PCIe4TxRxIBISAMIModel.html"
   },
   "pcie.gen4.loss": {
@@ -2288,7 +2290,7 @@
    "note": "https://www.seas.ucla.edu/brweb/papers/Journals/BR_Magzine4.pdf"
   },
   "tb.bangbang": {
-   "statement": "A bang-bang (Alexander) phase detector samples each bit in its middle and at its edge: if the edge sample equals the bit before it the clock is late, if it equals the bit after it the clock is early; XORs of neighbouring samples give each vote, and the votes nudge the sampling clock.",
+   "statement": "A bang-bang (Alexander) phase detector samples each bit in its middle and at its edge: if the edge sample equals the bit before it the clock is early (the change had not yet come), if it equals the bit after it the clock is late; XORs of neighbouring samples give each vote, and the votes nudge the sampling clock.",
    "kind": "generic",
    "source": "J. D. H. Alexander, \"Clock Recovery from Random Binary Signals\", Electronics Letters 11(22), 1975, pp. 541-542"
   },
@@ -2523,7 +2525,7 @@
    "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch6-1.pdf"
   },
   "el.off-channel": {
-   "statement": "An \"off\" transistor still lets about 10 billion electrons a second through, but each crosses its 16.5 nm channel in about 0.2 ps, so at any instant its channel holds on average 0.002 electrons.",
+   "statement": "On average (the chip's leakage at 80 °C shared over its transistors) an \"off\" transistor still lets about 10 billion electrons a second through, but each crosses its 16.5 nm channel in about 0.2 ps, so at any instant its channel holds on average 0.002 electrons.",
    "kind": "derived",
    "source": "arithmetic on et.leak-per-tr (10 billion electrons a second) and si.mobility (0.2 ps to cross the channel)",
    "note": "10^10 per second x 0.2 x 10^-12 s = 0.002. An average over every transistor on the chip; a given off transistor leaks more or less."
@@ -2534,7 +2536,7 @@
    "source": "arithmetic on et.v-minion, et.nominal-075 and el.dynamic (E = C V²)"
   },
   "el.sram-electrons": {
-   "statement": "A 6T SRAM bit holds roughly a thousand electrons (440-1,300) on its storage node at the 0.705 V SRAM rail; a latch bit of the minion's L1 at 0.517 V holds about 320-970.",
+   "statement": "A 6T SRAM bit holds roughly a thousand electrons (440-1,300) on its storage node at the 0.705 V SRAM rail; a latch bit of the minion's L1 at 0.517 V holds about 320-970 electrons.",
    "kind": "inferred",
    "source": "arithmetic on gate.cap-fin, n7.sram-dims, et.v-sram and et.v-minion (el.sram-node)",
    "note": "No N7 storage-node capacitance is published: 0.1-0.3 fF is assumed (el.sram-node). The inverters restore the charge all the time, so it needs no refresh."
@@ -2595,6 +2597,10 @@
   },
   "n7_ss": {
    "t": "65 mV per decade",
+   "f": "n7.ss"
+  },
+  "n7_ss_mv": {
+   "t": "65 mV",
    "f": "n7.ss"
   },
   "v_min": {
@@ -2702,7 +2708,7 @@
    "f": "el.sram-electrons"
   },
   "latch_e": {
-   "t": "about 320-970",
+   "t": "about 320-970 electrons",
    "f": "el.sram-electrons"
   },
   "dram_e": {
@@ -2753,8 +2759,8 @@
    "t": "0.235 nm",
    "f": "size.p.atom"
   },
-  "at_32k": {
-   "t": "about 32,000 times",
+  "at_29k": {
+   "t": "about 29,000 times",
    "f": "p.atom.11"
   },
   "nu_pn": {
@@ -2813,6 +2819,10 @@
    "t": "2 × 10⁻²⁰ m",
    "f": "p.electron.2"
   },
+  "el_edm": {
+   "t": "4.1 × 10⁻³² m",
+   "f": "p.electron.4"
+  },
   "el_q": {
    "t": "1.602176634 × 10⁻¹⁹ C",
    "f": "p.electron.1"
@@ -2836,6 +2846,14 @@
   "dp_50": {
    "t": "about 1 atom in 50",
    "f": "p.dopant.5"
+  },
+  "sd_29": {
+   "t": "one atom in 29",
+   "f": "dope.count-sd"
+  },
+  "sd_13": {
+   "t": "one of every thirteen",
+   "f": "dope.count-sd"
   },
   "ring_mid": {
    "t": "0.12 mm",

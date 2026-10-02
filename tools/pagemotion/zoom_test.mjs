@@ -21,7 +21,7 @@
 //      announced on arrival
 //   T12 the ring of sizes, off the loop since 1 Oct evening: #at=p.wrap opens it, and the top's panel and the Planck
 //      length's (after coming round) link to it, but no Up or + leads there; its ways back in (an atom of the
-//      multiply-add; an atom of a 6T memory cell; the Planck length under the first atom, which its Up takes, while +
+//      multiply-add; an atom of an L2 memory cell, drawn as a 6T cell; the Planck length under the first atom, which its Up takes, while +
 //      goes to the top) each land where they say and Up climbs their branch; the landing panel says the reader came
 //      round, and offers the way back
 //   T14 the easter egg (the owner, 1 Oct 07:25): no level above the rack is named in the page's text, the breadcrumb,
@@ -202,7 +202,8 @@ T.T3 = async b => {
   ok(/Round the loop: from the observable universe to the Planck length/.test(mv.note), 'T3 a note over the drawing: from the observable universe to the Planck length', mv.note);
   ok(!mv.grew.length && !mv.bad.length, 'T3 the step only zooms out: neither end grows on the screen, both within [1/30, 30]', mv.grew.concat(mv.bad).slice(0, 3).join(' | '));
   const pn = await b.ev(`document.getElementById('pn-body').textContent`), ro = await b.ev(`document.getElementById('scale-ro').textContent`);
-  ok(/You came round the loop/.test(pn) && /The ring of sizes/.test(pn) && /10⁻³⁵ m/.test(ro), 'T3 its panel says the reader came round, and offers the ring of sizes; the readout at rest gives the Planck length', `${ro} | ${pn.slice(0, 140)}`);
+  // (since the fact review of 1 Oct the landing says it is no journey through space, and names the fixed point)
+  ok(/round the loop/.test(pn) && /Not further out in space/.test(pn) && /XOR gate/.test(pn) && /The ring of sizes/.test(pn) && /10⁻³⁵ m/.test(ro), 'T3 its panel says the reader came round the loop (a picture, not a place), names the fixed atom, and offers the ring of sizes; the readout at rest gives the Planck length', `${ro} | ${pn.slice(0, 220)}`);
   // and up again to the die: 19 presses (a quark, a proton, the nucleus, the atom, the crystal, the channel, the fin, the
   // FinFET, the XOR, the full adder, the 4:2, the column, the tree, the multiply-add, the lane, the vector unit, the
   // minion, the shire, the chip)
@@ -371,7 +372,9 @@ T.T7 = async b => {
 T.T9 = async b => {
   const { mkdtempSync, copyFileSync } = await import('node:fs');
   const { resolve, join } = await import('node:path');
-  const d = mkdtempSync(resolve(process.env.ZT_TMP || '/home/yaroslavvb/claude/work/chipzoom/tests', 'noimg-'));
+  // (ZT_TMP, else TMPDIR, else the system's: no one machine's folder; code review of 1 Oct)
+  const { tmpdir } = await import('node:os');
+  const d = mkdtempSync(resolve(process.env.ZT_TMP || process.env.TMPDIR || tmpdir(), 'noimg-'));
   // (a page on a local server is fetched: the copy alone, without its folder)
   if (/^https?:/.test(PAGE)) { const { writeFileSync } = await import('node:fs'); writeFileSync(join(d, 'page.html'), await (await fetch(PAGE)).text()); }
   else copyFileSync(PAGE, join(d, 'page.html'));
@@ -419,7 +422,7 @@ T.T12 = async b => {
   ok(s.path === 'p.wrap' && await b.ev('location.hash') === '#at=p.wrap', 'T12 #at=p.wrap opens the ring of sizes', `${s.path} ${await b.ev('location.hash')}`);
   const xs = await b.ev('window.__chipTest.exits()');
   ok(xs.length === 3 && /lib\.xor\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(xs[0].path) && /lib\.sram6t\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(xs[1].path) && /p\.atom\/p\.nucleus\/p\.nucleon\/p\.quark\/p\.planck$/.test(xs[2].path),
-    'T12 the ring\'s ways back in: an atom of the multiply-add, an atom of a 6T cell, the Planck length under the first', xs.map(x => x.id).join(', '));
+    'T12 the ring\'s ways back in: an atom of the multiply-add, an atom of an L2 memory cell (drawn as 6T), the Planck length under the first', xs.map(x => x.id).join(', '));
   const parts = (await b.ev('window.__chipTest.parts()')).filter(p => /^exit-/.test(p.key));
   ok(parts.length === (b.touch ? 0 : 3), `T12 the ways back in are parts of the drawing${b.touch ? ' (a phone: in the panel)' : ''}`, parts.map(p => p.label).join(' | '));
   const pb = await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].map(x => x.textContent)`);
@@ -456,7 +459,8 @@ T.T12 = async b => {
   let seen = await climb(5);
   ok(seen.join(' ') === 'lib.si lib.channel lib.fin lib.finfet lib.xor', 'T12 Up climbs the compute branch: the crystal, the channel, the fin, the FinFET, the XOR gate', seen.join(' '));
   await goScene(b, 'p.wrap');
-  await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].find(x => /^An atom of a 6T/.test(x.textContent)).click()`); await sleep(40); await b.idle(15000);
+  // (since the fact review of 1 Oct the shire cache's cell is "drawn as" a 6T cell: its bitcell is not published)
+  await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].find(x => /^An atom of an L2 memory cell/.test(x.textContent)).click()`); await sleep(40); await b.idle(15000);
   s = await b.state();
   ok(s.path === xs[1].path, 'T12 the panel\'s memory-cell way in lands on its atom', s.path.split('/').slice(-4).join('/'));
   seen = await climb(5);

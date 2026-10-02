@@ -11,7 +11,7 @@ lazily fetched data). Prints PASS or FAIL lines; the exit code is the number of 
   T10 no IPv4-like string in the page or the image manifest; no street address, house number, ZIP code or listing link
       for Studio 45, in the page or its data; no latitude or longitude; the rack photo's sha256 equals the manifest's
       (from make_rack_photo.py, ten labels blurred); no EXIF, XMP or ICC in any image; the maps mark no point but the
-      usual city centres and the hill's summit; the AI Plumbers event (asked of the owner) is not on the page
+      usual city centres and the hill's summit; no event at the venue is named (asked of the owner)
   T14 the easter egg (the owner, 1 Oct 2026, 07:25): no level above the rack is named in the page's static text (its
       markup outside scripts and styles) or its description
 Since 1 Oct 2026 (the shared ladder, part 2) it also checks the memory levels' page, which carries the ladder's data in
@@ -76,8 +76,14 @@ ok(not re.search(r'\b10\.\d+\.\d+\.\d+\b|\b192\.168\.\d+\.\d+\b|\b100\.(6[4-9]|[
 s45 = re.findall(r'.{0,120}Studio 45.{0,160}', html)
 addr = [x for x in s45 if re.search(r'\b\d{2,5}\s+[A-Z][a-z]+\s+(St|Street|Ave|Avenue|Blvd|Rd|Road|Way)\b', x)]
 ok(not addr, 'T10 no street address beside Studio 45', addr[0][:120] if addr else '')
-links = re.findall(r'(?:https?://)?[^\s"\'<>)]*(?:sfstation|coworkingcafe|lu\.ma|luma\.com|globenewswire|workatthestudio)[^\s"\'<>)]*', html + lz, re.I)
+links = re.findall(r'(?:https?://)?[^\s"\'<>)]*(?:sfstation|coworkingcafe|lu\.ma|luma\.com|globenewswire|eventcreate)[^\s"\'<>)]*', html + lz, re.I)
 ok(not links, 'T10 no link to a listing or release that shows the address', ' '.join(links[:3]))
+# the venue's own site and an event held there, by hash (the repository is public: their names are not spelled out
+# here); any word of the page whose sha256 starts with one of these fails
+HIDDEN_H = {'1efd00b48907d88c': 'the venue\'s site', '44c9eb11254c57de': 'an event at the venue (it waits for the owner)'}
+words = set(re.findall(r'[a-z0-9]+', (html + lz).lower()))
+hid = sorted({HIDDEN_H[h] for h in (hashlib.sha256(w.encode()).hexdigest()[:16] for w in words) if h in HIDDEN_H})
+ok(not hid, 'T10 the venue\'s site and events at the venue are not named', ', '.join(hid))
 both = html + lz
 hn = re.findall(r'.{0,40}\b\d{1,5}\s+29th\b.{0,20}', both, re.I)
 ok(not hn, 'T10 no house number before 29th', hn[0] if hn else '')
@@ -86,7 +92,6 @@ ok(not zp, 'T10 no San Francisco ZIP code', ' '.join(zp[:3]))
 # (the usual city centre of San Francisco, which the coast-to-coast fibre example names, is not the lab's)
 ll = sorted(set(m.group(0) for m in re.finditer(r'(?<![\d.])-?(?:3[67]|12[12])\.\d{4,}', both)) - {'37.7749', '122.4194'})
 ok(not ll, 'T10 no latitude or longitude but the usual city centre', ' '.join(ll[:5]))
-ok(not re.search(r'Plumbers', both), 'T10 the AI Plumbers event is not on the page (it waits for the owner)')
 # the rack photo is the ten-label copy (since 1 Oct)
 man = D.get('img', {})
 for f in imgs:

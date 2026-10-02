@@ -59,7 +59,8 @@ const n0 = v => (v == null || isNaN(v) ? 0 : v);
    gate", "the FinFET transistor" (a word with capitals inside keeps them; a name with no article and no number gets
    "the": review of 1 Oct) */
 const inName = t => {
-  const s0 = String(t).replace(/^(The|A|An|One) /, m => m.toLowerCase()).replace(/^([A-Z])([a-z]+)(?=[\s,]|$)/, (m, a, b) => (/^(Booth|Wallace)$/.test(a + b) ? m : a.toLowerCase() + b));
+  // (a hyphenated first word too: "the flip-flop", not "the Flip-flop"; review of 1 Oct)
+  const s0 = String(t).replace(/^(The|A|An|One) /, m => m.toLowerCase()).replace(/^([A-Z])([a-z]+)(?=[\s,-]|$)/, (m, a, b) => (/^(Booth|Wallace|Kogge)$/.test(a + b) ? m : a.toLowerCase() + b));
   return /^(the|a|an|one) /.test(s0) || /\d\s*$/.test(s0) ? s0 : 'the ' + s0;
 };
 const L1X = () => CKT.INST.l1(), L2X = () => CKT.INST.l2(), DRX = () => CKT.INST.dram();

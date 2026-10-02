@@ -41,6 +41,8 @@ BA_SI28 = 8.4477445           # MeV per nucleon
 # NIST ASD ionization energies of Si (eV): Si I .. Si XIV
 IE = [8.15168, 16.34585, 33.49300, 45.14179, 166.767, 205.279, 246.57, 303.59,
       351.28, 401.38, 476.273, 523.415, 2437.65805, 2673.177958]
+# X-Ray Data Booklet (LBNL) Table 1-1, electron binding energies of Si (eV): K 1s, L1 2s, L3 2p3/2 (L2 2p1/2 99.82)
+XDB_1S, XDB_2S, XDB_2P = 1839, 149.7, 99.42
 # Clementi & Raimondi 1963 effective nuclear charges for Si
 ZEFF_1S, ZEFF_2P = 13.575, 9.945
 # PDG 2026
@@ -77,7 +79,7 @@ R_unif_meas = math.sqrt(5 / 3) * RMS_SI28             # fm, uniform sphere with 
 m_nuc_u = M_SI28_U - 14 * M_E_U
 frac_nuc = m_nuc_u / M_SI28_U
 rho_nuc = m_nuc_u * U_KG / (4 / 3 * math.pi * (R_nuc * 1e-15) ** 3)
-atom_over_nuc = bond / (2 * R_nuc * 1e-15)
+atom_over_nuc = bond / (2 * R_unif_meas * 1e-15)      # diameter to diameter: the page's nucleus, 8.06 fm across
 B_tot = BA_SI28 * 28
 uud = 2 * M_U + M_D
 qbound_over_planck = Q_RADIUS / L_P
@@ -125,7 +127,7 @@ S = {
     "nist-iso": "NIST, Atomic Weights and Isotopic Compositions for Silicon, physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=Si (read 1 Oct 2026)",
     "nist-asd": "NIST Atomic Spectra Database, Ground levels and ionization energies, spectra Si I to Si XIV, physics.nist.gov/cgi-bin/ASD/ie.pl (read 1 Oct 2026)",
     "iaea": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021))",
-    "krane": "K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm",
+    "krane": "K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm (the textbook rule as widely quoted; the book not read for this page)",
     "pdg-q": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: quarks (pdg.lbl.gov/2026/tables/rpp2026-sum-quarks.pdf)",
     "pdg-b": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf)",
     "pdg-l": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf)",
@@ -151,15 +153,16 @@ S = {
     "hotqcd": "A. Bazavov et al. (HotQCD), \"Chiral crossover in QCD at zero and non-zero chemical potentials\", Phys. Lett. B 795, 15 (2019), arXiv:1812.08235",
     "ew": "M. D'Onofrio and K. Rummukainen, \"Standard model cross-over on the lattice\", Phys. Rev. D 93, 025003 (2016), arXiv:1508.07161",
     "cern2017": "CERN press release, \"Quark Matter 2017: understanding the early universe\", 9 Feb 2017, home.cern",
-    "leconte": "G. Leconte-Chevillard, \"'The poor man's accelerator', or how the primordial universe became a testing ground for particle physics\", Synthese 207 (2026), doi:10.1007/s11229-026-05476-2",
-    "ssg": "G. Steigman, D. N. Schramm, J. E. Gunn, \"Cosmological limits to the number of massive leptons\", Phys. Lett. B 66, 202 (1977)",
+    "leconte": "G. Leconte-Chevillard, \"'The poor man's accelerator', or how the primordial universe became a testing ground for particle physics\", Synthese 207 (2026), doi:10.1007/s11229-026-05476-2 (its Crossref record; the paper not read for this page)",
+    "ssg": "G. Steigman, D. N. Schramm, J. E. Gunn, \"Cosmological limits to the number of massive leptons\", Phys. Lett. B 66, 202 (1977) (as cited in the review literature; the paper not read for this page)",
     "johnson": "J. A. Johnson, \"Populating the periodic table: Nucleosynthesis of the elements\", Science 363, 474 (2019)",
     "woosley": "S. E. Woosley, A. Heger, T. A. Weaver, \"The evolution and explosion of massive stars\", Rev. Mod. Phys. 74, 1015 (2002)",
     "connelly": "J. N. Connelly et al., \"The absolute chronology and thermal processing of solids in the solar protoplanetary disk\", Science 338, 651 (2012)",
     "usgs": "L. A. Corathers (USGS), \"Mineral resource of the month: silicon\", Geotimes (2003), usgs.gov/publications/mineral-resource-month-silicon",
     "ioffe": "Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others",
     "sze": "S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)",
-    "kittel": "C. Kittel, Introduction to Solid State Physics, 8th ed. (Wiley, 2005), ch. 3, Table 1 (cohesive energies): Si 4.63 eV per atom",
+    "kittel": "C. Kittel, Introduction to Solid State Physics, 8th ed. (Wiley, 2005), ch. 3, Table 1 (cohesive energies): Si 4.63 eV per atom (the table's value as widely quoted; the book not read for this page)",
+    "xdb": "Lawrence Berkeley National Laboratory, X-Ray Data Booklet, section 1.1, Table 1-1, Electron binding energies (xdb.lbl.gov/Section1/Table_1-1.pdf, read 1 Oct 2026): Si K 1s 1839, L1 2s 149.7, L2 2p1/2 99.82, L3 2p3/2 99.42 eV",
     "clementi": "E. Clementi and D. L. Raimondi, \"Atomic screening constants from SCF functions\", J. Chem. Phys. 38, 2686 (1963): Si Zeff 1s 13.575, 2p 9.945 (as tabulated in Wikipedia, \"Effective nuclear charge\")",
     "cordero": "B. Cordero et al., \"Covalent radii revisited\", Dalton Trans. 2008, 2832: Si 111(2) pm, P 107(3), B 84(3), As 119(4), Ge 120(4)",
     "tsmc-pat": "TSMC, US Patent 11,107,923 B2, \"Source/drain regions of FinFET devices and methods of forming same\" (priority 14 Jun 2019), description (a patent's embodiments, not a statement about N7)",
@@ -167,6 +170,7 @@ S = {
     "tdf2016": "C. Edwards, \"7nm finFET process techniques lead IEDM lineup\", Tech Design Forums, 24 Oct 2016 (on S.-Y. Wu et al., TSMC, IEDM 2016 paper 2.6)",
     "chip:chip.process": "docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process): TSMC 7 nm, more than 24 billion transistors (Esperanto, Hot Chips 33 and IEEE Micro 2022)",
     "inside": "the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si)",
+    "process": "process.json beside this file: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper)",
     "outside": "the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond)",
 }
 
@@ -196,7 +200,7 @@ levels.append({
     "frame_m": sig(1.5 * bond, 3),
     "size_kind": "derived",
     "size_note": f"the distance between neighbouring atoms in the crystal, sqrt(3)/4 x a = {bond*1e9:.4f} nm (a from CODATA 2022); each atom's share is a sphere of radius {bond/2*1e12:.1f} pm. Measured covalent radius 111 pm (Cordero 2008).",
-    "blurb": "One of the crystal's atoms: a tiny nucleus with 14 electrons around it. Only the outer four take part in bonds and in electronics; the other ten sit deep inside, held 20 to 300 times more tightly.",
+    "blurb": "One of the crystal's atoms: a tiny nucleus with 14 electrons around it. Only the outer four take part in bonds and in electronics; the other ten sit deep inside, bound about 12 to 230 times more tightly.",
     "facts": [
         F("Silicon has 14 electrons: 2 in the first shell, 8 in the second and 4 in the third (ground configuration 1s2 2s2 2p6 3s2 3p2).", "outside", "nist-asd"),
         F(f"Removing the outer four electrons one at a time costs {IE[0]:.2f}, {IE[1]:.2f}, {IE[2]:.2f} and {IE[3]:.2f} eV; the fifth, the first of the inner ten, costs {IE[4]:.1f} eV, and the last (1s) electron {IE[13]:,.0f} eV.", "outside", "nist-asd", topic="electronics"),
@@ -207,11 +211,11 @@ levels.append({
         F(f"Band gap {BAND_GAP} eV at 300 K: an electron needs that much energy to leave its bond and move freely. The thermal energy kT at 300 K is {kT300*1000:.2f} meV, {BAND_GAP/kT300:.0f} times smaller.", "outside", "ioffe", "codata", topic="electronics",
           note="kT derived from the Boltzmann constant (exact)"),
         F(f"So pure silicon at room temperature has only about 10^10 free electrons per cm3: one for every {sci(n_si_cm3/N_I,0)} atoms.", "derived", "ioffe", "codata", topic="electronics"),
-        F(f"A FinFET channel of about {CH_W} x {CH_L} x {CH_H} nm holds about {rnd(atoms_ch, 3)} silicon atoms and, on average, {sci(V_ch_nm3*1e-21*N_I,0)} thermally freed electrons: none. The transistor conducts only when the gate voltage pulls electrons in from the heavily doped source.", "inferred", "inside", "ioffe", topic="electronics",
-          note="the channel's size is the chip page's inference (TSMC does not publish N7's); the conduction picture is the textbook MOSFET (Sze ch. 6)"),
-        F(f"With more than 24 billion transistors and about {rnd(atoms_ch, 3)} atoms per fin's channel, the chip's channels hold at least {sci(24e9*atoms_ch,0)} silicon atoms: about {24e9*atoms_ch*M_SI28_U*U_KG*1e9:.1f} micrograms if each transistor has one fin, about a microgram if three. That is all the silicon that actually switches.", "inferred", "inside", "chip:chip.process",
-          note="the transistor count is Esperanto's; fins per transistor and N7's channel size are not published, so this is an order of magnitude"),
-        F(f"Its share of the crystal (a sphere of radius {bond/2*1e12:.0f} pm) is about {rnd(atom_over_nuc)} times wider than its nucleus.", "derived", "codata", "krane"),
+        F(f"A FinFET channel of about {CH_W} x {CH_L} x {CH_H} nm holds about {rnd(atoms_ch, 3)} silicon atoms and, on average, {sci(V_ch_nm3*1e-21*N_I,0)} thermally freed electrons: none. The transistor conducts only when the gate voltage pulls electrons in from the heavily doped source.", "inferred", "process", "ioffe", topic="electronics",
+          note="the channel: N7's published fin, 6 x 52 nm, and effective gate length, 16.5 nm (process.json n7.fin-width, n7.fin-height, n7.leff); the conduction picture is the textbook MOSFET (Sze ch. 6)"),
+        F(f"With more than 24 billion transistors and about {rnd(atoms_ch, 3)} atoms in each fin's channel, the chip's channels hold at least {sci(24e9*atoms_ch,0)} silicon atoms: about {24e9*atoms_ch*M_SI28_U*U_KG*1e9:.1f} micrograms at one fin per transistor, about {2*24e9*atoms_ch*M_SI28_U*U_KG*1e9:.1f} at the dense cells' two. That is all the silicon that actually switches.", "inferred", "process", "chip:chip.process",
+          note="the transistor count is Esperanto's; the channel is N7's published fin and effective gate length (process.json); dense cells have about two fins per transistor (process.json n7.two-fin, Angstronomics); how many fins each of this chip's transistors has is not published, so this is an order of magnitude"),
+        F(f"Its share of the crystal, {bond*1e9:.3f} nm across, is about {rnd(atom_over_nuc)} times wider than its nucleus (about {2*R_unif_meas:.1f} fm across).", "derived", "codata", "iaea"),
     ],
     "draw": "Drawn SVG: the atom at the centre with its four bonds to the neighbours' edges (tetrahedral, 109.5 degrees, drawn in projection); a soft cloud for the four valence electrons; a small bright core labelled \"10 inner electrons and the nucleus\"; a scale bar of 0.1 nm. Reuses lib.si's ball-and-stick style.",
     "zoom_from_inner": None,
@@ -262,7 +266,8 @@ levels.append({
         F(f"The 1s pair sits about {r1s*1e12:.1f} pm from the nucleus and the 2s and 2p eight about {r2p*1e12:.0f} pm: the outer four, around {bond/2*1e12:.0f} pm, are some 5 to 30 times farther out.", "derived", "clementi", "codata",
           note="hydrogen-like estimate with effective nuclear charges; good for the nodeless 1s and 2p orbitals"),
         F("The 1s electrons feel almost the full nuclear charge (an effective 13.6 of 14); the 3p electrons feel only 4.3, because the inner ten stand in between.", "outside", "clementi"),
-        F(f"The innermost electron of a silicon atom is bound by {IE[13]:,.0f} eV, more than 300 times an outer electron's {IE[0]:.2f} eV.", "outside", "nist-asd"),
+        F(f"In the silicon atom the 1s pair is bound by about {XDB_1S:,.0f} eV, some {rnd(XDB_1S/IE[0])} times an outer electron's {IE[0]:.2f} eV; the 2s and 2p eight by about {XDB_2S:.0f} and {XDB_2P:.0f} eV, {XDB_2P/IE[0]:.0f} to {XDB_2S/IE[0]:.0f} times. (The {IE[13]:,.0f} eV of the ionisation table is the cost of the last electron of an ion already stripped of the other thirteen.)", "outside", "xdb", "nist-asd",
+          note=f"core-level binding energies of the solid (X-Ray Data Booklet; relative to the Fermi level, which changes them by a few eV) against the free atom's first ionisation energy: {XDB_1S} / {IE[0]:.2f} = {XDB_1S/IE[0]:.0f}, {XDB_2P} / {IE[0]:.2f} = {XDB_2P/IE[0]:.1f}"),
         F("An electron in an atom is not a little ball on an orbit: the shells are clouds of probability, and the radii here are where each cloud is densest.", "generic", "sze"),
     ],
     "draw": "Drawn SVG: radial-density rings (1s small and bright, 2s/2p a ring at about 21 pm), the valence cloud as a faint rim at the frame's edge; a scale bar of 10 pm.",
@@ -281,18 +286,18 @@ levels.append({
     "frame_m": sig(3 * R_nuc * 1e-15, 3),
     "size_kind": "outside",
     "size_note": f"diameter from R = 1.2 fm x 28^(1/3) = {R_nuc:.2f} fm (Krane); the measured rms charge radius is {RMS_SI28} fm, which a uniform sphere of radius {R_unif_meas:.2f} fm would have. A nucleus has a soft edge, so any radius is a convention.",
-    "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: a thirty-thousandth of the atom's width but 99.97% of its mass. Nothing in a chip ever touches it.",
+    "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: some 29,000 times narrower than the atom, but 99.97% of its mass. Nothing in a chip ever touches it.",
     "facts": [
         F("Silicon-28: 14 protons and 14 neutrons, stable.", "outside", "iaea"),
         F(f"Nuclear radius R = R0 A^(1/3) with R0 about 1.2 fm: for A = 28, R = {R_nuc:.2f} fm, about {2*R_nuc:.1f} fm across.", "generic", "krane"),
         F(f"Measured rms charge radius {RMS_SI28} +/- 0.0024 fm.", "outside", "iaea"),
         F(f"The nucleus holds {frac_nuc*100:.2f}% of the atom's mass; the 14 electrons, {100-frac_nuc*100:.3f}%.", "derived", "iaea", "pdg-l"),
         F(f"Its density is about {sci(rho_nuc)} kg per m3: a teaspoon (5 mL) of nuclear matter would weigh about {rho_nuc*5e-6/1e12:.1f} billion tonnes.", "derived", "iaea", "krane"),
-        F(f"If the nucleus were a 1 cm marble, the atom's share of the crystal would be about {rnd(atom_over_nuc*0.01)} m across: an atom is almost all empty space.", "derived", "codata", "krane"),
+        F(f"If the nucleus were a 1 cm marble, the atom's share of the crystal would be about {rnd(atom_over_nuc*0.01)} m across: an atom is almost all empty space.", "derived", "codata", "iaea"),
         F(f"Binding energy {BA_SI28:.3f} MeV per nucleon, {B_tot:.0f} MeV in all: the nucleus weighs {B_tot/931.49410372/M_SI28_U*100:.1f}% less than its 28 separate parts (E = mc^2).", "outside", "iaea"),
         F(f"That is about a million times the energy of the outer electrons ({IE[0]:.2f} eV) or of a chemical bond (about 2.3 eV): why chemistry, and electronics, never change a nucleus.", "derived", "iaea", "nist-asd", "kittel"),
     ],
-    "draw": "Drawn SVG: a cluster of 28 overlapping spheres (14 proton-coloured, 14 neutron-coloured) with a soft edge; scale bar 1 fm; a small inset showing the atom with the nucleus as an invisible dot (\"this is 1/32,000 of the atom\").",
+    "draw": "Drawn SVG: a cluster of 28 overlapping spheres (14 proton-coloured, 14 neutron-coloured) with a soft edge; scale bar 1 fm; a small inset showing the atom with the nucleus as an invisible dot (\"this is 1/29,000 of the atom\").",
     "zoom_from_inner": None,
 })
 
@@ -417,14 +422,14 @@ levels.append({
     "frame_m": None,
     "size_kind": "conceptual",
     "size_note": "Not a size. This step is a picture of all the scales at once, not a place: zooming out past the observable universe does not lead to anything physical, and the circle is an idea, not a continuation of space.",
-    "blurb": "A serpent swallowing its tail: the physicist Sheldon Glashow's picture of all the sizes in nature, from the Planck length at the tail to the observable universe at the head. The circle is a way of seeing, not a place: the largest and smallest scales are joined by physics, not by distance. Looking far out is looking back in time, to an early universe that was a sea of quarks.",
+    "blurb": "A serpent swallowing its tail: the physicist Sheldon Glashow's picture of all the sizes in nature, from the Planck length at the tail to the observable universe at the head. The circle is a way of seeing, not a place: the largest and smallest scales are joined by physics, not by distance. Looking far out is looking back in time, as far as the oldest light; before it, physics tells of an early universe that was a sea of quarks.",
     "honesty": "The page must say on this level, in words: \"This is not further out in space. The ring is a picture; the links across it are physics.\" The readout shows \"conceptual link\" instead of a size, and the move animates along the ring, not as a zoom.",
     "facts": [
         F("Joel Primack and Nancy Ellen Abrams, adapting an idea of Sheldon Glashow (Nobel 1979), drew the 'Cosmic Uroboros': the tip of the tail is the Planck length, the head is the cosmic horizon, about 60 powers of ten apart.", "outside", "primack", "glashow"),
         F("Their first meaning: gravity, negligible from bacteria to atoms, becomes strong again at the tail's tip, so it may link the largest and smallest sizes (a hope of quantum gravity and string theory, not yet tested).", "hypothesis", "primack"),
         F("Their second meaning: at the very beginning of the Big Bang the largest scale, the horizon, was not much larger than the smallest; the serpent's body filled in as the universe expanded.", "hypothesis", "primack",
           note="the horizon's growth from near-Planck size rests on extrapolating known physics back to the Planck time"),
-        F("Looking out is looking back: the farthest light we can see, the cosmic microwave background, left 380,000 years after the Big Bang; before that the universe was hot, dense and opaque.", "outside", "nasa-bb", "nasa-history"),
+        F(f"Looking out is looking back: the farthest light we can see, the cosmic microwave background, left about 380,000 years after the Big Bang ({T_STAR_KYR * 1e3:,.0f} years in the Planck satellite's fit); before that the universe was hot, dense and opaque.", "outside", "nasa-bb", "nasa-history", "pdg-astro"),
         F("The early universe is 'the poor man's accelerator' (Zel'dovich): its first minutes reached energies that test particle physics.", "outside", "leconte"),
         F("Example: the helium made in the first three minutes limited how many kinds of neutrino could exist (Steigman, Schramm and Gunn, 1977); collider measurements of the Z boson later counted 2.996 +/- 0.007.", "outside", "ssg", "leconte", "pdg-l"),
         F(f"On a logarithmic scale the middle of the whole ladder, between the Planck length and the observable universe, is {log_mid*1e3:.2f} mm: about the size of a minion's 4 KB L1 data cache or one SRAM panel of the shire cache in this chip.", "derived", "codata", "outside", "inside",
@@ -502,7 +507,7 @@ epochs.append({
         F("The Standard Model's electroweak crossover, when the Higgs field takes its value, is at 159.5 +/- 1.5 GeV (lattice).", "outside", "ew"),
         F(f"That was about {t_ew*1e12:.0f} picoseconds after the Big Bang, when the region that is now our observable universe was about {d_ew/AU:.0f} times the Earth-Sun distance across.", "derived", "pdg-bb", "ew", "outside",
           note="PDG eq. 22.44 with all Standard Model particles, N = 106.75"),
-        F("In the Standard Model the electron and the quarks get their masses from the Higgs field. The electron's mass sets the size of every atom (the Bohr radius is inversely proportional to it), and so the size of the chip's transistors.", "generic", "pdg-bb", "codata"),
+        F("In the Standard Model the electron and the quarks get their masses from the Higgs field. The electron's mass sets the size of every atom (the Bohr radius is inversely proportional to it), and so how far apart the atoms of the chip's transistors sit.", "generic", "pdg-bb", "codata"),
     ],
 })
 epochs.append({
@@ -525,7 +530,7 @@ stardust = {
         F("Silicon is made in massive stars, by oxygen burning late in their lives, and spread by their supernova explosions; exploding white dwarfs make some too.", "outside", "johnson", "woosley"),
         F("The Sun and its planets formed from gas already enriched by earlier stars; the oldest solids in the Solar System are 4,567.30 +/- 0.16 million years old.", "outside", "connelly", "primack"),
         F("Silicon is the second most abundant element in Earth's crust, more than 25% by weight.", "outside", "usgs"),
-        F("So the silicon atoms in the chip's fins were forged in stars of the Milky Way more than 4.6 billion years ago, from protons and neutrons formed in the first 20 microseconds: a physical link between the ladder's top and bottom.", "inferred", "johnson", "connelly", "hotqcd"),
+        F("So the silicon atoms in the chip's fins were forged in stars of the Milky Way more than 4,567 million years ago, from protons and neutrons formed some 14 to 24 microseconds after the Big Bang: a physical link between the ladder's top and bottom.", "inferred", "johnson", "connelly", "hotqcd"),
     ],
 }
 

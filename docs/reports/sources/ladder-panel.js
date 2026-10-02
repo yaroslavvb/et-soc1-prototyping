@@ -41,7 +41,9 @@ function zoomRowHere(P) {
   else if (U) rows.push(zrow('', [zbtn(U, egg(U[U.length - 1]) || isTop(P) ? '↑ Zoom out: ?' : `↑ Zoom out to ${toOf(U[U.length - 1])}`, false, '(Backspace)')]));
   // (the top, the last level of the easter egg: the ring of sizes, off the loop since 1 Oct evening, by its link)
   if (isTop(P) && NODES[WRAP]) rows.push(zrow('', [zbtn([{id: WRAP}], '↻ The ring of sizes: every size at once', false, '')]));
-  return `<div class="pn-zoom">${rows.join('')}</div>`;
+  // (a page whose drawings have no edge links asks for the neighbours each way here: the memory levels, pageSide)
+  if (typeof pageSide === 'function') { const sb = pageSide(P); if (sb.length) rows.push(zrow('Next to it:', sb)); }
+  return `<div class="pn-zoom" data-here="${esc(pkeys(P))}">${rows.join('')}</div>`;
 }
 function hereKick(P) { return `You are here · <span class="pn-sz">${sizeHtml(sizeOf(P[P.length - 1]))}</span>`; }
 function flashZoomRow() {
@@ -126,7 +128,7 @@ function stageIntoView() {
 $('pn-body').addEventListener('click', e => {
   const b = e.target.closest('button[data-act]'); if (!b) return;
   // pressed from the keyboard: after the move, focus goes to the new panel's zoom row (it is rebuilt on arrival)
-  if (b.dataset.act === 'go') { stageIntoView(); userNav(pathFrom(b.dataset.to), {pfocus: e.detail === 0}); }
+  if (b.dataset.act === 'go') { stageIntoView(); userNav(pathFrom(b.dataset.to), {pfocus: e.detail === 0, pan: b.dataset.pan === '1'}); }
   else if (b.dataset.act === 'state') stateToggle();
   else if (ACTS[b.dataset.act]) ACTS[b.dataset.act](b);
 });

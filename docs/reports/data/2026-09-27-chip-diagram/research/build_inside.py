@@ -969,7 +969,7 @@ N('lib.adder', 'lib', 'Fast (parallel-prefix) adder', 3e-5, 'inferred', 'a 64-bi
   [G('Parallel-prefix adders (Kogge-Stone, Sklansky, Brent-Kung) compute carries in log2(N) levels of generate/propagate '
      'cells.', WH + ', ch. 11 (addition)')], kind='circuit', see=['lib.fa', 'lib.nand2'])
 
-N('lib.latch', 'lib', 'Latch (the L1\'s storage cell)', 5e-7, 'inferred',
+N('lib.latch', 'lib', 'Latch (drawn as the L1\'s storage cell)', 5e-7, 'inferred',
   'about 8-10 gate pitches wide in a 240 nm cell: about 0.1-0.15 um2 (inference)',
   '''A bit of memory made of logic: two inverters in a loop hold the value, and a clocked switch lets a new value in
   while the clock is high. The minion's caches and register files are made of these.''',

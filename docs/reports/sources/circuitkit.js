@@ -53,37 +53,37 @@ const CKT = (ENV => {
   const badges = list => list.map(([k, t]) => { const w = k === 'unknown' ? 'unknown · asked' : k; return `<span class="kd ${k === 'documented' ? 'spec' : k}">${esc(w)}</span>${t && t !== w ? ` <span class="cav">${esc(t)}</span>` : ''}`; }).join(' ');
 
 /* ---- the drawing kit ---- */
-// kickAs: memory-levels.script.js at 1980ebb, lines 3336-3336
+// kickAs: memory-levels.script.js at 290cb9c, lines 3862-3862
 const kickAs = (fn, kick, facts) => ctx => Object.assign({}, fn(ctx), {kick}, facts ? {facts} : {});
-// KB_CLS: memory-levels.script.js at 1980ebb, lines 242-245
+// KB_CLS: memory-levels.script.js at 290cb9c, lines 303-306
 /* Every label knocks out what runs under it (a trail, a lit ring, a wire, a rail band's tint) in the colour of what
    it sits on, so it reads cleanly; where nothing runs under it the knockout is invisible (CSS: #mem .lay text). A part
    sets that colour for its labels (boxShape, --kb); a label on an opaque shape (a gate, a card) takes the shape's */
 const KB_CLS = {gate: 'var(--surface)', ch: 'var(--surface)', bub: 'var(--surface)', 'co-box': 'var(--surface)'};
-// COL: memory-levels.script.js at 1980ebb, lines 689-691
+// COL: memory-levels.script.js at 290cb9c, lines 1170-1172
 /* Roles (DESIGN.md §3): logic --c1, storage --c3, interconnect --c4, crossings --c5; --c2 is kept for what is active.
    One stroke scale: components 2, frames 2.5, sub-structure 1.25, moving trails 6, transistors 2 (lit 3.5). */
 const COL = {logic: 'var(--c1)', store: 'var(--c3)', net: 'var(--c4)', xing: 'var(--c5)', aux: 'var(--c7)', ink: 'var(--ink-2)'};
-// DASH: memory-levels.script.js at 1980ebb, lines 699-700
+// DASH: memory-levels.script.js at 290cb9c, lines 1180-1181
 /* a part's outline: solid when documented, dotted when generic, dashed when unknown (DESIGN.md §3) */
 const DASH = {generic: '2 5', unknown: '8 6'};
-// BAND_FILL: memory-levels.script.js at 1980ebb, lines 77-82
+// BAND_FILL: memory-levels.script.js at 290cb9c, lines 104-109
 /* the rail bands: a light tint and a text label; the label, not the colour, names the band (DESIGN.md §3). Tints in
    hues the part colours do not use, since 28 Sep: the earlier stripes and dots behind the labels made text hard to read.
    The keys keep their old pattern names ('pat-…'): data-band on each tinted shape tells the legend which bands a view has. */
 const BAND_FILL = {'pat-lv': 'color-mix(in srgb, var(--c7) 9%, transparent)', 'pat-hv': 'color-mix(in srgb, var(--ref) 12%, transparent)',
   'pat-mesh': 'color-mix(in srgb, var(--c4) 10%, transparent)', 'pat-ddr': 'color-mix(in srgb, var(--c5) 8%, transparent)',
   'pat-hatch': 'color-mix(in srgb, var(--ink-2) 13%, transparent)'};
-// FS_BASE: memory-levels.script.js at 1980ebb, lines 266-266
+// FS_BASE: memory-levels.script.js at 290cb9c, lines 327-327
 const FS_BASE = {'t-sm': 17, 't-smb': 17, 't-mono': 17, 't-lab': 20, 't-labb': 20, 't-net': 19, 't-mid': 24, 't-big': 30};
-// comp: memory-levels.script.js at 1980ebb, lines 693-698
+// comp: memory-levels.script.js at 290cb9c, lines 1174-1179
 function comp(parent, key, ctx, label) {
   const g = E('g', {class: 'comp dimmable', tabindex: 0, role: 'button', 'aria-label': label, 'data-comp': key}, parent);
   g._key = key; g._ctx = ctx || {};
   if (BAP) (BAP.parts[key] = BAP.parts[key] || []).push(g);
   return g;
 }
-// boxShape: memory-levels.script.js at 1980ebb, lines 701-711
+// boxShape: memory-levels.script.js at 290cb9c, lines 1182-1192
 function boxShape(g, x, y, w, h, col, o) {
   o = o || {};
   const rx = o.rx == null ? 6 : o.rx;
@@ -95,7 +95,7 @@ function boxShape(g, x, y, w, h, col, o) {
   if (!g._box) g._box = {x, y, w, h};
   if (o.kind === 'unknown' && o.q !== false) T(g, x + w - 12, y + 26, '?', 't-q', 'end');
 }
-// part: memory-levels.script.js at 1980ebb, lines 712-724
+// part: memory-levels.script.js at 290cb9c, lines 1193-1208
 /* a named part: o.sub (lines under the title), o.child (the scale Enter zooms into), o.cur (the instance the address
    picks), o.kind, o.ctx, o.label (for a screen reader), o.tcls */
 function part(parent, key, x, y, w, h, col, title, o) {
@@ -106,13 +106,13 @@ function part(parent, key, x, y, w, h, col, title, o) {
   if (o.child) { g.setAttribute('data-child', o.child); if (o.cur !== false && BAP && (o.cur || !BAP.zg[o.child])) BAP.zg[o.child] = g; }
   const ty = o.ty || 28;
   if (title) T(g, o.center ? x + w / 2 : x + 12, y + ty, title, o.tcls || 't-labb', o.center ? 'middle' : 'start', o.f);
-  // (the chip page's copy: o.lh, a line pitch for the lines under the title, else 1.2 times the small type's size
-  // where the page sets it, never under the memory levels' 21; review of 1 Oct)
+  // (o.lh: a line pitch for the lines under the title, else 21; the chip diagram's blocks give theirs, and since the
+  // code review of 1 Oct this kit, drawing them for the shared ladder here, keeps it as the chip's copy does)
   const lh = o.lh || Math.max(21, SUBLH);
   (o.sub || []).forEach((s, i) => { const L0 = typeof s === 'string' ? {t: s} : s; T(g, o.center ? x + w / 2 : x + 12, y + ty + 23 + i * lh, L0.t, L0.c || 't-sm', o.center ? 'middle' : 'start', L0.f); });
   return g;
 }
-// tagPill: memory-levels.script.js at 1980ebb, lines 725-731
+// tagPill: memory-levels.script.js at 290cb9c, lines 1209-1215
 /* the corner tags of a frame, right-aligned on the title's line: [{kind, text}] */
 function tagPill(parent, xr, y, kind, text) {
   const w = Math.round(text.length * 9.4 + 26), g = E('g', {class: 'tg ' + kind}, parent);
@@ -120,7 +120,7 @@ function tagPill(parent, xr, y, kind, text) {
   T(g, xr - w / 2, y + 18.5, text, '', 'middle');
   return w;
 }
-// frame: memory-levels.script.js at 1980ebb, lines 732-741
+// frame: memory-levels.script.js at 290cb9c, lines 1216-1225
 function frame(L, o) {
   S(E('rect', {class: 'zbd', x: FR.x, y: FR.y, width: FR.w, height: FR.h, rx: 14, 'pointer-events': 'none'}, L), {fill: 'var(--page)'});
   const fr = E('g', {class: 'frm'}, L);
@@ -131,7 +131,7 @@ function frame(L, o) {
   (o.tags || []).forEach(t => { xr -= tagPill(fr, xr, FR.y + 18, t[0], t[1]) + 8; });
   return fr;
 }
-// railBand: memory-levels.script.js at 1980ebb, lines 742-748
+// railBand: memory-levels.script.js at 290cb9c, lines 1226-1232
 /* a rail band: a pattern and a label (DESIGN.md §3) */
 function railBand(parent, x, y, w, h, pat, label, key, fids) {
   const g = key ? comp(parent, key, {}, label + ': details') : E('g', {}, parent);
@@ -139,23 +139,23 @@ function railBand(parent, x, y, w, h, pat, label, key, fids) {
   if (key) { E('rect', {class: 'ring', x: x - 5, y: y - 5, width: w + 10, height: h + 10, rx: 14}, g); g._box = {x, y, w, h}; }
   return g;
 }
-// wire: memory-levels.script.js at 1980ebb, lines 749-749
+// wire: memory-levels.script.js at 290cb9c, lines 1233-1233
 const wire = (parent, P, cls) => E('path', {class: 'w' + (cls ? ' ' + cls : ''), d: 'M' + P.map(p => `${p[0]},${p[1]}`).join(' L')}, parent);
-// jn: memory-levels.script.js at 1980ebb, lines 750-750
+// jn: memory-levels.script.js at 290cb9c, lines 1234-1234
 const jn = (parent, x, y) => E('circle', {class: 'jn', cx: x, cy: y, r: 4}, parent);
-// netLab: memory-levels.script.js at 1980ebb, lines 751-751
+// netLab: memory-levels.script.js at 290cb9c, lines 1235-1235
 function netLab(parent, x, y, t, anchor, fids) { return T(parent, x, y, t, 't-net halo', anchor || 'start', fids); }
-// rail: memory-levels.script.js at 1980ebb, lines 752-755
+// rail: memory-levels.script.js at 290cb9c, lines 1236-1239
 function rail(parent, x1, x2, y, lab, anchor) {
   E('line', {class: 'rail', x1, y1: y, x2, y2: y}, parent);
   if (lab) netLab(parent, anchor === 'end' ? x1 - 8 : x2 + 8, y + 6, lab, anchor === 'end' ? 'end' : 'start');
 }
-// gnd: memory-levels.script.js at 1980ebb, lines 756-759
+// gnd: memory-levels.script.js at 290cb9c, lines 1240-1243
 function gnd(parent, x, y) {
   E('line', {class: 'w', x1: x, y1: y - 10, x2: x, y2: y}, parent);
   [[14, 0], [9, 6], [4, 12]].forEach(([hw, dy]) => E('line', {class: 'rail', x1: x - hw, y1: y + dy, x2: x + hw, y2: y + dy}, parent));
 }
-// mosV: memory-levels.script.js at 1980ebb, lines 760-775
+// mosV: memory-levels.script.js at 290cb9c, lines 1244-1259
 /* ---- transistors: a MOSFET drawn as a gate plate beside a channel; PMOS with a bubble. (x, y) is the channel's
    centre. The channel is the element the mos() primitive fills. ---- */
 function mosV(parent, x, y, o) {
@@ -172,7 +172,7 @@ function mosV(parent, x, y, o) {
   if (o.name) T(parent, x + f * 12, y + 6, o.name, 't-sm', o.flip ? 'end' : 'start');
   return {g, ch, gate: {x: gend, y}, top: {x, y: y - 30}, bot: {x, y: y + 30}, x, y, p: !!o.p, h: false};
 }
-// mosH: memory-levels.script.js at 1980ebb, lines 776-789
+// mosH: memory-levels.script.js at 290cb9c, lines 1260-1273
 function mosH(parent, x, y, o) {
   o = o || {};
   const f = o.down ? -1 : 1, g = E('g', {class: 'mos ' + (o.p ? 'pm' : 'nm')}, parent);
@@ -187,7 +187,7 @@ function mosH(parent, x, y, o) {
   if (o.name) T(parent, x, y + f * 30, o.name, 't-sm', 'middle');
   return {g, ch, gate: {x, y: gend}, left: {x: x - 30, y}, right: {x: x + 30, y}, x, y, p: !!o.p, h: true};
 }
-// invSym: memory-levels.script.js at 1980ebb, lines 790-796
+// invSym: memory-levels.script.js at 290cb9c, lines 1274-1280
 /* gate-level symbols, 2-unit strokes; each returns its pins */
 function invSym(parent, x, y, o) {
   o = o || {}; const s = o.s || 22, f = o.left ? -1 : 1, g = E('g', {}, parent);
@@ -195,7 +195,7 @@ function invSym(parent, x, y, o) {
   E('circle', {class: 'gate', cx: x + f * (s * 0.7 + 5), cy: y, r: 5}, g);
   return {g, in: {x: x - f * s, y}, out: {x: x + f * (s * 0.7 + 10), y}, shape: g.firstChild};
 }
-// andSym: memory-levels.script.js at 1980ebb, lines 797-806
+// andSym: memory-levels.script.js at 290cb9c, lines 1281-1290
 function andSym(parent, x, y, o) {
   o = o || {}; const h = o.h || 44, w = o.w || 44, g = E('g', {}, parent);
   const d = (o.or || o.xnor) ? `M${x},${y - h / 2} Q${x + w * 0.6},${y - h / 2} ${x + w},${y} Q${x + w * 0.6},${y + h / 2} ${x},${y + h / 2} Q${x + w * 0.25},${y} ${x},${y - h / 2} Z`
@@ -206,13 +206,13 @@ function andSym(parent, x, y, o) {
   if (o.bubble || o.xnor) { E('circle', {class: 'gate', cx: x + w + 5, cy: y, r: 5}, g); ox += 10; }
   return {g, shape: sh, a: {x: x + (o.xnor ? -8 : 0), y: y - h / 4}, b: {x: x + (o.xnor ? -8 : 0), y: y + h / 4}, out: {x: ox, y}};
 }
-// mux2: memory-levels.script.js at 1980ebb, lines 807-811
+// mux2: memory-levels.script.js at 290cb9c, lines 1291-1295
 function mux2(parent, x, y, o) {
   o = o || {}; const w = o.w || 26, h = o.h || 56, g = E('g', {}, parent);
   const sh = E('path', {class: 'gate', d: `M${x},${y - h / 2} L${x + w},${y - h / 2 + 10} L${x + w},${y + h / 2 - 10} L${x},${y + h / 2} Z`}, g);
   return {g, shape: sh, in0: {x, y: y - h / 4}, in1: {x, y: y + h / 4}, out: {x: x + w, y}, sel: {x: x + w / 2, y: y + h / 2 - 5}};
 }
-// flopSym: memory-levels.script.js at 1980ebb, lines 812-818
+// flopSym: memory-levels.script.js at 290cb9c, lines 1296-1302
 function flopSym(parent, x, y, w, h, lab, o) {
   o = o || {}; const g = E('g', {}, parent);
   E('rect', {class: 'gate', x, y, width: w, height: h, rx: 3}, g);
@@ -220,7 +220,7 @@ function flopSym(parent, x, y, w, h, lab, o) {
   if (lab) T(g, x + w / 2, y + h / 2 + 6, lab, o.cls || 't-sm', 'middle');
   return {g, shape: g.firstChild, d: {x, y: y + h / 3}, q: {x: x + w, y: y + h / 3}, ck: {x, y: y + h - 10}};
 }
-// icgSym: memory-levels.script.js at 1980ebb, lines 819-825
+// icgSym: memory-levels.script.js at 290cb9c, lines 1303-1309
 /* an integrated clock gate: a latch holding the enable, ANDed with the clock (drawn as a box with its two gates) */
 function icgSym(parent, x, y, o) {
   o = o || {}; const g = E('g', {}, parent), w = o.w || 58, h = o.h || 40;
@@ -228,7 +228,7 @@ function icgSym(parent, x, y, o) {
   T(g, x + w / 2, y + h / 2 + 6, 'ICG', 't-smb', 'middle');
   return {g, shape: g.firstChild, ck: {x, y: y + h * 0.3}, en: {x, y: y + h * 0.7}, out: {x: x + w, y: y + h / 2}, box: {x, y, w, h}};
 }
-// ringAll: memory-levels.script.js at 1980ebb, lines 207-217
+// ringAll: memory-levels.script.js at 290cb9c, lines 268-278
 /* every part a keyboard can reach shows a ring when focused: the parts drawn without a box get one from their
    extent (WCAG 2.4.7) */
 function ringAll(L) {
@@ -240,7 +240,7 @@ function ringAll(L) {
     E('rect', {class: 'ring', x: b.x - 6, y: b.y - 6, width: b.w + 12, height: b.h + 12, rx: 8}, g);
   });
 }
-// fitTexts: memory-levels.script.js at 1980ebb, lines 218-241
+// fitTexts: memory-levels.script.js at 290cb9c, lines 279-302
 /* a part's own labels stay inside its box at the text sizes in force (the short-screen sizes are larger): a label that
    would spill is set smaller, never below the 1920 size of its class or 15 units */
 function fitTexts(L) {
@@ -265,7 +265,7 @@ function fitTexts(L) {
     });
   });
 }
-// kbTexts: memory-levels.script.js at 1980ebb, lines 246-265
+// kbTexts: memory-levels.script.js at 290cb9c, lines 307-326
 function kbTexts(L) {
   const sh = [];
   L.querySelectorAll('rect, path, circle, ellipse, polygon').forEach(e => {
@@ -288,7 +288,7 @@ function kbTexts(L) {
 }
 
 /* ---- shared circuit drawings (generic textbook circuits; ET facts by counts and names) ---- */
-// draw6T: memory-levels.script.js at 1980ebb, lines 1307-1329
+// draw6T: memory-levels.script.js at 290cb9c, lines 1828-1850
 /* ---- a 6T SRAM cell with its bitline pair and wordline, drawn in its own coordinates (BL at x = 120, BLB at x = 540,
    WL at y = 160, the cell between y = 190 and 336). Returns the transistors and the nodes. ---- */
 function draw6T(g, o) {
@@ -312,7 +312,7 @@ function draw6T(g, o) {
   if (o.labels !== false) { netLab(g, 262, 258, 'Q', 'end'); netLab(g, 398, 290, 'QB'); }
   return {pl, nl, pr, nr, m5, m6, Q: {x: 270, y: 262}, QB: {x: 390, y: 262}, BL, BLB, WL};
 }
-// buildCell: memory-levels.script.js at 1980ebb, lines 1331-1416
+// buildCell: memory-levels.script.js at 290cb9c, lines 1852-1937
 /* ---- the cell scale: one bit of a data panel, read and written (the shared view of the L2, L3 and scratchpad) ---- */
 function buildCell(L, ap, o) {
   frame(L, {title: o.title, sub: o.sub, col: 'var(--c3)', kind: 'generic',
@@ -399,7 +399,7 @@ function buildCell(L, ap, o) {
   (o.note || []).forEach((t, i) => T(L, -150, 664 + i * Math.max(22, SUBLH), t, 't-sm', 'start', o.noteF));
   ap.gs = {pre: gp, wl: gw, cell: gc, mux: gm, wd: gd, sa: gs, olat: go, half: gh};
 }
-// buildPanel: memory-levels.script.js at 1980ebb, lines 1506-1588
+// buildPanel: memory-levels.script.js at 290cb9c, lines 2027-2109
 /* ---- the shared SRAM panel: a compiled macro's documented shell, a generic periphery, the internal geometry
    unknown. o: {title, sub, band: 'scp'|'l2'|'l3', row, facts} ---- */
 function buildPanel(L, ap, o) {
@@ -483,7 +483,7 @@ function buildPanel(L, ap, o) {
   ap.zg.cell = ga;
   ga.setAttribute('data-child', o.cellChild || 'cell');
 }
-// buildXing: memory-levels.script.js at 1980ebb, lines 1606-1661
+// buildXing: memory-levels.script.js at 290cb9c, lines 2127-2182
 /* ---- the crossing: a level shifter at the LV/HV edge (generic circuit; the crossing itself is documented) ---- */
 function buildXing(L, ap, o) {
   frame(L, {title: o.title, sub: o.sub, col: 'var(--c5)',
@@ -540,7 +540,7 @@ function buildXing(L, ap, o) {
   ap.T = {ip, inn, p1, p2, n1, n2};
   ap.wave = {x: -150, y: 440, w: 540, h: 250};
 }
-// buildLatchCell: memory-levels.script.js at 1980ebb, lines 1682-1741
+// buildLatchCell: memory-levels.script.js at 290cb9c, lines 2203-2262
 /* ---- a latch bit (L1): a transmission-gate D latch, 10 transistors ---- */
 function buildLatchCell(L, ap, o) {
   frame(L, {title: o.title, sub: o.sub, col: 'var(--c3)',
@@ -601,7 +601,7 @@ function buildLatchCell(L, ap, o) {
   ap.T = {t1n, t1p, t2n, t2p, kp, kn, i1p: i1.p, i1n: i1.q, i2p: i2.p, i2n: i2.q};
   ap.wave = {x: -150, y: 540, w: 700, h: 130};
 }
-// drawReadTree: memory-levels.script.js at 1980ebb, lines 1781-1830
+// drawReadTree: memory-levels.script.js at 290cb9c, lines 2302-2351
 /* ---- the read tree of one output bit (L1): a 128:1 select as seven levels of 2:1 muxes; the 16 rows around the
    addressed one are drawn, the last three levels take the other 112 rows as groups ---- */
 function drawReadTree(g, ap, row) {
@@ -652,7 +652,7 @@ function drawReadTree(g, ap, row) {
   P.push({x: 800, y: prev.y});
   ap.treePath = P; ap.tree = {lvl, chain, ff};
 }
-// buildComparator: memory-levels.script.js at 1980ebb, lines 1832-1864
+// buildComparator: memory-levels.script.js at 290cb9c, lines 2353-2385
 /* ---- a tag comparator: an XNOR per bit and an AND tree (L1: 33 bits; four run on every access) ---- */
 function buildComparator(L, ap, o) {
   frame(L, {title: o.title, sub: o.sub, col: 'var(--c1)', tags: [['generic', 'GENERIC circuit']]});
@@ -688,37 +688,37 @@ function buildComparator(L, ap, o) {
 }
 
 /* ---- the example address and its decoders ---- */
-// P40: memory-levels.script.js at 1980ebb, lines 1866-1867
+// P40: memory-levels.script.js at 290cb9c, lines 2387-2388
 /* ================= the example address (the chip tour's mkPA(13, 0x2468A), a DRAM-region line) ================= */
 const P40 = 2 ** 32;
-// ADDR: memory-levels.script.js at 1980ebb, lines 1868-1868
+// ADDR: memory-levels.script.js at 290cb9c, lines 2389-2389
 const ADDR = {pa: D.addr.line + D.addr.offset};
-// bits: memory-levels.script.js at 1980ebb, lines 1869-1869
+// bits: memory-levels.script.js at 290cb9c, lines 2390-2390
 const bits = (pa, hi, lo) => Math.floor(pa / 2 ** lo) % 2 ** (hi - lo + 1);
-// mkPA: memory-levels.script.js at 1980ebb, lines 1871-1871
+// mkPA: memory-levels.script.js at 290cb9c, lines 2392-2392
 function mkPA(home, salt) { return 0x80 * P40 + salt * 2048 + home * 64; }
-// L1_HART: memory-levels.script.js at 1980ebb, lines 1872-1877
+// L1_HART: memory-levels.script.js at 290cb9c, lines 2393-2398
 /* L1: set PA[9:6] in shared mode; in the firmware's split mode hart 0 has sets 12-13 and hart 1 sets 14-15 (PRM Table
    8.4, and the measured knee of 512 B per hart), so the issuing hart, not PA[7], picks the pair and PA[6] the set in it
    (the DCache Description §3.2.1 says only that both set MSBs are forced to 11: D.conflicts). The example's load is
    hart 0's. The row of the data array is {set, PA[5], way} (l1.lram-addr); block PA[4:3]. The way is an example: no
    address bit picks it. */
 const L1_HART = 0;
-// dec1: memory-levels.script.js at 1980ebb, lines 1878-1881
+// dec1: memory-levels.script.js at 290cb9c, lines 2399-2402
 function dec1(pa) {
   const set = 12 | (L1_HART << 1) | bits(pa, 6, 6), half = bits(pa, 5, 5), block = bits(pa, 4, 3), way = D.addr.way_l1;
   return {s: bits(pa, 9, 6), set, hart: L1_HART, half, block, way, row: set * 8 + half * 4 + way};
 }
-// dec2: memory-levels.script.js at 1980ebb, lines 1882-1887
+// dec2: memory-levels.script.js at 290cb9c, lines 2403-2408
 /* L2: bank PA[7:6], sub-bank PA[9:8], set PA[16:10] under M0's 7-bit mask, so rows 0x280-0x2FF (l2.decode,
    l2.partition.rows); a data row is {set, way} (the re-implementation's RTL; D.conflicts) */
 function dec2(pa) {
   const bank = bits(pa, 7, 6), sub = bits(pa, 9, 8), lo = bits(pa, 16, 10), set = 0x280 + lo, way = D.addr.way_l2;
   return {bank, sub, lo, set, way, row: set * 4 + way};
 }
-// hex3: memory-levels.script.js at 1980ebb, lines 1888-1888
+// hex3: memory-levels.script.js at 290cb9c, lines 2409-2409
 const hex3 = v => '0x' + v.toString(16).toUpperCase().padStart(3, '0');
-// dec5: memory-levels.script.js at 1980ebb, lines 4301-4306
+// dec5: memory-levels.script.js at 290cb9c, lines 4827-4832
 /* The map (dram.addr.*): memory shire PA[8:6], channel (controller) PA[9], then PA[9:6] stripped; inside a channel
    bank PA[12:10], row PA[34:18], column PA[17:13] and PA[5:1] (a 2 KB page of 1,024 16-bit columns); a 64-byte line is
    two BL16 bursts from one row, PA[5] picking the half. Measured by one-bit flips on three cards. */
@@ -727,13 +727,13 @@ function dec5(pa) {
 }
 
 /* ---- the chains' scenes ---- */
-// STG: memory-levels.script.js at 1980ebb, lines 2448-2448
+// STG: memory-levels.script.js at 290cb9c, lines 2970-2970
 const STG = ['ag', 'ad', 'rqa', 'tap', 'ta', 'ta0', 'ta1', 'te', 'tc', 'dap', 'da', 'da0', 'da1', 'de', 'dc'];
-// TLX: memory-levels.script.js at 1980ebb, lines 4379-4381
+// TLX: memory-levels.script.js at 290cb9c, lines 4905-4907
 /* the channel: one rank of 8 banks; the open row; the command and data timeline drawn to scale from the programmed
    timings (dram.ctl.*), which is ET's; the die's circuits are JEDEC/textbook */
 const TLX = ns => -60 + ns * 22.2;
-// buildL1Cache: memory-levels.script.js at 1980ebb, lines 1942-1993
+// buildL1Cache: memory-levels.script.js at 290cb9c, lines 2463-2514
 function buildL1Cache(L, ap, inst) {
   frame(L, {title: 'L1 data cache · 16 sets × 4 ways × 64 B', sub: 'tags first, then one way\'s row: the way is part of the data row\'s address', subf: 'l1:l1.phased',
     tags: [['unknown', '? parity on silicon · asked'], ['documented', 'documented']], col: COL.store});
@@ -786,7 +786,7 @@ function buildL1Cache(L, ap, inst) {
   gs._box = {x: -140, y: 576, w: 1216, h: 100};
   ap.setCell = {x: -140 + inst.set * 60, y: 602, w: 52, h: 40};
 }
-// buildL1Block: memory-levels.script.js at 1980ebb, lines 1995-2036
+// buildL1Block: memory-levels.script.js at 290cb9c, lines 2516-2557
 function buildL1Block(L, ap, inst) {
   const b = inst.block, R = inst.row;
   frame(L, {title: `LRAM block ${b} · 128 × 64 bits`, f: nf('l1_rows'),
@@ -829,7 +829,7 @@ function buildL1Block(L, ap, inst) {
   T(L, -150, 664, 'read: the registered address selects the row through a mux tree', 't-sm', 'start', 'l1:l1.latch-rf');
   ap.rsel = {x: 826, y: 278}; ap.oreg = {x: 952, y: 512}; ap.rdreg = {x: 952, y: 94}; ap.wl = {x: -25, y: 48};
 }
-// buildL1Row: memory-levels.script.js at 1980ebb, lines 2038-2071
+// buildL1Row: memory-levels.script.js at 290cb9c, lines 2559-2592
 function buildL1Row(L, ap, inst) {
   const R = inst.row;
   frame(L, {title: `Row ${R} · its latches and one bit's read tree`, f: nf('l1_rowbits'),
@@ -864,16 +864,16 @@ function buildL1Row(L, ap, inst) {
   T(L, -150, 168, `latch 5 of every row feeds this tree; row ${R}'s is the lit input`, 't-sm');
   ap.wave = {x: 520, y: 560, w: 560, h: 130};
 }
-// buildL1Latch: memory-levels.script.js at 1980ebb, lines 2073-2076
+// buildL1Latch: memory-levels.script.js at 290cb9c, lines 2594-2597
 function buildL1Latch(L, ap, inst) {
   buildLatchCell(L, ap, {title: 'One latch bit · a transmission-gate D latch',
     sub: 'how ET\'s latch register files hold a bit; the cell inside the silicon macro is not documented'});
 }
-// buildL1Cmp: memory-levels.script.js at 1980ebb, lines 2077-2079
+// buildL1Cmp: memory-levels.script.js at 290cb9c, lines 2598-2600
 function buildL1Cmp(L, ap, inst) {
   buildComparator(L, ap, {title: 'Tag comparator · XNORs and an AND tree', sub: `${nt('g_cmp33')} per way, an XNOR each; all four ways compare in S1 and one hits (way 2 in the example)`});
 }
-// buildL2Bank: memory-levels.script.js at 1980ebb, lines 2449-2494
+// buildL2Bank: memory-levels.script.js at 290cb9c, lines 2971-3016
 function buildL2Bank(L, ap, inst) {
   frame(L, {title: `Bank ${inst.bank} (PA[7:6]) · one of four`, sub: 'an independent L2 cache: its own request queue, pipeline and ports',
     tags: [['unknown', '? read-buffer storage, prefetcher · asked'], ['documented', 'documented']]});
@@ -920,7 +920,7 @@ function buildL2Bank(L, ap, inst) {
   part(L, 'tol3', -150, 632, 460, 56, COL.net, 'to_l3 master → the mesh (a miss)', {ty: 36, facts: 'meshstop'});
   ap.rbufC = {x: 582, y: 107}; ap.rq = {x: 50, y: 107}; ap.rsp = {x: 988, y: 325}; ap.dq = {x: 790, y: 107};
 }
-// buildL2Sub: memory-levels.script.js at 1980ebb, lines 2496-2535
+// buildL2Sub: memory-levels.script.js at 290cb9c, lines 3018-3057
 function buildL2Sub(L, ap, inst) {
   const a = inst, band = [640, 768];
   frame(L, {title: `Sub-bank ${a.sub} (PA[9:8]) of bank ${a.bank}`, sub: `a tag RAM, a tag-state RAM and four data panels; the L2's rows are sets ${hex3(0x280)}–${hex3(0x2FF)}`, subf: 'l2:l2.partition.rows',
@@ -961,23 +961,23 @@ function buildL2Sub(L, ap, inst) {
   T(L, -150, 640, 'the other sub-banks\' RAM inputs stay frozen', 't-sm', 'start', 'l2:l2.panel-select');
   ap.panelBox = ap.panels[a.panel] ? {x: ap.panels[a.panel].x, y: 14, w: 154, h: 420} : null;
 }
-// buildL2Panel: memory-levels.script.js at 1980ebb, lines 2537-2540
+// buildL2Panel: memory-levels.script.js at 290cb9c, lines 3059-3062
 function buildL2Panel(L, ap, inst) {
   buildPanel(L, ap, {title: `Data panel ${inst.panel} · ${nt('l2_mdata_s')} · 1PUHD`, f: nf('l2_mdata_s'), band: 'l2', row: inst.row,
     sub: 'saduls0g4l1p4096x144m4b4w0c0p0d0s1rm0sdrw11: a compiled macro, "SRAM memory panels" in the spec'});
 }
-// buildL2Cell: memory-levels.script.js at 1980ebb, lines 2541-2545
+// buildL2Cell: memory-levels.script.js at 290cb9c, lines 3063-3067
 function buildL2Cell(L, ap, inst) {
   buildCell(L, ap, {title: 'One bit · a 6T SRAM cell (generic)',
     sub: 'the spec says SRAM panels; the lab lead said the chip is not using SRAM; the bitcell is not documented (asked)',
     note: [`a shire's arrays: ≈ ${nt('l2_tr')}`, 'cell transistors if 6T/8T (estimate)'], noteF: nf('l2_tr')});
 }
-// buildL2Xing: memory-levels.script.js at 1980ebb, lines 2546-2549
+// buildL2Xing: memory-levels.script.js at 290cb9c, lines 3068-3071
 function buildL2Xing(L, ap, inst) {
   buildXing(L, ap, {title: 'The crossing · a level shifter', sub: 'the neighbourhood\'s bank FIFO is a VC FIFO with level shifters built in (documented); the circuit is generic',
     vddl: `VDDL ${nt('l1_v')}`, vddlF: nf('l1_v'), vddh: 'VDDH (rail asked)', vddhF: 'l2:l2.rail.hv-logic'});
 }
-// buildHop: memory-levels.script.js at 1980ebb, lines 3144-3205
+// buildHop: memory-levels.script.js at 290cb9c, lines 3670-3731
 /* ---- one mesh hop, up close (the L3 and the remote scratchpad): the requester bank's to_l3 master, the voltage and
    clock crossing into the mesh, a router, one link, the next router, the far shire's L3-slave port. The numbers are
    ET's; the router is a textbook one; its pipeline is unknown (asked). o: {title, sub, lane, laneF, to} ---- */
@@ -1040,7 +1040,7 @@ function buildHop(L, ap, o) {
   part(L, 'hopE', -136, 604, 600, 84, COL.aux, 'a 64 B reply over one hop', {sub: [{t: `≈ ${nt('l3_hop69')} on the mesh rail (derived); ${nt('l3_hop_rb')} on the board (measured)`, f: nf('l3_hop69') + ' ' + nf('l3_hop_rb')}]});
   part(L, 'nochop', 480, 604, 598, 84, 'var(--warn)', 'unknown: the router pipeline per hop', {kind: 'unknown', sub: [{t: 'which of the 9 layers, the flit width', f: 'l3:u.noc-hop'}]});
 }
-// buildWire: memory-levels.script.js at 1980ebb, lines 3222-3286
+// buildWire: memory-levels.script.js at 290cb9c, lines 3748-3812
 /* ---- a link bit and a crossing, transistor by transistor (generic circuits; ET numbers only where a fact gives them):
    a repeater pair driving a wire, and the level shifter that lifts a mesh signal back to the Shire Channel ---- */
 function buildWire(L, ap, o) {
@@ -1106,11 +1106,11 @@ function buildWire(L, ap, o) {
   ap.wave = {x: -150, y: 596, w: 700, h: 98};
   T(L, 580, 640, 'the ET RTL models the shifter as a buffer;', 't-sm', 'start', 'l2:l2.vc-fifo'); T(L, 580, 662, 'the physical cell is not documented', 't-sm', 'start', 'l2:l2.vc-fifo');
 }
-// buildL3Wire: memory-levels.script.js at 1980ebb, lines 3513-3515
+// buildL3Wire: memory-levels.script.js at 290cb9c, lines 4039-4041
 function buildL3Wire(L, ap, inst) {
   buildWire(L, ap, {title: 'A link bit, and the crossing', sub: 'a repeater charging a wire; the level shifter at the far shire (textbook)'});
 }
-// buildMS: memory-levels.script.js at 1980ebb, lines 4334-4377
+// buildMS: memory-levels.script.js at 290cb9c, lines 4860-4903
 function buildMS(L, ap, inst) {
   frame(L, {title: `Memory shire ${inst.ms} · two controllers, one PHY`, sub: `a logical drawing; the up-to-63 cycles past the DRAM's timing (home and memory shire) are not split (asked)`, subf: 'dram:dram.lat.ms-internal',
     tags: [['unknown', '? the 63 cycles · asked'], ['documented', 'spec, firmware']]});
@@ -1155,7 +1155,7 @@ function buildMS(L, ap, inst) {
   T(L, -140, 684, `the DRAM's own timing: ${nt('dr_share')}; the constant past an L3 hit: ${nt('l3_dram91')}`, 't-sm', 'start', nf('dr_share') + ' ' + nf('l3_dram91'));
   ap.noc = {x: -65, y: 130}; ap.xg = {x: 111, y: 130}; ap.st = {x: 289, y: 130}; ap.dfiP = {x: 803, y: 0}; ap.phyP = {x: 912, y: 0};
 }
-// buildChan: memory-levels.script.js at 1980ebb, lines 4382-4417
+// buildChan: memory-levels.script.js at 290cb9c, lines 4908-4943
 function buildChan(L, ap, inst) {
   frame(L, {title: `Channel ${inst.ch} (PA[9]) · 8 banks`, sub: `${nt('dr_geom')}; a line is ${nt('dr_1_32')} of a page`, subf: nf('dr_geom') + ' ' + nf('dr_1_32'),
     tags: [['unknown', '? the part · asked'], ['generic', 'GENERIC die'], ['documented', 'geometry, timings']]});
@@ -1192,7 +1192,7 @@ function buildChan(L, ap, inst) {
   gt._box = {x: -150, y: 452, w: 1228, h: 238};
   ap.tlY = 494; ap.tlX = TLX;
 }
-// buildDBank: memory-levels.script.js at 1980ebb, lines 4419-4445
+// buildDBank: memory-levels.script.js at 290cb9c, lines 4945-4971
 /* the bank, inside: mats of cells between sense-amplifier stripes and sub-wordline drivers (textbook; the vendor's
    organisation below the bank is not published) */
 function buildDBank(L, ap, inst) {
@@ -1220,7 +1220,7 @@ function buildDBank(L, ap, inst) {
   T(L, -150, 664, `one activate raises one row across the mats: ${nt('dr_16k_n')} sense amplifiers latch the page`, 't-sm', 'start', nf('dr_16k'));
   T(L, -150, 686, 'open or folded bitlines, cells per bitline, mats: the vendor\'s choice (generic here)', 't-sm', 'start', 'dram:dram.org.die-internals');
 }
-// buildDCell: memory-levels.script.js at 1980ebb, lines 4447-4520
+// buildDCell: memory-levels.script.js at 290cb9c, lines 4973-5046
 /* ---- the cell and its sense amplifier: two 1T1C cells on a folded bitline pair, the three-NMOS equaliser, the
    2N + 2P latch, the column-select pair to the local I/O lines. A textbook LPDDR circuit (dram's gen.* facts). ---- */
 function buildDCell(L, ap, inst) {
@@ -1295,7 +1295,7 @@ function buildDCell(L, ap, inst) {
   T(L, 690, 500, 'the bit is the charge on a capacitor;', 't-sm', 'start', 'dram:gen.cell'); T(L, 690, 521, 'it leaks: each row is refreshed', 't-sm', 'start', nf('dr_trefw'));
   T(L, 690, 542, `about every ${nt('dr_trefw')}`, 't-sm', 'start', nf('dr_trefw')); T(L, 690, 563, `(an all-bank REFRESH every ${nt('dr_trefi')})`, 't-sm', 'start', nf('dr_trefi') + ' dram:gen.refresh');
 }
-// buildPHY: memory-levels.script.js at 1980ebb, lines 4588-4608
+// buildPHY: memory-levels.script.js at 290cb9c, lines 5114-5134
 /* ---- the PHY: DFI in, CA and DQ lanes out; trained receivers ---- */
 function buildPHY(L, ap, inst) {
   frame(L, {title: 'PHY · one for both channels', sub: 'the lanes from the open RTL (derived); the circuits are generic', subf: 'dram:dram.topo.phy',
@@ -1317,7 +1317,7 @@ function buildPHY(L, ap, inst) {
   part(L, 'topkg', 880, 30, 198, 620, COL.store, 'to the package', {sub: [{t: 'LPDDR4X, off the chip', f: 'dram:dram.topo.packages'}, {t: 'x16 per channel', f: 'dram:dram.topo.memshires'}, {t: `VDDQ ${nt('dr_vddq')}`, f: nf('dr_vddq')}, {t: '(aifoundry2)', f: nf('dr_vddq')}]});
   T(L, 70, 676, `the rails: VDD_DDR ${nt('dr_vddr')}; VDDQ ${nt('dr_vddq')}; no current sensor on either`, 't-sm halo', 'start', nf('dr_vddr') + ' ' + nf('dr_vddq'));
 }
-// buildDQ: memory-levels.script.js at 1980ebb, lines 4609-4640
+// buildDQ: memory-levels.script.js at 290cb9c, lines 5135-5166
 /* ---- the DQ pin: an LVSTL driver (N-over-N pull-up to VDDQ, NMOS pull-down), the trace, the receiver's termination
    to ground: a 1 costs current, a 0 almost none; DBI inverts a byte with more than four 1s (gen.io, dram.ctl.dbi) ---- */
 function buildDQ(L, ap, inst) {
@@ -1352,7 +1352,7 @@ function buildDQ(L, ap, inst) {
 }
 
 /* ---- the parts' texts (each part's panel) ---- */
-// L1P: memory-levels.script.js at 1980ebb, lines 2099-2157
+// L1P: memory-levels.script.js at 290cb9c, lines 2620-2678
 const L1P = {
   overview: () => ({kick: 'Level 1 · key 1', title: 'The L1 data cache', badge: [['documented', 'structure, rail, timing'], ['generic', 'the latch circuit'], ['unknown', 'the silicon cell']],
     what: `Each minion has a private ${n('l1_kb')} data cache (${n('l1_geom')}). It is <b>not SRAM</b>: the data array is ${n('l1_blocks')} latch-RAM (LRAM) blocks of ${n('l1_rows')} × ${n('l1_rowbits')}, the tags are latch register files and the valid and LRU bits are flip-flops. It runs on the minion rail at ${n('l1_v')}, below the voltage the shire cache's SRAM panels are specified for, and ${src('the documents never say why; our reading is that SRAM cannot sit in the minion\'s low-voltage region', 'l1:l1.why-latch l1:l1.lv-region')}. A hit takes ${n('l1_lat')} and costs about ${n('l1_e')} per 32-byte vector load; the chip reads ${n('l1_bw')} from its L1s.`,
@@ -1412,7 +1412,7 @@ const L1P = {
   energy: () => ({kick: 'L1 · energy', title: 'What an L1 access costs', badge: [['documented', 'measured, three cards'], ['unknown', 'the split']],
     what: `A 32-byte vector load that hits costs ${n('l1_e')} (${n('l1_e_pjb')}) on random data and ${n('l1_e0')} on zeros, the instruction included; a scalar flw ${n('l1_flw')}, an fsw ${n('l1_fsw')}, a 32-byte store ${n('l1_vst')}: a store costs ${n('l1_ratio')} a load, as a read-modify-write would. Filling a line from the own scratchpad costs ${n('l1_fill')} (${n('l1_fill0')} on zeros). How a load's energy splits between the array, the tags and the pipeline is asked.`}),
 };
-// L2P: memory-levels.script.js at 1980ebb, lines 2569-2642
+// L2P: memory-levels.script.js at 290cb9c, lines 3091-3164
 const L2P = {
   overview: () => ({kick: 'Level 2 · key 2', title: 'The L2', badge: [['documented', 'structure, timing, energy'], ['generic', 'the cell'], ['unknown', 'the bitcell, the floorplan']],
     what: `The L2 is ${n('l2_kb')} per shire: ${src('sets 0x280–0x2FF of every sub-bank', 'l2:l2.partition.rows')} in the ${n('l2_sc')} shire cache, whose other rows hold the scratchpad and a slice of the L3. ${n('l2_banks')} (PA[7:6]) of ${n('l2_sub')} each; the tags are read first, then one way's row of four ${n('l2_panel_w')} panels. The spec calls the arrays "SRAM memory panels" and names compiled macros; ${src('the lab lead said the chip is not using SRAM', 'l2:l2.storage-question')}, and no source gives the bitcell. A hit takes ${n('l2_lat')} (the spec: ${n('l2_spec')} shire clocks inside the cache, so ${n('l2_over')} outside it), ${n('l2_lat_rb')} from the read buffer. The chip streams ${n('l2_bw')} from its L2s, ${n('l2_bw128')}, half the four banks' ${n('l2_bw256')}: which block caps it is asked. Reading it costs about ${n('l2_e')}.`,
@@ -1487,7 +1487,7 @@ const L2P = {
   energy: () => ({kick: 'L2 · energy', title: 'What an L2 access costs', badge: [['documented', 'measured'], ['unknown', 'the split']],
     what: `Reading the L2 with tensor loads on every minion costs ${n('l2_e')}, about ${n('l2_e_line')} per line for the whole path. No L2 hit has been split between the rails on three cards; read as the own scratchpad, the same arrays put ${n('l2_rails_sram')} of the power on the SRAM rail and ${n('l2_rails_min')} on the minion rail (aifoundry2, aifoundry3 and aifoundry1 card 1). A scratchpad write costs about twice a read (${n('l2_e_wr')}); a random fsw through the L1 costs ${n('l2_fsw')}. How much of the SRAM rail's share is the arrays and how much the logic is asked.`}),
 };
-// DP: memory-levels.script.js at 1980ebb, lines 4682-4761
+// DP: memory-levels.script.js at 290cb9c, lines 5208-5287
 const DP = {
   overview: () => ({kick: 'Level 5 · key 5', title: 'The DRAM', badge: [['documented', 'topology, timings, map, energy'], ['generic', 'the die\'s circuits'], ['unknown', 'the part, the 63 cycles, the energy split']],
     what: `${n('dr_gb')} of LPDDR4X from Micron on the V3 cards, ${n('dr_ch')} of 16 bits, each memory shire driving two. The firmware runs them at ${n('dr_mts')} (not the datasheet's 4,266): ${n('dr_peak')} peak, ${n('dr_bw')} measured. A typical load from shire 0 takes ${n('lad_dram')}: ${n('dr_share')} of it is the DRAM's own timing and ${n('dr_ms63')} the L3 home's miss path and the memory shire, not split. A byte costs ${n('lad_e_dram')}, about ${n('dr_unmet')} of it on no metered rail; on random data a DRAM byte is ${n('dr_vs')} one from the own scratchpad (${n('dr_e1')} against ${n('lad_e_scp1')} pJ/B). The cell is the textbook 1T1C, a capacitor that leaks: the controller sends an all-bank REFRESH every ${n('dr_trefi')}, and each row, so each cell, is refreshed about every ${n('dr_trefw')} (${n('dr_8192')}).`,
@@ -1568,7 +1568,7 @@ const DP = {
   dbi: () => ({kick: 'DRAM · pin', title: 'Data-bus inversion', badge: [['documented', 'on (the firmware)'], ['generic', 'how it works']], facts: 'io', what: 'A byte with more than four 1s is sent inverted, with the DBI pin high: at most four 1s cross on its nine wires, the DBI pin included, and since only 1s draw current through the termination, DBI saves I/O energy on data full of 1s.'}),
   ioE: () => DP.energy(),
 };
-// L3P: memory-levels.script.js at 1980ebb, lines 3537-3631
+// L3P: memory-levels.script.js at 290cb9c, lines 4063-4157
 const L3P = {
   link: () => ({kick: 'L3 · chip', title: 'A mesh hop', badge: [['documented', 'measured cost'], ['generic', 'the router'], ['unknown', 'its pipeline']], facts: 'hop',
     what: `Each hop adds ${n('l3_hopcyc')} to the round trip (${n('l3_hopns')}, the same for L3 hits, remote scratchpad and TensorSend). Zoom in to see a router, a link and the crossings.`,

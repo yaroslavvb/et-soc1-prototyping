@@ -259,11 +259,144 @@ def guard(script):
     return dup
 
 
+# ---- the built page's comments (1 Oct 2026, the code review of the shared ladder: comments were 14-15% of the two
+# interactive pages' scripts, which sat at 95-97% of their size budgets): a page whose meta.json has "strip_comments"
+# ships its script without the comments that take whole lines (the sources keep them). A lexer of strings, template
+# literals with nested ${...}, regular expressions and comments finds them; a comment after code on its line stays.
+
+def lex_comments(js):
+    """yield (start, end, kind) of every comment, kind '//' or '/*'"""
+    n, i = len(js), 0
+    stack = []          # template nesting: each entry the brace depth at which a ${ opened
+    depth = 0
+    prev = ''           # the previous significant token, for regex detection
+    KW = {'return', 'typeof', 'case', 'in', 'of', 'new', 'delete', 'void', 'throw', 'else', 'do', 'instanceof', 'yield', 'await'}
+    out = []
+    def regex_ok():
+        if prev == '':
+            return True
+        if prev in KW:
+            return True
+        if re.match(r'^[A-Za-z_$0-9]', prev) or prev in (')', ']', '}'):
+            return prev == '}'  # after a block's } a regex may start a statement; ) ] identifiers numbers: division
+        return True
+    while i < n:
+        c = js[i]
+        if c in ' \t\r\n':
+            i += 1; continue
+        if c == '/' and i + 1 < n and js[i + 1] == '/':
+            j = js.find('\n', i); j = n if j < 0 else j
+            out.append((i, j, '//')); i = j; continue
+        if c == '/' and i + 1 < n and js[i + 1] == '*':
+            j = js.find('*/', i + 2); j = n if j < 0 else j + 2
+            out.append((i, j, '/*')); i = j; continue
+        if c in '\'"':
+            q = c; i += 1
+            while i < n and js[i] != q:
+                if js[i] == '\\':
+                    i += 1
+                elif js[i] == '\n':
+                    raise ValueError(f'newline in a string at {i}: {js[i-60:i+10]!r}')
+                i += 1
+            i += 1; prev = 'str'; continue
+        if c == '`':
+            i += 1
+            while True:
+                if i >= n:
+                    raise ValueError('unterminated template')
+                ch = js[i]
+                if ch == '\\':
+                    i += 2; continue
+                if ch == '`':
+                    i += 1; break
+                if ch == '$' and i + 1 < n and js[i + 1] == '{':
+                    # code inside ${...}: lex recursively until the matching }
+                    i = lex_code_until_brace(js, i + 2, out)
+                    continue
+                i += 1
+            prev = 'str'; continue
+        if c == '/' and regex_ok():
+            i += 1; cls = False
+            while i < n and (js[i] != '/' or cls):
+                if js[i] == '\\':
+                    i += 1
+                elif js[i] == '[':
+                    cls = True
+                elif js[i] == ']':
+                    cls = False
+                elif js[i] == '\n':
+                    raise ValueError(f'newline in a regex at {i}: {js[i-80:i+5]!r}')
+                i += 1
+            i += 1
+            while i < n and js[i].isalpha():
+                i += 1
+            prev = 'regex'; continue
+        m = re.compile(r'[A-Za-z_$][\w$]*|\d[\w.]*').match(js, i)
+        if m:
+            prev = m.group(0); i = m.end(); continue
+        prev = c; i += 1
+    return out
+
+def lex_code_until_brace(js, i, out):
+    """lex code from i until the } that closes a ${ (comments inside are not stripped: they are recorded only)"""
+    n, d, prev = len(js), 0, '('
+    while i < n:
+        c = js[i]
+        if c == '}' and d == 0:
+            return i + 1
+        if c == '{':
+            d += 1
+        elif c == '}':
+            d -= 1
+        if c in '\'"':
+            q = c; i += 1
+            while i < n and js[i] != q:
+                if js[i] == '\\':
+                    i += 1
+                i += 1
+            i += 1; continue
+        if c == '`':
+            i += 1
+            while i < n and js[i] != '`':
+                if js[i] == '\\':
+                    i += 2; continue
+                if js[i] == '$' and i + 1 < n and js[i + 1] == '{':
+                    i = lex_code_until_brace(js, i + 2, out); continue
+                i += 1
+            i += 1; continue
+        if c == '/' and i + 1 < n and js[i + 1] == '*':
+            j = js.find('*/', i + 2); i = j + 2; continue
+        i += 1
+    raise ValueError('unterminated ${')
+
+def strip(js):
+    cm = lex_comments(js)
+    keep, last, removed = [], 0, 0
+    for s, e, k in cm:
+        ls = js.rfind('\n', 0, s) + 1
+        if js[ls:s].strip():
+            continue                     # after code on its line: stays
+        le = js.find('\n', e); le = len(js) if le < 0 else le
+        if js[e:le].strip():
+            continue                     # code after the comment on its last line: stays
+        keep.append(js[last:ls]); last = le + 1 if le < len(js) else le
+        removed += js.count('\n', ls, le) + 1
+    keep.append(js[last:])
+    return ''.join(keep), removed
+
+
+def strip_comments(js):
+    s, _ = strip(js)
+    return s
+
+
 script = includes(open(os.path.join(S, name + ".script.js")).read())
 if USED:
     problems = guard(script)
     if problems:
         raise SystemExit(f"{name}: " + "\n  ".join(problems))
+if meta.get("strip_comments"):
+    script = strip_comments(script)
 body = includes(body, ext=('.css',))
 html = (tpl.replace("__CHARTKIT__", open(os.path.join(S, "chartkit.js")).read())
         .replace("__TITLE__", meta["title"]).replace("__DESC__", meta["description"])

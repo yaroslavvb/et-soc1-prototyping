@@ -101,9 +101,11 @@ F('tb.serdes', 'A serial link\'s transmitter turns parallel words into one bit s
   '(a phase detector steering a phase interpolator) and deserialises the bits; a PLL makes the fast clock.', 'generic',
   f'{WH}, ch. 13 (I/O and high-speed links); no ET source describes the PHY\'s circuits')
 F('pcie.gen4.eq', 'PCIe 4.0 at 16 GT/s: the transmitter has a 3-tap feed-forward equaliser (one tap before the bit, one after) '
-  'with ten presets that the receiver asks for during link training; the reference receiver has a continuous-time linear '
-  'equaliser with seven settings and a 2-tap decision-feedback equaliser.', 'outside',
-  'MathWorks, SerDes Toolbox documentation, "PCIe4 Transmitter/Receiver IBIS-AMI Model" (after the PCI Express Base Specification 4.0)',
+  'with eleven presets (P0 to P10, as since PCIe 3.0) that the receiver asks for during link training; the reference receiver has a '
+  'continuous-time linear equaliser with seven settings and a 2-tap decision-feedback equaliser.', 'outside',
+  'MathWorks, SerDes Toolbox documentation, "PCIe4 Transmitter/Receiver IBIS-AMI Model" (after the PCI Express Base Specification 4.0); '
+  'the eleven presets: Teledyne LeCroy, "PCIe 3.0 Dynamic Link EQ: De-Emphasis, Preshoot, Cursors, and Presets" (blog, 10 November 2014: '
+  'PCI-SIG packaged "11 sets of cursor coefficients ... as presets"; MathWorks\' page says ten)',
   'https://www.mathworks.com/help/serdes/ug/PCIe4TxRxIBISAMIModel.html')
 F('pcie.gen4.loss', 'A PCIe 4.0 link may lose up to 28 dB at 8 GHz, the Nyquist frequency of a 16 Gb/s signal: up to 20 dB on '
   'the system board (5 dB of it in the root complex\'s package) and 8 dB on the add-in card (3 dB in the endpoint). 28 dB is '
@@ -119,7 +121,7 @@ F('tb.strongarm', 'A clocked comparator (the StrongARM latch) is a sense amplifi
   'B. Razavi, "The StrongARM Latch [A Circuit for All Seasons]", IEEE Solid-State Circuits Magazine 7(2), 2015, pp. 12-17',
   'https://www.seas.ucla.edu/brweb/papers/Journals/BR_Magzine4.pdf')
 F('tb.bangbang', 'A bang-bang (Alexander) phase detector samples each bit in its middle and at its edge: if the edge sample '
-  'equals the bit before it the clock is late, if it equals the bit after it the clock is early; XORs of neighbouring '
+  'equals the bit before it the clock is early (the change had not yet come), if it equals the bit after it the clock is late; XORs of neighbouring '
   'samples give each vote, and the votes nudge the sampling clock.', 'generic',
   'J. D. H. Alexander, "Clock Recovery from Random Binary Signals", Electronics Letters 11(22), 1975, pp. 541-542')
 F('tb.diffpair', 'A differential pair: two matched transistors whose sources share one tail current source. The input that is '
@@ -235,7 +237,7 @@ N('lib.pll', 'A phase-locked loop (PLL)', 'PLL', 'Makes a fast clock from a slow
   1e-4, 'on the order of 100 µm across, like the shire\'s clock generation (size.shire.clock)', ['tb.pll'])
 N('lib.ecc', 'Error correction (SECDED)', 'ECC', 'Extra check bits stored with the data, each the parity of some of the bits: on a read they show whether a bit flipped, which one, so it can be put right, and whether two did.',
   1e-5, 'the XOR trees of a 72-bit code: a few hundred gates', ['tb.ecc'])
-N('lib.rom', 'A read-only memory (ROM)', 'ROM', 'A table fixed when the chip is made: a transistor where a bit is 0, none where it is 1. The vector unit\'s transcendental functions read their coefficients from small tables like this.',
+N('lib.rom', 'A read-only memory (ROM)', 'ROM', 'A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit\'s transcendental functions read their coefficients from small tables like this.',
   2e-5, 'a small table of coefficients: a few thousand bits', ['tb.rom'])
 def N2(nid, name, short, blurb, m, kind, note, fl):
     F(f'size.{nid}', f'{name}: about {fmt(m) if m < 1e-3 else str(round(m * 100, 1)) + " cm"} across, the width of the view that frames it.', kind,

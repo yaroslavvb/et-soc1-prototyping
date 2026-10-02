@@ -133,9 +133,9 @@
   },
   {
    "id": "pcie.gen4.eq",
-   "statement": "PCIe 4.0 at 16 GT/s: the transmitter has a 3-tap feed-forward equaliser (one tap before the bit, one after) with ten presets that the receiver asks for during link training; the reference receiver has a continuous-time linear equaliser with seven settings and a 2-tap decision-feedback equaliser.",
+   "statement": "PCIe 4.0 at 16 GT/s: the transmitter has a 3-tap feed-forward equaliser (one tap before the bit, one after) with eleven presets (P0 to P10, as since PCIe 3.0) that the receiver asks for during link training; the reference receiver has a continuous-time linear equaliser with seven settings and a 2-tap decision-feedback equaliser.",
    "kind": "outside",
-   "source": "MathWorks, SerDes Toolbox documentation, \"PCIe4 Transmitter/Receiver IBIS-AMI Model\" (after the PCI Express Base Specification 4.0)",
+   "source": "MathWorks, SerDes Toolbox documentation, \"PCIe4 Transmitter/Receiver IBIS-AMI Model\" (after the PCI Express Base Specification 4.0); the eleven presets: Teledyne LeCroy, \"PCIe 3.0 Dynamic Link EQ: De-Emphasis, Preshoot, Cursors, and Presets\" (blog, 10 November 2014: PCI-SIG packaged \"11 sets of cursor coefficients ... as presets\"; MathWorks' page says ten)",
    "note": "https://www.mathworks.com/help/serdes/ug/PCIe4TxRxIBISAMIModel.html"
   },
   {
@@ -161,7 +161,7 @@
   },
   {
    "id": "tb.bangbang",
-   "statement": "A bang-bang (Alexander) phase detector samples each bit in its middle and at its edge: if the edge sample equals the bit before it the clock is late, if it equals the bit after it the clock is early; XORs of neighbouring samples give each vote, and the votes nudge the sampling clock.",
+   "statement": "A bang-bang (Alexander) phase detector samples each bit in its middle and at its edge: if the edge sample equals the bit before it the clock is early (the change had not yet come), if it equals the bit after it the clock is late; XORs of neighbouring samples give each vote, and the votes nudge the sampling clock.",
    "kind": "generic",
    "source": "J. D. H. Alexander, \"Clock Recovery from Random Binary Signals\", Electronics Letters 11(22), 1975, pp. 541-542"
   },
@@ -579,7 +579,7 @@
   "lib.rom": {
    "name": "A read-only memory (ROM)",
    "short": "ROM",
-   "blurb": "A table fixed when the chip is made: a transistor where a bit is 0, none where it is 1. The vector unit's transcendental functions read their coefficients from small tables like this.",
+   "blurb": "A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit's transcendental functions read their coefficients from small tables like this.",
    "m": 2e-05,
    "kind": "inferred",
    "f": "size.lib.rom",

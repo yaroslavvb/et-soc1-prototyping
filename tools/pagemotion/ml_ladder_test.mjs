@@ -7,15 +7,19 @@
 //       (the ladder takes over), the rack and the "?" levels; the labels at the rack and below name no level above it
 //   T5  + from the top of the ladder goes down through the package into the levels' map (their camera takes the stage),
 //       down their default chain to a cell, on into the transistor, the fin, the channel, the crystal, an atom, a nucleus,
-//       a proton, a quark and the Planck length, and round the ring to the top; every layer shown at rest within [1/30, 30]
+//       a proton, a quark and the Planck length, and round the loop straight back to the top (since the owner's UPDATE 3
+//       of 1 Oct evening never by the ring of sizes); every layer shown at rest within [1/30, 30]
 //   T7  reduced motion: a move out of the levels' scenes and back is a cut; a link while the ladder holds the stage
 //       brings the stage back to the link's level
-//   T12 the ring's ways back in: each level's own cell (the DRAM's through the DRAM cell, never the N7 FinFET); Up from the
-//       ring lands on the reader's level's atom, and its panel says so
+//   T12 the ring's ways back in: each level's own cell (the DRAM's through the DRAM cell, never the N7 FinFET); the ring,
+//       off the loop since UPDATE 3, opened by its address: its Up goes round to the Planck length under the reader's
+//       level's atom, its + to the top, and the landing panel says the reader came round
 //   T14 the easter egg: no level above the rack named in the Up bar, the crumbs or the menu at the rack or below; Up from
 //       the rack still finds them
 //   T15 the two-state electronics: G switches the gate on the transistor and the state holds into the channel
-//   T17 the loop: Up from a cell passes the ring twice and lands on the same atom each time
+//   T17 the loop (UPDATE 3: "The loop should always go in one direction"): Up from a cell goes out past the top straight
+//       to the Planck length under the same atom, lap after lap, then a quark, a proton, the nucleus and that atom; every
+//       press one level out (the top's: round the loop); never the ring; the landing panel says it is not a place in space
 //   T18 the navigation graph from the top and from the ring: every zoom has its seat, every glide its way back
 //   T19 no dead ends: every part of every scene (the levels' own drawings included) leads in, but the keys beside the
 //       maps and charts and the Planck length's ruler; every scene reaches a transistor and an atom; the DRAM's chains
@@ -31,6 +35,11 @@
 //       below the place each page's breadcrumb goes on along its own default: the level's example on the memory levels)
 //   T24 the panel after the ladder's moves: on the ladder's copy of a scene the levels draw, not at their place (another
 //       bank, another shire), the scale's own panel; the arrow keys' glides between them
+//   T25 the reviews of 1 Oct evening, by real input: the "…" menu's items on the screen; quick presses of Up all counted;
+//       Up then + back; the glides into the levels' places and back by the reverse key; an access kept when Up leaves its
+//       level, and stepped by the arrows from the ladder; the focus on a part after each hand-over; every part's label
+//       says what Enter does; #at= written and read; the zoom row at load; the stored bit on the levels' 6T cell; the
+//       layers not shown hidden from screen readers; after "New address" the hand-over shows the new example
 //   T23 the hand-over under quick input (the regression suites' fuzz run of 1 Oct): Up pressed while the levels' camera
 //       moves, then a level's tab before it rests: the tab's level keeps the stage (the ladder's move waiting for the
 //       levels' camera gives way); __memState().zooming stays true until a move of the ladder and its hand-over end
@@ -89,9 +98,10 @@ T.T5 = async () => {
     (s.visible || []).forEach(v => { if (v.k < 1 / 30 || v.k > 30) bad.push(`${s.node}:${v.node}:${v.k}`); });
     if (s.node === 'beyond' && i > 5) break;
   }
-  const want = ['package', 'die', 'lib.finfet', 'lib.fin', 'lib.channel', 'lib.si', 'p.atom', 'p.nucleus', 'p.nucleon', 'p.quark', 'p.planck', 'p.wrap', 'beyond'];
+  const want = ['package', 'die', 'lib.finfet', 'lib.fin', 'lib.channel', 'lib.si', 'p.atom', 'p.nucleus', 'p.nucleon', 'p.quark', 'p.planck', 'beyond'];
   const order = want.map(w => seen.indexOf(w));
-  ok(order.every((x, i) => x >= 0 && (!i || x > order[i - 1])), 'T5 + from the top: the package, the map, a cell, the transistor, the fin, the channel, the crystal, an atom, its nucleus, a proton, a quark, the Planck length, the ring, the top', seen.join(' '));
+  ok(order.every((x, i) => x >= 0 && (!i || x > order[i - 1])), 'T5 + from the top: the package, the map, a cell, the transistor, the fin, the channel, the crystal, an atom, its nucleus, a proton, a quark, the Planck length, round the loop to the top', seen.join(' '));
+  ok(!seen.includes('p.wrap') && seen[seen.indexOf('p.planck') + 1] === 'beyond', 'T5 + from the Planck length goes straight to the top, never by the ring of sizes', seen.slice(seen.indexOf('p.planck')).join(' '));
   ok(handed, 'T5 at the map the levels\' camera takes the stage (their own scenes, their own moves)');
   ok(back, 'T5 below their cell the ladder takes it again (the transistor and below)');
   ok(!bad.length, 'T5 every layer shown at rest within [1/30, 30]', bad.slice(0, 6).join(' '));
@@ -127,13 +137,19 @@ T.T12 = async () => {
     const want = {l1: /lib\.latch\/lib\.inverter\/lib\.finfet/, l2: /lib\.sram6t\/lib\.finfet/, l3: /l3\.panel:[\d.]+\/lib\.sram6t\/lib\.finfet/, scp: /scp\.panel:[\d.]+\/lib\.sram6t\/lib\.finfet/}[lv];
     ok(want.test(e[0].path) && /p\.atom$/.test(e[0].path), `T12 the ${lv.toUpperCase()}'s way in: its own cell, down to an atom`, e[0].path.split('/').slice(-6).join('/'));
   }
-  // round the ring from the L2: Up from the ring lands on that atom, and the panel says the reader came round
+  // the ring from the L2, by its address (off the loop since UPDATE 3): Up from it goes round to the Planck length under
+  // the L2's cell's atom, marked as come round, its panel naming the cell in its own words; + from the ring, the top
   await b.ev("document.getElementById('tab-l2').click()"); await rest(b);
   await b.ev("MLH.test.go('p.wrap')"); await rest(b);
   const r = await S(b);
-  ok(r.node === 'p.wrap' && /round the ring/i.test(r.up), 'T12 the ring: Up goes round it', r.up);
+  ok(r.node === 'p.wrap' && /round the ring/i.test(r.up) && /Planck/.test(r.up), 'T12 the ring: Up goes round it to the Planck length', r.up);
   const a = await up(b);
-  ok(a.node === 'p.atom' && /lib\.sram6t/.test(a.lp) && a.wrapin, 'T12 Up from the ring lands on an atom of the L2\'s cell, marked as come round', a.lp.split('/').slice(-5).join('/'));
+  const came = await b.ev("(document.querySelector('#pn-body .pn-came') || {}).textContent || ''");
+  ok(a.node === 'p.planck' && /lib\.sram6t\/lib\.finfet/.test(a.lp) && a.wrapin, 'T12 Up from the ring lands on the Planck length under an atom of the L2\'s cell, marked as come round', a.lp.split('/').slice(-8).join('/'));
+  ok(/drawn as a textbook 6T cell/.test(came) && !/one of its transistors/.test(came), 'T12 the landing panel names the L2\'s cell as drawn as a textbook 6T cell', came.slice(0, 220));
+  await b.ev("MLH.test.go('p.wrap')"); await rest(b);
+  const t = await plus(b);
+  ok(t.node === 'beyond', 'T12 + from the ring: the top', t.node);
   ok(!b.errs.length, 'T12 no error', b.errs.join(' | '));
   await b.close();
 };
@@ -174,14 +190,23 @@ T.T15 = async () => {
 
 T.T17 = async () => {
   const b = await open1(); await b.load(PAGE, '#l3/cell', 3000); await rest(b);
-  const atoms = []; let n = 0, laps = [], last = 0;
-  for (let i = 0; i < 80 && atoms.length < 2; i++) {
-    const s = await up(b); n++;
-    if (s.node === 'p.atom') { atoms.push(s.lp); laps.push(n - last); last = n; }
+  const lands = [], seq = [], grew = []; let n = 0, laps = [], last = 0, prev = await S(b), came = '';
+  for (let i = 0; i < 100 && lands.length < 3; i++) {
+    const s = await up(b); n++; seq.push(s.node);
+    if (s.node === 'p.planck') {
+      lands.push(s.lp); laps.push(n - last); last = n;
+      if (!came) came = await b.ev("(document.querySelector('#pn-body .pn-came') || {}).textContent || ''");
+    } else if (s.depth >= prev.depth) grew.push(`${prev.node} -> ${s.node}`);
+    prev = s;
   }
-  ok(atoms.length === 2, 'T17 Up from the L3\'s cell passes the ring twice', `${atoms.length} in ${n} presses`);
-  ok(atoms.length === 2 && atoms[0] === atoms[1], 'T17 and lands on the same atom each time', atoms.map(a => a.split('/').slice(-4).join('/')).join(' | '));
-  ok(laps.length === 2 && laps[1] >= 25 && laps[1] <= 40, 'T17 one lap is a few dozen presses', laps.join(', '));
+  ok(lands.length === 3, 'T17 Up from the L3\'s cell goes past the top straight to the Planck length, lap after lap', `${lands.length} in ${n} presses`);
+  ok(lands.length === 3 && lands.every(x => x === lands[0]) && /l3\.panel:[\d.]+\/lib\.sram6t\/lib\.finfet/.test(lands[0]), 'T17 the same Planck length, under the same atom of the L3\'s cell, each lap', lands.map(a => a.split('/').slice(-9, -4).join('/')).join(' | '));
+  ok(!seq.includes('p.wrap'), 'T17 never by the ring of sizes', seq.join(' '));
+  ok(!grew.length, 'T17 every press but the loop\'s goes one level out (none zooms in)', grew.slice(0, 4).join(' | '));
+  const i0 = seq.indexOf('p.planck'), after = seq.slice(i0 + 1, i0 + 5).join(','), before = seq[i0 - 1];
+  ok(before === 'beyond' && after === 'p.quark,p.nucleon,p.nucleus,p.atom', 'T17 from the top to the Planck length, then a quark, a proton, the nucleus and the atom', `${before} | ${after}`);
+  ok(laps.length === 3 && laps[1] === laps[2] && laps[1] >= 25 && laps[1] <= 45, 'T17 every lap the same few dozen presses', laps.join(', '));
+  ok(/Not further out in space/.test(came) && /L3 slice \(drawn as a textbook 6T cell\)/.test(came), 'T17 the landing panel: not a place in space, and the fixed point in the cell\'s own words', came.slice(0, 260));
   ok(!b.errs.length, 'T17 no error', b.errs.join(' | '));
   await b.close();
 };
@@ -355,6 +380,141 @@ T.T24 = async () => {
   ok(g.s.panel === g.nm, 'T24 and the panel names the neighbour', `panel="${g.s.panel}" name="${g.nm}" on=${g.s.on}`);
   ok(!b.errs.length, 'T24 no error', b.errs.join(' | '));
   await b.close();
+};
+
+// T25 the four reviews of 1 Oct evening, each checked with real input: the "…" menu's items are on the screen and a
+// click on one moves the camera; quick presses of Up and + are reckoned from the move under way (none absorbed); Up then
+// + comes back; the arrow keys' glides into the levels' places have their way back by the reverse key; an access stays
+// (paused) when Up leaves its level, and the arrows step it while the ladder holds the stage; the keyboard's focus is on
+// a part after each hand-over; every part of the levels' drawings says what Enter does; the address follows the ladder
+// (#at=); the level's panel has its zoom row at load, and its "Next to it" row moves sideways; the levels' 6T cell draws
+// the stored bit; the layers not shown are hidden from screen readers; after "New address" the hand-over shows the new
+// example
+T.T25 = async () => {
+  // (a page still loading on a busy machine is "moving" until its state hook exists)
+  const st = '(() => { if (typeof __memState !== "function" || typeof MLH === "undefined" || !MLH) return {z: true, lp: ""}; const s = __memState(), l = s.ladder; return {lv: s.lv, acc: s.acc, step: s.step, clock: s.clockOn, on: l.on, lp: l.path, node: l.node, z: s.zooming || l.zooming}; })()';
+  const restB = async (b, max = 15000) => { const t0 = Date.now(); while (Date.now() - t0 < max) { const s = await b.ev(st); if (!s.z) { await sleep(350); const t = await b.ev(st); if (!t.z) return t; } await sleep(70); } return b.ev(st); };
+  const tail = p => p.split('/').slice(-2).join('/');
+  // the "…" menu: real clicks on the dots and on an item
+  {
+    const b = await open1(); await b.load(PAGE, '#l2/cell', 3000); await restB(b);
+    const mb = await b.box('#crumbs .more');
+    if (ok(!!mb, 'T25 the breadcrumb folds into "…" at the 6T cell')) {
+      if (PHONE) await b.tap(mb.x, mb.y); else await b.click(mb.x, mb.y);
+      await sleep(300);
+      const it = await b.ev(`(() => { const m = document.getElementById('crumb-menu'), r = m.getBoundingClientRect(), bs = [...m.querySelectorAll('button')], t = bs.find(x => /^Rack/.test(x.textContent)) || bs[1] || bs[0]; if (!t) return null;
+        const q = t.getBoundingClientRect(), x = q.x + q.width / 2, y = q.y + q.height / 2, hit = document.elementFromPoint(x, y); return {h: r.height, x, y, txt: t.textContent, hit: !!hit && (hit === t || t.contains(hit))}; })()`);
+      ok(!!it && it.h > 60 && it.hit, 'T25 the "…" menu has its height and its items are on the screen (a click lands on the item)', JSON.stringify(it));
+      if (it) { if (PHONE) await b.tap(it.x, it.y); else await b.click(it.x, it.y); }
+      const s = await restB(b);
+      ok(!!it && s.on && s.node === 'rack', 'T25 a click on the menu\'s "Rack" takes the camera there', `${it && it.txt} -> ${s.node}`);
+    }
+    ok(!b.errs.length, 'T25 (menu) no error', b.errs.join(' | ')); await b.close();
+  }
+  // quick presses of Up (real clicks): every press counts
+  for (const [q, n, gap, want] of [['#l2', 5, 300, 'rack'], ['#l1', 8, 70, 'st29']]) {
+    const b = await open1(); await b.load(PAGE, q, 3000); await restB(b);
+    for (let i = 0; i < n; i++) { const r = await b.box('#up'); if (PHONE) await b.tap(r.x, r.y); else await b.click(r.x, r.y); await sleep(gap); }
+    const s = await restB(b, 25000);
+    ok(s.node === want, `T25 ${n} presses of Up ${gap} ms apart from ${q}: ${want}, every press counted`, s.node);
+    ok(!b.errs.length, `T25 (quick ${q}) no error`, b.errs.join(' | ')); await b.close();
+  }
+  // Up then +: back to the place left (L1's minion -> L2's shire -> + -> the minion, the L1 again)
+  {
+    const b = await open1(); await b.load(PAGE, '#l1', 3000); await restB(b);
+    await b.key('Backspace'); const s1 = await restB(b);
+    await b.key('+'); const s2 = await restB(b);
+    ok(s1.node === 'shire' && s2.node === 'minion' && s2.lv === 'l1', 'T25 Up from the L1\'s minion, then +: back to the minion and the L1', `${s1.node} -> ${s2.node} ${s2.lv}`);
+    ok(!b.errs.length, 'T25 (Up then +) no error', b.errs.join(' | ')); await b.close();
+  }
+  // the glides into the levels' own places, by real keys, and back
+  if (!PHONE) for (const [from, k1, k2] of [['die/shire:24', 'ArrowLeft', 'ArrowRight'], ['die/shire:0/shire.bank:0', 'ArrowRight', 'ArrowLeft'], ['die/shire:0/shire.bank:2', 'ArrowLeft', 'ArrowRight']]) {
+    const b = await open1(); await b.load(PAGE, '#l2', 3000); await restB(b);
+    await b.ev(`MLH.test.go(${JSON.stringify(from)})`); const s0 = await restB(b);
+    await b.ev('document.activeElement && document.activeElement.blur && document.activeElement.blur()');
+    await b.key(k1); const s1 = await restB(b); await b.key(k2); const s2 = await restB(b);
+    ok(s1.lp !== s0.lp && s2.lp === s0.lp && !s2.acc, `T25 ${tail(s0.lp)}: ${k1} glides to ${tail(s1.lp)}, ${k2} comes back (no access started)`, `${tail(s1.lp)} -> ${tail(s2.lp)} ${s2.acc}`);
+    ok(!b.errs.length, `T25 (glide ${from}) no error`, b.errs.join(' | ')); await b.close();
+  }
+  // an access stays when Up leaves its level, and the arrows step it while the ladder holds the stage
+  if (!PHONE) {
+    const b = await open1(); await b.load(PAGE, '#l1/load-hit/2', 3000); await restB(b);
+    await b.ev('document.activeElement && document.activeElement.blur && document.activeElement.blur()');
+    // (paused; the access's camera may have followed it deeper into the L1: Up until the camera leaves the level)
+    if ((await b.ev(st)).clock) { await b.key(' '); await sleep(300); }
+    let s1 = await restB(b);
+    for (let i = 0; i < 5 && !s1.on; i++) { await b.key('Backspace'); s1 = await restB(b); }
+    ok(s1.on && s1.node === 'shire' && s1.lv === 'l1' && s1.acc === 'load-hit' && !s1.clock, 'T25 Up out of the L1 with an access chosen: the ladder shows the shire, the L1 and its access stay, paused', `${s1.on} ${s1.node} ${s1.lv} ${s1.acc} ${s1.clock}`);
+    await b.key('ArrowRight'); const s2 = await restB(b);
+    ok(!s2.on && s2.lv === 'l1' && s2.acc === 'load-hit' && s2.step === s1.step + 1, 'T25 → steps the access and brings the camera back to its level', `${s2.on} ${s2.lv} step ${s1.step} -> ${s2.step}`);
+    ok(!b.errs.length, 'T25 (access) no error', b.errs.join(' | ')); await b.close();
+  }
+  // the focus after the hand-overs: Enter on the levels' VPU, then Backspace
+  if (!PHONE) {
+    const b = await open1(); await b.load(PAGE, '#l1', 3000); await restB(b);
+    const f0 = await b.ev(`(() => { const g = [...document.querySelectorAll('#mem .comp')].find(x => x.getClientRects().length && /^VPU/.test(x.getAttribute('aria-label') || '')); if (g) g.focus(); return g ? g.getAttribute('aria-label') : null; })()`);
+    const fo = () => b.ev(`(() => { const a = document.activeElement; return a ? (a.getAttribute('aria-label') || a.tagName) : ''; })()`);
+    await b.key('Enter'); await restB(b); const f1 = await fo();
+    await b.key('Backspace'); await restB(b); const f2 = await fo();
+    ok(!!f0 && f1 !== 'BODY' && /^VPU/.test(f2), 'T25 the focus after Enter into the ladder is on a part, and after Backspace back on the levels\' VPU', `${f1} | ${f2}`);
+    ok(!b.errs.length, 'T25 (focus) no error', b.errs.join(' | ')); await b.close();
+  }
+  // the labels, the address, the zoom row at load, the stored bit, the hidden layers, a new address
+  {
+    const b = await open1(); await b.load(PAGE, '', 3000); await restB(b);
+    const zr = await b.ev("document.querySelectorAll('#pn-body .pn-zoom button').length");
+    ok(zr > 0, 'T25 at load the level\'s panel has its zoom row', zr);
+    const lab = await b.ev(`(() => { const L = [...document.querySelectorAll('#mem > g.lay')].filter(l => l.style.display !== 'none'); const gs = L.flatMap(l => [...l.querySelectorAll('.comp')]);
+      return {n: gs.length, bad: gs.filter(g => !/(Enter zooms in\.|: details)$/.test(g.getAttribute('aria-label') || '')).map(g => g.getAttribute('aria-label')).slice(0, 3)}; })()`);
+    ok(lab.n >= 5 && !lab.bad.length, 'T25 every part of the levels\' drawing says what Enter does', JSON.stringify(lab));
+    await b.ev("MLH.test.go('host')"); await restB(b);
+    const h = await b.ev('location.hash');
+    ok(h === '#at=host', 'T25 the address follows the ladder: #at=host', h);
+    await b.ev("location.hash = '#at=rack'"); const s = await restB(b);
+    ok(s.on && s.node === 'rack', 'T25 a new #at= in the address moves the camera there', s.node);
+    const hid = await b.ev(`[...document.querySelectorAll('#chip > g.lay')].filter(l => l.style.display === 'none' && l.getAttribute('aria-hidden') !== 'true').length`);
+    ok(hid === 0, 'T25 every layer not shown is hidden from screen readers', hid);
+    ok(!b.errs.length, 'T25 (labels, address) no error', b.errs.join(' | ')); await b.close();
+  }
+  // the panel's "Next to it" row (the levels' maps have no edge links; on a phone the only way sideways without keys): at
+  // the L2's shire, once the page is idle (the neighbours are found in the die's drawing, drawn then), and a real click
+  // on its first button moves the camera there
+  {
+    const b = await open1(); await b.load(PAGE, '#l2', 3000); await restB(b); await sleep(2500);
+    const sel = '#pn-body .pn-zoom [data-pan="1"]';
+    const sb = await b.ev(`[...document.querySelectorAll('${sel}')].map(x => x.textContent)`);
+    ok(sb.length > 0, 'T25 the L2\'s panel offers the shires next to it', JSON.stringify(sb));
+    if (sb.length) {
+      const to = await b.ev(`(() => { const x = document.querySelector('${sel}'); x.scrollIntoView({block: 'center'}); return x.dataset.to; })()`);
+      await sleep(300); const r = await b.box(sel);
+      await b.click(r.x, r.y); const s = await restB(b);
+      ok(tail(s.lp) === tail(to), 'T25 a click on "Next to it" moves the camera to that shire', `${tail(s.lp)} | ${tail(to)}`);
+      const sb2 = await b.ev(`[...document.querySelectorAll('${sel}')].length`);
+      ok(sb2 > 0, 'T25 there, the panel offers its neighbours at once (the die is drawn)', sb2);
+    }
+    ok(!b.errs.length, 'T25 (next to it) no error', b.errs.join(' | ')); await b.close();
+  }
+  {
+    const b = await open1(); await b.load(PAGE, '#l2/cell', 3000); await restB(b);
+    const bit = await b.ev(`(() => { const L = [...document.querySelectorAll('#mem > g.lay')].filter(l => l.style.display !== 'none').pop(); const t = L && L.querySelector('.bitst'); return t ? t.textContent : ''; })()`);
+    ok(/holding 0/.test(bit) && /electrons/.test(bit), 'T25 the levels\' own 6T cell shows the stored bit, its rails and its electrons', bit.slice(0, 120));
+    ok(!b.errs.length, 'T25 (stored bit) no error', b.errs.join(' | ')); await b.close();
+  }
+  if (!PHONE) {
+    // the ladder's copy of the map built (a round trip out and in), then "New address", then Up: the copy that takes the
+    // stage is drawn with the new example (it is drawn again where the example has changed)
+    const b = await open1(); await b.load(PAGE, '#l3', 3000); await restB(b);
+    await b.ev("document.getElementById('up').click()"); await restB(b);
+    await b.ev("document.querySelector('#pmz [data-ci=plus]').click()"); await restB(b);
+    const nb = await b.ev(`(() => { const x = [...document.querySelectorAll('button[data-act="newpa"]')].find(e => e.getClientRects().length); if (x) x.click(); return !!x; })()`);
+    await restB(b);
+    const k0 = await b.ev("MLB.drawKey('l3')");
+    await b.ev("document.getElementById('up').click()"); await sleep(150);
+    const r = await b.ev(`(() => { const L = [...document.querySelectorAll('#chip > g.lay')].find(l => l.dataset.node === 'die' && l.style.display !== 'none'); return {have: !!L, key: L && L._ap ? L._ap.key : null, want: MLB.drawKey('l3')}; })()`);
+    await restB(b);
+    ok(nb && r.have && r.key === r.want && r.want === k0, 'T25 after "New address" the hand-over to the ladder shows the new example (its copy drawn again)', `${nb} ${r.have} ${String(r.key).slice(0, 60)} | ${String(r.want).slice(0, 60)}`);
+    ok(!b.errs.length, 'T25 (new address) no error', b.errs.join(' | ')); await b.close();
+  }
 };
 
 for (const k of Object.keys(T)) {

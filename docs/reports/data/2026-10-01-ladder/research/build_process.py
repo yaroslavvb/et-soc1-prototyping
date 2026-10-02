@@ -191,8 +191,9 @@ F('et.v-sram', g, ['l2', 'sram'], 'SRAM rail (shire-cache arrays): 0.703-0.707 V
   R('chip facts volt.sram; memory-levels l2:l2.voltage.idle, l2:l2.voltage.limits'), repo_fact='chip:volt.sram')
 F('et.v-noc', g, ['mesh'], 'Mesh rail: 0.485 V set point, 0.483-0.486 V on die.', 0.485, 'V', 'measured',
   R('chip facts mesh.voltage, L101'), repo_fact='chip:mesh.voltage')
-F('et.v-other', g, ['memshire', 'dram'], 'Other rails on die: DDR (memory shires) 0.76-0.77 V, Maxion 0.58-0.59 V, I/O shire 0.75 V, PCIe shire 0.75 V; LPDDR4X VDDQ 1.1 V, VDDQLP 0.64 V.', None, 'V', 'measured',
-  R('chip facts volt.other'), repo_fact='chip:volt.other')
+F('et.v-other', g, ['memshire', 'dram'], 'Other rails on die: DDR (memory shires) 0.76-0.77 V, Maxion 0.58-0.59 V, I/O shire 0.75 V, PCIe shire 0.75 V. The DRAM\'s own two rails have set points only (no reading on die): 1.1 V (the card\'s "VDDQ", the LPDDR4X\'s VDD2 core supply) and 0.64 V (the card\'s VDDQLP, the LPDDR4X\'s I/O VDDQ).', None, 'V', 'measured',
+  R('chip facts volt.other; memory levels dram.pwr.rails (the rails\' names)'), repo_fact='chip:volt.other',
+  note='volt.other gives these two as set points (1,100 and 640 mV) read from the power controller, with no on-die value; the memory levels\' dram.pwr.rails names them: VDD_Q is the LPDDR4X\'s VDDQ/VDD2 core supply, VDD_QLP its I/O VDDQ.')
 F('et.per-shire-v', g, ['shire'], 'Per-shire minion-rail voltage at idle: 513-522 mV across the 34 minion shires.', None, 'mV', 'measured',
   R('chip facts L123 (docs/findings/05-claims.md:41)'), repo_fact='chip:L123')
 F('et.leakage', g, ['die', 'finfet'], 'Leakage on aifoundry2 at 80 °C: 20-29 W, 55-80% of an idle card and 31-45% of a 64 W random-data matmul; it rises 0.65 W per °C (fit: 23.3 W x exp((T-80)/36)).', 23.3, 'W at 80 °C (fit)', 'measured',
@@ -200,7 +201,7 @@ F('et.leakage', g, ['die', 'finfet'], 'Leakage on aifoundry2 at 80 °C: 20-29 W,
   quote='"Fitted: 12.6 W fixed + 23.3 W x exp((T - 80)/36) of leakage" (why-low-power.md)')
 F('et.leak-double', g, ['finfet'], 'By that fit, leakage doubles every 25 °C.', 25, '°C per doubling', 'derived',
   ('arithmetic on et.leakage: 36 °C x ln 2', None), quote='36 x 0.693 = 24.95 °C')
-F('et.leak-per-tr', g, ['finfet'], 'Spread over 24 billion transistors, 23 W of leakage is about 1 nW each: roughly 1.4-1.9 nA, about 10 billion electrons a second through every transistor that is "off".', 1.0, 'nW per transistor', 'derived',
+F('et.leak-per-tr', g, ['finfet'], 'Spread over 24 billion transistors, the 23 W of leakage fitted at 80 °C is about 1 nW each on average: roughly 1.4-1.9 nA, about 10 billion electrons a second per transistor (an average over every kind, threshold voltage and state, not what any one "off" transistor passes).', 1.0, 'nW per transistor', 'derived',
   ('arithmetic on et.leakage and et.transistors', None),
   quote='23.3 W / 24e9 = 0.97 nW; at 0.52-0.705 V that is 1.4-1.9 nA = 0.9e10-1.2e10 electrons/s',
   note='An average over every kind of transistor and rail: SRAM, logic, analog; the leakage is not split by rail.')
@@ -242,7 +243,7 @@ F('n7.weff', g, ['fin', 'finfet'], 'One fin gives about 110 nm of channel width:
   quote='Hu: "The channel width, W, is the sum of twice the fin height and the width of the fin." 2 x 52 + 6 = 110 nm. WikiChip: "Compared to N16, N7 has over twice the effective channel width."')
 F('n7.cpp', g, ['finfet', 'gate', 'cell'], 'Contacted gate pitch 57 nm in the dense cells (64 nm in the 7.5-track high-performance cells).', 57, 'nm', 'outside', 'wc-n7',
   quote='"For the transistor, the gate pitch has been further scaled down to 57 nm, however, the interconnect pitch halted at the 40 nm point in order to keep patterning at the SADP point." Flavors table: Gate Pitch 57 nm (low power) / 64 nm (high performance)',
-  note='WikiChip: "while at IEDM TSMC reported slightly more aggressive pitches, the numbers shown in this article are the actual pitches used in their standard cells"; Dick James speculated 54 nm from the IEDM paper.')
+  note='WikiChip: "while at IEDM TSMC reported slightly more aggressive pitches, the numbers shown in this article are the actual pitches used in their standard cells"; the IEDM paper does not state it: Dick James reports Scotten Jones\'s guess of 54 nm, the same as Intel 10 nm.')
 F('n7.leff', g, ['gate', 'channel'], 'Effective gate length about 16.5 nm: the length of channel the gate controls, between source and drain.', 16.5, 'nm', 'outside', 'dj-iedm16',
   quote='"fifth-generation HKMG gate-last, dual gate oxide process ... effective gate length (leff) centered around 16.5 nm"',
   note='The physical (drawn) gate length is not published; comparable: TSMC 10 nm minimum Lg ~25 nm, Intel 10 nm 18 nm (Siliconics).')
@@ -302,8 +303,8 @@ F('cmp.tsmc10', g, ['fin'], 'TSMC 10 nm (Apple A11): fin pitch about 33 nm, fin 
 # 3. The gate stack, dopants and the crystal
 # =====================================================================================================
 g = 'gate'
-F('gate.hfo2', g, ['gate'], 'The gate insulator is hafnium oxide (HfO2, relative permittivity ~24, six times SiO2\'s 3.9) on a thin SiO2 interfacial layer: as good as 1 nm of SiO2 electrically, but thick enough that electrons cannot tunnel through.', 24, 'relative permittivity', 'generic', 'hu7',
-  quote='"HfO2 has a relative dielectric constant (k) of ~24, six times larger than that of SiO2. A 6 nm thick HfO2 film is equivalent to 1 nm thick SiO2 ... These problems are minimized by inserting a thin SiO2 interfacial layer between the silicon substrate and the high-k dielectric."',
+F('gate.hfo2', g, ['gate'], 'The gate insulator is hafnium oxide (HfO2, relative permittivity ~24, six times SiO2\'s 3.9) on a thin SiO2 interfacial layer: as good as 1 nm of SiO2 electrically, but a much thicker barrier, so the electrons that tunnel through it are several orders of magnitude fewer.', 24, 'relative permittivity', 'generic', 'hu7',
+  quote='"HfO2 has a relative dielectric constant (k) of ~24, six times larger than that of SiO2. A 6 nm thick HfO2 film is equivalent to 1 nm thick SiO2 ... the HfO2 film presents a much thicker (albeit lower) tunneling barrier to the electrons and holes. The consequence is that the leakage current through HfO2 is several orders of magnitude smaller than that through SiO2 ... These problems are minimized by inserting a thin SiO2 interfacial layer between the silicon substrate and the high-k dielectric."',
   note='TSMC does not publish N7\'s stack or its thicknesses.')
 F('gate.eot', g, ['gate'], 'Equivalent oxide thickness under 1 nm is typical of FinFETs of this generation (0.7 nm in a 15 nm-gate research FinFET); N7\'s is not published.', 0.7, 'nm (comparable, simulated)', 'outside', 'berkeley',
   quote='Table 1.1, nominal FinFET design: "Lgate (nm) 15", "EOT (nm) 0.7", "HSi (nm) 40", "WSi (nm) 8"',
@@ -327,7 +328,7 @@ F('dope.levels', g, ['channel', 'fin'], 'Fin doping in bulk FinFETs: about 1e18 
 F('dope.n-sd', g, ['finfet'], 'NMOS source and drain: phosphorus-doped silicon grown epitaxially, up to 1.75e21 P atoms per cm³ (about 3% of the atoms), of which only about 1.3e20 are electrically active.', 1.75e21, 'cm^-3', 'outside', 'amat-sip',
   quote='"total [P] by SIMS in HS Si:P epitaxial film is 1.75E+21 at/cc (~ 3 at.% in silicon)"; "only ~1.3E+20 at/cc phosphorous atoms are electrically active"',
   note='Applied Materials\' research film (2014), representative of FinFET Si:P source/drain epitaxy; TSMC\'s values are not published.')
-F('dope.p-sd', g, ['finfet'], 'PMOS source and drain: boron-doped silicon-germanium, with boron above 1e20 per cm³ (patent ranges run to about 2e20 and beyond); the larger germanium atoms squeeze the channel, which speeds holes.', 2e20, 'cm^-3 (order of)', 'outside', 'qc-pat',
+F('dope.p-sd', g, ['finfet'], 'PMOS source and drain: boron-doped silicon-germanium, with boron of the order of 1e20 per cm³ (a patent\'s range runs from below 1e20 to above 2e20); the larger germanium atoms squeeze the channel, which speeds holes.', 2e20, 'cm^-3 (order of)', 'outside', 'qc-pat',
   quote='"one example range of boron concentration that may be used in forming a SiGeB epi layer ... may span from, for example, less than 1E20 at/cm3 and may encompass, for example, greater than 2E20 at/cm3."',
   note='A patent range, not a product measurement. The strain statement is generic: TSMC calls its epitaxy one "that strains the transistor channel" (n7.features).')
 F('dope.donor-acceptor', g, ['crystal', 'channel'], 'Dopants work by valence: phosphorus or arsenic (5 outer electrons) gives one free electron (a donor); boron (3) leaves a hole (an acceptor). Freeing the extra electron takes only about 50 meV, about twice kT at room temperature, so dopants are almost all ionised.', 0.05, 'eV (ionisation energy)', 'generic', 'hu1',
@@ -336,8 +337,8 @@ F('dope.count-channel', g, ['channel'], 'A channel 6 x 16.5 x 52 nm holds about 
   ('arithmetic on n7.fin-width, n7.leff, n7.fin-height, si.density and dope.levels', None),
   quote='V = 6 x 16.5 x 52 = 5,148 nm³ = 5.15e-18 cm³; x 5.0e22 = 2.57e5 Si atoms; x 1e16 = 0.05, x 1e17 = 0.5, x 1e18 = 5.1 dopant atoms',
   note='Uses Leff for the length; the drawn gate is a little longer.')
-F('dope.count-sd', g, ['finfet'], 'At 1.75e21 per cm³ the source and drain hold 1.75 phosphorus atoms per cubic nanometre, one atom in 30.', 1.75, 'P atoms per nm³', 'derived',
-  ('arithmetic on dope.n-sd and si.density', None), quote='1.75e21 cm^-3 x 1e-21 cm³/nm³ = 1.75 /nm³; / 49.9 Si per nm³ = 3.5%')
+F('dope.count-sd', g, ['finfet'], 'At 1.75e21 per cm³ the source and drain hold 1.75 phosphorus atoms per cubic nanometre, one atom in 29; only about one of every thirteen of them (1.3e20 per cm³) is electrically active and gives its electron.', 1.75, 'P atoms per nm³', 'derived',
+  ('arithmetic on dope.n-sd and si.density', None), quote='1.75e21 cm^-3 x 1e-21 cm³/nm³ = 1.75 /nm³; / 49.9 Si per nm³ = 3.5% (1 in 28.5); 1.3e20 / 1.75e21 = 7.4% (1 in 13.5)')
 
 g = 'silicon'
 F('si.lattice', g, ['crystal'], 'Silicon is a diamond-cubic crystal with a 0.5431 nm cube; every atom bonds to four neighbours 0.235 nm away.', 0.5431, 'nm', 'outside', 'nist-asil',
@@ -361,9 +362,9 @@ F('si.mobility', g, ['channel'], 'In pure silicon electrons move about 3 times m
   note='Transit time 16.5e-7 cm / 8e6 cm/s = 0.21 ps (derived), against a 1.67 ns cycle at 600 MHz.')
 F('si.atom', g, ['atom'], 'A silicon atom: 14 protons and 14 electrons, 4 of them valence electrons shared in bonds; 92.2% of silicon is silicon-28 (14 neutrons), 4.7% Si-29, 3.1% Si-30.', 0.92223, 'fraction 28Si', 'outside', 'nist-iso',
   quote='"28Si 0.922 23(19)", "29Si 0.046 85(8)", "30Si 0.030 92(11)"; Hu ch. 1: "Silicon is a group IV element in the periodic table and has four valence electrons."')
-F('si.nucleus', g, ['nucleus'], 'The silicon-28 nucleus has a charge radius of 3.12 fm (3.12 x 10^-15 m): about 75,000 times smaller than the 0.235 nm bond.', 3.1224, 'fm', 'outside', 'konig',
+F('si.nucleus', g, ['nucleus'], 'The silicon-28 nucleus has a charge radius of 3.12 fm (3.12 x 10^-15 m): about 8.1 fm across, some 29,000 times narrower than the 0.235 nm an atom takes in the crystal.', 3.1224, 'fm', 'outside', 'konig',
   quote='28Si charge radius "3.1224 (24)" fm (Table 1, from Angeli and Marinova 2013)',
-  note='0.235 nm / 3.12 fm = 75,300 (derived).')
+  note='A uniform sphere with that rms radius has radius sqrt(5/3) x 3.1224 = 4.03 fm, 8.06 fm across; 0.2352 nm / 8.06 fm = 29,200 (derived).')
 
 # =====================================================================================================
 # 4. Electronics: how a FinFET switches, charges, electrons
@@ -379,7 +380,7 @@ F('el.ss-80c', g, ['finfet'], 'The swing scales with absolute temperature: the 5
   note='Leakage also rises because the threshold voltage drops with temperature (generic); the measured total doubles every 25 °C (et.leak-double).')
 F('el.finfet-why', g, ['finfet', 'fin'], 'Why fins: a thin body with gates on several sides leaves no leakage path far from a gate, so the gate holds the channel shut better and transistors can be shorter, leak less and drive more.', None, None, 'generic', 'hu7',
   quote='"very thin so that no leakage path is far from one of the gates ... For these reasons, a multigate MOSFET can have shorter Lg, lower Ioff, and larger Ion than a single-gate MOSFET." / "A tall FinFET has the advantage of providing a large W and therefore large Ion while occupying a small footprint."')
-F('el.dynamic', g, ['gate', 'minion'], 'Every switching cycle moves a charge C x Vdd from the supply into a node and dumps it to ground: dynamic power = k C Vdd² f. Halving the voltage quarters the energy per switch; this is the whole of Esperanto\'s low-voltage argument.', None, None, 'generic', 'hu6',
+F('el.dynamic', g, ['gate', 'minion'], 'Every switching cycle moves a charge C x Vdd from the supply into a node and dumps it to ground: dynamic power = k C Vdd² f. Halving the voltage quarters the energy per switch, which is why lowering the voltage saves so much.', None, None, 'generic', 'hu6',
   quote='"In each switching cycle, a charge CVdd is transferred from the power supply to the load, C. ... P_dynamic = Vdd x average current = kCVdd^2 f ... Power consumption can be reduced by lowering Vdd and by minimizing all capacitances"')
 F('el.kt', g, ['crystal', 'finfet'], 'Thermal energy kT is 25.9 meV at room temperature (30.4 meV at 80 °C): the band gap is about 43 kT, so thermal agitation alone frees almost no electrons; the dopants\' 50 meV is only 2 kT, so they are all ionised.', 25.85, 'meV at 300 K', 'derived',
   ('NIST k and e (CODATA 2022)', S['nist-k'][1]), quote='k = 1.380649e-23 J/K, e = 1.602176634e-19 C: kT/e = 25.85 mV (300 K), 30.43 mV (353 K); 1.12 / 0.02585 = 43')
