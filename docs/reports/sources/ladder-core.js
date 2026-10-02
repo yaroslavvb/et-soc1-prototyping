@@ -615,6 +615,9 @@ async function zoomWorker() {
       // a flow's or the tour's camera that starts off the chip's three scales (the reader had gone out to the universe
       // or down to the atom) comes back within the reader's cap; within the three its pace is as it was
       else if (!pan && req.o.total == null && steps.some(s => !TRIO.includes(s.P[s.P.length - 1].id))) T = Math.min(T, MOVECAP);
+      // on the clock, at the replay's speed (the chip diagram's CLK.rate, 1 or 2): the move is that much shorter and
+      // still steps by the reader's time, at most DTMAX a frame (a page whose clock has no rate keeps its pace)
+      if (clk && CLK.rate > 0) T /= CLK.rate;
       // images a scale shows are decoded before the camera enters it
       const imgs = [];
       steps.forEach(s => { if (!s.pan && !s.wrap && s.dir > 0) { const N0 = NODES[s.P[s.o + 1].id]; if (N0.imgs) imgs.push(...N0.imgs(prm(s.P[s.o + 1]))); } });

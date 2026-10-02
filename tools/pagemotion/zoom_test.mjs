@@ -48,6 +48,11 @@
 //      mocked clipboard, Enter, the spacesheep and GitHub Pages addresses, the forbidden clipboard's selected link);
 //      reduced motion; in a frame (an http page) only ss-hash is posted, and a new fragment in the frame's src moves the
 //      camera without a reload
+//   T22 the replay's speed (1 Oct, the owner: "Next to the pause button in the replay ... Give an option to go to 2X or
+//      1x speed"): the button beside Play/Pause on its row (1×, 2×; a phone's row does not wrap), the click and S;
+//      flow 8 at 2x takes about half the time of 1x and plays the same stages in the same order; the clock's pace;
+//      pause, the arrows, Follow and the tour at 2x; switching mid-flow, a camera move included; &speed=2 in the
+//      address (opened, held, reloaded, a hashchange, a bad value); reduced motion at 2x
 import { open, sleep } from './cdp.mjs';
 const args = process.argv.slice(2), PAGE = args.find(a => !a.startsWith('--')), PHONE = args.includes('--phone');
 const ONLY = (args.find(a => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
@@ -817,6 +822,175 @@ T.T21 = async b => {
       ok(m.length && m[m.length - 1].hash === '#', 'T21 framed: back at the die (the first view), the viewer is told to clear its fragment', JSON.stringify(m.slice(-2)));
       ok(m.every(x => x && x.type === 'ss-hash' && Object.keys(x).length === 2 && VIEWER.test(x.hash)), `T21 framed: nothing but ss-hash is posted, each a fragment the viewer mirrors (${m.length} messages)`, JSON.stringify(m.slice(0, 8)));
     } else console.log('  (T21 framed: skipped, the page is not on a server)');
+  } finally { await b.send('Page.removeScriptToEvaluateOnNewDocument', {identifier}); }
+};
+
+T.T22 = async b => {
+  const fresh = async (q, wait = 1500) => { await b.send('Page.navigate', {url: 'about:blank'}); await sleep(120); await b.load(PAGE, q, wait); await b.idle(15000); };
+  const hash = () => b.ev('location.hash');
+  // a real click (a tap on the phone) on a control, scrolled into view first
+  const press = async sel => {
+    await b.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}), r = e.getBoundingClientRect(); if (r.top < 60 || r.bottom > innerHeight - 60) e.scrollIntoView({block: 'center'}); return true; })()`); await sleep(150);
+    const bx = await b.box(sel); if (!bx) return false; if (b.touch) await b.tap(bx.x, bx.y); else await b.click(bx.x, bx.y); return true;
+  };
+  // the clock's pace: its milliseconds per millisecond of the reader's time
+  const pace = async (r = b, ms = 900) => { const a = await r.ev('[window.__chipState().clock, performance.now()]'); await sleep(ms); const c = await r.ev('[window.__chipState().clock, performance.now()]'); return +((c[0] - a[0]) / (c[1] - a[1])).toFixed(2); };
+  const near = (v, w, tol = 0.2) => Math.abs(v - w) <= tol;
+  const untilSt = async (cond, max = 30000) => { const t0 = Date.now(); let s = await b.state(); while (!cond(s) && Date.now() - t0 < max) { await sleep(80); s = await b.state(); } return s; };
+  const want = () => b.ev('window.__chipTest.want()');
+  const {identifier} = await b.send('Page.addScriptToEvaluateOnNewDocument', {source: "window.__warns = []; (() => { const w = console.warn; console.warn = function (...a) { window.__warns.push(a.map(String).join(' ')); return w.apply(this, a); }; })();"});
+  try {
+    // the button: right of Play (Pause while a flow plays), on its row with the arrows, Follow and Tour, in the window
+    const geo = () => b.ev(`(() => { const s = document.getElementById('btn-speed'), p = document.getElementById('btn-play'), r = s.getBoundingClientRect(), q = p.getBoundingClientRect();
+      return {text: s.textContent, play: p.textContent, label: s.getAttribute('aria-label'), next: p.nextElementSibling === s, gap: Math.round(r.left - q.right), w: Math.round(r.width), h: Math.round(r.height), l: Math.round(r.left), r: Math.round(r.right),
+        rows: ['btn-play', 'btn-speed', 'btn-prev', 'btn-next', 'btn-follow', 'btn-tour'].map(id => Math.round(document.getElementById(id).getBoundingClientRect().top)), iw: innerWidth, sw: document.documentElement.scrollWidth}; })()`);
+    const placed = g => g.next && g.gap >= 0 && g.gap <= 12 && g.w >= 28 && g.h >= 28 && g.l >= 0 && g.r <= g.iw && g.sw <= g.iw && Math.max(...g.rows) - Math.min(...g.rows) <= 2;
+    await fresh('');
+    let g = await geo();
+    ok(placed(g) && g.text === '1×' && g.label === 'Speed 1×, press for 2× (S)', `T22 the speed button: 1× beside Play, on the playback row (${b.W} px wide)`, JSON.stringify(g));
+    await press('[data-flow="H"]'); await sleep(900);
+    g = await geo();
+    ok(placed(g) && g.play === 'Pause', 'T22 beside Pause while flow 8 plays, the row unwrapped', JSON.stringify(g));
+    ok(near(await pace(), 1, 0.15), 'T22 at 1x the clock keeps the reader\'s time');
+    await press('#btn-speed'); await sleep(300);
+    let s = await b.state(); g = await geo();
+    ok(s.rate === 2 && g.text === '2×' && g.label === 'Speed 2×, press for 1× (S)' && placed(g) && await hash() === '#flow=8-data-watts&speed=2', 'T22 a press: 2×, and the address says &speed=2', JSON.stringify([s.rate, g.text, await hash()]));
+    const p2 = await pace();
+    ok(near(p2, 2, 0.25), 'T22 at 2x the clock runs twice as fast', String(p2));
+    await b.key('s'); await sleep(300);
+    s = await b.state();
+    ok(s.rate === 1 && await b.ev(`document.getElementById('btn-speed').textContent`) === '1×' && await hash() === '#flow=8-data-watts', 'T22 S: back to 1×, the address without it', JSON.stringify([s.rate, await hash()]));
+    await b.key('S'); await sleep(200);
+    ok((await b.state()).rate === 2, 'T22 S again: 2×');
+
+    // flow 8 whole at 1x and at 2x (the speed set before it starts): the same stages in the same order, in about half the time
+    const run8 = async () => {
+      await b.ev(`(() => { const L = window.__t22 = {st: [], done: 0}; const live = document.getElementById('st-live'), play = document.getElementById('btn-play');
+        new MutationObserver(() => { const t = live.textContent; if (/^Stage /.test(t) && (!L.st.length || L.st[L.st.length - 1][1] !== t)) L.st.push([performance.now(), t]); }).observe(live, {childList: true, characterData: true, subtree: true});
+        new MutationObserver(() => { if (play.textContent === 'Replay' && !L.done) L.done = performance.now(); }).observe(play, {childList: true, characterData: true, subtree: true});
+        return true; })()`);
+      await b.key('8');
+      for (let i = 0; i < 1200 && !await b.ev('window.__t22.done'); i++) await sleep(100);
+      const L = await b.ev('window.__t22');
+      return {ms: L.done && L.st.length ? L.done - L.st[0][0] : NaN, st: L.st.map(x => x[1]), per: L.st.map((x, i) => Math.round((i + 1 < L.st.length ? L.st[i + 1][0] : L.done) - x[0]))};
+    };
+    await fresh('');
+    const r1 = await run8();
+    await fresh('');
+    await b.key('s'); await sleep(200);
+    const r2 = await run8();
+    const ratio = r2.ms / r1.ms;
+    ok(r1.st.length === 7 && JSON.stringify(r1.st) === JSON.stringify(r2.st), 'T22 flow 8 at 2x plays the same seven stages in the same order', `${r1.st.length} and ${r2.st.length} stages`);
+    ok(ratio >= 0.42 && ratio <= 0.6, `T22 flow 8 at 2x takes about half the time of 1x (${(r2.ms / 1000).toFixed(1)} s against ${(r1.ms / 1000).toFixed(1)} s, ${ratio.toFixed(2)})`, `per stage ${JSON.stringify(r1.per)} | ${JSON.stringify(r2.per)}`);
+
+    // opened at 2x; paused (the address holds its stage and its speed); the arrows step, while paused; Play goes on at 2x
+    await fresh('#flow=8-data-watts&speed=2');
+    s = await b.state();
+    ok(s.flow === 'H' && !s.done && s.rate === 2 && await b.ev(`document.getElementById('btn-speed').textContent`) === '2×' && await hash() === '#flow=8-data-watts&speed=2', 'T22 opened with #flow=8-data-watts&speed=2: flow 8 plays at 2×, the address left as it is', JSON.stringify([s.flow, s.rate, await hash()]));
+    await b.ev(`document.getElementById('btn-play').click()`); await sleep(400);
+    s = await b.state();
+    const held = s.stage, c0 = s.clock;
+    await sleep(500);
+    ok(!s.clockOn && (await b.state()).clock === c0 && await hash() === `#flow=8-data-watts&stage=${held + 1}&speed=2`, 'T22 paused at 2x: the clock stops, the address holds the stage and the speed', await hash());
+    await b.key('ArrowRight'); await sleep(300); await b.idle(15000);
+    s = await b.state();
+    ok(s.stage === held + 1 && s.still && s.rate === 2 && s.path === await want() && await hash() === `#flow=8-data-watts&stage=${held + 2}&speed=2`, 'T22 Right while paused at 2x: the next stage, held, where it wants the camera', JSON.stringify([s.stage, s.still, await hash()]));
+    await b.key('ArrowLeft'); await sleep(300); await b.idle(15000);
+    s = await b.state();
+    ok(s.stage === held && s.still && s.path === await want(), 'T22 Left: back a stage, held', JSON.stringify([s.stage, s.still]));
+    await b.ev(`document.getElementById('btn-play').click()`); await sleep(200);
+    s = await b.state();
+    const pp = await pace();
+    ok(s.clockOn && !s.still && s.stage === held + 1 && near(pp, 2, 0.25) && await hash() === '#flow=8-data-watts&speed=2', 'T22 Play goes on to the next stage at 2x', JSON.stringify([s.stage, pp, await hash()]));
+    // the stages from where flow 8 enters a minion: every one lands where it wants the camera, stepped while playing at 2x
+    s = await untilSt(x => x.stage >= 3 && !x.zooming, 20000);
+    let good = 0, tot = 0;
+    for (let i = s.stage; i < 7; i++) {
+      if (i > s.stage) { await b.key('ArrowRight'); await sleep(150); await b.idle(15000); }
+      const st = await b.state(); tot++;
+      if (st.stage === i && st.path === await want()) good++; else console.log(`  flow 8 stage ${i + 1} at 2x: at ${st.path} (stage ${st.stage + 1}), wants ${await want()}`);
+    }
+    ok(tot >= 3 && good === tot, `T22 at 2x every stage stepped to lands where it wants the camera (${good}/${tot})`);
+
+    // switching mid-flow: 1x to 2x and back while flow 8 plays, and in the middle of its camera's move into a minion
+    await fresh('#flow=8');
+    await sleep(400);
+    const q1 = await pace();
+    await press('#btn-speed'); await sleep(100);
+    const q2 = await pace();
+    s = await b.state();
+    const st0 = s.stage;
+    s = await untilSt(x => x.stage > st0, 6000);
+    ok(near(q1, 1, 0.15) && near(q2, 2, 0.25) && s.stage === st0 + 1 && s.rate === 2, 'T22 switched to 2x mid-flow: the clock doubles at once, the flow goes on to its next stage', JSON.stringify({q1, q2, from: st0, now: s.stage}));
+    await b.key('s'); await sleep(100);
+    const q3 = await pace();
+    ok(near(q3, 1, 0.15) && (await b.state()).flow === 'H' && await hash() === '#flow=8-data-watts', 'T22 and back to 1x mid-flow', JSON.stringify({q3, hash: await hash()}));
+    await fresh('#flow=8-data-watts&stage=3');
+    await b.ev(`document.getElementById('btn-play').click()`);
+    let moving = false;
+    for (let i = 0; i < 40 && !moving; i++) { await sleep(25); moving = (await b.state()).zooming; }
+    await sleep(250);
+    await b.key('s');
+    await b.idle(15000); await sleep(200);
+    s = await b.state();
+    ok(moving && s.stage === 3 && s.rate === 2 && s.path === await want() && s.clockOn, 'T22 switched during the camera\'s move into a minion: it lands where the stage wants it, and plays on at 2x', JSON.stringify({moving, stage: s.stage, at: s.path.split('/').slice(-2).join('/')}));
+
+    // Follow at 2x: off, the stage plays without moving the camera; on again, the camera goes to it
+    await fresh('#flow=8-data-watts&stage=3&speed=2');
+    await b.key('c'); await sleep(100);
+    await b.ev(`document.getElementById('btn-play').click()`); await sleep(700);
+    s = await b.state();
+    const die = s.path;
+    ok(!s.follow && s.stage === 3 && !s.zooming && s.path.endsWith('/die') && s.rate === 2, 'T22 Follow off at 2x: the stage in a minion plays, the camera stays on the die', JSON.stringify({follow: s.follow, stage: s.stage, at: s.path.split('/').slice(-1)[0]}));
+    await b.key('c'); await sleep(200); await b.idle(15000);
+    s = await b.state();
+    ok(s.follow && s.stage === 3 && s.path !== die && s.path === await want(), 'T22 Follow on again: the camera goes to the stage', s.path.split('/').slice(-2).join('/'));
+
+    // the tour at 2x: its address, its slides, a flow's slide
+    await fresh('#tour=1&speed=2');
+    s = await b.state();
+    ok(s.tour === 0 && s.rate === 2 && await hash() === '#tour=1&speed=2', 'T22 #tour=1&speed=2 opens the tour at 2x', JSON.stringify([s.tour, s.rate, await hash()]));
+    for (let i = 0; i < 4; i++) { await b.key('ArrowRight', 8); await sleep(150); await b.idle(15000); }
+    s = await b.state();
+    ok(s.tour === 4 && !s.zooming && await hash() === '#tour=5&speed=2', 'T22 the tour steps its slides at 2x, the address with them', JSON.stringify([s.tour, await hash()]));
+    await b.key('8'); await sleep(600); await b.idle(15000);
+    s = await b.state();
+    ok(s.flow === 'H' && s.tour != null && s.rate === 2 && await hash() === '#flow=8-data-watts&speed=2' && near(await pace(), 2, 0.25), 'T22 the tour\'s slide of flow 8 plays at 2x', JSON.stringify([s.tour, s.flow, await hash()]));
+
+    // the address: without &speed= 1x; held at a stage; a hashchange that changes only the speed; a bad speed
+    await fresh('#flow=8-data-watts');
+    ok((await b.state()).rate === 1 && await b.ev(`document.getElementById('btn-speed').textContent`) === '1×', 'T22 #flow=8-data-watts (no speed) opens at 1x');
+    await fresh('#flow=8-data-watts&stage=3&speed=2');
+    s = await b.state();
+    ok(s.flow === 'H' && s.stage === 2 && s.still && s.rate === 2 && await hash() === '#flow=8-data-watts&stage=3&speed=2', 'T22 #flow=8-data-watts&stage=3&speed=2 opens held at stage 3, at 2x', JSON.stringify([s.stage, s.still, s.rate]));
+    await fresh('#flow=8-data-watts');
+    s = await untilSt(x => x.stage >= 1, 8000);
+    const before = s.stage;
+    await b.ev(`location.hash = '#flow=8-data-watts&speed=2'`); await sleep(400);
+    s = await b.state();
+    ok(s.rate === 2 && s.flow === 'H' && s.stage >= before && await hash() === '#flow=8-data-watts&speed=2', 'T22 a hashchange adding &speed=2: 2x, and the flow goes on (not restarted)', JSON.stringify({before, now: s.stage, rate: s.rate}));
+    const nerr = b.errs.length;
+    await fresh('#flow=8&speed=7'); await sleep(400);
+    s = await b.state();
+    ok(s.flow === 'H' && s.rate === 1 && await b.ev('window.__warns.length') > 0 && await hash() === '#flow=8-data-watts' && b.errs.length === nerr, 'T22 #flow=8&speed=7: a warning, flow 8 at 1x, the address corrected', JSON.stringify([s.rate, await hash()]));
+
+    // reduced motion at 2x: nothing animates (the camera cuts), and the stages advance on their own twice as fast
+    const r = await open(b.touch ? {w: 390, h: 844, dpr: 3, touch: true, reduced: true} : {w: 1280, h: 800, dpr: 1, reduced: true});
+    try {
+      await r.load(PAGE, '#flow=8-data-watts&stage=3&speed=2', 1500);
+      let rs = await r.state();
+      ok(rs.rate === 2 && rs.stage === 2 && rs.still, 'T22 reduced motion: #flow=8-data-watts&stage=3&speed=2 opens held, at 2x', JSON.stringify([rs.rate, rs.stage]));
+      await r.ev(`document.getElementById('btn-play').click()`);
+      const t0 = Date.now(); await sleep(120);
+      rs = await r.state();
+      ok(rs.stage === 3 && !rs.zooming && rs.path === await r.ev('window.__chipTest.want()'), 'T22 reduced motion at 2x: the camera cuts to the stage in a minion', rs.path.split('/').slice(-2).join('/'));
+      let n = rs.stage;
+      while (n === 3 && Date.now() - t0 < 15000) { await sleep(50); n = (await r.state()).stage; }
+      const adv = Date.now() - t0, rp = await pace(r);
+      // (stage 4 under reduced motion: its three phases wait 0.7 s each, then it holds 2.3 s: 4.4 s of the clock, 2.2 s at 2x)
+      ok(near(rp, 2, 0.25) && n === 4 && adv > 1600 && adv < 3200, `T22 reduced motion at 2x: the clock at 2x, and stage 4 gives way to stage 5 on its own after ${(adv / 1000).toFixed(1)} s (4.4 at 1x)`, JSON.stringify({pace: rp, stage: n}));
+      ok(!r.errs.length, 'T22 reduced motion: no console errors', r.errs.slice(0, 3).join(' | '));
+    } finally { await r.close(); }
   } finally { await b.send('Page.removeScriptToEvaluateOnNewDocument', {identifier}); }
 };
 

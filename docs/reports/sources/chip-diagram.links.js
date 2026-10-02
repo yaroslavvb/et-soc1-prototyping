@@ -4,10 +4,12 @@
    its key 1-9, 0 or b, then its name; #flow=8 opens it too), &stage=3 while a flow is held at a stage (paused, or
    stepped while paused), #tour=3 on the tour's still slides, and with nothing playing the scale the camera rests on as
    ?at= names it, #at=shire%3A20/minion%3A20.1.3 (above the rack only the level shown: the easter egg's rule), written
-   once the camera rests. The die, the first view, has none. In a frame each new fragment is posted to the viewer as
-   ss-hash (the only message), which spacesheep mirrors into the reader's address; the viewer forwards the outer
-   fragment in, and a hashchange goes there as any move does. At load the fragment wins over ?flow=, ?tour=, ?at=; one
-   that names nothing warns and is ignored (the address then says what is shown); any other (#facts) is left alone.
+   once the camera rests. The die, the first view, has none. A flow or the tour played at 2x (the speed button, S; 1
+   Oct) adds &speed=2, and opens at 2x (a fragment without it keeps the page's speed: 1x when it opens). In a frame
+   each new fragment is posted to the viewer as ss-hash (the only message), which spacesheep mirrors into the reader's
+   address; the viewer forwards the outer fragment in, and a hashchange goes there as any move does. At load the
+   fragment wins over ?flow=, ?tour=, ?at=; one that names nothing warns and is ignored (the address then says what is
+   shown); any other (#facts) is left alone.
    Copy link copies spacesheep's address of the page (the frame's origin is no address to share), elsewhere this one's;
    where the frame forbids the clipboard, the link is shown selected. Hooks: lnkStart() at load, lnkSoon() in
    renderBar, pageArrived() in the core's arrived(). */
@@ -32,10 +34,12 @@ function lnkAt(P) {
   return s ? 'at=' + s.split('/').map(lnkEnc).join('/') : '';
 }
 const lnkFlow = (k, i, held) => `flow=${KEYOF[k].toLowerCase()}-${lnkSlug(k)}` + (held ? '&stage=' + (i + 1) : '');
+/* the replay's speed, after a flow's or the tour's anchor: at 2x only (s: a speed asked for, else the page's) */
+const lnkRate = s => ((s || CLK.rate) === 2 ? '&speed=2' : '');
 function lnkAnchor() {
   const tf = TOUR && STEPS[TOUR.i] ? STEPS[TOUR.i].flow : null;
-  if (TOUR && !(tf && FL.k === tf)) return 'tour=' + (TOUR.i + 1);
-  if (FL.k) return lnkFlow(FL.k, FL.i, !FL.done && (FL.still || !CLK.on));
+  if (TOUR && !(tf && FL.k === tf)) return 'tour=' + (TOUR.i + 1) + lnkRate();
+  if (FL.k) return lnkFlow(FL.k, FL.i, !FL.done && (FL.still || !CLK.on)) + lnkRate();
   return lnkAt(zNow().path);
 }
 /* a fragment's fields; null for one not of these forms */
@@ -49,8 +53,17 @@ function lnkFields(h) {
   });
   return o;
 }
-/* what it asks for: {flow, i, held}, {tour}, {at}; {bad} when it names nothing; fix: a bad stage, the flow from its start */
+/* what it asks for: {flow, i, held}, {tour}, {at}; {bad} when it names nothing; fix: a bad stage, the flow from its
+   start, or a bad speed; speed: &speed=1 or 2 (any other warns and is dropped) */
 function lnkAsk(o) {
+  const r = lnkWhat(o);
+  if (o.speed != null && !r.bad) {
+    if (o.speed === '1' || o.speed === '2') r.speed = +o.speed;
+    else { console.warn(`&speed=${o.speed}: the replay plays at 1× or 2×`); r.fix = true; }
+  }
+  return r;
+}
+function lnkWhat(o) {
   if (o.flow != null) {
     const v = String(o.flow).toLowerCase(), m = /^([0-9b])(?:-[a-z0-9-]*)?$/.exec(v);
     const k = m ? (m[1] === 'b' ? 'K' : ORDER['1234567890'.indexOf(m[1])]) : ORDER.split('').find(x => lnkSlug(x) === v);
@@ -65,9 +78,10 @@ function lnkAsk(o) {
   if (o.at != null) { let P = null; try { P = o.at ? atPath(o.at) : null; } catch (_) { P = null; } return P ? {at: P} : {bad: `#at=${o.at}: no such scale`}; }
   return {bad: '#stage= alone names no flow'};
 }
-const lnkOf = r => (r.flow ? lnkFlow(r.flow, r.i, r.held) : r.tour != null ? 'tour=' + (r.tour + 1) : lnkAt(r.at));
+const lnkOf = r => (r.flow ? lnkFlow(r.flow, r.i, r.held) + lnkRate(r.speed) : r.tour != null ? 'tour=' + (r.tour + 1) + lnkRate(r.speed) : lnkAt(r.at));
 /* go there: at load at once (as the query does), on a hashchange by the reader's own kind of move */
 function lnkGo(r, smooth) {
+  if (r.speed) setRate(r.speed);
   if (r.flow && !r.held) { pickFlow(r.flow); return; }
   if (r.flow) { if (TOUR) endTour(); if (FOLLOW_AUTO) setFollow(true); startFlow(r.flow, r.i, {still: true}); return; }
   if (r.tour != null) { if (TOUR) tourGo(r.tour); else startTour(r.tour); return; }
@@ -109,6 +123,10 @@ window.addEventListener('hashchange', () => {
   const o = lnkFields(location.hash); if (!o) return;
   let r = lnkAsk(o), fix = !!r.fix;
   if (r.bad) { console.warn(r.bad + '; back to the first view'); r = {at: pathOf({level: 0})}; fix = true; }
+  // the speed first: a fragment that changes only the speed changes nothing else; one without it keeps the page's, and
+  // at 2x the address then says so
+  if (r.speed) setRate(r.speed);
+  else if (CLK.rate === 2 && (r.flow || r.tour != null)) fix = true;
   LNK.last = fix ? '\u0000' : lnkOf(r);   // (the address says it already, unless it named nothing)
   if (lnkOf(r) !== lnkAnchor()) lnkGo(r, true);
   if (fix) lnkSoon();

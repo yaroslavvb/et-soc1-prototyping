@@ -22,9 +22,10 @@
    allows it, else the stage fills the frame and offers F11 and a presenter window (a copy of the page in a window of
    its own). With reduced motion nothing animates: each stage draws its end state.
    Keys: 1-9 and 0 flows (in the tour, that flow's slide), B the broadcast (no tour slide: it ends the tour), Left/Right (and PageUp/PageDown) stages, crossing to the
-   next tour slide at a flow's ends; Shift+Left/Right tour slides; Space pauses; + and - zoom (a second press while the
-   camera moves goes on from its target); Enter on a part zooms in; Backspace zooms out; C follow; F present; P panel;
-   D light and dark; T tour (it picks up where it was left); Q ends the tour; Esc leaves presenting, never the tour.
+   next tour slide at a flow's ends; Shift+Left/Right tour slides; Space pauses; S plays at 2x or 1x (setRate); + and -
+   zoom (a second press while the camera moves goes on from its target); Enter on a part zooms in; Backspace zooms out;
+   C follow; F present; P panel; D light and dark; T tour (it picks up where it was left); Q ends the tour; Esc leaves
+   presenting, never the tour.
    URL flags: ?theme=light|dark, ?panel=off, ?flow=1..9|0|b, ?tour=1.
 
    Third version (27 September, for presenting): one drawing system (stroke weights, corner radii, type weights), --c2
@@ -639,13 +640,17 @@ function buildPip() {
 }
 
 /* ================= the animation clock: everything that moves runs on it, and Space stops it ================= */
-const CLK = {t: 0, on: true, last: 0, dt: 0, jobs: new Set()};
+/* rate: the replay's speed, 1 or 2 (1 Oct, setRate: the button beside Play, or S): the clock runs that many times as
+   fast as the reader's time, and the flows' and the tour's camera moves are planned that much shorter (ladder-core.js,
+   zoomWorker), so that dt, which those moves step by, stays the reader's time */
+const CLK = {t: 0, on: true, last: 0, dt: 0, rate: 1, jobs: new Set()};
 /* a frame that comes late (the page loading, a busy machine) moves things on by at most DTMAX: after a stall the motion
-   goes on from where it was, a little behind, rather than leaping ahead (80 ms until 30 September) */
+   goes on from where it was, a little behind, rather than leaping ahead (80 ms until 30 September); at 2x by at most
+   DTMAX of the reader's time too */
 const DTMAX = 40;
 (function loop(now) {
   const dt = CLK.last ? Math.min(DTMAX, now - CLK.last) : 0; CLK.last = now; CLK.dt = dt;   // dt: this frame, paused or not
-  if (CLK.on) CLK.t += dt;
+  if (CLK.on) CLK.t += dt * CLK.rate;
   CLK.jobs.forEach(j => { try { j(); } catch (e) { CLK.jobs.delete(j); console.error(e); } });
   requestAnimationFrame(loop);
 })(0);
@@ -2253,7 +2258,9 @@ const wAmp = k => (V(k) - V('w_idle')) / (V('w_randn') - V('w_idle'));
 function raceChart(tok, c, rows, title) {
   const fx = c.fx, g = E('g', {class: 'band'}, fx), X0 = BAND.x, W = BAND.w, TMAX = 602, SPEED = 50;   // s of card time per s shown
   T(g, X0, BAND.y + 22, title, 't-labb halo');
-  T2(g, X0, BAND.y + 46, ['time to 90 °C;', `1 s here is ${SPEED} s`], 't-sm halo');
+  // (at 2x a second here is twice the card's time: the line follows the replay's speed, setRate)
+  const per = T2(g, X0, BAND.y + 46, ['time to 90 °C;', ''], 't-sm halo').lastChild;
+  per.dataset.sps = SPEED; per.textContent = spsLine(SPEED);
   const bars = rows.map((r, i) => {
     const y = BAND.y + 80 + i * 64;
     T(g, X0, y + 18, r.name, 't-lab halo', 'start', r.f);
@@ -3122,6 +3129,30 @@ function playPause() {
   if (!CLK.on && refollow()) { CLK.on = true; restartStage(); playBtn(); renderBar(); return; }
   CLK.on = !CLK.on; playBtn(); renderBar();
 }
+/* the replay's speed (1 Oct, the owner: "Next to the pause button in the replay ... Give an option to go to 2X or 1x
+   speed"): the button beside Play, or S, switches it between 1x and 2x for as long as the page is open, and a link may
+   carry it (&speed=2, chip-diagram.links.js). Whatever a flow or the tour plays on the clock goes at it (CLK.rate): the
+   stages and their holds, the packets, the fades, the charts and the camera's moves; with reduced motion nothing
+   animates and the stages advance at it. Pausing and stepping are as at 1x, and the reader's own zooms keep their
+   pace. A change applies at once, from where everything is (a camera move under way ends at the pace it began with). */
+function setRate(r, say) {
+  r = +r === 2 ? 2 : 1;
+  if (CLK.rate !== r) {
+    CLK.rate = r;
+    // the heat race's "1 s here is 50 s" (flow 8): at 2x a second here is 100 s of the card's
+    document.querySelectorAll('#chip [data-sps], #pipsvg [data-sps]').forEach(e => { e.textContent = spsLine(+e.dataset.sps); });
+    lnkSoon();
+    if (say) $('st-live').textContent = `Replay speed ${r}×`;
+  }
+  speedBtn();
+}
+function spsLine(s) { return `1 s here is ${s * CLK.rate} s`; }
+function speedBtn() {
+  const b = $('btn-speed'), x2 = CLK.rate === 2, t = `Speed ${x2 ? '2×' : '1×'}, press for ${x2 ? '1×' : '2×'} (S)`;
+  b.textContent = x2 ? '2×' : '1×';
+  b.classList.toggle('x2', x2);
+  b.setAttribute('aria-label', t); b.title = t;
+}
 /* ---- presenting: full screen where the frame allows it, else the stage fills the frame ---- */
 const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
 const fsOK = () => !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
@@ -3258,6 +3289,7 @@ document.querySelectorAll('[data-flow]').forEach(b => b.addEventListener('click'
    keeps its focus) */
 $('stage').addEventListener('click', e => { const b = e.target.closest && e.target.closest('button, summary, li.fact'); if (b && e.detail > 0) b.blur(); });
 $('btn-play').addEventListener('click', playPause);
+$('btn-speed').addEventListener('click', () => setRate(CLK.rate === 2 ? 1 : 2, true));
 $('btn-tour').addEventListener('click', toggleTour);
 $('btn-fs').addEventListener('click', present);
 $('btn-panel').addEventListener('click', () => togglePanel());
@@ -3313,6 +3345,7 @@ document.addEventListener('keydown', e => {
     // G: the two-state electronics (1 Oct): the gate at 0 V or at the rail, a bit 0 or 1, a DRAM cell just written or later
     case 'g': case 'G': e.preventDefault(); stateToggle(); break;
     case 'c': case 'C': e.preventDefault(); setFollow(!FOLLOW); break;
+    case 's': case 'S': e.preventDefault(); setRate(CLK.rate === 2 ? 1 : 2, true); break;   // the replay at 1x or 2x (1 Oct)
     case 't': case 'T': e.preventDefault(); toggleTour(); break;
     case 'q': case 'Q': if (TOUR) { e.preventDefault(); endTour(); stopFlow(); } break;
     case 'b': case 'B': e.preventDefault(); pickFlow('K'); break;
@@ -3464,7 +3497,7 @@ scaleUI(true);
 prose();
 showHere();
 resetCap();
-playBtn();
+playBtn(); speedBtn();
 try {
   const q = new URLSearchParams(location.search);
   setTheme(q.get('theme'));
@@ -3590,7 +3623,7 @@ window.__chipTest = {
 };
 /* a read-only view of the state, for the page's tests (headless Chrome) */
 window.__chipState = () => ({level: Z.level, sid: Z.sid, nb: Z.nb, mi: Z.mi, flow: FL.k, stage: FL.i, done: FL.done, still: FL.still,
-  clockOn: CLK.on, clock: Math.round(CLK.t), follow: FOLLOW, zooming: ZW || UIP, pip: !PIP.el.hidden, pres: PRES, tour: TOUR ? TOUR.i : null,
+  clockOn: CLK.on, clock: Math.round(CLK.t), rate: CLK.rate, follow: FOLLOW, zooming: ZW || UIP, pip: !PIP.el.hidden, pres: PRES, tour: TOUR ? TOUR.i : null,
   transform: [0, 1, 2].map(i => LAYERS[i].getAttribute('transform')), shown: [0, 1, 2].map(i => LAYERS[i].style.display !== 'none'),
   // the path camera (30 September): the path shown, its depth, and every layer shown with its scale on the screen
   path: pkeys(Z.path), depth: Z.path.length - 1, die: DIE,
