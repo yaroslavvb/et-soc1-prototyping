@@ -363,6 +363,29 @@ class Usage(unittest.TestCase):
         self.assertEqual((u["logger"], u["paused"]), ("stale", "low free space, 310 MB free"))
         self.assertEqual(u["merged_gap_s"], 60)   # the whole log read: over 200 KB, merged by et-usage
 
+    def test_the_live_monitors_unseen_opens_are_left_out(self):
+        """et-usage logs the live monitor's 4 ms management-node reads as "?" opens, 3,600 an hour: they are no
+        one's use. A few real unseen opens (and a login's own runs) stay."""
+        iv = lambda u, a, b, n: {"user": u, "start": a, "end": b, "node_s": 1.0, "lock_s": 0, "procs": n, "programs": {"?": n}}
+        j = {"v": 1, "host": "aifoundry3", "now": 1790797200.0, "since": 1790703600.0,
+             "daemon": {"state": "running", "alive_at": 1790797190.0, "started_at": 1790700000.0},
+             "logging_since": 1790700000.0, "coverage": [[1790703600.0, 1790797200.0]], "merged_gap_s": 60.0,
+             "cards": {"0": {"intervals": [iv("?", 1790790000.0, 1790793600.0, 3600),   # the monitor: 1 a second
+                                           iv("?", 1790794000.0, 1790794030.0, 6),      # six real unseen opens
+                                           iv("?", 1790794100.0, 1790794102.0, 3),      # a once-a-second fragment
+                                           dict(iv("?", 1790794200.0, 1790794201.0, 40), lock_user="bob"),  # 40 in a second
+                                           iv("alice", 1790795000.0, 1790795003.0, 3)],
+                             "activity": [], "users": {}, "held_s": 3.0, "node_s": 3.0, "merged_gap_s": 60.0, "now": [],
+                             "daily": {"2026-10-02": {"?": {"held_s": 40.0, "node_s": 40.0, "runs": 15000},
+                                                      "alice": {"held_s": 3.0, "node_s": 3.0, "runs": 3}},
+                                       "2026-10-01": {"?": {"held_s": 0.1, "node_s": 0.1, "runs": 8}}}}}}
+        u = bare(now=1790797500.0).usage_block("aifoundry3", {"installed": True, "json": j})
+        c = u["cards"]["aifoundry3"]
+        self.assertEqual([(x["user"], x["runs"]) for x in c["intervals"]], [("?", 6), ("?", 40), ("alice", 3)])
+        days = {d["date"]: d["users"] for d in c["daily"]}
+        self.assertEqual(sorted(days["2026-10-02"]), ["alice"])
+        self.assertEqual(days["2026-10-01"]["?"]["runs"], 8)
+
     def test_a_busy_logs_cut_lists(self):
         j = {"v": 1, "host": "aifoundry2", "now": 1790797200.0, "since": 1790703600.0,
              "daemon": {"state": "running", "alive_at": 1790797190.0, "started_at": 1790700000.0},

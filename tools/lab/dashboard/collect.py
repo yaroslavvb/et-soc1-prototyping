@@ -531,6 +531,26 @@ def login_name(s):
     return s if LOGIN_RE.match(s) else "?"
 
 
+# Since 2 Oct 2026 the lab's live monitor (tools/lab/live/live-collector.py) reads each free card's temperature once
+# a second, a management-node open of about 4 ms that et-usaged cannot attribute: it logs them as "?" opens, about
+# 3,600 an hour on every machine, and the card-use table showed them as an "unseen (?)" person holding the card all
+# day. Two signatures, both far from anything a person's program does: a steady once-a-second cadence (n opens over
+# n-1 seconds, a minute's gap or a burn test's gaps leave fragments of a few seconds), and, with no lock holder named,
+# more than 0.3 opens a second over two minutes or more. A burst under someone's lock at any other rate (et-usage
+# names that login) and real unseen opens (a few a day) stay.
+MONITOR_OPENS_PER_S = 0.3
+MONITOR_MIN_SPAN_S = 120
+MONITOR_DAILY_RUNS = 2000
+
+
+def is_monitor_noise(procs, span_s, locked=False):
+    if not procs:
+        return False
+    if procs >= 2 and span_s >= 1 and 0.7 <= (procs - 1) / span_s <= 1.4:   # about once a second
+        return True
+    return (not locked) and span_s >= MONITOR_MIN_SPAN_S and procs / span_s > MONITOR_OPENS_PER_S
+
+
 def usage_login(u):
     """A login from et-usage for a sentence: its "?" is a node opened and closed between two of its scans (a few ms),
     whose user it could not see (or, rarely, a login that fails the login rule)."""
@@ -1382,6 +1402,8 @@ class Collector:
                 if not isinstance(iv, dict) or f(iv.get("start")) is None or f(iv.get("end")) is None:
                     continue
                 a, b = iv["start"], max(iv["start"], iv["end"])
+                if login_name(iv.get("user")) == "?" and is_monitor_noise(f(iv.get("procs")), b - a, bool(iv.get("lock_user"))):
+                    continue
                 # An interval is the union of one login's holds with gaps of up to --gap s merged (and up to the
                 # card's merged_gap_s when et-usage merged further), so its span counts those gaps. Every hold holds
                 # a node or the lock, so the time held is the union of node_s and lock_s: max(node_s, lock_s) when one
@@ -1437,6 +1459,8 @@ class Collector:
                 us = {}
                 for u, v in users.items():
                     if isinstance(v, dict):
+                        if login_name(u) == "?" and (f(v.get("runs")) or 0) >= MONITOR_DAILY_RUNS:
+                            continue   # the lab's live monitor (is_monitor_noise), a day of it
                         e = us.setdefault(login_name(u), {"held_s": 0, "node_s": 0, "runs": 0})
                         e["held_s"] = round(e["held_s"] + (f(v.get("held_s")) or 0), 1)
                         e["node_s"] = round(e["node_s"] + (f(v.get("node_s")) or 0), 1)

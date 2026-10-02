@@ -189,3 +189,12 @@ lab problems report and the observability hub, and carries the hub's four readin
 paths are a copy of the hub's own `#start` block (`et-soc1-limits-of-observability`), written into
 `page/body.html`: when the hub's paths change, change both. The history page is reached by clicking a machine's live
 temperature panel or a 48-hour chart title; there is no separate History button.
+
+## "Unseen (?)" and the live monitor (2 October 2026)
+
+et-usage lists a node open too short for its scanner to attribute (a few ms) as user `?`, shown as "unseen (?)". Since
+2 October the lab's live monitor (`tools/lab/live`) reads each free card's temperature once a second, about 3,600 such
+opens an hour, which made an "unseen" person hold every card all day. `collect.py` (`is_monitor_noise`) leaves them out of
+the card-use table: unseen opens on a steady once-a-second cadence, unseen opens with no lock holder named at more than
+0.3 a second over two minutes or more, and a day total of 2,000 unseen opens or more. Bursts under someone's lock at other
+rates and the few real unseen opens a day stay. Tests: `tests/test_collect.py`.
