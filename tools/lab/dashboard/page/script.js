@@ -466,19 +466,13 @@
     fill('ab-errors', errs.length ? 'Collector errors in this run: ' + errs.join('; ') + '.' : 'The collector reported no errors in this run.');
   }
 
-  /* ================= theme: auto, light, dark ================= */
+  /* ================= theme: follows the system (no selector since 2 Oct 2026; ?theme=light|dark|auto still works) ================= */
   function renderTheme() {
-    const KEY = 'labdash.theme', root = document.documentElement;
-    let pick = null;
-    try { const q = new URLSearchParams(location.search).get('theme'); if (/^(light|dark|auto)$/.test(q || '')) pick = q; } catch (_) { /* no query */ }
-    if (!pick) { try { pick = localStorage.getItem(KEY); } catch (_) { pick = null; } }
-    if (pick === 'light' || pick === 'dark') root.dataset.theme = pick;
-    else if (pick === 'auto') delete root.dataset.theme;
-    CK.seg('theme', {label: 'Theme', value: root.dataset.theme || 'auto', options: [['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']],
-      onChange: v => {
-        if (v === 'auto') delete root.dataset.theme; else root.dataset.theme = v;
-        try { localStorage.setItem(KEY, v); } catch (_) { /* not remembered */ }
-      }});
+    const root = document.documentElement;
+    try {
+      const q = new URLSearchParams(location.search).get('theme');
+      if (q === 'light' || q === 'dark') root.dataset.theme = q;
+    } catch (_) { /* no query */ }
   }
 
   /* ================= overview strip ================= */
