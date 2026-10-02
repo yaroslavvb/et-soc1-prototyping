@@ -90,6 +90,7 @@ before `</body>`. Private pages are listed but not mirrored.
 
 | Page | Space | Visibility | Repo file | Why |
 |---|---|---|---|---|
+| aifoundry2 power cycle: instructions for the owner's Intel agent (1 Oct, made by another session) | `d8070e18-98fb-467c-aa57-a1b243723442` | private | not mirrored | Operational instructions for the owner's own agent, with access details: never public (AGENT.md §10). It went out public on 1 Oct at 14:13 PDT though its own description says private; the next check-mirror run warned, and it was set private at about 17:55 the same day |
 | Notes of a conversation with David Kanter (R9, 20 Sep) | `f3533740-5ad9-45e1-927c-098dbbe5c210` | private | not mirrored | A personal memo quoting a private conversation; private and unlinked since 24 September (the owner's decision). The DVFS page and R9 describe it in words. |
 
 <!-- mirror:end -->
@@ -135,6 +136,16 @@ on-chip relay, influence functions). 04-artifacts.md, "The 25 September validati
 Since 26 September most pages' data also carry the version-3 check's three cards, through options on the same
 generators; the commands, in order, are in 04-artifacts.md, "Rebuilding the version-3 data", and on that day each
 reproduced its file in the tree byte for byte.
+
+## The GitHub Pages mirror
+
+Since 1 October 2026 (the owner's request: the chip diagram mirrored to GitHub Pages, where links with `#anchors` and
+`?flow=` work directly), the two interactive pages are also served from branch `gh-pages`:
+https://yaroslavvb.github.io/et-soc1-prototyping/ (an index), `chip-diagram/` and `memory-levels/`. The branch is
+generated: `tools/publish-gh-pages.sh` builds it from the committed pages of HEAD (with `docs/reports/ladder-img/`)
+and force-pushes one fresh commit, so run it after each deploy of either page and never edit the branch by hand
+(`--dry-run` builds into `~/claude/work/gh-pages-site` only). The spacesheep pages stay canonical; the mirror
+carries the commit it was built from in its index.
 
 ## Deploying one page
 

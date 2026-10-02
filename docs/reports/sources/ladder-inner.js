@@ -637,6 +637,8 @@ bnode('p.planck', {pv: () => IVIEW(), draw: (L, ap) => {
   KTT(gu, x + 34, (ua + ub) / 2 + 6, `unexplored: ${on('pl_16')}`, 'i-l');
   gu._box = {x: x + 18, y: ua, w: PH ? 300 : 420, h: ub - ua};
   mark(Math.log10(1.616255e-35), `the Planck length, ${on('pl_l')}`, onf('pl_l'), 'var(--c7)');
+  // (the loop, ladder-core.js: Up from the top of the ladder shrinks it into this mark)
+  ap.loopAt = {x, y: yl(Math.log10(1.616255e-35))};
   inotes(L, lay, [
     {t: 'The floor', h: 1},
     {t: 'Here gravity, quantum mechanics and the speed of light meet: space and time themselves would need a quantum description that nobody has yet.', f: 'p.planck.1 p.planck.4'},
@@ -762,8 +764,8 @@ onode('p.wrap', {kid: null, pv: () => opv(), build: (L, ap) => {
   const tl = at(1.616255e-35), mk = VB.w / 16, am = at(2.352e-10);
   ap.headBox = {x: hd.x - mk, y: hd.y - mk * VB.h / VB.w, w: 2 * mk, h: 2 * mk * VB.h / VB.w};
   ap.tailBox = {x: tl.x - mk, y: tl.y - mk * VB.h / VB.w, w: 2 * mk, h: 2 * mk * VB.h / VB.w};
-  // (since the owner's second update of 1 Oct, Up from the ring lands on an atom: the marker runs from the head across the
-  // mouth, then up the tail to the atom's tick, where the atom grows from)
+  // (a way back in to an atom: the marker runs from the head across the mouth, then up the tail to the atom's tick, where
+  // the atom grows from; since 1 Oct evening Up from the ring takes the tail's tip, the Planck length)
   ap.atomBox = {x: am.x - mk, y: am.y - mk * VB.h / VB.w, w: 2 * mk, h: 2 * mk * VB.h / VB.w};
   const run = E('path', {class: 'rrun', d: `M${hd.x},${hd.y} A${G.r},${G.r} 0 0 0 ${tl.x},${tl.y} A${G.r},${G.r} 0 0 0 ${am.x},${am.y}`, 'pointer-events': 'none'}, L);
   const runPl = 2 * Math.PI * G.r * 16 / 360, runLen = runPl + 2 * Math.PI * G.r * Math.abs(ringAng(1.616255e-35) - ringAng(2.352e-10)) / (2 * Math.PI) + 4;

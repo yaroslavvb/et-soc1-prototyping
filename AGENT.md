@@ -326,7 +326,7 @@ directories were intact.
 4. **Deploy** from a directory of its own, with `--space <uuid>`, and with `--slug` whenever you pass `--title`
    ([MIRROR.md, "Deploying one page"](docs/reports/MIRROR.md#deploying-one-page)). A new report page is deployed
    with `--visibility public` (the owner's rule of 29 September: the experiments are for sharing; the CLI's default
-   is private), unless it holds something §10 keeps out of public view. Check `spacesheep --version`: the pages up
+   is private), unless it holds something §10 keeps out of public view. Public by default covers reports, never operational pages: anything with addresses, host or tailnet names, ssh, root or sudo steps, accounts or instructions for an agent is deployed `--visibility private` (on 1 October an agent-instructions page went out public with two tailnet addresses and root steps; check-mirror's "public space not listed" warning caught it and it was set private). Check `spacesheep --version`: the pages up
    to 25 September were deployed with 1.5.1; 1.9.1 (npm's latest from the evening of 25 September) reads them back the same, and a 1.9.1 redeploy
    of an existing space keeps its slug, title and visibility (tested 25 Sep, 23:40). An older CLI (npm's latest was
    1.2.1 until then) may not. Never put the CLI's key in the repository.

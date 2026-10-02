@@ -38,6 +38,11 @@ html.et-pres [data-ss-ui]{display:none!important}
 .st-btn .k{display:inline-block;margin-right:6px;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .st-btn[aria-pressed="true"] .k{color:color-mix(in srgb,var(--c1) 65%,var(--ink))}
 .w-play{min-width:5.2em}.w-tour{min-width:6.4em}.w-fs{min-width:6.6em}
+/* the replay's speed beside Play (1 Oct): as wide at 1× as at 2×, and at 2× tinted, a choice that is on */
+.st-bar .st-btn.spd{min-width:2.9em;padding-left:6px;padding-right:6px;font-variant-numeric:tabular-nums}
+.st-btn.spd.x2{background:color-mix(in srgb,var(--c1) 16%,var(--surface));border-color:var(--c1);font-weight:650}
+/* (a phone 360 wide, in spacesheep's frame too: the playback buttons a little tighter, so that Tour stays on their row) */
+@media (max-width:380px){#bar .st-btn{padding-left:7px;padding-right:7px}#bar .st-btn.spd{min-width:2.5em;padding-left:4px;padding-right:4px}}
 .st-btn:focus-visible,.pn button:focus-visible,.pn a:focus-visible,.pn select:focus-visible,.pn summary:focus-visible,.stg:focus-visible,.pip:focus-visible,.toast button:focus-visible{outline:3px solid var(--c1);outline-offset:2px}
 .st-body{display:grid;grid-template-columns:minmax(0,1fr) var(--pnw);gap:14px;min-height:0;min-width:0}
 .st-view{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;gap:6px}
@@ -142,6 +147,18 @@ html.et-pres [data-ss-ui]{display:none!important}
 .cap-kick{display:flex;align-items:center;gap:6px 14px;min-height:18px;flex-wrap:wrap}
 #cap-k{font-size:clamp(12px,.3vw + 8px,14px);color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .cap-side{min-width:0;padding-top:1px}
+/* Copy link (1 Oct): the address of what the stage shows, at the top of the panel's column under the bar (a phone: under
+   the caption); where the frame forbids the clipboard, the link shown selected above the button */
+.lnk{position:relative;display:flex;justify-content:flex-end}
+.lnk-b{min-height:30px;padding:2px 10px;min-width:6.4em;font-size:clamp(.76rem,.22vw + .66rem,.92rem);color:var(--ink-2)}
+.lnk-b.done{color:var(--ink);border-color:var(--ok)}
+.lnk-pop{position:absolute;right:0;bottom:calc(100% + 6px);z-index:8;width:min(460px,calc(100vw - 48px));box-sizing:border-box;background:var(--surface);
+  color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:8px 10px;box-shadow:0 8px 28px rgba(0,0,0,.2)}
+.lnk-pop[hidden]{display:none}
+.lnk-pop label{display:block;font-size:.85rem;color:var(--ink-2);margin:0 0 4px}
+.lnk-pop input{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--page);color:var(--ink)}
+.lnk-ta{position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;font-size:16px;pointer-events:none}
+#stage.pres .lnk,#stage:fullscreen .lnk{display:none}
 .dots{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .dots:empty{display:none}
 .dots button{width:8px;height:8px;border-radius:50%;background:var(--grid);display:block;border:0;padding:0;cursor:pointer}
@@ -450,6 +467,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 </div>
 <div class="st-bar" id="bar" role="group" aria-label="Playback">
   <button type="button" class="st-btn w-play" id="btn-play" title="Space">Play</button>
+  <button type="button" class="st-btn spd" id="btn-speed" title="Speed 1×, press for 2× (S)" aria-label="Speed 1×, press for 2× (S)">1×</button>
   <button type="button" class="st-btn" id="btn-prev" aria-label="Previous stage (Left arrow)" title="Previous stage (Left arrow)"><svg class="ar" viewBox="0 0 16 10" aria-hidden="true"><path d="M14.5 5h-12M6.5 1.5 2.5 5l4 3.5"/></svg></button>
   <ol class="stages" id="stages" aria-label="Stages of the flow"></ol>
   <button type="button" class="st-btn" id="btn-next" aria-label="Next stage (Right arrow)" title="Next stage (Right arrow)"><svg class="ar" viewBox="0 0 16 10" aria-hidden="true"><path d="M1.5 5h12M9.5 1.5 13.5 5l-4 3.5"/></svg></button>
@@ -468,6 +486,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   </div>
   <div class="cap-side">
     <div class="vh" id="cap-scale" aria-live="polite">Scale: the chip</div>
+    <div class="lnk" id="lnk"><button type="button" class="st-btn lnk-b" id="btn-link" title="Copy a link to what the diagram shows now: the flow, the tour's slide or the scale">Copy link</button><span class="vh lnk-say" role="status"></span></div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -491,7 +510,9 @@ A click only selects. A part with no closer drawing says so in the panel and off
 <li><b>Zoom out</b> with the wide <b>↑ Zoom out</b> button above the drawing, Backspace or the − key: out past the
 package, the card and its host to the rack the lab's machines stand in. Beside it, the breadcrumb jumps to any level
 (the outer ones fold into its "…" menu), and the readout gives the size of what you see, in metres and as a power of
-ten. A second press while the camera moves goes one further. Past the rack the button only says "?".</li>
+ten. A second press while the camera moves goes one further. Past the rack the button only says "?". Keep pressing and
+the zoom goes round a loop, always outward: past the largest scale it comes back at the smallest, the Planck length, and
+climbs from there through a quark, a proton and an atom to the chip again (+ goes round the other way).</li>
 <li><b>Switch</b> (G): the transistor-level drawings have two states, drawn both ways: the gate at 0 V or at the minion
 rail's 0.517 V (the FinFET, its fin and its channel fill with electrons), an inverter's input 0 or 1, a stored bit 0
 or 1, a DRAM cell just written or 32 ms later. Press the switch in the drawing, the panel's button or G.</li>
@@ -504,7 +525,9 @@ relay against DRAM, gathers and scatters, the host over PCIe (timed on three car
 same matmul's watts and heat on different data, one hot line stopping a shire, the allreduce tree, and one value
 broadcast to every minion four ways (B, which the tour leaves out). Each flow is a
 row of <b>stages</b> under the drawing: click one, or step with the Left and Right arrows. <b>Space</b> pauses
-everything that moves, the camera included; stepping while paused shows each stage's end state.</li>
+everything that moves, the camera included; stepping while paused shows each stage's end state. The <b>1×</b> button
+beside Play (or S) plays the flows and the tour at double speed, <b>2×</b>, and back: the stages, the packets, the charts
+and the camera's moves all go twice as fast, and your own zooms keep their pace.</li>
 <li><b>Follow</b> (C): the camera follows the flow from scale to scale. Turn it off, or zoom yourself, and the camera
 stays: a stage on the die then plays in a small picture of the die in the corner, and a stage inside a shire or a minion
 marks its place. Stepping turns following back on after your own zoom.</li>
@@ -521,6 +544,15 @@ up. On a phone the drawing fits the screen's width: the die with its packages at
 at theirs, and a flow's charts under the die. The levels outside the chip show their middle, with larger type. A
 minion's labels, and those of the circuits inside it, are small there: pinch to enlarge them, or tap a part for its
 details.</li>
+<li><b>Links.</b> The address follows what the stage shows, so that a link opens the same thing: a flow as
+<code>#flow=8-data-watts</code> (the key alone works too, <code>#flow=8</code>), with <code>&amp;stage=3</code> while you hold
+it at a stage (paused, or stepped while paused); a still slide of the tour as <code>#tour=3</code>; a flow or the tour
+played at 2× adds <code>&amp;speed=2</code> (<code>#flow=8-data-watts&amp;speed=2</code>) and opens at 2×; and with nothing
+playing, the scale the camera rests on, as <code>?at=</code> names it (<code>#at=rack</code>,
+<code>#at=shire%3A20/minion%3A20.1.3</code>). On spacesheep it shows in your own address bar. <b>Copy link</b>, under
+the details panel (on a phone, under the caption), copies the link to what is shown; where the page's frame forbids the
+clipboard it shows the link selected, to copy with Ctrl-C. Such a link wins over <code>?flow=</code>, <code>?tour=</code>
+and <code>?at=</code>, and changing it in the address bar takes the stage there.</li>
 </ul>
 
 <h2 id="ladder">From the rack to the quarks</h2>
@@ -624,6 +656,11 @@ is not published, down to a transistor and its atoms; and the memory, PCIe and I
 each with its way back. Last, a walk of every scene by its path closed the remaining gaps: a PCIe lane, the crossbars,
 the rounding, the copper wiring and its atom, the card's regulators and boot switches, and the host's parts now lead
 down to a transistor drawn as such and its atoms.</li>
+<li><b>1 October, links</b>: each flow and each scale has an address you can copy (Copy link): the address follows the
+flow, its held stage, the tour's slide or the scale shown, and opening it goes there.</li>
+<li><b>1 October, speed</b>: the replay plays at 1× or 2× (the button beside Play, or S), and a link to a flow or the
+tour played at 2× opens at 2× (<code>&amp;speed=2</code>).</li>
+<li><b>1 October, evening</b>: Up past the top goes straight to the Planck length; the loop runs one way.</li>
 </ul>
 
 <h2 id="related">Related reports</h2>

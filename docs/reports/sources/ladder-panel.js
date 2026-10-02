@@ -34,11 +34,13 @@ function zoomRowPart(g, title) {
 function zoomRowHere(P) {
   const ks = kidsOf(P), d = defKid(P), rows = [];
   if (ks.length) rows.push(zrow('Zoom into:', ks.map(k => zbtn(P.concat([k]), capFirst(toOf(k)), d && pk(k) === pk(d), d && pk(k) === pk(d) ? '(+)' : ''))));
-  else if (P[P.length - 1].id === PLANCK && NODES[WRAP]) rows.push(zrow('', [zbtn(nextOf(P), '? (+)', false, '')]));
+  else if (atPlanck(P) && nextOf(P)) rows.push(zrow('', [zbtn(nextOf(P), '? (+)', false, '')]));
   else if (!isWrap(P)) rows.push('<p class="nz">The bottom of this branch: nothing smaller is drawn here.</p>');
   const U = upOf(P);
-  if (U && isWrap(P)) rows.push(zrow('', [zbtn(U, '↑ Round the ring: in again as an atom', false, '(Backspace)')]));
-  else if (U) rows.push(zrow('', [zbtn(U, egg(U[U.length - 1]) ? '↑ Zoom out: ?' : `↑ Zoom out to ${toOf(U[U.length - 1])}`, false, '(Backspace)')]));
+  if (U && isWrap(P)) rows.push(zrow('', [zbtn(U, '↑ Round the ring: the Planck length', false, '(Backspace)')]));
+  else if (U) rows.push(zrow('', [zbtn(U, egg(U[U.length - 1]) || isTop(P) ? '↑ Zoom out: ?' : `↑ Zoom out to ${toOf(U[U.length - 1])}`, false, '(Backspace)')]));
+  // (the top, the last level of the easter egg: the ring of sizes, off the loop since 1 Oct evening, by its link)
+  if (isTop(P) && NODES[WRAP]) rows.push(zrow('', [zbtn([{id: WRAP}], '↻ The ring of sizes: every size at once', false, '')]));
   return `<div class="pn-zoom">${rows.join('')}</div>`;
 }
 function hereKick(P) { return `You are here · <span class="pn-sz">${sizeHtml(sizeOf(P[P.length - 1]))}</span>`; }
