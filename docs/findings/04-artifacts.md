@@ -719,7 +719,7 @@ camera moves. The diagnosis, the method and the numbers are in
   (remembered in `localStorage`); flow 5's title lost its experiment ID.
 - Both deployed on 30 September (the versions "Smooth camera: …"); the live pages equal their files.
 
-## The deep zoom (30 September, branch `chipzoom`, not yet deployed)
+## The deep zoom (30 September, branch `chipzoom`; merged 750a6ed and deployed 1 October)
 
 For Q77, the owner's requests about the chip diagram: double-click everything that can be selected, a wide button up
 the hierarchy, zoom out to the rack, Studio 45, San Francisco, the US, Earth, the Milky Way, "the Andromeda Cluster"
@@ -752,7 +752,7 @@ in the session's work directory, `~/claude/work/chipzoom/`) was written and revi
   back down, the four edge arrows of shire 20) passed 131 of 131 checks each. It fixed block boxes that ended on a
   colon ("lanes:"), two image credits that ran past the drawing's edge, and a legible port label in the rack photo.
 
-## The shared ladder, part 1 (1 October, branch `ladder`, not yet deployed)
+## The shared ladder, part 1 (1 October, branch `ladder`; deployed 1 October, 65a06da, and 2 October, 302fe0e)
 
 The owner's request of 1 October (Q88): make the chip diagram and the memory levels consistent, give the memory levels
 the Up button and the same scales, go down to transistors, atoms and quarks, close the ladder into a circle past the
@@ -821,7 +821,7 @@ what the repository needs of it.
   adder of a 4:2 compressor of lane 0's multiply-add). The bullets above that say "Up from the ring" describe the loop
   before this update. Tests: `zoom_test.mjs` T3, T5, T7, T12, T17, T18; `ml_ladder_test.mjs` T5, T12, T17.
 
-## The shared ladder, part 2: the memory levels (1 October, branch `ladder`, not yet deployed)
+## The shared ladder, part 2: the memory levels (1 October, branch `ladder`; deployed 2 October, 302fe0e)
 
 The owner's request of 1 October (Q88), its easter egg (Q89) and its second update (Q90) on "Anatomy of a memory
 access, interactively" (`docs/reports/sources/memory-levels.*`): the chip diagram's Up bar, breadcrumb and readout, the
