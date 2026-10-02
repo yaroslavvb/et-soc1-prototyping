@@ -134,3 +134,40 @@ profile each, medians; `p2-firstload-*.txt`): the memory levels' first paint 236
 its scales, maps and facts); the ladder's own start-up takes 30-45 ms of the difference at 4x (`p2-loadtm.txt`, a build
 with markers), the parse of the larger script the rest. The design's gate (±10%) is met by the first paint and missed by
 DOMContentLoaded, by 3 points.
+
+## The final check (2 October)
+
+The commit `11b6e45` (`head`) and the final check's build (`fix`: the chip diagram with the address writer's fix, the
+ladder README's "The final check"; the memory levels as in `head`) against the pages of `bb0eb78` (`bb0`), served over
+http from the work directory, one run at a time on aifoundry2 with nothing else running, 1280 by 800 at DPR 1, a warm
+profile per version; at 1x one run of each (the access four times), at 4x two (bb0, head, head, bb0; then fix, fix).
+`final-run.sh` (both pages; on `head` also the chip's loop and the memory levels' out and in) and `final-runchip.sh` (the
+chip's runs on `fix`), `final-compare.py`, `final-compare-c1.txt` and `final-compare-c4.txt`; the recordings stay in
+`~/claude/work/ladder/final/motion/`. Late frames (over 25 ms) of the frames in motion:
+
+| Run | bb0, 1x | head, 1x | fix, 1x | bb0, 4x | head, 4x | fix, 4x |
+|---|---|---|---|---|---|---|
+| A (flow 1) | 1 of 241 | 1 of 241 | 1 of 241 | 14.3, 13.7% | 5.2, 7.1% | 7.1, 8.6% |
+| H (flow 8) | 0 of 206 | 0 of 206 | 0 of 206 | 10.8, 12.0% | 6.7, 6.7% | 6.7, 9.0% |
+| K (flow B) | 1 of 429 | 1 of 429 | 1 of 429 | 20.2, 22.0% | 13.2, 12.6% | 11.4, 12.6% |
+| up (36 presses, the crystal to the top) | 5 of 1,638 | 5 of 1,824 | 6 of 1,819 | 7.8, 8.2% | 8.4, 8.1% | 7.3, 7.8% |
+| dive (+ 36 times, the top to the crystal) | 7 of 1,642 | 10 of 1,810 | 9 of 1,815 | 7.0, 6.7% | 8.2, 8.3% | 8.3, 8.2% |
+| loop (Up 5 times from the top) | - | 3 of 328 | 0 of 331 | - | 18.1, 18.6% (longest 350-367 ms) | 1.2, 1.8% (longest 67-133 ms) |
+| the access `#dram/load` | 0 of 625 (4 runs) | 1 of 624, then 0 of 625 (3 runs) | as head | 28.6, 25.7% | 30.2, 30.5% | as head |
+| the level tabs | 0 of 444 | 0 of 444 | as head | 7.3, 7.5% | 8.9, 9.2% | as head |
+| out (Up 5 from the L3's map, + 5 back) | - | 0 of 357 | as head | - | 5.3, 5.3% | as head |
+| in (+ 5 from the L2's cell, Up 5 back) | - | 0 of 472 | as head | - | 5.7, 5.2% | as head |
+
+At 1x the shared runs are the base's (every late frame in the chip's runs is the first or second frame of a move, as on
+the base; the access's one late frame of its first run, mid-move with no long task, did not come back in three more
+runs), and the access's velocity kinks are the base's (at most 11.1% of peak on the base, 11.2% on head). At 4x the
+chip's flows drop fewer frames than the base's, Up the same, the dive one or two points more (its path has more legs:
+Bernal Heights, 29th Street); the memory levels' access two to five points more and the tabs about 1.5 (the page carries
+the ladder's second SVG and code). The loop's run on `head` lost a third of a second at the Planck length: the address
+writer's long task (the ladder README, "The final check"); on `fix` it does not.
+
+First load (`final-firstload-*.txt`: the fixer's `firstload.mjs`, a phone profile, 390 by 844 at DPR 3, CPU 4x, six
+interleaved runs, a fresh profile each, medians): the chip diagram's first paint 248 → 260 ms (+4.8%), DOMContentLoaded
+562 → 630 ms (+12.1%); the memory levels' first paint 228 → 228 ms (0%), DOMContentLoaded 1,002 → 1,141 ms (+13.9%).
+The design's gate (the first frame within ±10%) is met by the first paint on both pages; DOMContentLoaded misses it, as
+the part 2 and fix rounds found (the larger scripts' parse).

@@ -810,6 +810,16 @@ what the repository needs of it.
   path: every part leads in with its seat in that drawing, every zoom to a transistor comes from a drawing in
   transistors, every scale reaches a transistor and an atom, the DRAM's and the regulators' chains never reach the N7
   FinFET) and T19's double-click chains for a PCIe lane, the boot switches and the core regulator.
+- **The owner's third update (1 Oct, about 17:10; `b88da9b` on main, the memory levels in `11b6e45`)**: "When zooming
+  up, skip this slide [the ring of sizes] ... it should directly go at the lowest level ... The loop should always go in
+  one direction." Since then Up from the top (beyond) goes straight to the Planck length under the loop's fixed atom, in
+  one cross-fade (the readout "↻ round the loop: 10²⁶ m → 10⁻³⁵ m"), and on up through a quark, a proton, the nucleus
+  and that atom to the chip and round again: 40 presses a lap from the die, the same atom every lap; + from a Planck
+  length goes to the top. The ring of sizes is off the loop: only its link in the top's and the Planck length's panels,
+  or `#at=p.wrap`, opens it. The landing panel says the loop is a picture, not a journey through space (as in Glashow's
+  uroboros), and names the fixed point (on the chip, a silicon atom in the channel of a FinFET of an XOR gate, in a full
+  adder of a 4:2 compressor of lane 0's multiply-add). The bullets above that say "Up from the ring" describe the loop
+  before this update. Tests: `zoom_test.mjs` T3, T5, T7, T12, T17, T18; `ml_ladder_test.mjs` T5, T12, T17.
 
 ## The shared ladder, part 2: the memory levels (1 October, branch `ladder`, not yet deployed)
 
@@ -824,16 +834,18 @@ same scales outward and inward, the loop, a way back from every move and no dead
   to the pixel; on a phone the same sideways window). The design's one camera (D2) was set aside: the levels' camera cannot
   span 45 decades, and a port of the accesses, Dive and the phone window risked the smoothness the owner had asked for;
   its fallback (the outer and inner scales only on the chip page) would not have met the request.
-- **What a reader sees**: ↑ from the L1's minion goes out to the L2's shire, the chip level's map, the package, the card,
-  the host, the rack and then "?" (the easter egg, as on the chip, up to the ring of sizes and round again: Up from the
-  ring lands on an atom of the reader's level's own cell, the L2's 6T cell, the L1's latch, the DRAM's cell through the
-  DRAM process's transistor, never N7's). + and double-clicks go down every part: the levels' own scales where they draw
-  one, else the chip diagram's scene for it (the textbook constructions, the block scenes), down to a transistor, its fin
-  and channel, the crystal, an atom, its nucleus, a proton, a quark and the Planck length. A click selects and a
-  double-click (a double-tap) zooms, as on the chip; a part's panel has the chip's shape (its lead, where its double-click
-  goes, the rest folded); after a move, "You are here". One word for each kind of fact; the vector unit and the
-  TensorLoad unit coloured as logic, the map's cells without a compute shire labelled. On a phone the accesses keep one row,
-  the address one line (fields ▾) and Fit to screen sits in the Up bar: the drawing starts 32 px higher than before.
+- **What a reader sees**: ↑ from the L1's minion goes out to the L2's shire, the chip level's map, the package, the
+  card, the host, the rack and then "?" (the easter egg, as on the chip; since the third update, above, Up from the
+  top goes straight round to the Planck length under an atom of the reader's level's own cell, the L1's latch, a 6T
+  cell of the L2, the L3 or the scratchpad, the DRAM's cell through the DRAM process's transistor, never N7's, and
+  climbs back through that cell to the level and round again: 35 presses a lap from the L3's cell). + and
+  double-clicks go down every part: the levels' own scales where they draw one, else the chip diagram's scene for it
+  (the textbook constructions, the block scenes), down to a transistor, its fin and channel, the crystal, an atom, its
+  nucleus, a proton, a quark and the Planck length. A click selects and a double-click (a double-tap) zooms, as on the
+  chip; a part's panel has the chip's shape (its lead, where its double-click goes, the rest folded); after a move,
+  "You are here". One word for each kind of fact; the vector unit and the TensorLoad unit coloured as logic, the map's
+  cells without a compute shire labelled. On a phone the accesses keep one row, the address one line (fields ▾) and
+  Fit to screen sits in the Up bar: the drawing starts 32 px higher than before.
 - **Tests** (`tools/pagemotion/`): `ml_ladder_test.mjs` (Up level by level to the package and the rack, + from the top to
   the Planck length and round, reduced motion, the ring's ways in per level, the easter egg, the two states, the loop, the
   navigation graph, no dead ends over a walk of every scene, the hand-over by crumb, tab and Play, a part of the levels'
@@ -867,6 +879,15 @@ same scales outward and inward, the loop, a way back from every move and no dead
   two pages that carry a place wait on the viewer (below).
 - **Links between the two pages that carry a place** (DESIGN §3.8) were not made: the spacesheep viewer passes neither
   `?at=` nor `#at=` into the page it frames (checked on the public pages, 1 October).
+- **The four reviews of 1 October evening and the final check** (`11b6e45`, and the final check's commit of 2 October;
+  the data README's "Part 3" and "The final check"): the memory levels on main's one-way loop (the third update, above),
+  the facts corrected, the levels' controls made the chip's, the circuit drawings put right; then, in the final check,
+  `tools/publish-gh-pages.sh` copies `ladder-img/` beside the memory levels too (their lazy facts and images would have
+  answered 404 on GitHub Pages), and the chip diagram's address writer no longer draws every scene on the way to check an
+  anchor (a 100 ms task at 1x, 350 ms at 4x, after each arrival at the Planck length from the loop). On the final build:
+  `zoom_test.mjs` 783/783 and 620/620, `ml_ladder_test.mjs --chip` 150/150 and 137/137, `ml_access_test.mjs` 28/28 with
+  and without Dive, both pages rebuilt byte for byte, `check_page.sh` OK light and dark; motion against `bb0eb78` in
+  `docs/reports/data/2026-10-01-ladder/motion/README.md`, "The final check".
 
 ## Cross-links between the reports
 

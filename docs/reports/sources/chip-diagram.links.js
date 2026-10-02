@@ -25,7 +25,20 @@ function lnkPath(P) {
   if (d >= 0 && d < D0.length && samePath(P.slice(0, d + 1), D0)) tries.push(d === P.length - 1 ? 'die' : pkeys(P.slice(d + 1)));
   for (let i = P.length - 1; i >= 0; i--) if (OUT_IDS.includes(P[i].id) && P.slice(0, i).every((e, j) => pk(e) === OUT_IDS[j])) tries.push(pkeys(P.slice(i)));
   tries.push(pkeys(P));
-  return tries.find(s => { try { const Q = atPath(s); return !!Q && samePath(Q, P); } catch (_) { return false; } }) || null;
+  return tries.find(s => { try { const Q = lnkPrefix(s); return !!Q && samePath(Q, P); } catch (_) { return false; } }) || null;
+}
+/* the path an ?at= string names, as atPath reads it, without atPath's check that each scale has its seat in the one
+   above (the final check of 2 Oct 2026, as the memory levels' atPrefix since 11b6e45): lnkPath only asks which string
+   names a place the camera is at, whose seats are there, and the check drew every scene on the way: after the loop's
+   jump to the Planck length, about 100 ms at 1x and 350 ms at 4x, 400 ms after the arrival, so that an Up pressed then
+   waited for it (a 350-370 ms first frame at 4x). A string read from the address still goes through atPath (lnkWhat). */
+function lnkPrefix(s) {
+  const els = pathFrom(s); if (!els.length || !els.every(e => NODES[e.id])) return null;
+  if (els[0].id === WRAP) return els.length === 1 ? [{id: WRAP}] : null;
+  const oi = OUT_IDS.indexOf(els[0].id);
+  if (oi >= 0) return OUT_IDS.slice(0, oi).map(id => ({id})).concat(els);
+  if (els[0].id === 'die') return OUT_IDS.map(id => ({id})).concat(els);
+  return pathOf({level: 0}).concat(els);
 }
 /* (the first view has no anchor, unless the address's query asks for something else) */
 function lnkAt(P) {

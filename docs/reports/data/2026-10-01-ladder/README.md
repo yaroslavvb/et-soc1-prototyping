@@ -163,3 +163,35 @@ not moved; the levels' maps are not yet in the die's orientation (DESIGN B0), so
 on the chip diagram; the memory levels write and read `#at=` but have no Copy link button, and their scenes no drawn edge
 links (the panel's "Next to it" row moves sideways); the breadcrumbs' fold loop is unchanged (a width cache made the
 folding depend on the history).
+
+## The final check (2 October)
+
+An independent check of `11b6e45` before the merge. Both pages rebuild from their sources byte for byte (the whole data
+chain, `build_process.py` to both `build_facts.py`, with the fixed points holding; the other 15 pages of MIRROR.md
+too); `check_page.sh` OK at 1280 and 390 px, light and dark; over http: `zoom_test.mjs` 783/783 on the desktop and
+620/620 on a phone, `ml_ladder_test.mjs --chip` 150/150 and 137/137, `ml_access_test.mjs` 28/28 (and with Dive 28/28),
+`ui_test.mjs` the same states as the page of `bb0eb78`, `zoom_static.py` and `guard_test.py` 0 failed. Scripted tours by
+real input, clicks on a desktop and taps on a phone, with a screenshot at every step: on both pages Up from the die (the
+memory levels: from the L2) out past "?" to the top, straight round to the Planck length and up again, twice (40 presses
+a lap on the chip; 35 from the L3's cell on the memory levels, and through the DRAM's own cell when the DRAM's map was
+the last chip-level map shown); the dive to a quark by double-clicks (double-taps) on both pages; the vector add by
+double-clicks through the multiply-add's prefix adder and an AND-OR-INVERT gate to an atom; in shire 7's row of the
+die, Left to memory shire 3, Right across the die to memory shire 7, back by its "← shire 7" link and Left again to
+memory shire 3 (by the arrow keys on the desktop, by the edge links on a phone); the level tabs and the access
+`#dram/load`; and 40 random descents by double-clicks from the die and the rack, of which 39 reach a transistor and
+then an atom and one the copper wiring's atom.
+
+Two things fixed:
+- `tools/publish-gh-pages.sh` copied `ladder-img/` beside the chip diagram only, so the memory levels on GitHub Pages
+  would have fetched `memory-levels/ladder-img/ladder-data.json` and the outer levels' images in vain (404). It is now
+  copied beside both pages (the dry run's site, served: both pages fetch their lazy data, 200).
+- The chip diagram's address writer (`chip-diagram.links.js`, from main's links of 1 Oct) checked each candidate
+  anchor with `atPath`, whose seat check draws every scene on the way: after the loop's jump to the Planck length it drew
+  the whole chain down from the die in one task, about 100 ms at 1x and 350 ms at 4x, 400 ms after the arrival, so that
+  an Up pressed then waited, and the scenes it left in the document slowed every move after. It now resolves the
+  candidates without the seat check, as the memory levels' `atPrefix` does since `11b6e45` (a string read from the
+  address still goes through `atPath`). Up five times from the top (round the loop, a quark, a proton, the nucleus, the
+  atom): at 4x 48-52 of 272 frames late, the longest 333-367 ms, before; 3-6 of 327-331, the longest 50-133 ms, after;
+  at 1x 3-6 late before, none after. `zoom_test.mjs` on the fixed build: 783/783 and 620/620.
+
+Motion against `bb0eb78`: `motion/README.md`, "The final check".

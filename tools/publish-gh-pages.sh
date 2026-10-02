@@ -8,7 +8,9 @@
 # mirrored there, where links with #anchors work directly). The canonical copies stay on spacesheep.dev; MIRROR.md lists
 # both. The site holds only built pages that are already public, with the files they load beside them:
 #   /chip-diagram/   docs/reports/2026-09-27-et-soc1-chip-diagram.html as index.html, and docs/reports/ladder-img/
-#   /memory-levels/  docs/reports/2026-09-28-et-soc1-memory-levels.html as index.html
+#   /memory-levels/  docs/reports/2026-09-28-et-soc1-memory-levels.html as index.html, and docs/reports/ladder-img/
+#                    (since the shared ladder's part 2, 1 Oct 2026: the page fetches ladder-img/ladder-data.json and the
+#                    outer levels' images beside itself, as the chip diagram does)
 #   /                a short index linking both and their spacesheep originals
 # gh-pages is generated: each run replaces it with one fresh commit (force-push), so never edit it by hand.
 set -euo pipefail
@@ -20,11 +22,13 @@ rm -rf "$OUT"; mkdir -p "$OUT/chip-diagram" "$OUT/memory-levels"
 
 # Build from the committed files of HEAD, never from the working tree, so the mirror equals a commit.
 git show "HEAD:docs/reports/2026-09-27-et-soc1-chip-diagram.html" > "$OUT/chip-diagram/index.html"
-mkdir -p "$OUT/chip-diagram/ladder-img"
-for f in $(git ls-tree --name-only "HEAD:docs/reports/ladder-img"); do
-  git show "HEAD:docs/reports/ladder-img/$f" > "$OUT/chip-diagram/ladder-img/$f"
-done
 git show "HEAD:docs/reports/2026-09-28-et-soc1-memory-levels.html" > "$OUT/memory-levels/index.html"
+for d in chip-diagram memory-levels; do
+  mkdir -p "$OUT/$d/ladder-img"
+  for f in $(git ls-tree --name-only "HEAD:docs/reports/ladder-img"); do
+    git show "HEAD:docs/reports/ladder-img/$f" > "$OUT/$d/ladder-img/$f"
+  done
+done
 touch "$OUT/.nojekyll"
 cat > "$OUT/index.html" <<EOF
 <!doctype html>

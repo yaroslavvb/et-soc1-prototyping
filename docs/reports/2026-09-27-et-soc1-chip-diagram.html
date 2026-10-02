@@ -9782,7 +9782,15 @@ function lnkPath(P) {
   if (d >= 0 && d < D0.length && samePath(P.slice(0, d + 1), D0)) tries.push(d === P.length - 1 ? 'die' : pkeys(P.slice(d + 1)));
   for (let i = P.length - 1; i >= 0; i--) if (OUT_IDS.includes(P[i].id) && P.slice(0, i).every((e, j) => pk(e) === OUT_IDS[j])) tries.push(pkeys(P.slice(i)));
   tries.push(pkeys(P));
-  return tries.find(s => { try { const Q = atPath(s); return !!Q && samePath(Q, P); } catch (_) { return false; } }) || null;
+  return tries.find(s => { try { const Q = lnkPrefix(s); return !!Q && samePath(Q, P); } catch (_) { return false; } }) || null;
+}
+function lnkPrefix(s) {
+  const els = pathFrom(s); if (!els.length || !els.every(e => NODES[e.id])) return null;
+  if (els[0].id === WRAP) return els.length === 1 ? [{id: WRAP}] : null;
+  const oi = OUT_IDS.indexOf(els[0].id);
+  if (oi >= 0) return OUT_IDS.slice(0, oi).map(id => ({id})).concat(els);
+  if (els[0].id === 'die') return OUT_IDS.map(id => ({id})).concat(els);
+  return pathOf({level: 0}).concat(els);
 }
 function lnkAt(P) {
   if (samePath(P, pathOf({level: 0}))) return LNK.q ? 'at=die' : '';
