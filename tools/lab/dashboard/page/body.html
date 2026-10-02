@@ -386,9 +386,19 @@ the deploy may have stopped: nothing on it is current. Tell <span id="stale-main
 <h2 id="alerts">Alerts</h2>
 <div id="alert-list"></div>
 
-<h2 id="card-use">Card use, last 24 hours</h2>
+<h2 id="card-use">Card use</h2>
 <p class="small" id="cu-note">A bar runs from a program's first open of a card to its last close, coloured by login; hatched spans were not logged. <span id="cu-zone">Lab time</span>. Hover a bar for its details.</p>
 <div id="cu-legend"></div>
+<h3 id="card-use-live">Live, last 15 minutes</h3>
+<div id="cu-live"></div>
+<h3 id="card-use-24h">Last 24 hours</h3>
+<style>
+/* the card-use chart's live part (from the log's end to now) */
+.cu-livetrack{fill:color-mix(in srgb,var(--c1,#1f6fbf) 9%,transparent)}
+.cu-live.open{animation:cu-pulse 1.6s ease-in-out infinite}
+@keyframes cu-pulse{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.cu-live.open{animation:none}}
+</style>
 <div id="cu-chart"></div>
 <div id="cu-extra">
 <div id="cu-cards" class="cu-cards"></div>

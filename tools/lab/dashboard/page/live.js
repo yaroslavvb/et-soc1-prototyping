@@ -9,12 +9,12 @@
   var HOSTS = ["aifoundry1", "aifoundry2", "aifoundry3"];
   var grid = document.getElementById("live-grid"), note = document.getElementById("live-state");
   if (!grid) return;
-  var ROW_H = 22, TOP_N = 12, EMA = 0.35, KEEP = 300;
+  var ROW_H = 22, TOP_N = 12, EMA = 0.35, KEEP = 900;
   var TS = [["cpu", "CPU", "#22d3ee"], ["nvme", "NVMe", "#34d399"], ["nic", "NIC", "#fbbf24"]];
   var HISTORY = "https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history";
   var CARD_COL = ["#fb4f6b", "#c084fc"];
   var HIST = (typeof D !== "undefined" && D.history) || {}, CARDS = (typeof D !== "undefined" && D.cards) || {};
-  var last = {}, hist = {}, ui = {};
+  var last = {}, hist = {}, ui = {}, sent = {};
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function gb(mb) { return (mb / 1024).toFixed(mb >= 10240 ? 0 : 1); }
   function age(h) { var v = last[h]; return v ? (Date.now() - v.t) / 1000 : Infinity; }
@@ -220,7 +220,11 @@
       if (v && (!last[h] || v.t !== last[h].t)) {
         last[h] = v; updateTop(h, v);
         // the main dashboard (script.js) shows each card's state from this reading while it is fresh
-        document.dispatchEvent(new CustomEvent("lab-live", {detail: {host: h, t: v.t, cards: v.cards || []}}));
+        // the first time, also the stream's recent readings, so the card-use chart's live lanes start filled
+        var seed = sent[h] ? null : (history || []).map(function (x) { return x && x.v ? x.v : x; })
+          .filter(function (x) { return x && x.t && Array.isArray(x.cards); }).map(function (x) { return {t: x.t, cards: x.cards}; });
+        sent[h] = true;
+        document.dispatchEvent(new CustomEvent("lab-live", {detail: {host: h, t: v.t, cards: v.cards || [], seed: seed}}));
       }
       hist[h] = (history || []).map(function (x) { return x && x.v ? x.v : x; }).filter(function (x) { return x && typeof x.cpu_all === "number"; });
       update(h);

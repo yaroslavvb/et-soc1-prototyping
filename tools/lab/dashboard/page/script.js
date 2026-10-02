@@ -1245,11 +1245,88 @@
       {key: '_act', label: 'card queues active (ticks)', color: 'var(--ink-2)', mark: 'line'},
       {key: '_now', label: `now (${lclock(US1)})`, color: 'var(--ink)', mark: 'dash'});
     CK.legend('cu-legend', items);
-    CK.frame(chart, {minW: 300, maxW: 1248, label: `Card use by login, last ${UHOURS} hours`,
+    drawLiveUse(ids);
+    drawUsageChart(ids);
+    renderUsageCards(ids);
+    renderUsageTable(ids);
+    renderUsageDays(ids);
+  }
+  /* The chart runs from the log's start to now: the log (et-usage, every 10 minutes) ends at US1, and from there to now
+     the live stream's holds are drawn as they happen (LIVE_IV), while this page is open. */
+  const LIVE_IV = {};
+  function liveUse(id, t, lc) {
+    const L = LIVE_IV[id] = LIVE_IV[id] || [];
+    const hs = lc.held ? (Array.isArray(lc.holders) && lc.holders.length ? lc.holders : [['?', '?']]) : [];
+    let changed = false;
+    for (const iv of L) if (iv.open && !hs.some(h => h[0] === iv.user)) { iv.open = false; changed = true; }
+    for (const [u, p] of hs) {
+      const cur = L.find(iv => iv.open && iv.user === u);
+      if (cur) { cur.b = t; if (p && !cur.progs.includes(p)) cur.progs.push(p); }
+      else { L.push({user: u, progs: p ? [p] : [], a: t, b: t, open: true}); changed = true; }
+    }
+    return changed;
+  }
+  let usageDrawn = 0, usageLater = null;
+  function redrawUsage(now) {
+    const chart = $('cu-chart');
+    if (!chart || !U || US0 == null || US1 == null || !ANY_LOGGED) return;
+    const wait = 2e3 - (Date.now() - usageDrawn);
+    if (!now && wait > 0) { if (!usageLater) usageLater = setTimeout(() => { usageLater = null; redrawUsage(true); }, wait); return; }
+    usageDrawn = Date.now();
+    while (chart.firstChild) chart.removeChild(chart.firstChild);
+    drawUsageChart(CARDS.slice());
+    drawLiveUse(CARDS.slice());
+  }
+  /* Live, last 15 minutes: one lane per card, from the stream (who holds it, each second), sliding with the clock. */
+  const LIVE_MIN = 15;
+  function drawLiveUse(ids) {
+    const host = $('cu-live');
+    if (!host) return;
+    while (host.firstChild) host.removeChild(host.firstChild);
+    const any = Object.keys(LIVE_IV).length > 0;
+    if (!any) { host.append(E('p', 'small muted', 'Live card use appears here once the page receives the machines\' streams (on spacesheep.dev).')); return; }
+    CK.frame(host, {minW: 300, maxW: 1248, label: `Card use, live, last ${LIVE_MIN} minutes`,
+      height: W => 14 + ids.length * (W < 600 ? 30 : 26) + 26,
+      draw(f) {
+        const nar = f.narrow, L = nar ? 4 : 176, R = 10, Tp = 10, B = 26, rowH = nar ? 30 : 26, bh = 14;
+        const NOW = Date.now(), T0 = NOW - LIVE_MIN * 6e4, x = CK.lin(T0, NOW, L, f.W - R);
+        const ga = CK.el('g', {'aria-hidden': 'true'}, f.svg), labs = [];
+        for (let t = Math.ceil(T0 / 3e5) * 3e5; t <= NOW; t += 3e5) {
+          CK.el('line', {class: 'tl-vgrid', x1: x(t), x2: x(t), y1: Tp - 2, y2: f.H - B + 4}, ga);
+          labs.push(CK.txt(ga, x(t), f.H - B + 16, L_HM.format(t), 'tick', 'middle'));
+        }
+        CK.inside(f, labs);
+        ids.forEach((id, k) => {
+          const y0 = Tp + k * rowH, by = nar ? y0 + 12 : y0 + 4, c = C[id] || {};
+          const lg = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+          CK.cardMark(lg, id, nar ? 8 : 10, nar ? y0 + 6 : by + 7, 4, MARK_INK);
+          if (!nar) CK.txt(lg, 22, by + 11, cardName(id) + (c.excluded ? ' (excluded)' : ''), c.excluded ? 'lab' : 'lab-strong');
+          else CK.txt(lg, 18, y0 + 9, cardName(id), 'lab');
+          CK.el('rect', {class: 'tl-track', x: x(T0), y: by, width: x(NOW) - x(T0), height: bh, rx: 2}, f.svg);
+          for (const iv of LIVE_IV[id] || []) {
+            const a = Math.max(T0, iv.a), b = Math.min(NOW, iv.open ? NOW : iv.b + 1000);
+            if (b <= a) continue;
+            const g = CK.el('g', null, f.svg), xa = x(a), w = Math.max(2, x(b) - xa);
+            const r = CK.el('rect', {class: 'cu-live' + (iv.open ? ' open' : ''), x: xa, y: by, width: w, height: bh, rx: 2}, g);
+            r.style.fill = iv.user === '?' ? OTHER_COLOR : userColor(iv.user);
+            CK.el('rect', {class: 'ck-hit', x: xa, y: by - 3, width: Math.max(6, w), height: bh + 6}, g);
+            CK.tip(f, g, `<b>${esc(whoName(iv.user))}</b> on ${esc(cardName(id))}<br>${esc(iv.progs.join(', ') || '?')}<br>`
+              + `${esc(lclock(iv.a))} – ${iv.open ? 'now' : esc(lclock(iv.b))} (${esc(durS(Math.max(1, ((iv.open ? NOW : iv.b) - iv.a) / 1000)))})`);
+          }
+          const lv = liveOf(id);
+          if (lv && !nar) CK.txt(lg, f.W - R - 4, by + 11, lv.ok === false ? 'link down' : lv.held ? 'in use' : 'free', 'tick', 'end');
+        });
+        CK.el('line', {class: 'cu-now', x1: x(NOW), x2: x(NOW), y1: Tp - 4, y2: f.H - B}, ga);
+      }});
+  }
+  function drawUsageChart(ids) {
+    const chart = $('cu-chart');
+    CK.frame(chart, {minW: 300, maxW: 1248, label: `Card use by login, last ${UHOURS} hours, and live`,
       height: W => 16 + ids.length * (W < 600 ? 46 : 36) + 30,
       draw(f) {
         const nar = f.narrow, L = nar ? 4 : 176, R = 10, Tp = 16, B = 30, rowH = nar ? 46 : 36, bh = 16;
-        const x = CK.lin(US0, US1, L, f.W - R);
+        const NOW = Math.max(US1, Date.now());
+        const x = CK.lin(US0, NOW, L, f.W - R);
         const ga = CK.el('g', {'aria-hidden': 'true'}, f.svg), labs = [];
         const every = nar ? 6 : 3;
         for (let t = Math.ceil(US0 / 36e5) * 36e5; t <= US1; t += 36e5) {
@@ -1266,16 +1343,27 @@
           if (!nar) CK.txt(lg, 22, by + 25, (c.excluded ? 'excluded · ' : '') + (cu.logged ? (usersOf(id).length ? `${durS(cu.held_s)} held` : 'not used') : 'not logged'), 'tick');
           else if (cu.logged) CK.txt(lg, f.W - R - 8, y0 + 13, usersOf(id).length ? `${durS(cu.held_s)} held` : 'not used', 'tick', 'end');
           CK.keynav(f, drawLane(f, id, x, by, bh, cardName(id), false));
+          // live: from the log's end to now, the holds the stream has shown since this page opened
+          if (NOW > US1) {
+            CK.el('rect', {class: 'cu-livetrack', x: x(US1), y: by, width: Math.max(0, x(NOW) - x(US1)), height: bh}, f.svg);
+            for (const iv of LIVE_IV[id] || []) {
+              const a = Math.max(US1, iv.a), b = Math.min(NOW, iv.open ? NOW : iv.b + 1000);
+              if (b <= a) continue;
+              const g = CK.el('g', null, f.svg), xa = x(a), w = Math.max(3, x(b) - xa);
+              const r = CK.el('rect', {class: 'cu-live' + (iv.open ? ' open' : ''), x: xa, y: by, width: w, height: bh, rx: 2}, g);
+              r.style.fill = iv.user === '?' ? OTHER_COLOR : userColor(iv.user);
+              CK.el('rect', {class: 'ck-hit', x: xa, y: by - 3, width: Math.max(6, w), height: bh + 6}, g);
+              CK.tip(f, g, `<b>${esc(whoName(iv.user))}</b> on ${esc(cardName(id))} · live<br>${esc(iv.progs.join(', ') || '?')}<br>`
+                + `${esc(lclock(iv.a))} – ${iv.open ? 'now' : esc(lclock(iv.b))} (${esc(durS(Math.max(1, (Math.min(iv.open ? Date.now() : iv.b, NOW) - iv.a) / 1000)))})`);
+            }
+          }
         });
-        const xn = x(US1);
+        const xn = x(NOW);
         CK.el('line', {class: 'cu-now', x1: xn, x2: xn, y1: nar ? Tp - 6 : Tp - 2, y2: f.H - B}, ga);  // starts under its label
         labs.length = 0;
         labs.push(CK.txt(ga, xn, nar ? f.H - B + 18 : Tp - 8, 'now', nar ? 'lab-strong' : 'tick', 'end'));
         CK.inside(f, labs);
       }});
-    renderUsageCards(ids);
-    renderUsageTable(ids);
-    renderUsageDays(ids);
   }
   function usageStrip(host, id) {
     if (US0 == null) { host.append(E('span', 'small muted', 'no card-use data')); return; }
@@ -1509,13 +1597,23 @@
   }
   document.addEventListener('lab-live', e => {
     const d = e.detail || {};
+    for (const past of d.seed || []) for (const lc of past.cards || []) {   // the stream's recent readings, oldest first
+      const id = CARDS.find(k => hostOfCard(k) === d.host && (C[k] || {}).devnum === lc.n);
+      if (id) liveUse(id, past.t, lc);
+    }
     for (const lc of d.cards || []) {
       const id = CARDS.find(k => hostOfCard(k) === d.host && (C[k] || {}).devnum === lc.n);
-      if (id) LIVEC[id] = {t: d.t, ok: lc.ok, held: lc.held, holders: lc.holders, temp: lc.temp || (LIVEC[id] || {}).temp || null};
+      if (id) {
+        LIVEC[id] = {t: d.t, ok: lc.ok, held: lc.held, holders: lc.holders, temp: lc.temp || (LIVEC[id] || {}).temp || null};
+        if (liveUse(id, d.t, lc)) redrawUsage(false);
+      }
     }
     liveChanged();
   });
   setInterval(liveChanged, 5e3);
+  // an open live hold grows: redraw the chart every 5 s while one is open, and once a minute anyway (the axis moves)
+  setInterval(() => { if (Object.keys(LIVE_IV).length) redrawUsage(true); }, 3e3);   // the live lanes slide
+  setInterval(() => redrawUsage(true), 60e3);
   function tick() {
     const st = ageMin() > STALE_MIN;
     if (st !== PAGE_STALE) { PAGE_STALE = st; renderLive(); }
