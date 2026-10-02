@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Write the "New user? Start now" page's data from START.md, the agent brief.
+"""Write the "New user? Start here" page's data from START.md, the brief the Claude on a lab machine reads.
 
     python3 docs/lab-start/make_page_data.py           # writes docs/reports/data/2026-09-30-lab-start/brief.json
     python3 docs/lab-start/make_page_data.py --check   # exit 1 if brief.json is stale
 
-The page (docs/reports/sources/lab-start.*) shows START.md verbatim in its one copy box, with the viewer's username
-filled into `<login>` (the only placeholder the page fills; `<host>` and `<N>` stay, for the agent's own choice), so
-START.md is the only copy of the prompt: edit it, run this, then rebuild the page (README.md here).
-The card tiles at the top of the page come from CARDS below (facts of 2 October 2026, from AGENT.md §4 and
+Since the ninth edition (2 October 2026) the page gives a person three steps: from their own computer, create their
+account as root and start Claude on the lab machine as themselves (the commands are in the page's script), then give
+that Claude one line, which has it read START.md (fetched from GitHub into ~/lab-start.md). The page shows START.md
+verbatim in a fold, unfilled. The card tiles come from CARDS below (facts of 2 October 2026, from AGENT.md §4 and
 docs/findings/14-card-behaviour.md). No timestamps go into the output, so a rebuild with the same inputs is
 byte-identical."""
 import hashlib
@@ -38,7 +38,7 @@ CARDS = [
 ]
 
 
-FILLS = ["login"]  # the placeholders the page fills from its one field
+FILLS = []  # the page fills nothing into the brief: Claude learns the username with id -un
 
 
 def build():
@@ -47,8 +47,6 @@ def build():
     for bad in ("</script", "<!--"):
         if bad in md.lower():
             raise SystemExit(f"START.md contains {bad!r}, which would break the page's inline script")
-    if "`<login>`" not in md.split("\n## ", 1)[0]:
-        raise SystemExit("START.md's opening lines (the person's own words) must name `<login>`, which the page fills")
     m = re.search(r"^Version of ([^.,\n]+)", md, flags=re.M)
     if not m:
         raise SystemExit("START.md has no 'Version of <date>' line")

@@ -48,11 +48,11 @@ decision.
 
 **Self-service (since 2 October 2026).** A new person who has joined the tailnet can also log in as `root` on each
 machine (Tailscale SSH, with its check URL), and is asked to make their own account at once and use only that from then
-on, so that nobody steps on anyone else's work. The "New user? Start here" brief automates exactly that for their coding
-agent (step 1, "If `<login>` does not exist on a machine yet"): one block, run as root, that validates the name,
-refuses a name already taken, runs `adduser --disabled-password` (no password, no `sudo`, as `scripts/add-lab-user.sh`
-does) and checks `/dev/et*` access, and then never uses root again. The shared `root` login itself is the lab admin's
-decision.
+on, so that nobody steps on anyone else's work. The "New user? Start here" page
+(https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start) gives the three steps, run from the person's own computer: one
+ssh as root that creates the account (no password, no `sudo`, as `scripts/add-lab-user.sh` does, plus linger) and logs
+out; one ssh as the new account that installs Claude Code and starts it in tmux on the lab machine; then one line for
+that Claude, which reads `docs/lab-start/START.md`. The shared `root` login itself is the lab admin's decision.
 
 ## First login
 

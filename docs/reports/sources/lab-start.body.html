@@ -1,5 +1,5 @@
 <style>
-.lab { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.lab { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 14px 0 6px; }
 .lab .m { border: 1.5px solid var(--axis); border-radius: 12px; padding: 10px 12px 12px; background: var(--surface); min-width: 0; }
 .lab .m .h { font-weight: 700; font-size: 1.02rem; }
 .lab .m .os { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; }
@@ -8,87 +8,126 @@
 .lab .cbox .n { font-weight: 650; font-size: 0.92rem; }
 .lab .cbox .d { font-size: 0.8rem; color: var(--ink-2); overflow-wrap: anywhere; }
 .lab .cbox.off { border-style: dashed; background: transparent; opacity: 0.75; }
-.lab .cbox.off .n::after { content: " · do not use"; color: var(--bad); font-weight: 600; }
-.labnote { font-size: 0.84rem; color: var(--ink-2); margin: 4px 0 0; }
-.labnote code { white-space: nowrap; }
-ol.do { padding-left: 1.3em; }
-ol.do li { margin: 10px 0; }
-ol.do li b { display: block; }
-.prompt { border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; background: var(--surface); margin: 14px 0 10px; }
-.prompt .bar { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); }
-.prompt label { display: block; font-weight: 600; font-size: 0.92rem; margin-bottom: 6px; }
-.prompt .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.prompt input { font: inherit; font-size: 1rem; color: var(--ink); background: var(--page); border: 1px solid var(--axis);
-  border-radius: 8px; padding: 6px 10px; min-height: 40px; width: 15em; max-width: 100%; box-sizing: border-box; }
-.prompt input[aria-invalid="true"] { border-color: var(--warn); }
-.prompt input:focus-visible, .btn:focus-visible, .prompt pre:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
-.prompt .hint { font-size: 0.82rem; color: var(--ink-2); margin: 6px 0 0; }
-.prompt .hint.bad { color: var(--ink); }
-.prompt .hint.bad::before { content: "\26A0\FE0E\00a0"; color: var(--warn); }
-.btn { font: inherit; font-size: 0.95rem; font-weight: 600; border-radius: 999px; padding: 7px 18px; min-height: 40px;
+.lab .cbox.off .n::after { content: " · out of service"; color: var(--bad); font-weight: 600; }
+.where-map { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 6px; }
+.where-map .w { border: 1.5px solid var(--axis); border-radius: 12px; padding: 10px 14px; background: var(--surface); }
+.where-map .w b { display: block; margin-bottom: 4px; }
+.where-map .w p { margin: 0; font-size: 0.9rem; color: var(--ink-2); }
+.where-map .w.lab-side { border-color: var(--c1); }
+.fields { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: flex-end; margin: 18px 0 4px; }
+.fields label { display: block; font-weight: 600; font-size: 0.92rem; margin-bottom: 5px; }
+.fields input, .fields select { font: inherit; font-size: 1rem; color: var(--ink); background: var(--page); border: 1px solid var(--axis);
+  border-radius: 8px; padding: 6px 10px; min-height: 40px; box-sizing: border-box; }
+.fields input { width: 14em; max-width: 100%; }
+.fields input[aria-invalid="true"] { border-color: var(--warn); }
+.fields input:focus-visible, .fields select:focus-visible, .btn:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.hint { font-size: 0.84rem; color: var(--ink-2); margin: 6px 0 0; }
+.hint.bad { color: var(--ink); }
+.hint.bad::before { content: "\26A0\FE0E\00a0"; color: var(--warn); }
+ol.steps { list-style: none; padding: 0; margin: 18px 0 8px; counter-reset: none; }
+ol.steps > li { border: 1.5px solid var(--axis); border-radius: 12px; padding: 12px 14px 14px; margin: 0 0 14px; background: var(--surface); }
+ol.steps > li.on-lab { border-color: var(--c1); }
+ol.steps h2 { margin: 2px 0 6px; font-size: 1.15rem; }
+.where { display: inline-block; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  border-radius: 999px; padding: 2px 10px; border: 1px solid var(--axis); color: var(--ink-2); }
+.on-lab .where { border-color: var(--c1); color: var(--c1); }
+ol.steps p { margin: 6px 0; }
+.cmd { position: relative; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; margin: 8px 0 4px; }
+.cmd pre { margin: 0; border-radius: 0; padding: 10px 12px; padding-right: 92px; white-space: pre-wrap; overflow-wrap: anywhere;
+  font-size: 0.8rem; line-height: 1.5; background: var(--code-bg); }
+.cmd pre .ph { background: color-mix(in srgb, var(--warn) 26%, transparent); border-radius: 3px; }
+.cmd pre .fill { background: color-mix(in srgb, var(--ok) 22%, transparent); border-radius: 3px; }
+.cmd .btn { position: absolute; top: 6px; right: 6px; }
+.btn { font: inherit; font-size: 0.88rem; font-weight: 600; border-radius: 999px; padding: 5px 14px; min-height: 34px;
   cursor: pointer; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); }
-.btn.primary { background: var(--ink); color: var(--page); }
-.copystat { font-size: 0.86rem; color: var(--ok); }
+.copystat { font-size: 0.84rem; color: var(--ok); margin-left: 4px; }
 .copystat:empty { display: none; }
-.prompt .meta { font-size: 0.8rem; color: var(--muted); padding: 6px 14px; border-bottom: 1px solid var(--border); }
-.prompt pre { margin: 0; border-radius: 0; max-height: 440px; overflow: auto; white-space: pre-wrap;
-  overflow-wrap: anywhere; font-size: 0.75rem; line-height: 1.5; background: var(--code-bg); }
-.prompt pre .ph { background: color-mix(in srgb, var(--warn) 24%, transparent); border-radius: 3px; }
-.prompt pre .fill { background: color-mix(in srgb, var(--ok) 22%, transparent); border-radius: 3px; }
+details.brief { border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; margin: 14px 0; background: var(--surface); }
+details.brief > summary { cursor: pointer; padding: 9px 0; font-weight: 600; }
+details.brief pre { margin: 0 0 12px; max-height: 440px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+  font-size: 0.75rem; line-height: 1.5; background: var(--code-bg); }
 @media (max-width: 599px) {
-  .lab { grid-template-columns: minmax(0, 1fr); }
-  .prompt .bar { padding: 10px 12px; }
-  .prompt input { width: 100%; }
-  .prompt .row .btn { flex: 1 0 100%; }
-  .prompt pre { font-size: 0.78rem; max-height: 360px; }
+  .lab, .where-map { grid-template-columns: minmax(0, 1fr); }
+  .fields input { width: 100%; }
+  .cmd pre { padding-right: 12px; padding-top: 44px; }
 }
 </style>
 
 <h1>New user? Start here</h1>
-<p class="byline">30 September 2026 (PDT) · for new users of the AI Foundry ET-SoC-1 lab · part of the
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline">2 October 2026 (PDT) · for new users of the AI Foundry ET-SoC-1 lab ·
+<a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">the lab dashboard</a></p>
 
-<p class="lede">The lab is three machines with four ET-SoC-1 cards, shared by several people in #community-lab channel of AIFoundry discord.</p>
+<p class="lede">Three steps. Steps 1 and 2 are commands you paste into a terminal on your own computer: they create your
+own account on a lab machine and start Claude there, as you. Step 3 is one line you give that Claude.</p>
 
-<div class="lab" id="lab" role="img" aria-label="Three machines: aifoundry1 with card 0 (do not use) and card 1, aifoundry2 with card 0, aifoundry3 with card 0"></div>
-<p class="labnote">Each card is an ET-SoC-1 on PCIe: 1,088 small RISC-V cores. The machines are x86_64 Ubuntu 24.04,
-reached over the lab's Tailscale network. The lab is starting to log card use on them (who, which program, when;
-never arguments or files), so that everyone can see when a card is free: <code>et-usage</code> shows it where it is
-installed.</p>
-
-<h2 id="what-you-do">What you do</h2>
-<ol class="do">
-  <li><b>Ask Roman for access.</b> Roman is the lab lead. Ask him, on the AI Foundry Discord's #community-lab, for an
-  account on the lab machines and an invite to the lab's Tailscale network.</li>
-  <li><b>Join Tailscale.</b> Accept the invite and install Tailscale. Later, approve in your browser the login links
-  your agent shows you.</li>
-  <li><b>Give your agent the prompt.</b> Type your username below, copy the prompt, and paste it into your coding
-  agent (Claude Code on your laptop works). The agent picks a free machine and card, sets up a Claude that lives there
-  with Remote Control (a few steps at your keyboard; Remote Control needs a claude.ai plan), runs a first test, and
-  asks you before it touches a card.</li>
-</ol>
-
-<h2 id="the-prompt">The prompt</h2>
-<div class="prompt">
-  <div class="bar">
-    <label for="f-login">Your username on the lab machines</label>
-    <div class="row">
-      <input id="f-login" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. alice"
-        maxlength="64" aria-describedby="login-hint">
-      <button class="btn primary" type="button" data-role="copy">Copy the prompt</button>
-      <span class="copystat" data-role="stat" aria-live="polite"></span>
-    </div>
-    <p class="hint" id="login-hint" data-role="hint">The username you were given. Leave it blank and your agent will ask.</p>
-  </div>
-  <div class="meta" data-role="meta">The prompt</div>
-  <pre data-role="raw" tabindex="0" aria-label="The prompt for your coding agent"></pre>
+<div class="where-map">
+  <div class="w"><b>Your computer</b><p>Only a terminal: you paste the ssh commands of steps 1 and 2. No agent runs
+  here.</p></div>
+  <div class="w lab-side"><b>The lab machine, as you</b><p>Claude runs here, in your own account, in a tmux session
+  called <code>claude</code>. All the work happens here. Root is used once, in step 1, only to create your
+  account.</p></div>
 </div>
 
-<p class="small">More: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">the ET-SoC-1
-reports</a> · <a href="https://github.com/yaroslavvb/et-soc1-prototyping">the repository</a>
-(<code>docs/lab-start/START.md</code> is the prompt's source). <b>Versions.</b> 30 September 2026: first edition,
-from the lab's notes of 23–30 September; the same day, cut to what a person does, with the rest in the prompt; then
-one prompt with only the username to fill in, the agent choosing the machine and card; then, after a review, the
-fourth edition: never retrain a card's link, people counted by their processes, the agent passing on Tailscale login
-links itself, and a hand-off message for the Claude on the machine.</p>
+<p class="small">Before you start: join the lab's Tailscale network (ask Roman, the lab lead, in #community-lab on the
+AI Foundry Discord). Each ssh below may print a <code>login.tailscale.com</code> link: open it in your browser, approve
+it, and the command goes on.</p>
+
+<div class="fields">
+  <div>
+    <label for="f-login">Your username (new; you choose it)</label>
+    <input id="f-login" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. alice"
+      maxlength="64" aria-describedby="login-hint">
+  </div>
+  <div>
+    <label for="f-host">Machine</label>
+    <select id="f-host"><option value="aifoundry3">aifoundry3 (one card)</option><option value="aifoundry1">aifoundry1 (two cards)</option></select>
+  </div>
+</div>
+<p class="hint" id="login-hint" data-role="hint">Lowercase letters, digits, - and _, starting with a letter. It fills the
+commands below.</p>
+
+<div class="lab" id="lab" role="img" aria-label="Three machines: aifoundry1 with cards 0 and 1, aifoundry2 with card 0 (out of service), aifoundry3 with card 0"></div>
+<p class="small">aifoundry2's card is out of service. The <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">dashboard</a>
+shows which cards are free now.</p>
+
+<ol class="steps">
+  <li>
+    <span class="where">On your computer</span>
+    <h2>1. Create your account</h2>
+    <p>This logs in to the lab machine as the shared <code>root</code>, creates your own account (no password, no
+    sudo), and logs out. You never use root again.</p>
+    <div class="cmd"><button class="btn" type="button" data-copy="root">Copy</button><pre data-tpl="root" tabindex="0"></pre></div>
+    <p class="small">It ends with "created …". If it says your username already exists: go on if the account is yours,
+    otherwise choose another username.</p>
+  </li>
+  <li>
+    <span class="where">On your computer</span>
+    <h2>2. Start Claude on the lab machine</h2>
+    <p>This logs in as you, installs Claude Code in your account, fetches the lab's brief, starts Claude in a tmux
+    session, and attaches your terminal to it. The first time, Claude asks you to sign in: open the link it shows,
+    sign in, and paste the code back into the terminal; then trust the folder.</p>
+    <div class="cmd"><button class="btn" type="button" data-copy="user">Copy</button><pre data-tpl="user" tabindex="0"></pre></div>
+  </li>
+  <li class="on-lab">
+    <span class="where">In Claude, on the lab machine</span>
+    <h2>3. Give Claude the brief</h2>
+    <p>Paste this line. Claude reads the brief, picks a free card on this machine, runs a first test, and asks you
+    before it touches a card.</p>
+    <div class="cmd"><button class="btn" type="button" data-copy="prompt">Copy</button><pre data-tpl="prompt" tabindex="0"></pre></div>
+  </li>
+</ol>
+<p class="small"><span class="copystat" data-role="stat" aria-live="polite"></span></p>
+
+<h2 id="later">Later</h2>
+<p>To come back, on your computer: <code data-tpl="attach"></code>. To leave Claude running: Ctrl-b, then d. If you see
+a shell prompt instead of Claude, type <code>claude</code>. To use another machine, run steps 1 and 2 again with it
+chosen above.</p>
+
+<details class="brief"><summary>What Claude reads: the brief (<span data-role="meta"></span>)</summary>
+<pre data-role="raw" tabindex="0" aria-label="The brief Claude reads"></pre></details>
+
+<p class="small">More: <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">the lab dashboard</a> ·
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">the ET-SoC-1 reports</a> ·
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping">the repository</a> (<code>docs/lab-start/START.md</code>
+is the brief).</p>
 </main>
