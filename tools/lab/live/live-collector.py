@@ -3,7 +3,6 @@
 
 Read-only and unprivileged: /proc, /sys and /proc/locks only. It never opens an ET-SoC-1 device node, never takes a
 card lock, and never reads another user's command line (only the 15-character process name the kernel shows to all),
-and names only our own account and system accounts: every other person is "another user".
 Each line: {"host", "t" (ms), "up_s", "cpu": [per-core %], "cpu_all", "load": [1, 5, 15], "mem": {...},
 "top": [[user, comm, pid, cpu%, rss_mb], ...], "nproc", "cards": [{"n", "pci", "link", "ok", "held"}]}.
 """
@@ -24,15 +23,12 @@ ME = os.getuid()
 
 
 def user(uid):
-    """our own account and system accounts by name; any other person as "another user" (the stream is public)"""
+    """the login name for a uid (the owner chose to show every user's name on the public dashboard, 2 Oct 2026)"""
     if uid not in users:
-        if uid == ME or uid < 1000 or uid == 65534:
-            try:
-                users[uid] = pwd.getpwuid(uid).pw_name
-            except KeyError:
-                users[uid] = "system"
-        else:
-            users[uid] = "another user"
+        try:
+            users[uid] = pwd.getpwuid(uid).pw_name
+        except KeyError:
+            users[uid] = str(uid)
     return users[uid]
 
 
