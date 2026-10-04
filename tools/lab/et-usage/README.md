@@ -43,8 +43,9 @@ one a second.
 - **Never reads a card attribute** other than `devnum` and `{mgmt,ops}_vq_stats/msg_count` (driver counters in host
   memory); never `utilization_percent` (it syncs queue pointers from the card), `resource*`, `config`; never writes
   to sysfs. Cards given to `--skip-counters` have their counters never read; a PCI function given to `--skip-pci`
-  (aifoundry1's card 0, `0000:01:00.0`) has nothing at all read, not even `devnum` (the lab's rule, DESIGN.md §2.4,
-  and card numbers can move if a card fails its probe). Every run on a host, the service's or a manual `--once` or
+  has nothing at all read, not even `devnum` (card numbers can move if a card fails its probe). Until 4 Oct 2026
+  aifoundry1 skipped its card 0 (`0000:01:00.0`) this way, the lab's rule for that overheating card (DESIGN.md §2.4);
+  it is back in service, and nothing is skipped on any host now. Every run on a host, the service's or a manual `--once` or
   `--foreground`, also skips what `/etc/default/et-usaged` skips; if that file exists but cannot be parsed, no counter
   is read at all.
 - **Never reads a process's arguments**, environment, working directory or files: only `/proc/<pid>/stat` (comm,
@@ -164,8 +165,7 @@ is no coverage before it); `et-usage` says so.
 ## Install, check, remove (root, on each host)
 
 ```
-sudo tools/lab/et-usage/install.sh                      # aifoundry2, aifoundry3
-sudo tools/lab/et-usage/install.sh --skip-counters 0 --skip-pci 0000:01:00.0   # aifoundry1; refuses without both
+sudo tools/lab/et-usage/install.sh                      # every host (aifoundry1 skipped its card 0 until 4 Oct 2026)
 sudo tools/lab/et-usage/install.sh --check              # installed files (sha256), user, capabilities, now.json, journal
 sudo tools/lab/et-usage/install.sh --uninstall          # stop, disable, remove programs and unit; keep logs and config
 sudo tools/lab/et-usage/install.sh --purge              # also the logs, /etc/default/et-usaged and the et-usage user

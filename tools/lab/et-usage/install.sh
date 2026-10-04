@@ -8,9 +8,10 @@
 #   sudo ./install.sh --purge                         also remove /var/log/et-usage, /etc/default/et-usaged, the user
 #   ./install.sh --check-source                       (any user) could anyone but root and you change these files?
 #
-# --skip-counters and --skip-pci are written to /etc/default/et-usaged only when that file does not exist yet. On
-# aifoundry1 the lab's rule is to touch nothing of card 0 (0000:01:00.0) beyond link and err_stats: there a first
-# install refuses without --skip-counters 0 --skip-pci 0000:01:00.0. The service runs as the et-usage system user.
+# --skip-counters and --skip-pci are written to /etc/default/et-usaged only when that file does not exist yet. Until
+# 4 Oct 2026 a first install on aifoundry1 refused without --skip-counters 0 --skip-pci 0000:01:00.0, because the lab
+# touched nothing of its overheating card 0; the card is back in service (its fan was replaced on 2 Oct), so nothing
+# is skipped there any more. The service runs as the et-usage system user.
 # Root copies these files and systemd runs them: install refuses when anyone but root and the admin who ran sudo
 # could have changed them (a file, or a directory above it, writable by another user); --trust-source overrides.
 set -eu
@@ -157,12 +158,6 @@ fi
 if ! check_source; then
   if [ "$trust" = 1 ]; then say "--trust-source: installing anyway"
   else die "refusing: someone but root and uid $admin could change the files in $HERE (above); fix the modes, or --trust-source"; fi
-fi
-host=$(hostname -s)
-if [ ! -e "$DEFAULTS" ] && [ "$host" = aifoundry1 ]; then
-  case ",$skip," in *,0,*) ok0=1 ;; *) ok0=0 ;; esac
-  case ",$skip_pci," in *,0000:01:00.0,*) ok1=1 ;; *) ok1=0 ;; esac
-  [ "$ok0" = 1 ] && [ "$ok1" = 1 ] || die "refusing on aifoundry1 without --skip-counters 0 --skip-pci 0000:01:00.0: the lab touches nothing of card 0 there beyond link and err_stats (not even devnum)"
 fi
 for f in et-usaged et-usage; do
   python3 -c 'import ast, sys; ast.parse(open(sys.argv[1]).read())' "$HERE/$f" || die "$f does not parse"
