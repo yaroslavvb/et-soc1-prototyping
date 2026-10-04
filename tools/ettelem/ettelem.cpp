@@ -9,9 +9,13 @@
 //                                                   stats (and sends the PMIC its stats reset) every R ms and tags
 //                                                   each sample with its window; whether that makes avg a window
 //                                                   mean is untested.
-//   ettelem temp                                   one line: die temperature (minion shires: avg, high), PMIC
+//   ettelem temp [--if-free]                       one line: die temperature (minion shires: avg, high), PMIC
 //                                                   temperature, board power. Two requests, then it closes the node:
 //                                                   tools/lab/live/live-collector.py runs it once a second on a free card.
+//                                                   --if-free: just before opening the node, probe the card's lock
+//                                                   (/run/lock/etsoc-shire<ET_DEVICES>.lock: flock non-blocking, then
+//                                                   released at once, so no user's flock is ever refused); if someone
+//                                                   holds it, print {"busy":true} and exit 3 without opening the node.
 //   ettelem config                                 static governor inputs: TDP (W), SW temperature
 //                                                   threshold (C), power state, current minion clock and voltage
 //   ettelem loglevel debug|info                     SP log level (DM_CMD_SET_DM_TRACE_CONFIG). At debug the SP logs one
@@ -27,6 +31,10 @@
 #include <esperanto/device-apis/management-api/device_mgmt_api_spec.h>
 
 #include <dlfcn.h>
+#include <fcntl.h>
+#include <sys/file.h>
+#include <unistd.h>
+#include <cerrno>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -46,15 +54,34 @@ long long epochMs() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
+// Whether the card's lock (the lab's rule: flock -n /run/lock/etsoc-shire<N>.lock <cmd>) is free, probed just before the
+// management node is opened. The probe is released at once: holding it through the reading would refuse users' own
+// flock -n in that window, and most lab programs open only the ops node, which this reader never collides with.
+// A missing lock file means the host has no lock to honour; any other failure to open it counts as busy.
+struct Busy {};
+void probeCardLock() {
+  const char* dev = std::getenv("ET_DEVICES");
+  const std::string path = std::string("/run/lock/etsoc-shire") + (dev && *dev ? dev : "0") + ".lock";
+  const int fd = open(path.c_str(), O_RDONLY | O_CLOEXEC);
+  if (fd < 0) {
+    if (errno == ENOENT) return;
+    throw Busy{};
+  }
+  const bool held = flock(fd, LOCK_EX | LOCK_NB) != 0;
+  close(fd);  // releases the probe's own lock
+  if (held) throw Busy{};
+}
+
 struct Dm {
   std::shared_ptr<dev::IDeviceLayer> dl;
   DeviceManagement* dm = nullptr;
-  Dm() {
+  explicit Dm(bool ifFree = false) {
     void* h = dlopen("libDM.so", RTLD_LAZY);
     if (!h) throw std::runtime_error(std::string("dlopen libDM.so: ") + dlerror());
     using getDM_t = DeviceManagement& (*)(dev::IDeviceLayer*);
     auto get = reinterpret_cast<getDM_t>(dlsym(h, "getInstance"));
     if (!get) throw std::runtime_error("no getInstance in libDM.so");
+    if (ifFree) probeCardLock();
     dl = dev::IDeviceLayer::createPcieDeviceLayer(false, true);  // management node only
     dm = &get(dl.get());
   }
@@ -196,7 +223,7 @@ int temp(Dm& d) {
 
 int main(int argc, char** argv) {
   if (argc < 2) {
-    std::fprintf(stderr, "usage: ettelem sample [--seconds T] [--every-ms M] [--reset-ms R] | temp | config | loglevel debug|info"
+    std::fprintf(stderr, "usage: ettelem sample [--seconds T] [--every-ms M] [--reset-ms R] | temp [--if-free] | config | loglevel debug|info"
                          " | sptrace <out.bin>\n");
     return 2;
   }
@@ -206,7 +233,8 @@ int main(int argc, char** argv) {
     std::signal(SIGINT, SIG_IGN);
   }
   try {
-    Dm d;
+    const bool ifFree = cmd == "temp" && argc > 2 && !std::strcmp(argv[2], "--if-free");
+    Dm d(ifFree);
     if (cmd == "sample") {
       double seconds = 10;
       int everyMs = 100, resetMs = 0;
@@ -237,6 +265,9 @@ int main(int argc, char** argv) {
       std::printf("sptrace: rc %d, %zu bytes\n", rc, buf.size());
       return rc;
     }
+  } catch (const Busy&) {
+    std::printf("{\"t_ms\":%lld,\"busy\":true}\n", epochMs());  // someone holds the card's lock: the node was not opened
+    return 3;
   } catch (const std::exception& e) {
     std::fprintf(stderr, "FAIL: %s\n", e.what());
     return 1;
