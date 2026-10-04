@@ -255,3 +255,7 @@ systemctl daemon-reload && systemctl enable --now et-opens && sleep 5 && tail -3
 
 Tested here with a stand-in for bpftrace (the parsing, the monitor's per-minute lines, the file modes); the bpftrace
 program itself needs root to check, hence the first command.
+
+Installed on aifoundry1 on 4 Oct 2026 at 13:41 PDT, after the probe check (it named only the monitor's reads, one a
+second per card); its first lines were the monitor's per-minute counts for both cards. Not yet on aifoundry2, nor on
+aifoundry3 (its admin first).
