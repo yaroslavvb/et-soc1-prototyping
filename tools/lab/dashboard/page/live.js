@@ -93,7 +93,7 @@
     keys.forEach(function (k) {
       var t = (CARDS[k] || {}).telemetry || {}, n = k === h ? 0 : k.slice(h.length + 2);
       var ser = ((HIST.cards || {})[k] || {}).die_c || [], c = cardOf(v, n), lt = fresh(c), note;
-      if (lt) note = "live · hottest " + lt.die_max_c + " °C · " + lt.board_w.toFixed(0) + " W";
+      if (lt) note = "live · peak since card start/stats reset " + lt.die_max_c + " °C · " + lt.board_w.toFixed(0) + " W";
       else if (c && c.temp && c.temp.at) {
         t = { die_c: c.temp.die_c, at_ms: c.temp.at };
         note = "read " + ago(c.temp.at) + " ago" + (c.ok === false ? " (link down)" : c.held ? " (card in use)" : "");

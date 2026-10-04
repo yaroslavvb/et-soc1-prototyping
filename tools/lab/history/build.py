@@ -7,8 +7,9 @@
 <records dir> holds one subdirectory per host (aifoundry1/, ...) with that host's .jsonl files (update.sh gathers them
 with rsync). The page carries three views per host, each a fixed grid of buckets ending now:
   hour  5 s buckets (720)     day  1 min buckets (1440)     week  10 min buckets (1008)
-Each bucket holds the means of CPU %, memory %, the host temperatures, and per card the mean and hottest die
-temperature and the mean board power; null where nothing was recorded (a machine down, a card held or off the bus).
+Each bucket holds the means of CPU %, memory %, the host temperatures, and per card the mean die
+temperature and the highest of the firmware's peak since the card started or its stats were last reset
+(not a current hottest sensor; C30) and the mean board power; null where nothing was recorded (a machine down, a card held or off the bus).
 --dash adds the dashboard's 30-minute card samples (data.json "history", 10-minute steps over 48 h) as dots, for the
 time before the collectors kept records.
 """

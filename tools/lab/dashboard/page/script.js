@@ -727,7 +727,7 @@
     const g = E('div', 'gauge' + (stale || old ? ' stale-data' : ''));
     const read = E('div', 'g-read');
     if (r && isNum(r.die)) {
-      read.append(E('span', null, E('b', null, `${n0(r.die)} °C`), ' die', isNum(r.dieMax) ? ` (hottest sensor ${n0(r.dieMax)})` : ''),
+      read.append(E('span', null, E('b', null, `${n0(r.die)} °C`), ' die', isNum(r.dieMax) ? ` (peak ${n0(r.dieMax)} since the card started or its stats were reset; the firmware gives no current hottest sensor)` : ''),
         E('span', null, SRC[r.source] || r.source || 'reading', ', ', agoSpan(r.at), old ? ' (old)' : ''));
     } else read.append(E('span', null, E('b', null, ELL), ' die'), E('span', null, c.excluded ? 'never read: the card is not touched' : 'no reading in the last 7 days'));
     const tr = E('div', 'g-track');
@@ -823,7 +823,7 @@
       cu.logged ? ['Last used', lastIv ? [lastIv.open ? 'now' : lclock(lastIv.end_ms), ' by ', lastIv.user, ` (${LZONE || 'lab time'})`] : `not in the last ${U.hours || 24} h`, 'et-usage']
         : ['Last used', T(act, 'last_used_at') ? [clock(T(act, 'last_used_at')), act.last_used_by ? ' by ' + act.last_used_by : ''] : '', 'collector'],
       ['Card-use log', cu.logged ? `${usageSentence(id, true)}` : notLoggedText(hostOfCard(id)), 'et-usage'],
-      ['Telemetry', r ? [isNum(r.die) ? `die ${n0(r.die)} °C` : '', isNum(r.dieMax) ? ` (max ${n0(r.dieMax)})` : '', isNum(r.pmic) ? `, PMIC ${n0(r.pmic)} °C` : '',
+      ['Telemetry', r ? [isNum(r.die) ? `die ${n0(r.die)} °C` : '', isNum(r.dieMax) ? ` (peak since card start or stats reset ${n0(r.dieMax)})` : '', isNum(r.pmic) ? `, PMIC ${n0(r.pmic)} °C` : '',
         isNum(r.w) ? `, ${n1(r.w)} W` : '', isNum(r.mhz) ? `, minion ${n0(r.mhz)} MHz` : '', isNum(r.noc) ? `, NoC ${n0(r.noc)}` : '', isNum(r.ddr) ? `, DDR ${n0(r.ddr)}` : '',
         ' at ', clock(r.at)] : 'none', r ? (SRC[r.source] || r.source) : ''],
       ['From', r && r.from ? E('code', null, r.from) : '', ''],

@@ -56,7 +56,7 @@ svg.plot{width:100%;height:190px;display:block;overflow:visible;touch-action:pan
 <p class="note">Each machine's collector (<code>tools/lab/live/live-collector.py</code>) writes a record every 5 s to its own disk, so a
 machine that reboots loses only the time it is down; this page is rebuilt from those records every 5 minutes, and the hour view
 also takes new readings from the live streams while it is open. Hour: 5-second points; day: 1-minute means; week: 10-minute means
-(the card's "hottest" line is the hottest reading in each bucket). A card's die temperature is read once a second only while
+(the card's dashed "peak" line is the highest value in each bucket of the firmware's peak since the card started or its stats were last reset, not a current hottest sensor: the firmware reports only the mean of its 34 shire sensors and that peak; see Requests for Roman C30 and CF14). A card's die temperature is read once a second only while
 nobody holds a card on that machine: <span style="color:var(--am)">amber</span> bands mark a card in use (no reading), <span style="color:var(--rd)">red</span> bands a card off the
 bus, grey bands a machine that recorded nothing. Dots are the dashboard's 30-minute samples from before the records began.
 Dashed red line: 95 °C.</p>
@@ -77,7 +77,7 @@ const D = __DATA__;
     Object.keys(b.cards).forEach((n, i) => {
       const c = b.cards[n], col = CC[i % CC.length];
       S.temps.push({label: "card " + n + " die", col, ys: c.die, glow: 1});
-      S.temps.push({label: "card " + n + " hottest", col, ys: c.max, dash: 1});
+      S.temps.push({label: "card " + n + " peak since start", col, ys: c.max, dash: 1});
       S.power.push({label: "card " + n + " board", col, ys: c.w, glow: 1});
     });
     S.load.push({label: "CPU", col: "#22d3ee", ys: b.cpu, glow: 1}, {label: "memory", col: "#c084fc", ys: b.mem});
