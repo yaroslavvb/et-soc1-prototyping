@@ -471,6 +471,10 @@ for d in deploys:
 # The histories are cached in work/versions/ ($TIMELINE_VERSIONS_FETCH=0 reuses the cache without the network).
 VERS_DIR = os.path.join(TL, 'work', 'versions')
 VERS_FROM = datetime.datetime(2026, 9, 27, 12, 0, tzinfo=PDT)
+# pages a cron job on aifoundry2 republishes on its own (the dashboard every 10 minutes since 30 Sep, the history page every
+# 5 minutes since 2 Oct): their version histories are mostly the job's, and `spacesheep versions` lists only the latest
+# ones, so only a session's own deploys of them (from its transcript) are counted
+AUTO_PAGES = {'aifoundry-lab-dashboard', 'aifoundry-lab-history'}
 VERS_TO = (datetime.datetime.fromisoformat(os.environ['TIMELINE_CUTOFF'].replace('Z', '+00:00'))
            if os.environ.get('TIMELINE_CUTOFF') else datetime.datetime.now(datetime.timezone.utc))
 
@@ -514,6 +518,8 @@ for u in sorted(mirror):
     have += [t for nu, t in NEIGHBOR_DEPLOYS if nu == u]
     vers_neighbor += sum(1 for t, _, _ in vs if VERS_FROM <= t <= VERS_TO and any(nu == u and abs((t - nt).total_seconds()) <= 180
                                                                               for nu, nt in NEIGHBOR_DEPLOYS))
+    if (p.get('slug') or p['key']) in AUTO_PAGES:   # republished by its own cron job: those versions are not a session's
+        continue
     for i, (t, vid, msg) in enumerate(vs):
         if not (VERS_FROM <= t <= VERS_TO):
             continue

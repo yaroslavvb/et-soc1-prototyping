@@ -73,7 +73,7 @@ before `</body>`. Private pages are listed but not mirrored.
 
 | Page | Space | Visibility | Repo file | Deploy |
 |---|---|---|---|---|
-| [A week with the ET-SoC-1: the session timeline](https://spacesheep.dev/@yaroslavvb/et-soc1-session-timeline) (27 Sep, refreshed 1 Oct: the session from 19 September to 1 October on one time axis that scrolls and pinches on phones, the owner's requests as summaries, the agents, a neighbor session's lane with the link-retrain hang and the power cycle, the four cards and the hosts down, and every deploy and commit; built by `tools/timeline/`, whose README has the pipeline) | `b0669cbd-6132-4ac6-b35a-9b928a2ef926` | public | `docs/reports/2026-09-27-session-timeline.html` | file |
+| [Two weeks with the ET-SoC-1: the session timeline](https://spacesheep.dev/@yaroslavvb/et-soc1-session-timeline) (27 Sep; refreshed 1 Oct, and on 5 Oct to 19 Sep–5 Oct: the main session and every other Claude session on the lab's machine, on both of the owner's Claude accounts, in lanes of their own; the owner's messages as summaries and, on hover and in a reader, their own words, with access details, addresses, other people's names and private links removed and marked; aifoundry2's card off the bus and the hosts down; every deploy and commit; built by `tools/timeline/`, whose README has the pipeline) | `b0669cbd-6132-4ac6-b35a-9b928a2ef926` | public | `docs/reports/2026-09-27-session-timeline.html` | file |
 
 ### Public, not mirrored
 

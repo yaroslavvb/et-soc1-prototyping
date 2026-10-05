@@ -126,13 +126,15 @@ msgs = []
 for m in H['messages']:
     msgs.append([rel(m['ts']), round(m['active_s'], 1), round(m['active_s_paste_adjusted'], 1), CATS.index(m['category']),
                  KINDS.index(m['kind']), m['summary'], m['request_id'], m['chars'], round(m['read_s'], 1),
-                 round(m['type_s'], 1), 1 if m['likely_paste'] else 0])
+                 round(m['type_s'], 1), 1 if m['likely_paste'] else 0, m.get('text'), m.get('removed') or [],
+                 m.get('images') or 0])
 sessions = [[rel(s['start_est']), rel(s['end']), s['n'], round(s['active_s'], 1), round(s['active_s_paste_adjusted'], 1)]
             for s in H['engagement_sessions']]
 ht = H['totals']
 out['human'] = {
     'cats': CATS, 'kinds': KINDS,
-    'cols': ['t', 'active_s', 'active_paste_s', 'cat', 'kind', 'summary', 'request', 'chars', 'read_s', 'type_s', 'paste'],
+    'cols': ['t', 'active_s', 'active_paste_s', 'cat', 'kind', 'summary', 'request', 'chars', 'read_s', 'type_s', 'paste',
+             'text', 'removed', 'images'],
     'msgs': msgs, 'sessions': sessions,
     'totals': {'n': H['counts']['inputs'], 'chars': ht['chars'], 'active_h': round(ht['active_s'] / 3600, 2),
                'active_paste_h': round(ht['active_s_paste_adjusted'] / 3600, 2),
@@ -486,13 +488,18 @@ out['artifacts'] = {
 
 # ------------------------------------------------------------------ the neighbor sessions and the hosts down
 out['neighbors'] = {
-    'cols': {'msgs': ['t', 'category', 'kind', 'summary'], 'events': ['t', 'e', 'kind', 'title', 'text'],
+    'cols': {'msgs': ['t', 'category', 'kind', 'summary', 'text', 'removed', 'lost', 'session', 'chars'],
+             'events': ['t', 'e', 'kind', 'title', 'text'],
              'hosts': ['cards', 's', 'e', 'kind', 'title', 'text']},
-    'sessions': [{'name': n['name'], 'title': n['title'], 's': rel(n['first']), 'e': rel(n['last']),
+    'sessions': [{'id': n['id'], 'n': len(n.get('ids') or [n['id']]), 'lane': n.get('lane') or 'neighbor', 'name': n['name'],
+                  'title': n['title'],
+                  's': rel(n['first']), 'e': rel(n['last']),
                   'busy': [[rel(a), rel(b)] for a, b in n['busy']], 'sub': [[rel(a), rel(b)] for a, b in n['sub']],
                   'busy_h': n['busy_h'], 'agent_h': n['agent_h'], 'agents': n['agents'], 'workflow_runs': n['workflow_runs'],
                   'tokens': n['tokens']['total'], 'deploys': n['deploys'], 'commits': n['commits'],
-                  'msgs': [[rel(m['ts']), CATS.index(m['category']), KINDS.index(m['kind']), m['summary']] for m in n['messages']],
+                  'msgs': [[rel(m['ts']), CATS.index(m['category']), KINDS.index(m['kind']), m['summary'], m.get('text'),
+                            m.get('removed') or [], 1 if m.get('lost') else 0, m.get('session') or n['id'], m.get('chars', 0)]
+                           for m in n['messages']],
                   'events': [[rel(e['t']), rel(e['e'] or e['t']), e['kind'], e['title'], e['text']] for e in n['events']]}
                  for n in N['sessions']],
     'hosts': [[[CARD_IDS.index(c) for c in h['cards']], rel(h['s']), rel(h['e']), h['kind'], h['title'], h['text']] for h in N['hosts']],
@@ -1187,6 +1194,89 @@ if 'test' in NBEV and 'power' in NBEV:
                 + (f', published the incident page at {hm_(nb_page[0])}' if nb_page else '')
                 + (f' and committed the lesson at {hm_(nb_commit[0])}: never retrain or re-speed a card’s link on a running host.'
                    if nb_commit else '.')))
+# 1-5 October (the refresh of 5 Oct): the chip diagram's loop of scales; aifoundry2's card off the bus; the lab day of
+# 2 Oct (the maintenance session); 4 Oct, the audit session and the Antigravity session; the checkpoint and this refresh
+TO = lambda d, hm: T(30 + d, hm)   # a day of October
+nb_by = {n['id']: n for n in out['neighbors']['sessions']}
+def nb_ev(sid, rx):
+    return next((e for e in (nb_by.get(sid) or {}).get('events', []) if re.search(rx, e[3])), None)
+def nb_msg(sid, rx):
+    return next((m[0] for m in (nb_by.get(sid) or {}).get('msgs', []) if re.search(rx, m[3])), None)
+q88 = msg_at(r'^Chip diagram and memory levels: one consistent zoom loop')
+l6 = commit_at('Ladder (6)')
+if q88 and l6:
+    lk, sp, lp, ghp = (commit_at('Links (1 Oct)'), commit_at('Speed (1 Oct)'), commit_at('Loop (1 Oct, evening)'),
+                       commit_at('GitHub Pages mirror of the two interactive pages'))
+    cd_dep = page_at('et-soc1-chip-diagram', l6 - 900)
+    HL.append(dict(
+        t=cd_dep or l6, a=q88 - 900, b=max(cd_dep or 0, l6) + 900, track='artifacts',
+        title='The chip diagram’s loop of scales (Q88–Q94)',
+        caption=f'From {hm_(q88)} on 1 Oct the owner asks the chip diagram and the memory levels to share one ladder of '
+                'scales: a way back from every view, every path down to transistors and atoms, a hidden way out past the rack, '
+                'and zooming out past the universe looping back to an atom. Built and checked in six steps through the day'
+                + (f': an address for every flow, slide and scale at {hm_(lk)}' if lk else '')
+                + (f', a 1×/2× replay at {hm_(sp)}' if sp else '')
+                + (f', the one-way loop from the Planck length at {hm_(lp)}' if lp else '')
+                + (f'; mirrored to GitHub Pages at {hm_(ghp)}' if ghp else '')
+                + f'; the last check at {hm_(l6)} on 2 Oct.'))
+off1 = next((h for h in out['neighbors']['hosts'] if h[3] == 'hang' and 'off the bus' in h[4] and h[1] < TO(2, '06:00')), None)
+oos = next((h for h in out['neighbors']['hosts'] if 'out of service' in h[4]), None)
+if off1 and oos:
+    HL.append(dict(
+        t=off1[1], a=off1[1] - 1800, b=oos[1] + 1800, track='cards', title='aifoundry2’s card falls off the bus',
+        caption=f'At {hm_(off1[1])} on 1 Oct aifoundry2’s card stops answering on PCIe while idle: its cooling follows the '
+                'host’s fans, which slow down when the host is idle. A full-reset reboot at 06:45 on 2 Oct brings it back, but '
+                'idle it runs away again (126 °C at 07:42); a plain reboot at 10:47 leaves it off, a full reset at 10:53 brings '
+                f'it back, and at {hm_(oos[1])} it falls off for good after heating from 45 °C to a 138 °C mean and 134 W. Out '
+                'of service since: the air that reaches it is too warm, a fix of the fan settings on site.'))
+live = nb_ev('97db24ee', r'^The live dashboard')
+lab2 = page_at('aifoundry-lab-2-october') or (nb_ev('97db24ee', r'^Published: AI Foundry lab, 2 October') or [None])[0]
+c0 = nb_ev('97db24ee', r'card 0 back in service')
+if live and c0:
+    HL.append(dict(
+        t=lab2 or c0[0], a=live[0] - 900, b=max(lab2 or 0, c0[0]) + 1800, track='artifacts',
+        title='The lab day: a live dashboard, card 0 back, new users',
+        caption=f'On 2 Oct the maintenance session (a lane of its own) makes the lab dashboard live at {hm_(live[0])}: each '
+                'machine streams a reading every second, each card’s temperature included, and a history page keeps hour, '
+                f'day and week graphs. aifoundry1’s card 0 is back in service at {hm_(c0[0])} after its fan was replaced (49 °C '
+                'idle, 65 °C before). The new-user instructions go through five editions for three new lab users that '
+                'afternoon, card use is shown live, each second'
+                + (f', and the day’s report goes out at {hm_(lab2)}.' if lab2 else '.')))
+race = nb_ev('93af8ad7', r'driver race filed upstream')
+rep_ev = nb_ev('93af8ad7', r'report for the lab lead re-checked')
+if race and rep_ev:
+    HL.append(dict(
+        t=race[0], a=rep_ev[0] - 5400, b=race[0] + 900, track='artifacts',
+        title='The lab lead’s report checked; the driver race filed upstream',
+        caption=f'On 4 Oct a session on the owner’s second Claude account goes through the report for the lab lead item by '
+                f'item: what a 2 Oct rebuild had dropped comes back at {hm_(rep_ev[0])}, the live monitor reads the cards more '
+                'gently, a card-open logger goes onto aifoundry1, and card 0 is counted again once fixed. At '
+                f'{hm_(race[0])} the driver race of 30 Sep is filed publicly as issue 136 of aifoundry-org/et-platform: the chips '
+                'are end-of-life, so nothing needs holding back. It also prepares the two-account Claude setup for '
+                'aifoundry1 and aifoundry3.'))
+ag = nb_ev('c42b457d', r'^Antigravity on aifoundry2')
+turbo = nb_ev('c42b457d', r'^Turbo mode')
+ag_ask = nb_msg('c42b457d', r'^Install the Antigravity CLI')
+if ag and turbo and ag_ask:
+    HL.append(dict(
+        t=ag[0], a=ag_ask - 600, b=turbo[0] + 900, track='artifacts', title='Antigravity on the lab machines',
+        caption=f'At {hm_(ag_ask)} on 4 Oct the owner asks for Google’s Antigravity CLI on the lab machines, reachable from '
+                f'its web dashboard. By {hm_(ag[0])} it runs on aifoundry2 with its remote-control daemon, one Google account '
+                'per machine, kept up by a watchdog. The dashboard cannot switch the agents to turbo mode; at '
+                f'{hm_(turbo[0])} the session finds the two settings files that do, from the program’s own message '
+                'definitions, and writes a tool that sets both and a script for aifoundry1 and aifoundry3.'))
+ck = nb_ev('1f1f61cb', r'^The agent setup checkpointed')
+ck_ask = nb_msg('1f1f61cb', r'^Checkpoint the machine')
+rf_ask = nb_msg('1f1f61cb', r'^Refresh this timeline')
+if ck and ck_ask:
+    HL.append(dict(
+        t=rf_ask or ck[0], a=(nb_msg('1f1f61cb', r'^Asks why two app settings') or ck_ask) - 600,
+        b=(rf_ask or ck[0]) + 900, track='human', title='The setup checkpointed, and this page',
+        caption=f'At {hm_(ck_ask)} on 4 Oct the owner asks for the machine’s whole agent setup, two Claude accounts with '
+                'remote control and the Antigravity daemon, with its lessons, to be kept in GitHub, so that the machine can be '
+                f'rebuilt if it is wiped: a private repository with a rebuild guide, committed at {hm_(ck[0])}.'
+                + (f' At {hm_(rf_ask)} on 5 Oct the owner asks for this refresh: every session of the two weeks, on both '
+                   'accounts, and the owner’s own words behind every summary.' if rf_ask else '')))
 HL.sort(key=lambda h: h['t'])
 # the published pages each highlight produced or changed (slug, then an optional #anchor); only pages the page list shows
 # as public: the report for the lab lead and the pages outside the set are never linked
@@ -1236,6 +1326,10 @@ HL_LINKS = {
     'A departed user’s checkpoints deleted (Q87)': ['aifoundry-lab-start'],
     'Memory levels: the level tabs zoom (Q82)': ['et-soc1-memory-levels'],
     'The chip diagram’s powers of ten (Q85)': ['et-soc1-chip-diagram'],
+    'The chip diagram’s loop of scales (Q88–Q94)': ['et-soc1-chip-diagram', 'et-soc1-memory-levels'],
+    'aifoundry2’s card falls off the bus': ['aifoundry-lab-2-october'],
+    'The lab day: a live dashboard, card 0 back, new users': ['aifoundry-lab-dashboard', 'aifoundry-lab-history',
+                                                              'aifoundry-lab-2-october', 'aifoundry-lab-start'],
     # the dashboard is linked since it became public (30 Sep, the owner's word; MIRROR.md lists it public); the report for
     # the lab lead is never linked, so the driver race's highlight has no link
 }

@@ -69,7 +69,17 @@ const TRIGLAB = {human: 'a message from the owner', 'task-notification': 'a back
   'agent-message': 'a message from another agent', 'compact-continuation': 'a continuation after compaction',
   interrupt: 'an interrupt', continuation: 'a continuation', 'watch-loop': 'the end of a loop that watched its own workflows'};
 const CATMARK = ['dot', 'diamond', 'box', 'ring', 'line'];
-const MSG = HU.msgs.map((m, i) => ({i, t: m[0], act: m[1], actp: m[2], cat: m[3], kind: HU.kinds[m[4]], sum: m[5], rid: m[6], chars: m[7], read: m[8], type: m[9], paste: m[10]}));
+const MSG = HU.msgs.map((m, i) => ({i, t: m[0], act: m[1], actp: m[2], cat: m[3], kind: HU.kinds[m[4]], sum: m[5], rid: m[6], chars: m[7], read: m[8], type: m[9], paste: m[10],
+  text: m[11], rm: m[12] || [], img: m[13] || 0}));
+// every owner message, the main session's and the other sessions', in time order: what the prompt reader steps through
+const PROMPTS = MSG.map(m => ({t: m.t, sum: m.sum, text: m.text, rm: m.rm, img: m.img, kind: m.kind, cat: m.cat, rid: m.rid, chars: m.chars,
+  where: 'the main session', lost: false}))
+  .concat(NB ? NB.sessions.flatMap(nb => nb.msgs.map(m => ({t: m[0], sum: m[3], text: m[4], rm: m[5] || [], img: 0, kind: HU.kinds[m[2]], cat: m[1],
+    rid: null, chars: m[8] || 0, where: nb.name, lost: !!m[6], sid: m[7]}))) : [])
+  .sort((a, b) => a.t - b.t);
+PROMPTS.forEach((p, k) => { p.k = k; });
+const PIDX = new Map(PROMPTS.map(p => [p.where + '@' + p.t + '@' + p.sum, p.k]));
+const pidx = (where, t, sum) => PIDX.get(where + '@' + t + '@' + sum);
 const SES = HU.sessions.map((s, i) => ({i, s: s[0], e: s[1], n: s[2], act: s[3], actp: s[4]}));
 const BUSY = MA.busy.map(b => ({s: b[0], e: b[1], trig: MA.triggers[b[2]], tok: b[3], tools: b[4], msgs: b[5], act: b[6], tw: b[7], ow: b[8], twl: b[9]}));
 const STRICT = MA.strict, WATCH = MA.watch;
@@ -108,11 +118,15 @@ const TOT_SESSION = D.meta.snapshot_end - D.meta.session_start;
   setH('l-n', HU.totals.n); setH('l-agents', num(at.agents, 0)); setH('l-wf', at.workflow_runs);
   setH('l-dep', AR.totals.deploys); setH('l-com', AR.commits.filter(c => c[0] >= D.meta.session_start).length);
   setH('l-wall', `${num(TOT_SESSION / 3600, 0)} hours (${num(TOT_SESSION / DAY, 1)} days)`);
-  const nd = Math.round(TOT_SESSION / DAY), words = ['', 'one day', 'two days', 'three days', 'four days', 'five days', 'six days', 'a week',
+  // the main session's own span: its first message to its last work (it stopped on 2 October; the snapshot is later)
+  const mainEnd = Math.max(MSG[MSG.length - 1].t, ...BUSY.map(b => b.e));
+  const nd = Math.round((mainEnd - D.meta.session_start) / DAY), words = ['', 'one day', 'two days', 'three days', 'four days', 'five days', 'six days', 'a week',
     'eight days', 'nine days', 'ten days', 'eleven days', 'twelve days', 'thirteen days', 'two weeks'];
   setH('l-days', words[nd] || `${nd} days`);
-  if (NB) document.querySelector('p.lede').insertAdjacentHTML('beforeend', ` On 30 September a second session on the lab’s machine, <b>the neighbor session</b>, ran the link test that hung ` +
-    `aifoundry1 and then investigated the hang; it has a lane of its own, and a red band marks each host that was down.`);
+  if (NB) document.querySelector('p.lede').insertAdjacentHTML('beforeend', ` The owner also ran <b>other sessions</b> on the lab’s machine, on two Claude accounts: ` +
+    `a maintenance session, which ran the link test that hung aifoundry1 on 30 September and made the dashboard live on 2 October; an audit session and an ` +
+    `Antigravity session on 4 October; and the session that checkpointed the machine’s setup and refreshed this page on 5 October. Each has a lane of its own, ` +
+    `and a red band marks each host or card that was down.`);
   const bc = HU.totals.by_category;
   setH('k-human', `${HU.totals.n} messages`);
   setH('k-human-sub', `${bc.request} requests, ${bc.correction} corrections, ${bc['approval/answer']} approvals or answers, ${bc.question} questions, ${bc.status} status checks ` +
@@ -312,7 +326,7 @@ function gestures(f) {
   });
   const tap = p => {   // a touch that did not move: the mark's details, or a second tap on a flag zooms there
     const n = tipNode(p.target);
-    if (n && n.hasAttribute('data-hl') && f.pinned === n && n._go) { CK.hide(f); n._go(); return; }
+    if (n && (n.hasAttribute('data-hl') || n.hasAttribute('data-go')) && f.pinned === n && n._go) { CK.hide(f); n._go(); return; }
     p.target.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true, cancelable: true, composed: true, pointerType: 'touch',
       isPrimary: true, pointerId: 1e6, clientX: p.cx, clientY: p.cy}));
   };
@@ -396,9 +410,49 @@ function clip(f, id, L, R) {
 const vis = (a, b) => b >= S.v[0] && a <= S.v[1];
 
 /* ---------- tooltips ---------- */
+// the owner's own words, as the page may show them: a removed part is marked (rmFmt); the tooltip shows the start
+const rmFmt = s0 => esc(s0).replace(/\[(removed: [^\]]*|the report for the lab lead)\]/g, '<span class="rm">[$1]</span>');
+const EXC = 360;
+const promptTip = (text, lost, img) => text == null || text === ''
+  ? (lost ? '<div class="tip-prompt lost">Its words are no longer on the machine: the session’s transcript was rewritten on 2 October, and only the summary was kept.</div>' : '')
+  : `<div class="tip-prompt">${rmFmt(text.length > EXC ? text.slice(0, EXC).trimEnd() + ' …' : text)}</div>` +
+    `<span class="tip-more">${img ? `with ${img} image${img > 1 ? 's' : ''} (not shown) · ` : ''}${text.length > EXC ? `${num(text.length - EXC, 0)} more characters · ` : ''}click, tap again or press Enter to read it whole</span>`;
 const msgTip = m => `<b style="font-size:1.06em">${esc(m.sum)}</b><br>${when(m.t)} · ${HU.cats[m.cat]}${m.rid ? ` · request ${m.rid} in the knowledge base` : ''}` +
-  `<br><span style="font-size:.8em;color:var(--muted)">estimated ${dur(m.act)} of reading and typing (reading ${dur(m.read)}, typing ${dur(m.type)}` +
+  promptTip(m.text, false, m.img) +
+  `<span style="display:block;font-size:.8em;color:var(--muted)">estimated ${dur(m.act)} of reading and typing (reading ${dur(m.read)}, typing ${dur(m.type)}` +
   `${m.paste ? `; likely pasted, so ${dur(m.actp)} with typing capped at 3 min` : ''}) · ${num(m.chars, 0)} characters, ${KINDLAB[m.kind] || m.kind}</span>`;
+// a mark whose message the prompt reader opens: a click, a second tap (as on a highlight's flag) or Enter
+function readable(f, g, k) {
+  if (k == null) return;
+  g.setAttribute('data-go', '');
+  g._go = () => { CK.hide(f); openPrompt(k); };
+  g.addEventListener('click', ev => { ev.stopPropagation(); g._go(); });
+  g.style.cursor = 'pointer';
+}
+/* ---------- the prompt reader: one message's own words, whole; ← and → step to the previous and next message ---------- */
+const PV = {k: 0};
+function openPrompt(k) {
+  const d = document.getElementById('pv'); if (!d || k == null || !PROMPTS[k]) return;
+  const p = PROMPTS[k]; PV.k = k;
+  document.getElementById('pv-when').innerHTML = `${when(p.t)} · ${esc(HU.cats[p.cat] || '')} · ${esc(KINDLAB[p.kind] || p.kind || '')}` +
+    `${p.rid ? ` · request ${esc(p.rid)}` : ''} · to ${esc(p.where)}`;
+  document.getElementById('pv-sum').textContent = p.sum;
+  const tx = document.getElementById('pv-text');
+  if (p.text) { tx.innerHTML = rmFmt(p.text); tx.classList.remove('lost'); }
+  else {
+    tx.textContent = p.lost ? 'Its words are no longer on the machine: the session’s transcript was rewritten on 2 October, and only the summary was kept.'
+      : 'No words were recorded for this message.';
+    tx.classList.add('lost');
+  }
+  const note = [p.img ? `${p.img} image${p.img > 1 ? 's' : ''} came with it (not shown).` : '',
+    p.rm.length ? `Removed for this public page: ${p.rm.join(', ')}.` : ''].filter(Boolean).join(' ');
+  const nt = document.getElementById('pv-note'); nt.textContent = note; nt.hidden = !note;
+  document.getElementById('pv-pos').textContent = `${k + 1} of ${PROMPTS.length}`;
+  document.getElementById('pv-prev').disabled = k === 0;
+  document.getElementById('pv-next').disabled = k === PROMPTS.length - 1;
+  if (!d.open) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
+  tx.scrollTop = 0;
+}
 // a label cut to fit a width in pixels (the chart's 12 px text: about 6.6 px a character)
 const trunc = (s0, px) => { const n = Math.floor(px / 6.6); return s0.length <= n ? s0 : s0.slice(0, Math.max(1, n - 1)).trimEnd() + '…'; };
 const busyTip = b => `<b>Main agent busy</b> ${span(b.s, b.e)} (${dur(b.e - b.s)})<br>active (events under 3 min apart) ${dur(b.act)}` +
@@ -551,6 +605,7 @@ function drawMain(f) {
       CK.el('circle', {cx, cy: hy, r: 8, class: 'ck-hit'}, g);
       humanMark(g, m.cat, cx, hy);
       TIP(f, g, () => msgTip(m)); mNodes.push(g);
+      readable(f, g, pidx('the main session', m.t, m.sum));
     }
   }
   // what was asked: when two days or less are in view, each message's summary under the marks, starting at its mark
@@ -569,22 +624,23 @@ function drawMain(f) {
     });
     hair.flush(gL, {stroke: 'var(--axis)', strokeWidth: '1px', fill: 'none'});
   }
-  NAV(f, mNodes); NAV(f, sesNodes);
+  NAV(f, mNodes, {onEnter: n => n._go && n._go()}); NAV(f, sesNodes);
   // the owner's messages to the neighbor session(s), on a row of their own (smaller marks)
   if (NB) {
     const r = rows.humanNb, cy = r.y + 9, gN = CK.el('g', {}, plot), nNodes = [];
-    CK.txt(gut, 2, cy + 4, nar ? '→ nbr' : 'to the neighbor', 'lab');
+    CK.txt(gut, 2, cy + 4, nar ? '→ others' : 'to the others', 'lab');
     if (fast) { const pm = [PB(), PB(), PB(), PB(), PB()]; NB.sessions.forEach(nb => nb.msgs.forEach(m => { if (vis(m[0], m[0])) markPath(pm, m[1], x(m[0]), cy, 0.8); })); flushMarks(pm, gN); }
     else NB.sessions.forEach(nb => nb.msgs.forEach(m => {
       if (!vis(m[0], m[0])) return;
       const g = CK.el('g', {}, gN), cx = x(m[0]);
       CK.el('circle', {cx, cy, r: 7, class: 'ck-hit'}, g);
       sty(humanMark(g, m[1], cx, cy), {transform: `translate(${cx}px, ${cy}px) scale(0.8) translate(${-cx}px, ${-cy}px)`});
-      TIP(f, g, () => `<b style="font-size:1.06em">${esc(m[3])}</b><br>${when(m[0])} · ${HU.cats[m[1]]} · to ${esc(nb.name)}` +
-        `<br><span style="font-size:.8em;color:var(--muted)">${KINDLAB[HU.kinds[m[2]]] || ''}; a summary, as for the main session’s messages; not counted in this page’s totals</span>`);
+      TIP(f, g, () => `<b style="font-size:1.06em">${esc(m[3])}</b><br>${when(m[0])} · ${HU.cats[m[1]]} · to ${esc(nb.name)}` + promptTip(m[4], m[6]) +
+        `<span style="display:block;font-size:.8em;color:var(--muted)">${KINDLAB[HU.kinds[m[2]]] || ''}; not counted in this page’s totals</span>`);
       nNodes.push(g);
+      readable(f, g, pidx(nb.name, m[0], m[3]));
     }));
-    NAV(f, nNodes);
+    NAV(f, nNodes, {onEnter: n => n._go && n._go()});
   }
 
   // AGENTS: the main agent (tint: busy; solid: active; dotted: watching its own workflows, counted idle)
@@ -637,7 +693,7 @@ function drawMain(f) {
   // time (grey), its subagents (the thin bar under it) and its key events (a marker each; red for the host down)
   if (NB) NB.sessions.forEach((nb, k) => {
     const r = rows['nb' + k], gN = CK.el('g', {}, plot), nNodes = [], eNodes = [];
-    CK.txt(gut, 2, r.y + 14, nar ? 'neighbor' : 'neighbor session', 'lab');
+    CK.txt(gut, 2, r.y + 14, nb.lane || 'session', 'lab');
     if (fast) {
       const ps = PB(true), pb = PB(true);
       for (const [a, b] of nb.sub) if (vis(a, b)) ps.rect(X(a), r.y + r.h - 6, Math.max(1, X(b) - X(a)), 3);
@@ -655,7 +711,7 @@ function drawMain(f) {
     NAV(f, nNodes);
     nb.events.forEach(([t, e, kind, title, text]) => {
       if (!vis(t, e > t ? e : t)) return;
-      const g = CK.el('g', {}, plot), cx = x(t), red = kind === 'hang' || kind === 'power';
+      const g = CK.el('g', {}, plot), cx = x(t), red = kind === 'hang' || kind === 'power' || kind === 'reboot' || kind === 'down';
       if (e > t) rect(g, X(t), r.y + r.h - 2, Math.max(1, X(e) - X(t)), 2, red ? 'var(--bad)' : 'var(--ink-2)', {'aria-hidden': 'true'});
       if (red) sty(CK.el('polygon', {points: `${cx - 5},${r.y} ${cx + 5},${r.y} ${cx},${r.y + 8}`}, g), {fill: 'var(--bad)', stroke: 'var(--page)', strokeWidth: '1px'});
       else sty(CK.el('polygon', {points: `${cx},${r.y} ${cx + 4.5},${r.y + 4.5} ${cx},${r.y + 9} ${cx - 4.5},${r.y + 4.5}`}, g), {fill: 'var(--ink)', stroke: 'var(--page)', strokeWidth: '1px'});
@@ -966,7 +1022,7 @@ const presetBtns = [];
   button(z, '+', () => zoomBy(0.5), {aria: 'Zoom in', cls: 'icon'});
   button(z, '◀', () => panBy(-0.4), {aria: 'Earlier', cls: 'icon'});
   button(z, '▶', () => panBy(0.4), {aria: 'Later', cls: 'icon'});
-  presetBtns.push(button(z, 'Whole week', () => animateTo(...FULL), {view: FULL}));
+  presetBtns.push(button(z, 'Whole span', () => animateTo(...FULL), {view: FULL}));
   const d = document.getElementById('tl-days');
   const lab = document.createElement('span'); lab.className = 'tl-lab'; lab.textContent = 'Day:'; d.appendChild(lab);
   DN.forEach((n, i) => presetBtns.push(button(d, n, () => animateTo(...dayView(i)), {view: clampV(...dayView(i)), aria: `Show ${n} ${MOL(i)}`})));
@@ -981,7 +1037,10 @@ const presetBtns = [];
     ['Chip diagram, heat and DV2', [H('Chip diagram and this timeline').a, H('A major pass').a]],
     ['The major pass', [H('A major pass').a, 10 * DAY + 3 * 3600]],
     ['Sparse parity, DV2’s verdicts, a third card', [10 * DAY + 3.5 * 3600, 10 * DAY + 18.5 * 3600]],
-    ['Dashboard, new users and the hang', [11 * DAY + 12.5 * 3600, FULL[1]]],
+    ['Dashboard, new users and the hang', [11 * DAY + 12.5 * 3600, 12 * DAY + 3 * 3600]],
+    ['The chip diagram’s loop, a card off the bus', [12 * DAY + 5 * 3600, 13 * DAY + 3 * 3600]],
+    ['The lab day', [13 * DAY + 6 * 3600, 13 * DAY + 17 * 3600]],
+    ['Audit, Antigravity, the checkpoint', [15 * DAY + 10.5 * 3600, FULL[1]]],
   ].filter(([, v]) => v[0] < FULL[1] && v[1] > FULL[0] && v[1] > v[0]);
   spans.forEach(([t, v]) => presetBtns.push(button(sp, t, () => animateTo(...v), {view: clampV(...v)})));
   const tgs = document.getElementById('tg-sub'), tgp = document.getElementById('tg-pages'), det = document.getElementById('tl-detail'), detLeg = document.getElementById('tl-detail-leg');
@@ -1039,14 +1098,14 @@ legend('leg-human', [
   {key: 's', label: 'status', mark: 'line', color: 'var(--ink)'},
   {key: 'act', label: 'estimated reading + typing', mark: 'box', color: mixT('var(--ink-2)', 55)},
   {key: 'ses', label: 'engagement session', mark: 'box', color: mixT('var(--ink)', 14)}]
-  .concat(NB ? [{key: 'nbm', label: 'the row below: messages to the neighbor session (smaller marks)', mark: 'dot', color: 'var(--ink-2)'}] : []));
+  .concat(NB ? [{key: 'nbm', label: 'the row below: messages to the other sessions (smaller marks)', mark: 'dot', color: 'var(--ink-2)'}] : []));
 legend('leg-agents', [
   {key: 'ma', label: 'main agent active', color: COL.main}, {key: 'mb', label: 'main agent waiting inside a turn', color: mixT('var(--c7)', 32)},
   {key: 'mw', label: 'main agent watching its workflows (idle)', sw: SW.dotted},
   {key: 'wf', label: 'workflow agents busy', color: COL.wf}, {key: 'tl', label: 'Agent-tool agents and forks busy', color: COL.tool},
   {key: 'fl', label: 'agents that failed or ended on an error', color: COL.fail},
   {key: 'lim', label: 'usage limit reached', mark: 'dash', color: 'var(--bad)'}]
-  .concat(NB ? [{key: 'nb', label: 'neighbor session busy', color: 'var(--ref)'}, {key: 'nbs', label: 'its subagents busy', color: mixT('var(--c4)', 75)},
+  .concat(NB ? [{key: 'nb', label: 'another session busy', color: 'var(--ref)'}, {key: 'nbs', label: 'its subagents busy', color: mixT('var(--c4)', 75)},
     {key: 'nbe', label: 'its key events (red: the host down)', mark: 'diamond', color: 'var(--ink)'}] : []));
 legend('tl-detail-leg', [{key: 'w', label: 'workflow agent busy', color: COL.wf}, {key: 't', label: 'Agent-tool agent or fork busy', color: COL.tool},
   {key: 'f', label: 'failed, ended on an error or stopped', color: COL.fail}, {key: 'i', label: 'thin line: running, not busy', mark: 'line', color: 'var(--ink-2)'}]);
@@ -1065,7 +1124,7 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
     `still running then. Card work before the session (on 18 September) is left out. The owner’s bars and sessions are estimates (rule in <a href="#method">§5</a>). ` +
     `Subagent counts are per minute: an agent counts in a minute if any of its busy time falls in it. The lane’s scale follows the agents that did not fail; ` +
     `agents that failed or ended on an error (${PKM.started_in_it} of the ${PK} in the minute the usage limit hit on 20 September started in that minute) are drawn on top, and cut at the top of the lane.` +
-    (NB ? ` The neighbor session’s lanes come from its own transcripts (<a href="#method">§5</a>); its time is not in this page’s totals.` : ''));
+    (NB ? ` The other sessions’ lanes come from their own transcripts (<a href="#method">§5</a>); their time is not in this page’s totals.` : ''));
 })();
 
 /* ---------- highlights list ---------- */
@@ -1090,6 +1149,13 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
   });
 })();
 
+// under a message in §3: the start of its words and a button that opens the reader
+function words(text, lost, k) {
+  if (k == null) return '';
+  if (!text) return lost ? `<div class="ask-words lost">its words are no longer on the machine; only the summary was kept</div>` : '';
+  return `<div class="ask-words"><span class="ask-words-text">${rmFmt(text.length > 400 ? text.slice(0, 400) + ' …' : text)}</span>` +
+    `<button type="button" class="ask-read" data-pk="${k}">read it whole</button></div>`;
+}
 /* ---------- what the owner asked: every message, the request first, the estimates small ---------- */
 (function () {
   const host = document.getElementById('asked-list'); if (!host) return;
@@ -1100,7 +1166,7 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
   host.innerHTML = days.map(([d, ms]) => `<section class="ask-day" data-day="${d}"><h3>${DN[d]} ${MOL(d)} <span class="ask-n">${ms.length} message${ms.length > 1 ? 's' : ''}</span></h3><ol class="ask-list">` +
     ms.map(m => `<li data-cat="${m.cat}"><button type="button" data-t="${m.t}"><svg class="ask-mark" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="var(--ink)">${MARK[m.cat] || MARK[0]}</svg>` +
       `<span class="ask-sum">${esc(m.sum)}</span><span class="ask-meta">${hm(m.t)} · ${esc(HU.cats[m.cat])}${m.rid ? ` · ${esc(m.rid)}` : ''}${m.kind === 'talk' ? ' · from a page’s Talk tab' : ''}` +
-      `<span class="ask-est"> · about ${dur(m.act)} to read and write</span></span></button></li>`).join('') + '</ol></section>').join('');
+      `<span class="ask-est"> · about ${dur(m.act)} to read and write</span></span></button>${words(m.text, false, pidx('the main session', m.t, m.sum))}</li>`).join('') + '</ol></section>').join('');
   host.addEventListener('click', e => {
     const b = e.target.closest('button[data-t]'); if (!b) return;
     const t = +b.dataset.t; animateTo(t - 3 * 3600, t + 3 * 3600);
@@ -1108,10 +1174,14 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
   });
   // the owner's messages to the neighbor session(s): after the list, apart from its totals and its filter
   const hnb = document.getElementById('asked-nb');
-  if (hnb && NB) hnb.innerHTML = NB.sessions.map(nb => `<section class="ask-day ask-nb"><h3>To ${esc(nb.name)}, 30 September ` +
-    `<span class="ask-n">${nb.msgs.length} message${nb.msgs.length === 1 ? '' : 's'}</span></h3><ol class="ask-list">` +
+  if (hnb && NB) hnb.innerHTML = NB.sessions.filter(nb => nb.msgs.length).map(nb => {
+    const ds = [...new Set(nb.msgs.map(m => dayOf(m[0])))].map(d => `${+String(DN[d]).split(' ')[1]} ${MOL(d)}`);
+    return `<section class="ask-day ask-nb"><h3>To ${esc(nb.name)} <span class="ask-n">${nb.msgs.length} message${nb.msgs.length === 1 ? '' : 's'}, ` +
+    `${ds.length > 2 ? ds[0] + ' to ' + ds[ds.length - 1] : ds.join(' and ')}</span></h3><p class="ask-nb-what">${esc(nb.title)}</p><ol class="ask-list">` +
     nb.msgs.map(m => `<li><button type="button" data-t="${m[0]}"><svg class="ask-mark" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="var(--ink-2)">${MARK[m[1]] || MARK[0]}</svg>` +
-      `<span class="ask-sum">${esc(m[3])}</span><span class="ask-meta">${hm(m[0])} · ${esc(HU.cats[m[1]])} · to ${esc(nb.name)}</span></button></li>`).join('') + '</ol></section>').join('');
+      `<span class="ask-sum">${esc(m[3])}</span><span class="ask-meta">${DN[dayOf(m[0])]} ${MO(dayOf(m[0]))} ${hm(m[0])} · ${esc(HU.cats[m[1]])}</span></button>` +
+      `${words(m[4], m[6], pidx(nb.name, m[0], m[3]))}</li>`).join('') + '</ol></section>';
+  }).join('');
   if (hnb) hnb.addEventListener('click', e => {
     const b = e.target.closest('button[data-t]'); if (!b) return;
     const t = +b.dataset.t; animateTo(t - 3 * 3600, t + 3 * 3600);
@@ -1334,7 +1404,9 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
   const items = [
     `<b>The owner.</b> ${ht.n} inputs: ${bk.prompt} messages typed at the prompt or sent from the Remote Control queue, ${bk.midturn} sent while the agent was working, ` +
     `${bk['slash-command']} slash commands, ${bk['question-answer']} answer${bk['question-answer'] === 1 ? '' : 's'} to the agent’s questions, ${bk.interrupt} interrupt and ${bk.talk || 0} messages written on a published page’s Talk tab, which reach the session as notifications. Tool results, other notifications, messages between agents and system text are not counted. ` +
-    `A message’s time is when it was sent, and each is shown as a summary of at most 12 words that describes it rather than quoting it. <b>Estimated active time</b> is reading plus typing. ` +
+    `A message’s time is when it was sent. Each has a summary of at most 12 words, written for this page, and <b>its own words</b>: their start in the mark’s details and in <a href="#asked">§3</a>, all of them in the reader that a click, a second tap or Enter opens. ` +
+    `In the words, what this public page withholds is replaced by a marked note: a sentence about how the lab’s machines are reached (root, ssh, the network, keys or passwords), an address or a path, another person’s name or a place, ` +
+    `a link to a page or a session that is not public, and the agents’ permission mode. A slash command is shown as typed, an answer to the agent’s question with the question. <b>Estimated active time</b> is reading plus typing. ` +
     `Reading is the agent’s latest reply before the message, at 250 words a minute and at most 10 minutes, each reply counted once (none for a Talk message, written on a page). Typing is the message’s length at 200 characters a minute, at least 10 s. ` +
     `The “pasted” variant counts at most 3 minutes of typing for the few messages that were mostly pasted. An <b>engagement session</b> is a run of messages less than 30 minutes apart, from the estimated start of its first message to its last message.`,
     `<b>The main agent.</b> Its events (replies, tool calls, tool results and incoming messages) are merged into one busy interval when they are less than 3 minutes apart. ` +
@@ -1364,21 +1436,49 @@ CK.seg('cards-mode', {label: 'Colour the card intervals by', options: [['card', 
         `): the tool returned no result or could not reach the host, and the page was then created afresh. ` : '') +
     `Commits are the repository’s history on every branch: ${AR.totals.commits} in all, ${inSession} of them after the session began. ` +
     `Two other Claude sessions also committed to the repository, one on 24 September and one on the evening of 26 September (PDT), which also deployed pages. Their deploys are not in these transcripts, so they appear here only through their commits.`,
-    ...(NB ? NB.sessions.map(nb => `<b>The neighbor session.</b> On 30 September the owner started ${esc(nb.title.replace(/^another/, 'a second'))}. ` +
-      `Its lane is drawn from its own transcripts, with the rules above: its main agent is busy while its events are under 3 minutes apart or a tool call is in flight ` +
-      `(${hrs(nb.busy_h, 2)} by the snapshot), and the thin bar under it is when any of its ${nb.agents} subagents was busy (${num(nb.agent_h, 1)} agent-hours in ${nb.workflow_runs} workflow runs). ` +
-      `The owner’s ${nb.msgs.length} messages to it are summaries written for this page, like the main session’s, and are not in its totals. ` +
-      `Its key events come from its transcript, the hosts’ own boot records and the lesson in <code>docs/findings/14-card-behaviour.md</code>: ` +
-      `the link test at 14:41, the hang, the power cycle at about 15:07 (all three hosts down, then back, a red band on each of their cards’ lanes) and the investigation after it; ` +
-      `a deploy of a public page and a commit it made are events too. Its other ${nb.deploys.other} deploys (of pages this page does not name) and its ${num(nb.tokens / 1e6, 0)} million tokens are counted nowhere else on the page, ` +
-      `and its commits are the short ticks marked as the neighbor session’s.`) : []),
+    ...(NB ? [`<b>The other sessions.</b> In these two weeks the owner ran ${NB.sessions.reduce((a, nb) => a + (nb.n || 1), 0)} more Claude Code sessions on the lab’s machine, on two Claude accounts, ` +
+      `each in a lane of its own (the short ones share one): ` +
+      NB.sessions.map(nb => `<b>${esc(nb.name)}</b>, ${esc(nb.title)} (${hrs(nb.busy_h, 2)} busy, ${nb.agents} subagents and ${num(nb.agent_h, 1)} agent-hours, ${num(nb.tokens / 1e6, 0)} million tokens)`).join('; ') + '. ' +
+      `Each lane is drawn from that session’s own transcripts with the rules above: its main agent is busy while its events are under 3 minutes apart or a tool call is in flight, and the thin bar under it is when any of its subagents was busy. ` +
+      `The owner’s messages to them are on the row “to the others”, each with a summary and its words, as for the main session; they, the sessions’ time, deploys and tokens are not in this page’s totals. ` +
+      `Their key events (diamonds; red for a host or card down) come from their transcripts, the hosts’ own boot records and <code>docs/findings/14-card-behaviour.md</code>; a deploy of a public page and a commit are events too, and their commits are the short ticks marked as theirs. ` +
+      `The maintenance session’s transcript was rewritten when it resumed on 2 October, so its part of 30 September (the link test at 14:41, the hang, the power cycle at about 15:07 and the investigation after it) ` +
+      `comes from the previous snapshot’s extract: its messages of that day keep their summaries, but their words are no longer on the machine.`] : []),
     `<b>Tokens.</b> Every assistant reply in a transcript carries the usage fields the API returned with it: uncached input, cache writes, cache reads and output, which includes thinking. ` +
     `A reply streamed over several lines is counted once, and a reply that a fork copied from its parent counts only for the parent. Days are PDT, by the reply’s first line.`,
-    `<b>Privacy.</b> This page is public. It shows the owner’s messages only as short summaries in its own words. It names no other person, except two published authors whose work the public reports cite: ` +
+    `<b>Privacy.</b> This page is public. It shows the owner’s messages as summaries in its own words and as the owner wrote them, with the parts listed under “The owner” removed and each removal marked. It names no other person, except two published authors whose work the public reports cite: ` +
     `in the title of The Horace experiment, named after the author of the blog post it reproduces, and in the labels and commit subjects of the heat-per-mm check of a wire-energy figure (Q63). ` +
     `It shows no credentials or access paths, and does not say which account can do what on the lab machines. ` +
     `One report written for the lab lead appears only as “a report for the lab lead”, without its content or link. The pages outside the report set share one lane.` +
-    (NB ? ' The neighbor session’s workflows and agents are not named (they served that report and fixes to the machines), and its messages appear only as summaries.' : ''),
+    (NB ? ' The other sessions’ workflows and agents are not named (the maintenance session’s served that report and fixes to the machines).' : ''),
   ];
   document.getElementById('method-list').innerHTML = items.map(x => `<li>${x}</li>`).join('');
+})();
+
+/* ---------- the prompt reader's buttons and keys ---------- */
+(function () {
+  const d = document.getElementById('pv'); if (!d) return;
+  const on = (id, fn) => { const b = document.getElementById(id); if (b) b.addEventListener('click', fn); };
+  const close = () => { if (d.close) d.close(); else d.removeAttribute('open'); };
+  on('pv-close', close);
+  on('pv-prev', () => openPrompt(Math.max(0, PV.k - 1)));
+  on('pv-next', () => openPrompt(Math.min(PROMPTS.length - 1, PV.k + 1)));
+  on('pv-show', () => {
+    const t = PROMPTS[PV.k].t; close(); animateTo(t - 3 * 3600, t + 3 * 3600);
+    document.getElementById('timeline').scrollIntoView({block: 'start', behavior: CK.reduced ? 'auto' : 'smooth'});
+  });
+  // a click on the backdrop closes it, if it also began there: the click that a phone sends after the tap that opened the
+  // reader lands on the backdrop too, and must not close it
+  let downOnBackdrop = false;
+  d.addEventListener('pointerdown', ev => { downOnBackdrop = ev.target === d; });
+  d.addEventListener('click', ev => { if (ev.target === d && downOnBackdrop) close(); downOnBackdrop = false; });
+  d.addEventListener('keydown', ev => {
+    if (ev.key === 'ArrowLeft' && PV.k > 0) { ev.preventDefault(); openPrompt(PV.k - 1); }
+    else if (ev.key === 'ArrowRight' && PV.k < PROMPTS.length - 1) { ev.preventDefault(); openPrompt(PV.k + 1); }
+  });
+  // §3's lists: a message's "words" button opens it here too
+  document.addEventListener('click', ev => {
+    const b = ev.target.closest('button[data-pk]'); if (!b) return;
+    ev.stopPropagation(); openPrompt(+b.dataset.pk);
+  });
 })();

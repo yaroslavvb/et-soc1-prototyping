@@ -81,6 +81,38 @@ details.human-time p,details.human-time li{font-size:.8rem}
  .tl-legends>.tl-track{margin-top:4px}
  .hl-list{grid-template-columns:1fr}
 }
+/* the owner's own words: their start in a mark's details and under each message in §3, all of them in the reader */
+#tl .ck-tip,#tl-detail .ck-tip{max-width:min(380px,calc(100% - 8px))}
+.ck-tip .tip-prompt{white-space:pre-wrap;overflow-wrap:anywhere;max-height:12.5em;overflow:hidden;margin:5px 0 3px;padding:4px 0 4px 8px;
+ border-left:2px solid var(--axis);color:var(--ink);font-size:.95em;line-height:1.4}
+.ck-tip .tip-prompt.lost{color:var(--muted);font-style:italic;white-space:normal}
+.ck-tip .tip-more{display:block;font-size:.78em;color:var(--ink-2);margin-bottom:2px}
+.rm{color:var(--muted);font-style:italic;background:color-mix(in srgb,var(--ink) 6%,transparent);border-radius:3px;padding:0 2px}
+.ask-list .ask-words{margin:-2px 4px 7px 30px;font-size:.84rem;line-height:1.4;color:var(--ink-2)}
+.ask-list .ask-words-text{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line;overflow-wrap:anywhere}
+.ask-list .ask-words.lost{font-style:italic;color:var(--muted)}
+.ask-list button.ask-read{all:unset;cursor:pointer;color:var(--c1);font-size:.8rem;text-decoration:underline;text-underline-offset:2px;padding:2px 0;display:inline-block}
+.ask-list button.ask-read:focus-visible{outline:2px solid var(--c1);outline-offset:2px;border-radius:3px}
+.ask-nb-what{font-size:.82rem;color:var(--ink-2);margin:0 0 6px;max-width:880px}
+dialog#pv{width:min(760px,calc(100vw - 24px));max-height:min(86vh,900px);padding:0;border:1px solid var(--border,var(--grid));border-radius:12px;
+ background:var(--surface);color:var(--ink);box-shadow:0 12px 40px rgba(0,0,0,.25)}
+dialog#pv::backdrop{background:rgba(0,0,0,.35)}
+dialog#pv[open]{display:flex;flex-direction:column}
+#pv .pv-head{display:flex;align-items:flex-start;gap:10px;padding:14px 16px 6px}
+#pv .pv-head>div{flex:1 1 auto;min-width:0}
+#pv .pv-when{font-size:.8rem;color:var(--ink-2)}
+#pv h3{margin:4px 0 0;font-size:1.05rem;line-height:1.35}
+#pv .pv-x{all:unset;cursor:pointer;font-size:1.2rem;line-height:1;padding:4px 8px;border-radius:6px;color:var(--ink-2)}
+#pv .pv-x:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)}
+#pv .pv-x:focus-visible{outline:2px solid var(--c1)}
+#pv .pv-text{flex:1 1 auto;overflow:auto;margin:6px 16px;padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:.92rem;
+ line-height:1.5;background:color-mix(in srgb,var(--ink) 4%,transparent);border-radius:8px}
+#pv .pv-text.lost{color:var(--muted);font-style:italic}
+#pv .pv-note{margin:0 16px;font-size:.78rem;color:var(--ink-2)}
+#pv .pv-nav{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 16px 14px}
+#pv .pv-nav button{min-height:32px}
+#pv #pv-pos{font-size:.8rem;color:var(--ink-2);margin:0 4px}
+#pv #pv-show{margin-left:auto}
 </style>
 <h1>The session timeline</h1>
 <p class="byline"><span id="l-range">19–30 September 2026</span>, all times Pacific (PDT) · built from the session’s transcripts, the lab machines’ queue logs and the repository · data and tools in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
@@ -90,15 +122,18 @@ Saturday 19 September</b> and this snapshot ends at <b id="l-end"></b>. Four thi
 puts them on one time axis. <b>The owner</b> sent <b id="l-n"></b> messages. <b>The agents</b> were the main agent and
 <b id="l-agents"></b> subagents, most of them started by <b id="l-wf"></b> workflow runs. <b>The cards</b> were four ET-SoC-1 cards in three lab
 machines. <b>The artifacts</b> were <b id="l-dep"></b> deploys of published pages and <b id="l-com"></b> commits to the repository.</p>
-<p class="small">The owner’s messages appear only as summaries of at most 12 words, never their text. One report
-for the lab lead appears without its name, content or link.</p>
-<nav class="toc-line" aria-label="Contents"><b>Contents:</b> <ol id="toclist"><li><a href="#timeline">1. The week on one time axis</a></li><li><a href="#highlights">2. Highlights</a></li><li><a href="#asked">3. What the owner asked</a></li><li><a href="#totals">4. The totals</a></li><li><a href="#method">5. How it was counted</a></li></ol></nav>
+<p class="small">Each of the owner’s messages has a summary of at most 12 words, and its own words: hover over its mark,
+or tap it, for their start; click it, tap it again or press Enter to read it whole. Where a message told how the lab’s
+machines are reached, gave an address, named another person or linked a page that is not public, that part is replaced
+by a marked note. One report for the lab lead appears without its name, content or link.</p>
+<nav class="toc-line" aria-label="Contents"><b>Contents:</b> <ol id="toclist"><li><a href="#timeline">1. Two weeks on one time axis</a></li><li><a href="#highlights">2. Highlights</a></li><li><a href="#asked">3. What the owner asked</a></li><li><a href="#totals">4. The totals</a></li><li><a href="#method">5. How it was counted</a></li></ol></nav>
 
-<h2 id="timeline">1. The week on one time axis</h2>
+<h2 id="timeline">1. Two weeks on one time axis</h2>
 <p class="small"><b>On a phone:</b> swipe sideways to move along the time axis (it glides on when you let go),
 pinch to zoom, and swipe up or down to scroll the page. <b>With a mouse or trackpad:</b> drag or swipe sideways to move,
 <b>Ctrl or ⌘ with the wheel</b> or a trackpad pinch to zoom where the pointer is, and Shift with the wheel to move. The
-buttons zoom and move too. Tap, hover or tab to a mark for its details; the numbered flags are the highlights of
+buttons zoom and move too. Tap, hover or tab to a mark for its details; on a message of the owner’s, click, tap again or
+press Enter to read its words; the numbered flags are the highlights of
 <a href="#highlights">§2</a>: tap a flag to read it and tap it again, or click it, to zoom there. On the time axis,
 ← → move, + − zoom and 0 shows it all.</p>
 <div class="tl-wrap">
@@ -127,14 +162,15 @@ buttons zoom and move too. Tap, hover or tab to a mark for its details; the numb
 </div>
 
 <h2 id="highlights">2. Highlights</h2>
-<p class="small">The week’s turning points across all four tracks, in order. Click one to zoom the timeline there.</p>
+<p class="small">The turning points across all four tracks, in order. Click one to zoom the timeline there.</p>
 <ol class="hl-list" id="hl-list"></ol>
 
 <h2 id="asked">3. What the owner asked</h2>
-<p class="small">Every message of the session, in order: what was asked, as a summary of at most 12 words that describes the
-message without quoting it. The time, the kind of message and its request number in the knowledge base are small labels;
-the estimate of the time spent reading and writing it is smaller still. Click a message to see it on the timeline. The
-owner’s messages to the neighbor session follow the list, apart from its totals.</p>
+<p class="small">Every message of the main session, in order: what was asked, as a summary of at most 12 words, and under it
+the start of the message’s own words; “read it whole” opens them all, and ← → step through every message. The time, the kind
+of message and its request number in the knowledge base are small labels; the estimate of the time spent reading and
+writing it is smaller still. Click a summary to see it on the timeline. The owner’s messages to the other sessions follow
+the list, a section for each, apart from its totals.</p>
 <div id="asked-filter" class="ck-controls"></div>
 <div id="asked-list"></div>
 <div id="asked-nb"></div>
@@ -195,6 +231,15 @@ which this page draws. Generator: <code>tools/timeline/build_timeline_data.py</c
 <code>tools/timeline</code>, whose <code>README.md</code> gives their order and settings. They read the session’s transcripts and the lab machines’ logs, which are not in the
 repository, so the committed extracts are the page’s inputs; <code>tools/timeline/sanitize_extracts.py</code> removes from
 them what the page withholds and checks that nothing private is left.</p>
+
+<dialog id="pv" aria-labelledby="pv-sum">
+ <div class="pv-head"><div><div class="pv-when" id="pv-when"></div><h3 id="pv-sum"></h3></div>
+  <button type="button" class="pv-x" id="pv-close" aria-label="Close">✕</button></div>
+ <div class="pv-text" id="pv-text" tabindex="0"></div>
+ <div class="pv-note" id="pv-note" hidden></div>
+ <div class="pv-nav"><button type="button" id="pv-prev">← Earlier</button><output id="pv-pos"></output><button type="button" id="pv-next">Later →</button>
+  <button type="button" id="pv-show">Show it on the timeline</button></div>
+</dialog>
 
 <h2 id="related">Related reports</h2>
 <ul>

@@ -11,9 +11,12 @@ variable, so the scripts run from any checkout (tools/timeline/README.md lists t
   TIMELINE_PRIVATE      the local privacy table, never committed (default ~/.config/et-soc1-timeline/private.json);
                         extract_agents.py and build_artifacts.py stop without one unless it is set to none
   TIMELINE_CUTOFF       an ISO time: the snapshot; transcript lines after it are ignored
-  TIMELINE_NEIGHBORS    comma-separated ids of other Claude Code sessions in the same project folder whose work the page
-                        shows in a lane of its own (extract_neighbors.py; default 97db24ee-042f-547a-86c0-e1444e260a06,
-                        the session of 30 Sep that ran the link test; none for no neighbor lane)
+  TIMELINE_NEIGHBORS    comma-separated ids of other Claude Code sessions whose work the page shows in lanes of their own
+                        (extract_neighbors.py; default 97db24ee-042f-547a-86c0-e1444e260a06, the session of 30 Sep that ran
+                        the link test; none for no neighbor lane); an id joined to others with '+' (a+b+c) is one lane for
+                        several short sessions
+  TIMELINE_MORE_PROJECTS other project folders to find neighbor sessions in (default: the second account's folder of the
+                        same name, ~/.claude-yv2/projects/<name>)
   TIMELINE_REPO         the repository (default: the checkout this file is in)
 """
 import json
@@ -33,6 +36,21 @@ MAIN = os.path.join(PROJ, SID + '.jsonl')
 PRE = os.path.join(PROJ, PRE_SID + '.jsonl')
 SUB = os.path.join(PROJ, SID, 'subagents')
 WFJSON = os.path.join(PROJ, SID, 'workflows')
+
+# the owner's second claude.ai account keeps its sessions in its own config home, in a project folder of the same name:
+# neighbor sessions are looked for there too (TIMELINE_MORE_PROJECTS, folders separated by ':')
+MORE_PROJECTS = [os.path.expanduser(p) for p in
+                 (os.environ.get('TIMELINE_MORE_PROJECTS') or '~/.claude-yv2/projects/' + os.path.basename(PROJ)).split(':') if p]
+PROJECTS = [PROJ] + [p for p in MORE_PROJECTS if os.path.isdir(p) and p != PROJ]
+
+
+def project_of(sid):
+    """the project folder (PROJ first, then MORE_PROJECTS) that holds session sid's transcript, or None"""
+    for p in PROJECTS:
+        if os.path.exists(os.path.join(p, sid + '.jsonl')):
+            return p
+    return None
+
 
 _NB = os.environ.get('TIMELINE_NEIGHBORS', '97db24ee-042f-547a-86c0-e1444e260a06')
 NEIGHBORS = [] if _NB.strip().lower() in ('', 'none') else [x.strip() for x in _NB.split(',') if x.strip()]

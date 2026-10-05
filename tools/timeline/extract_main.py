@@ -2,16 +2,19 @@
 """Extract task A: human messages and main-agent activity/tokens from the main session transcript.
 
 Streams the JSONL line by line. Writes:
-  ../human.json       human inputs (summarised, never verbatim), active-time estimates, engagement sessions
+  ../human.json       human inputs (a summary, and since 5 Oct 2026 the message's own words as the public page may
+                      show them: prompt_privacy.redact()), active-time estimates, engagement sessions
   ../main_agent.json  main-agent busy intervals, token usage (deduped by message.id) per message/hour/day/model
 
 Summaries are hand-written (<= 12 words, no names of other people, no credentials or access paths) in SUMMARIES
 below, keyed by the UTC second of the human input.  Inputs not in SUMMARIES get summary=null and are flagged.
-They describe a message in the third person and never repeat its wording.
+They describe a message in the third person and never repeat its wording. Beside it, each input carries "text": what
+the owner typed (a slash command as typed, an answer as chosen, a Talk message), with access details, addresses,
+other people's names and private links replaced by "[removed: ...]" markers, and "removed": what kinds were removed.
 
 The owner's messages sent from a published page's Talk tab (spacesheep Talk) reach the session as task notifications
 of a monitor ({"spacesheep_talk": true, "from": "the account owner ...", "message": ...}); each counts as an input of
-kind 'talk' (its text is never kept, only its length).
+kind 'talk' (its text goes through the same redaction).
 
 $TIMELINE_CUTOFF (an ISO time) ends the transcript there, so a rerun reproduces a snapshot of a session that has
 gone on since; the page's snapshot is 2026-09-29T09:14:00Z (the earlier ones, 2026-09-29T04:00:00Z,
@@ -23,6 +26,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import paths  # noqa: E402
+import prompt_privacy as PP  # noqa: E402  (the owner's prompts as the public page may show them)
 
 MAIN = paths.MAIN
 PRE = paths.PRE
@@ -192,12 +196,47 @@ SUMMARIES = {
  '2026-10-01T03:49:21': ("Limits reset: continue with many agents; report the driver race upstream.", 'request', 'Q86'),
  '2026-10-01T05:23:25': ("Free aifoundry1's disk: delete a departed user's large public checkpoints.", 'request', 'Q87'),
  '2026-10-01T05:24:19': ("Approves deleting the largest checkpoints; they can be downloaded again.", 'approval/answer', 'Q87'),
+ '2026-10-01T13:29:00': ("Chip diagram and memory levels: one consistent zoom loop, atoms to universe.", 'request', 'Q88'),
+ '2026-10-01T13:36:18': ("Check that lab users can still hop between the three machines.", 'request', 'Q95'),
+ '2026-10-01T14:21:08': ("Chip diagram: zooming past the rack becomes a hidden Easter egg.", 'request', 'Q89'),
+ '2026-10-01T16:22:07': ("Chip diagram: fix navigation dead ends; every path down to atoms.", 'request', 'Q90'),
+ '2026-10-01T17:17:27': ("List asks for the Nekko team to make the diagram more authentic.", 'request', 'Q91'),
+ '2026-10-01T20:04:54': ("Chip diagram: zooming out past the top should loop back to atoms.", 'request', 'Q92'),
+ '2026-10-01T20:06:28': ("Corrects: at that view the zoom-out button is disabled, no way up.", 'correction', 'Q92'),
+ '2026-10-01T20:11:07': ("Wants shareable links to each flow, and the diagram on GitHub Pages.", 'request', 'Q92'),
+ '2026-10-01T23:45:54': ("Chip diagram replays: add a 1x/2x speed button beside pause.", 'request', 'Q93'),
+ '2026-10-01T23:46:53': ("Zooming up should skip a slide and loop one way only.", 'request', 'Q94'),
+ '2026-10-03T00:18:55': ("Asks for the machine's hostname.", 'question', None),
+ '2026-10-03T00:19:10': ("Compacts the conversation.", 'status', None),
 }
 
 
 # inputs that are mostly pasted or templated text although under 2000 chars (typing capped in the adjusted variant)
 LIKELY_PASTE = {'2026-09-20T20:51:16',   # a templated settings-fix prompt
                 '2026-09-25T19:56:33'}   # carries pasted terminal output
+
+
+def qa_text(s):
+    """The owner's answers to AskUserQuestion, one line each with its question: the tool result reads
+    'answered: "Q1"="A1", "Q2"="A2". You can now ...'; a question may hold quotes, an answer is short."""
+    a, b = s.find('"'), s.rfind('". ')
+    if a < 0 or '"="' not in s:
+        return None
+    parts = s[a + 1:b if b > a else len(s)].rstrip('"').split('"="')
+    qs, ans = [parts[0]], []
+    for mid in parts[1:-1]:
+        k = mid.find('", "')
+        ans.append(mid[:k] if k >= 0 else mid)
+        qs.append(mid[k + 4:] if k >= 0 else '')
+    ans.append(parts[-1])
+    return '\n'.join(f'→ {x}   (asked: {q})' for q, x in zip(qs, ans))
+
+
+def slash_text(s):
+    """a slash command as typed: '/name args'"""
+    name = re.search(r'<command-name>(.*?)</command-name>', s, re.S)
+    args = re.search(r'<command-args>(.*?)</command-args>', s, re.S)
+    return ((name.group(1).strip() if name else '') + (' ' + args.group(1).strip() if args and args.group(1).strip() else '')).strip()
 
 
 def slash_chars(s):
@@ -263,12 +302,17 @@ def talk_message(s):
             talk, frm = re.search(r'"spacesheep_talk"\s*:\s*true', b), re.search(r'"from"\s*:\s*"([^"]*)"', b)
             mid, msg = re.search(r'"id"\s*:\s*(\d+)', b), re.search(r'"message"\s*:\s*"((?:[^"\\]|\\.)*)', b)
             if talk and frm and mid and msg:
-                ev = {'spacesheep_talk': True, 'from': frm.group(1), 'id': int(mid.group(1)),
-                      'message': re.sub(r'\.\.\.\(truncated\)\s*(?:</event>.*)?$', '', msg.group(1), flags=re.S)}
+                raw = re.sub(r'\.\.\.\(truncated\)\s*(?:</event>.*)?$', '', msg.group(1), flags=re.S)
+                try:   # the field is still JSON-escaped (cut short, it may end inside an escape)
+                    text = json.loads('"' + re.sub(r'\\+$', '', raw) + '"')
+                except ValueError:
+                    text = raw.replace('\\"', '"').replace('\\n', '\n')
+                ev = {'spacesheep_talk': True, 'from': frm.group(1), 'id': int(mid.group(1)), 'message': text,
+                      'length': len(raw)}
     if not isinstance(ev, dict) or ev.get('spacesheep_talk') is not True or not ev.get('message') \
             or not str(ev.get('from', '')).startswith('the account owner'):
         return None
-    return ev.get('id'), len(ev['message'])
+    return ev.get('id'), ev.get('length', len(ev['message'])), ev['message']
 
 # What a foreground tool call waited on, by its command. 'watch': a loop that only watched the agent's own workflows or
 # subagents (their journals, transcripts or output files); the subagents' own hours already count that time, so a
@@ -394,28 +438,33 @@ with open(MAIN) as f:
                         s = cc if isinstance(cc, str) else text_of(cc)[0]
                         mm = re.search(r'"=\s*"(.*)"', s, re.S)
                         ans = mm.group(1) if mm else s
+                        shown_ans = qa_text(s) or ans
                         human.append({'dt': dt, 'kind': 'question-answer', 'source': 'AskUserQuestion',
-                                      'chars': len(ans), 'images': 0, 'read_words_override': ask_ids[x['tool_use_id']]})
+                                      'chars': len(ans), 'images': 0, 'read_words_override': ask_ids[x['tool_use_id']],
+                                      'raw': shown_ans})
                 continue
             s, imgs = text_of(c)
             if ok == 'human':
                 sent = enqueue_ts.get(s[:200]) if e.get('promptSource') == 'queued' else None
                 human.append({'dt': T(sent) if sent else dt, 'kind': 'prompt', 'source': e.get('promptSource'),
-                              'chars': len(s), 'images': imgs})
+                              'chars': len(s), 'images': imgs, 'raw': s})
                 events.append((dt, 'prompt', {'kind': 'human'}))
             elif ok in PROMPT_KIND:
                 events.append((dt, 'prompt', {'kind': PROMPT_KIND[ok]}))
                 tk = talk_message(s) if ok == 'task-notification' else None
                 if tk and tk[0] not in talk_ids:
                     talk_ids.add(tk[0])
-                    human.append({'dt': dt, 'kind': 'talk', 'source': 'spacesheep-talk', 'chars': tk[1], 'images': 0})
+                    human.append({'dt': dt, 'kind': 'talk', 'source': 'spacesheep-talk', 'chars': tk[1], 'images': 0,
+                                  'raw': tk[2]})
             elif e.get('isCompactSummary'):
                 events.append((dt, 'prompt', {'kind': 'compact-continuation'}))
             elif isinstance(s, str) and s.startswith('<command-name>'):
                 # a local slash command typed by the human (e.g. /permissions); the stdout entry is skipped
-                human.append({'dt': dt, 'kind': 'slash-command', 'source': 'typed', 'chars': slash_chars(s), 'images': 0})
+                human.append({'dt': dt, 'kind': 'slash-command', 'source': 'typed', 'chars': slash_chars(s), 'images': 0,
+                              'raw': slash_text(s)})
             elif isinstance(s, str) and s.strip() == '[Request interrupted by user]':
-                human.append({'dt': dt, 'kind': 'interrupt', 'source': 'keypress', 'chars': 0, 'images': 0})
+                human.append({'dt': dt, 'kind': 'interrupt', 'source': 'keypress', 'chars': 0, 'images': 0,
+                              'raw': '(pressed Esc: interrupted the agent)'})
                 events.append((dt, 'prompt', {'kind': 'interrupt'}))
             elif s.startswith('<local-command-stdout>'):
                 pass
@@ -433,12 +482,12 @@ with open(MAIN) as f:
                 ab_dt = T(ab) if ab else dt
                 if ok == 'human':
                     human.append({'dt': T(a.get('timestamp') or ts), 'kind': 'midturn', 'source': 'queued',
-                                  'chars': len(s), 'images': imgs, 'absorbed_at': ab_dt})
+                                  'chars': len(s), 'images': imgs, 'absorbed_at': ab_dt, 'raw': s})
                 tk = talk_message(s) if k == 'task-notification' else None
                 if tk and tk[0] not in talk_ids:
                     talk_ids.add(tk[0])
                     human.append({'dt': T(a.get('timestamp') or ts), 'kind': 'talk', 'source': 'spacesheep-talk',
-                                  'chars': tk[1], 'images': 0, 'absorbed_at': ab_dt})
+                                  'chars': tk[1], 'images': 0, 'absorbed_at': ab_dt, 'raw': tk[2]})
                 # the entry's own timestamp is the send time; the agent took the input in at ab_dt
                 events.append((ab_dt, 'midturn', {'kind': k}))
             else:
@@ -449,7 +498,8 @@ with open(MAIN) as f:
             if st == 'local_command':
                 s = e.get('content') or ''
                 if s.startswith('<command-name>'):
-                    human.append({'dt': dt, 'kind': 'slash-command', 'source': 'typed', 'chars': slash_chars(s), 'images': 0})
+                    human.append({'dt': dt, 'kind': 'slash-command', 'source': 'typed', 'chars': slash_chars(s), 'images': 0,
+                                  'raw': slash_text(s)})
                 continue
             if st in ('away_summary', 'bridge_status'):
                 presence.append({'ts': ts, 'pdt': pdt(dt), 'type': 'away-recap' if st == 'away_summary' else 'remote-control-connected'})
@@ -496,11 +546,13 @@ for i, h in enumerate(human, 1):
     if h['kind'] == 'interrupt':
         type_s = 2
     likely_paste = h['chars'] > 2000 or key in LIKELY_PASTE
+    shown, removed = PP.redact(h.get('raw') or '')
     type_s_adj = min(type_s, PASTE_TYPING_CAP_S) if likely_paste else type_s
     out_h.append({
         'n': i, 'ts': iso(dt), 'pdt': pdt(dt), 'kind': h['kind'], 'source': h['source'],
         'chars': h['chars'], 'images': h['images'],
         'summary': summ[0], 'category': summ[1], 'request_id': summ[2],
+        'text': shown, 'removed': sorted(set(removed)),
         'absorbed_mid_turn_at': iso(h['absorbed_at']) if h.get('absorbed_at') else None,
         'read_words': read_words, 'read_s': round(read_s, 1), 'type_s': round(type_s, 1),
         'active_s': round(read_s + type_s, 1), 'likely_paste': likely_paste,
