@@ -23,6 +23,20 @@ min and max, and the input power; `ettelem` samples them at 10 Hz. The other rai
 Maxion — have set points in the PMIC and no telemetry. So one number for the card, three for its inside, and at
 idle at 73 °C the difference is 15.1 W of 31.8 (47%).
 
+**What a meter of watts can price (the hub's §2 plane, added 5 October 2026).** Every event the reports priced was run
+as fast as the card runs it, so its energy × that rate is the power it lifted the board by (for the flips and the
+wires, the share a fit gives them inside a larger burst), and that power is all the meter sees. The hub's 45 events
+span 8.9 decades of energy (25 aJ to 19.85 nJ) at lifts of 1.19–26.5 W; E48's 101 configurations span 6,232× at
+3.12–26.2 W; sparse parity's solve, candidate and executed int8 multiply-add (E59) sit on one diagonal each, 11.4–14.5
+W, and one minion's L1 gathers, timed to the cycle, would add about 5.6 mW (its energy per element borrowed from the
+chip's run). What limits pricing is the baseline's σ ÷ the precision asked (3.33 W at 0.2 W and ±6%), 2.5–3.5 decades
+above one reading's step (1 mW on a rail, 10 mW on the board). The band of a few watts is partly a selection: it is
+where the chip's power lands when an event runs flat out, which is how every one was priced. The chart: "Every priced
+event sits on a few watts: the energy-rate plane", a second view of "How many identical events before the meter sees
+one?"; its points in `energy_events` and `energy_plane` of `limits-of-observability.data.json`, from
+`tools/ettelem/sync_hub_data.py`. Numbers in 05-claims.md: "What the board's meter can price, event by event", E48
+"Each configuration's lift" and E59 "A solve, a candidate and a multiply-add on one diagonal".
+
 ## The unmetered remainder, attributed (E30; three cards since E46)
 
 Fitted over the catalogue's configurations (the mean of each configuration's passes) as a fraction of each rail's
@@ -65,6 +79,17 @@ So half of idle is on no rail sensor, as is between an eighth and a sixth of wha
 (median 16% of an instruction's watts on aifoundry2, 15% on aifoundry3 and 12% on aifoundry1's card 1, over E46's
 catalogue; 17% and 15% over E30's) and about seven tenths of what DRAM traffic adds (70%, 73% and 72%; 69% and 65%
 over E30's). The minion regulator's delivery loss comes out at 19%, 18% and 10% of what that rail delivers.
+
+**On a workload the fit was not made on (E59, added 5 October 2026).** Sparse parity's energy runs on aifoundry3
+(one run per size, 29 September) give the first held-out test, in joules per solve (the hub's §4.2 chart "One solve's
+joules, as the card's meters report them"; `solve_energy` in `limits-of-observability.data.json`, from each run's
+`energy.json` through `tools/ettelem/sync_hub_data.py`). Idle is 61–67% of a solve and 35–38% of a solve is on no
+meter, almost all of it the off-rail half of the idle (12.9 W of a 23.7–23.9 W idle); of what a solve adds over idle,
+the rails carry 95–97%. The fit puts 0.185, 0.680 and 3.147 J per solve on no meter over idle where the meters show
+0.044, 0.256 and 1.409 J: 6.4–8.7% of the rails' joules, about the top of the rails' stated bias (−2% to +7%,
+`workloads/sparseparity/tools/energy_reduce.py`), and the same in watts by the catalogue's method (0.38–1.13 W
+measured against 1.19–1.63 W). So this workload cannot tell the fit's error from the meters'; the reducer's ±15% on
+the part on no meter was checked where it was a quarter of what a solve adds, not 3–5%. Numbers in 05-claims.md, E59.
 
 ## A droop meter for DRAM (E30)
 

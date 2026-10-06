@@ -37,11 +37,11 @@ the page without anyone copying numbers.
                       the version-3 claims check asks for them per card); each card's droop block also carries its own
                       per_config rows (fu.droop's full output), so the "Is the DDR monitor a DRAM meter?" chart can
                       draw any card
-  energy_events       every event the reports priced, with its energy [range] and the rate at which the measurement
-                      ran it, for the chart "How many identical events before the meter sees one?" (the energy manual's
-                      catalogue, tensor bars and reruns, on three cards since 26 September; the wires from Heat per
-                      millimetre's third run; the hot line and the flips as before; since 27 September E48's gathered and
-                      scattered elements and packed atomic adds, manual.json gs); its meter block
+  energy_events       a selection of the events the reports priced, each with its energy [range] and the rate at which
+                      the measurement ran it, for the chart "How many identical events before the meter sees one?"
+                      (the energy manual's catalogue, tensor bars and reruns, on three cards since 26 September; the
+                      wires from Heat per millimetre's third run; the hot line and the flips as before; since 27
+                      September E48's gathered and scattered elements and packed atomic adds, manual.json gs); its meter block
                       takes the board value's refresh and the service processor's pass per card from the
                       version-3 campaign (meter())
   claims_status       the claims check's verdicts per page, and the cards behind each claim, for §1's scoreboard: one
@@ -52,6 +52,50 @@ the page without anyone copying numbers.
                       128 off) and fixcyc()'s leftover per corrected launch (MEM-R3), from results/mem.json
   pcie                the host link per card (E50, docs/reports/data/2026-09-27-pcie/pcie.json), for the tokens of §1's
                       index row "Over the PCIe link"
+  solve_energy        one solve's board energy split by meter, for §4.2's chart "One solve's joules, as the card's meters
+                      report them": E59's energy runs (workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/
+                      <run>/energy.json, written by workloads/sparseparity/tools/energy_reduce.py), one entry per size
+                      (SOLVE_RUNS: L1, L2, and (256,5) as its two halves summed). Per solve: the board's idle over the
+                      solve's time (1 / solves_per_s) split into each rail's idle_w and the board's sp_avg_idle_w less
+                      the rails' (on no meter); the leakage's rise (board.leak_rise_j_per_solve); each rail over idle
+                      (rails.<rail>.j_per_solve) and the rest over idle (rails.unmetered.j_per_solve, the headline less
+                      the rails). The parts must add to board.j_per_solve_total within 5 mJ, or the script stops.
+                      Beside them, §4.2's fit for the runs' card (unmetered_fit.json coef, no DRAM term: every run
+                      staged its operands in the shires' scratchpads, host.json plan.stage "scp", which the script
+                      checks) applied to the rails' joules, and per run the same comparison in
+                      watts by the catalogue's method (board.catalogue.over_idle_w less the rails' over_idle_w_plateau);
+                      and the reducer's stated accuracy (SOLVE_ACC). Numbers only: the energy files also hold build
+                      paths and the sampler's command line
+  burst_trace         the same E59 runs as time traces through every meter, for §4.1's chart "One sparse parity burst
+                      through every meter on the card": one entry per run (BURST_RUNS: L1, L2 and (256,5)'s two halves,
+                      each a run of its own). From the run's telemetry.jsonl.gz, every 10 Hz sample from BURST_WINDOW[0]
+                      to BURST_WINDOW[1] s after the host's first launch (host.json launch_epoch_ms[0], which must be
+                      energy.json's window.lo_ms), kept only where one of BURST_COLS' readings differs from the sample
+                      before it, plus the window's last sample: [t_s, board_w, sp.board_avg_w, sp.minion_w[0],
+                      sp.sram_w[0], sp.noc_w[0], temp_c.minshire[0]]. Beside them, from host.json the solves' own times
+                      (launch_s) and from energy.json the burst's length (window.wall_s), the board's edges against the
+                      host's (window.board_edges_minus_host_s), the catalogue method's idle and busy board means and its
+                      count of busy board values at idle (board.catalogue.busy_readings, busy_readings_at_idle and its
+                      expected number), and each meter's step (levels: board_w from the catalogue's idle_before_w to its
+                      busy_w; sp.board_avg_w from board.sp_avg_idle_w by the same step, the average having unit gain; each
+                      rail from rails.<rail>.idle_w by its over_idle_w_plateau). rise is each meter's reading as sampled
+                      1 s and 2 s after the board's first edge, as a share of that step (BURST_RISE_S), the last sample
+                      at or before each time. Numbers only, as for solve_energy
+  energy_plane        the points §2's energy-rate plane (the second view of "How many identical events before the meter
+                      sees one?", "Every priced event sits on a few watts") draws beside energy_events' events, each as an
+                      energy per event and the rate it ran at, so energy x rate is the power it lifted the board by:
+                      .gs, every E48 configuration in manual.json gs.configs (set E: the chip-wide runs) with both
+                      pj_per_element and elements_per_s, as [config less its "gs/E/", J mean, lo, hi, per second], with
+                      words for its tables (gs_levels.LEVELS' labels, else the size per hart) and patterns
+                      (gs_levels.PATTERNS), the ops that count updates, not elements (update_ops), and each
+                      configuration measured on fewer than three cards with the cards it was (fewer_cards: E48's clock
+                      rule dropped the others' bursts); .minion, one minion's word gathers from the L1 (PLANE_MINION: set R's
+                      single-minion rate, both harts, measured; the chip's energy per element, borrowed: one minion's
+                      lift is below the meter); .workloads, E59 as one solve, one candidate scored and one executed int8
+                      multiply-add per size (SOLVE_RUNS, (256,5)'s halves summed): a solve's board joules over idle
+                      (board.j_per_solve) and the solve rate (1 / the summed 1 / solves_per_s), divided by plan.candidates
+                      (which must sum to C(n, k)) or by plan.ops x PLANE_MACS_PER_OP (16 x 16 x 64 per TensorIMA8A32).
+                      The page computes each point's power and draws the meter's lines from energy_events.meter
 
 Deterministic: the same inputs give the same file, byte for byte.
 """
@@ -59,6 +103,7 @@ import argparse
 import glob
 import gzip
 import json
+import math
 import os
 import re
 import statistics
@@ -649,17 +694,252 @@ def pcie_block(p):
                       "launch.<card>.single_us['32'] and b2b_us['32'], derived.<card>.h2d_two_in_flight_over_one; means over five runs"}
 
 
+# ---------------------------------------------------------------- one solve's joules, by meter (§4.2, E59)
+# E59's energy session on aifoundry3 (29 September; workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/README.md):
+# one run per size; (256,5) ran as two halves (slices 0/2 and 1/2) whose per-solve energies add, as energy_reduce.py
+# combine adds them into aifoundry3-1136-f5.json. [id, label, runs] (the size, (n, k, eta, m), is read from each run's
+# energy.json instance)
+SOLVE_DIR = os.path.join(ROOT, "workloads", "sparseparity", "data", "2026-09-29-aifoundry3-m5-energy", "energy")
+SOLVE_RUNS = [("l1", "L1", ["aifoundry3-1136-l1"]), ("l2", "L2", ["aifoundry3-1136-l2"]),
+              ("f5", "(256,5)", ["aifoundry3-1136-f5h0", "aifoundry3-1136-f5h1"])]
+SOLVE_RAILS = (("minion", "minion_w"), ("sram", "sram_w"), ("noc", "noc_w"))
+# energy_reduce.py's stated accuracy (its docstring, and the TRUTH tolerances its --dry runs on two test doubles passed;
+# workloads/sparseparity/README.md, "Dry tests"): the board over idle (the headline) +-3%; each rail -2% to +7% (upper
+# bounds: integrated above a ramp baseline, each keeps part of its own leakage's rise); the part on no meter +-15%, in
+# test doubles whose part on no meter was 24-25% of what a solve adds (workloads/sparseparity/tools/energy_stub.py
+# rail_share: 1 - 0.75, 1 - 0.76).
+SOLVE_ACC = {"board": 0.03, "rails": [-0.02, 0.07], "unmetered": 0.15, "stub_unmetered_share": [0.24, 0.25],
+             "source": "workloads/sparseparity/tools/energy_reduce.py docstring; workloads/sparseparity/tools/energy_stub.py rail_share"}
+
+
+def r4(v):
+    return round(float(v), 4)
+
+
+def solve_energy(fit):
+    """E59's four energy runs as one solve per size, by meter (see the module docstring). Every joule is per solve;
+    a size made of halves sums them (its time per solve too). Deterministic: the files are read in SOLVE_RUNS order."""
+    sizes, cards, mhz = [], set(), set()
+    for sid, label, runs in SOLVE_RUNS:
+        j = {k: 0.0 for k in ("idle_minion", "idle_sram", "idle_noc", "idle_off", "leak", "minion", "sram", "noc", "off")}
+        total = over = s_per = 0.0
+        inst, rr = None, []
+        for run in runs:
+            e, h = load(os.path.join(SOLVE_DIR, run, "energy.json")), load(os.path.join(SOLVE_DIR, run, "host.json"))
+            if not e.get("ok") or e["host"]["status"] != "PASS":
+                sys.exit(f"{run}: energy.json is not ok, or its host did not PASS")
+            if h["plan"]["stage"] != "scp":  # the fit's DRAM term is left out only while the operands stay on chip
+                sys.exit(f"{run}: staged in {h['plan']['stage']}, not the scratchpad: the fit's DRAM term would be needed")
+            b, r, sps = e["board"], e["rails"], e["solves_per_s"]
+            cards.add(e["run"]["card"]); mhz.update(e["meter"]["minion_mhz_busy"])
+            i = e["instance"]
+            if inst and inst != i["hash"]:
+                sys.exit(f"{label}: its runs are not one instance")
+            inst = i["hash"]
+            size = [i["n"], i["k"], i["eta"], i["m"]]
+            rail_idle = sum(r[k]["idle_w"] for _, k in SOLVE_RAILS)
+            parts = {**{"idle_" + n: r[k]["idle_w"] / sps for n, k in SOLVE_RAILS},
+                     "idle_off": (b["sp_avg_idle_w"] - rail_idle) / sps, "leak": b["leak_rise_j_per_solve"],
+                     **{n: r[k]["j_per_solve"] for n, k in SOLVE_RAILS}, "off": r["unmetered"]["j_per_solve"]}
+            if abs(sum(parts.values()) - b["j_per_solve_total"]) > 0.005:
+                sys.exit(f"{run}: the parts add to {sum(parts.values()):.4f} J, board.j_per_solve_total is {b['j_per_solve_total']:.4f} J")
+            for k, v in parts.items():
+                j[k] += v
+            total += b["j_per_solve_total"]; over += b["j_per_solve"]; s_per += 1 / sps
+            c = b["catalogue"]
+            plat = {n: r[k]["over_idle_w_plateau"] for n, k in SOLVE_RAILS}
+            rr.append({"run": run.split("-")[-1], "solves": e["solves"], "stage": h["plan"]["stage"], "solves_per_s": r4(sps), "board_idle_w": r3(b["sp_avg_idle_w"]),
+                       "rails_idle_w": r3(rail_idle), "die_c": [r3(e["die_c"]["before"]), r3(e["die_c"]["busy"])],
+                       "w": {"over": r3(c["over_idle_w"]), "rails": r3(sum(plat.values())), "off": r3(c["over_idle_w"] - sum(plat.values())),
+                             "fit_off": None}, "_plat": plat})
+        sizes.append({"id": sid, "label": label, "size": size, "s_per_solve": r4(s_per), "total": r4(total), "over": r4(over),
+                      "j": {k: r4(v) for k, v in j.items()}, "runs": rr})
+    if len(cards) != 1:
+        sys.exit(f"E59's energy runs are on {sorted(cards)}: one card expected")
+    card = cards.pop()
+    coef = fit[card]["coef"]
+    lin = lambda d: sum(coef[n] * d[n] for n, _ in SOLVE_RAILS)  # noqa: E731  the fit without its DRAM term
+    for s in sizes:
+        s["fit_off"] = r4(lin(s["j"]))
+        for x in s["runs"]:
+            x["w"]["fit_off"] = r3(lin(x.pop("_plat")))
+    return {"experiment": "E59", "date": "2026-09-29", "card": card, "mhz": sorted(mhz), "acc": SOLVE_ACC, "sizes": sizes,
+            "source": os.path.relpath(SOLVE_DIR, ROOT) + "/<run>/energy.json (" + ", ".join(r for _, _, rs in SOLVE_RUNS for r in rs) +
+                      "): solves_per_s, board.{sp_avg_idle_w, leak_rise_j_per_solve, j_per_solve, j_per_solve_total}, "
+                      "rails.<rail>.{idle_w, j_per_solve, over_idle_w_plateau}, rails.unmetered.j_per_solve, "
+                      "board.catalogue.over_idle_w; host.json plan.stage; the fit: " + os.path.relpath(FIT, ROOT) + " <card>.coef (minion, sram, noc)"}
+
+
+# ---------------------------------------------------------------- one burst through every meter (§4.1, E59)
+# The same session's four runs, each on its own (the two halves of (256,5) were two bursts). [id, label, run]
+BURST_RUNS = [("l1", "L1", "aifoundry3-1136-l1"), ("l2", "L2", "aifoundry3-1136-l2"),
+              ("f5h0", "(256,5), first half", "aifoundry3-1136-f5h0"), ("f5h1", "(256,5), second half", "aifoundry3-1136-f5h1")]
+BURST_WINDOW = (-4.0, 10.0)   # seconds from the host's first launch: the idle before, the burst, the rails' fall after
+BURST_COLS = ["t_s", "board_w", "board_avg_w", "minion_w", "sram_w", "noc_w", "die_c"]
+BURST_RISE_S = (1.0, 2.0)     # after the board's first edge: the rail_filter block's times, for the same comparison
+
+
+def burst_trace():
+    """E59's runs as time traces through every meter (see the module docstring). Deterministic: the runs in BURST_RUNS
+    order, the samples in the telemetry's order."""
+    runs, cards, mhz, hz = [], set(), set(), set()
+    for sid, label, run in BURST_RUNS:
+        d = os.path.join(SOLVE_DIR, run)
+        e, h = load(os.path.join(d, "energy.json")), load(os.path.join(d, "host.json"))
+        if not e.get("ok") or e["host"]["status"] != "PASS":
+            sys.exit(f"{run}: energy.json is not ok, or its host did not PASS")
+        lo, hi = h["launch_epoch_ms"]
+        if e["window"]["lo_ms"] != lo or e["window"]["hi_ms"] != hi:
+            sys.exit(f"{run}: energy.json's window is not the host's launch_epoch_ms")
+        cards.add(e["run"]["card"]); mhz.update(e["meter"]["minion_mhz_busy"]); hz.add(round(1000 / e["run"]["every_ms"], 3))
+        with gzip.open(os.path.join(d, "telemetry.jsonl.gz"), "rt") as fh:
+            tel = [json.loads(l) for l in fh if l.startswith("{")]
+        rows, last = [], None
+        for s in tel:
+            if "board_w" not in s or "sp" not in s or "temp_c" not in s:
+                continue
+            t = (s["t_ms"] - lo) / 1000
+            if not BURST_WINDOW[0] <= t <= BURST_WINDOW[1]:
+                continue
+            sp = s["sp"]
+            row = [round(t, 3), s["board_w"], sp["board_avg_w"], sp["minion_w"][0], sp["sram_w"][0], sp["noc_w"][0], s["temp_c"]["minshire"][0]]
+            if not rows or row[1:] != rows[-1][1:]:
+                rows.append(row)
+            last = row
+        if last is not None and rows[-1] is not last:
+            rows.append(last)  # the lines run to the window's end
+        b, c, r = e["board"], e["board"]["catalogue"], e["rails"]
+        step_b = c["busy_w"] - c["idle_before_w"]
+        levels = {"board_w": [c["idle_before_w"], c["busy_w"]], "board_avg_w": [b["sp_avg_idle_w"], b["sp_avg_idle_w"] + step_b],
+                  **{k: [r[k]["idle_w"], r[k]["idle_w"] + r[k]["over_idle_w_plateau"]] for k in ("minion_w", "sram_w", "noc_w")}}
+        edge = e["window"]["board_edges_minus_host_s"]
+        rise = {}
+        for k, (i0, i1) in levels.items():
+            col = BURST_COLS.index(k)
+            at = [next((x[col] for x in reversed(rows) if x[0] <= edge[0] + dt), None) for dt in BURST_RISE_S]
+            rise[k] = [r3((v - i0) / (i1 - i0)) for v in at]
+        runs.append({"id": sid, "label": label, "size": [e["instance"][k] for k in ("n", "k", "eta", "m")], "slice": e["slice"],
+                     "solves": e["solves"], "wall_s": r3(e["window"]["wall_s"]), "launch_s": [r4(x) for x in h["launch_s"]],
+                     "edges_s": [r3(x) for x in edge], "die_c": [r3(e["die_c"]["before"]), r3(e["die_c"]["busy"])],
+                     "levels": {k: [r3(v[0]), r3(v[1])] for k, v in levels.items()}, "rise": rise,
+                     "busy_readings": c["busy_readings"], "at_idle": c["busy_readings_at_idle"],
+                     "at_idle_expected": r4(c["busy_readings_at_idle_expected"]), "cat_idle_w": r3(c["idle_w"]), "cat_busy_w": r3(c["busy_w"]),
+                     "busy_from_s": b["windows_s"]["busy"][0], "samples": rows})
+    if len(cards) != 1 or len(hz) != 1:
+        sys.exit(f"E59's energy runs: cards {sorted(cards)}, sampler rates {sorted(hz)}: one of each expected")
+    return {"experiment": "E59", "date": "2026-09-29", "card": cards.pop(), "mhz": sorted(mhz), "sampler_hz": hz.pop(),
+            "window_s": list(BURST_WINDOW), "rise_s": list(BURST_RISE_S), "cols": BURST_COLS, "runs": runs,
+            "source": os.path.relpath(SOLVE_DIR, ROOT) + "/<run>/ (" + ", ".join(r for _, _, r in BURST_RUNS) + "): telemetry.jsonl.gz "
+                      "(t_ms, board_w, sp.board_avg_w, sp.{minion,sram,noc}_w[0], temp_c.minshire[0]); host.json launch_epoch_ms, launch_s; "
+                      "energy.json window.{lo_ms, hi_ms, wall_s, board_edges_minus_host_s}, board.{sp_avg_idle_w, windows_s.busy}, "
+                      "board.catalogue.{idle_w, idle_before_w, busy_w, busy_readings, busy_readings_at_idle, busy_readings_at_idle_expected}, "
+                      "rails.<rail>.{idle_w, over_idle_w_plateau}, instance, slice, solves, die_c"}
+
+
+# ---------------------------------------------------------------- the energy-rate plane (§2's second view of the events)
+# One TensorIMA8A32 multiplies 16 rows by 16 columns over 64 samples (03-experiments.md, E59 "Method";
+# workloads/sparseparity/kernel/sparseparity.c ima8_word: 16 A rows x 64 int8 x 16 B columns): 16,384 int8
+# multiply-adds an op, padding and masked candidates included (each output tile is ceil(m / 64) ops).
+PLANE_MACS_PER_OP = 16 * 16 * 64
+# E48's single-minion rate for the one-minion marker (both harts, the L1 table) and the chip's configuration whose
+# energy per element it borrows: one minion's energy per element was not measured (its lift is far below the meter).
+PLANE_MINION = ("gs/R/fgw.ps/dram-512B/rand/random/h2/mff/nM1", "gs/E/fgw.ps/dram-512B/rand/random/h2/mff/n1024")
+# Words for E48's tables (the label of gs_levels.LEVELS where the table is one of its levels, else its size per hart),
+# patterns (gs_levels.PATTERNS) and the one op that is not an instruction ("upd", gs_levels.UPDATES).
+PLANE_TABLES_EXTRA = {"shire-256K": "a 256 KB table shared by the shire (at its L2)",
+                      "chip-8M": "one 8 MB table for the chip (at the home L3 slices)"}
+
+
+def plane_table_words(table):
+    for _key, label, words, _stream, cols in GL.LEVELS:
+        if any(t == table for _op, t in cols.values()):
+            return f"{label}: {words}"
+    if table in PLANE_TABLES_EXTRA:
+        return PLANE_TABLES_EXTRA[table]
+    m = re.match(r"dram-(\d+)([BKM])$", table)
+    if not m:
+        sys.exit(f"energy_plane: no words for E48's table {table}")
+    return f"{m.group(1)} {'B' if m.group(2) == 'B' else m.group(2) + 'B'} per hart"
+
+
+def energy_plane(man):
+    """The points that §2's energy-rate plane draws beside energy_events (see the module docstring). Deterministic: E48's
+    configurations in manual.json's key order, E59's sizes in SOLVE_RUNS order."""
+    G = man["gs"]["configs"]
+    rows, tables, pats, upd_ops, fewer = [], {}, dict(GL.PATTERNS), set(), {}
+    for name, v in G.items():
+        if not name.startswith("gs/E/") or not v.get("pj_per_element") or not v.get("elements_per_s"):
+            continue
+        if v["unit"] not in ("element", "update"):
+            sys.exit(f"energy_plane: {name} counts {v['unit']}s")
+        if v["unit"] == "update":
+            upd_ops.add(v["op"])
+        p, r = v["pj_per_element"], v["elements_per_s"]["mean"]
+        if p["cards"] < 3:
+            # E48's clock rule dropped every energy burst of it on the other cards (05-claims.md, E48 "A gap")
+            fewer[name[len("gs/E/"):]] = sorted(p["per_card"])
+        rows.append([name[len("gs/E/"):], r3sig(p["mean"] * 1e-12), r3sig(p["lo"] * 1e-12), r3sig(p["hi"] * 1e-12), r3sig(r)])
+        tables.setdefault(v["table"], plane_table_words(v["table"]))
+        if v["index"] not in pats:
+            sys.exit(f"energy_plane: no words for E48's pattern {v['index']}")
+    used = {n.split("/")[2] for n, *_ in rows}
+    gs = {"experiment": "E48", "fields": ["config", "e_j", "lo_j", "hi_j", "per_s"], "rows": rows,
+          "tables": dict(sorted(tables.items())), "patterns": {k: w for k, w in GL.PATTERNS if k in used},
+          "upd": "gather + fadd.ps + scatter", "update_ops": sorted(upd_ops),
+          "fewer_cards": fewer,
+          "source": "manual.json gs.configs[gs/E/<config>]: pj_per_element.{mean, lo, hi} (x 1e-12) and elements_per_s.mean, "
+                    "every gs/E configuration with both; pooled over three passes on each of three cards (E48), except "
+                    "the configurations in fewer_cards, measured on the cards it names (pj_per_element.per_card)"}
+    mr, me = G[PLANE_MINION[0]], G[PLANE_MINION[1]]
+    minion = {"rate_config": PLANE_MINION[0][len("gs/"):], "e_config": PLANE_MINION[1][len("gs/"):],
+              "per_s": r3sig(mr["elements_per_s"]["mean"]), "e_j": r3sig(me["pj_per_element"]["mean"] * 1e-12),
+              "chip_per_s": r3sig(me["elements_per_s"]["mean"]),
+              "source": f"manual.json gs.configs[{PLANE_MINION[0]}].elements_per_s.mean (one minion, both harts, measured) and "
+                        f"[{PLANE_MINION[1]}].pj_per_element.mean (the chip's, assumed to hold for one minion)"}
+    minion["w"] = r3sig(minion["per_s"] * minion["e_j"])
+    sizes, cards = [], set()
+    for sid, label, runs in SOLVE_RUNS:
+        ops = cand = 0
+        j = s_per = 0.0
+        size = None
+        for run in runs:
+            e = load(os.path.join(SOLVE_DIR, run, "energy.json"))
+            if not e.get("ok") or e["host"]["status"] != "PASS":
+                sys.exit(f"{run}: energy.json is not ok, or its host did not PASS")
+            i = e["instance"]
+            size = [i["n"], i["k"], i["eta"], i["m"]]
+            cards.add(e["run"]["card"])
+            ops += e["plan"]["ops"]; cand += e["plan"]["candidates"]
+            j += e["board"]["j_per_solve"]; s_per += 1 / e["solves_per_s"]
+        if cand != math.comb(size[0], size[1]):
+            sys.exit(f"{label}: its runs score {cand} candidates, not C({size[0]}, {size[1]})")
+        sps, macs = 1 / s_per, ops * PLANE_MACS_PER_OP
+        sizes.append({"id": sid, "label": label, "size": size, "ops": ops, "candidates": cand, "macs": macs,
+                      "j_per_solve": r4(j), "solves_per_s": r4(sps), "w": r3(j * sps),
+                      "per": {"solve": [r3sig(j), r3sig(sps)], "candidate": [r3sig(j / cand), r3sig(cand * sps)],
+                              "mac": [r3sig(j / macs), r3sig(macs * sps)]}})
+    if len(cards) != 1:
+        sys.exit(f"E59's energy runs are on {sorted(cards)}: one card expected")
+    work = {"experiment": "E59", "card": cards.pop(), "macs_per_op": PLANE_MACS_PER_OP, "sizes": sizes,
+            "source": os.path.relpath(SOLVE_DIR, ROOT) + "/<run>/energy.json: board.j_per_solve (over idle) and 1 / solves_per_s, "
+                      "summed over a size's runs ((256,5)'s two halves); plan.ops (TensorIMA8A32 ops) and plan.candidates, summed; "
+                      "a solve's joules over idle divided by its candidates, or by its ops x 16,384 multiply-adds"}
+    return {"gs": gs, "minion": minion, "workloads": work}
+
+
 # ---------------------------------------------------------------- the cycle counter's late carry (§3's figure)
 # The RTL's constants (E2: rtl-sim/pmu_carry runs core-et's neigh_pmu.v unmodified under Verilator; its README.md):
 # twelve counters per neighbourhood share one adder, each a 7-bit pre-counter and a 57-bit post-counter; the adder's
 # index advances one counter a cycle while any carry is pending and stops just past the counter it served, so in the
 # simulation a read comes back 128 short for 12 cycles after each wrap (low bits 0-11). On aifoundry2's card on 19
-# September the short reads were low bits 0-10 (E1, 11 reads), which fixcyc() (workloads/memprobe/kernel/memprobe.c)
-# corrects: it adds 128 to a read whose low 7 bits are below 11.
-CARRY_RTL = {"counters": 12, "pre_bits": 7, "post_bits": 57, "sim_short_reads": 12, "card_short_reads_19sep": 11, "fixcyc_below": 11,
+# September the short window covered at least low bits 0-10 in one launch and 0-9 in the other (E1, E2);
+# fixcyc() (workloads/memprobe/kernel/memprobe.c) assumes 0-10: it adds 128 to a read whose low 7 bits are below 11.
+# card_short_reads_19sep is that window's length per launch, at least: [11, 10].
+CARRY_RTL = {"counters": 12, "pre_bits": 7, "post_bits": 57, "sim_short_reads": 12, "card_short_reads_19sep": [11, 10], "fixcyc_below": 11,
              "source": "rtl-sim/pmu_carry (E2; README.md: 12 counters, a 7-bit pre-counter and a 57-bit post-counter each, one shared "
-                       "adder whose index cnt_idx advances while any carry is pending; 12 short reads per wrap in simulation); the card's 11 "
-                       "(low bits 0-10) from E1 on 19 September; fixcyc() in workloads/memprobe/kernel/memprobe.c adds 128 below 11"}
+                       "adder whose index cnt_idx advances while any carry is pending; 12 short reads per wrap in simulation); on "
+                       "aifoundry2's card at least low bits 0-10 in one launch and 0-9 in the other (E1, E2; 19 September); fixcyc() "
+                       "in workloads/memprobe/kernel/memprobe.c adds 128 below 11"}
 
 
 def carry_block(mem):
@@ -827,7 +1107,7 @@ def dumps(obj, ind=0):
 
 # "meter" is energy_events.meter alone (it reads the campaign's tel.json and the Horace model, not the energy manual):
 # --only meter refreshes it while the energy manual's files are being regenerated. Every other name is a whole block.
-BLOCKS = ("power", "energy_events", "meter", "claims_status", "carry", "pcie")
+BLOCKS = ("power", "energy_events", "meter", "claims_status", "carry", "pcie", "solve_energy", "burst_trace", "energy_plane")
 
 
 def build(hub, only=BLOCKS):
@@ -849,6 +1129,12 @@ def build(hub, only=BLOCKS):
         new["carry"] = carry_block(load(MEM_V3))
     if "pcie" in only:
         new["pcie"] = pcie_block(load(PCIE))
+    if "solve_energy" in only:
+        new["solve_energy"] = solve_energy(load(FIT))
+    if "burst_trace" in only:
+        new["burst_trace"] = burst_trace()
+    if "energy_plane" in only:
+        new["energy_plane"] = energy_plane(load(MAN))
     return new
 
 
@@ -886,7 +1172,7 @@ def main():
                 sys.exit("  the page notes' counts are stale: run python3 tools/ettelem/v3_counts.py, then rebuild those pages")
             return
         stale = [f"power.{k}" for k in new["power"] if new["power"].get(k) != hub.get("power", {}).get(k)]
-        stale += [k for k in ("energy_events", "claims_status", "carry", "pcie") if new.get(k) != hub.get(k)]
+        stale += [k for k in ("energy_events", "claims_status", "carry", "pcie", "solve_energy", "burst_trace", "energy_plane") if new.get(k) != hub.get(k)]
         sys.exit(f"{os.path.relpath(a.hub, ROOT)} is stale: " + (", ".join(stale) if stale else "formatting only") +
                  "\n  run python3 tools/ettelem/sync_hub_data.py, then rebuild the page")
     with open(a.hub, "w") as fh:
@@ -904,6 +1190,20 @@ def main():
         msg.append("the late carry on " + ", ".join(new["carry"]["per_card"]))
     if "pcie" in only:
         msg.append("the host link on " + ", ".join(new["pcie"]["per_card"]))
+    if "solve_energy" in only:
+        SE = new["solve_energy"]
+        msg.append(f"one solve's joules ({SE['experiment']}, {SE['card']}): " + ", ".join(
+            f"{s['label']} {s['total']:.2f} J, off-meter over idle {s['j']['off']:.3f} J against the fit's {s['fit_off']:.3f}" for s in SE["sizes"]))
+    if "burst_trace" in only:
+        BT = new["burst_trace"]
+        msg.append(f"one burst through every meter ({BT['experiment']}, {BT['card']}): " + ", ".join(
+            f"{x['label']} {len(x['samples'])} samples, minion rail {x['rise']['minion_w'][0]:.2f}/{x['rise']['minion_w'][1]:.2f} of its step at 1/2 s" for x in BT["runs"]))
+    if "energy_plane" in only:
+        EP = new["energy_plane"]
+        lifts = sorted(r[1] * r[4] for r in EP["gs"]["rows"])
+        msg.append(f"the energy-rate plane: E48's {len(lifts)} configurations at {lifts[0]:.2f}-{lifts[-1]:.2f} W, one minion's gathers "
+                   f"{1e3 * EP['minion']['w']:.1f} mW; E59 " + ", ".join(f"{s['label']} {s['w']:.2f} W ({s['per']['mac'][0] * 1e12:.3f} pJ a MAC)"
+                                                                     for s in EP["workloads"]["sizes"]))
     if "claims_status" in only:
         msg.append("claims status for " + ", ".join(f"{len(s['pages'])} pages ({s['id']})" for s in new["claims_status"]["series"]))
     print(f"wrote {os.path.relpath(a.hub, ROOT)}: " + "; ".join(msg))

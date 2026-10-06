@@ -14,17 +14,17 @@
   {
    "level": "Rail power",
    "what": "Minion cores, SRAM (L2/L3/scratchpad arrays), NoC",
-   "gran": "1 mW; the PMIC's running average (τ ≈ {{rf_tau}} s) of each regulator's output power, copied by the SP every pass (§4.1); min and max since the last reset, which restarts the average too",
+   "gran": "1 mW; the PMIC's running average of each regulator's output power (τ 1.01–1.06 s on aifoundry3's rails, E58; the note has aifoundry1-c1's), copied by the SP every pass, one pass late (§4.1); min and max since the last reset, which restarts the average too",
    "sec": 1,
    "instrument": "SP stats trace (dev_mngt_service -t SPST:extract)",
    "access": "host, management node",
    "status": "works_now",
    "check": "changed",
-   "note": "The output side (w_out) of the three PMBus regulators only; the other rails have no power telemetry, and the input side is read by the SP but not forwarded (§4.1). ettelem --reset-ms reads the min/max over a chosen window (in every pass on aifoundry2 and aifoundry3; on aifoundry1-c1 one pass of three saw the maximum fall once with no reset), and each reset restarts the running average: with a reset every second, a rail had fallen 93% of the way one second after a burst, on all three cards (§4.1). E58 (29 September) fitted the filter rail by rail with the SP's one-pass delay kept apart: τ 1.01–1.06 s on aifoundry3's rails, 1.08 s on aifoundry1-c1's minion and NoC rails and 0.54 s on its SRAM rail; tools/ettelem/deconv.py undoes it (rung 4)."
+   "note": "The output side (w_out) of the three PMBus regulators only; the other rails have no power telemetry, and the input side is read by the SP but not forwarded (§4.1). ettelem --reset-ms reads the min/max over a chosen window (in every pass on aifoundry2 and aifoundry3; on aifoundry1-c1 one pass of three saw the maximum fall once with no reset), and each reset restarts the running average: with a reset every second, a rail had fallen 93% of the way one second after a burst, on all three cards (§4.1). E58 (29 September) fitted the filter rail by rail with the SP's one-pass delay kept apart: τ 1.01–1.06 s on aifoundry3's rails and, in development on aifoundry1-c1, 1.08 s on its minion and NoC rails and 0.54 s on its SRAM rail; tools/ettelem/deconv.py undoes it (rung 4)."
   },
   {
    "level": "Energy per event",
-   "what": "pJ per L1/L2/L3/DRAM load, per FMA slot",
+   "what": "pJ per instruction, per byte read from L1/L2/L3/DRAM or a scratchpad, per gathered or scattered element, per byte messaged or relayed, per atomic update, per FMA slot",
    "gran": "≥ 10⁹ identical events/s for 3 s bursts bracketed by idle; bars ±7% (median) over passes and cards",
    "sec": 3,
    "instrument": "regression of rail power against counted events",
@@ -46,14 +46,14 @@
   },
   {
    "level": "Temperature and voltage",
-   "what": "35 temperature sensors, 125 voltage sense points (3 per minion shire, 2 per memory shire, IO and PCIe shires), 35 process detectors",
-   "gran": "hardware 0.06 °C (12-bit) / 75 µV (14-bit); host sees 34-shire avg/low/high at 1 °C / 1 mV every SP pass (§4.1)",
+   "what": "35 temperature sensors, 125 voltage sense points (3 per minion shire, 2 per memory shire, 3 in the IO shire, 2 in the PCIe shire, 2 external analog inputs), 35 process detectors",
+   "gran": "hardware 0.06 °C (12-bit) / 75 µV (14-bit); every SP pass the host gets the 34 minion-shire sensors' mean at 1 °C with their low and high (anonymous peak-holds since start or the last stats reset) and rail voltages at 1 mV, the minion- and memory-shire ones as shire averages (§4.1, §4.3)",
    "sec": 0.133,
    "instrument": "Moortec PVT controllers (SP-only); DM_CMD_GET_MODULE_CURRENT_TEMPERATURE",
    "access": "service processor",
    "status": "needs_fw_change",
    "check": "changed",
-   "note": "Per-shire voltages work now (DEBUG trace): they leak out as DEBUG log strings through DM_CMD_SET_DM_TRACE_CONFIG (the per-shire voltage map in Power and temperature, §3); per-shire temperature needs a firmware change; the process detectors are configured with measurement disabled and never read; two external analog VM inputs have a stub reader and no caller. No sensor measures current (§4.3)."
+   "note": "Per-shire voltages work now (DEBUG trace): they leak out as DEBUG log strings through DM_CMD_SET_DM_TRACE_CONFIG (the per-shire voltage map in [Power and temperature, §3](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#the-per-shire-voltage-map)); per-shire temperature needs a firmware change; the process detectors are configured with measurement disabled and never read; two external analog VM inputs have a stub reader and no caller. No sensor measures current (§4.3)."
   },
   {
    "level": "DDR-rail droop",
@@ -119,7 +119,7 @@
    "access": "kernel",
    "status": "works_now",
    "check": "changed",
-   "note": "Two counters per neighbourhood, not synchronised across neighbourhoods; a read just after the low 7 bits wrap comes back 128 short, on all three cards, but the short window is not a fixed length: fixcyc() (Anatomy of a memory access §7), which corrects reads whose low bits are below 11, left 0–4.7% of intervals off by 128 in a launch (§3), so check corrected intervals for ±128 outliers. The standard cycle, time and instret CSRs trap."
+   "note": "Two counters per neighbourhood, not synchronised across neighbourhoods; a read just after the low 7 bits wrap comes back 128 short, on all three cards, but the short window is not a fixed length: fixcyc() ([Anatomy of a memory access §7](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#a-timer-bug-worth-knowing)), which corrects reads whose low bits are below 11, left 0–4.7% of intervals off by 128 in a launch (§3), so check corrected intervals for ±128 outliers. The standard cycle, time and instret CSRs trap."
   },
   {
    "level": "Timed single access",
@@ -273,7 +273,7 @@
    "access": "offline",
    "status": "needs_tooling",
    "check": "disputed",
-   "note": "Verilator 5.042 now builds here without root, and single open-RTL modules simulate with waveforms (rtl-sim/pmu_carry runs neigh_pmu.v and explains a silicon bug; rtl-sim/fma_toggle counts the multiply-add flips behind the Horace experiment). The full 8-minion bench still needs its missing verilator.mk and cosim library; the main branch's whole-minion co-simulation references original files that are not in the public drop. No shire cache, NoC or DRAM; no cell library, so no joules."
+   "note": "Verilator 5.042 now builds here without root, and single open-RTL modules simulate with waveforms (rtl-sim/pmu_carry runs neigh_pmu.v and explains a silicon bug; rtl-sim/fma_toggle counts the multiply-add flips behind [the Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts)). The full 8-minion bench still needs its missing verilator.mk and cosim library; the main branch's whole-minion co-simulation references original files that are not in the public drop. No shire cache, NoC or DRAM; no cell library, so no joules."
   },
   {
    "level": "Individual bit toggling on the fabricated chip",
@@ -320,7 +320,7 @@
   },
   {
    "topic": "Power",
-   "et": "Board power at 10 mW, a new value every service-processor pass (§4.1), plus three rails as the PMIC's ~1 s running average at 1 mW; no energy counter.",
+   "et": "Board power at 10 mW, a new value every service-processor pass (§4.1), plus three rails as the PMIC's running average at 1 mW (τ about 1 s, but 0.54 s on aifoundry1-c1's SRAM rail: E58, §4.1); no energy counter.",
    "gpu": "One board number: a 25 ms average every 100 ms on A100/H100; a mJ energy counter; no rails.",
    "src": "NVML docs; Yang et al. SC'24; this project's power-telemetry notes"
   },
@@ -353,7 +353,7 @@
   {
    "title": "Limits of observability (this page)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability",
-   "date": "20–29 Sep",
+   "date": "20 Sep – 5 Oct",
    "what": "The hub: every instrument on the card, what it resolves and what it cannot see, the unmetered power attributed, the ladder of improvements (rungs 4, 31–36 and 43 tested on the cards on 28–29 September), and every page's claims before and after the three-card campaign.",
    "instruments": "all of them",
    "short": "This hub",
@@ -380,7 +380,7 @@
    "title": "The ET-SoC-1, interactively",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram",
    "date": "27 Sep",
-   "what": "An interactive schematic for presenting: the die, a shire and a minion, and data flows played stage by stage (a load to DRAM, the relay, a matmul and its watts, the host over PCIe, a hot line) with the latency, bandwidth, energy and heat measured on the three cards, each number sourced and each part it still infers linked to <a href=\"#improve\">§5</a>'s rungs 21–36.",
+   "what": "An interactive schematic for presenting: the die, a shire and a minion, and eleven data flows played stage by stage, each with its own address (<a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=1-load-to-dram\">a load to DRAM</a>, <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=2-latency-ladder\">the latency ladder</a>, <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=3-tensorsend\">TensorSend</a>, <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=4-relay\">the relay</a>, E48's <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=5-gathers\">gathers and scatters</a>, <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=6-host-and-pcie\">the host over PCIe</a>, <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=7-matmul\">a matmul</a> and <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=8-data-watts\">its watts</a>, <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=9-hot-line\">a hot line</a>, <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=0-allreduce\">the allreduce</a>, <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=b-broadcast\">a broadcast</a>) with the latency, bandwidth, energy and heat measured on the three cards, each number sourced and each part it still infers linked to <a href=\"#improve\">§5</a>'s rungs 21–36; and a zoom (30 September, down to the quarks 1 October) from the lab's rack, the card and the package down the chip's parts to its circuits, a FinFET at TSMC N7's numbers, the silicon crystal, an atom, a proton and its quarks.",
    "instruments": "none: a synthesis of the set's measurements, the manuals, the firmware source and the RTL",
    "short": "Chip diagram",
    "pub": "2026-09-27"
@@ -410,8 +410,8 @@
    "title": "Feasibility of running the ET-SoC-1 without its heatsink",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-without-heatsink",
    "date": "30 Sep",
-   "what": "Can a card run with its heatsink off, so that a sensor can look straight at the chip? From the cards' measured leakage laws, the fitted heatsink model and a Monte Carlo model of the bare package, checked against vendor θJA tables and published bare-processor runs (43 outside sources): at 600 MHz a bare card almost never holds a stable temperature (1 of 3,600 draws), bare aifoundry2 in still air passes 90 °C 66–167 s after a cold power-on, and a sensor pointed at the chip would see a plated lid at nearly one temperature. A thermocouple taped to the heatsink base, heatsink on, is the safe way to read the package; an image of the shires needs a sacrificial delidded card and an infrared-window cooler.",
-   "instruments": "arithmetic on the record: the September idle leakage laws, the fitted heatsink model, aifoundry1 card 0's read-only guard samples, vendor θJA tables and outside sources; no card was touched",
+   "what": "Can a card run with its heatsink off, so that a sensor can look straight at the chip? From the cards' measured leakage laws, the fitted heatsink model and a Monte Carlo model of the bare package, checked against vendor θJA tables and published bare-processor runs (53 outside sources): at 600 MHz a bare card almost never holds a stable temperature (1 of 3,600 draws), bare aifoundry2 in still air passes 90 °C 66–167 s after a cold power-on, and a sensor pointed at the chip would see, in a single frame, a plated lid at nearly one temperature. A section added that evening finds that a slower clock does not rescue it: 100 MHz is the lowest the firmware can set, and the idle power is mostly leakage and power no minion clock drives, so aifoundry2's idle at a 60 °C die falls only from 25.8 W at 600 MHz to about 19 W even at the firmware's lowest voltages with the NoC slowed; bare, it then settles with a fan in about a fifth of draws, never in still air, and lock-in through a taped lid would show a single shire in about 10 s, but only in short looks a fan allows in some power-ons, behind an automatic power cut (the measurement plan is designed, not run). A thermocouple taped to the heatsink base, heatsink on, is the safe way to read the package, and the chip's own sensors, heatsink on, the safe way to see where the work runs (one usable sensor on the stock firmware, a per-shire map only with a rebuilt boot loader); an image of the shires needs a sacrificial delidded card and an infrared-window cooler.",
+   "instruments": "arithmetic on the record: the September idle leakage laws, the fitted heatsink model, aifoundry1 card 0's read-only guard samples, the firmware source's PLL tables and voltage limits, vendor θJA tables and outside sources; no card was touched",
    "short": "No heatsink",
    "pub": "2026-09-30"
   },
@@ -644,8 +644,8 @@
    "title": "Sparse parity on the ET-SoC-1",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-parity",
    "date": "29 Sep",
-   "what": "Noisy sparse parity solved on the card's 1,024 minions as an int8 tensor GEMM, checked on every run by two closed-form checksums over all the candidates and a CPU oracle: (512, 4, 0.4) in 0.323 s and (256, 5, 0.4) in 1.52 s on aifoundry3, 7.8–12× one CPU core and 1.1–1.6× six tuned AVX-512 threads; measured on the one-stage scan, the board alone uses 2.5–7.7× less energy per solve than the CPU's energy at an assumed package power, and 1.6–6.1× less with the host that drives the card (E59).",
-   "instruments": "cycle counter, host wall clock (kernelLaunch → waitForStream), board power, die temperature and clock (ettelem)",
+   "what": "Noisy sparse parity solved on the card's 1,024 minions as an int8 tensor GEMM, each timed solve checked by two closed-form sums over all the candidates and a CPU oracle: on aifoundry3, one launch per size, (512, 4, 0.3), (512, 4, 0.4) and (256, 5, 0.4) in 0.131, 0.323 and 1.52 s, 7.8–12× one CPU core, 1.1–1.6× six tuned AVX-512 threads and about level with the host's 16 threads (0.85–1.2×, extrapolated); on the one-stage scan, one burst per size, the board alone uses 2.5–7.7× less energy per solve than the CPU at an assumed package power (1.6–6.1× with the host that drives the card, also assumed) (E59).",
+   "instruments": "cycle counter, host wall clock (kernelLaunch → waitForStream), board power, the three rails, die temperature and clock (ettelem at 10 Hz)",
    "short": "Sparse parity",
    "pub": "2026-09-29"
   },
@@ -4521,9 +4521,9 @@
    "status": "works_now",
    "what": "Undo the rails' one-second average",
    "done": true,
-   "adds": "The PMIC's rail averages, as the SP forwards them, are roughly first-order ({{rf_1s}} of a step at 1 s, {{rf_2s}} at 2 s; τ ≈ {{rf_tau}} s, measured on the catalogue's bursts with no reset, a fit that also absorbs the SP's one-pass delay; a reset restarts the average, §4.1). E58 (28–29 September) measured the filter on each rail with step bursts of 2.0, 3.2 and 4.0 s and inverted it (tools/ettelem/deconv.py, for streams sampled without --reset-ms). With the one-pass delay kept apart, τ is 1.06 s on the minion rail, 1.01 s on SRAM, 1.04 s on the NoC and 1.05 s for the board's average on aifoundry3, the validation card, and 1.08, 0.54, 1.08 and 1.10 s on aifoundry1-c1 in development: that card's SRAM meter averages twice as fast. On aifoundry3 each reading is one first-order average with its card's τ, published one pass late (T1–T3 held). Deconvolved with the frozen τ, every burst's level came back within 3% of the step and its energy within 1%, but the flat top of the 2 s minion bursts scattered by 8.4% of the step against at most 6%, so T4 (a clean inverse) failed on aifoundry3. On aifoundry1-c1 the minion rail rose with τ 1.32 s and fell with 1.02 s, so one first-order average does not describe it (T1 failed there, in development).",
+   "adds": "The PMIC's rail averages, as the SP forwards them, are roughly first-order ({{rf_1s}} of a step at 1 s, {{rf_2s}} at 2 s; τ ≈ {{rf_tau}} s, measured on the catalogue's bursts with no reset, a fit that also absorbs the SP's one-pass delay; a reset restarts the average, §4.1). E58 (29 September) measured the filter on each rail with step bursts of 2.0, 3.2 and 4.0 s and inverted it (tools/ettelem/deconv.py, for streams sampled without --reset-ms). With the one-pass delay kept apart, τ is 1.06 s on the minion rail, 1.01 s on SRAM, 1.04 s on the NoC and 1.05 s for the board's average on aifoundry3, the validation card, and 1.08, 0.54, 1.08 and 1.10 s on aifoundry1-c1 in development: that card's SRAM meter averages twice as fast. On aifoundry3 each rail is one first-order average with its card's τ, published one SP pass late, and the board's average one with no lag (T1–T3 held). Deconvolved with the frozen τ, every burst's level came back within 3% of the step and its energy within 1%, but the flat top of the 2 s minion bursts scattered by 8.4% of the step against at most 6%, so T4 (a clean inverse) failed on aifoundry3. On aifoundry1-c1 the minion rail rose with τ 1.32 s and fell with 1.02 s, so one first-order average does not describe it (T1 failed there, in development).",
    "cost": "done (E58, 29 Sep): tools/ettelem/deconv.py; plan tools/claims-v3/tau/PREREG.md, frozen after development (SHA-256 7d4fabad…); data docs/reports/data/2026-09-29-tau-aifoundry3/ (validation) and docs/reports/data/2026-09-29-tau-aifoundry1-c1/ (development)",
-   "effect": "Rail split of bursts shorter than 3 s; per-launch rail energy; the minion/SRAM/NoC split of transients. The published readings understate a 2 s burst by 19–22% on the three rails (all but aifoundry1-c1's SRAM rail) and 16–17% for the board average, the deconvolved ones by at most 3% (Power and temperature, §2). Streams sampled with a statistics reset every second (E52, E53, DV2) need the reset in the model first."
+   "effect": "Rail split of bursts shorter than 3 s; per-launch rail energy; the minion/SRAM/NoC split of transients. The published readings understate a 2 s burst by 19–22% on the three rails (all but aifoundry1-c1's SRAM rail) and 16–17% for the board average, the deconvolved ones by at most 3% ([Power and temperature, §2](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor)). Streams sampled with a statistics reset every second (E52, E53, DV2) need the reset in the model first."
   },
   {
    "rung": 5,
@@ -4531,7 +4531,7 @@
    "status": "needs_tooling",
    "what": "Per-shire current maps from the DEBUG trace's IR drop",
    "done": false,
-   "adds": "The SP prints every minion shire's VDD_MNN/SRAM/NOC voltage each loop pass at LOG_LEVEL_DEBUG (the map in Power and temperature, §3). Calibrate each shire's drop against the rail meter with single-shire loads, and the map becomes current.",
+   "adds": "The SP prints every minion shire's VDD_MNN/SRAM/NOC voltage each loop pass at LOG_LEVEL_DEBUG (the map in [Power and temperature, §3](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#the-per-shire-voltage-map)). Calibrate each shire's drop against the rail meter with single-shire loads, and the map becomes current.",
    "cost": "a day: single-shire calibration bursts, a trace parser (sptrace exists)",
    "effect": "Where the metered watts go on the die, per shire, to about 10%; the spatial power map that the temperature sensors cannot give from the host."
   },
@@ -4541,7 +4541,7 @@
    "status": "works_now",
    "what": "Sub-degree temperature by step timing; min/max windows for peaks",
    "done": true,
-   "adds": "The integer die reading steps at sharp moments when polled at 10–45 Hz; fitting the heating that reproduces the steps gives rises that repeat to ±0.03 °C on aifoundry2 and about 0.2 °C on aifoundry3 for a pattern heating the die by a degree or more (the Horace experiment); below about one degree it only bounds the rise. ettelem --reset-ms reads the PMIC's min/max over a window (in every pass on aifoundry2 and aifoundry3; on aifoundry1-c1 one pass of three saw the maximum fall once with no reset), and restarts the rails' running average with each reset.",
+   "adds": "The integer die reading steps at sharp moments when polled at 10–45 Hz; fitting the heating that reproduces the steps gives rises that repeat to ±0.03 °C on aifoundry2 and about 0.2 °C on aifoundry3 for a pattern heating the die by a degree or more ([the Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#strict-temperature-control)); below about one degree it only bounds the rise. ettelem --reset-ms reads the PMIC's min/max over a window (in every pass on aifoundry2 and aifoundry3; on aifoundry1-c1 one pass of three saw the maximum fall once with no reset), and restarts the rails' running average with each reset.",
    "cost": "done",
    "effect": "Thermal responses without a firmware change; peak power over any window."
   },
@@ -4563,7 +4563,7 @@
    "done": false,
    "adds": "An external meter of the card's input, 1 mW at 1 ms, that owes nothing to the PMIC's closed firmware and its refresh of a few times a second.",
    "cost": "a riser or interposer with sense resistors and an INA-class ADC, or a bench DAQ; a day; a slot in an open chassis",
-   "effect": "The launch transients that widen the small-signal bars become visible and separable; 0.5 s bursts become measurable; the widest bars (the hot line's −15/+19%, the remote scratchpad's −19/+22% on random data) narrow toward the 1–2% pass-to-pass scatter on one card, leaving the difference between cards; the awake core's bars are −6/+10% (a nop) and the DRAM relay's −10/+16%, mostly aifoundry1-c1 against the other two; the PMIC's own input-power reading gets an independent check."
+   "effect": "The launch transients that widen the small-signal bars become visible and separable; 0.5 s bursts become measurable; wide bars such as the hot line's (−15/+19%) and the remote scratchpad's on random data (−19/+22%) narrow toward the 1–2% pass-to-pass scatter on one card, leaving the difference between cards; the awake core's bars are −6/+10% (a nop) and the DRAM relay's −10/+16%, mostly aifoundry1-c1 against the other two; the PMIC's own input-power reading gets an independent check."
   },
   {
    "rung": 9,
@@ -4583,7 +4583,7 @@
    "done": true,
    "adds": "aifoundry3 repeated the catalogue (not its DRAM-row runs), the reruns and the Horace protocol; since 26 September aifoundry1-c1 (older firmware, 1.2.0) joins both in the version-3 campaign, which ran the whole catalogue, DRAM rows included, on all three cards.",
    "cost": "done",
-   "effect": "The factor between cards over the whole catalogue, re-run on the three cards: aifoundry3 over aifoundry2 0.976 pass by pass (99% interval 0.961–0.990) and 0.972 as the median over its entries (0.95 in the 23 September catalogue), and aifoundry1-c1 over aifoundry2 0.967 (0.950–0.985; median 0.962). Part of it is temperature, not the card: over a 30-configuration panel of the catalogue, a card read 0.48% higher per °C of die temperature on aifoundry2 and 0.30% on aifoundry3. On the tensor unit's switching (the Horace patterns) aifoundry3 read 0.895 of aifoundry2 as registered, but 0.958–0.969 with busy and idle power compared at the same die temperature (AMENDMENTS C2), in line with the catalogue's 0.972, and aifoundry1-c1 1.004 (registered 1.009); the Horace factor of 0.92 (22 September) could not be separated into card and temperature."
+   "effect": "The factor between cards over the whole catalogue, re-run on the three cards: aifoundry3 over aifoundry2 0.976 pass by pass (99% interval 0.961–0.990) and 0.972 as the median over its entries (0.95 in the 23 September catalogue), and aifoundry1-c1 over aifoundry2 0.967 (0.950–0.985; median 0.962). Part of it is temperature, not the card: over a 30-configuration panel of the catalogue, a card read 0.48% higher per °C of die temperature on aifoundry2 and 0.30% on aifoundry3. On the tensor unit's switching (the Horace patterns) aifoundry3 read 0.895 of aifoundry2 as registered, but 0.958–0.969 with busy and idle power compared at the same die temperature ([AMENDMENTS C2](https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md)), in line with the catalogue's 0.972, and aifoundry1-c1 1.004 (registered 1.009); the Horace factor of 0.92 (22 September) could not be separated into card and temperature. On E48's gathers and scatters (26 September) the three cards ran at the same rates to 0.02% (157 configurations), but energy per element read 0.965 of aifoundry2's on aifoundry3 and 1.085 on aifoundry1-c1 (medians over 100 configurations), against the catalogue's 0.972 and 0.962 (each card at its own temperature in both): aifoundry3's factor held, aifoundry1-c1's did not."
   },
   {
    "rung": 11,
@@ -4602,7 +4602,7 @@
    "status": "needs_fw_change",
    "what": "Export the 35 temperature sensors per shire",
    "done": false,
-   "adds": "The spatial brief's three options: a trace field, a DM command, or a DEBUG log line like the voltage one.",
+   "adds": "[The spatial brief](https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief#needed)'s three options: a trace field, a DM command, or a DEBUG log line like the voltage one.",
    "cost": "a few lines; a firmware image",
    "effect": "Heat maps on the 6×6 mesh (0.06 °C only if the raw 12-bit codes are exported; the driver's own values are whole degrees); heat flow between shires; per-shire leakage from the idle law."
   },
@@ -4612,7 +4612,7 @@
    "status": "needs_fw_change",
    "what": "Enable the process detectors and the two external analog monitor inputs",
    "done": false,
-   "adds": "35 ring-oscillator process detectors (one per minion shire and the IO shire) are configured with measurement disabled and never read; two external analog channels of the voltage monitors have a stub reader and no caller. The effect of overheating needs them for the one question it could not measure, whether heat makes this chip's transistors switch faster or slower: a service-processor build that selects a delay chain on the detectors, samples the 34 minion-shire detectors with each temperature pass and exposes the counts. E53 registered its prediction before any data: on the minion rail (about 0.5 V) a count changes by less than ±2% between 55 and 85 °C, more likely up (faster); on a rail at 0.70 V or more it falls, by less than 5%.",
+   "adds": "35 ring-oscillator process detectors (one per minion shire and the IO shire) are configured with measurement disabled and never read; two external analog channels of the voltage monitors have a stub reader and no caller. [The effect of overheating](https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating#switching-speed) needs them for the one question it could not measure, whether heat makes this chip's transistors switch faster or slower: a service-processor build that selects a delay chain on the detectors, samples the 34 minion-shire detectors with each temperature pass and exposes the counts. E53 registered its prediction before any data: on the minion rail (about 0.5 V) a count changes by less than ±2% between 55 and 85 °C, more likely up (faster); on a rail at 0.70 V or more it falls, by less than 5%.",
    "cost": "driver already written; a firmware image; for the external inputs, finding what the board wires to them",
    "effect": "Per-shire silicon speed and a leakage proxy that separates the card factor into process and voltage; possibly two board-level sense points. For the overheating page: heat's effect on switching speed measured on this chip, and whether its low-voltage logic gets faster when hot (temperature inversion)."
   },
@@ -4746,7 +4746,7 @@
    "status": "ask_team",
    "what": "The ET-SoC-1 Data Book and a final datasheet, with the chip's thermal ratings",
    "done": false,
-   "adds": "The Programmer's Reference Manual sends readers to the ET-SoC-1 Data Book for the hardware architecture (pdf p.9) and for the DMCTRL and AndOrTreeL2 debug registers; the Preliminary Datasheet Rev 1.0 leaves the electrical specifications (§8) and the package's thermal information (§9.1) to 'a future release' and has no ball map. The Data Book, or a later datasheet with its ball map, would show from which package edges the PCIe lanes and the four LPDDR4X interfaces leave: a second way to fix the die's orientation, against the package and the card. The effect of overheating asks for the ratings those sections would hold, or Esperanto's qualification records: the maximum junction temperature (Tj max), the temperature the timing was signed off at, the qualification conditions (the high-temperature operating life test's temperature and hours) and the design life. Without them the page can set the firmware's 65 °C rule and the lab's ~120 °C episode only against other vendors' limits (throttles at about 95–110 °C, shutdowns at about 105–125 °C).",
+   "adds": "The Programmer's Reference Manual sends readers to the ET-SoC-1 Data Book for the hardware architecture (pdf p.9) and for the DMCTRL and AndOrTreeL2 debug registers; the Preliminary Datasheet Rev 1.0 leaves the electrical specifications (§8) and the package's thermal information (§9.1) to 'a future release' and has no ball map. The Data Book, or a later datasheet with its ball map, would show from which package edges the PCIe lanes and the four LPDDR4X interfaces leave: a second way to fix the die's orientation, against the package and the card. [The effect of overheating](https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating#limits-on-the-et-soc-1) asks for the ratings those sections would hold, or Esperanto's qualification records: the maximum junction temperature (Tj max), the temperature the timing was signed off at, the qualification conditions (the high-temperature operating life test's temperature and hours) and the design life. Without them the page can set the firmware's 65 °C rule and the lab's ~120 °C episode only against other vendors' limits (throttles at about 95–110 °C, shutdowns at about 105–125 °C).",
    "cost": "an email; the thermal ratings may be in a qualification or reliability report rather than the datasheet",
    "effect": "Chip diagram: the die view tied to the package and the card; the power pages gain the package's thermal data. The effect of overheating: the ET's own margin at 65–120 °C and its lifetime there, instead of other vendors'.",
    "diagram": "die orientation on the package and the card"
@@ -4820,7 +4820,7 @@
    "done": false,
    "adds": "Two results of the PCIe page have no explanation: two host-to-card DMA commands in flight on one stream move about half as much as one at a time (0.49 times on all three cards, docs/reports/data/2026-09-27-pcie/pcie.json derived.<card>.h2d_two_in_flight_over_one), and card-to-host DMA is fastest at 16 MB per copy, slowest at 64 MB and partly recovers by 256 MB (bw.<card>.d2h.dma). The firmware gives the engine four read and four write channels, one command each (pcie_dma.h, dmaw.c in the firmware), but how the channels share the link, what read-request size the engine issues and how it splits a 128 MB element are in no document of the open drop. E55 (29 September) put the halving inside one stream (T35-S: one command in each of two streams loses nothing; a shared engine and the IOMMU were refuted). The PCIe controller's and DMA engine's documentation, or the register values the firmware programs, would say which part of a stream serves its two commands in turn, and why card-to-host DMA dips.",
    "cost": "an email; the controller is licensed IP, so its documentation may not be shareable, while the programmed values are",
-   "effect": "PCIe page: section 5's 'not established' gets a cause, and so does the dip in card-to-host rates; the chip diagram's PCIe shire (fact pcie.conc) says why a program should not queue two copies at once.",
+   "effect": "[PCIe page](https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link#several-at-once): section 5's 'not established' gets a cause, and so does the dip in card-to-host rates; the chip diagram's PCIe shire (fact pcie.conc) says why a program should not queue two copies at once.",
    "diagram": "the PCIe shire and the host link"
   },
   {
@@ -4832,7 +4832,7 @@
    "done": false,
    "adds": "A normal user cannot read them, and the PCIe page needed both: (1) lspci -vvv for each card and its root port, the negotiated maximum payload size and maximum read-request size, which set how much of the link's 15.75 GB/s a transfer can use; (2) the IOMMU's configuration beyond its group type (every host runs it translated, docs/reports/data/2026-09-27-pcie/hosts.txt). A third reading this rung asked for, the memory channels populated, we made on 27 September without root (udev's copy of the DMI memory table, hosts.txt, pcie.json hostmem): aifoundry3's host runs one DDR4-2666 module on a single channel, aifoundry2's two on two channels and aifoundry1's four DDR4-3200 on two, consistent with aifoundry3's host copying memory at 9.2 GB/s against 17.4 and 21.4 GB/s on the other two (pcie.json hostcopy.<card>, 256 MB), though no run isolated the channel count as the cause.",
    "cost": "a request to the lab admin; minutes, and no card time",
-   "effect": "PCIe page: the payload size behind the link's efficiency (aifoundry3's slow staged copies are consistent with its single memory channel, read without root); the IOMMU reading is no longer needed for rung 35: E55 refuted the shared read engine or IOMMU as the cause of the halving (two streams lose nothing).",
+   "effect": "[PCIe page](https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link#caveats): the payload size behind the link's efficiency (aifoundry3's slow staged copies are consistent with its single memory channel, read without root); the IOMMU reading is no longer needed for rung 35: E55 refuted the shared read engine or IOMMU as the cause of the halving (two streams lose nothing).",
    "diagram": "the host and the PCIe link"
   },
   {
@@ -4943,7 +4943,7 @@
    "done": false,
    "adds": "The lab lead said in a meeting that an ET-SoC-1 was taken to about 120 °C, stopped working, and was fine again once cool; nothing in the repository records it. Which card and firmware release; what \"stopped\" meant (a hang, wrong results, a lost PCIe link, a power trip); whether a reset or a power cycle was needed; and whether board power and the PCIe link's error counters were logged. And aifoundry1's card 0, which read 115–117 °C on the host after its smoke blocks of 25 September and whose service processor still holds a 119 °C mean and a 123 °C sensor: those blocks' results, kept as a record of the fault (the version-3 plan's amendment A4) but not in the repository, and its service processor's trace from that day if it still holds it: what dropped it to 300 MHz (its 1.4.1 idle point or its PMIC's safe state), and whether any kernel computed wrong at 115–123 °C.",
    "cost": "a question to the lab lead; for card 0, copying the kept smoke data (no card time) and a read-only trace read (the owner's and the lab's call)",
-   "effect": "The effect of overheating (§4.4): its ranked causes of the stop (power first, untested; then a protection action, the PCIe link, DRAM retention, a hold-time or SRAM failure, a clock losing lock, a joint that opens hot) narrowed to what the record shows, and whether the chip computes correctly past 115 °C."
+   "effect": "[The effect of overheating (§4.4)](https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating#the-120-c-story): its ranked causes of the stop (power first, untested; then a protection action, the PCIe link, DRAM retention, a hold-time or SRAM failure, a clock losing lock, a joint that opens hot) narrowed to what the record shows, and whether the chip computes correctly past 115 °C."
   },
   {
    "rung": 46,
@@ -4954,13 +4954,13 @@
    "done": false,
    "adds": "The only hardware thermal alarm in the open firmware is the PMIC's, at 75 °C, and it reads the PMIC's own \"System Temperature\" register, not the die's sensors. The service processor's firmware notes that the PMIC \"is currently reporting system temperature as 0\", reads that register only when its statistics are reset, and otherwise feeds its statistic a literal 0; the statistic read 0 in every sample of the three-card check and of card 0 (et-platform ffca4cbb4, thermal_pwr_mgmt.c). The alarm's 75 W threshold did not act either when aifoundry2 drew 86.9 W. Which sensor the PMIC reads (its own die, the board, the package), and whether its closed firmware power-cycles the board on over-temperature, and at what temperature: the headers define a reset cause for it, OVRTEMPR_PWRCYCLE (pmic_hal.h). The card's schematic (rung 25) would show what the PMIC's temperature input is wired to.",
    "cost": "an email; the PMIC's firmware is closed",
-   "effect": "The effect of overheating (§3, §4.4): whether anything on the card stops a die that passes 100 °C at 600 MHz (on the 0.20.0 and 0.18.0 builds nothing in the service processor does), and whether a PMIC power cycle, which would clear itself as the card cooled, is a candidate for the stop near 120 °C."
+   "effect": "The effect of overheating ([§1.3](https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating#limits-on-the-et-soc-1), [§4.4](https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating#the-120-c-story)): whether anything on the card stops a die that passes 100 °C at 600 MHz (on the 0.20.0 and 0.18.0 builds nothing in the service processor does), and whether a PMIC power cycle, which would clear itself as the card cooled, is a candidate for the stop near 120 °C."
   },
   {
    "rung": 31,
    "id": "exp-mesh-stops",
    "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
-   "status": "needs_tooling",
+   "status": "works_now",
    "what": "Time counter reads from every shire to place the master shire and the memory shires",
    "done": false,
    "adds": "Two stock syscalls make M-mode read another block's counters for a user kernel: SYSCALL_PMC_SC_SAMPLE a cache bank's counter in a given shire, SYSCALL_PMC_MS_SAMPLE a memory shire's (docs/research/counters-and-dram.md §2.3 and §3.5; each call stops, reads and restarts one counter). Timed from each of the 32 compute shires, a call should cost a constant plus a term per hop to its target, which places the master shire (shire 32) and the eight memory shires directly, without the L3 home that leaves memory shire 2 a tie in the DRAM-latency fit. E56 (28–29 September, workloads/nocroute) ran it. In development on aifoundry1-c1 a call cost a constant plus 35–36 cycles per hop (T-DIRECT held), the master shire placed at (0,3), the firmware map's top grey cell (rms 1.1 cycles against 33 for the next grey cell), and memory shires 0–2, 4, 5 and 7 where the firmware map puts them (3 and 6 undecided). On aifoundry3, the validation card, the calls fit 1,557 + 35.9 cycles per hop over 992 caller-target pairs (r² 0.995) with an rms of 4.7 cycles, above the frozen rule's 4: T-DIRECT failed there, so the places that rest on it were not decided (the same fit ranks (0,3) first there too, rms 0.5; by the rule that is reported, not decided). aifoundry2, run as a third card after DV2 (29 September, evening), gave the same: 1,556.8 + 35.9 cycles per hop (r² 0.996) with an rms of 4.47 cycles, so T-DIRECT failed there too, and (0,3) ranks first (rms 0.44), reported only. Shire 33, the spare, was never called.",
@@ -4991,7 +4991,7 @@
    "what": "A row-conflict probe for the DRAM address map",
    "done": true,
    "adds": "With every timed load from DRAM, alternate loads between two lines that agree in the candidate bank bits and differ in row, and between lines in different banks: a step of about one DRAM row cycle marks the bank and row bits; fold each line's refresh stalls to find which bits change the refresh schedule; and time two accesses issued back to back. Until then the bits were decoded from the firmware's ADDRMAP values and a tool comment (the memory-levels page counts the row bits, PA[18] and up, as measured already: the anatomy's one-bit flips and MEM-P4). E57 (29 September, memprobe's new modes) ran it. On aifoundry3, the validation card: rows and banks split as the inferred map L50 says, in 15 of 15 conditions, with a bank-bit step of −20 cycles (R33a PASS, as in development on aifoundry1-c1); the refresh domain is the controller, with PA[6–9] its bits and PA[10–12] inside it (R33b PASS; in development on aifoundry1-c1 PA[7] read unclear and the test failed); whether PA[11] and PA[12] share a controller back to back was not resolved on any card (R33c INSUFFICIENT). On aifoundry2, run as a third card after DV2 (29 September, evening), 14 of 15 conditions came out as L50 says (R33a FAIL): two lines that differ only in PA[17], a column bit in L50, read as a row conflict, where the other two cards read them as one row (and so did the anatomy's one-bit flip of PA[17] on the same card on 19 September); its refresh domain is the controller too (R33b PASS).",
-   "cost": "done (E57, 29 Sep): plan tools/claims-v3/memp2/prereg/PREREG.md, frozen after development (lock SHA-256 9712c3d6…); data docs/reports/data/2026-09-29-memp2/ (raw/<card>/, val-aifoundry3/, val-aifoundry2/, dev-aifoundry1-c1/). Open: why PA[17] conflicts on aifoundry2 (the programmed map, rung 26, would say)",
+   "cost": "done (E57, 29 Sep): plan tools/claims-v3/memp2/prereg/PREREG.md, frozen after development (lock SHA-256 9712c3d6…); data docs/reports/data/2026-09-29-memp2/ (raw/<card>/, val-aifoundry3/, val-aifoundry2/, dev-aifoundry1-c1/). Open: why PA[17] conflicts on aifoundry2 (the programmed map, rung 26, would say); both a readback and a rerun wait for that card, out of service since 2 October (its cooling failed) until the lab fixes the air reaching it",
    "effect": "Chip diagram: the memory shire's address map (fact L50, inferred until 29 September) is measured on aifoundry3: its bank and row split, and PA[6–9] as the controller's bits by their refresh schedule; on aifoundry1-c1 the split only; on aifoundry2 the refresh bits, and the split except PA[17].",
    "diagram": "the memory shire's address map"
   },
@@ -5016,7 +5016,7 @@
    "done": true,
    "adds": "The test: workloads/pciebench's conc test with 2 × 1, 4, 16 and 64 MB, one and two commands in flight, in one stream or two, and with the copy split into 8 DMA elements. E55 (28–29 September) ran it on aifoundry1-c1 (development) and aifoundry3 (validation, five passes), and after DV2 on aifoundry2 as a third card (29 September, evening, five passes), with the same result on all three: two host-to-card commands in flight in one stream move 0.49 of one at 64 MB (a rate ratio of 0.48 over 1–64 MB on aifoundry3, 0.49 on aifoundry2), but one command in each of two streams loses nothing (1.01), and 8 elements move as much as 1 (0.99). Only two commands of one stream collide (T35-S held); a fixed cost per overlap (T35-A), a shared DMA read engine or the IOMMU (T35-BC), a queue that fills (T35-E) and the elements (T35-X) are refuted. Card to host, two commands in flight move 1.10 of one at 64 MB; at 1–16 MB the result was inconclusive on aifoundry3, and on aifoundry2 two 4 MB commands moved 0.88 of one, below the 0.95 predicted (a prediction no theory rests on). What inside one stream serialises its two commands is not established.",
    "cost": "done (E55, 29 Sep): a pciebench option; plan tools/claims-v3/pcie2/PREREG.md, frozen after development (SHA-256 f632d6b3…); data docs/reports/data/2026-09-29-pcie2/. The IOMMU passthrough run is no longer needed",
-   "effect": "PCIe page: section 5's collapse is a property of one stream: the same two copies in two streams lose nothing.",
+   "effect": "[PCIe page](https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link#several-at-once): section 5's collapse is a property of one stream: the same two copies in two streams lose nothing.",
    "diagram": "the PCIe shire and the host link"
   },
   {
@@ -5035,7 +5035,7 @@
    "rung": 43,
    "id": "exp-cache-bottleneck",
    "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
-   "status": "needs_tooling",
+   "status": "works_now",
    "what": "What caps a shire at 128 B per cycle",
    "done": false,
    "adds": "Own-scratchpad and L2 streams reach exactly 4.0 B per minion per cycle, 128 B per shire (2.46 TB/s chip-wide), half the four banks' 256 B. E57 (29 September) swept the tensor-load stride (64 B rotates the banks, 256 B stays in one bank, 1 KB in one sub-bank) over 1–4 neighbourhoods per shire, with the minions' starting banks and sub-banks staggered or not, on aifoundry1-c1 (development), aifoundry3 (validation) and, after DV2, aifoundry2 (a third card), with the same numbers on all three (within 0.32 B per shire-cycle): 128 B per shire-cycle at stride 64 from three neighbourhoods up (one alone: 50), 64 in one bank (stride 256), 32 in one sub-bank (stride 1 KB), and 37 for one neighbourhood in one bank. No registered theory survives (R43 FAIL on all three cards): 32 B per cycle per bank (T43-B) misses 7 configurations and a lockstep convoy (Cc) 5; a 128 B response path with 64 B banks and 32 B sub-banks (C) misses only the one neighbourhood in one bank (37 against 51.2). Which block is the limit is the question for the design team.",
@@ -5293,7 +5293,7 @@
    "id": "E20, E21",
    "when": "22 Sep, 12:12",
    "card": "aifoundry3, all three",
-   "what": "The strict protocol on the second card (one model scale, 0.92 of aifoundry2's model on 22 September; in the three-card check that scale is 0.88 as registered and 0.93–0.95 with busy and idle power compared at the same die temperature, and card to card over the eight Horace patterns (least squares) aifoundry3 switches 0.895 of aifoundry2 as registered and 0.958–0.969 at the same die temperature, near the catalogue's 0.972: §5, rung 10); the governor's inputs on every machine: aifoundry3's TDP of 0 W (65 W on aifoundry2), aifoundry1's cards unopenable then (an empty driver version string, fixed on 25 September; its card 1 has been measured since)",
+   "what": "The strict protocol on the second card: one model scale, 0.92 of aifoundry2's model on 22 September (in the three-card check 0.88 as registered and 0.93–0.95 with busy and idle power compared at the same die temperature; the card-to-card factors are in §5, rung 10); the governor's inputs on every machine: aifoundry3's TDP of 0 W (65 W on aifoundry2), aifoundry1's cards unopenable then (an empty driver version string, fixed on 25 September; its card 1 has been measured since)",
    "instruments": "board power, die temperature, DM config reads, SP trace",
    "data": [
     {
@@ -5431,8 +5431,8 @@
    ],
    "reports": [
     {
-     "title": "This page, §4",
-     "url": "#power"
+     "title": "This page, §4.2–§4.3",
+     "url": "#the-unmetered-remainder-attributed"
     }
    ]
   },
@@ -5482,7 +5482,7 @@
    "id": "E35–E46",
    "when": "25–26 Sep",
    "card": "aifoundry2, aifoundry3, aifoundry1-c1",
-   "what": "The version-3 campaign: twelve experiments re-measured 448 of the reports' claims under a plan registered before any run (its predictions and decision rules), each test planned for three to five repeats on each card: the memory anatomy and the cycle counter, latencies and the mesh, tensor-unit and SGEMM throughput, the Horace and sparsity ablations, hot and cool runs, the meter's refresh, reset and voltage maps, the wires, rings and relay, idle cycles, and the whole energy catalogue again; aifoundry1's card 0 was left out (it overheats)",
+   "what": "The version-3 campaign: twelve experiments, each under rules fixed before its data (predictions and decision rules), with three to six passes of each test planned on each card (eight for the catalogue's temperature panel on aifoundry2 and aifoundry1-c1). The eleven in the plan registered before any run re-measured 448 of the reports' claims: the memory anatomy and the cycle counter, latencies and the mesh, tensor-unit and SGEMM throughput, the Horace and sparsity ablations, hot and cool runs, the meter's refresh, reset and voltage maps, the wires, rings and relay, idle cycles, and the catalogue's temperature panel and DRAM-row rows. The twelfth, E46, added by an amendment, ran the whole energy catalogue again. aifoundry1's card 0 was left out (it overheated then, 98–102 °C in its smoke blocks: a broken fan, replaced on 2 October)",
    "instruments": "cycle counter, board power, rails, die temperature and clock (ettelem), SP stats and DEBUG traces, memory-shire counters",
    "data": [
     {
@@ -5501,7 +5501,7 @@
    "reports": [
     {
      "title": "This page: the note at the top and §1's scoreboard",
-     "url": "#reports"
+     "url": "#v3-note"
     },
     {
      "title": "Heat per millimetre",
@@ -5601,6 +5601,10 @@
     {
      "title": "Influence functions on the ET-SoC-1",
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions"
+    },
+    {
+     "title": "This page, §2: the energy-rate plane",
+     "url": "#events-title"
     }
    ]
   },
@@ -5608,7 +5612,7 @@
    "id": "E50",
    "when": "27 Sep, 14:24–15:13",
    "card": "aifoundry2, aifoundry3, aifoundry1-c1",
-   "what": "The host link and the launch path: copies of 4 KB to 256 MB each way, staged and DMA-only, small-copy round trips, empty-kernel launches and two transfers at once, through the runtime API; five runs per card 12 minutes apart, against thirteen predictions registered before any timed transfer",
+   "what": "The host link and the launch path: copies of 4 KB to 256 MB each way, staged and DMA-only, small-copy round trips, empty-kernel launches and two transfers at once, through the runtime API; five runs per card 12 minutes apart, against thirteen predictions registered before any timed transfer. The link trained at 16 GT/s x8 on every card; a 256 MB DMA-only copy crossed at 12.5–12.6 GB/s to the card (79–80% of Gen4 x8's 15.75 GB/s) and 10.4–10.5 GB/s back; an empty kernel on 32 shires took 556–566 µs launched and waited for but 104 µs each queued, the gap mostly the runtime's 500 µs idle poll; two host-to-card DMA commands in flight in one stream halved the rate (0.49 of one at a time; E55 found that two streams lose nothing); of the 44 verdicts on the predictions 31 passed, 8 failed (P3 and P11 on every card, P4a and P4b on aifoundry3) and 5 were inconclusive (P6, P7)",
    "instruments": "host wall clock through the runtime API (workloads/pciebench); die temperature, clocks and power before and after each run",
    "data": [
     {
@@ -5627,7 +5631,7 @@
     },
     {
      "title": "The ET-SoC-1, interactively (the PCIe shire, the Host panel, flow 6)",
-     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram"
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=6-host-and-pcie"
     }
    ]
   },
@@ -5635,7 +5639,7 @@
    "id": "E51",
    "when": "28–29 Sep",
    "card": "aifoundry2 (aifoundry3 read-only)",
-   "what": "DV2: what the governor compares (the mean of 34 shire sensors or the hottest one) and whether placement delays the first step down from 800 MHz. Development (28 Sep, 00:30–02:54): 21 read-only watch cycles, NAT-4 sessions of 7 s lifts, the throttle-state residencies; stopped when aifoundry2's Master Minion hung at 02:50 (restored at 08:32). Validation on the same card under the plan frozen after development (PREREG-VAL, SHA-256 e150ce16…), a replication the owner accepted, 28 Sep 20:45 – 29 Sep 16:57: 378 read-only watch cycles and the plan's limit of three NAT-4 sessions (22:13–22:30, 22:42–23:06, 23:19–23:56), each started from a reading of 60 °C or less; the Master Minion did not hang. The card idled at 71–76 °C in 327 of the 378 cycles, so the sessions could start only in an evening cool spell, and they gave 4 blocks with both placements measured, where the placement test needs 6. The frozen reducer's verdicts: no dead band (TH3), the heartbeat's latencies (TH4) and the residency counter's whole episodes (TH8) survived; an idle exit followed at once by the idle reset (TH7) fell, once in 52; the mean against the hottest sensor (TH1: 7 of 9 separating runs fitted the mean and none the hottest sensor, where the rule asks for 80%), the 0.20.0 loop (TH2) and placement (Q2: the perimeter held 800 MHz 1.16–1.52 times as long in each of the 4 blocks, a 99% interval of −0.11 to +0.61 for the log ratio) are untested",
+   "what": "DV2: what the governor compares (the mean of 34 shire sensors or the hottest one) and whether placement delays the first step down from 800 MHz. Development (28 Sep, 00:33–02:54): 21 read-only watch cycles, NAT-4 sessions of 7 s lifts, the throttle-state residencies; stopped when aifoundry2's Master Minion hung at 02:50 (restored at 08:32). Validation on the same card under the plan frozen after development (PREREG-VAL, SHA-256 e150ce16…), a replication the owner accepted, 28 Sep 20:45 – 29 Sep 16:57: 378 read-only watch cycles and the plan's limit of three NAT-4 sessions (22:13–22:30, 22:42–23:06, 23:19–23:56), each started from a reading of 60 °C or less; the Master Minion did not hang. The card idled at 71–76 °C in 327 of the 378 cycles, so the sessions could start only in an evening cool spell, and they gave 4 blocks with both placements measured, where the placement test needs 6. The frozen reducer's verdicts: no dead band (TH3), the heartbeat's latencies (TH4) and the residency counter's whole episodes (TH8) survived; an idle exit followed at once by the idle reset (TH7) fell, once in 52; the mean against the hottest sensor (TH1: 7 of 9 separating runs fitted the mean and none the hottest sensor, where the rule asks for 80%), the 0.20.0 loop (TH2) and placement (Q2: the perimeter held 800 MHz 1.16–1.52 times as long in each of the 4 blocks, a 99% interval of −0.11 to +0.61 for the log ratio) are untested",
    "instruments": "10 Hz ettelem telemetry of the 34 shire sensors' mean and peak-holds; the service processor's trace ring (governor entries and exits); DM throttle residencies; host wall clock",
    "data": [
     {
@@ -5687,8 +5691,12 @@
    ],
    "reports": [
     {
-     "title": "The effect of overheating",
-     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating"
+     "title": "The effect of overheating (§7: the experiments on the cards)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating#experiments"
+    },
+    {
+     "title": "This page, §5: rungs 45 and 46",
+     "url": "#ask-overheat-records"
     }
    ]
   },
@@ -5696,7 +5704,7 @@
    "id": "E54",
    "when": "28 Sep, 22:54",
    "card": "aifoundry3 (read-only)",
-   "what": "NV, the owner's NoC validation of Q63's voltage explanation: does the mesh's energy per bit·mm follow its 0.485 V supply? The NoC rail is to be set to 485, 540 and 600 mV at a fixed 400 MHz, with a restore to 485 mV on every exit path. Predictions frozen before any card write (predictions.json, SHA-256 c0d946c7…, registered at 23:06): the data part of a hop's energy goes as V² (×1.53 at 600 mV), against V or no dependence. A read-only probe of aifoundry3: firmware 1.3.1, BL2 0.20.0, the NoC set to 485 mV (484 on the die) at 400 MHz, the voltage table's NoC boot entry 485 mV. The first voltage write, the development probe, has not run: it waits for the owner. Validation on aifoundry2 (DV2's validation there ended on 29 Sep) after development on aifoundry3; aifoundry1's card 1 is refused, since its BL2 0.18.0 writes every NoC setting to flash. The source read found that a failed regulator write retries for ever on these BL2 builds (fixed upstream in 7c6049087, 10 October 2024), so the service processor's 10 s watchdog would reset the card",
+   "what": "NV, the owner's NoC validation of Q63's voltage explanation: does the mesh's energy per bit·mm follow its 0.485 V supply? The NoC rail is to be set to 485, 540 and 600 mV at a fixed 400 MHz, with a restore to 485 mV on every exit path. Predictions frozen before any card write (predictions.json, SHA-256 c0d946c7…, registered at 23:06): the data part of a hop's energy goes as V² (×1.53 at 600 mV), against V or no dependence. A read-only probe of aifoundry3: firmware 1.3.1, BL2 0.20.0, the NoC set to 485 mV (484 on the die) at 400 MHz, the voltage table's NoC boot entry 485 mV. The first voltage write, the development probe, has not run: it waits for the owner. Development is to run on aifoundry3 and the validation on aifoundry2, whose card has been out of service since 2 October (its cooling failed), so the registered validation waits until that card returns or the plan is amended; aifoundry1's card 1 is refused, since its BL2 0.18.0 writes every NoC setting to flash. The source read found that a failed regulator write retries for ever on these BL2 builds (fixed upstream in 7c6049087, 10 October 2024), so the service processor's 10 s watchdog would reset the card",
    "instruments": "read-only so far: ettelem, the SP trace, the NoC set-point, the on-die voltage and the voltage table",
    "data": [
     {
@@ -5731,6 +5739,10 @@
     {
      "title": "Over the PCIe link (§5: which commands collide; where a host copy lands)",
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link#which-commands-collide"
+    },
+    {
+     "title": "The ET-SoC-1, interactively (flow 6: the host's writes through the L3 homes)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=6-host-and-pcie"
     }
    ]
   },
@@ -5753,7 +5765,15 @@
     },
     {
      "title": "The ET-SoC-1, interactively (fact L104: the routing order)",
-     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram"
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#honest"
+    },
+    {
+     "title": "Heat per millimetre (the route map, y first)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm"
+    },
+    {
+     "title": "Anatomy of a memory access, interactively (the L3's route)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels"
     }
    ]
   },
@@ -5773,6 +5793,10 @@
     {
      "title": "This page, §5: rungs 33, 36 and 43",
      "url": "#exp-dram-rows"
+    },
+    {
+     "title": "The ET-SoC-1, interactively (fact L50: the DRAM address map; the L2 keeps a TensorLoad's lines)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#honest"
     }
    ]
   },
@@ -5780,7 +5804,7 @@
    "id": "E58",
    "when": "29 Sep, 00:01–00:45",
    "card": "aifoundry1-c1 (development), aifoundry3 (validation)",
-   "what": "tau, for rung 4: the rails' averaging filter per rail and card, from step bursts of 2.0, 3.2 and 4.0 s (a 20 W and a 10 W minion step, a DRAM step on the SRAM and NoC rails) under 10 Hz and 20 Hz samplers, and its inverse (tools/ettelem/deconv.py). Development on aifoundry1-c1 (00:01–00:13): τ 1.08 s on the minion rail, 0.54 on SRAM, 1.08 on the NoC, 1.10 for the board's average; the minion rail rose with 1.32 s and fell with 1.02 s (T1 failed there). Frozen (SHA-256 7d4fabad…); validation on aifoundry3 (00:34–00:45, three passes): 1.06, 1.01, 1.04 and 1.05 s; one first-order average per rail with its card's τ, published one SP pass late (T1–T3 held); deconvolved, every burst's level within 3% of the step and its energy within 1%, but the 2 s minion bursts' flat top scattered by 8.4% against at most 6% (T4 falsified); 94 of 96 items PASS. Not run on aifoundry2: its plan needs an amendment for that card first (a heat step, its own start temperature, a burst that does not starve its sampler, its own calibration)",
+   "what": "tau, for rung 4: the rails' averaging filter per rail and card, from step bursts of 2.0, 3.2 and 4.0 s (a 20 W and a 10 W minion step, a DRAM step on the SRAM and NoC rails) under 10 Hz and 20 Hz samplers, and its inverse (tools/ettelem/deconv.py). Development on aifoundry1-c1 (00:01–00:13): τ 1.08 s on the minion rail, 0.54 on SRAM, 1.08 on the NoC, 1.10 for the board's average; the minion rail rose with 1.32 s and fell with 1.02 s (T1 failed there). Frozen (SHA-256 7d4fabad…); validation on aifoundry3 (00:34–00:45, three passes): 1.06, 1.01, 1.04 and 1.05 s; one first-order average per rail with its card's τ, published one SP pass late (T1–T3 held); deconvolved, every burst's level within 3% of the step and its energy within 1%, but the 2 s minion bursts' flat top scattered by 8.4% against at most 6% (T4 falsified); 94 of 96 items PASS. Not run on aifoundry2: its plan needs an amendment for that card first (a heat step, its own start temperature, a burst that does not starve its sampler, its own calibration), and that card has been out of service since 2 October (its cooling failed)",
    "instruments": "ettelem at 10 and 20 Hz with no statistics reset (the three rails, board power and its average, die temperature, clock); enercat bursts",
    "data": [
     {
@@ -5795,11 +5819,11 @@
    "reports": [
     {
      "title": "This page, §5: rung 4",
-     "url": "#improve"
+     "url": "#rung-4"
     },
     {
      "title": "Power and temperature telemetry (§2: the filter, rail by rail)",
-     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature"
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor"
     }
    ]
   },
@@ -5827,6 +5851,14 @@
     {
      "title": "Sparse parity on the ET-SoC-1",
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-parity"
+    },
+    {
+     "title": "This page, §4.1: one burst through every meter",
+     "url": "#bt-title"
+    },
+    {
+     "title": "This page, §4.2: one solve's joules",
+     "url": "#sj-title"
     }
    ]
   }
@@ -7897,9 +7929,9 @@
    "pre_bits": 7,
    "post_bits": 57,
    "sim_short_reads": 12,
-   "card_short_reads_19sep": 11,
+   "card_short_reads_19sep": [11, 10],
    "fixcyc_below": 11,
-   "source": "rtl-sim/pmu_carry (E2; README.md: 12 counters, a 7-bit pre-counter and a 57-bit post-counter each, one shared adder whose index cnt_idx advances while any carry is pending; 12 short reads per wrap in simulation); the card's 11 (low bits 0-10) from E1 on 19 September; fixcyc() in workloads/memprobe/kernel/memprobe.c adds 128 below 11"
+   "source": "rtl-sim/pmu_carry (E2; README.md: 12 counters, a 7-bit pre-counter and a 57-bit post-counter each, one shared adder whose index cnt_idx advances while any carry is pending; 12 short reads per wrap in simulation); on aifoundry2's card at least low bits 0-10 in one launch and 0-9 in the other (E1, E2; 19 September); fixcyc() in workloads/memprobe/kernel/memprobe.c adds 128 below 11"
   },
   "per_card": {
    "aifoundry2": {
@@ -8245,5 +8277,733 @@
    }
   },
   "source": "docs/reports/data/2026-09-27-pcie/pcie.json (E50): bw.<card>.{h2d,d2h}.{dma,staged}[largest].gbs.mean, launch.<card>.single_us['32'] and b2b_us['32'], derived.<card>.h2d_two_in_flight_over_one; means over five runs"
+ },
+ "solve_energy": {
+  "experiment": "E59",
+  "date": "2026-09-29",
+  "card": "aifoundry3",
+  "mhz": [600],
+  "acc": {
+   "board": 0.03,
+   "rails": [-0.02, 0.07],
+   "unmetered": 0.15,
+   "stub_unmetered_share": [0.24, 0.25],
+   "source": "workloads/sparseparity/tools/energy_reduce.py docstring; workloads/sparseparity/tools/energy_stub.py rail_share"
+  },
+  "sizes": [
+   {
+    "id": "l1",
+    "label": "L1",
+    "size": [512, 4, 0.3, 448],
+    "s_per_solve": 0.1366,
+    "total": 5.0046,
+    "over": 1.6601,
+    "j": {
+     "idle_minion": 0.9423,
+     "idle_sram": 0.2632,
+     "idle_noc": 0.2898,
+     "idle_off": 1.761,
+     "leak": 0.0882,
+     "minion": 0.8159,
+     "sram": 0.7878,
+     "noc": 0.0123,
+     "off": 0.0441
+    },
+    "runs": [
+     {
+      "run": "l1",
+      "solves": 44,
+      "stage": "scp",
+      "solves_per_s": 7.3211,
+      "board_idle_w": 23.839,
+      "rails_idle_w": 10.947,
+      "die_c": [51.0, 53.273],
+      "w": {
+       "over": 12.737,
+       "rails": 12.061,
+       "off": 0.676,
+       "fit_off": 1.391
+      }
+     }
+    ],
+    "fit_off": 0.1848
+   },
+   {
+    "id": "l2",
+    "label": "L2",
+    "size": [512, 4, 0.4, 1850],
+    "s_per_solve": 0.4281,
+    "total": 16.6034,
+    "over": 6.1956,
+    "j": {
+     "idle_minion": 2.9193,
+     "idle_sram": 0.8167,
+     "idle_noc": 0.8997,
+     "idle_off": 5.5117,
+     "leak": 0.2604,
+     "minion": 3.0111,
+     "sram": 2.8865,
+     "noc": 0.0423,
+     "off": 0.2558
+    },
+    "runs": [
+     {
+      "run": "l2",
+      "solves": 14,
+      "stage": "scp",
+      "solves_per_s": 2.3361,
+      "board_idle_w": 23.705,
+      "rails_idle_w": 10.829,
+      "die_c": [51.0, 53.164],
+      "w": {
+       "over": 14.656,
+       "rails": 14.121,
+       "off": 0.535,
+       "fit_off": 1.633
+      }
+     }
+    ],
+    "fit_off": 0.6804
+   },
+   {
+    "id": "f5",
+    "label": "(256,5)",
+    "size": [256, 5, 0.4, 1925],
+    "s_per_solve": 2.492,
+    "total": 89.0681,
+    "over": 28.4226,
+    "j": {
+     "idle_minion": 17.3072,
+     "idle_sram": 4.8463,
+     "idle_noc": 5.3386,
+     "idle_off": 32.1673,
+     "leak": 0.9862,
+     "minion": 14.091,
+     "sram": 12.74,
+     "noc": 0.1831,
+     "off": 1.4085
+    },
+    "runs": [
+     {
+      "run": "f5h0",
+      "solves": 6,
+      "stage": "scp",
+      "solves_per_s": 1.0571,
+      "board_idle_w": 23.937,
+      "rails_idle_w": 11.028,
+      "die_c": [52.0, 53.596],
+      "w": {
+       "over": 13.916,
+       "rails": 12.787,
+       "off": 1.129,
+       "fit_off": 1.479
+      }
+     },
+     {
+      "run": "f5h1",
+      "solves": 3,
+      "stage": "scp",
+      "solves_per_s": 0.6468,
+      "board_idle_w": 23.942,
+      "rails_idle_w": 11.035,
+      "die_c": [52.0, 53.317],
+      "w": {
+       "over": 10.456,
+       "rails": 10.074,
+       "off": 0.382,
+       "fit_off": 1.188
+      }
+     }
+    ],
+    "fit_off": 3.1468
+   }
+  ],
+  "source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/<run>/energy.json (aifoundry3-1136-l1, aifoundry3-1136-l2, aifoundry3-1136-f5h0, aifoundry3-1136-f5h1): solves_per_s, board.{sp_avg_idle_w, leak_rise_j_per_solve, j_per_solve, j_per_solve_total}, rails.<rail>.{idle_w, j_per_solve, over_idle_w_plateau}, rails.unmetered.j_per_solve, board.catalogue.over_idle_w; host.json plan.stage; the fit: docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json <card>.coef (minion, sram, noc)"
+ },
+ "burst_trace": {
+  "experiment": "E59",
+  "date": "2026-09-29",
+  "card": "aifoundry3",
+  "mhz": [600],
+  "sampler_hz": 10.0,
+  "window_s": [-4.0, 10.0],
+  "rise_s": [1.0, 2.0],
+  "cols": ["t_s", "board_w", "board_avg_w", "minion_w", "sram_w", "noc_w", "die_c"],
+  "runs": [
+   {
+    "id": "l1",
+    "label": "L1",
+    "size": [512, 4, 0.3, 448],
+    "slice": "0/1",
+    "solves": 44,
+    "wall_s": 6.01,
+    "launch_s": [0.1353, 0.1352, 0.135, 0.1352, 0.1352, 0.1348, 0.1357, 0.1352, 0.1355, 0.1349, 0.1354, 0.1353, 0.1358, 0.1356, 0.1352, 0.1357, 0.1356, 0.1349, 0.1357, 0.1352, 0.1348, 0.1352, 0.1351, 0.1351, 0.1356, 0.1354, 0.1355, 0.1356, 0.1355, 0.1353, 0.1355, 0.1352, 0.1352, 0.1351, 0.1356, 0.135, 0.1351, 0.1353, 0.1355, 0.1355, 0.1353, 0.1352, 0.1356, 0.1355],
+    "edges_s": [0.341, 0.036],
+    "die_c": [51.0, 53.273],
+    "levels": {
+     "board_w": [23.857, 37.241],
+     "board_avg_w": [23.839, 37.224],
+     "minion_w": [6.898, 12.999],
+     "sram_w": [1.927, 7.756],
+     "noc_w": [2.121, 2.253]
+    },
+    "rise": {
+     "board_w": [1.006, 1.026],
+     "board_avg_w": [0.698, 0.842],
+     "minion_w": [0.647, 0.823],
+     "sram_w": [0.647, 0.839],
+     "noc_w": [0.247, 0.459]
+    },
+    "busy_readings": 21,
+    "at_idle": 0,
+    "at_idle_expected": 0.1951,
+    "cat_idle_w": 24.009,
+    "cat_busy_w": 37.241,
+    "busy_from_s": 0.5,
+    "samples": [
+     [-3.967, 23.85, 23.84, 6.893, 1.922, 2.124, 51],
+     [-3.867, 23.65, 23.84, 6.886, 1.924, 2.13, 51],
+     [-3.666, 23.78, 23.84, 6.891, 1.925, 2.126, 51],
+     [-3.366, 23.9, 23.84, 6.899, 1.927, 2.125, 51],
+     [-3.065, 23.85, 23.83, 6.901, 1.928, 2.129, 51],
+     [-2.865, 23.81, 23.84, 6.891, 1.927, 2.127, 51],
+     [-2.564, 23.89, 23.84, 6.893, 1.926, 2.125, 51],
+     [-2.264, 23.99, 23.84, 6.899, 1.928, 2.121, 51],
+     [-2.063, 23.89, 23.84, 6.904, 1.927, 2.12, 51],
+     [-1.763, 23.78, 23.84, 6.899, 1.927, 2.116, 51],
+     [-1.562, 23.9, 23.84, 6.905, 1.927, 2.115, 51],
+     [-1.262, 23.84, 23.84, 6.906, 1.926, 2.114, 51],
+     [-0.961, 23.77, 23.84, 6.895, 1.925, 2.118, 51],
+     [-0.761, 23.85, 23.84, 6.895, 1.926, 2.122, 51],
+     [-0.46, 23.81, 23.84, 6.895, 1.928, 2.124, 51],
+     [-0.26, 23.81, 23.84, 6.887, 1.926, 2.123, 51],
+     [0.04, 26.76, 23.85, 6.884, 1.927, 2.126, 52],
+     [0.341, 31.73, 26.76, 6.951, 1.93, 2.124, 52],
+     [0.541, 34.98, 28.93, 8.239, 3.257, 2.123, 52],
+     [0.841, 34.96, 30.72, 9.326, 4.262, 2.13, 52],
+     [1.041, 34.96, 30.72, 9.326, 4.262, 2.13, 53],
+     [1.141, 35.1, 32.13, 10.187, 5.082, 2.138, 53],
+     [1.341, 37.32, 33.18, 10.847, 5.699, 2.154, 53],
+     [1.642, 37.42, 34.03, 11.278, 6.15, 2.161, 53],
+     [1.942, 37.43, 34.66, 11.642, 6.52, 2.171, 53],
+     [2.142, 37.59, 35.11, 11.916, 6.816, 2.182, 53],
+     [2.442, 38.27, 35.51, 12.128, 7.012, 2.189, 53],
+     [2.743, 37.35, 35.83, 12.324, 7.174, 2.197, 53],
+     [2.943, 38.28, 36.02, 12.488, 7.309, 2.201, 53],
+     [3.243, 38.41, 36.21, 12.614, 7.402, 2.205, 53],
+     [3.543, 38.4, 36.38, 12.716, 7.483, 2.213, 53],
+     [3.743, 38.42, 36.47, 12.78, 7.554, 2.219, 53],
+     [4.044, 38.5, 36.55, 12.815, 7.585, 2.225, 54],
+     [4.344, 38.36, 36.62, 12.832, 7.62, 2.232, 54],
+     [4.544, 39.01, 36.65, 12.867, 7.654, 2.235, 54],
+     [4.844, 39.08, 36.7, 12.889, 7.661, 2.237, 54],
+     [5.045, 39.08, 36.85, 12.889, 7.661, 2.237, 54],
+     [5.145, 34.78, 36.85, 12.907, 7.696, 2.241, 54],
+     [5.345, 35.59, 36.92, 12.942, 7.702, 2.247, 54],
+     [5.645, 35.48, 36.93, 12.983, 7.744, 2.255, 54],
+     [5.845, 35.48, 36.98, 12.983, 7.744, 2.255, 54],
+     [5.945, 35.49, 36.98, 12.999, 7.747, 2.257, 54],
+     [6.146, 24.45, 35.56, 12.974, 7.753, 2.257, 53],
+     [6.446, 24.36, 33.0, 12.329, 7.124, 2.259, 53],
+     [6.747, 24.12, 31.02, 11.103, 5.911, 2.255, 53],
+     [6.947, 24.33, 29.49, 10.173, 4.985, 2.248, 53],
+     [7.247, 24.29, 28.27, 9.529, 4.348, 2.241, 53],
+     [7.448, 24.08, 27.4, 8.964, 3.787, 2.233, 53],
+     [7.748, 24.32, 26.67, 8.566, 3.387, 2.228, 53],
+     [8.049, 24.16, 26.11, 8.229, 3.068, 2.227, 53],
+     [8.249, 24.22, 25.69, 7.96, 2.813, 2.218, 53],
+     [8.55, 24.22, 25.34, 7.778, 2.629, 2.217, 53],
+     [8.85, 24.19, 25.06, 7.619, 2.476, 2.212, 53],
+     [9.051, 24.15, 24.87, 7.491, 2.354, 2.205, 53],
+     [9.151, 24.15, 24.87, 7.491, 2.354, 2.205, 52],
+     [9.352, 24.16, 24.7, 7.394, 2.272, 2.203, 52],
+     [9.652, 24.18, 24.57, 7.32, 2.203, 2.198, 52],
+     [9.853, 24.16, 24.48, 7.263, 2.151, 2.194, 52],
+     [9.953, 24.16, 24.48, 7.263, 2.151, 2.194, 52]
+    ]
+   },
+   {
+    "id": "l2",
+    "label": "L2",
+    "size": [512, 4, 0.4, 1850],
+    "slice": "0/1",
+    "solves": 14,
+    "wall_s": 5.993,
+    "launch_s": [0.4272, 0.427, 0.4269, 0.4267, 0.4268, 0.4269, 0.4272, 0.427, 0.4266, 0.4269, 0.4274, 0.4265, 0.4276, 0.4267],
+    "edges_s": [0.255, -0.034],
+    "die_c": [51.0, 53.164],
+    "levels": {
+     "board_w": [23.729, 39.042],
+     "board_avg_w": [23.705, 39.017],
+     "minion_w": [6.82, 14.015],
+     "sram_w": [1.908, 8.693],
+     "noc_w": [2.102, 2.242]
+    },
+    "rise": {
+     "board_w": [1.075, 0.788],
+     "board_avg_w": [0.622, 0.857],
+     "minion_w": [0.51, 0.806],
+     "sram_w": [0.528, 0.824],
+     "noc_w": [0.144, 0.386]
+    },
+    "busy_readings": 21,
+    "at_idle": 1,
+    "at_idle_expected": 0.0546,
+    "cat_idle_w": 23.887,
+    "cat_busy_w": 39.042,
+    "busy_from_s": 0.5,
+    "samples": [
+     [-3.953, 23.68, 23.69, 6.813, 1.905, 2.101, 51],
+     [-3.752, 23.62, 23.7, 6.807, 1.905, 2.1, 51],
+     [-3.452, 23.67, 23.7, 6.815, 1.904, 2.098, 51],
+     [-3.251, 23.71, 23.7, 6.817, 1.905, 2.098, 51],
+     [-2.951, 23.68, 23.7, 6.82, 1.908, 2.096, 51],
+     [-2.65, 23.89, 23.71, 6.826, 1.91, 2.102, 51],
+     [-2.45, 23.71, 23.71, 6.825, 1.909, 2.104, 51],
+     [-2.149, 23.78, 23.71, 6.827, 1.906, 2.104, 51],
+     [-1.849, 23.52, 23.7, 6.825, 1.91, 2.104, 51],
+     [-1.648, 23.81, 23.7, 6.823, 1.908, 2.105, 51],
+     [-1.347, 23.75, 23.71, 6.809, 1.907, 2.107, 51],
+     [-1.047, 23.89, 23.71, 6.809, 1.909, 2.103, 51],
+     [-0.846, 23.68, 23.71, 6.817, 1.909, 2.102, 51],
+     [-0.546, 23.68, 23.7, 6.822, 1.91, 2.099, 51],
+     [-0.245, 23.57, 23.7, 6.832, 1.911, 2.097, 51],
+     [-0.045, 23.78, 23.7, 6.821, 1.909, 2.098, 51],
+     [0.155, 23.78, 23.7, 6.821, 1.909, 2.098, 52],
+     [0.255, 40.06, 26.75, 6.82, 1.909, 2.097, 52],
+     [0.555, 41.33, 29.0, 8.286, 3.279, 2.104, 52],
+     [0.755, 38.55, 31.55, 9.365, 4.347, 2.114, 52],
+     [1.055, 40.19, 33.23, 10.49, 5.493, 2.122, 52],
+     [1.356, 24.99, 34.24, 11.289, 6.237, 2.131, 53],
+     [1.556, 38.75, 35.54, 11.753, 6.672, 2.138, 53],
+     [1.856, 41.43, 36.15, 12.356, 7.27, 2.147, 53],
+     [2.156, 35.79, 36.82, 12.618, 7.5, 2.156, 53],
+     [2.356, 40.37, 37.38, 12.936, 7.807, 2.163, 53],
+     [2.657, 41.56, 37.41, 13.226, 8.066, 2.173, 53],
+     [2.857, 38.92, 38.08, 13.276, 8.026, 2.18, 53],
+     [3.157, 40.49, 38.18, 13.545, 8.342, 2.187, 53],
+     [3.457, 35.75, 38.24, 13.596, 8.37, 2.193, 53],
+     [3.657, 39.09, 38.62, 13.619, 8.388, 2.203, 53],
+     [3.958, 41.76, 38.46, 13.799, 8.569, 2.205, 53],
+     [4.258, 35.96, 38.76, 13.802, 8.472, 2.21, 53],
+     [4.358, 35.96, 38.76, 13.802, 8.472, 2.21, 54],
+     [4.458, 40.73, 38.85, 13.903, 8.617, 2.213, 54],
+     [4.758, 41.76, 38.53, 13.94, 8.642, 2.221, 54],
+     [5.059, 39.2, 39.04, 13.846, 8.483, 2.228, 54],
+     [5.259, 41.83, 38.93, 14.034, 8.718, 2.236, 54],
+     [5.559, 36.02, 38.95, 13.974, 8.646, 2.239, 54],
+     [5.859, 39.23, 39.18, 13.973, 8.661, 2.248, 54],
+     [6.059, 24.54, 38.19, 14.059, 8.759, 2.251, 53],
+     [6.36, 24.41, 35.06, 13.582, 8.328, 2.259, 53],
+     [6.56, 24.41, 32.61, 13.582, 8.328, 2.259, 53],
+     [6.661, 24.29, 32.61, 12.114, 6.878, 2.253, 53],
+     [6.861, 24.18, 30.64, 10.931, 5.718, 2.248, 53],
+     [7.161, 24.18, 29.14, 10.058, 4.863, 2.238, 53],
+     [7.362, 24.18, 28.02, 10.058, 4.863, 2.238, 53],
+     [7.462, 24.18, 28.02, 9.386, 4.2, 2.232, 53],
+     [7.662, 24.15, 27.12, 8.826, 3.658, 2.226, 53],
+     [7.863, 24.15, 27.12, 8.826, 3.658, 2.226, 52],
+     [7.963, 24.25, 26.43, 8.417, 3.271, 2.215, 52],
+     [8.163, 24.12, 25.91, 8.098, 2.972, 2.21, 52],
+     [8.464, 24.08, 25.49, 7.864, 2.751, 2.204, 52],
+     [8.764, 24.12, 25.16, 7.668, 2.564, 2.199, 52],
+     [8.965, 24.05, 24.92, 7.511, 2.423, 2.195, 52],
+     [9.265, 24.02, 24.72, 7.398, 2.32, 2.194, 52],
+     [9.566, 23.99, 24.56, 7.318, 2.236, 2.186, 52],
+     [9.767, 24.12, 24.45, 7.245, 2.171, 2.183, 52],
+     [9.967, 24.12, 24.45, 7.245, 2.171, 2.183, 52]
+    ]
+   },
+   {
+    "id": "f5h0",
+    "label": "(256,5), first half",
+    "size": [256, 5, 0.4, 1925],
+    "slice": "0/2",
+    "solves": 6,
+    "wall_s": 5.676,
+    "launch_s": [0.9456, 0.9458, 0.9464, 0.9419, 0.9456, 0.9438],
+    "edges_s": [0.215, 0.043],
+    "die_c": [52.0, 53.596],
+    "levels": {
+     "board_w": [23.929, 38.316],
+     "board_avg_w": [23.937, 38.324],
+     "minion_w": [6.957, 13.478],
+     "sram_w": [1.935, 8.073],
+     "noc_w": [2.137, 2.264]
+    },
+    "rise": {
+     "board_w": [1.064, 1.075],
+     "board_avg_w": [0.576, 0.827],
+     "minion_w": [0.532, 0.828],
+     "sram_w": [0.542, 0.842],
+     "noc_w": [0.212, 0.471]
+    },
+    "busy_readings": 20,
+    "at_idle": 0,
+    "at_idle_expected": 0.0242,
+    "cat_idle_w": 24.065,
+    "cat_busy_w": 38.316,
+    "busy_from_s": 0.5,
+    "samples": [
+     [-3.993, 23.95, 23.94, 6.952, 1.938, 2.14, 52],
+     [-3.692, 23.89, 23.94, 6.949, 1.937, 2.136, 52],
+     [-3.392, 23.95, 23.93, 6.952, 1.937, 2.133, 52],
+     [-3.191, 23.81, 23.94, 6.953, 1.935, 2.137, 52],
+     [-2.891, 24.02, 23.94, 6.956, 1.935, 2.136, 52],
+     [-2.59, 24.02, 23.94, 6.957, 1.936, 2.139, 52],
+     [-2.389, 23.88, 23.94, 6.964, 1.933, 2.137, 52],
+     [-2.089, 23.91, 23.94, 6.959, 1.933, 2.138, 52],
+     [-1.889, 24.13, 23.94, 6.954, 1.934, 2.135, 52],
+     [-1.588, 23.89, 23.94, 6.954, 1.933, 2.132, 52],
+     [-1.287, 24.02, 23.94, 6.955, 1.933, 2.136, 52],
+     [-1.087, 23.71, 23.93, 6.962, 1.934, 2.141, 52],
+     [-0.786, 23.95, 23.93, 6.964, 1.934, 2.138, 52],
+     [-0.586, 23.94, 23.93, 6.953, 1.937, 2.142, 52],
+     [-0.286, 23.94, 23.93, 6.948, 1.935, 2.14, 52],
+     [0.015, 23.91, 23.92, 6.949, 1.936, 2.146, 52],
+     [0.215, 38.76, 26.56, 6.949, 1.939, 2.144, 52],
+     [0.515, 37.52, 29.3, 8.262, 3.154, 2.149, 53],
+     [0.815, 37.0, 31.25, 9.476, 4.362, 2.156, 53],
+     [1.015, 39.24, 32.23, 10.424, 5.26, 2.164, 53],
+     [1.316, 38.42, 33.83, 10.886, 5.679, 2.173, 53],
+     [1.616, 37.83, 34.85, 11.592, 6.4, 2.181, 53],
+     [1.816, 37.83, 35.4, 11.592, 6.4, 2.181, 53],
+     [1.916, 37.16, 35.4, 12.086, 6.869, 2.188, 53],
+     [2.116, 39.39, 35.83, 12.355, 7.105, 2.197, 53],
+     [2.416, 37.91, 36.48, 12.521, 7.297, 2.208, 53],
+     [2.516, 37.91, 36.48, 12.521, 7.297, 2.208, 54],
+     [2.717, 37.32, 36.79, 12.81, 7.575, 2.211, 54],
+     [2.817, 37.32, 36.79, 12.81, 7.575, 2.211, 53],
+     [2.917, 39.46, 36.6, 12.968, 7.696, 2.218, 54],
+     [3.217, 38.56, 37.2, 12.913, 7.575, 2.225, 54],
+     [3.517, 37.92, 37.45, 13.171, 7.858, 2.233, 54],
+     [3.718, 37.45, 37.48, 13.285, 7.963, 2.241, 54],
+     [4.018, 39.54, 37.46, 13.311, 7.96, 2.244, 54],
+     [4.218, 39.54, 37.76, 13.311, 7.96, 2.244, 54],
+     [4.318, 38.59, 37.76, 13.288, 7.949, 2.249, 54],
+     [4.518, 37.52, 37.84, 13.428, 8.091, 2.255, 54],
+     [4.819, 39.6, 37.39, 13.457, 8.109, 2.258, 54],
+     [5.019, 39.6, 37.84, 13.457, 8.109, 2.258, 54],
+     [5.119, 38.66, 37.84, 13.301, 7.878, 2.263, 54],
+     [5.319, 38.09, 37.99, 13.496, 8.101, 2.263, 54],
+     [5.619, 37.53, 37.95, 13.547, 8.156, 2.267, 54],
+     [5.819, 24.58, 35.98, 13.533, 8.123, 2.272, 54],
+     [6.12, 24.45, 33.3, 12.592, 7.253, 2.273, 54],
+     [6.22, 24.45, 33.3, 12.592, 7.253, 2.273, 53],
+     [6.42, 24.42, 31.18, 11.323, 6.009, 2.268, 53],
+     [6.621, 24.28, 29.69, 10.337, 5.059, 2.264, 53],
+     [6.921, 24.31, 28.45, 9.636, 4.379, 2.258, 53],
+     [7.122, 24.31, 27.54, 9.636, 4.379, 2.258, 53],
+     [7.222, 24.31, 27.54, 9.046, 3.813, 2.251, 53],
+     [7.422, 24.31, 26.77, 8.606, 3.395, 2.244, 53],
+     [7.723, 24.26, 26.19, 8.277, 3.084, 2.24, 53],
+     [8.024, 24.17, 25.74, 8.002, 2.823, 2.231, 53],
+     [8.224, 24.31, 25.39, 7.791, 2.624, 2.225, 53],
+     [8.525, 24.21, 25.11, 7.636, 2.475, 2.218, 53],
+     [8.725, 24.21, 24.92, 7.636, 2.475, 2.218, 53],
+     [8.825, 24.22, 24.92, 7.504, 2.36, 2.213, 53],
+     [9.026, 24.22, 24.75, 7.402, 2.276, 2.209, 53],
+     [9.326, 23.94, 24.62, 7.335, 2.211, 2.208, 53],
+     [9.526, 24.18, 24.52, 7.266, 2.156, 2.202, 53],
+     [9.827, 24.18, 24.44, 7.226, 2.115, 2.202, 53],
+     [9.927, 24.18, 24.44, 7.226, 2.115, 2.202, 53]
+    ]
+   },
+   {
+    "id": "f5h1",
+    "label": "(256,5), second half",
+    "size": [256, 5, 0.4, 1925],
+    "slice": "1/2",
+    "solves": 3,
+    "wall_s": 4.638,
+    "launch_s": [1.545, 1.5462, 1.5449],
+    "edges_s": [0.072, 0.138],
+    "die_c": [52.0, 53.317],
+    "levels": {
+     "board_w": [23.929, 34.823],
+     "board_avg_w": [23.942, 34.836],
+     "minion_w": [6.938, 12.272],
+     "sram_w": [1.951, 6.61],
+     "noc_w": [2.146, 2.227]
+    },
+    "rise": {
+     "board_w": [0.941, 1.156],
+     "board_avg_w": [0.589, 0.811],
+     "minion_w": [0.444, 0.727],
+     "sram_w": [0.466, 0.713],
+     "noc_w": [0.129, 0.51]
+    },
+    "busy_readings": 14,
+    "at_idle": 0,
+    "at_idle_expected": 0.0056,
+    "cat_idle_w": 24.029,
+    "cat_busy_w": 34.823,
+    "busy_from_s": 0.5,
+    "samples": [
+     [-3.935, 24.08, 23.94, 6.953, 1.947, 2.145, 52],
+     [-3.635, 23.92, 23.94, 6.949, 1.947, 2.142, 52],
+     [-3.434, 23.91, 23.94, 6.943, 1.948, 2.143, 52],
+     [-3.134, 23.91, 23.94, 6.935, 1.949, 2.144, 52],
+     [-2.833, 23.91, 23.94, 6.932, 1.949, 2.144, 52],
+     [-2.633, 23.91, 23.94, 6.932, 1.95, 2.147, 52],
+     [-2.332, 23.86, 23.94, 6.936, 1.952, 2.146, 52],
+     [-2.031, 23.95, 23.95, 6.941, 1.953, 2.144, 52],
+     [-1.831, 23.95, 23.95, 6.941, 1.95, 2.147, 52],
+     [-1.53, 23.99, 23.95, 6.946, 1.952, 2.146, 52],
+     [-1.23, 23.92, 23.95, 6.95, 1.953, 2.145, 52],
+     [-1.029, 23.95, 23.94, 6.937, 1.952, 2.146, 52],
+     [-0.729, 23.95, 23.93, 6.932, 1.953, 2.145, 52],
+     [-0.528, 23.94, 23.94, 6.933, 1.952, 2.148, 52],
+     [-0.228, 23.89, 23.93, 6.935, 1.951, 2.147, 52],
+     [0.072, 36.08, 24.02, 6.932, 1.953, 2.149, 52],
+     [0.272, 36.36, 26.78, 6.986, 1.957, 2.146, 52],
+     [0.372, 36.36, 26.78, 6.986, 1.957, 2.146, 53],
+     [0.573, 35.32, 28.87, 8.325, 3.207, 2.15, 53],
+     [0.873, 34.18, 30.36, 9.308, 4.122, 2.156, 53],
+     [1.073, 34.22, 31.22, 10.058, 4.787, 2.166, 53],
+     [1.373, 32.98, 31.69, 10.5, 5.132, 2.174, 53],
+     [1.674, 36.45, 31.72, 10.769, 5.294, 2.18, 53],
+     [1.874, 36.52, 32.78, 10.816, 5.272, 2.187, 53],
+     [2.174, 35.42, 33.49, 11.294, 5.773, 2.194, 53],
+     [2.474, 34.38, 33.87, 11.627, 6.102, 2.199, 53],
+     [2.674, 34.38, 33.99, 11.796, 6.252, 2.202, 53],
+     [2.975, 33.08, 33.79, 11.873, 6.279, 2.209, 53],
+     [3.275, 36.63, 33.49, 11.833, 6.154, 2.214, 53],
+     [3.375, 36.63, 33.49, 11.833, 6.154, 2.214, 54],
+     [3.475, 36.63, 34.24, 11.724, 6.023, 2.215, 54],
+     [3.775, 35.61, 34.59, 12.023, 6.36, 2.218, 54],
+     [4.076, 34.59, 34.69, 12.16, 6.522, 2.22, 54],
+     [4.276, 33.2, 34.59, 12.207, 6.557, 2.227, 54],
+     [4.576, 33.19, 34.26, 12.176, 6.496, 2.232, 54],
+     [4.676, 33.19, 34.26, 12.176, 6.496, 2.232, 53],
+     [4.876, 24.38, 32.45, 12.06, 6.304, 2.235, 53],
+     [5.077, 24.32, 30.5, 11.087, 5.477, 2.234, 53],
+     [5.377, 24.31, 29.07, 10.181, 4.68, 2.233, 53],
+     [5.678, 24.25, 27.93, 9.48, 4.068, 2.228, 53],
+     [5.878, 24.19, 27.12, 8.914, 3.573, 2.222, 53],
+     [6.179, 24.16, 26.46, 8.512, 3.226, 2.216, 53],
+     [6.379, 24.16, 25.96, 8.178, 2.943, 2.213, 53],
+     [6.68, 24.15, 25.53, 7.924, 2.729, 2.206, 53],
+     [6.98, 24.16, 25.2, 7.718, 2.55, 2.202, 53],
+     [7.181, 24.12, 24.99, 7.566, 2.415, 2.199, 53],
+     [7.481, 24.22, 24.79, 7.453, 2.321, 2.196, 53],
+     [7.682, 24.15, 24.65, 7.362, 2.245, 2.195, 53],
+     [7.982, 24.21, 24.53, 7.286, 2.183, 2.194, 53],
+     [8.283, 24.12, 24.43, 7.227, 2.134, 2.193, 52],
+     [8.483, 24.08, 24.36, 7.18, 2.097, 2.19, 52],
+     [8.784, 24.12, 24.31, 7.143, 2.068, 2.188, 52],
+     [8.984, 24.12, 24.27, 7.143, 2.068, 2.188, 52],
+     [9.084, 24.15, 24.27, 7.116, 2.043, 2.189, 52],
+     [9.285, 23.99, 24.23, 7.101, 2.026, 2.185, 52],
+     [9.585, 24.08, 24.21, 7.079, 2.013, 2.186, 52],
+     [9.786, 24.16, 24.18, 7.07, 2.003, 2.185, 52],
+     [9.986, 24.16, 24.18, 7.07, 2.003, 2.185, 52]
+    ]
+   }
+  ],
+  "source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/<run>/ (aifoundry3-1136-l1, aifoundry3-1136-l2, aifoundry3-1136-f5h0, aifoundry3-1136-f5h1): telemetry.jsonl.gz (t_ms, board_w, sp.board_avg_w, sp.{minion,sram,noc}_w[0], temp_c.minshire[0]); host.json launch_epoch_ms, launch_s; energy.json window.{lo_ms, hi_ms, wall_s, board_edges_minus_host_s}, board.{sp_avg_idle_w, windows_s.busy}, board.catalogue.{idle_w, idle_before_w, busy_w, busy_readings, busy_readings_at_idle, busy_readings_at_idle_expected}, rails.<rail>.{idle_w, over_idle_w_plateau}, instance, slice, solves, die_c"
+ },
+ "energy_plane": {
+  "gs": {
+   "experiment": "E48",
+   "fields": ["config", "e_j", "lo_j", "hi_j", "per_s"],
+   "rows": [
+    ["amoaddg.w/chip-8M/rand/zeros/h2/mff/n1024", 1.116e-09, 8.529e-10, 1.3e-09, 2792000000.0],
+    ["amoaddl.w/shire-256K/rand/zeros/h2/mff/n1024", 2.701e-10, 2.419e-10, 3.021e-10, 12820000000.0],
+    ["famoaddg.pi/chip-8M/rand/zeros/h2/mff/n1024", 1.731e-09, 1.566e-09, 1.872e-09, 2802000000.0],
+    ["famoaddg.pi/dram-512B/bcast/zeros/h2/mff/n1024", 2.518e-09, 2.268e-09, 2.803e-09, 1377000000.0],
+    ["famoaddl.pi/dram-512B/bcast/zeros/h2/mff/n1024", 4.127e-10, 3.801e-10, 4.479e-10, 10550000000.0],
+    ["famoaddl.pi/shire-256K/rand/zeros/h2/mff/n1024", 3.921e-10, 3.526e-10, 4.25e-10, 12690000000.0],
+    ["fg32b.ps/dram-512B/rand/random/h2/mff/n1024", 3.939e-12, 3.528e-12, 4.268e-12, 1820000000000.0],
+    ["fg32w.ps/dram-256K/rand/random/h2/mff/n1024", 5.396e-10, 4.898e-10, 5.873e-10, 19060000000.0],
+    ["fg32w.ps/dram-4K/rand/random/h2/mff/n1024", 2.264e-11, 2.019e-11, 2.493e-11, 424100000000.0],
+    ["fg32w.ps/dram-512B/rand/random/h2/mff/n1024", 3.814e-12, 3.669e-12, 3.972e-12, 1786000000000.0],
+    ["fg32w.ps/scp-16K/rand/random/h2/mff/n1024", 2.337e-11, 2.214e-11, 2.571e-11, 424100000000.0],
+    ["fgb.ps/dram-4K/rand/random/h2/mff/n1024", 3.552e-10, 3.235e-10, 3.935e-10, 27360000000.0],
+    ["fgb.ps/dram-512B/rand/random/h2/mff/n1024", 1.245e-11, 1.16e-11, 1.32e-11, 452000000000.0],
+    ["fgh.ps/dram-4K/rand/random/h2/mff/n1024", 3.554e-10, 3.326e-10, 3.901e-10, 27360000000.0],
+    ["fgh.ps/dram-512B/rand/random/h2/mff/n1024", 1.297e-11, 1.227e-11, 1.461e-11, 451900000000.0],
+    ["fgw.ps/dram-16K/rand/random/h2/mff/n1024", 1.626e-09, 1.504e-09, 1.814e-09, 8434000000.0],
+    ["fgw.ps/dram-1K/rand/random/h2/mff/n1024", 1.543e-10, 1.436e-10, 1.756e-10, 64780000000.0],
+    ["fgw.ps/dram-256B/rand/random/h2/mff/n1024", 1.24e-11, 1.112e-11, 1.327e-11, 452000000000.0],
+    ["fgw.ps/dram-256K/rand/random/h1/mff/n1024", 9.033e-09, 8.56e-09, 9.663e-09, 1194000000.0],
+    ["fgw.ps/dram-256K/rand/random/h2/mff/n1024", 9.83e-09, 9.215e-09, 1.034e-08, 1193000000.0],
+    ["fgw.ps/dram-256K/rand/zeros/h2/mff/n1024", 7.105e-09, 6.672e-09, 7.815e-09, 1193000000.0],
+    ["fgw.ps/dram-256K/s16/random/h2/mff/n1024", 9.791e-09, 9.196e-09, 1.038e-08, 1196000000.0],
+    ["fgw.ps/dram-256K/unit/random/h2/mff/n1024", 5.882e-10, 5.384e-10, 6.332e-10, 16700000000.0],
+    ["fgw.ps/dram-4K/bcast/random/h2/mff/n1024", 5.366e-11, 4.988e-11, 5.835e-11, 92740000000.0],
+    ["fgw.ps/dram-4K/line/random/h2/mff/n1024", 5.946e-11, 5.32e-11, 6.444e-11, 92740000000.0],
+    ["fgw.ps/dram-4K/rand/random/h2/m01/n1024", 1.893e-10, 1.81e-10, 1.995e-10, 46210000000.0],
+    ["fgw.ps/dram-4K/rand/random/h2/m0f/n1024", 3.611e-10, 3.388e-10, 3.95e-10, 27300000000.0],
+    ["fgw.ps/dram-4K/rand/random/h2/mff/n1024", 3.545e-10, 3.299e-10, 3.916e-10, 27360000000.0],
+    ["fgw.ps/dram-4K/rand/zeros/h2/mff/n1024", 1.675e-10, 1.582e-10, 1.763e-10, 27360000000.0],
+    ["fgw.ps/dram-4K/s16/random/h2/mff/n1024", 3.477e-10, 3.229e-10, 3.825e-10, 27910000000.0],
+    ["fgw.ps/dram-4K/s2/random/h2/mff/n1024", 5.746e-11, 5.272e-11, 6.288e-11, 92740000000.0],
+    ["fgw.ps/dram-4K/s4/random/h2/mff/n1024", 9.169e-11, 8.578e-11, 1.007e-10, 98870000000.0],
+    ["fgw.ps/dram-4K/unit/random/h2/mff/n1024", 3.421e-11, 3.223e-11, 3.764e-11, 154000000000.0],
+    ["fgw.ps/dram-512B/bcast/random/h2/mff/n1024", 9.278e-12, 8.731e-12, 9.578e-12, 453600000000.0],
+    ["fgw.ps/dram-512B/line/random/h2/mff/n1024", 1.237e-11, 1.136e-11, 1.308e-11, 453600000000.0],
+    ["fgw.ps/dram-512B/rand/random/h1/mff/n1024", 1.008e-11, 9.554e-12, 1.056e-11, 438700000000.0],
+    ["fgw.ps/dram-512B/rand/random/h2/m01/n1024", 6.89e-11, 6.46e-11, 7.631e-11, 56530000000.0],
+    ["fgw.ps/dram-512B/rand/random/h2/m0f/n1024", 2.039e-11, 1.925e-11, 2.14e-11, 226600000000.0],
+    ["fgw.ps/dram-512B/rand/random/h2/mff/n1024", 1.276e-11, 1.189e-11, 1.457e-11, 452300000000.0],
+    ["fgw.ps/dram-512B/rand/zeros/h2/mff/n1024", 1.073e-11, 1.021e-11, 1.173e-11, 452300000000.0],
+    ["fgw.ps/dram-512B/s16/random/h2/mff/n1024", 1.29e-11, 1.209e-11, 1.433e-11, 452300000000.0],
+    ["fgw.ps/dram-512B/s2/random/h2/mff/n1024", 1.254e-11, 1.178e-11, 1.363e-11, 453600000000.0],
+    ["fgw.ps/dram-512B/s4/random/h2/mff/n1024", 1.176e-11, 1.136e-11, 1.252e-11, 453700000000.0],
+    ["fgw.ps/dram-512B/unit/random/h2/mff/n1024", 1.213e-11, 1.127e-11, 1.253e-11, 452800000000.0],
+    ["fgw.ps/dram-64K/rand/random/h2/mff/n1024", 9.238e-09, 9.193e-09, 9.309e-09, 1194000000.0],
+    ["fgw.ps/dram-8K/rand/random/h1/mff/n1024", 3.176e-10, 2.853e-10, 3.549e-10, 27340000000.0],
+    ["fgw.ps/rscp-16K/rand/random/h2/mff/n1024", 9.031e-10, 8.431e-10, 1.01e-09, 10190000000.0],
+    ["fgw.ps/rscp-16K/unit/random/h2/mff/n1024", 7.566e-11, 7.272e-11, 8.275e-11, 71120000000.0],
+    ["fgw.ps/scp-16K/rand/random/h2/mff/n1024", 3.678e-10, 3.443e-10, 3.996e-10, 27360000000.0],
+    ["fgw.ps/scp-16K/rand/zeros/h2/mff/n1024", 2.001e-10, 1.883e-10, 2.214e-10, 27360000000.0],
+    ["fgw.ps/scp-16K/s16/random/h2/mff/n1024", 3.633e-10, 3.379e-10, 4.114e-10, 27910000000.0],
+    ["fgw.ps/scp-16K/unit/random/h2/mff/n1024", 3.594e-11, 3.353e-11, 3.834e-11, 154000000000.0],
+    ["fgwg.ps/dram-256K/rand/random/h2/mff/n1024", 9.613e-09, 9.147e-09, 1.019e-08, 1167000000.0],
+    ["fgwg.ps/dram-4K/rand/random/h2/mff/n1024", 1.533e-09, 1.422e-09, 1.64e-09, 6463000000.0],
+    ["fgwg.ps/rscp-16K/rand/random/h2/mff/n1024", 9.655e-10, 9.05e-10, 1.026e-09, 7426000000.0],
+    ["fgwl.ps/dram-4K/rand/random/h2/mff/n1024", 3.496e-10, 3.274e-10, 3.807e-10, 19570000000.0],
+    ["fgwl.ps/dram-4K/unit/random/h2/mff/n1024", 2.994e-10, 2.746e-10, 3.236e-10, 20930000000.0],
+    ["fgwl.ps/scp-16K/rand/random/h2/mff/n1024", 3.614e-10, 3.365e-10, 3.926e-10, 19580000000.0],
+    ["flw/dram-256K/rand/random/h2/mff/n1024", 9.235e-09, 8.648e-09, 9.907e-09, 1186000000.0],
+    ["flw/dram-4K/rand/random/h2/mff/n1024", 3.36e-10, 3.15e-10, 3.694e-10, 27470000000.0],
+    ["flw/dram-512B/rand/random/h2/mff/n1024", 1.404e-11, 1.343e-11, 1.455e-11, 402800000000.0],
+    ["flw/scp-16K/rand/random/h2/mff/n1024", 3.513e-10, 3.256e-10, 3.876e-10, 27470000000.0],
+    ["fsc32w.ps/dram-4K/rand/random/h2/mff/n1024", 4.965e-11, 4.651e-11, 5.489e-11, 311300000000.0],
+    ["fsc32w.ps/dram-512B/rand/random/h2/mff/n1024", 4.811e-12, 4.678e-12, 4.956e-12, 1809000000000.0],
+    ["fsc32w.ps/scp-16K/rand/random/h2/mff/n1024", 4.734e-11, 4.419e-11, 5.216e-11, 311400000000.0],
+    ["fscb.ps/dram-4K/rand/random/h2/mff/n1024", 7.303e-10, 6.78e-10, 8.129e-10, 23540000000.0],
+    ["fscb.ps/dram-512B/rand/random/h2/mff/n1024", 1.468e-11, 1.391e-11, 1.52e-11, 451600000000.0],
+    ["fsch.ps/dram-4K/rand/random/h2/mff/n1024", 7.289e-10, 6.777e-10, 8.114e-10, 23540000000.0],
+    ["fsch.ps/dram-512B/rand/random/h2/mff/n1024", 1.474e-11, 1.409e-11, 1.646e-11, 451600000000.0],
+    ["fscw.ps/dram-16K/rand/random/h2/mff/n1024", 3.197e-09, 2.956e-09, 3.522e-09, 8185000000.0],
+    ["fscw.ps/dram-256K/rand/random/h2/mff/n1024", 2.377e-08, 2.221e-08, 2.528e-08, 422100000.0],
+    ["fscw.ps/dram-256K/unit/random/h2/mff/n1024", 1.347e-09, 1.262e-09, 1.46e-09, 6821000000.0],
+    ["fscw.ps/dram-4K/bcast/random/h2/mff/n1024", 1.043e-10, 9.732e-11, 1.137e-10, 89750000000.0],
+    ["fscw.ps/dram-4K/line/random/h2/mff/n1024", 1.096e-10, 1.031e-10, 1.186e-10, 89750000000.0],
+    ["fscw.ps/dram-4K/rand/random/h2/mff/n1024", 7.315e-10, 6.769e-10, 8.139e-10, 23540000000.0],
+    ["fscw.ps/dram-4K/rand/zeros/h2/mff/n1024", 2.859e-10, 2.698e-10, 3.061e-10, 23540000000.0],
+    ["fscw.ps/dram-4K/s16/random/h2/mff/n1024", 7.274e-10, 6.145e-10, 8.245e-10, 22020000000.0],
+    ["fscw.ps/dram-4K/unit/random/h2/mff/n1024", 6.122e-11, 5.839e-11, 6.602e-11, 150500000000.0],
+    ["fscw.ps/dram-512B/bcast/random/h2/mff/n1024", 1.195e-11, 1.11e-11, 1.307e-11, 453400000000.0],
+    ["fscw.ps/dram-512B/line/random/h2/mff/n1024", 1.494e-11, 1.425e-11, 1.62e-11, 453400000000.0],
+    ["fscw.ps/dram-512B/rand/random/h1/mff/n1024", 1.254e-11, 1.177e-11, 1.414e-11, 438700000000.0],
+    ["fscw.ps/dram-512B/rand/random/h2/mff/n1024", 1.469e-11, 1.387e-11, 1.55e-11, 451500000000.0],
+    ["fscw.ps/dram-512B/rand/zeros/h2/mff/n1024", 1.165e-11, 1.107e-11, 1.242e-11, 451500000000.0],
+    ["fscw.ps/dram-512B/s16/random/h2/mff/n1024", 1.48e-11, 1.36e-11, 1.589e-11, 452000000000.0],
+    ["fscw.ps/dram-512B/unit/random/h2/mff/n1024", 1.412e-11, 1.358e-11, 1.465e-11, 452600000000.0],
+    ["fscw.ps/dram-8K/rand/random/h1/mff/n1024", 6.974e-10, 6.435e-10, 7.906e-10, 23320000000.0],
+    ["fscw.ps/rscp-16K/rand/random/h2/mff/n1024", 1.983e-09, 1.861e-09, 2.187e-09, 10230000000.0],
+    ["fscw.ps/scp-16K/rand/random/h2/mff/n1024", 6.905e-10, 6.419e-10, 7.625e-10, 23540000000.0],
+    ["fscw.ps/scp-16K/unit/random/h2/mff/n1024", 5.959e-11, 5.634e-11, 6.401e-11, 150500000000.0],
+    ["fscwg.ps/dram-256K/rand/random/h2/mff/n1024", 1.953e-08, 1.763e-08, 2.156e-08, 498200000.0],
+    ["fscwg.ps/dram-4K/rand/random/h2/mff/n1024", 1.423e-09, 1.275e-09, 1.529e-09, 4512000000.0],
+    ["fscwg.ps/rscp-16K/rand/random/h2/mff/n1024", 1.109e-09, 1.015e-09, 1.17e-09, 5182000000.0],
+    ["fscwl.ps/dram-4K/rand/random/h2/mff/n1024", 4.294e-10, 4.05e-10, 4.792e-10, 14450000000.0],
+    ["fscwl.ps/scp-16K/rand/random/h2/mff/n1024", 4.02e-10, 3.485e-10, 4.477e-10, 14460000000.0],
+    ["fsw/dram-4K/rand/random/h2/mff/n1024", 7.736e-10, 7.102e-10, 8.561e-10, 23610000000.0],
+    ["fsw/dram-512B/rand/random/h2/mff/n1024", 2.553e-11, 2.481e-11, 2.64e-11, 401900000000.0],
+    ["fsw/scp-16K/rand/random/h2/mff/n1024", 7.295e-10, 6.756e-10, 8.158e-10, 23610000000.0],
+    ["upd/dram-256K/rand/random/h2/mff/n1024", 2.215e-08, 2.074e-08, 2.375e-08, 422500000.0],
+    ["upd/dram-4K/rand/random/h2/mff/n1024", 8.498e-10, 7.892e-10, 9.65e-10, 18240000000.0],
+    ["upd/dram-512B/rand/random/h2/mff/n1024", 3.628e-11, 3.471e-11, 3.821e-11, 139400000000.0],
+    ["upd/scp-16K/rand/random/h2/mff/n1024", 8.006e-10, 6.989e-10, 8.877e-10, 18240000000.0]
+   ],
+   "tables": {
+    "chip-8M": "one 8 MB table for the chip (at the home L3 slices)",
+    "dram-16K": "L2 and L3: 16 KB per hart, 1 MB per shire (32 MB in all)",
+    "dram-1K": "1 KB per hart",
+    "dram-256B": "256 B per hart",
+    "dram-256K": "DRAM: 256 KB per hart (512 MB in all)",
+    "dram-4K": "L2: 4 KB per hart, 256 KB per shire (half the L2)",
+    "dram-512B": "L1: 512 B per hart (the hart's whole L1)",
+    "dram-64K": "L3 and DRAM: 64 KB per hart (128 MB in all)",
+    "dram-8K": "8 KB per hart",
+    "rscp-16K": "remote scratchpad: 16 KB per hart of a scratchpad 2 mesh hops away",
+    "scp-16K": "own scratchpad: 16 KB per hart of the shire's own scratchpad",
+    "shire-256K": "a 256 KB table shared by the shire (at its L2)"
+   },
+   "patterns": {
+    "unit": "unit stride",
+    "s2": "stride 2 words",
+    "s4": "stride 4 words",
+    "line": "8 words of one line, permuted",
+    "bcast": "every lane one word",
+    "s16": "one word per line, lines in order",
+    "rand": "one word per line, lines random"
+   },
+   "upd": "gather + fadd.ps + scatter",
+   "update_ops": ["amoaddg.w", "amoaddl.w", "famoaddg.pi", "famoaddl.pi", "upd"],
+   "fewer_cards": {
+    "fgw.ps/dram-64K/rand/random/h2/mff/n1024": ["aifoundry3"]
+   },
+   "source": "manual.json gs.configs[gs/E/<config>]: pj_per_element.{mean, lo, hi} (x 1e-12) and elements_per_s.mean, every gs/E configuration with both; pooled over three passes on each of three cards (E48), except the configurations in fewer_cards, measured on the cards it names (pj_per_element.per_card)"
+  },
+  "minion": {
+   "rate_config": "R/fgw.ps/dram-512B/rand/random/h2/mff/nM1",
+   "e_config": "E/fgw.ps/dram-512B/rand/random/h2/mff/n1024",
+   "per_s": 440700000.0,
+   "e_j": 1.276e-11,
+   "chip_per_s": 452300000000.0,
+   "source": "manual.json gs.configs[gs/R/fgw.ps/dram-512B/rand/random/h2/mff/nM1].elements_per_s.mean (one minion, both harts, measured) and [gs/E/fgw.ps/dram-512B/rand/random/h2/mff/n1024].pj_per_element.mean (the chip's, assumed to hold for one minion)",
+   "w": 0.005623
+  },
+  "workloads": {
+   "experiment": "E59",
+   "card": "aifoundry3",
+   "macs_per_op": 16384,
+   "sizes": [
+    {
+     "id": "l1",
+     "label": "L1",
+     "size": [512, 4, 0.3, 448],
+     "ops": 81989040,
+     "candidates": 2829877120,
+     "macs": 1343308431360,
+     "j_per_solve": 1.6601,
+     "solves_per_s": 7.3211,
+     "w": 12.154,
+     "per": {
+      "solve": [1.66, 7.321],
+      "candidate": [5.866e-10, 20720000000.0],
+      "mac": [1.236e-12, 9835000000000.0]
+     }
+    },
+    {
+     "id": "l2",
+     "label": "L2",
+     "size": [512, 4, 0.4, 1850],
+     "ops": 339668880,
+     "candidates": 2829877120,
+     "macs": 5565134929920,
+     "j_per_solve": 6.1956,
+     "solves_per_s": 2.3361,
+     "w": 14.473,
+     "per": {
+      "solve": [6.196, 2.336],
+      "candidate": [2.189e-09, 6611000000.0],
+      "mac": [1.113e-12, 13000000000000.0]
+     }
+    },
+    {
+     "id": "f5",
+     "label": "(256,5)",
+     "size": [256, 5, 0.4, 1925],
+     "ops": 1230032012,
+     "candidates": 8809549056,
+     "macs": 20152844484608,
+     "j_per_solve": 28.4226,
+     "solves_per_s": 0.4013,
+     "w": 11.406,
+     "per": {
+      "solve": [28.42, 0.4013],
+      "candidate": [3.226e-09, 3535000000.0],
+      "mac": [1.41e-12, 8087000000000.0]
+     }
+    }
+   ],
+   "source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/<run>/energy.json: board.j_per_solve (over idle) and 1 / solves_per_s, summed over a size's runs ((256,5)'s two halves); plan.ops (TensorIMA8A32 ops) and plan.candidates, summed; a solve's joules over idle divided by its candidates, or by its ops x 16,384 multiply-adds"
+  }
  }
 }
