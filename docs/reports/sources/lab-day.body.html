@@ -11,6 +11,7 @@ table.commits{font-size:.84rem}
 table.commits td:first-child{font-family:var(--mono,ui-monospace,monospace);white-space:nowrap}
 table.commits td:nth-child(2){white-space:nowrap;color:var(--ink-2)}
 .where{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--axis);border-radius:999px;padding:1px 8px;color:var(--ink-2);margin-right:4px}
+.upd{max-width:900px;margin:10px 0 16px;padding:9px 12px;border:1px solid var(--axis);border-left:3px solid var(--c1);border-radius:8px;background:var(--surface);font-size:.94rem}
 </style>
 
 <h1>AI Foundry lab, 2 October 2026: what changed</h1>
@@ -79,6 +80,8 @@ other near 97 °C, which is the slow crawl in the middle; past it nothing on the
 would hold it near 81 °C, so the fix is the air reaching this card, on site. The card is out of service until then. Data
 and the fit are in <code>docs/reports/data/2026-10-02-idle-runaway-aifoundry2/</code>; the Requests for Roman page has
 the visit steps (the card's fan cable, a watched test, a desk-fan test, a card swap).</p>
+<p class="upd"><b>Update, 6 October 2026:</b> fixed in the BIOS (every fan at full speed); the idle card now holds at
+about 63 °C — <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-6-october">what was done on 6 October</a>.</p>
 
 <h2 id="aifoundry1">3. aifoundry1's card 0: fan replaced, back in service</h2>
 <table class="kv">
@@ -111,7 +114,8 @@ for the user step, live on aifoundry3.</p>
   <li><b>Needs root:</b> staged in the maintainer's home directory on each machine, one or two commands each: the
   updated onboarding script <code>et-lab-start</code>, the two machines' new login banners, the open tracer
   <code>et-opens</code> (check its probe first, for 5 s), and the root login notice.</li>
-  <li><b>aifoundry2's card:</b> the cooling fix on site (Requests for Roman, SH5).</li>
+  <li><b>aifoundry2's card:</b> the cooling fix on site (Requests for Roman, SH5). <b>Done 6 October 2026:</b>
+  <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-6-october">every fan set to full speed in the BIOS</a>; the idle card holds at about 63 °C.</li>
   <li><b>The monitor's once-a-second card check</b> runs the lab's <code>et-who</code>, which uses a fixed sudo rule, so
   each machine logs a sudo line every second; a lighter check would be quieter.</li>
   <li><b>Signed-out viewers:</b> in a signed-out test browser the dashboard's live streams did not appear; to confirm
