@@ -329,8 +329,8 @@ Approach times were 12–120 s (median 63 s) for 7-second runs, and up to seven 
 
 Updated 2026-09-25: aifoundry1's two cards answer since 15:02 that day, so there are four cards on three firmware
 releases; three are usable for measurement, since aifoundry1's card 0 overheats and takes nothing sustained (amendment
-A4). Updated 2026-10-02: card 0 is usable again (its fan was replaced) and aifoundry2's card is out of service (its
-cooling failed), so the three cards in service are aifoundry3's and aifoundry1's two. Before using a card for
+A4). Updated 2026-10-02: card 0 is usable again (its fan was replaced) and aifoundry2's card was out of service (its
+cooling failed) until 2026-10-06, when its fans were set to full speed: all four cards are in service again. Before using a card for
 anything comparative, read its governor configuration. Two read-only commands:
 
 ```
@@ -356,8 +356,8 @@ Take the card lock before starting such a tool and the collector stays off the c
 | TDP the driver reports | 65 W | 65 W | 65 W | 65 W |
 | **TDP the firmware uses** | **65 W** | **0 W**, set at every boot (below) | 65 W | 65 W |
 | Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C. In this chassis the die never read below 65 °C in the version-3 campaign (336,070 samples, 25–26 Sep), and over DV2's 20 h validation (28–29 Sep) it idled at 71–76 °C in 327 of 378 cycles, so it runs at 600 MHz unless it starts cold | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry); its governor is latched by the zero TDP: no governor line in its trace since 25 Sep (E41 TEL-G), and its throttle residencies all 0 after 2 d 8 h up (28 Sep; E51, development); it makes no thermal step at any temperature | firmware DVFS; **idles at 300 MHz** (`low_power`); its 0.21.x governor acts only while a kernel runs (firmware source, 27 Sep) | **600 MHz in all 318,667 samples of the three-card check (25–26 Sep)**, and in the SP's own minimum and maximum, although 9,461 were busy at 45–65 W at 64 °C or less and the mean reached 88 °C: its governor does not raise the clock (active power management off, or latched; asked the lab). Its build steps 50 MHz between 300 and 700 MHz, so it could never reach 800 |
-| Idle | 31–36 W at 73–80 °C (27 W cold); on the night of 28–29 Sep (DV2's idle watch) 73–75 °C and 31.4–32.5 W at 20:45–21:09 and 00:11–01:00 PDT, 59 °C and 25.4–25.6 W at 22:12 and 23:15–23:18 (idle cycles only; its heating sessions ran 22:13–23:56); over the whole watch, to 16:48 on 29 Sep, 59–76 °C, 71–76 °C in 327 of 378 cycles, and never below 65 °C after 23:18 | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz; 49 °C (hottest sensor 53 °C) and 19.6 W after its fan was replaced (2 Oct) | 33–35 W at 600 MHz and 57–62 °C |
-| Use it for | **nothing: out of service since 2 Oct 2026**, its cooling failed (below); until then the main card | compare switching power over idle, never absolute watts | anything since its fan was replaced on 2 Oct 2026 (52–53 °C under sgemm bursts); from 25 Sep until then **nothing sustained: it overheated** (below) | anything; it peaked near 71 °C under the campaign's smoke blocks |
+| Idle | **about 64 °C and 27 W since 6 Oct** (fans at full speed); before that 31–36 W at 73–80 °C (27 W cold); on the night of 28–29 Sep (DV2's idle watch) 73–75 °C and 31.4–32.5 W at 20:45–21:09 and 00:11–01:00 PDT, 59 °C and 25.4–25.6 W at 22:12 and 23:15–23:18 (idle cycles only; its heating sessions ran 22:13–23:56); over the whole watch, to 16:48 on 29 Sep, 59–76 °C, 71–76 °C in 327 of 378 cycles, and never below 65 °C after 23:18 | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz; 49 °C (hottest sensor 53 °C) and 19.6 W after its fan was replaced (2 Oct) | 33–35 W at 600 MHz and 57–62 °C |
+| Use it for | **anything since 6 Oct 2026**, with its fans at full speed (below); out of service 2–6 Oct, its cooling failed; before that the main card | compare switching power over idle, never absolute watts | anything since its fan was replaced on 2 Oct 2026 (52–53 °C under sgemm bursts); from 25 Sep until then **nothing sustained: it overheated** (below) | anything; it peaked near 71 °C under the campaign's smoke blocks |
 | Version-3 campaign | yes | yes | excluded (amendment A4) | yes |
 
 The hosts differ too. Host-side timing (launch, synchronisation, copies, compile times) is not comparable between
@@ -506,8 +506,9 @@ After that boot the idle card heated from 45 to 55 °C in its first two minutes 
 load, not its own work**: 63–67 °C while the host was busy, 70 °C idle in the evening, 82–83 °C idle from 02:30 on
 1 October (idle power up from 29 to 37.5 W), and it failed minutes after the host went idle again; aifoundry3's card,
 on the same Gigabyte Z590 AORUS MASTER board in the same slot, stayed at 54–57 °C. The chassis fans most likely
-follow the CPU temperature (no fan speeds are visible from Linux). Fix on site: the BIOS fan settings (Smart Fan 5:
-Fan Stop off, a floor of at least 50%), copied from aifoundry3 (lab report SH5). Until then, a host that sits idle
+follow the CPU temperature (no fan speeds are visible from Linux). Fix on site: the BIOS fan settings (the lab report said Smart Fan 5; on this BIOS it is Smart Fan 6:
+Fan Stop off, a floor of at least 50%), copied from aifoundry3 (lab report SH5); done on 6 October with every fan at
+full speed (below). Until then, a host that sits idle
 lets this card overheat, and no firmware cut-off stops it.
 
 **Out of service since 2 October.** After the full reset at 10:53 no process held the idle card, and the host CPU
@@ -521,6 +522,33 @@ about 51 °C, where aifoundry3's identical card sees about 31 °C
 the lab fixes that air (lab report SH5). A full reset brings it back, but it then looks healthy for about an hour
 while it heats: that hour is not a sign that it is fixed. The machine aifoundry2 itself stays up, with the git
 checkout; only its card is out.
+
+## aifoundry2's card back in service: every fan at full speed (6 October 2026)
+
+On 6 October (15:54–16:07 PDT, on site) every fan header in aifoundry2's BIOS (Gigabyte Z590 AORUS MASTER; Smart Fan 6,
+F6) was moved from the Normal curve, which follows the CPU temperature, to Full Speed (CPU_FAN set, then TUNE ALL; Fan
+Stop stays Disabled, control mode Auto), and the card was brought back with the full reset. On the BIOS screen every fan
+followed the CPU at 43 °C while the card's slot sensor (PCIEX16) read 57 °C; five minutes after the change it read 55 °C.
+Measured since (`docs/reports/data/2026-10-06-fan-fix-aifoundry2/`, [the 6 October page](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-6-october)):
+
+- **Idle:** about 64 °C and 27.4 W, steady (16:16–16:22). Five minutes after coming back on the bus, the 2 October run
+  and this one both read 64–65 °C at about 28 W, but on 2 October the card was heating by about 2 °C a minute there, and
+  this time it cooled. By the 2 October fit, the cooling now carries the card's 27 W at 64 °C where it carried about
+  14 W, as if the air reaching the card were about 39 °C instead of 51 °C; that moves the idle tipping point from about
+  97 °C to about 122 °C.
+- **The 8-minute sgemm burst test** (aifoundry1's of 2 October, stops at an 85 °C mean or 95 °C hottest): 44 bursts,
+  all exit 0; 66 to 76 °C at 33 W, still rising about 1 °C every two minutes at the end. aifoundry1's cards ran it at
+  53–54 °C (card 0) and 59–61 °C (card 1).
+- **The 21 September long session's heavy run** (`run_horace_long.sh`, `randn 32 600 1`: heat to 84 °C, idle to
+  80 °C, then random data on every minion, stop at 90 °C): 37.3 s to the cap at about 71 W, against 19.3–26.5 s on
+  21 September (runs 1, 4, 8 and 23); 75 °C three and a half minutes later, where on 21 September the card settled at
+  81–82 °C. The fans slow the spike but don't remove it: full load on every minion still needs the cap or short runs.
+- **A trap in reading it:** the `max` of the live collector and of `ettelem` (`minshire[2]`) is the highest reading since
+  the card's statistics were last reset (`since_reset_ms` −1: never, so since boot), not the hottest sensor now. After
+  the heavy run it read 93 °C while the mean cooled from 75 °C; on 2 October it tracked the mean only because the card
+  heated the whole time.
+
+The setting lives in the BIOS: a BIOS update or a CMOS reset puts the Normal curves back.
 
 ## Traps that cost time here
 

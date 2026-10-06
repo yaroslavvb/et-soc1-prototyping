@@ -797,8 +797,8 @@ flagged the rest at the top of `../findings/README.md`.
   bandwidth PASS and its energy not resolved, T102 FAIL (`data/2026-09-29-{pcie2,nocr,memp2}/README.md`). On the pages
   30 September: the hub's rungs 31–36 and 43 and §7, the PCIe page's §5, the chip diagram (facts L104, L50,
   `pcie.write-l3`, `pcie.conc`, `minion.tensor-cache-path` and its asks) and the memory levels (`l3.route`). Left: tau,
-  after its amendment, then NV's validation (part 0). Blocked while aifoundry2's card is out of service (since
-  2 October 2026, its cooling failed; lab report SH5).
+  after its amendment, then NV's validation (part 0). Unblocked: aifoundry2's card is back in service since
+  6 October 2026 (lab report SH5 done).
 - [ ] **memp2's R43 is open:** no registered theory of the 128 B per cycle cap survives on any of the three cards
   (T43-B misses 7 conditions, Cc 5, on each; `data/2026-09-29-memp2/README.md`). New theories need a new
   pre-registration.

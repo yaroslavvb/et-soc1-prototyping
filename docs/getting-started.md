@@ -8,7 +8,7 @@ This page covers everything needed to pick the work up somewhere else: clone, co
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page, [`AGENT.md`](../AGENT.md) (the entry point for an agent) and `CLAUDE.md` carry the context.
 
-## Where things stand (2026-10-02)
+## Where things stand (2026-10-06)
 
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
@@ -17,7 +17,14 @@ Claude session scratchpad, which every boot clears: the power cycle of 30 Septem
 on all three machines, and about 19 GB of our agents' working files on aifoundry2 with it
 ([`AGENT.md`](../AGENT.md) §7, "Working files").
 
-- **The lab, 2 October.** aifoundry2's card is **out of service**: its cooling failed. It fell off the PCIe bus while
+- **The lab, 6 October.** aifoundry2's card is **back in service**. Every fan in its BIOS (Smart Fan 6) now runs at full
+  speed, so the case fans no longer slow down when the host's CPU idles. Idle, the card holds at about 64 °C and 27 W
+  (on 2 October it ran away to 138 °C); the 8-minute sgemm burst test peaks at 76 °C; at full load on every minion it
+  still reaches 90 °C, after 37 s instead of 19–27 s, so keep the 90 °C cap
+  ([the 6 October page](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-6-october),
+  `docs/reports/data/2026-10-06-fan-fix-aifoundry2/`). The dashboard's "hottest" figure is the highest reading since the card's
+  statistics were last reset, not a live one.
+- **The lab, 2 October.** aifoundry2's card was **out of service** from 2 to 6 October: its cooling failed. It fell off the PCIe bus while
   idle on 1 October (09:42 PDT); a full-reset power cycle at 06:45 on 2 October brought it back, and it dropped off
   again at 07:42 (126 °C, 103 W). A plain warm reboot at 10:47 did not bring it back; the full reset at 10:53 did, and
   idle, with nothing on it, it heated from 45 °C and 21.9 W to 95 °C and 48 W in 56 minutes, then ran away to a 138 °C
@@ -25,9 +32,9 @@ on all three machines, and about 19 GB of our agents' working files on aifoundry
   (`docs/reports/data/2026-10-02-idle-runaway-aifoundry2/`: `records.jsonl`, `fit.py`, `fit.txt`): 13.6 W plus a
   leakage part that doubles every 23 °C, cooled into air at about 51 °C through about 0.9 °C/W, where aifoundry3's
   identical card sees about 31 °C; heating and cooling meet near 97 °C, a tipping point. After a full reset the card
-  looks healthy for about an hour while it heats. Run nothing on it until the lab fixes the air reaching it (lab
-  report SH5; [findings/14-card-behaviour.md](findings/14-card-behaviour.md)); the machine itself is up and keeps the
-  git checkout. **aifoundry1's card 0 is back in service**: its broken fan was replaced on site (host up 12:59), and
+  looks healthy for about an hour while it heats. The lab fixed the air reaching it on 6 October (lab
+  report SH5; [findings/14-card-behaviour.md](findings/14-card-behaviour.md)); the machine itself stayed up and kept
+  the git checkout. **aifoundry1's card 0 is back in service**: its broken fan was replaced on site (host up 12:59), and
   the owner put it back in service at about 13:30. It idles at 49 °C (hottest sensor 53 °C, 19.6 W), and 8 minutes of
   sgemm bursts (8 s of `-n 1024` under the lock, 2.5 s gaps, 44 bursts) held it at 52–53 °C, hottest 56 °C; card 1,
   the same test just before, ran at 59–60 °C, hottest 63 °C (`docs/reports/data/2026-10-02-fan-fix-aifoundry1/`,
@@ -36,7 +43,7 @@ on all three machines, and about 19 GB of our agents' working files on aifoundry
   `et-who --check` there counts both cards (exit 1 if anyone holds either), so a script for one card looks for its own
   card's holder lines (those starting `/dev/et<N>_` or `lock:etsoc-shire<N>.lock`) and stops on exit 2
   ([lab-access.md](lab-access.md)). The new-user brief, [`lab-start/START.md`](lab-start/START.md), is at its seventh
-  edition (14:30, `607a44e`): card order aifoundry3, then aifoundry1's card 1, then its card 0, never aifoundry2; a
+  edition (14:30, `607a44e`): card order aifoundry3, then aifoundry2 (back in service since 6 October), then aifoundry1's card 1, then its card 0; a
   card is free only if its PCIe link is up (sysfs `current_link_speed`, not `Unknown`: a card that fell off the bus
   keeps its `/dev` node), `et-who` shows no line for it, no queue or other card program of another user is in the way,
   and nobody has claimed it. `tools/lab/et-lab-start` in the repository is the fourth version (2 October: `--card N`,
@@ -89,7 +96,7 @@ on all three machines, and about 19 GB of our agents' working files on aifoundry
   - **NV (E54)**, the owner's NoC validation of Q63's voltage explanation: its predictions are frozen and aifoundry3
     was probed read-only (NoC at 485 mV, 400 MHz), but its first voltage write has not run: the session's permission
     check refused it, so it waits for the owner. Its validation is on aifoundry2, after development on aifoundry3
-    (`tools/claims-v3/nv/`); aifoundry2's card is out of service since 2 October 2026 (first bullet).
+    (`tools/claims-v3/nv/`); aifoundry2's card is back in service since 6 October 2026 (first bullet).
   - **The lab.** aifoundry1 got four of the lab report's fixes at 20:51 PDT on 28 September (owner-approved; logged
     on the host); the other items wait for the owner (`reports/TODO.md`, part 0). aifoundry1's `build/sparsity` was
     rebuilt with the g3log fix. `et-lab-health` rev 3 and `et-reset` were written then; they are installed on all
@@ -236,7 +243,7 @@ on all three machines, and about 19 GB of our agents' working files on aifoundry
   `findings/19-observability-and-the-unmetered.md`, heat per millimetre in `findings/20-heat-per-mm.md`, the traps in
   `findings/14-card-behaviour.md`). The energy manual's rebuild, in order: `findings/04-artifacts.md`, A16; the
   reviews and validations of 24–26 September: `findings/04-artifacts.md` and `reports/data/2026-09-24-report-review/`.
-- **Next:** tau (E58) on aifoundry2 once its card is back in service (out of service since 2 October 2026), after the
+- **Next:** tau (E58) on aifoundry2, whose card is back in service since 6 October 2026, after the
   amendment its `PREREG.md` requires for that card (a heat step, its own start temperature, a D burst that does not
   starve its sampler and its own calibration, written before any aifoundry2 data); NV's first write and validation,
   the owner's; and, for DV2's two questions, a new pre-registered run whose heating sessions start from a cooler rest
@@ -332,8 +339,7 @@ on aifoundry3, and `tools/claims-v3` queues that hold a card for hours.
 
 ## 3. Hello world
 
-On a lab machine, with nothing to build (aifoundry3 as written; aifoundry2's card is out of service since 2 October
-2026; on aifoundry1 put `ET_DEVICES=<N>` before `flock` and take `etsoc-shire<N>.lock`, or the program opens both
+On a lab machine, with nothing to build (aifoundry3 and aifoundry2 as written; on aifoundry1 put `ET_DEVICES=<N>` before `flock` and take `etsoc-shire<N>.lock`, or the program opens both
 cards):
 
 ```bash
@@ -342,7 +348,7 @@ et-who                                                     # nobody on the card?
 flock -n /run/lock/etsoc-shire0.lock timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie   # the card: under 1 s
 ```
 
-marty1885's et-testdrive, from the laptop (on aifoundry3: aifoundry2's card is out of service since 2 October 2026):
+marty1885's et-testdrive, from the laptop (on aifoundry3 or aifoundry2):
 
 ```bash
 rsync -a --exclude .git --exclude build external/et-testdrive/ aifoundry3:et-testdrive/
@@ -495,8 +501,8 @@ as [`findings/04-artifacts.md`](findings/04-artifacts.md), "Rebuilding the versi
 | Sparsity | `workloads/sparsity` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order (`workloads/sparsity/README.md`) | `docs/reports/data/2026-09-18-sparsity-aifoundry3` | `python3 workloads/sparsity/analyze.py DATA --embed HTML` (the three-card check through `--claims-v3`, by default) |
 | Ridge points | `scripts/ridge-points.py` | nothing: derived from the four 2026-09-18 reports | their four data directories, and the energy manual's `manual.json` | `python3 scripts/ridge-points.py --embed HTML` (`docs/findings/04-artifacts.md`, A19, gives the input chain) |
 
-- **Measuring.** Build on the machine with `scripts/deploy-lab.sh <host> workloads/<name>` (aifoundry3 or aifoundry1;
-  aifoundry2's card is out of service since 2 October 2026), or `scripts/deploy-lab-gpsdk.sh` for `kernels/`. Follow
+- **Measuring.** Build on the machine with `scripts/deploy-lab.sh <host> workloads/<name>` (aifoundry3, aifoundry2 or
+  aifoundry1), or `scripts/deploy-lab-gpsdk.sh` for `kernels/`. Follow
   the etiquette above, then copy the outputs back into a new dated directory under `docs/reports/data/`. The runs
   print JSON lines that the analysis scripts read. Workloads also run on the simulator with `--sysemu` (small sizes),
   which checks correctness but not speed.

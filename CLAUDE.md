@@ -56,8 +56,9 @@ files that way. Subagent briefs name the persistent directory; long runs log und
 - The machines are `ssh aifoundry1|2|3` (Tailscale SSH in check mode, user `yaroslavvb`: a person must approve the
   login URL it prints; an agent hands it over and waits). See `docs/lab-access.md`.
 - Four cards: aifoundry2 and aifoundry3 have one each, aifoundry1 two (select one with `ET_DEVICES=<n>` there).
-  **Since 2 October 2026 aifoundry2's card is out of service** (its cooling failed: idle, it heats to a 138 °C mean and
-  drops off the PCIe bus): run nothing on it; the machine itself is up. **aifoundry1's card 0 is back in service** since
+  **aifoundry2's card is back in service since 6 October 2026**, with every fan at full speed in the BIOS (idle about
+  64 °C); from 2 to 6 October it was out of service (its cooling failed: idle, it heated to a 138 °C mean and dropped
+  off the PCIe bus). **aifoundry1's card 0 is back in service** since
   the same day (its broken fan was replaced; from 25 September until then it overheated and took no sustained work).
   aifoundry3 is pinned at 600 MHz by a boot service. Their differences: `docs/findings/14-card-behaviour.md`.
 - The hosts' `/opt/et` is **older** than the simulator's: GCC 15.1, no gp-sdk launchers and no Erbium bits, and not

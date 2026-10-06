@@ -46,14 +46,15 @@ those `et-who` lists on the other card, the shells that started them, and simula
 (`et-usage --since 30m --card <N>` shows no other user on it, the lab's live monitor aside, and the person sees no
 "using `<host>` card `<N>`" post in #community-lab without a "released" after it). A card someone holds or has
 claimed is theirs, even though their runs are short, so the agent takes the next free card in this order, now:
-(1) aifoundry3's card; aifoundry2's card is out of service since 2 October and never chosen, even if it looks free;
-(2) aifoundry1's card 1 (`ET_DEVICES=1`), else its card 0 (`ET_DEVICES=0`, back in service since its fan was replaced
-on 2 October); two people can work on aifoundry1 at once, one per card; (3) no card free: look again at most once a
-minute, meanwhile doing only the setup (step 3) on the first reachable machine of aifoundry3 and aifoundry1 (never
-aifoundry2), and tell the person after 30 minutes; (4) no machine reached: stop, the person asks the lab lead. Up to
+(1) aifoundry3's card; (2) aifoundry2's card (back in service since 6 October); (3) aifoundry1's card 1
+(`ET_DEVICES=1`), else its card 0 (`ET_DEVICES=0`, back in service since its fan was replaced on 2 October); two
+people can work on aifoundry1 at once, one per card; (4) no card free: look again at most once a minute, meanwhile
+doing only the setup (step 3) on the first reachable machine of aifoundry3, aifoundry2 and aifoundry1, and tell the
+person after 30 minutes; (5) no machine reached: stop, the person asks the lab lead. Up to
 the fourth edition (30 September) the order was the free card of aifoundry2 or aifoundry3 whose machine had the
 fewest other people, then aifoundry1's card 1, never its card 0; the fifth (2 October) dropped aifoundry2's card, and
-the sixth (2 October, 13:31) added aifoundry1's card 0 after card 1. People are counted by their processes, not by
+the sixth (2 October, 13:31) added aifoundry1's card 0 after card 1, and the tenth (6 October) put aifoundry2's
+card back, after aifoundry3's. People are counted by their processes, not by
 `loginctl list-sessions` or `who`: at 15:26 on 30 September aifoundry2 had no login session at all while two users
 kept Claude sessions running in tmux under linger (29 and 10 processes). The block still prints that count, but the
 choice no longer weighs it. The agent tells the person which machine and card and why; the person posts "using
@@ -112,8 +113,7 @@ et-lab-start --dry-run   # look, and print what the setup would do, without doin
   that reads `Unknown`, or no sysfs entry, marks the card DOWN and leaves it out, since a card that fell off the bus
   keeps its `/dev` node; each card's lock path, and a WARN if the lock file is missing, since a lock a user creates
   cannot be opened by the others' `flock`), per host a note (aifoundry1: one person per card, and `dev_mngt_service`
-  and `et-powertop` open both cards; aifoundry2: a WARN that its card is out of service and new users work on
-  aifoundry3 or aifoundry1), `et-who --check` (free, held with the holders, or failed), other users' card programs and
+  and `et-powertop` open both cards; aifoundry2: a note that its fans run at full speed since 6 October), `et-who --check` (free, held with the holders, or failed), other users' card programs and
   queues in `ps` (the brief's pattern, on the whole command line), a verdict for one card (below), `et-usage` (its
   default last-24-hour summary, at most 40 lines) if installed, how many other people have processes here (uids from
   1000 up, no names) and how many of them are logged in (`loginctl list-sessions`; a failure is a WARN, not a zero),
