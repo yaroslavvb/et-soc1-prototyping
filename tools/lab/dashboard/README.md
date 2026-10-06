@@ -204,8 +204,8 @@ rates and the few real unseen opens a day stay. Tests: `tests/test_collect.py`.
 (a page slug such as `aifoundry-lab-6-october`, never a URL: `page/render.py` refuses a data file holding one, and the
 collector scrubs them), the note links `https://spacesheep.dev/@yaroslavvb/<slug>`; `page/script.js` builds the address
 and keeps only the slug's safe characters. Write the note dated, so a reader knows when it was true:
-aifoundry2's card carries "Back in service 6 Oct 2026: fans at full speed in the BIOS; idles at about 63 °C" since its
-exclusion was lifted that day. An `excluded` card shows the excluded line instead.
+aifoundry2's card carries "Back in service 6 Oct 2026: fans at full speed in the BIOS; idles at about 64 °C" since its
+exclusion was lifted that day; its `note_page` waits in branch `fan-fix-6oct-links` until that day's page is published. An `excluded` card shows the excluded line instead.
 
 **The Worklog.** The section above "About this page" lists the lab's published pages, newest day first, with the oldest
 days folded into a `<details>`. It is static markup in `page/body.html` (the same for every reader, and it carries links,
