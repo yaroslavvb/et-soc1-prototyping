@@ -28,7 +28,9 @@ the host's sign-in bootstrap (no <title>), and the viewer address must redirect.
 
 With a key, `spacesheep list --json` is also read: each row's live visibility and slug must match MIRROR.md, and any
 public space whose slug starts with one of --prefix (default et-soc1, etsoc1, aifoundry, 2026-09-22-et-soc1) that
-MIRROR.md does not list as public is reported as a warning.
+MIRROR.md does not list as public is reported as a warning. That list is cut (5 Oct 2026): the CLI prints only the 50
+most recently updated spaces, so a row missing from it is unchecked, not deleted, and the warning sees only those 50
+(docs/findings/04-artifacts.md, "Publishing notes"; reported to the spacesheep team).
 
 Read-only: it never deploys, shares or edits anything, and it never prints the key.
 Exit status: 0 all equal and as listed; 1 any difference (content, visibility, slug, a private page served); 2 some
@@ -313,7 +315,8 @@ def main():
             for r, res in zip(rows, results):
                 s = spaces.get(r["uuid"]) if r["uuid"] else None
                 if r["uuid"] and not s:
-                    res["problems"].append("space not in `spacesheep list` (deleted, or another account?)")
+                    res["problems"].append("space not among the newest 50 that `spacesheep list` shows (the CLI's "
+                                           "first page only, 5 Oct 2026): visibility and slug not checked")
                     continue
                 if not s:
                     continue

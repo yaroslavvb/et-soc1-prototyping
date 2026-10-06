@@ -192,7 +192,10 @@ For each public page it fetches the live `index.html` and compares it with the r
 `data-ss-id` attributes. With a spacesheep key configured (`spacesheep login`, or `SPACESHEEP_KEY`) it reads the
 stored file with `spacesheep read <uuid> index.html -o <dir>`. It also reads the account's `spacesheep list --json` and
 compares every row's visibility and slug with this file, and warns about any public space whose slug starts like
-this set's (`et-soc1`, `etsoc1`, `aifoundry`, `2026-09-22-et-soc1`) that is not listed here as public. Without a key it fetches the raw page
+this set's (`et-soc1`, `etsoc1`, `aifoundry`, `2026-09-22-et-soc1`) that is not listed here as public. Since the
+account passed 50 spaces that list is cut: the CLI shows only the 50 most recently updated, so a row missing from it is
+unchecked rather than deleted ([`../findings/04-artifacts.md`](../findings/04-artifacts.md), "Publishing notes", 5 October
+2026; reported to the spacesheep team). Without a key it fetches the raw page
 anonymously over HTTPS (`https://<uuid>.spacesheep.app/`) and also removes what the host inserts just before
 `</body>` (its print style, print mark and viewer scripts), after checking that the insertion holds only `<style>` and
 `<script>` blocks and the host's own `ss-` elements, and that it is the same on every page. Folder files (the

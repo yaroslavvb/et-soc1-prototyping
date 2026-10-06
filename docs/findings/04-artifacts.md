@@ -1187,6 +1187,20 @@ one review of the set's structure, and wrote the plan (`PLAN2.md`); page owners 
   spikes that a returning visitor does not see). Late frames and a camera path that turns or changes pace at a scale
   both read as jumps; `kink.py` separates the two. Stroked text (knockout halos) re-rasterises at every scale of a
   zoom: drop the stroke while the camera moves.
+- **`spacesheep list` shows only the 50 most recently updated spaces** (found 5 October 2026). The CLI (1.9.1, and the
+  current 1.26.0 alike) calls the host's `list_spaces` once, without a limit or an offset, and prints that first page,
+  newest first; the reply's `total` and `next_offset` are dropped, there is no flag for more, and nothing says the list
+  is cut. `--json` is cut the same way. On 5 October the account had 469 spaces and the 50th listed had last changed
+  about a day and a half earlier: pages that cron jobs republish daily push every older page off the list. So a space
+  missing from `spacesheep list` is **not** a deleted space. What it broke: `scripts/check-mirror.py` reported 38 of
+  MIRROR.md's rows as "space not in `spacesheep list`" and exited 1, and for those rows it could not check the live
+  visibility and slug; its warning about a public space that MIRROR.md does not list saw only the newest 50; the
+  dashboard's guard (`tools/lab/dashboard/update.sh`, `vis_list`) reads the same list, which is safe only while the
+  dashboard republishes at least hourly. Still fine: checking a page right after its own deploy (a deploy lists it
+  first). Until the CLI pages through the list, trust check-mirror's `equal` lines and its anonymous checks, and read
+  a missing row as unchecked; the host's `list_spaces` (the MCP tool) takes `limit` (at most 200) and `offset` and
+  reports `next_offset`, which reaches every space. Reported to the spacesheep team the same day
+  (https://spacesheep.dev/feedback?thread=a80049a9-14ae-41d8-9cc9-c4472925c34d).
 - **The spacesheep viewer does not pass its `#…` into the page** (30 September): a link such as
   `/@yaroslavvb/et-soc1-memory-levels#dram/load` opens the page's default view; the raw address
   `https://<uuid>.spacesheep.app/#…` keeps it. Link to a view with the raw address.
