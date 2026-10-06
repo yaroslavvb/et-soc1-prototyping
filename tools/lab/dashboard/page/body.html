@@ -132,6 +132,8 @@ main{max-width:1280px}
 .ct-head .pill:last-child{margin-left:auto}
 .ct.excl .ct-head b,.ct.excl .kv dd{color:var(--ink-2)}
 .ct-note{font-size:.8rem;color:var(--ink-2);margin:-2px 0 0}
+.ct-note .ct-nlink{color:var(--accent);text-decoration:none}
+.ct-note .ct-nlink:hover,.ct-note .ct-nlink:focus-visible{text-decoration:underline}
 .gauge{margin:0}
 .g-read{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px;font-size:.8rem;color:var(--ink-2)}
 .g-read b{font-size:1.3rem;font-weight:650;color:var(--ink)}
@@ -271,7 +273,7 @@ main{max-width:1280px}
   <span id="fixture-pill" class="pill lv-fix" hidden><i aria-hidden="true"></i>MADE-UP DATA</span>
  </div>
  <p id="headline" class="dh-headline">—</p>
- <div class="dh-tools"><nav id="toclist" class="dh-tools" aria-label="Sections" style="margin:0"><a class="newuser" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener">New user? Start here</a><a href="#start-here">Start here</a><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#start" target="_blank" rel="noopener">Reports</a><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram" target="_blank" rel="noopener">Chip diagram</a><a href="#live">Live</a><a href="#alerts">Alerts</a><a href="#card-use">Card use</a><a href="#people">People</a><a href="#machines">Machines</a><a href="#last-48-hours">Last 48 hours</a></nav></div>
+ <div class="dh-tools"><nav id="toclist" class="dh-tools" aria-label="Sections" style="margin:0"><a class="newuser" href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener">New user? Start here</a><a href="#start-here">Start here</a><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#start" target="_blank" rel="noopener">Reports</a><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram" target="_blank" rel="noopener">Chip diagram</a><a href="#live">Live</a><a href="#alerts">Alerts</a><a href="#card-use">Card use</a><a href="#people">People</a><a href="#machines">Machines</a><a href="#last-48-hours">Last 48 hours</a><a href="#worklog">Worklog</a></nav></div>
 </header>
 <div id="stale" class="banner lv-bad" hidden><b>The data is <span id="stale-age">old</span> old.</b> The page expects a new
 version at least every <span id="stale-hb">60 min</span>, so the collector on <span id="stale-host">aifoundry2</span>, its cron job or
@@ -434,6 +436,113 @@ the deploy may have stopped: nothing on it is current. Tell <span id="stale-main
 <div class="chart-title" style="margin-top:18px">Sessions per machine</div>
 <div id="leg-sess"></div>
 <div id="ch-sess" class="mult"></div>
+
+<h2 id="worklog">Worklog</h2>
+<p class="small">What was done in the lab, newest day first; every line opens the page it was written up on. All of it is 2026.</p>
+<!-- The worklog lives here, in the page source: it is the same for every reader and carries links, which the
+     collector's data.json cannot (page/render.py refuses a data file holding a URL).
+     TO ADD A DAY: copy one .wl-row block to the top of .wl, newest first, one short line per published page; when the
+     shown list passes about five days, move the oldest .wl-row into the <details> below. -->
+<style>
+/* Worklog: a day label beside its lines, one column on a phone */
+.wl{margin:8px 0 18px}
+.wl-row{display:grid;grid-template-columns:6.6em 1fr;gap:1px 12px;padding:6px 0;border-top:1px solid var(--line,#ddd)}
+.wl-row:first-child{border-top:0}
+.wl-d{font-weight:650;font-size:13.5px;color:var(--ink-2,#555);white-space:nowrap;padding-top:5px}
+.wl-l{margin:0;padding:0;list-style:none;min-width:0}
+.wl-l li{margin:0;font-size:14.5px;line-height:1.4}
+.wl-l a{display:block;padding:5px 0;color:var(--accent,#1f6fbf);text-decoration:none}
+.wl-l a:hover,.wl-l a:focus-visible{text-decoration:underline}
+.wl-l .wl-x{color:var(--ink-2,#555)}
+details.wl-old{margin-top:4px}
+details.wl-old>summary{cursor:pointer;font-size:13.5px;color:var(--ink-2,#555);padding:6px 0}
+details.wl-old .wl-row{border-top:1px solid var(--line,#ddd)}
+@media (max-width:560px){
+ .wl-row{grid-template-columns:1fr;gap:0;padding:8px 0}
+ .wl-d{padding-top:0}
+}
+</style>
+<div class="wl">
+ <div class="wl-row"><div class="wl-d">Tue 6 Oct</div><ul class="wl-l">
+  <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-6-october" target="_blank" rel="noopener">aifoundry2's fans set to full speed in the BIOS <span class="wl-x">— the idle card holds at about 63 °C</span></a></li>
+ </ul></div>
+ <div class="wl-row"><div class="wl-d">Mon 5 Oct</div><ul class="wl-l">
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#start" target="_blank" rel="noopener">The reports hub <span class="wl-x">— scatter-gather and sparse parity added, three new charts</span></a></li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-session-timeline" target="_blank" rel="noopener">The session timeline <span class="wl-x">— refreshed: two weeks of sessions on the lab machines</span></a></li>
+ </ul></div>
+ <div class="wl-row"><div class="wl-d">Sun 4 Oct</div><ul class="wl-l">
+  <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history" target="_blank" rel="noopener">The history page <span class="wl-x">— the hottest sensor is each card's peak since it started</span></a></li>
+ </ul></div>
+ <div class="wl-row"><div class="wl-d">Fri 2 Oct</div><ul class="wl-l">
+  <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-2-october" target="_blank" rel="noopener">What changed that day <span class="wl-x">— the live dashboard and history, aifoundry2's idle runaway, aifoundry1 card 0 back in service</span></a></li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history" target="_blank" rel="noopener">The lab's history <span class="wl-x">— hour, day and week graphs of the machines and their cards</span></a></li>
+ </ul></div>
+ <div class="wl-row"><div class="wl-d">Thu 1 Oct</div><ul class="wl-l">
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram" target="_blank" rel="noopener">The chip diagram's deep zoom <span class="wl-x">— 33 scales, from beyond the observable universe to the silicon lattice</span></a></li>
+ </ul></div>
+ <details class="wl-old">
+  <summary>Earlier days: 18–30 September</summary>
+  <div class="wl-row"><div class="wl-d">Wed 30 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-without-heatsink" target="_blank" rel="noopener">Running a card without its heatsink <span class="wl-x">— a model on the record and 43 outside sources</span></a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-link-retrain-hang" target="_blank" rel="noopener">A PCIe link retrain hung aifoundry1</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener">New user? Start here <span class="wl-x">— the three steps onto the lab</span></a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Tue 29 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-parity" target="_blank" rel="noopener">Sparse parity <span class="wl-x">— the card's 1,024 minions against the host CPU</span></a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Mon 28 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels" target="_blank" rel="noopener">Anatomy of a memory access, interactively</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement" target="_blank" rel="noopener">Where the work sits <span class="wl-x">— placement and the thermal trip</span></a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating" target="_blank" rel="noopener">The effect of overheating</a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Sun 27 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram" target="_blank" rel="noopener">The ET-SoC-1, interactively <span class="wl-x">— the chip drawn and explained</span></a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link" target="_blank" rel="noopener">The PCIe link and the launch path</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-session-timeline" target="_blank" rel="noopener">The session timeline <span class="wl-x">— every session on the lab machines, in lanes</span></a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Sat 26 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-review-todo" target="_blank" rel="noopener">The review's TODO list</a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Fri 25 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting" target="_blank" rel="noopener">What is broken on aifoundry1</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-fix" target="_blank" rel="noopener">aifoundry1 is fixed</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman" target="_blank" rel="noopener">What trips people up on the lab <span class="wl-x">— and the requests for the lab lead</span></a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions" target="_blank" rel="noopener">Influence functions on the ET-SoC-1</a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Thu 24 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm" target="_blank" rel="noopener">Heat per millimetre</a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Wed 23 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual" target="_blank" rel="noopener">The energy manual</a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Tue 22 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage" target="_blank" rel="noopener">The DVFS loop and its leakage</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line" target="_blank" rel="noopener">One hot line stops a shire</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay" target="_blank" rel="noopener">Hand it to the next shire <span class="wl-x">— on-chip relay against DRAM</span></a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief" target="_blank" rel="noopener">Spatial temperature: a brief</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation" target="_blank" rel="noopener">L2 mainline starvation: a brief</a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Mon 21 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power" target="_blank" rel="noopener">Why is it low power?</a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Sun 20 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#start" target="_blank" rel="noopener">Limits of observability <span class="wl-x">— the reports hub</span></a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature" target="_blank" rel="noopener">Power and temperature telemetry</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment" target="_blank" rel="noopener">The Horace experiment</a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Sat 19 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy" target="_blank" rel="noopener">Anatomy of a memory access</a></li>
+  </ul></div>
+  <div class="wl-row"><div class="wl-d">Fri 18 Sep</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy" target="_blank" rel="noopener">Memory hierarchy</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication" target="_blank" rel="noopener">On-chip communication</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency" target="_blank" rel="noopener">Matmul efficiency</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute" target="_blank" rel="noopener">Sparse compute</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points" target="_blank" rel="noopener">Ridge points</a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive" target="_blank" rel="noopener">Test drive <span class="wl-x">— the first look at the card</span></a></li>
+  </ul></div>
+ </details>
+</div>
 
 <h2 id="about-this-page">About this page</h2>
 <div class="about">

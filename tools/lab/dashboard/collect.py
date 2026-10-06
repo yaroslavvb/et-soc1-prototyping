@@ -1766,7 +1766,7 @@ class Collector:
             out[cid] = {
                 "host": h, "devnum": dn, "pci": bdf, "lock": "etsoc-shire%d.lock" % dn,
                 "lock_owner": lockfiles.get("etsoc-shire%d.lock" % dn),
-                "label": lc.get("label", cid), "excluded": bool(lc.get("excluded")), "note": lc.get("note"),
+                "label": lc.get("label", cid), "excluded": bool(lc.get("excluded")), "note": lc.get("note"), "note_page": lc.get("note_page"),
                 "present": present, "numbering": numbering,
                 "static": {k: lc.get(k) for k in ("firmware", "bl", "pmic", "minion", "tdp_w", "clock", "policy",
                                                   "idle_c", "idle_w")},
@@ -2076,7 +2076,7 @@ class Collector:
             if c is None:
                 lc = self.lab["cards"].get(cid, {})
                 c = {"host": h, "devnum": self.lab["hosts"][h]["cards"][cid], "pci": lc.get("pci"),
-                     "label": lc.get("label", cid), "excluded": bool(lc.get("excluded")), "note": lc.get("note"),
+                     "label": lc.get("label", cid), "excluded": bool(lc.get("excluded")), "note": lc.get("note"), "note_page": lc.get("note_page"),
                      "present": None, "static": {k: lc.get(k) for k in ("firmware", "bl", "pmic", "minion", "tdp_w",
                                                                          "clock", "policy", "idle_c", "idle_w")},
                      "link": None, "errors": None, "aer": None, "kernel_log": None, "activity": None,

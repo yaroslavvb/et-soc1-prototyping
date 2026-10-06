@@ -291,6 +291,9 @@ LINK_OK = {"speed": "16.0 GT/s", "width": 8, "max_speed": "16.0 GT/s", "max_widt
 cards = {
     "aifoundry2": {
         **card_base("aifoundry2", 0, "0000:01:00.0", "etsoc-shire0.lock"),
+        # a dated card note with a page to read (lab.json note + note_page): the only card note of the fixture
+        "note": "Back in service: fans at full speed in the BIOS; idles at about 63 °C",
+        "note_page": "aifoundry-lab-6-october",
         "static": {"firmware": "1.3.1", "bl": "0.20.0", "pmic": "1.5.0", "minion": "0.20.0", "tdp_w": 65,
                    "clock": "DVFS 600–800 MHz, in practice 600 (die above 65 °C)", "policy": "dvfs",
                    "idle_c": [60, 80], "idle_w": [26, 36]},

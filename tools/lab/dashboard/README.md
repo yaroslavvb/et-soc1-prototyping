@@ -11,7 +11,7 @@ health rules and the reasons behind each choice, is [DESIGN.md](DESIGN.md). This
 | `collect.py` | the collector: probes the three hosts in parallel, parses, applies the privacy filter, derives alerts, history and a fingerprint, writes `data.json` |
 | `remote.sh` | the read-only probe run on each host (`bash -s` over ssh; locally on aifoundry2) |
 | `update.sh` | collect, render, deploy when something changed, keep the space public (or, in the private mode, private), log; cron, acknowledgements |
-| `lab.json` | static facts: hosts, cards, firmware, clock policy, idle ranges, known conditions. No personal data, no access paths |
+| `lab.json` | static facts: hosts, cards, firmware, clock policy, idle ranges, a card's dated `note` (with `note_page`, the slug of the page it links), known conditions. No personal data, no access paths |
 | `page/` | the page and its `render.py` (see `page/README.md`); `update.sh` runs `page/render.py <data.json> <out.html>` |
 | `testdata/` | invented probe outputs (`raw-<host>.txt`, `tailscale.json`) for `collect.py --from-raw`; `run2/` and `run3/` are the two runs after it (a machine down, one unreachable, reboots). The `@@usage` sections are real `et-usage --json` output: `testdata/make_usage.py <scratch>` makes them from the logs that `tools/lab/et-usage/test/test_et_usage.py --dir <scratch> --keep` leaves, laid out over an invented day |
 | `tests/` | `test_collect.py` (the collector's rules and the probe's process filter, no host contacted) and `guard_test.sh <workdir>` (`update.sh`'s visibility guard against a stub spacesheep; nothing is deployed) |
@@ -83,8 +83,8 @@ only each lab machine's online flag and last-seen time. One ssh per host per run
 
 It never opens a `/dev/et*` node (checked with `strace` on aifoundry2), never reads `utilization_percent` (it syncs
 queue pointers from the card), never reads anything of a card `lab.json` marks `excluded` (aifoundry1's card 0 until
-2 October 2026; aifoundry2's card since then, out of service) but its link, `err_stats` and its root port's error
-count, never writes on a host (except the sample's stamp file), never calls `tmux`, and never runs
+2 October 2026, and aifoundry2's card from then until 6 October 2026, while its cooling was out; no card is excluded
+now) but its link, `err_stats` and its root port's error count, never writes on a host (except the sample's stamp file), never calls `tmux`, and never runs
 `spacesheep update`. The card activity flag counts only the submission queues (`SQ*`, `HpSQ*`): the completion
 queues also count the card's own asynchronous events, so they move with nobody using the card.
 
@@ -197,3 +197,18 @@ opens an hour, which made an "unseen" person hold every card all day. `collect.p
 the card-use table: unseen opens on a steady once-a-second cadence, unseen opens with no lock holder named at more than
 0.3 a second over two minutes or more, and a day total of 2,000 unseen opens or more. Bursts under someone's lock at other
 rates and the few real unseen opens a day stay. Tests: `tests/test_collect.py`.
+
+## A card's note, and the Worklog (6 October 2026)
+
+**A card's note.** `lab.json` gives a card a `note`; the page shows it under the card's name. With `note_page` beside it
+(a page slug such as `aifoundry-lab-6-october`, never a URL: `page/render.py` refuses a data file holding one, and the
+collector scrubs them), the note links `https://spacesheep.dev/@yaroslavvb/<slug>`; `page/script.js` builds the address
+and keeps only the slug's safe characters. Write the note dated, so a reader knows when it was true:
+aifoundry2's card carries "Back in service 6 Oct 2026: fans at full speed in the BIOS; idles at about 63 °C" since its
+exclusion was lifted that day. An `excluded` card shows the excluded line instead.
+
+**The Worklog.** The section above "About this page" lists the lab's published pages, newest day first, with the oldest
+days folded into a `<details>`. It is static markup in `page/body.html` (the same for every reader, and it carries links,
+which the collector's `data.json` cannot). To add a day: copy one `.wl-row` block to the top of `.wl`, newest first, one
+short line per page; when more than about five days are shown, move the oldest `.wl-row` into the `<details>`. The dates
+and addresses come from [`docs/reports/MIRROR.md`](../../../docs/reports/MIRROR.md)'s index.

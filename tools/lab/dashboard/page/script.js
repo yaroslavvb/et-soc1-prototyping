@@ -759,6 +759,15 @@
     t.append(tb);
     return E('div', 'table-wrap', t);
   }
+  /* A card's note from lab.json, shown under its head. With note_page (a page slug, never a URL: render.py refuses a
+     data file holding one) the note links that page; the slug is cut down to its safe characters, since everything in
+     the data is read as data. */
+  const PAGE_BASE = 'https://spacesheep.dev/@yaroslavvb/';
+  function cardNote(c) {
+    const slug = c.note_page ? String(c.note_page).replace(/[^A-Za-z0-9_-]/g, '') : '';
+    return slug ? attrs(E('a', 'ct-nlink', String(c.note), ' \u2197'), {href: PAGE_BASE + slug, target: '_blank', rel: 'noopener'})
+      : String(c.note);
+  }
   function cardTile(id) {
     const c = C[id] || {}, st = cardState(id), r = reading(c), sx = c.static || {}, host = H[hostOfCard(id)] || {};
     const stale = st.key === 'unknown';
@@ -768,6 +777,7 @@
     else if (stale) tile.append(E('p', 'ct-note', host.reachable === false || c.stale ? (lastKnown(host) ? `Last known at ${lastKnown(host)}: the machine is ${stateOf(host) === 'down' ? 'down' : 'not answering'}; nothing below is current.`
       : `No data from this machine yet: it is ${stateOf(host) === 'down' ? 'down' : 'not answering'}.`)
       : `Last known state: this page's data is ${dur(ageMin())} old.`));
+    if (!c.excluded && c.note) tile.append(E('p', 'ct-note', cardNote(c)));
     tile.append(gauge(c, r, stale));
     const kv = E('dl', 'kv');
     const row = (k, ...v) => kv.append(E('dt', null, k), E('dd', null, ...v));
