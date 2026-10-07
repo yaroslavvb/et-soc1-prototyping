@@ -1,0 +1,75 @@
+
+:root{
+  --bg:#f3f5f6; --paper:#ffffff; --ink:#15232b; --ink-2:#3d4f5a; --muted:#6c7c86;
+  --rule:#d5dde2; --accent:#1f6f66; --accent-2:#a8631e; --accent-soft:#e3efec; --warm-soft:#f6ecdd;
+  --code-bg:#eaeff1; --shadow:0 1px 0 rgba(21,35,43,.06); --bad:#b3452f; --bad-soft:#f7e6e1;
+  --serif:"Charter","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --sans:"Avenir Next","Seravek","Gill Sans","Helvetica Neue",system-ui,-apple-system,sans-serif;
+  --mono:"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f171c; --paper:#151f26; --ink:#e6ecef; --ink-2:#c1ccd3; --muted:#8a9aa4;
+    --rule:#28363f; --accent:#5fbcae; --accent-2:#e0a35c; --accent-soft:#183531; --warm-soft:#33291b;
+    --code-bg:#1d2a32; --shadow:none; --bad:#e2705a; --bad-soft:#3a2420;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f171c; --paper:#151f26; --ink:#e6ecef; --ink-2:#c1ccd3; --muted:#8a9aa4;
+  --rule:#28363f; --accent:#5fbcae; --accent-2:#e0a35c; --accent-soft:#183531; --warm-soft:#33291b;
+  --code-bg:#1d2a32; --shadow:none; --bad:#e2705a; --bad-soft:#3a2420;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.55}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+a:hover,a:focus-visible{border-bottom-color:var(--accent);outline:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+header.mast{padding:52px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:26px}
+.eyebrow{font-family:var(--sans);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1.title{font-family:var(--sans);font-weight:600;font-size:clamp(30px,4.6vw,46px);line-height:1.08;letter-spacing:-.01em;margin:0 0 18px;text-wrap:balance;max-width:28ch}
+.lede{font-size:19px;line-height:1.45;color:var(--ink-2);max-width:62ch;margin:0 0 18px}
+.sources{font-family:var(--sans);font-size:13.5px;line-height:1.5;color:var(--muted);max-width:78ch;margin:0 0 10px}
+nav.toc{margin:0 0 40px;padding:18px 20px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;box-shadow:var(--shadow)}
+nav.toc .lbl{font-family:var(--sans);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 22px;font-family:var(--sans);font-size:14.5px;line-height:1.35}
+nav.toc a{border:none;color:var(--ink-2)}
+nav.toc a:hover{color:var(--accent)}
+main{display:block}
+main h2{font-family:var(--sans);font-weight:600;font-size:clamp(23px,2.6vw,29px);line-height:1.15;margin:64px 0 16px;padding-top:22px;border-top:2px solid var(--ink);text-wrap:balance}
+main h3{font-family:var(--sans);font-weight:600;font-size:18.5px;line-height:1.25;margin:34px 0 10px;color:var(--ink);text-wrap:balance}
+main p{margin:0 0 14px;max-width:72ch}
+main ul,main ol{margin:0 0 16px;padding-left:1.35em;max-width:72ch}
+main li{margin:0 0 7px}
+main strong{font-weight:700}
+main hr{border:0;border-top:1px solid var(--rule);margin:40px 0}
+main blockquote{margin:18px 0 22px;padding:14px 18px;background:var(--warm-soft);border-left:3px solid var(--accent-2);border-radius:0 4px 4px 0;font-size:16px;color:var(--ink);max-width:72ch}
+q{quotes:"\201C" "\201D"}
+code{font-family:var(--mono);font-size:.85em;background:var(--code-bg);padding:.12em .4em;border-radius:4px}
+main pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;margin:0 0 20px;overflow-x:auto;max-width:80ch}
+main pre code{background:none;padding:0;font-size:13px;line-height:1.5;white-space:pre}
+img{max-width:100%;height:auto}
+main figure{margin:26px 0 32px;max-width:820px}
+main figure a{display:block;border:none}
+main figure img{display:block;width:100%;border:1px solid var(--rule);border-radius:6px}
+main figcaption{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:72ch}
+.tablewrap{overflow-x:auto;margin:18px 0 24px}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:14.5px;line-height:1.45;background:var(--paper)}
+th,td{border:1px solid var(--rule);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);font-weight:600}
+td.t{font-family:var(--mono);font-size:13px;white-space:nowrap;color:var(--ink-2)}
+.ok{color:var(--accent);font-weight:700}
+.bad{color:var(--bad);font-weight:700}
+.mid{color:var(--accent-2);font-weight:700}
+details{margin:14px 0 22px;padding:12px 16px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;max-width:80ch}
+details summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:10px}
+details p,details li{font-size:15.5px}
+.kicker{font-family:var(--sans);font-size:14px;color:var(--muted);margin:-6px 0 14px}
+footer{max-width:1080px;margin:0 auto;padding:24px 20px 60px;color:var(--muted);font-family:var(--sans);font-size:13px;border-top:1px solid var(--rule)}
+/* MathJax, loaded by md2report only on pages that contain equations (2026-09-17, week 38).
+   A display equation gets its own scroll box: an over-wide matrix must not widen the page
+   on the phone.  Inline math inherits the prose colour in both themes. */
+.math-display{overflow-x:auto;overflow-y:hidden;max-width:100%;margin:20px 0 24px;padding:2px 0}
+mjx-container{color:var(--ink)}
+mjx-container[display="true"]{margin:0!important;text-align:left}

@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>AI Foundry lab, 7 October 2026: Ethernet, measured</title>
+<meta name="description" content="The three lab machines are wired together at 1 Gb/s: 929 Mb/s between any two, about 30 times WiFi. Nothing uses the cable yet: the wired ports have no addresses.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%8C%3C/text%3E%3C/svg%3E">
+<style>
+
+:root{
+  --bg:#f3f5f6; --paper:#ffffff; --ink:#15232b; --ink-2:#3d4f5a; --muted:#6c7c86;
+  --rule:#d5dde2; --accent:#1f6f66; --accent-2:#a8631e; --accent-soft:#e3efec; --warm-soft:#f6ecdd;
+  --code-bg:#eaeff1; --shadow:0 1px 0 rgba(21,35,43,.06); --bad:#b3452f; --bad-soft:#f7e6e1;
+  --serif:"Charter","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --sans:"Avenir Next","Seravek","Gill Sans","Helvetica Neue",system-ui,-apple-system,sans-serif;
+  --mono:"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f171c; --paper:#151f26; --ink:#e6ecef; --ink-2:#c1ccd3; --muted:#8a9aa4;
+    --rule:#28363f; --accent:#5fbcae; --accent-2:#e0a35c; --accent-soft:#183531; --warm-soft:#33291b;
+    --code-bg:#1d2a32; --shadow:none; --bad:#e2705a; --bad-soft:#3a2420;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f171c; --paper:#151f26; --ink:#e6ecef; --ink-2:#c1ccd3; --muted:#8a9aa4;
+  --rule:#28363f; --accent:#5fbcae; --accent-2:#e0a35c; --accent-soft:#183531; --warm-soft:#33291b;
+  --code-bg:#1d2a32; --shadow:none; --bad:#e2705a; --bad-soft:#3a2420;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.55}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+a:hover,a:focus-visible{border-bottom-color:var(--accent);outline:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+header.mast{padding:52px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:26px}
+.eyebrow{font-family:var(--sans);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1.title{font-family:var(--sans);font-weight:600;font-size:clamp(30px,4.6vw,46px);line-height:1.08;letter-spacing:-.01em;margin:0 0 18px;text-wrap:balance;max-width:28ch}
+.lede{font-size:19px;line-height:1.45;color:var(--ink-2);max-width:62ch;margin:0 0 18px}
+.sources{font-family:var(--sans);font-size:13.5px;line-height:1.5;color:var(--muted);max-width:78ch;margin:0 0 10px}
+nav.toc{margin:0 0 40px;padding:18px 20px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;box-shadow:var(--shadow)}
+nav.toc .lbl{font-family:var(--sans);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 22px;font-family:var(--sans);font-size:14.5px;line-height:1.35}
+nav.toc a{border:none;color:var(--ink-2)}
+nav.toc a:hover{color:var(--accent)}
+main{display:block}
+main h2{font-family:var(--sans);font-weight:600;font-size:clamp(23px,2.6vw,29px);line-height:1.15;margin:64px 0 16px;padding-top:22px;border-top:2px solid var(--ink);text-wrap:balance}
+main h3{font-family:var(--sans);font-weight:600;font-size:18.5px;line-height:1.25;margin:34px 0 10px;color:var(--ink);text-wrap:balance}
+main p{margin:0 0 14px;max-width:72ch}
+main ul,main ol{margin:0 0 16px;padding-left:1.35em;max-width:72ch}
+main li{margin:0 0 7px}
+main strong{font-weight:700}
+main hr{border:0;border-top:1px solid var(--rule);margin:40px 0}
+main blockquote{margin:18px 0 22px;padding:14px 18px;background:var(--warm-soft);border-left:3px solid var(--accent-2);border-radius:0 4px 4px 0;font-size:16px;color:var(--ink);max-width:72ch}
+q{quotes:"\201C" "\201D"}
+code{font-family:var(--mono);font-size:.85em;background:var(--code-bg);padding:.12em .4em;border-radius:4px}
+main pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;margin:0 0 20px;overflow-x:auto;max-width:80ch}
+main pre code{background:none;padding:0;font-size:13px;line-height:1.5;white-space:pre}
+img{max-width:100%;height:auto}
+main figure{margin:26px 0 32px;max-width:820px}
+main figure a{display:block;border:none}
+main figure img{display:block;width:100%;border:1px solid var(--rule);border-radius:6px}
+main figcaption{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:72ch}
+.tablewrap{overflow-x:auto;margin:18px 0 24px}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:14.5px;line-height:1.45;background:var(--paper)}
+th,td{border:1px solid var(--rule);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);font-weight:600}
+td.t{font-family:var(--mono);font-size:13px;white-space:nowrap;color:var(--ink-2)}
+.ok{color:var(--accent);font-weight:700}
+.bad{color:var(--bad);font-weight:700}
+.mid{color:var(--accent-2);font-weight:700}
+details{margin:14px 0 22px;padding:12px 16px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;max-width:80ch}
+details summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:10px}
+details p,details li{font-size:15.5px}
+.kicker{font-family:var(--sans);font-size:14px;color:var(--muted);margin:-6px 0 14px}
+footer{max-width:1080px;margin:0 auto;padding:24px 20px 60px;color:var(--muted);font-family:var(--sans);font-size:13px;border-top:1px solid var(--rule)}
+/* MathJax, loaded by md2report only on pages that contain equations (2026-09-17, week 38).
+   A display equation gets its own scroll box: an over-wide matrix must not widen the page
+   on the phone.  Inline math inherits the prose colour in both themes. */
+.math-display{overflow-x:auto;overflow-y:hidden;max-width:100%;margin:20px 0 24px;padding:2px 0}
+mjx-container{color:var(--ink)}
+mjx-container[display="true"]{margin:0!important;text-align:left}
+
+</style>
+<style>
+/* One-series bar charts in HTML, so the text stays readable on a phone (dataviz: thin bars, 4px rounded data end,
+   value at the tip in ink, hairline grid, hover/focus tooltip; the tables below are the table view) */
+.bz-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px 40px;margin:26px 0 30px}
+@media (max-width:820px){.bz-pair{grid-template-columns:1fr}}
+.bz{--s1:#2a78d6;--grid:#e3e7ea;--axis:#9aa6ad;--tipbg:#ffffff;--tipbd:#d5dde2;margin:0;position:relative;font-family:var(--sans)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bz{--s1:#3987e5;--grid:#26343c;--axis:#5f707a;--tipbg:#1d2a32;--tipbd:#33444e}}
+:root[data-theme="dark"] .bz{--s1:#3987e5;--grid:#26343c;--axis:#5f707a;--tipbg:#1d2a32;--tipbd:#33444e}
+.bz .ttl{font-weight:650;font-size:16px;color:var(--ink);margin:0 0 2px}
+.bz .sub{font-size:13.5px;color:var(--muted);margin:0 0 12px;line-height:1.4}
+.bz .row,.bz .axis{display:grid;grid-template-columns:9.6em 1fr;align-items:center;gap:0 10px}
+.bz .row{padding:5px 0;border-radius:4px;outline:none}
+.bz .row:hover .bar,.bz .row:focus-visible .bar{filter:brightness(1.12)}
+.bz .row:focus-visible{box-shadow:0 0 0 2px var(--s1)}
+.bz .lab{font-size:14px;color:var(--ink-2);line-height:1.2}
+.bz .track{position:relative;height:22px;--w:calc(100% - 5.6em)}
+.bz .rows .track::before{content:"";position:absolute;inset:-5px auto -5px 0;width:var(--w);
+  background:repeating-linear-gradient(to right,var(--grid) 0 1px,transparent 1px 25%);border-right:1px solid var(--grid)}
+.bz .bar{position:absolute;left:0;top:0;height:22px;width:calc(var(--w) * var(--f));min-width:3px;background:var(--s1);border-radius:0 4px 4px 0}
+.bz .val{position:absolute;top:0;line-height:22px;left:calc(var(--w) * var(--f) + 7px);font-size:13.5px;font-weight:650;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
+.bz .axis{margin-top:4px}
+.bz .axis .track{height:16px}
+.bz .tk{position:absolute;left:calc(var(--w) * var(--f));transform:translateX(-50%);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:560px){.bz .row,.bz .axis{grid-template-columns:7.4em 1fr;gap:0 8px}.bz .lab{font-size:13px}.bz .tk.mid{display:none}}
+.bz-tip{position:fixed;z-index:9;pointer-events:none;max-width:300px;background:var(--tipbg,#fff);color:var(--ink);border:1px solid var(--tipbd,#ccc);border-radius:6px;
+  padding:7px 9px;font-family:var(--sans);font-size:13px;line-height:1.4;box-shadow:0 2px 10px rgba(0,0,0,.12);opacity:0;transition:opacity .08s}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+td .q{color:var(--muted);font-size:.9em}
+.big{font-family:var(--sans);display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:22px 0 24px;max-width:900px}
+.big div{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:12px 14px}
+.big b{display:block;font-size:30px;font-weight:600;line-height:1.1;color:var(--ink)}
+.big span{display:block;font-size:13.5px;color:var(--muted);margin-top:4px;line-height:1.35}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="mast">
+<p class="eyebrow" data-ss-id="auto-p-edsyc4">AI Foundry lab</p>
+<h1 class="title" data-ss-id="auto-h1-6k5em6">The lab machines are wired together: Ethernet runs about 30 times faster than WiFi, and nothing uses it yet</h1>
+</header>
+<main>
+<p class="lede" data-ss-id="auto-p-4ax9gp"><em>Covers Wed 7 Oct 2026 (week 41), 15:09–15:31 PDT: aifoundry1, aifoundry2 and aifoundry3 at Studio 45.
+Written the same afternoon from timed transfers between every pair of machines, run from aifoundry1.</em></p>
+
+<p data-ss-id="auto-p-axldky"><strong>The three machines are cabled to one wired network, and it works.</strong> Every port came up at 1 Gb/s,
+every machine reaches the other two, and one TCP stream moves <strong>929 Mb/s (116 MB/s)</strong>
+in every direction: the most a gigabit link carries. WiFi between the same machines moves a median
+<strong>31 Mb/s</strong> (19–45), so the cable is about
+30 times faster. A round trip takes <strong>0.26 ms</strong> on the cable and about
+5.9 ms over WiFi.</p>
+
+<div class="big">
+<div><b>929 Mb/s</b><span>Ethernet, any machine to any other (116 MB/s)</span></div>
+<div><b>31 Mb/s</b><span>WiFi between the same machines, median (3.9 MB/s)</span></div>
+<div><b>0.26 ms</b><span>Ethernet round trip, against 5.9 ms over WiFi</span></div>
+</div>
+
+<p data-ss-id="auto-p-16jli9"><strong>But nothing uses the cable yet.</strong> The wired ports have no IP address. Nothing on that network
+hands addresses out (no DHCP server), so each machine's NetworkManager asks for 45 seconds, four times, gives up for
+5 minutes and starts again. Until each port gets an address, all traffic between the machines, ssh and Tailscale
+included, still goes over WiFi. These tests used the ports' automatic IPv6 link-local addresses, which exist only while
+NetworkManager is asking: about 3 minutes in every 8. The fix is a fixed address on each wired port, a one-time step
+for whoever has root on the machines.</p>
+
+<div class="bz-pair">
+<figure class="bz" data-ss-id="auto-figure-ybh57i"><div class="ttl">Transfer speed between two machines</div><div class="sub">Median over the six directions, one TCP stream, in Mb/s. Longer is faster.</div><div class="rows"><div class="row" tabindex="0" data-tip="Ethernet: median 928.5 Mb/s (116.1 MB/s) over 6 directions; range 928.4–928.5 Mb/s"><span class="lab">Ethernet</span><span class="track" style="--f:0.9285"><span class="bar"></span><span class="val">929 Mb/s</span></span></div><div class="row" tabindex="0" data-tip="WiFi: median 31.0 Mb/s (3.9 MB/s) over 6 directions; range 18.8–44.8 Mb/s"><span class="lab">WiFi</span><span class="track" style="--f:0.0310"><span class="bar"></span><span class="val">31 Mb/s</span></span></div><div class="row" tabindex="0" data-tip="Tailscale: median 29.9 Mb/s (3.7 MB/s) over 6 directions; range 22.2–39.0 Mb/s"><span class="lab">Tailscale (over WiFi)</span><span class="track" style="--f:0.0300"><span class="bar"></span><span class="val">30 Mb/s</span></span></div></div><div class="axis"><span class="lab"></span><span class="track"><span class="tk" style="--f:0.0000">0</span><span class="tk mid" style="--f:0.2500">250</span><span class="tk" style="--f:0.5000">500</span><span class="tk mid" style="--f:0.7500">750</span><span class="tk" style="--f:1.0000">1,000</span></span></div></figure>
+<figure class="bz" data-ss-id="auto-figure-ks083n"><div class="ttl">Round trip between two machines</div><div class="sub">Median over the three pairs, a 64-byte message and its echo, in ms. Shorter is faster.</div><div class="rows"><div class="row" tabindex="0" data-tip="Ethernet: median round trip 0.26 ms over 3 pairs (pairs 0.25–0.26 ms); worst 99th percentile 0.44 ms"><span class="lab">Ethernet</span><span class="track" style="--f:0.0322"><span class="bar"></span><span class="val">0.26 ms</span></span></div><div class="row" tabindex="0" data-tip="WiFi: median round trip 5.9 ms over 3 pairs (pairs 5.3–6.4 ms); worst 99th percentile 48.8 ms"><span class="lab">WiFi</span><span class="track" style="--f:0.7419"><span class="bar"></span><span class="val">5.9 ms</span></span></div><div class="row" tabindex="0" data-tip="Tailscale: median round trip 5.2 ms over 3 pairs (pairs 5.0–5.9 ms); worst 99th percentile 31.6 ms"><span class="lab">Tailscale (over WiFi)</span><span class="track" style="--f:0.6519"><span class="bar"></span><span class="val">5.2 ms</span></span></div></div><div class="axis"><span class="lab"></span><span class="track"><span class="tk" style="--f:0.0000">0</span><span class="tk mid" style="--f:0.2500">2</span><span class="tk" style="--f:0.5000">4</span><span class="tk mid" style="--f:0.7500">6</span><span class="tk" style="--f:1.0000">8</span></span></div></figure>
+</div>
+
+<h2 id="pairs" data-ss-id="auto-h2-pyfv0w">Every pair, every path</h2>
+<p data-ss-id="auto-p-m7s1xg">Speed in Mb/s, one TCP stream for 8 seconds, counted by the receiver. Tailscale between these machines connects
+directly over the WiFi network, so it measures WiFi plus encryption.</p>
+<div class="tablewrap"><table data-ss-id="auto-table-6ik7em">
+<thead><tr><th>From → to</th><th>Ethernet</th><th>WiFi</th><th>Tailscale</th></tr></thead>
+<tbody><tr><td>aifoundry1 → aifoundry2</td><td class="n">928.5</td><td class="n">18.8</td><td class="n">22.2</td></tr><tr><td>aifoundry2 → aifoundry1</td><td class="n">928.5</td><td class="n">22.6</td><td class="n">28.0</td></tr><tr><td>aifoundry2 → aifoundry3</td><td class="n">928.5</td><td class="n">44.8</td><td class="n">39.0</td></tr><tr><td>aifoundry3 → aifoundry2</td><td class="n">928.5*</td><td class="n">32.9</td><td class="n">31.9</td></tr><tr><td>aifoundry3 → aifoundry1</td><td class="n">928.5</td><td class="n">29.1</td><td class="n">26.6</td></tr><tr><td>aifoundry1 → aifoundry3</td><td class="n">928.4*</td><td class="n">37.6</td><td class="n">35.1</td></tr></tbody>
+</table></div>
+<p class="kicker" data-ss-id="auto-p-aa084a">* The first run in this direction overlapped a NetworkManager restart; the best of its runs is shown (see How it was measured).</p>
+<p data-ss-id="auto-p-6qse9n">Round trip in ms, median (99th percentile in brackets):</p>
+<div class="tablewrap"><table data-ss-id="auto-table-xi2ex7">
+<thead><tr><th>Pair</th><th>Ethernet</th><th>WiFi</th><th>Tailscale</th></tr></thead>
+<tbody><tr><td>aifoundry1 ↔ aifoundry2</td><td class="n">0.26 <span class="q">(0.40)</span></td><td class="n">5.3 <span class="q">(48.8)</span></td><td class="n">5.2 <span class="q">(18.1)</span></td></tr><tr><td>aifoundry2 ↔ aifoundry3</td><td class="n">0.25 <span class="q">(0.30)</span></td><td class="n">5.9 <span class="q">(47.6)</span></td><td class="n">5.9 <span class="q">(31.6)</span></td></tr><tr><td>aifoundry3 ↔ aifoundry1</td><td class="n">0.26 <span class="q">(0.44)</span></td><td class="n">6.4 <span class="q">(25.4)</span></td><td class="n">5.0 <span class="q">(17.3)</span></td></tr></tbody>
+</table></div>
+<ul>
+<li><strong>Four streams at once</strong> move the same 930 Mb/s as one, on every pair: the link is the limit,
+not the machines or the software.</li>
+<li><strong>Both directions at once</strong> (aifoundry1 → 2 and 2 → 1 together): 925 and 925 Mb/s. The link is full duplex: each direction keeps the whole gigabit.</li>
+<li><strong>All three links at once</strong> (1 → 2, 2 → 3 and 3 → 1 together): 925, 925, 925 and 925, 925, 925 Mb/s in the 2 runs that no NetworkManager restart touched, about 2,775 Mb/s in all. The switch gives every port its full speed at the same time. In the 4 runs a restart touched, two of the three links dropped to 558–755 Mb/s.</li>
+</ul>
+
+<h2 id="meaning" data-ss-id="auto-h2-4xfamx">What it means</h2>
+<p data-ss-id="auto-p-lyika5">Time to copy a file from one machine to another, at the speeds measured:</p>
+<div class="tablewrap"><table data-ss-id="auto-table-3yjgyv">
+<thead><tr><th>File</th><th>Ethernet (929 Mb/s)</th><th>WiFi (31 Mb/s)</th></tr></thead>
+<tbody><tr><td>1 GB (a model checkpoint)</td><td class='n'>9 s</td><td class='n'>4 min</td></tr><tr><td>10 GB</td><td class='n'>86 s</td><td class='n'>43 min</td></tr><tr><td>100 GB</td><td class='n'>14 min</td><td class='n'>7.2 h</td></tr></tbody>
+</table></div>
+<p data-ss-id="auto-p-t70i6l">WiFi is also uneven: its slowest round trips took up to
+48.8 ms, against 0.44 ms on the cable.</p>
+
+<h2 id="gigabit" data-ss-id="auto-h2-tmyaxx">Why 1 Gb/s</h2>
+<p data-ss-id="auto-p-8k4xzk">Each machine's wired port is an Aquantia AQC107, a 10 Gb/s controller that also runs at 2.5 and 5 Gb/s, and each
+offers all of those speeds. All three links settled at 1 Gb/s, so the switch (or the cabling) is gigabit. A 10 Gb/s
+switch would raise the ceiling up to ten times.</p>
+
+<h2 id="next" data-ss-id="auto-h2-eyti1i">To make it usable</h2>
+<ol>
+<li><strong>A fixed address on each wired port</strong> (root, one command per machine) and a name for each, such as
+aifoundry2-eth. NetworkManager then stops asking for an address every few minutes.</li>
+<li><strong>Tailscale should then pick the cable by itself.</strong> It offers every address a machine has and uses
+the fastest path it finds between two machines, so <code>ssh aifoundryN</code>, which goes through Tailscale, would
+ride the cable. To be checked once the ports have addresses.</li>
+<li><strong>Plain ssh to a wired address needs a key.</strong> Between the lab machines, ssh works today only through
+Tailscale; to the wired address it was refused for lack of a key in <code>~/.ssh/authorized_keys</code>.</li>
+</ol>
+
+<h2 id="method" data-ss-id="auto-h2-cufk34">How it was measured</h2>
+<ul>
+<li><strong>The cabling.</strong> Each port showed a carrier at 1 Gb/s full duplex. Pings between every pair over the
+link-local addresses were answered in about 0.5 ms. No port counted an error or a dropped packet; the frames are the
+standard 1,500 bytes.</li>
+<li><strong>The tool.</strong> <code>netbench.py</code>, a small Python TCP sender and receiver: each test runs 8 s after
+a 1 s warm-up that is discarded, and the receiver counts the bytes. The round trip is a 64-byte message and its echo
+on one TCP connection, repeated 2,000 times on Ethernet and 200 times over WiFi.</li>
+<li><strong>When.</strong> WiFi and Tailscale at 15:09–15:12 PDT; Ethernet at 15:13–15:31,
+each test waiting until both ends had their address.</li>
+<li><strong>Slow runs.</strong> 7 of the 20 Ethernet runs had a link below 900 Mb/s
+(558–761), and every one
+overlapped a NetworkManager restart, by the machines' logs or by watching the ports' addresses during the run. All
+12 runs that no restart touched ran at full speed, and so did 1 that a restart touched.
+A restart re-sets the port's address, but it is not only that port that slows: in the all-links runs a restart on one
+machine sometimes slowed the link between the other two. It does not bounce the cable (the ports' carrier counters
+did not move). Fixed addresses end the restarts. The table shows each direction's best run. * marks a direction whose first run was one of these.</li>
+<li><strong>WiFi moves</strong> with everyone else's traffic and with the access point a machine is on. These are a
+few minutes' sample, not a long-term average.</li>
+</ul>
+<p data-ss-id="auto-p-1uqgtr">The tool, the scripts and every result are in
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-10-07-lab-ethernet">docs/reports/data/2026-10-07-lab-ethernet</a>
+of the lab repository, with this page as <code>docs/reports/2026-10-07-lab-ethernet.html</code>.</p>
+</main>
+</div>
+<footer>AI Foundry lab · Wed 7 Oct 2026 · measured from aifoundry1 ·
+<a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">the lab dashboard's worklog</a></footer>
+<div class="bz-tip" id="bz-tip" role="tooltip"></div>
+<script>
+(function(){
+  var tip=document.getElementById("bz-tip");
+  function show(row,x,y){
+    tip.textContent=row.getAttribute("data-tip");
+    var st=getComputedStyle(row.closest(".bz"));
+    tip.style.setProperty("--tipbg",st.getPropertyValue("--tipbg"));
+    tip.style.setProperty("--tipbd",st.getPropertyValue("--tipbd"));
+    var w=tip.offsetWidth,h=tip.offsetHeight;
+    tip.style.left=Math.max(8,Math.min(x+14,innerWidth-w-8))+"px";
+    tip.style.top=Math.max(8,y-h-12)+"px";
+    tip.style.opacity=1;
+  }
+  function hide(){tip.style.opacity=0;}
+  document.querySelectorAll(".bz .row").forEach(function(r){
+    r.addEventListener("mousemove",function(e){show(r,e.clientX,e.clientY);});
+    r.addEventListener("mouseleave",hide);
+    r.addEventListener("focus",function(){var b=r.getBoundingClientRect();show(r,b.left+b.width/3,b.top);});
+    r.addEventListener("blur",hide);
+    r.addEventListener("click",function(e){show(r,e.clientX,e.clientY);});
+  });
+  addEventListener("scroll",hide,{passive:true});
+})();
+</script>
+</body>
+</html>
