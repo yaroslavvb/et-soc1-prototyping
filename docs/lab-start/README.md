@@ -9,7 +9,7 @@ page shows it; `tools/lab/et-lab-start` is the script.
 
 | File | What it is |
 |---|---|
-| `START.md` | The brief for the Claude that runs on a lab machine (ninth edition, 2 October 2026, about 3,800 words). The person gets there with the page's three steps, all from their own computer's terminal: (1) one ssh as the shared `root` that creates their own account (validated name, `adduser --disabled-password`, no sudo, linger) and logs out; (2) one ssh as that account that installs Claude Code, fetches this file from GitHub into `~/lab-start.md`, starts Claude in a tmux session `claude`, and attaches the terminal to it; (3) one line for that Claude: "Read ~/lab-start.md and follow it." The brief checks it is on a lab machine and not root, chooses a free card on that machine by a fixed list, runs the first-hour tests, and keeps to the lab's rules; it never uses ssh or root. The page's commands are in `docs/reports/sources/lab-start.script.js` (tested 2 October: the root block against stand-ins for a new, a taken and a bad name; the user block live on aifoundry3 with Claude swapped for an echo). |
+| `START.md` | The brief for the Claude that runs on a lab machine (eleventh edition, 7 October 2026, about 3,800 words). The person gets there with the page's three steps, all from their own computer's terminal: (1) one ssh as the shared `root` that creates their own account (validated name, `adduser --disabled-password`, no sudo, linger) and logs out; (2) one ssh as that account that installs Claude Code, fetches this file from GitHub into `~/lab-start.md`, starts Claude in a tmux session `claude`, and attaches the terminal to it; (3) one line for that Claude: "Read ~/lab-start.md and follow it." The brief checks it is on a lab machine and not root, chooses a free card on that machine by a fixed list, runs the first-hour tests, and keeps to the lab's rules; it never uses ssh or root. The page's commands are in `docs/reports/sources/lab-start.script.js` (tested 2 October: the root block against stand-ins for a new, a taken and a bad name; the user block live on aifoundry3 with Claude swapped for an echo). |
 | `make_page_data.py` | Writes `docs/reports/data/2026-09-30-lab-start/brief.json` (START.md word for word, its sha256, version and word count, the placeholders the page fills, and the page's card tiles). `--check` exits 1 if the JSON is stale. It refuses a START.md whose opening lines lack `<login>`. |
 | `README.md` | This file. |
 
@@ -46,15 +46,15 @@ those `et-who` lists on the other card, the shells that started them, and simula
 (`et-usage --since 30m --card <N>` shows no other user on it, the lab's live monitor aside, and the person sees no
 "using `<host>` card `<N>`" post in #community-lab without a "released" after it). A card someone holds or has
 claimed is theirs, even though their runs are short, so the agent takes the next free card in this order, now:
-(1) aifoundry3's card; (2) aifoundry2's card (back in service since 6 October); (3) aifoundry1's card 1
-(`ET_DEVICES=1`), else its card 0 (`ET_DEVICES=0`, back in service since its fan was replaced on 2 October); two
-people can work on aifoundry1 at once, one per card; (4) no card free: look again at most once a minute, meanwhile
-doing only the setup (step 3) on the first reachable machine of aifoundry3, aifoundry2 and aifoundry1, and tell the
-person after 30 minutes; (5) no machine reached: stop, the person asks the lab lead. Up to
+(1) aifoundry3's card; aifoundry2's card is out of service since 7 October and never chosen, even if it looks free;
+(2) aifoundry1's card 1 (`ET_DEVICES=1`), else its card 0 (`ET_DEVICES=0`, back in service since its fan was replaced
+on 2 October); two people can work on aifoundry1 at once, one per card; (3) no card free: look again at most once a
+minute, meanwhile doing only the setup (step 3) on the first reachable machine of aifoundry3 and aifoundry1 (never
+aifoundry2), and tell the person after 30 minutes; (4) no machine reached: stop, the person asks the lab lead. Up to
 the fourth edition (30 September) the order was the free card of aifoundry2 or aifoundry3 whose machine had the
-fewest other people, then aifoundry1's card 1, never its card 0; the fifth (2 October) dropped aifoundry2's card, and
-the sixth (2 October, 13:31) added aifoundry1's card 0 after card 1, and the tenth (6 October) put aifoundry2's
-card back, after aifoundry3's. People are counted by their processes, not by
+fewest other people, then aifoundry1's card 1, never its card 0; the fifth (2 October) dropped aifoundry2's card,
+the sixth (2 October, 13:31) added aifoundry1's card 0 after card 1, the tenth (6 October) put aifoundry2's card
+back, after aifoundry3's, and the eleventh (7 October) dropped it again. People are counted by their processes, not by
 `loginctl list-sessions` or `who`: at 15:26 on 30 September aifoundry2 had no login session at all while two users
 kept Claude sessions running in tmux under linger (29 and 10 processes). The block still prints that count, but the
 choice no longer weighs it. The agent tells the person which machine and card and why; the person posts "using
@@ -106,14 +106,15 @@ et-lab-start --dry-run   # look, and print what the setup would do, without doin
 ```
 
 - **Look**: the host, the user, this machine's cards (the names of `/dev/et*_ops`, from a glob and a stat, never an
-  open; built-in facts per host, as of 2 October 2026: aifoundry1's card 1 and card 0 both for use, with
+  open; built-in facts per host, as of 7 October 2026: aifoundry1's card 1 and card 0 both for use, with
   `ET_DEVICES=1` or `ET_DEVICES=0`, card 0 back in service since its fan was replaced; aifoundry2's card `never`, out
-  of service; aifoundry3's card for use; the installed third version of 30 September has aifoundry1's card 0 `never`
-  and aifoundry2's card for use; each card's PCIe link, read from sysfs through the driver's `devnum`, where a link
-  that reads `Unknown`, or no sysfs entry, marks the card DOWN and leaves it out, since a card that fell off the bus
-  keeps its `/dev` node; each card's lock path, and a WARN if the lock file is missing, since a lock a user creates
+  of service again since 7 October (`use` in this copy from 6 to 7 October); aifoundry3's card for use; the
+  installed third version of 30 September has aifoundry1's card 0 `never` and aifoundry2's card for use; each
+  card's PCIe link, read from sysfs through the driver's `devnum`, where a link that reads `Unknown`, or no sysfs
+  entry, marks the card DOWN and leaves it out, since a card that fell off the bus keeps its `/dev` node; each card's lock path, and a WARN if the lock file is missing, since a lock a user creates
   cannot be opened by the others' `flock`), per host a note (aifoundry1: one person per card, and `dev_mngt_service`
-  and `et-powertop` open both cards; aifoundry2: a note that its fans run at full speed since 6 October), `et-who --check` (free, held with the holders, or failed), other users' card programs and
+  and `et-powertop` open both cards; aifoundry2: a WARN that its card is out of service and new users work on
+  aifoundry3 or aifoundry1), `et-who --check` (free, held with the holders, or failed), other users' card programs and
   queues in `ps` (the brief's pattern, on the whole command line), a verdict for one card (below), `et-usage` (its
   default last-24-hour summary, at most 40 lines) if installed, how many other people have processes here (uids from
   1000 up, no names) and how many of them are logged in (`loginctl list-sessions`; a failure is a WARN, not a zero),
@@ -148,8 +149,9 @@ et-lab-start --dry-run   # look, and print what the setup would do, without doin
   message to paste into the Claude on the machine, and what to do when the tmux session is gone after a reboot. The
   message names the card given with `--card N`, or the only card of a one-card machine; on a machine with more than
   one card and no `--card` it leaves `<N>` for the agent to fill, since the card the script would pick now may not be
-  the one chosen in step 2. On a machine with no card for use (aifoundry2 since 2 October) it prints no hand-off,
-  only that the setup belongs on aifoundry3 or aifoundry1. Then the five rules that matter most: (1) `et-who --check`
+  the one chosen in step 2. On a machine with no card for use (aifoundry2 since 7 October, and from 2 to 6 October)
+  it prints no hand-off, only that the setup belongs on another machine (its host note names aifoundry3 and
+  aifoundry1). Then the five rules that matter most: (1) `et-who --check`
   before every run (exit 0 free, 1 held, 2 the check failed: stop and ask); (2) `ET_DEVICES=<N> flock -n
   /run/lock/etsoc-shire<N>.lock timeout 10 <cmd>`, with `<N>` as in the message; (3) use only your card: on
   aifoundry1 `et-who --check` counts both cards, so look for your card's own lines (`/dev/et<N>_…`,
@@ -243,7 +245,8 @@ logs card use"; `et-lab-health` rev 3 and `et-reset` are on all three machines s
 aifoundry3 at 14:38–14:39 PDT and aifoundry2 at 15:36, the same `et-lab-health` as `tools/lab/et-lab-health`), when
 aifoundry1 card 1's clock after the power cycle of 30 September has been read (the brief says "not rechecked"),
 when the lab adopts the onboarding page (the lab problems report's request DI1), when aifoundry2's card is back in
-service (out since 2 October 2026, until the lab fixes the air reaching it), when `et-lab-start`'s fourth version
+service (out since 7 October 2026, as from 2 to 6 October, until the cooling at the card is checked on site and the
+card is brought back with the full reset), when `et-lab-start`'s fourth version
 and the 2 October banners are installed (step 3's caution about the installed copy can then go), or when a new trap
 costs someone time. Bump its "Version of" line (the page shows it), rebuild, and redeploy the page. Keep `et-lab-start`'s per-host
 card facts and its printed Remote Control steps and rules in step with START.md. The facts it states are dated in `AGENT.md` §4, `docs/lab-access.md` and

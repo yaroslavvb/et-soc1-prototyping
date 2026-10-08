@@ -7,7 +7,7 @@
 Since the ninth edition (2 October 2026) the page gives a person three steps: from their own computer, create their
 account as root and start Claude on the lab machine as themselves (the commands are in the page's script), then give
 that Claude one line, which has it read START.md (fetched from GitHub into ~/lab-start.md). The page shows START.md
-verbatim in a fold, unfilled. The card tiles come from CARDS below (facts of 2 October 2026, from AGENT.md §4 and
+verbatim in a fold, unfilled. The card tiles come from CARDS below (facts of 7 October 2026, from AGENT.md §4 and
 docs/findings/14-card-behaviour.md). No timestamps go into the output, so a rebuild with the same inputs is
 byte-identical."""
 import hashlib
@@ -25,8 +25,8 @@ OUT = os.path.join(ROOT, "docs", "reports", "data", "2026-09-30-lab-start", "bri
 # The agent, not the person, chooses among the usable ones (START.md, step 2).
 CARDS = [
     {"id": "aifoundry2", "host": "aifoundry2", "n": 0, "firmware": "1.3.1",
-     "clock": "DVFS 600–800 MHz, usually 600", "note": "back in service 6 Oct: fans at full speed; idles at about 64 °C",
-     "use": True},
+     "clock": "DVFS 600–800 MHz, usually 600", "note": "out of service since 7 Oct: overheats at idle, drops off the bus",
+     "use": False},
     {"id": "aifoundry3", "host": "aifoundry3", "n": 0, "firmware": "1.3.1",
      "clock": "pinned at 600 MHz", "note": "a demo service can use it without the lock", "use": True},
     {"id": "aifoundry1-c1", "host": "aifoundry1", "n": 1, "firmware": "1.2.0",

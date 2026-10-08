@@ -53,6 +53,11 @@ governor sections and the card table below). Its Master Minion ran the validatio
 a hang. (7) On aifoundry2 two DRAM lines that differ only in PA[17], a column bit in the L50 map, read as a row
 conflict (E57; "Traps").
 
+**Updated 2026-10-07.** **aifoundry2's card is out of service again** since 16:46 PDT that day: idle, a day after the
+6 October fan fix, the cooling at the card got worse (at 03:55, and again at about 14:25) and the card ran away to a
+138 °C mean and dropped off the PCIe bus, as on 2 October ("aifoundry2's card ran away again at idle", below). So three
+cards are in service: aifoundry3's and aifoundry1's two.
+
 **Updated 2026-10-02.** (1) **aifoundry1's card 0 is back in service**: its fan was found broken and replaced on
 site, and the owner put the card back in service at about 13:30 PDT. It idles at 49 °C, and 8 minutes of sgemm bursts
 held it at a 52–53 °C mean (hottest sensor 56 °C), cooler than card 1 under the same test (59–60 °C); select it with
@@ -231,6 +236,13 @@ die's temperature:
   nothing tripped. In all, aifoundry2's mean passed 90 °C in eight version-3 telemetry files (12,176 samples: catalogue
   passes 6, 9 and 11, full-catalogue passes 22 and 31, the matmul benchmark's thermal passes 3 and 4, and X5's pass 3),
   every one at 600 MHz.
+- **An idle card is never throttled at all.** In the upstream firmware (et-platform `836a4ab`,
+  `check_power_throttle_conditions()`, `device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c:864–883`)
+  the software thermal check (threshold `TEMP_THRESHOLD_SW_MANAGED`, 65 °C, `thermal_pwr_mgmt.h:41`) runs only while the
+  master minion is not idle (`get_mm_state() != MM_STATE_IDLE`), and all it can do is step the minion clock down. So when
+  an idle card's cooling falls short, its leakage runs away with nothing in the way: aifoundry2's card reached a 138 °C
+  mean (hottest sensor 144 °C) at 133–134 W, idle, on 2 and on 7 October, and dropped off the PCIe bus both times. Read
+  from the upstream source, not from release 1.3.1's own.
 - **The one possible exception is aifoundry1's card 0** (release 1.4.1, not in the campaign): it read 115–117 °C after
   its smoke blocks of 25 September before it dropped to 300 MHz (the section on that card below); whether its PMIC's
   safe state or 1.4.1's idle point did that is not established.
@@ -330,7 +342,8 @@ Approach times were 12–120 s (median 63 s) for 7-second runs, and up to seven 
 Updated 2026-09-25: aifoundry1's two cards answer since 15:02 that day, so there are four cards on three firmware
 releases; three are usable for measurement, since aifoundry1's card 0 overheats and takes nothing sustained (amendment
 A4). Updated 2026-10-02: card 0 is usable again (its fan was replaced) and aifoundry2's card was out of service (its
-cooling failed) until 2026-10-06, when its fans were set to full speed: all four cards are in service again. Before using a card for
+cooling failed) until 2026-10-06, when its fans were set to full speed: all four cards were in service again. Updated
+2026-10-07: aifoundry2's card is out of service again since 16:46 that day (below). Before using a card for
 anything comparative, read its governor configuration. Two read-only commands:
 
 ```
@@ -356,8 +369,8 @@ Take the card lock before starting such a tool and the collector stays off the c
 | TDP the driver reports | 65 W | 65 W | 65 W | 65 W |
 | **TDP the firmware uses** | **65 W** | **0 W**, set at every boot (below) | 65 W | 65 W |
 | Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C. In this chassis the die never read below 65 °C in the version-3 campaign (336,070 samples, 25–26 Sep), and over DV2's 20 h validation (28–29 Sep) it idled at 71–76 °C in 327 of 378 cycles, so it runs at 600 MHz unless it starts cold | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry); its governor is latched by the zero TDP: no governor line in its trace since 25 Sep (E41 TEL-G), and its throttle residencies all 0 after 2 d 8 h up (28 Sep; E51, development); it makes no thermal step at any temperature | firmware DVFS; **idles at 300 MHz** (`low_power`); its 0.21.x governor acts only while a kernel runs (firmware source, 27 Sep) | **600 MHz in all 318,667 samples of the three-card check (25–26 Sep)**, and in the SP's own minimum and maximum, although 9,461 were busy at 45–65 W at 64 °C or less and the mean reached 88 °C: its governor does not raise the clock (active power management off, or latched; asked the lab). Its build steps 50 MHz between 300 and 700 MHz, so it could never reach 800 |
-| Idle | **about 64 °C and 27 W since 6 Oct** (fans at full speed); before that 31–36 W at 73–80 °C (27 W cold); on the night of 28–29 Sep (DV2's idle watch) 73–75 °C and 31.4–32.5 W at 20:45–21:09 and 00:11–01:00 PDT, 59 °C and 25.4–25.6 W at 22:12 and 23:15–23:18 (idle cycles only; its heating sessions ran 22:13–23:56); over the whole watch, to 16:48 on 29 Sep, 59–76 °C, 71–76 °C in 327 of 378 cycles, and never below 65 °C after 23:18 | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz; 49 °C (hottest sensor 53 °C) and 19.6 W after its fan was replaced (2 Oct) | 33–35 W at 600 MHz and 57–62 °C |
-| Use it for | **anything since 6 Oct 2026**, with its fans at full speed (below); out of service 2–6 Oct, its cooling failed; before that the main card | compare switching power over idle, never absolute watts | anything since its fan was replaced on 2 Oct 2026 (52–53 °C under sgemm bursts); from 25 Sep until then **nothing sustained: it overheated** (below) | anything; it peaked near 71 °C under the campaign's smoke blocks |
+| Idle | **about 64 °C and 27 W from 6 Oct** (fans at full speed) until 03:55 on 7 Oct, when the cooling at the card got worse; out of service since 16:46 on 7 Oct; before 6 Oct 31–36 W at 73–80 °C (27 W cold); on the night of 28–29 Sep (DV2's idle watch) 73–75 °C and 31.4–32.5 W at 20:45–21:09 and 00:11–01:00 PDT, 59 °C and 25.4–25.6 W at 22:12 and 23:15–23:18 (idle cycles only; its heating sessions ran 22:13–23:56); over the whole watch, to 16:48 on 29 Sep, 59–76 °C, 71–76 °C in 327 of 378 cycles, and never below 65 °C after 23:18 | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz; 49 °C (hottest sensor 53 °C) and 19.6 W after its fan was replaced (2 Oct) | 33–35 W at 600 MHz and 57–62 °C |
+| Use it for | **nothing: out of service since 7 Oct 2026** (16:46 PDT; below), as from 2 to 6 Oct; in service 6–7 Oct with its fans at full speed; before that the main card | compare switching power over idle, never absolute watts | anything since its fan was replaced on 2 Oct 2026 (52–53 °C under sgemm bursts); from 25 Sep until then **nothing sustained: it overheated** (below) | anything; it peaked near 71 °C under the campaign's smoke blocks |
 | Version-3 campaign | yes | yes | excluded (amendment A4) | yes |
 
 The hosts differ too. Host-side timing (launch, synchronisation, copies, compile times) is not comparable between
@@ -525,6 +538,8 @@ checkout; only its card is out.
 
 ## aifoundry2's card back in service: every fan at full speed (6 October 2026)
 
+**It held for about a day: out of service again since 7 October, 16:46 PDT (the next section).**
+
 On 6 October (15:54–16:07 PDT, on site) every fan header in aifoundry2's BIOS (Gigabyte Z590 AORUS MASTER; Smart Fan 6,
 F6) was moved from the Normal curve, which follows the CPU temperature, to Full Speed (CPU_FAN set, then TUNE ALL; Fan
 Stop stays Disabled, control mode Auto), and the card was brought back with the full reset. On the BIOS screen every fan
@@ -550,8 +565,49 @@ Measured since (`docs/reports/data/2026-10-06-fan-fix-aifoundry2/`, [the 6 Octob
 
 The setting lives in the BIOS: a BIOS update or a CMOS reset puts the Normal curves back.
 
+## aifoundry2's card ran away again at idle (7 October 2026), and is out of service
+
+**Out of service since Wed 7 October 2026, 16:46 PDT.** A day after the fan fix the idle card ran away and dropped off
+the PCIe bus exactly as on 2 October. The cause is the cooling at the card, not the card. From the live collector's
+records (`docs/reports/data/2026-10-07-idle-runaway-aifoundry2/`, `analyze.py`; the page
+[aifoundry2-idle-runaway-7-october](https://spacesheep.dev/@yaroslavvb/aifoundry2-idle-runaway-7-october)):
+
+- **Back on the bus** at 16:05:32 on 6 October. The fix's load tests held it at 16:22:30–16:35:05, and nobody held it
+  after that. From 17:00 to 03:50 it idled at 63–70 °C and 26.9–30.3 W.
+- **03:55 on 7 October: the cooling at the card got worse, in one step.** It went from 64 °C (27.6 W) to 78 °C (34.5 W)
+  by 04:50, then held 74–78 °C through the morning. The host was idle (0.5% CPU), and its own sensors did not move:
+  NVMe 45.9 → 46.3 °C, network chip 54.1 → 53.8 °C, CPU 39 → 38 °C (the 50 minutes either side).
+- **At about 14:25 it got worse again:** 85 °C at 14:44:50, 90 °C at 15:30:25 (43.3 W), 100 °C at 16:39:55. The last
+  reading was at 16:46:40: a 138 °C mean, hottest sensor 144 °C, 133.45 W. There was none after 16:46:45. On 2 October
+  the last reading was 138 °C, 144 °C and 133.65 W.
+- **The card itself did not change.** At every temperature its power matched the 2 October leakage law,
+  13.56 + 2.025·e^(0.0300·T) W: 0.25 W rms over 17,678 readings, and within 0.44 W at every whole degree it held
+  for a minute or more. Work, or a change of clock or voltage, would have left that curve.
+- **What the cooling did.** By the 2 October heat balance (R 0.897 °C/W, C 296 J/°C; air = T − R·(P − C·dT/dt)), the air
+  temperature the card's heat balance needs was 39.4 °C in the night, 45.6 °C after 03:55 and 50.7 °C after 14:25. An
+  idle card has no steady temperature above 51.5 °C (the tangent at 97 °C). The model's steady temperatures for
+  39, 46 and 51 °C air (63, 76 and 91 °C) are what the card did. These are model numbers: a loss of airflow shows up
+  as warmer air.
+- **The kernel** logged 5 corrected receiver errors on the link at 16:46:32–36. At 16:55:02 the driver's queue sync
+  read the card as all ones (`head_remote: -1`). At 17:01:20 root port 00:01.1 was reset; what triggered it is not
+  known. The card did not come back: it is not in `lspci` and has no `/dev/et0` nodes (`kernel.txt` there).
+- **The fan is not known.** No fan sensor driver is loaded on aifoundry2, and loading one needs root. Two other causes
+  are ruled out. The BIOS setting stands, because there was no reboot since the fix. Linux never switched a fan: the
+  ACPI fans' `stats/total_trans` is 0 since boot. A fan near the card that stopped, slowed or moved, or something
+  blocking its air, fits a step at 03:55 that nothing else felt. Look on site, and in the BIOS's Smart Fan 6 page,
+  which shows each header's RPM (System 5 read 2,368 RPM at full speed on 6 October).
+- **Nothing on the card stopped it,** from 65 to 138 °C: the firmware never throttles an idle card ("Nothing limits the
+  die's temperature", above).
+
+**To bring it back:** fix the cooling at the card on site, then do the full reset as root (the cold reboot from
+2 October, above); a warm reboot or a slot reset leaves it off the bus. Then watch it: after a reset it looks healthy for
+about an hour while it heats, and this time the trouble began 12 hours in.
+
 ## Traps that cost time here
 
+- **aifoundry2's kernel ring buffer keeps only about an hour (7 October 2026).** AppArmor audit lines from `bwrap`
+  arrive every 15 s, and they had pushed the card's 16:46 PCIe errors out of `dmesg` by 17:40. `journalctl -k` needs the
+  adm or systemd-journal group. Copy a card's kernel lines into the data folder as soon as it misbehaves.
 - **A card's queue counters race with its resets (30 September, from the driver source).** The world-readable sysfs files `mgmt_vq_stats/*` and `ops_vq_stats/*` (`msg_count` and its siblings) walk the driver's queue tables with no lock, and et-driver 0.20.0 (the same as upstream's latest, 836a4ab) shows them before it builds the tables and removes them after it frees them. A read during a card reset can return garbage (a jump of trillions of messages); one during a driver load can crash the reader. Tools that read them (our usage logger, the dashboard) discard impossible jumps; never poll them in a tight loop, and never read `utilization_percent`. Reported on the Requests for Roman page (C29, CF13); the upstream issue is drafted ([02-requests.md](02-requests.md), Q86).
 - **`sparsity_host --budget` defaults to 8 seconds** on silicon and silently stops a longer run. Raise it for
   anything past 8 s.

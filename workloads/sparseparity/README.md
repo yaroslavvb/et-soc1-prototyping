@@ -68,7 +68,7 @@ its kernel's path compiled in.
 |---|---|---|---|
 | aifoundry3 | `~/nekko` (a copy, no git) | the commands below | card idle; `sys_emu` at `/opt/et/bin/sys_emu`; built and tested there on 29 September |
 | aifoundry1 | `~/nekko` | the same | **`card_run.sh` and `energy.sh` use card 1 only**: they set `ET_DEVICES=1` and `etsoc-shire1.lock` (card 0, in service again since its fan was replaced on 2 October 2026, takes `ET_DEVICES=0` and `etsoc-shire0.lock` by hand); `/home` shares one pool with the system (99% full until 30 Sep, 116 GB free since), so keep builds small |
-| aifoundry2 | the git checkout, `~/claude/et-soc1-prototyping` | `cmake` and `make` as below, in the checkout | **not before the DV2 validation ends (about 17:00 PDT on 29 September)**: no builds, no `*_host` or `sys_emu` process until then; **its card is out of service since 2 October 2026** (its cooling failed): run nothing on it |
+| aifoundry2 | the git checkout, `~/claude/et-soc1-prototyping` | `cmake` and `make` as below, in the checkout | **not before the DV2 validation ends (about 17:00 PDT on 29 September)**: no builds, no `*_host` or `sys_emu` process until then; **its card is out of service since 7 October 2026**, as from 2 to 6 October (the cooling at the card fails): run nothing on it |
 
 From a clone (on aifoundry2 the checkout itself), copy the sources to aifoundry1 or aifoundry3 the way
 `scripts/deploy-lab.sh` does, then build there:
@@ -186,7 +186,7 @@ it by construction: a `TOUCH_ALL` after every `TensorWait` that precedes a vecto
   lock: check `et-who` before and after), or either of aifoundry1's cards with `ET_DEVICES=<N>` and
   `etsoc-shire<N>.lock` (`card_run.sh` and `energy.sh` use card 1 only there; card 0 overheated until its fan was
   replaced on 2 October 2026 and is in service again since, but these scripts do not select it); never aifoundry2's
-  card, out of service since 2 October 2026 (its cooling failed);
+  card, out of service since 7 October 2026, as from 2 to 6 October (the cooling at the card fails);
 - on aifoundry1 `et-who --check` counts both cards (exit 1 if anyone holds either): a check for one card looks for
   that card's own lines (`/dev/et<N>_…`, `lock:etsoc-shire<N>.lock`) and stops on exit 2;
 - every device-opening process runs as `ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 …` (on
@@ -437,7 +437,8 @@ host process with `--reps R --oracle sample` (every launch read back and checked
 taken by bash's `times`; idles 10 s; stops the sampler; releases the lock; reduces. About 30 s per run: the lock
 about 27 s, the card's ops node at most 10 s. It refuses aifoundry2 (the DV2 validation treats a sampler or a
 `*_host` process as foreign) unless `SPP_ALLOW_AIFOUNDRY2=1`; there only the stubs' `--dry` runs. Its card is out
-of service since 2 October 2026 (its cooling failed): do not set that variable. On aifoundry1 it uses card 1 only.
+of service since 7 October 2026, as from 2 to 6 October (the cooling at the card fails): do not set that variable.
+On aifoundry1 it uses card 1 only.
 
 | Preset | Launches | Burst | Launch (29 Sep) |
 |---|---|---|---|

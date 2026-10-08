@@ -777,7 +777,8 @@
     else if (stale) tile.append(E('p', 'ct-note', host.reachable === false || c.stale ? (lastKnown(host) ? `Last known at ${lastKnown(host)}: the machine is ${stateOf(host) === 'down' ? 'down' : 'not answering'}; nothing below is current.`
       : `No data from this machine yet: it is ${stateOf(host) === 'down' ? 'down' : 'not answering'}.`)
       : `Last known state: this page's data is ${dur(ageMin())} old.`));
-    if (!c.excluded && c.note) tile.append(E('p', 'ct-note', cardNote(c)));
+    // an excluded card shows its note too when the note links the page that says why (note_page)
+    if (c.note && (!c.excluded || c.note_page)) tile.append(E('p', 'ct-note', cardNote(c)));
     tile.append(gauge(c, r, stale));
     const kv = E('dl', 'kv');
     const row = (k, ...v) => kv.append(E('dt', null, k), E('dd', null, ...v));

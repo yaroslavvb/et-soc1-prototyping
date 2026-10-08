@@ -121,8 +121,10 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   catalogue launches at a 90–103 °C mean checked no arithmetic (the hottest checked launch is mmbench's, at 97 °C); the
   SRAM rail is 0.70–0.75 V by card. Otherwise trust 14-card-behaviour.md and this file. Since 2 October 2026
   (aifoundry1's card 0 back in service after its fan was replaced), text that forbids card 0 because it overheats is
-  stale; so, since 6 October 2026 (aifoundry2's card back in service, its fans at full speed in the BIOS; out of
-  service 2–6 October), is text that forbids aifoundry2's card, or treats it as the main card or the one to run on. Two kinds of text stay as they are: the dated record of 25 September to 2 October, and the frozen or
+  stale; so, since 7 October 2026 (aifoundry2's card out of service again: idle, it ran away and dropped off the PCIe
+  bus as on 2 October; it was in service only from 6 to 7 October, with its fans at full speed in the BIOS), is text
+  that treats aifoundry2's card as usable, the main card or the one to run on. Two kinds of text stay as they are: the
+  dated record of 25 September to 7 October, and the frozen or
   pre-registered experiment code (`tools/claims-v3/*`, `workloads/pciebench`), whose card-0 refusals stay;
   `workloads/sparseparity`'s scripts also use only card 1 on aifoundry1. The workload READMEs' `aifoundry2` commands
   reproduce that card's September data and wait until it is back in service. On 2 October the `et-lab-start` installed
@@ -137,11 +139,12 @@ command is prefixed with `scripts/vm`. On any other Ubuntu 24.04 box, `scripts/c
 builds the same `/opt/et` natively (the README's setup section). **Never run `provision-vm.sh` on a lab machine**: its
 `/opt/et` is the lab's. `sys_emu` is functional only: it checks correctness, never speed.
 
-**The lab.** Three x86_64 Ubuntu 24.04 machines on AI Foundry's Tailscale tailnet, four cards, three in service since 2 October 2026 (aifoundry2's is out):
+**The lab.** Three x86_64 Ubuntu 24.04 machines on AI Foundry's Tailscale tailnet, four cards, three in service
+(aifoundry2's is out since 7 October 2026, as it was from 2 to 6 October):
 
 | Card | Firmware | Clock policy | Notes |
 |---|---|---|---|
-| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | **back in service since 6 Oct**, when every fan was set to full speed in the BIOS (Smart Fan 6): it idles at about 64 °C and 27 W, peaks at 76 °C under 8 minutes of sgemm bursts, and at full load on every minion still reaches 90 °C, after 37 s instead of 19–27 s ([the 6 October page](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-6-october), `docs/reports/data/2026-10-06-fan-fix-aifoundry2/`). Out of service 2–6 Oct: its cooling failed. It dropped off the PCIe bus while idle on 1 Oct (09:42); after a full (cold) reset at 10:53 on 2 Oct it heated, idle and with nothing on it, from 45 °C to a 138 °C mean (134 W) in 69 minutes and dropped off again, and no firmware cut-off acted (`docs/reports/data/2026-10-02-idle-runaway-aifoundry2/`). After a full reset it looks healthy for about an hour while it heats. Run nothing on it until the lab fixes the air reaching it. Until then it was the main card. The machine is up, and the git checkout is `~/claude/et-soc1-prototyping` here. Its Master Minion hung at 02:50 PDT on 28 Sep; the management reset restored it at 08:32 (owner-approved; the sysfs per-card reset had not), and it ran kernels again (14-card-behaviour.md). DV2's validation ran there from 20:45 PDT on 28 Sep to 16:57 PDT on 29 Sep, then the third card's pcie2, nocr and memp2 (16:59–17:38) |
+| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | **out of service since 7 Oct** (16:46): idle and with nothing on it, it ran away again and dropped off the PCIe bus at a 138 °C mean (hottest sensor 144 °C) and 133 W, as on 2 Oct (138 °C, 144 °C, 134 W). With every fan at full speed in the BIOS since 6 Oct it had idled at 63–69 °C and 27–30 W through the night; at 03:55 on 7 Oct, with the host idle and the host's own sensors unchanged, the cooling at the card got worse in one step (64 → 78 °C by 04:50), again at about 14:25, and it ran away from about 16:25. Its power followed the 2 Oct leakage law within 0.25 W rms over the day, so the card did not change; the air reaching it did (by the 2 Oct model, from about 39–42 °C to about 51 °C). Fan speeds are not visible from Linux here: a fan near the card that stopped, slowed or moved fits the data. Run nothing on it. To bring it back: the cooling at the card checked on site, then the full reset (14-card-behaviour.md; a warm reboot or a slot reset leaves it off the bus); after a full reset it looks healthy for about an hour while it heats, so watch it ([the 7 October page](https://spacesheep.dev/@yaroslavvb/aifoundry2-idle-runaway-7-october), `docs/reports/data/2026-10-07-idle-runaway-aifoundry2/`). In service 6–7 Oct: it idled at about 64 °C and 27 W, peaked at 76 °C under 8 minutes of sgemm bursts, and at full load on every minion reached 90 °C after 37 s instead of 19–27 s ([the 6 October page](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-6-october), `docs/reports/data/2026-10-06-fan-fix-aifoundry2/`). Out of service 2–6 Oct: its cooling failed. It dropped off the PCIe bus while idle on 1 Oct (09:42); after a full (cold) reset at 10:53 on 2 Oct it heated, idle and with nothing on it, from 45 °C to a 138 °C mean (134 W) in 69 minutes and dropped off again, and no firmware cut-off acted (`docs/reports/data/2026-10-02-idle-runaway-aifoundry2/`). Until then it was the main card. The machine is up, and the git checkout is `~/claude/et-soc1-prototyping` here. Its Master Minion hung at 02:50 PDT on 28 Sep; the management reset restored it at 08:32 (owner-approved; the sysfs per-card reset had not), and it ran kernels again (14-card-behaviour.md). DV2's validation ran there from 20:45 PDT on 28 Sep to 16:57 PDT on 29 Sep, then the third card's pcie2, nocr and memp2 (16:59–17:38) |
 | aifoundry3 | 1.3.1 | **pinned at 600 MHz**: a boot service sets a 0 W TDP at every boot, which also latches its governor (no step at any temperature) | compare switching power over idle, never absolute watts; about 1 host launch in 100 crashes at 1.08 s unless the program registers libetrt's log levels first (`registerRuntimeLogLevels()`, 14-card-behaviour.md) |
 | aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz, and its 0.21.x governor acts only while a kernel runs (firmware source) | **back in service since 2 Oct**, when its broken fan was replaced: 49 °C idle (hottest sensor 53 °C), 52–53 °C (hottest 56 °C) under 8 minutes of sgemm bursts, cooler than card 1 under the same test (59–60 °C, hottest 63 °C; `docs/reports/data/2026-10-02-fan-fix-aifoundry1/`). From 25 Sep until then it overheated (115–117 °C on the host on 25 Sep; its service processor's statistics held a 119 °C mean and a 123 °C sensor) and took no sustained work; excluded from the campaign |
 | aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample since 25 Sep, cool or hot, busy or idle: its governor never raises the clock (off or latched; asked the lab) | fine; select a card on this host with `ET_DEVICES=<n>` and take its lock, `etsoc-shire<n>.lock` (one person per card) |
@@ -244,7 +247,7 @@ their host program has its kernel's path compiled in. Each workload's `README.md
   `val.json` on any changed byte: they stay as frozen, and `a745199`'s comment waits, until the owner decides about
   that lock (`docs/reports/TODO.md`, part B).
 
-**Run one workload on a card by hand** (in the host's tree, `~/nekko` on aifoundry3 and aifoundry1, the repository's `build/` on aifoundry2):
+**Run one workload on a card by hand** (in the host's tree, `~/nekko` on aifoundry3 and aifoundry1; aifoundry2's card is out of service):
 
 ```bash
 cmake -S workloads/sgemm -B build/sgemm-mine -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && nice cmake --build build/sgemm-mine -j4
@@ -256,7 +259,8 @@ flock -n /run/lock/etsoc-shire0.lock timeout 10 build/sgemm-mine/host/sgemm_host
 On aifoundry1, add `ET_DEVICES=<n>` before the program and take `etsoc-shire<n>.lock` for the card `<n>` you were
 given (1 or 0; card 0 is back in service since its fan was replaced on 2 October 2026, and the other card may be
 someone else's: one person per card). There `et-who` and `et-who --check` count both cards, so look for your card's own
-lines (`/dev/et<n>_…`, `lock:etsoc-shire<n>.lock`). aifoundry2's card is back in service since 6 October (it was out 2–6 October).
+lines (`/dev/et<n>_…`, `lock:etsoc-shire<n>.lock`). aifoundry2's card is out of service since 7 October (as it was
+from 2 to 6 October): run this on aifoundry3 or aifoundry1.
 The telemetry client builds the same way (`cmake -S tools/ettelem -B build/<dir> …`); build it on each host,
 so that on aifoundry1 it honours `ET_DEVICES`. `tools/etcfg/` is one C file: `gcc -O2 -I/opt/et/include -o etcfg
 tools/etcfg/etcfg.c`.

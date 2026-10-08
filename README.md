@@ -133,7 +133,7 @@ scripts/vm make run-hello SIM_PARAMS="-vpurf_warn"
 This adds the simulator's A0-errata checker to a run.
 
 On a lab machine with a card and the et-platform stack installed (aifoundry3 as written: aifoundry2's card is out of
-service since 2 October 2026, and on aifoundry1 a program needs `ET_DEVICES=<N>` and card N's lock,
+service since 7 October 2026, and on aifoundry1 a program needs `ET_DEVICES=<N>` and card N's lock,
 [`docs/lab-start/START.md`](docs/lab-start/START.md), rule 3). Never deploy while a `tools/claims-v3` queue runs on
 the host ([AGENT.md](AGENT.md) §7).
 

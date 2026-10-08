@@ -1,11 +1,11 @@
 # Lab machine accounts
 
-The AI Foundry lab machines are x86_64 Ubuntu 24.04 boxes on the lab's Tailscale tailnet (updated 2026-10-02):
+The AI Foundry lab machines are x86_64 Ubuntu 24.04 boxes on the lab's Tailscale tailnet (updated 2026-10-07):
 
 | Machine | ET-SoC-1 cards | Device nodes |
 |---|---|---|
 | `aifoundry1` | 2: card 0 (firmware 1.4.1; back in service since 2 October 2026, when its broken fan was replaced: from 25 September until then it overheated under load and took no sustained work) and card 1 (firmware 1.2.0; its clock stays at 600 MHz); select one with `ET_DEVICES=<n>` and take its lock, `etsoc-shire<n>.lock` | `/dev/et0_{mgmt,ops}`, `/dev/et1_{mgmt,ops}` |
-| `aifoundry2` | 1 (firmware 1.3.1; **back in service since 6 October 2026**, with every fan at full speed in the BIOS: it idles at about 64 °C; out of service 2–6 October, when idle it heated until it dropped off the PCIe bus) | `/dev/et0_{mgmt,ops}` |
+| `aifoundry2` | 1 (firmware 1.3.1; **out of service since 7 October 2026**: idle, even with every fan at full speed in the BIOS, the cooling at the card got worse and it heated until it dropped off the PCIe bus, as on 2 October; out of service from 2 to 6 October too, in service from 6 to 7 October; it is off the bus, with no `/dev/et0` nodes; the machine itself is up) | `/dev/et0_{mgmt,ops}` |
 | `aifoundry3` | 1 (firmware 1.3.1; pinned at 600 MHz at every boot) | `/dev/et0_{mgmt,ops}` |
 
 How the four cards and the three hosts differ, and what that does to measurements, is in
