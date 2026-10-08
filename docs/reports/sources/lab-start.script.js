@@ -1,25 +1,10 @@
 /* New user? Start here. D is brief.json (docs/lab-start/make_page_data.py): D.md is START.md word for word (the brief
-   the Claude on the lab machine reads), D.cards the card tiles (each shows its plain-words note only, since 8 October
-   2026: firmware and clocks are for the brief and the dashboard). The username and machine fields fill the commands
-   of steps 1 and 2, step 3's claim line and the lines under Later; nothing is stored or sent anywhere. */
+   the Claude on the lab machine reads). Since 8 October 2026 the page is the raw steps only, with no machine diagram.
+   The username and machine fields fill the commands of steps 1 and 2, step 4's claim line, the line to come back and
+   the no-Claude login; nothing is stored or sent anywhere. */
 (function () {
   const q = sel => document.querySelector(sel);
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-  /* ---- the lab diagram: three machines, four cards, from the data */
-  const lab = q('#lab');
-  ['aifoundry1', 'aifoundry2', 'aifoundry3'].forEach(h => {
-    const m = document.createElement('div');
-    m.className = 'm';
-    const cards = D.cards.filter(c => c.host === h).sort((a, b) => a.n - b.n);
-    m.innerHTML = `<div class="h">${esc(h)}</div><div class="os">${cards.length === 1 ? 'one card' : cards.length + ' cards'}</div>`
-      + cards.map(c => {
-          const k = CK.card(c.id);
-          return `<div class="cbox${c.use ? '' : ' off'}" style="--c:${k.color}"><div class="n">card ${c.n}</div>`
-            + `<div class="d">${esc(c.note)}</div></div>`;
-        }).join('');
-    lab.appendChild(m);
-  });
 
   /* ---- the commands. \u0001 marks the username and \u0002 the machine, so that they can be highlighted. The root
      block validates the name again on the machine, refuses nothing silently, and gives no sudo. */

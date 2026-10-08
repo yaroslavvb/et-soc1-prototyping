@@ -67,7 +67,7 @@ before `</body>`. Private pages are listed but not mirrored.
 
 | Page | Space | Visibility | Repo file | Deploy |
 |---|---|---|---|---|
-| [New user? Start here: the AI Foundry ET-SoC-1 lab](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start) (30 Sep; since 2 Oct, three steps: create your account as root once, start Claude on the lab machine as yourself, give it one line; since 8 Oct a step 0 before them, a Tailscale invite from the lab lead by direct message, never in #community-lab; the brief it reads is `docs/lab-start/START.md`; linked from the lab dashboard) | `7f665ca1-873b-4d0f-86b1-8ab15cd9ab25` | public | `docs/reports/2026-09-30-aifoundry-lab-start.html` | file |
+| [New user? Start here: the AI Foundry ET-SoC-1 lab](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start) (30 Sep; since 2 Oct, three steps: create your account as root once, start Claude on the lab machine as yourself, give it one line; since 8 Oct only the steps: step 0, a Tailscale invite from the lab lead by direct message, never in #community-lab, then steps 1 to 3 and step 4, the card claim; the brief it reads is `docs/lab-start/START.md`; linked from the lab dashboard) | `7f665ca1-873b-4d0f-86b1-8ab15cd9ab25` | public | `docs/reports/2026-09-30-aifoundry-lab-start.html` | file |
 
 ### The session
 
