@@ -32,10 +32,12 @@ on all three machines, and about 19 GB of our agents' working files on aifoundry
   not come back: it is not on the bus and has no `/dev/et0` nodes. Fan speeds are not visible from Linux on
   aifoundry2. The BIOS setting cannot have changed (no reboot since the fix), and Linux never switched a fan; a fan
   near the card that stopped, slowed or moved fits the data, and needs an on-site look (the BIOS's Smart Fan 6 page
-  shows each fan's RPM). The firmware never throttles an idle card: in upstream et-platform (`836a4ab`),
-  `check_power_throttle_conditions()` in `device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c`
-  (line 880) runs its thermal throttle only when the master minion is not idle, and its default software threshold
-  is 65 °C (`thermal_pwr_mgmt.h:41`); not checked against firmware 1.3.1's own source. To bring the card back: first
+  shows each fan's RPM). Nothing on the card stops it: its firmware (release 1.3.1, BL2 0.20.0) runs its thermal loop at idle
+  too, but the loop can only step the clock down, and the idle card already sits at its lowest point (600 MHz); the
+  PMIC alarm's safe state never moves the PLL (fixed upstream in `e024210bc`, 5 Sep 2024), and nothing calls
+  `pmic_force_shutdown()` ([findings/14-card-behaviour.md](findings/14-card-behaviour.md), "The clock governor, by
+  firmware build"); the current upstream code (`836a4ab`, `check_power_throttle_conditions()`) skips the thermal
+  check altogether while the card is idle. To bring the card back: first
   check the cooling at the card on site, then the full reset as root (the cold reboot that power-cycles the slot,
   [findings/14-card-behaviour.md](findings/14-card-behaviour.md)); a warm reboot or a slot reset leaves it off the
   bus. After a full reset it looks healthy for about an hour while it heats, so watch it

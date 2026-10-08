@@ -222,15 +222,18 @@ the leakage curve fitted on 2 October. Hover, tap or focus for values.</p>
 </figure>
 
 <h2 id="firmware" data-ss-id="auto-h2-nqkeao">Why the card could not save itself</h2>
-<p data-ss-id="auto-p-t4owg8">From 65 °C to 138 °C nothing on the card slowed it down, today as on 2 October. The firmware's
-thermal throttle does not look at an idle card: in the upstream firmware source
-(<a href="https://github.com/aifoundry-org/et-platform/blob/836a4ab600e93c3059bb58c898edbc37744cd8d0/device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c#L864-L883">et-platform 836a4ab, <code>check_power_throttle_conditions()</code></a>) the temperature check runs
-only while the card's master minion is busy, and its default threshold is 65 °C. An idle card whose cooling
-falls short is never throttled, however hot it gets. This card runs firmware 1.3.1, and the check above is the current
-upstream code, not that release's own source, which has not been read.</p>
+<p data-ss-id="auto-p-t4owg8">From 65 °C to 138 °C nothing on the card slowed it down, today as on 2 October. The card's
+firmware (release 1.3.1, boot loader 0.20.0; its closest public source is
+<a href="https://github.com/aifoundry-org/et-platform/blob/ffca4cbb436713cffcbc5028fc9a86529dc86c7c/device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c#L651-L688">et-platform ffca4cbb4</a>) does run its thermal check on an idle card above 65 °C.
+But all the check can do is step the minion clock down the voltage table, and the idle card already sits at the bottom
+of it, 600 MHz, so nothing changes. The emergency safe state changes nothing either: it moves the clock only when
+looking up its voltage fails, and its voltage step is commented out
+(<a href="https://github.com/aifoundry-org/et-platform/commit/e024210bcc20f4e0a138ade0edf744db0f0ddcc8">fixed upstream on 5 September 2024</a>). Nothing in the firmware shuts the card down. The
+current upstream code does no better at idle: its check (<a href="https://github.com/aifoundry-org/et-platform/blob/836a4ab600e93c3059bb58c898edbc37744cd8d0/device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c#L864-L883"><code>check_power_throttle_conditions()</code></a>,
+836a4ab) does not run at all while the card is idle.</p>
 <p data-ss-id="auto-p-c5qc84">So the two problems meet. Hotter silicon leaks more, which heats it further; a fan keeps that loop from closing,
-and the firmware does nothing once it does. Until the firmware throttles idle cards too, the cooling at the card is the
-only thing that keeps it out of the loop.</p>
+and the firmware does nothing once it does. Until the firmware can cut an idle card's power or shut it down, the
+cooling at the card is the only thing that keeps it out of the loop.</p>
 
 <h2 id="fan" data-ss-id="auto-h2-99iqqa">What is not known: the fan</h2>
 <p data-ss-id="auto-p-pwf1mj">The machine cannot see its fans: no fan sensor driver is loaded for this board, and loading one needs root. Two

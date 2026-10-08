@@ -37,9 +37,11 @@ card itself had not changed. The published page is
   port 00:01.1 reset at 17:01:20, by whom or what is not known. The card did not come back.
 - **The fan is not known.** No fan sensor driver is loaded on aifoundry2, and loading one needs root. The BIOS
   setting stands (no reboot since the fix), and Linux never switched a fan (the ACPI fans' `stats/total_trans` is 0).
-- **The firmware never throttles an idle card.** In upstream et-platform `836a4ab`, `check_power_throttle_conditions()`
-  (`thermal_pwr_mgmt.c:864–883`) checks the temperature only while the master minion is not idle (threshold 65 °C).
-  The card's own release, 1.3.1, was not read.
+- **Nothing in the firmware stops an idle runaway.** On the card's build (BL2 0.20.0, release 1.3.1; closest public
+  source `ffca4cbb4`) the thermal loop runs at idle above 65 °C but can only step the clock down, and the idle card is
+  already at its lowest point, 600 MHz. The PMIC alarm's safe state never moves the PLL (fixed upstream in `e024210bc`),
+  and nothing calls `pmic_force_shutdown()`. Upstream `836a4ab` skips the thermal check at idle altogether
+  (`check_power_throttle_conditions()`, `thermal_pwr_mgmt.c:864–883`). See `docs/findings/14-card-behaviour.md`.
 
 ## To rebuild
 

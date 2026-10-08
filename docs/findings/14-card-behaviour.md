@@ -236,13 +236,16 @@ die's temperature:
   nothing tripped. In all, aifoundry2's mean passed 90 °C in eight version-3 telemetry files (12,176 samples: catalogue
   passes 6, 9 and 11, full-catalogue passes 22 and 31, the matmul benchmark's thermal passes 3 and 4, and X5's pass 3),
   every one at 600 MHz.
-- **An idle card is never throttled at all.** In the upstream firmware (et-platform `836a4ab`,
-  `check_power_throttle_conditions()`, `device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c:864–883`)
-  the software thermal check (threshold `TEMP_THRESHOLD_SW_MANAGED`, 65 °C, `thermal_pwr_mgmt.h:41`) runs only while the
-  master minion is not idle (`get_mm_state() != MM_STATE_IDLE`), and all it can do is step the minion clock down. So when
-  an idle card's cooling falls short, its leakage runs away with nothing in the way: aifoundry2's card reached a 138 °C
-  mean (hottest sensor 144 °C) at 133–134 W, idle, on 2 and on 7 October, and dropped off the PCIe bus both times. Read
-  from the upstream source, not from release 1.3.1's own.
+- **An idle runaway meets nothing either.** On BL2 0.20.0 (release 1.3.1, aifoundry2's card) the thermal test acts busy
+  or idle ("The clock governor, by firmware build", below), but its only response is one point down the VMIN table, and
+  the idle card already sits at the lowest point (600 MHz), so the loop changes nothing. The PMIC alarm's safe state
+  sets the frequency register but not the PLL: `go_to_safe_state()` (at `ffca4cbb4`) moves the PLL only when its
+  voltage lookup fails, and its voltage update is commented out (fixed upstream in `e024210bc`, 5 September 2024).
+  `pmic_force_shutdown()` is defined and never called. In the current upstream code (`836a4ab`,
+  `check_power_throttle_conditions()`, `thermal_pwr_mgmt.c:864–883`) the thermal test does not run at all while the
+  master minion is idle. aifoundry2's idle card reached a 138 °C mean (hottest sensor 144 °C) at 133–134 W on 2 and on
+  7 October, and dropped off the PCIe bus both times. (Read from source on 7 October
+  2026.)
 - **The one possible exception is aifoundry1's card 0** (release 1.4.1, not in the campaign): it read 115–117 °C after
   its smoke blocks of 25 September before it dropped to 300 MHz (the section on that card below); whether its PMIC's
   safe state or 1.4.1's idle point did that is not established.
@@ -596,8 +599,8 @@ records (`docs/reports/data/2026-10-07-idle-runaway-aifoundry2/`, `analyze.py`; 
   ACPI fans' `stats/total_trans` is 0 since boot. A fan near the card that stopped, slowed or moved, or something
   blocking its air, fits a step at 03:55 that nothing else felt. Look on site, and in the BIOS's Smart Fan 6 page,
   which shows each header's RPM (System 5 read 2,368 RPM at full speed on 6 October).
-- **Nothing on the card stopped it,** from 65 to 138 °C: the firmware never throttles an idle card ("Nothing limits the
-  die's temperature", above).
+- **Nothing on the card stopped it,** from 65 to 138 °C: its firmware's thermal loop runs at idle but cannot go below
+  the 600 MHz the card idles at, and the safe state is a no-op ("Nothing limits the die's temperature", above).
 
 **To bring it back:** fix the cooling at the card on site, then do the full reset as root (the cold reboot from
 2 October, above); a warm reboot or a slot reset leaves it off the bus. Then watch it: after a reset it looks healthy for

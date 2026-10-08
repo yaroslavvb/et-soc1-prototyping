@@ -37,6 +37,11 @@ FW_COMMIT = "836a4ab"
 FW_URL = ("https://github.com/aifoundry-org/et-platform/blob/836a4ab600e93c3059bb58c898edbc37744cd8d0/"
           "device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c#L864-L883")
 FW_THRESHOLD = 65  # TEMP_THRESHOLD_SW_MANAGED, thermal_pwr_mgmt.h:41
+# the source closest to the card's own build (BL2 0.20.0, release 1.3.1; docs/findings/14-card-behaviour.md, "The clock
+# governor, by firmware build"): its thermal test runs busy or idle, update_module_current_temperature()
+FW131_URL = ("https://github.com/aifoundry-org/et-platform/blob/ffca4cbb436713cffcbc5028fc9a86529dc86c7c/"
+             "device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c#L651-L688")
+SAFE_FIX_URL = "https://github.com/aifoundry-org/et-platform/commit/e024210bcc20f4e0a138ade0edf744db0f0ddcc8"
 FAN_RPM_1006 = "2,368"  # System 5 at full speed on the BIOS screen, 6 Oct 16:01 (the 6 October page)
 
 
@@ -287,15 +292,18 @@ the leakage curve fitted on 2 October. Hover, tap or focus for values.</p>
 </figure>
 
 <h2 id="firmware">Why the card could not save itself</h2>
-<p>From {FW_THRESHOLD} °C to {last['die']} °C nothing on the card slowed it down, today as on 2 October. The firmware's
-thermal throttle does not look at an idle card: in the upstream firmware source
-(<a href="{FW_URL}">et-platform {FW_COMMIT}, <code>check_power_throttle_conditions()</code></a>) the temperature check runs
-only while the card's master minion is busy, and its default threshold is {FW_THRESHOLD} °C. An idle card whose cooling
-falls short is never throttled, however hot it gets. This card runs firmware 1.3.1, and the check above is the current
-upstream code, not that release's own source, which has not been read.</p>
+<p>From {FW_THRESHOLD} °C to {last['die']} °C nothing on the card slowed it down, today as on 2 October. The card's
+firmware (release 1.3.1, boot loader 0.20.0; its closest public source is
+<a href="{FW131_URL}">et-platform ffca4cbb4</a>) does run its thermal check on an idle card above {FW_THRESHOLD} °C.
+But all the check can do is step the minion clock down the voltage table, and the idle card already sits at the bottom
+of it, 600 MHz, so nothing changes. The emergency safe state changes nothing either: it moves the clock only when
+looking up its voltage fails, and its voltage step is commented out
+(<a href="{SAFE_FIX_URL}">fixed upstream on 5 September 2024</a>). Nothing in the firmware shuts the card down. The
+current upstream code does no better at idle: its check (<a href="{FW_URL}"><code>check_power_throttle_conditions()</code></a>,
+{FW_COMMIT}) does not run at all while the card is idle.</p>
 <p>So the two problems meet. Hotter silicon leaks more, which heats it further; a fan keeps that loop from closing,
-and the firmware does nothing once it does. Until the firmware throttles idle cards too, the cooling at the card is the
-only thing that keeps it out of the loop.</p>
+and the firmware does nothing once it does. Until the firmware can cut an idle card's power or shut it down, the
+cooling at the card is the only thing that keeps it out of the loop.</p>
 
 <h2 id="fan">What is not known: the fan</h2>
 <p>The machine cannot see its fans: no fan sensor driver is loaded for this board, and loading one needs root. Two
