@@ -1,6 +1,7 @@
 /* New user? Start here. D is brief.json (docs/lab-start/make_page_data.py): D.md is START.md word for word (the brief
-   the Claude on the lab machine reads), D.cards the card tiles. The username and machine fields fill the commands of
-   steps 1 and 2; nothing is stored or sent anywhere. */
+   the Claude on the lab machine reads), D.cards the card tiles (each shows its plain-words note only, since 8 October
+   2026: firmware and clocks are for the brief and the dashboard). The username and machine fields fill the commands
+   of steps 1 and 2, step 3's claim line and the lines under Later; nothing is stored or sent anywhere. */
 (function () {
   const q = sel => document.querySelector(sel);
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -15,7 +16,7 @@
       + cards.map(c => {
           const k = CK.card(c.id);
           return `<div class="cbox${c.use ? '' : ' off'}" style="--c:${k.color}"><div class="n">card ${c.n}</div>`
-            + `<div class="d">firmware ${esc(c.firmware)} · ${esc(c.clock)}</div><div class="d">${esc(c.note)}</div></div>`;
+            + `<div class="d">${esc(c.note)}</div></div>`;
         }).join('');
     lab.appendChild(m);
   });
@@ -44,8 +45,10 @@
       `ssh -t ${L}@${H} tmux attach -t claude`].join('\n'),
     prompt: 'Read ~/lab-start.md and follow it.',
     attach: `ssh -t ${L}@${H} tmux attach -t claude`,
+    login: `ssh ${L}@${H}`,
+    host: H,
   };
-  const NEEDS_LOGIN = {root: true, user: true, prompt: false, attach: true};
+  const NEEDS_LOGIN = {root: true, user: true, prompt: false, attach: true, login: true, host: false};
 
   const inp = q('#f-login'), sel = q('#f-host'), hint = q('[data-role=hint]');
   const LOGIN = /^[a-z][a-z0-9_-]{0,31}$/;

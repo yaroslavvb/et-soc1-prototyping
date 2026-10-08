@@ -19,13 +19,18 @@ https://spacesheep.dev/@yaroslavvb/aifoundry-lab-accounts (written on 18 Septemb
 ## How access works
 
 Logins go through **Tailscale SSH**, not sshd passwords or keys. A new person needs two things: membership in the
-tailnet, and an account on each machine. Ask the repo owner or the lab lead for both.
+tailnet, and an account on each machine. **The tailnet invite comes from the lab lead, asked for by direct message on
+the AI Foundry Discord, never in #community-lab**: invites are not sent in the public channel (8 October 2026, after
+three new users had asked there, the last because the "New user? Start here" page said to). The account comes from
+self-service since 2 October (below); before that the repo owner or a lab admin made it.
 
 **Tailscale SSH runs in "check" mode** (2026-09-25). `ssh aifoundryN` prints a `https://login.tailscale.com/a/…`
 URL and waits. Open it in a browser that is signed in to the lab tailnet as your member account, and approve it
 while that `ssh` is still waiting. One approval lasts the tailnet's check period (12 hours by default), and then
 Tailscale asks again. If the URL answers "Error 404 … could not be located", sign out of login.tailscale.com and sign
-back in (the owner's fix, 25 September), then run `ssh` again for a fresh URL. **An AI agent cannot approve this
+back in (the owner's fix, 25 September: it happens when the browser is signed in to Tailscale as another account,
+such as the one for one's own tailnet), then run `ssh` again for a fresh URL. A URL left unapproved expires after about
+30 minutes, and the waiting `ssh` then dies with `tailscale: failed to fetch next SSH action`. **An AI agent cannot approve this
 itself**: when a login prints the URL, it has to hand the URL to a person and wait.
 
 ## Adding someone
@@ -56,7 +61,8 @@ that Claude, which reads `docs/lab-start/START.md`. The shared `root` login itse
 
 ## First login
 
-1. Accept the Tailscale invite and install Tailscale on your laptop.
+1. Accept the Tailscale invite and install Tailscale on your laptop. If you already use Tailscale for another tailnet,
+   switch to the lab's while you work there: `aifoundryN` resolves only on the lab's tailnet.
 2. Run `ssh alice@aifoundry1` (or `aifoundry2`, `aifoundry3`), and approve the check URL it prints (above).
 3. Read the login banner. It lists the machine's cards with their firmware and clock policy, who is using a card
    right now, and the rules below.

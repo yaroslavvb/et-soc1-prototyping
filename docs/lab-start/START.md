@@ -1,16 +1,17 @@
 # The AI Foundry ET-SoC-1 lab: a brief for the Claude on a lab machine
 
-Your person asked you to read this and follow it: set them up in the lab and run a first test. You are running on
-one of the lab's machines, as your person's own account, in a tmux session they attach to from their own computer.
-They got here with the three steps of https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start: they logged in as the
-lab's shared `root` once, only to create their account; they logged in as that account and started you; then they
-pasted one line. Ask them only for what only they can do: a yes before the first run on a card, the lab's Discord
-posts, and anything for the lab lead.
+Your person asked you to read this and follow it: set them up in the lab and run a first test. You are running on one
+of the lab's machines, as your person's own account, in a tmux session they attach to from their own computer. They
+got here with the steps of https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start: the lab lead let them onto the
+lab's Tailscale network; they logged in as the lab's shared `root` once, only to create their account; they logged in
+as that account and started you; then they pasted one line. Ask them only for what only they can do: a yes before the
+first run on a card, the lab's Discord posts, and anything for the lab lead.
 
-Version of 7 October 2026, eleventh edition: the person creates their own account and starts Claude on the lab
-machine themselves; this brief is for that Claude, which never uses ssh or root. aifoundry2's card is out of service
-again since 7 October (it was in service 6–7 October); aifoundry1's card 0 is in service since 2 October. The
-current copy is `docs/lab-start/START.md` in
+Version of 8 October 2026, twelfth edition: the person creates their own account and starts Claude on the lab machine
+themselves; this brief is for that Claude, which never uses ssh or root. Access (a Tailscale invite) comes from the
+lab lead by direct message, never from #community-lab. aifoundry3's card and aifoundry1's card 1 run firmware 1.4.0
+since the lab lead's update of 7 October. aifoundry2's card is out of service again since 7 October (it was in service
+6–7 October); aifoundry1's card 0 is in service since 2 October. The current copy is `docs/lab-start/START.md` in
 https://github.com/yaroslavvb/et-soc1-prototyping; if this one is more than a month old, read that one instead.
 
 ## Where you are
@@ -70,8 +71,8 @@ Discord, and anything for the lab admin.
 | Card | Firmware | Clock | Idle | Watch for | Use it for |
 |---|---|---|---|---|---|
 | aifoundry2 | 1.3.1 | DVFS 600–800 MHz, usually 600 | rises with its temperature | **out of service since 7 October**, as from 2 to 6 October: even with its fans at full speed, the cooling at the card fails, it heats up even at idle (138 °C on 2 and 7 Oct) and drops off the PCIe bus | nothing, until this brief or the lab lead says it is back (after a reboot it looks healthy for about an hour while it heats up) |
-| aifoundry3 | 1.3.1 | pinned at 600 MHz (NoC 400) at every boot; no thermal step | 23.6 W at 50 °C; about 25 W at 55–57 °C since 25 Sep | reaches 88 °C under load, nothing slows it; a demo service can use the card without the lock | the card on aifoundry3; switching power over idle, never absolute watts |
-| aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample of 25–30 Sep; not rechecked since the power cycle of 30 Sep: read `mhz.minion` | 31–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | the first choice on aifoundry1 |
+| aifoundry3 | 1.4.0 since 7 Oct (1.3.1 before) | pinned at 600 MHz (NoC 400) at every boot, seen again on 8 Oct under 1.4.0; no thermal step under 1.3.1 | 23.6 W at 50 °C; about 25 W at 55–57 °C since 25 Sep | reaches 88 °C under load, nothing slows it; a demo service can use the card without the lock | the card on aifoundry3; switching power over idle, never absolute watts |
+| aifoundry1 card 1 | 1.4.0 since 7 Oct (1.2.0 before) | 600 MHz in every sample of 25–30 Sep, under 1.2.0; not rechecked since: read `mhz.minion` | 31–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | the first choice on aifoundry1 |
 | aifoundry1 card 0 | 1.4.1 | idles at 300 MHz; sgemm runs as fast as on card 1 | 19–20 W | needs `ET_DEVICES=0` and `etsoc-shire0.lock`; its fan was replaced on 2 Oct: 49 °C idle, 52–53 °C (peak 56 °C) under 8 minutes of sgemm | the second choice on aifoundry1 |
 
 Nothing on these cards limits the die temperature: aifoundry2's card reached 138 °C on 2 October and again on
@@ -299,8 +300,9 @@ switching power over idle, keep the host quiet, and record `et-lab-manifest` wit
 - On a wedged card, an error you do not understand, or a die over 90 °C: stop. Do not retry in a loop, and never
   reset a card or retrain its link. Give your person the time (PDT), host, card, command, error text, `et-who`
   output and `dmesg` lines.
-- Accounts, access and lab policy: the lab lead. A hung card or anything needing root: the lab admin.
-  #community-lab on the AI Foundry Discord is the shared place to ask; the lab lead can send an invite.
+- Access and lab policy: the lab lead, by direct message on the AI Foundry Discord. Tailscale invites are never asked
+  for or sent in #community-lab, the public channel. A hung card or anything needing root: the lab admin.
+  #community-lab is the shared place for card claims ("using `<host>` card `<N>`", "released") and questions.
 - Before reporting a problem, check the lab problems report, which lists the known ones with their status:
   https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman
 

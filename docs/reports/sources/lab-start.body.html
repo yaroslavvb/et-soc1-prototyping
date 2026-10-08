@@ -42,6 +42,14 @@ ol.steps p { margin: 6px 0; }
   cursor: pointer; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); }
 .copystat { font-size: 0.84rem; color: var(--ok); margin-left: 4px; }
 .copystat:empty { display: none; }
+.need, .trouble { border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; margin: 14px 0; background: var(--surface); }
+.need > b, .trouble > b { display: block; margin-bottom: 4px; }
+.need ul, .trouble ul { margin: 4px 0 0; padding-left: 1.2em; }
+.need li, .trouble li { margin: 3px 0; }
+.need p { margin: 8px 0 0; font-size: 0.9rem; color: var(--ink-2); }
+.trouble li { font-size: 0.92rem; }
+ol.steps > li.first { border-color: var(--warn); }
+.first .where { border-color: var(--warn); color: var(--ink); }
 details.brief { border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; margin: 14px 0; background: var(--surface); }
 details.brief > summary { cursor: pointer; padding: 9px 0; font-weight: 600; }
 details.brief pre { margin: 0 0 12px; max-height: 440px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere;
@@ -54,23 +62,42 @@ details.brief pre { margin: 0 0 12px; max-height: 440px; overflow: auto; white-s
 </style>
 
 <h1>New user? Start here</h1>
-<p class="byline">2 October 2026 (PDT) · for new users of the AI Foundry ET-SoC-1 lab ·
+<p class="byline">8 October 2026 (PDT) · for new users of the AI Foundry ET-SoC-1 lab ·
 <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">the lab dashboard</a></p>
 
-<p class="lede">Three steps. Steps 1 and 2 are commands you paste into a terminal on your own computer: they create your
-own account on a lab machine and start Claude there, as you. Step 3 is one line you give that Claude.</p>
+<p class="lede">Step 0 gets you onto the lab's network: one direct message to Roman. Then three steps: two commands,
+pasted into a terminal on your own computer, create your own account on a lab machine and start Claude there, as you;
+one line tells that Claude what to do.</p>
+
+<div class="need"><b>You need</b>
+<ul>
+  <li>the <a href="https://discord.com/invite/WNKvkefkUs">AI Foundry Discord</a>, to message Roman and to tell the lab
+  which card you use;</li>
+  <li>a terminal on macOS or Linux (on Windows, use WSL): the commands are for bash or zsh;</li>
+  <li>a Claude account that can sign in to Claude Code: a paid Claude plan or an Anthropic API account.</li>
+</ul>
+<p>No Claude? Steps 0 and 1 still give you an account; then work by hand (see <a href="#later">Later</a>).</p></div>
+
+<ol class="steps">
+  <li class="first">
+    <span class="where">Once, before step 1</span>
+    <h2>0. Get on the lab's network</h2>
+    <p>Send <b>Roman Shaposhnik</b>, the lab lead, a <b>direct message</b> on the AI Foundry Discord asking for a
+    Tailscale invite to the lab. Ask by direct message, not in #community-lab: invites are not sent in the public
+    channel. You don't need to ask anyone for an account: step 1 makes it.</p>
+    <p>Accept the invite, install <a href="https://tailscale.com/download">Tailscale</a> on your computer, and sign in
+    with the account you accepted the invite with. If you already use Tailscale for another network, switch to the
+    AI Foundry one while you use the lab.</p>
+  </li>
+</ol>
 
 <div class="where-map">
-  <div class="w"><b>Your computer</b><p>Only a terminal: you paste the ssh commands of steps 1 and 2. No agent runs
-  here.</p></div>
+  <div class="w"><b>Your computer</b><p>Tailscale and a terminal: you paste the ssh commands of steps 1 and 2. No
+  agent runs here.</p></div>
   <div class="w lab-side"><b>The lab machine, as you</b><p>Claude runs here, in your own account, in a tmux session
   called <code>claude</code>. All the work happens here. Root is used once, in step 1, only to create your
   account.</p></div>
 </div>
-
-<p class="small">Before you start: join the lab's Tailscale network (ask Roman, the lab lead, in #community-lab on the
-AI Foundry Discord). Each ssh below may print a <code>login.tailscale.com</code> link: open it in your browser, approve
-it, and the command goes on.</p>
 
 <div class="fields">
   <div>
@@ -87,15 +114,18 @@ it, and the command goes on.</p>
 commands below.</p>
 
 <div class="lab" id="lab" role="img" aria-label="Three machines: aifoundry1 with cards 0 and 1, aifoundry2 with card 0 (out of service), aifoundry3 with card 0"></div>
-<p class="small">aifoundry2's card is out of service again since 7 October. The <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">dashboard</a>
-shows which cards are free now.</p>
+<p class="small">Either machine works: Claude picks a free card on the one you choose. aifoundry2's card is out of
+service since 7 October; the <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">dashboard</a> shows
+which cards are free now.</p>
 
 <ol class="steps">
   <li>
     <span class="where">On your computer</span>
     <h2>1. Create your account</h2>
     <p>This logs in to the lab machine as the shared <code>root</code>, creates your own account (no password, no
-    sudo), and logs out. You never use root again.</p>
+    sudo), and logs out. You never use root again. The first ssh to a machine prints a <code>login.tailscale.com</code>
+    link and waits: open it in your browser, approve it, and the command goes on. An approval lasts about 12
+    hours.</p>
     <div class="cmd"><button class="btn" type="button" data-copy="root">Copy</button><pre data-tpl="root" tabindex="0"></pre></div>
     <p class="small">It ends with "created …". If it says your username already exists: go on if the account is yours,
     otherwise choose another username.</p>
@@ -114,14 +144,31 @@ shows which cards are free now.</p>
     <p>Paste this line. Claude reads the brief, picks a free card on this machine, runs a first test, and asks you
     before it touches a card.</p>
     <div class="cmd"><button class="btn" type="button" data-copy="prompt">Copy</button><pre data-tpl="prompt" tabindex="0"></pre></div>
+    <p class="small">When Claude names its card, post <code>using <span data-tpl="host"></span> card N</code> in
+    #community-lab, with N the card it named, and <code>released</code> when you are done: that is how people share
+    the cards.</p>
   </li>
 </ol>
 <p class="small"><span class="copystat" data-role="stat" aria-live="polite"></span></p>
 
+<div class="trouble" id="stuck"><b>If a step fails</b>
+<ul>
+  <li><code>Could not resolve hostname</code>: your computer is not on the lab's network. Open Tailscale and check that
+  it is connected to the AI Foundry network (step 0).</li>
+  <li>The <code>login.tailscale.com</code> link says "Error 404 … could not be located": your browser is signed in to
+  Tailscale as another account. Sign out at login.tailscale.com, sign in with the account you accepted the invite
+  with, and run the command again for a fresh link. A link also expires after about 30 minutes.</li>
+  <li><code>tailnet policy does not permit you to SSH as user …</code>: in step 1, the lab has not let you in yet, so
+  tell Roman, by direct message. In step 2, your account does not exist on that machine yet: run step 1 there first,
+  since each machine has its own accounts.</li>
+  <li>Anything else: ask in #community-lab. Only the invite itself goes by direct message.</li>
+</ul></div>
+
 <h2 id="later">Later</h2>
 <p>To come back, on your computer: <code data-tpl="attach"></code>. To leave Claude running: Ctrl-b, then d. If you see
 a shell prompt instead of Claude, type <code>claude</code>. To use another machine, run steps 1 and 2 again with it
-chosen above.</p>
+chosen above. Without Claude, log in with <code data-tpl="login"></code> after step 1, and keep to the rules in the
+brief below: they are the lab's rules for everyone.</p>
 
 <details class="brief"><summary>What Claude reads: the brief (<span data-role="meta"></span>)</summary>
 <pre data-role="raw" tabindex="0" aria-label="The brief Claude reads"></pre></details>

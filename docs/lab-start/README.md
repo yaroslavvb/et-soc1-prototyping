@@ -9,7 +9,7 @@ page shows it; `tools/lab/et-lab-start` is the script.
 
 | File | What it is |
 |---|---|
-| `START.md` | The brief for the Claude that runs on a lab machine (eleventh edition, 7 October 2026, about 3,800 words). The person gets there with the page's three steps, all from their own computer's terminal: (1) one ssh as the shared `root` that creates their own account (validated name, `adduser --disabled-password`, no sudo, linger) and logs out; (2) one ssh as that account that installs Claude Code, fetches this file from GitHub into `~/lab-start.md`, starts Claude in a tmux session `claude`, and attaches the terminal to it; (3) one line for that Claude: "Read ~/lab-start.md and follow it." The brief checks it is on a lab machine and not root, chooses a free card on that machine by a fixed list, runs the first-hour tests, and keeps to the lab's rules; it never uses ssh or root. The page's commands are in `docs/reports/sources/lab-start.script.js` (tested 2 October: the root block against stand-ins for a new, a taken and a bad name; the user block live on aifoundry3 with Claude swapped for an echo). |
+| `START.md` | The brief for the Claude that runs on a lab machine (twelfth edition, 8 October 2026, about 3,850 words). The person gets there with the page's steps: (0) a Tailscale invite from the lab lead, asked for by direct message on the AI Foundry Discord, never in #community-lab; then three steps, all from their own computer's terminal: (1) one ssh as the shared `root` that creates their own account (validated name, `adduser --disabled-password`, no sudo, linger) and logs out; (2) one ssh as that account that installs Claude Code, fetches this file from GitHub into `~/lab-start.md`, starts Claude in a tmux session `claude`, and attaches the terminal to it; (3) one line for that Claude: "Read ~/lab-start.md and follow it." The brief checks it is on a lab machine and not root, chooses a free card on that machine by a fixed list, runs the first-hour tests, and keeps to the lab's rules; it never uses ssh or root. The page's commands are in `docs/reports/sources/lab-start.script.js` (tested 2 October: the root block against stand-ins for a new, a taken and a bad name; the user block live on aifoundry3 with Claude swapped for an echo). |
 | `make_page_data.py` | Writes `docs/reports/data/2026-09-30-lab-start/brief.json` (START.md word for word, its sha256, version and word count, the placeholders the page fills, and the page's card tiles). `--check` exits 1 if the JSON is stale. It refuses a START.md whose opening lines lack `<login>`. |
 | `README.md` | This file. |
 
@@ -66,6 +66,24 @@ because …"), and stops. That message reads START.md from the clone, so it gets
 pushed to GitHub. Since the seventh edition the agent hands over this message, with the card it chose in step 2,
 even where `et-lab-start` prints its own: the installed copies' card notes, verdict and message may name another
 card or be out of date (below).
+
+**Since 8 October 2026 (twelfth edition).** Three new users had asked for Tailscale access in #community-lab (two on
+2 October, one on 8 October), the last because the page said to ask there; Roman, the lab lead, asks for direct
+messages and does not send invites in the public channel, where agents read along. The owner changed that line to
+"DM Roman" in the live page the same morning; this edition builds the rest around it. The page now has a
+"You need" box (the Discord, linked by the public invite on aifoundry.org, a bash or zsh terminal on macOS, Linux or
+WSL, and a Claude account that can sign in to Claude Code; without Claude, steps 0 and 1 still give an account, and
+Later gives the plain ssh login); then, above the username field, a step 0 card, "Get on the lab's network" (a direct message to Roman Shaposhnik for the invite, not the channel; no account to ask
+for, since step 1 makes it; install Tailscale and sign in; switch networks if you already use Tailscale); the Tailscale
+check link moved into step 1, with its 12-hour approval; step 3's claim line ("using `<host>` card N" in
+#community-lab, then "released"); an "If a step fails" box with the three errors `docs/lab-access.md` documents
+("Could not resolve hostname" off the network, the check link's "Error 404" when the browser is signed in to Tailscale
+as another account, and "tailnet policy does not permit you to SSH as user …", which in step 1 means the lab has not let
+the person in and in step 2 means the account is not on that machine); and card tiles that show one plain note each,
+without firmware or clocks (those stay in the brief and on the dashboard; two tiles' firmware was a day stale). Step
+numbers 1 to 3 are unchanged, since root's login banner (`tools/lab/root-notice.sh`) points at "step 1". The brief
+changed in three places: the access line in "When something breaks", the firmware of aifoundry3's card and aifoundry1's
+card 1 (1.4.0 since the lab lead's update of 7 October), and its opening lines.
 
 ## Rebuild
 
@@ -233,8 +251,8 @@ The page is public, so it follows `AGENT.md` §10: no access routes or credentia
 sudo, ACL or policy details, nothing on which accounts hold which privileges, no PCI addresses, no reset commands, no
 service names, and no people's names in the prompt (it says "the lab lead" and "the lab admin"; only the page names
 Roman, as the person to ask). `et-lab-start` follows the same rule in what it prints. How to get access is said the way
-`docs/lab-access.md` says it: ask the lab lead for an account and a Tailscale invite, and approve the login in a
-browser. No name remains, in links either: the brief reaches the lab problems report through the hub's improvement
+`docs/lab-access.md` says it: ask the lab lead for a Tailscale invite, by direct message (the account comes from step
+1), and approve the login in a browser. No name remains, in links either: the brief reaches the lab problems report through the hub's improvement
 ladder (`et-soc1-limits-of-observability#improve`) rather than by the report's own address.
 
 ## Keeping it current
