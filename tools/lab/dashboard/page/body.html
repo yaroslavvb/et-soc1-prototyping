@@ -282,8 +282,9 @@ header.dh{position:relative}
 </header>
 <div id="stale" class="banner lv-bad" hidden><b>The data is <span id="stale-age">old</span> old.</b> The page expects a new
 version at least every <span id="stale-hb">60 min</span>, so the collector on <span id="stale-host">aifoundry2</span>, its cron job or
-the deploy may have stopped: nothing on it is current. Tell <span id="stale-maint">its maintainer</span>, who can check it
-(<a href="#for-the-maintainer">for the maintainer</a>).</div>
+the deploy may have stopped: nothing on it is current. A keeper on that machine checks the collector every minute,
+aifoundry3 takes over after 90 minutes without new data, and a watchdog outside the lab alerts
+<span id="stale-maint">its maintainer</span>, who can check it (<a href="#for-the-maintainer">for the maintainer</a>).</div>
 
 <div id="strip" class="strip" role="group" aria-label="The lab at a glance"></div>
 <div id="pd-legend" class="pd-legend"></div>
@@ -443,11 +444,17 @@ the deploy may have stopped: nothing on it is current. Tell <span id="stale-main
 <div id="ch-sess" class="mult"></div>
 
 <h2 id="worklog">Worklog</h2>
-<p class="small">What was done in the lab, newest day first; every line opens the page it was written up on. All of it is 2026.</p>
+<p class="small wl-up"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard" target="_top">AI Foundry lab dashboard</a> › Worklog</p>
+<p class="small">What was done in the lab, newest day first; every line opens the page it was written up on, and every
+such page links back here. All of it is 2026.</p>
 <!-- The worklog lives here, in the page source: it is the same for every reader and carries links, which the
      collector's data.json cannot (page/render.py refuses a data file holding a URL).
      TO ADD A DAY: copy one .wl-row block to the top of .wl, newest first, one short line per published page; when the
-     shown list passes about five days, move the oldest .wl-row into the <details> below. -->
+     shown list passes about five days, move the oldest .wl-row into the <details> below.
+     THE WAY BACK (the owner's ask, 7 and 8 October 2026: dashboard > worklog > page): a page listed here carries, right
+     under its title, the line
+       <p data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">← AI Foundry lab dashboard</a> › <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a></p>
+     (AGENT.md §8). The dashboard reaches the worklog by its #worklog link, the worklog reaches each page by its line. -->
 <style>
 /* Worklog: a day label beside its lines, one column on a phone */
 .wl{margin:8px 0 18px}
@@ -459,6 +466,7 @@ the deploy may have stopped: nothing on it is current. Tell <span id="stale-main
 .wl-l a{display:block;padding:5px 0;color:var(--accent,#1f6fbf);text-decoration:none}
 .wl-l a:hover,.wl-l a:focus-visible{text-decoration:underline}
 .wl-l .wl-x{color:var(--ink-2,#555)}
+.wl-up{margin:2px 0 0}
 details.wl-old{margin-top:4px}
 details.wl-old>summary{cursor:pointer;font-size:13.5px;color:var(--ink-2,#555);padding:6px 0}
 details.wl-old .wl-row{border-top:1px solid var(--line,#ddd)}
@@ -468,6 +476,12 @@ details.wl-old .wl-row{border-top:1px solid var(--line,#ddd)}
 }
 </style>
 <div class="wl">
+ <div class="wl-row"><div class="wl-d">Thu 8 Oct</div><ul class="wl-l">
+  <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard-watcher" target="_blank" rel="noopener">Why this dashboard froze for 21 hours, and what watches it now <span class="wl-x">— its publishing check locked itself out after aifoundry2's outage; a keeper on the machine, a standby on aifoundry3 and an outside watchdog</span></a></li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-how-energy-is-measured" target="_blank" rel="noopener">How energy is measured on the ET-SoC-1 <span class="wl-x">— the tools, a 15-minute tutorial and live runs on aifoundry3: random data costs 14 times as much per multiply-add as zeros</span></a></li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start" target="_blank" rel="noopener">New user? Start here <span class="wl-x">— only the raw steps now; step 0 is a direct message to the lab lead for the Tailscale invite</span></a></li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman" target="_blank" rel="noopener">Requests for Roman, the 8 October pass <span class="wl-x">— the list for Friday's visit, notes on 20 items</span></a></li>
+ </ul></div>
  <div class="wl-row"><div class="wl-d">Wed 7 Oct</div><ul class="wl-l">
   <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry2-idle-runaway-7-october" target="_blank" rel="noopener">aifoundry2's card ran away again and is out of service <span class="wl-x">— idle, it heated to 138 °C and fell off the PCIe bus at 16:46; the cooling at the card got worse at 03:55</span></a></li>
   <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-7-october" target="_blank" rel="noopener">Ethernet between the three machines, measured <span class="wl-x">— 929 Mb/s between any two, about 30 times WiFi; the wired ports still need addresses</span></a></li>
@@ -482,12 +496,12 @@ details.wl-old .wl-row{border-top:1px solid var(--line,#ddd)}
  <div class="wl-row"><div class="wl-d">Sun 4 Oct</div><ul class="wl-l">
   <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history" target="_blank" rel="noopener">The history page <span class="wl-x">— the hottest sensor is each card's peak since it started</span></a></li>
  </ul></div>
- <div class="wl-row"><div class="wl-d">Fri 2 Oct</div><ul class="wl-l">
-  <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-2-october" target="_blank" rel="noopener">What changed that day <span class="wl-x">— the live dashboard and history, aifoundry2's idle runaway, aifoundry1 card 0 back in service</span></a></li>
-  <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history" target="_blank" rel="noopener">The lab's history <span class="wl-x">— hour, day and week graphs of the machines and their cards</span></a></li>
- </ul></div>
  <details class="wl-old">
-  <summary>Earlier days: 18 September – 1 October</summary>
+  <summary>Earlier days: 18 September – 2 October</summary>
+  <div class="wl-row"><div class="wl-d">Fri 2 Oct</div><ul class="wl-l">
+   <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-2-october" target="_blank" rel="noopener">What changed that day <span class="wl-x">— the live dashboard and history, aifoundry2's idle runaway, aifoundry1 card 0 back in service</span></a></li>
+   <li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-history" target="_blank" rel="noopener">The lab's history <span class="wl-x">— hour, day and week graphs of the machines and their cards</span></a></li>
+  </ul></div>
   <div class="wl-row"><div class="wl-d">Thu 1 Oct</div><ul class="wl-l">
    <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram" target="_blank" rel="noopener">The chip diagram's deep zoom <span class="wl-x">— 33 scales, from beyond the observable universe to the silicon lattice</span></a></li>
   </ul></div>
@@ -557,13 +571,17 @@ details.wl-old .wl-row{border-top:1px solid var(--line,#ddd)}
 <div class="about">
 <p>A collector on <b id="ab-host">aifoundry2</b> reads the three machines every <span id="ab-iv">10</span> minutes, read-only
 (<code>/proc</code>, sysfs counters, <code>et-who</code>, <code>et-lab-health</code>, <code>et-usage</code>) and republishes when something
-changed, at least every <span id="ab-hb">60</span> minutes; an open tab reloads itself. It never opens a card's device node.</p>
+changed, at least every <span id="ab-hb">60</span> minutes; an open tab reloads itself. It never opens a card's device node.
+When aifoundry2 has published nothing for 90 minutes, the same collector on aifoundry3 takes over until aifoundry2 is
+back. A keeper on each of the two checks its collector every minute and repairs what it safely can, and a watchdog
+outside the lab reads this page every 15 minutes and alerts the maintainer when it is stale.</p>
 <p><span id="ab-vis">It names the lab's users.</span> Per person: login, session and process counts, idle time, coarse activity,
 card holds and use; never commands, files, addresses or where anyone connects from.</p>
 <p>Something wrong or stale on this page? Tell <b id="ab-maint">the maintainer</b>, who runs the collector.</p>
 <details class="maint"><summary id="for-the-maintainer">For the maintainer (<span id="ab-maint2">the maintainer</span>): updating and checking it</summary>
 <ul>
- <li>On aifoundry2, in the checkout: <code>tools/lab/dashboard/update.sh now</code> collects, rebuilds and republishes at
+ <li>On the collecting machine (aifoundry2, or aifoundry3 while it stands in; "This version" below names it), in the
+ checkout: <code>tools/lab/dashboard/update.sh now</code> collects, rebuilds and republishes at
  once; open tabs update within seconds. <code>update.sh now --card-sample</code> also takes a card telemetry sample, behind
  every rule of the card etiquette. <code>update.sh status</code> shows the last runs and deploys, a halt, and the
  space's visibility.</li>
@@ -572,6 +590,10 @@ card holds and use; never commands, files, addresses or where anyone connects fr
  <li>A machine that shows "approval needed": run <code>ssh aifoundry1 true</code> (or aifoundry3) on aifoundry2, approve the
  address it prints, then <code>update.sh now</code>.</li>
  <li>Silence a known alert: <code>update.sh ack &lt;alert id&gt; [days] [note]</code> (the id is in each alert's detail).</li>
+ <li>The keeper: <code>tools/lab/dashboard/keeper.py status</code> shows what it sees (the cron line, the last run and
+ publish, the page's age, a halt); it reports the same every minute to the live stream <code>aifoundry-dash/&lt;machine&gt;</code>.
+ Why the page froze for 21 hours on 7–8 October, and what changed:
+ <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard-watcher" target="_blank" rel="noopener">the watcher page</a>.</li>
  <li id="ab-halt-help">After a halt (the private mode only: the space was, or may have been, readable without signing
  in): check the space, then <code>update.sh resume</code>; nothing resumes deploying by itself.</li>
 </ul>

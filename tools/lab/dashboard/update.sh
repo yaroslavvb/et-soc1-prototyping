@@ -17,14 +17,21 @@
 # "visibility": "private" in config.json (or LAB_DASH_VISIBILITY=private, which wins) turns on the private mode: the
 # guard that checks the space before and after every deploy and halts on exposure.
 #
-# Files: ~/.cache/lab-dashboard/ (data.json, history, state, update.log, lock, HALT, EXPOSED, halt.last, deploy.state;
-# mode 0700) and ~/.config/lab-dashboard/ (space: the uuid; config.json; ack.json). Nothing is written inside the
-# checkout. Test hooks (never needed in normal use): LAB_DASH_CACHE, LAB_DASH_CONFIG (other directories),
+# Standby (DESIGN.md §3.5): "standby_after_min": <minutes, 90 or more> in config.json (or LAB_DASH_STANDBY_AFTER_MIN,
+# which wins) makes a cron run stand by while the live page carries another machine's data younger than that, and take
+# over when it does not. It is how a second box covers this one. With no setting nothing changes: the box that is the
+# primary never stands by. The gate reads the page signed out, so it is the public mode's: a standby setting and
+# "visibility": "private" together refuse the run.
+#
+# Files: ~/.cache/lab-dashboard/ (data.json, history, state, update.log, lock, HALT, EXPOSED, halt.last, deploy.state,
+# standby.last; mode 0700) and ~/.config/lab-dashboard/ (space: the uuid; config.json; ack.json). Nothing is written
+# inside the checkout. Test hooks (never needed in normal use): LAB_DASH_CACHE, LAB_DASH_CONFIG (other directories),
 # LAB_DASH_SPACESHEEP (the spacesheep command), LAB_DASH_RENDER (the render command: <data.json> <out.html>),
 # LAB_DASH_FETCH (a command that prints the HTTP status, then the body, of an anonymous GET of its URL argument),
 # LAB_DASH_COLLECT_ARGS (extra collect.py arguments), LAB_DASH_CRONTAB (the crontab command), LAB_DASH_REREAD_S (the
 # pause between the re-reads of a list that said "not private", 5 s), LAB_DASH_RECHECK_S (the second check after a
-# deploy, 45 s; 0 skips it). tests/guard_test.sh drives the guard with stubs.
+# deploy, 45 s; 0 skips it), LAB_DASH_HOST (this machine's name, for the standby gate).
+# tests/guard_test.sh drives the guard and the standby gate with stubs.
 #
 # The whole body is the function main, called on the last line together with exit, so bash has read the entire
 # file before anything runs: an edit to this file while cron runs it cannot splice two versions (AGENT.md §6).
@@ -36,6 +43,12 @@ main() {
   HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
   CACHE=${LAB_DASH_CACHE:-$HOME/.cache/lab-dashboard}
   CONF=${LAB_DASH_CONFIG:-$HOME/.config/lab-dashboard}
+  # A box whose own spacesheep key cannot deploy (a streams-only key, as on aifoundry1 and aifoundry3) keeps the
+  # dashboard's deploy-capable one in $CONF/spacesheep/config.json, which the CLI reads through SPACESHEEP_CONFIG_DIR;
+  # the box's own key and its streams stay as they are (8 October 2026, the standby on aifoundry3, §3.5).
+  if [ -z "${SPACESHEEP_CONFIG_DIR:-}" ] && [ -f "$CONF/spacesheep/config.json" ]; then
+    export SPACESHEEP_CONFIG_DIR="$CONF/spacesheep"
+  fi
   read -r -a SS <<< "${LAB_DASH_SPACESHEEP:-spacesheep}"
   read -r -a CRONTAB <<< "${LAB_DASH_CRONTAB:-crontab}"
   LOG=$CACHE/update.log
@@ -58,6 +71,30 @@ main() {
        case "$cmd" in run|now) log_line "run refused: the visibility '$(printf '%s' "$VISIBILITY" | tr -cd '[:alnum:]_-' | cut -c1-20)' is neither public nor private (LAB_DASH_VISIBILITY or config.json)" ;; esac
        return 2 ;;
   esac
+  # the standby gate (§3.5): LAB_DASH_STANDBY_AFTER_MIN, else config.json's "standby_after_min", else off. A setting
+  # that is not a whole number of minutes, 90 or more, refuses the run rather than being ignored: a box that was meant
+  # to stand by would otherwise publish over the primary. The floor is 90 because a healthy primary's page is routinely
+  # an hour old — it deploys on a change, else on the heartbeat (60 min, less 2 minutes of slack), and the measured
+  # gaps have a p99 of 80 minutes — so a standby set below that takes over from a live primary, and the two boxes then
+  # take turns publishing, each from its own view of the lab (8 October 2026: this floor read 30, below one heartbeat).
+  STANDBY_MIN=${LAB_DASH_STANDBY_AFTER_MIN:-}
+  if [ -z "$STANDBY_MIN" ] && [ -f "$CONF/config.json" ]; then
+    STANDBY_MIN=$(python3 -c 'import json, sys; v = json.load(open(sys.argv[1])).get("standby_after_min"); print("" if v is None else v)' \
+                  "$CONF/config.json" 2>/dev/null)
+  fi
+  if [ -n "$STANDBY_MIN" ] && { ! [[ $STANDBY_MIN =~ ^[0-9]{1,6}$ ]] || [ "$STANDBY_MIN" -lt 90 ]; }; then
+    echo "update.sh: standby_after_min must be a whole number of minutes, 90 or more, not '$STANDBY_MIN' (LAB_DASH_STANDBY_AFTER_MIN or config.json)" >&2
+    case "$cmd" in run|now) log_line "run refused: standby_after_min '$(printf '%s' "$STANDBY_MIN" | tr -cd '[:alnum:]._-' | cut -c1-20)' is not a whole number of minutes, 90 or more (LAB_DASH_STANDBY_AFTER_MIN or config.json)" ;; esac
+    return 2
+  fi
+  # the gate reads the live page signed out, which in the private mode is the sign-in page: the box would stand by for
+  # ever, and standing by returns before the visibility check, so its runs would stop checking the space as well
+  # (§3.2: every run checks it, whether or not it deploys). The two settings together are a mistake, not a mode.
+  if [ -n "$STANDBY_MIN" ] && [ "$VISIBILITY" = private ]; then
+    echo "update.sh: standby_after_min is the public mode's (DESIGN.md §3.5): in the private mode the gate's signed-out read of the page is the sign-in page, so the box would stand by for ever and never check the space. Remove one of the two." >&2
+    case "$cmd" in run|now) log_line "run refused: standby_after_min is set and the visibility is private; the standby gate reads the live page signed out, so it belongs to the public mode (DESIGN.md §3.5)" ;; esac
+    return 2
+  fi
   export LAB_DASH_VISIBILITY=$VISIBILITY   # the collector puts it on the page ("About this page")
   if [ "$VISIBILITY" = private ]; then
     DESCRIPTION="Private: the AI Foundry lab's machines, cards and people, checked every 10 minutes"
@@ -207,17 +244,39 @@ share_vis() {
 }
 share_private() { share_vis "$1" private; }
 
-# keep_public UUID WHEN: the public mode's check (DESIGN.md §3.3), before and after each deploy. One list read: public
-# is kept; a space that is not public (a deploy can change a space's visibility) is shared public again, logged with
-# its row. Sets VIS (the list's word) and PUB: "public", "set public: done|FAILED (...)" (the run goes on: a page
-# that is not yet public exposes nothing, and the next run tries again) or "unverified: list failed|missing|unparsable"
-# (no deploy before it is known that the space is the dashboard's and readable).
+# keep_public UUID WHEN PAGE [no-ask]: the public mode's check (DESIGN.md §3.3), before and after each deploy. One
+# list read: public is kept; a space that is not public (a deploy can change its visibility) is shared public again,
+# logged with its row. A read that does not settle it never stops the deploy (8 October 2026): `spacesheep list`
+# returns only the 50 most-recently-updated spaces, so a space nobody has deployed to for a while is not in it. After
+# the 20-hour outage of aifoundry2 the dashboard stood 60th, every run read "missing" and skipped its deploy, and only a
+# deploy could have put the space back in the list — the page stayed frozen for 21 hours, until a person redeployed it
+# by hand. In the public mode a deploy exposes nothing the owner has not chosen to publish, so skipping only freezes
+# the page. "missing" is therefore checked once more against the page itself (one signed-out request: the list is not
+# the only evidence that a space is public), and the deploy goes on whatever that says. With "no-ask" — a run that
+# cannot deploy at all, a HALT left from the private mode — the page is not asked: only a deploy puts a space back in
+# the list, so the answer could change nothing, and the question would otherwise cost a request and a log line every
+# 10 minutes for as long as the halt lasts. The private mode still never deploys unverified (`guard`). Sets VIS (the
+# list's word) and PUB: "public", "public (signed-out request; ...)", "was <v>, set public: done|FAILED (...)" (the
+# run goes on: a page that is not yet public exposes nothing, and the next run tries again) or "unverified: list
+# failed|unparsable|missing, signed-out request: <verdict>".
 keep_public() {
-  local uuid=$1 when=$2 out row sh
+  local uuid=$1 when=$2 page=$3 ask=${4:-ask} out row sh res rc
   out=$(vis_list "$uuid" row); VIS=${out%%$'\t'*}; row=$(printf '%s' "$out" | cut -s -f2 | cut -c1-300)
   case "$VIS" in
     public) PUB=public ;;
-    failed|missing|unparsable) PUB="unverified: list $VIS" ;;
+    missing)
+      if [ "$ask" = no-ask ]; then PUB="unverified: list missing (this run deploys nothing, so the page was not asked)"; return; fi
+      res=$(anon_check "$uuid" "$page"); rc=$?
+      case $rc in
+        1) PUB="public (signed-out request; not among the newest 50 in the list)"
+           log_line "visibility $when: the space is not among the newest 50 spaces the list returns; a signed-out request got the page, so it is public; a deploy puts it back in the list" ;;
+        0) sh=$(share_vis "$uuid" public)
+           log_line "visibility $when: the space is not among the newest 50 spaces the list returns and a signed-out request got the sign-in page; the dashboard is public (the owner's decision): set public again: $sh"
+           PUB="was not public (the signed-out request got the sign-in page), set public: $sh" ;;
+        *) PUB="unverified: list missing, signed-out request: ${res#unverified: }"
+           log_line "visibility $when: the space is not among the newest 50 spaces the list returns and the signed-out request was inconclusive ($res); the deploy goes on" ;;
+      esac ;;
+    failed|unparsable) PUB="unverified: list $VIS" ;;
     *) sh=$(share_vis "$uuid" public)
        log_line "visibility $when: the list said $VIS (row: $row); the dashboard is public (the owner's decision): set public again: $sh"
        PUB="was $VIS, set public: $sh" ;;
@@ -308,6 +367,65 @@ guard() {
   else GUARD="misread: the list said $VIS, then private twice"; fi
 }
 
+# standby_log KEY TEXT: a standby line in the log, at most once an hour and at once when KEY changes. A box that is
+# standing by does nothing else, and cron calls it every 10 minutes, so an unconditional line would be the whole log.
+# The last key and the time it was written are kept in $CACHE/standby.last.
+standby_log() {
+  local key=$1 now last_t last_key
+  now=$(date +%s)
+  { read -r last_t last_key _ < "$CACHE/standby.last"; } 2>/dev/null || { last_t=0; last_key=; }
+  if [ "$key" != "${last_key:-}" ] || [ $(( now - ${last_t:-0} )) -ge 3600 ]; then
+    log_line "$2"
+    printf '%s %s\n' "$now" "$key" > "$CACHE/standby.last"
+  fi
+}
+
+# standby_gate: 0 to go on with the run, 1 to stand by (the reason is logged). Opt-in, and only for a cron run
+# ("standby_after_min"; DESIGN.md §3.5): a second box keeps the same checkout, space and cron line, collects on every
+# run, and publishes only when the live page's data is older than that. It stands by while the primary deploys (which it does at least every
+# heartbeat, 60 min), takes over when the primary stops — the power cut of 7 October 2026 took aifoundry2, and with it
+# the page, for 21 hours — and stands down by itself once the primary's first run back deploys again.
+# The live page is all the two boxes share: this reads it signed out with the same anon_fetch the visibility guard
+# uses, and takes the collector host and generated_ms that page/render.py embeds in it as `const D`. So the gate is
+# the public mode's, and main refuses the setting in the private mode, where that request only gets the sign-in page.
+# The age it weighs is a local clock against a timestamp from the page, so a box whose clock is far ahead of real time
+# reads a fresh page as stale and takes over; the 90-minute floor is the margin, and NTP is the real answer.
+standby_gate() {
+  local uuid resp status out age=- phost=- thost=
+  uuid=$(space_uuid) || {
+    standby_log no-space "standby: no space is configured, so there is no page to stand by for (update.sh create-space)"
+    return 1
+  }
+  resp=$(anon_fetch "https://$uuid.spacesheep.app/")
+  status=$(printf '%s\n' "$resp" | head -n 1)
+  if [ "$status" != 200 ]; then
+    standby_log "unread-$status" "standby: could not read the live page (the signed-out request answered ${status:-nothing}); standing by"
+    return 1
+  fi
+  # the data's age in minutes, the host that published it, this host: anon_fetch reads the first 400 KB of the page,
+  # which does truncate it (420 KB on 8 October 2026), but `const D` starts at about 93 KB and both fields are at the
+  # head of it, so the truncated body is enough
+  out=$(printf '%s\n' "$resp" | tail -n +2 | python3 -c '
+import os, re, socket, sys, time
+s = sys.stdin.read()
+g = re.search(r"\"generated_ms\":([0-9]{10,16})", s)
+i = s.find("\"collector\":{")
+h = re.search(r"\"host\":\"([A-Za-z0-9._-]{1,64})\"", s[i:i + 500]) if i >= 0 else None
+print("%s %s %s" % (int((time.time() * 1000 - int(g.group(1))) // 60000) if g else "-", h.group(1) if h else "-",
+                    os.environ.get("LAB_DASH_HOST") or socket.gethostname().split(".")[0]))' 9>&-)
+  read -r age phost thost <<< "$out"
+  if [ "$age" = - ] || [ "$phost" = - ] || [ -z "${thost:-}" ]; then
+    standby_log unreadable "standby: could not read the live page (it carries no generated_ms or collector host); standing by"
+    return 1
+  fi
+  if [ "$phost" != "$thost" ] && [ "$age" -lt "$STANDBY_MIN" ]; then
+    standby_log "primary-$phost" "standby: $phost published $age min ago; this machine takes over after $STANDBY_MIN min"
+    return 1
+  fi
+  [ "$phost" = "$thost" ] || standby_log "takeover-$phost" "standby: taking over: $phost's data is $age min old"
+  return 0
+}
+
 cmd_run() {
   local mode=$1; shift
   local sample=() a
@@ -352,6 +470,13 @@ cmd_run() {
     [ "$mode" = now ] && echo "update.sh: collect.py failed (exit $rc)" >&2
     return 1
   fi
+  # A standby box collects on every run, like the primary, and only then asks whether to publish (§3.5). Its history
+  # and its view of each machine's boots and outages are then current when it takes over, so the page it publishes
+  # keeps its 48-hour charts; the cost is a second read-only sweep of the three machines every 10 minutes (1 to 4 s).
+  # While the primary publishes, nothing is rendered or deployed. `now` is a person's run and always acts.
+  if [ "$mode" = cron ] && [ -n "$STANDBY_MIN" ]; then
+    standby_gate || return 0
+  fi
   fp=$(dj 'd["fingerprint"]')
   heartbeat=$(dj 'd["collector"]["heartbeat_min"]')
   mingap=$(dj 'd["collector"].get("min_deploy_gap_min") or 10')
@@ -364,14 +489,15 @@ cmd_run() {
   uuid=$(space_uuid) || uuid=
   if [ -z "$uuid" ]; then deploy="skipped(no space configured)"
   elif [ "$VISIBILITY" = public ]; then
-    # every run, whether or not it deploys: the space must be public (the owner's decision), or it is shared public
-    keep_public "$uuid" "before a deploy"
     if [ -f "$CACHE/HALT" ]; then
       # a halt left from the private mode: no deploy until a person clears it (update.sh resume); never set private
       deploy="skipped(HALT from the private mode: $(cut -d' ' -f2- "$CACHE/HALT" | tr -cd '[:print:]' | cut -c1-120); a person runs update.sh resume)"
-    else
-      case "$PUB" in unverified*) deploy="skipped(visibility $PUB)" ;; esac
     fi
+    # every run, whether or not it deploys: the space must be public (the owner's decision), or it is shared public.
+    # A read that leaves the visibility unverified does not stop the deploy here: skipping would only freeze the page
+    # (keep_public has the 8 October 2026 reason). A run that deploys nothing passes "no-ask", so a space missing from
+    # the list is not chased with a signed-out request whose answer could not change anything.
+    keep_public "$uuid" "before a deploy" "$D/index.html" ${deploy:+no-ask}
   elif [ -f "$CACHE/HALT" ]; then
     out=$(halt_check "$uuid" "$D/index.html") || exposed=1
     deploy="skipped($out)"
@@ -401,13 +527,17 @@ cmd_run() {
     if out=$(timeout 180 "${SS[@]}" deploy "$D" --space "$uuid" -m "lab $(date +%H:%M)" --json 2> "$D.deploy.log" 9>&-); then
       printf '%s %s\n' "$now_s" "$fp" > "$CACHE/deploy.state"
       deploy="ok"
-      case "$PUB" in public|"") ;; *) deploy="ok (before it: visibility $PUB)" ;; esac
+      case "$PUB" in
+        public|"") ;;
+        unverified*) deploy="ok (before it: visibility $PUB; deployed anyway in the public mode)" ;;
+        *) deploy="ok (before it: visibility $PUB)" ;;
+      esac
       # right after the deploy, and again RECHECK_S (45 s) later: a deploy can change a space's visibility, and the
       # first read after it may not show that yet. The public mode checks once, right after (a space that turns
       # private later is found by the next run's check: a page hidden for 10 minutes exposes nothing).
       local pass wait
       if [ "$VISIBILITY" = public ]; then
-        keep_public "$uuid" "after a deploy"
+        keep_public "$uuid" "after a deploy" "$D/index.html"
         case "$PUB" in public) ;; *) deploy="$deploy (after it: visibility $PUB)" ;; esac
       fi
       for pass in 1 2; do
@@ -473,11 +603,12 @@ cmd_status() {
   if [ -f "$CACHE/halt.last" ]; then echo "last halt: $(python3 -c 'import json,sys,time; h=json.load(open(sys.argv[1])); f=lambda t: time.strftime("%F %T", time.localtime(t)) if t else "-"; print("%s: %s; resumed %s by %s" % (f(h.get("at")), h.get("reason"), f(h.get("cleared_at")), h.get("cleared_by") or "-"))' "$CACHE/halt.last" 2>/dev/null)"; fi
   if "${CRONTAB[@]}" -l 2>/dev/null | grep -qF "$TAG"; then echo "cron: $("${CRONTAB[@]}" -l 2>/dev/null | grep -F "$TAG")"; else echo "cron: not installed (update.sh --install-cron)"; fi
   echo "mode: $VISIBILITY$([ "$VISIBILITY" = public ] && echo " (the owner's decision; \"visibility\": \"private\" in config.json turns on the private guard)" || echo " (the private guard: checked before and after every deploy, HALT on exposure)")"
+  [ -n "$STANDBY_MIN" ] && echo "standby: this machine is a standby; a cron run publishes only when the live page's data is over $STANDBY_MIN min old, or is its own (DESIGN.md §3.5)"
   if uuid=$(space_uuid); then
     echo "space: $uuid"
     if [ "$VISIBILITY" = public ]; then
-      local out; out=$(vis_list "$uuid" row)
-      echo "visibility: list ${out%%$'\t'*} (row $(printf '%s' "$out" | cut -s -f2 | cut -c1-300))"
+      local out v; out=$(vis_list "$uuid" row); v=${out%%$'\t'*}
+      echo "visibility: list $v (row $(printf '%s' "$out" | cut -s -f2 | cut -c1-300))$([ "$v" = missing ] && printf '%s' "  not among the newest 50 spaces spacesheep list returns; the public mode deploys anyway, which puts it back")"
     else
       vis_check "$uuid" "$CACHE/nopage.html"
       echo "visibility: list $VIS (row $VIS_ROW); anonymous request: $ANON"
@@ -648,7 +779,7 @@ cmd_create_space() {
   printf '%s\n' "$uuid" > "$CONF/space"; chmod 600 "$CONF/space"
   printf '%s %s\n' "$(date +%s)" "$(dj 'd["fingerprint"]')" > "$CACHE/deploy.state"
   if [ "$VISIBILITY" = public ]; then
-    keep_public "$uuid" "after create-space"; GUARD=$PUB
+    keep_public "$uuid" "after create-space" "$D/index.html"; GUARD=$PUB
   else
     guard "$uuid" "$D/index.html" "after create-space"
   fi

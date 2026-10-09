@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # update.sh: gather the live collectors' records from the three machines, build the history page, deploy it.
-#   update.sh run      what cron runs (every 5 minutes on aifoundry2): quiet, logs to ~/.cache/lab-history/update.log
+#   update.sh run      what cron runs (every 15 minutes on aifoundry2, "6-59/15"; every 5 until 8 Oct 2026, which spent about
+#                      288 of the account's 400 deploys a day; the page draws the live streams while it is open, so a
+#                      reader sees new readings between deploys): quiet, logs to ~/.cache/lab-history/update.log
 #   update.sh now      the same, printing what it does
 # Records: ~/live/history/*.jsonl on each machine (tools/lab/live/live-collector.py); copies in ~/.cache/lab-history/rec/<host>/.
 # A machine that does not answer keeps its last copy; the page shows when each machine last recorded.

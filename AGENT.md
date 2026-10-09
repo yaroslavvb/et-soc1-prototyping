@@ -351,6 +351,14 @@ directories were intact.
    [`tools/pagemotion/`](tools/pagemotion/README.md) (late frames, and the camera's velocity from frame to frame),
    before and after, one run at a time with a kept Chrome profile.
 6. **Commit** the page, its sources and data, and MIRROR.md together.
+7. **A lab page joins the dashboard's Worklog** (the owner's asks of 7 and 8 October 2026: dashboard > worklog >
+   page, each linking up). Right under the page's title goes
+   `<p data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">← AI Foundry lab dashboard</a> › <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a></p>`
+   (HTML, not a markdown link: a converter styles the first plain paragraph as the lede), and the page gets one line
+   under its day in the Worklog of `tools/lab/dashboard/page/body.html` (its `TO ADD A DAY` comment). The Worklog
+   reaches the live page only when the collecting machine's checkout is pulled and `update.sh now` runs; an edit made
+   on the live page is overwritten by the next deploy, within the hour. The 2 and 7 October pages went out without the
+   line, written by sessions that never saw the rule.
 
 A page written for one person, or one with sensitive content, stays private and is never mirrored here.
 

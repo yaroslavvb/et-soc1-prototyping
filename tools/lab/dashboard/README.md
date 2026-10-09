@@ -11,14 +11,16 @@ health rules and the reasons behind each choice, is [DESIGN.md](DESIGN.md). This
 | `collect.py` | the collector: probes the three hosts in parallel, parses, applies the privacy filter, derives alerts, history and a fingerprint, writes `data.json` |
 | `remote.sh` | the read-only probe run on each host (`bash -s` over ssh; locally on aifoundry2) |
 | `update.sh` | collect, render, deploy when something changed, keep the space public (or, in the private mode, private), log; cron, acknowledgements |
+| `keeper.py` | the keeper: watches the collector from the box itself, reports its health to a spacesheep stream every minute and repairs what is safe (below, "The keeper") |
 | `lab.json` | static facts: hosts, cards, firmware, clock policy, idle ranges, a card's dated `note` (with `note_page`, the slug of the page it links), known conditions. No personal data, no access paths |
 | `page/` | the page and its `render.py` (see `page/README.md`); `update.sh` runs `page/render.py <data.json> <out.html>` |
 | `testdata/` | invented probe outputs (`raw-<host>.txt`, `tailscale.json`) for `collect.py --from-raw`; `run2/` and `run3/` are the two runs after it (a machine down, one unreachable, reboots). The `@@usage` sections are real `et-usage --json` output: `testdata/make_usage.py <scratch>` makes them from the logs that `tools/lab/et-usage/test/test_et_usage.py --dir <scratch> --keep` leaves, laid out over an invented day |
-| `tests/` | `test_collect.py` (the collector's rules and the probe's process filter, no host contacted) and `guard_test.sh <workdir>` (`update.sh`'s visibility guard against a stub spacesheep; nothing is deployed) |
+| `tests/` | `test_collect.py` (the collector's rules and the probe's process filter, no host contacted), `test_keeper.py` (the keeper's parsing, repairs, rate limits and public-safety scrub, against stubs) and `guard_test.sh <workdir>` (`update.sh`'s visibility guard against a stub spacesheep; nothing is deployed) |
 
 Everything collected lives outside the repository: `~/.cache/lab-dashboard/` (mode 0700: `data.json`,
 `history.jsonl`, `state.json`, `raw/<host>.txt`, `update.log`, `deploy.state`, `lock`, `collect.lock`, `HALT`,
-`EXPOSED`, `halt.last`, `halt.times`) and
+`EXPOSED`, `halt.last`, `halt.times`; the keeper's `keeper.log`, `keeper-state.json`, `keeper-page.json`,
+`keeper-stream.log`) and
 `~/.config/lab-dashboard/` (`space` holds the space's uuid; `config.json`; `ack.json`; `crontab.bak`).
 
 ## Using it
@@ -50,7 +52,9 @@ is 60 minutes old, and never twice within 10 minutes; `now` always deploys. The 
 on every deploy; the page reads STALE after 80 minutes without a new version. Runs never overlap: `run` exits at once
 if another run holds the lock, `now` waits up to 60 s. `et-lab-health` runs hourly on each host (`now` runs it
 everywhere). Expect 30–60 versions a day, at most 144 on a day when a queue
-takes a card in bursts (DESIGN.md §3.2); the CLI cannot delete old versions, only the whole space.
+takes a card in bursts (DESIGN.md §3.2); the CLI cannot delete old versions, only the whole space. On a second box
+set up as a standby (below, 8 October 2026), the same cron line publishes only while the live page is stale or its
+own.
 
 **Machine states.** Each machine is `up`, `DOWN` (no answer, and Tailscale on aifoundry2 says it is offline: a
 `bad` alert at once, "down since" Tailscale's last-seen time), `UNREACHABLE` (online on Tailscale, or its view not
@@ -126,8 +130,9 @@ run it by hand to see its usage (read `tools/ettelem/ettelem.cpp`).
 
 **The page is public** by the owner's decision of 30 September 2026 ("AI Foundry pages should be public (stop making
 the dashboard private)"), although it names lab users. Every run reads the space's row in `spacesheep list` and, if it
-is not public (a deploy can change a space's visibility), shares it public again and logs it; a failed list skips that
-run's deploy. `update.sh status` names the mode. Because the page is public, the collector's rules below matter all the
+is not public (a deploy can change a space's visibility), shares it public again and logs it; a read that cannot settle
+it deploys anyway and says so in the log (below, 8 October 2026). `update.sh status` names the mode. Because the page
+is public, the collector's rules below matter all the
 more: no addresses, command lines, file paths or connection sources, whatever the mode.
 
 `"visibility": "private"` in `~/.config/lab-dashboard/config.json` (or `LAB_DASH_VISIBILITY=private`, which wins) turns
@@ -170,14 +175,17 @@ python3 collect.py --out $T --sample-dry                                        
 
 ```
 python3 tests/test_collect.py                       # the collector's rules, the privacy patterns, the probe's process filter
-bash tests/guard_test.sh ~/claude/work/<topic>      # update.sh's visibility checks against stubs, both modes (51 checks)
+python3 tests/test_keeper.py                        # the keeper: the run-line parser, each repair and its rate limit, the scrub
+bash tests/guard_test.sh ~/claude/work/<topic>      # update.sh's visibility checks and standby gate against stubs (78 checks)
 ```
 
 `update.sh` reads test hooks from the environment, so its deploy logic can be exercised without deploying:
 `LAB_DASH_CACHE`, `LAB_DASH_CONFIG` (scratch directories), `LAB_DASH_SPACESHEEP` (a stub CLI), `LAB_DASH_RENDER`
 (a stub renderer), `LAB_DASH_FETCH` (a stub anonymous fetch that prints a status line, then a body),
 `LAB_DASH_CRONTAB` (a stub crontab), `LAB_DASH_COLLECT_ARGS` (extra `collect.py` options), `LAB_DASH_REREAD_S` (the
-guard's re-read pause, 5 s), `LAB_DASH_RECHECK_S` (the second check after a deploy, 45 s; 0 skips it).
+guard's re-read pause, 5 s), `LAB_DASH_RECHECK_S` (the second check after a deploy, 45 s; 0 skips it). `keeper.py`
+reads the same ones, plus `LAB_DASH_UPDATE` (the `update.sh` to call), `LAB_DASH_HOST` (this machine's short name)
+and `LAB_DASH_STANDBY_AFTER_MIN` (the standby's takeover age).
 `tests/guard_test.sh` uses them for the guard's paths (DESIGN.md §3.3 lists its cases). Keep `LAB_DASH_CONFIG`
 pointed at a scratch directory with `{"card_sample": false}` for any test: the real `config.json` may switch the card
 sample on.
@@ -214,3 +222,146 @@ days folded into a `<details>`. It is static markup in `page/body.html` (the sam
 which the collector's `data.json` cannot). To add a day: copy one `.wl-row` block to the top of `.wl`, newest first, one
 short line per page; when more than about five days are shown, move the oldest `.wl-row` into the `<details>`. The dates
 and addresses come from [`docs/reports/MIRROR.md`](../../../docs/reports/MIRROR.md)'s index.
+
+## The guard that could not clear itself, and a standby box (8 October 2026)
+
+**What happened.** The lab lost power at about 18:16 on Wednesday 7 October; aifoundry2, which runs the only
+collector, was off until 14:49 on Thursday. The page then stayed frozen for another 43 minutes, and on its own would
+have stayed frozen for good. While the box was off, about 60 other spaces were deployed to, so the dashboard's space
+fell out of the 50 rows `spacesheep list --json` returns (there is no flag for more). Every run after the box came
+back read its visibility as `missing` and skipped its deploy — `deploy=skipped(visibility unverified: list missing)` —
+and only a deploy puts a space back in that list. `update.sh now` was blocked by the same branch. Redeploying the
+unchanged page by hand at 15:29 put the space back in the list, and aifoundry2's own 15:32 run deployed fresh data.
+
+**The guard now.** In the public mode a visibility read that cannot settle the question no longer stops the deploy:
+the run goes on to the normal rules (render, fingerprint, heartbeat, the 10-minute floor) and the log line says what
+it deployed on, `deploy=ok (before it: visibility unverified: …; deployed anyway in the public mode)`. A deploy
+exposes nothing the owner has not chosen to publish, so skipping only froze the page. A space missing from the list is
+asked one more question first — a signed-out request for the page itself, since the list is not the only evidence
+that a space is public: the page is served, so it is public and the run deploys; the sign-in bootstrap, so it is not,
+and it is shared public again like any other not-public read; an inconclusive answer deploys too, logged.
+`update.sh status` explains a missing row in its visibility line. **The private mode is untouched**: it still never
+deploys on a visibility it could not verify.
+
+**Standby.** `"standby_after_min": 90` in `~/.config/lab-dashboard/config.json` (or `LAB_DASH_STANDBY_AFTER_MIN`,
+which wins) turns a box into a standby: a whole number of minutes, 90 or more, and anything else refuses the run
+(exit 2, logged). The floor is 90 because a healthy primary's page is routinely an hour old — it deploys on a change,
+else on the 60-minute heartbeat — so a standby set lower would take over from a live primary and the two would take
+turns publishing. The private mode with a standby setting is refused as well: a signed-out read of a private space is
+the sign-in page, so the box would stand by for ever and its runs would stop checking the space.
+Each cron run collects the lab as usual (so its history stays current), then reads the live page signed out and
+takes the collector host and the data's age from it. Another machine's data, younger than the setting: it stands by,
+rendering and deploying nothing, and says so in the log at most once an hour. That old or older: it takes over. Its own data on the
+page, or no page it can read: the usual rules decide, or it stands by. `now` never stands by. That gate is also the
+answer to the obvious objection to a second box — both deploying, 0–10 minutes apart, from two different views of the
+lab — because the published page itself is what decides which box publishes, and neither box reads the other's state.
+
+**Setting one up** (the primary keeps no setting at all): the same checkout on the box, a real one and not an rsynced
+copy, since `collect.py` reads `tools/lab/et-lab-health` from it and `page/render.py` the two files under
+`docs/reports/sources/`; `~/.config/lab-dashboard/space` with the same uuid; a deploy-capable spacesheep key, which
+is the owner's call (there is no per-space key, and a key on a lab box is readable by the lab), in
+`~/.config/lab-dashboard/spacesheep/config.json` when the box's own key is streams-only (`update.sh` points the CLI there
+with `SPACESHEEP_CONFIG_DIR`; the box's own key and streams stay as they are); `update.sh --install-cron`; and
+`"standby_after_min": 90` in its config.json. aifoundry3 is the standby since 8 October 2026. It then stands by while the primary
+publishes (which it does at least hourly), takes over 90 minutes after the last data, keeps publishing while the page
+is its own, and stands down by itself once the primary's first run back deploys. **What it does not fix:** a machine
+the standby cannot reach by ssh reads as `UNREACHABLE` on its page, so a standby's view of the lab can be poorer than
+the primary's. Because a standby collects on every run, the page it publishes keeps its history (each box keeps its
+own `history.jsonl`; the page shows the publishing box's). DESIGN.md §3.5 has the whole gate.
+
+## The keeper (8 October 2026)
+
+**Why.** On Wednesday 7 October the lab lost power at about 18:16, aifoundry2 stayed off until 14:49 on Thursday, and
+the page stood still from 17:50 Wednesday to 15:32 Thursday — nearly 22 hours. Two faults, and the keeper exists for
+the second one. The collector, its cron line and its deploy all live on aifoundry2, so the machine that collects is
+also the machine that notices; and when aifoundry2 came back, every run still skipped its deploy, because the space
+had dropped out of `spacesheep list`'s newest 50 while the box was off and only a deploy puts it back
+(`deploy=skipped(visibility unverified: list missing)`, a loop that cannot clear itself). Nothing said so anywhere a
+person looks: the verdict went to `~/.cache/lab-dashboard/update.log`, on the box, behind ssh. `keeper.py` is the
+part that watches the collector from the box itself and says what it finds out loud.
+
+**What it is.** `keeper.py` reports the collector's health to the spacesheep stream `aifoundry-dash/<host>` once a
+minute and repairs what is safe to repair. The machine pushes; no Mac polls it, because a Mac's ssh to the lab needs
+a browser check every few hours and nothing unattended may depend on that (the agents dashboard is fed the same way).
+Python 3 standard library only, and it reads the same `LAB_DASH_*` hooks `update.sh` does, so it is testable with no
+box at all.
+
+```
+tools/lab/dashboard/keeper.py status           # a snapshot: cron, the last run, the last deploy, the page's age, HALT, warnings
+tools/lab/dashboard/keeper.py status --json    # the same as one JSON line
+tools/lab/dashboard/keeper.py tick --json      # the snapshot, the safe repairs, then the JSON line: what the unit pushes
+tools/lab/dashboard/keeper.py repair [--force] # the safe repairs with their rate limits ignored, then update.sh now if the page is still stale
+tools/lab/dashboard/keeper.py install [--dry-run]   # the systemd --user unit; uninstall removes it
+```
+
+**What it reports.** One JSON line, the same shape the agents feed uses: `host`, `hl` (a headline of at most 120
+characters, near the front because `spacesheep streams` shows only about the first 250 characters of a value: the first
+warning, as `WARN <n>: …`, or `ok primary: ran 3 min ago, page 42 min old`, or `ok standby: aifoundry2's page is 12 min
+old`), `t`, `keeper` (the checkout's short
+commit, or `nogit` on a box whose tree is an rsynced copy), `role`, `cron.installed`, `last_run` (the newest run line
+of `update.log`: when, `run` or `now`, its `vis=` word and its `deploy=` verdict), `runs_since_deploy`, `last_deploy`
+(from `deploy.state`), `page` (the age of the published page, from a signed-out read of the content origin, and the
+collector it names), `halt`, `exposed`, the last `repair`, and `warn`/`fix` lists. **Everything in it reaches a public
+stream**, so every piece of free text goes through `scrub()`: no login names, paths, addresses, e-mail addresses, URLs
+or tailnet names. The space's uuid is never in it — the page's address is not the keeper's to publish.
+`tests/test_keeper.py` pins the scrub against `collect.py`'s own privacy check, so the two cannot drift.
+
+The `warn`/`fix` pairs it raises: the cron line is missing, no cron run for 25 minutes (only on the box that should
+be publishing — a standby writes no run line at all, because `update.sh`'s standby gate returns before it), the page
+is stale (naming the box that should be refreshing it), the last three runs failed to deploy, `update.sh` could not
+be started at all, a `standby_after_min` `update.sh` refuses, a tick that ran out of its seconds, and the one verdict
+that means the checkout itself is old — `deploy=skipped(visibility unverified: list missing)`, matched exactly, with
+the fix `git pull --ff-only`. The update.sh that fixed that deadlock writes a longer verdict for the same list
+answer, and that one is not it.
+
+**What it repairs,** each logged to `~/.cache/lab-dashboard/keeper.log` and rate-limited through `keeper-state.json`:
+the tagged cron line is missing, so it runs `update.sh --install-cron` (at most once an hour); no cron-mode run for 25
+minutes (cron runs one every 10), or the published page is more than 90 minutes old and this box is the one that
+should be refreshing it, so it starts `update.sh run` **detached** and never waits for it (at most once every 20
+minutes, shared between the two). It deploys nothing itself: `update.sh` decides that, with all of its own rules.
+
+**What it never does.** Deploy by itself; clear `HALT` or `EXPOSED` (while either is there it restarts nothing at all
+and only says that a person checks the space and runs `update.sh resume`); touch a `/dev/et*` node or a card tool;
+kill anything. And it never blocks: `update.sh run` is started in a new session with its descriptors on `/dev/null`,
+and `update.sh`'s own lock makes a start during a run a no-op. A tick also works to one 25-second deadline, because
+the per-leg caps (the crontab, the page read, a cron reinstall) add up to more than the minute it is given: each leg
+gets what is left of the deadline, a leg with nothing left is skipped and said so in `warn`, and the page's body is
+read in chunks against it (`urlopen`'s timeout bounds each `recv`, not the whole read). The JSON line is printed
+whatever the repairs do, so a broken checkout makes the keeper noisy, not silent.
+
+**`repair` is the one a person or a watchdog runs.** It does the same repairs with the rate limits ignored — except
+that it starts no `update.sh run` of its own: that run takes `update.sh`'s lock without waiting and the `now` below
+waits only 60 s for it, so `repair` would lose the race to its own child on the very freeze it was run for. Then, if
+the page is still older than 80 minutes, it runs `update.sh now` in the foreground under a 300 s timeout, prints what
+it found and did, and exits 0 only if the page is fresh afterwards. Every `now` deploys, whatever the fingerprint
+says, and the account's deploys are capped per day, so a second `repair` within 10 minutes refuses and says to pass
+`--force`: a repair that soon after another means a person is needed, not another deploy. It is written to be run
+over ssh, so its summary is scrubbed too.
+
+**Roles.** `primary` on the box that holds `~/.config/lab-dashboard/space`: the collector. `standby` when
+`config.json` has `standby_after_min` (or `LAB_DASH_STANDBY_AFTER_MIN`, which wins): it keeps quiet while the page
+names another box and is fresher than that many minutes, and takes over past it. The value follows `update.sh`'s own
+rule — a whole number of minutes, 90 or more — and a value it refuses makes the role `none` with one warning naming
+it, because `update.sh` refuses every run on such a box and there is nothing to watch. `none` is also the role when
+the dashboard is not set up on the box, and then the keeper reports and repairs nothing. Setting a second box up as a
+standby is the Standby section above (8 October 2026); what still needs a person's decision there is the box itself: a
+real checkout, its own `spacesheep login` and a deploy-capable key on it, which is the owner's call because there is
+no per-space key. Without the gate — the `update.sh` of before 8 October — two boxes would both have fired the
+60-minute heartbeat and both deployed on the same change, 0–10 minutes apart and from two different views of the lab;
+the gate is what keeps one of them quiet.
+
+**The unit.** `keeper.py install` writes `~/.config/systemd/user/lab-dashboard-keeper.service`, which runs
+`node spacesheep.js stream aifoundry-dash/<host> --every 60s -- /usr/bin/python3 .../keeper.py tick --json`, with
+`Restart=always`, `RestartSec=5`, `StartLimitIntervalSec=0` and `WantedBy=default.target` — the live monitor's and the
+agents feed's shape, which is what comes back by itself after a reboot (with linger on; `install` prints
+`loginctl show-user $USER -p Linger` and warns when it is off). It finds `node` and `spacesheep.js` by reading the
+`ExecStart` of the box's own `spacesheep-stream-aifoundry-<host>.service`, because `node` is not on aifoundry1's or
+aifoundry3's login PATH, and falls back to `~/.local/node/bin/node` and
+`~/.local/ss-stream/node_modules/spacesheep/bin/spacesheep.js`. It refuses when either is missing or there is no
+`~/.config/spacesheep/config.json`: `spacesheep login` is a person's step. The unit is written by rename, so a running
+daemon keeps reading its own copy. Its output goes to `~/.cache/lab-dashboard/keeper-stream.log`, and `install` makes
+that directory first: systemd will not start a unit whose `append:` directory is missing, and on a box where the
+dashboard has never run nothing has created it.
+
+Tests: `python3 tools/lab/dashboard/tests/test_keeper.py` (59 checks, nothing contacted; stub `update.sh`, `crontab`
+and fetch, a scratch `HOME`).

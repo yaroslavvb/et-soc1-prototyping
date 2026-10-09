@@ -488,6 +488,7 @@ Failures never retry within a run, and nothing is drained: the collector may not
 | `lock`, `HALT` | the run lock; the deploy stop (§3.3) | until a person runs `update.sh resume` |
 | `EXPOSED` | the space was found readable without signing in and could not be set private (§3.3) | until a check finds it private |
 | `halt.last`, `halt.times` | the last halt: its time, reason, and who resumed it when (the page shows it for 24 hours after); the last 20 halt times | |
+| `standby.last` | on a standby box only: `<epoch> <reason>` of the last `standby:` line written, which keeps those lines to one an hour (§3.5) | overwritten when one is written |
 
 The directory is created with mode 0700.
 
@@ -548,13 +549,14 @@ AGENT.md §6). It sets `PATH` itself (`~/.local/bin` for `spacesheep` and `node`
 ### 3.1 A run
 
 1. `flock -n ~/.cache/lab-dashboard/lock` (cron: exit 0 quietly if another run holds it; `now` waits up to 60 s
-   with `flock -w 60` and says so).
+   with `flock -w 60` and says so). On a box with `standby_after_min` set, a cron run then reads the live page and
+   stops here while another machine's data on it is younger than that (§3.5); `now` never stands by.
 2. `timeout 120 nice -n 10 python3 collect.py` (exit 3, a privacy refusal, stops the run: nothing is rendered or
    deployed, and the log says which pattern matched, not the text).
 3. `python3 render.py ~/.cache/lab-dashboard/data.json $D/index.html`, where `D=$(mktemp -d)`.
 4. The visibility check (§3.3), every run. Public mode (the default): the list; a space that is not public is shared
-   public again; no deploy while the list fails. Private mode: with `HALT` set, `halt_check`; otherwise the list and
-   the signed-out request, and no deploy unless the space is verified private.
+   public again; a read that cannot settle it does not stop the deploy. Private mode: with `HALT` set, `halt_check`;
+   otherwise the list and the signed-out request, and no deploy unless the space is verified private.
 5. Deploy decision: skip when there is no `~/.config/lab-dashboard/space` (log "no space configured"), when `HALT`
    exists, when the fingerprint equals the last deployed one and the last deploy is younger than `heartbeat_min` (60)
    less 2 minutes of slack, or, for `run`, when the last deploy is younger than `min_deploy_gap_min` (10) less 1
@@ -577,7 +579,9 @@ A deploy failure (network, rate limit) is logged and retried by the next run; th
   only the tagged line: it refuses when `crontab -l` fails for any reason but "no crontab for", keeps a copy in
   `~/.config/lab-dashboard/crontab.bak`, keeps blank lines, and checks afterwards that every other line is unchanged
   (restoring the copy if not). The crontab also holds other lines of the account (nodewatch's, for one).
-- Every run checks the space's visibility (§3.3), whether or not it deploys. A deploy happens when the fingerprint
+- Every run checks the space's visibility (§3.3), whether or not it deploys, and a check that cannot settle it no
+  longer stops the deploy in the public mode (§3.3, 8 October 2026). A run that stands by (§3.5) is the one exception,
+  which is why a standby setting is refused in the private mode, where that check is the exposure guard. A deploy happens when the fingerprint
   changes, or every 60 minutes regardless, and a cron run never deploys twice within 10 minutes (a change seen sooner
   waits for the next run). The fingerprint is the state the page reports, not
   its drifting numbers (§1.7): each machine's state (up, down, unreachable, approval needed), its boot id and reboot,
@@ -599,6 +603,8 @@ A deploy failure (network, rate limit) is logged and retried by the next run; th
   `~/.config/lab-dashboard/space`) when it grows too large.
 - Every version keeps a copy of its data, login names included. Only deleting the space removes them; the README
   says so.
+- A box with `standby_after_min` set keeps this cadence but publishes only while the live page is stale or its own
+  (§3.5), so a standby adds no versions of its own while the primary is deploying.
 
 ### 3.3 Visibility: public by default; the private mode's guard and `HALT`
 
@@ -611,11 +617,28 @@ else `public`; any other word refuses the run (exit 2, logged). `update.sh` expo
 **Public mode.** Every run, whether or not it deploys, reads the space's row in `spacesheep list --json`
 (`keep_public`): public is kept; any other visibility (a deploy can change a space's visibility, in either direction)
 is shared public again with `spacesheep share $UUID --visibility public`, logged with the row and the share's outcome.
-A failed share is logged and the run goes on (a page not yet public exposes nothing; the next run tries again). A list
-that fails, lacks the space or is unparsable skips that run's deploy ("visibility unverified"). The same read follows
-each deploy once; a space that turns private later is found by the next run. No signed-out request is made and nothing
-halts; a `HALT` left from the private mode still stops the deploys (the check above still runs, and never sets the
-space private) until a person runs `update.sh resume`, which then checks nothing.
+A failed share is logged and the run goes on (a page not yet public exposes nothing; the next run tries again). The same
+read follows each deploy once; a space that turns private later is found by the next run. Nothing in this mode halts,
+and no signed-out request is made unless the list lacks the space (below); a `HALT` left from the private mode still
+stops the deploys (the check above still runs, and never sets the space private) until a person runs `update.sh
+resume`, which then checks nothing.
+
+**A read that cannot settle the visibility does not stop the deploy** (8 October 2026). `spacesheep list` returns only
+the 50 most-recently-updated spaces, so a space nobody has deployed to for a while is simply not in it. After the
+20-hour outage of aifoundry2 the dashboard stood 60th: every run read "missing", skipped its deploy as "visibility
+unverified", and only a deploy could have put the space back in the list — a loop with no way out, which `update.sh
+now` hit as well. The page stayed frozen for 21 hours, until a person redeployed it by hand. In the public mode a
+deploy exposes nothing the owner has not chosen to publish, so skipping only freezes the page: the run goes on to the
+normal rules (render, fingerprint, heartbeat, the 10-minute floor) and the log line records what it deployed on
+(`deploy=ok (before it: visibility unverified: ...; deployed anyway in the public mode)`). Because the list is not the
+only evidence that a space is public, "missing" is checked once more against the page itself, with one signed-out
+request (the same `anon_check` the private mode uses): the page is served, so the space is public
+("public (signed-out request; not among the newest 50 in the list)"); the sign-in bootstrap, so it is not public and
+it is shared public again and logged like any other not-public read; an inconclusive answer leaves it
+"unverified: list missing, signed-out request: …". A list that failed or was unparsable is not asked a second
+question — nothing suggests the space changed — and stays "unverified: list failed|unparsable". Every one of them
+deploys. `update.sh status` says what a missing row means in its visibility line. **The private mode still never
+deploys on a visibility it could not verify.**
 
 **Private mode** (`"visibility": "private"`): for a page that must not be public. Every run, whether or not it deploys, checks it
 (`vis_check`): the space's row in `spacesheep list --json` must say `"visibility": "private"`, and a signed-out request to
@@ -655,19 +678,33 @@ is where its readers learn that the space was, or may have been, readable withou
 shows `HALT`, `EXPOSED`, the last halt, and the list's row with the signed-out request's verdict.
 
 Testing without spacesheep: `tests/guard_test.sh <workdir>` runs `update.sh` with a stub spacesheep whose list answers
-a scripted sequence, a stub signed-out fetch, a stub crontab, `LAB_DASH_REREAD_S=0` and `LAB_DASH_RECHECK_S=0` (1 for
-the delayed check), scratch `LAB_DASH_CACHE` and `LAB_DASH_CONFIG`, and the collector on `testdata/run3`. Its public
+a scripted sequence, a stub signed-out fetch (the sign-in page, the page, an error, or a page carrying a given
+collector host and data age, for the standby gate), a stub crontab, `LAB_DASH_REREAD_S=0` and `LAB_DASH_RECHECK_S=0`
+(1 for the delayed check), `LAB_DASH_HOST` and `LAB_DASH_STANDBY_AFTER_MIN` where a case needs them,
+scratch `LAB_DASH_CACHE` and `LAB_DASH_CONFIG`, and the collector on `testdata/run3`. Its public
 cases: the default with no setting (two list reads, no signed-out request, no share, `status` names the mode); a private
 space (shared public, deployed, never set private); a deploy that turns it private (shared public right after); a
-failed list (no deploy); a failed share (deployed, retried next run); a `HALT` left from the private mode (no deploy,
-the space still checked and shared public, never private; `resume`, then a deploy); `"visibility": "private"` in config.json (the guard runs, and halts on a
+failed share (deployed, retried next run); a `HALT` left from the private mode (no deploy,
+the space still checked and shared public, never private, and a space missing from the list not chased with a
+signed-out request because no deploy can follow; `resume`, then a deploy); `"visibility": "private"` in config.json (the guard runs, and halts on a
 public space); an invalid word (exit 2). Its private cases: a
 normal deploy; one "public" read then private twice (no halt, no deploy, set private, the triggering row logged); public
 twice (halt); `signed_in` then private (set private); public on every read (halt, no automatic resume after three
 verified runs, `resume`, then a deploy whose page carries the halt); the page served after a deploy (halt at once, no
 automatic resume); a failing share (`EXPOSED`, exit 1, retried every run until it works); the list failing while the
 page is served (halt); a space turned public between two unchanged runs (halt); a deploy that turns public 1 s later (the
-delayed check halts); a failed list (no deploy); a change 1 minute after a deploy (skipped by the 10-minute floor).
+delayed check halts); a failed list and a missing one (no deploy either way, and no halt); a change 1 minute after a
+deploy (skipped by the 10-minute floor).
+Its cases for a space outside the newest 50 (8 October 2026), all in the public mode: missing from the list and the
+page served to a signed-out request (deploys, one request made), the same from cron rather than `now` (where it
+wedged); missing and the sign-in bootstrap (shared public
+again, then deploys); missing and a failed request (deploys unverified, logged, and `status` explains the missing
+row); and the failed list, which used to skip and now deploys. Its standby cases (§3.5): the primary published 5
+minutes ago (nothing collected, nothing deployed, the line written once however many runs); the primary's data 95
+minutes old (taken over, logged); the page this box's own (the normal rules decide); the page unreadable, both as a
+failed request and as a page without the data (nothing deployed); a `standby_after_min` below the floor, from the
+environment and from config.json, and the private mode with a standby setting (the run refused, exit 2, nothing
+called), with the private mode on its own still running.
 
 What the guard cannot see: `spacesheep share --email` grants a person access while the space stays "private". Setting
 a space's visibility is the owner's call (AGENT.md); `update.sh` only keeps this dashboard's own space in the mode the
@@ -683,7 +720,76 @@ owner chose: public now, private only if config.json says so.
 
 `vis` is the list's word at this run's last check; the checks' own lines (public mode: a space found not public, with
 its row and the share's outcome; private mode: a visibility check with the space's row, the re-reads, a halt with the
-share's outcome; a resume) are logged as they happen.
+share's outcome; a resume; a standby box's `standby: …` lines, §3.5) are logged as they happen.
+
+### 3.5 Standby: a second box that publishes when the primary's page goes stale
+
+Everything about the dashboard lives on one machine — the checkout, the cron line, the spacesheep login, the deploy —
+so the machine that collects the lab is also the machine that has to be up. The lab lost power at about 18:16 on
+Wednesday 7 October 2026 and aifoundry2 came back at 14:49 on Thursday; for those 20 hours the page carried
+Wednesday's 17:50 data, and its STALE banner was all a reader got.
+
+**Opt-in, and nothing changes without it.** `"standby_after_min": <minutes>` in `~/.config/lab-dashboard/config.json`,
+or `LAB_DASH_STANDBY_AFTER_MIN` (which wins): a whole number, 90 or more. Anything else refuses the run (exit 2,
+logged), as an invalid visibility does — a box that was meant to stand by must not publish over the primary because
+its setting was mistyped. The floor is 90 because a healthy primary's page is routinely an hour old (it deploys on a
+change, else on the heartbeat, 60 minutes less 2 of slack, and the measured gaps have a p99 of 80): a standby set
+below that takes over from a live primary, and the two then take turns publishing, each from its own view of the lab.
+**The private mode with a standby setting refuses the run too**: the gate's signed-out read of a private space is the
+sign-in page, so the box would stand by for ever — and because standing by returns before the visibility check, its
+runs would stop checking the space as well, against §3.2's rule that every run checks it. The primary has no setting
+and never stands by, and `update.sh now` never stands by either: it is a person's run.
+
+**The gate.** A cron run takes the run lock and collects the lab as every run does (`collect.py`), then reads the
+live page `https://<uuid>.spacesheep.app/` signed out (`anon_fetch`, the request the private guard makes) and takes
+from it the collector host and `generated_ms` that `page/render.py` embeds as `const D`. The 400 KB `anon_fetch` reads
+does truncate the page (420 KB on 8 October 2026), but `const D` starts at about 93 KB and both fields are at the head
+of it. Then, before anything is rendered or deployed:
+
+| the live page says | the run |
+|---|---|
+| another machine, its data younger than the setting | stands by: collected, but nothing rendered or deployed, exit 0 |
+| another machine, its data that old or older | takes over, logging `standby: taking over: <host>'s data is <n> min old` |
+| this machine's own data, whatever its age | nothing to decide: the usual rules do (§3.2) |
+| nothing readable (the request failed, or the page carries no `generated_ms`) | stands by: the primary may well be publishing |
+| no space is configured | stands by: there is no page to stand by for |
+
+The log stays quiet: a standby line is written at most once an hour, and at once when the reason changes
+(`~/.cache/lab-dashboard/standby.last` holds the last reason and when it was written), because cron reaches the gate
+every 10 minutes and a box that is standing by has nothing else to say.
+
+**A failover, end to end.** The standby stands by while the primary publishes, which it does at least every heartbeat
+(60 minutes; the measured gaps have a p99 of 80 minutes). The primary stops — power, a hang, a wedged deploy — and
+`standby_after_min` (90, the floor, is also the sensible value: above the heartbeat, above the p99, below two hours of
+silence) passes; the standby's next cron run deploys what it has been collecting all along. From then on the live page is its own, so
+the gate has nothing to weigh and it keeps publishing on the usual rules. When the primary comes back, its own
+`deploy.state` is hours old, so its first run deploys at once; the standby's next run finds another machine's fresh
+data on the page and stands down by itself. Nothing coordinates the two but the published page, and neither box reads
+the other's state.
+
+**What a standby box needs**, besides the setting: the same checkout — a real one, not an rsynced copy, because
+`collect.py` reads `tools/lab/et-lab-health` from it and `page/render.py` the two files under
+`docs/reports/sources/`; `~/.config/lab-dashboard/space` with the same uuid; a deploy-capable `spacesheep login` on
+that box, which is the owner's call (spacesheep has no per-space key, and a key on a lab box is readable by the lab),
+kept in `~/.config/lab-dashboard/spacesheep/config.json` when the box's own key is streams-only (`update.sh` then points
+the CLI there with `SPACESHEEP_CONFIG_DIR`, and the box's own key and streams stay as they are); and the cron line
+(`update.sh --install-cron`). aifoundry3 has been the standby since 8 October 2026, with a copy of aifoundry2's key
+(the owner's call: "Just reuse the key from aifoundry2").
+
+**What it does not fix.** A machine the standby cannot reach by ssh is `UNREACHABLE` on its page, so a standby's view
+of the lab can be poorer than the primary's (each box probes itself locally and the others over ssh) — the page names
+the collector it came from, which is also what the gate keys off. **History stays whole because a standby collects
+on every run**, like the primary (the first version of the gate, 8 October 2026, returned before `collect.py`, and a
+standby's page would have come up with an empty grid, timeline and session chart, since `history.jsonl` is per box,
+§1.7, §2.7). Its history and its view of each machine's boots and outages are therefore current when it takes over;
+the cost is a second read-only sweep of the three machines every 10 minutes, 1 to 4 s of wall time under the same
+`nice`, `ionice` and timeouts. History is still per box: what the primary saw while the standby published stays in
+the primary's file, and the page shows the history of whichever box publishes it. The gate also weighs a timestamp from the page against
+the local clock, so a box whose clock is more than `standby_after_min` ahead of real time — an unstepped RTC after the
+kind of power cut this exists for — reads a fresh page as stale and takes over; the floor is the margin, and NTP is
+the real answer (a clock that is behind is safe: the page reads as younger than it is, and the box stands by). A
+standby costs nothing against the account's deploy budget while it stands by: it deploys only when the primary has
+gone quiet.
 
 ---
 
