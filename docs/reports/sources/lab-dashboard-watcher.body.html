@@ -1,0 +1,135 @@
+<style>
+main>p,main>ul,main>ol,main>h1,main>h2,main>.links,main>.loops,main>.watch{max-width:900px}
+.crumb{font-size:.92rem;margin:0 0 10px}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:14px 0 6px}
+.links a{display:block;border:1px solid var(--axis);border-radius:6px;padding:9px 12px;background:var(--surface);color:inherit;text-decoration:none}
+.links a b{display:block}.links a span{font-size:.86rem;color:var(--ink-2)}
+.links a:hover,.links a:focus-visible{border-color:var(--c1)}
+.tl{width:100%;max-width:900px;border-collapse:collapse;margin:8px 0 14px;font-size:.93rem}
+.tl th,.tl td{padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+.tl td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.tl tr.bad td:last-child{color:var(--bad)}
+.tl tr.ok td:last-child{color:var(--ok)}
+.tblwrap{overflow-x:auto;max-width:900px}
+.loops{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:12px;margin:12px 0 8px}
+.loop{border:1px solid var(--axis);border-radius:6px;padding:10px 12px;background:var(--surface)}
+.loop .lt{font-size:.74rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
+.loop.bad .lt{color:var(--bad)}
+.loop ol{list-style:none;margin:8px 0 4px;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.loop li{border:1px solid var(--axis);border-radius:999px;padding:3px 10px;font-size:.88rem;background:var(--page)}
+.loop li+li::before{content:"→";margin-right:6px;color:var(--ink-2)}
+.loop.bad li.k{border-color:var(--bad)}
+.loop .back{font-size:.86rem;color:var(--ink-2);margin:4px 0 0}
+.watch{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px;margin:12px 0 10px}
+.watch section{border:1px solid var(--axis);border-radius:6px;padding:10px 13px;background:var(--surface)}
+.watch h3{margin:0 0 4px;font-size:1rem}
+.watch .where{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--axis);border-radius:999px;padding:1px 8px;color:var(--ink-2);margin-bottom:6px}
+.watch p{margin:4px 0;font-size:.93rem}
+.watch .file{font-size:.82rem;color:var(--ink-2)}
+.foot{margin-top:22px;font-size:.92rem}
+</style>
+
+<p class="crumb" data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">← AI Foundry lab dashboard</a> › <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a></p>
+
+<h1>The lab dashboard froze for 21 hours: why, and what watches it now</h1>
+<p class="byline">Thursday 8 October 2026 · found and fixed from the maintainer's own machine and on aifoundry2 and
+aifoundry3 · every change is a commit in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">the repository</a></p>
+
+<p class="lede">From Wednesday 17:50 to Thursday 15:32 (PDT) the dashboard showed the same data. aifoundry2, the only
+machine that publishes it, was off for 20 hours after the lab's power cut. When it came back, its check that the page
+is still public could not find the page among the 50 newest spaces that spacesheep lists, so it skipped every publish,
+and only a publish could have put the page back on that list. Now that check never blocks a publish, a keeper on the
+publishing machines repairs the collector, aifoundry3 takes over when aifoundry2 goes quiet, and a watchdog outside
+the lab alerts the maintainer.</p>
+
+<div class="links">
+  <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard"><b>Lab dashboard</b><span>Machines, cards, people, live.</span></a>
+  <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog"><b>Worklog</b><span>What was done in the lab, by day; this page is under Thursday 8 October.</span></a>
+  <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/tools/lab/dashboard/README.md"><b>The collector's manual</b><span>Commands, cadence, the keeper, the standby.</span></a>
+  <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/tools/lab/dashboard/DESIGN.md"><b>Its design</b><span>The data model, the visibility check and why.</span></a>
+</div>
+
+<h2 id="what-happened">1. What happened</h2>
+<div class="tblwrap"><table class="tl">
+<thead><tr><th>When (PDT)</th><th>What</th></tr></thead>
+<tbody>
+<tr><td>Wed 7 Oct 17:50</td><td>The last data. aifoundry2's collector reads the three machines every 10 minutes and publishes on any change, or at least every hour.</td></tr>
+<tr class="bad"><td>about 18:16</td><td>A power cut across the lab. aifoundry1 and aifoundry3 came back by themselves; aifoundry2 stopped at its BIOS screen.</td></tr>
+<tr class="bad"><td>about 19:07</td><td>The dashboard drops out of the 50 most recently updated spaces of its owner's account, as other pages keep being published.</td></tr>
+<tr><td>Thu 8 Oct 14:28</td><td>aifoundry2 is back (it restarted once more at 14:50).</td></tr>
+<tr class="bad"><td>14:32 to 15:22</td><td>Six collector runs read all three machines without trouble, then skip the publish: <code>visibility unverified: list missing</code>.</td></tr>
+<tr><td>15:29</td><td>The unchanged page is published once from outside the lab, which makes it the newest space again.</td></tr>
+<tr class="ok"><td>15:32</td><td>aifoundry2 publishes fresh data. The dashboard is current again.</td></tr>
+<tr class="ok"><td>17:24 to 17:28</td><td>The keepers start on aifoundry2 and aifoundry3, and the standby is tested: aifoundry3 publishes once (17:27, all three machines answering), then hands back to aifoundry2 (17:27).</td></tr>
+</tbody></table></div>
+
+<h2 id="why">2. Why it could not recover by itself</h2>
+<p>Every run first makes sure the page is still public, because a publish can change a page's visibility. It did that
+by finding the page in <code>spacesheep list</code>, which returns only the 50 most recently updated spaces of the
+account, and it treated a page it could not find as "cannot verify: do not publish".</p>
+<div class="loops" role="img" aria-label="Normally the dashboard is published at least hourly, so it is always among the newest spaces and the check finds it. After 20 hours without a publish it was off the 50-space list, the check skipped the publish, and skipping kept it off the list.">
+  <div class="loop"><div class="lt">Normally</div>
+    <ol><li>publish, at least hourly</li><li>the page is among the newest spaces</li><li>the check finds it</li></ol>
+    <p class="back">↻ and the next run publishes again</p></div>
+  <div class="loop bad"><div class="lt">After 20 hours without a publish</div>
+    <ol><li class="k">about 60 other spaces updated</li><li class="k">the page is off the 50-space list</li><li class="k">the check skips the publish</li></ol>
+    <p class="back">↻ and skipping keeps it off the list</p></div>
+</div>
+<p>The machine was fine, and so were cron, the credential and the network: the history page, which aifoundry2
+publishes the same way without that check, kept publishing all afternoon. The loop needs a long silence to start,
+which is why it never showed before: on a normal day the dashboard is published every hour and stays near the top.</p>
+
+<h2 id="what-watches-it-now">3. What watches the dashboard now</h2>
+<div class="watch">
+  <section><span class="where">update.sh · both machines</span>
+    <h3>The check no longer blocks a publish</h3>
+    <p>A page the list does not show is checked directly, with a signed-out request. Whatever the check cannot verify,
+    the run publishes anyway: the page is meant to be public, so publishing exposes nothing, and the next run, with
+    the page now on the list, checks again. The private mode, for a page that must stay private, is as strict as before.</p>
+    <p class="file"><code>tools/lab/dashboard/update.sh</code>; tested by <code>tests/guard_test.sh</code></p></section>
+  <section><span class="where">aifoundry2 · aifoundry3</span>
+    <h3>A keeper beside each collector</h3>
+    <p>A small user service that comes back by itself after a reboot. Every minute it checks its machine's collector
+    (its cron line, the last run and publish, the page's age, a halt) and sends one status line to the live stream
+    <code>aifoundry-dash/&lt;machine&gt;</code>. It puts back a missing cron line and starts the collector when it has not
+    run for 25 minutes or the page is 90 minutes old. It never clears a halt, which is a person's step, and never
+    touches a card.</p>
+    <p class="file"><code>tools/lab/dashboard/keeper.py</code></p></section>
+  <section><span class="where">aifoundry3</span>
+    <h3>A standby collector</h3>
+    <p>The same collector runs on aifoundry3 every 10 minutes and stands by while aifoundry2 publishes. When the page's
+    data is 90 minutes old, aifoundry3 publishes instead, and it hands back by itself once aifoundry2's first run after
+    its return has published. "This version", at the bottom of the dashboard, names the machine that collected.</p>
+    <p class="file"><code>"standby_after_min": 90</code> in its configuration</p></section>
+  <section><span class="where">outside the lab</span>
+    <h3>A watchdog that reads the page</h3>
+    <p>On the maintainer's own machine, every 15 minutes, it reads the dashboard signed out, the way a visitor does, and
+    the machines' live streams. When the data is more than 90 minutes old it works out why (a machine off, or on but
+    not publishing), tries the repairs that need nobody, and alerts the maintainer, who can approve the rest from his
+    phone.</p></section>
+</div>
+<p><b>The history page now publishes every 15 minutes instead of every 5.</b> The owner's account can publish 400 times
+a day in all, and the history page alone took about 288 of them; on 7 October the limit ran out in the afternoon,
+which stops the dashboard too. The history page still draws each machine's live readings while it is open.</p>
+
+<h2 id="when-it-is-stale">4. When the dashboard says its data is old</h2>
+<ul>
+  <li>A red banner at the top says how old the data is. The keeper on the collecting machine restarts its collector
+  within minutes, aifoundry3 takes over after 90 minutes, and the maintainer is alerted.</li>
+  <li>If aifoundry2 and aifoundry3 are both off, nothing can publish: the page keeps its last data, greyed, and the
+  banner says so. Tell the maintainer in <code>#community-lab</code>.</li>
+  <li>For the maintainer, on the collecting machine: <code>tools/lab/dashboard/update.sh status</code> (the last runs, the
+  last publish, a halt) and <code>tools/lab/dashboard/keeper.py status</code> (what the keeper sees). The
+  <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/tools/lab/dashboard/README.md">manual</a> has the rest.</li>
+</ul>
+
+<h2 id="the-changes">5. The changes</h2>
+<div class="tblwrap"><table class="tl">
+<thead><tr><th>Commit</th><th>What</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/yaroslavvb/et-soc1-prototyping/commit/718b246e">718b246e</a></td><td>The visibility check no longer blocks a publish in the public mode; the standby setting, and the dashboard's own key folder for a box whose key cannot publish; the keeper and its tests (80 and 61 checks, run on aifoundry3); the Worklog's Thursday row and its way back up to the dashboard; the back-link rule (AGENT.md §8.7); the history page every 15 minutes</td></tr>
+<tr><td>the next commit</td><td>This page, its source and its row in <code>docs/reports/MIRROR.md</code></td></tr>
+</tbody></table></div>
+
+<p class="foot" data-ss-id="foot-worklog" data-ss-react="off">← Back to the <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a> of the <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">AI Foundry lab dashboard</a></p>
+</main>
