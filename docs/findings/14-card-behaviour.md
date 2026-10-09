@@ -53,6 +53,12 @@ governor sections and the card table below). Its Master Minion ran the validatio
 a hang. (7) On aifoundry2 two DRAM lines that differ only in PA[17], a column bit in the L50 map, read as a row
 conflict (E57; "Traps").
 
+**Updated 2026-10-09.** **aifoundry2's card is back in service** since that afternoon: the stalling 120 mm fan clipped
+under the card was replaced by a two-fan 92 mm PCI-slot bracket in the slot beside it, and the card now idles at 51 °C
+and 23.2 W, levels off at 62–63 °C under the 8-minute sgemm burst test and settles at 75 °C and 59 W under 10 minutes
+of full load, with no stop ("aifoundry2's card back in service: a two-fan bracket at the card", below). So all four
+cards are in service. Long full-load runs still keep a temperature stop: the margin is 1.2 times today's cooling.
+
 **Updated 2026-10-07.** **aifoundry2's card is out of service again** since 16:46 PDT that day: idle, a day after the
 6 October fan fix, the cooling at the card got worse (at 03:55, and again at about 14:25) and the card ran away to a
 138 °C mean and dropped off the PCIe bus, as on 2 October ("aifoundry2's card ran away again at idle", below). So three
@@ -346,8 +352,9 @@ Updated 2026-09-25: aifoundry1's two cards answer since 15:02 that day, so there
 releases; three are usable for measurement, since aifoundry1's card 0 overheats and takes nothing sustained (amendment
 A4). Updated 2026-10-02: card 0 is usable again (its fan was replaced) and aifoundry2's card was out of service (its
 cooling failed) until 2026-10-06, when its fans were set to full speed: all four cards were in service again. Updated
-2026-10-07: aifoundry2's card is out of service again since 16:46 that day (below). Before using a card for
-anything comparative, read its governor configuration. Two read-only commands:
+2026-10-07: aifoundry2's card was out of service again from 16:46 that day. Updated 2026-10-09: a two-fan 92 mm
+bracket was fitted at that card and it is back in service, so all four cards are in service again (below). Before
+using a card for anything comparative, read its governor configuration. Two read-only commands:
 
 ```
 gcc -O2 -I/opt/et/include -o etcfg tools/etcfg/etcfg.c && ./etcfg   # the driver's view: TDP, boot clock, shire mask, cache sizes
@@ -372,8 +379,8 @@ Take the card lock before starting such a tool and the collector stays off the c
 | TDP the driver reports | 65 W | 65 W | 65 W | 65 W |
 | **TDP the firmware uses** | **65 W** | **0 W**, set at every boot (below) | 65 W | 65 W |
 | Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C. In this chassis the die never read below 65 °C in the version-3 campaign (336,070 samples, 25–26 Sep), and over DV2's 20 h validation (28–29 Sep) it idled at 71–76 °C in 327 of 378 cycles, so it runs at 600 MHz unless it starts cold | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry); its governor is latched by the zero TDP: no governor line in its trace since 25 Sep (E41 TEL-G), and its throttle residencies all 0 after 2 d 8 h up (28 Sep; E51, development); it makes no thermal step at any temperature | firmware DVFS; **idles at 300 MHz** (`low_power`); its 0.21.x governor acts only while a kernel runs (firmware source, 27 Sep) | **600 MHz in all 318,667 samples of the three-card check (25–26 Sep)**, and in the SP's own minimum and maximum, although 9,461 were busy at 45–65 W at 64 °C or less and the mean reached 88 °C: its governor does not raise the clock (active power management off, or latched; asked the lab). Its build steps 50 MHz between 300 and 700 MHz, so it could never reach 800 |
-| Idle | **about 64 °C and 27 W from 6 Oct** (fans at full speed) until 03:55 on 7 Oct, when the cooling at the card got worse; out of service since 16:46 on 7 Oct; before 6 Oct 31–36 W at 73–80 °C (27 W cold); on the night of 28–29 Sep (DV2's idle watch) 73–75 °C and 31.4–32.5 W at 20:45–21:09 and 00:11–01:00 PDT, 59 °C and 25.4–25.6 W at 22:12 and 23:15–23:18 (idle cycles only; its heating sessions ran 22:13–23:56); over the whole watch, to 16:48 on 29 Sep, 59–76 °C, 71–76 °C in 327 of 378 cycles, and never below 65 °C after 23:18 | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz; 49 °C (hottest sensor 53 °C) and 19.6 W after its fan was replaced (2 Oct) | 33–35 W at 600 MHz and 57–62 °C |
-| Use it for | **nothing: out of service since 7 Oct 2026** (16:46 PDT; below), as from 2 to 6 Oct; in service 6–7 Oct with its fans at full speed; before that the main card | compare switching power over idle, never absolute watts | anything since its fan was replaced on 2 Oct 2026 (52–53 °C under sgemm bursts); from 25 Sep until then **nothing sustained: it overheated** (below) | anything; it peaked near 71 °C under the campaign's smoke blocks |
+| Idle | **51 °C and 23.2 W since 9 Oct** (a two-fan 92 mm bracket at the card); about 64 °C and 27 W from 6 Oct until 03:55 on 7 Oct, when the cooling at the card got worse, and out of service from 16:46 on 7 Oct to 9 Oct; before 6 Oct 31–36 W at 73–80 °C (27 W cold); on the night of 28–29 Sep (DV2's idle watch) 73–75 °C and 31.4–32.5 W at 20:45–21:09 and 00:11–01:00 PDT, 59 °C and 25.4–25.6 W at 22:12 and 23:15–23:18 (idle cycles only; its heating sessions ran 22:13–23:56); over the whole watch, to 16:48 on 29 Sep, 59–76 °C, 71–76 °C in 327 of 378 cycles, and never below 65 °C after 23:18 | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz; 49 °C (hottest sensor 53 °C) and 19.6 W after its fan was replaced (2 Oct) | 33–35 W at 600 MHz and 57–62 °C |
+| Use it for | **anything since 9 Oct 2026**, with the two-fan bracket at the card (below), keeping a temperature stop on long full-load runs; out of service 7–9 Oct and 2–6 Oct; in service 6–7 Oct with its fans at full speed; before that the main card | compare switching power over idle, never absolute watts | anything since its fan was replaced on 2 Oct 2026 (52–53 °C under sgemm bursts); from 25 Sep until then **nothing sustained: it overheated** (below) | anything; it peaked near 71 °C under the campaign's smoke blocks |
 | Version-3 campaign | yes | yes | excluded (amendment A4) | yes |
 
 The hosts differ too. Host-side timing (launch, synchronisation, copies, compile times) is not comparable between
@@ -570,6 +577,8 @@ The setting lives in the BIOS: a BIOS update or a CMOS reset puts the Normal cur
 
 ## aifoundry2's card ran away again at idle (7 October 2026), and is out of service
 
+**Back in service since 9 October 2026, with a two-fan bracket at the card (the next section).**
+
 **Out of service since Wed 7 October 2026, 16:46 PDT.** A day after the fan fix the idle card ran away and dropped off
 the PCIe bus exactly as on 2 October. The cause is the cooling at the card, not the card. From the live collector's
 records (`docs/reports/data/2026-10-07-idle-runaway-aifoundry2/`, `analyze.py`; the page
@@ -604,7 +613,39 @@ records (`docs/reports/data/2026-10-07-idle-runaway-aifoundry2/`, `analyze.py`; 
 
 **To bring it back:** fix the cooling at the card on site, then do the full reset as root (the cold reboot from
 2 October, above); a warm reboot or a slot reset leaves it off the bus. Then watch it: after a reset it looks healthy for
-about an hour while it heats, and this time the trouble began 12 hours in.
+about an hour while it heats, and this time the trouble began 12 hours in. Brought back on 8 October at 14:47, the idle
+card crept up from about 71 °C and ran away again at 19:36–19:49 (a 138 °C mean, 134 W) and stopped answering. The fan
+under the card was found stalling and replaced on 9 October (the next section).
+
+## aifoundry2's card back in service: a two-fan bracket at the card (9 October 2026)
+
+On Friday 9 October (14:55–about 15:17 PDT, on site) the 120 mm fan clipped under aifoundry2's card, which had been
+stalling since 7 October, was taken out, and a two-fan 92 mm PCI-slot bracket was fitted in the slot beside the card:
+one Pano-mounts fan (3,000 RPM, 3-pin) and a Cooler Master SickleFlow 92 (650–2,300 RPM, 4-pin), which replaced the
+bracket's second fan because its cable was longer. The card is passive, and the bracket blows straight across its
+heatsink. The host was booted at 15:07, before the bracket was back in, and in those nine minutes the idle card heated
+by about **4.4 °C a minute**, from 44 to 87 °C (21.6 to 40.8 W): **never power this card without the bracket.** With the
+fans on it fell to 51 °C by 15:24.
+
+Measured that afternoon with the 6 October scripts, unchanged but for their folders
+(`docs/reports/data/2026-10-09-fan-swap-aifoundry2/`, [the 9 October page](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-9-october)):
+
+- **Idle** (15:24–15:36, nobody holding the card): 51 °C and 23.2 W, against aifoundry3's twin card at 53 °C and 24.3 W
+  in the same minutes. On the afternoon of 8 October this card idled at 71 °C and 30.8 W.
+- **The 8-minute sgemm burst test** (15:36:44–15:44:50): 44 bursts, every one exit 0; the die went from 49 to 63 °C and
+  **levelled off at 62–63 °C**. On 6 October the same test went from 66 to 76 °C and was still climbing at the end.
+- **The heavy run** (`randn 32 600 1`, the 21 September protocol, 32 minions per shire): it ran its **full 600 s** with
+  no stop and settled at **75 °C and 59 W**; three minutes after it the die read 54 °C. On 6 October the same run reached
+  the 90 °C cap after 37 s, and on 21 September after 19–27 s. All 1,584 launch records report `ok`, and neither the
+  driver nor the root port counted an error.
+- **The card itself is unchanged:** firmware 1.3.1, the firmware's DVFS at 600 MHz in about 99% of samples with brief
+  steps to 700–800 MHz, and no driver or PCIe errors anywhere in the afternoon.
+- **The margin** (a one-node steady state with the 7 October leakage law, P = 14.39 + 1.836·e^(0.0308·T) W; model
+  values): the cooling is 0.68 °C/W from die to air, the slope between the idle and full-load plateaus. The idle card
+  has no resting temperature at all from 1.26 °C/W — 1.9 times worse cooling than today's — and under sustained full
+  load from 0.81 °C/W, 1.2 times worse; the afternoon of 8 October works out to 1.18 °C/W. So the card is in service,
+  but **long full-load runs keep a temperature stop** (85–90 °C), as the lab's scripts already do: 1.2 times is not
+  much margin, and nothing on the card stops a runaway ("Nothing limits the die's temperature", above).
 
 ## Traps that cost time here
 

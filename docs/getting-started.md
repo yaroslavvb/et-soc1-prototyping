@@ -8,7 +8,7 @@ This page covers everything needed to pick the work up somewhere else: clone, co
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page, [`AGENT.md`](../AGENT.md) (the entry point for an agent) and `CLAUDE.md` carry the context.
 
-## Where things stand (2026-10-07)
+## Where things stand (2026-10-09)
 
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
@@ -17,9 +17,32 @@ Claude session scratchpad, which every boot clears: the power cycle of 30 Septem
 on all three machines, and about 19 GB of our agents' working files on aifoundry2 with it
 ([`AGENT.md`](../AGENT.md) §7, "Working files").
 
-- **The lab, 7 October.** aifoundry2's card is **out of service** again, since 16:46 PDT: run nothing on it; the
-  machine itself is up and keeps the git checkout. After the 6 October fix (every fan at full speed; the card back on
-  the bus at 16:05 that day) the idle card held at 63–69 °C and 27–30 W through the night. At 03:55, with the host
+- **The lab, 9 October.** aifoundry2's card is **back in service** (the owner's call, posted in the lab's
+  #community-lab at 16:34 PDT after the afternoon's tests). On site between 14:55 and about 15:17 the 120 mm fan
+  clipped under the card, stalling since 7 October, was taken out, and a two-fan 92 mm PCI-slot bracket was fitted in
+  the slot beside the card: one Pano-mounts fan (3,000 RPM, 3-pin) and a Cooler Master SickleFlow 92 (650–2,300 RPM,
+  4-pin). The card is passive, and the bracket blows straight across its heatsink. The host was booted at 15:07, before
+  the bracket was back in, and in those nine minutes the idle card heated by about 4.4 °C a minute, 44 → 87 °C:
+  **never power it without the bracket.** The tests were the 6 October ones with only their folders changed. Idle:
+  51 °C and 23.2 W, against aifoundry3's twin card at 53 °C and 24.3 W in the same minutes, where on the afternoon of
+  8 October this card idled at 71 °C and 30.8 W. The 8-minute sgemm burst test levels off at 62–63 °C (6 October:
+  66 → 76 °C, still climbing). The heavy run (`randn 32 600 1`, the 21 September protocol, 32 minions per shire) ran
+  its full 600 s and settled at 75 °C and 59 W with no stop, where on 6 October it reached the 90 °C cap after 37 s
+  and on 21 September after 19–27 s; all 1,584 launches report ok. No driver or PCIe errors, and the card itself is
+  unchanged: firmware 1.3.1, the firmware's DVFS at 600 MHz in about 99% of samples with brief steps to 700–800 MHz.
+  The margin, by a one-node steady-state model with the 7 October leakage law (P = 14.39 + 1.836·e^(0.0308·T) W):
+  the cooling is 0.68 °C/W die to air, and the idle card has no resting temperature from 1.26 °C/W (1.9 times worse
+  cooling) or, under sustained full load, from 0.81 °C/W (1.2 times). So the card is in service, but **long full-load
+  runs keep a temperature stop** (85–90 °C), as the lab's scripts already do
+  ([the 9 October page](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-9-october),
+  `docs/reports/data/2026-10-09-fan-swap-aifoundry2/`). On 8 October, after the lab lead brought aifoundry2 back at
+  14:47, the idle card had crept up from about 71 °C and run away again at 19:36–19:49 (a 138 °C mean, 134 W) and
+  stopped answering. The new-user brief, [`lab-start/START.md`](lab-start/START.md), is at its thirteenth edition:
+  card order aifoundry3, then aifoundry2 again, then aifoundry1's card 1 and its card 0, as in its tenth edition of
+  6 October.
+- **The lab, 7 October.** aifoundry2's card was **out of service** again from 16:46 PDT until 9 October (back in
+  service, above); the machine itself stayed up and kept the git checkout. After the 6 October fix (every fan at full
+  speed; the card back on the bus at 16:05 that day) the idle card held at 63–69 °C and 27–30 W through the night. At 03:55, with the host
   idle and the host's own sensors (CPU, NVMe, network chip) unchanged, the cooling at the card got worse in one step:
   64 → 78 °C by 04:50; by the 2 October heat model, the air reaching the card went from about 39–42 °C to about
   46 °C. It held about 75 °C through the morning, crept up after noon, got worse again at about 14:25, and was at
@@ -37,14 +60,15 @@ on all three machines, and about 19 GB of our agents' working files on aifoundry
   PMIC alarm's safe state never moves the PLL (fixed upstream in `e024210bc`, 5 Sep 2024), and nothing calls
   `pmic_force_shutdown()` ([findings/14-card-behaviour.md](findings/14-card-behaviour.md), "The clock governor, by
   firmware build"); the current upstream code (`836a4ab`, `check_power_throttle_conditions()`) skips the thermal
-  check altogether while the card is idle. To bring the card back: first
-  check the cooling at the card on site, then the full reset as root (the cold reboot that power-cycles the slot,
+  check altogether while the card is idle. Bringing the card back needed the cooling at the card checked on site, then
+  the full reset as root (the cold reboot that power-cycles the slot,
   [findings/14-card-behaviour.md](findings/14-card-behaviour.md)); a warm reboot or a slot reset leaves it off the
-  bus. After a full reset it looks healthy for about an hour while it heats, so watch it
+  bus, and after a full reset the card looks healthy for about an hour while it heats. That look came on 9 October,
+  and the fan under the card was stalling (first bullet)
   ([the 7 October page](https://spacesheep.dev/@yaroslavvb/aifoundry2-idle-runaway-7-october),
   `docs/reports/data/2026-10-07-idle-runaway-aifoundry2/`). The new-user brief,
-  [`lab-start/START.md`](lab-start/START.md), is at its eleventh edition: card order aifoundry3, then aifoundry1's
-  card 1, then its card 0, never aifoundry2, as in its ninth edition of 2 October.
+  [`lab-start/START.md`](lab-start/START.md), went to its eleventh edition that day: card order aifoundry3, then
+  aifoundry1's card 1, then its card 0, never aifoundry2, as in its ninth edition of 2 October.
 - **The lab, 6 October.** aifoundry2's card was **back in service** from 6 to 7 October (out again since 7 October,
   above). Every fan in its BIOS (Smart Fan 6) now runs at full speed, so the case fans no longer slow down when the
   host's CPU idles. Idle, the card held at about 64 °C and 27 W after the fix (on 2 October it ran away to 138 °C); the
@@ -126,7 +150,7 @@ on all three machines, and about 19 GB of our agents' working files on aifoundry
   - **NV (E54)**, the owner's NoC validation of Q63's voltage explanation: its predictions are frozen and aifoundry3
     was probed read-only (NoC at 485 mV, 400 MHz), but its first voltage write has not run: the session's permission
     check refused it, so it waits for the owner. Its validation is on aifoundry2, after development on aifoundry3
-    (`tools/claims-v3/nv/`); aifoundry2's card is out of service since 7 October 2026 (first bullet).
+    (`tools/claims-v3/nv/`); aifoundry2's card is back in service since 9 October 2026 (first bullet).
   - **The lab.** aifoundry1 got four of the lab report's fixes at 20:51 PDT on 28 September (owner-approved; logged
     on the host); the other items wait for the owner (`reports/TODO.md`, part 0). aifoundry1's `build/sparsity` was
     rebuilt with the g3log fix. `et-lab-health` rev 3 and `et-reset` were written then; they are installed on all
@@ -136,7 +160,7 @@ on all three machines, and about 19 GB of our agents' working files on aifoundry
     write), part B (`lib.sh`, which the heat-placement lock holds) and part C (tau on aifoundry2 after its amendment, and
     the open results).
 - **aifoundry2 runs kernels again: its card was restored at 08:32 PDT on 28 September** (owner-approved; since
-  7 October 2026 its card is out of service again, first bullet). Its Master Minion had hung at 02:50:53 PDT during
+  9 October 2026 its card is in service again, first bullet). Its Master Minion had hung at 02:50:53 PDT during
   E51's development session p6041: a heater launched 0.6 s after the previous one, as the governor's idle reset took
   the clock from 800 to 600 MHz, ran its short calibration kernel and then never completed the next kernel, and every
   launch after it failed with "Couldn't use the HPSQ. Perhaps the Master Minion is hanged?"; the cause is not
@@ -273,7 +297,7 @@ on all three machines, and about 19 GB of our agents' working files on aifoundry
   `findings/19-observability-and-the-unmetered.md`, heat per millimetre in `findings/20-heat-per-mm.md`, the traps in
   `findings/14-card-behaviour.md`). The energy manual's rebuild, in order: `findings/04-artifacts.md`, A16; the
   reviews and validations of 24–26 September: `findings/04-artifacts.md` and `reports/data/2026-09-24-report-review/`.
-- **Next:** tau (E58) on aifoundry2 once its card is back in service (out of service since 7 October 2026), after the
+- **Next:** tau (E58) on aifoundry2, whose card is back in service since 9 October 2026, after the
   amendment its `PREREG.md` requires for that card (a heat step, its own start temperature, a D burst that does not
   starve its sampler and its own calibration, written before any aifoundry2 data); NV's first write and validation,
   the owner's; and, for DV2's two questions, a new pre-registered run whose heating sessions start from a cooler rest
@@ -331,11 +355,12 @@ aifoundry2 are in [lab-access.md](lab-access.md), "How access works" and "First 
 `/opt/et/bin` is on PATH in login shells on every machine since 25 September; nothing to add to `.bashrc`.
 
 Four cards on three machines: aifoundry2 (the git checkout, `~/claude/et-soc1-prototyping`; its card, the main card
-until 2 October, is **out of service since 7 October 2026**, as it was from 2 to 6 October: idle, even with every fan
-at full speed since 6 October, it heats until it drops off the PCIe bus), aifoundry3 (held at 600 MHz; compare
+until 2 October, is **back in service since 9 October 2026**, when a two-fan 92 mm bracket was fitted at the card:
+it idles at 51 °C and 23 W, where before it heated at idle until it dropped off the PCIe bus, and long full-load runs
+keep a temperature stop), aifoundry3 (held at 600 MHz; compare
 switching power over idle, never absolute watts) and aifoundry1's two
 cards (select one with `ET_DEVICES=<n>` and its lock, `etsoc-shire<n>.lock`; card 0 overheated until its fan was
-replaced on 2 October 2026 and is back in service). So three cards are in service. Their firmware, clock policy, idle
+replaced on 2 October 2026 and is back in service). So all four cards are in service. Their firmware, clock policy, idle
 power and quirks, and how the hosts differ: AGENT.md §4 and
 [findings/14-card-behaviour.md](findings/14-card-behaviour.md), "The lab machines and their four cards are not
 interchangeable".
@@ -370,8 +395,8 @@ on aifoundry3, and `tools/claims-v3` queues that hold a card for hours.
 
 ## 3. Hello world
 
-On a lab machine, with nothing to build (aifoundry3 as written; aifoundry2's card is out of service since 7 October
-2026; on aifoundry1 put `ET_DEVICES=<N>` before `flock` and take `etsoc-shire<N>.lock`, or the program opens both
+On a lab machine, with nothing to build (aifoundry3 and aifoundry2 as written; on aifoundry1 put `ET_DEVICES=<N>`
+before `flock` and take `etsoc-shire<N>.lock`, or the program opens both
 cards):
 
 ```bash
@@ -380,7 +405,7 @@ et-who                                                     # nobody on the card?
 flock -n /run/lock/etsoc-shire0.lock timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie   # the card: under 1 s
 ```
 
-marty1885's et-testdrive, from the laptop (on aifoundry3: aifoundry2's card is out of service since 7 October 2026):
+marty1885's et-testdrive, from the laptop (on aifoundry3 or aifoundry2):
 
 ```bash
 rsync -a --exclude .git --exclude build external/et-testdrive/ aifoundry3:et-testdrive/
@@ -397,8 +422,8 @@ It should print "Hello World from hart N" from all 64 harts of shire 0. Add `-DE
 
 gp-sdk kernels (`kernels/`, `launchers/`) need gp-sdk pinned to `06605ab` plus
 `patches/lab-gp-sdk-06605ab.patch` on the lab machines. `patches/README.md` explains why. Without the patch, every
-kernel faults at PC `0x40`. The deploy script sets this up (on aifoundry3 here: aifoundry2's card is out of
-service since 7 October 2026; never while a `tools/claims-v3` queue runs on the host, [AGENT.md](../AGENT.md) §7):
+kernel faults at PC `0x40`. The deploy script sets this up (on aifoundry3 here; aifoundry2's card is back in
+service since 9 October 2026; never while a `tools/claims-v3` queue runs on the host, [AGENT.md](../AGENT.md) §7):
 
 ```bash
 scripts/deploy-lab-gpsdk.sh aifoundry3       # from the laptop: sources, patched gp-sdk, nice -j4 build (~10 s)
@@ -533,8 +558,8 @@ as [`findings/04-artifacts.md`](findings/04-artifacts.md), "Rebuilding the versi
 | Sparsity | `workloads/sparsity` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order (`workloads/sparsity/README.md`) | `docs/reports/data/2026-09-18-sparsity-aifoundry3` | `python3 workloads/sparsity/analyze.py DATA --embed HTML` (the three-card check through `--claims-v3`, by default) |
 | Ridge points | `scripts/ridge-points.py` | nothing: derived from the four 2026-09-18 reports | their four data directories, and the energy manual's `manual.json` | `python3 scripts/ridge-points.py --embed HTML` (`docs/findings/04-artifacts.md`, A19, gives the input chain) |
 
-- **Measuring.** Build on the machine with `scripts/deploy-lab.sh <host> workloads/<name>` (aifoundry3 or aifoundry1;
-  aifoundry2's card is out of service since 7 October 2026), or `scripts/deploy-lab-gpsdk.sh` for `kernels/`. Follow
+- **Measuring.** Build on the machine with `scripts/deploy-lab.sh <host> workloads/<name>` (aifoundry3, aifoundry2 or
+  aifoundry1), or `scripts/deploy-lab-gpsdk.sh` for `kernels/`. Follow
   the etiquette above, then copy the outputs back into a new dated directory under `docs/reports/data/`. The runs
   print JSON lines that the analysis scripts read. Workloads also run on the simulator with `--sysemu` (small sizes),
   which checks correctness but not speed.

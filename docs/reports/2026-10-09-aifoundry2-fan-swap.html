@@ -99,7 +99,7 @@ mjx-container[display="true"]{margin:0!important;text-align:left}
 <main>
 <p data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">← AI Foundry lab dashboard</a> › <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a></p>
 
-<p class="lede"><em>Covers Fri 9 Oct 2026 (week 41), 14:55–16:01 PDT: aifoundry2 in the AI Foundry lab at Studio 45. Written Fri 9 Oct 2026, about 16:07 PDT, on the Intel, from the live collectors on aifoundry2 and aifoundry3 (one reading every 5 s), today's test logs (10 readings a second in the heavy run), the fan controller, and photos taken during the swap.</em></p>
+<p class="lede"><em>Covers Fri 9 Oct 2026 (week 41), 14:55–16:01 PDT: aifoundry2 in the AI Foundry lab at Studio 45. Written Fri 9 Oct 2026, about 16:44 PDT, on the Intel, from the live collectors on aifoundry2 and aifoundry3 (one reading every 5 s), today's test logs (10 readings a second in the heavy run), the fan controller, and photos taken during the swap.</em></p>
 <style>
 .vz{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--ctx:#9b9a95;--grid:#e6e5e1;--axis:#8a8984;--ink:#0b0b0b;--ink2:#52514e;--band:rgba(110,110,105,.13);--shade:rgba(42,120,214,.08);--tipbg:#ffffff;--tipbd:#d6d5d0}
 @media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])) .vz{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--ctx:#7d7c77;--grid:#2c2c2a;--axis:#8f8e88;--ink:#ffffff;--ink2:#c3c2b7;--band:rgba(200,200,195,.10);--shade:rgba(57,135,229,.14);--tipbg:#242423;--tipbd:#3a3a38}}
@@ -131,7 +131,7 @@ figure.shot img{width:100%;height:auto;border-radius:6px;display:block}
 figure.shot figcaption{font-size:.86rem;opacity:.8;margin-top:5px}
 </style>
 
-<p><strong>The stalling fan behind aifoundry2's card is out. A two-fan 92 mm bracket now blows straight onto the card's heatsink, and the idle card holds at 51 °C and 23.2 W: 20 °C cooler than on Thursday, and 2 °C cooler than its twin on aifoundry3.</strong> The load tests from 6 October came out far better too. The 8-minute burst test levels off at 63 °C, where on 6 October it reached 76 °C and was still climbing. The heaviest workload settles at 75 °C, where on 6 October it hit the 90 °C stop in 37 seconds. At idle the card now has about twice the cooling it needs to stay out of the doom loop. Under long full-load runs the margin is thinner, so keep a temperature stop on those.</p>
+<p><strong>The stalling fan behind aifoundry2's card is out. A two-fan 92 mm bracket now blows straight onto the card's heatsink, and the idle card holds at 51 °C and 23.2 W: 20 °C cooler than on Thursday, and 2 °C cooler than its twin on aifoundry3.</strong> The load tests from 6 October came out far better too. The 8-minute burst test levels off at 63 °C, where on 6 October it reached 76 °C and was still climbing. The heaviest workload settles at 75 °C, where on 6 October it hit the 90 °C stop in 37 seconds. At idle the card now has about twice the cooling it needs to stay out of the doom loop. Under long full-load runs the margin is thinner, so keep a temperature stop on those. <strong>The card is back in service since 16:34, on the owner's call</strong>, and the lab's docs, dashboard and setup script say so.</p>
 <div class="kp" data-ss-id="kpis" role="group" aria-label="Key numbers">
 <div><b>51 °C</b><span>idle, mean of 34 sensors</span><em>Thu 8 Oct: 71 °C (−20)</em></div>
 <div><b>23.2 W</b><span>idle card power</span><em>Thu 8 Oct: 30.8 W</em></div>
@@ -323,7 +323,6 @@ figure.shot figcaption{font-size:.86rem;opacity:.8;margin-top:5px}
 <li><strong>What MV-SWPCIE21 is, and where the old 120 mm fan went.</strong> The bracket came from that frame. aifoundry3's card didn't change. aifoundry1's two cards each rose about 2 °C between 14:50 and 15:20 and held there. That is too little for a card that lost its fans, but it's worth a look.</li>
 <li><strong>Whether the bracket's second fan spins at full speed.</strong> Linux can't read its header (above).</li>
 <li><strong>How the full-load plateau holds over hours.</strong> Today's heavy run lasted 10 minutes, and the card was still creeping up by about a degree every few minutes at the end.</li>
-<li><strong>The lab's docs still mark aifoundry2's card out of service</strong> (<code>AGENT.md</code>, the start page and its scripted checks, <code>14-card-behaviour.md</code>, the dashboard). Putting it back is a lab-door edit.</li>
 </ul>
 <details>
 <summary><b>Sources and method</b></summary>

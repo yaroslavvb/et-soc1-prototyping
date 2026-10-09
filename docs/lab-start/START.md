@@ -7,11 +7,11 @@ lab's Tailscale network; they logged in as the lab's shared `root` once, only to
 as that account and started you; then they pasted one line. Ask them only for what only they can do: a yes before the
 first run on a card, the lab's Discord posts, and anything for the lab lead.
 
-Version of 8 October 2026, twelfth edition: the person creates their own account and starts Claude on the lab machine
-themselves; this brief is for that Claude, which never uses ssh or root. Access (a Tailscale invite) comes from the
-lab lead by direct message, never from #community-lab. aifoundry3's card and aifoundry1's card 1 run firmware 1.4.0
-since the lab lead's update of 7 October. aifoundry2's card is out of service again since 7 October (it was in service
-6–7 October); aifoundry1's card 0 is in service since 2 October. The current copy is `docs/lab-start/START.md` in
+Version of 9 October 2026, thirteenth edition: the person creates their own account and starts Claude on the lab
+machine themselves; this brief is for that Claude, which never uses ssh or root. Access (a Tailscale invite) comes from
+the lab lead by direct message, never from #community-lab. aifoundry3's card and aifoundry1's card 1 run firmware 1.4.0
+since the lab lead's update of 7 October. All four cards are in service: aifoundry2's again since 9 October, with a new
+two-fan bracket at the card, and aifoundry1's card 0 since 2 October. The current copy is `docs/lab-start/START.md` in
 https://github.com/yaroslavvb/et-soc1-prototyping; if this one is more than a month old, read that one instead.
 
 ## Where you are
@@ -57,7 +57,7 @@ Never do these; if one seems needed, stop and tell your person, who asks the lab
   (`ettelem --reset-ms`), firmware, driver or `/opt/et`;
 - use `sudo`, `su`, `root` or `ssh root@…`, or change any system setting. Your person used root once, to create this
   account; you never do;
-- use any card but card `<N>` on this machine; never aifoundry2's card, which is out of service (below);
+- use any card but card `<N>` on this machine;
 - run `/opt/et/bin/dev_mngt_service` or `et-powertop` on aifoundry1: they open both cards even with `-n`, and would
   break the run of whoever uses the other card;
 - `kill -9` a process that holds a card, or touch another user's processes or files;
@@ -70,13 +70,13 @@ Discord, and anything for the lab admin.
 
 | Card | Firmware | Clock | Idle | Watch for | Use it for |
 |---|---|---|---|---|---|
-| aifoundry2 | 1.3.1 | DVFS 600–800 MHz, usually 600 | rises with its temperature | **out of service since 7 October**, as from 2 to 6 October: even with its fans at full speed, the cooling at the card fails, it heats up even at idle (138 °C on 2 and 7 Oct) and drops off the PCIe bus | nothing, until this brief or the lab lead says it is back (after a reboot it looks healthy for about an hour while it heats up) |
+| aifoundry2 | 1.3.1 | DVFS 600–800 MHz, usually 600 | about 51 °C and 23 W since 9 Oct, when a two-fan bracket was fitted at the card | full load on every minion settles near 75 °C over 10 minutes, but nothing on the card stops a runaway: before the bracket it heated to 138 °C at idle and dropped off the PCIe bus | the card on aifoundry2 (back in service since 9 October) |
 | aifoundry3 | 1.4.0 since 7 Oct (1.3.1 before) | pinned at 600 MHz (NoC 400) at every boot, seen again on 8 Oct under 1.4.0; no thermal step under 1.3.1 | 23.6 W at 50 °C; about 25 W at 55–57 °C since 25 Sep | reaches 88 °C under load, nothing slows it; a demo service can use the card without the lock | the card on aifoundry3; switching power over idle, never absolute watts |
 | aifoundry1 card 1 | 1.4.0 since 7 Oct (1.2.0 before) | 600 MHz in every sample of 25–30 Sep, under 1.2.0; not rechecked since: read `mhz.minion` | 31–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | the first choice on aifoundry1 |
 | aifoundry1 card 0 | 1.4.1 | idles at 300 MHz; sgemm runs as fast as on card 1 | 19–20 W | needs `ET_DEVICES=0` and `etsoc-shire0.lock`; its fan was replaced on 2 Oct: 49 °C idle, 52–53 °C (peak 56 °C) under 8 minutes of sgemm | the second choice on aifoundry1 |
 
-Nothing on these cards limits the die temperature: aifoundry2's card reached 138 °C on 2 October and again on
-7 October, idle, and nothing tripped.
+Nothing on these cards limits the die temperature: aifoundry2's card reached 138 °C at idle on 2, 7 and 8 October,
+before its fan was replaced on 9 October, and nothing tripped.
 The lab dashboard shows every machine, its cards, who is using them and each card's temperature, live:
 https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard (click a machine's temperature panel for its last hour,
 day and week). Every host has driver 0.20.0 and RISC-V GCC 15.1 in `/opt/et`, but a different runtime build.
@@ -153,8 +153,7 @@ Then, by machine:
 - **aifoundry3**: card 0, if free.
 - **aifoundry1**: card 1 (`ET_DEVICES=1`) if free, else card 0 (`ET_DEVICES=0`). Two people can work here at once,
   one per card.
-- **aifoundry2**: its card is out of service, so there is no card here. Tell your person to run the page's steps 1
-  and 2 again with aifoundry3 or aifoundry1 chosen, and stop.
+- **aifoundry2**: card 0, if free (one card, as on aifoundry3).
 
 Several new people may start at the same time. A card that someone holds or has claimed is theirs, even though their
 runs are short. If no card here is free, do steps 2, 3 and 5 (no card) and look again at most once a minute; after 30
@@ -188,7 +187,6 @@ honours `ET_DEVICES` (checked on 30 September); aifoundry3's ignores it, which i
 
 ```bash
 cd ~/runs/first-hour
-[ "$(hostname)" != aifoundry2 ] || { echo "aifoundry2's card is out of service: stop"; exit 1; }
 [ "$(hostname)" != aifoundry1 ] || grep -aqw ET_DEVICES /opt/et/bin/it_test_code_loading || { echo "ignores ET_DEVICES: stop"; exit 1; }
 o=$(et-who --check); [ $? -le 1 ] && ! printf '%s\n' "$o" | grep -qE '^(/dev/et<N>_|lock:etsoc-shire<N>[.]lock)' || { echo "card <N> is held, or the check failed: stop"; printf '%s\n' "$o"; exit 1; }
 ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie
@@ -213,7 +211,6 @@ harmless. The simulator checks correctness, never speed.
 ```bash
 cd ~/et-soc1-prototyping
 R=~/runs/first-hour; mkdir -p $R
-[ "$(hostname)" != aifoundry2 ] || { echo "aifoundry2's card is out of service: stop"; exit 1; }
 [ "$(hostname)" != aifoundry1 ] || grep -aqw ET_DEVICES build/sgemm-mine/host/sgemm_host || { echo "ignores ET_DEVICES: stop"; exit 1; }
 et-lab-manifest > $R/manifest.txt; date > $R/when.txt
 o=$(et-who --check); [ $? -le 1 ] && ! printf '%s\n' "$o" | grep -qE '^(/dev/et<N>_|lock:etsoc-shire<N>[.]lock)' || { echo "card <N> is held, or the check failed: stop"; printf '%s\n' "$o"; exit 1; }
@@ -232,7 +229,6 @@ cd ~/et-soc1-prototyping
 cmake -S tools/ettelem -B build/ettelem-mine -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev
 nice cmake --build build/ettelem-mine -j4
 R=~/runs/first-hour
-[ "$(hostname)" != aifoundry2 ] || { echo "aifoundry2's card is out of service: stop"; exit 1; }
 [ "$(hostname)" != aifoundry1 ] || grep -aqw ET_DEVICES build/ettelem-mine/ettelem || { echo "ignores ET_DEVICES: stop"; exit 1; }
 o=$(et-who --check); [ $? -le 1 ] && ! printf '%s\n' "$o" | grep -qE '^(/dev/et<N>_|lock:etsoc-shire<N>[.]lock)' || { echo "card <N> is held, or the check failed: stop"; printf '%s\n' "$o"; exit 1; }
 ET_DEVICES=<N> flock -n /run/lock/etsoc-shire<N>.lock timeout 10 \

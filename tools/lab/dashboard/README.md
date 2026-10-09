@@ -87,8 +87,8 @@ only each lab machine's online flag and last-seen time. One ssh per host per run
 
 It never opens a `/dev/et*` node (checked with `strace` on aifoundry2), never reads `utilization_percent` (it syncs
 queue pointers from the card), never reads anything of a card `lab.json` marks `excluded` (aifoundry1's card 0 until
-2 October 2026; aifoundry2's card from then until 6 October 2026, and again since 7 October 2026, while its cooling is
-out) but its link, `err_stats` and its root port's error count, never writes on a host (except the sample's stamp file), never calls `tmux`, and never runs
+2 October 2026; aifoundry2's card from then until 6 October 2026, and again from 7 to 9 October 2026, while its cooling
+was out; none since) but its link, `err_stats` and its root port's error count, never writes on a host (except the sample's stamp file), never calls `tmux`, and never runs
 `spacesheep update`. The card activity flag counts only the submission queues (`SQ*`, `HpSQ*`): the completion
 queues also count the card's own asynchronous events, so they move with nobody using the card.
 
@@ -213,9 +213,11 @@ rates and the few real unseen opens a day stay. Tests: `tests/test_collect.py`.
 collector scrubs them), the note links `https://spacesheep.dev/@yaroslavvb/<slug>`; `page/script.js` builds the address
 and keeps only the slug's safe characters. Write the note dated, so a reader knows when it was true:
 aifoundry2's card carried "Back in service 6 Oct 2026: fans at full speed in the BIOS; idles at about 64 °C" from 6 to
-7 October, linking that day's page. Since 7 October (16:46 PDT) it is `excluded` again, with a note that links the page
-of that day's runaway (`aifoundry2-idle-runaway-7-october`). An `excluded` card shows the excluded line, and its note
-below it only when the note has a `note_page`.
+7 October, linking that day's page. From 7 October (16:46 PDT) to 9 October it was `excluded` again, with a note that
+linked the page of that day's runaway (`aifoundry2-idle-runaway-7-october`). Since 9 October it is back in service and
+carries "Back in service 9 Oct 2026: a two-fan bracket at the card in place of the stalling fan; …", linking
+`aifoundry-lab-9-october`. An `excluded` card shows the excluded line, and its note below it only when the note has a
+`note_page`.
 
 **The Worklog.** The section above "About this page" lists the lab's published pages, newest day first, with the oldest
 days folded into a `<details>`. It is static markup in `page/body.html` (the same for every reader, and it carries links,

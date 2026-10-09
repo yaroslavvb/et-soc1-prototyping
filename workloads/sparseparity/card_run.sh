@@ -11,9 +11,9 @@
 # and planner on that build, so every A/B pair runs one binary. --build and --out may be absolute, or relative to the
 # tree's root (the directory two levels above this script).
 #
-# Run it from the tree's root on the card's host (~/nekko on aifoundry1 and aifoundry3; never on aifoundry2, whose
-# card is out of service since 7 October 2026, as from 2 to 6 October), only with the owner's go-ahead for that
-# card. Every step is one host process run as
+# Run it from the tree's root on the card's host (~/nekko on aifoundry1 and aifoundry3; on aifoundry2 the git
+# checkout, whose card is back in service since 9 October 2026, out 7-9 October and 2-6 October), only with the
+# owner's go-ahead for that card. Every step is one host process run as
 #     flock -n /run/lock/etsoc-shire<N>.lock timeout 10 sparseparity_host ... --records-out <step>.rec
 # so the lock is held for one process at a time and released between steps, and no process holds the device for
 # more than 10 s (the host itself launches only while its timeout ends by 9 s). Before every step the script checks

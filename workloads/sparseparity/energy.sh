@@ -11,8 +11,9 @@
 # (tools/energy_reduce.py combine, which refuses anything but one instance's slices 0..N-1). Run it from the tree's
 # root on the card's host, only with the owner's go-ahead. It refuses aifoundry2 (its DV2 validation treats a
 # sampler or a *_host process as foreign) unless SPP_ALLOW_AIFOUNDRY2=1; there only the stubs' --dry runs. That card
-# is out of service since 7 October 2026, as from 2 to 6 October (the cooling at the card fails): never set
-# SPP_ALLOW_AIFOUNDRY2. On aifoundry1 it uses card 1 only.
+# is back in service since 9 October 2026 (out 7-9 October and 2-6 October), so this guard could go; dropping it
+# is the owner's call, and until he makes it, set SPP_ALLOW_AIFOUNDRY2=1 to run there.
+# On aifoundry1 it uses card 1 only.
 # These are the first card runs with --reps > 1 (L1: 44 launches at 7.3 per second): run l2 (14 launches, or a smoke
 # run of `l2 --reps 3`) before l1.
 #

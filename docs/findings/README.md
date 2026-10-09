@@ -59,9 +59,10 @@ Read [Terms](#terms) first.
    it at every boot), which makes the governor's step-up test unreachable and holds the card at 600 MHz for as long
    as it stays at zero. The driver reports the nameplate 65 W on every machine, so nothing on the host notices.
    aifoundry1's two cards work since 25 September 2026, on two more firmware releases; its card 0 overheated under
-   load until its fan was replaced on 2 October 2026, and is back in service. aifoundry2's card is out of service since
-   7 October (and was from 2 to 6 October): idle, even with every fan at full speed in the BIOS, the cooling at the card
-   got worse and it heated until it dropped off the PCIe bus. → [14-card-behaviour.md](14-card-behaviour.md)
+   load until its fan was replaced on 2 October 2026, and is back in service. aifoundry2's card is back in service
+   since 9 October 2026, cooled by a two-fan 92 mm bracket in the slot beside it (idle 51 °C, 23 W); it was out of
+   service from 7 to 9 October and from 2 to 6 October, when the cooling at the card fell short and it heated at idle
+   until it dropped off the PCIe bus. → [14-card-behaviour.md](14-card-behaviour.md)
 8. **The sharpest edge on the chip.** One contended global atomic is shared out fairly, to within half a percent,
    and takes the entire memory path of the shire that hosts it to **zero** — 384 operations, then nothing, for as
    long as the hammering lasts. It takes 21–24 remote requesters (20 leave the host at 98.9%, 24 stop it), under one shire's worth. The vendor's errata
@@ -279,9 +280,9 @@ tools/ettelem/finish_horace.sh     # no card needed: re-runs the Horace line (E9
 ```
 
 Every other experiment gives its own command in [03-experiments.md](03-experiments.md). Re-running on a card
-needs aifoundry2's card (out of service since 7 October 2026, as from 2 to 6 October: until the lab fixes the cooling
-at the card these runs cannot be repeated on the same card, and after a fix it may run cooler than when they were made,
-so compare with care), the build in `build/`, and an idle machine; see [14-card-behaviour.md](14-card-behaviour.md)
+needs aifoundry2's card (back in service since 9 October 2026 with a two-fan bracket at the card, so it now runs much
+cooler than when these runs were made: compare with care), the build in `build/`, and an idle machine;
+see [14-card-behaviour.md](14-card-behaviour.md)
 for the traps and [AGENT.md](../../AGENT.md) §5 for the etiquette.
 
 ## What is *not* established

@@ -797,10 +797,10 @@ flagged the rest at the top of `../findings/README.md`.
   bandwidth PASS and its energy not resolved, T102 FAIL (`data/2026-09-29-{pcie2,nocr,memp2}/README.md`). On the pages
   30 September: the hub's rungs 31–36 and 43 and §7, the PCIe page's §5, the chip diagram (facts L104, L50,
   `pcie.write-l3`, `pcie.conc`, `minion.tensor-cache-path` and its asks) and the memory levels (`l3.route`). Left: tau,
-  after its amendment, then NV's validation (part 0). Blocked again while aifoundry2's card is out of service (since
-  7 October 2026, 16:46 PDT: idle, even with every fan at full speed since lab report SH5's fix of 6 October, the
-  cooling at the card got worse and it ran away and dropped off the PCIe bus, as on 2 October; it needs an on-site
-  look at the cooling at the card, then the full reset).
+  after its amendment, then NV's validation (part 0). Unblocked: aifoundry2's card is back in service since
+  9 October 2026, when the stalling fan under it was replaced by a two-fan 92 mm bracket in the slot beside the card
+  (it was out from 16:46 PDT on 7 October, and from 2 to 6 October). It now idles at 51 °C instead of about 64 °C,
+  so record the clock and the temperatures with every run there, and keep a temperature stop on long full-load runs.
 - [ ] **memp2's R43 is open:** no registered theory of the 128 B per cycle cap survives on any of the three cards
   (T43-B misses 7 conditions, Cc 5, on each; `data/2026-09-29-memp2/README.md`). New theories need a new
   pre-registration.
@@ -855,12 +855,14 @@ generation, the shire's bandwidth for streamed A (about 512 cycles per op at 32 
 - [ ] **More cards.** E59 ran on aifoundry3's card only (pinned at 600 MHz). Run `card_run.sh m5` and `energy.sh`
   with the same kernel (`.text` `3e14be32…`) on aifoundry1's card 1 (600 MHz; `card_run.sh` sets `ET_DEVICES=1` and
   the shire1 lock) or card 0 (in service again since its fan was replaced on 2 October 2026; idles at 300 MHz;
-  `card_run.sh` and `energy.sh` would need a card-0 option), and on aifoundry2 once its card is back in service (out
-  since 7 October 2026, as from 2 to 6 October: the cooling at the card fails), where DV2's validation ended at
+  `card_run.sh` and `energy.sh` would need a card-0 option), and on aifoundry2, whose card is back in service since
+  9 October 2026 (out 7–9 October and 2–6 October), where DV2's validation ended at
   16:57 PDT on 29 September (E29 saw its governor lift the clock to 700–800 MHz mid-burst below about 68 °C,
-  `../findings/14-card-behaviour.md`, "The clock governor is thermal first", so record the clock with every run).
+  `../findings/14-card-behaviour.md`, "The clock governor is thermal first", so record the clock with every run — all
+  the more so now that the card idles at 51 °C, below the governor's 68 °C step).
   `energy.sh` refuses aifoundry2 unless `SPP_ALLOW_AIFOUNDRY2=1`, a guard written for DV2's validation, which has
-  ended; keep it while that card is out of service.
+  ended, and for the card being out of service, which it no longer is (since 9 October 2026): **the guard could now
+  go**, which is the owner's call. The code is unchanged; until he decides, set `SPP_ALLOW_AIFOUNDRY2=1` there.
 - [ ] **`lib.sh`'s device-process pattern** (review R4, finding 8). `ps` truncates
   `sparseparity_host` to `sparseparity_ho` (15 characters), which `DEV_COMM`'s `_host$` in
   `tools/claims-v3/lib.sh:57`, `tools/claims-v3/dv2/z2.sh:37` and `dv2lib.sh` never matches, so a campaign block

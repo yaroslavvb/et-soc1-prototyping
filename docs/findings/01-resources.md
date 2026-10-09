@@ -94,9 +94,10 @@ were registered on 25 September as E33 and E34 in [03-experiments.md](03-experim
 ## R5 — The card and the lab
 
 `aifoundry2`, one ET-SoC-1 PCIe card, 1,088 minion cores (1,024 usable for these workloads across 32 compute
-shires), 32 GB LPDDR4X, in a desktop chassis. Reached over Tailscale SSH. Its card is out of service since 7 October
-2026, as it was from 2 to 6 October: even with every fan at full speed in the BIOS, the cooling at the card fails, and
-idle it heats until it drops off the PCIe bus (14-card-behaviour.md); the machine itself is up.
+shires), 32 GB LPDDR4X, in a desktop chassis. Reached over Tailscale SSH. Its card is back in service since 9 October
+2026, when the stalling fan under it was replaced by a two-fan 92 mm bracket in the slot beside it: it idles at 51 °C
+and 23 W, where it had heated at idle until it dropped off the PCIe bus (out of service 7–9 October and 2–6 October;
+14-card-behaviour.md). Long full-load runs keep a temperature stop.
 
 - **Authoritative for:** everything measured. Note that it is *one* card in *one* chassis: the thermal
   resistance in [11-thermal-model.md](11-thermal-model.md) is a property of this installation, not of the chip.
