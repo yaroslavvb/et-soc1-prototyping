@@ -647,6 +647,33 @@ Measured that afternoon with the 6 October scripts, unchanged but for their fold
   but **long full-load runs keep a temperature stop** (85–90 °C), as the lab's scripts already do: 1.2 times is not
   much margin, and nothing on the card stops a runaway ("Nothing limits the die's temperature", above).
 
+## The lab dashboard's maintenance sweep (11 October 2026)
+
+On Sunday 11 October (16:40–23:00 PDT) the dashboard's four warnings were cleared
+([the 11 October page](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-11-october)). What it showed about the hosts:
+
+- **The wired ports now have fixed addresses on aifoundry1 and aifoundry2** (Requests for Roman U29; aifoundry3 once its
+  user is done). Since the 7 October cabling they had none, so NetworkManager retried DHCP every few minutes (about 30,000
+  log lines a boot), its start-up never completed within `NetworkManager-wait-online`'s 60 s, and that unit failed at every
+  boot, leaving systemd "degraded". The retrying profile was NetworkManager's unsaved default; `nmcli con mod` saved it into
+  `/etc/netplan` (`90-NM-<uuid>.yaml`) with no default route, Wi-Fi untouched. The two reach each other over the cable in
+  under a millisecond. No machine has rebooted with it yet.
+- **Tailscale SSH with a command and a terminal leaves the pty owned by root**, with only the user's own processes on it (no
+  `login(1)`, no utmp line), and can leave an empty root-owned pty behind. The dashboard read those as root logins; since
+  `95c0fef` a root-owned pty counts only with a root process on it.
+- **aifoundry1's root pool held 42 bad blocks in four files**, found by the 13 September and 11 October scrubs (none on
+  9 August); the disk reports no media errors, and every restart in the log since September was a crash. A corrupt stage-1
+  compiler build file was deleted, two llama.cpp vocabulary fixtures were restored byte for byte from their own git history,
+  and the pool was cleared and re-scrubbed. One block is left, in a dangling git object of a departed user's clone.
+- **The live monitor's 4 October fix (`efa3e8c`) runs on aifoundry2 only**; aifoundry1 and aifoundry3 still run the
+  2 October monitor. Its reader crashes about once in 24,000 runs, on exit, inside the vendor's management library
+  (a receiver thread that is never joined), after the reading is printed.
+- **The dashboard's half-hourly card sample has not run since 2 October.** aifoundry1 waits for a person to confirm card
+  numbering for its 7 October boot; aifoundry2's quiet gate counts the management queue, which the 1 Hz monitor uses twice a
+  second; on aifoundry3 a user was active. The page's temperatures come from the live monitor.
+- **The kernel ring buffer holds about 50 minutes on all three**: AppArmor audit lines for `bwrap`, about 23 a minute, fill
+  it, so `et-lab-health`'s per-card kernel-log counts cover the last hour; the journal holds the whole boot.
+
 ## Traps that cost time here
 
 - **aifoundry2's kernel ring buffer keeps only about an hour (7 October 2026).** AppArmor audit lines from `bwrap`

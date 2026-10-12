@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>AI Foundry lab, 11 October 2026: a maintenance sweep of the lab dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%AD%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f3f5f6; --paper:#ffffff; --ink:#15232b; --ink-2:#3d4f5a; --muted:#6c7c86;
+  --rule:#d5dde2; --accent:#1f6f66; --accent-2:#a8631e; --accent-soft:#e3efec; --warm-soft:#f6ecdd;
+  --code-bg:#eaeff1; --shadow:0 1px 0 rgba(21,35,43,.06); --bad:#b3452f; --bad-soft:#f7e6e1;
+  --serif:"Charter","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --sans:"Avenir Next","Seravek","Gill Sans","Helvetica Neue",system-ui,-apple-system,sans-serif;
+  --mono:"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f171c; --paper:#151f26; --ink:#e6ecef; --ink-2:#c1ccd3; --muted:#8a9aa4;
+    --rule:#28363f; --accent:#5fbcae; --accent-2:#e0a35c; --accent-soft:#183531; --warm-soft:#33291b;
+    --code-bg:#1d2a32; --shadow:none; --bad:#e2705a; --bad-soft:#3a2420;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f171c; --paper:#151f26; --ink:#e6ecef; --ink-2:#c1ccd3; --muted:#8a9aa4;
+  --rule:#28363f; --accent:#5fbcae; --accent-2:#e0a35c; --accent-soft:#183531; --warm-soft:#33291b;
+  --code-bg:#1d2a32; --shadow:none; --bad:#e2705a; --bad-soft:#3a2420;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.55}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+a:hover,a:focus-visible{border-bottom-color:var(--accent);outline:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+header.mast{padding:52px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:26px}
+.eyebrow{font-family:var(--sans);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1.title{font-family:var(--sans);font-weight:600;font-size:clamp(30px,4.6vw,46px);line-height:1.08;letter-spacing:-.01em;margin:0 0 18px;text-wrap:balance;max-width:28ch}
+.lede{font-size:19px;line-height:1.45;color:var(--ink-2);max-width:62ch;margin:0 0 18px}
+.sources{font-family:var(--sans);font-size:13.5px;line-height:1.5;color:var(--muted);max-width:78ch;margin:0 0 10px}
+.todo{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:0 6px 6px 0;padding:14px 18px;margin:22px 0 0;max-width:72ch}
+.todo p{margin:0 0 8px;font-family:var(--sans);font-size:15.5px;line-height:1.45}
+.todo p:last-child{margin:0}
+.todo strong{font-weight:700}
+nav.toc{margin:0 0 40px;padding:18px 20px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;box-shadow:var(--shadow)}
+nav.toc .lbl{font-family:var(--sans);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 22px;font-family:var(--sans);font-size:14.5px;line-height:1.35}
+nav.toc a{border:none;color:var(--ink-2)}
+nav.toc a:hover{color:var(--accent)}
+main{display:block}
+main h2{font-family:var(--sans);font-weight:600;font-size:clamp(23px,2.6vw,29px);line-height:1.15;margin:64px 0 16px;padding-top:22px;border-top:2px solid var(--ink);text-wrap:balance}
+main h3{font-family:var(--sans);font-weight:600;font-size:18.5px;line-height:1.25;margin:34px 0 10px;color:var(--ink);text-wrap:balance}
+main p{margin:0 0 14px;max-width:72ch}
+main ul,main ol{margin:0 0 16px;padding-left:1.35em;max-width:72ch}
+main li{margin:0 0 7px}
+main strong{font-weight:700}
+main hr{border:0;border-top:1px solid var(--rule);margin:40px 0}
+main blockquote{margin:18px 0 22px;padding:14px 18px;background:var(--warm-soft);border-left:3px solid var(--accent-2);border-radius:0 4px 4px 0;font-size:16px;color:var(--ink);max-width:72ch}
+q{quotes:"\201C" "\201D"}
+code{font-family:var(--mono);font-size:.85em;background:var(--code-bg);padding:.12em .4em;border-radius:4px}
+main pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;margin:0 0 20px;overflow-x:auto;max-width:80ch}
+main pre code{background:none;padding:0;font-size:13px;line-height:1.5;white-space:pre}
+img{max-width:100%;height:auto}
+main figure{margin:26px 0 32px;max-width:820px}
+main figure a{display:block;border:none}
+main figure img{display:block;width:100%;border:1px solid var(--rule);border-radius:6px}
+main figcaption{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:72ch}
+.tablewrap{overflow-x:auto;margin:18px 0 24px}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:14.5px;line-height:1.45;background:var(--paper)}
+th,td{border:1px solid var(--rule);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);font-weight:600}
+td.t{font-family:var(--mono);font-size:13px;white-space:nowrap;color:var(--ink-2)}
+.ok{color:var(--accent);font-weight:700}
+.bad{color:var(--bad);font-weight:700}
+.mid{color:var(--accent-2);font-weight:700}
+details{margin:14px 0 22px;padding:12px 16px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;max-width:80ch}
+details summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:10px}
+details p,details li{font-size:15.5px}
+.kicker{font-family:var(--sans);font-size:14px;color:var(--muted);margin:-6px 0 14px}
+footer{max-width:1080px;margin:0 auto;padding:24px 20px 60px;color:var(--muted);font-family:var(--sans);font-size:13px;border-top:1px solid var(--rule)}
+/* MathJax, loaded by md2report only on pages that contain equations (2026-09-17, week 38).
+   A display equation gets its own scroll box: an over-wide matrix must not widen the page
+   on the phone.  Inline math inherits the prose colour in both themes. */
+.math-display{overflow-x:auto;overflow-y:hidden;max-width:100%;margin:20px 0 24px;padding:2px 0}
+mjx-container{color:var(--ink)}
+mjx-container[display="true"]{margin:0!important;text-align:left}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header class="mast">
+<p class="eyebrow">AI Foundry lab</p>
+<h1 class="title">AI Foundry lab, 11 October 2026: a maintenance sweep of the lab dashboard</h1>
+</header>
+<main>
+<p data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">← AI Foundry lab dashboard</a> › <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a></p>
+
+<p class="lede"><em>Covers Sun 11 Oct 2026 (week 41), 16:40 PDT to 23:00 PDT: aifoundry1, aifoundry2 and aifoundry3 in the AI Foundry lab at Studio 45. Written Sun 11 Oct 2026, about 22:45 PDT, on the Intel, from the dashboard's own data before and after, each machine's logs and settings, and checks run on the three machines. Work on a machine someone was using waited until they were done.</em></p>
+<p><strong>The dashboard went from four warnings to "All clear".</strong> Three of the warnings were one problem: the cable that joins the three machines had no addresses on it, so each machine's network start-up timed out. The fourth, a "root login" on aifoundry3, was the dashboard misreading a lab user's own session. Along the way, the sweep repaired 41 of 42 damaged disk blocks on aifoundry1 and deployed a waiting fix to the live monitor. A fix for the card-use log's growth was written and reviewed, and needs one more round before it goes on the machines. aifoundry3's share, its kernel update and wired address, waits until the lab user working there all evening is done.</p>
+<h2 id="what-the-dashboard-said-and-what-it-says-now">What the dashboard said, and what it says now</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Alert at 15:52</th>
+<th>Level</th>
+<th>Now</th>
+<th>What was done</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aifoundry1, aifoundry2, aifoundry3: "systemd degraded: NetworkManager-wait-online failed"</td>
+<td>warning ×3</td>
+<td>gone</td>
+<td>Fixed addresses on the wired network (<a href="#1-the-wired-network-between-the-three-machines">1</a>)</td>
+</tr>
+<tr>
+<td>aifoundry3: "1 terminal logged in as root, the shared login"</td>
+<td>warning</td>
+<td>gone</td>
+<td>The dashboard's rule fixed (<a href="#2-the-root-login-that-wasnt">2</a>)</td>
+</tr>
+<tr>
+<td>aifoundry1: "pool rpool: 42 errors at the last scrub"</td>
+<td>info</td>
+<td>1 error</td>
+<td>41 of 42 blocks repaired (<a href="#3-aifoundry1s-disk">3</a>)</td>
+</tr>
+<tr>
+<td>aifoundry1, aifoundry3: "card-use log read only from …"</td>
+<td>info ×2</td>
+<td>stays</td>
+<td>A fix written and reviewed, not yet installed (<a href="#4-the-card-use-log">4</a>)</td>
+</tr>
+<tr>
+<td>aifoundry3: "reboot pending"</td>
+<td>info</td>
+<td>stays, for now</td>
+<td>Waits until the lab user working there is done (<a href="#6-aifoundry3-waits-for-its-user">6</a>)</td>
+</tr>
+<tr>
+<td>aifoundry1: "reboot pending"</td>
+<td>info</td>
+<td>stays</td>
+<td>Left for an on-site visit (<a href="#what-wasnt-done-and-why">what wasn't done</a>)</td>
+</tr>
+<tr>
+<td>"card telemetry sampling is on"</td>
+<td>info</td>
+<td>stays</td>
+<td>Correct, though the sample itself hasn't run since 2 October (<a href="#what-wasnt-done-and-why">below</a>)</td>
+</tr>
+<tr>
+<td>aifoundry3: "card used since the last check"</td>
+<td>info</td>
+<td>comes and goes</td>
+<td>Nothing to do: it shows while a lab user is on the card, as again at 22:21</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="what-was-done">What was done</h2>
+<h3 id="1-the-wired-network-between-the-three-machines">1. The wired network between the three machines</h3>
+<p>The three machines have been cabled together since 7 October, but nothing on that network hands out addresses. So the wired port on each one kept asking for an address, giving up after 45 seconds and starting again: about 30,000 log lines per machine per boot. And because those requests never finished, the machine's network start-up never finished in time either. The check that waits for it gave up after a minute at every boot and stayed failed, which is what the dashboard reported.</p>
+<p><strong>17:13 and 17:14: aifoundry1 and aifoundry2 got fixed private addresses on the wired port</strong>, with no route to the internet through it, so the internet and every remote login stay on Wi-Fi. The setting is saved where the machines keep their network configuration, so it should come back after a reboot. The two machines now reach each other over the cable in under a millisecond, against about 6 ms over Wi-Fi. The failed start-up check was cleared on both, and the address requests stopped. On aifoundry3, where a lab user was at work, only the failed check was cleared at 17:15, and the network was left alone. Its wired address comes with its kernel update, once that user is done, and that reboot will be the setting's first real test.</p>
+<h3 id="2-the-root-login-that-wasnt">2. The "root login" that wasn't</h3>
+<p>The dashboard counted a terminal as a root login when the root account owned it. On aifoundry3 the two root-owned terminals belonged to a lab user's own session: logging in over Tailscale SSH with a command, rather than to a shell, leaves the terminal owned by root, with only that person's programs on it, or with nothing on it at all. <strong>17:16: the dashboard now counts a root-owned terminal as a root login only when a program on it runs as root</strong>, and counts a terminal with only one person's programs on it as theirs (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/commit/95c0fef">95c0fef</a>). At 17:36 a real root shell, opened briefly on aifoundry2 between two of the dashboard's checks, was still counted as one.</p>
+<h3 id="3-aifoundry1s-disk">3. aifoundry1's disk</h3>
+<p>aifoundry1 keeps everything, home directories included, on one disk with no second copy. Its monthly check, at 00:24 on Sunday, found 42 blocks whose contents no longer matched their checksums, in four files. The same 42 were there at the check of 13 September, and none at the one before, on 9 August. The disk reports itself healthy: no media errors, 18% of its rated wear. What fits best is unclean power loss: every restart in the machine's log since September ended in a crash, not a shutdown, as when the lab's power switch cut all three machines on 7 October.</p>
+<p><strong>17:20 to 17:33, 41 of the 42 blocks were dealt with:</strong></p>
+<ul>
+<li>38 were in a leftover file from a January compiler build, a stage that the finished compiler, installed elsewhere, no longer needs. The installed compiler was checked before and after. The file was deleted.</li>
+<li>3 were in two small vocabulary files of a public model, in a lab user's copy of llama.cpp. Both were restored byte for byte from that copy's own history, and checked against the public original, with their owner, permissions and dates unchanged.</li>
+<li>Then the error record was cleared and the disk checked again (2 min 39 s).</li>
+</ul>
+<p><strong>One block is left:</strong> a 1.7 KB piece of a departed user's old git clone. It exists nowhere public and no branch uses it, so it can't be restored, and it was left as it was. Deleting it would lose nothing a branch uses and would clear the last error; that is the lab lead's call.</p>
+<h3 id="4-the-card-use-log">4. The card-use log</h3>
+<p>The lab's live monitor reads each card's temperature once a second, and the card-use logger wrote one line for every one of those reads: 86,400 lines a card a day, 98% of the log, 32 MB a day on aifoundry1. The dashboard reads only the newest 64 MB, so its seven-day card-use table reached back two days on aifoundry1 and four on aifoundry3, and marked the days it could not read "not logged". At that rate the log's size cap would also have started deleting aifoundry1's history around 18 October, after 15 days instead of 90. <strong>A fix was written and reviewed, but not installed.</strong> It has the logger write one line a minute for the monitor's reads instead of one a second, and the table say "not read" rather than "not logged" for days it could not read. Three reviewers found that, as written, each joined line would count its whole minute as time the card was held, so the lab's card-use command would show an idle card as busy most of the day. It needs that fixed and a second review before it goes on the three machines. Until then the dashboard's notes are accurate: the log really is read only that far back.</p>
+<h3 id="5-the-live-monitor">5. The live monitor</h3>
+<p>A fix written on 4 October had never been deployed. <strong>17:38: it went live on aifoundry2.</strong> The monitor now learns who holds a card from the card-use logger, instead of running a privileged command every second, which put about three lines a second into the system's login log. It also checks the card's own lock just before each reading. On aifoundry2 those log lines went from about 120 a minute to 1, and the readings carried on. aifoundry1 waits for the end of a session the lab lead announced there, and aifoundry3 for its user.</p>
+<h3 id="6-aifoundry3-waits-for-its-user">6. aifoundry3 waits for its user</h3>
+<p>A lab user has worked on aifoundry3 since 15:36, with a long-running agent in a terminal session, and was on the card again at 22:21. A reboot would end that session. So nothing that restarts or reconfigures aifoundry3 was done tonight: its kernel update (waiting since 10 October), its wired address and the live-monitor fix wait until that user is done. It is ready for them: the new kernel, its start-up files and the card driver built for it are in place, and the services that must come back after a reboot (the card's clock settings, the lab demo, the card-use logger) all start at boot. This page will say when it is done.</p>
+<h2 id="what-wasnt-done-and-why">What wasn't done, and why</h2>
+<ul>
+<li><strong>aifoundry1's kernel update (waiting since 9 October).</strong> A reboot re-trains the link to card 0, which is in its best state in weeks: 37 corrected link errors in 3.8 days, against about one a second for the twelve days after 18 September. The lab also has no remote console if a boot hangs. Better done on a visit, with card 0's pending reseat.</li>
+<li><strong>The dashboard's own card sample hasn't run since 2 October.</strong> The page's temperatures come from the live monitor and are current. The half-hourly sample is the fallback, and its 2 October readings are still in the page's data. It stopped for a different reason on each machine:</li>
+<li>aifoundry1: after a power cut, a person confirms which card is which before sampling resumes, and nobody has since the 7 October boot.</li>
+<li>aifoundry2: its "card quiet" check counts the card's management traffic, which the live monitor itself makes twice a second, so it can never pass.</li>
+<li>aifoundry3: a lab user was active, which is the check working as meant.</li>
+<li><strong>The kernel's own log covers about 50 minutes.</strong> It fills with security-audit lines from sandboxed programs, about 23 a minute, so the health check's per-card kernel-error counts cover only the last hour on all three machines.</li>
+<li><strong>The live monitor's reader crashes about once in 24,000 reads</strong>, on exit, inside the card vendor's management library, after its reading is printed. It loses about a dozen readings a day and leaves a core file each time. It is a bug for upstream.</li>
+<li><strong>The card-open tracer runs only on aifoundry1.</strong></li>
+<li><strong>The power cuts themselves.</strong> A UPS would remove the likeliest cause of the disk damage, on all three machines.</li>
+</ul>
+<h2 id="what-isnt-known">What isn't known</h2>
+<ul>
+<li>Whether the wired-address setting comes back after a reboot. It is saved where the machines keep their network configuration, and no machine has rebooted since; aifoundry3's reboot will be the first test.</li>
+</ul>
+<h2 id="sources">Sources</h2>
+<ul>
+<li>The dashboard's data at 15:52 and after each change, and the collector on aifoundry2 (<code>update.sh now</code> at 17:16).</li>
+<li>On each machine: NetworkManager's settings and journal, <code>systemctl</code>, the terminals and the programs on them, the disk's check results and event log, the disk's own health counters, the card-use logger's files, the live monitor's history and crash records.</li>
+<li>The lab repository: the dashboard's collector and probe, the card-use logger, the live monitor and their tests (the dashboard's 32 and 61 tests; the card-use logger's own suite in review).</li>
+<li><code>#community-lab</code> on the lab's Discord, for who was using which machine.</li>
+<li>Written by agents in one session, each change checked by a second agent that changed nothing.</li>
+</ul>
+<p><em>For total life satisfaction: the dashboard is clean again, so a warning on it means something new, and the lab's machines got an evening of care without anyone's work being interrupted.</em></p>
+</main>
+</div>
+
+</body>
+</html>
