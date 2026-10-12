@@ -665,8 +665,8 @@ On Sunday 11 October (16:40–23:00 PDT) the dashboard's four warnings were clea
   9 August); the disk reports no media errors, and every restart in the log since September was a crash. A corrupt stage-1
   compiler build file was deleted, two llama.cpp vocabulary fixtures were restored byte for byte from their own git history,
   and the pool was cleared and re-scrubbed. One block is left, in a dangling git object of a departed user's clone.
-- **The live monitor's 4 October fix (`efa3e8c`) runs on aifoundry2 only**; aifoundry1 and aifoundry3 still run the
-  2 October monitor. Its reader crashes about once in 24,000 runs, on exit, inside the vendor's management library
+- **The live monitor's 4 October fix (`efa3e8c`) runs on aifoundry2 and, since 12 October 08:01, aifoundry1**; aifoundry3
+  still runs the 2 October monitor. Its reader crashes about once in 24,000 runs, on exit, inside the vendor's management library
   (a receiver thread that is never joined), after the reading is printed.
 - **The dashboard's half-hourly card sample has not run since 2 October.** aifoundry1 waits for a person to confirm card
   numbering for its 7 October boot; aifoundry2's quiet gate counts the management queue, which the 1 Hz monitor uses twice a
