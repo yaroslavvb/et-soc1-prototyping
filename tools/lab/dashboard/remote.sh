@@ -100,7 +100,21 @@ done | head -40
 sec sessions
 t 10 loginctl list-sessions -o json | head -c 65536; echo
 sec pts
-for p in /dev/pts/[0-9]*; do [ -e "$p" ] && stat -c '%u %U %X' "$p" 2>/dev/null; done
+# Owner uid, owner login and last use of each pty, and a 4th field: the uid and login of every process whose
+# controlling terminal it is, "1007:efrank,0:root", or "-" when there is none. The owner alone does not say who is
+# logged in. An interactive login goes through login(1), which chowns the pty to the person; Tailscale SSH running a
+# command does not, so the pty stays owned by root while the only processes on it are the person's own, and such a
+# session can leave a root-owned pty behind with nothing on it at all (aifoundry3, Sun 11 Oct 2026: both, read as
+# "1 terminal logged in as root"). One ps for every pty, not one each, and the field is printed only when ps
+# answered, so that an older collect.py ignores it and this one falls back to the owner.
+{ t 10 ps -eo tty=,uid=,user:32=
+  for p in /dev/pts/[0-9]*; do [ -e "$p" ] && stat -c "@ ${p#/dev/} %u %U %X" "$p" 2>/dev/null; done
+} | awk '
+  $1 != "@" {n++
+    if ($1 ~ /^pts\/[0-9]+$/ && $2 ~ /^[0-9]+$/) {k = $1 SUBSEP $2
+      if (!(k in seen)) {seen[k] = 1; u[$1] = ($1 in u ? u[$1] "," : "") $2 ":" $3}}
+    next}
+  {if (n) print $3, $4, $5, ($2 in u ? u[$2] : "-"); else print $3, $4, $5}'
 sec procs
 # Per user: processes, device processes (counts), and what the processes are, as coarse categories (DESIGN.md §6):
 # agent (AI coding agents), build (compilers, linkers, make), sim (sys_emu), python, editor, shell (a shell, tmux or

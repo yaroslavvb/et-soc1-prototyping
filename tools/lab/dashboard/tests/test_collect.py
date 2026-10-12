@@ -193,6 +193,31 @@ class People(unittest.TestCase):
         self.assertEqual(bare().person_status(e), "active")  # a terminal used 5 min ago
         self.assertEqual(C.doing_of(e), ["agent"])
 
+    def test_a_root_owned_pty_is_a_root_login_only_with_a_root_process(self):
+        """aifoundry3, Sun 11 Oct 2026: Tailscale SSH running a command skips login(1), so it never chowns the pty.
+        /dev/pts/6 was owned by root with only efrank's processes on it and /dev/pts/5 had none, and the pair read as
+        "1 terminal logged in as root, the shared login"."""
+        meta = {"now": 1790800000}
+        people, _, _ = C.p_people(self.secs([], ["0 root 1790799700 1007:efrank",   # efrank over Tailscale SSH
+                                                 "0 root 1790799000 -",             # left behind, no processes
+                                                 "1009 yaroslavvb 1790799800 0:root,1009:yaroslavvb"]),  # login(1)
+                                  meta, 1790800000)
+        self.assertEqual(meta["root_ttys"], 0)
+        self.assertEqual(people["efrank"]["ttys"], 1)          # his terminal still counts, and still as his
+        self.assertEqual(people["efrank"]["idle_min"], 5)
+        self.assertEqual(people["yaroslavvb"]["ttys"], 1)
+        self.assertNotIn("root", people)
+
+    def test_a_real_root_shell_is_still_a_root_login(self):
+        meta = {"now": 1790800000}
+        people, _, _ = C.p_people(self.secs([], ["0 root 1790799700 0:root",            # a root shell
+                                                 "0 root 1790799700 0:root,1007:efrank",  # root, then su efrank
+                                                 "0 root 1790799700"]),                 # a probe with no 4th field
+                                  meta, 1790800000)
+        self.assertEqual(meta["root_ttys"], 3)
+        self.assertEqual(people, {})
+        self.assertEqual(C.pts_login("0 root 1 1007:efrank,1019:alice".split()), (None, ""))
+
     def test_brief_session_without_terminal(self):
         s = [{"session": "c9", "uid": 1019, "user": "bob", "tty": None, "state": "active"}]
         people, _, _ = C.p_people(self.secs(s, [], ["procs 1019 bob 2 0 -", "sessage c9 4"]), {"now": 1790800000},
@@ -260,6 +285,30 @@ class Probe(unittest.TestCase):
         self.assertIn("sessage c7 5", out)
         self.assertIn("sessage c8 0", out)  # a session seconds old is reported, with age 0
         self.assertEqual(procs["carol"][3:5], ["1", "1"])  # a device process counts wherever it runs
+
+    def pts_awk(self, ps_lines, stat_lines):
+        """remote.sh's @@pts awk: `ps -eo tty=,uid=,user:32=` lines, then the stat lines, which start with "@"."""
+        with open(os.path.join(DASH, "remote.sh")) as f:
+            src = f.read()
+        m = re.search(r"\n\} \| awk '\n(.*?)'\n", src, re.S)
+        self.assertIsNotNone(m, "the pts pipeline in remote.sh")
+        r = subprocess.run(["awk", m.group(1)], input="\n".join(list(ps_lines) + list(stat_lines)) + "\n",
+                           capture_output=True, text=True, check=True)
+        return [ln for ln in r.stdout.split("\n") if ln]
+
+    def test_pts_lines_carry_the_uids_of_the_processes_on_each_pty(self):
+        ps = ["pts/6     1007 efrank", "pts/6     1007 efrank",      # the same user twice: listed once
+              "pts/3        0 root", "pts/3     1009 yaroslavvb",    # login(1), then the person's shell
+              "?            0 root", "tty1         0 root"]          # no pty, and not a pty: both ignored
+        stat = ["@ pts/3 1009 yaroslavvb 1790799800", "@ pts/5 0 root 1790799000", "@ pts/6 0 root 1790799700"]
+        self.assertEqual(self.pts_awk(ps, stat),
+                         ["1009 yaroslavvb 1790799800 0:root,1009:yaroslavvb",
+                          "0 root 1790799000 -",                      # nothing on it
+                          "0 root 1790799700 1007:efrank"])
+
+    def test_pts_lines_leave_the_field_off_when_ps_did_not_answer(self):
+        stat = ["@ pts/5 0 root 1790799000"]
+        self.assertEqual(self.pts_awk([], stat), ["0 root 1790799000"])  # three fields: collect.py's old rule
 
 
 class Status(unittest.TestCase):

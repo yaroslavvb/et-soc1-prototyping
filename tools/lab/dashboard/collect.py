@@ -578,6 +578,41 @@ def paused_text(s):
     return "see journalctl -u et-usaged on the host"
 
 
+def pts_login(f):
+    """Whose login one pty is, from its line in the pts section (owner uid, owner login, last use, and since 11 Oct
+    2026 the uid:login of every process whose controlling terminal it is, or "-" for none). Returns (uid, login), or
+    (None, "") when the pty is nobody's login.
+
+    The owner is not the answer on its own. An interactive login goes through login(1), which chowns the pty to the
+    person; Tailscale SSH running a command does not, so the pty stays owned by root while the only processes on it
+    are the person's own, and such a session can leave a root-owned pty behind with nothing on it at all. Reading
+    those as root logins is what put "1 terminal logged in as root" on aifoundry3 on Sun 11 Oct 2026, where
+    /dev/pts/5 had no processes and /dev/pts/6 held only efrank's. So a root-owned pty is a root login only when a
+    process on it really runs as root (root's own `su` to someone else counts, the root shell is still there); one
+    whose processes are all a single other person's is that person's terminal, and keeps their tty count right; one
+    with no processes is nobody's. A pty the person owns stays theirs, as before, although login(1) leaves its own
+    root process on it. With no 4th field - an older probe, or one whose `ps` did not answer - the owner decides, as
+    before."""
+    if len(f) < 3:
+        return None, ""
+    uid, user = num(f[0], int), f[1]
+    if uid != 0 or len(f) < 4:
+        return uid, user
+    procs = {}
+    for tok in f[3].split(",") if f[3] != "-" else []:
+        u, _, login = tok.partition(":")
+        u = num(u, int)
+        if u is not None:
+            procs.setdefault(u, login)
+    if not procs:
+        return None, ""
+    if 0 in procs:
+        return 0, "root"
+    if len(procs) == 1:
+        return next(iter(procs.items()))
+    return None, ""  # several people's processes on one root-owned pty: not root's, and nobody's to claim
+
+
 def p_people(secs, meta, now):
     """Per login on this host: sessions (not closing), closing, ttys, idle_min, procs, device_procs, doing (the
     probe's category keys) and shell (a shell, tmux or screen runs). uid >= 1000 only; the probe's own session is left
@@ -619,13 +654,14 @@ def p_people(secs, meta, now):
             if not s.get("tty"):
                 e["notty_sessions"] += 1
     newest = {}
-    root_ttys = sum(1 for ln in secs.get("pts", []) if ln.split()[:1] == ["0"])
+    root_ttys = sum(1 for ln in secs.get("pts", []) if pts_login(ln.split())[0] == 0)
     meta["root_ttys"] = root_ttys
     for ln in secs.get("pts", []):
         f = ln.split()
         if len(f) < 3:
             continue
-        uid, user, at = num(f[0], int), f[1], num(f[2], int)
+        uid, user = pts_login(f)
+        at = num(f[2], int)
         if uid is None or uid < 1000 or uid == 65534 or not LOGIN_RE.match(user):
             continue
         e = ent(user)
