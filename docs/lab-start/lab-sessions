@@ -1,0 +1,56 @@
+#!/bin/bash
+# lab-sessions: keeps your Claude on this AI Foundry lab machine running through restarts.
+#
+# Step 2 of https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start installs it (13 October 2026), with a line in your
+# crontab that runs it every minute; running it by hand is safe too. It only starts things, and only your own:
+#   claude     a tmux session with Claude in it. Made again within a minute when it is missing, as after a restart of
+#              the machine, and then it continues your last conversation (claude --continue).
+#              Come back with:  ssh -t <you>@<machine> tmux attach -t claude
+#   claude-rc  once you have signed in to Claude here, a Remote Control server, so the Claude app and claude.ai/code
+#              can start sessions on this machine under its name. Restarted when it is not running, at most once in
+#              10 minutes.
+# Why (the owner's ask, 13 October 2026): the lab machines restart now and then (kernel updates, power cuts), and
+# after one, people should find their tmux session and their Remote Control server already up when they log in again.
+#
+# To turn it off: crontab -e, delete the lab-sessions line, then tmux kill-session -t claude-rc (and -t claude).
+set -u
+C="$HOME/.local/bin/claude"
+[ -x "$C" ] || exit 0                       # no Claude installed here (yet): nothing to keep
+# cron gives a bare PATH; use the system one (/etc/environment) after ~/.local/bin. /snap/bin matters: on aifoundry2
+# tmux is the snap, /snap/bin/tmux, and there is no /usr/bin/tmux.
+export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+command -v tmux >/dev/null || exit 0
+cd "$HOME" || exit 0
+state="$HOME/.cache/lab-sessions"
+mkdir -p "$state"
+exec 9>"$state/lock"
+flock -n 9 || exit 0                        # another run (cron's, or yours) is at it
+
+# Signed in to Claude here? (Claude Code keeps the login in ~/.claude/.credentials.json on Linux.)
+signed_in() { [ -s "$HOME/.claude/.credentials.json" ]; }
+
+# start SESSION COMMAND: a detached tmux session whose window runs COMMAND in a login shell and then stays at a shell
+# prompt. tmux refuses a second session of the same name, so two runs can never type into one window.
+# 9>&- : a tmux server started here must not inherit the lock, or it would hold it for as long as it lives and every
+# later run would stop at flock (found in the 13 October test).
+start() { tmux new-session -d -s "$1" -c "$HOME" "bash -lc '$2; exec bash -l'" 9>&- 2>/dev/null; }
+
+if ! tmux has-session -t =claude 2>/dev/null; then
+  if signed_in; then start claude "$C --continue || $C"; else start claude "$C"; fi
+fi
+
+# The server itself, by the start of its command line: tmux runs a window's command under `sh -c`, and that wrapper keeps
+# the whole line, "claude remote-control" included, after the server inside has exited (found in the 13 October test).
+if signed_in && ! pgrep -u "$(id -u)" -f -- '^([^ ]*/)?claude remote-control' >/dev/null; then
+  stamp="$state/rc-started"
+  if [ ! -e "$stamp" ] || [ $(( $(date +%s) - $(stat -c %Y "$stamp") )) -ge 600 ]; then
+    touch "$stamp"
+    cmd="$C remote-control --name $(hostname)"
+    if tmux has-session -t =claude-rc 2>/dev/null; then
+      tmux respawn-window -k -t "=claude-rc:" "bash -lc '$cmd; exec bash -l'" 9>&- 2>/dev/null
+    else
+      start claude-rc "$cmd"
+    fi
+  fi
+fi
+exit 0

@@ -7,8 +7,11 @@ lab's Tailscale network; they logged in as the lab's shared `root` once, only to
 as that account and started you; then they pasted one line. Ask them only for what only they can do: a yes before the
 first run on a card, the lab's Discord posts, and anything for the lab lead.
 
-Version of 9 October 2026, thirteenth edition: the person creates their own account and starts Claude on the lab
-machine themselves; this brief is for that Claude, which never uses ssh or root. Access (a Tailscale invite) comes from
+Version of 13 October 2026, fourteenth edition: the person creates their own account and starts Claude on the lab
+machine themselves; this brief is for that Claude, which never uses ssh or root. Since 13 October their account also
+runs `~/.local/bin/lab-sessions` every minute from its crontab: after a restart of the machine it brings back the tmux
+session `claude` (continuing the last conversation) and, once they have signed in, a Remote Control server in the
+tmux session `claude-rc`. So save what matters in files, never only in the conversation. Access (a Tailscale invite) comes from
 the lab lead by direct message, never from #community-lab. aifoundry3's card and aifoundry1's card 1 run firmware 1.4.0
 since the lab lead's update of 7 October. All four cards are in service: aifoundry2's again since 9 October, with a new
 two-fan bracket at the card, and aifoundry1's card 0 since 2 October. The current copy is `docs/lab-start/START.md` in
@@ -243,7 +246,7 @@ loop or drain yourself. Use only `sample` and `config`, never `--reset-ms` or `l
 
 **8. Finish.** Check that `et-who` lists nothing of yours, and tell your person what ran and what you saw; the
 files are in `~/runs/first-hour`. They post "released" in #community-lab. You may stay open in tmux, idle: your
-person comes back with `ssh -t <login>@<host> tmux attach -t claude` from their computer.
+person comes back with `ssh -t <login>@<host> tmux attach -t claude` from their computer, after a restart too.
 
 **Next.** Read two worked examples: `workloads/sparseparity/README.md` (a kernel brought up in stages, with
 negative controls) and `tools/claims-v3/pcie2/README.md` (pre-registered, developed on one card, validated on
@@ -286,7 +289,7 @@ switching power over idle, keep the host quiet, and record `et-lab-manifest` wit
   before deleting anything else.
 - Copy anything worth keeping out of `/tmp`, where agents often keep scratch files.
 - Close tmux windows you started for one job: some queues wait while another user is logged in. The `claude`
-  session may stay, idle.
+  and `claude-rc` sessions may stay, idle: `lab-sessions` brings them back after a restart anyway.
 - Your person posts "released" in #community-lab.
 
 ## When something breaks, and where to ask

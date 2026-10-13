@@ -9,6 +9,9 @@
   /* ---- the commands. \u0001 marks the username and \u0002 the machine, so that they can be highlighted. The root
      block validates the name again on the machine, refuses nothing silently, and gives no sudo. */
   const RAW = 'https://raw.githubusercontent.com/yaroslavvb/et-soc1-prototyping/main/docs/lab-start/START.md';
+  /* Since 13 October 2026 step 2 installs lab-sessions with a crontab line that runs it every minute, so that the tmux
+     session and, once signed in, a Remote Control server come back by themselves after a restart (the owner's ask). */
+  const KEEP = 'https://raw.githubusercontent.com/yaroslavvb/et-soc1-prototyping/main/docs/lab-start/lab-sessions';
   const L = '\u0001', H = '\u0002';
   const TPL = {
     root: [
@@ -25,7 +28,9 @@
       `[ -x ~/.local/bin/claude ] || curl -fsSL https://claude.ai/install.sh | bash`,
       `grep -qs '\\.local/bin' ~/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc`,
       `curl -fsSL ${RAW} -o ~/lab-start.md`,
-      `tmux has-session -t =claude 2>/dev/null || { tmux new-session -d -s claude -c ~ && tmux send-keys -t claude '~/.local/bin/claude' Enter; }`,
+      `mkdir -p ~/.local/bin && curl -fsSL ${KEEP} -o ~/.local/bin/lab-sessions && chmod +x ~/.local/bin/lab-sessions`,
+      `(crontab -l 2>/dev/null | grep -v lab-sessions; echo '* * * * * $HOME/.local/bin/lab-sessions >/dev/null 2>&1') | crontab -`,
+      `~/.local/bin/lab-sessions`,
       `EOF`,
       `ssh -t ${L}@${H} tmux attach -t claude`].join('\n'),
     prompt: 'Read ~/lab-start.md and follow it.',

@@ -70,7 +70,9 @@ details.brief li { margin: 4px 0; font-size: 0.92rem; }
   <li>
     <h2>2. In your terminal, start Claude on the lab machine</h2>
     <div class="cmd"><button class="btn" type="button" data-copy="user">Copy</button><pre data-tpl="user" tabindex="0"></pre></div>
-    <p class="small">Sign in when Claude asks, then trust the folder.</p>
+    <p class="small">Sign in when Claude asks, then trust the folder. From then on your Claude comes back by itself when
+    the lab machine restarts, with a Remote Control server for the Claude app. Set up before 13 October? Run step 2 again:
+    it is safe to repeat.</p>
   </li>
   <li class="on-lab">
     <h2>3. In Claude, paste this line</h2>
@@ -84,7 +86,7 @@ details.brief li { margin: 4px 0; font-size: 0.92rem; }
 </ol>
 <p class="small"><span class="copystat" data-role="stat" aria-live="polite"></span></p>
 
-<p>To leave Claude running: Ctrl-b, then d. To come back: <code data-tpl="attach"></code></p>
+<p>To leave Claude running: Ctrl-b, then d. To come back, also after a restart: <code data-tpl="attach"></code></p>
 
 <details class="brief" id="stuck"><summary>If a step fails</summary>
 <ul>
@@ -96,6 +98,7 @@ details.brief li { margin: 4px 0; font-size: 0.92rem; }
   machine first.</li>
   <li>Step 1 says the username exists: go on if it is yours, otherwise choose another.</li>
   <li>A shell prompt instead of Claude: type <code>claude</code>.</li>
+  <li>To stop Claude coming back after restarts: <code>crontab -e</code>, delete the <code>lab-sessions</code> line.</li>
   <li>No Claude account: after step 1, log in with <code data-tpl="login"></code> and keep to the brief's rules.</li>
   <li>Windows: run the commands in WSL.</li>
 </ul></details>
