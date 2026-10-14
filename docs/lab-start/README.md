@@ -88,6 +88,12 @@ data in `brief.json` behind it) and the explanations. Steps 1 to 3 keep their nu
 breaks", the firmware of aifoundry3's card and aifoundry1's card 1, 1.4.0 since the lab lead's update of 7 October,
 and its opening lines) is unchanged by the trim.
 
+**Since 14 October 2026: a line for people in more than one tailnet.** The owner's ask of 14 October (Q111): someone
+whose Tailscale login belongs to several tailnets may need to log out at https://login.tailscale.com/ and log back in
+to choose the lab's tailnet, or the approval links fail silently. Step 0 now says so in one line, and the "If a step
+fails" item for the check link also covers an approval after which ssh keeps waiting. `docs/lab-access.md` says the
+same. START.md is unchanged.
+
 ## Rebuild
 
 From the repository root:
