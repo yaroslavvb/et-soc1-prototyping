@@ -11,3 +11,11 @@ The models are illustrative. They do not reconstruct ET-SoC-1 layout, process di
 Browser QA uses one headless Chrome instance, reused for all cases. Initial checks at 1280 and 390 CSS pixels covered all four companion routes and the four original deep links: no JavaScript errors or horizontal page overflow. Every scene's primary control changed rendered pixels. Component buttons updated selected descriptions; keyboard orbit changed the image. Gate drive at zero removed the illustrated channel, with stable pixels during playback. Final checks include maximum separation, dark theme, narrow phone layout, source/deploy parity and live deep-link forwarding.
 
 No card, lab hardware or private design data was used.
+
+## Perspective correction (Q110)
+
+The owner's follow-up: “Fix the perspective. Dragging things around shouldn't change the zoom.” The first version refitted the projected bounding rectangle on every draw. Turning the model changed that rectangle, so the fit multiplied magnification even while the explicit zoom state stayed at 1. A real pointer drag reproduced a 1.1329× scale change.
+
+The camera now orbits a fixed world-space target at a fixed distance of 16 illustrative units. Scene framing is derived once from an unrotated bounding sphere covering the full range of the scene's controls; only viewport resize recomputes its base focal scale. Dragging, keyboard orbit, view presets, auto-orbit, and geometry controls preserve target-plane magnification. Explicit zoom multiplies that scale. Labels, particles and component picking use the same perspective projection.
+
+`camera-test.mjs` exposes measurements only in an in-memory browser copy. It first reproduces the old failure, then drives real pointer/keyboard input on all four views at 1280 and 390 CSS pixels. It checks target-plane magnification and centering, explicit 1.15× zoom, auto-orbit, maximum geometry controls, a full turn within the fixed frame, and no page errors/overflow. Eight cases passed; the baseline failure was detected. Run with a Playwright installation and installed Chrome: `node docs/reports/data/2026-10-14-chip-3d/camera-test.mjs`; `PLAYWRIGHT_MODULE` and `CHROME_HEADLESS` can select installed runtimes.
