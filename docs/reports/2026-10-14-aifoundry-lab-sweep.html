@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>AI Foundry lab, 14 October 2026: the dashboard&#x27;s pages checked, and a todo: list</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%AD%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f3f5f6; --paper:#ffffff; --ink:#15232b; --ink-2:#3d4f5a; --muted:#6c7c86;
+  --rule:#d5dde2; --accent:#1f6f66; --accent-2:#a8631e; --accent-soft:#e3efec; --warm-soft:#f6ecdd;
+  --code-bg:#eaeff1; --shadow:0 1px 0 rgba(21,35,43,.06); --bad:#b3452f; --bad-soft:#f7e6e1;
+  --serif:"Charter","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --sans:"Avenir Next","Seravek","Gill Sans","Helvetica Neue",system-ui,-apple-system,sans-serif;
+  --mono:"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f171c; --paper:#151f26; --ink:#e6ecef; --ink-2:#c1ccd3; --muted:#8a9aa4;
+    --rule:#28363f; --accent:#5fbcae; --accent-2:#e0a35c; --accent-soft:#183531; --warm-soft:#33291b;
+    --code-bg:#1d2a32; --shadow:none; --bad:#e2705a; --bad-soft:#3a2420;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f171c; --paper:#151f26; --ink:#e6ecef; --ink-2:#c1ccd3; --muted:#8a9aa4;
+  --rule:#28363f; --accent:#5fbcae; --accent-2:#e0a35c; --accent-soft:#183531; --warm-soft:#33291b;
+  --code-bg:#1d2a32; --shadow:none; --bad:#e2705a; --bad-soft:#3a2420;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.55}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+a:hover,a:focus-visible{border-bottom-color:var(--accent);outline:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+header.mast{padding:52px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:26px}
+.eyebrow{font-family:var(--sans);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1.title{font-family:var(--sans);font-weight:600;font-size:clamp(30px,4.6vw,46px);line-height:1.08;letter-spacing:-.01em;margin:0 0 18px;text-wrap:balance;max-width:28ch}
+.lede{font-size:19px;line-height:1.45;color:var(--ink-2);max-width:62ch;margin:0 0 18px}
+.sources{font-family:var(--sans);font-size:13.5px;line-height:1.5;color:var(--muted);max-width:78ch;margin:0 0 10px}
+.todo{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:0 6px 6px 0;padding:14px 18px;margin:22px 0 0;max-width:72ch}
+.todo p{margin:0 0 8px;font-family:var(--sans);font-size:15.5px;line-height:1.45}
+.todo p:last-child{margin:0}
+.todo strong{font-weight:700}
+nav.toc{margin:0 0 40px;padding:18px 20px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;box-shadow:var(--shadow)}
+nav.toc .lbl{font-family:var(--sans);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 22px;font-family:var(--sans);font-size:14.5px;line-height:1.35}
+nav.toc a{border:none;color:var(--ink-2)}
+nav.toc a:hover{color:var(--accent)}
+main{display:block}
+main h2{font-family:var(--sans);font-weight:600;font-size:clamp(23px,2.6vw,29px);line-height:1.15;margin:64px 0 16px;padding-top:22px;border-top:2px solid var(--ink);text-wrap:balance}
+main h3{font-family:var(--sans);font-weight:600;font-size:18.5px;line-height:1.25;margin:34px 0 10px;color:var(--ink);text-wrap:balance}
+main p{margin:0 0 14px;max-width:72ch}
+main ul,main ol{margin:0 0 16px;padding-left:1.35em;max-width:72ch}
+main li{margin:0 0 7px}
+main strong{font-weight:700}
+main hr{border:0;border-top:1px solid var(--rule);margin:40px 0}
+main blockquote{margin:18px 0 22px;padding:14px 18px;background:var(--warm-soft);border-left:3px solid var(--accent-2);border-radius:0 4px 4px 0;font-size:16px;color:var(--ink);max-width:72ch}
+q{quotes:"\201C" "\201D"}
+code{font-family:var(--mono);font-size:.85em;background:var(--code-bg);padding:.12em .4em;border-radius:4px}
+main pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;margin:0 0 20px;overflow-x:auto;max-width:80ch}
+main pre code{background:none;padding:0;font-size:13px;line-height:1.5;white-space:pre}
+img{max-width:100%;height:auto}
+main figure{margin:26px 0 32px;max-width:820px}
+main figure a{display:block;border:none}
+main figure img{display:block;width:100%;border:1px solid var(--rule);border-radius:6px}
+main figcaption{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:72ch}
+.tablewrap{overflow-x:auto;margin:18px 0 24px}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:14.5px;line-height:1.45;background:var(--paper)}
+th,td{border:1px solid var(--rule);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);font-weight:600}
+td.t{font-family:var(--mono);font-size:13px;white-space:nowrap;color:var(--ink-2)}
+.ok{color:var(--accent);font-weight:700}
+.bad{color:var(--bad);font-weight:700}
+.mid{color:var(--accent-2);font-weight:700}
+details{margin:14px 0 22px;padding:12px 16px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;max-width:80ch}
+details summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:10px}
+details p,details li{font-size:15.5px}
+.kicker{font-family:var(--sans);font-size:14px;color:var(--muted);margin:-6px 0 14px}
+footer{max-width:1080px;margin:0 auto;padding:24px 20px 60px;color:var(--muted);font-family:var(--sans);font-size:13px;border-top:1px solid var(--rule)}
+/* MathJax, loaded by md2report only on pages that contain equations (2026-09-17, week 38).
+   A display equation gets its own scroll box: an over-wide matrix must not widen the page
+   on the phone.  Inline math inherits the prose colour in both themes. */
+.math-display{overflow-x:auto;overflow-y:hidden;max-width:100%;margin:20px 0 24px;padding:2px 0}
+mjx-container{color:var(--ink)}
+mjx-container[display="true"]{margin:0!important;text-align:left}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header class="mast">
+<p class="eyebrow">AI Foundry lab</p>
+<h1 class="title">AI Foundry lab, 14 October 2026: the dashboard's pages checked, and a todo: list</h1>
+</header>
+<main>
+<p data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">← AI Foundry lab dashboard</a> › <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a></p>
+
+<p class="lede"><em>Covers Wed 14 Oct 2026 (week 42): the lab dashboard, every page it links, the three machines aifoundry1, aifoundry2 and aifoundry3, and what watches them. Written Wed 14 Oct 2026, about 17:00 PDT, from the live pages and their histories, the repository, and read-only checks on the three machines. No card was opened, and nothing that needs root was done.</em></p>
+<p><strong>The new-user page offers aifoundry2 again, and the dashboard has a todo: list.</strong> The page's Machine field had left aifoundry2 out since 2 October, through both of the card's returns to service. Eighteen pages the dashboard links are now up to date; most of them still described a card as it was a week or two ago. The checks also found the wired network down overnight with the dashboard reading "All clear", and aifoundry1's card-use log four days from its size cap. Those, and everything else still open, are on the new list.</p>
+<h2 id="the-new-user-page">The new-user page</h2>
+<p><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start">New user? Start here</a> has a Machine field that fills in the commands. It was added on 2 October, while aifoundry2's card was out of service, and offered only aifoundry3 and aifoundry1. The card came back on 6 October and again on 9 October, and both updates changed the brief, the dashboard and the docs, but not that field, so for five days a new user could not choose aifoundry2. <strong>It now offers aifoundry3, aifoundry2 and aifoundry1</strong>, in the brief's order. aifoundry2 is ready for newcomers: its tmux is found by a plain ssh command, and the page's restart-proof setup was tested there on 13 October.</p>
+<p>Two things keep it from happening again:</p>
+<ul>
+<li><strong>The note.</strong> The checklist for a card going out of service or coming back now lists the Machine field and the login banners' "New here?" lines with everything else to change in one commit (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/lab-start/README.md#keeping-it-current">docs/lab-start/README.md, Keeping it current</a>; <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/AGENT.md">AGENT.md</a> §4 points to it).</li>
+<li><strong>A check.</strong> The page's rebuild now refuses to run while the Machine field and the brief's per-machine list disagree, in either direction: tested against the old page (it asks to add aifoundry2) and against the brief of 7 October, when the card was out (it asks to remove it).</li>
+</ul>
+<p>On the same page, the footer link, broken since 9 October, opens <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-session-timeline">the session timeline</a> again, and "If a step fails" says how to stop the Remote Control server as well as the restarts.</p>
+<h2 id="the-dashboard">The dashboard</h2>
+<p>Under the Worklog there is now a <strong><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#todo">todo: list</a></strong>: 41 things we want to do in the lab, oldest first, from 25 September to today, each with the day it was added and who added it. It gathers what the lab problems ledger, the review's list, the 11 October sweep, the fan swap and today's checks left open. The longer ledgers stay where they are, and it links to them.</p>
+<p>The Worklog gained Tuesday 13 and Wednesday 14 October: the new-user steps that survive a restart, the chip diagram's Up bar and readout, the 3D views, and this page. Its intro no longer claims that every page it lists links back here. A standing note that folded away card 0's PCIe errors is gone: aifoundry1's card 0 logged about 4,000 corrected errors an hour in late September and 44 in all since the 7 October restart, so a return will now show as an alert.</p>
+<h2 id="pages-brought-up-to-date">Pages brought up to date</h2>
+<p>Each change is a dated line in the page's own style; nothing dated was rewritten.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>What changed</th>
+<th>Pages</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aifoundry2's card is in service since 9 October</td>
+<td>the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">reports hub</a> (four places, three of them work that waited on the card), the <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-2-october">2 October</a> and <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-6-october">6 October</a> pages, the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-how-energy-is-measured">energy tutorial</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-review-todo">the review's list</a>, <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman">Requests for Roman</a> (H28, SH5)</td>
+</tr>
+<tr>
+<td>aifoundry1's card 0 is in service since 2 October</td>
+<td>the reports hub, the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">energy manual</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement">heat placement</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the DVFS loop</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-without-heatsink">running without a heatsink</a> (its floor table too), and the two 25 September pages on aifoundry1 (<a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting">what was broken</a>, <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-fix">the fix</a>)</td>
+</tr>
+<tr>
+<td>the wired network (below)</td>
+<td>the <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-7-october">7 October</a> and <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-11-october">11 October</a> pages, Requests for Roman (H11, U29, SH4)</td>
+</tr>
+<tr>
+<td>aifoundry3's wired address and monitor fix went on on 13 October; only its reboot waits for its user</td>
+<td>the 11 October page's summary and sections 5 and 6</td>
+</tr>
+<tr>
+<td>the line back to the dashboard and its Worklog</td>
+<td>added to the 2 October page, <a href="https://spacesheep.dev/@yaroslavvb/aifoundry2-idle-runaway-7-october">the idle runaway of 7 October</a>, the two aifoundry1 pages and <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-link-retrain-hang">the link-retrain hang</a>; completed on the 6 and 7 October pages and the energy tutorial</td>
+</tr>
+<tr>
+<td>Requests for Roman's state, from 8 to 14 October</td>
+<td>C15 (card 0's link errors), C30, H1 and H37 re-checked</td>
+</tr>
+<tr>
+<td>the repository's own record</td>
+<td>the energy tutorial and its three scripts filed, with a row in the mirror index, as are the agents page and the heat-aware compiler page; the 9 October page's step 7, added on the live page today, folded in; aifoundry2's banner no longer sends newcomers elsewhere; the lab tools' notes say the daily health check is installed (it is, on all three); the history page says every 15 minutes, as it has been since 8 October; and its publisher refuses an unknown argument instead of publishing</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="found-and-on-the-todo-list">Found, and on the todo: list</h2>
+<ul>
+<li><strong>The wired network dropped overnight.</strong> All three wired ports lost their link at about 22:35 on 13 October and got it back at 13:56 on 14 October, within seven seconds of each other, which points at the switch or its power. Each port has lost its link twice since its machine last started. The dashboard read "All clear" throughout: its health check reports the link only as information, which the page does not show. The cable and its switch need a look on site.</li>
+<li><strong>aifoundry1's card-use log reaches its 500 MB cap about Saturday 18 October</strong>, growing about 30 MB a day, and from then on deletes its oldest days without saying so. The fix written on 11 October needs its review's blocking issue solved (a joined minute counted as held time) and a second review.</li>
+<li><strong>The card-use logger is at its 64 MB memory limit on aifoundry2 and aifoundry3</strong>; an out-of-memory stop would end card-use logging there.</li>
+<li><strong>aifoundry1's login banner still tells people not to use card 0</strong>, in service since 2 October. The corrected banners, the root-login notice, the card-open tracer and the current <code>et-lab-start</code> are in the repository and need root on the machines.</li>
+<li><strong>The history page has no keeper, standby, outside watcher or visibility check</strong>, unlike the dashboard.</li>
+<li><strong>Which firmware two cards run.</strong> The new-user brief says aifoundry3's card and aifoundry1's card 1 run 1.4.0 since 7 October; the dashboard and the docs say 1.3.1 and 1.2.0. It needs a reading on the cards before the numbers change.</li>
+</ul>
+<h2 id="not-done-and-why">Not done, and why</h2>
+<ul>
+<li>Nothing that needs root, a reboot or a visit: the banners and <code>et-lab-start</code> on the machines, the kernel reboots waiting on aifoundry1 (since 9 October) and aifoundry3 (since 10 October, for its user), and the cable.</li>
+<li>No card was opened, so the firmware question waits for a reading taken under the card etiquette.</li>
+</ul>
+<h2 id="sources">Sources</h2>
+<ul>
+<li>The live pages and their version histories, and the repository, <a href="https://github.com/yaroslavvb/et-soc1-prototyping">et-soc1-prototyping</a> (request Q114 in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/02-requests.md">02-requests.md</a>).</li>
+<li>Read-only checks on aifoundry1, aifoundry2 and aifoundry3: each machine's network state and its counters, systemd, the logs readable without root, and the installed tools and banners against the repository's copies.</li>
+<li>The dashboard's own data. Written by agents in one session: seven checkers, each re-checked by a second agent, then five fixers, each reviewed by another before anything was published.</li>
+</ul>
+</main>
+</div>
+
+</body>
+</html>
