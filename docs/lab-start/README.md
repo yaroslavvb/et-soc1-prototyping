@@ -10,7 +10,7 @@ page shows it; `tools/lab/et-lab-start` is the script.
 | File | What it is |
 |---|---|
 | `START.md` | The brief for the Claude that runs on a lab machine (fourteenth edition, 13 October 2026, about 3,780 words). The person gets there with the page's steps: (0) a Tailscale invite from the lab lead, asked for by direct message on the AI Foundry Discord, never in #community-lab; then three steps, all from their own computer's terminal: (1) one ssh as the shared `root` that creates their own account (validated name, `adduser --disabled-password`, no sudo, linger) and logs out; (2) one ssh as that account that installs Claude Code, fetches this file from GitHub into `~/lab-start.md`, starts Claude in a tmux session `claude`, and attaches the terminal to it; (3) one line for that Claude: "Read ~/lab-start.md and follow it." The brief checks it is on a lab machine and not root, chooses a free card on that machine by a fixed list, runs the first-hour tests, and keeps to the lab's rules; it never uses ssh or root. The page's commands are in `docs/reports/sources/lab-start.script.js` (tested 2 October: the root block against stand-ins for a new, a taken and a bad name; the user block live on aifoundry3 with Claude swapped for an echo). |
-| `make_page_data.py` | Writes `docs/reports/data/2026-09-30-lab-start/brief.json` (START.md word for word, its sha256, version and word count, the placeholders the page fills; the card tiles' data went with the tiles on 8 October 2026). `--check` exits 1 if the JSON is stale. It refuses a START.md whose opening lines lack `<login>`. |
+| `make_page_data.py` | Writes `docs/reports/data/2026-09-30-lab-start/brief.json` (START.md word for word, its sha256, version and word count, the placeholders the page fills; the card tiles' data went with the tiles on 8 October 2026). `--check` exits 1 if the JSON is stale. It refuses a START.md whose opening lines lack `<login>`. Since 14 October 2026 both modes also exit 1 when the page's Machine field (`select#f-host` in `docs/reports/sources/lab-start.body.html`) does not offer exactly the machines that START.md's "Then, by machine:" list has a card on (see Keeping it current). |
 | `lab-sessions` | Since 13 October 2026: keeps a person's Claude running through restarts. Step 2 downloads it to `~/.local/bin/lab-sessions` and adds `* * * * * $HOME/.local/bin/lab-sessions` to their crontab; each run makes the tmux session `claude` again when it is missing (continuing the last conversation with `claude --continue` once they have signed in), and keeps a Remote Control server (`claude remote-control --name <host>`) in the tmux session `claude-rc` once they have signed in, restarting it at most once in 10 minutes. It only starts things, only the person's own, under a `flock`; each session runs its command as the window's process, so two runs never type into one window. Why: the owner's ask of 13 October, after the 11–13 October maintenance sweep found that a restart leaves people with no session and no server until they redo step 2 by hand. Tested on aifoundry2 on 13 October with a throwaway account, deleted after (steps 1 and 2 as the page has them; a dummy login file for the signed-in branch; the tmux server killed, as a restart would): cron brought back both sessions 13 s after the kill, a failed server was restarted only after 10 minutes, and nothing held the lock. The test caught three bugs, fixed before publishing: aifoundry2 has only the snap tmux (`/snap/bin/tmux`), so the script uses the system PATH; a tmux server started under the lock inherited it and held it for good (hence `9>&-`); and tmux runs a window's command under `sh -c`, which keeps "claude remote-control" in its command line after the server exits, so the check matches the start of the line. A real Remote Control server needs a claude.ai subscription; a dummy login gets "Remote Control is only available with claude.ai subscriptions", and the pane stays at a prompt. |
 | `README.md` | This file. |
 
@@ -29,6 +29,11 @@ chooses them (START.md, step 2). Copying tries the clipboard API, then a selecte
 forbids the clipboard). The page is meant to be public: new users cannot open the owner's private pages.
 
 ### How the agent chooses the machine
+
+Since the ninth edition (2 October 2026) the person chooses the machine in the page's Machine field, which lists them
+in the order below (aifoundry3, aifoundry2, aifoundry1), and the Claude that START.md briefs is already on that machine
+and chooses only the card ("Then, by machine:"). What follows describes the flow up to the eighth edition, when an
+agent on the person's laptop chose the machine; the order and the test for a free card still hold.
 
 START.md's steps 1 and 2, in short. The agent logs in to each machine once with an ssh it runs in the background,
 its output in a file, so that it can pass a Tailscale login link to the person while the ssh waits; a machine that
@@ -277,3 +282,27 @@ and the 2 October banners are installed (step 3's caution about the installed co
 costs someone time. Bump its "Version of" line (the page shows it), rebuild, and redeploy the page. Keep `et-lab-start`'s per-host
 card facts and its printed Remote Control steps and rules in step with START.md. The facts it states are dated in `AGENT.md` §4, `docs/lab-access.md` and
 `docs/findings/14-card-behaviour.md`; where those change, this changes.
+
+**When a card goes out of service or comes back** (aifoundry2's card went out on 2 and 7 October and came back on 6
+and 9 October; aifoundry1's card 0 came back on 2 October), change all of these in one commit, then redeploy the
+page:
+
+1. `START.md`: its opening lines, the card table, and the machine's bullet under "Then, by machine:" (a machine whose
+   card is out says "its card is out of service" there and sends the person to another machine). Bump its edition.
+2. **The page's Machine field**, `<select id="f-host">` in `docs/reports/sources/lab-start.body.html`: it offers
+   exactly the machines with a card for a new user, in the pick order of "How the agent chooses the machine" above.
+   Why it is on this list (14 October 2026, Q114): the field was added on 2 October while aifoundry2's card was out,
+   both back-in-service updates (6 and 9 October) changed every other place but not this one, and new users could
+   not choose aifoundry2 until the owner noticed. Since then `make_page_data.py`, in both modes, refuses to run while
+   the field and START.md's "Then, by machine:" list disagree, so the rebuild fails until both say the same.
+3. `tools/lab/et-lab-start`'s per-host card facts, and the login banners `tools/lab/motd-aifoundryN`, their "New
+   here?" lines included; the installed copies (`/usr/local/bin/et-lab-start`, `/etc/motd`) need root on each
+   machine.
+4. The dashboard: `tools/lab/dashboard/lab.json` (`excluded`), and the day's page in its Worklog.
+5. The documents that state a card's state: `AGENT.md` §4, `CLAUDE.md`, `README.md`, `docs/lab-access.md`,
+   `docs/getting-started.md`, `docs/findings/14-card-behaviour.md` (a dated section), `docs/findings/README.md`,
+   `docs/findings/01-resources.md`, `docs/reports/TODO.md`; and the public pages that describe the card as it is
+   now, each with a dated update line (the reports hub, the lab's day pages): `git grep -n "out of service"` and
+   `git grep -n "back in service"` find them. The last two such commits, `a66cd26f` (out, 7 October) and `2fdb7fc6`
+   (back, 9 October), are a map, not a complete one: the Machine field and aifoundry2's "New here?" line were missing
+   from both.

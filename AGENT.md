@@ -150,6 +150,12 @@ builds the same `/opt/et` natively (the README's setup section). **Never run `pr
 | aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz, and its 0.21.x governor acts only while a kernel runs (firmware source) | **back in service since 2 Oct**, when its broken fan was replaced: 49 °C idle (hottest sensor 53 °C), 52–53 °C (hottest 56 °C) under 8 minutes of sgemm bursts, cooler than card 1 under the same test (59–60 °C, hottest 63 °C; `docs/reports/data/2026-10-02-fan-fix-aifoundry1/`). From 25 Sep until then it overheated (115–117 °C on the host on 25 Sep; its service processor's statistics held a 119 °C mean and a 123 °C sensor) and took no sustained work; excluded from the campaign |
 | aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample since 25 Sep, cool or hot, busy or idle: its governor never raises the clock (off or latched; asked the lab) | fine; select a card on this host with `ET_DEVICES=<n>` and take its lock, `etsoc-shire<n>.lock` (one person per card) |
 
+**When a card goes out of service or comes back**, change everything that states it in one commit:
+[`docs/lab-start/README.md`](docs/lab-start/README.md#keeping-it-current), "Keeping it current", lists the files and
+pages, the new-user page's Machine field among them. That field is why (14 October 2026, Q114): it never offered
+aifoundry2 after the card came back on 6 and 9 October, because neither update listed it. `docs/lab-start/make_page_data.py`
+now refuses to rebuild the page while the field and the brief disagree.
+
 The hosts also differ in CPU, RAM and ET runtime build, which matters for host-side timing:
 [14-card-behaviour.md](docs/findings/14-card-behaviour.md#the-lab-machines-and-their-four-cards-are-not-interchangeable).
 The trees on aifoundry1 and aifoundry3 (`~/nekko`) are rsynced copies without git: edit in a git checkout, then sync.
@@ -412,3 +418,15 @@ copy it here too.
 7. Run `python3 scripts/check-mirror.py` (read-only) to see that the published pages still match the repository.
 8. Before any card work: a dry run, a smoke, `timeout 10`, the card lock, and `et-lab-manifest` saved with the data.
 9. Write each lesson into the repository as you learn it (section 10), and keep getting-started's status current.
+
+## Changelog
+
+*Every edit to this file adds one line here, newest first, in the same commit (the owner's rule of 10 October 2026 for
+agent instruction files). It starts on 14 October 2026; earlier changes are in `git log -- AGENT.md`.*
+
+- **2026-10-14 (Wed, week 42)** — Section 4 gains "When a card goes out of service or comes back": a pointer to the
+  checklist in `docs/lab-start/README.md` ("Keeping it current"), which now names the new-user page's Machine field,
+  and to the check `docs/lab-start/make_page_data.py` runs on that field. This changelog starts. *Why:* the owner's ask
+  that day (Q114): "update https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start to include the aifoundry2 [...] this
+  was missed during the maintenance check somehow, so update the note to include it next time". The page's Machine
+  field had offered only aifoundry3 and aifoundry1 since 2 October.
