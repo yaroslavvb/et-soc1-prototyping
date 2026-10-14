@@ -19,11 +19,12 @@ cd "$(git rev-parse --show-toplevel)"
 DRY=0; [ "${1:-}" = "--dry-run" ] && DRY=1
 REV=$(git rev-parse --short HEAD)
 OUT=${GHP_OUT:-$HOME/claude/work/gh-pages-site}
-rm -rf "$OUT"; mkdir -p "$OUT/chip-diagram" "$OUT/memory-levels"
+rm -rf "${OUT:?}"; mkdir -p "$OUT/chip-diagram" "$OUT/memory-levels" "$OUT/chip-3d"
 
 # Build from the committed files of HEAD, never from the working tree, so the mirror equals a commit.
 git show "HEAD:docs/reports/2026-09-27-et-soc1-chip-diagram.html" > "$OUT/chip-diagram/index.html"
 git show "HEAD:docs/reports/2026-09-28-et-soc1-memory-levels.html" > "$OUT/memory-levels/index.html"
+git show "HEAD:docs/reports/chip-3d.html" > "$OUT/chip-3d/index.html"
 for d in chip-diagram memory-levels; do
   mkdir -p "$OUT/$d/ladder-img"
   for f in $(git ls-tree --name-only "HEAD:docs/reports/ladder-img"); do
@@ -48,6 +49,7 @@ a{color:var(--link)}ul{padding-left:1.2em}li{margin:10px 0}
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping">github.com/yaroslavvb/et-soc1-prototyping</a> (commit ${REV}).
 The originals, with comments and versions, are on spacesheep.dev.</p>
 <ul>
+<li><a href="chip-3d/"><b>From metal to channel, in 3D</b></a>: rotate the wiring, FinFET, silicon fin and channel.</li>
 <li><a href="chip-diagram/"><b>The ET-SoC-1, interactively</b></a>: the chip, its flows, and a zoom from the rack down to atoms
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram">original</a>)</li>
 <li><a href="memory-levels/"><b>Anatomy of a memory access, interactively</b></a>: each level of the memory system, down to the

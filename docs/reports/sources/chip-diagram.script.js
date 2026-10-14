@@ -1032,6 +1032,12 @@ function asksBlock(key, open) {
 }
 /* the panel is not a live region (it holds whole fact lists); a short line announces what it now shows */
 function panel(html) {
+  // Q109 (14 October 2026): the four physical scales have an orbitable 3D companion.
+  // Keep this hook in the chip page, so the shared ladder's other hosts keep their own panels.
+  const view3d = {'die.metal': 'metal', 'lib.finfet': 'finfet', 'lib.fin': 'fin', 'lib.channel': 'channel'};
+  const current3d = Z.path.length && view3d[Z.path[Z.path.length - 1].id];
+  if (current3d) html = html.replace(/(<p class="pn-title">[\s\S]*?<\/p>)/,
+    '$1' + `<p class="pn-3d" data-ss-id="physical-scale-3d-link"><a class="st-btn pri" href="https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d#${current3d}" target="_blank" rel="noopener">Explore this in 3D ↗</a></p>`);
   hideTip(); const b = $('pn-body'); b.innerHTML = ARW(html); b.scrollTop = 0;
   const k = b.querySelector('.pn-kick'), t = b.querySelector('.pn-title');
   $('pn-live').textContent = (k ? k.textContent + ': ' : '') + (t ? t.textContent : '');

@@ -906,6 +906,12 @@ same scales outward and inward, the loop, a way back from every move and no dead
   rebuilt. The probes and their numbers, before and after: `docs/reports/data/2026-10-13-jitter/`; the ladder's README,
   "The readout's one look, smoother moves, Studio 45 from its plans".
 
+## Four physical scales in 3D (14 October 2026, Q109)
+
+[Inside the silicon](https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d) (public, unlisted; space `9018f695-7165-4852-9fbb-4f49cfcaefa1`) adds four orbitable 3D teaching models: metal tracks and vias, a FinFET with its gate and oxide separated, parallel silicon fins, and an n-channel device under qualitative gate drive with positive drain bias. The chip diagram links each model from its corresponding scale panel and from a four-view index.
+
+The standalone source is `docs/reports/chip-3d.html`, with no build-time or runtime dependencies. All lengths, charge and motion are illustrative; the models do not reconstruct ET-SoC-1 physical design. The source footer links TSMC interconnect research, Chenming Hu's MOSFET chapters and Berkeley's BSIM-MG documentation. The QA/reproduction note is `docs/reports/data/2026-10-14-chip-3d/README.md`. GitHub Pages publishes the companion under `chip-3d/` through `tools/publish-gh-pages.sh`.
+
 ## Cross-links between the reports
 
 - **2026-09-24, afternoon (`d04b29a`).** Every report got the byline clause "· part of the measurement reports",
