@@ -193,6 +193,8 @@ python3 scripts/check-mirror.py --only "$SLUG"
 
 ## Checking that live equals repo
 
+**Perspective follow-up, 2026-10-14 (Wed, week 42), Q110:** the 3D companion at version `f3e51fc2ee8e` equals source commit `5f0614c0` (`check-mirror.py --via https --only et-soc1-in-3d`, exit 0, no warnings). All four scenes passed real-drag, keyboard, preset, auto-orbit, explicit-zoom and geometry-control regression checks at 1280 and 390 pixels. GitHub Pages deployment `38584895224` completed successfully.
+
 **Latest targeted check: 2026-10-14 (Wed, week 42), Q109**, through `scripts/check-mirror.py --via https --only et-soc1-chip-diagram et-soc1-in-3d`: both pages equal their committed sources, the chip diagram's seven folder assets equal, no visibility/slug warnings, exit 0. The four live scale links reach their corresponding 3D views; the companion's scene navigation updates the outer Spacesheep URL. GitHub Pages deployment `38581284838` completed successfully; `chip-3d/#finfet` renders the FinFET view. These checks cover the two Q109 pages, not the entire measurement set.
 
 ```bash
