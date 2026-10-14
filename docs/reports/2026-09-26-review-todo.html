@@ -29,11 +29,8 @@ version-3 results, 20 open, four of them the owner's in part 0 — but part 0's 
 eleven numbered fixes are done: U16, U17, U18, U20, U24 and U27, each checked read-only on all three hosts on
 14 October 2026 (the notes sit with the items). U19, U22, U23, U25 and U26 were not checked and stay open. Both cards
 that were out of service are back: aifoundry1's card 0 since 2 October 2026, when its broken fan was replaced, and
-aifoundry2's since 9 October 2026, on a two-fan 92 mm bracket fitted at the card. One thing got worse: the wired
-network between the three machines, which worked on 13 October, reports no carrier on every machine's wired port as of
-14 October. Its saved settings are intact, so the cable, its switch or a port needs a look on site, and traffic
-between the machines falls back to Wi-Fi meanwhile. The live page had last been built from this file on
-30 September; it is rebuilt with this change.</p>
+aifoundry2's since 9 October 2026, on a two-fan 92 mm bracket fitted at the card. The live page had last
+been built from this file on 30 September; it is rebuilt with this change.</p>
 <ul>
 <li><strong>Part 0</strong> is for the owner. <strong>Part A</strong> changes published pages, so it waits for the next pass: edit the source
   named in MIRROR.md's "How each page is built", rebuild, run <code>check_page.sh</code>, deploy (MIRROR.md, "Deploying one
@@ -105,7 +102,9 @@ between the machines falls back to Wi-Fi meanwhile. The live page had last been 
 <li>U19 and U26: the reboots. Open on 14 October 2026; aifoundry3's waits for the lab user working on it.</li>
 <li>U20 on aifoundry2 and aifoundry3: bluetooth, cups-browsed and the firmware-updater snap disabled, apport's
     core-dump hook masked. <strong>Done</strong> (14 October 2026): on all three hosts <code>bluetooth</code> and <code>cups-browsed</code> read
-    <code>disabled</code>, no firmware-updater snap unit is present, and <code>kernel.core_pattern</code> pipes to
+    <code>disabled</code>, <code>snap list</code> reads the <code>firmware-updater</code> snap itself as <code>disabled</code> (its per-revision
+    <code>snap-firmware\x2dupdater-*.mount</code> units stay enabled, as snapd leaves them for a disabled snap, and the
+    <code>firmware-notifier</code> timer is absent), and <code>kernel.core_pattern</code> pipes to
     <code>/usr/lib/systemd/systemd-coredump</code>, which is installed.</li>
 <li>U22 on aifoundry2 and aifoundry3: the login-service setting aifoundry1 got.</li>
 <li>U23 on aifoundry3: its login-service item.</li>
@@ -195,8 +194,8 @@ Many fix and cut items landed in the merge too; those are ticked below.</p>
   read 115–117 °C idle and drew 66–71 W at 600 MHz until its firmware dropped it to 300 MHz; card 1 peaked near
   71 °C. Source: <code>../findings/14-card-behaviour.md</code>.</li>
 <li>Note of 14 October 2026: card 0's broken fan was replaced on 2 October 2026 and the card is in service again,
-  so any new text says it overheated then, never that it overheats. The entry at the end of part D has the
-  measured numbers.</li>
+  so any new text says it overheated then, never that it overheats. The measured numbers are in the bullet
+  above.</li>
 <li>At <code>:124,163</code>: "still counts about one corrected error a second; its kernel log is rate-limited since
   25 September".</li>
 </ul>
