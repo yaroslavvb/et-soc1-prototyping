@@ -146,10 +146,13 @@ details.more[open]>summary{margin-bottom:6px}
 <section style="margin-top:0">
 <p class="eyebrow">AI Foundry lab · Troubleshooting · 25 September 2026</p>
 <h1>What is broken on aifoundry1</h1>
+<p data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">← AI Foundry lab dashboard</a> › <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a></p>
 <p class="small" style="border:1px solid var(--good);background:var(--good-soft);border-radius:8px;padding:8px 12px"><b>Fixed on 25 September 2026, 15:02 PDT.</b> Both cards answer again; what was done, and what is still open: <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-fix">aifoundry1 is fixed</a>.
 <b>Update, 27 September:</b> card 1 has since run the three-card version-3 check (25–26 September) and the gathers and
 scatters after it; card 0 overheats under load (98–102&nbsp;°C in short smoke launches, 115–117&nbsp;°C idle afterwards) and
-takes no sustained work.</p>
+takes no sustained work.
+<b>Update, 2 October:</b> card 0's broken fan was <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-2-october#aifoundry1">replaced</a>; it idles at 49&nbsp;°C, 52–53&nbsp;°C under
+8 minutes of sgemm, and is in service again.</p>
 <p class="byline">25 September 2026 · an answer to Roman’s question “Can someone try to see exactly what is broken on 1?” · read-only checks on aifoundry1, 2 and 3; no card was opened</p>
 <p class="lede">The cards are refused by software, not by hardware. Both ET-SoC-1 cards in aifoundry1 are on the bus, bound to the ET driver, and have their device nodes. What fails is a version check: the <code>et_soc1</code> kernel module that DKMS builds on aifoundry1 has an <strong>empty version string</strong> (<code>/sys/module/et_soc1/version</code> holds only a newline, where aifoundry2 and aifoundry3 read <code>0.20.0</code>), so et-platform’s deviceLayer, inside every ET program, throws <code>Error unable to evaluate compatibility!</code> before a single command reaches a card. The cause is a one-character Makefile typo, <code>$(ET_MODULE_VERSION=)</code>, in the stale driver copy DKMS builds from (<a href="#3-evidence">section 3</a>), so a reboot will not help. What we cannot know until the fix is in is which firmware the cards run and whether they answer.</p>
 

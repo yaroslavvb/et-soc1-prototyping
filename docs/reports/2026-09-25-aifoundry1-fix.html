@@ -146,6 +146,7 @@ details.more[open]>summary{margin-bottom:6px}
 <section style="margin-top:0">
 <p class="eyebrow">AI Foundry lab · Fix log · 25 September 2026</p>
 <h1>aifoundry1 is fixed</h1>
+<p data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">← AI Foundry lab dashboard</a> › <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a></p>
 <p class="byline">25 September 2026, 15:00–15:11 PDT · done at the owner's request · follows <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting">What is broken on aifoundry1</a></p>
 <p class="lede"><b>Both ET-SoC-1 cards in aifoundry1 answer again.</b> The <code>et_soc1</code> kernel module was rebuilt by DKMS from the fixed driver source that was already on the machine (et-platform <code>353f20e</code>), for all three kernels in <code>/boot</code>, and reloaded. It now reports version <code>0.20.0</code> and srcversion <code>47D26A305A0428B29FB7FC4</code>, the same as aifoundry2 and aifoundry3, and a read-only management query succeeds on both cards. The interrupted 24 September kernel update was finished as well, after freeing space on the nearly full root file system. The machine was not rebooted, and no running user work was touched.</p>
 
@@ -156,6 +157,11 @@ three-card version-3 check (25–26 September, as aifoundry1-c1) and the gathers
 its firmware dropped it to 300&nbsp;MHz and it cooled. Its cooling (a fan, heat sink or airflow) is at fault, which its
 300&nbsp;MHz idle normally hides; it takes no sustained work and was left out of the check (amendment A4 of the
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md">check's record</a>).</p>
+
+<p class="small" id="update-2-oct" style="border:1px solid var(--good);background:var(--good-soft);border-radius:8px;padding:8px 12px"><b>Update, 2 October 2026.</b> Card 0's broken fan was replaced; it idles at
+49&nbsp;°C and reads 52–53&nbsp;°C under 8 minutes of sgemm, and the card is in service again
+(<a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-2-october#aifoundry1">what was done on 2 October</a>). The
+cooling fault in the 27 September note above is therefore closed.</p>
 
 <div class="card">
 <dl class="glance">
