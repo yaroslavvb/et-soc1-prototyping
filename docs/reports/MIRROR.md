@@ -153,7 +153,8 @@ https://yaroslavvb.github.io/et-soc1-prototyping/ (an index), `chip-diagram/` an
 generated: `tools/publish-gh-pages.sh` builds it from the committed pages of HEAD (with `docs/reports/ladder-img/`
 beside each page: since the shared ladder's part 2 the memory levels fetch it too) and force-pushes one fresh commit,
 so run it after each deploy of either page and never edit the branch by hand (`--dry-run` builds into
-`~/claude/work/gh-pages-site` only). The spacesheep pages stay canonical; the mirror carries the commit it was built
+`~/claude/work/gh-pages-site` only; `GHP_OUT=<dir>` builds there instead, which is how it runs on a machine with no
+`~/claude/work`, since 13 October). The spacesheep pages stay canonical; the mirror carries the commit it was built
 from in its index.
 
 ## Deploying one page
