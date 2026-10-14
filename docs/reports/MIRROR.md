@@ -235,7 +235,7 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-10-14, 16:35 PDT**, after the lab sweep (Q114) redeployed eighteen pages and created the 14 October
+**Last check: 2026-10-14, 16:11 PDT**, after the lab sweep (Q114) redeployed eighteen pages and created the 14 October
 page: 41 of 42 mirrored public pages equal to their files in content. The checker's summary reads "19 of 42 equal, 31
 rows with a difference, exit 1" because 22 equal pages and 8 not-mirrored rows sit outside the 50 spaces `spacesheep
 list` returns, so their visibility and slug could not be checked (the listing cap of 5 October; on the lab's todo:
