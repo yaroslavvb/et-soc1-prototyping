@@ -122,6 +122,8 @@ because scope decisions explain why some questions were answered thoroughly and 
 
 | Q112 | 10-14 | “When I rotate it around, the gate label keeps jumping.” | FinFET and channel labels now keep stable viewport slots with leaders to their physical parts, instead of collision reflow that moved the gate in 25-pixel steps. Gate remains visible on phones; the channel leader reaches the actual gate top. Regression reproduced a 50-pixel jump in the old layout and zero drift after the correction on full-turn, pitch and zoom sweeps at desktop/phone widths. Camera projection is unchanged. `docs/reports/data/2026-10-14-chip-3d/label-test.mjs`. |
 
+| Q113 | 10-14 | “Improve the quality of these diagrams. Do some research to find good visualizations and create a higher-quality visualization with more details.” | Rebuilt all four 3D companion views using bundled WebGL, original detailed geometry and public Intel/Berkeley/imec references. Added lined vias and wiring hierarchy, raised source/drain and contacts, gate dielectric/spacers/STI, shared-gate fins, finite inversion charge, cutaways and synchronized labeled cross-sections. Studio lighting, reflections and cached soft shadows improve material/depth clarity. Desktop/phone input checks, full-turn label/scale regressions and before/after motion sampling pass. Existing deep links and generic-geometry scope remain. Sources/build/research/tests: `docs/reports/sources/chip-3d/` and `docs/reports/data/2026-10-14-chip-3d/`. |
+
 ## Scope decisions worth remembering
 
 - **The reflash was not done (Q7).** The minion runtime and the service-processor bootloader are signed

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Explore four semiconductor structures in 3D: detailed metal interconnect, FinFET, silicon fin and inversion channel, with cutaways and cross-sections.">
+<title>Inside the silicon · AI Foundry</title>
+<style>/* INLINE_STYLES */</style>
+</head>
+<body>
+<main class="wrap" id="chip-exhibit">
+<header class="masthead" data-ss-id="chip3d-header">
+ <div class="brand"><span class="brandmark" aria-hidden="true">◇</span> AI FOUNDRY <span class="brand-sub">/ Silicon explorer</span></div>
+ <a id="backLink" href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#at=die.metal">← Chip diagram</a>
+</header>
+<section class="intro" data-ss-id="chip3d-intro">
+ <div><p class="eyebrow">ET-SoC-1 · A physical intuition</p><h1>Inside the silicon.</h1></div>
+ <p>A chip is built in layers. <br>Explore the wires, the switch, and the surface where a channel forms.</p>
+</section>
+<nav class="scenes" aria-label="Explore four structures" data-ss-id="chip3d-scenes">
+ <a href="#metal" data-scene="metal" id="metal"><span>01</span><b>Metal layers</b><small>Connect</small></a>
+ <a href="#finfet" data-scene="finfet" id="finfet"><span>02</span><b>FinFET</b><small>Switch</small></a>
+ <a href="#fin" data-scene="fin" id="fin"><span>03</span><b>Silicon fin</b><small>Wrap</small></a>
+ <a href="#channel" data-scene="channel" id="channel"><span>04</span><b>Channel</b><small>Conduct</small></a>
+</nav>
+<section class="scene-heading" data-ss-id="chip3d-scene-heading"><div><p class="eyebrow" id="sceneKicker">01 / ABOVE THE SILICON</p><h2 id="sceneTitle">A network built in three dimensions</h2><p id="scenePurpose">Conductors run sideways. Vias connect the levels. Dielectric keeps the paths apart.</p></div><span class="scope-tag">ILLUSTRATIVE GEOMETRY</span></section>
+<section class="exhibit" data-ss-id="chip3d-exhibit">
+ <div class="stage" id="stage">
+  <canvas id="sceneCanvas" tabindex="0" role="img" aria-label="Interactive semiconductor model" aria-describedby="canvasHelp sceneSummary"></canvas>
+  <div id="labelOverlay" aria-hidden="true"></div>
+  <div class="stage-top"><span id="modelTag">FOUR METAL TIERS</span><span id="modelStatus">Perspective</span></div>
+  <div id="renderFallback" class="render-fallback" hidden><strong>3D needs WebGL 2</strong><p>Enable hardware acceleration or try another browser. The labeled sections and controls below still explain each structure.</p></div>
+  <div class="stage-bottom"><span id="canvasHelp">Drag to rotate · pinch or scroll to zoom</span><div class="zoom-buttons"><button id="zoomOut" aria-label="Zoom out">−</button><button id="zoomIn" aria-label="Zoom in">+</button><button id="resetButton">Reset</button></div></div>
+ </div>
+ <aside class="controls">
+  <div class="control-box"><p class="eyebrow">EXPLORE</p><div id="sceneControls"></div><div class="toggles"><button id="sectionButton" aria-pressed="false">Cutaway</button><button id="dielectricButton" aria-pressed="false">Show dielectric</button></div><p id="controlHint" class="control-hint">Separate the levels to follow the vertical connections.</p></div>
+  <div class="control-box camera"><p class="eyebrow">VIEWPOINT</p><div class="view-buttons"><button data-view="perspective" aria-pressed="true">Perspective</button><button data-view="top" aria-pressed="false">Top</button><button data-view="end" aria-pressed="false">End</button></div><div class="motion-buttons"><button id="rotateButton" aria-pressed="false">Auto orbit</button><button id="pauseButton" aria-pressed="false">Pause flow</button></div><p class="control-hint">Arrow keys rotate · + / − zoom · R resets</p></div>
+  <div class="takeaway"><span class="eyebrow">LOOK CLOSER</span><p id="lessonCopy">The vertical links make the stack a connected network.</p><span id="motionNote" hidden>Motion starts paused for reduced motion.</span></div>
+ </aside>
+</section>
+<section class="component-panel" data-ss-id="chip3d-materials"><div class="parts-label">SELECT A MATERIAL <span>or tap the model</span></div><div id="parts" class="parts" aria-label="Model components"></div><p id="selectedCopy" class="selected-copy" aria-live="polite"></p></section>
+<section class="detail-grid" data-ss-id="chip3d-section">
+ <div class="section-card"><div class="section-card-heading"><p class="eyebrow" id="sectionEyebrow">SECTION / METAL &amp; VIA</p><span>schematic</span></div><div id="sectionFigure"></div></div>
+ <div class="section-explanation"><p class="eyebrow">THE STRUCTURE EXPLAINS THE BEHAVIOR</p><h3 id="detailTitle">Connected metal, separated signals</h3><p id="detailCopy"></p><div id="detailMetric" class="detail-metric"></div><p id="detailFootnote" class="detail-footnote"></p></div>
+</section>
+<p class="sr-only" id="sceneSummary">A three-dimensional model with selectable components, fixed camera zoom during orbit and stable labels.</p><p class="sr-only" id="stateSummary" aria-live="polite">Ready.</p>
+<section class="scope" data-ss-id="chip3d-scope"><p><strong>Generic semiconductor structures, not an ET-SoC-1 physical layout.</strong> Materials are color-coded; layer thicknesses and spacing are exaggerated. Motion, charge and gate drive are qualitative, not a calibrated device simulation.</p><p>“7 nm” names a process family, not every feature’s width. Four wiring tiers here are a teaching sample, not the chip’s layer count.</p></section>
+<footer data-ss-id="chip3d-footer"><details><summary>Research &amp; visual references</summary><div class="references"><a href="https://download.intel.com/newsroom/kits/22nm/pdfs/22nm-Details_Presentation.pdf#page=5"><b>Intel · Tri-gate anatomy</b><span>Single and multiple fins under a common gate; pp. 5–8.</span></a><a href="https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu-ch7-slides.ppt-Compatibility-Mode-Repaired.pdf#page=31"><b>Berkeley · The fin in section</b><span>Gated perimeter and inversion density; slides 31 &amp; 38.</span></a><a href="https://www.imec-int.com/en/articles/mitigating-thermal-bottleneck-advanced-interconnects"><b>imec · The wiring hierarchy</b><span>Local, intermediate and global interconnect.</span></a></div><p>Additional sources: <a href="https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch6-1.pdf">Hu, MOS transistors, ch. 6</a>; <a href="https://bsim.berkeley.edu/bsim-mg-faq/">Berkeley BSIM-MG</a> (volume inversion); <a href="https://www.imec-int.com/en/articles/can-binary-or-ternary-compounds-beat-cu-future-interconnect-applications">imec, copper barriers and liners</a>; <a href="https://www.tsmc.com/english/dedicatedFoundry/technology/logic/l_7nm">TSMC 7 nm</a>. These original teaching models borrow explanatory ideas, not process dimensions or proprietary geometry.</p></details><p><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram">Return to the chip diagram ↗</a></p></footer>
+<noscript><p class="no-script">Enable JavaScript to rotate the models and explore their labeled sections. Metal wires connect through vias; a FinFET gate controls the top and sidewalls of a silicon fin through a thin insulator. Positive gate bias forms an electron channel in this n-channel example.</p></noscript>
+</main>
+<!-- THIRD_PARTY_LICENSE -->
+<script>/* INLINE_APP */</script>
+</body>
+</html>
