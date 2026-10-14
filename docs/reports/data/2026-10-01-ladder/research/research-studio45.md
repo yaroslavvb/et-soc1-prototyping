@@ -148,8 +148,35 @@ No file here stores the address or its position.
 2. May the page give the building's size (37 x 9 m, from city data)? It is harmless, but it describes the
    building itself.
 3. Where in the building is the rack (which floor, the warehouse or a studio)? And is "the lab's room" one of the
-   member studios?
+   member studios? *Half answered on 13 Oct 2026: the upper floor (§8). Which room is still to be confirmed; the page
+   marks its guess, the hard-floored room at the shop end, as inferred.*
 4. Should the page cite the venue's own website (link not given here: the page shows the street address) by name? Its pages show the address.
+
+## 8. The building inside (13 October 2026)
+
+The owner, that evening: *"for Studio 45, maybe you can find the original plans to make it more realistic. The lab is
+on the second floor, indeed."* That answers half of question 3 above: the lab is upstairs. The research (web sources
+only; its working notes, with the links and the address, stay in the owner's private notes) found:
+
+- **No plan set is online.** The city holds two planning records for the lot (a 1980 environmental review for a project
+  never built, and a 2002 conditional-use application, cancelled), neither with drawings; the 1985 construction
+  drawings are paper. No real-estate or event-venue listing of the building gives plans or dimensions.
+- **The venue's own public 3D tour (Matterport, scanned 2 June 2026) carries measured plans of both floors**, as vector
+  plans and top-down pictures. They agree with the city's footprint to within 0.6 m (the walls). From them: the ground
+  floor is one room 36.1 by 8.5 m inside; the upper floor is a mezzanine at each end, 17.1 m and 9.8 m long, with 9.3 m
+  open between them from the floor to the roof (s45.10). Downstairs, one end has a lounge and kitchen, small meeting
+  rooms and a stair, with a pallet lane down one side; the middle is the warehouse with the second stair; the other end
+  is the wood shop with the CNC router's bed (s45.11). Upstairs, the lounge end has the co-working room (two long
+  shared desks), a conference room, a meeting room and a bathroom; the shop end is one room with a hard floor, about
+  9.7 by 8.1 m (s45.12).
+- **The city's records:** the building went up in 1985, a one-storey shop by its permit and later a post office; a 2023
+  permit adds sprinklers "under an existing mezzanine"; the property roll still says one storey (s45.15). The parcel
+  is five-sided, and behind the building it runs on 2.3 to 10 m: a yard, most likely the venue's courtyard (s45.16).
+- **Inferred, and marked so:** which end faces 29th Street (the lounge end, most likely: s45.13); which room is the lab
+  (the hard-floored room at the shop end, most likely: s45.14); the upper floor's height (about 3.3 m: s45.17).
+
+The page draws both floors and a section to scale from these, the lab's room dashed. It still shows no house number,
+block, point or coordinates, and links none of the venue's pages or its tour, whose pages give the street address.
 
 ## Sources
 
@@ -178,6 +205,11 @@ San Francisco, "Chert" (nps.gov/prsf/learn/nature/chert.htm).
 Wikipedia (read 1 Oct 2026): "Bernal Heights, San Francisco"; "Bernal Heights Summit"; "List of hills in San
 Francisco"; "Mount Davidson (California)"; "Chert". SF Chronicle, "Why isn't Bernal Heights growing?" (S.
 Neilson, 29 Aug 2021): the 2020 census change (-12 people) and the Planning Commission boundaries.
+
+For §8 (13 Oct 2026): Studio 45's public 3D tour (Matterport, scanned 2 June 2026), its measured plans of both floors
+(not linked here: the tour gives the street address); DataSF, Building Permits (i98e-djp9), Assessor-Recorder's
+historical secured property roll (wv5m-vpq2), Parcels (acdm-wktn) and SF Planning records (y673-d69b), all Open Data
+Commons PDDL.
 
 From the repository: `docs/reports/data/2026-09-27-chip-diagram/research/research-outside.md` and `outside.json`
 (the current studio45 and sf levels, the SF map's projection, fibre index 1.4682, the 600 MHz clock, the die's

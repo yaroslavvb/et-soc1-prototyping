@@ -169,9 +169,9 @@ nodes = {
              'blurb': '29th Street, 1.3 km long, drops about 95 m from the hills of Noe Valley to the flats where the Mission meets Bernal Heights. Light runs its length in 4.3 µs, about 2,600 ticks of the chip\'s clock.',
              'facts': ['st.1', 'st.2', 'st.3', 's45.1']},
     'studio45': {'name': 'Studio 45', 'short': 'Studio 45', 'm': 37.0, 'kind': 'derived', 'f': 's45.6',
-                 'blurb': 'Studio 45, a co-working space and workshop for people who build hardware: the lab\'s rack is here. Light crosses the building in 123 ns, 74 ticks of the chip\'s clock.',
-                 'note': 'the building at its address, about 37 m deep and 9 m wide (DataSF building footprints); where the rack stands in it is not recorded',
-                 'facts': ['s45.1', 's45.2', 's45.3', 's45.4', 's45.5', 's45.6', 's45.7', 's45.8']},
+                 'blurb': 'Studio 45, a co-working space and workshop for people who build hardware: the lab is upstairs. A long, narrow building with a floor at each end of its upper storey and a warehouse open to the roof between them. Light crosses it in 123 ns, 74 ticks of the chip\'s clock.',
+                 'note': 'the building at its address, about 37 m deep and 9 m wide (DataSF building footprints), drawn from the measured plans of the venue\'s 3D tour; the lab upstairs (the owner, 13 Oct 2026), which room inferred',
+                 'facts': ['s45.1', 's45.9', 's45.2', 's45.3', 's45.10', 's45.11', 's45.12', 's45.13', 's45.14', 's45.15', 's45.16', 's45.17', 's45.4', 's45.5', 's45.6', 's45.7', 's45.8']},
 }
 for k in EGG:
     if k in nodes:
@@ -241,6 +241,10 @@ NUM = {
     'b_area': ('b.2', '2.79 km²'), 'b_sum': ('b.4', '142 m'), 'b_park': ('b.5', '10.7 ha'), 'b_pop': ('b.3', '26,140'), 'b_light': ('b.8', '7.3 µs'),
     'st_len': ('st.1', '1.29 km'), 'st_top': ('st.2', '126 m'), 'st_bot': ('st.2', 'about 30 m'), 'st_drop': ('st.2', 'about 95 m'), 'st_light': ('st.3', '4.31 µs'),
     's45_l': ('s45.6', '37 m'), 's45_w': ('s45.6', '9 m wide', '9 m'), 's45_h': ('s45.6', '6 to 8 m'), 's45_cnc': ('s45.3', '4 x 8 ft', '4 × 8 ft'), 's45_light': ('s45.7', '123 ns'),
+    # the building inside (13 Oct 2026: the venue's measured plans, the city's records)
+    's45_gf': ('s45.10', '36.1 m long and 8.5 m wide', '36.1 × 8.5 m'), 's45_mzA': ('s45.10', '17.1 m'), 's45_mzB': ('s45.10', '9.8 m'),
+    's45_void': ('s45.10', '9.3 m'), 's45_lab': ('s45.12', '9.7 by 8.1 m', '9.7 × 8.1 m'), 's45_yr': ('s45.15', '1985'),
+    's45_up': ('s45.17', 'about 3.3 m'), 's45_yard': ('s45.16', '2.3 to 10 m'),
 }
 # the textbook constructions' numbers (research/circuits.json, part 1b)
 for k, v in CIR.get('num', {}).items():

@@ -359,7 +359,10 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 }
 /* where a stage's name may wrap (under 1700 wide) the bar keeps room for two lines whatever the flow, so that the
    drawing above it never changes size between flows (a short screen keeps them to one line, below) */
-@media (min-width:900px) and (max-width:1700px) and (min-height:781px){.stg{min-height:calc(2.2em + 8px)}}
+@media (min-width:900px) and (max-width:1700px) and (min-height:781px){.stg{min-height:calc(2.2em + 8px)}
+  /* and the hint that stands in for the stages before a flow is picked keeps the same room (13 Oct 2026: the bar grew
+     6.7 px when a flow started, and the drawing above it shrank to match, at 1440 x 900) */
+  .stages li.stg-hint{min-height:calc(2.2 * clamp(.74rem,.27vw + .63rem,.98rem) + 8px)}}
 /* laptops and projectors, 900-1450 wide: tighter header buttons so that the header stays on one row */
 @media (min-width:900px) and (max-width:1450px){
   .st-head{gap:4px 10px}

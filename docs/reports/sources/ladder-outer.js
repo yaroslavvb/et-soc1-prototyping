@@ -493,12 +493,14 @@ function lineSeat(cx0, cx1, cy, px0, px1, py) { const k = (px1 - px0) / (cx1 - c
 /* ---- 29th Street: a side view, not a map. Its height along its length (USGS lidar, every 40 m), the vertical scale
    stretched and labelled so, the cross streets as ticks; no stretch of it marked, and Studio 45 in an inset beside the
    drawing, never at a point on the street ---- */
-const ST29X = [140, 880], ST29Y = () => (PH ? 330 : 380);
+// (13 Oct 2026: on a wide screen the profile sat 80 units low under an empty band; it and the street line the camera
+// lands on moved up together)
+const ST29X = [140, 880], ST29Y = () => (PH ? 330 : 300);
 onode('st29', {kid: 'studio45', build: (L, ap) => {
   const B = BERN.st29, pr = B.profile_m, len = pr[pr.length - 1][0], X0 = ST29X[0], W = ST29X[1] - ST29X[0];
   obd(L, false);
   otitle(L, '29th Street', 'side view, heights stretched', `${on('st_len')} long, it falls ${on('st_drop')}; light runs it in ${on('st_light')}`, `${onf('st_len')} ${onf('st_drop')} ${onf('st_light')}`);
-  const Y0 = PH ? 400 : 600, kz = PH ? 1.9 : 2.8, kx = W / len, xm = d => X0 + d * kx, ym = h => Y0 - h * kz;
+  const Y0 = PH ? 400 : 520, kz = PH ? 1.9 : 2.8, kx = W / len, xm = d => X0 + d * kx, ym = h => Y0 - h * kz;
   const g = opart(L, 'street', '29th Street, in profile: details', {title: '29th Street, in profile', kick: '29th Street · part', lead: (OSC.st29 || {}).blurb, facts: ['st.1', 'st.2', 'st.3']});
   const line = pr.map(([d, h], i) => `${i ? 'L' : 'M'}${xm(d).toFixed(1)},${ym(h).toFixed(1)}`).join('');
   E('path', {class: 'ground', d: `${line}L${xm(len)},${Y0}L${X0},${Y0}Z`}, g);
@@ -534,58 +536,143 @@ onode('st29', {kid: 'studio45', build: (L, ap) => {
   const gs = opart(L, 'to45', 'Studio 45, on 29th Street: zoom in', kidInfo('studio45'), {id: 'studio45'});
   S(E('rect', {class: 'shape inset', x: ib.x, y: ib.y, width: ib.w, height: ib.h, rx: 6}, gs), {});
   E('rect', {class: 'ring', x: ib.x - 5, y: ib.y - 5, width: ib.w + 10, height: ib.h + 10, rx: 9}, gs);
-  S(E('rect', {x: ib.x + ib.w / 2 - 36, y: ib.y + iy[0], width: 72, height: 30, rx: 2, 'pointer-events': 'none'}, gs), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 1.5});
+  // the building in a small side view (13 Oct 2026; an empty box before): its two upstairs floors, the warehouse open
+  // between them (the next level, s45.10)
+  const mk = PH ? 6.2 : 4.6, mw = 36.66 * mk, mh = 6.05 * mk, mx = ib.x + (ib.w - mw) / 2, my = ib.y + iy[0], gm = E('g', {'pointer-events': 'none'}, gs);
+  S(E('rect', {x: mx, y: my, width: mw, height: mh}, gm), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 1.5});
+  [[0, 17.1], [26.4, 36.66]].forEach(([a, b]) => S(E('line', {x1: mx + a * mk, y1: my + mh - 3.3 * mk, x2: mx + b * mk, y2: my + mh - 3.3 * mk}, gm), {stroke: 'var(--ink-2)', strokeWidth: 2}));
   T(gs, ib.x + ib.w / 2, ib.y + iy[1], 'Studio 45', 'o-l', 'middle'); T(gs, ib.x + ib.w / 2, ib.y + iy[2], 'on 29th Street', 'o-s', 'middle');
   T2(L, PH ? 140 : ib.x, PH ? ib.y + 30 : ib.y + ib.h + 30, ['its place on the street', 'is not shown'], 'o-s', 'start', null, 1.2);
   ap.zs.studio45 = {r: ib, g: gs, tr: 'jump'};
 }});
-/* ---- Studio 45: the building at its address in plan and in section, schematic, to scale (DataSF's footprint, 37 by
-   9 m); the rack to scale, its place in the building not recorded ---- */
-const SK45 = 19;   // units per metre
-const S45P = {x: 150, y: 60, w: 37 * SK45, h: 9 * SK45};
-const RK = {x: S45P.x + 22 * SK45, y: S45P.y + 5 * SK45, w: 1.5 * SK45, h: 0.6 * SK45};
+/* ---- Studio 45 (redrawn 13 Oct 2026, the owner: "for Studio 45, maybe you can find the original plans to make it more
+   realistic. The lab is on the second floor, indeed"). No plan set is online, but the venue's public 3D tour carries
+   measured plans of both floors (s45.10-s45.12), and the city's records give the footprint, the roof and the yard (s45.6,
+   s45.15, s45.16). Both floors in plan and a section along the building, to scale, the lounge end on the left: most
+   likely the street's (s45.13). The lab upstairs is the owner's word; which room is inferred (dashed). The rack in it to
+   scale, where in the room not recorded. On a phone the drawing sits lower (its subtitle wraps), the yard, past the
+   view's edge, is left out, and a few labels are shorter ---- */
+const SK45 = 19.5;   // units per metre
+const S45X = 150, S45L = 36.66, S45W = 8.84;   // the footprint (DataSF): 36.66 m deep, 8.84 m on the street
+const s45x = m => S45X + m * SK45;
+// the rooms, read off the tour's plans: [key, along from, along to, across from, across to] in metres from the lounge
+// end and the plan's top side, then the label (and a phone's)
+const S45GF = [['lane', 0, 16.8, 0, 3.2, 'pallet lane'], ['lounge', 0, 10.6, 3.2, S45W, 'lounge and kitchen', 'lounge'],
+  ['small', 10.6, 16.8, 3.2, S45W, 'small rooms', 'rooms']];
+const S45UP = [['cowork', 0, 10.6, 0, 7.4, 'co-working'], ['conf', 10.6, 17.1, 0, 3.1, 'conference'],
+  ['meet', 10.6, 17.1, 3.1, S45W, 'meeting'], ['land', 4.9, 8.0, 7.4, S45W, ''], ['wc', 8.0, 10.6, 7.4, S45W, 'WC']];
+const S45LAB = [26.4, S45L], S45VOID = [17.1, 26.4];
 onode('studio45', {kid: 'rack', build: (L, ap) => {
   obd(L, false);
-  otitle(L, 'Studio 45', 'schematic, to scale', `a co-working space and workshop for hardware, ${on('s45_l')} by ${on('s45_w')}; light crosses it in ${on('s45_light')}`, `${onf('s45_l')} ${onf('s45_light')}`);
-  const fl = S45P;
-  const g = opart(L, 'bldg', 'The building: details', {title: 'Studio 45', kick: 'Studio 45 · part', lead: (OSC.studio45 || {}).blurb, facts: ['s45.2', 's45.3', 's45.4', 's45.5', 's45.6', 's45.7']});
-  S(E('rect', {class: 'shape floor', x: fl.x, y: fl.y, width: fl.w, height: fl.h, rx: 3}, g), {});
-  E('rect', {class: 'ring', x: fl.x - 6, y: fl.y - 6, width: fl.w + 12, height: fl.h + 12, rx: 7}, g);
+  otitle(L, 'Studio 45', 'measured plans, to scale', `a co-working space and workshop for hardware, ${on('s45_l')} by ${on('s45_w')}, built ${on('s45_yr')}`,
+    `${onf('s45_l')} ${onf('s45_yr')}`);
+  const DY = PH ? 32 : 0, U = 34 + DY, G = 262 + DY, S0 = 588 + DY;   // the upper plan's top, the ground plan's, the section's ground line
+  const BW = S45L * SK45, BH = S45W * SK45;
+  const rect = (parent, top, x0, x1, y0, y1, cls) => S(E('rect', {class: cls, x: s45x(x0), y: top + y0 * SK45, width: (x1 - x0) * SK45, height: (y1 - y0) * SK45}, parent), {});
+  const rlab = (parent, top, r) => { const t = PH && r[6] ? r[6] : r[5]; if (t) T(parent, s45x((r[1] + r[2]) / 2), top + ((r[3] + r[4]) / 2) * SK45 + 6, t, 'o-s', 'middle'); };
+  const treads = (parent, top, x0, x1, y0, y1) => { for (let m = x0; m <= x1 + 1e-6; m += 0.28) E('line', {class: 's45st', x1: s45x(m), y1: top + y0 * SK45, x2: s45x(m), y2: top + y1 * SK45}, parent); };
+  const ring = (g, x, y, w, h) => E('rect', {class: 'ring', x: x - 6, y: y - 6, width: w + 12, height: h + 12, rx: 6}, g);
+  // ---- upstairs: a floor at each end, the warehouse open between them
+  T(L, S45X, U - 10, `upstairs: ${on('s45_mzA')} at the lounge end, ${on('s45_mzB')} at the shop end`, 'o-s', 'start', onf('s45_mzA'));
+  const gu = opart(L, 'upper', 'The upper floor: details', {title: 'The upper floor: a floor at each end', kick: 'Studio 45 · upstairs',
+    lead: 'Upstairs is a mezzanine at each end of the building. At the lounge end: the co-working room with two long shared desks, a conference room, a meeting room and a bathroom. Between the two ends the warehouse is open from the floor to the roof.',
+    facts: ['s45.10', 's45.12', 's45.17']});
+  S45UP.forEach(r => rect(gu, U, r[1], r[2], r[3], r[4], 'shape s45r'));
+  S45UP.forEach(r => rlab(gu, U, r));
+  rect(gu, U, S45VOID[0], S45VOID[1], 0, S45W, 's45void');
+  const vx = s45x((S45VOID[0] + S45VOID[1]) / 2);
+  T2(gu, vx, U + BH / 2 - 14, ['open to the', PH ? 'warehouse' : 'warehouse below'], 'o-s', 'middle', null, 1.2);
+  T(gu, vx, U + BH / 2 + 40, on('s45_void'), 'o-s', 'middle', onf('s45_void'));
+  ring(gu, S45X, U, s45x(S45VOID[1]) - S45X, BH);
+  // the lab's room (which room: inferred), its stair head and the rack
+  const gl = opart(L, 'lab', 'The lab, upstairs: details', {title: 'The lab, upstairs', kick: 'Studio 45 · the lab',
+    lead: 'The lab is on the upper floor (the owner). Which room has not been recorded: most likely this one, the large hard-floored room over the shop, with its own stair. The drawing dashes it for that reason.',
+    facts: ['s45.9', 's45.14', 's45.12']});
+  rect(gl, U, S45LAB[0], S45LAB[1], 0, S45W, 'shape s45lab');
+  rect(gl, U, 26.4, 27.5, 4.3, 6.6, 's45r');
+  treads(gl, U, 26.5, 27.4, 4.3, 6.6);
+  const lx = s45x((S45LAB[0] + S45LAB[1]) / 2) + 10;
+  T(gl, lx, U + 94, 'the lab', 'o-l', 'middle');
+  T(gl, lx, U + 118, PH ? 'room: inferred' : 'which room: inferred', 'o-s', 'middle');
+  T(gl, lx, U + 142, on('s45_lab'), 'o-s', 'middle', onf('s45_lab'));
+  ring(gl, s45x(S45LAB[0]), U, (S45LAB[1] - S45LAB[0]) * SK45, BH);
   // the walls stay drawn while the camera dives to the rack, until the rack's photo covers the screen
-  S(E('rect', {x: fl.x, y: fl.y, width: fl.w, height: fl.h, rx: 3, 'pointer-events': 'none'}, L), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 2, strokeDasharray: '10 8'});
-  T(g, fl.x + 14, fl.y + 28, 'in plan: what is where inside is not recorded', 'o-s');
-  T(g, fl.x + 14, fl.y + fl.h - 14, `${on('s45_l')} deep`, 'o-s', 'start', onf('s45_l'));
-  // in section: two storeys, 6 to 8 m tall
-  const sy = PH ? 470 : 470, sh = 7 * SK45, gsct = opart(L, 'section', 'The building in section: details', {title: 'Two storeys', kick: 'Studio 45 · part', lead: 'The building at its address has two storeys and is 6 to 8 m tall. The venue lists two floors of co-working space, a street-level warehouse and courtyard and a wood shop; how they fit in this building, and whether the venue reaches onto its neighbours, is not known.', facts: ['s45.3', 's45.6']});
-  S(E('rect', {class: 'shape floor', x: fl.x, y: sy - sh, width: fl.w, height: sh, rx: 2}, gsct), {});
-  S(E('line', {x1: fl.x, y1: sy - sh / 2, x2: fl.x + fl.w, y2: sy - sh / 2, 'pointer-events': 'none'}, gsct), {stroke: 'var(--ink-2)', strokeWidth: 1.5, strokeDasharray: '6 6'});
-  S(E('line', {x1: fl.x - 30, y1: sy, x2: fl.x + fl.w + 30, y2: sy, 'pointer-events': 'none'}, gsct), {stroke: 'var(--ink)', strokeWidth: 2.5});
-  E('rect', {class: 'ring', x: fl.x - 6, y: sy - sh - 6, width: fl.w + 12, height: sh + 12, rx: 6}, gsct);
-  T(gsct, fl.x + 14, sy - sh + 26, 'upper storey', 'o-s'); T(gsct, fl.x + 14, sy - 14, 'street level (the venue: a warehouse and shop)', 'o-s');
-  T(gsct, PH ? fl.x + fl.w - 10 : fl.x + fl.w + 12, PH ? sy - sh - 12 : sy - sh / 2 + 6, `${on('s45_h')} tall`, 'o-s', PH ? 'end' : 'start', onf('s45_h'));
-  // a person and the CNC router's bed, to scale
-  const gp = opart(L, 'person', 'A person, for scale: details', {title: 'A person, for scale', kick: 'Studio 45 · scale', lead: 'A person 1.7 m tall, drawn to the building\'s scale: light crosses the building in 123 ns, 74 ticks of the chip\'s clock.', facts: ['s45.7']});
-  const px = fl.x + 30 * SK45, ph = 1.7 * SK45;
-  S(E('circle', {cx: px, cy: sy - ph + 3.5, r: 3.5}, gp), {fill: 'var(--ink-2)'}); S(E('rect', {x: px - 3, y: sy - ph + 7, width: 6, height: ph - 7, rx: 2}, gp), {fill: 'var(--ink-2)'});
-  S(E('circle', {cx: px, cy: sy - ph / 2, r: 22, 'pointer-events': 'all'}, gp), {fill: 'transparent'}); E('circle', {class: 'ring', cx: px, cy: sy - ph / 2, r: 24}, gp);
-  T(gp, PH ? px - 14 : px + 14, sy - ph - 8, 'a person, 1.7 m', 'o-s ohalo', PH ? 'end' : 'start');
-  const gk = opart(L, 'cnc', 'The CNC router\'s bed: details', {title: 'A 4 × 8 ft CNC router', kick: 'Studio 45 · tools', lead: 'The shop\'s three-axis CNC router cuts a 4 by 8 foot sheet: 1.22 by 2.44 m, drawn here to the building\'s scale.', facts: ['s45.3', 's45.8']});
-  const cx = fl.x + 6 * SK45, cy = fl.y + 3 * SK45;
-  S(E('rect', {class: 'shape cncb', x: cx, y: cy, width: 2.44 * SK45, height: 1.22 * SK45, rx: 1}, gk), {});
-  E('rect', {class: 'ring', x: cx - 5, y: cy - 5, width: 2.44 * SK45 + 10, height: 1.22 * SK45 + 10, rx: 4}, gk);
-  S(E('rect', {x: cx - 12, y: cy - 12, width: 2.44 * SK45 + 24, height: 1.22 * SK45 + 24, 'pointer-events': 'all'}, gk), {fill: 'transparent'});
-  T(gk, cx, cy + 1.22 * SK45 + 22, `${on('s45_cnc')} CNC bed`, 'o-s', 'start', onf('s45_cnc'));
-  // the rack: to scale, its place in the building not recorded
+  S(E('rect', {x: s45x(S45LAB[0]), y: U, width: (S45LAB[1] - S45LAB[0]) * SK45, height: BH, 'pointer-events': 'none'}, L), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 2, strokeDasharray: '10 8'});
+  const RK = {x: s45x(31.2), y: U + 0.5 * SK45, w: 1.5 * SK45, h: 0.6 * SK45};   // the rack, against the room's wall
   const gr = opart(L, 'torack', 'The rack: zoom in', kidInfo('rack'), {id: 'rack'});
-  S(E('circle', {cx: RK.x + RK.w / 2, cy: RK.y + RK.h / 2, r: 40, 'pointer-events': 'all'}, gr), {fill: 'transparent'});
+  S(E('circle', {cx: RK.x + RK.w / 2, cy: RK.y + RK.h / 2, r: 30, 'pointer-events': 'all'}, gr), {fill: 'transparent'});
   S(E('rect', {class: 'shape rackp', x: RK.x, y: RK.y, width: RK.w, height: RK.h, rx: 2}, gr), {});
   E('rect', {class: 'ring', x: RK.x - 6, y: RK.y - 6, width: RK.w + 12, height: RK.h + 12, rx: 5}, gr);
-  if (PH) T2(gr, RK.x - 10, RK.y + 44, ['the rack (to scale;', 'its place is not recorded)'], 'o-s', 'middle', null, 1.15);
-  else T(gr, RK.x + RK.w / 2, RK.y + 40, 'the rack (to scale; its place is not recorded)', 'o-s', 'middle');
+  T(gr, RK.x + RK.w / 2, RK.y + RK.h + 24, 'the rack', 'o-s', 'middle');
   // (the rack is small in the building: a powers-of-ten jump from a box an eighth of the view around it, so that no
   // layer is ever scaled past 30 times, on a phone either)
   ap.zs.rack = {r: markBox(RK.x + RK.w / 2, RK.y + RK.h / 2), g: gr, tr: 'jump'};
-  sbar(L, 150, PH ? 560 : 560, 5 * SK45, '5 m');
+  // ---- street level
+  T(L, S45X, G - 10, `street level: inside, ${on('s45_gf')}`, 'o-s', 'start', onf('s45_gf'));
+  const gg = opart(L, 'ground', 'Street level: details', {title: 'Street level', kick: 'Studio 45 · downstairs',
+    lead: 'One room 36 m long: a pallet lane down one side from the street end, a lounge and kitchen, small meeting rooms and a stair; then the warehouse, open to the roof, with the second stair; the wood shop at the far end.',
+    facts: ['s45.10', 's45.11', 's45.13']});
+  S45GF.forEach(r => rect(gg, G, r[1], r[2], r[3], r[4], 'shape s45r'));
+  S45GF.forEach(r => rlab(gg, G, r));
+  treads(gg, G, 1.0, 5.0, 7.4, S45W);
+  ring(gg, S45X, G, 16.8 * SK45, BH);
+  const gw = opart(L, 'warehouse', 'The warehouse: details', {title: 'The warehouse', kick: 'Studio 45 · downstairs',
+    lead: 'The middle of the building is open from the floor to the roof, 9.3 m of it between the two upstairs floors: the venue\'s warehouse, where pallets come in and its big events are held. Its stair climbs to the lab\'s end.',
+    facts: ['s45.10', 's45.11', 's45.3']});
+  rect(gw, G, 16.8, 26.4, 0, S45W, 'shape s45r');
+  treads(gw, G, 21.9, 26.3, 4.4, 5.4);
+  T(gw, s45x(21.6), G + 40, 'warehouse', 'o-s', 'middle'); T(gw, s45x(21.6), G + 64, PH ? 'open above' : 'open to the roof', 'o-s', 'middle');
+  ring(gw, s45x(16.8), G, 9.6 * SK45, BH);
+  const gsh = opart(L, 'shop', 'The wood shop: details', {title: 'The wood shop', kick: 'Studio 45 · downstairs',
+    lead: 'The far end of the ground floor: benches and machines down both walls, the 4 × 8 ft CNC router among them. The lab is above it.', facts: ['s45.11', 's45.3']});
+  rect(gsh, G, 26.4, S45L, 0, S45W, 'shape s45r');
+  T(gsh, s45x(31.5), G + 40, 'wood shop', 'o-s', 'middle');
+  ring(gsh, s45x(26.4), G, (S45L - 26.4) * SK45, BH);
+  const gk = opart(L, 'cnc', 'The CNC router\'s bed: details', {title: 'A 4 × 8 ft CNC router', kick: 'Studio 45 · tools',
+    lead: 'The shop\'s three-axis CNC router cuts a 4 by 8 foot sheet: 1.22 by 2.44 m, drawn to the building\'s scale where the tour\'s plan shows its bed.', facts: ['s45.3', 's45.8']});
+  const cx = s45x(32.2), cy = G + 5.6 * SK45;
+  S(E('rect', {class: 'shape cncb', x: cx, y: cy, width: 2.44 * SK45, height: 1.22 * SK45, rx: 1}, gk), {});
+  E('rect', {class: 'ring', x: cx - 5, y: cy - 5, width: 2.44 * SK45 + 10, height: 1.22 * SK45 + 10, rx: 4}, gk);
+  S(E('rect', {x: cx - 12, y: cy - 12, width: 2.44 * SK45 + 24, height: 1.22 * SK45 + 24, 'pointer-events': 'all'}, gk), {fill: 'transparent'});
+  if (PH) T(gk, cx + 2.44 * SK45, cy + 1.22 * SK45 + 24, 'CNC bed', 'o-s', 'end');
+  else T(gk, cx + 2.44 * SK45, cy + 1.22 * SK45 + 22, `${on('s45_cnc')} CNC bed`, 'o-s', 'end', onf('s45_cnc'));
+  // the yard behind the building (a desktop's view only: it runs past a phone's)
+  if (!PH) {
+    const gy = opart(L, 'yard', 'The yard: details', {title: 'The yard', kick: 'Studio 45 · outside',
+      lead: 'Behind the building its lot runs on another 2.3 to 10 m, its back edge slanting: a yard, most likely the courtyard the venue pairs with its warehouse. Which side of the drawing is which is not known.', facts: ['s45.16']});
+    const yd = [[S45L, 0], [S45L + 2.3, 0], [S45L + 10, 4.6], [S45L + 7.4, S45W], [S45L, S45W]];
+    S(E('path', {class: 'shape s45yard', d: 'M' + yd.map(([a, b]) => `${s45x(a).toFixed(1)},${(G + b * SK45).toFixed(1)}`).join('L') + 'Z'}, gy), {});
+    T(gy, s45x(S45L + 4.2), G + BH / 2 + 6, 'yard', 'o-s', 'middle');
+    ring(gy, s45x(S45L), G, 10 * SK45, BH);
+  }
+  // ---- in section, along the building
+  const top = S0 - 6.05 * SK45, up = S0 - 3.3 * SK45;
+  T(L, S45X, top - 12, 'along the building, in section', 'o-s');
+  const gsc = opart(L, 'section', 'The building in section: details', {title: 'In section, along the building', kick: 'Studio 45 · section',
+    lead: 'Two floors at the ends and the warehouse open to the roof between them; a stair at each end climbs to them. The roof is flat, about 6 m up; the upper floor\'s height is an estimate.',
+    facts: ['s45.6', 's45.10', 's45.17']});
+  S(E('rect', {class: 'shape s45r', x: S45X, y: top, width: BW, height: S0 - top}, gsc), {});
+  E('line', {class: 's45slab', x1: s45x(0), y1: up, x2: s45x(17.1), y2: up}, gsc);
+  E('line', {class: 's45slab', x1: s45x(26.4), y1: up, x2: s45x(S45L), y2: up}, gsc);
+  E('line', {class: 's45st', x1: s45x(1.0), y1: S0, x2: s45x(5.0), y2: up}, gsc);
+  E('line', {class: 's45st', x1: s45x(21.9), y1: S0, x2: s45x(26.4), y2: up}, gsc);
+  T(gsc, s45x(8.5), up - 16, 'co-working, meeting rooms', 'o-s', 'middle');
+  T(gsc, s45x(31.5), up - 16, 'the lab', 'o-s', 'middle');
+  T(gsc, s45x(10.6), S0 - 16, 'lounge', 'o-s', 'middle');
+  T(gsc, s45x(33.0), S0 - 16, 'wood shop', 'o-s', 'middle');
+  T2(gsc, s45x((S45VOID[0] + S45VOID[1]) / 2), top + 28, ['warehouse:', PH ? 'open above' : 'open to the roof'], 'o-s', 'middle', null, 1.2);
+  ring(gsc, S45X, top, BW, S0 - top);
+  E('line', {class: 's45gl', x1: s45x(-0.6), y1: S0, x2: s45x(S45L + (PH ? 0.6 : 10)), y2: S0}, L);
+  T(L, S45X, S0 + 24, '← 29th Street, most likely', 'o-s', 'start', 's45.13');
+  T(L, S45X, S0 + 50, `roof ${on('s45_h')} up; upper floor ${on('s45_up')} up, an estimate`, 'o-s', 'start', `${onf('s45_h')} ${onf('s45_up')}`);
+  // a person, to scale, in the shop
+  const gp = opart(L, 'person', 'A person, for scale: details', {title: 'A person, for scale', kick: 'Studio 45 · scale',
+    lead: 'A person 1.7 m tall, drawn to the building\'s scale: light crosses the building in 123 ns, 74 ticks of the chip\'s clock.', facts: ['s45.7']});
+  const px = s45x(29.0), ph = 1.7 * SK45;
+  S(E('circle', {cx: px, cy: S0 - ph + 3.5, r: 3.5}, gp), {fill: 'var(--ink-2)'}); S(E('rect', {x: px - 3, y: S0 - ph + 7, width: 6, height: ph - 7, rx: 2}, gp), {fill: 'var(--ink-2)'});
+  S(E('circle', {cx: px, cy: S0 - ph / 2, r: 22, 'pointer-events': 'all'}, gp), {fill: 'transparent'}); E('circle', {class: 'ring', cx: px, cy: S0 - ph / 2, r: 24}, gp);
+  T(gp, px, S0 + 24, 'a person, 1.7 m', 'o-s', 'middle');
+  sbar(L, PH ? S45X : 700, S0 + (PH ? 86 : 50), 5 * SK45, '5 m');
 }});
 /* ---- the rack: the owner's photo, its machines' labels blurred ---- */
 const RKS = 0.69;   // units per pixel of the 1000 x 988 copy (a phone: 0.66, lower, under the wrapped line)

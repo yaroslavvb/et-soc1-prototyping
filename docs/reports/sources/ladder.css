@@ -32,8 +32,9 @@
    suffix goes (the readout and the button's name have it) and the readout takes only its width */
 @media (min-width:900px) and (max-width:1180px){.st-btn.up .up-s{display:none}.scale-ro{min-width:0}}
 .scale-ro .inf{text-decoration:underline dotted var(--muted);text-underline-offset:3px}
-.scale-ro.mv{color:var(--ink)}
-.scale-ro.jump{font-size:clamp(.9rem,.5vw + .7rem,1.3rem);font-weight:650;color:var(--ink)}
+/* the readout keeps one look while the camera moves (the owner, 13 Oct 2026: "The text sometimes changes in size ... when
+   I click while it's animating, it's larger, and then it goes back to the original size"): only its digits change.
+   Until then a move set it darker, and a jump larger and bold, until the camera rested */
 .crumb-menu{position:absolute;left:0;top:0;z-index:8;display:flex;flex-direction:column;min-width:12em;max-height:70%;overflow:auto;background:var(--surface);
   border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:4px}
 .crumb-menu[hidden]{display:none}
@@ -178,7 +179,7 @@
 /* ---- the shared ladder (1 October 2026): the levels between the city and the rack, the device, the atom and below, the
    ring of sizes, the two-state electronics and the easter egg's "?" ---- */
 .crumbs button.egg{font-weight:700;color:var(--ink-2);letter-spacing:.05em}
-.scale-ro.ring,.scale-ro .ro-ring{color:var(--ink);font-weight:600}
+.scale-ro.ring,.scale-ro .ro-ring{color:var(--ink)}
 #chip .hood,#chip .map .st.hood{fill:color-mix(in srgb,var(--c2) 26%,var(--page));stroke:var(--c2);stroke-width:1.6;vector-effect:non-scaling-stroke}
 #chip .nbh{fill:none;stroke:color-mix(in srgb,var(--ink-2) 45%,var(--page));stroke-width:1;vector-effect:non-scaling-stroke}
 #chip .nbl{fill:color-mix(in srgb,var(--ink-2) 80%,var(--page))}
@@ -193,6 +194,15 @@
 #chip .sumln{stroke:var(--c3);stroke-width:1.5;stroke-dasharray:3 6}
 #chip .xtick{stroke:var(--ink);stroke-width:2}
 #chip .cncb{fill:color-mix(in srgb,var(--c1) 22%,var(--page));stroke:var(--c1);stroke-width:1.5}
+/* Studio 45 from the measured plans of its 3D tour (13 Oct 2026): rooms, the stretch open over the warehouse, the lab's
+   room (dashed: which room is inferred), stairs, the upstairs floors in section, the ground line and the yard */
+#chip .s45r{fill:color-mix(in srgb,var(--ink-2) 5%,var(--page));stroke:var(--ink-2);stroke-width:1.5}
+#chip .s45void{fill:none;stroke:var(--ink-2);stroke-width:1.5;stroke-dasharray:4 6}
+#chip .s45lab{fill:color-mix(in srgb,var(--c2) 12%,var(--page));stroke:var(--c2);stroke-width:2.5;stroke-dasharray:9 6}
+#chip .s45st{fill:none;stroke:var(--ink-2);stroke-width:1.2}
+#chip .s45slab{stroke:var(--ink);stroke-width:3.5}
+#chip .s45gl{stroke:var(--ink);stroke-width:2.5}
+#chip .s45yard{fill:color-mix(in srgb,var(--c3) 10%,var(--page));stroke:var(--c3);stroke-width:1.5;stroke-dasharray:6 6}
 #chip .rrun{fill:none;stroke:#ffd27a;stroke-width:6;stroke-linecap:round}
 #chip .exitb{fill:color-mix(in srgb,#ffd27a 12%,transparent);stroke:#ffd27a;stroke-width:1.5}
 #chip .lay.sky .rticks text{fill:#dfe6f7}
@@ -290,14 +300,13 @@
 @media (max-width:600px){
   /* the Up bar in two rows: the Up button (its label wraps, the size goes: the readout beside it has it) and the
      readout; then the crumbs with − and + (review of 1 Oct: at 360 px the label and the readout were cut). The first row
-     keeps one height, a two-line label's, and the readout at most two lines of its own size, a jump's too (bold, not
-     larger), so that − and + under them never move (13 Oct 2026) */
+     keeps one height, a two-line label's, and the readout at most two lines, so that − and + under them never move
+     (13 Oct 2026) */
   .st-btn.up{flex:1 1 0;min-width:52%;padding:4px 10px;min-height:max(44px,calc(2.4em + 10px))}
   .st-btn.up .up-t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2}
   .st-btn.up .up-s{display:none}
   .scale-ro{order:1;min-width:0;max-width:44%;white-space:normal;text-align:right;line-height:1.25;display:-webkit-box;
     -webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
-  .scale-ro.jump{font-size:clamp(.74rem,.22vw + .64rem,.94rem)}
   .crumbs{order:2;flex:1 1 60%}
   .pmz{order:3}
 }

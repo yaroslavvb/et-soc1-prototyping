@@ -895,6 +895,16 @@ same scales outward and inward, the loop, a way back from every move and no dead
   "− and + keep their place"). Both pages rebuilt byte for byte from their sources before the change, so the built
   diff is the change alone; both spaces redeployed from the committed pages, and the GitHub Pages mirror rebuilt. The
   measurement, before and after: `docs/reports/data/2026-10-13-zoom-buttons/`.
+- **The readout's one look, smoother moves, Studio 45 from its plans (13 October, Q108).** The owner: "The text
+  sometimes changes in size" and "the animation is sometimes not smooth". The readout no longer grows and turns bold
+  while the camera moves (`ladder.css`); the playback bar's hint keeps the stages' room, so the drawing keeps its height
+  when a flow starts (`chip-diagram.body.html`); on a wide screen the drawing's box is held at its size in pixels, so a
+  change in the Up bar no longer lays the drawing out again, and the next scale is drawn in an idle moment
+  (`ladder-core.js`, `pinView` and `prebuildNext`); Studio 45 is drawn from the venue's measured plans, both floors and
+  a section, the lab upstairs (`ladder-outer.js`; facts s45.9–s45.17). Both pages rebuilt from their sources with the
+  ladder's facts chain at its fixed point; both spaces redeployed from the committed pages, and the GitHub Pages mirror
+  rebuilt. The probes and their numbers, before and after: `docs/reports/data/2026-10-13-jitter/`; the ladder's README,
+  "The readout's one look, smoother moves, Studio 45 from its plans".
 
 ## Cross-links between the reports
 

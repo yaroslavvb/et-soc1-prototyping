@@ -1159,6 +1159,25 @@ $('pmz').addEventListener('click', e => {
 $('up').addEventListener('click', e => { const b = e.currentTarget; blurClick(e, b); if (!isDis(b)) zoomBy(-1); });
 /* the crumbs fold again when the bar's width changes (a window resized, the panel shown or hidden) */
 try { let upW = 0, upT = 0; new ResizeObserver(es => { const w = Math.round(es[0].contentRect.width); if (w === upW) return; upW = w; cancelAnimationFrame(upT); upT = requestAnimationFrame(() => crumbsUI()); }).observe($('upbar')); } catch (_) { /* no observer: the crumbs fold on the next move */ }
+/* the drawing's box is held at its own size in pixels (the owner, 13 Oct 2026: "the animation is sometimes not smooth.
+   It's jittery sometimes"). Sized by the flexbox, any change in the bar above it (the readout, ten times a second while
+   the camera moves; the crumbs and the Up label at each step) laid the whole drawing out again: 8 to 10 ms each time on
+   the owner's Intel Mac at 2x, against 0.1 ms with the box's size given, and the camera's frames ran late. It is
+   measured as the flexbox sizes it, and again whenever the view or anything beside the box in it changes size. A narrow
+   screen sizes the box by the drawing's own shape: there it keeps the flexbox */
+const WIDE = window.matchMedia('(min-width: 900px)');
+let PINT = 0;
+function pinView() {
+  const w = $('svgwrap'); if (!w) return;
+  w.style.width = ''; w.style.height = '';
+  if (!WIDE.matches) return;
+  const r = w.getBoundingClientRect();
+  if (r.width > 0 && r.height > 0) { w.style.width = r.width + 'px'; w.style.height = r.height + 'px'; }
+}
+try {
+  const ob = new ResizeObserver(() => { cancelAnimationFrame(PINT); PINT = requestAnimationFrame(pinView); }), w = $('svgwrap');
+  if (w && w.parentNode) [w.parentNode, ...[...w.parentNode.children].filter(c => c !== w)].forEach(e => ob.observe(e));
+} catch (_) { /* no observer: the box keeps the flexbox's size */ }
 /* the "…" menu: the folded crumbs, outermost first */
 function menuToggle(b) {
   const m = $('crumb-menu');
@@ -1217,6 +1236,18 @@ function readout(s, e) {
   if (ROCLS.indexOf('mv') < 0) $('scale-ro').setAttribute('aria-hidden', 'true');
   roSet(`${fmtLen(m, 2)}${ro10(m)}`, 'mv' + (s.kind === 'jump' ? ' jump' : ''), true);
 }
+/* the scale + leads to is drawn while the reader looks at this one (the owner, 13 Oct 2026: "the animation is sometimes
+   not smooth"): drawn on the zoom's first frame, a textbook circuit took up to 233 ms on the owner's Intel Mac, and the
+   camera stood still that long. Drawn in an idle moment instead, hidden until the camera goes there (a move elsewhere
+   drops it, prune()); never the die's three scales, whose layers the flows hold (bindTrio) */
+function prebuildNext() {
+  const P0 = Z.path, ric = window.requestIdleCallback || (f => setTimeout(f, 300));
+  ric(() => {
+    if (Z.path !== P0 || ZW) return;
+    const k = defKid(P0); if (!k || TRIO.includes(k.id)) return;
+    try { built(P0.concat([k]), P0.length); } catch (e) { /* drawn on demand, as before */ }
+  }, {timeout: 1500});
+}
 /* after a move: announce the scale, and (unless a flow or the tour holds the panel) show where the camera is */
 function arrived() {
   const P = Z.path, el = P[P.length - 1];
@@ -1229,7 +1260,7 @@ function arrived() {
   $('cap-scale').textContent = `Scale: ${nameOf(el)}, ${sizeWords(sizeOf(el))}`;
   // off the page's own scales, the deep zoom's facts are fetched now if they have not been
   if (Z.level < 0 || Z.level > 2) lazyData();
-  prefetch();
+  prefetch(); prebuildNext();
   if (!FL.k && !TOUR && !SEL) showHere();
   // (a page's optional hook: the chip diagram's address follows the camera once it rests)
   if (typeof pageArrived === 'function') pageArrived();

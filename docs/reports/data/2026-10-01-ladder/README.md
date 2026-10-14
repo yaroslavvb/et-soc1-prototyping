@@ -231,3 +231,52 @@ to 1920 px wide, − and + slid 43–60 px during each move; from 900 to 1100 th
 and 820 they jumped rows. After: 0 px at ten widths, 1920 to 320, on both pages, but for the memory levels at 900 px,
 where their header (the accesses beside the level tabs) still wraps for some levels and moves the whole stage 38 px
 down, as it did before.
+
+## The readout's one look, smoother moves, Studio 45 from its plans (13 October 2026, Q108)
+
+The owner, with a screenshot of the readout "1.3 km · 10³ m" mid-move at `#at=st29`: "The text sometimes changes in
+size ... when I click while it's animating, it's larger, and then it goes back to the original size. Go through a
+diagram and fix various cosmetic inconsistencies like this. Also, for Studio 45, maybe you can find the original plans
+to make it more realistic. The lab is on the second floor, indeed." And, while that ran: "Also, the animation is
+sometimes not smooth. It's jittery sometimes. See if you can identify the issue and make sure there is no jitter."
+The measurements are in `docs/reports/data/2026-10-13-jitter/` (its README has the numbers and the tools).
+
+- **The readout keeps one look while the camera moves** (`ladder.css`): a move set it darker, a jump 18.4 px bold
+  instead of 13.4 px, the loop semi-bold, each until the camera rested. Now its size and weight never change, and its
+  colour only round the loop, whose words it shows in place of a size (as the ring of sizes does at rest).
+- **The cosmetic pass.** A probe recorded the page's chrome on every frame (box and type of the Up button, the crumbs,
+  the readout, − and +, the drawing, the caption, the bars) through the 46 scales of the default chain and every
+  flow, stage by stage, at 1440 × 900, with a screenshot at each rest. Besides the readout it found the drawing 6.7 px
+  shorter whenever a flow was on (the playback bar's stages keep room for two lines, its hint did not: now it does,
+  `chip-diagram.body.html`), and the caption set smaller for flow B (and slightly for flow 6), whose long captions need
+  it to fit two lines: kept, since it holds for a whole flow and making every caption that small would cost the rest.
+  The labels that sit over shapes (an atom, a proton, the wiring stack's layers) already carry halos and read; 29th
+  Street's profile sat 80 units low under an empty band and moved up, with the street line the camera lands on.
+- **Smoother moves.** Traced: every change in the Up bar (the readout, ten times a second while the camera moves; the
+  crumbs and the Up label at each step) laid the whole drawing out again, 8 to 10 ms a time on the owner's Intel Mac at
+  2×, because the drawing's box took its size from the flexbox (a 20-second trace logged 466,533 layout
+  invalidations). The box now has its size in pixels, measured as the flexbox sizes it and again when anything around
+  it changes size (`pinView` in `ladder-core.js`; a wide screen only): 0.1 ms a change. And the scale + leads to is
+  drawn in an idle moment while the reader looks at this one (`prebuildNext`): the textbook circuits' first build had
+  stopped the camera for up to 233 ms. Never the die's three scales, whose layers the flows hold.
+- **Studio 45 from its measured plans** (`ladder-outer.js`; facts s45.9 to s45.17 in `research/build_studio45.py`;
+  `research/research-studio45.md` §8): no plan set is online, but the venue's public 3D tour carries measured plans of
+  both floors, and the city's records give the year (1985), the mezzanine and the yard. The level now draws both floors
+  and a section to scale: upstairs a floor at each end, 9.3 m open between them over the warehouse; the lab upstairs
+  (the owner), its room dashed (inferred: the hard-floored room at the shop end), the rack in it; the lounge end on the
+  left, most likely the street's. 29th Street's inset shows the building's side view instead of an empty box. Still no
+  house number, block, point or coordinates, and no link to the tour or the venue's pages.
+
+Measured in headless Chrome 155 on the owner's Intel Mac at 1440 × 900 and 2× (`docs/reports/data/2026-10-13-jitter/`,
+its README has the tools and the tables). Over the default chain's 46 moves, frames later than 25 ms went from 85 of
+2,327 (3.7%) to 33 of 2,382 (1.4%), and the longest from 150 ms to 50; with the CPU slowed four times, from 31.4% to
+11.0%, and the frames over 100 ms from 119 to 30. The flows are late about one frame in nine at 2× (13.0% before, 11.5%
+after): each of their frames restyles the layer, through the custom properties that dim the context and the stroke
+keeper's widths, which is how the page draws a flow, and was left as it is. On every frame of the walk no element of the
+chrome changes type size or weight now. On that build `zoom_test.mjs` passed 783/783 on a desktop and
+`ml_ladder_test.mjs --chip` 149/150. Its one failure, T13 at Shire 0 (the memory levels fold one more outer crumb into
+"…" than the chip diagram, their bar also holding Fit), fails the same way on the pages as they were before Q107,
+deployed on 2 October, when they passed it: it comes from the machine that runs it (most likely its fonts), not from
+these changes. On a phone the tests that drive the Up bar and the dive passed (`zoom_test.mjs --phone` T3, T5, T11 and
+T17: 114/114; `ml_ladder_test.mjs --phone` T0, T3, T5 and T25: 40/40), and `check_page.sh` passed both pages, light,
+dark and the system's theme, at 1280 and 390 px.

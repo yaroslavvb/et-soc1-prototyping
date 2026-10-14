@@ -58,6 +58,41 @@ fact('s45.7', f'Light crosses the building\'s 37 m in {t * 1e9:.0f} ns: {n:.0f} 
      note=f'37 m / 299,792,458 m/s = {t * 1e9:.1f} ns; x 600 MHz = {n:.1f}')
 fact('s45.8', 'A 4 x 8 ft CNC router cuts a 1.22 x 2.44 m sheet: the size of the bed drawn here.',
      'derived', 'the venue\'s "4\'x8\' 3-axis CNC with a tool changer" (s45.3) in metres', note='4 ft = 1.219 m, 8 ft = 2.438 m')
+# the building inside (13 Oct 2026, the owner: "for Studio 45, maybe you can find the original plans to make it more
+# realistic. The lab is on the second floor, indeed"). No plan set is online; the venue's own public 3D tour carries
+# measured plans of both floors, and the city's records give the rest (research in the private notes of that day).
+TOUR = "Studio 45's public 3D tour (Matterport), its measured plans of both floors (scanned 2 June 2026; not linked here: the tour gives the street address)"
+fact('s45.9', 'The lab is on the building\'s upper floor.', 'owner', 'the owner, 13 Oct 2026')
+fact('s45.10', 'Inside, the ground floor is one room 36.1 m long and 8.5 m wide. The upper floor is a mezzanine at each end, 17.1 m and 9.8 m long, with 9.3 m between them open from the floor to the roof: the warehouse.',
+     'outside', TOUR,
+     note='The plans\' walls, in metres: ground floor 36.05 x 8.48 m inside; upper floor from 0 to 17.1 m and from 26.4 to '
+          '36.1 m along the building, nothing between. They agree with the city\'s footprint (s45.6) to within 0.6 m, the '
+          'thickness of the walls.')
+fact('s45.11', 'Downstairs, one end has a lounge and kitchen with a long table, small meeting rooms and a stair; the middle is the warehouse, open to the roof, with the second stair; the other end is the wood shop, with the 4 x 8 ft CNC router.',
+     'outside', TOUR, note='The rooms read from the tour\'s top-down plan pictures; the machines named from the venue\'s list (s45.3).')
+fact('s45.12', 'Upstairs at the lounge end: the co-working room with two long shared desks, a conference room, a small meeting room and a bathroom; at the shop end, one large room with a hard floor, about 9.7 by 8.1 m.',
+     'outside', TOUR)
+fact('s45.13', 'The lounge end most likely faces 29th Street: the front of the house at the door, the shop at the back beside the yard. The plans carry no compass.',
+     'inferred', 'the order of the rooms in the tour\'s plans (s45.11), and the yard behind the building (s45.16)',
+     note='A lounge, kitchen and small meeting rooms are what a door opens onto; the shop and its big machines sit at the '
+          'far end, against the yard. A pallet lane runs from the lounge end down one side to the warehouse, as the '
+          'venue\'s "street level shipping and receiving" needs. The other way round is possible.')
+fact('s45.14', 'The lab is most likely the large hard-floored room upstairs at the shop end: the only upstairs room with a hard floor, over the shop, with its own stair. Which room it is has not been recorded.',
+     'inferred', 'the owner\'s "upper floor" (s45.9) and the tour\'s plans (s45.12)',
+     note='Of the upstairs rooms, the others are the co-working room (wood floor, two long desks), a conference room, a '
+          'meeting room and a bathroom; this one has a sealed grey floor, benches and shelving, and sits over the shop.')
+fact('s45.15', 'The building went up in 1985, a one-storey shop by its permit and later a post office; the upper floor is a mezzanine.',
+     'outside', DATASF + ', Building Permits (i98e-djp9) and the Assessor-Recorder\'s property roll (wv5m-vpq2); SF Planning records (y673-d69b)',
+     note='The new-building permit was completed on 29 Nov 1985; a 2023 permit adds sprinklers "under an existing mezzanine". '
+          'The roll still says one storey, as the 1985 permit did.')
+fact('s45.16', 'Behind the building its lot runs on another 2.3 to 10 m: a yard, most likely the venue\'s courtyard.',
+     'derived', DATASF + ', Parcels (acdm-wktn) with Building Footprints (ynuv-fyni)',
+     note='The lot is five-sided and its back edge slants: 2.3 m beyond the building\'s back wall on one side, 7.4 m on the '
+          'other, 10 m at its point (the two maps registered on the street line). That it is the courtyard is inferred.')
+fact('s45.17', 'With the roof about 6 m up, the upper floor stands about 3.3 m above the ground floor.',
+     'inferred', 'the roof height (s45.6) shared by two floors, the upper one about 2.7 m to the ceiling',
+     note='The city\'s model gives the roof 6.05 m above the ground (median). The plans give no heights: 3.3 m below and '
+          '2.7 m above is an estimate, a usual split for a mezzanine under a flat roof.')
 
 # ---- Bernal Heights
 fact('b.1', 'Bernal Heights is a residential hill neighbourhood in south-eastern San Francisco, south of the Mission, bounded by Cesar Chavez Street (north), San Jose Avenue (west), US 101 (east) and I-280 (south).',
