@@ -471,6 +471,13 @@ owner asked for). What each change means for measurements:
 | Full package upgrade, installed; the reboot into kernel 7.0.0-34 is still pending | at the reboot the cards are re-initialised (same firmware and driver code) | at the reboot: a new kernel (IOMMU, DMA and interrupt paths) | card side yes; host side: take a new baseline after the reboot |
 | `et-who`, card lock files, login banner, `et-lab-manifest`, a persistent journal, clean-ups | no | no | yes |
 
+**Update 14 October 2026 (the kernel row above).** That reboot is long done: all three hosts came up on 7.0.0-34 at
+the 30 September power cycle, so any host-side baseline taken before 30 September is the old kernel's. `uname -r` on
+14 October: aifoundry2 runs **7.0.0-38** (since its 9 October restart), aifoundry1 and aifoundry3 run **7.0.0-34**
+with 7.0.0-38 installed and a restart still pending on both (`/var/run/reboot-required`); aifoundry3's waits for the
+lab user working there. So aifoundry2's host side is no longer comparable with the other two's: say which kernel a
+run used.
+
 Record the output of `et-lab-manifest` with every run (host, kernel, CPU and power profile, clock sync, driver
 version, PCIe link per card, library hashes and aifoundry3's clock-guard marker), and the card's firmware from your
 own tool: the manifest does not open the card, so it cannot read the firmware.
@@ -658,6 +665,11 @@ On Sunday 11 October (16:40–23:00 PDT) the dashboard's four warnings were clea
   boot, leaving systemd "degraded". The retrying profile was NetworkManager's unsaved default; `nmcli con mod` saved it into
   `/etc/netplan` (`90-NM-<uuid>.yaml`) with no default route, Wi-Fi untouched. The two reach each other over the cable in
   under a millisecond. No machine has rebooted with it yet.
+  **14 October 2026: the cable is down.** Every machine's wired port reports no carrier
+  (`cat /sys/class/net/enp7s0/carrier` reads 0 on all three, `ip link` shows `NO-CARRIER` with the port administratively
+  up, and the link is not detected), so nothing uses it and the machines reach each other over Wi-Fi again. The saved
+  settings are intact — each host still has its wired profile — so this is the cable, its switch or a port, and it needs
+  a look on site. Measure nothing over the cable until the carrier is back.
 - **Tailscale SSH with a command and a terminal leaves the pty owned by root**, with only the user's own processes on it (no
   `login(1)`, no utmp line), and can leave an empty root-owned pty behind. The dashboard read those as root logins; since
   `95c0fef` a root-owned pty counts only with a root process on it.

@@ -6,7 +6,7 @@ this directory existed its only copies were on the hosts. The second set (et-who
 corrected banners), written on 27 September, was **installed on all three hosts on 28 September** (aifoundry2 07:09,
 aifoundry3 07:26, aifoundry1 07:54 PDT). A read-only check at 21:03 on 28 September (`md5sum` of each installed file
 over ssh, as our user) found every installed file equal to this directory, `et-lab-health` equal to its rev 2.
-`et-lab-health` rev 3 and `et-reset`, written on 28 September, were installed on all three hosts on 30 September (aifoundry1 14:38, aifoundry3 14:39, aifoundry2 15:36 PDT; `et-lab-health` equal to this directory's rev 3 by `md5sum`). The third set, written on 30 September for the new users of 2 October, was installed on all three hosts the same day: `et-lab-start` (16:10), the card-usage logger `et-usage` (20:54) and banner lines that announce both (20:58). The daily timer below is still not installed. Of these tools only `et-reset` changes a card; the others never open a `/dev/et*` node, query a card or change one.
+`et-lab-health` rev 3 and `et-reset`, written on 28 September, were installed on all three hosts on 30 September (aifoundry1 14:38, aifoundry3 14:39, aifoundry2 15:36 PDT; `et-lab-health` equal to this directory's rev 3 by `md5sum`). The third set, written on 30 September for the new users of 2 October, was installed on all three hosts the same day: `et-lab-start` (16:10), the card-usage logger `et-usage` (20:54) and banner lines that announce both (20:58). **The daily timer below is installed on all three hosts** (checked read-only on 14 October 2026: `et-lab-health.timer` is enabled and active on aifoundry1, aifoundry2 and aifoundry3; it last ran on 14 October between 00:04 and 00:55 PDT and is next due on 15 October). Who installed it, and when, is not recorded here. Of these tools only `et-reset` changes a card; the others never open a `/dev/et*` node, query a card or change one.
 
 | File here | Installed as | Mode | Version | What it does |
 |---|---|---|---|---|
@@ -18,7 +18,7 @@ over ssh, as our user) found every installed file equal to this directory, `et-l
 | `et-usage/` | `/usr/local/sbin/et-usaged` (the service `et-usaged`, user `et-usage`, two capabilities), `/usr/local/bin/et-usage`, `/etc/default/et-usaged`, logs in `/var/log/et-usage/` (readable by every user) | 0755 root | 30 Sep (installed 20:54, all three; aifoundry1 with `--skip-counters 0 --skip-pci 0000:01:00.0` until 4 Oct 2026, when card 0's exclusions were removed: /etc/default/et-usaged now passes nothing) | the card-usage logger: which process of which user holds each card's nodes or lock, from when to when, by inotify and `/proc`, never opening a card; `et-usage` prints the last 24 hours, `--json` feeds the lab dashboard ([et-usage/README.md](et-usage/README.md)) |
 | `et-lab-manifest` | `/usr/local/bin/et-lab-manifest` | 0755 root | 25 Sep, unchanged | prints the machine facts a measurement should record ([lab-access.md](../../docs/lab-access.md)) |
 | `60-labfix-et-who` | `/etc/update-motd.d/60-labfix-et-who` | 0755 root | 25 Sep, unchanged | the login banner's live part: what `et-holders` prints |
-| `motd-aifoundry1`, `-2`, `-3` | `/etc/motd` on that host | 0644 root | 30 Sep: two lines on card-use logging and `et-lab-start` (installed 20:58, all three), and aifoundry1's disk line after the cleanup (installed 22:38; the 27 Sep text otherwise). The installed banners predate 2 Oct and say nothing on the cards' state (checked 9 Oct on all three: no out-of-service line). This directory's `motd-aifoundry1` (card 0 back in service since 2 Oct) and `motd-aifoundry2` (its card back in service since 9 Oct, with a two-fan bracket) are **not installed yet** | the login banner's fixed part: the machine's cards, clocks and rules |
+| `motd-aifoundry1`, `-2`, `-3` | `/etc/motd` on that host | 0644 root | 30 Sep: two lines on card-use logging and `et-lab-start` (installed 20:58, all three), and aifoundry1's disk line after the cleanup (installed 22:38; the 27 Sep text otherwise). The installed banners predate 2 Oct and carry no service state for the cards, but they are not silent on the cards: each states its clock and thermal behaviour, and **aifoundry1's installed `/etc/motd` still warns people off card 0** ("WARNING, card 0 OVERHEATS under load … Do not run work on card 0 until its fan, heat sink and airflow have been checked"), which has been wrong since its fan was replaced on 2 Oct. aifoundry2's still says its die "rarely cools below 65 C", which the 9 Oct fan swap changed. aifoundry3's matches this directory's file. This corrects the 9 Oct reading ("say nothing on the cards' state"); re-read over ssh on 14 Oct 2026. This directory's `motd-aifoundry1` (card 0 back in service since 2 Oct) and `motd-aifoundry2` (its card back in service since 9 Oct, with a two-fan bracket, and the newcomer line restored on 14 Oct) are **not installed yet**, so aifoundry1's stale warning stands until they are | the login banner's fixed part: the machine's cards, clocks and rules |
 
 Three more files from 25 September are one-liners, described here rather than kept as files (all present on the
 three hosts on 28 September):
@@ -89,9 +89,19 @@ Rev 3 (28 September; installed on all three hosts on 30 September) fixes two wro
 As a user who is not root, as `nobody` from the timer would be, rev 3 differs from a root run only in the journal
 line (`not checked` unless the unit adds `SupplementaryGroups=systemd-journal`, as below). The kernel-log counts
 work for any user on these hosts (dmesg is world-readable), and the holders line works for every account through the
-sudoers rule above. A run as `nobody` itself needs root to try, and waits for the install.
+sudoers rule above. A run as `nobody` itself needs root to try; the installed timer now does it daily (14 Oct 2026),
+but reading what those runs printed needs the `adm` or `systemd-journal` group, which our user is not in, so
+`journalctl -u et-lab-health` returns nothing for us.
 
-### The daily timer (not installed yet; lab report U18)
+### The daily timer (installed on all three; lab report U18)
+
+**Checked read-only on 14 October 2026:** `et-lab-health.timer` is enabled and active on all three hosts
+(`systemctl list-timers --all`), with `et-lab-health.service` static beside it. `systemctl cat` on each host shows
+the service exactly as written below — `User=nobody`, `Group=nogroup`, `SupplementaryGroups=systemd-journal`,
+`ExecStart=/usr/local/bin/et-lab-health`, `SuccessExitStatus=1`. Its last run was on 14 October (aifoundry1 00:04,
+aifoundry3 00:37, aifoundry2 00:55 PDT) and the next is due on 15 October; what the runs printed we cannot read (the
+journal needs the `adm` or `systemd-journal` group). The steps below stay as the record of how it goes in and how to
+roll it back.
 
 A oneshot service as `nobody` and a daily timer. `SuccessExitStatus=1` because the check exits 1 whenever it
 prints a WARN (aifoundry1 does every day: card 0's events, and until 30 September its 95% pool); without it the

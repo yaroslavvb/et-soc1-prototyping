@@ -105,6 +105,13 @@ lists from the data and never hard-codes them.
 
 ### 1.3 `cards.<id>`
 
+**Update 14 October 2026:** aifoundry1 card 0 has been in service since 2 October, when its broken fan was replaced,
+and `lab.json` no longer marks it `excluded` (its `known` entry is now the root port's corrected errors only). So the
+`excluded` field below, the `excluded` level of §5 and the muted tile of §4.2 apply to no card today: they are kept
+as the design, for whenever a card goes out of service again. Two rules named card 0 in their own right and still
+hold: §2.4 reads only `et-lab-health`'s fields for it, and §2.6 never samples it (`collect.py` and `remote.sh` refuse
+it whatever `lab.json` says).
+
 | Field | Example | Source |
 |---|---|---|
 | `host`, `devnum`, `pci`, `lock` | `"aifoundry1"`, 1, `"0000:02:00.0"`, `"etsoc-shire1.lock"` | sysfs `devnum`; `lab.json` |
