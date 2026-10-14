@@ -914,6 +914,8 @@ The standalone source is `docs/reports/chip-3d.html`, with no build-time or runt
 
 **Perspective corrected (14 October, Q110).** The companion's first camera refitted every rotated screen-space outline, which changed magnification without changing the zoom state. Its camera now orbits a fixed world-space target at fixed distance and focal scale. Scene bounds are measured once over the full control range. Pointer drag, keyboard orbit, presets, auto-orbit and geometry controls retain magnification; explicit zoom and viewport resizing behave independently. `camera-test.mjs` reproduced the old 13.29% scaling error and passed the correction on all four scenes at desktop and phone widths.
 
+**Gate labels stabilized (14 October, Q112).** The FinFET and channel views now keep their gate, source and drain callouts in fixed viewport slots, with leaders to physical projected anchors. The old collision solver moved the gate in 25-pixel increments; `label-test.mjs` reproduced a 50-pixel jump. Full rotation, pitch and zoom sweeps on desktop/phone show zero text-position and camera-magnification drift. Mobile gate labels are visible; the channel callout attaches to the electrode top.
+
 ## Cross-links between the reports
 
 - **2026-09-24, afternoon (`d04b29a`).** Every report got the byline clause "· part of the measurement reports",

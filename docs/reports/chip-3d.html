@@ -111,7 +111,7 @@ function makeChannel(){const drive=channelStrength();box(0,-1.25,0,7.8,.4,3.7,'f
  const gateLift=1.1;gateU(0,-.93+gateLift,0,2.0,.82,2.11,'gate','gate',.88);box(0,.94,0,2.02,.08,.81,'oxide','oxide',.35);box(0,-.05,-.365,2.02,1.9,.08,'oxide','oxide',.35);box(0,-.05,.365,2.02,1.9,.08,'oxide','oxide',.35);
  if(drive>0){box(0,.8725,0,2.02,.045,.65,'channel','electron',.22+drive*.68);box(0,-.05,-.30,2.02,1.9,.04,'channel','electron',.22+drive*.68);box(0,-.05,.30,2.02,1.9,.04,'channel','electron',.22+drive*.68);const n=Math.ceil(5+drive*12);for(let surface=0;surface<3;surface++){for(let i=0;i<n;i++){const frac=((i/n+state.time*.14)%1+1)%1,x=-2.8+frac*5.6,y=surface===0?.99:-.55+(i%4)*.36,z=surface===0?((i%3)-1)*.2:surface===1?-.355:.355;particle([x,y,z],.048+drive*.009,'electron','channel');}}}
  if(state.gateDrive>0){for(const x of [-.6,0,.6]){line3([x,2.18,0],[x,1.09,0],'highlight',1.8,.35+drive*.5,[4,4]);line3([x,1.09,0],[x-.09,1.29,0],'highlight',1.8,.5);line3([x,1.09,0],[x+.09,1.29,0],'highlight',1.8,.5);}}
- label([-2.35,1.2,0],'S · lower potential','source',[-7,-12]);label([2.35,1.2,0],'D · positive','drain',[5,-12]);label([0,3.16,0],'Gate (cutaway)','gate',[0,-10]);
+ label([-2.35,1.2,0],'S · lower potential','source',[-7,-12]);label([2.35,1.2,0],'D · positive','drain',[5,-12]);label([0,2.60,0],'Gate (cutaway)','gate',[0,-10]);
  // Opposite-direction arrows are drawn outside the model, keeping their meaning readable.
 }
 function inside(x,y,poly){let yes=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if(((a.y>y)!==(b.y>y))&&(x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x))yes=!yes;}return yes;}
@@ -120,7 +120,38 @@ function draw(){if(!width||!height)return;faces=[];labels=[];ctx.clearRect(0,0,w
  const makers={metal:makeMetal,finfet:makeFinfet,fin:makeFin,channel:makeChannel};makers[state.scene]();faces.sort((a,b)=>a.z-b.z);hitFaces=[];
  for(const f of faces){ctx.globalAlpha=f.alpha===undefined?1:f.alpha;if(f.particle){ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,Math.PI*2);ctx.fillStyle=f.color;ctx.fill();ctx.strokeStyle=rgba(palette.paper,.6);ctx.lineWidth=.7;ctx.stroke();if(f.key)hitFaces.push(f);continue;}if(f.line){ctx.beginPath();ctx.moveTo(f.a.x,f.a.y);ctx.lineTo(f.b.x,f.b.y);ctx.strokeStyle=f.key===state.selected?palette.highlight:f.color;ctx.lineWidth=f.lineWidth;ctx.setLineDash(f.dash);ctx.stroke();ctx.setLineDash([]);if(f.key)hitFaces.push(f);continue;}ctx.beginPath();f.points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fillStyle=f.color;ctx.fill();const selected=f.key===state.selected;ctx.strokeStyle=selected?rgba(palette.highlight,.85):rgba(palette.ink,.12);ctx.lineWidth=selected?1.45:.7;ctx.stroke();if(f.alpha>.2)hitFaces.push(f);}
  ctx.globalAlpha=1;drawLabels();if(state.scene==='channel')drawDirectionKey();dirty=false;}
-function drawLabels(){ctx.font='500 '+(width<450?11:12)+'px system-ui,sans-serif';const occupied=[];for(const l of labels){if(width<440&&state.scene==='finfet'&&l.key==='gate')continue;if(width<440&&state.scene==='metal'&&l.text==='Device layer')continue;const p=project(l.p),w=ctx.measureText(l.text).width+14,h=22;let x=p.x+l.offset[0]-w/2,y=p.y+l.offset[1]-h/2;x=Math.max(10,Math.min(width-w-10,x));y=Math.max(48,Math.min(height-50-h,y));let collisions=0;while(occupied.some(r=>x<r.x+r.w+4&&x+w+4>r.x&&y<r.y+r.h+4&&y+h+4>r.y)&&collisions<5){y+=25;collisions++;}if(y>height-55)continue;occupied.push({x,y,w,h});ctx.fillStyle=rgba(palette.paper,.93);ctx.beginPath();ctx.roundRect(x,y,w,h,5);ctx.fill();ctx.fillStyle=palette.ink;ctx.fillText(l.text,x+7,y+15);if(state.selected===l.key){ctx.strokeStyle=palette.accent;ctx.lineWidth=1;ctx.stroke();}}}
+function drawLabels(){
+ ctx.font='500 '+(width<450?11:12)+'px system-ui,sans-serif';
+ const occupied=[],boxes=[],fixed=state.scene==='finfet'||state.scene==='channel';
+ for(const l of labels){
+  if(width<440&&state.scene==='metal'&&l.text==='Device layer')continue;
+  const p=project(l.p),w=ctx.measureText(l.text).width+14,h=22;
+  let x=p.x+l.offset[0]-w/2,y=p.y+l.offset[1]-h/2;
+  if(fixed){
+   // These callouts keep their slots while the part's projected anchor moves.
+   // Per-frame collision reflow made the gate jump by 25 px (owner, 14 Oct).
+   x=l.key==='gate'?(width-w)/2:l.key==='source'?16:width-w-16;
+   y=l.key==='gate'?52:height-(state.scene==='channel'?108:82);
+  }else{
+   x=Math.max(10,Math.min(width-w-10,x));y=Math.max(48,Math.min(height-50-h,y));
+   let collisions=0;
+   while(occupied.some(r=>x<r.x+r.w+4&&x+w+4>r.x&&y<r.y+r.h+4&&y+h+4>r.y)&&collisions<5){y+=25;collisions++;}
+   if(y>height-55)continue;
+  }
+  occupied.push({x,y,w,h});boxes.push({...l,anchor:p,x,y,w,h});
+ }
+ // Draw leaders before text so a rotating anchor never crosses a label's ink.
+ if(fixed)for(const b of boxes){
+  ctx.strokeStyle=rgba(palette.ink,.32);ctx.lineWidth=1;ctx.beginPath();
+  ctx.moveTo(b.x+b.w/2,b.key==='gate'?b.y+b.h:b.y);ctx.lineTo(b.anchor.x,b.anchor.y);ctx.stroke();
+  ctx.fillStyle=palette.ink;ctx.beginPath();ctx.arc(b.anchor.x,b.anchor.y,2,0,Math.PI*2);ctx.fill();
+ }
+ for(const b of boxes){
+  ctx.fillStyle=rgba(palette.paper,.93);ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,5);ctx.fill();
+  ctx.fillStyle=palette.ink;ctx.fillText(b.text,b.x+7,b.y+15);
+  if(state.selected===b.key){ctx.strokeStyle=palette.accent;ctx.lineWidth=1;ctx.stroke();}
+ }
+}
 function drawDirectionKey(){const y=height-64,cx=width/2,span=Math.min(100,width*.19);ctx.font='500 11px system-ui,sans-serif';ctx.textAlign='center';ctx.fillStyle=palette.ink;ctx.fillText('Electrons  S → D',cx-span,y);ctx.fillStyle=palette.muted;ctx.fillText('Current  D → S',cx+span,y);ctx.textAlign='left';}
 function resize(){const r=stage.getBoundingClientRect();width=r.width-2;height=r.height-2;dpr=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);resizeCamera();dirty=true;requestFrame();}
 function selectedCopy(){const s=scenes[state.scene],part=s.parts.find(p=>p[0]===state.selected)||s.parts[0];state.selected=part[0];$('selectedCopy').replaceChildren();const title=document.createElement('strong');title.textContent=part[1]+'. ';const body=document.createElement('span');body.textContent=part[3];$('selectedCopy').append(title,body);document.querySelectorAll('#parts button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.part===state.selected)));dirty=true;requestFrame();}
