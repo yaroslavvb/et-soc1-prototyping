@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How energy is measured on the ET-SoC-1 · AI Foundry</title>
+<meta name="description" content="One power meter, read ten times a second, minus idle: how the AI Foundry lab measures energy on ET-SoC-1 cards, with a 15-minute tutorial and live readings from aifoundry3.">
+<style>
+:root{--bg:#f4f6f9;--card:#ffffff;--line:#dfe4ec;--ink:#18202b;--muted:#4a5462;--accent:#1f4e8c;--font-head:Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif;--font-body:-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Roboto, sans-serif;--sk-card:#ffffff;--sk-line:#dfe4ec;--sk-ink:#18202b;--sk-muted:#4a5462;--sk-accent:#1f4e8c;
+  --grey:#7a8494;--grey2:#aeb6c2;--code:#eef1f6;--fill:rgba(31,78,140,.13);--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (prefers-color-scheme: dark){:root{--bg:#12161c;--card:#1a2029;--line:#2e3846;--ink:#e8edf3;--muted:#b6c0cc;--accent:#8ab8f2;--sk-card:#1a2029;--sk-line:#2e3846;--sk-ink:#e8edf3;--sk-muted:#b6c0cc;--sk-accent:#8ab8f2;--grey:#8c97a6;--grey2:#55606f;--code:#0e1217;--fill:rgba(138,184,242,.16)}}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--font-body)}
+h1,h2,h3,h4{font-family:var(--font-head);font-weight:700}
+*{box-sizing:border-box}
+body{margin:0;font-size:18px;line-height:1.6;-webkit-text-size-adjust:100%}
+main{max-width:46rem;margin:0 auto;padding:0 clamp(16px,4vw,32px) 4rem}
+h1,h2,h3{text-wrap:balance;line-height:1.2}
+h1{font-size:clamp(30px,6.5vw,44px);margin:2rem 0 .2rem}
+h2{font-size:clamp(23px,4.4vw,29px);margin:3rem 0 .8rem}
+h3{font-size:20px;margin:1.6rem 0 .5rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-underline-offset:2px}
+code{font-family:var(--mono);font-size:.88em;background:var(--code);border:1px solid var(--line);border-radius:4px;padding:0 .25em;white-space:nowrap}
+.nav{margin:0 0 .4rem;font-size:16px}
+.nav a{display:inline-block;padding:10px 0}
+.eyebrow{margin:1rem 0 0;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lede{font-size:19px;color:var(--ink)}
+.muted{color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:1.2rem 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.kpi b{display:block;font-family:var(--font-head);font-size:clamp(28px,6vw,36px);line-height:1.1;color:var(--accent)}
+.kpi span{display:block;font-size:15px;color:var(--muted);line-height:1.4;margin-top:4px}
+.formula{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 16px;margin:1rem 0;overflow-x:auto}
+.formula p{margin:.3rem 0;font-size:16px;color:var(--muted)}
+.chain{display:grid;gap:2px;margin:1.2rem 0}
+.node{display:grid;grid-template-columns:10.5rem 1fr;gap:4px 14px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:16px;line-height:1.45}
+.node b{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.arrow{color:var(--grey);font-size:18px;line-height:1.2;padding-left:4.6rem}
+.unmetered{background:var(--card);border:1px dashed var(--grey);border-radius:6px;padding:10px 14px;font-size:16px;margin:.6rem 0 1rem}
+.unmetered b{color:var(--ink)}
+@media (max-width:560px){.node{grid-template-columns:1fr}.arrow{padding-left:1rem}}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:1rem 0}
+.tool{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.tool.hl{border-color:var(--accent)}
+.tool-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-weight:600;font-size:16px}
+.tool .rate{font-size:14px;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tool p{margin:.4rem 0 0;font-size:15px;line-height:1.5;color:var(--muted)}
+.tool p b{color:var(--ink);font-weight:600}
+.tablewrap{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:560px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.hl td{background:var(--fill)}
+ol.steps{list-style:none;padding:0;margin:1rem 0;counter-reset:step}
+ol.steps>li{counter-increment:step;position:relative;padding:0 0 1.4rem 3rem;margin:0}
+ol.steps>li::before{content:counter(step);position:absolute;left:0;top:0;width:2.1rem;height:2.1rem;border-radius:50%;background:var(--accent);color:var(--bg);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:16px}
+ol.steps>li>h3{margin:.15rem 0 .4rem}
+.code{margin:.6rem 0;border:1px solid var(--line);border-radius:6px;background:var(--code);overflow:hidden}
+.code .bar-top{display:flex;justify-content:space-between;align-items:center;padding:0 0 0 12px;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.code pre{margin:0;background:transparent;border:0;padding:10px 12px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.5;color:var(--ink)}
+pre code{white-space:pre;background:none;border:0;padding:0;font-size:inherit;border-radius:0}
+.out pre code{white-space:pre-wrap}
+.code button{min-width:72px;min-height:44px;padding:0 12px;font:600 13px var(--font-body);color:var(--accent);background:transparent;border:0;border-left:1px solid var(--line);cursor:pointer}
+.code button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.out{margin:.4rem 0 .6rem}
+.out pre{margin:0;background:transparent;border:1px dashed var(--line);border-radius:6px;padding:10px 14px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:13.5px;line-height:1.5;color:var(--muted)}
+.out .label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:2px}
+figure{margin:1.2rem 0;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 14px 10px}
+figure h4{font-family:var(--font-head);font-size:18px;margin:.1rem 0 .4rem;line-height:1.3}
+.chart{width:100%;min-height:200px}
+.chart svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted);margin:.4rem 0 0}
+.legend i{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+.fignote{font-size:14px;color:var(--muted);margin:.4rem 0 0}
+.bars{display:grid;gap:12px;margin:.4rem 0}
+.bar-row{display:grid;grid-template-columns:7.5rem 1fr;gap:4px 12px;align-items:center}
+.bar-label{font-size:15px;font-weight:600}
+.bar-track{position:relative;height:30px;background:transparent;border-left:1px solid var(--grey2)}
+.bar{position:absolute;left:0;top:4px;height:22px;background:var(--grey2);border-radius:0 3px 3px 0}
+.bar.hot{background:var(--accent)}
+.bar-val{position:absolute;top:4px;font-size:15px;font-weight:600;line-height:22px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pub{position:absolute;top:0;height:30px;background:var(--ink);opacity:.55;border-radius:1px}
+.bar-sub{grid-column:2;font-size:13px;color:var(--muted);margin-top:-2px}
+@media (max-width:520px){.bar-row{grid-template-columns:1fr}.bar-sub{grid-column:1}}
+.traps{display:grid;gap:12px;margin:1rem 0}
+.trap{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 16px}
+.trap b{display:block;font-size:17px;margin-bottom:2px}
+.trap p{margin:.2rem 0;font-size:16px;color:var(--muted)}
+.links{list-style:none;padding:0;margin:1rem 0;display:grid;gap:8px}
+.links li{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:16px}
+.links a{font-weight:600}
+details{margin:1rem 0;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px 14px}
+summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center}
+details pre{max-height:28rem;overflow:auto;background:var(--code);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:13px;line-height:1.45}
+footer{margin-top:3rem;font-size:14px;color:var(--muted)}
+.dl{display:flex;flex-wrap:wrap;gap:8px;margin:.6rem 0}
+.dl a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:6px;background:var(--card);font-family:var(--mono);font-size:14px;text-decoration:none}
+</style>
+</head>
+<body>
+<main>
+<h1 data-ss-id="title">How energy is measured on the ET-SoC-1</h1>
+<p class="nav" data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">← AI Foundry lab dashboard</a></p>
+<p class="lede" data-ss-id="lede">At Tuesday's AIFoundry standup someone asked how the energy is measured on the chip. The short answer: <b>one power meter on the card, read ten times a second through the card's management interface, minus the idle power measured just before and after the work.</b> Below are the chain, the tools the lab's agents use, and a 15-minute tutorial with readings taken on aifoundry3 on <time datetime="2026-10-08">Thu 8 Oct 2026</time>.</p>
+
+<section data-ss-id="section-answer" data-ss-section>
+<h2 data-ss-id="heading-answer">The answer in four numbers</h2>
+<div class="kpis" data-ss-id="kpis-answer">
+  <div data-ss-id="auto-div-efe22w" class="kpi"><b>1</b><span>power meter per card: the PMIC on the board</span></div>
+  <div data-ss-id="auto-div-x9ntnv" class="kpi"><b>10 mW</b><span>resolution of its board-power reading</span></div>
+  <div data-ss-id="auto-div-s3629m" class="kpi"><b>0.16 s</b><span>between fresh readings on aifoundry3, measured 8 Oct</span></div>
+  <div data-ss-id="auto-div-yfm0hg" class="kpi"><b>10 Hz</b><span>how the lab's agents sample it, with <code>ettelem</code></span></div>
+</div>
+<div class="formula" data-ss-id="formula-energy">
+<div data-ss-id="auto-div-shaonw">\[ E = \sum_i \bigl(P_i - P_{\text{idle}}\bigr)\,\Delta t \qquad e_{\text{op}} = \frac{E}{N_{\text{ops}}} \]</div>
+<p data-ss-id="auto-p-rh5f06">\(P_i\) is each 10 Hz board reading during the work, \(P_{\text{idle}}\) the mean of the idle stretches on either side, \(N_{\text{ops}}\) the operations the cores report completing.</p>
+</div>
+</section>
+
+<section data-ss-id="section-chain" data-ss-section>
+<h2 data-ss-id="heading-chain">One meter, three rails, and 13 W that nothing meters</h2>
+<div class="chain" data-ss-id="diagram-chain" role="img" aria-label="The measurement chain: the workload draws current; the PMIC on the card measures the 12 volt board input and three rails; the service processor polls the PMIC on every pass and caches the values; the host reads them through the single-opener management node with a tool such as ettelem.">
+  <div data-ss-id="auto-div-mmhg70" class="node"><b>Workload</b><span>1,024 minion cores run your kernel and draw current</span></div>
+  <div data-ss-id="auto-div-7gvkgt" class="arrow" aria-hidden="true">↓</div>
+  <div data-ss-id="auto-div-k4w286" class="node"><b>PMIC on the card</b><span>measures the 12 V board input in 10 mW steps, and three rails: the minion cores (VDD_MNN), the SRAM of L2, L3 and scratchpads (VDD_SRAM), and the mesh (VDD_NOC)</span></div>
+  <div data-ss-id="auto-div-7gvkgt-2" class="arrow" aria-hidden="true">↓</div>
+  <div data-ss-id="auto-div-y2mqe3" class="node"><b>Service processor</b><span>polls the PMIC once per pass, about every 163 ms on aifoundry3 on 8 Oct, and caches the values</span></div>
+  <div data-ss-id="auto-div-7gvkgt-3" class="arrow" aria-hidden="true">↓</div>
+  <div data-ss-id="auto-div-mrdvmc" class="node"><b>/dev/et0_mgmt</b><span>the management node, over PCIe: one program at a time</span></div>
+  <div data-ss-id="auto-div-7gvkgt-4" class="arrow" aria-hidden="true">↓</div>
+  <div data-ss-id="auto-div-mea6xd" class="node"><b>Your tool</b><span><code>ettelem</code>, <code>et-powertop</code>, or a short Python script</span></div>
+</div>
+<p class="unmetered" data-ss-id="note-unmetered"><b>No sensor at all:</b> the DDR controllers and DRAM, PCIe, the Maxion cores, the IO shire and the regulators' own losses. Board power minus the three rails is about 13 W at idle on aifoundry3 on 8 Oct (53% of the card), and nothing splits it further.</p>
+<p data-ss-id="para-no-core-meter">There is no per-core or per-instruction meter, and no energy counter on the die. The on-die monitors give per-shire temperature and voltage, not power. Energy per instruction, byte or hop comes from many such measurements, as in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">energy manual</a>.</p>
+</section>
+
+<section data-ss-id="section-tools" data-ss-section>
+<h2 data-ss-id="heading-tools">Four ways to read it, all through the same meter</h2>
+<div class="tools" data-ss-id="cards-tools">
+<div class="tool"><div data-ss-id="auto-div-0cb407" class="tool-h"><code>et-powertop</code><span class="rate">1 / s</span></div><p data-ss-id="auto-p-gjxzxl">Installed in <code>/opt/et/bin</code>. Board and rails as average, min and max. <b>For a quick look.</b></p></div>
+<div class="tool hl"><div data-ss-id="auto-div-29mhnx" class="tool-h"><code>ettelem</code><span class="rate">10 / s</span></div><p data-ss-id="auto-p-mmes0i"><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/tools/ettelem">tools/ettelem</a> in the lab repo, builds in seconds. JSON lines: board, rails, temperatures, voltages, clocks. <b>Behind every published number.</b></p></div>
+<div class="tool"><div data-ss-id="auto-div-rtxjy6" class="tool-h"><code>etpower.py</code><span class="rate">10 / s</span></div><p data-ss-id="auto-p-2velwn"><a href="etpower.py">On this page</a>, plain Python, no build. Board, rails, die temperature. <b>To see how the API works.</b></p></div>
+<div class="tool"><div data-ss-id="auto-div-ud8tfn" class="tool-h"><span>service-processor trace</span><span class="rate">every pass</span></div><p data-ss-id="auto-p-1vpcr8"><code>dev_mngt_service -n 0 -t SPST:extract</code>. Rail averages with µs timestamps. <b>For a gap-free time series.</b></p></div>
+</div>
+<p class="muted" data-ss-id="para-tools-note">All four read the same cached values, so sampling faster than one service-processor pass only repeats readings. The older <code>scripts/et-power-log.sh</code> logs board power only, at 7–8 Hz.</p>
+</section>
+
+<section data-ss-id="section-tutorial" data-ss-section>
+<h2 data-ss-id="heading-tutorial">Tutorial: measure an energy in 15 minutes</h2>
+<p data-ss-id="para-tutorial-intro">Run this on aifoundry3, whose card is pinned at 600 MHz. On aifoundry1, put <code>ET_DEVICES=&lt;N&gt;</code> in front of each command and lock <code>etsoc-shire&lt;N&gt;.lock</code>. Skip <code>et-powertop</code> there, because it opens both cards. aifoundry2's card is out of service.</p>
+<div class="dl" data-ss-id="downloads"><a href="etpower.py" download>etpower.py</a><a href="measure.sh" download>measure.sh</a><a href="energy.py" download>energy.py</a></div>
+<ol class="steps">
+
+<li data-ss-id="step-claim">
+<h3 data-ss-id="auto-h3-ethnm9">Claim the card and check it is free</h3>
+<p data-ss-id="auto-p-dh2tdc">Post <b>"using aifoundry3 card 0"</b> in <code>#community-lab</code>, then look. Exit code 0 means nobody holds the card. The lab's live monitor reads the card for a few milliseconds each second, so if you see <code>ettelem</code> held, look again.</p>
+<div class="code"><div data-ss-id="auto-div-mxakku" class="bar-top"><span>shell</span><button type="button" class="copy">Copy</button></div><pre data-ss-id="auto-pre-eols0a"><code>ssh aifoundry3
+et-who --check; echo "exit $?"</code></pre></div>
+<div class="out"><div data-ss-id="auto-div-aw0nnt" class="label">Output, 8 Oct</div><pre data-ss-id="auto-pre-ysel9w">No process holds an ET-SoC-1 device node or card lock.
+exit 0</pre></div>
+</li>
+
+<li data-ss-id="step-build">
+<h3 data-ss-id="auto-h3-yogbyi">Build the sampler and a workload</h3>
+<p data-ss-id="auto-p-7gcwyx">Use the lab repository's sparse clone that <code>et-lab-start</code> makes, or any clone. Both programs build in seconds. Then download this page's three scripts.</p>
+<div class="code"><div data-ss-id="auto-div-mxakku-2" class="bar-top"><span>shell</span><button type="button" class="copy">Copy</button></div><pre data-ss-id="auto-pre-p79fwp"><code>cd ~/et-soc1-prototyping
+cmake -S tools/ettelem -B build/ettelem-mine \
+  -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev
+nice cmake --build build/ettelem-mine -j4
+cmake -S workloads/sparsity -B build/sparsity-mine \
+  -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev
+nice cmake --build build/sparsity-mine -j4
+for f in etpower.py measure.sh energy.py; do
+  curl -fsSO https://7fb1dec7-791d-4315-b077-bc7752354add.spacesheep.app/$f
+done</code></pre></div>
+</li>
+
+<li data-ss-id="step-one-reading">
+<h3 data-ss-id="auto-h3-kquv2v">Take one reading</h3>
+<p data-ss-id="auto-p-nf2mn8"><code>flock -n</code> takes the card's lock for the command's lifetime and fails at once if someone holds it. The device layer first prints the card's configuration; the JSON at the end is the reading.</p>
+<div class="code"><div data-ss-id="auto-div-mxakku-3" class="bar-top"><span>shell</span><button type="button" class="copy">Copy</button></div><pre data-ss-id="auto-pre-46ur79"><code>L=/run/lock/etsoc-shire0.lock
+flock -n $L build/ettelem-mine/ettelem config
+flock -n $L build/ettelem-mine/ettelem sample --seconds 1 --every-ms 1000</code></pre></div>
+<div class="out"><div data-ss-id="auto-div-z563ff" class="label">Output, 8 Oct (the device layer's printout left out; the sample abridged)</div><pre data-ss-id="auto-pre-9c4d4i">{&quot;tdp_w&quot;:0,&quot;temp_threshold_c&quot;:65,&quot;power_state&quot;:0,&quot;power_state_name&quot;:&quot;max_power&quot;,&quot;minion_mhz&quot;:600,&quot;minion_mv&quot;:523}
+{&quot;t_ms&quot;:1791480295733,&quot;took_ms&quot;:21,&quot;board_w&quot;:24.31,&quot;sp&quot;:{&quot;board_avg_w&quot;:24.39, &quot;minion_w&quot;:[7.205,6.75,8.375], &quot;sram_w&quot;:[2.086,1.995,2.428], &quot;noc_w&quot;:[2.234,2.003,2.726], …},&quot;temp_c&quot;:{&quot;pmic&quot;:53,&quot;ioshire&quot;:[54,54,58],&quot;minshire&quot;:[53,52,59]}, …,&quot;mhz&quot;:{&quot;minion&quot;:600,&quot;noc&quot;:400,&quot;ddr&quot;:933}}</pre></div>
+<p data-ss-id="auto-p-sd79c4" class="muted">tdp_w 0 is how aifoundry3 holds its clock: a boot service sets a 0 W power limit, which also latches the governor at 600 MHz. In the sample, board_w is the meter; each rail in sp is [average, min, max]; temp_c.minshire is the die&#x27;s average, coolest and hottest shire.</p>
+</li>
+
+<li data-ss-id="step-idle">
+<h3 data-ss-id="auto-h3-re1eud">Watch the idle card for ten seconds</h3>
+<div class="code"><div data-ss-id="auto-div-mxakku-4" class="bar-top"><span>shell</span><button type="button" class="copy">Copy</button></div><pre data-ss-id="auto-pre-w5rcrx"><code>flock -n $L build/ettelem-mine/ettelem sample \
+  --seconds 10 --every-ms 100 &gt; idle.jsonl
+flock -n $L python3 etpower.py --seconds 10 &gt; idle-python.jsonl</code></pre></div>
+<figure data-ss-id="chart-idle">
+<h4 data-ss-id="auto-h4-g91k7r">Idle: 24.4 W at 53 °C, and a fresh reading about every 0.16 s</h4>
+<div class="chart" data-chart="idle" role="img" aria-label="Board power of the idle card over ten seconds, flat at about 24.4 watts. The reading steps to a new value about every 0.16 seconds, so the 100 samples hold only 35 distinct values."></div>
+<div data-ss-id="auto-div-jmn05f" class="legend"><span><i style="background:var(--accent)"></i>ettelem, 10 Hz</span><span><i style="background:var(--grey)"></i>etpower.py, 10 Hz, 2 s later</span></div>
+<p data-ss-id="auto-p-c271tc" class="fignote">aifoundry3 card 0, idle, <time datetime="2026-10-08T17:24:55Z">10:24 PDT</time>. Dots are samples.</p>
+</figure>
+<p data-ss-id="auto-p-odbgjx">Both readers agree: <code>ettelem</code> averaged 24.39 W and the Python reader 24.39 W, 12 s earlier. The reading changes about every 0.16 s, so each value lasts one or two samples. That is fine for energy, because the sum uses every sample. On 26 September, under the older firmware, this card refreshed every 263 ms; it now reports firmware 1.4.0.</p>
+</li>
+
+<li data-ss-id="step-measure">
+<h3 data-ss-id="auto-h3-avplqu">Measure a workload's energy</h3>
+<p data-ss-id="auto-p-62i1d2"><code>measure.sh</code> runs the sampler, waits 6 s, runs your program under <code>timeout 10</code>, and waits 8 s more. <code>energy.py</code> subtracts idle and divides by the work done. The workload here is the lab's TensorFMA loop: hart 0 of all 1,024 minions repeats one 16×16×16 fp32 tensor multiply-add, about 0.5 s per launch, for 3 s. It opens only the operations node, so it runs alongside the sampler. <code>sgemm_host</code> opens the management node too, so it doesn't.</p>
+<div class="code"><div data-ss-id="auto-div-mxakku-5" class="bar-top"><span>shell</span><button type="button" class="copy">Copy</button></div><pre data-ss-id="auto-pre-a8xkjc"><code>flock -n $L env ETTELEM=build/ettelem-mine/ettelem \
+  bash measure.sh runs/randn -- \
+  build/sparsity-mine/host/sparsity_host --test fma \
+  --type fp32 --pattern none --values randn \
+  --shires 0xffffffff --per-shire 32 --seconds 3
+python3 energy.py runs/randn</code></pre></div>
+<div class="out"><div data-ss-id="auto-div-aw0nnt-2" class="label">Output, 8 Oct</div><pre data-ss-id="auto-pre-4g80vg">idle: 24.42 W before, 24.87 W after, baseline 24.64 W
+work: 3.44 s, 26.40 W above idle on average, 90.8 J above idle
+      leakage correction 0.61 W (die 56.3 C busy vs 54.4 C idle) -&gt; 88.7 J
+      randn data, 3857014784 TensorFMA ops = 1.58e+13 multiply-adds -&gt; 5.746 pJ per multiply-add (5.613 corrected)
+die: 54 C before, 56.3 C during, 54.9 C after; minion clock [600] MHz</pre></div>
+<figure data-ss-id="chart-burst">
+<h4 data-ss-id="auto-h4-omkh2r">Random data: +26 W for 3.4 s, 89 J above idle</h4>
+<div class="chart" data-chart="burst" role="img" aria-label="Board power during a 3.4 second burst of TensorFMA on random data: idle at 24.6 watts, about 26 watts above idle while it runs, 89 joules in total above idle."></div>
+<div data-ss-id="auto-div-hd2jzy" class="legend"><span><i style="background:var(--accent)"></i>board power, 10 Hz</span><span><i style="background:var(--grey);height:2px"></i>idle baseline</span><span><i style="background:var(--fill);height:10px"></i>energy above idle</span></div>
+<p data-ss-id="auto-p-ov2bi3" class="fignote">Random-data pass 1, <time datetime="2026-10-08T17:26:48Z">10:26 PDT</time>. Time from the first launch.</p>
+</figure>
+</li>
+
+<li data-ss-id="step-data">
+<h3 data-ss-id="auto-h3-xzoc5j">Change only the data</h3>
+<p data-ss-id="auto-p-m1hoz7">Run the same command with <code>--values zeros</code> and <code>--values ones</code>. Leave 20 s between runs so the die settles to the same temperature.</p>
+<figure data-ss-id="chart-data-dependence">
+<h4 data-ss-id="auto-h4-uvvf9x">Random data costs 14× more per multiply-add than zeros</h4>
+<div class="bars" data-ss-id="bars-pj" role="img" aria-label="Energy per fp32 multiply-add above idle on aifoundry3 on 8 October: random 5.75, ones 2.17, zeros 0.42 picojoules, against the published 5.369, 1.925 and 0.163.">
+<div data-ss-id="auto-div-u0znrn" class="bar-row"><span class="bar-label">Random</span><div data-ss-id="auto-div-5mze9b" class="bar-track"><div class="bar hot" style="width:68.7%"></div><span class="pub" style="left:66.92%;width:max(3px,1.43%)"></span><span class="bar-val" style="left:calc(68.7% + 8px)">5.75 pJ</span></div><span class="bar-sub">8 Oct 5.61 and 5.89 · published 5.60–5.72</span></div>
+<div data-ss-id="auto-div-i8wvxl" class="bar-row"><span class="bar-label">Ones</span><div data-ss-id="auto-div-42k00u" class="bar-track"><div class="bar" style="width:25.9%"></div><span class="pub" style="left:25.37%;width:max(3px,1.35%)"></span><span class="bar-val" style="left:calc(26.7% + 8px)">2.17 pJ</span></div><span class="bar-sub">8 Oct 2.16 and 2.17 · published 2.12–2.24</span></div>
+<div data-ss-id="auto-div-n86cnr" class="bar-row"><span class="bar-label">Zeros</span><div data-ss-id="auto-div-9lwu4a" class="bar-track"><div class="bar" style="width:5.0%"></div><span class="pub" style="left:4.42%;width:max(3px,1.31%)"></span><span class="bar-val" style="left:calc(5.7% + 8px)">0.42 pJ</span></div><span class="bar-sub">8 Oct 0.44 and 0.40 · published 0.37–0.48</span></div>
+</div>
+<p data-ss-id="auto-p-f22yvc" class="fignote">Bars: the two passes of 8 Oct, leakage-corrected, averaged. Dark band: the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">energy manual</a>'s value for aifoundry3 (§3.2, four 7 s runs on 26 Sep) at its launch temperature.</p>
+</figure>
+<figure data-ss-id="chart-overlay">
+<h4 data-ss-id="auto-h4-k5ozzo">Same instruction, same rate, different data: the power above idle</h4>
+<div class="chart" data-chart="overlay" role="img" aria-label="Board power above idle for the same TensorFMA loop on zeros, ones and random data: zeros +2 W, ones +10 W, random +27 W."></div>
+<div data-ss-id="auto-div-gvybpx" class="legend"><span><i style="background:var(--accent)"></i>random</span><span><i style="background:var(--grey)"></i>ones</span><span><i style="background:var(--grey2)"></i>zeros</span></div>
+<p data-ss-id="auto-p-yzyenp" class="fignote">Pass 1 of each, board power minus that run's idle baseline.</p>
+</figure>
+<p data-ss-id="auto-p-venn32">Every launch ran the same instruction at the same rate (600 MHz in every sample). Only the operands changed. When an operand word is zero the tensor unit withholds the lane's clock, so zeros cost almost nothing. Random mantissas toggle nearly every bit. On 8 Oct, zeros and ones landed inside the energy manual's range for this card, and random was 0.6% above it.</p>
+</li>
+
+<li data-ss-id="step-release">
+<h3 data-ss-id="auto-h3-f71udg">Release the card</h3>
+<p data-ss-id="auto-p-8qzayy">Check that nothing of yours still holds the card, then post <b>"released"</b> in <code>#community-lab</code>, or edit your claim to say so.</p>
+<div class="code"><div data-ss-id="auto-div-mxakku-6" class="bar-top"><span>shell</span><button type="button" class="copy">Copy</button></div><pre data-ss-id="auto-pre-y7gr09"><code>et-who --check; echo "exit $?"</code></pre></div>
+</li>
+</ol>
+</section>
+
+<section data-ss-id="section-traps" data-ss-section>
+<h2 data-ss-id="heading-traps">Five things that fool people</h2>
+<div class="traps">
+<div class="trap" data-ss-id="trap-rails-lag"><b>The rails lag by about a second.</b><p data-ss-id="auto-p-3xy3hx">The three rail figures are the PMIC's own running average (time constant about 1 s, one pass late). Use board power for energy, or undo the filter with <code>tools/ettelem/deconv.py</code>.</p>
+<figure data-ss-id="chart-lag">
+<h4 data-ss-id="auto-h4-v6aetr">Board power steps up within 0.2 s; the minion rail takes 1.2 s to get 63% of the way</h4>
+<div class="chart" data-chart="lag" role="img" aria-label="During the random-data burst, board power rises within one reading while the minion rail, a running average, takes about 1.2 seconds to reach 63 percent of its level."></div>
+<div data-ss-id="auto-div-jcvo1b" class="legend"><span><i style="background:var(--accent)"></i>board power above idle</span><span><i style="background:var(--grey)"></i>minion rail above idle</span></div>
+</figure></div>
+<div class="trap" data-ss-id="trap-idle-drift"><b>Idle drifts with temperature.</b><p data-ss-id="auto-p-o942rw">Idle power climbs with die temperature, so take the baseline just before and after the work, never from another time of day. The published tables also remove the extra leakage of the slightly warmer die. On 8 Oct that was 0.19–0.78 W.</p></div>
+<div class="trap" data-ss-id="trap-clock"><b>The clock can move.</b><p data-ss-id="auto-p-gqsfnh">aifoundry3 is pinned at 600 MHz. aifoundry1's card 0 idles at 300 MHz, and aifoundry2's governor steps up to 800 MHz when the die is cooler than about 65 °C. Check <code>mhz.minion</code> in every sample.</p></div>
+<div class="trap" data-ss-id="trap-one-opener"><b>One program at a time.</b><p data-ss-id="auto-p-l1sywq">The management node has one opener: <code>et-powertop</code>, <code>ettelem</code>, <code>dev_mngt_service</code> and <code>sgemm_host</code> exclude one another. Stop them with Ctrl-C or <code>kill</code>, never <code>kill -9</code>. A killed request leaves a stale reply that breaks the next program to open the card.</p></div>
+<div class="trap" data-ss-id="trap-compare"><b>Compare cards on power above idle.</b><p data-ss-id="auto-p-0c9ych">Idle differs from card to card: about 25 W on aifoundry3 on 8 Oct, 31–35 W on aifoundry1's card 1. Compare the power a workload adds over idle, never absolute watts.</p></div>
+</div>
+</section>
+
+<section data-ss-id="section-deeper" data-ss-section>
+<h2 data-ss-id="heading-deeper">Go deeper</h2>
+<ul class="links">
+<li data-ss-id="link-telemetry"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature telemetry</a>: every sensor and its rate, and a load step seen through each one</li>
+<li data-ss-id="link-manual"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a>: picojoules per instruction, byte, hop and synchronisation, with the method in §9</li>
+<li data-ss-id="link-observability"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a>: what no sensor sees, and what would meter it</li>
+<li data-ss-id="link-data-power"><a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/10-data-dependent-power.md">Data-dependent power</a>: the same matmul draws 38 W on zeros and 63 W on random data on aifoundry2</li>
+<li data-ss-id="link-start"><a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/lab-start/START.md">The lab's rules and first hour</a>: which card, the lock, the 10-second cap</li>
+</ul>
+</section>
+
+<section data-ss-id="section-sources" data-ss-section>
+<details data-ss-id="details-scripts"><summary>The three scripts, in full</summary>
+<p data-ss-id="auto-p-dt34w2" class="fignote">etpower.py</p><pre data-ss-id="auto-pre-uov8yi">#!/usr/bin/env python3
+&quot;&quot;&quot;Read an ET-SoC-1 card&#x27;s power meter in plain Python: no libDM, nothing to build.
+
+It asks the card&#x27;s service processor (SP) three questions over the management node /dev/et&lt;N&gt;_mgmt,
+using the device-management API&#x27;s own message format (et-platform device-api headers):
+
+  DM_CMD_GET_MODULE_POWER (33)                board input power, 10 mW steps (the PMIC&#x27;s reading)
+  DM_CMD_GET_SP_STATS (60)                    the three metered rails (minion cores, SRAM, mesh) as
+                                              [average, min, max]; the average is the PMIC&#x27;s own
+                                              running average (time constant about 1 s)
+  DM_CMD_GET_MODULE_CURRENT_TEMPERATURE (27)  die temperature (average and hottest minion shire)
+
+One JSON line per sample on stdout. The node has one opener, so hold the card&#x27;s lock around it:
+
+  flock -n /run/lock/etsoc-shire0.lock python3 etpower.py --seconds 10 &gt; idle.jsonl
+
+Stop it early with Ctrl-C or a plain `kill`: the request in flight finishes first. Never `kill -9`
+it: a reply left in the management queue breaks the next program that opens the card.
+
+How a message travels (the same two ioctls libDM&#x27;s device layer uses): an 8-byte header (message
+size, tag, command code, flags) is pushed with ETSOC1_IOCTL_PUSH_SQ, and the reply, a 24-byte
+header (the same 8 bytes, the SP&#x27;s latency in µs, a status) plus the command&#x27;s struct, is popped
+with ETSOC1_IOCTL_POP_CQ.
+&quot;&quot;&quot;
+import argparse
+import ctypes
+import errno
+import fcntl
+import json
+import os
+import select
+import signal
+import struct
+import sys
+import time
+
+MAGIC = 0xE7  # ESPERANTO_PCIE_IOCTL_MAGIC (et-driver/et_ioctl.h)
+
+
+def _ioc(direction, nr, size):
+    return (direction &lt;&lt; 30) | (size &lt;&lt; 16) | (MAGIC &lt;&lt; 8) | nr
+
+
+class CmdDesc(ctypes.Structure):  # struct cmd_desc (et_ioctl.h)
+    _fields_ = [(&quot;cmd&quot;, ctypes.c_void_p), (&quot;size&quot;, ctypes.c_uint16),
+                (&quot;sq_index&quot;, ctypes.c_uint16), (&quot;flags&quot;, ctypes.c_uint8)]
+
+
+class RspDesc(ctypes.Structure):  # struct rsp_desc (et_ioctl.h)
+    _fields_ = [(&quot;rsp&quot;, ctypes.c_void_p), (&quot;size&quot;, ctypes.c_uint16), (&quot;cq_index&quot;, ctypes.c_uint16)]
+
+
+PUSH_SQ = _ioc(1, 6, ctypes.sizeof(CmdDesc))  # _IOW(MAGIC, 6, struct cmd_desc)
+POP_CQ = _ioc(3, 7, ctypes.sizeof(RspDesc))   # _IOWR(MAGIC, 7, struct rsp_desc)
+MAX_MSG = 1760
+
+GET_MODULE_CURRENT_TEMPERATURE = 27
+GET_MODULE_POWER = 33
+GET_SP_STATS = 60
+
+# struct get_sp_stats_t (device_mgmt_api_rpc_types.h): 42 uint16 values, in this order.
+SP_FIELDS = [&quot;system_power&quot;, &quot;system_temperature&quot;] + [
+    &quot;%s_%s&quot; % (part, q) for part in (&quot;minion&quot;, &quot;sram&quot;, &quot;noc&quot;)
+    for q in (&quot;power&quot;, &quot;temperature&quot;, &quot;voltage&quot;, &quot;freq&quot;)]
+
+_stop = False
+
+
+def _ask_to_stop(_sig, _frame):
+    global _stop
+    _stop = True
+
+
+def drain(fd):
+    &quot;&quot;&quot;Pop and drop any reply a killed program left behind (nobody else can have the node open).&quot;&quot;&quot;
+    rbuf = ctypes.create_string_buffer(MAX_MSG)
+    desc = RspDesc(ctypes.cast(rbuf, ctypes.c_void_p), MAX_MSG, 0)
+    dropped = 0
+    while True:
+        try:
+            fcntl.ioctl(fd, POP_CQ, desc)
+            dropped += 1
+        except OSError as e:
+            if e.errno == errno.EAGAIN:
+                return dropped
+            raise
+
+
+def request(fd, cmd, timeout_s=2.0):
+    &quot;&quot;&quot;Send one command (header only, as libDM does for these) and return its reply bytes.&quot;&quot;&quot;
+    tag = (os.getpid() ^ int(time.time() * 1000)) &amp; 0xFFFF or 1
+    msg = struct.pack(&quot;&lt;HHHH&quot;, 8, tag, cmd, 0)
+    sbuf = ctypes.create_string_buffer(msg, len(msg))
+    fcntl.ioctl(fd, PUSH_SQ, CmdDesc(ctypes.cast(sbuf, ctypes.c_void_p), len(msg), 0, 0))
+    rbuf = ctypes.create_string_buffer(MAX_MSG)
+    desc = RspDesc(ctypes.cast(rbuf, ctypes.c_void_p), MAX_MSG, 0)
+    poller = select.poll()
+    poller.register(fd, select.POLLIN)
+    end = time.time() + timeout_s
+    while time.time() &lt; end:
+        poller.poll(20)
+        try:
+            n = fcntl.ioctl(fd, POP_CQ, desc)
+        except OSError as e:
+            if e.errno == errno.EAGAIN:
+                continue
+            raise
+        data = rbuf.raw[:n]
+        _size, rtag, rcmd, _flags = struct.unpack_from(&quot;&lt;HHHH&quot;, data, 0)
+        if rtag == tag and rcmd == cmd:
+            status, = struct.unpack_from(&quot;&lt;i&quot;, data, 16)
+            if status != 0:
+                raise RuntimeError(&quot;command %d returned status %d&quot; % (cmd, status))
+            return data
+    raise TimeoutError(&quot;no reply to command %d within %.1f s&quot; % (cmd, timeout_s))
+
+
+def read_once(fd):
+    &quot;&quot;&quot;One sample: board power, the three rails and the die temperature.&quot;&quot;&quot;
+    t = time.time()
+    board_w = struct.unpack_from(&quot;&lt;H&quot;, request(fd, GET_MODULE_POWER), 24)[0] / 100.0  # 10 mW units
+    v = struct.unpack_from(&quot;&lt;42H&quot;, request(fd, GET_SP_STATS), 24)
+    sp = {name: list(v[3 * i:3 * i + 3]) for i, name in enumerate(SP_FIELDS)}  # [avg, min, max]
+    temp = struct.unpack_from(&quot;&lt;6hB&quot;, request(fd, GET_MODULE_CURRENT_TEMPERATURE), 24)
+    return {
+        &quot;t&quot;: round(t, 3),
+        &quot;took_ms&quot;: round((time.time() - t) * 1e3, 1),
+        &quot;board_w&quot;: board_w,
+        # the rails&#x27; running averages (index 0 of each triple), mW -&gt; W
+        &quot;minion_w&quot;: sp[&quot;minion_power&quot;][0] / 1000.0,
+        &quot;sram_w&quot;: sp[&quot;sram_power&quot;][0] / 1000.0,
+        &quot;noc_w&quot;: sp[&quot;noc_power&quot;][0] / 1000.0,
+        &quot;minion_mhz&quot;: sp[&quot;minion_freq&quot;][0],
+        &quot;die_c&quot;: temp[3],       # minion shires, average
+        &quot;die_max_c&quot;: temp[5],   # hottest minion shire
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split(&quot;\n&quot;)[0])
+    ap.add_argument(&quot;--card&quot;, type=int, default=int(os.environ.get(&quot;ET_DEVICES&quot;, &quot;0&quot;) or 0),
+                    help=&quot;card number N in /dev/etN_mgmt (default: $ET_DEVICES or 0)&quot;)
+    ap.add_argument(&quot;--seconds&quot;, type=float, default=10.0, help=&quot;how long to sample&quot;)
+    ap.add_argument(&quot;--every-ms&quot;, type=int, default=100, help=&quot;sampling period (default 100 ms = 10 Hz)&quot;)
+    a = ap.parse_args()
+
+    signal.signal(signal.SIGINT, _ask_to_stop)
+    signal.signal(signal.SIGTERM, _ask_to_stop)
+    # The node has one opener. Another reader (the lab&#x27;s live dashboard takes one reading a second on a
+    # free card) holds it for a few tens of ms, so wait up to 5 s for it before giving up.
+    end = time.time() + 5
+    while True:
+        try:
+            fd = os.open(&quot;/dev/et%d_mgmt&quot; % a.card, os.O_RDWR | os.O_NONBLOCK)
+            break
+        except OSError as e:
+            if e.errno not in (errno.EBUSY, errno.EPERM) or time.time() &gt; end:
+                raise
+            time.sleep(0.05)
+    try:
+        stale = drain(fd)
+        if stale:
+            print(&quot;dropped %d stale repl%s left in the queue&quot; % (stale, &quot;y&quot; if stale == 1 else &quot;ies&quot;),
+                  file=sys.stderr)
+        start = time.time()
+        while not _stop and time.time() - start &lt; a.seconds:
+            tick = time.time()
+            print(json.dumps(read_once(fd)), flush=True)
+            time.sleep(max(0.0, a.every_ms / 1000.0 - (time.time() - tick)))
+    finally:
+        os.close(fd)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre>
+<p data-ss-id="auto-p-akyjv8" class="fignote">measure.sh</p><pre data-ss-id="auto-pre-x9bbx0">#!/usr/bin/env bash
+# measure.sh: one energy measurement on an ET-SoC-1 card, made the way the lab&#x27;s agents make them.
+#
+#   idle (6 s)  -&gt;  the workload (one process, capped at 10 s)  -&gt;  idle (8 s)
+#
+# with the card&#x27;s power meter read 10 times a second the whole time. The idle stretches on both
+# sides are the baseline: energy = (power during the work - idle power) x time.
+#
+# Hold the card&#x27;s lock for the whole measurement, so nobody else starts on the card meanwhile:
+#   flock -n /run/lock/etsoc-shire0.lock ./measure.sh OUT_DIR -- &lt;workload command ...&gt;
+#   python3 energy.py OUT_DIR
+#
+# ETTELEM points at the sampler (default build/ettelem/ettelem); IDLE_BEFORE and IDLE_AFTER are seconds.
+set -u
+OUT=$1; shift; [ &quot;${1:-}&quot; = &quot;--&quot; ] &amp;&amp; shift
+ETTELEM=${ETTELEM:-build/ettelem/ettelem}
+IDLE_BEFORE=${IDLE_BEFORE:-6}
+IDLE_AFTER=${IDLE_AFTER:-8}
+mkdir -p &quot;$OUT&quot;
+
+# 1. Start the sampler. About one start in three fails right after another sampler exits, so retry.
+SAMPLER=
+for attempt in 1 2 3 4; do
+  &quot;$ETTELEM&quot; sample --seconds 120 --every-ms 100 &gt; &quot;$OUT/power.jsonl&quot; 2&gt; &quot;$OUT/sampler.err&quot; &lt; /dev/null &amp;
+  SAMPLER=$!
+  for i in $(seq 1 40); do
+    sleep 0.25
+    grep -q &#x27;^{&#x27; &quot;$OUT/power.jsonl&quot; &amp;&amp; break 2
+  done
+  kill -TERM &quot;$SAMPLER&quot;; wait &quot;$SAMPLER&quot;; SAMPLER=; sleep 2
+done
+[ -n &quot;$SAMPLER&quot; ] || { echo &quot;the sampler did not start (is the card free? et-who)&quot; &gt;&amp;2; exit 1; }
+# Stop it with a plain kill (SIGTERM): the request in flight completes. Never kill -9 a card tool.
+trap &#x27;kill -TERM &quot;$SAMPLER&quot; 2&gt;/dev/null; wait &quot;$SAMPLER&quot;&#x27; EXIT
+
+# 2. Idle, the work, idle.
+sleep &quot;$IDLE_BEFORE&quot;
+date +%s.%N &gt; &quot;$OUT/t_start&quot;
+timeout 10 &quot;$@&quot; &gt; &quot;$OUT/workload.out&quot; 2&gt;&amp;1 &lt; /dev/null
+echo $? &gt; &quot;$OUT/exit_code&quot;
+date +%s.%N &gt; &quot;$OUT/t_end&quot;
+sleep &quot;$IDLE_AFTER&quot;
+echo &quot;done: $OUT (workload exit code $(cat &quot;$OUT/exit_code&quot;))&quot;
+</pre>
+<p data-ss-id="auto-p-no852a" class="fignote">energy.py</p><pre data-ss-id="auto-pre-uqdit6">#!/usr/bin/env python3
+&quot;&quot;&quot;energy.py OUT_DIR: the energy of the workload that measure.sh ran, from the card&#x27;s power meter.
+
+  idle power    = mean board power over the idle stretches before and after the work
+                  (their mean removes most of idle power&#x27;s drift with die temperature)
+  energy        = sum over samples of (board power - idle power) x sample interval,
+                  over the work plus a short margin either side (the meter lags by up to one
+                  service-processor pass, about 0.13-0.27 s)
+  per operation = energy / operations completed (the workload&#x27;s own count, from the device)
+
+The published tables add one refinement, also computed here: the die runs a little warmer during
+the work than in the idle stretches, and the warmer die leaks more, so that extra leakage (the idle
+law&#x27;s slope times the temperature difference) is taken out (energy manual §9; the constants are
+workloads/enercat/analyze_catalogue.py&#x27;s).
+
+Prints a summary and writes OUT_DIR/summary.json and OUT_DIR/trace.csv (time from the start of the work).
+&quot;&quot;&quot;
+import json
+import math
+import os
+import re
+import statistics
+import sys
+
+
+def load_samples(path):
+    rows = []
+    with open(path) as f:
+        for line in f:
+            if not line.startswith(&quot;{&quot;):
+                continue
+            d = json.loads(line)
+            if &quot;board_w&quot; not in d:
+                continue
+            t = d[&quot;t_ms&quot;] / 1000.0 if &quot;t_ms&quot; in d else d[&quot;t&quot;]          # ettelem / etpower.py
+            sp = d.get(&quot;sp&quot;, {})
+            rail = lambda k: sp[k][0] if k in sp else d.get(k)           # the PMIC&#x27;s running average
+            die = d.get(&quot;temp_c&quot;, {}).get(&quot;minshire&quot;, [d.get(&quot;die_c&quot;)])[0]
+            mhz = d.get(&quot;mhz&quot;, {}).get(&quot;minion&quot;, d.get(&quot;minion_mhz&quot;))
+            rows.append({&quot;t&quot;: t, &quot;board_w&quot;: d[&quot;board_w&quot;], &quot;minion_w&quot;: rail(&quot;minion_w&quot;), &quot;sram_w&quot;: rail(&quot;sram_w&quot;),
+                         &quot;noc_w&quot;: rail(&quot;noc_w&quot;), &quot;die_c&quot;: die, &quot;mhz&quot;: mhz, &quot;took_ms&quot;: d.get(&quot;took_ms&quot;)})
+    return rows
+
+
+def load_launches(path):
+    &quot;&quot;&quot;The workload&#x27;s own records: sparsity_host prints one &#x27;SPARSITY {json}&#x27; line per launch.&quot;&quot;&quot;
+    out = []
+    if os.path.exists(path):
+        for line in open(path):
+            m = re.match(r&quot;SPARSITY (\{.*\})&quot;, line)
+            if m:
+                r = json.loads(m.group(1))
+                if r.get(&quot;launch&quot;, 0) &gt;= 0:      # launch -1 is a calibration run
+                    out.append(r)
+    return out
+
+
+def mean(xs):
+    xs = [x for x in xs if x is not None]
+    return statistics.mean(xs) if xs else None
+
+
+A_LEAK_80, T_L = 23.257, 36.0  # idle law&#x27;s leakage: 23.3 W x e^((T-80)/36)
+
+
+def leak_slope(t_c):
+    &quot;&quot;&quot;Watts of extra leakage per degree C of die temperature, at t_c.&quot;&quot;&quot;
+    return A_LEAK_80 / T_L * math.exp((t_c - 80.0) / T_L)
+
+
+def main():
+    out = sys.argv[1]
+    idle_before = float(os.environ.get(&quot;IDLE_BEFORE&quot;, 6))
+    idle_after = float(os.environ.get(&quot;IDLE_AFTER&quot;, 8))
+    s = load_samples(os.path.join(out, &quot;power.jsonl&quot;))
+    t_start = float(open(os.path.join(out, &quot;t_start&quot;)).read())
+    t_end = float(open(os.path.join(out, &quot;t_end&quot;)).read())
+    launches = load_launches(os.path.join(out, &quot;workload.out&quot;))
+
+    # The work itself: from the first launch to the end of the last (device-side records), else the process.
+    w0 = min(r[&quot;t_start_ms&quot;] for r in launches) / 1000.0 if launches else t_start
+    w1 = max(r[&quot;t_end_ms&quot;] for r in launches) / 1000.0 if launches else t_end
+    busy_s = w1 - w0
+
+    before = [x for x in s if t_start - idle_before + 1.0 &lt;= x[&quot;t&quot;] &lt;= t_start - 0.1]
+    after = [x for x in s if t_end + 3.0 &lt;= x[&quot;t&quot;] &lt;= t_end + idle_after - 0.3]
+    idle_b, idle_a = mean(x[&quot;board_w&quot;] for x in before), mean(x[&quot;board_w&quot;] for x in after)
+    idle_w = (idle_b + idle_a) / 2
+
+    # Energy above idle, integrated over the work plus a margin (sample interval from the timestamps).
+    win = [x for x in s if w0 - 0.5 &lt;= x[&quot;t&quot;] &lt;= w1 + 1.0]
+    energy_j = 0.0
+    for a, b in zip(win, win[1:]):
+        energy_j += (a[&quot;board_w&quot;] - idle_w) * (b[&quot;t&quot;] - a[&quot;t&quot;])
+    inside = [x for x in s if w0 + 0.3 &lt;= x[&quot;t&quot;] &lt;= w1]
+    t_idle = mean([x[&quot;die_c&quot;] for x in before + after])
+    t_busy = mean([x[&quot;die_c&quot;] for x in inside])
+    leak_w = leak_slope((t_busy + t_idle) / 2) * (t_busy - t_idle) if None not in (t_idle, t_busy) else 0.0
+    energy_corr_j = energy_j - leak_w * busy_s
+    res = {
+        &quot;idle_before_w&quot;: round(idle_b, 3), &quot;idle_after_w&quot;: round(idle_a, 3), &quot;idle_w&quot;: round(idle_w, 3),
+        &quot;busy_s&quot;: round(busy_s, 3), &quot;energy_above_idle_j&quot;: round(energy_j, 3),
+        &quot;mean_above_idle_w&quot;: round(energy_j / busy_s, 3) if busy_s &gt; 0 else None,
+        &quot;leakage_correction_w&quot;: round(leak_w, 3), &quot;energy_corrected_j&quot;: round(energy_corr_j, 3),
+        &quot;busy_mean_board_w&quot;: round(mean(x[&quot;board_w&quot;] for x in inside), 3) if inside else None,
+        &quot;die_c_before&quot;: mean(x[&quot;die_c&quot;] for x in before), &quot;die_c_busy&quot;: mean(x[&quot;die_c&quot;] for x in inside),
+        &quot;die_c_after&quot;: mean(x[&quot;die_c&quot;] for x in after),
+        &quot;minion_mhz_seen&quot;: sorted({x[&quot;mhz&quot;] for x in s if x[&quot;mhz&quot;] is not None and w0 &lt;= x[&quot;t&quot;] &lt;= w1}),
+        &quot;samples&quot;: len(s), &quot;sample_period_ms&quot;: round(1000 * (s[-1][&quot;t&quot;] - s[0][&quot;t&quot;]) / (len(s) - 1), 1),
+        &quot;distinct_board_values_per_s&quot;: round(sum(1 for a, b in zip(s, s[1:]) if a[&quot;board_w&quot;] != b[&quot;board_w&quot;])
+                                             / (s[-1][&quot;t&quot;] - s[0][&quot;t&quot;]), 2),
+        &quot;launches&quot;: len(launches),
+    }
+    if launches and launches[0].get(&quot;test&quot;) == &quot;fma&quot;:
+        ops = sum(r[&quot;iters&quot;] * r[&quot;minions&quot;] for r in launches)          # TensorFMA instructions completed
+        macs = ops * 16 * launches[0][&quot;a_elems&quot;]                         # 16 x 16 x 16 = 4,096 per fp32 op
+        res.update({&quot;values&quot;: launches[0][&quot;values&quot;], &quot;type&quot;: launches[0][&quot;type&quot;], &quot;tensorfma_ops&quot;: ops,
+                    &quot;multiply_adds&quot;: macs, &quot;pj_per_multiply_add&quot;: round(energy_j / macs * 1e12, 3),
+                    &quot;pj_per_multiply_add_corrected&quot;: round(energy_corr_j / macs * 1e12, 3),
+                    &quot;ghz_device&quot;: launches[0].get(&quot;ghz&quot;),
+                    &quot;all_checked_ok&quot;: all(r.get(&quot;ok&quot;) for r in launches)})
+    json.dump(res, open(os.path.join(out, &quot;summary.json&quot;), &quot;w&quot;), indent=1)
+
+    with open(os.path.join(out, &quot;trace.csv&quot;), &quot;w&quot;) as f:
+        f.write(&quot;t_s,board_w,minion_w,sram_w,noc_w,die_c,mhz\n&quot;)
+        for x in s:
+            f.write(&quot;%.3f,%s,%s,%s,%s,%s,%s\n&quot; % (x[&quot;t&quot;] - w0, x[&quot;board_w&quot;], x[&quot;minion_w&quot;], x[&quot;sram_w&quot;],
+                                                 x[&quot;noc_w&quot;], x[&quot;die_c&quot;], x[&quot;mhz&quot;]))
+
+    print(&quot;idle: %.2f W before, %.2f W after, baseline %.2f W&quot; % (idle_b, idle_a, idle_w))
+    print(&quot;work: %.2f s, %.2f W above idle on average, %.1f J above idle&quot; % (busy_s, res[&quot;mean_above_idle_w&quot;], energy_j))
+    print(&quot;      leakage correction %.2f W (die %.1f C busy vs %.1f C idle) -&gt; %.1f J&quot;
+          % (leak_w, t_busy or 0, t_idle or 0, energy_corr_j))
+    if &quot;pj_per_multiply_add&quot; in res:
+        print(&quot;      %s data, %d TensorFMA ops = %.3g multiply-adds -&gt; %.3f pJ per multiply-add (%.3f corrected)&quot;
+              % (res[&quot;values&quot;], res[&quot;tensorfma_ops&quot;], res[&quot;multiply_adds&quot;], res[&quot;pj_per_multiply_add&quot;],
+                 res[&quot;pj_per_multiply_add_corrected&quot;]))
+    print(&quot;die: %s C before, %s C during, %s C after; minion clock %s MHz&quot;
+          % tuple([None if v is None else round(v, 1) for v in (res[&quot;die_c_before&quot;], res[&quot;die_c_busy&quot;],
+                                                                 res[&quot;die_c_after&quot;])] + [res[&quot;minion_mhz_seen&quot;]]))
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre>
+</details>
+<details data-ss-id="details-sources"><summary>Sources, and how the 8 Oct runs were made</summary>
+<ul>
+<li data-ss-id="auto-li-vi4uyb">Runs: aifoundry3 card 0, <time datetime="2026-10-08T17:26:48Z">10:26 PDT</time>, by an agent on the box. The two passes ran in opposite orders, with 20 s between runs. Raw data is on the box in <code>~/nekko/build/energy-tutorial/runs/</code>.</li>
+<li data-ss-id="auto-li-9n0q5r">The sensors and the service-processor loop: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/research/power-telemetry.md">docs/research/power-telemetry.md</a>. The method: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/energy-manual/09-method.md">energy manual §9</a>.</li>
+<li data-ss-id="auto-li-moufur">Published per-multiply-add values for this loop, <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/energy-manual/03-instructions.md">energy manual §3.2</a>: 0.273, 2.131 and 5.782 pJ on zeros, ones and random data, the mean of three cards. For aifoundry3 alone, 0.163, 1.925 and 5.369 pJ as registered. The manual's launch-temperature note puts aifoundry3 at 0.37–0.48 pJ on zeros and 5.60–5.72 on random data; the ones band applies the same note's 0.91–1.43 W offset.</li>
+<li data-ss-id="auto-li-ok60j3">The Python reader's message layout: et-platform's <code>device-api</code> headers (<code>device_mgmt_api_rpc_types.h</code>) and the driver's ioctls (<code>et_ioctl.h</code>).</li>
+</ul>
+</details>
+</section>
+
+<footer data-ss-id="footer" data-ss-react="off">Written for AI Foundry's <code>#community-lab</code> by Yaroslav Bulatov's agents, <time datetime="2026-10-08">Thu 8 Oct 2026</time>. The lab's work lives in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">et-soc1-prototyping</a>.</footer>
+</main>
+
+<script type="application/json" id="chart-data">{"idle":{"x":[0,10],"y":[23.48,25.25],"xticks":[0,2,4,6,8,10],"xtl":["0","2","4","6","8","10 s"],"yticks":[23.5,24.0,24.5,25.0],"yunit":"W","height":220,"series":[{"pts":[[0.0,24.35],[0.1,24.36],[0.201,24.36],[0.301,24.39],[0.401,24.62],[0.501,24.41],[0.601,24.41],[0.701,24.41],[0.802,24.66],[0.902,24.35],[1.002,24.35],[1.102,24.39],[1.202,24.21],[1.302,24.39],[1.402,24.39],[1.503,24.32],[1.603,24.12],[1.703,24.41],[1.803,24.41],[1.903,24.08],[2.003,24.54],[2.104,24.35],[2.204,24.35],[2.304,24.35],[2.404,24.32],[2.504,24.35],[2.604,24.35],[2.704,24.31],[2.804,24.08],[2.904,24.64],[3.005,24.64],[3.105,24.46],[3.205,24.21],[3.305,24.39],[3.405,24.39],[3.505,24.35],[3.605,24.49],[3.705,24.21],[3.806,24.21],[3.906,24.36],[4.006,24.42],[4.106,24.18],[4.206,24.18],[4.307,24.49],[4.407,24.41],[4.507,24.38],[4.607,24.38],[4.707,24.8],[4.807,24.36],[4.907,24.53],[5.007,24.53],[5.108,24.18],[5.208,24.36],[5.308,24.53],[5.408,24.53],[5.508,24.45],[5.608,24.39],[5.709,24.21],[5.809,24.21],[5.909,24.59],[6.009,24.36],[6.109,24.32],[6.209,24.32],[6.309,24.39],[6.409,24.39],[6.509,24.44],[6.61,24.44],[6.71,24.76],[6.81,24.41],[6.91,24.72],[7.01,24.72],[7.11,24.41],[7.21,24.45],[7.311,24.36],[7.411,24.36],[7.511,24.25],[7.611,24.36],[7.711,23.81],[7.811,23.81],[7.911,24.39],[8.011,24.45],[8.112,24.32],[8.212,24.32],[8.312,24.49],[8.412,24.39],[8.512,24.35],[8.612,24.35],[8.713,24.41],[8.813,24.45],[8.913,24.36],[9.013,24.36],[9.113,24.42],[9.213,24.45],[9.314,24.35],[9.414,24.35],[9.514,24.39],[9.614,24.36],[9.714,24.81],[9.814,24.81],[9.914,24.48]],"color":"grey","step":true,"width":1.5,"dots":true},{"pts":[[0.0,24.31],[0.1,24.32],[0.2,24.59],[0.3,24.59],[0.4,24.43],[0.5,24.21],[0.601,24.21],[0.701,24.35],[0.801,24.45],[0.901,24.45],[1.001,24.35],[1.101,24.35],[1.201,24.53],[1.301,24.15],[1.401,24.15],[1.501,24.34],[1.602,24.31],[1.702,24.31],[1.802,24.62],[1.902,24.35],[2.002,24.35],[2.102,24.49],[2.203,24.45],[2.303,24.45],[2.403,24.48],[2.503,24.31],[2.603,24.31],[2.703,24.39],[2.803,24.39],[2.904,24.12],[3.004,24.41],[3.104,24.41],[3.204,24.38],[3.304,24.28],[3.404,24.28],[3.504,24.38],[3.604,24.32],[3.705,24.32],[3.805,24.45],[3.905,24.35],[4.005,24.35],[4.105,24.35],[4.206,24.38],[4.306,24.38],[4.406,24.29],[4.506,24.29],[4.606,24.58],[4.706,24.52],[4.807,24.52],[4.907,24.52],[5.007,24.17],[5.107,24.17],[5.207,24.36],[5.307,24.29],[5.408,24.29],[5.508,24.41],[5.608,24.66],[5.708,24.66],[5.808,24.18],[5.908,24.21],[6.009,24.21],[6.109,24.49],[6.209,24.49],[6.309,24.27],[6.409,24.62],[6.509,24.62],[6.609,24.39],[6.71,24.48],[6.81,24.48],[6.91,24.45],[7.01,24.35],[7.11,24.35],[7.21,24.92],[7.311,24.41],[7.411,24.41],[7.511,24.31],[7.611,24.14],[7.711,24.14],[7.811,24.07],[7.912,24.07],[8.012,24.63],[8.112,24.36],[8.212,24.36],[8.312,24.67],[8.412,24.42],[8.512,24.42],[8.613,24.4],[8.713,24.36],[8.813,24.36],[8.913,24.39],[9.013,24.51],[9.113,24.51],[9.214,24.48],[9.314,24.48],[9.414,24.48],[9.514,24.44],[9.614,24.44],[9.714,24.63],[9.815,24.18],[9.915,24.18]],"color":"accent","step":true,"width":2,"dots":true}]},"burst":{"x":[-5,12],"y":[20.6,55.8],"xticks":[-4,-2,0,2,4,6,8,10],"xtl":["-4","-2","0","2","4","6","8","10 s"],"yticks":[30,40,50],"yunit":"W","height":240,"areas":[{"pts":[[-5.453,24.45],[-5.352,24.45],[-5.252,24.34],[-5.152,24.73],[-5.052,24.73],[-4.952,24.41],[-4.852,24.41],[-4.751,24.41],[-4.651,24.35],[-4.551,24.52],[-4.451,24.52],[-4.351,24.42],[-4.251,24.44],[-4.151,24.44],[-4.05,24.39],[-3.95,24.47],[-3.85,24.47],[-3.75,24.39],[-3.65,24.62],[-3.549,24.62],[-3.449,24.54],[-3.349,24.54],[-3.249,24.18],[-3.149,24.52],[-3.049,24.52],[-2.948,24.34],[-2.848,24.31],[-2.748,24.31],[-2.648,24.31],[-2.548,24.35],[-2.447,24.35],[-2.347,24.55],[-2.247,24.31],[-2.147,24.31],[-2.047,24.26],[-1.946,24.39],[-1.846,24.39],[-1.746,24.36],[-1.646,24.36],[-1.546,24.31],[-1.445,24.44],[-1.345,24.44],[-1.245,24.52],[-1.145,24.26],[-1.045,24.26],[-0.945,24.41],[-0.845,24.27],[-0.744,24.27],[-0.644,24.41],[-0.544,24.52],[-0.444,24.52],[-0.344,24.39],[-0.244,24.41],[-0.144,24.41],[-0.044,24.38],[0.057,24.38],[0.157,50.66],[0.257,50.41],[0.357,50.41],[0.457,50.55],[0.557,50.89],[0.657,50.89],[0.757,50.92],[0.857,50.83],[0.957,50.83],[1.057,50.85],[1.158,50.99],[1.258,50.99],[1.358,50.99],[1.458,51.01],[1.558,51.01],[1.658,51.48],[1.758,51.48],[1.858,51.24],[1.958,51.22],[2.058,51.22],[2.158,51.42],[2.258,51.32],[2.359,51.32],[2.459,51.38],[2.559,51.71],[2.659,51.71],[2.759,51.38],[2.859,51.38],[2.959,51.38],[3.059,51.75],[3.159,51.69],[3.259,51.69],[3.359,51.57],[3.459,51.57],[3.56,25.67],[3.66,25.46],[3.76,25.46],[3.86,25.29],[3.96,25.45],[4.06,25.45],[4.16,25.22],[4.261,25.21],[4.361,25.21],[4.461,25.25],[4.561,25.17],[4.661,25.17],[4.762,25.16],[4.862,25.09],[4.962,25.09],[5.062,25.05],[5.162,25.05],[5.263,25.16],[5.363,25.02],[5.463,25.02],[5.563,25.14],[5.663,24.99],[5.763,24.99],[5.864,25.23],[5.964,24.92],[6.064,24.92],[6.164,24.99],[6.264,24.91],[6.364,24.91],[6.464,25.36],[6.564,24.95],[6.664,24.95],[6.764,24.88],[6.864,24.88],[6.964,25.29],[7.064,24.99],[7.164,24.99],[7.264,24.89],[7.365,24.92],[7.465,24.92],[7.565,24.89],[7.665,24.89],[7.765,24.89],[7.865,25.22],[7.966,24.88],[8.066,24.88],[8.166,24.83],[8.266,24.79],[8.366,24.79],[8.466,24.89],[8.566,24.89],[8.667,24.62],[8.767,24.85],[8.867,24.85],[8.967,24.64],[9.067,24.86],[9.167,24.86],[9.268,24.92],[9.368,24.79],[9.468,24.79],[9.568,24.82],[9.669,24.74],[9.769,24.74],[9.869,24.76],[9.969,24.99],[10.069,24.99],[10.169,24.75],[10.269,24.81],[10.369,24.81],[10.47,24.76],[10.57,24.76],[10.67,24.92],[10.77,24.71],[10.87,24.71],[10.97,24.78],[11.07,25.05],[11.17,25.05],[11.271,24.57],[11.371,24.89],[11.471,24.89]],"base":24.644,"x0":-0.5,"x1":4.438000000000001}],"series":[{"pts":[[-5,24.644],[12,24.644]],"color":"grey","width":1.5,"dash":"5 4"},{"pts":[[-5.453,24.45],[-5.352,24.45],[-5.252,24.34],[-5.152,24.73],[-5.052,24.73],[-4.952,24.41],[-4.852,24.41],[-4.751,24.41],[-4.651,24.35],[-4.551,24.52],[-4.451,24.52],[-4.351,24.42],[-4.251,24.44],[-4.151,24.44],[-4.05,24.39],[-3.95,24.47],[-3.85,24.47],[-3.75,24.39],[-3.65,24.62],[-3.549,24.62],[-3.449,24.54],[-3.349,24.54],[-3.249,24.18],[-3.149,24.52],[-3.049,24.52],[-2.948,24.34],[-2.848,24.31],[-2.748,24.31],[-2.648,24.31],[-2.548,24.35],[-2.447,24.35],[-2.347,24.55],[-2.247,24.31],[-2.147,24.31],[-2.047,24.26],[-1.946,24.39],[-1.846,24.39],[-1.746,24.36],[-1.646,24.36],[-1.546,24.31],[-1.445,24.44],[-1.345,24.44],[-1.245,24.52],[-1.145,24.26],[-1.045,24.26],[-0.945,24.41],[-0.845,24.27],[-0.744,24.27],[-0.644,24.41],[-0.544,24.52],[-0.444,24.52],[-0.344,24.39],[-0.244,24.41],[-0.144,24.41],[-0.044,24.38],[0.057,24.38],[0.157,50.66],[0.257,50.41],[0.357,50.41],[0.457,50.55],[0.557,50.89],[0.657,50.89],[0.757,50.92],[0.857,50.83],[0.957,50.83],[1.057,50.85],[1.158,50.99],[1.258,50.99],[1.358,50.99],[1.458,51.01],[1.558,51.01],[1.658,51.48],[1.758,51.48],[1.858,51.24],[1.958,51.22],[2.058,51.22],[2.158,51.42],[2.258,51.32],[2.359,51.32],[2.459,51.38],[2.559,51.71],[2.659,51.71],[2.759,51.38],[2.859,51.38],[2.959,51.38],[3.059,51.75],[3.159,51.69],[3.259,51.69],[3.359,51.57],[3.459,51.57],[3.56,25.67],[3.66,25.46],[3.76,25.46],[3.86,25.29],[3.96,25.45],[4.06,25.45],[4.16,25.22],[4.261,25.21],[4.361,25.21],[4.461,25.25],[4.561,25.17],[4.661,25.17],[4.762,25.16],[4.862,25.09],[4.962,25.09],[5.062,25.05],[5.162,25.05],[5.263,25.16],[5.363,25.02],[5.463,25.02],[5.563,25.14],[5.663,24.99],[5.763,24.99],[5.864,25.23],[5.964,24.92],[6.064,24.92],[6.164,24.99],[6.264,24.91],[6.364,24.91],[6.464,25.36],[6.564,24.95],[6.664,24.95],[6.764,24.88],[6.864,24.88],[6.964,25.29],[7.064,24.99],[7.164,24.99],[7.264,24.89],[7.365,24.92],[7.465,24.92],[7.565,24.89],[7.665,24.89],[7.765,24.89],[7.865,25.22],[7.966,24.88],[8.066,24.88],[8.166,24.83],[8.266,24.79],[8.366,24.79],[8.466,24.89],[8.566,24.89],[8.667,24.62],[8.767,24.85],[8.867,24.85],[8.967,24.64],[9.067,24.86],[9.167,24.86],[9.268,24.92],[9.368,24.79],[9.468,24.79],[9.568,24.82],[9.669,24.74],[9.769,24.74],[9.869,24.76],[9.969,24.99],[10.069,24.99],[10.169,24.75],[10.269,24.81],[10.369,24.81],[10.47,24.76],[10.57,24.76],[10.67,24.92],[10.77,24.71],[10.87,24.71],[10.97,24.78],[11.07,25.05],[11.17,25.05],[11.271,24.57],[11.371,24.89],[11.471,24.89]],"color":"accent","step":true,"width":2}],"notes":[{"x":-4.8,"y":25.843999999999998,"text":"idle 24.6 W","color":"muted"},{"x":1.719,"y":37.8455,"text":"89 J","anchor":"middle","bold":true,"color":"accent"}]},"overlay":{"x":[-2,6],"y":[-2,31],"xticks":[-2,0,2,4,6],"xtl":["-2","0","2","4","6 s"],"yticks":[0,10,20,30],"yunit":"W","height":240,"series":[{"pts":[[-1.954,0.144],[-1.854,0.144],[-1.754,-0.096],[-1.653,0.244],[-1.553,0.244],[-1.453,-0.226],[-1.353,-0.066],[-1.253,-0.066],[-1.153,-0.016],[-1.052,0.064],[-0.952,0.064],[-0.852,-0.226],[-0.752,0.034],[-0.652,0.034],[-0.551,-0.086],[-0.451,0.074],[-0.351,0.074],[-0.251,0.374],[-0.151,0.374],[-0.051,0.034],[0.049,2.074],[0.15,2.074],[0.25,2.114],[0.35,2.054],[0.45,2.054],[0.55,2.124],[0.65,2.054],[0.75,2.054],[0.85,2.054],[0.95,1.984],[1.05,1.984],[1.15,2.054],[1.25,2.024],[1.35,2.024],[1.45,2.024],[1.551,2.024],[1.651,2.164],[1.751,2.024],[1.851,2.024],[1.951,2.054],[2.051,2.054],[2.151,2.054],[2.251,2.054],[2.351,2.054],[2.451,2.054],[2.551,2.074],[2.651,2.154],[2.751,2.154],[2.852,2.094],[2.952,2.024],[3.052,2.024],[3.152,2.034],[3.252,2.034],[3.352,2.124],[3.452,2.024],[3.552,2.024],[3.652,0.034],[3.752,0.034],[3.852,0.034],[3.952,0.024],[4.052,-0.026],[4.153,-0.026],[4.253,0.144],[4.353,-0.036],[4.453,-0.036],[4.553,0.014],[4.653,-0.126],[4.753,-0.126],[4.854,0.014],[4.954,0.014],[5.054,0.014],[5.154,0.074],[5.254,0.074],[5.354,0.034],[5.455,0.114],[5.555,0.114],[5.655,-0.056],[5.755,-0.016],[5.855,-0.016],[5.955,-0.126]],"color":"grey2","step":true,"width":2,"label":"zeros +2 W","labelAt":[3.332,2.057103448275862],"labelDy":-7},{"pts":[[-1.949,-0.11],[-1.849,-0.07],[-1.749,-0.07],[-1.649,0.13],[-1.549,-0.03],[-1.449,-0.03],[-1.349,-0.14],[-1.248,-0.08],[-1.148,-0.08],[-1.048,0.2],[-0.948,-0.17],[-0.848,-0.17],[-0.748,-0.27],[-0.648,-0.17],[-0.547,-0.17],[-0.447,-0.37],[-0.347,-0.14],[-0.247,-0.14],[-0.147,-0.08],[-0.047,-0.07],[0.053,-0.07],[0.153,10.17],[0.253,10.17],[0.353,10.12],[0.454,10.17],[0.554,10.17],[0.654,10.27],[0.754,10.3],[0.854,10.3],[0.954,10.32],[1.054,10.3],[1.154,10.3],[1.254,10.36],[1.354,10.27],[1.454,10.27],[1.554,10.31],[1.654,10.43],[1.755,10.43],[1.855,10.35],[1.955,10.35],[2.055,10.45],[2.155,10.43],[2.255,10.43],[2.355,10.45],[2.455,10.5],[2.555,10.5],[2.655,10.54],[2.755,10.49],[2.855,10.49],[2.956,10.53],[3.056,10.49],[3.156,10.49],[3.256,10.46],[3.356,10.55],[3.456,10.55],[3.556,0.39],[3.656,0.39],[3.757,0.34],[3.857,0.26],[3.957,0.26],[4.057,0.23],[4.157,0.24],[4.257,0.24],[4.357,0.33],[4.458,0.21],[4.558,0.21],[4.658,0.17],[4.758,0.21],[4.858,0.21],[4.958,0.0],[5.059,0.13],[5.159,0.13],[5.259,-0.21],[5.359,-0.21],[5.459,0.22],[5.559,0.16],[5.66,0.16],[5.76,-0.26],[5.86,0.08],[5.96,0.08]],"color":"grey","step":true,"width":2,"label":"ones +10 W","labelAt":[3.36,10.402666666666667],"labelDy":-7},{"pts":[[-1.946,-0.254],[-1.846,-0.254],[-1.746,-0.284],[-1.646,-0.284],[-1.546,-0.334],[-1.445,-0.204],[-1.345,-0.204],[-1.245,-0.124],[-1.145,-0.384],[-1.045,-0.384],[-0.945,-0.234],[-0.845,-0.374],[-0.744,-0.374],[-0.644,-0.234],[-0.544,-0.124],[-0.444,-0.124],[-0.344,-0.254],[-0.244,-0.234],[-0.144,-0.234],[-0.044,-0.264],[0.057,-0.264],[0.157,26.016],[0.257,25.766],[0.357,25.766],[0.457,25.906],[0.557,26.246],[0.657,26.246],[0.757,26.276],[0.857,26.186],[0.957,26.186],[1.057,26.206],[1.158,26.346],[1.258,26.346],[1.358,26.346],[1.458,26.366],[1.558,26.366],[1.658,26.836],[1.758,26.836],[1.858,26.596],[1.958,26.576],[2.058,26.576],[2.158,26.776],[2.258,26.676],[2.359,26.676],[2.459,26.736],[2.559,27.066],[2.659,27.066],[2.759,26.736],[2.859,26.736],[2.959,26.736],[3.059,27.106],[3.159,27.046],[3.259,27.046],[3.359,26.926],[3.459,26.926],[3.56,1.026],[3.66,0.816],[3.76,0.816],[3.86,0.646],[3.96,0.806],[4.06,0.806],[4.16,0.576],[4.261,0.566],[4.361,0.566],[4.461,0.606],[4.561,0.526],[4.661,0.526],[4.762,0.516],[4.862,0.446],[4.962,0.446],[5.062,0.406],[5.162,0.406],[5.263,0.516],[5.363,0.376],[5.463,0.376],[5.563,0.496],[5.663,0.346],[5.763,0.346],[5.864,0.586],[5.964,0.276]],"color":"accent","step":true,"width":2,"label":"random +27 W","labelAt":[3.338,26.616],"labelDy":-7}]},"lag":{"x":[-1.5,7],"y":[-2,30],"xticks":[0,2,4,6],"xtl":["0","2","4","6 s"],"yticks":[0,10,20,30],"yunit":"W","height":200,"series":[{"pts":[[-1.445,-0.008],[-1.345,-0.008],[-1.245,-0.003],[-1.145,0.0],[-1.045,0.0],[-0.945,-0.001],[-0.845,0.002],[-0.744,0.002],[-0.644,-0.003],[-0.544,0.004],[-0.444,0.004],[-0.344,0.01],[-0.244,0.001],[-0.144,0.001],[-0.044,0.001],[0.057,0.001],[0.157,0.002],[0.257,1.672],[0.357,1.672],[0.457,4.484],[0.557,7.041],[0.657,7.041],[0.757,8.963],[0.857,10.883],[0.957,10.883],[1.057,12.411],[1.158,13.823],[1.258,13.823],[1.358,14.897],[1.458,16.01],[1.558,16.01],[1.658,16.792],[1.758,16.792],[1.858,17.593],[1.958,18.259],[2.058,18.259],[2.158,18.758],[2.258,19.274],[2.359,19.274],[2.459,19.67],[2.559,20.029],[2.659,20.029],[2.759,20.344],[2.859,20.633],[2.959,20.633],[3.059,20.842],[3.159,21.048],[3.259,21.048],[3.359,21.221],[3.459,21.221],[3.56,21.362],[3.66,20.649],[3.76,20.649],[3.86,17.854],[3.96,15.3],[4.06,15.3],[4.16,13.231],[4.261,11.342],[4.361,11.342],[4.461,9.905],[4.561,8.504],[4.661,8.504],[4.762,7.369],[4.862,6.338],[4.962,6.338],[5.062,5.561],[5.162,5.561],[5.263,4.798],[5.363,4.143],[5.463,4.143],[5.563,3.62],[5.663,3.134],[5.763,3.134],[5.864,2.771],[5.964,2.418],[6.064,2.418],[6.164,2.132],[6.264,1.865],[6.364,1.865],[6.464,1.662],[6.564,1.465],[6.664,1.465],[6.764,1.308],[6.864,1.308],[6.964,1.163]],"color":"grey","step":true,"width":2},{"pts":[[-1.445,-0.204],[-1.345,-0.204],[-1.245,-0.124],[-1.145,-0.384],[-1.045,-0.384],[-0.945,-0.234],[-0.845,-0.374],[-0.744,-0.374],[-0.644,-0.234],[-0.544,-0.124],[-0.444,-0.124],[-0.344,-0.254],[-0.244,-0.234],[-0.144,-0.234],[-0.044,-0.264],[0.057,-0.264],[0.157,26.016],[0.257,25.766],[0.357,25.766],[0.457,25.906],[0.557,26.246],[0.657,26.246],[0.757,26.276],[0.857,26.186],[0.957,26.186],[1.057,26.206],[1.158,26.346],[1.258,26.346],[1.358,26.346],[1.458,26.366],[1.558,26.366],[1.658,26.836],[1.758,26.836],[1.858,26.596],[1.958,26.576],[2.058,26.576],[2.158,26.776],[2.258,26.676],[2.359,26.676],[2.459,26.736],[2.559,27.066],[2.659,27.066],[2.759,26.736],[2.859,26.736],[2.959,26.736],[3.059,27.106],[3.159,27.046],[3.259,27.046],[3.359,26.926],[3.459,26.926],[3.56,1.026],[3.66,0.816],[3.76,0.816],[3.86,0.646],[3.96,0.806],[4.06,0.806],[4.16,0.576],[4.261,0.566],[4.361,0.566],[4.461,0.606],[4.561,0.526],[4.661,0.526],[4.762,0.516],[4.862,0.446],[4.962,0.446],[5.062,0.406],[5.162,0.406],[5.263,0.516],[5.363,0.376],[5.463,0.376],[5.563,0.496],[5.663,0.346],[5.763,0.346],[5.864,0.586],[5.964,0.276],[6.064,0.276],[6.164,0.346],[6.264,0.266],[6.364,0.266],[6.464,0.716],[6.564,0.306],[6.664,0.306],[6.764,0.236],[6.864,0.236],[6.964,0.646]],"color":"accent","step":true,"width":2}]}}</script>
+<script>
+(function () {
+  var DATA = JSON.parse(document.getElementById("chart-data").textContent);
+  function v(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  function nice(x) { return Math.abs(x) >= 10 ? x.toFixed(0) : (Math.abs(x) >= 1 ? x.toFixed(1).replace(/\.0$/, "") : x.toFixed(2)); }
+
+  function draw(el, spec) {
+    var W = Math.max(280, el.clientWidth), H = spec.height || 230;
+    var m = { l: 52, r: 14, t: 14, b: 34 };
+    var iw = W - m.l - m.r, ih = H - m.t - m.b;
+    var X = function (x) { return m.l + (x - spec.x[0]) / (spec.x[1] - spec.x[0]) * iw; };
+    var Y = function (y) { return m.t + (1 - (y - spec.y[0]) / (spec.y[1] - spec.y[0])) * ih; };
+    var col = { accent: v("--accent"), grey: v("--grey"), grey2: v("--grey2"), line: v("--line"), muted: v("--muted"), ink: v("--ink"), fill: v("--fill") };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true" font-family="' + esc(v("--font-body")) + '">';
+    (spec.bands || []).forEach(function (b) {
+      s += '<rect x="' + X(b.x0) + '" y="' + m.t + '" width="' + (X(b.x1) - X(b.x0)) + '" height="' + ih + '" fill="' + col.fill + '" opacity="0.55"/>';
+    });
+    var ystep = spec.yticks.length > 1 ? Math.abs(spec.yticks[1] - spec.yticks[0]) : 1;
+    var ydec = ystep >= 1 ? 0 : (ystep >= 0.1 ? 1 : 2);
+    spec.yticks.forEach(function (t) {
+      s += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + Y(t) + '" y2="' + Y(t) + '" stroke="' + col.line + '" stroke-width="1"/>';
+      s += '<text x="' + (m.l - 7) + '" y="' + (Y(t) + 4.5) + '" text-anchor="end" font-size="13" fill="' + col.muted + '">' + (t === 0 ? "0" : t.toFixed(ydec)) + (spec.yunit && t === spec.yticks[spec.yticks.length - 1] ? " " + esc(spec.yunit) : "") + '</text>';
+    });
+    spec.xticks.forEach(function (t, i) {
+      var last = i === spec.xticks.length - 1, xx = X(t);
+      var anchor = last && xx > W - m.r - 24 ? "end" : "middle";
+      s += '<text x="' + (anchor === "end" ? W - m.r : xx) + '" y="' + (H - 12) + '" text-anchor="' + anchor + '" font-size="13" fill="' + col.muted + '">' + esc(spec.xtl ? spec.xtl[i] : t) + '</text>';
+    });
+    (spec.areas || []).forEach(function (a) {
+      var pts = a.pts.filter(function (p) { return p[0] >= a.x0 && p[0] <= a.x1; });
+      if (!pts.length) return;
+      var d = "M" + X(pts[0][0]) + "," + Y(a.base);
+      pts.forEach(function (p, i) { if (i) d += "L" + X(p[0]) + "," + Y(pts[i - 1][1]); d += "L" + X(p[0]) + "," + Y(p[1]); });
+      d += "L" + X(pts[pts.length - 1][0]) + "," + Y(a.base) + "Z";
+      s += '<path d="' + d + '" fill="' + col.fill + '"/>';
+    });
+    spec.series.forEach(function (se) {
+      var c = col[se.color] || se.color, d = "";
+      se.pts.forEach(function (p, i) {
+        if (!i) { d = "M" + X(p[0]) + "," + Y(p[1]); return; }
+        if (se.step) d += "L" + X(p[0]) + "," + Y(se.pts[i - 1][1]);
+        d += "L" + X(p[0]) + "," + Y(p[1]);
+      });
+      s += '<path d="' + d + '" fill="none" stroke="' + c + '" stroke-width="' + (se.width || 2) + '"' + (se.dash ? ' stroke-dasharray="' + se.dash + '"' : '') + ' stroke-linejoin="round"/>';
+      if (se.dots) se.pts.forEach(function (p) { s += '<circle cx="' + X(p[0]) + '" cy="' + Y(p[1]) + '" r="2.2" fill="' + c + '"/>'; });
+      if (se.label) {
+        var lp = se.labelAt || se.pts[se.pts.length - 1];
+        s += '<text x="' + Math.min(X(lp[0]) + 6, W - m.r - 2) + '" y="' + (Y(lp[1]) + (se.labelDy || -6)) + '" font-size="13" font-weight="600" text-anchor="' + (se.labelAnchor || "end") + '" fill="' + c + '">' + esc(se.label) + '</text>';
+      }
+    });
+    (spec.notes || []).forEach(function (n) {
+      s += '<text x="' + X(n.x) + '" y="' + Y(n.y) + '" font-size="13" text-anchor="' + (n.anchor || "start") + '" fill="' + (col[n.color] || col.ink) + '"' + (n.bold ? ' font-weight="600"' : '') + '>' + esc(n.text) + '</text>';
+    });
+    s += "</svg>";
+    el.innerHTML = s;
+  }
+
+  function render() {
+    document.querySelectorAll("[data-chart]").forEach(function (el) {
+      var spec = DATA[el.getAttribute("data-chart")];
+      if (spec) { try { draw(el, spec); } catch (e) { el.textContent = "Chart failed to draw: " + e.message; } }
+    });
+  }
+  render();
+  var tid; window.addEventListener("resize", function () { clearTimeout(tid); tid = setTimeout(render, 150); });
+  if (window.matchMedia) { var mq = window.matchMedia("(prefers-color-scheme: dark)"); if (mq.addEventListener) mq.addEventListener("change", render); }
+
+  function copyText(text) {
+    var area = document.createElement("textarea");
+    area.value = text;
+    area.style.cssText = "position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;font-size:16px";
+    area.setAttribute("readonly", "");
+    var focused = document.activeElement, copied = false;
+    try {
+      document.body.appendChild(area); area.select(); area.setSelectionRange(0, text.length);
+      area.removeAttribute("readonly"); copied = document.execCommand("copy");
+    } catch (_) {} finally {
+      area.remove(); if (focused && focused.focus) focused.focus({ preventScroll: true });
+    }
+    if (copied) return Promise.resolve();
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    return Promise.reject(new Error("Copy unavailable"));
+  }
+  document.querySelectorAll(".code button.copy").forEach(function (b) {
+    b.addEventListener("click", function () {
+      copyText(b.closest(".code").querySelector("pre").textContent).then(
+        function () { b.textContent = "Copied ✓"; setTimeout(function () { b.textContent = "Copy"; }, 1800); },
+        function () { b.textContent = "Can't copy"; });
+    });
+  });
+  function ssLocalTimes() {
+    document.querySelectorAll("time[datetime*='T']").forEach(function (t) {
+      var d = new Date(t.getAttribute("datetime")); if (isNaN(d)) return;
+      t.textContent = d.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+      t.title = d.toLocaleString([], { dateStyle: "full", timeStyle: "short" });
+    });
+  }
+  ssLocalTimes();
+  document.addEventListener("ss:live", function () { ssLocalTimes(); render(); });
+})();
+</script>
+</body>
+</html>
+
