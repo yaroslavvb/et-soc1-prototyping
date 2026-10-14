@@ -67,3 +67,10 @@ node docs/reports/data/2026-10-14-chip-3d/quality-test.mjs
 ```
 
 Set `PLAYWRIGHT_MODULE` to an installed Playwright module when it is not resolvable locally. Set `PAGE` to a served or deployed companion URL to exercise the same checks there. The test-only introspection API is enabled by the `?qa` query parameter. Final QA and deployment results are recorded separately; this section describes the checks rather than asserting a completed run.
+
+
+### Final Q113 verification
+
+Local 1280/390px interaction checks passed for all four scenes. `motion-test.mjs` reuses the repository's `tools/pagemotion/recorder.js` for interleaved old/new runs and checks fixed zoom/labels during auto-orbit and a 64-step keyboard sweep. `live-smoke.mjs` verifies the actual Spacesheep viewer iframe and hash forwarding at both widths; all eight cases passed. `quality-results.json` records the results. Run those scripts with the same `PLAYWRIGHT_MODULE` override. For motion comparison, first save the pre-upgrade baseline with `git show bd8e731a:docs/reports/chip-3d.html > build/chip-3d-before.html`.
+
+`PAGE` on `quality-test.mjs` is for an HTML document served directly (such as GitHub Pages). Spacesheep's raw URL redirects top-level browsers into its viewer; use `live-smoke.mjs` for that host. The generic `check_page.sh` disables GPU, so it checks the explanatory fallback and layout rather than the WebGL rendering. Both public mirrors equal the built source; Spacesheep version `7f69884894ba`, successful GitHub workflow `38611452659`.
