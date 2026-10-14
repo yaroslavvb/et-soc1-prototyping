@@ -241,10 +241,11 @@ on all three machines, and about 19 GB of our agents' working files on aifoundry
   every boot by a service, not flashed. Between 16:14 and 16:27 the three hosts were brought to one configuration
   (performance power profile, chrony, core dumps, `et-who`, card locks, a login banner, `et-lab-manifest`); a full
   upgrade is installed and the reboot into kernel 7.0.0-34 is still pending. (**Update 14 October 2026:** that reboot
-  came with the 30 September power cycle, and all three hosts have run 7.0.0-34 since. Today aifoundry2 runs 7.0.0-38,
-  from its 9 October restart, while aifoundry1 and aifoundry3 run 7.0.0-34 with 7.0.0-38 installed and a restart
-  pending; aifoundry3's waits for the lab user working there.) What that does to comparability, and
-  every card's quirks: `docs/findings/14-card-behaviour.md`. The machines' shared tools: `docs/lab-access.md`.
+  is long done, though nothing here dates it: aifoundry3's manifests show it already on 7.0.0-34 on 29 September.
+  Today aifoundry2 runs 7.0.0-38, from its 9 October restart, while aifoundry1 and aifoundry3 run 7.0.0-34 with
+  7.0.0-38 installed and a restart pending; aifoundry3's waits for the lab user working there.) What that does to
+  comparability, and every card's quirks: `docs/findings/14-card-behaviour.md`. The machines' shared tools:
+  `docs/lab-access.md`.
 - **Version 3 of the claims check is finished** (26 September, 06:55). Pre-registered in
   `docs/reports/data/2026-09-25-claims-v3/` (`PLAN3.md`, and `AMENDMENTS.md` A1–A5, each written before the data it
   touches; C1 and C2 are post-data notes), with its code in `tools/claims-v3/`; its queues (`queue.sh` with

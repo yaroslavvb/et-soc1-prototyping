@@ -471,12 +471,15 @@ owner asked for). What each change means for measurements:
 | Full package upgrade, installed; the reboot into kernel 7.0.0-34 is still pending | at the reboot the cards are re-initialised (same firmware and driver code) | at the reboot: a new kernel (IOMMU, DMA and interrupt paths) | card side yes; host side: take a new baseline after the reboot |
 | `et-who`, card lock files, login banner, `et-lab-manifest`, a persistent journal, clean-ups | no | no | yes |
 
-**Update 14 October 2026 (the kernel row above).** That reboot is long done: all three hosts came up on 7.0.0-34 at
-the 30 September power cycle, so any host-side baseline taken before 30 September is the old kernel's. `uname -r` on
-14 October: aifoundry2 runs **7.0.0-38** (since its 9 October restart), aifoundry1 and aifoundry3 run **7.0.0-34**
-with 7.0.0-38 installed and a restart still pending on both (`/var/run/reboot-required`); aifoundry3's waits for the
-lab user working there. So aifoundry2's host side is no longer comparable with the other two's: say which kernel a
-run used.
+**Updated 2026-10-14.** The kernel row above is long out of date, but nothing here dates when each host moved.
+`uname -r` on 14 October: aifoundry2 runs **7.0.0-38** (since its 9 October restart), aifoundry1 and aifoundry3 run
+**7.0.0-34**, both with 7.0.0-38 installed and a restart still pending (`/boot` holds both kernels on all three;
+`/var/run/reboot-required.pkgs` names `linux-image-7.0.0-38-generic` on those two and is absent on aifoundry2);
+aifoundry3's waits for the lab user working there. aifoundry3 was **already on 7.0.0-34 on 29 September**, before the
+30 September power cycle, by its own manifests in `docs/reports/data/2026-09-29-nocr/raw/aifoundry3/`, while the same
+campaign recorded 7.0.0-31 on aifoundry1 card 1 and aifoundry2. So do not date a host-side baseline's kernel from a
+calendar date: take it from the run's own `et-lab-manifest` line, which every run here records. And aifoundry2's host
+side is no longer comparable with the other two's: say which kernel a run used.
 
 Record the output of `et-lab-manifest` with every run (host, kernel, CPU and power profile, clock sync, driver
 version, PCIe link per card, library hashes and aifoundry3's clock-guard marker), and the card's firmware from your
@@ -665,11 +668,12 @@ On Sunday 11 October (16:40–23:00 PDT) the dashboard's four warnings were clea
   boot, leaving systemd "degraded". The retrying profile was NetworkManager's unsaved default; `nmcli con mod` saved it into
   `/etc/netplan` (`90-NM-<uuid>.yaml`) with no default route, Wi-Fi untouched. The two reach each other over the cable in
   under a millisecond. No machine has rebooted with it yet.
-  **14 October 2026: the cable is down.** Every machine's wired port reports no carrier
-  (`cat /sys/class/net/enp7s0/carrier` reads 0 on all three, `ip link` shows `NO-CARRIER` with the port administratively
-  up, and the link is not detected), so nothing uses it and the machines reach each other over Wi-Fi again. The saved
-  settings are intact — each host still has its wired profile — so this is the cable, its switch or a port, and it needs
-  a look on site. Measure nothing over the cable until the carrier is back.
+  **Updated 2026-10-14.** The cable dropped earlier today and came back at 13:56 PDT on all three machines, at 1 Gb/s
+  and full duplex, with about 0.5 ms between machines and the saved settings intact (`ip link` and `ethtool` both report
+  the link up; each host's driver logs `link change old 0 new 1000` within seven seconds of the others). It is not yet
+  dependable, though: every port has now lost carrier twice since these hosts booted (`carrier_down_count` reads 2,
+  `carrier_up_count` 3). So read `cat /sys/class/net/enp7s0/carrier` and check it is 1 before measuring over the cable,
+  and record which link a run used — the machines fall back to Wi-Fi while the carrier is gone.
 - **Tailscale SSH with a command and a terminal leaves the pty owned by root**, with only the user's own processes on it (no
   `login(1)`, no utmp line), and can leave an empty root-owned pty behind. The dashboard read those as root logins; since
   `95c0fef` a root-owned pty counts only with a root process on it.
