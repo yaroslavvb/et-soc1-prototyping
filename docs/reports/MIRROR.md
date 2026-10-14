@@ -235,7 +235,18 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-30, 16:15 PDT**, after the memory levels' and the chip diagram's smooth camera, the memory levels'
+**Last check: 2026-10-14, 16:35 PDT**, after the lab sweep (Q114) redeployed eighteen pages and created the 14 October
+page: 41 of 42 mirrored public pages equal to their files in content. The checker's summary reads "19 of 42 equal, 31
+rows with a difference, exit 1" because 22 equal pages and 8 not-mirrored rows sit outside the 50 spaces `spacesheep
+list` returns, so their visibility and slug could not be checked (the listing cap of 5 October; on the lab's todo:
+list). The one real difference is the session timeline's `<style data-ss-id="ss-style">` block, which the host injects
+into `<head>` from the space's appearance setting, where the checker only tolerates insertions before `</body>`. Eleven
+public spaces have no row here: the 14 October chip diagram audits and proposals (`et-soc1-diagram-*`,
+`et-soc1-chip-diagram-deep-audit`, `et-soc1-2d-3d-bridge-mockup`, `et-soc1-readable-explorer-proposal`,
+`et-soc1-evidence-notation-proposal`, `et-soc1-imaging-voltage-riser-mount`), `aifoundry-agentic-setup` (public by the
+owner's choice, its source in a private repository) and `et-soc1-card-production-cost`, which is the owner's to judge.
+
+**Earlier check: 2026-09-30, 16:15 PDT**, after the memory levels' and the chip diagram's smooth camera, the memory levels'
 player bar and the chip diagram's beginner panel (Q74-Q76): both equal to their files; 31 of 32 mirrored public pages
 equal, exit 1 for work outside that pass: the hub (`et-soc1-limits-of-observability`) differs from its file, and the lab
 dashboard, listed here as private, is served publicly (its visibility is the owner's call).
