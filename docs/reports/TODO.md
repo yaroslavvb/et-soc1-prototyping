@@ -10,6 +10,17 @@ of them the owner's, in part 0). The review of 26 September listed 110; the lab 
 major pass of 28–29 September (Q65) 9 more, the sparse parity work (Q66, E59) its 6 next steps and the owner's call on
 its page, and the third card's runs of 29 September one open result.
 
+**Status, 14 October 2026 (week 42):** the item counts are unchanged — 134 items: 108 done, 6 superseded by the
+version-3 results, 20 open, four of them the owner's in part 0 — but part 0's lab-fixes item has moved. Six of its
+eleven numbered fixes are done: U16, U17, U18, U20, U24 and U27, each checked read-only on all three hosts on
+14 October 2026 (the notes sit with the items). U19, U22, U23, U25 and U26 were not checked and stay open. Both cards
+that were out of service are back: aifoundry1's card 0 since 2 October 2026, when its broken fan was replaced, and
+aifoundry2's since 9 October 2026, on a two-fan 92 mm bracket fitted at the card. One thing got worse: the wired
+network between the three machines, which worked on 13 October, reports no carrier on every machine's wired port as of
+14 October. Its saved settings are intact, so the cable, its switch or a port needs a look on site, and traffic
+between the machines falls back to Wi-Fi meanwhile. The live page had last been built from this file on
+30 September; it is rebuilt with this change.
+
 - **Part 0** is for the owner. **Part A** changes published pages, so it waits for the next pass: edit the source
   named in MIRROR.md's "How each page is built", rebuild, run `check_page.sh`, deploy (MIRROR.md, "Deploying one
   page"), run `check-mirror.py`, and commit the page, its sources and this file together. **Part B** is
@@ -63,17 +74,28 @@ its page, and the third card's runs of 29 September one open result.
   session's permission check refused them, so the owner runs each or allows it. aifoundry1 already has U20, U22, U24
   and U27 (20:51 PDT, owner-approved; [`../lab-access.md`](../lab-access.md), "aifoundry1's lab fixes of
   28 September").
-  - U16: install `et-reset` on the three hosts (`tools/lab/README.md`, "et-reset").
-  - U17: the ZFS pool scrub.
-  - U18: `et-lab-health` rev 3 and its daily timer (`tools/lab/README.md`, "The daily timer").
-  - U19 and U26: the reboots.
+  Six of these are done, each checked read-only on all three hosts on 14 October 2026; the notes below say what was
+  read. U19, U22, U23, U25 and U26 were not checked and stay open.
+  - U16: install `et-reset` on the three hosts (`tools/lab/README.md`, "et-reset"). **Done** (14 October 2026):
+    `/usr/local/bin/et-reset` is present on all three hosts, installed on 30 September.
+  - U17: the ZFS pool scrub. **Done** (14 October 2026): aifoundry1 is the only host with ZFS pools, and both were
+    scrubbed on 11 October 2026. `bpool` reports no known data errors; `rpool` repaired nothing and reports one data
+    error, which still needs a look.
+  - U18: `et-lab-health` rev 3 and its daily timer (`tools/lab/README.md`, "The daily timer"). **Done**
+    (14 October 2026): `/usr/local/bin/et-lab-health` on all three hosts carries the "rev 3 of 28 Sep" header, and
+    `et-lab-health.timer` is enabled on each and had already run that day.
+  - U19 and U26: the reboots. Open on 14 October 2026; aifoundry3's waits for the lab user working on it.
   - U20 on aifoundry2 and aifoundry3: bluetooth, cups-browsed and the firmware-updater snap disabled, apport's
-    core-dump hook masked.
+    core-dump hook masked. **Done** (14 October 2026): on all three hosts `bluetooth` and `cups-browsed` read
+    `disabled`, no firmware-updater snap unit is present, and `kernel.core_pattern` pipes to
+    `/usr/lib/systemd/systemd-coredump`, which is installed.
   - U22 on aifoundry2 and aifoundry3: the login-service setting aifoundry1 got.
   - U23 on aifoundry3: its login-service item.
-  - U24 on aifoundry2 and aifoundry3: the other two machines pinned to their tailnet names in `/etc/hosts`.
-  - U25: the PCIe Gen3 link test of aifoundry1's card 0.
-  - U27 on aifoundry2 and aifoundry3: boot to the text console (the headless default target).
+  - U24 on aifoundry2 and aifoundry3: the other two machines pinned to their tailnet names in `/etc/hosts`. **Done**
+    (14 October 2026): each of the three hosts lists all three host names in its `/etc/hosts`.
+  - U25: the PCIe Gen3 link test of aifoundry1's card 0. Open on 14 October 2026.
+  - U27 on aifoundry2 and aifoundry3: boot to the text console (the headless default target). **Done**
+    (14 October 2026): `systemctl get-default` reads `multi-user.target` on all three hosts.
 
 - [ ] **NV's first voltage write (E54), waiting for the owner.** The probe block on aifoundry3
   (`tools/claims-v3/nv/README.md`: `block.sh 1 --probe`, detached; 540 mV, then 600, then the restore to 485, about
@@ -109,7 +131,8 @@ Many fix and cut items landed in the merge too; those are ticked below.
     chart, the DVFS `#cardcfg` table, the spatial brief's per-card table and the hub's droop chart take every card in
     the data.
 - [x] **aifoundry1 and aifoundry3 statements (medium).** Since 25 September aifoundry1's two cards work (card 0
-  overheats; no sustained work on it). aifoundry3's 0 W TDP is set by a boot service at every boot; it is neither
+  overheated then, so it took no sustained work; its broken fan was replaced on 2 October 2026 and it is in service
+  again). aifoundry3's 0 W TDP is set by a boot service at every boot; it is neither
   flashed nor a firmware property.
   - **DVFS (PWR-03, high; AGENT.md §3).**
     - Byline "(aifoundry1 unavailable)" (`dvfs-leakage.body.html:32`).
@@ -141,10 +164,13 @@ Many fix and cut items landed in the merge too; those are ticked below.
     §10 (aifoundry1-c1 measured there), the boot-service wording on Horace, why low power, matmul, sparse compute and
     the test drive, the cards named (PWR-08; the power page's last "Both cards" on 27 September), and PWR-02 on
     27 September (a dated update box on both aifoundry1 pages; the PCIe line's rate-limited log).
-  - **"aifoundry1 is fixed" never says card 0 overheats (PWR-02, high).**
+  - **"aifoundry1 is fixed" never says card 0 overheated (PWR-02, high).**
     - Add to the box, §1 and §3: about ten minutes of short test launches took card 0 to 98–102 °C; right after, it
       read 115–117 °C idle and drew 66–71 W at 600 MHz until its firmware dropped it to 300 MHz; card 1 peaked near
       71 °C. Source: `../findings/14-card-behaviour.md`.
+    - Note of 14 October 2026: card 0's broken fan was replaced on 2 October 2026 and the card is in service again,
+      so any new text says it overheated then, never that it overheats. The entry at the end of part D has the
+      measured numbers.
     - At `:124,163`: "still counts about one corrected error a second; its kernel log is rate-limited since
       25 September".
 - [x] **Meter refresh period (HUB-01; medium; PLAN3 §1.3(c), V3-TEL).** Done 27 Sep: every page gives the period per

@@ -63,7 +63,7 @@ each with two hardware threads (<i>harts</i>) and a tensor unit whose matrix mul
 (one fp32 op multiplies 16×16×16 tiles: 4,096 multiply-adds); 32 minions form a <i>shire</i>. The <i>service processor</i>
 is the on-die management core whose firmware reads the sensors and runs the clock governor (600, 700 or 800 MHz).
 aifoundry2 and aifoundry3 are lab machines with one card each; aifoundry1 holds two, of which card 1 (aifoundry1-c1) was
-measured (card 0 cannot hold a load). More in the hub's
+measured (card 0 could not hold a load then; a broken fan, replaced on 2 October). More in the hub's
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">glossary</a>.</p></details>
 
 <h2 id="same-flops-different-heat">1. Same FLOPs, different heat</h2>
@@ -591,8 +591,8 @@ hot near the budget; from a generic idle start it runs slow when the heatsink wa
 <h2 id="a-second-card-and-what-transfers">10. Other cards, and what transfers</h2>
 <p>Everything to this point is aifoundry2's card. Two more cards have run the same 7 s protocol. aifoundry3's ran it on
 22 September, in one 13-minute session; on 26 September the three-card check re-ran eight of the operand patterns, four runs
-each, on aifoundry2, aifoundry3 and card 1 of aifoundry1 (aifoundry1-c1; card 0 was left out because its cooling cannot hold
-a load). The two newcomers differ from aifoundry2 in useful ways. aifoundry3 idles cool (51 °C before its first session,
+each, on aifoundry2, aifoundry3 and card 1 of aifoundry1 (aifoundry1-c1; card 0 was left out because its cooling could not
+hold a load then; its broken fan was replaced on 2 October). The two newcomers differ from aifoundry2 in useful ways. aifoundry3 idles cool (51 °C before its first session,
 against aifoundry2's 62 to 73 °C), too cool to hold at 80 °C between runs, so
 its runs launch at 55 to 58 °C; and it stays pinned at 600 MHz, because a boot service sets its TDP to 0 W at every boot, so the governor can
 only step down

@@ -130,7 +130,8 @@ heatsink: AMD warns that one there may add stress and leaves the paste thicker o
 temperature itself, and only with the lab's consent and at moderate risk, use Intel's method: a 36-gauge type T
 thermocouple soldered into a groove cut in the lid's centre <span class="cite">[<a href="#src-9">9</a>]</span>; calibrated, it reads the lid to about
 <span data-v="ansTc"></span> °C <span class="kind">model</span>. Put emissivity tape wherever the camera looks. The natural moment is the
-on-site check of aifoundry1 card 0's cooling that the lab-problems page already requests (SH1). For where the heat goes,
+on-site check of aifoundry1 card 0's cooling that the lab-problems page requested (SH1); that fan was replaced on
+2 October, so the next time the heatsink comes off is the moment now. For where the heat goes,
 use the thermal-camera plan's view of the back of the board with the on-die voltage map. To see where the work runs,
 the chip's own 34 sensors are the safe camera: with the heatsink on they see the same contrast between neighbouring
 shires as with it off <span class="kind">model</span>. On the stock firmware the host gets one usable sensor, the I/O
@@ -533,7 +534,8 @@ operating-point table (aifoundry2 has been seen at 600, 700 and 800 MHz <span cl
 no card's full table has been read). On
 aifoundry2 the governor would put 600 MHz back at its next idle or when its thermal loop exits; aifoundry3's governor
 is latched, so a clock set there stays, barring the race below (the plan starts from a freshly booted card); card 1's
-voltages must never be set; card 0 is excluded. So aifoundry3 is the
+voltages must never be set; card 0 was excluded from the campaign, and its fan was replaced on 2 October, after this
+page was written. So aifoundry3 is the
 card for any trial <span class="cite">[<a href="#src-r15">R15</a>, <a href="#src-r16">R16</a>]</span>
 <span class="kind">from source, inference</span>.</li>
 <li><b>Not established.</b> No lab card has run below 300 MHz, beyond the microseconds each PLL change spends bypassed at
@@ -771,11 +773,12 @@ twist the heatsink free; wipe the residue off with a cloth wetted with solvent, 
 alcohol is on its list), without flooding the package, since AMD's soldering chapter warns that washing solvents “can
 compromise the lid adhesive”; and refit with thermal paste (a heatsink without it “is not sufficient”) at 20–50 psi with
 four-corner mounting <span class="cite">[<a href="#src-1">1</a>]</span>.</p>
-<p><b>Why card 0 for the groove.</b> aifoundry1 card 0 is excluded from the measurement campaign
+<p><b>Why card 0 for the groove.</b> aifoundry1 card 0 was excluded from the measurement campaign
 <span class="cite">[<a href="#src-r14">R14</a>]</span> but works at 300 MHz. It is the lab's card and shares aifoundry1 with
-card 1 and the CI runners, so any physical work there takes both cards down. The lab-problems page already asks for an
+card 1 and the CI runners, so any physical work there takes both cards down. The lab-problems page asked for an
 on-site check of its fan, heatsink seating and thermal paste
-(<a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman#req-sh1">request SH1</a>): its heatsink is
+(<a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman#req-sh1">request SH1</a>), and its broken fan
+was replaced on 2 October, which put it back in service: its heatsink is
 likely to come off then anyway, and its cooling is already suspect (1.3–2 times worse than the others'), so re-pasting it loses no
 fitted constant we rely on. Cutting its lid is a permanent change, and destructive use of any card needs
 AI Foundry's consent. The full camera plan's line (under E-T20) that “aifoundry1's two are unusable” is out of
@@ -988,7 +991,7 @@ with line numbers as of 30 September 2026.</p>
 <li id="src-r13"><b>[R13]</b> <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-thermal-camera-experiments">Pointing a thermal camera at the ET-SoC-1</a> (the owner's plan), its instrument and experiments; and the full plan behind it, <code>plan.md</code>, linked from the page's footer: §1, §3 target 9, E-T20, §7 pitfall 10 and §8 questions 4 and 6.
 <br><span class="used">Used: the P3's band and rate; the lid decay lengths it estimated (target 9); E-T20 and its line on aifoundry1's cards; polyimide tape (pitfall 10); open questions 4 and 6; the heatsink as the state behind the 107 against 162–167 s scatter (§1).</span></li>
 <li id="src-r14"><b>[R14]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md">docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md</a>, lines 841–849.
-<br><span class="used">Used: card 0 is excluded from the campaign.</span></li>
+<br><span class="used">Used: card 0 was excluded from the campaign.</span></li>
 <li id="src-r15"><b>[R15]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-30-without-heatsink/LOWCLOCK-FIRMWARE.md">docs/reports/data/2026-09-30-without-heatsink/LOWCLOCK-FIRMWARE.md</a>: the firmware notes, each fact with its file and line in <a href="https://github.com/aifoundry-org/et-platform">et-platform</a> (BL2 0.18.0, 0.20.0 and 0.21.0, the PLL mode tables, the PMIC driver) or the manuals, with <code>pll_modes.py</code> decoding the tables (§0–§3, §6–§7).
 <br><span class="used">Used: the minions' one step clock and its 33-shire mask; what <code>DM_CMD_SET_FREQUENCY</code> accepts, 100 MHz as mode 62, nothing below, and the minion-debug commands' reach; the dividers' headroom; each rail's accepted range, 0.18.0's missing check and flash write; the safe state and its TODO; the governor on each card; the regulator module.</span></li>
 <li id="src-r16"><b>[R16]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-30-without-heatsink/LOWCLOCK-PLAN.md">docs/reports/data/2026-09-30-without-heatsink/LOWCLOCK-PLAN.md</a>: the low-clock measurement plan (design only, not run), with its predictions from <code>lc_plan_calc.py</code>; §0, §2.2, §3, §4.4, §5, §7–§9.

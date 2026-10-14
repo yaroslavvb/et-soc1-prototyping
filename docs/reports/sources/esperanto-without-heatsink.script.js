@@ -200,7 +200,7 @@ const lcWin = (c, air, load, f, pol) => LC.window[`${c}|${air}|${load}|${f}|${po
   const fb = c => pct(lcPt(c, 'floor+NoC', 100).idle.fan);
   const net = c => pct(lcPt(c, 'floor+NoC', 100).idle.fan_net), te = LC.theta_eff_fan;
   V.lcFanBest = `${V.lcABestFan} of draws on aifoundry2 and aifoundry3 and ${fb('aifoundry1-c1')} on card 1 (${fb('aifoundry1-c0')} on ` +
-    `card 0, which is excluded). It needs a thermal resistance of at most ${m595(th100('aifoundry2'), f2, ' °C/W')} ` +
+    `card 0, which the campaign excluded). It needs a thermal resistance of at most ${m595(th100('aifoundry2'), f2, ' °C/W')} ` +
     `on aifoundry2, on the SoC's share of the power in a 25 °C room, against ${f2(p600.idle.th85[1])} °C/W at 600 MHz. The share mostly ` +
     `reflects the assumed 2–7 °C/W: on the transient model's own network, which gives a fan ${rng(te[0], te[2], f1)} °C/W and also counts ` +
     `the board's heating by the off-die power, ${net('aifoundry2')} of aifoundry2's draws settle`;

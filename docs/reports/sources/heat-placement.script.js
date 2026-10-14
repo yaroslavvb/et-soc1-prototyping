@@ -807,7 +807,7 @@ function verdictPhrase(id) {
     `same-day attempts. Every sample of every kept run read 600 MHz.`;
   const nVoidDev = DEV.blocks.filter(b => b.void && b.void.length && ['L16', 'S', 'L8'].includes(b.type)).length;
   V.mSafety = `No run may take the die to ${DZ.abs_stop_c} °C: a run ends at ${word(DZ.cap_consecutive)} samples in a row with the mean at ${DZ.cap_mean_c} °C, a hottest ` +
-    `sensor at ${DZ.cap_high_c} °C or board power at ${DZ.cap_board_w} W, and the session stops at ${DZ.abs_stop_c} °C. On aifoundry1, card 0 overheats and is never ` +
+    `sensor at ${DZ.cap_high_c} °C or board power at ${DZ.cap_board_w} W, and the session stops at ${DZ.abs_stop_c} °C. On aifoundry1, card 0 overheated then (a broken fan, replaced on 2 October) and was never ` +
     `used: a read-only sampler watched it through every card-1 block and would have stopped card 1's work had it read above ${DZ.guard_stop_c} °C, and card 1's idle ` +
     `power at each start edge could rise by at most ${num(DZ.guard_widle_rise_w, 0)} W over the session's first measured run (the proxy that stopped the first validation ` +
     `session, departure 39). Every process ran under <code>timeout 10</code> with the card's lock held; nothing on any card was set except, where allowed, the ` +

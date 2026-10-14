@@ -542,7 +542,7 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
     `26 September, in the three-card check (V3-TEL); every pass gave the same values, and every one of the ${f0(ids.reduce((a, c) => a + G3[c].launches, 0))} ` +
     `timed launches ran at ${range(Math.min(...ids.map(c => G3[c].launch_ghz[0])) * 1000, Math.max(...ids.map(c => G3[c].launch_ghz[1])) * 1000, 1)} MHz. ` +
     (same ? 'aifoundry2 and aifoundry3 gave the same readouts on 22 September. ' : '') +
-    'aifoundry1’s card 0 (firmware 1.4.1) overheats and was left out of the check (amendment A4).';
+    'aifoundry1’s card 0 (firmware 1.4.1) overheated then and was left out of the check (amendment A4); a broken fan, replaced on 2 October.';
   const ev = D.sptrace_events, gl = ids.map(c => G3[c].governor_lines);
   if (sp) document.getElementById('spcount').innerHTML = `That 8 KB window of the card's trace buffer, read on 22 September, holds <b>${sp.down_events} throttle-down events</b>` +
     (ev ? ` alternating with <b>${ev.idle} idle events</b>` + (ev.consecutive_idle_pairs ? ` (one idle event follows another ${ev.consecutive_idle_pairs === 1 ? 'once' : ev.consecutive_idle_pairs + ' times'})` : '') : '') +

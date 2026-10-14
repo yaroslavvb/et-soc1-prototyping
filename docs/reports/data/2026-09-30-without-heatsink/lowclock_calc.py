@@ -699,7 +699,7 @@ def allowed(c, f, pol):
     if not SETTABLE[f]:
         return 'not settable (no PLL mode)'
     if c == 'aifoundry1-c0':
-        return 'off-limits (card 0 overheats); its own 1.4.1 idle point' if f == 300 else 'off-limits (card 0 overheats)'
+        return 'off-limits then (card 0 overheated; its fan was replaced on 2 October); its own 1.4.1 idle point' if f == 300 else 'off-limits then (card 0 overheated; its fan was replaced on 2 October)'
     if pol != 'boot' and c == 'aifoundry1-c1':
         return 'forbidden by the lab rule (0.18.0: no range check, NoC sets written to flash)'
     if c == 'aifoundry2' and f != 600:
@@ -1191,7 +1191,7 @@ print('Can the owner run at 100 MHz?  The command can: DM_CMD_SET_FREQUENCY -f 1
       'runtime (its handshake timeouts, 5-10 timer ticks, are 52-105 ms of wall time if a tick is the 10.5 ms that the '
       'measured ~1.05 s heartbeat implies, review-governor.md section 1.4) work there is not established [inference].  aifoundry3 '
       'is the natural card (its governor is latched); on aifoundry2 the governor restores 600 MHz at its next idle or '
-      'thermal-loop exit unless the owner changes it; card 1 must not have its voltages set; card 0 is off-limits [source].')
+      'thermal-loop exit unless the owner changes it; card 1 must not have its voltages set; card 0 was off-limits then, before its fan was replaced on 2 October [source].')
 print('Thermally, 100 MHz alone does not make a bare card safe: see the lines above.  With the heatsink on, every '
       'settable clock settles at idle, and a sustained 16-shire pattern settles below 85 C in >= 90 % of draws at: ' +
       '; '.join(f'{SHORT[c]} ' + (f'{ENV[f"{c}|heatsink|pattern|boot"]["highest_settable_90"]} MHz'
