@@ -277,6 +277,5 @@ chrome changes type size or weight now. On that build `zoom_test.mjs` passed 783
 `ml_ladder_test.mjs --chip` 149/150. Its one failure, T13 at Shire 0 (the memory levels fold one more outer crumb into
 "…" than the chip diagram, their bar also holding Fit), fails the same way on the pages as they were before Q107,
 deployed on 2 October, when they passed it: it comes from the machine that runs it (most likely its fonts), not from
-these changes. On a phone the tests that drive the Up bar and the dive passed (`zoom_test.mjs --phone` T3, T5, T11 and
-T17: 114/114; `ml_ladder_test.mjs --phone` T0, T3, T5 and T25: 40/40), and `check_page.sh` passed both pages, light,
-dark and the system's theme, at 1280 and 390 px.
+these changes. On a phone both suites passed whole (`--phone`: 620/620 and 137/137, as on 2 October), and
+`check_page.sh` passed both pages, light, dark and the system's theme, at 1280 and 390 px.
