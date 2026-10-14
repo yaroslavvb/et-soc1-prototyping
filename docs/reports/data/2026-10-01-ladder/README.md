@@ -195,3 +195,39 @@ Two things fixed:
   at 1x 3-6 late before, none after. `zoom_test.mjs` on the fixed build: 783/783 and 620/620.
 
 Motion against `bb0eb78`: `motion/README.md`, "The final check".
+
+## − and + keep their place (13 October 2026, Q107)
+
+The owner, with a screenshot of the Up bar at "… › FinFET › Fin › Channel": "Make sure that the plus and minuses don't
+move. For instance, I go there and I press - and it moves around." The bar was the Up button, the crumbs, − and +, and
+the readout, in that order. The crumbs take all the width the others leave, so − and + sat at the bar's right end
+minus the readout's width, and that width changes about ten times a second while the camera moves (larger still in a
+jump). Under 900 px wide the crumbs' flex basis was their content's width, so a long trail took a row of its own and
+pushed − and + to a third. What changed (`sources/ladder.css`, both pages' `body.html`):
+
+- The readout comes before − and +, and − and + are last, pinned to the bar's right end (`margin-left:auto`).
+- The readout gives way last: the Up button and the crumbs shrink a hundred times as readily (`flex-shrink` 100 and 1),
+  and only when both are at their narrowest does the readout take an ellipsis. At 900 px wide a quark's "< 4.3 × 10⁻¹⁹
+  m · no size measured" needs more than the bar has left; with the readout unshrinkable (the fix's first version) it
+  pushed − and + 37 px past the bar's end.
+- Under 900 px wide the Up button has a row of its own, and under it the crumbs, the readout and − and + at that row's
+  right end (then the memory levels' Fit). The crumbs' basis is 0 and the readout at most 45% wide, so that row never
+  wraps. On a phone the rows are as before, the Up button and the readout, then the crumbs with − and +, but the first
+  row keeps one height, a two-line label's and at least 44 px (`min-height: max(44px, calc(2.4em + 10px))`), and the
+  readout keeps at most two lines of its own size, a jump's too (bold, no longer larger), so nothing above − and +
+  changes height. The memory levels' own 40% crumbs basis applies on a phone only, where it leaves Fit room on the
+  second row.
+- − and + take no text selection and no double-tap zoom (`user-select:none`, `touch-action:manipulation`): a quick
+  second press had selected the readout's text, as in the owner's screenshot.
+
+A first version put − and + beside the Up button under 900 px wide and the readout beside the crumbs on a phone. It
+kept − and + still, but on a phone the crumbs then folded one level sooner, and `ml_ladder_test.mjs --phone` T0 (the
+breadcrumb at load names the place as a path, "… › Shire 0 › Minion 0") failed; the rows went back to the reviewed
+layout, held at fixed heights instead.
+
+Measured by `docs/reports/data/2026-10-13-zoom-buttons/pmz_probe.py`, which records the two buttons' boxes on every
+animation frame in headless Chrome while it presses them; the numbers are in that directory's README. Before, at 1280
+to 1920 px wide, − and + slid 43–60 px during each move; from 900 to 1100 they also came to rest 20–33 px apart; at 640
+and 820 they jumped rows. After: 0 px at ten widths, 1920 to 320, on both pages, but for the memory levels at 900 px,
+where their header (the accesses beside the level tabs) still wraps for some levels and moves the whole stage 38 px
+down, as it did before.

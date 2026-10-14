@@ -233,25 +233,33 @@ html.et-pres [data-ss-ui]{display:none!important}
 #mem{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;transform-origin:0 0}
 /* ================= ladder.css: the Up bar, the zoom rows, the levels outside the chip and the copied circuits (1 October 2026) =================
    Moved out of chip-diagram.body.html; a page's body pulls it into a <style> with an include line. */
-/* ---- the Up bar above the drawing (30 September): the wide button out, the breadcrumb, the scale readout ---- */
+/* ---- the Up bar above the drawing (30 September): the wide button out, the breadcrumb, the scale readout, and − and +
+   at its right end (13 October) ---- */
 .upbar{flex:none;display:flex;align-items:center;gap:6px 10px;min-width:0;contain:layout style}
-.st-btn.up{flex:0 1 auto;min-width:min(30%,16em);max-width:50%;min-height:40px;text-align:left;display:flex;align-items:center;gap:8px;overflow:hidden;
+.st-btn.up{flex:0 100 auto;min-width:min(30%,16em);max-width:50%;min-height:40px;text-align:left;display:flex;align-items:center;gap:8px;overflow:hidden;
   font-weight:600;background:color-mix(in srgb,var(--c1) 9%,var(--surface));border-color:color-mix(in srgb,var(--c1) 45%,var(--border))}
 .st-btn.up .up-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .st-btn.up .up-s{color:var(--ink-2);font-weight:400;white-space:nowrap}
 .st-btn.up.dis{background:var(--surface);border-color:var(--border);font-weight:400}
-.crumbs{flex:1 1 auto;min-width:min(25%,13em);display:flex;align-items:center;gap:2px;overflow:hidden;white-space:nowrap;font-size:clamp(.76rem,.25vw + .66rem,.98rem)}
+.crumbs{flex:1 100 auto;min-width:min(25%,13em);display:flex;align-items:center;gap:2px;overflow:hidden;white-space:nowrap;font-size:clamp(.76rem,.25vw + .66rem,.98rem)}
 .crumbs button{font:inherit;background:none;border:1px solid transparent;border-radius:6px;color:var(--ink);padding:3px 5px;cursor:pointer;min-height:30px;white-space:nowrap}
 .crumbs button:hover{border-color:var(--border);background:var(--surface)}
 .crumbs button[aria-current="location"]{font-weight:650;cursor:default;border-color:transparent;background:none}
 .crumbs button.nx{color:var(--ink-2);font-style:italic}
-.pmz{flex:none;display:flex;gap:3px}
+/* − and + keep one place on the screen (the owner, 13 Oct 2026: "make sure that the plus and minuses don't move"): they
+   come last, pinned to the bar's right end. Between the crumbs and the readout they slid with the readout's width, which
+   changes about ten times a second while the camera moves (up to 60 px at 1920 wide, and 33 px from one rest to the
+   next at 1100), so a second press landed on the readout and selected its text */
+.pmz{flex:none;display:flex;gap:3px;margin-left:auto;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 .pmz button{font:inherit;font-size:clamp(.8rem,.25vw + .7rem,1rem);font-weight:650;min-width:2.1em;min-height:30px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
 .pmz button:hover{border-color:var(--ink-2)}
 .pmz button.dis{opacity:.35;cursor:default}
 .crumbs .sep{color:var(--ink-2);padding:0 1px}
 .crumbs button:focus-visible,.pmz button:focus-visible,.crumb-menu button:focus-visible,.zpill button:focus-visible{outline:3px solid var(--c1);outline-offset:1px}
-.scale-ro{flex:0 0 auto;contain:layout paint style;color:var(--ink-2);font-size:clamp(.74rem,.22vw + .64rem,.94rem);white-space:nowrap;font-variant-numeric:tabular-nums;max-width:40%;overflow:hidden;text-overflow:ellipsis;min-width:9.5em;text-align:right}
+/* the readout gives way last (13 Oct 2026): the Up button and the crumbs shrink a hundred times as readily, and only
+   when both are at their narrowest does the readout take an ellipsis, rather than push − and + off the bar's end (at
+   900 wide a quark's "< 4.3 × 10⁻¹⁹ m · no size measured" did, by 37 px) */
+.scale-ro{flex:0 1 auto;contain:layout paint style;color:var(--ink-2);font-size:clamp(.74rem,.22vw + .64rem,.94rem);white-space:nowrap;font-variant-numeric:tabular-nums;max-width:40%;overflow:hidden;text-overflow:ellipsis;min-width:9.5em;text-align:right}
 .scale-ro b{color:var(--ink);font-weight:600}
 /* a narrow desktop (900-1180 px wide, the panel beside the drawing): the Up label keeps its destination; its size
    suffix goes (the readout and the button's name have it) and the readout takes only its width */
@@ -501,21 +509,28 @@ html.et-pres [data-ss-ui]{display:none!important}
 /* ---- the Up bar on narrow screens and phones (moved from the chip diagram's page, as above) ---- */
 @media (max-width:899px){
   .upbar{flex-wrap:wrap;gap:4px 8px}
+  /* the Up button on a row of its own, then the crumbs, the readout and − and + at that row's right end. The crumbs'
+     basis is 0 and the readout at most 45% wide, so that row never wraps: − and + never leave it (13 Oct 2026: with the
+     crumbs' basis their content's width, a long trail took a row of its own and pushed − and + to a third, at 820 wide
+     729 px across and 34 px down) */
   .st-btn.up{flex:1 1 100%;max-width:none;min-height:44px}
-  .crumbs{flex:1 1 auto}
-  .scale-ro{max-width:55%}
+  .crumbs{flex:1 1 0}
+  .scale-ro{max-width:45%}
   /* presenting on a narrow screen: the Up button and the readout only, in one row (the drawing keeps its height) */
   #stage.pres .crumbs,#stage.pres .pmz,#stage:fullscreen .crumbs,#stage:fullscreen .pmz{display:none}
   #stage.pres .st-btn.up,#stage:fullscreen .st-btn.up{flex:1 1 0;min-width:0}
 }
 @media (max-width:600px){
   /* the Up bar in two rows: the Up button (its label wraps, the size goes: the readout beside it has it) and the
-     readout; then the crumbs with − and + (review of 1 Oct: at 360 px the label and the readout were cut) */
-  .st-btn.up{flex:1 1 0;min-width:52%;padding:4px 10px}
+     readout; then the crumbs with − and + (review of 1 Oct: at 360 px the label and the readout were cut). The first row
+     keeps one height, a two-line label's, and the readout at most two lines of its own size, a jump's too (bold, not
+     larger), so that − and + under them never move (13 Oct 2026) */
+  .st-btn.up{flex:1 1 0;min-width:52%;padding:4px 10px;min-height:max(44px,calc(2.4em + 10px))}
   .st-btn.up .up-t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2}
   .st-btn.up .up-s{display:none}
-  .scale-ro{order:1;min-width:0;max-width:44%;white-space:normal;text-align:right;line-height:1.25}
-  .scale-ro.jump{font-size:1rem}
+  .scale-ro{order:1;min-width:0;max-width:44%;white-space:normal;text-align:right;line-height:1.25;display:-webkit-box;
+    -webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
+  .scale-ro.jump{font-size:clamp(.74rem,.22vw + .64rem,.94rem)}
   .crumbs{order:2;flex:1 1 60%}
   .pmz{order:3}
 }
@@ -883,7 +898,8 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
 }
 /* the shared ladder on a phone (1 Oct, DESIGN §3.9): the drawing's top no lower than before the Up bar came: the accesses
    in one row that scrolls sideways, the address in one line with its fields folded (fields ▾), Fit to screen in the Up
-   bar's second row */
+   bar's second row, after − and + (13 Oct: under 900 px wide the crumbs' basis is ladder.css's 0, and 40% only on a
+   phone, where the readout sits beside the Up button: so the second row never wraps and − and + never leave it) */
 .addr .flt,.upbar .fit{display:none}
 @media (max-width:899px){
   #acc-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;scrollbar-width:none}
@@ -894,9 +910,9 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
   .addr .flt{display:inline-flex}
   .addr,.addr .flds{row-gap:4px}
   .upbar .fit{display:inline-flex;order:4;min-height:30px;padding:2px 8px}
-  .upbar .crumbs{flex-basis:40%}
   #stage.lad-on .upbar .fit{visibility:hidden}
 }
+@media (max-width:600px){.upbar .crumbs{flex-basis:40%}}
 /* a phone: the scrubber on a row of its own, the playback buttons under it (Present, where it shows, last) */
 @media (max-width:600px){
   .st-bar{gap:6px 5px}
@@ -983,8 +999,8 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
     <div class="upbar" id="upbar">
       <button type="button" class="st-btn up" id="up" title="Zoom out one level (Backspace or −)"><span class="up-t">↑ Zoom out</span></button>
       <nav class="crumbs" id="crumbs" aria-label="Scale"></nav>
-      <span class="pmz" id="pmz"><button type="button" class="pm" data-ci="minus" aria-label="Zoom out (minus key)" title="Zoom out (−, Backspace)">−</button><button type="button" class="pm" data-ci="plus" aria-label="Zoom in (plus key)" title="Zoom in (+)">+</button></span>
       <span class="scale-ro" id="scale-ro"></span>
+      <span class="pmz" id="pmz"><button type="button" class="pm" data-ci="minus" aria-label="Zoom out (minus key)" title="Zoom out (−, Backspace)">−</button><button type="button" class="pm" data-ci="plus" aria-label="Zoom in (plus key)" title="Zoom in (+)">+</button></span>
       <button type="button" class="st-btn fit" id="fitbtn" aria-pressed="false" title="The whole level at the screen's width (small text); again: a readable size, scrolling sideways" aria-label="Fit to screen">Fit</button>
     </div>
     <div class="cmwrap"><div class="crumb-menu" id="crumb-menu" hidden role="menu" aria-label="Levels further out"></div></div>

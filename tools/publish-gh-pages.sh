@@ -3,6 +3,7 @@
 #
 #   tools/publish-gh-pages.sh            build the site from the committed pages on main and push branch gh-pages
 #   tools/publish-gh-pages.sh --dry-run  build it into ~/claude/work/gh-pages-site and stop
+#   GHP_OUT=<dir> tools/publish-gh-pages.sh   build in <dir> instead (either form)
 #
 # The site is https://yaroslavvb.github.io/et-soc1-prototyping/ (the owner asked on 1 Oct 2026 for the chip diagram to be
 # mirrored there, where links with #anchors work directly). The canonical copies stay on spacesheep.dev; MIRROR.md lists
@@ -58,8 +59,9 @@ EOF
 echo "built $OUT from $REV: $(find "$OUT" -type f | wc -l) files, $(du -sh "$OUT" | cut -f1)"
 [ $DRY = 1 ] && exit 0
 
-# One fresh orphan commit on gh-pages, made in a temporary worktree so the main checkout is never touched.
-WT=$(mktemp -d -p "$HOME/claude/work" ghp-wt.XXXXXX); rmdir "$WT"
+# One fresh orphan commit on gh-pages, made in a temporary worktree so the main checkout is never touched. It sits
+# beside the built site, so that GHP_OUT also serves a machine with no ~/claude/work (13 Oct 2026, a run from a Mac).
+WT=$(mktemp -d -p "$(dirname "$OUT")" ghp-wt.XXXXXX); rmdir "$WT"
 cleanup() { git worktree remove --force "$WT" >/dev/null 2>&1 || true; git branch -D ghp-build >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 git branch -D ghp-build >/dev/null 2>&1 || true

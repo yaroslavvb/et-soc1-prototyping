@@ -415,7 +415,8 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
 }
 /* the shared ladder on a phone (1 Oct, DESIGN §3.9): the drawing's top no lower than before the Up bar came: the accesses
    in one row that scrolls sideways, the address in one line with its fields folded (fields ▾), Fit to screen in the Up
-   bar's second row */
+   bar's second row, after − and + (13 Oct: under 900 px wide the crumbs' basis is ladder.css's 0, and 40% only on a
+   phone, where the readout sits beside the Up button: so the second row never wraps and − and + never leave it) */
 .addr .flt,.upbar .fit{display:none}
 @media (max-width:899px){
   #acc-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;scrollbar-width:none}
@@ -426,9 +427,9 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
   .addr .flt{display:inline-flex}
   .addr,.addr .flds{row-gap:4px}
   .upbar .fit{display:inline-flex;order:4;min-height:30px;padding:2px 8px}
-  .upbar .crumbs{flex-basis:40%}
   #stage.lad-on .upbar .fit{visibility:hidden}
 }
+@media (max-width:600px){.upbar .crumbs{flex-basis:40%}}
 /* a phone: the scrubber on a row of its own, the playback buttons under it (Present, where it shows, last) */
 @media (max-width:600px){
   .st-bar{gap:6px 5px}
@@ -515,8 +516,8 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
     <div class="upbar" id="upbar">
       <button type="button" class="st-btn up" id="up" title="Zoom out one level (Backspace or −)"><span class="up-t">↑ Zoom out</span></button>
       <nav class="crumbs" id="crumbs" aria-label="Scale"></nav>
-      <span class="pmz" id="pmz"><button type="button" class="pm" data-ci="minus" aria-label="Zoom out (minus key)" title="Zoom out (−, Backspace)">−</button><button type="button" class="pm" data-ci="plus" aria-label="Zoom in (plus key)" title="Zoom in (+)">+</button></span>
       <span class="scale-ro" id="scale-ro"></span>
+      <span class="pmz" id="pmz"><button type="button" class="pm" data-ci="minus" aria-label="Zoom out (minus key)" title="Zoom out (−, Backspace)">−</button><button type="button" class="pm" data-ci="plus" aria-label="Zoom in (plus key)" title="Zoom in (+)">+</button></span>
       <button type="button" class="st-btn fit" id="fitbtn" aria-pressed="false" title="The whole level at the screen's width (small text); again: a readable size, scrolling sideways" aria-label="Fit to screen">Fit</button>
     </div>
     <div class="cmwrap"><div class="crumb-menu" id="crumb-menu" hidden role="menu" aria-label="Levels further out"></div></div>

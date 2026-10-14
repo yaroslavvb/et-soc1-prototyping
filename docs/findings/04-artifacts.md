@@ -888,6 +888,13 @@ same scales outward and inward, the loop, a way back from every move and no dead
   `zoom_test.mjs` 783/783 and 620/620, `ml_ladder_test.mjs --chip` 150/150 and 137/137, `ml_access_test.mjs` 28/28 with
   and without Dive, both pages rebuilt byte for byte, `check_page.sh` OK light and dark; motion against `bb0eb78` in
   `docs/reports/data/2026-10-01-ladder/motion/README.md`, "The final check".
+- **− and + keep their place (13 October, Q107).** The owner: "Make sure that the plus and minuses don't move." In both
+  pages' Up bar, − and + sat between the crumbs and the readout and slid with the readout's width; they now come last,
+  at the right end of the crumbs' row, the readout gives way last (an ellipsis, rather than push them off the bar), and
+  under 900 px wide the rows keep their heights and never wrap (`ladder.css`, both `body.html`; the ladder's README,
+  "− and + keep their place"). Both pages rebuilt byte for byte from their sources before the change, so the built
+  diff is the change alone; both spaces redeployed from the committed pages, and the GitHub Pages mirror rebuilt. The
+  measurement, before and after: `docs/reports/data/2026-10-13-zoom-buttons/`.
 
 ## Cross-links between the reports
 
