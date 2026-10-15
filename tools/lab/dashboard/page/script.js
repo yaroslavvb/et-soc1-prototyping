@@ -1036,6 +1036,105 @@
   const ANY_LOGGED = CARDS.some(id => (UC[id] || {}).logged);  // at least one machine logs card use
   const US0 = U && isNum(U.start_ms) ? U.start_ms : null, US1 = U && isNum(U.end_ms) ? U.end_ms : null;
   const UHOURS = (U && isNum(U.hours)) ? U.hours : 24;
+  /* ---- reservations: what people post in the AI Foundry Discord's #community-lab when they take a card ("using
+     aifoundry1 card 1") and give it back ("released"). The owner's Mac reads the channel every 10 minutes (flush-util
+     lab_reservations) and streams the last 48 hours as aifoundry/reservations, which live.js relays here. Each is drawn on
+     its card's lanes as a blue hatched span behind the bars with a bracket over it, and its tooltip quotes the posts that
+     began and ended it (the owner's ask, 15 Oct 2026: "hover over the timeline where the reservation happened, and it would
+     show Max's messages: reserved and released"). A post that names a machine but no card is drawn on each of its cards.
+     None of it is in data.json: the page has no reservations until the stream's value arrives, and none off spacesheep.dev. */
+  let RESV = [], RESV_READ = null, RESV_CAP_H = 3, RESV_SEEN = false;
+  const resvOf = id => { const h = hostOfCard(id), n = (C[id] || {}).devnum; return RESV.filter(r => r.host === h && (r.n == null || r.n === n)); };
+  const resvOpen = (r, now) => !isNum(r.end_ms) && !(isNum(r.limit_ms) && now >= r.limit_ms);
+  const resvEnd = (r, now) => (isNum(r.end_ms) ? r.end_ms : isNum(r.limit_ms) ? Math.min(now, r.limit_ms) : now);
+  /* How a reservation without a release post ended, in words (null when its release post says it). */
+  function resvWhy(r, now) {
+    if (r.end_msg) return null;
+    if (r.end === 'edited') return `released by an edit of that post, at ${lclock(r.end_ms)}`;
+    if (r.end === 'next_claim') return `no release posted: it ends where ${r.next_who || 'someone else'} reserved the card`;
+    if (resvOpen(r, now)) return 'no release posted yet' + (isNum(r.limit_ms) ? `; drawn to now, and until ${lclock(r.limit_ms)} at most` : '');
+    if (isNum(r.stated_ms)) return `no release posted: drawn for the ${dur(r.stated_ms / 6e4)} the post gave`;
+    return `no release posted: drawn for ${plural(RESV_CAP_H, 'hour')}`;
+  }
+  /* What the card-use log saw on the card while it was reserved; "no card use" only where the log covers the whole span. */
+  function usedIn(id, a, b) {
+    const cu = UC[id] || {};
+    if (!cu.logged || US0 == null || US1 == null) return null;
+    const per = {}, put = (u, s, runs) => { const p = per[u] = per[u] || {s: 0, runs: 0}; p.s += s; p.runs += runs; };
+    for (const iv of cu.intervals || []) if (isNum(iv.start_ms) && isNum(iv.end_ms) && iv.end_ms >= a && iv.start_ms <= b) put(iv.user, iv.held_s || 0, iv.runs || 0);
+    for (const iv of LIVE_IV[id] || []) {
+      const e = iv.open ? Date.now() : iv.b;
+      if (iv.a >= US1 && iv.a <= b && e >= a) put(iv.user, Math.max(1, (e - iv.a) / 1000), 1);
+    }
+    const e = Object.entries(per).sort((p, q) => q[1].s - p[1].s);
+    if (e.length) return 'card use logged in that time: ' + e.map(([u, p]) => `${whoName(u)} ${durS(p.s)}` + (p.runs ? ` (${plural(p.runs, 'run')})` : '')).join(', ');
+    return a >= US0 && b <= US1 && !gapsOf(hostOfCard(id)).some(g => g.a < b && g.b > a) ? 'no card use logged in that time' : null;
+  }
+  function resvTip(r, id) {
+    const now = Date.now(), open = resvOpen(r, now), b = resvEnd(r, now), secs = b - r.start_ms < 600e3;
+    const L = [`<b>Reserved on Discord</b> · ${esc(cardName(id))}`,
+      esc(`${r.who || '?'}, ${spanText(r.start_ms, b, secs, open)}` + (open ? '' : ` (${durS(Math.max(1, (b - r.start_ms) / 1000))})`)),
+      `${esc(lclock(r.start_ms, secs))} <i>“${esc(r.start_msg.text)}”</i>`];
+    if (r.end_msg) L.push(`${esc(lclock(r.end_msg.at_ms, secs))}${r.end_msg.who && r.end_msg.who !== r.who ? ' ' + esc(r.end_msg.who) + ':' : ''} <i>“${esc(r.end_msg.text)}”</i>`);
+    const why = resvWhy(r, now);
+    if (why) L.push(esc(why));
+    if (r.n == null && cardsOf(r.host).length > 1) L.push(esc(`the post names ${r.host}, not one of its cards`));
+    const u = usedIn(id, r.start_ms, b);
+    if (u) L.push(esc(u));
+    return L.join('<br>');
+  }
+  /* One layer of a card's reservations on a lane, over t0..t1 of its axis: 'band', the hatched span, drawn before the bars
+     (its hit area lies under theirs, so a bar keeps its own tooltip), or 'mark', the bracket over the lane, drawn after
+     them, which carries the keyboard stop. A reservation of a minute is a few pixels wide on 24 hours, so both have a
+     minimum width. Returns [x, node] pairs for CK.keynav. */
+  function drawResv(f, id, x, by, bh, t0, t1, mini, layer) {
+    const out = [], now = Date.now();
+    for (const r of resvOf(id)) {
+      const a = Math.max(t0, r.start_ms), b = Math.min(t1, resvEnd(r, now));
+      if (!(b >= a)) continue;
+      const xa = x(a), w = Math.max(mini ? 3 : 5, x(b) - xa), tip = () => resvTip(r, id);
+      const g = CK.el('g', {class: 'cu-resv-g'}, f.svg);
+      if (layer === 'band') {
+        CK.el('rect', {class: 'cu-resv-band', x: xa, y: by, width: w, height: bh}, g);
+        const hw = Math.max(8, w);
+        CK.el('rect', {class: 'ck-hit', x: xa + w / 2 - hw / 2, y: by, width: hw, height: bh}, g);
+        CK.tip(f, g, tip);
+        g.setAttribute('tabindex', '-1'); g.setAttribute('aria-hidden', 'true');   // its bracket is the keyboard stop
+      } else {
+        const open = resvOpen(r, now) && b >= t1 - 1000, y = by - (mini ? 2 : 3.5), hw = Math.max(mini ? 10 : 14, w), hh = mini ? 5 : 8;
+        CK.el('path', {class: 'cu-resv-br' + (open ? ' open' : ''), d: `M${xa.toFixed(1)},${by} V${y} H${(xa + w).toFixed(1)}` + (open ? '' : ` V${by}`)}, g);
+        CK.el('rect', {class: 'ck-hit', x: xa + w / 2 - hw / 2, y: y - hh + 3, width: hw, height: hh}, g);
+        CK.tip(f, g, tip);
+        out.push([xa, g]);
+      }
+    }
+    return out;
+  }
+  /* Under the 24-hour chart: the same reservations as lines of text, newest first (no hover needed, e.g. on a phone). */
+  function renderResvList() {
+    const host = $('cu-resv');
+    if (!host) return;
+    while (host.firstChild) host.removeChild(host.firstChild);
+    host.hidden = !RESV_SEEN;
+    if (!RESV_SEEN) return;
+    const now = Date.now(), lo = now - UHOURS * 36e5, read = isNum(RESV_READ) ? `, read ${clock(RESV_READ)}` : '';
+    const rows = RESV.filter(r => resvEnd(r, now) >= lo).sort((a, b) => b.start_ms - a.start_ms);
+    if (!rows.length) {
+      host.append(E('p', 'small muted', `No card reservations posted in the AI Foundry Discord's #community-lab in the last ${UHOURS} hours${read}.`));
+      return;
+    }
+    host.append(E('p', 'small cu-resv-h', E('b', null, 'Reserved on Discord'), ` in #community-lab, last ${UHOURS} hours${read}:`));
+    const ul = E('ul', 'cu-resv-list');
+    for (const r of rows) {
+      const ids = CARDS.filter(id => resvOf(id).includes(r)), open = resvOpen(r, now), b = resvEnd(r, now);
+      const name = ids.length ? ids.map(id => cardName(id)).join(' and ') : r.host + (r.n != null ? ' card ' + r.n : '');
+      const why = resvWhy(r, now), posts = `${lclock(r.start_ms)} “${r.start_msg.text}”` +
+        (r.end_msg ? ` · ${lclock(r.end_msg.at_ms)}${r.end_msg.who && r.end_msg.who !== r.who ? ' ' + r.end_msg.who + ':' : ''} “${r.end_msg.text}”` : '') + (why ? ` · ${why}` : '');
+      ul.append(E('li', null, ids.length ? [markSvg(ids[0], 12), ' '] : null, E('b', null, name), ' · ', r.who || '?', ' · ',
+        spanText(r.start_ms, b, b - r.start_ms < 600e3, open), E('span', 'cu-resv-q', posts)));
+    }
+    host.append(ul);
+  }
   function loggerText(h) {
     const uh = UH[h] || {}, lg = uh.logger, sk = (isNum(uh.skipped) && uh.skipped > 0 ? `; ${plural(uh.skipped, 'unreadable log line')} skipped` : '') +
       (uh.log_error ? `; could not read part of its log (${uh.log_error})` : '') +
@@ -1157,7 +1256,7 @@
      login's hold (at least 2 px wide, so a 3-second run stays visible). Returns the marks with tooltips, in time order. */
   function drawLane(f, id, x, by, bh, label, mini) {
     const h = hostOfCard(id), cu = UC[id] || {}, uh = UH[h] || {}, nodes = [];
-    const X0 = x(US0), X1 = x(US1);
+    const X0 = x(US0), X1 = x(US1), RT1 = mini ? US1 : Math.max(US1, Date.now());   // reservations run to the axis's own end
     CK.el('rect', {class: 'tl-track', x: X0, y: by, width: X1 - X0, height: bh, rx: 2}, f.svg);
     if (!cu.logged) {
       const g = CK.el('g', null, f.svg);
@@ -1172,6 +1271,9 @@
       CK.el('rect', {class: 'ck-hit', x: X0, y: by - 3, width: X1 - X0, height: bh + 6}, g);
       CK.tip(f, g, `<b>${esc(label)}</b><br>${esc(t)}`);
       nodes.push([X0, g]);
+      drawResv(f, id, x, by, bh, US0, RT1, mini, 'band');   // a reservation is posted whether or not the card's use is logged
+      nodes.push(...drawResv(f, id, x, by, bh, US0, RT1, mini, 'mark'));
+      nodes.sort((a, b) => a[0] - b[0]);
       return nodes.map(n => n[1]);
     }
     for (const gp of gapsOf(h)) {
@@ -1181,6 +1283,7 @@
       CK.tip(f, g, `<b>${esc(label)}: not logged</b><br>${esc(spanText(gp.a, gp.b, false, false))} (${esc(durS((gp.b - gp.a) / 1000))})<br>${esc(gp.why)}`);
       nodes.push([xa, g]);
     }
+    drawResv(f, id, x, by, bh, US0, RT1, mini, 'band');
     const act = Array.isArray(cu.activity_min) ? cu.activity_min : [];
     if (act.length) {
       const ga = CK.el('g', {'aria-hidden': 'true', class: 'cu-act'}, f.svg);
@@ -1230,6 +1333,7 @@
       CK.tip(f, g, groupTip(gr, label));
       nodes.push([xa, g]);
     }
+    nodes.push(...drawResv(f, id, x, by, bh, US0, RT1, mini, 'mark'));
     nodes.sort((a, b) => a[0] - b[0]);
     return nodes.map(n => n[1]);
   }
@@ -1250,19 +1354,24 @@
       $('cu-extra').hidden = true; $('cu-note').hidden = true;
       return;
     }
-    const logins = (Array.isArray(U.logins) ? U.logins : []).filter(u => u && u !== '?');
-    const items = logins.filter(u => USER_COLOR[u]).map(u => ({key: u, label: u, color: userColor(u), mark: 'box'}));
-    if (hasOthers(logins) || ids.some(id => Object.keys((UC[id] || {}).users || {}).includes('?'))) items.push({key: '_others', label: 'others', color: OTHER_COLOR, mark: 'box'});
-    items.push({key: '_nolog', label: 'not logged', color: 'url(#cu-hatch)', mark: 'box'},
-      {key: '_act', label: 'card queues active (ticks)', color: 'var(--ink-2)', mark: 'line'},
-      {key: '_now', label: `now (${lclock(US1)})`, color: 'var(--ink)', mark: 'dash'});
-    CK.legend('cu-legend', items);
+    usageLegend();
     drawLiveUse(ids);
     drawUsageChart(ids);
     renderUsageCards(ids);
     renderUsageTable(ids);
     renderUsageDays(ids);
     renderOpens(ids);
+  }
+  /* The legend over the card-use charts; drawn again when reservations arrive, which add their entry. */
+  function usageLegend() {
+    const logins = (Array.isArray(U.logins) ? U.logins : []).filter(u => u && u !== '?'), now = Date.now();
+    const items = logins.filter(u => USER_COLOR[u]).map(u => ({key: u, label: u, color: userColor(u), mark: 'box'}));
+    if (hasOthers(logins) || CARDS.some(id => Object.keys((UC[id] || {}).users || {}).includes('?'))) items.push({key: '_others', label: 'others', color: OTHER_COLOR, mark: 'box'});
+    if (CARDS.some(id => resvOf(id).some(r => resvEnd(r, now) >= US0))) items.push({key: '_resv', label: 'reserved on Discord', color: 'url(#cu-resv-hatch)', mark: 'box'});
+    items.push({key: '_nolog', label: 'not logged', color: 'url(#cu-hatch)', mark: 'box'},
+      {key: '_act', label: 'card queues active (ticks)', color: 'var(--ink-2)', mark: 'line'},
+      {key: '_now', label: `now (${lclock(US1)})`, color: 'var(--ink)', mark: 'dash'});
+    CK.legend('cu-legend', items);
   }
   /* Unseen opens, and the open tracer (tools/lab/et-usage/et-opens, root): it names every open of a card node, however
      short, so that nothing is "unseen". Until it runs on a machine, one line says what unseen means there. */
@@ -1345,6 +1454,7 @@
           if (!nar) CK.txt(lg, 22, by + 11, cardName(id) + (c.excluded ? ' (excluded)' : ''), c.excluded ? 'lab' : 'lab-strong');
           else CK.txt(lg, 18, y0 + 9, cardName(id), 'lab');
           CK.el('rect', {class: 'tl-track', x: x(T0), y: by, width: x(NOW) - x(T0), height: bh, rx: 2}, f.svg);
+          drawResv(f, id, x, by, bh, T0, NOW, false, 'band');
           for (const iv of LIVE_IV[id] || []) {
             const a = Math.max(T0, iv.a), b = Math.min(NOW, iv.open ? NOW : iv.b + 1000);
             if (b <= a) continue;
@@ -1355,6 +1465,7 @@
             CK.tip(f, g, `<b>${esc(whoName(iv.user))}</b> on ${esc(cardName(id))}<br>${esc(iv.progs.join(', ') || '?')}<br>`
               + `${esc(lclock(iv.a))} – ${iv.open ? 'now' : esc(lclock(iv.b))} (${esc(durS(Math.max(1, ((iv.open ? NOW : iv.b) - iv.a) / 1000)))})`);
           }
+          drawResv(f, id, x, by, bh, T0, NOW, false, 'mark');
           const lv = liveOf(id);
           if (lv && !nar) CK.txt(lg, f.W - R - 4, by + 11, lv.ok === false ? 'link down' : lv.held ? 'in use' : 'free', 'tick', 'end');
         });
@@ -1651,6 +1762,19 @@
       }
     }
     liveChanged();
+  });
+  document.addEventListener('lab-reservations', e => {   // a new value of aifoundry/reservations (live.js), every 10 minutes
+    const d = e.detail || {};
+    RESV = (Array.isArray(d.reservations) ? d.reservations : []).filter(r => r && typeof r.host === 'string' && isNum(r.start_ms)
+      && (r.n == null || isNum(r.n)) && r.start_msg && typeof r.start_msg.text === 'string');
+    RESV_READ = isNum(d.read_ms) ? d.read_ms : null;
+    RESV_CAP_H = isNum(d.cap_h) && d.cap_h > 0 ? d.cap_h : 3;
+    RESV_SEEN = true;
+    renderResvList();
+    if (!U || US0 == null || US1 == null || !ANY_LOGGED) return;
+    usageLegend();
+    redrawUsage(true);
+    renderLive();   // the card tiles' own lanes
   });
   setInterval(liveChanged, 5e3);
   // an open live hold grows: redraw the chart every 5 s while one is open, and once a minute anyway (the axis moves)

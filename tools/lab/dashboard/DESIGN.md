@@ -814,7 +814,8 @@ calls `fetch()`.
 The template brings the colour tokens (light and dark, with `data-theme` overrides), the heading anchors that mirror
 `#hash` to the viewer (`ss-hash`), and the footer link to the reports hub. The header's row of section links is a
 `<nav id="toclist">`, so the template adds no contents list of its own; the body adds its own `<style>` block,
-starting with `main{max-width:1280px}`, and a hidden SVG with the hatch pattern (`#cu-hatch`) the charts share.
+starting with `main{max-width:1280px}`, and a hidden SVG with the hatch patterns the charts share (`#cu-hatch`, not
+logged; `#cu-resv-hatch`, a reservation: §4.6).
 
 ### 4.2 Layout, top to bottom
 
@@ -874,6 +875,21 @@ starting with `main{max-width:1280px}`, and a hidden SVG with the hatch pattern 
    row per day (today first) and a column per card with a log, each cell the time held, a small bar stacked by login
    and the busiest login by name ("user-a +2"), "not logged" before a log began, and the cards without a log named
    under it.
+   **Reservations** (the owner's ask of 15 October 2026: *"mark it maybe with a hashed line on the timeline, so we can
+   see when somebody reserved it ... I should be able to hover over the timeline where the reservation happened, and it
+   would show Max's messages: reserved and released"*): what people post in the AI Foundry Discord's #community-lab
+   when they take a card and give it back, from the stream of §4.6. Each is drawn on its card's lanes in the 24-hour
+   chart, the live 15 minutes and the card tiles: a blue hatched span (`#cu-resv-hatch`, `--c1`, hatched the other way
+   from "not logged") behind the bars, from the claim to the release, at least 5 px wide, and a bracket over the lane,
+   dashed at its end while no release has been posted. The bracket carries the lane's keyboard stop and a tooltip that
+   quotes the post that began it and the one that ended it with their times, says how it ended when no release was
+   posted (an edit of the post, the next person's claim, the duration the post gave, or the 3-hour cap), and what the
+   card-use log saw on the card in that time ("card use logged in that time: user-a 2 min (1 run)"; "no card use" only
+   where the log covers the whole span). The span's own hit area lies under the bars', so a bar keeps its tooltip. A post
+   that names a machine but no card is drawn on each of its cards. Under the 24-hour chart, "Reserved on Discord" lists
+   the same, newest first, with the posts as text, for readers with no hover; the legend gains "reserved on Discord"
+   when one is in the window. Off spacesheep.dev, or before the stream's value arrives, there are none and the list is
+   hidden.
 5. **People** (`h2`), above the machines since 30 September (on a phone the page was 18,000 px tall, and people began
    at 12,000). A sortable, filterable table (`CK.sortTable`; on a phone each row is a few short lines, the empty cells
    left out): login, status ("unknown (its machine is not answering)" for someone seen only there), doing (the
@@ -963,6 +979,35 @@ an id is filled, with "—" for a missing value. No sideways scroll at 390 px: t
 tiles to one per row, the tables turn into short lines, and the timeline keeps its labels outside the plot. Dark mode
 through the template's tokens. Colour means one thing per view: logins in card use and the tables (three hues, §4.2),
 status in pills and the machines' rows, cards only in the two readings charts; the status tokens are never a login's.
+Blue (`--c1`) in card use is a reservation (§4.6), hatched, never a login.
+
+### 4.6 Reservations: the stream `aifoundry/reservations`
+
+The lab's rule is that whoever takes a card says so in #community-lab ("using aifoundry1 card 1") and says "released"
+when done. Those posts are not on any lab machine, so this part of the page has its own source: a watcher outside the
+lab, run by the dashboard's owner (its code is in his own tools, not in this repository), reads the channel every 10
+minutes (reading an open view of it where it can, and loading Discord at most once in 30 minutes) and pushes one value
+to the spacesheep stream `aifoundry/reservations` on every run. The page already declares `aifoundry/*`
+(`render.py`); `live.js` relays each new value to `script.js` as a `lab-reservations` event, and nothing of it enters
+`data.json`, the collector or the deploy fingerprint. The value:
+
+```
+{"v": 1, "t": <ms>, "read_ms": <ms of the last good read>, "window_h": 48, "cap_h": 3, "source": "...",
+ "reservations": [ {"id": "<the claim's message id>", "host": "aifoundry1", "n": 1 | null (the post named the machine only),
+   "who": "<Discord display name>", "start_ms": <ms>, "end_ms": <ms> | null (no release yet),
+   "end": "released" | "edited" | "next_claim" | "stated" | "cap" | "open", "limit_ms": <ms>, "stated_ms": <ms>?,
+   "start_msg": {"at_ms": <ms>, "text": "..."}, "end_msg": {"at_ms": <ms>, "who": "...", "text": "..."}?,
+   "next_who": "..."?}, ... ] }
+```
+
+What the watcher counts: a claim is a card named ("aifoundry1 card 1", "card 0 on aifoundry1", "aifoundry3") with a
+verb of taking just before it ("using", "taking", "reserving", "I'll be on") or "is mine/taken" after it, and no
+question. It ends at the same author's release ("released", "done with aifoundry1 card 1", or any release posted as a
+reply to the claim), at the time of an edit that adds "released" to the claim itself (how the owner's agents close
+theirs), or at the next claim of that card by someone else; failing all three it is drawn for the duration the post
+gave ("for the next few hours" is 3 h, "for 90 min"), else for 3 h, and says "no release posted". A release more than
+24 hours after its claim closes nothing. The newest 30 within 48 hours go on the stream, under spacesheep's 16 KB a
+value.
 
 ---
 
@@ -1021,6 +1066,12 @@ Hard rules; the build pass implements each one and the README repeats them.
 - Nobody is singled out: the collector's own account is one login among the others, with no "you", no row of its
   own, and none of its sessions, agents' titles or accounts (until 30 September the page showed the owner's Claude
   logins and sessions from `claudes status` and `spacesheep sessions list`; the collector no longer runs them).
+- **Reservations** (§4.6) are the one thing on the page that names people by more than a login: the author's Discord
+  display name, as #community-lab shows it, beside the claim and release posts they wrote there (the owner's ask of
+  15 October 2026). The channel is public to the server's members; only claim and release posts leave the watcher,
+  each scrubbed of links, e-mail and IP addresses, `*.ts.net` names and file paths and cut to 160 characters, and how
+  the channel was read stays with the watcher. The page writes them as text (tooltips escape them); none of it enters
+  `data.json` or the repository.
 
 **The privacy check.** Before `data.json` is written, `collect.py` walks every string: free text (health lines, log
 lines, program names, failed unit and pending package names) first goes through a scrubber that removes IPv4 and IPv6
@@ -1099,3 +1150,7 @@ state, raw outputs, log, the space uuid and any ssh overrides stay in `~/.cache/
   series; card series pause while a host is unreachable.
 - **Installing et-lab-health rev 3** on the hosts would let the probe call it instead of streaming it; that is an
   admin step for the owner and the lab.
+- **Reservations beyond the timeline** (§4.6): a card's chip could read `RESERVED: <name>` while a claim is open and
+  nobody holds it, and a reservation could be matched to the card-use log's login (a Discord name is not a login, so
+  today the tooltip only reports what the log saw in that time). A Discord bot in the server would let the collector
+  read the channel itself; until the server's admins add one, the watcher outside the lab does it.

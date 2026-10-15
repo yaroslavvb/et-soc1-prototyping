@@ -51,6 +51,13 @@ else parsed from the ISO string. A few optional fields beyond §1 are used when 
 - `hosts.<h>.next_try_ms` (the next try after an approval failure), `people[].hosts.<h>.stale` (a count from old
   data), `collector.fixture` (shows the MADE-UP DATA pill).
 
+Beyond the data file, the page reads two kinds of spacesheep stream, only when it is open on spacesheep.dev
+(`render.py` declares `aifoundry/*`): `aifoundry/<host>`, a reading a second from each machine (the live section and
+the live card use, `live.js`), and `aifoundry/reservations`, the card reservations posted in the AI Foundry Discord's
+#community-lab, which a watcher outside the lab pushes every 10 minutes (`../DESIGN.md` §4.6). `live.js` relays each
+new value of the second as a `lab-reservations` event; `script.js` draws them on the card-use lanes (a blue hatched span
+behind the bars, a bracket over the lane, the posts in the tooltip) and lists them under the 24-hour chart.
+
 Host and card lists come from the data; a card's colour and mark come from the toolkit's registry (`CK.card`).
 A card whose holder is unknown, or whose machine did not answer, shows NO DATA rather than FREE.
 

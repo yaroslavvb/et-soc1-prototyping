@@ -23,6 +23,16 @@ Everything collected lives outside the repository: `~/.cache/lab-dashboard/` (mo
 `keeper-stream.log`) and
 `~/.config/lab-dashboard/` (`space` holds the space's uuid; `config.json`; `ack.json`; `crontab.bak`).
 
+**Reservations from Discord** (since 15 October 2026). The card-use chart also shows who reserved a card in the AI
+Foundry Discord's #community-lab: a blue hatched span from "using aifoundry1 card 1" to "released", the two posts in its
+tooltip. They come from the spacesheep stream `aifoundry/reservations`, which a watcher outside the lab, run by the
+dashboard's owner, pushes every 10 minutes ([DESIGN.md](DESIGN.md) §4.6); nothing on the lab machines collects them,
+and nothing here needs to run for them. To be counted, a post names the machine and card ("using aifoundry1 card 1",
+"taking aifoundry3") and is closed by a "released" from the same person (a new post, or an edit of the first) or by a
+"released" posted as a reply to it; a claim with no release is drawn for the time it gave ("for 2 hours"), else for 3
+hours. `spacesheep streams
+aifoundry/` shows the stream's last value.
+
 ## Using it
 
 All commands run on aifoundry2, in the checkout (`~/claude/et-soc1-prototyping`).

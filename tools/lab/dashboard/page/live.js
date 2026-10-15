@@ -1,5 +1,6 @@
 /* live.js: the dashboard's live section, drawn from the spacesheep streams aifoundry/<host> (one JSON line a second
-   from tools/lab/live/live-collector.py on each machine). window.ss exists only when the page is open on spacesheep.dev.
+   from tools/lab/live/live-collector.py on each machine), and the relay of aifoundry/reservations (the card
+   reservations posted on Discord) to script.js. window.ss exists only when the page is open on spacesheep.dev.
    Each card is built once and updated in place, so an open "Top processes" fold stays open; its rows slide to their
    new places, ordered by a smoothed CPU share so they do not swap places every second.
    Temperatures: the host's sensors stream live, and so do the cards' die temperatures: the collector reads them once a
@@ -229,6 +230,16 @@
       hist[h] = (history || []).map(function (x) { return x && x.v ? x.v : x; }).filter(function (x) { return x && typeof x.cpu_all === "number"; });
       update(h);
     });
+  });
+  // Card reservations posted in the AI Foundry Discord's #community-lab ("using aifoundry1 card 1" ... "released"),
+  // read every 10 minutes outside the lab and pushed as one value with the last 48 hours (the owner's ask, 15 Oct 2026).
+  // The main dashboard (script.js) draws them on the card-use lanes, the posts in their tooltips.
+  var resvT = null;
+  window.ss.stream("aifoundry/reservations").keep(1).draw(function (v) {
+    if (v && typeof v === "object" && Array.isArray(v.reservations) && v.t !== resvT) {
+      resvT = v.t;
+      document.dispatchEvent(new CustomEvent("lab-reservations", {detail: v}));
+    }
   });
   tick();
   setInterval(tick, 1000);

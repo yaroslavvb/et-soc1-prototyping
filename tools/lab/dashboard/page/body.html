@@ -195,6 +195,17 @@ main{max-width:1280px}
 .cu-now{stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3}
 .cu-minor{stroke:var(--axis);stroke-width:1;shape-rendering:crispEdges}
 .cu-blab{font-size:12px;font-weight:600;pointer-events:none}
+/* reservations posted on Discord (script.js drawResv): a blue hatched span behind the bars, a bracket over the lane */
+.cu-resv-band{fill:url(#cu-resv-hatch)}
+.resv-bg{fill:color-mix(in srgb,var(--c1) 12%,var(--surface))} .resv-ln{stroke:var(--c1);stroke-width:1.4}
+.cu-resv-br{fill:none;stroke:var(--c1);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.cu-resv-br.open{stroke-dasharray:4 2}
+.cu-resv-g.ck-active .cu-resv-br,.cu-resv-g:focus-visible .cu-resv-br{stroke-width:2.6}
+.cu-resv{margin:8px 0 4px}
+.cu-resv-h{margin:0 0 2px}
+.cu-resv-list{margin:2px 0 6px;padding-left:1.2em;font-size:.86rem}
+.cu-resv-list li{margin:3px 0;overflow-wrap:anywhere}
+.cu-resv-q{display:block;font-size:.8rem;color:var(--ink-2)}
 .cu-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:10px 28px;margin:12px 0 4px}
 .cu-card{font-size:.88rem;min-width:0;overflow-wrap:anywhere}
 .cu-card .cu-sub{display:block;font-size:.8rem;color:var(--ink-2)}
@@ -395,7 +406,7 @@ aifoundry3 takes over after 90 minutes without new data, and a watchdog outside 
 <div id="alert-list"></div>
 
 <h2 id="card-use">Card use</h2>
-<p class="small" id="cu-note">A bar runs from a program's first open of a card to its last close, coloured by login; hatched spans were not logged. <span id="cu-zone">Lab time</span>. Hover a bar for its details.</p>
+<p class="small" id="cu-note">A bar runs from a program's first open of a card to its last close, coloured by login; grey hatched spans were not logged, and a blue hatched span under a bracket is a reservation posted in the AI Foundry Discord's #community-lab. <span id="cu-zone">Lab time</span>. Hover a bar or a reservation for its details.</p>
 <div id="cu-legend"></div>
 <h3 id="card-use-live">Live, last 15 minutes</h3>
 <div id="cu-live"></div>
@@ -408,6 +419,7 @@ aifoundry3 takes over after 90 minutes without new data, and a watchdog outside 
 @media (prefers-reduced-motion:reduce){.cu-live.open{animation:none}}
 </style>
 <div id="cu-chart"></div>
+<div id="cu-resv" class="cu-resv" hidden></div>
 <div id="cu-extra">
 <div id="cu-cards" class="cu-cards"></div>
 <h3 id="card-use-by-person">By person and card</h3>
@@ -708,6 +720,7 @@ card holds and use; never commands, files, addresses or where anyone connects fr
 </div>
 <svg aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute"><defs>
 <pattern id="cu-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hatch-bg" width="6" height="6"/><line class="hatch-ln" x1="0" y1="0" x2="0" y2="6"/></pattern>
+<pattern id="cu-resv-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect class="resv-bg" width="5" height="5"/><line class="resv-ln" x1="0" y1="0" x2="0" y2="5"/></pattern>
 </defs></svg>
 <div id="labdash-canary" hidden>lab-dashboard-private-canary</div>
 </main>
