@@ -5,7 +5,8 @@ in-depth check of the chip for correctness https://spacesheep.dev/@yaroslavvb/et
 with the AI Foundry hub for where the ground truth and the manuals are. At about 14:55: "I've had Codex make some
 suggestions, and they're in the discussion tab ... Go through the suggestions/fixes and implement everything which is
 appropriate." No card time beyond one read-only query of aifoundry2's static configuration (`tools/etcfg`), held under
-the card's lock for under a second.
+the card's lock for under a second. The same Discussion tab also held two audits by Antigravity agents (topics 3 and 4),
+gone through the same way that evening (below, "The Antigravity audits").
 
 ## What was checked, and against what
 
@@ -115,6 +116,72 @@ The 17 left for the owner, with what each would take:
 | T11 | a scope line always visible in each frame | a frame convention |
 | T12 | reproducible permalinks for every source | a new feature of the fact system |
 
+## The Antigravity audits
+
+Two more audits were in the same Discussion tab, both by Antigravity agents at the owner's ask, on the version before
+this check (c753607a8c79), mostly about layout, type and interaction, each with mockup pages: topic 3 from the Intel Mac
+(the frame titles against their tags, the phone's view, the address parser, the 3D link, stale prose) and topic 4 from
+aifoundry1 (lines past the frame on short screens and phones, labels in boxes, knockout halos, the block scenes, the
+legend, the tour, the state switch, scale bars). Each of their 41 claims was checked against the sources at `814d519c`
+and measured in the built page with headless Chrome at 1440 × 900, at 1280 × 720 (a short screen, where the small type is
+21 units, not 17) and on a 390-pixel phone, in Linux's default face (Noto Sans) and, where the face decides, in Liberation
+Sans (Arial's widths) and DejaVu Sans: **13 real**, fixed by nine changes; **3 already fixed** that morning (the routes'
+turning order, the three cards, the space's description); **15 wrong** when measured; **10 left for the owner**.
+`antigravity-triage.json` has every decision with its evidence.
+
+Most of the wrong ones came from estimates. The audits computed text widths at 15.6 units a character: of the nine
+titles said to run into their tags, one overlapped (lib.counter, by 1.1 units), one touched (lib.fifo), two came within
+13 units (lib.channel, vpu.lane.fma) and five cleared them by 33 to 71 units. The five parsers said to show "Shire NaN"
+cannot be reached (every address goes through the seat check, which refuses a key that is not a number; the proposed
+`n0(+k)` would have opened neighbourhood 0 for a bad key). The mux's S and S' labels are 4 units apart, the vector unit's box has one summary, not two, the chip-tile
+legend is already hidden off the chip's three levels, and the package's heading fits the phone.
+
+The nine changes:
+
+| Change | Where | Claims |
+|---|---|---|
+| a frame's title measured against its tags and set smaller only where it would come within 16 units (four titles at 1440 × 900, from 30 to 29.1-29.8 units; the nearest now 17.4 units away) | `ladder-core.js` (`fitHeads`) | 3-1 |
+| the line under a frame's title, the notes and the one-line labels that start inside the frame set smaller where they would pass its inner edge, never below 15 units | `chip-diagram.blocks.js` (`fitLines`, run by the ladder's `buildInto` on every copied scene) | 4-A |
+| a label on a tinted shape knocks out in the tint over what is under it, not in the page's colour (12 scales change at 1440 × 900, each a label losing its ring) | `memory-levels.script.js` (`kbTexts`), `circuitkit.js` regenerated | 4-D |
+| the stored bit's notes set smaller together where they would pass their box (the latch, the 6T cell) | `ladder-inner.js` (`bitStates`) | 4-B2 (latch, 6T cell) |
+| the shire's UC block label on three lines | `chip-diagram.script.js` | 4-B1b |
+| the unknown-geometry box of the L2 panel rewrapped, so its first line ends before the "?" | `memory-levels.script.js`, `circuitkit.js` | 4-B2 (shire.panel) |
+| 29th Street's "sea level" inside the phone's view | `ladder-outer.js` | 3-2.1 |
+| the Local Group's subtitle six characters shorter ("mostly faint dwarfs"): in DejaVu Sans it ran off the stage | `ladder-outer.js` | 4-F5 |
+| "Explore this in 3D" follows the panel: a part's panel that is one of the 3D scales' own text links that scale's view (the FinFET's on the die's section, the channel's on the fin) | `chip-diagram.script.js` (`panel`) | 3-4.3 |
+
+Found while measuring them, and fixed: the L1 drawing's note "39.0 cycles at 768 B (cycles)", its unit said twice; the
+adder-tree column's "a bit passes", which crossed the frame at every size (now over its wire); three one-line labels past
+the frame on short screens (now within `fitLines`); the mesh hop's "+ RID, RRESP, RLAST; …" on a phone (shortened, and
+fitted); and the cache sub-bank's "the example line (…) is in bank 1, sub-bank 3", which ran into the "dc" box at
+1280 × 720 (now on two lines).
+
+The ten for the owner:
+
+| Claim | What it asks | Why it waits for the owner |
+|---|---|---|
+| 3-1.7 | the tag "this chip’s own circuit: not published" shortened to "chip circuit: not published" | the ladder's rule for textbook scenes (`2026-10-01-ladder/README.md`); the measured fit removes the collisions without changing the words |
+| 3-4.1 | the 3D page's back link returning to the reader's branch | a cross-page link feature; the 3D page opens in a new tab, so the reader's own tab keeps its place (as Codex's I08) |
+| 3-4.2 | a 3D link on lib.wire | a new link: Q109 asked for the four scales' views |
+| 3-4.4 | the 3D page in the 2D page's palette, with N7's numbers | a style change across two pages; the 3D page says its geometry is illustrative |
+| 4-B1a | `fitTexts`' floor lowered to 13.5 units on a wide screen | by design: at the desktop sizes the labels were laid out to fit; it would let every circuit label shrink |
+| 4-E1 | schematics with buses and ports in place of the block scenes' cards | a redesign; the documents give no port topology for most of these blocks |
+| 4-E2 | the block scenes' blurbs not cut after three lines | by design since 1 October: the box shows three lines, its panel the rest |
+| 4-F2 | the broadcast as a tour slide | deliberate: B ends the tour and plays on its own; "the ten flows" (steps 7 to 16) is accurate |
+| 4-F3 | one dock for the state switch | a layout convention: each switch sits under what it switches |
+| 4-F4 | scale bars on the scenes below the package | a new feature; the readout gives every scale's size |
+
+**Checked**, on the rebuilt pages: `tools/antigravity/measure.mjs` over all 104 scales at the three sizes, before and
+after (`antigravity-measure.md`, made by `compare.py`): one text past a frame fixed at 1440 × 900, 27 and two
+overlapping pairs at 1280 × 720, 29 and two pairs on the phone, none new at any size (what stays is the neighbour links
+set round the I/O, PCIe and memory shires' frames on purpose, two lines that touch by a pixel, and a street's two end
+names grazing a phone's edges). `allheads.mjs`: every frame title at least
+17.4 units from its tags at 1440 × 900. `link3d.mjs`: the 3D links as above, every other panel's unchanged. The suites:
+`zoom_test.mjs` 783/783 on the final page, `ml_ladder_test.mjs --chip` 150/150 and `ml_access_test.mjs` 28 accesses
+of 28 (on the final memory levels page, the chip page then differing from the final one only in a line of its Versions
+list), `zoom_static.py` clean on both pages. The page crawled again: against the morning's final crawl, 9 of the 1,857
+texts a reader sees changed, eight part panels titled "FinFET transistor" now linking their 3D view and the Versions list.
+
 ## How the fixes were made and checked
 
 Six fixers, each owning a disjoint set of source files, applied the findings and the citations; a second pass applied
@@ -135,9 +202,11 @@ every fix landed, that every changed text is explained by a fix, and that no new
 | `findings.json` | the 99 findings: slice, key, severity, the skeptic's verdict, what the page said, what is true, the evidence, the fix, the skeptic's reasoning |
 | `citations.json` | the settled line citations: fact, field, file, old and new lines, the text at the new lines, why |
 | `codex-triage.json` | Codex's 68 observations: the decision, its reason and evidence, the fix |
+| `antigravity-triage.json` | the Antigravity audits' 41 claims (Discussion topics 3 and 4): the decision, its reason and evidence, the fix; and the five found while checking them |
+| `antigravity-measure.md` | every text past a frame or the screen, and every pair of texts whose ink meets, on all 104 scales at 1440 × 900, 1280 × 720 and 390 × 844, before and after those fixes |
 | `fixes.json` | what each fixer reported: every item, its status and the file:line of each change |
 | `crawl-diff.md` | every text a reader sees that changed, before and after, as a word diff |
-| `tools/` | the check's own scripts, as they ran (their paths point at the session's work folder, `~/claude/work/chip-check-1014`, not committed): `crawl.mjs` and `shots.mjs` (what a reader sees, through `tools/pagemotion/cdp.mjs`), `partition.py` (the slices), `citecheck.py`, `crawldiff.py`, `splitdiff.py`, `buildchain.sh`, `postfix.sh`, the routing and merging scripts, and the checkers' and fixers' briefs |
+| `tools/` | the check's own scripts, as they ran (their paths point at the session's work folder, `~/claude/work/chip-check-1014`, not committed): `crawl.mjs` and `shots.mjs` (what a reader sees, through `tools/pagemotion/cdp.mjs`), `partition.py` (the slices), `citecheck.py`, `crawldiff.py`, `splitdiff.py`, `buildchain.sh`, `postfix.sh`, the routing and merging scripts, and the checkers' and fixers' briefs; in `tools/antigravity/`, the measurements made for the Antigravity audits (`measure.mjs`, `compare.py`, `allheads.mjs`, `headers.mjs`, `boxfit.mjs`, `near.py`, `blocks.mjs`, `kbdebug.mjs`, `phone.mjs`, `parse.mjs`, `parse2.mjs`, `link3d.mjs`, and `verify-n0.mjs` with `pdp.mjs` and `fixes.mjs`, which serve a page with a proposed change applied) |
 
 ## The full lists
 

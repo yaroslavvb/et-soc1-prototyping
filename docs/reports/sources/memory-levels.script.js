@@ -308,10 +308,13 @@ function kbTexts(L) {
   const sh = [];
   L.querySelectorAll('rect, path, circle, ellipse, polygon').forEach(e => {
     if (e.closest('.fx, .fxu, defs')) return;
-    const c = e.style.fill && !/url/.test(e.style.fill) && (e.style.fillOpacity === '' || +e.style.fillOpacity >= 0.9) ? e.style.fill : KB_CLS[[...e.classList].find(k => KB_CLS[k])];
+    // (a tinted shape, 5-90% opaque, knocks out in its tint over what is under it: Antigravity's audit of 14 Oct found
+    // labels on the channel's, the crystal's and the sets' tints ringed in the page's colour)
+    const f = e.style.fill && !/url/.test(e.style.fill) ? e.style.fill : '', fo = e.style.fillOpacity === '' ? 1 : +e.style.fillOpacity;
+    const k = KB_CLS[[...e.classList].find(q => KB_CLS[q])], c = f && fo >= 0.9 ? f : k || (f && fo >= 0.05 ? f : null), a = c === f && fo < 0.9 ? fo : 1;
     if (!c || e.classList.contains('zbd')) return;
     let b; try { b = e.getBBox(); } catch (_) { return; }
-    if (b.width && b.height) sh.push({e, c, x: b.x, y: b.y, w: b.width, h: b.height});
+    if (b.width && b.height) sh.push({e, c, a, x: b.x, y: b.y, w: b.width, h: b.height});
   });
   if (!sh.length) return;
   L.querySelectorAll('text').forEach(t => {
@@ -319,9 +322,15 @@ function kbTexts(L) {
     let b; try { b = t.getBBox(); } catch (_) { return; }
     if (!b.width) return;
     const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
-    let top = null;
-    for (const s0 of sh) if (cx >= s0.x && cx <= s0.x + s0.w && cy >= s0.y && cy <= s0.y + s0.h && (s0.e.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING)) top = s0;
-    if (top) t.style.setProperty('--kb', top.c);
+    // the shapes under it, bottom first: an opaque one's colour, then each tint it sits wholly on, mixed over that (or over
+    // the page); a label across a tint's edge, or over small marks such as wires, knocks them out in the colour below
+    let kb = null;
+    for (const s0 of sh) if (cx >= s0.x && cx <= s0.x + s0.w && cy >= s0.y && cy <= s0.y + s0.h && (s0.e.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+      if (s0.a === 1) kb = s0.c;
+      else if (!/transparent/.test(kb || '') && [b.x + 1, cx, b.x + b.width - 1].every(px => (s0.e.isPointInFill ? s0.e.isPointInFill(new DOMPoint(px, cy)) : px >= s0.x && px <= s0.x + s0.w)))
+        kb = `color-mix(in srgb, ${s0.c} ${Math.round(100 * s0.a)}%, ${kb || 'var(--page)'})`;
+    }
+    if (kb) t.style.setProperty('--kb', kb);
   });
 }
 const FS_BASE = {'t-sm': 17, 't-smb': 17, 't-mono': 17, 't-lab': 20, 't-labb': 20, 't-net': 19, 't-mid': 24, 't-big': 30};
@@ -2102,7 +2111,7 @@ function buildPanel(L, ap, o) {
   T(gt, RX + 12, 332, 'on the die', 't-sm', 'start', nf('l2_v'));
   const gg = comp(L, 'geom', {}, 'The panel\'s internal geometry, unknown: asked');
   boxShape(gg, RX, 362, RW, 176, 'var(--warn)', {fo: 0.04, kind: 'unknown'});
-  ['inside: if m4b4 in', 'the name means a', '4:1 column mux and', '4 banks, then', '≈1,024 wordlines', '× 576 bitline pairs'].forEach((t, i) => T(gg, RX + 12, 388 + i * 24, t, i >= 4 ? 't-smb' : 't-sm', 'start', 'l2:l2.macro.name-decode'));
+  ['inside: if m4b4', 'in the name means', 'a 4:1 column mux', 'and 4 banks, then', '≈1,024 wordlines', '× 576 bitline pairs'].forEach((t, i) => T(gg, RX + 12, 388 + i * 24, t, i >= 4 ? 't-smb' : 't-sm', 'start', 'l2:l2.macro.name-decode'));
   ap.cells = cells; ap.rows = rows; ap.rowK = rows.indexOf(R); ap.Y0 = Y0; ap.RH = RH; ap.AX = AX; ap.CW = CW;
   ap.zg.cell = ga;
   ga.setAttribute('data-child', o.cellChild || 'cell');
@@ -2523,7 +2532,7 @@ function buildL1Cache(L, ap, inst) {
   T(gs, 580, 666, 'hart 0', 't-sm', 'start', nf('l1_h0sets')); T(gs, 700, 666, 'hart 1', 't-sm', 'start', nf('l1_h1sets'));
   T(gs, 830, 592, `${nt('l1_hart')} per hart;`, 't-smb', 'start', nf('l1_hart')); T(gs, 830, 612, 'hart 1 reads', 't-smb', 'start', nf('l1_hart'));
   T(gs, 830, 634, `${nt('l1_knee_in')},`, 't-sm', 'start', nf('l1_knee_in'));
-  T(gs, 830, 656, `${nt('l1_knee_out')} (cycles)`, 't-sm', 'start', nf('l1_knee_out'));
+  T(gs, 830, 656, nt('l1_knee_out'), 't-sm', 'start', nf('l1_knee_out'));   // (its text has the unit: "(cycles)" after it said it twice)
   gs._box = {x: -140, y: 576, w: 1216, h: 100};
   ap.setCell = {x: -140 + inst.set * 60, y: 602, w: 52, h: 40};
 }
@@ -3073,7 +3082,9 @@ function buildL2Sub(L, ap, inst) {
     T(L, -150, 590, `→ data row {set, way} = ${fnum(a.row)}`, 't-smb', 'start', 'l2:l2.decode');
   } else {
     const e = dec2(ADDR.pa);
-    T(L, -150, 568, `the example line (${hexPA(ADDR.pa - ADDR.pa % 64)}) is in bank ${e.bank}, sub-bank ${e.sub}`, 't-sm', 'start', 'l2:l2.decode');
+    // (two lines: on one, a short screen's 21-unit type ran it into the dc box; 14 Oct 2026)
+    T(L, -150, 568, `the example line (${hexPA(ADDR.pa - ADDR.pa % 64)})`, 't-sm', 'start', 'l2:l2.decode');
+    T(L, -150, 590, `is in bank ${e.bank}, sub-bank ${e.sub}`, 't-sm', 'start', 'l2:l2.decode');
   }
   T(L, -150, 640, 'the other sub-banks\' RAM inputs stay frozen', 't-sm', 'start', 'l2:l2.panel-select');
   ap.panelBox = ap.panels[a.panel] ? {x: ap.panels[a.panel].x, y: 14, w: 154, h: 420} : null;
@@ -3752,7 +3763,7 @@ function buildHop(L, ap, o) {
   S(E('rect', {x: 552, y: 554, width: 16, height: 26, rx: 2}, gf), {fill: 'var(--c7)', fillOpacity: 0.4, stroke: 'var(--c7)', strokeWidth: 1.25});
   S(E('rect', {x: 568, y: 554, width: 30, height: 26, rx: 2}, gf), {fill: 'none', stroke: 'var(--warn)', strokeWidth: 1.5, strokeDasharray: '4 3'});
   T(gf, 612, 566, `reply: ${nt('l3_reply')}`, 't-sm', 'start', nf('l3_reply'));
-  T(gf, 612, 586, '+ RID, RRESP, RLAST; a header of unknown width', 't-sm', 'start', 'l3:l3.flits');
+  T(gf, 612, 586, '+ RID, RRESP, RLAST; header width unknown', 't-sm', 'start', 'l3:l3.flits');   // (shorter: on a phone it ran past the frame)
   gf._box = {x: -136, y: 512, w: 1214, h: 80};
   E('rect', {class: 'ring', x: -141, y: 507, width: 1224, height: 90, rx: 10}, gf);
   // the energy of a hop, and what is unknown

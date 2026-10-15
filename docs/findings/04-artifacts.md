@@ -914,7 +914,14 @@ same scales outward and inward, the loop, a way back from every move and no dead
   research), both pages and the 3D companion were rebuilt, the chain at its fixed point (`buildchain.sh` reproduced the
   committed pages byte for byte before the first edit), the page crawled again and diffed, five auditors checked the result,
   and the suites pass on the final build. The record, the tools, the crawl diff and every finding with its verdict:
-  `docs/reports/data/2026-10-14-chip-check/`.
+  `docs/reports/data/2026-10-14-chip-check/`. That evening, the same Discussion tab's two Antigravity audits (topics 3
+  and 4: layout, type and interaction): their 41 claims measured in the built page at 1440 × 900, at 1280 × 720 and on
+  a phone, 13 real (fixed by nine changes: frame titles kept clear of their tags, the lines, notes and labels that ran
+  past the frame on short screens and phones fitted, a label's knockout in the tint it sits on, the stored bit's notes
+  kept in their box, a phone's missing "sea level", the 3D link following the panel), 3 already fixed, 15 wrong when
+  measured, 10 left for the owner; five more such defects found while measuring were fixed too. Measured over all 104
+  scales before and after: 27 texts past a frame at 1280 × 720 and 29 on a phone fixed, none new
+  (`antigravity-triage.json`, `antigravity-measure.md` there).
 
 ## Four physical scales in 3D (14 October 2026, Q109)
 

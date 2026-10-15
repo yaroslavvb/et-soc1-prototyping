@@ -1902,10 +1902,11 @@ function kbTexts(L) {
   const sh = [];
   L.querySelectorAll('rect, path, circle, ellipse, polygon').forEach(e => {
     if (e.closest('.fx, .fxu, defs')) return;
-    const c = e.style.fill && !/url/.test(e.style.fill) && (e.style.fillOpacity === '' || +e.style.fillOpacity >= 0.9) ? e.style.fill : KB_CLS[[...e.classList].find(k => KB_CLS[k])];
+    const f = e.style.fill && !/url/.test(e.style.fill) ? e.style.fill : '', fo = e.style.fillOpacity === '' ? 1 : +e.style.fillOpacity;
+    const k = KB_CLS[[...e.classList].find(q => KB_CLS[q])], c = f && fo >= 0.9 ? f : k || (f && fo >= 0.05 ? f : null), a = c === f && fo < 0.9 ? fo : 1;
     if (!c || e.classList.contains('zbd')) return;
     let b; try { b = e.getBBox(); } catch (_) { return; }
-    if (b.width && b.height) sh.push({e, c, x: b.x, y: b.y, w: b.width, h: b.height});
+    if (b.width && b.height) sh.push({e, c, a, x: b.x, y: b.y, w: b.width, h: b.height});
   });
   if (!sh.length) return;
   L.querySelectorAll('text').forEach(t => {
@@ -1913,9 +1914,13 @@ function kbTexts(L) {
     let b; try { b = t.getBBox(); } catch (_) { return; }
     if (!b.width) return;
     const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
-    let top = null;
-    for (const s0 of sh) if (cx >= s0.x && cx <= s0.x + s0.w && cy >= s0.y && cy <= s0.y + s0.h && (s0.e.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING)) top = s0;
-    if (top) t.style.setProperty('--kb', top.c);
+    let kb = null;
+    for (const s0 of sh) if (cx >= s0.x && cx <= s0.x + s0.w && cy >= s0.y && cy <= s0.y + s0.h && (s0.e.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+      if (s0.a === 1) kb = s0.c;
+      else if (!/transparent/.test(kb || '') && [b.x + 1, cx, b.x + b.width - 1].every(px => (s0.e.isPointInFill ? s0.e.isPointInFill(new DOMPoint(px, cy)) : px >= s0.x && px <= s0.x + s0.w)))
+        kb = `color-mix(in srgb, ${s0.c} ${Math.round(100 * s0.a)}%, ${kb || 'var(--page)'})`;
+    }
+    if (kb) t.style.setProperty('--kb', kb);
   });
 }
 const FS_BASE = {'t-sm': 17, 't-smb': 17, 't-mono': 17, 't-lab': 20, 't-labb': 20, 't-net': 19, 't-mid': 24, 't-big': 30};
@@ -3411,7 +3416,7 @@ function buildPanel(L, ap, o) {
   T(gt, RX + 12, 332, 'on the die', 't-sm', 'start', nf('l2_v'));
   const gg = comp(L, 'geom', {}, 'The panel\'s internal geometry, unknown: asked');
   boxShape(gg, RX, 362, RW, 176, 'var(--warn)', {fo: 0.04, kind: 'unknown'});
-  ['inside: if m4b4 in', 'the name means a', '4:1 column mux and', '4 banks, then', '≈1,024 wordlines', '× 576 bitline pairs'].forEach((t, i) => T(gg, RX + 12, 388 + i * 24, t, i >= 4 ? 't-smb' : 't-sm', 'start', 'l2:l2.macro.name-decode'));
+  ['inside: if m4b4', 'in the name means', 'a 4:1 column mux', 'and 4 banks, then', '≈1,024 wordlines', '× 576 bitline pairs'].forEach((t, i) => T(gg, RX + 12, 388 + i * 24, t, i >= 4 ? 't-smb' : 't-sm', 'start', 'l2:l2.macro.name-decode'));
   ap.cells = cells; ap.rows = rows; ap.rowK = rows.indexOf(R); ap.Y0 = Y0; ap.RH = RH; ap.AX = AX; ap.CW = CW;
   ap.zg.cell = ga;
   ga.setAttribute('data-child', o.cellChild || 'cell');
@@ -3792,7 +3797,7 @@ function buildL1Cache(L, ap, inst) {
   T(gs, 580, 666, 'hart 0', 't-sm', 'start', nf('l1_h0sets')); T(gs, 700, 666, 'hart 1', 't-sm', 'start', nf('l1_h1sets'));
   T(gs, 830, 592, `${nt('l1_hart')} per hart;`, 't-smb', 'start', nf('l1_hart')); T(gs, 830, 612, 'hart 1 reads', 't-smb', 'start', nf('l1_hart'));
   T(gs, 830, 634, `${nt('l1_knee_in')},`, 't-sm', 'start', nf('l1_knee_in'));
-  T(gs, 830, 656, `${nt('l1_knee_out')} (cycles)`, 't-sm', 'start', nf('l1_knee_out'));
+  T(gs, 830, 656, nt('l1_knee_out'), 't-sm', 'start', nf('l1_knee_out'));   // (its text has the unit: "(cycles)" after it said it twice)
   gs._box = {x: -140, y: 576, w: 1216, h: 100};
   ap.setCell = {x: -140 + inst.set * 60, y: 602, w: 52, h: 40};
 }
@@ -4333,7 +4338,8 @@ function buildL2Sub(L, ap, inst) {
     T(L, -150, 590, `→ data row {set, way} = ${fnum(a.row)}`, 't-smb', 'start', 'l2:l2.decode');
   } else {
     const e = dec2(ADDR.pa);
-    T(L, -150, 568, `the example line (${hexPA(ADDR.pa - ADDR.pa % 64)}) is in bank ${e.bank}, sub-bank ${e.sub}`, 't-sm', 'start', 'l2:l2.decode');
+    T(L, -150, 568, `the example line (${hexPA(ADDR.pa - ADDR.pa % 64)})`, 't-sm', 'start', 'l2:l2.decode');
+    T(L, -150, 590, `is in bank ${e.bank}, sub-bank ${e.sub}`, 't-sm', 'start', 'l2:l2.decode');
   }
   T(L, -150, 640, 'the other sub-banks\' RAM inputs stay frozen', 't-sm', 'start', 'l2:l2.panel-select');
   ap.panelBox = ap.panels[a.panel] ? {x: ap.panels[a.panel].x, y: 14, w: 154, h: 420} : null;
@@ -4966,7 +4972,7 @@ function buildHop(L, ap, o) {
   S(E('rect', {x: 552, y: 554, width: 16, height: 26, rx: 2}, gf), {fill: 'var(--c7)', fillOpacity: 0.4, stroke: 'var(--c7)', strokeWidth: 1.25});
   S(E('rect', {x: 568, y: 554, width: 30, height: 26, rx: 2}, gf), {fill: 'none', stroke: 'var(--warn)', strokeWidth: 1.5, strokeDasharray: '4 3'});
   T(gf, 612, 566, `reply: ${nt('l3_reply')}`, 't-sm', 'start', nf('l3_reply'));
-  T(gf, 612, 586, '+ RID, RRESP, RLAST; a header of unknown width', 't-sm', 'start', 'l3:l3.flits');
+  T(gf, 612, 586, '+ RID, RRESP, RLAST; header width unknown', 't-sm', 'start', 'l3:l3.flits');   // (shorter: on a phone it ran past the frame)
   gf._box = {x: -136, y: 512, w: 1214, h: 80};
   E('rect', {class: 'ring', x: -141, y: 507, width: 1224, height: 90, rx: 10}, gf);
   part(L, 'hopE', -136, 604, 600, 84, COL.aux, 'a 64 B reply over one hop', {sub: [{t: `≈ ${nt('l3_hop69')} on the mesh rail (derived); ${nt('l3_hop_rb')} on the board (measured)`, f: nf('l3_hop69') + ' ' + nf('l3_hop_rb')}]});
@@ -7623,11 +7629,30 @@ function built(P, d) {
   if (!L._built) buildInto(L, P, d);
   return L;
 }
+function fitHeads(L) {
+  const run = () => L.querySelectorAll('g.frm, g.ifr').forEach(fr => {
+    const pills = [...fr.querySelectorAll(':scope > g.tg > rect')].map(r => ({x: +r.getAttribute('x'), y: +r.getAttribute('y'), h: +r.getAttribute('height')}));
+    if (!pills.length) return;
+    fr.querySelectorAll(':scope > text.t-big, :scope > text.i-t').forEach(t => {
+      let b; try { b = t.getBBox(); } catch (_) { return; }
+      const band = pills.filter(p => p.x > b.x && p.y < b.y + b.height && p.y + p.h > b.y);
+      if (!b.width || !band.length) return;
+      const room = Math.min(...band.map(p => p.x)) - 16 - b.x;
+      if (b.width <= room || room < 100) return;
+      const fs = parseFloat(getComputedStyle(t).fontSize) || 30;
+      t.style.fontSize = Math.max(22, Math.floor(fs * room / b.width * 10) / 10) + 'px';
+      if (t.getComputedTextLength() > room) { t.setAttribute('textLength', room.toFixed(1)); t.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }
+    });
+  });
+  if (CKT && CKT.kit && CKT.kit.measured) CKT.kit.measured(L, run); else run();
+}
 function buildInto(L, P, d) {
   const el = P[d], N0 = NODES[el.id];
   L.textContent = ''; ctxClear(L); L._sky = false;
   const ap = L._ap = {zs: {}};
   N0.build(L, ap, prm(el), P, d);
+  fitHeads(L);
+  if (L.classList.contains('ckt') && typeof fitLines === 'function') fitLines(L);   // (chip-diagram.blocks.js)
   if (typeof chipSeats === 'function') chipSeats(L, ap, el);
   if (L.classList.contains('ckt')) CKT.hitAreas(L);
   if (TOUCH && !N0.out) minHits(L, P, d);
@@ -8839,7 +8864,7 @@ onode('laniakea', {kid: 'localgroup', build: (L, ap) => {
 const LGK = 120;   // units per million light-years
 onode('localgroup', {kid: 'milkyway', img: ['andromeda.webp'], build: (L, ap) => {
   obd(L, true);
-  otitle(L, 'The Local Group', 'drawn to scale, positions schematic', `our galaxy's neighbourhood: more than 130 known galaxies, most of them faint dwarfs, over nearly ${on('lg_size')}`, `${onf('lg_size')} out.localgroup.5`);
+  otitle(L, 'The Local Group', 'drawn to scale, positions schematic', `our galaxy's neighbourhood: more than 130 known galaxies, mostly faint dwarfs, over nearly ${on('lg_size')}`, `${onf('lg_size')} out.localgroup.5`);
   const mw = {x: 280, y: 400}, m31 = {x: mw.x + 2.5 * LGK, y: mw.y}, m33 = {x: mw.x + 2.92 * LGK, y: mw.y - 0.68 * LGK};
   S(E('line', {x1: mw.x, y1: mw.y, x2: m31.x, y2: m31.y, 'pointer-events': 'none'}, L), {stroke: '#7a86a6', strokeWidth: 1.5, strokeDasharray: '6 6'});
   T(L, (mw.x + m31.x) / 2, mw.y + 34, on('lg_m31'), 'o-s', 'middle', onf('lg_m31'));
@@ -9086,7 +9111,7 @@ onode('st29', {kid: 'studio45', build: (L, ap) => {
   E('path', {class: 'st29', d: line}, g);
   E('rect', {class: 'ring', x: X0 - 8, y: ym(150) - 8, width: W + 16, height: Y0 - ym(150) + 16, rx: 10}, g);
   E('line', {class: 'sea', x1: X0, y1: Y0, x2: X0 + W, y2: Y0}, L);
-  T(L, X0 + W + 10, Y0 + 6, 'sea level', 'o-s');
+  if (PH) T(L, X0 + W, Y0 - 10, 'sea level', 'o-s ohalo', 'end'); else T(L, X0 + W + 10, Y0 + 6, 'sea level', 'o-s');
   T(g, xm(0) + 6, ym(pr[0][1]) - 12, on('st_top'), 'o-s ohalo', 'start', onf('st_top'));
   T(g, xm(len) - 4, ym(pr[pr.length - 1][1]) - 14, on('st_bot'), 'o-s ohalo', 'end', onf('st_bot'));
   E('line', {class: 'sumln', x1: X0, y1: ym(142), x2: X0 + W, y2: ym(142)}, L);
@@ -9789,6 +9814,17 @@ function ipart(L, ap, key, x, y, w, h, col, title, o) {
   return g;
 }
 const madeOf = id => P => (sc(id).see || []).filter(x => NODES[x]).map(x => ({lab: sc(x).name || x, to: P.concat([{id: x}]), made: true}));
+function fitLines(L) {
+  const FR = CKT.FR, xr = FR.x + FR.w - 18;
+  KT.measured(L, () => L.querySelectorAll(':scope > g.frm > text.t-sm, :scope > text.t-sm, :scope > g.comp > text.t-sm').forEach(t => {
+    if ((t.getAttribute('text-anchor') || 'start') !== 'start' || t.hasAttribute('transform') || [...t.children].some(s => parseFloat(s.getAttribute('dy')))) return;
+    if (t.parentNode.classList.contains('comp') && t.parentNode.querySelector(':scope > rect.shape')) return;
+    let b; try { b = t.getBBox(); } catch (_) { return; }
+    if (!b.width || b.x >= xr || b.x + b.width <= xr) return;
+    const fs = parseFloat(getComputedStyle(t).fontSize) || 17, nfs = Math.max(Math.min(fs, 15), Math.floor(fs * (xr - b.x) / b.width * 10) / 10);
+    if (nfs < fs) t.style.fontSize = nfs + 'px';
+  }));
+}
 function bnode(id, o) { return inode(id, Object.assign({}, o, {build: (L, ap, p, P, d) => CKT.build((L2, ap2, inst) => o.draw(L2, ap2, p, P, d), L, ap, {}, null)})); }
 function blockScene(id, L, ap, p, P, o) {
   o = o || {};
@@ -9953,7 +9989,7 @@ bnode('fma.tree.col', {draw: (L, ap) => {
       KT.wire(L, [[x + w + 40, lv.y + 52], [x + w + 6, lv.y + 52]], 'thin');
       KT.wire(L, [[x + 50, lv.y + h], [x + 50, lv.y + h + 26]]); KT.wire(L, [[x + 120, lv.y + h], [x + 120, lv.y + h + 26]], 'thin');
     }
-    if (lv.pass) { const px = 60 + lv.n * 230; KT.wire(L, [[px + 40, lv.y - 14], [px + 40, lv.y + 100]], 'thin'); KTT(L, px + 52, lv.y + 40, 'a bit passes', 't-sm'); }
+    if (lv.pass) { const px = 60 + lv.n * 230; KT.wire(L, [[px + 40, lv.y - 14], [px + 40, lv.y + 100]], 'thin'); KTT(L, px + 40, lv.y - 22, 'a bit passes', 't-sm', 'middle'); }
     KTT(L, -150, lv.y + 44, ['17 → 9', '9 → 5', '5 → 3', '3 → 2'][li], 't-smb');
   });
   KTT(L, -150, 652, 'each 4:2 takes a carry in from the column on its right and sends one to the column on its left (cout);', 't-sm');
@@ -10707,6 +10743,12 @@ function bitStates(L, o) {
   KTT(SA, x, y, 'holding 0: Q low, Q̄ high', 't-smb'); KTT(SB, x, y, 'holding 1: Q high, Q̄ low', 't-smb');
   KTT(g, x, y + 22, `low ${on('v_0')}, high the rail, ${on(o.rail)}`, 't-sm', 'start', `${onf(o.rail)} el.rails`);
   lines.forEach((t, i) => KTT(g, x, y + 44 + i * 21, t, 't-sm', 'start', onf(o.e)));
+  const ts = [...g.querySelectorAll(':scope > text.t-sm')];
+  KT.measured(L, () => {
+    const fs = parseFloat(getComputedStyle(ts[0]).fontSize) || 17, wide = Math.max(...ts.map(t => t.getComputedTextLength()));
+    const nfs = Math.max(17, Math.floor(fs * (w - 24) / wide * 10) / 10);
+    if (wide > w - 24 && nfs < fs) ts.forEach(t => { t.style.fontSize = nfs + 'px'; });
+  });
   stateSwitch(L, x - 12, y - 28 + h + 8, {lab: 'The stored bit', btn: ['Holding 0 · store a 1 (G)', 'Holding 1 · store a 0 (G)'], say: ['The cell holds a 0.', 'The cell holds a 1.']}, {w: w});
 }
 

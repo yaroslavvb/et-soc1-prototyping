@@ -38,6 +38,22 @@ function ipart(L, ap, key, x, y, w, h, col, title, o) {
 }
 /* the shared circuits a part is made of, as zoom options (each drawn in this scene's "made of" row) */
 const madeOf = id => P => (sc(id).see || []).filter(x => NODES[x]).map(x => ({lab: sc(x).name || x, to: P.concat([{id: x}]), made: true}));
+/* a copied scene's line under its frame's title, its notes and its other one-line labels (a part's own, where the part
+   has no box for fitTexts to fit them in): where the type in force (a short screen's or a phone's, 21 units, not 17) or a
+   wide face carries one that starts inside the frame past its inner edge, it is set smaller to fit, never below 15 units
+   (Antigravity's audit of 14 Oct: at 1280 x 720 seven of these lines and fifteen notes ran past the frame, ten of them
+   off the screen). The ladder's buildInto runs it on every copied scene. */
+function fitLines(L) {
+  const FR = CKT.FR, xr = FR.x + FR.w - 18;
+  KT.measured(L, () => L.querySelectorAll(':scope > g.frm > text.t-sm, :scope > text.t-sm, :scope > g.comp > text.t-sm').forEach(t => {
+    if ((t.getAttribute('text-anchor') || 'start') !== 'start' || t.hasAttribute('transform') || [...t.children].some(s => parseFloat(s.getAttribute('dy')))) return;
+    if (t.parentNode.classList.contains('comp') && t.parentNode.querySelector(':scope > rect.shape')) return;
+    let b; try { b = t.getBBox(); } catch (_) { return; }
+    if (!b.width || b.x >= xr || b.x + b.width <= xr) return;
+    const fs = parseFloat(getComputedStyle(t).fontSize) || 17, nfs = Math.max(Math.min(fs, 15), Math.floor(fs * (xr - b.x) / b.width * 10) / 10);
+    if (nfs < fs) t.style.fontSize = nfs + 'px';
+  }));
+}
 /* a node drawn here: the tree's name, lead and size; its frame the copied drawings' frame */
 function bnode(id, o) { return inode(id, Object.assign({}, o, {build: (L, ap, p, P, d) => CKT.build((L2, ap2, inst) => o.draw(L2, ap2, p, P, d), L, ap, {}, null)})); }
 /* ---- a block scene from the tree: its children as boxes, instances in a row, what they are made of below ---- */
@@ -219,7 +235,8 @@ bnode('fma.tree.col', {draw: (L, ap) => {
       KT.wire(L, [[x + w + 40, lv.y + 52], [x + w + 6, lv.y + 52]], 'thin');
       KT.wire(L, [[x + 50, lv.y + h], [x + 50, lv.y + h + 26]]); KT.wire(L, [[x + 120, lv.y + h], [x + 120, lv.y + h + 26]], 'thin');
     }
-    if (lv.pass) { const px = 60 + lv.n * 230; KT.wire(L, [[px + 40, lv.y - 14], [px + 40, lv.y + 100]], 'thin'); KTT(L, px + 52, lv.y + 40, 'a bit passes', 't-sm'); }
+    // (the label over its wire's top: beside it, the first level's ran past the frame; Antigravity's audit, 14 Oct)
+    if (lv.pass) { const px = 60 + lv.n * 230; KT.wire(L, [[px + 40, lv.y - 14], [px + 40, lv.y + 100]], 'thin'); KTT(L, px + 40, lv.y - 22, 'a bit passes', 't-sm', 'middle'); }
     KTT(L, -150, lv.y + 44, ['17 → 9', '9 → 5', '5 → 3', '3 → 2'][li], 't-smb');
   });
   KTT(L, -150, 652, 'each 4:2 takes a carry in from the column on its right and sends one to the column on its left (cout);', 't-sm');

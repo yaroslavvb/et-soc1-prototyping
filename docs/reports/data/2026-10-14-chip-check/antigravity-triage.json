@@ -1,0 +1,436 @@
+{
+ "about": "Discussion topics 3 and 4 on the chip diagram's space (Antigravity on the Intel Mac and on aifoundry1, 14 October 2026), audits of the published version c753607a8c79: each claim checked against the sources at 814d519c and measured in the built page (headless Chrome at 1440x900, 1280x720 and 390x844; Noto Sans, and Liberation Sans or DejaVu Sans where the face matters). Evidence paths point at the session's work folder (~/claude/work/chip-check-1014/codex/topic3-work, topic4-work), not committed.",
+ "topics": [
+  {
+   "topic": "Discussion topic #3 (Antigravity on Intel-mbp): multi-level consistency and stylistic audit of the published version c753607a8c79",
+   "items": [
+    {
+     "id": "3-1",
+     "title": "Desktop frame titles run into their tag pills (KT.frame and ihead)",
+     "decision": "implement",
+     "reason": "Real, but smaller than claimed, and it depends on the system font. The audit's overlaps (-30, -28, -26, -14, -13 units, '+2 tangency') are estimates at 15.6 units a character (its titleRight values come out exactly so), not measurements. Measured in the built page on all 104 scales: with this box's system-ui (Noto Sans), lib.counter's title overlaps its pill by 1.1 units and lib.fifo's clears it by 1.6 (they touch on screen), lib.channel's by 7.4 and vpu.lane.fma's by 12.5; every other title is at least 26.5 units clear (lib.cmpeq is next, then die.metal at 33.4). With Arial's metrics (Liberation Sans, about 5% narrower than Noto Sans; a Mac's or Windows' own system font was not measured here), the closest of the nine is 31 units. With DejaVu Sans, another Linux default, all nine named scales collide (by 17 to 130 units). The memory levels page hosts the same ladder and has the same two collisions. A pill's width is set from its character count, while the title's width comes from the font, so only a measured fit holds everywhere: after a scale is drawn, each frame title is measured against the pills on its line and set smaller only when it would come within 16 units. This is the audit's second proposal (step the title down), measured rather than estimated; its first (shorten the tag) is 3-1.7. The same change also fixes these frames on a phone, where the kit's frames keep their pills on the title's line too.",
+     "evidence": "Measured with headless Chrome at 1440x900 and 1280x720 (identical, since the units do not depend on the window): the title's getBBox against the pill rects in the frame group. Files: /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/headers-1440x900.json, headers-1440x900-LiberationSans.json, headers-1440x900-DejaVuSans.json, allheads-1440x900.json (104 scales, 4 under 20 units, 1 overlapping). Screenshots: /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/hdr-1440x900-lib.counter.png, hdr-1440x900-lib.fifo.png, hdr-1440x900-lib.channel.png; before/after crop /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/counter-fifo-before-after.png. Sources: circuitkit.js:117-133 (tagPill width = round(len*9.4+26); the frame's title at FR.x+22, FR.y+42, its pills from FR.y+18) and ladder-inner.js:151-161 (ihead, the same on a wide screen). With the change served into the real pages: all 104 scales at 1440x900 have 80 titles beside pills, the smallest gap is 17.4 units, exactly 4 titles are set smaller (lib.counter 29.1 px, lib.fifo 29.2, lib.channel 29.6, vpu.lane.fma 29.8), and no page error (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/fit-on-all-1440x900.json). At 390x844, 3 titles are set smaller, no error (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/fit-on-all-390x844.json). In DejaVu Sans the nine named titles fit at 25.5-28.3 px with gaps of 16.4 units or more (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/fit-on-nine-1440x900-DejaVuSans.json, fit-on-1440x900-DejaVuSans-*.png). On the memory levels page: lib.counter 29.1 px with a 17.4 gap, lib.fifo 29.2 with an 18.0 gap (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/ml-on-*.png, ml-off-*.png). The page suites, with all three proposed changes (3-1, 3-2.1, 3-4.3) served from /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/serve-patched: tools/pagemotion/zoom_test.mjs 783 passed, 0 failed (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/zoomtest-patched-desktop.log); ml_ladder_test.mjs --chip 150 passed, 0 failed (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/mltest-patched.log). Both pages also opened straight at ladder scales, on a wide screen and a phone, with no error (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/verify-load.mjs).",
+     "fix": "docs/reports/sources/ladder-core.js (the shared ladder: both pages include it).\n1. Insert just above line 101, `function buildInto(L, P, d) {`:\n/* a frame's title keeps clear of the tag pills on its line (discussion topic 3, 14 Oct 2026: in a wide system font,\n   Noto Sans on Linux, \"A counter: a register and an incrementer\" ran into its \"this chip’s own circuit: not published\"):\n   a title line that would come within 16 units of a pill on its band is set smaller, down to 22 units, and only then\n   narrower (textLength) */\nfunction fitHeads(L) {\n  const run = () => L.querySelectorAll('g.frm, g.ifr').forEach(fr => {\n    const pills = [...fr.querySelectorAll(':scope > g.tg > rect')].map(r => ({x: +r.getAttribute('x'), y: +r.getAttribute('y'), h: +r.getAttribute('height')}));\n    if (!pills.length) return;\n    fr.querySelectorAll(':scope > text.t-big, :scope > text.i-t').forEach(t => {\n      let b; try { b = t.getBBox(); } catch (_) { return; }\n      const band = pills.filter(p => p.x > b.x && p.y < b.y + b.height && p.y + p.h > b.y);\n      if (!b.width || !band.length) return;\n      const room = Math.min(...band.map(p => p.x)) - 16 - b.x;\n      if (b.width <= room) return;\n      const fs = parseFloat(getComputedStyle(t).fontSize) || 30;\n      t.style.fontSize = Math.max(22, Math.floor(fs * room / b.width * 10) / 10) + 'px';\n      if (t.getComputedTextLength() > room) { t.setAttribute('textLength', room.toFixed(1)); t.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }\n    });\n  });\n  if (CKT && CKT.kit && CKT.kit.measured) CKT.kit.measured(L, run); else run();\n}\n2. In buildInto, line 105:\nOld:\n  N0.build(L, ap, prm(el), P, d);\nNew:\n  N0.build(L, ap, prm(el), P, d);\n  fitHeads(L);\nThen rebuild both pages (the chip diagram and the memory levels: each includes ladder-core.js). This exact change was tried in the real built pages, served by topic3-work/pdp.mjs, which answers chip.html and ml.html with the replacement applied (fixes.mjs FITHEADS); see the evidence.",
+     "fix_files": [
+      "docs/reports/sources/ladder-core.js"
+     ]
+    },
+    {
+     "id": "3-1.1",
+     "title": "lib.fifo: 'A queue: a register file and two counters' against the GT pill",
+     "decision": "implement",
+     "reason": "Real in Linux's default font: the title ends 1.6 units short of 'this chip’s own circuit: not published' and touches it on screen. The estimate said 30 units into it. 3-1's fit sets it at 29.2 px with an 18.0-unit gap; it needs no change of its own.",
+     "evidence": "Noto Sans: title -150..458.4, pill from 460 (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/headers-1440x900.json, /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/hdr-1440x900-lib.fifo.png); Liberation Sans: gap 31.0; DejaVu Sans: -84.8. Source ladder-circuits.js:319. Patched: 29.2 px, gap 18.0 (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/fit-on-1440x900-lib.fifo.png).",
+     "fix": "No change of its own: 3-1's fitHeads (ladder-core.js) covers it; apply 3-1 once.",
+     "fix_files": []
+    },
+    {
+     "id": "3-1.2",
+     "title": "lib.channel: 'The channel: the fin under the gate, from the side' against 'electrons: an estimate'",
+     "decision": "implement",
+     "reason": "Crowded but not overlapping: measured 7.4 units clear in Noto Sans (48.6 with Arial's metrics), not -28. The title is drawn by ihead (ladder-inner.js), which 3-1's fit also measures (g.ifr). The fit sets it at 29.6 px, with a 17.5-unit gap.",
+     "evidence": "Noto Sans: title -152..592.6, pill from 600 (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/headers-1440x900.json, /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/hdr-1440x900-lib.channel.png); DejaVu Sans -97.4. Source ladder-inner.js:316 (ihead's title) and :161 (pills). Patched: 29.6 px, gap 17.5 (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/fit-on-1440x900-lib.channel.png).",
+     "fix": "No change of its own: 3-1's fitHeads covers ihead's frames too; apply 3-1 once.",
+     "fix_files": []
+    },
+    {
+     "id": "3-1.3",
+     "title": "die.metal: 'The die in section: transistors, then the wiring' against 'pitch: outside source'",
+     "decision": "reject",
+     "reason": "Measured clear: the title ends 33.4 units before the pill in Noto Sans and 66.2 with Arial's metrics. The claimed -26 comes from the 15.6-units-a-character estimate. Only a font as wide as DejaVu Sans would collide (-65.7), and 3-1's fit then handles it (26.8 px).",
+     "evidence": "Noto Sans: title -150..539.6, pill from 573 (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/headers-1440x900.json, /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/hdr-1440x900-die.metal.png); Liberation Sans 66.2; DejaVu Sans -65.7, and patched 26.8 px with an 18.5 gap. Source ladder-inner.js:418.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-1.4",
+     "title": "lib.counter: 'A counter: a register and an incrementer' against the GT pill",
+     "decision": "implement",
+     "reason": "Real: the only measured overlap, 1.1 units into 'this chip’s own circuit: not published' in Noto Sans (not -14 as estimated); with Arial's metrics it is 32.3 units clear. 3-1's fit sets it at 29.1 px, with a 17.4-unit gap.",
+     "evidence": "Noto Sans: title -150..461.1, pill from 460 (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/headers-1440x900.json, /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/hdr-1440x900-lib.counter.png: the 'r' meets the pill's border); the same on the memory levels page (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/ml-off-lib.counter.png). Source ladder-circuits.js:282. Patched: 29.1 px, gap 17.4 (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/fit-on-1440x900-lib.counter.png, /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/counter-fifo-before-after.png).",
+     "fix": "No change of its own: 3-1's fitHeads covers it; apply 3-1 once.",
+     "fix_files": []
+    },
+    {
+     "id": "3-1.5",
+     "title": "vpu.lane.fma: 'The fused multiply-add (TXFMA): a × b + c, rounded once' against 'stages: textbook'",
+     "decision": "implement",
+     "reason": "Tight but not overlapping: 12.5 units clear in Noto Sans (31.6 with Arial's metrics), not -13. That is inside 3-1's 16-unit margin, so the fit sets it at 29.8 px (gap 18.1), a change no reader will see. In DejaVu Sans it overlapped by 129.5 units and fits at 25.5 px.",
+     "evidence": "Noto Sans: title -150..682.5, pill from 695 (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/headers-1440x900.json, /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/hdr-1440x900-vpu.lane.fma.png). Source chip-diagram.blocks.js:137. Patched: /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/fit-on-1440x900-vpu.lane.fma.png, /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/fit-on-1440x900-DejaVuSans-vpu.lane.fma.png.",
+     "fix": "No change of its own: 3-1's fitHeads covers it; apply 3-1 once.",
+     "fix_files": []
+    },
+    {
+     "id": "3-1.6",
+     "title": "lib.lzd, lib.pll, lib.round, pcie.lane: '+2 unit tangency' with the GT pill",
+     "decision": "reject",
+     "reason": "Measured clear by 34 to 71 units: lib.lzd 54.5, lib.pll 34.5, lib.round 36.1, pcie.lane 70.9 in Noto Sans (76.0, 54.0, 64.9 and 77.8 with Arial's metrics). The titleRight of about 458 claimed for all four is a character-count estimate.",
+     "evidence": "/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/headers-1440x900.json, headers-1440x900-LiberationSans.json; screenshots /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/hdr-1440x900-lib.lzd.png, lib.pll, lib.round, pcie.lane. Sources ladder-circuits.js:183, :335, :530, :441. In Noto Sans 3-1's fit leaves them unchanged (30 px).",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-1.7",
+     "title": "Proposed: shorten GT's second tag to 'chip circuit: not published'",
+     "decision": "owner-decision",
+     "reason": "This changes the ladder's convention: its README (docs/reports/data/2026-10-01-ladder/README.md:50-51) has every textbook scene tagged \"textbook construction\" and \"this chip's own circuit: not published\". 3-1's fit removes the collision without changing the words.",
+     "evidence": "ladder-circuits.js:12 const GT = [['generic', 'textbook construction'], ['unknown', 'this chip’s own circuit: not published']]; the README's rule at lines 50-51.",
+     "fix": "If the owner wants it: the new wording in GT (ladder-circuits.js:12) and in the README's rule.",
+     "fix_files": []
+    },
+    {
+     "id": "3-2.1",
+     "title": "Phone: 29th Street's 'sea level' starts at the view's right edge and is never seen",
+     "decision": "implement",
+     "reason": "Confirmed. On a phone the label starts at x = 890 (start-anchored at X0 + W + 10), which is where the phone's view (opv, x 130-890) ends. At 390x844 it lies at 374-419 CSS px against the drawing's right edge at 374, wholly outside, and the screenshot shows the sea-level line unlabelled. The audit's fix (end-anchored at X0 + W, 10 units above the line) puts it above the line's east end, inside the ground's shade, with the halo the plot's other labels have. The wide screen keeps today's label. Tried in the real page: the label is inside the view and touches no other text at 360, 390 and 430 px wide, on both pages.",
+     "evidence": "Before: /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/phone-390x844-st29.png and phone-390x844.json ('sea level' l 374, r 419.2; the drawing's right edge at 374). Source ladder-outer.js:512 (and opv at :28). After, with the change served into the page: at 390x844 'sea level' spans 324.1-369.3 px against the right edge at 374 and meets no text (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/sea-on-390x844.png, sea-on-390x844-crop.png); at 360x780 298.3-339.7 against 344; at 430x932 358.5-408.8 against 414; 1440x900 and 1280x720 unchanged (the desktop branch). On the memory levels page's ladder, the same scene on a 390 px phone: before 374-419.2 px against its right edge at 374, after 324.1-369.3 px, meeting no text (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/verify-sea-ml.mjs; /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/sea-ml-off-390x844.png, sea-ml-on-390x844.png). The page suites, with all three proposed changes served from /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/serve-patched: zoom_test.mjs 783 passed, 0 failed; ml_ladder_test.mjs --chip 150 passed, 0 failed (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/zoomtest-patched-desktop.log, mltest-patched.log).",
+     "fix": "docs/reports/sources/ladder-outer.js:512 (the st29 scene; both pages include ladder-outer.js).\nOld:\n  T(L, X0 + W + 10, Y0 + 6, 'sea level', 'o-s');\nNew:\n  // (a phone's view ends at x = 890, where the label started: there it sits above the line's east end, in the ground's\n  // shade; discussion topic 3, 14 Oct 2026)\n  if (PH) T(L, X0 + W, Y0 - 10, 'sea level', 'o-s ohalo', 'end'); else T(L, X0 + W + 10, Y0 + 6, 'sea level', 'o-s');\nThen rebuild both pages. The wide screen keeps today's label exactly.",
+     "fix_files": [
+      "docs/reports/sources/ladder-outer.js"
+     ]
+    },
+    {
+     "id": "3-2.2",
+     "title": "Phone: the package's section heading is drawn with T, not owrap, and crowds the bottom row",
+     "decision": "reject",
+     "reason": "Measured, it fits and nothing crowds. On a 390 px phone the heading 'in section, heights ×5 (at most 3.95 mm; layer heights generic)' ends at 848.9 of the view's 890 units (354.6 of 374 CSS px) in Noto Sans, itself a wide face; only a face about 6% wider, such as DejaVu Sans, would reach the edge. The scale bar ('10 mm', ending at 102.9 px) and the 'drawing to scale' pill (from 250.1 px) share the bottom row 147 px apart. Only a desktop font as wide as DejaVu Sans overruns the heading, by 12.5 px. The proposed owrap would make it worse: it sets its second line 1.15 lines below the first, onto the lid drawn 12 units under the heading.",
+     "evidence": "/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/phone-390x844-package.png, phone-390x844.json (heading in units 150-848.9; '10 mm' 236-314.6; pill rect 250.1-369.3 CSS px); /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/out/phone-390x844-DejaVuSans.json (heading to 386.5 px). Sources ladder-outer.js:809 (the heading at sy - 12, the lid at sy), :50-58 (owrap, T2 at 1.15) and :60-70 (otitle's phone pill at y 690).",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-3",
+     "title": "Unprotected +k parameter parsing: a 'NaN' title on five scales",
+     "decision": "reject",
+     "reason": "No reader can reach a NaN. Every address goes through atPath, which refuses a path unless each scale has its seat in the one above (ladder-core.js:1339-1340, also in the audited build), and a scale keyed by a non-number has none. Measured: shire:abc, shire:, shire:1e1, shire:0x1f, shire:-1, shire:99, shire:1.5, shire.neigh:x, l1d.block:x, vpu.lane:x, vpu.lane:, pcie.lane:x, pcie.lane:99 and minion:20.x.3, each by ?at= and #at= at load and by #at= set later. Every one is refused with 'no such scale', the page is left as it would be without it, and no NaN appears anywhere. shire:5, shire.neigh:1, pcie.lane:3, vpu.lane:2 and l1d.block:1 open their scales. The panels' buttons and the flows only ever build numeric keys. The proposed n0(+k) would make things worse: served into the page, #at=die/shire:0/shire.neigh:x then opens 'Neighbourhood 0' and keeps 'shire.neigh%3Ax' in the address, because that scale's seat is looked up by the parsed number. The other four stay refused.",
+     "evidence": "/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/parse.mjs and parse2.mjs runs (warnings captured, e.g. '#at=die/shire:abc: no such scale; the page opens as it would without it'); /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/verify-n0.mjs (the n0 variant: neigh:x accepted as Neighbourhood 0). Sources: ladder-core.js:50 (prm), :844 (pathFrom), :1331-1342 (atPath); chip-diagram.script.js:899 (shire), chip-diagram.blocks.js:102 (shire.neigh, seat from ap.nbx[p.nb]), :110 (vpu.lane), ladder-circuits.js:440 (pcie.lane), ladder-mem.js:78 (l1d.block). n0 at ladder-mem.js:57 is for the missing parts of dotted keys (bsp, dk). The audited build has the same seat check at snapshot-c753607a8c79.html:3447-3457.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-3.1",
+     "title": "shire: parse k => ({sid: +k}) ('Shire NaN')",
+     "decision": "reject",
+     "reason": "Unreachable: die/shire:abc (and shire:, shire:1e1, shire:0x1f, shire:-1, shire:99, shire:1.5) is refused by atPath's seat check with a warning, while die/shire:5 opens 'Shire 5'. With n0, shire:abc is still refused.",
+     "evidence": "/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/parse.mjs, parse2.mjs, verify-n0.mjs output; chip-diagram.script.js:899.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-3.2",
+     "title": "l1d.block: parse k => ({block: +k}) ('Block NaN')",
+     "decision": "reject",
+     "reason": "Unreachable: die/shire:0/minion:0.0.0/l1d/l1d.block:x is refused (no such scale), while l1d.block:1 opens 'LRAM block 1'.",
+     "evidence": "/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/parse2.mjs output; ladder-mem.js:78.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-3.3",
+     "title": "shire.neigh: parse k => ({nb: +k}) ('Neighborhood NaN')",
+     "decision": "reject",
+     "reason": "Unreachable: die/shire:0/shire.neigh:x (and shire.neigh:9) is refused, while shire.neigh:1 opens 'Neighbourhood 1'. This is the scale where n0 would do harm: neigh:x would open Neighbourhood 0 and keep the bad key in the address.",
+     "evidence": "/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/parse2.mjs and verify-n0.mjs output; chip-diagram.blocks.js:102 (seat: ap.nbx[p.nb]).",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-3.4",
+     "title": "vpu.lane: parse k => ({lane: +k}) ('Lane NaN')",
+     "decision": "reject",
+     "reason": "Unreachable: vpu.lane:x and vpu.lane: (empty) are refused, while vpu.lane:2 opens 'Lane 2 of the vector unit'.",
+     "evidence": "/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/parse.mjs, parse2.mjs output; chip-diagram.blocks.js:110.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-3.5",
+     "title": "pcie.lane: parse k => ({lane: +k}) ('PCIe lane NaN')",
+     "decision": "reject",
+     "reason": "Unreachable: die/pcie/pcie.phy/pcie.lane:x (and :16, :99) is refused, while pcie.lane:3 opens 'Lane 3 of the PCIe PHY'.",
+     "evidence": "/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/parse.mjs, parse2.mjs output; ladder-circuits.js:440.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-4.1",
+     "title": "The 3D companion's '← Chip diagram' link loses the reader's branch",
+     "decision": "owner-decision",
+     "reason": "Not a broken link. The chip page opens the 3D page in a new tab (target=_blank), so the reader's own tab keeps its branch, and each of the 3D page's four back links (#at=die.metal, die.metal/lib.finfet, .../lib.fin, .../lib.channel) opens its scale (measured). Returning to the exact branch the reader came from is a cross-page link feature, like Codex's I08 (tour links that keep their context), which was left to the owner.",
+     "evidence": "chip-3d/app.js:51 ($('backLink').href = ...#at=' + s.anchor); chip-3d/content.js anchors die.metal, die.metal/lib.finfet, die.metal/lib.finfet/lib.fin, die.metal/lib.finfet/lib.fin/lib.channel; chip-diagram.script.js:1040 (target=\"_blank\"). /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/link3d.mjs: each anchor lands on die.metal, lib.finfet, lib.fin or lib.channel, with its panel.",
+     "fix": "It would take the chip page's link carrying the reader's path (e.g. #finfet&from=<its #at= path>), and app.js parsing the scene name out of the hash and setting backLink from 'from' when present, else from s.anchor.",
+     "fix_files": []
+    },
+    {
+     "id": "3-4.2",
+     "title": "No 3D link on lib.wire ('Copper wiring, in section')",
+     "decision": "owner-decision",
+     "reason": "A new link, not a defect. Q109 (02-requests.md:119) asked for 3D views of the metal, FinFET, fin and channel scales, and those four are linked. lib.wire, the wiring stack's zoom, would suit the metal scene, whose section figure is a copper connection (copper, liner, dielectric, a via), but adding it is the owner's call. Its back link would still return to die.metal.",
+     "evidence": "chip-diagram.script.js:1037 view3d = {'die.metal', 'lib.finfet', 'lib.fin', 'lib.channel'}; lib.wire's own panel has no link (link3d.mjs: own null); chip-3d/content.js:22 (the metal scene's section labels).",
+     "fix": "It would take one entry, 'lib.wire': 'metal', in view3d (chip-diagram.script.js:1037).",
+     "fix_files": []
+    },
+    {
+     "id": "3-4.3",
+     "title": "The 3D link follows the scale shown, not the panel, so a part's panel can point at another view",
+     "decision": "implement",
+     "reason": "Real where a part's panel is another 3D scale's own text. On die.metal, the transistors part opens the panel 'FinFET transistor', whose 'Explore this in 3D' goes to the metal scene. On lib.fin, the channel part's panel 'Channel (the silicon under the gate)' goes to #fin. The same 'FinFET transistor' panel on lib.xor and lib.inverter has no link at all. The audit's rule (follow the selected part's kid) would mis-target other panels: lib.fin's 'A fin' part (kid lib.channel:fin0, panel 'The fin, in section') would go to #channel, and lib.finfet's 'One n-type transistor' (kid lib.fin) to #fin. The safe rule keys on the panel's own title: a panel whose title is one of the four scales' names links that scale's view, and any other panel keeps the view of the scale shown. Tried in the page: die.metal's FinFET part now links #finfet, lib.fin's channel panels #channel, and the 'FinFET transistor' panels on lib.xor and lib.inverter #finfet. Every other panel on the nine scales tried is unchanged, with no error. The audit's other example (lib.sram6t's 'One transistor') does not exist: its parts have their own titles and keep no link. Whether further panels should carry the link (lib.finfet's 'The fins' to #fin, say) is the owner's call.",
+     "evidence": "/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/link3d.mjs (today) and link3d-patched.mjs (with the change) output: for each scale, each part clicked, its panel's title and link. chip-diagram.script.js:1034-1042 (panel()); ladder-panel.js:70, 79 (select, then showPart); ladder-outer.js:850 (a scale's own panel title is esc(nameOf(el))). The page suites, with all three proposed changes served from /home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/serve-patched: zoom_test.mjs 783 passed, 0 failed; ml_ladder_test.mjs --chip 150 passed, 0 failed (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/zoomtest-patched-desktop.log, mltest-patched.log).",
+     "fix": "docs/reports/sources/chip-diagram.script.js:1038, in panel() (the chip page only).\nOld:\n  const current3d = Z.path.length && view3d[Z.path[Z.path.length - 1].id];\nNew:\n  // (a panel that is one of the four scales' own text, as a part's panel on another scale can be, links that scale's\n  // view: the FinFET's on the die's section, the channel's on the fin; discussion topic 3, 14 Oct 2026)\n  const pt = /<p class=\"pn-title\">([\\s\\S]*?)<\\/p>/.exec(html), named = pt && Object.keys(view3d).find(id => esc(nameOf({id})) === pt[1]);\n  const current3d = named ? view3d[named] : Z.path.length && view3d[Z.path[Z.path.length - 1].id];\nThen rebuild the chip page.",
+     "fix_files": [
+      "docs/reports/sources/chip-diagram.script.js"
+     ]
+    },
+    {
+     "id": "3-4.4",
+     "title": "Align the 3D companion's palette with the 2D tokens and show TSMC N7's numbers in 3D",
+     "decision": "owner-decision",
+     "reason": "A style change across two pages and a change of the 3D page's stated scope. The 3D page says its views use illustrative geometry and generic FinFET physics, and Q109 kept it free of process data; N7 numbers would claim a scale its models are not drawn to.",
+     "evidence": "chip-diagram.body.html, section physical-scales-3d ('The four views use illustrative geometry and generic FinFET physics'); 02-requests.md:119 (Q109); chip-3d/content.js colors and models.js materials.",
+     "fix": "It would take re-colouring chip-3d/content.js's colors and models.js's materials to --c1..--c5 and, if wanted, adding the N7 numbers to the 3D page as facts with their sources.",
+     "fix_files": []
+    },
+    {
+     "id": "3-5.1",
+     "title": "COMPS.inferred still lists 'the routes' turning order' as inferred",
+     "decision": "covered",
+     "reason": "Fixed today by Codex's T05 (implemented in 814d519c): the die's 'What the drawing infers' panel now says what E56 timed and leaves the rest inferred.",
+     "evidence": "chip-diagram.script.js:1147 now reads: 'Still inferred: the LPDDR4X pairing (dashed), the die's east-west handedness, the routes of all packets but the two kinds ${src('timed on 29 September', 'L104')} (a load's reply and a store's data, between scratchpads), the inside of a shire, and the sizes.'; codex-triage.json T05.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-5.2",
+     "title": "COMPS.mesh says routes were 'measured on two cards'",
+     "decision": "covered",
+     "reason": "Fixed today by the verified finding routing-order-measured-on-two-cards (with Codex's T05).",
+     "evidence": "chip-diagram.script.js:1090 now reads: ${src('measured on three cards on 29 September', 'L104')}; findings.json routing-order-measured-on-two-cards.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "3-5.3",
+     "title": "The space's description: 'six data flows ... a 12-step tour'",
+     "decision": "covered",
+     "reason": "Fixed today by Codex's R01: the deploy passed chip-diagram.meta.json's description (deploy.sh --description), and the stored description now reads 'eleven data flows ... a 17-step tour'.",
+     "evidence": "spacesheep list --json (/home/yaroslavvb/claude/work/chip-check-1014/codex/topic3-work/spaces.json): et-soc1-chip-diagram, updated 2026-10-15T02:18Z, description '... and eleven data flows played stage by stage ... and a 17-step tour for the stage; ...'; chip-diagram.meta.json; work/chip-check-1014/deploy.sh.",
+     "fix": "",
+     "fix_files": []
+    }
+   ]
+  },
+  {
+   "topic": "#4 In-depth visual, stylistic & cross-level consistency audit + mockups (Antigravity · aifoundry1)",
+   "items": [
+    {
+     "id": "4-A",
+     "title": "KT.frame's line under the title and the scenes' notes run past the frame and off the screen",
+     "decision": "implement",
+     "reason": "Real, and worst on short screens and phones, where the type is 21 units, not 17: the frame's subtitle (one unwrapped line at x -150, y -6) and the notes at the frame's left edge (cnote and KTT(L, -150, y)) are measured by nothing (fitTexts sees only a part's own labels). With this box's system face (Noto Sans; Liberation Sans, with Arial's widths, is 5-7% narrower) nothing overflows at 1440x900, but at 1280x720 seven subtitles and fifteen notes in fifteen scenes run past the frame, ten of them cut at the stage's edge (lib.diffamp's subtitle runs 278 units past the frame, 152 of them off the stage); on a 390 px phone the same lines, fourteen cut. With a wider face (DejaVu Sans; the audit's box used one wider still) six subtitles and three notes already pass the frame at 1440x900. The fix keeps the page's way (fitTexts sets a spilling label smaller): after a ladder scene is built, its frame line and its left-edge notes are set smaller until they end at the frame's inner edge (the tags' 18-unit inset), never below 15 units; nothing moves. Checked on a patched copy of the built page: no such line past the frame at 1440x900, 1280x720 or 390x844, with Noto or DejaVu; the smallest set is 16.9 units at 1280x720 (lib.diffamp's subtitle) and 15.7 with DejaVu; at 1440x900 with Noto only lib.diffamp's subtitle changes (17 to 16.9). bnode is shared by both pages, so the memory levels' copies of these scenes get the same fit.",
+     "evidence": "topic4-work/measure.mjs over all 104 scales (one row per scale in m-*.json). Current build: 1440x900 Noto 0 lines past the frame; 1440x900 DejaVu 6 subtitles + 3 notes (9 scenes), 2 cut at the edge (lib.diffamp 76 units past the frame, 8 off the stage; lib.logic 70 and 2); 1280x720 Noto 7 subtitles (lib.rom, lib.wire, lib.buck, lib.strap, lib.powerfet, lib.diffamp, pcie.lane) + 15 notes (lib.booth x2, lib.shifter x2, lib.lzd x2, lib.round, lib.icg, lib.regfile, lib.rom x2, lib.logic, lib.buck, lib.ecc, lib.powerfet), 10 cut at the edge, worst lib.diffamp, 278 units past the frame; 1280x720 DejaVu 8 + 28 in 20 scenes, 20 cut; 390x844 7 + 15, 14 cut. Patched copy (topic4-work/mkpatched.py patch A, serve/chip.html): 0 in all five runs (p-*.json). Screenshots: shots/lib.diffamp-1280x720.png (subtitle cut at '... not thei') against pshots/lib.diffamp-1280x720.png. On the patched pair, zoom_test.mjs 783/783 and ml_ladder_test.mjs --chip 150/150 (details in 4-D); a full before/after screenshot of all 104 scales at 1440x900 changes only lib.diffamp's subtitle among the frame lines (all-diff2). Seen in passing, not the audit's claim: other single labels inside these scenes also pass the frame (fma.tree.col 'a bit passes' at x 1032 by 33 units even at 1440x900; vpu.lane.fma 'textbook stages; the blocks are the RTL's modules' 35, lib.booth 'row: 0, ±X or ±2X' 19, mesh '+ RID, RRESP, RLAST; ...' 44, lib.cmp42 3, at 1280x720); they are placed labels, not frame lines, and are left to a separate fix.",
+     "fix": "docs/reports/sources/chip-diagram.blocks.js:42. Replace the line\n  function bnode(id, o) { return inode(id, Object.assign({}, o, {build: (L, ap, p, P, d) => CKT.build((L2, ap2, inst) => o.draw(L2, ap2, p, P, d), L, ap, {}, null)})); }\nwith\n/* a scene's line under its frame's title and its notes at the frame's left edge are single lines: where the type in force\n   (a short screen's or a phone's, 21 units, not 17) or a wide face carries one past the frame's inner edge, it is set\n   smaller to fit, never below 15 units (Antigravity's audit of 14 Oct: at 1280 x 720 seven of these lines and fifteen\n   notes ran past the frame, ten of them off the screen) */\nfunction fitLines(L) {\n  const FR = CKT.FR, x0 = FR.x + 22, xr = FR.x + FR.w - 18;\n  KT.measured(L, () => L.querySelectorAll(':scope > g.frm > text.t-sm, :scope > text.t-sm').forEach(t => {\n    if (+t.getAttribute('x') !== x0 || (t.getAttribute('text-anchor') || 'start') !== 'start') return;\n    let b; try { b = t.getBBox(); } catch (_) { return; }\n    if (!b.width || b.x + b.width <= xr) return;\n    const fs = parseFloat(getComputedStyle(t).fontSize) || 17, nfs = Math.max(Math.min(fs, 15), Math.floor(fs * (xr - b.x) / b.width * 10) / 10);\n    if (nfs < fs) t.style.fontSize = nfs + 'px';\n  }));\n}\nfunction bnode(id, o) { return inode(id, Object.assign({}, o, {build: (L, ap, p, P, d) => { CKT.build((L2, ap2, inst) => o.draw(L2, ap2, p, P, d), L, ap, {}, null); fitLines(L); }})); }\n(CKT.FR and KT.measured exist on both pages: circuitkit.js exports FR and kit.measured, memory-levels.ladder.js gives FR: MFR and kit: ML.kit. No data-fit mark, so a later fitTexts does not undo it.) Then rebuild both pages (tools/buildchain.sh).",
+     "fix_files": [
+      "docs/reports/sources/chip-diagram.blocks.js"
+     ]
+    },
+    {
+     "id": "4-B1a",
+     "title": "fitTexts(L) is a no-op on the desktop: its floor equals the desktop font sizes",
+     "decision": "owner-decision",
+     "reason": "By design, and documented: 'a label that would spill is set smaller, never below the 1920 size of its class or 15 units' (memory-levels.script.js:279-280, copied into circuitkit.js). fitTexts exists for the short-screen and phone sizes, which are larger than the desktop's; at the desktop sizes the labels were laid out to fit. Lowering the floor to 13.5 (the audit's fix) would let any label of either page's circuit drawings shrink below its designed size, a convention change for both pages. What it would take: change the floor in memory-levels.script.js fitTexts, rerun make_circuitkit.py, and recheck both pages' drawings at every size. The overflows the audit lists under this item are decided in 4-B1b.",
+     "evidence": "memory-levels.script.js:281-302 fitTexts (floor = Math.min(fs, Math.max(15, FS_BASE[class] || 17))); FS_BASE at :327; the comment at :279-280. At 1440x900 no label of a circuit drawing runs past its part's box by more than fitTexts' 5-unit pad (topic4-work/boxfit.mjs, bf-1440.log: lib.channel's caption 'an electron's energy', set above its plot, by 5 units; the rest are labels set outside their parts on purpose: photo captions, the outer scenes' room names, the die's link label).",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-B1b",
+     "title": "Labels that still spill their boxes at short-screen and phone sizes (shire uc, shire.bank arb, lib.xbar arb, pcie.lane ffe, memshire strip, shire.panel trim)",
+     "decision": "implement",
+     "reason": "One of the six is real with the common faces: the shire's UC block, whose second line 'credits, atomics' runs past the box at 1280x720 and on a phone (8.8 units past fitTexts' pad; 'atomics' crosses the border in the screenshot). It is not a fitTexts case at all: the shire is the chip's own drawing, which fitTexts never runs on, and its label is 't-sm t-fit' (19 units there). Setting it as three short lines, a little closer together (T2's line pitch 1.1 em, from Y + 188), fits in the box's free height at every size with a clear margin. The other five fit with Noto Sans at 1280x720 (fitTexts already shrinks them where needed); with DejaVu Sans only pcie.lane's 'this one and the one after' (0.7 units) and shire.panel's 'model reset trims' (shrunk to 20, still 19.7 past) remain, and the second is better handled by the owner's 4-B1a choice. Seen in passing, same drawing, not in the audit: the shire's 'Neighbourhood N' labels touch their boxes' edges at 1280x720 (1.2 units past the border).",
+     "evidence": "topic4-work/boxfit.mjs (a part's own labels against its box, fitTexts' 5-unit pad): bf-1280.log shire [uc] 'barriers,credits, atomics' 19px past by 8.8u (the T2's two lines); none of shire.bank arb, lib.xbar arb, pcie.lane ffe, memshire strip, shire.panel trim listed; bf-1280-dv.log (DejaVu) uc 20.2u, pcie.lane ffe 0.7u, shire.panel trim 19.7u. Screenshots: before shots/shire-1280x720.png ('atomics' across the border); after, on a patched copy (serve/chip2.html), pshots2/cmp-uc.png (390x844 and 1280x720) and pshots2/crop-uc-1440.png: three lines inside the box with room above and below. Geometry: the UC box is Y+134..Y+242 (title baseline Y+164); lines at Y+188, +20.9, +20.9 at 19 units end at Y+229.8 (12 units clear), at 17 units at Y+225.4; 'atomics' has no descender. (The suites in 4-D ran with the first form of this change, three lines at Y + 190 at the default pitch; this tighter form changes only the label's own position.)",
+     "fix": "docs/reports/sources/chip-diagram.script.js:396. Replace\n  T2(gu, X + 544, Y + 190, ['barriers,', 'credits, atomics'], 't-sm t-fit');\nwith\n  T2(gu, X + 544, Y + 188, ['barriers,', 'credits,', 'atomics'], 't-sm t-fit', 'start', null, 1.1);   // (three lines: at 19 units 'credits, atomics' ran past the box; Antigravity's audit, 14 Oct)\nThen rebuild the chip page.",
+     "fix_files": [
+      "docs/reports/sources/chip-diagram.script.js"
+     ]
+    },
+    {
+     "id": "4-B2-minion",
+     "title": "minion at 1280x720 and on a phone: the vector unit's left and right 3-line summaries collide",
+     "decision": "reject",
+     "reason": "The vector unit's box has one summary, left-aligned (chip-diagram.script.js:563, a three-line T2 at X + 380); there is no right-aligned summary to collide with, in the current page or in the audited one (snapshot line 2165, the same T2). Measured, no two labels of the minion touch at any of the three sizes.",
+     "evidence": "topic4-work/m-1280.json and m-390.json: minion, 76 labels, 0 ink overlaps; near.py (pairs closer than 1 unit) lists none for the minion. Screenshots: topic4-work/shots/minion-1280x720.png and minion-390x844.png (the box reads 'FMA · 2× int8 MA · integer · transcendental / peak 16 FLOP per cycle, fp32, / the same for vector and tensor', nothing beside it).",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-B2-l1d.row",
+     "title": "l1d.row at 21px: the 'row 96'..'row 111' labels (18 apart) and the folded-row labels (17 apart) overlap",
+     "decision": "reject",
+     "reason": "The pitches are 21 units for the row labels (drawReadTree's DY = 21, memory-levels.script.js:2320, copied to circuitkit.js:624) and 20 for the folded 'rows / 64–95' pairs, not 18 and 17; at the short screen's 21-unit type the lines are close but do not touch: 5 units between one label's ink and the next.",
+     "evidence": "m-1280.json (1280x720, t-sm 21 px): row 96 ink 247.5-257.3 px, row 97 260.3-270.1, ... (3 px = 5 units apart, k = 0.6116 px/unit); 'rows' 364.6-371.9 over '112–127' 374.4-384.2. Crop: topic4-work/shots/crop-l1drow-1280.png.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-B2-shire.panel",
+     "title": "shire.panel at 21px: band labels overlap their row ranges, and the '?' overlaps 'inside: if m4b4 in'",
+     "decision": "implement",
+     "reason": "Half real. The band labels ('scratchpad' over 'rows 0–2,559', 'L2', 'L3') are 21 units apart and do not overlap at 1280x720 (near.py: their ink boxes within 1 unit, no glyphs meeting; clean in the screenshot). The '?' of the unknown-geometry box does cover the end of the box's first line on short screens and phones: boxShape puts the '?' at the box's top right on the first line's baseline (x + w - 12, y + 26), and at 21 units 'inside: if m4b4 in' reaches it (fitTexts does not count the '?'). Rewrapping the box's first four lines so the first ends early fixes it with no other change: six lines as before, each within the box at 21 units.",
+     "evidence": "m-1280.json: shire.panel pair '?' x 'inside: if m4b4 in' 4.1 x 9.8 px (1280x720), 1.7 x 4.1 px (390x844); none at 1440x900. Crop shots/crop-panel-1280.png ('in?' with the '?' over the 'n'); after the change pshots/cmp-panel.png (all lines inside the dashed box; the first line ends 17.2 units short of the '?' at 1280x720 and on the phone, 2.6 with DejaVu Sans, where it overlapped it by 6.7 before); p-1280.json and p-390.json: no pair. Source memory-levels.script.js:2105 (copied to circuitkit.js:481); the same box is on the memory levels page's L2 panel.",
+     "fix": "docs/reports/sources/memory-levels.script.js:2105. Replace the array\n  ['inside: if m4b4 in', 'the name means a', '4:1 column mux and', '4 banks, then', '≈1,024 wordlines', '× 576 bitline pairs']\nwith\n  ['inside: if m4b4', 'in the name means', 'a 4:1 column mux', 'and 4 banks, then', '≈1,024 wordlines', '× 576 bitline pairs']\n(the rest of the line unchanged). Then run python3 docs/reports/data/2026-09-27-chip-diagram/research/make_circuitkit.py and its --check, and rebuild both pages.",
+     "fix_files": [
+      "docs/reports/sources/memory-levels.script.js",
+      "docs/reports/sources/circuitkit.js (generated)"
+     ]
+    },
+    {
+     "id": "4-B2-latch-sram6t",
+     "title": "lib.latch and lib.sram6t at 21px: the state box's notes (bitStates) crowd and spill",
+     "decision": "implement",
+     "reason": "Real on short screens and phones: bitStates wraps the box's lines for 17-unit type ((w - 24) / 8.6 characters) and pitches them 21 apart, so at 21 units the lines touch and the longest run past the box's right edge ('about', '(an estimate);' on the latch, 'the' on the 6T cell, 7 to 16 px, 12 to 27 units, past at 1280x720). Setting the rails' line and the wrapped lines smaller together until the longest fits the box (never below 17, fitTexts' floor for t-sm) fixes both with nothing moved: the box, its height and the switch under it stay where they are.",
+     "evidence": "m-1280.json: lib.latch '320-970 electrons (an estimate);' ends at 306.1 px against the box's edge at 289.8; lib.sram6t 'thousand electrons (an estimate); the' at 858.4 against 851.2; near.py: their lines -1 to 0 units apart. Patched copy (mkpatched.py patch B2s): the lines at 18.4 units (latch) and 19.6 (6T cell), ending 7.6 and 7.8 px inside the box (p-1280.json). Crops pshots/cmp-latch.png, pshots/cmp-sram6t.png (before | after). The memory levels page draws the same box on its own latch and cell (memory-levels.hand.js mlStates calls bitStates), checked at 1280x720 (pshots/ml-l1_latch-1280.png).",
+     "fix": "docs/reports/sources/ladder-inner.js, function bitStates: after line 845\n  lines.forEach((t, i) => KTT(g, x, y + 44 + i * 21, t, 't-sm', 'start', onf(o.e)));\ninsert\n  // (the lines are wrapped for 17-unit type; where the type in force is larger, a short screen's or a phone's 21, the\n  // rails' line and these are set smaller together until the longest fits the box, never below 17: Antigravity's audit\n  // of 14 Oct found them running past the box on the latch and the 6T cell at 1280 x 720)\n  const ts = [...g.querySelectorAll(':scope > text.t-sm')];\n  KT.measured(L, () => {\n    const fs = parseFloat(getComputedStyle(ts[0]).fontSize) || 17, wide = Math.max(...ts.map(t => t.getComputedTextLength()));\n    const nfs = Math.max(17, Math.floor(fs * (w - 24) / wide * 10) / 10);\n    if (wide > w - 24 && nfs < fs) ts.forEach(t => { t.style.fontSize = nfs + 'px'; });\n  });\n(before the stateSwitch call, which stays as it is). Then rebuild both pages.",
+     "fix_files": [
+      "docs/reports/sources/ladder-inner.js"
+     ]
+    },
+    {
+     "id": "4-B2-dram.cell-l1d",
+     "title": "dram.cell and l1d at 21px: multi-line notes 19-20 apart overlap",
+     "decision": "reject",
+     "reason": "Tight but not overlapping: at 1280x720 the notes are 20-21 units apart in 21-unit type, so one line's descenders reach the next line's cap height (ink boxes 0 to 1 unit apart) and no glyphs meet; nothing runs out of its place. Opening their leading for the larger type would be a re-layout of the memory levels' drawings, which both pages share. Seen in passing, not the audit's claim: l1d's note reads '39.0 cycles at 768 B (cycles)', the unit twice (memory-levels.script.js:2526 appends ' (cycles)' to l1_knee_out, whose text is already '39.0 cycles at 768 B'); at 1280x720 that line also reaches 5 units past the frame.",
+     "evidence": "near.py on m-1280.json: dram.cell 'the bit is the charge on a capacitor;' over 'it leaks: each row is refreshed' gap 0.0 units, 'about every 32 ms' over '(an all-bank REFRESH every 3.875 µs)' 0.0; l1d 'one block; a 32-byte' over 'vector load all four' -1.0 (descender to cap). Crops at 2x: topic4-work/shots/crop-dramcell-1280.png, crop-l1d-1280.png (all lines legible, none overlapping).",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-C",
+     "title": "lib.mux2: the S and S' gate labels collide in the transmission gates' throat",
+     "decision": "reject",
+     "reason": "They do not collide. The audit quotes code the page does not have: each label is set beside its own lead's end, to its left (anchor 'end' at gate.x - 8), not centred on the lead (ladder-inner.js:480), and that placement was the review of 1 Oct's fix for leads that met (ladder-inner.js:474-475). Measured in every size, the two labels' glyphs are 4 units apart (t-net is 19 units at every screen size, so the geometry does not change on a short screen or a phone). Turning the gates outward (the audit's fix) is the other common way to draw a transmission gate, a style choice, not a repair.",
+     "evidence": "Current build at 1440x900 (topic4-work/measure.mjs, ink boxes from canvas metrics): first gate 'S' x 481-489 px, ink y 281.8-292.3; \"S'\" x 472-489, ink y 295.3-305.8 (3.0 px = 4 units apart); second gate the same, mirrored. No ink overlap at 1280x720 or 390x844 either (m-1280.json, m-390.json: lib.mux2 0 pairs). Crop at 4x: topic4-work/shots/crop-mux2-1440.png (S beside the PMOS lead's end, S' beside the NMOS lead's end, with a clear gap).",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-D",
+     "title": "kbTexts: labels on tinted shapes get a knockout halo in the page's colour",
+     "decision": "implement",
+     "reason": "Real, and against the page's own rule ('every label knocks out what runs under it ... in the colour of what it sits on, so it reads cleanly; where nothing runs under it the knockout is invisible', memory-levels.script.js:303-305): kbTexts takes a colour only from opaque shapes (fill-opacity 0.9 or more) and the four gate-like classes, so a label sitting on a tinted region (an ipt part's 10-55% fill, a set's box, a pipeline stage) keeps the page's colour, or its part's paler box colour, and shows a light ring (a dark one in dark mode) around every glyph: 'gate' on the channel's gate, 'a phosphorus atom', 'in bonds (full)' on the crystal's 55% green, the L1's set numbers, the power FET's 'electrons, down; current, up' and 'source metal', the fin's 'silicon wafer', 'oxide', '30 nm', the DRAM bank's 'sense amplifiers' and 'row dec.', the DRAM channel's timing bars ('row open (it stays open: open page)', '32 B'), the shire bank's stage names. The fix composes what is under a label, bottom first: an opaque shape's colour, then each tint (5-90%) the label sits on wholly (its two ends and its centre inside the shape, by isPointInFill), mixed over that, or over the page. Two guards keep what worked: a label across a tint's edge or over small marks (the metal stack's wires under 'thick top layers ...') keeps the colour below and knocks the marks out, as now; and over a rail band, whose fill is itself a translucent colour (BAND_FILL), labels keep the band's knockout, as now (composing over it made a darker ring on the memory shire). The audit's own formula (the tint over the page for any tint) was tried first and rejected: it ringed the memory shire's settings rows and the metal stack's labels.",
+     "evidence": "Before/after screenshots of all 104 scales at 1440x900 with every topic-4 patch applied (topic4-work/all-before, all-after2, diffall.py, strips in all-diff2/): 16 scales change, 12 of them by this fix only (dram, dram.bank, l1d, lib.channel, lib.dramcell, lib.fin, lib.powerfet, lib.round, lib.si, lib.wire, p.nucleon, shire.bank), each a label losing its ring; the other four are 4-A's lib.diffamp, 4-B1b's shire, 4-B2's shire.panel and 4-F5's localgroup. Crops: pshots/cmp-channel.png (lib.channel, 'gate' and 'a phosphorus atom' clean, 'the atoms' across the channel's edge keeps its page knockout), pshots/diff-lib.powerfet.png, diff-lib.fin.png, diff-l1d.png, all-diff2/combo2.png (the DRAM bars, 'in bonds (full)'); dark mode pshots/combo-dark.png (black rings gone). Unchanged where they should be: memshire's settings rows (labels over the DDR band), die.metal ('thick top layers ...' over the wires), p.atom, p.nucleus, p.dopant. kbdebug.mjs: lib.si 'in bonds (full)' sits on an opaque surface box and a 55% --c3 rect, knockout before var(--surface), after color-mix(in srgb, var(--c3) 55%, var(--surface)); shire.bank 'tap' before none (page), after color-mix(in srgb, var(--c3) 14%, var(--page)). The page's own suites on the patched pair (all of 4-A, 4-B1b, 4-B2, 4-D and 4-F5 applied to copies of both built pages, served with ladder-img): tools/pagemotion/zoom_test.mjs 783 passed, 0 failed (topic4-work/zoomtest-final.log), ml_ladder_test.mjs --chip 150 passed, 0 failed (mltest-final-par.log), the same counts as the committed build; zoom_static.py T9 sizes pass (chip script 779 KB of 900, memory levels 913 KB of 1,050).",
+     "fix": "docs/reports/sources/memory-levels.script.js, kbTexts (307-326); the kit copy circuitkit.js is regenerated from it.\n(1) Replace lines 311-314\n    const c = e.style.fill && !/url/.test(e.style.fill) && (e.style.fillOpacity === '' || +e.style.fillOpacity >= 0.9) ? e.style.fill : KB_CLS[[...e.classList].find(k => KB_CLS[k])];\n    if (!c || e.classList.contains('zbd')) return;\n    let b; try { b = e.getBBox(); } catch (_) { return; }\n    if (b.width && b.height) sh.push({e, c, x: b.x, y: b.y, w: b.width, h: b.height});\nwith\n    // (a tinted shape, 5-90% opaque, knocks out in its tint over what is under it: Antigravity's audit of 14 Oct found\n    // labels on the channel's, the crystal's and the sets' tints ringed in the page's colour)\n    const f = e.style.fill && !/url/.test(e.style.fill) ? e.style.fill : '', fo = e.style.fillOpacity === '' ? 1 : +e.style.fillOpacity;\n    const k = KB_CLS[[...e.classList].find(q => KB_CLS[q])], c = f && fo >= 0.9 ? f : k || (f && fo >= 0.05 ? f : null), a = c === f && fo < 0.9 ? fo : 1;\n    if (!c || e.classList.contains('zbd')) return;\n    let b; try { b = e.getBBox(); } catch (_) { return; }\n    if (b.width && b.height) sh.push({e, c, a, x: b.x, y: b.y, w: b.width, h: b.height});\n(2) Replace lines 322-324\n    let top = null;\n    for (const s0 of sh) if (cx >= s0.x && cx <= s0.x + s0.w && cy >= s0.y && cy <= s0.y + s0.h && (s0.e.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING)) top = s0;\n    if (top) t.style.setProperty('--kb', top.c);\nwith\n    // the shapes under it, bottom first: an opaque one's colour, then each tint it sits wholly on, mixed over that (or over\n    // the page); a label across a tint's edge, or over small marks such as wires, knocks them out in the colour below\n    let kb = null;\n    for (const s0 of sh) if (cx >= s0.x && cx <= s0.x + s0.w && cy >= s0.y && cy <= s0.y + s0.h && (s0.e.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING)) {\n      if (s0.a === 1) kb = s0.c;\n      else if (!/transparent/.test(kb || '') && [b.x + 1, cx, b.x + b.width - 1].every(px => (s0.e.isPointInFill ? s0.e.isPointInFill(new DOMPoint(px, cy)) : px >= s0.x && px <= s0.x + s0.w)))\n        kb = `color-mix(in srgb, ${s0.c} ${Math.round(100 * s0.a)}%, ${kb || 'var(--page)'})`;\n    }\n    if (kb) t.style.setProperty('--kb', kb);\n(b inside the loop is the label's own getBBox, already declared there.) Then run python3 docs/reports/data/2026-09-27-chip-diagram/research/make_circuitkit.py and its --check, and rebuild both pages.",
+     "fix_files": [
+      "docs/reports/sources/memory-levels.script.js",
+      "docs/reports/sources/circuitkit.js (generated)"
+     ]
+    },
+    {
+     "id": "4-E1",
+     "title": "Block scenes (core, vpu.lane, router, neighbourhood ...) are flat text-card grids, not schematics",
+     "decision": "owner-decision",
+     "reason": "A redesign: blockScene() draws 'a logical drawing: what the parts are and what they do; no floorplan of the inside is published' on purpose (chip-diagram.blocks.js:44-95), and the audit's directed-bus schematics (its Mockup 1) would invent port topology the documents do not give for most of these blocks. What it would take: a hand-drawn scene per block (12 scales), each bus and port sourced, replacing blockScene for them.",
+     "evidence": "chip-diagram.blocks.js:44 blockScene; :94 the scene's own note 'a logical drawing: what the parts are and what they do; no floorplan of the inside is published'; the 12 scales at :97-115.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-E2",
+     "title": "Block-scene blurbs cut after three lines with '…'",
+     "decision": "owner-decision",
+     "reason": "By design since the review of 1 Oct: 'a box shows at most three lines, the rest is in its panel' (chip-diagram.blocks.js:62-64), and a click on the box opens its full text. Measured today: 22 of the 35 boxes in the 12 block scenes end in '…' (the audit counted 20 of 34 on the older version). What it would take: taller boxes or fewer columns (the card has 560-650 units for all rows), smaller type, or the schematic redesign of 4-E1.",
+     "evidence": "topic4-work/blocks.mjs at 1440x900 on the current build: 'boxes 35, blurbs ending in an ellipsis 22' (e.g. shire.meshstop.router.alloc '... (x first, then y, for a…', core.fe '... a small buffer per thread…'); chip-diagram.blocks.js:75-76 cap = at most 3 lines, the last replaced with '…'.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-E3",
+     "title": "blockScene silently drops a title's second line and 'made of' pills past x = 1070",
+     "decision": "reject",
+     "reason": "Neither drop happens on any block scene today. The two guards (chip-diagram.blocks.js:80, a title cut to its first wrapped line when neither the name nor the short name fits; :89, a pill that would pass the card's width is skipped) are latent: every one of the 35 boxes shows its part's full name, and every 'made of' pill listed is drawn. They would only matter if the data grew (a longer name without a short one, an eighth pill on the core or the vector lane).",
+     "evidence": "topic4-work/blocks.mjs at 1440x900 on the current build, all 12 block scenes: no box title differs from its part's name (instances such as 'lane 0' and 'M0' are titled by design); pills drawn/listed: shire.meshstop 2/2, router 3/3, uc 2/2, xbar 2/2, neigh 4/4, core 7/7, vpu 2/2, vpu.lane 7/7, tensor 3/3, pcie 1/1, pcie.phy 0/0, io 0/0.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-F1",
+     "title": "The chip-tile legend (.pn-foot.lg) shows on the circuit and atomic scales",
+     "decision": "reject",
+     "reason": "The legend is already hidden everywhere off the chip's own three levels, in the audited version too: ladder-core.js:1261 sets the stage's class offchip when Z.level < 0 or > 2, and ladder.css:79 hides .pn-foot under it. It shows only on the die, a shire and a minion, whose tiles it describes. A per-scene legend for the circuit palettes would be a new feature (Codex's R03 was left to the owner as the same layout question).",
+     "evidence": "Source: ladder-core.js:1261 `$('stage').classList.toggle('offchip', Z.level < 0 || Z.level > 2)`; ladder.css:79 `#stage.offchip .pn-foot{display:none}`; the same two lines are in snapshot-c753607a8c79.html (308 and 3391). Screenshots at 1280x720 of the current page: topic4-work/shots/minion-1280x720.png shows the legend under the panel, while lib.latch-1280x720.png, lib.sram6t-1280x720.png and dram.cell-1280x720.png show none.",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-F2",
+     "title": "The tour omits flow B (the broadcast, K inside) and its bar calls its flows 'the ten flows'",
+     "decision": "owner-decision",
+     "reason": "Deliberate, and documented in the code: the broadcast (added 28 September, after the tour) has no tour slide, and pressing B during the tour ends the tour and plays the flow on its own (chip-diagram.script.js:24 'B the broadcast (no tour slide: it ends the tour)', :3316). The tooltip 'Tour steps 7 to 16: the ten flows' is accurate: steps 7 to 16 are exactly flows 1 to 0. What it would take: append {flow: 'K'} after {flow: 'J'} in STEPS (chip-diagram.script.js:2937) and drop the special case at :3316; the tour becomes 18 steps (the welcome line counts STEPS.length itself; the Summary moves to step 18 and its #tour= link with it; the tests and the record that count 17 slides change). Or, to keep the tour as it is, only reword the tooltip to 'flows 1 to 0 (the broadcast, B, plays on its own)'.",
+     "evidence": "chip-diagram.script.js:2937 STEPS lists {flow: 'A'} to {flow: 'J'}; :3116 the chip's title `Tour steps ${j + 1} to ${e + 1}: the ten flows`; :24 and :3316 the broadcast's exclusion by design; the welcome caption (:3090) says 'pick one of eleven flows, or press Tour to step through it all in 17 steps'. The snapshot has the same lines (9520, 9670).",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-F3",
+     "title": "The state switch (G) sits at a different place and width on each scene",
+     "decision": "owner-decision",
+     "reason": "A layout convention, not a defect: each scene puts its switch under the drawing it switches (ihead's lay.sw on the FinFET, fin, channel and DRAM cell; (-150, 545) under the inverter; under the state box on the latch and the 6T cell, ladder-inner.js:846), and the switch also works from the G key and the panel's button, which do not move. What it would take: one fixed dock (for example (700, 615), 368 wide) for every stateSwitch call and a check that it covers nothing on each of the seven scenes at desktop, short-screen and phone sizes.",
+     "evidence": "ladder-core.js:1361 stateSwitch(L, x, y, st, o); callers ladder-inner.js:247, 302, 357 (lay.sw, width SWW() = 330 or 470 on a phone), :722 (the DRAM cell), :834 ((-150, 545) the inverter), :846 (bitStates: below the state box).",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-F4",
+     "title": "No on-canvas scale bar below the package (st29, rack, die, shire, minion and the inner scales)",
+     "decision": "owner-decision",
+     "reason": "A new feature, not a defect: every scale already states its size in the bar above the drawing (the readout, for example '≈ 500 µm · 10⁻⁴ m' on a minion and '≈ 240 nm · 10⁻⁷ m' on the 6T cell), and the outer scenes draw their bars by hand, each with a length chosen for its picture (ladder-outer.js:198-819, 17 calls, down to the package's 10 mm). What it would take: a bar per chip-level and inner scene from its scale's size, placed where it covers nothing, on some 85 scenes at three screen sizes.",
+     "evidence": "ladder-outer.js:72 sbar() and its 17 callers (universe to package) are the only scale bars; no chip-level or inner scene calls it. The readout is in every screenshot taken today (topic4-work/shots/*-1280x720.png, top bar right of the breadcrumb).",
+     "fix": "",
+     "fix_files": []
+    },
+    {
+     "id": "4-F5",
+     "title": "Outer ladder on the desktop: the Local Group's subtitle and the photo credits of the Milky Way, Earth and the card pass x = 1210",
+     "decision": "implement",
+     "reason": "Partly real, and only with a wide face. With this box's system face (Noto Sans) every outer line ends well inside the stage (the Local Group's subtitle at 1161 units, the credits at 1031-1129). With DejaVu Sans the Local Group's subtitle, 119 characters on one line (otitle wraps only on a phone), runs to 1236 and is cut at the stage's edge (1210); the credits still fit (Earth's ends at 1202, the card's at 1206), so the audit's 1297 and 1333 come from a wider face still, and are not reproduced. Saying 'mostly faint dwarfs' for 'most of them faint dwarfs' takes six characters off the one long subtitle, enough for DejaVu (it then ends at 1176), with the same meaning and the same fact. Seen in passing: with DejaVu the universe's caption 'the whole sky as we see it (WMAP)' (x 900) passes the edge by 3 units.",
+     "evidence": "topic4-work/measure.mjs at 1440x900: m-1440.json (Noto) localgroup o-s ends 1161u, milkyway o-cr 1031u, earth o-cr 1128u, card o-cr 1129u; m-1440-dv.json (DejaVu) localgroup 1236u (cut by 26u), milkyway 1104u, earth 1202u, card 1206u, universe 'the whole sky ...' cut by 3u; patched copy p-1440-dv.json: localgroup 1176u, nothing else changed. Source: ladder-outer.js:232 (otitle) and :50-58 (owrap: one line unless PH); ocredit at :80.",
+     "fix": "docs/reports/sources/ladder-outer.js:232. In the Local Group's otitle, replace\n  `our galaxy's neighbourhood: more than 130 known galaxies, most of them faint dwarfs, over nearly ${on('lg_size')}`\nwith\n  `our galaxy's neighbourhood: more than 130 known galaxies, mostly faint dwarfs, over nearly ${on('lg_size')}`\n(the fact ids unchanged). Then rebuild both pages (the outer ladder is shared).",
+     "fix_files": [
+      "docs/reports/sources/ladder-outer.js"
+     ]
+    }
+   ]
+  }
+ ],
+ "found_while_checking": [
+  {
+   "id": "x-1",
+   "title": "The L1 drawing's note said its unit twice: '39.0 cycles at 768 B (cycles)'",
+   "decision": "implement",
+   "fix": "memory-levels.script.js: the note is nt('l1_knee_out') alone (its text has the unit); circuitkit.js regenerated"
+  },
+  {
+   "id": "x-2",
+   "title": "fma.tree.col: 'a bit passes' beside the first level's wire crossed the frame at every size (25 px at 1440x900)",
+   "decision": "implement",
+   "fix": "chip-diagram.blocks.js: each level's label centred over its wire's top"
+  },
+  {
+   "id": "x-3",
+   "title": "One-line labels past the frame on short screens and phones: vpu.lane.fma 'textbook stages; the blocks are the RTL's modules', lib.booth 'row: 0, ±X or ±2X', lib.cmp42 'cin comes from the 4:2 of the column on the right;'",
+   "decision": "implement",
+   "fix": "chip-diagram.blocks.js fitLines: any one-line, start-anchored label that starts inside the frame, not only the frame's left-edge lines"
+  },
+  {
+   "id": "x-4",
+   "title": "mesh: '+ RID, RRESP, RLAST; a header of unknown width' past the frame on a phone",
+   "decision": "implement",
+   "fix": "memory-levels.script.js: '+ RID, RRESP, RLAST; header width unknown'; circuitkit.js regenerated"
+  },
+  {
+   "id": "x-5",
+   "title": "shire.subbank at 1280x720: 'the example line (0x80_1234_5340) is in bank 1, sub-bank 3' ran into the 'dc: data complete' box",
+   "decision": "implement",
+   "fix": "memory-levels.script.js: the note on two lines ('the example line (…)', 'is in bank …, sub-bank …'); circuitkit.js regenerated"
+  }
+ ]
+}

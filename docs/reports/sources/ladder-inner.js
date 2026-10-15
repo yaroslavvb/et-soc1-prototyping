@@ -843,5 +843,14 @@ function bitStates(L, o) {
   KTT(SA, x, y, 'holding 0: Q low, Q̄ high', 't-smb'); KTT(SB, x, y, 'holding 1: Q high, Q̄ low', 't-smb');
   KTT(g, x, y + 22, `low ${on('v_0')}, high the rail, ${on(o.rail)}`, 't-sm', 'start', `${onf(o.rail)} el.rails`);
   lines.forEach((t, i) => KTT(g, x, y + 44 + i * 21, t, 't-sm', 'start', onf(o.e)));
+  // (the lines are wrapped for 17-unit type; where the type in force is larger, a short screen's or a phone's 21, the
+  // rails' line and these are set smaller together until the longest fits the box, never below 17: Antigravity's audit
+  // of 14 Oct found them running past the box on the latch and the 6T cell at 1280 x 720)
+  const ts = [...g.querySelectorAll(':scope > text.t-sm')];
+  KT.measured(L, () => {
+    const fs = parseFloat(getComputedStyle(ts[0]).fontSize) || 17, wide = Math.max(...ts.map(t => t.getComputedTextLength()));
+    const nfs = Math.max(17, Math.floor(fs * (w - 24) / wide * 10) / 10);
+    if (wide > w - 24 && nfs < fs) ts.forEach(t => { t.style.fontSize = nfs + 'px'; });
+  });
   stateSwitch(L, x - 12, y - 28 + h + 8, {lab: 'The stored bit', btn: ['Holding 0 · store a 1 (G)', 'Holding 1 · store a 0 (G)'], say: ['The cell holds a 0.', 'The cell holds a 1.']}, {w: w});
 }

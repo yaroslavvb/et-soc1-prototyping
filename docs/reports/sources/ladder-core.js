@@ -98,11 +98,34 @@ function built(P, d) {
   if (!L._built) buildInto(L, P, d);
   return L;
 }
+/* a frame's title keeps clear of the tag pills on its line (Antigravity's audit, 14 Oct 2026: in a wide system face,
+   Noto Sans on Linux, "A counter: a register and an incrementer" ran into its "this chip’s own circuit: not published";
+   a pill's width is set from its characters, a title's from the face): a title that would come within 16 units of a pill
+   on its band is set smaller, down to 22 units, and only then narrower (textLength) */
+function fitHeads(L) {
+  const run = () => L.querySelectorAll('g.frm, g.ifr').forEach(fr => {
+    const pills = [...fr.querySelectorAll(':scope > g.tg > rect')].map(r => ({x: +r.getAttribute('x'), y: +r.getAttribute('y'), h: +r.getAttribute('height')}));
+    if (!pills.length) return;
+    fr.querySelectorAll(':scope > text.t-big, :scope > text.i-t').forEach(t => {
+      let b; try { b = t.getBBox(); } catch (_) { return; }
+      const band = pills.filter(p => p.x > b.x && p.y < b.y + b.height && p.y + p.h > b.y);
+      if (!b.width || !band.length) return;
+      const room = Math.min(...band.map(p => p.x)) - 16 - b.x;
+      if (b.width <= room || room < 100) return;
+      const fs = parseFloat(getComputedStyle(t).fontSize) || 30;
+      t.style.fontSize = Math.max(22, Math.floor(fs * room / b.width * 10) / 10) + 'px';
+      if (t.getComputedTextLength() > room) { t.setAttribute('textLength', room.toFixed(1)); t.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }
+    });
+  });
+  if (CKT && CKT.kit && CKT.kit.measured) CKT.kit.measured(L, run); else run();
+}
 function buildInto(L, P, d) {
   const el = P[d], N0 = NODES[el.id];
   L.textContent = ''; ctxClear(L); L._sky = false;
   const ap = L._ap = {zs: {}};
   N0.build(L, ap, prm(el), P, d);
+  fitHeads(L);
+  if (L.classList.contains('ckt') && typeof fitLines === 'function') fitLines(L);   // (chip-diagram.blocks.js)
   if (typeof chipSeats === 'function') chipSeats(L, ap, el);
   if (L.classList.contains('ckt')) CKT.hitAreas(L);
   if (TOUCH && !N0.out) minHits(L, P, d);

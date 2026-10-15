@@ -393,7 +393,7 @@ function buildShire(L, ap, sid) {
   const gu = comp(L, 'uc', {}, 'UC block: barriers, credits and atomics: details');
   boxShape(gu, X + 530, Y + 134, W - 550, 108, 'var(--c7)', {fo: 0.1});
   T(gu, X + 544, Y + 164, 'UC block', 't-labb');
-  T2(gu, X + 544, Y + 190, ['barriers,', 'credits, atomics'], 't-sm t-fit');
+  T2(gu, X + 544, Y + 188, ['barriers,', 'credits,', 'atomics'], 't-sm t-fit', 'start', null, 1.1);   // (three lines: at a short screen's 19 units "credits, atomics" ran past the box; Antigravity's audit, 14 Oct)
   P.uc = {x: X + 530 + (W - 550) / 2, y: Y + 188};
   // the 4 MB in mode M0: scratchpad, L3 slice, L2
   // (the flows' colour, --c2, is kept for what moves: the L2 is --c5, which no part of a shire uses)
@@ -1035,7 +1035,10 @@ function panel(html) {
   // Q109 (14 October 2026): the four physical scales have an orbitable 3D companion.
   // Keep this hook in the chip page, so the shared ladder's other hosts keep their own panels.
   const view3d = {'die.metal': 'metal', 'lib.finfet': 'finfet', 'lib.fin': 'fin', 'lib.channel': 'channel'};
-  const current3d = Z.path.length && view3d[Z.path[Z.path.length - 1].id];
+  // A panel that is one of the four scales' own text, as a part's panel on another scale can be, links that scale's view:
+  // the FinFET's on the die's section, the channel's on the fin (Antigravity's audit, 14 Oct 2026).
+  const pt = /<p class="pn-title">([\s\S]*?)<\/p>/.exec(html), named = pt && Object.keys(view3d).find(id => esc(nameOf({id})) === pt[1]);
+  const current3d = named ? view3d[named] : Z.path.length && view3d[Z.path[Z.path.length - 1].id];
   if (current3d) html = html.replace(/(<p class="pn-title">[\s\S]*?<\/p>)/,
     '$1' + `<p class="pn-3d" data-ss-id="physical-scale-3d-link"><a class="st-btn pri" href="https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d#${current3d}" target="_blank" rel="noopener">Explore this in 3D ↗</a></p>`);
   hideTip(); const b = $('pn-body'); b.innerHTML = ARW(html); b.scrollTop = 0;

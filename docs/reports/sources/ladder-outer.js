@@ -229,7 +229,7 @@ onode('laniakea', {kid: 'localgroup', build: (L, ap) => {
 const LGK = 120;   // units per million light-years
 onode('localgroup', {kid: 'milkyway', img: ['andromeda.webp'], build: (L, ap) => {
   obd(L, true);
-  otitle(L, 'The Local Group', 'drawn to scale, positions schematic', `our galaxy's neighbourhood: more than 130 known galaxies, most of them faint dwarfs, over nearly ${on('lg_size')}`, `${onf('lg_size')} out.localgroup.5`);
+  otitle(L, 'The Local Group', 'drawn to scale, positions schematic', `our galaxy's neighbourhood: more than 130 known galaxies, mostly faint dwarfs, over nearly ${on('lg_size')}`, `${onf('lg_size')} out.localgroup.5`);
   const mw = {x: 280, y: 400}, m31 = {x: mw.x + 2.5 * LGK, y: mw.y}, m33 = {x: mw.x + 2.92 * LGK, y: mw.y - 0.68 * LGK};
   S(E('line', {x1: mw.x, y1: mw.y, x2: m31.x, y2: m31.y, 'pointer-events': 'none'}, L), {stroke: '#7a86a6', strokeWidth: 1.5, strokeDasharray: '6 6'});
   T(L, (mw.x + m31.x) / 2, mw.y + 34, on('lg_m31'), 'o-s', 'middle', onf('lg_m31'));
@@ -509,7 +509,9 @@ onode('st29', {kid: 'studio45', build: (L, ap) => {
   E('path', {class: 'st29', d: line}, g);
   E('rect', {class: 'ring', x: X0 - 8, y: ym(150) - 8, width: W + 16, height: Y0 - ym(150) + 16, rx: 10}, g);
   E('line', {class: 'sea', x1: X0, y1: Y0, x2: X0 + W, y2: Y0}, L);
-  T(L, X0 + W + 10, Y0 + 6, 'sea level', 'o-s');
+  // (a phone's view ends at x = 890, where this label started, so it was never seen: there it sits above the line's east
+  // end, in the ground's shade; Antigravity's audit, 14 Oct 2026)
+  if (PH) T(L, X0 + W, Y0 - 10, 'sea level', 'o-s ohalo', 'end'); else T(L, X0 + W + 10, Y0 + 6, 'sea level', 'o-s');
   T(g, xm(0) + 6, ym(pr[0][1]) - 12, on('st_top'), 'o-s ohalo', 'start', onf('st_top'));
   T(g, xm(len) - 4, ym(pr[pr.length - 1][1]) - 14, on('st_bot'), 'o-s ohalo', 'end', onf('st_bot'));
   // the hill's summit, for comparison: a level line
