@@ -88,8 +88,8 @@ The build's vocabulary (`research/build_inside.py`), with the label the pages pr
 | Transcendental unit | ROM-based | outside | WikiChip: "The trans unit is ROM-based, favoring lower power over silicon." |
 | Power target | 10 mW/minion at 1 GHz, 0.425 V, 0.04 nF | spec | HC33 slide 5 |
 | Average density | 42.1 MTr/mm² (46% of 91.2) | derived | 24e9 / 570 |
-| Transistors per minion | at most ~15 million | inferred | (24e9 - 7.0e9 shire-cache bitcells) / 1,088 |
-| Minion rail | 0.517 V at 600 MHz (0.568 / 700, 0.618 / 800) | measured | docs/findings/16-dvfs-and-leakage.md:20 |
+| Transistors per minion | at most ~15.6 million | inferred | (24e9 - 7.0e9 shire-cache bitcells) / 1,088 |
+| Minion rail | 0.517 V at 600 MHz (0.568 / 700, 0.618 / 800) | measured | docs/findings/16-dvfs-and-leakage.md:39 |
 | SRAM rail | 0.703-0.707 V | measured | chip fact volt.sram |
 | Mesh rail | 0.483-0.486 V | measured | chip fact mesh.voltage |
 | Leakage at 80 °C | 20-29 W (fit 23.3 W x exp((T-80)/36)) | measured | 16-dvfs-and-leakage.md; why-low-power.md |
@@ -194,7 +194,7 @@ like:
   holes); a Qualcomm FinFET patent gives boron "less than 1E20 ... greater than 2E20 at/cm3".
 - How dopants work (Hu): a group-V atom "bring[s] five valence electrons ... the fifth electron may escape to become a
   mobile electron"; boron, with three, leaves a hole; "the donor ionization energy (about 50 meV)" is about 2 kT, so
-  nearly every dopant is ionised.
+  nearly every dopant atom alone in a silicon site is ionised.
 
 **The crystal and the atom**:
 
@@ -278,7 +278,7 @@ Four Vt options, about 200 mV apart end to end, trade speed for leakage. N7's ab
 **The fin and the gate stack** (`n7.fin-*`, `n7.weff`, `gate.*`). A silicon slab 6 nm wide and 52 nm tall, 30 nm from
 the next; the gate drapes over it, so one fin is about 110 nm of channel width in a 30 nm footprint. Between metal and
 silicon: a thin SiO2 interlayer and HfO2 (k ~24), together electrically like less than 1 nm of SiO2. The gate metal's
-work function (TiAl about 4.1 eV for NMOS, TiN about 4.85 eV for PMOS) sets the threshold. Source and drain are grown
+work function (TiAl and TiN: about 4.1 and 4.85 eV in planar gates; a FinFET, its channel undoped, about 4.4 and 4.85 eV) sets the threshold. Source and drain are grown
 crystal, Si:P with 3% phosphorus for NMOS and boron-doped SiGe for PMOS, contacted by cobalt.
 
 **The channel and the crystal** (`dope.count-channel`, `si.*`, `el.kt`). About 31 atoms across, 86 along, 383 tall:

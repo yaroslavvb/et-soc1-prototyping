@@ -13,7 +13,7 @@
   },
   {
    "id": "tb.prefix",
-   "statement": "A parallel-prefix adder computes for each bit a generate g = a·b and a propagate p = a XOR b, combines them in a tree of carry cells (G = Gi + Pi·Gj, P = Pi·Pj) of log2 n levels, and forms each sum bit as p XOR the carry into it; a ripple-carry adder instead passes the carry through all n bits one after another.",
+   "statement": "A parallel-prefix adder computes for each bit a generate g = a·b and a propagate p = a XOR b, combines them in a tree of carry cells (G = Gi + Pi·Gj, P = Pi·Pj) of as few as log2 n levels, and forms each sum bit as p XOR the carry into it; a ripple-carry adder instead passes the carry through all n bits one after another.",
    "kind": "generic",
    "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (addition: tree adders); I. Koren, Computer Arithmetic Algorithms, 2nd ed. (A K Peters, 2002), ch. 5"
   },
@@ -31,7 +31,7 @@
   },
   {
    "id": "tb.booth",
-   "statement": "Radix-4 (modified) Booth recoding looks at overlapping triples of multiplier bits (bits 2i+1, 2i and 2i-1) and makes each partial product 0, +X, +2X, -X or -2X, halving the number of partial products to add; each bit of a partial product is a multiplexer choosing x(j) or x(j-1), followed by an XOR with the sign.",
+   "statement": "Radix-4 (modified) Booth recoding looks at overlapping triples of multiplier bits (bits 2i+1, 2i and 2i-1) and makes each partial product 0, +X, +2X, -X or -2X, halving the number of partial products to add; each bit of a partial product is a multiplexer choosing x(j), x(j-1) or 0, followed by an XOR with the sign.",
    "kind": "generic",
    "source": "A. D. Booth, \"A Signed Binary Multiplication Technique\", Quarterly Journal of Mechanics and Applied Mathematics 4(2), 1951; O. L. MacSorley, \"High-Speed Arithmetic in Binary Computers\", Proceedings of the IRE 49(1), 1961; I. Koren, Computer Arithmetic Algorithms, 2nd ed. (A K Peters, 2002), ch. 6; N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (multiplication)"
   },
@@ -67,9 +67,9 @@
   },
   {
    "id": "tb.icg",
-   "statement": "An integrated clock gate latches the enable while the clock is high and ANDs it with the clock: a block whose enable is low gets no clock edges, so its flip-flops and clock wires do not switch.",
+   "statement": "An integrated clock gate passes the enable through a latch that is transparent while the clock is low and holds it while the clock is high, and ANDs the held enable with the clock: a block whose enable is low gets no clock edges, so its flip-flops and clock wires do not switch.",
    "kind": "generic",
-   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 10 (sequential circuits) and ch. 5 (power: clock gating)"
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 10 (sequential circuits) and ch. 5 (power: clock gating); external/core-et/rtl/libs/rf_latches/et_clk_gate.v:22-29 (core-et's clock gate, Erbium branch: the enable is loaded while clk is low; enclk = clk && en_1p)"
   },
   {
    "id": "tb.stdcell",
@@ -91,9 +91,9 @@
   },
   {
    "id": "tb.fifo",
-   "statement": "A first-in, first-out queue is a small memory addressed by a write pointer and a read pointer, two counters; comparing the pointers tells a full queue from an empty one.",
+   "statement": "A first-in, first-out queue is a small memory addressed by a write pointer and a read pointer, two counters. Equal pointers mean empty or full; one way to tell them apart is a pointer one bit wider than the address: equal in every bit, the queue is empty; equal but for that extra bit, it is full.",
    "kind": "generic",
-   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 12 (serial-access memories: queues)"
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 12 (serial-access memories: queues); C. E. Cummings, \"Simulation and Synthesis Techniques for Asynchronous FIFO Design\", SNUG San Jose 2002, §2.2 (p. 3): the extra pointer bit"
   },
   {
    "id": "tb.pll",
@@ -219,7 +219,7 @@
   },
   {
    "id": "tb.powerfet",
-   "statement": "A power MOSFET is thousands of small cells in parallel: in a trench-gate device, current flows vertically, from the source on top, down a channel along each trench wall through the p-type body, across a lightly doped drift layer to the heavily doped substrate, the drain, underneath; its on-resistance is milliohms and it blocks tens of volts.",
+   "statement": "A power MOSFET is thousands of small cells in parallel: in a trench-gate device conducting with its drain positive, electrons flow vertically, from the source on top, down a channel along each trench wall through the p-type body, across a lightly doped drift layer to the heavily doped substrate, the drain, underneath, and the current flows up; its on-resistance is milliohms and it blocks tens of volts.",
    "kind": "generic",
    "source": "B. J. Baliga, Fundamentals of Power Semiconductor Devices, 2nd ed. (Springer, 2019), ch. 6 (power MOSFETs)"
   },
@@ -239,7 +239,7 @@
    "id": "card.dip",
    "statement": "The card has DIP switches to set all its boot options.",
    "kind": "spec",
-   "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 1 (features) and p. 3 (DIP switches)"
+   "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 3 (features) and pp. 7-10 (DIP Switches)"
   },
   {
    "id": "et.bootpins",
@@ -277,9 +277,9 @@
   },
   {
    "id": "host.intel14",
-   "statement": "Intel's 14 nm process, the host processors', is a FinFET process too: fins 42 nm apart, gates 70 nm apart and the finest wires 52 nm apart (TSMC N7: 30, 57 and 40 nm).",
+   "statement": "Intel's 14 nm process, the host processors', is a FinFET process too: as first made (2014), fins 42 nm apart, gates 70 nm apart and the finest wires 52 nm apart (TSMC N7: 30, 57 and 40 nm); its 14nm++ revision (2017), used for Intel's 14 nm desktop processors from Coffee Lake on, spaces the gates 84 nm apart.",
    "kind": "outside",
-   "source": "S. Natarajan et al., \"A 14nm Logic Technology Featuring 2nd-Generation FinFET, Air-Gapped Interconnects, Self-Aligned Double Patterning and a 0.0588 µm² SRAM cell size\", IEDM 2014; out.host.5 (the hosts' 14 nm)",
+   "source": "S. Natarajan et al., \"A 14nm Logic Technology Featuring 2nd-Generation FinFET, Air-Gapped Interconnects, Self-Aligned Double Patterning and a 0.0588 µm² SRAM cell size\", IEDM 2014; out.host.5 (the hosts' 14 nm); Intel, Technology and Manufacturing Day (March 2017): 14nm++ relaxes the gate pitch from 70 to 84 nm (as reported by The Motley Fool, \"Intel Corporation Outs 14-Nanometer++ Technology\", 2017, and AnandTech's Coffee Lake review, Oct 2017)",
    "note": "https://people.eecs.berkeley.edu/~pister/140sp16/resources/Intel14nmIEDM2014.pdf"
   },
   {
@@ -321,14 +321,14 @@
    "statement": "Decoder: about 3 µm across, the width of the view that frames it (an order of magnitude).",
    "kind": "inferred",
    "source": "the ladder's textbook constructions (research/build_circuits.py)",
-   "note": "a 7-to-128 row decoder spans the 128 rows of an array, a few µm; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+   "note": "the 3-to-8 decoder drawn spans 8 rows, about 1-2 µm; a 7-to-128 row decoder spans the 128 rows of an array, about 15 µm at the 114 nm row pitch of N7's dense SRAM cell (size.lib.sram6t); an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
   },
   {
    "id": "size.lib.regfile",
    "statement": "Register file: about 40 µm across, the width of the view that frames it (an order of magnitude).",
    "kind": "inferred",
    "source": "the ladder's textbook constructions (research/build_circuits.py)",
-   "note": "like the core's integer register file: 4,096 latch bits with their ports; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+   "note": "like the core's integer register file: 3,968 latch bits with their ports; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
   },
   {
    "id": "size.lib.logic",
@@ -579,7 +579,7 @@
   "lib.rom": {
    "name": "A read-only memory (ROM)",
    "short": "ROM",
-   "blurb": "A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit's transcendental functions read their coefficients from small tables like this.",
+   "blurb": "A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit's transcendental functions read their coefficients from small fixed tables too, but the Minion's VPU specification describes them as look-up tables in the RTL (\"ROMs (LUT latch-based)\", \"ROMs (RTL LUTs)\"), not an array like this one.",
    "m": 2e-05,
    "kind": "inferred",
    "f": "size.lib.rom",
@@ -653,7 +653,7 @@
   "lib.powerfet": {
    "name": "A power transistor, in section",
    "short": "Power transistor",
-   "blurb": "A switch for tens of amps: thousands of small transistor cells side by side, each passing current straight down through the silicon from its source on top to the drain underneath.",
+   "blurb": "A switch for tens of amps: thousands of small transistor cells side by side; in each, electrons flow straight down through the silicon from the source on top to the drain underneath, so the current flows up.",
    "m": 5e-06,
    "kind": "inferred",
    "f": "size.lib.powerfet",

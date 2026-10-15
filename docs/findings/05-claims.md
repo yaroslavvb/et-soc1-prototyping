@@ -307,7 +307,7 @@ cards' values here are 23 September's, and E45 and E46 re-measured them: "Versio
 
 | Claim | Value | Kind | Source | Verify at |
 |---|---|---|---|---|
-| Instructions that execute in U-mode | 161; 13 trap (divide, square root, sine, reciprocal square root, 64-bit float conversion, the cycle CSR) | M | E27 | `workloads/enercat/enercat_modes.json`; the trap list in `docs/energy-manual/03a-every-instruction.md` |
+| Instructions that execute in U-mode | 161; 13 trap (divide, square root, sine, reciprocal square root, conversion between fp32 and 64-bit integers (fcvt.l.s, fcvt.s.l), the cycle CSR) | M | E27 | `workloads/enercat/enercat_modes.json`; the trap list in `docs/energy-manual/03a-every-instruction.md` |
 | Pass-to-pass standard error | median 1.9%, 90th percentile 6.1% (aifoundry2) | M | E27 | `DATAK`, `se` of every entry |
 | Cross-card ratio over 386 configurations | median **0.950**, 10–90% 0.906–0.987 | M | E27 | `DATAK`, `cross_card` |
 | Cheapest and dearest instruction | `fence` 4.6 pJ; `amoaddg.d` 1,486 pJ (aifoundry2; 4.5 and 1,393 pJ pooled over both cards). Superseded by E46 (three cards, 3 passes each, random data): cheapest `fence` and `auipc`, **4.5 [3.9–5.5] and 5.3 [5.0–5.9] pJ**; dearest the global atomics `amoaddg.w` and `.d`, **1,313 [1,240–1,431] and 1,450 [1,313–1,591] pJ** (about 1,380 for the two, the energy manual's figure); `fence` against `nop` is within noise (the Version 3 row) | M | E27, E46 | `DATAK`, `combined`; three cards: `docs/reports/data/2026-09-23-energy-manual/manual.json`, `catalogue.combined["fence/random/h2"]` (and `auipc`, `amoaddg.w`, `amoaddg.d`), `mean`, `lo`, `hi` |

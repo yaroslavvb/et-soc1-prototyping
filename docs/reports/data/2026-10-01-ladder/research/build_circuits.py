@@ -29,7 +29,7 @@ F('tb.gates', 'A static CMOS gate pairs a pull-up network of PMOS transistors wi
   'transistors: a NOR has its PMOS in series and its NMOS in parallel, a NAND the reverse, and a compound gate such as '
   'AND-OR-INVERT combines series and parallel transistors in one stage.', 'generic', f'{WH}, ch. 1 (CMOS logic) and ch. 9 (combinational circuits)')
 F('tb.prefix', 'A parallel-prefix adder computes for each bit a generate g = a·b and a propagate p = a XOR b, combines them in '
-  'a tree of carry cells (G = Gi + Pi·Gj, P = Pi·Pj) of log2 n levels, and forms each sum bit as p XOR the carry into it; '
+  'a tree of carry cells (G = Gi + Pi·Gj, P = Pi·Pj) of as few as log2 n levels, and forms each sum bit as p XOR the carry into it; '
   'a ripple-carry adder instead passes the carry through all n bits one after another.', 'generic', f'{WH}, ch. 11 (addition: tree adders); {KO}, ch. 5')
 F('tb.kogge', 'In the Kogge-Stone prefix tree, level k combines every position with the one 2^k places below it, so that n '
   'bits need log2 n levels, each cell driving at most two others.', 'generic',
@@ -40,7 +40,7 @@ F('tb.shifter', 'A logarithmic (barrel) shifter shifts n bits by any amount in l
   'generic', f'{WH}, ch. 11 (shifters)')
 F('tb.booth', 'Radix-4 (modified) Booth recoding looks at overlapping triples of multiplier bits (bits 2i+1, 2i and 2i-1) and '
   'makes each partial product 0, +X, +2X, -X or -2X, halving the number of partial products to add; each bit of a partial '
-  'product is a multiplexer choosing x(j) or x(j-1), followed by an XOR with the sign.', 'generic',
+  'product is a multiplexer choosing x(j), x(j-1) or 0, followed by an XOR with the sign.', 'generic',
   'A. D. Booth, "A Signed Binary Multiplication Technique", Quarterly Journal of Mechanics and Applied Mathematics 4(2), 1951; '
   f'O. L. MacSorley, "High-Speed Arithmetic in Binary Computers", Proceedings of the IRE 49(1), 1961; {KO}, ch. 6; {WH}, ch. 11 (multiplication)')
 F('tb.booth.table', 'The radix-4 Booth table: multiplier bits 000 give 0, 001 and 010 give +X, 011 gives +2X, 100 gives -2X, '
@@ -59,8 +59,11 @@ F('tb.decoder', 'An n-to-2^n decoder has one AND gate per output, fed by each ad
 F('tb.regfile', 'A register file keeps each bit in a latch or a multi-ported memory cell; a write decodes its address to enable '
   'one row (through a clock gate or a write wordline), and each read port picks one row per bit through a multiplexer tree '
   'or a read wordline and bitline.', 'generic', f'{WH}, ch. 12 (multiported register files)')
-F('tb.icg', 'An integrated clock gate latches the enable while the clock is high and ANDs it with the clock: a block whose '
-  'enable is low gets no clock edges, so its flip-flops and clock wires do not switch.', 'generic', f'{WH}, ch. 10 (sequential circuits) and ch. 5 (power: clock gating)')
+F('tb.icg', 'An integrated clock gate passes the enable through a latch that is transparent while the clock is low and '
+  'holds it while the clock is high, and ANDs the held enable with the clock: a block whose enable is low gets no clock '
+  'edges, so its flip-flops and clock wires do not switch.', 'generic', f'{WH}, ch. 10 (sequential circuits) and ch. 5 '
+  '(power: clock gating); external/core-et/rtl/libs/rf_latches/et_clk_gate.v:22-29 (core-et\'s clock gate, Erbium branch: '
+  'the enable is loaded while clk is low; enclk = clk && en_1p)')
 F('tb.stdcell', 'Logic synthesis maps a block\'s register-transfer-level description onto a library of standard cells '
   '(inverters, NAND, NOR, AND-OR-INVERT and XOR gates, multiplexers, flip-flops, clock gates), typically a few hundred '
   'kinds of cell of one height, placed in rows.', 'generic', f'{WH}, ch. 14 (design methodology and tools: standard-cell design)')
@@ -68,8 +71,10 @@ F('tb.counter', 'A binary counter is a register and an incrementer: a chain of h
   'XOR of its bit and the carry in and its carry an AND of the two.', 'generic', f'{WH}, ch. 11 (counters)')
 F('tb.compare', 'An equality comparator XNORs each pair of bits and combines the results in a tree of NAND and NOR gates: '
   'the output is 1 only when every pair agrees.', 'generic', f'{WH}, ch. 11 (comparators)')
-F('tb.fifo', 'A first-in, first-out queue is a small memory addressed by a write pointer and a read pointer, two counters; '
-  'comparing the pointers tells a full queue from an empty one.', 'generic', f'{WH}, ch. 12 (serial-access memories: queues)')
+F('tb.fifo', 'A first-in, first-out queue is a small memory addressed by a write pointer and a read pointer, two counters. '
+  'Equal pointers mean empty or full; one way to tell them apart is a pointer one bit wider than the address: equal in '
+  'every bit, the queue is empty; equal but for that extra bit, it is full.', 'generic', f'{WH}, ch. 12 (serial-access memories: queues); '
+  'C. E. Cummings, "Simulation and Synthesis Techniques for Asynchronous FIFO Design", SNUG San Jose 2002, §2.2 (p. 3): the extra pointer bit')
 F('tb.pll', 'A phase-locked loop multiplies a reference clock: a phase-frequency detector compares the reference with the '
   'output divided by N, a charge pump and loop filter turn the difference into a control voltage, and a voltage-controlled '
   'oscillator, often a ring of an odd number of inverters, settles at N times the reference.', 'generic', f'{WH}, ch. 13 (clocks: PLLs and DLLs)')
@@ -158,9 +163,9 @@ F('buck.duty', 'Turning the card\'s 12 V into the minion rail\'s 0.517 V, a buck
   'of each cycle (D = 0.517 / 12 = 0.043): at 500 kHz, about 86 ns of every 2 µs.', 'derived',
   'arithmetic on tb.buck (D = Vout / Vin), out.card.6 (12 V at the card edge) and et.v-minion (0.517 V on die)',
   note='Losses and the drop between the regulator and the die make the true duty cycle a little higher; 500 kHz is a value inside the TPSM831D31\'s 350-700 kHz range, not a measured one.')
-F('tb.powerfet', 'A power MOSFET is thousands of small cells in parallel: in a trench-gate device, current flows vertically, '
+F('tb.powerfet', 'A power MOSFET is thousands of small cells in parallel: in a trench-gate device conducting with its drain positive, electrons flow vertically, '
   'from the source on top, down a channel along each trench wall through the p-type body, across a lightly doped drift layer '
-  'to the heavily doped substrate, the drain, underneath; its on-resistance is milliohms and it blocks tens of volts.',
+  'to the heavily doped substrate, the drain, underneath, and the current flows up; its on-resistance is milliohms and it blocks tens of volts.',
   'generic', 'B. J. Baliga, Fundamentals of Power Semiconductor Devices, 2nd ed. (Springer, 2019), ch. 6 (power MOSFETs)')
 F('card.stages', 'Which transistors the regulators\' power stages use is not published in the card\'s documents.', 'unknown',
   'Esperanto, "PCIe Dev Card (V3)", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man); TI\'s and ADI\'s product pages give no device structure')
@@ -169,7 +174,7 @@ F('tb.strap', 'A strap (boot-option) pin: a resistor pulls the pin up to the I/O
   'gives one clean change) reads its level, and a flip-flop holds it when the chip comes out of reset.', 'generic',
   'P. Horowitz and W. Hill, The Art of Electronics, 3rd ed. (Cambridge University Press, 2015)')
 F('card.dip', 'The card has DIP switches to set all its boot options.', 'spec',
-  'Esperanto, "PCIe Dev Card (V3)", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 1 (features) and p. 3 (DIP switches)')
+  'Esperanto, "PCIe Dev Card (V3)", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 3 (features) and pp. 7-10 (DIP Switches)')
 F('et.bootpins', 'The chip records the state of its boot pins: bits 10:0 of the reset manager\'s status register rm_status2 '
   '"provide status information about various boot pins": 11 bits.', 'spec',
   'Esperanto, ET Programmer\'s Reference Manual (github.com/aifoundry-org/et-man), §15.2.3.18 (SPIO CRU address space), pdf p. 431')
@@ -185,9 +190,10 @@ F('cu.free', 'In the metal each copper atom gives its one outer electron to a sh
   note='4 / (0.3615e-9 m)^3 = 4 / 4.724e-29 m^3 = 8.47e28 per m^3 (Kittel lists 8.47e22 per cm^3 for copper)')
 F('size.p.cu', 'One copper atom takes about 0.256 nm in the metal: the distance between neighbours, 0.3615 nm / sqrt(2).',
   'derived', 'arithmetic on wire.cu (the face-centred cubic cell, 0.3615 nm)', note='0.3615 / 1.4142 = 0.2556 nm')
-F('host.intel14', 'Intel\'s 14 nm process, the host processors\', is a FinFET process too: fins 42 nm apart, gates 70 nm apart '
-  'and the finest wires 52 nm apart (TSMC N7: 30, 57 and 40 nm).', 'outside',
-  'S. Natarajan et al., "A 14nm Logic Technology Featuring 2nd-Generation FinFET, Air-Gapped Interconnects, Self-Aligned Double Patterning and a 0.0588 µm² SRAM cell size", IEDM 2014; out.host.5 (the hosts\' 14 nm)',
+F('host.intel14', 'Intel\'s 14 nm process, the host processors\', is a FinFET process too: as first made (2014), fins 42 nm apart, gates 70 nm apart '
+  'and the finest wires 52 nm apart (TSMC N7: 30, 57 and 40 nm); its 14nm++ revision (2017), used for Intel\'s 14 nm desktop processors from Coffee Lake on, spaces the gates 84 nm apart.', 'outside',
+  'S. Natarajan et al., "A 14nm Logic Technology Featuring 2nd-Generation FinFET, Air-Gapped Interconnects, Self-Aligned Double Patterning and a 0.0588 µm² SRAM cell size", IEDM 2014; out.host.5 (the hosts\' 14 nm)'
+  '; Intel, Technology and Manufacturing Day (March 2017): 14nm++ relaxes the gate pitch from 70 to 84 nm (as reported by The Motley Fool, "Intel Corporation Outs 14-Nanometer++ Technology", 2017, and AnandTech\'s Coffee Lake review, Oct 2017)',
   'https://people.eecs.berkeley.edu/~pister/140sp16/resources/Intel14nmIEDM2014.pdf')
 F('host.ddr4', 'The hosts\' processors (Core i7-11700K, i5-11600) take DDR4 memory, up to DDR4-3200 on two channels: DRAM, the '
   'same kind of one-transistor, one-capacitor cell as the card\'s LPDDR4X.', 'outside',
@@ -222,9 +228,9 @@ N('lib.shifter', 'Shifter (stages of multiplexers)', 'Shifter', 'Moves a number 
 N('lib.lzd', 'A leading-zero counter', 'Leading zeros', 'Counts the zeros before the first 1 of a number, in a tree of small cells: it tells the normaliser how far to shift a sum so that its first digit is a 1.',
   5e-6, 'a 64-bit counter is about 60 small cells in six levels', ['tb.lzd', 'tb.lza'])
 N('lib.decoder', 'Decoder', 'Decoder', 'Turns an address into one raised line: 3 bits pick one of 8 rows, 7 bits one of 128. Every memory and register file has one for its rows.',
-  3e-6, 'a 7-to-128 row decoder spans the 128 rows of an array, a few µm', ['tb.decoder'])
+  3e-6, 'the 3-to-8 decoder drawn spans 8 rows, about 1-2 µm; a 7-to-128 row decoder spans the 128 rows of an array, about 15 µm at the 114 nm row pitch of N7\'s dense SRAM cell (size.lib.sram6t)', ['tb.decoder'])
 N('lib.regfile', 'Register file', 'Register file', 'A small, fast memory with several doors: rows of latches, a decoder that picks the row to write, and multiplexers that read one row out per port. Processors keep their registers in these.',
-  4e-5, 'like the core\'s integer register file: 4,096 latch bits with their ports', ['tb.regfile'])
+  4e-5, 'like the core\'s integer register file: 3,968 latch bits with their ports', ['tb.regfile'])
 N('lib.logic', 'Control logic: standard cells', 'Logic cells', 'What any block of control logic is made of when its own netlist is not published: flip-flops that hold its state and a few kinds of gate that compute the next state, all from a library of standard cells.',
   2e-5, 'a control block of a few thousand cells at 0.1-0.3 µm² each', ['tb.stdcell'])
 N('lib.counter', 'Counter', 'Counter', 'A register that adds one to itself on every clock (or every event): flip-flops and a chain of half adders. Barrier counters, credit counters and performance counters are all of this kind.',
@@ -237,7 +243,7 @@ N('lib.pll', 'A phase-locked loop (PLL)', 'PLL', 'Makes a fast clock from a slow
   1e-4, 'on the order of 100 µm across, like the shire\'s clock generation (size.shire.clock)', ['tb.pll'])
 N('lib.ecc', 'Error correction (SECDED)', 'ECC', 'Extra check bits stored with the data, each the parity of some of the bits: on a read they show whether a bit flipped, which one, so it can be put right, and whether two did.',
   1e-5, 'the XOR trees of a 72-bit code: a few hundred gates', ['tb.ecc'])
-N('lib.rom', 'A read-only memory (ROM)', 'ROM', 'A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit\'s transcendental functions read their coefficients from small tables like this.',
+N('lib.rom', 'A read-only memory (ROM)', 'ROM', 'A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit\'s transcendental functions read their coefficients from small fixed tables too, but the Minion\'s VPU specification describes them as look-up tables in the RTL ("ROMs (LUT latch-based)", "ROMs (RTL LUTs)"), not an array like this one.',
   2e-5, 'a small table of coefficients: a few thousand bits', ['tb.rom'])
 def N2(nid, name, short, blurb, m, kind, note, fl):
     F(f'size.{nid}', f'{name}: about {fmt(m) if m < 1e-3 else str(round(m * 100, 1)) + " cm"} across, the width of the view that frames it.', kind,
@@ -259,7 +265,7 @@ nodes['lib.wire'] = {'name': 'Copper wiring, in section', 'short': 'Copper wire'
                      'blurb': 'The chip\'s finest wires are copper, about 20 nm wide and 40 nm apart, wrapped in a thin cobalt liner so that copper atoms do not wander; cobalt contacts take them down to the transistors.'}
 N2('lib.buck', 'A buck converter (a switching regulator)', 'Buck converter', 'How 12 volts becomes half a volt without burning the rest as heat: two transistors connect an inductor to 12 V or to ground, hundreds of thousands of times a second, and the inductor and a capacitor smooth the pulses into a steady supply.',
    2e-2, 'inferred', 'about the size of the card\'s regulator modules: the TPSM831D31 is 15 x 48 mm (card.tpsm), the LTM4680 16 x 16 mm (card.ltm)', ['tb.buck', 'card.tpsm', 'card.ltm', 'buck.duty', 'card.stages'])
-N2('lib.powerfet', 'A power transistor, in section', 'Power transistor', 'A switch for tens of amps: thousands of small transistor cells side by side, each passing current straight down through the silicon from its source on top to the drain underneath.',
+N2('lib.powerfet', 'A power transistor, in section', 'Power transistor', 'A switch for tens of amps: thousands of small transistor cells side by side; in each, electrons flow straight down through the silicon from the source on top to the drain underneath, so the current flows up.',
    5e-6, 'inferred', 'a few cells of a trench MOSFET, each a micrometre or two wide (tb.powerfet); order of magnitude only, the regulators\' own devices are not published', ['tb.powerfet', 'card.stages', 'dope.donor-acceptor'])
 N2('lib.strap', 'A boot switch and its pin', 'Boot pin', 'A switch on the card holds one of the chip\'s pins at 0 or lets a resistor pull it to 1; when the chip comes out of reset it reads the pin and starts accordingly.',
    2e-2, 'inferred', 'a block of DIP switches is about 2 cm long on the card\'s photo (out.card.1 gives the card\'s 167.6 mm width); the pin and its receiver are far smaller', ['tb.strap', 'card.dip', 'et.bootpins'])

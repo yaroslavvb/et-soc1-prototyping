@@ -23,7 +23,7 @@ N_FIBRE = 1.4682                  # group index, Corning SMF-28e+ at 1550 nm
 V_FIBRE = C / N_FIBRE
 ER_FR4 = 4.0                      # ASSUMED: FR-4's relative permittivity, typical 3.8-4.5
 V_PCB = C / math.sqrt(ER_FR4)
-F_CLK = 600e6                     # Hz: the lab cards' usual minion clock (14-card-behaviour.md:338)
+F_CLK = 600e6                     # Hz: the lab cards' usual minion clock (14-card-behaviour.md:381)
 T_CLK = 1 / F_CLK
 LY = 9_460_730_472_580_800.0      # m (IAU: Julian year x c)
 PC = 3.0856775814913673e16        # m (IAU 2015 B2)
@@ -134,7 +134,7 @@ L.append({
         F('The datasheet gives no thermal ratings for the package (section 9.1 is a placeholder).', S['ds'] + ', §9.1',
           'spec'),
         F(f'Light crosses the die (25.6 mm) in {si_time(die_w / C, 2)}, about a twentieth of one 600 MHz clock tick; in '
-          f'one tick light goes {C * T_CLK * 100:.0f} cm.', S['si'] + '; the clock: ' + S['cb14'] + ':338', 'derived'),
+          f'one tick light goes {C * T_CLK * 100:.0f} cm.', S['si'] + '; the clock: ' + S['cb14'] + ':381', 'derived'),
     ],
     'light': light(die_w),
     # (no image: the level is drawn from Fig. 9-1; the card level's photo shows the lid)
@@ -159,38 +159,48 @@ L.append({
              'run on.',
     'facts': [
         F('6.6 x 4.4 in (167.6 x 111.8 mm); a PCIe x16 card edge carrying an x8 PCIe Gen 4 link; the chip soldered '
-          'down, no socket.', S['card'] + ', pp. 1 and 3', 'spec'),
+          'down, no socket.', S['card'] + ', p. 3', 'spec'),
         F('On all four lab cards the link runs at 16 GT/s on 8 lanes: 15.75 GB/s each way after coding. Measured '
           'host-to-card DMA: 12.5-12.6 GB/s; card to host 10.4-10.5 GB/s.',
-          S['hosts'] + ' (the link speed and width of all four cards); ' + S['claims'] + ':550-552 (E50: the DMA rates, '
+          S['hosts'] + ' (the link speed and width of all four cards); ' + S['claims'] + ':552-554 (E50: the DMA rates, '
           'on three cards)', 'measured'),
         F('Four LPDDR4X memory packages, 256 bits wide in all (16 channels of 16 bits), 32 GB: each package serves '
-          'two of the chip\'s eight memory shires.', S['facts'] + ' (L47, dram.channels); ' + S['card'] + ', p. 1',
+          'two of the chip\'s eight memory shires.', S['facts'] + ' (L47, dram.channels); ' + S['card'] + ', pp. 1 (the '
+          '"32GB (Micron part) v3 card" link) and 3 (features)',
           'spec'),
         F(f'Peak memory rate on these cards: 256 bits x 3,733 MT/s = {256 * 3733e6 / 8 / 1e9:.1f} GB/s, the firmware\'s '
           f'933 MHz mode, which every lab card runs; the datasheet\'s 4,266 MT/s would give {256 * 4266e6 / 8 / 1e9:.1f} '
-          'GB/s. Tensor loads from memory have been measured at 75 GB/s.',
+          f'GB/s. Tensor loads stream 76 GB/s from this memory, {75.9 / (256 * 3733e6 / 8 / 1e9):.0%} of the '
+          f'{256 * 3733e6 / 8 / 1e9:.1f} GB/s peak (fact bw-dram).',
           S['facts'] + ' (dram.rate-card: the firmware hard-codes 3,733 MT/s on every card; dram.peak-card; L47: the '
-          'datasheet\'s 4,266 Mb/s per pin); ' + S['claims'] + ':155 (E15)', 'derived'),
+          'datasheet\'s 4,266 Mb/s per pin; bw-dram: 75.9 GB/s); ' + S['claims'] + ':398 (row "Bandwidth at 600 MHz, '
+          '1,024 minions": E33, E29, E43)', 'derived'),
         F('Each memory package is about 15 mm square on the vendor photo, which shows SK hynix parts (a second photo '
           'in the same document shows Micron parts). Which maker\'s DRAM the lab cards carry is not recorded.',
           S['card'] + ', pp. 2, 8 and 10 (photos)', 'inferred'),
-        F('Power arrives as 12 V at the card edge: at most 7.3 A, 88 W. The highest draw on record is 87.8 W; the cards '
-          'idle at about 19-36 W, depending on the card and its temperature.',
-          S['card'] + ', p. 5 (power tree); ' + S['cb14'] + ':138, 339', 'spec, measured'),
+        F('Power arrives as 12 V at the card edge; the vendor\'s power tree budgets 7.3 A, 88 W. Under load the highest '
+          'draw on record is 87.8 W; an idle card whose cooling failed drew 134 W before it dropped off the PCIe bus '
+          '(aifoundry2, 2, 7 and 8 Oct 2026). With working cooling the cards idle at about 19-50 W, depending on the '
+          'card and its temperature (aifoundry1 card 1 idles highest: 42.7 W at 73 °C, 50 W at 80 °C).',
+          S['card'] + ', p. 5 (power tree); ' + S['cb14'] + ':158 (87.8 W), :382 (idle), :252-253 and :625-627 '
+          '(134 W); docs/reports/data/2026-10-02-idle-runaway-aifoundry2/records.jsonl (133.8 W board power); '
+          'docs/energy-manual/01-at-rest.md:25, 33 (aifoundry1 card 1, board 42.71 W at 73 °C); '
+          'docs/reports/data/2026-09-25-claims-v3/results/abla.json (all_cards.idle_clock.aifoundry1-c1.idle_w, '
+          '50.15 W); docs/reports/2026-09-18-et-soc1-matmul-efficiency.html:727 ("also at 80 °C but idling at 50 W")',
+          'spec, measured'),
         F('The cores run at about 0.52 V at 600 MHz, 23 times lower than the 12 V input, so the current is about 23 '
           'times higher: a Texas Instruments TPSM831D31 supplies the cores (3 phases, up to 120 A) and the on-chip '
           'network (1 phase, 40 A). Its four phases are the four large inductors marked "R15" on the photo.',
-          S['card'] + ', p. 1 (key voltage regulators) and p. 2 (photo); ' + S['claims'] + ':34 (E9)',
+          S['card'] + ', p. 5 (key voltage regulators) and p. 2 (photo); ' + S['claims'] + ':34 (E9)',
           'spec, measured, inferred'),
         F('An Analog Devices LTM4680 module (up to 60 A) supplies the SRAM rail; smaller FS1406 regulators the '
           'memory, PCIe, I/O and other rails; an LTC4218 hot-swap switch with a 1 mΩ sense resistor measures the '
-          'card\'s input current for the power readings.', S['card'] + ', pp. 1, 4', 'spec'),
+          'card\'s input current for the power readings.', S['card'] + ', pp. 4-7', 'spec'),
         F('A small microcontroller (Microchip ATSAMD20, the "PMIC micro") reads the 12 V input and three regulators '
           '(cores, network, SRAM); the other rails have set points only.',
           S['card'] + ', p. 4 (block diagram); ' + S['facts'] + ' (board.meters)', 'spec, measured'),
         F('Also on the board: 64 GB of eMMC flash (a Kingston part on the photo), an FTDI UART-to-USB bridge, JTAG, '
-          'DIP switches that set the boot options, and a fan header (P1).', S['card'] + ', pp. 1-3', 'spec, inferred'),
+          'DIP switches that set the boot options, and a fan header (P1).', S['card'] + ', pp. 2-3', 'spec, inferred'),
         F('Which heatsink the lab cards carry, and whether each has a fan, is not recorded; the vendor photo shows '
           'the card bare.', S['hs'] + ', section 1 ("Not recorded")', 'note'),
         F(f'A signal in the board\'s copper travels at about half the speed of light (c/√εr, εr ≈ 4 for FR-4), so '
@@ -231,23 +241,24 @@ L.append({
     'facts': [
         F('The lab\'s three hosts: aifoundry1, an Intel Core i7-11700K (8 cores) with 128 GB; aifoundry2, a Core '
           'i5-11600 (6 cores) with 64 GB; aifoundry3, an i7-11700K with 32 GB on a single memory channel.',
-          S['cb14'] + ':348; the et-lab-manifest records', 'measured'),
-        F('aifoundry2\'s motherboard is a Gigabyte Z590 AORUS MASTER, an ATX board of 30.5 x 24.4 cm. The other two '
-          'hosts\' BIOS versions (F5, F6) follow Gigabyte\'s naming, but their board models are not recorded.',
-          'the host\'s DMI table (/sys/devices/virtual/dmi/id, read 30 Sep 2026); Gigabyte, Z590 AORUS MASTER '
-          'specifications (gigabyte.com); ' + S['cb14'] + ':348', 'measured, spec, inferred'),
+          S['cb14'] + ':391; the et-lab-manifest records', 'measured'),
+        F('All three hosts\' motherboards are Gigabyte Z590 AORUS MASTER boards, ATX, 30.5 x 24.4 cm; aifoundry1 and '
+          'aifoundry2 run BIOS F5, aifoundry3 F6.',
+          'the hosts\' DMI tables (all three read in the lab\'s root audit of 25 Sep 2026, recorded in the lab-problems '
+          'report, H20; aifoundry2\'s again on 30 Sep and 14 Oct 2026); Gigabyte, Z590 AORUS MASTER specifications '
+          '(gigabyte.com); ' + S['cb14'] + ':391 (BIOS), :541 (aifoundry3\'s board), :563 (aifoundry2\'s board)', 'measured, spec'),
         F('aifoundry1 holds two ET cards, the other hosts one each.', S['hosts'], 'measured'),
         F('Each card\'s 8-lane PCIe 4.0 link goes straight to a root port on the CPU, which has 20 PCIe 4.0 lanes.',
           S['hosts'] + ' (root_port 00:01.x, the CPU\'s own PCIe ports on this platform: inferred); Intel, Core '
           'i7-11700K specifications (intel.com)', 'measured, inferred, spec'),
         F('The host CPUs are made in Intel\'s 14 nm process; the i7-11700K is rated at 125 W base power and may draw '
-          'up to 251 W in turbo (its PL2), the i5-11600 at 65 W base. The whole ET card, at most 88 W, draws less than '
-          'the bigger CPU\'s base power, and about a third of its turbo peak.',
+          'up to 251 W in turbo (its PL2), the i5-11600 at 65 W base. The ET card\'s 88 W budget is less than the '
+          'bigger CPU\'s base power and about a third of its turbo peak.',
           'Intel, Core i7-11700K and Core i5-11600 specifications (intel.com: 125 W and 65 W base power); the '
           'i7-11700K\'s 251 W maximum turbo power (PL2) as listed by cpu-monkey.com and techreviewer.com; '
           + S['card'] + ', p. 5', 'spec'),
         F('The host copies memory at 17.4 / 9.2 / 21.4 GB/s (aifoundry2 / 3 / 1); a program\'s staged copy to the '
-          'card is limited by both that and the link: 5.2-7.8 GB/s.', S['claims'] + ':553 (E50)', 'measured'),
+          'card is limited by both that and the link: 5.2-7.8 GB/s.', S['claims'] + ':555 (E50)', 'measured'),
         F('The owner\'s photo shows open-air frames with tower coolers and EVGA and MSI power supplies; several '
           'boards carry Gigabyte AORUS logos.', 'the owner\'s rack photo (30 Sep 2026)', 'inferred'),
         F('A standard ATX power supply is 150 mm wide, 86 mm high and 140 mm deep.',
@@ -483,8 +494,8 @@ L.append({
     'size_m': 2 * nep, 'frame_m': 1.1e13, 'size_kind': 'outside source',
     'size_note': f'Neptune\'s orbit: semimajor axis {nep / AU:.2f} au ({nep / 1e9:,.0f} million km), so about '
                  f'{2 * nep / 1e12:.1f} x 10^12 m across.',
-    'blurb': f'Sunlight takes {si_time(AU / C, 2)} to reach Earth and about {si_time(nep / C, 2)} to reach Neptune. In '
-             'November 2026 Voyager 1, the farthest spacecraft, will be a full light-day away.',
+    'blurb': f'Sunlight takes {si_time(AU / C, 2)} to reach Earth and about {si_time(nep / C, 2)} to reach Neptune. On '
+             '18 November 2026 Voyager 1, the farthest spacecraft, is a full light-day from Earth.',
     'facts': [
         F(f'Earth orbits at 1 au, {si_time(AU / C)} from the Sun at the speed of light.', S['iau_au'] + '; ' + S['si'],
           'derived'),
@@ -593,9 +604,11 @@ L.append({
           'T. Sawala et al., Nature Astronomy (2025), "No certainty of a Milky Way-Andromeda collision"',
           'outside source'),
         F('More than 130 members are now known within a megaparsec of the group\'s centre (134 in one count), most of '
-          'them faint dwarf galaxies; counted that way the group is about 5.1 Mpc (17 million light-years) across.',
-          'Wikipedia, "Local Group" (read 1 Oct 2026): "a current total of 134 members is known within 1 megaparsec", '
-          '"most of which are dwarf galaxies", "a total diameter of 5.11 megaparsecs (17 million light-years)"',
+          'them faint dwarf galaxies; judged by density matching and the potential surface of its parent structure, the '
+          'Local Sheet, the group is about 5.1 Mpc (17 million light-years) across.',
+          'Wikipedia, "Local Group" (read 1 Oct 2026; re-read 14 Oct 2026): "a current total of 134 members is known '
+          'within 1 megaparsec", "most of which are dwarf galaxies", "a total diameter of 5.11 megaparsecs (17 million '
+          'light-years) based on density matching and the potential surface of its parent structure, Local Sheet"',
           'outside source'),
         F('A galaxy cluster is far larger than a group: the nearest big one, the Virgo Cluster, about 54 million '
           'light-years away, has about 1,300 (possibly up to 2,000) galaxies. The Local Group belongs to the Virgo '
@@ -682,7 +695,9 @@ L.append({
           'Planck Collaboration, "Planck 2018 results. VI. Cosmological parameters", A&A 641, A6 (2020), Table 2',
           'outside source'),
         F(f'Radius {chi * 1e6 * PC / LY / 1e9:.1f} billion light-years (comoving), diameter {sci(univ, 2)} m.',
-          'derived from the Planck 2018 parameters (this script)', 'derived'),
+          f'derived from the Planck 2018 parameters (H0 {H0}, Ωm {Om}, ΩΛ {OL}, radiation from 2.7255 K, Neff 3.046): the '
+          'comoving distance to the particle horizon, integrated in '
+          'docs/reports/data/2026-09-27-chip-diagram/research/build_outside.py', 'derived'),
         F('The oldest light we can see, the cosmic microwave background, left its source about 380,000 years after the '
           'Big Bang; it now has a temperature of 2.7255 K.',
           'NASA/WMAP Science Team (the nine-year map\'s caption); D. J. Fixsen, ApJ 707, 916 (2009)', 'outside source'),
@@ -744,7 +759,7 @@ meta = {
     'order': 'inside out: package, card, host, rack, Studio 45, San Francisco, Bay Area, (California), US, Earth, '
              '(Earth-Moon), Solar System, (nearest stars), Milky Way, Local Group, Laniakea, observable universe, '
              'beyond. Levels marked optional bridge long steps; the owner\'s named levels are all required.',
-    'clock_hz': F_CLK, 'clock_source': S['cb14'] + ':338 (the lab cards\' usual minion clock)',
+    'clock_hz': F_CLK, 'clock_source': S['cb14'] + ':381 (the lab cards\' usual minion clock)',
     'fibre_group_index': N_FIBRE, 'fibre_source': S['corning'],
     'kinds': ['measured', 'spec', 'derived', 'inferred', 'estimate', 'assumed', 'outside source', 'owner',
               'hypothesis', 'note'],

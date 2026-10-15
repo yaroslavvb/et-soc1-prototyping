@@ -5,8 +5,8 @@
 /* the 4:2 compressor: two full adders, as the RTL's r42cmp computes it */
 bnode('lib.cmp42', {draw: (L, ap) => {
   KT.frame(L, {title: 'A 4:2 compressor: two full adders', sub: 'four bits of a column and a carry in become a sum and two carries', col: CC.logic, tags: [['unknown', 'logic: Erbium RTL'], ['generic', 'the circuit: textbook']]});
-  const f1 = ipart(L, ap, 'fa1', 120, 150, 240, 170, CC.logic, 'full adder 1', {node: 'lib.fa', center: true, ty: 92, kid: {id: 'lib.fa'}});
-  ipart(L, ap, 'fa2', 520, 330, 240, 170, CC.logic, 'full adder 2', {node: 'lib.fa', center: true, ty: 92});
+  const f1 = ipart(L, ap, 'fa1', 120, 150, 240, 170, CC.logic, 'full adder 1', {node: 'lib.fa', center: true, ty: 92, kid: {id: 'lib.fa'}, kind: 'generic'});
+  ipart(L, ap, 'fa2', 520, 330, 240, 170, CC.logic, 'full adder 2', {node: 'lib.fa', center: true, ty: 92, kind: 'generic'});
   ['x1', 'x2', 'x3'].forEach((t, i) => { const x = 170 + i * 70; KT.wire(L, [[x, 60], [x, 150]]); KT.netLab(L, x, 52, t, 'middle'); });
   KT.wire(L, [[700, 60], [700, 330]]); KT.netLab(L, 700, 52, 'x4', 'middle');
   KT.wire(L, [[900, 410], [760, 410]]); KT.netLab(L, 906, 416, '← cin');
@@ -27,7 +27,7 @@ function xorSym(parent, x, y, o) {
 }
 bnode('lib.fa', {draw: (L, ap) => {
   KT.frame(L, {title: 'A full adder, in gates', sub: `three bits in, a sum and a carry out; built of transistors, about ${on('fa_tr')} as a static mirror adder`, subf: onf('fa_tr'), col: CC.logic, tags: [['generic', 'textbook']]});
-  const gx = ipart(L, ap, 'xor1', 160, 60, 110, 100, CC.logic, '', {node: 'lib.xor', kid: {id: 'lib.xor'}, tr: 'jump', fo: 0.06, label: 'XOR gate 1'});
+  const gx = ipart(L, ap, 'xor1', 160, 60, 110, 100, CC.logic, '', {node: 'lib.xor', kid: {id: 'lib.xor'}, tr: 'jump', fo: 0.06, label: 'XOR gate 1', kind: 'generic'});
   const x1 = xorSym(gx, 190, 110, {w: 60, h: 60});
   const g2 = KT.comp(L, 'xor2', {}, 'XOR gate 2'); g2._info = {title: 'XOR gate', lead: sc('lib.xor').blurb, facts: sc('lib.xor').facts}; g2._kid = {id: 'lib.xor'};
   const x2 = xorSym(g2, 450, 140, {w: 60, h: 60}); g2._box = {x: 430, y: 100, w: 100, h: 80};
@@ -38,7 +38,7 @@ bnode('lib.fa', {draw: (L, ap) => {
   // the wires: a, b, cin from the left
   const ys = {a: 80, b: 140, c: 210};
   KT.netLab(L, -90, ys.a + 6, 'a', 'end'); KT.netLab(L, -90, ys.b + 6, 'b', 'end'); KT.netLab(L, -90, ys.c + 6, 'cin', 'end');
-  KT.wire(L, [[-80, ys.a], [x1.a.x, ys.a + 15]]); KT.wire(L, [[-80, ys.b], [x1.b.x, x1.b.y]]);
+  KT.wire(L, [[-80, ys.a], [150, ys.a], [150, x1.a.y], [x1.a.x, x1.a.y]]); KT.wire(L, [[-80, ys.b], [150, ys.b], [150, x1.b.y], [x1.b.x, x1.b.y]]);
   KT.wire(L, [[0, ys.a], [0, 316], [a1.a.x, a1.a.y]]); KT.wire(L, [[40, ys.b], [40, 344], [a1.b.x, a1.b.y]]); KT.jn(L, 0, ys.a); KT.jn(L, 40, ys.b);
   KT.wire(L, [[x1.out.x, x1.out.y], [380, x1.out.y], [380, x2.a.y], [x2.a.x, x2.a.y]]);
   KT.wire(L, [[-80, ys.c], [300, ys.c], [300, x2.b.y], [x2.b.x, x2.b.y]]);
@@ -80,7 +80,7 @@ bnode('lib.xor', {draw: (L, ap) => {
   gd._info = {title: 'The pull-down network', lead: 'N-type transistors conduct when their gate is 1. Two series pairs in parallel connect the output to ground when A and B agree: then OUT is 0.', facts: sc('lib.xor').facts};
   S(E('rect', {x: 220, y: 300, width: 340, height: 200, rx: 10}, gd), {fill: 'var(--c3)', fillOpacity: 0.04, stroke: 'var(--c3)', strokeWidth: 1.25, strokeDasharray: '2 5'}); gd._box = {x: 220, y: 300, w: 340, h: 200};
   // one transistor ringed: the device below it
-  ipart(L, ap, 'onefet', xl - 22, 314, 44, 72, 'var(--c2)', '', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, tr: 'jump', fo: 0.1, label: 'One transistor'});
+  ipart(L, ap, 'onefet', xl - 22, 314, 44, 72, 'var(--c2)', '', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, tr: 'jump', fo: 0.1, label: 'One transistor', kind: 'generic'});
   // the inverters that make A' and B'
   const gi = KT.comp(L, 'xinv', {}, 'Two inverters make A’ and B’: four more transistors');
   gi._info = {title: 'The input inverters', lead: sc('lib.inverter').blurb, facts: sc('lib.inverter').facts}; gi._kid = {id: 'lib.inverter'};
@@ -115,7 +115,7 @@ function gateScene(L, ap, which) {
     KT.netLab(L, p1.gate.x - 6, p1.gate.y + 6, 'A', 'end'); KT.netLab(L, p2.gate.x + 6, p2.gate.y + 6, 'B'); KT.netLab(L, n1.gate.x - 6, n1.gate.y + 6, 'A', 'end'); KT.netLab(L, n2.gate.x - 6, n2.gate.y + 6, 'B', 'end');
     nTop = n1;
   }
-  ipart(L, ap, 'onefet', nTop.x - 22, nTop.y - 36, 44, 72, 'var(--c2)', '', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, tr: 'jump', fo: 0.1, label: 'One transistor'});
+  ipart(L, ap, 'onefet', nTop.x - 22, nTop.y - 36, 44, 72, 'var(--c2)', '', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, tr: 'jump', fo: 0.1, label: 'One transistor', kind: 'generic'});
   const tb = KT.comp(L, 'gtable', {}, 'The truth table'); tb._info = {title: 'The truth table', lead: sc(nand ? 'lib.nand2' : 'lib.inverter').blurb, facts: sc(nand ? 'lib.nand2' : 'lib.inverter').facts};
   if (nand) { KTT(tb, 760, 300, 'A B | OUT', 't-mono'); [[0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]].forEach((r, i) => KTT(tb, 760, 324 + i * 22, `${r[0]} ${r[1]} |  ${r[2]}`, 't-mono')); }
   else { KTT(tb, 760, 300, 'IN | OUT', 't-mono'); KTT(tb, 760, 324, ' 0 |  1', 't-mono'); KTT(tb, 760, 346, ' 1 |  0', 't-mono'); }
@@ -127,12 +127,12 @@ bnode('lib.nand2', {draw: (L, ap) => gateScene(L, ap, 'nand'), def: () => ({id: 
 /* the flip-flop: two latches on opposite phases of the clock */
 bnode('lib.flipflop', {draw: (L, ap) => {
   KT.frame(L, {title: 'A flip-flop: two latches back to back', sub: 'the master follows D while the clock is low, the slave while it is high: the output changes only at the rising edge', col: CC.logic, tags: [['generic', 'textbook']]});
-  ipart(L, ap, 'master', 120, 160, 260, 200, CC.store, 'master latch', {node: 'lib.latch', kid: {id: 'lib.latch'}, center: true, ty: 92, sub: ['transparent', 'while CK = 0']});
-  ipart(L, ap, 'slave', 540, 160, 260, 200, CC.store, 'slave latch', {node: 'lib.latch', center: true, ty: 92, sub: ['transparent', 'while CK = 1']});
+  ipart(L, ap, 'master', 120, 160, 260, 200, CC.store, 'master latch', {node: 'lib.latch', kid: {id: 'lib.latch'}, center: true, ty: 92, sub: ['transparent', 'while CK = 0'], kind: 'generic'});
+  ipart(L, ap, 'slave', 540, 160, 260, 200, CC.store, 'slave latch', {node: 'lib.latch', center: true, ty: 92, sub: ['transparent', 'while CK = 1'], kind: 'generic'});
   KT.wire(L, [[-40, 260], [120, 260]]); KT.netLab(L, -48, 266, 'D', 'end');
   KT.wire(L, [[380, 260], [540, 260]]); KT.wire(L, [[800, 260], [960, 260]]); KT.netLab(L, 968, 266, 'Q');
-  KT.wire(L, [[-40, 460], [660, 460], [660, 360]]); KT.wire(L, [[250, 460], [250, 400]]); KT.netLab(L, -48, 466, 'CK', 'end');
-  KT.invSym(L, 250, 380, {s: 16}); KT.jn(L, 250, 460);
+  KT.wire(L, [[-40, 460], [660, 460], [660, 360]]); KT.wire(L, [[210, 460], [210, 380], [234, 380]]); KT.netLab(L, -48, 466, 'CK', 'end');
+  const ckb = KT.invSym(L, 250, 380, {s: 16}); KT.wire(L, [[ckb.out.x, 380], [290, 380], [290, 360]]); KT.jn(L, 210, 460);
   KTT(L, -150, 640, 'pipelines are rows of these between blocks of logic: each takes its input at the clock’s edge', 't-sm');
 }, def: () => ({id: 'lib.latch'}), kids: () => [{id: 'lib.latch'}]});
 /* ================= the device, the atom and below, and the ring of sizes (1 October 2026) =================
@@ -206,7 +206,7 @@ function ipt(L, ap, key, label, o) {
 }
 /* the gate's two states, the same on the FinFET, the fin and the channel (the state holds from one to the next) */
 const GATE = () => ({lab: 'The gate voltage', btn: [`Gate at ${on('v_0')} · switch on (G)`, `Gate at ${on('v_min')} · switch off (G)`],
-  say: [`The gate at ${on('v_0')}: the transistor is off.`, `The gate at ${on('v_min')}, the minion rail: the transistor is on.`]});
+  say: [`The gate at ${on('v_0')}: the n-type transistor is off.`, `The gate at ${on('v_min')}, the minion rail: the n-type transistor is on.`]});
 const SWW = () => (PH ? 470 : 330);
 /* a box that leaves no part of the frame empty when a scene's notes run under its picture */
 const KP = (pic, wNm, hNm) => Math.min(pic.w / wNm, pic.h / hNm);
@@ -234,9 +234,9 @@ bnode('lib.finfet', {pv: () => IVIEW(), draw: (L, ap) => {
   const gx = x0 + gp * 2, dev = {x: gx - gp / 2, y: y0 + 4.6 * fp, w: gp, h: 2.8 * fp};
   const SB = E('g', {class: 'st-b', 'pointer-events': 'none'}, L);
   [5.5, 6.5].forEach(r => S(E('rect', {x: gx - lg / 2 - gp * 0.32, y: y0 + r * fp - fw / 2 - 2, width: lg + gp * 0.64, height: fw + 4, rx: 2}, SB), {fill: 'var(--c2)', fillOpacity: 0.85}));
-  const ring = KT.comp(L, 'devring', {}, 'One transistor: a gate over two fins');
+  const ring = KT.comp(L, 'devring', {}, 'One n-type transistor: a gate over two fins');
   S(E('rect', {class: 'shape', x: dev.x, y: dev.y, width: dev.w, height: dev.h, rx: 8}, ring), {fill: 'transparent', stroke: 'var(--c2)', strokeWidth: 3, strokeDasharray: '7 5'});
-  ring._kid = {id: 'lib.fin'}; ring._info = {title: 'One transistor', lead: sc('lib.finfet').blurb, facts: sc('lib.finfet').facts}; ring._box = dev;
+  ring._kid = {id: 'lib.fin'}; ring._info = {title: 'One n-type transistor', lead: sc('lib.finfet').blurb, facts: sc('lib.finfet').facts}; ring._box = dev;
   ap.zs['lib.fin'] = {r: dev, g: ring, tr: 'jump'};
   KTT(L, dev.x + dev.w / 2, dev.y + dev.h + (PH ? 30 : 22), 'one transistor', 'i-l halo', 'middle');
   // dimensions and the switch
@@ -247,7 +247,7 @@ bnode('lib.finfet', {pv: () => IVIEW(), draw: (L, ap) => {
   stateSwitch(L, lay.sw.x, lay.sw.y, GATE(), {w: SWW()});
   inotes(L, lay, [
     {t: 'How it switches', h: 1},
-    {a: `Gate at ${on('v_0')}: no electrons under it; the transistor is off.`, b2: `Gate at ${on('v_min')}: its field pulls a sheet of electrons into the fins under it (lit); it conducts.`, f: 'el.switch el.rails'},
+    {a: `Gate at ${on('v_0')}: almost no electrons under it; the n-type transistor is off.`, b2: `Gate at ${on('v_min')}: its field pulls a sheet of electrons into the fins under it (lit); it conducts.`, f: 'el.switch el.rails'},
     {t: `Off is not quite off: below its threshold the current falls only tenfold for every ${on('n7_ss_mv')} less on the gate, and on average (at 80 °C) each transistor here still leaks about ${on('leak_e')}.`, f: `${onf('n7_ss_mv')} ${onf('leak_e')}`},
     {t: `The energy of a switch goes as the voltage squared: at ${on('v_min')} it is ${on('half')} of what it would be at N7's nominal ${on('v_nom')}.`, f: `${onf('half')} ${onf('v_nom')}`, ph: false},
     {t: 'p-type transistors on top, n-type below; this chip\'s own cells are not published, so the pattern is generic.', f: 'n7.cells', ph: false},
@@ -302,9 +302,9 @@ bnode('lib.fin', {pv: () => IVIEW(), draw: (L, ap) => {
   stateSwitch(L, lay.sw.x, lay.sw.y, GATE(), {w: SWW()});
   inotes(L, lay, [
     {t: 'The gate wraps three sides', h: 1},
-    {a: 'Gate off: the fin has almost no free electrons; nothing flows along it.', b2: `Gate on: a thin sheet of electrons lines the fin's two sides and its top: ${on('n7_weff')} of channel width per fin.`, f: 'el.switch n7.weff'},
+    {a: 'Gate off: the fin has almost no free electrons; almost nothing flows along it.', b2: `Gate on: a thin sheet of electrons lines the fin's two sides and its top: ${on('n7_weff')} of channel width per fin.`, f: 'el.switch n7.weff'},
     {t: `The insulator is ${on('hfo2')}, a high-k oxide, on a thin layer of silicon oxide: electrically like 1 nm of SiO₂, but a thicker barrier: several orders of magnitude fewer electrons tunnel through it.`, f: 'gate.hfo2 gate.eot'},
-    {t: `The metal over it, ${on('tial')} for n-type and ${on('tin')} for p-type, sets where the transistor turns on by its work function, ${on('wf')}; tungsten or aluminium fills the rest (the industry's practice: TSMC does not publish N7's stack).`, f: 'gate.metals', ph: false},
+    {t: `The metal over it, ${on('tial')} for n-type and ${on('tin')} for p-type, sets where the transistor turns on by its work function, ${on('wf')} in a FinFET; tungsten or aluminium fills the rest (the industry's practice: TSMC does not publish N7's stack).`, f: 'gate.metals', ph: false},
     {t: 'The taper and the rounded top follow published sections of 10 nm-class fins; TSMC does not publish N7\'s exact profile.', f: 'cmp.tsmc10 cmp.intel10'},
   ]);
 }, def: () => ({id: 'lib.channel'}), kids: () => [{id: 'lib.channel'}]});
@@ -326,7 +326,7 @@ bnode('lib.channel', {pv: () => IVIEW(), draw: (L, ap) => {
   const gate = E('g', {'pointer-events': 'none'}, L);
   S(E('rect', {x: x0 - 3, y: y0 - 14 * k, width: lg + 6, height: 11 * k, rx: 4}, gate), {fill: 'var(--c1)', fillOpacity: 0.4, stroke: 'var(--c1)', strokeWidth: 1.5});
   KTT(gate, x0 + lg / 2, y0 - 8.5 * k + 7, 'gate', 'i-l', 'middle');
-  // on: about a hundred electrons in the channel, and the current from source to drain; off: none, and the leak
+  // on: about a hundred electrons in the channel, crossing from source to drain; off: almost none, and the leak
   const SB = E('g', {class: 'st-b', 'pointer-events': 'none'}, L), SA = E('g', {class: 'st-a', 'pointer-events': 'none'}, L);
   for (let i = 0; i < 100; i++) S(E('circle', {cx: x0 + 4 + prand(i) * (lg - 8), cy: y0 + 6 + prand(i + 500) * (h - 12), r: Math.max(2.4, 0.42 * k)}, SB), {fill: 'var(--c2)'});
   for (let i = 0; i < 3; i++) { const y = y0 + h * (0.25 + 0.25 * i); KT.wire(SB, [[x0 - sdw + 10, y], [x0 + lg + sdw - 14, y]], 'thin'); E('path', {class: 'w', d: `M${x0 + lg + sdw - 24},${y - 7}L${x0 + lg + sdw - 14},${y}L${x0 + lg + sdw - 24},${y + 7}`}, SB); }
@@ -357,7 +357,7 @@ bnode('lib.channel', {pv: () => IVIEW(), draw: (L, ap) => {
   stateSwitch(L, lay.sw.x, lay.sw.y, GATE(), {w: SWW()});
   inotes(L, lay, [
     {t: 'Where the current flows', h: 1},
-    {a: `Off: the channel holds ${on('off_e')} on average; still, about ${on('leak_e')} slip through.`, b2: `On: ${on('ch_e')} sit in the channel, each crossing it in about ${on('cross_t')}.`, f: 'el.off-channel el.channel-electrons si.mobility'},
+    {a: `Off: the channel holds ${on('off_e')} on average; the chip's leakage still comes to about ${on('leak_e')} per transistor.`, b2: `On: ${on('ch_e')} sit in the channel, each crossing it in about ${on('cross_t')}.`, f: 'el.off-channel el.channel-electrons si.mobility'},
     {t: `Only ${on('ch_dop')} (often none) are in the channel itself: the gate's metal, not doping, sets where it turns on.`, f: `${onf('ch_dop')} gate.undoped-vt`},
     {t: `Across the fin's 6 nm stand ${on('si_pw')} of atoms: electronics here is counted in atoms.`, f: onf('si_pw'), ph: false},
   ]);
@@ -423,7 +423,7 @@ bnode('die.metal', {draw: (L, ap) => {
   S(E('rect', {x: 548, y: 586, width: 500, height: 12, rx: 2, 'pointer-events': 'none'}, gt), {fill: 'var(--c1)', fillOpacity: 0.45});
   KTT(L, -150, 680, 'drawn face up, the bumps on top: in the package the die is flipped, face down on its bumps', 't-sm');
   let y = 540;
-  const layers = [[6, 10, 12, 'M0-M4: the finest wires'], [3, 18, 22, 'middle layers'], [3, 30, 40, 'thick top layers: power and long wires (how many: not published)']];
+  const layers = [[5, 10, 12, 'M0-M4: the finest wires'], [3, 18, 22, 'middle layers'], [3, 30, 40, 'thick top layers: power and long wires (how many: not published)']];
   const gw = KT.comp(L, 'wires', {}, 'The wiring stack: copper wires in insulator, vias between');
   gw._info = {title: 'The wiring stack', lead: sc('die.metal').blurb, facts: sc('die.metal').facts};
   layers.forEach(([n, hgt, pitch, lab]) => {
@@ -458,7 +458,8 @@ libLink('lib.sram6t', {cell: FET, sa: FET, pre: FET, wd: FET, mux: FET, wl: INV,
   L => bitStates(L, {x: 712, y: 516, rail: 'v_sram', e: 'sram_e', w: 368}));   // (review of 1 Oct: at x 800, y 420 it covered the half-selected column)
 libLink('l1d.cmp', {xnors: {id: 'lib.xor'}}, [{id: 'lib.xor'}]);
 libLink('mesh.link.wire', {rep1: INV, rep2: INV, lsin: INV, ls: FET, sync: {id: 'lib.flipflop'}}, [INV, FET, {id: 'lib.flipflop'}]);
-libLink('shire.meshstop.xing', {ls: FET, lvin: INV, sync: {id: 'lib.flipflop'}, fifo: {id: 'lib.flipflop'}}, [FET, INV, {id: 'lib.flipflop'}]);
+libLink('shire.neigh.xing', {ls: FET, lvin: INV, sync: {id: 'lib.flipflop'}, fifo: {id: 'lib.flipflop'}}, [FET, INV, {id: 'lib.flipflop'}]);
+libLink('shire.meshstop.xing', {rep1: INV, rep2: INV, lsin: INV, ls: FET, sync: {id: 'lib.flipflop'}}, [INV, FET, {id: 'lib.flipflop'}]);
 libLink('memshire.phy.dq', {drv: FET, predrv: INV, rx: {id: 'lib.diffamp'}}, [FET, INV, {id: 'lib.diffamp'}]);
 libLink('dram.cell', {cellA: {id: 'lib.dramcell'}, cellB: {id: 'lib.dramcell'}}, [{id: 'lib.dramcell'}]);
 /* the minion's default way down is now the compute ladder: the vector unit, a lane, its multiply-add */
@@ -481,7 +482,7 @@ bnode('lib.mux2', {draw: (L, ap) => {
   };
   const a = tg(170, 'A', false), b = tg(430, 'B', true);
   KT.wire(L, [[460, 170], [600, 170], [600, 430], [460, 430]]); KT.wire(L, [[600, 300], [760, 300]]); KT.jn(L, 600, 300); KT.netLab(L, 768, 306, 'OUT');
-  ipart(L, ap, 'onefet', 378, 186, 44, 48, 'var(--c2)', '', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, tr: 'jump', fo: 0.1, label: 'One transistor'});
+  ipart(L, ap, 'onefet', 378, 186, 44, 48, 'var(--c2)', '', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, tr: 'jump', fo: 0.1, label: 'One transistor', kind: 'generic'});
   const tb = KT.comp(L, 'mtable', {}, 'What the multiplexer does'); tb._info = {title: 'The multiplexer', lead: sc('lib.mux2').blurb, facts: sc('lib.mux2').facts};
   KTT(tb, 840, 280, 'S | OUT', 't-mono'); KTT(tb, 840, 304, '0 |  A', 't-mono'); KTT(tb, 840, 326, '1 |  B', 't-mono');
   tb._box = {x: 832, y: 260, w: 120, h: 80};
@@ -529,7 +530,7 @@ bnode('p.atom', {pv: () => IVIEW(), draw: (L, ap) => {
     {t: 'Fourteen electrons, four that matter', h: 1},
     {t: `The outer four bond and conduct: pulling one off a lone atom costs ${on('at_ion')} eV; the first of the inner ten, ${on('at_ion5')}.`, f: onf('at_ion')},
     {t: `To scale, the nucleus would be a speck: the atom's share of the crystal is ${on('at_29k')} wider.`, f: onf('at_29k')},
-    {t: 'The rings are a picture: electrons are clouds of probability, densest at these radii, not little balls on orbits.', f: 'p.core.4', ph: false},
+    {t: 'The rings are a picture, not to scale: electrons are clouds of probability, not little balls on orbits.', f: 'p.core.4', ph: false},
   ]);
 }, def: () => ({id: 'p.nucleus'}), kids: () => [{id: 'p.nucleus'}, {id: 'p.electron'}]});
 
@@ -562,7 +563,7 @@ bnode('p.nucleus', {pv: () => IVIEW(), draw: (L, ap) => {
   });
   inotes(L, lay, [
     {t: 'Almost all the mass, almost none of the room', h: 1},
-    {t: `The strong force binds them with ${on('nu_bind')}: about a million times a chemical bond, which is why no chip ever changes a nucleus.`, f: `${onf('nu_bind')} p.nucleus.8`},
+    {t: `The strong force binds them with ${on('nu_bind')}: nearly four million times a chemical bond, which is why no chip ever changes a nucleus.`, f: `${onf('nu_bind')} p.nucleus.8`},
     {t: `Its measured charge radius is ${on('nu_rms')} fm; a nucleus has a soft edge, so any size is a convention.`, f: `${onf('nu_rms')} size.p.nucleus`},
   ]);
 }, def: () => ({id: 'p.nucleon'}), kids: () => [{id: 'p.nucleon'}]});
@@ -572,7 +573,7 @@ bnode('p.nucleon', {pv: () => IVIEW(), draw: (L, ap) => {
   const lay = ihead(L, {title: 'A proton: three quarks', sub: `${on('pr_uud')}, bound by gluons; radius ${on('pr_r')} fm, mass ${on('pr_m')}`, subf: `${onf('pr_uud')} ${onf('pr_r')} ${onf('pr_m')}`,
     tags: [['documented', 'measured (CODATA, PDG)'], ['generic', 'a picture: quarks are not little balls']]});
   const p = lay.pic, c = {x: p.x + p.w / 2, y: p.y + p.h / 2}, R = Math.min(p.w, p.h) * 0.42;
-  const gf = ipt(L, ap, 'field', 'The gluon field: most of the proton\'s mass', {title: 'The gluon field', lead: 'The quarks\' own masses are about 1% of the proton\'s. The rest is energy: the quarks\' motion and the field of gluons that binds them (E = mc²).', facts: ['p.quark.3', 'p.quark.4', 'p.quark.6', 'p.quark.8']});
+  const gf = ipt(L, ap, 'field', 'The gluon field: most of the proton\'s mass', {title: 'The gluon field', lead: 'The three quarks\' own masses add up to about 1% of the proton\'s. The rest is energy: the quarks\' motion and the field of gluons that binds them (E = mc²).', facts: ['p.quark.3', 'p.quark.4', 'p.quark.6', 'p.quark.8']});
   S(E('circle', {cx: c.x, cy: c.y, r: R}, gf), {fill: 'var(--c7)', fillOpacity: 0.10, stroke: 'var(--c7)', strokeWidth: 1.5, strokeDasharray: '6 5'});
   const q = [[-90, 'u', 'var(--c2)'], [30, 'u', 'var(--c3)'], [150, 'd', 'var(--c4)']].map(([a, t, col]) => ({x: c.x + Math.cos(a * Math.PI / 180) * R * 0.45, y: c.y + Math.sin(a * Math.PI / 180) * R * 0.45, t, col}));
   for (let i = 0; i < 3; i++) { const a = q[i], b = q[(i + 1) % 3], n = 9; let d = `M${a.x},${a.y}`; for (let j = 1; j <= n; j++) { const f = j / n, x = a.x + (b.x - a.x) * f, y = a.y + (b.y - a.y) * f, s = (j % 2 ? 1 : -1) * 9, nx = -(b.y - a.y), ny = b.x - a.x, l = Math.hypot(nx, ny); d += ` Q${x - (b.x - a.x) / n / 2 + nx / l * s},${y - (b.y - a.y) / n / 2 + ny / l * s} ${x},${y}`; } S(E('path', {d}, gf), {fill: 'none', stroke: 'var(--c7)', strokeWidth: 2}); }
@@ -586,7 +587,7 @@ bnode('p.nucleon', {pv: () => IVIEW(), draw: (L, ap) => {
   KTT(L, q[2].x - 30, q[2].y + 46, 'a down quark', 'i-l halo', 'middle');
   inotes(L, lay, [
     {t: 'Mass from energy', h: 1},
-    {t: `The quarks themselves weigh ${on('qk_u')} MeV (up) and ${on('qk_d')} MeV (down): together ${on('pr_1pc')}'s mass. The rest is the energy inside it.`, f: onf('qk_u')},
+    {t: `The quarks themselves weigh ${on('qk_u')} MeV/c² (up) and ${on('qk_d')} MeV/c² (down): together ${on('pr_1pc')}'s mass. The rest is the energy inside it.`, f: onf('qk_u')},
     {t: 'A quark is never found alone: pull one out and the energy makes new quarks.', f: 'p.quark.7'},
   ]);
 }, def: () => ({id: 'p.quark'}), kids: () => [{id: 'p.quark'}]});
@@ -610,18 +611,18 @@ bnode('p.quark', {pv: () => IVIEW(), draw: (L, ap) => pointScene(L, ap, {title: 
   boundLab: `the limit: ${on('qk_b')}`, boundF: onf('qk_b'), boundLead: sc('p.quark').blurb, facts: sc('p.quark').facts,
   pointLab: 'the quark: a point', pointTitle: 'A quark', pointLead: sc('p.quark').blurb,
   notes: [{t: 'No size found', h: 1}, {t: `The proton is at least ${on('qk_1955')} wider than a quark could be.`, f: onf('qk_1955')},
-    {t: `Below this lie ${on('pl_16')} that no experiment has reached, down to the Planck length.`, f: onf('pl_16')}]}),
+    {t: `Below the electron's limit, ${on('el_b')}, lie ${on('pl_16')} that no experiment has reached, down to the Planck length.`, f: `${onf('el_b')} ${onf('pl_16')}`}]}),
   def: () => ({id: 'p.planck'}), kids: () => [{id: 'p.planck'}]});
 bnode('p.electron', {pv: () => IVIEW(), draw: (L, ap) => pointScene(L, ap, {title: 'An electron: as far as we know, a point', sub: `no size measured: a radius under ${on('el_b')}`, subf: onf('el_b'),
   boundLab: `the limit: ${on('el_b')}`, boundF: onf('el_b'), boundLead: sc('p.electron').blurb, facts: sc('p.electron').facts,
   pointLab: 'the electron: a point', pointTitle: 'An electron', pointLead: sc('p.electron').blurb,
   notes: [{t: 'What carries every current in the chip', h: 1}, {t: `Its charge is ${on('el_q')}, exactly: it defines the coulomb.`, f: onf('el_q')},
-    {t: `It is round: its charge sits within ${on('el_edm')} of its centre (the limit on its dipole moment).`, f: onf('el_edm')}]}),
+    {t: `It is round: the centre of its charge sits within ${on('el_edm')} of its centre of mass (the limit on its dipole moment). That limits its shape, not its size.`, f: onf('el_edm')}]}),
   def: () => ({id: 'p.planck'}), kids: () => [{id: 'p.planck'}]});
 
 /* ---- the Planck length: a ruler from the proton down to where known physics stops ---- */
 bnode('p.planck', {pv: () => IVIEW(), draw: (L, ap) => {
-  const lay = ihead(L, {title: 'The Planck length: where known physics stops', sub: `${on('pl_l')}: below the quark's limit lie ${on('pl_16')} nobody has explored`, subf: `${onf('pl_l')} ${onf('pl_16')}`,
+  const lay = ihead(L, {title: 'The Planck length: where known physics stops', sub: `${on('pl_l')}: below the electron's limit lie ${on('pl_16')} nobody has explored`, subf: `${onf('pl_l')} ${onf('pl_16')}`,
     tags: [['documented', 'CODATA'], ['hypothesis', 'a smallest length? open']]});
   const p = lay.pic, top = -14, bot = -35, x = p.x + (PH ? 130 : 160), y0 = p.y + 10, y1 = p.y + p.h - 20, yl = e => y0 + (top - e) / (top - bot) * (y1 - y0);
   const gr = ipt(L, ap, 'ruler', 'A ruler of sizes, from a proton down to the Planck length', {title: 'Twenty powers of ten', lead: sc('p.planck').blurb, facts: sc('p.planck').facts, box: {x: x - 20, y: y0, w: 40, h: y1 - y0}});
@@ -631,13 +632,13 @@ bnode('p.planck', {pv: () => IVIEW(), draw: (L, ap) => {
     if ((e - bot) % (PH ? 3 : 2) === 0) KTT(gr, x - 18, y + 6, `10${String(e).split('').map(ch => SUP[ch]).join('')} m`, 'i-n', 'end');
   }
   const mark = (e, lab, f, col, dy) => { const y = yl(e); S(E('circle', {cx: x, cy: y, r: 7, 'pointer-events': 'none'}, L), {fill: col || 'var(--c2)', stroke: 'var(--ink)', strokeWidth: 1.25}); KTT(L, x + 22, y + 6 + (dy || 0), lab, 'i-l halo', 'start', f); };
-  mark(Math.log10(1.68e-15), 'a proton', 'p.nucleon.1');
+  mark(Math.log10(0.84075e-15), 'a proton (radius)', 'p.nucleon.1');
   // (on a phone the two limits, 1.3 powers of ten apart, are labelled apart: review of 1 Oct, they collided)
-  const gapQE = yl(Math.log10(4e-20)) - yl(Math.log10(8.6e-19)), sep = Math.max(0, (PH ? 40 : 30) - gapQE) / 2;
-  mark(Math.log10(8.6e-19), `a quark's limit: ${on('qk_b')}`, onf('qk_b'), null, -sep);
-  mark(Math.log10(4e-20), `an electron's limit: ${on('el_b')}`, onf('el_b'), null, sep);
-  const gu = ipt(L, ap, 'unexplored', 'Sixteen powers of ten that no experiment has reached', {title: 'Unexplored', lead: 'Between the smallest limit any experiment has set and the Planck length lie some sixteen powers of ten: nobody knows what is there.', facts: ['p.planck.3', 'p.planck.4']});
-  const ua = yl(Math.log10(4e-20)) + 18, ub = yl(Math.log10(1.6e-35)) - 18;
+  const gapQE = yl(Math.log10(2e-20)) - yl(Math.log10(4.3e-19)), sep = Math.max(0, (PH ? 40 : 30) - gapQE) / 2;
+  mark(Math.log10(4.3e-19), `a quark's limit: ${on('qk_b')}`, onf('qk_b'), null, -sep);
+  mark(Math.log10(2e-20), `an electron's limit: ${on('el_b')}`, onf('el_b'), null, sep);
+  const gu = ipt(L, ap, 'unexplored', 'Fifteen powers of ten that no experiment has reached', {title: 'Unexplored', lead: 'Between the electron\'s limit, the smallest on this ruler, and the Planck length lie some fifteen powers of ten: nobody knows what is there.', facts: ['p.planck.3', 'p.planck.4', 'p.electron.2']});
+  const ua = yl(Math.log10(2e-20)) + 18, ub = yl(Math.log10(1.6e-35)) - 18;
   S(E('rect', {x: x + 18, y: ua, width: PH ? 300 : 420, height: ub - ua, rx: 8}, gu), {fill: 'var(--c4)', fillOpacity: 0.06, stroke: 'var(--c4)', strokeWidth: 1.25, strokeDasharray: '6 6'});
   KTT(gu, x + 34, (ua + ub) / 2 + 6, `unexplored: ${on('pl_16')}`, 'i-l');
   gu._box = {x: x + 18, y: ua, w: PH ? 300 : 420, h: ub - ua};
@@ -648,7 +649,7 @@ bnode('p.planck', {pv: () => IVIEW(), draw: (L, ap) => {
     {t: 'The floor', h: 1},
     {t: 'Here gravity, quantum mechanics and the speed of light meet: space and time themselves would need a quantum description that nobody has yet.', f: 'p.planck.1 p.planck.4'},
     {t: 'Whether anything can be smaller is open (a hypothesis, not a measurement).', f: 'p.planck.4'},
-    {t: `From here to the edge of what we can see is ${on('pl_617')}.`, f: onf('pl_617'), ph: false},
+    {t: `From here to the observable universe's diameter is ${on('pl_617')}.`, f: onf('pl_617'), ph: false},
   ]);
 }});
 
@@ -677,7 +678,7 @@ bnode('p.dopant', {pv: () => IVIEW(), draw: (L, ap) => {
   KTT(L, c.x + a * 0.3, c.y - a * 1.5, 'its fifth electron', 'i-l halo');
   inotes(L, lay, [
     {t: 'How the source and drain conduct', h: 1},
-    {t: `Freeing the spare electron takes ${on('dp_p')}, about twice the thermal energy at room temperature: nearly every dopant in a silicon site gives its electron up.`, f: `${onf('dp_p')} p.dopant.2`},
+    {t: `Freeing the spare electron takes ${on('dp_p')}, about twice the thermal energy at room temperature: nearly every dopant alone in a silicon site gives its electron up.`, f: `${onf('dp_p')} p.dopant.2`},
     {t: `In the source and drain up to ${on('dop_sd')} phosphorus atoms per cm³, ${on('sd_29')}; so many crowd in that only about ${on('sd_13')} is active.`, f: `${onf('dop_sd')} ${onf('sd_29')}`},
     {t: 'p-type transistors use boron (three outer electrons) in silicon-germanium instead.', f: 'dope.p-sd', ph: false},
   ]);

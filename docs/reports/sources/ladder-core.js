@@ -313,7 +313,9 @@ function openWrap(s, req) {
       if (run) run.style.strokeDashoffset = runL + 'px';
       Z.path = here.slice();
       // came round (the landing scale's panel says so and offers the ring); the loop crossed
-      WRAPIN = isWrap(here) || here.length === 1 ? null : pkeys(here); WRAPVIA = s.loop ? 'loop' : 'ring';
+      // (from the ring only at one of its ways back in, exitAt: a jump from the ring to any other scale is no arrival
+      // round the ring, review of 14 Oct)
+      WRAPIN = isWrap(here) || here.length === 1 || (!s.loop && !exitAt(here)) ? null : pkeys(here); WRAPVIA = s.loop ? 'loop' : 'ring';
       if (s.loop && to && LOOPX && LOOPX.dir === s.ldir) LOOPX = null;
       if (s.loop) loopNote(null, REDUCED ? 2600 : 1300);
       bindTrio(Z.path);
@@ -1379,7 +1381,7 @@ const LAZY = {st: D.lazy ? 'idle' : 'done', cbs: []};
 let LAZYLI = 0;
 /* a fact list's one line for its facts still on their way (factLi gives it once per list: the panel is drawn in one go) */
 /* a panel's line for facts not there yet: "loading the sources…", or "sources not loaded" */
-const lazyNote = ids => ((ids || []).some(f => !F[f]) && LAZY.st !== 'done' ? `<p class="pn-what lz">${LAZY.st === 'failed' ? 'Sources not loaded: the page\'s data folder is missing.' : 'Loading the sources…'}</p>` : '');
+const lazyNote = ids => ((ids || []).some(f => !F[f]) && LAZY.st !== 'done' ? `<p class="pn-what lz">${LAZY.st === 'failed' ? 'Sources not loaded: the page could not fetch its data file; reloading it tries again.' : 'Loading the sources…'}</p>` : '');
 const lazyLi = t => { const now = performance.now(); if (now - LAZYLI < 50) return ''; LAZYLI = now; return `<li class="fact lz"><span>${esc(t)}</span></li>`; };
 function lazyData(cb) {
   if (LAZY.st === 'done' || LAZY.st === 'failed') { if (cb) cb(); return; }

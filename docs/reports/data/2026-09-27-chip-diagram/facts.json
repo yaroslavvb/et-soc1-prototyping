@@ -9,26 +9,26 @@
    "research/asks.json",
    "../../sources/limits-of-observability.data.json (the hub rows the asks link to)"
   ],
-  "n_facts": 1117,
+  "n_facts": 1123,
   "kinds": {
    "derived": 136,
-   "measured": 214,
-   "spec": 293,
+   "measured": 215,
+   "spec": 296,
    "inferred": 196,
    "generic": 97,
    "unknown": 18,
-   "outside": 155,
+   "outside": 157,
    "owner": 3,
    "hypothesis": 5
   },
-  "n_num": 278,
+  "n_num": 280,
   "et_platform_head": "836a4ab"
  },
  "facts": {
   "L08": {
    "statement": "The 6-column shire grid spans about 22.2 mm, 86% of the die width; the rest is the memory shires and their LPDDR4x PHYs down each side.",
    "kind": "derived",
-   "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a row 'Shire-grid span'; docs/reports/2026-09-24-heat-per-mm.html:269-276 (§2 text)",
+   "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a row 'Shire-grid span'; docs/reports/2026-09-24-heat-per-mm.html:294-302 (§2 text)",
    "note": "Tile outlines at x ≈ 139.5–1649.5 px. The heat-per-mm drawing places tiles at the 3.73 mm period, so its grid looks slightly wider than 86% (its caption says so).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die",
    "page": "Heat per millimetre",
@@ -71,11 +71,12 @@
    "unit": "bits"
   },
   "L103": {
-   "statement": "A shire has 4 to_l3 master and 4 L3 slave lanes to the mesh; the lane is chosen by PA[7:6], so lines i and i+4 share a lane (a 1 KB load puts 4 of its 16 lines on each).",
+   "statement": "A shire has 4 to_l3 master and 4 L3 slave lanes to the mesh. An L3 request takes the lane of the bank it will use at its home, PA[12:11] under the default swizzle, so all 16 lines of an aligned 1 KB load share one lane; only a remote-scratchpad request takes the lane PA[7:6] names, so its lines i and i+4 share a lane (re-implementation RTL, to confirm in silicon).",
    "kind": "spec",
-   "source": "docs/reports/data/2026-09-24-wire-energy/report.json inputs.lanes (core-et-main shirecache_mesh_master.sv:141-153); docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b 'Lanes'",
+   "source": "docs/reports/data/2026-09-24-wire-energy/report.json inputs.lanes; external/core-et-main/hw/ip/shirecache/rtl/shirecache_mesh_master.sv:127-153 (the port is the low bits of req_bank_id: the L3 swizzle's bank, or PA[7:6] for a remote scratchpad); external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf p.6 (L3 requests go to banks by PA[12:11]); docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b 'Lanes' (which reads PA[7:6] for every request)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#lanes",
    "page": "Heat per millimetre",
+   "caveat": "reimpl",
    "topic": "NoC lanes",
    "value": 4,
    "unit": "lanes"
@@ -94,9 +95,9 @@
    "topic": "routing"
   },
   "L105": {
-   "statement": "Each mesh stop has 9 main-NoC routers (layers 0–8) plus one debug-NoC router; routers have 8 ports (H, E, S, W, N, I, J, K) with 4 VC slots each; route info, packet, sideband and data are parity-protected (no ECC).",
+   "statement": "Each minion, PCIe and I/O shire's mesh stop has 9 main-NoC routers (layers 0–8) plus one debug-NoC router; the NoC register map has 36 copies of layers 0–1 and 44 of layers 2–8, so the 8 memory shires' stops most likely have 7 (layers 2–8); routers have 8 ports (H, E, S, W, N, I, J, K) with 4 VC slots each; route info, packet, sideband and data are parity-protected (no ECC).",
    "kind": "spec",
-   "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b rows 'Main-NoC layers', 'Router ports and VCs', 'Error protection' (etsoc_shire_other_esr.h:3877-3981; noc_esr.h)",
+   "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b rows 'Main-NoC layers', 'Router ports and VCs', 'Error protection' (etsoc_shire_other_esr.h:3877-3981; noc_esr.h); external/et-platform/etsoc-hal/include/hwinc/noc_esr.h:15498, 15628, 15758, 16538 (NOC_ESR_ROUTER_n_ARRAY_COUNT); external/et-man/ET Programmer's Reference Manual.pdf p.479 (PCIe shire NOC_INT_STAT 8:0)",
    "note": "SYNTHESIS marks these 'U' (not independently re-verified); router-to-router flit width is unknown.",
    "topic": "structure",
    "value": 9,
@@ -136,7 +137,7 @@
   "L116": {
    "statement": "Inside a shire only the reduction-tree edges are fast: 68 cycles (113 ns) round trip for 28 pairs per shire (in every neighbourhood 0–1, 0–2, 0–4, 2–3, 4–5, 4–6, 6–7) and 114–115 cycles (190 ns) for all 468 others, in every pass on three cards.",
    "kind": "measured",
-   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:735-742; embedded nocbench-data primitives.tree_pairs, tree_hop (68.1), other_hop (114.1)",
+   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:774-780; embedded nocbench-data primitives.tree_pairs, tree_hop (68.1), other_hop (114.1)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#inside-a-shire-only-the-tree-edges-are-fast",
    "page": "On-chip communication",
    "cards": [
@@ -158,9 +159,9 @@
    "unit": "mm"
   },
   "L120": {
-   "statement": "One temperature sensor and one process detector in each minion shire and the I/O shire (36 each), 8 voltage-monitor blocks with up to 128 remote sense points, read by five PVT controllers in the I/O shire.",
+   "statement": "One temperature sensor and one process detector in each minion shire, the PCIe shire and the I/O shire (36 each, as PRM Fig. 1-3 draws them; the RTL removed the PCIe shire's pair and the firmware reads 35: fact L121), 8 voltage-monitor blocks with up to 128 remote sense points, read by five PVT controllers in the I/O shire.",
    "kind": "spec",
-   "source": "external/et-man/ET Programmer's Reference Manual.pdf p.17 §1.6 and p.18 Figure 1-3, Table 1-6",
+   "source": "external/et-man/ET Programmer's Reference Manual.pdf p.17 §1.6 and p.18 Figure 1-3, Table 1-6; external/core-et/rtl/inc/pvt_defines.vh:16-26 ('Pshire no longer has ts/pd (RTLMIN-3619)')",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief#sensors",
    "page": "Spatial temperature: a brief",
    "topic": "placement",
@@ -170,7 +171,7 @@
   "L121": {
    "statement": "35 sensors are read: TS0–TS31 for the compute shires (TSn in shire n), TS32 master, TS33 spare, TS34 I/O; the PCIe shire has no sensor.",
    "kind": "spec",
-   "source": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:786 (caption) and :789-790",
+   "source": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:822 (caption) and :827-828",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief#mesh",
    "page": "Spatial temperature: a brief",
    "topic": "placement",
@@ -180,7 +181,7 @@
   "L123": {
    "statement": "Per-shire on-die voltage at idle (34 minion shires): minion rail 517–521 mV, lows 513 (shires 0, 1, 2, 18) to 520, highs to 522; SRAM 703–707 mV; mesh 483–486 mV.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:41 (docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json)",
+   "source": "docs/findings/05-claims.md:49 (docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature",
    "page": "Power and temperature telemetry",
    "cards": [
@@ -198,9 +199,9 @@
    "topic": "floorplan"
   },
   "L24": {
-   "statement": "Top-row order conflicts between sources: PRM Fig. 1-3 has PCIe in the fifth column and I/O in the sixth; the die plot with its MPR caption has I/O (purple, Maxion) fifth and PCIe (orange) sixth. The two are mirror images.",
+   "statement": "Top-row order conflicts between sources: PRM Fig. 1-3 has PCIe in the fifth column and I/O in the sixth; the die plot with its MPR caption has I/O (purple, Maxion) fifth and PCIe (orange) sixth. Both put the pair at the east end of the top row: the die plot swaps the two cells (an east-west mirror would move them to the west end).",
    "kind": "spec",
-   "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a row 'Top-row order'; docs/reports/sources/heat-per-mm.script.js:102 ('the two sources disagree on the order')",
+   "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a row 'Top-row order'; docs/reports/sources/heat-per-mm.script.js:103 ('the two sources disagree on the order')",
    "note": "Unresolved; the heat-per-mm die drawing labels both cells 'PCIe or I/O'.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die",
    "page": "Heat per millimetre",
@@ -239,10 +240,16 @@
   "L31": {
    "statement": "The four grey cells of the logical map are (0,3), (0,4), (0,5) and (5,3). They hold the master shire, the spare shire, the PCIe shire and the I/O shire, which route traffic too; which is which was not measured.",
    "kind": "measured",
-   "source": "workloads/nocbench/analyze.py:50-51,60 (EMPTY); docs/reports/2026-09-18-et-soc1-on-chip-communication.html:719; docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:786",
-   "note": "analyze.py:50-51: marty1885's bandwidth data shows (5,3) routes traffic.",
+   "source": "workloads/nocbench/analyze.py:54-55, 64 (EMPTY); docs/reports/2026-09-18-et-soc1-on-chip-communication.html:749; docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:822",
+   "note": "analyze.py:54-55: marty1885's bandwidth data shows (5,3) routes traffic.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#where-the-shires-are-a-6-6-mesh",
    "page": "On-chip communication",
+   "cards": [
+    "a2",
+    "a3",
+    "a1c1"
+   ],
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
    "topic": "grey cells",
    "value": 4,
    "unit": "cells"
@@ -250,17 +257,17 @@
   "L32": {
    "statement": "Inferred identities: (0,4) and (0,5) are the I/O and PCIe shires, in some order (the two top-row cells beside each other on the die); (0,3) and (5,3) are the master and spare shires, in some order.",
    "kind": "inferred",
-   "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a row 'Logical map vs die'; docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:765-786 (cells labelled 'master or spare' and 'I/O or PCIe', 'inferred'); superseded 27 Sep by fw.grey-cells",
+   "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a row 'Logical map vs die'; docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:800-822 (cells labelled 'master or spare' and 'I/O or PCIe', 'inferred'); superseded 27 Sep by fw.grey-cells",
    "note": "Superseded 27 Sep: the firmware's maps name the four cells (fact fw.grey-cells): (0,3) the master (shire 32), (5,3) the spare (33), (0,4) the PCIe shire and (0,5) the I/O shire, the order of PRM Fig. 1-3. Timing a counter read on shire 32 confirms the master's cell on a card: E56 (29 Sep, docs/reports/data/2026-09-29-nocr) placed it there on aifoundry1 card 1 and decided nothing on aifoundry3 or aifoundry2.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief#mesh",
    "page": "Spatial temperature: a brief",
    "topic": "grey cells"
   },
   "L33": {
-   "statement": "The logical map appears to be the die turned a quarter: in map orientation the memory shires sit above and below the grid; on the die (and in the firmware's naming, 0–3 west, 4–7 east) they are the two side columns. Logical x runs north–south (die rows) and y runs east–west (die columns).",
+   "statement": "The logical map is the die view transposed (x and y swapped: a quarter turn plus a mirror): in map orientation the memory shires sit above and below the grid; on the die (and in the firmware's naming, 0–3 west, 4–7 east) they are the two side columns. Logical x runs north–south (die rows) and y runs east–west (die columns).",
    "kind": "inferred",
-   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:719; docs/reports/2026-09-19-et-soc1-memory-anatomy.html:780-783; docs/et-soc1-notes.md:104-105; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a row 'Logical map vs die'; settled 27 Sep by fw.map-match except the handedness (die.handedness)",
-   "note": "Settled 27 Sep except the east-west handedness: the firmware's NoC-spec map, renamed as the boot firmware renames the shires, equals the measured map in every pair distance with no rotation or mirror (fact fw.map-match); which handedness the silicon has is open (fact die.handedness). Distances alone cannot tell a rotation from a reflection.",
+   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:749; docs/reports/2026-09-19-et-soc1-memory-anatomy.html:812-815; docs/et-soc1-notes.md:117-118; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a row 'Logical map vs die'; settled 27 Sep by fw.map-match except the handedness (die.handedness)",
+   "note": "Settled 27 Sep except the east-west handedness: the firmware's NoC-spec map, renamed as the boot firmware renames the shires, equals the measured map in every pair distance with no rotation or mirror (fact fw.map-match), so mapping (x, y) to (die row x, die column y) is a transpose (a quarter turn plus a mirror); which handedness the silicon has is open (fact die.handedness). Distances alone cannot tell a rotation from a reflection.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#where-the-shires-are-a-6-6-mesh",
    "page": "On-chip communication",
    "topic": "orientation"
@@ -268,7 +275,7 @@
   "L34": {
    "statement": "Die-orientation 8 × 6 view (north row first, west column first; MS = memory shire, None = empty corner): None 0 8 3 grey grey grey None | MS0 24 16 4 12 20 28 MS4 | MS1 9 1 13 21 29 5 MS5 | MS2 25 17 14 22 30 6 MS6 | MS3 2 10 18 26 15 7 MS7 | None 11 19 27 grey 23 31 None.",
    "kind": "inferred",
-   "source": "derived from workloads/nocbench/analyze.py:52-60 (MARTY) with the mapping of docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a ('Logical x runs N–S and y runs E–W'; '(0,3) = top row col 4, (0,4)/(0,5) = I/O and PCIe, (5,3) = bottom row col 4') and the memory-shire fit of docs/reports/2026-09-19-et-soc1-memory-anatomy.html:864; settled 27 Sep by fw.map-match except the handedness (die.handedness)",
+   "source": "derived from workloads/nocbench/analyze.py:56-64 (MARTY) with the mapping of docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a ('Logical x runs N–S and y runs E–W'; '(0,3) = top row col 4, (0,4)/(0,5) = I/O and PCIe, (5,3) = bottom row col 4') and the memory-shire fit of docs/reports/2026-09-19-et-soc1-memory-anatomy.html:908; settled 27 Sep by fw.map-match except the handedness (die.handedness)",
    "note": "Settled 27 Sep except the east-west handedness: this view is the firmware's NoC-spec map after the boot-time renaming (fact fw.map-match), and the firmware names the grey cells (fw.grey-cells). Memory shire 2's row is still a tie-break of the fit (L42, ms2-forced).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die",
    "page": "Heat per millimetre",
@@ -284,7 +291,7 @@
   "L40": {
    "statement": "Fitting DRAM latency with one shared constant plus 12 cycles per hop, and each memory shire one hop outside the grid, puts memory shires 0–3 above the grid and 4–7 below it at x = 1…4 (logical frame): MS0 (1,-1), MS1 (2,-1), MS2 (3,-1), MS3 (4,-1), MS4 (1,6), MS5 (2,6), MS6 (3,6), MS7 (4,6); total squared error 2 cycles² over 32 home/memory-shire pairs.",
    "kind": "measured",
-   "source": "docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json decomp.ms_pos, decomp.ms_fit_sqerr; workloads/memprobe/analyze.py:111-127; docs/reports/2026-09-19-et-soc1-memory-anatomy.html:862-865",
+   "source": "docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json decomp.ms_pos, decomp.ms_fit_sqerr; workloads/memprobe/analyze.py:111-127; docs/reports/2026-09-19-et-soc1-memory-anatomy.html:906-909",
    "note": "The fit tried only positions one hop outside the grid; moving all eight one hop further out fits equally with a constant of 79.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#the-memory-shire-leg-91-cycles-plus-12-per-hop",
    "page": "Anatomy of a memory access",
@@ -315,7 +322,7 @@
   "L42": {
    "statement": "Memory shire 2's position is a tie-break: its four home shires all sit in column x = 4, so x = 3 or x = 5 above the grid, or (6, 0) beside it, fit equally.",
    "kind": "measured",
-   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:778-780; docs/reports/2026-09-18-et-soc1-on-chip-communication.html:719",
+   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:810-812; docs/reports/2026-09-18-et-soc1-on-chip-communication.html:749",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#trace-one-load",
    "page": "Anatomy of a memory access",
    "cards": [
@@ -327,7 +334,7 @@
   "L43": {
    "statement": "The memory shire that serves a line is picked by physical-address bits 8:6 and its L3 home shire by bits 10:6, so memory shire m serves the lines of home shires m, m+8, m+16 and m+24. Hardware read counters confirmed the memory-shire bits for 64 of 64 lines (and in all 15 passes of the three-card check).",
    "kind": "measured",
-   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:834, 858-861; docs/research/counters-and-dram.md:66-69",
+   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:873, 902-905; docs/research/counters-and-dram.md:66-69",
    "note": "'m, m+8, m+16, m+24' is derived from the two bit fields (bits 8:6 are the low three bits of 10:6).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#the-memory-shire-leg-91-cycles-plus-12-per-hop",
    "page": "Anatomy of a memory access",
@@ -342,7 +349,7 @@
   "L44": {
    "statement": "With the memory shires one hop outside the grid, the memory shire's position adds 12–84 cycles to a DRAM load (1–7 hops from the L3 home).",
    "kind": "derived",
-   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:743",
+   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:772",
    "note": "Recomputed from MARTY and ms_pos: home→memory-shire distance is 1–7 hops, mean 2.625.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#trace-one-load",
    "page": "Anatomy of a memory access",
@@ -350,9 +357,9 @@
    "unit": "cycles"
   },
   "L45": {
-   "statement": "Whole DRAM load: latency = 110 + 12·hops(requester → L3 home) + 91 + 12·hops(L3 home → memory shire). Left as fitted, the model is within ±3 cycles for 97% of loads on aifoundry2, 93% on aifoundry3 and 94% on aifoundry1's card 1.",
+   "statement": "Whole DRAM load: latency = 110 + 12·hops(requester → L3 home) + 91 + 12·hops(L3 home → memory shire). Left as fitted, the model is within ±3 cycles for 97% of lines (each line's fastest of three loads) on aifoundry2, 93% on aifoundry3 and 94% on aifoundry1's card 1; on the 19 September fitting run, 83% of single loads were within ±3 cycles (aifoundry2).",
    "kind": "measured",
-   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:866-873",
+   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:910-917",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#the-memory-shire-leg-91-cycles-plus-12-per-hop",
    "page": "Anatomy of a memory access",
    "cards": [
@@ -365,9 +372,9 @@
    "unit": "cycles"
   },
   "L46": {
-   "statement": "Of the 91-cycle memory-shire constant (152 ns), the DRAM chip accounts for about 25–28 cycles (activate tRCD 11 cycles = 18 ns, 19.3 ns read latency, one or two 4.3 ns bursts); at most ~63–66 cycles (~105–110 ns) are the memory shire itself: controller queue, PHY and the crossings between the 933 MHz DDR clock and the mesh.",
+   "statement": "Of the 91-cycle memory-shire constant (152 ns), the DRAM chip accounts for about 28 cycles (activate tRCD 11 cycles = 18 ns, 19.3 ns read latency, the two 4.3 ns bursts of a 64-byte line); the rest, at most ~63 cycles (~105 ns), is the L3 home's miss handling (about 12 cycles by the spec: an L3 miss is 42 shire clocks against 30 for a hit) and the memory shire: controller queue, PHY and the crossings between the 933 MHz DDR clock and the mesh.",
    "kind": "derived",
-   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:888-893",
+   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:937-942; external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf p.11 Table 1 (L3 read hit 30 shire clocks, L3 read miss 42 plus the NoC and memory)",
    "note": "'At most' because each hop further out moves 12 cycles from the constant into the mesh legs.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#the-memory-shire-leg-91-cycles-plus-12-per-hop",
    "page": "Anatomy of a memory access",
@@ -406,7 +413,7 @@
   "L70": {
    "statement": "TensorSend 32 B round trip between shires = 150 + 12.02 × (Manhattan hops) cycles at 600 MHz, worst residual 1.1–1.4 cycles over all 496 pairs, on each of three cards.",
    "kind": "measured",
-   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:725 and embedded nocbench-data v3.cards.<card>.matrices['matrix-pingpong'].b; docs/findings/05-claims.md:412",
+   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:764 and embedded nocbench-data v3.cards.<card>.matrices['matrix-pingpong'].b; docs/findings/05-claims.md:446",
    "note": "Per card: aifoundry2 149.99 + 12.017 (worst 1.40); aifoundry3 150.01 + 12.015 (worst 1.08); aifoundry1-c1 150.06 + 12.017 (worst 1.10). First session (aifoundry2, 18 Sep): 149.97 + 12.021, worst 1.13.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#where-the-shires-are-a-6-6-mesh",
    "page": "On-chip communication",
@@ -423,7 +430,7 @@
   "L71": {
    "statement": "Intercept of the between-shire round trip: 150 cycles (the fixed cost of leaving and re-entering shires).",
    "kind": "measured",
-   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:725; docs/findings/05-claims.md:412 (149.96–150.08 over passes)",
+   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:764; docs/findings/05-claims.md:446 (149.96–150.08 over passes)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#where-the-shires-are-a-6-6-mesh",
    "page": "On-chip communication",
    "cards": [
@@ -439,7 +446,7 @@
   "L72": {
    "statement": "Each mesh hop adds 20 ns round trip: 12 minion cycles at 600 MHz, 16 at 800; a hop is 20 ns at either clock. In time, 250 ns + 20 ns per hop across shires, r² 0.9999 over 496 pairs.",
    "kind": "measured",
-   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:709 (KPI); docs/reports/2026-09-19-et-soc1-memory-anatomy.html:841-844; docs/et-soc1-notes.md:90-91",
+   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:739 (KPI); docs/reports/2026-09-19-et-soc1-memory-anatomy.html:880-883; docs/et-soc1-notes.md:98-99",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
    "cards": [
@@ -455,7 +462,7 @@
   "L79": {
    "statement": "Where the requester sits matters: L3 (4 MB working set) 168.8–168.9 cycles from shires 0 and 31, 160.6–160.7 from 7, 159.1–159.2 from 24; DRAM (256 MB) 296.6–297.1 from 0 and 31, 287.2–288.8 from 7 and 24. L3(0) − L3(24) = 9.69–9.73 cycles on the three cards.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:410 (V3R/lat.json LAT-M2)",
+   "source": "docs/findings/05-claims.md:444 (V3R/lat.json LAT-M2)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#scratchpad-latency-across-the-mesh",
    "page": "Memory hierarchy",
    "cards": [
@@ -471,7 +478,7 @@
   "L80": {
    "statement": "Why: the mean distance to the 32 L3 slices is 5.000 hops from shire 0, 4.3125 from 7, 4.1875 from 24 and 5.000 from 31 (0 and 31 sit in opposite corners of the map); the difference 0 − 24 is 0.8125 hops × 12 = 9.75 cycles, matching the measured 9.7.",
    "kind": "derived",
-   "source": "computed here from workloads/nocbench/analyze.py MARTY (hops) and the 12 cycles/hop of docs/reports/2026-09-19-et-soc1-memory-anatomy.html:837",
+   "source": "computed here from workloads/nocbench/analyze.py MARTY (hops) and the 12 cycles/hop of docs/reports/2026-09-19-et-soc1-memory-anatomy.html:876",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#scratchpad-latency-across-the-mesh",
    "page": "Memory hierarchy",
    "topic": "requester position",
@@ -479,9 +486,9 @@
    "unit": "cycles"
   },
   "L86": {
-   "statement": "Ring energy slope per mean hop by card: aifoundry2 1.78 [1.31–2.25], aifoundry3 1.73 [0.48–2.97], aifoundry1 card 1 1.74 [0.95–2.53] pJ/B (99% intervals, 6 passes each); no pair of cards differs; pooled 1.75 (the page gives ±50%).",
+   "statement": "Ring energy slope per mean hop by card: aifoundry2 1.78 [1.31–2.25], aifoundry3 1.73 [0.48–2.97], aifoundry1 card 1 1.74 [0.95–2.53] pJ/B (99% intervals, 6 passes each); no pair of cards differs; pooled 1.75, 1.40–2.10 at 99% over the 18 passes (±20%).",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:450 (V3R/rl.json RL-a)",
+   "source": "docs/findings/05-claims.md:489 (V3R/rl.json RL-a); docs/reports/2026-09-18-et-soc1-on-chip-communication.html:923 (pooled 1.75, 1.40–2.10 at 99% over the 18 passes)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#energy-per-byte-moved",
    "page": "On-chip communication",
    "cards": [
@@ -497,7 +504,7 @@
   "L87": {
    "statement": "Inside a shire, messaging costs 0.7–2.2 pJ per byte with 1 KB messages, busy cores included; a byte costs 6–26× more once it crosses the shire boundary.",
    "kind": "measured",
-   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:703 (lede), :711 (KPI), :783",
+   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:733 (lede), :741 (KPI), :831",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#energy-per-byte-moved",
    "page": "On-chip communication",
    "cards": [
@@ -512,7 +519,7 @@
   "L88": {
    "statement": "A random bit moved 1 mm over free links at 0.485 V: mesh rail 36.1 [35.2–37.0] (aifoundry2), 35.8 [35.1–36.5] (aifoundry3), 38.1 [26.3–49.9] fJ (aifoundry1 card 1); board power 46.7, 44.4, 51.1 fJ.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:341, 444 (V3R/wire.json WIRE-P1-16/P11a, P11b); docs/reports/data/2026-09-24-wire-energy/report.json headline",
+   "source": "docs/findings/05-claims.md:362, 482 (V3R/wire.json WIRE-P1-16/P11a, P11b); docs/reports/data/2026-09-24-wire-energy/report.json headline",
    "note": "36.2 fJ is the two-card (E32) mesh-rail value: 24.6 data + 11.7 fixed.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm",
    "page": "Heat per millimetre",
@@ -529,7 +536,7 @@
   "L91": {
    "statement": "The shire boundary is a bandwidth cliff: with every minion sending 1 KB messages the chip moves 1.1–3.0 TB/s inside shires but 0.09–0.16 TB/s between them (7–34× less); a TensorLoad from a remote scratchpad does 0.96 TB/s at 600 MHz.",
    "kind": "measured",
-   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:703, 775, 816; embedded nocbench-data scp_remote_gbps_600",
+   "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:733, 822, 866; embedded nocbench-data scp_remote_gbps_600",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#message-size-and-bandwidth",
    "page": "On-chip communication",
    "cards": [
@@ -554,7 +561,7 @@
   "L93": {
    "statement": "Handing a result to the next shire instead of through DRAM: aifoundry2 111.3 vs 8.61 pJ/B, aifoundry3 107.5 vs 8.27, aifoundry1 card 1 129.9 vs 9.89; DRAM ÷ next shire 12.9–13.1× on every card; own scratchpad 4.05–4.86 pJ/B.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:451 (V3R/rl.json)",
+   "source": "docs/findings/05-claims.md:490 (V3R/rl.json)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay",
    "page": "Hand it to the next shire: on-chip relay vs DRAM",
    "cards": [
@@ -568,17 +575,18 @@
    "unit": "× (pooled DRAM ÷ next shire)"
   },
   "L94": {
-   "statement": "In the relay, which shire receives the slab moves bandwidth by up to a quarter: 593 GB/s to the next shire by ID (3.5 hops on average, longest hand-off 10) to 733 GB/s at 16 shire IDs (2.1, longest 6); bandwidth falls with the longest hand-off (r = −0.99), about 3,200–3,300 cycles of stage time per hop of it.",
+   "statement": "In the relay, which shire receives the slab moves bandwidth by up to a quarter: 593 GB/s to the next shire by ID (3.5 hops on average, longest hand-off 10) to 734 GB/s at 16 shire IDs (2.1, longest 6); bandwidth falls with the longest hand-off (r = −0.99), about 3,200–3,300 cycles of stage time per hop of it.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:254 (DATAO/onchip.json distance[])",
+   "source": "docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json distance[].by_card (version 3, three cards); docs/findings/05-claims.md:266 (the 22 Sep session: 733)",
    "note": "A correlation over five offsets, not a controlled test (the claims row says so).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay#how-far-the-slab-moves-does-not-change-the-bandwidth",
    "page": "Hand it to the next shire: on-chip relay vs DRAM",
    "cards": [
     "a2",
-    "a3"
+    "a3",
+    "a1c1"
    ],
-   "card": "aifoundry2, aifoundry3",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
    "topic": "relay distance",
    "unit": "GB/s"
   },
@@ -591,7 +599,7 @@
   "addr.load-model": {
    "statement": "Measured load-to-use model from any requesting shire at 600 MHz: L1 5; L2 47-48; L3 110 + 12·hops(requester, home = PA[10:6]); DRAM 110 + 12·hops(requester, home) + 91 + 12·hops(home, memory shire = PA[8:6]). The mesh round trip is paid twice on a DRAM load: to the L3 home, then on to the memory shire.",
    "kind": "measured",
-   "source": "docs/et-soc1-notes.md:164-166; anatomy page §1 'Trace one load' and headline tiles; docs/findings/05-claims.md:403-404 (V3 check: L3 within ±4 cycles for 99.4-99.97% of lines, DRAM within ±3 for 93-97%)",
+   "source": "docs/et-soc1-notes.md:177-179; anatomy page §1 'Trace one load' and headline tiles; docs/findings/05-claims.md:434-435 (V3 check: L3 within ±4 cycles for 99.4-99.97% of lines, DRAM within ±3 for 93-97%)",
    "note": "The model counts hops, not routes. The route order inside the mesh was measured on 29 September (fact L104): each request x first, each reply y first.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#trace-one-load",
    "page": "Anatomy of a memory access",
@@ -623,7 +631,7 @@
   "ar.tree": {
    "statement": "The allreduce benchmark's tree: at level h, a minion whose ID has bit h as its lowest set bit sends its partial sum to the minion with that bit cleared (TensorReduce), levels 0 to 9, and the result comes back down the same tree (TensorBroadcast). Levels 0-2 join a neighbourhood's 8 minions along the fast network's edges, levels 3-4 its 4 neighbourhoods, levels 5-9 the 32 shires, rooted at minion 0 of shire 0.",
    "kind": "spec",
-   "source": "workloads/nocbench/kernel/nocbench.c:279-288 (tree: TensorReduce for levels 0..top, TensorBroadcast back), :516-521 ('Minion m receives at levels below ctz(m) and sends at ctz(m); the root (m = 0) receives at every level'); fact neigh.fln-edges for the tree edges",
+   "source": "workloads/nocbench/kernel/nocbench.c:279-288 (tree: TensorReduce for levels 0..top, TensorBroadcast back), :516-522 ('Minion m receives at levels below ctz(m) and sends at ctz(m); the root (m = 0) receives at every level'); fact neigh.fln-edges for the tree edges",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
    "topic": "sync",
@@ -733,7 +741,7 @@
   "board.meters": {
    "statement": "The PMIC meters the 12 V input and three regulators (minion, NoC, SRAM); DDR, VDDQ, VDDQLP, PCIe logic, PCIe and Maxion rails have set points only. The service processor forwards a new value about every 133 ms (aifoundry2; 224 ms quiet pass on aifoundry3).",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:330, 438 (docs/reports/data/2026-09-25-claims-v3/results/tel.json TEL-P1); docs/research/power-telemetry.md:39-56",
+   "source": "docs/findings/05-claims.md:349, 476 (docs/reports/data/2026-09-25-claims-v3/results/tel.json TEL-P1); docs/research/power-telemetry.md:39-56",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain",
    "page": "Limits of observability",
    "cards": [
@@ -759,7 +767,7 @@
   "bw-dram": {
    "statement": "DRAM streaming: 76 GB/s for the whole chip (0.124 B per minion-cycle), about 64% of the 119 GB/s that 16 x 16-bit channels carry at 3,733 MT/s; about a twentieth of an A100.",
    "kind": "measured",
-   "source": "ridge-data: levels[dram].measured (bpc 0.1235, gbps 75.9), .spec (gbps 119.5; datasheet max 136.5); docs/findings/05-claims.md:370",
+   "source": "ridge-data: levels[dram].measured (bpc 0.1235, gbps 75.9), .spec (gbps 119.5; datasheet max 136.5); docs/findings/05-claims.md:398",
    "note": "Tensor stores to DRAM also 76 GB/s on all three cards; stores through the L1 only 27 GB/s (ridge-data limits.write_gbps). The runtime's 128,000 MB/s is a firmware placeholder constant.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points",
    "page": "Ridge points",
@@ -793,7 +801,7 @@
   "bw-l2": {
    "statement": "L2 cache, 1 KB tensor loads by every minion: 2.45 TB/s chip-wide, 4.0 B per minion-cycle (128 B per shire-cycle), half the four banks' 256 B per shire-cycle spec.",
    "kind": "measured",
-   "source": "ridge-data: levels[l2].measured (bpc 3.999, gbps 2,452), .spec.bpc 8.0; docs/findings/05-claims.md:370",
+   "source": "ridge-data: levels[l2].measured (bpc 3.999, gbps 2,452), .spec.bpc 8.0; docs/findings/05-claims.md:398",
    "note": "A lone minion reads 6.4 B per cycle from L2 or scratchpad on all three cards (ridge points, three-card check).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points",
    "page": "Ridge points",
@@ -914,7 +922,7 @@
   "chip-minions": {
    "statement": "Kernels run on 1,024 minions (32 compute shires x 32) of the 1,088 on the chip; every measurement here uses them at 600 MHz.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:30",
+   "source": "docs/findings/05-claims.md:38",
    "note": "The other 64 are the master and spare shires (34 minion shires in all).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability",
    "page": "Limits of observability",
@@ -929,7 +937,7 @@
   "chip.advertised-range": {
    "statement": "Advertised operating range: 300-800 MHz and about 40 W for the open-sourced platform (AI Foundry); Esperanto's papers give 300 MHz to 2 GHz.",
    "kind": "spec",
-   "source": "external/et-man/ET Introduction.pdf, pdf p.2; docs/findings/01-resources.md:101-103 (R6)",
+   "source": "external/et-man/ET Introduction.pdf, pdf p.2; docs/findings/01-resources.md:121-122 (R6)",
    "note": "These cards' firmware only offers 600, 700 and 800 MHz (see clock.minion-opps).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power",
    "page": "Why is it low power?",
@@ -974,7 +982,7 @@
   "chip.die-area": {
    "statement": "Die area 570 mm².",
    "kind": "spec",
-   "source": "docs/findings/05-claims.md:513; docs/findings/01-resources.md:234 (R14: Hot Chips 33 slide 20; IEEE Micro 42(3) p.37)",
+   "source": "docs/findings/05-claims.md:832; docs/findings/01-resources.md:266 (R14: Hot Chips 33 slide 20; IEEE Micro 42(3) p.37)",
    "note": "External, vendor-published.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die",
    "page": "Heat per millimetre",
@@ -996,7 +1004,7 @@
   "chip.die-revision": {
    "statement": "The datasheet's package marking example gives die revision A0; the driver reports arch_rev 0 on every card. Whether the lab cards are A0 has not been confirmed by AI Foundry.",
    "kind": "spec",
-   "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.34 (Table 10-1); docs/reports/data/2026-09-22-cards/driver_config.json `arch_rev`; docs/et-soc1-notes.md:342",
+   "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.34 (Table 10-1); docs/reports/data/2026-09-22-cards/driver_config.json `arch_rev`; docs/et-soc1-notes.md:364",
    "cards": [
     "a2",
     "a3",
@@ -1006,7 +1014,7 @@
    "topic": "physical"
   },
   "chip.harts": {
-   "statement": "Software sees 2,048 harts on the 32 compute shires: hartid = shire × 64 + minion × 2 + thread (shire = hartid >> 6, neighbourhood = (hartid mod 64) >> 4, minion = hartid >> 1, thread = hartid & 1).",
+   "statement": "Software sees 2,048 harts on the 32 compute shires: hartid = shire × 64 + minion × 2 + thread (shire = hartid >> 6, neighbourhood = (hartid mod 64) >> 4, minion = (hartid mod 64) >> 1 (the firmware's get_minion_id(), hartid >> 1, numbers the minions chip-wide), thread = hartid & 1).",
    "kind": "spec",
    "source": "docs/et-soc1-notes.md:22; external/et-platform/et-common-libs/include/etsoc/isa/hart.h:50,62,74,86",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu",
@@ -1018,7 +1026,7 @@
   "chip.hop-pitch": {
    "statement": "Shire tile pitch 3.73 mm east-west and 3.70 mm north-south, so one mesh hop is about 3.72 mm (3.64-3.74 over three readings).",
    "kind": "inferred",
-   "source": "docs/findings/05-claims.md:340; docs/reports/data/2026-09-24-wire-energy/report.json `inputs.hop_mm`",
+   "source": "docs/findings/05-claims.md:361; docs/reports/data/2026-09-24-wire-energy/report.json `inputs.hop_mm`",
    "note": "Kind A (estimate from the die plot) in the claims index.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die",
    "page": "Heat per millimetre",
@@ -1099,7 +1107,7 @@
   "chip.process": {
    "statement": "TSMC 7 nm, over 24 billion transistors, 89 mask layers (Esperanto, Hot Chips 33 and IEEE Micro 2022).",
    "kind": "spec",
-   "source": "docs/findings/05-claims.md:513; docs/findings/01-resources.md:91-104 (R6)",
+   "source": "docs/findings/05-claims.md:832; docs/findings/01-resources.md:110-123 (R6)",
    "note": "External, published by the vendor; not checked on these cards.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power",
    "page": "Why is it low power?",
@@ -1159,7 +1167,7 @@
   "clock.minion-opps": {
    "statement": "Operating points the firmware uses: 600 MHz at 517 mV, 700 MHz at 568 mV, 800 MHz at 618 mV (measured on die); every table in the reports is at 600 MHz, where a warm card sits.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:28-29, 171 (docs/reports/data/2026-09-21-horace-aifoundry2/cold1/telemetry.jsonl.gz `mhz.minion`, `die_mv.minion`)",
+   "source": "docs/findings/05-claims.md:36-37, 182 (docs/reports/data/2026-09-21-horace-aifoundry2/cold1/telemetry.jsonl.gz `mhz.minion`, `die_mv.minion`)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured",
    "page": "The DVFS loop and its leakage",
    "cards": [
@@ -1172,17 +1180,24 @@
    "unit": "MHz"
   },
   "die.handedness": {
-   "statement": "The die view follows the firmware's NoC-spec drawing and the Programmer's Reference Manual's Fig. 1-3: memory shires 0-3 on the west, PCIe then I/O at the east end of the top row. The published die plot draws I/O then PCIe, its mirror image; no document in the open drop says which handedness the silicon has.",
+   "statement": "The die view follows the firmware's NoC-spec drawing and the Programmer's Reference Manual's Fig. 1-3: memory shires 0-3 on the west, PCIe then I/O at the east end of the top row. The published die plot (IEEE Micro 2022 Fig. 7, MPR Dec 2020 Fig. 1) also puts the PCIe and I/O cells at the east end of the top row, in the other order, I/O then PCIe (fact L24), and labels no memory shire: it is not the mirror image. Its own orientation is not stated, and no document in the open drop says which handedness the silicon has.",
    "kind": "inferred",
    "source": "docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json; fact L24 (PRM Fig. 1-3 against the die plot)",
    "topic": "placement"
   },
   "dram.capacity": {
-   "statement": "32 GB of LPDDR4X on these V3 cards (Micron part): 2 GB per channel; the chip supports 8 to 32 GB.",
-   "kind": "spec",
-   "source": "external/et-man/ET-PCIe-Dev-Card-V3.pdf, pdf p.1; docs/research/counters-and-dram.md:289; external/et-man/ET Programmer's Reference Manual.pdf, pdf p.342 and p.552; external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.30",
+   "statement": "32 GB of LPDDR4X on aifoundry2 and aifoundry3, 2 GB per channel, and 16 GB on aifoundry1 card 1, 1 GB per channel, as the firmware reads the DRAM's density at boot and the runtime reports it. The vendor's document names its 32 GB V3 card a Micron part; which maker's parts the lab cards carry is not recorded. The datasheet gives the chip 4 GB (2 Gb per channel) at full bandwidth up to 32 GB (16 Gb per channel); the PRM gives products 8 to 32 GB, the range mprot's dram_size field addresses.",
+   "kind": "measured",
+   "source": "docs/reports/data/2026-09-27-pcie/raw/<card>/r1/info.err ('DRAM size (B)'); external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:389-420 (the MR8 density sets ddr_mem_size); external/et-platform/device-minion-runtime/src/MasterMinion/src/config/mm_config.c:74-92 (the host's share of it); external/et-man/ET-PCIe-Dev-Card-V3.pdf, pdf p.1 ('32GB (Micron part) v3 card Bringup Planning'); docs/research/counters-and-dram.md:289; external/et-man/ET Programmer's Reference Manual.pdf, pdf p.342 and p.552; external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.30",
+   "note": "The runtime's DRAM size is 34,265,366,528 B on aifoundry2 and aifoundry3 and 17,085,497,344 B on aifoundry1 card 1 in every raw log that prints it (18-29 Sep): 32 and 16 GiB less the 90 MiB the device keeps for itself. aifoundry1's card 0 has no such record.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#the-hierarchy-as-a-spec-sheet",
    "page": "Memory hierarchy",
+   "cards": [
+    "a2",
+    "a3",
+    "a1c1"
+   ],
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
    "topic": "memory",
    "value": 32,
    "unit": "GB"
@@ -1217,9 +1232,9 @@
    "topic": "observability"
   },
   "dram.leg": {
-   "statement": "Past the L3, the DRAM leg costs 91 + 12 × hops(home shire, memory shire) cycles; about 25 of the 91 are the DRAM chip (activate 11, read and burst 14) and about 66 the memory shire. Only 25-28 of a ~300-cycle DRAM load are the DRAM's own timing.",
+   "statement": "Past the L3, the DRAM leg costs 91 + 12 × hops(home shire, memory shire) cycles; about 28 of the 91 are the DRAM chip (activate 11, read latency and two bursts 17) and at most about 63 the L3 home's miss handling and the memory shire. Only about 28 of a ~300-cycle DRAM load are the DRAM's own timing.",
    "kind": "measured",
-   "source": "docs/et-soc1-notes.md:166; docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json `decomp.ms_const`; cards.json `ms_const` (90-91 on three cards); docs/findings/05-claims.md:404",
+   "source": "docs/et-soc1-notes.md:179; docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json `decomp.ms_const`; cards.json `ms_const` (90-91 on three cards); docs/findings/05-claims.md:435",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#the-memory-shire-leg-91-cycles-plus-12-per-hop",
    "page": "Anatomy of a memory access",
    "cards": [
@@ -1235,7 +1250,7 @@
   "dram.memshire-select": {
    "statement": "The memory shire serving a line is PA[8:6] (so it is always the L3 home shire's low three bits) and the controller/channel within it is PA[9]: consecutive 64 B lines rotate over the 8 memory shires, the two channels alternate every 512 B.",
    "kind": "measured",
-   "source": "external/et-platform/device-minion-runtime/tools/zebumem.c:67-72, 120-121; external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.26-27 (§1.4.3: 'the Memory Shire is selected by the NoC using bits [8:6]'); confirmed by the memory shires' read counters (syscall 10), docs/et-soc1-notes.md:166",
+   "source": "external/et-platform/device-minion-runtime/tools/zebumem.c:67-72, 120-121; external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.26-27 (§1.4.3: 'the Memory Shire is selected by the NoC using bits [8:6]'); confirmed by the memory shires' read counters (syscall 10), docs/et-soc1-notes.md:179",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#trace-one-load",
    "page": "Anatomy of a memory access",
    "cards": [
@@ -1263,7 +1278,7 @@
   "dram.placeholder": {
    "statement": "The 128,000 MB/s DRAM bandwidth the runtime reports is a placeholder constant in the service-processor firmware, not a measurement.",
    "kind": "spec",
-   "source": "external/et-platform/device-bootloaders/src/ServiceProcessorBL2/include/mem_controller.h:37 (DDR_BANDWIDTH); docs/findings/05-claims.md:499; driver_config.json `ddr_mb_s`",
+   "source": "external/et-platform/device-bootloaders/src/ServiceProcessorBL2/include/mem_controller.h:37 (DDR_BANDWIDTH); docs/findings/05-claims.md:818-819; driver_config.json `ddr_mb_s`",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#the-hierarchy-as-a-spec-sheet",
    "page": "Memory hierarchy",
    "topic": "observability",
@@ -1273,7 +1288,7 @@
   "dram.rate-card": {
    "statement": "The firmware hard-codes the 933 MHz DDR configuration on every card (controller clock 933 MHz, DRAM clock 1,866 MHz, 3,733 MT/s); telemetry reads mhz.ddr = 933 in every sample.",
    "kind": "measured",
-   "source": "external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:41-42, 114-116, 225-228; docs/research/counters-and-dram.md:291-292; docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), field `mhz.ddr`",
+   "source": "external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:643-649 (configure_memshire: .frequency = DDR_FREQUENCY_933MHZ, '//TODO: decide ddr_mode'); 41-42, 114-116, 225-228 (the 933 MHz PLL mode and controller config); docs/research/counters-and-dram.md:291-292; docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), field `mhz.ddr`",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy",
    "page": "Anatomy of a memory access",
    "cards": [
@@ -1287,7 +1302,7 @@
   "dram.rate-datasheet": {
    "statement": "Datasheet rate: 4,266 MT/s, printed as 133 GB/s; 16 × 2 B × 4.266 GT/s is 136.5 GB/s (Esperanto's papers say 137).",
    "kind": "spec",
-   "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.4 (§1); docs/et-soc1-notes.md:20; docs/findings/05-claims.md:514",
+   "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.4 (§1); docs/et-soc1-notes.md:20; docs/findings/05-claims.md:833",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points#ridge-points-by-level",
    "page": "Ridge points",
    "topic": "bandwidth",
@@ -1297,7 +1312,7 @@
   "dram.row-bits": {
    "statement": "Inside a channel: bank PA[12:10], column PA[17:13] (plus PA[5:1] within the line), row PA[18] and up (PA[34:18]); 8 banks, 2 KB page, one rank per channel.",
    "kind": "measured",
-   "source": "docs/et-soc1-notes.md:167; docs/research/counters-and-dram.md:289, 362-370",
+   "source": "docs/et-soc1-notes.md:180; docs/research/counters-and-dram.md:289, 362-370",
    "note": "Row/bank bits measured with one address bit flipped; the controller's ADDRMAP decode is the research agent's inference.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#which-address-bits-share-a-row",
    "page": "Anatomy of a memory access",
@@ -1312,7 +1327,7 @@
   "dram.unmetered": {
    "statement": "About 70% of a DRAM byte's energy lands on no metered rail (DDR PHY, I/O rail and the DRAM chips); no meter covers the memory shires or DRAM.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:308; anatomy page headline tiles",
+   "source": "docs/findings/05-claims.md:323; anatomy page headline tiles",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes",
    "page": "Anatomy of a memory access",
    "cards": [
@@ -1344,7 +1359,7 @@
   "e-awake": {
    "statement": "An awake minion (addi loop) costs about 2 mW (1.87 mW one hart, 3.02 mW both harts, aifoundry2); 5.1 / 6.6 pJ per instruction pooled over three cards.",
    "kind": "measured",
-   "source": "docs/energy-manual/02-awake.md:9",
+   "source": "docs/energy-manual/02-awake.md:9-10",
    "note": "Keeping 1,024 minions awake for a second is 2-3.1 J, against 36 J for the card at 80 C.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual",
    "page": "The energy manual",
@@ -1458,9 +1473,9 @@
    "unit": "pJ/instruction"
   },
   "e-fexp-ps": {
-   "statement": "Transcendental fexp.ps (8 lanes): 155.4 pJ [147.3-162.4] on random data at a quarter the issue rate; flog.ps 218 pJ. No hardware divide or square root: they trap.",
+   "statement": "Transcendental fexp.ps (8 lanes): 155.4 pJ [147.3-162.4] on random data at a quarter the issue rate; flog.ps 218 pJ. No hardware float or vector divide or square root: they trap (the scalar integer div and rem run, at 141-157 pJ).",
    "kind": "measured",
-   "source": "docs/energy-manual/03-instructions.md:22",
+   "source": "docs/energy-manual/03-instructions.md:22; docs/energy-manual/03-instructions.md:25, 33 (every float and vector divide and square root traps; 141-157 pJ for the 64-bit divides and remainders)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual",
    "page": "The energy manual",
    "cards": [
@@ -1541,7 +1556,7 @@
   "e-l1-fill": {
    "statement": "Filling one 64 B line from the scratchpad into the L1: 101 pJ on zeros, 238 pJ on random data (1.6 and 3.7 pJ per byte of line).",
    "kind": "derived",
-   "source": "docs/energy-manual/04a-fine-grain.md:42",
+   "source": "docs/energy-manual/04a-fine-grain.md:44",
    "note": "Difference of catalogue strides (stride64 - stride32) x 2; per card random a2 221, a3 223, a1c1 271 pJ.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual",
    "page": "The energy manual",
@@ -1781,7 +1796,9 @@
    "statement": "Scatter-add alternatives, updates/s and nJ per update: gather + add + scatter in L1 139 G/s at 36 pJ; in DRAM 0.42 G/s at 22.2 nJ; packed atomic famoaddl.pi on a shire table 12.7 G/s at 0.39 nJ; amoaddg.w on a chip table 2.79 G/s at 1.12 nJ.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-ADD\"].rows[] (updates_per_s, nj_per_update, pooled over 9 passes)",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card). Reference: spread global atomics 1.92 G/s at 1.16 nJ (energy manual section 6).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card). Reference: spread global atomics 1.92 G/s at 1.16 nJ (energy manual section 6).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1796,7 +1813,9 @@
    "statement": "Card to card, gathers and scatters: elements/s identical (median ratio 1.000); pJ per element aifoundry3/aifoundry2 0.965, aifoundry1-c1/aifoundry2 1.085 (median over 100 configurations).",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-CARD\"].ratios",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1811,7 +1830,9 @@
    "statement": "Random gathers from DRAM (256 KB per hart) move whole lines at 76.4 GB/s of line traffic, the chip's 76 GB/s DRAM stream, on every card (PASS): 1.19 G useful 4-byte elements/s.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-DRAM\"].per_card.<card>.line_bytes_per_s",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1826,7 +1847,9 @@
    "statement": "Gather (fgw.ps, 32-bit elements) from DRAM (256 KB table per hart), random lines: 1.19 G elements/s chip-wide, 9,830 pJ per element [9,215-10,343] (per card: a2 9,873, a3 9,320, a1c1 10,298); 8,232 cycles per instruction per hart.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-RATE\"].pooled[\"gs/E/fgw.ps/dram-256K/rand/random/h2/mff/n1024\"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>[\"gs/E/fgw.ps/dram-256K/rand/random/h2/mff/n1024\"].cpi_med",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1841,7 +1864,9 @@
    "statement": "Gather (fgw.ps, 32-bit elements) from L2 (4 KB table per hart), random lines: 27.4 G elements/s chip-wide, 354.5 pJ per element [329.9-391.6] (per card: a2 343.2, a3 333.1, a1c1 387.1); 359.3 cycles per instruction per hart.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-RATE\"].pooled[\"gs/E/fgw.ps/dram-4K/rand/random/h2/mff/n1024\"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>[\"gs/E/fgw.ps/dram-4K/rand/random/h2/mff/n1024\"].cpi_med",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1856,7 +1881,9 @@
    "statement": "Gather (fgw.ps, 32-bit elements) from L1 (512 B table per hart), random lines: 452 G elements/s chip-wide, 12.76 pJ per element [11.89-14.57] (per card: a2 13.54, a3 12.46, a1c1 12.28); 21.78 cycles per instruction per hart.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-RATE\"].pooled[\"gs/E/fgw.ps/dram-512B/rand/random/h2/mff/n1024\"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>[\"gs/E/fgw.ps/dram-512B/rand/random/h2/mff/n1024\"].cpi_med",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1871,7 +1898,9 @@
    "statement": "Gather (fgw.ps, 32-bit elements) from scratchpad 2 hops away (16 KB per hart), random lines: 10.2 G elements/s chip-wide, 903.1 pJ per element [843.1-1,010] (per card: a2 888.7, a3 847.2, a1c1 973.4); 969.0 cycles per instruction per hart.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-RATE\"].pooled[\"gs/E/fgw.ps/rscp-16K/rand/random/h2/mff/n1024\"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>[\"gs/E/fgw.ps/rscp-16K/rand/random/h2/mff/n1024\"].cpi_med",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1886,7 +1915,9 @@
    "statement": "Gather (fgw.ps, 32-bit elements) from own scratchpad (16 KB per hart), random lines: 27.4 G elements/s chip-wide, 367.8 pJ per element [344.3-399.6] (per card: a2 359.6, a3 344.6, a1c1 399.3); 359.3 cycles per instruction per hart.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-RATE\"].pooled[\"gs/E/fgw.ps/scp-16K/rand/random/h2/mff/n1024\"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>[\"gs/E/fgw.ps/scp-16K/rand/random/h2/mff/n1024\"].cpi_med",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1901,7 +1932,9 @@
    "statement": "A 32-bit gather of 8 lanes from L1 (fgw.ps, random, 512 B per hart) takes 10.89 cycles per instruction per minion on every card (registered 7-12: PASS).",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-L1\"].per_card.<card>.cpi_minion",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1916,7 +1949,9 @@
    "statement": "Gathers from L2 and the own scratchpad saturate at 27.36 G elements/s chip-wide on every card, 1.15x the two-miss-handler bound of 23.86 G/s (registered 0.5-2x: PASS); a second hart adds nothing (h2/h1 1.0005).",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-MH\"].per_card.<card>.l2 / .scp, .bound_elements_per_s, .h2_over_h1_l2",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1931,7 +1966,9 @@
    "statement": "Scatter (fscw.ps, 32-bit elements) into DRAM (256 KB table per hart), random lines: 0.422 G elements/s chip-wide, 23,770 pJ per element [22,209-25,281] (per card: a2 23,640, a3 22,530, a1c1 25,139); 24,584 cycles per instruction per hart (median, pooled over the 9 passes; per card 24,599 on aifoundry2 and aifoundry3, 24,554 on aifoundry1-c1). 2,048 harts × 8 elements at 600 MHz over that is 0.400 G elements/s, about 5% under the measured aggregate rate.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-RATE\"].pooled[\"gs/E/fscw.ps/dram-256K/rand/random/h2/mff/n1024\"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>[\"gs/E/fscw.ps/dram-256K/rand/random/h2/mff/n1024\"].cpi_med; .pooled[same key].cpi_med (mean 24,584)",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1946,7 +1983,9 @@
    "statement": "Scatter (fscw.ps, 32-bit elements) into L2 (4 KB table per hart), random lines: 23.5 G elements/s chip-wide, 731.5 pJ per element [676.9-813.9] (per card: a2 701.9, a3 679.1, a1c1 813.5); 417.6 cycles per instruction per hart.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-RATE\"].pooled[\"gs/E/fscw.ps/dram-4K/rand/random/h2/mff/n1024\"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>[\"gs/E/fscw.ps/dram-4K/rand/random/h2/mff/n1024\"].cpi_med",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1961,7 +2000,9 @@
    "statement": "Scatter (fscw.ps, 32-bit elements) into L1 (512 B table per hart), random lines: 452 G elements/s chip-wide, 14.69 pJ per element [13.87-15.50] (per card: a2 14.71, a3 14.60, a1c1 14.76); 21.78 cycles per instruction per hart.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-RATE\"].pooled[\"gs/E/fscw.ps/dram-512B/rand/random/h2/mff/n1024\"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>[\"gs/E/fscw.ps/dram-512B/rand/random/h2/mff/n1024\"].cpi_med",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1976,7 +2017,9 @@
    "statement": "Scatter (fscw.ps, 32-bit elements) into scratchpad 2 hops away (16 KB per hart), random lines: 10.2 G elements/s chip-wide, 1,983 pJ per element [1,861-2,187] (per card: a2 1,960, a3 1,865, a1c1 2,125); 958.3 cycles per instruction per hart.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-RATE\"].pooled[\"gs/E/fscw.ps/rscp-16K/rand/random/h2/mff/n1024\"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>[\"gs/E/fscw.ps/rscp-16K/rand/random/h2/mff/n1024\"].cpi_med",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -1991,7 +2034,9 @@
    "statement": "Scatter (fscw.ps, 32-bit elements) into own scratchpad (16 KB per hart), random lines: 23.5 G elements/s chip-wide, 690.5 pJ per element [641.9-762.5] (per card: a2 670.6, a3 643.8, a1c1 757.0); 417.5 cycles per instruction per hart.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-RATE\"].pooled[\"gs/E/fscw.ps/scp-16K/rand/random/h2/mff/n1024\"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>[\"gs/E/fscw.ps/scp-16K/rand/random/h2/mff/n1024\"].cpi_med",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -2006,7 +2051,9 @@
    "statement": "GS-UC failed on all three cards: an L1-bypassing gather (fgwl.ps, random lines from L2, one minion) runs only 1.03x faster with both harts than with one (registered prediction 1.6-2.4x): the second hart adds about 3%.",
    "kind": "measured",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/gs.json: items[\"GS-UC\"].per_card.<card>.h2_over_h1 (1.0299-1.0303), outcome FAIL",
-   "note": "E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "note": "E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page (Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed instructions of 8 lanes; \"rand\" puts the visit's 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+   "page": "Memory hierarchy",
    "cards": [
     "a2",
     "a3",
@@ -2045,9 +2092,9 @@
    "unit": "W/°C"
   },
   "heat.race": {
-   "statement": "From a launch at 80.9-81.7 °C to the firmware's 90 °C cap on aifoundry2, the same matmul on all 1,024 minions: random data 19.1-26.3 s (4 runs), ones 107.1-166.9 s (3 runs); zeros never reached the cap in 602 s (3 runs).",
+   "statement": "From a launch at 80.9-81.7 °C to the 90 °C at which the run script stopped each run (run_horace_long.sh, not a firmware limit) on aifoundry2, the same matmul on all 1,024 minions: random data 19.1-26.3 s (4 runs), ones 107.1-166.9 s (3 runs); zeros never reached the cap in 602 s (3 runs).",
    "kind": "measured",
-   "source": "docs/reports/data/2026-09-21-horace-aifoundry2/long.json: runs[] with minions = 1024 and values = randn, ones, zeros: .dur, .reason (cap: reached 90 °C; time: the run ended first), .t_before",
+   "source": "docs/reports/data/2026-09-21-horace-aifoundry2/long.json: runs[] with minions = 1024 and values = randn, ones, zeros: .dur, .reason (cap: reached 90 °C; time: the run ended first), .t_before; tools/ettelem/run_horace_long.sh:8-9, 18, 69 (cap=${5:-90}: at the cap the script touches the host's stop file)",
    "note": "One card: the three-card version (E47) was registered and not run.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
    "page": "The Horace experiment",
@@ -2062,7 +2109,7 @@
   "hot-cost": {
    "statement": "One contended global atomic (amoaddg.w on one line, 1,024 minions): the bank retires one every 10.00 cycles, about 60 M/s for the whole chip; spread over 32 lines, one per shire, 0.31 cycles and 1,919 M/s: 32x.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:221; docs/findings/05-claims.md:222",
+   "source": "docs/findings/05-claims.md:233; docs/findings/05-claims.md:234",
    "note": "The atomic itself is fair: every shire gets 0.998-1.004 of an even split, the host included.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line",
    "page": "One hot line stops a shire",
@@ -2077,7 +2124,7 @@
   "hot-edge": {
    "statement": "The switch is sharp: 21 remote requesters leave the host at 95.5-95.7% of its rate, 22 stop it (0.02%). Rule: the bank is not saturated while N x 10 cycles < P + t_round_trip (216 cycles).",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:415; docs/reports/2026-09-22-hot-line.html section 3",
+   "source": "docs/findings/05-claims.md:450; docs/reports/2026-09-22-hot-line.html section 3",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line",
    "page": "One hot line stops a shire",
    "cards": [
@@ -2093,7 +2140,7 @@
   "hot-energy": {
    "statement": "Energy per atomic: 19.8 nJ [16.9-23.6] contended against 1.16 nJ [1.01-1.37] spread over 32 lines: 17x.",
    "kind": "measured",
-   "source": "manual.json: reruns.hotline_nj_per_op.contended / .spread; docs/findings/05-claims.md:322",
+   "source": "manual.json: reruns.hotline_nj_per_op.contended / .spread; docs/findings/05-claims.md:341",
    "note": "The three-card check did not repeat the power runs; n = 7 (4 a2 + 3 a3).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line",
    "page": "One hot line stops a shire",
@@ -2165,7 +2212,7 @@
   "l2.latency": {
    "statement": "L2 hit (and own-shire scratchpad hit): 47 cycles load-to-use, 78 ns at 600 MHz; L2 read-buffer hit 36 cycles (60 ns). On hart 1 the same loads take 50 and 39 cycles.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:366, 409 (docs/reports/data/2026-09-25-claims-v3/results/lat.json LAT-M1)",
+   "source": "docs/findings/05-claims.md:394, 443 (docs/reports/data/2026-09-25-claims-v3/results/lat.json LAT-M1)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#the-hierarchy-as-a-spec-sheet",
    "page": "Memory hierarchy",
    "cards": [
@@ -2191,7 +2238,7 @@
   "l2.read-buffer": {
    "statement": "Each L2 bank has an 8-line read buffer (2 KB per shire) that serves repeated reads of a clean line without touching the SRAM.",
    "kind": "spec",
-   "source": "docs/et-soc1-notes.md:72; external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.9",
+   "source": "docs/et-soc1-notes.md:73; external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.9",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#the-hierarchy-as-a-spec-sheet",
    "page": "Memory hierarchy",
    "topic": "microarchitecture",
@@ -2217,7 +2264,7 @@
   "l3.home": {
    "statement": "A line's L3 home shire is PA[10:6]: consecutive 64-byte lines rotate over the 32 compute shires' L3 slices (default 'swizzle0'; the firmware leaves the swizzle register at reset).",
    "kind": "measured",
-   "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.24 (§1.4.1.2) and p.26-27 (§1.4.3); external/core-et/rtl/shire/esr/esr_cache_bank.v:88-103; docs/research/counters-and-dram.md:373-377; memprobe: 1,500 lines, all but 2 within ±4 cycles of 110 + 12·hops(requester, PA[10:6]) (docs/et-soc1-notes.md:165)",
+   "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.24 (§1.4.1.2) and p.26-27 (§1.4.3); external/core-et/rtl/shire/esr/esr_cache_bank.v:88-103; docs/research/counters-and-dram.md:373-377; memprobe: 1,500 lines, all but 2 within ±4 cycles of 110 + 12·hops(requester, PA[10:6]) (docs/et-soc1-notes.md:178)",
    "note": "The IDs are virtual shire IDs; a spare-shire remap would move them (NOC_Remap_Shires).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#trace-one-load",
    "page": "Anatomy of a memory access",
@@ -2232,7 +2279,7 @@
   "l3.latency": {
    "statement": "L3 hit: 110 + 12 cycles per mesh hop between the requesting shire and the line's home shire (fitted 110.5 + 11.99 on three cards); 159-169 cycles (265-282 ns) on average depending on the requesting shire.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:367, 403, 410 (docs/reports/data/2026-09-25-claims-v3/results/mem.json MEM-P1; lat.json LAT-M2)",
+   "source": "docs/findings/05-claims.md:395, 434, 444 (docs/reports/data/2026-09-25-claims-v3/results/mem.json MEM-P1; lat.json LAT-M2)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#l3-110-cycles-plus-12-per-hop",
    "page": "Anatomy of a memory access",
    "cards": [
@@ -2256,7 +2303,7 @@
   "lat-dram": {
    "statement": "DRAM load from a pointer chase: 287-297 cycles at 600 MHz (479-495 ns): 296.6-297.1 from shires 0 and 31, 287.2-288.8 from 7 and 24; about 490 ns, a fifth more than an A100's HBM (405 ns).",
    "kind": "measured",
-   "source": "lat.json: items[LAT-M2].per_card.<card>.passes[].DRAM; docs/findings/05-claims.md:410",
+   "source": "lat.json: items[LAT-M2].per_card.<card>.passes[].DRAM; docs/findings/05-claims.md:444",
    "note": "The value field is the slowest requesters (shires 0 and 31). At 800 MHz (aifoundry2 only) 352-368 cycles, 440-460 ns: the mesh and DDR parts do not scale with the minion clock.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy",
    "page": "Memory hierarchy",
@@ -2271,10 +2318,10 @@
    "unit": "cycles"
   },
   "lat-dram-chip": {
-   "statement": "Of a DRAM load's ~300 cycles only about 25-28 are the DRAM chip's own timing (activate tRCD 18 ns, 19.3 ns read latency, one or two 4.3 ns bursts); the rest is paths on the chip.",
+   "statement": "Of a DRAM load's ~300 cycles only about 28 are the DRAM chip's own timing (activate tRCD 18 ns, 19.3 ns read latency, the two 4.3 ns bursts of a 64-byte line); the rest is paths on the chip.",
    "kind": "inferred",
-   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html section 4 (\"Of the 91 cycles (152 ns), the DRAM chip itself accounts for about 25-28\")",
-   "note": "From the controller's timing registers set against the fit; the memory shire (queue, PHY, clock crossings) is at most ~63-66 cycles.",
+   "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html section 4 (\"Of the 91 cycles (152 ns), the DRAM chip itself accounts for about 28\")",
+   "note": "From the controller's timing registers set against the fit; the L3 home's miss handling and the memory shire (queue, PHY, clock crossings) are at most ~63 cycles.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy",
    "page": "Anatomy of a memory access",
    "topic": "latency",
@@ -2284,7 +2331,7 @@
   "lat-dram-refresh": {
    "statement": "LPDDR4X refresh every 2,325 cycles (3.88 us) on every card; a load that meets it waits up to 208 extra cycles (347 ns).",
    "kind": "measured",
-   "source": "mem.json: [item=MEM-P5].per_card.<card>.tests.P5_refresh_period, .P5_max_extra; docs/findings/05-claims.md:407",
+   "source": "mem.json: [item=MEM-P5].per_card.<card>.tests.P5_refresh_period, .P5_max_extra; docs/findings/05-claims.md:438",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy",
    "page": "Anatomy of a memory access",
    "cards": [
@@ -2300,7 +2347,7 @@
   "lat-dram-rowconflict": {
    "statement": "Two loads to the same bank but different rows, issued together: the second pays about +37 cycles (a2 36.9, a3 37.4, a1c1 36.5); bank = PA[12:10].",
    "kind": "measured",
-   "source": "mem.json: [item=MEM-P4].per_card.<card>.tests.P4_row_conflict_extra; docs/findings/05-claims.md:406",
+   "source": "mem.json: [item=MEM-P4].per_card.<card>.tests.P4_row_conflict_extra; docs/findings/05-claims.md:437",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy",
    "page": "Anatomy of a memory access",
    "cards": [
@@ -2332,7 +2379,7 @@
   "lat-l1": {
    "statement": "L1 data cache hit: 5.25 cycles load-to-use (8.8 ns at 600 MHz); the same on three cards (per-pass ranges 5.247-5.259).",
    "kind": "measured",
-   "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: items[LAT-M1].per_card.<card>.passes[].L1; docs/findings/05-claims.md:409",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: items[LAT-M1].per_card.<card>.passes[].L1; docs/findings/05-claims.md:443",
    "note": "Only 512 B of L1 per hart: the firmware puts the L1 in scratchpad mode before every launch.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy",
    "page": "Memory hierarchy",
@@ -2349,7 +2396,7 @@
   "lat-l2": {
    "statement": "L2 cache hit (and the shire's own scratchpad): 47 cycles (78 ns); hart 1 pays 3 more (39 read buffer, 50 L2).",
    "kind": "measured",
-   "source": "lat.json: items[LAT-M1].per_card.<card>.passes[].L2 (46.998-47.024), .hart1; docs/findings/05-claims.md:409",
+   "source": "lat.json: items[LAT-M1].per_card.<card>.passes[].L2 (46.998-47.024), .hart1; docs/findings/05-claims.md:443",
    "note": "The single-load ladder of Anatomy reads L2 at 49 cycles in every pass (a different probe and offset).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy",
    "page": "Memory hierarchy",
@@ -2366,7 +2413,7 @@
   "lat-l3-avg": {
    "statement": "L3 hit from a pointer chase, averaged over all 32 slices: 159-169 cycles at 600 MHz (265-282 ns), by requesting shire: 168.8-168.9 (shire 0), 160.6-160.7 (7), 159.1-159.2 (24), 168.8-168.9 (31).",
    "kind": "measured",
-   "source": "lat.json: items[LAT-M2].per_card.<card>.passes[].L3; docs/findings/05-claims.md:410",
+   "source": "lat.json: items[LAT-M2].per_card.<card>.passes[].L3; docs/findings/05-claims.md:444",
    "note": "The value field is the fastest requester (shire 24). Clock model: 72 cycles + 61 ns + 20 ns per hop.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy",
    "page": "Memory hierarchy",
@@ -2383,7 +2430,7 @@
   "lat-l3-hop": {
    "statement": "L3 hit against distance to the line's home shire: 110.5 + 11.99 cycles per mesh hop (from shire 0), within 4 cycles for 99.4-100% of lines on each card.",
    "kind": "measured",
-   "source": "docs/reports/data/2026-09-25-claims-v3/results/mem.json: [item=MEM-P1].per_card.<card>.tests.P1_l3_slope / P1_l3_intercept; docs/findings/05-claims.md:403",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/mem.json: [item=MEM-P1].per_card.<card>.tests.P1_l3_slope / P1_l3_intercept; docs/findings/05-claims.md:434",
    "note": "A local L3 hit is ~110 cycles: ~48 for the L1 and L2 lookup and miss, ~62 for the home slice (Anatomy, inferred). 31 of 32 L3 lines live in another shire.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy",
    "page": "Anatomy of a memory access",
@@ -2400,7 +2447,7 @@
   "lat-rb": {
    "statement": "L2 read buffer (8 clean lines per bank x 4 banks = 2 KB per shire): 36 cycles (60 ns), 11 fewer than the L2 array.",
    "kind": "measured",
-   "source": "lat.json: items[LAT-M1].per_card.<card>.passes[].RB (35.998-36.006); docs/findings/05-claims.md:409",
+   "source": "lat.json: items[LAT-M1].per_card.<card>.passes[].RB (35.998-36.006); docs/findings/05-claims.md:443",
    "note": "Spec: 10 vs 21 shire cycles (CORE-ET Shire Cache Specification), per the memory-hierarchy page.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy",
    "page": "Memory hierarchy",
@@ -2417,7 +2464,7 @@
   "lat-scp-own": {
    "statement": "The shire's own L2 scratchpad: 47 cycles (78 ns), the same SRAM, latency and bandwidth as the L2 cache.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:366",
+   "source": "docs/findings/05-claims.md:394",
    "note": "Re-measured on three cards 26 Sep (E36).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy",
    "page": "Memory hierarchy",
@@ -2434,7 +2481,7 @@
   "lat-scp-remote": {
    "statement": "Another shire's scratchpad: 99.84 + 12.00 cycles per mesh hop at 600 MHz (112-220 cycles, 186-366 ns over 1-10 hops); all 124 points within 1 cycle, a->b equals b->a within 0.032 cycles.",
    "kind": "measured",
-   "source": "lat.json: items[LAT-M3].per_card.<card>.passes[] (row0_slope 11.998-12.002, frac_within_1 1.0); docs/findings/05-claims.md:411",
+   "source": "lat.json: items[LAT-M3].per_card.<card>.passes[] (row0_slope 11.998-12.002, frac_within_1 1.0); docs/findings/05-claims.md:445",
    "note": "Clock model (aifoundry2, 18 Sep): 66 minion cycles + 56 ns + 20 ns per hop.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy",
    "page": "Memory hierarchy",
@@ -2451,7 +2498,7 @@
   "mem.global-atomic": {
    "statement": "A global atomic (amoaddg) is performed at the shire cache that homes the line. One contended line serialises at 10.00 cycles per atomic (about 60 M/s for the chip) and stops the host shire's own memory path; an uncontended remote global atomic round trip is 216 cycles.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:221, 223; docs/findings/17-hot-line.md:10-16",
+   "source": "docs/findings/05-claims.md:233, 235; docs/findings/17-hot-line.md:10-16",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line#the-thing-that-actually-starves",
    "page": "One hot line stops a shire",
    "cards": [
@@ -2466,7 +2513,7 @@
   "mesh-bit-mm-free": {
    "statement": "A random bit per mm on free links, mesh rail at 0.485 V: 37 fJ (25 of it data-dependent); on board power 47 fJ. Dally's rule of thumb is ~100 fJ/b-mm.",
    "kind": "measured",
-   "source": "report.json: headline[\"uncontended/noc_rail\"].random_bit_total / .random_bit_data, headline[\"uncontended/board\"].random_bit_total; per card (V3) docs/findings/05-claims.md:444",
+   "source": "report.json: headline[\"uncontended/noc_rail\"].random_bit_total / .random_bit_data, headline[\"uncontended/board\"].random_bit_total; per card (V3) docs/findings/05-claims.md:482",
    "note": "Per card, mesh rail: a2 36.1, a3 35.8, a1c1 38.1 fJ; board 46.7, 44.4, 51.1 fJ (99% intervals in 05-claims). Scaled to 0.9 V the data cost is 85-105 fJ.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm",
    "page": "Heat per millimetre",
@@ -2499,7 +2546,7 @@
   "mesh-hop-lat": {
    "statement": "Each mesh hop adds 12 cycles round trip at 600 MHz (20 ns): L3 11.99, remote scratchpad 12.00, TensorSend 12.01-12.02 cycles per hop on every card.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:403; docs/findings/05-claims.md:411; docs/findings/05-claims.md:412",
+   "source": "docs/findings/05-claims.md:434; docs/findings/05-claims.md:445; docs/findings/05-claims.md:446",
    "note": "20 ns at either clock (16 cycles at 800 MHz): a NoC-clock cost.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
@@ -2516,7 +2563,7 @@
   "mesh-hop-ring": {
    "statement": "TensorSend across the mesh: 9.2 pJ/B to leave the shire plus 1.75 pJ/B per mean hop (three cards pooled; a2 9.1 + 1.8, a3 8.0 + 1.7, a1c1 10.4 + 1.7); no card's per-hop cost differs from another's.",
    "kind": "derived",
-   "source": "docs/reports/data/2026-09-25-claims-v3/results/rl.json: items[RL-a].pooled_mean; docs/findings/05-claims.md:450; docs/energy-manual/05-bytes-between-cores.md:31",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/rl.json: items[RL-a].pooled_mean; docs/findings/05-claims.md:489; docs/energy-manual/05-bytes-between-cores.md:31",
    "note": "Straight line through five 1 KB rings (1.6-4.7 mean hops), six passes per card.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
@@ -2533,7 +2580,7 @@
   "mesh.1kb-knee": {
    "statement": "With 1 KB messages a round trip adds 12 cycles per hop up to 5 hops and 36 cycles (27-36) per hop beyond, as if the sender had a limited number of packets in flight.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:382, 412 (docs/reports/data/2026-09-25-claims-v3/results/lat.json LAT-N2 `c32_slope_to5`, `c32_slope_beyond5`)",
+   "source": "docs/findings/05-claims.md:411, 446 (docs/reports/data/2026-09-25-claims-v3/results/lat.json LAT-N2 `c32_slope_to5`, `c32_slope_beyond5`)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#message-size-and-bandwidth",
    "page": "On-chip communication",
    "cards": [
@@ -2562,10 +2609,10 @@
    "unit": "MHz"
   },
   "mesh.empty-cells": {
-   "statement": "Four cells of the 6 × 6 map hold no compute shire: (0,3), (0,4), (0,5) and (5,3). They hold the master, spare, PCIe and I/O shires and route traffic too; which cell is which is not established.",
+   "statement": "Four cells of the 6 × 6 map hold no compute shire: (0,3), (0,4), (0,5) and (5,3). They hold the master, spare, PCIe and I/O shires and route traffic too; the firmware's maps name them (fact fw.grey-cells): (0,3) the master, shire 32; (5,3) the spare, 33; (0,4) the PCIe shire; (0,5) the I/O shire.",
    "kind": "measured",
-   "source": "workloads/nocbench/analyze.py:60 (`EMPTY`); on-chip communication page §'Where the shires are'",
-   "note": "The firmware's comment map (noc_reconfigure.h:76-90) puts PCIe/IO in one row and master/spare in another, but its shire placement matches the measured pairwise distances for only 254 of 1,024 shire pairs, so it cannot be used to label the cells.",
+   "source": "workloads/nocbench/analyze.py:64 (`EMPTY`); on-chip communication page §'Where the shires are'; the cells named 27 Sep by fw.grey-cells",
+   "note": "Since 27 Sep: read as written, before NOC_Remap_Shires renames the shires, the firmware's comment map matches only 254 of 1,024 ordered shire pairs (111 of 496 pairs, fact L37); renamed, it matches all 496 (fact fw.map-match), and its bridge map names the four cells (fact fw.grey-cells). On the cards, E56 (29 Sep) placed the master at (0,3) on aifoundry1 card 1 and decided nothing on aifoundry3 or aifoundry2.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#where-the-shires-are-a-6-6-mesh",
    "page": "On-chip communication",
    "cards": [
@@ -2591,7 +2638,7 @@
   "mesh.logical-map": {
    "statement": "Measured position of each compute shire on the 6 × 6 grid (marty1885's logical map, x across, y down): y=0: 0 24 9 25 2 11; y=1: 8 16 1 17 10 19; y=2: 3 4 13 14 18 27; y=3: _ 12 21 22 26 _; y=4: _ 20 29 30 15 23; y=5: _ 28 5 6 7 31.",
    "kind": "measured",
-   "source": "workloads/nocbench/analyze.py:52-60 (`MARTY`, `EMPTY`); docs/findings/05-claims.md:383, 412 (map recovered from latency alone in 12 of 12 search restarts on every card)",
+   "source": "workloads/nocbench/analyze.py:56-64 (`MARTY`, `EMPTY`); docs/findings/05-claims.md:412, 446 (map recovered from latency alone in 12 of 12 search restarts on every card)",
    "note": "Built by marty1885's etTopoScan from bandwidth on another card; confirmed by TensorSend latency on all three lab cards. Shire IDs are the firmware's logical IDs.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#where-the-shires-are-a-6-6-mesh",
    "page": "On-chip communication",
@@ -2617,26 +2664,26 @@
    "topic": "topology"
   },
   "mesh.no-counters": {
-   "statement": "There are no NoC performance counters in the PRM, the firmware or core-et; mesh transit is inferred from latency differences.",
+   "statement": "No NoC performance counters are documented in the PRM or used by the firmware's code, and core-et has none; the firmware's generated register header does define transaction counters in every NoC bridge: two address- and command-filtered counters in each master bridge (*_m_am_cntr0/1 with ccmd0/1 and caddr, beside registers named latnum0/1 whose use it does not give) and one command-filtered counter in each slave bridge (*_s_as_cntr), undocumented, on the service processor's register bus and not tried here. Mesh transit is inferred from latency differences.",
    "kind": "spec",
-   "source": "docs/research/counters-and-dram.md:272-279",
+   "source": "docs/research/counters-and-dram.md:272-279; external/et-platform/etsoc-hal/include/hwinc/noc_esr.h:552, 564, 1710 (bridge counters); docs/reports/sources/limits-of-observability.data.json rung 27 (ask-noc-registers)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#ladder",
    "page": "Limits of observability",
    "topic": "observability"
   },
   "mesh.orientation": {
-   "statement": "The logical map appears to be the die turned a quarter: in map orientation the memory shires sit above and below the grid, on the die (and in the firmware's naming, 0-3 west, 4-7 east) they are the two side columns.",
+   "statement": "The logical map is the die view transposed (x and y swapped: a quarter turn plus a mirror): in map orientation the memory shires sit above and below the grid, on the die (and in the firmware's naming, 0-3 west, 4-7 east) they are the two side columns.",
    "kind": "inferred",
-   "source": "docs/et-soc1-notes.md:102-105; anatomy page §1 'Trace one load'; settled 27 Sep by fw.map-match except the handedness (die.handedness)",
-   "note": "Settled 27 Sep except the east-west handedness (facts fw.map-match, die.handedness).",
+   "source": "docs/et-soc1-notes.md:115-118; anatomy page §1 'Trace one load'; settled 27 Sep by fw.map-match except the handedness (die.handedness)",
+   "note": "Settled 27 Sep except the east-west handedness (facts fw.map-match, die.handedness): mapping (x, y) to (die row x, die column y) is a transpose (a quarter turn plus a mirror).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#trace-one-load",
    "page": "Anatomy of a memory access",
    "topic": "topology"
   },
   "mesh.port-width": {
-   "statement": "The shire cache's mesh master port is 512 bits wide (one 64-byte line per beat); a shire has four mesh lanes and a line goes to lane PA[7:6], so consecutive lines on one lane are 256 bytes apart; a flit carries at least one 64-byte line.",
+   "statement": "The shire cache's mesh master port is 512 bits wide (one 64-byte line per beat); a shire has four mesh lanes and an L3 line goes to the lane of its home bank, PA[12:11] (a remote-scratchpad line to lane PA[7:6]); the heat-per-mm analysis treats a flit as at least one 64-byte line (the NoC's flit size is not documented).",
    "kind": "spec",
-   "source": "external/core-et/rtl/inc/axi_defines.vh:43 (`SC_MESH_MASTER_AXI_DATA_SIZE 512`); docs/findings/01-resources.md:238-239 (R14); docs/findings/20-heat-per-mm.md:117-122",
+   "source": "external/core-et/rtl/inc/axi_defines.vh:43 (`SC_MESH_MASTER_AXI_DATA_SIZE 512`); external/core-et-main/hw/ip/shirecache/rtl/shirecache_mesh_master.sv:132-153 (the lane: req_bank_id = remote scratchpad ? PA[7:6] : the L3 bank from shirecache_pipe_l3_swizzle_get); external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.27 (Table 8, swizzle0: the L3 bank is PA[12:11]); docs/findings/01-resources.md:270-271 (R14); docs/findings/20-heat-per-mm.md:219-223",
    "note": "The inter-router link width and flit size of the NoC itself are not documented in the sources.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#lanes",
    "page": "Heat per millimetre",
@@ -2647,7 +2694,7 @@
   "mesh.shortest-paths": {
    "statement": "Round trips fit a + b × Manhattan distance on the map over all 496 shire pairs (worst residual 1.1-1.4 cycles), so routes are shortest paths through all 36 cells, the four non-compute cells included. The order was measured later, on 29 September: requests x first, replies y first (fact L104).",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:381, 412; on-chip communication page §'What the numbers say'; anatomy page §1 ('the order in which the mesh routes a request was not measured'); the order: fact L104 (E56, docs/reports/data/2026-09-29-nocr)",
+   "source": "docs/findings/05-claims.md:410, 446; on-chip communication page §'What the numbers say'; anatomy page §1 ('the order in which the mesh routes a request was not measured'); the order: fact L104 (E56, docs/reports/data/2026-09-29-nocr)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#what-the-numbers-say",
    "page": "On-chip communication",
    "cards": [
@@ -2677,7 +2724,7 @@
   "mesh.voltage": {
    "statement": "NoC rail: set point 485 mV, 484-485 mV on die (per-shire 483-486 mV at idle).",
    "kind": "measured",
-   "source": "docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), fields `reg_mv.noc`, `die_mv.noc`; docs/findings/05-claims.md:41",
+   "source": "docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), fields `reg_mv.noc`, `die_mv.noc`; docs/findings/05-claims.md:49",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#method",
    "page": "Heat per millimetre",
    "cards": [
@@ -2691,7 +2738,7 @@
   "mesh.xy-assumption": {
    "statement": "The heat-per-mm analysis assumes dimension-ordered XY routing on the logical map (and checks YX); under it, links are shared by 0 / 22 / 32 / 55 / 72% of link-hops at 1 / 2 / 3 / 4 / 6 hops in the all-pairs traffic.",
    "kind": "inferred",
-   "source": "workloads/enercat/analyze_wire.py:38, 149-176; docs/findings/05-claims.md:348 (WIRE `checks.link_sharing`); settled 29 Sep by fact L104 (E56)",
+   "source": "workloads/enercat/analyze_wire.py:38, 149-176; docs/findings/05-claims.md:369 (WIRE `checks.link_sharing`); settled 29 Sep by fact L104 (E56)",
    "note": "Settled 29 Sep: an analysis assumption, not a documented routing rule. E56 measured the order (fact L104): requests x first, replies y first, so a load's data travel y first (the YX case this analysis also checks) and a store's x first.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#contention",
    "page": "Heat per millimetre",
@@ -2700,7 +2747,7 @@
   "minion.combine-free": {
    "statement": "Combining on receive (fp32/int32 add, max, min) adds 0 cycles to a round trip.",
    "kind": "measured",
-   "source": "docs/et-soc1-notes.md:114; on-chip communication page table",
+   "source": "docs/et-soc1-notes.md:127; on-chip communication page table",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu",
    "page": "On-chip communication",
    "cards": [
@@ -2734,7 +2781,7 @@
   "minion.l1-firmware": {
    "statement": "The firmware puts every minion's L1 in scratchpad mode before each launch, leaving each hart 512 B of data cache (2 sets × 4 ways × 64 B).",
    "kind": "spec",
-   "source": "docs/et-soc1-notes.md:84-86; docs/research/counters-and-dram.md:446-447 (fw MachineMinion/src/syscall.c:348-420)",
+   "source": "docs/et-soc1-notes.md:90-92; docs/research/counters-and-dram.md:446-447 (fw MachineMinion/src/syscall.c:348-420)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#the-hierarchy-as-a-spec-sheet",
    "page": "Memory hierarchy",
    "topic": "memory",
@@ -2765,7 +2812,7 @@
   "minion.l1d": {
    "statement": "Each minion has a private 4 KB L1 data cache: 16 sets × 4 ways × 64 B lines, not coherent with any other cache, writing back whole 64-byte lines.",
    "kind": "spec",
-   "source": "external/et-man/ET Minion Overview.pdf, pdf p.1 (slide 2); external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.9 (§2.1.1.5)",
+   "source": "external/et-man/ET Minion Overview.pdf, pdf p.1 (slide 2); external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.9 (§2.1.1.5); external/et-man/ET Programmer's Reference Manual.pdf, pdf p.243 (§8: an eviction writes a dirty line back); external/core-et/docs/Minion DCache Description.pdf, pdf p.33 (§3.5: \"Evict operations (REQ_Write): always 512b\")",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#the-hierarchy-as-a-spec-sheet",
    "page": "Memory hierarchy",
    "topic": "memory",
@@ -2795,9 +2842,9 @@
    "topic": "latency"
   },
   "minion.no-divide": {
-   "statement": "No hardware divide or square root in U-mode: fdiv.ps and fsqrt.ps trap, as do sine, reciprocal square root, 64-bit float conversion and reading the cycle CSR; 161 of the instructions tried execute in U-mode, 13 trap.",
+   "statement": "No hardware float or vector divide or square root in U-mode (the scalar integer div and rem run): fdiv.ps and fsqrt.ps trap, as do sine, reciprocal square root, conversion between fp32 and 64-bit integers (fcvt.l.s, fcvt.s.l) and reading the cycle CSR; 161 of the instructions tried execute in U-mode, 13 trap.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:278, 296 (workloads/enercat/enercat_modes.json)",
+   "source": "docs/findings/05-claims.md:290, 310 (workloads/enercat/enercat_modes.json); docs/energy-manual/03a-every-instruction.md:7 (the 13 that trap), 52-55 (div, divu, rem, remu retire in U-mode); external/et-man/ET Programmer's Reference Manual.pdf, pdf p.36 (§3.5: the float and vector divides and square roots, frsq.ps, fsin.ps and the conversions between fp32 and 64-bit integers trap to M-mode emulation)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#every-instruction-the-core-executes",
    "page": "The energy manual",
    "cards": [
@@ -2810,9 +2857,9 @@
    "unit": "trapping instructions"
   },
   "minion.one-ready-bit": {
-   "statement": "The hardware keeps one peer-to-peer ready bit per minion, not one per partner: a minion receiving from two TensorSend partners at once hangs its hart permanently (the card then needs a reset).",
+   "statement": "The hardware keeps one peer-to-peer ready bit per minion, not one per partner: if a minion that TensorSends to two partners gets both their readies before it has used the first, one is lost, and that receiver and its sender hang for good (the card then needs a reset).",
    "kind": "spec",
-   "source": "docs/et-soc1-notes.md:124-128 (core-et dcache_reduce.v `partner_ready_peer`); docs/findings/05-claims.md:257",
+   "source": "docs/et-soc1-notes.md:137-141 (core-et dcache_reduce.v `partner_ready_peer`); docs/findings/05-claims.md:269",
    "note": "sys_emu tracks every partner separately and does not reproduce the hang.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion",
    "page": "On-chip communication",
@@ -2839,7 +2886,7 @@
   "minion.sleep-unused": {
    "statement": "The minion's sleep and isolation ports (nsleepin, iso_enable, nsleepout) are marked 'not used'; in the open Erbium RTL they are tied off and no firmware drives them. Idle cores are clock-gated, not power-gated.",
    "kind": "spec",
-   "source": "external/core-et/docs/Minion Description.pdf, pdf p.7 (interfaces table); docs/findings/05-claims.md:177-179",
+   "source": "external/core-et/docs/Minion Description.pdf, pdf p.7 (interfaces table); docs/findings/05-claims.md:189-191",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-leakage-suppression-transistors",
    "page": "The DVFS loop and its leakage",
    "topic": "power"
@@ -2856,7 +2903,7 @@
    "statement": "Tensor loads skip the L1 but are cached in the L2 and L3; tensor stores skip the L1 and the L2.",
    "kind": "inferred",
    "source": "docs/energy-manual/04-bytes-memory.md:21, 38; the L2: docs/reports/data/2026-09-29-memp2/val-aifoundry3/memp2.json, val-aifoundry2/memp2.json and dev-aifoundry1-c1/memp2.json .cards.<card>.items.R36.medians (tl1, tl2, ref_l2, ref_l3, probe_tl)",
-   "note": "Settled 29 Sep for the L2: E57 (R36) TensorLoaded the same fresh 1 KB twice, and the second load took 199 cycles, the L2 reference's 199 (the L3 reference 744, the first load 1,344.5), and a scalar load after it 42, an L2 hit, on aifoundry3, aifoundry2 and aifoundry1-c1: a TensorLoad that misses allocates its lines in the L2. Not measured: whether the L3 keeps them and whether tensor stores skip the L2 (the Shire Cache Specification says they do).",
+   "note": "Settled 29 Sep for the L2: E57 (R36) TensorLoaded the same fresh 1 KB twice, and the second load took 199 cycles, the L2 reference's 199 (the L3 reference 744, the first load 1,344.5), and a scalar load after it 42, an L2 hit, on aifoundry3, aifoundry2 and aifoundry1-c1: a TensorLoad that misses allocates its lines in the L2. Not measured: whether the L3 keeps them and whether tensor stores skip the L2 (the PRM, pdf p.306 and p.309, and the Shire Cache Specification, pdf p.62, say they do).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-and-writes-measured-together",
    "page": "The energy manual",
    "topic": "data path"
@@ -2876,9 +2923,9 @@
    "topic": "ISA"
   },
   "minion.tensor-shape": {
-   "statement": "A TensorFMA computes C[M][N] += A[M][K] · B[K][N] with M, N ≤ 16 and K ≤ 64 / (bytes per element): A from the L1 scratchpad, B streamed through TenB, C accumulated in hart 0's vector registers (int8 in TenC). One fp32 op is 4,096 multiply-adds.",
+   "statement": "A TensorFMA computes C[M][N] += A[M][K] · B[K][N] with M, N ≤ 16 and K ≤ 64 / (bytes per element): A from the L1 scratchpad, B from the L1 scratchpad or streamed through TenB by a paired TensorLoadB, C accumulated in hart 0's vector registers (int8 in TenC). One fp32 op is 4,096 multiply-adds.",
    "kind": "spec",
-   "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.264 (§9); docs/et-soc1-notes.md:292-294",
+   "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.264 (§9), p.277 (TensorLoadB) and p.291 (TensorFMA32, TENB); docs/et-soc1-notes.md:314-316",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency",
    "page": "Matmul efficiency",
    "topic": "ISA",
@@ -2888,7 +2935,7 @@
   "minion.tensorfma-546": {
    "statement": "With A and B both in the L1 scratchpad a 16×16×16 fp32 TensorFMA takes 546 cycles (fp16 546, int8 318), identical for every data pattern.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:31-32, 414 (docs/reports/data/2026-09-25-claims-v3/results/lat.json LAT-S1)",
+   "source": "docs/findings/05-claims.md:39-40, 449 (docs/reports/data/2026-09-25-claims-v3/results/lat.json LAT-S1)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
    "page": "The Horace experiment",
    "cards": [
@@ -2914,7 +2961,7 @@
   "minion.tensorsend": {
    "statement": "TensorSend moves COUNT consecutive vector registers (32 B each, up to 127, wrapping past f31: about 4 KB) from the issuing hart into hart 0 of a target minion anywhere on the chip; the receiver's TensorRecv can add, max or min the data into its registers at no extra cost.",
    "kind": "spec",
-   "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.272 and p.311-314; on-chip communication page (headline); docs/findings/05-claims.md:380-381",
+   "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.272 and p.311-314; on-chip communication page (headline); docs/findings/05-claims.md:409-410",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu",
    "page": "On-chip communication",
    "topic": "messaging",
@@ -2924,7 +2971,7 @@
   "minion.vec-peak": {
    "statement": "The tensor instructions run on the vector unit's own lanes: each of the 8 lanes holds the FMA (TxFMA) and the two int8 multiply-add (IMA/TIMA) units, and state machines in the VPU sequence the multi-cycle tensor operations on them. An 8-lane fmadd.ps does 16 FLOP per cycle, the same fp32 peak as TensorFMA.",
    "kind": "spec",
-   "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.8 (§2.1.1.2: TxFMA, a pair of IMA units and 'Finite state machines that generate long sequences of vector operations to implement multi-cycle tensor operations'); external/core-et/docs/Minion VPU Specification.pdf, pdf p.11 (§2: TXFMA and two TIMA units per lane); scripts/ridge-points.py:46, 51 (fp32 TensorFMA and vec32 fmadd.ps, per_cycle 16 each)",
+   "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.8 (§2.1.1.2: TxFMA, a pair of IMA units and 'Finite state machines that generate long sequences of vector operations to implement multi-cycle tensor operations'); external/core-et/docs/Minion VPU Specification.pdf, pdf p.11 (§2: TXFMA and two TIMA units per lane); scripts/ridge-points.py:49, 54 (fp32 TensorFMA and vec32 fmadd.ps, per_cycle 16 each)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points",
    "page": "Ridge points",
    "topic": "compute",
@@ -2934,7 +2981,7 @@
   "minion.vector-rate": {
    "statement": "A simple vector-FMA loop reaches only about 1.5 lane-FMAs per cycle per minion; the best published vector-unit matmul is 2.94 TFLOP/s at 650 MHz (FOSDEM 2026), against the tensor unit's 9.5.",
    "kind": "measured",
-   "source": "docs/et-soc1-notes.md:152-153, 274; ridge-points page §'The compute ceilings'",
+   "source": "docs/et-soc1-notes.md:165-166, 296; ridge-points page §'The compute ceilings'",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute",
    "page": "Sparse compute",
    "cards": [
@@ -2976,7 +3023,7 @@
   "mm-board-w": {
    "statement": "Board power during the fp32 L2 matmul that runs at 9.51 TFLOP/s, idle before the run plus the watts over idle: aifoundry2 33.3 + 25.7 = 59.0 W (die 80 °C), aifoundry3 26.0 + 24.4 = 50.4 W (62 °C), aifoundry1-c1 41.83 + 27.25 = 69.1 W (75-76 °C): 50.4-69.1 W across the three cards (die 62-80 °C). 9.51 TFLOP/s over these is the 161, 189 and 138 GFLOP/s per W of the same run (138-189).",
    "kind": "derived",
-   "source": "docs/findings/05-claims.md:418 (E37, MMB-c: docs/reports/data/2026-09-25-claims-v3/results/mmb.json .items[item=MMB-c].per_card.<card>[\"fp32-tensor-L2\"].board_w, .idle_before_w, .mean, .die_c_mean) and :419 (MMB-d, GFLOP/s per W)",
+   "source": "docs/findings/05-claims.md:453 (E37, MMB-c: docs/reports/data/2026-09-25-claims-v3/results/mmb.json .items[item=MMB-c].per_card.<card>[\"fp32-tensor-L2\"].board_w, .idle_before_w, .mean, .die_c_mean) and :454 (MMB-d, GFLOP/s per W)",
    "note": "The sum is this page's; 05-claims.md gives the watts over idle and the idle before each run. Idle power moves with the card and its temperature (26.0-41.8 W here).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency",
    "page": "Matmul efficiency",
@@ -2993,7 +3040,7 @@
   "mm-peak": {
    "statement": "Tensor peak per minion-cycle: 16 fp32 / 32 fp16 / 128 int8 ops; 9.83 TFLOP/s, 19.7 TFLOP/s and 78.6 TOP/s on 1,024 minions at 600 MHz.",
    "kind": "spec",
-   "source": "ridge-data: peaks.<fp32|fp16|int8>.per_cycle, chip_600; docs/findings/05-claims.md:485",
+   "source": "ridge-data: peaks.<fp32|fp16|int8>.per_cycle, chip_600; docs/findings/05-claims.md:804",
    "note": "Minion VPU Specification sec. 2.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points",
    "page": "Ridge points",
@@ -3002,9 +3049,9 @@
    "unit": "FLOP per minion-cycle (fp32)"
   },
   "mm-perw": {
-   "statement": "Board GFLOP/s per W, L2 matmul fp32 / fp16 / int8: aifoundry2 161 / 316 / 1,172; aifoundry3 189 / 370 / 1,377; aifoundry1-c1 138 / 270 / 958 (each card at its own die temperature).",
+   "statement": "Board GFLOP/s per W (GOP/s per W for int8), L2 matmul fp32 / fp16 / int8: aifoundry2 161 / 316 / 1,172; aifoundry3 189 / 370 / 1,377; aifoundry1-c1 138 / 270 / 958 (each card at its own die temperature).",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:419",
+   "source": "docs/findings/05-claims.md:454",
    "note": "Against the A100 spec sheet (peak / TDP) at full fp32 precision the card is 3.3x (a2), 3.9x (a3), 2.8x (a1c1) more energy-efficient on the benchmark's +-1/+-2 operands; the A100's int8 tensor cores lead by 1.13-1.63x.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency",
    "page": "Matmul efficiency",
@@ -3021,7 +3068,7 @@
   "mm-rate": {
    "statement": "Tensor matmul, tiles in L2, all 1,024 minions at 600 MHz: 9.51 TFLOP/s fp32, 19.02 fp16, 71.77 TOP/s int8, the same on each card (91-97% of the 9.83 / 19.66 / 78.6 peak); 529 cycles per fp32/fp16 op, 280.35 per int8 op.",
    "kind": "measured",
-   "source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json: items[MMB-b].per_card.<card>.<mode>.tflops_pass_values; docs/findings/05-claims.md:417",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json: items[MMB-b].per_card.<card>.<mode>.tflops_pass_values; docs/findings/05-claims.md:452",
    "note": "Every result bit-exact against a host reference.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency",
    "page": "Matmul efficiency",
@@ -3036,9 +3083,9 @@
    "unit": "TFLOP/s"
   },
   "mm.dram": {
-   "statement": "The same benchmark with 64 private tiles per minion, so that every load comes from DRAM: 15,042-15,663 cycles per op and 0.309-0.312 TFLOP/s on the three cards, about 30 times slower than with the tiles in the L2.",
+   "statement": "The same benchmark with 64 private tiles per minion, so that every load comes from DRAM, on the three cards: 16,132-16,278 cycles per op on the slowest minion, whose finish sets the 0.309-0.312 TFLOP/s (15,042-15,663 on the average minion), about 30 times slower than with the tiles in the L2.",
    "kind": "measured",
-   "source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json: [item=MMB-a].per_card.<card>.\"fp32-tensor-DRAM\".cycles_per_op_mean_based, .info_tflops_range; tools/claims-v3/mmb/mmbench_power_v3.py:65",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json: [item=MMB-a].per_card.<card>.\"fp32-tensor-DRAM\".cycles_per_op_max_based, .cycles_per_op_mean_based, .info_tflops_range; tools/claims-v3/mmb/reduce.py:311-312, 325-326, 432-446; launchers/mmbench/mmbench.cpp:281-282, 288-290, 302-304 (cycles_max is the slowest minion, cycles_mean the average over the minions, tflops the FLOP over the launch's wall time); tools/claims-v3/mmb/mmbench_power_v3.py:65",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency",
    "page": "Matmul efficiency",
    "cards": [
@@ -3100,9 +3147,9 @@
    "unit": "W at the launch temperature (random data)"
   },
   "ms-fit-3cards": {
-   "statement": "Left as fitted on aifoundry2 on 19 September (constant 91 and the memory-shire places, not refitted), the DRAM latency model is within ±3 cycles for 93-97% of loads on all three cards: aifoundry2 97.0%, aifoundry3 92.9%, aifoundry1-c1 94.4% (5 passes each).",
+   "statement": "Left as fitted on aifoundry2 on 19 September (constant 91 and the memory-shire places, not refitted), the DRAM latency model is within ±3 cycles for 93-97% of lines (each line's fastest of three loads) on all three cards: aifoundry2 97.0%, aifoundry3 92.9%, aifoundry1-c1 94.4% (5 passes each).",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:404 (E35, MEM-P2: docs/reports/data/2026-09-25-claims-v3/results/mem.json [item=MEM-P2].per_card.<card>.tests.P2_dram_within3_frac)",
+   "source": "docs/findings/05-claims.md:435 (E35, MEM-P2: docs/reports/data/2026-09-25-claims-v3/results/mem.json [item=MEM-P2].per_card.<card>.tests.P2_dram_within3_frac)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy",
    "page": "Anatomy of a memory access",
    "cards": [
@@ -3113,12 +3160,12 @@
    "card": "aifoundry2, aifoundry3, aifoundry1-c1",
    "topic": "placement",
    "value": 97.0,
-   "unit": "% of loads within ±3 cycles (aifoundry2)"
+   "unit": "% of lines within ±3 cycles (aifoundry2)"
   },
   "ms2-forced": {
    "statement": "Memory shire 2's fit ties (3, -1), (5, -1) and (6, 0), but (5, -1) is a corner of the 8 × 6 grid, and the corners are empty, while (6, 0) lies outside the grid: within the fit's assumptions (3, -1) is the only place left.",
    "kind": "derived",
-   "source": "L42 (docs/reports/2026-09-19-et-soc1-memory-anatomy.html:778-780); external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.21 (§4: 'the corners of the grid are not occupied')",
+   "source": "L42 (docs/reports/2026-09-19-et-soc1-memory-anatomy.html:810-812); external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.21 (§4: 'the corners of the grid are not occupied')",
    "note": "The logical map is 6 rows (x = 0-5) by 8 columns (y = -1 to 6, the memory shires at y = -1 and 6).",
    "topic": "placement"
   },
@@ -3259,7 +3306,7 @@
   "pcie.link": {
    "statement": "Host link: PCIe Gen4 x8 on an x16 card edge; the datasheet gives up to 128 Gbps each way (25.78 Gbit/s per lane PHY). 15.75 GB/s per direction is the Gen4 x8 figure; the transfers were timed on three cards on 27 September (facts pcie.negotiated, pcie.h2d).",
    "kind": "derived",
-   "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.4 (§1); external/et-man/ET-PCIe-Dev-Card-V3.pdf, pdf p.3; docs/findings/05-claims.md:489; docs/reports/data/2026-09-27-pcie/pcie.json (27 Sep)",
+   "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.4 (§1); external/et-man/ET-PCIe-Dev-Card-V3.pdf, pdf p.3; docs/findings/05-claims.md:808; docs/reports/data/2026-09-27-pcie/pcie.json (27 Sep)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points#other-limits-that-act-like-ridge-points",
    "page": "Ridge points",
    "topic": "bandwidth",
@@ -3361,7 +3408,7 @@
   "power.idle": {
    "statement": "Idle card after 20.6 h with no workload: 31.79 W at 73 °C, of which minion rail 11.05 W, SRAM 2.00 W, mesh 3.64 W and 15.10 W on no sensor.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:181, 183 (docs/reports/data/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz)",
+   "source": "docs/findings/05-claims.md:193, 195 (docs/reports/data/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage",
    "page": "The DVFS loop and its leakage",
    "cards": [
@@ -3375,7 +3422,7 @@
   "relay-13x": {
    "statement": "Handing a slab to the next shire through its scratchpad costs 12.9x, 13.0x and 13.1x less energy per byte than the DRAM round trip (aifoundry2, aifoundry3, aifoundry1-c1): about a thirteenth, the same on every card at 99%.",
    "kind": "measured",
-   "source": "docs/reports/data/2026-09-25-claims-v3/results/rl.json: items[RL-d, part=relay DRAM / next shire].per_card.<card>.ratio_geo_mean; docs/findings/05-claims.md:451",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/rl.json: items[RL-d, part=relay DRAM / next shire].per_card.<card>.ratio_geo_mean; docs/findings/05-claims.md:490",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay",
    "page": "Hand it to the next shire: on-chip relay vs DRAM",
    "cards": [
@@ -3389,10 +3436,10 @@
    "unit": "x (pooled)"
   },
   "relay-bw": {
-   "statement": "Relay bandwidth (8 stages, 1,024 minions): 47.7 GB/s through DRAM, 592.5 GB/s to the next shire (12.4x), 1487 GB/s in the own scratchpad (aifoundry2 pass means; the other cards within 1.5%).",
+   "statement": "Relay bandwidth (8 stages, 1,024 minions; bytes read plus bytes written): 47.7 GB/s through DRAM, 592.5 GB/s to the next shire (12.4x), 1487 GB/s in the own scratchpad (aifoundry2 pass means; the other cards within 1.5%).",
    "kind": "measured",
-   "source": "docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json: headline.<card>.<dram|hop|scp>.gb_s; docs/findings/05-claims.md:241",
-   "note": "Speed-ups 12.25-12.42x (next shire) and 30.8-31.2x (own scratchpad) over DRAM; the advantage needs the live data to outgrow the 32 MB L3 (below it 1.4-1.5x).",
+   "source": "docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json: headline.<card>.<dram|hop|scp>.gb_s, size[].by_card.<card>.hop_over_dram; workloads/onchip/kernel/onchip.c:344 (bytes = stages x chunk x 2); docs/findings/05-claims.md:451",
+   "note": "Speed-ups 12.25-12.42x (next shire) and 30.8-31.2x (own scratchpad) over DRAM; the advantage needs the live data to outgrow the 32 MB L3 (below it at most 1.4-1.5x: 0.97-1.50x over 64-512 KB per stage).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay",
    "page": "Hand it to the next shire: on-chip relay vs DRAM",
    "cards": [
@@ -3405,9 +3452,9 @@
    "unit": "GB/s (next shire)"
   },
   "relay-energy": {
-   "statement": "Relay energy per byte (write + read): through DRAM 116.2 pJ/B [104.5-135.3], to the next shire's scratchpad 8.9 [7.6-10.2], in the own scratchpad 4.3 [3.8-5.1].",
+   "statement": "Relay energy per byte moved, each byte counted once when written and once when read: through DRAM 116.2 pJ/B [104.5-135.3], to the next shire, which reads the previous shire's scratchpad, 8.9 [7.6-10.2], in the own scratchpad 4.3 [3.8-5.1]; a hand-off writes every byte once and reads it once, so a byte handed to the next shire costs 17.8 pJ (232 through DRAM).",
    "kind": "measured",
-   "source": "manual.json: reruns.relay_pj_per_byte.<dram|hop|scp>; docs/energy-manual/05-bytes-between-cores.md:27",
+   "source": "manual.json: reruns.relay_pj_per_byte.<dram|hop|scp>; docs/energy-manual/05-bytes-between-cores.md:26-28; workloads/onchip/kernel/onchip.c:344 (bytes = stages x chunk x 2: each byte counted when written and when read); tools/ettelem/analyze_reruns.py:184-188 (energy over those bytes)",
    "note": "Per card DRAM / next shire / own: a2 111.3 / 8.61 / 4.05; a3 107.5 / 8.27 / 4.11; a1c1 129.9 / 9.89 / 4.86.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay",
    "page": "Hand it to the next shire: on-chip relay vs DRAM",
@@ -3424,7 +3471,7 @@
   "relay-watts": {
    "statement": "The three relay media draw within a watt of each other over idle (4.34 / 4.42 / 5.30 W for DRAM / next shire / own): the relay's energy saving is time, not power.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:250",
+   "source": "docs/findings/05-claims.md:262",
    "note": "The 22 Sep session's power block (onchip.json power).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay",
    "page": "Hand it to the next shire: on-chip relay vs DRAM",
@@ -3437,9 +3484,9 @@
    "unit": "W over idle (next shire)"
   },
   "relay.speedup": {
-   "statement": "A multi-stage pipeline that hands each stage's output to the next shire's scratchpad runs about 12.4× faster than one that goes through DRAM (31× keeping it in the own scratchpad), at 116 / 8.9 / 4.3 pJ per byte moved (DRAM / next shire / own).",
+   "statement": "A multi-stage pipeline that has the next shire read each stage's output from the producing shire's scratchpad runs about 12.4× faster than one that goes through DRAM (31× keeping it in the own scratchpad), at 116 / 8.9 / 4.3 pJ per byte moved (DRAM / next shire / own).",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:416, 451; docs/reports/data/2026-09-23-energy-manual/reruns.json `relay_pj_per_byte`",
+   "source": "docs/findings/05-claims.md:451, 490; docs/reports/data/2026-09-23-energy-manual/reruns.json `relay_pj_per_byte`",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay#one-kernel-three-places-to-put-the-answer",
    "page": "Hand it to the next shire: on-chip relay vs DRAM",
    "cards": [
@@ -3455,7 +3502,7 @@
   "ridge.levels": {
    "statement": "Ridge points at 600 MHz (fp32 FLOP per byte fetched): own shire L2 or scratchpad 4, L3 or another shire's scratchpad 10, DRAM 130, PCIe 624 at the link figure of 15.75 GB/s; at the measured host-to-device DMA rate (12.46-12.60 GB/s, fact pcie.h2d) the PCIe ridge is 780-789.",
    "kind": "derived",
-   "source": "docs/findings/05-claims.md:486-489; the measured-DMA ridge computed in build_facts.py: 1,024 minions x 16 FLOP x 600 MHz (facts chip-minions, minion.vec-peak, op-600) over docs/reports/data/2026-09-27-pcie/pcie.json bw.<card>.h2d.dma[bytes=268435456].gbs.mean",
+   "source": "docs/findings/05-claims.md:805-808; the measured-DMA ridge computed in build_facts.py: 1,024 minions x 16 FLOP x 600 MHz (facts chip-minions, minion.vec-peak, op-600) over docs/reports/data/2026-09-27-pcie/pcie.json bw.<card>.h2d.dma[bytes=268435456].gbs.mean",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points#ridge-points-by-level",
    "page": "Ridge points",
    "topic": "compute",
@@ -3471,7 +3518,7 @@
   "scp.format0": {
    "statement": "Scratchpad address, format 0 (bit 30 = 0): 0x80000000 + (shire << 23) + offset, shire ID in bits 29:23, offset in bits 22:0; shire ID 0x7F means the requester's own shire. A request whose shire field is not the local shire goes out over the to_l3 mesh interface to the target shire.",
    "kind": "spec",
-   "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.486 (§15.3); external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.10, p.24 (§1.4.1.3); external/et-platform/et-common-libs/include/system/layout.h:71-76; docs/et-soc1-notes.md:88",
+   "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.486 (§15.3); external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.10, p.24 (§1.4.1.3); external/et-platform/et-common-libs/include/system/layout.h:71-76; docs/et-soc1-notes.md:96-97",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#scratchpad-latency-across-the-mesh",
    "page": "Memory hierarchy",
    "topic": "address map"
@@ -3485,7 +3532,7 @@
   "scp.offset0": {
    "statement": "Offset 0 of a shire's scratchpad faults; a global atomic through the local-scratchpad ID 0x7F is a bus error.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:231, 256",
+   "source": "docs/findings/05-claims.md:243, 268",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay#method-and-what-is-not-established",
    "page": "Hand it to the next shire: on-chip relay vs DRAM",
    "cards": [
@@ -3558,7 +3605,7 @@
   "shire.l2-bw-spec": {
    "statement": "Spec L2 bandwidth: four banks × 64 B = 256 B per shire-cycle, i.e. 8 B per minion-cycle, 4.9 TB/s on 1,024 minions at 600 MHz.",
    "kind": "derived",
-   "source": "docs/findings/05-claims.md:486; docs/et-soc1-notes.md:249; external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.11 ('Read Bandwidth')",
+   "source": "docs/findings/05-claims.md:805; docs/et-soc1-notes.md:269; external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.11 ('Read Bandwidth')",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points#ridge-points-by-level",
    "page": "Ridge points",
    "topic": "bandwidth",
@@ -3617,7 +3664,7 @@
    "unit": "shire clocks (L2 read hit)"
   },
   "shire.voltage-domains": {
-   "statement": "A shire spans several voltage domains separated by level shifters and FIFOs: minions on the low-voltage minion rail, the SRAM arrays (shire cache, and the I-cache data memory, placed in the shire channel because it must run at high voltage) on the SRAM rail, the mesh stop on the NoC rail.",
+   "statement": "A shire spans several voltage domains separated by level shifters and FIFOs: minions on the low-voltage minion rail, the shire cache's SRAM arrays on the SRAM rail, the L1 I-cache data memory in the Shire Channel because it must run at high voltage (the description names no rail for it), the mesh stop on the NoC rail.",
    "kind": "spec",
    "source": "external/core-et/docs/CORE-ET Minion Shire Description.pdf, pdf p.4, p.10 (§3.1) and p.18 (§5); docs/research/why-low-power.md:23-28 (R6)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power",
@@ -3627,7 +3674,7 @@
   "sram-idle": {
    "statement": "SRAM rail at idle (leakage of the L2/L3/scratchpad arrays): 1.60 W at 67 C, 2.63 W at 82 C on aifoundry2; slope 0.066 W/C on aifoundry3.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:309; docs/findings/05-claims.md:459",
+   "source": "docs/findings/05-claims.md:324; docs/findings/05-claims.md:499",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual",
    "page": "The energy manual",
    "cards": [
@@ -3642,7 +3689,7 @@
   "sync-allreduce1024": {
    "statement": "Hardware allreduce of 32 B over all 1,024 minions: 1,393 cycles (2.3 us), 1,392.6-1,393.4 on the three cards; an A100 grid.sync() alone is 1.1-1.2 us.",
    "kind": "measured",
-   "source": "lat.json: items[LAT-N4].per_card.<card>.passes[].allreduce_1024; docs/findings/05-claims.md:413",
+   "source": "lat.json: items[LAT-N4].per_card.<card>.passes[].allreduce_1024; docs/findings/05-claims.md:447",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
    "cards": [
@@ -3658,7 +3705,7 @@
   "sync-allreduce32": {
    "statement": "Hardware allreduce (TensorReduce + TensorBroadcast) of 32 B over a shire's 32 minions: 444 cycles (0.74 us), 444.06-444.31 on all three cards.",
    "kind": "measured",
-   "source": "lat.json: items[LAT-N1].per_card.<card>.passes[].allreduce32; docs/findings/05-claims.md:413",
+   "source": "lat.json: items[LAT-N1].per_card.<card>.passes[].allreduce32; docs/findings/05-claims.md:447",
    "note": "Corrected from 432.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
@@ -3675,7 +3722,7 @@
   "sync-chip-barrier": {
    "statement": "Chip-wide barrier built from FLB, global atomics and credits: 4,976-4,991 cycles with one minion per shire, 4,998-5,013 with all 1,024 (about 8.3 us); the allreduce tree does it in 2.3 us.",
    "kind": "measured",
-   "source": "lat.json: items[LAT-N4].per_card.<card>.passes[].chip_barrier; docs/findings/05-claims.md:413",
+   "source": "lat.json: items[LAT-N4].per_card.<card>.passes[].chip_barrier; docs/findings/05-claims.md:447",
    "note": "Energy: about 10 uJ of waiting (1,024 stalled minions at 1.2 mW for the barrier's length; derived, energy manual section 6).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
@@ -3692,7 +3739,7 @@
   "sync-shire-barrier": {
    "statement": "Shire barrier (fast local barrier + credits, 32 minions, all 32 shires at once): 233 cycles (388 ns); 232.5-232.7 on the three cards.",
    "kind": "measured",
-   "source": "lat.json: items[LAT-N1].per_card.<card>.passes[].shire_barrier; docs/findings/05-claims.md:413",
+   "source": "lat.json: items[LAT-N1].per_card.<card>.passes[].shire_barrier; docs/findings/05-claims.md:447",
    "note": "Corrected from 237 (one session, 18 Sep).",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
@@ -3759,8 +3806,8 @@
   "temp-sensors": {
    "statement": "35 temperature sensors on the die (34 minion shires + the I/O shire, one per tile of the 6x6 grid except PCIe), 12-bit (0.061 C) in hardware; the host sees one 34-shire mean in whole degrees plus peak-hold extremes.",
    "kind": "spec",
-   "source": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html headline tiles; docs/findings/05-claims.md:331",
-   "note": "Firmware source (bl2_pvt_controller.h) and PRM sec. 1.6.",
+   "source": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html headline tiles; docs/findings/05-claims.md:350",
+   "note": "The RTL (core-et rtl/inc/pvt_defines.vh:16-18, 26: the PCIe shire's sensor removed, RTLMIN-3619) and the firmware (bl2_pvt_controller.h:75, 440); the PRM (sec. 1.6, Table 1-6, Figure 1-3) still counts 36, one in the PCIe shire.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief",
    "page": "Spatial temperature: a brief",
    "topic": "temperature",
@@ -3818,7 +3865,7 @@
   "ts-credit": {
    "statement": "Credit-counter (FCC) round trip: 140.2 + 14.43 cycles per hop (234 ns + 24 ns/hop); blocking credit inside a shire 119.5-119.9 cycles (200 ns).",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:412",
+   "source": "docs/findings/05-claims.md:446",
    "note": "The registered prediction (148 + 12.2) failed: credits rise 24 ns per hop, not 20.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
@@ -3835,7 +3882,7 @@
   "ts-e-pair": {
    "statement": "Messaging energy, 1 KB TensorSend: 0.69 pJ/B between the two minions of a pair, 2.16 around a neighbourhood, 2.22 around a shire, 12.5-18.3 across the mesh (busy cores included).",
    "kind": "measured",
-   "source": "manual.json: reruns.rings_pj_per_byte.<pair|neigh|shire|xshire*>; docs/energy-manual/05-bytes-between-cores.md:9",
+   "source": "manual.json: reruns.rings_pj_per_byte.<pair|neigh|shire|xshire*>; docs/energy-manual/05-bytes-between-cores.md:9-17",
    "note": "128 B messages cost more: 3.66 pJ/B around a shire, 20.2 to the next shire ID.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
@@ -3852,7 +3899,7 @@
   "ts-rt-fln": {
    "statement": "TensorSend round trip, 32 B register to register inside a shire: 68 cycles (113 ns) on the 7 fast-network tree edges of each neighbourhood, 114-115 cycles (190 ns) for every other pair.",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:380; docs/reports/2026-09-18-et-soc1-on-chip-communication.html \"Inside a shire, only the tree edges are fast\"",
+   "source": "docs/findings/05-claims.md:409; docs/reports/2026-09-18-et-soc1-on-chip-communication.html \"Inside a shire, only the tree edges are fast\"",
    "note": "Same pairs and same cycles in every pass on all three cards.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
@@ -3869,7 +3916,7 @@
   "ts-rt-mesh": {
    "statement": "TensorSend round trip between shires, 32 B: 150 + 12.02 cycles per mesh hop (250 ns + 20 ns/hop), worst residual 1.1-1.4 cycles over all 496 shire pairs; 1 KB messages add 12 cycles per hop to 5 hops and 36 beyond.",
    "kind": "measured",
-   "source": "lat.json: items[LAT-N2].per_card.<card>.passes[].pingpong_fit, .c32_slope_to5, .c32_slope_beyond5; docs/findings/05-claims.md:412",
+   "source": "lat.json: items[LAT-N2].per_card.<card>.passes[].pingpong_fit, .c32_slope_to5, .c32_slope_beyond5; docs/findings/05-claims.md:446",
    "note": "The shire map (marty1885's) is recovered from latency alone in 12 of 12 search restarts.",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "page": "On-chip communication",
@@ -3886,7 +3933,7 @@
   "volt.minion": {
    "statement": "Minion rail: set point 520 mV, 516-518 mV on die under load at 600 MHz; per-shire 517-521 mV at idle. Firmware limits 400-620 mV (boot default 500).",
    "kind": "measured",
-   "source": "docs/findings/05-claims.md:26-27, 41; docs/research/power-telemetry.md:186-190",
+   "source": "docs/findings/05-claims.md:34-35, 49; docs/research/power-telemetry.md:186-190",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature",
    "page": "Power and temperature telemetry",
    "cards": [
@@ -3914,7 +3961,7 @@
   "volt.sram": {
    "statement": "SRAM rail (shire-cache arrays): set point 705 mV, 703-707 mV on die.",
    "kind": "measured",
-   "source": "docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), fields `reg_mv.sram`, `die_mv.sram`; docs/findings/05-claims.md:41",
+   "source": "docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), fields `reg_mv.sram`, `die_mv.sram`; docs/findings/05-claims.md:49",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature",
    "page": "Power and temperature telemetry",
    "cards": [
@@ -4002,6 +4049,12 @@
   "dram_gb": {
    "v": 32,
    "t": "32 GB",
+   "u": "",
+   "f": "dram.capacity"
+  },
+  "dram_gb_a1c1": {
+   "v": 16,
+   "t": "16 GB",
    "u": "",
    "f": "dram.capacity"
   },
@@ -4638,7 +4691,7 @@
   },
   "lat_dram_chip": {
    "v": 28,
-   "t": "about 25–28",
+   "t": "about 28",
    "u": "cycles",
    "f": "lat-dram-chip"
   },
@@ -4833,6 +4886,12 @@
   "rl_e_own": {
    "v": 4.3,
    "t": "4.3",
+   "u": "pJ/B",
+   "f": "relay-energy"
+  },
+  "rl_e_hand": {
+   "v": 17.8,
+   "t": "17.8",
    "u": "pJ/B",
    "f": "relay-energy"
   },
@@ -5425,8 +5484,8 @@
    "f": "mm.reload"
   },
   "mm_dram_op": {
-   "v": 15663,
-   "t": "15,042–15,663",
+   "v": 16278,
+   "t": "16,132–16,278",
    "u": "cycles per op",
    "f": "mm.dram"
   },
@@ -6102,7 +6161,9 @@
    "mm-board-w",
    "power.idle",
    "board.meters",
-   "mm-rate"
+   "mm-rate",
+   "minion.tensorfma-546",
+   "mm.reload"
   ],
   "flowI": [
    "hot.fair",
@@ -6418,7 +6479,7 @@
     "shire_id": 32,
     "logical_pos": "(0,3) or (5,3)",
     "die_pos": "top row column 4 or bottom row column 4 (of 0..7)",
-    "source": "ID: external/et-platform/et-common-libs/include/system/layout.h:37; position: workloads/nocbench/analyze.py:60 EMPTY + docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a (inferred; which of the two is not measured)"
+    "source": "ID: external/et-platform/et-common-libs/include/system/layout.h:37; position: workloads/nocbench/analyze.py:64 EMPTY + docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a (inferred; which of the two is not measured)"
    },
    {
     "name": "spare shire",
@@ -6449,7 +6510,7 @@
    {
     "name": "grey cell that routes traffic",
     "logical_pos": "(5,3)",
-    "source": "workloads/nocbench/analyze.py:50-51 (marty1885's bandwidth data)"
+    "source": "workloads/nocbench/analyze.py:54-55 (marty1885's bandwidth data)"
    }
   ],
   "die_mm": {
@@ -6570,8 +6631,8 @@
    8
   ],
   "source": {
-   "mesh": "workloads/nocbench/analyze.py:52-60 (MARTY, EMPTY) = docs/reports/data/2026-09-24-wire-energy/report.json inputs.mesh_xy = embedded nocbench-data layout in docs/reports/2026-09-18-et-soc1-on-chip-communication.html",
-   "mesh_grey_labels": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:765-786 (labels marked 'inferred')",
+   "mesh": "workloads/nocbench/analyze.py:56-64 (MARTY, EMPTY) = docs/reports/data/2026-09-24-wire-energy/report.json inputs.mesh_xy = embedded nocbench-data layout in docs/reports/2026-09-18-et-soc1-on-chip-communication.html",
+   "mesh_grey_labels": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:800-822 (labels marked 'inferred')",
    "mesh_die": "derived here from MARTY with docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a 'Logical map vs die' (inferred)",
    "memshires": "docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json decomp.ms_pos (workloads/memprobe/analyze.py:111-127)",
    "special": "see each entry",
@@ -6604,7 +6665,7 @@
     "L24"
    ],
    "what_is_inferred": "How the measured logical map sits on the die: logical x as die rows, y as die columns, memory shires 0-3 on the west, and the east-west sense (distances cannot tell a rotation from a mirror).",
-   "what_settles_it": "Mostly settled by firmware source already in hand: the firmware's 'default Shire Virtual ID Map, based on the NOC spec' (noc_reconfigure.h:76-82), renamed by the boot firmware's NOC_Remap_Shires (main.c:284; 'No displacement' table noc_reconfigure.h:398-405, used when no shire is fused off), equals the measured map cell for cell with no rotation or mirror: 496 of 496 pair distances and 32 of 32 cells (docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json). So the diagram's die view L34 is exactly the NoC-spec drawing: memory shires 0-3 on the left (west), PCIe then I/O at the right (east) end of the top row, as PRM Fig. 1-3 and datasheet Fig. 2-6 also draw it. Fact L37 ('does NOT match') compared the map before the renaming and is superseded. Still open: whether the silicon has this handedness or the published die plot's (I/O then PCIe, the mirror); a floorplan with labelled mesh stops, a die plot with its orientation stated, or the package ball map settles it.",
+   "what_settles_it": "Mostly settled by firmware source already in hand: the firmware's 'default Shire Virtual ID Map, based on the NOC spec' (noc_reconfigure.h:76-82), renamed by the boot firmware's NOC_Remap_Shires (main.c:284; 'No displacement' table noc_reconfigure.h:398-405, used when no shire is fused off), equals the measured map cell for cell with no rotation or mirror: 496 of 496 pair distances and 32 of 32 cells (docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json). So the diagram's die view L34 is exactly the NoC-spec drawing: memory shires 0-3 on the left (west), PCIe then I/O at the right (east) end of the top row, as PRM Fig. 1-3 and datasheet Fig. 2-6 also draw it. Fact L37 ('does NOT match') compared the map before the renaming and is superseded. Still open: which east-west handedness the silicon has (the published die plot is not the mirror: it keeps the PCIe and I/O cells at the east end and swaps them, I/O then PCIe, fact L24); a floorplan with labelled mesh stops, a die plot with its orientation stated, or the package ball map settles it.",
    "ask": "document",
    "ask_detail": "top-level floorplan or an oriented, scaled die plot (AI Foundry); second source: the ET-SoC-1 Data Book / a final datasheet with the ball map",
    "hub_anchor": "ask-floorplan",
@@ -6833,7 +6894,7 @@
    "facts": [
     "lat-dram-chip"
    ],
-   "what_is_inferred": "About 25-28 of a DRAM load's cycles are the DRAM's own timing; the rest on-chip (timing registers set against the fit).",
+   "what_is_inferred": "About 28 of a DRAM load's cycles are the DRAM's own timing; the rest on-chip (timing registers set against the fit).",
    "what_settles_it": "A memory-shire description with its pipeline latencies (NoC bridge, uMCTL2 controller, PHY, clock crossings) or a readback of the programmed DRAMTMG registers; or, as an experiment, DRAM latency at a second DRAM clock (needs a build: mem_controller.c:643 fixes 933 MHz; 800 and 1066 modes exist).",
    "ask": "document / interface / experiment (firmware build)",
    "ask_detail": "ask-memshire",
@@ -6850,7 +6911,7 @@
    "facts": [
     "minion.tensor-cache-path"
    ],
-   "what_is_inferred": "Tensor loads skip the L1 but are cached in L2 and L3; tensor stores skip the L1 and L2 (energy manual; PRM confirms only the L1 bypass). The L2 part is measured (E57, 29 September): a second TensorLoad of the same 1 KB took 199 cycles, the L2 reference's 199, on aifoundry3, aifoundry2 and aifoundry1 card 1. Not measured: whether the L3 keeps the lines, and the stores' bypass.",
+   "what_is_inferred": "Tensor loads skip the L1 but are cached in L2 and L3; tensor stores skip the L1 and L2 (energy manual; the PRM states that loads bypass the L1, pdf p.275, and that stores bypass the L1 and the L2, pdf p.306 and p.309). The L2 part is measured (E57, 29 September): a second TensorLoad of the same 1 KB took 199 cycles, the L2 reference's 199, on aifoundry3, aifoundry2 and aifoundry1 card 1. Not measured: whether the L3 keeps the lines, and the stores' bypass.",
    "what_settles_it": "Mostly documents already in the repo: CORE-ET Shire Cache Specification §3.5 'REQ_WriteAround' (pdf p.62): TensorStores issue writeArounds that bypass the L2 (coalesced in its buffer, written to the L3 or a remote scratchpad); Minion DCache Description: TensorLoad requests go out the L2 miss interface (pdf p.32) and fill the L1 scratchpad straight from the L2 interface (pdf p.41). Whether the L2 allocates tensor-load lines: settled by the re-load timing test (tools/claims-v3/memp2/prereg/PREREG.md, R36; docs/reports/data/2026-09-29-memp2). What is left: the L3's copy, by the same test with the L2 evicted between the loads, or shire-cache counters.",
    "ask": "document (in repo) + experiment (done for the L2)",
    "ask_detail": "exp-tensor-reload (E57; no team ask needed)",
@@ -7151,7 +7212,7 @@
   "shire.meshstop.router": {
    "name": "Router (one of nine main-NoC layers)",
    "short": "Router",
-   "blurb": "A small switch. Packets arrive on its input ports, wait in short queues, and an arbiter decides which one crosses the router's internal switch to which output each cycle. Each mesh stop has nine of them stacked as separate networks, plus one for debug.",
+   "blurb": "A small switch. Packets arrive on its input ports, wait in short queues, and an arbiter decides which one crosses the router's internal switch to which output each cycle. A minion shire's mesh stop has nine of them stacked as separate networks (a memory shire's most likely seven), plus one for debug.",
    "parent": "shire.meshstop",
    "m": 0.0002,
    "kind": "inferred",
@@ -7246,13 +7307,13 @@
   "shire.meshstop.xing": {
    "name": "Voltage and clock crossing (VCFIFO)",
    "short": "Voltage and clock crossing",
-   "blurb": "The shire's cache runs at 0.705 V on its own clock, the network at 0.485 V and 400 MHz. Every bit that crosses is shifted in voltage and re-timed through two flip-flops into the other clock, so it cannot be caught half-changed.",
+   "blurb": "The shire cache runs on the shire clock, its arrays on the 0.705 V SRAM rail (the rail of its logic is not documented); the network runs at 0.485 V and 400 MHz. Every bit is level-shifted as it crosses; each word waits in a small FIFO whose write and read counts, not the data, pass through two-flip-flop synchronisers into the other clock, so a word is read only once it is completely written.",
    "parent": "shire.meshstop",
    "m": 5e-05,
    "kind": "inferred",
    "note": "order of magnitude: a FIFO of a few 512-bit entries with level shifters on every bit",
    "facts": [
-    "ml:l2:l2.vc-fifo",
+    "ml:l3:l3.ports",
     "ml:l3:l3.hv-region",
     "ml:l3:g.crossing",
     "in.shire.meshstop.xing.4",
@@ -7740,7 +7801,7 @@
   "shire.uc": {
    "name": "UC block",
    "short": "UC block",
-   "blurb": "Hardware for coordination: barrier counters (everyone waits until all have arrived), credit counters, interrupts between cores, and atomic operations that do not go through the cache.",
+   "blurb": "Hardware for coordination: barrier counters (everyone waits until all have arrived), credit increments, interrupts between cores, and atomic operations that do not go through the cache.",
    "parent": "shire",
    "m": 0.0002,
    "kind": "inferred",
@@ -7783,13 +7844,13 @@
    "f": "size.shire.uc.flb"
   },
   "shire.uc.fcc": {
-   "name": "Fast credit counters",
-   "short": "Fast credit counters",
-   "blurb": "Per-thread counters that other threads can add credits to; a thread that reads its counter takes a credit, or waits until one arrives. A cheap way to say \"your data is ready\".",
+   "name": "Credit increments (CREDINC0-3)",
+   "short": "Credit increments",
+   "blurb": "Four registers (CREDINC0-3) that any thread can write with a mask of minions; each write adds a credit to the chosen harts' counters, which sit in the minions themselves (two per hart). A thread that reads its counter takes a credit, or waits until one arrives.",
    "parent": "shire.uc",
    "m": 5e-05,
    "kind": "inferred",
-   "note": "order of magnitude: 4 counters per minion",
+   "note": "order of magnitude: the CREDINC decode (the counters, two per hart, sit in each minion)",
    "facts": [
     "in.shire.uc.fcc.1"
    ],
@@ -7894,6 +7955,7 @@
     "shire.neigh.l0",
     "shire.neigh.req",
     "shire.neigh.rsp",
+    "shire.neigh.xing",
     "shire.neigh.pmu",
     "minion"
    ],
@@ -7994,6 +8056,30 @@
    "nk": "block",
    "erbium": false,
    "f": "size.shire.neigh.rsp"
+  },
+  "shire.neigh.xing": {
+   "name": "Bank FIFOs: the voltage and clock crossing",
+   "short": "Bank FIFOs",
+   "blurb": "The neighbourhood's bank FIFOs are the crossing: semi-synchronous VC FIFOs whose cells sit in the HV region, with level shifters at the edge. The neighbourhood's clock is the shire clock shifted half a cycle by the DLL, so a word is handed over on a known edge and needs no synchroniser.",
+   "parent": "shire.neigh",
+   "m": 5e-05,
+   "kind": "inferred",
+   "note": "order of magnitude: five output FIFOs (four for the banks, one for the UC block) of three 256-bit entries, with level shifters at the edge",
+   "facts": [
+    "ml:l2:l2.vc-fifo",
+    "in.shire.neigh.xing.2",
+    "in.shire.neigh.xing.3",
+    "in.shire.neigh.xing.4"
+   ],
+   "kids": [],
+   "see": [
+    "lib.levelshift",
+    "lib.flipflop"
+   ],
+   "zoom_to": null,
+   "nk": "block",
+   "erbium": true,
+   "f": "size.shire.neigh.xing"
   },
   "shire.neigh.pmu": {
    "name": "Performance counters (PMU)",
@@ -8182,11 +8268,11 @@
   "core.irf": {
    "name": "Integer register file",
    "short": "Integer register file",
-   "blurb": "The 32 integer registers of each thread: 64 entries of 64 bits, built from latches, with two read ports and one write port.",
+   "blurb": "The 32 integer registers of each thread: 64 entries of 64 bits, built from latches, with two read ports, a third that reads only x31, and one write port.",
    "parent": "core",
    "m": 4e-05,
    "kind": "inferred",
-   "note": "4,096 latch bits at roughly 0.15-0.2 um2 each (an HD latch, inference) is 0.0006-0.0008 mm2: about 25-30 um before the read trees, some 40 um with them",
+   "note": "3,968 latch bits at roughly 0.15-0.2 um2 each (an HD latch, inference) is 0.0006-0.0008 mm2: about 25-30 um before the read trees, some 40 um with them",
    "facts": [
     "in.core.irf.1",
     "in.core.irf.2"
@@ -8513,7 +8599,7 @@
    "parent": "minion",
    "m": 0.0001,
    "kind": "inferred",
-   "note": "order of magnitude: state machines and two 1 KiB buffers",
+   "note": "order of magnitude: state machines; TenB and TenC, drawn here as the tensor extension's state, sit in the lanes' TIMA units in the RTL",
    "facts": [
     "minion.vec-peak",
     "minion.tensor-shape",
@@ -8557,7 +8643,7 @@
   "tensor.tenb": {
    "name": "TenB (stream buffer for B)",
    "short": "TenB",
-   "blurb": "Where the B matrix streams in from the cache on its way to the lanes; the programmer sees 16 registers of 64 bytes, the hardware keeps only what is in flight.",
+   "blurb": "Where the B matrix streams in from the cache, kept in each lane's two TIMA units; the programmer sees 16 registers of 64 bytes, the hardware keeps only what is in flight.",
    "parent": "tensor",
    "m": 3e-05,
    "kind": "inferred",
@@ -8579,7 +8665,7 @@
   "tensor.tenc": {
    "name": "TenC (int32 accumulators)",
    "short": "TenC",
-   "blurb": "Sixteen 64-byte registers that hold the running 32-bit sums of an integer matrix multiply.",
+   "blurb": "Sixteen 64-byte registers, kept in each lane's two TIMA units, that hold the running 32-bit sums of an integer matrix multiply.",
    "parent": "tensor",
    "m": 4e-05,
    "kind": "inferred",
@@ -9304,13 +9390,13 @@
    "f": "size.io.periph"
   },
   "mesh": {
-   "name": "The mesh (network on chip)",
-   "short": "Mesh",
+   "name": "One mesh hop",
+   "short": "Mesh hop",
    "blurb": "The on-chip network: a grid of 44 stops, one per shire, joined by links to their neighbours. A message crosses one link per step (a hop); each hop adds 12 cycles to a round trip.",
    "parent": "die",
-   "m": 0.0222,
-   "kind": "derived",
-   "note": "the 6-column shire grid spans about 22.2 mm (L08); with the memory shires the mesh spans the die",
+   "m": 0.00372,
+   "kind": "inferred",
+   "note": "one hop: one tile pitch (chip.hop-pitch); the whole mesh spans the die, its 6-column shire grid about 22.2 mm (L08)",
    "facts": [
     "mesh.grid",
     "mesh-hop-lat",
@@ -9671,7 +9757,7 @@
   "lib.adder": {
    "name": "Fast (parallel-prefix) adder",
    "short": "Adder",
-   "blurb": "Adding 64-bit numbers quickly means not waiting for a carry to ripple through 64 positions: prefix adders compute all the carries in about six levels of logic.",
+   "blurb": "Adding 64-bit numbers quickly means not waiting for a carry to ripple through 64 positions: the fastest prefix adders compute all the carries in about six levels of logic.",
    "parent": "lib",
    "m": 3e-05,
    "kind": "inferred",
@@ -9978,7 +10064,7 @@
   "lib.finfet": {
    "name": "FinFET transistor",
    "short": "FinFET",
-   "blurb": "The switch everything is made of. A voltage on the gate decides whether current flows: at 0 V the path along the fin is shut; at the supply rail (0.517 V on a minion) the gate's field pulls a thin sheet of electrons into the fin, and current flows from source to drain. The gate drapes over the fins on three sides.",
+   "blurb": "The switch everything is made of. A voltage on the gate decides whether current flows: in an n-type transistor, at 0 V the path along the fin is shut; at the supply rail (0.517 V on a minion) the gate's field pulls a thin sheet of electrons into the fin, and they flow from source to drain (the current, by convention, from drain to source). The gate drapes over the fins on three sides.",
    "parent": "lib",
    "m": 5.7e-08,
    "kind": "outside",
@@ -10647,7 +10733,7 @@
   "solar": {
    "name": "The Solar System",
    "short": "Solar System",
-   "blurb": "Sunlight takes 8.3 min to reach Earth and about 4.2 h to reach Neptune. In November 2026 Voyager 1, the farthest spacecraft, will be a full light-day away.",
+   "blurb": "Sunlight takes 8.3 min to reach Earth and about 4.2 h to reach Neptune. On 18 November 2026 Voyager 1, the farthest spacecraft, is a full light-day from Earth.",
    "parent": "stars",
    "m": 8996505821528.125,
    "kind": "outside",
@@ -10962,7 +11048,7 @@
   "p.nucleus": {
    "name": "The silicon-28 nucleus",
    "short": "Nucleus",
-   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: some 29,000 times narrower than the atom, but 99.97% of its mass. Nothing in a chip ever touches it.",
+   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: some 29,000 times narrower than the atom, but 99.97% of its mass. Nothing a chip does ever changes it.",
    "m": 8.06e-15,
    "kind": "derived",
    "f": "size.p.nucleus",
@@ -11001,7 +11087,7 @@
   "p.quark": {
    "name": "A quark",
    "short": "Quark",
-   "blurb": "As far as any experiment can tell, a quark is a point. The disc here is only the limit: if a quark has a size, it is smaller than this, under a two-thousandth of the proton. Quarks are never found alone; pull one out and the energy makes new quarks.",
+   "blurb": "As far as any experiment can tell, a quark is a point. The disc here is only the limit: if a quark has a size, it is smaller than this, which is about a two-thousandth of the proton. Quarks are never found alone; pull one out and the energy makes new quarks.",
    "m": 8.6e-19,
    "kind": "outside",
    "f": "p.quark.1",
@@ -11045,7 +11131,7 @@
   "p.planck": {
    "name": "The Planck length",
    "short": "Planck length",
-   "blurb": "The length built from gravity, quantum mechanics and the speed of light. Here, physicists expect space and time themselves to need a quantum description that nobody has yet; whether anything can be smaller is unknown. Between the quark's limit and here lie 16 powers of ten that no experiment has reached.",
+   "blurb": "The length built from gravity, quantum mechanics and the speed of light. Here, physicists expect space and time themselves to need a quantum description that nobody has yet; whether anything can be smaller is unknown. Below the electron's limit, 2 x 10^-20 m, lie some 15 powers of ten that no experiment has reached.",
    "m": 1.616255e-35,
    "kind": "outside",
    "f": "p.planck.1",
@@ -11291,7 +11377,7 @@
   "lib.rom": {
    "name": "A read-only memory (ROM)",
    "short": "ROM",
-   "blurb": "A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit's transcendental functions read their coefficients from small tables like this.",
+   "blurb": "A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit's transcendental functions read their coefficients from small fixed tables too, but the Minion's VPU specification describes them as look-up tables in the RTL (\"ROMs (LUT latch-based)\", \"ROMs (RTL LUTs)\"), not an array like this one.",
    "m": 2e-05,
    "kind": "inferred",
    "f": "size.lib.rom",
@@ -11357,7 +11443,7 @@
   "lib.powerfet": {
    "name": "A power transistor, in section",
    "short": "Power transistor",
-   "blurb": "A switch for tens of amps: thousands of small transistor cells side by side, each passing current straight down through the silicon from its source on top to the drain underneath.",
+   "blurb": "A switch for tens of amps: thousands of small transistor cells side by side; in each, electrons flow straight down through the silicon from the source on top to the drain underneath, so the current flows up.",
    "m": 5e-06,
    "kind": "inferred",
    "f": "size.lib.powerfet",
@@ -12332,6 +12418,12 @@
    "u": "",
    "f": "ml:dram:dram.org.capacity"
   },
+  "dr_gb_a1c1": {
+   "v": 16,
+   "t": "16 GB",
+   "u": "",
+   "f": "ml:dram:dram.org.capacity"
+  },
   "dr_geom": {
    "v": 8,
    "t": "8 banks × 131,072 rows × 2 KB pages",
@@ -12575,6 +12667,12 @@
    "u": "",
    "f": "ml:dram:gen.jedec-match",
    "src_t": "3.904 us"
+  },
+  "g_trfcab_16": {
+   "v": 380,
+   "t": "380 ns",
+   "u": "",
+   "f": "ml:dram:gen.jedec-match"
   },
   "g_xnor_t": {
    "v": 10,
@@ -13286,17 +13384,17 @@
    "f": "ml:l3:l3.dram-leg"
   },
   "l3_fj": {
-   "v": 36.2,
-   "t": "36.2 fJ",
+   "v": 36.7,
+   "t": "36.7 fJ",
    "u": "",
    "f": "ml:l3:l3.wire-energy"
   },
   "l3_hop69": {
-   "v": 69,
-   "t": "69 pJ",
+   "v": 70,
+   "t": "70 pJ",
    "u": "",
    "f": "ml:l3:l3.wire-energy",
-   "src_t": "about 69 pJ"
+   "src_t": "about 70 pJ"
   },
   "l3_hop_r": {
    "v": 115,
@@ -13720,7 +13818,7 @@
    "f": "gate.metals"
   },
   "wf": {
-   "t": "about 4.1 and 4.85 eV",
+   "t": "about 4.4 and 4.85 eV",
    "f": "gate.metals"
   },
   "v_nom": {
@@ -13848,7 +13946,7 @@
    "f": "p.nucleon.1"
   },
   "pr_m": {
-   "t": "938.272 MeV",
+   "t": "938.272 MeV/c²",
    "f": "p.nucleon.3"
   },
   "pr_uud": {
@@ -13884,7 +13982,7 @@
    "f": "p.electron.4"
   },
   "el_q": {
-   "t": "1.602176634 × 10⁻¹⁹ C",
+   "t": "−1.602176634 × 10⁻¹⁹ C",
    "f": "p.electron.1"
   },
   "pl_l": {
@@ -13892,7 +13990,7 @@
    "f": "p.planck.1"
   },
   "pl_16": {
-   "t": "16 powers of ten",
+   "t": "15 powers of ten",
    "f": "p.planck.3"
   },
   "pl_617": {
@@ -14126,7 +14224,7 @@
  },
  "outside": {
   "clock_hz": 600000000.0,
-  "clock_source": "docs/findings/14-card-behaviour.md:338 (the lab cards' usual minion clock)",
+  "clock_source": "docs/findings/14-card-behaviour.md:381 (the lab cards' usual minion clock)",
   "fibre_group_index": 1.4682,
   "fibre_source": "Corning SMF-28e+ optical fibre, product information sheet: effective group index 1.4676 at 1310 nm, 1.4682 at 1550 nm (copy at https://img-en.fs.com/file/datasheet/corning-smf-28eplus-33175.pdf)",
   "privacy": "Studio 45 by name and city only; no address, no coordinates, no map marker; the rack photo's host-name and address labels blurred."
@@ -14155,8 +14253,8 @@
    },
    {
     "id": "lib.fin",
-    "m": 6e-09,
-    "f": "n7.fin-width"
+    "m": 5.2e-08,
+    "f": "n7.fin-height"
    },
    {
     "id": "l1d",
@@ -14218,7 +14316,7 @@
    },
    {
     "id": "e.ew",
-    "lab": "particles get their masses",
+    "lab": "quarks and electrons get mass",
     "num": "ep_ew",
     "T_K": 1900000000000000.0,
     "t_s": 9.1e-12
@@ -14234,8 +14332,8 @@
  },
  "lazy": {
   "url": "ladder-img/ladder-data.json",
-  "n": 813,
-  "bytes": 369682,
-  "sha256": "d3413ead1c00c0f4002f84a3a6553a17ad8fbd3a6ec1d6b3efea53fccc6040ad"
+  "n": 819,
+  "bytes": 382339,
+  "sha256": "e2b5208fdf887d1cfee3d4e3ee8e4b73c806934218a3e3c8145d28f21fb830a2"
  }
 }

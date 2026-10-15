@@ -3,7 +3,8 @@
 for the ladder's inward scales (chip diagram and memory levels, 1 Oct 2026).
 
 Every fact: id, group, levels (which zoom scales it informs), statement, value, unit, kind, label, source, url,
-quote (verbatim from the source, or the inputs for a derived fact), note (assumptions, derivation, caveats).
+quote (verbatim from the source, or the inputs for a derived fact), note (assumptions, derivation, caveats), card (the card a
+measured fact was measured on).
 
 Kinds are the build's vocabulary (docs/reports/data/2026-09-27-chip-diagram/research/build_inside.py LABELS):
   spec      an Esperanto/ET document says so                 -> page label "documented"
@@ -102,7 +103,7 @@ def R(path):  # a repository source
     return ('repository: ' + path, None)
 
 facts = []
-def F(id, group, levels, statement, value, unit, kind, src, quote=None, note=None, url=None, repo_fact=None):
+def F(id, group, levels, statement, value, unit, kind, src, quote=None, note=None, url=None, repo_fact=None, card=None):
     assert kind in LABEL, kind
     if isinstance(src, str) and src in S:
         cit, u = S[src]
@@ -112,7 +113,7 @@ def F(id, group, levels, statement, value, unit, kind, src, quote=None, note=Non
         raise ValueError(src)
     facts.append({'id': id, 'group': group, 'levels': levels, 'statement': statement, 'value': value, 'unit': unit,
                   'kind': kind, 'label': LABEL[kind], 'source': cit, 'url': url or u, 'quote': quote, 'note': note,
-                  'repo_fact': repo_fact})
+                  'repo_fact': repo_fact, 'card': card})
 
 # =====================================================================================================
 # 1. The ET-SoC-1 (Esperanto's own statements, and the repository's measurements)
@@ -162,7 +163,7 @@ F('et.sram-nominal', g, ['l2', 'shire'], 'The shire\'s four 1 MB SRAM banks run 
   quote='"These SRAM banks operate near the process-nominal supply voltage to allow higher density than the smaller caches within each core." / "Shires are connected to each other via an on-chip mesh interconnect operated on its own low-voltage domain." (p. 35)')
 F('et.wires-slow', g, ['neighbourhood'], '7 nm wires are slow, so minions were grouped in eights (neighbourhoods) before wire length became a problem.', 8, 'minions per neighbourhood', 'spec', 'micro',
   quote='"Physical design plays an important role in chip architecture as 7-nm wires are relatively slow. We found it convenient to group eight ET-Minion cores together before wire length became a problem." (p. 34)')
-F('et.cdyn-target', g, ['minion'], 'Esperanto\'s target: 10 mW per minion at 1 GHz and 0.425 V, i.e. 0.04 nF switched per cycle (vs 2.2 nF for a 3 GHz x86 core).', 0.04, 'nF', 'spec', 'hc33',
+F('et.cdyn-target', g, ['minion'], 'Esperanto\'s target: 10 mW per minion at 1 GHz and 0.425 V, with 0.04 nF switched per cycle (vs 2.2 nF for a 3 GHz x86 core); 0.04 nF at 0.425 V and 1 GHz is 7.2 mW, the slide\'s formula adding leakage for the rest.', 0.04, 'nF', 'spec', 'hc33',
   quote='"10mW ET-Minion core (~10W for 1K cores) 0.01 W 1 GHz 0.425v 0.04nF" (slide 5); "Power (Watts) = Cdynamic x Voltage2 x Frequency + Leakage"')
 F('et.ops-per-ghz', g, ['minion', 'vpu'], 'Each minion peaks at 128 int8 operations per cycle (128 GOPS per GHz); 16 fp32 or 32 fp16 operations per cycle.', 128, 'int8 ops per cycle', 'spec', 'hc33',
   quote='"Each ET-Minion can deliver peak of 128 Int8 GOPS per GHz"; "16 32-bit single precision operations per cycle"; "32 16-bit half precision operations per cycle" (slide 7)')
@@ -177,28 +178,28 @@ F('et.icache', g, ['neighbourhood'], 'Eight minions share one 32 KB instruction 
 F('et.density', g, ['die'], 'Average density 24 billion / 570 mm² = 42 million transistors per mm², 46% of N7\'s densest logic (91.2 MTr/mm²): SRAM periphery, analog (PLLs, PHYs), I/O and wiring take the rest.',
   42.1, 'MTr/mm²', 'derived', ('arithmetic on et.transistors, et.die-area and n7.density-hd', S['wc-n7'][1]),
   quote='24e9 / 570 mm² = 42.1e6 per mm²; 42.1 / 91.2 = 0.46')
-F('et.tr-per-minion', g, ['minion'], 'At most about 15 million transistors per minion: what is left after the shire caches\' bitcells (35 x 4 MiB x 6 transistors = 7.0 billion), shared over 1,088 minions; the true count is lower because the rest also holds the mesh, memory shires, PHYs, PCIe and Maxions.',
-  15e6, 'transistors (upper bound)', 'inferred', ('arithmetic on et.transistors and chip.sram-total (repository)', None),
+F('et.tr-per-minion', g, ['minion'], 'At most about 15.6 million transistors per minion: what is left after the shire caches\' bitcells (35 x 4 MiB x 6 transistors = 7.0 billion), shared over 1,088 minions; the true count is lower because the rest also holds the mesh, memory shires, PHYs, PCIe and Maxions.',
+  15.6e6, 'transistors (upper bound)', 'inferred', ('arithmetic on et.transistors and chip.sram-total (repository)', None),
   quote='(24e9 - 35 x 4 x 2^20 x 8 x 6) / 1088 = 15.6e6',
   note='Assumes 6-transistor cells for the shire caches (the bitcell is not documented: memory-levels u.bitcell). No floorplan below the shire is published.')
 
 # measured on the cards (the repository)
 F('et.v-minion', g, ['minion', 'finfet'], 'Minion rail: 0.517 V at 600 MHz on die (0.568 V at 700, 0.618 V at 800); firmware limits 0.40-0.62 V.', 0.517, 'V', 'measured',
-  R('docs/findings/16-dvfs-and-leakage.md:20; docs/findings/05-claims.md:26-27, 41'),
+  R('docs/findings/16-dvfs-and-leakage.md:39; docs/findings/05-claims.md:34-35, 49; docs/research/power-telemetry.md:189 (the firmware limits)'),
   quote='"Three operating points: 600 MHz at 0.517 V, 700 at 0.568, 800 at 0.618." (16-dvfs-and-leakage.md)',
-  repo_fact='chip:volt.minion; ml:l1:l1.voltage')
+  repo_fact='chip:volt.minion; ml:l1:l1.voltage', card='aifoundry2')
 F('et.v-sram', g, ['l2', 'sram'], 'SRAM rail (shire-cache arrays): 0.703-0.707 V on die; firmware limits 0.66-0.85 V.', 0.705, 'V', 'measured',
-  R('chip facts volt.sram; memory-levels l2:l2.voltage.idle, l2:l2.voltage.limits'), repo_fact='chip:volt.sram')
+  R('chip facts volt.sram; memory-levels l2:l2.voltage.idle, l2:l2.voltage.limits'), repo_fact='chip:volt.sram', card='aifoundry2')
 F('et.v-noc', g, ['mesh'], 'Mesh rail: 0.485 V set point, 0.483-0.486 V on die.', 0.485, 'V', 'measured',
-  R('chip facts mesh.voltage, L101'), repo_fact='chip:mesh.voltage')
+  R('chip facts mesh.voltage, L101'), repo_fact='chip:mesh.voltage', card='aifoundry2')
 F('et.v-other', g, ['memshire', 'dram'], 'Other rails on die: DDR (memory shires) 0.76-0.77 V, Maxion 0.58-0.59 V, I/O shire 0.75 V, PCIe shire 0.75 V. The DRAM\'s own two rails have set points only (no reading on die): 1.1 V (the card\'s "VDDQ", the LPDDR4X\'s VDD2 core supply) and 0.64 V (the card\'s VDDQLP, the LPDDR4X\'s I/O VDDQ).', None, 'V', 'measured',
   R('chip facts volt.other; memory levels dram.pwr.rails (the rails\' names)'), repo_fact='chip:volt.other',
-  note='volt.other gives these two as set points (1,100 and 640 mV) read from the power controller, with no on-die value; the memory levels\' dram.pwr.rails names them: VDD_Q is the LPDDR4X\'s VDDQ/VDD2 core supply, VDD_QLP its I/O VDDQ.')
+  note='volt.other gives these two as set points (1,100 and 640 mV) read from the power controller, with no on-die value; the memory levels\' dram.pwr.rails names them: VDD_Q is the LPDDR4X\'s VDDQ/VDD2 core supply, VDD_QLP its I/O VDDQ.', card='aifoundry2')
 F('et.per-shire-v', g, ['shire'], 'Per-shire minion-rail voltage at idle: 513-522 mV across the 34 minion shires.', None, 'mV', 'measured',
-  R('chip facts L123 (docs/findings/05-claims.md:41)'), repo_fact='chip:L123')
+  R('chip facts L123 (docs/findings/05-claims.md:49)'), repo_fact='chip:L123', card='aifoundry2')
 F('et.leakage', g, ['die', 'finfet'], 'Leakage on aifoundry2 at 80 °C: 20-29 W, 55-80% of an idle card and 31-45% of a 64 W random-data matmul; it rises 0.65 W per °C (fit: 23.3 W x exp((T-80)/36)).', 23.3, 'W at 80 °C (fit)', 'measured',
   R('docs/findings/16-dvfs-and-leakage.md (Kanter table row "Leakage is typically 5-30%"); docs/research/why-low-power.md "What this card measures"'),
-  quote='"Fitted: 12.6 W fixed + 23.3 W x exp((T - 80)/36) of leakage" (why-low-power.md)')
+  quote='"Fitted: 12.6 W fixed + 23.3 W x exp((T - 80)/36) of leakage" (why-low-power.md)', card='aifoundry2')
 F('et.leak-double', g, ['finfet'], 'By that fit, leakage doubles every 25 °C.', 25, '°C per doubling', 'derived',
   ('arithmetic on et.leakage: 36 °C x ln 2', None), quote='36 x 0.693 = 24.95 °C')
 F('et.leak-per-tr', g, ['finfet'], 'Spread over 24 billion transistors, the 23 W of leakage fitted at 80 °C is about 1 nW each on average: roughly 1.4-1.9 nA, about 10 billion electrons a second per transistor (an average over every kind, threshold voltage and state, not what any one "off" transistor passes).', 1.0, 'nW per transistor', 'derived',
@@ -207,7 +208,7 @@ F('et.leak-per-tr', g, ['finfet'], 'Spread over 24 billion transistors, the 23 W
   note='An average over every kind of transistor and rail: SRAM, logic, analog; the leakage is not split by rail.')
 F('et.cdyn-measured', g, ['minion'], 'Measured switched capacitance per minion: 0.168 nF on random fp32 matmul (0.064 on ones, 0.012 on zeros), against the 0.04 nF target.', 0.168, 'nF', 'measured',
   R('docs/research/why-low-power.md "What this card measures"'),
-  quote='"Cdynamic = P/(V^2 f): 0.012, 0.064 and 0.168 nF against the slide\'s 0.04 nF target"')
+  quote='"Cdynamic = P/(V^2 f): 0.012, 0.064 and 0.168 nF against the slide\'s 0.04 nF target"', card='aifoundry2')
 F('et.electrons-per-cycle', g, ['minion'], 'Each cycle of a minion on random fp32 matmul moves about 87 pC from the 0.517 V supply: 540 million electrons per minion per cycle (45 pJ).', 5.4e8, 'electrons per minion-cycle', 'derived',
   ('arithmetic on et.cdyn-measured and et.v-minion', None), quote='Q = C V = 0.168 nF x 0.517 V = 86.9 pC; / 1.602e-19 C = 5.4e8; E = C V^2 = 44.9 pJ')
 F('et.flip-reg', g, ['lane', 'gate', 'latch'], 'Clocking one register bit in the tensor unit costs 3.18 fJ (fitted on aifoundry2): at 0.517 V that is an effective 11.9 fF charged, about 38,000 electrons from the supply.', 38000, 'electrons per register bit clocked', 'derived',
@@ -239,7 +240,7 @@ F('n7.fin-height', g, ['fin', 'channel'], 'Fin height 52 nm (42 nm at TSMC 10 nm
   quote='Transistor Profile table: "Fin Height | 42 nm | 52 nm | 1.24x"; "Continuing to scale the fin width gives you a narrower channel while increasing the height to maintain a good effective width is done in order to improve the short channel characteristics and subthreshold slope"',
   note='The height of fin standing above the isolation oxide, as these tables quote it (not stated explicitly).')
 F('n7.weff', g, ['fin', 'finfet'], 'One fin gives about 110 nm of channel width: the gate wraps both 52 nm sides and the 6 nm top. N7 has over twice N16\'s effective width.', 110, 'nm per fin', 'derived',
-  ('C. Hu, ch. 7 (the rule) with n7.fin-height and n7.fin-width', S['hu7'][1]),
+  ('C. Hu, ch. 7 (the rule) with n7.fin-height and n7.fin-width; the comparison with N16: ' + S['wc-7nm'][0], S['hu7'][1]),
   quote='Hu: "The channel width, W, is the sum of twice the fin height and the width of the fin." 2 x 52 + 6 = 110 nm. WikiChip: "Compared to N16, N7 has over twice the effective channel width."')
 F('n7.cpp', g, ['finfet', 'gate', 'cell'], 'Contacted gate pitch 57 nm in the dense cells (64 nm in the 7.5-track high-performance cells).', 57, 'nm', 'outside', 'wc-n7',
   quote='"For the transistor, the gate pitch has been further scaled down to 57 nm, however, the interconnect pitch halted at the 40 nm point in order to keep patterning at the SADP point." Flavors table: Gate Pitch 57 nm (low power) / 64 nm (high performance)',
@@ -268,7 +269,7 @@ F('n7.contacts-co', g, ['finfet', 'wire'], 'Contacts to source and drain are cob
 F('n7.cu-co-liner', g, ['wire'], 'The finest copper wires have a cobalt liner and cap (TSMC since 16FF\'s M1-M3, every generation since, including N5): the cobalt keeps copper atoms from migrating.', None, None, 'outside', 'dj-co',
   quote='"When we looked at the Apple A9 the following year, in TSMC\'s 16FF process, the M1 - M3 layers had Co liners and caps" / "And in fact, it has been used in the minimum pitch metals every generation since then, including the N5"',
   note='"keeps copper atoms from migrating" paraphrases the electromigration benefit the article attributes to cobalt (Intel: "improved electromigration (EM) 5 - 10x").')
-F('n7.cells', g, ['cell', 'gate'], 'Standard cells are 240 nm tall (high density, 6 tracks, 8 fin pitches, 57 nm gate pitch) or 300 nm (high performance, 7.5 tracks, 10 fin pitches, 64 nm gate pitch); a 360 nm 9-track variant also exists.', 240, 'nm (HD cell height)', 'outside', 'wc-n7',
+F('n7.cells', g, ['cell', 'gate'], 'Standard cells are 240 nm tall (high density, 6 tracks, 8 fin pitches, 57 nm gate pitch) or 300 nm (high performance, 7.5 tracks, 10 fin pitches, 64 nm gate pitch).', 240, 'nm (HD cell height)', 'outside', 'wc-n7',
   quote='"TSMC 7-nanometer comes in two variations - low power and high performance. Those cells are 240 nm and 300 nm tall respectively." Flavors: "240 nm 8-fin x 30 nm" / "300 nm 10-fin x 30 nm"; Tracks 6 T / 7.5 T',
   note='Which library the ET-SoC-1 uses is not published; the RTL names cell families HDBULT08 and HDBULT11 (memory-levels fact l1:l1.icg-cells, an open question l1:l1.u-library).')
 F('n7.two-fin', g, ['cell', 'finfet'], 'In the 240 nm dense cell each transistor typically has 2 fins (Angstronomics\' "2-fin" N7 cell).', 2, 'fins per transistor (HD logic)', 'outside', 'angstro',
@@ -309,8 +310,8 @@ F('gate.hfo2', g, ['gate'], 'The gate insulator is hafnium oxide (HfO2, relative
 F('gate.eot', g, ['gate'], 'Equivalent oxide thickness under 1 nm is typical of FinFETs of this generation (0.7 nm in a 15 nm-gate research FinFET); N7\'s is not published.', 0.7, 'nm (comparable, simulated)', 'outside', 'berkeley',
   quote='Table 1.1, nominal FinFET design: "Lgate (nm) 15", "EOT (nm) 0.7", "HSi (nm) 40", "WSi (nm) 8"',
   note='A simulation study\'s parameters, not a TSMC figure.')
-F('gate.metals', g, ['gate'], 'Gate metals: since the first high-k gates (45 nm), the n-type gate uses TiAl and the p-type TiN on HfO2, deposited into the trench left by a removed dummy polysilicon gate and filled with W or Al; their work functions (about 4.1 and 4.85 eV) set the threshold.', None, None, 'generic', 'zhao',
-  quote='"In the 45 nm node, the first generation of the high-k/metal gate technology for mass production, dual metal/single high-k stack was used. The metal gate for nMOS was TiAl, and that for pMOS was TiN, integrated with HfO2 dielectric by a gate last process ... To fill the gap, a conductive metal such as Al or W was deposited." / "The PVD TiAl and PVD TiN in gate stacks with HfO2 show EWF around 4.1 eV and 4.85 eV."',
+F('gate.metals', g, ['gate'], 'Gate metals: since the first high-k gates (45 nm), the n-type gate uses TiAl and the p-type TiN on HfO2, deposited into the trench left by a removed dummy polysilicon gate and filled with W or Al; their work functions set the threshold: about 4.1 and 4.85 eV in the planar 45 nm gates, while a FinFET, its channel undoped, needs about 4.4 and 4.85 eV.', None, None, 'generic', 'zhao',
+  quote='"In the 45 nm node, the first generation of the high-k/metal gate technology for mass production, dual metal/single high-k stack was used. The metal gate for nMOS was TiAl, and that for pMOS was TiN, integrated with HfO2 dielectric by a gate last process ... To fill the gap, a conductive metal such as Al or W was deposited." / "The PVD TiAl and PVD TiN in gate stacks with HfO2 show EWF around 4.1 eV and 4.85 eV." / "The work function values of FinFET are about 4.4 eV and 4.85 eV for N metal and P metal respectively"',
   note='Industry practice, not a TSMC N7 disclosure; multi-Vt options come from different work-function metal stacks (four per polarity in GF 7 nm, cmp.gf7).')
 F('gate.undoped-vt', g, ['gate', 'channel'], 'In a FinFET with an undoped channel the threshold voltage is set mainly by the gate metal\'s work function, not by dopants in the channel.', None, None, 'generic', 'zhao',
   quote='"The relation between Vt and the work function of the gate electrode for FinFETs with undoped channel is different to that for the planar MOSFETs. For planar devices, there are plenty of charges to form inversion. For undoped FinFETs, much less charges are available."')
@@ -331,7 +332,7 @@ F('dope.n-sd', g, ['finfet'], 'NMOS source and drain: phosphorus-doped silicon g
 F('dope.p-sd', g, ['finfet'], 'PMOS source and drain: boron-doped silicon-germanium, with boron of the order of 1e20 per cm³ (a patent\'s range runs from below 1e20 to above 2e20); the larger germanium atoms squeeze the channel, which speeds holes.', 2e20, 'cm^-3 (order of)', 'outside', 'qc-pat',
   quote='"one example range of boron concentration that may be used in forming a SiGeB epi layer ... may span from, for example, less than 1E20 at/cm3 and may encompass, for example, greater than 2E20 at/cm3."',
   note='A patent range, not a product measurement. The strain statement is generic: TSMC calls its epitaxy one "that strains the transistor channel" (n7.features).')
-F('dope.donor-acceptor', g, ['crystal', 'channel'], 'Dopants work by valence: phosphorus or arsenic (5 outer electrons) gives one free electron (a donor); boron (3) leaves a hole (an acceptor). Freeing the extra electron takes only about 50 meV, about twice kT at room temperature, so dopants are almost all ionised.', 0.05, 'eV (ionisation energy)', 'generic', 'hu1',
+F('dope.donor-acceptor', g, ['crystal', 'channel'], 'Dopants work by valence: phosphorus or arsenic (5 outer electrons) gives one free electron (a donor); boron (3) leaves a hole (an acceptor). Freeing the extra electron takes only about 50 meV, about twice kT at room temperature, so dopant atoms alone in silicon sites are almost all ionised.', 0.05, 'eV (ionisation energy)', 'generic', 'hu1',
   quote='"group V elements such as As ... bring five valence electrons with each atom. While four electrons are shared with the neighboring Si atoms, the fifth electron may escape to become a mobile electron, leaving behind a positive As ion." / "it takes the donor ionization energy (about 50 meV) to free the extra electron"')
 F('dope.count-channel', g, ['channel'], 'A channel 6 x 16.5 x 52 nm holds about 257,000 silicon atoms but only 0.05 to 5 dopant atoms (at 1e16 to 1e18 per cm³): often none. That is why random dopant fluctuation would wreck such a device if it relied on channel doping.', 257000, 'Si atoms in the channel', 'derived',
   ('arithmetic on n7.fin-width, n7.leff, n7.fin-height, si.density and dope.levels', None),
@@ -347,7 +348,7 @@ F('si.lattice', g, ['crystal'], 'Silicon is a diamond-cubic crystal with a 0.543
 F('si.density', g, ['crystal', 'channel'], '5 x 10^22 silicon atoms per cm³: 50 per cubic nanometre.', 5e22, 'atoms/cm³', 'outside', 'ioffe-basic',
   quote='"Number of atoms in 1 cm3: 5*10^22"; "Lattice constant: 5.431 A"; "Dielectric constant: 11.7"; "Crystal structure: Diamond"',
   note='8 / a³ = 49.94 per nm³ (derived).')
-F('si.planes-width', g, ['crystal', 'fin'], 'Across a 6 nm fin there are about 31 planes of atoms (11 unit cells); along a 16.5 nm channel about 86 planes (30 unit cells); up a 52 nm fin about 383 planes (96 unit cells).', 31, 'atomic planes across the fin', 'derived',
+F('si.planes-width', g, ['crystal', 'fin'], 'Across a 6 nm fin there are about 31 planes of atoms (11 unit cells); along a 16.5 nm channel about 86 planes (30 unit cells); up a 52 nm fin about 383 planes (96 unit cells).', 31, 'atomic planes across the fin', 'inferred',
   ('arithmetic on si.lattice, n7.fin-width, n7.leff, n7.fin-height', None),
   quote='(220) planes a/sqrt(8) = 0.192 nm apart: 6/0.192 = 31, 16.5/0.192 = 86; (400) planes a/4 = 0.136 nm apart: 52/0.136 = 383',
   note='Assumes the usual orientation: a (100) wafer, the channel along <110>, so fin sidewalls are (110) planes (an assumption; TSMC does not say).')
@@ -357,7 +358,8 @@ F('si.bandgap', g, ['crystal', 'finfet'], 'Silicon\'s band gap is 1.12 eV at roo
 F('si.ni', g, ['crystal', 'channel'], 'Pure silicon has only about 1e10 free electrons per cm³ at room temperature (about 4e11 at 80 °C): in one 5,148 nm³ channel that is 0.00000005 electrons. Every carrier that conducts comes from the gate\'s field and the doped source and drain.', 1e10, 'cm^-3', 'outside', 'ioffe-band',
   quote='"Intrinsic carrier concentration 1*10^10 cm-3"; Hu: "ni at room temperature is roughly 10^10 cm^-3 for Si"',
   note='At 80 °C: ni x (T/300)^1.5 x exp(-Eg/2kT ratio) = about 42x, 4e11 cm^-3 (derived); the count in a channel: 1e10 x 5.15e-18 = 5e-8.')
-F('si.mobility', g, ['channel'], 'In pure silicon electrons move about 3 times more easily than holes (mobility up to 1,400 vs 450 cm²/V·s); electrons saturate at about 8e6 cm/s, so crossing a 16.5 nm channel takes about 0.2 ps.', 1400, 'cm²/V·s (electrons, upper bound)', 'outside', 'ioffe-elec',
+F('si.mobility', g, ['channel'], 'In pure silicon electrons move about 3 times more easily than holes (mobility up to 1,400 vs 450 cm²/V·s); in a transistor\'s channel electrons saturate at about 8e6 cm/s, so crossing a 16.5 nm channel takes about 0.2 ps.', 1400, 'cm²/V·s (electrons, upper bound)', 'outside',
+  (S['ioffe-elec'][0] + ' (the mobilities); C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 6 (the saturation velocity in a transistor channel, 8 x 10^6 cm/s)', S['ioffe-elec'][1]),
   quote='"Mobility electrons <=1400 cm2 V-1s-1"; "Mobility holes <=450 cm2 V-1s-1"; Hu ch. 6: "It is known that vsat is 8 x 10^6 cm/s for electrons and 6 x 10^6 cm/s for holes."',
   note='Transit time 16.5e-7 cm / 8e6 cm/s = 0.21 ps (derived), against a 1.67 ns cycle at 600 MHz.')
 F('si.atom', g, ['atom'], 'A silicon atom: 14 protons and 14 electrons, 4 of them valence electrons shared in bonds; 92.2% of silicon is silicon-28 (14 neutrons), 4.7% Si-29, 3.1% Si-30.', 0.92223, 'fraction 28Si', 'outside', 'nist-iso',
@@ -382,7 +384,7 @@ F('el.finfet-why', g, ['finfet', 'fin'], 'Why fins: a thin body with gates on se
   quote='"very thin so that no leakage path is far from one of the gates ... For these reasons, a multigate MOSFET can have shorter Lg, lower Ioff, and larger Ion than a single-gate MOSFET." / "A tall FinFET has the advantage of providing a large W and therefore large Ion while occupying a small footprint."')
 F('el.dynamic', g, ['gate', 'minion'], 'Every switching cycle moves a charge C x Vdd from the supply into a node and dumps it to ground: dynamic power = k C Vdd² f. Halving the voltage quarters the energy per switch, which is why lowering the voltage saves so much.', None, None, 'generic', 'hu6',
   quote='"In each switching cycle, a charge CVdd is transferred from the power supply to the load, C. ... P_dynamic = Vdd x average current = kCVdd^2 f ... Power consumption can be reduced by lowering Vdd and by minimizing all capacitances"')
-F('el.kt', g, ['crystal', 'finfet'], 'Thermal energy kT is 25.9 meV at room temperature (30.4 meV at 80 °C): the band gap is about 43 kT, so thermal agitation alone frees almost no electrons; the dopants\' 50 meV is only 2 kT, so they are all ionised.', 25.85, 'meV at 300 K', 'derived',
+F('el.kt', g, ['crystal', 'finfet'], 'Thermal energy kT is 25.9 meV at room temperature (30.4 meV at 80 °C): the band gap is about 43 kT, so thermal agitation alone frees almost no electrons; the dopants\' 50 meV is only 2 kT, so nearly every dopant atom alone in a silicon site is ionised.', 25.85, 'meV at 300 K', 'derived',
   ('NIST k and e (CODATA 2022)', S['nist-k'][1]), quote='k = 1.380649e-23 J/K, e = 1.602176634e-19 C: kT/e = 25.85 mV (300 K), 30.43 mV (353 K); 1.12 / 0.02585 = 43')
 F('el.electron', g, ['all'], 'The charge of one electron is 1.602176634 x 10^-19 C (exact by definition), so 1 fC is 6,242 electrons.', 1.602176634e-19, 'C', 'outside', 'nist-e',
   quote='"1.602 176 634 x 10^-19 C (exact)"')
@@ -404,7 +406,7 @@ F('el.dram-leak', g, ['dram', 'cell1t1c'], 'To lose no more than a tenth of 60,0
   note='The tenth is an illustrative margin, not a JEDEC figure.')
 F('el.bus-bit', g, ['wire', 'lane'], 'Toggling one operand-word bit outside the tensor unit costs 15.5 fJ: an effective 58 fF of wire and drivers at 0.517 V, about 190,000 electrons; wires, not transistors, hold most of the switched charge.', 58, 'fF effective', 'derived',
   R('docs/energy-manual/03-instructions.md (bus 15.539 fJ)'), quote='C = 15.539 fJ / 0.517² = 58 fF; Q = 30 fC = 188,000 electrons',
-  note='Same E = C V^2 convention as et.flip-reg; a toggle that only discharges draws nothing from the supply, so this is an upper bound on C.')
+  note='E = C V^2, as for et.flip-reg, gives this effective 58 fF; but a toggle that only discharges draws nothing from the supply, so an average toggle costs C V^2 / 2 and the physical switched capacitance is up to twice this, 116 fF (2 x 15.539 fJ / 0.517^2). The 190,000 electrons (E / V) is the average drawn per toggle either way.')
 
 g = 'wire'
 F('wire.cu', g, ['wire'], 'Copper is face-centred cubic, 0.3615 nm cube, resistivity 16.78 nΩ·m in bulk: a 20 nm-wide M0-M4 wire is about 78 copper atoms across, thin enough that surface scattering raises its resistance well above bulk.', 0.3615, 'nm (Cu lattice)', 'outside', 'wp-cu',

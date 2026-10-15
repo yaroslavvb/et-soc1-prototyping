@@ -35,7 +35,7 @@ function updateControl(){
  $('sectionButton').textContent=state.section?'Close cutaway':'Open cutaway';
  $('dielectricButton').hidden=state.scene!=='metal';$('dielectricButton').setAttribute('aria-pressed',String(state.dielectric));
  $('dielectricButton').textContent=state.dielectric?'Hide dielectric':'Show dielectric';
- $('stateSummary').textContent=s.label+': '+$(s.primary+'Value').value+'. '+(state.section?'Cutaway open.':'Assembled view.');
+ $('stateSummary').textContent=s.label+': '+$(s.primary+'Value').value+'. '+(state.section?'Cutaway open.':'Cutaway closed.');
 }
 function updateMotion(){
  $('pauseButton').textContent=state.paused?'Play flow':'Pause flow';$('pauseButton').setAttribute('aria-pressed',String(state.paused));
@@ -57,8 +57,9 @@ function setScene(name){
  for(const [key,label] of s.parts){const b=document.createElement('button');b.type='button';b.dataset.part=key;b.innerHTML=`<span class="swatch" style="--swatch:${colors[key]}"></span>`;b.append(document.createTextNode(label));b.addEventListener('click',()=>selectPart(key));parts.append(b);}
  updateControl();rebuild();viewer?.reset();viewer?.setTheme(state.dark);selectPart(state.selected);updateMotion();
 }
-$('sectionButton').addEventListener('click',()=>{state.section=!state.section;updateControl();rebuild();});
-$('dielectricButton').addEventListener('click',()=>{state.dielectric=!state.dielectric;updateControl();rebuild();});
+// Metal's cutaway is a cut through the dielectric: opening it shows the dielectric, and hiding the dielectric closes it.
+$('sectionButton').addEventListener('click',()=>{state.section=!state.section;if(state.section&&state.scene==='metal')state.dielectric=true;updateControl();rebuild();});
+$('dielectricButton').addEventListener('click',()=>{state.dielectric=!state.dielectric;if(!state.dielectric&&state.scene==='metal')state.section=false;updateControl();rebuild();});
 $('zoomOut').addEventListener('click',()=>viewer?.zoomBy(1/1.15));$('zoomIn').addEventListener('click',()=>viewer?.zoomBy(1.15));$('resetButton').addEventListener('click',()=>viewer?.reset());
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>viewer?.setView(b.dataset.view)));
 $('pauseButton').addEventListener('click',()=>{state.paused=!state.paused;updateMotion();});

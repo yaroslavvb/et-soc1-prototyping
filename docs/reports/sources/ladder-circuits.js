@@ -94,7 +94,7 @@ bnode('lib.adder', {draw: (L, ap) => {
   KT.frame(L, {title: 'A fast adder, drawn as a prefix tree', sub: '8 bits drawn: every carry at once, in log₂ n levels of carry cells, instead of one bit after another', subf: 'tb.prefix', col: CC.logic, tags: GT});
   const X = i => 950 - i * 140, y0 = 70, ys = [196, 290, 384], yS = 470;
   for (let i = 0; i < 8; i++) KTT(L, X(i), 52, `a${i} b${i}`, 't-sm', 'middle');
-  const gp = cgrp(L, ap, 'pg', 'Generate and propagate: per bit, g = a·b and p = a ⊕ b', {x: X(7) - 50, y: y0, w: X(0) - X(7) + 100, h: 56}, 'lib.xor', {info: {title: 'Generate and propagate', lead: 'For each bit: generate g = a AND b (this bit makes a carry by itself) and propagate p = a XOR b (this bit passes a carry on). An XOR and a NAND with an inverter per bit.', facts: ['tb.prefix']}});
+  const gp = cgrp(L, ap, 'pg', 'Generate and propagate: per bit, g = a·b and p = a ⊕ b', {x: X(7) - 50, y: y0, w: X(0) - X(7) + 100, h: 56}, 'lib.xor', {info: {title: 'Generate and propagate', lead: 'For each bit: generate g = a AND b (this bit makes a carry by itself) and propagate p = a XOR b (this bit passes a carry on). An XOR and a NAND with an inverter per bit. Bit 0 also takes the carry in: g0 = a0·b0 + p0·cin (the textbook enters the carry in as one more column on the right, with G = cin and P = 0), so every carry the tree computes includes it.', facts: ['tb.prefix']}});
   for (let i = 0; i < 8; i++) boxG(gp, X(i) - 44, y0, 88, 56, 'g p');
   // the prefix levels: level L combines each column with the one 2^L places to its right (Kogge-Stone)
   ys.forEach((y, l) => {
@@ -104,18 +104,20 @@ bnode('lib.adder', {draw: (L, ap) => {
       const yu = l ? ys[l - 1] + 22 : y0 + 56;
       KT.wire(L, [[X(i), yu], [X(i), y - 22]]);
       if (i >= sp) { KT.wire(L, [[X(i - sp), yu + 8], [X(i) - 12, y - 20]], 'thin'); E('rect', {class: 'gate', x: X(i) - 22, y: y - 22, width: 44, height: 44, rx: 22, style: 'fill: var(--ink-2)'}, gl); }
-      else E('circle', {class: 'jn', cx: X(i), cy: y, r: 4}, L);
+      else KT.wire(L, [[X(i), y - 22], [X(i), y + 22]]);   // no cell at this level: the column passes straight through
     }
     KTT(L, -150, y + 6, `${sp} apart`, 't-smb');
   });
-  const gs = cgrp(L, ap, 'sum', 'The sums: each bit is p ⊕ the carry from the bits to its right', {x: X(7) - 50, y: yS, w: X(0) - X(7) + 100, h: 56}, 'lib.xor', {info: {title: 'The sum bits', lead: 'Each sum bit is its propagate p XOR the carry coming in from all the bits to its right, which the tree has just computed: one more XOR per bit.', facts: ['tb.prefix']}});
+  const gs = cgrp(L, ap, 'sum', 'The sums: each bit is p ⊕ the carry from the bits to its right', {x: X(7) - 50, y: yS, w: X(0) - X(7) + 100, h: 56}, 'lib.xor', {info: {title: 'The sum bits', lead: 'Each sum bit is its own propagate p (the thin line from its g p box, past the tree) XOR the carry coming in from all the bits to its right, which the tree has just computed: one more XOR per bit.', facts: ['tb.prefix']}});
   // (review of 1 Oct: each sum took its own column's carry, the carry out of its bit; it takes the carry into it, the
   // column to its right's, and bit 0 the carry in; the leftmost column's is the carry out)
   for (let i = 0; i < 8; i++) {
     if (i) KT.wire(L, [[X(i - 1), ys[2] + 22], [X(i - 1), ys[2] + 40], [X(i) - 22, yS - 14], [X(i) - 22, yS]], 'thin');
-    boxG(gs, X(i) - 44, yS, 88, 56, `s${i}`);
+    boxG(gs, X(i) - 44, yS, 88, 56, `s${i}`); KT.wire(L, [[X(i) + 30, y0 + 56], [X(i) + 30, yS]], 'thin');   // its own p, past the tree (review of 14 Oct)
   }
-  KT.wire(L, [[X(0) + 66, 62], [X(0) + 66, yS + 28], [X(0) + 44, yS + 28]], 'thin'); KTT(L, X(0) + 58, 52, 'cin', 't-sm');
+  // (the carry in also enters bit 0's generate, g0 = a0·b0 + p0·cin, so every carry the tree computes includes it: review
+  // of 14 Oct, the carries past bit 0 ignored it)
+  KT.wire(L, [[X(0) + 66, 62], [X(0) + 66, yS + 28], [X(0) + 44, yS + 28]], 'thin'); KT.wire(L, [[X(0) + 66, y0 + 28], [X(0) + 44, y0 + 28]], 'thin'); KT.jn(L, X(0) + 66, y0 + 28); KTT(L, X(0) + 58, 52, 'cin', 't-sm');
   KT.wire(L, [[X(7), ys[2] + 22], [X(7), ys[2] + 40], [X(7) - 60, ys[2] + 40]], 'thin'); KTT(L, X(7) - 66, ys[2] + 46, 'cout', 't-sm', 'end');
   cnote(L, ['a ripple-carry adder waits for each carry in turn, n steps; this tree takes log₂ n levels: 3 for the 8 bits drawn, 6 for 64 bits',
     'P. Kogge and H. Stone, IEEE Trans. Computers, 1973; the ET-SoC-1\'s own adders are not published: a textbook construction'], 628, 'tb.prefix tb.kogge');
@@ -159,11 +161,11 @@ bnode('lib.booth', {draw: (L, ap) => {
   const tx = 640;
   KTT(L, tx, 70, 'bits → the row adds', 't-smb', 'start', 'tb.booth.table');
   [['000', '0'], ['001', '+X'], ['010', '+X'], ['011', '+2X'], ['100', '−2X'], ['101', '−X'], ['110', '−X'], ['111', '0']].forEach(([b, r], i) => KTT(L, tx + (i >> 2) * 210, 100 + (i & 3) * 26, `${b} → ${r}`, 't-mono'));
-  // one row's selectors: a 2:1 mux per bit (X or 2X), then an XOR (minus)
+  // one row's selectors: per bit, X, 2X or 0 (an AND-OR on two select lines), then an XOR (minus)
   const sx = j => 900 - j * 112, sy = 330;
   KTT(L, -150, sy + 8, 'one row:', 't-smb');
-  const gm = cgrp(L, ap, 'sel', 'The row\'s selectors: per bit, a 2:1 multiplexer picks X or 2X (X shifted one place)', {x: sx(7) - 34, y: sy - 34, w: sx(0) - sx(7) + 68, h: 68}, 'lib.mux2',
-    {info: {title: 'The selectors', lead: 'For each bit of the row a 2:1 multiplexer picks bit j of X (for ±X) or bit j-1 (for ±2X: X shifted one place), or neither (for 0).', facts: ['tb.booth']}});
+  const gm = cgrp(L, ap, 'sel', 'The row\'s selectors: per bit, a multiplexer picks X, 2X (X shifted one place) or 0', {x: sx(7) - 34, y: sy - 34, w: sx(0) - sx(7) + 68, h: 68}, 'lib.mux2',
+    {info: {title: 'The selectors', lead: 'For each bit of the row a multiplexer picks bit j of X (for ±X) or bit j-1 (for ±2X: X shifted one place). The encoder raises one of its two select lines, or neither for a 0 row, and then the bit is 0: an AND-OR gate, not a plain 2:1 multiplexer, which always passes one of its inputs.', facts: ['tb.booth']}});
   const gx = cgrp(L, ap, 'neg', 'The negation: per bit, an XOR inverts the bit when the row is negative', {x: sx(7) - 34, y: sy + 70, w: sx(0) - sx(7) + 68, h: 68}, 'lib.xor',
     {info: {title: 'Negation', lead: 'Minus X is made by inverting every bit (an XOR with the sign) and adding a 1 at the row\'s lowest place, which the adder tree takes as one more bit.', facts: ['tb.booth']}});
   for (let j = 0; j < 8; j++) {
@@ -230,7 +232,10 @@ bnode('lib.regfile', {draw: (L, ap) => {
   const gm = cgrp(L, ap, 'rmux', 'The read multiplexers: per bit, a tree of 2:1 multiplexers picks the addressed row', {x: cx(0) - 30, y: 530, w: cx(7) - cx(0) + 60, h: 80}, 'lib.mux2');
   for (let c = 0; c < 8; c++) { KT.wire(L, [[cx(c), ry(7) + 36], [cx(c), 540]], 'thin'); E('path', {class: 'gate', d: `M${cx(c) - 28},540 L${cx(c) + 28},540 L${cx(c) + 16},590 L${cx(c) - 16},590 Z`}, gm); }
   KTT(L, cx(7) + 40, 570, '← read address', 't-sm'); KTT(L, cx(0) - 24, 616, 'read data, 8 bits', 't-sm');
-  cnote(L, ['a minion\'s registers are of this kind: the core\'s integer file is 64 words of 64 bits (two threads of 32), latches, with two read ports and one write', 'Weste and Harris, CMOS VLSI Design, ch. 12'], 648, 'tb.regfile in.core.irf.1');
+  // (x0 of each thread has no latch and x31 a read port of its own, intpipe_rf.v; split over the two lines so that it
+  // stays inside the frame: review of 14 Oct)
+  cnote(L, ['a minion\'s registers are of this kind: the core\'s integer file is 64 words of 64 bits (two threads of 32), latches (x0 of each thread is',
+    'wired to zero), with two read ports, a third that reads only x31, and one write; Weste and Harris, CMOS VLSI Design, ch. 12'], 648, 'tb.regfile in.core.irf.1');
 }, def: () => ({id: 'lib.latch'}), kids: () => [{id: 'lib.latch'}, {id: 'lib.decoder'}, {id: 'lib.icg'}, {id: 'lib.mux2'}]});
 
 /* ---- a clock gate: a latch holds the enable while the clock is high, an AND passes the clock only when enabled ---- */
@@ -281,8 +286,8 @@ bnode('lib.counter', {draw: (L, ap) => {
   const gf = cgrp(L, ap, 'ff', 'The register: one flip-flop per bit', {x: X(3) - 90, y: 300, w: X(0) - X(3) + 180, h: 120}, 'lib.flipflop');
   for (let i = 0; i < 4; i++) {
     boxG(gh, X(i) - 70, 120, 140, 100, 'half adder');
-    KT.flopSym(gf, X(i) - 60, 310, 120, 100, `q${i}`);
-    KT.wire(L, [[X(i), 220], [X(i), 310]]); KT.wire(L, [[X(i) + 70, 410], [X(i) + 90, 410], [X(i) + 90, 260], [X(i) + 50, 260], [X(i) + 50, 220]], 'thin');
+    const ff = KT.flopSym(gf, X(i) - 60, 310, 120, 100, `q${i}`);
+    KT.wire(L, [[X(i), 220], [X(i), 310]]); KT.wire(L, [[ff.q.x, ff.q.y], [X(i) + 90, ff.q.y], [X(i) + 90, 260], [X(i) + 50, 260], [X(i) + 50, 220]], 'thin');
     if (i < 3) { KT.wire(L, [[X(i) - 70, 150], [X(i + 1) + 70, 150]]); KTT(L, (X(i) + X(i + 1)) / 2, 140, 'carry', 't-sm', 'middle'); }
   }
   KT.wire(L, [[X(0) + 70, 150], [X(0) + 150, 150]]); KTT(L, X(0) + 156, 156, '+1', 't-net');
@@ -301,7 +306,7 @@ bnode('lib.cmpeq', {draw: (L, ap) => {
   const gt = cgrp(L, ap, 'tree', 'The AND tree: NANDs, then NORs: 1 only when every bit agrees', {x: X(7) - 50, y: 250, w: X(0) - X(7) + 100, h: 300}, 'lib.nand2');
   // (the gates drawn turned: inputs from above, the output below)
   const gate = (x, y, nor) => { E('path', {class: 'gate', d: nor ? `M${x - 28},${y - 22} Q${x},${y - 10} ${x + 28},${y - 22} Q${x + 24},${y + 14} ${x},${y + 26} Q${x - 24},${y + 14} ${x - 28},${y - 22} Z` : `M${x - 28},${y - 22} L${x + 28},${y - 22} L${x + 28},${y} A28,28 0 0 1 ${x - 28},${y} Z`}, gt); E('circle', {class: 'gate', cx: x, cy: y + 32, r: 5}, gt); return {x, top: y - 22, out: y + 37}; };
-  const n1 = [0, 1, 2, 3].map(j => { const xm = (X(2 * j) + X(2 * j + 1)) / 2, g = gate(xm, 300, false); KT.wire(L, [[X(2 * j) + 22, 180], [xm + 12, g.top]], 'thin'); KT.wire(L, [[X(2 * j + 1) + 22, 180], [xm - 12, g.top]], 'thin'); return g; });
+  const n1 = [0, 1, 2, 3].map(j => { const xm = (X(2 * j) + X(2 * j + 1)) / 2, g = gate(xm, 300, false); KT.wire(L, [[X(2 * j) + 38, 150], [xm + 12, g.top]], 'thin'); KT.wire(L, [[X(2 * j + 1) + 38, 150], [xm - 12, g.top]], 'thin'); return g; });
   const n2 = [[3, 2], [1, 0]].map(([a, b]) => { const xm = (n1[a].x + n1[b].x) / 2, g = gate(xm, 420, true); KT.wire(L, [[n1[a].x, n1[a].out], [xm - 12, g.top]], 'thin'); KT.wire(L, [[n1[b].x, n1[b].out], [xm + 12, g.top]], 'thin'); return g; });
   const xa = (n2[0].x + n2[1].x) / 2, ga = KT.andSym(gt, xa - 26, 520, {w: 52, h: 48});
   KT.wire(L, [[n2[0].x, n2[0].out], [n2[0].x, 508], [xa - 26, 508]], 'thin'); KT.wire(L, [[n2[1].x, n2[1].out], [n2[1].x, 532], [xa - 26, 532]], 'thin');
@@ -319,7 +324,7 @@ bnode('lib.fifo', {draw: (L, ap) => {
   boxG(gw, -30, 480, 220, 70, 'tail (write)');
   const gr = cgrp(L, ap, 'rptr', 'The read pointer: a counter that steps on every pop', {x: 700, y: 470, w: 240, h: 90}, 'lib.counter');
   boxG(gr, 710, 480, 220, 70, 'head (read)');
-  const gc = cgrp(L, ap, 'cmp', 'Full and empty: the two pointers compared', {x: 330, y: 500, w: 240, h: 90}, 'lib.cmpeq');
+  const gc = cgrp(L, ap, 'cmp', 'Full and empty: the two pointers compared', {x: 330, y: 500, w: 240, h: 90}, 'lib.cmpeq', {info: {title: 'Full or empty', lead: 'Equal pointers mean the queue is empty or full. Each pointer counts one bit beyond the address, so the two can be told apart: equal in every bit, the queue is empty; equal but for that extra bit, the writer has gone round once more than the reader and the queue is full. An equality comparator on the address bits and an XOR on the extra bits decide it.', facts: ['tb.fifo']}});
   boxG(gc, 340, 510, 220, 70, 'full? empty?');
   KT.wire(L, [[190, 515], [340, 545]], 'thin'); KT.wire(L, [[710, 515], [560, 545]], 'thin'); KT.wire(L, [[80, 480], [300, 440]], 'thin'); KT.wire(L, [[820, 480], [600, 440]], 'thin');
   cnote(L, ['queues of this kind wait at the ports of the shire cache, its crossbar and the mesh\'s routers', 'Weste and Harris, CMOS VLSI Design, ch. 12 (serial-access memories)'], 640, 'tb.fifo');
@@ -338,10 +343,10 @@ bnode('lib.pll', {draw: (L, ap) => {
   KT.wire(L, [[370, y - 10], [430, y - 10]]);
   const glf = cpart(L, ap, 'lf', 430, y - 80, 160, 140, 'var(--c3)', 'loop filter', 'lib.finfet', {ty: 26, tr: 'jump', info: {title: 'The loop filter', lead: 'Smooths the pump\'s pulses into a control voltage. On a chip its capacitor is usually a transistor\'s gate over its channel (a MOS capacitor).', facts: ['tb.pll']}});
   resV(glf, 470, y - 40, y + 50); const mc = KT.mosV(glf, 545, y + 4, {lead: 18}); KT.wire(glf, [[545, mc.top.y], [570, mc.top.y], [570, mc.bot.y], [545, mc.bot.y]]); KTT(glf, 545, y + 52, 'MOS cap', 't-sm', 'middle');
-  KT.wire(L, [[590, y - 10], [650, y - 10]]);
+  KT.wire(L, [[590, y - 10], [620, y - 10], [620, y + 30], [918, y + 30]]); for (let i = 0; i < 5; i++) KT.wire(L, [[678 + i * 60, y + 30], [678 + i * 60, y - 3.8]], 'thin');
   const gv = cgrp(L, ap, 'vco', 'The oscillator: a ring of an odd number of inverters', {x: 650, y: y - 90, w: 330, h: 170}, 'lib.inverter', {info: {title: 'The voltage-controlled oscillator', lead: 'A ring of an odd number of inverters can never settle: each passes its flip to the next, so the ring oscillates; the control voltage sets how fast each inverter switches.', facts: ['tb.pll']}});
-  for (let i = 0; i < 5; i++) KT.invSym(gv, 680 + i * 60, y - 10, {s: 16});
-  KT.wire(L, [[960, y - 10], [970, y - 10], [970, y + 60], [668, y + 60], [668, y - 10]], 'thin'); KTT(L, 820, y - 50, 'oscillator', 't-smb', 'middle');
+  const vi = [0, 1, 2, 3, 4].map(i => KT.invSym(gv, 680 + i * 60, y - 10, {s: 16})); for (let i = 0; i < 4; i++) KT.wire(L, [[vi[i].out.x, y - 10], [vi[i + 1].in.x, y - 10]]);
+  KT.wire(L, [[vi[4].out.x, y - 10], [970, y - 10], [970, y + 60], [656, y + 60], [656, y - 10], [vi[0].in.x, y - 10]], 'thin'); KTT(L, 820, y - 50, 'oscillator', 't-smb', 'middle');
   KT.wire(L, [[970, y - 10], [1040, y - 10]]); KT.netLab(L, 1000, y - 24, 'out');
   const gd = cgrp(L, ap, 'div', 'The divider: a counter that gives one edge per N of the output\'s', {x: 380, y: y + 150, w: 260, h: 110}, 'lib.counter', {info: {title: 'The divider', lead: 'A counter: one output edge for every N of the oscillator\'s, fed back to the detector, so the loop settles where the output is N times the reference.', facts: ['tb.pll']}});
   boxG(gd, 390, y + 160, 240, 90, '÷ N');
@@ -357,11 +362,11 @@ bnode('lib.ecc', {draw: (L, ap) => {
   const H = [];   // the Hamming positions 1..12 and an overall parity
   for (let c = 0; c < 8; c++) { const pos = [3, 5, 6, 7, 9, 10, 11, 12][c]; H.push([0, 1, 2, 3].map(b => pos >> b & 1).concat([1])); }
   for (let c = 0; c < 5; c++) H.push([0, 1, 2, 3, 4].map(r => (r === c || r === 4 ? 1 : 0)));
-  const ge = cgrp(L, ap, 'enc', 'The check bits: each an XOR tree over the data bits marked in its row', {x: X(0) - 30, y: Y(0) - 24, w: X(12) - X(0) + 60, h: Y(4) - Y(0) + 48}, 'lib.xor',
-    {info: {title: 'The parity-check matrix', lead: 'Each row is one check bit: the XOR of the data bits marked in it. Every data bit is in a different combination of rows, so a single flipped bit shows up as its own pattern of mismatches.', facts: ['tb.ecc']}});
+  const ge = cgrp(L, ap, 'enc', 'The check bits: each an XOR tree over the other bits marked in its row', {x: X(0) - 30, y: Y(0) - 24, w: X(12) - X(0) + 60, h: Y(4) - Y(0) + 48}, 'lib.xor',
+    {info: {title: 'The parity-check matrix', lead: 'Each row makes one check bit, the XOR of the other bits marked in it: data bits in the first four rows; in the fifth, the overall parity, all eight data bits and the first four check bits. Every bit is in a different combination of rows, so a single flipped bit shows up as its own pattern of mismatches.', facts: ['tb.ecc']}});
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) E('circle', {cx: X(c), cy: Y(r), r: H[c][r] ? 9 : 3, class: H[c][r] ? 'jn' : 'w'}, ge);
   KTT(L, -150, Y(2) + 6, 'XOR rows', 't-smb');
-  cpart(L, ap, 'syn', -110, 400, 300, 110, CC.logic, 'syndrome', 'lib.xor', {sub: ['stored vs recomputed', 'check bits: 5 XORs'], ty: 40, info: {title: 'The syndrome', lead: 'On a read the check bits are computed again and XORed with the stored ones: all zeros means no error; otherwise the pattern names the bit.', facts: ['tb.ecc']}});
+  cpart(L, ap, 'syn', -110, 400, 300, 110, CC.logic, 'syndrome', 'lib.xor', {sub: ['stored vs recomputed', 'check bits: 5 XORs'], ty: 40, info: {title: 'The syndrome', lead: 'On a read the check bits are computed again and XORed with the stored ones: all zeros means no error detected; otherwise the pattern names the bit.', facts: ['tb.ecc']}});
   cpart(L, ap, 'fix', 260, 400, 300, 110, CC.logic, 'correct', 'lib.decoder', {sub: ['the syndrome decoded', 'flips that one bit'], ty: 40, info: {title: 'Correction', lead: 'A decoder turns the syndrome into a one-hot mask, and an XOR per bit flips the bad one back.', facts: ['tb.ecc']}});
   cpart(L, ap, 'ded', 630, 400, 300, 110, CC.logic, 'detect two', 'lib.nor2', {sub: ['a syndrome but even', 'overall parity: two errors'], ty: 40, info: {title: 'Double errors', lead: 'If the syndrome is not zero but the overall parity checks out, two bits flipped: that is reported, not corrected.', facts: ['tb.ecc']}});
   cnote(L, ['64 data bits take 8 check bits: one flipped bit corrected, two detected. The shire cache keeps such codes on its tags, tag states and data', 'R. Hamming (1950), M. Hsiao (1970); Weste and Harris, CMOS VLSI Design, ch. 11'], 628, 'tb.ecc ml:l2:l2.ecc');
@@ -372,7 +377,7 @@ bnode('lib.rom', {draw: (L, ap) => {
   KT.frame(L, {title: 'A read-only memory (NOR ROM)', sub: '4 words of 4 bits drawn: precharged bitlines; a transistor where a bit is 1 pulls its line down when its row rises, and an inverter reads the 1', subf: 'tb.rom', col: CC.store, tags: GT});
   const bx = c => 300 + c * 150, wy = r => 180 + r * 100, DATA = [[1, 0, 1, 1], [0, 1, 1, 0], [1, 1, 0, 1], [0, 0, 1, 0]];
   const gp = cgrp(L, ap, 'pre', 'The precharge: a PMOS per bitline pulls it high before each read', {x: bx(0) - 40, y: 60, w: bx(3) - bx(0) + 80, h: 80}, 'lib.finfet', {tr: 'jump'});
-  for (let c = 0; c < 4; c++) { KT.mosV(gp, bx(c), 100, {p: true, lead: 30}); KT.wire(L, [[bx(c), 130], [bx(c), 560]]); KTT(L, bx(c) + 8, 552, `bit ${c}`, 't-sm'); }
+  for (let c = 0; c < 4; c++) { KT.mosV(gp, bx(c), 100, {p: true, lead: 30}); KT.wire(L, [[bx(c), 130], [bx(c), 600], [bx(c) + 14, 600]]); KTT(L, bx(c) + 8, 552, `bit ${c}`, 't-sm'); }
   KT.rail(L, bx(0) - 60, bx(3) + 60, 70, '');
   const gd = cgrp(L, ap, 'dec', 'The row decoder: the address raises one wordline', {x: -150, y: 150, w: 240, h: 360}, 'lib.decoder');
   boxG(gd, -140, 160, 200, 340, 'row decoder');
@@ -382,9 +387,10 @@ bnode('lib.rom', {draw: (L, ap) => {
     for (let c = 0; c < 4; c++) if (DATA[r][c]) {   // (review of 1 Oct: a transistor at a 0 and an output inverter read the complement)
  const m = KT.mosV(gc, bx(c) - 44, wy(r) + 40, {lead: 18}); KT.wire(gc, [[m.gate.x, m.gate.y], [m.gate.x, wy(r)]]); KT.jn(gc, m.gate.x, wy(r)); KT.wire(gc, [[m.x, m.top.y], [m.x, wy(r) + 6], [bx(c), wy(r) + 6]]); KT.jn(gc, bx(c), wy(r) + 6); KT.gnd(gc, m.x, m.bot.y + 10); }
   }
-  const go = cgrp(L, ap, 'out', 'The outputs: an inverter per bitline gives the bit', {x: bx(0) - 40, y: 566, w: bx(3) - bx(0) + 80, h: 70}, 'lib.inverter');
-  for (let c = 0; c < 4; c++) KT.invSym(go, bx(c) + 14, 600, {s: 16});
-  cnote(L, ['the vector unit\'s transcendental functions (2ˣ, log₂ x, 1/x) read their coefficients from small tables of this kind', 'Weste and Harris, CMOS VLSI Design, ch. 12'], 668, 'tb.rom et.trans-rom');
+  const go = cgrp(L, ap, 'out', 'The outputs: an inverter per bitline gives the bit', {x: bx(0) - 40, y: 566, w: bx(3) - bx(0) + 100, h: 70}, 'lib.inverter');
+  for (let c = 0; c < 4; c++) KT.invSym(go, bx(c) + 30, 600, {s: 16});
+  cnote(L, ['the vector unit\'s transcendental functions (2ˣ, log₂ x, 1/x) read coefficients from small fixed tables; the Minion\'s VPU specification',
+    'describes them as look-up tables in the RTL ("RTL LUTs", §2.3.7), not an array like this; Weste and Harris, CMOS VLSI Design, ch. 12'], 668, 'tb.rom et.trans-rom in.vpu.lane.trans.1');
 }, def: () => ({id: 'lib.finfet'}), kids: () => [{id: 'lib.finfet'}, {id: 'lib.decoder'}, {id: 'lib.inverter'}]});
 
 /* ---- an SRAM sense amplifier: a latch that turns a small difference into a full 0 or 1 ---- */
@@ -646,7 +652,7 @@ bnode('lib.buck', {draw: (L, ap) => {
 
 /* ---- a power transistor in section: a trench MOSFET, many cells side by side ---- */
 bnode('lib.powerfet', {draw: (L, ap) => {
-  KT.frame(L, {title: 'A power transistor, in section', sub: 'a trench MOSFET: thousands of cells side by side; when the gates are on, current flows straight down, from the source on top to the drain underneath', subf: 'tb.powerfet', col: 'var(--c7)', tags: [['generic', 'textbook'], ['unknown', 'the card\'s own: not published']]});
+  KT.frame(L, {title: 'A power transistor, in section', sub: 'a trench MOSFET: thousands of cells side by side; when the gates are on, electrons flow straight down, from the source on top to the drain underneath', subf: 'tb.powerfet', col: 'var(--c7)', tags: [['generic', 'textbook'], ['unknown', 'the card\'s own: not published']]});
   const x0 = -110, cw = 205, n = 5, yS = 90, yB = 200, yT = 330, yD = 470, yN = 590;
   S(E('rect', {x: x0, y: yS - 40, width: cw * n, height: 40, 'pointer-events': 'none'}, L), {fill: 'var(--ink-2)', fillOpacity: 0.35, stroke: 'none'}); KTT(L, x0 + cw * n - 10, yS - 14, 'source metal', 't-sm halo', 'end');
   S(E('rect', {x: x0, y: yB, width: cw * n, height: yT - yB, 'pointer-events': 'none'}, L), {fill: 'var(--c2)', fillOpacity: 0.12, stroke: 'none'});
@@ -667,7 +673,7 @@ bnode('lib.powerfet', {draw: (L, ap) => {
     info: {title: 'One cell', lead: 'A gate buried in a trench, in its oxide; along each wall, through the p-type body, the gate\'s field opens a channel of electrons. Thousands of cells in parallel carry tens of amps.', facts: ['tb.powerfet']}});
   S(E('rect', {class: 'shape', x: c2 - cw / 2 + 4, y: yS + 2, width: cw - 8, height: yD - yS - 4, rx: 8}, gc), {fill: 'transparent', stroke: 'var(--c2)', strokeWidth: 2.5, strokeDasharray: '6 5'});
   [-1, 1].forEach(s => { KT.wire(gc, [[c2 + s * 40, yB + 10], [c2 + s * 40, yT + 70]]); E('path', {class: 'w', d: `M${c2 + s * 40 - 7},${yT + 58} L${c2 + s * 40},${yT + 70} L${c2 + s * 40 + 7},${yT + 58}`}, gc); });
-  KTT(L, c2, yD + 30, 'current, down', 't-sm halo', 'middle');
+  KTT(L, c2, yD + 30, 'electrons, down; current, up', 't-sm halo', 'middle');
   const gs = cgrp(L, ap, 'source', 'The source: n-type silicon, packed with donor atoms', {x: c2 + 34, y: yS, w: 56, h: yB - yS}, 'p.dopant', {tr: 'jump',
     info: {title: 'The source', lead: 'Silicon packed with phosphorus or arsenic atoms, each with a spare electron: the electrons the channel carries down come from here.', facts: ['tb.powerfet', 'dope.donor-acceptor']}});
   S(E('rect', {class: 'shape', x: c2 + 36, y: yS + 2, width: 52, height: yB - yS - 4, rx: 4}, gs), {fill: 'transparent', stroke: 'var(--c5)', strokeWidth: 2.5});
@@ -760,7 +766,10 @@ links('dram.cell', {wld: 'lib.dramcell', eq: 'lib.dramcell', sa: 'lib.dramcell',
 links('lib.dramcell', {access: 'lib.si', bitline: 'lib.si', cap: 'p.electron'});
 links('pcie', {'pcie.ctrl': 'lib.logic'});
 links('io', {'io.maxion': 'lib.logic', 'io.sp': 'core', 'io.pll': 'lib.pll', 'io.pvt': 'lib.logic', 'io.periph': 'lib.logic'});
-links('memshire', {vddr: (c, g, P) => ({id: 'memshire.phy', k: MS0(c, g, P)}), noc: 'lib.fifo', xing: 'shire.meshstop.xing', strip: 'lib.mux2', settings: 'lib.flipflop',
+// (the memory shire's clock crossing, the mesh's 400 MHz into the controller's DFI clock, is neither the neighbourhood's
+// crossing nor the mesh stop's: it opens the queue a VC FIFO is built on, not a crossing drawn with another block's sides;
+// review of 14 Oct)
+links('memshire', {vddr: (c, g, P) => ({id: 'memshire.phy', k: MS0(c, g, P)}), noc: 'lib.fifo', xing: 'lib.fifo', strip: 'lib.mux2', settings: 'lib.flipflop',
   atomic: 'lib.adder', perfmon: 'lib.counter', ctl: 'lib.logic', dfi: 'lib.flipflop', lat63: 'lib.fifo'});
 links('memshire.phy', {dfiin: 'lib.flipflop', pll: 'lib.pll', anib: (c, g, P) => ({id: 'memshire.phy.dq', k: MS0(c, g, P)}), dbyte: (c, g, P) => ({id: 'memshire.phy.dq', k: MS0(c, g, P)}),
   topkg: (c, g, P) => ({id: 'memshire.phy.dq', k: MS0(c, g, P)})});
@@ -768,9 +777,11 @@ links('memshire.phy.dq', {trace: 'die.metal', dbi: 'lib.xor', ioE: 'lib.finfet'}
 links('mesh', {bankR: 'lib.fifo', tol3: 'lib.fifo', vcdown: 'shire.meshstop.xing', slave: 'lib.fifo', router: 'shire.meshstop.router', router2: 'shire.meshstop.router',
   more: 'mesh.link.wire', flits: 'mesh.link.wire', hopE: 'mesh.link.wire', nochop: 'shire.meshstop.router'});
 links('mesh.link.wire', {wireC: 'lib.wire', bitE: 'lib.inverter'});
+links('shire.meshstop.xing', {wireC: 'lib.wire', bitE: 'lib.inverter'});   // (drawn as the mesh link's crossing since 14 Oct)
 links('die.metal', {wires: 'lib.wire', bumps: 'lib.wire'});
 links('shire.meshstop.router', {'shire.meshstop.router.buf': 'lib.fifo', 'shire.meshstop.router.alloc': 'lib.logic', 'shire.meshstop.router.xbar': 'lib.xbar'});
-links('shire.uc', {'shire.uc.flb': 'lib.counter', 'shire.uc.fcc': 'lib.counter'});
+// (the UC's credit part is the CREDINC decode; the counters themselves sit in each minion: review of 14 Oct)
+links('shire.uc', {'shire.uc.flb': 'lib.counter', 'shire.uc.fcc': 'lib.decoder'});
 links('shire.xbar', {'shire.xbar.req': 'lib.xbar', 'shire.xbar.rsp': 'lib.xbar'});
 NODES['shire.xbar'].def = () => ({id: 'lib.xbar'});
 links('shire.neigh', {'shire.neigh.icache': 'lib.sram6t', 'shire.neigh.l0': 'lib.regfile', 'shire.neigh.req': 'lib.fifo', 'shire.neigh.rsp': 'lib.fifo', 'shire.neigh.pmu': 'lib.counter'});
@@ -779,7 +790,7 @@ links('shire.bank', {reqq: 'lib.fifo', arb: 'lib.logic', order: 'lib.logic', rbu
 links('shire.subbank', {tagram: 'lib.sram6t', stateram: 'lib.sram6t', ecc: 'lib.ecc', cmp: 'lib.cmpeq', zero: 'lib.sram6t', rowaddr: 'lib.decoder', dc: 'lib.mux2'});
 links('shire.panel', {periph: 'lib.decoder', pre: 'lib.sram6t', mux: 'lib.mux2', sa: 'lib.senseamp', olat: 'lib.latch', band: 'lib.sram6t', icg: 'lib.icg', trim: 'lib.sram6t', geom: 'lib.sram6t'});
 links('lib.sram6t', {half: 'lib.finfet'});
-links('minion', {hart: 'core', etlink: 'shire.meshstop.xing', fln: 'mesh.link.wire'});
+links('minion', {hart: 'core', etlink: 'shire.neigh.xing', fln: 'mesh.link.wire'});
 links('core', {'core.fe': 'lib.logic', 'core.irf': 'lib.regfile', 'core.alu': 'lib.adder', 'core.muldiv': 'lib.booth', 'core.csr': 'lib.flipflop'});
 links('vpu', {'vpu.shsw': 'lib.mux2'});
 links('vpu.lane', {'vpu.lane.vrf': 'lib.regfile', 'vpu.lane.tima': 'lib.booth', 'vpu.lane.trans': 'lib.rom'});

@@ -83,7 +83,8 @@ def take(names):
 KIT = ['kickAs', 'KB_CLS', 'COL', 'DASH', 'BAND_FILL', 'FS_BASE', 'comp', 'boxShape', 'part', 'tagPill', 'frame', 'railBand', 'wire', 'jn', 'netLab',
        'rail', 'gnd', 'mosV', 'mosH', 'invSym', 'andSym', 'mux2', 'flopSym', 'icgSym', 'ringAll', 'fitTexts', 'kbTexts']
 CIRC = ['draw6T', 'buildCell', 'buildPanel', 'buildXing', 'buildLatchCell', 'drawReadTree', 'buildComparator']
-ADDRS = ['P40', 'ADDR', 'bits', 'mkPA', 'L1_HART', 'dec1', 'dec2', 'hex3', 'dec5']
+# (hexPA since 14 Oct 2026: a sub-bank that does not hold the example line names the line's address)
+ADDRS = ['P40', 'ADDR', 'bits', 'hexPA', 'mkPA', 'L1_HART', 'dec1', 'dec2', 'hex3', 'dec5']
 CHAINS = ['STG', 'TLX', 'buildL1Cache', 'buildL1Block', 'buildL1Row', 'buildL1Latch', 'buildL1Cmp',
           'buildL2Bank', 'buildL2Sub', 'buildL2Panel', 'buildL2Cell', 'buildL2Xing',
           'buildHop', 'buildWire', 'buildL3Wire',
@@ -93,8 +94,8 @@ missing = [n for n in KIT + CIRC + ADDRS + CHAINS + PARTS if n not in decl]
 if missing:
     raise SystemExit('not in memory-levels.script.js: ' + ', '.join(missing))
 # the L3 level's parts: only those of the mesh hop and its wire (the L3's own scenes are not drawn here), with the
-# entries they borrow from
-L3KEEP = {'bankR', 'tol3', 'vcdown', 'slave', 'router', 'router2', 'link', 'flits', 'hopE', 'nochop', 'rep1', 'rep2', 'lsin', 'ls'}
+# entries they borrow from ('sync', the wire's VC FIFO into the shire clock, has a panel of its own since 14 Oct 2026)
+L3KEEP = {'bankR', 'tol3', 'vcdown', 'slave', 'router', 'router2', 'link', 'flits', 'hopE', 'nochop', 'rep1', 'rep2', 'lsin', 'ls', 'sync'}
 
 
 def keep_entries(text, name, keep):
@@ -126,6 +127,10 @@ PATCHES = [
      "  const lh = o.lh || Math.max(21, SUBLH);"),
     ("  (o.note || []).forEach((t, i) => T(L, -150, 664 + i * 22, t, 't-sm', 'start', o.noteF));",
      "  (o.note || []).forEach((t, i) => T(L, -150, 664 + i * Math.max(22, SUBLH), t, 't-sm', 'start', o.noteF));"),
+    # the chip page has no level tabs: its flow 1 (Load to DRAM) follows a miss from the minion to the mesh (the
+    # correctness check of 14 Oct 2026)
+    (" The L3 tab follows it.", " Flow 1 follows it."),
+    (" The L2 tab follows the request from there.", " Flow 1 follows the request from there."),
 ]
 
 

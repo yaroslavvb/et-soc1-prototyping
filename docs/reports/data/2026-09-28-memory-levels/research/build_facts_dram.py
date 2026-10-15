@@ -170,7 +170,10 @@ F("dram.addr.pa-map", "address mapping",
   f"measured by flipping one bit: {MP} bits['13'..'17'].b_minus_b0_med = -12 (same row), bits['18'..'29'] = +9 "
   f"(other row), bits['6'..'12'] ~ 0; {V3}/mem.json MEM-P4; anatomy page §5 #which-address-bits-share-a-row; {CAD} §3.4",
   "et-derived", None, card=C3, page_link=ANAT + "#which-address-bits-share-a-row",
-  note="Bank and row bits are measured (a same-bank, other-row pair conflicts from bit 18 up on three cards); the "
+  note="Bank and row bits are measured (a same-bank, other-row pair conflicts from bit 18 up on three cards; on "
+       "aifoundry2, E57 (29 Sep, R33a) matched this map in 14 of 15 conditions; in the fifteenth, two lines that differ "
+       "only in PA[17], a column bit in this map, read as a row conflict (48 trials), which the lab has not explained: docs/findings/05-claims.md row \"Which "
+       "address bits pick the DRAM bank and the row\", chip fact L50); the "
        "split of PA[12:10] into bank rather than channel or column is from the programmed map. zebumem.c:74-111 "
        "prints a different swizzle, but only 'if using DDR DRAM models' (an emulation model), and silicon disagrees "
        "with it.")
@@ -191,14 +194,19 @@ F("dram.addr.region", "address mapping",
 
 # ---------------------------------------------------------------- DRAM organisation
 F("dram.org.capacity", "DRAM organisation",
-  "32 GB of LPDDR4X on the V3 cards (a Micron part): 2 GB, i.e. 16 Gbit, per channel; the chip supports up to 32 GB "
-  "'using LPDDR4X at 16 Gbits per channel'.",
-  f"{CARD} pdf p.1 ('32GB (Micron part) v3 card'); {DS} pdf p.30 §7.1; {MC}:389-398 (MR8 density decode to 32 GB)",
-  "et-spec", 32, "GB")
+  "32 GB of LPDDR4X on aifoundry2 and aifoundry3: 2 GB, i.e. 16 Gbit, per channel; aifoundry1 card 1 has 16 GB, 8 Gbit "
+  "per channel (the sizes the firmware reads from MR8 at boot, as the driver reports them). The chip supports up to "
+  "32 GB 'using LPDDR4X at 16 Gbits per channel'. The vendor names its 32 GB V3 card a Micron part; which maker's parts "
+  "the lab cards carry is not recorded.",
+  "docs/reports/data/2026-09-27-pcie/raw/<card>/r1/info.err ('DRAM size (B)': 34265366528 on aifoundry2 and "
+  "aifoundry3, 17085497344 on aifoundry1-c1: 32 and 16 GiB less the 90 MiB the device keeps); "
+  f"{MC}:389-420 (the MR8 density sets the size); {CARD} pdf p.1 ('32GB (Micron part) v3 card'); {DS} pdf p.30 §7.1",
+  "et-measured", 32, "GB", card=C3 + " (driver report)")
 
 F("dram.org.geometry", "DRAM organisation",
-  "Each channel is one rank of 8 banks x 131,072 rows x 2 KB pages (1,024 columns of 16 bits): 8 x 131,072 x 2 KB = "
-  "2 GB, matching the capacity. One activate therefore senses 16,384 bits into one bank's sense amplifiers.",
+  "On the 32 GB cards (aifoundry2, aifoundry3) each channel is one rank of 8 banks x 131,072 rows x 2 KB pages (1,024 "
+  "columns of 16 bits): 8 x 131,072 x 2 KB = 2 GB, matching their capacity (aifoundry1 card 1's 1 GB channels are a "
+  "smaller die)." " One activate therefore senses 16,384 bits into one bank's sense amplifiers.",
   f"{INIT}:4639-4654 (3 bank, 10 column, 17 row address bits); {MSDEF}:38 (`DDR_BANKS_SIZE 3`); {INIT}:4539 (ODTMAP "
   "rank 0 only); JEDEC JESD209-4 addressing for a 16 Gb-per-channel LPDDR4 die (8 banks, R0-R16, C0-C9, 2 KB page)",
   "et-derived", 16384, "bits sensed per activate",
@@ -212,13 +220,13 @@ F("dram.org.line-vs-page", "DRAM organisation",
   "et-derived", 32, "lines per open row")
 
 F("dram.org.part", "DRAM organisation",
-  "The exact LPDDR4X part (Micron part number), its die density, the number of dies per package and whether each "
+  "The exact LPDDR4X part (its maker and part number), its die density, the number of dies per package and whether each "
   "channel is one x16 die or two byte-mode dies are not in any source. The firmware reads the vendor (MR5; Micron = "
   "0xFF) and density (MR8) at every boot and logs them, but no log has been captured.",
   f"{CARD} pdf p.1; {MC}:364-398 (ddr_config: 'DRAM vendor = MICRON', 'DRAM size = 32GB'); {MCU}:936-1027 "
   "(ms_verify_ddr_density; comment 'for the micron part it is 0x10 for 32gb and 0x18 for 64gb')",
   "unknown",
-  note="The firmware labels MR8 density code 6 '64gb/32GB' (mem_controller_utils.c:1000-1004); in JEDEC LPDDR4 terms "
+  note="The firmware labels MR8 density code 6 '64gb/32GB' (mem_controller_utils.c:996-1000); in JEDEC LPDDR4 terms "
        "code 6 is 32 Gb per die, 16 Gb per channel (GENERIC), which fits 2 GB per channel.")
 
 F("dram.org.die-internals", "DRAM organisation",
@@ -339,7 +347,7 @@ F("dram.ctl.refresh-duty", "refresh",
 F("dram.ctl.power-down", "controller policy",
   "No power-down and no self-refresh: the firmware disables both 'for performance reasons', so an idle channel stays "
   "in active standby with its clocks running.",
-  f"{INIT}:5459 (PWRCTL 0x0), :4738; {CAD}:331",
+  f"{INIT}:5459 (PWRCTL 0x0), :4732-4736; {CAD}:331",
   "et-spec",
   note="GENERIC consequence: the DRAM's active-standby current flows whenever the card is up; its share of the idle "
        "12-18 W unmetered power is unattributed (hub §4.2).")
@@ -365,7 +373,7 @@ F("dram.ctl.ports", "controller queues",
   "Each controller has two AXI ports with aging on: port 0 at priority 15 (commented 'lower priority') and port 1 at "
   "priority 8 ('higher priority'), for reads and writes alike; the memory shire keeps high/low request lines per "
   "controller, and the shire cache marks its to-memory requests high or low QoS from an ESR.",
-  f"{INIT}:4670-4680 (PCFGR_0 0x100f, PCFGR_1 0x1008, PCFGW_0 0x100f, PCFGW_1 0x1008); {MSDEF}:95 "
+  f"{INIT}:4670-4680 (PCFGR_0 0x100f, PCFGR_1 0x1008, PCFGW_0 0x100f, PCFGW_1 0x1008); {MSDEF}:94-95 "
   "(`MEMSHIRE_WRITE_CNT_SIZE`, 'one per priority'); external/core-et/rtl/inc/memshire_types.vh (ddrc_esr_ctl_t: "
   f"u0/u1 csysreq_hi/lo); {SCSPEC} pdf p.97 §4.1 (esr_sc_axi_qos: AXI_QOS_MEM_HIGH_PRIORITY / _LOW_PRIORITY)",
   "et-spec", 2, "AXI ports per controller",
@@ -681,11 +689,14 @@ F("gen.temp-refresh", "refresh",
 
 F("gen.jedec-match", "DRAM timing",
   "The programmed timings sit at JEDEC LPDDR4 minimums for a 16 Gb-per-channel die at 3,733 MT/s: tRCD and tRPpb "
-  "18 ns, tRAS 42 ns, tRRD 10 ns, tFAW 40 ns, tRFCab 280 ns, RL 36 with read DBI, WL 16, nWR 34, tREFI 3.9 us.",
+  "18 ns, tRAS 42 ns, tRRD 10 ns, tFAW 40 ns, RL 36 with read DBI, WL 16, nWR 34, tREFI 3.9 us; the all-bank refresh, "
+  "280.7 ns, is under JEDEC's 380 ns for 12-16 Gb per channel.",
   "GENERIC comparison: values quoted from JEDEC JESD209-4 from memory of the standard, not from an ET source; "
   "ET values from dram.ctl.*",
   "generic",
-  note="tRFCab = 280 ns is the JEDEC value for 12-16 Gb per channel, a cross-check on the die density.")
+  note="JEDEC's tRFCab is 280 ns for 6-8 Gb per channel and 380 ns for 12-16 Gb, so 280 ns is no cross-check on the "
+       "density; Micron rates its 16 Gb single-channel die at an improved 280 ns, which would allow the programmed value "
+       "if the card's part is such a die (the part is not identified: dram.org.part).")
 
 # ---------------------------------------------------------------- store and refill paths
 F("dram.store.path", "store",

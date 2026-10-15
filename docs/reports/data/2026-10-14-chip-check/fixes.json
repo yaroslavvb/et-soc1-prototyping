@@ -1,0 +1,2223 @@
+{
+ "pass1:E-ladder": {
+  "group": "E-ladder",
+  "items": [
+   {
+    "key": "measured-facts-card-not-recorded",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_process.py:106 F() takes card=None; :116 the stored dict gains 'card': card",
+     "build_process.py:190 et.v-minion, :192 et.v-sram, :194 et.v-noc, :197 et.v-other, :199 et.per-shire-v, :202 et.leakage, :211 et.cdyn-measured: card='aifoundry2'",
+     "docs/reports/data/2026-10-01-ladder/build_ladder.py:52 add(..., card=None); :57 ('card', card) added to the kept pairs; :63 the process loop passes f.get('card')",
+     "build_process.py:6-7 and build_ladder.py:21-22 docstrings mention the card field",
+     "regenerated research/process.json (every fact gains a 'card' key, null except these seven) and ladder.json (the seven facts gain \"card\": \"aifoundry2\")"
+    ],
+    "note": "My share is applied in full. The seven are exactly the ladder's measured facts. The page's label changes only after B-deepzoom's deepzoom.py:220 edit; build_facts.py's KEEP list already keeps 'card'. A2-numfacts owns L31 (see needs_other_groups)."
+   },
+   {
+    "key": "cdyn-target-ie-arithmetic",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_process.py:166 et.cdyn-target: ', i.e. 0.04 nF switched per cycle (...).' -> ', with 0.04 nF switched per cycle (vs 2.2 nF for a 3 GHz x86 core); 0.04 nF at 0.425 V and 1 GHz is 7.2 mW, the slide's formula adding leakage for the rest.'"
+    ],
+    "note": "Arithmetic checked: 0.04 nF x 0.425^2 x 1 GHz = 7.2 mW."
+   },
+   {
+    "key": "transistor-upper-bound-rounded-down",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_process.py:181-182 et.tr-per-minion: 'At most about 15 million' -> 'At most about 15.6 million'; value 15e6 -> 15.6e6",
+     "companion record edit: research/research-process.md:91 'at most ~15 million' -> 'at most ~15.6 million'"
+    ],
+    "note": "Arithmetic checked: (24e9 - 7.046e9) / 1088 = 15.58e6, which matches the fact's own quote. No number table cites it."
+   },
+   {
+    "key": "int-regfile-latches-ports",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:228 size.lib.regfile note: '4,096 latch bits with their ports' -> '3,968 latch bits with their ports'"
+    ],
+    "note": "This is my share; build_inside.py (B-deepzoom) and ladder-circuits.js:233 (C-pagescript) are routed below. I checked the RTL: intpipe_rf.v:46 ZERO={2{32'b1}} wires entries 0 and 32 to zero, and rf_latch_2r_1w.v:158-159 builds no latch for them, so 62 x 64 = 3,968."
+   },
+   {
+    "key": "s08-adder-brent-kung-levels",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:32 tb.prefix: 'P = Pi·Pj) of log2 n levels, and forms' -> 'P = Pi·Pj) of as few as log2 n levels, and forms'"
+    ],
+    "note": "This is my share; build_inside.py:967 and :969-970 are B-deepzoom's. The lib.adder drawing (ladder-circuits.js:92-120) is a Kogge-Stone tree, so its 'log₂ n levels' for the drawn tree stays consistent with the new tb.prefix."
+   },
+   {
+    "key": "s08-decoder-size-note-few-um",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:226 size.lib.decoder note: 'a 7-to-128 row decoder spans the 128 rows of an array, a few µm' -> 'the 3-to-8 decoder drawn spans 8 rows, about 1-2 µm; a 7-to-128 row decoder spans the 128 rows of an array, about 15 µm at the 114 nm row pitch of N7's dense SRAM cell (size.lib.sram6t)'"
+    ],
+    "note": "Arithmetic checked: 8 rows x 114-240 nm = 0.9-1.9 µm, and 128 x 114 nm = 14.6 µm."
+   },
+   {
+    "key": "s08-rom-trans-tables-not-nor-rom",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:241 lib.rom lead: 'read their coefficients from small tables like this.' -> 'read their coefficients from small fixed tables too, but the Minion's VPU specification describes them as look-up tables in the RTL (\"ROMs (LUT latch-based)\", \"ROMs (RTL LUTs)\"), not an array like this one.'"
+    ],
+    "note": "This is my share; the caption at ladder-circuits.js:387 is C-pagescript's. I checked the VPU spec wording (manuals text lines 1350 and 2229). As the skeptic warned, in.vpu.lane.trans.1 was not added to the lib.rom node's facts."
+   },
+   {
+    "key": "p.dopant.7-patent-wells",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:171 new source 'berkeley' (X. Zhang, UCB/EECS-2016-3, 5 Jan 2016, with its URL)",
+     "build_particles.py:246 p.dopant.7 statement -> 'TSMC's FinFET patent (US 11,107,923) implants its wells, in the fins or the substrate, at up to 10^18 per cm3 for n-wells (10^16 to 10^18) and up to 10^20 for p-wells (10^17 to 10^20). At a bulk FinFET's usual fin doping, 10^16 to 10^18 per cm3, a ... channel would hold on average ...' (rest unchanged); refs 'tsmc-pat','inside','sze' -> 'tsmc-pat','berkeley','process','sze'",
+     "build_particles.py:247 note -> '...; the count is arithmetic on N7's published fin and effective gate length (process.json) at the Berkeley TCAD study's fin doping (dope.levels)'",
+     "research/research-particles.md:64 and :100 well ranges corrected (n 10^16-10^18, p 10^17-10^20), each within its line"
+    ],
+    "note": "I re-read the patent copy: n-type at or below 1E18 (1E16-1E18), p-type at or below 1E20 (1E17-1E20), and wells 'in the fins 52 and/or the substrate 50'. Berkeley Table 1.2 gives Nfin 1e18 and 1e16. The count still renders '0.05 to 5.1 dopant atoms'."
+   },
+   {
+    "key": "planck-sixteen-vs-fifteen-decades",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:406 p.planck.3 -> renders 'The quark's radius limit is 3 x 10^16 times the Planck length; even the electron's smaller limit, 2 x 10^-20 m, is 1 x 10^15 times it: some 15 powers of ten that no experiment has probed.'; refs zeus, gabrielse, codata",
+     "build_particles.py:402 p.planck lead: 'Between the quark's limit and here lie 16 powers of ten that no experiment has reached.' -> 'Below the electron's limit, 2 x 10^-20 m, lie some 15 powers of ten that no experiment has reached.'",
+     "docs/reports/data/2026-10-01-ladder/build_ladder.py:235 'pl_16': ('p.planck.3', '15 powers of ten') (key kept)",
+     "research/research-particles.md:124 -> 'the quark limit is 3 x 10^16 Planck lengths, the electron's 1 x 10^15: 15 powers of ten unexplored below the electron's limit'"
+    ],
+    "note": "This is my share; ladder-inner.js:613, :624 and :639 are C-pagescript's. The NUM check passes."
+   },
+   {
+    "key": "gate.metals-finfet-work-function",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_process.py:313 statement: '...; their work functions (about 4.1 and 4.85 eV) set the threshold.' -> '...; their work functions set the threshold: about 4.1 and 4.85 eV in the planar 45 nm gates, while a FinFET, its channel undoped, needs about 4.4 and 4.85 eV.'",
+     "build_process.py:314 quote gains ' / \"The work function values of FinFET are about 4.4 eV and 4.85 eV for N metal and P metal respectively\"'",
+     "docs/reports/data/2026-10-01-ladder/build_ladder.py:219 'wf': ('gate.metals', 'about 4.4 and 4.85 eV')",
+     "companion record edit: research/research-process.md:281 gives the work-function values with both cases"
+    ],
+    "note": "This is my share; ladder-inner.js:307 is C-pagescript's. The review's text is verbatim (ald-metal-gates-review.txt:1072-1074), and the NUM check passes."
+   },
+   {
+    "key": "el.bus-bit-note-inverted-bound",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_process.py:409 el.bus-bit note -> 'E = C V^2, as for et.flip-reg, gives this effective 58 fF; but a toggle that only discharges draws nothing from the supply, so an average toggle costs C V^2 / 2 and the physical switched capacitance is up to twice this, 116 fF (2 x 15.539 fJ / 0.517^2). The 190,000 electrons (E / V) is the average drawn per toggle either way.'"
+    ],
+    "note": "Arithmetic checked: 2 x 15.539 fJ / 0.517^2 = 116 fF, and 15.539 fJ / 0.517 V = 30.1 fC = 188,000 electrons."
+   },
+   {
+    "key": "wikichip-wiki-claims-cited-to-other-sources",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_process.py:243 n7.weff source -> 'C. Hu, ch. 7 (the rule) with n7.fin-height and n7.fin-width; the comparison with N16: ' + S['wc-7nm'][0]",
+     "build_process.py:272 n7.cells: clause '; a 360 nm 9-track variant also exists.' dropped (statement now ends '...64 nm gate pitch).')"
+    ],
+    "note": "The fix offered two ways for n7.cells: rewrite the clause or drop it. Following the brief's rule to pick the simpler way that keeps the drawing intact, I dropped it. The Fuse quote then supports the whole statement. NUM n7_cell ('240 nm') and n7_weff ('110 nm') still match."
+   },
+   {
+    "key": "si.mobility-vsat-source",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_process.py:361 statement: 'electrons saturate at about 8e6 cm/s' -> 'in a transistor's channel electrons saturate at about 8e6 cm/s'",
+     "build_process.py:362 source 'ioffe-elec' -> (S['ioffe-elec'][0] + ' (the mobilities); C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 6 (the saturation velocity in a transistor channel, 8 x 10^6 cm/s)', S['ioffe-elec'][1])"
+    ],
+    "note": "NUM cross_t ('0.2 ps') still matches."
+   },
+   {
+    "key": "nucleus-million-times-a-bond",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:299 p.nucleus.8: 'about a million times the energy of the outer electrons (8.15 eV) or of a chemical bond' -> 'about a million times the energy of an outer electron (8.15 eV) and nearly four million times a chemical bond'",
+     "companion record edit: research/research-particles.md:112 -> 'a million times an outer electron's binding energy and nearly four million times a chemical bond.'"
+    ],
+    "note": "This is my share; the drawing note at ladder-inner.js:565 is C-pagescript's. Checked: 8.4477 MeV / 2.3 eV = 3.67 million."
+   },
+   {
+    "key": "in.lib-stale-kinds-and-sources",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_process.py:351 si.planes-width kind 'derived' -> 'inferred' (label becomes 'inference'; process.json meta kinds: derived 11, inferred 8)"
+    ],
+    "note": "Only part (4), the optional one, is in my files. I applied it: the 31 planes rest on an assumed (110) sidewall orientation (the fact's own note), and the vocabulary calls that inferred, as it does for el.channel-electrons, gate.cap-fin and n7.sram-dims. Parts (1)-(3) (build_inside.py FUSE and :1088, research-inside.tail.md:141) are B-deepzoom's."
+   },
+   {
+    "key": "quark-under-a-two-thousandth",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:346 p.quark lead: 'smaller than this, under a two-thousandth of the proton.' -> 'smaller than this, which is about a two-thousandth of the proton.'"
+    ],
+    "note": "Checked: R_p / 4.3e-19 m = 1,955."
+   },
+   {
+    "key": "devcard-pdf-page-citations",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:172 card.dip source: 'p. 1 (features) and p. 3 (DIP switches)' -> 'p. 3 (features) and pp. 7-10 (DIP Switches)'"
+    ],
+    "note": "This is my share; build_outside.py is B-deepzoom's. Checked: the PDF has 10 pages (pdfinfo). p. 3 has Features ('DIP switches to set all boot options'), p. 7 the 'DIP Switches' section, pp. 8 and 10 photos, and p. 9 'V3.2 cards (326-)'."
+   },
+   {
+    "key": "intel14-gate-pitch-rocket-lake",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:188-189 host.intel14 statement -> '...is a FinFET process too: as first made (2014), fins 42 nm apart, gates 70 nm apart and the finest wires 52 nm apart (TSMC N7: 30, 57 and 40 nm); its 14nm++ revision (2017), used for Intel's 14 nm desktop processors from Coffee Lake on, spaces the gates 84 nm apart.'",
+     "build_circuits.py:190-191 source gains '; Intel, Technology and Manufacturing Day (March 2017): 14nm++ relaxes the gate pitch from 70 to 84 nm (as reported by The Motley Fool, \"Intel Corporation Outs 14-Nanometer++ Technology\", 2017, and AnandTech's Coffee Lake review, Oct 2017)'"
+    ],
+    "note": "NUM i14_fp ('fins 42 nm apart') still matches. The host note in ladder-circuits.js:745 only prints the fin pitch, so it is unaffected."
+   },
+   {
+    "key": "missed: p.nucleon.8 (and p.dopant.7) still cite the chip diagram's i",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:326 p.nucleon.8 refs 'pdg-b','inside' -> 'pdg-b','process'",
+     "build_particles.py:327 note 'the channel count rests on the inferred channel size' -> 'the channel count rests on the channel's size, N7's published fin and effective gate length (process.json)'",
+     "p.dopant.7's refs and note were fixed under p.dopant.7-patent-wells (build_particles.py:246-247)",
+     "build_particles.py:173 S['inside'] now names inside.json's 'l1d, a minion's L1 data cache, and shire.panel.array, an SRAM panel of the shire cache' (was 'lib.channel, lib.si')"
+    ],
+    "note": "Confirmed from the evidence. CH_W, CH_L and CH_H are N7's published fin and Leff from process.json (build_particles.py:63-65), and p.atom.9 and p.atom.10 already cite 'process'. After this fix, the 'inside' key's only remaining user is p.wrap.7, which compares with inside.json's l1d (0.12 mm) and shire.panel.array (0.137 mm), so I corrected the key's description. inside.json needs no edit: the ladder's own lib.fin and lib.channel notes replace its stale ones on the page."
+   }
+  ],
+  "citations": {
+   "applied": 3,
+   "skipped": 0,
+   "notes": "I applied all three remap rows; there were no rewrite or content-error rows. In build_process.py:199, et.per-shire-v's 05-claims.md :41 -> :49. In build_process.py:188, et.v-minion's 05-claims.md '26-27, 41' -> '34-35, 49' and 16-dvfs-and-leakage.md :20 -> :39. All lines were checked at HEAD. Two extras: (a) the readers noted that et.v-minion's 'firmware limits 0.40-0.62 V' are on no cited line, so I added 'docs/research/power-telemetry.md:189 (the firmware limits)', where line 189 reads 'MNN 400–620'; (b) the same 16-dvfs-and-leakage.md:20 citation in the record research/research-process.md:92 is now :39."
+  },
+  "builders_run": [
+   "docs/reports/data/2026-10-01-ladder/research/build_process.py (process.json)",
+   "docs/reports/data/2026-10-01-ladder/research/build_particles.py (particles.json)",
+   "docs/reports/data/2026-10-01-ladder/research/build_studio45.py (studio45.json, unchanged)",
+   "docs/reports/data/2026-10-01-ladder/research/build_circuits.py (circuits.json)",
+   "docs/reports/data/2026-10-01-ladder/build_ladder.py (ladder.json) and build_ladder.py --check: 'ladder.json is current: 294 facts, 41 scales, 124 numbers'",
+   "fixed point: before editing, all five outputs reproduced HEAD byte for byte (scratch copy); after editing, a second run of every builder left all five outputs byte-identical; python3 -m json.tool parses process.json, particles.json, studio45.json, circuits.json and ladder.json"
+  ],
+  "needs_other_groups": [
+   "B-deepzoom (measured-facts-card-not-recorded): docs/reports/data/2026-09-27-chip-diagram/research/deepzoom.py:220, old \"'cards': [], 'set': 'ladder'}\" -> new \"'cards': [], 'card': f.get('card'), 'set': 'ladder'}\". ladder.json now carries \"card\": \"aifoundry2\" on et.v-minion, et.v-sram, et.v-noc, et.v-other, et.per-shire-v, et.leakage and et.cdyn-measured; build_facts.py's KEEP already keeps 'card'.",
+   "A2-numfacts (measured-facts-card-not-recorded): docs/reports/data/2026-09-27-chip-diagram/research/build_layout_facts.py:145-147 (L31): add card=\"aifoundry2, aifoundry3, aifoundry1-c1\" (as mesh.empty-cells carries); rerun it.",
+   "B-deepzoom (int-regfile-latches-ports): research/build_inside.py:494-496 in.core.irf.2 '64 x 64 = 4,096 storage latches per minion; at about 10 transistors each, some 41,000 transistors' -> '62 x 64 = 3,968 storage latches per minion (x0 of each thread is wired to 0); at about 10 transistors each, some 40,000 transistors'; :489 size note '4,096 latch bits' -> '3,968 latch bits'; :492-493 in.core.irf.1 '2 read ports and 1 write port' -> '2 read ports, a dedicated read port for x31 and 1 write port' (source widened to intpipe_rf.v:43-61); :490-491 blurb 'with two read ports and one write port' -> 'with two read ports, a third that reads only x31, and one write port'.",
+   "C-pagescript (int-regfile-latches-ports): docs/reports/sources/ladder-circuits.js:233 'latches, with two read ports and one write' -> 'latches (x0 of each thread is wired to zero), with two read ports, a third that reads only x31, and one write'.",
+   "B-deepzoom (s08-adder-brent-kung-levels): research/build_inside.py:969-970 in.lib.adder.1 -> 'Parallel-prefix adders compute every carry in a tree of generate/propagate cells: Kogge-Stone and Sklansky in log2(N) levels, Brent-Kung in 2 log2(N) - 1 levels with fewer cells and wires.'; :967 lead '64 positions: prefix adders compute' -> '64 positions: the fastest prefix adders compute'.",
+   "C-pagescript (s08-rom-trans-tables-not-nor-rom): docs/reports/sources/ladder-circuits.js:387 -> cnote(L, ['the vector unit\\'s transcendental functions (2ˣ, log₂ x, 1/x) read coefficients from small fixed tables; the Minion\\'s VPU specification', 'describes them as look-up tables in the RTL (\"RTL LUTs\", §2.3.7), not an array like this; Weste and Harris, CMOS VLSI Design, ch. 12'], 668, 'tb.rom et.trans-rom in.vpu.lane.trans.1');",
+   "C-pagescript (planck-sixteen-vs-fifteen-decades): docs/reports/sources/ladder-inner.js:613 -> {t: `Below the electron's limit, ${on('el_b')}, lie ${on('pl_16')} that no experiment has reached, down to the Planck length.`, f: `${onf('el_b')} ${onf('pl_16')}`}; :624 'below the quark's limit lie' -> 'below the electron's limit lie'; :639 label 'Sixteen powers of ten that no experiment has reached' -> 'Fifteen powers of ten that no experiment has reached', lead -> 'Between the electron\\'s limit, the smallest on this ruler, and the Planck length lie some fifteen powers of ten: nobody knows what is there.', facts add 'p.electron.2'. (on('pl_16') now prints '15 powers of ten'.)",
+   "C-pagescript (gate.metals-finfet-work-function): docs/reports/sources/ladder-inner.js:307 `by its work function, ${on('wf')};` -> `by its work function, ${on('wf')} in a FinFET;` (on('wf') now prints 'about 4.4 and 4.85 eV').",
+   "C-pagescript (nucleus-million-times-a-bond): docs/reports/sources/ladder-inner.js:565 'about a million times a chemical bond' -> 'nearly four million times a chemical bond'.",
+   "B-deepzoom (in.lib-stale-kinds-and-sources, parts 1-3): research/build_inside.py:63-65 FUSE -> 'WikiChip Fuse, D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", 16 Jun 2019, https://fuse.wikichip.org/?p=2408, read via the Internet Archive capture of 13 Nov 2019 (\"Those cells are 240 nm and 300 nm tall respectively\"; HD 6 tracks of 40 nm, HP 7.5; about 91.2 MTr/mm2 HD, 65 HP)' (keeps FUSE.split(',')[0] == 'WikiChip Fuse'); :1088 'the inferred 6 nm fin' -> 'N7\\'s 6 nm fin (n7.fin-width, WikiChip Fuse)'; research-inside.tail.md:141 say the values were re-read on 1 Oct through the archive capture.",
+   "B-deepzoom (devcard-pdf-page-citations): research/build_outside.py:162 out.card.1 ', pp. 1 and 3' -> ', p. 3'; :168 out.card.3 ', p. 1' -> ', pp. 1 (the \"32GB (Micron part) v3 card\" link) and 3 (features)'; :184 out.card.7 'p. 1 (key voltage regulators) and p. 2 (photo)' -> 'p. 5 (key voltage regulators) and p. 2 (photo)'; :188 out.card.8 ', pp. 1, 4' -> ', pp. 4-7'; :193 out.card.10 ', pp. 1-3' -> ', pp. 2-3'.",
+   "Chain (the single run after all fixers): the chip's build_facts.py (it regenerates docs/reports/ladder-img/ladder-data.json and the lazy sha256 in facts.json from the new ladder.json), the memory levels' build_facts.py, and build-report.py for both pages. I did not run them, per the brief."
+  ],
+  "notes": "I applied all 19 items in my files: the ladder folder docs/reports/data/2026-10-01-ladder/. I touched nothing outside it. HEAD is bff1974e, two commits past the brief's bd8e731a, but neither touches the ladder. Before editing, all five live outputs reproduced HEAD byte for byte. After editing, they are again a fixed point.\n\ngit diff --stat for my folder, 10 files, +339/-225:\n- build_ladder.py 13\n- ladder.json 83\n- research/build_circuits.py 17\n- research/build_particles.py 19\n- research/build_process.py 44\n- research/circuits.json 14\n- research/particles.json 31\n- research/process.json 329 (mostly the new 'card' key on all 99 facts, null on 92 of them, following the file's existing practice of keeping null-valued keys)\n- research/research-particles.md 8\n- research/research-process.md 6\n\nA field-by-field comparison with HEAD shows only the intended facts changed. Two other changes follow from them: meta.kinds in process.json (derived 12 -> 11, inferred 7 -> 8) and p.wrap.7's source, since the 'inside' key's description was corrected.\n\nBeyond the fix texts, all small and in my own files:\n1. et.v-minion's source now also cites docs/research/power-telemetry.md:189 for the 0.40-0.62 V firmware limits, which no cited line supported.\n2. build_particles.py's 'inside' source now names the nodes its one remaining user (p.wrap.7) actually uses.\n3. I made companion edits to the research records, each within existing lines (line counts unchanged): research-particles.md:112; research-process.md:91, :92 and :281.\n4. The build_ladder.py and build_process.py docstrings now mention the card field.\n5. For n7.cells I took the fix's 'drop the clause' alternative, per the brief's rule.\n\nOne pre-existing issue I did not fix, because it is not a verified finding: build_circuits.py's F(fid, statement, kind, source, note=None) receives a URL as its fifth argument for nine facts. Those are pcie.gen4.eq, pcie.gen4.loss, tb.strongarm, tb.ctle, card.tpsm, card.ltm, p.cu.1, p.cu.2 and host.intel14. In ladder.json each has the URL as its 'note' and no 'url', so the page shows a raw URL as the note and has no source link for them. The fix would be a url parameter on F() that build_ladder.py passes through.\n\nMy scripts are in /home/yaroslavvb/claude/work/chip-check-1014/fixes/E-ladder-work/: baseline.sh, rebuild.sh, fixedpoint.sh and semdiff.py."
+ },
+ "pass1:A1-archfacts": {
+  "group": "A1-archfacts",
+  "items": [
+   {
+    "key": "s01-die-mesh/grey-cells-called-unidentified",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/build_facts.py:241-249 new AMEND 'mesh.empty-cells' (find 'which cell is which is not established.', statement naming the four cells from fw.grey-cells, source '; the cells named 27 Sep by fw.grey-cells', note with 254 of 1,024 / 111 of 496 / 496 and E56)",
+     "research/facts-arch.json:331 + research/build_facts_arch.py:168 source analyze.py:60 -> :64 (citation remap)"
+    ],
+    "note": "Skeptic's fix as written. L31 left unchanged, as the skeptic ruled. Checked firmware_map.json: grey_cells name 32, 33, pcie0, io0; 496 of 496 after the renaming, 111 of 496 as written."
+   },
+   {
+    "key": "s01-die-mesh/map-to-die-is-a-transpose-not-a-turn",
+    "status": "applied",
+    "changes": [
+     "build_facts.py:217-224 AMEND 'L33': adds find 'The logical map appears to be the die turned a quarter:' and statement 'The logical map is the die view transposed (x and y swapped: a quarter turn plus a mirror):'; note gains ', so mapping (x, y) to (die row x, die column y) is a transpose (a quarter turn plus a mirror)'",
+     "build_facts.py:230-235 AMEND 'mesh.orientation': same find/statement; note set to the fix's text"
+    ],
+    "note": "Both notes still begin 'Settled 27 Sep', so the SETTLED filter keeps them. A2 changes only L33's source, so the find still matches (checked against A2's current facts-layout.json)."
+   },
+   {
+    "key": "s01-die-mesh/noc-bridges-do-have-counters",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:594 statement (new text as in the fix); :597 source + noc_esr.h:552, 564, 1710 and limits-of-observability.data.json rung 27 (ask-noc-registers)",
+     "research/build_facts_arch.py:251-252 in step"
+    ],
+    "note": "Verified: noc_esr.h:552, 564, 1710 and 12261 (0x22). No .c/.cpp file in et-platform uses the counters. Hub row 27 'ask-noc-registers' exists."
+   },
+   {
+    "key": "s01-die-mesh/flit-width-stated-as-spec",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:510 '; a flit carries at least one 64-byte line.' -> '; the heat-per-mm analysis treats a flit as at least one 64-byte line (the NoC's flit size is not documented).'",
+     "research/build_facts_arch.py:226 in step"
+    ],
+    "note": "N row port512 ('512 bits') still matches."
+   },
+   {
+    "key": "s01-die-mesh/harts-formula-minion-two-meanings",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:90 'minion = hartid >> 1' -> 'minion = (hartid mod 64) >> 1 (the firmware's get_minion_id(), hartid >> 1, numbers the minions chip-wide)'",
+     "research/build_facts_arch.py:89 in step"
+    ],
+    "note": "Verified in hart.h:50, 62, 74, 86 (the cited lines are right)."
+   },
+   {
+    "key": "s02-shire/mesh-lane-is-not-pa76-for-l3",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:510 statement 'a line goes to lane PA[7:6], so consecutive lines on one lane are 256 bytes apart' -> 'an L3 line goes to the lane of its home bank, PA[12:11] (a remote-scratchpad line to lane PA[7:6])'",
+     "research/facts-arch.json:513 source adds core-et-main shirecache_mesh_master.sv:132-153 and the Shire Cache Spec pdf p.27 (Table 8, swizzle0); R14 270-271 and heat-per-mm 219-223 remapped",
+     "research/build_facts_arch.py:226-227 in step",
+     "build_facts.py:641-643 norm() now copies 'caveat' into facts.json, so the fix's 'caveat reimpl' on L103 reaches the page (rendered 're-implementation RTL'); no research fact has a caveat today, so nothing else changes"
+    ],
+    "note": "My part only. Remaining parts are already in the owners' lists: C (script.js:373, 1096, 1443, 1690), A2 (L103, build_layout_facts.py:310), D (circuitkit.tail.js:45, memory-levels.script.js:6200). '512 bits' kept for N port512."
+   },
+   {
+    "key": "s02-shire/wrong-line-citations",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:737 shire.l2-bw-spec (05-claims :805, notes :269); :1367 l2.latency (:394, 443); :1381 l2.read-buffer (notes :73); :1465 scp.format0 (notes :96-97); :1507 scp.offset0 (:243, 268); :1521 l3.latency (:395, 434, 444); :1535 l3.home (notes :178)",
+     "research/build_facts_arch.py:292, 469, 473, 493, 504, 508, 513 in step"
+    ],
+    "note": "Where the item fix and the settled citation rows differ, I used the citation rows: scp.format0 96-97 (not 96) and scp.offset0 in ascending order 243, 268. A2's parts (facts-numbers.json:1179 sram-idle; build_layout_facts.py:336 L116) are in A2's list."
+   },
+   {
+    "key": "s03-minion/ready-bit-direction",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:1168 statement -> 'if a minion that TensorSends to two partners gets both their readies before it has used the first, one is lost, and that receiver and its sender hang for good (the card then needs a reset).'",
+     "research/facts-arch.json:1171 source notes:124-128 -> 137-141, 05-claims :257 -> :269",
+     "research/build_facts_arch.py:409-410 in step",
+     "docs/findings/01-resources.md:215 (optional, within the line) 'receiving from two partners' -> 'sending to two partners'"
+    ],
+    "note": "Verified: dcache_reduce.v:123, 806, 1062-1063 (the ready bit is the sender's). No N row affected."
+   },
+   {
+    "key": "s03-minion/prm-store-bypass",
+    "status": "applied",
+    "changes": [
+     "build_facts.py:430-431 AMEND3 minion.tensor-cache-path note '(the Shire Cache Specification says they do)' -> '(the PRM, pdf p.306 and p.309, and the Shire Cache Specification, pdf p.62, say they do)' (the optional improvement)",
+     "research/facts-arch.json:1118 + research/build_facts_arch.py:394 record note -> 'the PRM states the L1 bypass of loads (p.275) and the L1 and L2 bypass of stores (p.306, p.309)'"
+    ],
+    "note": "Verified PRM p.275, p.306, p.309 and SCS p.62. The required part, make_asks.py:138, belongs to A2 and is in A2's list."
+   },
+   {
+    "key": "s03-minion/stale-line-citations",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json sources: :1031 minion.tensorfma-546 (39-40, 449); :919 minion.no-divide (290, 310); :1171 minion.one-ready-bit (notes 137-141; 05-claims 269); :1129 minion.tensorsend (409-410); :1353 minion.sleep-unused (189-191); :2291 ridge.levels (805-808); :1241 minion.l1-firmware (notes 90-92); :1157 minion.combine-free (notes 127); :1339 minion.vector-rate (notes 165-166, 296); :1045 minion.tensor-shape (notes 314-316)",
+     "research/build_facts_arch.py:346, 374, 377, 398, 406, 410, 432, 459, 463, 731 in step"
+    ],
+    "note": "All ten facts remapped as the fix and the settled citations give."
+   },
+   {
+    "key": "s03-minion/no-divide-64bit-float",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:916 '64-bit float conversion' -> 'conversion between fp32 and 64-bit integers (fcvt.l.s, fcvt.s.l)'; :919 source adds PRM pdf p.36 (§3.5)",
+     "research/build_facts_arch.py:345-346 in step",
+     "docs/findings/05-claims.md:310 (optional, within the line) same words"
+    ],
+    "note": "Verified PRM p.36 §3.5 and 03a-every-instruction.md:7. Merged with the unverified no-divide item below, in the same statement."
+   },
+   {
+    "key": "s03-minion/tensor-shape-B-path",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:1042 'B streamed through TenB' -> 'B from the L1 scratchpad or streamed through TenB by a paired TensorLoadB'; :1045 source adds PRM p.277 (TensorLoadB) and p.291 (TensorFMA32, TENB)",
+     "research/build_facts_arch.py:376-377 in step"
+    ],
+    "note": "Verified PRM p.277 and p.291. N row tshape ('M, N ≤ 16') still matches."
+   },
+   {
+    "key": "s03-minion/l1d-writeback-source",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:1213 source appends PRM pdf p.243 (§8 eviction) and Minion DCache Description pdf p.33 (§3.5 'Evict operations (REQ_Write): always 512b')",
+     "research/build_facts_arch.py:423 in step"
+    ],
+    "note": "Verified both pages."
+   },
+   {
+    "key": "s04-memory/dram-model-within3-lines-not-loads",
+    "status": "applied",
+    "changes": [
+     "build_facts.py:147-151 ms-fit-3cards: '93-97% of loads' -> '93-97% of lines (each line's fastest of three loads)'; unit -> '% of lines within ±3 cycles (aifoundry2)'; source 05-claims :404 -> :435"
+    ],
+    "note": "N ms_fit ('93-97%') still matches. A2 (L45) and C (script.js:1083, 1084, 2920, 3414) have their parts in their lists."
+   },
+   {
+    "key": "s04-memory/dram-chip-share-stale-25-28",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:1756 dram.leg statement -> s07's merged text: 'about 28 of the 91 are the DRAM chip (activate 11, read latency and two bursts 17) and at most about 63 the L3 home's miss handling and the memory shire. Only about 28 of a ~300-cycle DRAM load are the DRAM's own timing.'; :1759 source notes:179, 05-claims :435",
+     "research/build_facts_arch.py:572-573 in step",
+     "build_facts.py:775 N ('lat_dram_chip', 'lat-dram-chip', 28, 'about 28', 'cycles')"
+    ],
+    "note": "I used the s07 item's dram.leg text, a superset of this item's that also names the L3 home's miss handling. It matches the ml:dram fact on the same panel and A2's new L46. N rows lat_ms_a '91' and lat_ms_b '12' still match. The N row needs A2's lat-dram-chip edit ('about 28'), which has landed: the build check passes."
+   },
+   {
+    "key": "s04-memory/stale-line-citations",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:1633 mem.global-atomic (233, 235); :1675 dram.rate-datasheet (833); :1689 dram.rate-card ('mem_controller.c:643-649 (configure_memshire: .frequency = DDR_FREQUENCY_933MHZ, '//TODO: decide ddr_mode'); 41-42, 114-116, 225-228 (the 933 MHz PLL mode and controller config)'); :1731 dram.placeholder (818-819); :1759 dram.leg (notes 179; 05-claims 435); :1773 dram.memshire-select (notes 179); :1787 dram.row-bits (notes 180); :1857 dram.unmetered (323); :1941 addr.load-model (notes 177-179; 05-claims 434-435)",
+     "research/build_facts_arch.py:537, 552, 555, 565, 573, 578, 582, 603, 626 in step",
+     "build_facts.py:151 ms-fit-3cards 05-claims :404 -> :435"
+    ],
+    "note": "Verified mem_controller.c:643-649. dram.placeholder uses the citation row's 818-819, not the fix's 818. A2's parts (facts-numbers.json; L43, L45, L46, L79, L80) are in A2's list."
+   },
+   {
+    "key": "s04-memory/dram-capacity-8-to-32",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:1658 '; the chip supports 8 to 32 GB.' -> '. The datasheet gives the chip 4 GB (2 Gb per channel) at full bandwidth up to 32 GB (16 Gb per channel); the PRM gives products 8 to 32 GB, the range mprot's dram_size field addresses.'",
+     "research/build_facts_arch.py:547 in step"
+    ],
+    "note": "Verified datasheet p.30 and PRM p.342 and p.552. N dram_gb ('32 GB') still matches."
+   },
+   {
+    "key": "s05-messaging/relay-energy-per-byte-moved-not-per-handoff",
+    "status": "applied",
+    "changes": [
+     "build_facts.py:811 N ('rl_e_hand', 'relay-energy', 17.8, '17.8', 'pJ/B') after rl_e_own",
+     "docs/energy-manual/05-bytes-between-cores.md:33 (within the line) 'costs 8.6, 8.3 and 9.9 pJ/B in that order for the write and the read together' -> 'costs 8.6, 8.3 and 9.9 pJ per byte moved in that order, twice that for a byte's write and read together'"
+    ],
+    "note": "The N row needs A2's relay-energy statement to contain '17.8'. It now does ('costs 17.8 pJ'), and the build check passes. The .md line is generated by tools/ettelem/render_energy_manual.py:719, which no group owns; see needs_other_groups. A2 (relay-energy, relay-bw) and C (script.js) have their parts."
+   },
+   {
+    "key": "s05-messaging/relay-mechanism-pull-not-push",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:2274 relay.speedup 'hands each stage's output to the next shire's scratchpad' -> 'has the next shire read each stage's output from the producing shire's scratchpad'",
+     "research/build_facts_arch.py:726 in step"
+    ],
+    "note": "Verified onchip.c:208-219 and onchip_args.h:13-15. C's script.js edits and A2's relay-energy merge are in their lists."
+   },
+   {
+    "key": "s05-messaging/stale-line-citations",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:541 mesh.1kb-knee ':382, 412' -> ':411, 446'; :2277 relay.speedup ':416, 451' -> ':451, 490'",
+     "research/build_facts_arch.py:236, 727 in step"
+    ],
+    "note": "A2's parts (build_layout_facts.py L70-L94, build_facts_v2.py:468, facts-numbers.json) are in A2's list."
+   },
+   {
+    "key": "s06-host-power/flow8-horace-device-rate",
+    "status": "applied",
+    "changes": [
+     "build_facts.py:992 COMP['flowH'] += 'minion.tensorfma-546', 'mm.reload'"
+    ],
+    "note": "Both ids exist (mm.reload is in facts-v2.json). C does CAPS.H (:2904) and the flow H panel (:2298), which use n('tfma546') and n('mm_op'); both N rows already exist."
+   },
+   {
+    "key": "s06-host-power/stale-claims-line-citations",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:1955 pcie.link (:808); :1997 board.meters (:349, 476); :2025 clock.minion-opps (:36-37, 182); :2081 volt.minion (:34-35, 49); :2095 volt.sram (:49); :2137 power.idle (:193, 195)",
+     "research/build_facts_arch.py:633, 643, 653, 668, 671, 687 in step",
+     "build_facts.py:118-119 mm-board-w ':418' -> ':453', ':419' -> ':454'"
+    ],
+    "note": "Also remapped mesh.voltage :41 -> :49 (facts-arch.json:499, build_facts_arch.py:223), which the skeptic named and the citation rows settle. A2's parts (L123; facts-numbers.json) are in A2's list."
+   },
+   {
+    "key": "s07-memlevels/dram-91-cycle-split-inconsistent",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:1756, 1759 and research/build_facts_arch.py:572-573 dram.leg (this item's text and sources)",
+     "build_facts.py:775 N lat_dram_chip 'about 28'"
+    ],
+    "note": "Same edits as s04 dram-chip-share-stale-25-28, merged as the skeptic asked. A2 has applied L46, lat-dram-chip and make_asks.py:132."
+   },
+   {
+    "key": "s06-host-power/missed: minion.no-divide integer divide (unverified)",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:916 'No hardware divide or square root in U-mode:' -> 'No hardware float or vector divide or square root in U-mode (the scalar integer div and rem run):'; :919 source adds 03a-every-instruction.md:7, 52-55 and PRM p.36",
+     "research/build_facts_arch.py:345-346 in step"
+    ],
+    "note": "Confirmed: 03a-every-instruction.md:52-55 measures div, divu, rem and remu retiring in U-mode. Datasheet p.7 says RV64IMFC (M = integer multiply/divide). PRM §3.5's emulation list has only float and vector divides. The wording matches A2's e-fexp-ps fix ('float or vector'). Nothing needed in 03a."
+   },
+   {
+    "key": "s07-memlevels/missed: L46 and dram.leg citations (unverified)",
+    "status": "applied",
+    "changes": [
+     "research/facts-arch.json:1759 + research/build_facts_arch.py:573 dram.leg source notes:166 -> :179, 05-claims :404 -> :435"
+    ],
+    "note": "Confirmed: notes:179 and 05-claims:435 hold the rows. L46's anatomy :888-893 -> :937-942 is A2's (build_layout_facts.py:217) and A2 has applied it. The knowledge-base files listed need no edit."
+   },
+   {
+    "key": "s07-memlevels/missed: ml:scp:scp.leak cites 05-claims.md:312, :473 (unverified)",
+    "status": "not-mine",
+    "changes": [],
+    "note": "Confirmed: HEAD 05-claims.md:473 is the aifoundry3 switching row, and :499 is the SRAM-idle row ('a3 at least 0.93 W above aifoundry2's SRAM law'). The source lives in D's files (memory-levels research/build_facts_scp.py:311, facts-scp.json:876), and D's citations list carries it."
+   }
+  ],
+  "citations": {
+   "applied": 59,
+   "skipped": 10,
+   "notes": "All 57 remap rows applied. 53 are in research/facts-arch.json, regenerated from the record build_facts_arch.py, which reproduces it byte for byte; the other 4 are in build_facts.py ADD: mm-board-w 418->453, ms-fit-3cards 404->435, minion.vec-peak ridge-points.py 46, 51 -> 49, 54, ms2-forced anatomy 778-780 -> 810-812. A script checks every remap against the new sources: 53/53. Of the 12 'other' rows, 2 are in my files and applied: mm-board-w ':419' -> ':454' and the dram.rate-card source rewrite. The 10 skipped are in files I do not own. The L31 note, layout.special[5], layout.source.mesh and mesh_grey_labels rows (A2, build_layout_facts.py:148, 374, 388, 389) were already applied by A2 when I checked. L121 :789-790 and L87 :711/:783 are in A2's list. outside.clock_source :338 -> :381 is in B's list (build_outside.py:26 already updated; outside.json awaits B's rebuild). ml:scp:scp.leak and ml:l2:l2.rbuf.enabled are in D's list. ml:dram:dram.ctl.power-down :4738 -> :4732-4736 was already applied by D at build_facts_dram.py:345. No rewrite, keep or content-error rows were in my list."
+  },
+  "builders_run": [
+   "research/build_facts_arch.py (record-only): run with OUT redirected in memory by /home/yaroslavvb/claude/work/chip-check-1014/fixes/A1-archfacts-work/regen_arch.py (the file's own OUT line is unchanged). One run wrote research/facts-arch.json; a second run into the work folder gave byte-identical output, so it is a fixed point. python3 -m json.tool parses facts-arch.json.",
+   "build_facts.py (chip): not run, per the rules. /home/yaroslavvb/claude/work/chip-check-1014/fixes/A1-archfacts-work/validate_bf.py executes its source only up to the deep-zoom import, so nothing is written. Against the current research JSON (A2's edits included), every AMEND find, all 279 N rows, and the COMP, NOTE and ASKS checks pass."
+  ],
+  "needs_other_groups": [
+   "UNOWNED (no group owns tools/ettelem/): tools/ettelem/render_energy_manual.py:719 renders docs/energy-manual/05-bytes-between-cores.md:33. Change 'pJ/B in that order for the write and the read together' to 'pJ per byte moved in that order, twice that for a byte\\'s write and read together', the edit A1 made in the .md for relay-energy-per-byte-moved, so that a re-render does not revert it.",
+   "A2, research/build_layout_facts.py:310 (L103, mesh-lane item): the fix's 'caveat reimpl' needs a 'caveat': 'reimpl' key on L103's fact dict (F() has no caveat parameter, so set it on the dict after the call). A1's build_facts.py norm() now copies 'caveat' into facts.json, and the page shows it as 're-implementation RTL'.",
+   "A2, research/facts-numbers.json (keep, already done): build_facts.py's N rows now require 'about 28' in lat-dram-chip's statement (N lat_dram_chip) and '17.8' in relay-energy's statement (new N rl_e_hand). Both are present in A2's current file; if either is reverted, build_facts.py stops at its N check.",
+   "Shared items' other parts, already in the owners' work lists (listed only for completeness): C chip-diagram.script.js (lane :373/:1096/:1443/:1690; 'of lines' :1083/:1084/:2920/:3414; rl_e_hand :2757/:2663/:2586/:3398/:1833/:1834/:2900; pull-not-push :1189/:1832/:1839/:1845/:1827/:1830/:2652-2654/:2670; CAPS.H :2904 and :2298). A2 build_layout_facts.py (L45, L46, L103, L116, L123, L43/L79/L80, L70-L94), build_facts_v2.py:468, make_asks.py:132 and :138, facts-numbers.json. D circuitkit.tail.js:45, memory-levels.script.js:6200, build_facts_scp.py:311. B outside.json:6 and :83."
+  ],
+  "notes": "I edited six files, all mine: research/build_facts_arch.py and research/facts-arch.json (116 lines each, in step: the JSON is the record's own output, byte for byte), build_facts.py, and one line each in docs/findings/05-claims.md:310, docs/findings/01-resources.md:215 and docs/energy-manual/05-bytes-between-cores.md:33. Line counts of the three knowledge-base files are unchanged. HEAD is now bff1974e, two commits after bd8e731a. Those commits touch only docs/findings/02-requests.md and 04-artifacts.md, which I did not edit.\n\nJudgment calls:\n(1) dram.leg uses the s07 item's merged text, which also names the L3 home's miss handling. It matches A2's new L46.\n(2) Where an item fix and a settled citation row differ, I used the citation row: scp.format0 96-97, scp.offset0 243, 268, dram.placeholder 818-819.\n(3) mesh.port-width now cites core-et-main shirecache_mesh_master.sv:132-153 and SCS p.27 for the lane rule. I added no caveat to it, because the fix asks for one only on L103.\n(4) The unverified no-divide item was confirmed and folded into the same statement, using A2's wording.\n\nFollow-ups outside every work item, left untouched for the owner:\n- docs/et-soc1-notes.md:117 still says 'That map is the die turned a quarter' (mesh.orientation's cited source).\n- docs/findings/20-heat-per-mm.md:222 states the PA[7:6] lane rule (right for remote-scratchpad flows only).\n- The arch fact shire.sensors cites 01-resources.md:212-215; R13's '35 live' text is now at 235-237. That fact is on no page and in no work list.\n\nScripts in /home/yaroslavvb/claude/work/chip-check-1014/fixes/A1-archfacts-work/: regen_arch.py, validate_bf.py, run_record.py, changed_lines.py. The .pyc files my compile check created were removed."
+ },
+ "pass1-resumed:A2-numfacts": {
+  "group": "A2-numfacts",
+  "items": [
+   {
+    "key": "die-plot-is-not-the-mirror",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/build_layout_facts.py:117 (L24 statement) -> research/facts-layout.json:247",
+     "research/build_layout_facts.py:152 (L32 stored note: 'the MPR die plot swaps the two (L24)') -> research/facts-layout.json:357",
+     "research/build_facts_v2.py:255-258 (die.handedness) -> research/facts-v2.json:177",
+     "research/make_asks.py:67 (die-view ask what_settles_it) -> research/asks.json:16"
+    ],
+    "note": "Text exactly as the skeptic's fix. The first run applied it; this run verified it (new text present, old 'mirror image' text gone). The chip-diagram.script.js:3412 part belongs to C and is in place in the working tree."
+   },
+   {
+    "key": "pvt-36th-sensor-is-drawn-in-pcie",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:341-342 (L120 statement as the fix gives it; value 36 kept; source also cites external/core-et/rtl/inc/pvt_defines.vh:16-26) -> research/facts-layout.json:1052, 1055"
+    ],
+    "note": "The in.io.pvt.1 part in build_inside.py belongs to B and is in place (build_inside.py:883)."
+   },
+   {
+    "key": "memshire-stops-have-7-router-layers",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:315-316 (L105 statement as the fix gives it; source appends noc_esr.h:15498, 15628, 15758, 16538 (NOC_ESR_ROUTER_n_ARRAY_COUNT) and PRM p.479 (PCIe shire NOC_INT_STAT 8:0)) -> research/facts-layout.json:948, 951"
+    ],
+    "note": "The PRM is cited through the builder's PRM path constant. The other parts are in place: build_inside.py:150-151 (B) and memory-levels.script.js:4164 (D)."
+   },
+   {
+    "key": "measured-facts-card-not-recorded",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:147 (L31 card=\"aifoundry2, aifoundry3, aifoundry1-c1\") -> research/facts-layout.json:343"
+    ],
+    "note": "Also routed from E. The other parts are in place: E's build_process.py and build_ladder.py card plumbing, and B's deepzoom.py card."
+   },
+   {
+    "key": "mesh-lane-is-not-pa76-for-l3",
+    "status": "applied",
+    "changes": [
+     "research/build_layout_facts.py:310-311 (L103 statement, merged with item 22's text; keeps '4 to_l3 master and 4 L3 slave lanes'; source cites external/core-et-main/hw/ip/shirecache/rtl/shirecache_mesh_master.sv:127-153 and CORE-ET-Shire-Cache-Specification.pdf p.6) -> research/facts-layout.json:921, 924 [first run]",
+     "research/build_layout_facts.py:312 facts[-1][\"caveat\"] = \"reimpl\" -> research/facts-layout.json:929 [this run; the fix's 'add caveat reimpl', routed from A1]"
+    ],
+    "note": "The fixes give the RTL range as 132-153 (item 4) and 126-153 (item 22). I kept the first run's 127-153: line 126 is blank, 127 is the comment 'L3 swizzle to determine port routing', and 153 is req_port_hot. A1's norm() now copies 'caveat', and ladder-core.js CAVW shows 'reimpl' as 're-implementation RTL'. The parts in other groups' files have their old text gone: chip-diagram.script.js (C), circuitkit.tail.js (B/D), facts-arch.json mesh.port-width (A1)."
+   },
+   {
+    "key": "wrong-line-citations",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:337 (L116 ':735-742' -> ':774-780') -> research/facts-layout.json:1042",
+     "research/facts-numbers.json:1179 (sram-idle ':309; ...:459' -> ':324; ...:499')"
+    ],
+    "note": "The facts-arch.json and build_facts_arch.py parts belong to A1 and are in place."
+   },
+   {
+    "key": "prm-store-bypass",
+    "status": "already-applied",
+    "changes": [
+     "research/make_asks.py:138 -> research/asks.json:262"
+    ],
+    "note": "Exactly the required text. A1 owns the optional build_facts.py:405 note and the facts-arch.json:1118 / build_facts_arch.py:394 record; the old facts-arch text is gone."
+   },
+   {
+    "key": "dram-model-within3-lines-not-loads",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:214 (L45 statement) -> research/facts-layout.json:502"
+    ],
+    "note": "One wording difference from the fix: its elliptical '83% of single loads were (aifoundry2)' is written out as '83% of single loads were within ±3 cycles (aifoundry2)'. No N row reads it. The other parts are in place: ms-fit-3cards in build_facts.py (A1) and chip-diagram.script.js:1083/1084/2920/3414 (C)."
+   },
+   {
+    "key": "dram-chip-share-stale-25-28",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:216-217 (L46 statement as item 21 merges it; source AN:937-942 plus Shire Cache Specification p.11 Table 1 for the 12 cycles) -> research/facts-layout.json:515, 518",
+     "research/facts-numbers.json:276, 279, 282 (lat-dram-chip statement 'only about 28', source quote 'accounts for about 28', note '~63'); record research/build_facts_numbers.py:170-172",
+     "research/make_asks.py:132 ('About 28 of a DRAM load's cycles') -> research/asks.json:245"
+    ],
+    "note": "Merged with dram-91-cycle-split-inconsistent, as both skeptics ask. The fact statements contain the N text 'about 28', and A1's build_facts.py:747 N row is in place."
+   },
+   {
+    "key": "e48-not-published-stale",
+    "status": "already-applied",
+    "changes": [
+     "research/facts-numbers.json gs-* x17 (first at :1752): note, page 'Memory hierarchy', page_file docs/reports/2026-09-18-et-soc1-memory-hierarchy.html, url https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters",
+     "record research/build_facts_numbers.py:604-605 (GS_NOTE), :594 (section comment), :47 (PAGES key 'memhier-gs' with the anchored url), :623, 627, 631, 635, 639, 644, 648, 651 (gs F() page argument)"
+    ],
+    "note": "The fix names the page argument 'memhier'. The record uses a new key, 'memhier-gs', so it reproduces the JSON's anchored url (test_record.py: record output equals the JSON). build_facts.py TITLE resolves the url to 'Memory hierarchy'. The chip-diagram.script.js:1928/3421 parts (C) have their old text gone."
+   },
+   {
+    "key": "stale-line-citations",
+    "status": "already-applied",
+    "changes": [
+     "research/facts-numbers.json: lat-l1, lat-rb, lat-l2 :443; lat-scp-own :394; lat-scp-remote :445; lat-l3-hop :434; lat-l3-avg, lat-dram :444; lat-dram-rowconflict :437; lat-dram-refresh :438; bw-l2, bw-dram :398 (as the citation rows)",
+     "research/build_layout_facts.py:208 (L43 AN:873, 902-905), :215 (L45 AN:910-917), :217 (L46 AN:937-942), :261 (L79 CL:444), :264 (L80 AN:876) -> facts-layout.json"
+    ],
+    "note": "Item 10, slice s04-memory. L45 uses the skeptic's corrected range, 910-917. The facts-arch.json and build_facts.py:143 parts belong to A1 and are in place."
+   },
+   {
+    "key": "relay-energy-per-byte-moved-not-per-handoff",
+    "status": "already-applied",
+    "changes": [
+     "research/facts-numbers.json:1686, 1689 (relay-energy statement as the fix gives it, merged with pull-not-push; source adds onchip.c:344 and analyze_reruns.py:184-188)",
+     "research/facts-numbers.json:1716, 1719 (relay-bw: '; bytes read plus bytes written'; source adds size[].by_card hop_over_dram and onchip.c:344)",
+     "record research/build_facts_numbers.py:574-577 (relay-energy; 17.8 and 232 computed from manual.json), :585-588 (relay-bw)"
+    ],
+    "note": "The N texts '8 stages', '47.7', '592.5', '1487', '12.4x' and '17.8' are all present. These parts are in place: N rl_e_hand (A1), 05-bytes-between-cores.md:33 (A1), and chip-diagram.script.js (C)."
+   },
+   {
+    "key": "relay-mechanism-pull-not-push",
+    "status": "already-applied",
+    "changes": [
+     "research/facts-numbers.json:1686 (relay-energy 'to the next shire, which reads the previous shire's scratchpad, 8.9'); record research/build_facts_numbers.py:574"
+    ],
+    "note": "Merged into the per-byte-moved rewrite. These parts are in place: facts-arch.json relay.speedup (A1) and chip-diagram.script.js (C)."
+   },
+   {
+    "key": "stale-line-citations",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:236 (L70 ONC:764, CL:446), :241 (L71), :274 (L86 CL:489), :276 (L87 ONC:733 lede, :741 KPI, :831), :278 (L88 CL:362, 482), :286 (L91 ONC:733, 822, 866), :292 (L93 CL:490), :294 (L94 CL:266) -> facts-layout.json",
+     "research/build_facts_v2.py:472 (ar.tree nocbench.c :516-522) -> research/facts-v2.json:376",
+     "research/facts-numbers.json citation rows (mesh-bit-mm-free, ts-rt-fln, ts-rt-mesh, ts-credit, sync-*, hot-cost, hot-edge, hot-energy, relay-13x, relay-bw :451, relay-watts); record :587 cl('| On-chip relay, repeated (E25) |')"
+    ],
+    "note": "Item 13, slice s05-messaging. relay-bw cites :451 as the skeptic says, not :253. The facts-arch.json mesh.1kb-knee and relay.speedup parts belong to A1 and are in place."
+   },
+   {
+    "key": "L86-stale-plus-minus-50",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:273-274 (L86 '... pooled 1.75, 1.40–2.10 at 99% over the 18 passes (±20%).'; source adds ONC:923) -> research/facts-layout.json:744"
+    ],
+    "note": "The first run recomputed the interval from rl.json RL-a (verify_l86_l94.py): mean 1.747, 99% t-interval 1.399-2.096."
+   },
+   {
+    "key": "L94-733-stale",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:293-294 (L94: 734 GB/s; card three cards; source 'docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json distance[].by_card (version 3, three cards); docs/findings/05-claims.md:266 (the 22 Sep session: 733)') -> research/facts-layout.json:852, 855, 857"
+    ],
+    "note": "Exactly as the fix gives it."
+   },
+   {
+    "key": "relay-bw-note-below-L3",
+    "status": "already-applied",
+    "changes": [
+     "research/facts-numbers.json:1722 (relay-bw note '(below it at most 1.4-1.5x: 0.97-1.50x over 64-512 KB per stage)'); record research/build_facts_numbers.py:588"
+    ],
+    "note": "No N row reads it."
+   },
+   {
+    "key": "heat-race-firmware-cap",
+    "status": "already-applied",
+    "changes": [
+     "research/build_facts_v2.py:398-399, 403-404 (heat.race 'to the 90 °C at which the run script stopped each run (run_horace_long.sh, not a firmware limit) on aifoundry2'; source adds tools/ettelem/run_horace_long.sh:8-9, 18, 69) -> research/facts-v2.json:303, 306"
+    ],
+    "note": "build_facts_v2.py asserts its own 61 num rows; all of them pass."
+   },
+   {
+    "key": "stale-claims-line-citations",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:348 (L123 CL:41 -> :49) -> research/facts-layout.json:1094",
+     "research/facts-numbers.json: e-l1-fill 04a-fine-grain.md:44, mm-rate :452, mm-peak :804, mm-perw :454, temp-sensors :350 (as the citation rows)"
+    ],
+    "note": "The facts-arch.json, build_facts_arch.py and build_facts.py:111-113 parts belong to A1 and are in place."
+   },
+   {
+    "key": "e-fexp-ps-no-divide",
+    "status": "already-applied",
+    "changes": [
+     "research/facts-numbers.json:786 (statement as the fix gives it), :789 (source adds 03-instructions.md:25, 33); record research/build_facts_numbers.py:312-315"
+    ],
+    "note": "No N row reads it."
+   },
+   {
+    "key": "temp-sensors-prm-citation",
+    "status": "already-applied",
+    "changes": [
+     "research/facts-numbers.json:1242 (note as the fix gives it); record research/build_facts_numbers.py:444-445"
+    ],
+    "note": "No N row reads it."
+   },
+   {
+    "key": "dram-91-cycle-split-inconsistent",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:216-217 (L46, exactly item 21's text; source AN:937-942) -> research/facts-layout.json:515, 518",
+     "research/facts-numbers.json:276, 279, 282 (lat-dram-chip); record research/build_facts_numbers.py:170-172",
+     "research/make_asks.py:132 -> research/asks.json:245"
+    ],
+    "note": "The same edits as dram-chip-share-stale-25-28, merged. The dram.leg part (facts-arch.json, A1) and N lat_dram_chip (A1) are in place."
+   },
+   {
+    "key": "l103-lane-rule-vs-l3-lane",
+    "status": "already-applied",
+    "changes": [
+     "research/build_layout_facts.py:310-311 (L103 statement, exactly item 22's text; source adds shirecache_mesh_master.sv:127-153 and the Shire Cache Specification p.6) -> research/facts-layout.json:921, 924"
+    ],
+    "note": "Merged with mesh-lane-is-not-pa76-for-l3, where this run added the caveat at :312. The chip-diagram.script.js (C), circuitkit.tail.js (B/D) and memory-levels.script.js (D) parts have their old text gone."
+   },
+   {
+    "key": "missed: Asks table row 'the DRAM chip's share of a load (memory shir",
+    "status": "already-applied",
+    "changes": [
+     "research/make_asks.py:132 ('About 25-28' -> 'About 28') -> research/asks.json:245"
+    ],
+    "note": "Unverified item, confirmed from the evidence: HEAD asks.json:245 and make_asks.py:132 read 'About 25-28'. It is the same edit as item 21 (5)."
+   }
+  ],
+  "citations": {
+   "applied": 79,
+   "skipped": 0,
+   "notes": "All 79 rows (78 remaps and 1 'other') were applied by the first run. This run verified them with check_cites.py --new: each path:new occurs once in its field and each path:old is gone. The work list has no rewrite, keep or content-error rows.\n- 45 remaps in research/facts-numbers.json, edited directly. The record resolves ledger rows by text and got mdrange() for e-awake (9-10) and ts-e-pair (9-17).\n- 33 remaps in research/facts-layout.json, made through build_layout_facts.py.\n- The 'other' row is layout.json special[0].source, analyze.py:60 -> :64 (build_layout_facts.py:367 -> layout.json:258).\n\nThe first run also carried the same settled line moves to citations of the same lines that the list does not name. This run checked each target:\n- L30 and layout.json source.mesh: analyze.py:52-60 -> 56-64.\n- The layout.json 'grey cell that routes traffic' entry: analyze.py:50-51 -> 54-55.\n- layout.json mesh_grey_labels: SB:765-786 -> 800-822.\n- L121's second range, :789-790 -> :827-828, and L87's :711 -> :741 and :783 -> :831. Notes #51 and #73 give these values.\n\nThe whole of facts-numbers.json is byte-identical to HEAD plus every A2 edit recomputed from the current work list."
+  },
+  "builders_run": [
+   "research/build_layout_facts.py, run twice. The first run added only L103's caveat to facts-layout.json:928-929. The second left all outputs unchanged (fixed point). layout.json did not change in either run.",
+   "research/build_facts_v2.py, run twice. facts-v2.json was unchanged both times (fixed point); its 61 num rows pass.",
+   "research/make_asks.py, run twice. asks.json was unchanged both times (fixed point).",
+   "The record research/build_facts_numbers.py was never run in place, because its OUT is an old scratchpad. test_record.py ran patched copies of HEAD's and the working tree's record, with REPO set to this checkout and OUT to the work dir. Result: 0 new record/JSON differences and 35 old drifts closed.",
+   "Checks: python3 -m json.tool parses facts-numbers.json, facts-layout.json, layout.json, facts-v2.json and asks.json. Each keeps HEAD's dump format, and only asks.json ends in a newline, as at HEAD. ncheck.py: every N row on A2 facts finds its text, except s_dr_c, which also fails at HEAD and is handled by AMEND['gs-s-dram-256K']. amendcheck.py: all 7 AMEND finds on A2 facts still match."
+  ],
+  "needs_other_groups": [
+   "A1, in place: build_facts.py:747 N ('lat_dram_chip', 'lat-dram-chip', 28, 'about 28', 'cycles') and new N ('rl_e_hand', 'relay-energy', 17.8, '17.8', 'pJ/B').",
+   "A1, in place: build_facts.py:140-142 ms-fit-3cards '... for 93-97% of lines (each line's fastest of three loads) ...', unit '% of lines within ±3 cycles (aifoundry2)'; build_facts.py:143 05-claims.md:404 -> :435; build_facts.py:111-113 mm-board-w :418 -> :453 and :419 -> :454.",
+   "A1, in place: facts-arch.json:1756 dram.leg -> 'Past the L3, the DRAM leg costs 91 + 12 × hops(home shire, memory shire) cycles; about 28 of the 91 are the DRAM chip (activate 11, read latency and two bursts 17) and at most about 63 the L3 home's miss handling and the memory shire. Only about 28 of a ~300-cycle DRAM load are the DRAM's own timing.', with sources notes:179 and 05-claims.md:435; build_facts_arch.py:572-573 in step.",
+   "A1, in place: facts-arch.json:2274 relay.speedup 'hands each stage's output to the next shire's scratchpad' -> 'has the next shire read each stage's output from the producing shire's scratchpad', citations ':416, 451' -> ':451, 490'; mesh.1kb-knee ':382, 412' -> ':411, 446'; facts-arch.json:510 mesh.port-width 'a line goes to lane PA[7:6], so consecutive lines on one lane are 256 bytes apart' -> 'an L3 line goes to the lane of its home bank, PA[12:11] (a remote-scratchpad line to lane PA[7:6])', keeping '512 bits'. Records in build_facts_arch.py in step.",
+   "A1, in place: facts-arch.json line citations of items 5, 10 and 18, e.g. 05-claims.md:486 -> :805, notes:249 -> :269, :366, 409 -> :394, 443, dram.rate-card -> mem_controller.c:643-649, pcie.link :489 -> :808, volt.sram :41 -> :49. build_facts_arch.py in step.",
+   "A1, in place: docs/energy-manual/05-bytes-between-cores.md:33 'costs 8.6, 8.3 and 9.9 pJ/B in that order for the write and the read together' -> 'costs 8.6, 8.3 and 9.9 pJ per byte moved in that order, twice that for a byte's write and read together'.",
+   "A1, old text gone; optional: build_facts.py:405 '(the Shire Cache Specification says they do)' -> '(the PRM, pdf p.306 and p.309, and the Shire Cache Specification, pdf p.62, say they do)'; facts-arch.json:1118 and build_facts_arch.py:394 'the PRM confirms only that TensorLoad bypasses the L1 data cache' -> 'the PRM states the L1 bypass of loads (p.275) and the L1 and L2 bypass of stores (p.306, p.309)'.",
+   "C, chip-diagram.script.js, verified in the working tree:\n- :3412 'Still open: which east-west handedness the silicon has; the published die plot is not its mirror, it keeps the PCIe and I/O cells at the east end and swaps them (...)': in place.\n- :1083, :2920 and :3414 'of lines', and :1084 K('ms_fit', 'of lines within ±3 cycles, three cards'): in place.\n- :373 'lane = PA[12:11] (L3)', :1096 the L3/remote-scratchpad lane sentence, and decode() with an L3-bank lane at :1690: the old 'lane = PA[7:6]' is gone.\n- :1928 and :3421 E48 sentences: the old text is gone.\n- Relay rl_e_hand edits at :2757, :2663, :2586, :3398, :1833, :1834 and :2900: rl_e_hand is present.\n- Pull-not-push edits at :1189, :1832, :1839, :1845, :1827 and :2652-2654 (route -> reply), :1830 and :2670: the old push text is gone.",
+   "B, in place: research/build_inside.py in.io.pvt.1 '36 process detectors and 36 temperature sensors (one each per minion shire, the PCIe shire and the I/O shire, as the manual's Figure 1-3 draws them) ...' (now :883); router blurb 'A minion shire's mesh stop has nine of them stacked as separate networks (a memory shire's most likely seven),' (now :150-151); deepzoom.py:220 'cards': [], 'card': f.get('card'), 'set': 'ladder'}.",
+   "D, in place: memory-levels.script.js:4144 (now :4164) 'Each minion shire's mesh stop has 9 main-NoC routers (layers 0–8) and a debug router,' then make_circuitkit.py and its --check.",
+   "B/D, old text gone: research/circuitkit.tail.js:45 lane: 'PA[7:6]' -> 'PA[12:11] (L3; remote scratchpad PA[7:6])' plus laneNote '(re-impl. RTL, to confirm)'; memory-levels.script.js:6199-6200 in step; then make_circuitkit.py.",
+   "E, in place: docs/reports/data/2026-10-01-ladder/research/build_process.py F() card=None with card='aifoundry2' on the seven et.* facts; build_ladder.py add(..., card=None) keeps ('card', card) and passes f.get('card')."
+  ],
+  "notes": "The first run had already applied every item and every citation in A2's files. It left the three live builders at a fixed point and the record build_facts_numbers.py in step with facts-numbers.json. It kept no log.\n\nThis run:\n- checked all 24 items, both routed edits that land in my files and all 79 citation rows against the working tree. verify_items.py found 0 failures: every new text present, every old text gone.\n- applied the one missing edit, routed item 2 from A1: build_layout_facts.py:312 sets facts[-1][\"caveat\"] = \"reimpl\" on L103, which reaches facts-layout.json:929.\n- re-ran the three live builders twice: the first run changed only that caveat, the second changed nothing.\n- checked the record, the N table, the AMEND finds and JSON formatting.\n\nThe progress log is /home/yaroslavvb/claude/work/chip-check-1014/fixes/A2-numfacts-progress.md. The check scripts are in /home/yaroslavvb/claude/work/chip-check-1014/fixes/A2-numfacts-work/: verify_items.py, amendcheck.py, othercheck.py, jsonlines.py, plus the first run's check_cites.py, test_record.py, ncheck.py and fixedpoint.sh.\n\ngit diff --stat on my files: 9 files, 265 insertions and 245 deletions.\n- asks.json 6\n- build_facts_numbers.py 60\n- build_facts_v2.py 14\n- build_layout_facts.py 91\n- facts-layout.json 87\n- facts-numbers.json 230\n- facts-v2.json 8\n- layout.json 8\n- make_asks.py 6\n\nWhere the result differs from a fix's literal text:\n1. L45 spells out the fix's elliptical '83% of single loads were (aifoundry2)' as '... were within ±3 cycles (aifoundry2)'.\n2. L103 cites shirecache_mesh_master.sv:127-153; the fixes say 132-153 and 126-153. Line 126 is blank and 127 is the swizzle comment.\n3. The record's gs-* facts use a new PAGES key, 'memhier-gs', instead of 'memhier', so the record reproduces the anchored url the JSON now holds.\n\nLeft alone because they are outside the work list:\n- L122 (build_layout_facts.py:346) cites 05-claims.md:36, which is now the clock row; the resolution row is :44. L122 is off-page (not in the chip's facts.json), and no citation row covers it.\n- 25 off-page facts in facts-numbers.json (op-800-*, lat-dram-model, lat-wake, temp-*, hot-stop and others) still carry 26 Sep ledger line numbers. The record would print the current lines.\n\nHEAD has moved from bd8e731a to 18928367. No commit since bd8e731a touches the research folder or any file the citations point to, so the settled line numbers still hold."
+ },
+ "pass1-resumed:B-deepzoom": {
+  "group": "B-deepzoom",
+  "items": [
+   {
+    "key": "s01-die-mesh/pvt-36th-sensor-is-drawn-in-pcie",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/build_inside.py:883-888 (in.io.pvt.1 statement and source, the skeptic's text verbatim)"
+    ],
+    "note": "Earlier run applied my part. Part 2 (L120, build_layout_facts.py:340) is A2-numfacts' and is present."
+   },
+   {
+    "key": "s01-die-mesh/mesh-scale-size-is-the-whole-grid",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:895-896 (node mesh: 'One mesh hop', 3.72e-3, inferred, new note)",
+     "build_inside.py:1247-1248 (companion: LADDERS 'A mesh hop' drops mesh.link, since the page's mesh kids are [mesh.link.wire], ladder-mem.js:127)"
+    ],
+    "note": "size.mesh now reads 'One mesh hop: about 3.72 mm across ...' (checked in a scratch build)."
+   },
+   {
+    "key": "s01-die-mesh/link-capacitance-mixes-board-power",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:907-913 (in.mesh.link.4 statement and source)"
+    ],
+    "note": "Statement verbatim. The source writes dally_gap.py's path in full. Checked: report.json random_bit_data 24.7 and 31.2 fJ give 420 and 530 fF/mm; 05-claims.md:381 and :384 hold the cited rows."
+   },
+   {
+    "key": "s01-die-mesh/memshire-stops-have-7-router-layers",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:150-151 (shire.meshstop.router blurb)"
+    ],
+    "note": "Part 1 (L105, A2) and part 3 (memory-levels.script.js:4174 router panel, D) are both present."
+   },
+   {
+    "key": "s01-die-mesh/measured-facts-card-not-recorded",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/deepzoom.py:219-221 ('card': f.get('card') on ladder facts)"
+    ],
+    "note": "Same as the routed E-ladder row. build_facts.py KEEP drops None. In a scratch build the 7 et.* facts carry card aifoundry2. Parts 1-2 (E-ladder) and 4 (L31 card, A2) are present."
+   },
+   {
+    "key": "s02-shire/xing-drawing-is-the-wrong-crossing",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:428-450 (new node shire.neigh.xing 'Bank FIFOs: the voltage and clock crossing', 4 facts incl. l2.vc-fifo, reuse buildL2Xing)",
+     "build_inside.py:191 (shire.meshstop.xing: l3:l3.ports takes l2.vc-fifo's slot so the in.* ids keep)",
+     "build_inside.py:197 (reuse note corrected: the L3 hop/wire scales draw this crossing)",
+     "research-inside.tail.md:51 (crossing row)"
+    ],
+    "note": "The blurb says the neighbourhood clock is the shire clock shifted by the DLL, the documented direction, not the fix's example wording. My part is done. C-pagescript's page side is still absent: no inode for shire.neigh.xing in ladder-mem.js, and ladder-circuits.js:782 and chip-diagram.blocks.js:125 not repointed. D's buildXing semisync is present."
+   },
+   {
+    "key": "s02-shire/mesh-lane-is-not-pa76-for-l3",
+    "status": "not-mine",
+    "changes": [],
+    "note": "No lane text in my files. inside.json copies L103 and mesh.port-width via cf(), and the chain's build_inside.py re-run refreshes them."
+   },
+   {
+    "key": "s02-shire/xing-blurb-every-bit-two-flops",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:185-188 (shire.meshstop.xing blurb, verbatim; kept on the bank-to-mesh node)"
+    ],
+    "note": "The optional g.crossing wording is D's (build_facts_l3.py)."
+   },
+   {
+    "key": "s02-shire/uc-fast-credit-counters-not-in-uc",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:346 (UC blurb: 'credit increments')",
+     "build_inside.py:360-364 (shire.uc.fcc title, size note, blurb)"
+    ],
+    "note": "shire.composition's 'fast credit counters' stays, as the skeptic allows. The optional ladder-circuits.js:773 edit is C's."
+   },
+   {
+    "key": "s02-shire/dll-delay-lines-misdescribed",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:463-466 (in.shire.clock.3 statement and source)",
+     "research-inside.tail.md:70 (companion: 'delay lines of 100 ps and 25 ps steps')"
+    ],
+    "note": ""
+   },
+   {
+    "key": "s02-shire/wrong-line-citations",
+    "status": "not-mine",
+    "changes": [],
+    "note": "Sources are in facts-arch.json/build_facts_arch.py (A1), facts-numbers.json and build_layout_facts.py:336 (A2). inside.json only copies them."
+   },
+   {
+    "key": "s02-shire/path-widths-rejoin",
+    "status": "not-mine",
+    "changes": [],
+    "note": "Fix is in build_facts_l2.py:186 (D). My only re-join text, build_inside.py:442, already says 'at the FIFO's output'."
+   },
+   {
+    "key": "s03-minion/ready-bit-direction",
+    "status": "not-mine",
+    "changes": [],
+    "note": "facts-arch.json:1168 (A1). build_inside.py:754 uses cf('minion.one-ready-bit') with no override."
+   },
+   {
+    "key": "s03-minion/fma6-kind-measured",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:589-593 (in.vpu.lane.fma.6: M to D, statement and source verbatim)"
+    ],
+    "note": ""
+   },
+   {
+    "key": "s03-minion/stale-line-citations",
+    "status": "not-mine",
+    "changes": [],
+    "note": "facts-arch.json + build_facts_arch.py (A1). inside.json copies refresh."
+   },
+   {
+    "key": "s03-minion/no-divide-64bit-float",
+    "status": "not-mine",
+    "changes": [],
+    "note": "facts-arch.json:916 (A1). build_inside.py:642 uses cf() with no override."
+   },
+   {
+    "key": "s03-minion/tensor-shape-B-path",
+    "status": "not-mine",
+    "changes": [],
+    "note": "facts-arch.json:1042 (A1)."
+   },
+   {
+    "key": "s03-minion/int-regfile-latches-ports",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:521 (size note '3,968 latch bits')",
+     "build_inside.py:522-523 (blurb: third port reads only x31)",
+     "build_inside.py:524-527 (in.core.irf.1, source intpipe_rf.v:43-61 + FE-Intpipe p.13)",
+     "build_inside.py:528-531 (in.core.irf.2: 62 x 64 = 3,968, about 40,000)"
+    ],
+    "note": "Same as the routed E-ladder row. ladder-circuits.js:233 (C) and build_circuits.py:227 (E) are present."
+   },
+   {
+    "key": "s03-minion/tenb-tenc-placement",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:653-655 (tensor size note)",
+     "build_inside.py:672-678 (tensor.tenb blurb + in.tensor.tenb.2)",
+     "build_inside.py:682-683 (tensor.tenc blurb, the optional edit)"
+    ],
+    "note": "The fix's source path 'inc/minion_defines.vh' was under shire/minion/vpu/; it is written in full instead. I checked every cited RTL line (vpu_tensorb_rf.v:27-29 = VPU_TENB_SIZE/2 entries of 32 bits). The drawing is left as is, as the skeptic says."
+   },
+   {
+    "key": "s04-memory/dram-chip-share-stale-25-28",
+    "status": "not-mine",
+    "changes": [],
+    "note": "A1/A2 files. No '25-28' text in my files. build_inside.py:772 uses cf('L46'), cf('dram.leg')."
+   },
+   {
+    "key": "s04-memory/stale-line-citations",
+    "status": "not-mine",
+    "changes": [],
+    "note": "A1/A2 files (facts-numbers.json, facts-arch.json, build_layout_facts.py, build_facts.py:143)."
+   },
+   {
+    "key": "s04-memory/dram-capacity-8-to-32",
+    "status": "not-mine",
+    "changes": [],
+    "note": "facts-arch.json:1658 (A1)."
+   },
+   {
+    "key": "s06-host-power/stale-claims-line-citations",
+    "status": "not-mine",
+    "changes": [],
+    "note": "A1/A2 files. inside.json's copies of L123 and temp-sensors refresh (the temp-sensors :350 copy already shows)."
+   },
+   {
+    "key": "s07-memlevels/dram-91-cycle-split-inconsistent",
+    "status": "not-mine",
+    "changes": [],
+    "note": "A1/A2 files."
+   },
+   {
+    "key": "s07-memlevels/l103-lane-rule-vs-l3-lane",
+    "status": "not-mine",
+    "changes": [],
+    "note": "Same as the s02 lane finding: L103 (A2), page parts (C/D)."
+   },
+   {
+    "key": "s07-memlevels/latch-read-mux-levels",
+    "status": "not-mine",
+    "changes": [],
+    "note": "facts-l1.json/build_facts_l1.py (D). My '128:1 read tree' text (build_inside.py:988) is right."
+   },
+   {
+    "key": "s07-memlevels/scp-panel-count-mbit-units",
+    "status": "not-mine",
+    "changes": [],
+    "note": "build_facts_scp.py:153 (D)."
+   },
+   {
+    "key": "s07-memlevels/l2-data-ram-way-set-order",
+    "status": "not-mine",
+    "changes": [],
+    "note": "D's files. No row-order text in mine."
+   },
+   {
+    "key": "s07-memlevels/rbuf-enabled-cites-commented-code",
+    "status": "not-mine",
+    "changes": [],
+    "note": "build_facts_l2.py:233-234 (D)."
+   },
+   {
+    "key": "s08-circuits/s08-adder-brent-kung-levels",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:1017-1018 (lead: 'the fastest prefix adders')",
+     "build_inside.py:1019-1021 (in.lib.adder.1)"
+    ],
+    "note": "Same as the routed E-ladder row. tb.prefix (build_circuits.py:32, E) is present."
+   },
+   {
+    "key": "s09-device-physics/in.lib-stale-kinds-and-sources",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:63-65 (FUSE)",
+     "build_inside.py:1139 (in.lib.si.3 source)",
+     "research-inside.tail.md:139-141",
+     "deepzoom.py:250-252 (comment updated)"
+    ],
+    "note": "Same as the routed E-ladder row. FUSE.split(',')[0] is still 'WikiChip Fuse' for :964. With no 'search summary' text left, in.lib.finfet.3 and in.lib.inverter.2 build as outside facts (checked in a scratch build). Part 4 (si.planes-width inferred, E) is present."
+   },
+   {
+    "key": "s09-device-physics/siliconics-slide-numbers",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:67-69 (SILICONICS constant)"
+    ],
+    "note": ""
+   },
+   {
+    "key": "s10-outside/card-power-88w-stale",
+    "status": "applied",
+    "changes": [
+     "build_outside.py:181-190 (out.card.6; earlier run, merged with card-idle-range)",
+     "build_outside.py:255-256 (out.host.5; earlier run)",
+     "build_outside.py:185 THIS RUN: ':615-617' -> ':625-627'"
+    ],
+    "note": "docs/findings/14-card-behaviour.md gained 10 lines after old line 473 in commit 8000b57c, which came after bd8e731a. The 8 Oct 134 W runaway the fix cites is now at 625-627. ladder-outer.js:709 and :744 (C) are present."
+   },
+   {
+    "key": "s10-outside/stale-line-citations",
+    "status": "already-applied",
+    "changes": [
+     "build_outside.py:26, 137, 762 (':381')",
+     "build_outside.py:165 (':552-554')",
+     "build_outside.py:185 (':158 (87.8 W), :382 (idle)')",
+     "build_outside.py:244, 249 (':391')",
+     "build_outside.py:261 (':555')"
+    ],
+    "note": "out.card.4's ':155 -> :156' is superseded by card-dram-75's rewrite, which cites :398. Every line was checked against today's files."
+   },
+   {
+    "key": "s10-outside/devcard-pdf-page-citations",
+    "status": "already-applied",
+    "changes": [
+     "build_outside.py:162 (out.card.1 'p. 3')",
+     "build_outside.py:168-169 (out.card.3 'pp. 1 (...) and 3')",
+     "build_outside.py:194 (out.card.7 'p. 5')",
+     "build_outside.py:198 (out.card.8 'pp. 4-7')",
+     "build_outside.py:203 (out.card.10 'pp. 2-3')"
+    ],
+    "note": "Same as the routed E-ladder row. card.dip (build_circuits.py:172, E) is present."
+   },
+   {
+    "key": "s10-outside/host-board-models-stale",
+    "status": "applied",
+    "changes": [
+     "build_outside.py:245-249 (out.host.2 statement, source, kind 'measured, spec'; earlier run)",
+     "build_outside.py:249 THIS RUN: ':531' -> ':541' (same 10-line shift; 'on the same Gigabyte Z590 AORUS MASTER board' is now line 541)",
+     "build_outside.py:249 THIS RUN: added ', :563 (aifoundry2\\'s board)', the optional second range citation row 26 suggests (old 553)"
+    ],
+    "note": ""
+   },
+   {
+    "key": "s10-outside/localgroup-diameter-misattributed",
+    "status": "already-applied",
+    "changes": [
+     "build_outside.py:606-611 (out.localgroup.5 statement and extended quote)"
+    ],
+    "note": ""
+   },
+   {
+    "key": "s10-outside/universe-radius-source-this-script",
+    "status": "already-applied",
+    "changes": [
+     "build_outside.py:698-700 (out.universe.2 source, f-string of H0, Om, OL)"
+    ],
+    "note": "Renders 'H0 67.66, Ωm 0.3111, ΩΛ 0.6889', checked in outside.json."
+   },
+   {
+    "key": "s11-prose/card-idle-range",
+    "status": "already-applied",
+    "changes": [
+     "build_outside.py:183-189 (out.card.6: '19-50 W ... aifoundry1 card 1 idles highest: 42.7 W at 73 °C, 50 W at 80 °C', sources)"
+    ],
+    "note": "Merged with card-power-88w-stale; 'With working cooling' replaces 'Kept cool'. Checked: 01-at-rest.md:25 (73 °C) and :33 (42.71 W), abla.json idle_w 50.15, matmul page :727. The optional research-outside.md:75 is in no group's owns (see needs_other_groups)."
+   },
+   {
+    "key": "s11-prose/card-dram-75",
+    "status": "already-applied",
+    "changes": [
+     "build_outside.py:173-177 (out.card.4: '76 GB/s ... 64% of the 119.5 GB/s peak (fact bw-dram)'; source 05-claims.md:398)"
+    ],
+    "note": "The optional research-outside.md:73-74 is in no group's owns."
+   },
+   {
+    "key": "s06-host-power/missed: in.io.pvt.1 36th sensor",
+    "status": "already-applied",
+    "changes": [
+     "build_inside.py:883-888"
+    ],
+    "note": "Confirmed by the pvt-36th-sensor skeptic (PRM Fig. 1-3). Same edit."
+   },
+   {
+    "key": "s09-device-physics/missed: p.nucleon.8 and p.dopant.7 cite inside.json",
+    "status": "not-mine",
+    "changes": [],
+    "note": "Confirmed. The fix is entirely in build_particles.py, which E-ladder has applied: the notes rest on process.json, and its 'inside' ref names l1d and shire.panel.array, both nodes in my tree. Nothing to edit in inside.json."
+   }
+  ],
+  "citations": {
+   "applied": 7,
+   "skipped": 21,
+   "notes": "Rows in my files: 9 out.card.2, 11 out.host.6, 13 in.lib.booth.1, 24 out.card.6, 25 out.host.1, 26 out.host.2 and 27 out.package.8 are all in place (build_outside.py:165, 261, 185, 244, 249, 137/762; build_inside.py:1013), with each line checked against today's files. This run added row 26's optional second range (:563). Skipped: row 10 (out.card.4 155->156), superseded by card-dram-75's rewrite citing :398. The other 20 rows (19 ml: remaps plus 1 'other', scp.leak's ':473') are not mine. assign.py routed them here because inside.json copies ml facts via mf(), but their source strings are in D-memlevels' build_facts_l1/l2/l3/scp.py and facts-*.json, and none is in D's list. D has applied 16 of the 20 in its files today. Rows 2 and 18 (l2.leak), 3 (l3.leakage) and 15 (l1.voltage) are still old: see needs_other_groups."
+  },
+  "builders_run": [
+   "python3 docs/reports/data/2026-09-27-chip-diagram/research/build_inside.py (inside.json and research-inside.md came out byte-identical: the earlier run had already rebuilt them)",
+   "python3 docs/reports/data/2026-09-27-chip-diagram/research/build_outside.py (outside.json: only this run's 3 citation edits)",
+   "fixed point: both again via B-deepzoom-work/fixedpoint.sh: outputs unchanged; inside.json and outside.json pass python3 -m json.tool",
+   "smoke only, outside the repository: B-deepzoom-work/smoke.sh with-ladder ran the chip's build_facts.py in a scratch copy of HEAD's docs/reports (B-deepzoom-work/tree), with my three inputs and E-ladder's ladder.json overlaid. It passes all its checks (ONUM/INUM, N table). The repository's generated files are untouched (git status clean for facts.json, ladder-data.json and the pages)."
+  ],
+  "needs_other_groups": [
+   "D-memlevels, settled citation rows 2+18: docs/reports/data/2026-09-28-memory-levels/research/build_facts_l2.py:353 and facts-l2.json (l2.leak source): CLAIMS + \":184, 312, 473; docs/findings/16-dvfs-and-leakage.md:141\" -> CLAIMS + \":195, 324, 499; docs/findings/16-dvfs-and-leakage.md:189\". 312->324 follows row 8's mapping for the same ledger row; checked today: 05-claims.md:195 Idle rails, :324 SRAM rail at idle 1.60/2.63 W, :499 slope row; 16-dvfs:189 '| SRAM rail | 2.00 W |'.",
+   "D-memlevels, settled citation row 3: build_facts_l3.py:540 and facts-l3.json (l3.leakage source): f\"...; {CLAIMS}:312, 473\" -> f\"...; {CLAIMS}:324, 499\".",
+   "D-memlevels, settled citation row 15: build_facts_l1.py:282 and research/facts-l1.json (l1.voltage source): 'docs/findings/16-dvfs-and-leakage.md:20' -> 'docs/findings/16-dvfs-and-leakage.md:39' (the 600 MHz at 0.517 V row).",
+   "C-pagescript, xing-drawing-is-the-wrong-crossing page side, still absent today: add inode('shire.neigh.xing') in docs/reports/sources/ladder-mem.js drawing CKT.buildL2Xing (plus a libLink like ladder-inner.js:461); point ladder-circuits.js:782 (minion etlink) and chip-diagram.blocks.js:125 at 'shire.neigh.xing'; redraw shire.meshstop.xing (ladder-mem.js:116) as the mesh crossing (buildL3Wire, or buildXing in circuit order). The data already carries scale shire.neigh.xing (parent shire.neigh, short 'Bank FIFOs', 4 facts in.shire.neigh.xing.1-4). Until the inode exists it is simply unused: page kids come from inode kids(), and ladder-core.js:1009 filters by NODES.",
+   "No owner, optional record only (card-dram-75 and card-idle-range step 4): docs/reports/data/2026-09-27-chip-diagram/research/research-outside.md:73-75. 'tensor loads measured at 75 GB/s' -> 'tensor loads stream 76 GB/s (bw-dram)'; '12 V in, at most 7.3 A / 88 W (p. 5); highest draw on record 87.8 W; idle 19-36 W by card' -> '12 V in, a 7.3 A / 88 W budget (p. 5); highest draw under load 87.8 W, 134 W in aifoundry2's idle runaways (2, 7, 8 Oct); idle 19-50 W by card'.",
+   "Checked present today in other groups' files, no action: L120, L105 and L31 card (A2); build_ladder.py card pass-through, build_circuits.py :32/:172/:227, process.json si.planes-width (E); ladder-circuits.js:233, ladder-outer.js:709/744, the chip-diagram.script.js lane label (C); memory-levels.script.js:4174 router panel and buildXing semisync (D)."
+  ],
+  "notes": "The earlier run left no log; it had applied nearly everything. I checked all 42 items, 28 citation rows and 5 routed rows against the current files and evidence. Log: /home/yaroslavvb/claude/work/chip-check-1014/fixes/B-deepzoom-progress.md. Work files: /home/yaroslavvb/claude/work/chip-check-1014/fixes/B-deepzoom-work/ (auditdiff.py, shiftscan.py, othercheck.py, smoke.sh, fixedpoint.sh).\n\nThis run's edits, all in docs/reports/data/2026-09-27-chip-diagram/research/build_outside.py: line 185 ':615-617' -> ':625-627'; line 249 ':531' -> ':541' and ', :563 (aifoundry2's board)' added. Both outputs were then rebuilt and reached a fixed point.\n\nBase drift, for everyone: HEAD is now 18928367, not bd8e731a. Commit 8000b57c (and 36619590) inserted 10 lines into docs/findings/14-card-behaviour.md after old line 473 and 6 more after old line 660. So any fix citing that file past line 473 in bd8e731a numbering is off by +10 (or +16). I scanned all chip, memory-levels and ladder data and research JSON: only my two outside.json citations were affected, and both are fixed. 02-requests.md and 04-artifacts.md also changed length but are cited by line nowhere in that data.\n\nI ran the chip's build_facts.py only inside an isolated scratch copy, as the earlier run of my group did, to prove the chain accepts the new node and fields. It never ran in the shared checkout.\n\ngit diff --stat on my files: build_inside.py +148/-?, build_outside.py 67, deepzoom.py 10, inside.json 164, outside.json 42, research-inside.md 99, research-inside.tail.md 10 (7 files, 337 insertions, 203 deletions).\n\nObservation, not applied (no verified finding asks for it): build_inside.py lib.fin (lines 1114-1122) and lib.channel (1124-1129), and research-inside.head.md:40-43, still call N7's fin an inference ('about 6-7 nm wide and 45-50 nm tall', channel 6 x 20 x 45 nm = 270,000 atoms). The ladder's process.json shows n7.fin-width 6 nm, n7.fin-height 52 nm (WikiChip Fuse) and n7.leff 16.5 nm, and dope.count-channel gives 257,000 on the same channel scale. This is a candidate for a follow-up finding."
+ },
+ "pass1-resumed:C-pagescript": {
+  "group": "C-pagescript",
+  "items": [
+   {
+    "key": "die-plot-is-not-the-mirror",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:3424 (honest prose: 'Still open: which east-west handedness the silicon has; the published die plot is not its mirror, it keeps the PCIe and I/O cells at the east end and swaps them (...)')"
+    ],
+    "note": "The first run made my part (step 4), exactly as the fix gives it. The rest of the fix is A2's."
+   },
+   {
+    "key": "xing-drawing-is-the-wrong-crossing",
+    "status": "partly",
+    "changes": [
+     "docs/reports/sources/ladder-mem.js:116-121: a new inode shire.neigh.xing, drawn by buildL2Xing; shire.meshstop.xing is now drawn by buildL3Wire, the Shire Channel <-> mesh crossing (the fix's first way)",
+     "docs/reports/sources/ladder-inner.js:461-462: shire.neigh.xing gets a libLink with the old part map {ls, lvin, sync, fifo}; shire.meshstop.xing gets mesh.link.wire's map {rep1, rep2, lsin, ls, sync}",
+     "docs/reports/sources/ladder-circuits.js:780: links('shire.meshstop.xing', {wireC: 'lib.wire', bitE: 'lib.inverter'}), so the new drawing has no dead-end parts (T19/T20)",
+     "docs/reports/sources/ladder-circuits.js:793: the minion's etlink now goes to 'shire.neigh.xing'",
+     "docs/reports/sources/chip-diagram.blocks.js:125-127: OPTS.etlink now goes to P[..shire] + {id: 'shire.neigh', k: <the minion's neighbourhood>} + {id: 'shire.neigh.xing'}",
+     "docs/reports/sources/ladder-circuits.js:769-772: the memory shire's 'crossing' part now goes to 'lib.fifo', not shire.meshstop.xing (comment explains why)",
+     "unchanged: ladder-circuits.js:777 mesh vcdown -> shire.meshstop.xing (now the right drawing); chip-diagram.blocks.js:98 keeps shire.meshstop.xing under the mesh stop"
+    ],
+    "note": "Every page-side edit in my files is done. B's node shire.neigh.xing is in build_inside.py and inside.json, and D's semisync option and memory-levels nodes/links repointing are in the tree; their part keys match mine. One deviation: the fix offers two ways for the memory shire's 'crossing' part, and I used neither. 'No zoom' fails the page's own no-dead-ends tests (zoom_test.mjs T19/T20 and ml_ladder_test.mjs T19, where only the die's key may be a dead end), and links' false value would make its panel call it 'a key to the drawing, not a part of the chip'. A new drawing with the memory shire's own sides would be new content. So the part now opens the textbook queue (lib.fifo) that a VC FIFO is built on, the same target as its neighbour 'noc'. That shows no crossing with wrong sides. Small side effect: shire.meshstop.xing's drawing now includes buildL3Wire's repeater and wire."
+   },
+   {
+    "key": "mesh-lane-is-not-pa76-for-l3",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:373 ('lane = PA[12:11] (L3)')",
+     "chip-diagram.script.js:1096 (meshstop panel: src('An L3 request takes the lane of its home bank, PA[12:11] under the default swizzle, and a remote-scratchpad request lane PA[7:6]', 'L103') (re-implementation RTL, to confirm))",
+     "chip-diagram.script.js:1443-1444 (decode() gains l3b: b(11) % 4)",
+     "chip-diagram.script.js:1691 (const ln = P1.lane[c.a.l3b])"
+    ],
+    "note": "The first run made all three edits in my file; the panel text is the fix's sentence wrapped in a src() citation. L103, mesh.port-width and circuitkit.tail.js are other groups', and all are done."
+   },
+   {
+    "key": "uc-fast-credit-counters-not-in-uc",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-circuits.js:783-784: 'shire.uc.fcc': 'lib.counter' -> 'lib.decoder' (the fix's optional part)"
+    ],
+    "note": "Of the two targets the fix allows, I chose lib.decoder, because the part is now B's 'Credit increments (CREDINC0-3)', a decode. B's build_inside.py edits are done."
+   },
+   {
+    "key": "int-regfile-latches-ports",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-circuits.js:235-238: the lib.regfile caption now reads '... latches (x0 of each thread is wired to zero), with two read ports, a third that reads only x31, and one write'"
+    ],
+    "note": "This also covers the routed E-ladder row. The text is the fix's word for word, but split over the caption's two cnote lines (136 and 123 characters), with the source appended to line 2 the way the fixed ROM caption does it. On one line it would be 216 characters, past the frame's ~165 (KT.T draws one unwrapped SVG line)."
+   },
+   {
+    "key": "dram-model-within3-lines-not-loads",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:1083 (memory-shire panel 'of lines')",
+     "chip-diagram.script.js:1084 (KPI 'of lines within ±3 cycles, three cards')",
+     "chip-diagram.script.js:2930 (tour 'Memory' sub)",
+     "chip-diagram.script.js:3426 (honest section)"
+    ],
+    "note": "The first run made all four of my edits. L45 and ms-fit-3cards belong to A2 and A1, and both are done."
+   },
+   {
+    "key": "e48-not-published-stale",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:1931 (flow 5 panel: 'measured on 26 September on all three cards; they are on the memory-hierarchy page and in the energy manual (§4.4).')",
+     "chip-diagram.script.js:3433 (honest list item)"
+    ],
+    "note": "Both script edits match the fix exactly. The gs-* notes and urls are A2's, and they are done."
+   },
+   {
+    "key": "memshire-west-drawing-mirrored",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-mem.js:144-147: dinst() passes mirror: p.ms < 4 (with a comment)"
+    ],
+    "note": "My part is only the flag. buildMS's mirror option (or the subtitle alternative) belongs to D, in memory-levels.script.js and then circuitkit.js. When I last checked, D had not done it; it is listed under needs_other_groups. Until then the flag is ignored and does no harm."
+   },
+   {
+    "key": "relay-energy-per-byte-moved-not-per-handoff",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:2761 (this run): flow B stage 5 caption now reads 'each hand-off costs ${n('rl_e_hand', 'pJ')} per byte, its write and its read (${n('rl_e_next', 'pJ/B')} moved).'",
+     "already there from the first run: chip-diagram.script.js:1836 ('Energy per byte moved (each write and each read counted)'), :1837 ('Bandwidth, reads plus writes, ...'), :2589 (BC_E relay row 'rl_e_hand'), :2667 (panel row), :2904 (CAPS.D 'per byte moved'), :3410 (summary B)"
+    ],
+    "note": "The first run had left out only the '(... moved)' clause in the stage 5 caption, which I added. That caption is now the longest of flow K's, 227 characters against 210 before. Captions are not clipped: fitCap shrinks the flow's shared font a little. The N row rl_e_hand ('17.8') is A1's and is in build_facts.py."
+   },
+   {
+    "key": "relay-mechanism-pull-not-push",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:1189 (FLOWLEAD D)",
+     "chip-diagram.script.js:1828-1830 (directC = reply(A, B), with a comment)",
+     "chip-diagram.script.js:1833 (the DRAM loop ends at A: viaR(mc, HOME, A))",
+     "chip-diagram.script.js:1835 (flow 4 panel)",
+     "chip-diagram.script.js:1842 (stage 1), :1848 (stage 3)",
+     "chip-diagram.script.js:2655-2658 (flow B chain uses reply(SH[i - 1], SH[i]))",
+     "chip-diagram.script.js:2674 (flow B routing note)"
+    ],
+    "note": "All eight of my edits match the fix's completions (step 6 used the viaR(mc, HOME, A) way). The relay-energy and relay.speedup facts are A2's and A1's, and both are done."
+   },
+   {
+    "key": "routing-order-measured-on-two-cards",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:1090 ('measured on three cards on 29 September')",
+     "chip-diagram.script.js:1804 ('measured on three cards')"
+    ],
+    "note": "Both match the fix."
+   },
+   {
+    "key": "flow8-horace-device-rate",
+    "status": "partly",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:2301: the flow H panel paragraph, exactly as the fix",
+     "chip-diagram.script.js:2908: CAPS.H reads '(${n('tfma546')} per op on the device, A and B in the L1 scratchpad)' (trimmed)"
+    ],
+    "note": "The wrong '(9.51 on the device)' is gone. The subtitle does not take the fix's full parenthesis ('...; flow 7's benchmark, B streamed through TenB, makes 9.51 TFLOP/s'). With it the subtitle would be about 285 characters, against 231 for the longest today, and #cap-sub is clamped to two lines (body.html:172-173), so its end ('random data reaches 90 °C in ...') would be cut at common widths. The panel carries the full explanation. A1 has added minion.tensorfma-546 and mm.reload to COMP flowH."
+   },
+   {
+    "key": "l103-lane-rule-vs-l3-lane",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:373, :1096, :1443-1444, :1691 (the same edits as mesh-lane-is-not-pa76-for-l3)"
+    ],
+    "note": "This was merged with mesh-lane-is-not-pa76-for-l3, as the skeptic asked. That item's wording is used: label 'lane = PA[12:11] (L3)' and decode key 'l3b' rather than 'lane'. The meaning is the same. L103 (A2), circuitkit.tail.js and memory-levels.script.js (D) are done."
+   },
+   {
+    "key": "example-line-drawn-in-wrong-instance",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-mem.js:103: buildL2Sub's instance gets ex: p.bank === L2X().bank && p.sub === L2X().sub",
+     "docs/reports/sources/ladder-mem.js:109: buildL2Panel's instance gets the same ex",
+     "docs/reports/sources/ladder-mem.js:144-147: dinst() gets ex: p.ms === DRX().ms && (p.ch == null || p.ch === DRX().ch)"
+    ],
+    "note": "D's kit now reads these flags, in memory-levels.script.js buildL2Sub (a.ex), buildL2Panel and buildChan (inst.ex). I skipped the optional step 3 at ladder-inner.js:468, which would move the die's default memory shire from 0 to 5. With ex in place, memory shire 0's channel no longer shows the example's row, so the inconsistency is fixed without changing the die's zoom list."
+   },
+   {
+    "key": "s08-ks-adder-cin-only-to-s0",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/ladder-circuits.js:97 (the pg lead's added sentence on g0 = a0·b0 + p0·cin)",
+     "ladder-circuits.js:118-120 (the checker's cin wiring into bit 0's g p box, plus a comment)"
+    ],
+    "note": "Done exactly as the skeptic's fix gives it."
+   },
+   {
+    "key": "s08-rom-trans-tables-not-nor-rom",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/ladder-circuits.js:392-393 (the two-line cnote citing 'tb.rom et.trans-rom in.vpu.lane.trans.1')"
+    ],
+    "note": "Matches the fix and the routed E-ladder row. The build_circuits.py lead is E's, and it is done."
+   },
+   {
+    "key": "s08-ipart-default-kind-documented",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:8, 9, 30, 83, 118, 130, 131, 485: kind: 'generic' added to the eight ipart calls (fa1, fa2, xor1, onefet x3, master, slave)"
+    ],
+    "note": "Line 420 (die.metal 'fets') and the kit's default are left alone, as the fix says."
+   },
+   {
+    "key": "planck-sixteen-vs-fifteen-decades",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:614 (the quark note: `Below the electron's limit, ${on('el_b')}, lie ${on('pl_16')} ...`, f: `${onf('el_b')} ${onf('pl_16')}`)",
+     "ladder-inner.js:625 (Planck subtitle: 'below the electron's limit lie')",
+     "ladder-inner.js:640 ('Fifteen powers of ten ...' label, the new lead, facts + 'p.electron.2')"
+    ],
+    "note": "Matches the fix and the routed E-ladder row. E's NUM now prints on('pl_16') as '15 powers of ten', and el_b exists."
+   },
+   {
+    "key": "gate.metals-finfet-work-function",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:307 ('... by its work function, ${on('wf')} in a FinFET;')"
+    ],
+    "note": "Also covers the routed row. on('wf') now prints 'about 4.4 and 4.85 eV' (E's change)."
+   },
+   {
+    "key": "electrons-table-labels",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:3440 (row 2 'One fin's channel when on, at the minion rail')",
+     "chip-diagram.script.js:3442 (row 8 'Leaking per transistor, every second (the chip's average at 80 °C)')",
+     "docs/reports/sources/ladder-inner.js:360 (lib.channel note)"
+    ],
+    "note": "All three edits match the fix."
+   },
+   {
+    "key": "nucleus-million-times-a-bond",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:566 ('nearly four million times a chemical bond')"
+    ],
+    "note": "Also covers the routed row. p.nucleus.8 is E's, and it is done."
+   },
+   {
+    "key": "planck-ruler-diameter-radius",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:635 (mark(Math.log10(0.84075e-15), 'a proton (radius)', 'p.nucleon.1'))",
+     "ladder-inner.js:637 (gapQE from 2e-20 and 4.3e-19)",
+     "ladder-inner.js:638-639 (quark mark at 4.3e-19, electron mark at 2e-20)",
+     "ladder-inner.js:641 (ua = yl(Math.log10(2e-20)) + 18)"
+    ],
+    "note": "Applied as the fix gives it. p.nucleon.1 is the proton's 0.84075 fm charge radius, so the proton mark is now at the size its fact states."
+   },
+   {
+    "key": "card-power-88w-stale",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-outer.js:711 (the host processor lead: 'The ET card’s 88 W budget is less than the bigger host processor’s 125 W base power;')",
+     "ladder-outer.js:746 (the card subtitle: `${on('card_w')}, an ${on('card_88')} budget from the host`)"
+    ],
+    "note": "B's out.card.6 and out.host.5 in build_outside.py are done."
+   },
+   {
+    "key": "us-map-arc-hidden",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-outer.js:389-390: L.appendChild(gl) after California's group, with a comment"
+    ],
+    "note": "Used the fix's second way, one line: the SF-NY arc and its San Francisco dot are now drawn over California's opaque highlight. The part order becomes states, California, arc, which is what the first way would also give."
+   },
+   {
+    "key": "package-section-height",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-outer.js:797 (['lid', 0.9, ...]: the layers add up to 3.95 mm)"
+    ],
+    "note": "Applied as the fix gives it."
+   },
+   {
+    "key": "ring-arrival-note-wrong-scale",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-core.js:316-318: WRAPIN = isWrap(here) || here.length === 1 || (!s.loop && !exitAt(here)) ? null : pkeys(here); (with a comment)"
+    ],
+    "note": "I checked that both pages define pageExits, which exitAt needs (chip-diagram.script.js:918, memory-levels.ladder.js:278). I skipped the optional guard at ladder-outer.js:845: an exit or a loop arrival always has scales above it, so the guard would never fire."
+   },
+   {
+    "key": "tour17-fact-count",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:2914-2921 (K4 and factKinds())",
+     "chip-diagram.script.js:2936 (the Summary caption)",
+     "chip-diagram.script.js:2943 (const c = factKinds(), tot = c.all, W = 860)",
+     "chip-diagram.script.js:2947 (the fifth 'other' segment)",
+     "chip-diagram.script.js:2950, :2953 (c[k])",
+     "chip-diagram.script.js:2958-2960 (the growth animation's span is now 1 + 0.2*(segments-1), so the fifth segment ends with the clock; before, it would stop at 80%)"
+    ],
+    "note": "All six fix steps are in place, plus the needed animation change. The 860-unit box spans x -44..816, inside the desktop frame (-190..1210) and the phone frame (-64..836). The chain should still check that the five-label legend fits at 1280 and 390 px, as the skeptic asked."
+   },
+   {
+    "key": "versions-stale-14-oct",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.body.html:501 (byline '..., the 3D views 14 October ·')",
+     "chip-diagram.body.html:687-689 (the '13–14 October' Versions item, text as the fix)"
+    ],
+    "note": "Studio 45 is not named, per the fix."
+   },
+   {
+    "key": "electrons-intro-about",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.body.html:623 ('every one is an estimate, its kind says model or inference, and its assumptions are in its source.')"
+    ],
+    "note": "The first half of the sentence stays on line 622, so the line break is kept and the rendered text is the fix's."
+   },
+   {
+    "key": "missed: The relay's bandwidth also counts bytes read plus bytes writ",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:1837 ('Bandwidth, reads plus writes, ...')",
+     "chip-diagram.script.js:1845 and :1848 ('GB/s of reads and writes' in flow 4's stage captions)"
+    ],
+    "note": "Confirmed: in onchip.json, headline.<card>.hop.bytes = 536,870,912 = 8 x 1 MiB x 32 x 2, and on-chip-relay.html:311 says '48 GB/s of reads and writes'. The edits from relay-energy-per-byte-moved-not-per-handoff cover it. A2 qualified relay-bw's statement."
+   },
+   {
+    "key": "missed: The same lane rule appears on the chip page at docs/reports/",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:373, :1096, :1443-1444, :1691"
+    ],
+    "note": "This is mesh-lane-is-not-pa76-for-l3. The only PA[7:6] left in my files are the L2 bank's (flow 1 leg 2 and the panels), which is correct."
+   },
+   {
+    "key": "missed: One mesh hop scale (mesh, slice s01): the 'to_l3 master' box",
+    "status": "not-mine",
+    "changes": [],
+    "note": "Confirmed. It lives in research/circuitkit.tail.js and memory-levels.script.js, both D's. D has already fixed it: circuitkit.tail.js:46 and circuitkit.js:1686 now read lane: 'PA[12:11] (L3)' with laneNote '(re-impl. RTL, to confirm)', and make_circuitkit.py --check passes."
+   },
+   {
+    "key": "missed: The crossing scale shire.meshstop.xing is also the zoom targ",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-mem.js:121 (shire.meshstop.xing now drawn by buildL3Wire, so the mesh hop's vcdown, ladder-circuits.js:777, opens the mesh crossing)",
+     "docs/reports/sources/ladder-circuits.js:769-772 (the memory shire's 'crossing' -> lib.fifo)"
+    ],
+    "note": "Confirmed from the code: before, both parts opened the neighbourhood's LV-to-bank drawing. The fix is part of xing-drawing-is-the-wrong-crossing; see that item's note on lib.fifo."
+   },
+   {
+    "key": "missed: Fact shire.voltage-domains (research/facts-arch.json:776, in",
+    "status": "not-mine",
+    "changes": [],
+    "note": "Confirmed from the Minion Shire Description's text. §3.1 (pdf p.10) says only that the L1 ICache data memory sits in the Shire Channel 'because it has to be operated at high voltage', and §5 (p.18) defers voltages to the Power Spec; no rail is named. The fact is A1's (facts-arch.json:773-776, record build_facts_arch.py:304), so the exact change is under needs_other_groups."
+   }
+  ],
+  "citations": {
+   "applied": 0,
+   "skipped": 0,
+   "notes": "The work list has no citations (0 remap or rewrite rows), so there was nothing to apply."
+  },
+  "builders_run": [
+   "None: this group owns no builders (its files are page sources: chip-diagram.*, ladder-*, ladder.css), and I edited no JSON.",
+   "node --check on all nine owned JS files (C-pagescript-work/jscheck.sh): all parse.",
+   "Read-only check, not a build: make_circuitkit.py --check (D's builder) reports 'circuitkit.js is current'.",
+   "Read-only check, not a build: tools/pagemotion/zoom_static.py on the committed chip page. Script 767 KB of a 900 KB budget, and comments are stripped from the shipped page (meta strip_comments), so there is room for this group's few hundred bytes.",
+   "Number keys: every n()/N./V() key in chip-diagram.script.js exists in facts.json num, except rl_e_hand, which is A1's new N row in build_facts.py:811. Every on() key in the ladder files exists in ladder.json num or facts.json onum.",
+   "git diff --stat (owned files): chip-diagram.blocks.js 4, chip-diagram.body.html 7, chip-diagram.script.js 96, ladder-circuits.js 25, ladder-core.js 4, ladder-inner.js 41, ladder-mem.js 16, ladder-outer.js 8; 8 files, +121/-80. Not touched: chip-diagram.links.js, chip-diagram.meta.json, ladder-panel.js, ladder.css."
+  ],
+  "needs_other_groups": [
+   "D-memlevels (memshire-west-drawing-mirrored): docs/reports/sources/memory-levels.script.js buildMS (4860-4903 at HEAD). It should read inst.mirror, which ladder-mem.js:144-147 now passes as mirror: p.ms < 4 through dinst(). With it set, buildMS should place every part, band, wire and tag at x' = (-150 + 1078) - x - w, keep text upright, and mirror the seats it sets (ap.phyBox, ap.die[k].box and .x, ap.noc/xg/st/dfiP/phyP). Alternatively, take the fix's smaller way: add the subtitle note for ms < 4. Then run make_circuitkit.py. Neither was in the tree at the end of this run.",
+   "A1-archfacts (missed: shire.voltage-domains), in research/facts-arch.json:776 and its record build_facts_arch.py:304. In the statement, change 'the SRAM arrays (shire cache, and the I-cache data memory, placed in the shire channel because it must run at high voltage) on the SRAM rail' to 'the shire cache's SRAM arrays on the SRAM rail, the I-cache data memory in the Shire Channel because it must run at high voltage (its rail is not stated)'. Source: CORE-ET Minion Shire Description pdf p.10 §3.1 names no rail.",
+   "Chain (the single run after all fixers): run the chip's build_facts.py, which gives scales['shire.neigh'].kids the new 'shire.neigh.xing' from B's inside.json so the neighbourhood scene draws its box and the etlink option has a seat. Then run the memory levels' build_facts.py and build-report.py for both pages, then zoom_test.mjs and ml_ladder_test.mjs (T19/T20 no dead ends: the new shire.neigh.xing scene, the redrawn shire.meshstop.xing, the memory shire's crossing -> lib.fifo). Also check two things by eye: the tour's slide 17 five-label legend at 1280 and 390 px, and flow 8's subtitle within its two-line clamp."
+  ],
+  "notes": "I resumed from the first run's uncommitted edits, which kept no log. I checked each item against the working tree with C-pagescript-work/state.py (new text present, old text gone) before touching it, and logged every item in /home/yaroslavvb/claude/work/chip-check-1014/fixes/C-pagescript-progress.md.\n\nThe first run had applied items 0, 2, 5, 6, 9, 10, 12, 14, 15, 19, 26, 27 and 28 in full, 8 all but one edit, and 11 in part. This run applied:\n- items 1, 3 (the optional link), 4, 7 and 13 (the flags), 16, 17, 18, 20, 21, 22, 23, 24 and 25;\n- item 8's last edit;\n- all five routed E-ladder rows.\n\nDeviations, each explained on its item:\n- Item 11: the subtitle is trimmed to fit its two-line clamp.\n- Item 4: the caption is split over its two lines to stay inside the frame.\n- Item 1: the memory shire's crossing goes to lib.fifo, because 'no zoom' fails the page's no-dead-ends tests.\n\nD-memlevels worked in the same checkout at the same time. Its memory-levels.nodes.js, links.js and ml_ladder_test edits and its ex handling match the node and key names I used (shire.neigh.xing, ex, mirror). Only buildMS's mirror was still missing.\n\nI touched only files I own. Work scripts are in /home/yaroslavvb/claude/work/chip-check-1014/fixes/C-pagescript-work/: state.py, edit_inner.py, edit_outer.py, edit_xing.py, saylen.py, caplen.py and jscheck.sh."
+ },
+ "pass1-resumed:D-memlevels": {
+  "group": "D-memlevels",
+  "items": [
+   {
+    "key": "link-bit-sync-panel-and-label",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:3838 (buildWire: 'then a VC FIFO', sub 'into the shire clock' / 'its counts cross by' / '2-flop synchronisers')",
+     "docs/reports/sources/memory-levels.script.js:4186-4188 (L3P.sync: its own panel 'The VC FIFO into the shire clock')",
+     "docs/reports/data/2026-09-27-chip-diagram/research/make_circuitkit.py:97-98 (L3KEEP keeps 'sync')",
+     "docs/reports/sources/circuitkit.js regenerated by make_circuitkit.py (--check passes)"
+    ],
+    "note": "The fix's sub-label 'its counts cross by 2-flop synchronisers' is drawn on two lines because 40 characters overrun the 308-wide box; the three lines sit at y+51/+72/+93 inside its 160 height."
+   },
+   {
+    "key": "memshire-stops-have-7-router-layers",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:4174 (router panel: 'Each minion shire's mesh stop has 9 main-NoC routers')",
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l3.py:624-625 (g.router note: '9 main layers per minion shire's stop, most likely 7 at a memory shire's'); facts-l3.json:969 propagated this run"
+    ],
+    "note": "My part (step 3) only; L105 (A2) and build_inside.py:149 (B) are theirs. The g.router note edit is the same misconception in my file, made by the earlier run; it had not reached facts-l3.json until this run's builder pass."
+   },
+   {
+    "key": "free-link-bit-energy-two-values",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:1062-1063 (l3_fj 36.7 '36.7 fJ'; l3_hop69 70 'about 70 pJ'/'70 pJ')",
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l3.py:499-505 (statement 36.7/47.4/70 pJ, value 36.7, card CARDS3 = 'aifoundry2, aifoundry3, aifoundry1-c1', note with the E32 36.2)",
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l3.py:751 (step 8 'about 70 pJ')"
+    ],
+    "note": "The late FIX[('l3','l3.wire-energy')] (build_facts.py:~547) still finds its tail ', close to the 47-59 pJ per hop of l3.energy-per-load.' and keeps '36.7 fJ' and 'about 70 pJ', so the N rows pass."
+   },
+   {
+    "key": "xing-drawing-is-the-wrong-crossing",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:2173-2193 (buildXing o.semisync: one hand-off register on the shire clock, 'semi-synchronous hand-off: the neighbourhood clock is / the shire clock shifted 180° (no synchroniser)', citing l2:l2.vc-fifo l2:l2.clock; two-flip-flop default kept), :2196 (ap.semisync), :2213 (waveform 'hand-off'), :3095 (buildL2Xing passes semisync: true) [earlier run]",
+     "docs/reports/sources/memory-levels.script.js:3184-3189 (L2P.sync: 'The hand-off register' panel when ctx.semi) and docs/reports/data/2026-09-28-memory-levels/build_facts.py:1330 (PARTS l2 'sync') [earlier run]",
+     "docs/reports/sources/memory-levels.nodes.js:33-35 ('l2:xing' -> shire.neigh.xing) and :190 (shire.neigh.xing added to the levels' view list) [this run]",
+     "docs/reports/sources/memory-levels.links.js:14-15 (shire kids: both crossings), :34-36 and :40 (shire fifo -> shire.neigh.xing), :45 (minion ports and nbr -> shire.neigh.xing), :60 (scp.shire fifo -> shire.neigh.xing) [this run]",
+     "tools/pagemotion/ml_ladder_test.mjs:254 (T19 want adds 'shire.neigh.xing') [this run]"
+    ],
+    "note": "Step 2's repoints done once C-pagescript added inode('shire.neigh.xing') (buildL2Xing) and redrew shire.meshstop.xing with buildL3Wire. Kept at shire.meshstop.xing: shire meshstop, l3.home stop and ports (links.js:50), scp.shire meshstop. The skeptic listed '48 ports' to repoint, but that part is 'The four L3-slave ports: VC FIFOs back up to the Shire Channel', the NoC-side crossing, so it stays. The label states the documented direction (the neighbourhood clock is the shire clock shifted 180°, as B's blurb and the MAS); for a 180° shift it is equivalent to the fix's wording. Step 3's second way (a parametrised, exported buildXing) was not needed: C took the first (buildL3Wire)."
+   },
+   {
+    "key": "mesh-lane-is-not-pa76-for-l3",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/circuitkit.tail.js:43-46 (buildMeshHop lane 'PA[12:11] (L3)', laneNote '(re-impl. RTL, to confirm)')",
+     "docs/reports/sources/memory-levels.script.js:6241 (MLB.builders.buildMeshHop in step)"
+    ],
+    "note": "My part (step 6) only. buildHop draws laneNote in place of '4 per shire', as the L3 level's own hop does (memory-levels.script.js:~4067)."
+   },
+   {
+    "key": "xing-blurb-every-bit-two-flops",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l3.py:614-615 (g.crossing: 'samples the FIFO's gray-coded counts in the receiving clock')"
+    ],
+    "note": "The optional part in my file; the blurb is B's (done)."
+   },
+   {
+    "key": "rbuf-misquote",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:3144 (rbuf panel: 'served without touching the RAM panels, which the specification calls \"slow and power hungry\"')"
+    ],
+    "note": "circuitkit.js regenerated."
+   },
+   {
+    "key": "path-widths-rejoin",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l2.py:186 (l2.path.widths: 'crosses the bank FIFO as two 256-bit entries and is re-joined into one 512-bit ET-Link request at its output')"
+    ],
+    "note": "facts-l2.json in step; N rows l2_req256 and l2_link still match."
+   },
+   {
+    "key": "parts-open-another-parts-panel",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:3177 (olat: its own panel 'Output latch and write drivers')",
+     "docs/reports/sources/memory-levels.script.js:3184-3189 (sync: the hand-off register when ctx.semi, else a two-flip-flop synchroniser panel)",
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:1330 (PARTS l2 'sync': l2.vc-fifo, l2.clock, l2.domain)"
+    ],
+    "note": "Checked on a stub DOM: the semi-synchronous drawing's sync part carries ctx {semi: true} and opens 'The hand-off register'."
+   },
+   {
+    "key": "stale-tab-reference",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/make_circuitkit.py:130-133 (two PATCHES: 'Flow 1 follows it.', 'Flow 1 follows the request from there.')"
+    ],
+    "note": "circuitkit.js regenerated this run (lines 1413 and 1472 now say 'Flow 1 follows'); memory-levels.script.js unchanged there."
+   },
+   {
+    "key": "jedec-trfcab-16gb",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_dram.py:687-688 (statement: all-bank refresh 280.7 ns under JEDEC's 380 ns), :692-694 (note: item 10's text)",
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:1207 (N row g_trfcab_16 380 '380 ns')",
+     "docs/reports/sources/memory-levels.script.js:5302 (tl panel: n('g_trfcab_16'), n('dr_trfc'))"
+    ],
+    "note": "Merged with item 12. The other limits the statement names were verified this run against the Micron datasheet text: Table 196 RL-B 36 and WL-A 16 at 3733, tRCD/tRPpb 18, tRAS 42, tRRD 10, tFAW 40 ns; Table 111 tREFI 3.904 us and tRFCab 380 ns at 12-16 Gb."
+   },
+   {
+    "key": "memshire-west-drawing-mirrored",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:4893-4900 (buildMS: for memory shires 0-3 the subtitle reads 'a logical drawing of an east memory shire: on this west side the PHY and DRAM pins face the die edge, at left', citing dram:dram.topo.memshires and dram:dram.topo.floorplan, in place of the 63-cycle clause, which the hatched bar and the tag still give)"
+    ],
+    "note": "Took the fix's smaller alternative, as the brief prefers: it keeps the drawing and needs nothing from C, because buildMS already gets inst.ms. A full mirror would touch every coordinate and anchor that the levels' animations and the ladder's seats use. A second subtitle line does not fit (subtitle y=-6, parts from y=12), hence the replacement. C-pagescript passes mirror: p.ms < 4 from dinst, which is now unused (see needs_other_groups)."
+   },
+   {
+    "key": "dram-jedec-trfc-280",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:277-279 (comment), :281-294 (FIX gen.jedec-match: item 12's statement, source and note)",
+     "docs/reports/sources/memory-levels.script.js:5302 (tl panel)",
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_dram.py:687-688 (unamended statement in step)"
+    ],
+    "note": "'100 ns shorter' is written 'about 100 ns shorter' (380 - 280.7 = 99.3). The panel merges item 12's sentence with item 10's n() numbers; its lead now names the datasheet instead of 'as recalled'."
+   },
+   {
+    "key": "l103-lane-rule-vs-l3-lane",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/circuitkit.tail.js:43-46 and docs/reports/sources/memory-levels.script.js:6241 (lane 'PA[12:11] (L3)' with laneNote '(re-impl. RTL, to confirm)') [earlier run]",
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:299-300 (l3.lane displayed note no longer cites L103 for PA[7:6]) [this run, consequential]",
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:1518 (ask-silicon-config settles) [this run, consequential]",
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:1706-1710 (conflict 'Which mesh lane an L3 request takes': the synthesis alone against l3.lane and the corrected L103; 'needs the correction' dropped) [this run, consequential]",
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l3.py:257-258 (l3.lane research note in step) and :816 (ask-l3-lane settles) [this run, consequential]"
+    ],
+    "note": "The fix's own part was in place; item 4's shorter label is used because 'PA[12:11] (L3; remote scratchpad PA[7:6])' would overrun the 300-wide to_l3 box, and the panel carries the scratchpad rule. A2 has corrected L103, so the memory levels' texts that said L103 still reads PA[7:6] were reworded."
+   },
+   {
+    "key": "latch-read-mux-levels",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l1.py:391 (g.latch-read: 'seven 2:1 levels, or three 4:1 levels and one 2:1')",
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l1.py:15 and docstring :4-5 (OUT now writes research/facts-l1.json, as the brief recommends)"
+    ],
+    "note": "facts-l1.json is the builder's own output and is at a fixed point; there is no stray ../facts-l1.json."
+   },
+   {
+    "key": "scp-panel-count-mbit-units",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_scp.py:153 ('33.55 Mbit data + 4.19 Mbit ECC')"
+    ],
+    "note": "facts-scp.json in step."
+   },
+   {
+    "key": "l2-data-ram-way-set-order",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l2.py:95-96 (l2.data-ram {set, way} + shirecache_pipe_sub_bank.sv:1613 in its source), :63 (partition.rows note), :440, :495 (steps)",
+     "docs/reports/sources/memory-levels.script.js:3168 (rowaddr: 'no ET document fixes the order')",
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:1704 (conflict 'Row order in the data panels' dropped)",
+     "docs/reports/sources/memory-levels.script.js:2419 (dec2's comment no longer points at D.conflicts) [this run, consequential]"
+    ],
+    "note": "All five parts were in place."
+   },
+   {
+    "key": "out-latch-panel-is-sense-amp",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:3177 (olat: title 'Output latch and write drivers' and the fix's text)"
+    ],
+    "note": "Uses facts: 'periph' (g.read, g.write, g.assist) rather than the fix's 'sa' (read only), because the panel also covers the write drivers; L3 and scratchpad have 'periph' lists too."
+   },
+   {
+    "key": "rbuf-enabled-cites-commented-code",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l2.py:233-234 (statement 'reset value of the RTL's sc_pipe_ctl register'; source esr_defines.vh:66 applied by esr_cache_bank_auto.v:215)"
+    ],
+    "note": ""
+   },
+   {
+    "key": "l3-clock-gating-kind",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:301-305 (FIX ('l3','l3.clock-gating'): _caveat reimpl and the note)"
+    ],
+    "note": "FIX applies every key, and _caveat is honoured at build_facts.py:~730."
+   },
+   {
+    "key": "pa-map-pa17-aifoundry2-e57",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_dram.py:173-176 (note: E57, R33a, PA[17], 14 of 15 conditions, ledger row by name, chip fact L50)"
+    ],
+    "note": ""
+   },
+   {
+    "key": "example-line-drawn-in-wrong-instance",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:3035-3037 (buildL2Sub: ex = a.ex !== false)",
+     "docs/reports/sources/memory-levels.script.js:3059 (rowaddr labelled 'row {set, way}' when not the example's)",
+     "docs/reports/sources/memory-levels.script.js:3071-3077 (the 'this line' and '→ data row' callouts only for the example's sub-bank; otherwise 'the example line (0x80_1234_5340) is in bank 1, sub-bank 3', computed from ADDR.pa with dec2 and hexPA)",
+     "docs/reports/sources/memory-levels.script.js:3083-3085 (buildL2Panel: row 2,560 stands in for the line's row when ex === false; the cell zoom seat follows)",
+     "docs/reports/sources/memory-levels.script.js:4961-4963 (buildChan: no 'row N' label unless the example's)",
+     "docs/reports/data/2026-09-27-chip-diagram/research/make_circuitkit.py:86-87 (hexPA copied into the kit)"
+    ],
+    "note": "My part 2. C-pagescript already passes ex from ladder-mem.js (part 1). These drawings have no static lit row (rowY feeds only the levels' own access animations). Smoke-tested on a stub DOM: sub-bank 0.0 shows the redirect line, panel rows drop 2,642 (rowK at 2,560), channel 0.1 has no 'row 1,165', and the example's instance and the levels page (ex unset) are unchanged."
+   },
+   {
+    "key": "stale-line-refs-28-facts",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l1.py:224, :305, :313, :334",
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l2.py:169, :251, :287, :291, :306, :344",
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l3.py:172, :189, :198, :398, :405, :430, :437, :443, :502, :625, :630, :686",
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_scp.py:223, :311, :346",
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:135, :244, :252"
+    ],
+    "note": "l3.hop and l3.route use the settled citations (05-claims.md 434, 445, 446; report_template.html 879-883; l3.route 446), not the item's 410 and 875-878."
+   },
+   {
+    "key": "missed: The same per-line vs per-load error is on the memory-levels ",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:4889 (DRAM map note: 'of lines on three cards')",
+     "docs/reports/sources/memory-levels.script.js:5264 (model panel: 'of lines (each line's fastest of three loads) on each of three cards')"
+    ],
+    "note": "Confirmed: dram.lat.model says 'of lines', and C's companion finding (mem.json MEM-P2, cards.json within3, 05-claims.md:435) scores each line by its fastest of three loads. No other 'of loads' wording for this fit remains in my files."
+   },
+   {
+    "key": "missed: Mesh scale (die/mesh, shots/scale-086-mesh.png): the to_l3 m",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/circuitkit.tail.js:43-46 (same edit as item 4)"
+    ],
+    "note": "Confirmed: buildMeshHop's default lane contradicted its own l3.lane panel."
+   },
+   {
+    "key": "missed: ml:l2:l2.partition.rows, which is on the chip page, says 'th",
+    "status": "already-applied",
+    "changes": [
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l2.py:63 (note: 'the matching {set, way} rows (2,560-3,071)')"
+    ],
+    "note": "Confirmed; same edit as item 16 part 2."
+   }
+  ],
+  "citations": {
+   "applied": 18,
+   "skipped": 0,
+   "notes": "All 18 rows were already in place from the earlier run and were checked here: 16 remaps (0-7, 9-11, 13-17) at build_facts_l1.py:224, :313, :334; build_facts_l2.py:169, :287, :291, :344; build_facts_l3.py:172, :198, :247, :398, :430, :437, :443; build_facts_dram.py:371; and the 2 'other' rows, 8 (scp.leak ':324, :499', build_facts_scp.py:311) and 12 (dram.org.part mem_controller_utils.c:996-1000, build_facts_dram.py:224). No rewrites. One extra row not in the work list came from a citation reader's 'other' note in the journal: dram.ctl.power-down ':4738' -> ':4732-4736' (build_facts_dram.py:345). It was verified: the cards boot with .training = true (mem_controller.c:646), so the if-branch runs, and both branches disable power-down and self-refresh."
+  },
+  "builders_run": [
+   "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l1.py (fixed point; facts-l1.json parses)",
+   "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l2.py (fixed point; facts-l2.json parses)",
+   "docs/reports/data/2026-09-28-memory-levels/research/build_facts_l3.py (picked up the earlier g.router note and this run's two l3.lane/ask edits, then fixed point; facts-l3.json parses)",
+   "docs/reports/data/2026-09-28-memory-levels/research/build_facts_dram.py (fixed point; facts-dram.json parses)",
+   "docs/reports/data/2026-09-28-memory-levels/research/build_facts_scp.py (fixed point; facts-scp.json parses)",
+   "docs/reports/data/2026-09-27-chip-diagram/research/make_circuitkit.py, then --check (passes; circuitkit.js regenerated, node --check ok)"
+  ],
+  "needs_other_groups": [
+   "C-pagescript (optional cleanup): docs/reports/sources/ladder-mem.js:147 dinst passes 'mirror: p.ms < 4', and :144 comments '(mirror: memory shires 0-3 sit on the west edge, their PHY and pins toward the die edge at the left; ...'. D took item 11's second way (buildMS's subtitle for memory shires 0-3; the drawing is not mirrored), so the flag is unused. Drop 'mirror: p.ms < 4, ' and the 'mirror: ...;' part of the comment, or leave it inert.",
+   "B-deepzoom (optional, consistency with item 0): docs/reports/data/2026-09-27-chip-diagram/research/build_inside.py:197, shire.meshstop.xing's reuse note: 'its wire scale the mesh-rail level shifter and the 2-flop synchroniser' -> 'its wire scale the mesh-rail level shifter and the VC FIFO whose counts cross by 2-flop synchronisers'. That part is now drawn 'then a VC FIFO / its counts cross by / 2-flop synchronisers'.",
+   "Chain (after all fixers, not a file edit): the memory levels' build_facts.py, then the chip's build_facts.py, which imports the new N row g_trfcab_16 and the ml facts circuitkit.js now cites (dram.topo.memshires, dram.topo.floorplan, l2.vc-fifo, l2.clock); then build_inside.py and build-report.py for both pages; then tools/pagemotion/ml_ladder_test.mjs T18/T19, whose walk now expects shire.neigh.xing."
+  ],
+  "notes": "I resumed from the earlier run's edits, which were in git diff but had no log. Each item and citation was checked against the working tree before touching anything. Progress log: /home/yaroslavvb/claude/work/chip-check-1014/fixes/D-memlevels-progress.md. Helper scripts are in /home/yaroslavvb/claude/work/chip-check-1014/fixes/D-memlevels-work/: fixedpoint.sh runs the five builders and diffs their output; kitsmoke.mjs runs the changed kit builders and panels on a stub DOM and prints their texts.\n\nNew this run:\n- item 23 (lines, not loads);\n- item 21's kit side, plus hexPA added to the kit's copy list;\n- item 11 (west memory shires' subtitle);\n- item 3's ladder repoints in memory-levels.nodes.js, memory-levels.links.js and ml_ladder_test.mjs, made after C added the shire.neigh.xing inode;\n- rewording of the memory levels' texts that said chip fact L103 still reads PA[7:6], now that A2 has corrected it;\n- circuitkit.js regenerated; it had not been run since the earlier edits.\n\nDeviations from the fixes' literal text, each with its reason in the item notes:\n- item 0's sub-label is split over two lines to fit the box;\n- item 13 uses item 4's shorter lane label;\n- item 17 uses facts 'periph' instead of 'sa';\n- item 3 keeps l3.home's 'ports' at the mesh crossing, because it is the NoC-side VC FIFO;\n- item 3's label states the documented clock direction.\n\nThe earlier run's dram.ctl.power-down citation edit and its g.router note were verified and kept.\n\nNot run, as the brief requires: the page builds and both build_facts.py. Their N, FIX and PARTS inputs were checked by reading: '36.7 fJ', 'about 70 pJ', '380 ns' and '3.904 us' all occur in their statements, and the new PARTS ids exist.\n\ngit diff --stat on my files: 18 files, +384/-266, including the generated circuitkit.js (+131/-94 of it is the regenerated copy)."
+ },
+ "codex:E-ladder": {
+  "group": "codex-E-ladder",
+  "items": [
+   {
+    "id": "L01",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/build_ladder.py:235 NUM el_q -> ('p.electron.1', '-1.602176634 x 10^-19 C', '−1.602176634 × 10⁻¹⁹ C'); the drawn text starts with U+2212",
+     "ladder.json regenerated: only num.el_q.t changed"
+    ],
+    "note": "Old text matched exactly. The NUM check passes because the ASCII '-1.602176634 x 10^-19 C' occurs in p.electron.1. ladder-inner.js:619 stays as it is, as the fix says."
+   },
+   {
+    "id": "L04",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:273 p.core.4 -> '... the shells are clouds of probability, and the radii here are each shell's most likely distance from the nucleus.' (kind generic and source sze unchanged)",
+     "particles.json and ladder.json regenerated: only p.core.4 changed"
+    ],
+    "note": "My part (2) only. Part (1), the atom note at ladder-inner.js:532 [:533], belongs to C-pagescript and is listed under needs_other_groups."
+   },
+   {
+    "id": "L05",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:291 p.nucleus blurb: 'Nothing in a chip ever touches it.' -> 'Nothing a chip does ever changes it.'",
+     "particles.json levels[p.nucleus].blurb and ladder.json nodes.p.nucleus.blurb regenerated"
+    ],
+    "note": "p.nucleus.8 and ladder-inner.js:565 are unchanged, as the fix says."
+   },
+   {
+    "id": "L08",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:356 p.quark.7 -> 'Colour is believed to be permanently confined: only colourless combinations exist on their own, usually three quarks or a quark and an antiquark; some observed states are classed as four or five quarks.'"
+    ],
+    "note": "I checked the evidence in rpp2026-rev-quark-model.txt (sec. 15.1 lines 68-71, sec. 15.5). Kind outside and source pdg-qm are unchanged. No NUM row cites this fact."
+   },
+   {
+    "id": "L11",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/build_ladder.py:258 RING ('lib.fin', 6e-9, 'n7.fin-width') -> ('lib.fin', 5.2e-8, 'n7.fin-height')",
+     "ladder.json regenerated: only ring.ticks[lib.fin].m and .f changed"
+    ],
+    "note": "The tick now matches the lib.fin node's own m (5.2e-8) and f (n7.fin-height). deepzoom.py passes the ring through unchanged, and no test in tools/pagemotion reads the ticks."
+   },
+   {
+    "id": "L16",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:382 p.electron.4 -> '... so the centre of its charge sits within {sci(EDM_E_CM*1e-2,1)} m of its centre of mass (dipole moment divided by its charge). That limits its shape, not its size.' It renders with 4.1 x 10^-32 m."
+    ],
+    "note": "My part (1) only. NUM el_edm still matches. PDG 2026 d < 0.041e-28 e cm is confirmed in rpp2026-sum-leptons.txt:15. Part (2), ladder-inner.js:619 [:620], belongs to C-pagescript."
+   },
+   {
+    "id": "L17",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:353 p.quark.4 -> \"A lattice-QCD breakdown of the proton's mass (MS-bar at 2 GeV): the masses of all the quarks in it, the sea of short-lived quark-antiquark pairs (strange ones too) as well as the three, give 9% (the quark condensate term); the quarks' energy of motion 33%, ...\" (the rest unchanged)"
+    ],
+    "note": "My part (2) only. Part (1), the field part's lead at ladder-inner.js:575 [:576], belongs to C-pagescript. No NUM row cites p.quark.4."
+   },
+   {
+    "id": "L18",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/build_ladder.py:233 NUM pr_m -> ('p.nucleon.3', '938.272 MeV/c^2', '938.272 MeV/c²')",
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:351 p.quark.3: MeV -> MeV/c^2 in all four places",
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:355 p.quark.6: '(a mass of a few MeV/c^2 is not excluded)'"
+    ],
+    "note": "My parts (1), (3) and (4). NUM qk_u, qk_d and pr_1pc still match, and num.pr_m.t is now '938.272 MeV/c²'. Part (2), ladder-inner.js:589 [:590], belongs to C-pagescript."
+   },
+   {
+    "id": "L19",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:82 new line: rho_unif = m_nuc_u * U_KG / (4 / 3 * math.pi * (R_unif_meas * 1e-15) ** 3), with the fix's comment",
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:297 p.nucleus.5 rewritten as given. It renders 'Its density is about 1.7 x 10^17 kg per m3 as a uniform sphere 8.06 fm across, or 2.3 x 10^17 at the textbook rule's radius of 3.64 fm: a teaspoon (5 mL) of nuclear matter would weigh about a billion tonnes.'",
+     "docs/reports/data/2026-10-01-ladder/build_ladder.py:80 new HOW row 'p.nucleus.5', which becomes the fact's note in ladder.json",
+     "docs/reports/data/2026-10-01-ladder/research/research-particles.md:110 record changed within the line to 'Density 1.7-2.3 x 10^17 kg/m3 (uniform sphere / 1.2 fm rule; a teaspoon about a billion tonnes).'"
+    ],
+    "note": "I re-derived the arithmetic: 1.6928e17 and 2.2916e17 kg/m3, and 0.846 to 1.146e12 kg per 5 mL. No page script hard-codes the old density. The two inserted lines move every later line by +1 in build_particles.py and in build_ladder.py; all line numbers in this report are final."
+   },
+   {
+    "id": "L20",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_process.py:387 el.kt -> '... the dopants\\' 50 meV is only 2 kT, so nearly every dopant atom alone in a silicon site is ionised.'",
+     "docs/reports/data/2026-10-01-ladder/research/build_process.py:335 dope.donor-acceptor -> '... so dopant atoms alone in silicon sites are almost all ionised.'",
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:241 p.dopant.2 -> '... so nearly every dopant atom alone in a silicon site has given up (or taken) its electron.'",
+     "docs/reports/data/2026-10-01-ladder/research/research-process.md:197 record changed within the line to 'nearly every dopant atom alone in a silicon site is ionised.'"
+    ],
+    "note": "My parts (1), (2), (3) and (5). NUM kt, kt43 and dop_e still match. Part (4), ladder-inner.js:680 [:681], belongs to C-pagescript."
+   },
+   {
+    "id": "L25",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/build_ladder.py:261 EPOCHS ('e.ew', 'ep_ew', 'quarks and electrons get mass')",
+     "docs/reports/data/2026-10-01-ladder/research/build_particles.py:504 record: e.ew name 'Quarks and electrons get their masses: about 10 picoseconds'"
+    ],
+    "note": "ladder.json ring.epochs[e.ew].lab and particles.json epochs[e.ew].name changed. The reader rejected part (b), so e.qcd.5, e.stars.4 and the stardust lead are unchanged."
+   },
+   {
+    "id": "T02",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:62-66 tb.icg statement and source replaced exactly as the fix gives them"
+    ],
+    "note": "I verified the citation: external/core-et/rtl/libs/rf_latches/et_clk_gate.v:22-29 (b38a1a3) loads en_1p <= en || te while !clk and sets enclk = clk && en_1p. In circuits.json and ladder.json only facts[tb.icg].statement and .source changed, matching the reader's dry run. The other fix_files (ladder-img/ladder-data.json, both facts.json files, both pages) are generated, so I did not edit them; the orchestrator's chain rebuilds them."
+   },
+   {
+    "id": "T13",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/build_ladder.py:125 lib.finfet blurb: '... pulls a thin sheet of electrons into the fin, and they flow from source to drain (the current, by convention, from drain to source). The gate drapes ...'",
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:166-168 tb.powerfet: '... in a trench-gate device conducting with its drain positive, electrons flow vertically, ... the drain, underneath, and the current flows up; its on-resistance ...'",
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:268 lib.powerfet blurb: '... thousands of small transistor cells side by side; in each, electrons flow straight down through the silicon from the source on top to the drain underneath, so the current flows up.'"
+    ],
+    "note": "My parts (1), (4) and (5). In circuits.json only tb.powerfet.statement and nodes.lib.powerfet.blurb changed; ladder.json also has the new lib.finfet blurb. Parts (2) and (3) in ladder-circuits.js and (6), the ladder-inner.js:329 comment, belong to C-pagescript."
+   },
+   {
+    "id": "T14",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/build_ladder.py:125 lib.finfet blurb: 'A voltage on the gate decides whether current flows: in an n-type transistor, at 0 V the path along the fin is shut; ...'"
+    ],
+    "note": "My part (6) only; it does not overlap T13's edit to the same blurb. The full blurb now reads: 'The switch everything is made of. A voltage on the gate decides whether current flows: in an n-type transistor, at 0 V the path along the fin is shut; at the supply rail (0.517 V on a minion) the gate's field pulls a thin sheet of electrons into the fin, and they flow from source to drain (the current, by convention, from drain to source). The gate drapes over the fins on three sides.' Parts (1) to (5) in ladder-inner.js belong to C-pagescript."
+   },
+   {
+    "id": "T19",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:43 tb.booth: 'product is a multiplexer choosing x(j), x(j-1) or 0, followed by an XOR with the sign.'"
+    ],
+    "note": "My part (2) only. Only tb.booth.statement changed. Part (1), ladder-circuits.js:162/165/166, belongs to C-pagescript."
+   },
+   {
+    "id": "T20",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-10-01-ladder/research/build_circuits.py:74-77 tb.fifo statement and source replaced exactly as the fix gives them (equal pointers mean empty or full; the extra pointer bit; source adds Cummings, SNUG San Jose 2002, §2.2 p. 3)"
+    ],
+    "note": "My part (1) only. Only tb.fifo.statement and .source changed. Part (2), the cmp part's info panel at ladder-circuits.js:322 [live :327], belongs to C-pagescript. As decided, the PCIe lane and the synchroniser get no change."
+   }
+  ],
+  "builders_run": [
+   "docs/reports/data/2026-10-01-ladder/research/build_process.py",
+   "docs/reports/data/2026-10-01-ladder/research/build_particles.py",
+   "docs/reports/data/2026-10-01-ladder/research/build_studio45.py",
+   "docs/reports/data/2026-10-01-ladder/research/build_circuits.py",
+   "docs/reports/data/2026-10-01-ladder/build_ladder.py",
+   "docs/reports/data/2026-10-01-ladder/build_ladder.py --check"
+  ],
+  "needs_other_groups": [
+   "C-pagescript, L04 (1): docs/reports/sources/ladder-inner.js:532 [:533 live]. {t: 'The rings are a picture: electrons are clouds of probability, densest at these radii, not little balls on orbits.', f: 'p.core.4', ph: false} -> {t: 'The rings are a picture, not to scale: electrons are clouds of probability, not little balls on orbits.', f: 'p.core.4', ph: false}",
+   "C-pagescript, L16 (2): ladder-inner.js:619 [:620]. `It is round: its charge sits within ${on('el_edm')} of its centre (the limit on its dipole moment).` -> `It is round: the centre of its charge sits within ${on('el_edm')} of its centre of mass (the limit on its dipole moment). That limits its shape, not its size.`",
+   "C-pagescript, L17 (1): ladder-inner.js:575 [:576], the field part's lead. 'The quarks\\' own masses are about 1% of the proton\\'s.' -> 'The three quarks\\' own masses add up to about 1% of the proton\\'s.'",
+   "C-pagescript, L18 (2): ladder-inner.js:589 [:590]. `weigh ${on('qk_u')} MeV (up) and ${on('qk_d')} MeV (down)` -> `weigh ${on('qk_u')} MeV/c² (up) and ${on('qk_d')} MeV/c² (down)`",
+   "C-pagescript, L20 (4): ladder-inner.js:680 [:681]. 'nearly every dopant in a silicon site gives its electron up.' -> 'nearly every dopant alone in a silicon site gives its electron up.'",
+   "C-pagescript, T13 (2): docs/reports/sources/ladder-circuits.js:649 [live :652], the power FET frame's sub. 'when the gates are on, current flows straight down, from the source on top to the drain underneath' -> 'when the gates are on, electrons flow straight down, from the source on top to the drain underneath'",
+   "C-pagescript, T13 (3): ladder-circuits.js:670 [live :673]. KTT(L, c2, yD + 30, 'current, down', 't-sm halo', 'middle'); -> KTT(L, c2, yD + 30, 'electrons, down; current, up', 't-sm halo', 'middle');",
+   "C-pagescript, T13 (6), comment only: ladder-inner.js:329. '// on: about a hundred electrons in the channel, and the current from source to drain; off: none, and the leak' -> '// on: about a hundred electrons in the channel, crossing from source to drain; off: almost none, and the leak'",
+   "C-pagescript, T14 (1)-(5): ladder-inner.js (bd8e731a lines). :209 GATE say -> [`The gate at ${on('v_0')}: the n-type transistor is off.`, `The gate at ${on('v_min')}, the minion rail: the n-type transistor is on.`]; :237 'One transistor: a gate over two fins' -> 'One n-type transistor: a gate over two fins'; :239 title 'One transistor' -> 'One n-type transistor'; :250 `Gate at ${on('v_0')}: no electrons under it; the transistor is off.` -> `Gate at ${on('v_0')}: almost no electrons under it; the n-type transistor is off.`; :305 'Gate off: the fin has almost no free electrons; nothing flows along it.' -> 'Gate off: the fin has almost no free electrons; almost nothing flows along it.' The drawn label at :241 stays.",
+   "C-pagescript, T19 (1): ladder-circuits.js (bd8e731a lines; live +2). :162 comment -> '// one row\\'s selectors: per bit, X, 2X or 0 (an AND-OR on two select lines), then an XOR (minus)'; :165 -> 'The row\\'s selectors: per bit, a multiplexer picks X, 2X (X shifted one place) or 0',; :166 lead -> 'For each bit of the row a multiplexer picks bit j of X (for ±X) or bit j-1 (for ±2X: X shifted one place). The encoder raises one of its two select lines, or neither for a 0 row, and then the bit is 0: an AND-OR gate, not a plain 2:1 multiplexer, which always passes one of its inputs.'",
+   "C-pagescript, T20 (2): ladder-circuits.js:322 [live :327]. const gc = cgrp(L, ap, 'cmp', 'Full and empty: the two pointers compared', {x: 330, y: 500, w: 240, h: 90}, 'lib.cmpeq'); -> const gc = cgrp(L, ap, 'cmp', 'Full and empty: the two pointers compared', {x: 330, y: 500, w: 240, h: 90}, 'lib.cmpeq', {info: {title: 'Full or empty', lead: 'Equal pointers mean the queue is empty or full. Each pointer counts one bit beyond the address, so the two can be told apart: equal in every bit, the queue is empty; equal but for that extra bit, the writer has gone round once more than the reader and the queue is full. An equality comparator on the address bits and an XOR on the extra bits decide it.', facts: ['tb.fifo']}});",
+   "Orchestrator's whole chain (no hand edits): ladder-img/ladder-data.json, the chip's and the memory levels' facts.json and both pages take up all 16 items' ladder changes when buildchain.sh runs. T02 lists these generated files in its fix_files."
+  ],
+  "notes": "I applied all 16 items: every part in my files (docs/reports/data/2026-10-01-ladder/), and nothing in any other group's file. There was no progress log from an earlier run of this pass, and my sources had not changed since the first pass, so I started fresh. Before editing, the repository's outputs were already a fixed point of their sources (checked with codex-E-ladder-work/baseline.sh), and I kept pre-edit copies in codex-E-ladder-work/before/.\n\nEvery 'Old' text each item quotes still matched the current text exactly. No first-pass fix had changed any of them, so I applied every new text as written. I did not need to adapt any item's intent to changed text.\n\nThe source diffs against the snapshot contain only this pass's hunks, so every first-pass edit is intact. Every output path that changed maps to an item:\n- process.json: 2 paths (el.kt, dope.donor-acceptor)\n- particles.json: 10 paths\n- circuits.json: 7 paths\n- studio45.json: none\n- ladder.json: 25 paths\n\ngit diff --stat on my folder, first and second pass together: 10 files, 418 insertions, 296 deletions.\n\nThis pass alone, against the snapshot:\n- build_ladder.py +6 -5\n- build_particles.py +11 -10\n- build_process.py +2 -2\n- build_circuits.py +13 -8\n- research-particles.md +1 -1 and research-process.md +1 -1 (both changed within the line)\n- process.json +2 -2, particles.json +10 -10, circuits.json +7 -7, ladder.json +26 -25\n\nClosing checks:\n- I ran all five live builders once more (codex-E-ladder-work/fixedpoint.sh). All five outputs were byte-identical on the rerun, build_ladder.py --check passes (294 facts, 41 scales, 124 numbers), and every JSON parses.\n- I did not hand-edit any JSON; every JSON change came from a builder.\n- No other group's builder asserts any text I changed: deepzoom.py's ONUM/INUM, the chip's N table and the memory levels' build_facts.py only reference these ids as scales.\n- No test in tools/pagemotion asserts any text I changed.\n\nI did not run the page builds or either build_facts.py.\n\nThe progress log is /home/yaroslavvb/claude/work/chip-check-1014/fixes/codex-E-ladder-progress.md. Its per-item lines give line numbers from before the L19 insertions and before T02 and T20 lengthened build_circuits.py; its closing summary, like this report, gives the final ones. The work files are in /home/yaroslavvb/claude/work/chip-check-1014/fixes/codex-E-ladder-work/."
+ },
+ "codex:F-3d": {
+  "group": "F-3d",
+  "items": [
+   {
+    "id": "I02",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-3d/app.js:60 new comment: Metal's cutaway is a cut through the dielectric: opening it shows the dielectric, and hiding the dielectric closes it.",
+     "docs/reports/sources/chip-3d/app.js:61 sectionButton handler: if(state.section&&state.scene==='metal')state.dielectric=true",
+     "docs/reports/sources/chip-3d/app.js:62 dielectricButton handler: if(!state.dielectric&&state.scene==='metal')state.section=false",
+     "docs/reports/data/2026-10-14-chip-3d/quality-test.mjs:41-42 (follow-on edit in my own test): in the metal scene the test now clicks #dielectricButton before #sectionButton, so it still ends with the cutaway open over the dielectric. With the old order and the new coupling it would end with both off."
+    ],
+    "note": "Applied exactly as the fix gives it. Checked in headless Chromium on a scratch bundle. At HEAD, opening the cutaway while the dielectric is hidden leaves the canvas pixels identical (the defect). After the edit the same click shows the opaque rear-quarter cutaway (2 opaque dielectric meshes and 4 cut lines). Both buttons' labels and aria-pressed follow. Hiding the dielectric closes the cutaway, and closing the cutaway keeps the dielectric shown. In the finfet scene the cutaway leaves the hidden dielectric alone. The metal hint ('Turn on the dielectric, then open the cutaway...') still holds."
+   },
+   {
+    "id": "I03",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-3d/viewer.js:465 comment: Browser and system shortcuts (Ctrl/Cmd with + or -, Ctrl/Cmd+R, Alt+arrows) stay the browser's.",
+     "docs/reports/sources/chip-3d/viewer.js:466 keyDown guard: if (event.ctrlKey || event.metaKey || event.altKey) return;",
+     "docs/reports/sources/chip-3d/shell.html:30 canvas aria-describedby=\"canvasHelp keyHelp sceneSummary\"",
+     "docs/reports/sources/chip-3d/shell.html:38 <p class=\"control-hint\" id=\"keyHelp\">Arrow keys rotate ..."
+    ],
+    "note": "Applied exactly as the fix gives it. The id keyHelp was not used anywhere else. Checked in headless Chromium with the canvas focused. These keys are no longer prevented and leave zoom and yaw unchanged: Ctrl+=, Ctrl+-, Cmd+=, Alt+Left, Alt+Right, Ctrl+R, Cmd+Shift+R. These still act on the model and are prevented: =, Shift++, Shift+_, ArrowLeft, r. The canvas's description now resolves to three texts, the third-party-free key help included. The page tests send unmodified keys only, so they are unaffected."
+   },
+   {
+    "id": "I10",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-3d/shell.html:34 <button id=\"resetButton\">Reset view</button>",
+     "docs/reports/sources/chip-3d/shell.html:38 the hint now ends 'R resets the view' (the whole line: 'Arrow keys rotate · + / − zoom · R resets the view')",
+     "docs/reports/sources/chip-3d/style.css:3 (addition beyond the fix text) the rule .zoom-buttons button{...} gets white-space:nowrap at its end"
+    ],
+    "note": "The label change is applied exactly as written. The reader's reason says the longer label fits at phone width. Measured in headless Chromium, that is true at 375 to 412 px but not at 360 or 320 px: 'Reset view' wrapped onto two lines ('Reset' over 'view') and all three zoom buttons grew from 44 to 50 px. I added white-space:nowrap to the zoom buttons in style.css (my file), so the help text wraps instead, as the reason intended. Result: the label is on one line at every width from 320 to 1280 px; at 320 px the help text is 105 px wide in 2 lines; the row's top and its clearance from the labels match HEAD; no page overflow. To keep only the fix text, drop that one CSS property. The tests find the button by #resetButton, not by its text."
+   },
+   {
+    "id": "I11",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-3d/app.js:38 the live sentence's closed case 'Assembled view.' becomes 'Cutaway closed.'"
+    ],
+    "note": "Only the confirmed mislabel is applied. The reason's per-scene control policy is an owner decision and is not part of the fix. In the browser the edited bundle reads 'Layer separation: 18%. Cutaway closed.' on entering the metal scene, and 'Layer separation: 100%. Cutaway closed.' at full separation. No 'Assembled view' text is left in the sources; the generated chip-3d.html keeps it until the build runs."
+   },
+   {
+    "id": "I12",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-3d/models.js:224-225 comment: a pulse's place is a fraction of the route (a loop in 11.2 s: 1.3 units/s at the default separation)",
+     "docs/reports/sources/chip-3d/models.js:227 let distance=((time/11.2+i/pulses.length)%1)*total;",
+     "docs/reports/sources/chip-3d/models.js:292-294 two comment lines and a module-level const drift={phase:0,time:null}; just before function channelModel",
+     "docs/reports/sources/chip-3d/models.js:326-334 the channel's animation adds dt*(.10+.30*charge) to drift.phase, with dt=clamp(time-drift.time,0,.05); the beads sit at ((phase+drift.phase)%1)*5.9"
+    ],
+    "note": "Each edit matched once and was applied exactly as written. The four edited sources are byte-identical to the auditor's IR-work/patched copies. My own test (codex-F-3d-work/i12-test.mjs) compares HEAD with the edited file on the auditor's Three.js stand-in and reproduces the reader's numbers. Metal, paused, separation 18% to 19% at 600 s: pulses move 7.896 units before, 0.015 after (at most 0.015 over the whole slider). Channel, paused, gate drive 60 to 61: carriers move 3.399 units at 60 s and 4.488 at 600 s before, 0 after. A drive change while playing: largest one-frame step 2.230 units before, 0.036 after. The channel's steady speed is unchanged at drives 30, 68 and 100. A 4000 s gap in the clock moves the carriers by at most one 0.05 s step. One correction, to the reason only, not the page or the code: across the slider the metal pulse speed runs from 1.266 units/s (0%) to 1.427 (100%), up to about 10% above 1.3, not 'within 7%'. At the default 18% it is 1.295, so the code comment's '1.3 units/s at the default separation' is right."
+   }
+  ],
+  "builders_run": [],
+  "needs_other_groups": [],
+  "notes": "All five items are applied, in my own files only. Checkout: /home/yaroslavvb/claude/et-soc1-prototyping, main. HEAD is now 18928367, not bd8e731a: other sessions committed lab-sweep work, and none of it touches the 3D companion. My sources had no first-pass edits, so there was nothing to undo and no 'Old' text had moved.\n\ngit diff --stat on my files: docs/reports/sources/chip-3d/app.js 7, models.js 21, shell.html 6, style.css 2, viewer.js 2, and docs/reports/data/2026-10-14-chip-3d/quality-test.mjs 2 (26 insertions, 14 deletions).\n\nTwo edits go beyond the fix texts, both in files I own; either can be dropped:\n- quality-test.mjs:41-42: the click order is swapped, so the test still reaches the cutaway over the dielectric (I02).\n- style.css:3: white-space:nowrap on the zoom buttons, because 'Reset view' wrapped at 360 and 320 px (I10).\n\nnode --check passes on every JS file I own. No JSON was edited, and this work file had no citations.\n\nBuilders: none run. My group's only builder is scripts/build-chip-3d.mjs, which the task says not to run, so docs/reports/chip-3d.html is untouched. For testing only, I bundled the sources into my scratchpad with esbuild, using the same options as the build. The HEAD bundle equals the committed chip-3d.html apart from the license comment. The edited bundle is reproducible (sha256 904199d19b3482bc...), so it is what the real build will produce. esbuild 0.25.11 and three 0.180.0 are now in the checkout's node_modules (installed 17:49 by someone else), so the build can run.\n\nStill to do, for the orchestrator: run node scripts/build-chip-3d.mjs, then redeploy the 3D space (spacesheep @yaroslavvb/et-soc1-in-3d) and its GitHub Pages mirror, and run scripts/check-mirror.py.\n\nThe README in docs/reports/data/2026-10-14-chip-3d/ still describes the page accurately; no change needed. quality-test.mjs itself cannot run on this box: it launches channel 'chrome' with --use-angle=metal, a Mac setup. My browser test covers its clicks.\n\nTest scripts are in /home/yaroslavvb/claude/work/chip-check-1014/fixes/codex-F-3d-work/: i12-test.mjs, ui-test.mjs (30 of 30 checks pass on the edited bundle), reset-fit.mjs, scratch-bundle.mjs, make-test-bundles.sh, compare-head.py. Progress log: /home/yaroslavvb/claude/work/chip-check-1014/fixes/codex-F-3d-progress.md."
+ },
+ "codex:C-pagescript": {
+  "group": "codex-C-pagescript",
+  "items": [
+   {
+    "id": "I01",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:1578-1579 stopFlow: a comment, then #st-live reset to 'No flow is playing.' (guarded, so it is not announced twice)"
+    ],
+    "note": "Part (2) applied exactly as the fix gives it. Part (1), keeping the flow across a phone turn, is the owner's call and was not done. zoom_test T22's st-live observer keeps only lines matching /^Stage /, so the reset does not disturb it."
+   },
+   {
+    "id": "I04",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:2941-2949 new block before `let TOUR = null, TLAST = 0;`: the Summary step's cap says 'Loading the sources…' while LAZY is idle or loading; its draw calls lazyData, then resets the caption and draws factSplit from the full count (and draws nothing if the token is dead or the tour ended)",
+     "docs/reports/sources/chip-diagram.script.js:3433 honest text: 'adds ${dzf.length ? ... : 'facts of its own, counted here once they load'}.'"
+    ],
+    "note": "Applied on top of tour17-fact-count from the first pass; both Old texts matched exactly. LAZY and lazyData come from ladder-core.js, included at script.js:882 before STEPS. The block's `const S` shadows the S() helper only inside the block, and factSplit still resolves the global S. node --check passes."
+   },
+   {
+    "id": "I05",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:426 die.metal: the first group has 5 rows, not 6, under 'M0-M4: the finest wires'"
+    ],
+    "note": "Checked against fact n7.mmp (40 nm pitch for M0 to M4: five levels). Nothing else reads the row count."
+   },
+   {
+    "id": "I15",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-core.js:1384 lazyNote failure line: 'Sources not loaded: the page could not fetch its data file; reloading it tries again.'"
+    ],
+    "note": "Part (b) is I01's fix and part (c) was rejected by the reader. zoom_test.mjs:387's /Sources not loaded/ still matches. The text reaches both pages through ladder-core.js."
+   },
+   {
+    "id": "L04",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:533 p.atom note: 'The rings are a picture, not to scale: electrons are clouds of probability, not little balls on orbits.'"
+    ],
+    "note": "My part only. p.core.4 in build_particles.py belongs to E-ladder and is now in the tree (:273)."
+   },
+   {
+    "id": "L09",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-outer.js:811 the view from below is drawn at bw = 45 * PKK (the 0.9 factor removed)",
+     "docs/reports/sources/ladder-outer.js:795 the section moved down: sy = PKGB.y + PKGB.h + (PH ? 124 : 94)"
+    ],
+    "note": "Old texts matched at the lines shifted by the first pass. The geometry was checked by hand: the bottom view's captions end at y 432 on desktop, and the section's caption now sits at y 464."
+   },
+   {
+    "id": "L10",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-outer.js:809 caption: `in section, heights ×5 (at most ${on('pkg_h')}; layer heights generic)`"
+    ],
+    "note": "The lid's 0.9 mm came from package-section-height in the first pass (:797). pkg_h stays '3.95 mm' (out.package.1: 'at most 3.95 mm tall')."
+   },
+   {
+    "id": "L12",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-outer.js:604 rack panel's lead: 'Where in the room it stands is not recorded: its place here is assumed. ' + the rack's blurb, through kidInfo",
+     "docs/reports/sources/ladder-outer.js:608 rack label: PH ? 'the rack' : 'rack, place assumed'",
+     "docs/reports/sources/ladder-outer.js:622 warehouse lead: 'Its stair climbs to the upper floor at the shop end, most likely the lab.'",
+     "docs/reports/sources/ladder-outer.js:629 wood shop lead: 'The lab is most likely above it.'",
+     "docs/reports/sources/ladder-outer.js:662 section label: PH ? 'lab, most likely' : 'the lab, most likely'"
+    ],
+    "note": "Checked against ladder.json: s45.9 (the lab is upstairs, per the owner), s45.14 (which room is inferred) and s45.6's note (the rack's place is not recorded)."
+   },
+   {
+    "id": "L16",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:620 p.electron note: 'It is round: the centre of its charge sits within ${on('el_edm')} of its centre of mass (the limit on its dipole moment). That limits its shape, not its size.'"
+    ],
+    "note": "My part only. p.electron.4 in build_particles.py belongs to E-ladder and is now in the tree (:382)."
+   },
+   {
+    "id": "L17",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:576 the gluon field's lead: 'The three quarks\\' own masses add up to about 1% of the proton\\'s.'"
+    ],
+    "note": "My part only. p.quark.4 belongs to E-ladder and is now in the tree (build_particles.py:353)."
+   },
+   {
+    "id": "L18",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:590 'weigh ${on('qk_u')} MeV/c² (up) and ${on('qk_d')} MeV/c² (down)'"
+    ],
+    "note": "My part only. E-ladder's parts are now in the tree: pr_m in build_ladder.py (:233), and p.quark.3 and p.quark.6 in build_particles.py (:351, :355)."
+   },
+   {
+    "id": "L20",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:681 'nearly every dopant alone in a silicon site gives its electron up.'"
+    ],
+    "note": "My part only. E-ladder's parts are now in the tree: el.kt and dope.donor-acceptor in build_process.py (:387, :335), p.dopant.2 in build_particles.py (:241), and the optional research-process.md:197."
+   },
+   {
+    "id": "L21",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:3451 electrons table, row 1: 'An \"off\" transistor\\'s channel at any instant (the chip\\'s average at 80 °C)'"
+    ],
+    "note": "Rows 2 and 8 and the lib.channel note were already done by electrons-table-labels in the first pass."
+   },
+   {
+    "id": "L23",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:652 p.planck note: `From here to the observable universe's diameter is ${on('pl_617')}.`"
+    ],
+    "note": "pl_617 is p.planck.5's '61.7 powers of ten', which p.planck.5 gives to the diameter."
+   },
+   {
+    "id": "L24",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-outer.js:316 phone: 'one light-day from Earth' at c.y - 236, plus 'on 18 Nov 2026 (off the frame)' at c.y - 210",
+     "docs/reports/sources/ladder-outer.js:317 desktop: 'one light-day from Earth' at c.y - 322, plus 'on 18 Nov 2026 (off the frame)' at c.y - 300"
+    ],
+    "note": "My part only. The solar blurb in build_outside.py belongs to B-deepzoom and is now in the tree (:498)."
+   },
+   {
+    "id": "R01",
+    "status": "already-applied",
+    "changes": [],
+    "note": "Nothing to edit in the repository. chip-diagram.meta.json's description is current ('eleven data flows ... a 17-step tour') and parses. The Versions item and the byline are versions-stale-14-oct's, from the first pass (body.html:501, :687). What is left is a deploy-time step for whoever deploys (see needs_other_groups)."
+   },
+   {
+    "id": "T05",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:1147 COMPS.inferred: 'the routes' turning order' becomes 'the routes of all packets but the two kinds ${src('timed on 29 September', 'L104')} (a load's reply and a store's data, between scratchpads)'"
+    ],
+    "note": "routing-order-measured-on-two-cards was already applied in the first pass. src() is the module-level helper at script.js:1003. L104 and the TensorSend caveat are unchanged."
+   },
+   {
+    "id": "T09",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/chip-diagram.script.js:1087 COMPS.dram: '${n('dram_gb')} on aifoundry2 and aifoundry3 (${n('dram_gb_a1c1')} on aifoundry1 card 1),'",
+     "docs/reports/sources/chip-diagram.script.js:1088 K('dram_gb', 'on aifoundry2 and aifoundry3')"
+    ],
+    "note": "My part only (step 3). I checked the evidence myself. Every aifoundry1-c1 info.err prints 'DRAM size (B): 17085497344', which is 16 GiB less 90 MiB. aifoundry2 and aifoundry3 print 34265366528. n('dram_gb_a1c1') needs A1's N row, which is now in the tree (build_facts.py:666); without it n() would print '?'. A1's and D's steps 1, 2 and 4-6 are all present in the tree."
+   },
+   {
+    "id": "T13",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-circuits.js:655 lib.powerfet sub: 'when the gates are on, electrons flow straight down, from the source on top to the drain underneath'",
+     "docs/reports/sources/ladder-circuits.js:676 arrow label: 'electrons, down; current, up'",
+     "docs/reports/sources/ladder-inner.js:329 code comment: 'crossing from source to drain; off: almost none, and the leak'"
+    ],
+    "note": "My part only (steps 2, 3 and 6). E-ladder's steps 1, 4 and 5 are now in the tree (build_ladder.py:125, build_circuits.py:268 and :166)."
+   },
+   {
+    "id": "T14",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:209 GATE() say: 'the n-type transistor is off' and '... is on'",
+     "docs/reports/sources/ladder-inner.js:237 devring label: 'One n-type transistor: a gate over two fins'",
+     "docs/reports/sources/ladder-inner.js:239 ring._info title: 'One n-type transistor'",
+     "docs/reports/sources/ladder-inner.js:250 lib.finfet off note: 'almost no electrons under it; the n-type transistor is off.'",
+     "docs/reports/sources/ladder-inner.js:305 lib.fin off note: 'almost nothing flows along it.'"
+    ],
+    "note": "My part only (steps 1-5). GATE() serves lib.finfet, lib.fin and lib.channel, and all three draw n-type devices. The 'one transistor' label at :241 stays, as the fix says. E-ladder's step 6 is now in the tree (build_ladder.py:125)."
+   },
+   {
+    "id": "T16",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-circuits.js:107 where a column has no carry cell at a level, it now passes straight through as a wire (the floating dot is gone)",
+     "docs/reports/sources/ladder-circuits.js:116 each bit's own p: a thin wire from its g p box (X(i)+30, y0+56) to its sum box (yS)",
+     "docs/reports/sources/ladder-circuits.js:111 the 'sum' part's lead names the thin line"
+    ],
+    "note": "Applied on top of s08-ks-adder-cin-only-to-s0 from the first pass (:97, :118-120). All three Old texts matched exactly."
+   },
+   {
+    "id": "T17",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-inner.js:41 full adder: a and b run level through the carry taps at x=0 and 40, then jog at x=150 to the XOR's pins",
+     "docs/reports/sources/ladder-inner.js:134-135 flip-flop: CK runs from a junction at (210,460) to the inverter's input (234,380); const ckb, and its output goes to the master latch's bottom at (290,360)",
+     "docs/reports/sources/ladder-circuits.js:289-290 counter: const ff = KT.flopSym(...); the feedback leaves ff.q",
+     "docs/reports/sources/ladder-circuits.js:309 comparator: the tree wires start at each XNOR's output pin (X+38,150)",
+     "docs/reports/sources/ladder-circuits.js:346 PLL: the control voltage runs on a line at y+30 under the ring, with a tap into each inverter that ends on the triangle at y-3.8",
+     "docs/reports/sources/ladder-circuits.js:348-349 PLL: const vi; each inverter's output wired to the next one's input; feedback from vi[4].out through x=656 to vi[0].in",
+     "docs/reports/sources/ladder-circuits.js:380 ROM: each bitline runs to (bx,600) and then into its inverter's input (bx+14,600)",
+     "docs/reports/sources/ladder-circuits.js:390-391 ROM: the output group box is 100 wider; the inverters sit at bx+30"
+    ],
+    "note": "My part only (fixes 1-6). Pin geometry was checked against invSym, andSym and flopSym in circuitkit.js and in memory-levels.script.js, which the memory levels page's ML.kit uses, so both pages resolve .in, .out and .q. D-memlevels' fix 7 (the DQ trace to 720) is now in the tree (memory-levels.script.js:5191, circuitkit.js:1372). node --check passes."
+   },
+   {
+    "id": "T18",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-circuits.js:365 enc label: 'each an XOR tree over the other bits marked in its row'",
+     "docs/reports/sources/ladder-circuits.js:366 the matrix's lead: the first four rows cover data bits; the fifth is the overall parity over all eight data bits and the first four check bits",
+     "docs/reports/sources/ladder-circuits.js:369 syndrome: 'all zeros means no error detected'"
+    ],
+    "note": "Checked by hand: with d3 alone set, c0..c3 = 1,1,1,0, so c4 = 0, while the data-only XOR gives 1. The fix is right. The matrix's dots are unchanged."
+   },
+   {
+    "id": "T19",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-circuits.js:164 code comment: 'per bit, X, 2X or 0 (an AND-OR on two select lines)'",
+     "docs/reports/sources/ladder-circuits.js:167 sel label: 'per bit, a multiplexer picks X, 2X (X shifted one place) or 0'",
+     "docs/reports/sources/ladder-circuits.js:168 selectors' lead: two select lines, neither for a 0 row, so the gate is an AND-OR rather than a plain 2:1 multiplexer"
+    ],
+    "note": "My part only. tb.booth in build_circuits.py belongs to E-ladder and is now in the tree (:43)."
+   },
+   {
+    "id": "T20",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/ladder-circuits.js:327 lib.fifo 'cmp' part gets its own panel, {title: 'Full or empty', lead: the extra pointer bit; equal in every bit means empty, equal but for the extra bit means full; an equality comparator plus an XOR, facts: ['tb.fifo']}"
+    ],
+    "note": "My part only. cgrp takes o.info as the panel and still claims the lib.cmpeq zoom. tb.fifo with the Cummings source belongs to E-ladder and is now in the tree (build_circuits.py:74-77). The PCIe lane is unchanged (the reader's decision), and the synchroniser was already covered in the first pass."
+   }
+  ],
+  "builders_run": [],
+  "needs_other_groups": [
+   "E-ladder L04: build_particles.py p.core.4: '...the radii here are each shell's most likely distance from the nucleus.' Present in the tree, :273.",
+   "E-ladder L16: build_particles.py p.electron.4: 'so the centre of its charge sits within ... m of its centre of mass (dipole moment divided by its charge). That limits its shape, not its size.' Present, :382.",
+   "E-ladder L17: build_particles.py p.quark.4: '(MS-bar at 2 GeV): the masses of all the quarks in it, the sea ... give 9% (the quark condensate term)'. Present, :353.",
+   "E-ladder L18: build_ladder.py 'pr_m': ('p.nucleon.3', '938.272 MeV/c^2', '938.272 MeV/c²') (present, :233); build_particles.py p.quark.3 and p.quark.6 in MeV/c^2 (present, :351, :355).",
+   "E-ladder L20: build_process.py el.kt and dope.donor-acceptor ('alone in a silicon site') (present, :387, :335); build_particles.py p.dopant.2 (present, :241); optional research-process.md:197 (present).",
+   "B-deepzoom L24: build_outside.py solar blurb: 'On 18 November 2026 Voyager 1, the farthest spacecraft, is a full light-day from Earth.' Present, :498. Then run build_outside.py.",
+   "A1-archfacts T09: facts-arch.json dram.capacity (statement, kind 'measured', cards, source, note) and build_facts_arch.py kept in step (present, :1658 and :547). Chip build_facts.py N row ('dram_gb_a1c1', 'dram.capacity', 16, '16 GB', '') (present, :666); chip-diagram.script.js:1087 now calls n('dram_gb_a1c1').",
+   "D-memlevels T09: build_facts_dram.py dram.org.capacity and dram.org.part (present, :197, :222); memory-levels build_facts.py N row dr_gb_a1c1 and ask-dram-part's question (present, :1139, :1533); memory-levels.script.js :5251-5252, :5290, :6124 (present). Then run make_circuitkit.py and its --check.",
+   "E-ladder T13: build_ladder.py lib.finfet blurb ('they flow from source to drain (the current, by convention, from drain to source)') (present, :125); build_circuits.py lib.powerfet blurb and tb.powerfet (present, :268, :166). Rerun build_circuits.py.",
+   "E-ladder T14: build_ladder.py lib.finfet blurb: 'in an n-type transistor, at 0 V the path along the fin is shut'. Present, :125.",
+   "D-memlevels T17 fix 7: memory-levels.script.js DQ trace wire(gt, [[210, 180], [720, 180]], 'bus') (present, :5191), carried into circuitkit.js by make_circuitkit.py (present, circuitkit.js:1372). Run make_circuitkit.py --check.",
+   "E-ladder T19: build_circuits.py tb.booth: 'a multiplexer choosing x(j), x(j-1) or 0'. Present, :43. Rerun build_circuits.py.",
+   "E-ladder T20: build_circuits.py tb.fifo: equal pointers mean empty or full, told apart by the extra pointer bit; source adds Cummings, SNUG 2002, §2.2. Present, :74-77. Rerun build_circuits.py.",
+   "Deployer R01: at the next deploy of et-soc1-chip-diagram (space 6cfdea5c-a598-438e-bd1a-613093ede523), pass docs/reports/sources/chip-diagram.meta.json's description in the deploy's description field, replacing the stored 27 Sep text (six data flows, a 12-step tour), then check that the space's listing shows it.",
+   "The chain (after all fixers): rebuild both pages. The ladder-*.js edits (I05, I15, L04-L24, T13-T20) reach both pages; I01, I04, L21, T05 and T09's script edits reach the chip page."
+  ],
+  "notes": "I applied all 25 items: 24 in my files, and R01 needs no repository edit, only a step at the next deploy. There was no progress log for this pass and no item's old text had been replaced yet, so this run started from the beginning; the log is at /home/yaroslavvb/claude/work/chip-check-1014/fixes/codex-C-pagescript-progress.md. Every item's 'Old' text still matched the current text exactly, with only line numbers shifted by the first pass, so no item had to be adapted. I undid nothing from the first pass.\n\nThis pass touched five files under /home/yaroslavvb/claude/et-soc1-prototyping/docs/reports/sources/: chip-diagram.script.js, ladder-core.js, ladder-inner.js, ladder-outer.js and ladder-circuits.js. git diff --stat on all owned files, both passes together: 8 files changed, 183 insertions(+), 132 deletions(-).\n\nChecks:\n- This group owns no live builder, so none was run; I did not run the page builds or either build_facts.py.\n- No JSON was edited; chip-diagram.meta.json, unedited, parses.\n- node --check passes on all nine owned JS files (C-pagescript-work/jscheck.sh).\n- HEAD has moved from bd8e731a to 18928367, but none of the commits since touch my files, so git diff still shows only the fixers' work.\n- Tests I read: zoom_test.mjs:387's /Sources not loaded/ still matches I15's new text, and T22's st-live observer only keeps /^Stage / lines.\n- Other groups' parts: as of the end of this run, every edit these items need outside my files is in the tree (checked with codex-C-pagescript-work/others.py). That includes A1's N row dram_gb_a1c1, which the chip script's new n('dram_gb_a1c1') needs."
+ },
+ "codex:G-small": {
+  "group": "codex-G-small",
+  "items": [
+   {
+    "id": "T09",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/facts-arch.json:1658 (dram.capacity statement), :1661 (source), :1662 (kind spec -> measured), :1663 (card -> 'aifoundry2, aifoundry3, aifoundry1-c1'), :1664 (note); edited by script, JSON round-trips with indent=1",
+     "docs/reports/data/2026-09-27-chip-diagram/research/build_facts_arch.py:546-552 (same fact in the record builder, card=CARDS3; builder exec'd to a scratch OUT agrees with facts-arch.json on all 164 facts)",
+     "docs/reports/data/2026-09-27-chip-diagram/build_facts.py:666 (new N row ('dram_gb_a1c1', 'dram.capacity', 16, '16 GB', ''))",
+     "docs/reports/data/2026-09-28-memory-levels/research/build_facts_dram.py:196-204 (dram.org.capacity, as the fix gives it, et-measured, card=C3 + ' (driver report)') and :222 (dram.org.part '(its maker and part number)')",
+     "docs/reports/data/2026-09-28-memory-levels/research/facts-dram.json:201, 204-206 (dram.org.capacity statement, source, kind, card) and :240 (dram.org.part statement), regenerated by build_facts_dram.py; nothing else changed",
+     "docs/reports/data/2026-09-28-memory-levels/build_facts.py:1139 (new N row ('dr_gb_a1c1', 'dram:dram.org.capacity', 16, '16 GB', '')) and :1533 (ask-dram-part question 'The part's maker and number, die density, ...')",
+     "docs/reports/sources/memory-levels.script.js:5251 (DRAM overview 'on aifoundry2 and aifoundry3 (${n('dr_gb_a1c1')} on aifoundry1 card 1)'), :5252 (K('dr_gb', 'on aifoundry2 and aifoundry3')), :5290 ('2 GB per channel on aifoundry2 and aifoundry3' and 'the part's maker and number'), :6124 (summary row: 'LPDDR4X;' and '32 GB on aifoundry2 and aifoundry3 (16 GB on aifoundry1 card 1);')",
+     "docs/reports/sources/circuitkit.js:1534-1535, 1573 (regenerated by make_circuitkit.py; --check passes)",
+     "The reason's note on the first pass's tRFC text, applied to the current text: docs/reports/data/2026-09-28-memory-levels/build_facts.py:278 (comment), :285-287 (gen.jedec-match amendment now 'The refresh is the exception on the 32 GB cards: ...' and 'the cards' exact part is not known (dram.org.part)')",
+     "docs/reports/sources/memory-levels.script.js:5302 (timing panel: 'except the all-bank refresh on the 32 GB cards: JEDEC asks ...'), carried to circuitkit.js:1585"
+    ],
+    "note": "All of my parts applied. I checked the evidence before editing. A census of every raw log under docs/reports/data finds 'DRAM size (B)' = 17,085,497,344 on aifoundry1-c1 (2,444 dumps) and 34,265,366,528 on aifoundry2 and aifoundry3 (3,173 dumps), with none for card 0. Each is 90 MiB short of 16 and 32 GiB. mem_controller.c:389-420 is the MR8 switch. Its hard-coded 16 GB at :672 is only in the #else of '#if !(FAST_BOOT || TEST_FRAMEWORK)'. mm_config.c:74-92 and the V3 PDF's p.1 wording '32GB (Micron part) v3 card Bringup Planning' are as quoted. Every N text is found: '32 GB' and '16 GB' in both capacity statements, and '380 ns' and '3.904 us' in the amended gen.jedec-match. The chip build picks up n('dr_gb_a1c1') from circuitkit.js on its own (the ML_NUM scan). buildchain.sh runs the memory levels' build_facts.py before the chip's in every round, so that number will exist. Step 3 (chip-diagram.script.js:1087-1088) belongs to C-pagescript and was already in the tree when I checked. Step 7 is the chain. One change goes beyond the fix field. The reason asks that the first pass's tRFC text (jedec-trfcab-16gb, dram-jedec-trfc-280) say 'on the 32 GB cards', because aifoundry1 card 1's 8 Gb channels meet JEDEC's 280 ns. That text is now in my files, so I added that scoping. Following T09's intent, I also changed 'the card's exact Micron part' to 'the cards' exact part'. Left as is, as 32 GB-card descriptions the reason says may stay: the deep zoom's 'four packages of 8 GB' (build_inside.py:802), dram.org.geometry's 'matching the capacity', and out.card.*."
+   },
+   {
+    "id": "T07",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/facts-numbers.json:1026 (mm-perw statement now 'Board GFLOP/s per W (GOP/s per W for int8), L2 matmul fp32 / fp16 / int8: ...'; JSON round-trips with indent=1)",
+     "docs/reports/data/2026-09-27-chip-diagram/research/build_facts_numbers.py:374 (same text in the record builder)"
+    ],
+    "note": "Checked: 71.77 TOP/s over 61.2 W is 1,173 GOP/s per W, so the int8 column is in integer operations. No N row quotes mm-perw. Value, unit, source and note are unchanged. The record builder (exec'd to a scratch OUT) gives the same mm-perw statement as the JSON. Its source line differs (:419 against the JSON's :454) because it reads 05-claims.md from an old checkout (/home/yaroslavvb/claude/et-soc1-pages) while the first pass remapped the JSON. That difference predates this pass and is shared by 35 facts."
+   },
+   {
+    "id": "T08",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/build_facts_v2.py:312 (dr_mx from cycles_per_op_max_based)",
+     "docs/reports/data/2026-09-27-chip-diagram/research/build_facts_v2.py:323-331 (mm.dram statement and source as the fix gives them)",
+     "docs/reports/data/2026-09-27-chip-diagram/research/build_facts_v2.py:333-335 (comment and two reciprocity asserts)",
+     "docs/reports/data/2026-09-27-chip-diagram/research/build_facts_v2.py:336 (num mm_dram_op from dr_mx)",
+     "docs/reports/data/2026-09-27-chip-diagram/research/facts-v2.json:261 (mm.dram statement), :264 (source), :597-598 (num mm_dram_op 16278, '16,132-16,278'), regenerated"
+    ],
+    "note": "The builder was a fixed point before the edit. After it, facts-v2.json changes in exactly the three predicted places. The new statement contains the N text '16,132-16,278'. I verified the asserts (8,192 x 1,024 x 600 MHz over 16,278.312 and 16,131.866 cycles gives 0.30919 and 0.31200 TFLOP/s, against 0.309 and 0.3119) and the cited lines (reduce.py:311-312, 325-326, 432-446; mmbench.cpp:281-282, 288-290, 302-304). Flow G's table and callout (chip-diagram.script.js:2169, 2255) read N.mm_dram_op, so no script edit is needed."
+   },
+   {
+    "id": "L24",
+    "status": "applied",
+    "changes": [
+     "docs/reports/data/2026-09-27-chip-diagram/research/build_outside.py:497-498 (solar blurb: 'On 18 November 2026 Voyager 1, the farthest spacecraft, is a full light-day from Earth.')",
+     "docs/reports/data/2026-09-27-chip-diagram/research/outside.json:735 (blurb, regenerated; nothing else changed, research-outside.md unchanged)"
+    ],
+    "note": "My part, build_outside.py, is applied. The builder was a fixed point before the edit. The two label edits in ladder-outer.js:316-317 belong to C-pagescript and were already in the tree. I left the research-only draw text at build_outside.py:514 ('an arrow off the frame \"Voyager 1: 173 au, one light-day\"') as is, as the fix does. No build reads it and it is on no page."
+   },
+   {
+    "id": "T15",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:1839 (draw6T: wire(g, [[270, pl.bot.y], [270, nl.top.y]]) and wire(g, [[390, pr.bot.y], [390, nr.top.y]]))",
+     "docs/reports/sources/memory-levels.script.js:1902 (buildCell sense amp: wires 240 and 420 from sp.bot.y to sn.top.y)",
+     "docs/reports/sources/memory-levels.script.js:5065 (buildDCell sense amp: the same two wires)",
+     "docs/reports/sources/circuitkit.js:303, 366, 1311 (regenerated; --check passes)"
+    ],
+    "note": "Each 'Old' text occurred once and matched exactly. mosV's leads end at y +/- 30, so the gaps are 252-272, 542-562 and 470-490, as the reason says. Nothing in these groups is indexed by child position. node --check passes on both files."
+   },
+   {
+    "id": "T17",
+    "status": "applied",
+    "changes": [
+     "docs/reports/sources/memory-levels.script.js:5191 (item 7, buildDQ: wire(gt, [[210, 180], [720, 180]], 'bus'))",
+     "docs/reports/sources/circuitkit.js:1372 (regenerated; --check passes)"
+    ],
+    "note": "My part is item 7: the trace now reaches the receiver's junction at 720, where dqDrive's sweep already goes. Items 1-2 (ladder-inner.js) and 3-6 (ladder-circuits.js) belong to C-pagescript and were already in the tree when I checked (all six new texts found)."
+   }
+  ],
+  "builders_run": [
+   "python3 docs/reports/data/2026-09-27-chip-diagram/research/build_facts_v2.py (before the T08 edit, a fixed point; after it; and once more at the end, a fixed point)",
+   "python3 docs/reports/data/2026-09-27-chip-diagram/research/build_outside.py (before the L24 edit, a fixed point; after it; and once more, a fixed point)",
+   "python3 docs/reports/data/2026-09-28-memory-levels/research/build_facts_dram.py (before the T09 edit, a fixed point; after it; and once more, a fixed point)",
+   "python3 docs/reports/data/2026-09-27-chip-diagram/research/make_circuitkit.py and --check (after T15, T17 and T09; once more at the end: unchanged, --check passes)",
+   "Final fixed-point run, once each, outputs unchanged: research/build_layout_facts.py, research/make_asks.py, research/build_inside.py, memory levels' research/build_facts_l1.py, _l2.py, _l3.py, _scp.py",
+   "Record builders exec'd with OUT redirected to the work dir (nothing in the repository written), to check they agree with the JSON: research/build_facts_arch.py (agrees on all 164 facts) and research/build_facts_numbers.py (mm-perw statement agrees)"
+  ],
+  "needs_other_groups": [
+   "T09 step 3 (C-pagescript): docs/reports/sources/chip-diagram.script.js:1087 '${n('dram_gb')} on aifoundry2 and aifoundry3 (${n('dram_gb_a1c1')} on aifoundry1 card 1),' and :1088 K('dram_gb', 'on aifoundry2 and aifoundry3'). Already in the tree when checked.",
+   "L24 (C-pagescript): docs/reports/sources/ladder-outer.js:316 (phone) and :317 (desktop), the labels 'one light-day from Earth' / 'on 18 Nov 2026 (off the frame)'. Already in the tree when checked.",
+   "T17 items 1-6 (C-pagescript): docs/reports/sources/ladder-inner.js:41 (full adder), :134-135 (flip-flop clock); docs/reports/sources/ladder-circuits.js:284-285 (counter), :304 (comparator), :341-344 (PLL), :375 and :385-386 (ROM). All six new texts found in the tree when checked.",
+   "The chain (not run by me, per the brief): buildchain.sh, i.e. both build_facts.py files (the memory levels' before the chip's, as buildchain.sh orders them, so that the chip build can import dr_gb_a1c1) and both page builds. This carries T07, T08, T09, T15, T17 and L24 into facts.json, ladder-data.json and the two HTML pages."
+  ],
+  "notes": "The earlier run left no progress log and none of the six items in the tree, so this run did all six from the start. Progress is in /home/yaroslavvb/claude/work/chip-check-1014/fixes/codex-G-small-progress.md. Scripts and snapshots are in /home/yaroslavvb/claude/work/chip-check-1014/fixes/codex-G-small-work/.\n\nHEAD is now 18928367, not bd8e731a: other sessions committed on main. Those commits touch none of the lines these items edit. No first-pass change was undone. Every 'Old' text matched the current tree. The one first-pass text I adjusted is the gen.jedec-match amendment and its panel line (T09's tRFC note, see T09).\n\nClosing checks:\n- Every live builder I own was run once more and is a fixed point: build_layout_facts, build_facts_v2, make_asks, build_inside, build_outside, the memory levels' build_facts_{l1,l2,l3,dram,scp}, and make_circuitkit, whose --check passes.\n- Every edited Python file parses, including both build_facts.py files, which were not run.\n- Every edited or regenerated JSON parses and round-trips with json.dump(indent=1, ensure_ascii=False): facts-arch.json, facts-numbers.json, facts-v2.json, outside.json, facts-dram.json.\n- node --check passes on memory-levels.script.js and circuitkit.js.\n\ngit diff --stat over the 14 files this pass touched shows 714 insertions and 531 deletions. That figure includes the first pass's changes to the same files; this pass's own lines are the ones listed per item. This work list has no citations, so there are no remaps or rewrites."
+ }
+}

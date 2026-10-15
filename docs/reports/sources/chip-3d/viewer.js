@@ -462,6 +462,8 @@ export function createViewer({ canvas, overlay, onPick = () => {}, onViewChange 
   }
 
   function keyDown(event) {
+    // Browser and system shortcuts (Ctrl/Cmd with + or -, Ctrl/Cmd+R, Alt+arrows) stay the browser's.
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
     let handled = true;
     switch (event.key) {
       case 'ArrowLeft': orbit(18, 0); break;

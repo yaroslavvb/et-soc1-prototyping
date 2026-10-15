@@ -169,7 +169,7 @@ fact("l3.sram-rail", "voltage",
      "The SRAM rail sits at 705 mV (703-707 mV on the die at idle, per shire), well above the minion rail (517-521 mV) "
      "and the mesh rail (483-486 mV).",
      705, "mV",
-     f"{CLAIMS}:41 (docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json); telemetry fields reg_mv.sram, die_mv.sram",
+     f"{CLAIMS}:49 (docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json); telemetry fields reg_mv.sram, die_mv.sram",
      "et-measured", "aifoundry2", PT)
 
 fact("l3.rail-vs-trim", "voltage",
@@ -186,7 +186,7 @@ fact("l3.hv-region", "voltage",
      "low-voltage rail, and the router side of each crossing is low voltage.",
      None, None,
      f"{MSD} pdf p.10 §3.1 and pdf p.18 §5; external/core-et/rtl/libs/mems_and_fifos/vcfifo_nsip_brdg2rtr.v:9 "
-     "(via docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:74)",
+     "(via docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:81)",
      "et-spec", None, HPM + "#method",
      "Which rail feeds the shire-cache logic (the SRAM rail or another) is in the Power Spec, which is not in the drop: u.rail-of-logic.")
 
@@ -195,7 +195,7 @@ fact("l3.clock", "clocks",
      "180 degrees; the errata: every area of a minion shire except the NoC uses the same clock), so 600 MHz on these "
      "cards; the mesh runs on clk__noc, 400 MHz.",
      600, "MHz",
-     f"{MSD} pdf p.12 Table 2; {ERR} pdf p.42; clk__noc 400 MHz: telemetry mhz.noc (docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl) and SYNTHESIS.md:72",
+     f"{MSD} pdf p.12 Table 2; {ERR} pdf p.42; clk__noc 400 MHz: telemetry mhz.noc (docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl) and SYNTHESIS.md:79",
      "et-spec", CARDS3, HIER + "#load-latency-against-working-set-size")
 
 fact("l3.clock-gating", "circuit",
@@ -244,7 +244,7 @@ fact("l3.ports", "ports",
      "per cycle each), 4 to_l3 master ports and 1 to_sys master port (to memory). AXI channels cross into the NoC through "
      "voltage-changing FIFOs with 2-stage synchronizers.",
      4, "L3 slave ports",
-     f"{SCS} pdf p.8, pdf p.11 (VCFIFO, 2-stage synchronizers), pdf p.32-34 §2.3-2.4 ('four for the L3 mesh and one for the SYS mesh'); {CEM}shirecache_pkg.sv:138-139",
+     f"{SCS} pdf p.8, pdf p.11 (VCFIFO, 2-stage synchronizers), pdf p.32-34 §2.3-2.4 ('four for the L3 mesh and one for the SYS mesh'); {CEM}shirecache_pkg.sv:138-140",
      "et-spec", None, HPM + "#lanes")
 
 fact("l3.lane", "ports",
@@ -254,8 +254,8 @@ fact("l3.lane", "ports",
      f"{CEM}shirecache_mesh_master.sv:132-153 (req_bank_id = remote SCP ? PA[7:6] : L3 bank from shirecache_pipe_l3_swizzle_get); "
      f"{SCS} pdf p.100 (the swizzle fields are used 'by the incoming L3 distribute design to select the correct bank')",
      "et-spec", None, HPM + "#lanes",
-     "core-et-main is Ainekko's co-simulated translation of the CORE-ET RTL. Heat per millimetre's lane rule (PA[7:6], chip "
-     "fact L103) is right for its remote-scratchpad flows; for L3 lines the lane is the home bank.")
+     "core-et-main is Ainekko's co-simulated translation of the CORE-ET RTL. Heat per millimetre's lane rule (PA[7:6]) is "
+     "right for its remote-scratchpad flows; for L3 lines the lane is the home bank, as chip fact L103 also says since 14 Oct 2026.")
 
 fact("l3.reqq", "pipeline",
      "Each bank has a 64-entry request queue, up to 21 entries of it reserved for L3-slave requests; two entries can be "
@@ -395,14 +395,14 @@ fact("l3.hop", "mesh",
      "Each mesh hop adds 12 cycles to the round trip at 600 MHz: 20 ns, which is 16 cycles at 800 MHz. The same 12.00 per "
      "hop holds for L3 hits (11.99), remote scratchpad (12.00) and TensorSend (12.02).",
      20, "ns per hop, round trip",
-     f"{CLAIMS}:415, 423, 392; workloads/memprobe/report_template.html:881-884",
+     f"{CLAIMS}:434, 445, 446; workloads/memprobe/report_template.html:879-883",
      "et-measured", CARDS3, NOC + "#where-the-shires-are-a-6-6-mesh")
 
 fact("l3.hop-noc-cycles", "mesh",
      "20 ns per hop round trip is 10 ns, or 4 cycles of the 400 MHz NoC clock, per hop each way, if request and reply "
      "take equal time.",
      4, "NoC cycles per hop each way",
-     "l3.hop with l3.clock; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:76",
+     "l3.hop with l3.clock; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:83",
      "et-derived", None, HPM + "#method",
      "A published measurement (Chang) reports 3 cycles per direction at an unstated clock; not reconciled.")
 
@@ -427,20 +427,20 @@ fact("l3.route", "mesh",
      "too); whether a request turns x or y first, which of the nine router layers L3 traffic uses and how wide a link is "
      "are not documented in the drop.",
      None, None,
-     f"{CLAIMS}:392; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:66-68, 75",
+     f"{CLAIMS}:446; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:73-75, 82",
      "et-measured", CARDS3, NOC + "#what-the-numbers-say")
 
 fact("l3.flits", "mesh",
      "A read request is about 75-85 bits (AXI AR); the reply is one 512-bit data beat plus RID/RRESP/RLAST (524-534 bits) "
      "and a NetSpeed header of unknown width. Only the reply carries the line.",
      512, "data bits per reply",
-     "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:64, 77 (external/core-et/rtl/inc/axi_defines.vh:39, 43, 61, 69)",
+     "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:71, 84 (external/core-et/rtl/inc/axi_defines.vh:39, 43, 61, 69)",
      "et-spec", None, HPM + "#lanes")
 
 fact("l3.mesh-rail", "voltage",
      "The mesh (routers, links, NetSpeed bridges) runs at 485 mV set (484 at the die) and 400 MHz on these cards.",
      485, "mV",
-     "SYNTHESIS.md:72-74 (telemetry reg_mv.noc, die_mv.noc, mhz.noc)",
+     "SYNTHESIS.md:79-81 (telemetry reg_mv.noc, die_mv.noc, mhz.noc)",
      "et-measured", CARDS3, HPM + "#method")
 
 # ---------------------------------------------------------------- measured bandwidth and energy
@@ -496,12 +496,13 @@ fact("l3.energy-per-load", "energy",
      "Superseded by the energy manual for totals; still the only per-load rail split with a local home.")
 
 fact("l3.wire-energy", "energy",
-     "A random bit costs 36.2 fJ per mm on the mesh rail over free links (46.7 on board power). A 64 B reply over one "
-     "3.72 mm hop is then about 69 pJ on the mesh rail (1.1 pJ/B per hop), close to the 47-59 pJ per hop of l3.energy-per-load.",
-     36.2, "fJ per random bit-mm",
-     f"{CLAIMS}:350, 457 (docs/reports/data/2026-09-24-wire-energy/report.json headline['uncontended/noc_rail']); hop length docs/findings/05-claims.md:349",
-     "et-derived", "aifoundry2, aifoundry3", HPM,
-     "The per-hop product (512 bits x 36.2 fJ x 3.72 mm) is computed here and ignores the request and headers.")
+     "A random bit costs 36.7 fJ per mm on the mesh rail over free links (47.4 on board power; three cards). A 64 B reply over one "
+     "3.72 mm hop is then about 70 pJ on the mesh rail (1.1 pJ/B per hop), close to the 47-59 pJ per hop of l3.energy-per-load.",
+     36.7, "fJ per random bit-mm",
+     f"{CLAIMS}:362, 482 (docs/reports/data/2026-09-24-wire-energy/report.json headline['uncontended/noc_rail']); hop length docs/findings/05-claims.md:361",
+     "et-derived", CARDS3, HPM,
+     "The per-hop product (512 bits x 36.7 fJ x 3.72 mm) is computed here and ignores the request and headers. The two-card "
+     "(E32) value, still in the claims ledger's row, was 36.2 fJ (46.7 on board power).")
 
 fact("l3.gather", "energy",
      "A gather that goes straight to the home slice (fgwg.ps, random lines, 4 KB per hart) costs 1.53 nJ per 4-byte "
@@ -610,8 +611,8 @@ fact("g.icg", "circuit (generic)",
 
 fact("g.crossing", "circuit (generic)",
      "GENERIC. A voltage and clock crossing: a level shifter (cross-coupled PMOS over an NMOS differential input pair) "
-     "lifts or drops the signal swing, and a 2-flip-flop synchroniser (as the spec's VCFIFO uses) samples it in the "
-     "receiving clock, costing 2-3 receiving-clock cycles.",
+     "lifts or drops the signal swing, and a 2-flip-flop synchroniser (as the spec's VCFIFO uses) samples the FIFO's "
+     "gray-coded counts in the receiving clock, costing 2-3 receiving-clock cycles.",
      2, "synchroniser stages",
      f"textbook; the 2 stages are et-spec ({SCS} pdf p.11)", "generic", None, None)
 
@@ -620,12 +621,13 @@ fact("g.router", "circuit (generic)",
      "virtual-channel and switch allocators (arbiters), a crossbar of multiplexers, and output drivers onto the link; each "
      "link is a bundle of wires broken by repeaters (inverter pairs) every few hundred microns.",
      None, None, "textbook (Dally and Towles, Principles and Practices of Interconnection Networks)", "generic", None, None,
-     "ET routers have 8 ports and 4 VC slots each, 9 main layers per stop (chip fact L105; SYNTHESIS.md:67-68).")
+     "ET routers have 8 ports and 4 VC slots each, 9 main layers per minion shire's stop, most likely 7 at a memory "
+     "shire's (chip fact L105; SYNTHESIS.md:74-75).")
 
 fact("g.wire-energy", "circuit (generic)",
      "GENERIC. A wire's switching energy is about C x V^2 per 0-to-1 transition (C about 0.2 pF/mm), so random data (a "
      "transition on about half the bits) costs several times zeros; repeaters add to it.",
-     None, None, "textbook; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:135-147 (literature table)", "generic", None, None)
+     None, None, "textbook; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:142-154 (literature table)", "generic", None, None)
 
 fact("g.leakage", "circuit (generic)",
      "GENERIC. Every SRAM cell leaks all the time: sub-threshold current flows through its off transistors (one pull-up "
@@ -681,7 +683,7 @@ fact("u.zero-share", "energy (unknown)",
 fact("u.noc-hop", "mesh (unknown)",
      "UNKNOWN. The router pipeline per hop (4 NoC cycles each way is derived), which of the 9 main-NoC layers carries L3 "
      "requests and replies, the dimension order, and the flit width.",
-     None, None, "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:66-68, 75-76", "unknown", None, None)
+     None, None, "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:73-75, 82-83", "unknown", None, None)
 
 fact("u.slice-floorplan", "floorplan (unknown)",
      "UNKNOWN. Where the four banks (and so the L3 slice's quarters) sit in the 3.7 mm shire tile relative to the mesh "
@@ -746,7 +748,7 @@ SEQ = {
          "facts": ["l3.hit-way-read", "l3.panels", "l3.mru-write", "l3.zero-state", "l3.no-rbuf", "l3.spec-latency"]},
         {"n": 8, "block": "home H to R: reply over the mesh",
          "action": "AXI read response (512 data bits + ~12-22 control) through the VCFIFO down to the NoC, hops(R, H) links back, VCFIFO up at R.",
-         "latency": "about 10 ns per hop; the 12 cycles/hop round trip counts steps 4 and 8 together", "energy": "about 69 pJ per line per hop on the mesh rail for random data (l3.wire-energy); 47-59 pJ measured (l3.energy-per-load)",
+         "latency": "about 10 ns per hop; the 12 cycles/hop round trip counts steps 4 and 8 together", "energy": "about 70 pJ per line per hop on the mesh rail for random data (l3.wire-energy); 47-59 pJ measured (l3.energy-per-load)",
          "circuit": [{"element": "link repeaters (inverter pairs)", "action": "toggle with the data; zeros do not toggle", "kind": "generic"},
                      {"element": "router buffers and crossbar", "action": "forward the 512-bit beat", "kind": "generic"}],
          "facts": ["l3.flits", "l3.wire-energy", "l3.mesh-rail"]},
@@ -811,7 +813,7 @@ ASKS = [
      "hub_overlap": "ask-noc-docs"},
     {"id": "ask-l3-lane", "facts": ["l3.lane"],
      "question": "Does the taped-out RTL pick an L3 request's to_l3 lane by the home bank (PA[12:11] under swizzle0), as core-et-main's shirecache_mesh_master.sv:132-153 does, with PA[7:6] only for remote scratchpad?",
-     "settles": "Which of the four mesh lanes an L3 access is drawn on (and corrects chip fact L103 for L3 traffic).",
+     "settles": "Which of the four mesh lanes an L3 access is drawn on (and confirms or corrects chip fact L103, which follows the re-implementation, for L3 traffic).",
      "hub_overlap": None},
     {"id": "ask-l3-noc", "facts": ["u.noc-hop", "l3.hop-noc-cycles", "l3.route"],
      "question": "Per hop, how many NoC cycles does a router take, which of the nine main-NoC layers carry L3 read requests and replies, and do they route x first?",

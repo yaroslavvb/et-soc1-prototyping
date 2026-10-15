@@ -905,6 +905,16 @@ same scales outward and inward, the loop, a way back from every move and no dead
   ladder's facts chain at its fixed point; both spaces redeployed from the committed pages, and the GitHub Pages mirror
   rebuilt. The probes and their numbers, before and after: `docs/reports/data/2026-10-13-jitter/`; the ladder's README,
   "The readout's one look, smoother moves, Studio 45 from its plans".
+- **A correctness check, and Codex's review folded in (14 October, Q115).** The owner: "Do the in-depth check of the
+  chip for correctness ... and apply fixes", then "Go through the [Codex] suggestions/fixes and implement everything which
+  is appropriate." Every fact, panel, flow stage, tour slide and drawing checked against the manuals, the core-et documents
+  and RTL, the firmware and this repository: 97 findings stand (11 major), 2 refuted; 181 drifted line citations settled;
+  Codex's 68 observations: 40 implemented, 7 covered, 4 rejected, 17 left for the owner. The fixes went into the sources
+  (the research builders and JSON, `build_facts.py`'s tables, the page scripts, the memory levels' kit, the ladder's
+  research), both pages and the 3D companion were rebuilt, the chain at its fixed point (`buildchain.sh` reproduced the
+  committed pages byte for byte before the first edit), the page crawled again and diffed, five auditors checked the result,
+  and the suites pass on the final build. The record, the tools, the crawl diff and every finding with its verdict:
+  `docs/reports/data/2026-10-14-chip-check/`.
 
 ## Four physical scales in 3D (14 October 2026, Q109)
 
@@ -917,6 +927,15 @@ The initial standalone canvas source was `docs/reports/chip-3d.html`. Q113 repla
 **Gate labels stabilized (14 October, Q112).** The FinFET and channel views now keep their gate, source and drain callouts in fixed viewport slots, with leaders to physical projected anchors. The old collision solver moved the gate in 25-pixel increments; `label-test.mjs` reproduced a 50-pixel jump. Full rotation, pitch and zoom sweeps on desktop/phone show zero text-position and camera-magnification drift. Mobile gate labels are visible; the channel callout attaches to the electrode top.
 
 **Research-based visual upgrade (14 October, Q113).** Intel's tri-gate figures, Hu's fin/charge sections and imec's interconnect illustrations informed original detailed geometry: lined copper vias, local-to-upper wiring hierarchy, device contacts, raised source/drain, high-k shell, spacers, STI, shared-gate fins and finite inversion volumes. WebGL adds rounded geometry, studio reflections, soft cached shadows, correct depth testing, raycast picking and fixed callouts on all four views. Interactive cutaways and synchronized labeled SVG sections explain material interfaces and the approximate gated-perimeter relation. Camera and label fixes remain enforced. Eight 1280/390px interaction cases passed; a full-turn keyboard sweep and sampled auto-orbit frames had zero magnification/label drift. Two interleaved before/after frame runs had 16.7ms median; new-renderer p95 was 16.8ms with one 66–83ms outlier in each run. No calibrated voltage/current or proprietary geometry is asserted. Research and tests live beside the README.
+
+**Codex's review applied (14 October, Q115).** Five of the observations in Codex's audit of the chip diagram concern the
+companion and were applied in its sources (`docs/reports/sources/chip-3d/`), the page rebuilt with `node
+scripts/build-chip-3d.mjs` (its committed sources first rebuilt byte for byte): the metal scene's cutaway now opens with
+the dielectric shown, and hiding the dielectric closes it (the button had announced a change the model did not make);
+Ctrl, Cmd and Alt with a key stay the browser's; "Reset" reads "Reset view", which is what it does; the live line says
+"Cutaway closed." instead of "Assembled view."; and the pulses and carriers keep their place when a slider moves or the
+flow is paused. The decisions and their evidence: `docs/reports/data/2026-10-14-chip-check/codex-triage.json` (I02, I03,
+I10, I11, I12).
 
 ## Cross-links between the reports
 

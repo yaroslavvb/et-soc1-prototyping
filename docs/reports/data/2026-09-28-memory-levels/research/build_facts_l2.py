@@ -60,7 +60,7 @@ f("l2.partition.default", "organisation",
 f("l2.partition.rows", "organisation",
   "In Mode 0 the L2 occupies sets 0x280-0x2FF (128 of the 1,024 physical sets) of every sub-bank, set mask 0x7F: 4 banks x 4 sub-banks x 128 sets x 4 ways x 64 B = 512 KB. The scratchpad sits in sets 0x000-0x27F and the L3 in 0x300-0x3FF of the same RAMs.",
   128, "sets per sub-bank", SCS + ", pdf p.22 Table 7 (Mode 0 rows); pdf p.25 §1.4.1.4 (physical set = region set + set_base)", "et-spec",
-  note="So an L2 access lights only rows 640-767 of each tag/tag-state RAM and the matching {way,set} rows of the data RAMs; the other rows belong to scratchpad and L3.")
+  note="So an L2 access lights only rows 640-767 of each tag/tag-state RAM and the matching {set, way} rows (2,560-3,071) of the data RAMs; the other rows belong to scratchpad and L3.")
 f("l2.private", "organisation",
   "The L2 is private to its shire and not coherent: it does not track ownership or sharing across the 32 minions it serves; software handles coherence.",
   None, None, SCS + ", pdf p.6 §1; " + DS + ", pdf p.13 §2.1.3.1", "et-spec", page_link=CHIP)
@@ -92,8 +92,8 @@ f("l2.tag-state-ram", "storage",
   "Tag-state RAM: one 40-bit row per set = 4 x {valid, locked, zero, qwen[3:0]} + 5-bit LRU code + 7-bit ECC. It is read and written on every L2 request, and it is two-ported, so the read and the LRU/dirty update happen in the same pass.",
   40, "bits per row", SCS + ", pdf p.47 §2.14.3 Table 12 and pdf p.45; " + DEF + ":231-237", "et-spec")
 f("l2.data-ram", "storage",
-  "Data RAM: each sub-bank is four 144-bit-wide panels, each holding one 128-bit quadword + 16 ECC bits (8 per 64 bits). A 64 B line is one row across the four panels (576 bits); a sub-bank's data RAM is 4,096 rows addressed by {way, set}.",
-  576, "bits per line incl. ECC", SCS + ", pdf p.48 §2.14.5 and pdf p.48-49 §2.14.6.2; " + DEF + ":250-255", "et-spec")
+  "Data RAM: each sub-bank is four 144-bit-wide panels, each holding one 128-bit quadword + 16 ECC bits (8 per 64 bits). A 64 B line is one row across the four panels (576 bits); a sub-bank's data RAM is 4,096 rows addressed by {set, way} (set-major, as the re-implementation's RTL has it; the Erbium header fixes only the width, way + set bits).",
+  576, "bits per line incl. ECC", SCS + ", pdf p.48 §2.14.5 and pdf p.48-49 §2.14.6.2; " + DEF + ":250-255; " + CEM + "/shirecache/rtl/shirecache_pipe_sub_bank.sv:1613", "et-spec")
 f("l2.serial-lookup", "storage",
   "The lookup is serial (tag first, then data): the data-RAM address includes the way, and the data stages (dap..dc) start after the tag compare (tc), so a hit reads only the hit way's row, not all four ways.",
   None, None, DEF + ":253 (SC_DATA_RAM_ADDR_SIZE = way + set); " + SCS + ", pdf p.44 read-hit stage figure", "et-derived")
@@ -166,7 +166,7 @@ f("l2.rail.hv-logic", "voltage",
   None, None, MSD + ", pdf p.18 §5 (refers to the Power Spec)", "unknown", page_link=HUB + "#ask-design-docs")
 f("l2.voltage.idle", "voltage",
   "Measured on-die SRAM-rail voltage per shire at idle: 703-707 mV across the 34 minion shires (minion rail 513-522 mV, mesh 483-486 mV).",
-  705, "mV", CLAIMS + ":41 (docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json)", "et-measured",
+  705, "mV", CLAIMS + ":49 (docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json)", "et-measured",
   card="aifoundry2", page_link=CHIP)
 f("l2.voltage.limits", "voltage",
   "The firmware limits the SRAM rail to 660-850 mV, and DVFS moves the minion and L2/SRAM voltages together.",
@@ -183,7 +183,7 @@ f("l2.path.nbr-request", "path",
   "Inside the neighbourhood a request passes the minion's Miss/Evict flip-flops, a 2:1 minion arbiter (evicts first), a flop, a two-stage 13:1 round-robin arbiter, a 1-cycle pre-processing stage and then one of five output FIFOs (four banks + UC, 3 entries each, with a 2-entry intermediate FIFO). Minimum latency for a minion's request is 6 cycles.",
   6, "cycles", NMAS + ", pdf p.16-20 §4.3.1-4.3.5", "et-spec")
 f("l2.path.widths", "path",
-  "The neighbourhood's request datapath is 256 bits wide (a 512-bit write takes two cycles and is re-joined before the bank FIFO); its response datapath and the ET-Link into each bank are 512 bits; the minion's own fill interface is 256 bits, so a 64 B line reaches the L1 in two beats.",
+  "The neighbourhood's request datapath is 256 bits wide (a 512-bit write takes two cycles, crosses the bank FIFO as two 256-bit entries and is re-joined into one 512-bit ET-Link request at its output); its response datapath and the ET-Link into each bank are 512 bits; the minion's own fill interface is 256 bits, so a 64 B line reaches the L1 in two beats.",
   512, "bits", NMAS + ", pdf p.14-15 §4.3, p.19 §4.3.5, p.20 §4.4, p.22-23 §4.4.3; " + SCS + ", pdf p.10 §1.1", "et-spec")
 f("l2.xbar.req", "path",
   "req_xbar: a full crossbar from the 5 clients (4 neighbourhoods + RBOX) to the 4 banks + UC. Each bank has one catch FIFO per neighbourhood and a round-robin arbiter that skips entries whose bank is stalled. It lives in the shire-cache hierarchy 'so that it can be routed on top of all four banks'.",
@@ -230,8 +230,8 @@ f("l2.rbuf", "read buffer",
   8, "lines per bank", SCS + ", pdf p.9 §1.1, pdf p.40 §2.8; " + DEF + ":273-275", "et-spec",
   page_link=MH + "#load-latency-against-working-set-size")
 f("l2.rbuf.enabled", "read buffer",
-  "The RBUF is on by default (esr_sc_l2_rbuf_enable = esr_sc_scp_rbuf_enable = 1 in the RTL's ESR init), and the cards show it: a 36-cycle plateau for working sets of 768 B to 2 KB, then 47 cycles from 4 KB, on all three cards.",
-  2048, "bytes per shire", ESRB + ":311-312; " + LAT + " items[LAT-M1] (knees between 512/768 B and 2/4 KB)", "et-derived",
+  "The RBUF is on by default (esr_sc_l2_rbuf_enable = esr_sc_scp_rbuf_enable = 1 in the reset value of the RTL's sc_pipe_ctl register), and the cards show it: a 36-cycle plateau for working sets of 768 B to 2 KB, then 47 cycles from 4 KB, on all three cards.",
+  2048, "bytes per shire", "external/core-et/rtl/inc/esr_defines.vh:66 (ESR_SC_PIPE_CTL_RESET_VAL), applied by external/core-et/rtl/shire/esr/esr_cache_bank_auto.v:215; " + LAT + " items[LAT-M1] (knees between 512/768 B and 2/4 KB)", "et-derived",
   card=ALL3, page_link=MH + "#load-latency-against-working-set-size")
 f("l2.rbuf.storage", "read buffer",
   "What the RBUF is built from on silicon is not documented. The Ainekko reimplementation keeps it as 8 x 512-bit registers (flip-flops) holding ECC-corrected data, with an LRU replacement arbiter and a 7-stage pending-install pipeline.",
@@ -248,7 +248,7 @@ f("l2.zero-state", "bank",
   note="Whether an ordinary write of all-zero data sets the bit is not stated (ask). It matters for reading the zeros-vs-random energy gap.")
 f("l2.ecc", "bank",
   "All shire-cache RAMs have SECDED ECC (single-error correct, double-error detect): 6 bits per tag, 7 per tag-state row and 8 per 64 data bits, checked in stages te and de. On this chip ECC covers only the L2/L3/scratchpad SRAM and the instruction cache. Background ECC scrubbing is a reserved bit, 'implemented in Gepardo', a later chip.",
-  8, "ECC bits per 64 data bits", SCS + ", pdf p.9, pdf p.48-49 §2.14.6.2, pdf p.99; docs/findings/15-earlier-findings.md:65-66", "et-spec")
+  8, "ECC bits per 64 data bits", SCS + ", pdf p.9, pdf p.48-49 §2.14.6.2, pdf p.99; docs/findings/15-earlier-findings.md:75-76", "et-spec")
 f("l2.sleep", "power",
   "The RAMs can be put into deep sleep (low-leakage retention) or shut down only for shires that are not operational (esr_sc_ram_deep_sleep / esr_sc_ram_shut_down). The cards show no array wake-up: an L2 hit reads 49.5 cycles after any idle from 1.7 us to 27 ms.",
   0, "cycles of wake-up", SCS + ", pdf p.101; docs/findings/16-dvfs-and-leakage.md:123; " + CLAIMS + ":181, 420",
@@ -284,11 +284,11 @@ f("l2.lat.spec", "latency",
   21, "shire clocks (L2 hit)", SCS + ", pdf p.11 Table 1", "et-spec", page_link=MH + "#load-latency-against-working-set-size")
 f("l2.lat.measured", "latency",
   "Load-to-use latency by pointer chase at 600 MHz: read-buffer hit 36.00 cycles (60 ns) and L2 or own-scratchpad hit 47.00 cycles (78 ns) on hart 0; hart 1 pays 3 more (39.0 and 50.0). Every pass on every card fell within 35.998-36.006 and 46.998-47.024.",
-  47, "cycles", CLAIMS + ":421; " + LAT + " items[LAT-M1].per_card.<card>.passes[] (RB, L2, hart1)", "et-measured",
+  47, "cycles", CLAIMS + ":443; " + LAT + " items[LAT-M1].per_card.<card>.passes[] (RB, L2, hart1)", "et-measured",
   card=ALL3, page_link=MH + "#load-latency-against-working-set-size")
 f("l2.lat.overhead", "latency",
   "Measured minus spec is 26 cycles for both (47 - 21 = 36 - 10), so the path outside the shire cache is a constant and the 11-cycle read-buffer saving is all inside the bank. That is consistent with one shire clock being one minion cycle (l2.clock). Of the 26, the neighbourhood's request and response datapaths take at least 6 + 6, leaving about 14 for the minion's L1 miss detection, miss handler and fill-to-use.",
-  26, "cycles outside the shire cache", "derived from " + SCS + ", pdf p.11 Table 1, " + CLAIMS + ":421 and " + NMAS + ", pdf p.20-21", "et-derived",
+  26, "cycles outside the shire cache", "derived from " + SCS + ", pdf p.11 Table 1, " + CLAIMS + ":443 and " + NMAS + ", pdf p.20-21", "et-derived",
   page_link=MH + "#load-latency-against-working-set-size")
 f("l2.lat.ladder", "latency",
   "Timing one load after an evict_va to L2 gives two populations: about 37 cycles when the line is still in the bank's read buffer and 48 from the array. The 19 September histogram has 37: 2,187, 38: 780, 48: 1,117, 49: 407 loads over 1,500 lines x 3. The version-3 ladder median is 49 cycles on every card.",
@@ -303,7 +303,7 @@ f("l2.lat.miss", "latency",
 # ---------------------------------------------------------------- bandwidth
 f("l2.bw.measured", "bandwidth",
   "With 1 KB tensor loads on every minion the L2 delivers 2.45 TB/s chip-wide: 4.0 B per minion-cycle = 128 B per shire-cycle, half the four banks' 256 B per shire-cycle. The own scratchpad gives the same (2.46 TB/s).",
-  2.45, "TB/s", CLAIMS + ":380, 546; docs/findings/15-earlier-findings.md:98", "et-measured", card=ALL3,
+  2.45, "TB/s", CLAIMS + ":398, 805; docs/findings/15-earlier-findings.md:112", "et-measured", card=ALL3,
   page_link=MH + "#the-hierarchy-as-a-spec-sheet")
 f("l2.bw.per-bank", "bandwidth",
   "128 B per shire-cycle is one 64 B line every 2 cycles per bank (0.5 lines per bank-cycle). The rate is exact (3.999-4.000 B per minion-cycle, the same for L2 and scratchpad), which points to a structural 2-cycle limit rather than a latency or concurrency limit. The spec lets a bank return one line per cycle when successive requests go to different sub-banks, and 1 KB tensor loads do rotate sub-banks (PA[9:8]).",
@@ -341,7 +341,7 @@ f("l2.e.l1fill", "energy",
   205, "pJ per line (random)", CLAIMS + ":306", "et-measured", card="aifoundry2, aifoundry3", page_link=EMAN)
 f("l2.e.scalar", "energy",
   "One random flw from the L2 (a line per load) costs 336 pJ [315-369] at 27.5 G/s. One fsw costs 774 pJ: the store allocates the line and writes it back.",
-  336, "pJ per load", CLAIMS + ":509; " + EM4 + ":55", "et-measured", card=ALL3, page_link=EMAN)
+  336, "pJ per load", CLAIMS + ":535; " + EM4 + ":55", "et-measured", card=ALL3, page_link=EMAN)
 f("l2.e.gather-line", "energy",
   "A gather from the L2 costs 104 pJ per instruction plus 338 pJ per line it fetches (least-squares fit over seven patterns).",
   338, "pJ per line", CLAIMS + ":512", "et-derived", card=ALL3, page_link=MH + "#irregular-access-gathers-and-scatters")
@@ -437,7 +437,7 @@ step(S, 8, "tag compare (stage tc) + tag-state write",
      circuit=LOGIC("4 x 23-bit equality comparators, LRU encode/decode logic") + [
          c("two-port register file write port", "write wordline + write drivers flip the LRU bits that change", "generic")])
 step(S, 9, "data RAM, 4 panels of one sub-bank (stages dap, da, da0, da1)",
-     "Row {hit way, set} is read from the four 4096x144 panels: 4 x 144 = 576 bits (512 data + 64 ECC). Only this sub-bank's data macros are clocked; a partial access would enable fewer panels.",
+     "Row {set, hit way} is read from the four 4096x144 panels: 4 x 144 = 576 bits (512 data + 64 ECC). Only this sub-bank's data macros are clocked; a partial access would enable fewer panels.",
      "et-spec", SCS + ", pdf p.44-46, pdf p.48 §2.14.5, pdf p.51; " + DEF + ":253",
      latency="2 cycles (ram_delay = 2)",
      energy="the SRAM rail carried ~112 pJ per L2 hit (19 Sep); how much of that is this data read, versus the tag/state reads, crossbars and periphery, is unknown",
@@ -492,7 +492,7 @@ step(S, 3, "reqq + dataq write", "A reqq entry is allocated and the 64 B of data
 step(S, 4, "pipeline L2_Write: tag + tag-state read, compare", "As load-hit steps 6-8. The dirty bits (qwen = 0xF) and LRU are updated in the state write.",
      "et-spec", SCS + ", pdf p.47, pdf p.58-59", circuit=SRAM_READ)
 step(S, 5, "data RAM write (hit way)",
-     "The data comes back out of the dataq and is written to row {way, set} of the four panels (only panels with written quadwords are enabled). If the tag missed, the LRU way is the victim: a clean victim is dropped silently, and a dirty one is read in a reserved slot, then overwritten and sent to L3 on to_l3. A full-line write needs no fill.",
+     "The data comes back out of the dataq and is written to row {set, way} of the four panels (only panels with written quadwords are enabled). If the tag missed, the LRU way is the victim: a clean victim is dropped silently, and a dirty one is read in a reserved slot, then overwritten and sent to L3 on to_l3. A full-line write needs no fill.",
      "et-spec", SCS + ", pdf p.44-45, pdf p.48, pdf p.58-59 §3.4.1 Figure 18",
      circuit=SRAM_WRITE, energy="a scratchpad write is ~2x a read (tensor store 4.65 zeros / 8.58 random pJ/B)")
 step(S, 6, "REP_Ack back to the minion", "Sent as soon as the cache write completes; the reqq entry frees when any victim's mesh write is acknowledged.",

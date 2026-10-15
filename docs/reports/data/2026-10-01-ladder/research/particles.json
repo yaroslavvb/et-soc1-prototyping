@@ -81,9 +81,10 @@
    "tsmc-pat": "TSMC, US Patent 11,107,923 B2, \"Source/drain regions of FinFET devices and methods of forming same\" (priority 14 Jun 2019), description (a patent's embodiments, not a statement about N7)",
    "ibm-pat": "IBM, US Patent 10,431,502 B1, \"Maskless epitaxial growth of phosphorus-doped Si and boron-doped SiGe (Ge) for advanced source/drain contact\" (priority 16 Apr 2018), background",
    "tdf2016": "C. Edwards, \"7nm finFET process techniques lead IEDM lineup\", Tech Design Forums, 24 Oct 2016 (on S.-Y. Wu et al., TSMC, IEDM 2016 paper 2.6)",
+   "berkeley": "X. Zhang, \"Simulation-based Study of Super-steep Retrograde Doped Bulk FinFET Technology and 6T-SRAM Yield\", UC Berkeley EECS Technical Report UCB/EECS-2016-3, 5 Jan 2016 (www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-3.pdf)",
    "chip:chip.process": "docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process): TSMC 7 nm, more than 24 billion transistors (Esperanto, Hot Chips 33 and IEEE Micro 2022)",
-   "inside": "the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si)",
-   "process": "process.json beside this file: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper)",
+   "inside": "the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: l1d, a minion's L1 data cache, and shire.panel.array, an SRAM panel of the shire cache)",
+   "process": "docs/reports/data/2026-10-01-ladder/research/process.json: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper)",
    "outside": "the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond)"
   }
  },
@@ -183,7 +184,7 @@
       "process",
       "ioffe"
      ],
-     "source": "process.json beside this file: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others",
+     "source": "docs/reports/data/2026-10-01-ladder/research/process.json: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others",
      "topic": "electronics",
      "note": "the channel: N7's published fin, 6 x 52 nm, and effective gate length, 16.5 nm (process.json n7.fin-width, n7.fin-height, n7.leff); the conduction picture is the textbook MOSFET (Sze ch. 6)"
     },
@@ -194,7 +195,7 @@
       "process",
       "chip:chip.process"
      ],
-     "source": "process.json beside this file: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process): TSMC 7 nm, more than 24 billion transistors (Esperanto, Hot Chips 33 and IEEE Micro 2022)",
+     "source": "docs/reports/data/2026-10-01-ladder/research/process.json: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process): TSMC 7 nm, more than 24 billion transistors (Esperanto, Hot Chips 33 and IEEE Micro 2022)",
      "note": "the transistor count is Esperanto's; the channel is N7's published fin and effective gate length (process.json); dense cells have about two fins per transistor (process.json n7.two-fin, Angstronomics); how many fins each of this chip's transistors has is not published, so this is an order of magnitude"
     },
     {
@@ -236,7 +237,7 @@
      "topic": "electronics"
     },
     {
-     "text": "Those energies are only about 2 kT at room temperature (2 kT = 52 meV), so nearly every dopant atom has given up (or taken) its electron.",
+     "text": "Those energies are only about 2 kT at room temperature (2 kT = 52 meV), so nearly every dopant atom alone in a silicon site has given up (or taken) its electron.",
      "kind": "generic",
      "refs": [
       "sze",
@@ -283,16 +284,17 @@
      "topic": "electronics"
     },
     {
-     "text": "The same patent dopes the wells under the fins at 10^16 to 10^18 per cm3. At those levels a 6 x 16.5 x 52 nm channel would hold on average 0.05 to 5.1 dopant atoms, among some 257,000 silicon atoms: a handful at most, and their random number and place would make every transistor different. FinFET channels are therefore left nearly undoped and the threshold voltage is set by the gate metal instead.",
+     "text": "TSMC's FinFET patent (US 11,107,923) implants its wells, in the fins or the substrate, at up to 10^18 per cm3 for n-wells (10^16 to 10^18) and up to 10^20 for p-wells (10^17 to 10^20). At a bulk FinFET's usual fin doping, 10^16 to 10^18 per cm3, a 6 x 16.5 x 52 nm channel would hold on average 0.05 to 5.1 dopant atoms, among some 257,000 silicon atoms: a handful at most, and their random number and place would make every transistor different. FinFET channels are therefore left nearly undoped and the threshold voltage is set by the gate metal instead.",
      "kind": "inferred",
      "refs": [
       "tsmc-pat",
-      "inside",
+      "berkeley",
+      "process",
       "sze"
      ],
-     "source": "TSMC, US Patent 11,107,923 B2, \"Source/drain regions of FinFET devices and methods of forming same\" (priority 14 Jun 2019), description (a patent's embodiments, not a statement about N7); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si); S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)",
+     "source": "TSMC, US Patent 11,107,923 B2, \"Source/drain regions of FinFET devices and methods of forming same\" (priority 14 Jun 2019), description (a patent's embodiments, not a statement about N7); X. Zhang, \"Simulation-based Study of Super-steep Retrograde Doped Bulk FinFET Technology and 6T-SRAM Yield\", UC Berkeley EECS Technical Report UCB/EECS-2016-3, 5 Jan 2016 (www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-3.pdf); docs/reports/data/2026-10-01-ladder/research/process.json: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)",
      "topic": "electronics",
-     "note": "whether N7 dopes its channels, and how much, is not published (unknown); the count is arithmetic on an inferred volume and the patent's well range"
+     "note": "whether N7 dopes its channels, and how much, is not published (unknown); the count is arithmetic on N7's published fin and effective gate length (process.json) at the Berkeley TCAD study's fin doping (dope.levels)"
     }
    ],
    "draw": "Drawn SVG: the crystal view of p.atom with one atom recoloured (P or B, toggle), its spare electron (or hole) drawn as a large faint orbit several atoms wide; caption \"1 atom in 50 in the source and drain; maybe none in the channel\".",
@@ -341,7 +343,7 @@
      "note": "core-level binding energies of the solid (X-Ray Data Booklet; relative to the Fermi level, which changes them by a few eV) against the free atom's first ionisation energy: 1839 / 8.15 = 226, 99.42 / 8.15 = 12.2"
     },
     {
-     "text": "An electron in an atom is not a little ball on an orbit: the shells are clouds of probability, and the radii here are where each cloud is densest.",
+     "text": "An electron in an atom is not a little ball on an orbit: the shells are clouds of probability, and the radii here are each shell's most likely distance from the nucleus.",
      "kind": "generic",
      "refs": [
       "sze"
@@ -364,7 +366,7 @@
    "frame_m": 1.09e-14,
    "size_kind": "outside",
    "size_note": "diameter from R = 1.2 fm x 28^(1/3) = 3.64 fm (Krane); the measured rms charge radius is 3.1224 fm, which a uniform sphere of radius 4.03 fm would have. A nucleus has a soft edge, so any radius is a convention.",
-   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: some 29,000 times narrower than the atom, but 99.97% of its mass. Nothing in a chip ever touches it.",
+   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: some 29,000 times narrower than the atom, but 99.97% of its mass. Nothing a chip does ever changes it.",
    "facts": [
     {
      "text": "Silicon-28: 14 protons and 14 neutrons, stable.",
@@ -400,7 +402,7 @@
      "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf)"
     },
     {
-     "text": "Its density is about 2.3 x 10^17 kg per m3: a teaspoon (5 mL) of nuclear matter would weigh about 1.1 billion tonnes.",
+     "text": "Its density is about 1.7 x 10^17 kg per m3 as a uniform sphere 8.06 fm across, or 2.3 x 10^17 at the textbook rule's radius of 3.64 fm: a teaspoon (5 mL) of nuclear matter would weigh about a billion tonnes.",
      "kind": "derived",
      "refs": [
       "iaea",
@@ -426,7 +428,7 @@
      "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021))"
     },
     {
-     "text": "That is about a million times the energy of the outer electrons (8.15 eV) or of a chemical bond (about 2.3 eV): why chemistry, and electronics, never change a nucleus.",
+     "text": "That is about a million times the energy of an outer electron (8.15 eV) and nearly four million times a chemical bond (about 2.3 eV): why chemistry, and electronics, never change a nucleus.",
      "kind": "derived",
      "refs": [
       "iaea",
@@ -519,10 +521,10 @@
      "kind": "inferred",
      "refs": [
       "pdg-b",
-      "inside"
+      "process"
      ],
-     "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si)",
-     "note": "the per-atom count is arithmetic (derived); the channel count rests on the inferred channel size"
+     "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf); docs/reports/data/2026-10-01-ladder/research/process.json: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper)",
+     "note": "the per-atom count is arithmetic (derived); the channel count rests on the channel's size, N7's published fin and effective gate length (process.json)"
     }
    ],
    "draw": "Drawn SVG: a soft sphere 1.68 fm across with three coloured dots (red, green, blue: colour charge, not real colours) joined by wavy gluon lines, and faint quark-antiquark pairs; caption \"the dots are drawn far too big: a quark is less than 1/2000 of this\".",
@@ -541,7 +543,7 @@
    "frame_m": 1.29e-18,
    "size_kind": "outside",
    "size_note": "no size has ever been measured: the 95% upper limit on a quark's effective radius is 0.43 x 10^-16 cm = 4.3 x 10^-19 m (ZEUS 2016). The frame shows the limit, not the quark.",
-   "blurb": "As far as any experiment can tell, a quark is a point. The disc here is only the limit: if a quark has a size, it is smaller than this, under a two-thousandth of the proton. Quarks are never found alone; pull one out and the energy makes new quarks.",
+   "blurb": "As far as any experiment can tell, a quark is a point. The disc here is only the limit: if a quark has a size, it is smaller than this, which is about a two-thousandth of the proton. Quarks are never found alone; pull one out and the energy makes new quarks.",
    "facts": [
     {
      "text": "Upper limit on the effective quark radius: 4.3 x 10^-19 m (95% confidence), from electron-proton collisions at HERA.",
@@ -561,7 +563,7 @@
      "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); ZEUS Collaboration, \"Limits on the effective quark radius from inclusive ep scattering at HERA\", Phys. Lett. B 757, 468 (2016), arXiv:1604.01280"
     },
     {
-     "text": "Masses (MS-bar at 2 GeV): up 2.16 +/- 0.07 MeV, down 4.70 +/- 0.07 MeV. Two ups and a down add to 9.0 MeV: 1% of the proton's 938.3 MeV.",
+     "text": "Masses (MS-bar at 2 GeV): up 2.16 +/- 0.07 MeV/c^2, down 4.70 +/- 0.07 MeV/c^2. Two ups and a down add to 9.0 MeV/c^2: 1% of the proton's 938.3 MeV/c^2.",
      "kind": "derived",
      "refs": [
       "pdg-q",
@@ -571,7 +573,7 @@
      "note": "quark masses depend on the scheme and scale they are quoted at; the simple sum is an illustration"
     },
     {
-     "text": "A lattice-QCD breakdown of the proton's mass: the quarks' masses (through the quark condensate, u, d and s) give 9%, the quarks' energy of motion 33%, the gluon field's energy 37%, and the 'trace anomaly' 23%.",
+     "text": "A lattice-QCD breakdown of the proton's mass (MS-bar at 2 GeV): the masses of all the quarks in it, the sea of short-lived quark-antiquark pairs (strange ones too) as well as the three, give 9% (the quark condensate term); the quarks' energy of motion 33%, the gluon field's energy 37%, and the 'trace anomaly' 23%.",
      "kind": "outside",
      "refs": [
       "yang"
@@ -587,7 +589,7 @@
      "source": "S. Duerr et al., \"Ab initio determination of light hadron masses\", Science 322, 1224 (2008), arXiv:0906.3599"
     },
     {
-     "text": "Gluons carry the strong force between quarks; they are massless in theory (a mass of a few MeV is not excluded) and come in eight colour states.",
+     "text": "Gluons carry the strong force between quarks; they are massless in theory (a mass of a few MeV/c^2 is not excluded) and come in eight colour states.",
      "kind": "outside",
      "refs": [
       "pdg-g",
@@ -596,7 +598,7 @@
      "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: gauge and Higgs bosons, gluon (pdg.lbl.gov/2026/tables/rpp2026-sum-gauge-higgs-bosons.pdf); Particle Data Group (2026), review 15, Quark Model (C. Amsler, V. Crede et al., rev. Aug 2025), sec. 15.1-15.2"
     },
     {
-     "text": "Colour is believed to be permanently confined: only colourless combinations (three quarks, or a quark and an antiquark) exist on their own.",
+     "text": "Colour is believed to be permanently confined: only colourless combinations exist on their own, usually three quarks or a quark and an antiquark; some observed states are classed as four or five quarks.",
      "kind": "outside",
      "refs": [
       "pdg-qm"
@@ -659,7 +661,7 @@
      "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf); G. Gabrielse group (Northwestern Center for Fundamental Physics), \"Limit on Electron Substructure\", cfp.physics.northwestern.edu/gabrielse-group/electron-substructure.html, citing D. Bourilkov, Phys. Rev. D 64, 071701(R) (2001) for the LEP contact-interaction limit"
     },
     {
-     "text": "The electron is round: its electric dipole moment is below 4.1 x 10^-30 e cm (PDG 2026), so its charge sits within 4.1 x 10^-32 m of its centre (dipole moment divided by its charge).",
+     "text": "The electron is round: its electric dipole moment is below 4.1 x 10^-30 e cm (PDG 2026), so the centre of its charge sits within 4.1 x 10^-32 m of its centre of mass (dipole moment divided by its charge). That limits its shape, not its size.",
      "kind": "derived",
      "refs": [
       "pdg-l"
@@ -707,7 +709,7 @@
    "frame_m": 2.42e-35,
    "size_kind": "outside",
    "size_note": "Planck length sqrt(hbar G / c^3) = 1.616255(18) x 10^-35 m (CODATA 2022)",
-   "blurb": "The length built from gravity, quantum mechanics and the speed of light. Here, physicists expect space and time themselves to need a quantum description that nobody has yet; whether anything can be smaller is unknown. Between the quark's limit and here lie 16 powers of ten that no experiment has reached.",
+   "blurb": "The length built from gravity, quantum mechanics and the speed of light. Here, physicists expect space and time themselves to need a quantum description that nobody has yet; whether anything can be smaller is unknown. Below the electron's limit, 2 x 10^-20 m, lie some 15 powers of ten that no experiment has reached.",
    "facts": [
     {
      "text": "Planck length 1.616255 x 10^-35 m; Planck time 5.391247 x 10^-44 s.",
@@ -726,13 +728,14 @@
      "source": "M. Planck, \"Ueber irreversible Strahlungsvorgaenge\", Sitzungsberichte der Koeniglich Preussischen Akademie der Wissenschaften zu Berlin (1899), pp. 440-480 (natural units of length, mass, time and temperature)"
     },
     {
-     "text": "The quark's radius limit is 3 x 10^16 times the Planck length: some 16 powers of ten that no experiment has probed.",
+     "text": "The quark's radius limit is 3 x 10^16 times the Planck length; even the electron's smaller limit, 2 x 10^-20 m, is 1 x 10^15 times it: some 15 powers of ten that no experiment has probed.",
      "kind": "derived",
      "refs": [
       "zeus",
+      "gabrielse",
       "codata"
      ],
-     "source": "ZEUS Collaboration, \"Limits on the effective quark radius from inclusive ep scattering at HERA\", Phys. Lett. B 757, 468 (2016), arXiv:1604.01280; NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
+     "source": "ZEUS Collaboration, \"Limits on the effective quark radius from inclusive ep scattering at HERA\", Phys. Lett. B 757, 468 (2016), arXiv:1604.01280; G. Gabrielse group (Northwestern Center for Fundamental Physics), \"Limit on Electron Substructure\", cfp.physics.northwestern.edu/gabrielse-group/electron-substructure.html, citing D. Bourilkov, Phys. Rev. D 64, 071701(R) (2001) for the LEP contact-interaction limit; NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
     },
     {
      "text": "Whether the Planck length is a smallest possible length is an open question: thought experiments and several approaches to quantum gravity suggest a minimal length, and none is confirmed.",
@@ -834,7 +837,7 @@
       "outside",
       "inside"
      ],
-     "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si)",
+     "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: l1d, a minion's L1 data cache, and shire.panel.array, an SRAM panel of the shire cache)",
      "note": "the two chip sizes are the chip page's order-of-magnitude inferences"
     },
     {
@@ -1044,7 +1047,7 @@
   },
   {
    "id": "e.ew",
-   "name": "Particles get their masses: about 10 picoseconds",
+   "name": "Quarks and electrons get their masses: about 10 picoseconds",
    "time_s": 9.1e-12,
    "temperature_K": 1900000000000000.0,
    "region_m": 430000000000.0,

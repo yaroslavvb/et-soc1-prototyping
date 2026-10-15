@@ -61,7 +61,7 @@ level's size kind is `conceptual`: it has no size.
 | clementi | E. Clementi and D. L. Raimondi, J. Chem. Phys. 38, 2686 (1963) (via Wikipedia's table, checked against the raw table) | Si effective nuclear charge 1s 13.575, 2s 9.020, 2p 9.945, 3s 4.903, 3p 4.285 |
 | cordero | B. Cordero et al., Dalton Trans. 2008, 2832 | covalent radii Si 111(2), P 107(3), B 84(3), As 119(4), Ge 120(4) pm |
 | kittel | C. Kittel, Introduction to Solid State Physics, 8th ed., ch. 3 Table 1 | Si cohesive energy 4.63 eV per atom (from memory of the standard table; worth a glance if a copy is at hand) |
-| tsmc-pat | TSMC, US 11,107,923 B2 (priority 14 Jun 2019) | n-type S/D: Si, SiC, SiCP, SiP ("tensile strain"); p-type S/D: SiGe, first layer 10-40% Ge, second 20-80% Ge, dopants B, BF2, In at 5 x 10^20 to 1 x 10^22 cm^-3 ("compressive strain"); wells: n-type P, As, Sb and p-type B, BF2, In, at or below 10^18 (typically 10^16-10^18) cm^-3; LDD 10^15-10^19 cm^-3; contact metals listed generically (W, Co, Cu ... with Ti/TiN liners) |
+| tsmc-pat | TSMC, US 11,107,923 B2 (priority 14 Jun 2019) | n-type S/D: Si, SiC, SiCP, SiP ("tensile strain"); p-type S/D: SiGe, first layer 10-40% Ge, second 20-80% Ge, dopants B, BF2, In at 5 x 10^20 to 1 x 10^22 cm^-3 ("compressive strain"); wells: n-type P, As, Sb at or below 10^18 (typically 10^16-10^18) and p-type B, BF2, In at or below 10^20 (typically 10^17-10^20) cm^-3; LDD 10^15-10^19 cm^-3; contact metals listed generically (W, Co, Cu ... with Ti/TiN liners) |
 | ibm-pat | IBM, US 10,431,502 B1 (priority 16 Apr 2018) | "In 7 nm node technology and beyond, contact resistivity of less than 2e-9 ohm cm2 is desired for both nFET and pFET"; Si:P and SiGe:B source/drain contacts |
 | tdf2016 | C. Edwards, Tech Design Forums, 24 Oct 2016 (on Wu et al., TSMC, IEDM 2016 paper 2.6) | "an epitaxially raised source and drain design that strains the transistor channel"; "a contact structure designed to reduce resistance"; 0.027 um2 SRAM; 256 Mbit SRAM to 0.5 V |
 
@@ -97,7 +97,7 @@ Key verified or derived numbers by level (full text in `particles.json`):
   All the chip's channels: at least 6 x 10^15 atoms, 0.3 to 1 microgram (inferred; >24 billion transistors).
 - **Dopant (electronics).** Donors P 45 meV, As 54 meV; acceptor B 45 meV (Ioffe), about 2 kT, so nearly all
   ionized. TSMC patent: n-type S/D Si:P or SiCP (tensile), p-type S/D SiGe with 10-80% Ge doped with boron at
-  5 x 10^20 to 10^22 cm^-3 (compressive); wells 10^16-10^18 cm^-3. 10^21 cm^-3 = one dopant per nm3 = 1 atom in 50;
+  5 x 10^20 to 10^22 cm^-3 (compressive); wells 10^16-10^18 (n) and 10^17-10^20 (p) cm^-3. 10^21 cm^-3 = one dopant per nm3 = 1 atom in 50;
   10^22 = 1 in 5. Heavy doping makes the metal-semiconductor (Schottky) barrier thin enough to tunnel; 7 nm target
   contact resistivity < 2 x 10^-9 ohm cm2 (IBM patent). In the channel, 10^16-10^18 cm^-3 would be 0.05-5.4
   dopant atoms: random dopant counts would scatter thresholds, hence nearly undoped fins with work-function-metal
@@ -107,9 +107,9 @@ Key verified or derived numbers by level (full text in `particles.json`):
   118 pm: 5 to 30 times farther out.
 - **Nucleus.** 14 p + 14 n, stable. R = 1.2 A^(1/3) = 3.64 fm (diameter 7.3 fm); measured rms 3.1224 fm (equivalent
   uniform sphere R = 4.03 fm, so r0 = 1.33 fm for this light nucleus: the 1.2 fm rule is a rough average). 99.97%
-  of the atom's mass. Density 2.3 x 10^17 kg/m3 (a teaspoon about 1.1 billion tonnes). Atom/nucleus width about
+  of the atom's mass. Density 1.7-2.3 x 10^17 kg/m3 (uniform sphere / 1.2 fm rule; a teaspoon about a billion tonnes). Atom/nucleus width about
   32,000 (a 1 cm marble nucleus gives a 320 m atom). Binding 8.448 MeV/nucleon, 237 MeV total, 0.9% mass defect;
-  a million times the chemical/electronic energies.
+  a million times an outer electron's binding energy and nearly four million times a chemical bond.
 - **Nucleon.** r_p = 0.84075 fm (and the proton radius puzzle); m_p/m_e = 1836; uud / udd; free neutron 878.3 s,
   stable in Si-28; neutron <r^2> negative; proton lifetime > 2.4 x 10^34 yr. 84 valence quarks per Si-28 atom
   (42 u + 42 d); about 23 million quarks and 3.8 million electrons in one channel (inferred).
@@ -121,7 +121,7 @@ Key verified or derived numbers by level (full text in `particles.json`):
   a point particle; EDM < 4.1 x 10^-30 e cm, i.e. its charge is centred to within 4.1 x 10^-32 m (derived); the
   classical radius 2.818 fm is not its size; stable (> 6.6 x 10^28 yr); 1 C = 6.24 x 10^18 electrons.
 - **Planck length.** 1.616 x 10^-35 m, 5.39 x 10^-44 s; Planck 1899; whether it is a minimum is open (hypothesis);
-  the quark limit is 3 x 10^16 Planck lengths: 16 powers of ten unexplored; Planck length to the observable
+  the quark limit is 3 x 10^16 Planck lengths, the electron's 1 x 10^15: 15 powers of ten unexplored below the electron's limit; Planck length to the observable
   universe's diameter (8.739 x 10^26 m, `outside.json`) is 61.7 powers of ten.
 
 ## 3. The wrap, designed honestly

@@ -48,7 +48,7 @@ builders as the top three scales.
 | Compute shire, logical view (`shire`) | l2 · shire | `buildL2Shire` | the same 4 neighbourhoods x 8 minions over 4 banks, crossbars, UC, mesh stop, with the LV and HV bands; the neighbourhood's 2:1 and 13:1 arbiters and bank FIFOs |
 | Mesh stop (`shire.meshstop`), mesh link (`mesh.link`) | l3 · hop; scp · hop | `buildL3Hop`, `buildHop` | to_l3 master, VC FIFO (level shifters, 2-flop synchroniser), a router of one of 9 layers, the 3.72 mm link, the next router, flit sizes, energy per hop |
 | Wire segment, repeater (`mesh.link.wire`, `lib.repeater`, `lib.levelshift`) | l3 · rep; scp · rep | `buildL3Wire`, `buildWire` | a repeater and a level shifter transistor by transistor |
-| Crossing (`shire.meshstop.xing`, `shire.neigh.req`, `lib.levelshift`) | l2 · xing | `buildL2Xing`, `buildXing` | a VC FIFO cell with a level shifter; relabel the rails per crossing (0.517 to 0.705 V; 0.705 to 0.485 V; 400 to 933 MHz in a memory shire) |
+| Crossing (`shire.neigh.xing`, `shire.neigh.req`, `lib.levelshift`) | l2 · xing | `buildL2Xing`, `buildXing` | the neighbourhood's bank FIFO: a VC FIFO cell with a level shifter, semi-synchronous (no synchroniser). The mesh stop's crossing (`shire.meshstop.xing`: 2-stage synchronisers on the FIFO's counts) is the hop's VC FIFO above, and a memory shire's (400 to 933 MHz) another again (corrected 14 Oct 2026) |
 | Bank (`shire.bank`, comp `banks`) | l2 · bank; l3 · hbank | `buildL2Bank`, `buildL3Bank` | request queue, read buffer, coalescing buffer, atomic unit, the 15-stage pipeline strip, four sub-banks; `inst.bank` from the chip diagram's `ctx.bank` |
 | Sub-bank (`shire.subbank`) | l2 · sub; l3 · sub; scp · bank | `buildL2Sub`, `buildL3Sub`, `buildScpBank` | tag RAM, tag-state RAM, four data panels, ECC, comparators |
 | Data panel (`shire.panel` and its children) | l2/l3/scp · panel | `buildPanel` (via `buildL2Panel`, `buildL3Panel`, `buildScpPanel`) | the documented shell, the generic periphery and the dashed unknown geometry, with the band of the partition lit (L2 0x280-0x2FF, L3 768-1023, scratchpad 0-639) |
@@ -67,7 +67,7 @@ builders as the top three scales.
 align, add, normalise, round: `vpu.lane.fma.*`; needs an XOR/majority symbol for the full adder and 4:2 compressor,
 whose logic `r42cmp.v` gives), the int8 units, the transcendental ROM lookup, the integer ALU and iterative
 multiplier, the front end, the UC block's counters, the router's insides beyond `buildHop`'s generic box, the clock
-generation (DPLL, DLL, 25 ps delay lines) and tree, the PCIe controllers and a SerDes lane, the I/O shire's blocks,
+generation (DPLL, DLL, delay lines of 100 ps and 25 ps steps) and tree, the PCIe controllers and a SerDes lane, the I/O shire's blocks,
 and the device and material scales: the FinFET (top view at 57 nm gate pitch and 30 nm fin pitch), the fin in
 cross-section with its gate stack, the channel, and the silicon crystal (diamond cubic, a = 0.5431 nm).
 
@@ -136,9 +136,9 @@ to the crystal (0.54 nm), about 11x, are fine.
   high density 6-T SRAM cell for mobile SoC applications", IEDM 2016, paper 2.6.
 - Wikipedia, "7 nm process" (comparison table: TSMC N7 gate pitch 57 nm, fin pitch 30 nm, minimum metal pitch 40 nm,
   91.2-96.5 MTr/mm², SRAM 0.027 µm²; IRDS 2021 gate length 20 nm), read 30 September 2026.
-- WikiChip Fuse, "TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO" (https://fuse.wikichip.org/?p=2408):
-  HD cells 240 nm tall (6 tracks), HP 300 nm, about 91.2 and 65 MTr/mm². The site refused connections on 30 September;
-  the values are as a search summary reported them, and should be re-read before publishing.
+- WikiChip Fuse, D. Schor, "TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO", 16 June 2019
+  (https://fuse.wikichip.org/?p=2408): HD cells 240 nm tall (6 tracks), HP 300 nm (7.5), about 91.2 and 65 MTr/mm². The
+  site refused connections on 30 September; re-read on 1 October through the Internet Archive capture of 13 November 2019.
 - D. James (Siliconics), "A Quick Look at 14-nm and 10-nm", AVS Joint Users Group, July 2018 (JTG718-4): TSMC 10 nm and
   Intel 10 nm cross-sections (https://nccavs-usergroups.avs.org/wp-content/uploads/JTG2018/JTG718-4-James-Siliconics.pdf;
   local copies of it and of the IEEE Micro paper, with text, in `~/claude/work/chipzoom/`).

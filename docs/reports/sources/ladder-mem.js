@@ -100,20 +100,25 @@ inode('shire.bank', {parse: k => bsp(k), name: p => `Cache bank ${p.bank}`, shor
   def: p => ({id: 'shire.subbank', k: `${p.bank}.${L2X().sub}`}), kids: p => [0, 1, 2, 3].map(s => ({id: 'shire.subbank', k: `${p.bank}.${s}`}))});
 inode('shire.subbank', {parse: k => bsp(k), name: p => `Sub-bank ${p.sub} of bank ${p.bank}`, short: p => `Sub-bank ${p.sub}`, to: p => `sub-bank ${p.sub}`,
   build: (L, ap, p) => {
-    CKT.build(CKT.buildL2Sub, L, ap, Object.assign(L2X(), {bank: p.bank, sub: p.sub}), CKT.parts.l2);
+    CKT.build(CKT.buildL2Sub, L, ap, Object.assign(L2X(), {bank: p.bank, sub: p.sub, ex: p.bank === L2X().bank && p.sub === L2X().sub}), CKT.parts.l2);
     mlKids(L, ap, {panel: () => ({el: {id: 'shire.panel', k: `${p.bank}.${p.sub}.${L2X().panel}`}, seat: ap.panelBox, main: true})});
   },
   def: p => ({id: 'shire.panel', k: `${p.bank}.${p.sub}.${L2X().panel}`}), kids: p => [{id: 'shire.panel', k: `${p.bank}.${p.sub}.${L2X().panel}`}]});
 inode('shire.panel', {parse: k => bsp(k), name: p => `Data panel ${p.panel}, sub-bank ${p.sub}, bank ${p.bank}`, short: p => `Panel ${p.panel}`, to: p => `data panel ${p.panel}`,
   build: (L, ap, p) => {
-    CKT.build(CKT.buildL2Panel, L, ap, Object.assign(L2X(), {bank: p.bank, sub: p.sub, panel: p.panel}), CKT.parts.l2);
+    CKT.build(CKT.buildL2Panel, L, ap, Object.assign(L2X(), {bank: p.bank, sub: p.sub, panel: p.panel, ex: p.bank === L2X().bank && p.sub === L2X().sub}), CKT.parts.l2);
     const k = ap.rowK, y = ap.Y0 + k * ap.RH;
     ap.zs['lib.sram6t'] = {r: {x: ap.AX + ap.CW, y: y + 2, w: ap.CW - 12, h: ap.RH - 16}, g: ap.zg.cell || null};
     if (ap.zg.cell) ap.zg.cell._kid = {id: 'lib.sram6t'};
   },
   def: () => ({id: 'lib.sram6t'}), kids: () => [{id: 'lib.sram6t'}]});
 inode('lib.sram6t', {build: (L, ap) => CKT.build(CKT.buildL2Cell, L, ap, L2X(), CKT.parts.l2)});
-inode('shire.meshstop.xing', {build: (L, ap) => CKT.build(CKT.buildL2Xing, L, ap, L2X(), CKT.parts.l2)});
+/* the two crossings into and out of the Shire Channel (review of 14 Oct 2026): the neighbourhood's bank FIFOs, a
+   semi-synchronous crossing (one clock, two phases), drawn by the L2 scene's crossing scale; and the mesh stop's VC FIFO
+   between the Shire Channel and the 400 MHz mesh, drawn by the L3 scene's wire scale: the mesh rail's level shifter and
+   the FIFO whose counts cross by two-flip-flop synchronisers */
+inode('shire.neigh.xing', {build: (L, ap) => CKT.build(CKT.buildL2Xing, L, ap, L2X(), CKT.parts.l2)});
+inode('shire.meshstop.xing', {build: (L, ap) => CKT.build(CKT.buildL3Wire, L, ap, {}, CKT.parts.l3)});
 
 /* ---- the mesh: one hop, its wire, a repeater ---- */
 inode('mesh', {name: () => 'One mesh hop', short: () => 'Hop', to: () => 'one mesh hop',
@@ -136,7 +141,9 @@ function meshSeat(Lp) {
 
 /* ---- the DRAM: a memory shire, its PHY and a DQ driver; a package's die, a bank, a cell ---- */
 const dk = k => { const q = String(k).split('.').map(Number); return {ms: n0(q[0]), ch: n0(q[1]), bank: n0(q[2])}; };
-const dinst = p => Object.assign(DRX(), {ms: p.ms, ch: p.ch != null ? p.ch : DRX().ch, bank: p.bank != null ? p.bank : DRX().bank});
+// (ex: the instance holds the example line; review of 14 Oct)
+const dinst = p => Object.assign(DRX(), {ms: p.ms, ch: p.ch != null ? p.ch : DRX().ch, bank: p.bank != null ? p.bank : DRX().bank,
+  ex: p.ms === DRX().ms && (p.ch == null || p.ch === DRX().ch)});
 inode('memshire', {parse: k => dk(k), name: p => `Memory shire ${p.ms}`, short: p => `Memory shire ${p.ms}`, to: p => `memory shire ${p.ms}`,
   build: (L, ap, p) => {
     CKT.build(CKT.buildMS, L, ap, dinst({ms: p.ms}), CKT.parts.dram);

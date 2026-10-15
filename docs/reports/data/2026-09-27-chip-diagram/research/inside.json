@@ -8,13 +8,13 @@
    "die",
    "lib"
   ],
-  "n_nodes": 130,
-  "n_facts": 395,
+  "n_nodes": 131,
+  "n_facts": 399,
   "fact_labels": {
-   "spec": 206,
+   "spec": 208,
    "inferred": 11,
-   "derived": 34,
-   "measured": 59,
+   "derived": 35,
+   "measured": 60,
    "generic": 63,
    "unknown": 10,
    "outside": 12
@@ -55,7 +55,7 @@
     {
      "text": "Die area 570 mm².",
      "label": "spec",
-     "source": "docs/findings/05-claims.md:513; docs/findings/01-resources.md:234 (R14: Hot Chips 33 slide 20; IEEE Micro 42(3) p.37)",
+     "source": "docs/findings/05-claims.md:832; docs/findings/01-resources.md:266 (R14: Hot Chips 33 slide 20; IEEE Micro 42(3) p.37)",
      "fid": "chip:chip.die-area"
     },
     {
@@ -67,7 +67,7 @@
     {
      "text": "TSMC 7 nm, over 24 billion transistors, 89 mask layers (Esperanto, Hot Chips 33 and IEEE Micro 2022).",
      "label": "spec",
-     "source": "docs/findings/05-claims.md:513; docs/findings/01-resources.md:91-104 (R6)",
+     "source": "docs/findings/05-claims.md:832; docs/findings/01-resources.md:110-123 (R6)",
      "fid": "chip:chip.process"
     },
     {
@@ -139,7 +139,7 @@
      "fid": "chip:L114"
     },
     {
-     "text": "A shire spans several voltage domains separated by level shifters and FIFOs: minions on the low-voltage minion rail, the SRAM arrays (shire cache, and the I-cache data memory, placed in the shire channel because it must run at high voltage) on the SRAM rail, the mesh stop on the NoC rail.",
+     "text": "A shire spans several voltage domains separated by level shifters and FIFOs: minions on the low-voltage minion rail, the shire cache's SRAM arrays on the SRAM rail, the L1 I-cache data memory in the Shire Channel because it must run at high voltage (the description names no rail for it), the mesh stop on the NoC rail.",
      "label": "spec",
      "source": "external/core-et/docs/CORE-ET Minion Shire Description.pdf, pdf p.4, p.10 (§3.1) and p.18 (§5); docs/research/why-low-power.md:23-28 (R6)",
      "fid": "chip-research:shire.voltage-domains"
@@ -153,7 +153,7 @@
     {
      "text": "Per-shire on-die voltage at idle (34 minion shires): minion rail 517–521 mV, lows 513 (shires 0, 1, 2, 18) to 520, highs to 522; SRAM 703–707 mV; mesh 483–486 mV.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:41 (docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json)",
+     "source": "docs/findings/05-claims.md:49 (docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json)",
      "fid": "chip:L123"
     }
    ],
@@ -204,15 +204,15 @@
      "fid": "chip:mesh.single-attach"
     },
     {
-     "text": "Each mesh stop has 9 main-NoC routers (layers 0–8) plus one debug-NoC router; routers have 8 ports (H, E, S, W, N, I, J, K) with 4 VC slots each; route info, packet, sideband and data are parity-protected (no ECC).",
+     "text": "Each minion, PCIe and I/O shire's mesh stop has 9 main-NoC routers (layers 0–8) plus one debug-NoC router; the NoC register map has 36 copies of layers 0–1 and 44 of layers 2–8, so the 8 memory shires' stops most likely have 7 (layers 2–8); routers have 8 ports (H, E, S, W, N, I, J, K) with 4 VC slots each; route info, packet, sideband and data are parity-protected (no ECC).",
      "label": "spec",
-     "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b rows 'Main-NoC layers', 'Router ports and VCs', 'Error protection' (etsoc_shire_other_esr.h:3877-3981; noc_esr.h)",
+     "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b rows 'Main-NoC layers', 'Router ports and VCs', 'Error protection' (etsoc_shire_other_esr.h:3877-3981; noc_esr.h); external/et-platform/etsoc-hal/include/hwinc/noc_esr.h:15498, 15628, 15758, 16538 (NOC_ESR_ROUTER_n_ARRAY_COUNT); external/et-man/ET Programmer's Reference Manual.pdf p.479 (PCIe shire NOC_INT_STAT 8:0)",
      "fid": "chip:L105"
     },
     {
-     "text": "A shire has 4 to_l3 master and 4 L3 slave lanes to the mesh; the lane is chosen by PA[7:6], so lines i and i+4 share a lane (a 1 KB load puts 4 of its 16 lines on each).",
+     "text": "A shire has 4 to_l3 master and 4 L3 slave lanes to the mesh. An L3 request takes the lane of the bank it will use at its home, PA[12:11] under the default swizzle, so all 16 lines of an aligned 1 KB load share one lane; only a remote-scratchpad request takes the lane PA[7:6] names, so its lines i and i+4 share a lane (re-implementation RTL, to confirm in silicon).",
      "label": "spec",
-     "source": "docs/reports/data/2026-09-24-wire-energy/report.json inputs.lanes (core-et-main shirecache_mesh_master.sv:141-153); docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b 'Lanes'",
+     "source": "docs/reports/data/2026-09-24-wire-energy/report.json inputs.lanes; external/core-et-main/hw/ip/shirecache/rtl/shirecache_mesh_master.sv:127-153 (the port is the low bits of req_bank_id: the L3 swizzle's bank, or PA[7:6] for a remote scratchpad); external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf p.6 (L3 requests go to banks by PA[12:11]); docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b 'Lanes' (which reads PA[7:6] for every request)",
      "fid": "chip:L103"
     },
     {
@@ -264,12 +264,12 @@
     "note": "order of magnitude: an 8-port router with 512-bit datapaths; the NetSpeed configuration is not in the repository"
    },
    "kind": "block",
-   "blurb": "A small switch. Packets arrive on its input ports, wait in short queues, and an arbiter decides which one crosses the router's internal switch to which output each cycle. Each mesh stop has nine of them stacked as separate networks, plus one for debug.",
+   "blurb": "A small switch. Packets arrive on its input ports, wait in short queues, and an arbiter decides which one crosses the router's internal switch to which output each cycle. A minion shire's mesh stop has nine of them stacked as separate networks (a memory shire's most likely seven), plus one for debug.",
    "facts": [
     {
-     "text": "Each mesh stop has 9 main-NoC routers (layers 0–8) plus one debug-NoC router; routers have 8 ports (H, E, S, W, N, I, J, K) with 4 VC slots each; route info, packet, sideband and data are parity-protected (no ECC).",
+     "text": "Each minion, PCIe and I/O shire's mesh stop has 9 main-NoC routers (layers 0–8) plus one debug-NoC router; the NoC register map has 36 copies of layers 0–1 and 44 of layers 2–8, so the 8 memory shires' stops most likely have 7 (layers 2–8); routers have 8 ports (H, E, S, W, N, I, J, K) with 4 VC slots each; route info, packet, sideband and data are parity-protected (no ECC).",
      "label": "spec",
-     "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b rows 'Main-NoC layers', 'Router ports and VCs', 'Error protection' (etsoc_shire_other_esr.h:3877-3981; noc_esr.h)",
+     "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b rows 'Main-NoC layers', 'Router ports and VCs', 'Error protection' (etsoc_shire_other_esr.h:3877-3981; noc_esr.h); external/et-platform/etsoc-hal/include/hwinc/noc_esr.h:15498, 15628, 15758, 16538 (NOC_ESR_ROUTER_n_ARRAY_COUNT); external/et-man/ET Programmer's Reference Manual.pdf p.479 (PCIe shire NOC_INT_STAT 8:0)",
      "fid": "chip:L105"
     },
     {
@@ -281,13 +281,13 @@
     {
      "text": "UNKNOWN. The router pipeline per hop (4 NoC cycles each way is derived), which of the 9 main-NoC layers carries L3 requests and replies, and the flit width. The dimension order, asked here until 29 September, is measured (l3.route).",
      "label": "unknown",
-     "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:66-68, 75-76; the order: docs/reports/data/2026-09-29-nocr (E56)",
+     "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:73-75, 82-83; the order: docs/reports/data/2026-09-29-nocr (E56)",
      "fid": "ml:l3:u.noc-hop"
     },
     {
      "text": "20 ns per hop round trip is 10 ns, or 4 cycles of the 400 MHz NoC clock, per hop each way, if request and reply take equal time.",
      "label": "derived",
-     "source": "l3.hop with l3.clock; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:76",
+     "source": "l3.hop with l3.clock; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:83",
      "fid": "ml:l3:l3.hop-noc-cycles"
     },
     {
@@ -323,7 +323,7 @@
     {
      "text": "Routers have 8 ports (H, E, S, W, N, I, J, K) with 4 VC slots each.",
      "label": "spec",
-     "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b rows 'Main-NoC layers', 'Router ports and VCs', 'Error protection' (etsoc_shire_other_esr.h:3877-3981; noc_esr.h)",
+     "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b rows 'Main-NoC layers', 'Router ports and VCs', 'Error protection' (etsoc_shire_other_esr.h:3877-3981; noc_esr.h); external/et-platform/etsoc-hal/include/hwinc/noc_esr.h:15498, 15628, 15758, 16538 (NOC_ESR_ROUTER_n_ARRAY_COUNT); external/et-man/ET Programmer's Reference Manual.pdf p.479 (PCIe shire NOC_INT_STAT 8:0)",
      "fid": "chip:L105"
     },
     {
@@ -414,22 +414,22 @@
     "note": "order of magnitude: a FIFO of a few 512-bit entries with level shifters on every bit"
    },
    "kind": "block",
-   "blurb": "The shire's cache runs at 0.705 V on its own clock, the network at 0.485 V and 400 MHz. Every bit that crosses is shifted in voltage and re-timed through two flip-flops into the other clock, so it cannot be caught half-changed.",
+   "blurb": "The shire cache runs on the shire clock, its arrays on the 0.705 V SRAM rail (the rail of its logic is not documented); the network runs at 0.485 V and 400 MHz. Every bit is level-shifted as it crosses; each word waits in a small FIFO whose write and read counts, not the data, pass through two-flip-flop synchronisers into the other clock, so a word is read only once it is completely written.",
    "facts": [
     {
-     "text": "The neighbourhood's per-bank output FIFOs double as the clock- and voltage-crossing elements: semi-synchronous VC FIFOs from the cell library, with level shifters built in at the HV/LV boundary. Their storage cells always sit in the HV region 'as performance and access time improve with the voltage'. Responses cross back through a VC FIFO at the neighbourhood's input.",
+     "text": "Each shire meets the mesh with 4 L3-slave ports (incoming L3 and remote-scratchpad requests, 512 bits, one request per cycle each), 4 to_l3 master ports and 1 to_sys master port (to memory). AXI channels cross into the NoC through voltage-changing FIFOs with 2-stage synchronizers.",
      "label": "spec",
-     "source": "external/core-et/docs/CORE-ET-Neigborhood-MAS.pdf, pdf p.18-19 §4.3.4, pdf p.20 §4.4.1, pdf p.45 §7.1 (Figure 16)",
-     "fid": "ml:l2:l2.vc-fifo"
+     "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf pdf p.8, pdf p.11 (VCFIFO, 2-stage synchronizers), pdf p.32-34 §2.3-2.4 ('four for the L3 mesh and one for the SYS mesh'); external/core-et-main/hw/ip/shirecache/rtl/shirecache_pkg.sv:138-140",
+     "fid": "ml:l3:l3.ports"
     },
     {
      "text": "The Shire Channel, which holds the shire cache, the UC block and the I-cache data memory, is a high-voltage region: the I-cache memory sits there 'because it has to be operated at high voltage'. The mesh routers sit on their own low-voltage rail, and the router side of each crossing is low voltage.",
      "label": "spec",
-     "source": "external/core-et/docs/CORE-ET Minion Shire Description.pdf pdf p.10 §3.1 and pdf p.18 §5; external/core-et/rtl/libs/mems_and_fifos/vcfifo_nsip_brdg2rtr.v:9 (via docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:74)",
+     "source": "external/core-et/docs/CORE-ET Minion Shire Description.pdf pdf p.10 §3.1 and pdf p.18 §5; external/core-et/rtl/libs/mems_and_fifos/vcfifo_nsip_brdg2rtr.v:9 (via docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:81)",
      "fid": "ml:l3:l3.hv-region"
     },
     {
-     "text": "GENERIC. A voltage and clock crossing: a level shifter (cross-coupled PMOS over an NMOS differential input pair) lifts or drops the signal swing, and a 2-flip-flop synchroniser (as the spec's VCFIFO uses) samples it in the receiving clock, costing 2-3 receiving-clock cycles.",
+     "text": "GENERIC. A voltage and clock crossing: a level shifter (cross-coupled PMOS over an NMOS differential input pair) lifts or drops the signal swing, and a 2-flip-flop synchroniser (as the spec's VCFIFO uses) samples the FIFO's gray-coded counts in the receiving clock, costing 2-3 receiving-clock cycles.",
      "label": "generic",
      "source": "textbook; the 2 stages are et-spec (external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf pdf p.11)",
      "fid": "ml:l3:g.crossing"
@@ -443,7 +443,7 @@
     {
      "text": "Another shire's scratchpad: 99.84 + 12.00 cycles per mesh hop at 600 MHz (112-220 cycles, 186-366 ns over 1-10 hops); all 124 points within one cycle; a to b equals b to a within 0.032 cycles, on three cards.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:423; lat.json items[LAT-M3].per_card.<card>.passes[] (row0_slope 11.998-12.002, frac_within_1 1.0)",
+     "source": "docs/findings/05-claims.md:445; lat.json items[LAT-M3].per_card.<card>.passes[] (row0_slope 11.998-12.002, frac_within_1 1.0)",
      "fid": "ml:scp:scp.lat-remote"
     }
    ],
@@ -454,13 +454,13 @@
    ],
    "reuse": {
     "page": "memory-levels",
-    "scene": "l2",
-    "scale": "xing",
+    "scene": "l3",
+    "scale": "hop",
     "builders": [
-     "buildL2Xing",
-     "buildXing"
+     "buildL3Hop",
+     "buildL3Wire"
     ],
-    "how": "the crossing scale draws a VC FIFO cell with a level shifter (cross-coupled PMOS over an NMOS pair); the same drawing serves the mesh stop's 0.705 V to 0.485 V crossing with the rails relabelled"
+    "how": "the L3 scene draws this crossing: its hop scale the bank's to_l3 master and the VC FIFO with its level shifters and synchroniser, its wire scale the mesh-rail level shifter and the VC FIFO whose counts cross by 2-flop synchronisers; the L2 scene's crossing scale (buildL2Xing) draws the neighbourhood's bank FIFO instead (shire.neigh.xing), a semi-synchronous crossing, and its rails are not relabelled for this one"
    }
   },
   {
@@ -574,13 +574,13 @@
     {
      "text": "Load-to-use latency by pointer chase at 600 MHz: read-buffer hit 36.00 cycles (60 ns) and L2 or own-scratchpad hit 47.00 cycles (78 ns) on hart 0; hart 1 pays 3 more (39.0 and 50.0). Every pass on every card fell within 35.998-36.006 and 46.998-47.024.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:421; docs/reports/data/2026-09-25-claims-v3/results/lat.json items[LAT-M1].per_card.<card>.passes[] (RB, L2, hart1)",
+     "source": "docs/findings/05-claims.md:443; docs/reports/data/2026-09-25-claims-v3/results/lat.json items[LAT-M1].per_card.<card>.passes[] (RB, L2, hart1)",
      "fid": "ml:l2:l2.lat.measured"
     },
     {
      "text": "With 1 KB tensor loads on every minion the L2 delivers 2.45 TB/s chip-wide: 4.0 B per minion-cycle = 128 B per shire-cycle, half the four banks' 256 B per shire-cycle. The own scratchpad gives the same (2.46 TB/s).",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:380, 546; docs/findings/15-earlier-findings.md:98",
+     "source": "docs/findings/05-claims.md:398, 805; docs/findings/15-earlier-findings.md:112",
      "fid": "ml:l2:l2.bw.measured"
     }
    ],
@@ -658,9 +658,9 @@
      "fid": "ml:l2:l2.rbuf"
     },
     {
-     "text": "The RBUF is on by default (esr_sc_l2_rbuf_enable = esr_sc_scp_rbuf_enable = 1 in the RTL's ESR init), and the cards show it: a 36-cycle plateau for working sets of 768 B to 2 KB, then 47 cycles from 4 KB, on all three cards.",
+     "text": "The RBUF is on by default (esr_sc_l2_rbuf_enable = esr_sc_scp_rbuf_enable = 1 in the reset value of the RTL's sc_pipe_ctl register), and the cards show it: a 36-cycle plateau for working sets of 768 B to 2 KB, then 47 cycles from 4 KB, on all three cards.",
      "label": "derived",
-     "source": "external/core-et/rtl/shire/esr/esr_cache_bank.v:311-312; docs/reports/data/2026-09-25-claims-v3/results/lat.json items[LAT-M1] (knees between 512/768 B and 2/4 KB)",
+     "source": "external/core-et/rtl/inc/esr_defines.vh:66 (ESR_SC_PIPE_CTL_RESET_VAL), applied by external/core-et/rtl/shire/esr/esr_cache_bank_auto.v:215; docs/reports/data/2026-09-25-claims-v3/results/lat.json items[LAT-M1] (knees between 512/768 B and 2/4 KB)",
      "fid": "ml:l2:l2.rbuf.enabled"
     },
     {
@@ -727,7 +727,7 @@
     {
      "text": "A global atomic on a scratchpad word is performed by the home bank's atomic block (read, ALU, write; the sub-bank is held busy throughout) after arriving on the L3-slave port; the bank retires one every 10.00 cycles; an uncontended remote atomic takes 216 cycles round trip; an atomic through the self ID 0x7F is a bus error.",
      "label": "measured",
-     "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf p.17 (L3 slave REQ_Atomic, local SCP), p.36, p.40 §2.9; docs/findings/05-claims.md:232; docs/findings/17-hot-line.md:35-38; lat.json [item=LAT-H]",
+     "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf p.17 (L3 slave REQ_Atomic, local SCP), p.36, p.40 §2.9; docs/findings/05-claims.md:243; docs/findings/17-hot-line.md:36-39; lat.json [item=LAT-H]",
      "fid": "ml:scp:scp.atomic"
     }
    ],
@@ -928,9 +928,9 @@
      "fid": "ml:l2:l2.macro.data"
     },
     {
-     "text": "Data RAM: each sub-bank is four 144-bit-wide panels, each holding one 128-bit quadword + 16 ECC bits (8 per 64 bits). A 64 B line is one row across the four panels (576 bits); a sub-bank's data RAM is 4,096 rows addressed by {way, set}.",
+     "text": "Data RAM: each sub-bank is four 144-bit-wide panels, each holding one 128-bit quadword + 16 ECC bits (8 per 64 bits). A 64 B line is one row across the four panels (576 bits); a sub-bank's data RAM is 4,096 rows addressed by {set, way} (set-major, as the re-implementation's RTL has it; the Erbium header fixes only the width, way + set bits).",
      "label": "spec",
-     "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf (v1.1), pdf p.48 §2.14.5 and pdf p.48-49 §2.14.6.2; external/core-et/rtl/inc/shire_cache_defines.vh:250-255",
+     "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf (v1.1), pdf p.48 §2.14.5 and pdf p.48-49 §2.14.6.2; external/core-et/rtl/inc/shire_cache_defines.vh:250-255; external/core-et-main/hw/ip/shirecache/rtl/shirecache_pipe_sub_bank.sv:1613",
      "fid": "ml:l2:l2.data-ram"
     },
     {
@@ -946,7 +946,7 @@
      "fid": "ml:l3:l3.vendor"
     },
     {
-     "text": "Per shire 64 data panels (4 banks x 4 sub-banks x 4), each 589,824 bits; 37.7 Mbit per shire including ECC (32 Mbit data + 4 Mbit ECC); 2,048 data panels over the 32 compute shires.",
+     "text": "Per shire 64 data panels (4 banks x 4 sub-banks x 4), each 589,824 bits; 37.7 Mbit per shire including ECC (33.55 Mbit data + 4.19 Mbit ECC); 2,048 data panels over the 32 compute shires.",
      "label": "derived",
      "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf p.9, p.48, p.51",
      "fid": "ml:scp:scp.panel-count"
@@ -1175,7 +1175,7 @@
     {
      "text": "All shire-cache RAMs have SECDED ECC (single-error correct, double-error detect): 6 bits per tag, 7 per tag-state row and 8 per 64 data bits, checked in stages te and de. On this chip ECC covers only the L2/L3/scratchpad SRAM and the instruction cache. Background ECC scrubbing is a reserved bit, 'implemented in Gepardo', a later chip.",
      "label": "spec",
-     "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf (v1.1), pdf p.9, pdf p.48-49 §2.14.6.2, pdf p.99; docs/findings/15-earlier-findings.md:65-66",
+     "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf (v1.1), pdf p.9, pdf p.48-49 §2.14.6.2, pdf p.99; docs/findings/15-earlier-findings.md:75-76",
      "fid": "ml:l2:l2.ecc"
     },
     {
@@ -1246,7 +1246,7 @@
     {
      "text": "Load-to-use latency by pointer chase at 600 MHz: read-buffer hit 36.00 cycles (60 ns) and L2 or own-scratchpad hit 47.00 cycles (78 ns) on hart 0; hart 1 pays 3 more (39.0 and 50.0). Every pass on every card fell within 35.998-36.006 and 46.998-47.024.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:421; docs/reports/data/2026-09-25-claims-v3/results/lat.json items[LAT-M1].per_card.<card>.passes[] (RB, L2, hart1)",
+     "source": "docs/findings/05-claims.md:443; docs/reports/data/2026-09-25-claims-v3/results/lat.json items[LAT-M1].per_card.<card>.passes[] (RB, L2, hart1)",
      "fid": "ml:l2:l2.lat.measured"
     },
     {
@@ -1258,7 +1258,7 @@
     {
      "text": "SRAM-rail power at idle: 2.00 W for the chip (about 16 mW per MB if split evenly over the 128 MB of L2, L3 and scratchpad, the energy manual's denominator); 1.70 W at 67 C and 2.73 W at 82 C on aifoundry2; 0.051-0.066 W per degree C on the other cards.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:184, 473; docs/findings/16-dvfs-and-leakage.md:141; docs/energy-manual/04a-fine-grain.md:110 ('Measured: 1.70 W at 67 °C') and its table (67 °C 1.698 W, 82 °C 2.726 W)",
+     "source": "docs/findings/05-claims.md:195, 499; docs/findings/16-dvfs-and-leakage.md:189; docs/energy-manual/04a-fine-grain.md:110 ('Measured: 1.70 W at 67 °C') and its table (67 °C 1.698 W, 82 °C 2.726 W)",
      "fid": "ml:l2:l2.leak"
     }
    ],
@@ -1306,13 +1306,13 @@
     {
      "text": "L3 hit: 110 + 12 cycles per mesh hop between the requesting shire and the line's home shire (fitted 110.5 + 11.99 on three cards); 159-169 cycles (265-282 ns) on average depending on the requesting shire.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:367, 403, 410 (docs/reports/data/2026-09-25-claims-v3/results/mem.json MEM-P1; lat.json LAT-M2)",
+     "source": "docs/findings/05-claims.md:395, 434, 444 (docs/reports/data/2026-09-25-claims-v3/results/mem.json MEM-P1; lat.json LAT-M2)",
      "fid": "chip:l3.latency"
     },
     {
      "text": "The SRAM rail at idle is 1.70 W at 67 C and 2.73 W at 82 C on aifoundry2 (slope 0.066 W/C on aifoundry3); at 80 C its 2.51 W is 19.6 mW per MB of the 128 MB of L2, L3 and scratchpad, an upper bound on the arrays' leakage since cache logic shares the rail. The L3's 32 MB are then at most about 0.63 W.",
      "label": "measured",
-     "source": "docs/energy-manual/04a-fine-grain.md:106-111 and its table (67 °C 1.698 W, 82 °C 2.726 W); docs/findings/05-claims.md:473",
+     "source": "docs/energy-manual/04a-fine-grain.md:106-111 and its table (67 °C 1.698 W, 82 °C 2.726 W); docs/findings/05-claims.md:499",
      "fid": "ml:l3:l3.leakage"
     }
    ],
@@ -1366,13 +1366,13 @@
     {
      "text": "The shire's own L2 scratchpad: 47 cycles (78 ns), the same SRAM, latency and bandwidth as the L2 cache.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:366",
+     "source": "docs/findings/05-claims.md:394",
      "fid": "chip:lat-scp-own"
     },
     {
      "text": "Another shire's scratchpad: 99.84 + 12.00 cycles per mesh hop at 600 MHz (112-220 cycles, 186-366 ns over 1-10 hops); all 124 points within 1 cycle, a->b equals b->a within 0.032 cycles.",
      "label": "measured",
-     "source": "lat.json: items[LAT-M3].per_card.<card>.passes[] (row0_slope 11.998-12.002, frac_within_1 1.0); docs/findings/05-claims.md:411",
+     "source": "lat.json: items[LAT-M3].per_card.<card>.passes[] (row0_slope 11.998-12.002, frac_within_1 1.0); docs/findings/05-claims.md:445",
      "fid": "chip:lat-scp-remote"
     }
    ],
@@ -1403,7 +1403,7 @@
     "note": "order of magnitude: counters, interrupt logic and an atomic ALU"
    },
    "kind": "block",
-   "blurb": "Hardware for coordination: barrier counters (everyone waits until all have arrived), credit counters, interrupts between cores, and atomic operations that do not go through the cache.",
+   "blurb": "Hardware for coordination: barrier counters (everyone waits until all have arrived), credit increments, interrupts between cores, and atomic operations that do not go through the cache.",
    "facts": [
     {
      "text": "The uncacheable (UC) block holds fast local barriers, fast credit counters, inter-processor interrupts and global atomics.",
@@ -1414,13 +1414,13 @@
     {
      "text": "Shire barrier (fast local barrier + credits, 32 minions, all 32 shires at once): 233 cycles (388 ns); 232.5-232.7 on the three cards.",
      "label": "measured",
-     "source": "lat.json: items[LAT-N1].per_card.<card>.passes[].shire_barrier; docs/findings/05-claims.md:413",
+     "source": "lat.json: items[LAT-N1].per_card.<card>.passes[].shire_barrier; docs/findings/05-claims.md:447",
      "fid": "chip:sync-shire-barrier"
     },
     {
      "text": "One contended global atomic (amoaddg.w on one line, 1,024 minions): the bank retires one every 10.00 cycles, about 60 M/s for the whole chip; spread over 32 lines, one per shire, 0.31 cycles and 1,919 M/s: 32x.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:221; docs/findings/05-claims.md:222",
+     "source": "docs/findings/05-claims.md:233; docs/findings/05-claims.md:234",
      "fid": "chip:hot-cost"
     }
    ],
@@ -1466,14 +1466,14 @@
   {
    "id": "shire.uc.fcc",
    "parent": "shire.uc",
-   "name": "Fast credit counters",
+   "name": "Credit increments (CREDINC0-3)",
    "size_m": 5e-05,
    "size": {
     "label": "inferred",
-    "note": "order of magnitude: 4 counters per minion"
+    "note": "order of magnitude: the CREDINC decode (the counters, two per hart, sit in each minion)"
    },
    "kind": "block",
-   "blurb": "Per-thread counters that other threads can add credits to; a thread that reads its counter takes a credit, or waits until one arrives. A cheap way to say \"your data is ready\".",
+   "blurb": "Four registers (CREDINC0-3) that any thread can write with a mask of minions; each write adds a credit to the chosen harts' counters, which sit in the minions themselves (two per hart). A thread that reads its counter takes a credit, or waits until one arrives.",
    "facts": [
     {
      "text": "Each hart has two credit-counter CSRs (four per minion); remote harts increment them through the CREDINC0-3 ESRs of the target shire; a read with no credit blocks until one arrives.",
@@ -1520,7 +1520,7 @@
     {
      "text": "TensorSend round trip, 32 B register to register inside a shire: 68 cycles (113 ns) on the 7 fast-network tree edges of each neighbourhood, 114-115 cycles (190 ns) for every other pair.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:380; docs/reports/2026-09-18-et-soc1-on-chip-communication.html \"Inside a shire, only the tree edges are fast\"",
+     "source": "docs/findings/05-claims.md:409; docs/reports/2026-09-18-et-soc1-on-chip-communication.html \"Inside a shire, only the tree edges are fast\"",
      "fid": "chip:ts-rt-fln"
     }
    ],
@@ -1634,6 +1634,7 @@
     "shire.neigh.l0",
     "shire.neigh.req",
     "shire.neigh.rsp",
+    "shire.neigh.xing",
     "shire.neigh.pmu",
     "minion"
    ],
@@ -1733,7 +1734,7 @@
      "fid": "ml:l2:l2.path.nbr-request"
     },
     {
-     "text": "The neighbourhood's request datapath is 256 bits wide (a 512-bit write takes two cycles and is re-joined before the bank FIFO); its response datapath and the ET-Link into each bank are 512 bits; the minion's own fill interface is 256 bits, so a 64 B line reaches the L1 in two beats.",
+     "text": "The neighbourhood's request datapath is 256 bits wide (a 512-bit write takes two cycles, crosses the bank FIFO as two 256-bit entries and is re-joined into one 512-bit ET-Link request at its output); its response datapath and the ET-Link into each bank are 512 bits; the minion's own fill interface is 256 bits, so a 64 B line reaches the L1 in two beats.",
      "label": "spec",
      "source": "external/core-et/docs/CORE-ET-Neigborhood-MAS.pdf, pdf p.14-15 §4.3, p.19 §4.3.5, p.20 §4.4, p.22-23 §4.4.3; external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf (v1.1), pdf p.10 §1.1",
      "fid": "ml:l2:l2.path.widths"
@@ -1794,6 +1795,57 @@
    ]
   },
   {
+   "id": "shire.neigh.xing",
+   "parent": "shire.neigh",
+   "name": "Bank FIFOs: the voltage and clock crossing",
+   "size_m": 5e-05,
+   "size": {
+    "label": "inferred",
+    "note": "order of magnitude: five output FIFOs (four for the banks, one for the UC block) of three 256-bit entries, with level shifters at the edge"
+   },
+   "kind": "block",
+   "blurb": "The neighbourhood's bank FIFOs are the crossing: semi-synchronous VC FIFOs whose cells sit in the HV region, with level shifters at the edge. The neighbourhood's clock is the shire clock shifted half a cycle by the DLL, so a word is handed over on a known edge and needs no synchroniser.",
+   "facts": [
+    {
+     "text": "The neighbourhood's per-bank output FIFOs double as the clock- and voltage-crossing elements: semi-synchronous VC FIFOs from the cell library, with level shifters built in at the HV/LV boundary. Their storage cells always sit in the HV region 'as performance and access time improve with the voltage'. Responses cross back through a VC FIFO at the neighbourhood's input.",
+     "label": "spec",
+     "source": "external/core-et/docs/CORE-ET-Neigborhood-MAS.pdf, pdf p.18-19 §4.3.4, pdf p.20 §4.4.1, pdf p.45 §7.1 (Figure 16)",
+     "fid": "ml:l2:l2.vc-fifo"
+    },
+    {
+     "text": "The neighbourhood clock is the shire clock shifted by 180 degrees, made by the DLL from the same source, so the two domains meet at a semi-synchronous interface: ET-Link requests and responses cross in semi-synchronous FIFOs, which take advantage of the two clocks being one clock shifted by a constant 180 degrees.",
+     "label": "spec",
+     "source": "external/core-et/docs/CORE-ET-Neigborhood-MAS.pdf, pdf p.39-40 (§6.1, §6.1.1 and its table of crossings)"
+    },
+    {
+     "text": "Four bank FIFOs and a UC FIFO, three entries each, end the request datapath; a 512-bit request takes two consecutive entries, and its halves are re-joined into one 512-bit ET-Link request at the FIFO's output, in the HV region.",
+     "label": "spec",
+     "source": "external/core-et/docs/CORE-ET-Neigborhood-MAS.pdf, pdf p.18-19 (§4.3.4-4.3.5)"
+    },
+    {
+     "text": "The cell library's semi-synchronous VC FIFO, written on the low-voltage side and read on the high-voltage side (vcfifo_wr_lov_ss), works only at a 1:1 clock ratio with the two clocks offset by a DLL, for \"guaranteed signal hand-off between edges without any meta-stability\"; its minimum latency is 1.5 cycles.",
+     "label": "spec",
+     "source": "external/core-et/rtl/libs/mems_and_fifos/vcfifo_wr_lov_ss.v:7-19",
+     "caveat": "erbium-rtl"
+    }
+   ],
+   "children": [],
+   "see": [
+    "lib.levelshift",
+    "lib.flipflop"
+   ],
+   "reuse": {
+    "page": "memory-levels",
+    "scene": "l2",
+    "scale": "xing",
+    "builders": [
+     "buildL2Xing",
+     "buildXing"
+    ],
+    "how": "the L2 scene's crossing scale draws this crossing: the neighbourhood (LV), the bank FIFO, a VC FIFO with level shifters (cross-coupled PMOS over an NMOS pair), and the bank (HV)"
+   }
+  },
+  {
    "id": "shire.neigh.pmu",
    "parent": "shire.neigh",
    "name": "Performance counters (PMU)",
@@ -1842,9 +1894,9 @@
      "source": "external/core-et/docs/CORE-ET Minion Shire Description.pdf, pdf p.11-12 (§4.1, Table 2)"
     },
     {
-     "text": "Programmable clock delay lines: 25 ps steps (first specified at 100 ps), up to 1 ns, set by ESR, one per DLL feedback path.",
+     "text": "Programmable clock delay lines on the four neighbourhood clocks and the two DLL feedback clocks (the shire clock itself cannot be delayed), set by one ESR (clk_dly_ctl): 100 ps coarse steps up to 1,500 ps plus 25 ps fine steps up to 75 ps (first specified as 100 ps steps up to 1 ns; the cells built have 115 ps and 30 ps taps).",
      "label": "spec",
-     "source": "external/core-et/docs/Minion Shire DLL Delay Control.pdf, pdf p.4 (§2)"
+     "source": "external/core-et/docs/Minion Shire DLL Delay Control.pdf, pdf p.4 (§2), p.6 (§3.1), p.8-9 (§3.2.1)"
     },
     {
      "text": "Firmware DVFS limits: minion 300-800 MHz, NoC 300-500 MHz; the minion PLL table covers 300-1,400 MHz in 25 MHz steps.",
@@ -1855,7 +1907,7 @@
     {
      "text": "The minion's sleep and isolation ports (nsleepin, iso_enable, nsleepout) are marked 'not used'; in the open Erbium RTL they are tied off and no firmware drives them. Idle cores are clock-gated, not power-gated.",
      "label": "spec",
-     "source": "external/core-et/docs/Minion Description.pdf, pdf p.7 (interfaces table); docs/findings/05-claims.md:177-179",
+     "source": "external/core-et/docs/Minion Description.pdf, pdf p.7 (interfaces table); docs/findings/05-claims.md:189-191",
      "fid": "chip:minion.sleep-unused"
     }
    ],
@@ -1878,21 +1930,21 @@
    "blurb": "Each shire carries a temperature sensor, a process detector and voltage sense points, read by the service processor. The host sees only the average temperature.",
    "facts": [
     {
-     "text": "One temperature sensor and one process detector in each minion shire and the I/O shire (36 each), 8 voltage-monitor blocks with up to 128 remote sense points, read by five PVT controllers in the I/O shire.",
+     "text": "One temperature sensor and one process detector in each minion shire, the PCIe shire and the I/O shire (36 each, as PRM Fig. 1-3 draws them; the RTL removed the PCIe shire's pair and the firmware reads 35: fact L121), 8 voltage-monitor blocks with up to 128 remote sense points, read by five PVT controllers in the I/O shire.",
      "label": "spec",
-     "source": "external/et-man/ET Programmer's Reference Manual.pdf p.17 §1.6 and p.18 Figure 1-3, Table 1-6",
+     "source": "external/et-man/ET Programmer's Reference Manual.pdf p.17 §1.6 and p.18 Figure 1-3, Table 1-6; external/core-et/rtl/inc/pvt_defines.vh:16-26 ('Pshire no longer has ts/pd (RTLMIN-3619)')",
      "fid": "chip-research:L120"
     },
     {
      "text": "35 temperature sensors on the die (34 minion shires + the I/O shire, one per tile of the 6x6 grid except PCIe), 12-bit (0.061 C) in hardware; the host sees one 34-shire mean in whole degrees plus peak-hold extremes.",
      "label": "spec",
-     "source": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html headline tiles; docs/findings/05-claims.md:331",
+     "source": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html headline tiles; docs/findings/05-claims.md:350",
      "fid": "chip-research:temp-sensors"
     },
     {
      "text": "35 sensors are read: TS0–TS31 for the compute shires (TSn in shire n), TS32 master, TS33 spare, TS34 I/O; the PCIe shire has no sensor.",
      "label": "spec",
-     "source": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:786 (caption) and :789-790",
+     "source": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:822 (caption) and :827-828",
      "fid": "chip:L121"
     }
    ],
@@ -1917,7 +1969,7 @@
      "fid": "chip:minion.isa"
     },
     {
-     "text": "Software sees 2,048 harts on the 32 compute shires: hartid = shire × 64 + minion × 2 + thread (shire = hartid >> 6, neighbourhood = (hartid mod 64) >> 4, minion = hartid >> 1, thread = hartid & 1).",
+     "text": "Software sees 2,048 harts on the 32 compute shires: hartid = shire × 64 + minion × 2 + thread (shire = hartid >> 6, neighbourhood = (hartid mod 64) >> 4, minion = (hartid mod 64) >> 1 (the firmware's get_minion_id(), hartid >> 1, numbers the minions chip-wide), thread = hartid & 1).",
      "label": "spec",
      "source": "docs/et-soc1-notes.md:22; external/et-platform/et-common-libs/include/etsoc/isa/hart.h:50,62,74,86",
      "fid": "chip:chip.harts"
@@ -1930,13 +1982,13 @@
     {
      "text": "The latch arrays switch at the minion-rail voltage: 0.517 V at 600 MHz (0.568 V at 700, 0.618 V at 800). The card's power tree gives the minion rail 400 mV nominal, and the firmware limits it to 400-620 mV.",
      "label": "measured",
-     "source": "docs/findings/16-dvfs-and-leakage.md:20; docs/research/power-telemetry.md:44 (ET-PCIe-Dev-Card-V3), :189-190 (bl2_pmic_controller.h:165-244)",
+     "source": "docs/findings/16-dvfs-and-leakage.md:39; docs/research/power-telemetry.md:44 (ET-PCIe-Dev-Card-V3), :189-190 (bl2_pmic_controller.h:165-244)",
      "fid": "ml:l1:l1.voltage"
     },
     {
      "text": "An awake minion (addi loop) costs about 2 mW (1.87 mW one hart, 3.02 mW both harts, aifoundry2); 5.1 / 6.6 pJ per instruction pooled over three cards.",
      "label": "measured",
-     "source": "docs/energy-manual/02-awake.md:9",
+     "source": "docs/energy-manual/02-awake.md:9-10",
      "fid": "chip:e-awake"
     },
     {
@@ -2046,7 +2098,7 @@
     {
      "text": "L1 data cache hit: 5.25 cycles load-to-use (8.8 ns at 600 MHz); the same on three cards (per-pass ranges 5.247-5.259).",
      "label": "measured",
-     "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: items[LAT-M1].per_card.<card>.passes[].L1; docs/findings/05-claims.md:409",
+     "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: items[LAT-M1].per_card.<card>.passes[].L1; docs/findings/05-claims.md:443",
      "fid": "chip:lat-l1"
     }
    ],
@@ -2100,21 +2152,21 @@
    "size_m": 4e-05,
    "size": {
     "label": "inferred",
-    "note": "4,096 latch bits at roughly 0.15-0.2 um2 each (an HD latch, inference) is 0.0006-0.0008 mm2: about 25-30 um before the read trees, some 40 um with them"
+    "note": "3,968 latch bits at roughly 0.15-0.2 um2 each (an HD latch, inference) is 0.0006-0.0008 mm2: about 25-30 um before the read trees, some 40 um with them"
    },
    "kind": "block",
-   "blurb": "The 32 integer registers of each thread: 64 entries of 64 bits, built from latches, with two read ports and one write port.",
+   "blurb": "The 32 integer registers of each thread: 64 entries of 64 bits, built from latches, with two read ports, a third that reads only x31, and one write port.",
    "facts": [
     {
-     "text": "intpipe_rf instantiates rf_latch_2r_1w with WIDTH = 64 (XREG_SIZE) and ENTRIES = 2 threads x 32: a latch register file, 2 read ports and 1 write port.",
+     "text": "intpipe_rf instantiates rf_latch_2r_1w with WIDTH = 64 (XREG_SIZE) and ENTRIES = 2 threads x 32: a latch register file, 2 read ports, a dedicated read port for x31 and 1 write port.",
      "label": "spec",
-     "source": "external/core-et/rtl/shire/minion/intpipe/intpipe_rf.v:43-50",
+     "source": "external/core-et/rtl/shire/minion/intpipe/intpipe_rf.v:43-61 (rd_par, the x31 port); external/core-et/docs/FE-Intpipe-Description.pdf, pdf p.13 (§3.2.1: \"three for reading and one for writing\")",
      "caveat": "erbium-rtl"
     },
     {
-     "text": "64 x 64 = 4,096 storage latches per minion; at about 10 transistors each, some 41,000 transistors before the read multiplexers.",
+     "text": "62 x 64 = 3,968 storage latches per minion (x0 of each thread is wired to 0); at about 10 transistors each, some 40,000 transistors before the read multiplexers.",
      "label": "inferred",
-     "source": "arithmetic on intpipe_rf.v and the latch count of l1:g.latch-cell; the 10 transistors per latch are assumed, so the total is inferred"
+     "source": "arithmetic on intpipe_rf.v (ZERO wires entries 0 and 32 to zero, with no latch: external/core-et/rtl/libs/rf_latches/rf_latch_2r_1w.v:158-159) and the latch count of l1:g.latch-cell; the 10 transistors per latch are assumed, so the total is inferred"
     }
    ],
    "children": [],
@@ -2243,7 +2295,7 @@
     {
      "text": "The tensor instructions run on the vector unit's own lanes: each of the 8 lanes holds the FMA (TxFMA) and the two int8 multiply-add (IMA/TIMA) units, and state machines in the VPU sequence the multi-cycle tensor operations on them. An 8-lane fmadd.ps does 16 FLOP per cycle, the same fp32 peak as TensorFMA.",
      "label": "spec",
-     "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.8 (§2.1.1.2: TxFMA, a pair of IMA units and 'Finite state machines that generate long sequences of vector operations to implement multi-cycle tensor operations'); external/core-et/docs/Minion VPU Specification.pdf, pdf p.11 (§2: TXFMA and two TIMA units per lane); scripts/ridge-points.py:46, 51 (fp32 TensorFMA and vec32 fmadd.ps, per_cycle 16 each)",
+     "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.8 (§2.1.1.2: TxFMA, a pair of IMA units and 'Finite state machines that generate long sequences of vector operations to implement multi-cycle tensor operations'); external/core-et/docs/Minion VPU Specification.pdf, pdf p.11 (§2: TXFMA and two TIMA units per lane); scripts/ridge-points.py:49, 54 (fp32 TensorFMA and vec32 fmadd.ps, per_cycle 16 each)",
      "fid": "chip:minion.vec-peak"
     },
     {
@@ -2255,7 +2307,7 @@
     {
      "text": "A simple vector-FMA loop reaches only about 1.5 lane-FMAs per cycle per minion; the best published vector-unit matmul is 2.94 TFLOP/s at 650 MHz (FOSDEM 2026), against the tensor unit's 9.5.",
      "label": "measured",
-     "source": "docs/et-soc1-notes.md:152-153, 274; ridge-points page §'The compute ceilings'",
+     "source": "docs/et-soc1-notes.md:165-166, 296; ridge-points page §'The compute ceilings'",
      "fid": "chip:minion.vector-rate"
     }
    ],
@@ -2383,9 +2435,9 @@
      "fid": "chip-research:e-flip-model"
     },
     {
-     "text": "A random-data 16x16x16 tile clocks 2.5 million register bits and toggles 74 million multiplier-tree nets; zeros clock nothing, because the lane clock is withheld when an operand word is zero.",
-     "label": "measured",
-     "source": "docs/energy-manual/03-instructions.md:53-65 (flip model fitted on aifoundry2)"
+     "text": "In the flip model (the TXFMA RTL replayed on the operands aifoundry2 ran), a random-data 16x16x16 tile clocks 2.5 million register bits and toggles 74 million multiplier-tree nets; zeros clock nothing, because the lane clock is withheld when an operand word is zero.",
+     "label": "derived",
+     "source": "docs/energy-manual/03-instructions.md:55, 65; docs/findings/10-data-dependent-power.md:73 (E11); docs/findings/11-thermal-model.md:17 (counted in RTL)"
     }
    ],
    "children": [
@@ -2556,9 +2608,9 @@
      "caveat": "erbium-rtl"
     },
     {
-     "text": "No hardware divide or square root in U-mode: fdiv.ps and fsqrt.ps trap, as do sine, reciprocal square root, 64-bit float conversion and reading the cycle CSR; 161 of the instructions tried execute in U-mode, 13 trap.",
+     "text": "No hardware float or vector divide or square root in U-mode (the scalar integer div and rem run): fdiv.ps and fsqrt.ps trap, as do sine, reciprocal square root, conversion between fp32 and 64-bit integers (fcvt.l.s, fcvt.s.l) and reading the cycle CSR; 161 of the instructions tried execute in U-mode, 13 trap.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:278, 296 (workloads/enercat/enercat_modes.json)",
+     "source": "docs/findings/05-claims.md:290, 310 (workloads/enercat/enercat_modes.json); docs/energy-manual/03a-every-instruction.md:7 (the 13 that trap), 52-55 (div, divu, rem, remu retire in U-mode); external/et-man/ET Programmer's Reference Manual.pdf, pdf p.36 (§3.5: the float and vector divides and square roots, frsq.ps, fsin.ps and the conversions between fp32 and 64-bit integers trap to M-mode emulation)",
      "fid": "chip:minion.no-divide"
     }
    ],
@@ -2599,7 +2651,7 @@
    "size_m": 0.0001,
    "size": {
     "label": "inferred",
-    "note": "order of magnitude: state machines and two 1 KiB buffers"
+    "note": "order of magnitude: state machines; TenB and TenC, drawn here as the tensor extension's state, sit in the lanes' TIMA units in the RTL"
    },
    "kind": "block",
    "blurb": "Runs the matrix-multiply instructions: state machines that feed the eight lanes step after step for up to 512 cycles from one instruction, with the operands in the L1 scratchpad and a stream buffer.",
@@ -2607,19 +2659,19 @@
     {
      "text": "The tensor instructions run on the vector unit's own lanes: each of the 8 lanes holds the FMA (TxFMA) and the two int8 multiply-add (IMA/TIMA) units, and state machines in the VPU sequence the multi-cycle tensor operations on them. An 8-lane fmadd.ps does 16 FLOP per cycle, the same fp32 peak as TensorFMA.",
      "label": "spec",
-     "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.8 (§2.1.1.2: TxFMA, a pair of IMA units and 'Finite state machines that generate long sequences of vector operations to implement multi-cycle tensor operations'); external/core-et/docs/Minion VPU Specification.pdf, pdf p.11 (§2: TXFMA and two TIMA units per lane); scripts/ridge-points.py:46, 51 (fp32 TensorFMA and vec32 fmadd.ps, per_cycle 16 each)",
+     "source": "external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.8 (§2.1.1.2: TxFMA, a pair of IMA units and 'Finite state machines that generate long sequences of vector operations to implement multi-cycle tensor operations'); external/core-et/docs/Minion VPU Specification.pdf, pdf p.11 (§2: TXFMA and two TIMA units per lane); scripts/ridge-points.py:49, 54 (fp32 TensorFMA and vec32 fmadd.ps, per_cycle 16 each)",
      "fid": "chip:minion.vec-peak"
     },
     {
-     "text": "A TensorFMA computes C[M][N] += A[M][K] · B[K][N] with M, N ≤ 16 and K ≤ 64 / (bytes per element): A from the L1 scratchpad, B streamed through TenB, C accumulated in hart 0's vector registers (int8 in TenC). One fp32 op is 4,096 multiply-adds.",
+     "text": "A TensorFMA computes C[M][N] += A[M][K] · B[K][N] with M, N ≤ 16 and K ≤ 64 / (bytes per element): A from the L1 scratchpad, B from the L1 scratchpad or streamed through TenB by a paired TensorLoadB, C accumulated in hart 0's vector registers (int8 in TenC). One fp32 op is 4,096 multiply-adds.",
      "label": "spec",
-     "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.264 (§9); docs/et-soc1-notes.md:292-294",
+     "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.264 (§9), p.277 (TensorLoadB) and p.291 (TensorFMA32, TENB); docs/et-soc1-notes.md:314-316",
      "fid": "chip:minion.tensor-shape"
     },
     {
      "text": "With A and B both in the L1 scratchpad a 16×16×16 fp32 TensorFMA takes 546 cycles (fp16 546, int8 318), identical for every data pattern.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:31-32, 414 (docs/reports/data/2026-09-25-claims-v3/results/lat.json LAT-S1)",
+     "source": "docs/findings/05-claims.md:39-40, 449 (docs/reports/data/2026-09-25-claims-v3/results/lat.json LAT-S1)",
      "fid": "chip:minion.tensorfma-546"
     },
     {
@@ -2686,7 +2738,7 @@
     "note": "logically 1 KiB, \"physically much smaller\""
    },
    "kind": "block",
-   "blurb": "Where the B matrix streams in from the cache on its way to the lanes; the programmer sees 16 registers of 64 bytes, the hardware keeps only what is in flight.",
+   "blurb": "Where the B matrix streams in from the cache, kept in each lane's two TIMA units; the programmer sees 16 registers of 64 bytes, the hardware keeps only what is in flight.",
    "facts": [
     {
      "text": "TenB is virtually 16 registers × 64 B (1 KiB), physically much smaller, and only streams loaded data to a consumer; TenC is 16 × 64 B (1 KiB) of int32 accumulators visible only to integer tensor multiplies.",
@@ -2695,9 +2747,9 @@
      "fid": "chip:minion.tenb-tenc"
     },
     {
-     "text": "Modules vpu_tensorb_rf, vpu_tensora_rf, vpu_tensortmp_rf.",
+     "text": "TenB is vpu_tensorb_rf, instantiated in each of a lane's two vpu_lane_tima units (4 entries of 32 bits each: 256 B per minion); vpu_tensora_rf (TenA, the A buffer) and vpu_tensortmp_rf sit in vpu_ctrl.",
      "label": "spec",
-     "source": "external/core-et/rtl/shire/minion/vpu/",
+     "source": "external/core-et/rtl/shire/minion/vpu/vpu_lane_tima.v:42, vpu_lane.v:408-421, vpu_ctrl.v:1806, 1832, vpu_tensorb_rf.v:27-29; external/core-et/rtl/inc/minion_defines.vh:191, 349; external/core-et/rtl/inc/vpu_defines.vh:210",
      "caveat": "erbium-rtl"
     }
    ],
@@ -2717,7 +2769,7 @@
     "note": "8,192 bits of register file: order of magnitude"
    },
    "kind": "block",
-   "blurb": "Sixteen 64-byte registers that hold the running 32-bit sums of an integer matrix multiply.",
+   "blurb": "Sixteen 64-byte registers, kept in each lane's two TIMA units, that hold the running 32-bit sums of an integer matrix multiply.",
    "facts": [
     {
      "text": "TenB is virtually 16 registers × 64 B (1 KiB), physically much smaller, and only streams loaded data to a consumer; TenC is 16 × 64 B (1 KiB) of int32 accumulators visible only to integer tensor multiplies.",
@@ -2752,7 +2804,7 @@
     {
      "text": "Each minion has a private 4 KB L1 data cache: 16 sets × 4 ways × 64 B lines, not coherent with any other cache, writing back whole 64-byte lines.",
      "label": "spec",
-     "source": "external/et-man/ET Minion Overview.pdf, pdf p.1 (slide 2); external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.9 (§2.1.1.5)",
+     "source": "external/et-man/ET Minion Overview.pdf, pdf p.1 (slide 2); external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.9 (§2.1.1.5); external/et-man/ET Programmer's Reference Manual.pdf, pdf p.243 (§8: an eviction writes a dirty line back); external/core-et/docs/Minion DCache Description.pdf, pdf p.33 (§3.5: \"Evict operations (REQ_Write): always 512b\")",
      "fid": "chip:minion.l1d"
     },
     {
@@ -2776,7 +2828,7 @@
     {
      "text": "L1 data cache hit: 5.25 cycles load-to-use (8.8 ns at 600 MHz); the same on three cards (per-pass ranges 5.247-5.259).",
      "label": "measured",
-     "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: items[LAT-M1].per_card.<card>.passes[].L1; docs/findings/05-claims.md:409",
+     "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: items[LAT-M1].per_card.<card>.passes[].L1; docs/findings/05-claims.md:443",
      "fid": "chip:lat-l1"
     },
     {
@@ -3059,7 +3111,7 @@
    "blurb": "One row of 64 latches that all load together when the row's clock gate fires; for reading, each output bit is chosen from 128 rows by a tree of seven levels of two-way switches.",
    "facts": [
     {
-     "text": "A latch-array read is logic: the registered address drives a decoder or a mux tree (128:1 per output bit, e.g. seven 2:1 levels or four 4:1 levels), and only the nodes whose value changes spend energy, so read energy depends on the data.",
+     "text": "A latch-array read is logic: the registered address drives a decoder or a mux tree (128:1 per output bit, e.g. seven 2:1 levels, or three 4:1 levels and one 2:1), and only the nodes whose value changes spend energy, so read energy depends on the data.",
      "label": "generic",
      "source": "textbook standard-cell memory design (GENERIC)",
      "fid": "ml:l1:g.latch-read"
@@ -3109,7 +3161,7 @@
     {
      "text": "The firmware puts every minion's L1 in scratchpad mode before each launch, leaving each hart 512 B of data cache (2 sets × 4 ways × 64 B).",
      "label": "spec",
-     "source": "docs/et-soc1-notes.md:84-86; docs/research/counters-and-dram.md:446-447 (fw MachineMinion/src/syscall.c:348-420)",
+     "source": "docs/et-soc1-notes.md:90-92; docs/research/counters-and-dram.md:446-447 (fw MachineMinion/src/syscall.c:348-420)",
      "fid": "chip:minion.l1-firmware"
     },
     {
@@ -3223,19 +3275,19 @@
     {
      "text": "Inside a shire only the reduction-tree edges are fast: 68 cycles (113 ns) round trip for 28 pairs per shire (in every neighbourhood 0–1, 0–2, 0–4, 2–3, 4–5, 4–6, 6–7) and 114–115 cycles (190 ns) for all 468 others, in every pass on three cards.",
      "label": "measured",
-     "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:735-742; embedded nocbench-data primitives.tree_pairs, tree_hop (68.1), other_hop (114.1)",
+     "source": "docs/reports/2026-09-18-et-soc1-on-chip-communication.html:774-780; embedded nocbench-data primitives.tree_pairs, tree_hop (68.1), other_hop (114.1)",
      "fid": "chip:L116"
     },
     {
-     "text": "The hardware keeps one peer-to-peer ready bit per minion, not one per partner: a minion receiving from two TensorSend partners at once hangs its hart permanently (the card then needs a reset).",
+     "text": "The hardware keeps one peer-to-peer ready bit per minion, not one per partner: if a minion that TensorSends to two partners gets both their readies before it has used the first, one is lost, and that receiver and its sender hang for good (the card then needs a reset).",
      "label": "spec",
-     "source": "docs/et-soc1-notes.md:124-128 (core-et dcache_reduce.v `partner_ready_peer`); docs/findings/05-claims.md:257",
+     "source": "docs/et-soc1-notes.md:137-141 (core-et dcache_reduce.v `partner_ready_peer`); docs/findings/05-claims.md:269",
      "fid": "chip:minion.one-ready-bit"
     },
     {
      "text": "Combining on receive (fp32/int32 add, max, min) adds 0 cycles to a round trip.",
      "label": "measured",
-     "source": "docs/et-soc1-notes.md:114; on-chip communication page table",
+     "source": "docs/et-soc1-notes.md:127; on-chip communication page table",
      "fid": "chip:minion.combine-free"
     }
    ],
@@ -3339,15 +3391,15 @@
      "fid": "chip:L48"
     },
     {
-     "text": "Of the 91-cycle memory-shire constant (152 ns), the DRAM chip accounts for about 25–28 cycles (activate tRCD 11 cycles = 18 ns, 19.3 ns read latency, one or two 4.3 ns bursts); at most ~63–66 cycles (~105–110 ns) are the memory shire itself: controller queue, PHY and the crossings between the 933 MHz DDR clock and the mesh.",
+     "text": "Of the 91-cycle memory-shire constant (152 ns), the DRAM chip accounts for about 28 cycles (activate tRCD 11 cycles = 18 ns, 19.3 ns read latency, the two 4.3 ns bursts of a 64-byte line); the rest, at most ~63 cycles (~105 ns), is the L3 home's miss handling (about 12 cycles by the spec: an L3 miss is 42 shire clocks against 30 for a hit) and the memory shire: controller queue, PHY and the crossings between the 933 MHz DDR clock and the mesh.",
      "label": "derived",
-     "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:888-893",
+     "source": "docs/reports/2026-09-19-et-soc1-memory-anatomy.html:937-942; external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf p.11 Table 1 (L3 read hit 30 shire clocks, L3 read miss 42 plus the NoC and memory)",
      "fid": "chip:L46"
     },
     {
-     "text": "Past the L3, the DRAM leg costs 91 + 12 × hops(home shire, memory shire) cycles; about 25 of the 91 are the DRAM chip (activate 11, read and burst 14) and about 66 the memory shire. Only 25-28 of a ~300-cycle DRAM load are the DRAM's own timing.",
+     "text": "Past the L3, the DRAM leg costs 91 + 12 × hops(home shire, memory shire) cycles; about 28 of the 91 are the DRAM chip (activate 11, read latency and two bursts 17) and at most about 63 the L3 home's miss handling and the memory shire. Only about 28 of a ~300-cycle DRAM load are the DRAM's own timing.",
      "label": "measured",
-     "source": "docs/et-soc1-notes.md:166; docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json `decomp.ms_const`; cards.json `ms_const` (90-91 on three cards); docs/findings/05-claims.md:404",
+     "source": "docs/et-soc1-notes.md:179; docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json `decomp.ms_const`; cards.json `ms_const` (90-91 on three cards); docs/findings/05-claims.md:435",
      "fid": "chip:dram.leg"
     }
    ],
@@ -3430,7 +3482,7 @@
     {
      "text": "Inside a channel: bank PA[12:10], column PA[17:13] (plus PA[5:1] within the line), row PA[18] and up (PA[34:18]); 8 banks, 2 KB page, one rank per channel.",
      "label": "measured",
-     "source": "docs/et-soc1-notes.md:167; docs/research/counters-and-dram.md:289, 362-370",
+     "source": "docs/et-soc1-notes.md:180; docs/research/counters-and-dram.md:289, 362-370",
      "fid": "chip:dram.row-bits"
     },
     {
@@ -3548,15 +3600,15 @@
      "fid": "chip:dram.channels"
     },
     {
-     "text": "32 GB of LPDDR4X on these V3 cards (Micron part): 2 GB per channel; the chip supports 8 to 32 GB.",
-     "label": "spec",
-     "source": "external/et-man/ET-PCIe-Dev-Card-V3.pdf, pdf p.1; docs/research/counters-and-dram.md:289; external/et-man/ET Programmer's Reference Manual.pdf, pdf p.342 and p.552; external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.30",
+     "text": "32 GB of LPDDR4X on aifoundry2 and aifoundry3, 2 GB per channel, and 16 GB on aifoundry1 card 1, 1 GB per channel, as the firmware reads the DRAM's density at boot and the runtime reports it. The vendor's document names its 32 GB V3 card a Micron part; which maker's parts the lab cards carry is not recorded. The datasheet gives the chip 4 GB (2 Gb per channel) at full bandwidth up to 32 GB (16 Gb per channel); the PRM gives products 8 to 32 GB, the range mprot's dram_size field addresses.",
+     "label": "measured",
+     "source": "docs/reports/data/2026-09-27-pcie/raw/<card>/r1/info.err ('DRAM size (B)'); external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:389-420 (the MR8 density sets ddr_mem_size); external/et-platform/device-minion-runtime/src/MasterMinion/src/config/mm_config.c:74-92 (the host's share of it); external/et-man/ET-PCIe-Dev-Card-V3.pdf, pdf p.1 ('32GB (Micron part) v3 card Bringup Planning'); docs/research/counters-and-dram.md:289; external/et-man/ET Programmer's Reference Manual.pdf, pdf p.342 and p.552; external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.30",
      "fid": "chip:dram.capacity"
     },
     {
      "text": "The firmware hard-codes the 933 MHz DDR configuration on every card (controller clock 933 MHz, DRAM clock 1,866 MHz, 3,733 MT/s); telemetry reads mhz.ddr = 933 in every sample.",
      "label": "measured",
-     "source": "external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:41-42, 114-116, 225-228; docs/research/counters-and-dram.md:291-292; docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), field `mhz.ddr`",
+     "source": "external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:643-649 (configure_memshire: .frequency = DDR_FREQUENCY_933MHZ, '//TODO: decide ddr_mode'); 41-42, 114-116, 225-228 (the 933 MHz PLL mode and controller config); docs/research/counters-and-dram.md:291-292; docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), field `mhz.ddr`",
      "fid": "chip:dram.rate-card"
     },
     {
@@ -3572,7 +3624,7 @@
      "fid": "chip:dram.pkg-pairing"
     },
     {
-     "text": "The exact LPDDR4X part (Micron part number), its die density, the number of dies per package and whether each channel is one x16 die or two byte-mode dies are not in any source. The firmware reads the vendor (MR5; Micron = 0xFF) and density (MR8) at every boot and logs them, but no log has been captured.",
+     "text": "The exact LPDDR4X part (its maker and part number), its die density, the number of dies per package and whether each channel is one x16 die or two byte-mode dies are not in any source. The firmware reads the vendor (MR5; Micron = 0xFF) and density (MR8) at every boot and logs them, but no log has been captured.",
      "label": "unknown",
      "source": "external/et-man/ET-PCIe-Dev-Card-V3.pdf pdf p.1; external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:364-398 (ddr_config: 'DRAM vendor = MICRON', 'DRAM size = 32GB'); external/et-platform/device-bootloaders/src/ServiceProcessorBL2/utils/mem_controller_utils.c:936-1027 (ms_verify_ddr_density; comment 'for the micron part it is 0x10 for 32gb and 0x18 for 64gb')",
      "fid": "ml:dram:dram.org.part"
@@ -3611,15 +3663,15 @@
    "blurb": "One 16-bit channel: 8 banks, each a large grid of rows; opening a row copies its 16,384 bits into a row of sense amplifiers, from which the 64-byte line is read.",
    "facts": [
     {
-     "text": "Each channel is one rank of 8 banks x 131,072 rows x 2 KB pages (1,024 columns of 16 bits): 8 x 131,072 x 2 KB = 2 GB, matching the capacity. One activate therefore senses 16,384 bits into one bank's sense amplifiers.",
+     "text": "On the 32 GB cards (aifoundry2, aifoundry3) each channel is one rank of 8 banks x 131,072 rows x 2 KB pages (1,024 columns of 16 bits): 8 x 131,072 x 2 KB = 2 GB, matching their capacity (aifoundry1 card 1's 1 GB channels are a smaller die). One activate therefore senses 16,384 bits into one bank's sense amplifiers.",
      "label": "derived",
      "source": "external/et-platform/etsoc-hal/src/memshire_ddr_init_functions.c:4639-4654 (3 bank, 10 column, 17 row address bits); external/core-et/rtl/inc/memshire_defines.vh:38 (`DDR_BANKS_SIZE 3`); external/et-platform/etsoc-hal/src/memshire_ddr_init_functions.c:4539 (ODTMAP rank 0 only); JEDEC JESD209-4 addressing for a 16 Gb-per-channel LPDDR4 die (8 banks, R0-R16, C0-C9, 2 KB page)",
      "fid": "ml:dram:dram.org.geometry"
     },
     {
-     "text": "32 GB of LPDDR4X on the V3 cards (a Micron part): 2 GB, i.e. 16 Gbit, per channel; the chip supports up to 32 GB 'using LPDDR4X at 16 Gbits per channel'.",
-     "label": "spec",
-     "source": "external/et-man/ET-PCIe-Dev-Card-V3.pdf pdf p.1 ('32GB (Micron part) v3 card'); external/et-man/ET Preliminary Datasheet Rev 1.0.pdf pdf p.30 §7.1; external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:389-398 (MR8 density decode to 32 GB)",
+     "text": "32 GB of LPDDR4X on aifoundry2 and aifoundry3: 2 GB, i.e. 16 Gbit, per channel; aifoundry1 card 1 has 16 GB, 8 Gbit per channel (the sizes the firmware reads from MR8 at boot, as the driver reports them). The chip supports up to 32 GB 'using LPDDR4X at 16 Gbits per channel'. The vendor names its 32 GB V3 card a Micron part; which maker's parts the lab cards carry is not recorded.",
+     "label": "measured",
+     "source": "docs/reports/data/2026-09-27-pcie/raw/<card>/r1/info.err ('DRAM size (B)': 34265366528 on aifoundry2 and aifoundry3, 17085497344 on aifoundry1-c1: 32 and 16 GiB less the 90 MiB the device keeps); external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:389-420 (the MR8 density sets the size); external/et-man/ET-PCIe-Dev-Card-V3.pdf pdf p.1 ('32GB (Micron part) v3 card'); external/et-man/ET Preliminary Datasheet Rev 1.0.pdf pdf p.30 §7.1",
      "fid": "ml:dram:dram.org.capacity"
     }
    ],
@@ -4001,14 +4053,14 @@
    "blurb": "Controllers that read the temperature sensors, process detectors and voltage monitors spread over the die.",
    "facts": [
     {
-     "text": "36 process detectors and 36 temperature sensors (one each per minion shire and the I/O shire) and 8 voltage-monitor blocks of up to 16 sense points (128 in all), read through five PVT controllers. (The manual's own count does not add up: 34 minion shires and the I/O shire make 35, and it does not say where the 36th sensor sits.)",
+     "text": "36 process detectors and 36 temperature sensors (one each per minion shire, the PCIe shire and the I/O shire, as the manual's Figure 1-3 draws them) and 8 voltage-monitor blocks of up to 16 sense points (128 in all), read through five PVT controllers. (The RTL removed the PCIe shire's pair, \"Pshire no longer has ts/pd (RTLMIN-3619)\", core-et rtl/inc/pvt_defines.vh:16-26, and the firmware reads 35: fact L121.)",
      "label": "spec",
-     "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.17-18 (§1.6, Table 1-6: \"36 sensors. 1 PD in each minion/IO-Shire\")"
+     "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.17-18 (§1.6, Figure 1-3, Table 1-6: \"36 sensors. 1 PD in each minion/IO-Shire\"); external/core-et/rtl/inc/pvt_defines.vh:16-26"
     },
     {
      "text": "35 temperature sensors on the die (34 minion shires + the I/O shire, one per tile of the 6x6 grid except PCIe), 12-bit (0.061 C) in hardware; the host sees one 34-shire mean in whole degrees plus peak-hold extremes.",
      "label": "spec",
-     "source": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html headline tiles; docs/findings/05-claims.md:331",
+     "source": "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html headline tiles; docs/findings/05-claims.md:350",
      "fid": "chip-research:temp-sensors"
     }
    ],
@@ -4044,11 +4096,11 @@
   {
    "id": "mesh",
    "parent": "die",
-   "name": "The mesh (network on chip)",
-   "size_m": 0.0222,
+   "name": "One mesh hop",
+   "size_m": 0.00372,
    "size": {
-    "label": "derived",
-    "note": "the 6-column shire grid spans about 22.2 mm (L08); with the memory shires the mesh spans the die"
+    "label": "inferred",
+    "note": "one hop: one tile pitch (chip.hop-pitch); the whole mesh spans the die, its 6-column shire grid about 22.2 mm (L08)"
    },
    "kind": "block",
    "blurb": "The on-chip network: a grid of 44 stops, one per shire, joined by links to their neighbours. A message crosses one link per step (a hop); each hop adds 12 cycles to a round trip.",
@@ -4062,7 +4114,7 @@
     {
      "text": "Each mesh hop adds 12 cycles round trip at 600 MHz (20 ns): L3 11.99, remote scratchpad 12.00, TensorSend 12.01-12.02 cycles per hop on every card.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:403; docs/findings/05-claims.md:411; docs/findings/05-claims.md:412",
+     "source": "docs/findings/05-claims.md:434; docs/findings/05-claims.md:445; docs/findings/05-claims.md:446",
      "fid": "chip:mesh-hop-lat"
     },
     {
@@ -4074,7 +4126,7 @@
     {
      "text": "NoC rail: set point 485 mV, 484-485 mV on die (per-shire 483-486 mV at idle).",
      "label": "measured",
-     "source": "docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), fields `reg_mv.noc`, `die_mv.noc`; docs/findings/05-claims.md:41",
+     "source": "docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), fields `reg_mv.noc`, `die_mv.noc`; docs/findings/05-claims.md:49",
      "fid": "chip:mesh.voltage"
     },
     {
@@ -4086,7 +4138,7 @@
     {
      "text": "A random bit per mm on free links, mesh rail at 0.485 V: 37 fJ (25 of it data-dependent); on board power 47 fJ. Dally's rule of thumb is ~100 fJ/b-mm.",
      "label": "measured",
-     "source": "report.json: headline[\"uncontended/noc_rail\"].random_bit_total / .random_bit_data, headline[\"uncontended/board\"].random_bit_total; per card (V3) docs/findings/05-claims.md:444",
+     "source": "report.json: headline[\"uncontended/noc_rail\"].random_bit_total / .random_bit_data, headline[\"uncontended/board\"].random_bit_total; per card (V3) docs/findings/05-claims.md:482",
      "fid": "chip:mesh-bit-mm-free"
     },
     {
@@ -4120,25 +4172,25 @@
     {
      "text": "Shire tile pitch 3.73 mm east-west and 3.70 mm north-south, so one mesh hop is about 3.72 mm (3.64-3.74 over three readings).",
      "label": "inferred",
-     "source": "docs/findings/05-claims.md:340; docs/reports/data/2026-09-24-wire-energy/report.json `inputs.hop_mm`",
+     "source": "docs/findings/05-claims.md:361; docs/reports/data/2026-09-24-wire-energy/report.json `inputs.hop_mm`",
      "fid": "chip:chip.hop-pitch"
     },
     {
-     "text": "A random bit costs 36.2 fJ per mm on the mesh rail over free links (46.7 on board power). A 64 B reply over one 3.72 mm hop is then about 69 pJ on the mesh rail (1.1 pJ/B per hop); on board power a hop measures 115 pJ per line on random data and 43 on zeros (l3.energy-per-load).",
+     "text": "A random bit costs 36.7 fJ per mm on the mesh rail over free links (47.4 on board power; three cards). A 64 B reply over one 3.72 mm hop is then about 70 pJ on the mesh rail (1.1 pJ/B per hop); on board power a hop measures 115 pJ per line on random data and 43 on zeros (l3.energy-per-load).",
      "label": "derived",
-     "source": "docs/findings/05-claims.md:350, 457 (docs/reports/data/2026-09-24-wire-energy/report.json headline['uncontended/noc_rail']); hop length docs/findings/05-claims.md:349",
+     "source": "docs/findings/05-claims.md:362, 482 (docs/reports/data/2026-09-24-wire-energy/report.json headline['uncontended/noc_rail']); hop length docs/findings/05-claims.md:361",
      "fid": "ml:l3:l3.wire-energy"
     },
     {
      "text": "A random bit moved 1 mm over free links at 0.485 V: mesh rail 36.1 [35.2–37.0] (aifoundry2), 35.8 [35.1–36.5] (aifoundry3), 38.1 [26.3–49.9] fJ (aifoundry1 card 1); board power 46.7, 44.4, 51.1 fJ.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:341, 444 (V3R/wire.json WIRE-P1-16/P11a, P11b); docs/reports/data/2026-09-24-wire-energy/report.json headline",
+     "source": "docs/findings/05-claims.md:362, 482 (V3R/wire.json WIRE-P1-16/P11a, P11b); docs/reports/data/2026-09-24-wire-energy/report.json headline",
      "fid": "chip-research:L88"
     },
     {
-     "text": "Measured on the mesh rail, routers included: 0.50-0.84 pF of switched capacitance per mm of travel, against 0.2-0.4 pF/mm estimated for a plain 7 nm repeated wire; most of the mesh's efficiency comes from its 0.485 V.",
+     "text": "Measured on the mesh rail, routers included: about 0.42-0.53 pF of switched capacitance per mm of travel (25-31 fJ of data-dependent energy per random bit and mm, free links to a loaded mesh, as C = 4E/V² at 0.485 V), against 0.2-0.4 pF/mm estimated for a plain 7 nm repeated wire; most of the mesh's efficiency comes from its 0.485 V.",
      "label": "derived",
-     "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md lines 38, 170, 255"
+     "source": "docs/reports/data/2026-09-24-wire-energy/report.json headline[\"uncontended/noc_rail\"] and [\"loaded/noc_rail\"] .random_bit_data; docs/reports/data/2026-09-24-wire-energy/research/lit/dally_gap.py (C = 4E/V²: 420 and 530 fF/mm); docs/findings/05-claims.md:381, 384 (the 23 Sep figures of research/SYNTHESIS.md §2c, 0.50-0.57 pF/mm on the mesh rail and 0.67-0.84 on board power, are superseded)"
     }
    ],
    "children": [
@@ -4174,7 +4226,7 @@
     {
      "text": "GENERIC. A wire's switching energy is about C x V^2 per 0-to-1 transition (C about 0.2 pF/mm), so random data (a transition on about half the bits) costs several times zeros; repeaters add to it.",
      "label": "generic",
-     "source": "textbook; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:135-147 (literature table)",
+     "source": "textbook; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:142-154 (literature table)",
      "fid": "ml:l3:g.wire-energy"
     },
     {
@@ -4221,7 +4273,7 @@
     {
      "text": "The latch arrays switch at the minion-rail voltage: 0.517 V at 600 MHz (0.568 V at 700, 0.618 V at 800). The card's power tree gives the minion rail 400 mV nominal, and the firmware limits it to 400-620 mV.",
      "label": "measured",
-     "source": "docs/findings/16-dvfs-and-leakage.md:20; docs/research/power-telemetry.md:44 (ET-PCIe-Dev-Card-V3), :189-190 (bl2_pmic_controller.h:165-244)",
+     "source": "docs/findings/16-dvfs-and-leakage.md:39; docs/research/power-telemetry.md:44 (ET-PCIe-Dev-Card-V3), :189-190 (bl2_pmic_controller.h:165-244)",
      "fid": "ml:l1:l1.voltage"
     },
     {
@@ -4233,13 +4285,13 @@
     {
      "text": "NoC rail: set point 485 mV, 484-485 mV on die (per-shire 483-486 mV at idle).",
      "label": "measured",
-     "source": "docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), fields `reg_mv.noc`, `die_mv.noc`; docs/findings/05-claims.md:41",
+     "source": "docs/reports/data/2026-09-20-power-aifoundry2/horace-telemetry.jsonl (and horace2-, thermal-telemetry.jsonl: 3,681 samples, 20 Sep), fields `reg_mv.noc`, `die_mv.noc`; docs/findings/05-claims.md:49",
      "fid": "chip:mesh.voltage"
     },
     {
      "text": "Per-shire on-die voltage at idle (34 minion shires): minion rail 517–521 mV, lows 513 (shires 0, 1, 2, 18) to 520, highs to 522; SRAM 703–707 mV; mesh 483–486 mV.",
      "label": "measured",
-     "source": "docs/findings/05-claims.md:41 (docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json)",
+     "source": "docs/findings/05-claims.md:49 (docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json)",
      "fid": "chip:L123"
     },
     {
@@ -4284,7 +4336,7 @@
     {
      "text": "The minion's sleep and isolation ports (nsleepin, iso_enable, nsleepout) are marked 'not used'; in the open Erbium RTL they are tied off and no firmware drives them. Idle cores are clock-gated, not power-gated.",
      "label": "spec",
-     "source": "external/core-et/docs/Minion Description.pdf, pdf p.7 (interfaces table); docs/findings/05-claims.md:177-179",
+     "source": "external/core-et/docs/Minion Description.pdf, pdf p.7 (interfaces table); docs/findings/05-claims.md:189-191",
      "fid": "chip:minion.sleep-unused"
     },
     {
@@ -4316,7 +4368,7 @@
     {
      "text": "TSMC 7 nm, over 24 billion transistors, 89 mask layers.",
      "label": "spec",
-     "source": "docs/findings/05-claims.md:513; docs/findings/01-resources.md:91-104 (R6)",
+     "source": "docs/findings/05-claims.md:832; docs/findings/01-resources.md:110-123 (R6)",
      "fid": "chip:chip.process"
     },
     {
@@ -4440,7 +4492,7 @@
     {
      "text": "TSMC N7 high-density cells are 240 nm tall (6 tracks of 40 nm); high-performance cells 300 nm.",
      "label": "outside",
-     "source": "WikiChip Fuse, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", https://fuse.wikichip.org/?p=2408 (HD cell 240 nm tall = 6 tracks of 40 nm, HP 300 nm; about 91.2 MTr/mm2 HD, 65 HP); values as the search summary reported them, the page itself refused the connection on 30 Sep 2026"
+     "source": "WikiChip Fuse, D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", 16 Jun 2019, https://fuse.wikichip.org/?p=2408, read via the Internet Archive capture of 13 Nov 2019 (\"Those cells are 240 nm and 300 nm tall respectively\"; HD 6 tracks of 40 nm, HP 7.5; about 91.2 MTr/mm2 HD, 65 HP)"
     }
    ],
    "children": [],
@@ -4527,7 +4579,7 @@
      "source": "N. Weste and D. Harris, CMOS VLSI Design, 4th ed. (Addison-Wesley 2011), ch. 9 (combinational circuits)"
     },
     {
-     "text": "A latch-array read is logic: the registered address drives a decoder or a mux tree (128:1 per output bit, e.g. seven 2:1 levels or four 4:1 levels), and only the nodes whose value changes spend energy, so read energy depends on the data.",
+     "text": "A latch-array read is logic: the registered address drives a decoder or a mux tree (128:1 per output bit, e.g. seven 2:1 levels, or three 4:1 levels and one 2:1), and only the nodes whose value changes spend energy, so read energy depends on the data.",
      "label": "generic",
      "source": "textbook standard-cell memory design (GENERIC)",
      "fid": "ml:l1:g.latch-read"
@@ -4648,7 +4700,7 @@
     {
      "text": "txfma_booth_ppg_32r4_norm decodes each 3-bit group into one of five selections (0, +1, +2, -2, -1).",
      "label": "spec",
-     "source": "external/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_booth_ppg_32r4_norm.v:13-25",
+     "source": "external/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_booth_ppg_32r4_norm.v:13-32",
      "caveat": "erbium-rtl"
     },
     {
@@ -4673,10 +4725,10 @@
     "note": "a 64-bit adder: tens of um (order of magnitude)"
    },
    "kind": "circuit",
-   "blurb": "Adding 64-bit numbers quickly means not waiting for a carry to ripple through 64 positions: prefix adders compute all the carries in about six levels of logic.",
+   "blurb": "Adding 64-bit numbers quickly means not waiting for a carry to ripple through 64 positions: the fastest prefix adders compute all the carries in about six levels of logic.",
    "facts": [
     {
-     "text": "Parallel-prefix adders (Kogge-Stone, Sklansky, Brent-Kung) compute carries in log2(N) levels of generate/propagate cells.",
+     "text": "Parallel-prefix adders compute every carry in a tree of generate/propagate cells: Kogge-Stone and Sklansky in log2(N) levels, Brent-Kung in 2 log2(N) - 1 levels with fewer cells and wires.",
      "label": "generic",
      "source": "N. Weste and D. Harris, CMOS VLSI Design, 4th ed. (Addison-Wesley 2011), ch. 11 (addition)"
     }
@@ -4708,7 +4760,7 @@
     {
      "text": "Estimate: at 8-12 transistors per latch bit, the data array holds about 0.26-0.39 million storage transistors per minion (0.29-0.43 billion on the chip, 1.2-1.8% of its >24 billion), against 0.2 million for the same 4 KB in 6T SRAM.",
      "label": "generic",
-     "source": "l1.bits x GENERIC transistors per bit; chip total from docs/findings/01-resources.md:101",
+     "source": "l1.bits x GENERIC transistors per bit; chip total from docs/findings/01-resources.md:121",
      "fid": "ml:l1:l1.transistors"
     },
     {
@@ -4838,7 +4890,7 @@
      "fid": "ml:scp:scp.g-level-shifter"
     },
     {
-     "text": "GENERIC. A voltage and clock crossing: a level shifter (cross-coupled PMOS over an NMOS differential input pair) lifts or drops the signal swing, and a 2-flip-flop synchroniser (as the spec's VCFIFO uses) samples it in the receiving clock, costing 2-3 receiving-clock cycles.",
+     "text": "GENERIC. A voltage and clock crossing: a level shifter (cross-coupled PMOS over an NMOS differential input pair) lifts or drops the signal swing, and a 2-flip-flop synchroniser (as the spec's VCFIFO uses) samples the FIFO's gray-coded counts in the receiving clock, costing 2-3 receiving-clock cycles.",
      "label": "generic",
      "source": "textbook; the 2 stages are et-spec (external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf pdf p.11)",
      "fid": "ml:l3:g.crossing"
@@ -4871,7 +4923,7 @@
    "blurb": "Two flip-flops in a row on the receiving clock: a bit that changed just as the clock ticked gets a full cycle to settle before anyone uses it.",
    "facts": [
     {
-     "text": "GENERIC. A voltage and clock crossing: a level shifter (cross-coupled PMOS over an NMOS differential input pair) lifts or drops the signal swing, and a 2-flip-flop synchroniser (as the spec's VCFIFO uses) samples it in the receiving clock, costing 2-3 receiving-clock cycles.",
+     "text": "GENERIC. A voltage and clock crossing: a level shifter (cross-coupled PMOS over an NMOS differential input pair) lifts or drops the signal swing, and a 2-flip-flop synchroniser (as the spec's VCFIFO uses) samples the FIFO's gray-coded counts in the receiving clock, costing 2-3 receiving-clock cycles.",
      "label": "generic",
      "source": "textbook; the 2 stages are et-spec (external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf pdf p.11)",
      "fid": "ml:l3:g.crossing"
@@ -4950,7 +5002,7 @@
     {
      "text": "The SRAM rail at idle (all 128 MB of L2, L3 and scratchpad plus whatever else is on it): 2.51 W at 80 C on aifoundry2, 19.6 mW per MB, an upper bound on the arrays' leakage; a byte held for one second leaks at most ~19 nJ, as much as reading it 4,200 times. aifoundry3 and aifoundry1-c1 sit about 1 W higher.",
      "label": "measured",
-     "source": "docs/energy-manual/04a-fine-grain.md:104-115; docs/findings/05-claims.md:312, :473",
+     "source": "docs/energy-manual/04a-fine-grain.md:104-115; docs/findings/05-claims.md:324, :499",
      "fid": "ml:scp:scp.leak"
     }
    ],
@@ -5061,7 +5113,7 @@
     {
      "text": "A random bit per mm on free links, mesh rail at 0.485 V: 37 fJ (25 of it data-dependent); on board power 47 fJ. Dally's rule of thumb is ~100 fJ/b-mm.",
      "label": "measured",
-     "source": "report.json: headline[\"uncontended/noc_rail\"].random_bit_total / .random_bit_data, headline[\"uncontended/board\"].random_bit_total; per card (V3) docs/findings/05-claims.md:444",
+     "source": "report.json: headline[\"uncontended/noc_rail\"].random_bit_total / .random_bit_data, headline[\"uncontended/board\"].random_bit_total; per card (V3) docs/findings/05-claims.md:482",
      "fid": "chip:mesh-bit-mm-free"
     }
    ],
@@ -5085,7 +5137,7 @@
     {
      "text": "GENERIC. A wire's switching energy is about C x V^2 per 0-to-1 transition (C about 0.2 pF/mm), so random data (a transition on about half the bits) costs several times zeros; repeaters add to it.",
      "label": "generic",
-     "source": "textbook; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:135-147 (literature table)",
+     "source": "textbook; docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md:142-154 (literature table)",
      "fid": "ml:l3:g.wire-energy"
     },
     {
@@ -5168,12 +5220,12 @@
     {
      "text": "N7 high-density cells are 240 nm tall; high-performance cells 300 nm.",
      "label": "outside",
-     "source": "WikiChip Fuse, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", https://fuse.wikichip.org/?p=2408 (HD cell 240 nm tall = 6 tracks of 40 nm, HP 300 nm; about 91.2 MTr/mm2 HD, 65 HP); values as the search summary reported them, the page itself refused the connection on 30 Sep 2026"
+     "source": "WikiChip Fuse, D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", 16 Jun 2019, https://fuse.wikichip.org/?p=2408, read via the Internet Archive capture of 13 Nov 2019 (\"Those cells are 240 nm and 300 nm tall respectively\"; HD 6 tracks of 40 nm, HP 7.5; about 91.2 MTr/mm2 HD, 65 HP)"
     },
     {
      "text": "TSMC 7 nm, over 24 billion transistors, 89 mask layers (Esperanto, Hot Chips 33 and IEEE Micro 2022).",
      "label": "spec",
-     "source": "docs/findings/05-claims.md:513; docs/findings/01-resources.md:91-104 (R6)",
+     "source": "docs/findings/05-claims.md:832; docs/findings/01-resources.md:110-123 (R6)",
      "fid": "chip:chip.process"
     }
    ],
@@ -5202,7 +5254,7 @@
     {
      "text": "Comparable generations: TSMC 10 nm minimum Lg about 25 nm; Intel 10 nm 18 nm.",
      "label": "outside",
-     "source": "D. James (Siliconics), \"A Quick Look at 14-nm and 10-nm\", AVS Joint Users Group, July 2018 (JTG718-4), slides 11 and 17-18: TSMC 10 nm (Apple A11) fin pitch ~33 nm, fin width ~6 nm, functional gate height ~44 nm, gate width ~95 nm; Intel 10 nm fin height 46-53 nm, width ~7 nm at half height, Lg 18 nm; https://nccavs-usergroups.avs.org/wp-content/uploads/JTG2018/JTG718-4-James-Siliconics.pdf"
+     "source": "D. James (Siliconics), \"A Quick Look at 14-nm and 10-nm\", AVS Joint Users Group, July 2018 (JTG718-4), slides 12, 15, 16 and 18: Intel 10 nm fin height 46-53 nm, width ~7 nm at half height (12), minimum Lg 18 nm (15); TSMC 10 nm, Apple A10X, minimum Lg ~25 nm (16); TSMC 10 nm, Apple A11, fin pitch ~33 nm, fin width ~6 nm, functional gate height ~44 nm, gate width ~95 nm (18); https://nccavs-usergroups.avs.org/wp-content/uploads/JTG2018/JTG718-4-James-Siliconics.pdf"
     },
     {
      "text": "A high-k metal gate: a hafnium-based oxide on a thin silicon-oxide interlayer under work-function metals; TSMC does not publish its N7 stack.",
@@ -5232,7 +5284,7 @@
     {
      "text": "TSMC 10 nm (Apple A11): fin width ~6 nm, functional gate height ~44 nm; Intel 10 nm: fin height 46-53 nm, width ~7 nm at half height.",
      "label": "outside",
-     "source": "D. James (Siliconics), \"A Quick Look at 14-nm and 10-nm\", AVS Joint Users Group, July 2018 (JTG718-4), slides 11 and 17-18: TSMC 10 nm (Apple A11) fin pitch ~33 nm, fin width ~6 nm, functional gate height ~44 nm, gate width ~95 nm; Intel 10 nm fin height 46-53 nm, width ~7 nm at half height, Lg 18 nm; https://nccavs-usergroups.avs.org/wp-content/uploads/JTG2018/JTG718-4-James-Siliconics.pdf"
+     "source": "D. James (Siliconics), \"A Quick Look at 14-nm and 10-nm\", AVS Joint Users Group, July 2018 (JTG718-4), slides 12, 15, 16 and 18: Intel 10 nm fin height 46-53 nm, width ~7 nm at half height (12), minimum Lg 18 nm (15); TSMC 10 nm, Apple A10X, minimum Lg ~25 nm (16); TSMC 10 nm, Apple A11, fin pitch ~33 nm, fin width ~6 nm, functional gate height ~44 nm, gate width ~95 nm (18); https://nccavs-usergroups.avs.org/wp-content/uploads/JTG2018/JTG718-4-James-Siliconics.pdf"
     },
     {
      "text": "For N7, a fin about 6-7 nm wide and 45-50 nm tall, carrying about 2 x 45 + 6 = ~100 nm of effective channel width.",
@@ -5291,7 +5343,7 @@
     {
      "text": "Across a 6 nm fin whose sidewalls are (110) planes (the usual orientation on a (100) wafer, an assumption), the (220) planes are a / sqrt(8) = 0.192 nm apart: about 31 planes of atoms.",
      "label": "inferred",
-     "source": "arithmetic on the lattice parameter, the inferred 6 nm fin and the assumed (110) sidewalls: inferred"
+     "source": "arithmetic on the lattice parameter, N7's 6 nm fin (n7.fin-width, WikiChip Fuse) and the assumed (110) sidewalls: inferred"
     }
    ],
    "children": []

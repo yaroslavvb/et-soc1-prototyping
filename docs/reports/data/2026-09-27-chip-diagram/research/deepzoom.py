@@ -3,7 +3,7 @@ outlines, the image manifest and the memory-levels facts the copied drawings cit
 
 Inputs, beside this file:
   inside.json       what is inside every part the diagram lets a reader select, as a tree down to the silicon crystal
-                    (build_inside.py; 130 nodes, 395 facts; its research-inside.md says how each was found)
+                    (build_inside.py; 131 nodes, 399 facts; its research-inside.md says how each was found)
   outside.json      the 18 levels outside the chip, from the package to "beyond what we can see" (build_outside.py;
                     research-outside.md)
   outside-geo.json  the map outlines in km (make_geo.py, from the US Census and Natural Earth files, public domain)
@@ -216,8 +216,9 @@ def build(ALL, ml_keys_extra=(), ml_num_keys=()):
         if fid in facts:
             raise SystemExit(f'ladder fact {fid} collides with the chip\'s')
         u = f.get('url')
+        # (a measured ladder fact names its card, as the chip's own facts do; review of 14 Oct 2026)
         facts[fid] = {'id': fid, 'statement': f['statement'], 'kind': f['kind'], 'source': f['source'], 'note': f.get('note'), 'url': u,
-                      'page': (re.sub(r'^www\.', '', u.split('/')[2]) if u else None), 'cards': [], 'set': 'ladder'}
+                      'page': (re.sub(r'^www\.', '', u.split('/')[2]) if u else None), 'cards': [], 'card': f.get('card'), 'set': 'ladder'}
     for nid, n in LD['nodes'].items():
         s0 = scales.get(nid, {})
         old_f = s0.get('f')
@@ -246,8 +247,9 @@ def build(ALL, ml_keys_extra=(), ml_num_keys=()):
     for s in scales.values():
         if s.get('img') and s['img']['file'] not in img:
             raise SystemExit('no image ' + s['img']['file'])
-    # facts read from a search summary of a page that refused the connection (the N7 cell height and density): shown as
-    # inferred until someone re-reads the page (DESIGN §7 R8)
+    # facts read from a search summary of a page that refused the connection: shown as inferred until someone re-reads
+    # the page (DESIGN §7 R8). (The N7 cell heights, the case this was for, were re-read on 1 Oct 2026 through the
+    # Internet Archive, and their source says so since 14 Oct: none is demoted now.)
     for f in facts.values():
         if 'search summary' in (f.get('source') or '') and f['kind'] == 'outside':
             f['kind'] = 'inferred'

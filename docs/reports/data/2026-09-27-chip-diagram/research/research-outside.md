@@ -71,8 +71,8 @@ is 50 cm of light.
 **Card.** ET-PCIe Dev Card V3: 6.6 x 4.4 in (167.6 x 111.8 mm), x16 card edge carrying x8 Gen 4 (measured on all four
 lab cards: 16 GT/s x8; DMA 12.5-12.6 GB/s to the card, E50). Four LPDDR4X packages, 256 bits, 32 GB (peak 119.5 GB/s
 on these cards, whose firmware runs the DRAM at 3,733 MT/s on every card (dram.rate-card, dram.peak-card); the
-datasheet's 4,266 MT/s would give 136.5 GB/s; tensor loads measured at 75 GB/s). 12 V in, at most 7.3 A / 88 W (p. 5); highest draw on record 87.8 W;
-idle 19-36 W by card. The cores run at about 0.52 V at 600 MHz (E9): 23 times below 12 V, so 23 times the current.
+datasheet's 4,266 MT/s would give 136.5 GB/s; tensor loads stream 76 GB/s, bw-dram). 12 V in, a 7.3 A / 88 W budget (p. 5); highest draw under load 87.8 W,
+134 W in aifoundry2's idle runaways (2 and 7 Oct); idle 19-50 W by card. The cores run at about 0.52 V at 600 MHz (E9): 23 times below 12 V, so 23 times the current.
 The TI TPSM831D31 (3 phases up to 120 A for the cores, 1 phase 40 A for the network): **its four phases are the four
 "R15" inductors on the photo** (inferred; a nice thing to point at): three of them feed the cores, the fourth the
 on-chip network. LTM4680 (SRAM, 60 A), FS1406s (other rails), LTC4218

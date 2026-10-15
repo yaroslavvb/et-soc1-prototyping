@@ -60,12 +60,13 @@ WIKI7 = ('Wikipedia, "7 nm process", comparison table, row TSMC N7 (gate pitch 5
          'pitch 40 nm, 91.2-96.5 MTr/mm2, SRAM cell 0.027 um2; fins SAQP, gates and M0-M4 SADP), '
          'https://en.wikipedia.org/wiki/7_nm_process (read 30 Sep 2026)')
 WIKI7IRDS = 'Wikipedia, "7 nm process" (quoting IRDS 2021, Lithography: 7 nm-class gate length 20 nm), https://en.wikipedia.org/wiki/7_nm_process'
-FUSE = ('WikiChip Fuse, "TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO", https://fuse.wikichip.org/?p=2408 '
-        '(HD cell 240 nm tall = 6 tracks of 40 nm, HP 300 nm; about 91.2 MTr/mm2 HD, 65 HP); values as the search summary '
-        'reported them, the page itself refused the connection on 30 Sep 2026')
+FUSE = ('WikiChip Fuse, D. Schor, "TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO", 16 Jun 2019, '
+        'https://fuse.wikichip.org/?p=2408, read via the Internet Archive capture of 13 Nov 2019 ("Those cells are 240 nm '
+        'and 300 nm tall respectively"; HD 6 tracks of 40 nm, HP 7.5; about 91.2 MTr/mm2 HD, 65 HP)')
 SILICONICS = ('D. James (Siliconics), "A Quick Look at 14-nm and 10-nm", AVS Joint Users Group, July 2018 (JTG718-4), '
-              'slides 11 and 17-18: TSMC 10 nm (Apple A11) fin pitch ~33 nm, fin width ~6 nm, functional gate height ~44 nm, '
-              'gate width ~95 nm; Intel 10 nm fin height 46-53 nm, width ~7 nm at half height, Lg 18 nm; '
+              'slides 12, 15, 16 and 18: Intel 10 nm fin height 46-53 nm, width ~7 nm at half height (12), minimum Lg 18 nm '
+              '(15); TSMC 10 nm, Apple A10X, minimum Lg ~25 nm (16); TSMC 10 nm, Apple A11, fin pitch ~33 nm, fin width '
+              '~6 nm, functional gate height ~44 nm, gate width ~95 nm (18); '
               'https://nccavs-usergroups.avs.org/wp-content/uploads/JTG2018/JTG718-4-James-Siliconics.pdf')
 CODATA = 'NIST CODATA 2018: lattice parameter of silicon a = 543.1020511 pm (at 22.5 C in vacuum), https://physics.nist.gov/cgi-bin/cuu/Value?asil'
 WH = 'N. Weste and D. Harris, CMOS VLSI Design, 4th ed. (Addison-Wesley 2011)'
@@ -146,8 +147,8 @@ N('shire.meshstop', 'shire', 'Mesh stop', 5e-4, 'inferred',
 N('shire.meshstop.router', 'shire.meshstop', 'Router (one of nine main-NoC layers)', 2e-4, 'inferred',
   'order of magnitude: an 8-port router with 512-bit datapaths; the NetSpeed configuration is not in the repository',
   '''A small switch. Packets arrive on its input ports, wait in short queues, and an arbiter decides which one crosses
-  the router's internal switch to which output each cycle. Each mesh stop has nine of them stacked as separate networks,
-  plus one for debug.''',
+  the router's internal switch to which output each cycle. A minion shire's mesh stop has nine of them stacked as
+  separate networks (a memory shire's most likely seven), plus one for debug.''',
   [cf('L105'), mf('l3:g.router'), mf('l3:u.noc-hop'), mf('l3:l3.hop-noc-cycles'),
    cr('L92', 'At least 117 B cross one link direction per 400 MHz NoC cycle (at least 936 data bits), more than one '
       '512-bit layer carries: the link was not saturated in that test.')],
@@ -181,15 +182,19 @@ N('shire.meshstop.router.xbar', 'shire.meshstop.router', 'Router switch (crossba
 
 N('shire.meshstop.xing', 'shire.meshstop', 'Voltage and clock crossing (VCFIFO)', 5e-5, 'inferred',
   'order of magnitude: a FIFO of a few 512-bit entries with level shifters on every bit',
-  '''The shire's cache runs at 0.705 V on its own clock, the network at 0.485 V and 400 MHz. Every bit that crosses is
-  shifted in voltage and re-timed through two flip-flops into the other clock, so it cannot be caught half-changed.''',
-  [mf('l2:l2.vc-fifo'), mf('l3:l3.hv-region'), mf('l3:g.crossing'),
+  '''The shire cache runs on the shire clock, its arrays on the 0.705 V SRAM rail (the rail of its logic is not
+  documented); the network runs at 0.485 V and 400 MHz. Every bit is level-shifted as it crosses; each word waits in a
+  small FIFO whose write and read counts, not the data, pass through two-flip-flop synchronisers into the other clock,
+  so a word is read only once it is completely written.''',
+  # (the neighbourhood's bank FIFOs, semi-synchronous, are another crossing: shire.neigh.xing, review of 14 Oct 2026;
+  # l3.ports, the NoC side's VC FIFOs, takes l2.vc-fifo's place in this list, so the in.* ids below keep)
+  [mf('l3:l3.ports'), mf('l3:l3.hv-region'), mf('l3:g.crossing'),
    S('The ET cell library has level shifters in both directions (vclevel_shft_h2l, vclevel_shft_l2h) and VCFIFO '
      'memories and synchronisers (vcfifo_mem, vcfifo_wr_hiv_*, vcfifo_wr_lov_*, et_cdc_sync) for these crossings. ' + ERBIUM,
      RTL + 'libs/mems_and_fifos/ (file names)'),
    mf('scp:scp.lat-remote', None)],
   see=['lib.levelshift', 'lib.sync'],
-  reuse=R('l2', 'xing', ['buildL2Xing', 'buildXing'], 'the crossing scale draws a VC FIFO cell with a level shifter (cross-coupled PMOS over an NMOS pair); the same drawing serves the mesh stop\'s 0.705 V to 0.485 V crossing with the rails relabelled'))
+  reuse=R('l3', 'hop', ['buildL3Hop', 'buildL3Wire'], 'the L3 scene draws this crossing: its hop scale the bank\'s to_l3 master and the VC FIFO with its level shifters and synchroniser, its wire scale the mesh-rail level shifter and the VC FIFO whose counts cross by 2-flop synchronisers; the L2 scene\'s crossing scale (buildL2Xing) draws the neighbourhood\'s bank FIFO instead (shire.neigh.xing), a semi-synchronous crossing, and its rails are not relabelled for this one'))
 
 # ---- the shire cache ----
 N('shire.cache', 'shire', 'Shire cache (four banks)', 1.5e-3, 'inferred',
@@ -338,7 +343,7 @@ N('shire.scp', 'shire', 'Scratchpad (a partition of the shire cache)', 1.5e-3, '
 
 # ---- UC block ----
 N('shire.uc', 'shire', 'UC block', 2e-4, 'inferred', 'order of magnitude: counters, interrupt logic and an atomic ALU',
-  '''Hardware for coordination: barrier counters (everyone waits until all have arrived), credit counters, interrupts
+  '''Hardware for coordination: barrier counters (everyone waits until all have arrived), credit increments, interrupts
   between cores, and atomic operations that do not go through the cache.''',
   [cf('shire.composition', 'The uncacheable (UC) block holds fast local barriers, fast credit counters, inter-processor '
       'interrupts and global atomics.'), cf('sync-shire-barrier'), cf('hot-cost')],
@@ -352,9 +357,11 @@ N('shire.uc.flb', 'shire.uc', 'Fast local barrier counters', 5e-5, 'inferred', '
    D('32 x 8 = 256 counter bits per shire.', 'arithmetic on the PRM\'s 32 x 8-bit counters')],
   see=['lib.adder', 'lib.flipflop'])
 
-N('shire.uc.fcc', 'shire.uc', 'Fast credit counters', 5e-5, 'inferred', 'order of magnitude: 4 counters per minion',
-  '''Per-thread counters that other threads can add credits to; a thread that reads its counter takes a credit, or
-  waits until one arrives. A cheap way to say "your data is ready".''',
+N('shire.uc.fcc', 'shire.uc', 'Credit increments (CREDINC0-3)', 5e-5, 'inferred',
+  'order of magnitude: the CREDINC decode (the counters, two per hart, sit in each minion)',
+  '''Four registers (CREDINC0-3) that any thread can write with a mask of minions; each write adds a credit to the
+  chosen harts' counters, which sit in the minions themselves (two per hart). A thread that reads its counter takes a
+  credit, or waits until one arrives.''',
   [S('Each hart has two credit-counter CSRs (four per minion); remote harts increment them through the CREDINC0-3 '
      'ESRs of the target shire; a read with no credit blocks until one arrives.', PRM + ', pdf p.328 (ch. 11)')],
   see=['lib.adder', 'lib.flipflop'])
@@ -418,6 +425,29 @@ N('shire.neigh.rsp', 'shire.neigh', 'Response path from the banks', 2e-4, 'infer
   256-bit halves.''',
   [mf('l2:l2.nbr.response')], see=['lib.flipflop', 'lib.levelshift'])
 
+# (the neighbourhood's own crossing, apart from the mesh stop's, shire.meshstop.xing: review of 14 Oct 2026. The minion's
+# ET-Link leads here; the L2 scene's crossing drawing, buildL2Xing, is this crossing)
+N('shire.neigh.xing', 'shire.neigh', 'Bank FIFOs: the voltage and clock crossing', 5e-5, 'inferred',
+  'order of magnitude: five output FIFOs (four for the banks, one for the UC block) of three 256-bit entries, with level '
+  'shifters at the edge',
+  '''The neighbourhood's bank FIFOs are the crossing: semi-synchronous VC FIFOs whose cells sit in the HV region, with
+  level shifters at the edge. The neighbourhood's clock is the shire clock shifted half a cycle by the DLL, so a word is
+  handed over on a known edge and needs no synchroniser.''',
+  [mf('l2:l2.vc-fifo'),
+   S('The neighbourhood clock is the shire clock shifted by 180 degrees, made by the DLL from the same source, so the two '
+     'domains meet at a semi-synchronous interface: ET-Link requests and responses cross in semi-synchronous FIFOs, which '
+     'take advantage of the two clocks being one clock shifted by a constant 180 degrees.',
+     NBHMAS + ', pdf p.39-40 (§6.1, §6.1.1 and its table of crossings)'),
+   S('Four bank FIFOs and a UC FIFO, three entries each, end the request datapath; a 512-bit request takes two '
+     'consecutive entries, and its halves are re-joined into one 512-bit ET-Link request at the FIFO\'s output, in the HV '
+     'region.', NBHMAS + ', pdf p.18-19 (§4.3.4-4.3.5)'),
+   S('The cell library\'s semi-synchronous VC FIFO, written on the low-voltage side and read on the high-voltage side '
+     '(vcfifo_wr_lov_ss), works only at a 1:1 clock ratio with the two clocks offset by a DLL, for "guaranteed signal '
+     'hand-off between edges without any meta-stability"; its minimum latency is 1.5 cycles. ' + ERBIUM,
+     RTL + 'libs/mems_and_fifos/vcfifo_wr_lov_ss.v:7-19')],
+  see=['lib.levelshift', 'lib.flipflop'],
+  reuse=R('l2', 'xing', ['buildL2Xing', 'buildXing'], 'the L2 scene\'s crossing scale draws this crossing: the neighbourhood (LV), the bank FIFO, a VC FIFO with level shifters (cross-coupled PMOS over an NMOS pair), and the bank (HV)'))
+
 N('shire.neigh.pmu', 'shire.neigh', 'Performance counters (PMU)', 3e-5, 'inferred', 'order of magnitude: 12 counters',
   '''Twelve event counters shared by the eight minions' threads.''', [cf('neigh.pmu')], see=['lib.adder', 'lib.flipflop'])
 
@@ -430,8 +460,10 @@ N('shire.clock', 'shire', 'Shire clock generation (PLL, DLL, delay lines)', 2e-4
   [cr('shire.clock'), S('Five clocks in a minion shire: ref_clock (24/100 MHz pin), step_clk (400-1,000 MHz from PLL4 in '
      'the I/O shire), the shire\'s local DPLL output (1,000 MHz design), the DLL output for the four neighbourhoods '
      '(shire_clock shifted 180 degrees), and clk__noc (500 MHz design, from PLL2).', SHIREDESC + ', pdf p.11-12 (§4.1, Table 2)'),
-   S('Programmable clock delay lines: 25 ps steps (first specified at 100 ps), up to 1 ns, set by ESR, one per DLL '
-     'feedback path.', DLLDOC + ', pdf p.4 (§2)'),
+   S('Programmable clock delay lines on the four neighbourhood clocks and the two DLL feedback clocks (the shire clock '
+     'itself cannot be delayed), set by one ESR (clk_dly_ctl): 100 ps coarse steps up to 1,500 ps plus 25 ps fine steps '
+     'up to 75 ps (first specified as 100 ps steps up to 1 ns; the cells built have 115 ps and 30 ps taps).',
+     DLLDOC + ', pdf p.4 (§2), p.6 (§3.1), p.8-9 (§3.2.1)'),
    cr('clock.dvfs-limits'), cf('minion.sleep-unused')],
   see=['lib.clocktree', 'lib.icg'])
 
@@ -486,14 +518,17 @@ N('core.fe', 'core', 'Front end (fetch, thread scheduler, decoder)', 8e-5, 'infe
   see=['lib.flipflop', 'lib.mux2'])
 
 N('core.irf', 'core', 'Integer register file', 4e-5, 'inferred',
-  '4,096 latch bits at roughly 0.15-0.2 um2 each (an HD latch, inference) is 0.0006-0.0008 mm2: about 25-30 um before the read trees, some 40 um with them',
-  '''The 32 integer registers of each thread: 64 entries of 64 bits, built from latches, with two read ports and one
-  write port.''',
+  '3,968 latch bits at roughly 0.15-0.2 um2 each (an HD latch, inference) is 0.0006-0.0008 mm2: about 25-30 um before the read trees, some 40 um with them',
+  '''The 32 integer registers of each thread: 64 entries of 64 bits, built from latches, with two read ports, a third
+  that reads only x31, and one write port.''',
   [S('intpipe_rf instantiates rf_latch_2r_1w with WIDTH = 64 (XREG_SIZE) and ENTRIES = 2 threads x 32: a latch register '
-     'file, 2 read ports and 1 write port. ' + ERBIUM, RTL + 'shire/minion/intpipe/intpipe_rf.v:43-50'),
-   I('64 x 64 = 4,096 storage latches per minion; at about 10 transistors each, some 41,000 transistors before the read '
-     'multiplexers.', 'arithmetic on intpipe_rf.v and the latch count of l1:g.latch-cell; the 10 transistors per latch '
-     'are assumed, so the total is inferred')],
+     'file, 2 read ports, a dedicated read port for x31 and 1 write port. ' + ERBIUM,
+     RTL + 'shire/minion/intpipe/intpipe_rf.v:43-61 (rd_par, the x31 port); ' + FEINT + ', pdf p.13 (§3.2.1: "three for '
+     'reading and one for writing")'),
+   I('62 x 64 = 3,968 storage latches per minion (x0 of each thread is wired to 0); at about 10 transistors each, some '
+     '40,000 transistors before the read multiplexers.', 'arithmetic on intpipe_rf.v (ZERO wires entries 0 and 32 to '
+     'zero, with no latch: ' + RTL + 'libs/rf_latches/rf_latch_2r_1w.v:158-159) and the latch count of l1:g.latch-cell; '
+     'the 10 transistors per latch are assumed, so the total is inferred')],
   see=['lib.latch', 'lib.mux2', 'lib.icg'],
   reuse=R('l1', 'lram/row/latch', ['buildL1Block', 'buildL1Row', 'drawReadTree', 'buildLatchCell'], 'the same latch register-file pattern as the L1 data array (per-row clock gates, latch rows, a read mux tree); a new instance with 64 rows and two read trees'))
 
@@ -551,9 +586,11 @@ N('vpu.lane.fma', 'vpu.lane', 'Fused multiply-add unit (TXFMA)', 6e-5, 'inferred
      'integer and FP32/FP16 arithmetic.', VPUSPEC + ', pdf p.18 (§2.2.3)'),
    cf('e-fmadd-ps'), cf('e-tfma-fp32'), cf('e-tfma-fp32-zeros'),
    cr('e-flip-model'),
-   M('A random-data 16x16x16 tile clocks 2.5 million register bits and toggles 74 million multiplier-tree nets; zeros '
-     'clock nothing, because the lane clock is withheld when an operand word is zero.',
-     'docs/energy-manual/03-instructions.md:53-65 (flip model fitted on aifoundry2)')],
+   D('In the flip model (the TXFMA RTL replayed on the operands aifoundry2 ran), a random-data 16x16x16 tile clocks 2.5 '
+     'million register bits and toggles 74 million multiplier-tree nets; zeros clock nothing, because the lane clock is '
+     'withheld when an operand word is zero.',
+     'docs/energy-manual/03-instructions.md:55, 65; docs/findings/10-data-dependent-power.md:73 (E11); '
+     'docs/findings/11-thermal-model.md:17 (counted in RTL)')],
   see=['lib.booth', 'lib.cmp42', 'lib.adder', 'lib.flipflop'])
 
 N('vpu.lane.fma.booth', 'vpu.lane.fma', 'Booth encoders and partial products', 3e-5, 'inferred', 'order of magnitude',
@@ -613,7 +650,9 @@ N('vpu.shsw', 'vpu', 'Shuffle, swizzle and bypass network', 8e-5, 'inferred', 'o
   see=['lib.mux2', 'lib.wire'])
 
 # ---- the tensor sequencer ----
-N('tensor', 'minion', 'Tensor sequencer', 1e-4, 'inferred', 'order of magnitude: state machines and two 1 KiB buffers',
+N('tensor', 'minion', 'Tensor sequencer', 1e-4, 'inferred',
+  'order of magnitude: state machines; TenB and TenC, drawn here as the tensor extension\'s state, sit in the lanes\' '
+  'TIMA units in the RTL',
   '''Runs the matrix-multiply instructions: state machines that feed the eight lanes step after step for up to 512
   cycles from one instruction, with the operands in the L1 scratchpad and a stream buffer.''',
   [cf('minion.vec-peak'), cf('minion.tensor-shape'), cf('minion.tensorfma-546'),
@@ -630,13 +669,18 @@ N('tensor.fsm', 'tensor', 'Tensor state machines', 3e-5, 'inferred', 'order of m
   see=['lib.flipflop', 'lib.adder'])
 
 N('tensor.tenb', 'tensor', 'TenB (stream buffer for B)', 3e-5, 'inferred', 'logically 1 KiB, "physically much smaller"',
-  '''Where the B matrix streams in from the cache on its way to the lanes; the programmer sees 16 registers of 64 bytes,
-  the hardware keeps only what is in flight.''',
-  [cf('minion.tenb-tenc'), S('Modules vpu_tensorb_rf, vpu_tensora_rf, vpu_tensortmp_rf. ' + ERBIUM, RTL + 'shire/minion/vpu/')],
+  '''Where the B matrix streams in from the cache, kept in each lane's two TIMA units; the programmer sees 16 registers
+  of 64 bytes, the hardware keeps only what is in flight.''',
+  [cf('minion.tenb-tenc'),
+   S('TenB is vpu_tensorb_rf, instantiated in each of a lane\'s two vpu_lane_tima units (4 entries of 32 bits each: 256 B '
+     'per minion); vpu_tensora_rf (TenA, the A buffer) and vpu_tensortmp_rf sit in vpu_ctrl. ' + ERBIUM,
+     RTL + 'shire/minion/vpu/vpu_lane_tima.v:42, vpu_lane.v:408-421, vpu_ctrl.v:1806, 1832, vpu_tensorb_rf.v:27-29; '
+     + RTL + 'inc/minion_defines.vh:191, 349; ' + RTL + 'inc/vpu_defines.vh:210')],
   see=['lib.latch', 'lib.flipflop'])
 
 N('tensor.tenc', 'tensor', 'TenC (int32 accumulators)', 4e-5, 'inferred', '8,192 bits of register file: order of magnitude',
-  '''Sixteen 64-byte registers that hold the running 32-bit sums of an integer matrix multiply.''',
+  '''Sixteen 64-byte registers, kept in each lane's two TIMA units, that hold the running 32-bit sums of an integer
+  matrix multiply.''',
   [cf('minion.tenb-tenc'), S('Macro model vpu_tensorc_rf_buffer_array. ' + ERBIUM, RTL + 'libs/macros/vpu_tensorc_rf_buffer_array.v')],
   see=['lib.latch'])
 
@@ -836,18 +880,20 @@ N('io.pll', 'io', 'Clock generators (PLL0-PLL4)', 1e-4, 'inferred', 'a PLL is on
 
 N('io.pvt', 'io', 'PVT controllers (five)', 1e-4, 'inferred', 'order of magnitude',
   '''Controllers that read the temperature sensors, process detectors and voltage monitors spread over the die.''',
-  [S('36 process detectors and 36 temperature sensors (one each per minion shire and the I/O shire) and 8 voltage-monitor '
-     'blocks of up to 16 sense points (128 in all), read through five PVT controllers. (The manual\'s own count does '
-     'not add up: 34 minion shires and the I/O shire make 35, and it does not say where the 36th sensor sits.)',
-     PRM + ', pdf p.17-18 (§1.6, Table 1-6: "36 sensors. 1 PD in each minion/IO-Shire")'),
+  [S('36 process detectors and 36 temperature sensors (one each per minion shire, the PCIe shire and the I/O shire, as '
+     'the manual\'s Figure 1-3 draws them) and 8 voltage-monitor blocks of up to 16 sense points (128 in all), read '
+     'through five PVT controllers. (The RTL removed the PCIe shire\'s pair, "Pshire no longer has ts/pd (RTLMIN-3619)", '
+     'core-et rtl/inc/pvt_defines.vh:16-26, and the firmware reads 35: fact L121.)',
+     PRM + ', pdf p.17-18 (§1.6, Figure 1-3, Table 1-6: "36 sensors. 1 PD in each minion/IO-Shire"); '
+     'external/core-et/rtl/inc/pvt_defines.vh:16-26'),
    cr('temp-sensors')])
 
 N('io.periph', 'io', 'Peripherals, root of trust, 4 MB cache', 1e-3, 'inferred', 'order of magnitude',
   '''USB, I2C, SPI, UART and eMMC interfaces, a hardware root of trust, and another 4 MB of shared cache for the
   Maxions.''', [cf('L29'), cf('chip.io-shire')])
 
-N('mesh', 'die', 'The mesh (network on chip)', 2.22e-2, 'derived',
-  'the 6-column shire grid spans about 22.2 mm (L08); with the memory shires the mesh spans the die',
+N('mesh', 'die', 'One mesh hop', 3.72e-3, 'inferred',
+  'one hop: one tile pitch (chip.hop-pitch); the whole mesh spans the die, its 6-column shire grid about 22.2 mm (L08)',
   '''The on-chip network: a grid of 44 stops, one per shire, joined by links to their neighbours. A message crosses one
   link per step (a hop); each hop adds 12 cycles to a round trip.''',
   [cf('mesh.grid'), cf('mesh-hop-lat'), cf('L104'), cf('mesh.voltage'), cf('mesh.clock'), cf('mesh-bit-mm-free'),
@@ -858,9 +904,13 @@ N('mesh.link', 'mesh', 'One hop\'s link', 3.72e-3, 'inferred', 'one tile pitch l
   '''The bundle of wires between two neighbouring stops, about 3.7 mm long: hundreds of parallel wires per direction,
   each broken into segments by repeaters.''',
   [cf('chip.hop-pitch'), mf('l3:l3.wire-energy'), cr('L88'),
-   D('Measured on the mesh rail, routers included: 0.50-0.84 pF of switched capacitance per mm of travel, against 0.2-0.4 '
-     'pF/mm estimated for a plain 7 nm repeated wire; most of the mesh\'s efficiency comes from its 0.485 V.',
-     'docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md lines 38, 170, 255')],
+   D('Measured on the mesh rail, routers included: about 0.42-0.53 pF of switched capacitance per mm of travel (25-31 fJ '
+     'of data-dependent energy per random bit and mm, free links to a loaded mesh, as C = 4E/V² at 0.485 V), against '
+     '0.2-0.4 pF/mm estimated for a plain 7 nm repeated wire; most of the mesh\'s efficiency comes from its 0.485 V.',
+     'docs/reports/data/2026-09-24-wire-energy/report.json headline["uncontended/noc_rail"] and ["loaded/noc_rail"] '
+     '.random_bit_data; docs/reports/data/2026-09-24-wire-energy/research/lit/dally_gap.py (C = 4E/V²: 420 and 530 '
+     'fF/mm); docs/findings/05-claims.md:381, 384 (the 23 Sep figures of research/SYNTHESIS.md §2c, 0.50-0.57 pF/mm on '
+     'the mesh rail and 0.67-0.84 on board power, are superseded)')],
   see=['lib.wire', 'lib.repeater'],
   reuse=R('l3', 'hop', ['buildL3Hop', 'buildHop'], 'the link segment of the hop scale'))
 
@@ -960,14 +1010,15 @@ N('lib.booth', 'lib', 'Booth encoder and partial-product selector', 5e-7, 'infer
   '''Looks at three overlapping bits of the multiplier and chooses 0, +/-1 or +/-2 times the multiplicand for that
   row: two multiplier bits per row instead of one.''',
   [S('txfma_booth_ppg_32r4_norm decodes each 3-bit group into one of five selections (0, +1, +2, -2, -1). ' + ERBIUM,
-     RTL + 'shire/minion/vpu/txfma_7s/txfma_booth_ppg_32r4_norm.v:13-25'),
+     RTL + 'shire/minion/vpu/txfma_7s/txfma_booth_ppg_32r4_norm.v:13-32'),
    G('Radix-4 Booth recoding.', WH + ', ch. 11 (multiplication)')], kind='circuit', see=['lib.mux2', 'lib.xor'])
 
 N('lib.adder', 'lib', 'Fast (parallel-prefix) adder', 3e-5, 'inferred', 'a 64-bit adder: tens of um (order of magnitude)',
-  '''Adding 64-bit numbers quickly means not waiting for a carry to ripple through 64 positions: prefix adders compute
-  all the carries in about six levels of logic.''',
-  [G('Parallel-prefix adders (Kogge-Stone, Sklansky, Brent-Kung) compute carries in log2(N) levels of generate/propagate '
-     'cells.', WH + ', ch. 11 (addition)')], kind='circuit', see=['lib.fa', 'lib.nand2'])
+  '''Adding 64-bit numbers quickly means not waiting for a carry to ripple through 64 positions: the fastest prefix
+  adders compute all the carries in about six levels of logic.''',
+  [G('Parallel-prefix adders compute every carry in a tree of generate/propagate cells: Kogge-Stone and Sklansky in '
+     'log2(N) levels, Brent-Kung in 2 log2(N) - 1 levels with fewer cells and wires.', WH + ', ch. 11 (addition)')],
+  kind='circuit', see=['lib.fa', 'lib.nand2'])
 
 N('lib.latch', 'lib', 'Latch (drawn as the L1\'s storage cell)', 5e-7, 'inferred',
   'about 8-10 gate pitches wide in a 240 nm cell: about 0.1-0.15 um2 (inference)',
@@ -1085,7 +1136,7 @@ N('lib.si', 'lib.channel', 'Silicon crystal', 5.43e-10, 'outside', 'one cubic un
      'neighbours are sqrt(3)/4 x a = 0.235 nm apart.', 'arithmetic on the lattice parameter'),
    I('Across a 6 nm fin whose sidewalls are (110) planes (the usual orientation on a (100) wafer, an assumption), the '
      '(220) planes are a / sqrt(8) = 0.192 nm apart: about 31 planes of atoms.', 'arithmetic on the lattice parameter, '
-     'the inferred 6 nm fin and the assumed (110) sidewalls: inferred')],
+     'N7\'s 6 nm fin (n7.fin-width, WikiChip Fuse) and the assumed (110) sidewalls: inferred')],
   kind='material')
 
 # =====================================================================================================================
@@ -1193,7 +1244,8 @@ LADDERS = [
     ('Shire memory, to the atom', ['die', 'shire', 'shire.cache', 'shire.bank', 'shire.subbank', 'shire.panel',
                                    'shire.panel.array', 'lib.sram6t', 'lib.finfet', 'lib.fin', 'lib.channel', 'lib.si']),
     ('The L1, to the latch', ['minion', 'l1d', 'l1d.data', 'l1d.block', 'l1d.row', 'lib.latch', 'lib.inverter', 'lib.finfet']),
-    ('A mesh hop, to the repeater', ['die', 'mesh', 'mesh.link', 'mesh.link.wire', 'lib.repeater', 'lib.inverter', 'lib.finfet']),
+    # (the mesh node is one hop since 1 Oct, the link's own length: the page zooms from it straight to a wire segment)
+    ('A mesh hop, to the repeater', ['die', 'mesh', 'mesh.link.wire', 'lib.repeater', 'lib.inverter', 'lib.finfet']),
 ]
 lad = []
 for title, path in LADDERS:

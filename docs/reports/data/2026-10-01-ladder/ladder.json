@@ -29,7 +29,7 @@
    "m": 5.7e-08,
    "kind": "outside",
    "f": "n7.cpp",
-   "blurb": "The switch everything is made of. A voltage on the gate decides whether current flows: at 0 V the path along the fin is shut; at the supply rail (0.517 V on a minion) the gate's field pulls a thin sheet of electrons into the fin, and current flows from source to drain. The gate drapes over the fins on three sides.",
+   "blurb": "The switch everything is made of. A voltage on the gate decides whether current flows: in an n-type transistor, at 0 V the path along the fin is shut; at the supply rail (0.517 V on a minion) the gate's field pulls a thin sheet of electrons into the fin, and they flow from source to drain (the current, by convention, from drain to source). The gate drapes over the fins on three sides.",
    "facts": [
     "el.switch",
     "el.rails",
@@ -224,7 +224,7 @@
    "m": 8.06e-15,
    "kind": "derived",
    "f": "size.p.nucleus",
-   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: some 29,000 times narrower than the atom, but 99.97% of its mass. Nothing in a chip ever touches it.",
+   "blurb": "Fourteen protons and fourteen neutrons, packed together by the strong force: some 29,000 times narrower than the atom, but 99.97% of its mass. Nothing a chip does ever changes it.",
    "facts": [
     "size.p.nucleus",
     "p.nucleus.1",
@@ -267,7 +267,7 @@
     "txt": "< 4.3 × 10⁻¹⁹ m",
     "words": "no size measured: a radius under 4.3 × 10⁻¹⁹ m"
    },
-   "blurb": "As far as any experiment can tell, a quark is a point. The disc here is only the limit: if a quark has a size, it is smaller than this, under a two-thousandth of the proton. Quarks are never found alone; pull one out and the energy makes new quarks.",
+   "blurb": "As far as any experiment can tell, a quark is a point. The disc here is only the limit: if a quark has a size, it is smaller than this, which is about a two-thousandth of the proton. Quarks are never found alone; pull one out and the energy makes new quarks.",
    "facts": [
     "p.quark.1",
     "p.quark.2",
@@ -307,7 +307,7 @@
    "m": 1.616255e-35,
    "kind": "outside",
    "f": "p.planck.1",
-   "blurb": "The length built from gravity, quantum mechanics and the speed of light. Here, physicists expect space and time themselves to need a quantum description that nobody has yet; whether anything can be smaller is unknown. Between the quark's limit and here lie 16 powers of ten that no experiment has reached.",
+   "blurb": "The length built from gravity, quantum mechanics and the speed of light. Here, physicists expect space and time themselves to need a quantum description that nobody has yet; whether anything can be smaller is unknown. Below the electron's limit, 2 x 10^-20 m, lie some 15 powers of ten that no experiment has reached.",
    "facts": [
     "p.planck.1",
     "p.planck.2",
@@ -577,7 +577,7 @@
   "lib.rom": {
    "name": "A read-only memory (ROM)",
    "short": "ROM",
-   "blurb": "A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit's transcendental functions read their coefficients from small tables like this.",
+   "blurb": "A table fixed when the chip is made: a transistor where a bit is 1 (it pulls its line down, and an inverter reads the 1), none where it is 0. The vector unit's transcendental functions read their coefficients from small fixed tables too, but the Minion's VPU specification describes them as look-up tables in the RTL (\"ROMs (LUT latch-based)\", \"ROMs (RTL LUTs)\"), not an array like this one.",
    "m": 2e-05,
    "kind": "inferred",
    "f": "size.lib.rom",
@@ -651,7 +651,7 @@
   "lib.powerfet": {
    "name": "A power transistor, in section",
    "short": "Power transistor",
-   "blurb": "A switch for tens of amps: thousands of small transistor cells side by side, each passing current straight down through the silicon from its source on top to the drain underneath.",
+   "blurb": "A switch for tens of amps: thousands of small transistor cells side by side; in each, electrons flow straight down through the silicon from the source on top to the drain underneath, so the current flows up.",
    "m": 5e-06,
    "kind": "inferred",
    "f": "size.lib.powerfet",
@@ -975,7 +975,7 @@
    "quote": "\"Physical design plays an important role in chip architecture as 7-nm wires are relatively slow. We found it convenient to group eight ET-Minion cores together before wire length became a problem.\" (p. 34)"
   },
   "et.cdyn-target": {
-   "statement": "Esperanto's target: 10 mW per minion at 1 GHz and 0.425 V, i.e. 0.04 nF switched per cycle (vs 2.2 nF for a 3 GHz x86 core).",
+   "statement": "Esperanto's target: 10 mW per minion at 1 GHz and 0.425 V, with 0.04 nF switched per cycle (vs 2.2 nF for a 3 GHz x86 core); 0.04 nF at 0.425 V and 1 GHz is 7.2 mW, the slide's formula adding leakage for the rest.",
    "kind": "spec",
    "source": "D. Ditzel et al. (Esperanto), \"Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip\", Hot Chips 33 slides, 24 Aug 2021",
    "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
@@ -1024,7 +1024,7 @@
    "quote": "24e9 / 570 mm² = 42.1e6 per mm²; 42.1 / 91.2 = 0.46"
   },
   "et.tr-per-minion": {
-   "statement": "At most about 15 million transistors per minion: what is left after the shire caches' bitcells (35 x 4 MiB x 6 transistors = 7.0 billion), shared over 1,088 minions; the true count is lower because the rest also holds the mesh, memory shires, PHYs, PCIe and Maxions.",
+   "statement": "At most about 15.6 million transistors per minion: what is left after the shire caches' bitcells (35 x 4 MiB x 6 transistors = 7.0 billion), shared over 1,088 minions; the true count is lower because the rest also holds the mesh, memory shires, PHYs, PCIe and Maxions.",
    "kind": "inferred",
    "source": "arithmetic on et.transistors and chip.sram-total (repository)",
    "note": "Assumes 6-transistor cells for the shire caches (the bitcell is not documented: memory-levels u.bitcell). No floorplan below the shire is published.",
@@ -1033,35 +1033,41 @@
   "et.v-minion": {
    "statement": "Minion rail: 0.517 V at 600 MHz on die (0.568 V at 700, 0.618 V at 800); firmware limits 0.40-0.62 V.",
    "kind": "measured",
-   "source": "repository: docs/findings/16-dvfs-and-leakage.md:20; docs/findings/05-claims.md:26-27, 41",
-   "quote": "\"Three operating points: 600 MHz at 0.517 V, 700 at 0.568, 800 at 0.618.\" (16-dvfs-and-leakage.md)"
+   "source": "repository: docs/findings/16-dvfs-and-leakage.md:39; docs/findings/05-claims.md:34-35, 49; docs/research/power-telemetry.md:189 (the firmware limits)",
+   "quote": "\"Three operating points: 600 MHz at 0.517 V, 700 at 0.568, 800 at 0.618.\" (16-dvfs-and-leakage.md)",
+   "card": "aifoundry2"
   },
   "et.v-sram": {
    "statement": "SRAM rail (shire-cache arrays): 0.703-0.707 V on die; firmware limits 0.66-0.85 V.",
    "kind": "measured",
-   "source": "repository: chip facts volt.sram; memory-levels l2:l2.voltage.idle, l2:l2.voltage.limits"
+   "source": "repository: chip facts volt.sram; memory-levels l2:l2.voltage.idle, l2:l2.voltage.limits",
+   "card": "aifoundry2"
   },
   "et.v-noc": {
    "statement": "Mesh rail: 0.485 V set point, 0.483-0.486 V on die.",
    "kind": "measured",
-   "source": "repository: chip facts mesh.voltage, L101"
+   "source": "repository: chip facts mesh.voltage, L101",
+   "card": "aifoundry2"
   },
   "et.v-other": {
    "statement": "Other rails on die: DDR (memory shires) 0.76-0.77 V, Maxion 0.58-0.59 V, I/O shire 0.75 V, PCIe shire 0.75 V. The DRAM's own two rails have set points only (no reading on die): 1.1 V (the card's \"VDDQ\", the LPDDR4X's VDD2 core supply) and 0.64 V (the card's VDDQLP, the LPDDR4X's I/O VDDQ).",
    "kind": "measured",
    "source": "repository: chip facts volt.other; memory levels dram.pwr.rails (the rails' names)",
-   "note": "volt.other gives these two as set points (1,100 and 640 mV) read from the power controller, with no on-die value; the memory levels' dram.pwr.rails names them: VDD_Q is the LPDDR4X's VDDQ/VDD2 core supply, VDD_QLP its I/O VDDQ."
+   "note": "volt.other gives these two as set points (1,100 and 640 mV) read from the power controller, with no on-die value; the memory levels' dram.pwr.rails names them: VDD_Q is the LPDDR4X's VDDQ/VDD2 core supply, VDD_QLP its I/O VDDQ.",
+   "card": "aifoundry2"
   },
   "et.per-shire-v": {
    "statement": "Per-shire minion-rail voltage at idle: 513-522 mV across the 34 minion shires.",
    "kind": "measured",
-   "source": "repository: chip facts L123 (docs/findings/05-claims.md:41)"
+   "source": "repository: chip facts L123 (docs/findings/05-claims.md:49)",
+   "card": "aifoundry2"
   },
   "et.leakage": {
    "statement": "Leakage on aifoundry2 at 80 °C: 20-29 W, 55-80% of an idle card and 31-45% of a 64 W random-data matmul; it rises 0.65 W per °C (fit: 23.3 W x exp((T-80)/36)).",
    "kind": "measured",
    "source": "repository: docs/findings/16-dvfs-and-leakage.md (Kanter table row \"Leakage is typically 5-30%\"); docs/research/why-low-power.md \"What this card measures\"",
-   "quote": "\"Fitted: 12.6 W fixed + 23.3 W x exp((T - 80)/36) of leakage\" (why-low-power.md)"
+   "quote": "\"Fitted: 12.6 W fixed + 23.3 W x exp((T - 80)/36) of leakage\" (why-low-power.md)",
+   "card": "aifoundry2"
   },
   "et.leak-double": {
    "statement": "By that fit, leakage doubles every 25 °C.",
@@ -1080,7 +1086,8 @@
    "statement": "Measured switched capacitance per minion: 0.168 nF on random fp32 matmul (0.064 on ones, 0.012 on zeros), against the 0.04 nF target.",
    "kind": "measured",
    "source": "repository: docs/research/why-low-power.md \"What this card measures\"",
-   "quote": "\"Cdynamic = P/(V^2 f): 0.012, 0.064 and 0.168 nF against the slide's 0.04 nF target\""
+   "quote": "\"Cdynamic = P/(V^2 f): 0.012, 0.064 and 0.168 nF against the slide's 0.04 nF target\"",
+   "card": "aifoundry2"
   },
   "et.electrons-per-cycle": {
    "statement": "Each cycle of a minion on random fp32 matmul moves about 87 pC from the 0.517 V supply: 540 million electrons per minion per cycle (45 pJ).",
@@ -1152,7 +1159,7 @@
   "n7.weff": {
    "statement": "One fin gives about 110 nm of channel width: the gate wraps both 52 nm sides and the 6 nm top. N7 has over twice N16's effective width.",
    "kind": "derived",
-   "source": "C. Hu, ch. 7 (the rule) with n7.fin-height and n7.fin-width",
+   "source": "C. Hu, ch. 7 (the rule) with n7.fin-height and n7.fin-width; the comparison with N16: WikiChip, \"7 nm lithography process\" (comparison table and TSMC section); read via the Internet Archive capture of 16 Jun 2025",
    "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch7.pdf",
    "quote": "Hu: \"The channel width, W, is the sum of twice the fin height and the width of the fin.\" 2 x 52 + 6 = 110 nm. WikiChip: \"Compared to N16, N7 has over twice the effective channel width.\""
   },
@@ -1232,7 +1239,7 @@
    "quote": "\"When we looked at the Apple A9 the following year, in TSMC's 16FF process, the M1 - M3 layers had Co liners and caps\" / \"And in fact, it has been used in the minimum pitch metals every generation since then, including the N5\""
   },
   "n7.cells": {
-   "statement": "Standard cells are 240 nm tall (high density, 6 tracks, 8 fin pitches, 57 nm gate pitch) or 300 nm (high performance, 7.5 tracks, 10 fin pitches, 64 nm gate pitch); a 360 nm 9-track variant also exists.",
+   "statement": "Standard cells are 240 nm tall (high density, 6 tracks, 8 fin pitches, 57 nm gate pitch) or 300 nm (high performance, 7.5 tracks, 10 fin pitches, 64 nm gate pitch).",
    "kind": "outside",
    "source": "D. Schor, \"TSMC 7nm HD and HP Cells, 2nd Gen 7nm, And The Snapdragon 855 DTCO\", WikiChip Fuse, 16 Jun 2019 (VLSI 2019); read via the Internet Archive capture of 13 Nov 2019",
    "url": "https://fuse.wikichip.org/news/2408/tsmc-7nm-hd-and-hp-cells-2nd-gen-7nm-and-the-snapdragon-855-dtco/",
@@ -1329,12 +1336,12 @@
    "quote": "Table 1.1, nominal FinFET design: \"Lgate (nm) 15\", \"EOT (nm) 0.7\", \"HSi (nm) 40\", \"WSi (nm) 8\""
   },
   "gate.metals": {
-   "statement": "Gate metals: since the first high-k gates (45 nm), the n-type gate uses TiAl and the p-type TiN on HfO2, deposited into the trench left by a removed dummy polysilicon gate and filled with W or Al; their work functions (about 4.1 and 4.85 eV) set the threshold.",
+   "statement": "Gate metals: since the first high-k gates (45 nm), the n-type gate uses TiAl and the p-type TiN on HfO2, deposited into the trench left by a removed dummy polysilicon gate and filled with W or Al; their work functions set the threshold: about 4.1 and 4.85 eV in the planar 45 nm gates, while a FinFET, its channel undoped, needs about 4.4 and 4.85 eV.",
    "kind": "generic",
    "source": "C. Zhao and J. Xiang, \"Atomic Layer Deposition (ALD) of Metal Gates for CMOS\", Applied Sciences 9 (2019) 2388",
    "url": "https://doi.org/10.3390/app9112388",
    "note": "Industry practice, not a TSMC N7 disclosure; multi-Vt options come from different work-function metal stacks (four per polarity in GF 7 nm, cmp.gf7).",
-   "quote": "\"In the 45 nm node, the first generation of the high-k/metal gate technology for mass production, dual metal/single high-k stack was used. The metal gate for nMOS was TiAl, and that for pMOS was TiN, integrated with HfO2 dielectric by a gate last process ... To fill the gap, a conductive metal such as Al or W was deposited.\" / \"The PVD TiAl and PVD TiN in gate stacks with HfO2 show EWF around 4.1 eV and 4.85 eV.\""
+   "quote": "\"In the 45 nm node, the first generation of the high-k/metal gate technology for mass production, dual metal/single high-k stack was used. The metal gate for nMOS was TiAl, and that for pMOS was TiN, integrated with HfO2 dielectric by a gate last process ... To fill the gap, a conductive metal such as Al or W was deposited.\" / \"The PVD TiAl and PVD TiN in gate stacks with HfO2 show EWF around 4.1 eV and 4.85 eV.\" / \"The work function values of FinFET are about 4.4 eV and 4.85 eV for N metal and P metal respectively\""
   },
   "gate.undoped-vt": {
    "statement": "In a FinFET with an undoped channel the threshold voltage is set mainly by the gate metal's work function, not by dopants in the channel.",
@@ -1382,7 +1389,7 @@
    "quote": "\"one example range of boron concentration that may be used in forming a SiGeB epi layer ... may span from, for example, less than 1E20 at/cm3 and may encompass, for example, greater than 2E20 at/cm3.\""
   },
   "dope.donor-acceptor": {
-   "statement": "Dopants work by valence: phosphorus or arsenic (5 outer electrons) gives one free electron (a donor); boron (3) leaves a hole (an acceptor). Freeing the extra electron takes only about 50 meV, about twice kT at room temperature, so dopants are almost all ionised.",
+   "statement": "Dopants work by valence: phosphorus or arsenic (5 outer electrons) gives one free electron (a donor); boron (3) leaves a hole (an acceptor). Freeing the extra electron takes only about 50 meV, about twice kT at room temperature, so dopant atoms alone in silicon sites are almost all ionised.",
    "kind": "generic",
    "source": "C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 1 (author's free chapter)",
    "url": "https://www.chu.berkeley.edu/wp-content/uploads/2020/01/Chenming-Hu_ch1-3.pdf",
@@ -1419,7 +1426,7 @@
   },
   "si.planes-width": {
    "statement": "Across a 6 nm fin there are about 31 planes of atoms (11 unit cells); along a 16.5 nm channel about 86 planes (30 unit cells); up a 52 nm fin about 383 planes (96 unit cells).",
-   "kind": "derived",
+   "kind": "inferred",
    "source": "arithmetic on si.lattice, n7.fin-width, n7.leff, n7.fin-height",
    "note": "Assumes the usual orientation: a (100) wafer, the channel along <110>, so fin sidewalls are (110) planes (an assumption; TSMC does not say).",
    "quote": "(220) planes a/sqrt(8) = 0.192 nm apart: 6/0.192 = 31, 16.5/0.192 = 86; (400) planes a/4 = 0.136 nm apart: 52/0.136 = 383"
@@ -1441,9 +1448,9 @@
    "quote": "\"Intrinsic carrier concentration 1*10^10 cm-3\"; Hu: \"ni at room temperature is roughly 10^10 cm^-3 for Si\""
   },
   "si.mobility": {
-   "statement": "In pure silicon electrons move about 3 times more easily than holes (mobility up to 1,400 vs 450 cm²/V·s); electrons saturate at about 8e6 cm/s, so crossing a 16.5 nm channel takes about 0.2 ps.",
+   "statement": "In pure silicon electrons move about 3 times more easily than holes (mobility up to 1,400 vs 450 cm²/V·s); in a transistor's channel electrons saturate at about 8e6 cm/s, so crossing a 16.5 nm channel takes about 0.2 ps.",
    "kind": "outside",
-   "source": "Ioffe Institute, NSM Archive, \"Electrical properties of Silicon (Si)\" (read via the mirror at www-f9.ijs.si)",
+   "source": "Ioffe Institute, NSM Archive, \"Electrical properties of Silicon (Si)\" (read via the mirror at www-f9.ijs.si) (the mobilities); C. Hu, Modern Semiconductor Devices for Integrated Circuits (Pearson 2010), ch. 6 (the saturation velocity in a transistor channel, 8 x 10^6 cm/s)",
    "url": "https://www.ioffe.ru/SVA/NSM/Semicond/Si/electric.html",
    "note": "Transit time 16.5e-7 cm / 8e6 cm/s = 0.21 ps (derived), against a 1.67 ns cycle at 600 MHz.",
    "quote": "\"Mobility electrons <=1400 cm2 V-1s-1\"; \"Mobility holes <=450 cm2 V-1s-1\"; Hu ch. 6: \"It is known that vsat is 8 x 10^6 cm/s for electrons and 6 x 10^6 cm/s for holes.\""
@@ -1500,7 +1507,7 @@
    "quote": "\"In each switching cycle, a charge CVdd is transferred from the power supply to the load, C. ... P_dynamic = Vdd x average current = kCVdd^2 f ... Power consumption can be reduced by lowering Vdd and by minimizing all capacitances\""
   },
   "el.kt": {
-   "statement": "Thermal energy kT is 25.9 meV at room temperature (30.4 meV at 80 °C): the band gap is about 43 kT, so thermal agitation alone frees almost no electrons; the dopants' 50 meV is only 2 kT, so they are all ionised.",
+   "statement": "Thermal energy kT is 25.9 meV at room temperature (30.4 meV at 80 °C): the band gap is about 43 kT, so thermal agitation alone frees almost no electrons; the dopants' 50 meV is only 2 kT, so nearly every dopant atom alone in a silicon site is ionised.",
    "kind": "derived",
    "source": "NIST k and e (CODATA 2022)",
    "url": "https://physics.nist.gov/cgi-bin/cuu/Value?k",
@@ -1546,7 +1553,7 @@
    "statement": "Toggling one operand-word bit outside the tensor unit costs 15.5 fJ: an effective 58 fF of wire and drivers at 0.517 V, about 190,000 electrons; wires, not transistors, hold most of the switched charge.",
    "kind": "derived",
    "source": "repository: docs/energy-manual/03-instructions.md (bus 15.539 fJ)",
-   "note": "Same E = C V^2 convention as et.flip-reg; a toggle that only discharges draws nothing from the supply, so this is an upper bound on C.",
+   "note": "E = C V^2, as for et.flip-reg, gives this effective 58 fF; but a toggle that only discharges draws nothing from the supply, so an average toggle costs C V^2 / 2 and the physical switched capacitance is up to twice this, 116 fF (2 x 15.539 fJ / 0.517^2). The 190,000 electrons (E / V) is the average drawn per toggle either way.",
    "quote": "C = 15.539 fJ / 0.517² = 58 fF; Q = 30 fC = 188,000 electrons"
   },
   "wire.cu": {
@@ -1602,13 +1609,13 @@
   "p.atom.9": {
    "statement": "A FinFET channel of about 6 x 16.5 x 52 nm holds about 257,000 silicon atoms and, on average, 5 x 10^-8 thermally freed electrons: none. The transistor conducts only when the gate voltage pulls electrons in from the heavily doped source.",
    "kind": "inferred",
-   "source": "process.json beside this file: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others",
+   "source": "docs/reports/data/2026-10-01-ladder/research/process.json: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others",
    "note": "the channel: N7's published fin, 6 x 52 nm, and effective gate length, 16.5 nm (process.json n7.fin-width, n7.fin-height, n7.leff); the conduction picture is the textbook MOSFET (Sze ch. 6)"
   },
   "p.atom.10": {
    "statement": "With more than 24 billion transistors and about 257,000 atoms in each fin's channel, the chip's channels hold at least 6 x 10^15 silicon atoms: about 0.3 micrograms at one fin per transistor, about 0.6 at the dense cells' two. That is all the silicon that actually switches.",
    "kind": "inferred",
-   "source": "process.json beside this file: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process): TSMC 7 nm, more than 24 billion transistors (Esperanto, Hot Chips 33 and IEEE Micro 2022)",
+   "source": "docs/reports/data/2026-10-01-ladder/research/process.json: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); docs/reports/data/2026-09-27-chip-diagram/facts.json (chip.process): TSMC 7 nm, more than 24 billion transistors (Esperanto, Hot Chips 33 and IEEE Micro 2022)",
    "note": "the transistor count is Esperanto's; the channel is N7's published fin and effective gate length (process.json); dense cells have about two fins per transistor (process.json n7.two-fin, Angstronomics); how many fins each of this chip's transistors has is not published, so this is an order of magnitude"
   },
   "p.atom.11": {
@@ -1623,7 +1630,7 @@
    "source": "Ioffe Institute, NSM Archive, \"Silicon (Si): basic parameters\" and \"band structure and carrier concentration\" (www.ioffe.ru/SVA/NSM/Semicond/Si/), compiled from Sze, Shur and others"
   },
   "p.dopant.2": {
-   "statement": "Those energies are only about 2 kT at room temperature (2 kT = 52 meV), so nearly every dopant atom has given up (or taken) its electron.",
+   "statement": "Those energies are only about 2 kT at room temperature (2 kT = 52 meV), so nearly every dopant atom alone in a silicon site has given up (or taken) its electron.",
    "kind": "generic",
    "source": "S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors); NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
   },
@@ -1650,10 +1657,10 @@
    "source": "IBM, US Patent 10,431,502 B1, \"Maskless epitaxial growth of phosphorus-doped Si and boron-doped SiGe (Ge) for advanced source/drain contact\" (priority 16 Apr 2018), background; S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)"
   },
   "p.dopant.7": {
-   "statement": "The same patent dopes the wells under the fins at 10^16 to 10^18 per cm3. At those levels a 6 x 16.5 x 52 nm channel would hold on average 0.05 to 5.1 dopant atoms, among some 257,000 silicon atoms: a handful at most, and their random number and place would make every transistor different. FinFET channels are therefore left nearly undoped and the threshold voltage is set by the gate metal instead.",
+   "statement": "TSMC's FinFET patent (US 11,107,923) implants its wells, in the fins or the substrate, at up to 10^18 per cm3 for n-wells (10^16 to 10^18) and up to 10^20 for p-wells (10^17 to 10^20). At a bulk FinFET's usual fin doping, 10^16 to 10^18 per cm3, a 6 x 16.5 x 52 nm channel would hold on average 0.05 to 5.1 dopant atoms, among some 257,000 silicon atoms: a handful at most, and their random number and place would make every transistor different. FinFET channels are therefore left nearly undoped and the threshold voltage is set by the gate metal instead.",
    "kind": "inferred",
-   "source": "TSMC, US Patent 11,107,923 B2, \"Source/drain regions of FinFET devices and methods of forming same\" (priority 14 Jun 2019), description (a patent's embodiments, not a statement about N7); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si); S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)",
-   "note": "whether N7 dopes its channels, and how much, is not published (unknown); the count is arithmetic on an inferred volume and the patent's well range"
+   "source": "TSMC, US Patent 11,107,923 B2, \"Source/drain regions of FinFET devices and methods of forming same\" (priority 14 Jun 2019), description (a patent's embodiments, not a statement about N7); X. Zhang, \"Simulation-based Study of Super-steep Retrograde Doped Bulk FinFET Technology and 6T-SRAM Yield\", UC Berkeley EECS Technical Report UCB/EECS-2016-3, 5 Jan 2016 (www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-3.pdf); docs/reports/data/2026-10-01-ladder/research/process.json: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper); S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)",
+   "note": "whether N7 dopes its channels, and how much, is not published (unknown); the count is arithmetic on N7's published fin and effective gate length (process.json) at the Berkeley TCAD study's fin doping (dope.levels)"
   },
   "p.core.1": {
    "statement": "The 1s pair sits about 3.9 pm from the nucleus and the 2s and 2p eight about 21 pm: the outer four, around 118 pm, are some 5 to 30 times farther out.",
@@ -1673,7 +1680,7 @@
    "note": "core-level binding energies of the solid (X-Ray Data Booklet; relative to the Fermi level, which changes them by a few eV) against the free atom's first ionisation energy: 1839 / 8.15 = 226, 99.42 / 8.15 = 12.2"
   },
   "p.core.4": {
-   "statement": "An electron in an atom is not a little ball on an orbit: the shells are clouds of probability, and the radii here are where each cloud is densest.",
+   "statement": "An electron in an atom is not a little ball on an orbit: the shells are clouds of probability, and the radii here are each shell's most likely distance from the nucleus.",
    "kind": "generic",
    "source": "S. M. Sze and K. K. Ng, Physics of Semiconductor Devices, 3rd ed. (Wiley, 2007), ch. 1 (crystal, bands, donors and acceptors)"
   },
@@ -1698,9 +1705,10 @@
    "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf)"
   },
   "p.nucleus.5": {
-   "statement": "Its density is about 2.3 x 10^17 kg per m3: a teaspoon (5 mL) of nuclear matter would weigh about 1.1 billion tonnes.",
+   "statement": "Its density is about 1.7 x 10^17 kg per m3 as a uniform sphere 8.06 fm across, or 2.3 x 10^17 at the textbook rule's radius of 3.64 fm: a teaspoon (5 mL) of nuclear matter would weigh about a billion tonnes.",
    "kind": "derived",
-   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm (the textbook rule as widely quoted; the book not read for this page)"
+   "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); K. S. Krane, Introductory Nuclear Physics (Wiley, 1988), ch. 3: R = R0 A^(1/3) with R0 about 1.2 fm (the textbook rule as widely quoted; the book not read for this page)",
+   "note": "the nucleus's mass, 27.977 u less 14 electrons = 4.644 x 10^-26 kg, over 4/3 pi R^3: R = sqrt(5/3) x 3.1224 fm = 4.03 fm (size.p.nucleus) gives 1.69 x 10^17 kg/m^3, R = 1.2 fm x 28^(1/3) = 3.64 fm (p.nucleus.2) gives 2.29 x 10^17; 5 mL of it is 0.85 to 1.15 x 10^12 kg"
   },
   "p.nucleus.6": {
    "statement": "If the nucleus were a 1 cm marble, the atom's share of the crystal would be about 290 m across: an atom is almost all empty space.",
@@ -1714,7 +1722,7 @@
    "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021))"
   },
   "p.nucleus.8": {
-   "statement": "That is about a million times the energy of the outer electrons (8.15 eV) or of a chemical bond (about 2.3 eV): why chemistry, and electronics, never change a nucleus.",
+   "statement": "That is about a million times the energy of an outer electron (8.15 eV) and nearly four million times a chemical bond (about 2.3 eV): why chemistry, and electronics, never change a nucleus.",
    "kind": "derived",
    "source": "IAEA Nuclear Data Section, LiveChart of Nuclides data service, 28Si ground state (nds.iaea.org/relnsd/v1/data?fields=ground_states&nuclides=28si, read 1 Oct 2026): charge radius from I. Angeli and K. P. Marinova, At. Data Nucl. Data Tables 99, 69 (2013); mass and binding energy from AME2020 (M. Wang et al., Chinese Phys. C 45, 030003 (2021)); NIST Atomic Spectra Database, Ground levels and ionization energies, spectra Si I to Si XIV, physics.nist.gov/cgi-bin/ASD/ie.pl (read 1 Oct 2026); C. Kittel, Introduction to Solid State Physics, 8th ed. (Wiley, 2005), ch. 3, Table 1 (cohesive energies): Si 4.63 eV per atom (the table's value as widely quoted; the book not read for this page)"
   },
@@ -1756,8 +1764,8 @@
   "p.nucleon.8": {
    "statement": "Each silicon-28 atom holds 42 up and 42 down quarks (84 in all); a 6 x 16.5 x 52 nm channel's ~257,000 atoms hold some 22 million quarks and 3.6 million electrons.",
    "kind": "inferred",
-   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si)",
-   "note": "the per-atom count is arithmetic (derived); the channel count rests on the inferred channel size"
+   "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf); docs/reports/data/2026-10-01-ladder/research/process.json: TSMC N7's fin, 6 nm wide and 52 nm tall (WikiChip Fuse), and effective gate length, 16.5 nm (Dick James on TSMC's IEDM 2016 paper)",
+   "note": "the per-atom count is arithmetic (derived); the channel count rests on the channel's size, N7's published fin and effective gate length (process.json)"
   },
   "p.quark.1": {
    "statement": "Upper limit on the effective quark radius: 4.3 x 10^-19 m (95% confidence), from electron-proton collisions at HERA.",
@@ -1770,13 +1778,13 @@
    "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); ZEUS Collaboration, \"Limits on the effective quark radius from inclusive ep scattering at HERA\", Phys. Lett. B 757, 468 (2016), arXiv:1604.01280"
   },
   "p.quark.3": {
-   "statement": "Masses (MS-bar at 2 GeV): up 2.16 +/- 0.07 MeV, down 4.70 +/- 0.07 MeV. Two ups and a down add to 9.0 MeV: 1% of the proton's 938.3 MeV.",
+   "statement": "Masses (MS-bar at 2 GeV): up 2.16 +/- 0.07 MeV/c^2, down 4.70 +/- 0.07 MeV/c^2. Two ups and a down add to 9.0 MeV/c^2: 1% of the proton's 938.3 MeV/c^2.",
    "kind": "derived",
    "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: quarks (pdg.lbl.gov/2026/tables/rpp2026-sum-quarks.pdf); Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: N baryons (p, n) (pdg.lbl.gov/2026/tables/rpp2026-sum-baryons.pdf)",
    "note": "quark masses depend on the scheme and scale they are quoted at; the simple sum is an illustration"
   },
   "p.quark.4": {
-   "statement": "A lattice-QCD breakdown of the proton's mass: the quarks' masses (through the quark condensate, u, d and s) give 9%, the quarks' energy of motion 33%, the gluon field's energy 37%, and the 'trace anomaly' 23%.",
+   "statement": "A lattice-QCD breakdown of the proton's mass (MS-bar at 2 GeV): the masses of all the quarks in it, the sea of short-lived quark-antiquark pairs (strange ones too) as well as the three, give 9% (the quark condensate term); the quarks' energy of motion 33%, the gluon field's energy 37%, and the 'trace anomaly' 23%.",
    "kind": "outside",
    "source": "Y.-B. Yang et al. (chiQCD), \"Proton mass decomposition from the QCD energy momentum tensor\", Phys. Rev. Lett. 121, 212001 (2018), arXiv:1808.08677"
   },
@@ -1786,12 +1794,12 @@
    "source": "S. Duerr et al., \"Ab initio determination of light hadron masses\", Science 322, 1224 (2008), arXiv:0906.3599"
   },
   "p.quark.6": {
-   "statement": "Gluons carry the strong force between quarks; they are massless in theory (a mass of a few MeV is not excluded) and come in eight colour states.",
+   "statement": "Gluons carry the strong force between quarks; they are massless in theory (a mass of a few MeV/c^2 is not excluded) and come in eight colour states.",
    "kind": "outside",
    "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: gauge and Higgs bosons, gluon (pdg.lbl.gov/2026/tables/rpp2026-sum-gauge-higgs-bosons.pdf); Particle Data Group (2026), review 15, Quark Model (C. Amsler, V. Crede et al., rev. Aug 2025), sec. 15.1-15.2"
   },
   "p.quark.7": {
-   "statement": "Colour is believed to be permanently confined: only colourless combinations (three quarks, or a quark and an antiquark) exist on their own.",
+   "statement": "Colour is believed to be permanently confined: only colourless combinations exist on their own, usually three quarks or a quark and an antiquark; some observed states are classed as four or five quarks.",
    "kind": "outside",
    "source": "Particle Data Group (2026), review 15, Quark Model (C. Amsler, V. Crede et al., rev. Aug 2025), sec. 15.1-15.2"
   },
@@ -1817,7 +1825,7 @@
    "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf); G. Gabrielse group (Northwestern Center for Fundamental Physics), \"Limit on Electron Substructure\", cfp.physics.northwestern.edu/gabrielse-group/electron-substructure.html, citing D. Bourilkov, Phys. Rev. D 64, 071701(R) (2001) for the LEP contact-interaction limit"
   },
   "p.electron.4": {
-   "statement": "The electron is round: its electric dipole moment is below 4.1 x 10^-30 e cm (PDG 2026), so its charge sits within 4.1 x 10^-32 m of its centre (dipole moment divided by its charge).",
+   "statement": "The electron is round: its electric dipole moment is below 4.1 x 10^-30 e cm (PDG 2026), so the centre of its charge sits within 4.1 x 10^-32 m of its centre of mass (dipole moment divided by its charge). That limits its shape, not its size.",
    "kind": "derived",
    "source": "Particle Data Group, F. Takahashi et al., Int. J. Mod. Phys. A 41, 2630011 (2026), summary table: leptons (pdg.lbl.gov/2026/tables/rpp2026-sum-leptons.pdf)",
    "note": "the dipole limit divided by the charge: 4.1 x 10^-30 e cm / e = 4.1 x 10^-30 cm = 4.1 x 10^-32 m"
@@ -1849,9 +1857,9 @@
    "source": "M. Planck, \"Ueber irreversible Strahlungsvorgaenge\", Sitzungsberichte der Koeniglich Preussischen Akademie der Wissenschaften zu Berlin (1899), pp. 440-480 (natural units of length, mass, time and temperature)"
   },
   "p.planck.3": {
-   "statement": "The quark's radius limit is 3 x 10^16 times the Planck length: some 16 powers of ten that no experiment has probed.",
+   "statement": "The quark's radius limit is 3 x 10^16 times the Planck length; even the electron's smaller limit, 2 x 10^-20 m, is 1 x 10^15 times it: some 15 powers of ten that no experiment has probed.",
    "kind": "derived",
-   "source": "ZEUS Collaboration, \"Limits on the effective quark radius from inclusive ep scattering at HERA\", Phys. Lett. B 757, 468 (2016), arXiv:1604.01280; NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
+   "source": "ZEUS Collaboration, \"Limits on the effective quark radius from inclusive ep scattering at HERA\", Phys. Lett. B 757, 468 (2016), arXiv:1604.01280; G. Gabrielse group (Northwestern Center for Fundamental Physics), \"Limit on Electron Substructure\", cfp.physics.northwestern.edu/gabrielse-group/electron-substructure.html, citing D. Bourilkov, Phys. Rev. D 64, 071701(R) (2001) for the LEP contact-interaction limit; NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026)"
   },
   "p.planck.4": {
    "statement": "Whether the Planck length is a smallest possible length is an open question: thought experiments and several approaches to quantum gravity suggest a minimal length, and none is confirmed.",
@@ -1898,7 +1906,7 @@
   "p.wrap.7": {
    "statement": "On a logarithmic scale the middle of the whole ladder, between the Planck length and the observable universe, is 0.12 mm: about the size of a minion's 4 KB L1 data cache or one SRAM panel of the shire cache in this chip.",
    "kind": "derived",
-   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: lib.channel, lib.si)",
+   "source": "NIST, 2022 CODATA recommended values of the fundamental physical constants, physics.nist.gov/cuu/Constants (each constant's values page, read 1 Oct 2026); the chip diagram's outside ladder (docs/reports/data/2026-09-27-chip-diagram/research/outside.json: universe, beyond); the chip diagram's own tree (docs/reports/data/2026-09-27-chip-diagram/research/inside.json: l1d, a minion's L1 data cache, and shire.panel.array, an SRAM panel of the shire cache)",
    "note": "the two chip sizes are the chip page's order-of-magnitude inferences"
   },
   "p.wrap.8": {
@@ -2227,7 +2235,7 @@
    "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 1 (CMOS logic) and ch. 9 (combinational circuits)"
   },
   "tb.prefix": {
-   "statement": "A parallel-prefix adder computes for each bit a generate g = a·b and a propagate p = a XOR b, combines them in a tree of carry cells (G = Gi + Pi·Gj, P = Pi·Pj) of log2 n levels, and forms each sum bit as p XOR the carry into it; a ripple-carry adder instead passes the carry through all n bits one after another.",
+   "statement": "A parallel-prefix adder computes for each bit a generate g = a·b and a propagate p = a XOR b, combines them in a tree of carry cells (G = Gi + Pi·Gj, P = Pi·Pj) of as few as log2 n levels, and forms each sum bit as p XOR the carry into it; a ripple-carry adder instead passes the carry through all n bits one after another.",
    "kind": "generic",
    "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (addition: tree adders); I. Koren, Computer Arithmetic Algorithms, 2nd ed. (A K Peters, 2002), ch. 5"
   },
@@ -2242,7 +2250,7 @@
    "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (shifters)"
   },
   "tb.booth": {
-   "statement": "Radix-4 (modified) Booth recoding looks at overlapping triples of multiplier bits (bits 2i+1, 2i and 2i-1) and makes each partial product 0, +X, +2X, -X or -2X, halving the number of partial products to add; each bit of a partial product is a multiplexer choosing x(j) or x(j-1), followed by an XOR with the sign.",
+   "statement": "Radix-4 (modified) Booth recoding looks at overlapping triples of multiplier bits (bits 2i+1, 2i and 2i-1) and makes each partial product 0, +X, +2X, -X or -2X, halving the number of partial products to add; each bit of a partial product is a multiplexer choosing x(j), x(j-1) or 0, followed by an XOR with the sign.",
    "kind": "generic",
    "source": "A. D. Booth, \"A Signed Binary Multiplication Technique\", Quarterly Journal of Mechanics and Applied Mathematics 4(2), 1951; O. L. MacSorley, \"High-Speed Arithmetic in Binary Computers\", Proceedings of the IRE 49(1), 1961; I. Koren, Computer Arithmetic Algorithms, 2nd ed. (A K Peters, 2002), ch. 6; N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (multiplication)"
   },
@@ -2272,9 +2280,9 @@
    "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 12 (multiported register files)"
   },
   "tb.icg": {
-   "statement": "An integrated clock gate latches the enable while the clock is high and ANDs it with the clock: a block whose enable is low gets no clock edges, so its flip-flops and clock wires do not switch.",
+   "statement": "An integrated clock gate passes the enable through a latch that is transparent while the clock is low and holds it while the clock is high, and ANDs the held enable with the clock: a block whose enable is low gets no clock edges, so its flip-flops and clock wires do not switch.",
    "kind": "generic",
-   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 10 (sequential circuits) and ch. 5 (power: clock gating)"
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 10 (sequential circuits) and ch. 5 (power: clock gating); external/core-et/rtl/libs/rf_latches/et_clk_gate.v:22-29 (core-et's clock gate, Erbium branch: the enable is loaded while clk is low; enclk = clk && en_1p)"
   },
   "tb.stdcell": {
    "statement": "Logic synthesis maps a block's register-transfer-level description onto a library of standard cells (inverters, NAND, NOR, AND-OR-INVERT and XOR gates, multiplexers, flip-flops, clock gates), typically a few hundred kinds of cell of one height, placed in rows.",
@@ -2292,9 +2300,9 @@
    "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 11 (comparators)"
   },
   "tb.fifo": {
-   "statement": "A first-in, first-out queue is a small memory addressed by a write pointer and a read pointer, two counters; comparing the pointers tells a full queue from an empty one.",
+   "statement": "A first-in, first-out queue is a small memory addressed by a write pointer and a read pointer, two counters. Equal pointers mean empty or full; one way to tell them apart is a pointer one bit wider than the address: equal in every bit, the queue is empty; equal but for that extra bit, it is full.",
    "kind": "generic",
-   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 12 (serial-access memories: queues)"
+   "source": "N. Weste and D. Harris, CMOS VLSI Design: A Circuits and Systems Perspective, 4th ed. (Addison-Wesley, 2011), ch. 12 (serial-access memories: queues); C. E. Cummings, \"Simulation and Synthesis Techniques for Asynchronous FIFO Design\", SNUG San Jose 2002, §2.2 (p. 3): the extra pointer bit"
   },
   "tb.pll": {
    "statement": "A phase-locked loop multiplies a reference clock: a phase-frequency detector compares the reference with the output divided by N, a charge pump and loop filter turn the difference into a control voltage, and a voltage-controlled oscillator, often a ring of an odd number of inverters, settles at N times the reference.",
@@ -2400,7 +2408,7 @@
    "note": "Losses and the drop between the regulator and the die make the true duty cycle a little higher; 500 kHz is a value inside the TPSM831D31's 350-700 kHz range, not a measured one."
   },
   "tb.powerfet": {
-   "statement": "A power MOSFET is thousands of small cells in parallel: in a trench-gate device, current flows vertically, from the source on top, down a channel along each trench wall through the p-type body, across a lightly doped drift layer to the heavily doped substrate, the drain, underneath; its on-resistance is milliohms and it blocks tens of volts.",
+   "statement": "A power MOSFET is thousands of small cells in parallel: in a trench-gate device conducting with its drain positive, electrons flow vertically, from the source on top, down a channel along each trench wall through the p-type body, across a lightly doped drift layer to the heavily doped substrate, the drain, underneath, and the current flows up; its on-resistance is milliohms and it blocks tens of volts.",
    "kind": "generic",
    "source": "B. J. Baliga, Fundamentals of Power Semiconductor Devices, 2nd ed. (Springer, 2019), ch. 6 (power MOSFETs)"
   },
@@ -2417,7 +2425,7 @@
   "card.dip": {
    "statement": "The card has DIP switches to set all its boot options.",
    "kind": "spec",
-   "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 1 (features) and p. 3 (DIP switches)"
+   "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 3 (features) and pp. 7-10 (DIP Switches)"
   },
   "et.bootpins": {
    "statement": "The chip records the state of its boot pins: bits 10:0 of the reset manager's status register rm_status2 \"provide status information about various boot pins\": 11 bits.",
@@ -2449,9 +2457,9 @@
    "note": "0.3615 / 1.4142 = 0.2556 nm"
   },
   "host.intel14": {
-   "statement": "Intel's 14 nm process, the host processors', is a FinFET process too: fins 42 nm apart, gates 70 nm apart and the finest wires 52 nm apart (TSMC N7: 30, 57 and 40 nm).",
+   "statement": "Intel's 14 nm process, the host processors', is a FinFET process too: as first made (2014), fins 42 nm apart, gates 70 nm apart and the finest wires 52 nm apart (TSMC N7: 30, 57 and 40 nm); its 14nm++ revision (2017), used for Intel's 14 nm desktop processors from Coffee Lake on, spaces the gates 84 nm apart.",
    "kind": "outside",
-   "source": "S. Natarajan et al., \"A 14nm Logic Technology Featuring 2nd-Generation FinFET, Air-Gapped Interconnects, Self-Aligned Double Patterning and a 0.0588 µm² SRAM cell size\", IEDM 2014; out.host.5 (the hosts' 14 nm)",
+   "source": "S. Natarajan et al., \"A 14nm Logic Technology Featuring 2nd-Generation FinFET, Air-Gapped Interconnects, Self-Aligned Double Patterning and a 0.0588 µm² SRAM cell size\", IEDM 2014; out.host.5 (the hosts' 14 nm); Intel, Technology and Manufacturing Day (March 2017): 14nm++ relaxes the gate pitch from 70 to 84 nm (as reported by The Motley Fool, \"Intel Corporation Outs 14-Nanometer++ Technology\", 2017, and AnandTech's Coffee Lake review, Oct 2017)",
    "note": "https://people.eecs.berkeley.edu/~pister/140sp16/resources/Intel14nmIEDM2014.pdf"
   },
   "host.ddr4": {
@@ -2487,13 +2495,13 @@
    "statement": "Decoder: about 3 µm across, the width of the view that frames it (an order of magnitude).",
    "kind": "inferred",
    "source": "the ladder's textbook constructions (research/build_circuits.py)",
-   "note": "a 7-to-128 row decoder spans the 128 rows of an array, a few µm; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+   "note": "the 3-to-8 decoder drawn spans 8 rows, about 1-2 µm; a 7-to-128 row decoder spans the 128 rows of an array, about 15 µm at the 114 nm row pitch of N7's dense SRAM cell (size.lib.sram6t); an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
   },
   "size.lib.regfile": {
    "statement": "Register file: about 40 µm across, the width of the view that frames it (an order of magnitude).",
    "kind": "inferred",
    "source": "the ladder's textbook constructions (research/build_circuits.py)",
-   "note": "like the core's integer register file: 4,096 latch bits with their ports; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
+   "note": "like the core's integer register file: 3,968 latch bits with their ports; an order of magnitude only: no layout of the ET-SoC-1's circuits is published."
   },
   "size.lib.logic": {
    "statement": "Control logic: standard cells: about 20 µm across, the width of the view that frames it (an order of magnitude).",
@@ -2721,7 +2729,7 @@
    "f": "gate.metals"
   },
   "wf": {
-   "t": "about 4.1 and 4.85 eV",
+   "t": "about 4.4 and 4.85 eV",
    "f": "gate.metals"
   },
   "v_nom": {
@@ -2849,7 +2857,7 @@
    "f": "p.nucleon.1"
   },
   "pr_m": {
-   "t": "938.272 MeV",
+   "t": "938.272 MeV/c²",
    "f": "p.nucleon.3"
   },
   "pr_uud": {
@@ -2885,7 +2893,7 @@
    "f": "p.electron.4"
   },
   "el_q": {
-   "t": "1.602176634 × 10⁻¹⁹ C",
+   "t": "−1.602176634 × 10⁻¹⁹ C",
    "f": "p.electron.1"
   },
   "pl_l": {
@@ -2893,7 +2901,7 @@
    "f": "p.planck.1"
   },
   "pl_16": {
-   "t": "16 powers of ten",
+   "t": "15 powers of ten",
    "f": "p.planck.3"
   },
   "pl_617": {
@@ -3149,8 +3157,8 @@
    },
    {
     "id": "lib.fin",
-    "m": 6e-09,
-    "f": "n7.fin-width"
+    "m": 5.2e-08,
+    "f": "n7.fin-height"
    },
    {
     "id": "l1d",
@@ -3212,7 +3220,7 @@
    },
    {
     "id": "e.ew",
-    "lab": "particles get their masses",
+    "lab": "quarks and electrons get mass",
     "num": "ep_ew",
     "T_K": 1900000000000000.0,
     "t_s": 9.1e-12

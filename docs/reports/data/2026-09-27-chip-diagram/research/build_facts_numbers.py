@@ -35,9 +35,16 @@ def mdline(path, sub):
     assert hits, (path, sub)
     return f'{path}:{hits[0]}'
 
+def mdrange(path, first, last):
+    # a block of rows cited as one range, from the first row holding `first` to the first holding `last` (14 Oct 2026)
+    a, b = (int(mdline(path, s).rsplit(':', 1)[1]) for s in (first, last))
+    assert a <= b, (path, first, last)
+    return f'{path}:{a}-{b}'
+
 PAGES = {
     'energy': ('The energy manual', 'docs/reports/2026-09-23-energy-manual.html', 'https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual'),
     'memhier': ('Memory hierarchy', 'docs/reports/2026-09-18-et-soc1-memory-hierarchy.html', 'https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy'),
+    'memhier-gs': ('Memory hierarchy', 'docs/reports/2026-09-18-et-soc1-memory-hierarchy.html', 'https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#irregular-access-gathers-and-scatters'),
     'anatomy': ('Anatomy of a memory access', 'docs/reports/2026-09-19-et-soc1-memory-anatomy.html', 'https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy'),
     'noc': ('On-chip communication', 'docs/reports/2026-09-18-et-soc1-on-chip-communication.html', 'https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication'),
     'hotline': ('One hot line stops a shire', 'docs/reports/2026-09-22-hot-line.html', 'https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line'),
@@ -160,9 +167,9 @@ F('lat-dram-model', 'DRAM (LPDDR4X, memory shires)', 'latency',
   91, 'cycles (memory-shire leg constant)', 'mem.json: [item=MEM-P2].per_card.<card>.tests.P2_dram_within3_frac; ' + cl('DRAM latency against the 19 September model'),
   'derived', CARDS3, 'Fitted on aifoundry2 (one constant plus eight memory-shire positions); PA bits 10:6 pick the L3 home, bits 8:6 the memory shire.', 'anatomy')
 F('lat-dram-chip', 'DRAM (LPDDR4X, memory shires)', 'latency',
-  'Of a DRAM load\'s ~300 cycles only about 25-28 are the DRAM chip\'s own timing (activate tRCD 18 ns, 19.3 ns read latency, one or two 4.3 ns bursts); the rest is paths on the chip.',
-  28, 'cycles', 'docs/reports/2026-09-19-et-soc1-memory-anatomy.html section 4 ("Of the 91 cycles (152 ns), the DRAM chip itself accounts for about 25-28")',
-  'inferred', None, 'From the controller\'s timing registers set against the fit; the memory shire (queue, PHY, clock crossings) is at most ~63-66 cycles.', 'anatomy')
+  'Of a DRAM load\'s ~300 cycles only about 28 are the DRAM chip\'s own timing (activate tRCD 18 ns, 19.3 ns read latency, the two 4.3 ns bursts of a 64-byte line); the rest is paths on the chip.',
+  28, 'cycles', 'docs/reports/2026-09-19-et-soc1-memory-anatomy.html section 4 ("Of the 91 cycles (152 ns), the DRAM chip itself accounts for about 28")',
+  'inferred', None, 'From the controller\'s timing registers set against the fit; the L3 home\'s miss handling and the memory shire (queue, PHY, clock crossings) are at most ~63 cycles.', 'anatomy')
 F('lat-dram-refresh', 'DRAM (LPDDR4X, memory shires)', 'latency',
   'LPDDR4X refresh every 2,325 cycles (3.88 us) on every card; a load that meets it waits up to 208 extra cycles (347 ns).',
   208, 'cycles', 'mem.json: [item=MEM-P5].per_card.<card>.tests.P5_refresh_period, .P5_max_extra; ' + cl('DRAM refresh and open rows'),
@@ -302,14 +309,16 @@ F('e-fadd-ps', 'vector unit', 'energy per instruction',
   '8-lane vector add fadd.ps: 22.4 pJ on zeros (same as the scalar op: lanes on zeros add nothing), 41.1 on random data (5.1 per lane).',
   41.1, 'pJ/instruction', mdline(I3, '| `fadd.ps (8 lanes)` |'), 'measured', CARDS3, None, 'energy')
 F('e-fexp-ps', 'vector unit', 'energy per instruction',
-  'Transcendental fexp.ps (8 lanes): 155.4 pJ [147.3-162.4] on random data at a quarter the issue rate; flog.ps 218 pJ. No hardware divide or square root: they trap.',
-  155.4, 'pJ/instruction', mdline(I3, '| `fexp.ps (8 lanes)` |'), 'measured', CARDS3, None, 'energy')
+  'Transcendental fexp.ps (8 lanes): 155.4 pJ [147.3-162.4] on random data at a quarter the issue rate; flog.ps 218 pJ. No hardware float or vector divide or square root: they trap (the scalar integer div and rem run, at 141-157 pJ).',
+  155.4, 'pJ/instruction', mdline(I3, '| `fexp.ps (8 lanes)` |') + '; ' + mdline(I3, 'every float and vector divide and square root')
+  + ', ' + mdline(I3, '141–157 pJ for the 64-bit divides').rsplit(':', 1)[1]
+  + ' (every float and vector divide and square root traps; 141-157 pJ for the 64-bit divides and remainders)', 'measured', CARDS3, None, 'energy')
 F('e-nop', 'minion', 'energy per instruction',
   'The awake core\'s issue floor: a nop costs 5.1 pJ [4.8-5.7] and a fence 4.4 [4.0-4.8] per instruction with both harts.',
   5.1, 'pJ/instruction', mdline('docs/energy-manual/02-awake.md', 'The addi loop is not the floor'), 'measured', CARDS3, None, 'energy')
 F('e-awake', 'minion', 'power',
   'An awake minion (addi loop) costs about 2 mW (1.87 mW one hart, 3.02 mW both harts, aifoundry2); 5.1 / 6.6 pJ per instruction pooled over three cards.',
-  1.87, 'mW per minion', mdline('docs/energy-manual/02-awake.md', '| One hart per minion, `addi` loop |'), 'measured', CARDS3,
+  1.87, 'mW per minion', mdrange('docs/energy-manual/02-awake.md', '| One hart per minion, `addi` loop |', '| Both harts per minion |'), 'measured', CARDS3,
   'Keeping 1,024 minions awake for a second is 2-3.1 J, against 36 J for the card at 80 C.', 'energy')
 F('e-stalled', 'minion', 'power',
   'A minion stalled on a contended atomic draws about 1.2 mW (1,024 stalled: 1.19 W [1.01-1.41] over idle), less than a spinning one (1.9 mW): waiting is cheap.',
@@ -362,7 +371,7 @@ for c, lab in [('aifoundry2', 'a2'), ('aifoundry3', 'a3'), ('aifoundry1-c1', 'a1
       r(f32['board_w'], 1), 'W', f'mmb.json: items[MMB-c].per_card.{c}.fp32-tensor-L2 (board_w, idle_before_w, mean, die_c_mean); ' + cl('mmbench board watts over idle'),
       'measured', c, 'Four passes; the matmul page\'s three-card table.', 'matmul')
 F('mm-perw', 'tensor unit', 'efficiency',
-  'Board GFLOP/s per W, L2 matmul fp32 / fp16 / int8: aifoundry2 161 / 316 / 1,172; aifoundry3 189 / 370 / 1,377; aifoundry1-c1 138 / 270 / 958 (each card at its own die temperature).',
+  'Board GFLOP/s per W (GOP/s per W for int8), L2 matmul fp32 / fp16 / int8: aifoundry2 161 / 316 / 1,172; aifoundry3 189 / 370 / 1,377; aifoundry1-c1 138 / 270 / 958 (each card at its own die temperature).',
   161, 'GFLOP/s per W (fp32, aifoundry2)', cl('Board GFLOP/s per W, L2 matmul'), 'measured', CARDS3,
   'Against the A100 spec sheet (peak / TDP) at full fp32 precision the card is 3.3x (a2), 3.9x (a3), 2.8x (a1c1) more energy-efficient on the benchmark\'s +-1/+-2 operands; the A100\'s int8 tensor cores lead by 1.13-1.63x.', 'matmul')
 tr = MAN['tensor']['per_card_rows']
@@ -432,7 +441,8 @@ F('gov-thresholds', 'clock and voltage', 'operating point',
 F('temp-sensors', 'die temperature', 'temperature',
   '35 temperature sensors on the die (34 minion shires + the I/O shire, one per tile of the 6x6 grid except PCIe), 12-bit (0.061 C) in hardware; the host sees one 34-shire mean in whole degrees plus peak-hold extremes.',
   35, 'sensors', 'docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html headline tiles; ' + cl('Moortec PVT: 35 temperature sensors'),
-  'spec', None, 'Firmware source (bl2_pvt_controller.h) and PRM sec. 1.6.', 'spatial')
+  'spec', None, 'The RTL (core-et rtl/inc/pvt_defines.vh:16-18, 26: the PCIe shire\'s sensor removed, RTLMIN-3619) and the '
+  'firmware (bl2_pvt_controller.h:75, 440); the PRM (sec. 1.6, Table 1-6, Figure 1-3) still counts 36, one in the PCIe shire.', 'spatial')
 F('temp-hottest', 'die temperature', 'temperature',
   'At each rise, the hottest shire read 2-3 C above the chip mean (3-4 C in 61-83% of rises by card), but the host never learns which shire it was.',
   3, 'C above the mean', cl('Peak-hold high against the SP\'s maximum of the mean'), 'measured', CARDS3, None, 'spatial')
@@ -526,7 +536,7 @@ F('sync-chip-barrier', 'synchronisation (barriers, atomics)', 'latency',
 tsring = MAN['reruns']['rings_pj_per_byte']
 F('ts-e-pair', 'tensor network (TensorSend)', 'energy per byte',
   f'Messaging energy, 1 KB TensorSend: {tsring["pair"]["mean"]:.2f} pJ/B between the two minions of a pair, {tsring["neigh"]["mean"]:.2f} around a neighbourhood, {tsring["shire"]["mean"]:.2f} around a shire, 12.5-18.3 across the mesh (busy cores included).',
-  r(tsring['pair']['mean'], 2), 'pJ/B', 'manual.json: reruns.rings_pj_per_byte.<pair|neigh|shire|xshire*>; ' + mdline('docs/energy-manual/05-bytes-between-cores.md', '| pair |'),
+  r(tsring['pair']['mean'], 2), 'pJ/B', 'manual.json: reruns.rings_pj_per_byte.<pair|neigh|shire|xshire*>; ' + mdrange('docs/energy-manual/05-bytes-between-cores.md', '| pair |', '| xshire6 |'),
   'measured', CARDS3, '128 B messages cost more: 3.66 pJ/B around a shire, 20.2 to the next shire ID.', 'noc')
 
 # --------------------------------------------------------------------------------------------------
@@ -561,8 +571,10 @@ F('hot-pace', 'hot line', 'rate',
 # --------------------------------------------------------------------------------------------------
 rel = MAN['reruns']['relay_pj_per_byte']
 F('relay-energy', 'relay', 'energy per byte',
-  f'Relay energy per byte (write + read): through DRAM {rel["dram"]["mean"]:.1f} pJ/B [{rel["dram"]["lo"]:.1f}-{rel["dram"]["hi"]:.1f}], to the next shire\'s scratchpad {rel["hop"]["mean"]:.1f} [{rel["hop"]["lo"]:.1f}-{rel["hop"]["hi"]:.1f}], in the own scratchpad {rel["scp"]["mean"]:.1f} [{rel["scp"]["lo"]:.1f}-{rel["scp"]["hi"]:.1f}].',
-  r(rel['hop']['mean'], 1), 'pJ/B (next shire)', 'manual.json: reruns.relay_pj_per_byte.<dram|hop|scp>; ' + mdline('docs/energy-manual/05-bytes-between-cores.md', '| Write where the next shire reads it |'),
+  f'Relay energy per byte moved, each byte counted once when written and once when read: through DRAM {rel["dram"]["mean"]:.1f} pJ/B [{rel["dram"]["lo"]:.1f}-{rel["dram"]["hi"]:.1f}], to the next shire, which reads the previous shire\'s scratchpad, {rel["hop"]["mean"]:.1f} [{rel["hop"]["lo"]:.1f}-{rel["hop"]["hi"]:.1f}], in the own scratchpad {rel["scp"]["mean"]:.1f} [{rel["scp"]["lo"]:.1f}-{rel["scp"]["hi"]:.1f}]; '
+  f'a hand-off writes every byte once and reads it once, so a byte handed to the next shire costs {2 * rel["hop"]["mean"]:.1f} pJ ({2 * rel["dram"]["mean"]:.0f} through DRAM).',
+  r(rel['hop']['mean'], 1), 'pJ/B (next shire)', 'manual.json: reruns.relay_pj_per_byte.<dram|hop|scp>; ' + mdrange('docs/energy-manual/05-bytes-between-cores.md', '| Write to DRAM, read back |', '| Keep it in this shire\'s scratchpad |')
+  + '; workloads/onchip/kernel/onchip.c:344 (bytes = stages x chunk x 2: each byte counted when written and when read); tools/ettelem/analyze_reruns.py:184-188 (energy over those bytes)',
   'measured', CARDS3, 'Per card DRAM / next shire / own: a2 111.3 / 8.61 / 4.05; a3 107.5 / 8.27 / 4.11; a1c1 129.9 / 9.89 / 4.86.', 'relay')
 F('relay-13x', 'relay', 'energy per byte',
   'Handing a slab to the next shire through its scratchpad costs 12.9x, 13.0x and 13.1x less energy per byte than the DRAM round trip (aifoundry2, aifoundry3, aifoundry1-c1): about a thirteenth, the same on every card at 99%.',
@@ -570,15 +582,16 @@ F('relay-13x', 'relay', 'energy per byte',
   'measured', CARDS3, None, 'relay')
 hg = {c: {m: ONCHIP['headline'][c][m]['gb_s'] for m in ('dram', 'hop', 'scp')} for c in ONCHIP['headline']}
 F('relay-bw', 'relay', 'bandwidth',
-  f'Relay bandwidth (8 stages, 1,024 minions): {hg["aifoundry2"]["dram"]:.1f} GB/s through DRAM, {hg["aifoundry2"]["hop"]:.1f} GB/s to the next shire ({hg["aifoundry2"]["hop"]/hg["aifoundry2"]["dram"]:.1f}x), {hg["aifoundry2"]["scp"]:.0f} GB/s in the own scratchpad (aifoundry2 pass means; the other cards within 1.5%).',
-  r(hg['aifoundry2']['hop'], 1), 'GB/s (next shire)', 'docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json: headline.<card>.<dram|hop|scp>.gb_s; ' + cl('On-chip relay, repeated (E25)'),
-  'measured', CARDS3, 'Speed-ups 12.25-12.42x (next shire) and 30.8-31.2x (own scratchpad) over DRAM; the advantage needs the live data to outgrow the 32 MB L3 (below it 1.4-1.5x).', 'relay')
+  f'Relay bandwidth (8 stages, 1,024 minions; bytes read plus bytes written): {hg["aifoundry2"]["dram"]:.1f} GB/s through DRAM, {hg["aifoundry2"]["hop"]:.1f} GB/s to the next shire ({hg["aifoundry2"]["hop"]/hg["aifoundry2"]["dram"]:.1f}x), {hg["aifoundry2"]["scp"]:.0f} GB/s in the own scratchpad (aifoundry2 pass means; the other cards within 1.5%).',
+  r(hg['aifoundry2']['hop'], 1), 'GB/s (next shire)', 'docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json: headline.<card>.<dram|hop|scp>.gb_s, size[].by_card.<card>.hop_over_dram; '
+  'workloads/onchip/kernel/onchip.c:344 (bytes = stages x chunk x 2); ' + cl('| On-chip relay, repeated (E25) |'),
+  'measured', CARDS3, 'Speed-ups 12.25-12.42x (next shire) and 30.8-31.2x (own scratchpad) over DRAM; the advantage needs the live data to outgrow the 32 MB L3 (below it at most 1.4-1.5x: 0.97-1.50x over 64-512 KB per stage).', 'relay')
 F('relay-watts', 'relay', 'power',
   'The three relay media draw within a watt of each other over idle (4.34 / 4.42 / 5.30 W for DRAM / next shire / own): the relay\'s energy saving is time, not power.',
   4.42, 'W over idle (next shire)', cl('Power over idle, all three media'), 'measured', 'aifoundry2', 'The 22 Sep session\'s power block (onchip.json power).', 'relay')
 
 # --------------------------------------------------------------------------------------------------
-# Gathers and scatters (E48, gs.json; reduced 27 Sep, not yet on a published page)
+# Gathers and scatters (E48, gs.json; reduced 27 Sep, published on the memory-hierarchy page and in the energy manual 4.4)
 # --------------------------------------------------------------------------------------------------
 GSP = 'docs/reports/data/2026-09-25-claims-v3/results/gs.json'
 gp = GS['items']['GS-RATE']['pooled']
@@ -588,7 +601,8 @@ LEVELS = [('dram-512B', 'L1 data cache', 'L1 (512 B table per hart)'),
           ('scp-16K', 'scratchpad (own shire)', 'own scratchpad (16 KB per hart)'),
           ('rscp-16K', 'scratchpad (other shire)', 'scratchpad 2 hops away (16 KB per hart)'),
           ('dram-256K', 'DRAM (LPDDR4X, memory shires)', 'DRAM (256 KB table per hart)')]
-GS_NOTE = ('E48 (V3-GS), reduced 27 Sep; not yet on a published page or in 03-experiments.md. Each visit issues 8 indexed '
+GS_NOTE = ('E48 (V3-GS; 03-experiments.md), measured 26 Sep, reduced 27 Sep; published on the memory-hierarchy page '
+           '(Irregular access: gathers and scatters) and in the energy manual §4.4. Each visit issues 8 indexed '
            'instructions of 8 lanes; "rand" puts the visit\'s 64 elements on the 64 distinct lines of one 4 KB tile, tiles walked '
            'in scrambled order, not uniform random addresses (tools/claims-v3/gs/README.md). A 512 B private table stays in the L1 '
            'and a 4 KB one thrashes the 8-line L1 and hits the L2. Both harts of 1,024 minions, random data, energy above idle; brackets are the range over the 9 passes (three per card).')
@@ -606,35 +620,35 @@ for op, opname, prep in [('fgw.ps', 'Gather (fgw.ps, 32-bit elements)', 'from'),
           f'{opname} {prep} {lvname}, random lines: {eu} chip-wide, {fm(pj["mean"])} pJ per element [{fm(pj["min"])}-{fm(pj["max"])}] (per card: {per}); {fm(cpi)} cycles per instruction per hart.',
           float('%.4g' % pj['mean']), 'pJ per element',
           f'{GSP}: items["GS-RATE"].pooled["{k}"] (elements_per_s, pj_per_element over 9 passes); .per_card.<card>["{k}"].cpi_med',
-          'measured', CARDS3, GS_NOTE, None)
+          'measured', CARDS3, GS_NOTE, 'memhier-gs')
 ul = GS['items']['GS-UC']
 F('gs-uc', 'gather/scatter', 'gather/scatter',
   'GS-UC failed on all three cards: an L1-bypassing gather (fgwl.ps, random lines from L2, one minion) runs only 1.03x faster with both harts than with one (registered prediction 1.6-2.4x): the second hart adds about 3%.',
-  1.03, 'x (h2/h1)', f'{GSP}: items["GS-UC"].per_card.<card>.h2_over_h1 (1.0299-1.0303), outcome FAIL', 'measured', CARDS3, GS_NOTE, None)
+  1.03, 'x (h2/h1)', f'{GSP}: items["GS-UC"].per_card.<card>.h2_over_h1 (1.0299-1.0303), outcome FAIL', 'measured', CARDS3, GS_NOTE, 'memhier-gs')
 F('gs-l1', 'gather/scatter', 'gather/scatter',
   'A 32-bit gather of 8 lanes from L1 (fgw.ps, random, 512 B per hart) takes 10.89 cycles per instruction per minion on every card (registered 7-12: PASS).',
   GS['items']['GS-L1']['per_card']['aifoundry2']['cpi_minion']['mean'], 'cycles per instruction per minion',
-  f'{GSP}: items["GS-L1"].per_card.<card>.cpi_minion', 'measured', CARDS3, GS_NOTE, None)
+  f'{GSP}: items["GS-L1"].per_card.<card>.cpi_minion', 'measured', CARDS3, GS_NOTE, 'memhier-gs')
 mh = GS['items']['GS-MH']['per_card']['aifoundry2']
 F('gs-mh', 'gather/scatter', 'gather/scatter',
   f'Gathers from L2 and the own scratchpad saturate at {mh["l2"]["mean"]/1e9:.2f} G elements/s chip-wide on every card, 1.15x the two-miss-handler bound of 23.86 G/s (registered 0.5-2x: PASS); a second hart adds nothing (h2/h1 1.0005).',
-  r(mh['l2']['mean'] / 1e9, 2), 'G elements/s', f'{GSP}: items["GS-MH"].per_card.<card>.l2 / .scp, .bound_elements_per_s, .h2_over_h1_l2', 'measured', CARDS3, GS_NOTE, None)
+  r(mh['l2']['mean'] / 1e9, 2), 'G elements/s', f'{GSP}: items["GS-MH"].per_card.<card>.l2 / .scp, .bound_elements_per_s, .h2_over_h1_l2', 'measured', CARDS3, GS_NOTE, 'memhier-gs')
 gd = GS['items']['GS-DRAM']['per_card']
 F('gs-dram', 'gather/scatter', 'gather/scatter',
   f'Random gathers from DRAM (256 KB per hart) move whole lines at {gd["aifoundry2"]["line_bytes_per_s"]["mean"]/1e9:.1f} GB/s of line traffic, the chip\'s 76 GB/s DRAM stream, on every card (PASS): 1.19 G useful 4-byte elements/s.',
-  r(gd['aifoundry2']['line_bytes_per_s']['mean'] / 1e9, 1), 'GB/s (line bytes)', f'{GSP}: items["GS-DRAM"].per_card.<card>.line_bytes_per_s', 'measured', CARDS3, GS_NOTE, None)
+  r(gd['aifoundry2']['line_bytes_per_s']['mean'] / 1e9, 1), 'GB/s (line bytes)', f'{GSP}: items["GS-DRAM"].per_card.<card>.line_bytes_per_s', 'measured', CARDS3, GS_NOTE, 'memhier-gs')
 ga = {x['method']: x for x in GS['items']['GS-ADD']['rows']}
 F('gs-add', 'gather/scatter', 'gather/scatter',
   f'Scatter-add alternatives, updates/s and nJ per update: gather + add + scatter in L1 {ga["upd L1"]["updates_per_s"]["mean"]/1e9:.0f} G/s at {ga["upd L1"]["nj_per_update"]["mean"]*1000:.0f} pJ; in DRAM {ga["upd DRAM"]["updates_per_s"]["mean"]/1e9:.2f} G/s at {ga["upd DRAM"]["nj_per_update"]["mean"]:.1f} nJ; packed atomic famoaddl.pi on a shire table {ga["famoaddl.pi shire table"]["updates_per_s"]["mean"]/1e9:.1f} G/s at {ga["famoaddl.pi shire table"]["nj_per_update"]["mean"]:.2f} nJ; amoaddg.w on a chip table {ga["amoaddg.w chip table"]["updates_per_s"]["mean"]/1e9:.2f} G/s at {ga["amoaddg.w chip table"]["nj_per_update"]["mean"]:.2f} nJ.',
   r(ga['famoaddl.pi shire table']['nj_per_update']['mean'], 3), 'nJ per update (famoaddl.pi, shire table)', f'{GSP}: items["GS-ADD"].rows[] (updates_per_s, nj_per_update, pooled over 9 passes)',
-  'measured', CARDS3, GS_NOTE + ' Reference: spread global atomics 1.92 G/s at 1.16 nJ (energy manual section 6).', None)
+  'measured', CARDS3, GS_NOTE + ' Reference: spread global atomics 1.92 G/s at 1.16 nJ (energy manual section 6).', 'memhier-gs')
 gc = GS['items']['GS-CARD']['ratios']
 F('gs-card', 'gather/scatter', 'gather/scatter',
   f'Card to card, gathers and scatters: elements/s identical (median ratio 1.000); pJ per element aifoundry3/aifoundry2 {gc["aifoundry3/aifoundry2"]["pj_per_element"]["median"]:.3f}, aifoundry1-c1/aifoundry2 {gc["aifoundry1-c1/aifoundry2"]["pj_per_element"]["median"]:.3f} (median over 100 configurations).',
-  r(gc['aifoundry3/aifoundry2']['pj_per_element']['median'], 3), 'ratio', f'{GSP}: items["GS-CARD"].ratios', 'measured', CARDS3, GS_NOTE, None)
+  r(gc['aifoundry3/aifoundry2']['pj_per_element']['median'], 3), 'ratio', f'{GSP}: items["GS-CARD"].ratios', 'measured', CARDS3, GS_NOTE, 'memhier-gs')
 F('gs-conflict', 'gather/scatter', 'gather/scatter',
   'When every lane of a scatter hits one word, lane 7 (the highest active lane) wins, in every launch on every card, as the simulator orders it.',
-  7, 'lane', f'{GSP}: items["GS-CONFLICT"].per_card.<card>.winners_by_op', 'measured', CARDS3, GS_NOTE, None)
+  7, 'lane', f'{GSP}: items["GS-CONFLICT"].per_card.<card>.winners_by_op', 'measured', CARDS3, GS_NOTE, 'memhier-gs')
 
 # --------------------------------------------------------------------------------------------------
 # Chip-level measured facts

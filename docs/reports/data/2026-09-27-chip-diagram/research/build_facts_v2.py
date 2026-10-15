@@ -252,8 +252,10 @@ fact('fw.memshires', 'memory shire', 'placement', 'spec',
           'place memory shire 2 directly.')
 fact('die.handedness', 'chip', 'placement', 'inferred',
      'The die view follows the firmware\'s NoC-spec drawing and the Programmer\'s Reference Manual\'s Fig. 1-3: '
-     'memory shires 0-3 on the west, PCIe then I/O at the east end of the top row. The published die plot draws '
-     'I/O then PCIe, its mirror image; no document in the open drop says which handedness the silicon has.', None, None,
+     'memory shires 0-3 on the west, PCIe then I/O at the east end of the top row. The published die plot (IEEE Micro '
+     '2022 Fig. 7, MPR Dec 2020 Fig. 1) also puts the PCIe and I/O cells at the east end of the top row, in the other '
+     'order, I/O then PCIe (fact L24), and labels no memory shire: it is not the mirror image. Its own orientation is '
+     'not stated, and no document in the open drop says which handedness the silicon has.', None, None,
      f'{FWF}; fact L24 (PRM Fig. 1-3 against the die plot)', None)
 
 # ======================= the L3 miss path (the reply of a DRAM load) =======================
@@ -307,6 +309,7 @@ ma = item(MMB, 'MMB-a')
 op = [x for c in CARDS for x in ma['per_card'][c]['fp32-tensor-L2']['cycles_per_op_mean_based']]
 dr_op = [x for c in CARDS for x in ma['per_card'][c]['fp32-tensor-DRAM']['cycles_per_op_mean_based']]
 dr_tf = [x for c in CARDS for x in ma['per_card'][c]['fp32-tensor-DRAM']['info_tflops_range']]
+dr_mx = [x for c in CARDS for x in ma['per_card'][c]['fp32-tensor-DRAM']['cycles_per_op_max_based']]
 fact('mm.reload', 'tensor', 'compute', 'derived',
      f'The matmul benchmark loads a new A (16 lines from the shire\'s L2 into one of two L1-scratchpad buffers) and '
      f'streams B through TenB before every TensorFMA, issuing the next op\'s loads while the current FMA runs, and it '
@@ -318,12 +321,19 @@ fact('mm.reload', 'tensor', 'compute', 'derived',
      'figure, not a measured one.')
 num('mm_op', 'mm.reload', round(op[0], 3), rng(op, 3), 'cycles per op')
 fact('mm.dram', 'tensor', 'compute', 'measured',
-     f'The same benchmark with 64 private tiles per minion, so that every load comes from DRAM: {rng(dr_op, 0)} cycles '
-     f'per op and {rng(dr_tf, 3)} TFLOP/s on the three cards, about 30 times slower than with the tiles in the L2.',
-     round(dr_tf[0], 3), 'TFLOP/s', f'{MF}: [item=MMB-a].per_card.<card>."fp32-tensor-DRAM".cycles_per_op_mean_based, '
-     '.info_tflops_range; tools/claims-v3/mmb/mmbench_power_v3.py:65', CARDS_TXT, MM_PAGE, MM_URL)
+     f'The same benchmark with 64 private tiles per minion, so that every load comes from DRAM, on the three cards: '
+     f'{rng(dr_mx, 0)} cycles per op on the slowest minion, whose finish sets the {rng(dr_tf, 3)} TFLOP/s '
+     f'({rng(dr_op, 0)} on the average minion), about 30 times slower than with the tiles in the L2.',
+     round(dr_tf[0], 3), 'TFLOP/s', f'{MF}: [item=MMB-a].per_card.<card>."fp32-tensor-DRAM".cycles_per_op_max_based, '
+     '.cycles_per_op_mean_based, .info_tflops_range; tools/claims-v3/mmb/reduce.py:311-312, 325-326, 432-446; '
+     'launchers/mmbench/mmbench.cpp:281-282, 288-290, 302-304 '
+     '(cycles_max is the slowest minion, cycles_mean the average over the minions, tflops the FLOP over the launch\'s '
+     'wall time); tools/claims-v3/mmb/mmbench_power_v3.py:65', CARDS_TXT, MM_PAGE, MM_URL)
 assert 25 < 9.51 / max(dr_tf) < 35
-num('mm_dram_op', 'mm.dram', round(max(dr_op)), rng(dr_op, 0), 'cycles per op')
+# the slowest minion's cycles give the measured rate: 8,192 FLOP per op on 1,024 minions at 600 MHz
+assert abs(8192 * 1024 * 600e6 / max(dr_mx) / 1e12 - min(dr_tf)) < 0.001
+assert abs(8192 * 1024 * 600e6 / min(dr_mx) / 1e12 - max(dr_tf)) < 0.001
+num('mm_dram_op', 'mm.dram', round(max(dr_mx)), rng(dr_mx, 0), 'cycles per op')
 num('mm_dram_tf', 'mm.dram', round(max(dr_tf), 3), rng(dr_tf, 3), 'TFLOP/s')
 
 # ======================= the same matmul on different data: watts and heat =======================
@@ -393,11 +403,13 @@ rn, on, zr = race('randn', 1024), race('ones', 1024), race('zeros', 1024)
 assert all(r['reason'] == 'cap' for r in rn + on) and all(r['reason'] == 'time' for r in zr)
 starts = [r['t_before'] for r in rn + on + zr]
 fact('heat.race', 'board', 'thermal', 'measured',
-     f'From a launch at {rng(starts, 1)} °C to the firmware\'s 90 °C cap on aifoundry2, the same matmul on all 1,024 '
+     f'From a launch at {rng(starts, 1)} °C to the 90 °C at which the run script stopped each run '
+     f'(run_horace_long.sh, not a firmware limit) on aifoundry2, the same matmul on all 1,024 '
      f'minions: random data {rng(durs(rn, "cap"), 1)} s ({len(rn)} runs), ones {rng(durs(on, "cap"), 1)} s '
      f'({len(on)} runs); zeros never reached the cap in {rng(durs(zr, "time"), 0)} s ({len(zr)} runs).',
      round(min(durs(rn, 'cap')), 1), 's (random data)', f'{LGF}: runs[] with minions = 1024 and values = randn, ones, '
-     'zeros: .dur, .reason (cap: reached 90 °C; time: the run ended first), .t_before', 'aifoundry2', HOR_PAGE, HOR_URL,
+     'zeros: .dur, .reason (cap: reached 90 °C; time: the run ended first), .t_before; tools/ettelem/run_horace_long.sh:8-9, '
+     '18, 69 (cap=${5:-90}: at the cap the script touches the host\'s stop file)', 'aifoundry2', HOR_PAGE, HOR_URL,
      'One card: the three-card version (E47) was registered and not run.')
 num('race_rand', 'heat.race', round(min(durs(rn, 'cap')), 1), rng(durs(rn, 'cap'), 1), 's')
 num('race_ones', 'heat.race', round(min(durs(on, 'cap')), 1), rng(durs(on, 'cap'), 1), 's')
@@ -465,7 +477,7 @@ fact('ar.tree', 'neigh', 'sync', 'spec',
      'tree (TensorBroadcast). Levels 0-2 join a neighbourhood\'s 8 minions along the fast network\'s edges, levels 3-4 '
      'its 4 neighbourhoods, levels 5-9 the 32 shires, rooted at minion 0 of shire 0.', 10, 'levels',
      'workloads/nocbench/kernel/nocbench.c:279-288 (tree: TensorReduce for levels 0..top, TensorBroadcast back), '
-     ':516-521 (\'Minion m receives at levels below ctz(m) and sends at ctz(m); the root (m = 0) receives at every '
+     ':516-522 (\'Minion m receives at levels below ctz(m) and sends at ctz(m); the root (m = 0) receives at every '
      'level\'); fact neigh.fln-edges for the tree edges', None, OC_PAGE, OC_URL)
 
 out = {'about': __doc__.strip().split('\n')[0], 'facts': FACTS, 'num': NUM}

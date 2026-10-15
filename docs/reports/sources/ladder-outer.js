@@ -313,8 +313,8 @@ onode('solar', {kid: 'moon', build: (L, ap) => {
   const gv = opart(L, 'voyager', 'Voyager 1: details', {title: 'Voyager 1', kick: 'Solar System · spacecraft', lead: 'The farthest spacecraft: on 18 November 2026 it is one light-day from Earth, so a command takes a day to arrive and the answer another day.', facts: ofx('solar', 3)});
   E('path', {class: 'voy', d: `M${c.x + 250},${c.y - 250} L${c.x + 330},${c.y - 330}`}, gv); E('path', {class: 'voy', d: `M${c.x + 316},${c.y - 334} L${c.x + 332},${c.y - 332} L${c.x + 330},${c.y - 316}`}, gv);
   S(E('rect', {x: c.x + 236, y: c.y - 370, width: 150, height: 130}, gv), {fill: 'transparent'}); E('rect', {class: 'ring', x: c.x + 231, y: c.y - 375, width: 160, height: 140, rx: 8}, gv);
-  if (PH) { T(gv, c.x + 235, c.y - 262, `Voyager 1: ${on('so_voy')},`, 'o-s ohalo', 'end', onf('so_voy')); T(gv, c.x + 235, c.y - 236, 'one light-day (off the frame)', 'o-s ohalo', 'end'); }
-  else { T(gv, c.x + 340, c.y - 344, `Voyager 1: ${on('so_voy')},`, 'o-s', 'start', onf('so_voy')); T(gv, c.x + 340, c.y - 322, 'one light-day (off the frame)', 'o-s'); }
+  if (PH) { T(gv, c.x + 235, c.y - 262, `Voyager 1: ${on('so_voy')},`, 'o-s ohalo', 'end', onf('so_voy')); T(gv, c.x + 235, c.y - 236, 'one light-day from Earth', 'o-s ohalo', 'end'); T(gv, c.x + 235, c.y - 210, 'on 18 Nov 2026 (off the frame)', 'o-s ohalo', 'end'); }
+  else { T(gv, c.x + 340, c.y - 344, `Voyager 1: ${on('so_voy')},`, 'o-s', 'start', onf('so_voy')); T(gv, c.x + 340, c.y - 322, 'one light-day from Earth', 'o-s'); T(gv, c.x + 340, c.y - 300, 'on 18 Nov 2026 (off the frame)', 'o-s'); }
   sbar(L, 140, PH ? 652 : 690, 5 * AU, '5 au (1 au: Earth to the Sun)');
 }});
 /* ---- Earth and the Moon ---- */
@@ -386,6 +386,8 @@ onode('us', {kid: 'california', build: (L, ap) => {
   E('rect', {class: 'ring', x: cr.x - 5, y: cr.y - 5, width: cr.w + 10, height: cr.h + 10, rx: 8}, gc);
   T(gc, cr.x + cr.w / 2, cr.y - 10, 'California', 'o-l ohalo', 'middle');
   ap.zs.california = {r: geoSeat('california', ge.california_bbox_km, f), g: gc};
+  // (the arc and its San Francisco end over California's highlight, whose fill is opaque: review of 14 Oct)
+  L.appendChild(gl);
   sbar(L, 140, PH ? 680 : 664, 1000 * f.k, '1,000 km');
   ocredit(L, 'Outlines: US Census Bureau, 2023 cartographic boundaries (public domain); Albers equal-area', 712);
 }});
@@ -599,11 +601,11 @@ onode('studio45', {kid: 'rack', build: (L, ap) => {
   // the walls stay drawn while the camera dives to the rack, until the rack's photo covers the screen
   S(E('rect', {x: s45x(S45LAB[0]), y: U, width: (S45LAB[1] - S45LAB[0]) * SK45, height: BH, 'pointer-events': 'none'}, L), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 2, strokeDasharray: '10 8'});
   const RK = {x: s45x(31.2), y: U + 0.5 * SK45, w: 1.5 * SK45, h: 0.6 * SK45};   // the rack, against the room's wall
-  const gr = opart(L, 'torack', 'The rack: zoom in', kidInfo('rack'), {id: 'rack'});
+  const gr = opart(L, 'torack', 'The rack: zoom in', kidInfo('rack', 'Where in the room it stands is not recorded: its place here is assumed. ' + ((OSC.rack || {}).blurb || '')), {id: 'rack'});
   S(E('circle', {cx: RK.x + RK.w / 2, cy: RK.y + RK.h / 2, r: 30, 'pointer-events': 'all'}, gr), {fill: 'transparent'});
   S(E('rect', {class: 'shape rackp', x: RK.x, y: RK.y, width: RK.w, height: RK.h, rx: 2}, gr), {});
   E('rect', {class: 'ring', x: RK.x - 6, y: RK.y - 6, width: RK.w + 12, height: RK.h + 12, rx: 5}, gr);
-  T(gr, RK.x + RK.w / 2, RK.y + RK.h + 24, 'the rack', 'o-s', 'middle');
+  T(gr, RK.x + RK.w / 2, RK.y + RK.h + 24, PH ? 'the rack' : 'rack, place assumed', 'o-s', 'middle');
   // (the rack is small in the building: a powers-of-ten jump from a box an eighth of the view around it, so that no
   // layer is ever scaled past 30 times, on a phone either)
   ap.zs.rack = {r: markBox(RK.x + RK.w / 2, RK.y + RK.h / 2), g: gr, tr: 'jump'};
@@ -617,14 +619,14 @@ onode('studio45', {kid: 'rack', build: (L, ap) => {
   treads(gg, G, 1.0, 5.0, 7.4, S45W);
   ring(gg, S45X, G, 16.8 * SK45, BH);
   const gw = opart(L, 'warehouse', 'The warehouse: details', {title: 'The warehouse', kick: 'Studio 45 · downstairs',
-    lead: 'The middle of the building is open from the floor to the roof, 9.3 m of it between the two upstairs floors: the venue\'s warehouse, where pallets come in and its big events are held. Its stair climbs to the lab\'s end.',
+    lead: 'The middle of the building is open from the floor to the roof, 9.3 m of it between the two upstairs floors: the venue\'s warehouse, where pallets come in and its big events are held. Its stair climbs to the upper floor at the shop end, most likely the lab.',
     facts: ['s45.10', 's45.11', 's45.3']});
   rect(gw, G, 16.8, 26.4, 0, S45W, 'shape s45r');
   treads(gw, G, 21.9, 26.3, 4.4, 5.4);
   T(gw, s45x(21.6), G + 40, 'warehouse', 'o-s', 'middle'); T(gw, s45x(21.6), G + 64, PH ? 'open above' : 'open to the roof', 'o-s', 'middle');
   ring(gw, s45x(16.8), G, 9.6 * SK45, BH);
   const gsh = opart(L, 'shop', 'The wood shop: details', {title: 'The wood shop', kick: 'Studio 45 · downstairs',
-    lead: 'The far end of the ground floor: benches and machines down both walls, the 4 × 8 ft CNC router among them. The lab is above it.', facts: ['s45.11', 's45.3']});
+    lead: 'The far end of the ground floor: benches and machines down both walls, the 4 × 8 ft CNC router among them. The lab is most likely above it.', facts: ['s45.11', 's45.3']});
   rect(gsh, G, 26.4, S45L, 0, S45W, 'shape s45r');
   T(gsh, s45x(31.5), G + 40, 'wood shop', 'o-s', 'middle');
   ring(gsh, s45x(26.4), G, (S45L - 26.4) * SK45, BH);
@@ -657,7 +659,7 @@ onode('studio45', {kid: 'rack', build: (L, ap) => {
   E('line', {class: 's45st', x1: s45x(1.0), y1: S0, x2: s45x(5.0), y2: up}, gsc);
   E('line', {class: 's45st', x1: s45x(21.9), y1: S0, x2: s45x(26.4), y2: up}, gsc);
   T(gsc, s45x(8.5), up - 16, 'co-working, meeting rooms', 'o-s', 'middle');
-  T(gsc, s45x(31.5), up - 16, 'the lab', 'o-s', 'middle');
+  T(gsc, s45x(31.5), up - 16, PH ? 'lab, most likely' : 'the lab, most likely', 'o-s', 'middle');
   T(gsc, s45x(10.6), S0 - 16, 'lounge', 'o-s', 'middle');
   T(gsc, s45x(33.0), S0 - 16, 'wood shop', 'o-s', 'middle');
   T2(gsc, s45x((S45VOID[0] + S45VOID[1]) / 2), top + 28, ['warehouse:', PH ? 'open above' : 'open to the roof'], 'o-s', 'middle', null, 1.2);
@@ -706,7 +708,7 @@ onode('host', {kid: 'card', build: (L, ap) => {
   S(E('rect', {class: 'shape pcb', x: B.x, y: B.y, width: B.w, height: B.h, rx: 4}, gb), {});
   E('rect', {class: 'ring', x: B.x - 6, y: B.y - 6, width: B.w + 12, height: B.h + 12, rx: 8}, gb);
   T(gb, B.x + 12, B.y + B.h - 14, 'ATX board, 305 × 244 mm', 'o-s');
-  const gc = opart(L, 'cpu', 'The processor and its cooler: details', {title: 'The host’s processor', kick: 'Host · part', lead: 'An Intel desktop processor under a tower cooler. The whole ET card, at most 88 W, draws less than the bigger host processor’s 125 W base power; in turbo that processor may draw up to 251 W.', facts: ofx('host', 1, 5, 6)});
+  const gc = opart(L, 'cpu', 'The processor and its cooler: details', {title: 'The host’s processor', kick: 'Host · part', lead: 'An Intel desktop processor under a tower cooler. The ET card’s 88 W budget is less than the bigger host processor’s 125 W base power; in turbo that processor may draw up to 251 W.', facts: ofx('host', 1, 5, 6)});
   const cx = B.x + 150 * HK, cy = B.y + 75 * HK, cs = 120 * HK;
   S(E('rect', {class: 'shape cool', x: cx - cs / 2, y: cy - cs / 2, width: cs, height: cs, rx: 6}, gc), {});
   S(E('circle', {cx, cy, r: cs * 0.42, 'pointer-events': 'none'}, gc), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 1.5});
@@ -741,7 +743,7 @@ const CARDPH = {x: 140, y: 40, w: 720 * CPX, h: 479 * CPX};
 const cpr = b => rc(CARDPH.x + b[0] * CPX, CARDPH.y + b[1] * CPX, (b[2] - b[0]) * CPX, (b[3] - b[1]) * CPX);
 onode('card', {kid: 'package', img: ['card.webp'], build: (L, ap) => {
   obd(L, false);
-  otitle(L, 'The PCIe card', 'photo', `${on('card_w')}, at most ${on('card_88')} from the host`, `${onf('card_w')} ${onf('card_88')}`);
+  otitle(L, 'The PCIe card', 'photo', `${on('card_w')}, an ${on('card_88')} budget from the host`, `${onf('card_w')} ${onf('card_88')}`);
   const g = opart(L, 'board', 'The card: details', {title: 'The PCIe card', kick: 'Card · photo', lead: (OSC.card || {}).blurb, facts: ofx('card', 1, 2, 6, 9, 10, 12)});
   oimg(g, 'card.webp', CARDPH.x, CARDPH.y, CARDPH.w, CARDPH.h);
   E('rect', {class: 'shape hotr', x: CARDPH.x, y: CARDPH.y, width: CARDPH.w, height: CARDPH.h, rx: 4}, g);
@@ -790,9 +792,9 @@ onode('package', {kid: 'die', tr: 'nest', build: (L, ap) => {
   T(gd, PKGDIE.x + PKGDIE.w / 2, PKGDIE.y + PKGDIE.h / 2 + 34, 'position assumed', 'o-s', 'middle');
   ap.zs.die = {r: PKGDIE, g: gd, tr: 'jump'};
   // the side view, heights drawn five times their scale
-  const sx = PKGB.x, sy = PKGB.y + PKGB.h + (PH ? 92 : 60), V5 = 5 * PKK;
+  const sx = PKGB.x, sy = PKGB.y + PKGB.h + (PH ? 124 : 94), V5 = 5 * PKK;
   const gs = opart(L, 'side', 'The package in section: details', {title: 'The package, cut in half', kick: 'Package · part', lead: 'Under the lid the die sits face down on more than 30,000 tiny bumps; the substrate below fans them out to 2,494 solder balls, about 12 bumps per ball.', facts: ofx('package', 1, 3)});
-  const lay = [['lid', 1.2, 'var(--ink-2)'], ['die', 0.8, 'var(--c1)'], ['bumps', 0.15, 'var(--c2)'], ['substrate', 1.6, 'var(--c4)'], ['balls', 0.5, 'var(--c5)']];
+  const lay = [['lid', 0.9, 'var(--ink-2)'], ['die', 0.8, 'var(--c1)'], ['bumps', 0.15, 'var(--c2)'], ['substrate', 1.6, 'var(--c4)'], ['balls', 0.5, 'var(--c5)']];
   let yy = sy, ly = -Infinity;
   lay.forEach(([nm, hmm, col]) => {
     const w = nm === 'die' ? PKGDIE.w : nm === 'bumps' ? PKGDIE.w : PKGB.w, x = nm === 'die' || nm === 'bumps' ? PKGDIE.x : sx;
@@ -804,9 +806,9 @@ onode('package', {kid: 'die', tr: 'nest', build: (L, ap) => {
   });
   S(E('rect', {x: sx, y: sy, width: PKGB.w, height: yy - sy}, gs), {fill: 'transparent'});
   E('rect', {class: 'ring', x: sx - 6, y: sy - 6, width: PKGB.w + 12, height: yy - sy + 12, rx: 6}, gs);
-  T(gs, sx, sy - 12, `in section, heights ×5 (${on('pkg_h')} in all; layer heights generic)`, 'o-s', 'start', onf('pkg_h'));
+  T(gs, sx, sy - 12, `in section, heights ×5 (at most ${on('pkg_h')}; layer heights generic)`, 'o-s', 'start', onf('pkg_h'));
   // the ball grid from below
-  const bx = 540, by = PKGB.y, bw = 45 * PKK * 0.9;
+  const bx = 540, by = PKGB.y, bw = 45 * PKK;
   const gg = opart(L, 'balls', 'The ball grid: details', {title: 'The ball grid', kick: 'Package · part', lead: `${on('pkg_balls')} solder balls on a ${on('pkg_pitch')} grid join the package to the card.`, facts: ofx('package', 1, 2, 3)});
   const nb = 53, p = bw / nb;
   S(E('rect', {class: 'shape pkgb', x: bx, y: by, width: bw, height: bw, rx: 6}, gg), {});

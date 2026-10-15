@@ -54,6 +54,13 @@ page's drawings). Output blocks: scales, geo, img, mlnum, mladdr, onum (the numb
 checked against its fact), outside; facts gain in.*, out.*, size.* and ml:* ids, and the page's facts carry only the
 fields it reads.
 
+The page's correctness check (14 Oct, each finding checked by a second reader) changes here: AMEND says the die view is
+the map transposed, not turned (L33, mesh.orientation), and names the grey cells from the firmware's maps
+(mesh.empty-cells); ms-fit-3cards counts lines (each line's fastest of three loads), not loads; N prints the DRAM chip's
+share as about 28 cycles and adds rl_e_hand, a byte handed to the next shire (written once and read once, 17.8 pJ);
+flow H's panel lists the 546-cycle TensorFMA and the benchmark's reload; norm() keeps a fact's caveat; and the line
+numbers the ADD facts cite follow the files they cite.
+
 Output, facts.json:
   facts  the facts the page uses, by id, with one page link field (`url`, a spacesheep URL, or null), the lab cards
          each one covers (`cards`: a2, a3, a1c1) and, for the CARDS entries, the text shown for them (`cards_txt`)
@@ -108,8 +115,8 @@ ADD = [
                   'aifoundry1-c1 41.83 + 27.25 = 69.1 W (75-76 °C): 50.4-69.1 W across the three cards (die 62-80 °C). '
                   '9.51 TFLOP/s over these is the 161, 189 and 138 GFLOP/s per W of the same run (138-189).',
      'value': 59.0, 'unit': 'W (aifoundry2)',
-     'source': 'docs/findings/05-claims.md:418 (E37, MMB-c: docs/reports/data/2026-09-25-claims-v3/results/mmb.json '
-               '.items[item=MMB-c].per_card.<card>["fp32-tensor-L2"].board_w, .idle_before_w, .mean, .die_c_mean) and :419 '
+     'source': 'docs/findings/05-claims.md:453 (E37, MMB-c: docs/reports/data/2026-09-25-claims-v3/results/mmb.json '
+               '.items[item=MMB-c].per_card.<card>["fp32-tensor-L2"].board_w, .idle_before_w, .mean, .die_c_mean) and :454 '
                '(MMB-d, GFLOP/s per W)',
      'card': 'aifoundry2, aifoundry3, aifoundry1-c1', 'page': 'Matmul efficiency', 'url': MATMUL,
      'note': 'The sum is this page\'s; 05-claims.md gives the watts over idle and the idle before each run. Idle power '
@@ -123,7 +130,7 @@ ADD = [
      'source': 'external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.8 (§2.1.1.2: TxFMA, a pair of IMA units '
                'and \'Finite state machines that generate long sequences of vector operations to implement '
                'multi-cycle tensor operations\'); external/core-et/docs/Minion VPU Specification.pdf, pdf p.11 (§2: '
-               'TXFMA and two TIMA units per lane); scripts/ridge-points.py:46, 51 (fp32 TensorFMA and vec32 '
+               'TXFMA and two TIMA units per lane); scripts/ridge-points.py:49, 54 (fp32 TensorFMA and vec32 '
                'fmadd.ps, per_cycle 16 each)',
      'card': None, 'page': 'Ridge points', 'url': 'https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points', 'note': None},
     {'id': 'minion.etlink-width', 'component': 'minion', 'topic': 'interconnect', 'kind': 'spec',
@@ -137,10 +144,11 @@ ADD = [
      'card': None, 'page': None, 'url': None, 'note': None},
     {'id': 'ms-fit-3cards', 'component': 'memory shire', 'topic': 'placement', 'kind': 'measured',
      'statement': 'Left as fitted on aifoundry2 on 19 September (constant 91 and the memory-shire places, not '
-                  'refitted), the DRAM latency model is within ±3 cycles for 93-97% of loads on all three cards: '
-                  'aifoundry2 97.0%, aifoundry3 92.9%, aifoundry1-c1 94.4% (5 passes each).',
-     'value': 97.0, 'unit': '% of loads within ±3 cycles (aifoundry2)',
-     'source': 'docs/findings/05-claims.md:404 (E35, MEM-P2: docs/reports/data/2026-09-25-claims-v3/results/mem.json '
+                  'refitted), the DRAM latency model is within ±3 cycles for 93-97% of lines (each line\'s fastest of '
+                  'three loads) on all three cards: aifoundry2 97.0%, aifoundry3 92.9%, aifoundry1-c1 94.4% (5 passes '
+                  'each).',
+     'value': 97.0, 'unit': '% of lines within ±3 cycles (aifoundry2)',
+     'source': 'docs/findings/05-claims.md:435 (E35, MEM-P2: docs/reports/data/2026-09-25-claims-v3/results/mem.json '
                '[item=MEM-P2].per_card.<card>.tests.P2_dram_within3_frac)',
      'card': 'aifoundry2, aifoundry3, aifoundry1-c1', 'page': 'Anatomy of a memory access',
      'url': 'https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy', 'note': None},
@@ -149,7 +157,7 @@ ADD = [
                   'and the corners are empty, while (6, 0) lies outside the grid: within the fit\'s assumptions '
                   '(3, -1) is the only place left.',
      'value': None, 'unit': None,
-     'source': 'L42 (docs/reports/2026-09-19-et-soc1-memory-anatomy.html:778-780); external/et-man/ET Preliminary '
+     'source': 'L42 (docs/reports/2026-09-19-et-soc1-memory-anatomy.html:810-812); external/et-man/ET Preliminary '
                'Datasheet Rev 1.0.pdf, pdf p.21 (§4: \'the corners of the grid are not occupied\')',
      'card': None, 'page': None, 'url': None,
      'note': 'The logical map is 6 rows (x = 0-5) by 8 columns (y = -1 to 6, the memory shires at y = -1 and 6).'},
@@ -206,22 +214,39 @@ AMEND = {
                     'Fig. 1-3. Timing a counter read on shire 32 confirms the master\'s cell on a card: E56 (29 Sep, '
                     'docs/reports/data/2026-09-29-nocr) placed it there on aifoundry1 card 1 and decided nothing on '
                     'aifoundry3 or aifoundry2.'},
-    'L33': {'source': '; settled 27 Sep by fw.map-match except the handedness (die.handedness)',
+    # (the chip check of 14 Oct: the die view is the map transposed, not turned; and mesh.empty-cells below)
+    'L33': {'find': 'The logical map appears to be the die turned a quarter:',
+            'statement': 'The logical map is the die view transposed (x and y swapped: a quarter turn plus a mirror):',
+            'source': '; settled 27 Sep by fw.map-match except the handedness (die.handedness)',
             'note': 'Settled 27 Sep except the east-west handedness: the firmware\'s NoC-spec map, renamed as the boot '
                     'firmware renames the shires, equals the measured map in every pair distance with no rotation or '
-                    'mirror (fact fw.map-match); which handedness the silicon has is open (fact die.handedness). '
+                    'mirror (fact fw.map-match), so mapping (x, y) to (die row x, die column y) is a transpose (a quarter '
+                    'turn plus a mirror); which handedness the silicon has is open (fact die.handedness). '
                     'Distances alone cannot tell a rotation from a reflection.'},
     'L34': {'source': '; settled 27 Sep by fw.map-match except the handedness (die.handedness)',
             'note': 'Settled 27 Sep except the east-west handedness: this view is the firmware\'s NoC-spec map after '
                     'the boot-time renaming (fact fw.map-match), and the firmware names the grey cells (fw.grey-cells). '
                     'Memory shire 2\'s row is still a tie-break of the fit (L42, ms2-forced).'},
-    'mesh.orientation': {'source': '; settled 27 Sep by fw.map-match except the handedness (die.handedness)',
-                         'note': 'Settled 27 Sep except the east-west handedness (facts fw.map-match, die.handedness).'},
+    'mesh.orientation': {'find': 'The logical map appears to be the die turned a quarter:',
+                         'statement': 'The logical map is the die view transposed (x and y swapped: a quarter turn plus a '
+                                      'mirror):',
+                         'source': '; settled 27 Sep by fw.map-match except the handedness (die.handedness)',
+                         'note': 'Settled 27 Sep except the east-west handedness (facts fw.map-match, die.handedness): '
+                                 'mapping (x, y) to (die row x, die column y) is a transpose (a quarter turn plus a mirror).'},
     'L37': {'find': 'It does NOT match the measured map:',
             'statement': 'As written it does not match the measured map:',
             'source': '; superseded 27 Sep by fw.map-match (the map after the boot firmware renames the shires)',
             'note': 'Superseded: this compares the map before NOC_Remap_Shires renames the shires at boot; after the '
                     'renaming it matches all 496 pair distances (fact fw.map-match).'},
+    'mesh.empty-cells': {'find': 'which cell is which is not established.',
+                         'statement': 'the firmware\'s maps name them (fact fw.grey-cells): (0,3) the master, shire 32; '
+                                      '(5,3) the spare, 33; (0,4) the PCIe shire; (0,5) the I/O shire.',
+                         'source': '; the cells named 27 Sep by fw.grey-cells',
+                         'note': 'Since 27 Sep: read as written, before NOC_Remap_Shires renames the shires, the firmware\'s '
+                                 'comment map matches only 254 of 1,024 ordered shire pairs (111 of 496 pairs, fact L37); '
+                                 'renamed, it matches all 496 (fact fw.map-match), and its bridge map names the four cells '
+                                 '(fact fw.grey-cells). On the cards, E56 (29 Sep) placed the master at (0,3) on aifoundry1 '
+                                 'card 1 and decided nothing on aifoundry3 or aifoundry2.'},
     'gs-s-dram-256K': {
         'find': '24,599 cycles per instruction per hart.',
         'statement': '24,584 cycles per instruction per hart (median, pooled over the 9 passes; per card 24,599 on '
@@ -402,7 +427,8 @@ AMEND3 = {
                     f'(the L3 reference {f_(TL2["aifoundry3"]["ref_l3"])}, the first load {f_(TL2["aifoundry3"]["tl1"])}), '
                     f'and a scalar load after it {f_(TL2["aifoundry3"]["probe_tl"])}, an L2 hit, on aifoundry3, aifoundry2 and '
                     'aifoundry1-c1: a TensorLoad that misses allocates its lines in the L2. Not measured: whether the L3 '
-                    'keeps them and whether tensor stores skip the L2 (the Shire Cache Specification says they do).'},
+                    'keeps them and whether tensor stores skip the L2 (the PRM, pdf p.306 and p.309, and the Shire Cache '
+                    'Specification, pdf p.62, say they do).'},
     'pcie.conc': {'find': '(two streams: 5.96 / 6.00 / 5.96 GB/s in total)',
                   'statement': '(two streams with both of each stream\'s commands in flight, four in all: 5.96 / 6.00 / '
                                '5.96 GB/s in total; with one command in flight in each of two streams nothing is lost, '
@@ -612,7 +638,9 @@ def norm(f):
     cards_txt = None
     if f['id'] in CARDS:
         cards, cards_txt = CARDS[f['id']]
-    out = {k: f.get(k) for k in ('id', 'component', 'topic', 'statement', 'value', 'unit', 'source', 'kind', 'card', 'note')}
+    # caveat: which non-silicon source a fact rests on ('reimpl', 'erbium-rtl'), shown beside its kind (14 Oct)
+    out = {k: f.get(k) for k in ('id', 'component', 'topic', 'statement', 'value', 'unit', 'source', 'kind', 'card', 'note',
+                                 'caveat')}
     out.update(range=f.get('range'), url=url, page=title, cards=cards, set=f['set'])
     if cards_txt:
         out['cards_txt'] = cards_txt
@@ -635,6 +663,7 @@ N = [
     ('channels', 'dram.channels', 16, '16', 'LPDDR4X channels'),
     ('ch_bits', 'dram.channels', 16, '16 bits', ''),
     ('dram_gb', 'dram.capacity', 32, '32 GB', ''),
+    ('dram_gb_a1c1', 'dram.capacity', 16, '16 GB', ''),
     ('mts', 'dram.rate-card', 3733, '3,733', 'MT/s'),
     ('dram_peak', 'dram.peak-card', 119, '119', 'GB/s'),
     ('dram_bw', 'bw-dram', 76, '76', 'GB/s'),
@@ -744,7 +773,7 @@ N = [
     ('lat_dram', 'lat-dram-typical', 299, '299', 'cycles'),
     ('lat_dram_ns', 'lat-dram-typical', 500, '500 ns', ''),
     ('lat_dram_rng', 'lat-dram', 297, '287-297', 'cycles'),
-    ('lat_dram_chip', 'lat-dram-chip', 28, 'about 25-28', 'cycles'),
+    ('lat_dram_chip', 'lat-dram-chip', 28, 'about 28', 'cycles'),
     ('row_conf', 'lat-dram-rowconflict', 37, '+37 cycles', ''),
     ('refresh', 'lat-dram-refresh', 3.88, '3.88 us', ''),
     # bandwidth (chip-wide, 1,024 minions at 600 MHz)
@@ -780,6 +809,7 @@ N = [
     ('rl_e_dram', 'relay-energy', 116.2, '116.2', 'pJ/B'),
     ('rl_e_next', 'relay-energy', 8.9, '8.9', 'pJ/B'),
     ('rl_e_own', 'relay-energy', 4.3, '4.3', 'pJ/B'),
+    ('rl_e_hand', 'relay-energy', 17.8, '17.8', 'pJ/B'),   # a byte handed on: written once and read once (14 Oct)
     ('rl_x', 'relay-13x', 12.97, '12.9x, 13.0x and 13.1x', ''),
     ('rl_bw_dram', 'relay-bw', 47.7, '47.7', 'GB/s'),
     ('rl_bw_next', 'relay-bw', 592.5, '592.5', 'GB/s'),
@@ -960,7 +990,7 @@ COMP = {
               'minion.vec-peak', 'mm-peak', 'mm-rate', 'neigh.coop-tload', 'minion.tensor-cache-path', 'mm.dram', 'e-scp-tload',
               'e-dram-tload', 'e-tfma-fp32', 'L104'],
     'flowH': ['mm.w-data', 'mm.w-3cards', 'e-tfma-fp32', 'e-tfma-fp32-zeros', 'heat.race', 'heat.fewer', 'heat.leak',
-              'mm-board-w', 'power.idle', 'board.meters', 'mm-rate'],
+              'mm-board-w', 'power.idle', 'board.meters', 'mm-rate', 'minion.tensorfma-546', 'mm.reload'],
     'flowI': ['hot.fair', 'hot-cost', 'hot.cliff', 'hot-edge', 'hot-energy', 'mem.global-atomic', 'L43', 'l3.home'],
     'flowJ': ['ar.tree', 'neigh.fln-edges', 'sync.tree-levels', 'sync-allreduce32', 'sync-allreduce1024', 'sync-shire-barrier',
               'sync-chip-barrier', 'sync.flb', 'sync.fcc', 'ts-rt-fln', 'L104'],

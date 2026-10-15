@@ -212,7 +212,7 @@ same repository state (`b36acd6`) and from R11.
 - **Useful for:** two things this work took from it and checked. First, that the register-to-register path
   (`TensorSend`/`TensorRecv`) never touches the shire cache, so it is immune to the contention in
   [17-hot-line.md](17-hot-line.md). Second, the warning that a two-dimensional systolic array — every cell
-  receiving from two partners — hangs a hart permanently, because the hardware keeps one ready flag per
+  sending to two partners — hangs a hart permanently, because the hardware keeps one ready flag per
   minion and not one per partner (`docs/et-soc1-notes.md`). That warning is why
   [18-on-chip-relay.md](18-on-chip-relay.md) is built at shire granularity on the scratchpad rather than as a
   mesh of TensorSend cells.

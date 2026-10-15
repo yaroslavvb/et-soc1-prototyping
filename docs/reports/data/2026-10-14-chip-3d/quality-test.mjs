@@ -38,8 +38,8 @@ try{
    await page.locator('#'+primary).fill(name==='fin'?'4':'100');await page.locator('#'+primary).dispatchEvent('input');await page.waitForTimeout(150);
    const controlled=await page.evaluate(()=>window.__chip3d.debug());
    assert.ok(Math.abs(zoomed.scale-controlled.scale)<1e-8,'geometry controls preserve scale');
-   await page.locator('#sectionButton').click();
    if(name==='metal')await page.locator('#dielectricButton').click();
+   await page.locator('#sectionButton').click();
    await page.locator('[data-view="end"]').click();
    await page.waitForTimeout(100);
    assert.ok(Math.abs(zoomed.scale-(await page.evaluate(()=>window.__chip3d.debug())).scale)<1e-8,'preset preserves scale');

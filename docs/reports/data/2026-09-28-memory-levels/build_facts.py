@@ -132,7 +132,7 @@ FIX = {
     ('l1', 'l1.voltage'): {
         'statement': "The latch arrays switch at the minion-rail voltage: 0.517 V at 600 MHz (0.568 V at 700, 0.618 V at 800). "
                      "The card's power tree gives the minion rail 400 mV nominal, and the firmware limits it to 400-620 mV.",
-        'source': "docs/findings/16-dvfs-and-leakage.md:20; docs/research/power-telemetry.md:44 (ET-PCIe-Dev-Card-V3), "
+        'source': "docs/findings/16-dvfs-and-leakage.md:39; docs/research/power-telemetry.md:44 (ET-PCIe-Dev-Card-V3), "
                   ":189-190 (bl2_pmic_controller.h:165-244)"},
     ('l2', 'l2.rail.sram'): {
         'statement': "The card's VDD_SRAM regulator feeds the shire-cache SRAM arrays (L2/L3/scratchpad); it is one of the three "
@@ -241,7 +241,7 @@ FIX = {
         'statement': "SRAM-rail power at idle: 2.00 W for the chip (about 16 mW per MB if split evenly over the 128 MB of L2, L3 and "
                      "scratchpad, the energy manual's denominator); 1.70 W at 67 C and 2.73 W at 82 C on aifoundry2; 0.051-0.066 W "
                      "per degree C on the other cards.",
-        'source': "docs/findings/05-claims.md:184, 473; docs/findings/16-dvfs-and-leakage.md:141; docs/energy-manual/"
+        'source': "docs/findings/05-claims.md:195, 499; docs/findings/16-dvfs-and-leakage.md:189; docs/energy-manual/"
                   "04a-fine-grain.md:110 ('Measured: 1.70 W at 67 °C') and its table (67 °C 1.698 W, 82 °C 2.726 W)",
         'note': "The per-MB split assumes the rail feeds the 128 MB evenly; what else is on the rail is unknown (asked)."},
     ('l3', 'l3.leakage'): {
@@ -249,7 +249,7 @@ FIX = {
                      "80 C its 2.51 W is 19.6 mW per MB of the 128 MB of L2, L3 and scratchpad, an upper bound on the arrays' "
                      "leakage since cache logic shares the rail. The L3's 32 MB are then at most about 0.63 W.",
         'source': "docs/energy-manual/04a-fine-grain.md:106-111 and its table (67 °C 1.698 W, 82 °C 2.726 W); docs/findings/"
-                  "05-claims.md:473"},
+                  "05-claims.md:499"},
     ('dram', 'dram.lat.row-hit'): {
         'statement': "A load that finds its row open skips the activate and saves 11-12 cycles (about 19 ns, tRCD): 214 against 226 "
                      "cycles in the refresh series; the two clusters' means were 11.0-11.6 cycles apart on three cards."},
@@ -274,19 +274,36 @@ FIX = {
                      "rd_dbi_en, wr_dbi_en and dm_en.",
         'note': "The init also writes MR3 = 0xF1 (INIT4.emr2). In LPDDR4 (GENERIC) MR3 holds PU-CAL, PDDS and the DBI-RD/WR "
                 "enables, and data masking is set by MR13 OP[5]."},
+    # tRFCab depends on the density per channel: JEDEC's 280 ns is the 6-8 Gb value and 380 ns the 12-16 Gb one, so the
+    # programmed 280.7 ns is under JEDEC's figure for the 32 GB cards' 16 Gb channels (the correctness check of 14 Oct 2026,
+    # against the JEDEC tables a Micron LPDDR4/LPDDR4X datasheet reproduces)
     ('dram', 'gen.jedec-match'): {
-        'statement': "The programmed timings are close to JEDEC LPDDR4's limits for a 16 Gb-per-channel die at 3,733 MT/s, as "
-                     "recalled from JESD209-4 and not checked against the standard: tRCD and tRPpb 18 ns minimum, tRAS 42 ns, tRRD "
-                     "10 ns, tFAW 40 ns, tRFCab 280 ns; RL 36 (with read DBI) and WL 16 are the fixed read and write latencies for "
-                     "this rate, and tREFI 3.875 us is just under the 3.904 us maximum interval.",
-        'source': "GENERIC comparison: JEDEC JESD209-4 values recalled, not checked against the standard (no ET source); ET values "
-                  "from dram.ctl.*"},
+        'statement': "The programmed timings are close to JEDEC LPDDR4's limits for a 16 Gb-per-channel die at 3,733 MT/s "
+                     "(JESD209-4's tables as a Micron LPDDR4/LPDDR4X datasheet reproduces them, not the standard itself): tRCD "
+                     "and tRPpb 18 ns minimum, tRAS 42 ns, tRRD 10 ns, tFAW 40 ns; RL 36 (with read DBI) and WL 16 are the read "
+                     "and write latencies for this rate, and tREFI 3.875 us is just under the 3.904 us maximum interval. The "
+                     "refresh is the exception on the 32 GB cards: JEDEC's tRFCab for 12-16 Gb per channel is 380 ns, and the "
+                     "programmed 280.7 ns is about 100 ns shorter, which needs a part rated better than JEDEC, such as Micron's 16 "
+                     "Gb single-channel LPDDR4X die (280 ns); the cards' exact part is not known (dram.org.part).",
+        'source': "GENERIC comparison: JEDEC JESD209-4 tables as reproduced in Micron's 200b x16/x32 LPDDR4/LPDDR4X datasheet "
+                  "(MT53E1G32D2 family) Rev. F 12/2020, Table 111 (tRFCab 130/180/280/380 ns for 2/3-4/6-8/12-16 Gb per "
+                  "channel), Table 3 (16 Gb single-channel die 280 ns, 'improved values from JEDEC') and Table 196; density: "
+                  "external/et-platform/device-bootloaders/src/ServiceProcessorBL2/utils/mem_controller_utils.c:993-999 and "
+                  "include/mem_controller.h:137 (MR8 density code 6, the firmware's 32 GB setting, which the driver reports on "
+                  "aifoundry2 and aifoundry3: dram.org.capacity); ET values from dram.ctl.*",
+        'note': "JEDEC's tRFCab is 280 ns for 6-8 Gb per channel and 380 ns for 12-16 Gb, so the programmed 280.7 ns is no "
+                "cross-check on the density: at 16 Gb per channel it relies on the vendor's better rating."},
     # the lane rule rests on the re-implementation RTL alone
     ('l3', 'l3.lane'): {'_caveat': 'reimpl',
                         'note': "The lane rule rests on core-et-main alone, Ainekko's co-simulated translation of the CORE-ET RTL; spec "
                                 "p.100 says only that the swizzle picks the bank at the incoming L3 side. Heat per millimetre's lane "
-                                "rule (PA[7:6], chip fact L103) is right for its remote-scratchpad flows; for L3 lines the lane is the "
-                                "home bank (to confirm)."},
+                                "rule (PA[7:6]) is right for its remote-scratchpad flows; for L3 lines the lane is the home bank (to "
+                                "confirm), as the chip tour's fact L103 also says since 14 Oct 2026."},
+    # the per-access RAM clock gate is the re-implementation's alone; the spec asks only for still inputs (14 Oct 2026)
+    ('l3', 'l3.clock-gating'): {'_caveat': 'reimpl',
+                                'note': "The per-access RAM clock gate is the Ainekko re-implementation's (core-et-main), as "
+                                        "l2.clock-gating notes; the specification asks only that a RAM's inputs stay unchanged "
+                                        "when it is not accessed (pdf p.46) and names module-level clock gaters (pdf p.97)."},
     # the ET-SoC-1's own manual gives the scratchpad address format a minion uses
     ('scp', 'scp.addr'): {
         'statement': "Scratchpad address fields as a minion issues them (the PRM's format 0): [39:31] = 9'h1 (scratchpad region), "
@@ -1043,8 +1060,8 @@ N = [
     ('l3_hopcyc', 'l3:l3.hop', 12, '12 cycles', ''),
     ('l3_hopns', 'l3:l3.hop', 20, '20 ns', ''),
     ('l3_hopmm', 'l3:l3.wire-energy', 3.72, '3.72 mm', ''),
-    ('l3_fj', 'l3:l3.wire-energy', 36.2, '36.2 fJ', ''),
-    ('l3_hop69', 'l3:l3.wire-energy', 69, 'about 69 pJ', '', '69 pJ'),
+    ('l3_fj', 'l3:l3.wire-energy', 36.7, '36.7 fJ', ''),
+    ('l3_hop69', 'l3:l3.wire-energy', 70, 'about 70 pJ', '', '70 pJ'),
     # an L3 read through the mesh on each card, and a mesh hop per line (computed above from manual.json, since 28 Sep)
     ('l3_rails_sram', 'l3:l3.energy-per-load', rnd(SC('l3', 'sram')[0]), RS['l3_sram'], ''),
     ('l3_rails_mesh', 'l3:l3.energy-per-load', rnd(SC('l3', 'noc')[0]), RS['l3_noc'], ''),
@@ -1120,6 +1137,7 @@ N = [
     ('scp_rm0', 'scp:scp.vmin-table', 585, '585 mV (650)', '', '585 / 650'),
     # DRAM (part 2)
     ('dr_gb', 'dram:dram.org.capacity', 32, '32 GB', ''),
+    ('dr_gb_a1c1', 'dram:dram.org.capacity', 16, '16 GB', ''),
     ('dr_ch', 'dram:dram.topo.memshires', 16, '16 channels', ''),
     ('dr_mts', 'dram:dram.ctl.clock', 3733, '3,733 MT/s', ''),
     ('dr_dfi', 'dram:dram.ctl.clock', 933, '933 MHz', ''),
@@ -1188,6 +1206,7 @@ N = [
     ('dr_droop', 'dram:dram.pwr.droop', 0.87, '0.86-1.01 mV per watt', ''),
     ('dr_vddq6', 'dram:gen.io', 0.6, '0.6 V VDDQ', '', '0.6 V'),
     ('g_trefi_max', 'dram:gen.jedec-match', 3.904, '3.904 us', '', '3.904 µs'),
+    ('g_trfcab_16', 'dram:gen.jedec-match', 380, '380 ns', ''),
 ]
 
 DASH = str.maketrans({'–': '-', '‑': '-', '−': '-', ' ': ' ', 'µ': 'u', 'μ': 'u', '×': 'x'})
@@ -1310,6 +1329,7 @@ PARTS = {
         'half': L('l2', 'scp:scp.g-half-select', 'l2.macro.name-decode'),
         'leak': L('l2', 'l3:g.leakage', 'l3:l3.leakage', 'l2.leak', 'l3:g.no-refresh'),
         'ls': L('l2', 'l3:g.crossing', 'scp:scp.g-level-shifter', 'l2.vc-fifo', 'l2.rail.hv-logic'),
+        'sync': L('l2', 'l2.vc-fifo', 'l2.clock', 'l2.domain'),
         'energy': L('l2', 'l2.e.level', 'l2.e.rails', 'l2.e.scp-contents', 'l2.e.tload-tstore', 'l2.e.l2-minus-scp', 'l2.e.bit',
                     'l2.e.scalar', 'l2.e.gather-line', 'l2.e.shire', 'l2.e.l1fill', 'l2.power-goal', 'l2.leak'),
         'latency': L('l2', 'l2.lat.spec', 'l2.lat.measured', 'l2.lat.overhead', 'l2.lat.ladder', 'l2.lat.miss', 'l2.sleep'),
@@ -1497,7 +1517,7 @@ ASKS = [
                  "macros the taped-out ones? Does an L3 request pick its mesh lane by the home bank PA[12:11], as core-et-main's "
                  "shirecache_mesh_master.sv:132-153 does?",
      'settles': "Check bits drawn per L1 row or not; the prefetcher box drawn or removed; the read buffer's storage drawn; the "
-                "L3 lane (and the correction to the chip tour's fact L103).",
+                "L3 lane (and the chip tour's fact L103, which follows the re-implementation since 14 Oct 2026).",
      'facts': ['l1:l1.u-parity', 'l2:l2.hpf', 'l2:l2.rbuf.storage'], 'also': [], 'l3_asks': ['ask-l3-lane']},
     {'id': 'ask-cache-esrs', 'rung': 41, 'status': 'ask_team', 'group': 'AI Foundry ask (or firmware)',
      'title': 'The live shire-cache settings on these cards',
@@ -1511,7 +1531,7 @@ ASKS = [
      'facts': ['l3:u.live-settings', 'scp:scp.u-trim', 'dram:dram.u-qos'], 'also': [], 'l3_asks': ['ask-l3-live-esrs']},
     {'id': 'ask-dram-part', 'rung': 42, 'status': 'ask_team', 'group': 'AI Foundry ask',
      'title': 'The DRAM part',
-     'question': "The Micron part number, die density, dies per package, and x16 or byte-mode channels. The firmware reads MR5 "
+     'question': "The part's maker and number, die density, dies per package, and x16 or byte-mode channels. The firmware reads MR5 "
                  "and MR8 at every boot and logs them (mem_controller_utils.c), but no log has been captured; a boot log or the "
                  "card's BOM line settles it. The part's datasheet gives whatever it publishes of the internal organisation. With "
                  "temperature derating off, also whether the packages stay under 85 C under load: a read of MR4 during a long "
@@ -1684,16 +1704,12 @@ CONFLICTS = [
     {'what': 'Filling a 64 B line into the L1 from the scratchpad', 'levels': ['l1', 'l2'],
      'sources': ['238 pJ random, 101 zeros, three cards (l1.e-fill)', '205 / 101 with two cards pooled (l2.e.l1fill)'],
      'resolution': 'Canonical 238 pJ; 205 only in the facts table, as the earlier figure.'},
-    {'what': 'Row order in the data panels', 'levels': ['l2', 'l3', 'scp'],
-     'sources': ['l2.data-ram and its steps write "{way, set}"',
-                 're-implementation RTL shirecache_pipe_sub_bank.sv:1613: data RAM address = {set, way} (l3.same-arrays, scp.m0-rows)'],
-     'resolution': 'Drawn set-major, as the RTL line has it: the L2 is rows 2,560-3,071 of each panel (sets 640-767 times 4 ways).'},
     {'what': 'Which mesh lane an L3 request takes', 'levels': ['l2', 'l3'],
-     'sources': ['the chip tour (fact L103) and the wire-energy synthesis: PA[7:6]',
-                 'l3.lane: the home bank PA[12:11]; PA[7:6] only for a remote scratchpad (re-implementation RTL)'],
+     'sources': ['the wire-energy synthesis (and Heat per millimetre): PA[7:6] for every request',
+                 'l3.lane, and the chip tour\'s fact L103 since 14 Oct 2026: the home bank PA[12:11]; PA[7:6] only for a '
+                 'remote scratchpad (re-implementation RTL)'],
      'resolution': 'The L3 draws PA[12:11], marked re-implementation RTL, to confirm in silicon (ask-silicon-config); the '
-                   'chip tour\'s fact L103 cites the same RTL file, whose lines 145-149 take PA[7:6] only for a remote '
-                   'scratchpad, and needs the correction.'},
+                   'synthesis cites the same RTL file, whose lines 145-149 take PA[7:6] only for a remote scratchpad.'},
     {'what': 'The scratchpad address format', 'levels': ['scp'],
      'sources': ["Shire Cache Specification v1.1 p.24: the shire field is [30:23], all ones meaning the local shire",
                  "PRM pdf p.486: bit 30 picks the format; format 0 puts the shire ID in [29:23], 0x7F meaning the local shire; "

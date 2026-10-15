@@ -337,7 +337,7 @@
    "id": "scp.panel-count",
    "level": "scp",
    "topic": "memory macro",
-   "statement": "Per shire 64 data panels (4 banks x 4 sub-banks x 4), each 589,824 bits; 37.7 Mbit per shire including ECC (32 Mbit data + 4 Mbit ECC); 2,048 data panels over the 32 compute shires.",
+   "statement": "Per shire 64 data panels (4 banks x 4 sub-banks x 4), each 589,824 bits; 37.7 Mbit per shire including ECC (33.55 Mbit data + 4.19 Mbit ECC); 2,048 data panels over the 32 compute shires.",
    "value": 64,
    "unit": "data panels per shire",
    "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf p.9, p.48, p.51",
@@ -574,7 +574,7 @@
    "statement": "Another shire's scratchpad: 99.84 + 12.00 cycles per mesh hop at 600 MHz (112-220 cycles, 186-366 ns over 1-10 hops); all 124 points within one cycle; a to b equals b to a within 0.032 cycles, on three cards.",
    "value": 99.84,
    "unit": "cycles + 12.00 per hop",
-   "source": "docs/findings/05-claims.md:423; lat.json items[LAT-M3].per_card.<card>.passes[] (row0_slope 11.998-12.002, frac_within_1 1.0)",
+   "source": "docs/findings/05-claims.md:445; lat.json items[LAT-M3].per_card.<card>.passes[] (row0_slope 11.998-12.002, frac_within_1 1.0)",
    "kind": "et-measured",
    "card": "aifoundry2, aifoundry3, aifoundry1-c1",
    "page_link": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#scratchpad-latency-across-the-mesh",
@@ -873,7 +873,7 @@
    "statement": "The SRAM rail at idle (all 128 MB of L2, L3 and scratchpad plus whatever else is on it): 2.51 W at 80 C on aifoundry2, 19.6 mW per MB, an upper bound on the arrays' leakage; a byte held for one second leaks at most ~19 nJ, as much as reading it 4,200 times. aifoundry3 and aifoundry1-c1 sit about 1 W higher.",
    "value": 19.6,
    "unit": "mW per MB at 80 C",
-   "source": "docs/energy-manual/04a-fine-grain.md:104-115; docs/findings/05-claims.md:312, :473",
+   "source": "docs/energy-manual/04a-fine-grain.md:104-115; docs/findings/05-claims.md:324, :499",
    "kind": "et-measured",
    "card": "aifoundry2, aifoundry3, aifoundry1-c1",
    "page_link": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-sram-arrays-at-rest",
@@ -974,10 +974,10 @@
    "id": "scp.relay",
    "level": "scp",
    "topic": "path",
-   "statement": "Handing each stage's output to the next shire's scratchpad instead of DRAM: 592.5 GB/s against 47.7 (12.4x), own scratchpad 1,487 GB/s (31x); energy per byte moved 116.2 / 8.92 / 4.34 pJ/B (DRAM / next shire / own), DRAM over next shire 12.9-13.1x on every card.",
+   "statement": "Having the next shire read each stage's output from the producing shire's scratchpad instead of going through DRAM: 592.5 GB/s against 47.7 (12.4x), own scratchpad 1,487 GB/s (31x); energy per byte moved 116.2 / 8.92 / 4.34 pJ/B (DRAM / next shire / own), DRAM over next shire 12.9-13.1x on every card.",
    "value": 8.92,
    "unit": "pJ/B (next shire)",
-   "source": "docs/findings/05-claims.md:464, :428; docs/reports/data/2026-09-23-energy-manual/manual.json reruns.relay_pj_per_byte; docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json headline",
+   "source": "docs/findings/05-claims.md:490, :451; docs/reports/data/2026-09-23-energy-manual/manual.json reruns.relay_pj_per_byte; docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json headline",
    "kind": "et-measured",
    "card": "aifoundry2, aifoundry3, aifoundry1-c1",
    "page_link": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay#one-kernel-three-places-to-put-the-answer",
@@ -1003,7 +1003,7 @@
    "statement": "A global atomic on a scratchpad word is performed by the home bank's atomic block (read, ALU, write; the sub-bank is held busy throughout) after arriving on the L3-slave port; the bank retires one every 10.00 cycles; an uncontended remote atomic takes 216 cycles round trip; an atomic through the self ID 0x7F is a bus error.",
    "value": 10.0,
    "unit": "cycles per atomic at the bank",
-   "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf p.17 (L3 slave REQ_Atomic, local SCP), p.36, p.40 §2.9; docs/findings/05-claims.md:232; docs/findings/17-hot-line.md:35-38; lat.json [item=LAT-H]",
+   "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf p.17 (L3 slave REQ_Atomic, local SCP), p.36, p.40 §2.9; docs/findings/05-claims.md:243; docs/findings/17-hot-line.md:36-39; lat.json [item=LAT-H]",
    "kind": "et-measured",
    "card": "aifoundry2, aifoundry3, aifoundry1-c1",
    "page_link": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line#the-atomic-itself-is-fair",
@@ -1498,7 +1498,7 @@
   },
   "load_remote": {
    "title": "A load from another shire's scratchpad",
-   "measured": "99.84 + 12.00 cycles per hop at 600 MHz (112-220 cycles over 1-10 hops); 0.96 TB/s chip-wide at 2.1 hops; 5.10 / 11.8 pJ/B at 2.1 hops, +0.67 / 1.80 pJ/B per hop",
+   "measured": "99.84 + 12.00 cycles per hop at 600 MHz (112-220 cycles over 1-10 hops); 0.96 TB/s chip-wide at 2.1 hops; 5.10 / 11.8 pJ/B at 2.1 hops, +0.67 / 1.80 pJ/B per hop; the relay's next stage reads the previous shire's scratchpad this way: 592.5 GB/s for 8.92 pJ per byte moved, against 116.2 through DRAM",
    "steps": [
     {
      "n": 1,
@@ -1564,7 +1564,7 @@
   },
   "store_remote": {
    "title": "A write into another shire's scratchpad",
-   "measured": "the relay hands data to the next shire at 592.5 GB/s for 8.92 pJ/B moved (write + read), against 116.2 through DRAM",
+   "measured": null,
    "steps": [
     {
      "n": 1,

@@ -221,8 +221,10 @@ function metalModel(opts) {
   const lengths = route.slice(1).map((p,i)=>p.distanceTo(route[i]));
   const total = lengths.reduce((a,b)=>a+b,0);
   const pulses = Array.from({length:7},(_,i)=>k.bead([0,0,0],'metal',1.35,'electron'));
+  // A pulse's place is a fraction of the route (a loop in 11.2 s: 1.3 units/s at the default separation), so a new
+  // separation carries the pulses with their tracks instead of along them, and a paused flow stays put.
   k.animations.push(time=>pulses.forEach((p,i)=>{
-    let distance=(time*1.3+i*total/pulses.length)%total;
+    let distance=((time/11.2+i/pulses.length)%1)*total;
     for(let j=0;j<lengths.length;j++){if(distance<=lengths[j]){p.position.lerpVectors(route[j],route[j+1],distance/lengths[j]);break;} distance-=lengths[j];}
   }));
   return k.finish({center:[0,3.0,0],radius:7.9,groundY:-.78},[
@@ -287,6 +289,9 @@ function finModel(opts) {
   ]);
 }
 
+// The channel's carriers keep their travel across rebuilds (each slider step builds a new model): it accumulates
+// at the present drive's speed, so a new gate drive changes their speed, not their place, and paused they stay put.
+const drift={phase:0,time:null};
 function channelModel(opts) {
   const k=kit(opts.dark), drive=opts.gateDrive/100;
   const charge=THREE.MathUtils.smoothstep(drive,.23,.82);
@@ -318,11 +323,15 @@ function channelModel(opts) {
     const bead=k.bead([0,y,z],'channel',.25+charge*.05);
     electrons.push({bead,y,z,phase:i/30});
   }
-  k.animations.push(time=>electrons.forEach(({bead,y,z,phase})=>{
-    bead.visible=charge>.035 && phase<.10+charge*.90;
-    // Flow is source (-X) to drain (+X), with a fixed positive drain bias.
-    bead.position.set(-2.95+((phase+time*(.10+.30*charge))%1)*5.9,y,z);
-  }));
+  k.animations.push(time=>{
+    const dt=drift.time===null?0:clamp(time-drift.time,0,.05);
+    drift.time=time; drift.phase=(drift.phase+dt*(.10+.30*charge))%1;
+    electrons.forEach(({bead,y,z,phase})=>{
+      bead.visible=charge>.035 && phase<.10+charge*.90;
+      // Flow is source (-X) to drain (+X), with a fixed positive drain bias.
+      bead.position.set(-2.95+((phase+drift.phase)%1)*5.9,y,z);
+    });
+  });
   return k.finish({center:[0,1.2,0],radius:5.1,groundY:-.78},[
     {key:'gate',text:'Gate electrode',position:[0,2.34,-.23],slot:'top'},
     {key:'source',text:'Source',position:[-2.50,1.55,.64],slot:'left'},

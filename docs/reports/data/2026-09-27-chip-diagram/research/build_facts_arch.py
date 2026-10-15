@@ -86,7 +86,7 @@ fact("chip.cm-shire-mask", "chip", "hierarchy",
      "docs/reports/data/2026-09-22-cards/driver_config.json, fields `cm_shire_mask`, `sync_shire`", "measured",
      card="aifoundry1 (both cards), aifoundry2, aifoundry3", page="dvfs")
 fact("chip.harts", "chip", "hierarchy",
-     "Software sees 2,048 harts on the 32 compute shires: hartid = shire × 64 + minion × 2 + thread (shire = hartid >> 6, neighbourhood = (hartid mod 64) >> 4, minion = hartid >> 1, thread = hartid & 1).",
+     "Software sees 2,048 harts on the 32 compute shires: hartid = shire × 64 + minion × 2 + thread (shire = hartid >> 6, neighbourhood = (hartid mod 64) >> 4, minion = (hartid mod 64) >> 1 (the firmware's get_minion_id(), hartid >> 1, numbers the minions chip-wide), thread = hartid & 1).",
      2048, "harts", f"{NOTES}:22; {EP}/et-common-libs/include/etsoc/isa/hart.h:50,62,74,86", "spec",
      page="onchip", anchor="every-primitive-against-a-gpu")
 fact("chip.master-shire-id", "master shire", "hierarchy",
@@ -127,10 +127,10 @@ fact("chip.sram-total", "chip", "memory",
      page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
 fact("chip.process", "chip", "physical",
      "TSMC 7 nm, over 24 billion transistors, 89 mask layers (Esperanto, Hot Chips 33 and IEEE Micro 2022).",
-     24e9, "transistors (lower bound)", f"{CL}:513; docs/findings/01-resources.md:91-104 (R6)", "spec",
+     24e9, "transistors (lower bound)", f"{CL}:832; docs/findings/01-resources.md:110-123 (R6)", "spec",
      note="External, published by the vendor; not checked on these cards.", page="lowpower")
 fact("chip.die-area", "chip", "physical", "Die area 570 mm².", 570, "mm²",
-     f"{CL}:513; docs/findings/01-resources.md:234 (R14: Hot Chips 33 slide 20; IEEE Micro 42(3) p.37)", "spec",
+     f"{CL}:832; docs/findings/01-resources.md:266 (R14: Hot Chips 33 slide 20; IEEE Micro 42(3) p.37)", "spec",
      note="External, vendor-published.", page="heat", anchor="die")
 fact("chip.die-dims", "chip", "physical",
      "Die about 25.6-25.8 mm east-west by 22.1-22.2 mm north-south (width/height 1.15-1.17), from the published die plot scaled to 570 mm²; the shire grid spans about 86% of the die's width, the rest being the memory shires and their DRAM PHYs down each side (about 1.76 mm per side).",
@@ -140,15 +140,15 @@ fact("chip.die-dims", "chip", "physical",
      page="heat", anchor="die")
 fact("chip.hop-pitch", "mesh", "physical",
      "Shire tile pitch 3.73 mm east-west and 3.70 mm north-south, so one mesh hop is about 3.72 mm (3.64-3.74 over three readings).",
-     3.72, "mm per hop", f"{CL}:340; docs/reports/data/2026-09-24-wire-energy/report.json `inputs.hop_mm`", "inferred",
+     3.72, "mm per hop", f"{CL}:361; docs/reports/data/2026-09-24-wire-energy/report.json `inputs.hop_mm`", "inferred",
      note="Kind A (estimate from the die plot) in the claims index.", page="heat", anchor="die")
 fact("chip.die-revision", "chip", "physical",
      "The datasheet's package marking example gives die revision A0; the driver reports arch_rev 0 on every card. Whether the lab cards are A0 has not been confirmed by AI Foundry.",
-     None, None, f"{DS}, pdf p.34 (Table 10-1); docs/reports/data/2026-09-22-cards/driver_config.json `arch_rev`; {NOTES}:342",
+     None, None, f"{DS}, pdf p.34 (Table 10-1); docs/reports/data/2026-09-22-cards/driver_config.json `arch_rev`; {NOTES}:364",
      "spec", card="aifoundry1, aifoundry2, aifoundry3 (arch_rev)", page=None)
 fact("chip.advertised-range", "chip", "clocks",
      "Advertised operating range: 300-800 MHz and about 40 W for the open-sourced platform (AI Foundry); Esperanto's papers give 300 MHz to 2 GHz.",
-     None, None, f"{INTRO}, pdf p.2; docs/findings/01-resources.md:101-103 (R6)", "spec",
+     None, None, f"{INTRO}, pdf p.2; docs/findings/01-resources.md:121-122 (R6)", "spec",
      note="These cards' firmware only offers 600, 700 and 800 MHz (see clock.minion-opps).", page="lowpower")
 
 # ---------------------------------------------------------------- mesh
@@ -159,19 +159,19 @@ fact("mesh.grid", "mesh", "topology",
 fact("mesh.logical-map", "mesh", "topology",
      "Measured position of each compute shire on the 6 × 6 grid (marty1885's logical map, x across, y down): y=0: 0 24 9 25 2 11; y=1: 8 16 1 17 10 19; y=2: 3 4 13 14 18 27; y=3: _ 12 21 22 26 _; y=4: _ 20 29 30 15 23; y=5: _ 28 5 6 7 31.",
      None, None,
-     "workloads/nocbench/analyze.py:52-60 (`MARTY`, `EMPTY`); " + f"{CL}:383, 412 (map recovered from latency alone in 12 of 12 search restarts on every card)",
+     "workloads/nocbench/analyze.py:56-64 (`MARTY`, `EMPTY`); " + f"{CL}:412, 446 (map recovered from latency alone in 12 of 12 search restarts on every card)",
      "measured", card=CARDS3,
      note="Built by marty1885's etTopoScan from bandwidth on another card; confirmed by TensorSend latency on all three lab cards. Shire IDs are the firmware's logical IDs.",
      page="onchip", anchor="where-the-shires-are-a-6-6-mesh")
 fact("mesh.empty-cells", "mesh", "topology",
      "Four cells of the 6 × 6 map hold no compute shire: (0,3), (0,4), (0,5) and (5,3). They hold the master, spare, PCIe and I/O shires and route traffic too; which cell is which is not established.",
-     4, "cells", "workloads/nocbench/analyze.py:60 (`EMPTY`); on-chip communication page §'Where the shires are'",
+     4, "cells", "workloads/nocbench/analyze.py:64 (`EMPTY`); on-chip communication page §'Where the shires are'",
      "measured", card=CARDS3,
      note="The firmware's comment map (noc_reconfigure.h:76-90) puts PCIe/IO in one row and master/spare in another, but its shire placement matches the measured pairwise distances for only 254 of 1,024 shire pairs, so it cannot be used to label the cells.",
      page="onchip", anchor="where-the-shires-are-a-6-6-mesh")
 fact("mesh.orientation", "mesh", "topology",
      "The logical map appears to be the die turned a quarter: in map orientation the memory shires sit above and below the grid, on the die (and in the firmware's naming, 0-3 west, 4-7 east) they are the two side columns.",
-     None, None, f"{NOTES}:102-105; anatomy page §1 'Trace one load'", "inferred", page="anatomy",
+     None, None, f"{NOTES}:115-118; anatomy page §1 'Trace one load'", "inferred", page="anatomy",
      anchor="trace-one-load")
 fact("mesh.memshire-positions", "memory shire", "topology",
      "Fitted memory-shire positions on the logical map: memory shires 0-3 one step off the top edge at x = 1-4 (y = -1), 4-7 one step off the bottom edge at x = 1-4 (y = 6). Memory shire 2's position is a tie-break (x = 3 or 5 above the grid, or (6,0), fit equally).",
@@ -203,11 +203,11 @@ fact("mesh.hop-latency", "mesh", "latency",
      anchor="latency-grows-with-distance-except-through-memory")
 fact("mesh.shortest-paths", "mesh", "routing",
      "Round trips fit a + b × Manhattan distance on the map over all 496 shire pairs (worst residual 1.1-1.4 cycles), so routes are shortest paths through all 36 cells, the four non-compute cells included. The order in which the mesh routes a request (x first or y first) was not measured.",
-     None, None, f"{CL}:381, 412; on-chip communication page §'What the numbers say'; anatomy page §1 ('the order in which the mesh routes a request was not measured')",
+     None, None, f"{CL}:410, 446; on-chip communication page §'What the numbers say'; anatomy page §1 ('the order in which the mesh routes a request was not measured')",
      "measured", card=CARDS3, page="onchip", anchor="what-the-numbers-say")
 fact("mesh.xy-assumption", "mesh", "routing",
      "The heat-per-mm analysis assumes dimension-ordered XY routing on the logical map (and checks YX); under it, links are shared by 0 / 22 / 32 / 55 / 72% of link-hops at 1 / 2 / 3 / 4 / 6 hops in the all-pairs traffic.",
-     None, None, "workloads/enercat/analyze_wire.py:38, 149-176; " + f"{CL}:348 (WIRE `checks.link_sharing`)",
+     None, None, "workloads/enercat/analyze_wire.py:38, 149-176; " + f"{CL}:369 (WIRE `checks.link_sharing`)",
      "inferred", note="An analysis assumption, not a documented routing rule.", page="heat", anchor="contention")
 fact("mesh.single-attach", "shire", "topology",
      "Each shire meets the mesh at a single point: minion 31 of each shire gives the same round trips as minion 0.",
@@ -220,11 +220,11 @@ fact("mesh.clock", "mesh", "clocks",
      anchor="load-latency-against-working-set-size")
 fact("mesh.voltage", "mesh", "voltages",
      "NoC rail: set point 485 mV, 484-485 mV on die (per-shire 483-486 mV at idle).",
-     485, "mV", f"{TEL}, fields `reg_mv.noc`, `die_mv.noc`; {CL}:41", "measured", card="aifoundry2",
+     485, "mV", f"{TEL}, fields `reg_mv.noc`, `die_mv.noc`; {CL}:49", "measured", card="aifoundry2",
      page="heat", anchor="method")
 fact("mesh.port-width", "mesh", "links",
-     "The shire cache's mesh master port is 512 bits wide (one 64-byte line per beat); a shire has four mesh lanes and a line goes to lane PA[7:6], so consecutive lines on one lane are 256 bytes apart; a flit carries at least one 64-byte line.",
-     512, "bits", "external/core-et/rtl/inc/axi_defines.vh:43 (`SC_MESH_MASTER_AXI_DATA_SIZE 512`); docs/findings/01-resources.md:238-239 (R14); docs/findings/20-heat-per-mm.md:117-122",
+     "The shire cache's mesh master port is 512 bits wide (one 64-byte line per beat); a shire has four mesh lanes and an L3 line goes to the lane of its home bank, PA[12:11] (a remote-scratchpad line to lane PA[7:6]); the heat-per-mm analysis treats a flit as at least one 64-byte line (the NoC's flit size is not documented).",
+     512, "bits", "external/core-et/rtl/inc/axi_defines.vh:43 (`SC_MESH_MASTER_AXI_DATA_SIZE 512`); external/core-et-main/hw/ip/shirecache/rtl/shirecache_mesh_master.sv:132-153 (the lane: req_bank_id = remote scratchpad ? PA[7:6] : the L3 bank from shirecache_pipe_l3_swizzle_get); " + f"{SCS}, pdf p.27 (Table 8, swizzle0: the L3 bank is PA[12:11]); docs/findings/01-resources.md:270-271 (R14); docs/findings/20-heat-per-mm.md:219-223",
      "spec", note="The inter-router link width and flit size of the NoC itself are not documented in the sources.",
      page="heat", anchor="lanes")
 fact("mesh.memshire-port", "memory shire", "links",
@@ -233,7 +233,7 @@ fact("mesh.memshire-port", "memory shire", "links",
      anchor="the-memory-shire-leg-91-cycles-plus-12-per-hop")
 fact("mesh.1kb-knee", "mesh", "latency",
      "With 1 KB messages a round trip adds 12 cycles per hop up to 5 hops and 36 cycles (27-36) per hop beyond, as if the sender had a limited number of packets in flight.",
-     36, "cycles per hop beyond 5 hops", f"{CL}:382, 412 ({V3R}/lat.json LAT-N2 `c32_slope_to5`, `c32_slope_beyond5`)",
+     36, "cycles per hop beyond 5 hops", f"{CL}:411, 446 ({V3R}/lat.json LAT-N2 `c32_slope_to5`, `c32_slope_beyond5`)",
      "measured", card=CARDS3, page="onchip", anchor="message-size-and-bandwidth")
 fact("mesh.hop-energy-wire", "mesh", "energy",
      "One mesh hop costs 0.67 pJ per byte on zeros [0.62-0.73] and 1.80 pJ/B on random data [1.72-1.91] on board power (fit over 1-8 hops).",
@@ -248,8 +248,8 @@ fact("mesh.debug-noc", "mesh", "topology",
      "A separate Debug NoC shares the main NoC's clock with its own reset.", None, None,
      f"{MSD}, pdf p.7 (Table 1) and pdf p.17", "spec", page=None)
 fact("mesh.no-counters", "mesh", "observability",
-     "There are no NoC performance counters in the PRM, the firmware or core-et; mesh transit is inferred from latency differences.",
-     None, None, f"{CAD}:272-279", "spec", page="hub", anchor="ladder")
+     "No NoC performance counters are documented in the PRM or used by the firmware's code, and core-et has none; the firmware's generated register header does define transaction counters in every NoC bridge: two address- and command-filtered counters in each master bridge (*_m_am_cntr0/1 with ccmd0/1 and caddr, beside registers named latnum0/1 whose use it does not give) and one command-filtered counter in each slave bridge (*_s_as_cntr), undocumented, on the service processor's register bus and not tried here. Mesh transit is inferred from latency differences.",
+     None, None, f"{CAD}:272-279; {EP}/etsoc-hal/include/hwinc/noc_esr.h:552, 564, 1710 (bridge counters); docs/reports/sources/limits-of-observability.data.json rung 27 (ask-noc-registers)", "spec", page="hub", anchor="ladder")
 
 # ---------------------------------------------------------------- shire
 fact("shire.composition", "shire", "hierarchy",
@@ -289,7 +289,7 @@ fact("shire.bank-queues", "shire cache", "microarchitecture",
      "spec", page="hotline", anchor="the-thing-that-actually-starves")
 fact("shire.l2-bw-spec", "L2", "bandwidth",
      "Spec L2 bandwidth: four banks × 64 B = 256 B per shire-cycle, i.e. 8 B per minion-cycle, 4.9 TB/s on 1,024 minions at 600 MHz.",
-     256, "B per shire-cycle", f"{CL}:486; {NOTES}:249; {SCS}, pdf p.11 ('Read Bandwidth')", "derived",
+     256, "B per shire-cycle", f"{CL}:805; {NOTES}:269; {SCS}, pdf p.11 ('Read Bandwidth')", "derived",
      page="ridge", anchor="ridge-points-by-level")
 fact("shire.l2-bw-measured", "L2", "bandwidth",
      "Measured L2 streaming bandwidth: 2.45 TB/s on 1,024 minions at 600 MHz = 128 B per shire-cycle = 4.0 B per minion-cycle, half the banks' 256 B.",
@@ -302,7 +302,7 @@ fact("shire.clock", "shire", "clocks",
      note="Measured consequence: on-chip latencies (L1, L2, own scratchpad) stay fixed in cycles when the clock moves, while L3 and DRAM are fixed in ns.",
      page="memhier", anchor="load-latency-against-working-set-size")
 fact("shire.voltage-domains", "shire", "voltages",
-     "A shire spans several voltage domains separated by level shifters and FIFOs: minions on the low-voltage minion rail, the SRAM arrays (shire cache, and the I-cache data memory, placed in the shire channel because it must run at high voltage) on the SRAM rail, the mesh stop on the NoC rail.",
+     "A shire spans several voltage domains separated by level shifters and FIFOs: minions on the low-voltage minion rail, the shire cache's SRAM arrays on the SRAM rail, the L1 I-cache data memory in the Shire Channel because it must run at high voltage (the description names no rail for it), the mesh stop on the NoC rail.",
      None, None, f"{MSD}, pdf p.4, p.10 (§3.1) and p.18 (§5); docs/research/why-low-power.md:23-28 (R6)", "spec",
      page="lowpower")
 fact("shire.sensors", "shire", "observability",
@@ -342,8 +342,8 @@ fact("minion.isa", "minion", "ISA",
      2, "harts per minion", f"{MIND}, pdf p.5 (§2); {DS}, pdf p.7 (§2.1.1); {INTRO}, pdf p.7", "spec",
      page="hub", anchor="terms")
 fact("minion.no-divide", "minion", "ISA",
-     "No hardware divide or square root in U-mode: fdiv.ps and fsqrt.ps trap, as do sine, reciprocal square root, 64-bit float conversion and reading the cycle CSR; 161 of the instructions tried execute in U-mode, 13 trap.",
-     13, "trapping instructions", f"{CL}:278, 296 (workloads/enercat/enercat_modes.json)", "measured",
+     "No hardware float or vector divide or square root in U-mode (the scalar integer div and rem run): fdiv.ps and fsqrt.ps trap, as do sine, reciprocal square root, conversion between fp32 and 64-bit integers (fcvt.l.s, fcvt.s.l) and reading the cycle CSR; 161 of the instructions tried execute in U-mode, 13 trap.",
+     13, "trapping instructions", f"{CL}:290, 310 (workloads/enercat/enercat_modes.json); docs/energy-manual/03a-every-instruction.md:7 (the 13 that trap), 52-55 (div, divu, rem, remu retire in U-mode); {PRM}, pdf p.36 (§3.5: the float and vector divides and square roots, frsq.ps, fsin.ps and the conversions between fp32 and 64-bit integers trap to M-mode emulation)", "measured",
      card="aifoundry2, aifoundry3", page="energy", anchor="every-instruction-the-core-executes")
 fact("minion.vpu", "vector unit", "microarchitecture",
      "The vector unit has 8 identical 32-bit lanes in lockstep; the 32 FP registers f0-f31 are 256 bits wide (8 × fp32) per hart. Each lane has one FMA unit (one fp32 or two fp16 multiply-adds per cycle), two integer multiply-add units (four int8 multiply-accumulates each), one integer unit and one transcendental unit (exp2, log2, reciprocal).",
@@ -371,10 +371,10 @@ fact("minion.tensor-measured", "tensor unit", "compute",
      page="matmul", anchor="three-card-table")
 fact("minion.tensorfma-546", "tensor unit", "compute",
      "With A and B both in the L1 scratchpad a 16×16×16 fp32 TensorFMA takes 546 cycles (fp16 546, int8 318), identical for every data pattern.",
-     546, "cycles per op", f"{CL}:31-32, 414 ({V3R}/lat.json LAT-S1)", "measured", card=CARDS3, page="horace")
+     546, "cycles per op", f"{CL}:39-40, 449 ({V3R}/lat.json LAT-S1)", "measured", card=CARDS3, page="horace")
 fact("minion.tensor-shape", "tensor unit", "ISA",
-     "A TensorFMA computes C[M][N] += A[M][K] · B[K][N] with M, N ≤ 16 and K ≤ 64 / (bytes per element): A from the L1 scratchpad, B streamed through TenB, C accumulated in hart 0's vector registers (int8 in TenC). One fp32 op is 4,096 multiply-adds.",
-     4096, "multiply-adds per fp32 op", f"{PRM}, pdf p.264 (§9); {NOTES}:292-294", "spec", page="matmul")
+     "A TensorFMA computes C[M][N] += A[M][K] · B[K][N] with M, N ≤ 16 and K ≤ 64 / (bytes per element): A from the L1 scratchpad, B from the L1 scratchpad or streamed through TenB by a paired TensorLoadB, C accumulated in hart 0's vector registers (int8 in TenC). One fp32 op is 4,096 multiply-adds.",
+     4096, "multiply-adds per fp32 op", f"{PRM}, pdf p.264 (§9), p.277 (TensorLoadB) and p.291 (TensorFMA32, TENB); {NOTES}:314-316", "spec", page="matmul")
 fact("minion.tenb-tenc", "tensor unit", "microarchitecture",
      "TenB is virtually 16 registers × 64 B (1 KiB), physically much smaller, and only streams loaded data to a consumer; TenC is 16 × 64 B (1 KiB) of int32 accumulators visible only to integer tensor multiplies.",
      1024, "bytes (each, logical)", f"{PRM}, pdf p.264", "spec", page=None)
@@ -391,11 +391,11 @@ fact("minion.tensorload", "tensor unit", "data path",
 fact("minion.tensor-cache-path", "tensor unit", "data path",
      "Tensor loads skip the L1 but are cached in the L2 and L3; tensor stores skip the L1 and the L2.",
      None, None, "docs/energy-manual/04-bytes-memory.md:21, 38",
-     "inferred", note="Stated by the energy manual; the PRM confirms only that TensorLoad bypasses the L1 data cache.",
+     "inferred", note="Stated by the energy manual; the PRM states the L1 bypass of loads (p.275) and the L1 and L2 bypass of stores (p.306, p.309).",
      page="energy", anchor="reads-and-writes-measured-together")
 fact("minion.tensorsend", "tensor unit", "messaging",
      "TensorSend moves COUNT consecutive vector registers (32 B each, up to 127, wrapping past f31: about 4 KB) from the issuing hart into hart 0 of a target minion anywhere on the chip; the receiver's TensorRecv can add, max or min the data into its registers at no extra cost.",
-     127, "registers per message (max)", f"{PRM}, pdf p.272 and p.311-314; on-chip communication page (headline); {CL}:380-381",
+     127, "registers per message (max)", f"{PRM}, pdf p.272 and p.311-314; on-chip communication page (headline); {CL}:409-410",
      "spec", page="onchip", anchor="every-primitive-against-a-gpu")
 fact("minion.tensorsend-rtt", "tensor unit", "latency",
      "TensorSend round trip between shires: 150 + 12.02 cycles per mesh hop (250 ns + 20 ns/hop at 600 MHz), r² 0.9999 over all 496 shire pairs.",
@@ -403,11 +403,11 @@ fact("minion.tensorsend-rtt", "tensor unit", "latency",
      page="onchip", anchor="latency-grows-with-distance-except-through-memory")
 fact("minion.combine-free", "tensor unit", "messaging",
      "Combining on receive (fp32/int32 add, max, min) adds 0 cycles to a round trip.",
-     0, "cycles", f"{NOTES}:114; on-chip communication page table", "measured", card=CARDS3, page="onchip",
+     0, "cycles", f"{NOTES}:127; on-chip communication page table", "measured", card=CARDS3, page="onchip",
      anchor="every-primitive-against-a-gpu")
 fact("minion.one-ready-bit", "tensor unit", "messaging",
-     "The hardware keeps one peer-to-peer ready bit per minion, not one per partner: a minion receiving from two TensorSend partners at once hangs its hart permanently (the card then needs a reset).",
-     1, "ready bit per minion", f"{NOTES}:124-128 (core-et dcache_reduce.v `partner_ready_peer`); {CL}:257",
+     "The hardware keeps one peer-to-peer ready bit per minion, not one per partner: if a minion that TensorSends to two partners gets both their readies before it has used the first, one is lost, and that receiver and its sender hang for good (the card then needs a reset).",
+     1, "ready bit per minion", f"{NOTES}:137-141 (core-et dcache_reduce.v `partner_ready_peer`); {CL}:269",
      "spec", note="sys_emu tracks every partner separately and does not reproduce the hang.", page="onchip",
      anchor="a-trap-one-ready-flag-per-minion")
 fact("minion.msg-cost", "tensor unit", "latency",
@@ -420,7 +420,7 @@ fact("minion.link-bw", "tensor unit", "bandwidth",
      card=CARDS3, page="onchip", anchor="message-size-and-bandwidth")
 fact("minion.l1d", "L1 data cache", "memory",
      "Each minion has a private 4 KB L1 data cache: 16 sets × 4 ways × 64 B lines, not coherent with any other cache, writing back whole 64-byte lines.",
-     4, "KB", f"{MOV}, pdf p.1 (slide 2); {DS}, pdf p.9 (§2.1.1.5)", "spec", page="memhier",
+     4, "KB", f"{MOV}, pdf p.1 (slide 2); {DS}, pdf p.9 (§2.1.1.5); {PRM}, pdf p.243 (§8: an eviction writes a dirty line back); external/core-et/docs/Minion DCache Description.pdf, pdf p.33 (§3.5: \"Evict operations (REQ_Write): always 512b\")", "spec", page="memhier",
      anchor="the-hierarchy-as-a-spec-sheet")
 fact("minion.l1-modes", "L1 data cache", "memory",
      "Three L1 modes (mcache_control D1Split, ScpEnable): shared (both harts, all sets); split (hart 0 sets 0-7, hart 1 sets 14-15); scratchpad (hart 0 sets 12-13, hart 1 sets 14-15, sets 0-11 become a 3 KB = 48-line tensor scratchpad).",
@@ -429,7 +429,7 @@ fact("minion.l1-modes", "L1 data cache", "memory",
      page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
 fact("minion.l1-firmware", "L1 data cache", "memory",
      "The firmware puts every minion's L1 in scratchpad mode before each launch, leaving each hart 512 B of data cache (2 sets × 4 ways × 64 B).",
-     512, "B per hart", f"{NOTES}:84-86; {CAD}:446-447 (fw MachineMinion/src/syscall.c:348-420)", "spec",
+     512, "B per hart", f"{NOTES}:90-92; {CAD}:446-447 (fw MachineMinion/src/syscall.c:348-420)", "spec",
      page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
 fact("minion.miss-handlers", "L1 data cache", "microarchitecture",
      "Two miss handlers per minion, so at most 2 outstanding cacheable line misses; tensor loads keep up to 4 L2 transfers in flight; there is no prefetcher.",
@@ -456,21 +456,21 @@ fact("minion.energy-mac", "tensor unit", "energy",
      page="energy", anchor="the-tensor-unit-per-multiply-add")
 fact("minion.vector-rate", "vector unit", "compute",
      "A simple vector-FMA loop reaches only about 1.5 lane-FMAs per cycle per minion; the best published vector-unit matmul is 2.94 TFLOP/s at 650 MHz (FOSDEM 2026), against the tensor unit's 9.5.",
-     1.5, "lane-FMAs per cycle per minion", f"{NOTES}:152-153, 274; ridge-points page §'The compute ceilings'", "measured",
+     1.5, "lane-FMAs per cycle per minion", f"{NOTES}:165-166, 296; ridge-points page §'The compute ceilings'", "measured",
      card="aifoundry3 (the loop); FOSDEM figure external", page="sparse")
 fact("minion.sleep-unused", "minion", "power",
      "The minion's sleep and isolation ports (nsleepin, iso_enable, nsleepout) are marked 'not used'; in the open Erbium RTL they are tied off and no firmware drives them. Idle cores are clock-gated, not power-gated.",
-     None, None, f"{MIND}, pdf p.7 (interfaces table); {CL}:177-179", "spec", page="dvfs",
+     None, None, f"{MIND}, pdf p.7 (interfaces table); {CL}:189-191", "spec", page="dvfs",
      anchor="the-leakage-suppression-transistors")
 
 # ---------------------------------------------------------------- memory levels (published values)
 fact("l2.latency", "L2", "latency",
      "L2 hit (and own-shire scratchpad hit): 47 cycles load-to-use, 78 ns at 600 MHz; L2 read-buffer hit 36 cycles (60 ns). On hart 1 the same loads take 50 and 39 cycles.",
-     47, "cycles", f"{CL}:366, 409 ({V3R}/lat.json LAT-M1)", "measured", card=CARDS3, page="memhier",
+     47, "cycles", f"{CL}:394, 443 ({V3R}/lat.json LAT-M1)", "measured", card=CARDS3, page="memhier",
      anchor="the-hierarchy-as-a-spec-sheet")
 fact("l2.read-buffer", "L2", "microarchitecture",
      "Each L2 bank has an 8-line read buffer (2 KB per shire) that serves repeated reads of a clean line without touching the SRAM.",
-     8, "lines per bank", f"{NOTES}:72; {SCS}, pdf p.9", "spec", page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
+     8, "lines per bank", f"{NOTES}:73; {SCS}, pdf p.9", "spec", page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
 fact("l2.private", "L2", "memory",
      "The L2 partition is shared by the 32 minions of its shire and not by other shires: an independent L2 per shire (512 KB; 16 MB chip).",
      512, "KB per shire", f"{DS}, pdf p.13 (§2.1.3.1)", "spec", page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
@@ -490,7 +490,7 @@ fact("scp.remote", "scratchpad", "latency",
      "measured", card=CARDS3, page="memhier", anchor="scratchpad-latency-across-the-mesh")
 fact("scp.format0", "scratchpad", "address map",
      "Scratchpad address, format 0 (bit 30 = 0): 0x80000000 + (shire << 23) + offset, shire ID in bits 29:23, offset in bits 22:0; shire ID 0x7F means the requester's own shire. A request whose shire field is not the local shire goes out over the to_l3 mesh interface to the target shire.",
-     None, None, f"{PRM}, pdf p.486 (§15.3); {SCS}, pdf p.10, p.24 (§1.4.1.3); {EP}/et-common-libs/include/system/layout.h:71-76; {NOTES}:88",
+     None, None, f"{PRM}, pdf p.486 (§15.3); {SCS}, pdf p.10, p.24 (§1.4.1.3); {EP}/et-common-libs/include/system/layout.h:71-76; {NOTES}:96-97",
      "spec", page="memhier", anchor="scratchpad-latency-across-the-mesh")
 fact("scp.format1", "scratchpad", "address map",
      "Scratchpad address, format 1 (bit 30 = 1, minions only): the shire ID sits in bits 29:28 and 10:6, so consecutive 64-byte lines land in different shires' scratchpads.",
@@ -501,16 +501,16 @@ fact("scp.size", "scratchpad", "memory",
      page="relay")
 fact("scp.offset0", "scratchpad", "traps",
      "Offset 0 of a shire's scratchpad faults; a global atomic through the local-scratchpad ID 0x7F is a bus error.",
-     None, None, f"{CL}:231, 256", "measured", card="aifoundry2", page="relay",
+     None, None, f"{CL}:243, 268", "measured", card="aifoundry2", page="relay",
      anchor="method-and-what-is-not-established")
 fact("l3.latency", "L3", "latency",
      "L3 hit: 110 + 12 cycles per mesh hop between the requesting shire and the line's home shire (fitted 110.5 + 11.99 on three cards); 159-169 cycles (265-282 ns) on average depending on the requesting shire.",
-     110, "cycles + 12/hop", f"{CL}:367, 403, 410 ({V3R}/mem.json MEM-P1; lat.json LAT-M2)", "measured", card=CARDS3,
+     110, "cycles + 12/hop", f"{CL}:395, 434, 444 ({V3R}/mem.json MEM-P1; lat.json LAT-M2)", "measured", card=CARDS3,
      page="anatomy", anchor="l3-110-cycles-plus-12-per-hop")
 fact("l3.home", "L3", "address map",
      "A line's L3 home shire is PA[10:6]: consecutive 64-byte lines rotate over the 32 compute shires' L3 slices (default 'swizzle0'; the firmware leaves the swizzle register at reset).",
      None, None,
-     f"{SCS}, pdf p.24 (§1.4.1.2) and p.26-27 (§1.4.3); external/core-et/rtl/shire/esr/esr_cache_bank.v:88-103; {CAD}:373-377; memprobe: 1,500 lines, all but 2 within ±4 cycles of 110 + 12·hops(requester, PA[10:6]) ({NOTES}:165)",
+     f"{SCS}, pdf p.24 (§1.4.1.2) and p.26-27 (§1.4.3); external/core-et/rtl/shire/esr/esr_cache_bank.v:88-103; {CAD}:373-377; memprobe: 1,500 lines, all but 2 within ±4 cycles of 110 + 12·hops(requester, PA[10:6]) ({NOTES}:178)",
      "measured", card=CARDS3, note="The IDs are virtual shire IDs; a spare-shire remap would move them (NOC_Remap_Shires).",
      page="anatomy", anchor="trace-one-load")
 fact("l3.bank", "L3", "address map",
@@ -534,7 +534,7 @@ fact("mem.coherence", "chip", "memory model",
      None, None, f"{NOTES}:44-60; {CAD}:484 (core-et dcache_miss_handler.v:492-511)", "spec", page="hotline")
 fact("mem.global-atomic", "L3", "atomics",
      "A global atomic (amoaddg) is performed at the shire cache that homes the line. One contended line serialises at 10.00 cycles per atomic (about 60 M/s for the chip) and stops the host shire's own memory path; an uncontended remote global atomic round trip is 216 cycles.",
-     10.0, "cycles per contended atomic", f"{CL}:221, 223; docs/findings/17-hot-line.md:10-16", "measured",
+     10.0, "cycles per contended atomic", f"{CL}:233, 235; docs/findings/17-hot-line.md:10-16", "measured",
      card="aifoundry2, aifoundry3", page="hotline", anchor="the-thing-that-actually-starves")
 
 # ---------------------------------------------------------------- DRAM
@@ -544,15 +544,17 @@ fact("dram.channels", "DRAM", "memory",
      "spec", note="The datasheet (pdf p.30) says two 16-bit PHYs share one 32-bit controller per memory shire; the firmware programs two uMCTL2 controller instances per memory shire (docs/research/counters-and-dram.md:286-287).",
      page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
 fact("dram.capacity", "DRAM", "memory",
-     "32 GB of LPDDR4X on these V3 cards (Micron part): 2 GB per channel; the chip supports 8 to 32 GB.",
-     32, "GB", f"{CARD}, pdf p.1; {CAD}:289; {PRM}, pdf p.342 and p.552; {DS}, pdf p.30", "spec", page="memhier",
-     anchor="the-hierarchy-as-a-spec-sheet")
+     "32 GB of LPDDR4X on aifoundry2 and aifoundry3, 2 GB per channel, and 16 GB on aifoundry1 card 1, 1 GB per channel, as the firmware reads the DRAM's density at boot and the runtime reports it. The vendor's document names its 32 GB V3 card a Micron part; which maker's parts the lab cards carry is not recorded. The datasheet gives the chip 4 GB (2 Gb per channel) at full bandwidth up to 32 GB (16 Gb per channel); the PRM gives products 8 to 32 GB, the range mprot's dram_size field addresses.",
+     32, "GB", f"docs/reports/data/2026-09-27-pcie/raw/<card>/r1/info.err ('DRAM size (B)'); external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:389-420 (the MR8 density sets ddr_mem_size); external/et-platform/device-minion-runtime/src/MasterMinion/src/config/mm_config.c:74-92 (the host's share of it); {CARD}, pdf p.1 ('32GB (Micron part) v3 card Bringup Planning'); {CAD}:289; {PRM}, pdf p.342 and p.552; {DS}, pdf p.30",
+     "measured", card=CARDS3,
+     note="The runtime's DRAM size is 34,265,366,528 B on aifoundry2 and aifoundry3 and 17,085,497,344 B on aifoundry1 card 1 in every raw log that prints it (18-29 Sep): 32 and 16 GiB less the 90 MiB the device keeps for itself. aifoundry1's card 0 has no such record.",
+     page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
 fact("dram.rate-datasheet", "DRAM", "bandwidth",
      "Datasheet rate: 4,266 MT/s, printed as 133 GB/s; 16 × 2 B × 4.266 GT/s is 136.5 GB/s (Esperanto's papers say 137).",
-     136.5, "GB/s", f"{DS}, pdf p.4 (§1); {NOTES}:20; {CL}:514", "spec", page="ridge", anchor="ridge-points-by-level")
+     136.5, "GB/s", f"{DS}, pdf p.4 (§1); {NOTES}:20; {CL}:833", "spec", page="ridge", anchor="ridge-points-by-level")
 fact("dram.rate-card", "DRAM", "clocks",
      "The firmware hard-codes the 933 MHz DDR configuration on every card (controller clock 933 MHz, DRAM clock 1,866 MHz, 3,733 MT/s); telemetry reads mhz.ddr = 933 in every sample.",
-     3733, "MT/s", f"{EP}/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:41-42, 114-116, 225-228; {CAD}:291-292; {TEL}, field `mhz.ddr`",
+     3733, "MT/s", f"{EP}/device-bootloaders/src/ServiceProcessorBL2/driver/mem_controller.c:643-649 (configure_memshire: .frequency = DDR_FREQUENCY_933MHZ, '//TODO: decide ddr_mode'); 41-42, 114-116, 225-228 (the 933 MHz PLL mode and controller config); {CAD}:291-292; {TEL}, field `mhz.ddr`",
      "measured", card="aifoundry2", page="anatomy")
 fact("dram.peak-card", "DRAM", "bandwidth", "At 3,733 MT/s the 16 channels carry 119 GB/s.", 119, "GB/s",
      f"{CAD}:293; memory-hierarchy page spec sheet", "derived", page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
@@ -562,24 +564,24 @@ fact("dram.bw", "DRAM", "bandwidth",
      "measured", card="aifoundry2, aifoundry3", page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
 fact("dram.placeholder", "DRAM", "observability",
      "The 128,000 MB/s DRAM bandwidth the runtime reports is a placeholder constant in the service-processor firmware, not a measurement.",
-     128000, "MB/s (placeholder)", f"{EP}/device-bootloaders/src/ServiceProcessorBL2/include/mem_controller.h:37 (DDR_BANDWIDTH); {CL}:499; driver_config.json `ddr_mb_s`",
+     128000, "MB/s (placeholder)", f"{EP}/device-bootloaders/src/ServiceProcessorBL2/include/mem_controller.h:37 (DDR_BANDWIDTH); {CL}:818-819; driver_config.json `ddr_mb_s`",
      "spec", page="memhier", anchor="the-hierarchy-as-a-spec-sheet")
 fact("dram.latency", "DRAM", "latency",
      "DRAM load: 287-297 cycles at 600 MHz (479-495 ns) depending on the requesting shire; the typical load from shire 0 is 299 cycles (500 ns), in each of 15 passes on three cards.",
      299, "cycles", f"{CL}:368, 410; docs/reports/data/2026-09-26-memprobe-3cards/cards.json `cards.<card>.dram_med`",
      "measured", card=CARDS3, note="287-297 is the pointer-chase plateau (memory-hierarchy page, requesters 0/7/24/31); 299 is the median of single loads to random lines from shire 0 (anatomy page).", page="anatomy", anchor="the-ladder-one-load-at-a-time")
 fact("dram.leg", "memory shire", "latency",
-     "Past the L3, the DRAM leg costs 91 + 12 × hops(home shire, memory shire) cycles; about 25 of the 91 are the DRAM chip (activate 11, read and burst 14) and about 66 the memory shire. Only 25-28 of a ~300-cycle DRAM load are the DRAM's own timing.",
-     91, "cycles + 12/hop", f"{NOTES}:166; docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json `decomp.ms_const`; cards.json `ms_const` (90-91 on three cards); {CL}:404",
+     "Past the L3, the DRAM leg costs 91 + 12 × hops(home shire, memory shire) cycles; about 28 of the 91 are the DRAM chip (activate 11, read latency and two bursts 17) and at most about 63 the L3 home's miss handling and the memory shire. Only about 28 of a ~300-cycle DRAM load are the DRAM's own timing.",
+     91, "cycles + 12/hop", f"{NOTES}:179; docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json `decomp.ms_const`; cards.json `ms_const` (90-91 on three cards); {CL}:435",
      "measured", card=CARDS3, page="anatomy", anchor="the-memory-shire-leg-91-cycles-plus-12-per-hop")
 fact("dram.memshire-select", "memory shire", "address map",
      "The memory shire serving a line is PA[8:6] (so it is always the L3 home shire's low three bits) and the controller/channel within it is PA[9]: consecutive 64 B lines rotate over the 8 memory shires, the two channels alternate every 512 B.",
      None, None,
-     f"{EP}/device-minion-runtime/tools/zebumem.c:67-72, 120-121; {SCS}, pdf p.26-27 (§1.4.3: 'the Memory Shire is selected by the NoC using bits [8:6]'); confirmed by the memory shires' read counters (syscall 10), {NOTES}:166",
+     f"{EP}/device-minion-runtime/tools/zebumem.c:67-72, 120-121; {SCS}, pdf p.26-27 (§1.4.3: 'the Memory Shire is selected by the NoC using bits [8:6]'); confirmed by the memory shires' read counters (syscall 10), {NOTES}:179",
      "measured", card="aifoundry2", page="anatomy", anchor="trace-one-load")
 fact("dram.row-bits", "DRAM", "address map",
      "Inside a channel: bank PA[12:10], column PA[17:13] (plus PA[5:1] within the line), row PA[18] and up (PA[34:18]); 8 banks, 2 KB page, one rank per channel.",
-     8, "banks per channel", f"{NOTES}:167; {CAD}:289, 362-370", "measured", card="aifoundry2",
+     8, "banks per channel", f"{NOTES}:180; {CAD}:289, 362-370", "measured", card="aifoundry2",
      note="Row/bank bits measured with one address bit flipped; the controller's ADDRMAP decode is the research agent's inference.",
      page="anatomy", anchor="which-address-bits-share-a-row")
 fact("dram.row-timing", "DRAM", "latency",
@@ -600,7 +602,7 @@ fact("dram.energy", "DRAM", "energy",
      anchor="the-hierarchy-as-a-spec-sheet")
 fact("dram.unmetered", "DRAM", "observability",
      "About 70% of a DRAM byte's energy lands on no metered rail (DDR PHY, I/O rail and the DRAM chips); no meter covers the memory shires or DRAM.",
-     70, "% unmetered", f"{CL}:308; anatomy page headline tiles", "measured", card=CARDS3, page="anatomy",
+     70, "% unmetered", f"{CL}:323; anatomy page headline tiles", "measured", card=CARDS3, page="anatomy",
      anchor="where-the-energy-goes")
 fact("dram.counters", "memory shire", "observability",
      "Each memory shire has a perf monitor with a 40-bit cycle counter (933 MHz) and two event counters; the firmware sets them to count mesh reads and writes, which U-mode can sample through syscall 10.",
@@ -623,14 +625,14 @@ fact("addr.load-path", "chip", "data flow",
      page="anatomy", anchor="trace-one-load")
 fact("addr.load-model", "chip", "data flow",
      "Measured load-to-use model from any requesting shire at 600 MHz: L1 5; L2 47-48; L3 110 + 12·hops(requester, home = PA[10:6]); DRAM 110 + 12·hops(requester, home) + 91 + 12·hops(home, memory shire = PA[8:6]). The mesh round trip is paid twice on a DRAM load: to the L3 home, then on to the memory shire.",
-     None, None, f"{NOTES}:164-166; anatomy page §1 'Trace one load' and headline tiles; {CL}:403-404 (V3 check: L3 within ±4 cycles for 99.4-99.97% of lines, DRAM within ±3 for 93-97%)",
+     None, None, f"{NOTES}:177-179; anatomy page §1 'Trace one load' and headline tiles; {CL}:434-435 (V3 check: L3 within ±4 cycles for 99.4-99.97% of lines, DRAM within ±3 for 93-97%)",
      "measured", card=CARDS3, note="The route order inside the mesh was not measured.", page="anatomy",
      anchor="trace-one-load")
 
 # ---------------------------------------------------------------- PCIe / board
 fact("pcie.link", "PCIe shire", "bandwidth",
      "Host link: PCIe Gen4 x8 on an x16 card edge; the datasheet gives up to 128 Gbps each way (25.78 Gbit/s per lane PHY). 15.75 GB/s per direction is the Gen4 x8 figure; host transfer bandwidth was never measured here.",
-     15.75, "GB/s (not measured)", f"{DS}, pdf p.4 (§1); {CARD}, pdf p.3; {CL}:489", "derived", page="ridge",
+     15.75, "GB/s (not measured)", f"{DS}, pdf p.4 (§1); {CARD}, pdf p.3; {CL}:808", "derived", page="ridge",
      anchor="other-limits-that-act-like-ridge-points")
 fact("board.card", "board", "board",
      "The PCIe dev card V3: ET-SoC-1 soldered down, 4 LPDDR4x devices (256-bit), 64 GB eMMC, USB (device/debug, OTG, FTDI UART), JTAG, 12 V input metered by an LTC4218 hot-swap controller.",
@@ -640,7 +642,7 @@ fact("board.regulators", "board", "voltages",
      120, "A (minion rail max)", f"{CARD}, pdf p.5-6 (Key Voltage Regulators)", "spec", page="hub", anchor="the-chain")
 fact("board.meters", "board", "observability",
      "The PMIC meters the 12 V input and three regulators (minion, NoC, SRAM); DDR, VDDQ, VDDQLP, PCIe logic, PCIe and Maxion rails have set points only. The service processor forwards a new value about every 133 ms (aifoundry2; 224 ms quiet pass on aifoundry3).",
-     3, "metered rails", f"{CL}:330, 438 ({V3R}/tel.json TEL-P1); {PT}:39-56", "measured", card=CARDS3,
+     3, "metered rails", f"{CL}:349, 476 ({V3R}/tel.json TEL-P1); {PT}:39-56", "measured", card=CARDS3,
      page="hub", anchor="the-chain")
 fact("board.thresholds", "board", "power",
      "Governor thresholds in the firmware: 65 °C software temperature threshold and 65 W TDP; hardware catastrophic 75 °C and 75 W.",
@@ -650,7 +652,7 @@ fact("board.thresholds", "board", "power",
 # ---------------------------------------------------------------- clocks and voltages
 fact("clock.minion-opps", "minion", "clocks",
      "Operating points the firmware uses: 600 MHz at 517 mV, 700 MHz at 568 mV, 800 MHz at 618 mV (measured on die); every table in the reports is at 600 MHz, where a warm card sits.",
-     600, "MHz", f"{CL}:28-29, 171 (docs/reports/data/2026-09-21-horace-aifoundry2/cold1/telemetry.jsonl.gz `mhz.minion`, `die_mv.minion`)",
+     600, "MHz", f"{CL}:36-37, 182 (docs/reports/data/2026-09-21-horace-aifoundry2/cold1/telemetry.jsonl.gz `mhz.minion`, `die_mv.minion`)",
      "measured", card="aifoundry2 (aifoundry3 pinned at 600 MHz)", page="dvfs", anchor="the-loop-as-measured")
 fact("clock.minion-boot", "minion", "clocks", "Boot minion clock 600 MHz on every card.", 600, "MHz",
      "docs/reports/data/2026-09-22-cards/driver_config.json `minion_boot_freq_mhz`", "measured",
@@ -665,10 +667,10 @@ fact("clock.design", "chip", "clocks",
      "spec", page=None)
 fact("volt.minion", "minion", "voltages",
      "Minion rail: set point 520 mV, 516-518 mV on die under load at 600 MHz; per-shire 517-521 mV at idle. Firmware limits 400-620 mV (boot default 500).",
-     518, "mV", f"{CL}:26-27, 41; {PT}:186-190", "measured", card="aifoundry2 (aifoundry3 523 mV)", page="power")
+     518, "mV", f"{CL}:34-35, 49; {PT}:186-190", "measured", card="aifoundry2 (aifoundry3 523 mV)", page="power")
 fact("volt.sram", "shire cache", "voltages",
      "SRAM rail (shire-cache arrays): set point 705 mV, 703-707 mV on die.",
-     704, "mV", f"{TEL}, fields `reg_mv.sram`, `die_mv.sram`; {CL}:41", "measured", card="aifoundry2", page="power")
+     704, "mV", f"{TEL}, fields `reg_mv.sram`, `die_mv.sram`; {CL}:49", "measured", card="aifoundry2", page="power")
 fact("volt.other", "chip", "voltages",
      "Other rails, set point / on die: DDR 800 / 762-768 mV, Maxion 600 / 583-586 mV, I/O shire - / 751-754 mV, PCIe shire - / 749-753 mV (PCIe logic set 775 mV), VDDQ 1,100 mV, VDDQLP 640 mV.",
      None, None, f"{TEL}, fields `reg_mv.*`, `die_mv.*`", "measured", card="aifoundry2",
@@ -684,7 +686,7 @@ fact("volt.per-shire", "shire", "voltages",
 # ---------------------------------------------------------------- power (overlay)
 fact("power.idle", "board", "power",
      "Idle card after 20.6 h with no workload: 31.79 W at 73 °C, of which minion rail 11.05 W, SRAM 2.00 W, mesh 3.64 W and 15.10 W on no sensor.",
-     31.79, "W", f"{CL}:181, 183 (docs/reports/data/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz)", "measured",
+     31.79, "W", f"{CL}:193, 195 (docs/reports/data/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz)", "measured",
      card="aifoundry2", page="dvfs")
 fact("power.leakage", "chip", "power",
      "Leakage is 23.3 W of an idle card at 80 °C (65%) and 36% of a random-data matmul.",
@@ -723,12 +725,12 @@ fact("onchip.energy", "chip", "energy",
      1.75, "pJ/B per mean hop", f"{CL}:450; docs/reports/data/2026-09-23-energy-manual/reruns.json `rings_pj_per_byte`", "measured",
      card=CARDS3, page="onchip", anchor="energy-per-byte-moved")
 fact("relay.speedup", "scratchpad", "data flow",
-     "A multi-stage pipeline that hands each stage's output to the next shire's scratchpad runs about 12.4× faster than one that goes through DRAM (31× keeping it in the own scratchpad), at 116 / 8.9 / 4.3 pJ per byte moved (DRAM / next shire / own).",
-     12.4, "× faster than DRAM", f"{CL}:416, 451; docs/reports/data/2026-09-23-energy-manual/reruns.json `relay_pj_per_byte`",
+     "A multi-stage pipeline that has the next shire read each stage's output from the producing shire's scratchpad runs about 12.4× faster than one that goes through DRAM (31× keeping it in the own scratchpad), at 116 / 8.9 / 4.3 pJ per byte moved (DRAM / next shire / own).",
+     12.4, "× faster than DRAM", f"{CL}:451, 490; docs/reports/data/2026-09-23-energy-manual/reruns.json `relay_pj_per_byte`",
      "measured", card=CARDS3, page="relay", anchor="one-kernel-three-places-to-put-the-answer")
 fact("ridge.levels", "chip", "compute",
      "Ridge points at 600 MHz (fp32 FLOP per byte fetched): own shire L2 or scratchpad 4, L3 or another shire's scratchpad 10, DRAM 130, PCIe 624 (unmeasured link).",
-     130, "FLOP/B (DRAM, fp32)", f"{CL}:486-489", "derived", page="ridge", anchor="ridge-points-by-level")
+     130, "FLOP/B (DRAM, fp32)", f"{CL}:805-808", "derived", page="ridge", anchor="ridge-points-by-level")
 
 # ---------------------------------------------------------------- validate and write
 ids = [f["id"] for f in F]

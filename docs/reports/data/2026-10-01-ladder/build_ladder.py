@@ -18,7 +18,8 @@ Output, ladder.json:
   nodes    the new scales and the corrected ones: name, short name, a beginner's lead (blurb), size in metres with its
            kind and fact (or a bound, or "conceptual" for the ring), the facts its panel lists, and egg: true for the
            levels above the rack, which the pages never list in advance (the owner, 1 Oct 07:25: an easter egg)
-  facts    every fact, by id, with its kind (one of the nine), source, URL where it has one, and note
+  facts    every fact, by id, with its kind (one of the nine), source, URL where it has one, and note (a measured fact
+           also names its card)
   more     facts to add to the chip's existing scales (the die, a minion, a 6T cell, ...), by scale
   num      the numbers the new drawings print: key -> {t: the text drawn, f: the fact}; the build checks that each
            text occurs in its fact's statement
@@ -48,18 +49,18 @@ CIR = json.load(open(os.path.join(R, 'circuits.json')))
 facts = {}
 
 
-def add(fid, statement, kind, source, url=None, note=None, quote=None):
+def add(fid, statement, kind, source, url=None, note=None, quote=None, card=None):
     if fid in facts:
         raise SystemExit(f'fact {fid} twice')
     if kind not in KINDS:
         raise SystemExit(f'{fid}: kind {kind!r} is not one of the nine')
-    facts[fid] = {k: v for k, v in (('statement', statement), ('kind', kind), ('source', source), ('url', url), ('note', note), ('quote', quote)) if v}
+    facts[fid] = {k: v for k, v in (('statement', statement), ('kind', kind), ('source', source), ('url', url), ('note', note), ('quote', quote), ('card', card)) if v}
     return fid
 
 
 # ---- the research facts
 for f in PROC['facts']:
-    add(f['id'], f['statement'], f['kind'], f['source'], f.get('url'), f.get('note'), f.get('quote'))
+    add(f['id'], f['statement'], f['kind'], f['source'], f.get('url'), f.get('note'), f.get('quote'), f.get('card'))
 PLEV = {lv['id']: lv for lv in PART['levels']}
 for lv in PART['levels']:
     for i, f in enumerate(lv['facts']):
@@ -76,6 +77,7 @@ HOW = {
     'p.atom.4': 'sqrt(3)/4 x 0.5431 nm = 0.2352 nm; 8 atoms per cubic cell / (0.5431 nm)^3 = 49.9 per nm^3',
     'p.atom.11': 'the 0.2352 nm neighbour distance against the nucleus\'s 8.06 fm diameter (a uniform sphere with the measured rms charge radius, size.p.nucleus): 0.2352 nm / 8.06 fm = 29,200',
     'p.dopant.5': '10^21 per cm^3 = 1 per nm^3; silicon has 49.9 atoms per nm^3 (p.atom.4)',
+    'p.nucleus.5': 'the nucleus\'s mass, 27.977 u less 14 electrons = 4.644 x 10^-26 kg, over 4/3 pi R^3: R = sqrt(5/3) x 3.1224 fm = 4.03 fm (size.p.nucleus) gives 1.69 x 10^17 kg/m^3, R = 1.2 fm x 28^(1/3) = 3.64 fm (p.nucleus.2) gives 2.29 x 10^17; 5 mL of it is 0.85 to 1.15 x 10^12 kg',
     'p.nucleus.6': 'the 29,000 ratio of p.atom.11 applied to a 1 cm marble: 1 cm x 29,200 = 292 m',
     'p.electron.4': 'the dipole limit divided by the charge: 4.1 x 10^-30 e cm / e = 4.1 x 10^-30 cm = 4.1 x 10^-32 m',
     'p.electron.7': '1 C / 1.602176634 x 10^-19 C = 6.2415 x 10^18',
@@ -120,7 +122,7 @@ pf = lambda i, *ns: [f'{i}.{n}' for n in ns] if ns else [f'{i}.{k + 1}' for k in
 nodes = {
     # ---- inner: the device, corrected to N7's published numbers
     'lib.finfet': {'name': 'FinFET transistor', 'short': 'FinFET', 'm': 5.7e-8, 'kind': 'outside', 'f': 'n7.cpp',
-                   'blurb': 'The switch everything is made of. A voltage on the gate decides whether current flows: at 0 V the path along the fin is shut; at the supply rail (0.517 V on a minion) the gate\'s field pulls a thin sheet of electrons into the fin, and current flows from source to drain. The gate drapes over the fins on three sides.',
+                   'blurb': 'The switch everything is made of. A voltage on the gate decides whether current flows: in an n-type transistor, at 0 V the path along the fin is shut; at the supply rail (0.517 V on a minion) the gate\'s field pulls a thin sheet of electrons into the fin, and they flow from source to drain (the current, by convention, from drain to source). The gate drapes over the fins on three sides.',
                    'facts': ['el.switch', 'el.rails', 'n7.cpp', 'n7.fin-pitch', 'n7.two-fin', 'n7.cells', 'n7.generation', 'n7.litho', 'n7.features', 'n7.vt-options', 'n7.vt-abs',
                              'n7.ss', 'n7.dibl', 'el.off-not-off', 'el.ss-80c', 'el.finfet-why', 'et.nominal-075', 'et.sweet-spot', 'et.v-minion', 'el.half-energy',
                              'et.leak-per-tr', 'et.leakage', 'et.leak-double', 'n7.contacts-co', 'dope.n-sd', 'dope.p-sd', 'n7.density-hd', 'n7.hpc']},
@@ -215,7 +217,7 @@ NUM = {
     'ch_e': ('el.channel-electrons', '85-120 electrons'), 'leak_e': ('et.leak-per-tr', '10 billion electrons a second'),
     'off_e': ('el.off-channel', '0.002 electrons'), 'cross_t': ('si.mobility', '0.2 ps'),
     'hfo2': ('gate.hfo2', 'HfO2', 'HfO₂'), 'k24': ('gate.hfo2', '~24', 'k ≈ 24'), 'tial': ('gate.metals', 'TiAl'), 'tin': ('gate.metals', 'TiN'),
-    'wf': ('gate.metals', 'about 4.1 and 4.85 eV'), 'v_nom': ('et.nominal-075', '0.75 V'), 'dop_sd': ('dope.n-sd', '1.75e21', '1.75 × 10²¹'),
+    'wf': ('gate.metals', 'about 4.4 and 4.85 eV'), 'v_nom': ('et.nominal-075', '0.75 V'), 'dop_sd': ('dope.n-sd', '1.75e21', '1.75 × 10²¹'),
     'gap': ('si.bandgap', '1.12 eV'), 'kt': ('el.kt', '25.9 meV'), 'kt43': ('el.kt', 'about 43 kT'), 'dop_e': ('dope.donor-acceptor', 'about 50 meV'),
     'si_la': ('si.lattice', '0.5431 nm'), 'si_bd': ('si.lattice', '0.235 nm'), 'si_pw': ('si.planes-width', 'about 31 planes'),
     'ni': ('si.ni', '1e10 free electrons per cm³', '10¹⁰ free electrons per cm³'),
@@ -228,10 +230,10 @@ NUM = {
     'at_ion': ('p.atom.2', '8.15'), 'at_ion5': ('p.atom.2', '166.8 eV'), 'at_nn': ('size.p.atom', '0.235 nm'), 'at_29k': ('p.atom.11', 'about 29,000 times'),
     'nu_pn': ('p.nucleus.1', '14 protons and 14 neutrons'), 'nu_rms': ('p.nucleus.3', '3.1224'), 'nu_mass': ('p.nucleus.4', '99.97%'),
     'nu_size': ('size.p.nucleus', 'about 8.1 fm'), 'nu_bind': ('p.nucleus.7', '8.448 MeV per nucleon'),
-    'pr_r': ('p.nucleon.1', '0.84075'), 'pr_m': ('p.nucleon.3', '938.272 MeV'), 'pr_uud': ('p.nucleon.4', 'uud'), 'pr_1pc': ('p.quark.3', '1% of the proton'),
+    'pr_r': ('p.nucleon.1', '0.84075'), 'pr_m': ('p.nucleon.3', '938.272 MeV/c^2', '938.272 MeV/c²'), 'pr_uud': ('p.nucleon.4', 'uud'), 'pr_1pc': ('p.quark.3', '1% of the proton'),
     'qk_b': ('p.quark.1', '4.3 x 10^-19 m', '4.3 × 10⁻¹⁹ m'), 'qk_u': ('p.quark.3', '2.16'), 'qk_d': ('p.quark.3', '4.70'), 'qk_1955': ('p.quark.2', '1,955 times'),
-    'el_b': ('p.electron.2', '2 x 10^-20 m', '2 × 10⁻²⁰ m'), 'el_edm': ('p.electron.4', '4.1 x 10^-32 m', '4.1 × 10⁻³² m'), 'el_q': ('p.electron.1', '1.602176634 x 10^-19 C', '1.602176634 × 10⁻¹⁹ C'),
-    'pl_l': ('p.planck.1', '1.616255 x 10^-35 m', '1.616255 × 10⁻³⁵ m'), 'pl_16': ('p.planck.3', '16 powers of ten'), 'pl_617': ('p.planck.5', '61.7 powers of ten'),
+    'el_b': ('p.electron.2', '2 x 10^-20 m', '2 × 10⁻²⁰ m'), 'el_edm': ('p.electron.4', '4.1 x 10^-32 m', '4.1 × 10⁻³² m'), 'el_q': ('p.electron.1', '-1.602176634 x 10^-19 C', '−1.602176634 × 10⁻¹⁹ C'),
+    'pl_l': ('p.planck.1', '1.616255 x 10^-35 m', '1.616255 × 10⁻³⁵ m'), 'pl_16': ('p.planck.3', '15 powers of ten'), 'pl_617': ('p.planck.5', '61.7 powers of ten'),
     'dp_p': ('p.dopant.1', '0.045 eV'), 'dp_50': ('p.dopant.5', 'about 1 atom in 50'), 'sd_29': ('dope.count-sd', 'one atom in 29'), 'sd_13': ('dope.count-sd', 'one of every thirteen'),
     'ring_mid': ('ring.mid', '0.12 mm'),
     'ep_cmb': ('e.cmb.1', '372.6 +/- 1.0 thousand years', '372,600 years'), 'ep_cmbT': ('e.cmb.2', '2,973 K'), 'ep_bbn': ('e.bbn.1', 'about 180 s', 'about 3 minutes'),
@@ -253,10 +255,10 @@ for k, v in CIR.get('num', {}).items():
     NUM[k] = tuple(v)
 # the ring's ticks: a scale and the fact of its size (the drawing places each at its size's log)
 RING = [('p.planck', 1.616255e-35, 'p.planck.1'), ('p.quark', 8.6e-19, 'p.quark.1'), ('p.nucleon', 1.6815e-15, 'p.nucleon.1'), ('p.atom', 2.352e-10, 'size.p.atom'),
-        ('lib.fin', 6e-9, 'n7.fin-width'), ('l1d', 1.2e-4, 'ring.mid'), ('die', 0.0257, None), ('studio45', 37.0, 's45.6'), ('earth', 1.2742e7, None),
+        ('lib.fin', 5.2e-8, 'n7.fin-height'), ('l1d', 1.2e-4, 'ring.mid'), ('die', 0.0257, None), ('studio45', 37.0, 's45.6'), ('earth', 1.2742e7, None),
         ('solar', 9.0e12, None), ('milkyway', 9.46e20, None), ('universe', 8.738988638177877e26, None)]
 EPOCHS = [('e.cmb', 'ep_cmb', 'the oldest light'), ('e.bbn', 'ep_bbn', 'the first nuclei'), ('e.qcd', 'ep_qcd', 'quarks become protons'),
-          ('e.ew', 'ep_ew', 'particles get their masses'), ('e.planck', 'ep_pl', 'the Planck time')]
+          ('e.ew', 'ep_ew', 'quarks and electrons get mass'), ('e.planck', 'ep_pl', 'the Planck time')]
 
 
 def norm(s):

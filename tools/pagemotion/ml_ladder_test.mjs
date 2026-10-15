@@ -251,7 +251,7 @@ T.T19 = async () => {
   ok(!bad.length, 'T19 every scene reaches a transistor and then an atom', bad.join(' '));
   const dr = Object.keys(nxt).filter(i => /^dram/.test(i) || i === 'lib.dramcell').filter(i => reach(i, new Set(['lib.si', 'p.atom'])).has('lib.finfet'));
   ok(!dr.length, 'T19 the DRAM\'s chains never reach the N7 FinFET', dr.join(' '));
-  const ids = new Set(W.map(s => s.id)), want = ['die', 'shire', 'minion', 'l1d', 'l1d.block', 'l1d.row', 'lib.latch', 'l1d.cmp', 'shire.bank', 'shire.subbank', 'shire.panel', 'lib.sram6t', 'shire.meshstop.xing',
+  const ids = new Set(W.map(s => s.id)), want = ['die', 'shire', 'minion', 'l1d', 'l1d.block', 'l1d.row', 'lib.latch', 'l1d.cmp', 'shire.bank', 'shire.subbank', 'shire.panel', 'lib.sram6t', 'shire.neigh.xing', 'shire.meshstop.xing',
     'l3.home', 'l3.bank', 'l3.subbank', 'l3.panel', 'mesh', 'mesh.link.wire', 'scp.shire', 'scp.bank', 'scp.panel', 'scp.vmin', 'memshire', 'dram', 'dram.bank', 'dram.cell', 'memshire.phy', 'memshire.phy.dq'];
   ok(want.every(i => ids.has(i)), 'T19 the walk covers every scene of the five levels', want.filter(i => !ids.has(i)).join(' '));
   ok(!b.errs.length, 'T19 no error', b.errs.join(' | '));

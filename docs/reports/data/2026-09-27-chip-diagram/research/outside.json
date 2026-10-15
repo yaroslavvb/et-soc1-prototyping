@@ -3,7 +3,7 @@
   "built": "2026-09-30, build_outside.py",
   "order": "inside out: package, card, host, rack, Studio 45, San Francisco, Bay Area, (California), US, Earth, (Earth-Moon), Solar System, (nearest stars), Milky Way, Local Group, Laniakea, observable universe, beyond. Levels marked optional bridge long steps; the owner's named levels are all required.",
   "clock_hz": 600000000.0,
-  "clock_source": "docs/findings/14-card-behaviour.md:338 (the lab cards' usual minion clock)",
+  "clock_source": "docs/findings/14-card-behaviour.md:381 (the lab cards' usual minion clock)",
   "fibre_group_index": 1.4682,
   "fibre_source": "Corning SMF-28e+ optical fibre, product information sheet: effective group index 1.4676 at 1310 nm, 1.4682 at 1550 nm (copy at https://img-en.fs.com/file/datasheet/corning-smf-28eplus-33175.pdf)",
   "kinds": [
@@ -80,7 +80,7 @@
     },
     {
      "text": "Light crosses the die (25.6 mm) in 0.085 ns, about a twentieth of one 600 MHz clock tick; in one tick light goes 50 cm.",
-     "source": "BIPM, The International System of Units (SI Brochure, 9th ed., 2019): c = 299 792 458 m/s exactly; the clock: docs/findings/14-card-behaviour.md:338",
+     "source": "BIPM, The International System of Units (SI Brochure, 9th ed., 2019): c = 299 792 458 m/s exactly; the clock: docs/findings/14-card-behaviour.md:381",
      "kind": "derived"
     }
    ],
@@ -117,22 +117,22 @@
    "facts": [
     {
      "text": "6.6 x 4.4 in (167.6 x 111.8 mm); a PCIe x16 card edge carrying an x8 PCIe Gen 4 link; the chip soldered down, no socket.",
-     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), pp. 1 and 3",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 3",
      "kind": "spec"
     },
     {
      "text": "On all four lab cards the link runs at 16 GT/s on 8 lanes: 15.75 GB/s each way after coding. Measured host-to-card DMA: 12.5-12.6 GB/s; card to host 10.4-10.5 GB/s.",
-     "source": "docs/reports/data/2026-09-27-pcie/hosts.txt (the link speed and width of all four cards); docs/findings/05-claims.md:550-552 (E50: the DMA rates, on three cards)",
+     "source": "docs/reports/data/2026-09-27-pcie/hosts.txt (the link speed and width of all four cards); docs/findings/05-claims.md:552-554 (E50: the DMA rates, on three cards)",
      "kind": "measured"
     },
     {
      "text": "Four LPDDR4X memory packages, 256 bits wide in all (16 channels of 16 bits), 32 GB: each package serves two of the chip's eight memory shires.",
-     "source": "docs/reports/data/2026-09-27-chip-diagram/facts.json (L47, dram.channels); Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 1",
+     "source": "docs/reports/data/2026-09-27-chip-diagram/facts.json (L47, dram.channels); Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), pp. 1 (the \"32GB (Micron part) v3 card\" link) and 3 (features)",
      "kind": "spec"
     },
     {
-     "text": "Peak memory rate on these cards: 256 bits x 3,733 MT/s = 119.5 GB/s, the firmware's 933 MHz mode, which every lab card runs; the datasheet's 4,266 MT/s would give 136.5 GB/s. Tensor loads from memory have been measured at 75 GB/s.",
-     "source": "docs/reports/data/2026-09-27-chip-diagram/facts.json (dram.rate-card: the firmware hard-codes 3,733 MT/s on every card; dram.peak-card; L47: the datasheet's 4,266 Mb/s per pin); docs/findings/05-claims.md:155 (E15)",
+     "text": "Peak memory rate on these cards: 256 bits x 3,733 MT/s = 119.5 GB/s, the firmware's 933 MHz mode, which every lab card runs; the datasheet's 4,266 MT/s would give 136.5 GB/s. Tensor loads stream 76 GB/s from this memory, 64% of the 119.5 GB/s peak (fact bw-dram).",
+     "source": "docs/reports/data/2026-09-27-chip-diagram/facts.json (dram.rate-card: the firmware hard-codes 3,733 MT/s on every card; dram.peak-card; L47: the datasheet's 4,266 Mb/s per pin; bw-dram: 75.9 GB/s); docs/findings/05-claims.md:398 (row \"Bandwidth at 600 MHz, 1,024 minions\": E33, E29, E43)",
      "kind": "derived"
     },
     {
@@ -141,18 +141,18 @@
      "kind": "inferred"
     },
     {
-     "text": "Power arrives as 12 V at the card edge: at most 7.3 A, 88 W. The highest draw on record is 87.8 W; the cards idle at about 19-36 W, depending on the card and its temperature.",
-     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 5 (power tree); docs/findings/14-card-behaviour.md:138, 339",
+     "text": "Power arrives as 12 V at the card edge; the vendor's power tree budgets 7.3 A, 88 W. Under load the highest draw on record is 87.8 W; an idle card whose cooling failed drew 134 W before it dropped off the PCIe bus (aifoundry2, 2, 7 and 8 Oct 2026). With working cooling the cards idle at about 19-50 W, depending on the card and its temperature (aifoundry1 card 1 idles highest: 42.7 W at 73 °C, 50 W at 80 °C).",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 5 (power tree); docs/findings/14-card-behaviour.md:158 (87.8 W), :382 (idle), :252-253 and :625-627 (134 W); docs/reports/data/2026-10-02-idle-runaway-aifoundry2/records.jsonl (133.8 W board power); docs/energy-manual/01-at-rest.md:25, 33 (aifoundry1 card 1, board 42.71 W at 73 °C); docs/reports/data/2026-09-25-claims-v3/results/abla.json (all_cards.idle_clock.aifoundry1-c1.idle_w, 50.15 W); docs/reports/2026-09-18-et-soc1-matmul-efficiency.html:727 (\"also at 80 °C but idling at 50 W\")",
      "kind": "spec, measured"
     },
     {
      "text": "The cores run at about 0.52 V at 600 MHz, 23 times lower than the 12 V input, so the current is about 23 times higher: a Texas Instruments TPSM831D31 supplies the cores (3 phases, up to 120 A) and the on-chip network (1 phase, 40 A). Its four phases are the four large inductors marked \"R15\" on the photo.",
-     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 1 (key voltage regulators) and p. 2 (photo); docs/findings/05-claims.md:34 (E9)",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 5 (key voltage regulators) and p. 2 (photo); docs/findings/05-claims.md:34 (E9)",
      "kind": "spec, measured, inferred"
     },
     {
      "text": "An Analog Devices LTM4680 module (up to 60 A) supplies the SRAM rail; smaller FS1406 regulators the memory, PCIe, I/O and other rails; an LTC4218 hot-swap switch with a 1 mΩ sense resistor measures the card's input current for the power readings.",
-     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), pp. 1, 4",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), pp. 4-7",
      "kind": "spec"
     },
     {
@@ -162,7 +162,7 @@
     },
     {
      "text": "Also on the board: 64 GB of eMMC flash (a Kingston part on the photo), an FTDI UART-to-USB bridge, JTAG, DIP switches that set the boot options, and a fan header (P1).",
-     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), pp. 1-3",
+     "source": "Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), pp. 2-3",
      "kind": "spec, inferred"
     },
     {
@@ -285,13 +285,13 @@
    "facts": [
     {
      "text": "The lab's three hosts: aifoundry1, an Intel Core i7-11700K (8 cores) with 128 GB; aifoundry2, a Core i5-11600 (6 cores) with 64 GB; aifoundry3, an i7-11700K with 32 GB on a single memory channel.",
-     "source": "docs/findings/14-card-behaviour.md:348; the et-lab-manifest records",
+     "source": "docs/findings/14-card-behaviour.md:391; the et-lab-manifest records",
      "kind": "measured"
     },
     {
-     "text": "aifoundry2's motherboard is a Gigabyte Z590 AORUS MASTER, an ATX board of 30.5 x 24.4 cm. The other two hosts' BIOS versions (F5, F6) follow Gigabyte's naming, but their board models are not recorded.",
-     "source": "the host's DMI table (/sys/devices/virtual/dmi/id, read 30 Sep 2026); Gigabyte, Z590 AORUS MASTER specifications (gigabyte.com); docs/findings/14-card-behaviour.md:348",
-     "kind": "measured, spec, inferred"
+     "text": "All three hosts' motherboards are Gigabyte Z590 AORUS MASTER boards, ATX, 30.5 x 24.4 cm; aifoundry1 and aifoundry2 run BIOS F5, aifoundry3 F6.",
+     "source": "the hosts' DMI tables (all three read in the lab's root audit of 25 Sep 2026, recorded in the lab-problems report, H20; aifoundry2's again on 30 Sep and 14 Oct 2026); Gigabyte, Z590 AORUS MASTER specifications (gigabyte.com); docs/findings/14-card-behaviour.md:391 (BIOS), :541 (aifoundry3's board), :563 (aifoundry2's board)",
+     "kind": "measured, spec"
     },
     {
      "text": "aifoundry1 holds two ET cards, the other hosts one each.",
@@ -304,13 +304,13 @@
      "kind": "measured, inferred, spec"
     },
     {
-     "text": "The host CPUs are made in Intel's 14 nm process; the i7-11700K is rated at 125 W base power and may draw up to 251 W in turbo (its PL2), the i5-11600 at 65 W base. The whole ET card, at most 88 W, draws less than the bigger CPU's base power, and about a third of its turbo peak.",
+     "text": "The host CPUs are made in Intel's 14 nm process; the i7-11700K is rated at 125 W base power and may draw up to 251 W in turbo (its PL2), the i5-11600 at 65 W base. The ET card's 88 W budget is less than the bigger CPU's base power and about a third of its turbo peak.",
      "source": "Intel, Core i7-11700K and Core i5-11600 specifications (intel.com: 125 W and 65 W base power); the i7-11700K's 251 W maximum turbo power (PL2) as listed by cpu-monkey.com and techreviewer.com; Esperanto, \"PCIe Dev Card (V3)\", ET-PCIe-Dev-Card-V3.pdf (github.com/aifoundry-org/et-man), p. 5",
      "kind": "spec"
     },
     {
      "text": "The host copies memory at 17.4 / 9.2 / 21.4 GB/s (aifoundry2 / 3 / 1); a program's staged copy to the card is limited by both that and the link: 5.2-7.8 GB/s.",
-     "source": "docs/findings/05-claims.md:553 (E50)",
+     "source": "docs/findings/05-claims.md:555 (E50)",
      "kind": "measured"
     },
     {
@@ -732,7 +732,7 @@
    "frame_m": 11000000000000.0,
    "size_kind": "outside source",
    "size_note": "Neptune's orbit: semimajor axis 30.07 au (4,498 million km), so about 9.0 x 10^12 m across.",
-   "blurb": "Sunlight takes 8.3 min to reach Earth and about 4.2 h to reach Neptune. In November 2026 Voyager 1, the farthest spacecraft, will be a full light-day away.",
+   "blurb": "Sunlight takes 8.3 min to reach Earth and about 4.2 h to reach Neptune. On 18 November 2026 Voyager 1, the farthest spacecraft, is a full light-day from Earth.",
    "facts": [
     {
      "text": "Earth orbits at 1 au, 8.32 min from the Sun at the speed of light.",
@@ -905,8 +905,8 @@
      "kind": "outside source"
     },
     {
-     "text": "More than 130 members are now known within a megaparsec of the group's centre (134 in one count), most of them faint dwarf galaxies; counted that way the group is about 5.1 Mpc (17 million light-years) across.",
-     "source": "Wikipedia, \"Local Group\" (read 1 Oct 2026): \"a current total of 134 members is known within 1 megaparsec\", \"most of which are dwarf galaxies\", \"a total diameter of 5.11 megaparsecs (17 million light-years)\"",
+     "text": "More than 130 members are now known within a megaparsec of the group's centre (134 in one count), most of them faint dwarf galaxies; judged by density matching and the potential surface of its parent structure, the Local Sheet, the group is about 5.1 Mpc (17 million light-years) across.",
+     "source": "Wikipedia, \"Local Group\" (read 1 Oct 2026; re-read 14 Oct 2026): \"a current total of 134 members is known within 1 megaparsec\", \"most of which are dwarf galaxies\", \"a total diameter of 5.11 megaparsecs (17 million light-years) based on density matching and the potential surface of its parent structure, Local Sheet\"",
      "kind": "outside source"
     },
     {
@@ -994,7 +994,7 @@
     },
     {
      "text": "Radius 46.2 billion light-years (comoving), diameter 8.7 × 10^26 m.",
-     "source": "derived from the Planck 2018 parameters (this script)",
+     "source": "derived from the Planck 2018 parameters (H0 67.66, Ωm 0.3111, ΩΛ 0.6889, radiation from 2.7255 K, Neff 3.046): the comoving distance to the particle horizon, integrated in docs/reports/data/2026-09-27-chip-diagram/research/build_outside.py",
      "kind": "derived"
     },
     {

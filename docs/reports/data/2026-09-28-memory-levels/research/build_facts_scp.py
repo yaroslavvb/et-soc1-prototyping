@@ -150,7 +150,7 @@ f("panel-others", "memory macro",
   "Other shire-cache macros: tag RAM 'saduls0g4l1p1024x116m4b1...' (1PUHD, 4 ways x (23-bit tag + 6 ECC)), tag-state RAM 'saculs0g4l2p1024x40m4b1...' (2PUHDRF, a two-port register-file type), I-cache data 'saduls0g4l1p512x144m4b1...'. The scratchpad path uses only the data panels.",
   None, None, SCS + " p.47 §2.14.2-2.14.3, p.51 Tables 13-14", "et-spec")
 f("panel-count", "memory macro",
-  "Per shire 64 data panels (4 banks x 4 sub-banks x 4), each 589,824 bits; 37.7 Mbit per shire including ECC (32 Mbit data + 4 Mbit ECC); 2,048 data panels over the 32 compute shires.",
+  "Per shire 64 data panels (4 banks x 4 sub-banks x 4), each 589,824 bits; 37.7 Mbit per shire including ECC (33.55 Mbit data + 4.19 Mbit ECC); 2,048 data panels over the 32 compute shires.",
   64, "data panels per shire", SCS + " p.9, p.48, p.51", "et-derived",
   note="If each bit is a 6-transistor cell (GENERIC assumption, see scp.u-cell) that is 3.54 M transistors per panel array and about 226 M per shire, cells only.")
 f("line-read-panels", "memory macro",
@@ -220,7 +220,7 @@ f("same-as-l2", "latency",
   "et-measured", card=ALL, page_link=MH + "#what-the-numbers-say", note="The latency and bandwidth parts are measured; 'saves no time because the stages are fixed' is derived from the spec's non-stalling pipeline.")
 f("lat-remote", "latency",
   "Another shire's scratchpad: 99.84 + 12.00 cycles per mesh hop at 600 MHz (112-220 cycles, 186-366 ns over 1-10 hops); all 124 points within one cycle; a to b equals b to a within 0.032 cycles, on three cards.",
-  99.84, "cycles + 12.00 per hop", CLM + ":423; lat.json items[LAT-M3].per_card.<card>.passes[] (row0_slope 11.998-12.002, frac_within_1 1.0)",
+  99.84, "cycles + 12.00 per hop", CLM + ":445; lat.json items[LAT-M3].per_card.<card>.passes[] (row0_slope 11.998-12.002, frac_within_1 1.0)",
   "et-measured", card=ALL, page_link=MH + "#scratchpad-latency-across-the-mesh")
 f("lat-remote-split", "latency",
   "Fitted over 600, 700 and 800 MHz, a remote scratchpad load is 65.95 minion cycles + 56.48 ns + 20.00 ns per hop: the part that scales with the core clock (both shires' pipelines) and a fixed part in other clock domains (mesh, clock crossings).",
@@ -308,7 +308,7 @@ f("gather", "energy",
   367.8, "pJ per element", EMB + ":56, :59; " + CLM + ":502", "et-measured", card=ALL, page_link=MH + "#irregular-access-gathers-and-scatters")
 f("leak", "leakage",
   "The SRAM rail at idle (all 128 MB of L2, L3 and scratchpad plus whatever else is on it): 2.51 W at 80 C on aifoundry2, 19.6 mW per MB, an upper bound on the arrays' leakage; a byte held for one second leaks at most ~19 nJ, as much as reading it 4,200 times. aifoundry3 and aifoundry1-c1 sit about 1 W higher.",
-  19.6, "mW per MB at 80 C", EMF + ":104-115; " + CLM + ":312, :473", "et-measured", card=ALL, page_link=EMU + "#the-sram-arrays-at-rest")
+  19.6, "mW per MB at 80 C", EMF + ":104-115; " + CLM + ":324, :499", "et-measured", card=ALL, page_link=EMU + "#the-sram-arrays-at-rest")
 f("power-goal", "energy",
   "The spec's power goal is '100 MW [sic] for the entire Shire Cache running benchmark'; streaming random data from the own scratchpad raises the SRAM rail %.2f W over idle on aifoundry2, %.0f mW per shire." % (r2l["sram_w"], r2l["sram_w"] / 32 * 1000),
   round(r2l["sram_w"] / 32 * 1000), "mW per shire (SRAM rail rise)", SCS + " p.11 ('Power: TBD. Goal is 100 MW'); " + EMR + "/catalogue.json aifoundry2 tload/scp/random", "et-derived", card=A2,
@@ -335,15 +335,15 @@ f("remote-write", "path",
   "Writes to another shire's scratchpad: a plain write goes from the dataq to the mesh without using the local pipeline; a TensorStore write-around is coalesced in the local L2 and sent when the line is full (a full-line write-around that misses bypasses the local data panels); the target shire's L3 slave writes its scratchpad through its pipeline. Such write-arounds are not ordered against other remote scratchpad accesses (erratum RTLMIN-6617).",
   None, None, SCS + " p.13 Table 2, p.40 §2.7, p.62 §3.4.5, §3.5; " + ERR + " p.84 §4.6; " + RTLM + "shirecache_pipe_sub_bank.sv:640-642, 810", "et-spec")
 f("relay", "path",
-  "Handing each stage's output to the next shire's scratchpad instead of DRAM: 592.5 GB/s against 47.7 (12.4x), own scratchpad 1,487 GB/s (31x); energy per byte moved 116.2 / 8.92 / 4.34 pJ/B (DRAM / next shire / own), DRAM over next shire 12.9-13.1x on every card.",
-  8.92, "pJ/B (next shire)", CLM + ":464, :428; " + EMR + "/manual.json reruns.relay_pj_per_byte; docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json headline",
+  "Having the next shire read each stage's output from the producing shire's scratchpad instead of going through DRAM: 592.5 GB/s against 47.7 (12.4x), own scratchpad 1,487 GB/s (31x); energy per byte moved 116.2 / 8.92 / 4.34 pJ/B (DRAM / next shire / own), DRAM over next shire 12.9-13.1x on every card.",
+  8.92, "pJ/B (next shire)", CLM + ":490, :451; " + EMR + "/manual.json reruns.relay_pj_per_byte; docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json headline",
   "et-measured", card=ALL, page_link=RL + "#one-kernel-three-places-to-put-the-answer")
 f("relay-mech", "path",
   "In the relay kernel, a 'next shire' stage reads the previous shire's scratchpad with 32 B vector loads through the L1 (remote scratchpad reads over the mesh) and writes its own scratchpad with TensorStores of 32 B rows.",
   32, "B per TensorStore row", "workloads/onchip/kernel/onchip.c:58-66, 167-184, 209-220", "et-spec")
 f("atomic", "path",
   "A global atomic on a scratchpad word is performed by the home bank's atomic block (read, ALU, write; the sub-bank is held busy throughout) after arriving on the L3-slave port; the bank retires one every 10.00 cycles; an uncontended remote atomic takes 216 cycles round trip; an atomic through the self ID 0x7F is a bus error.",
-  10.0, "cycles per atomic at the bank", SCS + " p.17 (L3 slave REQ_Atomic, local SCP), p.36, p.40 §2.9; " + CLM + ":232; docs/findings/17-hot-line.md:35-38; lat.json [item=LAT-H]",
+  10.0, "cycles per atomic at the bank", SCS + " p.17 (L3 slave REQ_Atomic, local SCP), p.36, p.40 §2.9; " + CLM + ":243; docs/findings/17-hot-line.md:36-39; lat.json [item=LAT-H]",
   "et-measured", card=ALL, page_link=HL + "#the-atomic-itself-is-fair")
 f("starve", "path",
   "Because remote (L3-slave) requests win each sub-bank's arbitration, 22 or more minions of one other shire hammering one scratchpad word stop the host shire's own scratchpad reads (0.02% of their rate); 21 leave it at 95.6%. Errata RTLMIN-6207 and -6214 describe it.",
@@ -486,7 +486,7 @@ SEQ["store_own"] = dict(
   ])
 SEQ["load_remote"] = dict(
   title="A load from another shire's scratchpad",
-  measured="99.84 + 12.00 cycles per hop at 600 MHz (112-220 cycles over 1-10 hops); 0.96 TB/s chip-wide at 2.1 hops; 5.10 / 11.8 pJ/B at 2.1 hops, +0.67 / 1.80 pJ/B per hop",
+  measured="99.84 + 12.00 cycles per hop at 600 MHz (112-220 cycles over 1-10 hops); 0.96 TB/s chip-wide at 2.1 hops; 5.10 / 11.8 pJ/B at 2.1 hops, +0.67 / 1.80 pJ/B per hop; the relay's next stage reads the previous shire's scratchpad this way: 592.5 GB/s for 8.92 pJ per byte moved, against 116.2 through DRAM",
   steps=[
    dict(n=1, block="requesting minion, neighbourhood, request crossbar, bank", domain="as the local load",
         does="The shire field does not match: the reqq sends a Mesh_Read instead of using the pipeline.",
@@ -510,7 +510,7 @@ SEQ["load_remote"] = dict(
   ])
 SEQ["store_remote"] = dict(
   title="A write into another shire's scratchpad",
-  measured="the relay hands data to the next shire at 592.5 GB/s for 8.92 pJ/B moved (write + read), against 116.2 through DRAM",
+  measured=None,
   steps=[
    dict(n=1, block="local bank", domain="shire channel",
         does="A plain remote write goes from the dataq straight to the mesh; a TensorStore write-around is coalesced in the local L2 (a partial line occupies a local L2 line and the coalescing buffer) and sent when all four quadwords are present; a full-line write-around that misses bypasses the local panels.",

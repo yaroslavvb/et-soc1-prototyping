@@ -40,9 +40,10 @@
     l2: () => { const a = dec2(ADDR.pa); return {bank: a.bank, sub: a.sub, set: a.set, way: a.way, row: a.row, panel: 0}; },
     dram: () => dec5(ADDR.pa),
   };
-  /* one mesh hop, as the L3 level draws it from a requester to the home's L3-slave port */
+  /* one mesh hop, as the L3 level draws it from a requester to the home's L3-slave port (an L3 request takes the lane
+     of its home bank, PA[12:11], by the re-implementation RTL; PA[7:6] only for a remote scratchpad: l3.lane) */
   const buildMeshHop = (L, ap, o) => buildHop(L, ap, Object.assign({title: 'One mesh hop, up close', sub: 'from a shire’s cache bank to the next shire’s port; a reply comes back the same way',
-    bank: 0, lane: 'PA[7:6]', laneF: 'l3:l3.lane', to: 'the next shire’s port'}, o || {}));
+    bank: 0, lane: 'PA[12:11] (L3)', laneF: 'l3:l3.lane', laneNote: '(re-impl. RTL, to confirm)', to: 'the next shire’s port'}, o || {}));
   return {build, hitAreas, partText, INST, FR, COL, DASH, buildMeshHop,
     buildL1Cache, buildL1Block, buildL1Row, buildL1Latch, buildL1Cmp, buildL2Bank, buildL2Sub, buildL2Panel, buildL2Cell, buildL2Xing,
     buildWire, buildL3Wire, buildMS, buildChan, buildDBank, buildDCell, buildPHY, buildDQ,

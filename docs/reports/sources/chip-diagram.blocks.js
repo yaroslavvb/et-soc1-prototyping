@@ -122,7 +122,9 @@ Object.assign(KIDS, {
 /* parts with no scale of their own: the zooms they do have */
 Object.assign(OPTS, {
   hart: (c, P) => [{lab: 'The minion core (its integer registers)', to: P.concat([{id: 'core'}])}, {lab: 'The vector unit (its vector registers)', to: P.concat([{id: 'vpu'}])}],
-  etlink: (c, P) => { const i = P.findIndex(e => e.id === 'shire'); return i < 0 ? [] : [{lab: 'The crossing into the shire’s clock and voltage (level shifter, FIFO)', to: P.slice(0, i + 1).concat([{id: 'shire.meshstop'}, {id: 'shire.meshstop.xing'}])}]; },
+  // (the minion's own neighbourhood's bank FIFOs, not the mesh stop's crossing: review of 14 Oct)
+  etlink: (c, P) => { const i = P.findIndex(e => e.id === 'shire'), m = P.find(e => e.id === 'minion'), nb = m ? String(m.k).split('.')[1] || '0' : '0';
+    return i < 0 ? [] : [{lab: 'The crossing into the shire’s clock and voltage (level shifter, FIFO)', to: P.slice(0, i + 1).concat([{id: 'shire.neigh', k: nb}, {id: 'shire.neigh.xing'}])}]; },
   fln: (c, P) => { const i = P.findIndex(e => e.id === 'die'); return i < 0 ? [] : [{lab: 'A wire and its repeaters (a mesh link, up close)', to: P.slice(0, i + 1).concat([{id: 'mesh'}, {id: 'mesh.link.wire'}]), made: true}]; },
   chip: (c, P) => [{lab: 'The die in cross-section: transistors and the wiring stack', to: P.concat([{id: 'die.metal'}])}, {lab: 'A compute shire', to: P.concat([{id: 'shire', k: String(isShire(LASTSID) ? LASTSID : 0)}])}],
 });

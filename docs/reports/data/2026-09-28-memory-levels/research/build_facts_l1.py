@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Facts for the L1 level (minion data cache + L1 scratchpad) of the memory-anatomy diagrams.
 
-Output: ../facts-l1.json, a JSON list. Two kinds of rows share the list:
+Output: facts-l1.json beside this script (research/, which the memory levels' build_facts.py reads; until 14 Oct 2026
+it wrote ../facts-l1.json, a stray copy), a JSON list. Two kinds of rows share the list:
   - facts:            topic does not start with "sequence/"
   - access sequences: topic "sequence/<name>", with extra fields step, stage, block, action, circuit,
                       circuit_kind, latency, energy (all other fields as for facts).
@@ -11,7 +12,7 @@ nekko repo (pages worktree). PDF pages are physical pdf pages; "text L" is the l
 """
 import json, os
 
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'facts-l1.json')
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'facts-l1.json')
 
 DC = 'external/core-et/docs/Minion DCache Description.pdf'
 MD = 'external/core-et/docs/Minion Description.pdf'
@@ -220,7 +221,7 @@ F('l1.firmware-mode', 'modes',
   'The firmware sets D1Split and ScpEnable before every launch, so a kernel runs with 512 B of L1 cache per hart '
   '(2 sets x 4 ways x 64 B) and a 3 KB scratchpad.',
   512, 'B per hart',
-  'docs/et-soc1-notes.md:84-86; docs/research/counters-and-dram.md:447 (fw MachineMinion/src/syscall.c:348-420)',
+  'docs/et-soc1-notes.md:90-92; docs/research/counters-and-dram.md:447 (fw MachineMinion/src/syscall.c:348-420)',
   'et-spec', page_link=P_MH)
 F('l1.knee', 'modes',
   'The measured knee confirms 512 B per hart: hart 1 reads 5.25 cycles at 256 B, 5.256 at 512 B and 39.0 at 768 B '
@@ -301,7 +302,7 @@ F('l1.transistors', 'array technology',
   'minion (0.29-0.43 billion on the chip, 1.2-1.8% of its >24 billion), against 0.2 million for the same 4 KB in 6T '
   'SRAM.',
   0.33, 'million transistors per minion (mid)',
-  'l1.bits x GENERIC transistors per bit; chip total from docs/findings/01-resources.md:101', 'generic',
+  'l1.bits x GENERIC transistors per bit; chip total from docs/findings/01-resources.md:121', 'generic',
   note='GENERIC count per bit; the real latch cell is unknown (l1.u-cell). Excludes decoders, clock gates and read muxes.')
 
 # ---------------------------------------------------------------- latency and bandwidth (measured)
@@ -309,7 +310,7 @@ F('l1.latency', 'latency',
   'L1 hit: 5.25 cycles load-to-use in a dependent pointer chase (8.75 ns at 600 MHz), per-pass ranges 5.247-5.259, '
   'in every pass on three cards.',
   5.25, 'cycles',
-  f'{LAT}: items[LAT-M1].per_card.<card>.passes[].L1; docs/findings/05-claims.md:421', 'et-measured', card=CARDS3,
+  f'{LAT}: items[LAT-M1].per_card.<card>.passes[].L1; docs/findings/05-claims.md:443', 'et-measured', card=CARDS3,
   page_link=P_MH)
 F('l1.latency-5', 'latency',
   'A dependent L1 load issues 5 cycles after the previous one: ID, EX, TAG, MEM, WB (data leaves S3 at WB) and the '
@@ -330,7 +331,7 @@ F('l1.bw', 'bandwidth',
   'L1 bandwidth: 14.5 TB/s over the chip with 32-byte vector loads on both harts (23.6 B per minion-cycle of the 32 '
   'designed); 6.2 TB/s in the memory-hierarchy probe\'s loop.',
   14.49, 'TB/s',
-  f'{EM4}:11 (14,488 GB/s); docs/findings/05-claims.md:380 (6.2 TB/s)', 'et-measured', card=CARDS3, page_link=P_EM)
+  f'{EM4}:11 (14,488 GB/s); docs/findings/05-claims.md:398 (6.2 TB/s)', 'et-measured', card=CARDS3, page_link=P_EM)
 
 # ---------------------------------------------------------------- energy (measured, three cards)
 F('l1.e-vload', 'energy',
@@ -387,7 +388,7 @@ F('g.latch-cell', 'circuit',
   10, 'transistors per bit (typical)', 'textbook CMOS (GENERIC)', 'generic')
 F('g.latch-read', 'circuit',
   'A latch-array read is logic: the registered address drives a decoder or a mux tree (128:1 per output bit, e.g. '
-  'seven 2:1 levels or four 4:1 levels), and only the nodes whose value changes spend energy, so read energy depends '
+  'seven 2:1 levels, or three 4:1 levels and one 2:1), and only the nodes whose value changes spend energy, so read energy depends '
   'on the data.',
   None, None, 'textbook standard-cell memory design (GENERIC)', 'generic')
 F('g.latch-write', 'circuit',

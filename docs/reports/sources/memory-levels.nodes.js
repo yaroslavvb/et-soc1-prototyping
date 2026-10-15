@@ -30,7 +30,9 @@ function mlEl(lv, id, V0) {
     case 'l2:sub': return {id: 'shire.subbank', k: `${i.bank}.${i.sub}`};
     case 'l2:panel': return {id: 'shire.panel', k: `${i.bank}.${i.sub}.${i.panel || 0}`};
     case 'l2:cell': case 'l3:cell': case 'scp:cell': return {id: 'lib.sram6t'};
-    case 'l2:xing': return {id: 'shire.meshstop.xing'};
+    // (the L2's crossing scale draws the neighbourhood's bank FIFOs, a scale of its own since 14 Oct 2026; the mesh
+    // stop's crossing, shire.meshstop.xing, is the L3 wire's drawing)
+    case 'l2:xing': return {id: 'shire.neigh.xing'};
     case 'l3:chip': return {id: 'die', k: 'l3'};
     case 'l3:home': return {id: 'l3.home', k: String(i.home)};
     case 'l3:hbank': return {id: 'l3.bank', k: String(i.bank)};
@@ -185,7 +187,7 @@ mnode('scp.vmin', 'scp', 'vmin', {sizeOf: 'shire.panel', name: () => 'The SRAM\'
 // as the levels' own scales above: review of 1 Oct)
 const CHAINLV = {'l1d.block': ['l1', 'lram'], 'shire.bank': ['l2', 'bank'], 'shire.subbank': ['l2', 'sub'], 'shire.panel': ['l2', 'panel'], memshire: ['dram', 'ms'],
   dram: ['dram', 'chan'], 'dram.bank': ['dram', 'dbank'], 'memshire.phy': ['dram', 'phy'], 'memshire.phy.dq': ['dram', 'dq']};
-['l1d', 'l1d.block', 'l1d.row', 'lib.latch', 'l1d.cmp', 'shire.bank', 'shire.subbank', 'shire.panel', 'lib.sram6t', 'shire.meshstop.xing', 'mesh', 'mesh.link.wire',
+['l1d', 'l1d.block', 'l1d.row', 'lib.latch', 'l1d.cmp', 'shire.bank', 'shire.subbank', 'shire.panel', 'lib.sram6t', 'shire.neigh.xing', 'shire.meshstop.xing', 'mesh', 'mesh.link.wire',
   'memshire', 'memshire.phy', 'memshire.phy.dq', 'dram', 'dram.bank', 'dram.cell'].forEach(id => {
   const N0 = NODES[id]; if (!N0) { console.error('memory levels: no scale ' + id); return; }
   const c = CHAINLV[id];

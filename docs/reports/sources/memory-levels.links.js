@@ -11,7 +11,8 @@
 NODES.minion.def = () => ({id: 'l1d'});
 NODES.minion.kids = () => [{id: 'l1d'}, {id: 'core'}, {id: 'vpu'}, {id: 'tensor'}];
 NODES.shire.def = () => mlEl('l2', 'bank');
-NODES.shire.kids = p => [mlEl('l2', 'bank'), {id: 'shire.meshstop.xing'}, {id: 'lib.xbar'}, {id: 'shire.uc'}, {id: 'minion', k: `${p.sid}.0.0`}];
+// (two crossings since 14 Oct 2026: the neighbourhoods' bank FIFOs, the L2's own crossing scale, and the mesh stop's)
+NODES.shire.kids = p => [mlEl('l2', 'bank'), mlEl('l2', 'xing'), {id: 'shire.meshstop.xing'}, {id: 'lib.xbar'}, {id: 'shire.uc'}, {id: 'minion', k: `${p.sid}.0.0`}];
 NODES.die.kids = p => ({l3: [mlEl('l3', 'home', 'l3'), {id: 'mesh'}], scp: [mlEl('scp', 'shire', 'scp'), {id: 'mesh'}], dram: [mlEl('dram', 'ms', 'dram')]}[p.lv] || [])
   .concat([{id: 'shire', k: String(REQ(p.lv))}, {id: 'pcie'}, {id: 'io'}, {id: 'die.metal'}]);
 /* the package opens the chip as the map of the chip level last visited */
@@ -30,17 +31,18 @@ links('die', Object.assign({
   pll: 'lib.pll', vddr: RAIL,
 }, keys(['homebox', 'fit', 'mean', 'byhome', 'fmt', 'own', 'remote', 'size', 'fmt1', 'relay', 'model', 'typical', 'rate', 'energy', 'addrmap'])));
 /* the L2's shire: a neighbourhood opens its first minion (the requester's neighbourhood 0 is the L1 level itself), the
-   crossbars the textbook crossbar, the UC its block, the mesh stop the crossing into the mesh, the row partition the
-   6T cell its rows are made of */
+   crossbars the textbook crossbar, the UC its block, the mesh stop the crossing into the mesh, a neighbourhood's bank
+   FIFOs the crossing into the Shire Channel (semi-synchronous; since 14 Oct 2026 a scale apart from the mesh stop's),
+   the row partition the 6T cell its rows are made of */
 links('shire', {
   nbr: (c, g, P) => ({id: 'minion', k: `${P[P.length - 1].k}.${c.i || 0}.0`}),
   reqxbar: 'lib.xbar', rspxbar: 'lib.xbar', uc: 'shire.uc', meshstop: 'shire.meshstop.xing', partition: 'lib.sram6t',
-  fifo: 'shire.meshstop.xing', lvband: RAIL, rail: RAIL,
+  fifo: 'shire.neigh.xing', lvband: RAIL, rail: RAIL,
 });
 /* the L1's minion: the pipeline is the minion core's, the TLB a small CAM (a register file), the miss handlers and the
    replay queue flip-flops and a queue, the VPU the vector unit, the TensorLoad unit the tensor unit, the ports and the
    neighbourhood the crossing out of the minion's low-voltage plane */
-links('minion', {pipeline: 'core', tlb: 'lib.regfile', mh: 'lib.flipflop', rq: 'lib.fifo', vpu: 'vpu', tl: 'tensor', ports: 'shire.meshstop.xing', nbr: 'shire.meshstop.xing', rail: RAIL});
+links('minion', {pipeline: 'core', tlb: 'lib.regfile', mh: 'lib.flipflop', rq: 'lib.fifo', vpu: 'vpu', tl: 'tensor', ports: 'shire.neigh.xing', nbr: 'shire.neigh.xing', rail: RAIL});
 /* the L3's home shire: its banks' L3 slices, the to_l3 and to_sys masters (queues), the mesh stop and the L3-slave ports
    (crossings), the crossbar, the UC, its neighbourhoods' first minions; the floorplan is unknown (a key) */
 const homeK = P => { const e = P.find(x => x.id === 'l3.home' || x.id === 'scp.shire'); return e ? e.k : '0'; };
@@ -55,7 +57,7 @@ links('l3.subbank', Object.assign({}, LINKS['shire.subbank']));
 links('l3.panel', Object.assign({}, LINKS['shire.panel']));
 /* the scratchpad's shire: as the L2's shire; the L1 scratchpad is the L1's latch RAM; the note on what caps a stream is a key */
 links('scp.shire', Object.assign({
-  nbr: (c, g, P) => ({id: 'minion', k: `${homeK(P)}.${c.i || 0}.0`}), fifo: 'shire.meshstop.xing', l1scp: 'l1d',
+  nbr: (c, g, P) => ({id: 'minion', k: `${homeK(P)}.${c.i || 0}.0`}), fifo: 'shire.neigh.xing', l1scp: 'l1d',
   reqxbar: 'lib.xbar', rspxbar: 'lib.xbar', uc: 'shire.uc', partition: 'lib.sram6t', meshstop: 'shire.meshstop.xing', lvband: RAIL, rail: RAIL,
 }, keys(['bneck'])));
 links('scp.bank', Object.assign({}, LINKS['shire.bank'], {
