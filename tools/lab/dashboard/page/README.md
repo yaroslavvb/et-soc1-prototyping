@@ -58,6 +58,11 @@ the live card use, `live.js`), and `aifoundry/reservations`, the card reservatio
 new value of the second as a `lab-reservations` event; `script.js` draws them on the card-use lanes (a blue hatched span
 behind the bars, a bracket over the lane, the posts in the tooltip) and lists them under the 24-hour chart.
 
+A third, `thermal/p3`, is the thermal camera's video, declared by name next to `aifoundry/*` and shown by the
+`<video data-ss-stream="thermal/p3">` of the last section, "Thermal camera, live" (the owner's ask, 19 October 2026).
+The viewer runs it: it watches only while the video is on screen and the tab is visible, stops 10 s after it scrolls
+away, and shows the camera's last still while the camera is off, so the page's other readers cost the camera nothing.
+
 Host and card lists come from the data; a card's colour and mark come from the toolkit's registry (`CK.card`).
 A card whose holder is unknown, or whose machine did not answer, shows NO DATA rather than FREE.
 

@@ -190,8 +190,9 @@ def main(argv):
     page = re.sub(r"__(CHARTKIT|TITLE|DESC|BODY|DATA|SCRIPT)__", put, tpl)
     if seen != set(subst):
         usage("the template lacks " + ", ".join(sorted(set(subst) - seen)))
-    # the live section reads these spacesheep streams (one per machine); the viewer provides window.ss
-    page = page.replace("<meta charset=\"utf-8\">", "<meta charset=\"utf-8\">\n<meta name=\"ss-streams\" content=\"aifoundry/*\">", 1)
+    # the live section reads these spacesheep streams (one per machine), and the thermal camera section at the
+    # bottom shows thermal/p3, the camera's video (the owner's ask, 19 Oct 2026); the viewer provides window.ss
+    page = page.replace("<meta charset=\"utf-8\">", "<meta charset=\"utf-8\">\n<meta name=\"ss-streams\" content=\"aifoundry/*, thermal/p3\">", 1)
     tmp = out + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(page)
