@@ -32,6 +32,12 @@ def fj(x, se=None, n=1):
     return f"{x * 1e15:.{n}f} fJ"
 
 
+def el(x):
+    if not x:
+        return "–"
+    return f"{x / 1e6:.2f} million" if x >= 1e6 else f"{float(f'{x:.3g}'):,.0f}"
+
+
 def w(x, se=None, n=2):
     if x is None:
         return "–"
@@ -47,6 +53,7 @@ def main():
     C3, C2, C1 = R["cards"]["aifoundry3"], R["cards"].get("aifoundry2", {}), R["cards"].get("aifoundry1-c0", {})
     G = R["gates"]
     v3 = C3["v_mean"]
+    v2c, v1c = C2.get("v_mean", 0), C1.get("v_mean", 0)
     lq, lb, ec3 = C3["lq"], C3["lb"], C3.get("ec", {})
     lq_d, lq_b, lq_n = lq["designed"], lq["bus"], lq["nets"]
     lb_d, lb_b, lb_n = lb["designed"], lb["bus"], lb["nets"]
@@ -159,7 +166,7 @@ explained the effect as power: random data flips more transistors, so a power-ca
 times each transistor flips. On this chip the multiply-add unit's RTL is open, and the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">Horace experiment</a>
 (21 Sep) showed one matmul drawing 38.3, 46.7 and 63.4 W on zeros, ones and random data at one speed, with counted toggles predicting
 14 patterns to half a watt. What was missing was a <i>dose</i>: turn one knob, the number of bits that flip, and watch the watts follow.
-Prior work measured GPU power against value distributions and bit similarity (ALUPower, 2016; Gregersen, Patel and Choukse, 2024), and
+Prior work measured GPU power against value distributions and bit similarity (<a href="https://depositonce.tu-berlin.de/items/f6f95245-1fea-41d7-8a84-8f83c4d6a84a">ALUPower</a>, Lucas and Juurlink, 2016; <a href="https://arxiv.org/abs/2409.18324">Gregersen, Patel and Choukse</a>, 2024), and
 side-channel analysis has modelled power as Hamming distance since 2004; none of it priced a flip in joules on a chip whose flips can be counted.</p>
 
 <h2>The experiment</h2>
@@ -182,15 +189,15 @@ heater burst, the 21 Sep method; 4 s runs; the board's power over two seconds on
 card's own leakage slope; every item compared with its zero rung inside the same pass; every error bar the scatter between passes. Each
 device process stayed under 10 s, and the cards were claimed in the lab channel.</p>
 <p><b>Three operating points, none changed by us.</b> The cards no longer reach 80 °C under this duty cycle (they level off at 60–64 °C), so the
-two cards whose clock governor is free ran at 800 MHz (aifoundry2 at 0.618 V, aifoundry1's card 0 at 0.604 V), and only aifoundry3, whose clock
-is pinned, ran at 600 MHz and 0.522 V. That gave the ½CV² test three voltages for free. On aifoundry3 tonight's anchors read {pi3:.1f} W on π and
+two cards whose clock governor is free ran at 800 MHz (aifoundry2 at {v2c:.3f} V, aifoundry1's card 0 at {v1c:.3f} V), and only aifoundry3, whose clock
+is pinned, ran at 600 MHz and {v3:.3f} V. That gave the ½CV² test three voltages for free. On aifoundry3 tonight's anchors read {pi3:.1f} W on π and
 {rn3:.1f} W on random data, {rn3 - pi3:.1f} W apart, against 16.4 W apart on 21 Sep (on another card, launched at 80 °C).</p>
 
 <h2>1. Same arithmetic, different order</h2>
 <p>The cleanest result needs no bit accounting at all. On the pinned card the same 4,096 multiply-adds cost <b>{w(m0.get('W'), m0.get('se'), 3)}</b>
 more in max-flip order than in Gray order when the four changing bits are mantissa bits 0–3, and <b>{w(m19.get('W'), m19.get('se'), 3)}</b> when they
 are bits 19–22 ({m0.get('n', '–')} passes; the RTL model predicted {w(m0.get('pred_W'), n=2)} and {w(m19.get('pred_W'), n=2)}). The four orders rank
-{ranking(o3, 0)} at bits 0–3, and {ranking(o3, 19)} at bits 19–22. On aifoundry2 at 800 MHz and 0.618 V, where every switching watt is about 1.9 times
+{ranking(o3, 0)} at bits 0–3, and {ranking(o3, 19)} at bits 19–22. On aifoundry2 at 800 MHz and {v2c:.3f} V, where every switching watt is about 1.9 times
 larger: {w(o2(0, 'maxflip').get('W'), o2(0, 'maxflip').get('se'))} and {w(o2(19, 'maxflip').get('W'), o2(19, 'maxflip').get('se'))} ({n2} passes).
 By the pre-registered rule, a difference of at least three standard errors, the effect is confirmed on both cards.</p>
 {{{{fig:ord}}}}
@@ -257,11 +264,11 @@ although the board figure carries the regulators' loss; the rail is the number t
 <h2>From one flip down to the floor</h2>
 <div class="tablewrap"><table><thead><tr><th>One event</th><th class="n">Energy</th><th class="n">C = 2E/V² at {v3 * 1000:.0f} mV</th><th class="n">Electrons, CV/e</th></tr></thead><tbody>
 <tr><td>Landauer's floor at 58 °C, kT ln 2</td><td class="n">{kT * 1e21:.1f} zJ</td><td class="n">–</td><td class="n">–</td></tr>
-<tr><td>A minimum 7 nm inverter's input (ASAP7 INVx1, 0.62 fF)</td><td class="n">{inv * 1e18:.0f} aJ</td><td class="n">0.62 fF</td><td class="n">{0.62e-15 * v3 / E:,.0f}</td></tr>
-<tr><td>One counted net toggle in the multiply-add, busy partner</td><td class="n">{lb_n.get('J', 0) * 1e18:.0f} aJ</td><td class="n">{lb_n.get('C_fF', 0):.1f} fF</td><td class="n">{lb_n.get('electrons', 0):,.0f}</td></tr>
-<tr><td>One flipped bit on a register-file read port</td><td class="n">{fj(e_in.get('J'), n=1)}</td><td class="n">{e_in.get('C_fF', 0):.0f} fF</td><td class="n">{e_in.get('electrons', 0):,.0f}</td></tr>
-<tr><td>One flipped result bit</td><td class="n">{fj(e_out.get('J'), n=1)}</td><td class="n">{e_out.get('C_fF', 0):.0f} fF</td><td class="n">{e_out.get('electrons', 0):,.0f}</td></tr>
-<tr><td>One flipped B bit of an fp32 multiply-add, all it sets off</td><td class="n">{fj(lq_d.get('J'), n=0)}</td><td class="n">{lq_d.get('C_fF', 0):.0f} fF</td><td class="n">{lq_d.get('electrons', 0):,.0f}</td></tr>
+<tr><td>A minimum 7 nm inverter's input (ASAP7 INVx1, 0.62 fF)</td><td class="n">{inv * 1e18:.0f} aJ</td><td class="n">0.62 fF</td><td class="n">{el(0.62e-15 * v3 / E)}</td></tr>
+<tr><td>One counted net toggle in the multiply-add, busy partner</td><td class="n">{lb_n.get('J', 0) * 1e18:.0f} aJ</td><td class="n">{lb_n.get('C_fF', 0):.1f} fF</td><td class="n">{el(lb_n.get('electrons'))}</td></tr>
+<tr><td>One flipped bit on a register-file read port</td><td class="n">{fj(e_in.get('J'), n=1)}</td><td class="n">{e_in.get('C_fF', 0):.0f} fF</td><td class="n">{el(e_in.get('electrons'))}</td></tr>
+<tr><td>One flipped result bit</td><td class="n">{fj(e_out.get('J'), n=1)}</td><td class="n">{e_out.get('C_fF', 0):.0f} fF</td><td class="n">{el(e_out.get('electrons'))}</td></tr>
+<tr><td>One flipped B bit of an fp32 multiply-add, all it sets off</td><td class="n">{fj(lq_d.get('J'), n=0)}</td><td class="n">{lq_d.get('C_fF', 0):.0f} fF</td><td class="n">{el(lq_d.get('electrons'))}</td></tr>
 <tr><td>The meter's smallest step (10 mW for one 0.16 s reading)</td><td class="n">1.6 mJ</td><td class="n">–</td><td class="n">–</td></tr>
 </tbody></table></div>
 <p>These energies are on the board's 12 V input, so they include the regulators' loss; the capacitances and electron counts are charge-equivalents at the
