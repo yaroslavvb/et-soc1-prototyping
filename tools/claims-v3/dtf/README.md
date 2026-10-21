@@ -1051,6 +1051,21 @@ script is running and is never edited while it runs, §7). Same items, duplicate
 follow the surviving pass count (§9 rule 1). The extra passes are started by `build/dtf-after.sh` on each box, which
 waits for that card's queue (or chain) to end.
 
+**A2 — Wed 21 Oct 2026, 01:05 PDT, after pass 1's gate output and before any family V or family A energy was read.**
+The rate gate showed that the issue rate is fixed by the mode, not the data: within every mode it is constant from h = 0
+to h = 32 to 1e-4, identical on all three cards, at 0.5814 ops per cycle per hart (modes 202, 300, 302, 306-308), 0.6088
+(177, 179, 191, 301, 303, 309), 0.7356 (304, 1A) and 0.7574 (305, 1B). Two registered comparisons cross modes, so, as the
+smoke rule above (§7, "every comparison is per flip or within one mode") already requires:
+(1) **family V**: each shape is reduced against its own zero rung (`d1b_h*` against `d1b_h0`, no longer `d1a_h0`), and
+the cell price is the difference of the two modes' per-flip slopes, 1B minus 1A, over h = 16 and 32; the 0.2% pair gate
+between `d1a` and `d1b` (2.96% apart at h = 0, by code) is replaced by each mode's own within-mode rate gate;
+(2) **family A**: `a0`, `a1` and `a3` share one rate and form the registered ladder (index distance 0, 1, 3); `a5`
+(mode 309, 4.7% faster by code) is reported beside it as rate-confounded and does not enter the slope; the one-sided rule
+(exclude 32 fJ per address bit at 3 SE) is read on the matched ladder;
+(3) a clerical fix: `participants_expected` is 1,024 × harts, so family R's two-hart arms expect 2,048.
+The run-driving fields are unchanged; the analysis reads `manifest-a2.json` (the same items, these three fields
+corrected) beside the committed `manifest.json`.
+
 *Anything changed after the pre-registration commit goes here, dated, before the data it touches, and lands by
 `mv` between passes (§7) — identified in the reduction by `block_begin`'s `code.sha256`, not by a timestamp. Each
 cut taken under §6's cut order is logged here with its clock time. The first candidate is already visible: if the
