@@ -1,0 +1,67 @@
+{
+ "card": "aifoundry1-c0",
+ "args": {
+  "out": "/home/yaroslavvb/nekko/build/claims-v3/aifoundry1-c0/hl-smoke/p1",
+  "root": "/home/yaroslavvb/nekko",
+  "gen": "/home/yaroslavvb/nekko/build/hl-gen",
+  "items": "anchor_pi,lq_h8,xin_h16",
+  "tel_live": "/home/yaroslavvb/nekko/build/claims-v3/aifoundry1-c0/hl-smoke/p1/telemetry.jsonl.raw",
+  "heater": "build/sparsity/host/sparsity_host",
+  "sparsity": "build/sparsity/host/sparsity_host",
+  "enercat": "build/enercat-hl/host/enercat_host",
+  "blocks": 1,
+  "first_block": 0,
+  "seed": 1,
+  "target": 200.0,
+  "preheat": 0.0,
+  "max_heats": 40,
+  "max_wait": 300.0,
+  "fma_s": 2.0,
+  "ec_s": 2.0,
+  "stall_s": 6.0,
+  "card": "aifoundry1-c0",
+  "dry": false,
+  "list": false
+ },
+ "items": [
+  {
+   "name": "anchor_pi",
+   "kind": "fma",
+   "family": "anchor",
+   "values": "pi"
+  },
+  {
+   "name": "lq_h8",
+   "kind": "fma",
+   "family": "lq",
+   "h": 8,
+   "mask": "0xff",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 32768,
+    "b_all": 32768,
+    "total": 32768
+   }
+  },
+  {
+   "name": "xin_h16",
+   "kind": "ec",
+   "family": "xin",
+   "h": 16,
+   "op": "fxor.pi",
+   "per_op": {
+    "port1": 128.0,
+    "port2": 128.0,
+    "in": 256.0,
+    "out": 0.0
+   }
+  }
+ ],
+ "et_devices": "0"
+}

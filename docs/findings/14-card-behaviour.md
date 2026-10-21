@@ -346,6 +346,14 @@ agree to 0.03–0.08 W for most patterns.
 Approach times were 12–120 s (median 63 s) for 7-second runs, and up to seven minutes after a run that reached
 90 °C. **Budget three to eight times more wall-clock than card time.**
 
+**Since the October cooling changes the cards no longer reach 80 °C this way (E60, 20 October 2026).** Twenty 2 s
+random-fp32 heater launches took aifoundry2 and aifoundry3 from about 50 °C to 64 °C and aifoundry1's card 0 to 60 °C
+(`docs/reports/data/2026-10-20-bitflip-ladder/*/hl-probe/p1`). E60 therefore launched at a 58 °C reading (57 °C on
+aifoundry1's card 0) with a 1 °C pre-heat: approaches took 1–10 s, a 4 s run about 10 s of wall clock. Below 65 °C
+the governor-free cards (aifoundry2, aifoundry1's card 0) run a busy launch at **800 MHz** (0.618 and 0.604 V),
+stepping 600 → 700 → 800 MHz within 0.3–1.4 s of the launch, so a measurement window must start after the step
+(E60's amendment A2); only aifoundry3, pinned, measures 600 MHz there. Leakage at 58 °C is 0.2–0.4 W per °C.
+
 ## The lab machines and their four cards are not interchangeable
 
 Updated 2026-09-25: aifoundry1's two cards answer since 15:02 that day, so there are four cards on three firmware

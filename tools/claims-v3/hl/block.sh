@@ -14,7 +14,7 @@
 # aside to p<pass>.attempt-<epoch> before it is run again.
 . "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 # Departure D1 (README): on aifoundry3 and aifoundry1 a user who is only logged in does not block (two idle tmux logins
-# of other users on aifoundry3 since 11 and 16 Oct; user max on aifoundry1, whose card is card 1); another user on THIS
+# of other users on aifoundry3; on aifoundry1 another user, whose card is card 1); another user on THIS
 # card does, and so does any other user's device process on a one-card host. Fails closed when et-holders is unreadable.
 # aifoundry2 keeps lib.sh's own test.
 case "$CARD" in aifoundry3|aifoundry1-c*)

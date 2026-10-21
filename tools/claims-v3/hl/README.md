@@ -47,9 +47,9 @@ only to its complement, so at most 8 of the 16 steps flip 4 bits.
 
 ## Departures from the 21 Sep protocol and from the plan, and why
 
-- **D1, idle logins.** On aifoundry3 (two other users with idle tmux logins since 11 and 16 Oct) and aifoundry1 (user
-  max, whose card is card 1), a user who is only logged in does not block; another user on *this* card does (card-scoped
-  `et-holders`, failing closed), as amendment A3 already does for aifoundry1. aifoundry2 keeps lib.sh's own test. The
+- **D1, idle logins.** On aifoundry3 (two other users with idle shell logins) and aifoundry1 (another user, whose card is
+  card 1), a user who is only logged in does not block; another user on *this* card does (card-scoped
+  `et-holders`, failing closed), as the claims-v3 campaign's own amendment A3 (PLAN3) already does for aifoundry1. aifoundry2 keeps lib.sh's own test. The
   cards are claimed in #community-lab for the evening.
 - **D2, the launch reading is 57–58 C, not 80 C.** Measured tonight (probe_heat.sh, data `hl-probe/p1`): twenty 2 s
   heater launches take aifoundry2 and aifoundry3 to 64 C and aifoundry1's card 0 to 60 C; the cards no longer reach
@@ -174,3 +174,10 @@ clock dips to 700 MHz inside the window in every pass (5 of 5) and the gate reje
 failure sets a whole pass aside. D5's estimate for that rung (~59 W) was wrong. So on aifoundry2 `ls_h8` is excluded
 from the analysis and from the pass-rejection count (reported as excluded, by name); the ls contrast there rests on
 h = 2. Every other rule stands.
+
+## Results
+
+The passes ran Tue 20 Oct 2026, 20:22–21:01 PDT (28 passes after the gates: aifoundry3 8, aifoundry2 9, aifoundry1's card 0 10).
+The reduction is `docs/reports/data/2026-10-20-bitflip-ladder/hl.json` (with `runs.csv` and `reduce.txt` beside it), the write-up
+[docs/reports/2026-10-20-bitflip-ladder](../../../docs/reports/2026-10-20-bitflip-ladder/index.html), and the scored decision rules
+are in E60 of `docs/findings/03-experiments.md`.

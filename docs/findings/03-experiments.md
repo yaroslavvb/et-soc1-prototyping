@@ -2404,7 +2404,39 @@ source registers set so that 16·h port bits, or 8·h port and 8·h result bits,
 aifoundry3 plateau at 64 C, aifoundry1's card 0 at 60 C; `hl-probe/p1`), so every pass launches at a 57–58 C reading:
 aifoundry3 (pinned) at 600 MHz and 0.522 V, the two governor-free cards at 800 MHz and 0.618 / 0.604 V. The ½CV² test
 therefore runs at natural operating points, across cards.
-**Results:** (to be added after the passes).
+**Results** (card runs 20:22–21:01 PDT; claimed in #community-lab at 19:58, released 21:01). After the gates: aifoundry3 8
+passes, 220 of 220 runs; aifoundry2 9 passes (pass 5 set aside for a −1.78 W anchor drift), 160 of 180 runs (amendment A3 took
+out the 10 `ls_h8` runs, which trip the governor's power threshold at 800 MHz); aifoundry1's card 0 10 passes, 229 of 230.
+Data, reduction (`hl.json`, `runs.csv`, `reduce.txt`) and every pass's telemetry: `docs/reports/data/2026-10-20-bitflip-ladder/`;
+the write-up: [What one flipped bit costs on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-ladder).
+- **The Hamming ladder** (aifoundry3, 600 MHz, 0.522 V, board energy, h ≥ 1, 4 passes): **116.7 ± 0.6 fJ per flipped B bit** with
+  A = 1.0 and **129.9 ± 0.5 fJ** with A = π, the cascade included; per RTL-counted operand-bus bit (accumulator reads included,
+  A1's primary measure) 74.7 ± 0.4 and 85.6 ± 0.3 fJ; per counted net toggle 0.301 and 0.119 fJ; on the minion rail 87.5 and
+  96.9 fJ per flipped bit. The first flip costs +1.95 W with A = π (3.3 times that ladder's per-bit slope) and +0.59 W with
+  A = 1.0 (1.1 times).
+- **Same arithmetic, different order** (max-flip − Gray on the same 4,096 multiply-adds): aifoundry3 **+0.682 ± 0.010 W** (bits
+  0–3) and **+0.716 ± 0.023 W** (bits 19–22), 4 passes, the four orders ranked by their flipped bits (binary indistinguishable from
+  Gray at bits 0–3); aifoundry2 at 800 MHz +1.291 ± 0.009 and +1.311 ± 0.131 W, 9 passes.
+- **Which bit** (aifoundry3, above constant operands): sign +0.55, exponent bit 23 +0.78, mantissa bits 0 / 8 / 16 / 22 +0.63 /
+  +0.47 / +2.49 / +4.68 W. At equal Hamming weight, two flipped bits spread over the mantissa cost +2.25 ± 0.05 W more than two
+  low bits (aifoundry2, h = 2, 9 passes).
+- **One gate** (aifoundry3): a read-port bit **20.83 ± 0.10 fJ** into `fxor.pi`; a result bit **31.17 ± 0.17 fJ** (`xnz`, results never
+  zero) and 30.00 ± 0.16 fJ (`xio`, results alternate with zero); into `fand.pi` 28.1 ± 0.7 fJ per port bit from the one rung kept
+  (h = 8); `ain_h32` (an all-zero operand) reads 25% below the line through h = 8, level with `xin_h32`. On the minion rail: 16.3 fJ
+  in, about 24 fJ out.
+- **½CV²**: per-flip energies on the 800 MHz cards over aifoundry3's, minion rail: read port 1.38× (aifoundry1's card 0, V² 1.34×)
+  and 1.43× (aifoundry2, V² 1.40×), multiply-add h 2 → 8 1.45× and 1.35×; board 1.22×, 1.38×, 1.19×, 1.41×.
+- **Decision rules:** linear ladder PASS on the 5%-of-span branch (residual 0.39 and 0.43 W over 11.7 and 13.1 W), not the 0.25 W
+  branch; order CONFIRMED on both cards (≥ 3 SE; the kill rule, < 0.1 W at both positions, not met); RTL predictions PASS on
+  aifoundry3, 1.28 W rms over 26 items against the 1.5 W mark, measured differences 0.83 of predicted (the 800 MHz cards, scaled:
+  1.59 and 1.89 W); ½CV² SUPPORTED, all 8 ratios inside the registered band 1.18–1.59 and none near the 1.8–1.9 of a
+  clock-dependent price.
+- **Predictions against results:** quiet slope 122 → 116.7 fJ; busy 128 → 129.9 fJ; Gray/max-flip +0.91 / +0.87 → +0.68 / +0.72 W
+  (75–82% of predicted); e_in 2–20 fJ → **20.8 fJ, just outside the registered range (a miss)**; e_out 5–40 fJ → 30–31 fJ, above
+  e_in as predicted; V² ratios as predicted.
+- **Found along the way:** the cards level off at 60–64 °C under the heater bursts (14-card-behaviour.md, the measurement protocol);
+  aifoundry1's card 0 reads its ladders only 1.12× its minion rail on the board meter, against 1.33× and 1.42× on the other two.
+
 
 ## A note on E10, re-analysed for Q20
 
