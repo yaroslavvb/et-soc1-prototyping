@@ -21,3 +21,8 @@ if(ENERCAT_GS)
   target_sources(enercat.elf PRIVATE enercat_gs.c)
   target_compile_definitions(enercat.elf PRIVATE ENERCAT_GS)
 endif()
+# Deterministic flips (V3-DTF): only with -DENERCAT_DF=ON (build/enercat-df); the cases live in enercat_df.inc.
+option(ENERCAT_DF "compile the deterministic-flip modes (300+)" OFF)
+if(ENERCAT_DF)
+  target_compile_definitions(enercat.elf PRIVATE ENERCAT_DF)
+endif()

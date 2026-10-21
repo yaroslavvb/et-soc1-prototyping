@@ -11,6 +11,8 @@ include(ExternalProject)
 # -DENERCAT_GS=ON adds the gather/scatter modes (V3-GS) to kernel and host; build it in its own directory
 # (build/enercat_gs) so the catalogue's binaries (build/enercat, build/enercat_v2) are never rebuilt with it.
 option(ENERCAT_GS "compile the gather/scatter modes (400+)" OFF)
+# -DENERCAT_DF=ON adds the V3-DTF modes (300+, gen_df.py); build it in build/enercat-df for the same reason.
+option(ENERCAT_DF "compile the deterministic-flip modes (300+)" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_PREFIX_PATH}/lib/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_PREFIX_PATH}/lib/cmake/cmake-modules")
@@ -26,6 +28,7 @@ ExternalProject_Add(enercat_kernel
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_INSTALL_LIBDIR=lib
         -DENERCAT_GS=${ENERCAT_GS}
+        -DENERCAT_DF=${ENERCAT_DF}
     INSTALL_COMMAND ""
     BUILD_ALWAYS TRUE
     BUILD_BYPRODUCTS ${KERNEL_BINARY_DIR}/enercat.elf

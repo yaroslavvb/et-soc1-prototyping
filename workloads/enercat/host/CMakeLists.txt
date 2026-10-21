@@ -23,3 +23,6 @@ target_link_libraries(enercat_host PRIVATE runtime::etrt deviceLayer::deviceLaye
 if(ENERCAT_GS)
   target_compile_definitions(enercat_host PRIVATE ENERCAT_GS)
 endif()
+if(ENERCAT_DF)
+  target_compile_definitions(enercat_host PRIVATE ENERCAT_DF)
+endif()

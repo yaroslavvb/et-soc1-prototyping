@@ -2445,3 +2445,27 @@ They are E10's telemetry re-read by `tools/ettelem/analyze_dvfs.py`, which class
 changes against the firmware's two thresholds; the seven down-steps that neither threshold explains on the sampled
 values are labelled unattributed. Nothing is fitted.
 
+## E61 — dtf: verifying the deterministic transistor-flip experiments (Q120; card runs 2026-10-21 from about 01:05 PDT, aifoundry3, aifoundry2 and aifoundry1's card 0) — pre-registered
+
+**Asked (Q120):** an agent-written page ("Deterministic transistor-flip experiments on 1,024 RISC-V cores", 20 Oct)
+proposes seven experiments, E-D1 to E-D7, that would price a single transistor flip on the vector unit's one-gate-deep
+ops, and prices from the E46 catalogue that E60 contradicts; run its programme and score it.
+**Pre-registered** in [`tools/claims-v3/dtf/README.md`](../../tools/claims-v3/dtf/README.md) (the page's 95 claims,
+the desk check of the 34 that existing data settle, eleven families, per-item designed counts, predictions as
+intervals, protocol, per-card lists, analysis and decision rules), with the operand files' hashes, the manifest and the
+frozen predictions in [`docs/reports/data/2026-10-21-dtf/`](../reports/data/2026-10-21-dtf/), committed before the
+first measured pass. Families: X (E60's own fxor.pi / fand.pi images, byte-identical), N (E-D1b's fnot.pi dial, as the
+page has it and with no zero word), V (E-D1's 1A/1B rebuilt so a register-file cell flips: 16-op shapes), B (E-D2 as a
+2 x 2: fand.pi / for.pi with the second source held at 0 or all-ones), gate (OR / XOR / ADD at matched counts), C (E-D3's
+carry ladder, zero-free and page-exact), M (E-D4's Miller patterns at matched occupancy), A (E-D5's register-index
+ladder, gated and live), Z (E-D6's zero-gate step), R (the catalogue's operand law and two-hart interleaving), 7 (E-D7's
+halves, with the thermal camera). New code: `workloads/enercat/gen_df.py` (modes 300-309, compiled only with
+`-DENERCAT_DF=ON` into `build/enercat-df`).
+**Proofs before the first pass:** `make_dtf.py --check` (68 items, every count re-derived from the bytes, E60's
+images byte-identical) and `check_elf.py` (the ELF holds exactly the generated blocks; `.text` identical on the three
+boxes) on all three boxes; ten `sys_emu` runs on aifoundry2; a smoke block on each card.
+**Registered from the smoke:** the issue rate belongs to the compiled case (0.5814 ops per cycle per hart for
+`df.c2.fand` and `df.c2.fadd`, 0.6089 for `df.c2.fxor` and mode 179 in this build, 0.5791 for mode 179 in E60's),
+so every comparison is per flip or within one mode.
+**Result:** pending.
+

@@ -1,0 +1,211 @@
+{
+ "first": 300,
+ "modes": [
+  {
+   "name": "df.c2.fand",
+   "mode": 300,
+   "ops_per_iter": 64,
+   "ops": [
+    "fand.pi f8, f0, f7",
+    "fand.pi f9, f1, f7",
+    "fand.pi f10, f2, f7",
+    "fand.pi f11, f3, f7",
+    "fand.pi f12, f0, f7",
+    "fand.pi f13, f1, f7",
+    "fand.pi f14, f2, f7",
+    "fand.pi f15, f3, f7"
+   ],
+   "prologue": [],
+   "note": "E-D2: fand.pi, second source f7 held"
+  },
+  {
+   "name": "df.c2.for",
+   "mode": 301,
+   "ops_per_iter": 64,
+   "ops": [
+    "for.pi f8, f0, f7",
+    "for.pi f9, f1, f7",
+    "for.pi f10, f2, f7",
+    "for.pi f11, f3, f7",
+    "for.pi f12, f0, f7",
+    "for.pi f13, f1, f7",
+    "for.pi f14, f2, f7",
+    "for.pi f15, f3, f7"
+   ],
+   "prologue": [],
+   "note": "E-D2: for.pi, second source f7 held"
+  },
+  {
+   "name": "df.c2.fadd",
+   "mode": 302,
+   "ops_per_iter": 64,
+   "ops": [
+    "fadd.pi f8, f0, f7",
+    "fadd.pi f9, f1, f7",
+    "fadd.pi f10, f2, f7",
+    "fadd.pi f11, f3, f7",
+    "fadd.pi f12, f0, f7",
+    "fadd.pi f13, f1, f7",
+    "fadd.pi f14, f2, f7",
+    "fadd.pi f15, f3, f7"
+   ],
+   "prologue": [],
+   "note": "E-D3: fadd.pi, second source f7 held"
+  },
+  {
+   "name": "df.c2.fxor",
+   "mode": 303,
+   "ops_per_iter": 64,
+   "ops": [
+    "fxor.pi f8, f0, f7",
+    "fxor.pi f9, f1, f7",
+    "fxor.pi f10, f2, f7",
+    "fxor.pi f11, f3, f7",
+    "fxor.pi f12, f0, f7",
+    "fxor.pi f13, f1, f7",
+    "fxor.pi f14, f2, f7",
+    "fxor.pi f15, f3, f7"
+   ],
+   "prologue": [],
+   "note": "gate ladder: fxor.pi, second source f7 held"
+  },
+  {
+   "name": "df.un1a.fnot",
+   "mode": 304,
+   "ops_per_iter": 128,
+   "ops": [
+    "fnot.pi f8, f0",
+    "fnot.pi f9, f1",
+    "fnot.pi f10, f2",
+    "fnot.pi f11, f3",
+    "fnot.pi f12, f4",
+    "fnot.pi f13, f5",
+    "fnot.pi f14, f6",
+    "fnot.pi f15, f7",
+    "fnot.pi f8, f0",
+    "fnot.pi f9, f1",
+    "fnot.pi f10, f2",
+    "fnot.pi f11, f3",
+    "fnot.pi f12, f4",
+    "fnot.pi f13, f5",
+    "fnot.pi f14, f6",
+    "fnot.pi f15, f7"
+   ],
+   "prologue": [],
+   "note": "E-D1 1A: 16 fnot.pi, every sink rewritten with the same value"
+  },
+  {
+   "name": "df.un1b.fnot",
+   "mode": 305,
+   "ops_per_iter": 128,
+   "ops": [
+    "fnot.pi f8, f0",
+    "fnot.pi f9, f1",
+    "fnot.pi f10, f2",
+    "fnot.pi f11, f3",
+    "fnot.pi f12, f4",
+    "fnot.pi f13, f5",
+    "fnot.pi f14, f6",
+    "fnot.pi f15, f7",
+    "fnot.pi f11, f0",
+    "fnot.pi f12, f1",
+    "fnot.pi f13, f2",
+    "fnot.pi f14, f3",
+    "fnot.pi f15, f4",
+    "fnot.pi f8, f5",
+    "fnot.pi f9, f6",
+    "fnot.pi f10, f7"
+   ],
+   "prologue": [],
+   "note": "E-D1 1B: 16 fnot.pi, second half's sinks rotated by 3 (cells flip)"
+  },
+  {
+   "name": "df.addr.a0",
+   "mode": 306,
+   "ops_per_iter": 64,
+   "ops": [
+    "fxor.pi f8, f0, f0",
+    "fxor.pi f9, f0, f0",
+    "fxor.pi f10, f0, f0",
+    "fxor.pi f11, f0, f0",
+    "fxor.pi f12, f0, f0",
+    "fxor.pi f13, f0, f0",
+    "fxor.pi f14, f0, f0",
+    "fxor.pi f15, f0, f0"
+   ],
+   "prologue": [
+    "fxor.pi f30, f0, f0",
+    "fxor.pi f31, f0, f0",
+    "fmv.x.w x0, f30",
+    "fmv.x.w x0, f31"
+   ],
+   "note": "E-D5: fxor.pi fR,fR with R = f0 always (index distance 0)"
+  },
+  {
+   "name": "df.addr.a1",
+   "mode": 307,
+   "ops_per_iter": 64,
+   "ops": [
+    "fxor.pi f8, f0, f0",
+    "fxor.pi f9, f1, f1",
+    "fxor.pi f10, f0, f0",
+    "fxor.pi f11, f1, f1",
+    "fxor.pi f12, f0, f0",
+    "fxor.pi f13, f1, f1",
+    "fxor.pi f14, f0, f0",
+    "fxor.pi f15, f1, f1"
+   ],
+   "prologue": [
+    "fxor.pi f30, f0, f0",
+    "fxor.pi f31, f0, f0",
+    "fmv.x.w x0, f30",
+    "fmv.x.w x0, f31"
+   ],
+   "note": "E-D5: R alternating f0 / f1 (index distance 1)"
+  },
+  {
+   "name": "df.addr.a3",
+   "mode": 308,
+   "ops_per_iter": 64,
+   "ops": [
+    "fxor.pi f8, f0, f0",
+    "fxor.pi f9, f7, f7",
+    "fxor.pi f10, f0, f0",
+    "fxor.pi f11, f7, f7",
+    "fxor.pi f12, f0, f0",
+    "fxor.pi f13, f7, f7",
+    "fxor.pi f14, f0, f0",
+    "fxor.pi f15, f7, f7"
+   ],
+   "prologue": [
+    "fxor.pi f30, f0, f0",
+    "fxor.pi f31, f0, f0",
+    "fmv.x.w x0, f30",
+    "fmv.x.w x0, f31"
+   ],
+   "note": "E-D5: R alternating f0 / f7 (index distance 3)"
+  },
+  {
+   "name": "df.addr.a5",
+   "mode": 309,
+   "ops_per_iter": 64,
+   "ops": [
+    "fxor.pi f8, f0, f0",
+    "fxor.pi f9, f31, f31",
+    "fxor.pi f10, f0, f0",
+    "fxor.pi f11, f31, f31",
+    "fxor.pi f12, f0, f0",
+    "fxor.pi f13, f31, f31",
+    "fxor.pi f14, f0, f0",
+    "fxor.pi f15, f31, f31"
+   ],
+   "prologue": [
+    "fxor.pi f30, f0, f0",
+    "fxor.pi f31, f0, f0",
+    "fmv.x.w x0, f30",
+    "fmv.x.w x0, f31"
+   ],
+   "note": "E-D5: R alternating f0 / f31 (index distance 5)"
+  }
+ ]
+}

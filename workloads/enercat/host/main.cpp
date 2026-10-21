@@ -33,6 +33,9 @@
 #include "Constants.h"
 #include "enercat_args.h"
 #include "enercat_modes.h"
+#ifdef ENERCAT_DF
+#include "enercat_df.h"   // V3-DTF modes 300+ (build/enercat-df only): gen_df.py
+#endif
 #ifdef ENERCAT_GS
 #include <functional>
 #include <set>
@@ -312,6 +315,11 @@ Pat lookup(const std::string& name) {
   for (const auto& g : EC_GEN_MODES) {
     if (name == g.name) return Pat{g.mode, g.ops_per_iter, g.unit, g.hart0};
   }
+#ifdef ENERCAT_DF
+  for (const auto& g : EC_DF_MODES) {
+    if (name == g.name) return Pat{g.mode, g.ops_per_iter, g.unit, g.hart0};
+  }
+#endif
   if (name == "tload_pat") return Pat{EC_TLOAD_PAT, 8, "tensor_load", true};
   if (name == "flw_pat") return Pat{EC_FLW_PAT, 8, "flw.ps", false};
   throw std::runtime_error("unknown --pattern " + name);
@@ -532,7 +540,13 @@ int main(int argc, char** argv) {
     else if (a == "--targets") o.targets = next();
     else if (a == "--jump-every") o.jumpEvery = std::strtoull(next().c_str(), nullptr, 0);
     else if (a == "--jump-bytes") o.jumpBytes = parseSize(next());
-    else if (a == "--list") { for (const auto& g : EC_GEN_MODES) std::printf("%s\t%s\n", g.name, g.note); return 0; }
+    else if (a == "--list") {
+      for (const auto& g : EC_GEN_MODES) std::printf("%s\t%s\n", g.name, g.note);
+#ifdef ENERCAT_DF
+      for (const auto& g : EC_DF_MODES) std::printf("%s\t%s\n", g.name, g.note);
+#endif
+      return 0;
+    }
     else if (a == "--kernel") o.kernel = next();
 #ifdef ENERCAT_GS
     else if (gsParseOne(o, a, next)) {}
