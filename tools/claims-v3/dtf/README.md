@@ -1042,7 +1042,16 @@ not instructions).
 
 ## Amendments
 
-*None yet. Anything changed after this is committed goes here, dated, before the data it touches, and lands by
+**A1 — Wed 21 Oct 2026, 00:58 PDT, before any reduction of measured data.** The passes run faster than §6 planned
+(10.6 s a run): pass 1 took 7.2 min on aifoundry3, 4.0 min on aifoundry1 card 0 and 2.8 min on aifoundry2. Decided on
+elapsed time alone, with no measured data reduced or read beyond each pass's `block.json` status: every card runs more
+passes inside the claim window (to 05:30 PDT). aifoundry3 runs **12** passes (8 + 4), aifoundry1 card 0 **12** (9 + 3)
+and aifoundry2 **14** electrical passes (10 + 4; the extra four run after the dtf-cam block, because aifoundry2's chain
+script is running and is never edited while it runs, §7). Same items, duplicates and protocol. The decision rules' df
+follow the surviving pass count (§9 rule 1). The extra passes are started by `build/dtf-after.sh` on each box, which
+waits for that card's queue (or chain) to end.
+
+*Anything changed after the pre-registration commit goes here, dated, before the data it touches, and lands by
 `mv` between passes (§7) — identified in the reduction by `block_begin`'s `code.sha256`, not by a timestamp. Each
 cut taken under §6's cut order is logged here with its clock time. The first candidate is already visible: if the
 0.2% pair gate voids `d1a`/`d1b`, the fallback is the in-place accumulator (`fxor.pi f8,f8,f0` in eight
