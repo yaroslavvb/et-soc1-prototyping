@@ -700,6 +700,13 @@ On Sunday 11 October (16:40–23:00 PDT) the dashboard's four warnings were clea
 
 ## Traps that cost time here
 
+- **A kernel's issue rate is set by where its loop sits, not by its data (E61, 21 October 2026).** In enercat's
+  vector modes every loop body is 64 or 128 vector ops plus eight scalar instructions, and the measured rate falls into two
+  levels, 0.6088 and 0.5814 ops per cycle per hart, according to the loop head's address mod 32 (6 or 22): 14 of 14 modes,
+  all three cards, constant in the data to 1e-4. The vector unit itself retires one op per cycle per hart; the rest is the
+  loop's own overhead. Rebuilding the kernel moved mode 179 (`fxor.pi`) from 0.5791 (E60's build) to 0.6088, so compare
+  watts only between runs of one build and one mode, and per-op energies against each run's own op count
+  (`tools/claims-v3/dtf/README.md` amendment A2; `docs/reports/data/2026-10-21-dtf/proof/enercat-df-aifoundry2.dis.txt`).
 - **aifoundry2's kernel ring buffer keeps only about an hour (7 October 2026).** AppArmor audit lines from `bwrap`
   arrive every 15 s, and they had pushed the card's 16:46 PCIe errors out of `dmesg` by 17:40. `journalctl -k` needs the
   adm or systemd-journal group. Copy a card's kernel lines into the data folder as soon as it misbehaves.

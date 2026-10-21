@@ -1,0 +1,748 @@
+V3-DTF (E61) reduction -- 2026-10-21T05:31:01
+manifest docs/reports/data/2026-10-21-dtf/manifest-a2.json (68 items, seed 20261021)
+pass dirs: 45 (dtf, dtf-cam, dtf-smoke); primary card aifoundry3
+§9.1 a "3 SE" window is the two-sided t quantile at p = 0.0027 on the between-pass scatter, df = passes - 1:
+     4 passes |t| >= 9.22,  6 passes |t| >= 5.51,  8 passes |t| >= 4.53,  9 passes |t| >= 4.28,  10 passes |t| >= 4.09
+§9.2 the confirmatory five (e_cell, e_carry, e_addr, phase_term, zero_word_term) are Holm-corrected at alpha = 0.05; everything else is exploratory.
+Departures from the plan for tonight's build: the on-silicon register dump (§7 proof 6) is not implemented; modes are 300-309; anchor_pi runs first, middle and last, so the drift statistic is a fitted W/min
+
+== WHAT IS MISSING (20) ==
+  - manifest: the `pair` links join ['d1a_h0', 'd1b_h0'] into one group across modes ['304', '305']; A2 splits it by mode, so the 0.2% pair gate never compares two opcodes and each arm is reduced against its own zero rung
+  - manifest: the `pair` links join ['d1a_h16', 'd1b_h16'] into one group across modes ['304', '305']; A2 splits it by mode, so the 0.2% pair gate never compares two opcodes and each arm is reduced against its own zero rung
+  - manifest: the `pair` links join ['d1a_h32', 'd1b_h32'] into one group across modes ['304', '305']; A2 splits it by mode, so the 0.2% pair gate never compares two opcodes and each arm is reduced against its own zero rung
+  - aifoundry1-c0: the zero-word primary falls on h = 32, which §4 names as not clean (at h = 32 d1n's result is the zero word every other op; at h = 0 nothing flips). The clean rungs are h = 8 and h = 16, and neither ran in both arms on this card.
+  - aifoundry1-c0: family V ran as the h = 32 pair alone with no h = 0 rung for either arm, so A2.3's per-flip slope difference cannot be formed and e_cell is NOT IDENTIFIED here (arms with a zero rung: none). The cross-mode d1b - d1a watt difference is rate-confounded and is reported as a bound only; the decision rests on aifoundry3, where §6 registers it.
+  - aifoundry1-c0: family B's 2x2 has one nonzero rung ([32.0]), so the raw bridge does not remove the §5.1 changed-word term; e_out is quoted from the joint fit alone
+  - aifoundry1-c0: family M absent -- the phase term is NOT IDENTIFIED
+  - aifoundry1-c0: family A absent -- e_addr is NOT IDENTIFIED, the page's 32 fJ x 3 ports stands unscored
+  - aifoundry1-c0: family Z absent -- the zero-gate step is not evaluated on silicon (S3's desk refutation stands alone)
+  - aifoundry1-c0: 8 of the 12 registered passes KEPT; 4 SET ASIDE ([6, 7, 10, 12]) (§8.9: reported and not replaced -- see the pass block for each one's reason). No pass dir is missing: all 12 were read.
+  - aifoundry2: the d1nz ladder has 1 nonzero rung(s), so it has no free intercept and §5.1's R1/R2/R3 reading is NOT IDENTIFIED here
+  - aifoundry2: the zero-word primary falls on h = 32, which §4 names as not clean (at h = 32 d1n's result is the zero word every other op; at h = 0 nothing flips). The clean rungs are h = 8 and h = 16, and neither ran in both arms on this card.
+  - aifoundry2: family V absent -- e_cell is NOT IDENTIFIED
+  - aifoundry2: family B's 2x2 has one nonzero rung ([32.0]), so the raw bridge does not remove the §5.1 changed-word term; e_out is quoted from the joint fit alone
+  - aifoundry2: family C absent -- e_carry is NOT IDENTIFIED
+  - aifoundry2: family A absent -- e_addr is NOT IDENTIFIED, the page's 32 fJ x 3 ports stands unscored
+  - aifoundry2: family Z absent -- the zero-gate step is not evaluated on silicon (S3's desk refutation stands alone)
+  - aifoundry2: family R absent -- rho and the model-free fnot leg are not evaluated
+  - aifoundry2: 13 of the 14 registered passes KEPT; 1 SET ASIDE ([4]) (§8.9: reported and not replaced -- see the pass block for each one's reason). No pass dir is missing: all 14 were read.
+  - aifoundry3: family R absent -- rho and the model-free fnot leg are not evaluated
+
+== smoke blocks (not in the analysis) ==
+  aifoundry1-c0          7 runs, cold start_c [49.0, 52.0, 54.0, 55.0], ok True, participants [1024], items d1b_h32,d2A_h32,d2X_h32,d3_L8,d5_a5,d6_one,xin_h32
+  aifoundry2             7 runs, cold start_c [49.0, 51.0, 52.0, 54.0, 55.0], ok True, participants [1024], items d1b_h32,d2A_h32,d2X_h32,d3_L8,d5_a5,d6_one,xin_h32
+  aifoundry3             7 runs, cold start_c [52.0, 53.0, 54.0], ok True, participants [1024], items d1b_h32,d2A_h32,d2X_h32,d3_L8,d5_a5,d6_one,xin_h32
+
+====================================================================================================
+== aifoundry1-c0: 800 MHz, 604.0 mV, passes [1, 2, 3, 4, 5, 8, 9, 11] (registered 12), runs kept 302/456, leak 0.210 W/C (392 runs; E60 0.327)
+   pass 6 SET ASIDE: 2 of 38 runs failed a gate (5.26% > 5%, and >= the 2-run floor)
+   pass 7 SET ASIDE: 2 of 38 runs failed a gate (5.26% > 5%, and >= the 2-run floor)
+   pass 10 SET ASIDE: 3 of 38 runs failed a gate (7.89% > 5%, and >= the 2-run floor)
+   pass 12 SET ASIDE: anchor drift 2.272 W/5min (>1.997)
+   A2.1 the manifest's `pair` link ['d1a_h0', 'd1b_h0'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   A2.1 the manifest's `pair` link ['d1a_h16', 'd1b_h16'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   A2.1 the manifest's `pair` link ['d1a_h32', 'd1b_h32'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   gate failures: 9 of 456 runs after A3 (1.97%)
+     pass 10 r_not_r1     pos 2   clock [600, 800]; die_mv.minion 566.8 vs the pass median 604.0 (>3 mV)
+     pass 10 r_and_c2     pos 7   clock [600, 700, 800]; die_mv.minion 553.9 vs the pass median 604.0 (>3 mV)
+     pass 10 xin_h0       pos 14  clock [600, 700, 800]; die_mv.minion 553.9 vs the pass median 604.0 (>3 mV)
+     pass 3 xin_h32      pos 21  ramp 1787 ms
+     pass 4 d2B_h32      pos 32  ramp 2129 ms
+     pass 6 r_and_r2     pos 16  clock [600, 700, 800]; die_mv.minion 556.1 vs the pass median 604.0 (>3 mV)
+     pass 6 d1b_h32      pos 28  clock [600, 700, 800]; die_mv.minion 555.3 vs the pass median 604.0 (>3 mV)
+     pass 7 xin_h32      pos 13  clock [600, 800]; die_mv.minion 575.2 vs the pass median 604.0 (>3 mV)
+     pass 7 r_not_r1     pos 19  clock [600, 700, 800]; die_mv.minion 554.0 vs the pass median 604.0 (>3 mV)
+   within-pass repeat spread (§8.10): anchor_pi 0.319 W (max 1.739)
+   IPC per shape (reference mode 179 = 0.6088, E60 0.5791):
+     df.c2.fadd / ops_per_iter 64 / harts 1     0.5815  n/a
+     df.c2.fand / ops_per_iter 64 / harts 1     0.5814  n/a
+     df.c2.for / ops_per_iter 64 / harts 1      0.6089  n/a   <-- >1%, reported (§9)
+     df.un1a.fnot / ops_per_iter 128 / harts 1  0.7356  n/a   <-- >1%, reported (§9)
+     df.un1b.fnot / ops_per_iter 128 / harts 1  0.7574  n/a   <-- >1%, reported (§9)
+     fand.pi / ops_per_iter 64 / harts 1        0.6089  n/a   <-- >1%, reported (§9)
+     fand.pi / ops_per_iter 64 / harts 2        0.3731  n/a   <-- >1%, reported (§9)
+     fnot.pi / ops_per_iter 64 / harts 1        0.5814  n/a
+     fxor.pi / ops_per_iter 64 / harts 1        0.6088  n/a   <-- >1%, reported (§9)
+   -- derived quantities (value, SE, rail, passes, identifying family) --
+     ain_h32_zero_word_corner_W    7.1635 +- 0.0620   W      rail   5.8971   n=8  [X]  excess_over_fit_fJ_per_op -3237.3897
+     e_carry                        0.445 +- 1.433   fJ   rail    0.240 fJ  (rail 1.3 fF / 4970 e- (1/2CV^2), 0.7 fF (CV^2))  n=7  [C]
+                                  t = 0.31 (df 6, 3-sigma |t| >= 4.90, p = 0.766639)  robust SE 1.173 fJ
+     e_carry_alt_from_B             0.445 +- 1.433   fJ   rail      n/a fJ  (no rail leg)  n=7  [C]
+                                  t = 0.31 (df 6, 3-sigma |t| >= 4.90, p = 0.766639)  robust SE 1.173 fJ
+     e_cell                     NOT IDENTIFIED  [V]
+                                  why: family V ran here as the h = 32 pair alone (§6), with no h = 0 rung for either arm, so A2.3's slope difference cannot be formed and e_cell is NOT IDENTIFIED on this card. The cross-mode watt difference is rate-confounded (0.7574 vs 0.7356 ops per cycle per hart); the rate-free per-rung step above is a BOUND. The decision rests on the pinned card, where §6 registers it anyway.
+     e_in_fand                     34.545 +- 1.332   fJ   rail   28.728 fJ  (rail 157.5 fF / 593727 e- (1/2CV^2), 78.7 fF (CV^2))  n=8  [X]
+                                  t = 25.93 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.936 fJ
+     e_in_fand_d2A                 32.822 +- 0.768   fJ   rail   27.623 fJ  (rail 151.4 fF / 570898 e- (1/2CV^2), 75.7 fF (CV^2))  n=8  [B]
+                                  t = 42.73 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.116 fJ
+     e_in_for_d2C                  33.088 +- 0.841   fJ   rail   28.448 fJ  (rail 156.0 fF / 587939 e- (1/2CV^2), 78.0 fF (CV^2))  n=8  [B]
+                                  t = 39.32 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.191 fJ
+     e_in_fxor                     25.385 +- 0.206   fJ   rail   21.453 fJ  (rail 117.6 fF / 443374 e- (1/2CV^2), 58.8 fF (CV^2))  n=8  [X]
+                                  t = 123.19 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.224 fJ
+     e_in_fxor_E60fit              27.250 +- 0.332   fJ   rail   23.082 fJ  (rail 126.5 fF / 477043 e- (1/2CV^2), 63.3 fF (CV^2))  n=8  [X]
+                                  t = 81.96 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.095 fJ
+     e_out_add_plus_e_carry        35.178 +- 0.589   fJ   rail   30.339 fJ  (rail 166.3 fF / 627032 e- (1/2CV^2), 83.2 fF (CV^2))  n=8  [C]
+                                  t = 59.72 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.218 fJ
+     e_out_bridge                  34.568 +- 0.956   fJ   rail   29.877 fJ  (rail 163.8 fF / 617478 e- (1/2CV^2), 81.9 fF (CV^2))  n=7  [B]
+                                  t = 36.18 (df 6, 3-sigma |t| >= 4.90, p = 0.000000)  robust SE 0.896 fJ
+     e_out_bridge_one_rate_superseded    35.385 +- 0.980   fJ   rail      n/a fJ  (no rail leg)  n=7  [B]
+                                  t = 36.12 (df 6, 3-sigma |t| >= 4.90, p = 0.000000)  robust SE 0.920 fJ
+     e_out_fand_BA                 33.654 +- 1.826   fJ   rail   30.663 fJ  (rail 168.1 fF / 633717 e- (1/2CV^2), 84.1 fF (CV^2))  n=7  [B]
+                                  t = 18.43 (df 6, 3-sigma |t| >= 4.90, p = 0.000002)  robust SE 1.205 fJ
+     e_out_for_DC                  35.367 +- 0.966   fJ   rail   29.453 fJ  (rail 161.5 fF / 608705 e- (1/2CV^2), 80.7 fF (CV^2))  n=8  [B]
+                                  t = 36.61 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.376 fJ
+     e_sum_fnot_d1n                67.733 +- 0.257   fJ   rail   57.016 fJ  (rail 312.6 fF / 1178363 e- (1/2CV^2), 156.3 fF (CV^2))  n=8  [N]
+                                  t = 263.55 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.334 fJ
+     e_sum_fnot_d1nz               66.539 +- 0.293   fJ   rail   56.031 fJ  (rail 307.2 fF / 1158001 e- (1/2CV^2), 153.6 fF (CV^2))  n=8  [N]
+                                  t = 227.28 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.173 fJ
+     e_sum_fnot_from_R             61.856 +- 0.936   fJ   rail      n/a fJ  (no rail leg)  n=8  [R]
+                                  t = 66.08 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 1.176 fJ
+     half_die_result_path_load_W    2.1443 +- 0.0594   W      rail   1.8533   n=7  [B]
+                                 t = 36.13 (df 6, 3-sigma window |t| >= 4.90, p = 0.00000)
+     half_sum_fnot_d1n             33.866 +- 0.128   fJ   rail   28.508 fJ  (rail 156.3 fF / 589182 e- (1/2CV^2), 78.1 fF (CV^2))  n=8  [N]
+                                  t = 263.55 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.167 fJ
+     half_sum_fnot_d1nz            33.269 +- 0.146   fJ   rail   28.015 fJ  (rail 153.6 fF / 579000 e- (1/2CV^2), 76.8 fF (CV^2))  n=8  [N]
+                                  t = 227.28 (df 7, 3-sigma |t| >= 4.53, p = 0.000000)  robust SE 0.087 fJ
+     intercept_N_W                 0.2834 +- 0.0465   W      rail   0.1734   n=8  [N]
+                                 t = 6.09 (df 7, 3-sigma window |t| >= 4.53, p = 0.00049)
+     intercept_X_W                 0.5236 +- 0.0706   W      rail   0.5393   n=8  [X]
+                                 t = 7.42 (df 7, 3-sigma window |t| >= 4.53, p = 0.00015)
+     result_path_load_W            4.2886 +- 0.1187   W      rail   3.7066   n=7  [B]
+                                 t = 36.13 (df 6, 3-sigma window |t| >= 4.90, p = 0.00000)
+     rho_harts2_over_harts1        1.1169 +- 0.0242   ratio  rail      n/a   n=8  [R]
+                                 t = 46.10 (df 7, 3-sigma window |t| >= 4.53, p = 0.00000)
+     zero_word_bridge_2gop_gres   -0.4195 +- 0.2855   W      rail   0.0193   n=7  [B]  fJ_per_op -886.1390
+                                 t = -1.47 (df 6, 3-sigma window |t| >= 4.90, p = 0.19205)
+     zero_word_term               -0.1130 +- 0.0313   W      rail  -0.0134   n=8  [N]  fJ_per_op -238.6180
+                                 t = -3.61 (df 7, 3-sigma window |t| >= 4.53, p = 0.00867)
+   -- the ladders (§8.4), one per family/opcode/zero --
+     B|df.c2.fand|d2A_h0        port+result bits/op single form, 1 rung(s) ['d2A_h32']
+        first rung d2A_h32: 3.9777 +- 0.0931 W
+        slope    32.822 +- 0.768    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 32.822 +- 0.768 fJ
+     B|df.c2.fand|d2B_h0        port+result bits/op single form, 1 rung(s) ['d2B_h32']
+        first rung d2B_h32: 8.0530 +- 0.1615 W
+        slope    33.222 +- 0.666    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 33.222 +- 0.666 fJ
+     B|df.c2.for|d2C_h0         port+result bits/op single form, 1 rung(s) ['d2C_h32']
+        first rung d2C_h32: 4.2001 +- 0.1070 W
+        slope    33.088 +- 0.841    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 33.088 +- 0.841 fJ
+     B|df.c2.for|d2D_h0         port+result bits/op single form, 1 rung(s) ['d2D_h32']
+        first rung d2D_h32: 8.6888 +- 0.0209 W
+        slope    34.230 +- 0.082    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 34.230 +- 0.082 fJ
+     C|df.c2.fadd|d3_L0         carry bits/op      multi form, 4 rung(s) ['d3_L2', 'd3_L8', 'd3_L16', 'd3_L29']
+        first rung d3_L2: 0.2413 +- 0.0416 W
+        slope    35.178 +- 0.589    fJ   intercept   -0.0184 +- 0.0355   W   resid rms 0.0484 W
+        E60's own ec fit ((0,0) included): 35.082 +- 0.581 fJ
+        excluded (zero-word mismatch with the zero rung): ['d3p_L29']
+     N|fnot.pi|d1n_h0           port+result bits/op single form, 1 rung(s) ['d1n_h32']
+        first rung d1n_h32: 8.2114 +- 0.0310 W
+        slope    33.866 +- 0.128    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 33.866 +- 0.128 fJ
+     N|fnot.pi|d1nz_h0          port+result bits/op multi form, 3 rung(s) ['d1nz_h8', 'd1nz_h16', 'd1nz_h32']
+        first rung d1nz_h8: 2.2574 +- 0.0402 W
+        slope    33.269 +- 0.146    fJ   intercept    0.2834 +- 0.0465   W   resid rms 0.0505 W
+        E60's own ec fit ((0,0) included): 34.204 +- 0.173 fJ
+     R|fand.pi|r_and_c1         port+result bits/op single form, 1 rung(s) ['r_and_r1']
+        first rung r_and_r1: 3.7479 +- 0.0523 W
+        slope    31.558 +- 0.439    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 31.558 +- 0.439 fJ
+     R|fand.pi|r_and_c2         port+result bits/op single form, 1 rung(s) ['r_and_r2']
+        first rung r_and_r2: 5.1216 +- 0.0911 W
+        slope    35.205 +- 0.627    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 35.205 +- 0.627 fJ
+     R|fnot.pi|r_not_c1         port+result bits/op single form, 1 rung(s) ['r_not_r1']
+        first rung r_not_r1: 3.0819 +- 0.0453 W
+        slope    34.066 +- 0.498    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 34.066 +- 0.498 fJ
+     X|fand.pi|ain_h0           port+result bits/op single form, 1 rung(s) ['ain_h8']
+        first rung ain_h8: 2.1930 +- 0.0844 W
+        slope    34.545 +- 1.332    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 34.545 +- 1.332 fJ
+        excluded (zero-word mismatch with the zero rung): ['ain_h32']
+     X|fxor.pi|xin_h0           port+result bits/op multi form, 3 rung(s) ['xin_h8', 'xin_h16', 'xin_h32']
+        first rung xin_h8: 2.2005 +- 0.0614 W
+        slope    25.385 +- 0.206    fJ   intercept    0.5236 +- 0.0706   W   resid rms 0.0866 W
+        E60's own ec fit ((0,0) included): 27.250 +- 0.332 fJ
+        NB: every rung's zero-word flag differs from the zero rung's, so this slope CONTAINS the zero-word step (['xin_h8', 'xin_h16', 'xin_h32'])
+   -- RECON 5 the leakage-slope arm (primary: fitted (§8.1: the card's own fitted slope)) --
+     k W/C: fitted 0.2099 (from 392 run(s), 86% of them) | zero 0.000 | E60 0.327
+     quantity                                    fitted         k=0         E60   E60-fitted, in SE
+     e_carry                              0.445+-1.433         0.105       0.635   0.13  
+     e_in_fand                           34.545+-1.332        35.392      34.072   -0.35  
+     e_in_fand_d2A                       32.822+-0.768        33.666      32.351   -0.61  
+     e_in_for_d2C                        33.088+-0.841        34.111      32.517   -0.68  
+     e_in_fxor                           25.385+-0.206        26.565      24.727   -3.20  MOVES
+     e_in_fxor_E60fit                    27.250+-0.332        28.202      26.718   -1.60  MOVES
+     e_out_add_plus_e_carry              35.178+-0.589        36.402      34.494   -1.16  MOVES
+     e_out_bridge                        34.568+-0.956        36.102      33.711   -0.90  
+     e_out_fand_BA                       33.654+-1.826        35.584      32.578   -0.59  
+     e_out_for_DC                        35.367+-0.966        36.514      34.727   -0.66  
+     e_sum_fnot_d1nz                     66.539+-0.293        69.052      65.136   -4.79  MOVES
+     half_die_result_path_load_W          2.144+-0.059         2.239       2.091   -0.89  
+     intercept_N_W                        0.283+-0.047         0.221       0.318   0.75  
+     intercept_X_W                        0.524+-0.071         0.489       0.543   0.27  
+     result_path_load_W                   4.289+-0.119         4.479       4.182   -0.89  
+     zero_word_term                      -0.113+-0.031        -0.114      -0.112   0.02  
+     quantities the arm MOVES (>= 1 SE): e_in_fxor, e_in_fxor_E60fit, e_out_add_plus_e_carry, e_sum_fnot_d1nz
+     N intercept at k=E60      0.3181 +- 0.0434  W   matches ['R1_changed_source_word', 'R2_any_changed_word']
+     N intercept at k=fitted   0.2834 +- 0.0465  W   matches ['R1_changed_source_word', 'R2_any_changed_word']
+     N intercept at k=zero     0.2211 +- 0.0556  W   matches ['R1_changed_source_word', 'R2_any_changed_word', 'R3_result_leaves_zero']
+   -- RECON 7 the per-op constant between separately emitted kernels --
+     ipc 0.5810                       d1n_h0, d1nz_h0, d2A_h0, d2B_h0, r_not_c1
+        all of them    spread   0.1237 W =     34.8 fJ per address bit
+        outside fam A  spread   0.1237 W =     34.8 fJ per address bit   (d1n_h0, d1nz_h0, d2A_h0, d2B_h0, r_not_c1)
+     ipc 0.6090                       ain_h0, d2C_h0, d2D_h0, r_and_c1, xin_h0
+        all of them    spread   0.9029 W =    253.6 fJ per address bit
+        outside fam A  spread   0.9029 W =    253.6 fJ per address bit   (ain_h0, d2C_h0, d2D_h0, r_and_c1, xin_h0)
+     HEADLINE (the comparison that is not circular): n/a W = n/a fJ/address bit, over nothing
+     the spread among the zero rungs of OTHER families at the A ladder's own issue rate (None, from None). Family A's own rungs are excluded: the ladder is their difference, so including them would be circular. The widest group at any rate is printed too, but it mixes kernel bodies (fmadd against fxor) and is not the comparison.
+   -- §5.1 the intercept's mechanism (scale vs the pinned card: 1.621) --
+     R1_changed_source_word     target   0.222 W   t     1.32   inside 3 SE: True
+     R2_any_changed_word        target   0.443 W   t    -3.42   inside 3 SE: True
+     R3_result_leaves_zero      target   0.000 W   t     6.09   inside 3 SE: False
+     matched: ['R1_changed_source_word', 'R2_any_changed_word']
+   -- §8.6 the zero-word functional form --
+     constant_per_op    resid rms   0.0721 W  fJ_per_op -115.63 +- 92.47
+     per_flip           resid rms   0.0951 W  fJ_per_flip -0.47 +- 0.13
+     preferred single term: constant_per_op
+   -- family V (A2.3): each arm's per-flip slope against its OWN zero, then the difference --
+     e_cell NOT IDENTIFIED here: family V ran here as the h = 32 pair alone (§6), with no h = 0 rung for either arm, so A2.3's slope difference cannot be formed and e_cell is NOT IDENTIFIED on this card. The cross-mode watt difference is rate-confounded (0.7574 vs 0.7356 ops per cycle per hart); the rate-free per-rung step above is a BOUND. The decision rests on the pinned card, where §6 registers it anyway.
+     cross-mode (rate-confounded, reported only): d1b - d1a at h32    0.8506 +- 0.1867  W   | rate-free per-rung step n/a fJ/op = n/a fJ per cell bit
+   -- family C: the L vs L log2 L topology test --
+     both                 resid rms 0.0293 W
+     linear_L             resid rms 0.0344 W
+     sublinear_L_log2L    resid rms 0.1404 W
+     preferred: linear_L
+   -- §8.5 the joint fit (descriptive; reading R2 for w), 18 rows/pass, cond 7.9 --
+     RECON 3: the column-scaled condition number is 7.946 over 18 rows per pass (raw design 1742330431697343159265337192480768.000, a units artefact of counts-per-second columns beside an intercept of 1.0), and the VIFs below are the collinearity statement that matters
+     e_in            27.370 +- 0.344       fJ  VIF    1.9  n=8  identified by X (and ain); collinear with e_out inside N and V
+     e_out           37.570 +- 0.404       fJ  VIF    1.4  n=8  identified by B's 2x2 (one contrast)
+     e_cell       NOT IDENTIFIED -- NOT IN THE DESIGN on this card: the identifying pair exists in the manifest (['d1a_h32', 'd1b_h32']) but no fitted row carries this count -- its rungs have no zero rung inside the kept set -- so the column was dropped from every per-pass fit
+     e_carry         -2.635 +- (not quoted) fJ  VIF    1.5  n=8  identified by C only, and only given e_out(add) (one contrast)
+     e_addr       NOT IDENTIFIED -- NOT IDENTIFIED on this card: no pair of items differs in this count alone, so the least squares value (0.00 fJ) is an artefact of the collinearity and is withheld
+     w               47.976 +- 6.099       fJ  VIF    1.7  n=8  identified by N's and X's intercepts
+     intercept_W     0.0000 +- 0.0000  W   n=8
+     collinearity: N and V have equal port and result counts at every h: e_in and e_out are perfectly collinear WITHIN them
+     collinearity: C's carry and result counts differ by a constant 8, so they are collinear once a free intercept is present
+====================================================================================================
+== aifoundry2: 800 MHz, 618.0 mV, passes [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] (registered 14), runs kept 311/336, leak 0.272 W/C (266 runs; E60 0.442)
+   pass 4 SET ASIDE: anchor drift 1.626 W/5min (>1.328)
+   A2.1 the manifest's `pair` link ['d1a_h0', 'd1b_h0'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   A2.1 the manifest's `pair` link ['d1a_h16', 'd1b_h16'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   A2.1 the manifest's `pair` link ['d1a_h32', 'd1b_h32'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   gate failures: 1 of 336 runs after A3 (0.30%)
+     pass 14 m_nib_c      pos 7   clock [600, 700, 800]; die_mv.minion 555.4 vs the pass median 618.0 (>3 mV)
+   within-pass repeat spread (§8.10): anchor_pi 0.237 W (max 1.172)
+   IPC per shape (reference mode 179 = 0.6088, E60 0.5791):
+     df.c2.fand / ops_per_iter 64 / harts 1     0.5814  n/a
+     df.c2.for / ops_per_iter 64 / harts 1      0.6089  n/a   <-- >1%, reported (§9)
+     fnot.pi / ops_per_iter 64 / harts 1        0.5814  n/a
+     fxor.pi / ops_per_iter 64 / harts 1        0.6088  n/a   <-- >1%, reported (§9)
+   -- derived quantities (value, SE, rail, passes, identifying family) --
+     e_in_fand_d2A                 35.725 +- 0.175   fJ   rail   28.226 fJ  (rail 147.8 fF / 570141 e- (1/2CV^2), 73.9 fF (CV^2))  n=13  [B]
+                                  t = 204.68 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.149 fJ
+     e_in_for_d2C                  34.908 +- 0.421   fJ   rail   28.566 fJ  (rail 149.6 fF / 577011 e- (1/2CV^2), 74.8 fF (CV^2))  n=13  [B]
+                                  t = 82.84 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.138 fJ
+     e_in_fxor                     25.816 +- 0.792   fJ   rail   21.073 fJ  (rail 110.4 fF / 425656 e- (1/2CV^2), 55.2 fF (CV^2))  n=13  [X]
+                                  t = 32.60 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.075 fJ
+     e_in_fxor_E60fit              28.960 +- 0.468   fJ   rail   22.736 fJ  (rail 119.1 fF / 459248 e- (1/2CV^2), 59.5 fF (CV^2))  n=13  [X]
+                                  t = 61.90 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.114 fJ
+     e_out_bridge                  37.697 +- 0.462   fJ   rail   29.421 fJ  (rail 154.1 fF / 594269 e- (1/2CV^2), 77.0 fF (CV^2))  n=13  [B]
+                                  t = 81.54 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.343 fJ
+     e_out_bridge_one_rate_superseded    38.588 +- 0.473   fJ   rail      n/a fJ  (no rail leg)  n=13  [B]
+                                  t = 81.65 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.354 fJ
+     e_out_fand_BA                 36.846 +- 0.679   fJ   rail   29.304 fJ  (rail 153.5 fF / 591911 e- (1/2CV^2), 76.7 fF (CV^2))  n=13  [B]
+                                  t = 54.26 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.277 fJ
+     e_out_for_DC                  38.510 +- 0.533   fJ   rail   29.532 fJ  (rail 154.6 fF / 596515 e- (1/2CV^2), 77.3 fF (CV^2))  n=13  [B]
+                                  t = 72.26 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.207 fJ
+     e_sum_fnot_d1n                72.194 +- 0.724   fJ   rail   57.352 fJ  (rail 300.3 fF / 1158449 e- (1/2CV^2), 150.2 fF (CV^2))  n=13  [N]
+                                  t = 99.69 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.177 fJ
+     e_sum_fnot_d1nz               73.389 +- 0.286   fJ   rail   57.856 fJ  (rail 303.0 fF / 1168638 e- (1/2CV^2), 151.5 fF (CV^2))  n=13  [N]
+                                  t = 256.64 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.131 fJ
+     half_die_result_path_load_W    2.3391 +- 0.0287   W      rail   1.8255   n=13  [B]
+                                 t = 81.54 (df 12, 3-sigma window |t| >= 3.76, p = 0.00000)
+     half_sum_fnot_d1n             36.097 +- 0.362   fJ   rail   28.676 fJ  (rail 150.2 fF / 579225 e- (1/2CV^2), 75.1 fF (CV^2))  n=13  [N]
+                                  t = 99.69 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.089 fJ
+     half_sum_fnot_d1nz            36.694 +- 0.143   fJ   rail   28.928 fJ  (rail 151.5 fF / 584319 e- (1/2CV^2), 75.7 fF (CV^2))  n=13  [N]
+                                  t = 256.64 (df 12, 3-sigma |t| >= 3.76, p = 0.000000)  robust SE 0.066 fJ
+     intercept_N_W              NOT IDENTIFIED  [N]
+                                  why: the d1nz ladder has 1 nonzero rung(s) here, so its fit goes through the zero and carries NO free intercept: §5.1's R1/R2/R3 discriminator is NOT IDENTIFIED on this card and the §5.1 corrections are taken from the card that has the three-rung ladder (§6 gives aifoundry3 four N rungs and aifoundry1 c0 three)
+                                  nonzero rungs in the ladder: 1.000
+     intercept_X_W                 0.7986 +- 0.1112   W      rail   0.4223   n=13  [X]
+                                 t = 7.18 (df 12, 3-sigma window |t| >= 3.76, p = 0.00001)
+     phase_term                   -0.1530 +- 0.0976   W      rail  -0.0929   n=13  [M]
+                                 t = -1.57 (df 12, 3-sigma window |t| >= 3.76, p = 0.14298)
+     result_path_load_W            4.6783 +- 0.0574   W      rail   3.6511   n=13  [B]
+                                 t = 81.54 (df 12, 3-sigma window |t| >= 3.76, p = 0.00000)
+     zero_word_bridge_2gop_gres   -0.4224 +- 0.0983   W      rail  -0.1969   n=13  [B]  fJ_per_op -892.0061
+                                 t = -4.30 (df 12, 3-sigma window |t| >= 3.76, p = 0.00104)
+     zero_word_term               -0.2661 +- 0.1171   W      rail  -0.0686   n=13  [N]  fJ_per_op -561.8527
+                                 t = -2.27 (df 12, 3-sigma window |t| >= 3.76, p = 0.04224)
+   -- the ladders (§8.4), one per family/opcode/zero --
+     B|df.c2.fand|d2A_h0        port+result bits/op single form, 1 rung(s) ['d2A_h32']
+        first rung d2A_h32: 4.3315 +- 0.0213 W
+        slope    35.725 +- 0.175    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 35.725 +- 0.175 fJ
+     B|df.c2.fand|d2B_h0        port+result bits/op single form, 1 rung(s) ['d2B_h32']
+        first rung d2B_h32: 8.7986 +- 0.0864 W
+        slope    36.287 +- 0.355    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 36.287 +- 0.355 fJ
+     B|df.c2.for|d2C_h0         port+result bits/op single form, 1 rung(s) ['d2C_h32']
+        first rung d2C_h32: 4.4322 +- 0.0535 W
+        slope    34.908 +- 0.421    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 34.908 +- 0.421 fJ
+     B|df.c2.for|d2D_h0         port+result bits/op single form, 1 rung(s) ['d2D_h32']
+        first rung d2D_h32: 9.3217 +- 0.0433 W
+        slope    36.709 +- 0.170    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 36.709 +- 0.170 fJ
+     M|fxor.pi|xin_h0           port+result bits/op single form, 1 rung(s) ['m_solid_z']
+        first rung m_solid_z: 3.7077 +- 0.0600 W
+        slope    29.201 +- 0.473    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 29.201 +- 0.473 fJ
+        excluded (zero-word mismatch with the zero rung): ['m_byte', 'm_nib', 'm_nib_c', 'm_pair', 'm_phase0']
+     N|fnot.pi|d1n_h0           port+result bits/op single form, 1 rung(s) ['d1n_h32']
+        first rung d1n_h32: 8.7527 +- 0.0882 W
+        slope    36.097 +- 0.362    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 36.097 +- 0.362 fJ
+     N|fnot.pi|d1nz_h0          port+result bits/op single form, 1 rung(s) ['d1nz_h32']
+        first rung d1nz_h32: 8.8972 +- 0.0348 W
+        slope    36.694 +- 0.143    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 36.694 +- 0.143 fJ
+     X|fxor.pi|xin_h0           port+result bits/op multi form, 2 rung(s) ['xin_h16', 'xin_h32']
+        first rung xin_h16: 4.0763 +- 0.0560 W
+        slope    25.816 +- 0.792    fJ   intercept    0.7986 +- 0.1112   W   resid rms 0.0000 W
+        E60's own ec fit ((0,0) included): 28.960 +- 0.468 fJ
+        NB: every rung's zero-word flag differs from the zero rung's, so this slope CONTAINS the zero-word step (['xin_h16', 'xin_h32'])
+   !! k_adj for m_byte taken from the plan's §4 table (the manifest carries none)
+   !! k_adj for m_nib taken from the plan's §4 table (the manifest carries none)
+   !! k_adj for m_nib_c taken from the plan's §4 table (the manifest carries none)
+   !! k_adj for m_pair taken from the plan's §4 table (the manifest carries none)
+   !! k_adj for m_phase0 taken from the plan's §4 table (the manifest carries none)
+   !! k_adj for m_solid_z taken from the plan's §4 table (the manifest carries none)
+   -- RECON 5 the leakage-slope arm (primary: fitted (§8.1: the card's own fitted slope)) --
+     k W/C: fitted 0.2721 (from 266 run(s), 79% of them) | zero 0.000 | E60 0.442
+     quantity                                    fitted         k=0         E60   E60-fitted, in SE
+     e_in_fand_d2A                       35.725+-0.175        37.192      34.809   -5.25  MOVES
+     e_in_for_d2C                        34.908+-0.421        36.474      33.930   -2.32  MOVES
+     e_in_fxor                           25.816+-0.792        26.591      25.332   -0.61  
+     e_in_fxor_E60fit                    28.960+-0.468        30.024      28.296   -1.42  MOVES
+     e_out_bridge                        37.697+-0.462        39.160      36.784   -1.98  MOVES
+     e_out_fand_BA                       36.846+-0.679        38.305      35.935   -1.34  MOVES
+     e_out_for_DC                        38.510+-0.533        39.977      37.593   -1.72  MOVES
+     e_sum_fnot_d1nz                     73.389+-0.286        76.151      71.664   -6.03  MOVES
+     half_die_result_path_load_W          2.339+-0.029         2.430       2.282   -1.98  MOVES
+     intercept_X_W                        0.799+-0.111         0.872       0.753   -0.41  
+     phase_term                          -0.153+-0.098        -0.160      -0.148   0.05  
+     result_path_load_W                   4.678+-0.057         4.860       4.565   -1.98  MOVES
+     zero_word_term                      -0.266+-0.117        -0.265      -0.267   -0.01  
+     quantities the arm MOVES (>= 1 SE): e_in_fand_d2A, e_in_for_d2C, e_in_fxor_E60fit, e_out_bridge, e_out_fand_BA, e_out_for_DC, e_sum_fnot_d1nz, half_die_result_path_load_W, result_path_load_W
+   -- §8.6 the zero-word functional form --
+     constant_per_op    resid rms   0.1190 W  fJ_per_op -409.32 +- 153.04
+     per_flip           resid rms   0.1026 W  fJ_per_flip -1.10 +- 0.48
+     preferred single term: per_flip
+   -- family M: 4 distinct k_adj levels (reference xin_h16) --
+     k_adj  0.031   dW  -0.0277 W
+     k_adj  0.969   dW  -0.2750 W
+     k_adj  1.469   dW  -0.4340 W
+     k_adj  1.719   dW  -0.3172 W
+     Spearman rho -0.800 over 4 levels; whole spread -0.2894 +- 0.0713 W (t -4.06, 3-sigma |t| >= 3.76)
+       step  0.031 ->  0.969   -0.2342 +- 0.0657   W  t   -3.56  >= 3 SE: False
+       step  0.969 ->  1.469   -0.1733 +- 0.0884   W  t   -1.96  >= 3 SE: False
+       step  1.469 ->  1.719    0.1168 +- 0.0912   W  t    1.28  >= 3 SE: False
+   -- §8.5 the joint fit (descriptive; reading R2 for w), 8 rows/pass, cond 13.4 --
+     RECON 3: the column-scaled condition number is 13.433 over 8 rows per pass (raw design non-finite, a units artefact of counts-per-second columns beside an intercept of 1.0), and the VIFs below are the collinearity statement that matters
+     e_in            29.914 +- 0.516       fJ  VIF    1.5  n=13  identified by X (and ain); collinear with e_out inside N and V
+     e_out           40.801 +- 0.627       fJ  VIF    2.4  n=13  identified by B's 2x2 (one contrast)
+     e_cell       NOT IDENTIFIED -- NOT IDENTIFIED on this card: no pair of items differs in this count alone, so the least squares value (0.00 fJ) is an artefact of the collinearity and is withheld
+     e_carry      NOT IDENTIFIED -- NOT IDENTIFIED on this card: no pair of items differs in this count alone, so the least squares value (0.00 fJ) is an artefact of the collinearity and is withheld
+     e_addr       NOT IDENTIFIED -- NOT IDENTIFIED on this card: no pair of items differs in this count alone, so the least squares value (0.00 fJ) is an artefact of the collinearity and is withheld
+     w               35.069 +- 11.589      fJ  VIF    1.7  n=13  identified by N's and X's intercepts
+     intercept_W     0.0000 +- 0.0000  W   n=13
+     collinearity: N and V have equal port and result counts at every h: e_in and e_out are perfectly collinear WITHIN them
+     collinearity: C's carry and result counts differ by a constant 8, so they are collinear once a free intercept is present
+====================================================================================================
+== aifoundry2 [dtf-cam]: 800 MHz, 618.5 mV, passes [1, 2, 3, 4] (registered 4), runs kept 80/80, leak 0.102 W/C (33 runs; E60 0.442)
+   no pass set aside (threshold: >5% of runs AND >=2 runs failing a gate [RECON 2], or drift >0.300 W/5min)
+   FIX.7 the launch-reading gate does NOT apply here: this block ran with --preheat 0 (no heater): §10(a)'s contiguous dtf-cam block. Its --target [200.0] is the runner's never-wait sentinel, not a launch reading, so the on-protocol launch gate does not apply and the realised spread is reported instead.
+        realised start_c 55-60 C (mean 59.3), every launch on-protocol: True
+   A2.1 the manifest's `pair` link ['d1a_h0', 'd1b_h0'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   A2.1 the manifest's `pair` link ['d1a_h16', 'd1b_h16'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   A2.1 the manifest's `pair` link ['d1a_h32', 'd1b_h32'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   gate failures: 0 of 80 runs after A3 (0.00%)
+   within-pass repeat spread (§8.10): d7e_hi 0.643 W (max 1.046), d7e_lo 0.278 W (max 0.483), d7w_hi 0.675 W (max 1.135), d7w_lo 0.149 W (max 0.236)
+   -- derived quantities (value, SE, rail, passes, identifying family) --
+     dipole_W_vs_E_board_W        -0.0340 +- 0.3399   W      rail  -0.1682   n=4  [7]
+                                 t = -0.10 (df 3, 3-sigma window |t| >= 9.22, p = 0.92661)
+   -- the ladders (§8.4), one per family/opcode/zero --
+     7|df.c2.fand|d7e_lo        port+result bits/op single form, 1 rung(s) ['d7e_hi']
+        first rung d7e_hi: 2.0449 +- 0.1757 W
+        slope    33.732 +- 2.898    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 33.732 +- 2.898 fJ
+        NB: every rung's zero-word flag differs from the zero rung's, so this slope CONTAINS the zero-word step (['d7e_hi'])
+     7|df.c2.fand|d7w_lo        port+result bits/op single form, 1 rung(s) ['d7w_hi']
+        first rung d7w_hi: 1.9834 +- 0.2389 W
+        slope    32.709 +- 3.939    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 32.709 +- 3.939 fJ
+        NB: every rung's zero-word flag differs from the zero rung's, so this slope CONTAINS the zero-word step (['d7w_hi'])
+   -- RECON 5 the leakage-slope arm (primary: fitted (§8.1: the card's own fitted slope)) --
+     k W/C: fitted 0.1022 (from 33 run(s), 41% of them) | zero 0.000 | E60 0.442
+     quantity                                    fitted         k=0         E60   E60-fitted, in SE
+     dipole_W_vs_E_board_W               -0.034+-0.340        -0.031      -0.043   -0.02  
+     quantities the arm MOVES (>= 1 SE): none
+====================================================================================================
+== aifoundry3: 600 MHz, 522.0 mV, passes [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] (registered 12), runs kept 744/744, leak 0.033 W/C (171 runs; E60 0.203)
+   no pass set aside (threshold: >5% of runs AND >=2 runs failing a gate [RECON 2], or drift >0.639 W/5min)
+   A2.4 excluded by name as rate-confounded (reported beside its ladder, NOT a gate failure): d5_a5
+   A2.1 the manifest's `pair` link ['d1a_h0', 'd1b_h0'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   A2.1 the manifest's `pair` link ['d1a_h16', 'd1b_h16'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   A2.1 the manifest's `pair` link ['d1a_h32', 'd1b_h32'] crosses modes ['304', '305']: SPLIT by mode, so the 0.2% gate never compares two opcodes
+   gate failures: 0 of 744 runs after A3 (0.00%)
+   within-pass repeat spread (§8.10): anchor_pi 0.190 W (max 0.815), d1a_h32 0.075 W (max 0.406), d1b_h32 0.076 W (max 0.371), d1n_h32 0.101 W (max 0.690), d1nz_h32 0.123 W (max 0.645), d2A_h32 0.047 W (max 0.097), d2B_h32 0.085 W (max 0.364), d2C_h32 0.052 W (max 0.161), d2D_h32 0.089 W (max 0.495)
+   IPC per shape (reference mode 179 = 0.6089, E60 0.5791):
+     df.addr.a0 / ops_per_iter 64 / harts 1     0.5815  n/a
+     df.addr.a1 / ops_per_iter 64 / harts 1     0.5814  n/a
+     df.addr.a3 / ops_per_iter 64 / harts 1     0.5815  n/a
+     df.addr.a5 / ops_per_iter 64 / harts 1     0.6087  n/a   <-- >1%, reported (§9)
+     df.c2.fadd / ops_per_iter 64 / harts 1     0.5815  n/a
+     df.c2.fand / ops_per_iter 64 / harts 1     0.5815  n/a
+     df.c2.for / ops_per_iter 64 / harts 1      0.6088  n/a   <-- >1%, reported (§9)
+     df.c2.fxor / ops_per_iter 64 / harts 1     0.6089  n/a   <-- >1%, reported (§9)
+     df.un1a.fnot / ops_per_iter 128 / harts 1  0.7356  n/a   <-- >1%, reported (§9)
+     df.un1b.fnot / ops_per_iter 128 / harts 1  0.7574  n/a   <-- >1%, reported (§9)
+     fmadd.ps / ops_per_iter 64 / harts 1       0.6088  n/a   <-- >1%, reported (§9)
+     fnot.pi / ops_per_iter 64 / harts 1        0.5814  n/a
+     fxor.pi / ops_per_iter 64 / harts 1        0.6089  n/a   <-- >1%, reported (§9)
+   -- derived quantities (value, SE, rail, passes, identifying family) --
+     e_addr                       368.936 +- 21.928  fJ   rail  220.893 fJ  (rail 1621.3 fF / 5282398 e- (1/2CV^2), 810.7 fF (CV^2))  n=12  [A]
+                                  t = 16.82 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 7.390 fJ
+     e_addr_live                  497.641 +- 8.463   fJ   rail  388.943 fJ  (rail 2854.8 fF / 9301125 e- (1/2CV^2), 1427.4 fF (CV^2))  n=12  [A]
+                                  t = 58.80 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 5.757 fJ
+     e_carry                        0.975 +- 0.802   fJ   rail   -0.101 fJ  (rail -0.7 fF / -2409 e- (1/2CV^2), -0.4 fF (CV^2))  n=12  [C]
+                                  t = 1.22 (df 11, 3-sigma |t| >= 3.85, p = 0.249511)  robust SE 0.420 fJ
+     e_carry_R2_corrected           3.482 +- 0.742   fJ   rail      n/a fJ  (no rail leg)  n=12  [C]
+                                  t = 4.69 (df 11, 3-sigma |t| >= 3.85, p = 0.000660)  robust SE 0.715 fJ
+     e_carry_alt_from_B             2.812 +- 0.867   fJ   rail      n/a fJ  (no rail leg)  n=12  [C]
+                                  t = 3.24 (df 11, 3-sigma |t| >= 3.85, p = 0.007842)  robust SE 0.633 fJ
+     e_cell                         0.757 +- 0.324   fJ   rail    0.862 fJ  (rail 6.3 fF / 20618 e- (1/2CV^2), 3.2 fF (CV^2))  n=12  [V]
+                                  t = 2.33 (df 11, 3-sigma |t| >= 3.85, p = 0.039613)  robust SE 0.256 fJ
+     e_cell_h0_null_W              0.0289 +- 0.0244   W      rail   0.0374   n=12  [V]
+                                 t = 1.18 (df 11, 3-sigma window |t| >= 3.85, p = 0.26136)
+     e_in_fand_d2A                 26.112 +- 0.132   fJ   rail   20.216 fJ  (rail 148.4 fF / 483439 e- (1/2CV^2), 74.2 fF (CV^2))  n=12  [B]
+                                  t = 198.21 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.074 fJ
+     e_in_fand_d2A_free_intercept    25.012 +- 0.641   fJ   rail   18.821 fJ  (rail 138.1 fF / 450072 e- (1/2CV^2), 69.1 fF (CV^2))  n=12  [B]
+                                  t = 39.05 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.127 fJ
+     e_in_fand_d2A_through_origin    26.331 +- 0.216   fJ   rail      n/a fJ  (no rail leg)  n=12  [B]
+                                  t = 121.88 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.119 fJ
+     e_in_fand_d2A_with_origin     26.112 +- 0.132   fJ   rail      n/a fJ  (no rail leg)  n=12  [B]
+                                  t = 198.15 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.074 fJ
+     e_in_for_d2C                  26.081 +- 0.293   fJ   rail   19.972 fJ  (rail 146.6 fF / 477616 e- (1/2CV^2), 73.3 fF (CV^2))  n=12  [B]
+                                  t = 88.94 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.215 fJ
+     e_in_fxor                     19.379 +- 0.200   fJ   rail   14.701 fJ  (rail 107.9 fF / 351553 e- (1/2CV^2), 54.0 fF (CV^2))  n=12  [X]
+                                  t = 97.08 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.077 fJ
+     e_in_fxor_E60fit              20.696 +- 0.125   fJ   rail   16.104 fJ  (rail 118.2 fF / 385106 e- (1/2CV^2), 59.1 fF (CV^2))  n=12  [X]
+                                  t = 165.28 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.116 fJ
+     e_out_add_plus_e_carry        28.526 +- 0.413   fJ   rail   22.115 fJ  (rail 162.3 fF / 528863 e- (1/2CV^2), 81.2 fF (CV^2))  n=12  [C]
+                                  t = 69.06 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.174 fJ
+     e_out_bridge                  25.714 +- 0.859   fJ   rail   21.706 fJ  (rail 159.3 fF / 519078 e- (1/2CV^2), 79.7 fF (CV^2))  n=12  [B]
+                                  t = 29.95 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.284 fJ
+     e_out_bridge_one_rate_superseded    26.320 +- 0.879   fJ   rail      n/a fJ  (no rail leg)  n=12  [B]
+                                  t = 29.95 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.297 fJ
+     e_out_fand_BA                 26.417 +- 0.288   fJ   rail   21.078 fJ  (rail 154.7 fF / 504064 e- (1/2CV^2), 77.4 fF (CV^2))  n=12  [B]
+                                  t = 91.59 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.115 fJ
+     e_out_for_DC                  27.038 +- 0.472   fJ   rail   21.828 fJ  (rail 160.2 fF / 522003 e- (1/2CV^2), 80.1 fF (CV^2))  n=12  [B]
+                                  t = 57.28 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.269 fJ
+     e_sum_fnot_d1n                50.687 +- 0.592   fJ   rail   39.647 fJ  (rail 291.0 fF / 948114 e- (1/2CV^2), 145.5 fF (CV^2))  n=12  [N]
+                                  t = 85.59 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.265 fJ
+     e_sum_fnot_d1nz               50.681 +- 0.520   fJ   rail   40.754 fJ  (rail 299.1 fF / 974578 e- (1/2CV^2), 149.6 fF (CV^2))  n=12  [N]
+                                  t = 97.41 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.272 fJ
+     half_die_result_path_load_W    1.2462 +- 0.0111   W      rail   1.0004   n=12  [B]
+                                 t = 111.96 (df 11, 3-sigma window |t| >= 3.85, p = 0.00000)
+     half_sum_fnot_d1n             25.343 +- 0.296   fJ   rail   19.824 fJ  (rail 145.5 fF / 474057 e- (1/2CV^2), 72.8 fF (CV^2))  n=12  [N]
+                                  t = 85.59 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.133 fJ
+     half_sum_fnot_d1nz            25.341 +- 0.260   fJ   rail   20.377 fJ  (rail 149.6 fF / 487289 e- (1/2CV^2), 74.8 fF (CV^2))  n=12  [N]
+                                  t = 97.41 (df 11, 3-sigma |t| >= 3.85, p = 0.000000)  robust SE 0.136 fJ
+     intercept_N_W                 0.2283 +- 0.0342   W      rail   0.0865   n=12  [N]
+                                 t = 6.67 (df 11, 3-sigma window |t| >= 3.85, p = 0.00004)
+     intercept_X_W                 0.3140 +- 0.0302   W      rail   0.3346   n=12  [X]
+                                 t = 10.38 (df 11, 3-sigma window |t| >= 3.85, p = 0.00000)
+     phase_term                   -0.0393 +- 0.0316   W      rail  -0.0747   n=12  [M]
+                                 t = -1.24 (df 11, 3-sigma window |t| >= 3.85, p = 0.23968)
+     result_path_load_W            2.4924 +- 0.0223   W      rail   2.0008   n=12  [B]
+                                 t = 111.96 (df 11, 3-sigma window |t| >= 3.85, p = 0.00000)
+     zero_gate_step                0.0875 +- 0.0600   W      rail   0.0068   n=12  [Z]  pJ_per_op 0.2348
+                                 t = 1.46 (df 11, 3-sigma window |t| >= 3.85, p = 0.17287)
+     zero_word_bridge_2gop_gres   -0.1726 +- 0.0588   W      rail  -0.1620   n=12  [B]  fJ_per_op -485.0942
+                                 t = -2.93 (df 11, 3-sigma window |t| >= 3.85, p = 0.01361)
+     zero_word_term               -0.0478 +- 0.0257   W      rail  -0.0699   n=12  [N]  fJ_per_op -134.2111
+                                 t = -1.86 (df 11, 3-sigma window |t| >= 3.85, p = 0.09017)
+   -- the ladders (§8.4), one per family/opcode/zero --
+     A|df.addr|d5_a0            addr bits/op       multi form, 2 rung(s) ['d5_a1', 'd5_a3']
+        first rung d5_a1: 0.4697 +- 0.0201 W
+        slope   368.936 +- 21.928   fJ   intercept    0.2071 +- 0.0324   W   resid rms 0.0000 W
+        E60's own ec fit ((0,0) included): 452.110 +- 12.157 fJ
+     A|df.addr|d5n_a0           addr bits/op       single form, 1 rung(s) ['d5n_a3']
+        first rung d5n_a3: 1.0623 +- 0.0181 W
+        slope   497.641 +- 8.463    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 497.641 +- 8.463 fJ
+     B|df.c2.fand|d2A_h0        port+result bits/op multi form, 2 rung(s) ['d2A_h16', 'd2A_h32']
+        first rung d2A_h16: 1.2393 +- 0.0329 W
+        slope    25.012 +- 0.641    fJ   intercept    0.1001 +- 0.0611   W   resid rms 0.0000 W
+        E60's own ec fit ((0,0) included): 26.112 +- 0.132 fJ
+     B|df.c2.fand|d2B_h0        port+result bits/op multi form, 2 rung(s) ['d2B_h16', 'd2B_h32']
+        first rung d2B_h16: 2.5153 +- 0.0136 W
+        slope    24.909 +- 0.253    fJ   intercept    0.2467 +- 0.0285   W   resid rms 0.0000 W
+        E60's own ec fit ((0,0) included): 26.264 +- 0.137 fJ
+     B|df.c2.for|d2C_h0         port+result bits/op multi form, 2 rung(s) ['d2C_h16', 'd2C_h32']
+        first rung d2C_h16: 1.3112 +- 0.0339 W
+        slope    24.661 +- 0.689    fJ   intercept    0.1354 +- 0.0607   W   resid rms 0.0000 W
+        E60's own ec fit ((0,0) included): 26.081 +- 0.293 fJ
+     B|df.c2.for|d2D_h0         port+result bits/op multi form, 2 rung(s) ['d2D_h16', 'd2D_h32']
+        first rung d2D_h16: 2.6225 +- 0.0401 W
+        slope    25.614 +- 0.583    fJ   intercept    0.1800 +- 0.0908   W   resid rms 0.0000 W
+        E60's own ec fit ((0,0) included): 26.557 +- 0.178 fJ
+     C|df.c2.fadd|d3_L0         carry bits/op      multi form, 4 rung(s) ['d3_L2', 'd3_L8', 'd3_L16', 'd3_L29']
+        first rung d3_L2: 0.0976 +- 0.0312 W
+        slope    28.526 +- 0.413    fJ   intercept   -0.0447 +- 0.0230   W   resid rms 0.0529 W
+        E60's own ec fit ((0,0) included): 28.218 +- 0.294 fJ
+     M|fxor.pi|xin_h0           port+result bits/op multi form, 4 rung(s) ['m_byte', 'm_nib', 'm_pair', 'm_phase0']
+        first rung m_byte: 1.9725 +- 0.0459 W
+        slope    21.836 +- 0.238    fJ   intercept    0.0000 +- 0.0000   W   resid rms 0.1046 W
+        E60's own ec fit ((0,0) included): 21.836 +- 0.238 fJ
+        NB: every rung's zero-word flag differs from the zero rung's, so this slope CONTAINS the zero-word step (['m_byte', 'm_nib', 'm_pair', 'm_phase0'])
+     N|fnot.pi|d1n_h0           port+result bits/op multi form, 3 rung(s) ['d1n_h8', 'd1n_h16', 'd1n_h32']
+        first rung d1n_h8: 1.3106 +- 0.0240 W
+        slope    25.343 +- 0.296    fJ   intercept    0.1777 +- 0.0302   W   resid rms 0.0329 W
+        E60's own ec fit ((0,0) included): 26.124 +- 0.216 fJ
+     N|fnot.pi|d1nz_h0          port+result bits/op multi form, 3 rung(s) ['d1nz_h8', 'd1nz_h16', 'd1nz_h32']
+        first rung d1nz_h8: 1.3604 +- 0.0264 W
+        slope    25.341 +- 0.260    fJ   intercept    0.2283 +- 0.0342   W   resid rms 0.0320 W
+        E60's own ec fit ((0,0) included): 26.343 +- 0.182 fJ
+     V|df.un1a.fnot|d1a_h0      port+result bits/op multi form, 2 rung(s) ['d1a_h16', 'd1a_h32']
+        first rung d1a_h16: 3.2462 +- 0.0152 W
+        slope    25.524 +- 0.075    fJ   intercept    0.3055 +- 0.0160   W   resid rms 0.0000 W
+        E60's own ec fit ((0,0) included): 26.849 +- 0.082 fJ
+     V|df.un1b.fnot|d1b_h0      port+result bits/op multi form, 2 rung(s) ['d1b_h16', 'd1b_h32']
+        first rung d1b_h16: 3.4101 +- 0.0194 W
+        slope    25.902 +- 0.155    fJ   intercept    0.3367 +- 0.0355   W   resid rms 0.0000 W
+        E60's own ec fit ((0,0) included): 27.321 +- 0.055 fJ
+     X|fxor.pi|xin_h0           port+result bits/op multi form, 3 rung(s) ['xin_h8', 'xin_h16', 'xin_h32']
+        first rung xin_h8: 1.2330 +- 0.0291 W
+        slope    19.379 +- 0.200    fJ   intercept    0.3140 +- 0.0302   W   resid rms 0.0321 W
+        E60's own ec fit ((0,0) included): 20.696 +- 0.125 fJ
+        NB: every rung's zero-word flag differs from the zero rung's, so this slope CONTAINS the zero-word step (['xin_h8', 'xin_h16', 'xin_h32'])
+     gate|df.c2.fadd|d3z_h0     port+result bits/op single form, 1 rung(s) ['d3z_h32']
+        first rung d3z_h32: 4.8879 +- 0.0601 W
+        slope    26.831 +- 0.331    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 26.831 +- 0.331 fJ
+     gate|df.c2.fxor|d2X_h0     port+result bits/op single form, 1 rung(s) ['d2X_h32']
+        first rung d2X_h32: 5.3208 +- 0.0277 W
+        slope    27.891 +- 0.146    fJ   intercept       n/a +- n/a      W   resid rms n/a W
+        E60's own ec fit ((0,0) included): 27.891 +- 0.146 fJ
+   !! k_adj for m_byte taken from the plan's §4 table (the manifest carries none)
+   !! k_adj for m_nib taken from the plan's §4 table (the manifest carries none)
+   !! k_adj for m_pair taken from the plan's §4 table (the manifest carries none)
+   !! k_adj for m_phase0 taken from the plan's §4 table (the manifest carries none)
+   !! ladder A|df.addr|d5_a0: its zero rung d5_a0 is a df.addr.a0 item, so this slope carries alpha(df) - alpha(df.addr) and is NOT a matched-opcode price (E60 subtracted the same opcode's own h0 rung)
+   !! ladder A|df.addr|d5n_a0: its zero rung d5n_a0 is a df.addr.a0 item, so this slope carries alpha(df) - alpha(df.addr) and is NOT a matched-opcode price (E60 subtracted the same opcode's own h0 rung)
+   -- RECON 5 the leakage-slope arm (primary: fitted (§8.1: the card's own fitted slope)) --
+     k W/C: fitted 0.0330 (from 171 run(s), 23% of them) | zero 0.000 | E60 0.203
+     quantity                                    fitted         k=0         E60   E60-fitted, in SE
+     e_addr                             368.936+-21.928      376.287     331.127   -1.72  MOVES
+     e_addr_live                        497.641+-8.463       501.705     476.742   -2.47  MOVES
+     e_carry                              0.975+-0.802         1.020       0.742   -0.29  
+     e_cell                               0.757+-0.324         0.780       0.638   -0.37  
+     e_in_fand_d2A                       26.112+-0.132        26.217      25.567   -4.13  MOVES
+     e_in_for_d2C                        26.081+-0.293        26.243      25.249   -2.84  MOVES
+     e_in_fxor                           19.379+-0.200        19.379      19.379   -0.00  
+     e_in_fxor_E60fit                    20.696+-0.125        20.699      20.678   -0.14  
+     e_out_add_plus_e_carry              28.526+-0.413        28.614      28.075   -1.09  MOVES
+     e_out_bridge                        25.714+-0.859        25.682      25.881   0.19  
+     e_out_fand_BA                       26.417+-0.288        26.349      26.767   1.21  MOVES
+     e_out_for_DC                        27.038+-0.472        26.982      27.328   0.61  
+     e_sum_fnot_d1nz                     50.681+-0.520        50.681      50.681   -0.00  
+     half_die_result_path_load_W          1.246+-0.011         1.243       1.261   1.34  MOVES
+     intercept_N_W                        0.228+-0.034         0.244       0.145   -2.42  MOVES
+     intercept_X_W                        0.314+-0.030         0.315       0.310   -0.14  
+     phase_term                          -0.039+-0.032        -0.039      -0.039   0.00  
+     result_path_load_W                   2.492+-0.022         2.487       2.522   1.34  MOVES
+     zero_gate_step                       0.087+-0.060         0.087       0.087   0.00  
+     zero_word_term                      -0.048+-0.026        -0.048      -0.048   0.00  
+     quantities the arm MOVES (>= 1 SE): e_addr, e_addr_live, e_in_fand_d2A, e_in_for_d2C, e_out_add_plus_e_carry, e_out_fand_BA, half_die_result_path_load_W, intercept_N_W, result_path_load_W
+     N intercept at k=E60      0.1455 +- 0.0313  W   matches ['R1_changed_source_word']
+     N intercept at k=fitted   0.2283 +- 0.0342  W   matches ['R1_changed_source_word', 'R2_any_changed_word']
+     N intercept at k=zero     0.2444 +- 0.0361  W   matches ['R1_changed_source_word', 'R2_any_changed_word']
+   -- RECON 8 e_cell's scaling test (h = 16 against h = 32) --
+     fJ per cell bit: 1.129 +- 0.465 at h16 | 0.944 +- 0.211 at h32  -> paired difference -0.186 +- 0.341 (ratio of means 0.836, -16.4%), proportional within 3 SE: True
+     per-op step: 144.568 +- 59.503 fJ at h16 -> 241.615 +- 54.009 fJ at h32, a growth of 1.671x where a proportional law needs 2.00x
+   -- RECON 7 the per-op constant between separately emitted kernels --
+     ipc 0.5810 (the A ladder's rate) d1n_h0, d1nz_h0, d2A_h0, d2B_h0, d3z_h0, d5_a0, d5_a1, d5_a3, d5n_a0, d5n_a3
+        all of them    spread   1.0681 W =    300.0 fJ per address bit
+        outside fam A  spread   0.0895 W =     25.1 fJ per address bit   (d1n_h0, d1nz_h0, d2A_h0, d2B_h0, d3z_h0)
+     ipc 0.6090                       d2C_h0, d2D_h0, d2X_h0, d5_a5, d6_one, d6_zero, xin_h0
+        all of them    spread   5.5427 W =   1556.9 fJ per address bit
+        outside fam A  spread   5.5427 W =   1556.9 fJ per address bit   (d2C_h0, d2D_h0, d2X_h0, d6_one, d6_zero, xin_h0)
+     HEADLINE (the comparison that is not circular): 0.0895 W = 25.1 fJ/address bit, over d1n_h0, d1nz_h0, d2A_h0, d2B_h0, d3z_h0
+     the spread among the zero rungs of OTHER families at the A ladder's own issue rate (0.581, from d5_a0). Family A's own rungs are excluded: the ladder is their difference, so including them would be circular. The widest group at any rate is printed too, but it mixes kernel bodies (fmadd against fxor) and is not the comparison.
+   -- §5.1 the intercept's mechanism (scale vs the pinned card: 1.000) --
+     R1_changed_source_word     target   0.137 W   t     2.67   inside 3 SE: True
+     R2_any_changed_word        target   0.273 W   t    -1.31   inside 3 SE: True
+     R3_result_leaves_zero      target   0.000 W   t     6.67   inside 3 SE: False
+     matched: ['R1_changed_source_word', 'R2_any_changed_word']
+   -- §8.6 the zero-word functional form --
+     both               resid rms   0.0427 W  fJ_per_op -47.06 +- 60.83, fJ_per_flip -0.22 +- 0.15
+     constant_per_op    resid rms   0.0589 W  fJ_per_op -95.48 +- 53.00
+     per_flip           resid rms   0.0597 W  fJ_per_flip -0.34 +- 0.16
+     preferred single term: constant_per_op
+   -- the gate ladder (e_in + e_out per opcode, matched counts and port count) --
+     d2D_h32      df.c2.for     53.12 +- 0.36    fJ   depth rank 1
+     d2X_h32      df.c2.fxor     55.78 +- 0.29    fJ   depth rank 2
+     d3z_h32      df.c2.fadd     53.66 +- 0.66    fJ   depth rank 3
+     spread 2.67 fJ (t 5.78, 3-sigma |t| >= 3.85), monotone in depth: False
+   -- family V (A2.3): each arm's per-flip slope against its OWN zero, then the difference --
+     1A  mode 304  zero d1a_h0   h 16,32        slope    25.524 +- 0.075   fJ per port+result bit
+     1B  mode 305  zero d1b_h0   h 16,32        slope    25.902 +- 0.155   fJ per port+result bit
+     1B - 1A      0.378 +- 0.162   fJ per port+result bit  x 2.0 (= port+result bits / cell bits) -> e_cell 0.757 +- 0.324 fJ per CELL bit
+     cross-mode (rate-confounded, reported only): d1b - d1a at h0     0.0289 +- 0.0244  W   | rate-free per-rung step n/a fJ/op = n/a fJ per cell bit
+     cross-mode (rate-confounded, reported only): d1b - d1a at h16    0.1928 +- 0.0157  W   | rate-free per-rung step 144.6 fJ/op = 1.129 fJ per cell bit
+     cross-mode (rate-confounded, reported only): d1b - d1a at h32    0.3240 +- 0.0262  W   | rate-free per-rung step 241.6 fJ/op = 0.944 fJ per cell bit
+   -- family A (A2.4): the rate-confounded rung, beside the ladder, never inside it --
+     d5_a5    delta 5      448.01 +- 2.97    fJ per address bit   (mode retires at another rate)
+   -- family A: gated minus live at MATCHED register-index distance (§9's own arm) --
+     delta0    -0.0058 +- 0.0142  W   t   -0.41 (3-sigma |t| >= 3.85)
+     delta3    -0.0734 +- 0.0288  W   t   -2.55 (3-sigma |t| >= 3.85)
+   -- family M: 4 distinct k_adj levels (reference xin_h16) --
+     k_adj  0.031   dW   0.0198 W
+     k_adj  0.969   dW  -0.0663 W
+     k_adj  1.469   dW  -0.1057 W
+     k_adj  1.719   dW  -0.1977 W
+     Spearman rho -1.000 over 4 levels; whole spread -0.2175 +- 0.0591 W (t -3.68, 3-sigma |t| >= 3.85)
+       step  0.031 ->  0.969   -0.0862 +- 0.0451   W  t   -1.91  >= 3 SE: False
+       step  0.969 ->  1.469   -0.0393 +- 0.0316   W  t   -1.24  >= 3 SE: False
+       step  1.469 ->  1.719   -0.0920 +- 0.0490   W  t   -1.88  >= 3 SE: False
+   -- family C: the L vs L log2 L topology test --
+     both                 resid rms 0.0088 W
+     linear_L             resid rms 0.0158 W
+     sublinear_L_log2L    resid rms 0.0863 W
+     preferred: linear_L
+   -- §8.5 the joint fit (descriptive; reading R2 for w), 31 rows/pass, cond 9.2 --
+     RECON 3: the column-scaled condition number is 9.212 over 31 rows per pass (raw design 279463229586764.844, a units artefact of counts-per-second columns beside an intercept of 1.0), and the VIFs below are the collinearity statement that matters
+     e_in            21.658 +- 0.116       fJ  VIF    1.9  n=12  identified by X (and ain); collinear with e_out inside N and V
+     e_out           29.666 +- 0.154       fJ  VIF    1.9  n=12  identified by B's 2x2 (one contrast)
+     e_cell           1.267 +- (not quoted) fJ  VIF    1.2  n=12  identified by V only (one contrast)
+     e_carry         -1.881 +- (not quoted) fJ  VIF    1.2  n=12  identified by C only, and only given e_out(add) (one contrast)
+     e_addr         465.689 +- (not quoted) fJ  VIF    0.9  n=12  identified by A only (one contrast)
+     w               34.918 +- 2.090       fJ  VIF    2.1  n=12  identified by N's and X's intercepts
+     intercept_W     0.0000 +- 0.0000  W   n=12
+     collinearity: N and V have equal port and result counts at every h: e_in and e_out are perfectly collinear WITHIN them
+     collinearity: C's carry and result counts differ by a constant 8, so they are collinear once a free intercept is present
+====================================================================================================
+== §8.7 across cards ==
+  aifoundry1-c0          V 604.0 mV, V^2 ratio 1.339 (E60 1.339); e_in 25.39 fJ (ratio to a3 1.310, E60 tie 1.216); e_out 34.57 fJ
+  aifoundry2             V 618.0 mV, V^2 ratio 1.402 (E60 1.402); e_in 25.82 fJ (ratio to a3 1.332, E60 tie 1.376); e_out 37.70 fJ
+  aifoundry3             V 522.0 mV, V^2 ratio 1.000 (E60 1.0); e_in 19.38 fJ (ratio to a3 1.000, E60 tie 1.0); e_out 25.71 fJ
+  E60 read card-to-card agreement inside a 0.88-0.99 band (§8.7); `_inside_pm12pct` is the symmetric +-12% reading, reported beside it and never merged with it
+
+== §9.2 the confirmatory family, Holm-corrected at alpha = 0.05 on aifoundry3 ==
+  e_cell           t    2.33 (df 11) rank 2, alpha 0.0125, |t| >= 2.98 -> not significant
+  e_carry          t    1.22 (df 11) rank 5, alpha 0.0500, |t| >= 2.20 -> not tested (a higher rank failed; Holm stops)
+  e_addr           t   16.82 (df 11) rank 1, alpha 0.0100, |t| >= 3.11 -> significant at alpha=0.05 family-wise
+  phase_term       t   -1.24 (df 11) rank 4, alpha 0.0250, |t| >= 2.59 -> not tested (a higher rank failed; Holm stops)
+  zero_word_term   t   -1.86 (df 11) rank 3, alpha 0.0167, |t| >= 2.82 -> not tested (a higher rank failed; Holm stops)
+  everything else in this file is EXPLORATORY and labelled so (§9.2)
+
+== §9 verdicts ==
+  C13 C15                CONFIRMED          determinism of the designed flip counts
+      basis: no run failed the within-mode rate / ok / participants gates on any card; 0 pair-group subtraction(s) voided by the 0.2% gate; ['d5_a5'] excluded by name as rate-confounded (A2.4) and reported beside its ladder. RECON 16: the 0.2% matched-pair gate RAN on families ['A', 'C', 'M', 'N', 'X'] and NEVER RAN on families ['7', 'B', 'R', 'V', 'Z', 'anchor', 'gate'] -- those have no `pair` link in the manifest (and A2 splits every group by mode), so their zero voids mean the gate was never applicable, not that it passed. The rest of this arm is OFF-CARD and stays visible: the objdump walk against enercat_df.inc on every new mode, the ten sys_emu runs of §7 proof 4, and {'aifoundry1-c0': 0, 'aifoundry2': 0, 'aifoundry2 [dtf-cam]': 0, 'aifoundry3': 0} DUMP line(s) in any run.log -- there is NO on-silicon register dump tonight (§7 proof 6 is not implemented), so a corruption that leaves op count and participants intact is outside the evidence.
+      caveat: the on-silicon register dump (plan §7 proof 6) was NOT implemented tonight, so this row rests on the ec rate gate, ok, participants and the off-card proofs (make_dtf.py --check, the objdump walk, sys_emu, the smoke block). DUMP lines seen: {'aifoundry1-c0': 0, 'aifoundry2': 0, 'aifoundry2 [dtf-cam]': 0, 'aifoundry3': 0}
+  C33 C37                OPEN               an inverter is cheap: 2 FETs vs 10-12
+      basis: spread >= 3 SE (|t| = 4.880 against the 3-sigma-equivalent 3.850 -- VER 12: read on §8.4's PAIRED per-pass statistic, df.c2.fxor - df.c2.for differenced inside each pass, 2.666 +- 0.546 fJ over 12 passes. The cross-item reading the wf4 build used, sqrt(se_min^2 + se_max^2), gives 2.666 +- 0.461 fJ and |t| = 5.78; the per-pass max - min gives 3.581 +- 0.647 fJ and |t| = 5.54. All three fire the same arm here) but NOT monotone in depth (depth 1 -> 53.12 fJ, depth 2 -> 55.78 fJ, depth 3 -> 53.66 fJ): reported as opcode-dependent, not gate-depth-dependent
+      context: RECON 14: this row rests on 12 pass(es) (the card has 12) -- the three opcodes are read at the ONE h they share (XCHK 3) and the statistic is the between-pass scatter of THAT contrast. The measured order is df.c2.for (depth 1) 53.12 fJ, df.c2.fxor (depth 2) 55.78 fJ, df.c2.fadd (depth 3) 53.66 fJ; that order is NOT gate depth (for = 1, fxor = 2, fadd = 3), so even a significant spread reads opcode-dependent, never gate-depth-dependent. The margin is |t| = 4.88 of the 3.85 window = 126.8% (VER 12: on §8.4's paired per-pass statistic; the cross-item reading gives |t| = 5.78). How close is it to the other arm? The 3-sigma-equivalent quantile falls with df (3.69 at 14 passes to 4.90 at 7), so holding tonight's |t| = 4.88 fixed the arm reads: 7 passes -> |t| >= 4.90 -> REFUTED (spread < 3 SE); 8 passes -> |t| >= 4.53 -> OPEN (spread >= 3 SE); 9 passes -> |t| >= 4.28 -> OPEN (spread >= 3 SE); 10 passes -> |t| >= 4.09 -> OPEN (spread >= 3 SE); 12 passes -> |t| >= 3.85 -> OPEN (spread >= 3 SE); 14 passes -> |t| >= 3.69 -> OPEN (spread >= 3 SE). So the verdict TURNS ON the pass count at tonight's |t|. §6 registered 8 passes on this card and amendment A1 delivered 12. Note this sensitivity moves the QUANTILE only -- the realised SE, and so |t| itself, also depends on which passes ran, so a REFUTED reading of this row needs a smaller realised spread-to-scatter ratio than tonight's, not just fewer passes.
+      note: the fnot-vs-fxor leg is reported SEPARATELY as one-port/one-gate vs two-port/one-gate; the registered conclusion is a bound on the total gate contribution, never an attribution to FET count
+  C61 C62 I-22           under-resolved     energy per flipped register-file cell bit
+      basis: SE 0.324 fJ exceeds one third of the rule's 0.30 fJ separation (§9.4). For the record, RECON 8's scaling test, which VER 7 reads as HAVING NO POWER HERE: the per-cell-bit price is 1.129 +- 0.465 fJ at h = 16 and 0.944 +- 0.211 fJ at h = 32, a paired difference of -0.186 +- 0.341 fJ/bit (-16.4% change, ratio of means 0.836) where a law proportional to the designed cell count needs zero, and the per-op step grows 1.671x where it needs 2.00x. That difference is |t| = 0.54 against the 3.85 3-sigma-equivalent window, so BOTH readings survive: proportionality (a difference of exactly 0) is inside 3 SE and so is the measured -16.4% change, which is why `proportional_within_3SE` prints True. The test therefore neither supports nor denies scaling with h -- it does not discriminate at this resolution, so the CONFIRMED arm's second condition is UNTESTED, not satisfied and not failed. The wf3 build recorded it as SATISFIED without testing it at all, and the wf4 build read the same non-result as 'nothing here shows the cell term scaling with h'; neither is evidence either way.
+      method: §9 rule 4, one ordering (RECON 6): the under-resolved test (SE > one third of the rule's separation) is evaluated BEFORE the arms in every row; if it fires the row is not scored. Only then are the arms read, and two arms satisfied -> OPEN with the realised SE reported.
+      leak arm (RECON 5): fitted 0.757 +- 0.324 | k=0 0.780 | E60 0.638 fJ   (within 1 SE)
+  C56 C57 C63 C64 C86    OPEN               e_out, from the 2x2 bridge with w fitted
+      basis: §9 rule 4 precedence: the CONFIRMED arm is satisfied -- the joint-fit e_out lands in E60's [30.00, 31.17] fJ -> E60 confirmed through a second, independent kernel (29.67 +- 0.154 fJ, inside it only once widened by its own 3-SE-equivalent window of +-0.59 fJ (§5.0 rule 2); the point value is below the interval); the raw (B+D)-(A+C) combination reads 25.71 +- 0.86 fJ, 3.95 fJ lower, and §5.1 is why e_out is quoted from the fit that carries changed words as a regressor -- AND the registered OPEN condition "the h = 0 intercepts differ by more than 3 SE between cells" fires on d2A-d2C = -0.0944 +- 0.0230 W (t -4.10 vs 3.85), d2A-d2D = -0.0933 +- 0.0163 W (t -5.74 vs 3.85), d2B-d2D = -0.0750 +- 0.0131 W (t -5.73 vs 3.85). Every differing pair is CROSS-opcode (d2A-d2C, d2A-d2D, d2B-d2D) and the two within-opcode pairs agree, so the measured pattern is alpha(fand) - alpha(for) -- exactly the term the 2 x 2 cancels by construction (§4), which is why the arm's number still landed. So the row is OPEN, and the number above is reported, not scored. || RECON 3, the two readings side by side: the registered basis is the JOINT-FIT e_out, 29.67 +- 0.154 fJ (VIF 1.92, column-scaled condition number 9.212 over 31 rows per pass), and the raw 2 x 2 reads 25.71 +- 0.859 fJ. VER 3, what the gap IS: the joint fit sits 3.952 fJ per flip above the raw combination, which on the bridge's own per-mode denominator (256 x rate(d2B_h32) + 256 x rate(d2D_h32) -- RECON 1, each leg at its own mode's rate = 1.8645e+14 bits/s) is 0.7368 W. The §5.1 R2 changed-word term is a PART of that gap, not the whole of it: the raw combination changes 16 32-bit word(s) per op and §5.1 prices them at the ladder intercept, 0.2283 W = 1.224 fJ per flip, which is 31.0% of the gap. The remaining 0.5085 W is the difference between two estimators -- a pooled 7-regressor fit against a 2 x 2 difference of four cells -- and is not accounted for by changed words. The raw bridge's own rate denominator was corrected by RECON 1 (each leg at its own mode's rate), which moved it 2.36% down from the single-rate form.
+      method: §9 rule 4, one ordering (RECON 6): the under-resolved test (SE > one third of the rule's separation) is evaluated BEFORE the arms in every row; if it fires the row is not scored. Only then are the arms read, and two arms satisfied -> OPEN with the realised SE reported.
+      leak arm (RECON 5): fitted 25.714 +- 0.859 | k=0 25.682 | E60 25.881 fJ   (within 1 SE)
+  C65                    REFUTED            A vs C measures the NMOS/PMOS Miller skew
+      basis: by design, whatever the data: (B-A)-(D-C) = 2 g_op + g_res, so the A-vs-C difference carries the held-value and zero-result effects, and A and C also differ in opcode. Reported as an AND/OR/clamp-polarity contrast, never as device polarity.
+  C14 C64                not scored         d2A: the read-port price with a static result
+      basis: REPORTED, NOT SCORED (VER 2, README §5.2): the A/C arms are registered as the MEASUREMENT of e_in(fand) / e_in(for), so d2A cannot both supply e_in(fand) and be tested against it, and the equivalence to E60's one-rung 28.10 +- 0.70 fJ is dropped as a decision -- reported as agreement or disagreement. The reading is AGREEMENT: d2A's delta / 8h lands in E60's fand interval [26.0, 30.2] fJ: 26.112 +- 0.132 fJ, inside the interval itself. d2C (for.pi, the same shape with a static all-ones result) reads 26.081 fJ, so the two read-port prices agree with each other, which is the premise the bridge's e_out rests on and is the part of this row that carries weight.
+      context: RECON 11: the arm sits AT THE EDGE. The quoted value is 26.112 +- 0.132 fJ against an interval that opens at 26.0 fJ -- 0.112 fJ above it, 0.85 SE. Every rung: h16 27.211 +- 0.723 fJ, h32 26.112 +- 0.132 fJ. Every fit form: (0,0) added + free intercept (= the endpoint slope by algebra) = 26.112 +- 0.132 fJ; forced through the origin, no intercept = 26.331 +- 0.216 fJ; one rung, delta / 8h (the row's own form) = 26.112 +- 0.132 fJ; two rungs, free intercept (§8.4's form) = 25.012 +- 0.641 fJ. The rungs disagree by more than the quoted SE, so 'inside the interval' is a statement about WHICH rung and WHICH fit form were chosen, not only about the data; that choice is listed in the method block.
+      margin: VER 5, the leakage-slope arm MOVES THIS ROW'S ANSWER, not only its number: at the fitted slope 0.033 W/C (PRIMARY, §8.1), 26.112 +- 0.132 fJ -- INSIDE the strict [26.0, 30.2] and INSIDE it once widened by its own 3-SE window of +-0.507 fJ (AGREEMENT); at k = 0, 26.217 +- 0.144 fJ -- INSIDE the strict [26.0, 30.2] and INSIDE it once widened by its own 3-SE window of +-0.556 fJ (AGREEMENT); at E60's 0.203 W/C, 25.567 +- 0.230 fJ -- OUTSIDE the strict [26.0, 30.2] and INSIDE it once widened by its own 3-SE window of +-0.885 fJ (AGREEMENT). §8.1 registers the card's own FITTED slope, so the reading above is the fitted one; the E60-slope reading is reported beside it and is not the row's answer. Since the row is reported rather than scored (VER 2), the agreement is a statement about the slope choice as well as about the data.
+      not_scored_because: README §5.2: the A/C arms ARE the measurement of e_in(fand) / e_in(for), so the equivalence to E60's 28.10 fJ is reported as agreement or disagreement, never scored (VER 2)
+      leak arm (RECON 5): fitted 26.112 +- 0.132 | k=0 26.217 | E60 25.567 fJ   <-- MOVES: E60 - fitted = -0.544 = -4.13 SE
+  C54 C67 C68 C87        CONFIRMED-ours     "about 14 fJ per carry stage"
+      basis: e_carry lands on 1.7 fJ +- 3 SE and 14.2 fJ is excluded at >= 3 SE || RECON 4, the registered estimator: e_out(add) comes from d3z -- the same opcode, the same shape, the same pass -- as 2 x its per-(port+result)-bit slope minus e_in from the SAME c2 shape's d2A, giving e_out(add) = 27.55 +- 0.664 fJ, and e_carry = the d3 slope per carry node (28.53 +- 0.413 fJ) minus it. §4 forbids importing e_out from fand/for; that route reads e_carry = 2.81 +- 0.867 fJ and is printed as e_carry_alt_from_B, and the d3z-minus-e_in(fxor) route (a different shape and opcode) reads e_out(add) = 34.28 fJ. || RECON 4 / §5.1, and this one is NOT cosmetic: the d3z leg is ONE rung through its own zero, and that zero changes 16 fewer 32-bit word(s) per op (0 against 16), so the registered e_out(add) carries the changed-word term under reading R2 -- +2.51 fJ/flip priced at the N ladder's own fitted intercept -- exactly as XCHK 7 says of a one-rung bridge. Corrected for it, e_out(add) = 25.04 fJ and e_carry = 3.48 +- 0.742 fJ, which reads CONFIRMED-ours: 1.7 fJ is inside 3 SE (|t| 2.40) and 14.2 fJ is excluded (|t| 14.44), against the 3.85 window. So the row's verdict DOES NOT depend on whether that term is removed: the registered form and the R2-corrected form give the SAME verdict. Both readings are reported; the primary is the registered form (0.98 fJ, verdict CONFIRMED-ours), because §4 registers the estimator and §5.1's reading is itself an OPEN row in this file. VER 1: the term is priced at the intercept per R2 changed word (16 words/op), which is the reading dw is counted on -- the wf4 build priced it per SOURCE word (8) against an R2 count of 16, doubling it to 5.01 fJ/flip and flipping this corrected reading to REFUTED-both on nothing but the mismatched reading.
+      unit_note: the L vs L log2 L fit prefers linear_L; on a parallel-prefix adder 'per carry stage' is refuted AS A UNIT whatever the number
+      method: §9 rule 4, one ordering (RECON 6): the under-resolved test (SE > one third of the rule's separation) is evaluated BEFORE the arms in every row; if it fires the row is not scored. Only then are the arms read, and two arms satisfied -> OPEN with the realised SE reported.
+      leak arm (RECON 5): fitted 0.975 +- 0.802 | k=0 1.020 | E60 0.742 fJ   (within 1 SE)
+  C47 C55 C69-C73 C88    REFUTED            the Miller wire law at matched occupancy and counts
+      basis: the whole spread is < 3 SE -> the design did not deliver k_adj and nothing about C_gnd vs C_adj can be read from it
+      context: RECON 12: the four k_adj levels are MONOTONE IN THE WRONG DIRECTION. Spearman rho over the pass-averaged levels is -1.000, and the per-pass rho is -0.667 +- 0.146 over 12 pass(es) -- so this is not one outlier pass. The whole spread is -0.2175 +- 0.0591 W, and the page's law predicts +0.275 W: more adjacency reads LESS power, by 0.4925 W. A REFUTED verdict here means only 'the design did not deliver k_adj'; it must not be read as support for the law, and the arm fired at 95.6% of its threshold, a thin margin. The complement control (m_nib vs m_nib_c) exists only on aifoundry2 -- -0.0325 +- 0.0957 W over 12 pass(es), complement-symmetric within 3 SE -- because §6 puts m_nib_c on that card's list alone.
+      note: bit index = physical wire adjacency is an ASSUMPTION, stated in the result, not discovered later; the page-exact m_solid_z point is reported only after the N-measured zero-word correction and is confounded by construction either way
+      method: §9 rule 4, one ordering (RECON 6): the under-resolved test (SE > one third of the rule's separation) is evaluated BEFORE the arms in every row; if it fires the row is not scored. Only then are the arms read, and two arms satisfied -> OPEN with the realised SE reported.
+      leak arm (RECON 5): fitted -0.039 +- 0.032 | k=0 -0.039 | E60 -0.039 W   (within 1 SE)
+  C46 C74 C75 C76 C89    under-resolved     energy per toggled register-index bit
+      basis: SE 21.928 fJ exceeds one third of the 32 fJ separation (§9.4). RECON 7, for the record: the measured slope is 368.9 +- 21.9 fJ/bit, 11.5x the page's 32 fJ/bit and 184x the 0-2 fJ prior's ceiling, so 32 fJ/bit is excluded FROM ABOVE (|t| = 15.4 against the 3.85 window). The registered REFUTED arm is a CEILING test -- the page claims 32 fJ a bit and the question was whether silicon is cheaper -- so an exclusion from above does not answer it and the exclusion is read ONE-SIDED DOWNWARD ONLY. Read as 'NOT MEASURABLE AS REGISTERED', with the ladder reported descriptively. The wf3 build read this row as REFUTED on that upward exclusion. And on whether it can be e_addr at all: A2.4 fits a0/a1/a3 as ONE cross-mode ladder, and those are modes 306/307/308 -- three SEPARATELY EMITTED kernels that share one issue rate to 1e-4 but not necessarily one per-op constant, which a single free intercept cannot remove (it removes a common offset, not a mode-dependent one). Measured size of such a constant: zero rungs flip nothing, so two at the SAME issue rate differ only in which kernel the build emitted. At the A ladder's own rate (0.5810) the zero rungs of the OTHER families -- d1n_h0, d1nz_h0, d2A_h0, d2B_h0, d3z_h0 -- span 0.0895 W = 25.1 fJ per address bit on this ladder (§9 rule 3: 0.00356 W per fJ/bit), which is 11% of the ladder's own signal of 0.788 W and 7% of its 368.9 fJ/bit slope. So a kernel-to-kernel constant of the size measured ELSEWHERE accounts for part of the slope, not all of it -- and it cannot be subtracted, because the A rungs' own spread (1.0681 W over d1n_h0, d1nz_h0, d2A_h0, d2B_h0, d3z_h0, d5_a0, d5_a1, d5_a3, d5n_a0, d5n_a3) is the ladder itself and using it would be circular. The slope is therefore an UPPER BOUND on e_addr with an unresolved per-op term inside it, which is why no CONFIRMED arm is registered and why this number must not be read as e_addr.
+      note: no CONFIRMED arm is registered: the family's resolution is ~20 fJ/bit against a 0-2 fJ prior, so this is a one-sided exclusion, not a measurement. The wordline claim is refuted either way, since the same wordline count is asserted at every distance. A gated-vs-live difference >= 3 SE means data-path gating reaches the address path and the zero-data ladder is a LOWER bound -- read that from the MATCHED-DELTA pair (d5_a0/d5n_a0 and d5_a3/d5n_a3), not from the slope difference, whose two fits have different forms (the gated ladder is a 2-rung free-intercept fit, the live one a single rung through its zero).
+      method: §9 rule 4, one ordering (RECON 6): the under-resolved test (SE > one third of the rule's separation) is evaluated BEFORE the arms in every row; if it fires the row is not scored. Only then are the arms read, and two arms satisfied -> OPEN with the realised SE reported.
+      leak arm (RECON 5): fitted 368.936 +- 21.928 | k=0 376.287 | E60 331.127 fJ   <-- MOVES: E60 - fitted = -37.809 = -1.72 SE
+  C79 C80 C90            REFUTED            the zero-gate step
+      basis: <= 0.5 pJ/op -> the page's +8.94 pJ is refuted on silicon as well as in the catalogue; this reads as "a null, <= 0.1 W", not as a measurement of 0.147 pJ
+      margin: VER 8, the margin: the step is 0.2348 +- 0.1611 pJ/op (0.0875 +- 0.0600 W) and the REFUTED arm is a hard boundary at 0.5 pJ/op, which is 1.65 SE away -- well inside this statistic's own 3-SE-equivalent window of +-0.620 pJ/op (|t| >= 3.85 at 12 passes). So the verdict rests on the POINT VALUE: the OPEN band 0.5-2.5 pJ/op is NOT excluded (its lower edge sits inside the window, which reaches 0.855 pJ/op), while the page's 8.94 pJ/op is excluded at 54.0 SE. Read it as "a null, <= 0.1 W" with an upper bound of 0.855 pJ/op at 3 SE, not as a 3-SE exclusion of the OPEN band.
+  C58 C83 C84 C91        OPEN               tier 1: dP_card == 0 and the half-die result-path load
+      basis: one arm of tier 1 is outside its window -- W-vs-E equality: equal within 3 SE; half-die load 1.246 W against [1.33, 1.42]
+      context: RECON 15: the half-die load three ways -- measured half-combination 1.2462 +- 0.0111 W; from the joint-fit e_out 1.3510 W; from the RECON-1-corrected raw bridge 1.1710 W; strict [1.33, 1.42] W OUTSIDE, after its own 3-SE widening of +-0.043 W OUTSIDE.
+      caveat: VER 11, the four-pass caveat on the W-vs-E half: it is measured on the §10(a) dtf-cam block, 4 pass(es) -- BELOW §9's own 6-pass floor for a confirmatory item ("a genuine 4-pass SE there would be ~1.6x larger ... which is why the floor is 6 passes") -- and at that pass count the 3-sigma-equivalent quantile is 9.22, not 4.53. The reading is -0.0340 +- 0.3399 W, so "equal within 3 SE" means only that an asymmetry smaller than 3.13 W was not detected: this arm could not have seen a 3.1 W difference, let alone the page's own dipole. It is an absence of evidence at low resolution, not an equality.
+      tier2: EXPLORATORY, no CONFIRMED/REFUTED arm (§9): the lobe's displacement is reported with its permutation p-value; if it does not move ~11 mm the result is the voltage regulators, per the thermal hub's own control
+  C22 C23 C26            REFUTED            the operand law and hart interleaving
+      basis: rho is within 3 SE of 1.12-1.14 -> interleaving destroys sharing, the catalogue's split is unidentifiable from --harts 2 data, and the page's 6.81:1 is the full-interleave reading by coincidence; the model-free fnot leg reads 61.86 +- 0.94 fJ on aifoundry1-c0, against E60's [52.00, 53.10] fJ scaled by THIS campaign's MEASURED per-bit tie x1.310 (RECON 9: measured, not E60's x1.216) to [68.1, 69.6] -- OUTSIDE even tie-scaled and widened, so the operand law is not confirmed on this leg. The page's 128-flip model would read 39.6 fJ and is excluded either way; the tie itself: measured 1.310 (no-origin ladder fit) and 1.317 (with-origin, E60's own ec form) against E60's 1.216, a ratio of 1.077 -- OUTSIDE §8.7's registered 0.88-0.99 card-to-card band, so the scaling is a reported method choice, not a check that passed
+      margin: VER 10, the margin: rho = 1.1169 +- 0.0242 W/W on 8 passes, so the CONFIRMED arm's 1.000 is 4.82 SE away and is excluded at 106.5% of the 4.53 3-sigma-equivalent threshold, while the REFUTED arm's 1.12-1.14 band is 0.52 SE away (its centre 1.1295) and is NOT excluded. The arm fires, but on a margin of 0.29 SE past the threshold, not comfortably: a realised SE 6.5% larger would put 1.000 back inside and read OPEN (partial interleaving, fraction 0.903).
+      note: separately, (r_not_r1 - r_not_c1) - N's intercept, / 95.556, landing in [52.00, 53.10] x the card's per-bit tie +- 3 SE confirms the real operand law and refutes the page's 128-flip model (which would read 39.6 fJ)
+  S10 C16 C59            OPEN               the whole-card instruction rate
+      basis: RECON 10, the finding first: MODE 179 ITSELF SHIFTED BETWEEN BUILDS. The same mode -- same pattern, same designed counts -- ran 0.5791 ops per cycle per hart in E60's build and {'aifoundry1-c0': 0.6088, 'aifoundry2': 0.6088, 'aifoundry3': 0.6089} in tonight's, +5.14%, on every card, with no change to the data it touches. So the registered REFUTED arm ('0.579 +- 0.01 on all three cards') does not fire on its exact number, and the reason is a build-level issue-rate change, not a rate instability. Measured {'aifoundry1-c0': 0.6088, 'aifoundry2': 0.6088, 'aifoundry3': 0.6089} per hart; the page's 1.0 IPC is refuted at 0.609x either way. Every shape in this file is now compared against the REGISTERED 0.5791 (RECON 10: the wf3 build compared against TONIGHT's mode 179, which hid this shift and flagged the three 0.5814 shapes instead). Shapes off the registered reference by more than 1%: {'df.c2.for / ops_per_iter 64 / harts 1': {'aifoundry1-c0': 5.14, 'aifoundry2': 5.14, 'aifoundry3': 5.13}, 'df.un1a.fnot / ops_per_iter 128 / harts 1': {'aifoundry1-c0': 27.03, 'aifoundry3': 27.03}, 'df.un1b.fnot / ops_per_iter 128 / harts 1': {'aifoundry1-c0': 30.79, 'aifoundry3': 30.79}, 'fand.pi / ops_per_iter 64 / harts 1': {'aifoundry1-c0': 5.15}, 'fand.pi / ops_per_iter 64 / harts 2': {'aifoundry1-c0': 1.8}, 'fxor.pi / ops_per_iter 64 / harts 1': {'aifoundry1-c0': 5.13, 'aifoundry2': 5.13, 'aifoundry3': 5.14}, 'df.addr.a5 / ops_per_iter 64 / harts 1': {'aifoundry3': 5.11}, 'df.c2.fxor / ops_per_iter 64 / harts 1': {'aifoundry3': 5.15}, 'fmadd.ps / ops_per_iter 64 / harts 1': {'aifoundry3': 5.12}}.
+      finding: WHY THERE ARE TWO LEVELS AT ALL (the physics skeptic, E61's physics review -- re-derived here from docs/reports/data/2026-10-21-dtf/proof/enercat-df-aifoundry2.dis.txt, not quoted): the level follows the LOOP HEAD'S ADDRESS MOD 32. Over the 84 long packed-vector loops in the binary, the c2 family's four opcodes pin the map one-to-one -- mode 300 (fand.pi) head 0x8005802396, mod 32 = 22, 0.5814 ops/cycle/hart; mode 301 (for.pi) head 0x8005802206, mod 32 = 6, 0.6088 ops/cycle/hart; mode 302 (fadd.pi) head 0x8005802076, mod 32 = 22, 0.5814 ops/cycle/hart; mode 303 (fxor.pi) head 0x8005801ee6, mod 32 = 6, 0.6088 ops/cycle/hart -- so heads at 6 (mod 32) issue 0.6088 ops per cycle per hart and heads at 22 issue 0.5814, a 4.71% difference with NOTHING in the data changing. The four df.addr kernels cannot be named a0/a1/a3/a5 from the bytes, so they are a COUNT check and it agrees: 1 head(s) at the fast residue and 3 at the slow, against 1 of modes 306-309 at the fast rate and 3 at the slow. This is an instruction-FETCH alignment effect: it is why A2.1 found the rate fixed by the mode rather than by h, why it is identical on all three cards, why every rate gate had to be computed within one mode, and why the same mode can shift between builds (mode 179's +5.1% above is a relink moving its head across a fetch boundary). It is reported, never a gate: §9's own row says each shape's IPC is a REPORTED quantity.
+      note: each new shape's measured IPC is REPORTED against mode 179's 0.5791 whenever it differs by more than 1% -- a reported quantity, not a gate
+  E60's corner           under-resolved     the zero-operand (zero-word) term
+      basis: SE 0.0257 W exceeds one third of the rule's separation (2% of the 2.569 W matched delta) (§9.4) || VER 4, the replication set, NOT POOLED (§8.6): 4 replication(s) across 3 card(s), each in fJ per op at its own rate -- B 2 g_op + g_res (fand/for) [aifoundry3] = -485.09 +- 165.37 fJ/op [aifoundry3, df.c2.fand]; N primary (d1n - d1nz) [aifoundry3] = -134.21 +- 72.25 fJ/op [aifoundry3, fnot.pi]; fadd (d3p - d3) [aifoundry1-c0] = 28.40 +- 126.00 fJ/op [aifoundry1-c0, df.c2.fadd]; miller (m_solid_z - m_phase0) [aifoundry2] = -687.23 +- 98.53 fJ/op [aifoundry2, fxor.pi]. The heterogeneity check FIRES: 2 of 6 pair(s) differ by >= 3 SE (N primary (d1n - d1nz) [aifoundry3] vs miller (m_solid_z - m_phase0) [aifoundry2] |t| 4.53; fadd (d3p - d3) [aifoundry1-c0] vs miller (m_solid_z - m_phase0) [aifoundry2] |t| 4.47), Cochran's Q = 28.7 on 3 df about an inverse-variance mean of -285.3 fJ/op that is printed only as Q's centre and is read by nothing. So the set is reported as OPCODE-DEPENDENT, the README's registered OPEN arm, and no single zero-word term is applied across opcodes.
+      context: RECON 13 as VER 4 corrects it: the four replications §8.6 registers are GATHERED across cards -- two of them are not on the pinned card's list at all, d3p_L29 lives on aifoundry1-c0 and m_solid_z on aifoundry2 (§6), so a heterogeneity check run on the primary card alone would have two members, not four -- and they are NOT POOLED into one indicator. Each is labelled with its card and its opcode and compared in fJ per op, never as watts (§8.6). Members gathered (not pooled): B 2 g_op + g_res (fand/for) [aifoundry3], N primary (d1n - d1nz) [aifoundry3], fadd (d3p - d3) [aifoundry1-c0], miller (m_solid_z - m_phase0) [aifoundry2]. The TERM applied wherever this correction is used is the form the §8.6 fit prefers, and it comes from the N PRIMARY alone, never from the replications: constant_per_op = -95.48 +- 53.00 fJ/op, against the single-rung headline of -134.21 fJ/op at h = 16.
+      method: §9 rule 4, one ordering (RECON 6): the under-resolved test (SE > one third of the rule's separation) is evaluated BEFORE the arms in every row; if it fires the row is not scored. Only then are the arms read, and two arms satisfied -> OPEN with the realised SE reported.
+      leak arm (RECON 5): fitted -0.048 +- 0.026 | k=0 -0.048 | E60 -0.048 W   (within 1 SE)
+  the ladder intercept   OPEN               E60's +0.273 W, per changed word
+      basis: OPEN for a reason the §9 partition does NOT name (VER 9): MORE THAN ONE of the three readings is inside 3 SE -- ['R1_changed_source_word', 'R2_any_changed_word'] -- because the measured intercept 0.2283 +- 0.0342 W sits between R1's 0.137 W and R2's 0.273 W and the realised SE covers both. That is not the registered OPEN arm. The REGISTERED arm is the X-vs-N disagreement per changed word, and it does NOT fire: X per changed source word 0.01963 +- 0.00189 W against N per changed source word 0.02854 +- 0.00428 W, a difference of -0.00891 +- 0.00515 W, |t| 1.73 against the 3.85 3-sigma-equivalent window (does not fire), so the two shapes' intercepts AGREE once scaled by their word counts (16 words/op in rot2, 8 in the unary shape) and nothing here is shape-dependent. Consequence, as §5.1 directs: every §5.1 target is reported at both its R1 and its R2 value and the bridge's e_out is quoted from the joint fit.; RECON 5, the leakage-slope arm: §8.1 corrects each run with the card's own FITTED slope, and E60 fitted 0.203 W/C on this card, an order of magnitude larger (the die sensor steps in whole degrees, so only 23% of runs qualify for the within-run drift fit). The intercept and therefore THIS ROW move with that choice: k = 0.033 W/C -> intercept 0.2283 +- 0.0342 W, matches ['R1_changed_source_word', 'R2_any_changed_word']; k = 0.000 W/C -> intercept 0.2444 +- 0.0361 W, matches ['R1_changed_source_word', 'R2_any_changed_word']; k = 0.203 W/C -> intercept 0.1455 +- 0.0313 W, matches ['R1_changed_source_word']. The per-flip prices do not (see leak_sensitivity). The verdict above is read at the FITTED slope, which §8.1 registers; the reading at E60's slope is reported beside it and is not scored.
+      open_arm: UNNAMED by the §9 partition: more than one reading is inside 3 SE, while the registered OPEN arm (X vs N per changed word) does not fire
+      leak arm (RECON 5): fitted 0.228 +- 0.034 | k=0 0.244 | E60 0.145 W   <-- MOVES: E60 - fitted = -0.083 = -2.42 SE
+
+== RECON 15 the method choices (not a claim row: no arm, no verdict) ==
+  RECON 15: stated so a reader can tell a method choice from a measurement. Each entry names the alternatives, the one chosen and why.
+  d2A_rung_and_fit_form_for_C14    the h = 32 delta / 8h, as the row's own rule spells it, with every rung and every fit form printed because the arm sits at the interval's edge (RECON 11)
+  e_out_add_for_e_carry            from d3z, the same opcode and shape and pass, minus e_in from the same c2 shape's d2A, as §4 registers (RECON 4); the family-B import is printed as an alternative, and because d3z has one nonzero rung the registered form carries the §5.1 changed-word term, so the R2-corrected value is printed beside it and the verdict stated for both
+  e_out_for_C56                    the joint-fit e_out, which the registered rule names, with the raw 2 x 2 beside it (RECON 3)
+  family_A_with_or_without_the_origin:
+     chosen                         the FREE-INTERCEPT fit (the plan's §8.4 form), because every A rung has every data count exactly zero and the intercept is the only thing that can absorb the kernels' common per-op offset
+     free_intercept_fJ_per_bit      368.93643181083775
+     free_intercept_se_fJ           21.92844667055941
+     note                           the two differ by 83.2 fJ/bit, far more than either SE, which is itself the reason C46 is read as 'not measurable as registered' (RECON 7)
+     with_origin_fJ_per_bit         452.10980982846223
+     with_origin_se_fJ              12.156795868924837
+  rule_4_ordering                  §9 rule 4, one ordering (RECON 6): the under-resolved test (SE > one third of the rule's separation) is evaluated BEFORE the arms in every row; if it fires the row is not scored. Only then are the arms read, and two arms satisfied -> OPEN with the realised SE reported.
+  the_cross_card_tie:
+     chosen                         THIS campaign's measured e_in ratio from the NO-ORIGIN ladder fit (RECON 9), with the with-origin reading and E60's published tie printed beside it
+     note                           E60's 20.83 +- 0.10 fJ anchor came from the WITH-ORIGIN form (§5.2), so a tie built from no-origin fits is self-consistent within this campaign but is not E60's number; both are reported wherever a target is tie-scaled
+     ties                           {'aifoundry1-c0': {'measured_no_origin': 1.3099, 'measured_with_origin': 1.3167, 'E60': 1.216, 'measured_over_E60': 1.0772, 'inside_the_0.88_0.99_band': False}, 'aifoundry2': {'measured_no_origin': 1.3321, 'measured_with_origin': 1.3993, 'E60': 1.376, 'measured_over_E60': 0.9681, 'inside_the_0.88_0.99_band': True}}
+  the_half_die_load:
+     card                           aifoundry3
+     chosen                         (a) as the quoted number, with (b) and (c) printed; the arm's answer is stated for the strict reading AND the widened one
+     three_ways                     see the C58 row's half_die_three_ways: (a) half the measured 1/2[(B-A)+(D-C)] combination, (b) e_out x 256 bits/op x rate / 2 from the joint fit and from the RECON-1-corrected raw bridge, (c) the strict [1.33, 1.42] W interval against the same number widened by its own 3-SE window (§5.0 rule 2, XCHK 4)
+  the_leakage_slope:
+     arms                           k = 0 and E60's fitted slope for the card, on every quantity -- see each card's leak_sensitivity block and the ladder-intercept row
+     chosen                         fitted, as registered; the arm exists because tonight's fit and E60's differ by an order of magnitude and the N-ladder intercept moves with it
+     primary                        the card's own FITTED slope (§8.1)
+
+Every capacitance and electron count above is from the MINION RAIL leg (§8.4); board figures are labelled board energy per flip.  Both the 1/2 CV^2 and the CV^2 conventions are printed, since conflating them is the page's own claim S8.

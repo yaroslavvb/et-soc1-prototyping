@@ -1,0 +1,313 @@
+{
+ "role": "camera block (E61 V3-DTF tier 2, plan section 10)",
+ "generated": "2026-10-21T01:50:15-0700",
+ "block": {
+  "card": "aifoundry2",
+  "when": "2026-10-21 01:15-01:32 PDT",
+  "passes": 4,
+  "runs_per_pass": 20,
+  "run_s": 8,
+  "heater": false,
+  "realised_block_order": [
+   "d7w_hi d7e_hi d7w_lo d7e_lo (p1, p3)",
+   "d7e_hi d7w_hi d7e_lo d7w_lo (p2, p4)"
+  ],
+  "frames_fetched": 614,
+  "frames_failed": 0,
+  "frames_used_primary": 614,
+  "frames_per_pass": [
+   154,
+   155,
+   153,
+   152
+  ],
+  "frame_rate_per_s": 0.9,
+  "operating_point": {
+   "mhz_minion_in_run_mean": 792,
+   "die_mv_minion_in_run_mean": 614,
+   "reg_mv_minion_in_run_mean": 616,
+   "minshire_c_in_run_mean": 59.5,
+   "at_rest_mhz": 600,
+   "at_rest_die_mv": 519,
+   "at_rest_minshire_c": 57.0
+  },
+  "field_drift_mk_per_s": [
+   6.91,
+   4.78,
+   5.42,
+   5.01
+  ]
+ },
+ "tier2_primary": {
+  "arm": "block/w0/pass_linear",
+  "geometry": "REGISTERED AUTOMATIC (no hand-set rectangle)",
+  "statistic_mk": 372.8939103020123,
+  "contrast": "hi",
+  "p_cyclic": 0.0006999300069993001,
+  "p_cyclic_enumerated": true,
+  "p_cyclic_labellings": 10000,
+  "p_block": 0.17647058823529413,
+  "p_block_floor": 0.17647058823529413,
+  "p_run": 9.999000099990002e-05,
+  "null_sd_cyclic_mk": 132.7694365274111,
+  "per_pass_mk": [
+   397.0856877140801,
+   351.55185506838177,
+   395.8525469941709,
+   347.08555143141626
+  ],
+  "se_pass_mk": 13.643972424683774,
+  "lo_mk": 202.81014921928937,
+  "lo_p_cyclic": 0.0206979302069793,
+  "hi_minus_lo_mk": 170.0837610827229,
+  "hi_minus_lo_p_cyclic": 0.00029997000299970003,
+  "hi_minus_lo_caveat": "hi ran before lo in ALL FOUR passes, so the lo arm carries the preceding hi block's residual heat and hi_minus_lo is biased. On the cross-checker's synthetic hi-first campaign the tool read hi_minus_lo = +61.95 mK against a planted +35.8 mK (a 73% overstatement) while reading hi itself exactly. Read hi as the statistic; hi_minus_lo is an upper bound."
+ },
+ "tier2_spatial": {
+  "monopole_hi_mk": -13.237881446608336,
+  "monopole_hi_p_cyclic": 0.961038961038961,
+  "monopole_hi_null_sd_mk": 216.08818020858635,
+  "monopole_per_pass_mk": [
+   -643.0825473482886,
+   553.1791189545909,
+   -657.2703504509335,
+   694.222253058198
+  ],
+  "gradient_hi_mk_per_px": 2.5598225417626295,
+  "gradient_hi_axis_deg": 173.75549074912823,
+  "gradient_hi_p_cyclic": 0.002997002997002997,
+  "gradient_hi_null_median_mk_per_px": 0.6663627486548928,
+  "gradient_hi_per_pass_x": [
+   -2.758670529641417,
+   -2.3608660400902592,
+   -2.739734282112844,
+   -2.319267216283271
+  ],
+  "gradient_lo_mk_per_px": 1.3643080364846534,
+  "gradient_lo_axis_deg": 172.9181286453442,
+  "gradient_lo_p_cyclic": 0.025974025974025976,
+  "profile_hi": 238.88401914267016,
+  "profile_hi_peak_px": 47,
+  "profile_hi_trough_mk": -262.0535481770833,
+  "profile_hi_trough_px": 209,
+  "profile_hi_separation_px": 162,
+  "mm_per_px": null,
+  "mm_note": "the camera was never calibrated on this card and the automatic bbox is the whole frame, not the card, so no mm scale is established and the plan's '~11 mm' prediction is NOT testable from this block. The identified quantities are the monopole, the gradient and its direction, and the profile in pixels."
+ },
+ "controls": {
+  "orthogonal_axis": {
+   "what": "the same reduction with the frame halved across y instead of x",
+   "stat_mk": -11.743659263743751,
+   "p_cyclic": 0.28787121287871215,
+   "per_pass_mk": [
+    -41.43870851078373,
+    14.646837598381723,
+    -35.407656494877045,
+    15.224890352304044
+   ],
+   "reads": "no effect; the signal lives on the x axis alone"
+  },
+  "die_footprint_rects": {
+   "what": "patches restricted to the mean frame's 2nd Otsu level, x 25..211, y 3..184 (label-blind), cut at the same x = 128",
+   "stat_mk": 348.45785432602696,
+   "p_cyclic": 0.00029997000299970003,
+   "reads": "the statistic survives dropping the frame's outer border"
+  },
+  "side_vs_block_order": {
+   "hi": {
+    "contrast": "hi",
+    "per_pass_mk": [
+     397.0856877140801,
+     351.55185506838177,
+     395.8525469941709,
+     347.08555143141626
+    ],
+    "side_term_mk": 372.8939103020122,
+    "order_term_mk": 23.575207052113225,
+    "residual_mk": [
+     0.6165703599546646,
+     2.2331518184827814,
+     -0.6165703599545509,
+     -2.2331518184827246
+    ],
+    "se_side_mk": 1.1583529312311707,
+    "df": 2,
+    "t_side": 321.91735372541166,
+    "note": "the side term is what the reduction reports as T; the order term is how much the statistic depends on WHICH side ran first, which the W-first/E-first alternation makes orthogonal to it. An artefact of the block order lives entirely in the order term, so a large side term with a small order term is the signature of a real side effect. The t is a parametric side-note on 2 df, NOT the registered inference -- that is the permutation p."
+   },
+   "lo": {
+    "contrast": "lo",
+    "per_pass_mk": [
+     194.3827643697302,
+     214.88171123090206,
+     182.41744402226715,
+     219.5586772542581
+    ],
+    "side_term_mk": 202.81014921928937,
+    "order_term_mk": -14.410045023290705,
+    "residual_mk": [
+     5.982660173731546,
+     -2.338483011678022,
+     -5.982660173731517,
+     2.338483011678022
+    ],
+    "se_side_mk": 3.211725609009124,
+    "df": 2,
+    "t_side": 63.14678584322152,
+    "note": "the side term is what the reduction reports as T; the order term is how much the statistic depends on WHICH side ran first, which the W-first/E-first alternation makes orthogonal to it. An artefact of the block order lives entirely in the order term, so a large side term with a small order term is the signature of a real side effect. The t is a parametric side-note on 2 df, NOT the registered inference -- that is the permutation p."
+   },
+   "hi_minus_lo": {
+    "contrast": "hi_minus_lo",
+    "per_pass_mk": [
+     202.7029233443499,
+     136.6701438374796,
+     213.43510297190375,
+     127.52687417715828
+    ],
+    "side_term_mk": 170.08376108272284,
+    "order_term_mk": 37.98525207540393,
+    "residual_mk": [
+     -5.366089813776881,
+     4.57163483016069,
+     5.366089813776966,
+     -4.571634830160633
+    ],
+    "se_side_mk": 3.5247256953505817,
+    "df": 2,
+    "t_side": 48.254467378008464,
+    "note": "the side term is what the reduction reports as T; the order term is how much the statistic depends on WHICH side ran first, which the W-first/E-first alternation makes orthogonal to it. An artefact of the block order lives entirely in the order term, so a large side term with a small order term is the signature of a real side effect. The t is a parametric side-note on 2 df, NOT the registered inference -- that is the permutation p."
+   }
+  },
+  "arm_sensitivity_hi_mk": {
+   "block/w0/none": 455.1062534935802,
+   "block/w0/pass_linear": 372.8939103020123,
+   "block/w15/none": 572.0298470872822,
+   "block/w15/pass_linear": 474.6207482132954,
+   "run/w0/none": 455.1062534935802,
+   "run/w0/pass_linear": 372.8939103020123,
+   "run/w15/none": 572.0298470872822,
+   "run/w15/pass_linear": 474.6207482132954
+  },
+  "lo_carryover_detector": "the tool's own check (lo gradient opposed to hi by >120 deg and not small) did NOT fire: lo points at +172.9 deg against hi's +173.8 deg, the same way. The lo arm is a real lower-amplitude copy of the same contrast, not an inverted control."
+ },
+ "geometry": {
+  "automatic_card_mask_is_NOT_the_card": true,
+  "card_px": 42083,
+  "card_fraction_of_frame": 0.8562,
+  "card_bbox_xyxy": [
+   0,
+   0,
+   255,
+   191
+  ],
+  "rect_west_xyxy": [
+   0,
+   0,
+   127,
+   191
+  ],
+  "rect_east_xyxy": [
+   128,
+   0,
+   255,
+   191
+  ],
+  "why_it_was_kept": "Otsu's largest component covers 85.6% of the frame and its bbox is the whole frame, so the mask is the warm board, not the card -- the tool's own warning fired. It was kept as the PRIMARY anyway because the geometry it produces is right: the frame halved across its longer axis cuts at x = 128, and the mean difference image's own neutral band sits at x = 129, one pixel away. The die-footprint rectangles are reported beside it as the sensitivity arm.",
+  "mean_frame_c": {
+   "min": 39.98729277744356,
+   "max": 50.259001045351305,
+   "card_mean": 48.83839905203352,
+   "off_card_mean": 45.603565956610545
+  }
+ },
+ "tier1_board_meter": {
+  "source": "the dtf-cam block's own telemetry.jsonl.gz, board_w at 10 Hz, ~416 samples per item per pass",
+  "levels_w": {
+   "hi_mean": 39.26517605083504,
+   "lo_mean": 37.39945616102324,
+   "gap_mean": 24.86205718310214,
+   "hi_per_pass": [
+    39.252192236641314,
+    39.05831203660797,
+    39.28088395979021,
+    39.46931597030068
+   ],
+   "lo_per_pass": [
+    37.6158273381295,
+    37.302335296440646,
+    37.24973621103118,
+    37.42992579849164
+   ],
+   "gap_per_pass": [
+    24.96513513513513,
+    24.799375,
+    24.877663551401874,
+    24.806055045871556
+   ]
+  },
+  "W_minus_E_hi_w": -0.4358115731592829,
+  "W_minus_E_hi_se_naive_w": 0.30442749372136196,
+  "W_minus_E_hi_t_naive": -1.4315775747842763,
+  "W_minus_E_hi_se_order_adjusted_w": 0.045647275797284045,
+  "W_minus_E_hi_t_order_adjusted": -9.547373102716746,
+  "W_minus_E_lo_w": -0.37137318867537594,
+  "W_minus_E_lo_t_naive": -5.200328584503539,
+  "W_minus_E_lo_t_order_adjusted": -4.546623034740632,
+  "block_order_term_w": 0.5233172548511875,
+  "hi_minus_lo_w": 1.8657198898118033,
+  "hi_minus_lo_se_w": 0.10090218625520934,
+  "hi_minus_rest_w": 14.403118867732903,
+  "lo_minus_rest_w": 12.5373989779211,
+  "registered_rule": "E-D7 tier 1 (README section 9, row C58 C83 C84 C91): board power for d7w_hi and d7e_hi equal within 3 SE. This block is NOT the registered family-B half-die amplitude arm, which is measured on the pinned 600 MHz card; this is the same equality test read on the dtf-cam block's own meter at aifoundry2's 800 MHz / 0.618 V.",
+  "reading": "Taken as the registered statistic reads literally -- the pass as the unit of replication, no order term -- hi is EQUAL within 3 SE (|t| 1.43) and lo already DIFFERS (|t| 5.20). But the hi per-pass values track the pass parity (-1.02, +0.16, -0.90, +0.02): the block that runs SECOND reads +0.52 W higher, which inflates the naive SE sixfold. With that balanced order term fitted, the point estimate is unchanged at -0.44 W and |t| is 9.55 -- the two MESH halves are NOT electrically symmetric, by about 0.4 W out of the 12.5-14.4 W the work itself draws (~3%). This is a CROSS-CHECK on this card, not the registered tier-1 arm, which is family B on the pinned 600 MHz card.",
+  "caveats": [
+   "one meter reading per 100 ms, averaged over each run window; no idle rung was run inside dtf-cam, so the 'gap' column is the inter-run wait (the card is between launches, not idle)",
+   "the hi blocks precede the lo blocks in all four passes, so hi - lo carries the pass's own time trend; the W-vs-E tests do not, because the side order alternates between passes"
+  ]
+ },
+ "verdict": {
+  "tier": "2 (exploratory by design -- plan section 10 and section 2's E-D7 row carry no CONFIRMED/REFUTED arm)",
+  "what_is_established": [
+   "The pattern MOVES. Swapping which MESH half runs loud moves heat across the board by +372.9 mK on the double difference, p = 0.0007 against the registered cyclic null with all 10,000 labellings enumerated. The hub's prescribed regulator control is PASSED: two fixed voltage regulators cannot produce a pattern that changes sides with the shire mask.",
+   "It is a dipole, not a level shift. The card-mean of the difference image (the camera's own read of 'Delta P_card == 0') is -13.2 mK against a +373 mK half-to-half contrast, p = 0.96.",
+   "It lies on one axis. Halving the frame the other way returns -11.7 mK, p = 0.29.",
+   "It is not the block order. Decomposed on the balanced 2x2, the side term is +372.9 mK and the order term +23.6 mK; once the order term is out the four passes agree to within +/-2.3 mK (SE 1.16 mK on 2 df).",
+   "The hart activity alone already carries it: the quiet lo arm shows the same dipole in the same direction (173 deg vs 174 deg) at +202.8 mK, 54% of the loud arm's."
+  ],
+  "what_is_NOT_established": [
+   "Which image half is the die's West. The camera's orientation relative to the MESH x<=2 split was never measured, so the finding is 'the image half at lower x heats when the 0x3131733b mask runs' -- label-blind, exactly as the tool's own sign_note says.",
+   "Any displacement in millimetres. No mm/px scale exists for this card, and from W-E alone a displacement is not identified in the first place (plan section 10, rule 8). The plan's '~11 mm' is untestable from this block.",
+   "Absolute mK, mK/W, or a die-side amplitude: the camera has never been calibrated on this card and the die-to-back coupling is unmeasured (plan section 10, 'what tier 2 cannot show' iii, iv).",
+   "The shire map. That the pattern splits where MESH says it should is consistent with the hart->shire->position map, but the halves-only resolution cannot test a single shire (section 10, ii), and the monopole's null SD of 216 mK is far too wide to resolve the 0.44 W electrical asymmetry the board meter does see (~34 mK expected).",
+   "Anything at constant TOTAL power. Both arms run half the chip idle, so this is a contrast at constant WORK, not the page's constant-total-power dipole (section 10, i)."
+  ],
+  "honest_reading": "For an exploratory test this is about as clean as it gets: the effect is 2.8 null-SDs out on the conservative cyclic null and sits at or near the floor of the two other nulls, it reproduces in all four passes with an order-adjusted spread of +/-2.3 mK, it survives every assignment, warmup and detrend arm (+349 to +572 mK), it disappears on the orthogonal axis, and the monopole it leaves behind is consistent with zero. The 4-pass block null cannot resolve below p = 0.176 and says so. The one thing to hold loosely is hi_minus_lo: the arm order was not alternated, so that number is an upper bound on the result-path contribution. Nothing here reaches the page's E-D7 as written, and tier 2 was never allowed to."
+ },
+ "files": {
+  "cam_json_primary": "<E61 working copy>/wf3/camera/out/auto10k/cam.json",
+  "cam_json_registered_default_perms": "<E61 working copy>/wf3/camera/out/auto/cam.json",
+  "cam_json_orthogonal_control": "<E61 working copy>/wf3/camera/out/axisy/cam.json",
+  "cam_json_die_footprint": "<E61 working copy>/wf3/camera/out/diecore/cam.json",
+  "tier1_json": "<E61 working copy>/wf3/camera/tier1.json",
+  "png_scene_mean_frame": "<E61 working copy>/wf3/camera/look/mean_frame.png",
+  "png_scene_raw_hi": "<E61 working copy>/wf3/camera/look/raw_p1_hi.png",
+  "png_response_hi_minus_lo": "<E61 working copy>/wf3/camera/look/hi_minus_lo.png",
+  "png_dipole_hi": "<E61 working copy>/wf3/camera/look/we_hi.png",
+  "png_dipole_lo": "<E61 working copy>/wf3/camera/look/we_lo.png",
+  "png_tool_cam_diff": "<E61 working copy>/wf3/camera/out/auto/cam_diff.png",
+  "png_profile_figure": "<E61 working copy>/wf3/camera/fig_profile.png",
+  "npz_per_pass": [
+   "<E61 working copy>/wf3/camera/out/auto10k/cam_pass_p1.npz",
+   "<E61 working copy>/wf3/camera/out/auto10k/cam_pass_p2.npz",
+   "<E61 working copy>/wf3/camera/out/auto10k/cam_pass_p3.npz",
+   "<E61 working copy>/wf3/camera/out/auto10k/cam_pass_p4.npz"
+  ]
+ },
+ "provenance": {
+  "tool": "wf2/camera/cam_reduce.py, unmodified",
+  "frames": "rsync of aifoundry2:claude/et-soc1-prototyping/build/dtf-cam (230 MB, 614 frames of 393,216 B each, 0 fetch failures); every frame fell inside a block span, so all 614 are in the primary arm",
+  "marks": "docs/reports/data/2026-10-21-dtf/aifoundry2/dtf-cam/p1..p4",
+  "disclosure": "the geometry decision was taken from the mean frame and the hi-minus-lo level image, both blind to the W/E labels, as rule 5 requires. The W-E difference panels were also viewed before the primary was finalised -- which is why the PRIMARY was left as the tool's own automatic geometry, chosen by the registered rule and not by me; the die-footprint rectangles are reported only as a sensitivity arm, and no p-value was read before the geometry was fixed.",
+  "perms_note": "the registered default is 5000 sampled cyclic labellings (p = 0.0012); the primary quoted here enumerates all 10,000 (p = 0.0007). Both are reported."
+ }
+}

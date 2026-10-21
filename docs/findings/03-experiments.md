@@ -2467,5 +2467,20 @@ boxes) on all three boxes; ten `sys_emu` runs on aifoundry2; a smoke block on ea
 **Registered from the smoke:** the issue rate belongs to the compiled case (0.5814 ops per cycle per hart for
 `df.c2.fand` and `df.c2.fadd`, 0.6089 for `df.c2.fxor` and mode 179 in this build, 0.5791 for mode 179 in E60's),
 so every comparison is per flip or within one mode.
-**Result:** pending.
+**Result** (board energy on aifoundry3, 600 MHz, 12 of 12 passes, unless noted; `docs/reports/data/2026-10-21-dtf/reduce.txt`):
+the reduction's 15 registered rows read 1 CONFIRMED, 1 CONFIRMED-ours, 4 REFUTED, 5 OPEN, 3 under-resolved and 1 not scored.
+E60 reproduces through its own images in the new build (a read-port bit into `fxor.pi` 20.70 ± 0.13 fJ against 20.83). A
+result bit costs 26.7 ± 0.3 fJ inside one kernel family and 29.67 ± 0.15 fJ from the registered joint fit, not the page's
+44.4 fJ; the page's sum of an input and an output bit (50.9 fJ) holds at 50.7 fJ through `fnot.pi`, its 6.81 : 1 split does
+not. A carry position costs 0.98 ± 0.80 fJ (3.48 ± 0.74 with the changed-word term removed), not 14.2 fJ (CONFIRMED-ours).
+`fmadd.ps` has no zero gate on the vector unit (0.23 ± 0.16 pJ/op, not 8.94). The Miller patterns run monotone the wrong way
+(−0.22 ± 0.06 W over four k_adj levels: REFUTED as a delivered design). A register-file cell flip costs 0.76 ± 0.32 fJ
+(under-resolved). Changing the read register's index costs 369–452 fJ per index bit, 12–14 times the page's 32 fJ, with no
+linear law across the three matched-rate rungs (under-resolved, not measurable as registered). Two-hart interleaving destroys
+operand sharing (ρ = 1.117 ± 0.024 on aifoundry1 card 0). The vector unit retires one op per cycle per hart; the harness's
+0.58 / 0.61 is its loop overhead, and which of the two a mode gets is set by the loop head's address mod 32 (mode 179 ran 0.5791
+in E60's build and 0.6088 in this one). On aifoundry2's thermal camera, swapping which 16 shires run loud moves heat across the
+board by 373 ± 14 mK (p = 0.0007, exploratory). Two pipelines written independently agree on 48 quantities within 1.6 SE.
+1,437 of 1,616 runs kept; passes set aside by §8.9: aifoundry2 p4, aifoundry1 card 0 p6, p7, p10, p12.
+**Report:** [Verifying the deterministic transistor-flip experiments](https://spacesheep.dev/@yaroslavvb/et-soc1-verifying-transistor-flips).
 
