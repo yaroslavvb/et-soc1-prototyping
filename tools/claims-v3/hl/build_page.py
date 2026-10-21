@@ -32,7 +32,7 @@ code{font-family:var(--mono);font-size:.86em;background:var(--code);padding:.05e
 table{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6rem 0}th,td{border-bottom:1px solid var(--line);padding:.35rem .4rem;text-align:left;vertical-align:top}
 th{color:var(--muted);font-weight:600}td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .tablewrap{overflow-x:auto}
-figure{margin:1.2rem 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+figure{margin:1.2rem 0;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px}
 figcaption{font-size:.9rem;color:var(--muted);margin-top:.4rem}.chart{width:100%;height:auto;display:block}
 .chart text{font-family:var(--font-body);fill:var(--muted);font-size:15px}.chart .lab{fill:var(--ink);font-size:15px}
 .chart .axis{stroke:var(--faint);stroke-width:1}.chart .grid{stroke:var(--grid);stroke-width:1}
@@ -40,12 +40,12 @@ figcaption{font-size:.9rem;color:var(--muted);margin-top:.4rem}.chart{width:100%
 .legend{display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.85rem;color:var(--muted);margin:.2rem 0 .4rem}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:.35rem;vertical-align:-1px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:10px;margin:1rem 0}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
 .stat b{display:block;font-family:var(--font-head);font-size:1.35rem;color:var(--ink)}.stat span{font-size:.85rem;color:var(--muted)}
 details{margin:.4rem 0}summary{cursor:pointer;color:var(--muted);font-size:.9rem}
 #tip{position:fixed;pointer-events:none;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:.3rem .5rem;
 font-size:.82rem;box-shadow:0 2px 8px rgba(0,0,0,.18);display:none;z-index:9;max-width:18rem}
-.note{border-left:3px solid var(--line);padding:.1rem .8rem;color:var(--muted);font-size:.95rem}
+.note{border:1px solid var(--line);border-radius:6px;padding:.5rem .8rem;color:var(--muted);font-size:.95rem}
 """
 JS = """
 (function(){var t=document.getElementById('tip');function show(e){var el=e.target.closest('[data-tip]');if(!el){t.style.display='none';return}
@@ -329,6 +329,26 @@ def main():
     body = T["body"]
     for key in ("ladder", "ord", "ec", "bits", "v2"):
         body = body.replace("{{fig:" + key + "}}", fig(key, T["captions"][key]))
+    import re as _re
+    seen = set()
+
+    def anchor(m):
+        tag, rest = m.group(1), m.group(2)
+        if "data-ss-id" in rest:
+            return m.group(0)
+        tail = body_src[m.end():m.end() + 160]
+        words = _re.sub(r"<[^>]+>|&[a-z#0-9]+;", " ", tail)
+        slug = "-".join(_re.findall(r"[a-z0-9]+", words.lower())[:5]) or tag
+        base, k = f"{tag}-{slug}"[:48], 2
+        sid = base
+        while sid in seen:
+            sid, k = f"{base}-{k}", k + 1
+        seen.add(sid)
+        return f'<{tag} data-ss-id="{sid}"{rest}>'
+
+    body_src = body
+    body = _re.sub(r"<(h2|h3|p|figure|ul|div class=\"tablewrap\"|div class=\"stats\")((?:\s[^>]*)?)>", lambda m: anchor(m) if not m.group(1).startswith("div") else
+                   m.group(0).replace("<div", f'<div data-ss-id="{("stats" if "stats" in m.group(1) else "table") + "-" + str(len(seen))}"', 1) if seen.add(("stats" if "stats" in m.group(1) else "table") + "-" + str(len(seen))) is None else m.group(0), body)
     out = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(T['title'])}</title><meta name="description" content="{esc(T['description'])}">
