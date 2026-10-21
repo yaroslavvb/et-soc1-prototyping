@@ -187,7 +187,7 @@ def main():
         """Heat to --preheat if below it, then idle until the reading first shows --target or less."""
         if a.dry:
             print(f"DRY approach: heat to {a.preheat:g}, wait for {a.target:g}", file=sys.stderr, flush=True)
-            return {"start_c": a.target, "heats": 0, "wait_s": 0.0, "on_protocol": True}
+            return {"start_c": a.target, "start_hot_c": a.preheat, "heats": 0, "wait_s": 0.0, "on_protocol": True}
         t = reading()
         heats = 0
         while a.preheat > 0 and t < a.preheat and heats < a.max_heats:
