@@ -2388,6 +2388,24 @@ the CPU side, M0 and M1's code), `ddb493f` (M1–M3 on the card), `4aea801` and 
 **Fed:** the page "Sparse parity on the ET-SoC-1" (`docs/reports/2026-09-29-sparse-parity.html`, A21), the rows marked
 E59 in [05-claims.md](05-claims.md), and Q66.
 
+## E60 — hl: the bit-flip ladder, what one flipped operand bit costs (Q119; card runs 2026-10-20 from 20:30 PDT, aifoundry3, aifoundry2 and aifoundry1's card 0) — pre-registered
+
+**Asked (Q119):** the "Hamming ladder" of the 12 Oct plan for the follow-up to the Horace experiment: hold clock,
+voltage, launch reading and throughput fixed and turn one knob, the number of operand bits that flip from one operation
+to the next; the slope of power against designed flips is the energy of a flip.
+**Pre-registered** in [`tools/claims-v3/hl/README.md`](../../tools/claims-v3/hl/README.md) (design, departures D1–D5,
+per-card items, analysis, predictions, decision rules), with the operand files' hashes and the RTL predictions in
+[`docs/reports/data/2026-10-20-bitflip-ladder/`](../reports/data/2026-10-20-bitflip-ladder/), committed before the first
+measured pass. Families: anchors; the Hamming ladder with a quiet (A = 1.0) and a busy (A = pi) partner, h = 0–23
+flipped B mantissa bits every cycle; spread masks; the same 4,096 multiply-adds in Gray, binary, shuffled and max-flip
+order; a B bit-position scan; and a one-gate-deep ladder on the vector integer unit (fxor.pi / fand.pi with the eight
+source registers set so that 16·h port bits, or 8·h port and 8·h result bits, flip per instruction).
+**Measured tonight before the runs:** the cards no longer reach 80 C under the heater's duty cycle (aifoundry2 and
+aifoundry3 plateau at 64 C, aifoundry1's card 0 at 60 C; `hl-probe/p1`), so every pass launches at a 57–58 C reading:
+aifoundry3 (pinned) at 600 MHz and 0.522 V, the two governor-free cards at 800 MHz and 0.618 / 0.604 V. The ½CV² test
+therefore runs at natural operating points, across cards.
+**Results:** (to be added after the passes).
+
 ## A note on E10, re-analysed for Q20
 
 The governor transitions in [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) are **not** a new experiment.

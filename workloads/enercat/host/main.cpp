@@ -2,7 +2,7 @@
 // Every launch prints one line
 //   ENERCAT {json}
 //
-//   enercat_host --pattern spin|iadd|...|tload [--operands zeros|const|random] [--harts 1|2]
+//   enercat_host --pattern spin|iadd|...|tload [--operands zeros|const|random|file:<256 B image of f0..f7>] [--harts 1|2]
 //                [--seconds S] [--window CYCLES] [--slice-bytes B] [--scp] [--shires MASK]
 //
 // The card is shared: each launch runs `window` cycles (0.4 s by default) and the process stops after
@@ -233,10 +233,22 @@ private:
 //           2P(1-P), whichever flows interleave on a link.
 //   alt:N   blocks of N bytes (N >= 4, dividing 512) alternately all-zero and all-one, by offset in the 512 B image:
 //           the bytes on a link toggle only where a flit boundary meets a block boundary, which probes flit width.
+// One family for the bit-flip ladder (tools/claims-v3/hl):
+//   file:<path>  exactly 256 B, the image of f0..f7 (eight 32 B vectors), given to every hart, so the bits that
+//           change from one vector op to the next are set by design (tools/claims-v3/hl/make_hl.py writes them).
 std::vector<uint32_t> sources(const std::string& kind, uint64_t seed) {
   std::vector<uint32_t> v(EC_MAX_HARTS * 64);
   std::mt19937_64 rng(seed);
   std::uniform_real_distribution<float> u(0.5f, 2.0f);
+  if (kind.rfind("file:", 0) == 0) {
+    uint32_t img[64];
+    std::ifstream f(kind.substr(5), std::ios::binary);
+    f.read(reinterpret_cast<char*>(img), sizeof img);
+    if (!f || f.peek() != std::ifstream::traits_type::eof())
+      throw std::runtime_error("--operands file: needs exactly 256 bytes: " + kind.substr(5));
+    for (size_t i = 0; i < v.size(); ++i) v[i] = img[i % 64];
+    return v;
+  }
   if (kind.rfind("bern:", 0) == 0) {
     const double pr = std::stod(kind.substr(5));
     std::bernoulli_distribution bit(pr);
