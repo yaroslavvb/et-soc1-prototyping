@@ -160,7 +160,11 @@ def main():
         gov_free = not card_.startswith("aifoundry3")      # aifoundry3 is pinned at 600 MHz by its boot service
         rs, _ = runs_of_pass(d, man, gov_free=gov_free)
         allruns += rs
-    res = {"cards": {}, "gates": {}}
+    # amendment A3: items a card cannot run at its clock (the governor's power threshold), excluded by name
+    excluded = {"aifoundry2": {"ls_h8"}}
+    dropped_a3 = [r for r in allruns if r["item"] in excluded.get(r["card"], set())]
+    allruns = [r for r in allruns if r["item"] not in excluded.get(r["card"], set())]
+    res = {"cards": {}, "gates": {}, "excluded_a3": sorted({(r["card"], r["item"]) for r in dropped_a3}), "excluded_a3_runs": len(dropped_a3)}
     rows_csv = []
     for card in sorted({r["card"] for r in allruns}):
         R = [r for r in allruns if r["card"] == card]
@@ -337,10 +341,14 @@ def main():
                         xs.append((po["in"] + po["out"]) * val[p][n]["rate"])
                         ys.append(val[p][n]["p80"] - val[p][z]["p80"])
                         yr.append((val[p][n]["rail"] or 0) - (val[p][z]["rail"] or 0))
-                f = fit_line(xs, ys)
-                if f and len(xs) >= 3:
-                    sl.append(f[1])
-                    slr.append(fit_line(xs, yr)[1])
+                if len(xs) >= 3:
+                    f, fr = fit_line(xs, ys), fit_line(xs, yr)
+                    if f:
+                        sl.append(f[1])
+                        slr.append(fr[1] if fr else None)
+                elif len(xs) == 2 and xs[1]:   # one rung besides the zero: the slope through the zero
+                    sl.append(ys[1] / xs[1])
+                    slr.append(yr[1] / xs[1])
             m_, se, n = mean_se(sl)
             mr, ser, _ = mean_se(slr)
             ec[fam] = {"J_per_bit": m_, "se_J": se, "n_passes": n, **units(m_, v), "rail_J_per_bit": mr, "rail_se_J": ser}
@@ -391,6 +399,18 @@ def main():
                 return None
             e["lq_h2_h8_J"] = lq28(C)
             e["xin_J"] = C.get("ec", {}).get("xin", {}).get("J_per_bit")
+            # the same on the minion rail (the die's own supply; the board meter's scale differs card to card)
+            def lq28r(c):
+                it = c["items"]
+                if all(n in it and it[n].get("d_rail") is not None for n in ("lq_h8", "lq_h2")):
+                    return (it["lq_h8"]["d_rail"] - it["lq_h2"]["d_rail"]) / ((32768 - 8192) * it["lq_h8"]["rate"])
+                return None
+            e["lq_h2_h8_rail_J"] = lq28r(C)
+            e["xin_rail_J"] = C.get("ec", {}).get("xin", {}).get("rail_J_per_bit")
+            r0 = lq28r(ref)
+            e["lq_h2_h8_rail_J_ratio"] = e["lq_h2_h8_rail_J"] / r0 if e["lq_h2_h8_rail_J"] and r0 else None
+            r0 = ref.get("ec", {}).get("xin", {}).get("rail_J_per_bit")
+            e["xin_rail_J_ratio"] = e["xin_rail_J"] / r0 if e["xin_rail_J"] and r0 else None
             for kk in ("lq_h2_h8_J", "xin_J"):
                 r0 = (lq28(ref) if kk == "lq_h2_h8_J" else ref.get("ec", {}).get("xin", {}).get("J_per_bit"))
                 e[kk + "_ratio"] = e[kk] / r0 if e[kk] and r0 else None
@@ -436,7 +456,8 @@ def main():
             print(f"  RTL predictions: rms {C['rtl_score']['rms_W']:.2f} W over {C['rtl_score']['n_items']} items; measured/predicted {C['rtl_score']['ratio_measured_over_pred']:.3f}")
     if "v2" in res:
         for card, e in res["v2"].items():
-            print(f"  V2 {card}: V {e['v']*1000:.1f} mV, (V/V_a3)^2 {e['v2_ratio']:.3f}; lq h2-h8 ratio {e['lq_h2_h8_J_ratio']}, xin ratio {e['xin_J_ratio']}")
+            print(f"  V2 {card}: V {e['v']*1000:.1f} mV, (V/V_a3)^2 {e['v2_ratio']:.3f}; board: lq h2-h8 {e['lq_h2_h8_J_ratio']}, xin {e['xin_J_ratio']}; "
+                  f"rail: lq h2-h8 {e['lq_h2_h8_rail_J_ratio']}, xin {e['xin_rail_J_ratio']}")
 
 
 if __name__ == "__main__":

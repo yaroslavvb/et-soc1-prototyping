@@ -167,3 +167,10 @@ into `build/enercat-hl` so no locked build directory changes.
 - *Change, governor-free cards only:* the power window is the 2 s that start 0.5 s after the clock first reads the
   card's clock (800 MHz) in the run, but never before second 1; a run whose clock has not reached it by second 1.5 is
   rejected; the leakage fit uses only samples after the same point. aifoundry3 keeps seconds 1–3.
+
+**A3, Tue 20 Oct 2026, 20:47 PDT** (written after the gate counts of aifoundry2's passes 1–5, before its results from
+passes 6–10 were looked at): `ls_h8` draws 68 W at 800 MHz on aifoundry2, above the governor's power threshold, so its
+clock dips to 700 MHz inside the window in every pass (5 of 5) and the gate rejects it; with it counted, any one other
+failure sets a whole pass aside. D5's estimate for that rung (~59 W) was wrong. So on aifoundry2 `ls_h8` is excluded
+from the analysis and from the pass-rejection count (reported as excluded, by name); the ls contrast there rests on
+h = 2. Every other rule stands.
