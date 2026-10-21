@@ -157,3 +157,13 @@ into `build/enercat-hl` so no locked build directory changes.
   ladders' primary regressor is the RTL-counted operand-bus bits (A + B + C: the accumulator reads co-vary with h),
   with the designed B flips and the counted net toggles beside it; the bit scan is quoted as "item minus lq_h0", not
   as a per-flip price.
+
+**A2, Tue 20 Oct 2026, 20:40 PDT** (written after the gate counts of the first passes, before any result of the two
+800 MHz cards was looked at: every one of their runs had been set aside by the gates):
+- *Why:* on the governor-free cards the clock steps 600 → 700 → 800 MHz after a launch, and after an idle approach
+  the step sometimes ends after second 1, inside the registered seconds 1–3 window (aifoundry2 8 of 19 runs, aifoundry1's
+  card 0 13 of 42 in the first passes). The same ramp corrupts the within-run leakage fit there (2.4–4.8 W/C, against
+  0.25 W/C on the pinned card).
+- *Change, governor-free cards only:* the power window is the 2 s that start 0.5 s after the clock first reads the
+  card's clock (800 MHz) in the run, but never before second 1; a run whose clock has not reached it by second 1.5 is
+  rejected; the leakage fit uses only samples after the same point. aifoundry3 keeps seconds 1–3.
