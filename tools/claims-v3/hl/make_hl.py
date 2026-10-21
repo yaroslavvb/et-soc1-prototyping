@@ -31,6 +31,8 @@ Families (item names in manifest.json):
        xio_h<h>        fxor.pi, f0..f7 = x, x, y, y, x, x, y, y: h bits per lane on the ports and h in the result
        ain_h<h>        fand.pi, f0..f7 = x, y, x, y, ... with x = 0 under the mask: inputs flip, result constant
                        (ain_h0: fand.pi with nothing changing, the AND ladder's own zero rung)
+       xnz_h<h>        fxor.pi, f0..f7 = a, b, c, d, a, b, c, d (x, x^p, x^p^m, x^m; p = bits 28-31): ports and result
+                       each flip 8(4 + h) bits per op and no result is the zero word (amendment A1, a control for xio)
 """
 import argparse
 import json
@@ -188,6 +190,15 @@ def ec_image(pattern, h, rng):
         y = [w ^ m for w in x]
         regs = [x, y] * 4 if pattern == "xin" else [x, x, y, y] * 2
         op = "xor"
+    elif pattern == "xnz":
+        # amendment A1: four values a, b, c, d = x, x^p, x^p^m, x^m with p = bits 28-31, so the results alternate
+        # p <-> m and are never the all-zero word (xio's alternate 0 <-> m); h <= 24 keeps m clear of p
+        p = 0xF0000000
+        assert h <= 24
+        x = [int(v) for v in rng.integers(0, 1 << 32, 8, dtype=np.uint64)]
+        a_, b_, c_, d_ = x, [w ^ p for w in x], [w ^ p ^ m for w in x], [w ^ m for w in x]
+        regs = [a_, b_, c_, d_] * 2
+        op = "xor"
     elif pattern == "ain":
         x = [int(v) & ~m & 0xFFFFFFFF for v in rng.integers(0, 1 << 32, 8, dtype=np.uint64)]
         y = [w ^ m for w in x]
@@ -237,7 +248,7 @@ def build(out):
         name = f"bit_{j}"
         write_tiles(f"{out}/tiles/{name}.bin", A, B)
         items.append({"name": name, "kind": "fma", "family": "bit", "bit": j, "flips": fma_flips(A, B)})
-    for pat, hs in (("xin", EC_H), ("xio", EC_H[1:]), ("ain", EC_H)):   # xio_h0 would equal xin_h0; ain_h0 is fand.pi's own zero
+    for pat, hs in (("xin", EC_H), ("xio", EC_H[1:]), ("ain", EC_H), ("xnz", [4, 8, 16, 24])):   # xio_h0 would equal xin_h0; ain_h0 is fand.pi's own zero
         for h in hs:
             regs, op = ec_image(pat, h, np.random.default_rng(SEED + 200 + h))
             name = f"{pat}_h{h}"

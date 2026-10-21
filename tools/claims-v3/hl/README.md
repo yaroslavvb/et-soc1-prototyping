@@ -136,4 +136,24 @@ into `build/enercat-hl` so no locked build directory changes.
 
 ## Amendments
 
-(none yet)
+**A1, Tue 20 Oct 2026, 20:35 PDT** (written after pass 1 on each card and before any pass it touches):
+- *Why:* a run takes 8–12 s, not the ~50 s budgeted (the approach to the launch reading takes 1–10 s at 57–58 C), so a
+  pass takes 5–6 min on aifoundry3 and about 4 min on the other two; there is time for more. And the design review's
+  physics critique, which landed during pass 1: the order family is the headline and belongs on the pinned card; xio's
+  results alternate between m and the all-zero word, and ain_h32's x is the zero word, so a zero-word skip in the vector
+  integer unit could bias e_out and e_in.
+- *aifoundry3, passes 5–8:* `anchor_pi,ord_,bit_31,bit_23,bit_0,bit_8,bit_16,bit_22,lq_h0,lq_h8,xin_h0,xin_h32,xnz_`
+  (operand set `build/hl-gen2`, below). The order family at the pinned 600 MHz becomes the primary order measurement;
+  aifoundry2's order passes become its 800 MHz replication. Passes 1–4 keep the registered list.
+- *aifoundry2, passes 6–10* and *aifoundry1 card 0, passes 6–10:* the registered lists again, with `xnz_` added on
+  aifoundry1 (operand set `build/hl-gen2`).
+- *New control family `xnz_h<h>`* (h = 4, 8, 16, 24; make_hl.py): fxor.pi with f0..f7 = a, b, c, d, a, b, c, d where
+  a = x, b = x^p, c = x^p^m, d = x^m, p = bits 28–31: the results alternate p ↔ m, never the zero word; ports and
+  result each flip 8(4 + h) bits per op. Its slope against xio's tests the zero-result question. The set is generated
+  into `build/hl-gen2`; every earlier file in it is byte-identical to `build/hl-gen`'s (checked).
+- *Analysis additions:* ain_h32 is excluded from every e_in fit and reported as a labelled corner point; xio and xnz are
+  both reported, e_out from each; runs are keyed by (pass, item, position), since anchor_pi runs twice a pass; the op
+  rate is the work completed inside the power window (launches overlapping it, prorated), not a nominal clock; the fma
+  ladders' primary regressor is the RTL-counted operand-bus bits (A + B + C: the accumulator reads co-vary with h),
+  with the designed B flips and the counted net toggles beside it; the bit scan is quoted as "item minus lq_h0", not
+  as a per-flip price.
