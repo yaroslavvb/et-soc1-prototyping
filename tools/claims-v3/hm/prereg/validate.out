@@ -1,0 +1,140 @@
+======================================================================================================================
+E62 protocol validation   tools/claims-v3/hm/prereg/protocol.json   (version 2)
+die map re-derived from tools/claims-v3/hp/placements.py (reads workloads/nocbench/analyze.py MARTY)
+budget gated at the worst-case 8.6 s launch; sigma floor 27 mK; tau 143.2 s from DECISIONS' 53->62 C/60 s
+======================================================================================================================
+
+SETS   (mask vs shire list vs harts vs die map; x is the W->E column axis, y the N->S row axis, origin the die centre)
+set       mask           n  per  harts     x_mm     y_mm    sw_W   mask/list/harts/rc
+B4NW      0x01010101     4   32    128    -7.46    -7.40     5.2   ok
+B4NE      0x30100020     4   32    128     7.46    -3.70     5.2   ok
+B4SE      0x80808080     4   32    128     7.46     7.40     5.2   ok
+B4SW      0x00080c04     4   32    128    -7.46     7.40     5.2   ok
+B4C       0x00606000     4   32    128     0.00     0.00     5.2   ok
+W12       0x03076616    12   32    384    -5.59     0.00    15.6   ok
+E12       0x747090e0    12   32    384     5.59     0.00    15.6   ok
+N12       0x31313232    12   32    384     0.00    -3.70    15.6   ok
+S12       0x4646c4c4    12   32    384     0.00     3.70    15.6   ok
+W12_A     0x03076616    12   32    384    -5.59     0.00    15.6   ok
+W12_B     0x03076616    12   32    384    -5.59     0.00    15.6   ok
+W8B       0x02026606     8   32    256    -6.06     1.39    10.4   ok
+E8B       0x606080e0     8   32    256     6.06     1.39    10.4   ok
+NULLP12   0x243522a6    12   32    384     0.00     0.00    15.6   ok
+NULLQ12   0x5342d450    12   32    384     0.00     0.00    15.6   ok
+SCAN1     0x03030606     8   32    256    -7.46     0.00    10.4   ok
+SCAN2     0x00076412     8   32    256    -3.73     0.00    10.4   ok
+CEN8      0x04647010     8   32    256     0.00     0.00    10.4   ok
+SCAN4     0x64709000     8   32    256     3.73     0.00    10.4   ok
+SCAN5     0x701080e0     8   32    256     7.46     0.00    10.4   ok
+INT16     0x6477f412    16   32    512     0.00     0.00    20.8   ok
+INT16_8   0x6477f412    16    8    128     0.00     0.00     5.2   ok
+W8B_16    0x02026606     8   16    128    -6.06     1.39     5.2   ok
+UNI32     0xffffffff    32   32   1024    -0.58     0.58    41.6   ok
+IDLE      0x00000000     0    0      0     0.00     0.00     0.0   ok
+
+IDENTITIES re-derived from the die map
+   ok   W12 | E12 = N12 | S12 = CORE24 = 0x7777f6f6 (24 shires, 4 per column)
+   ok   W12 <-> E12 is the exact mirror c -> 7-c
+   ok   N12 <-> S12 is the exact mirror r -> 5-r
+   ok   NULLQ12 is NULLP12 rotated 180 deg about the die centre, (r,c) -> (5-r, 7-c)
+   ok   NULLP12 | NULLQ12 = CORE24, disjoint, 12 + 12
+   ok   NULLP12 and NULLQ12 have the same centroid to 1e-9 mm (zero dipole)
+   ok   NULLP12 and NULLQ12 are matched on all four features placements.py records
+   ok   the five sweep phases are 8 shires each, mean die row exactly 2.5, mean column 1.5/2.5/3.5/4.5/5.5
+   ok   every sweep phase is an exact one-column translate of the one before
+   ok   the sweep's five phases union to exactly CORE24, and phase 3 IS the registered CEN8
+   ok   the five orbit arms are all 4 shires x 32 = 128 harts
+   ok   B4C sits exactly on the die centre
+   ok   W8b/E8b are matched on n, mem_side, ns_edge, by_io and by_ms, which W12/E12 are NOT (physics.md:582 is wrong)
+      (mem_side, ns_edge, by_io, by_ms):  W12 (4, 0, 0, 0)  E12 (4, 0, 2, 2)   |   W8B (3, 0, 0, 0)  E8B (3, 0, 0, 0)
+      orbit arms:  NW (1, 2, 0, 0)  NE (2, 0, 2, 0)  SE (1, 2, 0, 1)  SW (1, 2, 0, 0)  |  C (0, 0, 0, 0)  <- the CENTRE arm is the most mismatched
+
+ANGLES re-derived from the die map (a hand-written angle in a pass rule cannot survive this)
+   ok   E62-ORBIT     the angle between the NW-SE and NE-SW diagonal difference dire registered   98.6 +/- 12    die map  98.58  in pass_rule yes
+   ok   E62-ORBIT     the NE<->SW diagonal's bearing from the measured W->E directio registered   36.6 +/- 10    die map  36.65  in pass_rule yes
+   ok   E62-NS42      the die's N-S axis against its W-E axis                        registered   90.0 +/- 10    die map  90.00  in pass_rule yes
+   ok   E62-SWEEP     the sweep's column axis against the die's W-E axis             registered    0.0 +/- 10    die map   0.00  in pass_rule yes
+
+SIGN ORDERS rebuilt from each block's own lap_phase_orders (what the runner EXECUTES, not what analysis assumes)
+block         kind         cyc  ana  executed sign order moments sum s*t^k
+E62-CAL       calibration    1    1  fixed              none -- an ascending ladder then a desce
+E62-ORBIT     sequence       6    5  cyclic shifts      every phase in every slot once, mean slot 2.0
+E62-BLOOM     bloom          3    3  fixed              none -- a bloom is pattern-versus-idle, 
+E62-WE42      swap           5    4  ABBABAAB           [0, 0, 0, -48]
+E62-NS42      swap           5    4  ABBABAAB           [0, 0, 0, -48]
+E62-NULLAA    control        5    4  ABBABAAB           [0, 0, 0, -48]
+E62-NULLGEO   control        3    2  ABBA               [0, 0, 4, 18]
+E62-W8BE8B    swap           3    2  ABBA               [0, 0, 4, 18]
+E62-SWEEP     sequence       6    5  cyclic shifts      every phase in every slot once, mean slot 2.0
+E62-WE17      swap           5    4  ABBABAAB           [0, 0, 0, -48]
+   for contrast, plain alternation ABABABAB: moments [0, -4, -28, -208] -- sum s*t = -4 against the registered 0
+
+PREDICTIONS recomputed from conventions.anchor and conventions.transfer_table (a hand-edited mK cannot pass)
+   dwell factors: 8.5s 0.126  17.0s 0.324  25.5s 0.542  42.5s 1.024
+block           travel    sw_W  dwell  laps  pred mK  formula   floor SNR/all
+E62-CAL              -       -      -     1        -      n/a       -       -
+E62-ORBIT       21.015     5.2   25.5     5    153.2    153.2    27.0    12.7
+E62-BLOOM            -       -      -     3     3100      n/a       -       -
+E62-WE42        11.190    15.6   42.5     4    462.3    462.3    32.4    28.6
+E62-NS42         7.400    15.6   42.5     4    305.7    305.7    27.0    22.6
+E62-NULLAA       0.000    15.6   42.5     4      0.0      0.0    27.0 2s 27.0
+E62-NULLGEO      0.000    15.6   42.5     2      0.0      0.0    27.0 2s 38.2
+E62-W8BE8B      12.123    10.4   42.5     2    333.9    333.9    27.0    17.5
+E62-SWEEP       14.920    10.4   17.0     5    129.9    129.9    27.0    10.8
+E62-WE17        11.190    15.6   17.0     4    146.2    146.2    27.0    10.8
+
+BLOCKS   (launch counts, not clock targets: the runner executes exactly n launches per phase)
+block         kind        lap_s  min86  min85  cyc  ana  lnch   harts   sw_W  brd_W  steady  pk_inf
+---------------------------------------------------------------------------------------------------
+E62-CAL       calibration 159.0  2.650  2.625    1    1    15   mixed   12.3   36.3    59.4    79.3
+E62-ORBIT     sequence    129.0 12.900 12.750    6    5    15     128    5.2   29.2    54.5    54.5
+E62-BLOOM     bloom       128.0  6.400  6.375    3    3     5    1024   13.9   37.9    60.4    79.3
+E62-WE42      swap         86.0  7.167  7.083    5    4    10     384   15.6   39.6    61.6    61.6
+E62-NS42      swap         86.0  7.167  7.083    5    4    10     384   15.6   39.6    61.6    61.6
+E62-NULLAA    control      86.0  7.167  7.083    5    4    10     384   15.6   39.6    61.6    61.6
+E62-NULLGEO   control      86.0  4.300  4.250    3    2    10     384   15.6   39.6    61.6    61.6
+E62-W8BE8B    swap         86.0  4.300  4.250    3    2    10     256   10.4   34.4    58.1    58.1
+E62-SWEEP     sequence     86.0  8.600  8.500    6    5    10     256   10.4   34.4    58.1    58.1
+E62-WE17      swap         34.4  2.867  2.833    5    4     4     384   15.6   39.6    61.6    61.6
+---------------------------------------------------------------------------------------------------
+
+DIE TEMPERATURE simulated phase by phase through the session (tau 143.2 s), not only as a dwell-weighted mean
+   E62-CAL       mean  12.3 W  peak die  56.9 C  leaving  56.9 C   
+   E62-ORBIT     mean   5.2 W  peak die  55.8 C  leaving  54.5 C   
+   E62-BLOOM     mean  13.9 W  peak die  62.8 C  leaving  57.5 C   cool-down gate: die 53.9 C after the 30 s gap, threshold 59 C -> no hold
+   E62-WE42      mean  15.6 W  peak die  61.3 C  leaving  61.3 C   cool-down gate: die 56.3 C after the 30 s gap, threshold 59 C -> no hold
+   E62-NS42      mean  15.6 W  peak die  61.5 C  leaving  61.5 C   
+   E62-NULLAA    mean  15.6 W  peak die  61.5 C  leaving  61.5 C   
+   E62-NULLGEO   mean  15.6 W  peak die  61.3 C  leaving  61.3 C   
+   E62-W8BE8B    mean  10.4 W  peak die  59.3 C  leaving  58.3 C   
+   E62-SWEEP     mean  10.4 W  peak die  58.0 C  leaving  58.0 C   
+   E62-WE17      mean  15.6 W  peak die  59.7 C  leaving  59.7 C   cool-down gate: die 56.7 C after the 30 s gap, threshold 59 C -> no hold
+   worst die in the session 62.8 C (E62-BLOOM), governor 65 C, abs stop 85 C
+   E62-BLOOM on-phase peaks 59.9 / 62.0 / 62.8 C against the 64 C per-cycle gate
+
+total card time  63.52 min  of 75      (nominal 8.5 s launch: 62.83 min)
+plus idle       10.75 min  (180 s before, 60 s after, gaps 30 75* 75* 30 30 30 30 30 75*)
+                              * = cool-down gate, gap extended to <= 75 s while the die is above 59 C
+card-held span  74.27 min  of 75        slack 0.73 min
+card session wall 91.27 min of 100     (+ 12 min setup, 5 min E62-CAL go/no-go; reduction is OUTSIDE this and outside the lock)
+heater launches 410, every one under timeout 10 with --stop-file
+
+run order, cumulative card-held minutes (the order IS the priority order):
+   E62-CAL         5.65 min
+   E62-ORBIT      19.05 min
+   E62-BLOOM      26.70 min
+   E62-WE42       35.12 min
+   E62-NS42       42.78 min
+   E62-NULLAA     50.45 min
+   E62-NULLGEO    55.25 min
+   E62-W8BE8B     60.05 min
+   E62-SWEEP      69.15 min
+   E62-WE17       73.27 min
+   post-idle      74.27 min
+
+WARN  W12/E12 differ on by_io and by_ms (declared departure: priced at ~34 mK and arbitrated by E62-W8BE8B)
+WARN  the five orbit arms are not feature-matched, B4C least of all (declared departure: the per-phase board power band is tightened to +/-0.3 W and the C-minus-corner dipoles carry the ~34 mK correction)
+WARN  E62-NULLGEO: 2 analysed laps leave a quadratic moment of 4 (no 4-phase two-arm order can do better; bounded by E62-NULLAA's matched two-lap reduction)
+WARN  E62-W8BE8B: 2 analysed laps leave a quadratic moment of 4 (no 4-phase two-arm order can do better; bounded by E62-NULLAA's matched two-lap reduction)
+
+VALIDATION OK: 25 sets, 10 blocks, 4 angles re-derived from the die map, every mask matches its shire list and the die map, every swap and sequence has equal harts, every executed sign order matches its registered Sylvester or cyclic-shift form with the claimed moments, every predicted amplitude reproduces from the registered formula, the simulated die peaks at 62.8 C under the 65 C governor, and 63.52 min of card time / 74.27 min card-held / 91.27 min card session wall are inside 75 / 75 / 100.
