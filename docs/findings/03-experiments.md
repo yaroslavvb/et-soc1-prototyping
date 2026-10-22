@@ -2484,3 +2484,69 @@ board by 373 ± 14 mK (p = 0.0007, exploratory). Two pipelines written independe
 1,437 of 1,616 runs kept; passes set aside by §8.9: aifoundry2 p4, aifoundry1 card 0 p6, p7, p10, p12.
 **Report:** [Verifying the deterministic transistor-flip experiments](https://spacesheep.dev/@yaroslavvb/et-soc1-verifying-transistor-flips).
 
+
+## E62 — hm: spatial heat movies, where on the die the compute was scheduled (Q121; card runs 2026-10-21 from 17:06 PDT, aifoundry2) — pre-registered
+
+**Asked (Q121):** "design a set of spatial heating experiments. I want to generate some videos of heat spreading in
+various patterns depending on how the compute is scheduled. Come up with some interesting ideas, maybe like corners or
+the center, and create a set of videos. Turn this into a set of videos and eventually produce a [spacesheep] page,
+which has these videos. Use the live stream to make this possible."
+**Pre-registered** in [`tools/claims-v3/hm/prereg/`](../../tools/claims-v3/hm/prereg/PROTOCOL.md) (version 2, after a
+red-team pass): the die map re-derived from `placements.py`, ten blocks with their masks, launch counts and executed
+lap orders, every prediction as a formula anchored on E61's measured +372.9 ± 13.6 mK, a σ-per-lap prior of 27 mK, the
+analysis plan, the falsifiers that would say "regulators, not die", and the runner's safety plumbing; `protocol.json`
+sha256 `c227da78…`, frozen 16:58 PDT, before the session's first launch at 17:09 (`validate.out` exit 0). E62 takes
+up E61's deferral of the constant-total-power spatial dipole, by chained launches rather than an in-kernel switch. The
+instrument is the Thermal Master P3 that has watched aifoundry2's card since 16 Oct, recorded on aifoundry2 from the
+phone's lossless 25 fps stream with its settings left as they were (the public live page kept its look). Every spatial
+block is a **constant-total-power swap between equal-hart patterns**, cycled and shown as a phase-averaged difference
+image, because the board blurs heat 29–49 mm, wider than the 22 × 26 mm die: the back of the board shows where one blob
+is, not the shape of a hot region. Blocks: E62-CAL (the power ladder and the camera gate), E62-ORBIT (the four corners
+then the centre, 128 harts each), E62-BLOOM (all 32 shires on and off), E62-WE42 and E62-NS42 (the west↔east swap and
+its 90° keystone), E62-NULLAA (the same mask in both arms), E62-NULLGEO (12 shires against their 180° rotation),
+E62-W8BE8B (the feature-matched mirror pair) and E62-SWEEP (a 4 × 2 block sliding one column at a time). New code:
+`tools/claims-v3/hm/` (`run_hm.py`, `record_cam.py`, `p3rec.py`, `reduce_hm.py`, `analyze_hm.py`, `render_hm.py`).
+**Amendment A1** ([`prereg/AMENDMENTS.md`](../../tools/claims-v3/hm/prereg/AMENDMENTS.md), 17:14 PDT, during
+E62-ORBIT, nothing reduced): E62-CAL measured about 2.5× the designed power per hart, so the registered power fallback
+fired. Every 12-shire set ran at `--per-shire 16` and every 8-shire set at `--per-shire 24` (192 harts either way),
+UNI32 at 24 (768 harts), E62-BLOOM's off-phase 85.0 → 127.5 s, E62-WE17 dropped. Session 1 (CAL, ORBIT) ended by an
+operator STOP in the gap after ORBIT and session 2 ran `protocol-A1.json` (sha256 `5d7910c4…`). 390 launches over
+71.1 min of card time, 0 failed; claimed and released in #community-lab.
+**Result** (9 blocks: 1 CONFIRMED, 8 PARTLY by their registered rules; the camera result is exploratory in the lab's
+grading, as E61's was; data in [`docs/reports/data/2026-10-21-e62-heat-movies/`](../reports/data/2026-10-21-e62-heat-movies/)):
+**the back of the board shows where on the die the compute runs.** The camera sees the die turned −88.0 ± 2.8° and not
+mirrored (west→east runs up the picture, north→south runs right), so the hero's four corners land lower-left (NW),
+upper-left (NE), upper-right (SE) and lower-right (SW), and the warm patch walks them clockwise in every lap before
+fading into the centre: registered lobe contrast 1,271 mK, **+846 mK = 5.6 σ over its own permutation null, p = 0.0005**
+(floor 0.001). Moving 192 harts from the die's west twelve shires to its east twelve at the same total power moves the
+warm half of the picture by **+525 ± 22 mK** (4 laps: 585, 527, 500, 489; post hoc, cross-session template; the
+registered lobe contrast is 1,071 mK with p at the 4-lap floor of 0.125). The same 24 shires split north/south move it
+by **+511 ± 7 mK** and turn the pattern **94°** (first moment; 98° by the lobe centroids; registered band 90 ± 10°).
+E62-SWEEP's block steps monotonically west→east (+253, +179, +49, −187, −294 mK along ORBIT's west–east template, post
+hoc; registered excess +698 mK = 4.6 σ, p = 0.0005) while staying within ±21 mK on the north–south axis. The controls
+hold: E62-NULLAA, the same mask in both arms, reads **+4 ± 11 mK** and E62-NULLGEO **−8 ± 9 mK** (post hoc; registered
+excesses 0.65 σ and 1.2 σ). The replicate E62-W8BE8B points the same way as E62-WE42 (87° against 89°) at **+415 ± 135
+mK** over its two laps (post hoc), too coarse to price the adjacency correction it was registered to arbitrate. The
+bloom (768 harts, about +47 W switched) warms the whole frame by **+7.1 K** at the end of a 42.3 s on-phase and reaches
+half its rise 14.8 s after the load step: what a change in total power looks like, and what every swap is built to
+cancel. E62-CAL **refutes the design's power model**: the card is linear in harts but as **5.80 ± 0.30 W + 55.8 ± 1.0
+mW per hart**, not 40.6 mW per hart from zero, and three 128-hart legs at 4 × 32, 8 × 16 and 16 × 8 agree within
+0.51 W (power follows harts, not geometry). Against the re-priced predictions the amplitudes run high (ORBIT about
+1.7×, SWEEP 2–2.4×, BLOOM about 1.9× its bound) while E62-WE42 sits at 0.9× and E62-W8BE8B at 0.6×: the shape and the
+signs are right, a scale is not understood. No millimetres: the registered 10% gate for a scale bar was not met (two
+routes disagree by 64%), so every finding is a direction. The measured per-lap noise is 66–80 mK, 2.4–3.0× the
+registered prior, and it replaces the prior in every error bar.
+**Deviations:** A1 above, whose branch 2 fired on an extrapolation (the UNI32 rung read 43.76 W against a 45 W trigger,
+low only because the governor throttled it). Two post-hoc choices, labelled as such wherever they appear: per-pixel
+shutter-step removal and cross-session template contrasts ([`tools/claims-v3/hm/posthoc/`](../../tools/claims-v3/hm/posthoc/README.md)),
+made after the camera's shutter was seen to fire every 8–10 s under load with per-pixel steps up to 10 K; every
+registered conclusion stands without them except E62-W8BE8B's amplitude (−23 ± 109 mK uncleaned). The registered FFC
+drop window (§7.2) was not applied: it would remove 45–82% of every block. The bloom's 64 °C per-launch gate never armed
+(`run_hm.py` keyed it to 1,024 harts and A1 ran 768): the die reached 69 °C and the governor stepped in every on-phase,
+so the bloom's amplitude and arrival time are not the registered measurement; the registered clock fallback was not
+implemented in code. The pipeline's orientation fit excludes E62-ORBIT (it takes two-arm blocks only); the orientation
+comes from E62-WE42 + E62-NS42 and agrees with ORBIT's corners fitted by hand (−90.2 ± 1.1°). The renderer's own bloom
+path was replaced by `posthoc/make_bloom_cycle.py`. Raw frames (1.26 GB + 3.59 GB) are on aifoundry2 in
+`build/e62/runs/`, not the registered per-block path. Nothing was unsafe: peak die 69 °C against an 85 °C stop, peak
+board 86.0 W against a 95 W cap.
+**Report:** [Heat follows the work: ET-SoC-1 heat movies](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-movies).

@@ -40,6 +40,18 @@ The chain, per block
     name.  Rotation and mirror only: a lobe separation is not a displacement, so the apparent
     scale is reported as exactly that.
 
+8.  The movie cycle, which is built separately from all of that and feeds nothing back into it.
+    A block's laps do not all have the same shape - a swap alternates its arm order, a sequence
+    rotates its ring - so a cycle averaged on the *lap's* start can only use one shape and throws
+    the rest away (two of the dry null's four analysed laps).  Instead every analysed dwell is
+    aligned on its *own* start: for a two-arm block, each dwell that follows the other arm (a real
+    switch; the repeats the ABBA lap boundary makes are not switches and are named in the npz),
+    and for a rotating sequence, every occurrence of each position.  Each frame's uniform part is
+    then removed on a swap, sequence or control block - the total power does not change, so a
+    frame-wide rise is drift, a shutter step or the lag's tail - and never on the bloom or the
+    calibration ladder, whose frame mean is the measurement.  `cycle_movie` carries the detail and
+    `--movie-average` the measured choice of estimator.
+
 Outputs (ANA), as INTERFACES.md specifies: gain.npy, bloom_dt.npy, <block>/cycle.npz,
 <block>/stats.json, orientation.json, summary.json.
 """
@@ -52,6 +64,7 @@ import math
 import os
 import sys
 import time
+import warnings
 
 import numpy as np
 
@@ -1072,19 +1085,39 @@ def analyze_block(b, red, proto, ptab, gain, a, rng, out_dir, bi=None, lab=None)
         st["p_primary_scheme"] = "within"
         st["p_primary_note"] = None
 
-    # ---- the cycle movie
-    mov = cycle_movie(b, ph, cyc_used, tt, X, gain, med_mask, a, hw)
+    # ---- the cycle movie.  Nothing above this line reads it: the movie decides what it averages
+    # on its own (every analysed lap, aligned on each dwell's own start), and the statistics above
+    # keep using every cycle exactly as they did.
+    mov = cycle_movie(b, ph, cyc_used, tt, X, gain, med_mask, a, hw, arms)
     if mov is not None:
         os.makedirs(os.path.join(out_dir, name), exist_ok=True)
         np.savez_compressed(os.path.join(out_dir, name, "cycle.npz"), **mov)
-        st["cycle"] = dict(T=int(len(mov["t_s"])), cycle_s=round(float(mov["t_s"][-1]) + a.bin_s, 2),
-                           n_cycles=int(mov["n_cycles"]), phase_sets=list(mov["phase_sets"]),
-                           cycles_dropped=int(len(cyc_used) - int(mov["n_cycles"])),
-                           note=("a block that alternates its phase order has two cycle shapes; "
-                                 "the movie uses the commoner one, the statistics use every cycle"
-                                 if int(mov["n_cycles"]) < len(cyc_used) else None),
-                           phase_edges_s=[round(float(v), 2) for v in mov["phase_edges_s"]],
-                           range_mk=round(float(np.nanpercentile(np.abs(mov["diff_mk"]), 99)), 1))
+
+        def _phlist(pre):
+            return ["%s lap%d.p%d after %s @%.1f s" % (s, c, q, pv, t0) for s, c, q, pv, t0 in
+                    zip(mov[pre + "_set"], mov[pre + "_cycle"], mov[pre + "_phase"],
+                        mov[pre + "_prev_set"], mov[pre + "_t0_s"])]
+        d = mov["diff_mk"].astype(np.float64)
+        st["cycle"] = dict(
+            T=int(len(mov["t_s"])), cycle_s=round(float(mov["phase_edges_s"][-1]), 2),
+            mode=str(mov["movie_mode"]), lap_average=str(mov["lap_average"]),
+            n_cycles=int(mov["n_cycles"]), phase_sets=list(mov["phase_sets"]),
+            cycles_dropped=int(len(cyc_used) - int(mov["n_cycles"])),
+            n_phases_used=int(mov["n_phases_used"]),
+            n_phases_skipped=int(mov["n_phases_skipped"]),
+            slot_n_phases=[int(v) for v in mov["slot_n_phases"]],
+            phases_used=_phlist("used"), phases_skipped=_phlist("skipped"),
+            skipped_why=sorted({str(w) for w in mov["skipped_why"] if str(w)}),
+            uniform_removed=bool(mov["uniform_removed"]),
+            uniform_stat=str(mov["uniform_stat"]),
+            uniform_mk_range=[round(float(np.nanmin(mov["uniform_mk"])), 2),
+                              round(float(np.nanmax(mov["uniform_mk"])), 2)],
+            uniform_removed_rms_mk=round(float(np.sqrt(np.nanmean(
+                np.asarray(mov["uniform_removed_mk"], dtype=np.float64) ** 2))), 2),
+            residual_rms_mk=round(float(np.sqrt(np.nanmean(d ** 2))), 2),
+            note="; ".join(str(v) for v in mov["notes"]),
+            phase_edges_s=[round(float(v), 2) for v in mov["phase_edges_s"]],
+            range_mk=round(float(np.nanpercentile(np.abs(d), 99)), 1))
 
     # ---- telemetry per arm
     trows = tel_rows(red)
@@ -1119,48 +1152,395 @@ def analyze_block(b, red, proto, ptab, gain, a, rng, out_dir, bi=None, lab=None)
     return st, arm_maps
 
 
-def cycle_movie(b, ph, cyc_used, tt, X, gain, med_mask, a, hw):
-    """The phase-averaged cycle: [T,H,W] averaged over cycles, and the same minus its cycle mean."""
-    order = {}
-    spans = {}
+MOVIE_AVERAGES = ("mean", "trimmed", "trimmed-lap", "median")
+UNIFORM_KINDS = ("swap", "sequence", "control", "null")
+
+
+def lap_average(V, how):
+    """Average [n, T, H, W] over the laps, where NaN marks a bin that lap does not have.
+
+    `mean` is the minimum-variance one and, measured, the best of them here (see
+    `--movie-average`).  `median` is the robust one.  `trimmed` drops, per pixel and per time bin,
+    the single lap furthest from that element's own median and averages the rest - but only with
+    four laps or more, because with three it would throw away a third of the data to guard against
+    nothing.  `trimmed-lap` drops one whole lap coherently and is handled by `slot_average`, which
+    is the only place that sees the whole slot at once; here it means the plain mean of whatever
+    laps are left.
+
+    -> (avg [T,H,W] float32, laps_present [T] int32, laps_used [T] int32)
+    """
+    V = np.asarray(V, dtype=np.float32)
+    if how not in MOVIE_AVERAGES:
+        raise SystemExit("--movie-average must be one of %s" % ", ".join(MOVIE_AVERAGES))
+    fin = np.isfinite(V)
+    n = fin.sum(axis=0)
+    present = n.reshape(n.shape[0], -1).max(axis=1).astype(np.int32)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)          # all-NaN bins are expected
+        if how == "median":
+            return np.nanmedian(V, axis=0).astype(np.float32), present, present
+        if how in ("mean", "trimmed-lap"):                       # the lap trim is done by caller
+            return np.nanmean(V, axis=0).astype(np.float32), present, present
+        med = np.nanmedian(V, axis=0)
+    k = np.argmax(np.where(fin, np.abs(V - med), np.float32(-1.0)), axis=0)[None, ...]
+    keep = fin.copy()
+    np.put_along_axis(keep, k, np.take_along_axis(keep, k, 0) & (n < 4)[None, ...], 0)
+    cnt = keep.sum(axis=0)
+    tot = np.where(keep, V, np.float32(0.0)).sum(axis=0, dtype=np.float64)
+    avg = np.divide(tot, cnt, out=np.full(cnt.shape, np.nan), where=cnt > 0)
+    return (avg.astype(np.float32), present,
+            cnt.reshape(cnt.shape[0], -1).max(axis=1).astype(np.int32))
+
+
+def _slot_fill(t0s, j0, j1, tt, X, hw, bin_s):
+    """[n, j1-j0, H, W]: each occurrence's bins at time since its own start, NaN where absent."""
+    V = np.full((len(t0s), j1 - j0) + hw, np.nan, dtype=np.float32)
+    for oi, t0 in enumerate(t0s):
+        for j in range(j0, j1):
+            want = t0 + (j + 0.5) * bin_s
+            k = int(np.argmin(np.abs(tt - want)))
+            if abs(tt[k] - want) <= bin_s:
+                V[oi, j - j0] = X[k]
+    return V
+
+
+def lap_scores(t0s, T, tt, X, hw, bin_s, chunk=64):
+    """Each occurrence's rms distance, over the whole slot, from the slot's per-element median.
+
+    This is the lap-level score `trimmed-lap` drops on: one whole lap, coherently, rather than a
+    different lap at every pixel.  A shutter step or a lap-sized drift excursion moves a whole map
+    at once, so that is the shape an outlier actually has.
+    """
+    ss = np.zeros(len(t0s), dtype=np.float64)
+    nn = np.zeros(len(t0s), dtype=np.float64)
+    for j0 in range(0, T, chunk):
+        j1 = min(T, j0 + chunk)
+        V = _slot_fill(t0s, j0, j1, tt, X, hw, bin_s)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            d = (V - np.nanmedian(V, axis=0)) ** 2
+        f = np.isfinite(d).reshape(len(t0s), -1)
+        ss += np.nansum(d.reshape(len(t0s), -1), axis=1)
+        nn += f.sum(axis=1)
+    return np.sqrt(np.divide(ss, nn, out=np.full_like(ss, np.nan), where=nn > 0))
+
+
+def slot_average(t0s, T, tt, X, hw, bin_s, how, chunk=64):
+    """One slot of the movie: the same time-since-start window over several occurrences, averaged.
+
+    Built in chunks of `chunk` time bins, so a long lap never holds [n, T, H, W] at once: the
+    calibration ladder's single lap is 320 bins, which as one float32 stack would be 157 MB.
+
+    -> (avg [T,H,W], laps_present [T], laps_used [T], lap_rms [n] or None, dropped lap index or -1)
+    """
+    out = np.full((T,) + hw, np.nan, dtype=np.float32)
+    present = np.zeros(T, dtype=np.int32)
+    used = np.zeros(T, dtype=np.int32)
+    rms, drop = None, -1
+    if how == "trimmed-lap" and len(t0s) >= 4:
+        rms = lap_scores(t0s, T, tt, X, hw, bin_s, chunk)
+        if np.isfinite(rms).any():
+            drop = int(np.nanargmax(rms))
+    for j0 in range(0, T, chunk):
+        j1 = min(T, j0 + chunk)
+        V = _slot_fill(t0s, j0, j1, tt, X, hw, bin_s)
+        present[j0:j1] = np.isfinite(V).reshape(V.shape[0], V.shape[1], -1).max(axis=2).sum(axis=0)
+        if drop >= 0:
+            V[drop] = np.nan
+        out[j0:j1], _, used[j0:j1] = lap_average(V, how)
+    return out, present, used, rms, drop
+
+
+def _phase_chain(ph):
+    """The block's non-idle phases in time order, each tagged with the set that ran before it.
+
+    `prev` is read off the realised schedule with the warm-up laps still in it: whether a dwell is
+    a real switch is a fact about what the card did immediately before it, not about which laps
+    the statistics keep.  So the first analysed lap's first dwell counts as a switch when the
+    warm-up lap ended on the other arm - which is exactly what `W E | E W` does.
+    """
+    seq = sorted([p for p in ph if not p["idle"]], key=lambda p: p["t0"])
+    return [dict(p, prev=(seq[i - 1]["set"] if i else None)) for i, p in enumerate(seq)]
+
+
+def _lap_shapes(ph, cycles):
+    """{cycle: (set, ...)}: each lap's non-idle sets in time order."""
+    out = {}
+    for c in cycles:
+        ps = sorted([p for p in ph if p["cycle"] == c and not p["idle"]], key=lambda p: p["t0"])
+        if ps:
+            out[c] = tuple(p["set"] for p in ps)
+    return out
+
+
+def _is_rotation(ring, lap):
+    """Is `lap` a rotation of `ring`?  E62-ORBIT and E62-SWEEP rotate theirs by one each lap."""
+    r = list(ring)
+    return len(lap) == len(r) and any(tuple(r[k:] + r[:k]) == tuple(lap) for k in range(len(r)))
+
+
+def _slot_order(b, chain, arms=None):
+    """The order the movie concatenates its slots in: the protocol's own, then whatever else ran."""
+    want = [str(s) for s in (arms or b.get("arms") or [])]
+    if not want:
+        want = [str(p.get("set")) for p in (b.get("phases") or [])
+                if p.get("set") and not p.get("idle")]
+    want = [s for i, s in enumerate(want) if s not in want[:i]]
+    seen = [p["set"] for p in chain]
+    seen = [s for i, s in enumerate(seen) if s not in seen[:i]]
+    return [s for s in want if s in seen] + [s for s in seen if s not in want]
+
+
+def uniform_default(kind):
+    """Which blocks lose their movie's uniform part unless they are told to keep it.
+
+    A constant-power swap, a sequence and a control have nothing to say with their frame mean: the
+    total power does not change, so a uniform rise across the cycle is the board's drift, a shutter
+    step or the arrival lag's tail, and on a +-100 mK colour key it swamps the pattern that is the
+    point.  The bloom is the exact opposite - the uniform rise *is* the measurement - and the
+    calibration ladder's session gate is itself a frame mean, so neither one ever loses it.
+    """
+    return str(kind or "").lower() in UNIFORM_KINDS
+
+
+def uniform_series(diff, stat):
+    """Each frame's uniform part, and the part of it the movie takes out.
+
+    The per-pixel cycle mean is already out of `diff`, so the series' own constant went with it:
+    what is left to remove is its *variation* over the cycle.  Removing exactly `u - mean(u)`
+    leaves every pixel's cycle mean at zero - which is what the difference colour key means, and
+    what `test_hm.py`'s `cycle_movie_*` check measures - instead of putting a constant back in.
+    With the plain spatial mean `mean(u)` is already zero and the two are the same thing.
+    """
+    flat = np.asarray(diff, dtype=np.float32).reshape(diff.shape[0], -1)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        u = np.nanmedian(flat, axis=1) if stat == "median" else np.nanmean(flat, axis=1)
+    u = np.asarray(u, dtype=np.float64)
+    fin = np.isfinite(u)
+    u0 = float(u[fin].mean()) if fin.any() else 0.0
+    return u, np.where(fin, u - u0, 0.0)
+
+
+def _cycle_pack(b, avg, edges, sets_order, present, used, laps, mode, notes, extra, gain,
+                med_mask, a):
+    """Smooth, centre, take the uniform part out, and build the cycle.npz payload."""
+    T = int(avg.shape[0])
+    avg = np.stack([smooth_map(f, gain, a.sigma, med_mask, a.median_size) for f in avg])
+    diff = (avg - np.nanmean(avg, axis=0, keepdims=True)).astype(np.float32)
+    kind = str(b.get("kind") or "").lower()
+    remove = uniform_default(kind) and kind != "bloom" and not a.movie_keep_uniform
+    u_raw, u_rem = uniform_series(diff, a.movie_uniform_stat)
+    if remove:
+        diff = (diff - u_rem[:, None, None].astype(np.float32)).astype(np.float32)
+    else:
+        u_rem = np.zeros_like(u_rem)
+    out = dict(t_s=(np.arange(T) + 0.5) * a.bin_s, avg_mk=avg, diff_mk=diff,
+               phase_edges_s=np.asarray(edges, dtype=np.float64),
+               phase_sets=np.asarray(list(sets_order), dtype="U32"),
+               n_cycles=np.int32(laps), n_per_step=np.asarray(present, dtype=np.int32),
+               n_laps_used_per_step=np.asarray(used, dtype=np.int32),
+               movie_mode=np.asarray(str(mode), dtype="U32"),
+               lap_average=np.asarray(str(a.movie_average), dtype="U16"),
+               uniform_stat=np.asarray(str(a.movie_uniform_stat), dtype="U16"),
+               uniform_removed=np.asarray(bool(remove)),
+               uniform_mk=u_raw.astype(np.float64),
+               uniform_removed_mk=np.asarray(u_rem, dtype=np.float64),
+               notes=np.asarray(list(notes), dtype="U400"))
+    out.update(extra)
+    return out
+
+
+def _records(rows, prefix):
+    """Parallel arrays describing a list of phases, for cycle.npz (no pickle, so no dicts)."""
+    return {
+        prefix + "_set": np.asarray([str(r.get("set")) for r in rows], dtype="U32"),
+        prefix + "_cycle": np.asarray([int(r.get("cycle", -1)) for r in rows], dtype=np.int32),
+        prefix + "_phase": np.asarray([int(r.get("phase", -1)) for r in rows], dtype=np.int32),
+        prefix + "_t0_s": np.asarray([float(r["t0"]) for r in rows], dtype=np.float64),
+        prefix + "_t1_s": np.asarray([float(r["t1"]) for r in rows], dtype=np.float64),
+        prefix + "_prev_set": np.asarray([str(r.get("prev")) for r in rows], dtype="U32"),
+        prefix + "_slot": np.asarray([int(r.get("slot", -1)) for r in rows], dtype=np.int32),
+        prefix + "_why": np.asarray([str(r.get("why") or "") for r in rows], dtype="U80"),
+    }
+
+
+def cycle_movie(b, ph, cyc_used, tt, X, gain, med_mask, a, hw, arms=None):
+    """The movie cycle, built so that every analysed lap contributes to it.
+
+    Which of three shapes it uses is read off the realised schedule, never off a block's name.
+
+    * **switch-aligned** - two sets.  A swap block's laps alternate their arm order
+      (`W E | E W | E W | W E`), so a cycle averaged on the *lap's* start can use only one of the
+      two shapes and throws the other half away - two of the dry null's four analysed laps.  Here
+      every analysed dwell that follows the *other* arm is a real switch and goes in, aligned on
+      its own start; arm A's switch-average is concatenated with arm B's.  The repeats the ABBA
+      boundary makes (the second `E` of `W E | E W`) follow themselves, so they are not switches
+      and are left out: they would average a dwell that had already settled against a switch
+      transient, which is the one thing the movie is of.
+    * **ring-aligned** - a sequence block whose laps are rotations of one ring (E62-ORBIT,
+      E62-SWEEP).  Each position is averaged over its analysed occurrences, aligned on that
+      occurrence's own start, and the positions are concatenated in the protocol's ring order.
+      The same rule as above applies one step further round: a lap that starts at a different
+      position makes its first dwell follow the wrong ring neighbour, so that occurrence is left
+      out and named, exactly as the ABBA repeats are.
+    * **modal-lap** - anything else: the calibration ladder (one lap, sets repeated at different
+      rungs, no ring), or a block with idle phases inside its laps.  The lap-aligned average over
+      the commonest lap shape, as before.
+
+    The block's statistics are computed upstream and do not come through here: this function only
+    decides what the movie averages.
+    """
+    chain = _phase_chain(ph)
+    use = set(cyc_used)
+    anal = [p for p in chain if p["cycle"] in use]
+    order = _slot_order(b, anal, arms)
+    shapes = _lap_shapes(ph, cyc_used)
+    kind = str(b.get("kind") or "").lower()
+    # Any idle phase ANYWHERE in the block, warm-up laps included, sends it to modal-lap.  The
+    # chain leaves idle phases out, so after one of them `prev` would name the dwell before the
+    # idle and a dwell that really followed a gap would be read as a switch.  Testing only the
+    # analysed cycles would miss an idle that sits in the warm-up lap and mis-tag the first
+    # analysed dwell.  No block in the registered protocol has one (E62-CAL's IDLE is in its
+    # single lap and E62-CAL gets no movie; the bloom never reaches here), so this is a guard.
+    has_idle = any(p["idle"] for p in ph)
+    mode, notes = None, []
+    if anal and not has_idle:
+        if len(order) == 2:
+            mode = "switch-aligned"
+        elif (len(order) >= 3 and shapes
+                and all(_is_rotation(order, v) for v in shapes.values())
+                and (kind == "sequence" or len({v for v in shapes.values()}) > 1)):
+            mode = "ring-aligned"
+    if mode is not None:
+        out = _aligned_movie(b, anal, order, mode, tt, X, gain, med_mask, a, hw, notes)
+        if out is not None:
+            return out
+        notes.append("fell back to the commonest lap shape: a slot had no usable occurrence")
+    return _modal_movie(b, ph, cyc_used, tt, X, gain, med_mask, a, hw, notes)
+
+
+def _aligned_movie(b, anal, order, mode, tt, X, gain, med_mask, a, hw, notes):
+    """switch-aligned / ring-aligned: one slot per set, each aligned on its own occurrences.
+
+    ONE rule for both: a dwell goes in only when the set that ran immediately before it on the
+    card is the set the finished cycle shows immediately before it.  With two arms that is the
+    switch rule - `shown_prev` of each arm is the other one, so a dwell that follows itself (the
+    ABBA lap boundary) is out.  On a rotating ring it is the same statement one step further: a
+    lap that starts at a different position makes its first dwell follow the wrong neighbour (lap
+    2 of E62-ORBIT opens on B4NE, which the card ran straight after B4C, while the cycle shows
+    B4NW before it), and averaging that in puts the wrong residual heat into the first seconds
+    after the switch - which is the part of the movie that carries the answer.  Measured on a
+    planted 5-position ring with the registered rotation: leaving those 4 of 25 dwells in moves
+    the noiseless cycle by 4.4 mK rms, 18% of its own signal, and 5-8 mK in the first 6 s of four
+    of the five positions, against the sqrt(5/4) of extra noise that dropping them costs.
+    """
+    shown_prev = {s: order[i - 1] for i, s in enumerate(order)}
+    slots, used_rows, skip_rows = [], [], []
+    for si, s in enumerate(order):
+        occ = []
+        for p in anal:
+            if p["set"] != s:
+                continue
+            if p["prev"] is None:
+                skip_rows.append(dict(p, slot=si, why="nothing ran before it"))
+            elif p["prev"] != shown_prev[s]:
+                skip_rows.append(dict(p, slot=si, why=(
+                    "follows the same arm: not a switch" if p["prev"] == s else
+                    "follows %s, not the %s the cycle shows before it" % (p["prev"],
+                                                                          shown_prev[s]))))
+            else:
+                occ.append(dict(p, slot=si))
+        if not occ:
+            return None
+        slots.append((s, occ))
+        used_rows += occ
+    parts, present, used, edges, slot_n, slot_T = [], [], [], [0.0], [], []
+    lap_rms, lap_drop = [], []
+    for s, occ in slots:
+        dur = float(np.median([p["t1"] - p["t0"] for p in occ]))
+        Ti = max(2, int(round(dur / a.bin_s)))
+        m, pr, us, rms, drop = slot_average([p["t0"] for p in occ], Ti, tt, X, hw, a.bin_s,
+                                            a.movie_average)
+        parts.append(m)
+        present.append(pr)
+        used.append(us)
+        edges.append(edges[-1] + Ti * a.bin_s)
+        slot_n.append(len(occ))
+        slot_T.append(Ti)
+        lap_rms.append(np.full(len(occ), np.nan) if rms is None else rms)
+        lap_drop.append(drop)
+        if drop >= 0:
+            occ[drop]["why"] = "the slot's most extreme lap, dropped by --movie-average trimmed-lap"
+    present = np.concatenate(present)
+    if int((present > 0).sum()) < 2:
+        return None
+    laps = len({p["cycle"] for p in used_rows})
+    notes.append(
+        "%s: %d phases averaged over %d analysed laps (%s per slot); %d left out (%s)%s"
+        % (mode, len(used_rows), laps, "+".join(str(n) for n in slot_n), len(skip_rows),
+           ", ".join(sorted({r["why"] for r in skip_rows})) or "none",
+           ("; --movie-average %s also dropped one lap per slot, marked in `used_why`"
+            % a.movie_average) if any(d >= 0 for d in lap_drop) else ""))
+    extra = dict(n_phases_used=np.int32(len(used_rows)),
+                 n_phases_skipped=np.int32(len(skip_rows)),
+                 slot_sets=np.asarray([s for s, _ in slots], dtype="U32"),
+                 slot_n_phases=np.asarray(slot_n, dtype=np.int32),
+                 slot_n_steps=np.asarray(slot_T, dtype=np.int32),
+                 slot_lap_rms_mk=np.concatenate(lap_rms).astype(np.float64),
+                 slot_lap_dropped=np.asarray(lap_drop, dtype=np.int32))
+    extra.update(_records(used_rows, "used"))
+    extra.update(_records(skip_rows, "skipped"))
+    return _cycle_pack(b, np.concatenate(parts, axis=0), edges, [s for s, _ in slots],
+                       present, np.concatenate(used), laps, mode, notes, extra, gain,
+                       med_mask, a)
+
+
+def _modal_movie(b, ph, cyc_used, tt, X, gain, med_mask, a, hw, notes):
+    """The old shape: the commonest lap, averaged on the lap's own start."""
+    shapes, spans = {}, {}
     for c in cyc_used:
         ps = sorted([p for p in ph if p["cycle"] == c], key=lambda p: p["t0"])
         if not ps:
             continue
-        order.setdefault(tuple(p["set"] for p in ps), []).append(c)
+        shapes.setdefault(tuple(p["set"] for p in ps), []).append(c)
         spans[c] = (ps[0]["t0"], max(p["t1"] for p in ps), ps)
-    if not order:
+    if not shapes:
         return None
-    modal = max(order.items(), key=lambda kv: len(kv[1]))
-    sets_order, cyc = modal[0], modal[1]
-    durs = [spans[c][1] - spans[c][0] for c in cyc]
-    cyc_s = float(np.median(durs))
+    sets_order, cyc = max(shapes.items(), key=lambda kv: len(kv[1]))
+    cyc_s = float(np.median([spans[c][1] - spans[c][0] for c in cyc]))
     T = max(2, int(round(cyc_s / a.bin_s)))
-    acc = np.zeros((T,) + hw, dtype=np.float64)
-    cnt = np.zeros(T, dtype=np.int64)
-    for c in cyc:
-        t0 = spans[c][0]
-        for j in range(T):
-            want = t0 + (j + 0.5) * a.bin_s
-            k = int(np.argmin(np.abs(tt - want)))
-            if abs(tt[k] - want) <= a.bin_s:
-                acc[j] += X[k]
-                cnt[j] += 1
-    good = cnt > 0
-    if good.sum() < 2:
+    avg, present, used, lap_rms, lap_drop = slot_average(
+        [spans[c][0] for c in cyc], T, tt, X, hw, a.bin_s, a.movie_average)
+    if int((present > 0).sum()) < 2:
         return None
-    avg = np.full((T,) + hw, np.nan, dtype=np.float32)
-    avg[good] = (acc[good] / cnt[good][:, None, None]).astype(np.float32)
-    avg = np.stack([smooth_map(f, gain, a.sigma, med_mask, a.median_size) for f in avg])
-    diff = avg - np.nanmean(avg, axis=0, keepdims=True)
-    edges = [0.0]
-    ps = spans[cyc[0]][2]
-    for p in ps:
-        edges.append(min(cyc_s, p["t1"] - spans[cyc[0]][0]))
-    return dict(t_s=(np.arange(T) + 0.5) * a.bin_s, avg_mk=avg, diff_mk=diff.astype(np.float32),
-                phase_edges_s=np.asarray(edges, dtype=np.float64),
-                phase_sets=np.asarray(list(sets_order), dtype="U32"),
-                n_cycles=np.int32(len(cyc)), n_per_step=cnt.astype(np.int32))
+    edges = [0.0] + [min(cyc_s, p["t1"] - spans[cyc[0]][0]) for p in spans[cyc[0]][2]]
+    dropped = [dict(p, slot=-1, prev=None, why="its lap shape is not the movie's")
+               for c in cyc_used if c not in cyc for p in spans.get(c, (0, 0, []))[2]]
+    notes.append("modal-lap: the commonest of %d lap shapes, %d of %d analysed laps"
+                 % (len(shapes), len(cyc), len(cyc_used)))
+    extra = dict(n_phases_used=np.int32(len(spans[cyc[0]][2]) * len(cyc)),
+                 n_phases_skipped=np.int32(len(dropped)),
+                 slot_sets=np.asarray(list(sets_order), dtype="U32"),
+                 slot_n_phases=np.asarray([len(cyc)] * len(sets_order), dtype=np.int32),
+                 # modal-lap averages the whole lap in ONE slot, so the per-slot arrays the aligned
+                 # modes write have no per-set meaning here.  They keep the documented length [P]
+                 # all the same, so a reader can zip them with `slot_sets` without a special case:
+                 # the step count is how many of the movie's own frames fall inside that phase
+                 # (which is what the renderer reads the edges for), and the one lap the trim
+                 # dropped is repeated across the slots it applies to.
+                 slot_n_steps=np.asarray(
+                     [int((((np.arange(T) + 0.5) * a.bin_s >= edges[i])
+                           & ((np.arange(T) + 0.5) * a.bin_s < edges[i + 1])).sum())
+                      for i in range(len(sets_order))], dtype=np.int32),
+                 slot_lap_rms_mk=np.asarray(np.full(len(cyc), np.nan) if lap_rms is None
+                                            else lap_rms, dtype=np.float64),
+                 slot_lap_dropped=np.asarray([lap_drop] * len(sets_order), dtype=np.int32))
+    extra.update(_records([dict(p, slot=i % max(len(sets_order), 1), prev=None)
+                           for c in cyc for i, p in enumerate(spans[c][2])], "used"))
+    extra.update(_records(dropped, "skipped"))
+    return _cycle_pack(b, avg, edges, sets_order, present, used, len(cyc), "modal-lap", notes,
+                       extra, gain, med_mask, a)
 
 
 # ---------------------------------------------------------------- orientation
@@ -1380,7 +1760,10 @@ def analyze(a):
                    settle_s=a.settle_s, perms=a.perms, gain=bool(a.gain), seed=a.seed,
                    detrend_order=a.detrend_order, detrend_trend=a.detrend_trend,
                    detrend_settled=bool(a.detrend_settled),
-                   detrend_protect=bool(a.detrend_protect)),
+                   detrend_protect=bool(a.detrend_protect),
+                   movie_average=a.movie_average,
+                   movie_uniform_stat=a.movie_uniform_stat,
+                   movie_keep_uniform=bool(a.movie_keep_uniform)),
         gain=ginfo, orientation={k: v for k, v in orient.items() if k != "pairs"},
         blocks=[{k: v for k, v in s.items()
                  if k not in ("amp_cycle_mk", "steady_bins_per_arm", "ffc_events_in_block")}
@@ -1449,6 +1832,37 @@ def main(argv=None):
                    help="with --detrend-protect, fit on the settled part of each dwell only, so "
                         "the arrival ramp is not read as drift")
     p.add_argument("--no-detrend-settled", dest="detrend_settled", action="store_false")
+    p.add_argument("--movie-average", default="mean", choices=list(MOVIE_AVERAGES),
+                   help="how the MOVIE averages its laps (the statistics never come through here)."
+                        "  `mean`; `trimmed`, which drops per pixel and per time bin the lap "
+                        "furthest from that element's median once there are four or more; "
+                        "`trimmed-lap`, which drops one whole lap - the slot's most extreme by "
+                        "`slot_lap_rms_mk` - coherently; `median`.  MEASURED, and the measurement "
+                        "is why the default is the plain mean: on the dry null's WE17 (3 switches "
+                        "per arm, so both trims are inactive and give the mean exactly) the "
+                        "residual is 50.5 mK for the mean against 57.5 for the median, +14%%; on "
+                        "the same frames re-cut to 7 "
+                        "switches per arm, mean 27.1, median 26.7 (-1.5%%), trimmed 30.6 (+13%%), "
+                        "trimmed-lap 30.9 (+14%%); on a 5-position ring, mean 55.1, median 55.1, "
+                        "trimmed 63.6 (+15%%), trimmed-lap 76.1 (+38%%).  Against a planted signal "
+                        "(synth_hm.py) the mean also adds the least noise, and every robust one "
+                        "biases the recovered amplitude (median -4.8%% on a 17 s pair-alternating "
+                        "swap, trimmed-lap +5.1%% on a 5-position ring).  The reason is in "
+                        "`slot_lap_rms_mk`: once the per-frame uniform part is out, no single lap "
+                        "is wild - the lap-to-lap scatter is broad-band, and dropping a lap only "
+                        "throws away 1/n of the data.  The wild per-cycle numbers (121, -39, 79, "
+                        "658 mK on this null) are the *projected dipole* in the statistics, which "
+                        "the movie's detrend and uniform removal already take out.  Re-measure per "
+                        "session: if one lap's `slot_lap_rms_mk` stands well above the rest, "
+                        "`trimmed-lap` is the one to use")
+    p.add_argument("--movie-keep-uniform", action="store_true", default=False,
+                   help="keep each movie frame's uniform part (its spatial mean) on a swap, "
+                        "sequence or control block instead of removing it.  The bloom and the "
+                        "calibration ladder always keep theirs: their frame mean is the "
+                        "measurement")
+    p.add_argument("--movie-uniform-stat", default="mean", choices=["mean", "median"],
+                   help="which uniform part to remove: the frame's mean, or its median (robust to "
+                        "the pattern itself, but the two agree to a few mK on these frames)")
     p.add_argument("--bin-s", type=float, default=0.5)
     p.add_argument("--t-zero-ms", type=float,
                    help="the session's t_start_ms, when the RED carries neither session.json "

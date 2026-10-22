@@ -1549,7 +1549,10 @@ class Session:
         so the one more ~8.5 s launch cannot carry it past the gate and the governor's 65 C step.
         Returns the reason string when the phase must end, else None."""
         lim = self.proto.safety.get("bloom_cycle_stop_c")
-        if lim is None or ph.idle or not ph.harts or ph.harts < 1024 or self.watcher is None:
+        # A full-card phase is one that lights every shire, at any --per-shire: E62 keyed this on 1,024 harts, and
+        # amendment A1 ran the full card at 768 (per-shire 24), so the gate never armed and the die reached 69 C.
+        if (lim is None or ph.idle or ph.mask is None or popcount(ph.mask) < 32
+                or self.watcher is None):
             return None
         die = self.watcher.snapshot().get("die_c")
         if die is not None and die >= lim - 1.0:

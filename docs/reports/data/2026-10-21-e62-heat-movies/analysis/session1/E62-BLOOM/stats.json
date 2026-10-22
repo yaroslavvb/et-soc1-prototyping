@@ -1,0 +1,26 @@
+{
+ "block": "E62-BLOOM",
+ "block_label": null,
+ "block_label_how": null,
+ "kind": "bloom",
+ "title": "The establishing shot: the whole board breathing, and the gain map",
+ "predicted": {
+  "what": "All 32 shires at per-shire 32 (1,024 harts, 41.6 W switched, 65-84 W board) against idle: +2,500 to +4,000 mK zero-to-peak on the back, visible raw in single frames with no difference imaging at all. A monopole, not a dipole -- which is the point: it is what a change in TOTAL power looks like, the thing every other block is built to avoid. Arrival of the step on the back 4-14 s after the compute starts (an upper bound, because the visualize preset's TNR=50 smears time). Delivers the per-pixel gain map that divides out the 12.4% of pixels that are shiny component tops. Die 51 -> about 60 C at this 33% duty; each on-phase is 42.5 s, inside DECISIONS' 60 s cap.",
+  "mk": 3100.0,
+  "direction": "a rise everywhere inside the die footprint, strongest at the centre, spreading outward",
+  "basis": "physics.md section 2's pattern-vs-idle table (ALL32, 2,651 mK at 40 s and 28.8 W, already scaled by K = 0.674) carried to 41.6 W, with the upper end as written and the lower end divided by the 572/373 gap between E61's undetrended and detrended arms",
+  "anchor": null
+ },
+ "pass_rule": "PASS if the frame mean rises by at least 1 K within each on-phase, in phase with board_w sampled at 10 Hz, and the whole-frame monopole is LARGE (that contrast with every swap's null monopole is the control). The gain map is accepted if the per-pixel rise has a signal-to-noise above 50 on at least 90% of pixels inside the die footprint. PER-CYCLE DIE GATE, registered now: the runner reads the die before and during every on-phase and ends it early via --stop-file at 64 C, logging the truncated dwell; the duty-cycle model (tau 143 s, fitted on DECISIONS' own 53 -> 62 C in 60 s) puts the three on-phase peaks at 60.3 / 62.1 / 62.8 C at 1.3 W per shire, so the gate should not fire. At the p90 reading of 1.9 W per shire it would fire on two of three cycles, which is what conventions.power_fallback branch 2 exists to prevent: above 45 W switched this block runs at --per-shire 24 with a 127.5 s off-phase (peaks 61.0 / 62.0 / 62.3 C). A governor step inside an on-phase would silently change the power during the one block that builds the per-pixel gain map applied to every other difference image, and would void both the +2,500-4,000 mK prediction and the 4-14 s arrival measurement. The frame-extent and regulator-in-frame check is E62-CAL's, done before this block, not assumed from the planned 60 mm lens distance.",
+ "bloom": {
+  "found": false,
+  "why": "the bloom block ran no launch phase (label None)"
+ },
+ "verdict_vars": {
+  "bloom_dt_p99_mk": null,
+  "bloom_dt_median_mk": null
+ },
+ "verdict": null,
+ "verdict_note": "pass_rule is prose, not an expression, so this file does not judge it (unterminated string literal (detected at line 1) (<unknown>, line 1)); the numbers beside it are the evidence",
+ "skipped": "no phases in the session for this block (tried ['E62-BLOOM', 'block2'])"
+}

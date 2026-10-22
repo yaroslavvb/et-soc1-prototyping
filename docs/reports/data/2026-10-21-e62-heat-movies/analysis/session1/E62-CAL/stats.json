@@ -1,0 +1,666 @@
+{
+ "block": "E62-CAL",
+ "block_label": "E62-CAL",
+ "block_label_how": "the protocol's own name",
+ "kind": "calibration",
+ "title": "Idle baseline, the hart-matched triple, and the power ladder",
+ "predicted": {
+  "what": "Board power linear in harts at 40.6 mW/hart (1.3 W per shire at per-shire 32): 5.2 / 10.4 / 15.6 / 20.8 / 41.6 W above a 23-25 W idle. The hart-matched triple at 128 harts (B4C 4x32, W8B_16 8x16, INT16_8 16x8) agrees within hp's own +/-0.5 W equivalence band, i.e. power follows harts and not geometry. Every board-power statistic here is the MEDIAN of the 10 Hz samples in the last 4.0 s of a launch, after device open, kernel load and the power ramp, and the within-arm scatter is reported beside the between-arm difference so the +/-0.5 W test has a stated power. Field drift 5-8 mK/s and at least one FFC in the 180 s pre-idle.",
+  "mk": null,
+  "direction": "no spatial claim; this block is the control for every later one",
+  "basis": "launch.md section 5 (the per-shire-count sweep is unmeasured on aifoundry2 and this settles it); hp/README.md's +/-0.5 W band, measured -0.21 W for INT16@32 vs PER16@32 at ~14 W",
+  "anchor": null
+ },
+ "pass_rule": "PASS if board power is linear in harts with the three 128-hart legs inside +/-0.5 W of each other (medians of the last 4.0 s of each launch) and mhz.minion reads 800 in every rung. SESSION GATE, with its window and its reference named: on the frame mean over the UNI32 rung PLUS the 30 s IDLE phase that follows it -- the peak of an 8.5 s step lands in that idle, because the registered arrival of a step on the back is 4-14 s -- measured against the mean of the 180 s pre-session idle, the rise must be at least 300 mK. Below that the camera is not seeing the card and the session stops here. (Version 1 asked for 'of order 500 mK' with no window and no reference: against the pre-ladder baseline the accumulated rise is about 1.7 K and passes easily, against the preceding INT16 rung the UNI32 increment is about 400 mK and fails -- the most expensive ambiguity in the file.) FRAME-EXTENT CHECK, from the same UNI32 monopole image and recorded before E62-ORBIT commits 12.9 min: the die footprint's pixel extent, the clipped-pixel fraction, and whether any regulator hot spot is in frame, each compared against PROTOCOL.md section 3's table. Everything in section 3 -- the dwell split, the clipping rule, the nominal 0.156 mm/px and section 9 item 8's claim that the regulators are out of frame -- rests on a lens distance PROTOCOL.md itself calls planned, and the camera is live and read-only, so this costs nothing.",
+ "detrend": {
+  "order": 1,
+  "levels": null,
+  "trends": 1,
+  "protected": false,
+  "fit_rows": 315,
+  "trend_rms_mk": 319684.206
+ },
+ "bins": 315,
+ "t_s": [
+  180.5,
+  337.88
+ ],
+ "dwell_s_realised": 8.47,
+ "dwell_s_planned": 8.5,
+ "drift_mk_per_s_median": 57.708,
+ "ffc_count": 43,
+ "ffc_events_in_block": [
+  {
+   "t_s": 184.881,
+   "seq": 10780659,
+   "step_mk_median": -1696.75,
+   "step_mk_p95": -700.55,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -1647.31,
+   "shrink": {
+    "sigma_mk": 10.7,
+    "dev_mk": 578.02,
+    "common_mk": -1696.75,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 592.72
+   },
+   "frame_mean_step_mk": 363.74
+  },
+  {
+   "t_s": 189.353,
+   "seq": 10781502,
+   "step_mk_median": 37.44,
+   "step_mk_p95": 126.97,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 50.2,
+   "shrink": {
+    "sigma_mk": 12.2,
+    "dev_mk": 65.0,
+    "common_mk": 37.44,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 88.43
+   },
+   "frame_mean_step_mk": 94.54
+  },
+  {
+   "t_s": 191.238,
+   "seq": 10781590,
+   "step_mk_median": 10.81,
+   "step_mk_p95": 63.38,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -9.48,
+   "shrink": {
+    "sigma_mk": 10.36,
+    "dev_mk": 30.37,
+    "common_mk": 10.81,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 56.29
+   },
+   "frame_mean_step_mk": 23.22
+  },
+  {
+   "t_s": 194.558,
+   "seq": 10781680,
+   "step_mk_median": -10.46,
+   "step_mk_p95": -0.78,
+   "method": "mean_step+drift+shrink0.31",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 10.85,
+   "shrink": {
+    "sigma_mk": 9.22,
+    "dev_mk": 18.24,
+    "common_mk": -10.46,
+    "k": 0.3112,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 23.49
+   },
+   "frame_mean_step_mk": 4.39
+  },
+  {
+   "t_s": 206.997,
+   "seq": 10781992,
+   "step_mk_median": 24.67,
+   "step_mk_p95": 101.62,
+   "method": "frozen+mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 7,
+   "frames_after": 13,
+   "step_mk_shoulders": -1.65,
+   "shrink": {
+    "sigma_mk": 11.47,
+    "dev_mk": 44.25,
+    "common_mk": 24.67,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 59.81
+   },
+   "frame_mean_step_mk": 112.03
+  },
+  {
+   "t_s": 208.876,
+   "seq": 10782039,
+   "step_mk_median": 5.02,
+   "step_mk_p95": 34.81,
+   "method": "median_step+drift+shrink0.69",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 8.36,
+   "shrink": {
+    "sigma_mk": 13.51,
+    "dev_mk": 25.02,
+    "common_mk": 5.02,
+    "k": 0.6931,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 41.14
+   },
+   "frame_mean_step_mk": 15.08
+  },
+  {
+   "t_s": 215.475,
+   "seq": 10782203,
+   "step_mk_median": -18.42,
+   "step_mk_p95": 33.42,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -58.66,
+   "shrink": {
+    "sigma_mk": 12.91,
+    "dev_mk": 29.81,
+    "common_mk": -18.42,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 77.94
+   },
+   "frame_mean_step_mk": 8.48
+  },
+  {
+   "t_s": 217.476,
+   "seq": 10782243,
+   "step_mk_median": -4.85,
+   "step_mk_p95": 51.28,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 3.94,
+   "shrink": {
+    "sigma_mk": 15.99,
+    "dev_mk": 33.32,
+    "common_mk": -4.85,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 57.17
+   },
+   "frame_mean_step_mk": 22.74
+  },
+  {
+   "t_s": 219.759,
+   "seq": 10782311,
+   "step_mk_median": 13.71,
+   "step_mk_p95": 40.75,
+   "method": "frozen+small_step+drift+shrink0.50",
+   "gap_frames": 0,
+   "frames_before": 12,
+   "frames_after": 13,
+   "step_mk_shoulders": 20.77,
+   "shrink": {
+    "sigma_mk": 16.38,
+    "dev_mk": 29.66,
+    "common_mk": 13.71,
+    "k": 0.5045,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 37.1
+   },
+   "frame_mean_step_mk": 14.74
+  },
+  {
+   "t_s": 221.644,
+   "seq": 10782357,
+   "step_mk_median": -5.55,
+   "step_mk_p95": 30.86,
+   "method": "mean_step+median_step+drift+shrink0.80",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -30.33,
+   "shrink": {
+    "sigma_mk": 12.95,
+    "dev_mk": 26.85,
+    "common_mk": -5.55,
+    "k": 0.8037,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 40.8
+   },
+   "frame_mean_step_mk": 6.5
+  },
+  {
+   "t_s": 223.126,
+   "seq": 10782395,
+   "step_mk_median": 15.09,
+   "step_mk_p95": 65.48,
+   "method": "median_step+drift+shrink0.85",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 27.92,
+   "shrink": {
+    "sigma_mk": 14.84,
+    "dev_mk": 35.77,
+    "common_mk": 15.09,
+    "k": 0.8532,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 64.0
+   },
+   "frame_mean_step_mk": 17.4
+  },
+  {
+   "t_s": 228.479,
+   "seq": 10782529,
+   "step_mk_median": -9.14,
+   "step_mk_p95": 2.32,
+   "method": "median_step+drift+shrink0.27",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -17.48,
+   "shrink": {
+    "sigma_mk": 17.2,
+    "dev_mk": 28.35,
+    "common_mk": -9.14,
+    "k": 0.2723,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 31.36
+   },
+   "frame_mean_step_mk": 12.24
+  },
+  {
+   "t_s": 232.399,
+   "seq": 10782627,
+   "step_mk_median": -0.37,
+   "step_mk_p95": 53.94,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -33.85,
+   "shrink": {
+    "sigma_mk": 20.05,
+    "dev_mk": 33.49,
+    "common_mk": -0.37,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 67.22
+   },
+   "frame_mean_step_mk": 58.44
+  },
+  {
+   "t_s": 244.838,
+   "seq": 10782665,
+   "step_mk_median": 502.52,
+   "step_mk_p95": 1907.46,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 525.18,
+   "shrink": {
+    "sigma_mk": 22.69,
+    "dev_mk": 694.16,
+    "common_mk": 502.52,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 712.29
+   },
+   "frame_mean_step_mk": 229.74
+  },
+  {
+   "t_s": 246.794,
+   "seq": 10782970,
+   "step_mk_median": 24.33,
+   "step_mk_p95": 106.56,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -3.36,
+   "shrink": {
+    "sigma_mk": 21.48,
+    "dev_mk": 50.35,
+    "common_mk": 24.33,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 80.34
+   },
+   "frame_mean_step_mk": -131.23
+  },
+  {
+   "t_s": 248.517,
+   "seq": 10783030,
+   "step_mk_median": -44.95,
+   "step_mk_p95": -13.32,
+   "method": "mean_step+drift+shrink0.70",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -29.79,
+   "shrink": {
+    "sigma_mk": 17.49,
+    "dev_mk": 30.66,
+    "common_mk": -44.95,
+    "k": 0.6957,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 42.61
+   },
+   "frame_mean_step_mk": -40.53
+  },
+  {
+   "t_s": 250.794,
+   "seq": 10783080,
+   "step_mk_median": 7.12,
+   "step_mk_p95": 54.37,
+   "method": "mean_step+median_step+drift+shrink0.90",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 15.21,
+   "shrink": {
+    "sigma_mk": 15.75,
+    "dev_mk": 37.07,
+    "common_mk": 7.12,
+    "k": 0.8998,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 50.46
+   },
+   "frame_mean_step_mk": -25.09
+  },
+  {
+   "t_s": 252.447,
+   "seq": 10783128,
+   "step_mk_median": -6.2,
+   "step_mk_p95": 19.56,
+   "method": "median_step+drift+shrink0.67",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 43.98,
+   "shrink": {
+    "sigma_mk": 14.44,
+    "dev_mk": 24.3,
+    "common_mk": -6.2,
+    "k": 0.6667,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 42.99
+   },
+   "frame_mean_step_mk": -10.44
+  },
+  {
+   "t_s": 258.532,
+   "seq": 10783279,
+   "step_mk_median": 12.18,
+   "step_mk_p95": 26.15,
+   "method": "mean_step+median_step+drift+shrink0.45",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 30.1,
+   "shrink": {
+    "sigma_mk": 9.52,
+    "dev_mk": 19.38,
+    "common_mk": 12.18,
+    "k": 0.45,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 23.2
+   },
+   "frame_mean_step_mk": -6.13
+  },
+  {
+   "t_s": 263.649,
+   "seq": 10783407,
+   "step_mk_median": 9.06,
+   "step_mk_p95": 39.96,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 8.48,
+   "shrink": {
+    "sigma_mk": 9.17,
+    "dev_mk": 20.36,
+    "common_mk": 9.06,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 40.25
+   },
+   "frame_mean_step_mk": -2.56
+  },
+  {
+   "t_s": 276.73,
+   "seq": 10783457,
+   "step_mk_median": 347.95,
+   "step_mk_p95": 1200.69,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 12,
+   "frames_after": 13,
+   "step_mk_shoulders": 336.72,
+   "shrink": {
+    "sigma_mk": 15.85,
+    "dev_mk": 525.91,
+    "common_mk": 347.95,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 535.92
+   },
+   "frame_mean_step_mk": 665.01
+  },
+  {
+   "t_s": 278.799,
+   "seq": 10783767,
+   "step_mk_median": 39.58,
+   "step_mk_p95": 101.34,
+   "method": "mean_step+median_step+drift+shrink0.53",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -36.82,
+   "shrink": {
+    "sigma_mk": 14.56,
+    "dev_mk": 88.52,
+    "common_mk": 39.58,
+    "k": 0.5324,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 101.35
+   },
+   "frame_mean_step_mk": 61.19
+  },
+  {
+   "t_s": 286.527,
+   "seq": 10783978,
+   "step_mk_median": 20.67,
+   "step_mk_p95": 77.68,
+   "method": "seq_gap+small_step+drift+shrink1.00",
+   "gap_frames": 2,
+   "frames_before": 9,
+   "frames_after": 11,
+   "step_mk_shoulders": -10.79,
+   "shrink": {
+    "sigma_mk": 14.97,
+    "dev_mk": 33.0,
+    "common_mk": 20.67,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 74.45
+   },
+   "frame_mean_step_mk": 20.97
+  },
+  {
+   "t_s": 297.729,
+   "seq": 10784256,
+   "step_mk_median": 21.97,
+   "step_mk_p95": 184.37,
+   "method": "frozen+mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 7,
+   "frames_after": 13,
+   "step_mk_shoulders": 23.16,
+   "shrink": {
+    "sigma_mk": 12.2,
+    "dev_mk": 104.26,
+    "common_mk": 21.97,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 162.77
+   },
+   "frame_mean_step_mk": 75.99
+  },
+  {
+   "t_s": 314.251,
+   "seq": 10784642,
+   "step_mk_median": 35.28,
+   "step_mk_p95": 161.28,
+   "method": "frozen+small_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 12,
+   "frames_after": 11,
+   "step_mk_shoulders": 65.14,
+   "shrink": {
+    "sigma_mk": 11.29,
+    "dev_mk": 119.76,
+    "common_mk": 35.28,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 157.33
+   },
+   "frame_mean_step_mk": 6.71
+  },
+  {
+   "t_s": 324.081,
+   "seq": 10784907,
+   "step_mk_median": -8.02,
+   "step_mk_p95": 29.3,
+   "method": "median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -11.56,
+   "shrink": {
+    "sigma_mk": 10.53,
+    "dev_mk": 21.03,
+    "common_mk": -8.02,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 64.18
+   },
+   "frame_mean_step_mk": 21.33
+  },
+  {
+   "t_s": 327.004,
+   "seq": 10784980,
+   "step_mk_median": 3.15,
+   "step_mk_p95": 36.49,
+   "method": "frozen+small_step+drift+shrink0.95",
+   "gap_frames": 0,
+   "frames_before": 12,
+   "frames_after": 8,
+   "step_mk_shoulders": -18.97,
+   "shrink": {
+    "sigma_mk": 10.11,
+    "dev_mk": 21.26,
+    "common_mk": 3.15,
+    "k": 0.9499,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 34.84
+   },
+   "frame_mean_step_mk": 22.4
+  },
+  {
+   "t_s": 329.008,
+   "seq": 10785028,
+   "step_mk_median": 50.62,
+   "step_mk_p95": 109.29,
+   "method": "seq_gap+small_step+drift+shrink1.00",
+   "gap_frames": 1,
+   "frames_before": 12,
+   "frames_after": 9,
+   "step_mk_shoulders": 113.23,
+   "shrink": {
+    "sigma_mk": 12.34,
+    "dev_mk": 33.16,
+    "common_mk": 50.62,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 63.51
+   },
+   "frame_mean_step_mk": 17.73
+  },
+  {
+   "t_s": 333.556,
+   "seq": 10785140,
+   "step_mk_median": 26.46,
+   "step_mk_p95": 69.9,
+   "method": "frozen+small_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 12,
+   "frames_after": 13,
+   "step_mk_shoulders": 133.98,
+   "shrink": {
+    "sigma_mk": 13.19,
+    "dev_mk": 28.96,
+    "common_mk": 26.46,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 113.06
+   },
+   "frame_mean_step_mk": -15.56
+  }
+ ],
+ "warmup_rule": "the runner's own warmup flag (0 cycles dropped)",
+ "arms": [
+  "B4C",
+  "W8B_16",
+  "INT16_8",
+  "CEN8",
+  "W12",
+  "INT16",
+  "UNI32",
+  "E12",
+  "N12",
+  "S12"
+ ],
+ "n_arms": 10,
+ "cycles": 1,
+ "warmup_cycles": 0,
+ "n_cycles": 1,
+ "arm_order_per_cycle": [
+  [
+   "B4C",
+   "W8B_16",
+   "INT16_8",
+   "CEN8",
+   "W12",
+   "INT16",
+   "UNI32",
+   "W12",
+   "E12",
+   "N12",
+   "S12",
+   "S12",
+   "N12",
+   "E12",
+   "W12"
+  ]
+ ],
+ "arm_order_alternates": false,
+ "skipped": "only 1 usable cycles for 10 arms",
+ "steady_bins": [
+  [
+   8,
+   8,
+   8,
+   8,
+   25,
+   8,
+   8,
+   16,
+   16,
+   16
+  ]
+ ]
+}

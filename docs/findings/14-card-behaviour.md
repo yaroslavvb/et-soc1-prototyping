@@ -178,6 +178,37 @@ launches 1 s apart, 10 Hz telemetry) the first launch after such an idle showed 
 Firmware 1.2.0 (aifoundry1's card 1) and 1.3.1 (aifoundry2 and aifoundry3) idle at 600 MHz. At 600 MHz the three
 releases idle very differently: 26 W (1.4.1), 33–35 W (1.2.0 at 57–62 °C) and 32 W (1.3.1, aifoundry2 at 74 °C).
 
+## Power is an offset plus a per-hart term (aifoundry2, 21 October 2026, E62)
+
+E62-CAL put the card on a ladder (the `hp` heater kernel over 128, 256, 384, 512 and 1,024 harts, each an 8.5 s
+launch, the statistic the **median of the 10 Hz board samples in the last 4.0 s**), and the card is linear in harts but
+**not through zero**: switched board W = **5.80 ± 0.30 W + 55.8 ± 1.0 mW per hart** (the six clean rungs, 128–512
+harts). Idle before it: 22.69 W at 600 MHz, die 49 °C.
+
+| harts | board W | switched W | die °C |
+|---|---|---|---|
+| 128 (B4C, 4 × 32) | 35.45 | +12.75 | 52 |
+| 128 (W8B_16, 8 × 16) | 35.69 | +13.00 | 53 |
+| 128 (INT16_8, 16 × 8) | 35.95 | +13.26 | 53 |
+| 256 (CEN8) | 42.71 | +20.02 | 56 |
+| 384 (W12) | 49.39 | +26.70 | 58 |
+| 512 (INT16) | 57.40 | +34.71 | 61 |
+| 1,024 (UNI32) | 66.45 | +43.76 | 63, throttled |
+
+- **Do not price work per hart from zero.** 128 harts read 2.5× a linear-from-zero model and 512 harts 1.7×; the fixed
+  ~5.8 W (clock tree, leakage, the rails coming up to 617–621 mV under any load) is 45% of the smaller reading.
+- **The offset cancels in a constant-hart swap, and only there.** Moving the same number of harts across the die
+  changes the board reading by ~0.3 W; any pattern-against-idle statistic carries the whole offset.
+- **Geometry costs almost nothing:** three 128-hart legs at per-shire 32, 16 and 8 agree within 0.51 W, rising with
+  the die's warm-up across the ladder rather than with geometry.
+- **The governor takes 1,024 harts over:** the UNI32 rung ran an 800 → 700 → 600 → 700 MHz limit cycle through its
+  whole 8.6 s, board 52 / 66 / 86 W. 768 harts at per-shire 24 is already governor territory (E62-BLOOM: die 69 °C,
+  45% of on-phase samples below 800 MHz). **192 harts (12 shires × 16 or 8 × 24) is the quiet operating point:** every
+  12-shire swap held 62.5–63.5 °C and 800 MHz at about 43 W board.
+- **Read power with a median.** The board meter drops 5–12 W for a sample or two at random, and the DVFS ramp at each
+  launch's start (the card idles at 600 MHz between launches) puts sub-800 MHz samples into every launch's first ~1.2 s:
+  separate ramp samples from governor samples by their offset into the launch.
+
 ## The clock governor, by firmware build
 
 The pages first described the governor at et-platform `353f20e` (R3). The cards run older builds, read on

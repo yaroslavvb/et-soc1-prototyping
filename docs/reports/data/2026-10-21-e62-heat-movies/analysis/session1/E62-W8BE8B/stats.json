@@ -1,0 +1,21 @@
+{
+ "block": "E62-W8BE8B",
+ "block_label": null,
+ "block_label_how": null,
+ "kind": "swap",
+ "title": "The fully feature-matched replicate of the same axis",
+ "predicted": {
+  "what": "+334 mK (0.90 x E61) at 10.4 W, centroid travel 12.123 mm -- slightly LARGER than W12/E12's 11.190 mm. Predicted ratio to E62-WE42 0.722; the quantity that must agree between the two blocks is the reduced one, mK per watt per millimetre of travel. Direction identical to E62-WE42's.",
+  "mk": 333.9,
+  "direction": "identical to E62-WE42's measured W->E direction",
+  "basis": "placements.py asserts the by_io / by_ms / mem_side / ns_edge balance ONLY for the 8-shire mirror pairs. physics.md:582's claim that W12/E12 'matches memory-side and IO-adjacency counts by construction' is WRONG and is corrected here: W12/E12 differ on by_io (0 vs 2) and by_ms (0 vs 2), because E12 holds the shires beside the IO/PCIe and master/spare cells. W8b/E8b is matched on all five features. This block is therefore the arbiter of the headline and the sharpest available test of physics.md's open question 6.",
+  "anchor": {
+   "travel_mm": 12.123,
+   "switched_w": 10.4,
+   "dwell_s": 42.5,
+   "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+  }
+ },
+ "pass_rule": "PASS if the direction agrees with E62-WE42's within 10 deg AND the reduced amplitude (mK per watt per mm of travel) agrees within 15%: the adjacency mismatch is then proved harmless and the headline stands. If they disagree, THIS is the number to trust and E62-WE42's headline is reported with the electrical-asymmetry correction stated. Second, registered now: the two arms' board power must differ by LESS than the +/-0.5 W band hp's own README registered, since this pair is matched by construction on exactly the features that would cause an asymmetry -- if 0.44 W survives here it is the CARD, not the mask pair.",
+ "skipped": "no phases in the session for this block (tried ['E62-W8BE8B', 'block7'] against the labels the session wrote)"
+}

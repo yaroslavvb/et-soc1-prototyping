@@ -1,0 +1,21 @@
+{
+ "block": "E62-NS42",
+ "block_label": null,
+ "block_label_how": null,
+ "kind": "swap",
+ "title": "The same swap turned ninety degrees: the keystone",
+ "predicted": {
+  "what": "+306 mK (0.82 x E61), centroid travel 7.400 mm on the die's short N-S axis at the SAME 15.6 W, the same 24 shires and the same 384 harts as E62-WE42 -- only the partition changes. The CONFIRMATORY keystone is the 90 +/- 10 deg orthogonality, which is robust. The amplitude ratio is CONDITIONAL: predicted 0.661 x r, where 0.661 = 7.400 / 11.190 mm is pure geometry and r is the blur anisotropy between the die's short and long axes, measured for free by E62-ORBIT's lobe widths along its NW-SW and NW-NE baselines. The half-patch amplitude scales as travel / sigma_axis, so an anisotropic board shifts the ratio directly, and nothing in the readers' notes measures it -- a rectangular PCB with a heatsink bracket and edge connectors on one side is not obviously isotropic. 0.661 is quoted only as the isotropic special case. N12/S12 is also E61's own axis, so the image direction should land near E61's measured 173.8 deg gradient with the same sign.",
+  "mk": 305.7,
+  "direction": "90 deg from E62-WE42's measured direction, and within about 20 deg of E61's own 173.8 deg",
+  "basis": "the same anchor scaling; and the identity W12|E12 = N12|S12 = CORE24 (0x7777f6f6, asserted in placements.py and re-derived here), so card power, regulator dissipation, die temperature and clock are identical between this block and E62-WE42",
+  "anchor": {
+   "travel_mm": 7.4,
+   "switched_w": 15.6,
+   "dwell_s": 42.5,
+   "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+  }
+ },
+ "pass_rule": "PASS if the measured angle between this block's dipole direction and E62-WE42's is 90 +/- 10 deg -- the confirmatory keystone -- and the amplitude ratio to E62-WE42 is 0.661 x r +/- 0.08, with r the anisotropy measured by E62-ORBIT. The die's rows and columns are orthogonal by construction, and orthogonality survives a rotation, a mirror and a modest tilt, so if the two blocks land within 30 deg of each other that is geometrically impossible for the die and the signal is the power stages or a mask-to-position error. (Version 1's justification, 'a camera projection is a rotation and possibly a mirror', is true only for a fronto-parallel camera: a 30 deg tilt moves two orthogonal die axes to about 82 deg apart. That still passes 90 +/- 10, so the test stands and only the stated reason was wrong.) Same monopole, orthogonal-axis, board-meter and permutation nulls as E62-WE42.",
+ "skipped": "no phases in the session for this block (tried ['E62-NS42', 'block4'] against the labels the session wrote)"
+}

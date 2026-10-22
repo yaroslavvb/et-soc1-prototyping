@@ -1,0 +1,21 @@
+{
+ "block": "E62-WE17",
+ "block_label": null,
+ "block_label_how": null,
+ "kind": "swap",
+ "title": "The same swap twice as fast: sharper lobes, and the transfer slope",
+ "predicted": {
+  "what": "+146 mK (0.39 x E61) on the identical masks and the identical 15.6 W, at 17.0 s instead of 42.5 s. The measurement is the RATIO to E62-WE42, predicted 0.316, i.e. a local log-log transfer slope of 1.26 between 17.0 and 42.5 s. Blur FWHM 39 mm against 47 mm, so the difference image's lobes sit 33 mm apart instead of 40 mm and read as two lobes rather than one sliding blob. Arrival lag 74 deg = 7.0 s at the 34.0 s period: with the 127.5 s and 85.0 s laps this gives THREE lock-in drive periods (127.5 / 85.0 / 34.0 s) spanning 1.94x in sqrt(f), plus E62-BLOOM's direct step response as a fourth point, for the lag fit.",
+  "mk": 146.2,
+  "direction": "identical to E62-WE42's, since the masks are identical -- a free replicate of the orientation",
+  "basis": "the hub's transfer table read dwell-indexed and log-log interpolated, 50.1 mK/W at 17.0 s against 158.5 at 42.5 s. The design does NOT claim this settles physics.md's period-versus-dwell octave: a locally power-law table gives nearly the same dwell-to-dwell ratio under either reading, so the octave is a desk job (rerun the model behind the hub's table) and no number here depends on it.",
+  "anchor": {
+   "travel_mm": 11.19,
+   "switched_w": 15.6,
+   "dwell_s": 17.0,
+   "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+  }
+ },
+ "pass_rule": "PASS if the measured amplitude ratio to E62-WE42 is 0.25-0.40 and the measured direction agrees with E62-WE42's within 15 deg (the dipole's geometry must not move with dwell, only its contrast). Four analysed laps realise the 8-phase Sylvester order A B B A B A A B, balanced through the quadratic term, which is what this smaller signal needs. Same monopole, orthogonal-axis and board-meter nulls as E62-WE42. This block is also the geometry-legible one: at this dwell the blur narrows from 47 mm to 39 mm, so the difference image reads as two lobes rather than one sliding blob. No pixel figure is quoted here, because mm/px is unmeasured and conventions.mm_per_px forbids a decision rule reading one. Note on the ratio's own width: the registered 0.25-0.40 band was computed for a 42.5 s realised dwell; the transfer row is recomputed from the realised dwells of BOTH blocks before this rule is read, so a long realised dwell cannot push the ratio onto the edge of its own band.",
+ "skipped": "no phases in the session for this block (tried ['E62-WE17', 'block9'] against the labels the session wrote)"
+}

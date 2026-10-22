@@ -1,0 +1,785 @@
+{
+ "block": "E62-NULLGEO",
+ "block_label": "E62-NULLGEO",
+ "block_label_how": "the protocol's own name",
+ "kind": "control",
+ "title": "The pair that must show nothing",
+ "predicted": {
+  "what": "Zero. Twelve shires against their own 180 deg rotation about the die centre: the same 15.6 W, the same 384 harts, zero shire overlap, centroid separation exactly 0.000 mm, and -- because a point reflection preserves every EVEN moment -- identical radial profiles, so the camera's own radial post-shutter drift (corners warming against the centre by about 140 mK over 20 s) cancels by symmetry rather than by argument. The only modelled residual is from the arms' higher odd moments: 0.0077 x E62-WE42 = 3.5 mK at this dwell, far below the floor. Two analysed laps at the registered 27 mK floor give a 2 sigma bound of 38.2 mK, 8.3% of E62-WE42's prediction.",
+  "mk": 0.0,
+  "direction": "none; a difference image indistinguishable from the pre-session idle baseline",
+  "basis": "derived here: the point reflection (r,c) -> (5-r, 7-c) partitions CORE24 into exactly 12 orbits, and taking one member of each gives P whose complement is P rotated 180 deg. Matched on all four features placements.py records (mem_side 4/4, ns_edge 0/0, by_io 1/1, by_ms 1/1) and maximally interleaved, so it looks like it should show something. Blur-model radial fraction 0.000.",
+  "anchor": {
+   "travel_mm": 0.0,
+   "switched_w": 15.6,
+   "dwell_s": 42.5,
+   "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+  },
+  "bound_2sigma_mk": 38.2
+ },
+ "pass_rule": "PASS if the half-patch statistic is 0 +/- 38.2 mK (2 sigma over the two analysed laps at the registered 27 mK floor, 8.3% of E62-WE42's prediction) whichever way the patch is cut, the gradient has no preferred direction, and the monopole is null. This block is the empirical bound for the whole set, covering what a permutation null cannot reach: FFC steps, non-linear field drift, and the camera's radial warm-up. If it shows a dipole, every number in the swap blocks is suspect and the session's conclusion is about the instrument, not the chip -- and E62-NULLAA, which runs BEFORE it, separates 'the instrument' from 'the die map'. Raising this block to cycles 5 (four analysed laps, the quadratically balanced 8-phase order, a 27 mK bound) is the first item in the slack queue; at two analysed laps it carries the same residual quadratic leak as every other two-lap block, which is why E62-NULLAA is reduced twice (see conventions.sign_orders.note).",
+ "detrend": {
+  "order": 1,
+  "levels": null,
+  "trends": 1,
+  "protected": false,
+  "fit_rows": 509,
+  "trend_rms_mk": 319259.787
+ },
+ "bins": 509,
+ "t_s": [
+  1994.98,
+  2249.64
+ ],
+ "dwell_s_realised": 42.471,
+ "dwell_s_planned": 42.5,
+ "drift_mk_per_s_median": 7.763,
+ "ffc_count": 32,
+ "ffc_events_in_block": [
+  {
+   "t_s": 1995.692,
+   "seq": 10855171,
+   "step_mk_median": -14.87,
+   "step_mk_p95": 47.78,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -87.92,
+   "shrink": {
+    "sigma_mk": 8.16,
+    "dev_mk": 37.05,
+    "common_mk": -14.87,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 150.66
+   },
+   "frame_mean_step_mk": -6.1
+  },
+  {
+   "t_s": 1997.056,
+   "seq": 10855205,
+   "step_mk_median": -7.12,
+   "step_mk_p95": 62.25,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 35.89,
+   "shrink": {
+    "sigma_mk": 10.19,
+    "dev_mk": 41.86,
+    "common_mk": -7.12,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 133.54
+   },
+   "frame_mean_step_mk": 1.13
+  },
+  {
+   "t_s": 1999.62,
+   "seq": 10855269,
+   "step_mk_median": 5.86,
+   "step_mk_p95": 50.98,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -0.64,
+   "shrink": {
+    "sigma_mk": 12.85,
+    "dev_mk": 26.96,
+    "common_mk": 5.86,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 62.24
+   },
+   "frame_mean_step_mk": 11.32
+  },
+  {
+   "t_s": 2001.614,
+   "seq": 10855311,
+   "step_mk_median": -17.2,
+   "step_mk_p95": 49.96,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -30.5,
+   "shrink": {
+    "sigma_mk": 12.16,
+    "dev_mk": 42.16,
+    "common_mk": -17.2,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 87.87
+   },
+   "frame_mean_step_mk": 16.66
+  },
+  {
+   "t_s": 2004.09,
+   "seq": 10855357,
+   "step_mk_median": 144.19,
+   "step_mk_p95": 242.71,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 68.17,
+   "shrink": {
+    "sigma_mk": 13.02,
+    "dev_mk": 62.29,
+    "common_mk": 144.19,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 106.66
+   },
+   "frame_mean_step_mk": 251.13
+  },
+  {
+   "t_s": 2010.49,
+   "seq": 10855427,
+   "step_mk_median": 312.18,
+   "step_mk_p95": 472.03,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 381.55,
+   "shrink": {
+    "sigma_mk": 7.88,
+    "dev_mk": 100.45,
+    "common_mk": 312.18,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 128.79
+   },
+   "frame_mean_step_mk": 45.93
+  },
+  {
+   "t_s": 2012.892,
+   "seq": 10855601,
+   "step_mk_median": -0.99,
+   "step_mk_p95": 41.92,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 34.82,
+   "shrink": {
+    "sigma_mk": 7.28,
+    "dev_mk": 21.83,
+    "common_mk": -0.99,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 42.17
+   },
+   "frame_mean_step_mk": 3.48
+  },
+  {
+   "t_s": 2034.332,
+   "seq": 10856138,
+   "step_mk_median": -3.45,
+   "step_mk_p95": 23.72,
+   "method": "frozen+small_step+drift+shrink0.99",
+   "gap_frames": 0,
+   "frames_before": 12,
+   "frames_after": 13,
+   "step_mk_shoulders": -23.61,
+   "shrink": {
+    "sigma_mk": 7.72,
+    "dev_mk": 16.4,
+    "common_mk": -3.45,
+    "k": 0.9934,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 33.4
+   },
+   "frame_mean_step_mk": -17.03
+  },
+  {
+   "t_s": 2036.53,
+   "seq": 10856193,
+   "step_mk_median": 65.32,
+   "step_mk_p95": 108.65,
+   "method": "mean_step+drift+shrink0.88",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 21.49,
+   "shrink": {
+    "sigma_mk": 6.76,
+    "dev_mk": 31.89,
+    "common_mk": 65.32,
+    "k": 0.8761,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 41.83
+   },
+   "frame_mean_step_mk": 76.23
+  },
+  {
+   "t_s": 2056.493,
+   "seq": 10856678,
+   "step_mk_median": -83.8,
+   "step_mk_p95": 49.13,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -141.2,
+   "shrink": {
+    "sigma_mk": 9.94,
+    "dev_mk": 74.31,
+    "common_mk": -83.8,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 114.64
+   },
+   "frame_mean_step_mk": -81.39
+  },
+  {
+   "t_s": 2061.537,
+   "seq": 10856818,
+   "step_mk_median": -318.87,
+   "step_mk_p95": -239.99,
+   "method": "frozen+mean_step+median_step+drift+shrink0.91",
+   "gap_frames": 0,
+   "frames_before": 7,
+   "frames_after": 13,
+   "step_mk_shoulders": -313.18,
+   "shrink": {
+    "sigma_mk": 9.95,
+    "dev_mk": 64.29,
+    "common_mk": -318.87,
+    "k": 0.9142,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 62.24
+   },
+   "frame_mean_step_mk": -304.87
+  },
+  {
+   "t_s": 2065.933,
+   "seq": 10856928,
+   "step_mk_median": 12.48,
+   "step_mk_p95": 33.54,
+   "method": "mean_step+drift+shrink0.67",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 11.4,
+   "shrink": {
+    "sigma_mk": 9.97,
+    "dev_mk": 17.97,
+    "common_mk": 12.48,
+    "k": 0.6725,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 31.77
+   },
+   "frame_mean_step_mk": 40.53
+  },
+  {
+   "t_s": 2077.617,
+   "seq": 10857220,
+   "step_mk_median": -11.11,
+   "step_mk_p95": 3.55,
+   "method": "mean_step+drift+shrink0.49",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -28.0,
+   "shrink": {
+    "sigma_mk": 8.51,
+    "dev_mk": 15.77,
+    "common_mk": -11.11,
+    "k": 0.4914,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 23.12
+   },
+   "frame_mean_step_mk": -56.55
+  },
+  {
+   "t_s": 2101.85,
+   "seq": 10857544,
+   "step_mk_median": -41.01,
+   "step_mk_p95": 103.95,
+   "method": "mean_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -23.21,
+   "shrink": {
+    "sigma_mk": 7.24,
+    "dev_mk": 93.26,
+    "common_mk": -41.01,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 104.1
+   },
+   "frame_mean_step_mk": -7.45
+  },
+  {
+   "t_s": 2107.849,
+   "seq": 10857971,
+   "step_mk_median": 99.68,
+   "step_mk_p95": 125.33,
+   "method": "mean_step+median_step+drift+shrink0.63",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 77.39,
+   "shrink": {
+    "sigma_mk": 10.12,
+    "dev_mk": 25.21,
+    "common_mk": 99.68,
+    "k": 0.6272,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 27.77
+   },
+   "frame_mean_step_mk": 51.61
+  },
+  {
+   "t_s": 2121.489,
+   "seq": 10858232,
+   "step_mk_median": 95.18,
+   "step_mk_p95": 163.33,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 133.17,
+   "shrink": {
+    "sigma_mk": 7.92,
+    "dev_mk": 41.13,
+    "common_mk": 95.18,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 53.76
+   },
+   "frame_mean_step_mk": 127.47
+  },
+  {
+   "t_s": 2195.97,
+   "seq": 10860179,
+   "step_mk_median": 79.75,
+   "step_mk_p95": 110.32,
+   "method": "mean_step+drift+shrink0.58",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 74.33,
+   "shrink": {
+    "sigma_mk": 8.58,
+    "dev_mk": 41.59,
+    "common_mk": 79.75,
+    "k": 0.5837,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 33.4
+   },
+   "frame_mean_step_mk": 77.73
+  },
+  {
+   "t_s": 2215.568,
+   "seq": 10860668,
+   "step_mk_median": -4.22,
+   "step_mk_p95": 20.15,
+   "method": "mean_step+drift+shrink0.80",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -9.81,
+   "shrink": {
+    "sigma_mk": 7.29,
+    "dev_mk": 17.59,
+    "common_mk": -4.22,
+    "k": 0.7955,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 31.57
+   },
+   "frame_mean_step_mk": -0.06
+  },
+  {
+   "t_s": 2224.852,
+   "seq": 10860900,
+   "step_mk_median": -5.88,
+   "step_mk_p95": 19.07,
+   "method": "mean_step+drift+shrink0.89",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": 9.32,
+   "shrink": {
+    "sigma_mk": 8.19,
+    "dev_mk": 18.87,
+    "common_mk": -5.88,
+    "k": 0.8938,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 35.27
+   },
+   "frame_mean_step_mk": -18.55
+  },
+  {
+   "t_s": 2232.61,
+   "seq": 10861081,
+   "step_mk_median": -0.72,
+   "step_mk_p95": 46.0,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -14.6,
+   "shrink": {
+    "sigma_mk": 7.92,
+    "dev_mk": 28.94,
+    "common_mk": -0.72,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 69.11
+   },
+   "frame_mean_step_mk": 20.57
+  },
+  {
+   "t_s": 2234.364,
+   "seq": 10861138,
+   "step_mk_median": -11.82,
+   "step_mk_p95": 18.69,
+   "method": "mean_step+median_step+drift+shrink1.00",
+   "gap_frames": 0,
+   "frames_before": 13,
+   "frames_after": 13,
+   "step_mk_shoulders": -26.36,
+   "shrink": {
+    "sigma_mk": 7.9,
+    "dev_mk": 21.38,
+    "common_mk": -11.82,
+    "k": 1.0,
+    "test": "shoulder persistence",
+    "shoulder_dev_mk": 55.15
+   },
+   "frame_mean_step_mk": -19.01
+  }
+ ],
+ "warmup_rule": "the runner's own warmup flag (1 cycles dropped)",
+ "arms": [
+  "NULLP12",
+  "NULLQ12"
+ ],
+ "n_arms": 2,
+ "cycles": 3,
+ "warmup_cycles": 1,
+ "n_cycles": 2,
+ "arm_order_per_cycle": [
+  [
+   "NULLP12",
+   "NULLQ12"
+  ],
+  [
+   "NULLQ12",
+   "NULLP12"
+  ]
+ ],
+ "arm_order_alternates": true,
+ "cycles_used": [
+  1,
+  2
+ ],
+ "steady_bins_per_arm": [
+  [
+   42,
+   42
+  ],
+  [
+   42,
+   42
+  ]
+ ],
+ "phases": {
+  "NULLP12": {
+   "pos_mean_mk": 5.936024179676068,
+   "neg_mean_mk": -50.79369147359743,
+   "grad_mk_per_px": [
+    -0.09518,
+    -0.07802
+   ],
+   "grad_deg": -140.66,
+   "contrast_mk": 56.729715653273495,
+   "pos_centroid_px": [
+    93.9127740053659,
+    33.89144422443825
+   ],
+   "neg_centroid_px": [
+    118.41441749826454,
+    55.84466333957206
+   ],
+   "frame_mean_mk": -19.61663074294726,
+   "peak_mk": 64.18626403808594,
+   "frac": 0.05,
+   "dipole_px": [
+    -24.502,
+    -21.953
+   ],
+   "dipole_len_px": 32.898,
+   "dipole_deg": -138.14,
+   "die_rc": [
+    2.5,
+    2.5
+   ],
+   "die_rc_convention": "0-based grid (row r0 = 0, column c1 = 0)"
+  },
+  "NULLQ12": {
+   "pos_mean_mk": 50.79369130585015,
+   "neg_mean_mk": -5.936024182782499,
+   "grad_mk_per_px": [
+    0.09518,
+    0.07802
+   ],
+   "grad_deg": 39.34,
+   "contrast_mk": 56.72971548863265,
+   "pos_centroid_px": [
+    118.41441743003557,
+    55.844663434832185
+   ],
+   "neg_centroid_px": [
+    93.91277437906093,
+    33.891445108118276
+   ],
+   "frame_mean_mk": 19.616630783847842,
+   "peak_mk": 64.18626403808594,
+   "frac": 0.05,
+   "dipole_px": [
+    24.502,
+    21.953
+   ],
+   "dipole_len_px": 32.898,
+   "dipole_deg": 41.86,
+   "die_rc": [
+    2.5,
+    2.5
+   ],
+   "die_rc_convention": "0-based grid (row r0 = 0, column c1 = 0)"
+  }
+ },
+ "contrast": [
+  "NULLP12",
+  "NULLQ12"
+ ],
+ "contrast_die_offset": [
+  0.0,
+  0.0
+ ],
+ "contrast_shire_distance": 0.0,
+ "pairs": {
+  "NULLP12|NULLQ12": {
+   "pos_mean_mk": 11.872048376437506,
+   "neg_mean_mk": -101.58738284778906,
+   "grad_mk_per_px": [
+    -0.19036,
+    -0.15604
+   ],
+   "grad_deg": -140.66,
+   "contrast_mk": 113.45943122422656,
+   "pos_centroid_px": [
+    93.91277420827734,
+    33.89144470918737
+   ],
+   "neg_centroid_px": [
+    118.4144174746962,
+    55.84466338773473
+   ],
+   "frame_mean_mk": -39.23326154115299,
+   "peak_mk": 128.37252807617188,
+   "frac": 0.05,
+   "dipole_px": [
+    -24.502,
+    -21.953
+   ],
+   "dipole_len_px": 32.898,
+   "dipole_deg": -138.14,
+   "die_offset": [
+    0.0,
+    0.0
+   ],
+   "die_distance": 0.0
+  }
+ },
+ "orient_eligible": true,
+ "diff_map": {
+  "pos_mean_mk": 11.872048421480757,
+  "neg_mean_mk": -101.58738262412602,
+  "grad_mk_per_px": [
+   -0.19036,
+   -0.15604
+  ],
+  "grad_deg": -140.66,
+  "contrast_mk": 113.45943104560678,
+  "pos_centroid_px": [
+   93.91277395663045,
+   33.89144457353644
+  ],
+  "neg_centroid_px": [
+   118.41441745016697,
+   55.844663398523444
+  ],
+  "frame_mean_mk": -39.233261533391975,
+  "peak_mk": 128.37252807617188,
+  "frac": 0.05,
+  "dipole_px": [
+   -24.502,
+   -21.953
+  ],
+  "dipole_len_px": 32.898,
+  "dipole_deg": -138.14
+ },
+ "amp_mk": 113.46,
+ "monopole_mk": -39.233,
+ "dipole_deg": -138.14,
+ "dipole_px": [
+  -24.502,
+  -21.953
+ ],
+ "amp_proj_mk": 113.46,
+ "amp_se_mk": 267.89,
+ "amp_cycle_mk": [
+  -154.43,
+  381.35
+ ],
+ "amp_t": 0.42,
+ "drift_leak": {
+  "arm_dt_s": 0.0,
+  "order_alternates": true,
+  "residual_drift_mk_s": -3.1367,
+  "leak_contrast_mk": 0.0,
+  "leak_proj_mk": 0.0,
+  "frac_of_amp": 0.0,
+  "note": "the arm order alternates, so the time offset averages to 0.0 s and a drift cannot masquerade as the dipole"
+ },
+ "p": 0.5,
+ "p_floor": 0.5,
+ "perm": {
+  "scheme": "within",
+  "exact": true,
+  "n": 3,
+  "null_sd_mk": 10.304,
+  "null_mean_mk": 101.562,
+  "at_floor": true
+ },
+ "amp_perm_obs_mk": 113.46,
+ "amp_null_mean_mk": 101.56,
+ "amp_excess_mk": 11.9,
+ "amp_excess_sd": 1.15,
+ "p_unrestricted": 0.33733,
+ "p_unrestricted_floor": 0.33733,
+ "perm_unrestricted": {
+  "scheme": "unrestricted",
+  "exact": false,
+  "n": 2000,
+  "null_sd_mk": 49.269,
+  "null_mean_mk": 71.079,
+  "at_floor": true
+ },
+ "amp_perm_obs_mk_unrestricted": 113.46,
+ "p_min_cycles_for_0.05": 6,
+ "p_min_cycles_for_0.01": 8,
+ "p_primary": 0.33733,
+ "p_primary_scheme": "unrestricted",
+ "p_primary_note": "the within-cycle sign-flip null of 2 cycles cannot return below 0.5, so p < 0.05 is out of its reach; the unrestricted null across cycle-arm slots is quoted instead, and it lets a within-cycle drift leak in - read it with `drift_leak`",
+ "cycle": {
+  "T": 170,
+  "cycle_s": 85.0,
+  "mode": "switch-aligned",
+  "lap_average": "mean",
+  "n_cycles": 2,
+  "phase_sets": [
+   "NULLP12",
+   "NULLQ12"
+  ],
+  "cycles_dropped": 0,
+  "n_phases_used": 3,
+  "n_phases_skipped": 1,
+  "slot_n_phases": [
+   2,
+   1
+  ],
+  "phases_used": [
+   "NULLP12 lap1.p0 after NULLQ12 @2079.6 s",
+   "NULLP12 lap2.p0 after NULLQ12 @2207.1 s",
+   "NULLQ12 lap1.p1 after NULLP12 @2122.1 s"
+  ],
+  "phases_skipped": [
+   "NULLQ12 lap2.p1 after NULLQ12 @2164.6 s"
+  ],
+  "skipped_why": [
+   "follows the same arm: not a switch"
+  ],
+  "uniform_removed": true,
+  "uniform_stat": "mean",
+  "uniform_mk_range": [
+   -98.23,
+   125.57
+  ],
+  "uniform_removed_rms_mk": 61.65,
+  "residual_rms_mk": 20.36,
+  "note": "switch-aligned: 3 phases averaged over 2 analysed laps (2+1 per slot); 1 left out (follows the same arm: not a switch)",
+  "phase_edges_s": [
+   0.0,
+   42.5,
+   85.0
+  ],
+  "range_mk": 70.4
+ },
+ "tel": {
+  "NULLP12": {
+   "board_w": {
+    "mean": 42.819,
+    "sd": 0.208,
+    "n": 2
+   },
+   "die_c": {
+    "mean": 63.48,
+    "sd": 0.48,
+    "n": 2
+   },
+   "minion_mhz": {
+    "mean": 800.0,
+    "sd": 0.0,
+    "n": 2
+   }
+  },
+  "NULLQ12": {
+   "board_w": {
+    "mean": 43.069,
+    "sd": 0.107,
+    "n": 2
+   },
+   "die_c": {
+    "mean": 63.328,
+    "sd": 0.328,
+    "n": 2
+   },
+   "minion_mhz": {
+    "mean": 800.0,
+    "sd": 0.0,
+    "n": 2
+   }
+  }
+ },
+ "board_w_delta": -0.25,
+ "verdict_vars": {
+  "amp_mk": 113.46,
+  "amp_excess_mk": 11.9,
+  "amp_excess_sd": 1.15,
+  "amp_proj_mk": 113.46,
+  "amp_se_mk": 267.89,
+  "amp_t": 0.42,
+  "p": 0.5,
+  "p_unrestricted": 0.33733,
+  "p_floor": 0.5,
+  "p_primary": 0.33733,
+  "monopole_mk": -39.233,
+  "n_cycles": 2,
+  "dipole_len_px": 32.898,
+  "drift_leak_mk": 0.0,
+  "ffc_count": 32,
+  "board_w_delta": -0.25
+ },
+ "verdict": null,
+ "verdict_note": "pass_rule is prose, not an expression, so this file does not judge it (unterminated string literal (detected at line 1) (<unknown>, line 1)); the numbers beside it are the evidence"
+}

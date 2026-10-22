@@ -1,0 +1,22 @@
+{
+ "block": "E62-NULLGEO",
+ "block_label": null,
+ "block_label_how": null,
+ "kind": "control",
+ "title": "The pair that must show nothing",
+ "predicted": {
+  "what": "Zero. Twelve shires against their own 180 deg rotation about the die centre: the same 15.6 W, the same 384 harts, zero shire overlap, centroid separation exactly 0.000 mm, and -- because a point reflection preserves every EVEN moment -- identical radial profiles, so the camera's own radial post-shutter drift (corners warming against the centre by about 140 mK over 20 s) cancels by symmetry rather than by argument. The only modelled residual is from the arms' higher odd moments: 0.0077 x E62-WE42 = 3.5 mK at this dwell, far below the floor. Two analysed laps at the registered 27 mK floor give a 2 sigma bound of 38.2 mK, 8.3% of E62-WE42's prediction.",
+  "mk": 0.0,
+  "direction": "none; a difference image indistinguishable from the pre-session idle baseline",
+  "basis": "derived here: the point reflection (r,c) -> (5-r, 7-c) partitions CORE24 into exactly 12 orbits, and taking one member of each gives P whose complement is P rotated 180 deg. Matched on all four features placements.py records (mem_side 4/4, ns_edge 0/0, by_io 1/1, by_ms 1/1) and maximally interleaved, so it looks like it should show something. Blur-model radial fraction 0.000.",
+  "anchor": {
+   "travel_mm": 0.0,
+   "switched_w": 15.6,
+   "dwell_s": 42.5,
+   "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+  },
+  "bound_2sigma_mk": 38.2
+ },
+ "pass_rule": "PASS if the half-patch statistic is 0 +/- 38.2 mK (2 sigma over the two analysed laps at the registered 27 mK floor, 8.3% of E62-WE42's prediction) whichever way the patch is cut, the gradient has no preferred direction, and the monopole is null. This block is the empirical bound for the whole set, covering what a permutation null cannot reach: FFC steps, non-linear field drift, and the camera's radial warm-up. If it shows a dipole, every number in the swap blocks is suspect and the session's conclusion is about the instrument, not the chip -- and E62-NULLAA, which runs BEFORE it, separates 'the instrument' from 'the die map'. Raising this block to cycles 5 (four analysed laps, the quadratically balanced 8-phase order, a 27 mK bound) is the first item in the slack queue; at two analysed laps it carries the same residual quadratic leak as every other two-lap block, which is why E62-NULLAA is reduced twice (see conventions.sign_orders.note).",
+ "skipped": "no phases in the session for this block (tried ['E62-NULLGEO', 'block6'] against the labels the session wrote)"
+}

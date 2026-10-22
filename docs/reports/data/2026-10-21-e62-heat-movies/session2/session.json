@@ -1,0 +1,2486 @@
+{
+ "experiment": "E62",
+ "protocol_path": "/home/yaroslavvb/claude/et-soc1-prototyping/build/e62/code/protocol-A1.json",
+ "protocol_sha256": "5d7910c4179b350000089fadfa4d79c7e7cb0a984c322042ac24cdc1d9668eb9",
+ "protocol": {
+  "experiment": "E62",
+  "request": "Q121",
+  "card": "aifoundry2",
+  "version": 2,
+  "heater": {
+   "bin": "build/sparsity_t2/host/sparsity_host",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "args": [
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "randn",
+    "--seed",
+    "1",
+    "--stop-file",
+    "/home/yaroslavvb/drive.unsynced/e62/STOP"
+   ],
+   "launch_seconds": 8,
+   "budget": 9.5,
+   "timeout_s": 10,
+   "stop_file": "/home/yaroslavvb/drive.unsynced/e62/STOP",
+   "note": "--stop-file is on EVERY launch (main.cpp:980; the binary supports it, launch.md:60). The loop checks the same path between launches, so the worst-case latency to stop is one launch. --budget 9.5 because --budget defaults to 8.0 s counted from device open, so a bare --seconds 8 is silently truncated (main.cpp:1007)."
+  },
+  "safety": {
+   "abs_stop_c": 85,
+   "board_cap_w": 95,
+   "governor_c": 65,
+   "max_steady_c": 63,
+   "bloom_cycle_stop_c": 64,
+   "bloom_cycle_stop_note": "E62-BLOOM and E62-CAL's UNI32 rung are the only phases that duty-cycle the full card. The runner reads the die from the sampler's own file before AND during every on-phase and ends it early by touching the stop file at 64 C, logging the truncated dwell. 64 C, not 63: max_steady_c 63 governs STEADY states (DECISIONS section 2 exempts the bloom explicitly, '<= 60 s at a time'), the design's own duty-cycle model puts the three on-phase peaks at 60.3 / 62.1 / 62.8 C, and a gate that fires on the predicted outcome is a mis-set gate. 64 C still leaves 1.0 C under the governor's 65 C step, which is the thing being protected."
+  },
+  "conventions": {
+   "launch_s": 8.5,
+   "dwell_rule": "A phase is specified as a LAUNCH COUNT, not as a target in seconds: the runner executes exactly phases[i].launches back-to-back launches and switches at the last one's exit, never on a clock. dwell_s = launches x 8.5 s is the NOMINAL dwell and is what the predictions are priced at; the realised dwell is read from launches.jsonl (t_start_ms / t_end_ms) and the transfer row is recomputed from it before any decision rule is read (E61's registered ~53 s dwell was really 41.7 s). Why a count and not a clock: E61 measured 8.31-8.49 s per launch, so a rule that switched at the first launch boundary at or after a planned phase end would add one WHOLE extra launch to every phase (+95% at 8.5 s, +17% at 42.5 s), blow the 75 min cap by 9 min, and -- worse -- could give one arm of a swap 6 launches and the other 5, a duty-cycle asymmetry that makes a monopole at the swap frequency: exactly the confound this design exists to avoid. A fixed count guarantees both arms always get the same number of launches. IDLE phases launch nothing and are timed directly, so they carry launches = 0 and are exempt from the 8.5 s multiple.",
+   "cycles_rule": "cycles is the TOTAL number of laps the runner executes; the first warmup_cycles laps are discarded, so analysed laps = cycles - warmup_cycles. est_card_min is the WORST CASE, (launch count x 8.6 s + idle seconds) x cycles / 60; est_card_min_nominal is the same at 8.5 s. The budget is gated on the worst case.",
+   "sign_orders": {
+    "two_arm_8phase": [
+     "A",
+     "B",
+     "B",
+     "A",
+     "B",
+     "A",
+     "A",
+     "B"
+    ],
+    "two_arm_4phase": [
+     "A",
+     "B",
+     "B",
+     "A"
+    ],
+    "two_arm_16phase": [
+     "A",
+     "B",
+     "B",
+     "A",
+     "B",
+     "A",
+     "A",
+     "B",
+     "B",
+     "A",
+     "A",
+     "B",
+     "A",
+     "B",
+     "B",
+     "A"
+    ],
+    "sequence": "the five cyclic shifts of the phase ring, one per analysed lap, written out in each sequence block's lap_phase_orders. Every phase then occupies every slot exactly once (mean slot 2.0 for all five), so ANY function of slot position within a lap cancels exactly -- not merely a linear drift.",
+    "note": "Every block carries lap_phase_orders: the actual per-lap phase sequence the runner EXECUTES, one row per cycle including the warmup lap. The signs are therefore physically realised, not applied in analysis, and the ambiguity of the version-1 wording ('applied to the ANALYSED phases') is gone. For a two-arm block the analysed laps' phases concatenate to analysed_sign_order, which is the Sylvester order of that length; validate_protocol.py rebuilds the sequence from lap_phase_orders and asserts both the equality and the vanishing moments. Verified: the 8-phase order A B B A B A A B has sum s = sum s*t = sum s*t^2 = 0, so no drift up to quadratic can leak; 16-phase balances through t^3. The 4-phase order A B B A balances sum s and sum s*t only -- its quadratic moment is 4, and no 4-phase two-arm order can do better (sum s = 0 forces two A's, and the A-positions would have to sum to 3, which leaves sum s*t^2 = +/-4 either way). So the two-lap blocks keep a residual quadratic leak, and E62-NULLAA is reduced TWICE to bound it: over all four analysed laps on the 8-phase order (the clean sigma), and over its first two analysed laps on the 4-phase order (the exact configuration of every two-lap block). A literal [A,B] x cycles run would instead give plain alternation, whose moments are sum s*t = -4 and sum s*t^2 = -28: at the measured 4.78-6.91 mK/s field drift that leaks 20-35% of E62-WE42's own prediction, which is why the orders are executed and not assumed."
+   },
+   "statistic": "E61's permutation-calibrated half-patch double difference (cam_reduce.py), with a per-lap per-pixel linear time trend removed first and sigma from permuting the arm labels inside each lap. Pre-registered sigma per analysed lap: max(27 mK, 7% of the amplitude). 27 mK is E61's own measured between-pass scatter (27 mK on 373 mK) used as an ADDITIVE floor; version 1's 15 mK was below the very measurement it was derived from, and a purely multiplicative form would give a 33 mK signal a 2.3 mK error, which is impossible when the stated limit is 5-8 mK/s of field drift and not photons. E61's 13.6 mK single-pass standard error is quoted as the OPTIMISTIC bound, never as the expectation. E62-NULLAA measures the real floor and replaces this prior on the page -- and it now runs sixth, before every block whose published error bars depend on it.",
+   "mm_per_px": "UNMEASURED. 0.156 mm/px appears in planning only, as the nominal figure from the PLANNED 60 mm lens distance; it is never published and never read by a decision rule. No millimetre scale bar and no displacement in millimetres is published until the registration produces the number, and no displacement is ever read off a lobe separation. Primary route: E62-ORBIT's four-corner similarity fit (predicted 9.9% fractional error at the registered floor). Cross-check: E62-SWEEP's WIDEST-separated pairwise registration, (phase1-phase2) against (phase4-phase5), a three-column 11.19 mm shift (predicted 18.4%); consecutive pairs are 166% and are NOT used. The scale bar appears only if the inverse-variance combination of the two routes lands inside 10% (predicted 8.7%).",
+   "power_fallback": "DECISIONS fixes about 1.3 W per shire at per-shire 32, which gives 15.6 W and a 61.6 C steady die for a 384-hart arm. The full-card heater reads p50 65.6 W but p90 84.1 W against a 23-25 W idle, i.e. 1.3 to 1.9 W per shire. E62-CAL measures it in the first 2.7 minutes, before any movie block. THREE REGISTERED BRANCHES, decided now, each a timestamped amendment recorded before any reduction; harts stay equal within every swap in all of them. (1) HIGH, 384-hart arms: if a 384-hart arm reads above 16.0 W switched, every 384-hart block (WE42, NS42, NULLAA, NULLGEO, WE17) runs at --per-shire 24 for BOTH arms (288 harts, amplitudes x 0.75) and every amplitude is re-anchored per measured watt. (2) HIGH, the full card: if the UNI32 rung reads above 45 W switched, E62-BLOOM runs at --per-shire 24 (768 harts) AND its off-phase lengthens from 85.0 s to 127.5 s -- the duty-cycle model puts the on-phase peaks at 61.0 / 62.0 / 62.3 C there against 63.7 / 64.0 / 64.0 C unchanged, i.e. unchanged it would be truncated by the 64 C gate on two of three cycles. The gain map's SNR > 50 criterion still holds comfortably at 768 harts. The extra 2.1 min is paid by dropping E62-WE17, which is last in the run order. (3) LOW: if a 384-hart arm reads BELOW 12.0 W switched, every amplitude falls about 25%, E62-SWEEP's one-column step drops under the measured floor, so E62-SWEEP is dropped and its 8.6 min go to E62-NULLGEO (to cycles 5) and to the B4NW <-> B4SE 42.5 s diagonal. A decision, not a disappointment.",
+   "launch_s_range": [
+    8.3,
+    8.6
+   ],
+   "clock_fallback": "mhz.minion is logged at 10 Hz and any lap containing a sub-800 MHz sample is flagged. If two laps in a block are flagged the block ENDS at the next lap boundary -- it is not rescaled mid-block. The realised lap count is recorded, and if budget remains the block restarts as a separate block id at --per-shire 28 (14.0 W, 60.5 C) with its own full cycle count and its own sign order. Laps taken at different --per-shire are NEVER averaged together, and each amplitude is re-anchored per measured watt. Version 1 dropped --per-shire mid-block at the next lap boundary, which cut a balanced Sylvester quartet across a 0.875x amplitude change.",
+   "ffc_rule": "Auto-FFC stays ON (DECISIONS section 1) and fires on a 0.25 C focal-plane move, so it is correlated with the load. Detect each event two ways -- a gap in the P3FZ header's seq, and a step in the whole-frame mean. Then DROP at least 16 s after every event, or until the frame-mean slope returns to within 1 mK/s of the pre-event baseline, whichever is longer, and 2 s before it. 16 s, not 2 s: the camera's own measured post-shutter settle is 'median 23 mK at 5 s, 34 mK at 10 s, ~140 mK from 20 s on; 95th pct ~400 mK -- the corners warm against the centre, ~16 s settling' (physics.md:473), and a 2 s window left ~14 s of a 140-400 mK RADIAL transient inside every arm. The bridging offset is estimated per pixel from windows OUTSIDE that settle (the 4 s before the event and the 4 s after the drop ends), never from the steepest 2 s of it. Report the dropped fraction per block AND per arm, and publish the per-block FFC-phase histogram as a diagnostic: a load-correlated FFC distribution is itself a result. If the dropped fraction exceeds 30% for a block, that block's amplitude is reported as a BOUND, not a value.",
+   "clipping_rule": "Quantitative, and it replaces version 1's 'any block whose lobes touch a frame edge is excluded from the geometry fit', which read literally excluded all three inputs to the geometry fit. A block is excluded from the geometry fit only if more than 15% of the matched-filter template's energy falls outside the frame, computed from the MEASURED die footprint (E62-CAL's UNI32 monopole image) and the MEASURED blur FWHM (E62-WE42's own difference image), never from the assumed 60 mm lens distance or the modelled FWHM. The exclusion applies to CENTROID estimators only: the matched-filter peak and the registration translation are kept with a clipping-aware template, because those are the estimators clipping does not bias.",
+   "sigma_floor_mk": 27.0,
+   "sigma_frac": 0.07,
+   "sigma_floor_source": "E61's own measured between-pass scatter, 27 mK on 373 mK, used ADDITIVELY. The optimistic bound is E61's 13.6 mK single-pass standard error, quoted as such and never as the expectation.",
+   "anchor": {
+    "mk": 372.9,
+    "se_mk": 13.6,
+    "travel_mm": 10.012,
+    "switched_w": 14.4,
+    "dwell_s": 41.7,
+    "source": "E61's measured half-patch double difference, permutation p = 0.0007, monopole -13.2 mK at p = 0.96, over a 10.012 mm N<->S swap at 14.40 W and a realised 41.7 s dwell"
+   },
+   "transfer_table": {
+    "dwell_s": [
+     5.0,
+     10.0,
+     20.0,
+     50.0
+    ],
+    "mk_per_w": [
+     8.8,
+     25.0,
+     62.0,
+     194.0
+    ],
+    "read": "dwell-indexed, log-log interpolated",
+    "source": "the thermal camera hub's 5 W quadrant square-wave table, 44 / 125 / 310 / 970 mK at 5 / 10 / 20 / 50 s, divided by 5 W"
+   }
+  },
+  "sets": {
+   "B4NW": {
+    "shires": [
+     0,
+     8,
+     16,
+     24
+    ],
+    "mask": "0x01010101",
+    "per_shire": 32,
+    "harts": 128,
+    "rc": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      1
+     ]
+    ],
+    "note": "corner r0r1 x c1c2 (die corner S0); derived here from the MARTY map, not a registered set"
+   },
+   "B4NE": {
+    "shires": [
+     5,
+     20,
+     28,
+     29
+    ],
+    "mask": "0x30100020",
+    "per_shire": 32,
+    "harts": 128,
+    "rc": [
+     [
+      2,
+      6
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      5
+     ]
+    ],
+    "note": "corner r1r2 x c5c6, the registered B4NE; pushed one row in because (r0,c5) and (r0,c6) are IO/PCIe"
+   },
+   "B4SE": {
+    "shires": [
+     7,
+     15,
+     23,
+     31
+    ],
+    "mask": "0x80808080",
+    "per_shire": 32,
+    "harts": 128,
+    "rc": [
+     [
+      4,
+      6
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      5,
+      5
+     ],
+     [
+      5,
+      6
+     ]
+    ],
+    "note": "corner r4r5 x c5c6 (die corner S31); derived here, not registered"
+   },
+   "B4SW": {
+    "shires": [
+     2,
+     10,
+     11,
+     19
+    ],
+    "mask": "0x00080c04",
+    "per_shire": 32,
+    "harts": 128,
+    "rc": [
+     [
+      4,
+      1
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      5,
+      1
+     ],
+     [
+      5,
+      2
+     ]
+    ],
+    "note": "corner r4r5 x c1c2, the registered B4SW (die corner S11)"
+   },
+   "B4C": {
+    "shires": [
+     13,
+     14,
+     21,
+     22
+    ],
+    "mask": "0x00606000",
+    "per_shire": 32,
+    "harts": 128,
+    "rc": [
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "note": "the registered centre 2x2, exactly on the die centre (r 2.5, c 3.5)"
+   },
+   "W12": {
+    "shires": [
+     1,
+     2,
+     4,
+     9,
+     10,
+     13,
+     14,
+     16,
+     17,
+     18,
+     24,
+     25
+    ],
+    "mask": "0x03076616",
+    "per_shire": 16,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      4,
+      1
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      1,
+      1
+     ],
+     [
+      3,
+      1
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 16 (192 harts), was 32 (384); registered west half, rows r1-r4 x c1-c3; exact mirror of E12 under c -> 7-c"
+   },
+   "E12": {
+    "shires": [
+     5,
+     6,
+     7,
+     12,
+     15,
+     20,
+     21,
+     22,
+     26,
+     28,
+     29,
+     30
+    ],
+    "mask": "0x747090e0",
+    "per_shire": 16,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      4,
+      4
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 16 (192 harts), was 32 (384); registered east half, rows r1-r4 x c4-c6"
+   },
+   "N12": {
+    "shires": [
+     1,
+     4,
+     5,
+     9,
+     12,
+     13,
+     16,
+     20,
+     21,
+     24,
+     28,
+     29
+    ],
+    "mask": "0x31313232",
+    "per_shire": 16,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      5
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 16 (192 harts), was 32 (384); registered north half, rows r1+r2; exact mirror of S12 under r -> 5-r"
+   },
+   "S12": {
+    "shires": [
+     2,
+     6,
+     7,
+     10,
+     14,
+     15,
+     17,
+     18,
+     22,
+     25,
+     26,
+     30
+    ],
+    "mask": "0x4646c4c4",
+    "per_shire": 16,
+    "harts": 192,
+    "rc": [
+     [
+      4,
+      1
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      1
+     ],
+     [
+      4,
+      4
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 16 (192 harts), was 32 (384); registered south half, rows r3+r4"
+   },
+   "W12_A": {
+    "shires": [
+     1,
+     2,
+     4,
+     9,
+     10,
+     13,
+     14,
+     16,
+     17,
+     18,
+     24,
+     25
+    ],
+    "mask": "0x03076616",
+    "per_shire": 16,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      4,
+      1
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      1,
+      1
+     ],
+     [
+      3,
+      1
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 16 (192 harts), was 32 (384); W12 again, labelled arm A for the instrumental null: identical drive"
+   },
+   "W12_B": {
+    "shires": [
+     1,
+     2,
+     4,
+     9,
+     10,
+     13,
+     14,
+     16,
+     17,
+     18,
+     24,
+     25
+    ],
+    "mask": "0x03076616",
+    "per_shire": 16,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      4,
+      1
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      1,
+      1
+     ],
+     [
+      3,
+      1
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 16 (192 harts), was 32 (384); W12 again, labelled arm B for the instrumental null: identical drive"
+   },
+   "W8B": {
+    "shires": [
+     1,
+     2,
+     9,
+     10,
+     13,
+     14,
+     17,
+     25
+    ],
+    "mask": "0x02026606",
+    "per_shire": 24,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      4,
+      1
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      3,
+      1
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 24 (192 harts), was 32 (256); registered W8b quadrant; matched to E8b on n, mem_side, ns_edge, by_io, by_ms"
+   },
+   "E8B": {
+    "shires": [
+     5,
+     6,
+     7,
+     15,
+     21,
+     22,
+     29,
+     30
+    ],
+    "mask": "0x606080e0",
+    "per_shire": 24,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 24 (192 harts), was 32 (256); registered E8b quadrant, W8b's exact mirror under c -> 7-c"
+   },
+   "NULLP12": {
+    "shires": [
+     1,
+     2,
+     5,
+     7,
+     9,
+     13,
+     16,
+     18,
+     20,
+     21,
+     26,
+     29
+    ],
+    "mask": "0x243522a6",
+    "per_shire": 16,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      4,
+      1
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      4,
+      4
+     ],
+     [
+      2,
+      5
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 16 (192 harts), was 32 (384); one member of each of CORE24's 12 point-reflection orbits; union with NULLQ12 is CORE24"
+   },
+   "NULLQ12": {
+    "shires": [
+     4,
+     6,
+     10,
+     12,
+     14,
+     15,
+     17,
+     22,
+     24,
+     25,
+     28,
+     30
+    ],
+    "mask": "0x5342d450",
+    "per_shire": 16,
+    "harts": 192,
+    "rc": [
+     [
+      1,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      1,
+      1
+     ],
+     [
+      3,
+      1
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 16 (192 harts), was 32 (384); NULLP12 rotated 180 deg about the die centre: identical even moments, zero dipole"
+   },
+   "SCAN1": {
+    "shires": [
+     1,
+     2,
+     9,
+     10,
+     16,
+     17,
+     24,
+     25
+    ],
+    "mask": "0x03030606",
+    "per_shire": 24,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      4,
+      1
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      1,
+      1
+     ],
+     [
+      3,
+      1
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 24 (192 harts), was 32 (256); sweep phase 1: rows r1-r4 x c1c2"
+   },
+   "SCAN2": {
+    "shires": [
+     1,
+     4,
+     10,
+     13,
+     14,
+     16,
+     17,
+     18
+    ],
+    "mask": "0x00076412",
+    "per_shire": 24,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      4,
+      3
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 24 (192 harts), was 32 (256); sweep phase 2: rows r1-r4 x c2c3"
+   },
+   "CEN8": {
+    "shires": [
+     4,
+     12,
+     13,
+     14,
+     18,
+     21,
+     22,
+     26
+    ],
+    "mask": "0x04647010",
+    "per_shire": 24,
+    "harts": 192,
+    "rc": [
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      4,
+      4
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 24 (192 harts), was 32 (256); the registered CEN8 = sweep phase 3: rows r1-r4 x c3c4, exactly on the sweep centroid"
+   },
+   "SCAN4": {
+    "shires": [
+     12,
+     15,
+     20,
+     21,
+     22,
+     26,
+     29,
+     30
+    ],
+    "mask": "0x64709000",
+    "per_shire": 24,
+    "harts": 192,
+    "rc": [
+     [
+      1,
+      4
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      4,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 24 (192 harts), was 32 (256); sweep phase 4: rows r1-r4 x c4c5"
+   },
+   "SCAN5": {
+    "shires": [
+     5,
+     6,
+     7,
+     15,
+     20,
+     28,
+     29,
+     30
+    ],
+    "mask": "0x701080e0",
+    "per_shire": 24,
+    "harts": 192,
+    "rc": [
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 24 (192 harts), was 32 (256); sweep phase 5: rows r1-r4 x c5c6"
+   },
+   "INT16": {
+    "shires": [
+     1,
+     4,
+     10,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     20,
+     21,
+     22,
+     26,
+     29,
+     30
+    ],
+    "mask": "0x6477f412",
+    "per_shire": 32,
+    "harts": 512,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      4,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "note": "registered interior 16; the 512-hart rung of the ladder"
+   },
+   "INT16_8": {
+    "shires": [
+     1,
+     4,
+     10,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     20,
+     21,
+     22,
+     26,
+     29,
+     30
+    ],
+    "mask": "0x6477f412",
+    "per_shire": 8,
+    "harts": 128,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      4,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "note": "INT16 at per-shire 8 = 128 harts: the 16-shire leg of the hart-matched triple"
+   },
+   "W8B_16": {
+    "shires": [
+     1,
+     2,
+     9,
+     10,
+     13,
+     14,
+     17,
+     25
+    ],
+    "mask": "0x02026606",
+    "per_shire": 16,
+    "harts": 128,
+    "rc": [
+     [
+      2,
+      2
+     ],
+     [
+      4,
+      1
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      3,
+      1
+     ]
+    ],
+    "note": "W8b at per-shire 16 = 128 harts: the 8-shire leg of the hart-matched triple"
+   },
+   "UNI32": {
+    "shires": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31
+    ],
+    "mask": "0xffffffff",
+    "per_shire": 24,
+    "harts": 768,
+    "rc": [
+     [
+      0,
+      1
+     ],
+     [
+      2,
+      2
+     ],
+     [
+      4,
+      1
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      5,
+      1
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      5,
+      2
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      5,
+      5
+     ],
+     [
+      1,
+      1
+     ],
+     [
+      3,
+      1
+     ],
+     [
+      4,
+      4
+     ],
+     [
+      5,
+      3
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      5,
+      6
+     ]
+    ],
+    "note": "A1 (2026-10-21 17:14): per-shire 24 (768 harts), was 32 (1024); all 32 compute shires: the bloom, the gain map and the ladder's top rung"
+   },
+   "IDLE": {
+    "shires": [],
+    "mask": "0x00000000",
+    "per_shire": 0,
+    "harts": 0,
+    "note": "no launch; the card idles"
+   }
+  },
+  "blocks": [
+   {
+    "id": "E62-BLOOM",
+    "title": "The establishing shot: the whole board breathing, and the gain map",
+    "kind": "bloom",
+    "phases": [
+     {
+      "set": "UNI32",
+      "dwell_s": 42.5,
+      "launches": 5
+     },
+     {
+      "set": "IDLE",
+      "dwell_s": 127.5,
+      "launches": 0,
+      "timed": true
+     }
+    ],
+    "cycles": 3,
+    "warmup_cycles": 0,
+    "predicted": {
+     "what": "All 32 shires at per-shire 32 (1,024 harts, 41.6 W switched, 65-84 W board) against idle: +2,500 to +4,000 mK zero-to-peak on the back, visible raw in single frames with no difference imaging at all. A monopole, not a dipole -- which is the point: it is what a change in TOTAL power looks like, the thing every other block is built to avoid. Arrival of the step on the back 4-14 s after the compute starts (an upper bound, because the visualize preset's TNR=50 smears time). Delivers the per-pixel gain map that divides out the 12.4% of pixels that are shiny component tops. Die 51 -> about 60 C at this 33% duty; each on-phase is 42.5 s, inside DECISIONS' 60 s cap.",
+     "mk": 3100.0,
+     "direction": "a rise everywhere inside the die footprint, strongest at the centre, spreading outward",
+     "basis": "physics.md section 2's pattern-vs-idle table (ALL32, 2,651 mK at 40 s and 28.8 W, already scaled by K = 0.674) carried to 41.6 W, with the upper end as written and the lower end divided by the 572/373 gap between E61's undetrended and detrended arms",
+     "anchor": null
+    },
+    "pass_rule": "PASS if the frame mean rises by at least 1 K within each on-phase, in phase with board_w sampled at 10 Hz, and the whole-frame monopole is LARGE (that contrast with every swap's null monopole is the control). The gain map is accepted if the per-pixel rise has a signal-to-noise above 50 on at least 90% of pixels inside the die footprint. PER-CYCLE DIE GATE, registered now: the runner reads the die before and during every on-phase and ends it early via --stop-file at 64 C, logging the truncated dwell; the duty-cycle model (tau 143 s, fitted on DECISIONS' own 53 -> 62 C in 60 s) puts the three on-phase peaks at 60.3 / 62.1 / 62.8 C at 1.3 W per shire, so the gate should not fire. At the p90 reading of 1.9 W per shire it would fire on two of three cycles, which is what conventions.power_fallback branch 2 exists to prevent: above 45 W switched this block runs at --per-shire 24 with a 127.5 s off-phase (peaks 61.0 / 62.0 / 62.3 C). A governor step inside an on-phase would silently change the power during the one block that builds the per-pixel gain map applied to every other difference image, and would void both the +2,500-4,000 mK prediction and the 4-14 s arrival measurement. The frame-extent and regulator-in-frame check is E62-CAL's, done before this block, not assumed from the planned 60 mm lens distance.",
+    "est_card_min": 6.4,
+    "lap_phase_orders": [
+     [
+      "UNI32",
+      "IDLE"
+     ],
+     [
+      "UNI32",
+      "IDLE"
+     ],
+     [
+      "UNI32",
+      "IDLE"
+     ]
+    ],
+    "analysed_sign_order": "none -- a bloom is pattern-versus-idle, not a balanced difference",
+    "est_card_min_nominal": 6.375
+   },
+   {
+    "id": "E62-WE42",
+    "title": "Heat slides west to east: the hub's own 11 mm control, on the axis it was written for",
+    "kind": "swap",
+    "phases": [
+     {
+      "set": "W12",
+      "dwell_s": 42.5,
+      "launches": 5
+     },
+     {
+      "set": "E12",
+      "dwell_s": 42.5,
+      "launches": 5
+     }
+    ],
+    "cycles": 5,
+    "warmup_cycles": 1,
+    "predicted": {
+     "what": "+462 mK half-patch (1.24 x E61's measured +372.9 mK), peak-to-peak of the difference image about 1.7-2.0x that. Centroid travel 11.190 mm on the die's long W-E axis at 15.6 W, the strongest spatial signal of the session and the only one with a prediction written down by someone else. Arrival lag 47 deg = 11.0 s at the 85.0 s period. Visible in a single cycle at 14 sigma.",
+     "mk": 462.3,
+     "direction": "the image direction of the die's W->E axis; this block DEFINES it, and E62-NS42 must then come out 90 deg away",
+     "basis": "the anchor scaled by 11.190 mm / 10.012 mm, 15.6 W / 14.40 W and dwell factor 1.024. The hub's own control (thermal-camera-hub.md:350) predicts about 11 mm of movement for this swap.",
+     "anchor": {
+      "travel_mm": 11.19,
+      "switched_w": 15.6,
+      "dwell_s": 42.5,
+      "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+     }
+    },
+    "pass_rule": "PASS if the lobe moves: a dipole whose two extrema change sides with the mask, with the permutation null over the four analysed cycles giving p < 0.01; monopole |card mean| < 25 mK with p > 0.1. ORTHOGONAL-AXIS NULL, now defined from a reference this block does not itself set: the component |.| < 40 mK with p > 0.1 is measured perpendicular to the DIE FRAME fitted by E62-ORBIT, which runs earlier, and if that fit is unavailable, perpendicular to E61's measured 173.8 deg gradient on the same axis family. Version 1 took the orthogonal axis from this block's own measured dipole direction, which this block DEFINES -- so the component was zero by construction and the criterion tested nothing; read instead as the sensor's own x/y axes it would fail on a perfectly good result at an unmeasured camera roll near 45 deg. The arms' board power is logged at 10 Hz and the known by_io 0-vs-2 and by_ms 0-vs-2 mismatch of this pair is priced at about 34 mK (E61's 0.44 W half-die asymmetry) and quoted as a correction, never ignored. FAIL, reading 'the regulators, not the die', if the monopole is non-null or the lobe does not move.",
+    "est_card_min": 7.167,
+    "lap_phase_orders": [
+     [
+      "W12",
+      "E12"
+     ],
+     [
+      "W12",
+      "E12"
+     ],
+     [
+      "E12",
+      "W12"
+     ],
+     [
+      "E12",
+      "W12"
+     ],
+     [
+      "W12",
+      "E12"
+     ]
+    ],
+    "analysed_sign_order": "ABBABAAB",
+    "est_card_min_nominal": 7.083
+   },
+   {
+    "id": "E62-NS42",
+    "title": "The same swap turned ninety degrees: the keystone",
+    "kind": "swap",
+    "phases": [
+     {
+      "set": "N12",
+      "dwell_s": 42.5,
+      "launches": 5
+     },
+     {
+      "set": "S12",
+      "dwell_s": 42.5,
+      "launches": 5
+     }
+    ],
+    "cycles": 5,
+    "warmup_cycles": 1,
+    "predicted": {
+     "what": "+306 mK (0.82 x E61), centroid travel 7.400 mm on the die's short N-S axis at the SAME 15.6 W, the same 24 shires and the same 384 harts as E62-WE42 -- only the partition changes. The CONFIRMATORY keystone is the 90 +/- 10 deg orthogonality, which is robust. The amplitude ratio is CONDITIONAL: predicted 0.661 x r, where 0.661 = 7.400 / 11.190 mm is pure geometry and r is the blur anisotropy between the die's short and long axes, measured for free by E62-ORBIT's lobe widths along its NW-SW and NW-NE baselines. The half-patch amplitude scales as travel / sigma_axis, so an anisotropic board shifts the ratio directly, and nothing in the readers' notes measures it -- a rectangular PCB with a heatsink bracket and edge connectors on one side is not obviously isotropic. 0.661 is quoted only as the isotropic special case. N12/S12 is also E61's own axis, so the image direction should land near E61's measured 173.8 deg gradient with the same sign.",
+     "mk": 305.7,
+     "direction": "90 deg from E62-WE42's measured direction, and within about 20 deg of E61's own 173.8 deg",
+     "basis": "the same anchor scaling; and the identity W12|E12 = N12|S12 = CORE24 (0x7777f6f6, asserted in placements.py and re-derived here), so card power, regulator dissipation, die temperature and clock are identical between this block and E62-WE42",
+     "anchor": {
+      "travel_mm": 7.4,
+      "switched_w": 15.6,
+      "dwell_s": 42.5,
+      "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+     }
+    },
+    "pass_rule": "PASS if the measured angle between this block's dipole direction and E62-WE42's is 90 +/- 10 deg -- the confirmatory keystone -- and the amplitude ratio to E62-WE42 is 0.661 x r +/- 0.08, with r the anisotropy measured by E62-ORBIT. The die's rows and columns are orthogonal by construction, and orthogonality survives a rotation, a mirror and a modest tilt, so if the two blocks land within 30 deg of each other that is geometrically impossible for the die and the signal is the power stages or a mask-to-position error. (Version 1's justification, 'a camera projection is a rotation and possibly a mirror', is true only for a fronto-parallel camera: a 30 deg tilt moves two orthogonal die axes to about 82 deg apart. That still passes 90 +/- 10, so the test stands and only the stated reason was wrong.) Same monopole, orthogonal-axis, board-meter and permutation nulls as E62-WE42.",
+    "est_card_min": 7.167,
+    "lap_phase_orders": [
+     [
+      "N12",
+      "S12"
+     ],
+     [
+      "N12",
+      "S12"
+     ],
+     [
+      "S12",
+      "N12"
+     ],
+     [
+      "S12",
+      "N12"
+     ],
+     [
+      "N12",
+      "S12"
+     ]
+    ],
+    "analysed_sign_order": "ABBABAAB",
+    "est_card_min_nominal": 7.083,
+    "angles": [
+     {
+      "name": "the die's N-S axis against its W-E axis",
+      "deg": 90.0,
+      "tol_deg": 10,
+      "derive": "ns_from_we",
+      "in_pass_rule": true
+     }
+    ]
+   },
+   {
+    "id": "E62-NULLAA",
+    "title": "The instrumental null: the same mask in both arms",
+    "kind": "control",
+    "phases": [
+     {
+      "set": "W12_A",
+      "dwell_s": 42.5,
+      "launches": 5
+     },
+     {
+      "set": "W12_B",
+      "dwell_s": 42.5,
+      "launches": 5
+     }
+    ],
+    "cycles": 5,
+    "warmup_cycles": 1,
+    "predicted": {
+     "what": "Zero, with no appeal to geometry at all -- the two arms are the SAME mask at the same per-shire, so the drive never changes and the prediction is zero by construction rather than by a blur model. It runs at E62-WE42's own dwell, power and set, and it now runs SIXTH, before E62-NULLGEO, E62-W8BE8B and E62-SWEEP, so the measured floor exists before the blocks whose published error bars and whose detectability depend on it (version 1 ran it tenth of ten). Four analysed laps on the quadratically balanced 8-phase order give a 2 sigma bound of 27 mK, 5.8% of E62-WE42's prediction. It is reduced TWICE: over all four analysed laps (the clean sigma every error bar uses), and over its first two analysed laps on the 4-phase order -- the exact configuration of every two-lap block in the session -- so the residual quadratic drift leak those blocks carry is bounded by a matched null rather than argued away.",
+     "mk": 0.0,
+     "direction": "none",
+     "basis": "E61's null was a permutation -- a relabelling of real data. This is a physical null: a real repeat with nothing swapped. It is the only control whose zero does not depend on the die map being right, so if E62-NULLGEO ever comes out non-null this block separates 'the instrument' from 'the die map'.",
+     "anchor": {
+      "travel_mm": 0.0,
+      "switched_w": 15.6,
+      "dwell_s": 42.5,
+      "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+     },
+     "bound_2sigma_mk": 27.0
+    },
+    "pass_rule": "PASS if the half-patch statistic is 0 +/- 27.0 mK (2 sigma over the four analysed laps at the registered 27 mK floor). Analysed through exactly E62-WE42's pipeline, including its sign order and its detrend, so the two are directly comparable; and again over its first two analysed laps alone, for the matched two-lap bound. Any non-zero result is the instrument or the analysis, and it is subtracted from nothing: it is reported as the honest floor under every other number, and the measured value REPLACES the 27 mK prior in every error bar and every SNR on the page.",
+    "est_card_min": 7.167,
+    "lap_phase_orders": [
+     [
+      "W12_A",
+      "W12_B"
+     ],
+     [
+      "W12_A",
+      "W12_B"
+     ],
+     [
+      "W12_B",
+      "W12_A"
+     ],
+     [
+      "W12_B",
+      "W12_A"
+     ],
+     [
+      "W12_A",
+      "W12_B"
+     ]
+    ],
+    "analysed_sign_order": "ABBABAAB",
+    "est_card_min_nominal": 7.083
+   },
+   {
+    "id": "E62-NULLGEO",
+    "title": "The pair that must show nothing",
+    "kind": "control",
+    "phases": [
+     {
+      "set": "NULLP12",
+      "dwell_s": 42.5,
+      "launches": 5
+     },
+     {
+      "set": "NULLQ12",
+      "dwell_s": 42.5,
+      "launches": 5
+     }
+    ],
+    "cycles": 3,
+    "warmup_cycles": 1,
+    "predicted": {
+     "what": "Zero. Twelve shires against their own 180 deg rotation about the die centre: the same 15.6 W, the same 384 harts, zero shire overlap, centroid separation exactly 0.000 mm, and -- because a point reflection preserves every EVEN moment -- identical radial profiles, so the camera's own radial post-shutter drift (corners warming against the centre by about 140 mK over 20 s) cancels by symmetry rather than by argument. The only modelled residual is from the arms' higher odd moments: 0.0077 x E62-WE42 = 3.5 mK at this dwell, far below the floor. Two analysed laps at the registered 27 mK floor give a 2 sigma bound of 38.2 mK, 8.3% of E62-WE42's prediction.",
+     "mk": 0.0,
+     "direction": "none; a difference image indistinguishable from the pre-session idle baseline",
+     "basis": "derived here: the point reflection (r,c) -> (5-r, 7-c) partitions CORE24 into exactly 12 orbits, and taking one member of each gives P whose complement is P rotated 180 deg. Matched on all four features placements.py records (mem_side 4/4, ns_edge 0/0, by_io 1/1, by_ms 1/1) and maximally interleaved, so it looks like it should show something. Blur-model radial fraction 0.000.",
+     "anchor": {
+      "travel_mm": 0.0,
+      "switched_w": 15.6,
+      "dwell_s": 42.5,
+      "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+     },
+     "bound_2sigma_mk": 38.2
+    },
+    "pass_rule": "PASS if the half-patch statistic is 0 +/- 38.2 mK (2 sigma over the two analysed laps at the registered 27 mK floor, 8.3% of E62-WE42's prediction) whichever way the patch is cut, the gradient has no preferred direction, and the monopole is null. This block is the empirical bound for the whole set, covering what a permutation null cannot reach: FFC steps, non-linear field drift, and the camera's radial warm-up. If it shows a dipole, every number in the swap blocks is suspect and the session's conclusion is about the instrument, not the chip -- and E62-NULLAA, which runs BEFORE it, separates 'the instrument' from 'the die map'. Raising this block to cycles 5 (four analysed laps, the quadratically balanced 8-phase order, a 27 mK bound) is the first item in the slack queue; at two analysed laps it carries the same residual quadratic leak as every other two-lap block, which is why E62-NULLAA is reduced twice (see conventions.sign_orders.note).",
+    "est_card_min": 4.3,
+    "lap_phase_orders": [
+     [
+      "NULLP12",
+      "NULLQ12"
+     ],
+     [
+      "NULLP12",
+      "NULLQ12"
+     ],
+     [
+      "NULLQ12",
+      "NULLP12"
+     ]
+    ],
+    "analysed_sign_order": "ABBA",
+    "est_card_min_nominal": 4.25
+   },
+   {
+    "id": "E62-W8BE8B",
+    "title": "The fully feature-matched replicate of the same axis",
+    "kind": "swap",
+    "phases": [
+     {
+      "set": "W8B",
+      "dwell_s": 42.5,
+      "launches": 5
+     },
+     {
+      "set": "E8B",
+      "dwell_s": 42.5,
+      "launches": 5
+     }
+    ],
+    "cycles": 3,
+    "warmup_cycles": 1,
+    "predicted": {
+     "what": "+334 mK (0.90 x E61) at 10.4 W, centroid travel 12.123 mm -- slightly LARGER than W12/E12's 11.190 mm. Predicted ratio to E62-WE42 0.722; the quantity that must agree between the two blocks is the reduced one, mK per watt per millimetre of travel. Direction identical to E62-WE42's.",
+     "mk": 333.9,
+     "direction": "identical to E62-WE42's measured W->E direction",
+     "basis": "placements.py asserts the by_io / by_ms / mem_side / ns_edge balance ONLY for the 8-shire mirror pairs. physics.md:582's claim that W12/E12 'matches memory-side and IO-adjacency counts by construction' is WRONG and is corrected here: W12/E12 differ on by_io (0 vs 2) and by_ms (0 vs 2), because E12 holds the shires beside the IO/PCIe and master/spare cells. W8b/E8b is matched on all five features. This block is therefore the arbiter of the headline and the sharpest available test of physics.md's open question 6.",
+     "anchor": {
+      "travel_mm": 12.123,
+      "switched_w": 10.4,
+      "dwell_s": 42.5,
+      "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+     }
+    },
+    "pass_rule": "PASS if the direction agrees with E62-WE42's within 10 deg AND the reduced amplitude (mK per watt per mm of travel) agrees within 15%: the adjacency mismatch is then proved harmless and the headline stands. If they disagree, THIS is the number to trust and E62-WE42's headline is reported with the electrical-asymmetry correction stated. Second, registered now: the two arms' board power must differ by LESS than the +/-0.5 W band hp's own README registered, since this pair is matched by construction on exactly the features that would cause an asymmetry -- if 0.44 W survives here it is the CARD, not the mask pair.",
+    "est_card_min": 4.3,
+    "lap_phase_orders": [
+     [
+      "W8B",
+      "E8B"
+     ],
+     [
+      "W8B",
+      "E8B"
+     ],
+     [
+      "E8B",
+      "W8B"
+     ]
+    ],
+    "analysed_sign_order": "ABBA",
+    "est_card_min_nominal": 4.25
+   },
+   {
+    "id": "E62-SWEEP",
+    "title": "A front of heat sweeping across the die, one column at a time -- and the ruler it provides",
+    "kind": "sequence",
+    "phases": [
+     {
+      "set": "SCAN1",
+      "dwell_s": 17.0,
+      "launches": 2
+     },
+     {
+      "set": "SCAN2",
+      "dwell_s": 17.0,
+      "launches": 2
+     },
+     {
+      "set": "CEN8",
+      "dwell_s": 17.0,
+      "launches": 2
+     },
+     {
+      "set": "SCAN4",
+      "dwell_s": 17.0,
+      "launches": 2
+     },
+     {
+      "set": "SCAN5",
+      "dwell_s": 17.0,
+      "launches": 2
+     }
+    ],
+    "cycles": 6,
+    "warmup_cycles": 1,
+    "predicted": {
+     "what": "A 4 x 2 block of shires slides one column at a time: five phases of exactly 8 shires, mean die row 2.500 in all five, mean column 1.5 / 2.5 / 3.5 / 4.5 / 5.5, four perfectly even 3.730 mm steps, and every phase an exact one-column translate of phase 1. One step +32.5 mK (averaged only: 1.2 sigma per lap and 2.7 over five at the registered 27 mK floor, which is why it is registered as an average and never as a per-lap result); end to end 14.920 mm and +130 mK at 4.8 sigma per lap. Phase 3 is the registered CEN8 and sits exactly on the sweep centroid, so its FIRST MOMENT against the five-phase mean is exactly zero BY CONSTRUCTION -- but the image residual is NOT: the mean of five translates of a pattern is a comb-smeared pattern, not the pattern at the centre, and in this design's own blur model phase 3 minus the five-phase mean carries a predicted +8 to +20 mK centre-positive, wing-negative RADIAL term (+12 mK at the 17.0 s model FWHM of 39.2 mm, +20 mK at E61's measured 30 mm, +8 mK at 47.1 mm). That is below the 27 mK floor, so the middle frame reads blank WITHIN NOISE -- which is the honest form of version 1's 'predicted EXACTLY ZERO'. Arrival lag 47 deg = 11.0 s at the 85.0 s lap.",
+     "mk": 129.9,
+     "direction": "parallel to E62-WE42's measured W->E direction within 10 deg; the five image positions collinear and evenly spaced, four points on a straight line with 2 df of residual",
+     "basis": "the anchor scaled as everywhere else; and the structural tie, re-derived here: the five phases' union is EXACTLY W12 u E12 = CORE24, and phase 3 IS the registered CEN8 (0x04647010). The sweep is the hub's 11 mm control taken apart into five steps. mm per pixel comes from registering PAIRWISE difference images against each other -- (phase1-phase2) against (phase2-phase3), which ARE exact translates under convolution and so invariant to the 12 s thermal lag -- never from phase-minus-cycle-mean images, which are not translates, and never from a lobe separation, because cam_reduce.py measured that failure (a synthetic 9 px move read 41.9 px).",
+     "anchor": {
+      "travel_mm": 14.92,
+      "switched_w": 10.4,
+      "dwell_s": 17.0,
+      "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+     }
+    },
+    "pass_rule": "PASS if the matched-filter position advances MONOTONICALLY in one image direction by a constant step -- the observable that distinguishes sliding from jumping, and the finding this block rests on -- the end-to-end displacement equals the sum of the four steps within 2 sigma, the direction is parallel to E62-WE42's within 10 deg, and every phase's board power is within +/-0.5 W of the others. Phase 3's statistic is pre-registered NOW in the form that is genuinely zero: its MATCHED-FILTER POSITION sits at the sequence centroid. Its image amplitude is predicted at +8 to +20 mK of centre-positive radial residual, below the floor, so 'blank' means blank within noise and is reported as corroboration of the monotone advance, never as a radial finding (the residual is 77-85% radial in the blur model). The half-patch form is blind here by construction and is not used. A fixed source cannot walk: if the position does not advance, the reading is 'the regulators, not the die'.",
+    "est_card_min": 8.6,
+    "lap_phase_orders": [
+     [
+      "SCAN1",
+      "SCAN2",
+      "CEN8",
+      "SCAN4",
+      "SCAN5"
+     ],
+     [
+      "SCAN1",
+      "SCAN2",
+      "CEN8",
+      "SCAN4",
+      "SCAN5"
+     ],
+     [
+      "SCAN2",
+      "CEN8",
+      "SCAN4",
+      "SCAN5",
+      "SCAN1"
+     ],
+     [
+      "CEN8",
+      "SCAN4",
+      "SCAN5",
+      "SCAN1",
+      "SCAN2"
+     ],
+     [
+      "SCAN4",
+      "SCAN5",
+      "SCAN1",
+      "SCAN2",
+      "CEN8"
+     ],
+     [
+      "SCAN5",
+      "SCAN1",
+      "SCAN2",
+      "CEN8",
+      "SCAN4"
+     ]
+    ],
+    "analysed_sign_order": "cyclic-shift",
+    "est_card_min_nominal": 8.5,
+    "angles": [
+     {
+      "name": "the sweep's column axis against the die's W-E axis",
+      "deg": 0.0,
+      "tol_deg": 10,
+      "derive": "sweep_from_we",
+      "in_pass_rule": false
+     }
+    ]
+   }
+  ],
+  "order": [
+   "E62-BLOOM",
+   "E62-WE42",
+   "E62-NS42",
+   "E62-NULLAA",
+   "E62-NULLGEO",
+   "E62-W8BE8B",
+   "E62-SWEEP"
+  ],
+  "session": {
+   "pre_idle_s": 90.0,
+   "post_idle_s": 60.0,
+   "between_blocks_idle_s": 30.0,
+   "pre_idle_note": "180 s, not 90: camera.md records that in the only capture on this rig 'ffcCountdown read 0 for all 375 frames while the header said auto_ffc=1' and no FFC fired, concluding that 15 s was not enough to see one and that a capture of at least 3 min would show the steps directly. So the FFC detection path has never been exercised on this camera. GATE: the run proceeds only if at least one FFC is detected by BOTH routes (a P3FZ seq gap and a frame-mean step) and the two agree; if none fires in 180 s, the FFC rhythm is recorded on the page as UNCHARACTERISED. This idle also carries tonight's drift, the zero-signal reference frame rendered at every movie's colour scale, and the baseline that E62-CAL's session gate reads against.",
+   "post_idle_note": "60 s, trimmed from 90 to pay for the 180 s pre-idle; the pre-idle now carries the reference frame."
+  },
+  "revision": "A1, 2026-10-21 17:14 PDT, after E62-CAL and during E62-ORBIT, before any reduction: E62-CAL measured the switched board power at about +13 W for 128 harts, +20 W for 256, +27 W for 384 and +35 W for 512 (an offset of about 6.5 W plus about 53 mW per hart, not 40.6 mW per hart from zero), and the die reached 65 C in the 384-hart octet. Registered power_fallback branch 1 (a 384-hart arm above 16 W) and branch 2 (UNI32 above 45 W) both fire. Branch 1's --per-shire 24 was priced on the wrong model and would still settle near 66 C, over the governor's 65 C step that the branch exists to avoid, so every 12-shire set runs at --per-shire 16 and every 8-shire set at --per-shire 24 (192 harts, about +16.5 W, about 62 C steady: the operating point the predictions were priced at). Branch 2 as registered: UNI32 at --per-shire 24, the bloom's off-phase 127.5 s, E62-WE17 dropped. E62-CAL and E62-ORBIT ran as registered in the first session. Harts stay equal within every swap. Version 2 follows: version 2, Wed 21 Oct 2026: every blocker and major from the red-team pass applied. See PROTOCOL.md section 11 'Changes after the red team'.",
+  "runner": {
+   "executable_on_its_own": false,
+   "note": "protocol.json is NOT executable on its own. PROTOCOL.md sections 4 and 5 are mandatory for the runner and this block carries the parts a machine must not have to infer.",
+   "lock": {
+    "line": "exec 9<>/run/lock/etsoc-shire0.lock; flock -n 9 || exit 3",
+    "blocking": false,
+    "held_for": "the card session only -- released, with the sampler, BEFORE reduction starts",
+    "forbidden": "wait_free(); any wait loop; any blocking flock"
+   },
+   "other_user_checks": {
+    "when": "between every pair of launches",
+    "checks": [
+     "another logged-in user",
+     "any other user's device process by ps comm",
+     "lsmod et_soc1 use count against the session's own baseline"
+    ],
+    "on_hit": "stop, exit 3, do not wait"
+   },
+   "telemetry": {
+    "cmd": "ettelem sample --every-ms 100 --reset-ms 1000",
+    "instances": 1,
+    "start": "with fds 8 and 9 closed, up to six attempts (about one start in three fails right after a previous instance)",
+    "stop": "SIGTERM only, never kill -9",
+    "note": "nothing else may open the management node while it runs; every die reading comes from this sampler's file"
+   },
+   "stop_watcher": {
+    "reads": "the sampler's own output file",
+    "touches": "/home/yaroslavvb/drive.unsynced/e62/STOP",
+    "on": [
+     "temp_c.minshire[0] >= 85",
+     "board_w >= 95",
+     "temp_c.minshire[0] >= 64 during an E62-BLOOM or UNI32 on-phase (ends that phase only, logged)"
+    ]
+   },
+   "frames_path": "~/drive.unsynced/e62/<block>/  -- a NON-SYNCED path on aifoundry2, never the Dropbox work tree; deleted after reduction",
+   "before_recording": "close the browser viewer tab: / polls /frame.raw in a loop and holds activeClients above zero",
+   "per_launch_log": "one line in launches.jsonl: run, pattern, mask, per_shire, seconds, t_start_ms, t_end_ms, rc",
+   "forbidden": [
+    "reboot aifoundry2 or restart its networking (it is the dashboard collector AND the camera phone's only route to the internet)",
+    "reset the card or retrain its PCIe link",
+    "kill -9 the ettelem sampler",
+    "any change to the camera's settings, preset, gain or auto-FFC (DECISIONS section 1: the public live page stays as it is)",
+    "any clock, voltage, TDP, firmware or driver change",
+    "any blocking wait for the card lock",
+    "averaging laps taken at different --per-shire"
+   ]
+  },
+  "cooldown_gate": {
+   "applies_when": "the next block's dwell-weighted switched power exceeds the previous block's",
+   "enter_below_c": 59,
+   "gap_s": 30,
+   "max_gap_s": 75,
+   "source": "the die reading from the sampler's own file; bounded, then proceed and log -- never an unbounded wait",
+   "predicted_holds": "none. The model puts the die below 59 C at all three gated boundaries: 54.5 C after E62-ORBIT, about 56 C after E62-BLOOM (whose lap ENDS in its 85 s idle) and 58.1 C after E62-SWEEP. The 75 s allowance is a worst case and it is counted in the card-held span.",
+   "skip_note": "the gate is skipped between two blocks at the same switched power -- WE42, NS42, NULLAA and NULLGEO all sit at the same 61.6 C steady state, so cooling between them buys nothing."
+  },
+  "order_note": "The run order IS the priority order: the session ends the moment another user appears. E62-NULLAA moves from tenth to sixth because its number becomes the sigma behind every error bar on the page, and E62-W8BE8B moves ahead of E62-SWEEP and E62-WE17 because it is the arbiter of the headline. All three blocks that underwrite the others -- the measured floor (NULLAA), the empirical systematic bound (NULLGEO) and the arbiter (W8BE8B) -- now precede the two blocks that only add to the story.",
+  "budget": {
+   "card_time_cap_min": 75.0,
+   "card_held_cap_min": 75.0,
+   "card_session_wall_cap_min": 100.0,
+   "gated_at_launch_s": 8.6,
+   "note": "Three separate caps, because version 1 had one. card_time and card_held are both gated at the WORST CASE 8.6 s launch (DECISIONS section 3's range is 8.3-8.6 s). card_held includes the idles and the cool-down gate allowance. The card session wall covers setup -- the lock, starting the camera recording, closing the browser viewer tab, the Discord claim, and a sampler of which about one start in three fails right after a previous instance, with six registered attempts -- plus the E62-CAL go/no-go and any per-shire amendment. REDUCTION IS OUTSIDE THE WALL CLAIM and outside the lock: the card lock and the sampler are released and the Discord message is edited to 'released' BEFORE reduction starts. Reduction is roughly 4 GB of frames (about 100k frames at 25 fps over the session) through decompression, 1 s binning, per-lap per-pixel detrending, permutation nulls for ten blocks and five ffmpeg renders, and aifoundry2 is the box earmarked for Roman's firmware work, so holding its card through a half-hour reduction is a courtesy problem as well as a scheduling one.",
+   "setup_min": 12.0,
+   "cal_decision_min": 5.0
+  },
+  "slack_queue": [
+   {
+    "what": "E62-NULLGEO to cycles 5 (four analysed laps, the quadratically balanced order, a 27 mK bound)",
+    "cost_min": 2.87
+   },
+   {
+    "what": "B4NW <-> B4SE at 42.5 s, 3 cycles: 21.015 mm, the longest travel this die offers, predicted +290 mK",
+    "cost_min": 4.3
+   },
+   {
+    "what": "E62-BLOOM to cycles 4 with a 127.5 s off-phase",
+    "cost_min": 4.97
+   },
+   {
+    "what": "two more analysed laps on E62-ORBIT",
+    "cost_min": 4.3
+   },
+   {
+    "what": "the feature-matched inner-quadrant rectangle of PROTOCOL.md section 2.1",
+    "cost_min": 7.17
+   },
+   {
+    "note": "Version 1 had 7.51 min of slack. It is spent: on the worst-case launch budget, the 180 s pre-idle, the cool-down gate allowance, E62-NULLAA's four analysed laps and the thermal margin. What is left is 0.73 min at an 8.6 s launch and 2.78 min at 8.3 s, so this queue runs only if the session's realised launch comes in short or a block ends early."
+   }
+  ]
+ },
+ "host": "aifoundry2",
+ "user": "yaroslavvb",
+ "dry": false,
+ "argv": [
+  "run_hm.py",
+  "--protocol",
+  "protocol-A1.json",
+  "--out",
+  "../runs/e62-card-1021b"
+ ],
+ "python": "3.12.3",
+ "root": "/home/yaroslavvb/claude/et-soc1-prototyping",
+ "git": {
+  "head": "cd46a46f137c233c45cc120acdf5b414ee6c5fa6",
+  "dirty_files": 1
+ },
+ "sha256": {
+  "heater": "7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "16037641ab75bdbe1209f323641e269c9b897468091243173bfaaaf0b21686e2",
+  "record_cam": "7ad8d78050669cb480e9260c167c8a056d8da09efc9dfd6ba31882b1157e71c7",
+  "hm/analyze_hm.py": "a8cf05d15d7e13ec5b995183ed71058812c25f5e14907fc46a5fd025e93a575e",
+  "hm/p3rec.py": "3db77268c5b9644fbf8c739f27f824e097868c0a8bbaa4e8d4bea4a001bba460",
+  "hm/protocol-A1.json": "5d7910c4179b350000089fadfa4d79c7e7cb0a984c322042ac24cdc1d9668eb9",
+  "hm/protocol-dry.json": "35533be9318ca483d2bc2c255f725a8a03dc2f65f0a00505d280816e6da49032",
+  "hm/protocol.json": "c227da785f79b54e07ba96e7cdd6da1a4a4b1fe5af93640dd35403506744ce55",
+  "hm/record_cam.py": "7ad8d78050669cb480e9260c167c8a056d8da09efc9dfd6ba31882b1157e71c7",
+  "hm/reduce_hm.py": "ca960f951cff83080ed971ae7f22a1872552c33cc80e854a10322af795370732",
+  "hm/run_hm.py": "f3db786d098311823c4e74db283c65e11516acae334d5bccc37c444ae2a3adac"
+ },
+ "caps": {
+  "max_card_min": 75.0,
+  "max_wall_min": 100.0
+ },
+ "t_start_ms": 1792628698409,
+ "t_end_ms": 1792631832916,
+ "stop_reason": "done",
+ "exit_code": 0,
+ "plan": {
+  "pre_idle_s": 90.0,
+  "post_idle_s": 60.0,
+  "blocks": [
+   {
+    "block": "E62-BLOOM",
+    "title": "The establishing shot: the whole board breathing, and the gain map",
+    "cycles": 3,
+    "warmup_cycles": 0,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "UNI32",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0xffffffff",
+      "harts": 768
+     },
+     {
+      "set": "IDLE",
+      "idle": true,
+      "dwell_s": 127.5,
+      "mask": null,
+      "harts": null
+     }
+    ],
+    "launches": 15,
+    "s": 539.2,
+    "block_gap_s": 30.0
+   },
+   {
+    "block": "E62-WE42",
+    "title": "Heat slides west to east: the hub's own 11 mm control, on the axis it was written for",
+    "cycles": 5,
+    "warmup_cycles": 1,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "W12",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0x03076616",
+      "harts": 192
+     },
+     {
+      "set": "E12",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0x747090e0",
+      "harts": 192
+     }
+    ],
+    "launches": 50,
+    "s": 452.5,
+    "block_gap_s": 30.0
+   },
+   {
+    "block": "E62-NS42",
+    "title": "The same swap turned ninety degrees: the keystone",
+    "cycles": 5,
+    "warmup_cycles": 1,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "N12",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0x31313232",
+      "harts": 192
+     },
+     {
+      "set": "S12",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0x4646c4c4",
+      "harts": 192
+     }
+    ],
+    "launches": 50,
+    "s": 452.5,
+    "block_gap_s": 30.0
+   },
+   {
+    "block": "E62-NULLAA",
+    "title": "The instrumental null: the same mask in both arms",
+    "cycles": 5,
+    "warmup_cycles": 1,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "W12_A",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0x03076616",
+      "harts": 192
+     },
+     {
+      "set": "W12_B",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0x03076616",
+      "harts": 192
+     }
+    ],
+    "launches": 50,
+    "s": 452.5,
+    "block_gap_s": 30.0
+   },
+   {
+    "block": "E62-NULLGEO",
+    "title": "The pair that must show nothing",
+    "cycles": 3,
+    "warmup_cycles": 1,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "NULLP12",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0x243522a6",
+      "harts": 192
+     },
+     {
+      "set": "NULLQ12",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0x5342d450",
+      "harts": 192
+     }
+    ],
+    "launches": 30,
+    "s": 283.5,
+    "block_gap_s": 30.0
+   },
+   {
+    "block": "E62-W8BE8B",
+    "title": "The fully feature-matched replicate of the same axis",
+    "cycles": 3,
+    "warmup_cycles": 1,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "W8B",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0x02026606",
+      "harts": 192
+     },
+     {
+      "set": "E8B",
+      "idle": false,
+      "dwell_s": 42.5,
+      "mask": "0x606080e0",
+      "harts": 192
+     }
+    ],
+    "launches": 30,
+    "s": 283.5,
+    "block_gap_s": 30.0
+   },
+   {
+    "block": "E62-SWEEP",
+    "title": "A front of heat sweeping across the die, one column at a time -- and the ruler it provides",
+    "cycles": 6,
+    "warmup_cycles": 1,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "SCAN1",
+      "idle": false,
+      "dwell_s": 17.0,
+      "mask": "0x03030606",
+      "harts": 192
+     },
+     {
+      "set": "SCAN2",
+      "idle": false,
+      "dwell_s": 17.0,
+      "mask": "0x00076412",
+      "harts": 192
+     },
+     {
+      "set": "CEN8",
+      "idle": false,
+      "dwell_s": 17.0,
+      "mask": "0x04647010",
+      "harts": 192
+     },
+     {
+      "set": "SCAN4",
+      "idle": false,
+      "dwell_s": 17.0,
+      "mask": "0x64709000",
+      "harts": 192
+     },
+     {
+      "set": "SCAN5",
+      "idle": false,
+      "dwell_s": 17.0,
+      "mask": "0x701080e0",
+      "harts": 192
+     }
+    ],
+    "launches": 60,
+    "s": 507.0,
+    "block_gap_s": 0.0
+   }
+  ],
+  "total_s": 3120.8,
+  "total_min": 52.01,
+  "expected_launch_s": 8.4,
+  "launches": 285
+ },
+ "pre_idle_s": 90.0,
+ "post_idle_s": 60.0,
+ "t_pre_idle_end_ms": 1792628788896,
+ "t_post_idle_start_ms": 1792631772338,
+ "card_s": 3134.5,
+ "n_launches": 285,
+ "launch_wall_s": 2417.9,
+ "expected_launch_s_final": 8.472,
+ "safety": {
+  "abs_stop_c": 85.0,
+  "board_cap_w": 95.0,
+  "cap_consecutive": 2,
+  "die_consecutive": 1,
+  "sampler_stale_s": 3.0,
+  "cap_mean_c": null,
+  "cap_high_c": null,
+  "pmic_margin_c": 10.0,
+  "bloom_cycle_stop_c": 64.0
+ },
+ "heater": {
+  "bin": "/home/yaroslavvb/claude/et-soc1-prototyping/build/sparsity_t2/host/sparsity_host",
+  "kernel": "/home/yaroslavvb/claude/et-soc1-prototyping/build/sparsity_t2/kernel/sparsity.elf",
+  "test": "fma",
+  "type": "fp32",
+  "pattern": "none",
+  "values": "randn",
+  "seconds": 8.0,
+  "budget": 9.5,
+  "seed": 1,
+  "expected_launch_s": 8.4
+ },
+ "sampler": {
+  "restarts": 0,
+  "tel_raw": "/home/yaroslavvb/claude/et-soc1-prototyping/build/e62/runs/e62-card-1021b/tel.jsonl.raw",
+  "ettelem": "/home/yaroslavvb/claude/et-soc1-prototyping/build/ettelem/ettelem",
+  "args": "sample --every-ms 100 --reset-ms 1000"
+ },
+ "camera": {
+  "url": "http://p3-phone:8080/stream.raw.z",
+  "recorder": "/home/yaroslavvb/claude/et-soc1-prototyping/build/e62/code/record_cam.py",
+  "recorded": true,
+  "pid": 7775,
+  "rc": 0,
+  "exited_early": false,
+  "rc_early": null,
+  "cmd": [
+   "nice",
+   "-n",
+   "19",
+   "/usr/bin/python3",
+   "/home/yaroslavvb/claude/et-soc1-prototyping/build/e62/code/record_cam.py",
+   "--url",
+   "http://p3-phone:8080/stream.raw.z",
+   "--out",
+   "/home/yaroslavvb/claude/et-soc1-prototyping/build/e62/runs/e62-card-1021b/cam",
+   "--stop-file",
+   "/home/yaroslavvb/claude/et-soc1-prototyping/build/e62/runs/e62-card-1021b/CAMSTOP",
+   "--max-s",
+   "3888",
+   "--status-every",
+   "5",
+   "--min-free-mb",
+   "5000",
+   "--no-nice"
+  ]
+ },
+ "watcher": {
+  "trip": null,
+  "lost": null,
+  "error": null,
+  "clock_skew_ms": null,
+  "samples": 30162,
+  "bad_samples": 0,
+  "no_die_samples": 0,
+  "last": {
+   "t_ms": 1792631832446,
+   "recv_ms": 1792631832471,
+   "first_recv_ms": 1792628698733,
+   "die_c": 55.0,
+   "die_low_c": 54.0,
+   "die_high_c": 57.0,
+   "pmic_c": 55.0,
+   "board_w": 24.43,
+   "mhz_minion": 600.0,
+   "n": 30162,
+   "bad": 0,
+   "no_die": 0,
+   "die_recv_ms": 1792631832471,
+   "skew_ms": 25,
+   "heartbeat_ms": 1792631832621,
+   "age_ms": 475,
+   "stamp_age_ms": 500,
+   "die_age_ms": 475,
+   "trip": null,
+   "lost": null
+  }
+ },
+ "orphans": [],
+ "etiquette": {
+  "checks": 359,
+  "use_count_baseline": 1,
+  "hits": [],
+  "lock": "/run/lock/etsoc-shire0.lock"
+ },
+ "et_who": "No process holds an ET-SoC-1 device node or card lock.",
+ "notes": []
+}

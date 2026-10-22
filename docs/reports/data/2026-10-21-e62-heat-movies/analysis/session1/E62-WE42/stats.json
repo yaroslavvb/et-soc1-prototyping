@@ -1,0 +1,21 @@
+{
+ "block": "E62-WE42",
+ "block_label": null,
+ "block_label_how": null,
+ "kind": "swap",
+ "title": "Heat slides west to east: the hub's own 11 mm control, on the axis it was written for",
+ "predicted": {
+  "what": "+462 mK half-patch (1.24 x E61's measured +372.9 mK), peak-to-peak of the difference image about 1.7-2.0x that. Centroid travel 11.190 mm on the die's long W-E axis at 15.6 W, the strongest spatial signal of the session and the only one with a prediction written down by someone else. Arrival lag 47 deg = 11.0 s at the 85.0 s period. Visible in a single cycle at 14 sigma.",
+  "mk": 462.3,
+  "direction": "the image direction of the die's W->E axis; this block DEFINES it, and E62-NS42 must then come out 90 deg away",
+  "basis": "the anchor scaled by 11.190 mm / 10.012 mm, 15.6 W / 14.40 W and dwell factor 1.024. The hub's own control (thermal-camera-hub.md:350) predicts about 11 mm of movement for this swap.",
+  "anchor": {
+   "travel_mm": 11.19,
+   "switched_w": 15.6,
+   "dwell_s": 42.5,
+   "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+  }
+ },
+ "pass_rule": "PASS if the lobe moves: a dipole whose two extrema change sides with the mask, with the permutation null over the four analysed cycles giving p < 0.01; monopole |card mean| < 25 mK with p > 0.1. ORTHOGONAL-AXIS NULL, now defined from a reference this block does not itself set: the component |.| < 40 mK with p > 0.1 is measured perpendicular to the DIE FRAME fitted by E62-ORBIT, which runs earlier, and if that fit is unavailable, perpendicular to E61's measured 173.8 deg gradient on the same axis family. Version 1 took the orthogonal axis from this block's own measured dipole direction, which this block DEFINES -- so the component was zero by construction and the criterion tested nothing; read instead as the sensor's own x/y axes it would fail on a perfectly good result at an unmeasured camera roll near 45 deg. The arms' board power is logged at 10 Hz and the known by_io 0-vs-2 and by_ms 0-vs-2 mismatch of this pair is priced at about 34 mK (E61's 0.44 W half-die asymmetry) and quoted as a correction, never ignored. FAIL, reading 'the regulators, not the die', if the monopole is non-null or the lobe does not move.",
+ "skipped": "no phases in the session for this block (tried ['E62-WE42', 'block3'] against the labels the session wrote)"
+}

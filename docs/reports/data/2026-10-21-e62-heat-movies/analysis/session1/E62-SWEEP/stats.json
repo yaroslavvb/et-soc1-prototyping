@@ -1,0 +1,21 @@
+{
+ "block": "E62-SWEEP",
+ "block_label": null,
+ "block_label_how": null,
+ "kind": "sequence",
+ "title": "A front of heat sweeping across the die, one column at a time -- and the ruler it provides",
+ "predicted": {
+  "what": "A 4 x 2 block of shires slides one column at a time: five phases of exactly 8 shires, mean die row 2.500 in all five, mean column 1.5 / 2.5 / 3.5 / 4.5 / 5.5, four perfectly even 3.730 mm steps, and every phase an exact one-column translate of phase 1. One step +32.5 mK (averaged only: 1.2 sigma per lap and 2.7 over five at the registered 27 mK floor, which is why it is registered as an average and never as a per-lap result); end to end 14.920 mm and +130 mK at 4.8 sigma per lap. Phase 3 is the registered CEN8 and sits exactly on the sweep centroid, so its FIRST MOMENT against the five-phase mean is exactly zero BY CONSTRUCTION -- but the image residual is NOT: the mean of five translates of a pattern is a comb-smeared pattern, not the pattern at the centre, and in this design's own blur model phase 3 minus the five-phase mean carries a predicted +8 to +20 mK centre-positive, wing-negative RADIAL term (+12 mK at the 17.0 s model FWHM of 39.2 mm, +20 mK at E61's measured 30 mm, +8 mK at 47.1 mm). That is below the 27 mK floor, so the middle frame reads blank WITHIN NOISE -- which is the honest form of version 1's 'predicted EXACTLY ZERO'. Arrival lag 47 deg = 11.0 s at the 85.0 s lap.",
+  "mk": 129.9,
+  "direction": "parallel to E62-WE42's measured W->E direction within 10 deg; the five image positions collinear and evenly spaced, four points on a straight line with 2 df of residual",
+  "basis": "the anchor scaled as everywhere else; and the structural tie, re-derived here: the five phases' union is EXACTLY W12 u E12 = CORE24, and phase 3 IS the registered CEN8 (0x04647010). The sweep is the hub's 11 mm control taken apart into five steps. mm per pixel comes from registering PAIRWISE difference images against each other -- (phase1-phase2) against (phase2-phase3), which ARE exact translates under convolution and so invariant to the 12 s thermal lag -- never from phase-minus-cycle-mean images, which are not translates, and never from a lobe separation, because cam_reduce.py measured that failure (a synthetic 9 px move read 41.9 px).",
+  "anchor": {
+   "travel_mm": 14.92,
+   "switched_w": 10.4,
+   "dwell_s": 17.0,
+   "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+  }
+ },
+ "pass_rule": "PASS if the matched-filter position advances MONOTONICALLY in one image direction by a constant step -- the observable that distinguishes sliding from jumping, and the finding this block rests on -- the end-to-end displacement equals the sum of the four steps within 2 sigma, the direction is parallel to E62-WE42's within 10 deg, and every phase's board power is within +/-0.5 W of the others. Phase 3's statistic is pre-registered NOW in the form that is genuinely zero: its MATCHED-FILTER POSITION sits at the sequence centroid. Its image amplitude is predicted at +8 to +20 mK of centre-positive radial residual, below the floor, so 'blank' means blank within noise and is reported as corroboration of the monotone advance, never as a radial finding (the residual is 77-85% radial in the blur model). The half-patch form is blind here by construction and is not used. A fixed source cannot walk: if the position does not advance, the reading is 'the regulators, not the die'.",
+ "skipped": "no phases in the session for this block (tried ['E62-SWEEP', 'block8'] against the labels the session wrote)"
+}

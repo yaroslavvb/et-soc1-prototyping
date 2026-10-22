@@ -59,6 +59,16 @@ DIE_CELL, DIE_GAP = 40, 4
 DIE_X0, DIE_Y0 = 52, PY + 30
 TXT_X0, TXT_X1 = 336, 744
 DIE_NOTE = "this map is the die's own frame, not the camera's view"
+# --die-view camera: draw the die turned the way E62 measured the camera sees it (rolled about -90 degrees, not
+# mirrored: west->east runs UP the picture, north->south runs RIGHT), so a lit corner on the map sits where its heat
+# appears in the camera panel. Die cell (row r, col index c 0..5) goes to screen row 5-c, screen column r.
+DIE_VIEW = "die"
+CAMERA_DIE_NOTE = "die turned to match the camera: west to east runs up, north to south runs right"
+
+
+def die_pos(r, c):
+    """screen (row, col) of die cell (row r, 0-based column index c) in the current DIE_VIEW"""
+    return (r, c) if DIE_VIEW == "die" else (5 - c, r)
 
 IDLE_NAMES = {"", "-", "none", "idle", "off", "null", "None"}
 NICE = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 80, 100, 125, 150, 200, 250, 300,
@@ -263,8 +273,9 @@ def draw_die(img, draw, grid, lit, x0, y0, cell, gap, label_cells=True, fs=None,
     for r in range(6):
         for c in range(6):
             kind, shire, text = cell_kind(grid[r][c])
-            bx = x0 + c * (cell + gap)
-            by = y0 + r * (cell + gap)
+            sr, sc = die_pos(r, c)
+            bx = x0 + sc * (cell + gap)
+            by = y0 + sr * (cell + gap)
             box = (bx, by, bx + cell, by + cell)
             on = kind == "shire" and shire in lit
             if kind == "shire":
@@ -288,13 +299,13 @@ def draw_die(img, draw, grid, lit, x0, y0, cell, gap, label_cells=True, fs=None,
     if not labels_rc:
         return
     fl = font(max(10, int(cell * 0.42)))
-    for r in range(6):
-        t = "r%d" % r
-        draw.text((x0 - 6 - text_w(draw, t, fl), y0 + r * (cell + gap) + (cell - fl.size * 1.3) / 2),
+    for k in range(6):                       # labels down the left side, then along the bottom
+        t = ("r%d" % k) if DIE_VIEW == "die" else ("c%d" % (6 - k))
+        draw.text((x0 - 6 - text_w(draw, t, fl), y0 + k * (cell + gap) + (cell - fl.size * 1.3) / 2),
                   t, font=fl, fill=FAINT)
-    for c in range(6):
-        t = "c%d" % (c + 1)
-        draw.text((x0 + c * (cell + gap) + (cell - text_w(draw, t, fl)) / 2,
+    for k in range(6):
+        t = ("c%d" % (k + 1)) if DIE_VIEW == "die" else ("r%d" % k)
+        draw.text((x0 + k * (cell + gap) + (cell - text_w(draw, t, fl)) / 2,
                    y0 + 6 * (cell + gap) - gap + 5), t, font=fl, fill=FAINT)
 
 
@@ -816,7 +827,8 @@ def render_block(block, ana_dir, sets, spec, out_dir, args, grid, stats):
                 t_label="t = %.1f s" % (tt - t0c), speedup=speed, lit=sh, grid=grid,
                 die_note=args._die_note,
                 key={"cmap": "RdBu_r", "lo": -L, "hi": L, "signed": True,
-                     "caption": "difference from the cycle mean", "ends": ("cooler", "warmer")},
+                     "caption": args.key_caption or "difference from the cycle mean",
+                     "ends": ("cooler", "warmer")},
                 sched={"edges": edges, "sets": psets, "t": tt, "cycle_s": cycle_s,
                        "n_cycles": n_cycles},
                 foot=args.foot or "phase-averaged, 0.5 s bins, 2x2-binned pixels")
@@ -1175,11 +1187,13 @@ def set_svg(name, shires, grid, out_dir, mask=None, per=None):
          '<text x="%d" y="%d" font-family="%s" font-size="15" fill="%s">%s</text>'
          % (p, p + 42, fnt, mut, sub)]
     for r in range(6):
-        o.append('<text x="%d" y="%.1f" font-family="%s" font-size="13" fill="%s" text-anchor="end">r%d</text>'
-                 % (x0 - 8, y0 + r * (c + g) + c / 2 + 5, fnt, mut, r))
+        o.append('<text x="%d" y="%.1f" font-family="%s" font-size="13" fill="%s" text-anchor="end">%s</text>'
+                 % (x0 - 8, y0 + r * (c + g) + c / 2 + 5, fnt, mut,
+                    ("r%d" % r) if DIE_VIEW == "die" else ("c%d" % (6 - r))))
         for cc in range(6):
             kind, shire, text = cell_kind(grid[r][cc])
-            bx, by = x0 + cc * (c + g), y0 + r * (c + g)
+            sr, sc = die_pos(r, cc)
+            bx, by = x0 + sc * (c + g), y0 + sr * (c + g)
             on = kind == "shire" and shire in set(shires)
             if kind == "shire":
                 o.append('<rect x="%d" y="%d" width="%d" height="%d" rx="6" fill="%s" stroke="%s"/>'
@@ -1194,9 +1208,12 @@ def set_svg(name, shires, grid, out_dir, mask=None, per=None):
                         "#fff" if on else (mut if kind == "shire" else fnt_faint), text))
     for cc in range(6):
         o.append('<text x="%.1f" y="%.1f" font-family="%s" font-size="13" fill="%s" text-anchor="middle">'
-                 'c%d</text>' % (x0 + cc * (c + g) + c / 2, y0 + gw + 20, fnt, mut, cc + 1))
-    o.append('<text x="%d" y="%d" font-family="%s" font-size="13" fill="%s">r0 is the die\'s I/O edge; '
-             'hatched cells are not compute shires</text>' % (p, H - 6, fnt, mut))
+                 '%s</text>' % (x0 + cc * (c + g) + c / 2, y0 + gw + 20, fnt, mut,
+                                ("c%d" % (cc + 1)) if DIE_VIEW == "die" else ("r%d" % cc)))
+    o.append('<text x="%d" y="%d" font-family="%s" font-size="13" fill="%s">%s</text>'
+             % (p, H - 6, fnt, mut,
+                "r0 is the die's I/O edge; hatched cells are not compute shires" if DIE_VIEW == "die"
+                else "turned as the camera sees it: west to east runs up; hatched cells are not compute shires"))
     o.append('</svg>')
     path = os.path.join(out_dir, "sets", "%s.svg" % name)
     with open(path, "w") as fh:
@@ -1253,6 +1270,12 @@ def main(argv=None):
     ap.add_argument("--poster-at", type=float, default=None,
                     help="seconds into the cycle for the poster frame (default: the loudest frame)")
     ap.add_argument("--foot", default=None, help="override the footer line on the cycle movies")
+    ap.add_argument("--die-view", choices=("die", "camera"), default="die",
+                    help="draw the die map in its own frame (default) or turned as E62 measured the camera sees "
+                         "it (west to east up, north to south right; only valid for aifoundry2's camera mount)")
+    ap.add_argument("--key-caption", default=None,
+                    help="override the colour key's caption on the cycle movies (default: difference from the "
+                         "cycle mean); e.g. a bloom rendered as a cycle against its pre-step baseline")
     ap.add_argument("--contact", action="store_true", help="also write contact/<name>.png, 6 frames each")
     ap.add_argument("--skip-movies", action="store_true", help="stills and SVGs only")
     args = ap.parse_args(argv)
@@ -1292,7 +1315,11 @@ def main(argv=None):
     # it does: a set lit lower-left on the map can be the hot lobe at upper-right in the camera.
     _roll = first(ori, "roll_deg", "roll")
     _mir = (ori or {}).get("mirrored", (ori or {}).get("is_mirrored"))
-    if _roll is not None and (ori or {}).get("fitted") is not False:
+    global DIE_VIEW
+    DIE_VIEW = args.die_view
+    if DIE_VIEW == "camera":
+        args._die_note = CAMERA_DIE_NOTE
+    elif _roll is not None and (ori or {}).get("fitted") is not False:
         args._die_note = ("the camera sees this map rolled %.0f%s%s, not as drawn"
                           % (_roll, u"°", ", mirrored" if _mir else ""))
     else:

@@ -1,0 +1,1259 @@
+{
+ "tool": "analyze_hm.py",
+ "version": 1,
+ "red": "<scratch>/RED1c",
+ "protocol": "<scratch>/RED1c/protocol.json",
+ "experiment": "E62",
+ "bins": 2265,
+ "shape": [
+  96,
+  128
+ ],
+ "bin_s": 0.5,
+ "ffc_total": 225,
+ "bins_in_phases": 1842,
+ "phases": 46,
+ "block_labels": {
+  "session_labels": [
+   "E62-CAL",
+   "E62-ORBIT"
+  ],
+  "resolved": {
+   "E62-CAL": {
+    "label": "E62-CAL",
+    "how": "the protocol's own name",
+    "candidates": [
+     "E62-CAL",
+     "block0"
+    ]
+   },
+   "E62-ORBIT": {
+    "label": "E62-ORBIT",
+    "how": "the protocol's own name",
+    "candidates": [
+     "E62-ORBIT",
+     "block1"
+    ]
+   },
+   "E62-BLOOM": {
+    "label": null,
+    "how": null,
+    "candidates": [
+     "E62-BLOOM",
+     "block2"
+    ]
+   },
+   "E62-WE42": {
+    "label": null,
+    "how": null,
+    "candidates": [
+     "E62-WE42",
+     "block3"
+    ]
+   },
+   "E62-NS42": {
+    "label": null,
+    "how": null,
+    "candidates": [
+     "E62-NS42",
+     "block4"
+    ]
+   },
+   "E62-NULLAA": {
+    "label": null,
+    "how": null,
+    "candidates": [
+     "E62-NULLAA",
+     "block5"
+    ]
+   },
+   "E62-NULLGEO": {
+    "label": null,
+    "how": null,
+    "candidates": [
+     "E62-NULLGEO",
+     "block6"
+    ]
+   },
+   "E62-W8BE8B": {
+    "label": null,
+    "how": null,
+    "candidates": [
+     "E62-W8BE8B",
+     "block7"
+    ]
+   },
+   "E62-SWEEP": {
+    "label": null,
+    "how": null,
+    "candidates": [
+     "E62-SWEEP",
+     "block8"
+    ]
+   },
+   "E62-WE17": {
+    "label": null,
+    "how": null,
+    "candidates": [
+     "E62-WE17",
+     "block9"
+    ]
+   }
+  },
+  "unmatched_blocks": [
+   "E62-BLOOM",
+   "E62-WE42",
+   "E62-NS42",
+   "E62-NULLAA",
+   "E62-NULLGEO",
+   "E62-W8BE8B",
+   "E62-SWEEP",
+   "E62-WE17"
+  ],
+  "labels_nothing_claimed": [],
+  "note": "run_hm.py labels a phase with the block's `name` key or else `block<i>`: it reads neither `block` nor `id`, so a protocol naming blocks under either is logged positionally.  Resolved per block here and reported; the one-line fix belongs in the runner."
+ },
+ "knobs": {
+  "sigma": 1.2,
+  "median_size": 3,
+  "lobe_frac": 0.05,
+  "settle_s": 15.0,
+  "perms": 2000,
+  "gain": true,
+  "seed": 1,
+  "detrend_order": 1,
+  "detrend_trend": "block",
+  "detrend_settled": false,
+  "detrend_protect": false,
+  "movie_average": "mean",
+  "movie_uniform_stat": "mean",
+  "movie_keep_uniform": false
+ },
+ "gain": {
+  "found": false,
+  "why": "the bloom block ran no launch phase (label None)"
+ },
+ "orientation": {
+  "n_pairs": 0,
+  "excluded": [
+   {
+    "block": "E62-ORBIT",
+    "why": "5 arms: a dwell shorter than the arrival lag rotates a multi-arm dipole"
+   }
+  ],
+  "convention": "image x = column, y = row (down).  +col maps to (cos roll, sin roll); +row to (-sin roll, cos roll) * mirror.",
+  "fitted": false,
+  "why": "only 0 usable arm-pair displacements: E62-ORBIT 5 arms: a dwell shorter than the arrival lag rotates a multi-arm dipole"
+ },
+ "blocks": [
+  {
+   "block": "E62-CAL",
+   "block_label": "E62-CAL",
+   "block_label_how": "the protocol's own name",
+   "kind": "calibration",
+   "title": "Idle baseline, the hart-matched triple, and the power ladder",
+   "predicted": {
+    "what": "Board power linear in harts at 40.6 mW/hart (1.3 W per shire at per-shire 32): 5.2 / 10.4 / 15.6 / 20.8 / 41.6 W above a 23-25 W idle. The hart-matched triple at 128 harts (B4C 4x32, W8B_16 8x16, INT16_8 16x8) agrees within hp's own +/-0.5 W equivalence band, i.e. power follows harts and not geometry. Every board-power statistic here is the MEDIAN of the 10 Hz samples in the last 4.0 s of a launch, after device open, kernel load and the power ramp, and the within-arm scatter is reported beside the between-arm difference so the +/-0.5 W test has a stated power. Field drift 5-8 mK/s and at least one FFC in the 180 s pre-idle.",
+    "mk": null,
+    "direction": "no spatial claim; this block is the control for every later one",
+    "basis": "launch.md section 5 (the per-shire-count sweep is unmeasured on aifoundry2 and this settles it); hp/README.md's +/-0.5 W band, measured -0.21 W for INT16@32 vs PER16@32 at ~14 W",
+    "anchor": null
+   },
+   "pass_rule": "PASS if board power is linear in harts with the three 128-hart legs inside +/-0.5 W of each other (medians of the last 4.0 s of each launch) and mhz.minion reads 800 in every rung. SESSION GATE, with its window and its reference named: on the frame mean over the UNI32 rung PLUS the 30 s IDLE phase that follows it -- the peak of an 8.5 s step lands in that idle, because the registered arrival of a step on the back is 4-14 s -- measured against the mean of the 180 s pre-session idle, the rise must be at least 300 mK. Below that the camera is not seeing the card and the session stops here. (Version 1 asked for 'of order 500 mK' with no window and no reference: against the pre-ladder baseline the accumulated rise is about 1.7 K and passes easily, against the preceding INT16 rung the UNI32 increment is about 400 mK and fails -- the most expensive ambiguity in the file.) FRAME-EXTENT CHECK, from the same UNI32 monopole image and recorded before E62-ORBIT commits 12.9 min: the die footprint's pixel extent, the clipped-pixel fraction, and whether any regulator hot spot is in frame, each compared against PROTOCOL.md section 3's table. Everything in section 3 -- the dwell split, the clipping rule, the nominal 0.156 mm/px and section 9 item 8's claim that the regulators are out of frame -- rests on a lens distance PROTOCOL.md itself calls planned, and the camera is live and read-only, so this costs nothing.",
+   "detrend": {
+    "order": 1,
+    "levels": null,
+    "trends": 1,
+    "protected": false,
+    "fit_rows": 315,
+    "trend_rms_mk": 319684.206
+   },
+   "bins": 315,
+   "t_s": [
+    180.5,
+    337.88
+   ],
+   "dwell_s_realised": 8.47,
+   "dwell_s_planned": 8.5,
+   "drift_mk_per_s_median": 57.708,
+   "ffc_count": 43,
+   "warmup_rule": "the runner's own warmup flag (0 cycles dropped)",
+   "arms": [
+    "B4C",
+    "W8B_16",
+    "INT16_8",
+    "CEN8",
+    "W12",
+    "INT16",
+    "UNI32",
+    "E12",
+    "N12",
+    "S12"
+   ],
+   "n_arms": 10,
+   "cycles": 1,
+   "warmup_cycles": 0,
+   "n_cycles": 1,
+   "arm_order_per_cycle": [
+    [
+     "B4C",
+     "W8B_16",
+     "INT16_8",
+     "CEN8",
+     "W12",
+     "INT16",
+     "UNI32",
+     "W12",
+     "E12",
+     "N12",
+     "S12",
+     "S12",
+     "N12",
+     "E12",
+     "W12"
+    ]
+   ],
+   "arm_order_alternates": false,
+   "skipped": "only 1 usable cycles for 10 arms",
+   "steady_bins": [
+    [
+     8,
+     8,
+     8,
+     8,
+     25,
+     8,
+     8,
+     16,
+     16,
+     16
+    ]
+   ]
+  },
+  {
+   "block": "E62-ORBIT",
+   "block_label": "E62-ORBIT",
+   "block_label_how": "the protocol's own name",
+   "kind": "sequence",
+   "title": "The hero: heat walks the four corners of the die, then the middle",
+   "predicted": {
+    "what": "Each phase minus the five-phase cycle mean puts one warm lobe at that phase's own place, and the lobe steps round the board. The confirmatory statistics are the ten pairwise constant-power swaps: NW<->SE +153 mK over 21.015 mm (the longest travel this die offers), NE<->SW +136 mK over 18.596 mm, the four sides +81 to +112 mK, and the centre against each individual corner +61 to +77 mK -- quoted WITH the electrical correction below, never as a clean confirmation. Arrival lag 38 deg = 13.5 s at the 127.5 s lap. This block also measures, for free, the blur anisotropy r that E62-NS42's amplitude ratio needs: the lobe widths along the NW-NE baseline (15.372 mm, the W-E family) and the NW-SW baseline (14.800 mm, the N-S family) give it directly.",
+    "mk": 153.2,
+    "direction": "four lobes at four distinct image positions whose bearings span the plane, stepping round a CLOSED LOOP in the sense set by the fitted handedness k -- which E62-WE42 and E62-NS42 determine two and three blocks later, so neither a compass word nor a sense is claimed here -- and then collapsing to the middle. The two diagonal difference directions are 98.6 deg apart, NOT opposed: the IO/PCIe corner makes the four arms a trapezoid, not a rectangle.",
+    "basis": "the anchor scaled by centroid travel, switched watts and dwell: 372.9 mK x (travel / 10.012 mm) x (5.2 W / 14.40 W) x 0.542. Centroid travel from placements.py; no absolute mK in the chain.",
+    "anchor": {
+     "travel_mm": 21.015,
+     "switched_w": 5.2,
+     "dwell_s": 25.5,
+     "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+    }
+   },
+   "pass_rule": "PASS if the four corner phases land at four image positions that are mutually separated by more than 3x the per-cycle position scatter, their bearings span the plane, THE ANGLE BETWEEN THE NW-SE AND NE-SW DIAGONAL DIFFERENCE DIRECTIONS IS 98.6 +/- 12 DEG (not 180: the two diagonals of a quadrilateral are never opposed, and the IO/PCIe corner makes these four arms a trapezoid -- version 1's criterion demanded a geometry that correct data could only fail), every phase's board power is inside +/-0.3 W of the others, and every phase-minus-mean monopole is null (|card mean| < 25 mK, permutation p > 0.1). The signed falsifier is PROTOCOL.md section 7.7 check 3, the NE<->SW diagonal at 36.6 +/- 10 deg from the measured W->E direction. FAIL -- and the reading is 'the regulators, not the die' -- if the lobe does not move, or if the four positions collapse onto fewer than three distinct places. +/-0.3 W, tightened from +/-0.5 W, because B4C's own feature vector is (0, 0, 0, 0) against NW (1, 2, 0, 0), NE (2, 0, 2, 0), SE (1, 2, 0, 1) and SW (1, 2, 0, 0): the CENTRE arm is the most mismatched of the five, and the C-minus-corner dipoles are only +61 to +77 mK against the session's own ~34 mK price for an electrical half-die asymmetry. If the measured B4C-versus-corner power spread exceeds +/-0.3 W, the centre result is reported as EXPLORATORY alongside the ring statistic. The centre phase's radial contrast against the ring mean is exploratory in either case (DECISIONS section 4).",
+   "detrend": {
+    "order": 1,
+    "levels": null,
+    "trends": 1,
+    "protected": false,
+    "fit_rows": 1529,
+    "trend_rms_mk": 320595.264
+   },
+   "bins": 1529,
+   "t_s": [
+    367.89,
+    1132.62
+   ],
+   "dwell_s_realised": 25.478,
+   "dwell_s_planned": 25.5,
+   "drift_mk_per_s_median": -0.595,
+   "ffc_count": 154,
+   "warmup_rule": "the runner's own warmup flag (1 cycles dropped)",
+   "arms": [
+    "B4NW",
+    "B4NE",
+    "B4SE",
+    "B4SW",
+    "B4C"
+   ],
+   "n_arms": 5,
+   "cycles": 6,
+   "warmup_cycles": 1,
+   "n_cycles": 5,
+   "arm_order_per_cycle": [
+    [
+     "B4NW",
+     "B4NE",
+     "B4SE",
+     "B4SW",
+     "B4C"
+    ],
+    [
+     "B4NE",
+     "B4SE",
+     "B4SW",
+     "B4C",
+     "B4NW"
+    ],
+    [
+     "B4SE",
+     "B4SW",
+     "B4C",
+     "B4NW",
+     "B4NE"
+    ],
+    [
+     "B4SW",
+     "B4C",
+     "B4NW",
+     "B4NE",
+     "B4SE"
+    ],
+    [
+     "B4C",
+     "B4NW",
+     "B4NE",
+     "B4SE",
+     "B4SW"
+    ]
+   ],
+   "arm_order_alternates": true,
+   "cycles_used": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "phases": {
+    "B4NW": {
+     "pos_mean_mk": 373.0625631226779,
+     "neg_mean_mk": -347.9468317187182,
+     "grad_mk_per_px": [
+      -4.75197,
+      4.27215
+     ],
+     "grad_deg": 138.04,
+     "contrast_mk": 721.0093948413961,
+     "pos_centroid_px": [
+      21.984364472726075,
+      77.15917733491443
+     ],
+     "neg_centroid_px": [
+      110.51016406651244,
+      11.810464660536784
+     ],
+     "frame_mean_mk": -16.42813488683517,
+     "peak_mk": 432.2398376464844,
+     "frac": 0.05,
+     "dipole_px": [
+      -88.526,
+      65.349
+     ],
+     "dipole_len_px": 110.033,
+     "dipole_deg": 143.57,
+     "die_rc": [
+      0.5,
+      0.5
+     ],
+     "die_rc_convention": "0-based grid (row r0 = 0, column c1 = 0)"
+    },
+    "B4NE": {
+     "pos_mean_mk": 367.6717729599546,
+     "neg_mean_mk": -132.60514010202613,
+     "grad_mk_per_px": [
+      -2.40652,
+      -3.44124
+     ],
+     "grad_deg": -124.97,
+     "contrast_mk": 500.27691306198074,
+     "pos_centroid_px": [
+      35.349801678297176,
+      7.568744110470278
+     ],
+     "neg_centroid_px": [
+      105.76804494675905,
+      70.48847909270631
+     ],
+     "frame_mean_mk": 31.585272876334937,
+     "peak_mk": 443.0668029785156,
+     "frac": 0.05,
+     "dipole_px": [
+      -70.418,
+      -62.92
+     ],
+     "dipole_len_px": 94.433,
+     "dipole_deg": -138.22,
+     "die_rc": [
+      1.5,
+      4.5
+     ],
+     "die_rc_convention": "0-based grid (row r0 = 0, column c1 = 0)"
+    },
+    "B4SE": {
+     "pos_mean_mk": 339.0687316993937,
+     "neg_mean_mk": -227.3069107602396,
+     "grad_mk_per_px": [
+      3.31915,
+      -3.37127
+     ],
+     "grad_deg": -45.45,
+     "contrast_mk": 566.3756424596334,
+     "pos_centroid_px": [
+      102.95644834930937,
+      9.521771254118853
+     ],
+     "neg_centroid_px": [
+      20.480752285828952,
+      67.34107282981367
+     ],
+     "frame_mean_mk": -48.55265300534089,
+     "peak_mk": 412.02490234375,
+     "frac": 0.05,
+     "dipole_px": [
+      82.476,
+      -57.819
+     ],
+     "dipole_len_px": 100.724,
+     "dipole_deg": -35.03,
+     "die_rc": [
+      4.5,
+      4.5
+     ],
+     "die_rc_convention": "0-based grid (row r0 = 0, column c1 = 0)"
+    },
+    "B4SW": {
+     "pos_mean_mk": 343.4053989373123,
+     "neg_mean_mk": -285.85399704725035,
+     "grad_mk_per_px": [
+      3.90311,
+      3.9172
+     ],
+     "grad_deg": 45.1,
+     "contrast_mk": 629.2593959845626,
+     "pos_centroid_px": [
+      100.3937043056042,
+      78.32487846909218
+     ],
+     "neg_centroid_px": [
+      39.552832316932275,
+      12.945209649515556
+     ],
+     "frame_mean_mk": -11.367060653622806,
+     "peak_mk": 449.86151123046875,
+     "frac": 0.05,
+     "dipole_px": [
+      60.841,
+      65.38
+     ],
+     "dipole_len_px": 89.309,
+     "dipole_deg": 47.06,
+     "die_rc": [
+      4.5,
+      0.5
+     ],
+     "die_rc_convention": "0-based grid (row r0 = 0, column c1 = 0)"
+    },
+    "B4C": {
+     "pos_mean_mk": 193.87069965573787,
+     "neg_mean_mk": -68.89264622418034,
+     "grad_mk_per_px": [
+      -0.06377,
+      -1.37683
+     ],
+     "grad_deg": -92.65,
+     "contrast_mk": 262.76334587991823,
+     "pos_centroid_px": [
+      61.343689776082975,
+      34.20731038869382
+     ],
+     "neg_centroid_px": [
+      61.19916491339932,
+      87.03109386849358
+     ],
+     "frame_mean_mk": 44.76257609577673,
+     "peak_mk": 228.45742797851562,
+     "frac": 0.05,
+     "dipole_px": [
+      0.145,
+      -52.824
+     ],
+     "dipole_len_px": 52.824,
+     "dipole_deg": -89.84,
+     "die_rc": [
+      2.5,
+      2.5
+     ],
+     "die_rc_convention": "0-based grid (row r0 = 0, column c1 = 0)"
+    }
+   },
+   "contrast": [
+    "B4NW",
+    "B4SE"
+   ],
+   "contrast_die_offset": [
+    -4.0,
+    -4.0
+   ],
+   "contrast_shire_distance": 5.6569,
+   "pairs": {
+    "B4NW|B4NE": {
+     "pos_mean_mk": 393.03196706368016,
+     "neg_mean_mk": -481.5973870591154,
+     "grad_mk_per_px": [
+      -2.34545,
+      7.71339
+     ],
+     "grad_deg": 106.91,
+     "contrast_mk": 874.6293541227956,
+     "pos_centroid_px": [
+      25.983683141809212,
+      81.2647822178242
+     ],
+     "neg_centroid_px": [
+      51.56260589349226,
+      5.285968736214261
+     ],
+     "frame_mean_mk": -48.013407757078916,
+     "peak_mk": 578.2230224609375,
+     "frac": 0.05,
+     "dipole_px": [
+      -25.579,
+      75.979
+     ],
+     "dipole_len_px": 80.169,
+     "dipole_deg": 108.61,
+     "die_offset": [
+      -4.0,
+      -1.0
+     ],
+     "die_distance": 4.1231
+    },
+    "B4NW|B4SE": {
+     "pos_mean_mk": 591.5008293425221,
+     "neg_mean_mk": -679.7102004060528,
+     "grad_mk_per_px": [
+      -8.07111,
+      7.64342
+     ],
+     "grad_deg": 136.56,
+     "contrast_mk": 1271.211029748575,
+     "pos_centroid_px": [
+      21.0797226707059,
+      75.4216581893473
+     ],
+     "neg_centroid_px": [
+      106.44565135415074,
+      9.785599738100075
+     ],
+     "frame_mean_mk": 32.12451812531799,
+     "peak_mk": 759.7808837890625,
+     "frac": 0.05,
+     "dipole_px": [
+      -85.366,
+      65.636
+     ],
+     "dipole_len_px": 107.682,
+     "dipole_deg": 142.44,
+     "die_offset": [
+      -4.0,
+      -4.0
+     ],
+     "die_distance": 5.6569
+    },
+    "B4NW|B4SW": {
+     "pos_mean_mk": 503.59539317774073,
+     "neg_mean_mk": -530.2777802408324,
+     "grad_mk_per_px": [
+      -8.65507,
+      0.35495
+     ],
+     "grad_deg": 177.65,
+     "contrast_mk": 1033.873173418573,
+     "pos_centroid_px": [
+      17.30704268547638,
+      68.41798821957555
+     ],
+     "neg_centroid_px": [
+      114.82803680327281,
+      62.032264646068114
+     ],
+     "frame_mean_mk": -5.061074250028469,
+     "peak_mk": 684.3693237304688,
+     "frac": 0.05,
+     "dipole_px": [
+      -97.521,
+      6.386
+     ],
+     "dipole_len_px": 97.73,
+     "dipole_deg": 176.25,
+     "die_offset": [
+      0.0,
+      -4.0
+     ],
+     "die_distance": 4.0
+    },
+    "B4NW|B4C": {
+     "pos_mean_mk": 413.4903778672607,
+     "neg_mean_mk": -390.69368895490317,
+     "grad_mk_per_px": [
+      -4.6882,
+      5.64898
+     ],
+     "grad_deg": 129.69,
+     "contrast_mk": 804.1840668221639,
+     "pos_centroid_px": [
+      25.84444537389086,
+      80.13342801101506
+     ],
+     "neg_centroid_px": [
+      97.52477175617823,
+      17.331482844652385
+     ],
+     "frame_mean_mk": -61.19071088951508,
+     "peak_mk": 466.0168151855469,
+     "frac": 0.05,
+     "dipole_px": [
+      -71.68,
+      62.802
+     ],
+     "dipole_len_px": 95.3,
+     "dipole_deg": 138.78,
+     "die_offset": [
+      -2.0,
+      -2.0
+     ],
+     "die_distance": 2.8284
+    },
+    "B4NE|B4SE": {
+     "pos_mean_mk": 485.39588098184294,
+     "neg_mean_mk": -364.7647571874364,
+     "grad_mk_per_px": [
+      -5.72567,
+      -0.06997
+     ],
+     "grad_deg": -179.3,
+     "contrast_mk": 850.1606381692793,
+     "pos_centroid_px": [
+      29.308497068428075,
+      12.503932183163936
+     ],
+     "neg_centroid_px": [
+      111.53188229154397,
+      12.507062190830005
+     ],
+     "frame_mean_mk": 80.13792588132976,
+     "peak_mk": 557.6998901367188,
+     "frac": 0.05,
+     "dipole_px": [
+      -82.223,
+      -0.003
+     ],
+     "dipole_len_px": 82.223,
+     "dipole_deg": -180.0,
+     "die_offset": [
+      0.0,
+      -3.0
+     ],
+     "die_distance": 3.0
+    },
+    "B4NE|B4SW": {
+     "pos_mean_mk": 646.1575648404099,
+     "neg_mean_mk": -468.96310931774224,
+     "grad_mk_per_px": [
+      -6.30962,
+      -7.35844
+     ],
+     "grad_deg": -130.61,
+     "contrast_mk": 1115.1206741581523,
+     "pos_centroid_px": [
+      37.27431608418561,
+      9.338109553593156
+     ],
+     "neg_centroid_px": [
+      101.59400244894346,
+      76.59865916777345
+     ],
+     "frame_mean_mk": 42.95233367162291,
+     "peak_mk": 748.8255615234375,
+     "frac": 0.05,
+     "dipole_px": [
+      -64.32,
+      -67.261
+     ],
+     "dipole_len_px": 93.065,
+     "dipole_deg": -133.72,
+     "die_offset": [
+      4.0,
+      -3.0
+     ],
+     "die_distance": 5.0
+    },
+    "B4NE|B4C": {
+     "pos_mean_mk": 293.5680824304637,
+     "neg_mean_mk": -200.02616653690896,
+     "grad_mk_per_px": [
+      -2.34275,
+      -2.06441
+     ],
+     "grad_deg": -138.61,
+     "contrast_mk": 493.59424896737266,
+     "pos_centroid_px": [
+      26.99667231562441,
+      6.167527104864179
+     ],
+     "neg_centroid_px": [
+      78.70972663656345,
+      49.92692910006965
+     ],
+     "frame_mean_mk": -13.17730323059368,
+     "peak_mk": 368.73095703125,
+     "frac": 0.05,
+     "dipole_px": [
+      -51.713,
+      -43.759
+     ],
+     "dipole_len_px": 67.743,
+     "dipole_deg": -139.76,
+     "die_offset": [
+      2.0,
+      -1.0
+     ],
+     "die_distance": 2.2361
+    },
+    "B4SE|B4SW": {
+     "pos_mean_mk": 422.94076070878714,
+     "neg_mean_mk": -459.7489444595983,
+     "grad_mk_per_px": [
+      -0.58396,
+      -7.28847
+     ],
+     "grad_deg": -94.58,
+     "contrast_mk": 882.6897051683854,
+     "pos_centroid_px": [
+      86.0411704411468,
+      7.873373555919294
+     ],
+     "neg_centroid_px": [
+      88.94629831372919,
+      82.86493144242196
+     ],
+     "frame_mean_mk": -37.18559227317261,
+     "peak_mk": 526.9849853515625,
+     "frac": 0.05,
+     "dipole_px": [
+      -2.905,
+      -74.992
+     ],
+     "dipole_len_px": 75.048,
+     "dipole_deg": -92.22,
+     "die_offset": [
+      4.0,
+      0.0
+     ],
+     "die_distance": 4.0
+    },
+    "B4SE|B4C": {
+     "pos_mean_mk": 319.4591087316457,
+     "neg_mean_mk": -322.3520659406333,
+     "grad_mk_per_px": [
+      3.38291,
+      -1.99444
+     ],
+     "grad_deg": -30.52,
+     "contrast_mk": 641.811174672279,
+     "pos_centroid_px": [
+      104.37282029007133,
+      10.160923811942704
+     ],
+     "neg_centroid_px": [
+      47.064015660776874,
+      39.0842494125983
+     ],
+     "frame_mean_mk": -93.3152290880874,
+     "peak_mk": 437.0830383300781,
+     "frac": 0.05,
+     "dipole_px": [
+      57.309,
+      -28.923
+     ],
+     "dipole_len_px": 64.194,
+     "dipole_deg": -26.78,
+     "die_offset": [
+      2.0,
+      2.0
+     ],
+     "die_distance": 2.8284
+    },
+    "B4SW|B4C": {
+     "pos_mean_mk": 370.8541278652726,
+     "neg_mean_mk": -413.9732435394188,
+     "grad_mk_per_px": [
+      3.96687,
+      5.29403
+     ],
+     "grad_deg": 53.16,
+     "contrast_mk": 784.8273714046913,
+     "pos_centroid_px": [
+      102.56695985737115,
+      82.3775069817116
+     ],
+     "neg_centroid_px": [
+      46.84582484837656,
+      20.780544086664786
+     ],
+     "frame_mean_mk": -56.129636772559024,
+     "peak_mk": 515.9953002929688,
+     "frac": 0.05,
+     "dipole_px": [
+      55.721,
+      61.597
+     ],
+     "dipole_len_px": 83.06,
+     "dipole_deg": 47.87,
+     "die_offset": [
+      -2.0,
+      2.0
+     ],
+     "die_distance": 2.8284
+    }
+   },
+   "orient_eligible": false,
+   "diff_map": {
+    "pos_mean_mk": 591.5008317282611,
+    "neg_mean_mk": -679.7102029906034,
+    "grad_mk_per_px": [
+     -8.07111,
+     7.64342
+    ],
+    "grad_deg": 136.56,
+    "contrast_mk": 1271.2110347188645,
+    "pos_centroid_px": [
+     21.079722670048234,
+     75.42165818680631
+    ],
+    "neg_centroid_px": [
+     106.44565136313224,
+     9.785599765532327
+    ],
+    "frame_mean_mk": 32.1245178348654,
+    "peak_mk": 759.7808837890625,
+    "frac": 0.05,
+    "dipole_px": [
+     -85.366,
+     65.636
+    ],
+    "dipole_len_px": 107.682,
+    "dipole_deg": 142.44
+   },
+   "amp_mk": 1271.21,
+   "monopole_mk": 32.125,
+   "dipole_deg": 142.44,
+   "dipole_px": [
+    -85.366,
+    65.636
+   ],
+   "amp_proj_mk": 1271.21,
+   "amp_se_mk": 81.69,
+   "amp_t": 15.56,
+   "drift_leak": {
+    "arm_dt_s": 0.0,
+    "order_alternates": true,
+    "residual_drift_mk_s": 1.2589,
+    "leak_contrast_mk": 0.0,
+    "leak_proj_mk": 0.0,
+    "frac_of_amp": 0.0,
+    "note": "the arm order alternates, so the time offset averages to 0.0 s and a drift cannot masquerade as the dipole"
+   },
+   "p": 0.0005,
+   "p_floor": 0.001,
+   "perm": {
+    "scheme": "within",
+    "exact": false,
+    "n": 2000,
+    "null_sd_mk": 150.701,
+    "null_mean_mk": 425.1,
+    "at_floor": false
+   },
+   "amp_perm_obs_mk": 1271.21,
+   "amp_null_mean_mk": 425.1,
+   "amp_excess_mk": 846.11,
+   "amp_excess_sd": 5.61,
+   "p_unrestricted": 0.0005,
+   "p_unrestricted_floor": 0.001,
+   "perm_unrestricted": {
+    "scheme": "unrestricted",
+    "exact": false,
+    "n": 2000,
+    "null_sd_mk": 135.792,
+    "null_mean_mk": 385.755,
+    "at_floor": false
+   },
+   "amp_perm_obs_mk_unrestricted": 1271.21,
+   "p_min_cycles_for_0.05": null,
+   "p_min_cycles_for_0.01": null,
+   "p_primary": 0.0005,
+   "p_primary_scheme": "within",
+   "p_primary_note": null,
+   "cycle": {
+    "T": 255,
+    "cycle_s": 127.5,
+    "mode": "ring-aligned",
+    "lap_average": "mean",
+    "n_cycles": 5,
+    "phase_sets": [
+     "B4NW",
+     "B4NE",
+     "B4SE",
+     "B4SW",
+     "B4C"
+    ],
+    "cycles_dropped": 0,
+    "n_phases_used": 21,
+    "n_phases_skipped": 4,
+    "slot_n_phases": [
+     5,
+     4,
+     4,
+     4,
+     4
+    ],
+    "phases_used": [
+     "B4NW lap1.p0 after B4C @495.1 s",
+     "B4NW lap2.p0 after B4C @724.6 s",
+     "B4NW lap3.p0 after B4C @826.6 s",
+     "B4NW lap4.p0 after B4C @928.6 s",
+     "B4NW lap5.p0 after B4C @1030.8 s",
+     "B4NE lap1.p1 after B4NW @520.6 s",
+     "B4NE lap3.p1 after B4NW @852.2 s",
+     "B4NE lap4.p1 after B4NW @954.0 s",
+     "B4NE lap5.p1 after B4NW @1056.3 s",
+     "B4SE lap1.p2 after B4NE @546.1 s",
+     "B4SE lap2.p2 after B4NE @648.3 s",
+     "B4SE lap4.p2 after B4NE @979.6 s",
+     "B4SE lap5.p2 after B4NE @1081.7 s",
+     "B4SW lap1.p3 after B4SE @571.6 s",
+     "B4SW lap2.p3 after B4SE @673.7 s",
+     "B4SW lap3.p3 after B4SE @775.6 s",
+     "B4SW lap5.p3 after B4SE @1107.2 s",
+     "B4C lap1.p4 after B4SW @597.1 s",
+     "B4C lap2.p4 after B4SW @699.2 s",
+     "B4C lap3.p4 after B4SW @801.1 s",
+     "B4C lap4.p4 after B4SW @903.1 s"
+    ],
+    "phases_skipped": [
+     "B4NE lap2.p1 after B4C @622.7 s",
+     "B4SE lap3.p2 after B4NW @750.2 s",
+     "B4SW lap4.p3 after B4NE @877.6 s",
+     "B4C lap5.p4 after B4SE @1005.2 s"
+    ],
+    "skipped_why": [
+     "follows B4C, not the B4NW the cycle shows before it",
+     "follows B4NE, not the B4SE the cycle shows before it",
+     "follows B4NW, not the B4NE the cycle shows before it",
+     "follows B4SE, not the B4SW the cycle shows before it"
+    ],
+    "uniform_removed": true,
+    "uniform_stat": "mean",
+    "uniform_mk_range": [
+     -114.33,
+     109.92
+    ],
+    "uniform_removed_rms_mk": 45.02,
+    "residual_rms_mk": 157.33,
+    "note": "ring-aligned: 21 phases averaged over 5 analysed laps (5+4+4+4+4 per slot); 4 left out (follows B4C, not the B4NW the cycle shows before it, follows B4NE, not the B4SE the cycle shows before it, follows B4NW, not the B4NE the cycle shows before it, follows B4SE, not the B4SW the cycle shows before it)",
+    "phase_edges_s": [
+     0.0,
+     25.5,
+     51.0,
+     76.5,
+     102.0,
+     127.5
+    ],
+    "range_mk": 389.8
+   },
+   "tel": {
+    "B4NW": {
+     "board_w": {
+      "mean": 38.816,
+      "sd": 0.131,
+      "n": 5
+     },
+     "die_c": {
+      "mean": 60.997,
+      "sd": 0.006,
+      "n": 5
+     },
+     "minion_mhz": {
+      "mean": 800.0,
+      "sd": 0.0,
+      "n": 5
+     }
+    },
+    "B4NE": {
+     "board_w": {
+      "mean": 38.88,
+      "sd": 0.136,
+      "n": 5
+     },
+     "die_c": {
+      "mean": 60.566,
+      "sd": 0.466,
+      "n": 5
+     },
+     "minion_mhz": {
+      "mean": 800.0,
+      "sd": 0.0,
+      "n": 5
+     }
+    },
+    "B4SE": {
+     "board_w": {
+      "mean": 38.814,
+      "sd": 0.12,
+      "n": 5
+     },
+     "die_c": {
+      "mean": 60.597,
+      "sd": 0.487,
+      "n": 5
+     },
+     "minion_mhz": {
+      "mean": 800.0,
+      "sd": 0.0,
+      "n": 5
+     }
+    },
+    "B4SW": {
+     "board_w": {
+      "mean": 38.562,
+      "sd": 0.315,
+      "n": 5
+     },
+     "die_c": {
+      "mean": 60.759,
+      "sd": 0.384,
+      "n": 5
+     },
+     "minion_mhz": {
+      "mean": 796.585,
+      "sd": 6.829,
+      "n": 5
+     }
+    },
+    "B4C": {
+     "board_w": {
+      "mean": 39.182,
+      "sd": 0.105,
+      "n": 5
+     },
+     "die_c": {
+      "mean": 60.998,
+      "sd": 0.003,
+      "n": 5
+     },
+     "minion_mhz": {
+      "mean": 800.0,
+      "sd": 0.0,
+      "n": 5
+     }
+    }
+   },
+   "board_w_delta": 0.002,
+   "verdict_vars": {
+    "amp_mk": 1271.21,
+    "amp_excess_mk": 846.11,
+    "amp_excess_sd": 5.61,
+    "amp_proj_mk": 1271.21,
+    "amp_se_mk": 81.69,
+    "amp_t": 15.56,
+    "p": 0.0005,
+    "p_unrestricted": 0.0005,
+    "p_floor": 0.001,
+    "p_primary": 0.0005,
+    "monopole_mk": 32.125,
+    "n_cycles": 5,
+    "dipole_len_px": 107.682,
+    "drift_leak_mk": 0.0,
+    "ffc_count": 154,
+    "board_w_delta": 0.002
+   },
+   "verdict": null,
+   "verdict_note": "pass_rule is prose, not an expression, so this file does not judge it (invalid decimal literal (<unknown>, line 1)); the numbers beside it are the evidence"
+  },
+  {
+   "block": "E62-BLOOM",
+   "block_label": null,
+   "block_label_how": null,
+   "kind": "bloom",
+   "title": "The establishing shot: the whole board breathing, and the gain map",
+   "predicted": {
+    "what": "All 32 shires at per-shire 32 (1,024 harts, 41.6 W switched, 65-84 W board) against idle: +2,500 to +4,000 mK zero-to-peak on the back, visible raw in single frames with no difference imaging at all. A monopole, not a dipole -- which is the point: it is what a change in TOTAL power looks like, the thing every other block is built to avoid. Arrival of the step on the back 4-14 s after the compute starts (an upper bound, because the visualize preset's TNR=50 smears time). Delivers the per-pixel gain map that divides out the 12.4% of pixels that are shiny component tops. Die 51 -> about 60 C at this 33% duty; each on-phase is 42.5 s, inside DECISIONS' 60 s cap.",
+    "mk": 3100.0,
+    "direction": "a rise everywhere inside the die footprint, strongest at the centre, spreading outward",
+    "basis": "physics.md section 2's pattern-vs-idle table (ALL32, 2,651 mK at 40 s and 28.8 W, already scaled by K = 0.674) carried to 41.6 W, with the upper end as written and the lower end divided by the 572/373 gap between E61's undetrended and detrended arms",
+    "anchor": null
+   },
+   "pass_rule": "PASS if the frame mean rises by at least 1 K within each on-phase, in phase with board_w sampled at 10 Hz, and the whole-frame monopole is LARGE (that contrast with every swap's null monopole is the control). The gain map is accepted if the per-pixel rise has a signal-to-noise above 50 on at least 90% of pixels inside the die footprint. PER-CYCLE DIE GATE, registered now: the runner reads the die before and during every on-phase and ends it early via --stop-file at 64 C, logging the truncated dwell; the duty-cycle model (tau 143 s, fitted on DECISIONS' own 53 -> 62 C in 60 s) puts the three on-phase peaks at 60.3 / 62.1 / 62.8 C at 1.3 W per shire, so the gate should not fire. At the p90 reading of 1.9 W per shire it would fire on two of three cycles, which is what conventions.power_fallback branch 2 exists to prevent: above 45 W switched this block runs at --per-shire 24 with a 127.5 s off-phase (peaks 61.0 / 62.0 / 62.3 C). A governor step inside an on-phase would silently change the power during the one block that builds the per-pixel gain map applied to every other difference image, and would void both the +2,500-4,000 mK prediction and the 4-14 s arrival measurement. The frame-extent and regulator-in-frame check is E62-CAL's, done before this block, not assumed from the planned 60 mm lens distance.",
+   "bloom": {
+    "found": false,
+    "why": "the bloom block ran no launch phase (label None)"
+   },
+   "verdict_vars": {
+    "bloom_dt_p99_mk": null,
+    "bloom_dt_median_mk": null
+   },
+   "verdict": null,
+   "verdict_note": "pass_rule is prose, not an expression, so this file does not judge it (unterminated string literal (detected at line 1) (<unknown>, line 1)); the numbers beside it are the evidence",
+   "skipped": "no phases in the session for this block (tried ['E62-BLOOM', 'block2'])"
+  },
+  {
+   "block": "E62-WE42",
+   "block_label": null,
+   "block_label_how": null,
+   "kind": "swap",
+   "title": "Heat slides west to east: the hub's own 11 mm control, on the axis it was written for",
+   "predicted": {
+    "what": "+462 mK half-patch (1.24 x E61's measured +372.9 mK), peak-to-peak of the difference image about 1.7-2.0x that. Centroid travel 11.190 mm on the die's long W-E axis at 15.6 W, the strongest spatial signal of the session and the only one with a prediction written down by someone else. Arrival lag 47 deg = 11.0 s at the 85.0 s period. Visible in a single cycle at 14 sigma.",
+    "mk": 462.3,
+    "direction": "the image direction of the die's W->E axis; this block DEFINES it, and E62-NS42 must then come out 90 deg away",
+    "basis": "the anchor scaled by 11.190 mm / 10.012 mm, 15.6 W / 14.40 W and dwell factor 1.024. The hub's own control (thermal-camera-hub.md:350) predicts about 11 mm of movement for this swap.",
+    "anchor": {
+     "travel_mm": 11.19,
+     "switched_w": 15.6,
+     "dwell_s": 42.5,
+     "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+    }
+   },
+   "pass_rule": "PASS if the lobe moves: a dipole whose two extrema change sides with the mask, with the permutation null over the four analysed cycles giving p < 0.01; monopole |card mean| < 25 mK with p > 0.1. ORTHOGONAL-AXIS NULL, now defined from a reference this block does not itself set: the component |.| < 40 mK with p > 0.1 is measured perpendicular to the DIE FRAME fitted by E62-ORBIT, which runs earlier, and if that fit is unavailable, perpendicular to E61's measured 173.8 deg gradient on the same axis family. Version 1 took the orthogonal axis from this block's own measured dipole direction, which this block DEFINES -- so the component was zero by construction and the criterion tested nothing; read instead as the sensor's own x/y axes it would fail on a perfectly good result at an unmeasured camera roll near 45 deg. The arms' board power is logged at 10 Hz and the known by_io 0-vs-2 and by_ms 0-vs-2 mismatch of this pair is priced at about 34 mK (E61's 0.44 W half-die asymmetry) and quoted as a correction, never ignored. FAIL, reading 'the regulators, not the die', if the monopole is non-null or the lobe does not move.",
+   "skipped": "no phases in the session for this block (tried ['E62-WE42', 'block3'] against the labels the session wrote)"
+  },
+  {
+   "block": "E62-NS42",
+   "block_label": null,
+   "block_label_how": null,
+   "kind": "swap",
+   "title": "The same swap turned ninety degrees: the keystone",
+   "predicted": {
+    "what": "+306 mK (0.82 x E61), centroid travel 7.400 mm on the die's short N-S axis at the SAME 15.6 W, the same 24 shires and the same 384 harts as E62-WE42 -- only the partition changes. The CONFIRMATORY keystone is the 90 +/- 10 deg orthogonality, which is robust. The amplitude ratio is CONDITIONAL: predicted 0.661 x r, where 0.661 = 7.400 / 11.190 mm is pure geometry and r is the blur anisotropy between the die's short and long axes, measured for free by E62-ORBIT's lobe widths along its NW-SW and NW-NE baselines. The half-patch amplitude scales as travel / sigma_axis, so an anisotropic board shifts the ratio directly, and nothing in the readers' notes measures it -- a rectangular PCB with a heatsink bracket and edge connectors on one side is not obviously isotropic. 0.661 is quoted only as the isotropic special case. N12/S12 is also E61's own axis, so the image direction should land near E61's measured 173.8 deg gradient with the same sign.",
+    "mk": 305.7,
+    "direction": "90 deg from E62-WE42's measured direction, and within about 20 deg of E61's own 173.8 deg",
+    "basis": "the same anchor scaling; and the identity W12|E12 = N12|S12 = CORE24 (0x7777f6f6, asserted in placements.py and re-derived here), so card power, regulator dissipation, die temperature and clock are identical between this block and E62-WE42",
+    "anchor": {
+     "travel_mm": 7.4,
+     "switched_w": 15.6,
+     "dwell_s": 42.5,
+     "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+    }
+   },
+   "pass_rule": "PASS if the measured angle between this block's dipole direction and E62-WE42's is 90 +/- 10 deg -- the confirmatory keystone -- and the amplitude ratio to E62-WE42 is 0.661 x r +/- 0.08, with r the anisotropy measured by E62-ORBIT. The die's rows and columns are orthogonal by construction, and orthogonality survives a rotation, a mirror and a modest tilt, so if the two blocks land within 30 deg of each other that is geometrically impossible for the die and the signal is the power stages or a mask-to-position error. (Version 1's justification, 'a camera projection is a rotation and possibly a mirror', is true only for a fronto-parallel camera: a 30 deg tilt moves two orthogonal die axes to about 82 deg apart. That still passes 90 +/- 10, so the test stands and only the stated reason was wrong.) Same monopole, orthogonal-axis, board-meter and permutation nulls as E62-WE42.",
+   "skipped": "no phases in the session for this block (tried ['E62-NS42', 'block4'] against the labels the session wrote)"
+  },
+  {
+   "block": "E62-NULLAA",
+   "block_label": null,
+   "block_label_how": null,
+   "kind": "control",
+   "title": "The instrumental null: the same mask in both arms",
+   "predicted": {
+    "what": "Zero, with no appeal to geometry at all -- the two arms are the SAME mask at the same per-shire, so the drive never changes and the prediction is zero by construction rather than by a blur model. It runs at E62-WE42's own dwell, power and set, and it now runs SIXTH, before E62-NULLGEO, E62-W8BE8B and E62-SWEEP, so the measured floor exists before the blocks whose published error bars and whose detectability depend on it (version 1 ran it tenth of ten). Four analysed laps on the quadratically balanced 8-phase order give a 2 sigma bound of 27 mK, 5.8% of E62-WE42's prediction. It is reduced TWICE: over all four analysed laps (the clean sigma every error bar uses), and over its first two analysed laps on the 4-phase order -- the exact configuration of every two-lap block in the session -- so the residual quadratic drift leak those blocks carry is bounded by a matched null rather than argued away.",
+    "mk": 0.0,
+    "direction": "none",
+    "basis": "E61's null was a permutation -- a relabelling of real data. This is a physical null: a real repeat with nothing swapped. It is the only control whose zero does not depend on the die map being right, so if E62-NULLGEO ever comes out non-null this block separates 'the instrument' from 'the die map'.",
+    "anchor": {
+     "travel_mm": 0.0,
+     "switched_w": 15.6,
+     "dwell_s": 42.5,
+     "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+    },
+    "bound_2sigma_mk": 27.0
+   },
+   "pass_rule": "PASS if the half-patch statistic is 0 +/- 27.0 mK (2 sigma over the four analysed laps at the registered 27 mK floor). Analysed through exactly E62-WE42's pipeline, including its sign order and its detrend, so the two are directly comparable; and again over its first two analysed laps alone, for the matched two-lap bound. Any non-zero result is the instrument or the analysis, and it is subtracted from nothing: it is reported as the honest floor under every other number, and the measured value REPLACES the 27 mK prior in every error bar and every SNR on the page.",
+   "skipped": "no phases in the session for this block (tried ['E62-NULLAA', 'block5'] against the labels the session wrote)"
+  },
+  {
+   "block": "E62-NULLGEO",
+   "block_label": null,
+   "block_label_how": null,
+   "kind": "control",
+   "title": "The pair that must show nothing",
+   "predicted": {
+    "what": "Zero. Twelve shires against their own 180 deg rotation about the die centre: the same 15.6 W, the same 384 harts, zero shire overlap, centroid separation exactly 0.000 mm, and -- because a point reflection preserves every EVEN moment -- identical radial profiles, so the camera's own radial post-shutter drift (corners warming against the centre by about 140 mK over 20 s) cancels by symmetry rather than by argument. The only modelled residual is from the arms' higher odd moments: 0.0077 x E62-WE42 = 3.5 mK at this dwell, far below the floor. Two analysed laps at the registered 27 mK floor give a 2 sigma bound of 38.2 mK, 8.3% of E62-WE42's prediction.",
+    "mk": 0.0,
+    "direction": "none; a difference image indistinguishable from the pre-session idle baseline",
+    "basis": "derived here: the point reflection (r,c) -> (5-r, 7-c) partitions CORE24 into exactly 12 orbits, and taking one member of each gives P whose complement is P rotated 180 deg. Matched on all four features placements.py records (mem_side 4/4, ns_edge 0/0, by_io 1/1, by_ms 1/1) and maximally interleaved, so it looks like it should show something. Blur-model radial fraction 0.000.",
+    "anchor": {
+     "travel_mm": 0.0,
+     "switched_w": 15.6,
+     "dwell_s": 42.5,
+     "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+    },
+    "bound_2sigma_mk": 38.2
+   },
+   "pass_rule": "PASS if the half-patch statistic is 0 +/- 38.2 mK (2 sigma over the two analysed laps at the registered 27 mK floor, 8.3% of E62-WE42's prediction) whichever way the patch is cut, the gradient has no preferred direction, and the monopole is null. This block is the empirical bound for the whole set, covering what a permutation null cannot reach: FFC steps, non-linear field drift, and the camera's radial warm-up. If it shows a dipole, every number in the swap blocks is suspect and the session's conclusion is about the instrument, not the chip -- and E62-NULLAA, which runs BEFORE it, separates 'the instrument' from 'the die map'. Raising this block to cycles 5 (four analysed laps, the quadratically balanced 8-phase order, a 27 mK bound) is the first item in the slack queue; at two analysed laps it carries the same residual quadratic leak as every other two-lap block, which is why E62-NULLAA is reduced twice (see conventions.sign_orders.note).",
+   "skipped": "no phases in the session for this block (tried ['E62-NULLGEO', 'block6'] against the labels the session wrote)"
+  },
+  {
+   "block": "E62-W8BE8B",
+   "block_label": null,
+   "block_label_how": null,
+   "kind": "swap",
+   "title": "The fully feature-matched replicate of the same axis",
+   "predicted": {
+    "what": "+334 mK (0.90 x E61) at 10.4 W, centroid travel 12.123 mm -- slightly LARGER than W12/E12's 11.190 mm. Predicted ratio to E62-WE42 0.722; the quantity that must agree between the two blocks is the reduced one, mK per watt per millimetre of travel. Direction identical to E62-WE42's.",
+    "mk": 333.9,
+    "direction": "identical to E62-WE42's measured W->E direction",
+    "basis": "placements.py asserts the by_io / by_ms / mem_side / ns_edge balance ONLY for the 8-shire mirror pairs. physics.md:582's claim that W12/E12 'matches memory-side and IO-adjacency counts by construction' is WRONG and is corrected here: W12/E12 differ on by_io (0 vs 2) and by_ms (0 vs 2), because E12 holds the shires beside the IO/PCIe and master/spare cells. W8b/E8b is matched on all five features. This block is therefore the arbiter of the headline and the sharpest available test of physics.md's open question 6.",
+    "anchor": {
+     "travel_mm": 12.123,
+     "switched_w": 10.4,
+     "dwell_s": 42.5,
+     "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+    }
+   },
+   "pass_rule": "PASS if the direction agrees with E62-WE42's within 10 deg AND the reduced amplitude (mK per watt per mm of travel) agrees within 15%: the adjacency mismatch is then proved harmless and the headline stands. If they disagree, THIS is the number to trust and E62-WE42's headline is reported with the electrical-asymmetry correction stated. Second, registered now: the two arms' board power must differ by LESS than the +/-0.5 W band hp's own README registered, since this pair is matched by construction on exactly the features that would cause an asymmetry -- if 0.44 W survives here it is the CARD, not the mask pair.",
+   "skipped": "no phases in the session for this block (tried ['E62-W8BE8B', 'block7'] against the labels the session wrote)"
+  },
+  {
+   "block": "E62-SWEEP",
+   "block_label": null,
+   "block_label_how": null,
+   "kind": "sequence",
+   "title": "A front of heat sweeping across the die, one column at a time -- and the ruler it provides",
+   "predicted": {
+    "what": "A 4 x 2 block of shires slides one column at a time: five phases of exactly 8 shires, mean die row 2.500 in all five, mean column 1.5 / 2.5 / 3.5 / 4.5 / 5.5, four perfectly even 3.730 mm steps, and every phase an exact one-column translate of phase 1. One step +32.5 mK (averaged only: 1.2 sigma per lap and 2.7 over five at the registered 27 mK floor, which is why it is registered as an average and never as a per-lap result); end to end 14.920 mm and +130 mK at 4.8 sigma per lap. Phase 3 is the registered CEN8 and sits exactly on the sweep centroid, so its FIRST MOMENT against the five-phase mean is exactly zero BY CONSTRUCTION -- but the image residual is NOT: the mean of five translates of a pattern is a comb-smeared pattern, not the pattern at the centre, and in this design's own blur model phase 3 minus the five-phase mean carries a predicted +8 to +20 mK centre-positive, wing-negative RADIAL term (+12 mK at the 17.0 s model FWHM of 39.2 mm, +20 mK at E61's measured 30 mm, +8 mK at 47.1 mm). That is below the 27 mK floor, so the middle frame reads blank WITHIN NOISE -- which is the honest form of version 1's 'predicted EXACTLY ZERO'. Arrival lag 47 deg = 11.0 s at the 85.0 s lap.",
+    "mk": 129.9,
+    "direction": "parallel to E62-WE42's measured W->E direction within 10 deg; the five image positions collinear and evenly spaced, four points on a straight line with 2 df of residual",
+    "basis": "the anchor scaled as everywhere else; and the structural tie, re-derived here: the five phases' union is EXACTLY W12 u E12 = CORE24, and phase 3 IS the registered CEN8 (0x04647010). The sweep is the hub's 11 mm control taken apart into five steps. mm per pixel comes from registering PAIRWISE difference images against each other -- (phase1-phase2) against (phase2-phase3), which ARE exact translates under convolution and so invariant to the 12 s thermal lag -- never from phase-minus-cycle-mean images, which are not translates, and never from a lobe separation, because cam_reduce.py measured that failure (a synthetic 9 px move read 41.9 px).",
+    "anchor": {
+     "travel_mm": 14.92,
+     "switched_w": 10.4,
+     "dwell_s": 17.0,
+     "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+    }
+   },
+   "pass_rule": "PASS if the matched-filter position advances MONOTONICALLY in one image direction by a constant step -- the observable that distinguishes sliding from jumping, and the finding this block rests on -- the end-to-end displacement equals the sum of the four steps within 2 sigma, the direction is parallel to E62-WE42's within 10 deg, and every phase's board power is within +/-0.5 W of the others. Phase 3's statistic is pre-registered NOW in the form that is genuinely zero: its MATCHED-FILTER POSITION sits at the sequence centroid. Its image amplitude is predicted at +8 to +20 mK of centre-positive radial residual, below the floor, so 'blank' means blank within noise and is reported as corroboration of the monotone advance, never as a radial finding (the residual is 77-85% radial in the blur model). The half-patch form is blind here by construction and is not used. A fixed source cannot walk: if the position does not advance, the reading is 'the regulators, not the die'.",
+   "skipped": "no phases in the session for this block (tried ['E62-SWEEP', 'block8'] against the labels the session wrote)"
+  },
+  {
+   "block": "E62-WE17",
+   "block_label": null,
+   "block_label_how": null,
+   "kind": "swap",
+   "title": "The same swap twice as fast: sharper lobes, and the transfer slope",
+   "predicted": {
+    "what": "+146 mK (0.39 x E61) on the identical masks and the identical 15.6 W, at 17.0 s instead of 42.5 s. The measurement is the RATIO to E62-WE42, predicted 0.316, i.e. a local log-log transfer slope of 1.26 between 17.0 and 42.5 s. Blur FWHM 39 mm against 47 mm, so the difference image's lobes sit 33 mm apart instead of 40 mm and read as two lobes rather than one sliding blob. Arrival lag 74 deg = 7.0 s at the 34.0 s period: with the 127.5 s and 85.0 s laps this gives THREE lock-in drive periods (127.5 / 85.0 / 34.0 s) spanning 1.94x in sqrt(f), plus E62-BLOOM's direct step response as a fourth point, for the lag fit.",
+    "mk": 146.2,
+    "direction": "identical to E62-WE42's, since the masks are identical -- a free replicate of the orientation",
+    "basis": "the hub's transfer table read dwell-indexed and log-log interpolated, 50.1 mK/W at 17.0 s against 158.5 at 42.5 s. The design does NOT claim this settles physics.md's period-versus-dwell octave: a locally power-law table gives nearly the same dwell-to-dwell ratio under either reading, so the octave is a desk job (rerun the model behind the hub's table) and no number here depends on it.",
+    "anchor": {
+     "travel_mm": 11.19,
+     "switched_w": 15.6,
+     "dwell_s": 17.0,
+     "formula": "372.9 mK x (travel_mm / 10.012) x (switched_w / 14.40) x (transfer(dwell_s) / transfer(41.7 s))"
+    }
+   },
+   "pass_rule": "PASS if the measured amplitude ratio to E62-WE42 is 0.25-0.40 and the measured direction agrees with E62-WE42's within 15 deg (the dipole's geometry must not move with dwell, only its contrast). Four analysed laps realise the 8-phase Sylvester order A B B A B A A B, balanced through the quadratic term, which is what this smaller signal needs. Same monopole, orthogonal-axis and board-meter nulls as E62-WE42. This block is also the geometry-legible one: at this dwell the blur narrows from 47 mm to 39 mm, so the difference image reads as two lobes rather than one sliding blob. No pixel figure is quoted here, because mm/px is unmeasured and conventions.mm_per_px forbids a decision rule reading one. Note on the ratio's own width: the registered 0.25-0.40 band was computed for a 42.5 s realised dwell; the transfer row is recomputed from the realised dwells of BOTH blocks before this rule is read, so a long realised dwell cannot push the ratio onto the edge of its own band.",
+   "skipped": "no phases in the session for this block (tried ['E62-WE17', 'block9'] against the labels the session wrote)"
+  }
+ ],
+ "elapsed_s": 3.64
+}
