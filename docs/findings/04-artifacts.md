@@ -1259,3 +1259,18 @@ one review of the set's structure, and wrote the plan (`PLAN2.md`); page owners 
 - **The spacesheep viewer does not pass its `#…` into the page** (30 September): a link such as
   `/@yaroslavvb/et-soc1-memory-levels#dram/load` opens the page's default view; the raw address
   `https://<uuid>.spacesheep.app/#…` keeps it. Link to a view with the raw address.
+- **Movies on a page: no native video controls over a burnt-in key** (22 October 2026, E62). A paused
+  `<video controls>` gets the browser's control bar and a dark gradient over its bottom 60–90 px, which is where
+  `tools/claims-v3/hm/render_hm.py` burns the key, the schedule strip and the timeline; on a phone the bar (play, 0:00,
+  menu) covers them outright. The HTML looks fine; a full-page screenshot shows it at once. The E62 page
+  (`docs/reports/2026-10-21-heat-movies/`) keeps `controls` in its HTML for readers without scripts, and its script
+  swaps them for one play/pause button over the picture: each movie plays muted on a loop while half of it is on
+  screen, pauses when scrolled away, and starts nothing under reduced motion.
+- **A page with a stream reads blank in screenshots** (22 October 2026): the MCP `screenshot` tool loads the raw
+  address, where a stream cannot play and the player says so ("Can't show thermal/p3"). Check the stream itself with
+  the MCP `streams` tool and its `path` (the last values say `live: true`). Such a page is served with the host's
+  streams client right after its `<meta name="ss-streams">` tag, which `check-mirror.py` removes since 22 October.
+- **`check-mirror.py` needs CA certificates** (22 October 2026): python.org's macOS framework builds (the Intel's
+  `python3`, 3.7.9) ship without a CA bundle until their `Install Certificates.command` runs, and then every page reads
+  `unreachable` with `CERTIFICATE_VERIFY_FAILED`, which looks like an outage. On a Mac, run it with
+  `SSL_CERT_FILE=/etc/ssl/cert.pem`.
