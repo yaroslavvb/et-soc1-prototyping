@@ -455,7 +455,8 @@ aifoundry3 takes over after 90 minutes without new data, and a watchdog outside 
 <div id="leg-sess"></div>
 <div id="ch-sess" class="mult"></div>
 
-<h2 id="worklog">Worklog</h2>
+<details class="wl-box" id="worklog-box">
+<summary><h2 id="worklog">Worklog</h2> <span class="small wl-hint">tap to open</span></summary>
 <p class="small wl-up"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard" target="_top">AI Foundry lab dashboard</a> › Worklog</p>
 <p class="small">What was done in the lab, newest day first; every line opens the page it was written up on, and the
 lab's own day pages link back here. All of it is 2026.</p>
@@ -483,6 +484,11 @@ lab's own day pages link back here. All of it is 2026.</p>
 .wl-l .wl-t{display:block;padding:5px 0}
 .wl-l .td-due{color:var(--bad,#b3261e);font-weight:650}
 .wl-up{margin:2px 0 0}
+/* the whole Worklog is folded by default, the owner's ask of Wed 21 Oct 2026; script.js opens it on #worklog */
+details.wl-box>summary{cursor:pointer}
+details.wl-box>summary h2{display:inline-block;margin-bottom:6px}
+.wl-hint{color:var(--ink-2,#555)}
+details.wl-box[open] .wl-hint{display:none}
 details.wl-old{margin-top:4px}
 details.wl-old>summary{cursor:pointer;font-size:13.5px;color:var(--ink-2,#555);padding:6px 0}
 details.wl-old .wl-row{border-top:1px solid var(--line,#ddd)}
@@ -610,6 +616,8 @@ details.wl-old .wl-row{border-top:1px solid var(--line,#ddd)}
   </ul></div>
  </details>
 </div>
+
+</details>
 
 <h2 id="todo">todo:</h2>
 <p class="small wl-up"><a href="#worklog">Worklog</a> &#8250; todo:</p>

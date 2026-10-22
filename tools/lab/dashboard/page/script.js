@@ -1839,3 +1839,13 @@
   window.addEventListener('hashchange', () => { if (/^#(focus|card)=/.test(location.hash)) focusOn(location.hash, true); });
   startTimers();
 })();
+
+// The Worklog is folded by default (the owner's ask, Wed 21 Oct 2026). Open it when the address asks for it,
+// so the day pages' back links (…/aifoundry-lab-dashboard#worklog) and the section list still land on it open.
+(function () {
+  function openWorklog() {
+    if (location.hash === "#worklog") { var d = document.getElementById("worklog-box"); if (d) d.open = true; }
+  }
+  window.addEventListener("hashchange", openWorklog);
+  openWorklog();
+})();
