@@ -63,7 +63,7 @@ DIE_NOTE = "this map is the die's own frame, not the camera's view"
 # mirrored: west->east runs UP the picture, north->south runs RIGHT), so a lit corner on the map sits where its heat
 # appears in the camera panel. Die cell (row r, col index c 0..5) goes to screen row 5-c, screen column r.
 DIE_VIEW = "die"
-CAMERA_DIE_NOTE = "die turned to match the camera: west to east runs up, north to south runs right"
+CAMERA_DIE_NOTE = "camera's view: west to east up, north to south right"   # fits the frame's two lines
 
 
 def die_pos(r, c):

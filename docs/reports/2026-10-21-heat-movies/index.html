@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heat follows the work: ET-SoC-1 heat movies (E62)</title>
+<meta name="description" content="Moving compute between chosen shires of an ET-SoC-1 at constant total power, filmed from behind the circuit board.">
+<meta name="ss-streams" content="thermal/p3" data-press="editors">
+<style>
+:root{--bg:#ffffff;--card:#ffffff;--line:#dfe4ec;--ink:#18202b;--muted:#4a5462;--accent:#a63f1c;
+--font-head:Charter,'Bitstream Charter','Sitka Text',Cambria,serif;
+--font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--font-body)}
+h1,h2{font-family:var(--font-head);font-weight:700}
+*{box-sizing:border-box}
+body{margin:0;font-size:17.5px;line-height:1.58}
+.page{max-width:1000px;margin:0 auto;padding:0 clamp(16px,4vw,32px) 64px}
+.text{max-width:40em}
+header{padding:40px 0 8px}
+h1{font-size:clamp(30px,6vw,44px);line-height:1.12;margin:0 0 10px;text-wrap:balance}
+h2{font-size:clamp(22px,3.6vw,28px);line-height:1.2;margin:52px 0 12px;text-wrap:balance}
+.lede{font-size:19px;margin:0 0 10px}
+.meta{font-size:14.5px;color:var(--muted);margin:0}
+a{color:var(--accent)}
+p{margin:0 0 14px}
+p[data-ss-id="nav-lab-dashboard"]{font-size:14.5px;margin:0 0 14px}
+p[data-ss-id="nav-lab-dashboard"] a,.jump a{color:var(--muted);display:inline-block;padding:11px 5px;margin:-11px 0}
+.jump{font-size:14.5px;margin:18px 0 0;line-height:2.2}
+.jump a{color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:26px 0 8px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.tile .v{font-family:var(--font-head);font-size:clamp(26px,5vw,34px);font-weight:700;line-height:1.1;color:var(--accent)}
+.tile .v.q{color:var(--ink)}
+.tile .l{font-size:14.5px;margin-top:4px}
+.tile .s{font-size:14px;color:var(--muted);margin-top:4px}
+figure{margin:18px 0 26px}
+figure video{display:block;width:100%;height:auto;aspect-ratio:4/5;
+max-width:min(100%,620px,calc(78vh * 0.8));margin-left:auto;margin-right:auto;
+background:#f6f8fa;border:1px solid var(--line);border-radius:6px}
+figcaption{font-size:14.5px;color:var(--muted);margin-top:7px;max-width:46em}
+.chart{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin:18px 0 8px}
+.chart .k{font-size:14px;color:var(--muted);font-weight:600;margin-bottom:10px;max-width:46em}
+.chart svg{display:block;width:100%;height:auto}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+.two figure{margin:8px 0 10px}
+ul.plain{padding-left:20px;max-width:46em}
+ul.plain li{margin:0 0 9px}
+.links a{display:inline-block;padding:11px 5px;margin:-11px 0}
+.bar{display:grid;grid-template-columns:minmax(160px,17em) 1fr;gap:4px 14px;align-items:center;margin:0 0 8px}
+.bar .n{font-size:14.5px}
+.bar .n b{display:block;font-size:15px;color:var(--accent);font-variant-numeric:tabular-nums}
+.bar .n b.q{color:var(--muted)}
+.bar .track{position:relative;height:26px}
+.bar .fill{position:absolute;top:2px;height:22px;border-radius:3px;background:#c8ccd4}
+.bar .fill.hi{background:var(--accent)}
+.bar .fill.out{background:#f1f3f7;border:1.2px dashed #b4bbc6}
+.bar .val{position:absolute;top:3px;font-size:14.5px;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:700;white-space:nowrap}
+.dots{margin:0}
+.dots .track{height:36px;border-top:1px solid #eef1f5}
+.dot{position:absolute;top:18px;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;border-radius:50%;background:var(--accent);opacity:.85}
+.dot.q{background:#8e97a6;opacity:1}
+.zero{position:absolute;top:0;bottom:0;width:1px;background:var(--ink)}
+.ticks{position:relative;height:24px}
+.ticks span{position:absolute;transform:translateX(-50%);font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.axnote{font-size:14px;color:var(--muted);margin-top:10px;max-width:46em}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:4px 14px;font-size:14.5px;margin-top:10px}
+.legend b{color:var(--ink)}
+.legend span{color:var(--muted)}
+.lims{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:16px;margin:4px 0 2px}
+.lim{text-align:center;font-size:14.5px}
+.lim svg{width:100%;max-width:118px;height:auto;margin:6px auto}
+.lim .s{color:var(--muted)}
+.live{position:relative}
+.live video{position:relative;display:block;width:100%;max-width:100%;height:auto;aspect-ratio:4/3;
+margin:0;background:#f6f8fa;border:1px solid var(--line);border-radius:6px}
+.livemsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+font-size:15px;color:var(--muted)}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:14.5px;color:var(--muted)}
+@media (max-width:640px){body{font-size:17px}
+figure video{max-width:min(100%,calc(70vh * 0.8))}
+.bar{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header data-ss-id="section-header">
+  <h1 data-ss-id="heading-title">You can see where a chip is thinking from the back of its circuit board</h1>
+  <p data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">&#8592; AI Foundry lab dashboard</a> &#8250; <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a></p>
+  <p class="lede text" data-ss-id="para-lede">A thermal camera sits behind an ET-SoC-1 accelerator card. Move 128 of its 1,024 hardware threads from one corner of the die to another every 25 seconds, and the warm patch on the board walks with them.</p>
+  <p class="meta text" data-ss-id="para-meta">Thermal Master P3 behind the card; two sessions, 390 heater launches, 71.1 minutes of card time, none failed. Every movie is a difference image, never a raw frame: the swaps against their opposite half, the orbit and the sweep against their lap&#8217;s own average, the bloom against the idle before each load step. The panel burnt into each frame says <i>harts</i>, the chip&#8217;s own word for hardware threads.</p>
+</header>
+
+<section id="s-hero" data-ss-id="section-hero" data-ss-section>
+  <figure data-ss-id="fig-hero" data-ss-thumb>
+    <video src="img/orbit.mp4" poster="img/orbit-poster.jpg" autoplay muted loop playsinline controls width="768" height="960" aria-label="Thermal movie: the warm patch walks the die&#8217;s four corners clockwise, five laps, then collapses into the middle."></video>
+    <figcaption data-ss-id="cap-hero">128 threads in each of four corner blocks of the die, then the centre; 25 s a position, five laps at 10&#215; real time. The die map in each frame is turned to match the camera; colours are the difference from that lap&#8217;s average, red warmer. The corners saturate the shared &#177;400 mK scale and the centre, a fifth their size, reads nearly blank. The key burnt into the frame runs off its bottom edge &#8212; the whole of it is in the next paragraph.</figcaption>
+  </figure>
+  <h2 data-ss-id="heading-hero">Move the work round the four corners and the heat walks with it</h2>
+  <div class="text">
+    <p data-ss-id="para-hero">The camera sees the die rolled about a right angle, not mirrored: west&#8594;east runs <b>up</b> the picture, north&#8594;south runs <b>right</b>. So the corners read NW lower left, NE upper left, SE upper right, SW lower right &#8212; and the warm patch walks them <b>clockwise</b>, in all five laps, before collapsing into the middle.</p>
+  </div>
+</section>
+
+<section id="s-kpis" data-ss-id="section-kpis" data-ss-section>
+  <div class="tiles">
+    <div class="tile" data-ss-id="tile-swap"><div class="v">+525 &#177; 22 mK</div><div class="l">the board&#8217;s warm half changes ends when the work does</div><div class="s">west&#8596;east swap, 192 threads a side, constant total power, 4 of 4 laps (post hoc)</div></div>
+    <div class="tile" data-ss-id="tile-hero"><div class="v">p = 0.0005</div><div class="l">the four-corner walk against its own permutation null</div><div class="s">+846 mK of excess contrast, 5.6 sd; 2,000 label shuffles, and not at the test&#8217;s floor</div></div>
+    <div class="tile" data-ss-id="tile-angle"><div class="v">94&#176; apart</div><div class="l">the same 24 shires split the other way turn the picture through a right angle</div><div class="s">first moment; 91.6&#8211;98.7&#176; across three estimators and every drop-one-lap combination; the registered band was 90 &#177; 10&#176;</div></div>
+    <div class="tile" data-ss-id="tile-null"><div class="v q">+4 &#177; 11 mK</div><div class="l">the same pipeline with nothing swapped</div><div class="s">identical mask in both arms, 4 laps (post hoc) &#8212; under 1% of the real swap</div></div>
+  </div>
+  <p class="jump" data-ss-id="nav-sections" data-ss-react="off"><a href="#s-compass">The compass</a> &#183; <a href="#s-halves">The swap</a> &#183; <a href="#s-controls">The controls</a> &#183; <a href="#s-sweep">The sweep</a> &#183; <a href="#s-bloom">The bloom</a> &#183; <a href="#s-power">Power</a> &#183; <a href="#s-limits">Limits</a> &#183; <a href="#s-method">Method</a></p>
+</section>
+
+<section id="s-compass" data-ss-id="section-compass" data-ss-section>
+  <h2 data-ss-id="heading-compass">Four corners, four quadrants &#8212; and a centre near zero that its own power rule makes exploratory</h2>
+  <div class="chart" data-ss-id="chart-compass">
+    <div class="k">Where each block&#8217;s heat lands &#8212; on the die&#8217;s own compass, not the camera&#8217;s view above, which is rolled a right angle. Ticks every 100 mK.</div>
+    <svg viewBox="0 0 400 400" role="img" aria-label="Compass chart: the four corner blocks land in four separate quadrants of the die - NW 206 mK west and 323 mK north, NE 176 mK east and 173 mK north, SE 165 mK east and 229 mK south, SW 202 mK west and 281 mK south - while the centre block sits near the origin at 66 mK east and 14 mK north."><rect x="0" y="0" width="400" height="400" fill="#fff"/><line x1="35" y1="175" x2="345" y2="175" stroke="#c8ccd4" stroke-width="1.2"/><line x1="190" y1="35" x2="190" y2="320" stroke="#c8ccd4" stroke-width="1.2"/><line x1="154" y1="171" x2="154" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="226" y1="171" x2="226" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="118" y1="171" x2="118" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="262" y1="171" x2="262" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="82" y1="171" x2="82" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="298" y1="171" x2="298" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="139" x2="194" y2="139" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="211" x2="194" y2="211" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="103" x2="194" y2="103" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="247" x2="194" y2="247" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="67" x2="194" y2="67" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="283" x2="194" y2="283" stroke="#c8ccd4" stroke-width="1.2"/><text x="30" y="181" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="end" font-weight="700">west</text><text x="350" y="181" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="start" font-weight="700">east</text><text x="190" y="26" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="middle" font-weight="700">north</text><text x="190" y="344" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="middle" font-weight="700">south</text><line x1="101.8" y1="58.7" x2="129.8" y2="58.7" stroke="#a63f1c" stroke-width="1.8"/><line x1="115.8" y1="46.5" x2="115.8" y2="70.9" stroke="#a63f1c" stroke-width="1.8"/><circle cx="115.8" cy="58.7" r="7" fill="#a63f1c"/><text x="115.8" y="34" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">NW</text><line x1="244.8" y1="112.7" x2="262.0" y2="112.7" stroke="#a63f1c" stroke-width="1.8"/><line x1="253.4" y1="102.3" x2="253.4" y2="123.1" stroke="#a63f1c" stroke-width="1.8"/><circle cx="253.4" cy="112.7" r="7" fill="#a63f1c"/><text x="253.4" y="88" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">NE</text><line x1="236.4" y1="257.4" x2="262.4" y2="257.4" stroke="#a63f1c" stroke-width="1.8"/><line x1="249.4" y1="246.2" x2="249.4" y2="268.6" stroke="#a63f1c" stroke-width="1.8"/><circle cx="249.4" cy="257.4" r="7" fill="#a63f1c"/><text x="249.4" y="289" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">SE</text><line x1="105.4" y1="276.2" x2="129.2" y2="276.2" stroke="#a63f1c" stroke-width="1.8"/><line x1="117.3" y1="264.3" x2="117.3" y2="288.1" stroke="#a63f1c" stroke-width="1.8"/><circle cx="117.3" cy="276.2" r="7" fill="#a63f1c"/><text x="117.3" y="308" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">SW</text><line x1="200.5" y1="170.0" x2="227.1" y2="170.0" stroke="#8e97a6" stroke-width="1.8"/><line x1="213.8" y1="160.3" x2="213.8" y2="179.7" stroke="#8e97a6" stroke-width="1.8"/><circle cx="213.8" cy="170.0" r="7" fill="#8e97a6"/><text x="234" y="152" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="start" font-weight="700">centre</text></svg>
+    <div class="legend" data-ss-id="legend-compass"><div><b>NW</b> <span>206 west &#183; 323 north</span></div><div><b>NE</b> <span>176 east &#183; 173 north</span></div><div><b>SE</b> <span>165 east &#183; 229 south</span></div><div><b>SW</b> <span>202 west &#183; 281 south</span></div><div><b>centre</b> <span>66 east &#183; 14 north</span></div></div>
+    <div class="axnote">Mean &#177; standard error over five laps, in mK, post hoc.</div>
+  </div>
+  <div class="text">
+    <p data-ss-id="para-compass">Positions are read along templates built from the <i>other</i> session&#8217;s blocks, and two independent fits of the die&#8217;s direction agree to within 2.5&#176;. Post hoc, like the shutter cleaning behind them.</p>
+    <p data-ss-id="para-compass-fail">Two clauses of the hero&#8217;s own pass rule failed, and that belongs here. The five positions&#8217; board power spread <b>0.620 W</b> where the rule allowed 0.3, and the centre drew the most &#8212; so <b>the centre reading is exploratory</b>; its electrical correction is 23&#8211;48 mK against centre-to-corner dipoles of 217&#8211;381 mK. And each phase&#8217;s frame average reached 86 mK where the rule allowed 25 &#8212; but it flips sign when the shutter cleaning changes while the moving lobe does not, so it is the camera&#8217;s shutter, not the card&#8217;s regulators.</p>
+  </div>
+</section>
+
+<section id="s-halves" data-ss-id="section-halves" data-ss-section>
+  <h2 data-ss-id="heading-halves">Split the same 24 shires the other way and the picture turns a right angle</h2>
+  <div class="two">
+  <figure data-ss-id="fig-we42">
+    <video src="img/we42.mp4" poster="img/we42-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: twelve shires west against twelve east, the warm half swapping sides every 42.5 seconds."></video>
+    <figcaption data-ss-id="cap-we42">Twelve shires west, then twelve east: 192 threads either way, 42.5 s a side. Heat arrives about 11 s late, so just after each switch the picture still shows the half that has gone quiet. Tap any movie here to play it.</figcaption>
+  </figure>
+  <figure data-ss-id="fig-ns42">
+    <video src="img/ns42.mp4" poster="img/ns42-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: the same twenty-four shires split north against south, the warm half swapping top to bottom."></video>
+    <figcaption data-ss-id="cap-ns42">The same 24 shires split north against south instead.</figcaption>
+  </figure>
+  </div>
+  <div class="chart" data-ss-id="chart-laps">
+    <div class="k">Same sign in all ten swap laps; both controls sit on zero &#8212; all five contrasts post hoc, read along the other session&#8217;s templates</div>
+    <div class="bar dots"><div class="n">west &#8596; east swap<b>+525 &#177; 22 mK</b></div><div class="track"><span class="zero" style="left:18.75%"></span><span class="dot" style="left:91.875%"></span><span class="dot" style="left:84.625%"></span><span class="dot" style="left:81.25%"></span><span class="dot" style="left:79.875%"></span></div></div>
+    <div class="bar dots"><div class="n">north &#8596; south swap<b>+511 &#177; 7 mK</b></div><div class="track"><span class="zero" style="left:18.75%"></span><span class="dot" style="left:84.875%"></span><span class="dot" style="left:81.5%"></span><span class="dot" style="left:83.125%"></span><span class="dot" style="left:80.875%"></span></div></div>
+    <div class="bar dots"><div class="n">matched replicate, 8 shires (post hoc)<b>+415 &#177; 135 mK</b></div><div class="track"><span class="zero" style="left:18.75%"></span><span class="dot" style="left:53.625%"></span><span class="dot" style="left:87.5%"></span></div></div>
+    <div class="bar dots"><div class="n">null: same mask in both arms<b class="q">+4 &#177; 11 mK</b></div><div class="track"><span class="zero" style="left:18.75%"></span><span class="dot q" style="left:20.125%"></span><span class="dot q" style="left:20.375%"></span><span class="dot q" style="left:21.5%"></span><span class="dot q" style="left:15.25%"></span></div></div>
+    <div class="bar dots"><div class="n">null: 12 shires vs their rotation<b class="q">&#8722;8 &#177; 9 mK</b></div><div class="track"><span class="zero" style="left:18.75%"></span><span class="dot q" style="left:18.875%"></span><span class="dot q" style="left:16.625%"></span></div></div>
+    <div class="bar"><div class="n"></div><div class="ticks"><span style="left:6.25%">&#8722;100</span><span style="left:18.75%">0</span><span style="left:43.75%">+200</span><span style="left:68.75%">+400</span><span style="left:93.75%">+600</span></div></div>
+    <div class="axnote">Contrast along the block&#8217;s own axis, in mK &#8212; one dot per analysed lap.</div>
+  </div>
+  <div class="text">
+    <p data-ss-id="para-halves">Moving 192 threads from the die&#8217;s west twelve shires to its east twelve at constant total power moves the warm half by <b>+525 &#177; 22 mK</b> (post hoc) &#8212; same sign in every lap, in both swap directions. Split the same shires north against south and the picture turns a right angle, which two fixed power stages drawing the same 43 W cannot do.</p>
+  </div>
+</section>
+
+<section id="s-controls" data-ss-id="section-controls" data-ss-section>
+  <h2 data-ss-id="heading-controls">The same pipeline with nothing to find, and it found nothing</h2>
+  <div class="text">
+    <p data-ss-id="para-nulls">A permutation p is no use here: four laps give sixteen ways to flip the labels, so the registered within-lap null cannot return below 0.125 however large the signal. The controls answer instead by size.</p>
+  </div>
+  <div class="two">
+  <figure data-ss-id="fig-nullaa">
+    <video src="img/nullaa.mp4" poster="img/nullaa-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: the control with the identical shire mask in both arms, showing no swapping pattern."></video>
+    <figcaption data-ss-id="cap-nullaa">Control: the identical mask in <i>both</i> arms &#8212; the compute never changes.</figcaption>
+  </figure>
+  <figure data-ss-id="fig-nullgeo">
+    <video src="img/nullgeo.mp4" poster="img/nullgeo-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: the control with twelve shires against their own 180 degree rotation, showing no swapping pattern."></video>
+    <figcaption data-ss-id="cap-nullgeo">Control: twelve shires against their own 180&#176; rotation, same power, same centre &#8212; measured in a quiet four-minute window, so the bound that governs the two-lap blocks comes from the louder instrumental null beside it, not from this one.</figcaption>
+  </figure>
+  </div>
+  <figure data-ss-id="fig-w8be8b">
+    <video src="img/w8be8b.mp4" poster="img/w8be8b-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: the feature-matched replicate, eight shires west against eight east."></video>
+    <figcaption data-ss-id="cap-w8be8b">The feature-matched replicate, eight shires a side. <b>Post hoc</b>, its dipole points 87.1&#176; against the headline swap&#8217;s 89.2&#176; &#8212; uncleaned it points &#8722;21.9&#176;, about 112&#176; away, so the agreement is the cleaning&#8217;s doing. Its size stays open. All five swap movies share one &#177;400 mK scale, which the strongest frames clip.</figcaption>
+  </figure>
+</section>
+
+<section id="s-sweep" data-ss-id="section-sweep" data-ss-section>
+  <h2 data-ss-id="heading-sweep">Slide the work one column east and the warm patch slides with it</h2>
+  <figure data-ss-id="fig-sweep">
+    <video src="img/sweep.mp4" poster="img/sweep-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: eight running shires sliding one column at a time from the west of the die to the east, five laps."></video>
+    <figcaption data-ss-id="cap-sweep">Eight shires sliding one column at a time, 17 s a position, five laps averaged. The two end positions clip the shared &#177;400 mK scale.</figcaption>
+  </figure>
+  <div class="chart" data-ss-id="chart-sweep">
+    <div class="k">The five positions march west to east, as the eight running shires slide one column at a time</div>
+    <svg viewBox="0 0 460 310" role="img" aria-label="Five-point chart: as the running block of eight shires slides one column east, its contrast along the west-east template marches from plus 253 mK through plus 179 and plus 49 to minus 187 and minus 294 mK."><rect x="0" y="0" width="460" height="310" fill="#fff"/><line x1="70" y1="88" x2="440" y2="88" stroke="#eef1f5" stroke-width="1"/><line x1="70" y1="192" x2="440" y2="192" stroke="#eef1f5" stroke-width="1"/><line x1="70" y1="140" x2="440" y2="140" stroke="#18202b" stroke-width="1.2"/><text x="62" y="94" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="21" fill="#4a5462" text-anchor="end" font-weight="400">+200</text><text x="62" y="146" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="21" fill="#4a5462" text-anchor="end" font-weight="400">0</text><text x="62" y="198" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="21" fill="#4a5462" text-anchor="end" font-weight="400">&#8722;200</text><path d="M110,74.2 L185,93.5 L260,127.3 L335,188.6 L410,216.4" fill="none" stroke="#a63f1c" stroke-width="2.2" stroke-opacity="0.45"/><line x1="110" y1="68.2" x2="110" y2="80.2" stroke="#a63f1c" stroke-width="1.8"/><circle cx="110" cy="74.2" r="7.5" fill="#a63f1c"/><text x="110" y="56" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="23" fill="#18202b" text-anchor="middle" font-weight="700">+253</text><text x="110" y="276" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="21" fill="#4a5462" text-anchor="middle" font-weight="400">SCAN1</text><line x1="185" y1="90.6" x2="185" y2="96.4" stroke="#a63f1c" stroke-width="1.8"/><circle cx="185" cy="93.5" r="7.5" fill="#a63f1c"/><text x="185" y="76" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="23" fill="#18202b" text-anchor="middle" font-weight="700">+179</text><text x="185" y="276" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="21" fill="#4a5462" text-anchor="middle" font-weight="400">SCAN2</text><line x1="260" y1="119.2" x2="260" y2="135.4" stroke="#a63f1c" stroke-width="1.8"/><circle cx="260" cy="127.3" r="7.5" fill="#a63f1c"/><text x="260" y="106" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="23" fill="#18202b" text-anchor="middle" font-weight="700">+49</text><text x="260" y="276" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="21" fill="#4a5462" text-anchor="middle" font-weight="400">CEN8</text><line x1="335" y1="185.2" x2="335" y2="192.0" stroke="#a63f1c" stroke-width="1.8"/><circle cx="335" cy="188.6" r="7.5" fill="#a63f1c"/><text x="335" y="215" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="23" fill="#18202b" text-anchor="middle" font-weight="700">&#8722;187</text><text x="335" y="276" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="21" fill="#4a5462" text-anchor="middle" font-weight="400">SCAN4</text><line x1="410" y1="210.4" x2="410" y2="222.4" stroke="#a63f1c" stroke-width="1.8"/><circle cx="410" cy="216.4" r="7.5" fill="#a63f1c"/><text x="410" y="243" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="23" fill="#18202b" text-anchor="middle" font-weight="700">&#8722;294</text><text x="410" y="276" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="21" fill="#4a5462" text-anchor="middle" font-weight="400">SCAN5</text><text x="110" y="300" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="21" fill="#18202b" text-anchor="middle" font-weight="700">west</text><text x="410" y="300" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="21" fill="#18202b" text-anchor="middle" font-weight="700">east</text></svg>
+    <div class="axnote">Post-hoc half-patch contrast along the west&#8211;east template, in mK, mean over five laps.</div>
+  </div>
+  <p class="text" data-ss-id="para-sweep">The matched-filter position advances in the same order in the averaged run &#8212; one chance in 120 &#8212; and, on the cleaned frames, in every one of the five laps; without the cleaning, in three of five. The card&#8217;s total draw spreads 0.391 W across the five, and on the perpendicular axis all five sit within &#177;21 mK. Positions post hoc.</p>
+</section>
+
+<section id="s-bloom" data-ss-id="section-bloom" data-ss-section>
+  <h2 data-ss-id="heading-bloom">Turn the whole chip on and the whole board glows &#8212; this is what every other movie cancels</h2>
+  <figure data-ss-id="fig-bloom">
+    <video src="img/bloom.mp4" poster="img/bloom-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: all thirty-two shires switching on and off, the whole board warming and cooling together."></video>
+    <figcaption data-ss-id="cap-bloom">All 32 shires on for 42 s, then idle for 127 s, three cycles at 12&#215; real time, on a &#177;8,000 mK scale against the swaps&#8217; &#177;400.</figcaption>
+  </figure>
+  <div class="text">
+    <p data-ss-id="para-bloom">Switch every shire on &#8212; 768 threads, about <b>+39 W</b> measured &#8212; and the frame mean rises <b>+7.1 K in 42 s</b>, half of it within <b>14.8 s</b>. That is a change in <i>total</i> power, the one thing the swaps are built to cancel: their whole-frame means sit between &#8722;79 and +94 mK, this one at +7,100 mK.</p>
+    <p data-ss-id="para-bloom-honesty">Honestly: the governor stepped the clock in every on-phase and the die reached 69 &#176;C, because the registered 64 &#176;C gate was keyed to 1,024 threads and the amendment ran 768. The clean power law would have drawn 49 W here, and the governor is why it did not. Nothing was unsafe, but the arrival time is an upper bound, not the registered measurement.</p>
+  </div>
+</section>
+
+<section id="s-power" data-ss-id="section-power" data-ss-section>
+  <h2 data-ss-id="heading-power">Power follows how many threads run, not where they run</h2>
+  <div class="chart" data-ss-id="chart-power">
+    <div class="k">Switched board watts by thread count, above a 22.69 W idle</div>
+    <div class="bar"><div class="n">128 threads &#183; 4 shires &#215; 32</div><div class="track"><span class="fill hi" style="width:22.12%"></span><span class="val" style="left:calc(22.12% + 8px)">+12.75 W</span></div></div>
+    <div class="bar"><div class="n">128 threads &#183; 8 shires &#215; 16</div><div class="track"><span class="fill hi" style="width:22.56%"></span><span class="val" style="left:calc(22.56% + 8px)">+13.00 W</span></div></div>
+    <div class="bar"><div class="n">128 threads &#183; 16 shires &#215; 8</div><div class="track"><span class="fill hi" style="width:23.01%"></span><span class="val" style="left:calc(23.01% + 8px)">+13.26 W</span></div></div>
+    <div class="bar"><div class="n">256 threads</div><div class="track"><span class="fill" style="width:34.70%"></span><span class="val" style="left:calc(34.70% + 8px)">+20.0 W</span></div></div>
+    <div class="bar"><div class="n">384 threads</div><div class="track"><span class="fill" style="width:46.33%"></span><span class="val" style="left:calc(46.33% + 8px)">+26.7 W</span></div></div>
+    <div class="bar"><div class="n">512 threads</div><div class="track"><span class="fill" style="width:60.21%"></span><span class="val" style="left:calc(60.21% + 8px)">+34.7 W</span></div></div>
+    <div class="bar"><div class="n">1,024 threads &#8212; throttled, off the line</div><div class="track"><span class="fill out" style="width:76%"></span><span class="val" style="left:calc(76% + 8px)">+43.8 W</span></div></div>
+    <div class="axnote">Rust bars are the three shapes that run the same 128 threads in different places on the die.</div>
+  </div>
+  <p class="text" data-ss-id="para-power">Three shapes of 128 threads draw <b>0.51 W apart</b> &#8212; a hair outside the half-watt the plan allowed, and not proof of anything either way: the legs ran in ascending order and carry 0.8&#8211;1.1 W of warm-up drift. Corrected for that drift they agree to 0.37 W and the order reverses. The ladder fits <b>5.80 &#177; 0.30 W plus 55.8 &#177; 1.0 mW a thread</b>, not 40.6 mW from zero. Those six watts of waking up never move with the work: they brighten every picture and shift none.</p>
+</section>
+
+<section id="s-limits" data-ss-id="section-limits" data-ss-section>
+  <h2 data-ss-id="heading-limits">The board blurs heat over 3&#8211;5 cm, so there is no shape and no scale bar</h2>
+  <figure data-ss-id="fig-limits">
+    <div class="lims">
+      <div class="lim"><div>one shire</div><svg viewBox="0 0 120 170" role="img" aria-label="One running shire on the die arrives at the camera as a single broad blob."><rect x="0" y="0" width="120" height="170" fill="#fff"/><g stroke="#dfe4ec" stroke-width="1"><rect x="18" y="6" width="13" height="13" fill="#eef1f5"/><rect x="32" y="6" width="13" height="13" fill="#eef1f5"/><rect x="46" y="6" width="13" height="13" fill="#eef1f5"/><rect x="60" y="6" width="13" height="13" fill="#eef1f5"/><rect x="74" y="6" width="13" height="13" fill="#eef1f5"/><rect x="88" y="6" width="13" height="13" fill="#eef1f5"/><rect x="18" y="20" width="13" height="13" fill="#eef1f5"/><rect x="32" y="20" width="13" height="13" fill="#eef1f5"/><rect x="46" y="20" width="13" height="13" fill="#eef1f5"/><rect x="60" y="20" width="13" height="13" fill="#eef1f5"/><rect x="74" y="20" width="13" height="13" fill="#eef1f5"/><rect x="88" y="20" width="13" height="13" fill="#eef1f5"/><rect x="18" y="34" width="13" height="13" fill="#eef1f5"/><rect x="32" y="34" width="13" height="13" fill="#eef1f5"/><rect x="46" y="34" width="13" height="13" fill="#a63f1c"/><rect x="60" y="34" width="13" height="13" fill="#eef1f5"/><rect x="74" y="34" width="13" height="13" fill="#eef1f5"/><rect x="88" y="34" width="13" height="13" fill="#eef1f5"/><rect x="18" y="48" width="13" height="13" fill="#eef1f5"/><rect x="32" y="48" width="13" height="13" fill="#eef1f5"/><rect x="46" y="48" width="13" height="13" fill="#eef1f5"/><rect x="60" y="48" width="13" height="13" fill="#eef1f5"/><rect x="74" y="48" width="13" height="13" fill="#eef1f5"/><rect x="88" y="48" width="13" height="13" fill="#eef1f5"/><rect x="18" y="62" width="13" height="13" fill="#eef1f5"/><rect x="32" y="62" width="13" height="13" fill="#eef1f5"/><rect x="46" y="62" width="13" height="13" fill="#eef1f5"/><rect x="60" y="62" width="13" height="13" fill="#eef1f5"/><rect x="74" y="62" width="13" height="13" fill="#eef1f5"/><rect x="88" y="62" width="13" height="13" fill="#eef1f5"/><rect x="18" y="76" width="13" height="13" fill="#eef1f5"/><rect x="32" y="76" width="13" height="13" fill="#eef1f5"/><rect x="46" y="76" width="13" height="13" fill="#eef1f5"/><rect x="60" y="76" width="13" height="13" fill="#eef1f5"/><rect x="74" y="76" width="13" height="13" fill="#eef1f5"/><rect x="88" y="76" width="13" height="13" fill="#eef1f5"/></g><path d="M60,98 L60,113 M54,107 L60,114 L66,107" fill="none" stroke="#4a5462" stroke-width="1.8"/><circle cx="60" cy="142" r="26" fill="#a63f1c" fill-opacity="0.10"/><circle cx="60" cy="142" r="17" fill="#a63f1c" fill-opacity="0.22"/><circle cx="60" cy="142" r="9" fill="#a63f1c" fill-opacity="0.45"/></svg><div class="s">one broad blob</div></div>
+      <div class="lim"><div>a row of shires</div><svg viewBox="0 0 120 170" role="img" aria-label="A whole row of running shires on the die arrives at the camera as the same broad blob."><rect x="0" y="0" width="120" height="170" fill="#fff"/><g stroke="#dfe4ec" stroke-width="1"><rect x="18" y="6" width="13" height="13" fill="#eef1f5"/><rect x="32" y="6" width="13" height="13" fill="#eef1f5"/><rect x="46" y="6" width="13" height="13" fill="#eef1f5"/><rect x="60" y="6" width="13" height="13" fill="#eef1f5"/><rect x="74" y="6" width="13" height="13" fill="#eef1f5"/><rect x="88" y="6" width="13" height="13" fill="#eef1f5"/><rect x="18" y="20" width="13" height="13" fill="#eef1f5"/><rect x="32" y="20" width="13" height="13" fill="#eef1f5"/><rect x="46" y="20" width="13" height="13" fill="#eef1f5"/><rect x="60" y="20" width="13" height="13" fill="#eef1f5"/><rect x="74" y="20" width="13" height="13" fill="#eef1f5"/><rect x="88" y="20" width="13" height="13" fill="#eef1f5"/><rect x="18" y="34" width="13" height="13" fill="#a63f1c"/><rect x="32" y="34" width="13" height="13" fill="#a63f1c"/><rect x="46" y="34" width="13" height="13" fill="#a63f1c"/><rect x="60" y="34" width="13" height="13" fill="#a63f1c"/><rect x="74" y="34" width="13" height="13" fill="#a63f1c"/><rect x="88" y="34" width="13" height="13" fill="#a63f1c"/><rect x="18" y="48" width="13" height="13" fill="#eef1f5"/><rect x="32" y="48" width="13" height="13" fill="#eef1f5"/><rect x="46" y="48" width="13" height="13" fill="#eef1f5"/><rect x="60" y="48" width="13" height="13" fill="#eef1f5"/><rect x="74" y="48" width="13" height="13" fill="#eef1f5"/><rect x="88" y="48" width="13" height="13" fill="#eef1f5"/><rect x="18" y="62" width="13" height="13" fill="#eef1f5"/><rect x="32" y="62" width="13" height="13" fill="#eef1f5"/><rect x="46" y="62" width="13" height="13" fill="#eef1f5"/><rect x="60" y="62" width="13" height="13" fill="#eef1f5"/><rect x="74" y="62" width="13" height="13" fill="#eef1f5"/><rect x="88" y="62" width="13" height="13" fill="#eef1f5"/><rect x="18" y="76" width="13" height="13" fill="#eef1f5"/><rect x="32" y="76" width="13" height="13" fill="#eef1f5"/><rect x="46" y="76" width="13" height="13" fill="#eef1f5"/><rect x="60" y="76" width="13" height="13" fill="#eef1f5"/><rect x="74" y="76" width="13" height="13" fill="#eef1f5"/><rect x="88" y="76" width="13" height="13" fill="#eef1f5"/></g><path d="M60,98 L60,113 M54,107 L60,114 L66,107" fill="none" stroke="#4a5462" stroke-width="1.8"/><circle cx="60" cy="142" r="26" fill="#a63f1c" fill-opacity="0.10"/><circle cx="60" cy="142" r="17" fill="#a63f1c" fill-opacity="0.22"/><circle cx="60" cy="142" r="9" fill="#a63f1c" fill-opacity="0.45"/></svg><div class="s">the same broad blob</div></div>
+      <div class="lim"><div>a checkerboard</div><svg viewBox="0 0 120 170" role="img" aria-label="A checkerboard of running shires on the die arrives at the camera as nothing at all."><rect x="0" y="0" width="120" height="170" fill="#fff"/><g stroke="#dfe4ec" stroke-width="1"><rect x="18" y="6" width="13" height="13" fill="#a63f1c"/><rect x="32" y="6" width="13" height="13" fill="#eef1f5"/><rect x="46" y="6" width="13" height="13" fill="#a63f1c"/><rect x="60" y="6" width="13" height="13" fill="#eef1f5"/><rect x="74" y="6" width="13" height="13" fill="#a63f1c"/><rect x="88" y="6" width="13" height="13" fill="#eef1f5"/><rect x="18" y="20" width="13" height="13" fill="#eef1f5"/><rect x="32" y="20" width="13" height="13" fill="#a63f1c"/><rect x="46" y="20" width="13" height="13" fill="#eef1f5"/><rect x="60" y="20" width="13" height="13" fill="#a63f1c"/><rect x="74" y="20" width="13" height="13" fill="#eef1f5"/><rect x="88" y="20" width="13" height="13" fill="#a63f1c"/><rect x="18" y="34" width="13" height="13" fill="#a63f1c"/><rect x="32" y="34" width="13" height="13" fill="#eef1f5"/><rect x="46" y="34" width="13" height="13" fill="#a63f1c"/><rect x="60" y="34" width="13" height="13" fill="#eef1f5"/><rect x="74" y="34" width="13" height="13" fill="#a63f1c"/><rect x="88" y="34" width="13" height="13" fill="#eef1f5"/><rect x="18" y="48" width="13" height="13" fill="#eef1f5"/><rect x="32" y="48" width="13" height="13" fill="#a63f1c"/><rect x="46" y="48" width="13" height="13" fill="#eef1f5"/><rect x="60" y="48" width="13" height="13" fill="#a63f1c"/><rect x="74" y="48" width="13" height="13" fill="#eef1f5"/><rect x="88" y="48" width="13" height="13" fill="#a63f1c"/><rect x="18" y="62" width="13" height="13" fill="#a63f1c"/><rect x="32" y="62" width="13" height="13" fill="#eef1f5"/><rect x="46" y="62" width="13" height="13" fill="#a63f1c"/><rect x="60" y="62" width="13" height="13" fill="#eef1f5"/><rect x="74" y="62" width="13" height="13" fill="#a63f1c"/><rect x="88" y="62" width="13" height="13" fill="#eef1f5"/><rect x="18" y="76" width="13" height="13" fill="#eef1f5"/><rect x="32" y="76" width="13" height="13" fill="#a63f1c"/><rect x="46" y="76" width="13" height="13" fill="#eef1f5"/><rect x="60" y="76" width="13" height="13" fill="#a63f1c"/><rect x="74" y="76" width="13" height="13" fill="#eef1f5"/><rect x="88" y="76" width="13" height="13" fill="#a63f1c"/></g><path d="M60,98 L60,113 M54,107 L60,114 L66,107" fill="none" stroke="#4a5462" stroke-width="1.8"/><circle cx="60" cy="142" r="26" fill="none" stroke="#c8ccd4" stroke-width="1.4" stroke-dasharray="4 4"/></svg><div class="s">nothing at all</div></div>
+    </div>
+    <figcaption data-ss-id="cap-limits">What the board does to a pattern before the camera sees it. Shapes, not measurements.</figcaption>
+  </figure>
+  <div class="text">
+    <p data-ss-id="para-limits">Copper spreads heat 3&#8211;5 cm before it reaches the camera &#8212; wider than the die itself. A single shire arrives as the same blob as any other pattern of the same power, a checkerboard arrives as nothing, and a better camera buys none of it back: the limit is the board.</p>
+    <p data-ss-id="para-limits-2">The die&#8217;s footprint also fills the frame, so the pre-registered gate for a distance scale got no input. Directions only: no distances, no scale bar.</p>
+  </div>
+</section>
+
+<section id="s-live" data-ss-id="section-live" data-ss-section>
+  <h2 data-ss-id="heading-live">The same camera, live</h2>
+  <figure data-ss-id="fig-live">
+    <div class="live"><span class="livemsg">Connecting&#8230;</span><video data-ss-stream="thermal/p3" muted playsinline aria-label="Live thermal video from the camera behind the card."></video></div>
+    <figcaption data-ss-id="cap-live">The same camera, live. The picture is auto-gained, so its pixels carry no temperature. Anyone who can open this page can watch &#8212; signed out, the video starts after spacesheep&#8217;s quick check for people in the picture, or once you sign in.</figcaption>
+  </figure>
+  <p class="text" data-ss-id="para-live">The camera has its own page: <a href="https://spacesheep.dev/@yaroslavvb/thermal-master-p3-live-camera-stream">Thermal Master P3 live camera stream</a>.</p>
+</section>
+
+<section id="s-method" data-ss-id="section-method" data-ss-section>
+  <h2 data-ss-id="heading-method">Method, and what changed from the plan</h2>
+  <ul class="plain">
+    <li data-ss-id="method-prereg"><b><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/tools/claims-v3/hm/prereg">Pre-registered</a></b> &#8212; masks, orders, predictions and falsifiers frozen at <time datetime="2026-10-21T16:58:00-07:00">16:58 PDT</time>, seven minutes before the first session.</li>
+    <li data-ss-id="method-a1"><b>Amendment A1</b>, <time datetime="2026-10-21T17:14:00-07:00">17:14 PDT</time>, before anything was reduced: the ladder measured about 2.5&#215; the designed power a thread, so 12-shire sets ran at 16 threads a shire and 8-shire sets at 24 &#8212; 192 either way &#8212; and a 17 s west&#8211;east swap was dropped.</li>
+    <li data-ss-id="method-posthoc"><b>Post hoc, labelled throughout:</b> per-pixel shutter-step removal, and contrasts read along the other session&#8217;s templates. Every pre-registered conclusion survives without them except the replicate &#8212; uncleaned its dipole points &#8722;21.9&#176;, about 112&#176; away, so both its size and its direction are the cleaning&#8217;s doing &#8212; and the sweep&#8217;s lap-by-lap ordering, which falls from 5 of 5 laps to 3 of 5.</li>
+    <li data-ss-id="method-camera"><b>The camera was left as the public stream has it.</b> Its shutter fired every 8&#8211;10 s under load, so the registered exclusion window could not be applied. The same rule says a block that would lose more than 30% of its frames is reported as a bound, not a value &#8212; and the window would have removed 45&#8211;82% of every block, so <b>under the rule as written every amplitude here is a bound</b>. Where the rule could be approximated the answer does not move.</li>
+    <li data-ss-id="method-p"><b>Registered p floors:</b> four laps cannot go below 0.125, two laps below 0.5; the five-arm blocks are not so limited. And one bug: the bloom&#8217;s 64 &#176;C die gate was guarded on a thread count A1 had changed, so it never read the die.</li>
+    <li data-ss-id="method-also"><b>Also off the plan:</b> the amendment&#8217;s power branch fired on an extrapolation rather than the registered rung; the hero&#8217;s session ran before the gain map existed, so it was analysed without one; the orientation fit the protocol registers for the hero was excluded by the pipeline and run by hand; the registered clock fallback was never coded; the instrumental null&#8217;s second, two-lap reduction was never produced; and the movies render 0.5 s bins at 24 fps with a 2&#215;2 spatial bin against a frozen table of 1 s bins at 8&#8211;10 fps and 4&#215;4 &#8212; finer, uniform across the set, and burnt into every frame.</li>
+    <li class="links" data-ss-id="method-runs"><b>The runs:</b> <time datetime="2026-10-21T17:05:59-07:00">17:05:59</time>&#8211;<time datetime="2026-10-21T17:24:52-07:00">17:24:52</time>, then until <time datetime="2026-10-21T18:17:12-07:00">18:17:12</time>. <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/tools/claims-v3/hm">Code</a> &#183; <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-10-21-e62-heat-movies">data</a> &#183; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-verifying-transistor-flips">the previous experiment</a>.</li>
+  </ul>
+</section>
+
+<footer data-ss-id="page-footer" data-ss-react="off">
+  AI Foundry lab &#183; E62, &#8220;heat movies&#8221; &#183; <time datetime="2026-10-21">21 October 2026</time>. Exploratory: the camera is uncalibrated on this card, so no absolute temperatures and no distances.
+</footer>
+
+</div>
+<script>
+function ssLocalTimes() {
+  document.querySelectorAll("time[datetime*='T']").forEach(function (t) {
+    var d = new Date(t.getAttribute("datetime"));
+    if (isNaN(d)) return;
+    var sameDay = d.toDateString() === new Date().toDateString();
+    t.textContent = d.toLocaleString([], sameDay
+      ? { hour: "numeric", minute: "2-digit" }
+      : { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    t.title = d.toLocaleString([], { dateStyle: "full", timeStyle: "short" });
+  });
+}
+ssLocalTimes();
+document.addEventListener("ss:live", ssLocalTimes);
+try {
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll("video[autoplay]").forEach(function (v) {
+      v.removeAttribute("autoplay"); v.removeAttribute("loop"); v.pause();
+    });
+  }
+} catch (e) {}
+</script>
+</body>
+</html>

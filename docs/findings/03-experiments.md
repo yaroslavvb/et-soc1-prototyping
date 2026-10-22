@@ -2527,7 +2527,7 @@ hoc; registered excess +698 mK = 4.6 σ, p = 0.0005) while staying within ±21 m
 hold: E62-NULLAA, the same mask in both arms, reads **+4 ± 11 mK** and E62-NULLGEO **−8 ± 9 mK** (post hoc; registered
 excesses 0.65 σ and 1.2 σ). The replicate E62-W8BE8B points the same way as E62-WE42 (87° against 89°) at **+415 ± 135
 mK** over its two laps (post hoc), too coarse to price the adjacency correction it was registered to arbitrate. The
-bloom (768 harts, about +47 W switched) warms the whole frame by **+7.1 K** at the end of a 42.3 s on-phase and reaches
+bloom (768 harts, +39 W switched as measured: the governor throttled it, and the clean power law would have drawn 49 W) warms the whole frame by **+7.1 K** at the end of a 42.3 s on-phase and reaches
 half its rise 14.8 s after the load step: what a change in total power looks like, and what every swap is built to
 cancel. E62-CAL **refutes the design's power model**: the card is linear in harts but as **5.80 ± 0.30 W + 55.8 ± 1.0
 mW per hart**, not 40.6 mW per hart from zero, and three 128-hart legs at 4 × 32, 8 × 16 and 16 × 8 agree within
