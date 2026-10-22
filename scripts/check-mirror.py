@@ -8,8 +8,9 @@ its address, the space uuid, the intended visibility, the repo file (or "not mir
 folder deploy names its extra files in backticks).
 
 For each PUBLIC row with a repo file, the live index.html is fetched and compared with the repo file after removing
-the ` data-ss-id="..."` attributes the host adds to elements (and adding a final newline if one is missing), as the
-review's deploy_all.sh did:
+the ` data-ss-id="..."` attributes the host adds to elements, and the streams client it loads right after a page's
+`<meta name="ss-streams">` declaration (and adding a final newline if one is missing), as the review's deploy_all.sh
+did:
   --via cli    `spacesheep read <uuid> index.html -o <tmp>`: the stored file. Needs a key (`spacesheep login`, or
                SPACESHEEP_KEY). The command is `spacesheep` on PATH, or SPACESHEEP_CLI (e.g. "node /path/spacesheep.js").
   --via https  an anonymous GET of https://<uuid>.spacesheep.app/, the raw page. The host also inserts its viewer
@@ -55,6 +56,9 @@ UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 URL_RE = re.compile(r"https://spacesheep\.dev/@([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)")
 TICKS = re.compile(r"`([^`]+)`")
 SSID = re.compile(rb' data-ss-id="[^"]*"')
+# A page that declares a stream (<meta name="ss-streams" ...>) is served with the host's streams client loaded right
+# after that declaration; its version number moves with the host, so any version is accepted, and only in that place.
+STREAMS_JS = re.compile(rb'(<meta name="ss-streams"[^>]*>)<script src="/_ss/streams\.js(?:\?v=\d+)?"></script>')
 # What the host inserts before </body> on the raw address: its print stylesheet, its print mark (a div of class
 # ss-print-mark holding an inline SVG) and its viewer scripts. Anything else inserted there counts as a difference.
 INJECTED = re.compile(rb"\s*(?:<style\b[^>]*>.*?</style>|<script\b[^>]*>.*?</script>"
@@ -154,7 +158,7 @@ def cli_list(cli, timeout):
 
 # ---------------------------------------------------------------- comparing
 def norm(b):
-    b = SSID.sub(b"", b)
+    b = STREAMS_JS.sub(rb"\1", SSID.sub(b"", b))
     return b if b.endswith(b"\n") else b + b"\n"
 
 

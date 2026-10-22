@@ -2,8 +2,9 @@
 
 The repository is the ground truth. spacesheep.dev is where people read the pages. Every public page below is a
 committed file in this repository, and the live page must equal that file. The only allowed difference is what the
-host adds when it serves the page: `data-ss-id` attributes on elements and, on the raw address, its viewer scripts just
-before `</body>`. Private pages are listed but not mirrored.
+host adds when it serves the page: `data-ss-id` attributes on elements, its streams client right after a page's
+`<meta name="ss-streams">` declaration and, on the raw address, its viewer scripts just before `</body>`. Private pages
+are listed but not mirrored.
 
 - **Check:** `python3 scripts/check-mirror.py` compares every public page with its file and exits non-zero on any
   difference (see [Checking that live equals repo](#checking-that-live-equals-repo)).
