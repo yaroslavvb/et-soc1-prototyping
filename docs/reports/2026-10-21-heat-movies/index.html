@@ -34,18 +34,27 @@ p[data-ss-id="nav-lab-dashboard"] a,.jump a{color:var(--muted);display:inline-bl
 .tile .l{font-size:14.5px;margin-top:4px}
 .tile .s{font-size:14px;color:var(--muted);margin-top:4px}
 figure{margin:18px 0 26px}
-figure video{display:block;width:100%;height:auto;aspect-ratio:4/5;
-max-width:min(100%,620px,calc(78vh * 0.8));margin-left:auto;margin-right:auto;
-background:#f6f8fa;border:1px solid var(--line);border-radius:6px}
+.mv{position:relative;width:100%;max-width:min(100%,620px,calc(78vh * 0.8));margin:0 auto}
+.mv video{display:block;width:100%;height:auto;aspect-ratio:4/5;
+background:#f6f8fa;border:1px solid var(--line);border-radius:6px;cursor:pointer}
+.pp{position:absolute;top:10px;right:10px;width:44px;height:44px;padding:0;border:0;border-radius:50%;
+background:rgba(24,32,43,.55);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pp svg{width:20px;height:20px;fill:#fff}
+.mv.paused .pp{top:30%;left:50%;right:auto;width:64px;height:64px;margin:-32px 0 0 -32px;background:rgba(24,32,43,.7)}
+.mv.paused .pp svg{width:28px;height:28px}
+.mv .i-play,.mv.paused .i-pause{display:none}
+.mv.paused .i-play{display:inline}
+.pp:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 figcaption{font-size:14.5px;color:var(--muted);margin-top:7px;max-width:46em}
 .chart{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin:18px 0 8px}
 .chart .k{font-size:14px;color:var(--muted);font-weight:600;margin-bottom:10px;max-width:46em}
-.chart svg{display:block;width:100%;height:auto}
+.chart svg{display:block;width:100%;height:auto;max-width:480px;margin:0 auto}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
 .two figure{margin:8px 0 10px}
 ul.plain{padding-left:20px;max-width:46em}
 ul.plain li{margin:0 0 9px}
 .links a{display:inline-block;padding:11px 5px;margin:-11px 0}
+.links a:last-child{padding-right:0}
 .bar{display:grid;grid-template-columns:minmax(160px,17em) 1fr;gap:4px 14px;align-items:center;margin:0 0 8px}
 .bar .n{font-size:14.5px}
 .bar .n b{display:block;font-size:15px;color:var(--accent);font-variant-numeric:tabular-nums}
@@ -77,7 +86,7 @@ margin:0;background:#f6f8fa;border:1px solid var(--line);border-radius:6px}
 font-size:15px;color:var(--muted)}
 footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:14.5px;color:var(--muted)}
 @media (max-width:640px){body{font-size:17px}
-figure video{max-width:min(100%,calc(70vh * 0.8))}
+.mv{max-width:min(100%,calc(70vh * 0.8))}
 .bar{grid-template-columns:1fr}}
 </style>
 </head>
@@ -93,8 +102,8 @@ figure video{max-width:min(100%,calc(70vh * 0.8))}
 
 <section id="s-hero" data-ss-id="section-hero" data-ss-section>
   <figure data-ss-id="fig-hero" data-ss-thumb>
-    <video src="img/orbit.mp4" poster="img/orbit-poster.jpg" autoplay muted loop playsinline controls width="768" height="960" aria-label="Thermal movie: the warm patch walks the die&#8217;s four corners clockwise, five laps, then collapses into the middle."></video>
-    <figcaption data-ss-id="cap-hero">128 threads in each of four corner blocks of the die, then the centre; 25 s a position, five laps at 10&#215; real time. The die map in each frame is turned to match the camera; colours are the difference from that lap&#8217;s average, red warmer. The corners saturate the shared &#177;400 mK scale and the centre, a fifth their size, reads nearly blank. The key burnt into the frame runs off its bottom edge &#8212; the whole of it is in the next paragraph.</figcaption>
+    <div class="mv"><video src="img/orbit.mp4" poster="img/orbit-poster.jpg" autoplay muted loop playsinline controls width="768" height="960" aria-label="Thermal movie: the warm patch walks the die&#8217;s four corners clockwise, five laps, then collapses into the middle."></video></div>
+    <figcaption data-ss-id="cap-hero">128 threads in each of four corner blocks of the die, then the centre; 25 s a position, five laps at 10&#215; real time. The die map in each frame is turned to match the camera; colours are the difference from that lap&#8217;s average, red warmer. The corners saturate the shared &#177;400 mK scale and the centre, a fifth their size, reads nearly blank.</figcaption>
   </figure>
   <h2 data-ss-id="heading-hero">Move the work round the four corners and the heat walks with it</h2>
   <div class="text">
@@ -116,7 +125,7 @@ figure video{max-width:min(100%,calc(70vh * 0.8))}
   <h2 data-ss-id="heading-compass">Four corners, four quadrants &#8212; and a centre near zero that its own power rule makes exploratory</h2>
   <div class="chart" data-ss-id="chart-compass">
     <div class="k">Where each block&#8217;s heat lands &#8212; on the die&#8217;s own compass, not the camera&#8217;s view above, which is rolled a right angle. Ticks every 100 mK.</div>
-    <svg viewBox="0 0 400 400" role="img" aria-label="Compass chart: the four corner blocks land in four separate quadrants of the die - NW 206 mK west and 323 mK north, NE 176 mK east and 173 mK north, SE 165 mK east and 229 mK south, SW 202 mK west and 281 mK south - while the centre block sits near the origin at 66 mK east and 14 mK north."><rect x="0" y="0" width="400" height="400" fill="#fff"/><line x1="35" y1="175" x2="345" y2="175" stroke="#c8ccd4" stroke-width="1.2"/><line x1="190" y1="35" x2="190" y2="320" stroke="#c8ccd4" stroke-width="1.2"/><line x1="154" y1="171" x2="154" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="226" y1="171" x2="226" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="118" y1="171" x2="118" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="262" y1="171" x2="262" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="82" y1="171" x2="82" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="298" y1="171" x2="298" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="139" x2="194" y2="139" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="211" x2="194" y2="211" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="103" x2="194" y2="103" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="247" x2="194" y2="247" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="67" x2="194" y2="67" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="283" x2="194" y2="283" stroke="#c8ccd4" stroke-width="1.2"/><text x="30" y="181" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="end" font-weight="700">west</text><text x="350" y="181" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="start" font-weight="700">east</text><text x="190" y="26" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="middle" font-weight="700">north</text><text x="190" y="344" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="middle" font-weight="700">south</text><line x1="101.8" y1="58.7" x2="129.8" y2="58.7" stroke="#a63f1c" stroke-width="1.8"/><line x1="115.8" y1="46.5" x2="115.8" y2="70.9" stroke="#a63f1c" stroke-width="1.8"/><circle cx="115.8" cy="58.7" r="7" fill="#a63f1c"/><text x="115.8" y="34" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">NW</text><line x1="244.8" y1="112.7" x2="262.0" y2="112.7" stroke="#a63f1c" stroke-width="1.8"/><line x1="253.4" y1="102.3" x2="253.4" y2="123.1" stroke="#a63f1c" stroke-width="1.8"/><circle cx="253.4" cy="112.7" r="7" fill="#a63f1c"/><text x="253.4" y="88" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">NE</text><line x1="236.4" y1="257.4" x2="262.4" y2="257.4" stroke="#a63f1c" stroke-width="1.8"/><line x1="249.4" y1="246.2" x2="249.4" y2="268.6" stroke="#a63f1c" stroke-width="1.8"/><circle cx="249.4" cy="257.4" r="7" fill="#a63f1c"/><text x="249.4" y="289" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">SE</text><line x1="105.4" y1="276.2" x2="129.2" y2="276.2" stroke="#a63f1c" stroke-width="1.8"/><line x1="117.3" y1="264.3" x2="117.3" y2="288.1" stroke="#a63f1c" stroke-width="1.8"/><circle cx="117.3" cy="276.2" r="7" fill="#a63f1c"/><text x="117.3" y="308" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">SW</text><line x1="200.5" y1="170.0" x2="227.1" y2="170.0" stroke="#8e97a6" stroke-width="1.8"/><line x1="213.8" y1="160.3" x2="213.8" y2="179.7" stroke="#8e97a6" stroke-width="1.8"/><circle cx="213.8" cy="170.0" r="7" fill="#8e97a6"/><text x="234" y="152" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="start" font-weight="700">centre</text></svg>
+    <svg viewBox="0 0 400 400" role="img" aria-label="Compass chart: the four corner blocks land in four separate quadrants of the die - NW 206 mK west and 323 mK north, NE 176 mK east and 173 mK north, SE 165 mK east and 229 mK south, SW 202 mK west and 281 mK south - while the centre block sits near the origin at 66 mK east and 14 mK north."><rect x="0" y="0" width="400" height="400" fill="#fff"/><line x1="60" y1="175" x2="320" y2="175" stroke="#c8ccd4" stroke-width="1.2"/><line x1="190" y1="35" x2="190" y2="320" stroke="#c8ccd4" stroke-width="1.2"/><line x1="154" y1="171" x2="154" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="226" y1="171" x2="226" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="118" y1="171" x2="118" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="262" y1="171" x2="262" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="82" y1="171" x2="82" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="298" y1="171" x2="298" y2="179" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="139" x2="194" y2="139" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="211" x2="194" y2="211" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="103" x2="194" y2="103" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="247" x2="194" y2="247" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="67" x2="194" y2="67" stroke="#c8ccd4" stroke-width="1.2"/><line x1="186" y1="283" x2="194" y2="283" stroke="#c8ccd4" stroke-width="1.2"/><text x="55" y="181" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="end" font-weight="700">west</text><text x="325" y="181" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="start" font-weight="700">east</text><text x="190" y="26" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="middle" font-weight="700">north</text><text x="190" y="344" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="19" fill="#18202b" text-anchor="middle" font-weight="700">south</text><line x1="101.8" y1="58.7" x2="129.8" y2="58.7" stroke="#a63f1c" stroke-width="1.8"/><line x1="115.8" y1="46.5" x2="115.8" y2="70.9" stroke="#a63f1c" stroke-width="1.8"/><circle cx="115.8" cy="58.7" r="7" fill="#a63f1c"/><text x="115.8" y="34" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">NW</text><line x1="244.8" y1="112.7" x2="262.0" y2="112.7" stroke="#a63f1c" stroke-width="1.8"/><line x1="253.4" y1="102.3" x2="253.4" y2="123.1" stroke="#a63f1c" stroke-width="1.8"/><circle cx="253.4" cy="112.7" r="7" fill="#a63f1c"/><text x="253.4" y="88" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">NE</text><line x1="236.4" y1="257.4" x2="262.4" y2="257.4" stroke="#a63f1c" stroke-width="1.8"/><line x1="249.4" y1="246.2" x2="249.4" y2="268.6" stroke="#a63f1c" stroke-width="1.8"/><circle cx="249.4" cy="257.4" r="7" fill="#a63f1c"/><text x="249.4" y="289" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">SE</text><line x1="105.4" y1="276.2" x2="129.2" y2="276.2" stroke="#a63f1c" stroke-width="1.8"/><line x1="117.3" y1="264.3" x2="117.3" y2="288.1" stroke="#a63f1c" stroke-width="1.8"/><circle cx="117.3" cy="276.2" r="7" fill="#a63f1c"/><text x="117.3" y="308" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="middle" font-weight="700">SW</text><line x1="200.5" y1="170.0" x2="227.1" y2="170.0" stroke="#8e97a6" stroke-width="1.8"/><line x1="213.8" y1="160.3" x2="213.8" y2="179.7" stroke="#8e97a6" stroke-width="1.8"/><circle cx="213.8" cy="170.0" r="7" fill="#8e97a6"/><text x="234" y="152" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif" font-size="20" fill="#18202b" text-anchor="start" font-weight="700">centre</text></svg>
     <div class="legend" data-ss-id="legend-compass"><div><b>NW</b> <span>206 west &#183; 323 north</span></div><div><b>NE</b> <span>176 east &#183; 173 north</span></div><div><b>SE</b> <span>165 east &#183; 229 south</span></div><div><b>SW</b> <span>202 west &#183; 281 south</span></div><div><b>centre</b> <span>66 east &#183; 14 north</span></div></div>
     <div class="axnote">Mean &#177; standard error over five laps, in mK, post hoc.</div>
   </div>
@@ -130,12 +139,12 @@ figure video{max-width:min(100%,calc(70vh * 0.8))}
   <h2 data-ss-id="heading-halves">Split the same 24 shires the other way and the picture turns a right angle</h2>
   <div class="two">
   <figure data-ss-id="fig-we42">
-    <video src="img/we42.mp4" poster="img/we42-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: twelve shires west against twelve east, the warm half swapping sides every 42.5 seconds."></video>
-    <figcaption data-ss-id="cap-we42">Twelve shires west, then twelve east: 192 threads either way, 42.5 s a side. Heat arrives about 11 s late, so just after each switch the picture still shows the half that has gone quiet. Tap any movie here to play it.</figcaption>
+    <div class="mv"><video src="img/we42.mp4" poster="img/we42-poster.jpg" preload="none" controls muted loop playsinline width="768" height="960" aria-label="Thermal movie: twelve shires west against twelve east, the warm half swapping sides every 42.5 seconds."></video></div>
+    <figcaption data-ss-id="cap-we42">Twelve shires west, then twelve east: 192 threads either way, 42.5 s a side. Heat arrives about 11 s late, so just after each switch the picture still shows the half that has gone quiet. Movies play as they scroll into view; tap one to pause or play it.</figcaption>
   </figure>
   <figure data-ss-id="fig-ns42">
-    <video src="img/ns42.mp4" poster="img/ns42-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: the same twenty-four shires split north against south, the warm half swapping top to bottom."></video>
-    <figcaption data-ss-id="cap-ns42">The same 24 shires split north against south instead.</figcaption>
+    <div class="mv"><video src="img/ns42.mp4" poster="img/ns42-poster.jpg" preload="none" controls muted loop playsinline width="768" height="960" aria-label="Thermal movie: the same twenty-four shires split north against south, the warm half swapping top to bottom."></video></div>
+    <figcaption data-ss-id="cap-ns42">The same 24 shires split north against south instead. The speckle while the north twelve run is shutter residue the cleaning missed, not heat: the board blurs heat over centimetres.</figcaption>
   </figure>
   </div>
   <div class="chart" data-ss-id="chart-laps">
@@ -160,16 +169,16 @@ figure video{max-width:min(100%,calc(70vh * 0.8))}
   </div>
   <div class="two">
   <figure data-ss-id="fig-nullaa">
-    <video src="img/nullaa.mp4" poster="img/nullaa-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: the control with the identical shire mask in both arms, showing no swapping pattern."></video>
+    <div class="mv"><video src="img/nullaa.mp4" poster="img/nullaa-poster.jpg" preload="none" controls muted loop playsinline width="768" height="960" aria-label="Thermal movie: the control with the identical shire mask in both arms, showing no swapping pattern."></video></div>
     <figcaption data-ss-id="cap-nullaa">Control: the identical mask in <i>both</i> arms &#8212; the compute never changes.</figcaption>
   </figure>
   <figure data-ss-id="fig-nullgeo">
-    <video src="img/nullgeo.mp4" poster="img/nullgeo-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: the control with twelve shires against their own 180 degree rotation, showing no swapping pattern."></video>
+    <div class="mv"><video src="img/nullgeo.mp4" poster="img/nullgeo-poster.jpg" preload="none" controls muted loop playsinline width="768" height="960" aria-label="Thermal movie: the control with twelve shires against their own 180 degree rotation, showing no swapping pattern."></video></div>
     <figcaption data-ss-id="cap-nullgeo">Control: twelve shires against their own 180&#176; rotation, same power, same centre &#8212; measured in a quiet four-minute window, so the bound that governs the two-lap blocks comes from the louder instrumental null beside it, not from this one.</figcaption>
   </figure>
   </div>
   <figure data-ss-id="fig-w8be8b">
-    <video src="img/w8be8b.mp4" poster="img/w8be8b-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: the feature-matched replicate, eight shires west against eight east."></video>
+    <div class="mv"><video src="img/w8be8b.mp4" poster="img/w8be8b-poster.jpg" preload="none" controls muted loop playsinline width="768" height="960" aria-label="Thermal movie: the feature-matched replicate, eight shires west against eight east."></video></div>
     <figcaption data-ss-id="cap-w8be8b">The feature-matched replicate, eight shires a side. <b>Post hoc</b>, its dipole points 87.1&#176; against the headline swap&#8217;s 89.2&#176; &#8212; uncleaned it points &#8722;21.9&#176;, about 112&#176; away, so the agreement is the cleaning&#8217;s doing. Its size stays open. All five swap movies share one &#177;400 mK scale, which the strongest frames clip.</figcaption>
   </figure>
 </section>
@@ -177,7 +186,7 @@ figure video{max-width:min(100%,calc(70vh * 0.8))}
 <section id="s-sweep" data-ss-id="section-sweep" data-ss-section>
   <h2 data-ss-id="heading-sweep">Slide the work one column east and the warm patch slides with it</h2>
   <figure data-ss-id="fig-sweep">
-    <video src="img/sweep.mp4" poster="img/sweep-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: eight running shires sliding one column at a time from the west of the die to the east, five laps."></video>
+    <div class="mv"><video src="img/sweep.mp4" poster="img/sweep-poster.jpg" preload="none" controls muted loop playsinline width="768" height="960" aria-label="Thermal movie: eight running shires sliding one column at a time from the west of the die to the east, five laps."></video></div>
     <figcaption data-ss-id="cap-sweep">Eight shires sliding one column at a time, 17 s a position, five laps averaged. The two end positions clip the shared &#177;400 mK scale.</figcaption>
   </figure>
   <div class="chart" data-ss-id="chart-sweep">
@@ -191,7 +200,7 @@ figure video{max-width:min(100%,calc(70vh * 0.8))}
 <section id="s-bloom" data-ss-id="section-bloom" data-ss-section>
   <h2 data-ss-id="heading-bloom">Turn the whole chip on and the whole board glows &#8212; this is what every other movie cancels</h2>
   <figure data-ss-id="fig-bloom">
-    <video src="img/bloom.mp4" poster="img/bloom-poster.jpg" preload="none" controls muted playsinline width="768" height="960" aria-label="Thermal movie: all thirty-two shires switching on and off, the whole board warming and cooling together."></video>
+    <div class="mv"><video src="img/bloom.mp4" poster="img/bloom-poster.jpg" preload="none" controls muted loop playsinline width="768" height="960" aria-label="Thermal movie: all thirty-two shires switching on and off, the whole board warming and cooling together."></video></div>
     <figcaption data-ss-id="cap-bloom">All 32 shires on for 42 s, then idle for 127 s, three cycles at 12&#215; real time, on a &#177;8,000 mK scale against the swaps&#8217; &#177;400.</figcaption>
   </figure>
   <div class="text">
@@ -273,13 +282,48 @@ function ssLocalTimes() {
 }
 ssLocalTimes();
 document.addEventListener("ss:live", ssLocalTimes);
-try {
-  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    document.querySelectorAll("video[autoplay]").forEach(function (v) {
-      v.removeAttribute("autoplay"); v.removeAttribute("loop"); v.pause();
+// Movies: the native controls (kept for readers without scripts) would cover the key burnt into each frame, so swap
+// them for one button over the picture. Each movie plays muted on a loop while at least half of it is on screen and
+// pauses when scrolled away; a tap pauses or resumes it, and a movie the reader paused stays paused. Reduced motion:
+// nothing starts on its own.
+(function () {
+  var reduce = false;
+  try { reduce = matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+  var ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-play" d="M8 5v14l11-7z"/>' +
+             '<path class="i-pause" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+  var boxes = [].slice.call(document.querySelectorAll(".mv"));
+  boxes.forEach(function (box) {
+    var v = box.querySelector("video");
+    v.removeAttribute("controls");
+    if (reduce) { v.removeAttribute("autoplay"); v.removeAttribute("loop"); v.pause(); }
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "pp"; b.innerHTML = ICON;
+    box.appendChild(b);
+    function sync() {
+      box.classList.toggle("paused", v.paused);
+      b.setAttribute("aria-label", v.paused ? "Play the movie" : "Pause the movie");
+    }
+    function play() { var p = v.play(); if (p && p.catch) p.catch(sync); }
+    function toggle() {
+      if (v.paused) { box.removeAttribute("data-held"); play(); }
+      else { box.setAttribute("data-held", ""); v.pause(); }
+    }
+    b.addEventListener("click", toggle);
+    v.addEventListener("click", toggle);
+    ["play", "playing", "pause", "ended", "emptied"].forEach(function (ev) { v.addEventListener(ev, sync); });
+    sync();
+    box.ssPlay = play;
+  });
+  if (reduce || !("IntersectionObserver" in window)) return;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      var box = e.target, v = box.querySelector("video");
+      if (e.intersectionRatio >= 0.5) { if (v.paused && !box.hasAttribute("data-held")) box.ssPlay(); }
+      else if (!v.paused) v.pause();
     });
-  }
-} catch (e) {}
+  }, { threshold: [0, 0.5] });
+  boxes.forEach(function (box) { io.observe(box); });
+})();
 </script>
 </body>
 </html>
