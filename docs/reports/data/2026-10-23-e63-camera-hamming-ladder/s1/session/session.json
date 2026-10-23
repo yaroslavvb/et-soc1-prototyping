@@ -1,0 +1,1005 @@
+{
+ "experiment": "E63",
+ "protocol_path": "/home/yaroslavvb/claude/et-soc1-prototyping/build/e63/code/protocol.json",
+ "protocol_sha256": "645ab842a04eb828b0cf23113c2679eacc23653a3ef72acb9e5e10b6ab6e79ee",
+ "protocol": {
+  "experiment": "E63",
+  "request": "Q122",
+  "card": "aifoundry2",
+  "version": 2,
+  "title": "The camera half of the Hamming ladder: E60's top rung against its zero at 0.05 Hz, filmed from the back of the board",
+  "pad_to_dwell": true,
+  "pad_to_dwell_note": "Each phase is one launch of --seconds 8.5 (a device hold of about 8.6-9.3 s, never over --budget 9.5) idled out to its 10 s dwell, so the two arms switch on a fixed 20 s grid: 0.05 Hz. The idle tail (about 0.7-1.4 s) is the same in both arms, so it lands on 2f and its harmonics, not on f.",
+  "heater": {
+   "bin": "build/sparsity_t2/host/sparsity_host",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "test": "fma",
+   "type": "fp32",
+   "pattern": "none",
+   "values": "ones",
+   "values_note": "Only a default: every set below names its own --values (run_hlc.py). The binary is E62's heater on this card; its --values file: path reads A then B, 1,024 bytes each, and its kernel is byte-identical to build/sparsity's, which E60 ran these operand files through (sha256 990807f4...).",
+   "seconds": 8.5,
+   "budget": 9.5,
+   "seed": 1,
+   "expected_launch_s": 8.9
+  },
+  "safety": {
+   "abs_stop_c": 80,
+   "board_cap_w": 70,
+   "cap_consecutive": 2,
+   "die_consecutive": 1,
+   "sampler_stale_s": 3,
+   "note": "The heaviest arm, lq_h23 on 256 minions, is predicted at about 45 W on the board at a 62-63 C die; 70 W on two consecutive samples or an 80 C die (the lab's 90 C rule stands) ends the session. Holding 800 MHz is measured, not enforced: see README, Hold gate."
+  },
+  "sets": {
+   "TOP23": {
+    "shires": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31
+    ],
+    "mask": "0xffffffff",
+    "per_shire": 8,
+    "harts": 256,
+    "values": "file:build/hl-gen2/tiles/lq_h23.bin",
+    "note": "E60 lq_h23: A = 1.0, B alternates every cycle between b and b ^ (all 23 mantissa bits): 94,208 designed B bit flips per op per minion"
+   },
+   "ZERO": {
+    "shires": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31
+    ],
+    "mask": "0xffffffff",
+    "per_shire": 8,
+    "harts": 256,
+    "values": "file:build/hl-gen2/tiles/lq_h0.bin",
+    "note": "E60 lq_h0: the ladder's zero, the same tiles with no B flips"
+   },
+   "MID8": {
+    "shires": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31
+    ],
+    "mask": "0xffffffff",
+    "per_shire": 8,
+    "harts": 256,
+    "values": "file:build/hl-gen2/tiles/lq_h8.bin",
+    "note": "E60 lq_h8: 32,768 designed B bit flips per op per minion; the rung E60 measured on this card at 800 MHz"
+   },
+   "ONES": {
+    "shires": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31
+    ],
+    "mask": "0xffffffff",
+    "per_shire": 8,
+    "harts": 256,
+    "values": "ones",
+    "note": "E60 anchor_ones: every operand 1.0; 53.27 W on the full card at 800 MHz in E60"
+   },
+   "PI": {
+    "shires": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31
+    ],
+    "mask": "0xffffffff",
+    "per_shire": 8,
+    "harts": 256,
+    "values": "pi",
+    "note": "E60 anchor_pi: every operand pi; 53.30 W on the full card at 800 MHz in E60, 0.03 W from ones"
+   }
+  },
+  "blocks": [
+   {
+    "id": "E63-TOP",
+    "title": "The top rung against its zero: lq_h23 vs lq_h0, 256 minions, 0.05 Hz",
+    "kind": "lockin",
+    "phases": [
+     {
+      "set": "TOP23",
+      "dwell_s": 10,
+      "launches": 1
+     },
+     {
+      "set": "ZERO",
+      "dwell_s": 10,
+      "launches": 1
+     }
+    ],
+    "cycles": 30,
+    "warmup_cycles": 9,
+    "lap_phase_orders": [
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ]
+    ],
+    "predicted": {
+     "board_step_w": [
+      4.5,
+      7.5
+     ],
+     "camera_roi_fundamental_mk": [
+      50,
+      400
+     ],
+     "phase_lag_deg": [
+      20,
+      150
+     ]
+    },
+    "pass_rule": "README, Decision rules 1-2"
+   },
+   {
+    "id": "E63-NULL",
+    "title": "The null: equal watts in the same place, ones vs pi, 256 minions, 0.05 Hz",
+    "kind": "lockin",
+    "phases": [
+     {
+      "set": "ONES",
+      "dwell_s": 10,
+      "launches": 1
+     },
+     {
+      "set": "PI",
+      "dwell_s": 10,
+      "launches": 1
+     }
+    ],
+    "cycles": 21,
+    "warmup_cycles": 3,
+    "lap_phase_orders": [
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ],
+     [
+      "ONES",
+      "PI"
+     ]
+    ],
+    "predicted": {
+     "board_step_w": [
+      -0.1,
+      0.1
+     ],
+     "camera_roi_fundamental_mk": "consistent with zero"
+    },
+    "pass_rule": "README, Decision rule 3"
+   },
+   {
+    "id": "E63-MID",
+    "title": "A middle rung against the same zero: lq_h8 vs lq_h0, 256 minions, 0.05 Hz",
+    "kind": "lockin",
+    "phases": [
+     {
+      "set": "MID8",
+      "dwell_s": 10,
+      "launches": 1
+     },
+     {
+      "set": "ZERO",
+      "dwell_s": 10,
+      "launches": 1
+     }
+    ],
+    "cycles": 21,
+    "warmup_cycles": 3,
+    "lap_phase_orders": [
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ],
+     [
+      "MID8",
+      "ZERO"
+     ]
+    ],
+    "predicted": {
+     "board_step_w": [
+      1.1,
+      2.2
+     ],
+     "camera_over_top": "equal to board_over_top within the rule"
+    },
+    "pass_rule": "README, Decision rule 4"
+   },
+   {
+    "id": "E63-TOP2",
+    "title": "The top rung again, to bracket the middle one",
+    "kind": "lockin",
+    "phases": [
+     {
+      "set": "TOP23",
+      "dwell_s": 10,
+      "launches": 1
+     },
+     {
+      "set": "ZERO",
+      "dwell_s": 10,
+      "launches": 1
+     }
+    ],
+    "cycles": 18,
+    "warmup_cycles": 3,
+    "lap_phase_orders": [
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ],
+     [
+      "TOP23",
+      "ZERO"
+     ]
+    ],
+    "predicted": {
+     "transfer_equal_to_top": true
+    },
+    "pass_rule": "README, Decision rule 5"
+   }
+  ],
+  "session": {
+   "pre_idle_s": 60,
+   "post_idle_s": 60,
+   "block_gap_s": 0,
+   "block_order": [
+    "E63-TOP",
+    "E63-NULL",
+    "E63-MID",
+    "E63-TOP2"
+   ]
+  },
+  "camera": {
+   "url": "http://p3-phone:8080/stream.raw.z",
+   "settings": "unchanged: preset visualize, automatic shutter on, as the public live page has them"
+  },
+  "caps": {
+   "max_card_min": 40,
+   "max_wall_min": 50
+  }
+ },
+ "host": "aifoundry2",
+ "user": "yaroslavvb",
+ "dry": false,
+ "argv": [
+  "run_hlc.py",
+  "--protocol",
+  "protocol.json",
+  "--out",
+  "../runs/e63-card-1023"
+ ],
+ "python": "3.12.3",
+ "root": "/home/yaroslavvb/claude/et-soc1-prototyping",
+ "git": {
+  "head": "c1286c15626ba0d938f0770139ff578389abb45f",
+  "dirty_files": 1
+ },
+ "sha256": {
+  "heater": "7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "16037641ab75bdbe1209f323641e269c9b897468091243173bfaaaf0b21686e2",
+  "record_cam": "7ad8d78050669cb480e9260c167c8a056d8da09efc9dfd6ba31882b1157e71c7",
+  "hm/fpa_trace.py": "1b86dddee9a9b236abc8aa64ce0e652e75c4220a6a088ee288a08c371ded3894",
+  "hm/lockin_hlc.py": "2e590148cd62142a7252d611bfe8d916fb6724c4c158678ae639357d68f1b6db",
+  "hm/p3rec.py": "3db77268c5b9644fbf8c739f27f824e097868c0a8bbaa4e8d4bea4a001bba460",
+  "hm/protocol-A1.json": "084365abedaf203a003c095c336b4fe7fbeb94175bc72d18b973ab14b31f1542",
+  "hm/protocol-dry.json": "ba38550e3a2ed70246b84a6fd832adf89d476477e92ea331e2a7ed5257c271a6",
+  "hm/protocol.json": "645ab842a04eb828b0cf23113c2679eacc23653a3ef72acb9e5e10b6ab6e79ee",
+  "hm/record_cam.py": "7ad8d78050669cb480e9260c167c8a056d8da09efc9dfd6ba31882b1157e71c7",
+  "hm/reduce_hm.py": "ca960f951cff83080ed971ae7f22a1872552c33cc80e854a10322af795370732",
+  "hm/run_hlc.py": "e6a7673d5e10e89cfedb3fa5e19a3927d60e02b830776101af5491fcad708c39",
+  "hm/tile_compare.py": "e3c68c727a98d53252908181aac963edfde3a019c2d377d3d51effba1b3b686c",
+  "operand/MID8": "50357d5f92a05f92de2cc74497133c7ffcebc89cd00625de7bcdb5edd96777b7",
+  "operand/TOP23": "cc18e774d5d91acfe95a1522288abe7c400d9b09b824467d20ee40f8c866eb30",
+  "operand/ZERO": "9094a633262c4011c15368dd84f4b02e4f309c46fda83e3cd541ada09c110d8d"
+ },
+ "caps": {
+  "max_card_min": 40.0,
+  "max_wall_min": 50.0
+ },
+ "t_start_ms": 1792785314182,
+ "t_end_ms": 1792787235288,
+ "stop_reason": "done",
+ "exit_code": 0,
+ "plan": {
+  "pre_idle_s": 60.0,
+  "post_idle_s": 60.0,
+  "blocks": [
+   {
+    "block": "E63-TOP",
+    "title": "The top rung against its zero: lq_h23 vs lq_h0, 256 minions, 0.05 Hz",
+    "cycles": 30,
+    "warmup_cycles": 9,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "TOP23",
+      "idle": false,
+      "dwell_s": 10.0,
+      "mask": "0xffffffff",
+      "harts": 256
+     },
+     {
+      "set": "ZERO",
+      "idle": false,
+      "dwell_s": 10.0,
+      "mask": "0xffffffff",
+      "harts": 256
+     }
+    ],
+    "launches": 60,
+    "s": 600.0,
+    "block_gap_s": 0.0
+   },
+   {
+    "block": "E63-NULL",
+    "title": "The null: equal watts in the same place, ones vs pi, 256 minions, 0.05 Hz",
+    "cycles": 21,
+    "warmup_cycles": 3,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "ONES",
+      "idle": false,
+      "dwell_s": 10.0,
+      "mask": "0xffffffff",
+      "harts": 256
+     },
+     {
+      "set": "PI",
+      "idle": false,
+      "dwell_s": 10.0,
+      "mask": "0xffffffff",
+      "harts": 256
+     }
+    ],
+    "launches": 42,
+    "s": 420.0,
+    "block_gap_s": 0.0
+   },
+   {
+    "block": "E63-MID",
+    "title": "A middle rung against the same zero: lq_h8 vs lq_h0, 256 minions, 0.05 Hz",
+    "cycles": 21,
+    "warmup_cycles": 3,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "MID8",
+      "idle": false,
+      "dwell_s": 10.0,
+      "mask": "0xffffffff",
+      "harts": 256
+     },
+     {
+      "set": "ZERO",
+      "idle": false,
+      "dwell_s": 10.0,
+      "mask": "0xffffffff",
+      "harts": 256
+     }
+    ],
+    "launches": 42,
+    "s": 420.0,
+    "block_gap_s": 0.0
+   },
+   {
+    "block": "E63-TOP2",
+    "title": "The top rung again, to bracket the middle one",
+    "cycles": 18,
+    "warmup_cycles": 3,
+    "order": "as-given",
+    "phases": [
+     {
+      "set": "TOP23",
+      "idle": false,
+      "dwell_s": 10.0,
+      "mask": "0xffffffff",
+      "harts": 256
+     },
+     {
+      "set": "ZERO",
+      "idle": false,
+      "dwell_s": 10.0,
+      "mask": "0xffffffff",
+      "harts": 256
+     }
+    ],
+    "launches": 36,
+    "s": 360.0,
+    "block_gap_s": 0.0
+   }
+  ],
+  "total_s": 1920.0,
+  "total_min": 32.0,
+  "expected_launch_s": 8.9,
+  "launches": 180
+ },
+ "pre_idle_s": 60.0,
+ "post_idle_s": 60.0,
+ "t_pre_idle_end_ms": 1792785374770,
+ "t_post_idle_start_ms": 1792787174812,
+ "card_s": 1921.1,
+ "n_launches": 180,
+ "launch_wall_s": 1597.0,
+ "expected_launch_s_final": 8.859,
+ "safety": {
+  "abs_stop_c": 80.0,
+  "board_cap_w": 70.0,
+  "cap_consecutive": 2,
+  "die_consecutive": 1,
+  "sampler_stale_s": 3.0,
+  "cap_mean_c": null,
+  "cap_high_c": null,
+  "pmic_margin_c": 10.0,
+  "bloom_cycle_stop_c": null
+ },
+ "heater": {
+  "bin": "/home/yaroslavvb/claude/et-soc1-prototyping/build/sparsity_t2/host/sparsity_host",
+  "kernel": "/home/yaroslavvb/claude/et-soc1-prototyping/build/sparsity_t2/kernel/sparsity.elf",
+  "test": "fma",
+  "type": "fp32",
+  "pattern": "none",
+  "values": "ones",
+  "seconds": 8.5,
+  "budget": 9.5,
+  "seed": 1,
+  "expected_launch_s": 8.9
+ },
+ "sampler": {
+  "restarts": 0,
+  "tel_raw": "/home/yaroslavvb/claude/et-soc1-prototyping/build/e63/runs/e63-card-1023/tel.jsonl.raw",
+  "ettelem": "/home/yaroslavvb/claude/et-soc1-prototyping/build/ettelem/ettelem",
+  "args": "sample --every-ms 100 --reset-ms 1000"
+ },
+ "camera": {
+  "url": "http://p3-phone:8080/stream.raw.z",
+  "recorder": "/home/yaroslavvb/claude/et-soc1-prototyping/build/e63/code/record_cam.py",
+  "recorded": true,
+  "pid": 1478976,
+  "rc": 0,
+  "exited_early": false,
+  "rc_early": null,
+  "cmd": [
+   "nice",
+   "-n",
+   "19",
+   "/usr/bin/python3",
+   "/home/yaroslavvb/claude/et-soc1-prototyping/build/e63/code/record_cam.py",
+   "--url",
+   "http://p3-phone:8080/stream.raw.z",
+   "--out",
+   "/home/yaroslavvb/claude/et-soc1-prototyping/build/e63/runs/e63-card-1023/cam",
+   "--stop-file",
+   "/home/yaroslavvb/claude/et-soc1-prototyping/build/e63/runs/e63-card-1023/CAMSTOP",
+   "--max-s",
+   "2508",
+   "--status-every",
+   "5",
+   "--min-free-mb",
+   "5000",
+   "--no-nice"
+  ]
+ },
+ "watcher": {
+  "trip": null,
+  "lost": null,
+  "error": null,
+  "clock_skew_ms": null,
+  "samples": 18473,
+  "bad_samples": 0,
+  "no_die_samples": 0,
+  "last": {
+   "t_ms": 1792787234957,
+   "recv_ms": 1792787234986,
+   "first_recv_ms": 1792785314509,
+   "die_c": 50.0,
+   "die_low_c": 49.0,
+   "die_high_c": 51.0,
+   "pmic_c": 50.0,
+   "board_w": 22.86,
+   "mhz_minion": 600.0,
+   "n": 18473,
+   "bad": 0,
+   "no_die": 0,
+   "die_recv_ms": 1792787234986,
+   "skew_ms": 29,
+   "heartbeat_ms": 1792787235086,
+   "age_ms": 331,
+   "stamp_age_ms": 360,
+   "die_age_ms": 331,
+   "trip": null,
+   "lost": null
+  }
+ },
+ "orphans": [],
+ "etiquette": {
+  "checks": 374,
+  "use_count_baseline": 1,
+  "hits": [],
+  "lock": "/run/lock/etsoc-shire0.lock"
+ },
+ "et_who": "No process holds an ET-SoC-1 device node or card lock.",
+ "notes": []
+}

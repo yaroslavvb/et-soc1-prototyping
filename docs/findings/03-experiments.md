@@ -2550,3 +2550,48 @@ path was replaced by `posthoc/make_bloom_cycle.py`. Raw frames (1.26 GB + 3.59 G
 `build/e62/runs/`, not the registered per-block path. Nothing was unsafe: peak die 69 °C against an 85 °C stop, peak
 board 86.0 W against a 95 W cap.
 **Report:** [Heat follows the work: ET-SoC-1 heat movies](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-movies).
+
+## E63 — hlc: the camera half of the Hamming ladder, E60's top rung against its zero filmed from the back of the board (Q122; card runs 2026-10-23 from 12:55 PDT, aifoundry2) — pre-registered
+
+**Asked (Q122):** "run the camera half of the Hamming ladder on aifoundry2. This is E-T10 of the 26 Sep camera plan,
+with E60's rungs in place of patterns. […] Reuse E60's operand files (tools/claims-v3/hl) and E62's camera tools
+(tools/claims-v3/hm). Switch the highest rung aifoundry2 can hold at 800 MHz against its zero at about 0.05 Hz, with
+on-windows of 9.5 s or less and at least 5 minutes per rung. Record raw frames with the switch times logged, and add a
+null run (equal watts, same place). In E62 the shutter fired every 8–10 s, so plan around it. Pre-register before the
+first pass, claim the card in #community-lab […]."
+**Pre-registered** in [`tools/claims-v3/hlc/`](../../tools/claims-v3/hlc/README.md), commit `5740cdb7` (12:54 PDT, pushed
+before the first card access): E60's lq_h23 against lq_h0 on 8 minions in each of the 32 shires (256; the full card's
+zero alone is +31 W, which continuous switching would carry past the governor's step), one 8.5 s launch per 10 s phase
+idled out to its dwell (0.05 Hz; every on-window under 9.5 s), four blocks (TOP 9 + 21 laps, NULL ones/pi 3 + 18, MID
+lq_h8 3 + 18, TOP2 3 + 15), the camera's settings untouched, and a lock-in that gives every stretch between two shutter
+events a free offset, so no step is ever bridged; predictions, a hold gate and five decision rules. New code: E62's runner
+with per-set operand files and a fixed period (`run_hlc.py`), `lockin_hlc.py` and its tests; E62's recorder and reducer
+unchanged; E60's operand files checked byte for byte on the card (`tile_check.sh`). Amendment A0 (12:56, before any
+launch) fixed a path in the tile check; **amendment A1** (`d6704c60`, 13:08, from telemetry only, no frame reduced): rule 2
+failed in session 1, so the run repeated as session 2 at 6 minions per shire (192). 360 launches over the two sessions,
+none failed; claimed and released in #community-lab.
+**Result** (data in [`docs/reports/data/2026-10-23-e63-camera-hamming-ladder/`](../reports/data/2026-10-23-e63-camera-hamming-ladder/README.md);
+the full tables in the README's Results): **the thermal camera weighs the flips.** Session 1's top rung put **+5.443 ±
+0.008 W** on the board (154 fJ per designed flipped bit at 0.618 V) and the back of the board over the die followed with
+**194.2 ± 9.1 mK at 0.05 Hz** (p at the 20,000-draw floor, SNR 21): **59.0 ± 3.0 mK per watt** of power at that frequency,
+the heat **87 ± 5°** (about 5 s) behind the power. The null, ones against pi in the same 256 minions (−0.04 W apart), read
+**1.9 ± 15.0 mK** along the top rung's phase; the middle rung moved the camera 0.24 ± 0.08 of the top rung's amplitude
+for 0.27 of its power; the top rung run again read 178.8 ± 9.1 mK. Session 2 (192 minions) repeated it: 4.02 W, 118.7 ±
+13.0 mK, null −13.6 ± 8.4, middle rung 0.33 ± 0.05 for 0.28. All five rules pass in session 2; in session 1 rules 1, 3, 4
+and 5 pass and **rule 2 fails** (39 of 42 top-rung launches held 800 MHz, 92.9% against 95%; 98.8% of samples). The
+in-phase map carries the capacitor field's emissivity pattern (high-passed correlation with E62's bloom map 0.90–0.92),
+the focal plane's thermistor shows nothing at f, and the shutter (2.8–10.7 a minute by block) fell at no preferred phase,
+so the signal is heat on the board, not the camera. Against the predictions: steps and lag as registered; the camera's
+amplitude inside the registered band but 1.8× the central value (the transfer 59 mK/W against ~31 from E62's bloom); the
+noise twice the predicted.
+**Deviations and findings beside the rules:** (1) the transfer drifted through the hour, 59.0 → 52.9 → 47.8 → 42.4 mK/W
+over the four top-rung blocks, the lag 87° → 109°, as the board's back and the camera warmed; the rules compare blocks
+within a session and stand, but a camera wattmeter needs its own reference near each reading. (2) In 8 of 360 launches
+the clock fell to 600 MHz for 0.6–1.5 s at 1.4–8.4 s into a launch, at every load and a 54–57 °C die, the governor's
+idle-reset shape (`14-card-behaviour.md`, "A one-second idle reset inside a launch"); this, not heat, is what failed rule 2
+in session 1. (3) The header's `fpa_c` is the scene's mean, not the focal plane (it tracks the frame mean, ~5 °C above
+it); the registered camera-body check rests on VTEMP. (4) `reduce_hm.py` bridged one session-2 shutter step 5.0 K wrong;
+the plain lock-in on the bridged frames reads that block 127 ± 119 mK, the registered fit 36.3 ± 3.3. Session 1's frames
+were reduced on the Intel from a byte-identical copy (sha256 checked) while session 2 ran; raw frames (2.1 + 2.0 GB) stay
+on aifoundry2 in `build/e63/runs/`. Nothing was unsafe: peak die 57.3 °C, peak board 42 W.
+**Report:** [Weighing flipped bits with heat: the camera half of the Hamming ladder](https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-camera).

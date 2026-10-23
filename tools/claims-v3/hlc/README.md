@@ -171,6 +171,9 @@ python3 lockin_hlc.py ../runs/<session>-RED --protocol protocol.json --template 
 | `test_lockin_hlc.py` | synthetic sessions with planted signals, shutter steps and drift: recovery, null, coverage, blindness to per-stretch offsets |
 | `fpa_trace.py` | the camera's focal-plane readings per frame |
 | `prereg/e62_bloom_dt.npy`, `prereg/e62_gain.npy`, `prereg/e62_scene.npy` | E62 session 2's bloom map, gain map and idle scene (the ROI, the shape, the registration) |
+| `protocol-A1.json` | amendment A1's protocol: every set at 6 minions per shire (session 2) |
+| `summary_hlc.py`, `dips_hlc.py`, `fpa_scene.py` | added after the freeze, reported with no verdict: prices per flip and the plain bridged lock-in; the clock dips; the header's `fpa_c` against the scene |
+| `figures_hlc.py`, `page_text_hlc.py`, `build_page_hlc.py` | the write-up's pictures, prose and page (`docs/reports/2026-10-23-camera-hamming-ladder/`), every number from the files above |
 
 ## Amendments
 
@@ -192,4 +195,59 @@ power that feeds the transfer is measured through them.
 
 ## Results
 
-(after the run)
+Two sessions on aifoundry2, Fri 23 Oct 2026: session 1, 12:55–13:27 PDT (`protocol.json`, 256 minions), and session 2,
+13:27–13:59 (`protocol-A1.json`, 192 minions, amendment A1), 180 launches each, none failed, the card claimed and released
+in `#community-lab`. The camera's view had not moved since E62 (shift 0, 0; correlation 0.98 and 0.99). Data:
+[`docs/reports/data/2026-10-23-e63-camera-hamming-ladder/`](../../../docs/reports/data/2026-10-23-e63-camera-hamming-ladder/README.md);
+write-up: [Weighing flipped bits with heat](https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-camera).
+
+The registered lock-in, ROI = the warm quarter of E62's bloom map (3,072 binned pixels); camera amplitudes are the 0.05 Hz
+component's, ± its SE over laps; "along" is along the session's top-rung phase:
+
+| Session, block | Laps | Board step | Power at f | Camera at f, ROI | Phase | p | Transfer, mK/W, lag |
+|---|---|---|---|---|---|---|---|
+| 1, TOP: lq_h23 vs lq_h0 | 21 | +5.443 ± 0.008 W | 3.290 W | **194.2 ± 9.1 mK** | 83° | 5 × 10⁻⁵ (floor) | **59.0 ± 3.0**, 87 ± 5° |
+| 1, NULL: ones vs pi | 18 | −0.044 ± 0.006 W | 0.045 W | 1.9 ± 15.0 along (44.2 ± 18.5 in all) | −5° | 0.076 | — |
+| 1, MID: lq_h8 vs lq_h0 | 18 | +1.496 ± 0.009 W | 0.918 W | **48.8 ± 9.9 mK** | 66° | 0.009 | 53.2 ± 11.5, 71 ± 22° |
+| 1, TOP2 | 15 | +5.457 ± 0.011 W | 3.383 W | **178.8 ± 9.1 mK** | 97° | 9 × 10⁻⁵ | 52.9 ± 2.6, 101 ± 6° |
+| 2, TOP | 21 | +4.020 ± 0.014 W | 2.485 W | **118.7 ± 13.0 mK** | 96° | 5 × 10⁻⁵ (floor) | 47.8 ± 5.1, 100 ± 5° |
+| 2, NULL | 18 | −0.033 ± 0.006 W | 0.032 W | −13.6 ± 8.4 along (14.2 ± 5.0 in all) | −101° | 0.25 | — |
+| 2, MID | 18 | +1.109 ± 0.006 W | 0.687 W | **36.3 ± 3.3 mK** | 101° | 1 × 10⁻⁴ | 52.8 ± 5.9, 104 ± 7° |
+| 2, TOP2 | 15 | +4.038 ± 0.012 W | 2.450 W | **103.8 ± 21.8 mK** | 104° | 2 × 10⁻⁴ | 42.4 ± 9.7, 109 ± 12° |
+
+**Decision rules.** Session 1: 1 PASS (SNR 21.4, lag 87°); **2 FAIL** (39 of 42 launches held, 92.9%; 98.8% of samples at
+800 MHz after the ramp; die 56.5 °C mean, 57.3 max); 3 PASS (1.9 ± 15.0 mK along the top rung's phase against 1.9 expected
+from its own power, p 0.076); 4 PASS (camera ratio 0.24 ± 0.08 against the power's 0.27); 5 PASS (|H₂ − H| 14.3 against
+3 SE 25.2). Session 2: 1 PASS (SNR 9.1, lag 100°); **2 PASS** (41 of 42 held; die 55.7 °C mean, 57.0 max); 3 PASS (−13.6 ±
+8.4 against −1.2 expected, p 0.25); 4 PASS (0.33 ± 0.05 against 0.28); 5 PASS (8.7 against 44.6). So, scored as
+registered: the camera weighs the top rung's flips in both sessions, the null of equal watts is flat in both, the middle
+rung scales with its watts in both, and the top rung holds 800 MHz on 192 minions (session 2) but not, by the 95% bar, on
+256 (session 1).
+
+**Predictions against the data.** The board steps came in as registered (TOP 5.44 W in 4.5–7.5, A1's 4.02 W in 3.4–5.6;
+MID 1.50 and 1.11 W; NULL −0.04 and −0.03 W), and so did the lag (87° against ~84°). The electrical price: 154 fJ per
+designed flipped bit for lq_h23 and 122 fJ for lq_h8 at 0.618 V in session 1 (predicted ~170 and ~130), 114 and 90 fJ in
+session 2. The camera's amplitude, 194 mK, sits inside the registered 50–400 mK but 1.8× the central 110: the transfer
+is 59 mK/W at first, not the ~31 predicted from E62's bloom, so the board answers 0.05 Hz faster than one 15–20 s time
+constant says. The noise was about twice the predicted 4–5 mK (SE 9–13 mK on the top rung). The spatial predictions held:
+the in-phase map correlates 0.58–0.63 with E62's bloom map and 0.90–0.92 in its high-passed detail, the capacitor field's
+low-emissivity tops under-reporting as in the bloom. The shutter fired 2.8–10.7 times a minute by block (about 7 with the
+card idle in the dry run) at no preferred phase (Rayleigh p 0.045–0.997; two of eight blocks under 0.05, none under 0.01).
+The focal plane's thermistor (VTEMP) shows no 0.05 Hz component (p 0.05–0.98).
+
+**Reported with no verdict.** (1) **The transfer drifted through the hour**: 59.0, 52.9, 47.8 and 42.4 mK/W for the four
+top-rung blocks in time order, the lag 87° → 101° → 100° → 109°, as the board's back warmed (its frame mean rose ~10 K in
+session 1) and the camera warmed (VTEMP fell 12 and 21 counts). Rules 4 and 5 compare blocks inside one session, so they
+stand; a camera wattmeter needs its own top rung near every reading. (2) **The plain lock-in on `reduce_hm.py`'s bridged
+frames** (one stretch, no guard bins) reads session 1's TOP 192.5 ± 18.2 mK: the same amplitude, twice the error. In
+session 2 one shutter step was bridged 5.0 K wrong in a single bin (t = 1,376 s, inside MID), and there the plain lock-in
+reads 127 ± 119 mK against the registered 36.3 ± 3.3: what the free offset per stretch is for. (3) **The header's
+`fpa_c` is the scene, not the focal plane** (`fpa_scene.py`): in session 1 it ran a median 5.0 °C above the bridged frame
+mean (3.4–7.0 by minute) and followed it (detrended r 0.58, VTEMP's 0.06), as `p3rec.py` already notes for InfoLine word
+176; its 0.25 K at f for the top rung is the signal, seen by the sensor's own statistic. (4) **The clock dips**
+(`dips_hlc.py`): in 8 of 360 launches (4 per session; TOP 3 and 1, NULL 1 and 3, MID and TOP2 none) the clock fell from
+800 MHz straight to 600 MHz for 0.6–1.5 s and climbed back through 700, the SRAM rail 830 → 704 mV, anywhere from 1.4 to
+8.4 s into a launch (session 1's four all at 7.2–7.3 s), at 36–42 W and a 54–57 °C die (not the thermal step and not the
+65 W TDP), the sampler's command taking 38–132 ms at the onset against a median of 22. The heater's own internal launches
+ran on without a gap over 2 ms and its cycle counters read 0.60 GHz through each one. Their shape is the governor's idle
+reset and climb (`docs/findings/14-card-behaviour.md`); why it fires mid-launch is not known.
