@@ -178,6 +178,18 @@ python3 lockin_hlc.py ../runs/<session>-RED --protocol protocol.json --template 
 to the tree root, so a relative path failed every redirection and no heater ran (its first call, 12:55). It now
 resolves the output directory and its own directory to absolute paths first. Nothing else changes.
 
+**A1, Fri 23 Oct 2026, 13:08 PDT** (written during session 1's NULL block, from telemetry only; no camera frame has been
+reduced or looked at): **rule 2 failed in session 1.** In `E63-TOP`, 3 of the 42 analysed launches (#21 and #53,
+lq_h23; #56, lq_h0) dropped to 600 MHz for 1.0–1.5 s, each 7.2–7.3 s after the launch started, the SRAM rail stepping
+830 → 704 mV and back up through 700 MHz: 39 of 42 hold, under the registered 95%. The die read 56–57 °C and the PMIC
+55–57 °C at every dip, so it is not the governor's 65 °C thermal step. As rule 2 directs, **the run is repeated as
+session 2 at 6 minions per shire** (192 minions, `protocol-A1.json`: every set's `per_shire` 8 → 6, `harts` 256 → 192;
+nothing else changes), right after session 1. Its predictions scale with the minions: TOP's board step ~4.1 W (3.4–5.6),
+MID's ~1.2 W, the camera ×0.75. Session 1 runs to its end as registered and both sessions are reported, each scored by the
+same five rules. If session 2's hold gate fails too there is no third session: the dips are then described (when in a
+launch, which arm, at which load) as exploratory, and the camera numbers stand with the dips inside them, since the board
+power that feeds the transfer is measured through them.
+
 ## Results
 
 (after the run)
