@@ -1840,12 +1840,15 @@
   startTimers();
 })();
 
-// The Worklog is folded by default (the owner's ask, Wed 21 Oct 2026). Open it when the address asks for it,
-// so the day pages' back links (…/aifoundry-lab-dashboard#worklog) and the section list still land on it open.
+// The Worklog and todo: are folded by default (the owner's asks, Wed 21 and Thu 22 Oct 2026: "I don't want it,
+// distracting from people scrolling down to the live, thermal feed"). Open one when the address asks for it, so the
+// day pages' back links (…/aifoundry-lab-dashboard#worklog), the section list and the breadcrumbs still land on it open.
 (function () {
-  function openWorklog() {
-    if (location.hash === "#worklog") { var d = document.getElementById("worklog-box"); if (d) d.open = true; }
+  var boxes = { "#worklog": "worklog-box", "#todo": "todo-box" };
+  function openFolded() {
+    var id = boxes[location.hash], d = id && document.getElementById(id);
+    if (d) d.open = true;
   }
-  window.addEventListener("hashchange", openWorklog);
-  openWorklog();
+  window.addEventListener("hashchange", openFolded);
+  openFolded();
 })();
