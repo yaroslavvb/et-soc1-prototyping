@@ -6,8 +6,9 @@
 # Usage, on aifoundry2 from build/e63/code:  bash tile_check.sh <outdir>
 set -u
 ROOT=$HOME/claude/et-soc1-prototyping
-OUT=${1:?usage: tile_check.sh <outdir>}
-mkdir -p "$OUT"
+HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+mkdir -p "${1:?usage: tile_check.sh <outdir>}"
+OUT=$(cd "$1" && pwd)
 cd "$ROOT" || exit 2
 export LD_LIBRARY_PATH=/opt/et/lib
 HEATER=build/sparsity_t2/host/sparsity_host
@@ -35,5 +36,5 @@ for v in file:build/hl-gen2/tiles/lq_h23.bin file:build/hl-gen2/tiles/lq_h0.bin 
 done
 flock -u 9
 exec 9>&-
-python3 "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/tile_compare.py" "$ROOT" "$OUT" || rc_all=1
+python3 "$HERE/tile_compare.py" "$ROOT" "$OUT" || rc_all=1
 exit $rc_all

@@ -174,7 +174,9 @@ python3 lockin_hlc.py ../runs/<session>-RED --protocol protocol.json --template 
 
 ## Amendments
 
-(none yet)
+**A0, Fri 23 Oct 2026, 12:56 PDT** (before any launch): `tile_check.sh` resolved its output directory after changing
+to the tree root, so a relative path failed every redirection and no heater ran (its first call, 12:55). It now
+resolves the output directory and its own directory to absolute paths first. Nothing else changes.
 
 ## Results
 
