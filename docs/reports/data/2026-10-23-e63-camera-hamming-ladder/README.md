@@ -12,7 +12,7 @@ the camera's lossless stream with the host's receive time on every frame) stay o
 | `s*/red/` | from `reduce_hm.py` (E62's, unchanged): `ffc.json` (every shutter event it found), `meta.json`, `scene.npy` (the idle scene, 192 × 256 °C); and `fpa.npz` from `fpa_trace.py` (per frame: the focal-plane thermistor VTEMP and the header's `fpa_c`) |
 | `s*/analysis/` | the registered lock-in, `lockin_hlc.py`: `lockin.json` (every block's ROI, frame and power amplitudes, per lap, the transfers, the hold gate, the shutter-phase test, the decision rules) and `E63-*-maps.npz` (per pixel, 96 × 128: the complex amplitude at 0.05 Hz and its SEs, the in-phase map, the ROI) |
 | `s*/summary.json`, `s*/dips.json`, `s*/fpa_scene.json` | reported beside the registered numbers with no verdict: `summary_hlc.py` (prices per flipped bit, the camera per watt and per flip rate, the plain lock-in on bridged frames), `dips_hlc.py` (the one-second clock dips inside launches), `fpa_scene.py` (the header's `fpa_c` is the scene's mean, not the focal plane) |
-| `s1/figures.json` | the page's folded cycles and map statistics (`figures_hlc.py`) |
+| `s1/figures.json`, `dips.json` | the page's folded cycles and map statistics (`figures_hlc.py`); both sessions' dips in one file (`dips_hlc.py s1/RED s2/RED`), as the page's text reads them |
 | `tiles/` | the pre-session operand check (`tile_check.sh`): each launch's record with `--dump-tiles`, compared byte for byte with E60's files |
 
 Rebuild everything from a RUNDIR (on aifoundry2, from `build/e63/code/`, or on any machine with numpy):
