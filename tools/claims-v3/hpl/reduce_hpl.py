@@ -26,7 +26,16 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "dv2"))
+sys.path.insert(0, HERE)
 import sptrace_events as spe  # noqa: E402
+import sptrace_full as spf  # noqa: E402  (amendment A1: the whole ring, binary records included)
+
+KEEP = set(spe.GOVERNOR) | {"new_op", "pstat"}
+
+
+def is_idle_marker(e):
+    """The idle reset: a 'Power idle state event' line, or (this build) a power-status record in POWER_IDLE."""
+    return e["kind"] == "power_idle" or (e["kind"] == "pstat" and e.get("throttle_state") == 0)
 
 OPS = {"fp32": 2 * 16 * 16 * 16, "fp16": 2 * 16 * 16 * 32, "int8": 2 * 16 * 16 * 64}
 TDP_MW = 65000
@@ -93,16 +102,17 @@ def sp_events_by_run(rundir, sess, runs, q0):
     prev = []
     start = os.path.join(rundir, "sp", "start.bin")
     if os.path.exists(start):
-        prev = spe.events(open(start, "rb").read())
+        prev = spf.scan(open(start, "rb").read()) or []
     for r in runs:
         p = os.path.join(rundir, "sp", f"{r['run']}.bin")
         if not os.path.exists(p):
             out[r["run"]] = None
             continue
-        cur = spe.events(open(p, "rb").read())
-        new = spe.since(prev, cur) if prev else [e for e in cur if e["ts"] is not None]
-        out[r["run"]] = [e for e in new if e["kind"] in spe.GOVERNOR]
-        out[r["run"] + "#overlap"] = spe.overlap(prev, cur) if prev else None
+        cur = spf.scan(open(p, "rb").read()) or []
+        new = spf.since(prev, cur)
+        out[r["run"]] = [e for e in new if e["kind"] in KEEP]
+        # did the previous dump's newest entry survive into this one (no entries lost to a wrap between dumps)?
+        out[r["run"] + "#overlap"] = (any(e["ts"] == prev[-1]["ts"] for e in cur) if prev else None)
         prev = cur
     return out
 
@@ -117,7 +127,7 @@ def fit_clock(evs_by_run, launches, sess):
             continue
         idle = True
         for e in evs:
-            if e["kind"] == "power_idle":
+            if is_idle_marker(e):
                 sp.append((e["ts"], "end"))
                 idle = True
             elif e["kind"] in spe.POWER_START and idle:
@@ -129,8 +139,43 @@ def fit_clock(evs_by_run, launches, sess):
     return spe.fit_ticks(sp, anchors, lag_ms=(0.0, 1600.0))
 
 
+def align_run(evs, s, b_ms_per_tick):
+    """A1: place a run's SP entries on the host clock by matching its operating-point lines ("New OP: Freq F")
+    to the sampler's clock changes (the first 100 ms sample that reads F after a sample that did not). One offset
+    per run at the session's tick (1 us on these cards): every same-frequency pair proposes an offset; the one that
+    matches the most changes within 250 ms wins, then the median of its matches. Returns (a_ms, n_matched, n_ops)."""
+    ops = [(e["ts"], e["mhz"]) for e in evs if e["kind"] == "new_op" and e.get("ts") is not None]
+    ch = [(s[i][0], s[i][4]) for i in range(1, len(s)) if s[i][4] is not None and s[i][4] != s[i - 1][4]]
+    if not ops or not ch:
+        return None, 0, len(ops)
+    best = None
+    for ts, f in ops:
+        for t, g in ch:
+            if g != f:
+                continue
+            a = t - b_ms_per_tick * ts - 50.0      # a sample reads a change 0-100 ms after it: aim mid-interval
+            m = []
+            for ts2, f2 in ops:
+                h = a + b_ms_per_tick * ts2
+                near = [t3 for t3, g3 in ch if g3 == f2 and -150.0 <= t3 - h <= 250.0]
+                if near:
+                    m.append(min(near, key=lambda t3: abs(t3 - h - 50.0)) - b_ms_per_tick * ts2 - 50.0)
+            if best is None or len(m) > len(best):
+                best = m
+    if not best:
+        return None, 0, len(ops)
+    return st.median(best), len(best), len(ops)
+
+
 def run_metrics(rundir, r, procs, evs, fit):
     s = tel(os.path.join(rundir, r["tel"]))
+    if evs:
+        b = fit["b_ms_per_tick"] if fit else 0.001
+        a_run, n_match, n_ops = align_run(evs, s, b)
+        if a_run is not None and n_match >= max(2, n_ops // 2):
+            fit = {"a_ms": a_run, "b_ms_per_tick": b, "source": "run", "matched": n_match, "ops": n_ops}
+        elif fit:
+            fit = dict(fit, source="session", matched=n_match, ops=n_ops)
     work_procs = [p for p in procs if p.get("role") == "work"]
     lw = []
     for p in work_procs:
@@ -150,7 +195,8 @@ def run_metrics(rundir, r, procs, evs, fit):
     ws = [x for x in s if in_work(x[0])]
     m = {"run": r["run"], "block": r["block"], "label": r["label"], "type": r["type"], "values": r["values"],
          "minions": r["minions"], "rep": r["rep"], "gate": r["gate"], "n_samples": len(ws),
-         "work_s": round((t1 - t0) / 1000.0, 2)}
+         "work_s": round((t1 - t0) / 1000.0, 2),
+         "placement": ({k: v for k, v in fit.items() if k in ("source", "matched", "ops")} if fit else None)}
     mh = [x[4] for x in ws if x[4] is not None]
     for f in (600, 700, 800):
         m[f"mhz_{f}"] = round(sum(1 for v in mh if v == f) / len(mh), 3) if mh else None
@@ -199,10 +245,17 @@ def run_metrics(rundir, r, procs, evs, fit):
         for e in evs:
             h = fit["a_ms"] + fit["b_ms_per_tick"] * e["ts"] if (fit and e.get("ts") is not None) else None
             placed.append({"kind": e["kind"], "pwr_mw": e.get("pwr_mw"), "T": e.get("T"),
+                           "mhz": e.get("mhz"), "sp_w": e.get("power_w"), "sp_c": e.get("temp_c"),
+                           "state": e.get("throttle_state"), "ts": e.get("ts"),
                            "t_s": round((h - t0) / 1000.0, 2) if h is not None else None,
                            "die": die_at(s, h) if h is not None else None,
                            "in_work": (h is not None and t0 - 200 <= h <= t1 + 1500)})
         m["event_list"] = placed
+        kinds = {}
+        for e in evs:
+            if e["kind"] in spe.GOVERNOR:
+                kinds[e["kind"]] = kinds.get(e["kind"], 0) + 1
+        m["events"] = kinds
         work_ev = [e for e in placed if e["in_work"]] if fit else placed
         m["work_power_down"] = [e for e in work_ev if e["kind"] == "power_down"]
         m["work_thermal_down"] = [e for e in work_ev if e["kind"] == "thermal_down"]
@@ -220,7 +273,9 @@ def run_metrics(rundir, r, procs, evs, fit):
                 lab["800"] += 1
                 continue
             recent_hot = any(y[1] is not None and y[1] >= 66 for y in ws if x[0] - 2000 <= y[0] <= x[0])
-            prior = [e for e in pe if t0 + e["t_s"] * 1000 <= x[0] and e["kind"] != "power_up"]
+            # A1: "the last governor line" is the last throttle-DOWN line (power or thermal): an up-step or an
+            # idle reset names no limiter, and the climb after a power-down is one point per pass
+            prior = [e for e in pe if t0 + e["t_s"] * 1000 <= x[0] and e["kind"] in ("power_down", "thermal_down")]
             last_ev = prior[-1]["kind"] if prior else None
             ramp = any(0 <= x[0] - a <= RAMP_S * 1000 for a in starts)
             if recent_hot or last_ev in ("thermal_down",):

@@ -162,3 +162,20 @@ against the measured runs at 65 W.
   sampler opened the device, so the sampler read as another user. The baseline is now taken after each sampler start,
   with only our sampler open, as E63's runner does (`run_hlc.py` `take_ns_baseline`). Nothing else changes; that
   session's directory (`build/e64/runs/smoke`) holds only the start-of-session queries.
+- **A1 (Fri 23 Oct 2026, 20:5x PDT, after the smoke `build/e64/runs/smoke2`, before any registered data).**
+  (1) *The trace reader.* `sptrace_events.py` walks the ring from its header and stops at the first entry that is not
+  a printable string. On this card the governor writes a 16-byte binary power-status record at every operating-point
+  change, so that walk lost most of each dump (the smoke: 7–29 of 60–71 entries, every governor line of the first
+  three runs). E64 reads the ring with `sptrace_full.py`: a scan of the whole ring at 8-byte steps that keeps the
+  governor's text lines as before, the `New OP: Freq <MHz> MNN <mV> (V) SRM <mV> (V)` line of every operating point
+  set, and the binary record (power W, throttle state, power state, temperature °C, target MHz; layout in its header).
+  (2) *The idle marker.* The idle reset prints no "Power idle state event" line on this card; a power-status record
+  in throttle state 0 marks it. (3) *Placement.* Each run's entries are placed by one offset per run that matches the
+  SP's `New OP` lines to the sampler's clock changes, at the session fit's tick (1 µs: the smoke's fit read 999,252 Hz),
+  falling back to the session fit when fewer than half the lines match (the smoke: 6 of 6, 3 of 3, 3 of 3, 3 of 3).
+  (4) *R4's wording.* "The last governor line before it" is the last throttle-*down* line, power or thermal: an
+  up-step or an idle reset names no limiter, and after a power throttle-down the clock climbs one point per pass. The
+  rules' populations and thresholds are unchanged. *Observed in the smoke, not analysed:* the fp32 random run's power
+  throttle-down logged 65,880 mW while the sampler's board reading was 80.8 W on the three samples before the step, so
+  the governor's power input lags the board reading by about a second (as a running average would); P5 already looks
+  wrong (that run logged a second power throttle-down at 700 MHz and then a power throttle-up within one process).
