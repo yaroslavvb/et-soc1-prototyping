@@ -157,4 +157,8 @@ against the measured runs at 65 W.
 
 ## Amendments
 
-*None yet.*
+- **A0 (Fri 23 Oct 2026, 20:3x PDT, before any data).** The first smoke (20:31) ended at its first run, before any
+  launch, with exit 3 `other_user:et_soc1_use:1>0`: the runner took the et_soc1 use count's baseline before its own
+  sampler opened the device, so the sampler read as another user. The baseline is now taken after each sampler start,
+  with only our sampler open, as E63's runner does (`run_hlc.py` `take_ns_baseline`). Nothing else changes; that
+  session's directory (`build/e64/runs/smoke`) holds only the start-of-session queries.

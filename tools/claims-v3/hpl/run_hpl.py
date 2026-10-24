@@ -738,6 +738,11 @@ class Session:
         if not self.start_sampler(tel, r.plan_s() + 900):
             raise EndSession("error:sampler_would_not_start", EXIT_ERR)
         self.sampler_t0 = now_ms()
+        if not self.dry:
+            # A0: the et_soc1 use count's baseline is taken with only our sampler open, as E63's runner does
+            # (run_hlc.py take_ns_baseline); taken before it, our own sampler read as another user (exit 3).
+            self.ns_baseline = self.modcount()
+            self.mark("use_count_baseline", str(self.ns_baseline))
         time.sleep(1.0)
         g = self.gate(r)
         self.say(f"    gate: {g}")
