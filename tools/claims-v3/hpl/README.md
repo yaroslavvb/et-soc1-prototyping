@@ -179,3 +179,13 @@ against the measured runs at 65 W.
   throttle-down logged 65,880 mW while the sampler's board reading was 80.8 W on the three samples before the step, so
   the governor's power input lags the board reading by about a second (as a running average would); P5 already looks
   wrong (that run logged a second power throttle-down at 700 MHz and then a power throttle-up within one process).
+- **A2 (Fri 23 Oct 2026, 20:4x PDT, during the session, before any HOT data was reduced).** The first HOT gate (20:44,
+  run 27) heated the die with twelve 3 s random-data launches for 46 s and peaked at a 65 °C reading, short of the
+  69 °C the HOT gate aims for: the power test holds the heater near 65 W, and above 65 °C the thermal test holds it at
+  600 MHz, where random data draws about 50 W. So the 67 °C edge is out of reach on this card's cooling, and those
+  runs will launch at about 65 °C, which would make R3(a) hold trivially. Read from the gate's log only; no clock or
+  event of any HOT run was looked at. Changes: (1) R3(a)'s population becomes every HOT or HOT2 run whose work begins
+  on a die that reads 66 or more; a HOT edge-67 run that does not is listed as excluded, not counted. (2) A new block
+  `HOT2` runs after the session (as its own session, `--only HOT2`): heat with back-to-back 8 s random-data launches on
+  the full card until the die reads 66 or more (at most 8), then launch the work at once, fp32 ones and zeros, 2 passes,
+  6 s each (runner start mode `hot`). (3) R3(b)'s population adds the HOT2 runs. Thresholds unchanged.

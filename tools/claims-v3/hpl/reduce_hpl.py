@@ -334,9 +334,15 @@ def rules(metrics):
     out["R2"] = {"population": len(lo), "with_power_down": n2,
                  "verdict": ("PASS" if n2 <= 0.1 * len(lo) else "FAIL") if len(lo) >= 4 else "UNDER-RESOLVED",
                  "runs": [[m["run"], m["p800_w"], bool(m.get("work_power_down"))] for m in lo]}
-    hot = [m for m in metrics if m["block"] == "HOT"]
-    a_runs = [m for m in hot if "edge67" in m["label"]]
-    b_runs = [m for m in hot if "edge63" in m["label"]]
+    hot = [m for m in metrics if m["block"] in ("HOT", "HOT2")]
+
+    def starts_hot(m):
+        """A2: R3(a) needs the work to begin on a die that reads 66 or more (the governor in its thermal loop)."""
+        first = next((x for x in m["trace"] if x[0] >= 0 and x[1] is not None), None)
+        return bool(first and first[1] >= 66)
+    a_runs = [m for m in hot if starts_hot(m)]
+    b_runs = [m for m in hot if "edge63" in m["label"] or m["block"] == "HOT2"]
+    out_hot_excluded = [m["run"] for m in hot if ("edge67" in m["label"] or m["block"] == "HOT2") and not starts_hot(m)]
 
     def a_ok(m):
         bad = 0
@@ -364,7 +370,7 @@ def rules(metrics):
     ok_a = len(a_runs) >= 2 and a_n == len(a_runs)
     ok_b = len(b_ap) >= 2 and b_n == len(b_ap)
     out["R3"] = {"a_population": len(a_runs), "a_held_600_until_65": a_n, "b_population_reaching_66": len(b_ap),
-                 "b_thermal_not_power": b_n,
+                 "b_thermal_not_power": b_n, "a_excluded_not_hot_at_start": out_hot_excluded,
                  "verdict": "PASS" if ok_a and ok_b else ("UNDER-RESOLVED" if len(b_ap) < 2 or len(a_runs) < 2
                                                           else "FAIL"),
                  "runs": [[m["run"], a_ok(m) if m in a_runs else None,

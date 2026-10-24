@@ -173,8 +173,10 @@ class Run:
         if not (1 <= self.per_shire <= 32) or self.mask == 0 or self.mask >> 32:
             bad.append(f"{self.name}: mask/per_shire")
         m = self.start.get("mode")
-        if m not in ("cool", "edge"):
+        if m not in ("cool", "edge", "hot"):
             bad.append(f"{self.name}: start.mode {m}")
+        if m == "hot" and not (num(self.start.get("hot_c")) and 60 <= num(self.start["hot_c"]) <= 75):
+            bad.append(f"{self.name}: a hot start needs hot_c between 60 and 75")
         if m == "edge" and not (num(self.start.get("heat_to_c")) and num(self.start.get("edge_c"))):
             bad.append(f"{self.name}: an edge start needs heat_to_c and edge_c")
         if m == "edge" and num(self.start.get("heat_to_c")) and num(self.start["heat_to_c"]) > 80:
@@ -707,6 +709,25 @@ class Session:
             ok, held, rd = self.wait_until(lambda x: x[0] <= num(st["max_c"]), num(st.get("max_wait_s", 300)),
                                            f"{r.name} cool gate")
             return {"mode": "cool", "max_c": st["max_c"], "reached": ok, "held_s": held, "reading": rd}
+        if st["mode"] == "hot":
+            # A2: heat with back-to-back full-card random launches of heat_s seconds until the die reads hot_c or
+            # more (the governor is then in its thermal loop), then launch the work at once, with no edge to wait for
+            hot, heats, t0 = num(st["hot_c"]), 0, time.time()
+            hs = num(st.get("heat_s", 8)) or 8.0
+            rd = self.reading()
+            while rd is not None and rd[0] is not None and rd[0] < hot and heats < int(st.get("max_heats", 8)):
+                self.guard(f"{r.name} heat")
+                self.check_others(f"{r.name} heat")
+                cmd, rc, out, err, a, b = self.spawn_kernel(r, values=st.get("heater_values", "randn"), seconds=hs,
+                                                           budget=hs + 1.5, mask=0xffffffff, per_shire=32, typ="fp32")
+                heats += 1
+                self.jsonl("launches.jsonl", {"run": r.name, "role": "heat", "cmd": cmd, "rc": rc, "t_start_ms": a,
+                                              "t_end_ms": b, "stderr_tail": err[-300:] if err else ""})
+                if rc != 0:
+                    raise EndSession(f"error:heater_rc_{rc}", EXIT_ERR)
+                rd = self.reading()
+            return {"mode": "hot", "hot_c": hot, "reached": bool(rd and rd[0] is not None and rd[0] >= hot),
+                    "heats": heats, "heat_s": round(time.time() - t0, 1), "reading": rd}
         heat_to, edge = num(st["heat_to_c"]), num(st["edge_c"])
         heats = 0
         t0 = time.time()

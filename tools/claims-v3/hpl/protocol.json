@@ -83,6 +83,16 @@
         {"type": "int8", "values": "ones"},
         {"type": "int8", "values": "randn"}
       ]
+    },
+    {
+      "name": "HOT2", "title": "amendment A2: work under the TDP launched at once after heating the die to a reading of 66 C",
+      "default": false, "passes": 2, "shuffle": true,
+      "launch": {"seconds": 6, "budget": 7.5, "processes": 1}, "tail_s": 4,
+      "start": {"mode": "hot", "hot_c": 66, "heat_s": 8, "max_heats": 8},
+      "runs": [
+        {"type": "fp32", "values": "ones", "label": "fp32-ones-hot66"},
+        {"type": "fp32", "values": "zeros", "label": "fp32-zeros-hot66"}
+      ]
     }
   ]
 }
