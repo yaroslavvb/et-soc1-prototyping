@@ -25,6 +25,13 @@ build itself (TH2) is untested too. The card idled at 71–76 °C for most of th
 only in an evening cool spell. The development notes below stand as development evidence, each with the validation's
 count beside it.
 
+**Updated 2026-10-23 (E64).** On aifoundry2 since its October cooling, **the power branch acts alone**: from a cool
+die the governor's own log shows 98 power throttle-downs at a 57–63 °C reading and no thermal step, for every
+run whose work drew 67 W or more at 800 MHz, and none for work under 62 W; at a reading of 66 °C only the thermal
+branch acts. The table's "Power branch acting alone: 0" below is the September record, when the card rested above
+65 °C. The power test also compares a ~1 s running average, not the instantaneous reading, and dithers one point per
+pass around 65 W ([14-card-behaviour.md](14-card-behaviour.md), "Which limit acts, read from the governor's own log").
+
 In a conversation on 20 September 2026, David Kanter (MLCommons) described how a mature chip regulates its own
 power. The notes of that conversation are private (R9); what follows paraphrases his statements. Six of them are
 checkable against this chip. Two hold, one holds at idle but is not established under load, one is wrong for this

@@ -2595,3 +2595,50 @@ the plain lock-in on the bridged frames reads that block 127 ± 119 mK, the regi
 were reduced on the Intel from a byte-identical copy (sha256 checked) while session 2 ran; raw frames (2.1 + 2.0 GB) stay
 on aifoundry2 in `build/e63/runs/`. Nothing was unsafe: peak die 57.3 °C, peak board 42 W.
 **Report:** [Weighing flipped bits with heat: the camera half of the Hamming ladder](https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-camera).
+
+## E64 — hpl: Horace, power limit — which of the governor's two limits sets the matmul's speed (Q123; card runs 2026-10-23 from 20:31 PDT, aifoundry2) — pre-registered
+
+**Asked (Q123):** "test the hypothesis that the underlying issue is power limit and not temperature limit. Look up the
+existing numbers [...] Do a study of underlying specifications of the chip and check if it's indeed the power limit
+that's limiting it, and give me the surface of this power limit. What kind of speeds would I expect for different types
+of numbers? [...] Run necessary experiments on AI Foundry2."
+**Pre-registered** in [`tools/claims-v3/hpl/`](../../tools/claims-v3/hpl/README.md), commit `2b951fca` (pushed before the
+first card access): the Horace kernel (one 16×16 TensorFMA per minion on L1 tiles, `build/sparsity_t2`, kernel sha256
+`990807f4…`) in four blocks — LAD (ten fp32 operand patterns on all 1,024 minions, 36–84 W at 800 MHz, from a die of 55 °C
+or less, two shuffled passes), MIN (random normal on 768, 640, 512 minions), HOT (ones and zeros launched on a heated die's
+falling edge at 67 or 63 °C) and SUS (fp32, fp16, int8 × zeros, ones, random, nine 8 s processes back to back) — with
+nothing set on the card (TDP and threshold read back after every run), a 10 Hz sampler without `--reset-ms`, and after
+every run the SP's trace ring, its throttle residencies and its configuration; rules R1–R4. New code: the runner
+`run_hpl.py` (E63's etiquette: card lock, other-user checks before every launch process, `timeout 10`, the safety
+watcher; a dry mode with a toy governor), `reduce_hpl.py`, and `sptrace_full.py`, a whole-ring reader. Amendments, each
+before the data it touched: **A0** (`4b2b1401`: the use-count baseline is taken with our own sampler open; the first smoke stopped
+before any launch), **A1** (`69380c49`: the dv2 trace reader stops at the first 16-byte binary power-status record and
+lost most governor lines, so the whole ring is scanned; entries are placed by matching the SP's `New OP` lines to the
+sampler's clock changes), **A2** (`1a899d8f`: the HOT heater could not take the die past a 65–67 °C reading, so R3(a)
+counts only runs that start at 66 °C or more, and a HOT2 block heats with 8 s launches), **A3** (with the results: the
+4 KB ring keeps only its last ~67 entries, a few seconds of a dither, so the placement is anchored at the run's end and
+R4 is also reported on the sampler alone). Three sessions: the smoke (20:31:56), `s1` 20:37:01–21:08:43 (43 runs, 31.7
+card-minutes, none failed) and `s2` (HOT2, 21:09–21:11); claimed and released in #community-lab.
+**Result** (data in [`docs/reports/data/2026-10-23-e64-horace-power-limit/`](../reports/data/2026-10-23-e64-horace-power-limit/README.md)):
+**both limits act, each on its own; which sets the speed depends on the die's temperature, and in sustained work on this
+card's cooling heat wins.** R1 PASS: every one of the 10 cool-die runs whose work drew 67 W or more at 800 MHz was
+stepped down first by the power test (98 power throttle-downs logged, at a 57–63 °C die, the governor's reading 65.0–67.9
+W). R2 PASS: none of the 10 runs under 62 W got one; random normal data on 768 minions (69 W) was stepped down, on 640
+(62.5 W) it was not. The power loop is a dither (800 → 700 → 600 → 700 MHz for random fp32, ~82 / 64 / 50 W at the three
+points) around a ~1 s running average: a model with a 1.3 s first-order average compared with 65 W once per 0.24 s pass
+reproduces the mean clock of all 26 cool-die runs to 3.3 MHz rms. On a cool die zeros run 13% faster than random normal
+data (800 against 710 MHz): Horace's effect by Horace's mechanism. R3 PASS: work under the power level (ones, zeros)
+launched at a 66–67 °C reading held 600 MHz until the die read 65 (4 of 4), and every such run that reached 66 °C at
+800 MHz was stepped down by the thermal test and not the power test (4 of 4); 104 thermal steps logged in all, 102 at
+66 °C and 2 at 67 °C. R4 PASS: in 80 s runs the thermal test sets the sustained clock (the line through the runs' last
+40 s reads 65.5 °C at 50.3 W of board power, under the 65 W level): random fp32 and fp16 data end pinned at 600 MHz with
+the die at 66–67 °C; ones and int8 random settle at 737–763 MHz; zeros hold 800 MHz at 59 °C; sustained, zeros run 33%
+faster than random fp32 data (12.3 against 9.2 TFLOPS). Every number type's burst and sustained rate, and the governor
+model's rate under caps of 35–85 W, are in the README's Results.
+**Deviations and findings beside the rules:** (1) the governor's power input is a ~1 s running average, not the
+instantaneous reading `ffca4cbb4`'s source names (14-card-behaviour.md, "Which limit acts"); (2) a power throttle-down is
+not sticky (P5 refuted); (3) the trace ring carries `New OP` lines and binary power-status records, and the sampler's board
+value trails the clock by ~2 samples; (4) a random-data heater cannot take this die past ~67 °C, because the two limits
+hold it there (A2); (5) the governor model's surface (mean clock against the data's 800 MHz power and the power level) is a
+model, never tested at another level: the lab rule sets no TDP, threshold or clock on a shared card.
+**Report:** [Power, then heat: what limits the ET-SoC-1's matmul speed](https://spacesheep.dev/@yaroslavvb/et-soc1-power-limit).

@@ -189,3 +189,15 @@ against the measured runs at 65 W.
   `HOT2` runs after the session (as its own session, `--only HOT2`): heat with back-to-back 8 s random-data launches on
   the full card until the die reads 66 or more (at most 8), then launch the work at once, fp32 ones and zeros, 2 passes,
   6 s each (runner start mode `hot`). (3) R3(b)'s population adds the HOT2 runs. Thresholds unchanged.
+- **A3 (Fri 23 Oct 2026, 21:1x PDT, after the session, at the first reduction of the SUS runs).** The SP's trace ring
+  keeps only its last ~67 entries, three per clock step, so a dump covers the last ~5 s of a dithering run: the 6 s LAD
+  runs on random data lost their first second, and an 80 s SUS run keeps only its last 5–60 s (`ring_covers_from_s` in
+  the results). A1's placement, one offset per run matching the `New OP` lines to the sampler's clock changes, then
+  matched a periodic dither at the wrong cycle in the SUS runs (fp32 random's surviving lines landed at 11–13 s instead of
+  near its end). Changes, to the reduction only: (1) the placement is anchored: only offsets that put the ring's newest
+  entry between 0.5 s before the last process's end and the dump are allowed (`align_run`); (2) in R4 a governor line
+  labels a sample only inside the span the dump still covers, and before it the sample is labelled by the sampler alone;
+  (3) R4 is also reported on the sampler alone (a reading ≥ 66 °C in the 2 s before), which does not depend on the
+  ring. R1 and R2 do not depend on the lost entries: every LAD and MIN run's die read 63 °C or less throughout, so no
+  thermal step was possible there. Thresholds and populations unchanged. The rules' verdicts are the same before and
+  after this change (R1–R4 PASS).

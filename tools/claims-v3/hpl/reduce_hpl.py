@@ -45,9 +45,17 @@ RAMP_S = 1.5
 
 
 def jl(path):
+    """JSON lines from path, or from path.gz (the committed telemetry is gzipped)."""
     out = []
-    if os.path.exists(path):
-        for ln in open(path):
+    if not os.path.exists(path) and os.path.exists(path + ".gz"):
+        import gzip
+        lines = gzip.open(path + ".gz", "rt")
+    elif os.path.exists(path):
+        lines = open(path)
+    else:
+        return out
+    if lines:
+        for ln in lines:
             ln = ln.strip()
             if ln.startswith("{"):
                 try:
@@ -139,21 +147,30 @@ def fit_clock(evs_by_run, launches, sess):
     return spe.fit_ticks(sp, anchors, lag_ms=(0.0, 1600.0))
 
 
-def align_run(evs, s, b_ms_per_tick):
+def align_run(evs, s, b_ms_per_tick, t_end_ms=None, t_dump_ms=None):
     """A1: place a run's SP entries on the host clock by matching its operating-point lines ("New OP: Freq F")
     to the sampler's clock changes (the first 100 ms sample that reads F after a sample that did not). One offset
     per run at the session's tick (1 us on these cards): every same-frequency pair proposes an offset; the one that
-    matches the most changes within 250 ms wins, then the median of its matches. Returns (a_ms, n_matched, n_ops)."""
+    matches the most changes within 250 ms wins, then the median of its matches. Returns (a_ms, n_matched, n_ops).
+    A3: the 4 KB ring keeps only the last ~67 entries (a few seconds of a dither), so in a long run a periodic
+    dither matches at many offsets. The ring was dumped after the run's idle tail, so its newest entry falls between
+    the last process's end and the dump (the run's last idle reset, or, when the thermal loop was holding the clock
+    at the end, its exit during the tail): only offsets that put it from 0.5 s before t_end_ms to t_dump_ms are
+    allowed."""
     ops = [(e["ts"], e["mhz"]) for e in evs if e["kind"] == "new_op" and e.get("ts") is not None]
     ch = [(s[i][0], s[i][4]) for i in range(1, len(s)) if s[i][4] is not None and s[i][4] != s[i - 1][4]]
     if not ops or not ch:
         return None, 0, len(ops)
+    newest = max(e["ts"] for e in evs if e.get("ts") is not None)
     best = None
     for ts, f in ops:
         for t, g in ch:
             if g != f:
                 continue
             a = t - b_ms_per_tick * ts - 50.0      # a sample reads a change 0-100 ms after it: aim mid-interval
+            if t_end_ms is not None and t_dump_ms is not None and \
+                    not (t_end_ms - 500.0 <= a + b_ms_per_tick * newest <= t_dump_ms):
+                continue
             m = []
             for ts2, f2 in ops:
                 h = a + b_ms_per_tick * ts2
@@ -171,7 +188,9 @@ def run_metrics(rundir, r, procs, evs, fit):
     s = tel(os.path.join(rundir, r["tel"]))
     if evs:
         b = fit["b_ms_per_tick"] if fit else 0.001
-        a_run, n_match, n_ops = align_run(evs, s, b)
+        t_end = max((p["t_end_ms"] for p in procs if p.get("role") == "work"), default=r.get("t_last_ms"))
+        t_dump = (r.get("queries") or {}).get("t_ms")
+        a_run, n_match, n_ops = align_run(evs, s, b, t_end, t_dump)
         if a_run is not None and n_match >= max(2, n_ops // 2):
             fit = {"a_ms": a_run, "b_ms_per_tick": b, "source": "run", "matched": n_match, "ops": n_ops}
         elif fit:
@@ -267,16 +286,24 @@ def run_metrics(rundir, r, procs, evs, fit):
         last = [x for x in ws if x[0] >= tl]
         starts = [p["t_start_ms"] for p in work_procs]
         lab = {"800": 0, "thermal": 0, "power": 0, "ramp": 0, "other": 0}
+        tel_only = {"below": 0, "hot": 0}
         pe = [e for e in (m.get("event_list") or []) if e["t_s"] is not None]
+        # A3: the ring keeps only its last ~67 entries, so a governor line can name the cause of a sample only inside
+        # the span the dump still covers; before it, a sample is labelled from the sampler alone
+        covered_from = (t0 + min(e["t_s"] for e in pe) * 1000) if pe else None
         for x in last:
             if x[4] == 800:
                 lab["800"] += 1
                 continue
             recent_hot = any(y[1] is not None and y[1] >= 66 for y in ws if x[0] - 2000 <= y[0] <= x[0])
+            tel_only["below"] += 1
+            tel_only["hot"] += 1 if recent_hot else 0
             # A1: "the last governor line" is the last throttle-DOWN line (power or thermal): an up-step or an
             # idle reset names no limiter, and the climb after a power-down is one point per pass
-            prior = [e for e in pe if t0 + e["t_s"] * 1000 <= x[0] and e["kind"] in ("power_down", "thermal_down")]
-            last_ev = prior[-1]["kind"] if prior else None
+            last_ev = None
+            if covered_from is not None and x[0] >= covered_from:
+                prior = [e for e in pe if t0 + e["t_s"] * 1000 <= x[0] and e["kind"] in ("power_down", "thermal_down")]
+                last_ev = prior[-1]["kind"] if prior else None
             ramp = any(0 <= x[0] - a <= RAMP_S * 1000 for a in starts)
             if recent_hot or last_ev in ("thermal_down",):
                 lab["thermal"] += 1
@@ -288,6 +315,10 @@ def run_metrics(rundir, r, procs, evs, fit):
                 lab["other"] += 1
         n = len(last)
         m["sus_last"] = {k: round(v / n, 3) for k, v in lab.items()} if n else None
+        m["sus_tel_hot_share"] = round(tel_only["hot"] / tel_only["below"], 3) if tel_only["below"] else None
+        m["sus_ring_from_s"] = round((covered_from - t0) / 1000.0, 1) if covered_from is not None else None
+        hot = next((x for x in ws if x[1] is not None and x[1] >= 66), None)
+        m["sus_first_66_s"] = round((hot[0] - t0) / 1000.0, 1) if hot else None
         lw_last = [k for k in lw if k["t_start_ms"] >= tl]
         wl = sum(k.get("wall_s", 0) for k in lw_last)
         ol = sum(k.get("minions", r["minions"]) * k.get("iters", 0) * OPS[r["type"]] for k in lw_last)
@@ -384,12 +415,18 @@ def rules(metrics):
         rows.append({"run": m["run"], "type": m["type"], "values": m["values"], "at_800": sl["800"],
                      "thermal_share_of_below": round(th_share, 3) if th_share is not None else None,
                      "power_share_of_below": round(sl["power"] / below, 3) if below > 0 else None,
+                     "sampler_only_hot_share_of_below": m.get("sus_tel_hot_share"),
+                     "ring_covers_from_s": m.get("sus_ring_from_s"), "first_66_s": m.get("sus_first_66_s"),
                      "rate_t": m.get("sus_rate_t"), "die": m.get("sus_die_mean")})
     rnd = [x for x in rows if x["values"] in ("randn",)]
     zer = [x for x in rows if x["values"] == "zeros"]
     p4a = all((x["thermal_share_of_below"] or 0) >= 0.6 for x in rnd) if rnd else None
     p4b = all(x["at_800"] >= 0.9 for x in zer) if zer else None
+    # A3: the same test on the sampler's readings alone (a reading of 66 or more in the 2 s before), which does
+    # not depend on what the trace ring kept
+    p4a_tel = all((x["sampler_only_hot_share_of_below"] or 0) >= 0.6 for x in rnd) if rnd else None
     out["R4"] = {"rows": rows, "randn_thermal_share_ge_0.6": p4a, "zeros_at_800_ge_0.9": p4b,
+                 "randn_sampler_only_hot_share_ge_0.6": p4a_tel,
                  "verdict": ("PASS" if p4a and p4b else "FAIL") if rnd and zer else "UNDER-RESOLVED"}
     return out
 

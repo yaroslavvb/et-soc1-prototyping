@@ -53,6 +53,11 @@ governor sections and the card table below). Its Master Minion ran the validatio
 a hang. (7) On aifoundry2 two DRAM lines that differ only in PA[17], a column bit in the L50 map, read as a row
 conflict (E57; "Traps").
 
+**Updated 2026-10-23.** E64 read the governor's own log through every run on aifoundry2: on a die below 65 °C only
+the power test acts (a dither around a ~1 s average of the card's power, not its instantaneous reading), at a reading
+of 66 °C only the thermal test acts, and the trace ring carries binary records the old reader stopped at ("Which limit
+acts, read from the governor's own log", below).
+
 **Updated 2026-10-09.** **aifoundry2's card is back in service** since that afternoon: the stalling 120 mm fan clipped
 under the card was replaced by a two-fan 92 mm PCI-slot bracket in the slot beside it, and the card now idles at 51 °C
 and 23.2 W, levels off at 62–63 °C under the 8-minute sgemm burst test and settles at 75 °C and 59 W under 10 minutes
@@ -220,7 +225,7 @@ at each commit). The table is read from source; the entries marked *seen* have c
 | When the thermal test acts | only while a kernel runs | **always, busy or idle** (*seen*: 18 of the 20 thermal entries of E51's night came after the SP's own idle line; in its validation 51 idle entries, I5 PASS) | as 0.20.0 |
 | Thermal response | one table point down per pass | **a blocking loop**: one point down, sleep 1,000 ticks (about 0.40 s), read the mean again, repeat while it is above 65; meanwhile the power branch, the idle reset included, cannot act (*seen*: 17 of 17 idle episodes under 60 s lasted k × 0.4053 s to within 1.4 ms, k = 0–3, E51; in its validation 44 of 46 within 10.9 ms, and the two longest, 20 and 21 periods, 17–21 ms short, so TH2 is untested; E10's down-steps paired 0.4–0.5 s apart) | as 0.20.0 |
 | Leaving the thermal state | — | at a mean of 65 or less, to the boot point (600 MHz); on the next pass a busy card under the TDP **climbs to the top point in one call** (*seen*: 57 of 57 climbs showed at most one 700 MHz sample, E51; 67 of 67 in its validation, G2-C PASS) | as 0.20.0 |
-| Power test | the PMIC's average | the PMIC's **instantaneous** reading; the loops exit on the average, the power-down loop at under 1.05 × TDP or at 300 MHz | as 0.20.0 |
+| Power test | the PMIC's average | the PMIC's **instantaneous** reading; the loops exit on the average, the power-down loop at under 1.05 × TDP or at 300 MHz (**E64, *seen* on aifoundry2: the input the card logs at each power step behaves as a ~1 s running average**, 65.0–67.9 W while the board read 80–83 W, and each step is one point per pass; "Which limit acts", below) | as 0.20.0 |
 | Operating points | the flash VMIN table (600, 700, 800 MHz on aifoundry2) | the same table | **fixed 50 MHz steps between 300 and 700 MHz**, the voltage computed from the boot point |
 | Hysteresis | none | none: in above 65, out at 65 (*seen*: all 20 entry lines of E51 printed 66, all 20 exit lines 65; in its validation 51 entries at 66, 52 exits at 65 or less, 92 up-steps from 65 or less: TH3 survived) | none |
 | The PMIC alarm (75 °C, 75 W) | a 300 MHz safe state | a safe state that never ends and sets the frequency register but not the PLL (source only) | a real 300 MHz safe state |
@@ -251,6 +256,42 @@ What each card shows:
   same tree, are not counted (with them: 359,687 and 11,612). A live 0.18.0
   governor would have stepped to 650 MHz or 550 MHz there. Active power management switched off, or a latched state,
   would each explain it; they are not told apart (the power-up residency since boot would narrow it).
+
+## Which limit acts, read from the governor's own log (aifoundry2, 23 October 2026, E64)
+
+E64 (pre-registered, `tools/claims-v3/hpl/`) ran the Horace matmul from a cool die across ten fp32 operand patterns and
+three minion counts, from a heated die, and for 75 s at a time, and dumped the service processor's trace ring after
+every run. The ring names the cause of every step, so no step had to be inferred:
+
+- **Below 65 °C only the power test acts, and it acts alone.** 98 power throttle-downs, every one in the
+  cool-die blocks, at a die reading of 57–63 °C; the governor's logged power at each was 65.0–67.9 W.
+  Every run whose work drew 67 W or more at 800 MHz got one first; no run under 62 W got any (rules R1, R2). The line is
+  the watts, not the data: random normal data on 768 minions (69 W) was stepped down, on 640 (62.5 W) it was not.
+- **At a reading of 66 °C only the thermal test acts**, at any power: 104 thermal throttle-downs, 102 logged at
+  66 °C and 2 at 67 °C (the first readings over the line), including ones and zeros at 34–55 W, under the power
+  level, with no power step beside them (R3).
+- **The power loop is a dither on an average.** At a cool die, random fp32 on the full card goes 800 → 700 → 600 → 700
+  → 800 MHz, one point per pass (~0.24 s under a 10 Hz sampler), drawing ~82 / 64 / 50 W at the three points, while
+  the governor's logged input at its steps stays between about 58 and 68 W. A model, a first-order average of the board's power with a 1.3 s time
+  constant compared with 65 W once per pass (step down if over, up if under, no dead band), reproduces the mean clock
+  of every cool-die run to 3.3 MHz rms (`surface_hpl.py`). So **the power test reads a ~1 s running
+  average, not the instantaneous value**: the table above says "instantaneous" from the `ffca4cbb4` source, and the
+  card's own log disagrees (its power throttle-down lines read 65.0–67.9 W while the board read 80–83 W). A burst
+  shorter than about a second at 800 MHz never meets the power level.
+- **A power throttle-down is not sticky.** The clock climbs back within a pass or two (the source reading of P5, that
+  the power-down state lasts until the idle reset, was wrong).
+- **Sustained:** in 80 s runs (nine 8 s processes back to back) the die passes 65 °C for anything that draws more than about 50 W: the line through the nine runs' last 40 s reads 65.5 °C at 50.3 W of board power (0.47 °C per W). So on the bracket's cooling **the thermal test, not the power test, sets a sustained matmul's clock**: random fp32 and fp16 data first read 66 °C 8–9 s in and end pinned at 600 MHz with the die at 66–67 °C (the table has no lower point to take), fp32 and fp16 ones settle near 738 MHz and int8 random near 763 MHz, all under the thermal test, while zeros hold 800 MHz at 59 °C (R4). Sustained, zeros run 33% faster than random fp32 data (12.3 against 9.2 TFLOPS), against 13% from a cool die.
+- **The trace ring holds more than text.** Next to the CRITICAL lines the 1.3.1 build writes a `New OP: Freq <MHz>
+  MNN <mV> (V) SRM <mV> (V)` line at every operating point set and a 16-byte binary power-status record (power W,
+  throttle state, power state, temperature °C, target MHz). `tools/claims-v3/dv2/sptrace_events.py` stops at the first
+  binary record and loses everything after it (7–29 of 60–71 entries in E64's smoke); read the ring with
+  `tools/claims-v3/hpl/sptrace_full.py`. Placing entries on the host clock works best by matching the `New OP` lines to
+  the sampler's clock changes (one offset per run; the SP's tick is 1 µs).
+- **The sampler's board value trails the clock by about two samples** (0.2 s at 10 Hz): the board reading is
+  refreshed once per SP pass and read a pass late, so a power paired with the clock in the same sample is the previous
+  operating point's. Shift it before reading power per clock (`surface_hpl.py` picks the shift per run).
+- **A random-data heater cannot take this die past about 67 °C** on the bracket's cooling: the power test holds it near
+  65 W, and above 65 °C the thermal test holds it at 600 MHz, where random data draws about 50 W (E64 amendment A2).
 
 ## A one-second idle reset inside a launch (aifoundry2, 23 October 2026, E63)
 
