@@ -1,0 +1,88 @@
+{
+  "experiment": "E64",
+  "request": "Q123",
+  "card": "aifoundry2",
+  "order_seed": 64,
+  "tools": {
+    "heater": "build/sparsity_t2/host/sparsity_host",
+    "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+    "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "sampler": {"every_ms": 100},
+  "safety": {"abs_stop_c": 85, "board_cap_w": 97, "cap_consecutive": 3},
+  "caps": {"max_card_min": 150},
+  "blocks": [
+    {
+      "name": "SMOKE", "title": "one short launch of each number type", "default": false,
+      "start": {"mode": "cool", "max_c": 99, "max_wait_s": 5},
+      "launch": {"seconds": 2, "budget": 3.5, "processes": 1}, "tail_s": 3,
+      "runs": [
+        {"type": "fp32", "values": "randn"},
+        {"type": "fp16", "values": "randn"},
+        {"type": "int8", "values": "randn"},
+        {"type": "fp32", "values": "zeros"}
+      ]
+    },
+    {
+      "name": "LAD", "title": "the power ladder: ten fp32 operand patterns on the full card from a cool die",
+      "passes": 2, "shuffle": true,
+      "start": {"mode": "cool", "max_c": 55, "max_wait_s": 300},
+      "launch": {"seconds": 6, "budget": 7.5, "processes": 1}, "tail_s": 4,
+      "runs": [
+        {"type": "fp32", "values": "zeros"},
+        {"type": "fp32", "values": "sparse75"},
+        {"type": "fp32", "values": "ones"},
+        {"type": "fp32", "values": "signs"},
+        {"type": "fp32", "values": "pow2"},
+        {"type": "fp32", "values": "a_randn_b_ones"},
+        {"type": "fp32", "values": "a_ones_b_randn"},
+        {"type": "fp32", "values": "mant"},
+        {"type": "fp32", "values": "uniform"},
+        {"type": "fp32", "values": "randn"}
+      ]
+    },
+    {
+      "name": "MIN", "title": "the same random data on fewer minions: the watts, not the data",
+      "passes": 2, "shuffle": true,
+      "start": {"mode": "cool", "max_c": 55, "max_wait_s": 300},
+      "launch": {"seconds": 6, "budget": 7.5, "processes": 1}, "tail_s": 4,
+      "runs": [
+        {"type": "fp32", "values": "randn", "per_shire": 24},
+        {"type": "fp32", "values": "randn", "per_shire": 20},
+        {"type": "fp32", "values": "randn", "per_shire": 16}
+      ]
+    },
+    {
+      "name": "HOT", "title": "the thermal wall: work under the TDP launched on a heated die's falling edge",
+      "passes": 2, "shuffle": true,
+      "launch": {"seconds": 6, "budget": 7.5, "processes": 1}, "tail_s": 4,
+      "runs": [
+        {"type": "fp32", "values": "ones", "label": "fp32-ones-edge67",
+         "start": {"mode": "edge", "heat_to_c": 69, "edge_c": 67, "max_wait_s": 240, "max_heats": 12}},
+        {"type": "fp32", "values": "ones", "label": "fp32-ones-edge63",
+         "start": {"mode": "edge", "heat_to_c": 69, "edge_c": 63, "max_wait_s": 300, "max_heats": 12}},
+        {"type": "fp32", "values": "zeros", "label": "fp32-zeros-edge67",
+         "start": {"mode": "edge", "heat_to_c": 69, "edge_c": 67, "max_wait_s": 240, "max_heats": 12}},
+        {"type": "fp32", "values": "zeros", "label": "fp32-zeros-edge63",
+         "start": {"mode": "edge", "heat_to_c": 69, "edge_c": 63, "max_wait_s": 300, "max_heats": 12}}
+      ]
+    },
+    {
+      "name": "SUS", "title": "sustained: nine back-to-back 8 s launch processes per number type",
+      "passes": 1, "shuffle": true,
+      "start": {"mode": "cool", "max_c": 57, "max_wait_s": 300},
+      "launch": {"seconds": 8, "budget": 9.5, "processes": 9}, "tail_s": 6,
+      "runs": [
+        {"type": "fp32", "values": "zeros"},
+        {"type": "fp32", "values": "ones"},
+        {"type": "fp32", "values": "randn"},
+        {"type": "fp16", "values": "zeros"},
+        {"type": "fp16", "values": "ones"},
+        {"type": "fp16", "values": "randn"},
+        {"type": "int8", "values": "zeros"},
+        {"type": "int8", "values": "ones"},
+        {"type": "int8", "values": "randn"}
+      ]
+    }
+  ]
+}
