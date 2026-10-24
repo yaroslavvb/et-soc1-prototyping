@@ -2,7 +2,7 @@
 
 Which of the governor's two limits, the 65 W power test or the 65 °C thermal test, sets the Horace matmul's speed on
 aifoundry2's card, and when. Pre-registered in [`tools/claims-v3/hpl/`](../../../../tools/claims-v3/hpl/README.md)
-(`2b951fca`, before the first card access; amendments A0 `4b2b1401`, A1 `69380c49`, A2 `1a899d8f`). The page:
+(`2b951fca`, before the first card access; amendments A0 `4b2b1401`, A1 `69380c49`, A2 `1a899d8f`, and A3 with the results, `4a58ed79`). The page:
 [Power, then heat: what limits the ET-SoC-1's matmul speed](https://spacesheep.dev/@yaroslavvb/et-soc1-power-limit).
 
 Three card sessions, all on aifoundry2 with nothing set on the card (TDP 65 W and threshold 65 °C read back after
