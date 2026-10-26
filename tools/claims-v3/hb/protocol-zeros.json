@@ -297,8 +297,10 @@
   "note": "aifoundry3 is pinned at 600 MHz, so there is no governor step to protect; 72 C on a full-card phase and 78 C absolute keep the die well inside the lab's 90 C rule."
  },
  "cooldown_gate": {
-  "max_wait_s": 120,
-  "die_c": 60
+  "enter_below_c": 60,
+  "gap_s": 0,
+  "max_gap_s": 75,
+  "applies_when": "the next block's dwell-weighted switched power exceeds the previous block's; with one block per session it is never called"
  },
  "budget": {
   "card_held_cap_min": 40,

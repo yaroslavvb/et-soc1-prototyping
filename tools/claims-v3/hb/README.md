@@ -138,6 +138,11 @@ Each prediction above is scored PASS / FAIL / UNDECIDED against its own stated b
 data README and in E65 of `docs/findings/03-experiments.md`. A block whose passes do not survive the gates is
 reported as not run, never re-registered.
 
+**A6, Mon 26 Oct 2026, 16:5x PDT (before any block-C data).** The two ladder protocols' `cooldown_gate` named
+`max_wait_s` / `die_c`, which are not `run_hm.py`'s keys (`enter_below_c` / `max_gap_s`), so the gate would have
+parsed as absent. Corrected, and `make_ladder.py` regenerated both files. Nothing measured changes: the gate is
+called only *between* blocks and each of these sessions has exactly one block, so it never fires either way.
+
 ## Files
 
 `make_ladder.py` (block C's two protocols), `protocol-randn.json`, `protocol-zeros.json` (frozen with this commit),

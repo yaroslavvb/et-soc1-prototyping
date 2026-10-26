@@ -87,7 +87,12 @@ def build(values):
                    "sampler_stale_s": 3, "bloom_cycle_stop_c": 72,
                    "note": "aifoundry3 is pinned at 600 MHz, so there is no governor step to protect; 72 C on a "
                            "full-card phase and 78 C absolute keep the die well inside the lab's 90 C rule."},
-        "cooldown_gate": {"max_wait_s": 120, "die_c": 60},
+        # run_hm.py's schema (hm/prereg/protocol.json): enter_below_c + max_gap_s. The gate is called only
+        # BETWEEN blocks and each session has exactly one, so it never fires here; the keys are right so a reader
+        # is not misled, and so a later session that adds a block inherits a live gate (A6).
+        "cooldown_gate": {"enter_below_c": 60, "gap_s": 0, "max_gap_s": 75,
+                          "applies_when": "the next block's dwell-weighted switched power exceeds the previous "
+                                          "block's; with one block per session it is never called"},
         "budget": {"card_held_cap_min": 40, "card_session_wall_cap_min": 60},
         "conventions": {"power_window": "the last 4.0 s of a launch, median of the 10 Hz samples (E62-CAL)",
                         "idle_window": "the last 10.0 s of an IDLE phase, median"},
