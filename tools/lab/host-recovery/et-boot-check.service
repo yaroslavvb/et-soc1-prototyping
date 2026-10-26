@@ -1,0 +1,8 @@
+[Unit]
+Description=Check the ET-SoC-1 cards' PCIe links after boot; cold-reboot once if one trained badly (et-boot-check)
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/et-boot-check
+TimeoutStartSec=5min

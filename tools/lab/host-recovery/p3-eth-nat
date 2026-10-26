@@ -1,0 +1,24 @@
+#!/bin/sh
+# p3-eth-nat up|down|status (26 Oct 2026): the camera phone's way out through the lab cable. The phone (10.45.0.55)
+# takes a DHCP lease on enp7s0 from aifoundry1 or aifoundry2 (p3-eth-dhcp.service), which names itself the router;
+# these rules let it reach the internet through the box's Wi-Fi. They are the rules thermal-android's
+# tools/setup_aifoundry_lan_ssh.sh added live on 16 Oct; nothing saved them, so the power cut of 25 Oct dropped them.
+# This unit puts them back at every boot. Only 10.45.0.0/24 to the Wi-Fi is masqueraded, never to tailscale0.
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+LAN=enp7s0; WAN=wlp8s0; NET=10.45.0.0/24
+case "${1:-status}" in
+  up)
+    sysctl -q -w net.ipv4.ip_forward=1
+    iptables -t nat -C POSTROUTING -s $NET -o $WAN -j MASQUERADE 2>/dev/null || iptables -t nat -A POSTROUTING -s $NET -o $WAN -j MASQUERADE
+    iptables -C FORWARD -i $LAN -j ACCEPT 2>/dev/null || iptables -I FORWARD 1 -i $LAN -j ACCEPT
+    iptables -C FORWARD -o $LAN -j ACCEPT 2>/dev/null || iptables -I FORWARD 1 -o $LAN -j ACCEPT ;;
+  down)
+    while iptables -t nat -D POSTROUTING -s $NET -o $WAN -j MASQUERADE 2>/dev/null; do :; done
+    while iptables -D FORWARD -i $LAN -j ACCEPT 2>/dev/null; do :; done
+    while iptables -D FORWARD -o $LAN -j ACCEPT 2>/dev/null; do :; done ;;
+  status)
+    echo "ip_forward=$(sysctl -n net.ipv4.ip_forward)"
+    iptables -t nat -S POSTROUTING | grep -- "-s $NET" || echo "no masquerade for $NET"
+    iptables -S FORWARD | grep -- "$LAN" || echo "no FORWARD rules for $LAN" ;;
+  *) echo "usage: p3-eth-nat up|down|status" >&2; exit 2 ;;
+esac

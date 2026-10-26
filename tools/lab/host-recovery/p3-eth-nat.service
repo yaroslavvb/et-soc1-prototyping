@@ -1,0 +1,13 @@
+[Unit]
+Description=Camera phone: NAT the lab cable (10.45.0.0/24) out through this box's Wi-Fi (p3-eth-nat)
+After=network-pre.target docker.service tailscaled.service
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/p3-eth-nat up
+ExecStop=/usr/local/sbin/p3-eth-nat down
+
+[Install]
+WantedBy=multi-user.target

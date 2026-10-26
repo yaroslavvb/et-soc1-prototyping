@@ -1,0 +1,149 @@
+#!/bin/bash
+# et-boot-check: after each boot, check that every ET-SoC-1 card came back on a clean, full-speed PCIe link, and when
+# one did not, do the one fix that works, a cold reboot, by itself (26 Oct 2026).
+#
+# Why. A card's link is trained once per boot, and on a marginal slot that training is a lottery. On aifoundry1 card 0
+# (root port 00:01.0) the power-up of 26 Oct 11:54 reached 16 GT/s with about 3 corrected receiver errors a second
+# (34,552 in three hours); the cold reboot at 15:01 came up at 8 GT/s, "downgraded". A card that falls off the bus
+# needs the same cold reboot (2 Oct, docs/findings/14-card-behaviour.md). Until now a person had to notice and ask.
+#
+# What it does, as root, a few minutes after each boot (et-boot-check.timer):
+#   1. Each card in ET_BOOT_CHECK_CARDS (/etc/default/et-boot-check): present, bound to the ET driver, its driver
+#      start finished this boot ("added peer-to-peer DMA memory"), its link at the speed its root port targets and at
+#      its full width, and at most ET_BOOT_CHECK_ERR_MAX corrected errors at the root port in ET_BOOT_CHECK_WINDOW_S.
+#   2. All good: one "ok" line, and it stops.
+#   3. A card is bad: it reboots cold (reboot mode cold, type pci: the chipset's full reset, which power-cycles the
+#      slots and retrains every link) only if all of these hold, and otherwise it logs a warning and stops:
+#      the machine is in its first ET_BOOT_CHECK_MAX_UPTIME_S seconds; et-who --check shows nothing held; no CI job
+#      runs; nobody is logged in at a terminal; and fewer than ET_BOOT_CHECK_MAX_REBOOTS automatic reboots happened
+#      in the last 24 h, so a slot that never trains clean costs at most that many reboots a day.
+#
+# It never opens a /dev/et* node, never writes a PCIe register (retraining a live link hung aifoundry1 on 30 Sep),
+# and never reboots a machine someone is using. Its record: /var/lib/et-boot-check/history (one line a run) and the
+# journal (journalctl -t et-boot-check).
+#
+#   et-boot-check             check, then act as above (what the timer runs)
+#   et-boot-check --dry-run   check, and say what it would do; changes nothing (any user; the counters need no root)
+#   et-boot-check --status    the last runs and the automatic reboots of the last 24 h
+PATH=/usr/sbin:/usr/bin:/sbin:/bin; export PATH
+LC_ALL=C; export LC_ALL
+
+ET_BOOT_CHECK_CARDS=""            # PCI addresses; empty: every device bound to the ET driver now
+ET_BOOT_CHECK_WINDOW_S=60
+ET_BOOT_CHECK_ERR_MAX=30          # a clean link logs 0-1 a minute; the 26 Oct flood about 180
+ET_BOOT_CHECK_MAX_UPTIME_S=1200
+ET_BOOT_CHECK_MAX_REBOOTS=2
+ET_BOOT_CHECK_REBOOT=1            # 0: never reboot, only report
+[ -r /etc/default/et-boot-check ] && . /etc/default/et-boot-check
+
+STATE=/var/lib/et-boot-check
+mode=run
+case "${1:-}" in
+  "") ;;
+  --dry-run) mode=dry ;;
+  --status) mode=status ;;
+  *) echo "usage: et-boot-check [--dry-run | --status]" >&2; exit 2 ;;
+esac
+
+now=$(date +%s)
+if [ "$mode" = status ]; then
+  echo "last runs (newest last):"; tail -n 12 "$STATE/history" 2>/dev/null || echo "  none yet"
+  n=$(awk -v t=$((now - 86400)) '$1 > t' "$STATE/reboots" 2>/dev/null | wc -l)
+  echo "automatic reboots in the last 24 h: $n of at most $ET_BOOT_CHECK_MAX_REBOOTS"
+  exit 0
+fi
+if [ "$mode" = run ] && [ "$(id -u)" -ne 0 ]; then echo "et-boot-check: run as root (or use --dry-run)" >&2; exit 2; fi
+
+boot=$(cut -c1-8 /proc/sys/kernel/random/boot_id)
+# Under systemd ($INVOCATION_ID set) stdout already goes to the journal as et-boot-check; by hand, log it too.
+say() { echo "$*"; [ "$mode" = run ] && [ -z "${INVOCATION_ID:-}" ] && logger -t et-boot-check -- "$*"; return 0; }
+record() {   # record <verdict> <text>: one history line a run
+  [ "$mode" = run ] || return 0
+  mkdir -p "$STATE"
+  printf '%s %s boot=%s up=%ss %s %s\n' "$(date +%s)" "$(date '+%F %T %Z')" "$boot" "$(cut -d. -f1 /proc/uptime)" "$1" "$2" >> "$STATE/history"
+  tail -n 400 "$STATE/history" > "$STATE/history.new" && mv -f "$STATE/history.new" "$STATE/history"
+}
+gts() {   # "16.0 GT/s PCIe" -> 16.0 ; a Link Control 2 speed code -> GT/s
+  case "$1" in 1) echo 2.5 ;; 2) echo 5.0 ;; 3) echo 8.0 ;; 4) echo 16.0 ;; 5) echo 32.0 ;; *) echo "${1%% *}" ;; esac
+}
+lt() { awk -v a="$1" -v b="$2" 'BEGIN {exit !(a + 0 < b + 0)}'; }
+errs() { awk '$1 == "TOTAL_ERR_COR" {print $2}' "/sys/bus/pci/devices/$1/aer_dev_correctable" 2>/dev/null; }
+
+cards=$ET_BOOT_CHECK_CARDS
+if [ -z "$cards" ]; then
+  for d in /sys/bus/pci/drivers/ET/0000:*; do [ -e "$d" ] && cards="$cards ${d##*/}"; done
+fi
+if [ -z "$cards" ]; then say "no cards configured and none bound to the ET driver: nothing to check"; record none "no cards"; exit 0; fi
+
+klog=$(timeout 30 journalctl -k -b -q --no-pager -o cat 2>/dev/null </dev/null)
+[ -n "$klog" ] || klog=$(timeout 10 dmesg 2>/dev/null)
+bad=""; good=""; watch=""
+for c in $cards; do
+  d=/sys/bus/pci/devices/$c
+  if [ ! -e "$d" ]; then bad="$bad|$c: not on the bus"; continue; fi
+  drv=$(readlink "$d/driver" 2>/dev/null); drv=${drv##*/}
+  if [ "$drv" != ET ]; then bad="$bad|$c: not bound to the ET driver (${drv:-none})"; continue; fi
+  if [ -n "$klog" ] && ! printf '%s\n' "$klog" | grep -q "ET $c: added peer-to-peer DMA memory"; then
+    bad="$bad|$c: the driver's start did not finish this boot"; continue
+  fi
+  rp=$(readlink -f "$d"); rp=${rp%/*}; rp=${rp##*/}
+  tcode=$(setpci -s "$rp" CAP_EXP+30.w 2>/dev/null)
+  want=$(gts "$(cat "$d/max_link_speed" 2>/dev/null)")
+  if [ -n "$tcode" ]; then t=$(gts $((0x$tcode & 0xf))); lt "$t" "$want" && want=$t; fi
+  cur=$(gts "$(cat "$d/current_link_speed" 2>/dev/null)")
+  w=$(cat "$d/current_link_width" 2>/dev/null); wmax=$(cat "$d/max_link_width" 2>/dev/null)
+  if lt "$cur" "$want"; then bad="$bad|$c: link at $cur GT/s, below the $want GT/s its root port $rp targets"; continue; fi
+  if [ -n "$w" ] && [ -n "$wmax" ] && [ "$w" -lt "$wmax" ]; then bad="$bad|$c: link x$w, narrower than x$wmax"; continue; fi
+  watch="$watch $c@$rp@$(errs "$rp")"   # PCI addresses hold colons, so @ separates
+done
+if [ -n "$watch" ]; then
+  sleep "$ET_BOOT_CHECK_WINDOW_S"
+  for x in $watch; do
+    c=${x%%@*}; r=${x#*@}; rp=${r%%@*}; e0=${r#*@}; e1=$(errs "$rp")
+    n=$(( ${e1:-0} - ${e0:-0} ))
+    if [ "$n" -gt "$ET_BOOT_CHECK_ERR_MAX" ]; then
+      bad="$bad|$c: $n corrected PCIe errors at root port $rp in ${ET_BOOT_CHECK_WINDOW_S} s (more than $ET_BOOT_CHECK_ERR_MAX)"
+    else
+      good="$good $c ($(gts "$(cat /sys/bus/pci/devices/$c/current_link_speed)") GT/s x$(cat /sys/bus/pci/devices/$c/current_link_width), $n errors in ${ET_BOOT_CHECK_WINDOW_S} s)"
+    fi
+  done
+fi
+
+if [ -z "$bad" ]; then
+  say "ok:$good"; record ok "$good"; exit 0
+fi
+why=${bad#|}; why=${why//|/; }
+say "bad: $why"
+
+# Act only if nobody can be using the machine yet.
+refuse=""
+up=$(cut -d. -f1 /proc/uptime)
+[ "$up" -le "$ET_BOOT_CHECK_MAX_UPTIME_S" ] || refuse="$refuse; up ${up} s, past the ${ET_BOOT_CHECK_MAX_UPTIME_S} s after boot when it may act"
+[ "$ET_BOOT_CHECK_REBOOT" = 1 ] || refuse="$refuse; reboots are switched off (ET_BOOT_CHECK_REBOOT=$ET_BOOT_CHECK_REBOOT)"
+if [ -x /usr/local/bin/et-who ]; then
+  timeout 20 /usr/local/bin/et-who --check >/dev/null 2>&1 </dev/null; rc=$?
+  [ "$rc" -eq 0 ] || refuse="$refuse; et-who --check says a card is held or it could not tell (exit $rc)"
+else
+  refuse="$refuse; et-who is missing, so who holds a card is unknown"
+fi
+pgrep -x Runner.Worker >/dev/null 2>&1 && refuse="$refuse; a CI job is running"
+for s in $(loginctl list-sessions --no-legend 2>/dev/null | awk '{print $1}'); do
+  cls=$(loginctl show-session "$s" -p Class --value 2>/dev/null); tty=$(loginctl show-session "$s" -p TTY --value 2>/dev/null)
+  st=$(loginctl show-session "$s" -p State --value 2>/dev/null); u=$(loginctl show-session "$s" -p Name --value 2>/dev/null)
+  if [ "$cls" = user ] && [ -n "$tty" ] && [ "$st" != closing ]; then refuse="$refuse; $u is logged in at $tty"; fi
+done
+recent=$(awk -v t=$((now - 86400)) '$1 > t' "$STATE/reboots" 2>/dev/null | wc -l)
+[ "$recent" -lt "$ET_BOOT_CHECK_MAX_REBOOTS" ] || refuse="$refuse; already $recent automatic reboots in the last 24 h"
+
+if [ -n "$refuse" ]; then
+  say "not rebooting:${refuse#;}"; record bad "$why | not rebooting:${refuse#;}"; exit 1
+fi
+if [ "$mode" = dry ]; then
+  echo "would reboot cold now (automatic reboot $((recent + 1)) of at most $ET_BOOT_CHECK_MAX_REBOOTS in 24 h)"; exit 1
+fi
+say "rebooting cold to retrain the links (automatic reboot $((recent + 1)) of at most $ET_BOOT_CHECK_MAX_REBOOTS in 24 h)"
+record reboot "$why"
+echo "$now $boot" >> "$STATE/reboots"
+sync
+echo cold > /sys/kernel/reboot/mode && echo pci > /sys/kernel/reboot/type
+systemctl --no-block reboot

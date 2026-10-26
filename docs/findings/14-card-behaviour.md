@@ -785,6 +785,46 @@ On Sunday 11 October (16:40–23:00 PDT) the dashboard's four warnings were clea
 - **The kernel ring buffer holds about 50 minutes on all three**: AppArmor audit lines for `bwrap`, about 23 a minute, fill
   it, so `et-lab-health`'s per-card kernel-log counts cover the last hour; the journal holds the whole boot.
 
+## aifoundry1 card 0's link is a lottery at each boot, and the hosts now retry it themselves (26 October 2026)
+
+The lab lost power on Sunday 25 October at about 17:20 PDT. When it came back on Monday 26 October, all three hosts booted
+by themselves within 28 s of each other, aifoundry2 first at 11:54:22. That boot gave aifoundry1's card 0 (root port
+`00:01.0`, the top x16 slot) a bad link, and a cold reboot gave it another bad one:
+
+| Boot | Card 0's link | Corrected errors at root port `00:01.0` |
+|---|---|---|
+| Sat 3 Oct 08:17 | 16 GT/s x8 | 697 in 4.5 days |
+| Wed 7 Oct 18:17 and 21:28 (the lab's power) | 16 GT/s x8 | 26 in 3 h; 67 in 18 days |
+| Mon 26 Oct 11:54 (power back) | 16 GT/s x8 | 34,552 in 3 h 6 min, about 3 a second, all receiver errors (`RxErr`), none at the card |
+| Mon 26 Oct 15:02 (cold reboot, mode cold, type pci) | **8 GT/s x8, "downgraded"**: the 16 GT/s equalization did not complete | 0 |
+
+Card 1 beside it, and aifoundry2's and aifoundry3's cards, trained at 16 GT/s with no errors at every boot. So the top
+slot or card 0's edge connector is marginal at 16 GT/s, and the clean training after the 30 September power cycle was
+luck, not a fix. A link this marginal is redrawn at every boot: the one at 15:02 is stable but at half the host
+bandwidth (`63.008 Gb/s available PCIe bandwidth, limited by 8.0 GT/s PCIe x8 link at 0000:00:01.0`).
+
+**Since 26 October the hosts redraw it themselves.** `et-boot-check` (in `tools/lab/host-recovery/`) checks every card
+3 minutes after each boot: present, its driver started, its link at the speed its root port targets, and at most 30
+corrected errors at the root port in 60 s. When one fails, it does the cold reboot itself, at most twice in 24 hours and
+only within the first 20 minutes after boot, with no card held, no CI job running and nobody at a terminal; otherwise
+the unit fails and shows as a failed unit in `systemctl --failed`, `et-lab-health` and the dashboard.
+`et-boot-check --status` shows its runs.
+
+Three host facts from the same afternoon, each read on all three hosts:
+
+- **They power on by themselves when power returns.** The chipset's `AFTERG3_EN` bit (`GEN_PMCON_A`, at `PWRMBASE`
+  0xFE000000 + 0x1020) reads 0 on all three, which agrees with the unattended boots at 11:54. aifoundry2's BIOS power
+  setting (AC BACK) is therefore no longer "Always Off", as earlier notes said.
+- **The chipset watchdog cannot reset them.** The BIOS (Gigabyte Z590 AORUS MASTER, F5 on aifoundry1 and aifoundry2,
+  F6 on aifoundry3) routes the TCO timeout to its own SMI handler and locks it (`TCO_LOCK` and `TCO_EN` set): armed for
+  10 s and left to expire on aifoundry3, it did not reset the machine. So a hung host, like aifoundry1 on 30 September,
+  still needs a power cycle from outside. `kernel.panic` is now 10 on all three, so a panic at least reboots.
+- **After the power came back, aifoundry1 and aifoundry2 booted with the ACPI interrupt switched off.** The kernel logged
+  `irq 9: nobody cared` and disabled IRQ 9 after 100,001 unhandled interrupts at boot. That happened at aifoundry1's
+  boots after the lab's power events of 7 October and 26 October, and at aifoundry2's on 26 October (its journal starts on
+  10 October). aifoundry3 never did, and no host did at the cold reboots of 26 October. In such a boot the OS never sees a
+  short press of the power button, so shut down from a shell, or hold the button for a forced off.
+
 ## Traps that cost time here
 
 - **A kernel's issue rate is set by where its loop sits, not by its data (E61, 21 October 2026).** In enercat's
