@@ -28,7 +28,7 @@ import numpy as np
 
 E_CHARGE = 1.602176634e-19
 ZERO = {"lq": "lq_h0", "lb": "lb_h0", "ls": "lq_h0", "bit": "lq_h0", "xin": "xin_h0", "xio": "xin_h0", "xnz": "xin_h0",
-        "ain": "ain_h0"}
+        "ain": "ain_h0", "bpi": "lb_h0"}   # bpi (E65, A4): the single-bit flip with A = pi, against lb_h0
 
 
 def load_jsonl(path):
@@ -240,6 +240,13 @@ def main():
         C["items"] = items
         # ---- fma ladders: per-pass slopes over h >= 1
         scale = (clock / 600.0) * (v / 0.517) ** 2   # the predictions' switching watts at this card's f and V
+
+        def dpred(n, z_):
+            """(predicted n - predicted z_) scaled to this card, or None when either has no RTL replay (A4)."""
+            if n not in pred or z_ not in pred:
+                return None
+            return (pred[n]["p_switching_w"] - pred[z_]["p_switching_w"]) * scale
+
         for fam in ("lq", "lb"):
             z = ZERO[fam]
             names = [n for n, it in man.items() if it.get("family") == fam and it.get("h", 0) >= 1]
@@ -288,7 +295,7 @@ def main():
                 out["linear"] = {"W_per_h": f[1], "intercept_W": f[0], "residual_rms_W": f[2],
                                  "span_W": max(y for _, y in pts) - min(y for _, y in pts)}
             out["rungs"] = {n: {"h": man[n]["h"], "dW": items[n].get("d_p80"), "se": items[n].get("d_p80_se"),
-                                "pred_dW": (pred[n]["p_switching_w"] - pred[z]["p_switching_w"]) * scale}
+                                "pred_dW": dpred(n, z)}
                             for n in [z] + names if n in items}
             C[fam] = out
         # ---- ls: paired equal-Hamming contrasts against lq
@@ -298,7 +305,7 @@ def main():
             d = [val[p][a_]["p80"] - val[p][b_]["p80"] for p in passes if a_ in val[p] and b_ in val[p]]
             if d:
                 m_, se, n = mean_se(d)
-                C["ls_vs_lq"][h] = {"W": m_, "se": se, "n": n, "pred_W": (pred[a_]["p_switching_w"] - pred[b_]["p_switching_w"]) * scale}
+                C["ls_vs_lq"][h] = {"W": m_, "se": se, "n": n, "pred_W": dpred(a_, b_)}
         # ---- ord: max-flip minus Gray, and every order against Gray, per position
         C["ord"] = {}
         for pos in (0, 19):
@@ -314,17 +321,20 @@ def main():
                     rate = items[a_]["rate"] or 1
                     e[o] = {"W": m_, "se": se, "n": n, "raw_W": mr_, "raw_se": ser_, "extra_A_bits_per_op": extra,
                             "J_per_extra_A_bit": m_ / (extra * rate) if extra else None,
-                            "pred_W": (pred[a_]["p_switching_w"] - pred[g_]["p_switching_w"]) * scale}
+                            "pred_W": dpred(a_, g_)}
             if e:
                 C["ord"][pos] = e
-        # ---- bit scan: item minus lq_h0 (a workload in which bit j alternates, against the constant one)
-        C["bits"] = {}
-        for n, it in man.items():
-            if it.get("family") == "bit" and n in items and items[n].get("d_p80") is not None:
-                rate = items[n]["rate"] or 1
-                C["bits"][it["bit"]] = {"dW": items[n]["d_p80"], "se": items[n]["d_p80_se"], "n": items[n]["d_n"],
-                                        "J_per_alternating_bit": items[n]["d_p80"] / (4096 * rate),
-                                        "pred_dW": (pred[n]["p_switching_w"] - pred["lq_h0"]["p_switching_w"]) * scale}
+        # ---- bit scan: item minus its family's zero (a workload in which bit j alternates, against the constant
+        # one). bit_<j> has the quiet partner A = 1.0 and lq_h0 as its zero; bpi_<j> has A = pi and lb_h0 (A4).
+        for fam_, key_ in (("bit", "bits"), ("bpi", "bits_pi")):
+            C[key_] = {}
+            z_b = ZERO[fam_]
+            for n, it in man.items():
+                if it.get("family") == fam_ and n in items and items[n].get("d_p80") is not None:
+                    rate = items[n]["rate"] or 1
+                    C[key_][it["bit"]] = {"dW": items[n]["d_p80"], "se": items[n]["d_p80_se"], "n": items[n]["d_n"],
+                                          "J_per_alternating_bit": items[n]["d_p80"] / (4096 * rate),
+                                          "zero": z_b, "pred_dW": dpred(n, z_b)}
         # ---- ec: per-pass slopes, e_in from xin (and ain), e_out from xio and xnz
         ec = {}
         for fam, excl in (("xin", ()), ("ain", ("ain_h32",)), ("xio", ()), ("xnz", ())):
@@ -443,9 +453,11 @@ def main():
         for pos, e in C.get("ord", {}).items():
             if "maxflip" in e:
                 q = e["maxflip"]
-                print(f"  ord pos {pos}: max-flip - Gray = {q['W']:.3f} +- {q['se'] or 0:.3f} W (raw {q['raw_W']:.3f}), pred {q['pred_W']:.3f}, n {q['n']}")
-        if C.get("bits"):
-            print("  bits: " + ", ".join(f"{b}:{x['dW']:.2f}" for b, x in sorted(C["bits"].items())))
+                pr_ = "n/a" if q.get("pred_W") is None else f"{q['pred_W']:.3f}"
+                print(f"  ord pos {pos}: max-flip - Gray = {q['W']:.3f} +- {q['se'] or 0:.3f} W (raw {q['raw_W']:.3f}), pred {pr_}, n {q['n']}")
+        for key_, lbl_ in (("bits", "bits (A=1.0)"), ("bits_pi", "bits (A=pi)")):
+            if C.get(key_):
+                print(f"  {lbl_}: " + ", ".join(f"{b}:{x['dW']:.2f}" for b, x in sorted(C[key_].items())))
         ec = C.get("ec", {})
         for kk in ("e_in", "e_out_from_xio", "e_out_from_xnz"):
             if kk in ec:

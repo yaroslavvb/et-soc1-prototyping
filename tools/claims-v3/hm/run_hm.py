@@ -134,7 +134,12 @@ EXIT_OK, EXIT_ERR, EXIT_REFUSE, EXIT_CARD, EXIT_SAFETY, EXIT_SIGNAL = 0, 1, 2, 3
 DEV_COMM = re.compile(r"_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$")
 OTHER_COMM = re.compile(DEV_COMM.pattern + r"|^Runner\.Worker$")
 
-CARD_HOST = "aifoundry2"                      # the only card this experiment runs on (DECISIONS 2)
+CARD_HOST = "aifoundry2"                      # E62's card (DECISIONS 2), and the default when a protocol names none
+# E65 amendment A1 (26 Oct 2026): a protocol may name its own card in its top-level "card" field, so the one runner
+# serves E62 on aifoundry2 and E65's hart ladder on aifoundry3. A protocol without the field keeps CARD_HOST, so
+# E62's own protocol.json runs exactly as before. The build pairing below (lib.sh:35-43) is aifoundry2's rule and is
+# checked only on aifoundry2: every other host builds sparsity into build/sparsity.
+HOST_HEATER_DIR = {"aifoundry2": "sparsity_t2"}   # lib.sh:35-43; every other card: "sparsity"
 LOCK_PATH = "/run/lock/etsoc-shire0.lock"     # single-card host: V3_DEVICE is unset (lib.sh:183)
 ET_LIB = "/opt/et/lib"
 DEVMNGT = "/opt/et/bin/dev_mngt_service"
@@ -914,9 +919,11 @@ class Session:
     def preflight(self):
         """Everything checked before the card is opened. Raises Refuse."""
         host = socket.gethostname().split(".")[0]
+        want_host = str(self.proto.raw.get("card") or CARD_HOST).split("-c")[0]   # A1: the protocol names its card
         pf = []
-        if not self.dry and host != CARD_HOST:
-            pf.append(f"hostname is {host!r}, not {CARD_HOST!r}: a real session runs only on the card")
+        if not self.dry and host != want_host:
+            pf.append(f"hostname is {host!r}, not {want_host!r}: a real session runs only on the card its "
+                      f"protocol names")
         for env in ("HM_HEATER", "HM_ETTELEM", "HM_KERNEL", "HM_RECORD_CAM"):
             if os.environ.get(env) and not self.dry:
                 pf.append(f"{env} is set: binary overrides are honoured in dry mode only "
@@ -935,9 +942,10 @@ class Session:
                           "device process and it cannot be enforced without it")
             # lib.sh:35-43 picks build/sparsity_t2 on this card and build/sparsity elsewhere; the
             # wrong one here would run a different binary against this card (launch.md 8.1)
-            if os.sep + "build" + os.sep + "sparsity" + os.sep in self.heater_bin:
-                pf.append(f"heater {self.heater_bin} is the non-{CARD_HOST} build: lib.sh:35-43 "
-                          f"uses build/sparsity_t2 on this card (launch.md 8.1)")
+            want_dir = HOST_HEATER_DIR.get(want_host, "sparsity")
+            if os.sep + "build" + os.sep + want_dir + os.sep not in self.heater_bin:
+                pf.append(f"heater {self.heater_bin} is not {want_host}'s build: lib.sh:35-43 "
+                          f"uses build/{want_dir} on this card (launch.md 8.1)")
             for label, path, x in (("heater", self.heater_bin, True), ("kernel", self.kernel, False),
                                    ("ettelem", self.ettelem, True)):
                 if not os.path.isfile(path):

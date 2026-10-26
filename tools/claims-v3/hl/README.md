@@ -175,6 +175,19 @@ failure sets a whole pass aside. D5's estimate for that rung (~59 W) was wrong. 
 from the analysis and from the pass-rejection count (reported as excluded, by name); the ls contrast there rests on
 h = 2. Every other rule stands.
 
+**A4, Mon 26 Oct 2026, 17:5x PDT** (written for E65, after every E60 pass and before any E65 data; E60's results
+below are untouched by it):
+- *Why:* E65 (Q126, `tools/claims-v3/hb/README.md`) needs the 26 bit positions E60 never built and the flow-M case
+  the chip diagram priced at the gate level but no card has run.
+- `make_hl.py`: `BITS` becomes all 32 positions, and a new family `bpi_<j>` (j = 0, 8, 11, 16, 22) runs the same
+  single-bit alternation with the busy partner A = pi, against `lb_h0`. `bit_tiles` gains a `partner` argument and
+  its base words do not depend on it, so `bit_<j>` and `bpi_<j>` differ in A alone. Every file E60 ran is
+  byte-identical in the new set (E65 checks it against `build/hl-gen2` before its first launch).
+- `reduce_hl.py`: `ZERO["bpi"] = "lb_h0"`; the bit scan is reported for both partners (`bits` for A = 1.0,
+  `bits_pi` for A = pi), each against its own zero; and every RTL-prediction lookup goes through `dpred()`, which
+  returns `None` for an item with no replay instead of raising. E60's own items all have predictions, so its
+  reduction is unchanged.
+
 ## Results
 
 The passes ran Tue 20 Oct 2026, 20:22–21:01 PDT (28 passes after the gates: aifoundry3 8, aifoundry2 9, aifoundry1's card 0 10).

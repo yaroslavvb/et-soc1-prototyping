@@ -26,6 +26,8 @@ Families (item names in manifest.json):
        ord_<o>_<pos>   the same 16 A values in Gray, binary, shuffled or max-flip order down every A column;
                        B fixed: the same 4,096 multiply-adds, only the order (so the flips) differs
        bit_<j>         one bit j of B flips every cycle (A = 1.0); exponent bits use a base whose flip stays normal
+       bpi_<j>         the same single-bit flip with the busy partner A = pi (E65 amendment A4): bit_<j> and
+                       bpi_<j> share their B words, so the pair isolates what the partner costs at one position
   ec   xin_h<h>        fxor.pi, f0..f7 = x, y, x, y, ... with y = x ^ m(h): 2h bits per lane flip on the read
                        ports per op, the result (m) never changes
        xio_h<h>        fxor.pi, f0..f7 = x, x, y, y, x, x, y, y: h bits per lane on the ports and h in the result
@@ -149,8 +151,9 @@ def order_tiles(order, pos, rng):
     return A, B
 
 
-def bit_tiles(j):
-    """B[k][8+l] = B[k][l] ^ (1 << j), A = 1.0; the base keeps both words normal and finite."""
+def bit_tiles(j, partner=ONE):
+    """B[k][8+l] = B[k][l] ^ (1 << j); A = partner (1.0, or pi for the bpi family). The base keeps both words
+    normal and finite, and does not depend on the partner, so bit_<j> and bpi_<j> differ in A alone (E65, A4)."""
     rng = np.random.default_rng(SEED + 100 + j)
     exp = 127
     if j == 30:
@@ -158,7 +161,7 @@ def bit_tiles(j):
     base = base_b(rng, exp)
     for w in base:
         assert is_normal(w) and is_normal(w ^ (1 << j)), (j, hex(w))
-    return ladder_tiles(ONE, 1 << j, base)
+    return ladder_tiles(partner, 1 << j, base)
 
 
 def write_tiles(path, A, B):
@@ -218,7 +221,8 @@ def write_img(path, regs):
 # ---------------------------------------------------------------- the item list
 LADDER_H = [0, 1, 2, 4, 8, 12, 16, 23]
 SPREAD_H = [2, 4, 8, 12, 16]
-BITS = [0, 4, 8, 12, 16, 20, 22, 23, 25, 27, 29, 30, 31]
+BITS = list(range(32))        # E65 amendment A4: every bit position (E60 built 13 and ran 6)
+BITS_PI = [0, 8, 11, 16, 22]  # E65 amendment A4: the same single-bit flip with the busy partner A = pi
 EC_H = [0, 4, 8, 16, 24, 32]
 
 
@@ -247,7 +251,14 @@ def build(out):
         A, B = bit_tiles(j)
         name = f"bit_{j}"
         write_tiles(f"{out}/tiles/{name}.bin", A, B)
-        items.append({"name": name, "kind": "fma", "family": "bit", "bit": j, "flips": fma_flips(A, B)})
+        items.append({"name": name, "kind": "fma", "family": "bit", "bit": j, "partner": "1.0",
+                      "flips": fma_flips(A, B)})
+    for j in BITS_PI:
+        A, B = bit_tiles(j, PI)
+        name = f"bpi_{j}"
+        write_tiles(f"{out}/tiles/{name}.bin", A, B)
+        items.append({"name": name, "kind": "fma", "family": "bpi", "bit": j, "partner": "pi",
+                      "flips": fma_flips(A, B)})
     for pat, hs in (("xin", EC_H), ("xio", EC_H[1:]), ("ain", EC_H), ("xnz", [4, 8, 16, 24])):   # xio_h0 would equal xin_h0; ain_h0 is fand.pi's own zero
         for h in hs:
             regs, op = ec_image(pat, h, np.random.default_rng(SEED + 200 + h))

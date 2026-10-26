@@ -26,6 +26,13 @@ One stated detail did not happen as written: raw frames went to `build/e62/runs/
 (gitignored), not to the `~/drive.unsynced/e62/` path the protocol names, and the heater's stop file was
 `<RUNDIR>/STOP`.
 
+## Amendment A1, Mon 26 Oct 2026 (E65, Q126), before any E65 data
+
+`run_hm.py` takes the expected hostname from the protocol's top-level `card` field, defaulting to `aifoundry2`, and
+checks the `build/sparsity_t2` pairing rule (`lib.sh:35-43`) only on the host that uses it. *Why:* E65's hart ladder
+(`tools/claims-v3/hb/README.md`, block C) runs this runner on aifoundry3, whose build is `build/sparsity`. E62's own
+`protocol.json` names `aifoundry2`, so nothing about E62 changes; a protocol with no `card` field behaves as before.
+
 ## Files
 
 | File | Runs on | What |
