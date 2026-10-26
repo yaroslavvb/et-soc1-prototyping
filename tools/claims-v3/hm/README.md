@@ -33,6 +33,15 @@ checks the `build/sparsity_t2` pairing rule (`lib.sh:35-43`) only on the host th
 (`tools/claims-v3/hb/README.md`, block C) runs this runner on aifoundry3, whose build is `build/sparsity`. E62's own
 `protocol.json` names `aifoundry2`, so nothing about E62 changes; a protocol with no `card` field behaves as before.
 
+## Amendment A2, Mon 26 Oct 2026 (E65, Q126), before any E65 block-C data
+
+On `aifoundry3` and `aifoundry1` the other-user test is the card-scoped one of E60's departure D1
+(`hl/README.md`, `hl/block.sh`): another user holding **this card's** device nodes or its lock, read from
+`sudo -n /usr/local/sbin/et-holders` and failing **closed** when the helper cannot be read. *Why:* two lab users
+keep idle tmux shell logins on aifoundry3, so `who` alone would refuse every session there while nobody is on the
+card. aifoundry2 keeps `lib.sh`'s own login test, so E62 is unchanged. The device-process test, the `et_soc1` use
+count and the between-launch cadence are untouched.
+
 ## Files
 
 | File | Runs on | What |

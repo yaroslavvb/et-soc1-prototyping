@@ -155,7 +155,17 @@ reported as not run, never re-registered.
   against its own zero; and every RTL-prediction lookup goes through a `dpred()` that returns `None` when an item has
   no replay, instead of raising. *Why:* D3 — Verilator is not on this host, so the 26 new positions and the five
   `bpi` items have no prediction, and E60's own items are unaffected (all of theirs are in `predictions.json`).
-- `hm/run_hm.py`: the expected hostname comes from the protocol's top-level `card` field, defaulting to
-  `aifoundry2`, and the `build/sparsity_t2` pairing rule (`lib.sh:35-43`) is checked only on the host that uses it.
-  *Why:* block C runs E62's runner on aifoundry3. E62's own `protocol.json` names `aifoundry2`, so its behaviour is
-  unchanged.
+- `hm/run_hm.py` (its own amendment A1): the expected hostname comes from the protocol's top-level `card` field,
+  defaulting to `aifoundry2`, and the `build/sparsity_t2` pairing rule (`lib.sh:35-43`) is checked only on the host
+  that uses it. *Why:* block C runs E62's runner on aifoundry3. E62's own `protocol.json` names `aifoundry2`, so its
+  behaviour is unchanged.
+
+**A5 to `tools/claims-v3/hm/run_hm.py` (Mon 26 Oct 2026, 16:5x PDT, written after blocks A and B had started and
+before any block-C data; its own amendment A2).** On `aifoundry3` and `aifoundry1` the runner's other-user test
+becomes the card-scoped one of E60's departure D1: another user holding **this card's** device nodes or its lock,
+from `sudo -n /usr/local/sbin/et-holders`, failing **closed** when the helper cannot be read. *Why:* two lab users
+(`nkarpov`, `likelytobelaura`) keep idle tmux shell logins on aifoundry3, and `run_hm.py`'s `who`-based test would
+have refused every block-C session with `other_user` while nobody was on the card — exactly the case E60's D1 was
+written for, and the case `hl/block.sh` (which blocks A, B and D run through) already handles. aifoundry2 keeps
+`lib.sh`'s login test, so E62 is unchanged. Nothing else about the check changes: the device-process test, the
+`et_soc1` use count and the between-launch cadence stand.

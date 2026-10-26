@@ -142,6 +142,12 @@ CARD_HOST = "aifoundry2"                      # E62's card (DECISIONS 2), and th
 HOST_HEATER_DIR = {"aifoundry2": "sparsity_t2"}   # lib.sh:35-43; every other card: "sparsity"
 LOCK_PATH = "/run/lock/etsoc-shire0.lock"     # single-card host: V3_DEVICE is unset (lib.sh:183)
 ET_LIB = "/opt/et/lib"
+ET_HOLDERS = "/usr/local/sbin/et-holders"
+# E65 amendment A2 (26 Oct 2026): E60's departure D1 (hl/README.md, hl/block.sh). On these hosts other lab users
+# keep idle shell logins, so a bare `who` would refuse every session; what blocks is another user ON THIS CARD,
+# read from the card-scoped helper and failing CLOSED when it cannot be read. aifoundry2 keeps lib.sh's own test,
+# so E62 is unchanged.
+IDLE_LOGIN_OK_HOSTS = ("aifoundry3", "aifoundry1")
 DEVMNGT = "/opt/et/bin/dev_mngt_service"
 DEFAULT_CAM_URL = "http://p3-phone:8080/stream.raw.z"
 DEFAULT_HEATER = "build/sparsity_t2/host/sparsity_host"   # aifoundry2's build (lib.sh:35-38)
@@ -1032,7 +1038,29 @@ class Session:
             os.close(self.lock_fd)
             self.lock_fd = None
 
+    def _card_holders(self):
+        """Other users holding THIS card's device nodes or its lock, from the card-scoped helper (E60 departure
+        D1, hl/block.sh). Fails closed: a helper that cannot be read counts as a hit."""
+        if not os.path.exists(ET_HOLDERS):
+            return [f"et-holders missing ({ET_HOLDERS})"]
+        rc, out, err = run_out(["sudo", "-n", ET_HOLDERS], timeout=15)
+        if rc != 0:
+            return [f"et-holders unreadable (rc {rc}): {((err or out) or '').strip()[:80]}"]
+        me, dev = me_user(), (os.environ.get("ET_DEVICES") or "0")
+        hits = []
+        for ln in out.splitlines():
+            if "et-holders" in ln:
+                continue
+            f = ln.split()
+            if len(f) >= 2 and f[1] not in ("", me) and (f[0].startswith(f"/dev/et{dev}_")
+                                                         or f[0] == f"lock:etsoc-shire{dev}.lock"):
+                hits.append(":".join(f[:3]))
+        return hits
+
     def _logged_in_others(self):
+        # A2: on a host whose other users keep idle logins, the card-scoped test replaces the login test.
+        if socket.gethostname().split(".")[0] in IDLE_LOGIN_OK_HOSTS:
+            return self._card_holders()
         if not shutil.which("who"):
             return []
         rc, out, _ = run_out(["who"])
