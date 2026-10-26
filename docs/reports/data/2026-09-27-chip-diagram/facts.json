@@ -7,21 +7,22 @@
    "research/facts-v2.json",
    "research/layout.json",
    "research/asks.json",
-   "../../sources/limits-of-observability.data.json (the hub rows the asks link to)"
+   "../../sources/limits-of-observability.data.json (the hub rows the asks link to)",
+   "research/tensorfma32.json (the multiply-add as built and flow M, 25 Oct 2026)"
   ],
-  "n_facts": 1123,
+  "n_facts": 1169,
   "kinds": {
-   "derived": 136,
-   "measured": 215,
-   "spec": 296,
-   "inferred": 196,
+   "derived": 147,
+   "measured": 230,
+   "spec": 311,
+   "inferred": 200,
    "generic": 97,
    "unknown": 18,
    "outside": 157,
-   "owner": 3,
+   "owner": 4,
    "hypothesis": 5
   },
-  "n_num": 280,
+  "n_num": 303,
   "et_platform_head": "836a4ab"
  },
  "facts": {
@@ -1735,21 +1736,21 @@
    "unit": "pJ/MAC"
   },
   "e-tfma-fp32-zeros": {
-   "statement": "TensorFMA fp32 zeros: 0.273 pJ per multiply-add [0.141-0.445] above idle, all 1,024 minions; per card a2 0.403, a3 0.163, a1c1 0.251.",
-   "kind": "measured",
-   "source": "manual.json: tensor.bars.fp32_zeros (mean, lo, hi, per_card); docs/energy-manual/03-instructions.md:43",
-   "note": "Zeros clock nothing: the lane clock is withheld when an operand word is zero.",
-   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual",
-   "page": "The energy manual",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
    "cards": [
     "a2",
     "a3",
     "a1c1"
    ],
-   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "kind": "measured",
+   "note": "Zeros clock almost nothing: a zero operand word withholds the micro-op's valid bit, so the multiply-add's stage clock gates stay shut (15 flip-flops clocked per lane-op instead of 1,586; tfma.zero, tfma.clocked).",
+   "page": "The energy manual",
+   "source": "manual.json: tensor.bars.fp32_zeros (mean, lo, hi, per_card); docs/energy-manual/03-instructions.md:43",
+   "statement": "TensorFMA fp32 zeros: 0.273 pJ per multiply-add [0.141-0.445] above idle, all 1,024 minions; per card a2 0.403, a3 0.163, a1c1 0.251.",
    "topic": "energy per MAC",
-   "value": 0.273,
-   "unit": "pJ/MAC"
+   "unit": "pJ/MAC",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual",
+   "value": 0.273
   },
   "e-tfma-int8": {
    "statement": "TensorFMA int8 random: 0.295 pJ per multiply-add [0.260-0.317] above idle, all 1,024 minions; per card a2 0.313, a3 0.262, a1c1 0.309.",
@@ -3971,6 +3972,120 @@
    "topic": "voltages",
    "value": 704,
    "unit": "mV"
+  },
+  "tfma.avg": {
+   "kind": "derived",
+   "note": "A bit of a costs more: a is Booth-recoded, so one flip re-selects one or two whole rows (an odd bit sits in two groups); a bit of b changes one bit in each non-zero row. A bit of c never reaches the tree (156 in the unit). Physical wires: RTL names ÷ 3.5 (tfma.names), checked against the gate-level run for bits of b (tfma.flip.gate).",
+   "source": "a Verilator simulation of the multiply-add's RTL (one lane's txfma_top, the module core-et's Erbium branch also has; FMADD_PS, round to nearest even; it matches an exact fp32 fused multiply-add on 3,000 of 3,000 cases), research for this page, 23 October 2026: 192,000 single-bit flips (a and b normally distributed; c = 0, 1, 100 or random)",
+   "statement": "Averaged over all 46 fraction bits of a and b, each flipped alone in 2,000 random operand sets: 1,037 RTL signal bits toggle in the Wallace tree (1,227 for a bit of a, 848 for a bit of b), 1,106 with the Booth rows, 2,059 in the whole unit; about 300 physical wires in the tree."
+  },
+  "tfma.booth.rows": {
+   "kind": "spec",
+   "note": "In fp32 a's low 8 bits are zero, so rows 1-4 are always zero: at most 13 rows carry data (a = 1.0 gives 2 non-zero rows, a = π 10).",
+   "source": "Esperanto's design files for the ET-SoC-1 (its RTL, its RTL review and drawings of the partial products); the same modules in core-et's open Erbium RTL: rtl/shire/minion/vpu/txfma_7s/txfma_booth_ppg_32r4_norm.v, txfma_booth_ppg_32r4.v, txfma_booth_ppg_32r4_msb.v, txfma_wallace1.v",
+   "statement": "a's 24-bit significand sits in bits 31-8 of a 32-bit multiplier. Radix-4 Booth recoding reads it three bits at a time (bits 2k−1, 2k−2 and 2k−3 for row k) and makes 16 rows of 33 bits, each 0, +b, +2b, −b or −2b (000 and 111 give a zero row). A negative row is only inverted; its +1 goes into a separate carry-in row, and the rows' sign extensions are replaced by their inverted signs, constant ones and a 'magic' 1 at bit 33 of row 1. Row 17 adds b once more for the multiplier's top bit. 18 rows enter the tree."
+  },
+  "tfma.clocked": {
+   "kind": "derived",
+   "note": "The RTL view: 1,739 of 2,071 register bits load per multiply-add.",
+   "source": "a gate-level simulation of lane 0 of a netlist synthesized from the ET-SoC-1's RTL with its tape-out flow (zero delay), with every clock gate's enable evaluated from its netlist cone (Esperanto's design files for the ET-SoC-1)",
+   "statement": "A random-data multiply-add clocks 1,586 of the lane's 1,851 multiply-add flip-flops; a zero operand word, 15."
+  },
+  "tfma.example": {
+   "kind": "derived",
+   "note": "With bit 8 of a's fraction flipped instead, Booth row 9 changes from 0 to −b: 23 partial-product bits enter the tree at once, and the unit toggles 2,154 signal bits, 1,255 of them in the Wallace tree.",
+   "source": "a Verilator simulation of the multiply-add's RTL (one lane's txfma_top, the module core-et's Erbium branch also has; FMADD_PS, round to nearest even; it matches an exact fp32 fused multiply-add on 3,000 of 3,000 cases), research for this page, 23 October 2026; the operands are the lab's E60 case",
+   "statement": "The worked example: a = π (0x40490fdb), b = 1.2345678 (0x3f9e0651), c = 100 (0x42c80000). Flipping bit 11 of b's fraction makes b = 1.2348119 (0x3f9e0e51): the product goes from 3.8785091 to 3.8792761 and the result from 103.87851 (0x42cfc1cc) to 103.87927 (0x42cfc230), 8 of its 32 bits."
+  },
+  "tfma.flip.energy": {
+   "kind": "derived",
+   "note": "Glitches, which a zero-delay model leaves out, add about 40 % to the tree's energy (tfma.glitch). For scale: a random fp32 multiply-add measures 5.8 pJ above idle on the cards (e-tfma-fp32).",
+   "source": "a gate-level simulation of lane 0 of a netlist synthesized from the ET-SoC-1's RTL with its tape-out flow (zero delay), priced with its cells' energies at the typical corner, interpolated to 0.517 V (Esperanto's design files for the ET-SoC-1)",
+   "statement": "Priced with the cells' energies at the minion's 0.517 V, flipping such a bit of b (with a = π) on every multiply-add costs about 0.11-0.13 pJ more in the multiplier: the Booth rows, the tree and the product adder."
+  },
+  "tfma.flip.gate": {
+   "kind": "derived",
+   "source": "a gate-level simulation of lane 0 of a netlist synthesized from the ET-SoC-1's RTL with its tape-out flow (zero delay), the lab's E60 case 'b bit 11, a = π' (Esperanto's design files for the ET-SoC-1); compared with the RTL simulation of the research for this page",
+   "statement": "In a gate-level simulation of the netlist the same flip toggles 381 physical wires in the Booth rows, the tree, its register and the product adder: 129 in f1 (19 of them the register's flip-flops) and 252 in f2 (16 of them the product's)."
+  },
+  "tfma.flip.stages": {
+   "kind": "derived",
+   "note": "Zero delay, so no glitches. Every bit of every named signal in every module is counted, as a simulator's toggle count does; for the distinct count, bits with identical waveforms over a long training stream count once. RTL names are not wires: a physical wire carries about 3.5 RTL names in the tree and 2.55 in the whole unit (tfma.names).",
+   "source": "a Verilator simulation of the multiply-add's RTL (one lane's txfma_top, the module core-et's Erbium branch also has; FMADD_PS, round to nearest even; it matches an exact fp32 fused multiply-add on 3,000 of 3,000 cases), research for this page, 23 October 2026",
+   "statement": "Flipping that bit changes 1,946 named RTL signal bits as the difference passes through the unit: 3 on the operand bus and 8 in f0 (11 with the bus), 409 in f1, 639 in f2, 235 in f3, 284 in f4, 173 in f5 and 195 in f6. 875 of them are in the Wallace tree (its four levels and its register) and 48 in the Booth rows. Counted once per wire, they are 482 distinct nets."
+  },
+  "tfma.glitch": {
+   "kind": "derived",
+   "source": "a gate-level simulation of lane 0 of a netlist synthesized from the ET-SoC-1's RTL with its tape-out flow: its timed pass (event-driven, inertial delays) against the zero-delay one (Esperanto's design files for the ET-SoC-1)",
+   "statement": "With gate delays the multiplier tree makes about 1.5 times as many toggles as at zero delay (1,871 against 1,244 physical toggles per random multiply-add) and spends about 1.4 times the energy."
+  },
+  "tfma.lab": {
+   "kind": "derived",
+   "note": "The simulator's toggle coverage, the lab's tool, misses the compressor cells' input ports and counts transient values while the model settles (30 counted where 2 changes happened), so its counts inside the tree are not reliable.",
+   "source": "a Verilator simulation of the multiply-add's RTL (one lane's txfma_top, the module core-et's Erbium branch also has; FMADD_PS, round to nearest even; it matches an exact fp32 fused multiply-add on 3,000 of 3,000 cases), research for this page, 23 October 2026, with the lab's stream pattern (rtl-sim/fma_toggle: 16×16×16 random tiles, a and b normal, 2 seeds, 3 accumulator scales); the lab's count: docs/reports/data/2026-09-21-horace-aifoundry2/toggles_all.json",
+   "statement": "The lab's count of 21,331 toggles per random multiply-add was not reproduced: on the same RTL and the same random TensorFMA32 pattern, this page's research counts 7,160-7,470 per multiply-add (5,820-6,090 with the lab's own counting tool), 55 % of them in the tree rather than 85 %."
+  },
+  "tfma.names": {
+   "cards_txt": "the design (RTL and netlists), not a card",
+   "kind": "measured",
+   "source": "a synthesis of the vector lane that kept every module (Esperanto's design files for the ET-SoC-1)",
+   "statement": "Names per physical net in a synthesis of the lane that kept its hierarchy: 2.55 over the whole multiply-add, 3.70 in the first tree module (txfma_wallace1) and 3.48 in the second."
+  },
+  "tfma.operands": {
+   "kind": "spec",
+   "source": "Esperanto's design files for the ET-SoC-1 (its RTL); the same in core-et's open Erbium RTL: rtl/shire/minion/vpu/vpu_tensorfma.v, vpu_bypass.v and txfma_7s/txfma_f1.v (.mplr and .mpcnd)",
+   "statement": "In a TensorFMA32, a is one TenA element broadcast to all 8 lanes and is the multiplier that gets Booth-recoded; b is the lane's own TenB element, the multiplicand; c is the accumulator from the lane's register file. The first pass issues a multiply (FMUL_PS), every later pass a multiply-add (FMADD_PS)."
+  },
+  "tfma.owner": {
+   "kind": "owner",
+   "note": "The lab's figure is its 21,331 counted toggles per random multiply-add divided by the 20.3 bits of a and b that change between consecutive multiply-adds: an average over a stream, not one flip's cascade (tfma.owner.why). Counted directly on the RTL, an isolated flip toggles 1,037 signal bits in the tree on average (tfma.avg).",
+   "source": "the owner, 23 Oct 2026; the same figure as the lab's RTL toggle model (tools/claims-v3/dtf/README.md, S15: 21,331 counted toggles ÷ 20.3 bits on txfma_top)",
+   "statement": "One input bit flip in the 7-stage TensorFMA32 triggers an avalanche of about 1,050 toggles across the Wallace tree."
+  },
+  "tfma.owner.why": {
+   "kind": "derived",
+   "source": "the lab's RTL toggle model: tools/claims-v3/dtf/README.md (S15) and docs/reports/data/2026-09-21-horace-aifoundry2/toggles_all.json; a Verilator simulation of the multiply-add's RTL (one lane's txfma_top, the module core-et's Erbium branch also has; FMADD_PS, round to nearest even; it matches an exact fp32 fused multiply-add on 3,000 of 3,000 cases), research for this page, 23 October 2026: 20.0 bits of a and b change per multiply-add in the lab's stream pattern",
+   "statement": "The owner's ~1,050 is an average over a random stream: the lab's 21,331 counted toggles per random multiply-add divided by the ~20 bits of a and b that change from one multiply-add to the next (about 1,067), not one flipped bit's cascade."
+  },
+  "tfma.reg12": {
+   "cards_txt": "the design (RTL and netlists), not a card",
+   "kind": "measured",
+   "source": "Esperanto's design files for the ET-SoC-1: its RTL (the same in core-et's open Erbium RTL: rtl/shire/minion/vpu/txfma_7s/txfma_f1.v), and lane 0 of a netlist synthesized from the ET-SoC-1's RTL with its tape-out flow (the tape-out's own netlist is not among the files; its flip-flops are the bits a model of the RTL calls non-constant, except three sign bits synthesis merged)",
+   "statement": "Between f1 and f2 a register holds the tree's four rows and the two rows that wait for level 4: 353 bits in the RTL (4 × 64 + 33 + 32 + 32). Synthesis keeps 253 flip-flops (constant bits pruned), of which 205 can change in fp32."
+  },
+  "tfma.regs.stage": {
+   "cards_txt": "the design (RTL and netlists), not a card",
+   "kind": "measured",
+   "source": "Esperanto's design files for the ET-SoC-1: its RTL, elaborated (research for this page, 23 Oct 2026), and lane 0 of a netlist synthesized from the ET-SoC-1's RTL with its tape-out flow, by the stage each register feeds",
+   "statement": "The register that starts each stage, in RTL bits (flip-flops in lane 0 after synthesis): f0 255 (229), f1 223 (213), f2 606 (492), f3 340 (322), f4 263 (248), f5 238 (213), f6 146 (134): 2,071 bits, 1,851 flip-flops."
+  },
+  "tfma.side": {
+   "kind": "spec",
+   "source": "Esperanto's design files for the ET-SoC-1 (its RTL); the same in core-et's open Erbium RTL: rtl/shire/minion/vpu/txfma_7s/txfma_f3.v, txfma_f4.v, txfma_f5.v",
+   "statement": "In f3 a 32-bit integer and min-max register loads the product's top 32 bits on every fp32 multiply-add and carries them to f4 and f5, where nothing reads them: 64 register-bit loads a multiply-add for nothing."
+  },
+  "tfma.stages": {
+   "kind": "spec",
+   "note": "Lane stages F2 to F8; the operands are read in F1. Checked on a simulation of the RTL: 3,000 random and corner-case multiply-adds and 23 boundary cases agree with an exact fp32 fused multiply-add, result and flags.",
+   "source": "Esperanto's design files for the ET-SoC-1 (its RTL and stage diagrams); the same stages in core-et's open Erbium RTL: rtl/shire/minion/vpu/txfma_7s/txfma_f0.v … txfma_f6.v, txfma_top.v; external/core-et/docs/Minion VPU Specification.pdf §2.2.3",
+   "statement": "The TensorFMA32 multiply-add (each vector lane's TXFMA) is a 7-stage pipeline, f0 to f6: f0 captures the operands; f1 recodes a and adds its 16 Booth rows of b down to 4 (tree levels 1-2); f2 finishes the tree (levels 3-4) and adds the last two rows into the product; f3 lines the product up with c and merges them; f4 adds them while it anticipates the leading one; f5 normalises and decides the rounding; f6 rounds and writes the result. A new multiply-add enters every cycle; each result leaves 7 cycles later."
+  },
+  "tfma.tree.levels": {
+   "kind": "spec",
+   "note": "The RTL calls it a Wallace tree; it is a regular tree of 4:2 compressors with no 3:2 level, two levels in each of f1 and f2.",
+   "source": "Esperanto's design files for the ET-SoC-1 (its RTL and stage diagrams); the same in core-et's open Erbium RTL: rtl/shire/minion/vpu/txfma_7s/txfma_wallace1.v:81-88, txfma_wallace2.v:29-32, txfma_f1.v, txfma_f2.v",
+   "statement": "The tree adds the rows in four levels of 64-bit arrays of 4:2 compressors. In f1, level 1 (four arrays: rows 1-4, 5-8, 9-12, 13-16) makes 8 rows and level 2 (two arrays) 4, which a register holds. In f2, level 3 (one array) makes 2, and level 4 adds those 2, row 17 and the sign row into 2. A 64-bit adder in f2 adds the last two into the product."
+  },
+  "tfma.underflow": {
+   "kind": "spec",
+   "source": "Esperanto's design files for the ET-SoC-1 (its RTL); the same in core-et's open Erbium RTL: rtl/shire/minion/vpu/txfma_7s/txfma_c6.v; external/core-et/docs/Minion VPU Specification.pdf §2.2.3.9; a Verilator simulation of the multiply-add's RTL (one lane's txfma_top, the module core-et's Erbium branch also has; FMADD_PS, round to nearest even; it matches an exact fp32 fused multiply-add on 3,000 of 3,000 cases), research for this page, 23 October 2026, six constructed cases",
+   "statement": "Results below 2^-126 flush to zero, as denormal inputs read as zero. The RTL judges 'below' after rounding: a result just under 2^-126 that rounds up comes back as 2^-126 (0x00800000) with only the inexact flag, where the VPU specification says before rounding."
+  },
+  "tfma.zero": {
+   "kind": "spec",
+   "note": "The lane's own clock gate keeps running (vpu_lane.v).",
+   "source": "Esperanto's design files for the ET-SoC-1 (its RTL); the same in core-et's open Erbium RTL: rtl/shire/minion/vpu/vpu_ctrl.v (ex_fma_gate_mask) and txfma_7s/txfmafrac_top.v",
+   "statement": "Zero gating: in a TensorFMA's accumulate passes a lane gets no valid bit when its a or b word is exactly 0x00000000 (a zero a gates all 8 lanes, a zero b its own lane), and then none of the unit's stage clock gates opens. −0.0, denormals and the first pass are not gated."
   }
  },
  "num": {
@@ -5668,6 +5783,144 @@
    "t": "0.02%",
    "u": "",
    "f": "hot.cliff"
+  },
+  "tf_avg": {
+   "f": "tfma.avg",
+   "t": "~1,040",
+   "u": "",
+   "v": 1037
+  },
+  "tf_avg_a": {
+   "f": "tfma.avg",
+   "t": "1,227",
+   "u": "",
+   "v": 1227
+  },
+  "tf_avg_b": {
+   "f": "tfma.avg",
+   "t": "848",
+   "u": "",
+   "v": 848
+  },
+  "tf_e": {
+   "f": "tfma.flip.energy",
+   "t": "about 0.11-0.13 pJ",
+   "u": "",
+   "v": 0.12
+  },
+  "tf_ex": {
+   "f": "tfma.flip.stages",
+   "t": "1,946",
+   "u": "",
+   "v": 1946
+  },
+  "tf_ex_b": {
+   "f": "tfma.flip.stages",
+   "t": "48",
+   "u": "",
+   "v": 48
+  },
+  "tf_ex_n": {
+   "f": "tfma.flip.stages",
+   "t": "482",
+   "u": "",
+   "v": 482
+  },
+  "tf_ex_w": {
+   "f": "tfma.flip.stages",
+   "t": "875",
+   "u": "",
+   "v": 875
+  },
+  "tf_fac": {
+   "f": "tfma.asbuilt.cells",
+   "t": "248",
+   "u": "",
+   "v": 248
+  },
+  "tf_flops": {
+   "f": "tfma.clocked",
+   "t": "1,586",
+   "u": "",
+   "v": 1586
+  },
+  "tf_gate": {
+   "f": "tfma.flip.gate",
+   "t": "381",
+   "u": "",
+   "v": 381
+  },
+  "tf_lab": {
+   "f": "tfma.lab",
+   "t": "21,331",
+   "u": "",
+   "v": 21331
+  },
+  "tf_owner": {
+   "f": "tfma.owner",
+   "t": "~1,050",
+   "u": "",
+   "v": 1050
+  },
+  "tf_phys": {
+   "f": "tfma.avg tfma.names",
+   "t": "~300",
+   "u": "",
+   "v": 296
+  },
+  "tf_s0": {
+   "f": "tfma.flip.stages",
+   "t": "11",
+   "u": "",
+   "v": 11
+  },
+  "tf_s1": {
+   "f": "tfma.flip.stages",
+   "t": "409",
+   "u": "",
+   "v": 409
+  },
+  "tf_s2": {
+   "f": "tfma.flip.stages",
+   "t": "639",
+   "u": "",
+   "v": 639
+  },
+  "tf_s3": {
+   "f": "tfma.flip.stages",
+   "t": "235",
+   "u": "",
+   "v": 235
+  },
+  "tf_s4": {
+   "f": "tfma.flip.stages",
+   "t": "284",
+   "u": "",
+   "v": 284
+  },
+  "tf_s5": {
+   "f": "tfma.flip.stages",
+   "t": "173",
+   "u": "",
+   "v": 173
+  },
+  "tf_s6": {
+   "f": "tfma.flip.stages",
+   "t": "195",
+   "u": "",
+   "v": 195
+  },
+  "tf_unit": {
+   "f": "tfma.avg",
+   "t": "~2,060",
+   "u": "",
+   "v": 2059
+  },
+  "tf_z": {
+   "f": "tfma.clocked tfma.zero",
+   "t": "15",
+   "u": "",
+   "v": 15
   }
  },
  "comp": {
@@ -6220,6 +6473,26 @@
    "pcie.poll",
    "sync-chip-barrier",
    "L104"
+  ],
+  "flowL": [
+   "tfma.stages",
+   "tfma.operands",
+   "tfma.booth.rows",
+   "tfma.tree.levels",
+   "tfma.reg12",
+   "tfma.example",
+   "tfma.flip.stages",
+   "tfma.flip.gate",
+   "tfma.flip.energy",
+   "tfma.avg",
+   "tfma.owner",
+   "tfma.owner.why",
+   "tfma.lab",
+   "tfma.glitch",
+   "tfma.names",
+   "tfma.clocked",
+   "tfma.zero",
+   "e-tfma-fp32"
   ]
  },
  "layout": {
@@ -6959,6 +7232,23 @@
     "ask-pcie-dma",
     "ask-lab-root"
    ]
+  },
+  {
+   "ask": "experiment",
+   "ask_detail": "an experiment: the same flips on the gate-level netlist",
+   "comps": [
+    "flow:L",
+    "vpu"
+   ],
+   "facts": [
+    "tfma.avg",
+    "tfma.flip.gate",
+    "tfma.names",
+    "tfma.glitch"
+   ],
+   "part": "the avalanche in physical wires (Flow M, TensorFMA32)",
+   "what_is_inferred": "The physical count for the average flip (about 300 wires in the tree) is the RTL count divided by 3.5 names per wire; a gate-level run checked it only for three bits of b with a = π and 1.0, at zero delay.",
+   "what_settles_it": "Replay the 192,000 single-bit flips on the gate-level netlist of lane 0 (the earlier gate-level harness takes a stream of micro-ops), at zero delay and with gate delays, and count physical toggles per stage."
   }
  ],
  "rungs": {
@@ -8427,103 +8717,128 @@
    "f": "size.vpu.lane.vrf"
   },
   "vpu.lane.fma": {
-   "name": "Fused multiply-add unit (TXFMA)",
-   "short": "Multiply-add",
-   "blurb": "Computes a x b + c on 32-bit floating-point numbers (or two 16-bit ones) in one pass, rounding only once. Inside are a multiplier array, an adder, and circuits that line up and normalise the exponents.",
-   "parent": "vpu.lane",
-   "m": 6e-05,
-   "kind": "inferred",
-   "note": "order of magnitude; the multiplier array alone is some 20,000 transistors (see below)",
+   "blurb": "Computes c + a × b on 32-bit floats, rounded once, in a pipeline of seven stages, f0 to f6: a new multiply-add enters every cycle and each result leaves 7 cycles later. Its multiplier (f1 and f2) is a radix-4 Booth recoder and a Wallace tree of 4:2 compressors; then the sum is aligned, added, normalised and rounded.",
+   "erbium": false,
+   "f": "size.vpu.lane.fma",
    "facts": [
-    "in.vpu.lane.fma.1",
+    "tfma.stages",
+    "tfma.operands",
+    "tfma.regs.stage",
+    "tfma.clocked",
+    "tfma.zero",
+    "tfma.avg",
     "e-fmadd-ps",
     "e-tfma-fp32",
     "e-tfma-fp32-zeros",
     "e-flip-model",
-    "in.vpu.lane.fma.6",
-    "tb.fma"
+    "in.vpu.lane.fma.1",
+    "tb.fma",
+    "tfma.mdp.size"
    ],
    "kids": [
     "vpu.lane.fma.booth",
     "vpu.lane.fma.tree",
     "vpu.lane.fma.norm"
    ],
+   "kind": "inferred",
+   "m": 6e-05,
+   "name": "Multiply-add unit (TXFMA): TensorFMA32 in seven stages",
+   "nk": "block",
+   "note": "order of magnitude: synthesized logic placed among the lane's other units; its multiplier alone is about 50,000 transistors as built, and a hand-placed version of an earlier design's significand datapath measured 78 × 31 µm",
+   "parent": "vpu.lane",
    "see": [
     "lib.booth",
     "lib.cmp42",
     "lib.adder",
     "lib.flipflop"
    ],
-   "zoom_to": null,
-   "nk": "block",
-   "erbium": false,
-   "f": "size.vpu.lane.fma"
+   "short": "Multiply-add",
+   "zoom_to": null
   },
   "vpu.lane.fma.booth": {
-   "name": "Booth encoders and partial products",
-   "short": "Booth encoders and parti…",
-   "blurb": "Multiplication is many shifted additions. Radix-4 Booth encoding looks at the multiplier two bits at a time, halving the number of rows to add: 17 rows for a 32-bit multiplier.",
-   "parent": "vpu.lane.fma",
-   "m": 3e-05,
-   "kind": "inferred",
-   "note": "order of magnitude",
+   "blurb": "a's significand is read three bits at a time; each group picks 0, +b, +2b, −b or −2b for one row, so 16 rows (and a 17th for a's top bit) replace 32. The rows, shifted two places each, go to the Wallace tree.",
+   "erbium": true,
+   "f": "size.vpu.lane.fma.booth",
    "facts": [
+    "tfma.booth.rows",
+    "tfma.booth.fp32",
+    "tfma.sel.asbuilt",
+    "tfma.benc",
+    "tfma.psel",
+    "tfma.hand",
     "in.vpu.lane.fma.booth.1",
     "in.vpu.lane.fma.booth.2",
-    "in.vpu.lane.fma.booth.3"
+    "tb.booth"
    ],
    "kids": [],
+   "kind": "inferred",
+   "m": 3e-05,
+   "name": "The Booth multiplier: rows of b chosen by a",
+   "nk": "block",
+   "note": "order of magnitude: the Booth path is about 21,300 transistors as built",
+   "parent": "vpu.lane.fma",
    "see": [
+    "fma.benc",
+    "fma.psel",
     "lib.booth"
    ],
-   "zoom_to": null,
-   "nk": "block",
-   "erbium": true,
-   "f": "size.vpu.lane.fma.booth"
+   "short": "Booth multiplier",
+   "zoom_to": null
   },
   "vpu.lane.fma.tree": {
-   "name": "Compressor tree (Wallace tree of 4:2 compressors)",
-   "short": "Compressor tree",
-   "blurb": "The 17 rows are added in a tree of small adders that turn every four bits of a column into two, level after level, until two rows remain for one final adder. This is most of the multiplier's area and most of its switching.",
-   "parent": "vpu.lane.fma",
-   "m": 4e-05,
-   "kind": "inferred",
-   "note": "order of magnitude",
+   "blurb": "Adds the 18 rows (16 Booth rows, row 17 and a sign row) down to two in four levels of 64-wide arrays of 4:2 compressors: 16 → 8 → 4 in f1, a register, then 4 → 2 and 2 + row 17 + the sign row → 2 in f2. Most of the multiplier's area and most of its switching.",
+   "erbium": true,
+   "f": "size.vpu.lane.fma.tree",
    "facts": [
+    "tfma.tree.levels",
+    "tfma.tree.arrays",
+    "tfma.tree.synth",
+    "tfma.tree.fp32",
+    "tfma.reg12",
+    "tfma.asbuilt.cells",
+    "tfma.depth",
     "in.vpu.lane.fma.tree.1",
     "in.vpu.lane.fma.tree.2",
-    "e-flip-model"
+    "tfma.avg"
    ],
    "kids": [],
+   "kind": "inferred",
+   "m": 4e-05,
+   "name": "The Wallace tree as built: four levels of 4:2 compressors",
+   "nk": "block",
+   "note": "order of magnitude: about 22,000 transistors (the four levels, one lane, as built), spread by the placement tool through the multiply-add",
+   "parent": "vpu.lane.fma",
    "see": [
     "lib.cmp42",
     "lib.fa"
    ],
-   "zoom_to": null,
-   "nk": "block",
-   "erbium": true,
-   "f": "size.vpu.lane.fma.tree"
+   "short": "Wallace tree",
+   "zoom_to": null
   },
   "vpu.lane.fma.norm": {
-   "name": "Align, add, normalise, round",
-   "short": "Align",
    "blurb": "Floating-point numbers must be lined up by their exponents before adding, and the result shifted back and rounded: a shifter, a wide adder, a leading-zero counter and a rounding adder.",
-   "parent": "vpu.lane.fma",
-   "m": 3e-05,
-   "kind": "inferred",
-   "note": "order of magnitude",
+   "erbium": true,
+   "f": "size.vpu.lane.fma.norm",
    "facts": [
-    "in.vpu.lane.fma.norm.1"
+    "tfma.stages",
+    "tfma.frame",
+    "in.vpu.lane.fma.norm.1",
+    "tfma.side",
+    "tfma.underflow"
    ],
    "kids": [],
+   "kind": "inferred",
+   "m": 3e-05,
+   "name": "Align, add, normalise, round",
+   "nk": "block",
+   "note": "order of magnitude",
+   "parent": "vpu.lane.fma",
    "see": [
     "lib.adder",
     "lib.mux2"
    ],
-   "zoom_to": null,
-   "nk": "block",
-   "erbium": true,
-   "f": "size.vpu.lane.fma.norm"
+   "short": "Align",
+   "zoom_to": null
   },
   "vpu.lane.tima": {
    "name": "Integer multiply-add units (two TIMA)",
@@ -9688,94 +10003,105 @@
    "f": "size.lib.arbiter"
   },
   "lib.fa": {
-   "name": "Full adder",
-   "short": "Full adder",
    "blurb": "Adds three bits and gives a sum bit and a carry bit: the brick of every adder and multiplier.",
-   "parent": "lib",
-   "m": 8e-07,
-   "kind": "inferred",
-   "note": "about 12-16 gate pitches wide (inference)",
+   "erbium": false,
+   "f": "size.lib.fa",
    "facts": [
-    "in.lib.fa.1"
+    "in.lib.fa.1",
+    "tfma.csa",
+    "tfma.fa.mirror",
+    "tfma.fa.tg",
+    "tfma.asbuilt.cells"
    ],
    "kids": [],
+   "kind": "inferred",
+   "m": 8e-07,
+   "name": "Full adder",
+   "nk": "circuit",
+   "note": "about 12-16 gate pitches wide (inference)",
+   "parent": "lib",
    "see": [
+    "lib.fa.tr",
     "lib.xor",
     "lib.finfet"
    ],
-   "zoom_to": null,
-   "nk": "circuit",
-   "erbium": false,
-   "f": "size.lib.fa"
+   "short": "Full adder",
+   "zoom_to": null
   },
   "lib.cmp42": {
-   "name": "4:2 compressor",
-   "short": "4:2 compressor",
-   "blurb": "Takes four bits of a column (and a carry in) and gives two bits out: the step of a multiplier's adder tree that halves the rows at each level.",
-   "parent": "lib",
-   "m": 1.5e-06,
-   "kind": "inferred",
-   "note": "about two full adders (inference)",
+   "blurb": "Two full adders in a chain: four bits of a column and a carry in become a sum and two carries. Its sideways carry does not depend on the carry coming in, so a row of them adds without a ripple.",
+   "erbium": false,
+   "f": "size.lib.cmp42",
    "facts": [
-    "in.lib.cmp42.1",
+    "tfma.cmp42",
+    "tfma.csa",
+    "tfma.tree.synth",
+    "tfma.asbuilt.cells",
     "in.lib.cmp42.2"
    ],
    "kids": [],
+   "kind": "inferred",
+   "m": 1.5e-06,
+   "name": "4:2 compressor",
+   "nk": "circuit",
+   "note": "about two full adders (inference)",
+   "parent": "lib",
    "see": [
     "lib.fa",
     "lib.xor"
    ],
-   "zoom_to": null,
-   "nk": "circuit",
-   "erbium": true,
-   "f": "size.lib.cmp42"
+   "short": "4:2 compressor",
+   "zoom_to": null
   },
   "lib.booth": {
-   "name": "Booth encoder and partial-product selector",
-   "short": "Booth encoder",
    "blurb": "Looks at three overlapping bits of the multiplier and chooses 0, +/-1 or +/-2 times the multiplicand for that row: two multiplier bits per row instead of one.",
-   "parent": "lib",
-   "m": 5e-07,
-   "kind": "inferred",
-   "note": "order of magnitude",
+   "erbium": false,
+   "f": "size.lib.booth",
    "facts": [
-    "in.lib.booth.1",
+    "tfma.booth.rows",
+    "tfma.benc",
+    "tfma.psel",
     "in.lib.booth.2",
     "tb.booth",
     "tb.booth.table"
    ],
    "kids": [],
+   "kind": "inferred",
+   "m": 5e-07,
+   "name": "Booth encoder and partial-product selector",
+   "nk": "circuit",
+   "note": "order of magnitude",
+   "parent": "lib",
    "see": [
     "lib.mux2",
     "lib.xor"
    ],
-   "zoom_to": null,
-   "nk": "circuit",
-   "erbium": true,
-   "f": "size.lib.booth"
+   "short": "Booth encoder",
+   "zoom_to": null
   },
   "lib.adder": {
-   "name": "Fast (parallel-prefix) adder",
-   "short": "Adder",
    "blurb": "Adding 64-bit numbers quickly means not waiting for a carry to ripple through 64 positions: the fastest prefix adders compute all the carries in about six levels of logic.",
-   "parent": "lib",
-   "m": 3e-05,
-   "kind": "inferred",
-   "note": "a 64-bit adder: tens of um (order of magnitude)",
+   "erbium": false,
+   "f": "size.lib.adder",
    "facts": [
     "in.lib.adder.1",
     "tb.prefix",
-    "tb.kogge"
+    "tb.kogge",
+    "tfma.padd"
    ],
    "kids": [],
+   "kind": "inferred",
+   "m": 3e-05,
+   "name": "Fast (parallel-prefix) adder",
+   "nk": "circuit",
+   "note": "a 64-bit adder: tens of um (order of magnitude)",
+   "parent": "lib",
    "see": [
     "lib.fa",
     "lib.nand2"
    ],
-   "zoom_to": null,
-   "nk": "circuit",
-   "erbium": false,
-   "f": "size.lib.adder"
+   "short": "Adder",
+   "zoom_to": null
   },
   "lib.latch": {
    "name": "Latch (drawn as the L1's storage cell)",
@@ -10232,23 +10558,28 @@
    "f": "si.lattice"
   },
   "fma.tree.col": {
-   "name": "One column of the compressor tree",
-   "short": "Column",
-   "blurb": "One bit position of the multiplier: its 17 partial-product bits pass down through layers of 4:2 compressors. Each passes a carry to the next column and takes one from the column before, so the whole tree works in parallel.",
-   "parent": "vpu.lane.fma.tree",
-   "m": 1e-05,
-   "kind": "inferred",
-   "note": "order of magnitude: one bit-column of a tree some 40 um wide",
-   "facts": [],
+   "blurb": "Every bit of weight 2^40 on its way down the tree: twelve Booth-row bits in fp32 into three compressors of level 1, then two in level 2, the register, one in level 3 and one in level 4, which also takes row 17's bit and the sign row's. Carries leave for column 41 and arrive from column 39.",
+   "erbium": false,
+   "f": "size.fma.tree.col",
+   "facts": [
+    "tfma.tree.arrays",
+    "tfma.tree.synth",
+    "tfma.cmp42",
+    "size.fma.tree.col"
+   ],
    "kids": [],
+   "kind": "inferred",
+   "m": 4e-06,
+   "name": "Column 40 of the tree, all four levels",
+   "nk": "circuit",
+   "note": "a logical drawing of the eight compressor positions of one column (4 + 2 + 1 + 1)",
+   "parent": "vpu.lane.fma.tree",
    "see": [
     "lib.cmp42",
     "lib.fa"
    ],
-   "zoom_to": null,
-   "nk": "circuit",
-   "erbium": false,
-   "f": "size.fma.tree.col"
+   "short": "Column 40",
+   "zoom_to": null
   },
   "package": {
    "name": "The package",
@@ -11482,6 +11813,150 @@
     "size.p.cu",
     "wire.cu"
    ]
+  },
+  "fma.benc": {
+   "blurb": "Esperanto's hand-drawn encoder for one row: three bits of a in; the row's select lines (one for ±b, two for ±2b, neg) and its inverted sign bit out, with big drivers for the lines that run along the row.",
+   "erbium": false,
+   "f": "size.fma.benc",
+   "facts": [
+    "tfma.benc",
+    "tfma.hand",
+    "tfma.booth.rows",
+    "size.fma.benc"
+   ],
+   "kids": [],
+   "kind": "inferred",
+   "m": 1.5e-06,
+   "name": "A Booth encoder, as Esperanto drew it",
+   "nk": "circuit",
+   "note": "a hand design of the same 7-stage datapath, never taped out: ten cells, 232 transistors",
+   "parent": "vpu.lane.fma.booth",
+   "see": [
+    "lib.xor",
+    "lib.nor2"
+   ],
+   "short": "Booth encoder (drawn)",
+   "zoom_to": null
+  },
+  "fma.col": {
+   "blurb": "One bit position of one array: four bits of the same weight and a carry from the column to the right come in; a sum (same weight) and two carries (twice the weight) go out, one sideways to the next column, one down to the next level.",
+   "erbium": false,
+   "f": "size.fma.col",
+   "facts": [
+    "tfma.cmp42",
+    "tfma.tree.arrays",
+    "tfma.tree.synth",
+    "size.fma.col"
+   ],
+   "kids": [],
+   "kind": "inferred",
+   "m": 2e-06,
+   "name": "One column of a level: one 4:2 compressor",
+   "nk": "circuit",
+   "note": "a logical drawing: one compressor and its neighbours, about two full adders wide each",
+   "parent": "fma.lvl",
+   "see": [
+    "lib.cmp42",
+    "lib.fa"
+   ],
+   "short": "Column",
+   "zoom_to": null
+  },
+  "fma.lvl": {
+   "blurb": "One level halves the rows: each group of four rows goes through a row of 64 4:2 compressors, one per bit position, and comes out as a sum row and a carry row. Each compressor passes a carry sideways to the next column, which does not wait for it.",
+   "erbium": false,
+   "f": "size.fma.lvl",
+   "facts": [
+    "tfma.tree.levels",
+    "tfma.tree.arrays",
+    "tfma.tree.synth",
+    "tfma.tree.fp32",
+    "tfma.asbuilt.cells",
+    "size.fma.lvl"
+   ],
+   "kids": [],
+   "kind": "inferred",
+   "m": 3e-05,
+   "name": "One level of the Wallace tree",
+   "nk": "circuit",
+   "note": "a logical drawing: the compressors are synthesized logic placed by tools, not a row on silicon",
+   "parent": "vpu.lane.fma.tree",
+   "see": [
+    "lib.cmp42",
+    "lib.fa"
+   ],
+   "short": "Level",
+   "zoom_to": null
+  },
+  "fma.psel": {
+   "blurb": "Esperanto's hand-drawn bit of a Booth row: an AND-OR-INVERT gate picks b's bit j (for ±b) or bit j−1 (for ±2b), and an XNOR inverts it for a negative row: 18 transistors.",
+   "erbium": false,
+   "f": "size.fma.psel",
+   "facts": [
+    "tfma.psel",
+    "tfma.sel.asbuilt",
+    "tfma.hand",
+    "size.fma.psel"
+   ],
+   "kids": [],
+   "kind": "inferred",
+   "m": 5e-07,
+   "name": "One partial-product bit, as Esperanto drew it",
+   "nk": "circuit",
+   "note": "two cells (order of magnitude)",
+   "parent": "vpu.lane.fma.booth",
+   "see": [
+    "lib.xor"
+   ],
+   "short": "Partial-product bit (drawn)",
+   "zoom_to": null
+  },
+  "lib.cmos": {
+   "blurb": "Any static CMOS gate from its function: n-type transistors in series for AND and in parallel for OR pull the output down; p-type ones in the opposite arrangement pull it up.",
+   "erbium": false,
+   "f": "size.lib.cmos",
+   "facts": [
+    "tb.gates",
+    "tfma.xnor",
+    "tfma.maj",
+    "size.lib.cmos"
+   ],
+   "kids": [],
+   "kind": "inferred",
+   "m": 3e-07,
+   "name": "A static CMOS gate in transistors",
+   "nk": "circuit",
+   "note": "a compound gate is 3 to 6 gate pitches (171-342 nm) wide in one 240 nm row (order of magnitude; n7.cells)",
+   "parent": "lib",
+   "see": [
+    "lib.finfet"
+   ],
+   "short": "CMOS gate",
+   "zoom_to": null
+  },
+  "lib.fa.tr": {
+   "blurb": "The tree's full-adder cell: a carry stage of 10 transistors computes NOT carry, a sum stage of 14 reuses it, and two inverters drive the outputs: 28 transistors, the textbook mirror adder.",
+   "erbium": false,
+   "f": "size.lib.fa",
+   "facts": [
+    "tfma.fa.mirror",
+    "tfma.fa.tg",
+    "in.lib.fa.1",
+    "size.lib.fa"
+   ],
+   "kids": [],
+   "kind": "inferred",
+   "m": 6e-07,
+   "name": "A full adder in transistors: the mirror adder",
+   "nk": "circuit",
+   "note": "order of magnitude: a full-adder cell spans several gate pitches",
+   "parent": "lib.fa",
+   "see": [
+    "lib.finfet",
+    "lib.inverter"
+   ],
+   "short": "Full adder (transistors)",
+   "zoom_to": null
   }
  },
  "geo": {
@@ -13670,8 +14145,8 @@
    "f": "in.vpu.lane.fma.booth.2"
   },
   "tree_tr": {
-   "t": "14,000 transistors",
-   "f": "in.vpu.lane.fma.tree.2"
+   "f": "tfma.asbuilt.cells",
+   "t": "22,000 transistors"
   },
   "fa_tr": {
    "t": "28 transistors",
@@ -14220,6 +14695,26 @@
   "boot_11": {
    "t": "11 bits",
    "f": "et.bootpins"
+  },
+  "tf_cmp": {
+   "f": "tfma.tree.arrays",
+   "t": "512 4:2 compressors"
+  },
+  "tf_fa": {
+   "f": "tfma.tree.arrays",
+   "t": "1,024 full adders"
+  },
+  "tf_ff": {
+   "f": "tfma.reg12",
+   "t": "253 flip-flops"
+  },
+  "tf_kept": {
+   "f": "tfma.tree.synth",
+   "t": "377 of 512 compressors"
+  },
+  "tf_reg": {
+   "f": "tfma.reg12",
+   "t": "353 bits"
   }
  },
  "outside": {
@@ -14330,10 +14825,529 @@
    }
   ]
  },
+ "tfma": {
+  "ex": {
+   "a": "40490fdb",
+   "av": 3.1415927410125732,
+   "b": "3f9e0651",
+   "bv": 1.2345677614212036,
+   "c": "42c80000",
+   "cv": 100.0,
+   "digits": [
+    0,
+    0,
+    0,
+    0,
+    -1,
+    -1,
+    2,
+    -1,
+    0,
+    0,
+    1,
+    0,
+    1,
+    -2,
+    1,
+    -1,
+    1
+   ],
+   "f": "tfma.example",
+   "flip": {
+    "after": "3f9e0e51",
+    "bit": 11,
+    "op": "b",
+    "v": 1.2348119020462036
+   },
+   "pp": [
+    [
+     5,
+     25
+    ],
+    [
+     6,
+     27
+    ],
+    [
+     7,
+     30
+    ],
+    [
+     8,
+     31
+    ],
+    [
+     11,
+     37
+    ],
+    [
+     13,
+     41
+    ],
+    [
+     14,
+     44
+    ],
+    [
+     15,
+     45
+    ],
+    [
+     16,
+     47
+    ],
+    [
+     17,
+     49
+    ]
+   ],
+   "prod": [
+    3.8785091175689956,
+    3.879276107984282
+   ],
+   "r4": [
+    "000",
+    "000",
+    "000",
+    "000",
+    "110",
+    "101",
+    "011",
+    "110",
+    "111",
+    "111",
+    "001",
+    "000",
+    "010",
+    "100",
+    "001",
+    "110",
+    ""
+   ],
+   "res": [
+    "42cfc1cc",
+    "42cfc230",
+    103.87850952148438,
+    103.8792724609375,
+    8
+   ],
+   "sum": [
+    103.878509117569,
+    103.87927610798428
+   ]
+  },
+  "gate": {
+   "f1_booth_wallace1_comb": 110.0,
+   "f1_carry_save_flops": 19.0,
+   "f2_product_flops": 16.0,
+   "f2_wallace2_and_product_adder_comb": 230.0,
+   "source": "a gate-level simulation of lane 0 of a netlist synthesized from the RTL with the tape-out flow (zero delay, physical toggles per micro-op)",
+   "tree_and_adder_total": 380.9
+  },
+  "maps": {
+   "add": "0000000000000000000000000110110100000100011101111111000000000000",
+   "arr": {
+    "csa41_41": "0000000000000000000000000232324220000241020123332200000000000000",
+    "csa42_12": "0000000000000000000000000424103100000000000000000000000000000000",
+    "csa42_13": "0000000000000000000000000000000000000200000000000000000000000000",
+    "csa42_14": "0000000000000000000000000000000000000000031043210000000000000000",
+    "csa42_21": "0000000000000000000000000211002000000000000000000000000000000000",
+    "csa42_22": "0000000000000000000000000000000000000300012014430000000000000000",
+    "csa42_31": "0000000000000000000000000224312300000130022312221000000000000000"
+   },
+   "lv": {
+    "0": "0000000000000000000000000101001100000100010011010100000000000000",
+    "1": "0000000000000000000000000424103100000200031043210000000000000000",
+    "2": "0000000000000000000000000211002000000300012014430000000000000000",
+    "3": "0000000000000000000000000224312300000130022312221000000000000000",
+    "4": "0000000000000000000000000232324220000241020123332200000000000000"
+   },
+   "reg": "0000000000000000000000000211002000000200012012220100000000000000"
+  },
+  "stages": [
+   {
+    "blocks": {
+     "frac_f0": 1,
+     "frac_glue": 1,
+     "top": 1
+    },
+    "names": 3,
+    "nets": 1,
+    "phys": 1.0,
+    "st": "bus"
+   },
+   {
+    "blocks": {
+     "frac_f0": 6,
+     "frac_f1": 1,
+     "frac_glue": 1
+    },
+    "names": 8,
+    "nets": 2,
+    "phys": 3.0,
+    "st": "f0"
+   },
+   {
+    "blocks": {
+     "booth": 48,
+     "frac_f1": 31,
+     "wallace1": 330
+    },
+    "bnets": {
+     "wallace1": 55
+    },
+    "names": 409,
+    "nets": 66,
+    "phys": 120.0,
+    "st": "f1"
+   },
+   {
+    "blocks": {
+     "frac_f2": 39,
+     "prod_adder": 55,
+     "tree_reg": 57,
+     "wallace2": 488
+    },
+    "bnets": {
+     "tree_reg": 19,
+     "wallace2": 81
+    },
+    "names": 639,
+    "nets": 116,
+    "phys": 193.0,
+    "st": "f2"
+   },
+   {
+    "blocks": {
+     "frac_f2": 16,
+     "frac_f3": 203,
+     "frac_glue": 16
+    },
+    "names": 235,
+    "nets": 96,
+    "phys": 92.0,
+    "st": "f3"
+   },
+   {
+    "blocks": {
+     "frac_f3": 27,
+     "frac_f4": 230,
+     "frac_glue": 27
+    },
+    "names": 284,
+    "nets": 102,
+    "phys": 111.0,
+    "st": "f4"
+   },
+   {
+    "blocks": {
+     "frac_f4": 27,
+     "frac_f5": 119,
+     "frac_glue": 27
+    },
+    "names": 173,
+    "nets": 68,
+    "phys": 68.0,
+    "st": "f5"
+   },
+   {
+    "blocks": {
+     "ctl_f6": 1,
+     "ctl_glue": 1,
+     "frac_f5": 12,
+     "frac_f6": 136,
+     "frac_glue": 20,
+     "top": 25
+    },
+    "names": 195,
+    "nets": 31,
+    "phys": 76.0,
+    "st": "f6"
+   }
+  ],
+  "total": {
+   "adder_names": 55,
+   "adder_nets": 16,
+   "nets": 482,
+   "rtl_names": 1946,
+   "samples_after_f6": [
+    0,
+    0
+   ],
+   "tree_names": 923,
+   "tree_nets": 165
+  },
+  "vals": {
+   "C21": [
+    "000004944a928000",
+    "0000049404928000",
+    4,
+    64
+   ],
+   "C22": [
+    "0004a14244000000",
+    "0004456244000000",
+    5,
+    64
+   ],
+   "C31": [
+    "0008168ba8480000",
+    "0008b8cb30480000",
+    9,
+    64
+   ],
+   "C41": [
+    "5ee771aa64004100",
+    "5ee6a1ea80004100",
+    9,
+    64
+   ],
+   "Cin": [
+    "44004500",
+    "44004500",
+    0,
+    32
+   ],
+   "S21": [
+    "00007b23b06d7b00",
+    "00007b23f26d7b00",
+    2,
+    64
+   ],
+   "S22": [
+    "7f7c5ebab8000000",
+    "7f7ca89ab8000000",
+    7,
+    64
+   ],
+   "S31": [
+    "7f75f87435027b00",
+    "7f744614db027b00",
+    15,
+    64
+   ],
+   "S41": [
+    "61384c7501923e00",
+    "613b7e147f923e00",
+    14,
+    64
+   ],
+   "Sxt": [
+    "77ff75fe",
+    "77ff75fe",
+    0,
+    32
+   ],
+   "align_in_48b_f3a_h": [
+    "7c1cbf27264b",
+    "7c2307a5fe4b",
+    16,
+    48
+   ],
+   "aligned_48b_f3a_h": [
+    "00f8397e4e4c9",
+    "00f8460f4bfc9",
+    16,
+    50
+   ],
+   "c11": [
+    "0000000000000000",
+    "0000000000000000",
+    0,
+    64
+   ],
+   "c12": [
+    "00000249b54d4000",
+    "00000249fb4d4000",
+    4,
+    64
+   ],
+   "c13": [
+    "0000000000000000",
+    "0000000000000000",
+    0,
+    64
+   ],
+   "c14": [
+    "049f2aad80000000",
+    "049f5aad80000000",
+    3,
+    64
+   ],
+   "comb_add_f4a_h": [
+    "19f8397e4e4c9",
+    "19f8460f4bfc9",
+    16,
+    52
+   ],
+   "comb_add_f5a_h": [
+    "19f8397e4e4c9",
+    "19f8460f4bfc9",
+    16,
+    52
+   ],
+   "comb_c_f3a_h": [
+    "0000000000000",
+    "0000000000000",
+    0,
+    52
+   ],
+   "comb_s_f3a_h": [
+    "19f8397e4e4c9",
+    "19f8460f4bfc9",
+    16,
+    52
+   ],
+   "ediff_abs_diff_hi_f3a_h": [
+    "05",
+    "05",
+    0,
+    6
+   ],
+   "elxd_f4a_h": [
+    "7f",
+    "7f",
+    0,
+    7
+   ],
+   "enc_nsamt_f5a_h": [
+    "7f",
+    "7f",
+    0,
+    7
+   ],
+   "fa_f0a_h": [
+    "c90fdb00",
+    "c90fdb00",
+    0,
+    32
+   ],
+   "fa_f1a_h": [
+    "c90fdb00",
+    "c90fdb00",
+    0,
+    32
+   ],
+   "fb_f0a_h": [
+    "27819440",
+    "27839440",
+    1,
+    32
+   ],
+   "fb_f1a_h": [
+    "27819440",
+    "27839440",
+    1,
+    32
+   ],
+   "fc_f0a_h": [
+    "c8000000",
+    "c8000000",
+    0,
+    32
+   ],
+   "fc_f3a_h": [
+    "c8000000",
+    "c8000000",
+    0,
+    32
+   ],
+   "fma_res_f6a_h": [
+    "42cfc1cc",
+    "42cfc230",
+    8,
+    32
+   ],
+   "mergd_frac_res_hi_f6a_h": [
+    "19f8397e4",
+    "19f8460f4",
+    11,
+    33
+   ],
+   "norm_shift_out_f5a_h": [
+    "19f8397e4",
+    "19f8460f4",
+    11,
+    34
+   ],
+   "opa_f0a_h": [
+    "40490fdb",
+    "40490fdb",
+    0,
+    32
+   ],
+   "opb_f0a_h": [
+    "3f9e0651",
+    "3f9e0e51",
+    1,
+    32
+   ],
+   "opc_f0a_h": [
+    "42c80000",
+    "42c80000",
+    0,
+    32
+   ],
+   "opd3_f3a_h": [
+    "1900000000000",
+    "1900000000000",
+    0,
+    52
+   ],
+   "out_data_res": [
+    "10b3f07301",
+    "10b3f08c01",
+    8,
+    38
+   ],
+   "prodsum_f2a_h": [
+    "1f072fc9c992c000",
+    "1f08c1e97f92c000",
+    16,
+    64
+   ],
+   "prodsum_f3a_h": [
+    "1f072fc9c992c000",
+    "1f08c1e97f92c000",
+    16,
+    64
+   ],
+   "rndres_hi_f6a_h": [
+    "cfc1cc72",
+    "cfc2307a",
+    9,
+    32
+   ],
+   "s11": [
+    "0000000200000000",
+    "0000000200000000",
+    0,
+    64
+   ],
+   "s12": [
+    "00007fb6daf7fb00",
+    "00007fb604f7fb00",
+    6,
+    64
+   ],
+   "s13": [
+    "0002781944000000",
+    "0002783944000000",
+    1,
+    64
+   ],
+   "s14": [
+    "7644d3cafc000000",
+    "764405cafc000000",
+    5,
+    64
+   ]
+  }
+ },
  "lazy": {
   "url": "ladder-img/ladder-data.json",
-  "n": 819,
-  "bytes": 382339,
-  "sha256": "e2b5208fdf887d1cfee3d4e3ee8e4b73c806934218a3e3c8145d28f21fb830a2"
+  "n": 845,
+  "bytes": 394959,
+  "sha256": "3d063bc6f1855f2297c5c7b365f34ae1720fad3f3bdd6cdea3abf31d5abbfb55"
  }
 }

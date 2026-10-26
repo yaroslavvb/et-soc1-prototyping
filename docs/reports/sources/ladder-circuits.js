@@ -32,6 +32,12 @@ function cpart(L, ap, key, x, y, w, h, col, title, kid, o) {
   if (kid) g._kid = claim(ap, kid, key, {x, y, w, h}, g, o.tr);
   return g;
 }
+function dpart(L, ap, key, x, y, w, h, col, title, kid, o) {   // ipart's look, claim's seat: the second part with the same kid gets k = key
+  o = o || {};
+  const g = ipart(L, ap, key, x, y, w, h, col, title, Object.assign({}, o, {kid: null}));
+  if (kid) g._kid = claim(ap, kid, key, {x, y, w, h}, g, o.tr);
+  return g;
+}
 /* a part drawn by the caller (gate symbols, a grid of cells): a group with a transparent box under it. Its seat, where
    the camera zooms in, is one element of it (a row's first cell, a column's first): zoomed into a whole row of eight
    cells the camera would barely zoom (1.4 times in 150 ms, a blink; motion check of 1 Oct) */
@@ -90,8 +96,145 @@ bnode('lib.nor2', {draw: (L, ap) => gate2(L, ap, 'nor'), def: () => ({id: 'lib.f
 bnode('lib.aoi21', {draw: (L, ap) => gate2(L, ap, 'aoi'), def: () => ({id: 'lib.finfet'}), kids: () => [{id: 'lib.finfet'}]});
 
 /* ---- a fast adder: Kogge and Stone's parallel prefix, 8 bits drawn (the 64-bit one has three more levels) ---- */
-bnode('lib.adder', {draw: (L, ap) => {
-  KT.frame(L, {title: 'A fast adder, drawn as a prefix tree', sub: '8 bits drawn: every carry at once, in log₂ n levels of carry cells, instead of one bit after another', subf: 'tb.prefix', col: CC.logic, tags: GT});
+// TensorFMA32 (23 Oct 2026): any static CMOS gate from its series-parallel function; the full adder, Esperanto's Booth encoder and partial-product bit
+const SPG = {   // out = NOT f; f in series (S) / parallel (P) form is the pull-down; u: 'mirror' draws the pull-up with the same arrangement (as the carry gate as built does)
+  maj:    {f: ['P', ['S', 'A', 'B'], ['S', 'C', ['P', 'A', 'B']]], u: 'mirror', t: 'The carry (majority) gate', sub: 'out = NOT majority(A, B, C): the mirror adder’s carry stage, 10 transistors; its pull-up repeats its pull-down (the carry is self-dual)', tag: ['measured', 'as built'], fid: 'tfma.maj'},
+  aoi22:  {f: ['P', ['S', 'A1', 'A2'], ['S', 'B1', 'B2']], t: 'An AND-OR-INVERT gate (2-2)', sub: 'out = NOT(A1·A2 + B1·B2): the first gate of Esperanto’s partial-product bit, 8 transistors', tag: ['generic', 'textbook'], fid: 'tfma.psel'},
+  oai221: {f: ['S', ['P', 'A1', 'A2'], ['P', 'B1', 'B2'], 'C'], t: 'An OR-AND-INVERT gate (2-2-1)', sub: 'out = NOT((A1 + A2)·(B1 + B2)·C): part of a partial-product bit in an earlier synthesis, 10 transistors', tag: ['generic', 'textbook'], fid: 'tfma.sel.asbuilt'},
+  oai21:  {f: ['S', ['P', 'A1', 'A2'], 'B'], t: 'An OR-AND-INVERT gate (2-1)', sub: 'out = NOT((A1 + A2)·B): it makes the row’s sign in Esperanto’s Booth encoder, 6 transistors', tag: ['generic', 'textbook'], fid: 'tfma.benc'},
+  nand3:  {f: ['S', 'A', 'B', 'C'], t: 'A three-input NAND', sub: 'out = NOT(A·B·C): three in series pull down, three in parallel pull up, 6 transistors', tag: ['generic', 'textbook'], fid: 'tb.gates'},
+  nor3:   {f: ['P', 'A', 'B', 'C'], t: 'A three-input NOR', sub: 'out = NOT(A + B + C): 6 transistors', tag: ['generic', 'textbook'], fid: 'tb.gates'},
+};
+const spDual = f => (typeof f === 'string' ? f : [f[0] === 'S' ? 'P' : 'S'].concat(f.slice(1).map(spDual)));
+const spSize = f => (typeof f === 'string' ? {w: 1, h: 1} : f[0] === 'S' ? f.slice(1).map(spSize).reduce((a, b) => ({w: Math.max(a.w, b.w), h: a.h + b.h}), {w: 0, h: 0}) : f.slice(1).map(spSize).reduce((a, b) => ({w: a.w + b.w, h: Math.max(a.h, b.h)}), {w: 0, h: 0}));
+function spDraw(L, f, x, yT, yB, p, dx, fets) {   // draw network f between the nodes at yT (top) and yB (bottom), in the column band from x, dx units wide each
+  const sz = spSize(f);
+  if (typeof f === 'string') { const y = (yT + yB) / 2, t = KT.mosV(L, x + dx / 2, y, {p, lead: 26}); KT.wire(L, [[t.top.x, t.top.y], [t.top.x, yT]]); KT.wire(L, [[t.bot.x, t.bot.y], [t.bot.x, yB]]); KT.netLab(L, t.gate.x - 4, t.gate.y + 6, f, 'end'); fets.push(t); return {cx: x + dx / 2}; }
+  if (f[0] === 'S') { let y = yT; const hs = f.slice(1).map(g => spSize(g).h), H = hs.reduce((a, b) => a + b, 0); const cx = x + sz.w * dx / 2;
+    f.slice(1).forEach((g, i) => { const y2 = y + (yB - yT) * hs[i] / H, gw = spSize(g).w, x0 = cx - gw * dx / 2; spDraw(L, g, x0, y, y2, p, dx, fets); y = y2; });
+    return {cx}; }
+  let xx = x; const xs = [];
+  f.slice(1).forEach(g => { const gw = spSize(g).w; const r = spDraw(L, g, xx, yT + 18, yB - 18, p, dx, fets); xs.push(r.cx); xx += gw * dx; });
+  KT.wire(L, [[xs[0], yT + 18], [xs[xs.length - 1], yT + 18]]); KT.wire(L, [[xs[0], yB - 18], [xs[xs.length - 1], yB - 18]]);
+  const cx = x + sz.w * dx / 2; KT.wire(L, [[cx, yT], [cx, yT + 18]]); KT.wire(L, [[cx, yB - 18], [cx, yB]]);
+  return {cx};
+}
+bnode('lib.cmos', {parse: k => ({g: SPG[k] ? k : 'nand3'}), name: p => SPG[p.g].t + ', in transistors', short: p => ({maj: 'Majority', aoi22: 'AOI22', oai221: 'OAI221', oai21: 'OAI21', nand3: 'NAND3', nor3: 'NOR3'})[p.g],
+  to: p => SPG[p.g].t.replace(/^(A|An|The) /, m => m.toLowerCase()),
+  draw: (L, ap, p) => {
+    const g = SPG[p.g], fd = g.f, fu = g.u === 'mirror' ? fd : spDual(fd), su = spSize(fu), sd = spSize(fd), dx = 96, fets = [];
+    KT.frame(L, {title: `${g.t}, in transistors`, sub: g.sub, subf: g.fid, col: CC.logic, tags: [g.tag]});
+    const X0 = 300, W = Math.max(su.w, sd.w) * dx;
+    KT.rail(L, X0 - 60, X0 + W + 60, 20, 'VDD'); KT.rail(L, X0 - 60, X0 + W + 60, 600, 'GND');
+    const ru = spDraw(L, fu, X0 + (W - su.w * dx) / 2, 20, 300, true, dx, fets), rd = spDraw(L, fd, X0 + (W - sd.w * dx) / 2, 300, 600, false, dx, fets);
+    KT.wire(L, [[ru.cx, 300], [rd.cx, 300]]); KT.wire(L, [[Math.max(ru.cx, rd.cx), 300], [X0 + W + 120, 300]]); KT.jn(L, ru.cx, 300); KT.netLab(L, X0 + W + 128, 306, 'OUT');
+    const t0 = fets[fets.length - 1];
+    ipart(L, ap, 'onefet', t0.x - 22, t0.y - 36, 44, 72, 'var(--c2)', '', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, tr: 'jump', fo: 0.1, label: 'One transistor', kind: 'generic'});
+    KTT(L, -150, 652, `${fets.length} transistors: ${fets.filter(t => t.p).length} p-type pull up, ${fets.filter(t => !t.p).length} n-type pull down`, 't-sm', 'start', g.fid);
+    KTT(L, -150, 676, g.u === 'mirror' ? 'the pull-up is drawn with the same series-parallel arrangement as the pull-down: the majority function is its own dual' : 'the pull-down network is the function; the pull-up is its dual, series turned parallel and parallel series', 't-sm', 'start', 'tb.gates');
+  }, def: () => ({id: 'lib.finfet'}), kids: () => [{id: 'lib.finfet'}]});
+bnode('lib.fa.tr', {draw: (L, ap) => {
+  KT.frame(L, {title: 'A full adder in 28 transistors: the mirror adder', sub: 'the tree’s full-adder cell, as built: a carry stage, a sum stage that reuses the carry, two inverters', subf: 'tfma.fa.mirror',
+    col: CC.logic, tags: [['measured', 'as built'], ['generic', 'textbook: Weste and Harris']]});
+  KT.rail(L, -150, 1020, 20, 'VDD'); KT.rail(L, -150, 1020, 600, 'GND');
+  const fets = [], fc = ['P', ['S', 'A', 'B'], ['S', ['P', 'A', 'B'], 'C']], fs = ['P', ['S', 'A', 'B', 'C'], ['S', ['P', 'A', 'B', 'C'], "CO'"]];
+  const cu = spDraw(L, fc, -120, 20, 310, true, 90, fets), cd = spDraw(L, fc, -120, 310, 600, false, 90, fets);
+  KT.jn(L, cu.cx, 310); KT.wire(L, [[cu.cx, 310], [cd.cx, 310]]);
+  KT.wire(L, [[cu.cx, 310], [214, 310]]); KT.netLab(L, 206, 302, "CO'", 'end');
+  const su = spDraw(L, fs, 260, 20, 310, true, 90, fets), sd = spDraw(L, fs, 260, 310, 600, false, 90, fets);
+  KT.jn(L, su.cx, 310); KT.wire(L, [[su.cx, 310], [sd.cx, 310]]);
+  KT.wire(L, [[su.cx, 310], [700, 310], [700, 400], [780, 400]]); KT.netLab(L, 694, 302, "S'", 'end');
+  const t0 = fets.find(t => !t.p), t1 = fets.find(t => !t.p && t.x > 240), fb = t => ({x: t.x - 22, y: t.y - 36, w: 44, h: 72});   // a transistor of each stage: where it zooms in
+  const gc = cgrp(L, ap, 'cstage', 'The carry stage: 10 transistors', {x: -140, y: 30, w: 310, h: 560}, {id: 'lib.finfet'}, {seat: fb(t0), info: {title: 'The carry stage',
+    lead: 'The carry stage, 10 transistors: NOT carry is pulled down when A and B are both 1, or when either is and C is; the pull-up is the same arrangement.', facts: ['tfma.fa.mirror', 'tfma.maj']}});
+  S(E('rect', {x: -140, y: 30, width: 310, height: 560, rx: 10}, gc), {fill: 'var(--c1)', fillOpacity: 0.03, stroke: 'var(--c1)', strokeWidth: 1.25, strokeDasharray: '2 5'});
+  const gs = cgrp(L, ap, 'sstage', 'The sum stage: 14 transistors', {x: 240, y: 30, w: 400, h: 560}, {id: 'lib.finfet', k: 'sstage'}, {seat: fb(t1), info: {title: 'The sum stage',
+    lead: 'The sum stage, 14 transistors: NOT sum is pulled down when all three inputs are 1, or when any is 1 and the carry is not (exactly one of them is 1); it reuses NOT carry rather than recompute it.', facts: ['tfma.fa.mirror']}});
+  S(E('rect', {x: 240, y: 30, width: 400, height: 560, rx: 10}, gs), {fill: 'var(--c3)', fillOpacity: 0.03, stroke: 'var(--c3)', strokeWidth: 1.25, strokeDasharray: '2 5'});
+  ipart(L, ap, 'inv', 712, 150, 308, 320, CC.logic, '', {node: 'lib.inverter', kid: {id: 'lib.inverter'}, fo: 0.04, label: 'Two output inverters',
+    info: {title: 'The output inverters', lead: 'Each stage gives the inverted output, NOT carry and NOT sum; an inverter on each, 2 transistors apiece, gives carry and sum.', facts: ['tfma.fa.mirror']}});
+  const ic = KT.invSym(L, 830, 220, {s: 26}), is = KT.invSym(L, 830, 400, {s: 26});
+  KT.wire(L, [[770, 220], [ic.in.x, 220]]); KT.netLab(L, 764, 226, "CO'", 'end');
+  KT.wire(L, [[780, 400], [is.in.x, 400]]);
+  KT.wire(L, [[ic.out.x, 220], [900, 220]]); KT.netLab(L, 906, 226, 'carry');
+  KT.wire(L, [[is.out.x, 400], [900, 400]]); KT.netLab(L, 906, 406, 'sum');
+  ipart(L, ap, 'onefet', t0.x - 22, t0.y - 36, 44, 72, 'var(--c2)', '', {node: 'lib.finfet', kid: {id: 'lib.finfet'}, tr: 'jump', fo: 0.1, label: 'One transistor'});
+  KTT(L, 15, 626, 'carry stage, 10', 't-smb', 'middle', 'tfma.fa.mirror'); KTT(L, 440, 626, 'sum stage, 14', 't-smb', 'middle', 'tfma.fa.mirror'); KTT(L, 880, 626, 'inverters, 2 × 2', 't-smb', 'middle', 'tfma.fa.mirror');
+  KTT(L, -150, 652, '10 + 14 + 2 × 2 = 28 transistors, every one with 2 fins', 't-sm', 'start', 'tfma.fa.mirror');
+  KTT(L, -150, 676, 'a third of the tree’s full adders are a 36-transistor transmission-gate type instead', 't-sm', 'start', 'tfma.fa.tg');
+}, def: () => ({id: 'lib.finfet'}), kids: () => [{id: 'lib.finfet'}, {id: 'lib.inverter'}]});
+const NB = '\u00a0';   // a space that SVG text keeps (the truth tables' columns)
+const bufSym = (p, x, y, s) => { E('path', {class: 'gate', d: `M${x - s},${y - s * 0.8} L${x + s * 0.7},${y} L${x - s},${y + s * 0.8} Z`}, p); return {in: {x: x - s, y}, out: {x: x + s * 0.7, y}}; };
+bnode('fma.benc', {draw: (L, ap) => {
+  KT.frame(L, {title: 'A Booth encoder, as Esperanto drew it', sub: 'one per row: three bits of a in; one (±b), two (±2b), neg and the row’s inverted sign out', subf: 'tfma.benc',
+    col: CC.logic, tags: [['documented', 'Esperanto’s hand design (not taped out)']]});
+  const XI = -62, ins = [['y(2i+1)', 120], ['y(2i)', 240], ['y(2i−1)', 330], ['sx', 470]];
+  ins.forEach(([t, y]) => { KT.netLab(L, -150, y + 6, t); KT.wire(L, [[XI, y], [XI + 8, y]]); });
+  const xn = KT.andSym(L, 120, 160, {xnor: true, w: 50, h: 50}), x1 = xorSym(L, 120, 285, {w: 50, h: 50}), nr = norSym(L, 380, 200, {w: 50, h: 50});
+  KT.wire(L, [[XI, 120], [60, 120], [60, xn.a.y], [xn.a.x, xn.a.y]]);
+  KT.wire(L, [[XI, 240], [80, 240], [80, xn.b.y], [xn.b.x, xn.b.y]]); KT.wire(L, [[80, 240], [80, x1.a.y], [x1.a.x, x1.a.y]]); KT.jn(L, 80, 240);
+  KT.wire(L, [[XI, 330], [94, 330], [94, x1.b.y], [x1.b.x, x1.b.y]]);
+  KT.wire(L, [[xn.out.x, 160], [340, 160], [340, nr.a.y], [nr.a.x, nr.a.y]]); KT.netLab(L, 250, 152, 'n5', 'middle');
+  KT.wire(L, [[x1.out.x, 285], [360, 285], [360, nr.b.y], [nr.b.x, nr.b.y]]); KT.jn(L, 360, 285);
+  KT.wire(L, [[360, 285], [560, 285]]); KT.wire(L, [[nr.out.x, 200], [560, 200]]);
+  KT.wire(L, [[40, 120], [40, 100], [560, 100]]); KT.jn(L, 40, 120);
+  const chain = (y, lab, one) => {   // a small buffer, then a big driver (the 'two' line: the driver alone)
+    const b2 = bufSym(L, 760, y, 26);
+    if (one) KT.wire(L, [[560, y], [b2.in.x, y]]);
+    else { const b1 = bufSym(L, 600, y, 16); KT.wire(L, [[560, y], [b1.in.x, y]]); KT.wire(L, [[b1.out.x, y], [b2.in.x, y]]); }
+    KT.wire(L, [[b2.out.x, y], [1000, y]]); KT.netLab(L, 1006, y + 6, lab);
+  };
+  chain(100, 'neg'); chain(200, 'two', true); chain(285, 'one');
+  KTT(L, 250, 278, 'n1', 't-net', 'middle');
+  const ob = {x: 640, y: 395, w: 166, h: 70};
+  boxG(L, ob.x, ob.y, ob.w, ob.h, 'OR-AND-INVERT', 't-sm');
+  KT.wire(L, [[520, 200], [520, 410], [ob.x, 410]]); KT.jn(L, 520, 200);
+  KT.wire(L, [[560, 285], [560, 430], [ob.x, 430]]); KT.jn(L, 560, 285);
+  KT.wire(L, [[XI, 470], [600, 470], [600, 450], [ob.x, 450]]);
+  const x2 = xorSym(L, 840, 380, {w: 50, h: 50});
+  KT.wire(L, [[620, 100], [620, 140], [700, 140], [700, x2.a.y], [x2.a.x, x2.a.y]]); KT.jn(L, 620, 100);
+  KT.wire(L, [[ob.x + ob.w, 430], [812, 430], [812, x2.b.y], [x2.b.x, x2.b.y]]); KT.netLab(L, 818, 456, 'n3');
+  KT.wire(L, [[x2.out.x, 380], [1000, 380]]); KT.netLab(L, 1006, 386, 'not_n');
+  cgrp(L, ap, 'xor1', 'An XOR: one = y(2i) ⊕ y(2i−1)', {x: 100, y: 255, w: 82, h: 60}, {id: 'lib.xor'}, {info: {title: 'The ‘one’ XOR', lead: 'one = y(2i) ⊕ y(2i−1): the row adds ±b exactly when the two lower bits of its group differ.', facts: ['tfma.benc']}});
+  cgrp(L, ap, 'xnor', 'An XNOR of y(2i+1) and y(2i)', {x: 100, y: 130, w: 92, h: 60}, {id: 'lib.xor'}, {info: {title: 'The XNOR', lead: 'n5 = XNOR(y(2i+1), y(2i)): 1 when the two upper bits agree.', facts: ['tfma.benc']}});
+  cgrp(L, ap, 'nor', 'A NOR: two = NOR(n5, one)', {x: 370, y: 170, w: 86, h: 60}, {id: 'lib.nor2'}, {info: {title: 'The ‘two’ NOR', lead: 'two = NOR(n5, one): the row adds ±2b when the upper bits differ and the lower two agree (011 and 100).', facts: ['tfma.benc']}});
+  cgrp(L, ap, 'oai', 'An OR-AND-INVERT gate: n3 = NOT((two + one) · sx)', ob, {id: 'lib.cmos', k: 'oai21'}, {info: {title: 'The OR-AND-INVERT gate', lead: 'n3 = NOT((two + one) · sx), where sx is the multiplicand’s sign in a signed multiply.', facts: ['tfma.benc']}});
+  cgrp(L, ap, 'xor2', 'An XOR: not_n = neg ⊕ n3', {x: 820, y: 350, w: 82, h: 60}, {id: 'lib.xor'}, {info: {title: 'The row’s inverted sign', lead: 'not_n = neg ⊕ NOT((one + two) · sx): the row’s sign bit, inverted, for the sign-extension scheme.', facts: ['tfma.benc']}});
+  cgrp(L, ap, 'drv', 'Three big drivers, for the lines along the row', {x: 728, y: 76, w: 62, h: 232}, {id: 'lib.inverter'}, {info: {title: 'The drivers', lead: 'Three drivers, 144 of the encoder’s 232 transistors: each select line runs along all 33 bits of the row.', facts: ['tfma.benc']}});
+  KTT(L, 700, 494, 'y(2i+1..2i−1) | one two neg'.replace(/ /g, NB), 't-mono', 'start', 'tfma.benc');
+  [['000', '0 0 0'], ['001', '1 0 0'], ['010', '1 0 0'], ['011', '0 1 0'], ['100', '0 1 1'], ['101', '1 0 1'], ['110', '1 0 1'], ['111', '0 0 1']].forEach(([b, r], i) => KTT(L, 700, 514 + i * 18, `${NB.repeat(5)}${b}${NB.repeat(6)}|${NB}${r.split(' ').join(NB.repeat(3))}`, 't-mono', 'start', 'tfma.benc'));
+  KTT(L, -150, 604, 'y(2i+1), y(2i), y(2i−1): three bits of the multiplier a; sx: b’s sign if signed', 't-sm', 'start', 'tfma.benc');
+  KTT(L, -150, 628, 'five buffers: the bigger triangle on each line drives the select line along the row’s 33 bits', 't-sm', 'start', 'tfma.benc');
+  KTT(L, -150, 652, '111 gives all ones plus +1 here: the same 0 as the RTL’s zero row', 't-sm', 'start', 'tfma.benc tfma.booth.rows');
+  KTT(L, -150, 676, 'as built, synthesis decoded each row into four one-hot lines (+1, −1, +2, −2) from two-input NORs and NANDs, 10-21 cells a row', 't-sm', 'start', 'tfma.sel.asbuilt');
+}, def: () => ({id: 'lib.xor'}), kids: () => [{id: 'lib.xor'}, {id: 'lib.nor2'}, {id: 'lib.cmos', k: 'oai21'}, {id: 'lib.inverter'}]});
+bnode('fma.psel', {draw: (L, ap) => {
+  KT.frame(L, {title: 'One bit of a Booth row, as Esperanto drew it', sub: 'pp = (one · b(j) + two · b(j−1)) ⊕ neg: an AND-OR-INVERT gate and an XNOR, 18 transistors', subf: 'tfma.psel',
+    col: CC.logic, tags: [['documented', 'Esperanto’s hand design (not taped out)']]});
+  const XI = -72;
+  [['one', 140], ['b(j)', 200], ['two', 330], ['b(j−1)', 390], ['neg', 500]].forEach(([t, y]) => KT.netLab(L, -150, y + 6, t));
+  const a1 = KT.andSym(L, 160, 170, {w: 60, h: 60}), a2 = KT.andSym(L, 160, 360, {w: 60, h: 60}), nr = norSym(L, 380, 265, {w: 60, h: 60});
+  KT.wire(L, [[XI, 140], [120, 140], [120, a1.a.y], [a1.a.x, a1.a.y]]); KT.wire(L, [[XI, 200], [120, 200], [120, a1.b.y], [a1.b.x, a1.b.y]]);
+  KT.wire(L, [[XI, 330], [120, 330], [120, a2.a.y], [a2.a.x, a2.a.y]]); KT.wire(L, [[XI, 390], [120, 390], [120, a2.b.y], [a2.b.x, a2.b.y]]);
+  KT.wire(L, [[a1.out.x, 170], [300, 170], [300, nr.a.y], [nr.a.x, nr.a.y]]); KT.wire(L, [[a2.out.x, 360], [300, 360], [300, nr.b.y], [nr.b.x, nr.b.y]]);
+  const xn = KT.andSym(L, 620, 300, {xnor: true, w: 60, h: 60});
+  KT.wire(L, [[nr.out.x, 265], [560, 265], [560, xn.a.y], [xn.a.x, xn.a.y]]);
+  KT.wire(L, [[XI, 500], [580, 500], [580, xn.b.y], [xn.b.x, xn.b.y]]);
+  KT.wire(L, [[xn.out.x, 300], [900, 300]]); KT.netLab(L, 908, 306, 'pp');
+  cgrp(L, ap, 'aoi', 'An AND-OR-INVERT gate (2-2): NOT(one·b(j) + two·b(j−1))', {x: 140, y: 120, w: 330, h: 300}, {id: 'lib.cmos', k: 'aoi22'},
+    {info: {title: 'The AND-OR-INVERT gate', lead: 'An AND-OR-INVERT gate: NOT(one·b(j) + two·b(j−1)), one stage of 8 transistors.', facts: ['tfma.psel']}});
+  S(E('rect', {x: 140, y: 120, width: 330, height: 300, rx: 10}, L), {fill: 'var(--c1)', fillOpacity: 0.03, stroke: 'var(--c1)', strokeWidth: 1.25, strokeDasharray: '2 5'});
+  KTT(L, 305, 410, 'one gate: AND-OR-INVERT', 't-sm', 'middle', 'tfma.psel');
+  cgrp(L, ap, 'xn', 'An XNOR with neg: pp = the selected bit ⊕ neg', {x: 590, y: 260, w: 120, h: 80}, {id: 'lib.xor'}, {info: {title: 'The XNOR', lead: 'XNOR of the AND-OR-INVERT’s output with neg: the selected bit itself for a positive row, inverted for a negative one.', facts: ['tfma.psel']}});
+  KTT(L, 700, 454, `row digit | one two neg | pp`.replace(/ /g, NB), 't-mono', 'start', 'tfma.psel');
+  [['+1', '1 0 0', 'b(j)'], ['−1', '1 0 1', 'NOT b(j)'], ['+2', '0 1 0', 'b(j−1)'], ['−2', '0 1 1', 'NOT b(j−1)'], [' 0', '0 0 0', '0']].forEach(([d, s, o], i) => KTT(L, 700, 478 + i * 22, `${NB.repeat(3)}${d.trim().padStart(2, NB)}${NB.repeat(5)}|${NB}${s.split(' ').join(NB.repeat(3))}${NB.repeat(3)}|${NB}${o}`, 't-mono', 'start', 'tfma.psel'));
+  KTT(L, -150, 652, 'the hand design has 528 of these (16 rows × 33 bits), 247 with a NOR that zeroes the bit in fp16-pair mode', 't-sm', 'start', 'tfma.psel');
+  KTT(L, -150, 676, 'as built: two inverting multiplexers steered by b’s bits and a NAND or NOR, about 24-26 transistors', 't-sm', 'start', 'tfma.sel.asbuilt');
+}, def: () => ({id: 'lib.cmos', k: 'aoi22'}), kids: () => [{id: 'lib.cmos', k: 'aoi22'}, {id: 'lib.xor'}]});
+
+bnode('lib.adder', {draw: (L, ap, p, P, d) => {
+  const fm = inFma(P, d);   // (reached from the multiply-add: its product adder is synthesized as one)
+  KT.frame(L, {title: 'A fast adder, drawn as a prefix tree', sub: '8 bits drawn: every carry at once, in log₂ n levels of carry cells, instead of one bit after another', subf: 'tb.prefix', col: CC.logic, tags: fm ? [['generic', 'textbook construction'], ['measured', 'the product adder: a prefix adder too']] : GT});
   const X = i => 950 - i * 140, y0 = 70, ys = [196, 290, 384], yS = 470;
   for (let i = 0; i < 8; i++) KTT(L, X(i), 52, `a${i} b${i}`, 't-sm', 'middle');
   const gp = cgrp(L, ap, 'pg', 'Generate and propagate: per bit, g = a·b and p = a ⊕ b', {x: X(7) - 50, y: y0, w: X(0) - X(7) + 100, h: 56}, 'lib.xor', {info: {title: 'Generate and propagate', lead: 'For each bit: generate g = a AND b (this bit makes a carry by itself) and propagate p = a XOR b (this bit passes a carry on). An XOR and a NAND with an inverter per bit. Bit 0 also takes the carry in: g0 = a0·b0 + p0·cin (the textbook enters the carry in as one more column on the right, with G = cin and P = 0), so every carry the tree computes includes it.', facts: ['tb.prefix']}});
@@ -120,7 +263,8 @@ bnode('lib.adder', {draw: (L, ap) => {
   KT.wire(L, [[X(0) + 66, 62], [X(0) + 66, yS + 28], [X(0) + 44, yS + 28]], 'thin'); KT.wire(L, [[X(0) + 66, y0 + 28], [X(0) + 44, y0 + 28]], 'thin'); KT.jn(L, X(0) + 66, y0 + 28); KTT(L, X(0) + 58, 52, 'cin', 't-sm');
   KT.wire(L, [[X(7), ys[2] + 22], [X(7), ys[2] + 40], [X(7) - 60, ys[2] + 40]], 'thin'); KTT(L, X(7) - 66, ys[2] + 46, 'cout', 't-sm', 'end');
   cnote(L, ['a ripple-carry adder waits for each carry in turn, n steps; this tree takes log₂ n levels: 3 for the 8 bits drawn, 6 for 64 bits',
-    'P. Kogge and H. Stone, IEEE Trans. Computers, 1973; the ET-SoC-1\'s own adders are not published: a textbook construction'], 628, 'tb.prefix tb.kogge');
+    ...(fm ? ['P. Kogge and H. Stone, IEEE Trans. Computers, 1973;', 'in the multiply-add: its 64-bit product adder is written a + b in the RTL and synthesized as a prefix tree like this one, 11 gates deep']
+      : ['P. Kogge and H. Stone, IEEE Trans. Computers, 1973; the ET-SoC-1\'s own adders are not published: a textbook construction'])], 628, fm ? 'tb.prefix tb.kogge tfma.padd' : 'tb.prefix tb.kogge');
 }, def: () => ({id: 'lib.aoi21'}), kids: () => [{id: 'lib.aoi21'}, {id: 'lib.xor'}]});
 
 /* ---- a logarithmic (barrel) shifter: log₂ n stages of 2:1 multiplexers, 8 bits drawn ---- */
@@ -145,8 +289,9 @@ bnode('lib.shifter', {draw: (L, ap) => {
 }, def: () => ({id: 'lib.mux2'}), kids: () => [{id: 'lib.mux2'}]});
 
 /* ---- radix-4 Booth recoding: three bits of the multiplier pick 0, ±X or ±2X for a row of partial product ---- */
-bnode('lib.booth', {draw: (L, ap) => {
-  KT.frame(L, {title: 'A Booth encoder and its selectors', sub: 'radix 4: two bits of the multiplier per row of partial product, so half as many rows to add', subf: 'tb.booth', col: CC.logic, tags: GT});
+bnode('lib.booth', {draw: (L, ap, p, P, d) => {
+  const fm = inFma(P, d);   // (reached from the multiply-add: Esperanto drew this circuit for it)
+  KT.frame(L, {title: 'A Booth encoder and its selectors', sub: 'radix 4: two bits of the multiplier per row of partial product, so half as many rows to add', subf: 'tb.booth', col: CC.logic, tags: fm ? [['generic', 'textbook construction'], ['documented', 'Esperanto’s hand design: the same']] : GT});
   const bx = i => 470 - i * 64;
   for (let i = -1; i < 8; i++) KTT(L, bx(i), 70, i < 0 ? '(0)' : `y${i}`, 't-net', 'middle');
   KTT(L, -150, 70, 'the multiplier', 't-smb');
@@ -175,7 +320,8 @@ bnode('lib.booth', {draw: (L, ap) => {
   }
   KTT(L, sx(0) + 46, sy + 110, 'row: 0, ±X or ±2X', 't-sm');
   cnote(L, [`a signed 8-bit multiplier makes 4 rows (drawn; an unsigned one, one more); the multiply-add's 32-bit one makes ${on('pp17')}, which its tree adds`,
-    'A. Booth (1951), O. MacSorley (1961, radix 4); Koren, Computer Arithmetic Algorithms, ch. 6; the chip\'s own encoder is not published'], 628, `tb.booth ${onf('pp17')}`);
+    ...(fm ? ['A. Booth (1951), O. MacSorley (1961, radix 4); Koren, Computer Arithmetic Algorithms, ch. 6;', 'in the multiply-add: Esperanto’s hand-drawn encoder and bit are this circuit; the silicon makes the same rows with other, synthesized gates']
+      : ['A. Booth (1951), O. MacSorley (1961, radix 4); Koren, Computer Arithmetic Algorithms, ch. 6; the chip\'s own encoder is not published'])], 628, fm ? `tb.booth tfma.benc tfma.psel tfma.sel.asbuilt ${onf('pp17')}` : `tb.booth ${onf('pp17')}`);
 }, def: () => ({id: 'lib.mux2'}), kids: () => [{id: 'lib.mux2'}, {id: 'lib.xor'}]});
 
 /* ---- a leading-zero detector: a tree of small cells, 8 bits drawn (Oklobdzija 1994) ---- */
@@ -799,11 +945,8 @@ links('l1d', {tags: 'lib.regfile', valid: 'lib.flipflop', lru: 'lib.flipflop', h
 links('l1d.cmp', {andtree: 'lib.nand2', ways: 'lib.nor2'});
 links('l1d.block', {wlatch: 'lib.latch', wdec: 'lib.decoder', icg: 'lib.icg', rdreg: 'lib.flipflop', oreg: 'lib.flipflop'});
 links('l1d.row', {icg: 'lib.icg', row: 'lib.latch', muxtree: 'lib.mux2'});
-links('vpu.lane.fma', {fmabooth: 'lib.booth', fmaalign: 'lib.shifter', fmaadd: 'lib.adder', fmalzd: 'lib.lzd', fmanorm: 'lib.shifter', fmarnd: 'lib.round', fmazero: 'lib.icg'});
-links('vpu.lane.fma.tree', {treedots: 'lib.booth', treelevels: 'lib.cmp42'});
-links('fma.tree.col', {colbits: 'lib.booth'});
 links('lib.cmp42', {fa2: 'lib.fa'});
-links('lib.fa', {majority: 'lib.nand2', fatable: 'lib.xor'});
+links('lib.fa', {majority: () => ({id: 'lib.cmos', k: 'maj'}), fatable: 'lib.xor'});
 links('lib.xor', {pun: 'lib.finfet', pdn: 'lib.finfet', xtable: 'lib.finfet'});
 links('lib.inverter', {gtable: 'lib.finfet'});
 links('lib.nand2', {gtable: 'lib.finfet'});

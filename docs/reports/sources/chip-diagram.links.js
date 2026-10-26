@@ -78,9 +78,9 @@ function lnkAsk(o) {
 }
 function lnkWhat(o) {
   if (o.flow != null) {
-    const v = String(o.flow).toLowerCase(), m = /^([0-9b])(?:-[a-z0-9-]*)?$/.exec(v);
-    const k = m ? (m[1] === 'b' ? 'K' : ORDER['1234567890'.indexOf(m[1])]) : ORDER.split('').find(x => lnkSlug(x) === v);
-    if (!k || !FLOWS[k]) return {bad: `#flow=${o.flow}: no such flow (1-9, 0 or b)`};
+    const v = String(o.flow).toLowerCase(), m = /^([0-9bm])(?:-[a-z0-9-]*)?$/.exec(v);
+    const k = m ? FLOWOF[m[1]] : ORDER.split('').find(x => lnkSlug(x) === v);
+    if (!k || !FLOWS[k]) return {bad: `#flow=${o.flow}: no such flow (1-9, 0, b or m)`};
     if (o.stage == null) return {flow: k};
     const n = /^\d{1,2}$/.test(o.stage) ? +o.stage : 0;
     if (n >= 1 && n <= FLOWS[k].stages.length) return {flow: k, i: n - 1, held: true};

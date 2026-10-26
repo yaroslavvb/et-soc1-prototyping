@@ -820,7 +820,7 @@ function setView() { const L = restLayer(); if (L) setT(L, restMat()); }
    tour starts or stops, and when a flow's charts outgrow the band; never during a zoom */
 function phBox() {
   if (!PH) return;
-  const flow = !!(TOUR || FL.k);
+  const flow = !!(TOUR || (FL.k && !FLOWS[FL.k].deep));   // a deep flow draws no charts under the die
   if (flow !== PHV.flow) { PHV.flow = flow; PHV.extra = 0; }
   const hw = Math.max(...[0, 1, 2].map(lv => { const r = pview(lv); return r.h / r.w; }));
   const H = (1000 * hw).toFixed(1), ar = `1000 / ${H}`;
@@ -914,7 +914,7 @@ node('minion', {parse: k => { const q = String(k).split('.').map(Number); return
    climbs through it to the die, the rack and round again. The ring's panel also offers the atom and a memory cell's. */
 const COMPUTE0 = () => pathOf({level: 2, sid: 0, nb: 0, mi: 0}).concat([{id: 'vpu'}, {id: 'vpu.lane', k: '0'}]);
 /* the loop's fixed point, in words (the landing panel's, the visual review of 1 Oct: name where the reader is) */
-const CWHERE = 'a silicon atom in the channel of a FinFET of an XOR gate, in a full adder of a 4:2 compressor in the multiply-add\'s multiplier tree (lane 0 of minion 0, shire 0)';
+const CWHERE = 'a silicon atom in the channel of a FinFET of the mirror full adder of a 4:2 compressor in the multiply-add\'s Wallace tree (lane 0 of minion 0, shire 0)';
 function pageExits() {
   return [
     {id: 'compute', lab: 'a silicon atom in a transistor of the multiply-add (lane 0 of minion 0, shire 0)', short: 'an atom of the multiply-add',
@@ -1196,6 +1196,7 @@ const FLOWLEAD = {
   H: () => 'The same matrix multiplication on different numbers: the chip runs just as fast, but random data draws more power than zeros, because more bits flip.',
   I: () => 'When every core hammers the same memory location, the one cache bank that holds it becomes a bottleneck, and the shire it sits in can be starved.',
   J: () => 'Adding up one value from every core and giving everyone the total: pairs combine, then pairs of pairs, up a tree and back down.',
+  L: () => 'One lane’s fp32 multiply-add, c + a × b, run twice: as is, and with one bit of b flipped. The flow follows the difference through the seven pipeline stages and counts every signal it changes; most of them are in the multiplier’s Wallace tree.',
   K: () => `Getting one value from one core to all ${n('n1024')} minions: the four ways the chip offers, and what each costs.`,
 };
 /* Details: open or closed as the reader last left it */
@@ -1257,8 +1258,8 @@ function callout(fx, x, y, lines, o) {
   o = o || {};
   // on a phone a callout is larger at the chip's scale and a shire's, where the drawing is small (not one that stands
   // in the band right of the die: that one folds under the die, enlarged with the charts)
-  const lv = PH ? fxLevel(fx) : 0, inBand = PH && lv === 0 && x >= BANDX, big = PH && !inBand ? [1.25, 1.1, 1][lv] : 1;
-  const col = o.col || 'var(--c2)', fs = (o.fs || 22) * big, lh = fs * 1.28, pad = 11, acc = 9;
+  const lv0 = fxLevel(fx), deep = lv0 < 0 || lv0 > 2, lv = PH && !deep ? lv0 : 0, inBand = PH && lv === 0 && !deep && x >= BANDX, big = PH && !inBand && !deep ? [1.25, 1.1, 1][lv] : 1;
+  const col = o.col || 'var(--c2)', fs = (o.fs || 22) * big * (PH && deep ? 1.5 : 1), lh = fs * 1.28, pad = 11, acc = 9;   // (a deep scene on a phone: larger)
   const g = E('g', {class: 'co'}, fx), lead = E('g', {class: 'co-lead'}, g);
   const box = S(E('rect', {class: 'co-box', rx: 6, filter: 'url(#co-sh)'}, g), {stroke: `color-mix(in srgb, ${col} 55%, var(--surface))`});
   const bar = S(E('rect', {class: 'co-acc', rx: 2, width: 4}, g), {fill: col});
@@ -1279,7 +1280,8 @@ function callout(fx, x, y, lines, o) {
   // inside the drawing's frame; on a phone, inside the view of its scale, unless it stands in the band right of the die
   // (then it folds under the die with the band's charts, bandFold)
   let R = VB;
-  if (PH) { if (inBand) bx = Math.max(bx, BANDX + 4); else R = PV[lv]; }
+  if (deep) { const Lr = fx.closest('.lay'); R = Lr && Lr._path ? viewOf(Lr._path[Lr._path.length - 1]) : VB; }   // a deep scene: its own view
+  else if (PH) { if (inBand) bx = Math.max(bx, BANDX + 4); else R = PV[lv]; }
   bx = Math.max(R.x + 4, Math.min(R.x + R.w - 4 - bw, bx)); by = Math.max(R.y + 4, Math.min(R.y + R.h - 4 - bh, by));
   box.setAttribute('x', bx); box.setAttribute('y', by); box.setAttribute('width', bw); box.setAttribute('height', bh);
   bar.setAttribute('x', bx + 5); bar.setAttribute('y', by + 6); bar.setAttribute('height', Math.max(4, bh - 12));
@@ -1325,6 +1327,7 @@ function clearDim() {
 const clearGlow = soft => svg.querySelectorAll('.lay .comp > .glow').forEach(g => { if (soft) fadeOut(g, 260); else g.remove(); });
 /* a flow's drawing goes: at once, or (soft: the tour moving on, another flow) fading out over a quarter second */
 function clearFx(soft) {
+  LYR.forEach(L => { if (L._built && L._fx && !LAYERS.includes(L)) L._fx.textContent = ''; });   // the deep scenes' fx (only flows draw there)
   FX.forEach((f, i) => {
     if (!f) return;
     if (soft && f.firstChild && LAYERS[i].style.display !== 'none' && CLK.on && !REDUCED) {
@@ -1450,13 +1453,17 @@ function hex(pa) { const s = pa.toString(16).padStart(10, '0'); return '0x' + s.
 const hopw = h => h === 1 ? 'hop' : 'hops';
 /* the flows by their internal letter, in the flow bar's order; the key that plays each (B, the broadcast, is K here:
    the letter B is the ladder's) */
-const FLOWS = {}, ORDER = 'ABCDEFGHIJK', KEYOF = {A: '1', B: '2', C: '3', D: '4', E: '5', F: '6', G: '7', H: '8', I: '9', J: '0', K: 'B'};
+const FLOWS = {}, ORDER = 'ABCDEFGHIJKL', KEYOF = {A: '1', B: '2', C: '3', D: '4', E: '5', F: '6', G: '7', H: '8', I: '9', J: '0', K: 'B', L: 'M'};
+const FLOWOF = Object.fromEntries(Object.entries(KEYOF).map(([f, k]) => [k.toLowerCase(), f]));
 const FL = {k: null, i: 0, tok: {dead: true}, ctx: null, done: false, still: false};
 let FOLLOW = true, FOLLOW_AUTO = false, LASTFLOW = null, CAPFLOW = false;
 const flowOn = () => !!FL.k && !FL.done;
 const HOLD = 2300, HOP_MS = 650;
+const fxOf = P => { const L = LYR.get(pkeys(P)); return L && L._built ? L._fx : null; };   // a deep scene's fx layer
 function atView(w) {
-  if (ZW || Z.level !== w.level) return false;
+  if (ZW) return false;
+  if (w.path) return samePath(Z.path, w.path);
+  if (Z.level !== w.level) return false;
   if (w.level === 0) return true;
   return Z.sid === w.sid && (w.level === 1 || (Z.nb === w.nb && Z.mi === w.mi));
 }
@@ -1465,7 +1472,7 @@ function atView(w) {
 async function cam(tok, w, cut, o) {
   if (!FOLLOW || atView(w)) return;
   const quick = cut || tok.ff;
-  await goTo(w, Object.assign({clk: quick ? null : tok, keepFx: true, total: quick ? 600 : undefined, carry: FL.ctx && FL.ctx.tok === tok ? FL.ctx.pk : null}, o || {}));
+  await goTo(w.path || w, Object.assign({clk: quick ? null : tok, keepFx: true, total: quick ? 600 : undefined, carry: FL.ctx && FL.ctx.tok === tok ? FL.ctx.pk : null}, o || {}));
   alive(tok);
 }
 /* the look a stage on the die gives it (most set the rest of the die back, CSS #chip.fdim): a zoom out to it ends there */
@@ -1519,7 +1526,7 @@ async function runFrom(tok, ctx, i, still, intro) {
   for (let j = 0; j < i; j++) {
     const sj = sts[j], wj = sj.where(ctx);
     ctx.stage = j;
-    if (atView(wj)) { ctx.fx = FX[wj.level]; ctx.pip = false; await sj.run(tok, ctx); }
+    if (atView(wj)) { ctx.fx = wj.path ? fxOf(wj.path) : FX[wj.level]; ctx.pip = false; await sj.run(tok, ctx); }
     else if (wj.level === 0) { ctx.fx = PIP.fx; ctx.pip = true; await sj.run(tok, ctx); }
   }
   tok.ff = false; if (i > 0) FFEND = performance.now();
@@ -1545,6 +1552,9 @@ const stageLine = html => { const s = String(html || '').replace(/^Leg \d+ of \d
 function showStage(ctx, j) {
   const sts = FLOWS[ctx.k].stages;
   FL.i = j; renderBar(); setCap(stageLine(sts[j].say ? sts[j].say(ctx) : '')); sub(CAPS[ctx.k]()); leg(j);
+  const pb = $('pn-body'), zb = pb.querySelector('.pn-tfz'), nb = pb.querySelector('.pn-tfn');   // a deep flow's stage: its way down, its note
+  if (zb) zb.innerHTML = sts[j].zoom ? zrow('Go down from here:', sts[j].zoom(ctx).map(([P, lab]) => zbtn(P, lab))) : '';
+  if (nb) nb.innerHTML = sts[j].note ? `<p class="pn-stage">${sts[j].note(ctx)}</p>` : '';
   $('st-live').textContent = `Stage ${j + 1} of ${sts.length}: ${sts[j].name}`;
 }
 async function playStage(tok, ctx, j) {
@@ -1552,13 +1562,21 @@ async function playStage(tok, ctx, j) {
   ctx.stage = j; leg(j);
   if (FOLLOW) await cam(tok, w, false, {c1: stageLook(st, w)});
   alive(tok);
-  if (atView(w)) { pipOff(); ctx.fx = FX[w.level]; ctx.pip = false; return st.run(tok, ctx); }
+  if (w.path && ZW) { await new Promise(res => ZWAIT.push(res)); alive(tok); }   // a deep stage: a move under way (Follow off) lands first
+  if (atView(w)) { pipOff(); ctx.fx = w.path ? fxOf(w.path) : FX[w.level]; ctx.pip = false; return st.run(tok, ctx); }
   if (w.level === 0) { ctx.fx = PIP.fx; ctx.pip = true; pipOn(); return st.run(tok, ctx); }
   pipOff();
   return markStage(tok, ctx, st, w);
 }
 /* a stage inside a shire or a minion the camera is not showing: its place is marked, with its name */
 async function markStage(tok, ctx, st, w) {
+  if (w.path || Z.level > 2 || Z.level < 0) {   // a deep stage seen from elsewhere, or any stage seen from a deep scene: a note in the corner
+    if (ctx.mark) { ctx.mark.remove(); ctx.mark = null; }
+    const R = restLayer(), fx = R && (LAYERS.includes(R) ? FX[LAYERS.indexOf(R)] : R._fx), v = viewOf(Z.path[Z.path.length - 1]), Fk = FL.k && FLOWS[FL.k];
+    if (Fk && Fk.deep) { if (fx && !LAYERS.includes(R)) fx.textContent = ''; if (Fk.off) Fk.off(ctx, ctx.stage); }   // a deep flow: the last stage's marks go (they would not match this one), and the panel counts this stage
+    if (fx) { const g = ctx.mark = E('g', {}, fx); callout(g, v.x + v.w - 24, v.y + (Z.level > 2 ? 96 : 24), [{t: `Stage ${ctx.stage + 1}: ${st.name}`}].concat(st.mark ? st.mark(ctx) : []).concat([{t: w.path ? `in ${toOf(w.path[w.path.length - 1])}` : 'on the chip'}, {t: 'C follows the flow'}]), {tr: true, fs: 20}); }
+    await wait(tok, st.dur || 2400); return;
+  }
   const L = Z.level, fx = FX[L]; let p = null;
   if (L === 0 && SH[w.sid]) p = {x: SH[w.sid].sx, y: SH[w.sid].sy};
   else if (L === 1 && w.level === 2 && Z.sid === w.sid && AP[1].min[w.nb + ':' + w.mi]) { const m = AP[1].min[w.nb + ':' + w.mi]; p = {x: m.x + m.w / 2, y: m.y + m.h / 2}; }
@@ -1600,9 +1618,10 @@ function goStage(i) {
 }
 function sub(html) { const e = $('cap-sub'); e.innerHTML = glue(html); e.classList.remove('hint'); }
 /* a flow's legs: a numeric column only where some row has a number in it (an empty column still takes width) */
-const legRows = rows => {
-  const cols = [[2, 'cycles'], [3, 'pJ/B']].filter(([k]) => rows.some(r => r[k]));
-  return `<table class="legs"><thead><tr><th>Leg</th><th>What happens</th>${cols.map(([, h]) => `<th class="num">${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r, i) => `<tr class="todo" data-leg="${i}"><td>${r[0]}</td><td>${r[1]}</td>${cols.map(([k]) => `<td class="num">${r[k] || ''}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+const legRows = (rows, o) => {
+  o = o || {};
+  const cols = (o.cols || [[2, 'cycles'], [3, 'pJ/B']]).filter(([k]) => rows.some(r => r[k]));
+  return `<table class="legs${o.cls ? ' ' + o.cls : ''}"><thead><tr><th>${o.head || 'Leg'}</th><th>What happens</th>${cols.map(([, h]) => `<th class="num">${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r, i) => `<tr class="todo" data-leg="${i}"><td>${r[0]}</td><td>${r[1]}</td>${cols.map(([k]) => `<td class="num">${r[k] || ''}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 };
 function leg(i) {
   let on = null;
@@ -1614,7 +1633,7 @@ function flowPanel(k, head, body) {
   box.innerHTML = body;
   // in their order: the prose and the tables, and the address's own controls (flow 1's requester and New address)
   [...box.children].forEach(el => {
-    if (el.matches('p.pn-what, table.legs')) det.push(el);
+    if (el.matches('p.pn-what, table.legs') && !el.matches('.pn-keep')) det.push(el);
     else if (el.matches('.pn-act')) {
       const tech = [...el.children].filter(x => x.matches('label, [data-act="newpa"]'));
       if (tech.length) { const d = document.createElement('div'); d.className = 'pn-act'; tech.forEach(x => d.appendChild(x)); det.push(d); }
@@ -2893,6 +2912,212 @@ FLOWS.K = {
   ],
 };
 
+// Flow M, TensorFMA32 (23 Oct 2026): one input bit flips in a lane's fp32 multiply-add; its stages play on the deep scenes of the multiply-add
+const TFP = (c, ...more) => pathOf({level: 2, sid: c.sid, nb: c.nb, mi: c.mi}).concat([{id: 'vpu'}, {id: 'vpu.lane', k: String(c.lane)}, {id: 'vpu.lane.fma'}],
+  more.map(x => (typeof x === 'string' ? {id: x} : x)));
+const TFT = (c, ...more) => TFP(c, 'vpu.lane.fma.tree', ...more);
+const tfG = c => { const L = c.fx && c.fx.closest('.lay'); return L && L._ap && L._ap.tf ? L._ap.tf : null; };
+const TFD = () => D.tfma;
+const tfSoFar = j => TFD().stages.slice(0, j + 2).reduce((a, s) => a + s.names, 0);                   // bus + f0 … f(j)
+const tfWal = j => TFD().stages.slice(0, j + 2).reduce((a, s) => a + (s.blocks.wallace1 || 0) + (s.blocks.wallace2 || 0) + (s.blocks.tree_reg || 0), 0);
+const tfWalN = j => TFD().stages.slice(0, j + 2).reduce((a, s) => a + ((s.bnets || {}).wallace1 || 0) + ((s.bnets || {}).wallace2 || 0) + ((s.bnets || {}).tree_reg || 0), 0);   // the same, in wires (distinct nets): what the tree lights
+function tfSay(c, x, y, lines, o) { const g = callout(c.fx, x, y, lines, o); (c.cos = c.cos || []).push(g); return g; }   // a stage's own callout: the next stage clears it
+function tfClear(c) { (c.cos || []).forEach(g => fadeOut(g, 220)); c.cos = []; }
+async function glowPart(tok, fx, b, ms, col) {   // light a part of a deep scene: a tinted box over it that breathes
+  if (!b) return wait(tok, ms);
+  const r = S(E('rect', {class: 'glow', x: b.x - 4, y: b.y - 4, width: b.w + 8, height: b.h + 8, rx: 9}, fx), {fill: col || 'var(--c2)', fillOpacity: 0, stroke: col || 'var(--c2)', strokeWidth: 3});
+  await anim(tok, ms, q => { const v = 0.5 - 0.5 * Math.cos(Math.PI * 2 * Math.min(1, q * 1.5)); r.style.fillOpacity = (0.08 + 0.22 * v).toFixed(3); });
+  return r;
+}
+function tfKpis(s, w, wn) {   // the panel's three KPIs, in RTL signal bits (and the tree's wires)
+  const k = $('pn-body').querySelector('.pn-tfk');
+  if (k) k.innerHTML = kpi(src(fnum(s, 0), 'tfma.flip.stages'), 'RTL signal bits toggled so far') + kpi(src(fnum(w, 0), 'tfma.flip.stages'), `in the Wallace tree${wn ? `, on ${fnum(wn, 0)} distinct signals` : ''}`) + kpi(n('tf_avg'), 'the average flip, in the tree');
+}
+const tfMeter0 = () => tfKpis(0, 0, 0);
+const tfAt = j => tfKpis(tfSoFar(j), tfWal(j), tfWalN(j));
+function tfMeter(c, j) {   // the running count, in RTL signal bits (the wires it lights are fewer: several names per wire): a callout where the scene has room, and the panel's KPIs
+  const G = tfG(c), L = c.fx.closest('.lay'), v = L && L._path ? viewOf(L._path[L._path.length - 1]) : VB, m = PH ? {x: CKT.FR.x + CKT.FR.w, y: CKT.FR.y + CKT.FR.h + 18} : G && G.meter ? G.meter : {x: v.x + v.w - 24, y: v.y + 96};   // (a phone: under the frame, where the tall view has room)
+  if (c.meter && c.meter.isConnected) c.meter.remove();
+  const wn = tfWalN(j);
+  c.meter = callout(c.fx, m.x, m.y, [{t: `${fnum(tfSoFar(j), 0)} RTL bits so far`, f: 'tfma.flip.stages'},
+    {t: `${fnum(tfWal(j), 0)} in the tree${wn ? `, ${fnum(wn, 0)} signals` : ''}`, f: 'tfma.flip.stages'}, {t: `average flip: ${N.tf_avg.t}`, f: 'tfma.avg'}], m.tl && !PH ? {tl: true, fs: 17, col: 'var(--c2)'} : {tr: true, fs: PH ? 28 : 20, col: 'var(--c2)'});
+  tfAt(j);
+}
+async function tfLight(tok, fx, cells, ms, col) {   // light boxes {x, y, w, h, n} in a wave from bit 0 (right) to bit 63 (left); brighter for more toggled nets
+  if (!cells.length) return wait(tok, ms);
+  const xs = cells.map(b => b.x), x0 = Math.min(...xs), x1 = Math.max(...xs) + 1e-6;
+  const rs = cells.map(b => S(E('rect', {class: 'glow', x: b.x - 1, y: b.y - 1, width: b.w + 2, height: b.h + 2, rx: 2}, fx), {fill: col || 'var(--c2)', fillOpacity: 0, stroke: col || 'var(--c2)', strokeOpacity: 0, strokeWidth: 1.5}));
+  await anim(tok, ms, q => rs.forEach((r, i) => { const on = q >= 0.15 + 0.7 * (x1 - cells[i].x) / (x1 - x0 + 1e-6) * 0.999 ? 1 : 0, a = Math.min(0.9, 0.3 + 0.18 * cells[i].n);
+    r.style.fillOpacity = (on * a).toFixed(2); r.style.strokeOpacity = on ? '1' : '0'; }));
+  return rs;
+}
+const tfMap = (s, f) => [...s].map((d, i) => ({i, n: +d})).filter(o => o.n).map(o => Object.assign(f(o.i), {n: o.n}));
+const tfSum = cs => cs.reduce((a, b) => a + b.n, 0);
+function tfStrip(fx, x, y, hex, w, bit, lab, o) {   // a w-bit register as cells (bit w−1 first), in o.rows rows o.W wide, its label o.ly below its top, an optional flipped bit
+  o = o || {};
+  const rows = o.rows || 1, per = w / rows, cw = Math.min(14, (o.W || 300) / per), g = E('g', {}, fx), v = BigInt('0x' + hex), cells = [], pos = [];
+  for (let i = 0; i < w; i++) {
+    const b = (v >> BigInt(w - 1 - i)) & 1n, cx = x + (i % per) * cw, cy = y + Math.floor(i / per) * 14;
+    const r = S(E('rect', {x: cx, y: cy, width: Math.max(1, cw - 1.5), height: 12, rx: Math.min(1.5, cw / 4)}, g), {fill: b ? 'var(--ink-2)' : 'var(--surface)', stroke: 'var(--grid)', strokeWidth: cw > 6 ? 1 : 0.6});
+    cells.unshift(r); pos.unshift({x: cx + (cw - 1.5) / 2, y: cy + 6});
+  }
+  const t = T(g, x, y + (o.ly == null ? -6 : o.ly), lab, 't-sm halo');
+  if (bit != null) S(cells[bit], {stroke: 'var(--c2)', strokeWidth: 2});
+  return {g, cells, lab: t, at: k => pos[k], set: hex2 => { const v2 = BigInt('0x' + hex2); cells.forEach((r, i) => { const b = (v2 >> BigInt(i)) & 1n, b0 = (v >> BigInt(i)) & 1n; r.style.fill = b ? 'var(--ink-2)' : 'var(--surface)'; if (b !== b0) { r.style.stroke = 'var(--c2)'; r.style.strokeWidth = 2; } }); }};
+}
+const tfSide = (G, key) => { const b = G.parts[key], col = Math.round((b.x + 132) / 172); return col >= 4 ? {x: b.x, y: b.y + b.h / 2, side: 'l'} : {x: b.x + b.w, y: b.y + b.h / 2, side: 'r'}; };
+async function tfGlowSay(tok, c, key, lines, ms) {   // glow a part of the pipeline, then say what changed there
+  const G = tfG(c); if (!G || !G.parts[key]) return wait(tok, ms || 1200);
+  await glowPart(tok, c.fx, G.parts[key], ms || 1200);
+  if (lines) { const s = tfSide(G, key); tfSay(c, s.x, s.y, lines, {side: s.side, lead: true, fs: 20}); }
+}
+FLOWS.L = {
+  title: 'TensorFMA32', deep: true,
+  pick: () => { const P = zNow().path, m = P.find(e => e.id === 'minion'), l = P.find(e => e.id === 'vpu.lane'), q = m ? String(m.k).split('.').map(Number) : null;
+    return {sid: q ? q[0] : shireOfCamera() != null ? shireOfCamera() : 0, nb: q ? q[1] : 0, mi: q ? q[2] : 0, lane: l ? +l.k : 0}; },
+  cap: () => CAPS.L(),
+  off: (c, j) => { tfClear(c); if (c.meter && c.meter.isConnected) c.meter.remove(); c.meter = null; tfAt(j); },   // the stage plays as the corner note (Follow off)
+  setup(c) {
+    Object.assign(c, c.pick);
+    flowPanel('L', 'TensorFMA32: one bit flips', `<div class="pn-kpis pn-tfk"></div><div class="pn-tfn"></div><div class="pn-zoom pn-tfz"></div>`
+      + `<p class="pn-what">One fp32 multiply-add in lane ${c.lane} of minion ${c.mi} (shire ${c.sid}), c + a × b with a = π, b = 1.2345678, c = 100, then the same with bit 11 of b’s fraction flipped. The difference runs through the seven stages; each stage counts the signals it changes. ${src('The design simulated', 'tfma.example')}: the ET-SoC-1’s own RTL.</p>`
+      + legRows(TFROWS(), {cols: [[2, 'RTL bits'], [3, 'signals']], cls: 'pn-keep', head: 'Stage'})
+      + `<p class="pn-what pn-keep small">How it is counted: <b>RTL bits</b> are every bit of every named RTL signal that changes, at zero delay (${src('a simulation of the RTL', 'tfma.flip.stages')}); <b>signals</b> count each distinct RTL signal once (one signal carries several names; gate-internal nets have no RTL name, so this is a lower bound on wires). The drawing lights signals; the counts are RTL bits.</p>`
+      + `<p class="pn-what small">The same flip in the gate-level netlist toggles ${n('tf_gate')} physical wires in the multiplier. Over every fraction bit of a and b the Wallace tree averages ${n('tf_avg')} RTL bits (a ${n('tf_avg_a')}, b ${n('tf_avg_b')}), ${n('tf_phys')} physical wires. The owner’s figure, ${n('tf_owner')}, is the lab’s toggle model’s per-bit figure: its ${n('tf_lab')} toggles per random multiply-add divided by the ~20 input bits that change between multiply-adds, so ${src('an average over a stream, not one flip’s cascade', 'tfma.owner.why')}.</p>`);
+    tfMeter0(c);
+  },
+  stages: [
+    {name: 'f0 · operands', where: c => ({path: TFP(c)}), mark: () => [],
+      say: () => `In f0 the lane captures a = π, b = 1.2345678 and c = 100, and one bit of b flips: bit 11 of its fraction, so b becomes 1.2348119. ${n('tf_s0')} signal bits change here`,
+      note: () => `The operand registers each sit behind a clock gate that opens only for a valid multiply-add (${src('in accumulate passes a zero word never opens it', 'tfma.zero')}). b’s significand is placed in bits 29-6 of the multiplicand, so fraction bit 11 is bit 17 there: 0x27819440 becomes 0x27839440. a, the multiplier, is the same in all 8 lanes.`,
+      zoom: c => [[TFP(c, 'lib.flipflop'), 'An operand register: a flip-flop'], [TFP(c, 'lib.mux2'), 'Unpacking: a multiplexer'], [TFP(c, 'lib.icg'), 'Zero gating: the clock gate']],
+      run: async (tok, c) => {
+        tfClear(c);
+        const G = tfG(c), T0 = TFD(), fx = c.fx; if (!G) return wait(tok, 1500);
+        const ss = [['opA', T0.ex.a, null, 'a = π'], ['opB', T0.ex.b, 11, 'b = 1.2345678'], ['opC', T0.ex.c, null, 'c = 100']]
+          .map(([k, hx, bit, lab]) => { const p = G.parts[k]; return tfStrip(fx, p.x + 6, p.y + 27, hx, 32, bit, lab, {W: 128, rows: 2, ly: 38}); });
+        const sb = ss[1];
+        await pulse(tok, fx, sb.at(11), 1000, 'var(--c2)', 30);
+        sb.set(T0.ex.flip.after); sb.lab.textContent = 'b = 1.2348119';
+        await glowPart(tok, fx, G.parts.unpack, 1200);
+        const u = G.parts.unpack;
+        tfSay(c, u.x + u.w, u.y + u.h / 2, [{t: 'b’s significand, bits 29-6:'}, {t: '0x27819440 → 0x27839440 (bit 17)', f: 'tfma.example'}], {side: 'r', lead: true, fs: 20});
+        tfMeter(c, 0);
+      }},
+    {name: 'f1 · Booth rows, levels 1-2', where: c => ({path: TFT(c)}), hold: 3000, mark: () => [{t: `${N.tf_s1.t} signal bits`, f: 'tfma.flip.stages'}],
+      say: () => `In f1 a is Booth-recoded: π gives 10 non-zero rows of b, so b’s one flipped bit enters the Wallace tree as 10 bits, one per row, and levels 1 and 2 spread it: ${n('tf_s1')} signal bits change`,
+      note: () => `a’s Booth digits, rows 1-17: 0 0 0 0 −1 −1 +2 −1 0 0 +1 0 +1 −2 +1 −1 +1 (${src('rows 1-4 are always zero in fp32', 'tfma.booth.fp32')}). Each non-zero row holds a shifted copy of ±b or ±2b, so the flipped bit appears once in each, on a diagonal from column 25 to 49. Level 1 turns them into changes on 31 compressor signals in three arrays, level 2 into 24: the boxes lit. Counted by RTL name, the two levels change 330 signal bits on those 55 signals, since a signal carries several names (its ports at each level of the hierarchy). ${src('Flip a bit of a instead (bit 8) and row 9 changes from 0 to −b: 23 bits enter at once and the unit toggles 2,154 signal bits, 1,255 in the Wallace tree', 'tfma.example')}.`,
+      zoom: c => [[TFP(c, 'vpu.lane.fma.booth'), 'The Booth multiplier'], [TFT(c, {id: 'fma.lvl', k: '1'}), 'Level 1'], [TFT(c, {id: 'fma.lvl', k: '1'}, {id: 'fma.col', k: '1.3.44'}), 'Level 1, column 44'],
+        [TFT(c, {id: 'fma.lvl', k: '1'}, {id: 'fma.col', k: '1.3.44'}, 'lib.cmp42'), 'Its 4:2 compressor'], [TFT(c, {id: 'fma.lvl', k: '1'}, {id: 'fma.col', k: '1.3.44'}, 'lib.cmp42', 'lib.fa'), 'A full adder'],
+        [TFT(c, {id: 'fma.lvl', k: '1'}, {id: 'fma.col', k: '1.3.44'}, 'lib.cmp42', 'lib.fa', 'lib.fa.tr'), 'In transistors'], [TFT(c, {id: 'fma.lvl', k: '1'}, {id: 'fma.col', k: '1.3.44'}, 'lib.cmp42', 'lib.fa', 'lib.fa.tr', 'lib.finfet'), 'One transistor'],
+        [TFP(c, 'vpu.lane.fma.booth', 'fma.benc'), 'Esperanto’s Booth encoder']],
+      run: async (tok, c) => {
+        tfClear(c);
+        const G = tfG(c), T0 = TFD(), fx = c.fx; if (!G) return wait(tok, 1500);
+        const dg = T0.ex.digits.map((d, i) => { const r = i + 1, p = G.pp(r, r === 17 ? 31 : 32), t = T(fx, p.x - 12, G.ry(r) + 4, d === 0 ? '0' : (d > 0 ? '+' : '−') + Math.abs(d), 't-sm halo', 'end', 'tfma.booth.rows'); t.style.opacity = 0; return [t, d]; });
+        const hd = T(fx, G.pp(1, 32).x - 12, G.ry(1) - 11, 'a’s digits', 't-sm halo', 'end', 'tfma.booth.rows'); hd.style.opacity = 0;
+        await anim(tok, 900, q => { hd.style.opacity = Math.min(1, q * 3); dg.forEach(([t, d], i) => { t.style.opacity = q * 17 >= i ? (d ? 1 : 0.4) : 0; }); });
+        tfSay(c, G.rows.x, G.rows.y, [{t: 'a = π: 10 of 17 rows', f: 'tfma.booth.fp32'}, {t: 'are not zero'}], {tr: true, fs: 18});
+        const pts = T0.ex.pp.map(([r, col]) => G.pp(r, col - (r === 17 ? 32 : 2 * (r - 1)))).sort((p, q) => p.y - q.y);
+        const lit = pts.map(p => S(E('circle', {cx: p.x, cy: p.y, r: 4}, fx), {fill: 'var(--c2)', opacity: 0}));
+        const P0 = [{x: pts[0].x, y: 6}].concat(pts), pk = packet(fx, 'var(--c2)', 5); at(pk, P0[0]);
+        await travel(tok, fx, pk, P0, 1600, {w: 3, op: 0.45, onSeg: si => lit.forEach((d, k) => { if (k < si) d.style.opacity = 1; })});
+        pk.remove();
+        const l1 = ['csa42_12', 'csa42_13', 'csa42_14'].flatMap((nm, k) => tfMap(T0.maps.arr[nm] || '', i => G.cell(1, k + 1, i)));
+        await tfLight(tok, fx, l1, 1400);
+        tfSay(c, G.right, G.band[1], [{t: `level 1: ${tfSum(l1)} signals change`, f: 'tfma.flip.stages'}], {tr: true, fs: 18});
+        const l2 = ['csa42_21', 'csa42_22'].flatMap((nm, k) => tfMap(T0.maps.arr[nm] || '', i => G.cell(2, k, i)));
+        await tfLight(tok, fx, l2, 1200);
+        tfSay(c, G.right, G.band[2], [{t: `level 2: ${tfSum(l2)} signals`, f: 'tfma.flip.stages'}], {tr: true, fs: 18});
+        tfMeter(c, 1);
+      }},
+    {name: 'f2 · levels 3-4, the product', where: c => ({path: TFT(c)}), hold: 3000, mark: () => [{t: `${N.tf_s2.t} signal bits`, f: 'tfma.flip.stages'}],
+      say: () => `In f2 the register hands the four rows to levels 3 and 4, row 17’s changed bit joins at level 4, and a 64-bit adder makes the product, 3.8785091 → 3.8792761: ${n('tf_s2')} more, ${n('tf_ex_w')} in the Wallace tree in all`,
+      note: () => `${src('19 of the register’s 253 flip-flops', 'tfma.reg12 tfma.flip.stages')} change; level 3 turns them into 36 changed signals and level 4 into 45, spreading from column 25 to 49 as carries move left. The tree’s 155 lit signals (55 in f1, 19 in the register, 81 in f2) carry 875 changed RTL signal bits, the count the meter keeps. The product’s 64 bits: 0x1f072fc9c992c000 → 0x1f08c1e97f92c000, 16 change. In the gate-level netlist this flip toggles ${n('tf_gate')} physical wires in the Booth rows, the tree and the adder, ${n('tf_e')} of energy at the minion’s 0.517 V (zero delay; ${src('glitches add about 40 % to the tree’s energy', 'tfma.glitch')}).`,
+      zoom: c => [[TFT(c, {id: 'fma.lvl', k: '3'}), 'Level 3'], [TFT(c, {id: 'fma.lvl', k: '4'}), 'Level 4'], [TFT(c, {id: 'fma.lvl', k: '4'}, {id: 'fma.col', k: '4.0.44'}), 'Level 4, column 44'],
+        [TFT(c, {id: 'fma.lvl', k: '4'}, {id: 'fma.col', k: '4.0.44'}, 'lib.cmp42'), 'Its 4:2 compressor'], [TFT(c, 'lib.adder'), 'The product adder'], [TFT(c, 'lib.flipflop'), 'A register flip-flop']],
+      run: async (tok, c) => {
+        tfClear(c);
+        const G = tfG(c), T0 = TFD(), fx = c.fx; if (!G) return wait(tok, 1500);
+        const rg = tfMap(T0.maps.reg, i => { const p = G.reg(i); return {x: p.x - 6, y: p.y - 13, w: 12, h: 26}; });
+        await tfLight(tok, fx, rg, 900);
+        tfSay(c, G.right, G.band.reg, [{t: `register: ${tfSum(rg)} flip-flops change`, f: 'tfma.flip.stages tfma.reg12'}], {tr: true, fs: 18});
+        const l3 = tfMap(T0.maps.arr.csa42_31 || '', i => G.cell(3, 0, i));
+        await tfLight(tok, fx, l3, 1100);
+        tfSay(c, G.right, G.band[3], [{t: `level 3: ${tfSum(l3)} signals`, f: 'tfma.flip.stages'}], {tr: true, fs: 18});
+        const pk = packet(fx, 'var(--c2)', 5); at(pk, {x: G.bus.x, y: G.bus.y1});
+        await travel(tok, fx, pk, [{x: G.bus.x, y: G.bus.y1}, {x: G.bus.x, y: G.bus.y2}], 700, {w: 3, op: 0.45});
+        pk.remove();
+        const l4 = tfMap(T0.maps.arr.csa41_41 || '', i => G.cell(4, 0, i));
+        await tfLight(tok, fx, l4, 1100);
+        tfSay(c, G.right, G.band[4], [{t: `level 4: ${tfSum(l4)} signals`, f: 'tfma.flip.stages'}], {tr: true, fs: 18});
+        const ad = tfMap(T0.maps.add, i => G.add(i));
+        await tfLight(tok, fx, ad, 900);
+        tfSay(c, G.right, G.band.add, [{t: `the product: ${tfSum(ad)} bits change`, f: 'tfma.example'}], {tr: true, fs: 18});
+        tfMeter(c, 2);
+      }},
+    {name: 'f3 · align and merge', where: c => ({path: TFP(c)}), mark: () => [],
+      say: () => `In f3 the product is lined up with c: c = 100 has the larger exponent, so the product shifts right 5 places, and a row of 52 full adders merges the two: ${n('tf_s3')} signal bits change`,
+      note: () => `c’s exponent is 133 and the product’s 128, so the product is the one shifted (a 48-bit operand in a 50-bit window); 16 of its bits differ before and after the flip, and 16 of the merged sum’s. The ${src('32-bit side register', 'tfma.side')} also loads the product’s top bits here, on every op, and nothing reads them in fp32.`,
+      zoom: c => [[TFP(c, 'lib.shifter'), 'The aligner'], [TFP(c, 'lib.fa'), 'The merge: a full adder']],
+      run: async (tok, c) => {
+        tfClear(c);
+        await tfGlowSay(tok, c, 'align', [{t: 'the product → right 5 places', f: 'tfma.example'}]);
+        await tfGlowSay(tok, c, 'csa3', [{t: '3:2 merge: 16 bits change', f: 'tfma.example'}, {t: '0x19f8397e4e4c9 → 0x19f8460f4bfc9', f: 'tfma.example'}]);
+        if (tfG(c)) tfMeter(c, 3);
+      }},
+    {name: 'f4 · add, guess the shift', where: c => ({path: TFP(c)}), mark: () => [],
+      say: () => `In f4 a 52-bit adder sums them, 103.8785091 → 103.8792761, while the leading-one anticipator guesses the normalising shift from the same inputs: ${n('tf_s4')}`,
+      note: () => `The anticipator works from the adder’s inputs, not its sum, so it finishes with the adder; the price is that it ${src('can be one place off', 'tfma.stages tb.lza')}, which f5 fixes. Here its guess (shift right one) is the same before and after the flip.`,
+      zoom: c => [[TFP(c, {id: 'lib.adder', k: 'cadd'}), 'The 52-bit adder'], [TFP(c, {id: 'lib.lzd', k: 'lza'}), 'The anticipator']],
+      run: async (tok, c) => {
+        tfClear(c);
+        await tfGlowSay(tok, c, 'cadd', [{t: 'sum: 16 bits change', f: 'tfma.example'}]);
+        await tfGlowSay(tok, c, 'lza', [{t: 'guess: unchanged', f: 'tfma.example'}]);
+        if (tfG(c)) tfMeter(c, 4);
+      }},
+    {name: 'f5 · normalise, decide rounding', where: c => ({path: TFP(c)}), mark: () => [],
+      say: () => `In f5 the sum is shifted into a 34-bit window, the anticipator’s one-place error is corrected, and the last kept bit, the round bit and the sticky bit decide the rounding: ${n('tf_s5')}`,
+      note: () => `The shift right one puts the leading 1 one place low, and a ${src('one-bit correction', 'tfma.stages')} takes the window one place left. Of the 34-bit window, 11 bits differ before and after the flip; ${src('round to nearest even', 'tb.round')} decides from them.`,
+      zoom: c => [[TFP(c, {id: 'lib.shifter', k: 'norm'}), 'The normalising shifter'], [TFP(c, 'lib.round'), 'Rounding']],
+      run: async (tok, c) => {
+        tfClear(c);
+        await tfGlowSay(tok, c, 'norm', [{t: '11 of 34 bits change', f: 'tfma.example'}]);
+        await tfGlowSay(tok, c, 'rdec', null, 1000);
+        if (tfG(c)) tfMeter(c, 5);
+      }},
+    {name: 'f6 · round, write', where: c => ({path: TFP(c)}), dur: 4000, mark: () => [{t: `${N.tf_ex.t} in all`, f: 'tfma.flip.stages'}],
+      say: () => `In f6 the round adder and the exponent logic finish: 103.87851 becomes 103.87927, 8 bits of the result. One flipped input bit changed ${n('tf_ex')} signal bits, ${n('tf_ex_w')} of them across the Wallace tree; the average flip of a or b, ${n('tf_avg')} there`,
+      note: () => `The result leaves the unit unregistered and is written into the lane’s register file at the end of this cycle (lane stage F8). ${src('Results below 2^-126 flush to zero', 'tfma.underflow')}, judged after rounding.`,
+      zoom: c => [[TFP(c, {id: 'lib.round', k: 'rnd'}), 'The round adder'], [TFP(c, 'lib.flipflop'), 'A flip-flop']],
+      run: async (tok, c) => {
+        tfClear(c);
+        const G = tfG(c), T0 = TFD(), fx = c.fx; if (!G) return wait(tok, 1500);
+        await glowPart(tok, fx, G.parts.rnd, 1000);
+        await glowPart(tok, fx, G.parts.exc, 1000);
+        const ex = G.parts.exc, rs = tfStrip(fx, ex.x + 4, ex.y + ex.h + 52, T0.ex.res[0], 32, null, '103.87851', {W: 132, rows: 2});
+        await wait(tok, 600);
+        rs.set(T0.ex.res[1]); rs.lab.textContent = '103.87927: 8 bits';
+        tfMeter(c, 6);
+        tfSay(c, 430, 290, [{t: `One flipped bit of b, a = π: ${N.tf_ex.t} RTL signal bits toggle in seven stages`, f: 'tfma.flip.stages'},
+          {t: `${N.tf_ex_w.t} in the Wallace tree, ${N.tf_ex_b.t} in the Booth rows; ${N.tf_ex_n.t} distinct signals in all`, f: 'tfma.flip.stages'},
+          {t: `in the gate-level netlist: ${N.tf_gate.t} physical wires in the multiplier, ${N.tf_e.t}`, f: 'tfma.flip.gate tfma.flip.energy'},
+          {t: `every fraction bit of a and b, on average: ${N.tf_avg.t} in the tree`, f: 'tfma.avg'},
+          {t: `(a ${N.tf_avg_a.t}, b ${N.tf_avg_b.t}), ${N.tf_unit.t} in the unit, ${N.tf_phys.t} physical wires`, f: 'tfma.avg tfma.names'},
+          {t: `the owner’s figure, ${N.tf_owner.t}: a stream average, not one flip`, f: 'tfma.owner tfma.owner.why'}], {side: 'c', fs: 22, minW: 760});
+      }},
+  ],
+};
+const TFROWS = () => [
+  ['f0', 'capture a, b, c; unpack', n('tf_s0'), '3'],
+  ['f1', 'Booth rows; tree levels 1-2', n('tf_s1'), '66'],
+  ['f2', 'register; levels 3-4; product adder', n('tf_s2'), '116'],
+  ['f3', 'align the product to c; 3:2 merge', n('tf_s3'), '96'],
+  ['f4', '52-bit add; leading-one guess', n('tf_s4'), '102'],
+  ['f5', 'normalise; rounding bits', n('tf_s5'), '68'],
+  ['f6', 'round; result and flags', n('tf_s6'), '31'],
+];
+
 const ACTS = {
   replay: () => { if (FL.k || LASTFLOW) startFlow(FL.k || LASTFLOW, 0, {intro: true}); },
   newpa: () => { ST.pa = mkPA(Math.floor(Math.random() * 32), Math.floor(Math.random() * 2 ** 20)); startFlow('A', 0, {keep: true}); },
@@ -2913,6 +3138,7 @@ const CAPS = {
   H: () => `The same matmul, ${n('w_tflops')} TFLOP/s timed from the host (${n('tfma546')} per op on the device, A and B in the L1 scratchpad), draws ${n('w_zeros', 'W')} on zeros and ${n('w_randn', 'W')} on random data at the board; random data reaches 90 °C in ${n('race_rand', 's')}.`,
   I: () => `One hot line: the atomic is fair to every shire, but 22 requesters stop its home shire's own traffic dead, while 21 leave it ${n('hot21r')} of its rate.`,
   J: () => `The allreduce tree: ten levels up with TensorReduce and back down with TensorBroadcast, ${n('ar1024')} for all ${n('n1024')} minions, about a quarter of a software barrier.`,
+  L: () => `TensorFMA32: one input bit flip triggers an avalanche of ${n('tf_avg')} toggles across a Wallace tree, ${n('tf_unit')} in all seven stages (RTL signal bits; ${n('tf_phys')} physical wires in the tree).`,
   K: () => `One value to all ${n('n1024')} minions, four ways: the hardware tree, within an allreduce's ${n('ar_us')}; a relay from shire to shire; one line that every minion loads; and the multicast every kernel launch makes, ${n('pcie_b2b_rng')} a queued launch.`,
 };
 const compG = (key, i) => LAYERS[Z.level].querySelectorAll(`.comp[data-comp="${key}"]`)[i || 0] || null;
@@ -2937,7 +3163,7 @@ const STEPS = [
     view: {level: 1, sid: 0}, panel: ['banks', () => ({})], sub: () => `Amber links: the fast local network's tree edges, ${n('ts_fln')} round trip against ${n('ts_xbar', 'cycles')} for other pairs.`},
   {name: 'Minion', cap: () => `A minion has ${n('harts')} and a vector unit whose ${n('lanes_n')} lanes also run the tensor instructions. ${n('n1024')} minions sustain ${n('tflops')} TFLOP/s fp32 at ${n('mhz')}.`,
     view: {level: 2, sid: 0, nb: 0, mi: 0}, panel: ['tensor'], sel: () => compG('tensor'), sub: () => `The firmware turns ${n('l1_scp')} of the ${n('l1_kb')} L1 into the tensor scratchpad and leaves each hart ${n('l1_hart')}.`},
-  {flow: 'A'}, {flow: 'B'}, {flow: 'C'}, {flow: 'D'}, {flow: 'E'}, {flow: 'F'}, {flow: 'G'}, {flow: 'H'}, {flow: 'I'}, {flow: 'J'},
+  {flow: 'A'}, {flow: 'B'}, {flow: 'C'}, {flow: 'D'}, {flow: 'E'}, {flow: 'F'}, {flow: 'G'}, {flow: 'H'}, {flow: 'I'}, {flow: 'J'}, {flow: 'L'},
   {name: 'Summary', cap: () => { const c = factKinds(); return `Every number on this diagram has a source: ${c.all} facts, ${c.measured} of them measured, ${c.spec} from the documents, ${c.derived} derived, ${c.inferred} inferred and ${c.other} of other kinds (outside sources, textbooks, open questions).`; },
     view: {level: 0}, hi: [], panel: ['chip'], draw: tok => factSplit(tok), sub: () => 'Each inferred part says what would settle it; the facts, their sources and the asks are listed under the diagram.'},
 ];
@@ -3090,7 +3316,7 @@ function resetCap() {
     setKick('ET-SoC-1'); setCap(STEPS[0].cap()); sub(STEPS[0].sub()); renderBar(); return;
   }
   setKick('Explore');
-  setCap(`${TOUCH ? 'Tap' : 'Click'} any part for its details, ${TOUCH ? 'double-tap' : 'double-click'} to zoom into it, pick one of eleven flows, or press Tour to step through it all in ${STEPS.length} steps.`);
+  setCap(`${TOUCH ? 'Tap' : 'Click'} any part for its details, ${TOUCH ? 'double-tap' : 'double-click'} to zoom into it, pick one of twelve flows, or press Tour to step through it all in ${STEPS.length} steps.`);
   sub(HINT); $('cap-sub').classList.add('hint'); renderBar();
 }
 /* the stage bar: the active flow's stages, the current one marked; in the tour on a still step, the tour's still
@@ -3116,13 +3342,13 @@ function renderBar() {
         if (s.flow) {
           if (STEPS[j - 1] && STEPS[j - 1].flow) return;
           let e = j; while (STEPS[e + 1] && STEPS[e + 1].flow) e++;
-          chip(`${j + 1}–${e + 1}`, 'Flows', e < TOUR.i ? ' past' : '', `Tour steps ${j + 1} to ${e + 1}: the ten flows`, () => tourGo(j));
+          chip(`${j + 1}–${e + 1}`, 'Flows', e < TOUR.i ? ' past' : '', `Tour steps ${j + 1} to ${e + 1}: the ${['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'][e - j + 1] || e - j + 1} flows`, () => tourGo(j));
         } else chip(j + 1, s.name, j < TOUR.i ? ' past' : j === TOUR.i ? ' on' : '', `Tour step ${j + 1} of ${STEPS.length}: ${s.name}. The arrows step; Shift with an arrow jumps a step`, () => tourGo(j));
         ol.lastChild.classList.add('tchip');
       });
     } else {
       const li = document.createElement('li'); li.className = 'stg-hint';
-      li.textContent = TOUCH ? 'Pick a flow above to see its stages here, or press Tour' : 'Pick a flow above (keys 1 to 9, 0 and B) to see its stages here, or press Tour';
+      li.textContent = TOUCH ? 'Pick a flow above to see its stages here, or press Tour' : 'Pick a flow above (keys 1 to 9, 0, B and M) to see its stages here, or press Tour';
       ol.appendChild(li);
     }
     refocus(ol, had);
@@ -3386,6 +3612,7 @@ document.addEventListener('keydown', e => {
     case 't': case 'T': e.preventDefault(); toggleTour(); break;
     case 'q': case 'Q': if (TOUR) { e.preventDefault(); endTour(); stopFlow(); } break;
     case 'b': case 'B': e.preventDefault(); pickFlow('K'); break;
+    case 'm': case 'M': e.preventDefault(); pickFlow('L'); break;
     case '+': case '=': e.preventDefault(); zoomBy(1); break;
     case '-': case '_': e.preventDefault(); zoomBy(-1); break;
     case 'Escape': back(); break;
@@ -3421,7 +3648,7 @@ function prose(again) {
     `<p><b>The chip.</b> The ET-SoC-1 has ${n('cores')} RISC-V cores on a ${n('die_mm2')} mm² die in TSMC ${n('process')}: ${n('minions')} minions in ${n('shires')} shires, ${n('maxions')} and a service processor. The diagram draws the die (width and height from a published die plot) with ${n('cshires')} compute shires, the master (${n('master_id')}) and spare (${n('spare_id')}) shires, the PCIe and I/O shires, and ${n('memshires').toLowerCase()} memory shires, on an ${n('grid86')} mesh of ${n('stops')} stops. The compute shires sit where measured distances put them, and the firmware's NoC-spec map, once its boot-time renaming is applied, puts every one in the same cell (${n('fw_pairs')} pair distances). Each mesh hop adds ${n('hop_cyc')} (${n('hop_ns')}) to a round trip and is about ${n('hop_mm')} of wire. Off the die, four LPDDR4X packages hold ${n('channels')} channels of ${n('ch_bits')}, ${n('dram_gb')}; the chip streams ${n('dram_bw')} GB/s from them against ${n('dram_peak')} GB/s peak at their ${n('mts')} MT/s. The host links through the PCIe shire: Gen4 x8, trained at ${n('pcie_neg')} on every card, ${n('pcie_h2d')} GB/s to the card by DMA. The fp32 matmul at ${n('tflops')} TFLOP/s draws ${n('mmw')} at the board on the three cards, ${n('perw')} GFLOP/s per watt.</p>`,
     `<p><b>A shire.</b> ${n('neigh')} of ${n('per_neigh')} share ${n('cache_mb')} of SRAM in ${n('banks')}. The cards run mode M0: ${n('scp_mb')} of scratchpad that any shire can address, ${n('l2_kb')} of L2 private to the shire, and a ${n('l3_mb')} slice of the chip's ${n('l3_chip')} L3. The shire meets the mesh at one stop, and inside a neighbourhood minions talk fastest along the tree edges of the fast local network (${n('ts_fln')} round trip, against ${n('ts_xbar')} cycles for other pairs).</p>`,
     `<p><b>A minion.</b> ${n('harts')}, in-order and single-issue, a vector unit of ${n('lanes')} and a ${n('l1_kb')} L1 data cache, of which the firmware makes ${n('l1_scp')} a tensor scratchpad and leaves each hart ${n('l1_hart')}. The tensor instructions are no separate unit: state machines in the vector unit run them on its lanes' FMA and int8 multiply-add units, so the tensor peak (${n('peak32')}, ${n('peak16')} or ${n('peak8')} operations per cycle) is the lanes' peak. On ${n('n1024')} minions at ${n('mhz')} they sustain ${n('tflops')} TFLOP/s fp32.</p>`,
-    `<p><b>The flows.</b> (1) A load that misses every cache: ${n('lat_l1')} cycles would have been an L1 hit and ${n('lat_l2')} an L2 hit; the L3 home is PA[10:6] and costs ${n('lat_l3_a')} + ${n('lat_l3_b')}; the memory shire is PA[8:6] and adds ${n('lat_ms_a')} + ${n('lat_ms_b')} cycles per hop; a typical DRAM load takes ${n('lat_dram')}, of which ${n('lat_dram_chip')} are the DRAM chip. (2) The ladder adds the read buffer (${n('lat_rb')}), the own scratchpad (${n('lat_scp')}) and another shire's scratchpad (${n('lat_rs_a')} + ${n('lat_rs_b')} per hop). (3) TensorSend: ${n('ts_a')} cycles plus ${n('ts_b')} per hop, round trip. (4) The relay: ${n('rl_e_next')} pJ per byte moved (each write and each read counted) to the next shire against ${n('rl_e_dram')} through DRAM (${n('rl_x')} less). (5) Gathers from scattered lines: ${n('g_l1_r')}, ${n('g_l2_r')}, ${n('g_rs_r')} and ${n('g_dr_r')} G elements/s from L1, L2, a scratchpad two hops away and DRAM. (6) The host over PCIe, timed on three cards: ${n('pcie_h2d')} GB/s to the card and ${n('pcie_d2h')} back by DMA (${n('pcie_h2d_pct')} and ${n('pcie_d2h_pct')} of the link), ${n('pcie_stg_rng')} GB/s for a program's staged copies, whose lines land in their L3 homes (${n('pcie_l3pct')} then read at L3 latency); an empty kernel costs the card ${n('pcie_b2b_rng')} queued, while one launch waited for takes ${n('pcie_launch_rng')}, most of it the runtime's ${n('poll500')} idle poll. (7) A matmul step: TensorLoad ${n('tl_l2')} cycles, TensorFMA ${n('tfma_tenb')}, ${n('mm_op')} per op with the next load hidden. (8) The Horace runs of the matmul (${n('w_tflops')} TFLOP/s, timed from the host) on zeros, ones and random data: ${n('w_zeros')}, ${n('w_ones')} and ${n('w_randn')} W at the board at the launch temperature; random data reaches 90 °C in ${n('race_rand')} s, zeros never. (9) One hot line: fair shares (${n('hot_host')} for the host shire), and 22 requesters stop the host shire's own loads (${n('hot22')}). (0) The allreduce tree: ${n('ar1024')} for all ${n('n1024')} minions, against ${n('chipbar')} cycles for a chip barrier. (B) One value to every minion, four ways: the hardware tree (TensorBroadcast down the allreduce's tree) has it everywhere within the allreduce's ${n('ar1024')} (${n('ar_us')}) for 32 B and ${n('bc_1k', 'cycles')} (${n('bc_1k_us')}) for 1 KB, the broadcast half never timed alone; a relay hands a buffer from shire to shire at ${n('rl_e_hand')} pJ per byte a hand-off, its write and its read, where every shire reading its own copy from DRAM pays ${n('e_dram')} pJ per byte; one line that every minion loads costs each shire one request to its home, but hammered with atomics it is the hot line of flow 9; and every kernel launch is itself a broadcast of one 64-byte message, ${n('pcie_b2b_rng')} for an empty kernel queued on 32 shires.</p>`,
+    `<p><b>The flows.</b> (1) A load that misses every cache: ${n('lat_l1')} cycles would have been an L1 hit and ${n('lat_l2')} an L2 hit; the L3 home is PA[10:6] and costs ${n('lat_l3_a')} + ${n('lat_l3_b')}; the memory shire is PA[8:6] and adds ${n('lat_ms_a')} + ${n('lat_ms_b')} cycles per hop; a typical DRAM load takes ${n('lat_dram')}, of which ${n('lat_dram_chip')} are the DRAM chip. (2) The ladder adds the read buffer (${n('lat_rb')}), the own scratchpad (${n('lat_scp')}) and another shire's scratchpad (${n('lat_rs_a')} + ${n('lat_rs_b')} per hop). (3) TensorSend: ${n('ts_a')} cycles plus ${n('ts_b')} per hop, round trip. (4) The relay: ${n('rl_e_next')} pJ per byte moved (each write and each read counted) to the next shire against ${n('rl_e_dram')} through DRAM (${n('rl_x')} less). (5) Gathers from scattered lines: ${n('g_l1_r')}, ${n('g_l2_r')}, ${n('g_rs_r')} and ${n('g_dr_r')} G elements/s from L1, L2, a scratchpad two hops away and DRAM. (6) The host over PCIe, timed on three cards: ${n('pcie_h2d')} GB/s to the card and ${n('pcie_d2h')} back by DMA (${n('pcie_h2d_pct')} and ${n('pcie_d2h_pct')} of the link), ${n('pcie_stg_rng')} GB/s for a program's staged copies, whose lines land in their L3 homes (${n('pcie_l3pct')} then read at L3 latency); an empty kernel costs the card ${n('pcie_b2b_rng')} queued, while one launch waited for takes ${n('pcie_launch_rng')}, most of it the runtime's ${n('poll500')} idle poll. (7) A matmul step: TensorLoad ${n('tl_l2')} cycles, TensorFMA ${n('tfma_tenb')}, ${n('mm_op')} per op with the next load hidden. (8) The Horace runs of the matmul (${n('w_tflops')} TFLOP/s, timed from the host) on zeros, ones and random data: ${n('w_zeros')}, ${n('w_ones')} and ${n('w_randn')} W at the board at the launch temperature; random data reaches 90 °C in ${n('race_rand')} s, zeros never. (9) One hot line: fair shares (${n('hot_host')} for the host shire), and 22 requesters stop the host shire's own loads (${n('hot22')}). (0) The allreduce tree: ${n('ar1024')} for all ${n('n1024')} minions, against ${n('chipbar')} cycles for a chip barrier. (B) One value to every minion, four ways: the hardware tree (TensorBroadcast down the allreduce's tree) has it everywhere within the allreduce's ${n('ar1024')} (${n('ar_us')}) for 32 B and ${n('bc_1k', 'cycles')} (${n('bc_1k_us')}) for 1 KB, the broadcast half never timed alone; a relay hands a buffer from shire to shire at ${n('rl_e_hand')} pJ per byte a hand-off, its write and its read, where every shire reading its own copy from DRAM pays ${n('e_dram')} pJ per byte; one line that every minion loads costs each shire one request to its home, but hammered with atomics it is the hot line of flow 9; and every kernel launch is itself a broadcast of one 64-byte message, ${n('pcie_b2b_rng')} for an empty kernel queued on 32 shires. (M) TensorFMA32: one input bit of a lane's fp32 multiply-add flips (bit 11 of b, with a = π and c = 100) and the seven stages pass on ${n('tf_ex')} signal toggles, ${n('tf_ex_w')} of them in the Wallace tree; over every fraction bit of a and b the tree averages ${n('tf_avg')}, ${n('tf_phys')} physical wires.</p>`,
   ].join('');
   // what is measured, specified, derived and inferred
   // (the deep zoom's facts, 30 September, are counted apart: they describe the world around the chip and the circuits)
@@ -3429,11 +3656,11 @@ function prose(again) {
   const EGF = eggFacts();
   const fs = Object.values(F).filter(f => !f.dz), of = k => fs.filter(f => f.kind === k), meas = of('measured');
   const dzf = Object.entries(F).filter(([id, f]) => f.dz && !EGF.has(id)).map(x => x[1]), dzk = KINDS9.map(k => [k, dzf.filter(f => f.kind === k).length]).filter(x => x[1]);
-  const mc = k => meas.filter(f => f.cards.length === k).length;
+  const des = meas.filter(f => /not a card/.test(f.cards_txt || '')), mc = k => meas.filter(f => f.cards.length === k && !des.includes(f)).length;   // (des: measured on the design, its RTL and netlists)
   const lk = id => `<a href="#facts" data-f="${id}" class="num">${id}</a>`;
   const SETTLED = f => /^(Superseded|Settled) 2[79] Sep/.test(f.note || '');   // an inferred fact settled since: by the firmware's map (27 Sep) or E56 (29 Sep) (build_facts.py, AMEND, AMEND2)
-  $('honest-text').innerHTML = `<p>The page rests on ${fs.length} facts: <b>${meas.length} measured</b>, ${of('spec').length} from the specification (the datasheet, the Programmer's Reference Manual, the core-et documents and the firmware and runtime source), ${of('derived').length} derived from others and <b>${of('inferred').length} inferred</b>${KINDS9.slice(4).filter(k => of(k).length).map(k => `, ${of(k).length} ${KWORD[k]}`).join('')}. Of the measured facts, ${mc(3)} hold on all three lab cards (aifoundry2, aifoundry3 and aifoundry1 card 1), ${mc(2)} on two and ${mc(1)} on one, mostly aifoundry2${mc(0) ? `; ${mc(0)} ${mc(0) === 1 ? 'names' : 'name'} no card` : ''}. Every table here is at ${n('mhz')}, where a warm card sits.</p>`
-    + `<p>The zoom past the chip and into its parts (30 September and 1 October) adds ${dzf.length ? `${dzf.length} facts of its own: ${dzk.map(([k, c]) => `${c} ${KWORD[k]}`).join(', ')}` : 'facts of its own, counted here once they load'}. The sizes of the chip's parts from the shire down are estimates; the levels outside the chip rest on the vendor's documents and the lab's own records; the circuits inside the blocks, where the chip's own are not published, on the textbooks (Weste and Harris, Rabaey, Koren, and the papers each construction cites), and say so; the device on TSMC N7's published numbers and Esperanto's papers (Hot Chips 33, IEEE Micro 2022); the atom and below on CODATA, NIST and the Particle Data Group.</p>`
+  $('honest-text').innerHTML = `<p>The page rests on ${fs.length} facts: <b>${meas.length} measured</b>, ${of('spec').length} from the specification (the datasheet, the Programmer's Reference Manual, the core-et documents, the firmware and runtime source, and for the multiply-add Esperanto's design files for the ET-SoC-1), ${of('derived').length} derived from others and <b>${of('inferred').length} inferred</b>${KINDS9.slice(4).filter(k => of(k).length).map(k => `, ${of(k).length} ${KWORD[k]}`).join('')}. Of the measured facts, ${mc(3)} hold on all three lab cards (aifoundry2, aifoundry3 and aifoundry1 card 1), ${mc(2)} on two and ${mc(1)} on one, mostly aifoundry2${mc(0) ? `; ${mc(0)} ${mc(0) === 1 ? 'names' : 'name'} no card` : ''}${des.length ? `; ${des.length} more ${des.length === 1 ? 'measures' : 'measure'} the design itself (its RTL and netlists), not a card` : ''}. Every table here is at ${n('mhz')}, where a warm card sits.</p>`
+    + `<p>The zoom past the chip and into its parts (30 September and 1 October; the multiply-add as built, 25 October) adds ${dzf.length ? `${dzf.length} facts of its own: ${dzk.map(([k, c]) => `${c} ${KWORD[k]}`).join(', ')}` : 'facts of its own, counted here once they load'}. The sizes of the chip's parts from the shire down are estimates; the levels outside the chip rest on the vendor's documents and the lab's own records; the circuits inside the blocks, where the chip's own circuit is not published, on the textbooks (Weste and Harris, Rabaey, Koren, and the papers each construction cites), and say so; the multiply-add's on Esperanto's design files for the ET-SoC-1 (its RTL has the same modules as core-et's open Erbium branch); the device on TSMC N7's published numbers and Esperanto's papers (Hot Chips 33, IEEE Micro 2022); the atom and below on CODATA, NIST and the Particle Data Group.</p>`
     + `<p>What the drawing assumes, and what the second version (27 September) and the measurements of 29 September settled:</p><ul>`
     + `<li><b>Where the compute shires are</b> is measured: all ${n('pairs496')} shire pairs fit a constant plus ${n('hop_cyc')} per hop of Manhattan distance on the logical map (${lk('mesh.shortest-paths')}). <b>How that map sits on the die</b> was inferred (${lk('mesh.orientation')}, ${lk('L33')}, ${lk('L34')}); it is now the firmware's own: the "default Shire Virtual ID Map, based on the NOC spec", renamed as the boot firmware renames the shires, matches the measured map in ${n('fw_pairs')} pair distances with no rotation or mirror (${lk('fw.map-match')}; fact ${lk('L37')}, which compared the map before the renaming, is superseded). Still open: which east-west handedness the silicon has; the published die plot is not this view's mirror: it keeps the PCIe and I/O cells at the east end and swaps them (${lk('die.handedness')}, ${lk('L24')}).</li>`
     + `<li><b>The four cells without a compute shire</b>: the firmware's maps name them, the master (shire 32) in the north cell, the spare (33) in the south one, PCIe and then I/O east of the master (${lk('fw.grey-cells')}). They are drawn solid now. Timing a counter read on shire 32 from every compute shire confirms the master's cell on a card: E56 did so on 29 September, and it placed shire 32 in the firmware's cell on aifoundry1 card 1 and decided nothing on aifoundry3 or aifoundry2 (the asks below).</li>`
@@ -3543,10 +3770,25 @@ try {
   const f = q.get('flow'); if (lnkStart()) { /* the address's #flow=, #tour= or #at= wins (chip-diagram.links.js) */ }
   else if (f && '1234567890'.includes(f) && f.length === 1) startFlow(ORDER['1234567890'.indexOf(f)], 0, {intro: true});
   else if (f && f.toLowerCase() === 'b') startFlow('K', 0, {intro: true});
+  else if (f && f.toLowerCase() === 'm') startFlow('L', 0, {intro: true});
   else if (q.get('tour') === '1') startTour(0);
   else if (q.get('at')) { const P = atPath(q.get('at')); if (P) goTo(P, {total: 0}).then(() => { scaleUI(true); showHere(); }); else console.warn('?at=: no such scale', q.get('at')); }
 } catch (_) { /* no URL flags */ }
 if (window.__ET_PRESENTER) { setTimeout(() => toast('<p><b>Presenter window.</b> Press <kbd>F</kbd> for full screen; <kbd>T</kbd> starts the tour.</p>', 9000), 300); }
+function fitHead() {   // one header row for the twelve flows: the long title gives way to the short one, then the buttons tighten, then the twelfth's label shortens
+  const h = document.querySelector('#stage .st-head'), r = h && h.querySelector('.st-row');
+  if (!h || !r) return;
+  h.classList.remove('tight', 'tighter', 'tightest', 'tfs', 'tfk', 'tightest3');
+  if (window.matchMedia('(max-width: 899px)').matches) return;
+  const rows = () => new Set([...r.querySelectorAll('.st-btn')].filter(b => b.getClientRects().length).map(b => Math.round(b.getBoundingClientRect().top))).size;   // (the row's own wrap: its height grows with the header's)
+  const wraps = () => rows() > 1 || h.getBoundingClientRect().height > r.getBoundingClientRect().height * 1.5;
+  for (const c of ['tight', 'tighter', 'tightest', 'tfs', 'tfk']) { if (!wraps()) return; h.classList.add(c); }
+  if (!wraps()) return;
+  h.classList.remove('tfs', 'tfk'); h.classList.add('tightest3');   // still two rows: the title on a line of its own, the buttons on the next,
+  for (const c of ['tfs', 'tfk']) { if (rows() <= 1) return; h.classList.add(c); }   // the twelfth's label as long as one row allows
+}
+fitHead(); window.addEventListener('resize', () => { clearTimeout(fitHead.t); fitHead.t = setTimeout(fitHead, 100); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHead);
 fitCap();
 /* for the page's tests: the parts of the scale shown, with what each zooms into, and the stage a flow wants shown */
 window.__chipTest = {
@@ -3554,7 +3796,7 @@ window.__chipTest = {
     const k = kidOf(g), r = g.getBoundingClientRect();
     return {key: g._key, label: g.getAttribute('aria-label'), kid: g._go ? 'go:' + pkeys(g._go()) : k ? (k.up ? 'up:' + k.up : pk(k)) : null, x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height};
   }) : []; },
-  want: () => { try { return FL.k ? pkeys(pathOf(FLOWS[FL.k].stages[FL.i].where(FL.ctx))) : null; } catch (_) { return null; } },
+  want: () => { try { if (!FL.k) return null; const w = FLOWS[FL.k].stages[FL.i].where(FL.ctx); return pkeys(w.path || pathOf(w)); } catch (_) { return null; } },
   nstages: () => (FL.k ? FLOWS[FL.k].stages.length : 0),
   nodes: () => Object.keys(NODES),
   defPath: () => { let P = Z.path.slice(); for (let i = 0; i < 60; i++) { const k = defKid(P); if (!k) break; P = P.concat([k]); } return pkeys(P); },
@@ -3582,7 +3824,7 @@ window.__chipTest = {
       const parts = [...L.querySelectorAll('.comp')].map(g => {
         const k = kidOf(g), go = g._go ? g._go() : null;
         const r = {key: g._key, label: g.getAttribute('aria-label'), ext: !!g._ext};
-        if (go) { r.go = pkeys(go); r.seat = seatOk(go); push(go); }
+        if (go) { r.go = pkeys(go); r.seat = seatOk(go); if (g._side) r.side = true; push(go); }
         else if (k && k.up) r.up = k.up;
         else if (k) { const C = P.concat([k]); r.kid = pk(k); r.id = k.id; r.seat = seatOk(C); if (r.seat) push(C); }
         return r;
@@ -3630,7 +3872,7 @@ window.__chipTest = {
       const next = [];
       const parts = [...L.querySelectorAll('.comp')].map(g => {
         const k = kidOf(g), go = g._go ? g._go() : null, r = {key: g._key, ext: !!g._ext, mos: g.querySelectorAll('g.mos').length};
-        if (go) { r.go = go.map(e => e.id).join('/'); r.to = go[go.length - 1].id; r.seat = seatAll(go); next.push(go); }
+        if (go) { r.go = go.map(e => e.id).join('/'); r.to = go[go.length - 1].id; r.seat = seatAll(go); if (g._side) r.side = true; next.push(go); }
         else if (k && k.up) r.up = k.up;
         else if (k) { const C = P.concat([k]); r.to = k.id; r.seat = seat1(C); if (r.seat) next.push(C); }
         return r;

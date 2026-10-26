@@ -851,7 +851,8 @@ function userNav(t, o) {
     if (!k || FL.k !== k || ZW) return;
     // the flow waits off the chip's three scales, paused (Play or a step brings the camera back to its stage; review of
     // 1 Oct: its clock ran on, with nothing to show)
-    if (Z.level < 0 || Z.level > 2) { if (CLK.on && !done) { CLK.on = false; playBtn(); renderBar(); } return; }
+    const home = FLOWS[k].deep && FL.ctx && atView(FLOWS[k].stages[FL.i].where(FL.ctx));   // a deep flow plays on where its stage is
+    if ((Z.level < 0 || Z.level > 2) && !home) { if (CLK.on && !done) { CLK.on = false; playBtn(); renderBar(); } return; }
     if (done) startFlow(k, FL.i, {still: true, keep: true, done: true});
     else restartStage();
   });
@@ -1348,10 +1349,19 @@ function focusDir(dir) {
   best.focus({preventScroll: true});
   return true;
 }
+const OLDAT = [   // [old, new] path segments, tried only when an address does not resolve as it is
+  [/\/vpu\.lane\.fma\.tree\/fma\.tree\.col\/lib\.booth(?=\/|$)/, '/vpu.lane.fma.booth/lib.booth'], [/\/vpu\.lane\.fma\.tree\/lib\.booth(?=\/|$)/, '/vpu.lane.fma.booth/lib.booth'],
+  [/\/vpu\.lane\.fma\.tree\/lib\.cmp42(?=\/|$)/, '/vpu.lane.fma.tree/fma.lvl:1/fma.col:1.1.40/lib.cmp42'], [/\/lib\.fa\/lib\.nand2(?=\/|$)/, '/lib.fa/lib.cmos:maj'],
+  [/\/lib\.shifter:fmanorm(?=\/|$)/, '/lib.shifter:norm'], [/\/vpu\.lane\.fma\.booth\/vpu\.lane\.fma\.tree(?=\/|$)/, '/vpu.lane.fma.tree']];
 /* ?at=<path> (read once at load; the viewer drops #hash): elements by '/', each id or id:params. An id of a scale
    above the die alone expands to the ladder down to it (?at=sf); a path under the die starts from the die
    (?at=shire:20/minion:20.1.3). Tests start anywhere with it. */
 function atPath(s) {
+  const P0 = atPath0(s); if (P0) return P0;
+  let t = String(s || ''); OLDAT.forEach(([a, b]) => { t = t.replace(a, b); });
+  return t !== String(s || '') ? atPath0(t) : null;
+}
+function atPath0(s) {
   const els = pathFrom(s); if (!els.length || !els.every(e => NODES[e.id])) return null;
   if (els[0].id === WRAP) return els.length === 1 ? [{id: WRAP}] : null;
   const oi = OUT_IDS.indexOf(els[0].id);

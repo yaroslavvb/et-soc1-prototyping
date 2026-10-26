@@ -1765,8 +1765,18 @@ for sc in LAD.get('scales', {}).values():
     if sc.get('f'):
         cited.add(sc['f'])
     cited.update(sc.get('facts') or [])
+# the chip's numbers that the shared scenes print, with the facts they cite (25 Oct 2026, TensorFMA32: the multiply-add's
+# scenes in chip-diagram.blocks.js and ladder-inner.js print its as-built counts, N.tf_fac, N.tf_flops and N.tf_z; until
+# then the shared files printed none of the chip's numbers). A name the files read as N.<key> that is a chip number
+SHARED = ('ladder-core.js', 'ladder-outer.js', 'ladder-mem.js', 'chip-diagram.blocks.js', 'ladder-inner.js',
+          'ladder-circuits.js', 'ladder-panel.js')
+nkeys = set()
+for fn in SHARED:
+    nkeys.update(re.findall(r"\bN\.([A-Za-z_]\w*)", open(os.path.join(REPORTS, 'sources', fn)).read()))
+LAD['num'] = {k: CHIP['num'][k] for k in sorted(nkeys) if k in CHIP['num']}
+for x in LAD['num'].values():
+    cited.update(x['f'].split())
 LAD['facts'] = {i: CHIP['facts'][i] for i in sorted(cited) if i in CHIP['facts']}
-LAD['num'] = {}
 out['ladder'] = LAD
 out['meta']['built_from'].append('../2026-09-27-chip-diagram/facts.json (.scales, .geo, .img, .onum, .outside, .ring, .lazy and the facts '
                                  'they cite: the shared ladder)')

@@ -47,7 +47,7 @@
 //   T20 (part 1b) every scene by its path (window.__chipTest.walk): every part of every drawing leads in, its seat there
 //      in that drawing; every zoom to a transistor comes from a drawing in transistors; every scale reaches a transistor
 //      and an atom; the DRAM's and the regulators' chains never reach the N7 FinFET; the walk leaves no layer behind
-//   T21 links (1 Oct, the owner: "individual clicks like data->watts come with anchors"): each flow's button (1-9, 0, B)
+//   T21 links (1 Oct, the owner: "individual clicks like data->watts come with anchors"): each flow's button (1-9, 0, B, M)
 //      writes #flow=<key>-<name> and the page opened with it plays that flow; a key and the tour's slides (#tour=N, a
 //      flow's slide its flow's); a flow held at a stage (&stage=N) opens held there; the scale at rest (#at=, a deep
 //      circuit, the rack, a shire, a level of the easter egg named alone) opens at the same place; a hashchange takes the
@@ -203,7 +203,7 @@ T.T3 = async b => {
   ok(!mv.grew.length && !mv.bad.length, 'T3 the step only zooms out: neither end grows on the screen, both within [1/30, 30]', mv.grew.concat(mv.bad).slice(0, 3).join(' | '));
   const pn = await b.ev(`document.getElementById('pn-body').textContent`), ro = await b.ev(`document.getElementById('scale-ro').textContent`);
   // (since the fact review of 1 Oct the landing says it is no journey through space, and names the fixed point)
-  ok(/round the loop/.test(pn) && /Not further out in space/.test(pn) && /XOR gate/.test(pn) && /The ring of sizes/.test(pn) && /10⁻³⁵ m/.test(ro), 'T3 its panel says the reader came round the loop (a picture, not a place), names the fixed atom, and offers the ring of sizes; the readout at rest gives the Planck length', `${ro} | ${pn.slice(0, 220)}`);
+  ok(/round the loop/.test(pn) && /Not further out in space/.test(pn) && /mirror full adder/.test(pn) && /The ring of sizes/.test(pn) && /10⁻³⁵ m/.test(ro), 'T3 its panel says the reader came round the loop (a picture, not a place), names the fixed atom, and offers the ring of sizes; the readout at rest gives the Planck length', `${ro} | ${pn.slice(0, 220)}`);
   // and up again to the die: 19 presses (a quark, a proton, the nucleus, the atom, the crystal, the channel, the fin, the
   // FinFET, the XOR, the full adder, the 4:2, the column, the tree, the multiply-add, the lane, the vector unit, the
   // minion, the shire, the chip)
@@ -312,7 +312,7 @@ T.T5 = async b => {
 };
 
 T.T6 = async b => {
-  const keys = '1234567890b'.split('');
+  const keys = '1234567890bm'.split('');   // (m: flow M, TensorFMA32, since 25 Oct 2026)
   let total = 0, good = 0;
   for (const k of keys) {
     await b.load(PAGE, `?flow=${k}`, 1500);
@@ -329,8 +329,8 @@ T.T6 = async b => {
   ok(good === total, `T6 every flow stage lands where it wants (${good}/${total})`);
   await b.load(PAGE, '?tour=1', 1500);
   let s = await b.state();
-  for (let i = 0; i < 40 && s.tour != null && s.tour < 16; i++) { await b.key('ArrowRight', 8); await sleep(200); await b.idle(15000); s = await b.state(); }
-  ok(s.tour === 16, 'T6 the tour steps to its end', String(s.tour));
+  for (let i = 0; i < 40 && s.tour != null && s.tour < 17; i++) { await b.key('ArrowRight', 8); await sleep(200); await b.idle(15000); s = await b.state(); }
+  ok(s.tour === 17, 'T6 the tour steps to its end (its eighteenth slide)', String(s.tour));
   // a flow started far from the chip (San Francisco, or the silicon lattice) brings the camera back to it
   for (const q of ['?at=sf', '?at=p.wrap', '?at=' + (await b.ev('window.__chipTest.defPath()')).split('/').slice(20).join('/')]) {
     await b.load(PAGE, q, 1500); await b.idle(10000);
@@ -421,7 +421,7 @@ T.T12 = async b => {
   s = await b.state();
   ok(s.path === 'p.wrap' && await b.ev('location.hash') === '#at=p.wrap', 'T12 #at=p.wrap opens the ring of sizes', `${s.path} ${await b.ev('location.hash')}`);
   const xs = await b.ev('window.__chipTest.exits()');
-  ok(xs.length === 3 && /lib\.xor\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(xs[0].path) && /lib\.sram6t\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(xs[1].path) && /p\.atom\/p\.nucleus\/p\.nucleon\/p\.quark\/p\.planck$/.test(xs[2].path),
+  ok(xs.length === 3 && /lib\.fa\.tr\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(xs[0].path) && /lib\.sram6t\/lib\.finfet\/lib\.fin\/lib\.channel\/lib\.si\/p\.atom$/.test(xs[1].path) && /p\.atom\/p\.nucleus\/p\.nucleon\/p\.quark\/p\.planck$/.test(xs[2].path),
     'T12 the ring\'s ways back in: an atom of the multiply-add, an atom of an L2 memory cell (drawn as 6T), the Planck length under the first', xs.map(x => x.id).join(', '));
   const parts = (await b.ev('window.__chipTest.parts()')).filter(p => /^exit-/.test(p.key));
   ok(parts.length === (b.touch ? 0 : 3), `T12 the ways back in are parts of the drawing${b.touch ? ' (a phone: in the panel)' : ''}`, parts.map(p => p.label).join(' | '));
@@ -457,7 +457,7 @@ T.T12 = async b => {
   s = await b.state();
   ok(s.path === xs[0].path, 'T12 the panel\'s compute way in lands on the atom of the multiply-add', s.path.split('/').slice(-4).join('/'));
   let seen = await climb(5);
-  ok(seen.join(' ') === 'lib.si lib.channel lib.fin lib.finfet lib.xor', 'T12 Up climbs the compute branch: the crystal, the channel, the fin, the FinFET, the XOR gate', seen.join(' '));
+  ok(seen.join(' ') === 'lib.si lib.channel lib.fin lib.finfet lib.fa.tr', 'T12 Up climbs the compute branch: the crystal, the channel, the fin, the FinFET, the full adder in transistors', seen.join(' '));
   await goScene(b, 'p.wrap');
   // (since the fact review of 1 Oct the shire cache's cell is "drawn as" a 6T cell: its bitcell is not published)
   await b.ev(`[...document.querySelectorAll('#pn-body .pn-zoom button')].find(x => /^An atom of an L2 memory cell/.test(x.textContent)).click()`); await sleep(40); await b.idle(15000);
@@ -598,7 +598,7 @@ T.T17 = async b => {
   ok(!stuck, 'T17 every Up press moved the camera', String(stuck));
   ok(planckAt.length === 3 && planckAt[0] === 21 && !ring.length, `T17 Up from the die: out past the top straight to the Planck length (press ${planckAt[0]}), and round again (presses ${planckAt.slice(1).join(' and ')}), never by the ring`, JSON.stringify({planckAt, ring}));
   const laps = planckAt.slice(1).map((p, i) => p - planckAt[i]);
-  ok(laps.length === 2 && laps.every(l => l === 40), `T17 every lap the same number of presses: ${laps.join(', ')} (40: a quark, a proton, the nucleus, the atom, on up to the top, and round)`);
+  ok(laps.length === 2 && laps.every(l => l === 41), `T17 every lap the same number of presses: ${laps.join(', ')} (41: a quark, a proton, the nucleus, the atom, on up to the top, and round; 40 until the multiply-add's tree gained its levels, 25 Oct 2026)`);
   const after = planckAt.slice(0, 2).map(p => lands.slice(p, p + 4).map(x => x.split('/').pop()).join(' '));
   ok(after.length === 2 && after.every(x => x === 'p.quark p.nucleon p.nucleus p.atom') && planckAt.slice(0, 2).every(p => lands[p + 3] === AT), 'T17 every lap from the Planck length: a quark, a proton, the nucleus and the same atom of the multiply-add', after.join(' | '));
   ok(!wrong.length, `T17 every press one level out, the top's round the loop to the Planck length (${n} presses)`, wrong.slice(0, 4).join(' | '));
@@ -656,9 +656,17 @@ T.T18 = async b => {
   ok(!notTo.length, 'T18 every scale reaches the die (no one-way exit, no trap)', notTo.join(' '));
   // a zoom in is undone by Up: a part's or a scale's zoom from A lands on a path whose parent is A; a path of its own (the
   // card's edge) passes A on its way, so Up climbs back through it; only the ring's ways in do not (the loop)
-  const oneway = [];
-  G.forEach(s => (s.parts || []).forEach(p => { if (p.go && s.id !== 'p.wrap' && !p.go.startsWith(s.path + '/')) oneway.push(`${s.id} · ${p.key}`); }));
+  // (since 25 Oct 2026, TensorFMA32) a part may glide to a sibling scene instead, as the multiply-add's Booth multiplier and
+  // its tree do to each other: a sideways glide, like the arrow keys' between siblings, so it needs its glide back
+  const oneway = [], noBack = [], idOf = q => q.split('/').pop().split(':')[0], up1 = q => q.split('/').slice(0, -1).join('/');
+  G.forEach(s => (s.parts || []).forEach(p => {
+    if (!p.go || s.id === 'p.wrap' || p.go.startsWith(s.path + '/')) return;
+    if (!p.side) { oneway.push(`${s.id} · ${p.key}`); return; }
+    const t = by.get(idOf(p.go));
+    if (!(t && (t.parts || []).some(q => q.side && idOf(q.go) === s.id && up1(q.go) === up1(p.go)))) noBack.push(`${s.id} · ${p.key} → ${idOf(p.go)}`);
+  }));
   ok(!oneway.length, 'T18 every path of its own starts from where its part is, so Up comes back', oneway.join(' | '));
+  ok(!noBack.length, 'T18 every part that glides to a sibling scene has the glide back from it', noBack.join(' | '));
 };
 T.T19 = async b => {
   const G = await graph(b), by = new Map(G.map(s => [s.id, s]));
@@ -749,8 +757,8 @@ T.T20 = async b => {
    specific experiment"): the address follows the stage (chip-diagram.links.js) and opens it again */
 T.T21 = async b => {
   const VIEWER = /^#[A-Za-z0-9_.=%&/-]*$/;   // what spacesheep's viewer mirrors into its own address
-  const LET = {1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H', 9: 'I', 0: 'J', b: 'K'};
-  const NAME = {1: 'load-to-dram', 2: 'latency-ladder', 3: 'tensorsend', 4: 'relay', 5: 'gathers', 6: 'host-and-pcie', 7: 'matmul', 8: 'data-watts', 9: 'hot-line', 0: 'allreduce', b: 'broadcast'};
+  const LET = {1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H', 9: 'I', 0: 'J', b: 'K', m: 'L'};
+  const NAME = {1: 'load-to-dram', 2: 'latency-ladder', 3: 'tensorsend', 4: 'relay', 5: 'gathers', 6: 'host-and-pcie', 7: 'matmul', 8: 'data-watts', 9: 'hot-line', 0: 'allreduce', b: 'broadcast', m: 'tensorfma32'};
   // a new document each time (a navigation that changes only the fragment would not load the page again)
   const fresh = async (q, wait = 1500) => { await b.send('Page.navigate', {url: 'about:blank'}); await sleep(120); await b.load(PAGE, q, wait); await b.idle(15000); };
   const hash = () => b.ev('location.hash');
@@ -762,7 +770,7 @@ T.T21 = async b => {
     const D0 = (await b.state()).path;
     ok(await hash() === '' && await b.ev('window.__chipLinks.anchor()') === '', 'T21 the first view (the die) has no fragment');
     // every flow by its button: its address, and the page opened with that address plays the same flow
-    for (const k of '1234567890b') {
+    for (const k of '1234567890bm') {
       await fresh('');
       await press(`[data-flow="${LET[k]}"]`); await sleep(700);
       const h = await hash(), want = `#flow=${k}-${NAME[k]}`;
@@ -803,7 +811,7 @@ T.T21 = async b => {
     ok(await hash() === '#flow=8-data-watts', 'T21 playing on drops the stage', await hash());
     // the scale the camera rests on (each reached by the Up button), and the page opened with it at the same place
     const DEEP = 'shire:0/minion:0.0.0/vpu/vpu.lane:0/vpu.lane.fma/vpu.lane.fma.tree/fma.tree.col/lib.cmp42/lib.fa/lib.xor';
-    for (const [from, name, want] of [[DEEP + '/lib.finfet', 'a deep circuit (an XOR gate in transistors)', '#at=' + DEEP.replace(/:/g, '%3A')],
+    for (const [from, name, want] of [[DEEP + '/lib.finfet', 'a deep circuit (a full adder in transistors)', '#at=' + DEEP.replace(/:/g, '%3A')],
       ['host', 'the rack', '#at=rack'], ['shire:20/minion:20.1.3', 'a shire', '#at=shire%3A20'], ['rack', 'a level of the easter egg (only its own name)', '#at=studio45']]) {
       await fresh('?at=' + from);
       await b.ev(`document.getElementById('up').click()`); await sleep(80); await b.idle(15000); await sleep(900);

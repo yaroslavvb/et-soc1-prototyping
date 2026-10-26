@@ -19,7 +19,7 @@ const zbtn = (path, label, pri, hint) => `<button type="button" class="st-btn${p
 const zrow = (lab, btns) => (btns.length ? `<div class="zr">${lab ? `<span class="zl">${esc(lab)}</span>` : ''}${btns.slice(0, 6).join('')}${btns.length > 6 ? `<details class="zmore"><summary>more…</summary><div class="zr">${btns.slice(6).join('')}</div></details>` : ''}</div>` : '');
 function zoomRowPart(g, title) {
   const P = layerPath(g) || Z.path, k = kidOf(g), rows = [];
-  if (g._go) rows.push(zrow('Go in:', [zbtn(g._go(), capFirst(String(g.getAttribute('aria-label') || '').replace(/[.:].*$/, '')), true, dcHint())]));
+  if (g._go) rows.push(zrow(g._side ? 'Go to:' : 'Go in:', [zbtn(g._go(), capFirst(String(g.getAttribute('aria-label') || '').replace(/[.:].*$/, '')), true, dcHint())]));
   else if (k && k.up) { const up = upPath(k.up); if (up) rows.push(zrow('', [zbtn(up, `Go to ${toOf({id: k.up})} (zooms out)`, true, dcHint())])); }
   else if (k) rows.push(zrow('Zoom in:', [zbtn(P.concat([k]), capFirst(toOf(k)), true, dcHint())]));
   const ex = g._opts ? g._opts(P) : OPTS[g._key] ? OPTS[g._key](g._ctx || {}, P, g) : [];
@@ -128,7 +128,7 @@ function stageIntoView() {
 $('pn-body').addEventListener('click', e => {
   const b = e.target.closest('button[data-act]'); if (!b) return;
   // pressed from the keyboard: after the move, focus goes to the new panel's zoom row (it is rebuilt on arrival)
-  if (b.dataset.act === 'go') { stageIntoView(); userNav(pathFrom(b.dataset.to), {pfocus: e.detail === 0, pan: b.dataset.pan === '1'}); }
+  if (b.dataset.act === 'go') { const tz = !!b.closest('.pn-tfz'); stageIntoView(); userNav(pathFrom(b.dataset.to), Object.assign({pfocus: e.detail === 0 && !tz, pan: b.dataset.pan === '1'}, tz && e.detail === 0 ? {focus: true} : {})); }   // (a deep flow's way down: the keyboard lands in the drawing, where Space plays on)
   else if (b.dataset.act === 'state') stateToggle();
   else if (ACTS[b.dataset.act]) ACTS[b.dataset.act](b);
 });

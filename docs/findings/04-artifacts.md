@@ -922,6 +922,19 @@ same scales outward and inward, the loop, a way back from every move and no dead
   measured, 10 left for the owner; five more such defects found while measuring were fixed too. Measured over all 104
   scales before and after: 27 texts past a frame at 1280 × 720 and 29 on a phone fixed, none new
   (`antigravity-triage.json`, `antigravity-measure.md` there).
+- **TensorFMA32: the multiply-add as built, and a twelfth flow (25 October, Q124).** The owner asked for the TensorFMA32
+  part of a private copy of this page (made there on 23 October from Esperanto's design files for the ET-SoC-1). Flow M
+  (key M) flips one input bit of lane 0's multiply-add and follows it through the seven stages; the deep scenes go down
+  the Booth multiplier and the Wallace tree as built (four levels of 64 4:2 compressors) to a full adder's 28
+  transistors, and the loop's fixed atom now sits in that full adder. The copy's page was carried back into the sources
+  hunk by hunk (each line of a built page traced to the source line it came from), its data into
+  `research/tensorfma32.json`; the shared ladder's files changed with it, so the memory levels show the same scenes and
+  print the chip's numbers they need. Its sources say "Esperanto's design files for the ET-SoC-1" beside core-et's open
+  Erbium RTL, which has every module and signal named; no design file is named and no cell-library dimension appears.
+  Thirteen of the copy's new parts led nowhere; each now leads in (a stage's header where its first block does, the
+  Booth groups and the full adder's stages where they are clicked, a cut compressor into its column), and the Booth
+  multiplier's and the tree's glides to each other are reported as sideways glides, which T18 checks for their way back.
+  The suites on the final build: `zoom_test.mjs` 791/791, `ml_ladder_test.mjs --chip` 149/150 (its one miss, T13's breadcrumb at shire 0, fails the same on the unchanged pages on this Mac), `ml_access_test.mjs` 28/28.
 
 ## Four physical scales in 3D (14 October 2026, Q109)
 

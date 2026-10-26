@@ -4,19 +4,20 @@
    the silicon crystal and the die in section, and the links from the memory drawings' transistors into them. */
 /* the 4:2 compressor: two full adders, as the RTL's r42cmp computes it */
 bnode('lib.cmp42', {draw: (L, ap) => {
-  KT.frame(L, {title: 'A 4:2 compressor: two full adders', sub: 'four bits of a column and a carry in become a sum and two carries', col: CC.logic, tags: [['unknown', 'logic: Erbium RTL'], ['generic', 'the circuit: textbook']]});
-  const f1 = ipart(L, ap, 'fa1', 120, 150, 240, 170, CC.logic, 'full adder 1', {node: 'lib.fa', center: true, ty: 92, kid: {id: 'lib.fa'}, kind: 'generic'});
-  ipart(L, ap, 'fa2', 520, 330, 240, 170, CC.logic, 'full adder 2', {node: 'lib.fa', center: true, ty: 92, kind: 'generic'});
-  ['x1', 'x2', 'x3'].forEach((t, i) => { const x = 170 + i * 70; KT.wire(L, [[x, 60], [x, 150]]); KT.netLab(L, x, 52, t, 'middle'); });
-  KT.wire(L, [[700, 60], [700, 330]]); KT.netLab(L, 700, 52, 'x4', 'middle');
+  KT.frame(L, {title: 'A 4:2 compressor: two full adders', sub: 'four bits of a column and a carry in become a sum and two carries', col: CC.logic, tags: [['documented', 'as built: txfma_4_2_compressor'], ['measured', 'silicon: synthesized into gates']]});
+  const f1 = ipart(L, ap, 'fa1', 120, 150, 240, 170, CC.logic, 'full adder 1', {node: 'lib.fa', center: true, ty: 84, sub: ['csa0'], kid: {id: 'lib.fa'}});
+  ipart(L, ap, 'fa2', 520, 330, 240, 170, CC.logic, 'full adder 2', {node: 'lib.fa', center: true, ty: 84, sub: ['csa1']});
+  ['x0', 'x1', 'x2'].forEach((t, i) => { const x = 170 + i * 70; KT.wire(L, [[x, 60], [x, 150]]); KT.netLab(L, x, 52, t, 'middle'); });
+  KT.wire(L, [[700, 60], [700, 330]]); KT.netLab(L, 700, 52, 'x3', 'middle');
   KT.wire(L, [[900, 410], [760, 410]]); KT.netLab(L, 906, 416, '← cin');
-  KT.wire(L, [[240, 320], [240, 380], [520, 380]]); KT.netLab(L, 380, 372, 's1', 'middle');
+  KT.wire(L, [[240, 320], [240, 380], [520, 380]]); KT.netLab(L, 380, 372, 's0', 'middle');
   KT.wire(L, [[120, 250], [-60, 250]]); KT.netLab(L, -66, 256, 'cout ←', 'end');
-  KTT(L, 600, 120, 'cin comes from the 4:2 of the column on the right;', 't-sm'); KTT(L, 600, 142, 'cout goes to the column on the left', 't-sm');
-  KT.wire(L, [[580, 500], [580, 580]]); KT.netLab(L, 580, 604, 'sum', 'middle');
-  KT.wire(L, [[700, 500], [700, 580]]); KT.netLab(L, 700, 604, 'carry', 'middle');
-  KTT(L, -150, 640, 'sum = x1 ⊕ x2 ⊕ x3 ⊕ x4 ⊕ cin; cout = majority(x1, x2, x3)', 't-mono', 'start', 'in.lib.cmp42.1');
-  KTT(L, -150, 668, 'the RTL’s r42cmp writes the same in AND, OR and XOR (core-et’s Erbium branch; not confirmed to match the silicon)', 't-sm', 'start', 'in.lib.cmp42.1');
+  KTT(L, 790, 230, 'cin comes from the 4:2', 't-sm', 'start', 'tfma.cmp42'); KTT(L, 790, 252, 'of the column on the right;', 't-sm', 'start', 'tfma.cmp42'); KTT(L, 790, 274, 'cout goes to the column', 't-sm', 'start', 'tfma.cmp42'); KTT(L, 790, 296, 'on the left', 't-sm', 'start', 'tfma.cmp42');
+  KT.wire(L, [[580, 500], [580, 580]]); KT.netLab(L, 580, 604, 's', 'middle');
+  KT.wire(L, [[700, 500], [700, 580]]); KT.netLab(L, 700, 604, 'c', 'middle');
+  KTT(L, -150, 636, 's = x0 ⊕ x1 ⊕ x2 ⊕ x3 ⊕ cin; cout = majority(x0, x1, x2); c = majority(s0, x3, cin)', 't-mono', 'start', 'tfma.cmp42');
+  KTT(L, -150, 660, 'as built there is no 4:2 cell: synthesis made each one from full-adder cells or XNOR and majority gates', 't-sm', 'start', 'tfma.tree.synth tfma.asbuilt.cells');
+  KTT(L, -150, 682, '(Esperanto’s hand design used a 4:2 cell of 62 transistors)', 't-sm', 'start', 'tfma.hand');
   ap.zs['lib.fa'] = {r: {x: 120, y: 150, w: 240, h: 170}, g: f1};
 }, def: () => ({id: 'lib.fa'}), kids: () => [{id: 'lib.fa'}]});
 /* the full adder in gates: two XORs for the sum, the majority for the carry */
@@ -26,7 +27,7 @@ function xorSym(parent, x, y, o) {
   return {g: s0.g, a: {x: x - 9, y: y - (o && o.h || 44) / 4}, b: {x: x - 9, y: y + (o && o.h || 44) / 4}, out: s0.out, shape: s0.shape};
 }
 bnode('lib.fa', {draw: (L, ap) => {
-  KT.frame(L, {title: 'A full adder, in gates', sub: `three bits in, a sum and a carry out; built of transistors, about ${on('fa_tr')} as a static mirror adder`, subf: onf('fa_tr'), col: CC.logic, tags: [['generic', 'textbook']]});
+  KT.frame(L, {title: 'A full adder, in gates', sub: `three bits in, a sum and a carry out: as the RTL writes it (txfma_csa), sum = a ⊕ b ⊕ cin and carry = majority; built of ${on('fa_tr')} as a mirror adder`, subf: 'tfma.csa ' + onf('fa_tr'), col: CC.logic, tags: [['documented', 'function: the ET-SoC-1 RTL'], ['generic', 'gates: textbook']]});
   const gx = ipart(L, ap, 'xor1', 160, 60, 110, 100, CC.logic, '', {node: 'lib.xor', kid: {id: 'lib.xor'}, tr: 'jump', fo: 0.06, label: 'XOR gate 1', kind: 'generic'});
   const x1 = xorSym(gx, 190, 110, {w: 60, h: 60});
   const g2 = KT.comp(L, 'xor2', {}, 'XOR gate 2'); g2._info = {title: 'XOR gate', lead: sc('lib.xor').blurb, facts: sc('lib.xor').facts}; g2._kid = {id: 'lib.xor'};
@@ -55,7 +56,10 @@ bnode('lib.fa', {draw: (L, ap) => {
   for (let i = 0; i < 8; i++) { const a = i >> 2 & 1, b = i >> 1 & 1, c = i & 1, s0 = a ^ b ^ c, cy = (a + b + c) >= 2 ? 1 : 0; KTT(tb, tx, ty + 24 + i * 22, `${a} ${b}  ${c}  |  ${s0}     ${cy}`, 't-mono'); }
   tb._box = {x: tx - 8, y: ty - 20, w: 220, h: 210};
   ap.zs['lib.xor'] = {r: {x: 160, y: 60, w: 110, h: 100}, g: gx, tr: 'jump'};
-}, def: () => ({id: 'lib.xor'}), kids: () => [{id: 'lib.xor'}]});
+  ipart(L, ap, 'tr', -150, 560, 300, 50, CC.logic, 'in transistors: the mirror adder', {node: 'lib.fa.tr', kid: {id: 'lib.fa.tr'}, center: true, ty: 32, tcls: 't-smb'});
+  KTT(L, -150, 646, `as built: ${N.tf_fac.t} full-adder cells per lane in the tree (162 mirror type,`, 't-sm', 'start', 'tfma.asbuilt.cells tfma.fa.tg');
+  KTT(L, -150, 670, '86 transmission-gate type); where synthesis split one, two XNORs and a majority gate', 't-sm', 'start', 'tfma.asbuilt.cells tfma.fa.tg');
+}, def: () => ({id: 'lib.fa.tr'}), kids: () => [{id: 'lib.fa.tr'}, {id: 'lib.xor'}, {id: 'lib.cmos', k: 'maj'}]});
 /* the XOR in transistors: a static CMOS gate (the complementary networks and two inverters, 12 in all) */
 bnode('lib.xor', {draw: (L, ap) => {
   KT.frame(L, {title: 'An XOR gate, in transistors', sub: `out = A ⊕ B: static CMOS, ${on('xor_tr')} as gates of this kind are built (here 12)`, subf: onf('xor_tr'), col: CC.logic, tags: [['generic', 'textbook']]});
@@ -217,7 +221,7 @@ const prand = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; retu
 bnode('lib.finfet', {pv: () => IVIEW(), draw: (L, ap) => {
   const lay = ihead(L, {title: 'FinFET transistors from above, at N7’s pitches', sub: `gates ${on('n7_cpp')} apart, fins ${on('n7_fp')} apart, a dense cell ${on('n7_cell')} tall (TSMC N7)`, subf: `${onf('n7_cpp')} ${onf('n7_fp')} ${onf('n7_cell')}`,
     tags: [['documented', 'pitches: outside source'], ['generic', 'the pattern']], sw: 1});
-  const p = lay.pic, ng = PH ? 6 : 7, k = Math.min(p.w / (57 * (ng - 0.4)), (p.hd - 90) / 250), fp = 30 * k, gp = 57 * k, lg = 16.5 * k, fw = 6 * k;
+  const p = lay.pic, ng = PH ? 6 : 7, k = Math.min((p.w - (PH ? 0 : 72)) / (57 * (ng - 0.4)), (p.hd - 90) / 250), fp = 30 * k, gp = 57 * k, lg = 16.5 * k, fw = 6 * k;
   const x0 = p.x + gp * 0.3, y0 = p.y + 20, ch = 240 * k;   // one 240 nm cell: 8 fin pitches
   // the cell's rows of fins: the p-type pair on top, the n-type pair below (2 fins per transistor)
   const rows = [1.5, 2.5, 5.5, 6.5], W = gp * (ng - 0.6);

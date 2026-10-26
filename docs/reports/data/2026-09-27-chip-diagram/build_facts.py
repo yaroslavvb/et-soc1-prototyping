@@ -61,6 +61,18 @@ share as about 28 cycles and adds rl_e_hand, a byte handed to the next shire (wr
 flow H's panel lists the 546-cycle TensorFMA and the benchmark's reload; norm() keeps a fact's caveat; and the line
 numbers the ADD facts cite follow the files they cite.
 
+TensorFMA32 (25 Oct 2026, Q124: the multiply-add as built and the twelfth flow, M, made first on a private copy of
+this page on 23 October from Esperanto's design files for the ET-SoC-1) is one more input, research/tensorfma32.json,
+applied last, on top of everything above: 46 facts (tfma.*, and the deep zoom's size.fma.*, size.lib.cmos), changes to
+8 others, 23 numbers the flow and the deep scenes print, 5 printed numbers of the deep zoom (onum) and a change to
+tree_tr, 6 new scales and changes to 9 (the multiply-add, its Booth multiplier, the tree as built, its levels and
+columns, the 4:2 compressor, the full adder in gates and in transistors, any static CMOS gate), flow M's panel (comp
+flowL), its ask, and the flow's data block, tfma (the worked example, each RTL signal's two values, the toggle maps).
+Every entry it changes carries the value it was made against (was): if the research underneath moves, the build stops
+instead of overwriting it. A printed number's text or value must occur in its fact's statement, as for N. The RTL
+modules and signals the edition names are all in core-et's open Erbium branch, which its sources cite beside the
+design files; it names none of the design files and none of the cell library's dimensions.
+
 Output, facts.json:
   facts  the facts the page uses, by id, with one page link field (`url`, a spacesheep URL, or null), the lab cards
          each one covers (`cards`: a2, a3, a1c1) and, for the CARDS entries, the text shown for them (`cards_txt`)
@@ -1050,17 +1062,56 @@ for i, f in list(facts.items()):
     if dz:
         g['dz'] = 1
     facts[i] = g
+# ---- TensorFMA32 (25 Oct 2026, the owner's ask: the multiply-add as built and its flow M, made first on a copy of this
+# page on 23 October): research/tensorfma32.json holds that edition's data in the form this build writes, as one layer
+# on top of everything above: new facts (the page's, and the deep zoom's with dz), the numbers flow M and the deep
+# scenes print, the scales it adds and the ones it changes, flow M's panel (comp flowL), its ask, and the flow's data
+# block (tfma: the worked example, the RTL signals' values and the toggle maps). Each entry it changes carries the value
+# it was made against ("was"): when the research files underneath change that entry, the build stops here rather than
+# overwrite the change; merge the edition again. A number's text, or its value, must occur in its fact's statement.
+TF = json.load(open(os.path.join(R, 'tensorfma32.json')))
+
+
+def tf_was(where, cur, was):
+    if cur != was:
+        raise SystemExit(f'research/tensorfma32.json: {where} has changed since the edition was made against it; merge again')
+
+
+for i, f in TF['facts'].items():
+    assert i not in facts, i
+    facts[i] = f
+for i, ch in TF['facts_changed'].items():
+    tf_was(f'fact {i}', facts.get(i), ch['was'])
+    facts[i] = ch['now']
+for k, x in TF['num'].items():
+    assert k not in num, k
+    s = ' | '.join(facts[i]['statement'] for i in x['f'].split()).translate(DASH)   # (f may name several facts)
+    if x['t'].translate(DASH).lstrip('~') not in s and f"{x['v']:,}" not in s and x.get('src_t', '\0') not in s:
+        raise SystemExit(f'{k}: neither "{x["t"]}" nor {x["v"]:,} in {x["f"]}: {s}')
+    num[k] = x
+for blk in ('onum', 'scales'):
+    for k, x in TF[blk].items():
+        assert k not in DZ[blk], (blk, k)
+        DZ[blk][k] = x
+    for k, ch in TF[blk + '_changed'].items():
+        tf_was(f'{blk} {k}', DZ[blk].get(k), ch['was'])
+        DZ[blk][k] = ch['now']
+for k, x in TF['comp'].items():
+    assert k not in COMP, k
+    COMP[k] = x
+ASKS.extend(TF['asks'])
 kinds = {}
 for f in facts.values():
     kinds[f['kind']] = kinds.get(f['kind'], 0) + 1
 out = {
     'meta': {'built_from': ['research/facts-arch.json', 'research/facts-layout.json', 'research/facts-numbers.json',
                             'research/facts-v2.json', 'research/layout.json', 'research/asks.json',
-                            '../../sources/limits-of-observability.data.json (the hub rows the asks link to)'],
+                            '../../sources/limits-of-observability.data.json (the hub rows the asks link to)',
+                            'research/tensorfma32.json (the multiply-add as built and flow M, 25 Oct 2026)'],
              'n_facts': len(facts), 'kinds': kinds, 'n_num': len(num), 'et_platform_head': '836a4ab'},
     'facts': facts, 'num': num, 'comp': COMP, 'layout': layout, 'asks': ASKS, 'rungs': RUNGS,
     'scales': DZ['scales'], 'geo': DZ['geo'], 'img': DZ['img'], 'mlnum': DZ['ml_num'], 'mladdr': DZ['ml_addr'], 'onum': DZ['onum'], 'outside': DZ['outside_meta'],
-    'ring': DZ['ring'],
+    'ring': DZ['ring'], 'tfma': TF['tfma'],
 }
 # the deep zoom's facts (the circuits', the levels', the device's and the particles', and the memory levels' that the
 # copied drawings cite) are fetched by the page at idle after its first paint, from the folder beside it (DESIGN §2.4,
