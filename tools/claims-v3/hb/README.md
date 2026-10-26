@@ -73,9 +73,9 @@ alternate`, so the rung order is counterbalanced against the session's own warmi
 
 ## Block D — a second launch temperature (gap 4), only if time allows
 
-`lq_h0`, `lq_h2`, `lq_h8` and `bit_22` launched at a 65 °C reading after 66 °C instead of 58/59, two passes. The
-switching drift with temperature is quoted at +0.3–0.5 %/°C with the cause unknown; this measures it on one card at
-one clock over a 7 °C step.
+`lq_h0`, `lq_h2`, `lq_h8` and `bit_22` launched hotter than blocks A and B's 58 °C. The switching drift with
+temperature is quoted at +0.3–0.5 %/°C with the cause unknown; this measures it on one card at one clock.
+**Amended before the block ran — see A7.**
 
 ## Protocol, shared
 
@@ -129,8 +129,9 @@ one clock over a 7 °C step.
   of the randn slope.
 - **C4 (linearity).** Residual rms of the seven rungs about the fitted line ≤ 0.4 W, or ≤ 3% of the span; otherwise
   the ladder is reported as bent, with its curvature.
-- **D1.** The switching difference `lq_h8` − `lq_h0` grows by +0.3 to +0.5 %/°C between the 58 °C and the 65 °C
-  launch, i.e. +2 to +4% over the step.
+- **D1.** The switching difference `lq_h8` − `lq_h0` grows by +0.3 to +0.5 %/°C with the launch reading. It is
+  fitted on every run's **own recorded launch reading** across both regimes (A7), not on two nominal setpoints,
+  and reported as %/°C with its SE and CI. The registered band is +0.3 to +0.5 %/°C.
 
 ## Decision rules
 
@@ -142,6 +143,19 @@ reported as not run, never re-registered.
 `max_wait_s` / `die_c`, which are not `run_hm.py`'s keys (`enter_below_c` / `max_gap_s`), so the gate would have
 parsed as absent. Corrected, and `make_ladder.py` regenerated both files. Nothing measured changes: the gate is
 called only *between* blocks and each of these sessions has exactly one block, so it never fires either way.
+
+**A7, Mon 26 Oct 2026, 16:5x PDT (before any block-D data; blocks A and B were running, block C had not started).**
+Block D's registered launch pair, 65 °C after 66 °C, is **not reachable on this card**: E60's own heat probe put
+aifoundry3's plateau at 64 °C under the 2 s heater bursts, and every one of blocks A and B's approaches today
+reached only 60–61 °C before falling back to the 58 °C launch (`build/e65-ab.log`, "hot 60.0"/"hot 61.0" on every
+run). Registered as written, block D would have skipped every run and stopped the pass at exit 7 without
+measuring anything. **Changed:** block D runs with **no approach at all** (`HL_PREHEAT=0 HL_TARGET=200`), so its
+runs follow one another at the duty cycle's own plateau instead of waiting down to 58 °C, and it runs **8 passes**
+instead of 2 (a pass is about a minute without the approach). Each run still records its own launch reading
+(`start_c`), and D1 is scored by fitting the switching difference against those readings over both regimes
+(blocks A and B at 58 °C, block D at whatever it reaches), which is a better-posed estimate than two nominal
+setpoints would have been. The temperature contrast is therefore whatever the card gives, and the result states
+it; if it is under 2 °C the block is reported as having too little leverage to score D1.
 
 ## Files
 

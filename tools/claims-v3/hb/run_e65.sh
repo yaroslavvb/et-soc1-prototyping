@@ -52,10 +52,10 @@ ab)
   ;;
 d)
   p=${2:?first pass}; n=${3:?passes}
-  export HL_GEN=$GEN HL_TARGET=65 HL_PREHEAT=66
+  export HL_GEN=$GEN HL_TARGET=${HL_TARGET:-200} HL_PREHEAT=${HL_PREHEAT:-0}   # A7: no approach, the plateau
   setsid nohup bash tools/claims-v3/hl/queue_hl.sh "$p" "$n" "$ITEMS_D" \
     > "$ROOT/build/e65-d.log" 2>&1 < /dev/null &
-  echo "d queue started: passes $p..$((p + n - 1)) at 65 C, log $ROOT/build/e65-d.log"
+  echo "d queue started: passes $p..$((p + n - 1)) with no approach (A7), log $ROOT/build/e65-d.log"
   ;;
 c)
   PY=$PY setsid nohup bash tools/claims-v3/hb/ladder_sessions.sh \
