@@ -1,0 +1,577 @@
+{
+ "what": "Frozen predictions of the joined load model (tools/ettelem/load_model.py) for four loads it has never seen. Written and pushed before the measurements were read; scored afterwards by tools/ettelem/score_load_predictions.py into scores.json.",
+ "request": "Q126",
+ "written_utc": "2026-10-26",
+ "repo_head_at_freeze": "69334e8ade3fc88ed6a6d6aacf0c3a7f161d6b03",
+ "model": {
+  "form": "P_board = idle(T, card) + k_clk*(s(f)-1) + c0*s(f) + p_sm*(active/1024)*s(f) + flips*prices*s(f)*k_T*k_card + catalogue rows",
+  "s_of_f_V": "(f/600) * (V/0.517)^2",
+  "fitted_static": {
+   "idle58_w": 24.456201851967165,
+   "c0_w": -1.18,
+   "k_clk_w": 8.398319099264425,
+   "rms_w": 0.41860966817728495,
+   "resid_w": {
+    "600": 0.324821939967304,
+    "700": -0.5910356448731804,
+    "800": 0.2662137049058799
+   },
+   "e62_intercept_w": 5.3538333333333314,
+   "e62_slope_mw_per_hart": 46.275390625
+  },
+  "leakage_refit_51_67C": {
+   "P_fix_w": 16.689307065134937,
+   "A_at_80C_w": 20.95169100101219,
+   "e_fold_c": 27.0,
+   "bins": 14,
+   "band_c": [
+    54,
+    67
+   ],
+   "rms_w": 0.026324360385759075,
+   "source": "E44 idle.json, aifoundry3's own idle cycles"
+  },
+  "flip_prices_fJ": {
+   "ffclk": 3.178587073836598,
+   "mult": 0.02503948904511476,
+   "rest": 0.8008083235978227,
+   "bus": 15.539003141447854
+  },
+  "p_sm_w": 1.8545908797737398,
+  "card_scales": {
+   "aifoundry2": 1.0,
+   "aifoundry3": 0.963,
+   "aifoundry1-c0": 1.0,
+   "aifoundry1-c1": 1.0
+  },
+  "temp_coeff_per_c": 0.004,
+  "sources": {
+   "e_fJ, P_fix, A_leak, T_L, p_sm": "2026-09-21-horace-aifoundry2/model.json (E17 fit, 14 fp32 patterns)",
+   "B(f) floor by clock": "2026-10-23-e64-horace-power-limit/figures.json fit.B (E64, 103 points)",
+   "s(f) referral": "E64 figures.json fit.s; same form as tools/claims-v3/hpl/surface_hpl.py:31",
+   "c0 per-kernel offset": "fitted here on E64's B and E62's de-leaked 0-hart intercept",
+   "leakage shape": "2026-09-25-claims-v3/results/idle.json (E44) aifoundry3 residual bins 55-84 C",
+   "bus bit, all-in": "2026-10-20-bitflip-ladder (E60) reduce.txt lq/lb per bus",
+   "read-port bit": "E60/E61: 20.83 fJ, used when --pin-bus is given",
+   "hart line": "2026-10-21-e62-heat-movies/posthoc/cal_ladder.json rungs 1-6",
+   "memory levels, relay, rings": "2026-09-23-energy-manual/reruns.json",
+   "instructions": "2026-09-23-energy-manual/catalogue.json combined",
+   "governor tau, pass": "E64 figures.json governor",
+   "heat path": "E64 figures.json thermal (T = a_c + k_c_per_w * P)",
+   "card scale": "E38 (05-claims.md): aifoundry3 switches 0.958-0.969 of aifoundry2"
+  },
+  "not_fitted_on": [
+   "E37 mmb",
+   "E39 ablb",
+   "E43 rl",
+   "E59 sparse parity"
+  ]
+ },
+ "predictions": {
+  "E59_sparse_parity": {
+   "rule": "int8 TensorIMA8A32 at a duty of (280.35 ideal cycles an op) / (the measured cycles an op), on the +-1 operand coefficient below, plus hart 1's row generation priced as 4096 B an op through the shire's own scratchpad.",
+   "int8_pm1_coefficient": {
+    "c_w": 5.351571772039243,
+    "phi": 0.4626786718313618,
+    "transport_share": 0.4440611305591395,
+    "datapath_share": 0.5559388694408605,
+    "c_zeros_w": 2.123,
+    "c_ones_w": 2.684,
+    "c_randn_w": 9.101,
+    "bracket_w": [
+     2.684,
+     9.101
+    ]
+   },
+   "assumptions": [
+    "the +-1 coefficient rule (transport 0.875, datapath 1/7.5 of random int8)",
+    "4096 B of scratchpad traffic per tensor op (16 rows x 64 B written, 3 feature vectors x 64 B read)",
+    "the tensor unit's own operand fetch is already inside the measured int8 coefficient",
+    "no term for the 1,606-cycle epilogue or the host link"
+   ],
+   "rows": [
+    {
+     "size": "L1 (512,4,0.3,448)",
+     "card": "aifoundry3",
+     "f_mhz": 600.0,
+     "die_c": 53.3,
+     "tensor_ops_per_s": 600249960.7440001,
+     "cycles_per_op": 1023.5735779781829,
+     "tensor_duty": 0.2738933536695645,
+     "scratchpad_bytes_per_s": 2458623839207.4243,
+     "predicted_over_idle_w": 9.804366811158616,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.8429592005916378,
+      "tensor": 1.4106917353553183,
+      "scratchpad": 7.550715875211659
+     },
+     "predicted_j_per_solve_over_idle": 1.3391931282401026,
+     "work_unit": "solve",
+     "solves_per_s": 7.3211
+    },
+    {
+     "size": "L2 (512,4,0.4,1850)",
+     "card": "aifoundry3",
+     "f_mhz": 600.0,
+     "die_c": 53.2,
+     "tensor_ops_per_s": 793500470.5680001,
+     "cycles_per_op": 774.2906561355948,
+     "tensor_duty": 0.36207333483681453,
+     "scratchpad_bytes_per_s": 3250177927446.5283,
+     "predicted_over_idle_w": 12.68873227526675,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.8429592005916378,
+      "tensor": 1.864103783636162,
+      "scratchpad": 9.98166929103895
+     },
+     "predicted_j_per_solve_over_idle": 5.431587806714931,
+     "work_unit": "solve",
+     "solves_per_s": 2.3361
+    },
+    {
+     "size": "(256,5,0.4,1925) first half",
+     "card": "aifoundry3",
+     "f_mhz": 600.0,
+     "die_c": 53.6,
+     "tensor_ops_per_s": 692395346.6374999,
+     "cycles_per_op": 887.35431713071,
+     "tensor_duty": 0.3159391852698944,
+     "scratchpad_bytes_per_s": 2836051339827.1997,
+     "predicted_over_idle_w": 11.182037751616209,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.8429592005916378,
+      "tensor": 1.6292395211338746,
+      "scratchpad": 8.709839029890697
+     },
+     "predicted_j_per_solve_over_idle": 10.57803211769578,
+     "work_unit": "solve",
+     "solves_per_s": 1.0571
+    },
+    {
+     "size": "(256,5,0.4,1925) second half",
+     "card": "aifoundry3",
+     "f_mhz": 600.0,
+     "die_c": 53.3,
+     "tensor_ops_per_s": 371933858.5116,
+     "cycles_per_op": 1651.9066117257992,
+     "tensor_duty": 0.16971298377885266,
+     "scratchpad_bytes_per_s": 1523441084463.5137,
+     "predicted_over_idle_w": 6.395730759563722,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.8429592005916378,
+      "tensor": 0.8741092121868549,
+      "scratchpad": 4.678662346785229
+     },
+     "predicted_j_per_solve_over_idle": 9.888266480463392,
+     "work_unit": "solve",
+     "solves_per_s": 0.6468
+    }
+   ]
+  },
+  "E43_relay": {
+   "rule": "the energy manual's measured pJ per byte for the level the stage's output comes back from, plus one 8-lane fp32 vector add per element on constant operands (22.9 pJ an instruction / 32 B).",
+   "caveat": "the weakest of the four as a held-out test: the level prices and the relay were measured in the same campaign (reruns.json), and energy manual S7.2 already prices the relay by hand. What is new here is that the arithmetic is mechanical and per-card.",
+   "rows": [
+    {
+     "route": "DRAM, read back next stage",
+     "level": "dram",
+     "card": "aifoundry2",
+     "predicted_pj_per_byte": 112.2646234245041,
+     "level_pj_per_byte": 111.5494447995041,
+     "vector_add_pj_per_byte": 0.715178625,
+     "measured_gb_s_used_for_watts": 48.4,
+     "predicted_w_over_idle": 6.1222434037074605
+    },
+    {
+     "route": "the next shire's scratchpad",
+     "level": "scp-remote",
+     "card": "aifoundry2",
+     "predicted_pj_per_byte": 8.795419643000196,
+     "level_pj_per_byte": 8.080241018000196,
+     "vector_add_pj_per_byte": 0.715178625,
+     "measured_gb_s_used_for_watts": 592.9,
+     "predicted_w_over_idle": 5.903439936296278
+    },
+    {
+     "route": "this shire's own scratchpad",
+     "level": "scp-local",
+     "card": "aifoundry2",
+     "predicted_pj_per_byte": 3.8342485845191567,
+     "level_pj_per_byte": 3.1190699595191567,
+     "vector_add_pj_per_byte": 0.715178625,
+     "measured_gb_s_used_for_watts": 1483.7,
+     "predicted_w_over_idle": 6.3775102548125355
+    },
+    {
+     "route": "DRAM, read back next stage",
+     "level": "dram",
+     "card": "aifoundry3",
+     "predicted_pj_per_byte": 106.33016854795115,
+     "level_pj_per_byte": 105.61498992295115,
+     "vector_add_pj_per_byte": 0.715178625,
+     "measured_gb_s_used_for_watts": 48.4,
+     "predicted_w_over_idle": 5.989339358312473
+    },
+    {
+     "route": "the next shire's scratchpad",
+     "level": "scp-remote",
+     "card": "aifoundry3",
+     "predicted_pj_per_byte": 8.377103373907122,
+     "level_pj_per_byte": 7.661924748907123,
+     "vector_add_pj_per_byte": 0.715178625,
+     "measured_gb_s_used_for_watts": 592.9,
+     "predicted_w_over_idle": 5.80974379098117
+    },
+    {
+     "route": "this shire's own scratchpad",
+     "level": "scp-local",
+     "card": "aifoundry3",
+     "predicted_pj_per_byte": 3.786293349750147,
+     "level_pj_per_byte": 3.071114724750147,
+     "vector_add_pj_per_byte": 0.715178625,
+     "measured_gb_s_used_for_watts": 1483.7,
+     "predicted_w_over_idle": 6.460682643615931
+    },
+    {
+     "route": "DRAM, read back next stage",
+     "level": "dram",
+     "card": "aifoundry1-c1",
+     "predicted_pj_per_byte": 127.32838146878245,
+     "level_pj_per_byte": 126.61320284378246,
+     "vector_add_pj_per_byte": 0.715178625,
+     "measured_gb_s_used_for_watts": 48.4,
+     "predicted_w_over_idle": 6.179290236884772
+    },
+    {
+     "route": "the next shire's scratchpad",
+     "level": "scp-remote",
+     "card": "aifoundry1-c1",
+     "predicted_pj_per_byte": 10.36942064093287,
+     "level_pj_per_byte": 9.65424201593287,
+     "vector_add_pj_per_byte": 0.715178625,
+     "measured_gb_s_used_for_watts": 592.9,
+     "predicted_w_over_idle": 6.1646260718048
+    },
+    {
+     "route": "this shire's own scratchpad",
+     "level": "scp-local",
+     "card": "aifoundry1-c1",
+     "predicted_pj_per_byte": 4.504043374062,
+     "level_pj_per_byte": 3.788864749062,
+     "vector_add_pj_per_byte": 0.715178625,
+     "measured_gb_s_used_for_watts": 1483.7,
+     "predicted_w_over_idle": 6.699245727891492
+    }
+   ],
+   "pooled": [
+    {
+     "route": "DRAM, read back next stage",
+     "predicted_pj_per_byte_pooled": 115.30772448041256
+    },
+    {
+     "route": "the next shire's scratchpad",
+     "predicted_pj_per_byte_pooled": 9.180647885946728
+    },
+    {
+     "route": "this shire's own scratchpad",
+     "predicted_pj_per_byte_pooled": 4.041528436110435
+    }
+   ]
+  },
+  "E39_gemv_sparsity_ladder": {
+   "rule": "the flip model on the 'pow2' toggle counts as the proxy for the host's default small-integer operands, scaled linearly by the useful-slot fraction (the zero gate as a hard gate), with a bracket from 'ternary' and 'uniform'.",
+   "assumptions": [
+    "the bench has no toggle count for the small-integer pattern, so a proxy is frozen here",
+    "a zero operand slot costs exactly nothing"
+   ],
+   "rows": [
+    {
+     "card": "aifoundry2",
+     "config": "fma-dense",
+     "useful_slot_fraction": 1.0,
+     "die_c": 80.5,
+     "predicted_over_idle_w": 16.277986303883665,
+     "bracket_w": [
+      7.548411407337915,
+      24.3267889619854
+     ]
+    },
+    {
+     "card": "aifoundry2",
+     "config": "fma-50",
+     "useful_slot_fraction": 0.503,
+     "die_c": 80.5,
+     "predicted_over_idle_w": 8.530079018944331,
+     "bracket_w": [
+      4.139102845981818,
+      12.578626755969502
+     ]
+    },
+    {
+     "card": "aifoundry2",
+     "config": "fma-rowmask",
+     "useful_slot_fraction": 0.5,
+     "die_c": 80.5,
+     "predicted_over_idle_w": 8.483310966922565,
+     "bracket_w": [
+      4.118523518649689,
+      12.50771229597343
+     ]
+    },
+    {
+     "card": "aifoundry2",
+     "config": "fma-col50",
+     "useful_slot_fraction": 0.438,
+     "die_c": 80.5,
+     "predicted_over_idle_w": 7.5167712251393874,
+     "bracket_w": [
+      3.693217420452349,
+      11.042146789387946
+     ]
+    },
+    {
+     "card": "aifoundry2",
+     "config": "fma-875",
+     "useful_slot_fraction": 0.105,
+     "die_c": 80.5,
+     "predicted_over_idle_w": 2.325517450723294,
+     "bracket_w": [
+      1.4089120865859899,
+      3.1706417298239753
+     ]
+    },
+    {
+     "card": "aifoundry2",
+     "config": "fma-zero",
+     "useful_slot_fraction": 0.0,
+     "die_c": 80.5,
+     "predicted_over_idle_w": 0.6886356299614624,
+     "bracket_w": [
+      0.6886356299614624,
+      0.6886356299614624
+     ]
+    },
+    {
+     "card": "aifoundry3",
+     "config": "fma-dense",
+     "useful_slot_fraction": 1.0,
+     "die_c": 58.0,
+     "predicted_over_idle_w": 14.733853467123678,
+     "bracket_w": [
+      6.955363880476861,
+      21.905740804477645
+     ]
+    },
+    {
+     "card": "aifoundry3",
+     "config": "fma-50",
+     "useful_slot_fraction": 0.503,
+     "die_c": 58.0,
+     "predicted_over_idle_w": 7.830079016657255,
+     "bracket_w": [
+      3.917498754573905,
+      11.437538347346301
+     ]
+    },
+    {
+     "card": "aifoundry3",
+     "config": "fma-rowmask",
+     "useful_slot_fraction": 0.5,
+     "die_c": 58.0,
+     "predicted_over_idle_w": 7.788406333857658,
+     "bracket_w": [
+      3.8991615405342497,
+      11.374350002534642
+     ]
+    },
+    {
+     "card": "aifoundry3",
+     "config": "fma-col50",
+     "useful_slot_fraction": 0.438,
+     "die_c": 58.0,
+     "predicted_over_idle_w": 6.927170889332672,
+     "bracket_w": [
+      3.5201924503813657,
+      10.068457543093709
+     ]
+    },
+    {
+     "card": "aifoundry3",
+     "config": "fma-875",
+     "useful_slot_fraction": 0.105,
+     "die_c": 58.0,
+     "predicted_over_idle_w": 2.301503098577502,
+     "bracket_w": [
+      1.4847616919795863,
+      3.054551268999669
+     ]
+    },
+    {
+     "card": "aifoundry3",
+     "config": "fma-zero",
+     "useful_slot_fraction": 0.0,
+     "die_c": 58.0,
+     "predicted_over_idle_w": 0.8429592005916378,
+     "bracket_w": [
+      0.8429592005916378,
+      0.8429592005916378
+     ]
+    },
+    {
+     "card": "aifoundry1-c1",
+     "config": "fma-dense",
+     "useful_slot_fraction": 1.0,
+     "die_c": 80.3,
+     "predicted_over_idle_w": 14.441443545107413,
+     "bracket_w": [
+      6.3639562500195055,
+      21.889011379964103
+     ]
+    },
+    {
+     "card": "aifoundry1-c1",
+     "config": "fma-50",
+     "useful_slot_fraction": 0.503,
+     "die_c": 80.3,
+     "predicted_over_idle_w": 7.272294600365493,
+     "bracket_w": [
+      3.2093184909362753,
+      11.018421221298407
+     ]
+    },
+    {
+     "card": "aifoundry1-c1",
+     "config": "fma-rowmask",
+     "useful_slot_fraction": 0.5,
+     "die_c": 80.3,
+     "predicted_over_idle_w": 7.229020059451558,
+     "bracket_w": [
+      3.190276411907604,
+      10.952803976879903
+     ]
+    },
+    {
+     "card": "aifoundry1-c1",
+     "config": "fma-col50",
+     "useful_slot_fraction": 0.438,
+     "die_c": 80.3,
+     "predicted_over_idle_w": 6.334679547230231,
+     "bracket_w": [
+      2.7967401119817286,
+      9.596714258897462
+     ]
+    },
+    {
+     "card": "aifoundry1-c1",
+     "config": "fma-875",
+     "useful_slot_fraction": 0.105,
+     "die_c": 80.3,
+     "predicted_over_idle_w": 1.5312055057834322,
+     "bracket_w": [
+      0.6830693397992018,
+      2.313200128443385
+     ]
+    },
+    {
+     "card": "aifoundry1-c1",
+     "config": "fma-zero",
+     "useful_slot_fraction": 0.0,
+     "die_c": 80.3,
+     "predicted_over_idle_w": 0.016596573795702563,
+     "bracket_w": [
+      0.016596573795702563,
+      0.016596573795702563
+     ]
+    }
+   ],
+   "lines": [
+    {
+     "card": "aifoundry2",
+     "predicted_slope_w": 15.589350673922203,
+     "predicted_intercept_w": 0.6886356299614628,
+     "predicted_dense_w": 16.277986303883665,
+     "predicted_zero_w": 0.6886356299614624
+    },
+    {
+     "card": "aifoundry3",
+     "predicted_slope_w": 13.890894266532042,
+     "predicted_intercept_w": 0.8429592005916374,
+     "predicted_dense_w": 14.733853467123678,
+     "predicted_zero_w": 0.8429592005916378
+    },
+    {
+     "card": "aifoundry1-c1",
+     "predicted_slope_w": 14.424846971311709,
+     "predicted_intercept_w": 0.016596573795703524,
+     "predicted_dense_w": 14.441443545107413,
+     "predicted_zero_w": 0.016596573795702563
+    }
+   ]
+  },
+  "E37_mmbench_fp32_from_DRAM": {
+   "rule": "random fp32 tiles at a duty of 546 / 15267 cycles an op, plus 2048 B an op from DRAM at the catalogue's per-card price.",
+   "assumptions": [
+    "2048 B an op (the A and B tiles) reach DRAM and nothing is caught by the 32 MB L3; the bracket halves and doubles that"
+   ],
+   "rows": [
+    {
+     "card": "aifoundry2",
+     "die_c": 76.94,
+     "tensor_duty": 0.035764114052152726,
+     "dram_bytes_per_s": 82420641002.96724,
+     "dram_pj_per_byte": 111.5494447995041,
+     "predicted_over_idle_w": 10.775085057687711,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.6886356299614624,
+      "tensor": 0.8924726838260114,
+      "dram": 9.193976743900238
+     },
+     "predicted_pj_per_byte_whole_load": 130.73284709469556,
+     "bracket_w_bytes_1024_to_3072": [
+      6.178096685737593,
+      15.372073429637831
+     ],
+     "predicted_tflops": 0.32968256401186896
+    },
+    {
+     "card": "aifoundry3",
+     "die_c": 58.85,
+     "tensor_duty": 0.035764114052152726,
+     "dram_bytes_per_s": 82420641002.96724,
+     "dram_pj_per_byte": 105.61498992295115,
+     "predicted_over_idle_w": 10.357581931307763,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.8429592005916378,
+      "tensor": 0.8097675617445667,
+      "dram": 8.704855168971559
+     },
+     "predicted_pj_per_byte_whole_load": 125.66733048017521,
+     "bracket_w_bytes_1024_to_3072": [
+      6.005154346821984,
+      14.710009515793542
+     ],
+     "predicted_tflops": 0.32968256401186896
+    },
+    {
+     "card": "aifoundry1-c1",
+     "die_c": 70.95,
+     "tensor_duty": 0.035764114052152726,
+     "dram_bytes_per_s": 82420641002.96724,
+     "dram_pj_per_byte": 126.61320284378246,
+     "predicted_over_idle_w": 11.258480660296707,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.016596573795702563,
+      "tensor": 0.8063427486777395,
+      "dram": 10.435541337823265
+     },
+     "predicted_pj_per_byte_whole_load": 136.59782941862088,
+     "bracket_w_bytes_1024_to_3072": [
+      6.040709991385074,
+      16.47625132920834
+     ],
+     "predicted_tflops": 0.32968256401186896
+    }
+   ]
+  }
+ }
+}
