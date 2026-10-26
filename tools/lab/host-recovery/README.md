@@ -11,7 +11,7 @@ isn't needed."* Backups, notes and an undo script are in `/root/host-recovery-20
 | `et-boot-check.service`, `.timer` | `/etc/systemd/system/` | 0644 root | timer enabled, all three | runs it 3 minutes after each boot |
 | (written per host) | `/etc/default/et-boot-check` | 0644 root | | the cards it expects: aifoundry1 `0000:01:00.0 0000:02:00.0`, aifoundry2 and aifoundry3 `0000:02:00.0` |
 | `lab-panic.conf` | `/etc/sysctl.d/60-lab-panic-reboot.conf` | 0644 root | yes, all three | `kernel.panic = 10`: a kernel panic reboots after 10 s instead of freezing (it was 0) |
-| `p3-eth-nat`, `p3-eth-nat.service` | `/usr/local/sbin/p3-eth-nat`, `/etc/systemd/system/p3-eth-nat.service` | 0755 / 0644 root | **no** (below) | the camera phone's NAT out through the lab cable, saved so it survives a reboot |
+| `p3-eth-nat`, `p3-eth-nat.service` | `/usr/local/sbin/p3-eth-nat`, `/etc/systemd/system/p3-eth-nat.service` | 0755 / 0644 root | aifoundry1 and aifoundry2, since 16:17 (below) | the camera phone's NAT out through the lab cable, saved so it survives a reboot |
 
 ## et-boot-check
 
@@ -78,12 +78,18 @@ aifoundry3) routes the TCO timeout to its own SMI handler and locks that (`TCO1_
 comes. A hung host still needs a power cycle from outside: per-machine switched outlets are the fix, on the lab's
 hardware list.
 
-## The camera phone's NAT: installed, not enabled
+## The camera phone's NAT: on aifoundry1 and aifoundry2
 
-The phone (10.45.0.55) takes its DHCP lease on the cable from aifoundry1 or aifoundry2 (`p3-eth-dhcp.service`).
-thermal-android's `tools/setup_aifoundry_lan_ssh.sh` added the NAT that lets it out through a box's Wi-Fi live on
-16 October and never saved it, so the power cut dropped it. On 26 October the phone's own Wi-Fi passed its internet
-check (it failed on 18 October, which is why the cable carried the stream), so the stream goes out over the phone's
-Wi-Fi and does not depend on any box. Through the cable it would depend on aifoundry2, its current gateway, the box
-meant for firmware work. So the unit is installed and left off. To route the phone through a box again:
-`sudo systemctl enable --now p3-eth-nat` on aifoundry1 and aifoundry2 (`p3-eth-nat status` shows the rules).
+The phone (10.45.0.55) takes its DHCP lease on the cable from aifoundry1 or aifoundry2 (`p3-eth-dhcp.service`), and
+the box that answers names itself the router. thermal-android's `tools/setup_aifoundry_lan_ssh.sh` added the NAT that
+lets it out through that box's Wi-Fi live on 16 October and never saved it, so the power cut dropped it. The unit here
+puts it back at every boot: `-s 10.45.0.0/24 -o wlp8s0 -j MASQUERADE` and the two `FORWARD` accepts for `enp7s0`.
+
+It was installed off at first, since the phone's own Wi-Fi passed its internet check again on 26 October, and enabled
+on aifoundry1 and aifoundry2 at 16:17 at the repo owner's word (*"turn it on"*). At 16:2x the phone read
+`ALL_HEALTHY_DUAL_LAN`: internet over the cable through aifoundry1 (10.45.0.1, 14.8 ms), its Wi-Fi validated as the
+standby. A second keeper of the same rules arrived the same afternoon from the camera's side: `p3-phone-helper.timer`
+(every 2 minutes) and `/usr/local/sbin/p3-eth-nat.sh`, which `p3-eth-dhcp.service` now runs before it starts; that
+script masquerades to every interface but `enp7s0`. Either keeps the route alone. `p3-eth-nat status` shows the rules;
+`sudo systemctl disable --now p3-eth-nat` stops this unit and removes its rules (the camera helper re-adds its own
+within 2 minutes).
