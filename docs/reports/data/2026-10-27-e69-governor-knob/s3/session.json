@@ -1,0 +1,128 @@
+{
+ "experiment": "E69",
+ "governor_grid": [
+  [
+   65,
+   62
+  ],
+  [
+   65,
+   65
+  ]
+ ],
+ "governor_bounds": {
+  "tdp_w": [
+   30,
+   65
+  ],
+  "threshold_c": [
+   60,
+   70
+  ]
+ },
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793137027663,
+ "protocol": {
+  "experiment": "E69",
+  "request": "Q129",
+  "card": "aifoundry2",
+  "order_seed": 269,
+  "tools": {
+   "heater": "build/sparsity_t2/host/sparsity_host",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 72,
+   "high_stop_c": 80,
+   "board_cap_w": 85,
+   "cap_consecutive": 3
+  },
+  "caps": {
+   "max_card_min": 20
+  },
+  "blocks": [
+   {
+    "name": "SUS",
+    "title": "A4: the lowered-threshold cell, the only registered sustained cell left - `ones` only, because every sustained `randn` cell breaches the 85 W board abort at the card's own default settings",
+    "passes": 1,
+    "shuffle": true,
+    "start": {
+     "mode": "cool",
+     "max_c": 57,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 8,
+     "budget": 9.5,
+     "processes": 9
+    },
+    "tail_s": 6,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "ones",
+      "label": "tdp65-thr62-ones",
+      "governor": {
+       "tdp_w": 65,
+       "threshold_c": 62
+      }
+     }
+    ]
+   },
+   {
+    "name": "BACK",
+    "title": "the return check: the card's own settings restored, one 6 s randn burst, normal stepping and the default TDP in the governor's log",
+    "passes": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 57,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 6,
+     "budget": 7.5,
+     "processes": 1
+    },
+    "tail_s": 4,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "randn",
+      "label": "back-randn",
+      "governor": {
+       "tdp_w": 65,
+       "threshold_c": 65
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "SUS-00-tdp65-thr62-ones-r1",
+  "BACK-00-back-randn-r1"
+ ],
+ "sha256": {
+  "heater": "7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "f833ff0deda0024f6efad2e71ed0bbef2c754a9016707d00486de91e41d282af"
+ },
+ "argv": [
+  "tools/claims-v3/knob/run_knob.py",
+  "--protocol",
+  "tools/claims-v3/knob/protocol_s3.json",
+  "--out",
+  "<rundir>/s3",
+  "--max-card-min",
+  "18"
+ ],
+ "git_head": "4f3da00bebdc8425cf2a958bad3a53984505df3b",
+ "git_dirty_tools": ""
+}

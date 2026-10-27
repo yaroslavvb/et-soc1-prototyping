@@ -263,16 +263,13 @@ management query failing — not on another burst of the known one.
 identities unchanged, module uptime 23 h 19 m (so **no SP reset**), idle die mean 54 °C at 24 W and 600 MHz,
 no AER, no link error, no new kind of error event.
 
-**Why, and why it is a result rather than a mishap.** The cell's prediction was that raising the threshold to
-70 °C would leave `randn` at 600 MHz, held there by the 65 W cap, because 700 MHz draws about 6 W more than
-the cap. What the card did instead is the interesting part: with the heat clamp lifted, the governor let the
-clock climb, and `randn`'s **instantaneous** board power overshot to 85.2 W — because the power trigger
-compares a ~1.3 s average, and the archive's own analysis says there is no hardware fast throttle. So the
-thermal clamp had been doing the work of holding this pattern's board power down, and the power cap alone
-does not bound the peak. That is exactly the band the archive flagged (a service-processor hang seen with card
-power pinned just above the firmware's 75 W catastrophic threshold), which is why the abort is set where it
-is and why the cell is **not retried**: the prediction is recorded as refuted, the measurement stands, and the
-cell is closed.
+**Why. ⚠️ The first reading of this, written at 14:34 PDT, was wrong and is corrected in A4 below.** It said
+the abort showed that lifting the heat clamp let `randn`'s peak power overshoot. Session `s2` then aborted the
+same way on the **control** cell, with nothing moved, which refutes that reading. What stands: the cell's
+prediction (600 MHz, held by the 65 W cap) is **not tested**, because the run stopped before its sustained
+window; the instantaneous overshoot above the cap is real and is consistent with an average-based trigger and
+no hardware fast throttle, but it is a property of sustained `randn` on this card, not of the knob. The abort
+bound is **not raised** to get the cell — field manual rule 11 — so the cell is closed unmeasured.
 
 **What follows.** `s2` runs the three sustained cells the abort left and the `BACK` return check, under
 `protocol_s2.json`, pre-registered by this amendment and committed before its first launch. Every one of them
@@ -282,3 +279,25 @@ cell is closed.
 unchanged from `predictions.json`; nothing is re-derived. `S-tdp65-thr70-fp32-randn` is reported as
 **ABORTED**, and K5's first half, which depended on it, is reported as **not established** rather than scored
 either way.
+
+
+### A4 — the two sustained `randn` aborts are the pattern's own peak power, not the knob (27 Oct 2026,
+14:36 PDT)
+
+Session `s2`'s second run, `SUS-00-tdp65-thr65-fp32-randn-r1`, aborted at **board 85.8 W > 85 W on 3
+samples** — the **control** cell, governor at the card's own 65 W and 65 °C, nothing moved. So A3's reading of
+the first abort is withdrawn: sustained `randn` on this card reaches 85 W of instantaneous board power at its
+own default settings, and E69's 85 W bound — chosen below E64's 97 W — stops every sustained `randn` cell,
+moved or not. E64 ran the same cell on 23 Oct under its wider bound and it completed at 600 MHz. **Neither
+sustained `randn` cell is measured, and E69 concludes nothing about the threshold's effect on `randn`.** The
+bound is not raised; `randn` is not retried.
+
+Also measured in `s2` before the abort, and reported as a miss: **`S-tdp50-thr65-fp32-ones` read 770.2 MHz
+against 700.0 predicted**, outside its 675–725 band, with a sustained board power of 49.73 W — *under* the
+50 W cap. The cap never bound. The prediction assumed `ones` would be trying for 800 MHz in the sustained
+regime, where it would draw about 56 W; in fact the heat clamp already holds it near 765 MHz, where it draws
+under 50 W. The sustained ladder's one-ratio scaling over-stated `ones`' power by about 6 W, which is the
+model error this cell exposes. A cap below about 48 W would bind, and is a cell for another experiment.
+
+`protocol_s3.json` then runs the last registered sustained cell, `tdp65-thr62-ones` (the threshold lowered;
+`ones` peaks near 52 W, far below the bound) and the `BACK` return check.

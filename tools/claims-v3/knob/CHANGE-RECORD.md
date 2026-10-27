@@ -258,9 +258,21 @@ The machine-readable record is `gov.jsonl` in the session directory: one line pe
 (with `asked`, `before`, `after`, and each command's argv, rc and ISO timestamp) and `restore`. The table
 below is filled from it after the session.
 
-| # | Local time (PDT) | Event | Asked | Read back | rc |
-|---|---|---|---|---|---|
-| — | — | *filled from `gov.jsonl` after the session* | — | — | — |
+Summary of `s1/gov.jsonl` (29 events), with `s2` and `s3` the same shape:
+
+| Item | Value |
+|---|---|
+| Originals read under the lock, before any set | 2026-10-27 **14:24:04.235 PDT** — TDP **65 W**, software threshold **65 °C**, power state `low_power`, 600 MHz, 519 mV |
+| Set events | 27; of these **23 sent a command** (4 were already at the target, so nothing was sent) |
+| First set | 14:24:04.311 — asked TDP 35 W / 65 °C, read back **35 / 65** |
+| Last set | 14:31:50.353 — asked TDP 65 W / 70 °C, read back **65 / 70** |
+| Distinct settings used across `s1`–`s3` | (35, 65), (45, 65), (50, 65), (55, 65), (65, 62), (65, 65), (65, 70) W / °C |
+| Command exit statuses | **every one rc 0** |
+| **Read-back mismatches** | **0** — each set was followed by `ettelem config` and compared; the runner also compares every run's end query against that run's own target |
+| Restore | `s1` 14:32:11.929 — **TDP 65 W, threshold 65 °C, `ok: true`, equal to the originals**; `s2` and `s3` the same |
+
+Each line of `gov.jsonl` carries the full argv, the rc, the raw tool output tail and a millisecond ISO
+timestamp for every command, plus the configuration read before and after. Nothing is summarised away.
 
 ## Activation and acceptance
 
@@ -287,8 +299,16 @@ either way.
 
 - **Retained firmware / module / PMIC / bank state:** unchanged (release 1.4.0, BL1/BL2 0.22.0, PMIC 1.5.0,
   minions 0.25.1; driver `et-soc1` srcversion `47D26A305A0428B29FB7FC4`).
-- **Governor fields at handoff:** *filled after the session from `end.json` `governor_restore`; the target is
-  TDP 65 W and threshold 65 °C, equal to the originals.*
+- **Governor fields at handoff: TDP 65 W, software threshold 65 °C — equal to the originals, read back three
+  times.** Each of the three sessions' `finally` sent both originals and read them back `ok: true`
+  (`s1` 14:32:11.929, `s2` 14:35:06, `s3` 14:38:43 PDT); an independent `ettelem config` after the last run
+  read `{"tdp_w": 65, "temp_threshold_c": 65, "power_state_name": "low_power", "minion_mhz": 600,
+  "minion_mv": 519}`. The module's uptime read **23 h 19 m** after the first abort and the host has been up
+  22 h 41 m since 26 Oct, so **the service processor never reset**: the restored values are a real write, not
+  a reboot's defaults. The `BACK` return check then ran one 6 s `randn` burst at the restored settings and the
+  card stepped normally (706.3 MHz mean, 10 power-down and 12 power-up events, peak 84.4 W, die 58 → 65 °C —
+  the same behaviour as the TDP-65 control cells), with `tdp level: 65000` back in the governor's log. `s3`
+  exited 0.
 - **Guest / excluded memory / packet / core state:** none existed and none was created.
 - **Card lock and claim:** the lock is released only after the restore has been read back; the Discord claim
   in `#community-lab` is released after the data README is pushed.
@@ -301,4 +321,16 @@ either way.
   fleet. Prohibited next actions without fresh authorization: raising the TDP level above the card's default,
   setting it to 0 or near a pattern's 600 MHz draw, lowering the threshold below a pattern's 600 MHz die,
   touching active power management, and every reset, PMIC, flash and OTA operation.
-- **Signoff:** *filled at the end of the session with the UTC/local timestamp and the restore read-back.*
+- **Error events across the whole operation (amendment A2):** the host kernel log's
+  `Error Event Detected` count went from **6** before the first set to **234** after the last run, every one
+  of them the same `Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond
+  Threshold: N` with N simply counting up. The count tracks telemetry volume, not the knob: the sessions
+  sampled at 10 Hz for about 20 card-minutes. No event of any other description, no AER, no link error, no
+  all-ones read. A2's abort condition was never met.
+- **Three runs did not happen and are closed, not deferred:** the two sustained `randn` cells (aborted on the
+  85 W board bound, which the pattern breaches at the card's own defaults — amendment A4) and the `SMOKE`
+  block's analysis (never intended to be analysed).
+- **Signoff:** 2026-10-27 **21:42 UTC / 14:42 PDT** (Tue, ISO week 44). Operator: the AI Foundry agent
+  `a2-e69-knob`. Independent reviewer: **none** — stated as a limitation of this record, not as a pass. The
+  governor is at its defaults, the card is healthy, the firmware is untouched, and no flash, PMIC, reset,
+  driver or PCIe action was performed at any point.
