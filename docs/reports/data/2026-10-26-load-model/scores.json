@@ -726,8 +726,164 @@
   "recount_path_first_expected": "docs/reports/data/2026-10-26-toggle-recount/counts.json",
   "recount_present": true,
   "recount_rungs": {
+   "settled": {
+    "how": "recount.json nets_settled, split by by_block_settled: one count per RTL NAME, after the settling window drops the transient values Verilator's coverage counter keeps",
+    "source": "docs/reports/data/2026-10-26-toggle-recount/recount.json",
+    "caveat": "the four-class split is load_model's, not job (b)'s: job (b) counts toggles and publishes no price classes.",
+    "fits": {
+     "0.0": {
+      "prices_fJ": {
+       "ffclk": 3.252796757910172,
+       "mult": 0.22475088178275587,
+       "rest": 0.7101938639199732,
+       "bus": 16.0302050009985
+      },
+      "in_sample_rms_w": 0.4879886746456215,
+      "leave_one_out_rms_w": 0.6975843120146785,
+      "kernel_offset_w": 0.0,
+      "base_w": 38.14459087977374,
+      "counts_used": "settled"
+     },
+     "-1.18": {
+      "prices_fJ": {
+       "ffclk": 3.7275122864155597,
+       "mult": 0.21360653762705728,
+       "rest": 0.6056996274183466,
+       "bus": 25.197501258558592
+      },
+      "in_sample_rms_w": 0.7145729821700365,
+      "leave_one_out_rms_w": 0.8700927963042053,
+      "kernel_offset_w": -1.18,
+      "base_w": 36.96459087977374,
+      "counts_used": "settled"
+     }
+    },
+    "price_ratio_recount_over_bench_at_c0_zero": {
+     "ffclk": 1.0351070481843003,
+     "mult": 7.131931535462089,
+     "rest": 0.9575432244220109,
+     "bus": 0.9964148839069922
+    }
+   },
    "hier": {
-    "how": "nets_hier and by_block_hier: once per net, merging a name with its ancestor scope's name",
+    "how": "per pattern, nets_hier as the total with the SHARES taken from by_block_settled -- job (b)'s corrected recipe, applied pattern by pattern",
+    "source": "docs/reports/data/2026-10-26-toggle-recount/recount.json",
+    "caveat": "the four-class split is load_model's, not job (b)'s: job (b) counts toggles and publishes no price classes.",
+    "fits": {
+     "0.0": {
+      "prices_fJ": {
+       "ffclk": 3.355816082075072,
+       "mult": 1.1792253730539164,
+       "rest": 3.885020136359778,
+       "bus": 17.96171533785849
+      },
+      "in_sample_rms_w": 0.8534090375552005,
+      "leave_one_out_rms_w": 1.3641277497611208,
+      "kernel_offset_w": 0.0,
+      "base_w": 38.14459087977374,
+      "counts_used": "hier"
+     },
+     "-1.18": {
+      "prices_fJ": {
+       "ffclk": 3.817333708533693,
+       "mult": 1.132049361550185,
+       "rest": 3.3073508593423298,
+       "bus": 26.862267611937078
+      },
+      "in_sample_rms_w": 0.934066395877627,
+      "leave_one_out_rms_w": 1.3567014680542349,
+      "kernel_offset_w": -1.18,
+      "base_w": 36.96459087977374,
+      "counts_used": "hier"
+     }
+    },
+    "price_ratio_recount_over_bench_at_c0_zero": {
+     "ffclk": 1.0678899228852643,
+     "mult": 37.41989601459951,
+     "rest": 5.238111587984054,
+     "bus": 1.1164748362249832
+    }
+   },
+   "hier_one_factor": {
+    "how": "by_block_settled scaled by ONE factor for the whole unit, hier-factors.json _total (5.327 settled names per merged net on randn) -- job (b)'s corrected recipe read literally, 'scale the whole unit by one factor'",
+    "source": "docs/reports/data/2026-10-26-toggle-recount/recount.json",
+    "caveat": "the four-class split is load_model's, not job (b)'s: job (b) counts toggles and publishes no price classes.",
+    "fits": {
+     "0.0": {
+      "prices_fJ": {
+       "ffclk": 3.2527967579101698,
+       "mult": 1.1972730119664885,
+       "rest": 3.783281915474265,
+       "bus": 16.030205000998436
+      },
+      "in_sample_rms_w": 0.487988674645624,
+      "leave_one_out_rms_w": 0.6975843120146783,
+      "kernel_offset_w": 0.0,
+      "base_w": 38.14459087977374,
+      "counts_used": "hier_one_factor"
+     },
+     "-1.18": {
+      "prices_fJ": {
+       "ffclk": 3.7275122864155668,
+       "mult": 1.1379058478074642,
+       "rest": 3.226629464204326,
+       "bus": 25.19750125855874
+      },
+      "in_sample_rms_w": 0.7145729821700356,
+      "leave_one_out_rms_w": 0.8700927963042051,
+      "kernel_offset_w": -1.18,
+      "base_w": 36.96459087977374,
+      "counts_used": "hier_one_factor"
+     }
+    },
+    "price_ratio_recount_over_bench_at_c0_zero": {
+     "ffclk": 1.0351070481842997,
+     "mult": 37.99259465800515,
+     "rest": 5.100939543810141,
+     "bus": 0.9964148839069882
+    }
+   },
+   "distinct": {
+    "how": "per pattern, nets_distinct as the total, shares from by_block_settled: once per distinct waveform, job (b)'s LOWER BOUND on the physical count",
+    "source": "docs/reports/data/2026-10-26-toggle-recount/recount.json",
+    "caveat": "the four-class split is load_model's, not job (b)'s: job (b) counts toggles and publishes no price classes.",
+    "fits": {
+     "0.0": {
+      "prices_fJ": {
+       "ffclk": 4.008020255272573,
+       "mult": 1.7187454100223467,
+       "rest": 2.281305766689091,
+       "bus": 31.618156624803195
+      },
+      "in_sample_rms_w": 1.6359072757971072,
+      "leave_one_out_rms_w": 2.450302914703262,
+      "kernel_offset_w": 0.0,
+      "base_w": 38.14459087977374,
+      "counts_used": "distinct"
+     },
+     "-1.18": {
+      "prices_fJ": {
+       "ffclk": 4.3966486575771935,
+       "mult": 1.697357716086578,
+       "rest": 1.7231762001363866,
+       "bus": 39.23560495799823
+      },
+      "in_sample_rms_w": 1.5518756922553547,
+      "leave_one_out_rms_w": 2.3199258208957274,
+      "kernel_offset_w": -1.18,
+      "base_w": 36.96459087977374,
+      "counts_used": "distinct"
+     }
+    },
+    "price_ratio_recount_over_bench_at_c0_zero": {
+     "ffclk": 1.2754347487002287,
+     "mult": 54.54027363068433,
+     "rest": 3.075848709352057,
+     "bus": 1.9653399230199475
+    }
+   },
+   "hier_by_block": {
+    "how": "by_block_hier straight. KEPT ONLY FOR THE RECORD: this is what the first pass read, and hier-factors.json now says a net is credited to the OUTERMOST module that names it, so by_block_hier is not a per-block net count. It is what made the multiplier price come out negative",
     "source": "docs/reports/data/2026-10-26-toggle-recount/recount.json",
     "caveat": "the four-class split is load_model's, not job (b)'s: job (b) counts toggles and publishes no price classes.",
     "fits": {
@@ -742,7 +898,7 @@
       "leave_one_out_rms_w": 1.3471800677645365,
       "kernel_offset_w": 0.0,
       "base_w": 38.14459087977374,
-      "counts_used": "hier"
+      "counts_used": "hier_by_block"
      },
      "-1.18": {
       "prices_fJ": {
@@ -755,7 +911,7 @@
       "leave_one_out_rms_w": 1.3125805543776907,
       "kernel_offset_w": -1.18,
       "base_w": 36.96459087977374,
-      "counts_used": "hier"
+      "counts_used": "hier_by_block"
      }
     },
     "price_ratio_recount_over_bench_at_c0_zero": {
@@ -766,46 +922,11 @@
     }
    },
    "settled_over_hf": {
-    "how": "by_block_settled divided by hier-factors.json's per-module factor, summed for the total",
-    "source": "docs/reports/data/2026-10-26-toggle-recount/recount.json",
-    "caveat": "the four-class split is load_model's, not job (b)'s: job (b) counts toggles and publishes no price classes.",
-    "fits": {
-     "0.0": {
-      "prices_fJ": {
-       "ffclk": 3.239355590751635,
-       "mult": 0.27488291413509813,
-       "rest": 2.3544069306466735,
-       "bus": 14.1612454942668
-      },
-      "in_sample_rms_w": 0.5024254973084116,
-      "leave_one_out_rms_w": 0.7070153105283562,
-      "kernel_offset_w": 0.0,
-      "base_w": 38.14459087977374,
-      "counts_used": "settled_over_hf"
-     },
-     "-1.18": {
-      "prices_fJ": {
-       "ffclk": 3.718209348990579,
-       "mult": 0.28857125195872646,
-       "rest": 1.9965316034227227,
-       "bus": 23.699560938510015
-      },
-      "in_sample_rms_w": 0.7311963649644841,
-      "leave_one_out_rms_w": 0.892977446046653,
-      "kernel_offset_w": -1.18,
-      "base_w": 36.96459087977374,
-      "counts_used": "settled_over_hf"
-     }
-    },
-    "price_ratio_recount_over_bench_at_c0_zero": {
-     "ffclk": 1.030829791442762,
-     "mult": 8.72275164541864,
-     "rest": 3.174409859766098,
-     "bus": 0.8802430027731615
-    }
+    "unreadable": "rung 'settled_over_hf' is retired. hier-factors.json's own _how_to_use now says: 'Do NOT divide by_block_settled by the per-module factors below' -- 12 of the 40 switching modules hold no merged net at all and carry a null factor, and 7 more are attribution artefacts. Use 'hier_one_factor', which is the recipe that file gives instead."
    }
   },
-  "verdict": "Job (b)'s deduplicated counts fit the 14 measured board powers WORSE than the bench's own counts, on the same base. Leave-one-out at c0 = 0: bench 0.458 W, settled/hier-factors 0.707 W, per-net (hier) 1.347 W -- and on the per-net reading the multiplier-tree price comes out NEGATIVE (-1.769 fJ), which is unphysical. A refit does not just rescale when the per-pattern shape changes: removing the hierarchy's duplicates removes them unevenly across the patterns, and the four classes no longer separate. Job (b)'s count is the right count of wires; it is not, as read here, a better regressor for board power. What the recount does settle is that the ABSOLUTE fJ figures quoted from the 21 Sep fit are prices per counted NAME, not per net, and should be quoted that way."
+  "second_pass_in_full": "docs/reports/data/2026-10-26-load-model/refit_on_recount.json, written by tools/ettelem/refit_on_recount.py: every rung, the capacitance each price implies, E60's ladder re-scored under each, and a re-run of what the first pass published here.",
+  "verdict": "Job (b)'s deduplicated counts fit the 14 measured board powers WORSE than the bench's own counts, on the same base: leave-one-out at c0 = 0 is bench 0.458 W against 0.698 W on the recount, read job (b)'s corrected way (shares from by_block_settled, the whole unit scaled by one factor). A refit does not just rescale when the per-pattern shape changes. But the first pass's headline -- a NEGATIVE multiplier price (-1.769 fJ) -- was an artefact of reading by_block_hier as a per-block count; on the corrected split the multiplier prices at 1.197 fJ a net. What the recount settles is that the ABSOLUTE fJ figures quoted from the 21 Sep fit are prices per counted NAME, not per net: per merged net the same fit reads about 2.37 fJ, an effective 17.7 fF, and on Q126(e)'s open-netlist count of 3,299 physical nets a multiply-add, 0.95 fJ or 7.1 fF."
  },
  "freeze_reproduction": {
   "numbers_compared": 234,

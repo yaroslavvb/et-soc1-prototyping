@@ -516,7 +516,14 @@ def refit_pass(path=None):
 
     Job (b) landed on main as dc3a5820 and b2e180b9 and shipped recount.json, not the counts.json this hook
     first expected, and it publishes no four-class split of its own. load_model.recount_reading() builds one
-    at two rungs of job (b)'s ladder; both are scored here, and the split is named as this file's."""
+    at each rung of job (b)'s ladder, and the split is named as this file's.
+
+    🛑 The rungs here are the CORRECTED ones (job (b)'s d1059a8e). The first pass read by_block_hier as a
+    per-block net count, which it is not -- a net is credited to the outermost module that names it -- and
+    that is where its negative multiplier price came from. 'hier_by_block' reproduces that reading so the
+    difference stays on the record; 'settled_over_hf' is retired, because hier-factors.json now says in so
+    many words not to divide by those factors. The pass in full, with E60's ladder re-scored under every
+    rung, is docs/reports/data/2026-10-26-load-model/refit_on_recount.json."""
     out = {"bench_counts": {str(c0): LM.refit_prices(MEAS14, IDLE21, kernel_offset=c0)
                             for c0 in (0.0, LM.STATIC["c0_w"])},
            "recount_path_first_expected": os.path.relpath(os.path.join(LM.RECOUNT_DIR, "counts.json"),
@@ -529,7 +536,7 @@ def refit_pass(path=None):
                               for c0 in (0.0, LM.STATIC["c0_w"])}
 
     rungs = {}
-    for rung in ("hier", "settled_over_hf"):
+    for rung in ("settled", "hier", "hier_one_factor", "distinct", "hier_by_block", "settled_over_hf"):
         r = LM.recount_reading(rung)
         if r is None:
             continue
@@ -550,22 +557,27 @@ def refit_pass(path=None):
                             for k in bench0}}
     out["recount_present"] = bool(rungs)
     out["recount_rungs"] = rungs
+    out["second_pass_in_full"] = ("docs/reports/data/2026-10-26-load-model/refit_on_recount.json, written "
+                                  "by tools/ettelem/refit_on_recount.py: every rung, the capacitance each "
+                                  "price implies, E60's ladder re-scored under each, and a re-run of what "
+                                  "the first pass published here.")
     if rungs:
-        h = rungs.get("hier", {}).get("fits", {}).get("0.0", {})
-        s = rungs.get("settled_over_hf", {}).get("fits", {}).get("0.0", {})
+        hf1 = rungs.get("hier_one_factor", {}).get("fits", {}).get("0.0", {})
+        hbb = rungs.get("hier_by_block", {}).get("fits", {}).get("0.0", {})
         b0 = out["bench_counts"]["0.0"]
         out["verdict"] = (
             "Job (b)'s deduplicated counts fit the 14 measured board powers WORSE than the bench's own "
-            f"counts, on the same base. Leave-one-out at c0 = 0: bench {b0['leave_one_out_rms_w']:.3f} W, "
-            f"settled/hier-factors {s.get('leave_one_out_rms_w', float('nan')):.3f} W, per-net (hier) "
-            f"{h.get('leave_one_out_rms_w', float('nan')):.3f} W -- and on the per-net reading the "
-            f"multiplier-tree price comes out NEGATIVE "
-            f"({h.get('prices_fJ', {}).get('mult', float('nan')):.3f} fJ), which is unphysical. A refit does "
-            "not just rescale when the per-pattern shape changes: removing the hierarchy's duplicates "
-            "removes them unevenly across the patterns, and the four classes no longer separate. Job (b)'s "
-            "count is the right count of wires; it is not, as read here, a better regressor for board power. "
-            "What the recount does settle is that the ABSOLUTE fJ figures quoted from the 21 Sep fit are "
-            "prices per counted NAME, not per net, and should be quoted that way.")
+            f"counts, on the same base: leave-one-out at c0 = 0 is bench {b0['leave_one_out_rms_w']:.3f} W "
+            f"against {hf1.get('leave_one_out_rms_w', float('nan')):.3f} W on the recount, read job (b)'s "
+            "corrected way (shares from by_block_settled, the whole unit scaled by one factor). A refit "
+            "does not just rescale when the per-pattern shape changes. But the first pass's headline -- a "
+            "NEGATIVE multiplier price "
+            f"({hbb.get('prices_fJ', {}).get('mult', float('nan')):.3f} fJ) -- was an artefact of reading "
+            "by_block_hier as a per-block count; on the corrected split the multiplier prices at "
+            f"{hf1.get('prices_fJ', {}).get('mult', float('nan')):.3f} fJ a net. What the recount settles "
+            "is that the ABSOLUTE fJ figures quoted from the 21 Sep fit are prices per counted NAME, not "
+            "per net: per merged net the same fit reads about 2.37 fJ, an effective 17.7 fF, and on "
+            "Q126(e)'s open-netlist count of 3,299 physical nets a multiply-add, 0.95 fJ or 7.1 fF.")
     else:
         out["recount_note"] = ("job (b)'s recount is not on main yet; rerun this script once it is, and "
                                "report the refit as a separate pass.")

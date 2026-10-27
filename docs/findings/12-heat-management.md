@@ -130,6 +130,17 @@ three outside the measurement's own interval; a DRAM-streamed matmul 23–27% hi
 and a sparse-parity solve 13–39% **low**, because the model still has no term for a hart that is awake and not
 issuing tensor work.
 
+**Quote the per-flip prices as prices per counted RTL name, not per wire.** Refitting the same four prices on
+job (b)'s deduplicated toggle recount (Q126, [`refit_on_recount.json`](../reports/data/2026-10-26-load-model/refit_on_recount.json))
+leaves the watts alone and moves only the divisor: one *merged net* on random fp32 data costs **2.37 fJ**, an
+effective 17.7 fF at 0.517 V, against 0.140 fJ for one counted name — and the classes do not scale together
+(the multiplier price rises 38× on a count that falls 25×). Whichever way the wires are counted, the fit puts
+5.4–5.8 pJ on one random fp32 multiply-add. The deduplicated counts fit the 14 measured board powers *worse*
+(leave-one-out 0.458 → 0.698 W), and the merged count is a floor on the physical one: on Q126(e)'s open
+netlist, 3,299 unique physical nets a multiply-add, the same energy reads **0.95 fJ ≈ 7.1 fF** a wire. Even
+that is an upper bound — the board-power fit carries 3.7–3.8× the energy the netlist's own power analysis puts
+on the unit.
+
 ## Levers, in order of effect
 
 1. **Gate the multiply-adds.** A zero operand word costs nothing at all: 1.9 W for a full-rate matmul against

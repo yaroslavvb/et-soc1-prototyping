@@ -399,10 +399,9 @@ def recount_counts(path=None):
     recount.json, 14 patterns x {nets, nets_settled, nets_ids, nets_hier, nets_distinct, ff_clocked, bus,
     by_block_* for each}, plus hier-factors.json. It publishes no four-class split of its own, so
     recount_reading() builds one the same way flips_from_toggles does, and the caller must say which rung of
-    job (b)'s ladder it read. Two are defensible and both are scored:
-      'hier'            nets_hier / by_block_hier -- job (b)'s "figure to quote", once per net
-      'settled_over_hf' by_block_settled divided by hier-factors.json, which is the recipe that file's own
-                        _note gives for a pattern whose stream is too regular to separate nets
+    job (b)'s ladder it read; the rungs are RUNG_HOW, and RUNG_RETIRED says why 'settled_over_hf' is gone.
+    The second pass itself, every rung scored and E60's ladder re-scored under each, is
+    docs/reports/data/2026-10-26-load-model/refit_on_recount.json (tools/ettelem/refit_on_recount.py).
     """
     p = path or os.path.join(RECOUNT_DIR, "counts.json")
     if not os.path.exists(p):
@@ -413,41 +412,97 @@ def recount_counts(path=None):
     return {"unreadable": f"{p} has neither 'per_pattern' nor 'scale'; see load_model.recount_counts"}
 
 
-def recount_reading(rung="hier", directory=None):
+RUNG_HOW = {
+ "settled": "recount.json nets_settled, split by by_block_settled: one count per RTL NAME, after the "
+            "settling window drops the transient values Verilator's coverage counter keeps",
+ "ids": "recount.json nets_ids: once per VCD identifier, names that share a waveform object merged",
+ "hier": "per pattern, nets_hier as the total with the SHARES taken from by_block_settled -- job (b)'s "
+         "corrected recipe, applied pattern by pattern",
+ "hier_one_factor": "by_block_settled scaled by ONE factor for the whole unit, hier-factors.json _total "
+                    "(5.327 settled names per merged net on randn) -- job (b)'s corrected recipe read "
+                    "literally, 'scale the whole unit by one factor'",
+ "distinct": "per pattern, nets_distinct as the total, shares from by_block_settled: once per distinct "
+             "waveform, job (b)'s LOWER BOUND on the physical count",
+ "distinct_one_factor": "by_block_settled scaled by ONE factor, randn's nets_settled / nets_distinct",
+ "hier_by_block": "by_block_hier straight. KEPT ONLY FOR THE RECORD: this is what the first pass read, "
+                  "and hier-factors.json now says a net is credited to the OUTERMOST module that names "
+                  "it, so by_block_hier is not a per-block net count. It is what made the multiplier "
+                  "price come out negative",
+}
+RUNG_RETIRED = {
+ "settled_over_hf": "retired. hier-factors.json's own _how_to_use now says: 'Do NOT divide "
+                    "by_block_settled by the per-module factors below' -- 12 of the 40 switching modules "
+                    "hold no merged net at all and carry a null factor, and 7 more are attribution "
+                    "artefacts. Use 'hier_one_factor', which is the recipe that file gives instead.",
+}
+
+
+def recount_reading(rung="hier_one_factor", directory=None):
     """Job (b)'s recount.json read into the four classes, at one rung of its ladder. None if it is not here.
 
     Returns {"per_pattern": {...}, "rung": ..., "how": ...} so refit_prices() can take it directly. The split
-    is this file's, not job (b)'s: job (b) measured counts, it did not price them."""
+    is this file's, not job (b)'s: job (b) measured counts, it did not price them.
+
+    🛑 THE SHARES COME FROM by_block_settled, ALWAYS. Job (b)'s d1059a8e measured what by_block_hier is: a
+    net is credited to the OUTERMOST module that names it, so the multiplier's share reads 54.8% of
+    by_block_settled but 22.8% of by_block_hier on randn and 0.0% on pow2 and signs. A least-squares fit over
+    patterns whose multiplier column collapses to zero for an attribution reason has nothing left to fit,
+    which is where the first pass's negative multiplier price (-1.769 fJ) came from. The rung chooses the
+    TOTAL only; 'hier_by_block' reproduces the old reading and is kept to show the difference."""
     d = directory or RECOUNT_DIR
     rc_p = os.path.join(d, "recount.json")
     if not os.path.exists(rc_p):
         return None
+    if rung in RUNG_RETIRED:
+        return {"unreadable": f"rung {rung!r} is {RUNG_RETIRED[rung]}"}
+    if rung not in RUNG_HOW:
+        return {"unreadable": f"unknown rung {rung!r}; use one of {', '.join(RUNG_HOW)}"}
     rc = json.load(open(rc_p))
-    hf = {}
     hf_p = os.path.join(d, "hier-factors.json")
+    hf_total = None
     if os.path.exists(hf_p):
-        hf = json.load(open(hf_p)).get("by_module", {})
-    if rung == "settled_over_hf" and not hf:
-        return {"unreadable": f"{hf_p} is missing, so the settled_over_hf rung cannot be built"}
+        hf_total = json.load(open(hf_p)).get("_total")
+    if rung == "hier_one_factor" and not hf_total:
+        return {"unreadable": f"{hf_p} has no _total, so the hier_one_factor rung cannot be built"}
+    d2d = None
+    if rung == "distinct_one_factor":
+        rm = (rc.get("randn") or {}).get("mean") or {}
+        if not rm.get("nets_distinct"):
+            return {"unreadable": "recount.json has no randn.mean.nets_distinct for the single factor"}
+        d2d = rm["nets_settled"] / rm["nets_distinct"]
     out = {}
     for pat, v in rc.items():
         m = v.get("mean") or {}
-        if rung == "hier":
+        if rung == "hier_by_block":
             bb, tot = m.get("by_block_hier"), m.get("nets_hier")
-        elif rung == "settled_over_hf":
-            raw = m.get("by_block_settled") or {}
-            bb = {k: (x / hf[k] if k in hf else x) for k, x in raw.items()}
-            tot = sum(bb.values())
+            if bb is None or tot is None:
+                return {"unreadable": f"recount.json[{pat!r}].mean has no by_block_hier/nets_hier"}
+            mult = sum(x for k, x in bb.items() if any(b in k for b in MULT_BLOCKS))
         else:
-            return {"unreadable": f"unknown rung {rung!r}; use 'hier' or 'settled_over_hf'"}
-        if bb is None or tot is None:
-            return {"unreadable": f"recount.json[{pat!r}].mean has no {rung} fields"}
-        mult = sum(x for k, x in bb.items() if any(b in k for b in MULT_BLOCKS))
+            bbs = m.get("by_block_settled")
+            if bbs is None:
+                return {"unreadable": f"recount.json[{pat!r}].mean has no by_block_settled"}
+            names = sum(bbs.values())
+            share = (sum(x for k, x in bbs.items() if any(b in k for b in MULT_BLOCKS)) / names
+                     if names else 0.0)
+            settled = m.get("nets_settled")
+            if rung == "settled":
+                tot = settled
+            elif rung == "ids":
+                tot = m.get("nets_ids")
+            elif rung == "hier":
+                tot = m.get("nets_hier")
+            elif rung == "distinct":
+                tot = m.get("nets_distinct")
+            elif rung == "hier_one_factor":
+                tot = None if settled is None else settled / hf_total
+            else:                                           # distinct_one_factor
+                tot = None if settled is None else settled / d2d
+            if tot is None:
+                return {"unreadable": f"recount.json[{pat!r}].mean has no total for rung {rung!r}"}
+            mult = share * tot
         out[pat] = {"ffclk": m["ff_clocked"], "mult": mult, "rest": tot - mult, "bus": m["bus"]}
-    how = ("nets_hier and by_block_hier: once per net, merging a name with its ancestor scope's name"
-           if rung == "hier" else
-           "by_block_settled divided by hier-factors.json's per-module factor, summed for the total")
-    return {"per_pattern": out, "rung": rung, "how": how,
+    return {"per_pattern": out, "rung": rung, "how": RUNG_HOW[rung],
             "source": os.path.relpath(rc_p, REPO),
             "caveat": "the four-class split is load_model's, not job (b)'s: job (b) counts toggles and "
                       "publishes no price classes."}

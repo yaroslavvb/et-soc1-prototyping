@@ -14,12 +14,15 @@ speed and the energy per unit of work. Until now four pieces did parts of this a
 The model is [`tools/ettelem/load_model.py`](../../../../tools/ettelem/load_model.py); its command line is
 [`tools/ettelem/predict_load.py`](../../../../tools/ettelem/predict_load.py).
 
-> **Revised the same day.** A check of the first version found ten things wrong with how this page read its own
-> numbers, and one bug in the shipped command line. Every correction is in place below and in
-> [`scores.json`](scores.json); the section
-> [What the first version of this page got wrong](#what-the-first-version-of-this-page-got-wrong) lists them
-> against the sentences they replace. No frozen prediction changed — the fixes are to the reading and to
-> `predict()`, which the freeze never calls (`scores.json` → `freeze_reproduction`).
+> **Revised twice the same day.** A check of the first version found ten things wrong with how this page read
+> its own numbers, and one bug in the shipped command line. Then job (b) corrected the recount this page's
+> second pass was built on (`d1059a8e`), and the second pass was re-run against the corrected files: two more
+> claims fell, including the negative multiplier price. Every correction is in place below, in
+> [`scores.json`](scores.json) and in [`refit_on_recount.json`](refit_on_recount.json); the section
+> [What the first version of this page got wrong](#what-the-first-version-of-this-page-got-wrong) lists all
+> thirteen against the sentences they replace. **No frozen prediction changed** — every fix is to the reading,
+> to `predict()`, which the freeze never calls, and to the second pass, which is reported separately by
+> construction (`scores.json` → `freeze_reproduction`).
 
 ## The form
 
@@ -217,27 +220,110 @@ patterns' own leave-one-out) and E38's 0.91–1.01 W across cards — still a FA
 cross-card test. What the new terms buy is everywhere else: other clocks, other cards, other die temperatures,
 and loads that are not an fp32 tile at all.
 
-## The second pass: job (b)'s toggle recount
+## The second pass: job (b)'s toggle recount, verified and corrected
 
-Job (b) landed on `main` while this was running (`dc3a5820`, `b2e180b9`) and shipped
+Job (b) landed on `main` while the first pass was running (`dc3a5820`, `b2e180b9`) and shipped
 [`recount.json`](../2026-10-26-toggle-recount/recount.json), not the `counts.json` this hook first expected, with
-no four-class split of its own. `load_model.recount_reading()` builds one at two rungs of job (b)'s ladder —
-per-net (`nets_hier` / `by_block_hier`, job (b)'s "figure to quote") and settled-over-hierarchy-factors (the
-recipe `hier-factors.json`'s own `_note` gives). **The split is this model's, not job (b)'s.** All at `c0 = 0`:
+no four-class split of its own, so `load_model.recount_reading()` builds one. **The split is this model's, not
+job (b)'s.** Then job (b) revised its own files (`d1059a8e`) — after this page had been written. The whole second
+pass was therefore re-run: [`refit_on_recount.json`](refit_on_recount.json), written by
+[`tools/ettelem/refit_on_recount.py`](../../../../tools/ettelem/refit_on_recount.py). Nothing in it touches the
+frozen predictions or their scores.
 
-| counts | ffclk | mult | rest | bus | in sample | leave one out |
-|---|---|---|---|---|---|---|
-| the bench's own (21 Sep) | 3.14 | 0.0315 | 0.742 | 16.09 fJ | 0.359 W | **0.458 W** |
-| settled ÷ hierarchy factors | 3.24 | 0.275 | 2.354 | 14.16 fJ | 0.502 W | 0.707 W |
-| per-net (`hier`) | 3.34 | **−1.769** | 3.716 | 16.72 fJ | 0.788 W | 1.347 W |
+**What survived the re-run.** Two of the three fits the first pass published reproduce **to the last float
+digit**. The third cannot be re-run at all: it divided `by_block_settled` by `hier-factors.json`'s per-module
+factors, and that file now lists all 40 switching modules with a **null** factor on the 12 that hold no merged
+net — and says in its own `_how_to_use`, *"Do NOT divide `by_block_settled` by the per-module factors below"*.
+So the 0.707 W leave-one-out this page used to report for that rung is withdrawn, not restated; the rung is
+retired in `load_model.RUNG_RETIRED` and returns a reason instead of a traceback.
 
-**Job (b)'s deduplicated counts fit the 14 measured board powers worse, not better**, and on the per-net reading
-the multiplier-tree price comes out **negative**, which is unphysical. A recount does not just rescale the
-prices: removing the hierarchy's duplicates removes them unevenly across the patterns, the per-pattern *shape*
-changes, and the four classes stop separating. Job (b)'s count is the right count of wires; as read here it is
-not a better regressor for board power. What the recount does settle is that **the absolute fJ figures from the
-21 Sep fit are prices per counted name, not per net**, and should be quoted that way — the count under each one
-is 16× too large, so the energy per actual net is 16× larger than the number reads.
+**What was wrong, and it was the headline.** The negative multiplier price was an artefact of the split, not a
+property of the counts. `by_block_hier` is not a per-block net count: a net is credited to the **outermost**
+module that names it, so the multiplier's share reads 54.8% of `by_block_settled` but 22.8% of `by_block_hier`
+on `randn` and **0.0%** on `pow2` and `signs`. A least-squares fit whose multiplier column collapses to zero for
+an attribution reason has nothing left to fit. Taking the shares from `by_block_settled` and letting the rung
+choose only the *total* — job (b)'s corrected recipe — the multiplier prices at **+1.20 fJ a net**. All at
+`c0 = 0`, prices in fJ:
+
+| counts, per multiply-add | ffclk | mult | rest | bus | in sample | leave one out | per counted wire |
+|---|---|---|---|---|---|---|---|
+| the bench's own, 21,331 names | 3.14 | 0.032 | 0.742 | 16.09 | 0.359 W | **0.458 W** | 0.140 fJ (1.0 fF) |
+| settled names, 7,083 | 3.25 | 0.225 | 0.710 | 16.03 | 0.488 W | 0.698 W | 0.444 fJ (3.3 fF) |
+| per VCD identifier, 3,968 | 3.25 | 0.378 | 1.296 | 16.04 | 0.592 W | 0.872 W | 0.793 fJ (5.9 fF) |
+| **per net, one factor (5.327), 1,330** | 3.25 | **1.197** | 3.783 | 16.03 | 0.488 W | **0.698 W** | **2.367 fJ (17.7 fF)** |
+| per net, pattern by pattern, 1,301 | 3.36 | 1.179 | 3.885 | 17.96 | 0.853 W | 1.364 W | 2.403 fJ (18.0 fF) |
+| per distinct waveform, one factor, 1,007 | 3.25 | 1.580 | 4.994 | 16.03 | 0.488 W | 0.698 W | 3.125 fJ (23.4 fF) |
+| per distinct waveform, pattern by pattern | 4.01 | 1.719 | 2.281 | 31.62 | 1.636 W | 2.450 W | 1.973 fJ (14.8 fF) |
+| *`by_block_hier` — what the first pass read* | 3.34 | *−1.769* | 3.716 | 16.72 | 0.788 W | 1.347 W | 2.465 fJ (18.4 fF) |
+
+Four things fall out of that table.
+
+**1. The deduplicated counts still fit worse, by half.** Leave-one-out goes 0.458 W → **0.698 W**, in sample
+0.359 → 0.488 W, on the best reading of the recount. That is a real cost and a smaller one than the first pass
+reported (it had 1.347 W): most of the gap it saw was the attribution artefact, not the recount.
+
+**2. The damage is the per-pattern merge factor, not the merge.** Scaling the whole unit by *one* factor
+(5.327 settled names a net) leaves the fit exactly where the settled counts put it — 0.698 W — because a
+constant rescale only moves the prices. Using each pattern's own `nets_hier` costs another 0.67 W, and the
+reason is in `merge_factor_per_pattern`: among the patterns that really switch, the factor runs **5.02 to 7.20**
+(`sparse75` 5.22, `signs` 6.15, `a_ones_b_randn` 7.20). The hierarchy merge is not pattern-neutral, and fitting
+through it imports that variation as noise. Quote 1,301 as a count; scale with one factor when pricing.
+
+**3. The energy per physical wire is 2.37 fJ, an effective 17.7 fF — and both halves of that are too big.**
+Taking `E = ½CV²` at the fit's 0.517 V (7.48 fF per fJ), the activity-weighted price of one *merged net* on
+`randn` is **2.37 fJ ≈ 17.7 fF**, against 0.140 fJ ≈ 1.0 fF for one bench-counted *name*. 17.7 fF is far above
+any plausible single wire in this technology, which is the quantitative form of job (b)'s warning that **1,301
+is a floor**. Both ends of the division are now measurable against something outside this fit, and both are
+loose in the same direction — Q126(e)'s open synthesised netlist of the same unit
+([`POWER.md`](../2026-10-26-open-netlist/POWER.md)) counts **3,299 unique physical nets** a multiply-add
+(3,623 keeping hierarchy), 2.5× the merged-RTL count, and prices the unit at **1.47–1.52 pJ** against the
+3.15 pJ this fit puts on nets alone and 5.62 pJ on all four classes:
+
+| divisor | wires per multiply-add | fJ per wire | effective fF |
+|---|---|---|---|
+| bench-counted names | 21,331 | 0.140 | 1.0 |
+| merged RTL nets (job (b)'s floor) | 1,330 | 2.367 | 17.7 |
+| open netlist, unique physical nets | 3,299 | **0.954** | **7.1** |
+| open netlist, hierarchy kept | 3,623 | 0.869 | 6.5 |
+
+So the honest reading is **about 7 fF a physical wire, with a factor of 2 either way**, and even that is an
+upper bound: the board-power fit carries **3.7–3.8×** the energy the netlist's own power analysis puts on the
+unit, which is the size of everything the board meter sees and the lane's nets are not. The one thing every
+rung agrees on is the total — the fit puts **5.42–5.76 pJ on one random fp32 multiply-add** at every one of the
+eight rungs, because the watts are measured and only the divisor moves.
+
+**4. "16× too large" is right for the whole unit and wrong class by class.** 21,331 counted names against
+1,330 merged nets is 16.0× overall, and the published fJ figures are indeed prices per counted *name*. But the
+refit does not scale by 16: the multiplier price goes up **38.0×** (0.032 → 1.197 fJ) on a count that fell
+24.8×, and `rest` goes up 5.10× on a count that fell 5.40×, while `ffclk` (1.04×) and `bus` (1.00×) barely
+move. The classes do not travel together, which is the arithmetic statement of "a refit is not a rescale".
+
+### Does the recount explain the systematic over-prediction?
+
+Mostly no. E60's frozen bit-flip ladder over-predicts: measured differences are **0.832 of predicted** on
+aifoundry3's 26 items with 25 of 26 residuals sharing a sign (recap, "it is biased, not noisy"). Each item's
+predicted watts are exactly linear in the four flip columns, so a new price vector re-scores the ladder exactly
+— except that E60's items are counted in the *bench's* currency, so each class is converted by
+κ = (rung count ÷ bench count) over the 14 patterns. Ratio of measured to predicted, and rms:
+
+| prices | aifoundry3, 26 items | aifoundry2, 9 | aifoundry1-c0, 8 |
+|---|---|---|---|
+| as published | 0.832 / 1.28 W | 0.632 / 1.59 W | 0.721 / 1.89 W |
+| refit, the bench's own counts | 0.848 / 1.17 W | 0.660 / 1.42 W | 0.755 / 1.72 W |
+| **refit on the recount, one factor** | **0.854 / 1.15 W** | 0.706 / 1.15 W | 0.817 / 1.49 W |
+| refit on the recount, pattern by pattern | 0.882 / 0.99 W | 0.722 / 1.06 W | 0.834 / 1.43 W |
+
+Every rung moves the ratio toward 1 on all three cards and lowers the rms, so the direction is consistent. The
+size is not established: on the 26-item set the shift is 0.832 → 0.854, and the κ band over the seven patterns
+whose multiplier really switches (κ_mult 0.0392–0.0494) moves the same number **0.933 to 0.746** — wider than
+the shift itself. **25 of 26 residuals keep their sign under every rung.** So the recount removes at most a
+sixth of the bias and leaves the one-sided shape untouched: the over-prediction is a missing or mis-split term,
+not a counting artefact. The two-kernel hart ladder at one clock (recap item 5) is still the experiment that
+would find it.
+
+*(One cell in that table looks like a result and is not: the per-pattern `distinct` rung reads 0.974 and 0.17 W
+on aifoundry2's nine items. Its own fit is the worst of the eight — 2.450 W leave-one-out — so that is a
+coincidence between two bad numbers, and it is in `refit_on_recount.json` so nobody has to rediscover it.)*
 
 ## The operand-statistics front end (recap item 2b)
 
@@ -272,7 +358,8 @@ actual bytes the card was given, so their side is exact.
 | File | What |
 |---|---|
 | `frozen_predictions.json` | the four loads' predictions, with the rule and the assumptions behind each. Pushed before any score |
-| `scores.json` | those predictions against the committed measurements, the 14-pattern fit at both bases, the E64 and E62 re-scores, the recount second pass, the freeze-reproduction check and `held_out_leaks` |
+| `scores.json` | those predictions against the committed measurements, the 14-pattern fit at both bases, the E64 and E62 re-scores, the recount second pass in summary, the freeze-reproduction check and `held_out_leaks` |
+| `refit_on_recount.json` | the second pass in full: every rung of job (b)'s ladder refitted, the capacitance each price implies, E60's ladder re-scored under each, and a re-run of what the first pass published. Written by `tools/ettelem/refit_on_recount.py`; it changes no frozen prediction and no score |
 | `fit.txt` | the fitted constants and their residuals, as `load_model.py` prints them |
 | `operand_stats.json` | the stretch: an operand-statistics front end, fitted without the RTL bench |
 
@@ -323,3 +410,15 @@ sentence said, and what replaced it:
 
 An eleventh, found while fixing these: "re-running the freeze reproduces all of them to the last float digit"
 is 15 numbers out, by at most 7.1e-15 W. Stated exactly above.
+
+A twelfth and a thirteenth, found when the second pass was re-run against job (b)'s corrected files
+(`d1059a8e`, which landed after both earlier versions of this page):
+
+| | the claim | why it was wrong | where it is now |
+|---|---|---|---|
+| 12 | "on the per-net reading the multiplier-tree price comes out **−1.769 fJ**, which is unphysical" | the price was an artefact of the split, not of the counts: `by_block_hier` credits a net to the outermost module that names it, so the multiplier column read 0.0% on two patterns. Shares from `by_block_settled` give **+1.20 fJ a net**, and the leave-one-out cost of the recount is 0.698 W, not 1.347 | [the second pass](#the-second-pass-job-bs-toggle-recount-verified-and-corrected) |
+| 13 | "settled ÷ hierarchy factors … 0.707 W" | that rung cannot be re-run: `hier-factors.json` now nulls the 12 modules that hold no merged net and says not to divide by those factors. The number is withdrawn; `recount_reading('settled_over_hf')` returns the reason instead of raising | `load_model.RUNG_RETIRED` |
+
+Both earlier fits that *can* be re-run — the bench counts at both bases, and the `by_block_hier` rung — reproduce
+to the last float digit under this commit, and the check is kept in
+[`refit_on_recount.json`](refit_on_recount.json) → `verification_of_the_first_pass`.

@@ -1,0 +1,2279 @@
+{
+ "what": "Q126(c) second pass: the four flip energies refitted on job (b)'s toggle recount, at every rung of its ladder, on the same 14 measured board powers and the same two bases as the first pass -- plus a verification of what the first pass published. NOTHING HERE TOUCHES THE FROZEN PREDICTIONS OR THEIR SCORES: a recount changes the price per counted event, not the watts.",
+ "generated_utc": "2026-10-27T02:50:36+00:00",
+ "repo_commit": "e0945426",
+ "written_by": "tools/ettelem/refit_on_recount.py",
+ "measured": {
+  "board_w": {
+   "zeros": 38.29,
+   "checker": 40.94,
+   "sparse75": 41.04,
+   "ternary": 45.7,
+   "sparse50": 46.13,
+   "ones": 46.73,
+   "pi": 46.96,
+   "signs": 51.41,
+   "pow2": 52.6,
+   "a_randn_b_ones": 54.29,
+   "a_ones_b_randn": 57.93,
+   "mant": 60.41,
+   "uniform": 61.29,
+   "randn": 63.4
+  },
+  "idle_w": 36.29,
+  "source": "docs/findings/10-data-dependent-power.md:42 (21 Sep, aifoundry2, 600 MHz)"
+ },
+ "recount_source": {
+  "recount.json": "docs/reports/data/2026-10-26-toggle-recount/recount.json",
+  "hier-factors.json": "docs/reports/data/2026-10-26-toggle-recount/hier-factors.json",
+  "hier_factors_total": 5.3271115221865095,
+  "hier_factors_window_cycles": 512
+ },
+ "verification_of_the_first_pass": {
+  "reran_under_commit": "e0945426",
+  "published_block_read_from": "docs/reports/data/2026-10-26-load-model/scores.json at 10c911d5",
+  "what": "the first pass's toggle_recount_refit, re-run against the files as they stand now. Job (b)'s d1059a8e landed after it was written.",
+  "bench_counts": {
+   "0.0": {
+    "reproduces_to_the_last_digit": true,
+    "published": {
+     "prices_fJ": {
+      "ffclk": 3.142473779514844,
+      "mult": 0.03151332576108275,
+      "rest": 0.7416833473482705,
+      "bus": 16.08788192539163
+     },
+     "in_sample_rms_w": 0.3592837203931772,
+     "leave_one_out_rms_w": 0.4583104579513761
+    },
+    "rerun": {
+     "prices_fJ": {
+      "ffclk": 3.142473779514844,
+      "mult": 0.03151332576108275,
+      "rest": 0.7416833473482705,
+      "bus": 16.08788192539163
+     },
+     "in_sample_rms_w": 0.3592837203931772,
+     "leave_one_out_rms_w": 0.4583104579513761
+    }
+   },
+   "-1.18": {
+    "reproduces_to_the_last_digit": true,
+    "published": {
+     "prices_fJ": {
+      "ffclk": 3.6188056841861846,
+      "mult": 0.03213354105553118,
+      "rest": 0.6285171076485537,
+      "bus": 25.335513568443083
+     },
+     "in_sample_rms_w": 0.6519750471377854,
+     "leave_one_out_rms_w": 0.7391422478152747
+    },
+    "rerun": {
+     "prices_fJ": {
+      "ffclk": 3.6188056841861846,
+      "mult": 0.03213354105553118,
+      "rest": 0.6285171076485537,
+      "bus": 25.335513568443083
+     },
+     "in_sample_rms_w": 0.6519750471377854,
+     "leave_one_out_rms_w": 0.7391422478152747
+    }
+   }
+  },
+  "per_net_by_block_hier": {
+   "0.0": {
+    "reproduces_to_the_last_digit": true,
+    "published": {
+     "prices_fJ": {
+      "ffclk": 3.344381758331615,
+      "mult": -1.7694263827069001,
+      "rest": 3.7159783521073155,
+      "bus": 16.724165417165512
+     },
+     "in_sample_rms_w": 0.7880433710220276,
+     "leave_one_out_rms_w": 1.3471800677645365
+    },
+    "rerun": {
+     "prices_fJ": {
+      "ffclk": 3.344381758331615,
+      "mult": -1.7694263827069001,
+      "rest": 3.7159783521073155,
+      "bus": 16.724165417165512
+     },
+     "in_sample_rms_w": 0.7880433710220276,
+     "leave_one_out_rms_w": 1.3471800677645365
+    }
+   },
+   "-1.18": {
+    "reproduces_to_the_last_digit": true,
+    "published": {
+     "prices_fJ": {
+      "ffclk": 3.8041671912851767,
+      "mult": -1.2927017410618284,
+      "rest": 3.196597983044718,
+      "bus": 25.750643118732476
+     },
+     "in_sample_rms_w": 0.8895656996601468,
+     "leave_one_out_rms_w": 1.3125805543776907
+    },
+    "rerun": {
+     "prices_fJ": {
+      "ffclk": 3.8041671912851767,
+      "mult": -1.2927017410618284,
+      "rest": 3.196597983044718,
+      "bus": 25.750643118732476
+     },
+     "in_sample_rms_w": 0.8895656996601468,
+     "leave_one_out_rms_w": 1.3125805543776907
+    }
+   }
+  },
+  "settled_over_hf": {
+   "reproduces": false,
+   "why": "rung 'settled_over_hf' is retired. hier-factors.json's own _how_to_use now says: 'Do NOT divide by_block_settled by the per-module factors below' -- 12 of the 40 switching modules hold no merged net at all and carry a null factor, and 7 more are attribution artefacts. Use 'hier_one_factor', which is the recipe that file gives instead.",
+   "what_it_did_before_the_guard": "it divided by_block_settled by hier-factors.json's per-module factor; 12 of the 40 modules now carry a null factor, so the divide raised TypeError",
+   "hier_factors_now_says": "For a refit, use recount.json key <pattern>.mean.nets_hier directly; it exists for every pattern measured here and needs no factor. To split that total into price classes, take the SHARES from by_block_settled (names, attributed to the module where the net switches) and scale the whole unit by _total -- one factor for the unit. Do NOT divide by_block_settled by the per-module factors below, and do NOT use by_block_hier as a per-block net count: under the hierarchy merge a net is credited to the OUTERMOST module that names it, so the multiplier's share reads 54.8% of by_block_settled but 22.8% of by_block_hier on randn and 0.0% on pow2 and signs. A per-module pass also leaves the 12 unfactored modules undivided (mixing name counts into a net total) and crushes the 7 flagged ones to near zero.",
+   "published_numbers_that_can_no_longer_be_reproduced": {
+    "0.0": {
+     "prices_fJ": {
+      "ffclk": 3.239355590751635,
+      "mult": 0.27488291413509813,
+      "rest": 2.3544069306466735,
+      "bus": 14.1612454942668
+     },
+     "in_sample_rms_w": 0.5024254973084116,
+     "leave_one_out_rms_w": 0.7070153105283562
+    },
+    "-1.18": {
+     "prices_fJ": {
+      "ffclk": 3.718209348990579,
+      "mult": 0.28857125195872646,
+      "rest": 1.9965316034227227,
+      "bus": 23.699560938510015
+     },
+     "in_sample_rms_w": 0.7311963649644841,
+     "leave_one_out_rms_w": 0.892977446046653
+    }
+   },
+   "read_instead": "the hier_one_factor rung below, which is the recipe hier-factors.json now gives"
+  }
+ },
+ "rungs": {
+  "bench": {
+   "how": "the bench's own coverage counts, toggles.json -- what every published fJ was fitted on",
+   "counts_per_multiply_add_randn": {
+    "ffclk": 602.484375,
+    "mult": 18082.759863281248,
+    "rest": 3248.7256835937515,
+    "bus": 33.764837646484374
+   },
+   "fits": {
+    "0.0": {
+     "prices_fJ": {
+      "ffclk": 3.142473779514844,
+      "mult": 0.03151332576108275,
+      "rest": 0.7416833473482705,
+      "bus": 16.08788192539163
+     },
+     "in_sample_rms_w": 0.3592837203931772,
+     "leave_one_out_rms_w": 0.4583104579513761,
+     "kernel_offset_w": 0.0,
+     "base_w": 38.14459087977374,
+     "counts_used": "the bench's own counts"
+    },
+    "-1.18": {
+     "prices_fJ": {
+      "ffclk": 3.6188056841861846,
+      "mult": 0.03213354105553118,
+      "rest": 0.6285171076485537,
+      "bus": 25.335513568443083
+     },
+     "in_sample_rms_w": 0.6519750471377854,
+     "leave_one_out_rms_w": 0.7391422478152747,
+     "kernel_offset_w": -1.18,
+     "base_w": 36.96459087977374,
+     "counts_used": "the bench's own counts"
+    }
+   },
+   "capacitance_at_c0_zero": {
+    "ffclk": {
+     "fJ": 3.142473779514844,
+     "fF_per_counted_event": 23.51367829962957
+    },
+    "mult": {
+     "fJ": 0.03151332576108275,
+     "fF_per_counted_event": 0.2357996457847704
+    },
+    "rest": {
+     "fJ": 0.7416833473482705,
+     "fF_per_counted_event": 5.549673554454321
+    },
+    "bus": {
+     "fJ": 16.08788192539163,
+     "fF_per_counted_event": 120.3781818585249
+    }
+   },
+   "per_wire_on_randn_at_c0_zero": {
+    "counted_wires_per_multiply_add": 21331.485546875,
+    "fJ_per_counted_wire": 0.1396702369981727,
+    "fF_per_counted_wire": 1.0450878038241207,
+    "fJ_per_multiply_add_nets_only": 2979.373641855126,
+    "fJ_per_multiply_add_all_four_classes": 5415.869714146674
+   }
+  },
+  "settled": {
+   "how": "recount.json nets_settled, split by by_block_settled: one count per RTL NAME, after the settling window drops the transient values Verilator's coverage counter keeps",
+   "counts_per_multiply_add_randn": {
+    "ffclk": 595.243137254902,
+    "mult": 3878.4167076771646,
+    "rest": 3204.254183070867,
+    "bus": 33.651225490196076
+   },
+   "fits": {
+    "0.0": {
+     "prices_fJ": {
+      "ffclk": 3.252796757910172,
+      "mult": 0.22475088178275587,
+      "rest": 0.7101938639199732,
+      "bus": 16.0302050009985
+     },
+     "in_sample_rms_w": 0.4879886746456215,
+     "leave_one_out_rms_w": 0.6975843120146785,
+     "kernel_offset_w": 0.0,
+     "base_w": 38.14459087977374,
+     "counts_used": "settled"
+    },
+    "-1.18": {
+     "prices_fJ": {
+      "ffclk": 3.7275122864155597,
+      "mult": 0.21360653762705728,
+      "rest": 0.6056996274183466,
+      "bus": 25.197501258558592
+     },
+     "in_sample_rms_w": 0.7145729821700365,
+     "leave_one_out_rms_w": 0.8700927963042053,
+     "kernel_offset_w": -1.18,
+     "base_w": 36.96459087977374,
+     "counts_used": "settled"
+    }
+   },
+   "capacitance_at_c0_zero": {
+    "ffclk": {
+     "fJ": 3.252796757910172,
+     "fF_per_counted_event": 24.3391741366848
+    },
+    "mult": {
+     "fJ": 0.22475088178275587,
+     "fF_per_counted_event": 1.6817069298231941
+    },
+    "rest": {
+     "fJ": 0.7101938639199732,
+     "fF_per_counted_event": 5.3140523098217525
+    },
+    "bus": {
+     "fJ": 16.0302050009985,
+     "fF_per_counted_event": 119.94661210149688
+    }
+   },
+   "per_wire_on_randn_at_c0_zero": {
+    "counted_wires_per_multiply_add": 7082.6708907480315,
+    "fJ_per_counted_wire": 0.4443689792701705,
+    "fF_per_counted_wire": 3.3250076080210595,
+    "fJ_per_multiply_add_nets_only": 3147.319234228252,
+    "fJ_per_multiply_add_all_four_classes": 5622.960224401946
+   }
+  },
+  "ids": {
+   "how": "recount.json nets_ids: once per VCD identifier, names that share a waveform object merged",
+   "counts_per_multiply_add_randn": {
+    "ffclk": 595.243137254902,
+    "mult": 2172.66485140408,
+    "rest": 1795.0032096195418,
+    "bus": 33.651225490196076
+   },
+   "fits": {
+    "0.0": {
+     "prices_fJ": {
+      "ffclk": 3.2535621691924472,
+      "mult": 0.37762338498274994,
+      "rest": 1.2958475704316275,
+      "bus": 16.03829648280657
+     },
+     "in_sample_rms_w": 0.5922679689918462,
+     "leave_one_out_rms_w": 0.8717228676971696,
+     "kernel_offset_w": 0.0,
+     "base_w": 38.14459087977374,
+     "counts_used": "ids"
+    },
+    "-1.18": {
+     "prices_fJ": {
+      "ffclk": 3.7314808215255164,
+      "mult": 0.3626873210672746,
+      "rest": 1.098952328278235,
+      "bus": 25.30974483383208
+     },
+     "in_sample_rms_w": 0.7819556577782057,
+     "leave_one_out_rms_w": 1.0056772414458945,
+     "kernel_offset_w": -1.18,
+     "base_w": 36.96459087977374,
+     "counts_used": "ids"
+    }
+   },
+   "capacitance_at_c0_zero": {
+    "ffclk": {
+     "fJ": 3.2535621691924472,
+     "fF_per_counted_event": 24.344901355405177
+    },
+    "mult": {
+     "fJ": 0.37762338498274994,
+     "fF_per_counted_event": 2.825581187274822
+    },
+    "rest": {
+     "fJ": 1.2958475704316275,
+     "fF_per_counted_event": 9.696228205662242
+    },
+    "bus": {
+     "fJ": 16.03829648280657,
+     "fF_per_counted_event": 120.00715691859051
+    }
+   },
+   "per_wire_on_randn_at_c0_zero": {
+    "counted_wires_per_multiply_add": 3967.6680610236217,
+    "fJ_per_counted_wire": 0.793034990661729,
+    "fF_per_counted_wire": 5.933914157797208,
+    "fJ_per_multiply_add_nets_only": 3146.4996037227083,
+    "fJ_per_multiply_add_all_four_classes": 5622.868487988228
+   }
+  },
+  "hier": {
+   "how": "per pattern, nets_hier as the total with the SHARES taken from by_block_settled -- job (b)'s corrected recipe, applied pattern by pattern",
+   "counts_per_multiply_add_randn": {
+    "ffclk": 595.243137254902,
+    "mult": 712.3049251143435,
+    "rest": 588.4891201612471,
+    "bus": 33.651225490196076
+   },
+   "fits": {
+    "0.0": {
+     "prices_fJ": {
+      "ffclk": 3.355816082075072,
+      "mult": 1.1792253730539164,
+      "rest": 3.885020136359778,
+      "bus": 17.96171533785849
+     },
+     "in_sample_rms_w": 0.8534090375552005,
+     "leave_one_out_rms_w": 1.3641277497611208,
+     "kernel_offset_w": 0.0,
+     "base_w": 38.14459087977374,
+     "counts_used": "hier"
+    },
+    "-1.18": {
+     "prices_fJ": {
+      "ffclk": 3.817333708533693,
+      "mult": 1.132049361550185,
+      "rest": 3.3073508593423298,
+      "bus": 26.862267611937078
+     },
+     "in_sample_rms_w": 0.934066395877627,
+     "leave_one_out_rms_w": 1.3567014680542349,
+     "kernel_offset_w": -1.18,
+     "base_w": 36.96459087977374,
+     "counts_used": "hier"
+    }
+   },
+   "capacitance_at_c0_zero": {
+    "ffclk": {
+     "fJ": 3.355816082075072,
+     "fF_per_counted_event": 25.110020106140336
+    },
+    "mult": {
+     "fJ": 1.1792253730539164,
+     "fF_per_counted_event": 8.823598225545506
+    },
+    "rest": {
+     "fJ": 3.885020136359778,
+     "fF_per_counted_event": 29.069809355115833
+    },
+    "bus": {
+     "fJ": 17.96171533785849,
+     "fF_per_counted_event": 134.39921087555783
+    }
+   },
+   "per_wire_on_randn_at_c0_zero": {
+    "counted_wires_per_multiply_add": 1300.7940452755906,
+    "fJ_per_counted_wire": 2.4033475047457324,
+    "fF_per_counted_wire": 17.98313813696585,
+    "fJ_per_multiply_add_nets_only": 3126.260122901198,
+    "fJ_per_multiply_add_all_four_classes": 5728.220348671007
+   }
+  },
+  "hier_one_factor": {
+   "how": "by_block_settled scaled by ONE factor for the whole unit, hier-factors.json _total (5.327 settled names per merged net on randn) -- job (b)'s corrected recipe read literally, 'scale the whole unit by one factor'",
+   "counts_per_multiply_add_randn": {
+    "ffclk": 595.243137254902,
+    "mult": 728.0524711232761,
+    "rest": 601.499362220163,
+    "bus": 33.651225490196076
+   },
+   "fits": {
+    "0.0": {
+     "prices_fJ": {
+      "ffclk": 3.2527967579101698,
+      "mult": 1.1972730119664885,
+      "rest": 3.783281915474265,
+      "bus": 16.030205000998436
+     },
+     "in_sample_rms_w": 0.487988674645624,
+     "leave_one_out_rms_w": 0.6975843120146783,
+     "kernel_offset_w": 0.0,
+     "base_w": 38.14459087977374,
+     "counts_used": "hier_one_factor"
+    },
+    "-1.18": {
+     "prices_fJ": {
+      "ffclk": 3.7275122864155668,
+      "mult": 1.1379058478074642,
+      "rest": 3.226629464204326,
+      "bus": 25.19750125855874
+     },
+     "in_sample_rms_w": 0.7145729821700356,
+     "leave_one_out_rms_w": 0.8700927963042051,
+     "kernel_offset_w": -1.18,
+     "base_w": 36.96459087977374,
+     "counts_used": "hier_one_factor"
+    }
+   },
+   "capacitance_at_c0_zero": {
+    "ffclk": {
+     "fJ": 3.2527967579101698,
+     "fF_per_counted_event": 24.339174136684786
+    },
+    "mult": {
+     "fJ": 1.1972730119664885,
+     "fF_per_counted_event": 8.958640362801974
+    },
+    "rest": {
+     "fJ": 3.783281915474265,
+     "fF_per_counted_event": 28.308549289153426
+    },
+    "bus": {
+     "fJ": 16.030205000998436,
+     "fF_per_counted_event": 119.9466121014964
+    }
+   },
+   "per_wire_on_randn_at_c0_zero": {
+    "counted_wires_per_multiply_add": 1329.551833343439,
+    "fJ_per_counted_wire": 2.367203109572387,
+    "fF_per_counted_wire": 17.71268634004682,
+    "fJ_per_multiply_add_nets_only": 3147.319234228257,
+    "fJ_per_multiply_add_all_four_classes": 5622.960224401947
+   }
+  },
+  "distinct": {
+   "how": "per pattern, nets_distinct as the total, shares from by_block_settled: once per distinct waveform, job (b)'s LOWER BOUND on the physical count",
+   "counts_per_multiply_add_randn": {
+    "ffclk": 595.243137254902,
+    "mult": 551.5517940357781,
+    "rest": 455.6787669878439,
+    "bus": 33.651225490196076
+   },
+   "fits": {
+    "0.0": {
+     "prices_fJ": {
+      "ffclk": 4.008020255272573,
+      "mult": 1.7187454100223467,
+      "rest": 2.281305766689091,
+      "bus": 31.618156624803195
+     },
+     "in_sample_rms_w": 1.6359072757971072,
+     "leave_one_out_rms_w": 2.450302914703262,
+     "kernel_offset_w": 0.0,
+     "base_w": 38.14459087977374,
+     "counts_used": "distinct"
+    },
+    "-1.18": {
+     "prices_fJ": {
+      "ffclk": 4.3966486575771935,
+      "mult": 1.697357716086578,
+      "rest": 1.7231762001363866,
+      "bus": 39.23560495799823
+     },
+     "in_sample_rms_w": 1.5518756922553547,
+     "leave_one_out_rms_w": 2.3199258208957274,
+     "kernel_offset_w": -1.18,
+     "base_w": 36.96459087977374,
+     "counts_used": "distinct"
+    }
+   },
+   "capacitance_at_c0_zero": {
+    "ffclk": {
+     "fJ": 4.008020255272573,
+     "fF_per_counted_event": 29.99016237310606
+    },
+    "mult": {
+     "fJ": 1.7187454100223467,
+     "fF_per_counted_event": 12.860577203119819
+    },
+    "rest": {
+     "fJ": 2.281305766689091,
+     "fF_per_counted_event": 17.069956239793566
+    },
+    "bus": {
+     "fJ": 31.618156624803195,
+     "fF_per_counted_event": 236.5840466671146
+    }
+   },
+   "per_wire_on_randn_at_c0_zero": {
+    "counted_wires_per_multiply_add": 1007.230561023622,
+    "fJ_per_counted_wire": 1.9732519943158426,
+    "fF_per_counted_wire": 14.764932296621579,
+    "fJ_per_multiply_add_nets_only": 1987.5197132757273,
+    "fJ_per_multiply_add_all_four_classes": 5437.255982370956
+   }
+  },
+  "distinct_one_factor": {
+   "how": "by_block_settled scaled by ONE factor, randn's nets_settled / nets_distinct",
+   "counts_per_multiply_add_randn": {
+    "ffclk": 595.243137254902,
+    "mult": 551.5517940357781,
+    "rest": 455.6787669878439,
+    "bus": 33.651225490196076
+   },
+   "fits": {
+    "0.0": {
+     "prices_fJ": {
+      "ffclk": 3.252796757910169,
+      "mult": 1.58040928231459,
+      "rest": 4.993960272275664,
+      "bus": 16.03020500099836
+     },
+     "in_sample_rms_w": 0.4879886746456238,
+     "leave_one_out_rms_w": 0.6975843120146769,
+     "kernel_offset_w": 0.0,
+     "base_w": 38.14459087977374,
+     "counts_used": "distinct_one_factor"
+    },
+    "-1.18": {
+     "prices_fJ": {
+      "ffclk": 3.7275122864155685,
+      "mult": 1.5020441839921173,
+      "rest": 4.259174895659456,
+      "bus": 25.197501258558727
+     },
+     "in_sample_rms_w": 0.7145729821700363,
+     "leave_one_out_rms_w": 0.8700927963042048,
+     "kernel_offset_w": -1.18,
+     "base_w": 36.96459087977374,
+     "counts_used": "distinct_one_factor"
+    }
+   },
+   "capacitance_at_c0_zero": {
+    "ffclk": {
+     "fJ": 3.252796757910169,
+     "fF_per_counted_event": 24.33917413668478
+    },
+    "mult": {
+     "fJ": 1.58040928231459,
+     "fF_per_counted_event": 11.82547192226085
+    },
+    "rest": {
+     "fJ": 4.993960272275664,
+     "fF_per_counted_event": 37.3674956490964
+    },
+    "bus": {
+     "fJ": 16.03020500099836,
+     "fF_per_counted_event": 119.94661210149584
+    }
+   },
+   "per_wire_on_randn_at_c0_zero": {
+    "counted_wires_per_multiply_add": 1007.230561023622,
+    "fJ_per_counted_wire": 3.1247257142691565,
+    "fF_per_counted_wire": 23.380877733607868,
+    "fJ_per_multiply_add_nets_only": 3147.3192342282605,
+    "fJ_per_multiply_add_all_four_classes": 5622.960224401948
+   }
+  },
+  "hier_by_block": {
+   "how": "by_block_hier straight. KEPT ONLY FOR THE RECORD: this is what the first pass read, and hier-factors.json now says a net is credited to the OUTERMOST module that names it, so by_block_hier is not a per-block net count. It is what made the multiplier price come out negative",
+   "counts_per_multiply_add_randn": {
+    "ffclk": 595.243137254902,
+    "mult": 296.58759842519686,
+    "rest": 1004.2064468503938,
+    "bus": 33.651225490196076
+   },
+   "fits": {
+    "0.0": {
+     "prices_fJ": {
+      "ffclk": 3.344381758331615,
+      "mult": -1.7694263827069001,
+      "rest": 3.7159783521073155,
+      "bus": 16.724165417165512
+     },
+     "in_sample_rms_w": 0.7880433710220276,
+     "leave_one_out_rms_w": 1.3471800677645365,
+     "kernel_offset_w": 0.0,
+     "base_w": 38.14459087977374,
+     "counts_used": "hier_by_block"
+    },
+    "-1.18": {
+     "prices_fJ": {
+      "ffclk": 3.8041671912851767,
+      "mult": -1.2927017410618284,
+      "rest": 3.196597983044718,
+      "bus": 25.750643118732476
+     },
+     "in_sample_rms_w": 0.8895656996601468,
+     "leave_one_out_rms_w": 1.3125805543776907,
+     "kernel_offset_w": -1.18,
+     "base_w": 36.96459087977374,
+     "counts_used": "hier_by_block"
+    }
+   },
+   "capacitance_at_c0_zero": {
+    "ffclk": {
+     "fJ": 3.344381758331615,
+     "fF_per_counted_event": 25.024462348481347
+    },
+    "mult": {
+     "fJ": -1.7694263827069001,
+     "fF_per_counted_event": -13.239799488246057
+    },
+    "rest": {
+     "fJ": 3.7159783521073155,
+     "fF_per_counted_event": 27.804947843774457
+    },
+    "bus": {
+     "fJ": 16.724165417165512,
+     "fF_per_counted_event": 125.139197027678
+    }
+   },
+   "per_wire_on_randn_at_c0_zero": {
+    "counted_wires_per_multiply_add": 1300.7940452755906,
+    "fJ_per_counted_wire": 2.465278425706537,
+    "fF_per_counted_wire": 18.446538583380065,
+    "fJ_per_multiply_add_nets_only": 3206.8194961054464,
+    "fJ_per_multiply_add_all_four_classes": 5760.3284477011985
+   }
+  }
+ },
+ "merge_factor_per_pattern": {
+  "zeros": {
+   "settled_per_multiply_add": 0.011811023622047244,
+   "hier_per_multiply_add": 0.003937007874015748,
+   "distinct_per_multiply_add": 0.0004921259842519685,
+   "settled_over_hier": 3.0
+  },
+  "checker": {
+   "settled_per_multiply_add": 2.8208661417322833,
+   "hier_per_multiply_add": 0.812992125984252,
+   "distinct_per_multiply_add": 0.043799212598425195,
+   "settled_over_hier": 3.469733656174334
+  },
+  "sparse75": {
+   "settled_per_multiply_add": 411.5030757874016,
+   "hier_per_multiply_add": 78.84571850393701,
+   "distinct_per_multiply_add": 56.810900590551185,
+   "settled_over_hier": 5.219092216996589
+  },
+  "ternary": {
+   "settled_per_multiply_add": 533.0171013779527,
+   "hier_per_multiply_add": 106.12795275590551,
+   "distinct_per_multiply_add": 53.433686023622045,
+   "settled_over_hier": 5.022400673306994
+  },
+  "sparse50": {
+   "settled_per_multiply_add": 1534.7429872047244,
+   "hier_per_multiply_add": 284.85789862204723,
+   "distinct_per_multiply_add": 226.22268700787401,
+   "settled_over_hier": 5.387749452020775
+  },
+  "ones": {
+   "settled_per_multiply_add": 0.3248031496062992,
+   "hier_per_multiply_add": 0.19094488188976377,
+   "distinct_per_multiply_add": 0.015748031496062992,
+   "settled_over_hier": 1.7010309278350515
+  },
+  "pi": {
+   "settled_per_multiply_add": 0.3484251968503937,
+   "hier_per_multiply_add": 0.21456692913385828,
+   "distinct_per_multiply_add": 0.015748031496062992,
+   "settled_over_hier": 1.6238532110091741
+  },
+  "signs": {
+   "settled_per_multiply_add": 1128.8580216535433,
+   "hier_per_multiply_add": 183.58993602362204,
+   "distinct_per_multiply_add": 77.65809547244095,
+   "settled_over_hier": 6.148801214835088
+  },
+  "pow2": {
+   "settled_per_multiply_add": 1515.9077263779527,
+   "hier_per_multiply_add": 287.5987942913386,
+   "distinct_per_multiply_add": 209.53211122047244,
+   "settled_over_hier": 5.2709112710755415
+  },
+  "a_randn_b_ones": {
+   "settled_per_multiply_add": 3298.0994094488187,
+   "hier_per_multiply_add": 571.4311023622047,
+   "distinct_per_multiply_add": 40.17605807086614,
+   "settled_over_hier": 5.7716484031320725
+  },
+  "a_ones_b_randn": {
+   "settled_per_multiply_add": 3134.9827755905512,
+   "hier_per_multiply_add": 435.70669291338584,
+   "distinct_per_multiply_add": 187.08968996062993,
+   "settled_over_hier": 7.1951678194985975
+  },
+  "mant": {
+   "settled_per_multiply_add": 5880.725393700787,
+   "hier_per_multiply_add": 1013.7971210629921,
+   "distinct_per_multiply_add": 819.6460383858267,
+   "settled_over_hier": 5.800692536525155
+  },
+  "uniform": {
+   "settled_per_multiply_add": 6223.630536417323,
+   "hier_per_multiply_add": 1080.6535433070867,
+   "distinct_per_multiply_add": 868.9928641732283,
+   "settled_over_hier": 5.759135825688742
+  },
+  "randn": {
+   "settled_per_multiply_add": 7082.6708907480315,
+   "hier_per_multiply_add": 1300.7940452755906,
+   "distinct_per_multiply_add": 1007.230561023622,
+   "settled_over_hier": 5.4448826210973875
+  }
+ },
+ "cross_check_against_the_open_netlist": {
+  "source": "docs/reports/data/2026-10-26-open-netlist/POWER.md (Q126(e))",
+  "counts": {
+   "mixed_netlist_nets_per_multiply_add": 3299.0,
+   "hierarchy_kept_nets_per_multiply_add": 3623.0,
+   "netlist_own_energy_pJ_per_multiply_add": [
+    1.468,
+    1.516
+   ]
+  },
+  "this_fit_nets_only_fJ_per_multiply_add": 3147.319234228257,
+  "this_fit_all_classes_fJ_per_multiply_add": 5622.960224401947,
+  "fJ_per_physical_wire_on_the_open_netlist_count": {
+   "mixed_netlist_nets_per_multiply_add": 0.9540221989173255,
+   "hierarchy_kept_nets_per_multiply_add": 0.8687052813216276
+  },
+  "fF_per_physical_wire_on_the_open_netlist_count": {
+   "mixed_netlist_nets_per_multiply_add": 7.13850700116597,
+   "hierarchy_kept_nets_per_multiply_add": 6.500119954967302
+  },
+  "board_fit_over_netlist_energy": [
+   3.7090766651727884,
+   3.8303543762956043
+  ],
+  "reading": "the board-power fit puts about 3.7-3.8x the energy on one multiply-add that the netlist's own power analysis does, which is the size of everything the board meter sees and the lane's nets are not: the rest of the die that scales with the kernel, and the board's own conversion. A 'per wire' number taken from board watts is an upper bound on a wire by about that factor."
+ },
+ "e60_rescore": {
+  "bench": {
+   "kappa_rung_over_bench": {
+    "ffclk": 1.0,
+    "mult": 1.0,
+    "rest": 1.0,
+    "bus": 1.0
+   },
+   "kappa_over_the_busy_patterns": {
+    "ffclk": {
+     "n": 7,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "mult": {
+     "n": 7,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "rest": {
+     "n": 7,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "bus": {
+     "n": 7,
+     "low": 1.0,
+     "high": 1.0
+    }
+   },
+   "busy_patterns": [
+    "sparse75",
+    "sparse50",
+    "a_randn_b_ones",
+    "a_ones_b_randn",
+    "mant",
+    "uniform",
+    "randn"
+   ],
+   "sensitivity_to_kappa_aifoundry3": {
+    "low": {
+     "kappa": {
+      "ffclk": 1.0,
+      "mult": 1.0,
+      "rest": 1.0,
+      "bus": 1.0
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 1.1665397836075493,
+      "ratio_measured_over_pred": 0.8480215078673327,
+      "residuals_sharing_a_sign": 25
+     }
+    },
+    "high": {
+     "kappa": {
+      "ffclk": 1.0,
+      "mult": 1.0,
+      "rest": 1.0,
+      "bus": 1.0
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 1.1665397836075493,
+      "ratio_measured_over_pred": 0.8480215078673327,
+      "residuals_sharing_a_sign": 25
+     }
+    }
+   },
+   "aifoundry3_with_the_c0_minus_1_18_prices": {
+    "n_items": 26,
+    "rms_W": 1.1257745368510812,
+    "ratio_measured_over_pred": 0.8511308497331599,
+    "residuals_sharing_a_sign": 25
+   },
+   "cards": {
+    "aifoundry1-c0": {
+     "as_published": {
+      "n_items": 8,
+      "rms_W": 1.8945350884905054,
+      "ratio_measured_over_pred": 0.7211900281684871,
+      "residuals_sharing_a_sign": 8
+     },
+     "under_this_rung": {
+      "n_items": 8,
+      "rms_W": 1.718220922208235,
+      "ratio_measured_over_pred": 0.7550014427495944,
+      "residuals_sharing_a_sign": 7
+     },
+     "scale": 1.8190344184340361,
+     "items": [
+      {
+       "item": "lq_h2",
+       "measured_W": 1.912103317535545,
+       "pred_published_W": 3.3379444789110693,
+       "pred_this_rung_W": 3.1851561554162133
+      },
+      {
+       "item": "lq_h8",
+       "measured_W": 5.672445971563982,
+       "pred_published_W": 9.469699101755317,
+       "pred_this_rung_W": 9.093333910917385
+      },
+      {
+       "item": "bit_0",
+       "measured_W": 1.2305246445497644,
+       "pred_published_W": 2.5722532604384227,
+       "pred_this_rung_W": 2.4449524107452865
+      },
+      {
+       "item": "bit_8",
+       "measured_W": 0.962488862559239,
+       "pred_published_W": 3.9131524361778625,
+       "pred_this_rung_W": 3.7302496279752533
+      },
+      {
+       "item": "bit_16",
+       "measured_W": 4.966328199052133,
+       "pred_published_W": 6.23424046247406,
+       "pred_this_rung_W": 5.935891327335065
+      },
+      {
+       "item": "bit_22",
+       "measured_W": 8.084634834123225,
+       "pred_published_W": 8.122342285533577,
+       "pred_this_rung_W": 7.701191541334968
+      },
+      {
+       "item": "bit_23",
+       "measured_W": 1.4860184834123231,
+       "pred_published_W": 1.767992446073174,
+       "pred_this_rung_W": 1.6707089569763542
+      },
+      {
+       "item": "bit_31",
+       "measured_W": 0.9641573459715659,
+       "pred_published_W": 1.2225511952262704,
+       "pred_this_rung_W": 1.160628298137694
+      }
+     ]
+    },
+    "aifoundry2": {
+     "as_published": {
+      "n_items": 9,
+      "rms_W": 1.593892958932345,
+      "ratio_measured_over_pred": 0.6324938521220573,
+      "residuals_sharing_a_sign": 9
+     },
+     "under_this_rung": {
+      "n_items": 9,
+      "rms_W": 1.416594594225845,
+      "ratio_measured_over_pred": 0.6597000804635893,
+      "residuals_sharing_a_sign": 9
+     },
+     "scale": 1.9015436013435096,
+     "items": [
+      {
+       "item": "lq_h2",
+       "measured_W": 1.9622022727272719,
+       "pred_published_W": 3.4893495698544474,
+       "pred_this_rung_W": 3.3296309543310763
+      },
+      {
+       "item": "lq_h8",
+       "measured_W": 6.41162222222222,
+       "pred_published_W": 9.899233104722144,
+       "pred_this_rung_W": 9.505796447804785
+      },
+      {
+       "item": "ls_h2",
+       "measured_W": 4.207453787878786,
+       "pred_published_W": 7.005331278760385,
+       "pred_this_rung_W": 6.675180711741619
+      },
+      {
+       "item": "ord_binary_0",
+       "measured_W": 0.07786010101010118,
+       "pred_published_W": 0.1510475129097929,
+       "pred_this_rung_W": 0.15151967835741167
+      },
+      {
+       "item": "ord_shuffled_0",
+       "measured_W": 0.604800284090909,
+       "pred_published_W": 0.9351303565678204,
+       "pred_this_rung_W": 0.9347755789852963
+      },
+      {
+       "item": "ord_maxflip_0",
+       "measured_W": 1.2910739898989887,
+       "pred_published_W": 1.7354018906466064,
+       "pred_this_rung_W": 1.7405607262084832
+      },
+      {
+       "item": "ord_binary_19",
+       "measured_W": 0.0025164772727332974,
+       "pred_published_W": 0.3096882621430254,
+       "pred_this_rung_W": 0.333385712880603
+      },
+      {
+       "item": "ord_shuffled_19",
+       "measured_W": 0.8184750000000017,
+       "pred_published_W": 0.9613514248172245,
+       "pred_this_rung_W": 0.9368866419431042
+      },
+      {
+       "item": "ord_maxflip_19",
+       "measured_W": 1.3108388888888929,
+       "pred_published_W": 1.6485607809175036,
+       "pred_this_rung_W": 1.6064182665628035
+      }
+     ]
+    },
+    "aifoundry3": {
+     "as_published": {
+      "n_items": 26,
+      "rms_W": 1.2763888266863876,
+      "ratio_measured_over_pred": 0.8316699195262847,
+      "residuals_sharing_a_sign": 25
+     },
+     "under_this_rung": {
+      "n_items": 26,
+      "rms_W": 1.1665397836075493,
+      "ratio_measured_over_pred": 0.8480215078673327,
+      "residuals_sharing_a_sign": 25
+     },
+     "scale": 1.0185572568455867,
+     "items": [
+      {
+       "item": "lq_h1",
+       "measured_W": 0.5938044871794883,
+       "pred_published_W": 1.3972341525367784,
+       "pred_this_rung_W": 1.328896926509878
+      },
+      {
+       "item": "lq_h2",
+       "measured_W": 0.8409775641025625,
+       "pred_published_W": 1.8690617052036944,
+       "pred_this_rung_W": 1.783508812922014
+      },
+      {
+       "item": "lq_h4",
+       "measured_W": 1.7118226495726478,
+       "pred_published_W": 3.1931695112808844,
+       "pred_this_rung_W": 3.0569885608731164
+      },
+      {
+       "item": "lq_h8",
+       "measured_W": 3.206491452991454,
+       "pred_published_W": 5.302500404879935,
+       "pred_this_rung_W": 5.091757005817664
+      },
+      {
+       "item": "lq_h12",
+       "measured_W": 5.535733974358978,
+       "pred_published_W": 7.754692893981966,
+       "pred_this_rung_W": 7.451572291280306
+      },
+      {
+       "item": "lq_h16",
+       "measured_W": 8.298516025641021,
+       "pred_published_W": 10.044137339852265,
+       "pred_this_rung_W": 9.65524199979113
+      },
+      {
+       "item": "lq_h23",
+       "measured_W": 12.261077991452986,
+       "pred_published_W": 13.89730496804938,
+       "pred_this_rung_W": 13.37764348806458
+      },
+      {
+       "item": "lb_h1",
+       "measured_W": 1.9544294871794907,
+       "pred_published_W": 3.0416811693118637,
+       "pred_this_rung_W": 2.996350072028311
+      },
+      {
+       "item": "lb_h2",
+       "measured_W": 2.382672008547013,
+       "pred_published_W": 3.6919826048053483,
+       "pred_this_rung_W": 3.65800929765478
+      },
+      {
+       "item": "lb_h4",
+       "measured_W": 3.3826645299145355,
+       "pred_published_W": 5.168215804028357,
+       "pred_this_rung_W": 5.115999537635669
+      },
+      {
+       "item": "lb_h8",
+       "measured_W": 4.78776298920379,
+       "pred_published_W": 7.054596492552187,
+       "pred_this_rung_W": 7.0320404467155875
+      },
+      {
+       "item": "lb_h12",
+       "measured_W": 8.040747863247864,
+       "pred_published_W": 9.490352089165613,
+       "pred_this_rung_W": 9.45741959258706
+      },
+      {
+       "item": "lb_h16",
+       "measured_W": 10.339041666666665,
+       "pred_published_W": 12.255605195104014,
+       "pred_this_rung_W": 12.198380144648446
+      },
+      {
+       "item": "lb_h23",
+       "measured_W": 15.059518162393159,
+       "pred_published_W": 16.32977284478635,
+       "pred_this_rung_W": 16.276120310318955
+      },
+      {
+       "item": "ord_binary_0",
+       "measured_W": 0.04099252136752263,
+       "pred_published_W": 0.08090823702072675,
+       "pred_this_rung_W": 0.0811611513071854
+      },
+      {
+       "item": "ord_shuffled_0",
+       "measured_W": 0.38163568376068824,
+       "pred_published_W": 0.500900326506208,
+       "pred_this_rung_W": 0.5007102907473693
+      },
+      {
+       "item": "ord_maxflip_0",
+       "measured_W": 0.6824925213675215,
+       "pred_published_W": 0.9295638490817535,
+       "pred_this_rung_W": 0.9323271669434686
+      },
+      {
+       "item": "ord_binary_19",
+       "measured_W": 0.10650000000000404,
+       "pred_published_W": 0.16588377281636374,
+       "pred_this_rung_W": 0.17857725531155694
+      },
+      {
+       "item": "ord_shuffled_19",
+       "measured_W": 0.4445331196581215,
+       "pred_published_W": 0.5149455786523086,
+       "pred_this_rung_W": 0.5018410765436109
+      },
+      {
+       "item": "ord_maxflip_19",
+       "measured_W": 0.7163418803418828,
+       "pred_published_W": 0.8830476175083063,
+       "pred_this_rung_W": 0.860474081046996
+      },
+      {
+       "item": "bit_0",
+       "measured_W": 0.6343269230769213,
+       "pred_published_W": 1.4403175653596272,
+       "pred_this_rung_W": 1.3690362289849274
+      },
+      {
+       "item": "bit_8",
+       "measured_W": 0.47039316239316165,
+       "pred_published_W": 2.19114590170493,
+       "pred_this_rung_W": 2.0887305869069928
+      },
+      {
+       "item": "bit_16",
+       "measured_W": 2.4892745726495704,
+       "pred_published_W": 3.490825022123466,
+       "pred_this_rung_W": 3.3237662388536937
+      },
+      {
+       "item": "bit_22",
+       "measured_W": 4.679175213675219,
+       "pred_published_W": 4.548056152030419,
+       "pred_this_rung_W": 4.312235354808396
+      },
+      {
+       "item": "bit_23",
+       "measured_W": 0.7758153958614464,
+       "pred_published_W": 0.9899766149264392,
+       "pred_this_rung_W": 0.935503317012633
+      },
+      {
+       "item": "bit_31",
+       "measured_W": 0.5470512820512781,
+       "pred_published_W": 0.6845601046048154,
+       "pred_this_rung_W": 0.6498867550764602
+      }
+     ]
+    }
+   }
+  },
+  "settled": {
+   "kappa_rung_over_bench": {
+    "ffclk": 0.9865139806734627,
+    "mult": 0.2157998357727639,
+    "rest": 0.9163057839383745,
+    "bus": 0.9895972505138275
+   },
+   "kappa_over_the_busy_patterns": {
+    "ffclk": {
+     "n": 7,
+     "low": 0.9554664512697764,
+     "high": 1.066922835343888
+    },
+    "mult": {
+     "n": 7,
+     "low": 0.2090118080829874,
+     "high": 0.2630913316680814
+    },
+    "rest": {
+     "n": 7,
+     "low": 0.7979284370785464,
+     "high": 1.0580152909701517
+    },
+    "bus": {
+     "n": 7,
+     "low": 0.9820932215511181,
+     "high": 1.013201120455736
+    }
+   },
+   "busy_patterns": [
+    "sparse75",
+    "sparse50",
+    "a_randn_b_ones",
+    "a_ones_b_randn",
+    "mant",
+    "uniform",
+    "randn"
+   ],
+   "sensitivity_to_kappa_aifoundry3": {
+    "low": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.2090118080829874,
+      "rest": 0.7979284370785464,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 0.8088515421075891,
+      "ratio_measured_over_pred": 0.9330322488767244,
+      "residuals_sharing_a_sign": 21
+     }
+    },
+    "high": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.2630913316680814,
+      "rest": 1.0580152909701517,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 1.9376867829661517,
+      "ratio_measured_over_pred": 0.7463604601676519,
+      "residuals_sharing_a_sign": 25
+     }
+    }
+   },
+   "aifoundry3_with_the_c0_minus_1_18_prices": {
+    "n_items": 26,
+    "rms_W": 1.0948834780548653,
+    "ratio_measured_over_pred": 0.8575193113921997,
+    "residuals_sharing_a_sign": 25
+   },
+   "cards": {
+    "aifoundry1-c0": {
+     "as_published": {
+      "n_items": 8,
+      "rms_W": 1.8945350884905054,
+      "ratio_measured_over_pred": 0.7211900281684871,
+      "residuals_sharing_a_sign": 8
+     },
+     "under_this_rung": {
+      "n_items": 8,
+      "rms_W": 1.48641553604204,
+      "ratio_measured_over_pred": 0.8172283454608096,
+      "residuals_sharing_a_sign": 7
+     },
+     "scale": 1.8190344184340361
+    },
+    "aifoundry2": {
+     "as_published": {
+      "n_items": 9,
+      "rms_W": 1.593892958932345,
+      "ratio_measured_over_pred": 0.6324938521220573,
+      "residuals_sharing_a_sign": 9
+     },
+     "under_this_rung": {
+      "n_items": 9,
+      "rms_W": 1.1465635567568833,
+      "ratio_measured_over_pred": 0.7059691946928257,
+      "residuals_sharing_a_sign": 9
+     },
+     "scale": 1.9015436013435096
+    },
+    "aifoundry3": {
+     "as_published": {
+      "n_items": 26,
+      "rms_W": 1.2763888266863876,
+      "ratio_measured_over_pred": 0.8316699195262847,
+      "residuals_sharing_a_sign": 25
+     },
+     "under_this_rung": {
+      "n_items": 26,
+      "rms_W": 1.1492562928484018,
+      "ratio_measured_over_pred": 0.8538560776222845,
+      "residuals_sharing_a_sign": 25
+     },
+     "scale": 1.0185572568455867
+    }
+   }
+  },
+  "ids": {
+   "kappa_rung_over_bench": {
+    "ffclk": 0.9865139806734627,
+    "mult": 0.12127378612518466,
+    "rest": 0.5114128991198708,
+    "bus": 0.9895972505138275
+   },
+   "kappa_over_the_busy_patterns": {
+    "ffclk": {
+     "n": 7,
+     "low": 0.9554664512697764,
+     "high": 1.066922835343888
+    },
+    "mult": {
+     "n": 7,
+     "low": 0.1179079898623176,
+     "high": 0.14075621065549937
+    },
+    "rest": {
+     "n": 7,
+     "low": 0.45012833931639495,
+     "high": 0.6118501557467011
+    },
+    "bus": {
+     "n": 7,
+     "low": 0.9820932215511181,
+     "high": 1.013201120455736
+    }
+   },
+   "busy_patterns": [
+    "sparse75",
+    "sparse50",
+    "a_randn_b_ones",
+    "a_ones_b_randn",
+    "mant",
+    "uniform",
+    "randn"
+   ],
+   "sensitivity_to_kappa_aifoundry3": {
+    "low": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.1179079898623176,
+      "rest": 0.45012833931639495,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 0.8089552854357579,
+      "ratio_measured_over_pred": 0.9293670309098897,
+      "residuals_sharing_a_sign": 22
+     }
+    },
+    "high": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.14075621065549937,
+      "rest": 0.6118501557467011,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 1.9850367150271149,
+      "ratio_measured_over_pred": 0.7401709683297052,
+      "residuals_sharing_a_sign": 25
+     }
+    }
+   },
+   "aifoundry3_with_the_c0_minus_1_18_prices": {
+    "n_items": 26,
+    "rms_W": 1.0797485186276574,
+    "ratio_measured_over_pred": 0.8595266957494788,
+    "residuals_sharing_a_sign": 25
+   },
+   "cards": {
+    "aifoundry1-c0": {
+     "as_published": {
+      "n_items": 8,
+      "rms_W": 1.8945350884905054,
+      "ratio_measured_over_pred": 0.7211900281684871,
+      "residuals_sharing_a_sign": 8
+     },
+     "under_this_rung": {
+      "n_items": 8,
+      "rms_W": 1.5092400845363945,
+      "ratio_measured_over_pred": 0.8092129391227832,
+      "residuals_sharing_a_sign": 7
+     },
+     "scale": 1.8190344184340361
+    },
+    "aifoundry2": {
+     "as_published": {
+      "n_items": 9,
+      "rms_W": 1.593892958932345,
+      "ratio_measured_over_pred": 0.6324938521220573,
+      "residuals_sharing_a_sign": 9
+     },
+     "under_this_rung": {
+      "n_items": 9,
+      "rms_W": 1.1772207753378672,
+      "ratio_measured_over_pred": 0.7003739491325491,
+      "residuals_sharing_a_sign": 9
+     },
+     "scale": 1.9015436013435096
+    },
+    "aifoundry3": {
+     "as_published": {
+      "n_items": 26,
+      "rms_W": 1.2763888266863876,
+      "ratio_measured_over_pred": 0.8316699195262847,
+      "residuals_sharing_a_sign": 25
+     },
+     "under_this_rung": {
+      "n_items": 26,
+      "rms_W": 1.1344462862509075,
+      "ratio_measured_over_pred": 0.8554121079297926,
+      "residuals_sharing_a_sign": 25
+     },
+     "scale": 1.0185572568455867
+    }
+   }
+  },
+  "hier": {
+   "kappa_rung_over_bench": {
+    "ffclk": 0.9865139806734627,
+    "mult": 0.03769851732331382,
+    "rest": 0.15847660009380296,
+    "bus": 0.9895972505138275
+   },
+   "kappa_over_the_busy_patterns": {
+    "ffclk": {
+     "n": 7,
+     "low": 0.9554664512697764,
+     "high": 1.066922835343888
+    },
+    "mult": {
+     "n": 7,
+     "low": 0.03603221628571159,
+     "high": 0.0466358036851008
+    },
+    "rest": {
+     "n": 7,
+     "low": 0.1274300515353869,
+     "high": 0.2027201756513518
+    },
+    "bus": {
+     "n": 7,
+     "low": 0.9820932215511181,
+     "high": 1.013201120455736
+    }
+   },
+   "busy_patterns": [
+    "sparse75",
+    "sparse50",
+    "a_randn_b_ones",
+    "a_ones_b_randn",
+    "mant",
+    "uniform",
+    "randn"
+   ],
+   "sensitivity_to_kappa_aifoundry3": {
+    "low": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.03603221628571159,
+      "rest": 0.1274300515353869,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 0.6901497789720392,
+      "ratio_measured_over_pred": 1.0073794436266148,
+      "residuals_sharing_a_sign": 18
+     }
+    },
+    "high": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.0466358036851008,
+      "rest": 0.2027201756513518,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 2.1222241053906448,
+      "ratio_measured_over_pred": 0.7251264837627244,
+      "residuals_sharing_a_sign": 25
+     }
+    }
+   },
+   "aifoundry3_with_the_c0_minus_1_18_prices": {
+    "n_items": 26,
+    "rms_W": 0.9535057389000138,
+    "ratio_measured_over_pred": 0.8816553845714244,
+    "residuals_sharing_a_sign": 25
+   },
+   "cards": {
+    "aifoundry1-c0": {
+     "as_published": {
+      "n_items": 8,
+      "rms_W": 1.8945350884905054,
+      "ratio_measured_over_pred": 0.7211900281684871,
+      "residuals_sharing_a_sign": 8
+     },
+     "under_this_rung": {
+      "n_items": 8,
+      "rms_W": 1.4290429081397702,
+      "ratio_measured_over_pred": 0.8338065683572089,
+      "residuals_sharing_a_sign": 6
+     },
+     "scale": 1.8190344184340361
+    },
+    "aifoundry2": {
+     "as_published": {
+      "n_items": 9,
+      "rms_W": 1.593892958932345,
+      "ratio_measured_over_pred": 0.6324938521220573,
+      "residuals_sharing_a_sign": 9
+     },
+     "under_this_rung": {
+      "n_items": 9,
+      "rms_W": 1.0601544156802167,
+      "ratio_measured_over_pred": 0.7222922835081563,
+      "residuals_sharing_a_sign": 9
+     },
+     "scale": 1.9015436013435096
+    },
+    "aifoundry3": {
+     "as_published": {
+      "n_items": 26,
+      "rms_W": 1.2763888266863876,
+      "ratio_measured_over_pred": 0.8316699195262847,
+      "residuals_sharing_a_sign": 25
+     },
+     "under_this_rung": {
+      "n_items": 26,
+      "rms_W": 0.9869211765891661,
+      "ratio_measured_over_pred": 0.8817377581843788,
+      "residuals_sharing_a_sign": 25
+     },
+     "scale": 1.0185572568455867
+    }
+   }
+  },
+  "hier_one_factor": {
+   "kappa_rung_over_bench": {
+    "ffclk": 0.9865139806734627,
+    "mult": 0.040509727433712325,
+    "rest": 0.17200799722741253,
+    "bus": 0.9895972505138275
+   },
+   "kappa_over_the_busy_patterns": {
+    "ffclk": {
+     "n": 7,
+     "low": 0.9554664512697764,
+     "high": 1.066922835343888
+    },
+    "mult": {
+     "n": 7,
+     "low": 0.03923548572476639,
+     "high": 0.04938723932704449
+    },
+    "rest": {
+     "n": 7,
+     "low": 0.14978632111516924,
+     "high": 0.19860956290546924
+    },
+    "bus": {
+     "n": 7,
+     "low": 0.9820932215511181,
+     "high": 1.013201120455736
+    }
+   },
+   "busy_patterns": [
+    "sparse75",
+    "sparse50",
+    "a_randn_b_ones",
+    "a_ones_b_randn",
+    "mant",
+    "uniform",
+    "randn"
+   ],
+   "sensitivity_to_kappa_aifoundry3": {
+    "low": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.03923548572476639,
+      "rest": 0.14978632111516924,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 0.8088515421075886,
+      "ratio_measured_over_pred": 0.9330322488767242,
+      "residuals_sharing_a_sign": 21
+     }
+    },
+    "high": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.04938723932704449,
+      "rest": 0.19860956290546924,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 1.937686782966154,
+      "ratio_measured_over_pred": 0.7463604601676516,
+      "residuals_sharing_a_sign": 25
+     }
+    }
+   },
+   "aifoundry3_with_the_c0_minus_1_18_prices": {
+    "n_items": 26,
+    "rms_W": 1.0948834780548549,
+    "ratio_measured_over_pred": 0.8575193113922014,
+    "residuals_sharing_a_sign": 25
+   },
+   "cards": {
+    "aifoundry1-c0": {
+     "as_published": {
+      "n_items": 8,
+      "rms_W": 1.8945350884905054,
+      "ratio_measured_over_pred": 0.7211900281684871,
+      "residuals_sharing_a_sign": 8
+     },
+     "under_this_rung": {
+      "n_items": 8,
+      "rms_W": 1.486415536042045,
+      "ratio_measured_over_pred": 0.8172283454608079,
+      "residuals_sharing_a_sign": 7
+     },
+     "scale": 1.8190344184340361,
+     "items": [
+      {
+       "item": "lq_h2",
+       "measured_W": 1.912103317535545,
+       "pred_published_W": 3.3379444789110693,
+       "pred_this_rung_W": 2.950612016867204
+      },
+      {
+       "item": "lq_h8",
+       "measured_W": 5.672445971563982,
+       "pred_published_W": 9.469699101755317,
+       "pred_this_rung_W": 8.516617413629081
+      },
+      {
+       "item": "bit_0",
+       "measured_W": 1.2305246445497644,
+       "pred_published_W": 2.5722532604384227,
+       "pred_this_rung_W": 2.2506553696803637
+      },
+      {
+       "item": "bit_8",
+       "measured_W": 0.962488862559239,
+       "pred_published_W": 3.9131524361778625,
+       "pred_this_rung_W": 3.417971594256089
+      },
+      {
+       "item": "bit_16",
+       "measured_W": 4.966328199052133,
+       "pred_published_W": 6.23424046247406,
+       "pred_this_rung_W": 5.413884969610244
+      },
+      {
+       "item": "bit_22",
+       "measured_W": 8.084634834123225,
+       "pred_published_W": 8.122342285533577,
+       "pred_this_rung_W": 6.97553952374268
+      },
+      {
+       "item": "bit_23",
+       "measured_W": 1.4860184834123231,
+       "pred_published_W": 1.767992446073174,
+       "pred_this_rung_W": 1.500955559252101
+      },
+      {
+       "item": "bit_31",
+       "measured_W": 0.9641573459715659,
+       "pred_published_W": 1.2225511952262704,
+       "pred_this_rung_W": 1.0475415604189393
+      }
+     ]
+    },
+    "aifoundry2": {
+     "as_published": {
+      "n_items": 9,
+      "rms_W": 1.593892958932345,
+      "ratio_measured_over_pred": 0.6324938521220573,
+      "residuals_sharing_a_sign": 9
+     },
+     "under_this_rung": {
+      "n_items": 9,
+      "rms_W": 1.1465635567568904,
+      "ratio_measured_over_pred": 0.7059691946928243,
+      "residuals_sharing_a_sign": 9
+     },
+     "scale": 1.9015436013435096,
+     "items": [
+      {
+       "item": "lq_h2",
+       "measured_W": 1.9622022727272719,
+       "pred_published_W": 3.4893495698544474,
+       "pred_this_rung_W": 3.0844481796838314
+      },
+      {
+       "item": "lq_h8",
+       "measured_W": 6.41162222222222,
+       "pred_published_W": 9.899233104722144,
+       "pred_this_rung_W": 8.90292079350469
+      },
+      {
+       "item": "ls_h2",
+       "measured_W": 4.207453787878786,
+       "pred_published_W": 7.005331278760385,
+       "pred_this_rung_W": 6.1323186844085
+      },
+      {
+       "item": "ord_binary_0",
+       "measured_W": 0.07786010101010118,
+       "pred_published_W": 0.1510475129097929,
+       "pred_this_rung_W": 0.15556473496313497
+      },
+      {
+       "item": "ord_shuffled_0",
+       "measured_W": 0.604800284090909,
+       "pred_published_W": 0.9351303565678204,
+       "pred_this_rung_W": 0.972541985233314
+      },
+      {
+       "item": "ord_maxflip_0",
+       "measured_W": 1.2910739898989887,
+       "pred_published_W": 1.7354018906466064,
+       "pred_this_rung_W": 1.8236688856283934
+      },
+      {
+       "item": "ord_binary_19",
+       "measured_W": 0.0025164772727332974,
+       "pred_published_W": 0.3096882621430254,
+       "pred_this_rung_W": 0.40161303217846717
+      },
+      {
+       "item": "ord_shuffled_19",
+       "measured_W": 0.8184750000000017,
+       "pred_published_W": 0.9613514248172245,
+       "pred_this_rung_W": 0.9168800825855417
+      },
+      {
+       "item": "ord_maxflip_19",
+       "measured_W": 1.3108388888888929,
+       "pred_published_W": 1.6485607809175036,
+       "pred_this_rung_W": 1.5686599082603436
+      }
+     ]
+    },
+    "aifoundry3": {
+     "as_published": {
+      "n_items": 26,
+      "rms_W": 1.2763888266863876,
+      "ratio_measured_over_pred": 0.8316699195262847,
+      "residuals_sharing_a_sign": 25
+     },
+     "under_this_rung": {
+      "n_items": 26,
+      "rms_W": 1.1492562928484031,
+      "ratio_measured_over_pred": 0.8538560776222842,
+      "residuals_sharing_a_sign": 25
+     },
+     "scale": 1.0185572568455867,
+     "items": [
+      {
+       "item": "lq_h1",
+       "measured_W": 0.5938044871794883,
+       "pred_published_W": 1.3972341525367784,
+       "pred_this_rung_W": 1.2251556574853046
+      },
+      {
+       "item": "lq_h2",
+       "measured_W": 0.8409775641025625,
+       "pred_published_W": 1.8690617052036944,
+       "pred_this_rung_W": 1.65217724934701
+      },
+      {
+       "item": "lq_h4",
+       "measured_W": 1.7118226495726478,
+       "pred_published_W": 3.1931695112808844,
+       "pred_this_rung_W": 2.8450037948289033
+      },
+      {
+       "item": "lq_h8",
+       "measured_W": 3.206491452991454,
+       "pred_published_W": 5.302500404879935,
+       "pred_this_rung_W": 4.768828111508306
+      },
+      {
+       "item": "lq_h12",
+       "measured_W": 5.535733974358978,
+       "pred_published_W": 7.754692893981966,
+       "pred_this_rung_W": 6.98460050376338
+      },
+      {
+       "item": "lq_h16",
+       "measured_W": 8.298516025641021,
+       "pred_published_W": 10.044137339852265,
+       "pred_this_rung_W": 9.055764172867086
+      },
+      {
+       "item": "lq_h23",
+       "measured_W": 12.261077991452986,
+       "pred_published_W": 13.89730496804938,
+       "pred_this_rung_W": 12.572041926811844
+      },
+      {
+       "item": "lb_h1",
+       "measured_W": 1.9544294871794907,
+       "pred_published_W": 3.0416811693118637,
+       "pred_this_rung_W": 3.053436440760875
+      },
+      {
+       "item": "lb_h2",
+       "measured_W": 2.382672008547013,
+       "pred_published_W": 3.6919826048053483,
+       "pred_this_rung_W": 3.7590619837274315
+      },
+      {
+       "item": "lb_h4",
+       "measured_W": 3.3826645299145355,
+       "pred_published_W": 5.168215804028357,
+       "pred_this_rung_W": 5.229175578671415
+      },
+      {
+       "item": "lb_h8",
+       "measured_W": 4.78776298920379,
+       "pred_published_W": 7.054596492552187,
+       "pred_this_rung_W": 7.267616834632854
+      },
+      {
+       "item": "lb_h12",
+       "measured_W": 8.040747863247864,
+       "pred_published_W": 9.490352089165613,
+       "pred_this_rung_W": 9.763116401986721
+      },
+      {
+       "item": "lb_h16",
+       "measured_W": 10.339041666666665,
+       "pred_published_W": 12.255605195104014,
+       "pred_this_rung_W": 12.534364614165009
+      },
+      {
+       "item": "lb_h23",
+       "measured_W": 15.059518162393159,
+       "pred_published_W": 16.32977284478635,
+       "pred_this_rung_W": 16.742313473465504
+      },
+      {
+       "item": "ord_binary_0",
+       "measured_W": 0.04099252136752263,
+       "pred_published_W": 0.08090823702072675,
+       "pred_this_rung_W": 0.08332787614967634
+      },
+      {
+       "item": "ord_shuffled_0",
+       "measured_W": 0.38163568376068824,
+       "pred_published_W": 0.500900326506208,
+       "pred_this_rung_W": 0.5209397754258791
+      },
+      {
+       "item": "ord_maxflip_0",
+       "measured_W": 0.6824925213675215,
+       "pred_published_W": 0.9295638490817535,
+       "pred_this_rung_W": 0.9768438526615456
+      },
+      {
+       "item": "ord_binary_19",
+       "measured_W": 0.10650000000000404,
+       "pred_published_W": 0.16588377281636374,
+       "pred_this_rung_W": 0.21512305480669386
+      },
+      {
+       "item": "ord_shuffled_19",
+       "measured_W": 0.4445331196581215,
+       "pred_published_W": 0.5149455786523086,
+       "pred_this_rung_W": 0.49112461113952566
+      },
+      {
+       "item": "ord_maxflip_19",
+       "measured_W": 0.7163418803418828,
+       "pred_published_W": 0.8830476175083063,
+       "pred_this_rung_W": 0.8402489072311687
+      },
+      {
+       "item": "bit_0",
+       "measured_W": 0.6343269230769213,
+       "pred_published_W": 1.4403175653596272,
+       "pred_this_rung_W": 1.2602407828104278
+      },
+      {
+       "item": "bit_8",
+       "measured_W": 0.47039316239316165,
+       "pred_published_W": 2.19114590170493,
+       "pred_this_rung_W": 1.9138724016111108
+      },
+      {
+       "item": "bit_16",
+       "measured_W": 2.4892745726495704,
+       "pred_published_W": 3.490825022123466,
+       "pred_this_rung_W": 3.0314719543739796
+      },
+      {
+       "item": "bit_22",
+       "measured_W": 4.679175213675219,
+       "pred_published_W": 4.548056152030419,
+       "pred_this_rung_W": 3.9059109219262766
+      },
+      {
+       "item": "bit_23",
+       "measured_W": 0.7758153958614464,
+       "pred_published_W": 0.9899766149264392,
+       "pred_this_rung_W": 0.8404509346200657
+      },
+      {
+       "item": "bit_31",
+       "measured_W": 0.5470512820512781,
+       "pred_published_W": 0.6845601046048154,
+       "pred_this_rung_W": 0.5865645242329165
+      }
+     ]
+    }
+   }
+  },
+  "distinct": {
+   "kappa_rung_over_bench": {
+    "ffclk": 0.9865139806734627,
+    "mult": 0.02582334103676804,
+    "rest": 0.1017473332465051,
+    "bus": 0.9895972505138275
+   },
+   "kappa_over_the_busy_patterns": {
+    "ffclk": {
+     "n": 7,
+     "low": 0.9554664512697764,
+     "high": 1.066922835343888
+    },
+    "mult": {
+     "n": 7,
+     "low": 0.0025549583436597764,
+     "high": 0.033602610989998505
+    },
+    "rest": {
+     "n": 7,
+     "low": 0.01131141513686808,
+     "high": 0.14606646962133976
+    },
+    "bus": {
+     "n": 7,
+     "low": 0.9820932215511181,
+     "high": 1.013201120455736
+    }
+   },
+   "busy_patterns": [
+    "sparse75",
+    "sparse50",
+    "a_randn_b_ones",
+    "a_ones_b_randn",
+    "mant",
+    "uniform",
+    "randn"
+   ],
+   "sensitivity_to_kappa_aifoundry3": {
+    "low": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.0025549583436597764,
+      "rest": 0.01131141513686808,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 2.9947368023763183,
+      "ratio_measured_over_pred": 2.2169097602287633,
+      "residuals_sharing_a_sign": 24
+     }
+    },
+    "high": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.033602610989998505,
+      "rest": 0.14606646962133976,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 0.7896361428768539,
+      "ratio_measured_over_pred": 0.9334337044985729,
+      "residuals_sharing_a_sign": 20
+     }
+    }
+   },
+   "aifoundry3_with_the_c0_minus_1_18_prices": {
+    "n_items": 26,
+    "rms_W": 0.7367209383403804,
+    "ratio_measured_over_pred": 1.0919335101256813,
+    "residuals_sharing_a_sign": 13
+   },
+   "cards": {
+    "aifoundry1-c0": {
+     "as_published": {
+      "n_items": 8,
+      "rms_W": 1.8945350884905054,
+      "ratio_measured_over_pred": 0.7211900281684871,
+      "residuals_sharing_a_sign": 8
+     },
+     "under_this_rung": {
+      "n_items": 8,
+      "rms_W": 1.3224527760615563,
+      "ratio_measured_over_pred": 1.1249626026494737,
+      "residuals_sharing_a_sign": 4
+     },
+     "scale": 1.8190344184340361
+    },
+    "aifoundry2": {
+     "as_published": {
+      "n_items": 9,
+      "rms_W": 1.593892958932345,
+      "ratio_measured_over_pred": 0.6324938521220573,
+      "residuals_sharing_a_sign": 9
+     },
+     "under_this_rung": {
+      "n_items": 9,
+      "rms_W": 0.17069827179622354,
+      "ratio_measured_over_pred": 0.9743131708233421,
+      "residuals_sharing_a_sign": 7
+     },
+     "scale": 1.9015436013435096
+    },
+    "aifoundry3": {
+     "as_published": {
+      "n_items": 26,
+      "rms_W": 1.2763888266863876,
+      "ratio_measured_over_pred": 0.8316699195262847,
+      "residuals_sharing_a_sign": 25
+     },
+     "under_this_rung": {
+      "n_items": 26,
+      "rms_W": 0.8709270728901989,
+      "ratio_measured_over_pred": 1.1278686872110097,
+      "residuals_sharing_a_sign": 13
+     },
+     "scale": 1.0185572568455867
+    }
+   }
+  },
+  "distinct_one_factor": {
+   "kappa_rung_over_bench": {
+    "ffclk": 0.9865139806734627,
+    "mult": 0.030689014498490996,
+    "rest": 0.1303083544416906,
+    "bus": 0.9895972505138275
+   },
+   "kappa_over_the_busy_patterns": {
+    "ffclk": {
+     "n": 7,
+     "low": 0.9554664512697764,
+     "high": 1.066922835343888
+    },
+    "mult": {
+     "n": 7,
+     "low": 0.029723685310719658,
+     "high": 0.037414364395026455
+    },
+    "rest": {
+     "n": 7,
+     "low": 0.11347384619906353,
+     "high": 0.15046094214083794
+    },
+    "bus": {
+     "n": 7,
+     "low": 0.9820932215511181,
+     "high": 1.013201120455736
+    }
+   },
+   "busy_patterns": [
+    "sparse75",
+    "sparse50",
+    "a_randn_b_ones",
+    "a_ones_b_randn",
+    "mant",
+    "uniform",
+    "randn"
+   ],
+   "sensitivity_to_kappa_aifoundry3": {
+    "low": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.029723685310719658,
+      "rest": 0.11347384619906353,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 0.8088515421075895,
+      "ratio_measured_over_pred": 0.933032248876724,
+      "residuals_sharing_a_sign": 21
+     }
+    },
+    "high": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.037414364395026455,
+      "rest": 0.15046094214083794,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 1.9376867829661573,
+      "ratio_measured_over_pred": 0.7463604601676511,
+      "residuals_sharing_a_sign": 25
+     }
+    }
+   },
+   "aifoundry3_with_the_c0_minus_1_18_prices": {
+    "n_items": 26,
+    "rms_W": 1.094883478054854,
+    "ratio_measured_over_pred": 0.8575193113922017,
+    "residuals_sharing_a_sign": 25
+   },
+   "cards": {
+    "aifoundry1-c0": {
+     "as_published": {
+      "n_items": 8,
+      "rms_W": 1.8945350884905054,
+      "ratio_measured_over_pred": 0.7211900281684871,
+      "residuals_sharing_a_sign": 8
+     },
+     "under_this_rung": {
+      "n_items": 8,
+      "rms_W": 1.4864155360420468,
+      "ratio_measured_over_pred": 0.8172283454608074,
+      "residuals_sharing_a_sign": 7
+     },
+     "scale": 1.8190344184340361
+    },
+    "aifoundry2": {
+     "as_published": {
+      "n_items": 9,
+      "rms_W": 1.593892958932345,
+      "ratio_measured_over_pred": 0.6324938521220573,
+      "residuals_sharing_a_sign": 9
+     },
+     "under_this_rung": {
+      "n_items": 9,
+      "rms_W": 1.1465635567568928,
+      "ratio_measured_over_pred": 0.7059691946928239,
+      "residuals_sharing_a_sign": 9
+     },
+     "scale": 1.9015436013435096
+    },
+    "aifoundry3": {
+     "as_published": {
+      "n_items": 26,
+      "rms_W": 1.2763888266863876,
+      "ratio_measured_over_pred": 0.8316699195262847,
+      "residuals_sharing_a_sign": 25
+     },
+     "under_this_rung": {
+      "n_items": 26,
+      "rms_W": 1.1492562928484054,
+      "ratio_measured_over_pred": 0.8538560776222838,
+      "residuals_sharing_a_sign": 25
+     },
+     "scale": 1.0185572568455867
+    }
+   }
+  },
+  "hier_by_block": {
+   "kappa_rung_over_bench": {
+    "ffclk": 0.9865139806734627,
+    "mult": 0.015481507670932839,
+    "rest": 0.2529019965784391,
+    "bus": 0.9895972505138275
+   },
+   "kappa_over_the_busy_patterns": {
+    "ffclk": {
+     "n": 7,
+     "low": 0.9554664512697764,
+     "high": 1.066922835343888
+    },
+    "mult": {
+     "n": 7,
+     "low": 0.00506959106986165,
+     "high": 0.01640167765692924
+    },
+    "rest": {
+     "n": 7,
+     "low": 0.16923941432716527,
+     "high": 0.3129059904968755
+    },
+    "bus": {
+     "n": 7,
+     "low": 0.9820932215511181,
+     "high": 1.013201120455736
+    }
+   },
+   "busy_patterns": [
+    "sparse75",
+    "sparse50",
+    "a_randn_b_ones",
+    "a_ones_b_randn",
+    "mant",
+    "uniform",
+    "randn"
+   ],
+   "sensitivity_to_kappa_aifoundry3": {
+    "low": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.00506959106986165,
+      "rest": 0.16923941432716527,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 1.2045364670395737,
+      "ratio_measured_over_pred": 1.166862399939363,
+      "residuals_sharing_a_sign": 15
+     }
+    },
+    "high": {
+     "kappa": {
+      "ffclk": 0.9865139806734627,
+      "mult": 0.01640167765692924,
+      "rest": 0.3129059904968755,
+      "bus": 0.9895972505138275
+     },
+     "aifoundry3": {
+      "n_items": 26,
+      "rms_W": 2.1189745451596207,
+      "ratio_measured_over_pred": 0.7411524776771043,
+      "residuals_sharing_a_sign": 25
+     }
+    }
+   },
+   "aifoundry3_with_the_c0_minus_1_18_prices": {
+    "n_items": 26,
+    "rms_W": 1.2044477128758146,
+    "ratio_measured_over_pred": 0.8952614363285882,
+    "residuals_sharing_a_sign": 22
+   },
+   "cards": {
+    "aifoundry1-c0": {
+     "as_published": {
+      "n_items": 8,
+      "rms_W": 1.8945350884905054,
+      "ratio_measured_over_pred": 0.7211900281684871,
+      "residuals_sharing_a_sign": 8
+     },
+     "under_this_rung": {
+      "n_items": 8,
+      "rms_W": 2.2690944766451744,
+      "ratio_measured_over_pred": 0.6615503444125721,
+      "residuals_sharing_a_sign": 8
+     },
+     "scale": 1.8190344184340361
+    },
+    "aifoundry2": {
+     "as_published": {
+      "n_items": 9,
+      "rms_W": 1.593892958932345,
+      "ratio_measured_over_pred": 0.6324938521220573,
+      "residuals_sharing_a_sign": 9
+     },
+     "under_this_rung": {
+      "n_items": 9,
+      "rms_W": 1.8771279126689746,
+      "ratio_measured_over_pred": 0.5942372356668656,
+      "residuals_sharing_a_sign": 8
+     },
+     "scale": 1.9015436013435096
+    },
+    "aifoundry3": {
+     "as_published": {
+      "n_items": 26,
+      "rms_W": 1.2763888266863876,
+      "ratio_measured_over_pred": 0.8316699195262847,
+      "residuals_sharing_a_sign": 25
+     },
+     "under_this_rung": {
+      "n_items": 26,
+      "rms_W": 1.2708710394720542,
+      "ratio_measured_over_pred": 0.8978992665714851,
+      "residuals_sharing_a_sign": 21
+     },
+     "scale": 1.0185572568455867
+    }
+   }
+  }
+ },
+ "capacitance_convention": "E = 0.5 C V^2 for one counted transition at V_REF = 0.517 V, so C_fF = 2 E_fJ / V^2 = 7.483 fF per fJ. A toggle is one edge here, so a full 0->1->0 cycle costs C V^2 and counts twice."
+}
