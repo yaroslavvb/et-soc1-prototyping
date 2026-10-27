@@ -85,33 +85,45 @@ def main():
     mant = [fj(A[j]) for j in range(23) if j in A]
     allp = [fj(A[j]) for j in sorted(A)]
     rho_j = spearman(list(range(len(mant))), mant) if len(mant) > 2 else float("nan")
-    span = (max(allp) / min(allp)) if allp and min(allp) > 0 else float("nan")
+    # The span is a ratio, so it needs a positive floor: a position whose price is not at least 1 SE above zero
+    # is excluded by name rather than allowed to make the ratio meaningless (one noisy position can read < 0).
+    pos = {j: fj(A[j]) for j in A if fj(A[j]) > 0 and A[j]["dW"] > (A[j]["se"] or 0)}
+    excluded = sorted(set(A) - set(pos))
+    span = (max(pos.values()) / min(pos.values())) if pos else float("nan")
     cheap4 = sorted(A, key=lambda j: fj(A[j]))[:4]
     expo = [fj(A[j]) for j in range(23, 31) if j in A]
     low = [fj(A[j]) for j in range(16) if j in A]
-    w(f"\nMantissa Spearman ρ(bit, price) = **{rho_j:.3f}**; span over all 32 positions "
-      f"**{span:.1f}×** ({min(allp):.0f} fJ at bit {min(A, key=lambda j: fj(A[j]))}, "
-      f"{max(allp):.0f} fJ at bit {max(A, key=lambda j: fj(A[j]))}). Exponent mean "
+    w(f"\nMantissa Spearman ρ(bit, price) = **{rho_j:.3f}**; span over the {len(pos)} positions whose price "
+      f"clears its own SE **{span:.1f}×** ({min(pos.values()):.0f} fJ at bit {min(pos, key=pos.get)}, "
+      f"{max(pos.values()):.0f} fJ at bit {max(pos, key=pos.get)})"
+      + (f"; excluded as not above zero at 1 SE: {excluded}" if excluded else "") + ". Exponent mean "
       f"{(sum(expo)/len(expo) if expo else float('nan')):.0f} fJ, "
       f"low-mantissa (0–15) mean {(sum(low)/len(low) if low else float('nan')):.0f} fJ, "
       f"sign bit {fj(A[31]):.0f} fJ. Four cheapest positions: {cheap4}.\n")
     rho_ab = spearman(pa, pb) if len(pa) > 2 else float("nan")
     rl = [r for r in ratios.values() if r]
-    inband = sum(1 for r in rl if 1 / 3 <= r <= 3)
-    w(f"A-side against E65's B side over the 23 mantissa positions: Spearman ρ = **{rho_ab:.3f}**; the A/B "
-      f"ratio runs {min(rl):.2f}–{max(rl):.2f} over all {len(rl)} shared positions, median "
-      f"{sorted(rl)[len(rl)//2]:.2f}, with **{inband} of {len(rl)}** inside [1/3, 3].\n")
-    S["P1"] = {"rho_mantissa": rho_j, "span": span,
+    rm = [r for j, r in ratios.items() if r and j <= 22]          # the 23 mantissa positions P2 registers
+    inband = sum(1 for r in rm if 1 / 3 <= r <= 3)
+    w(f"A-side against E65's B side over the 23 mantissa positions: Spearman ρ = **{rho_ab:.3f}**, with "
+      f"**{inband} of {len(rm)}** inside the registered [1/3, 3] band. Over all {len(rl)} shared positions the "
+      f"A/B ratio runs {min(rl):.2f}–{max(rl):.2f}, median {sorted(rl)[len(rl)//2]:.2f}.\n")
+    S["P1"] = {"rho_mantissa": rho_j, "span": span, "positions_excluded_from_span": excluded,
                "verdict": "PASS" if (rho_j > 0.5 and span > 5) else "FAIL"}
-    S["P2"] = {"rho_A_vs_B": rho_ab, "n_in_band": inband, "n": len(rl),
+    S["P2"] = {"rho_A_vs_B": rho_ab, "n_in_band": inband, "n": len(rm),
                "ratio_min": min(rl), "ratio_max": max(rl), "ratio_median": sorted(rl)[len(rl) // 2],
-               "verdict": "PASS" if (rho_ab > 0.5 and inband > len(rl) / 2) else "FAIL"}
+               "verdict": "PASS" if (rho_ab > 0.5 and inband > len(rm) / 2) else "FAIL"}
+    # P3 has two halves, scored as E65 scored its own A3: (a) the sign bit among the four cheapest; (b) EVERY
+    # exponent bit dearer than EVERY mantissa bit below 16. The counterexample is named when (b) fails.
+    half_a = 31 in cheap4
+    ctr = [(je, jm) for je in range(23, 31) if je in A for jm in range(16) if jm in A
+           and fj(A[jm]) >= fj(A[je])]
+    half_b = expo and low and not ctr
     S["P3"] = {"sign_rank": sorted(A, key=lambda j: fj(A[j])).index(31) + 1, "cheapest_four": cheap4,
                "exponent_mean_fJ": sum(expo) / len(expo) if expo else None,
                "low_mantissa_mean_fJ": sum(low) / len(low) if low else None,
-               "verdict": "PASS" if (31 in cheap4 and expo and low and min(expo) > max(low[:16]))
-                          else ("PARTIAL" if 31 in cheap4 or (expo and low and sum(expo) / len(expo) > sum(low) / len(low))
-                                else "FAIL")}
+               "half_a_sign_cheap": bool(half_a), "half_b_exponent_over_low_mantissa": bool(half_b),
+               "counterexamples": ctr[:6], "n_counterexamples": len(ctr),
+               "verdict": "PASS" if (half_a and half_b) else ("PARTIAL" if (half_a or half_b) else "FAIL")}
 
     # ---- block 2
     w("### Block 2 — the busy partner (B = π)\n")
@@ -258,7 +270,9 @@ def main():
            "P8": "the summed price lists predict both one-sided steps within a factor of 2"}
     GOT = {"P1": lambda s: f"ρ = {s['rho_mantissa']:.3f}, span {s['span']:.1f}×",
            "P2": lambda s: f"ρ = {s['rho_A_vs_B']:.3f}, {s['n_in_band']}/{s['n']} in band, median ratio {s['ratio_median']:.2f}",
-           "P3": lambda s: f"sign bit ranks {s['sign_rank']}/32; exponent mean {s['exponent_mean_fJ']:.0f} fJ vs low-mantissa {s['low_mantissa_mean_fJ']:.0f} fJ",
+           "P3": lambda s: (f"sign bit ranks {s['sign_rank']}/32 ({'in' if s['half_a_sign_cheap'] else 'not in'} the cheapest four); "
+                            f"exponent mean {s['exponent_mean_fJ']:.0f} fJ vs low-mantissa {s['low_mantissa_mean_fJ']:.0f} fJ, "
+                            f"{s['n_counterexamples']} mantissa-below-16 bits at or above an exponent bit"),
            "P4": lambda s: f"{s['n_positive']}/{s['n']} positive, {s['n_at_2se']}/{s['n']} at ≥ 2 SE",
            "P5": lambda s: f"{s['abp_11_fJ']:.0f} fJ, ratio {s['ratio']:.2f}",
            "P6": lambda s: f"mean excess {s['mean_excess_W']:+.3f} ± {s['se']:.3f} W, |max| {s['max_abs_excess_W']:.3f} W, {s['cells_within_20pct']}/{s['n_cells']} within 20%",
