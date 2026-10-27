@@ -121,6 +121,7 @@ dialog#pv[open]{display:flex;flex-direction:column}
 .story .src{font-size:.76rem;color:var(--muted)}
 .story .src a{color:var(--c1)}
 .next{margin:6px 0 18px;max-width:880px}
+.readthis{max-width:880px;margin:14px 0 18px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--c1);border-radius:10px;font-size:1rem;line-height:1.5}
 .next li{margin:4px 0}
 #tl-weeks button{font-variant-numeric:tabular-nums}
 .ask-week{max-width:880px;margin:20px 0 0;padding-top:6px;border-top:2px solid var(--axis)}
@@ -131,6 +132,11 @@ dialog#pv[open]{display:flex;flex-direction:column}
 .lane-key b{font-weight:650}
 </style><h1>Tracking heat down to transistor flips</h1>
 <p class="byline"><span id="l-range"></span>, all times Pacific · built from the lab repository’s request log, experiment register and published pages, and from the project’s own hub · data and tools in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<p class="readthis"><b>The result this thread was chasing is now one page:</b>
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor">From matmul speed to one transistor switch</a>
+— the whole chain, from the speed gap down to 108 electrons on one transistor’s gate. This page is how it was
+reached: every ask, session, card measurement and write-up behind it, on one axis.</p>
 
 <p class="lede">Horace He found that a matrix multiply runs faster on predictable data. This is seven weeks of
 following that result down into an ET-SoC-1: from the speed, to the watts, to the transistors that flip, to the heat
@@ -143,20 +149,20 @@ you can film coming off the back of the board. The chart below puts four things 
 <h2 id="story">The story so far</h2>
 <p class="small">Every number here is measured on these cards and published. Nothing on this page is modelled unless it says so.</p>
 <div class="story">
- <div class="card"><span class="big">116.7 fJ</span><span class="what">per flipped input bit of an fp32 multiply-add, on the card’s own board power — and 20.8 fJ for a bit flipped into a register-file read port.</span><span class="src">E60 · <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-ladder">What one flipped bit costs</a></span></div>
- <div class="card"><span class="big">+0.68 W</span><span class="what">from the <i>order</i> of the same arithmetic: 4,096 identical multiply-adds, sequenced to flip the most bits instead of the fewest.</span><span class="src">E60 · <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-ladder">the ladder</a></span></div>
- <div class="card"><span class="big">~154 fJ</span><span class="what">per flipped bit, weighed a second way: a thermal camera on the back of the board reads 59 ± 3 mK per watt, the heat about five seconds behind the work.</span><span class="src">E63 · <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-camera">Weighing flipped bits with heat</a></span></div>
- <div class="card"><span class="big">13% → 33%</span><span class="what">how much faster zeros run than random fp32 data: 13% on a cool die, where the power limit acts — and 33% sustained, where heat takes over.</span><span class="src">E64 · <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-limit">Power, then heat</a></span></div>
- <div class="card"><span class="big">1.8 mm</span><span class="what">of mesh wire is what one multiply-add input bit is worth. Dally’s rule of thumb, read per flipped bit, is 10 µm; a bare gate toggle here is about 5 µm. The bit’s trip to the gate is what costs.</span><span class="src"><a href="https://spacesheep.dev/@yaroslavvb/bit-flip-in-microns">A bit flip in microns</a></span></div>
- <div class="card"><span class="big">1,946 bits</span><span class="what">toggle somewhere in the multiply-add when one operand bit changes — 875 of them in the Wallace tree. You can zoom through all seven stages, down to a full adder’s 28 transistors.</span><span class="src"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=m-tensorfma32">The chip, interactively</a></span></div>
+ <div class="card"><span class="big">15% → 33%</span><span class="what">how much faster zeros run than random fp32 data: 15% in the first seconds on a cool die, where the power cap acts, and 33% once it is hot and the clock has fallen to its floor.</span><span class="src">E64 · <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-limit">Power, then heat</a></span></div>
+ <div class="card"><span class="big">118–136 fJ</span><span class="what">what one flipped operand bit costs at the board. It is a band, not a number: an overnight idle measured this card’s leakage at 0.296 W/°C, 5.1× below the figure the earlier prices were corrected with.</span><span class="src">E60, E65, E67, E68 · <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-ladder">the ladder</a></span></div>
+ <div class="card"><span class="big">108 electrons</span><span class="what">on one minimum transistor’s gate at the 0.517 V rail this card runs: 8.94 aJ, which is 2,755 times Landauer’s floor at the die’s 66 °C trip. The bottom of the chain.</span><span class="src"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor">The chain, end to end</a></span></div>
+ <div class="card"><span class="big">a third</span><span class="what">of what the board actually pays for one random multiply-add is all the bottom-up count can name: 1.95 pJ of 5.78. The missing two thirds are drawn on the page rather than hidden.</span><span class="src"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor">the waterfall</a></span></div>
+ <div class="card"><span class="big">×1.147</span><span class="what">the speed gap predicted from the watts up, against a measured 1.127–1.150 depending on whether you read clocks or TFLOPS. The sustained gap is a clamp, not a fit: any cap inside a 14.6 W window gives the same 800/600.</span><span class="src"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor">the closure</a></span></div>
+ <div class="card"><span class="big">64 positions</span><span class="what">both operands’ bits priced on two cards, 83 fJ to 1,440 fJ — and shown <i>not</i> to add: both operands random costs 16.2 W against the 18.4 W the single-bit list predicts.</span><span class="src">E65, E67 · <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-10-27-e67-a-side-bit-prices">the A side</a></span></div>
 </div>
 <h3 id="whats-next">What’s next</h3>
 <ul class="next">
- <li><b>Join the pieces into load-to-watts.</b> The flip model prices one kind of load well in sample (0.45–0.49 W rms) and errs high out of it: <b>0.91–1.01 W held out</b>, against a 0.6 W bar it set itself.</li>
- <li><b>Settle the toggle count.</b> Two counts of the same multiply-add disagree by three times — 21,331 against 7,160–7,470 — and every femtojoule in dispute sits under that number.</li>
- <li><b>Price a transistor at 0.517 V,</b> the voltage this card actually runs at. No gate in the model has been priced there yet, and an open cell library’s energy tables would do it without a card.</li>
+ <li><b>Move the power cap.</b> Every step above the governor says the cap is what makes zeros faster — but the cap has never actually been moved. About half an hour of card time would turn the best-supported link in the chain from an inference into a measurement.</li>
+ <li><b>Count the flips that happen at once.</b> The single-bit prices do not add, and nothing yet says by how much. A ladder in the <i>number</i> of positions flipping together is written and never run: 20 card-minutes, and it turns the bottom-up range <b>×1.06–1.19</b> into one number.</li>
+ <li><b>Price the other half of the capacitance.</b> Half the design’s farads — 23,331 fF of 47,093 — sit on nets made after the netlist was simulated, so the bottom-up total is a floor three times over. Writing the netlist out later and re-simulating needs no card.</li>
 </ul>
-<p class="small">All three are being worked on today; whatever lands will show up at the right-hand edge of the timeline.</p>
+<p class="small">The first two need a card; the third does not. One measurement is still running at the right-hand edge of the timeline as this page was built.</p>
 
 <nav class="toc-line" aria-label="Contents"><b>Contents:</b> <ol id="toclist"><li><a href="#timeline">1. Seven weeks on one time axis</a></li><li><a href="#highlights">2. The turning points</a></li><li><a href="#asked">3. What I asked</a></li><li><a href="#totals">4. The totals</a></li><li><a href="#method">5. How it was put together</a></li></ol></nav>
 
@@ -192,7 +198,7 @@ press Enter to read its words; the numbered flags are the turning points of
 </div>
 <p class="small" id="tl-cap"></p>
 </div>
-<h3 id="lanes">The ten lanes</h3>
+<h3 id="lanes">The lanes</h3>
 <p class="small">Each lane is one strand of the thread. A strand is sometimes one session and sometimes several,
 because the same piece of work was picked up again on another day.</p>
 <ul class="lane-key" id="lane-key"></ul>
@@ -228,7 +234,7 @@ snapshot is <b id="l-wall"></b>.</p>
 
 <div class="two">
 <div>
-<h3 id="card-hours">Card-hours per card, by experiment family</h3>
+<h3 id="card-hours">Where each card’s hours went, by experiment family</h3>
 <div id="cardh-leg"></div>
 <div id="cardh"></div>
 <p class="small" id="cardh-cap"></p>

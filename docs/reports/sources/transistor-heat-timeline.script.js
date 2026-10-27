@@ -120,7 +120,7 @@ const TOT_SESSION = D.meta.snapshot_end - D.meta.session_start;
   setH('l-mach', AG.groups.length);
   setH('l-lanes', NB ? NB.sessions.length : 0);
   setH('l-exp', num(ct.intervals, 0));
-  setH('l-cardh', `${num(ct.held_h, 0)} card-hours`);
+  setH('l-cardh', `${num(ct.held_h, 1)} card-hours`);
   setH('l-doc', art.pages);
   setH('l-pub', art.public);
   setH('l-wall', `${num(W.wall_h / 24, 0)} days`);
@@ -135,7 +135,7 @@ const TOT_SESSION = D.meta.snapshot_end - D.meta.session_start;
   setH('k-agents', `${num(W.sub_agent_h, 0)} session-hours`);
   setH('k-agents-sub', `${at.agents} sessions on ${AG.groups.length} machines, ${hrs(W.main_busy_h, 0)} of wall clock in which some session was working; ` +
     `up to ${AG.peak.subagents.value} at once`);
-  setH('k-cards', `${num(W.card_held_h, 0)} card-hours`);
+  setH('k-cards', `${num(ct.held_h, 1)} card-hours`);
   setH('k-cards-sub', CA.per_card.map(p => `${CK.card(p.id).label} ${num(p.held_h, 1)}`).join(' \u00b7 ') +
     ` h held, over ${num(ct.intervals, 0)} measurements`);
   setH('k-doc', `${art.pages} write-ups`);
@@ -1229,11 +1229,11 @@ function words(text, lost, k) {
 (function () {
   legend('cardh-leg', famLegend());
   const P = CA.per_card, max = Math.max(...P.map(p => p.family_h.reduce((a, b) => a + b, 0)));
-  CK.frame('cardh', {label: 'Card-hours per card, by experiment family', minW: 300, maxW: 640, height: W => P.length * 40 + 56, draw(f) {
+  CK.frame('cardh', {label: 'Where each card\u2019s hours went, by experiment family', minW: 300, maxW: 640, height: W => P.length * 40 + 56, draw(f) {
     const nar = f.narrow, L = nar ? 50 : 140, R = nar ? 104 : 116, T = 8, rh = 40, bh = 20;
     const x = CK.lin(0, Math.ceil(max / 5) * 5, L, f.W - R), g = CK.el('g', {'aria-hidden': 'true'}, f.svg), labs = [], nodes = [];
     for (const t of x.ticks(nar ? 4 : 6)) { CK.el('line', {x1: x(t), x2: x(t), y1: T, y2: T + P.length * rh, class: 'grid-line'}, g); labs.push(CK.txt(g, x(t), T + P.length * rh + 16, num(t, 0), 'tick', 'middle')); }
-    labs.push(CK.txt(g, (L + f.W - R) / 2, f.H - 4, 'card-hours busy; the label gives the hours held', 'lab', 'middle'));
+    labs.push(CK.txt(g, (L + f.W - R) / 2, f.H - 4, 'hours busy, the exact union of the intervals', 'lab', 'middle'));
     P.forEach((p, i) => {
       const y = T + i * rh + (rh - bh) / 2, c = CK.card(p.id);
       CK.cardMark(f.svg, p.id, 8, y + bh / 2, 4);
@@ -1243,14 +1243,14 @@ function words(text, lost, k) {
         if (v <= 0) return;
         const n = rect(f.svg, x(acc), y, Math.max(1, x(acc + v) - x(acc)), bh, k === DEVF ? famFill(k, c.color) : FAMCOL[k]);
         sty(n, k === DEVF ? {stroke: c.color, strokeWidth: '1px'} : {stroke: 'var(--page)', strokeWidth: '1.5px'});
-        CK.tip(f, n, `<b>${c.label}</b><br>${esc(CA.families[k].label)}: ${num(v, 2)} card-hours busy`); nodes.push(n); acc += v;
+        CK.tip(f, n, `<b>${c.label}</b><br>${esc(CA.families[k].label)}: ${num(v, 2)} h busy`); nodes.push(n); acc += v;
       });
-      labs.push(CK.txt(f.svg, x(acc) + 6, y + bh / 2 + 4, `held ${num(p.held_h, 1)} card-h`, 'lab-strong'));
+      labs.push(CK.txt(f.svg, x(acc) + 6, y + bh / 2 + 4, `${num(acc, 1)} h busy`, 'lab-strong'));
     });
     CK.inside(f, labs); CK.keynav(f, nodes);
   }});
   const tot = CA.totals;
-  setH('cardh-cap', `${num(tot.held_h, 1)} card-hours held in all, ${num(tot.busy_h, 1)} busy, over ${num(tot.intervals, 0)} measurements. Held counts a card’s gaps shorter than 2 minutes as held, because a queue keeps the card between passes; busy is the exact union of the intervals. ` +
+  setH('cardh-cap', `The one card-time figure this page quotes is ${num(tot.held_h, 1)} card-hours, over ${num(tot.intervals, 0)} measurements: the hours a card was <i>held</i>, counting gaps shorter than 2 minutes as held, because a queue keeps the card between passes. The bars above are the stricter <i>busy</i> union of the intervals themselves, ${num(tot.busy_h, 1)} h, which is why they stop short of it. ` +
     `The families are shades of one grey, a step per family in time order. Card 0 of the first host ran only smoke tests: an amendment kept it out of the September campaign because it overheats under load.`);
 })();
 
