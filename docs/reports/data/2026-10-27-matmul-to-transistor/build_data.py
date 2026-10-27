@@ -40,18 +40,10 @@ o["speed"] = {
 }
 
 # ---- level 1: the governor --------------------------------------------------
-# chain.json's own clamp note says the window holds "every candidate cap". It does not: E64's measured
-# sustained randn point, 54.4 W, is above it. Carry the object, but do not carry a claim this page
-# contradicts two sections later -- the original wording is kept beside it so nothing is quietly dropped.
+# chain.json's clamp note said the window holds "every candidate cap"; E64's measured sustained randn
+# point, 54.4 W, is above it. Corrected at its source (chain.py) on Tue 27 Oct 2026, so it is carried as is.
 _clamp = dict(ch["sustained_is_a_clamp"])
-_clamp["note_as_written_in_chain_json"] = _clamp.get("note")
-_clamp["note"] = (
-    "Three of the four candidate caps are inside the window; for those, zeros clamps high and random "
-    "clamps low, so the ratio is 800/600 by construction and the 0.3% residual is E64's rounding of "
-    "12.3 x 600/800 = 9.225 to 9.2. The fourth, E64's own measured sustained randn point at 54.4 W, is "
-    "ABOVE the window: at that cap random would settle above the 600 MHz floor and the ratio would fall "
-    "to about 1.30. The prediction that survives either way is ordinal."
-)
+assert "every candidate cap" not in _clamp["note"], "chain.json carries the superseded clamp note again"
 o["governor"] = {
     "cap_W": ch["power_cap_W"], "cap_source": ch["power_cap_source"],
     "tau_s": ch["governor"]["tau_s"], "rms_mhz": ch["governor"]["rms_mhz"], "n": ch["governor"]["n"],
@@ -103,7 +95,7 @@ o["perbit"] = {
     "shape": pl["shape"],
     "flowM_fJ": 745.0, "flowM_se": 56.0, "flowM_A_side_fJ": 856.0,
     "e68_band_fJ": [117.5, 135.9], "e68_vs_e60_same_card": [133.7, 121.3],
-    "e66_leak_W_per_C": 0.296, "a1_leak_W_per_C": 1.508,
+    "e66_leak_W_per_C": 0.294, "a1_leak_W_per_C": 1.508,  # E66 final: median of 18 cycles, 51-58 C (lab 1cd09165)
     "ladder_rows": sat["lq_rows"], "flat_fJ_per_bit": sat["flat_fJ_per_bit"],
     "flat_marginal_fJ": sat["flat_fJ_per_bit_marginal"],
     "laws": sat["law_scores_pct"], "beta": sat["beta"],

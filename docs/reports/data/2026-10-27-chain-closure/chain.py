@@ -541,9 +541,12 @@ R["chain"] = {"v600": v600, "v800_mean": v800, "v800_cards": {"aifoundry1-c0": v
                   "ratio_anywhere_in_window": 800 / 600,
                   "candidate_caps_W": CAND,
                   "measured_sustained_ratio_unrounded": 800 / 600,
-                  "note": "zeros clamps high and random clamps low for every candidate cap, so the "
-                          "sustained ratio is 800/600 by construction and the 0.3% residual is E64's "
-                          "rounding of 12.3 x 600/800 = 9.225 to 9.2. The prediction is ordinal."},
+                  "note": "Three of the four candidate caps are inside the window; for those, zeros "
+                          "clamps high and random clamps low, so the ratio is 800/600 by construction and "
+                          "the 0.3% residual is E64's rounding of 12.3 x 600/800 = 9.225 to 9.2. The fourth, "
+                          "E64's own measured sustained randn point at 54.4 W, is ABOVE the window: at that "
+                          "cap random would settle above the 600 MHz floor and the ratio would fall to about "
+                          "1.30. The prediction that survives either way is ordinal."},
               "burst_cap_sensitivity": {str(c): settle(dynM["zeros"], c) / settle(dynM["randn"], c) for c in CAPS},
               "burst_measured_comparators": COMP,
               "referral_step_ratio": {str(f): sr[f] for f in sr},

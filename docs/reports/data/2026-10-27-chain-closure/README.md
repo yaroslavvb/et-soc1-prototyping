@@ -33,8 +33,12 @@ measurement, and the model cannot resolve the four measurements from each other.
 
 ‡ **The sustained ratio is a clamp, not a fit.** Zeros at 800 MHz draws 37.9 W and random at
 600 MHz draws 52.5 W, so *any* sustained cap in that 14.6 W window returns exactly 800 / 600 =
-1.3333 — and every candidate cap is inside it (E64's registered 50.3 W, a 66 °C trip's 51.4 W,
-E64's measured sustained ones level 49.4 W). The measurement is the same number: E64 reports
+1.3333 — and three of the four candidate caps are inside it (E64's registered 50.3 W, a 66 °C trip's
+51.4 W, E64's measured sustained ones level 49.4 W). The fourth, E64's own measured sustained random point at
+54.4 W, is above it: at that cap random would settle above the 600 MHz floor and the ratio would fall to about
+1.30, so the ordinal prediction below is what survives every candidate. *(Corrected Tue 27 Oct 2026: this
+read "every candidate cap is inside it", which the 54.4 W point contradicts; the page caught it first.)* For
+the three caps inside, the measurement is the same number: E64 reports
 sustained 800 and 600 MHz, and its 9.2 TFLOPS is 12.3 × 600/800 = 9.225 rounded. So the predicted
 and measured sustained ratios are *identically* 1.3333 and the earlier "0.3%" was E64's rounding.
 What the chain does predict here is ordinal and still real: **random falls to the governor's
