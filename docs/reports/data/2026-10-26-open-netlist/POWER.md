@@ -4,7 +4,7 @@
 [`tools/open-flow/txfma/`](../../../../tools/open-flow/txfma/README.md), scripts `pnr.tcl`,
 `mktiles.sh`, `gatesim.sh`, `tb_gate.sv`, `power.py`, `ladder.py`.
 
-> **Corrected the same day, after review.** The first version of this file made four claims it
+> **Corrected the same day, after review.** The first version of this file made several claims it
 > should not have, and they are restated below with the measurements that settle them:
 > its headline toggle agreement ("3.5% apart") compared a Booth+tree+adder figure against a
 > **tree-only** one; its 35.4 fJ per flipped bit was a two-point difference divided by counted bus
@@ -48,8 +48,9 @@ toggle costs. But two consequences bear on the numbers below and neither was sta
   (probably larger) tree;
 - the energies are priced at **0.517 V**, the minion rail, while the liberty is ASAP7 RVT **TT at
   nominal 0.7 V, 25 °C** (`asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib`: `nom_voltage : 0.7`,
-  `PVT_0P7V_25C`). That is deliberate: the pin capacitances that dominate C here are geometry and
-  are very nearly voltage-independent, so ½CV² at the real rail is the right arithmetic. The cell
+  `PVT_0P7V_25C`). That is deliberate: capacitance here is 30,291 fF of pin against 16,802 fF of
+  wire, both geometry and very nearly voltage-independent, so ½CV² at the real rail is the right
+  arithmetic — unlike an energy taken straight out of the liberty, which would need (V/0.7)². The cell
   **delays** at 0.7 V are not transferable to 0.517 V, which is a second reason the timing numbers
   above are only indicative.
 
@@ -69,7 +70,7 @@ measured op and one without, because a SAIF counts the whole simulation.
 | `randn` (the 21 Sep random tile) | 33.9 | **3,623** | **1.516** | 1.946 | 32.7% |
 | `lb_h8` (ladder, busy partner A = π, h = 8) | 13.0 | 1,759 | 0.962 | 1.171 | 51.6% |
 | `lq_h8` (ladder, quiet partner A = 1.0, h = 8) | 13.6 | 1,068 | 0.800 | 0.927 | 62.1% |
-| `lb_h0` / `lq_h0` (the ladders' own zero rungs) | 0.23 / 0.19 | 37 / 36 | 0.509 / 0.508 | 0.513 | 97.6% |
+| `lb_h0` / `lq_h0` (the ladders' own zero rungs) | 0.23 / 0.19 | 37 / 36 | 0.509 / 0.508 | 0.513 | 97.6% / 97.7% |
 | `ones` | 0.06 | 31 | 0.507 | 0.511 | 97.9% |
 | `zeros` | 0 | 0.008 | 0.217 | 0.217 | 100% |
 
@@ -98,7 +99,8 @@ Three things fall out:
 The V3-HL ladder ([`tools/claims-v3/hl/`](../../../../tools/claims-v3/hl/README.md)) flips the low
 `h` bits of a B mantissa between one multiply-add and the next, with the partner operand A held
 either quiet (`lq`, A = 1.0) or busy (`lb`, A = π). E60 ran it on three cards; the open netlist now
-runs the same operand files. Both rungs of both ladders, h = 0, 1, 2, 4, 8:
+runs the same operand files, on both netlists. All five rungs of both ladders, h = 0, 1, 2, 4, 8
+(the hierarchy-kept netlist; `power-mixed/` holds the same ten runs on the `mixed` one):
 
 | h | `lq` pJ / mul-add | `lq` clock share | `lb` pJ / mul-add | `lb` clock share |
 | ---: | ---: | ---: | ---: | ---: |
@@ -138,9 +140,14 @@ comparison:
    flip. The bench's `bus_toggles` counts more than that: at `lb_h8` it is 13.0 per multiply-add
    against 8 designed, the extra ≈ 4.8 being the accumulator word, which the bench writes back
    (`tb_gate.sv` l. 106: `C[...] <= out_data[l].data`). Dividing by the wrong one moves the answer
-   38%. Both denominators are given above, each against its own E60 counterpart.
+   38%. Both denominators are given above, each against its own E60 counterpart. The bench's live
+   accumulator is **not** a difference from the card: V3-HL's "sources are never written and every
+   sink is rewritten with the same value" describes its `ec` (instruction-catalogue) items, and the
+   ladder's own amendment A2 says of the fma families that the primary regressor is "the
+   RTL-counted operand-bus bits (A + B + C: the accumulator reads co-vary with h)". So the bus row
+   above is a like-for-like comparison and the designed row is the cleaner one.
 2. **The partner.** `lb` is the *busy* partner; the board's 116.7 fJ is the *quiet* one. Comparing
-   `lb` against 116.7 fJ was a 11% error on top of the first. Both partners now ran.
+   `lb` against 116.7 fJ was an 11% error on top of the first. Both partners now ran.
 3. **Slope, not difference.** The ladder is markedly non-linear — the free intercept is 141 fJ for
    `lb` and 34 fJ for `lq`, i.e. the first flipped bit costs several times the marginal one — so
    a two-point (h8 − h0) ÷ 8 reads 56.6 fJ where the fitted slope reads 38.5. E60's own reducer
@@ -192,7 +199,7 @@ disagreement, not a 3.5% agreement. The direction is worth noting: the open flow
 tree toggles than the tape-out flow, on a tree with about the same transistor count, so the gap is
 not "the open netlist is bigger".
 
-Both rows of the `mixed` column come from `power-mixed/`, the same bench and the same stimulus
+Every `mixed` figure above comes from `power-mixed/`, the same bench and the same stimulus
 driven into the netlist whose boundaries only the four multiplier blocks keep. Its per-net
 capacitance covers 56.3% of the design's farads against the kept netlist's 50.5%, and it prices a
 random multiply-add at 1.468 pJ against 1.516, with the clock at 32.0% against 32.7% — so none of
@@ -248,27 +255,34 @@ because both omissions scale with activity. Everything this directory concludes 
 1. **Detailed routing does not close, so there is no SPEF and no coupling capacitance.**
    TritonRoute in the only OpenROAD binary installable without root (the litex-hub conda build,
    `f12e2f47`, a **2022** build) fails with `DRT-0255 Maze Route cannot find path` — and the nets
-   it names are **top-level port nets at the die boundary**, not core logic: `clock`,
-   `trans_coefficients[51]`, `out_data_res[0]`, `out_data_res[29]`. Every failing `routeBox` lies
-   on an edge of the die (`( 0 15119 ) ( 3779 18899 )` and its siblings, x or y pinned to
-   0–3779). Six configurations were tried and the diagnosis survives all of them:
+   it names are **top-level port nets at the die boundary**, never core logic: `clock`,
+   `trans_coefficients[6/51]`, `in_data[4/33/48]`, `out_data_res[0/8/9/14/29]`. Every failing
+   `routeBox` lies on an edge of the die (`( 0 15119 ) ( 3779 18899 )` and its siblings, x or y
+   pinned to 0–3779, which is one routeBox width). **Ten configurations were run and the
+   diagnosis survives all of them:**
 
-   | # | floorplan | pins | global route | detailed route | result |
-   | ---: | --- | --- | --- | --- | --- |
-   | 1 | util 40 | M4/M5 | M2–M7 | M2–M9 | DRT-0255, port nets |
-   | 2 | util 30 | M4/M5 | M2–M7 | M2–M9 | DRT-0255 on `clock`, `trans_coefficients[51]` |
-   | 3 | util 22 | M4/M5 | M2–M7 | M2–M9 | DRT-0255 |
-   | 4 | util 30 | M6/M7, `-min_distance 4` | M2–M7 | M2–M9 | DRT-0255, mostly `clock` |
-   | 5 | util 30 | M4/M5 | M2–**M7** | M2–**M7** (matched) | **DRT-0155**: the global route emitted an M8 guide for `in_data[48]` anyway |
-   | 6 | core space 6 µm, util 30 | M4/M5 | M2–M9 | M2–M9 | DRT-0255 on `out_data_res[0]` |
+   | # | netlist | util | core space | pins | global route | detailed route | result |
+   | ---: | --- | ---: | ---: | --- | --- | --- | --- |
+   | 1 | keep | 30 | 2 µm | M4/M5 | M2–M7, clk M4–M7 | M2–M9 | 8 × DRT-0255: `clock`, `trans_coefficients[51]` |
+   | 2 | keep | 30 | 2 µm | M6/M7, `-min_distance 4` | M2–M7 | M2–M9 | 9 × DRT-0255: `clock`, `out_data_res[29]` |
+   | 3 | keep | 40 | 2 µm | M4/M5 | M2–M7 | M2–M9 | 4 × DRT-0255: `clock`, `out_data_res[8]` |
+   | 4 | keep | 22 | 2 µm | M4/M5 | M2–M7 | M2–M9 | 3 × DRT-0255: `trans_coefficients[6]` |
+   | 5 | keep | 30 | 2 µm | M4/M5 | M2–M7 | **M2–M7 (matched)** | **DRT-0155**: the global route emitted an M8 guide for `in_data[48]` anyway |
+   | 6 | keep | 30 | 2 µm | M4/M5 | M2–M7, **clk M2–M7** | M2–M7 | DRT-0155, the same guide |
+   | 7 | keep | 30 | 2 µm | M4/M5 | **M2–M9** | M2–M9 | 8 × DRT-0255, unchanged |
+   | 8 | keep | 30 | **6 µm** | M4/M5 | M2–M9 | M2–M9 | 7 × DRT-0255: `clock`, `in_data[33]`, `out_data_res[0]` |
+   | 9 | keep | 30 | 2 µm | **M2/M3** | M2–M9 | M2–M9 | 13 × DRT-0255, worse |
+   | 10 | **mixed** | 30 | 2 µm | M4/M5 | M2–M7 | M2–M9 | 2 × DRT-0255: `clock`, `in_data[4]` — the closest any run came |
 
-   Row 5 is the informative one: matching the two layer ranges, which looked like the obvious fix,
-   only trades the failure for a different one, because this GRT puts an I/O net's guide on a layer
-   outside the range it was given. At 30% utilisation the router had completed 20% of its first
-   iteration with **zero violations** before the port nets failed, so this is pin access, not
-   congestion. **What would clear it:** a current OpenROAD (the ORFS Docker image, or a source
-   build — neither was available: Docker is not running on the Intel and a source build needs
-   root), or a floorplan that gives the I/O pins a proper ring instead of bare die-edge slots.
+   Rows 5 and 6 are the informative ones: matching the two layer ranges, which looks like the
+   obvious fix, only trades the failure for a different one, because this GRT puts an I/O net's
+   guide on a layer outside the range it was given. Utilisation moves the *count* of failures
+   (4 at 40%, 3 at 22%) but never removes them, and at 30% the router had completed 20% of its
+   first iteration with **zero violations** before the port nets failed, so this is pin access,
+   not congestion. The one lever that helped was fewer nets at the boundary (row 10). **What
+   would clear it:** a current OpenROAD (the ORFS Docker image, or a source build — neither was
+   available: Docker is not running on the Intel and a source build needs root), or a floorplan
+   that gives the I/O pins a proper ring instead of bare die-edge slots.
    `pnr.tcl` already runs `extract_parasitics` and `write_spef` and re-reads the SPEF once routing
    closes.
 2. **No timed pass, so no glitch number — but the bench for it now exists and runs.** Three
@@ -306,7 +320,7 @@ tree — still rests on the tape-out flow alone.
 | "1250 ps (800 MHz), 0.517 V" as the operating point | the design **misses** 1250 ps by **wns −1,219 ps**, so it would run near **400 MHz**; and the liberty is TT at 0.7 V while the energy is priced at the 0.517 V rail |
 | "leaving them out makes this an underestimate" (coverage, by net count) | **50.5% of the capacitance, in farads, is unpriced** |
 | `power.py`: internal energy is "a few per cent of a delivered bit" | OpenROAD's own `report_power` on this netlist: **internal is 55% of the dynamic power**. The liberty's internal term adds **28%** to `randn` for the combinational cells alone |
-| "DRT-0255 … on a block pin", fix suggested: "a `-exclude` region for the pins" | the failing nets are named — `clock`, `trans_coefficients[51]`, `out_data_res[0/29]` — and six configurations are tabulated above, including the one that showed matching the layer ranges does not help |
+| "DRT-0255 … on a block pin", fix suggested: "a `-exclude` region for the pins" | the failing nets are named — `clock`, `trans_coefficients[51]`, `out_data_res[0/29]` — and ten configurations are tabulated above, including the two that showed matching the layer ranges does not help |
 | the flow could not be re-run: no tile generator, no pinned versions | `mktiles.sh` is committed with the exact flags; `setup.sh` pins every tool and fetches each sha by name |
 | per-block counts read off the hierarchy-kept netlist | the whole bench was re-run on the `mixed` netlist and both are reported; the census page now compares on `mixed`, where the multiplier is 1.11× the tape-out flow's cells rather than 1.77× |
 | the ladder ran two rungs of one partner | h = 0, 1, 2, 4, 8 of **both** partners, on **both** netlists: 52 simulations, all committed |

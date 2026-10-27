@@ -52,7 +52,7 @@ puts "=== global route"
 # same range: holding both to M2-M7 only trades one failure for another, because the global
 # route emits an M8 guide for an I/O net anyway and TritonRoute then stops with DRT-0155
 # ("Guide in net in_data[48] uses layer M8 ... outside the allowed routing range"). Five
-# variants of this pair were tried; POWER.md § blockers has the table.
+# configurations of this pair were tried; POWER.md § blockers has the table of ten.
 set_routing_layers -signal M2-M7 -clock M4-M7
 global_route -congestion_iterations 100
 estimate_parasitics -global_routing

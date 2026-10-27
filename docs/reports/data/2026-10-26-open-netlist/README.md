@@ -46,6 +46,11 @@ So an open 7 nm library and an open synthesizer build this multiplier out of **1
 the thing worth checking, because every per-flip price in this project is a watt divided by a
 count derived from that structure.
 
+[Q126(d)](../2026-10-26-asap7-cell-energies/README.md) uses this netlist's **cell mix** from
+`census_flat.json`, which is unchanged, but its caveat sentence still quotes the superseded
+"7,967 against 4,487": on the comparable netlist that is **4,989 against 4,487**, so the mix it
+borrows is closer to the silicon's than it says.
+
 Even `mixed` is a slight **upper bound** on the cells: its four blocks still cannot be optimised
 across their own boundaries, and the as-built figure was traced cone by cone out of a netlist that
 had no such constraint.
