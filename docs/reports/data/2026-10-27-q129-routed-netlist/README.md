@@ -15,8 +15,8 @@ the glitch bench.
 global-route Steiner estimate "has no coupling term, so it is a lower bound on the wire half of
 each net". It is not. The ORFS asap7 platform's `setRC.tcl` gives the estimator **0.1658 fF per
 micron** for a signal wire, which is a layer's *total* capacitance at nominal spacing — the
-neighbour coupling is already bundled into it and grounded. Against the extraction the estimate
-comes out **20% high**, not low:
+neighbour coupling is already bundled into it and grounded. The estimate sits **20–23% above** the
+extraction, not below it — equivalently, the extraction comes out **17–19% below** the estimate:
 
 | the whole design's capacitance, fF | `mixed` | `keep` |
 | --- | ---: | ---: |
@@ -26,14 +26,26 @@ comes out **20% high**, not low:
 | wire, extracted coupling (each capacitor once) | 3,495.8 | 3,633.1 |
 | **wire, extracted, Miller k = 1** (each coupling cap charged to **both** its nets) | **12,005.8** | **12,605.2** |
 | extracted (k = 1) ÷ Steiner | **0.832** | **0.812** |
-| coupling as a share of the extracted wire capacitance | **41.0%** | 40.5% |
+| Steiner ÷ extracted (k = 1) — *how far above* | **1.202 (+20.2%)** | **1.232 (+23.2%)** |
+| coupling as a share of the **physical** extracted wire capacitance | **41.0%** | 40.5% |
+| coupling as a share of the **k = 1** wire capacitance each driver sees | **58.1%** | 57.6% |
 
-**Where the 20% comes from, measured.** The detailed router used **82,358 µm** of wire and
-166,805 vias on `mixed`. That carries 0.1035 fF/µm of physical capacitance, or 0.1458 fF/µm as
-each driver sees it at k = 1. The Steiner estimate instead assumes **87,642 µm — 1.064× the
-routed length — at 1.137× the extracted fF/µm**, and 1.064 × 1.137 = 1.210, against the measured
-ratio of 1.202. So it is about a third topology and two thirds the unit capacitance, and neither
-is a coupling term that was missing.
+The two coupling-share rows are the same capacitors on two bases: 3,495.8 ÷ (5,028.1 + 3,495.8)
+on `mixed` for the physical one, 6,977.8 ÷ 12,005.8 for the k = 1 one. **Every other wire figure
+on this page is on the k = 1 basis**, so quote 58% unless the sentence is explicitly about
+capacitors counted once.
+
+**Where the 20–23% comes from, measured.** The detailed router used **82,358 µm** of wire and
+166,805 vias on `mixed`, and **87,570 µm** and 191,590 vias on `keep` — both read from the final,
+converged DRT pass (the one preceded by `Number of violations = 0`), not from an earlier
+iteration. On `mixed` that carries 0.1035 fF/µm of physical capacitance, or 0.1458 fF/µm as each
+driver sees it at k = 1. The Steiner estimate instead assumes **87,642 µm — 1.064× the routed
+length — at 1.137× the extracted fF/µm**, and 1.064 × 1.137 = 1.210, against the measured ratio of
+1.202. On `keep` the same split is 1.078× the length at 1.152× the unit capacitance = 1.241,
+against a measured 1.232. So it is about a third topology and two thirds the unit capacitance, and
+neither is a coupling term that was missing. (The length cancels out of that product, so the
+diagnosis does not depend on which DRT pass the length is read from; the per-micron rows do, and
+`summarize.py` records the correction.)
 
 ## The Miller factor, stated
 
@@ -130,12 +142,20 @@ the **designed** flip count. fJ per designed flipped bit:
 | `lq`, quiet partner A = 1.0 | 34.96 | **33.09** | 28.63 | **27.01** | 34.8 (`mixed`) / 32.9 (`keep`) | **116.7 ± 0.6** |
 | `lb`, busy partner A = π | 37.72 | **35.56** | 33.07 | **31.31** | 38.3 (`mixed`) / 38.5 (`keep`) | **129.9 ± 0.5** |
 
-**Detailed routing moves the ladder's slope by 5–6%** — down, on all four ladders. The Miller
-factor brackets the k = 1 slope by −16 to −23% at k = 0 and +16 to +23% at k = 2, which is the
-honest error bar on this row and is larger than the move itself. On `mixed` the k = 1 slopes land within 5% and 7% of the published ones. So the central
-claim Q126(e) rested on the ladder — the arithmetic inside one lane is about 30% of what the
-board pays per flipped operand bit on switching alone — survives the extraction unchanged. That
-is the one result here that confirms rather than corrects.
+**Detailed routing moves the ladder's slope by 5–6%** — down, on all four ladders (`lq` −5.7%,
+`lb` −5.3% on `keep`). The Miller factor brackets the k = 1 slope by −16 to −23% at k = 0 and
++16 to +23% at k = 2, which is the honest error bar on this row and is larger than the move
+itself. On `mixed` the k = 1 slopes land 4.9% and 7.2% below the published `mixed` ones.
+
+**What that does to the "about 30%" claim, stated on the netlist the claim is made on.**
+POWER.md's row is the **kept** netlist: 32.9 fJ quiet = **28.2%** of E60's 116.7 fJ at the board,
+38.5 fJ busy = **29.6%** of 129.9 fJ — "about 30%". Carrying the published keep slopes through
+this run's own within-run extraction ratios (×0.9434, ×0.9468) gives 31.04 and 36.45 fJ, i.e.
+**26.6% and 28.1%** — *about 27–28%*. So **the ratio survives in order, not unchanged**: one
+lane's arithmetic is still a minority of what the board pays per flipped operand bit, and still
+near three tenths of it, but the extraction moves it a point and a half down. (This run's own
+`keep` k = 1 absolutes, 27.01 and 31.31 fJ, read 23.1% and 24.1% — those carry the tool change as
+well as the extraction and are not the comparator.)
 
 ## What it does to Q128's waterfall
 
@@ -184,12 +204,14 @@ They differ by the tool, not by the routing.
 - **"no detailed route / SPEF / coupling"** — **done**, both netlists, 0 DRC violations, coupling
   extracted, and the answer is the opposite sign to the one the entry assumed.
 - **"the between-cell wire has no coupling term, so the Steiner estimate is a lower bound"** —
-  **wrong and retired.** The estimate is 17–20% *above* the extraction at k = 1. Of Q126(e)'s
-  three reasons the bottom-up figure is a floor, this one was never a floor; the other two —
-  half the capacitance unpriced, and the ledger covering one lane's arithmetic — are untouched
-  and are now carrying the whole claim.
-- **"the routed wires"** (Levels tab, Missing) — **done** for the open netlist. 82,358 µm on
-  `mixed`, 88,248 µm on `keep`, per-net capacitance committed.
+  **wrong and retired.** The estimate is **20–23%** *above* the extraction at k = 1 (+20.2% on
+  `mixed`, +23.2% on `keep`). Of Q126(e)'s three reasons the bottom-up figure is a floor, this one
+  was never a floor; the other two — half the capacitance unpriced, and the ledger covering one
+  lane's arithmetic — are untouched and are now carrying the whole claim. **Where it was
+  corrected, file by file**, is listed below.
+- **"the routed wires"** (Levels tab, Missing) — **done** for the open netlist. 82,358 µm /
+  166,805 vias on `mixed`, 87,570 µm / 191,590 vias on `keep` — both from the converged DRT pass —
+  with per-net capacitance committed.
 - **the glitch factor** — **unblocked, not measured.** An SDF annotated with the extracted
   parasitics now exists for both netlists (paths and hashes in `versions.txt`). Whether Icarus
   can annotate it is the next step and belongs to the glitch bench, not here.
@@ -197,6 +219,31 @@ They differ by the tool, not by the routing.
   to re-simulate the *post-route* netlist (`txfma_routed.v`, which has the CTS and
   `repair_design` cells in it) rather than the pre-placement one. That is a bench change, not a
   capacitance change, and it is the single largest remaining item in this part of the chain.
+
+### Where the retired claim was corrected, 27 October 2026
+
+The falsified sentence had been copied into eight committed files besides POWER.md. A claim is not
+retired while it still reads as current somewhere a reader lands, so each was corrected in the
+same commit as this page:
+
+| File | What was there |
+| --- | --- |
+| [`2026-10-26-open-netlist/POWER.md`](../2026-10-26-open-netlist/POWER.md) | the original sentence, with a dated correction block under it |
+| [`2026-10-27-transistor-ledger/ledger.py`](../2026-10-27-transistor-ledger/ledger.py) | `the_wire_is_a_lower_bound` and `what_the_missing_energy_is` — the two strings the ledger JSON and the page data are *built* from |
+| `2026-10-27-transistor-ledger/transistor-ledger.json` | regenerated from `ledger.py`, byte-reproducibly |
+| [`2026-10-27-transistor-ledger/README.md`](../2026-10-27-transistor-ledger/README.md) | "the *generous* reading" paragraph, and reason 2 of "a floor, three times over" |
+| `2026-10-27-matmul-to-transistor/data.json` | `gates.wire_is_a_floor`, `waterfall.why` — regenerated from `build_data.py` |
+| [`2026-10-27-matmul-to-transistor/README.md`](../2026-10-27-matmul-to-transistor/README.md) | "What the page says is still open" |
+| `docs/reports/sources/matmul-to-transistor.body.html` | the page's own prose: the step-7 "Open" note, and "a floor three times over" |
+| `docs/reports/2026-10-27-matmul-to-transistor.html` | rebuilt from the body and `data.json` with `scripts/build-report.py` |
+| [`docs/findings/05-claims.md`](../../../findings/05-claims.md) | the Track-C preamble, the "floor three times over" row, and the "Not established by Q128" paragraph |
+| [`tools/open-flow/txfma/spef_caps.py`](../../../../tools/open-flow/txfma/spef_caps.py) | its own header called k = 0 "the closest analogue of the Steiner estimate that has no coupling term to begin with" |
+
+Two further copies were **not** touched, deliberately:
+`2026-10-27-q129-ledger-scope/{README.md,METHOD.md}` belong to another request running the same
+afternoon ("a lower bound on every wire", README l.192 / METHOD l.78) and are for its author to
+correct; and the **deployed** copy of the Q128 page on spacesheep still shows the old prose until
+somebody redeploys it from the rebuilt HTML.
 
 ## What ran, and what did not
 
@@ -237,7 +284,9 @@ so the Steiner row and the extracted row describe the same placed design.
   ran as root per the lab's root rule, with `--user 1009:1009` so every output file belongs to
   the ordinary account. **Nothing was configured**: no group edit, no package, no daemon change.
   The one persistent effect is the pulled image, and the undo line is
-  `docker rmi openroad/orfs:26Q4-229-g64939f371` (1.55 GB in `/var/lib/docker`, which has 111 GB
+  `docker rmi openroad/orfs:26Q4-229-g64939f371` (**4.27 GB** in `/var/lib/docker` —
+  `docker image inspect … --format '{{.Size}}'` reads 4,265,040,202 B; the 1.55 GB this page first
+  quoted was the compressed download, not the disk it occupies — on a filesystem with 111 GB
   free).
 - The first routing run died **after** writing the SPEF, on `sta::cmd_corner_name` — an OpenSTA
   accessor that current builds have renamed. The route was not repeated: `post_route.tcl` reads
@@ -250,9 +299,15 @@ so the Steiner row and the extracted row describe the same placed design.
   is geometry and very nearly voltage-independent. The **delays**, and therefore the SDF, are
   ASAP7 TT at **0.700 V, 25 °C** (the SDF's own `(VOLTAGE 0.700::0.700)`), and are not
   transferable to 0.517 V. Same caveat as POWER.md's, unchanged.
-- **The design still misses its clock.** wns −1,322 ps (`mixed`) and −1,354 ps (`keep`) against
-  a 1250 ps period after extraction, so this netlist would run near 400 MHz. The CTS answer being priced is an answer to
-  a constraint the design misses by about 2×.
+- **The design still misses its clock, and by more than before.** wns −1,322 ps (`mixed`) and
+  −1,354 ps (`keep`) against a 1250 ps period after extraction, so this netlist would run near
+  400 MHz. The CTS answer being priced is an answer to a constraint the design misses by about 2×.
+  Against Q126(e)'s placed numbers on the same SDC (−1,165.90 `mixed` / −1,219.14 `keep`) that is
+  **13% and 11% worse** — this run's own placement and the extracted parasitics together, not the
+  extraction alone: on `mixed` the `STOP_AFTER=grt` pass reads −1,351.81 ps *before* the
+  extraction, so the extraction itself made the design 30 ps **faster**, which is the timing
+  moving the same way the capacitance does. "About 2× short" is unchanged; "unchanged from
+  Q126(e)" would not be.
 - **ASAP7 is not the process the chip was built in.** Ratios, not absolutes.
 - **77 coupling pairs (of 251,162) have one side this script could not resolve to a net** —
   0.03%, almost certainly coupling to a power net, and they are dropped.

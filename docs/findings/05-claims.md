@@ -988,8 +988,18 @@ mean `docs/reports/data/2026-10-26-asap7-cell-energies/` and `docs/reports/data/
 core-et's `txfma_top` synthesised with Yosys onto ASAP7 and placed with OpenROAD, to get a physical net
 count and a switching energy that do not depend on the RTL bench's counter. 🛑 Detailed routing does not
 close in this OpenROAD, so **there is no SPEF**: every capacitance below is the global route's Steiner
-estimate, with no coupling term. `ON` means `docs/reports/data/2026-10-26-open-netlist/`; the flow is
+estimate. `ON` means `docs/reports/data/2026-10-26-open-netlist/`; the flow is
 `tools/open-flow/txfma/`.
+
+🛑 **Superseded in part, Tue 27 Oct 2026 (Q129(a), `docs/reports/data/2026-10-27-q129-routed-netlist/`).**
+That preamble used to end "the global route's Steiner estimate, **with no coupling term**", and the rows
+below are written on that reading. Routing **does** close in a current OpenROAD (ORFS container, 0 DRC
+violations on both netlists), the coupling **is** extracted, and the Steiner estimate was never
+coupling-free: `setRC.tcl` hands it a layer's *total* capacitance at nominal spacing, so it sits **20–23%
+above** the extraction at Miller k = 1. Every capacitance row below is therefore a **ceiling** on the wire,
+not a floor, and re-pricing the identical SAIFs moves the wire between the cells 0.590 → **0.453 pJ**, the
+bottom-up total 1.947 → **1.810 pJ**, and the closure against the board 33.7% → **31.3%**. The ladder
+slopes move only −5 to −6%.
 
 | Claim | Value | Kind | Source | Verify at |
 |---|---|---|---|---|
@@ -1030,7 +1040,7 @@ registered reduction, not the post-hoc clean subset**; where the two differ the 
 | Which saturation law fits the ladder, **in sample** | free power exponent **0.993** (13.3% rms / 19.1% worst), flat 107.1 fJ per bit (14.4% / 22.7%), the single-bit price list compressed (28.5% / 62.5%) — all three fitted and scored on E60's same seven rungs | D | Q128(f), CC | `CC/chain.json`, `saturation.law_scores_pct` |
 | **One transistor's gate, switched** | **8.94 aJ**, **17.30 aC**, **108 electrons** at the 0.517 V minion rail (the mean of four bias cases spanning 8.04–9.88 aJ); the gate charge is linear in fins to 0.01%. Inside a working cell the same fin costs its driver **9.42 aJ / 114 electrons**, and one driven pin **57.3 aJ / 692 electrons** | S | Q128(d), TL | `TL/transistor-ledger.json`, `one_transistor_switching` |
 | What one random multiply-add's switching charges | **1.516 pJ** of switching plus **0.431 pJ** of the cells' own internal energy = **1.946 pJ**, against E38's **5.783 pJ** at the board — **26.2%** and **33.7%**. Of the switching, **transistor gates 20.2%**, wire inside the cells 40.9%, wire between them 38.9% — so **transistor gate is about 5% of what the board pays** | S | Q128(d), TL | `TL/transistor-ledger.json`, `up_to_the_board` |
-| Why that is a floor three times over | **49.5% of the design's farads are unpriced** (nets CTS and `repair_design` made after the netlist was simulated); the between-cell wire is a global-route estimate with no coupling term; and the ledger covers one lane's arithmetic while the board also pays for the register file, the operand bus, the result path and leakage | S | Q128(d) | `TL/README.md` |
+| Why that is a floor **twice** over (three, until 27 Oct) | **49.5% of the design's farads are unpriced** (nets CTS and `repair_design` made after the netlist was simulated — **43.6% priced** on a routed design, slightly worse); and the ledger covers one lane's arithmetic while the board also pays for the register file, the operand bus, the result path and leakage. **The third reason — "the between-cell wire is a global-route estimate with no coupling term" — was WITHDRAWN Tue 27 Oct 2026**: the estimate carries coupling already and runs 20–23% above the extraction, so that row was a ceiling, not a floor | S | Q128(d), corrected Q129(a) | `TL/README.md`; `docs/reports/data/2026-10-27-q129-routed-netlist/README.md` |
 | Short-circuit current, **bracketed rather than assumed** | at 0.517 V the cheapest input edge is **300 ps** and the whole 1 ps–2 ns range costs at most **7.5%** of a cycle over it, against **58.8%** at 0.700 V. The design's own edge (an INVx1 driving the average 2.105 fF net) is 23.4 ps rising, 17.0 ps falling, about 2% above the minimum | S | Q128(d), TL | `TL/one-switch4.json`; `TL/README.md` |
 | **Landauer's floor, at the die's own temperature** | **kT ln 2 = 3.246 zJ** at the governor's 66 °C trip. One electron across the 0.517 V rail is already **25.5×** it; one minimum transistor's gate **2,755×**; one flipped operand bit at the board **3.6 × 10⁷**; one random fp32 multiply-add at the board **1.8 × 10⁹** | S | Q128(d), TL | `TL/transistor-ledger.json`, `the_floor` |
 | 🛑 **A rise is not a toggle** | a net takes `C·V²` on the rise and nothing on the fall, so a toggle costs `½C·V²`. Every single-edge rung in `the_floor` is **per rise**; `one_physical_net_toggle`'s figures are half of them. E60's own `reduce.txt` prints electrons as `C·V/e`, twice the convention used here | S | Q128(d) | `TL/transistor-ledger.json`, `convention` |
@@ -1043,9 +1053,15 @@ registered reduction, not the post-hoc clean subset**; where the two differ the 
 saturation law rests on seven in-sample rungs from one session, and the ladder in the *number* of
 simultaneously flipping positions that would separate how-many from which-bits is built and unrun. E68's
 registered scoring still uses the 1.508 W/°C slope; E66's measured slope is published beside it as a
-sensitivity, not as a replacement. Half the design's capacitance is unpriced and the open flow has no SPEF,
+sensitivity, not as a replacement. Half the design's capacitance is unpriced and the open flow had no SPEF,
 no coupling term and no glitch measurement, so the bottom-up total is a floor and the transistor share a
-ceiling. Ones' sustained clock is the chain's one real miss, 775 MHz predicted against 738 measured, which
+ceiling — **amended Tue 27 Oct 2026 (Q129(a)): the SPEF and the coupling now exist, and they went the other
+way.** The Steiner estimate was never coupling-free, so it was a ceiling on the wire: extracting it moves
+0.137 pJ *out* of "accounted" (bottom-up 1.947 → 1.810 pJ, closure 33.7% → 31.3%) and the transistor share
+is a floor, not a ceiling. What remains is the unpriced half (43.6% of the farads priced on a routed
+design, slightly worse than 50.5%), the scope of one lane's arithmetic, and the glitch measurement — the
+last unblocked but not made, an SDF with the extracted parasitics now existing for both netlists. Ones'
+sustained clock is the chain's one real miss, 775 MHz predicted against 738 measured, which
 wants a temperature term in the static-power surface. And the A side has no multi-bit ladder, so the
 carry-over from one operand to the other is a choice between two defensible numbers that moves the
 bottom-up prediction by 6%.

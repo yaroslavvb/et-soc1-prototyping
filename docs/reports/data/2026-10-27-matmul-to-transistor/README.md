@@ -52,5 +52,15 @@ In the order that closing them would most change it: the governor's cap has neve
 knob test); the single-bit price list over-predicts a whole random word by about 2×, and the ladder in the
 *number* of simultaneously flipping positions that would settle it is built and unrun; the leakage slope used
 to correct each run moves every per-bit price by 15%, which is why the page quotes a band; detailed routing
-never closed in the open flow, so the wire share is a floor and the transistor share a ceiling; and half the
-design's capacitance is unpriced.
+never closed in the open flow; and half the design's capacitance is unpriced.
+
+> 🛑 **Corrected Tue 27 Oct 2026 (Q129(a)).** That list used to read "detailed routing never closed in the
+> open flow, **so the wire share is a floor and the transistor share a ceiling**". Both halves are now
+> wrong. Routing closes in the current ORFS container, with the coupling extracted; and the global-route
+> estimate the page prices the wire with was never coupling-free, so it runs **20–23% above** the extraction
+> — the wire share is a **ceiling** and the transistor share a **floor**. Closing it therefore *widens* the
+> page's own remainder: bottom-up 1.947 → **1.810 pJ**, unaccounted against the board 3.837 → **3.973 pJ**,
+> closure 33.7% → **31.3%**.
+> [`../2026-10-27-q129-routed-netlist/`](../2026-10-27-q129-routed-netlist/README.md). The page's prose and
+> its `data.json` were rebuilt in the same commit; **the deployed copy on spacesheep still shows the old
+> text until it is redeployed from the rebuilt HTML.**

@@ -219,9 +219,21 @@ per-rise row is the one that lines up with §1: **14.5 fins × 108 electrons = 1
 7,206 — 21.7%**, exactly the transistor share in the table.
 
 **So about one fifth of what a toggle costs is transistor, and four fifths is wire** — and that is
-the *generous* reading, because the between-cell capacitance is a Steiner estimate with no coupling
-term (detailed routing never closed, Q126(e)), so the wire share is a floor and the transistor share
-a ceiling.
+the *conservative* reading of the transistor share, not the generous one.
+
+> 🛑 **Corrected Tue 27 Oct 2026 (Q129(a)).** This paragraph used to end "and that is the
+> *generous* reading, because the between-cell capacitance is a Steiner estimate with no coupling
+> term (detailed routing never closed, Q126(e)), so the wire share is a floor and the transistor
+> share a ceiling." The direction is backwards. The Steiner estimate is **not** coupling-free: the
+> ORFS asap7 `setRC.tcl` hands it 0.1658 fF/µm for a signal wire, a layer's *total* capacitance at
+> nominal spacing with the neighbour coupling bundled in and grounded. Detailed routing now closes
+> and the extraction puts the estimate **20–23% above** itself
+> ([`../2026-10-27-q129-routed-netlist/`](../2026-10-27-q129-routed-netlist/README.md)), so **the
+> wire share above is a ceiling and the transistor share a floor.** Scaling this section's own
+> split by that measured within-run ratio moves the signal-net transistor share from **21.7% to
+> about 23.4%**, and the clock-net one from 17.1% to about 20.2%. That is a scaling of this
+> ledger's capacitance split by Q129(a)'s ratio, **not** a re-measurement: the fin × electron join
+> was not re-run on a routed design.
 
 **Two independent routes agree on it.** Route A is the table above: count the fins each net drives
 and price every fin at the isolated device's 0.0335 fF. Route B never counts a fin — it takes the
@@ -302,18 +314,32 @@ Q126(d)'s census-weighted VDD-group internal energy, 0.1188 fJ at 0.517 V. It co
 clock-pin energy, on a design whose clock is a third of the switching — so the "+ internal" column
 everywhere above is itself a floor.
 
-### Why the bottom-up number is a floor, three times over
+### Why the bottom-up number is a floor, twice over
+
+*Three, until Tue 27 Oct 2026 — reason 2 was withdrawn that day by Q129(a), and is kept here
+struck through rather than deleted, because the published page and the claims register both rested
+on it.*
 
 1. **Half the capacitance is unpriced.** Only **50.5%** of the design's farads are priced here:
    23,762 fF of 47,093 fF are on nets the simulation can name, and the other **23,331 fF — 49.5%**
    — belongs to nets CTS and `repair_design` made after the netlist was simulated. They switch.
-2. **The between-cell wire has no coupling term.** Detailed routing never closed, so there is no
-   SPEF; the Steiner estimate is a lower bound on every wire.
+   On a routed design this gets *worse*, not better: 43.6% of the farads priced, because the
+   current `repair_design`/CTS create more nets still.
+2. ~~**The between-cell wire has no coupling term.** Detailed routing never closed, so there is no
+   SPEF; the Steiner estimate is a lower bound on every wire.~~ **WITHDRAWN 27 Oct 2026.** Routing
+   closes in the current ORFS container and OpenRCX extracts the coupling; the Steiner estimate was
+   never coupling-free (`setRC.tcl` gives it a layer's total capacitance at nominal spacing) and
+   runs **20–23% above** the extraction at Miller k = 1. So this row was not a floor at all, and
+   closing it moves **0.137 pJ out of "accounted"**: bottom-up 1.947 → **1.810 pJ**, closure
+   against the board 33.7% → **31.3%**.
+   [`../2026-10-27-q129-routed-netlist/`](../2026-10-27-q129-routed-netlist/README.md)
 3. **The ledger is one lane's arithmetic.** The board also pays for the register file's read ports,
    the operand bus, the result path, the accumulator and leakage.
 
-Each of the three pushes the same way, which is why the closure ratios land where they do and why
-they should be read as "the arithmetic is a minority of the bill", not as a discrepancy.
+The two that remain push the same way, which is why the closure ratios land where they do and why
+they should be read as "the arithmetic is a minority of the bill", not as a discrepancy. The
+withdrawn one pushed the other way, and now carries no weight: with it gone, 1 and 3 carry the
+whole claim.
 
 ### What this does not close
 

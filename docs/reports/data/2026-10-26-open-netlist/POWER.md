@@ -63,11 +63,16 @@ pin half comes from ASAP7's liberty and is exact.
 > per micron** for a signal wire, which is a layer's *total* capacitance at nominal spacing, with
 > the neighbour coupling already bundled in and grounded. Detailed routing now closes
 > ([`../2026-10-27-q129-routed-netlist/`](../2026-10-27-q129-routed-netlist/README.md)) and the
-> extraction puts the Steiner estimate **17–20% above** it, not below: 14,427 fF against 12,006 fF
-> on `mixed` at a Miller factor of 1, and 15,533 against 12,605 on the kept netlist. The wire half
+> extraction puts the Steiner estimate **20–23% above** it, not below: 14,427 fF against 12,006 fF
+> on `mixed` at a Miller factor of 1 (**+20.2%**), and 15,533 against 12,605 on the kept netlist
+> (**+23.2%**) — equivalently, the extraction reads **17–19% below** the estimate. The wire half
 > below is therefore **not** a floor, and the between-cell wire energy of a random multiply-add
 > falls by about a quarter when it is extracted. The pin half is exactly as described, and routing
 > does not move it at all.
+>
+> *(Amended the same day: this block first said "17–20% above", which was the two
+> below-percentages with the word "above" on them — a direction error. 12,006 ÷ 14,427 = 0.832 and
+> 12,605 ÷ 15,533 = 0.812 are the ratios; their reciprocals, 1.202 and 1.232, are the "above".)*
 
 ## Toggles and energy per multiply-add
 

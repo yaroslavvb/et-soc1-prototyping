@@ -287,8 +287,12 @@ from one multiply-add at the board.</p>
       <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-26-asap7-cell-energies/README.md">the cell energy table</a></dd>
     <dt>Confidence</dt><dd><span class="conf d">modelled</span>, and checked two ways that agree within 5% on
       signal nets.</dd>
-    <dt>Open</dt><dd>The between-cell wire has no coupling term, so <b>the transistor share is a ceiling and
-      the wire share a floor</b>. Half the design's capacitance is unpriced: the clock tree and the timing
+    <dt>Open</dt><dd><b>Corrected 27 October 2026:</b> this note said the between-cell wire has no coupling
+      term, so the transistor share was a ceiling. It is the other way round. Detailed routing now closes,
+      and the global-route estimate used here was never coupling-free — it runs <b>20–23% above</b> the
+      extraction — so <b>the transistor share is a floor and the wire share a ceiling</b>: on this split the
+      signal-net transistor share goes from 21.7% to about 23.4% when the extracted wire is used. Half the
+      design's capacitance is still unpriced: the clock tree and the timing
       repair add nets after the point the simulation saw. A private archive cross-check of the same
       quantities was run on 26 October 2026; it is not reported here.</dd>
   </dl>
@@ -360,11 +364,14 @@ fp32 multiply-add as the card pays for it, against what the bottom-up count can 
 
 <div class="note" data-ss-id="why-remainder-expected-would-shrink-bottom-2">
   <p data-ss-id="why-remainder-expected-would-shrink-bottom"><b class="k">Why the remainder is expected, and what would shrink it.</b> The bottom-up figure is a floor
-  three times over. <b>One</b>, half the design's capacitance is unpriced — <span id="cl-cap"></span> of the
+  twice over — three, until 27 October 2026. <b>One</b>, half the design's capacitance is unpriced — <span id="cl-cap"></span> of the
   farads sit on nets that the clock-tree build and the timing repair created after the netlist was simulated.
-  <b>Two</b>, the between-cell wire is a global-route estimate with no coupling term, because detailed routing
-  never closed. <b>Three</b>, the ledger covers one lane's arithmetic, while the board also pays for the
-  register file's read ports, the operand bus, the result path and leakage. The remainder is not a measurement
+  <b>Two</b>, the ledger covers one lane's arithmetic, while the board also pays for the
+  register file's read ports, the operand bus, the result path and leakage. <b>The third reason is
+  withdrawn:</b> this page said the between-cell wire is a global-route estimate with no coupling term,
+  because detailed routing never closed. Routing has now closed, and the estimate was never coupling-free —
+  it runs <b>20–23% above</b> the extraction, so extracting the wire moves <b>0.137 pJ out of
+  “accounted”</b> and widens this remainder to 3.97 pJ. The remainder is not a measurement
   error; it is the parts of the chip this count does not yet reach.</p>
 </div>
 

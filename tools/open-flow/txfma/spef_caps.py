@@ -18,10 +18,15 @@ extractor flag:
 
     C_switched(net) = C_ground + k_miller * C_coupling   (+ the liberty's pin capacitance)
 
-k = 0 is a net whose neighbours always move with it: no coupling cost at all, the lower bound,
-and the closest analogue of the Steiner estimate that has no coupling term to begin with. k = 1
-is the quiet-neighbour convention and the one to quote. k = 2 is a neighbour switching the
-other way, the worst case.
+k = 0 is a net whose neighbours always move with it: no coupling cost at all, and the genuine
+lower bound. k = 1 is the quiet-neighbour convention and the one to quote. k = 2 is a neighbour
+switching the other way, the worst case.
+
+k = 0 is NOT the analogue of the global-route Steiner estimate (corrected 27 Oct 2026; this header
+first said it was). That estimate is not coupling-free either: the ORFS asap7 setRC.tcl hands it
+0.1658 fF/um for a signal wire, a layer's TOTAL capacitance at nominal spacing with the neighbour
+coupling bundled in and grounded -- which is why it comes out 20-23% ABOVE the k = 1 extraction,
+not below the k = 0 one. See docs/reports/data/2026-10-27-q129-routed-netlist/README.md.
 
 **Every coupling cap is charged to BOTH nets of its pair.** Under the quiet-neighbour
 convention that is not a double count but the physics: net A's driver delivers C_c*V when A

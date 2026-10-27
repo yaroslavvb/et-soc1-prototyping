@@ -333,10 +333,23 @@ def main():
                 "column, which is the check that the join is right. The 'including' row "
                 "reads fanout 0 for the rest and so is a floor.",
         },
+        # The key name is historical; the claim it named was RETIRED on 27 Oct 2026 and the
+        # value says so. Renaming it would rename data.json's gates.wire_is_a_floor through
+        # build_data.py and so the published page's data block, for no gain.
         "the_wire_is_a_lower_bound":
-            "the between-cell capacitance is the global-route Steiner estimate with no "
-            "coupling term (detailed routing never closed, Q126(e)), so the wire share is "
-            "a floor and the transistor share a ceiling.",
+            "RETIRED Tue 27 Oct 2026 by Q129(a) -- it is NOT a lower bound, and this key's "
+            "name is historical. The between-cell capacitance here is the global-route "
+            "Steiner estimate, and that estimate is not coupling-free: the ORFS asap7 "
+            "setRC.tcl hands it 0.1658 fF/um for a signal wire, a layer's TOTAL capacitance "
+            "at nominal spacing with the neighbour coupling already bundled in and grounded. "
+            "Detailed routing now closes and OpenRCX extraction puts the estimate 20-23% "
+            "ABOVE the extraction at Miller k=1 (14,427 against 12,006 fF on the mixed "
+            "netlist, +20.2%; 15,533 against 12,605 on this kept one, +23.2%), with coupling "
+            "58% of the k=1 wire capacitance each driver sees. So the wire share here is a "
+            "CEILING and the transistor share a FLOOR: scaling this section's own split by "
+            "that measured ratio moves the signal-net transistor share from 21.7% to about "
+            "23.4% and the clock-net one from 17.1% to about 20.2% -- a scaling, not a "
+            "re-measurement. See docs/reports/data/2026-10-27-q129-routed-netlist/.",
     }
 
     # the join has to reproduce Q126(e)'s own published numbers, or it is wrong
@@ -478,11 +491,18 @@ def main():
             "mktiles.sh on E65's own operand files would give one.")),
         "E38": E38,
         "what_the_missing_energy_is":
-            "the bottom-up figure is a floor three times over: half the design's "
-            "capacitance is unpriced (CTS and repair_design made those nets after the "
-            "netlist was simulated), the between-cell wire has no coupling term, and the "
+            "the bottom-up figure is a floor TWICE over (corrected Tue 27 Oct 2026 by "
+            "Q129(a); it said three times): half the design's capacitance is unpriced (CTS "
+            "and repair_design made those nets after the netlist was simulated), and the "
             "ledger covers one lane's arithmetic while the board pays for the register "
-            "file's read ports, the operand bus, the result path and leakage as well.",
+            "file's read ports, the operand bus, the result path and leakage as well. The "
+            "third reason once given here -- that the between-cell wire has no coupling "
+            "term -- is WITHDRAWN: the global-route Steiner estimate carries coupling "
+            "already and runs 20-23% above the extraction, so extracting the wire moves "
+            "0.137 pJ OUT of 'accounted' and widens the gap (1.9465 -> 1.8094 pJ bottom-up, "
+            "closure against the board 33.7% -> 31.3%). Of the two reasons that remain, the "
+            "unpriced half got slightly worse on a routed design, 43.6% of the farads priced "
+            "against 50.5%. See docs/reports/data/2026-10-27-q129-routed-netlist/.",
     }
 
     # ============================================================ 4. the floor

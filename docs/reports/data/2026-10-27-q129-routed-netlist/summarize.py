@@ -35,8 +35,17 @@ LEDGER = {"transistor_gates_pJ": 0.306, "wire_in_cells_pJ": 0.620,
 # from the ORFS asap7 platform's setRC.tcl (`set_wire_rc -signal/-clock -capacitance`, fF/um).
 # They are constants here because neither lives in a JSON; both are quoted in the README with
 # their source, and this block is what makes the diagnosis below reproducible.
+#
+# Corrected Tue 27 Oct 2026, after review: both rows must be read from the FINAL, converged DRT
+# pass -- the one whose `DRT-0199 Number of violations = 0` precedes it -- and not from an earlier
+# iteration. The first version of this file took `keep` from the 0th iteration (3,861 violations
+# still open: 88,248 um / 200,870 vias at route_keep.log.gz l.1063/1074), which read the wire
+# 0.8% long and the vias 4.8% high. The converged pass is l.1275/1286. `mixed` was always read
+# from its converged pass (l.1281/1292). The extraction ran on the converged route in both cases,
+# so only the per-micron diagnosis below was affected; every capacitance and energy figure is
+# taken from the SPEF and does not use these lengths at all.
 ROUTED = {"mixed": {"wire_length_um": 82358, "vias": 166805},
-          "keep": {"wire_length_um": 88248, "vias": 200870}}
+          "keep": {"wire_length_um": 87570, "vias": 191590}}
 SETRC = {"signal_fF_per_um": 1.65790E-01, "clock_fF_per_um": 1.45426E-01}
 
 
