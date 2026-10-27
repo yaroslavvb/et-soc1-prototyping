@@ -726,6 +726,21 @@ and **the documents** (39 write-ups, 24 of them public, one lane each, with 374 
 the order of the same arithmetic, ~154 fJ weighed by the camera (E63), 13% then 33% faster on zeros (E64), 1.8 mm of
 wire per bit, 1,946 RTL bits toggling for one flip (Q124) — and ends on what is still missing.
 
+**Refreshed for the stand-up, 27 October 02:4x–03:4x, with the night it was itself built in the middle of.**
+The thread did not end where the first build stopped, so the page now runs to **52 days** and carries the closing
+night: Q126's and Q128's asks in his own words, an **eleventh lane** holding its eight sessions, E65's, E67's and
+E68's card spans read from their committed `block.json` and E66 still running on its host — **160 asks, 69
+sessions, 952 card intervals over 52 experiments, 94.1 card-hours, 51 write-ups (37 public) and 449 commits**.
+The private-archive cross-check is recorded as that and nothing more. The “story so far” and “what's next” are
+rebuilt from A24's own public numbers (15% → 33%, 118–136 fJ, 108 electrons, a third of the board accounted for,
+×1.147 against a measured 1.127–1.150, 64 bit positions priced and shown not to add), and A24 is linked above
+the lede. Six defects of the first build were fixed, the three worth naming here: a redaction that replaced one
+name twice and left “a lab user a lab user”; a quoted ask that still named a card host and two repository
+folders; and **card-hours stated three ways** — 85 in the lede, 84.6 in the caption and bars that summed to 82 —
+so the page now quotes one figure, the hours a card was *held*, to one decimal, and the family chart says plainly
+that its bars are the stricter *busy* union. The 19 October talk, where this result was first told to an audience
+rather than written down, is now a milestone with no link, no group and no names, because its write-up is private.
+
 **How it differs from A20.** A20's pipeline extracts one session's transcripts on one machine; this thread ran on five
 machines under three harnesses, two of which leave no transcript those scripts can read. So the inputs are **curated,
 not extracted**: six small JSON files assembled from this repository's own ledgers and from the project's hub, all
