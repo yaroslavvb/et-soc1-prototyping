@@ -111,3 +111,65 @@ What it costs and what it does not:
 
 No rule, band or command changes; `e66_split.py` already fits whatever bins the cooling provides and reports
 each cycle's lowest reading, which is what L4 scores.
+
+**A2, Mon 26 Oct 2026, 23:1x PDT — the record of a pass this session ended. Written before any pass after 11.**
+
+🛑 **Pass 11 was cut short at 23:09:57 PDT by this session**, 32 minutes into its 90-minute cooling. A review of
+E68 had asked whether the night's remaining card time could be re-tasked (A3 below); the signal sent to the
+overnight driver — meant to stop it *after* pass 11 — reached the whole job, because a non-interactive bash
+passes a fatal signal on to the foreground process group it is waiting on. The block got no chance to finish:
+`p11/` has **no `block.json`**, its `telemetry.jsonl` was never gzipped and `marks.jsonl` carries no `abort`
+mark, so **the registered reduction drops p11 as a non-ok pass**. It is not re-registered, and no verdict below
+rests on it.
+
+What it still holds, and why its profile is quoted in A3: p11's cooling ran **1,940 s from 22:37:37, 70 °C down
+to 49 °C** — and on this card that is the *whole* informative part of a cooling. The die passes 51 °C at
+t+207 s and is at its floor by t+278 s. The raw pass stays on the box at
+`build/claims-v3/aifoundry2/idle/p11/` (ungzipped telemetry, 16 MB) as the measurement A3 is argued from; it is
+not published as a kept pass and it is not scored.
+
+**A3, Mon 26 Oct 2026, 23:2x PDT — the cooling drops from 5,400 s to 900 s, and the night runs many cycles
+instead of four. Written before the first pass it touches (pass 12), and before any data from it exists.**
+
+*Why.* The registered 5,400 s cooling spends **94 % of its card time at the floor**, and buys nothing over the
+registered **900 s** short cooling on this card. Measured on p11's own telemetry (A2), seconds of idle samples
+per whole degree over the cooling:
+
+| die °C | 69 | 68 | 67 | 66 | 65 | 64 | 63 | 62 | 61 | 60 | 59 | 58 | 57 | 56 | 55 | 54 | 53 | 52 | 51 | 50 | 49 |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| seconds | 0.7 | 1.2 | 2.0 | 3.2 | 4.1 | 5.5 | 6.3 | 7.2 | 7.8 | 9.1 | 10.0 | 11.2 | 13.4 | 13.9 | 16.9 | 22.4 | 31.8 | 41.3 | 73.9 | 1343 | 218 |
+
+**280.0 s** of the cooling lie in the registered **51–67 °C** band, **55.2 s** of them above 59 °C — and
+**every one of those seconds falls in the first 300 s.** A 300 s cooling and a 5,400 s cooling collect
+identical in-band data; the remaining 5,100 s are the die resting at 49–50 °C.
+
+So the Q128(b) band is served by *repetition*, not by length. With a **900 s** cooling — the length this
+tool's own short cycle uses, so `reduce.py`'s items 0, a–f and k (which read each cycle's first 900 s) see a
+complete cooling, and item L (which reads a long cycle whole) sees the same 900 s:
+
+| | registered (5,400 s) | A3 (900 s) |
+|---|---:|---:|
+| cycle length | ~99 min | ~24 min |
+| cycles before 06:30 | 4 | ~17 |
+| seconds in 51–67 °C | 1,120 | ~4,760 |
+| seconds above 59 °C | 221 | ~938 |
+| cycles for the 99 % t-interval | 4 (3 dof, t = 5.84) | ~17 (16 dof, t = 2.92) |
+
+The interval-width thresholds L1 and L2 are scored against (±8 °C on T_L, ±3 W on A80) are **between-cycle**
+intervals, so the cycle count is what decides whether they can be met at all; four cycles halve nothing. This
+amendment roughly halves the t multiplier before any gain from the extra in-band samples.
+
+*What changes, exactly.* `tools/claims-v3/idle/block.sh` gains one **default-preserving** knob, in the manner of
+the two E68 added to `hl/block.sh`: `IDLE_COOL_S` overrides the long variant's cooling length, and the long
+variant's pass range widens from 11–19 to 11–49 so the extra cycles have numbers. With `IDLE_COOL_S` unset,
+every pass 11–19 behaves exactly as before; nothing E44 ran changes. The driver becomes
+`~/q128b/run_e66b.sh`, the same loop with `IDLE_COOL_S=900` and a pass budget of 1,500 s.
+
+*What does not change.* The heater, the 88 °C target and 150-burst cap, the 10 Hz sampler, the intrusion poll,
+the card lock, the registered reduction (`reduce.py`, unchanged), every band and threshold in L1–L5, and the
+06:30 PT stop. The cooling length is the one parameter touched, and it is set to the value this tool already
+uses for its short cycle.
+
+*What it costs.* The long dwell at the floor is gone from every cycle after 11 (about 300 s per cycle at
+49–50 °C remains, and ~17 cycles give more floor samples in total than four long ones did). L5 (IDLE-d, a
+73 °C bin) was already out of reach tonight at a 70 °C plateau (A1) and stays so.

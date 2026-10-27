@@ -4,9 +4,14 @@
 #   bash tools/claims-v3/idle/block.sh <pass> [--smoke]         (aifoundry1: V3_DEVICE=0|1 selects the card, lib.sh)
 #
 #   pass 1-9    a short cycle: heat, then 900 s with no launch            (items IDLE-0, a-f, k)
-#   pass 11-19  an IDLE-LONG cycle: heat, then LONG_COOL_S with no launch (item IDLE-L; also a cycle for 0, a-f, k,
+#   pass 11-49  an IDLE-LONG cycle: heat, then LONG_COOL_S with no launch (item IDLE-L; also a cycle for 0, a-f, k,
 #               (5400 s aifoundry2 and aifoundry1's cards, 2700 s         using its first 900 s of cooling)
 #               aifoundry3); overnight only, from a schedule of its own (one block of ~95 / ~60 min)
+#   IDLE_COOL_S overrides the long variant's cooling length (Q128(b) amendment A3, 26 Oct 2026). Unset, every
+#               pass 11-19 behaves exactly as before. On aifoundry2 the die reaches its floor 278 s into a cooling
+#               and every second of the 51-67 C band falls in the first 300 s, so a 5,400 s cooling collects the
+#               same in-band data as the 900 s short one and spends 94% of the card's time at 49-50 C; the band is
+#               served by repeating the cycle, not by extending it. The long range widens to 11-49 for the numbers.
 #   --smoke     the smallest real check of every component (~30 s of card time): sampler, live die reading from
 #               the sampler, two heater bursts, 20 s idle with the intrusion poll, pass check by reduce.py
 #
@@ -58,8 +63,8 @@ if [ -n "$SMOKE" ]; then
 else
   EXPNAME=idle; HEAT_MAX_BURSTS=150; HEAT_MAX_S=900
   if [ "$PASS_ARG" -ge 1 ] && [ "$PASS_ARG" -le 9 ]; then VARIANT=short; COOL_S=900
-  elif [ "$PASS_ARG" -ge 11 ] && [ "$PASS_ARG" -le 19 ]; then VARIANT=long; COOL_S=$LONG_COOL_S
-  else echo "pass must be 1-9 (short cycle) or 11-19 (IDLE-LONG)" >&2; exit 2
+  elif [ "$PASS_ARG" -ge 11 ] && [ "$PASS_ARG" -le 49 ]; then VARIANT=long; COOL_S=${IDLE_COOL_S:-$LONG_COOL_S}
+  else echo "pass must be 1-9 (short cycle) or 11-49 (IDLE-LONG)" >&2; exit 2
   fi
 fi
 SAMPLER_S=$(( HEAT_MAX_S + COOL_S + 90 ))                              # outlives the cycle; stopped with SIGTERM
