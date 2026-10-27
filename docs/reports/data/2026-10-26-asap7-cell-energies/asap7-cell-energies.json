@@ -1,0 +1,3738 @@
+{
+ "asap7_devices": {
+  "citation": "L.T. Clark, V. Vashishtha, L. Shifren, A. Gujja, S. Sinha, B. Cline, C. Ramamurthy, G. Yeric, \"ASAP7: A 7-nm finFET predictive process design kit\", Microelectronics Journal 53 (2016) 105-115, doi:10.1016/j.mejo.2016.04.006 (open access, CC BY-NC-ND). Shipped with the kit as asap7_pdk_r1p7/docs/mej_paper_asap7.pdf.",
+  "corner": "typical (TT), per fin, 25 C, VDD = 0.7 V",
+  "fo4_note": "The paper prints no FO4 delay. The FO4 in this file is computed from the liberty itself, self-consistently: an INVx1 driving four INVx1 input pins, input slew iterated until it equals the output slew.",
+  "gate_leakage": {
+   "note": "The paper gives no gate-leakage number; it states only that the BSIM-CMG cards enable it (igcmod = 1, in models/hspice/7nm_TT_160803.pm). Table 3/4's Ioff is the drain current at Vgs = 0, not gate leakage. Getting a gate-leakage figure needs a SPICE sweep (part 2).",
+   "value": null
+  },
+  "geometry": {
+   "CPP_nm": 54,
+   "M1_M3_pitch_nm": 36,
+   "cell_track_height": 7.5,
+   "fin_height_nm": 32,
+   "fin_pitch_nm": 27,
+   "fin_width_nm_actual": 6.5,
+   "fin_width_nm_drawn": 7,
+   "gate_length_nm_actual": 21,
+   "gate_length_nm_drawn": 20,
+   "note": "Section 3.1, 4.1 and Table 1 of the paper. The standard-cell row is 7.5 M2 tracks of 36 nm = 270 nm."
+  },
+  "nmos": {
+   "DIBL_mV_V": {
+    "LVT": 22.32,
+    "RVT": 21.31,
+    "SLVT": 22.55,
+    "SRAM": 19.23
+   },
+   "Idsat_uA": {
+    "LVT": 45.19,
+    "RVT": 37.85,
+    "SLVT": 50.79,
+    "SRAM": 28.57
+   },
+   "Ieff_uA": {
+    "LVT": 23.56,
+    "RVT": 18.13,
+    "SLVT": 28.67,
+    "SRAM": 13.07
+   },
+   "Ioff_nA": {
+    "LVT": 0.242,
+    "RVT": 0.019,
+    "SLVT": 2.444,
+    "SRAM": 0.001
+   },
+   "SS_mV_dec": {
+    "LVT": 62.9,
+    "RVT": 63.03,
+    "SLVT": 63.33,
+    "SRAM": 62.44
+   },
+   "Vtlin_V": {
+    "LVT": 0.12,
+    "RVT": 0.19,
+    "SLVT": 0.06,
+    "SRAM": 0.27
+   },
+   "Vtsat_V": {
+    "LVT": 0.1,
+    "RVT": 0.17,
+    "SLVT": 0.04,
+    "SRAM": 0.25
+   }
+  },
+  "pmos": {
+   "DIBL_mV_V": {
+    "LVT": 31.06,
+    "RVT": 30.36,
+    "SLVT": 31.76,
+    "SRAM": 24.1
+   },
+   "Idsat_uA": {
+    "LVT": 39.88,
+    "RVT": 32.88,
+    "SLVT": 45.6,
+    "SRAM": 26.9
+   },
+   "Ieff_uA": {
+    "LVT": 18.18,
+    "RVT": 14.08,
+    "SLVT": 22.64,
+    "SRAM": 11.37
+   },
+   "Ioff_nA": {
+    "LVT": 0.23,
+    "RVT": 0.023,
+    "SLVT": 2.41,
+    "SRAM": 0.004
+   },
+   "SS_mV_dec": {
+    "LVT": 64.44,
+    "RVT": 64.48,
+    "SLVT": 64.94,
+    "SRAM": 64.34
+   },
+   "Vtlin_V": {
+    "LVT": -0.13,
+    "RVT": -0.19,
+    "SLVT": -0.07,
+    "SRAM": -0.22
+   },
+   "Vtsat_V": {
+    "LVT": -0.1,
+    "RVT": -0.16,
+    "SLVT": -0.04,
+    "SRAM": -0.2
+   }
+  }
+ },
+ "cells": {
+  "AOI21x1": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.22140600648148148,
+   "E_int_mean_over_arcs_fJ": 0.44132347962962964,
+   "arcs": {
+    "A1->Y": {
+     "E_int_fall_VDDonly_fJ": -0.04857868333333333,
+     "E_int_fall_fJ": 0.2814503166666667,
+     "E_int_mean_VDDonly_fJ": 0.14653799166666667,
+     "E_int_mean_fJ": 0.2881043138888889,
+     "E_int_per_cycle_VDDonly_fJ": 0.29307598333333335,
+     "E_int_per_cycle_fJ": 0.5762086277777778,
+     "E_int_rise_VDDonly_fJ": 0.34165466666666666,
+     "E_int_rise_fJ": 0.2947583111111111,
+     "E_transition_0p517_fJ": 0.42444637541846375,
+     "E_transition_0p7_fJ": 0.7781043138888888,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.27317568333333336,
+       "E_transition_0p7_fJ": 0.39567568333333336
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.2800417472222222,
+       "E_transition_0p7_fJ": 0.5250417472222222
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.2881043138888889,
+       "E_transition_0p7_fJ": 0.7781043138888888
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.2963279888888889,
+       "E_transition_0p7_fJ": 1.2763279888888888
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.30161054444444446,
+       "E_transition_0p7_fJ": 2.2616105444444443
+      }
+     }
+    },
+    "A2->Y": {
+     "E_int_fall_VDDonly_fJ": -0.043750700000000003,
+     "E_int_fall_fJ": 0.35591280000000003,
+     "E_int_mean_VDDonly_fJ": 0.16324273333333333,
+     "E_int_mean_fJ": 0.3253076111111111,
+     "E_int_per_cycle_VDDonly_fJ": 0.32648546666666667,
+     "E_int_per_cycle_fJ": 0.6506152222222222,
+     "E_int_rise_VDDonly_fJ": 0.37023616666666664,
+     "E_int_rise_fJ": 0.2947024222222222,
+     "E_transition_0p517_fJ": 0.4447403185026078,
+     "E_transition_0p7_fJ": 0.815307611111111,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.32137980833333335,
+       "E_transition_0p7_fJ": 0.44387980833333335
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.3232244805555555,
+       "E_transition_0p7_fJ": 0.5682244805555555
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.3253076111111111,
+       "E_transition_0p7_fJ": 0.815307611111111
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.32728193333333333,
+       "E_transition_0p7_fJ": 1.3072819333333332
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.3290838944444444,
+       "E_transition_0p7_fJ": 2.289083894444444
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": -0.12480102222222221,
+     "E_int_fall_fJ": 0.733340811111111,
+     "E_int_mean_VDDonly_fJ": 0.35443729444444444,
+     "E_int_mean_fJ": 0.7105585138888888,
+     "E_int_per_cycle_VDDonly_fJ": 0.7088745888888889,
+     "E_int_per_cycle_fJ": 1.4211170277777776,
+     "E_int_rise_VDDonly_fJ": 0.8336756111111111,
+     "E_int_rise_fJ": 0.6877762166666667,
+     "E_transition_0p517_fJ": 0.6548899686098923,
+     "E_transition_0p7_fJ": 1.2005585138888888,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.6488190111111111,
+       "E_transition_0p7_fJ": 0.771319011111111
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.6778293000000001,
+       "E_transition_0p7_fJ": 0.9228293000000001
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.7105585138888888,
+       "E_transition_0p7_fJ": 1.2005585138888888
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.7382462777777778,
+       "E_transition_0p7_fJ": 1.7182462777777778
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.7606139333333333,
+       "E_transition_0p7_fJ": 2.720613933333333
+      }
+     }
+    }
+   },
+   "area_um2": 0.11664,
+   "cell": "AOI21x1_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "A1": {
+     "by_state": {
+      "(!A2 * !B * Y)": {
+       "fall_fJ": 0.0573772,
+       "per_clock_cycle_VDDonly_fJ": 0.0,
+       "per_clock_cycle_fJ": 0.0006952,
+       "rise_fJ": -0.056682
+      },
+      "(!A2 * B * !Y)": {
+       "fall_fJ": -0.0663753,
+       "per_clock_cycle_VDDonly_fJ": 0.0010345000000000076,
+       "per_clock_cycle_fJ": 0.003126500000000018,
+       "rise_fJ": 0.06950180000000002
+      },
+      "(A2 * B * !Y)": {
+       "fall_fJ": -0.072311,
+       "per_clock_cycle_VDDonly_fJ": 0.00720189999999999,
+       "per_clock_cycle_fJ": 0.009023900000000015,
+       "rise_fJ": 0.08133490000000002
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.002745466666666666,
+     "mean_per_cycle_fJ": 0.004281866666666678
+    },
+    "A2": {
+     "by_state": {
+      "(!A1 * !B * Y)": {
+       "fall_fJ": -0.062459,
+       "per_clock_cycle_VDDonly_fJ": 0.0020883000000000013,
+       "per_clock_cycle_fJ": 0.00690629999999999,
+       "rise_fJ": 0.06936529999999999
+      },
+      "(!A1 * B * !Y)": {
+       "fall_fJ": -0.0658365,
+       "per_clock_cycle_VDDonly_fJ": 7.419999999999649e-05,
+       "per_clock_cycle_fJ": 0.004808199999999985,
+       "rise_fJ": 0.07064469999999999
+      },
+      "(A1 * B * !Y)": {
+       "fall_fJ": -0.0718458,
+       "per_clock_cycle_VDDonly_fJ": 0.007321100000000004,
+       "per_clock_cycle_fJ": 0.010122100000000009,
+       "rise_fJ": 0.08196790000000001
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0031612000000000007,
+     "mean_per_cycle_fJ": 0.007278866666666661
+    },
+    "B": {
+     "by_state": {
+      "(A1 * A2 * !Y)": {
+       "fall_fJ": -0.1534012922,
+       "per_clock_cycle_VDDonly_fJ": 7.70904e-05,
+       "per_clock_cycle_fJ": 0.0008380903999999911,
+       "rise_fJ": 0.1542393826
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 7.70904e-05,
+     "mean_per_cycle_fJ": 0.0008380903999999911
+    }
+   },
+   "inputs": {
+    "A1": {
+     "cap_fF": 1.11252,
+     "fall_cap_fF": 1.11252,
+     "is_clock": false,
+     "rise_cap_fF": 1.09883
+    },
+    "A2": {
+     "cap_fF": 0.963289,
+     "fall_cap_fF": 0.962465,
+     "is_clock": false,
+     "rise_cap_fF": 0.963289
+    },
+    "B": {
+     "cap_fF": 1.13437,
+     "fall_cap_fF": 1.1324,
+     "is_clock": false,
+     "rise_cap_fF": 1.13437
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A1 * !A2 * !B * Y)": 126.039,
+    "(!A1 * !A2 * B * !Y)": 98.4241,
+    "(!A1 * A2 * !B * Y)": 181.065,
+    "(!A1 * A2 * B * !Y)": 100.76,
+    "(A1 * !A2 * !B * Y)": 172.291,
+    "(A1 * !A2 * B * !Y)": 100.76,
+    "(A1 * A2 * !B * !Y)": 184.718,
+    "(A1 * A2 * B * !Y)": 51.6142
+   },
+   "leakage_pW": 126.959,
+   "liberty_file": "asap7sc7p5t_AO_RVT_TT_nldm_211120.lib",
+   "what": "AND-OR-invert, 2+1"
+  },
+  "AOI21xp33": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.08561458824074075,
+   "E_int_mean_over_arcs_fJ": 0.17043711231481481,
+   "arcs": {
+    "A1->Y": {
+     "E_int_fall_VDDonly_fJ": -0.014913044444444447,
+     "E_int_fall_fJ": 0.10653228888888888,
+     "E_int_mean_VDDonly_fJ": 0.05498772777777777,
+     "E_int_mean_fJ": 0.10855739166666667,
+     "E_int_per_cycle_VDDonly_fJ": 0.10997545555555555,
+     "E_int_per_cycle_fJ": 0.21711478333333334,
+     "E_int_rise_VDDonly_fJ": 0.1248885,
+     "E_int_rise_fJ": 0.11058249444444444,
+     "E_transition_0p517_fJ": 0.32650572787998305,
+     "E_transition_0p7_fJ": 0.5985573916666667,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.10383105555555555,
+       "E_transition_0p7_fJ": 0.22633105555555555
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.106433125,
+       "E_transition_0p7_fJ": 0.35143312499999996
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.10855739166666667,
+       "E_transition_0p7_fJ": 0.5985573916666667
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.10990500833333333,
+       "E_transition_0p7_fJ": 1.0899050083333333
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.110583875,
+       "E_transition_0p7_fJ": 2.0705838749999996
+      }
+     }
+    },
+    "A2->Y": {
+     "E_int_fall_VDDonly_fJ": -0.014119066666666668,
+     "E_int_fall_fJ": 0.13441904444444444,
+     "E_int_mean_VDDonly_fJ": 0.05919218888888889,
+     "E_int_mean_fJ": 0.11807699444444444,
+     "E_int_per_cycle_VDDonly_fJ": 0.11838437777777779,
+     "E_int_per_cycle_fJ": 0.2361539888888889,
+     "E_int_rise_VDDonly_fJ": 0.13250344444444445,
+     "E_int_rise_fJ": 0.10173494444444445,
+     "E_transition_0p517_fJ": 0.3316985546286962,
+     "E_transition_0p7_fJ": 0.6080769944444444,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.11692656111111112,
+       "E_transition_0p7_fJ": 0.2394265611111111
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.11746425833333335,
+       "E_transition_0p7_fJ": 0.3624642583333333
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.11807699444444444,
+       "E_transition_0p7_fJ": 0.6080769944444444
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.11851001666666668,
+       "E_transition_0p7_fJ": 1.0985100166666666
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.1184881611111111,
+       "E_transition_0p7_fJ": 2.078488161111111
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": -0.03307249833333333,
+     "E_int_fall_fJ": 0.3009460016666667,
+     "E_int_mean_VDDonly_fJ": 0.14266384805555557,
+     "E_int_mean_fJ": 0.28467695083333333,
+     "E_int_per_cycle_VDDonly_fJ": 0.28532769611111114,
+     "E_int_per_cycle_fJ": 0.5693539016666667,
+     "E_int_rise_VDDonly_fJ": 0.31840019444444445,
+     "E_int_rise_fJ": 0.2684078999999999,
+     "E_transition_0p517_fJ": 0.42257679083936917,
+     "E_transition_0p7_fJ": 0.7746769508333333,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.2615953138888889,
+       "E_transition_0p7_fJ": 0.3840953138888889
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.27484521666666667,
+       "E_transition_0p7_fJ": 0.5198452166666666
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.28467695083333333,
+       "E_transition_0p7_fJ": 0.7746769508333333
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.2905115386111111,
+       "E_transition_0p7_fJ": 1.270511538611111
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.29443906583333335,
+       "E_transition_0p7_fJ": 2.254439065833333
+      }
+     }
+    }
+   },
+   "area_um2": 0.0729,
+   "cell": "AOI21xp33_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "A1": {
+     "by_state": {
+      "(!A2 * !B * Y)": {
+       "fall_fJ": 0.012374799999999998,
+       "per_clock_cycle_VDDonly_fJ": 0.00029309999999999753,
+       "per_clock_cycle_fJ": 0.00029309999999999753,
+       "rise_fJ": -0.0120817
+      },
+      "(!A2 * B * !Y)": {
+       "fall_fJ": -0.028926800000000003,
+       "per_clock_cycle_VDDonly_fJ": 0.0003356999999999978,
+       "per_clock_cycle_fJ": 0.0008044999999999962,
+       "rise_fJ": 0.0297313
+      },
+      "(A2 * B * !Y)": {
+       "fall_fJ": -0.0305746,
+       "per_clock_cycle_VDDonly_fJ": 0.002170700000000001,
+       "per_clock_cycle_fJ": 0.003207599999999998,
+       "rise_fJ": 0.0337822
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0009331666666666655,
+     "mean_per_cycle_fJ": 0.001435066666666664
+    },
+    "A2": {
+     "by_state": {
+      "(!A1 * !B * Y)": {
+       "fall_fJ": -0.031887,
+       "per_clock_cycle_VDDonly_fJ": 0.0007361,
+       "per_clock_cycle_fJ": 0.0026560000000000056,
+       "rise_fJ": 0.034543000000000004
+      },
+      "(!A1 * B * !Y)": {
+       "fall_fJ": -0.032796900000000004,
+       "per_clock_cycle_VDDonly_fJ": 0.0,
+       "per_clock_cycle_fJ": 0.001564999999999997,
+       "rise_fJ": 0.0343619
+      },
+      "(A1 * B * !Y)": {
+       "fall_fJ": -0.0349694,
+       "per_clock_cycle_VDDonly_fJ": 0.0019302,
+       "per_clock_cycle_fJ": 0.0033825999999999995,
+       "rise_fJ": 0.038352
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0008887666666666667,
+     "mean_per_cycle_fJ": 0.002534533333333334
+    },
+    "B": {
+     "by_state": {
+      "(A1 * A2 * !Y)": {
+       "fall_fJ": -0.06270371699999999,
+       "per_clock_cycle_VDDonly_fJ": 2.60709e-05,
+       "per_clock_cycle_fJ": 2.6070900000008113e-05,
+       "rise_fJ": 0.0627297879
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 2.60709e-05,
+     "mean_per_cycle_fJ": 2.6070900000008113e-05
+    }
+   },
+   "inputs": {
+    "A1": {
+     "cap_fF": 0.402303,
+     "fall_cap_fF": 0.402303,
+     "is_clock": false,
+     "rise_cap_fF": 0.397682
+    },
+    "A2": {
+     "cap_fF": 0.37126,
+     "fall_cap_fF": 0.371235,
+     "is_clock": false,
+     "rise_cap_fF": 0.37126
+    },
+    "B": {
+     "cap_fF": 0.442337,
+     "fall_cap_fF": 0.441475,
+     "is_clock": false,
+     "rise_cap_fF": 0.442337
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A1 * !A2 * !B * Y)": 53.784,
+    "(!A1 * !A2 * B * !Y)": 33.1505,
+    "(!A1 * A2 * !B * Y)": 72.126,
+    "(!A1 * A2 * B * !Y)": 33.9291,
+    "(A1 * !A2 * !B * Y)": 69.2042,
+    "(A1 * !A2 * B * !Y)": 33.9291,
+    "(A1 * A2 * !B * !Y)": 61.5786,
+    "(A1 * A2 * B * !Y)": 17.5473
+   },
+   "leakage_pW": 46.9061,
+   "liberty_file": "asap7sc7p5t_AO_RVT_TT_nldm_211120.lib",
+   "what": "AND-OR-invert 2+1, 1/3 drive"
+  },
+  "BUFx2": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.25166675,
+   "E_int_mean_over_arcs_fJ": 0.5032564444444444,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": 0.3302217777777778,
+     "E_int_fall_fJ": 0.530334,
+     "E_int_mean_VDDonly_fJ": 0.25166675,
+     "E_int_mean_fJ": 0.5032564444444444,
+     "E_int_per_cycle_VDDonly_fJ": 0.5033335,
+     "E_int_per_cycle_fJ": 1.0065128888888888,
+     "E_int_rise_VDDonly_fJ": 0.1731117222222222,
+     "E_int_rise_fJ": 0.4761788888888889,
+     "E_transition_0p517_fJ": 0.5418092281206349,
+     "E_transition_0p7_fJ": 0.9932564444444443,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.497364,
+       "E_transition_0p7_fJ": 0.619864
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.497364,
+       "E_transition_0p7_fJ": 0.7423639999999999
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.5032564444444444,
+       "E_transition_0p7_fJ": 0.9932564444444443
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.5183219166666666,
+       "E_transition_0p7_fJ": 1.4983219166666664
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.5312914166666667,
+       "E_transition_0p7_fJ": 2.4912914166666664
+      }
+     }
+    }
+   },
+   "area_um2": 0.0729,
+   "cell": "BUFx2_ASAP7_75t_R",
+   "clock_pin_energy": {},
+   "inputs": {
+    "A": {
+     "cap_fF": 0.534279,
+     "fall_cap_fF": 0.53423,
+     "is_clock": false,
+     "rise_cap_fF": 0.534279
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !Y)": 133.537,
+    "(A * Y)": 139.314
+   },
+   "leakage_pW": 136.426,
+   "liberty_file": "asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib",
+   "what": "buffer (two inverters)"
+  },
+  "DFFHQNx1": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.49649044444444446,
+   "E_int_mean_over_arcs_fJ": 1.1010160833333333,
+   "arcs": {
+    "CLK->QN": {
+     "E_int_fall_VDDonly_fJ": 0.48487744444444447,
+     "E_int_fall_fJ": 1.0750116666666667,
+     "E_int_mean_VDDonly_fJ": 0.49649044444444446,
+     "E_int_mean_fJ": 1.1010160833333333,
+     "E_int_per_cycle_VDDonly_fJ": 0.9929808888888889,
+     "E_int_per_cycle_fJ": 2.2020321666666667,
+     "E_int_rise_VDDonly_fJ": 0.5081034444444444,
+     "E_int_rise_fJ": 1.1270205,
+     "E_transition_0p517_fJ": 0.8678797916287417,
+     "E_transition_0p7_fJ": 1.5910160833333333,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 1.0967955,
+       "E_transition_0p7_fJ": 1.2192955
+      },
+      "1.0": {
+       "E_int_mean_fJ": 1.0976417222222223,
+       "E_transition_0p7_fJ": 1.3426417222222222
+      },
+      "2.0": {
+       "E_int_mean_fJ": 1.1010160833333333,
+       "E_transition_0p7_fJ": 1.5910160833333333
+      },
+      "4.0": {
+       "E_int_mean_fJ": 1.1066900833333333,
+       "E_transition_0p7_fJ": 2.086690083333333
+      },
+      "8.0": {
+       "E_int_mean_fJ": 1.1126821944444445,
+       "E_transition_0p7_fJ": 3.072682194444444
+      }
+     }
+    }
+   },
+   "area_um2": 0.2916,
+   "cell": "DFFHQNx1_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "CLK": {
+     "by_state": {
+      "(!D * !QN)": {
+       "fall_fJ": 1.015546,
+       "per_clock_cycle_VDDonly_fJ": 0.570405,
+       "per_clock_cycle_fJ": 1.015546,
+       "rise_fJ": 0.0
+      },
+      "(!D * QN)": {
+       "fall_fJ": 0.60721,
+       "per_clock_cycle_VDDonly_fJ": 0.599515,
+       "per_clock_cycle_fJ": 1.199081,
+       "rise_fJ": 0.591871
+      },
+      "(D * !QN)": {
+       "fall_fJ": 0.599305,
+       "per_clock_cycle_VDDonly_fJ": 0.5969249999999999,
+       "per_clock_cycle_fJ": 1.193911,
+       "rise_fJ": 0.594606
+      },
+      "(D * QN)": {
+       "fall_fJ": 0.882944,
+       "per_clock_cycle_VDDonly_fJ": 0.491853,
+       "per_clock_cycle_fJ": 0.882944,
+       "rise_fJ": 0.0
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.5646745,
+     "mean_per_cycle_fJ": 1.0728705
+    },
+    "D": {
+     "by_state": {
+      "!CLK": {
+       "fall_fJ": 0.34587199999999996,
+       "per_clock_cycle_VDDonly_fJ": 0.37893299999999996,
+       "per_clock_cycle_fJ": 0.758894,
+       "rise_fJ": 0.413022
+      },
+      "CLK": {
+       "fall_fJ": -0.020710500000000007,
+       "per_clock_cycle_VDDonly_fJ": 0.004811699999999995,
+       "per_clock_cycle_fJ": 0.009611399999999985,
+       "rise_fJ": 0.030321899999999992
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.19187234999999997,
+     "mean_per_cycle_fJ": 0.38425269999999995
+    }
+   },
+   "inputs": {
+    "CLK": {
+     "cap_fF": 0.474736,
+     "fall_cap_fF": 0.474736,
+     "is_clock": true,
+     "rise_cap_fF": 0.474467
+    },
+    "D": {
+     "cap_fF": 0.558822,
+     "fall_cap_fF": 0.555706,
+     "is_clock": false,
+     "rise_cap_fF": 0.558822
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!CLK * !D * !QN)": 260.146,
+    "(!CLK * !D * QN)": 231.711,
+    "(!CLK * D * !QN)": 230.672,
+    "(!CLK * D * QN)": 260.532,
+    "(CLK * !D * !QN)": 224.47,
+    "(CLK * !D * QN)": 205.309,
+    "(CLK * D * !QN)": 192.231,
+    "(CLK * D * QN)": 232.822
+   },
+   "leakage_pW": 229.737,
+   "liberty_file": "asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib",
+   "what": "D flip-flop, inverting output"
+  },
+  "FAx1": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.42551970740740747,
+   "E_int_mean_over_arcs_fJ": 0.8502713106481482,
+   "arcs": {
+    "A->CON": {
+     "E_int_fall_VDDonly_fJ": 0.08430448888888889,
+     "E_int_fall_fJ": 0.6467016555555556,
+     "E_int_mean_VDDonly_fJ": 0.29398985555555557,
+     "E_int_mean_fJ": 0.5876463166666667,
+     "E_int_per_cycle_VDDonly_fJ": 0.5879797111111111,
+     "E_int_per_cycle_fJ": 1.1752926333333333,
+     "E_int_rise_VDDonly_fJ": 0.5036752222222223,
+     "E_int_rise_fJ": 0.5285909777777777,
+     "E_transition_0p517_fJ": 0.587842870072483,
+     "E_transition_0p7_fJ": 1.0776463166666665,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.5830603,
+       "E_transition_0p7_fJ": 0.7055602999999999
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.5844048833333334,
+       "E_transition_0p7_fJ": 0.8294048833333334
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.5876463166666667,
+       "E_transition_0p7_fJ": 1.0776463166666665
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.5913248666666667,
+       "E_transition_0p7_fJ": 1.5713248666666666
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.5973966777777778,
+       "E_transition_0p7_fJ": 2.5573966777777777
+      }
+     }
+    },
+    "A->SN": {
+     "E_int_fall_VDDonly_fJ": 0.3236594555555556,
+     "E_int_fall_fJ": 1.1722006055555558,
+     "E_int_mean_VDDonly_fJ": 0.5592789027777778,
+     "E_int_mean_fJ": 1.11724945,
+     "E_int_per_cycle_VDDonly_fJ": 1.1185578055555556,
+     "E_int_per_cycle_fJ": 2.2344989,
+     "E_int_rise_VDDonly_fJ": 0.79489835,
+     "E_int_rise_fJ": 1.0622982944444443,
+     "E_transition_0p517_fJ": 0.87673489436949,
+     "E_transition_0p7_fJ": 1.60724945,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 1.1064412,
+       "E_transition_0p7_fJ": 1.2289412
+      },
+      "1.0": {
+       "E_int_mean_fJ": 1.1095454472222221,
+       "E_transition_0p7_fJ": 1.354545447222222
+      },
+      "2.0": {
+       "E_int_mean_fJ": 1.11724945,
+       "E_transition_0p7_fJ": 1.60724945
+      },
+      "4.0": {
+       "E_int_mean_fJ": 1.1244122944444443,
+       "E_transition_0p7_fJ": 2.1044122944444443
+      },
+      "8.0": {
+       "E_int_mean_fJ": 1.1336797833333334,
+       "E_transition_0p7_fJ": 3.093679783333333
+      }
+     }
+    },
+    "B->CON": {
+     "E_int_fall_VDDonly_fJ": 0.07678922222222223,
+     "E_int_fall_fJ": 0.624879,
+     "E_int_mean_VDDonly_fJ": 0.2832151388888889,
+     "E_int_mean_fJ": 0.5655557980555554,
+     "E_int_per_cycle_VDDonly_fJ": 0.5664302777777778,
+     "E_int_per_cycle_fJ": 1.131111596111111,
+     "E_int_rise_VDDonly_fJ": 0.48964105555555554,
+     "E_int_rise_fJ": 0.506232596111111,
+     "E_transition_0p517_fJ": 0.5757927626662682,
+     "E_transition_0p7_fJ": 1.0555557980555554,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.554289155,
+       "E_transition_0p7_fJ": 0.6767891549999999
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.5574859986111111,
+       "E_transition_0p7_fJ": 0.8024859986111111
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.5655557980555554,
+       "E_transition_0p7_fJ": 1.0555557980555554
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.5731369405555555,
+       "E_transition_0p7_fJ": 1.5531369405555555
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.5811030997222222,
+       "E_transition_0p7_fJ": 2.541103099722222
+      }
+     }
+    },
+    "B->SN": {
+     "E_int_fall_VDDonly_fJ": 0.30678947777777776,
+     "E_int_fall_fJ": 1.2030244483333332,
+     "E_int_mean_VDDonly_fJ": 0.5785514694444445,
+     "E_int_mean_fJ": 1.155216093611111,
+     "E_int_per_cycle_VDDonly_fJ": 1.157102938888889,
+     "E_int_per_cycle_fJ": 2.310432187222222,
+     "E_int_rise_VDDonly_fJ": 0.8503134611111111,
+     "E_int_rise_fJ": 1.1074077388888888,
+     "E_transition_0p517_fJ": 0.8974452335616743,
+     "E_transition_0p7_fJ": 1.645216093611111,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 1.1393202299999998,
+       "E_transition_0p7_fJ": 1.2618202299999999
+      },
+      "1.0": {
+       "E_int_mean_fJ": 1.143911736111111,
+       "E_transition_0p7_fJ": 1.388911736111111
+      },
+      "2.0": {
+       "E_int_mean_fJ": 1.155216093611111,
+       "E_transition_0p7_fJ": 1.645216093611111
+      },
+      "4.0": {
+       "E_int_mean_fJ": 1.1654759558333334,
+       "E_transition_0p7_fJ": 2.145475955833333
+      },
+      "8.0": {
+       "E_int_mean_fJ": 1.175962119722222,
+       "E_transition_0p7_fJ": 3.1359621197222216
+      }
+     }
+    },
+    "CI->CON": {
+     "E_int_fall_VDDonly_fJ": 0.13881285,
+     "E_int_fall_fJ": 0.5993444611111112,
+     "E_int_mean_VDDonly_fJ": 0.28079523055555555,
+     "E_int_mean_fJ": 0.5621295527777779,
+     "E_int_per_cycle_VDDonly_fJ": 0.5615904611111111,
+     "E_int_per_cycle_fJ": 1.1242591055555557,
+     "E_int_rise_VDDonly_fJ": 0.4227776111111111,
+     "E_int_rise_fJ": 0.5249146444444445,
+     "E_transition_0p517_fJ": 0.5739237878212644,
+     "E_transition_0p7_fJ": 1.0521295527777779,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.55574025,
+       "E_transition_0p7_fJ": 0.67824025
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.5577301166666666,
+       "E_transition_0p7_fJ": 0.8027301166666666
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.5621295527777779,
+       "E_transition_0p7_fJ": 1.0521295527777779
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.5662779083333334,
+       "E_transition_0p7_fJ": 1.5462779083333333
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.5723126805555556,
+       "E_transition_0p7_fJ": 2.532312680555555
+      }
+     }
+    },
+    "CI->SN": {
+     "E_int_fall_VDDonly_fJ": 0.3639339166666667,
+     "E_int_fall_fJ": 1.1303645944444445,
+     "E_int_mean_VDDonly_fJ": 0.5572876472222222,
+     "E_int_mean_fJ": 1.1138306527777777,
+     "E_int_per_cycle_VDDonly_fJ": 1.1145752944444445,
+     "E_int_per_cycle_fJ": 2.2276613055555554,
+     "E_int_rise_VDDonly_fJ": 0.7506413777777778,
+     "E_int_rise_fJ": 1.097296711111111,
+     "E_transition_0p517_fJ": 0.8748699823475908,
+     "E_transition_0p7_fJ": 1.6038306527777777,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 1.0857478,
+       "E_transition_0p7_fJ": 1.2082478
+      },
+      "1.0": {
+       "E_int_mean_fJ": 1.0939030333333333,
+       "E_transition_0p7_fJ": 1.3389030333333332
+      },
+      "2.0": {
+       "E_int_mean_fJ": 1.1138306527777777,
+       "E_transition_0p7_fJ": 1.6038306527777777
+      },
+      "4.0": {
+       "E_int_mean_fJ": 1.1302623583333333,
+       "E_transition_0p7_fJ": 2.1102623583333333
+      },
+      "8.0": {
+       "E_int_mean_fJ": 1.1442258555555556,
+       "E_transition_0p7_fJ": 3.1042258555555553
+      }
+     }
+    }
+   },
+   "area_um2": 0.20412,
+   "cell": "FAx1_ASAP7_75t_R",
+   "clock_pin_energy": {},
+   "inputs": {
+    "A": {
+     "cap_fF": 1.82696,
+     "fall_cap_fF": 1.82696,
+     "is_clock": false,
+     "rise_cap_fF": 1.82329
+    },
+    "B": {
+     "cap_fF": 1.99671,
+     "fall_cap_fF": 1.99671,
+     "is_clock": false,
+     "rise_cap_fF": 1.99586
+    },
+    "CI": {
+     "cap_fF": 1.49446,
+     "fall_cap_fF": 1.49446,
+     "is_clock": false,
+     "rise_cap_fF": 1.4923
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * !CI * CON * SN)": 229.752,
+    "(!A * !B * CI * CON * !SN)": 226.93,
+    "(!A * B * !CI * CON * !SN)": 203.167,
+    "(!A * B * CI * !CON * SN)": 209.013,
+    "(A * !B * !CI * CON * !SN)": 208.724,
+    "(A * !B * CI * !CON * SN)": 203.993,
+    "(A * B * !CI * !CON * SN)": 222.629,
+    "(A * B * CI * !CON * !SN)": 193.308
+   },
+   "leakage_pW": 212.189,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "full adder (28-transistor mirror type)"
+  },
+  "HAxp5": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.15172774173611112,
+   "E_int_mean_over_arcs_fJ": 0.3040832875694444,
+   "arcs": {
+    "A->CON": {
+     "E_int_fall_VDDonly_fJ": 0.057796461111111114,
+     "E_int_fall_fJ": 0.25370618333333333,
+     "E_int_mean_VDDonly_fJ": 0.10483623055555556,
+     "E_int_mean_fJ": 0.20999978333333336,
+     "E_int_per_cycle_VDDonly_fJ": 0.20967246111111112,
+     "E_int_per_cycle_fJ": 0.4199995666666667,
+     "E_int_rise_VDDonly_fJ": 0.151876,
+     "E_int_rise_fJ": 0.16629338333333335,
+     "E_transition_0p517_fJ": 0.3818413103824151,
+     "E_transition_0p7_fJ": 0.6999997833333333,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.20474461111111109,
+       "E_transition_0p7_fJ": 0.3272446111111111
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.20740089444444448,
+       "E_transition_0p7_fJ": 0.4524008944444444
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.20999978333333336,
+       "E_transition_0p7_fJ": 0.6999997833333333
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.2124686722222222,
+       "E_transition_0p7_fJ": 1.1924686722222222
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.21578184166666667,
+       "E_transition_0p7_fJ": 2.1757818416666663
+      }
+     }
+    },
+    "A->SN": {
+     "E_int_fall_VDDonly_fJ": 0.15982110666666666,
+     "E_int_fall_fJ": 0.4521004622222222,
+     "E_int_mean_VDDonly_fJ": 0.20040962,
+     "E_int_mean_fJ": 0.4029208311111111,
+     "E_int_per_cycle_VDDonly_fJ": 0.40081924,
+     "E_int_per_cycle_fJ": 0.8058416622222222,
+     "E_int_rise_VDDonly_fJ": 0.24099813333333334,
+     "E_int_rise_fJ": 0.3537412,
+     "E_transition_0p517_fJ": 0.4870773796466486,
+     "E_transition_0p7_fJ": 0.892920831111111,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.3943978941666667,
+       "E_transition_0p7_fJ": 0.5168978941666666
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.39862851722222226,
+       "E_transition_0p7_fJ": 0.6436285172222223
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.4029208311111111,
+       "E_transition_0p7_fJ": 0.892920831111111
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.40682816388888887,
+       "E_transition_0p7_fJ": 1.3868281638888886
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.411719935,
+       "E_transition_0p7_fJ": 2.371719935
+      }
+     }
+    },
+    "B->CON": {
+     "E_int_fall_VDDonly_fJ": 0.07140533888888889,
+     "E_int_fall_fJ": 0.24504628333333334,
+     "E_int_mean_VDDonly_fJ": 0.106889975,
+     "E_int_mean_fJ": 0.2149584111111111,
+     "E_int_per_cycle_VDDonly_fJ": 0.21377995,
+     "E_int_per_cycle_fJ": 0.4299168222222222,
+     "E_int_rise_VDDonly_fJ": 0.1423746111111111,
+     "E_int_rise_fJ": 0.18487053888888888,
+     "E_transition_0p517_fJ": 0.38454618111730166,
+     "E_transition_0p7_fJ": 0.704958411111111,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.20948956666666665,
+       "E_transition_0p7_fJ": 0.3319895666666666
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.21231254444444445,
+       "E_transition_0p7_fJ": 0.4573125444444444
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.2149584111111111,
+       "E_transition_0p7_fJ": 0.704958411111111
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.21749514166666667,
+       "E_transition_0p7_fJ": 1.1974951416666666
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.2204298027777778,
+       "E_transition_0p7_fJ": 2.1804298027777778
+      }
+     }
+    },
+    "B->SN": {
+     "E_int_fall_VDDonly_fJ": 0.14478111055555554,
+     "E_int_fall_fJ": 0.3853332827777778,
+     "E_int_mean_VDDonly_fJ": 0.19477514138888888,
+     "E_int_mean_fJ": 0.3884541247222222,
+     "E_int_per_cycle_VDDonly_fJ": 0.38955028277777776,
+     "E_int_per_cycle_fJ": 0.7769082494444444,
+     "E_int_rise_VDDonly_fJ": 0.24476917222222222,
+     "E_int_rise_fJ": 0.39157496666666664,
+     "E_transition_0p517_fJ": 0.4791859684548533,
+     "E_transition_0p7_fJ": 0.8784541247222222,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.37357134816666665,
+       "E_transition_0p7_fJ": 0.49607134816666665
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.38102994088888886,
+       "E_transition_0p7_fJ": 0.6260299408888889
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.3884541247222222,
+       "E_transition_0p7_fJ": 0.8784541247222222
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.39398709805555554,
+       "E_transition_0p7_fJ": 1.3739870980555553
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.39917789833333334,
+       "E_transition_0p7_fJ": 2.359177898333333
+      }
+     }
+    }
+   },
+   "area_um2": 0.13122,
+   "cell": "HAxp5_ASAP7_75t_R",
+   "clock_pin_energy": {},
+   "inputs": {
+    "A": {
+     "cap_fF": 0.981185,
+     "fall_cap_fF": 0.973416,
+     "is_clock": false,
+     "rise_cap_fF": 0.981185
+    },
+    "B": {
+     "cap_fF": 0.91359,
+     "fall_cap_fF": 0.91359,
+     "is_clock": false,
+     "rise_cap_fF": 0.849183
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * CON * SN)": 125.705,
+    "(!A * B * CON * !SN)": 148.7,
+    "(A * !B * CON * !SN)": 150.756,
+    "(A * B * !CON * SN)": 122.742
+   },
+   "leakage_pW": 136.976,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "half adder"
+  },
+  "ICGx1": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.6516768611111111,
+   "E_int_mean_over_arcs_fJ": 0.8090078005555557,
+   "arcs": {
+    "CLK->GCLK": {
+     "E_int_fall_VDDonly_fJ": 1.3033537222222222,
+     "E_int_fall_fJ": 1.6180156011111113,
+     "E_int_mean_VDDonly_fJ": 0.6516768611111111,
+     "E_int_mean_fJ": 0.8090078005555557,
+     "E_int_per_cycle_VDDonly_fJ": 1.3033537222222222,
+     "E_int_per_cycle_fJ": 1.6180156011111113,
+     "E_int_rise_VDDonly_fJ": 0.0,
+     "E_int_rise_fJ": 0.0,
+     "E_transition_0p517_fJ": 0.7085928489850898,
+     "E_transition_0p7_fJ": 1.2990078005555556,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.800234325,
+       "E_transition_0p7_fJ": 0.922734325
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.8027708275,
+       "E_transition_0p7_fJ": 1.0477708275
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.8090078005555557,
+       "E_transition_0p7_fJ": 1.2990078005555556
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.8136382583333333,
+       "E_transition_0p7_fJ": 1.793638258333333
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.8159740027777778,
+       "E_transition_0p7_fJ": 2.7759740027777777
+      }
+     }
+    }
+   },
+   "area_um2": 0.26244,
+   "cell": "ICGx1_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "CLK": {
+     "by_state": {
+      "(!ENA * !SE * !GCLK)": {
+       "fall_fJ": 0.2284932,
+       "per_clock_cycle_VDDonly_fJ": 0.17180000000000004,
+       "per_clock_cycle_fJ": 0.3426912,
+       "rise_fJ": 0.114198
+      },
+      "(ENA * !GCLK) + (!ENA * SE * !GCLK)": {
+       "fall_fJ": 0.835646,
+       "per_clock_cycle_VDDonly_fJ": 0.653937,
+       "per_clock_cycle_fJ": 0.835646,
+       "rise_fJ": 0.0
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.4128685,
+     "mean_per_cycle_fJ": 0.5891686
+    },
+    "ENA": {
+     "by_state": {
+      "(!CLK * !SE * !GCLK)": {
+       "fall_fJ": 0.858294,
+       "per_clock_cycle_VDDonly_fJ": 0.8164830000000001,
+       "per_clock_cycle_fJ": 1.635613,
+       "rise_fJ": 0.777319
+      },
+      "(CLK * !SE)": {
+       "fall_fJ": 0.2319648,
+       "per_clock_cycle_VDDonly_fJ": 0.1979583,
+       "per_clock_cycle_fJ": 0.3957811,
+       "rise_fJ": 0.1638163
+      },
+      "(CLK * SE) + (!CLK * SE * !GCLK)": {
+       "fall_fJ": -0.055272733,
+       "per_clock_cycle_VDDonly_fJ": 0.0001139164,
+       "per_clock_cycle_fJ": 0.0009768164000000037,
+       "rise_fJ": 0.0562495494
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.3381850721333333,
+     "mean_per_cycle_fJ": 0.6774569721333333
+    },
+    "SE": {
+     "by_state": {
+      "(!CLK * !ENA * !GCLK)": {
+       "fall_fJ": 0.874284,
+       "per_clock_cycle_VDDonly_fJ": 0.839089,
+       "per_clock_cycle_fJ": 1.6791969999999998,
+       "rise_fJ": 0.804913
+      },
+      "(CLK * !ENA)": {
+       "fall_fJ": 0.2478614,
+       "per_clock_cycle_VDDonly_fJ": 0.2210856,
+       "per_clock_cycle_fJ": 0.44059800000000005,
+       "rise_fJ": 0.1927366
+      },
+      "(CLK * ENA) + (!CLK * ENA * !GCLK)": {
+       "fall_fJ": -0.033087099999999994,
+       "per_clock_cycle_VDDonly_fJ": 0.002598900000000001,
+       "per_clock_cycle_fJ": 0.0046771000000000035,
+       "rise_fJ": 0.0377642
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.3542578333333333,
+     "mean_per_cycle_fJ": 0.7081573666666666
+    }
+   },
+   "inputs": {
+    "CLK": {
+     "cap_fF": 2.19131,
+     "fall_cap_fF": 2.19131,
+     "is_clock": true,
+     "rise_cap_fF": 2.13873
+    },
+    "ENA": {
+     "cap_fF": 0.427309,
+     "fall_cap_fF": 0.426501,
+     "is_clock": false,
+     "rise_cap_fF": 0.427309
+    },
+    "SE": {
+     "cap_fF": 0.427655,
+     "fall_cap_fF": 0.427655,
+     "is_clock": false,
+     "rise_cap_fF": 0.422103
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!CLK * !ENA * !SE * !GCLK)": 299.164,
+    "(!CLK * !ENA * SE * !GCLK)": 319.316,
+    "(!CLK * ENA * !SE * !GCLK)": 320.867,
+    "(!CLK * ENA * SE * !GCLK)": 299.375,
+    "(CLK * !ENA * !SE * !GCLK)": 319.349,
+    "(CLK * !ENA * !SE * GCLK)": 393.907,
+    "(CLK * !ENA * SE * !GCLK)": 311.842,
+    "(CLK * !ENA * SE * GCLK)": 326.644,
+    "(CLK * ENA * !SE * !GCLK)": 313.393,
+    "(CLK * ENA * !SE * GCLK)": 328.195,
+    "(CLK * ENA * SE * !GCLK)": 291.9,
+    "(CLK * ENA * SE * GCLK)": 306.702
+   },
+   "leakage_pW": 319.221,
+   "liberty_file": "asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib",
+   "what": "integrated clock gate"
+  },
+  "INVx1": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.04871379444444445,
+   "E_int_mean_over_arcs_fJ": 0.09752684722222224,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": -0.022167799999999998,
+     "E_int_fall_fJ": 0.10310086666666667,
+     "E_int_mean_VDDonly_fJ": 0.04871379444444445,
+     "E_int_mean_fJ": 0.09752684722222224,
+     "E_int_per_cycle_VDDonly_fJ": 0.0974275888888889,
+     "E_int_per_cycle_fJ": 0.19505369444444448,
+     "E_int_rise_VDDonly_fJ": 0.1195953888888889,
+     "E_int_rise_fJ": 0.0919528277777778,
+     "E_transition_0p517_fJ": 0.32048870095342974,
+     "E_transition_0p7_fJ": 0.5875268472222221,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.0896843,
+       "E_transition_0p7_fJ": 0.2121843
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.09224972222222222,
+       "E_transition_0p7_fJ": 0.33724972222222216
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.09752684722222224,
+       "E_transition_0p7_fJ": 0.5875268472222221
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.10095289444444444,
+       "E_transition_0p7_fJ": 1.0809528944444442
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.10360986666666666,
+       "E_transition_0p7_fJ": 2.0636098666666665
+      }
+     }
+    }
+   },
+   "area_um2": 0.04374,
+   "cell": "INVx1_ASAP7_75t_R",
+   "clock_pin_energy": {},
+   "inputs": {
+    "A": {
+     "cap_fF": 0.619928,
+     "fall_cap_fF": 0.619647,
+     "is_clock": false,
+     "rise_cap_fF": 0.619928
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * Y)": 53.3254,
+    "(A * !Y)": 48.9923
+   },
+   "leakage_pW": 51.1588,
+   "liberty_file": "asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib",
+   "what": "inverter, minimum drive"
+  },
+  "INVxp33": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.024331224166666665,
+   "E_int_mean_over_arcs_fJ": 0.04842229916666667,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": -0.006413135,
+     "E_int_fall_fJ": 0.052214337222222226,
+     "E_int_mean_VDDonly_fJ": 0.024331224166666665,
+     "E_int_mean_fJ": 0.04842229916666667,
+     "E_int_per_cycle_VDDonly_fJ": 0.04866244833333333,
+     "E_int_per_cycle_fJ": 0.09684459833333334,
+     "E_int_rise_VDDonly_fJ": 0.05507558333333333,
+     "E_int_rise_fJ": 0.04463026111111111,
+     "E_transition_0p517_fJ": 0.29370277126930444,
+     "E_transition_0p7_fJ": 0.5384222991666666,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.04575497388888889,
+       "E_transition_0p7_fJ": 0.16825497388888888
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.04745411527777778,
+       "E_transition_0p7_fJ": 0.29245411527777776
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.04842229916666667,
+       "E_transition_0p7_fJ": 0.5384222991666666
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.04913281722222222,
+       "E_transition_0p7_fJ": 1.029132817222222
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.04935688277777778,
+       "E_transition_0p7_fJ": 2.0093568827777775
+      }
+     }
+    }
+   },
+   "area_um2": 0.04374,
+   "cell": "INVxp33_ASAP7_75t_R",
+   "clock_pin_energy": {},
+   "inputs": {
+    "A": {
+     "cap_fF": 0.275723,
+     "fall_cap_fF": 0.275491,
+     "is_clock": false,
+     "rise_cap_fF": 0.275723
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * Y)": 17.7784,
+    "(A * !Y)": 16.334
+   },
+   "leakage_pW": 17.0562,
+   "liberty_file": "asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib",
+   "what": "inverter, 1/3 drive (the smallest)"
+  },
+  "MAJIxp5": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.2111901425925926,
+   "E_int_mean_over_arcs_fJ": 0.42192333981481484,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": -0.041719905555555555,
+     "E_int_fall_fJ": 0.34118814999999997,
+     "E_int_mean_VDDonly_fJ": 0.167546575,
+     "E_int_mean_fJ": 0.3345127583333333,
+     "E_int_per_cycle_VDDonly_fJ": 0.33509315,
+     "E_int_per_cycle_fJ": 0.6690255166666667,
+     "E_int_rise_VDDonly_fJ": 0.37681305555555555,
+     "E_int_rise_fJ": 0.3278373666666667,
+     "E_transition_0p517_fJ": 0.44976161359624156,
+     "E_transition_0p7_fJ": 0.8245127583333333,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.31075853333333336,
+       "E_transition_0p7_fJ": 0.43325853333333336
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.32256446111111114,
+       "E_transition_0p7_fJ": 0.5675644611111111
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.3345127583333333,
+       "E_transition_0p7_fJ": 0.8245127583333333
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.3437026638888889,
+       "E_transition_0p7_fJ": 1.3237026638888887
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.3484678194444445,
+       "E_transition_0p7_fJ": 2.308467819444444
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": -0.09076010000000001,
+     "E_int_fall_fJ": 0.5010510666666668,
+     "E_int_mean_VDDonly_fJ": 0.23559850555555556,
+     "E_int_mean_fJ": 0.4705609333333334,
+     "E_int_per_cycle_VDDonly_fJ": 0.4711970111111111,
+     "E_int_per_cycle_fJ": 0.9411218666666668,
+     "E_int_rise_VDDonly_fJ": 0.5619571111111111,
+     "E_int_rise_fJ": 0.44007080000000004,
+     "E_transition_0p517_fJ": 0.5239742271627212,
+     "E_transition_0p7_fJ": 0.9605609333333334,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.44125940555555554,
+       "E_transition_0p7_fJ": 0.5637594055555555
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.45695429722222225,
+       "E_transition_0p7_fJ": 0.7019542972222222
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.4705609333333334,
+       "E_transition_0p7_fJ": 0.9605609333333334
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.48124890555555555,
+       "E_transition_0p7_fJ": 1.4612489055555553
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.4880183055555556,
+       "E_transition_0p7_fJ": 2.4480183055555553
+      }
+     }
+    },
+    "C->Y": {
+     "E_int_fall_VDDonly_fJ": -0.11428497222222223,
+     "E_int_fall_fJ": 0.5148124722222223,
+     "E_int_mean_VDDonly_fJ": 0.23042534722222224,
+     "E_int_mean_fJ": 0.4606963277777778,
+     "E_int_per_cycle_VDDonly_fJ": 0.4608506944444445,
+     "E_int_per_cycle_fJ": 0.9213926555555556,
+     "E_int_rise_VDDonly_fJ": 0.5751356666666667,
+     "E_int_rise_fJ": 0.40658018333333334,
+     "E_transition_0p517_fJ": 0.5185932056232541,
+     "E_transition_0p7_fJ": 0.9506963277777778,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.4554694944444445,
+       "E_transition_0p7_fJ": 0.5779694944444445
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.4583119472222221,
+       "E_transition_0p7_fJ": 0.7033119472222221
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.4606963277777778,
+       "E_transition_0p7_fJ": 0.9506963277777778
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.46235869166666665,
+       "E_transition_0p7_fJ": 1.4423586916666666
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.46358090555555553,
+       "E_transition_0p7_fJ": 2.4235809055555553
+      }
+     }
+    }
+   },
+   "area_um2": 0.10206,
+   "cell": "MAJIxp5_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "A": {
+     "by_state": {
+      "(!B * !C * Y)": {
+       "fall_fJ": 0.057947,
+       "per_clock_cycle_VDDonly_fJ": 0.0005232000000000014,
+       "per_clock_cycle_fJ": 0.0005232000000000014,
+       "rise_fJ": -0.0574238
+      },
+      "(B * C * !Y)": {
+       "fall_fJ": -0.0802194349,
+       "per_clock_cycle_VDDonly_fJ": 4.9732000000000004e-05,
+       "per_clock_cycle_fJ": 4.973199999999678e-05,
+       "rise_fJ": 0.0802691669
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.00028646600000000074,
+     "mean_per_cycle_fJ": 0.0002864659999999991
+    },
+    "B": {
+     "by_state": {
+      "(!A * !C * Y)": {
+       "fall_fJ": 0.0387038,
+       "per_clock_cycle_VDDonly_fJ": 0.0006899999999999962,
+       "per_clock_cycle_fJ": 0.006315100000000004,
+       "rise_fJ": -0.03238869999999999
+      },
+      "(A * C * !Y)": {
+       "fall_fJ": -0.1019257,
+       "per_clock_cycle_VDDonly_fJ": 0.008862300000000004,
+       "per_clock_cycle_fJ": 0.011707300000000018,
+       "rise_fJ": 0.11363300000000001
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.00477615,
+     "mean_per_cycle_fJ": 0.009011200000000011
+    },
+    "C": {
+     "by_state": {
+      "(!A * !B * Y)": {
+       "fall_fJ": -0.0320178,
+       "per_clock_cycle_VDDonly_fJ": 0.002017999999999992,
+       "per_clock_cycle_fJ": 0.012518000000000001,
+       "rise_fJ": 0.0445358
+      },
+      "(A * B * !Y)": {
+       "fall_fJ": -0.05314959999999999,
+       "per_clock_cycle_VDDonly_fJ": 0.012732899999999998,
+       "per_clock_cycle_fJ": 0.017217900000000008,
+       "rise_fJ": 0.0703675
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.007375449999999995,
+     "mean_per_cycle_fJ": 0.014867950000000005
+    }
+   },
+   "inputs": {
+    "A": {
+     "cap_fF": 0.594896,
+     "fall_cap_fF": 0.594896,
+     "is_clock": false,
+     "rise_cap_fF": 0.594479
+    },
+    "B": {
+     "cap_fF": 1.12165,
+     "fall_cap_fF": 1.12165,
+     "is_clock": false,
+     "rise_cap_fF": 1.1137
+    },
+    "C": {
+     "cap_fF": 0.963238,
+     "fall_cap_fF": 0.960319,
+     "is_clock": false,
+     "rise_cap_fF": 0.963238
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * !C * Y)": 61.763,
+    "(!A * !B * C * Y)": 110.083,
+    "(!A * B * !C * Y)": 105.696,
+    "(!A * B * C * !Y)": 109.477,
+    "(A * !B * !C * Y)": 125.948,
+    "(A * !B * C * !Y)": 97.9174,
+    "(A * B * !C * !Y)": 100.249,
+    "(A * B * C * !Y)": 43.4368
+   },
+   "leakage_pW": 94.3213,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "majority gate, inverting (the 4:2 compressor's carry)"
+  },
+  "MAJx2": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.6292116296296296,
+   "E_int_mean_over_arcs_fJ": 1.2584220185185186,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": 0.8408311666666667,
+     "E_int_fall_fJ": 1.2413328333333333,
+     "E_int_mean_VDDonly_fJ": 0.5853145,
+     "E_int_mean_fJ": 1.1700853055555556,
+     "E_int_per_cycle_VDDonly_fJ": 1.170629,
+     "E_int_per_cycle_fJ": 2.340170611111111,
+     "E_int_rise_VDDonly_fJ": 0.32979783333333335,
+     "E_int_rise_fJ": 1.0988377777777778,
+     "E_transition_0p517_fJ": 0.9055562066053857,
+     "E_transition_0p7_fJ": 1.6600853055555556,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 1.1593300000000002,
+       "E_transition_0p7_fJ": 1.2818300000000002
+      },
+      "1.0": {
+       "E_int_mean_fJ": 1.1593300000000002,
+       "E_transition_0p7_fJ": 1.40433
+      },
+      "2.0": {
+       "E_int_mean_fJ": 1.1700853055555556,
+       "E_transition_0p7_fJ": 1.6600853055555556
+      },
+      "4.0": {
+       "E_int_mean_fJ": 1.1990920277777777,
+       "E_transition_0p7_fJ": 2.1790920277777777
+      },
+      "8.0": {
+       "E_int_mean_fJ": 1.2275690833333335,
+       "E_transition_0p7_fJ": 3.187569083333333
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": 1.0262397777777776,
+     "E_int_fall_fJ": 1.3599051111111111,
+     "E_int_mean_VDDonly_fJ": 0.6529254999999999,
+     "E_int_mean_fJ": 1.3059380833333334,
+     "E_int_per_cycle_VDDonly_fJ": 1.3058509999999999,
+     "E_int_per_cycle_fJ": 2.6118761666666668,
+     "E_int_rise_VDDonly_fJ": 0.27961122222222223,
+     "E_int_rise_fJ": 1.2519710555555554,
+     "E_transition_0p517_fJ": 0.9796622333797622,
+     "E_transition_0p7_fJ": 1.7959380833333334,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 1.2943595,
+       "E_transition_0p7_fJ": 1.4168595000000002
+      },
+      "1.0": {
+       "E_int_mean_fJ": 1.2943595,
+       "E_transition_0p7_fJ": 1.5393595
+      },
+      "2.0": {
+       "E_int_mean_fJ": 1.3059380833333334,
+       "E_transition_0p7_fJ": 1.7959380833333334
+      },
+      "4.0": {
+       "E_int_mean_fJ": 1.3369560277777777,
+       "E_transition_0p7_fJ": 2.3169560277777776
+      },
+      "8.0": {
+       "E_int_mean_fJ": 1.3667153611111111,
+       "E_transition_0p7_fJ": 3.326715361111111
+      }
+     }
+    },
+    "C->Y": {
+     "E_int_fall_VDDonly_fJ": 1.0378968888888889,
+     "E_int_fall_fJ": 1.3242005000000001,
+     "E_int_mean_VDDonly_fJ": 0.6493948888888889,
+     "E_int_mean_fJ": 1.2992426666666668,
+     "E_int_per_cycle_VDDonly_fJ": 1.2987897777777777,
+     "E_int_per_cycle_fJ": 2.5984853333333335,
+     "E_int_rise_VDDonly_fJ": 0.2608928888888889,
+     "E_int_rise_fJ": 1.2742848333333332,
+     "E_transition_0p517_fJ": 0.9760099655727894,
+     "E_transition_0p7_fJ": 1.7892426666666668,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 1.289158,
+       "E_transition_0p7_fJ": 1.411658
+      },
+      "1.0": {
+       "E_int_mean_fJ": 1.289158,
+       "E_transition_0p7_fJ": 1.534158
+      },
+      "2.0": {
+       "E_int_mean_fJ": 1.2992426666666668,
+       "E_transition_0p7_fJ": 1.7892426666666668
+      },
+      "4.0": {
+       "E_int_mean_fJ": 1.3271043333333332,
+       "E_transition_0p7_fJ": 2.307104333333333
+      },
+      "8.0": {
+       "E_int_mean_fJ": 1.3558575,
+       "E_transition_0p7_fJ": 3.3158575
+      }
+     }
+    }
+   },
+   "area_um2": 0.13122,
+   "cell": "MAJx2_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "A": {
+     "by_state": {
+      "(!B * !C * !Y)": {
+       "fall_fJ": 0.0591171,
+       "per_clock_cycle_VDDonly_fJ": 0.0001860999999999946,
+       "per_clock_cycle_fJ": 0.0001860999999999946,
+       "rise_fJ": -0.058931000000000004
+      },
+      "(B * C * Y)": {
+       "fall_fJ": -0.079385498,
+       "per_clock_cycle_VDDonly_fJ": 0.000169263,
+       "per_clock_cycle_fJ": 0.00016926300000000283,
+       "rise_fJ": 0.079554761
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0001776814999999973,
+     "mean_per_cycle_fJ": 0.00017768149999999872
+    },
+    "B": {
+     "by_state": {
+      "(!A * !C * !Y)": {
+       "fall_fJ": 0.047813400000000006,
+       "per_clock_cycle_VDDonly_fJ": 0.0011769999999999975,
+       "per_clock_cycle_fJ": 0.006945800000000002,
+       "rise_fJ": -0.040867600000000004
+      },
+      "(A * C * Y)": {
+       "fall_fJ": -0.09759150000000001,
+       "per_clock_cycle_VDDonly_fJ": 0.008931399999999999,
+       "per_clock_cycle_fJ": 0.013744399999999976,
+       "rise_fJ": 0.11133589999999999
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.005054199999999998,
+     "mean_per_cycle_fJ": 0.010345099999999989
+    },
+    "C": {
+     "by_state": {
+      "(!A * !B * !Y)": {
+       "fall_fJ": -0.0305787,
+       "per_clock_cycle_VDDonly_fJ": 0.0024865000000000026,
+       "per_clock_cycle_fJ": 0.011661499999999991,
+       "rise_fJ": 0.04224019999999999
+      },
+      "(A * B * Y)": {
+       "fall_fJ": -0.052256,
+       "per_clock_cycle_VDDonly_fJ": 0.012574700000000001,
+       "per_clock_cycle_fJ": 0.017958699999999994,
+       "rise_fJ": 0.07021469999999999
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.007530600000000002,
+     "mean_per_cycle_fJ": 0.014810099999999993
+    }
+   },
+   "inputs": {
+    "A": {
+     "cap_fF": 0.597618,
+     "fall_cap_fF": 0.597618,
+     "is_clock": false,
+     "rise_cap_fF": 0.597254
+    },
+    "B": {
+     "cap_fF": 1.12771,
+     "fall_cap_fF": 1.12771,
+     "is_clock": false,
+     "rise_cap_fF": 1.11877
+    },
+    "C": {
+     "cap_fF": 0.95901,
+     "fall_cap_fF": 0.958178,
+     "is_clock": false,
+     "rise_cap_fF": 0.95901
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * !C * !Y)": 159.748,
+    "(!A * !B * C * !Y)": 208.071,
+    "(!A * B * !C * !Y)": 203.684,
+    "(!A * B * C * Y)": 216.13,
+    "(A * !B * !C * !Y)": 223.936,
+    "(A * !B * C * Y)": 204.57,
+    "(A * B * !C * Y)": 206.901,
+    "(A * B * C * Y)": 150.088
+   },
+   "leakage_pW": 196.641,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "majority gate, non-inverting"
+  },
+  "NAND2x1": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.11025887777777779,
+   "E_int_mean_over_arcs_fJ": 0.22317289861111111,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": -0.02134091111111111,
+     "E_int_fall_fJ": 0.3210728666666667,
+     "E_int_mean_VDDonly_fJ": 0.13548110000000002,
+     "E_int_mean_fJ": 0.27590445555555554,
+     "E_int_per_cycle_VDDonly_fJ": 0.27096220000000004,
+     "E_int_per_cycle_fJ": 0.5518089111111111,
+     "E_int_rise_VDDonly_fJ": 0.2923031111111111,
+     "E_int_rise_fJ": 0.23073604444444445,
+     "E_transition_0p517_fJ": 0.41779150208365085,
+     "E_transition_0p7_fJ": 0.7659044555555554,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.2672525,
+       "E_transition_0p7_fJ": 0.3897525
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.27005195555555556,
+       "E_transition_0p7_fJ": 0.5150519555555555
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.27590445555555554,
+       "E_transition_0p7_fJ": 0.7659044555555554
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.279594425,
+       "E_transition_0p7_fJ": 1.259594425
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.2829994361111111,
+       "E_transition_0p7_fJ": 2.242999436111111
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": -0.02495502222222222,
+     "E_int_fall_fJ": 0.21233025555555557,
+     "E_int_mean_VDDonly_fJ": 0.08503665555555556,
+     "E_int_mean_fJ": 0.1704413416666667,
+     "E_int_per_cycle_VDDonly_fJ": 0.17007331111111113,
+     "E_int_per_cycle_fJ": 0.3408826833333334,
+     "E_int_rise_VDDonly_fJ": 0.19502833333333333,
+     "E_int_rise_fJ": 0.12855242777777778,
+     "E_transition_0p517_fJ": 0.36026266484233,
+     "E_transition_0p7_fJ": 0.6604413416666666,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.155451,
+       "E_transition_0p7_fJ": 0.277951
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.15971532222222223,
+       "E_transition_0p7_fJ": 0.4047153222222222
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.1704413416666667,
+       "E_transition_0p7_fJ": 0.6604413416666666
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.18039965833333332,
+       "E_transition_0p7_fJ": 1.1603996583333331
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.18768054722222224,
+       "E_transition_0p7_fJ": 2.147680547222222
+      }
+     }
+    }
+   },
+   "area_um2": 0.08748,
+   "cell": "NAND2x1_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "A": {
+     "by_state": {
+      "(!B * Y)": {
+       "fall_fJ": -0.058864999999999994,
+       "per_clock_cycle_VDDonly_fJ": 0.002375300000000004,
+       "per_clock_cycle_fJ": 0.011777300000000011,
+       "rise_fJ": 0.0706423
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.002375300000000004,
+     "mean_per_cycle_fJ": 0.011777300000000011
+    },
+    "B": {
+     "by_state": {
+      "(!A * Y)": {
+       "fall_fJ": 0.0566106,
+       "per_clock_cycle_VDDonly_fJ": 0.0009634000000000031,
+       "per_clock_cycle_fJ": 0.0010416999999999996,
+       "rise_fJ": -0.0555689
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0009634000000000031,
+     "mean_per_cycle_fJ": 0.0010416999999999996
+    }
+   },
+   "inputs": {
+    "A": {
+     "cap_fF": 0.990183,
+     "fall_cap_fF": 0.953971,
+     "is_clock": false,
+     "rise_cap_fF": 0.990183
+    },
+    "B": {
+     "cap_fF": 0.990331,
+     "fall_cap_fF": 0.990331,
+     "is_clock": false,
+     "rise_cap_fF": 0.988843
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * Y)": 53.9602,
+    "(!A * B * Y)": 100.578,
+    "(A * !B * Y)": 109.352,
+    "(A * B * !Y)": 101.052
+   },
+   "leakage_pW": 91.2355,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "2-input NAND"
+  },
+  "NAND2xp33": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.03977705041666667,
+   "E_int_mean_over_arcs_fJ": 0.08000899055555556,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": -0.006013428333333333,
+     "E_int_fall_fJ": 0.10488634944444444,
+     "E_int_mean_VDDonly_fJ": 0.044029330277777785,
+     "E_int_mean_fJ": 0.08895807194444445,
+     "E_int_per_cycle_VDDonly_fJ": 0.08805866055555557,
+     "E_int_per_cycle_fJ": 0.1779161438888889,
+     "E_int_rise_VDDonly_fJ": 0.0940720888888889,
+     "E_int_rise_fJ": 0.07302979444444446,
+     "E_transition_0p517_fJ": 0.3158145389631809,
+     "E_transition_0p7_fJ": 0.5789580719444444,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.08564618055555556,
+       "E_transition_0p7_fJ": 0.20814618055555556
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.08738703055555555,
+       "E_transition_0p7_fJ": 0.3323870305555555
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.08895807194444445,
+       "E_transition_0p7_fJ": 0.5789580719444444
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.08940188805555555,
+       "E_transition_0p7_fJ": 1.0694018880555554
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.088979185,
+       "E_transition_0p7_fJ": 2.048979185
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": -0.0066183311111111115,
+     "E_int_fall_fJ": 0.07308533555555556,
+     "E_int_mean_VDDonly_fJ": 0.03552477055555556,
+     "E_int_mean_fJ": 0.07105990916666667,
+     "E_int_per_cycle_VDDonly_fJ": 0.07104954111111111,
+     "E_int_per_cycle_fJ": 0.14211981833333334,
+     "E_int_rise_VDDonly_fJ": 0.07766787222222223,
+     "E_int_rise_fJ": 0.06903448277777778,
+     "E_transition_0p517_fJ": 0.30605131032907995,
+     "E_transition_0p7_fJ": 0.5610599091666666,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.06507933222222222,
+       "E_transition_0p7_fJ": 0.1875793322222222
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.06845208583333334,
+       "E_transition_0p7_fJ": 0.3134520858333333
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.07105990916666667,
+       "E_transition_0p7_fJ": 0.5610599091666666
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.07310787499999999,
+       "E_transition_0p7_fJ": 1.0531078749999998
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.07312638916666667,
+       "E_transition_0p7_fJ": 2.033126389166666
+      }
+     }
+    }
+   },
+   "area_um2": 0.05832,
+   "cell": "NAND2xp33_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "A": {
+     "by_state": {
+      "(!B * Y)": {
+       "fall_fJ": -0.026677600000000003,
+       "per_clock_cycle_VDDonly_fJ": 0.0009419999999999984,
+       "per_clock_cycle_fJ": 0.0038839999999999986,
+       "rise_fJ": 0.0305616
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0009419999999999984,
+     "mean_per_cycle_fJ": 0.0038839999999999986
+    },
+    "B": {
+     "by_state": {
+      "(!A * Y)": {
+       "fall_fJ": 0.0171052,
+       "per_clock_cycle_VDDonly_fJ": 0.00010920000000000027,
+       "per_clock_cycle_fJ": 0.00014789999999999942,
+       "rise_fJ": -0.0169573
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.00010920000000000027,
+     "mean_per_cycle_fJ": 0.00014789999999999942
+    }
+   },
+   "inputs": {
+    "A": {
+     "cap_fF": 0.336683,
+     "fall_cap_fF": 0.328332,
+     "is_clock": false,
+     "rise_cap_fF": 0.336683
+    },
+    "B": {
+     "cap_fF": 0.346682,
+     "fall_cap_fF": 0.346682,
+     "is_clock": false,
+     "rise_cap_fF": 0.346637
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * Y)": 17.9885,
+    "(!A * B * Y)": 33.5305,
+    "(A * !B * Y)": 36.4524,
+    "(A * B * !Y)": 33.6905
+   },
+   "leakage_pW": 30.4155,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "2-input NAND, 1/3 drive"
+  },
+  "NOR2x1": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.11656189583333333,
+   "E_int_mean_over_arcs_fJ": 0.22928297083333332,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": -0.05139123888888889,
+     "E_int_fall_fJ": 0.2535725944444444,
+     "E_int_mean_VDDonly_fJ": 0.1454027972222222,
+     "E_int_mean_fJ": 0.2840174305555555,
+     "E_int_per_cycle_VDDonly_fJ": 0.2908055944444444,
+     "E_int_per_cycle_fJ": 0.568034861111111,
+     "E_int_rise_VDDonly_fJ": 0.34219683333333334,
+     "E_int_rise_fJ": 0.31446226666666666,
+     "E_transition_0p517_fJ": 0.4222170306035998,
+     "E_transition_0p7_fJ": 0.7740174305555554,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.27736380000000005,
+       "E_transition_0p7_fJ": 0.39986380000000005
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.2793404638888889,
+       "E_transition_0p7_fJ": 0.5243404638888889
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.2840174305555555,
+       "E_transition_0p7_fJ": 0.7740174305555554
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.28834299722222223,
+       "E_transition_0p7_fJ": 1.2683429972222222
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.29177521111111104,
+       "E_transition_0p7_fJ": 2.2517752111111107
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": -0.053028011111111106,
+     "E_int_fall_fJ": 0.16126182222222224,
+     "E_int_mean_VDDonly_fJ": 0.08772099444444445,
+     "E_int_mean_fJ": 0.17454851111111114,
+     "E_int_per_cycle_VDDonly_fJ": 0.1754419888888889,
+     "E_int_per_cycle_fJ": 0.3490970222222223,
+     "E_int_rise_VDDonly_fJ": 0.22847,
+     "E_int_rise_fJ": 0.1878352,
+     "E_transition_0p517_fJ": 0.36250307548240374,
+     "E_transition_0p7_fJ": 0.6645485111111111,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.15669919999999998,
+       "E_transition_0p7_fJ": 0.2791992
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.16183891111111112,
+       "E_transition_0p7_fJ": 0.4068389111111111
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.17454851111111114,
+       "E_transition_0p7_fJ": 0.6645485111111111
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.18384884444444444,
+       "E_transition_0p7_fJ": 1.1638488444444444
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.1892558888888889,
+       "E_transition_0p7_fJ": 2.149255888888889
+      }
+     }
+    }
+   },
+   "area_um2": 0.08748,
+   "cell": "NOR2x1_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "A": {
+     "by_state": {
+      "(B * !Y)": {
+       "fall_fJ": -0.01891100000000001,
+       "per_clock_cycle_VDDonly_fJ": 0.01549339999999999,
+       "per_clock_cycle_fJ": 0.02243439999999998,
+       "rise_fJ": 0.04134539999999999
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.01549339999999999,
+     "mean_per_cycle_fJ": 0.02243439999999998
+    },
+    "B": {
+     "by_state": {
+      "(A * !Y)": {
+       "fall_fJ": -0.124192307,
+       "per_clock_cycle_VDDonly_fJ": 3.93418e-05,
+       "per_clock_cycle_fJ": 3.93417999999951e-05,
+       "rise_fJ": 0.1242316488
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 3.93418e-05,
+     "mean_per_cycle_fJ": 3.93417999999951e-05
+    }
+   },
+   "inputs": {
+    "A": {
+     "cap_fF": 1.00136,
+     "fall_cap_fF": 1.00136,
+     "is_clock": false,
+     "rise_cap_fF": 0.963743
+    },
+    "B": {
+     "cap_fF": 1.01718,
+     "fall_cap_fF": 1.01471,
+     "is_clock": false,
+     "rise_cap_fF": 1.01718
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * Y)": 107.382,
+    "(!A * B * !Y)": 97.1813,
+    "(A * !B * !Y)": 92.5186,
+    "(A * B * !Y)": 31.1695
+   },
+   "leakage_pW": 82.0628,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "2-input NOR"
+  },
+  "NOR2xp33": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.04073254166666667,
+   "E_int_mean_over_arcs_fJ": 0.0809405101388889,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": -0.015184927777777777,
+     "E_int_fall_fJ": 0.08563379444444444,
+     "E_int_mean_VDDonly_fJ": 0.045571313888888895,
+     "E_int_mean_fJ": 0.09012940555555556,
+     "E_int_per_cycle_VDDonly_fJ": 0.09114262777777779,
+     "E_int_per_cycle_fJ": 0.1802588111111111,
+     "E_int_rise_VDDonly_fJ": 0.10632755555555556,
+     "E_int_rise_fJ": 0.09462501666666667,
+     "E_transition_0p517_fJ": 0.31645348710518145,
+     "E_transition_0p7_fJ": 0.5801294055555555,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.08766117777777777,
+       "E_transition_0p7_fJ": 0.21016117777777776
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.08902305,
+       "E_transition_0p7_fJ": 0.33402305
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.09012940555555556,
+       "E_transition_0p7_fJ": 0.5801294055555555
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.09091922499999999,
+       "E_transition_0p7_fJ": 1.070919225
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.09094121944444444,
+       "E_transition_0p7_fJ": 2.0509412194444443
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": -0.012869133333333335,
+     "E_int_fall_fJ": 0.06123814999999999,
+     "E_int_mean_VDDonly_fJ": 0.035893769444444446,
+     "E_int_mean_fJ": 0.07175161472222222,
+     "E_int_per_cycle_VDDonly_fJ": 0.07178753888888889,
+     "E_int_per_cycle_fJ": 0.14350322944444444,
+     "E_int_rise_VDDonly_fJ": 0.08465667222222223,
+     "E_int_rise_fJ": 0.08226507944444444,
+     "E_transition_0p517_fJ": 0.30642862723977154,
+     "E_transition_0p7_fJ": 0.5617516147222221,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.06571643916666667,
+       "E_transition_0p7_fJ": 0.18821643916666664
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.06942996111111112,
+       "E_transition_0p7_fJ": 0.3144299611111111
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.07175161472222222,
+       "E_transition_0p7_fJ": 0.5617516147222221
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.07286167027777778,
+       "E_transition_0p7_fJ": 1.0528616702777776
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.07343514611111111,
+       "E_transition_0p7_fJ": 2.0334351461111106
+      }
+     }
+    }
+   },
+   "area_um2": 0.05832,
+   "cell": "NOR2xp33_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "A": {
+     "by_state": {
+      "(B * !Y)": {
+       "fall_fJ": -0.014036300000000002,
+       "per_clock_cycle_VDDonly_fJ": 0.0033116000000000013,
+       "per_clock_cycle_fJ": 0.004546199999999997,
+       "rise_fJ": 0.0185825
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0033116000000000013,
+     "mean_per_cycle_fJ": 0.004546199999999997
+    },
+    "B": {
+     "by_state": {
+      "(A * !Y)": {
+       "fall_fJ": -0.0412583995,
+       "per_clock_cycle_VDDonly_fJ": 1.406513e-05,
+       "per_clock_cycle_fJ": 1.4065130000004422e-05,
+       "rise_fJ": 0.041272464630000005
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 1.406513e-05,
+     "mean_per_cycle_fJ": 1.4065130000004422e-05
+    }
+   },
+   "inputs": {
+    "A": {
+     "cap_fF": 0.338541,
+     "fall_cap_fF": 0.338541,
+     "is_clock": false,
+     "rise_cap_fF": 0.330191
+    },
+    "B": {
+     "cap_fF": 0.348828,
+     "fall_cap_fF": 0.348153,
+     "is_clock": false,
+     "rise_cap_fF": 0.348828
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * Y)": 35.8005,
+    "(!A * B * !Y)": 32.3954,
+    "(A * !B * !Y)": 30.8442,
+    "(A * B * !Y)": 10.3916
+   },
+   "leakage_pW": 27.3579,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "2-input NOR, 1/3 drive"
+  },
+  "OAI21x1": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.22515561018518518,
+   "E_int_mean_over_arcs_fJ": 0.4511747944444444,
+   "arcs": {
+    "A1->Y": {
+     "E_int_fall_VDDonly_fJ": -0.03630248333333333,
+     "E_int_fall_fJ": 0.3214434611111111,
+     "E_int_mean_VDDonly_fJ": 0.14441753611111113,
+     "E_int_mean_fJ": 0.29152585277777776,
+     "E_int_per_cycle_VDDonly_fJ": 0.28883507222222227,
+     "E_int_per_cycle_fJ": 0.5830517055555555,
+     "E_int_rise_VDDonly_fJ": 0.32513755555555557,
+     "E_int_rise_fJ": 0.26160824444444447,
+     "E_transition_0p517_fJ": 0.42631278298595815,
+     "E_transition_0p7_fJ": 0.7815258527777778,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.28061475,
+       "E_transition_0p7_fJ": 0.40311475
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.28359066388888887,
+       "E_transition_0p7_fJ": 0.5285906638888889
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.29152585277777776,
+       "E_transition_0p7_fJ": 0.7815258527777778
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.2985735777777778,
+       "E_transition_0p7_fJ": 1.2785735777777778
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.30314969444444445,
+       "E_transition_0p7_fJ": 2.263149694444444
+      }
+     }
+    },
+    "A2->Y": {
+     "E_int_fall_VDDonly_fJ": -0.04404804444444445,
+     "E_int_fall_fJ": 0.3623012333333333,
+     "E_int_mean_VDDonly_fJ": 0.16560400555555554,
+     "E_int_mean_fJ": 0.3317430444444444,
+     "E_int_per_cycle_VDDonly_fJ": 0.3312080111111111,
+     "E_int_per_cycle_fJ": 0.6634860888888888,
+     "E_int_rise_VDDonly_fJ": 0.3752560555555555,
+     "E_int_rise_fJ": 0.3011848555555555,
+     "E_transition_0p517_fJ": 0.44825076858471663,
+     "E_transition_0p7_fJ": 0.8217430444444443,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.32833085,
+       "E_transition_0p7_fJ": 0.45083085
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.3293056194444445,
+       "E_transition_0p7_fJ": 0.5743056194444445
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.3317430444444444,
+       "E_transition_0p7_fJ": 0.8217430444444443
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.33386631666666666,
+       "E_transition_0p7_fJ": 1.3138663166666666
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.33532935277777776,
+       "E_transition_0p7_fJ": 2.2953293527777774
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": -0.15066875555555553,
+     "E_int_fall_fJ": 0.7547829666666667,
+     "E_int_mean_VDDonly_fJ": 0.36544528888888894,
+     "E_int_mean_fJ": 0.7302554861111111,
+     "E_int_per_cycle_VDDonly_fJ": 0.7308905777777779,
+     "E_int_per_cycle_fJ": 1.4605109722222223,
+     "E_int_rise_VDDonly_fJ": 0.8815593333333334,
+     "E_int_rise_fJ": 0.7057280055555556,
+     "E_transition_0p517_fJ": 0.6656344257696997,
+     "E_transition_0p7_fJ": 1.220255486111111,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.6833229000000001,
+       "E_transition_0p7_fJ": 0.8058229
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.6970932222222224,
+       "E_transition_0p7_fJ": 0.9420932222222224
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.7302554861111111,
+       "E_transition_0p7_fJ": 1.220255486111111
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.7608306611111111,
+       "E_transition_0p7_fJ": 1.740830661111111
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.7887895027777777,
+       "E_transition_0p7_fJ": 2.7487895027777776
+      }
+     }
+    }
+   },
+   "area_um2": 0.11664,
+   "cell": "OAI21x1_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "A1": {
+     "by_state": {
+      "(!A2 * !B * Y)": {
+       "fall_fJ": -0.023670799999999992,
+       "per_clock_cycle_VDDonly_fJ": 7.120000000000737e-05,
+       "per_clock_cycle_fJ": 0.00687320000000001,
+       "rise_fJ": 0.030544
+      },
+      "(A2 * !B * Y)": {
+       "fall_fJ": -0.0337239,
+       "per_clock_cycle_VDDonly_fJ": 0.0035967999999999972,
+       "per_clock_cycle_fJ": 0.0035967999999999972,
+       "rise_fJ": 0.0373207
+      },
+      "(A2 * B * !Y)": {
+       "fall_fJ": -0.1600659879,
+       "per_clock_cycle_VDDonly_fJ": 8.57581e-05,
+       "per_clock_cycle_fJ": 0.00022775810000000285,
+       "rise_fJ": 0.16029374600000001
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0012512527000000015,
+     "mean_per_cycle_fJ": 0.00356591936666667
+    },
+    "A2": {
+     "by_state": {
+      "(!A1 * !B * Y)": {
+       "fall_fJ": -0.06412660000000002,
+       "per_clock_cycle_VDDonly_fJ": 0.0007034999999999958,
+       "per_clock_cycle_fJ": 0.007791499999999979,
+       "rise_fJ": 0.0719181
+      },
+      "(A1 * !B * Y)": {
+       "fall_fJ": -0.0737867,
+       "per_clock_cycle_VDDonly_fJ": 0.004235800000000005,
+       "per_clock_cycle_fJ": 0.004531799999999989,
+       "rise_fJ": 0.07831849999999999
+      },
+      "(A1 * B * !Y)": {
+       "fall_fJ": -0.07290519999999999,
+       "per_clock_cycle_VDDonly_fJ": 0.006329000000000001,
+       "per_clock_cycle_fJ": 0.010023000000000004,
+       "rise_fJ": 0.0829282
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0037561000000000005,
+     "mean_per_cycle_fJ": 0.0074487666666666575
+    },
+    "B": {
+     "by_state": {
+      "(!A1 * !A2 * Y)": {
+       "fall_fJ": 0.0663766,
+       "per_clock_cycle_VDDonly_fJ": 0.0,
+       "per_clock_cycle_fJ": 0.0004825999999999997,
+       "rise_fJ": -0.065894
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0,
+     "mean_per_cycle_fJ": 0.0004825999999999997
+    }
+   },
+   "inputs": {
+    "A1": {
+     "cap_fF": 1.1124,
+     "fall_cap_fF": 1.09705,
+     "is_clock": false,
+     "rise_cap_fF": 1.1124
+    },
+    "A2": {
+     "cap_fF": 0.952497,
+     "fall_cap_fF": 0.952422,
+     "is_clock": false,
+     "rise_cap_fF": 0.952497
+    },
+    "B": {
+     "cap_fF": 1.25069,
+     "fall_cap_fF": 1.25069,
+     "is_clock": false,
+     "rise_cap_fF": 1.24855
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A1 * !A2 * !B * Y)": 68.8346,
+    "(!A1 * !A2 * B * Y)": 197.206,
+    "(!A1 * A2 * !B * Y)": 110.449,
+    "(!A1 * A2 * B * !Y)": 192.037,
+    "(A1 * !A2 * !B * Y)": 110.449,
+    "(A1 * !A2 * B * !Y)": 196.699,
+    "(A1 * A2 * !B * Y)": 112.785,
+    "(A1 * A2 * B * !Y)": 132.221
+   },
+   "leakage_pW": 140.085,
+   "liberty_file": "asap7sc7p5t_OA_RVT_TT_nldm_211120.lib",
+   "what": "OR-AND-invert, 2+1"
+  },
+  "OAI21xp33": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.09516885555555556,
+   "E_int_mean_over_arcs_fJ": 0.19121349444444444,
+   "arcs": {
+    "A1->Y": {
+     "E_int_fall_VDDonly_fJ": -0.014943672222222223,
+     "E_int_fall_fJ": 0.11698582777777779,
+     "E_int_mean_VDDonly_fJ": 0.055151052777777786,
+     "E_int_mean_fJ": 0.10881923055555556,
+     "E_int_per_cycle_VDDonly_fJ": 0.11030210555555557,
+     "E_int_per_cycle_fJ": 0.21763846111111113,
+     "E_int_rise_VDDonly_fJ": 0.1252457777777778,
+     "E_int_rise_fJ": 0.10065263333333335,
+     "E_transition_0p517_fJ": 0.3266485577876815,
+     "E_transition_0p7_fJ": 0.5988192305555555,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.10468884722222221,
+       "E_transition_0p7_fJ": 0.2271888472222222
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.10685076388888888,
+       "E_transition_0p7_fJ": 0.35185076388888886
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.10881923055555556,
+       "E_transition_0p7_fJ": 0.5988192305555555
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.11041679722222224,
+       "E_transition_0p7_fJ": 1.090416797222222
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.1107097388888889,
+       "E_transition_0p7_fJ": 2.0707097388888887
+      }
+     }
+    },
+    "A2->Y": {
+     "E_int_fall_VDDonly_fJ": -0.01058061111111111,
+     "E_int_fall_fJ": 0.100095,
+     "E_int_mean_VDDonly_fJ": 0.049038083333333336,
+     "E_int_mean_fJ": 0.09784961944444445,
+     "E_int_per_cycle_VDDonly_fJ": 0.09807616666666667,
+     "E_int_per_cycle_fJ": 0.1956992388888889,
+     "E_int_rise_VDDonly_fJ": 0.10865677777777778,
+     "E_int_rise_fJ": 0.09560423888888889,
+     "E_transition_0p517_fJ": 0.32066476924833903,
+     "E_transition_0p7_fJ": 0.5878496194444444,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.09003580000000001,
+       "E_transition_0p7_fJ": 0.2125358
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.09426246111111111,
+       "E_transition_0p7_fJ": 0.3392624611111111
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.09784961944444445,
+       "E_transition_0p7_fJ": 0.5878496194444444
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.10021186416666666,
+       "E_transition_0p7_fJ": 1.0802118641666665
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.10157550944444445,
+       "E_transition_0p7_fJ": 2.0615755094444443
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": -0.03866091666666667,
+     "E_int_fall_fJ": 0.4172011388888889,
+     "E_int_mean_VDDonly_fJ": 0.18131743055555558,
+     "E_int_mean_fJ": 0.3669716333333333,
+     "E_int_per_cycle_VDDonly_fJ": 0.36263486111111115,
+     "E_int_per_cycle_fJ": 0.7339432666666666,
+     "E_int_rise_VDDonly_fJ": 0.4012957777777778,
+     "E_int_rise_fJ": 0.31674212777777777,
+     "E_transition_0p517_fJ": 0.46746753245312933,
+     "E_transition_0p7_fJ": 0.8569716333333333,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.3534787777777778,
+       "E_transition_0p7_fJ": 0.4759787777777778
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.3609131305555555,
+       "E_transition_0p7_fJ": 0.6059131305555555
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.3669716333333333,
+       "E_transition_0p7_fJ": 0.8569716333333333
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.3698215944444444,
+       "E_transition_0p7_fJ": 1.3498215944444443
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.37101453055555556,
+       "E_transition_0p7_fJ": 2.331014530555555
+      }
+     }
+    }
+   },
+   "area_um2": 0.0729,
+   "cell": "OAI21xp33_ASAP7_75t_R",
+   "clock_pin_energy": {
+    "A1": {
+     "by_state": {
+      "(!A2 * !B * Y)": {
+       "fall_fJ": 0.0063064,
+       "per_clock_cycle_VDDonly_fJ": 0.0,
+       "per_clock_cycle_fJ": 0.0002152000000000022,
+       "rise_fJ": -0.006091199999999998
+      },
+      "(A2 * !B * Y)": {
+       "fall_fJ": 0.0059226999999999995,
+       "per_clock_cycle_VDDonly_fJ": 0.001121900000000002,
+       "per_clock_cycle_fJ": 0.001407000000000002,
+       "rise_fJ": -0.0045156999999999975
+      },
+      "(A2 * B * !Y)": {
+       "fall_fJ": -0.0339702,
+       "per_clock_cycle_VDDonly_fJ": 0.002024100000000001,
+       "per_clock_cycle_fJ": 0.0032666000000000014,
+       "rise_fJ": 0.0372368
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0010486666666666676,
+     "mean_per_cycle_fJ": 0.0016296000000000019
+    },
+    "A2": {
+     "by_state": {
+      "(!A1 * !B * Y)": {
+       "fall_fJ": 0.026577299999999998,
+       "per_clock_cycle_VDDonly_fJ": 0.0,
+       "per_clock_cycle_fJ": 8.380000000000193e-05,
+       "rise_fJ": -0.026493499999999996
+      },
+      "(A1 * !B * Y)": {
+       "fall_fJ": 0.0260528,
+       "per_clock_cycle_VDDonly_fJ": 0.0010056999999999983,
+       "per_clock_cycle_fJ": 0.0010056999999999983,
+       "rise_fJ": -0.025047100000000003
+      },
+      "(A1 * B * !Y)": {
+       "fall_fJ": -0.0555617879,
+       "per_clock_cycle_VDDonly_fJ": 2.88209e-05,
+       "per_clock_cycle_fJ": 4.5420900000002484e-05,
+       "rise_fJ": 0.0556072088
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0003448402999999994,
+     "mean_per_cycle_fJ": 0.0003783069666666676
+    },
+    "B": {
+     "by_state": {
+      "(!A1 * !A2 * Y)": {
+       "fall_fJ": -0.013612200000000005,
+       "per_clock_cycle_VDDonly_fJ": 0.0007713999999999985,
+       "per_clock_cycle_fJ": 0.0031113999999999933,
+       "rise_fJ": 0.016723599999999998
+      }
+     },
+     "mean_per_cycle_VDDonly_fJ": 0.0007713999999999985,
+     "mean_per_cycle_fJ": 0.0031113999999999933
+    }
+   },
+   "inputs": {
+    "A1": {
+     "cap_fF": 0.401083,
+     "fall_cap_fF": 0.401083,
+     "is_clock": false,
+     "rise_cap_fF": 0.396337
+    },
+    "A2": {
+     "cap_fF": 0.424052,
+     "fall_cap_fF": 0.422859,
+     "is_clock": false,
+     "rise_cap_fF": 0.424052
+    },
+    "B": {
+     "cap_fF": 0.412629,
+     "fall_cap_fF": 0.407687,
+     "is_clock": false,
+     "rise_cap_fF": 0.412629
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A1 * !A2 * !B * Y)": 28.9865,
+    "(!A1 * !A2 * B * Y)": 72.1258,
+    "(!A1 * A2 * !B * Y)": 49.7054,
+    "(!A1 * A2 * B * !Y)": 65.5698,
+    "(A1 * !A2 * !B * Y)": 49.7054,
+    "(A1 * !A2 * B * !Y)": 64.0186,
+    "(A1 * A2 * !B * Y)": 34.3154,
+    "(A1 * A2 * B * !Y)": 44.0772
+   },
+   "leakage_pW": 51.063,
+   "liberty_file": "asap7sc7p5t_OA_RVT_TT_nldm_211120.lib",
+   "what": "OR-AND-invert 2+1, 1/3 drive"
+  },
+  "XNOR2x1": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.4857572138888889,
+   "E_int_mean_over_arcs_fJ": 0.9742486625,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": 0.4684786611111111,
+     "E_int_fall_fJ": 1.0092278833333332,
+     "E_int_mean_VDDonly_fJ": 0.4814351361111111,
+     "E_int_mean_fJ": 0.9669784722222221,
+     "E_int_per_cycle_VDDonly_fJ": 0.9628702722222222,
+     "E_int_per_cycle_fJ": 1.9339569444444442,
+     "E_int_rise_VDDonly_fJ": 0.4943916111111111,
+     "E_int_rise_fJ": 0.924729061111111,
+     "E_transition_0p517_fJ": 0.7947639160445013,
+     "E_transition_0p7_fJ": 1.456978472222222,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.9519627500000001,
+       "E_transition_0p7_fJ": 1.0744627500000001
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.9564902527777779,
+       "E_transition_0p7_fJ": 1.2014902527777778
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.9669784722222221,
+       "E_transition_0p7_fJ": 1.456978472222222
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.9714860194444443,
+       "E_transition_0p7_fJ": 1.9514860194444443
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.9657280638888888,
+       "E_transition_0p7_fJ": 2.9257280638888883
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": 0.5003446388888889,
+     "E_int_fall_fJ": 1.07166815,
+     "E_int_mean_VDDonly_fJ": 0.49007929166666664,
+     "E_int_mean_fJ": 0.9815188527777778,
+     "E_int_per_cycle_VDDonly_fJ": 0.9801585833333333,
+     "E_int_per_cycle_fJ": 1.9630377055555557,
+     "E_int_rise_VDDonly_fJ": 0.4798139444444444,
+     "E_int_rise_fJ": 0.8913695555555555,
+     "E_transition_0p517_fJ": 0.8026955155920807,
+     "E_transition_0p7_fJ": 1.4715188527777778,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.9597232499999999,
+       "E_transition_0p7_fJ": 1.08222325
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.9656129722222222,
+       "E_transition_0p7_fJ": 1.210612972222222
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.9815188527777778,
+       "E_transition_0p7_fJ": 1.4715188527777778
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.9973591,
+       "E_transition_0p7_fJ": 1.9773591
+      },
+      "8.0": {
+       "E_int_mean_fJ": 1.0092966944444441,
+       "E_transition_0p7_fJ": 2.969296694444444
+      }
+     }
+    }
+   },
+   "area_um2": 0.17496,
+   "cell": "XNOR2x1_ASAP7_75t_R",
+   "clock_pin_energy": {},
+   "inputs": {
+    "A": {
+     "cap_fF": 1.51956,
+     "fall_cap_fF": 1.51956,
+     "is_clock": false,
+     "rise_cap_fF": 1.48636
+    },
+    "B": {
+     "cap_fF": 1.51635,
+     "fall_cap_fF": 1.51635,
+     "is_clock": false,
+     "rise_cap_fF": 1.50544
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * Y)": 224.552,
+    "(!A * B * !Y)": 246.896,
+    "(A * !B * !Y)": 247.172,
+    "(A * B * Y)": 210.772
+   },
+   "leakage_pW": 232.348,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "2-input XNOR"
+  },
+  "XNOR2xp5": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.29802263902777776,
+   "E_int_mean_over_arcs_fJ": 0.5973098084722223,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": 0.31255391888888884,
+     "E_int_fall_fJ": 0.6192955355555555,
+     "E_int_mean_VDDonly_fJ": 0.306408515,
+     "E_int_mean_fJ": 0.6152885816666667,
+     "E_int_per_cycle_VDDonly_fJ": 0.61281703,
+     "E_int_per_cycle_fJ": 1.2305771633333333,
+     "E_int_rise_VDDonly_fJ": 0.30026311111111115,
+     "E_int_rise_fJ": 0.6112816277777777,
+     "E_transition_0p517_fJ": 0.6029213871532688,
+     "E_transition_0p7_fJ": 1.1052885816666667,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.5996715886111111,
+       "E_transition_0p7_fJ": 0.7221715886111111
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.6077774925,
+       "E_transition_0p7_fJ": 0.8527774925
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.6152885816666667,
+       "E_transition_0p7_fJ": 1.1052885816666667
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.6208077872222222,
+       "E_transition_0p7_fJ": 1.6008077872222222
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.6240001591666666,
+       "E_transition_0p7_fJ": 2.584000159166666
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": 0.2705883594444444,
+     "E_int_fall_fJ": 0.5360073316666667,
+     "E_int_mean_VDDonly_fJ": 0.2896367630555555,
+     "E_int_mean_fJ": 0.5793310352777779,
+     "E_int_per_cycle_VDDonly_fJ": 0.579273526111111,
+     "E_int_per_cycle_fJ": 1.1586620705555557,
+     "E_int_rise_VDDonly_fJ": 0.3086851666666667,
+     "E_int_rise_fJ": 0.6226547388888889,
+     "E_transition_0p517_fJ": 0.5833069858946164,
+     "E_transition_0p7_fJ": 1.0693310352777778,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.5727413911222223,
+       "E_transition_0p7_fJ": 0.6952413911222223
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.5776548541444445,
+       "E_transition_0p7_fJ": 0.8226548541444445
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.5793310352777779,
+       "E_transition_0p7_fJ": 1.0693310352777778
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.5768978761111111,
+       "E_transition_0p7_fJ": 1.556897876111111
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.5724314727777778,
+       "E_transition_0p7_fJ": 2.5324314727777777
+      }
+     }
+    }
+   },
+   "area_um2": 0.13122,
+   "cell": "XNOR2xp5_ASAP7_75t_R",
+   "clock_pin_energy": {},
+   "inputs": {
+    "A": {
+     "cap_fF": 0.969466,
+     "fall_cap_fF": 0.966489,
+     "is_clock": false,
+     "rise_cap_fF": 0.969466
+    },
+    "B": {
+     "cap_fF": 0.96727,
+     "fall_cap_fF": 0.96727,
+     "is_clock": false,
+     "rise_cap_fF": 0.879088
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * Y)": 125.705,
+    "(!A * B * !Y)": 148.7,
+    "(A * !B * !Y)": 150.756,
+    "(A * B * Y)": 122.742
+   },
+   "leakage_pW": 136.976,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "2-input XNOR, half drive"
+  },
+  "XOR2x1": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.4896377513888889,
+   "E_int_mean_over_arcs_fJ": 0.9762933777777778,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": 0.4052240055555556,
+     "E_int_fall_fJ": 0.8763673666666667,
+     "E_int_mean_VDDonly_fJ": 0.49239319722222225,
+     "E_int_mean_fJ": 0.9834493083333333,
+     "E_int_per_cycle_VDDonly_fJ": 0.9847863944444445,
+     "E_int_per_cycle_fJ": 1.9668986166666667,
+     "E_int_rise_VDDonly_fJ": 0.5795623888888889,
+     "E_int_rise_fJ": 1.09053125,
+     "E_transition_0p517_fJ": 0.8037485554594049,
+     "E_transition_0p7_fJ": 1.4734493083333333,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.9629589,
+       "E_transition_0p7_fJ": 1.0854589
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.9684658,
+       "E_transition_0p7_fJ": 1.2134658
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.9834493083333333,
+       "E_transition_0p7_fJ": 1.4734493083333333
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.9986707277777778,
+       "E_transition_0p7_fJ": 1.9786707277777777
+      },
+      "8.0": {
+       "E_int_mean_fJ": 1.0100152,
+       "E_transition_0p7_fJ": 2.9700151999999997
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": 0.4244317777777778,
+     "E_int_fall_fJ": 0.9085003333333335,
+     "E_int_mean_VDDonly_fJ": 0.48688230555555556,
+     "E_int_mean_fJ": 0.9691374472222223,
+     "E_int_per_cycle_VDDonly_fJ": 0.9737646111111111,
+     "E_int_per_cycle_fJ": 1.9382748944444446,
+     "E_int_rise_VDDonly_fJ": 0.5493328333333334,
+     "E_int_rise_fJ": 1.029774561111111,
+     "E_transition_0p517_fJ": 0.7959416104705728,
+     "E_transition_0p7_fJ": 1.4591374472222223,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.9532250500000001,
+       "E_transition_0p7_fJ": 1.0757250500000002
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.9581365805555555,
+       "E_transition_0p7_fJ": 1.2031365805555554
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.9691374472222223,
+       "E_transition_0p7_fJ": 1.4591374472222223
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.9745099641666667,
+       "E_transition_0p7_fJ": 1.9545099641666666
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.970461731111111,
+       "E_transition_0p7_fJ": 2.9304617311111105
+      }
+     }
+    }
+   },
+   "area_um2": 0.17496,
+   "cell": "XOR2x1_ASAP7_75t_R",
+   "clock_pin_energy": {},
+   "inputs": {
+    "A": {
+     "cap_fF": 1.519,
+     "fall_cap_fF": 1.50278,
+     "is_clock": false,
+     "rise_cap_fF": 1.519
+    },
+    "B": {
+     "cap_fF": 1.52258,
+     "fall_cap_fF": 1.4808,
+     "is_clock": false,
+     "rise_cap_fF": 1.52258
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * !Y)": 206.1,
+    "(!A * B * Y)": 256.952,
+    "(A * !B * Y)": 263.395,
+    "(A * B * !Y)": 201.836
+   },
+   "leakage_pW": 232.071,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "2-input XOR"
+  },
+  "XOR2xp5": {
+   "E_int_mean_over_arcs_VDDonly_fJ": 0.30077698194444447,
+   "E_int_mean_over_arcs_fJ": 0.6002928860972222,
+   "arcs": {
+    "A->Y": {
+     "E_int_fall_VDDonly_fJ": 0.26807967222222223,
+     "E_int_fall_fJ": 0.5235997333333333,
+     "E_int_mean_VDDonly_fJ": 0.309814725,
+     "E_int_mean_fJ": 0.6175811722222222,
+     "E_int_per_cycle_VDDonly_fJ": 0.61962945,
+     "E_int_per_cycle_fJ": 1.2351623444444444,
+     "E_int_rise_VDDonly_fJ": 0.3515497777777778,
+     "E_int_rise_fJ": 0.7115626111111111,
+     "E_transition_0p517_fJ": 0.604171967228787,
+     "E_transition_0p7_fJ": 1.1075811722222222,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.6026497805555555,
+       "E_transition_0p7_fJ": 0.7251497805555555
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.6100938527777777,
+       "E_transition_0p7_fJ": 0.8550938527777777
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.6175811722222222,
+       "E_transition_0p7_fJ": 1.1075811722222222
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.6231163027777777,
+       "E_transition_0p7_fJ": 1.6031163027777775
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.6266601472222222,
+       "E_transition_0p7_fJ": 2.586660147222222
+      }
+     }
+    },
+    "B->Y": {
+     "E_int_fall_VDDonly_fJ": 0.2714597,
+     "E_int_fall_fJ": 0.5344270722222222,
+     "E_int_mean_VDDonly_fJ": 0.29173923888888886,
+     "E_int_mean_fJ": 0.5830045999722222,
+     "E_int_per_cycle_VDDonly_fJ": 0.5834784777777777,
+     "E_int_per_cycle_fJ": 1.1660091999444444,
+     "E_int_rise_VDDonly_fJ": 0.31201877777777776,
+     "E_int_rise_fJ": 0.6315821277222222,
+     "E_transition_0p517_fJ": 0.585310870453011,
+     "E_transition_0p7_fJ": 1.0730045999722222,
+     "by_load_fJ": {
+      "0.5": {
+       "E_int_mean_fJ": 0.5763902416666666,
+       "E_transition_0p7_fJ": 0.6988902416666666
+      },
+      "1.0": {
+       "E_int_mean_fJ": 0.5813779342500001,
+       "E_transition_0p7_fJ": 0.8263779342500001
+      },
+      "2.0": {
+       "E_int_mean_fJ": 0.5830045999722222,
+       "E_transition_0p7_fJ": 1.0730045999722222
+      },
+      "4.0": {
+       "E_int_mean_fJ": 0.5804302180555555,
+       "E_transition_0p7_fJ": 1.5604302180555554
+      },
+      "8.0": {
+       "E_int_mean_fJ": 0.5756715902777778,
+       "E_transition_0p7_fJ": 2.5356715902777776
+      }
+     }
+    }
+   },
+   "area_um2": 0.13122,
+   "cell": "XOR2xp5_ASAP7_75t_R",
+   "clock_pin_energy": {},
+   "inputs": {
+    "A": {
+     "cap_fF": 0.981861,
+     "fall_cap_fF": 0.981861,
+     "is_clock": false,
+     "rise_cap_fF": 0.979716
+    },
+    "B": {
+     "cap_fF": 0.981333,
+     "fall_cap_fF": 0.886516,
+     "is_clock": false,
+     "rise_cap_fF": 0.981333
+    }
+   },
+   "leakage_by_state_pW": {
+    "(!A * !B * !Y)": 121.072,
+    "(!A * B * Y)": 152.643,
+    "(A * !B * Y)": 154.699,
+    "(A * B * !Y)": 108.455
+   },
+   "leakage_pW": 134.217,
+   "liberty_file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+   "what": "2-input XOR, half drive"
+  }
+ },
+ "census_weighted_mix": {
+  "by_cell": {
+   "AND2x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.26672009722222223,
+    "E_int_mean_fJ": 0.5343569027777778,
+    "count": 1633,
+    "leakage_pW": 149.786
+   },
+   "AND3x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.2113072083333333,
+    "E_int_mean_fJ": 0.4243242546296296,
+    "count": 811,
+    "leakage_pW": 100.76
+   },
+   "AND4x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.22247630069444443,
+    "E_int_mean_fJ": 0.4484465291666666,
+    "count": 148,
+    "leakage_pW": 92.1278
+   },
+   "AND5x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.2387988,
+    "E_int_mean_fJ": 0.4807023,
+    "count": 38,
+    "leakage_pW": 82.2591
+   },
+   "AO21x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.33334158333333336,
+    "E_int_mean_fJ": 0.6659075379629629,
+    "count": 2736,
+    "leakage_pW": 121.333
+   },
+   "AO221x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.9024416405555555,
+    "E_int_mean_fJ": 1.7999423105555556,
+    "count": 226,
+    "leakage_pW": 116.07
+   },
+   "AO222x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 2.959479060185185,
+    "E_int_mean_fJ": 5.908376865740741,
+    "count": 146,
+    "leakage_pW": 205.099
+   },
+   "AO22x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.5442114444444445,
+    "E_int_mean_fJ": 1.0879770208333333,
+    "count": 192,
+    "leakage_pW": 109.675
+   },
+   "AO32x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.8240698166666667,
+    "E_int_mean_fJ": 1.6508852572222221,
+    "count": 260,
+    "leakage_pW": 118.948
+   },
+   "AO33x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 1.8870567083333334,
+    "E_int_mean_fJ": 3.779234037037037,
+    "count": 8,
+    "leakage_pW": 179.423
+   },
+   "AOI211x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.24939623888888887,
+    "E_int_mean_fJ": 0.4940081868055555,
+    "count": 13,
+    "leakage_pW": 89.8689
+   },
+   "AOI21x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.22140600648148148,
+    "E_int_mean_fJ": 0.44132347962962964,
+    "count": 263,
+    "leakage_pW": 126.959
+   },
+   "AOI221x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.5270830916666667,
+    "E_int_mean_fJ": 1.045909993888889,
+    "count": 8,
+    "leakage_pW": 109.734
+   },
+   "AOI22x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.5370209951388888,
+    "E_int_mean_fJ": 1.0728087534722222,
+    "count": 24,
+    "leakage_pW": 176.342
+   },
+   "INVx1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.04871379444444445,
+    "E_int_mean_fJ": 0.09752684722222224,
+    "count": 1133,
+    "leakage_pW": 51.1588
+   },
+   "MAJx2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.6292116296296296,
+    "E_int_mean_fJ": 1.2584220185185186,
+    "count": 415,
+    "leakage_pW": 196.641
+   },
+   "NAND2x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.11025887777777779,
+    "E_int_mean_fJ": 0.22317289861111111,
+    "count": 1004,
+    "leakage_pW": 91.2355
+   },
+   "NAND3x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.1778573111111111,
+    "E_int_mean_fJ": 0.3627066083333333,
+    "count": 25,
+    "leakage_pW": 116.986
+   },
+   "NOR2x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.11656189583333333,
+    "E_int_mean_fJ": 0.22928297083333332,
+    "count": 665,
+    "leakage_pW": 82.0628
+   },
+   "NOR3x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.19158141666666664,
+    "E_int_mean_fJ": 0.3746706009259259,
+    "count": 13,
+    "leakage_pW": 93.686
+   },
+   "OA211x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.5788575555555555,
+    "E_int_mean_fJ": 1.1604664375,
+    "count": 497,
+    "leakage_pW": 158.446
+   },
+   "OA21x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.4821294259259259,
+    "E_int_mean_fJ": 0.9656762592592593,
+    "count": 986,
+    "leakage_pW": 177.822
+   },
+   "OA222x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 2.9437838287037033,
+    "E_int_mean_fJ": 5.89759637962963,
+    "count": 12,
+    "leakage_pW": 208.511
+   },
+   "OA22x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.866581236111111,
+    "E_int_mean_fJ": 1.7336380277777779,
+    "count": 54,
+    "leakage_pW": 190.833
+   },
+   "OA33x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 1.9754609027777779,
+    "E_int_mean_fJ": 3.9470427870370366,
+    "count": 9,
+    "leakage_pW": 188.717
+   },
+   "OAI21x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.22515561018518518,
+    "E_int_mean_fJ": 0.4511747944444444,
+    "count": 218,
+    "leakage_pW": 140.085
+   },
+   "OAI22x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.5371099236111112,
+    "E_int_mean_fJ": 1.0737564555555554,
+    "count": 25,
+    "leakage_pW": 175.944
+   },
+   "OR2x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.27316308333333333,
+    "E_int_mean_fJ": 0.5455879444444445,
+    "count": 610,
+    "leakage_pW": 150.186
+   },
+   "OR3x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.213545375,
+    "E_int_mean_fJ": 0.4254251435185185,
+    "count": 331,
+    "leakage_pW": 98.7865
+   },
+   "OR4x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.22634641875,
+    "E_int_mean_fJ": 0.4495247041666667,
+    "count": 143,
+    "leakage_pW": 88.8269
+   },
+   "OR5x1_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.23763662388888887,
+    "E_int_mean_fJ": 0.47052375722222217,
+    "count": 94,
+    "leakage_pW": 76.8221
+   },
+   "XNOR2x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.7364961527777777,
+    "E_int_mean_fJ": 1.4724861805555554,
+    "count": 1024,
+    "leakage_pW": 236.537
+   },
+   "XOR2x2_ASAP7_75t_R": {
+    "E_int_mean_VDDonly_fJ": 0.7345829722222221,
+    "E_int_mean_fJ": 1.4708546527777777,
+    "count": 355,
+    "leakage_pW": 239.295
+   }
+  },
+  "caveat": "The open synthesis made 7,967 cells for the multiplier against the tape-out flow's 4,487, so this is the mix of a different netlist of the same RTL, not of the silicon. It is used as the mix, not as the count.",
+  "cell_types_missing": [],
+  "cell_types_priced": 33,
+  "combinational_cells_priced": 14119,
+  "sequential_and_tie_cells_skipped": {
+   "DFFHQx4_ASAP7_75t_R": 1953,
+   "DLLx1_ASAP7_75t_R": 13,
+   "TIEHIx1_ASAP7_75t_R": 1,
+   "TIELOx1_ASAP7_75t_R": 1
+  },
+  "source": "docs/reports/data/2026-10-26-open-netlist/census_flat.json (Q126(e), same day): core-et's txfma_top synthesized onto ASAP7 RVT with Yosys, 16,087 cells flattened.",
+  "weighted_E_int_mean_VDDonly_fJ_0p7": 0.3791571986418845,
+  "weighted_E_int_mean_fJ_0p7": 0.7583410146614262
+ },
+ "conventions": {
+  "E_transition": "E_int_mean + 1/2 C_load V^2, the task's formula: the energy DISSIPATED per output transition, averaged over a rise and a fall. Over a full cycle the load dissipates C_load V^2 in all.",
+  "drawing_scale": "ASAP7's layout is drawn at 4x: every length in the GDS, the LEF and the QRC techfile is four times the real dimension (the kit is drawn on a relaxed 1 nm grid so commercial tools can hold it). THE LIBERTY IS NOT SCALED: the capacitances, energies, delays and leakages here are real-world 7 nm values and need no 4x correction. Only lengths and anything derived from the LEF or QRC do.",
+  "internal_energy": "An internal_power event is summed over its related_pg_pin groups (VDD and VSS), which is what a power tool does for total internal energy. ASAP7 splits each event between the two rails with a negative cross term: INVx1's output rise is +0.120 fJ on VDD and -0.028 fJ on VSS. rise/fall is the OUTPUT pin's direction.",
+  "leakage": "Leakage is the state-averaged VDD entry at 0.7 V and 25 C, in pW. It is NOT scaled to 0.517 V: leakage falls with voltage through DIBL and the subthreshold slope, not as V^2."
+ },
+ "e60_measured": {
+  "board_fJ": [
+   116.7,
+   129.9
+  ],
+  "rail_fJ": [
+   87.5,
+   96.9
+  ],
+  "what": "E60's measured cost of one flipped mantissa bit per multiply-add"
+ },
+ "flow_m_flip_estimate": {
+  "assumptions": [
+   "One toggling physical wire = one cell-output transition.",
+   "The combinational cell mix is the unweighted mean of a pool of ASAP7 cells -- the gate kinds Q124's census names in the Booth rows, the Wallace tree and the product adder (tfma.asbuilt.cells, tfma.benc, tfma.cmp42). Two pools are carried: the x1 drives and the minimum drives (xp33/xp5) a dense synthesized tree fills up with. The real mix is not in the public data, so the min-to-max spread over each pool is carried too.",
+   "Internal energy is reported both ways -- VDD+VSS summed, and the VDD group alone. They differ by about 2x and part 2 settles which matches SPICE on the real netlist.",
+   "Load per net = pin capacitance of what it drives plus its wire. ASAP7's own input pins are 0.62 fF (INVx1) to about 2 fF (FAx1); wire inside a 30 um tree level at 0.2 fF/um is roughly 0.5-1.5 fF. 1, 2 and 4 fF bracket it; 2 fF is the headline.",
+   "Flip-flops: the data-switching (QN) arc only. The clock reaches 1,586 of 1,851 flops on every multiply-add either way (tfma.clocked), so the clock-pin energy is not marginal to a flip.",
+   "Zero-delay, like Q124's count: no glitches. tfma.glitch puts the timed tree at 1.5x the toggles and 1.4x the energy.",
+   "Internal energy is scaled from 0.7 V by (0.517/0.7)^2 = 0.5454. That is exact for the capacitive part and optimistic for the short-circuit part, which falls faster than V^2.",
+   "ASAP7 is a predictive 7 nm PDK, not TSMC N7, and the ET-SoC-1's cells are not these cells. This is an order-of-magnitude check."
+  ],
+  "headline": {
+   "central_band_1_to_4fF_pJ": [
+    0.13195924628374384,
+    0.28471490978374386
+   ],
+   "central_key": "vdd_only/census",
+   "central_pJ": 0.18287780078374385,
+   "central_what": "VDD-only internal energy (the convention SPICE confirms in part 2), the cell mix Q126(e) measured for this unit, 2 fF per net",
+   "e60_board_fJ": [
+    116.7,
+    129.9
+   ],
+   "e60_rail_fJ": [
+    87.5,
+    96.9
+   ],
+   "full_range_pJ": [
+    0.0862456900079974,
+    0.3678232409475609
+   ],
+   "q124_pJ": [
+    0.11,
+    0.13
+   ]
+  },
+  "method": "Price Q124's 381-wire flow-M flip from ASAP7 alone.\n\n    Q124 counted 381 physical wires toggling for 'b bit 11, a = pi' in a\n    gate-level, zero-delay run of lane 0: 129 in f1 (19 of them flip-flop\n    outputs) and 252 in f2 (16 of them the product register's).  Here each\n    toggling wire is priced as one cell-output transition out of ASAP7's\n    liberty, at the minion's 0.517 V.",
+  "mixes": {
+   "sum/census": {
+    "E_int_flop_fJ_0p7": 1.1010160833333333,
+    "E_int_mean_fJ_0p7": 0.7583410146614262,
+    "cell_pool_fJ_0p7": {
+     "(Q126(e) census-weighted)": 0.7583410146614262
+    },
+    "cell_spread_at_2fF_pJ": [
+     0.265986131947561,
+     0.265986131947561
+    ],
+    "load_band_1_to_4fF_pJ": [
+     0.21506757744756094,
+     0.3678232409475609
+    ],
+    "loads_fF": {
+     "1.0": {
+      "E_comb_total_fJ": 189.369342240555,
+      "E_flip_total_fJ": 215.06757744756095,
+      "E_flip_total_pJ": 0.21506757744756094,
+      "E_flop_total_fJ": 25.698235207005954,
+      "E_per_comb_net_fJ": 0.5473102376894653
+     },
+     "2.0": {
+      "E_comb_total_fJ": 235.61033924055502,
+      "E_flip_total_fJ": 265.986131947561,
+      "E_flip_total_pJ": 0.265986131947561,
+      "E_flop_total_fJ": 30.375792707005957,
+      "E_per_comb_net_fJ": 0.6809547376894654
+     },
+     "4.0": {
+      "E_comb_total_fJ": 328.092333240555,
+      "E_flip_total_fJ": 367.8232409475609,
+      "E_flip_total_pJ": 0.3678232409475609,
+      "E_flop_total_fJ": 39.730907707005954,
+      "E_per_comb_net_fJ": 0.9482437376894652
+     }
+    }
+   },
+   "sum/min_drive": {
+    "E_int_flop_fJ_0p7": 1.1010160833333333,
+    "E_int_mean_fJ_0p7": 0.27381855512557873,
+    "cell_pool_fJ_0p7": {
+     "AOI21xp33": 0.17043711231481481,
+     "INVxp33": 0.04842229916666667,
+     "MAJIxp5": 0.42192333981481484,
+     "NAND2xp33": 0.08000899055555556,
+     "NOR2xp33": 0.0809405101388889,
+     "OAI21xp33": 0.19121349444444444,
+     "XNOR2xp5": 0.5973098084722223,
+     "XOR2xp5": 0.6002928860972222
+    },
+    "cell_spread_at_2fF_pJ": [
+     0.1319969515661853,
+     0.23615632362595698
+    ],
+    "load_band_1_to_4fF_pJ": [
+     0.12361940766050072,
+     0.27637507116050075
+    ],
+    "loads_fF": {
+     "1.0": {
+      "E_comb_total_fJ": 97.92117245349478,
+      "E_flip_total_fJ": 123.61940766050073,
+      "E_flip_total_pJ": 0.12361940766050072,
+      "E_flop_total_fJ": 25.698235207005954,
+      "E_per_comb_net_fJ": 0.28300916894073636
+     },
+     "2.0": {
+      "E_comb_total_fJ": 144.1621694534948,
+      "E_flip_total_fJ": 174.53796216050077,
+      "E_flip_total_pJ": 0.17453796216050077,
+      "E_flop_total_fJ": 30.375792707005957,
+      "E_per_comb_net_fJ": 0.4166536689407364
+     },
+     "4.0": {
+      "E_comb_total_fJ": 236.6441634534948,
+      "E_flip_total_fJ": 276.37507116050074,
+      "E_flip_total_pJ": 0.27637507116050075,
+      "E_flop_total_fJ": 39.730907707005954,
+      "E_per_comb_net_fJ": 0.6839426689407364
+     }
+    }
+   },
+   "sum/x1_drive": {
+    "E_int_flop_fJ_0p7": 1.1010160833333333,
+    "E_int_mean_fJ_0p7": 0.47686829635416667,
+    "cell_pool_fJ_0p7": {
+     "AOI21x1": 0.44132347962962964,
+     "INVx1": 0.09752684722222224,
+     "MAJIxp5": 0.42192333981481484,
+     "NAND2x1": 0.22317289861111111,
+     "NOR2x1": 0.22928297083333332,
+     "OAI21x1": 0.4511747944444444,
+     "XNOR2x1": 0.9742486625,
+     "XOR2x1": 0.9762933777777778
+    },
+    "cell_spread_at_2fF_pJ": [
+     0.14126488323689265,
+     0.3071221914128921
+    ],
+    "load_band_1_to_4fF_pJ": [
+     0.16194276470132488,
+     0.3146984282013249
+    ],
+    "loads_fF": {
+     "1.0": {
+      "E_comb_total_fJ": 136.24452949431893,
+      "E_flip_total_fJ": 161.94276470132488,
+      "E_flip_total_pJ": 0.16194276470132488,
+      "E_flop_total_fJ": 25.698235207005954,
+      "E_per_comb_net_fJ": 0.39377031645756916
+     },
+     "2.0": {
+      "E_comb_total_fJ": 182.48552649431892,
+      "E_flip_total_fJ": 212.86131920132487,
+      "E_flip_total_pJ": 0.21286131920132487,
+      "E_flop_total_fJ": 30.375792707005957,
+      "E_per_comb_net_fJ": 0.5274148164575692
+     },
+     "4.0": {
+      "E_comb_total_fJ": 274.96752049431893,
+      "E_flip_total_fJ": 314.6984282013249,
+      "E_flip_total_pJ": 0.3146984282013249,
+      "E_flop_total_fJ": 39.730907707005954,
+      "E_per_comb_net_fJ": 0.7947038164575692
+     }
+    }
+   },
+   "vdd_only/census": {
+    "E_int_flop_fJ_0p7": 0.49649044444444446,
+    "E_int_mean_fJ_0p7": 0.3791571986418845,
+    "cell_pool_fJ_0p7": {
+     "(Q126(e) census-weighted)": 0.3791571986418845
+    },
+    "cell_spread_at_2fF_pJ": [
+     0.18287780078374385,
+     0.18287780078374385
+    ],
+    "load_band_1_to_4fF_pJ": [
+     0.13195924628374384,
+     0.28471490978374386
+    ],
+    "loads_fF": {
+     "1.0": {
+      "E_comb_total_fJ": 117.8026577548073,
+      "E_flip_total_fJ": 131.95924628374382,
+      "E_flip_total_pJ": 0.13195924628374384,
+      "E_flop_total_fJ": 14.156588528936512,
+      "E_per_comb_net_fJ": 0.3404701091179402
+     },
+     "2.0": {
+      "E_comb_total_fJ": 164.04365475480733,
+      "E_flip_total_fJ": 182.87780078374385,
+      "E_flip_total_pJ": 0.18287780078374385,
+      "E_flop_total_fJ": 18.83414602893651,
+      "E_per_comb_net_fJ": 0.47411460911794023
+     },
+     "4.0": {
+      "E_comb_total_fJ": 256.5256487548073,
+      "E_flip_total_fJ": 284.71490978374385,
+      "E_flip_total_pJ": 0.28471490978374386,
+      "E_flop_total_fJ": 28.189261028936514,
+      "E_per_comb_net_fJ": 0.7414036091179402
+     }
+    }
+   },
+   "vdd_only/min_drive": {
+    "E_int_flop_fJ_0p7": 0.49649044444444446,
+    "E_int_mean_fJ_0p7": 0.1369517529513889,
+    "cell_pool_fJ_0p7": {
+     "AOI21xp33": 0.08561458824074075,
+     "INVxp33": 0.024331224166666665,
+     "MAJIxp5": 0.2111901425925926,
+     "NAND2xp33": 0.03977705041666667,
+     "NOR2xp33": 0.04073254166666667,
+     "OAI21xp33": 0.09516885555555556,
+     "XNOR2xp5": 0.29802263902777776,
+     "XOR2xp5": 0.30077698194444447
+    },
+    "cell_spread_at_2fF_pJ": [
+     0.1159083851868841,
+     0.16808441561980228
+    ],
+    "load_band_1_to_4fF_pJ": [
+     0.0862456900079974,
+     0.2390013535079974
+    ],
+    "loads_fF": {
+     "1.0": {
+      "E_comb_total_fJ": 72.08910147906089,
+      "E_flip_total_fJ": 86.2456900079974,
+      "E_flip_total_pJ": 0.0862456900079974,
+      "E_flop_total_fJ": 14.156588528936512,
+      "E_per_comb_net_fJ": 0.20835000427474243
+     },
+     "2.0": {
+      "E_comb_total_fJ": 118.33009847906088,
+      "E_flip_total_fJ": 137.16424450799738,
+      "E_flip_total_pJ": 0.13716424450799738,
+      "E_flop_total_fJ": 18.83414602893651,
+      "E_per_comb_net_fJ": 0.34199450427474243
+     },
+     "4.0": {
+      "E_comb_total_fJ": 210.81209247906088,
+      "E_flip_total_fJ": 239.0013535079974,
+      "E_flip_total_pJ": 0.2390013535079974,
+      "E_flop_total_fJ": 28.189261028936514,
+      "E_per_comb_net_fJ": 0.6092835042747424
+     }
+    }
+   },
+   "vdd_only/x1_drive": {
+    "E_int_flop_fJ_0p7": 0.49649044444444446,
+    "E_int_mean_fJ_0p7": 0.23858516157407408,
+    "cell_pool_fJ_0p7": {
+     "AOI21x1": 0.22140600648148148,
+     "INVx1": 0.04871379444444445,
+     "MAJIxp5": 0.2111901425925926,
+     "NAND2x1": 0.11025887777777779,
+     "NOR2x1": 0.11656189583333333,
+     "OAI21x1": 0.22515561018518518,
+     "XNOR2x1": 0.4857572138888889,
+     "XOR2x1": 0.4896377513888889
+    },
+    "cell_spread_at_2fF_pJ": [
+     0.1205103213463413,
+     0.20372976367408085
+    ],
+    "load_band_1_to_4fF_pJ": [
+     0.10542785385788049,
+     0.2581835173578805
+    ],
+    "loads_fF": {
+     "1.0": {
+      "E_comb_total_fJ": 91.27126532894398,
+      "E_flip_total_fJ": 105.42785385788049,
+      "E_flip_total_pJ": 0.10542785385788049,
+      "E_flop_total_fJ": 14.156588528936512,
+      "E_per_comb_net_fJ": 0.2637897841876994
+     },
+     "2.0": {
+      "E_comb_total_fJ": 137.512262328944,
+      "E_flip_total_fJ": 156.3464083578805,
+      "E_flip_total_pJ": 0.1563464083578805,
+      "E_flop_total_fJ": 18.83414602893651,
+      "E_per_comb_net_fJ": 0.3974342841876994
+     },
+     "4.0": {
+      "E_comb_total_fJ": 229.99425632894398,
+      "E_flip_total_fJ": 258.1835173578805,
+      "E_flip_total_pJ": 0.2581835173578805,
+      "E_flop_total_fJ": 28.189261028936514,
+      "E_per_comb_net_fJ": 0.6647232841876993
+     }
+    }
+   }
+  },
+  "wires": {
+   "combinational": 346,
+   "flip_flop_outputs": 35,
+   "total": 381
+  }
+ },
+ "fo4_by_vt": {
+  "LVT": {
+   "FO4_ps": 15.783403887278766,
+   "delay_fall_ps": 14.52697244125656,
+   "delay_rise_ps": 17.03983533330097,
+   "input_cap_fF": 0.643178,
+   "load_fF": 2.572712,
+   "note": "Delay is 50%-to-50%; the liberty's slew is 10-90% with slew_derate_from_library = 1. TT, 0.7 V, 25 C. The input slew is iterated until it equals the stage's own output slew, which is what a chain of these cells settles at.",
+   "self_consistent_slew_ps": 22.093808817958987
+  },
+  "RVT": {
+   "FO4_ps": 19.59868471633618,
+   "delay_fall_ps": 18.238808275369724,
+   "delay_rise_ps": 20.958561157302633,
+   "input_cap_fF": 0.619928,
+   "load_fF": 2.479712,
+   "note": "Delay is 50%-to-50%; the liberty's slew is 10-90% with slew_derate_from_library = 1. TT, 0.7 V, 25 C. The input slew is iterated until it equals the stage's own output slew, which is what a chain of these cells settles at.",
+   "self_consistent_slew_ps": 24.33219932337329
+  },
+  "SLVT": {
+   "FO4_ps": 13.481612981856973,
+   "delay_fall_ps": 12.317377140275473,
+   "delay_rise_ps": 14.64584882343847,
+   "input_cap_fF": 0.667414,
+   "load_fF": 2.669656,
+   "note": "Delay is 50%-to-50%; the liberty's slew is 10-90% with slew_derate_from_library = 1. TT, 0.7 V, 25 C. The input slew is iterated until it equals the stage's own output slew, which is what a chain of these cells settles at.",
+   "self_consistent_slew_ps": 21.0624713218764
+  },
+  "SRAM": {
+   "FO4_ps": 24.306411192246113,
+   "delay_fall_ps": 23.994860284171608,
+   "delay_rise_ps": 24.617962100320618,
+   "input_cap_fF": 0.579931,
+   "load_fF": 2.319724,
+   "note": "Delay is 50%-to-50%; the liberty's slew is 10-90% with slew_derate_from_library = 1. TT, 0.7 V, 25 C. The input slew is iterated until it equals the stage's own output slew, which is what a chain of these cells settles at.",
+   "self_consistent_slew_ps": 26.726142335413634
+  },
+  "note": "The brief for this request quoted 'about 8.1 ps RVT at 0.7 V' as the kit's FO4. The kit's own liberty does not give that: see the numbers above. The SPICE run in part 2 is checked against these."
+ },
+ "fo4_from_liberty": {
+  "FO4_ps": 19.59868471633618,
+  "delay_fall_ps": 18.238808275369724,
+  "delay_rise_ps": 20.958561157302633,
+  "input_cap_fF": 0.619928,
+  "load_fF": 2.479712,
+  "note": "Delay is 50%-to-50%; the liberty's slew is 10-90% with slew_derate_from_library = 1. TT, 0.7 V, 25 C. The input slew is iterated until it equals the stage's own output slew, which is what a chain of these cells settles at.",
+  "self_consistent_slew_ps": 24.33219932337329
+ },
+ "kit": {
+  "corner": "RVT, TT (typical), NLDM, 0.7 V, 25 C",
+  "liberty_files": [
+   "asap7sc7p5t_AO_RVT_TT_nldm_211120.lib",
+   "asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib",
+   "asap7sc7p5t_OA_RVT_TT_nldm_211120.lib",
+   "asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib",
+   "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib"
+  ],
+  "licence": "BSD 3-Clause",
+  "name": "ASAP7 7.5-track predictive 7 nm PDK and standard cell library",
+  "repos": [
+   "github.com/The-OpenROAD-Project/asap7sc7p5t_28",
+   "github.com/The-OpenROAD-Project/asap7_pdk_r1p7"
+  ],
+  "units": {
+   "capacitance": "fF",
+   "energy": "fJ -- the liberty's derived power unit is voltage_unit x current_unit x time_unit = 1 V x 1 mA x 1 ps = 1 fJ",
+   "leakage": "pW",
+   "time": "ps"
+  }
+ },
+ "operating_point": {
+  "V2_scale_0p517_over_0p7": 0.545487755102041,
+  "VDD_liberty_V": 0.7,
+  "VDD_minion_V": 0.517,
+  "input_slew_ps": 10.0,
+  "output_load_fF": 2.0
+ },
+ "q124_census": {
+  "source": "docs/reports/data/2026-09-27-chip-diagram/research/tensorfma32.json",
+  "tfma.asbuilt.cells": {
+   "cells": 4487,
+   "fa_mirror": 162,
+   "fa_tg": 86,
+   "full_adders": 248,
+   "transistors": 49755
+  },
+  "tfma.clocked": {
+   "flops_clocked_random": 1586,
+   "flops_clocked_zero": 15,
+   "flops_total": 1851
+  },
+  "tfma.flip.energy": {
+   "basis": "the real cells' energies, interpolated to 0.517 V",
+   "pJ_high": 0.13,
+   "pJ_low": 0.11
+  },
+  "tfma.flip.gate": {
+   "case": "b bit 11 flipped, a = pi (the lab's E60 case)",
+   "f1": 129,
+   "f1_flops": 19,
+   "f2": 252,
+   "f2_flops": 16,
+   "wires_total": 381
+  },
+  "tfma.glitch": {
+   "energy_ratio": 1.4,
+   "toggle_ratio": 1.5
+  }
+ },
+ "short_circuit_window": {
+  "VDD_minion_V": 0.517,
+  "Vtn_lin_V": 0.19,
+  "Vtn_sat_V": 0.17,
+  "Vtp_lin_V": 0.19,
+  "Vtp_sat_V": 0.16,
+  "sum_lin_V": 0.38,
+  "sum_sat_V": 0.33,
+  "verdict": "0.517 V is ABOVE Vtn + |Vtp| for ASAP7 RVT, by 0.187 V on the saturation thresholds and 0.137 V on the linear ones. So the short-circuit path does NOT close at the minion's rail: both devices can conduct during an input edge. The 20 Oct plan's hope that it might vanish at 0.517 V is wrong for these devices. How much energy that costs against edge time is part 2."
+ },
+ "what": "ASAP7 cell energies: the price of one transistor flip, by kind of gate, from open data. AI Foundry request Q126(d), Mon 26 Oct 2026 (week 44)."
+}
