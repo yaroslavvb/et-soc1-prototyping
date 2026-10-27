@@ -2594,6 +2594,25 @@ it); the registered camera-body check rests on VTEMP. (4) `reduce_hm.py` bridged
 the plain lock-in on the bridged frames reads that block 127 ± 119 mK, the registered fit 36.3 ± 3.3. Session 1's frames
 were reduced on the Intel from a byte-identical copy (sha256 checked) while session 2 ran; raw frames (2.1 + 2.0 GB) stay
 on aifoundry2 in `build/e63/runs/`. Nothing was unsafe: peak die 57.3 °C, peak board 42 W.
+**Corrected Mon 26 Oct 2026 (Q126):** session 2's prices per flipped bit were three quarters of the truth, because
+`summary_hlc.py` hard-coded 256 minions and session 2 ran amendment A1's 192. **113.8 → 151.7 fJ** (top rung),
+**114.3 → 152.4** (the top rung again) and **90.2 → 120.3** (the middle rung), with the camera per 10¹³ flips a second
+rising in step (33.59 → 44.79, 29.38 → 39.17, 29.52 → 39.36 mK). Session 1's 154 and 122 fJ stand, and no registered
+number or verdict moves: the minion count enters no decision rule. The script now takes the minions from
+`launches.jsonl`'s `harts` and the clock from the telemetry — **that record's own `mhz_minion` is sampled before the
+launch opens and reads 600 MHz in all 360 records of both sessions**, while 99.6% of the in-launch samples are at 800
+(the median over the steady windows is 800 in all eight blocks, the mean 797.4–800.0). Session 1's RED had to be rebuilt
+for the re-run and finds 244 shutter events against the committed 243, which moves only its null's plain bridged lock-in,
+13.4 → 14.2 mK against an SE of 47.
+**Post hoc, no verdict (Q126,** [`tools/claims-v3/hlc/posthoc/`](../../tools/claims-v3/hlc/posthoc/README.md)**):**
+(a) the square drive's third harmonic, which the registered fit carries as a nuisance column and throws away, read out
+as **a second transfer point at 0.15 Hz**: pooled over the four top-rung blocks, **19.0 ± 5.2 mK/W against 54.1 ± 1.8 at
+0.05 Hz**, a ratio of **0.35 ± 0.10** — the board is rolling off between the two, at the rate of a ~8.9 s single pole,
+though the measured 87–109° lag at f is more phase than one pole can give, so the pole is a scale and not a model.
+No single block's third harmonic clears 2 SE on its own (the camera reads 8.3 ± 10.2 to 19.5 ± 13.0 mK there).
+(b) The card's own rails, demodulated from the same 10 Hz telemetry: **84–86% of every rung block's board step is on
+the minion rail**, under 1% on each of the SRAM and NoC rails, 85–88% on the three together, the remaining 12–15% being
+the board's conversion loss and the rails the sampler does not break out.
 **Report:** [Weighing flipped bits with heat: the camera half of the Hamming ladder](https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-camera).
 
 ## E64 — hpl: Horace, power limit — which of the governor's two limits sets the matmul's speed (Q123; card runs 2026-10-23 from 20:31 PDT, aifoundry2) — pre-registered

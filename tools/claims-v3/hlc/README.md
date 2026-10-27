@@ -173,6 +173,7 @@ python3 lockin_hlc.py ../runs/<session>-RED --protocol protocol.json --template 
 | `prereg/e62_bloom_dt.npy`, `prereg/e62_gain.npy`, `prereg/e62_scene.npy` | E62 session 2's bloom map, gain map and idle scene (the ROI, the shape, the registration) |
 | `protocol-A1.json` | amendment A1's protocol: every set at 6 minions per shire (session 2) |
 | `summary_hlc.py`, `dips_hlc.py`, `fpa_scene.py` | added after the freeze, reported with no verdict: prices per flip and the plain bridged lock-in; the clock dips; the header's `fpa_c` against the scene |
+| [`posthoc/`](posthoc/README.md) | added Mon 26 Oct 2026 (Q126), no verdict and nothing re-scored: the drive's third harmonic read out of the registered fit as a second transfer point at 0.15 Hz (`h3_rails_hlc.py`, `pool_h3.py`), and the card's minion, SRAM and NoC rails demodulated beside the board |
 | `figures_hlc.py`, `page_text_hlc.py`, `build_page_hlc.py` | the write-up's pictures, prose and page (`docs/reports/2026-10-23-camera-hamming-ladder/`), every number from the files above |
 
 ## Amendments
@@ -226,8 +227,8 @@ rung scales with its watts in both, and the top rung holds 800 MHz on 192 minion
 
 **Predictions against the data.** The board steps came in as registered (TOP 5.44 W in 4.5–7.5, A1's 4.02 W in 3.4–5.6;
 MID 1.50 and 1.11 W; NULL −0.04 and −0.03 W), and so did the lag (87° against ~84°). The electrical price: 154 fJ per
-designed flipped bit for lq_h23 and 122 fJ for lq_h8 at 0.618 V in session 1 (predicted ~170 and ~130), 114 and 90 fJ in
-session 2. The camera's amplitude, 194 mK, sits inside the registered 50–400 mK but 1.8× the central 110: the transfer
+designed flipped bit for lq_h23 and 122 fJ for lq_h8 at 0.618 V in session 1 (predicted ~170 and ~130), 152 and 120 fJ in
+session 2 (corrected Mon 26 Oct 2026; they were published as 114 and 90, see Corrections). The camera's amplitude, 194 mK, sits inside the registered 50–400 mK but 1.8× the central 110: the transfer
 is 59 mK/W at first, not the ~31 predicted from E62's bloom, so the board answers 0.05 Hz faster than one 15–20 s time
 constant says. The noise was about twice the predicted 4–5 mK (SE 9–13 mK on the top rung). The spatial predictions held:
 the in-phase map correlates 0.58–0.63 with E62's bloom map and 0.90–0.92 in its high-passed detail, the capacitor field's
@@ -251,3 +252,28 @@ mean (3.4–7.0 by minute) and followed it (detrended r 0.58, VTEMP's 0.06), as 
 65 W TDP), the sampler's command taking 38–132 ms at the onset against a median of 22. The heater's own internal launches
 ran on without a gap over 2 ms and its cycle counters read 0.60 GHz through each one. Their shape is the governor's idle
 reset and climb (`docs/findings/14-card-behaviour.md`); why it fires mid-launch is not known.
+
+## Corrections
+
+**Mon 26 Oct 2026 (week 44), Q126 — session 2's prices per flipped bit were three quarters of the truth.**
+`summary_hlc.py` hard-coded `MINIONS = 256` and `mhz = 800.0`. Session 2 ran amendment A1's 6 minions per shire,
+192 in all, so its flip rate was 4/3 of the truth and its prices 3/4: **113.8 → 151.7 fJ** for lq_h23, **114.3 →
+152.4** for the top rung again, **90.2 → 120.3** for lq_h8, and the camera per 10¹³ flips a second 33.59 → 44.79,
+29.38 → 39.17 and 29.52 → 39.36 mK. Session 1's three prices are unchanged. Nothing registered moves: the minions
+enter no decision rule, and `lockin.json` was not re-run.
+
+The script now reads both numbers from the session's own records — the minions from `launches.jsonl`'s `harts`,
+the clock as the median minion MHz over the same steady windows the board step's medians are taken in. **Do not
+read the clock from `launches.jsonl`**: its `mhz_minion` is sampled before the launch opens and says 600.0 in all
+360 records of both sessions, while 99.6% of the in-launch telemetry samples read 800. The median over the steady
+windows is 800 MHz in all eight blocks; the mean, which the one-second dips pull down, is 797.4 (session 1's top
+rung) to 800.0, and both now go into `summary.json` as `clock` beside the price.
+
+## Post hoc, with no verdict
+
+[`posthoc/`](posthoc/README.md), Mon 26 Oct 2026 (Q126): the third harmonic of the square drive, which the
+registered fit carries as a nuisance column and discards, read out as a **second transfer point at 0.15 Hz**
+(pooled over the four top-rung blocks: 19.0 ± 5.2 mK/W against 54.1 ± 1.8 at 0.05 Hz, a ratio of 0.35 ± 0.10, the
+roll-off of a ~8.9 s pole, though the measured 87–109° lag is more phase than one pole can give); and the card's
+own **minion, SRAM and NoC rails** demodulated beside the board, which put **84–86% of every rung block's board
+step on the minion rail** and under 1% on each of the other two. Neither re-scores a rule.

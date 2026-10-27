@@ -251,7 +251,14 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-10-14, 16:11 PDT**, after the lab sweep (Q114) redeployed eighteen pages and created the 14 October
+**Last check: 2026-10-26, 16:49 PDT** (`--via https --only et-soc1-bitflip-camera`, Q126), after the E63 page was
+redeployed with session 2's corrected prices per flipped bit and **re-tiered from `signed_in` to public**: 1 of 1 equal,
+0 differences, 0 warnings, exit 0; its four map PNGs equal too. The row below had said `public` since 23 October while
+the space was `signed_in` — it was created without `--visibility`, so it took the account's default, and
+`check-mirror.py` could not catch the mismatch because the space sits outside the 50 that `spacesheep list` returns
+([04-artifacts.md](../findings/04-artifacts.md), Publishing notes). Version `1169b5b8e3e7` replaces `5f222fcc82fc`.
+
+**Earlier check: 2026-10-14, 16:11 PDT**, after the lab sweep (Q114) redeployed eighteen pages and created the 14 October
 page: 41 of 42 mirrored public pages equal to their files in content. The checker's summary reads "19 of 42 equal, 31
 rows with a difference, exit 1" because 22 equal pages and 8 not-mirrored rows sit outside the 50 spaces `spacesheep
 list` returns, so their visibility and slug could not be checked (the listing cap of 5 October; on the lab's todo:

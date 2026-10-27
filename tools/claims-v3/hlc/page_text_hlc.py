@@ -95,16 +95,19 @@ watt of power at that frequency, the heat {n(top['lag_deg'])}° (about {n(top['l
 its watts, a null of equal watts in the same place stayed flat, and the whole run repeated on 192 cores.</p>""")
     body.append(f"""<div class="stats">
 <div class="stat"><b>{n(top['roi_amp_mk'])} mK</b><span>the back of the board over the die at 0.05 Hz, top rung against its zero (SE {n(top['roi_se_mk'])})</span></div>
-<div class="stat"><b>{n(top['board_step_w'], 2)} W</b><span>what the flips add on the board: {n(top['fj_per_flip'])} fJ per flipped bit at 800 MHz</span></div>
+<div class="stat"><b>{n(top['board_step_w'], 2)} W</b><span>what the flips add on the board: {n(top['fj_per_flip'])} fJ per flipped bit, {n(top['minions'])} cores at {n(top['mhz'])} MHz</span></div>
 <div class="stat"><b>{n(top['camera_mk_per_w_step'])} mK/W</b><span>per watt switched; {n(top['transfer_mk_per_w'])} ± {n(top['transfer_se'])} per watt of power at 0.05 Hz</span></div>
 <div class="stat"><b>{n(na)} ± {n(nse)} mK</b><span>the null, ones against pi: equal watts in the same place ({n(abs(nul['board_step_w']), 2)} W apart)</span></div>
 </div>""")
     s2txt = ""
     if t2:
         t22 = S2["blocks"]["E63-TOP2"]
-        s2txt = (f" Session 2, the same run on 192 cores, put {n(t2['board_step_w'], 2)} W on the board and read "
+        s2txt = (f" Session 2, the same run on {n(t2['minions'])} cores, put {n(t2['board_step_w'], 2)} W on the board and read "
                  f"{n(t2['roi_amp_mk'])} ± {n(t2['roi_se_mk'])} mK, {n(t2['camera_mk_per_w_step'])} mK per watt switched against "
-                 f"session 1's {n(top['camera_mk_per_w_step'])}. The camera's gain fell through the hour as the board and the "
+                 f"session 1's {n(top['camera_mk_per_w_step'])}. Three quarters of the cores drew three quarters of the watts "
+                 f"for the same price per flipped bit: {n(t2['fj_per_flip'])} and {n(t22['fj_per_flip'])} fJ on "
+                 f"{n(t2['minions'])} cores against {n(top['fj_per_flip'])} and {n(top2['fj_per_flip'])} on "
+                 f"{n(top['minions'])}. The camera's gain fell through the hour as the board and the "
                  f"camera warmed: {n(top['transfer_mk_per_w'])}, {n(top2['transfer_mk_per_w'])}, {n(t2['transfer_mk_per_w'])} "
                  f"and {n(t22['transfer_mk_per_w'])} mK per watt for the four top-rung blocks in order, the lag growing from "
                  f"{n(top['lag_deg'])}° to {n(t22['lag_deg'])}°. Each session's middle rung is read against its own top "

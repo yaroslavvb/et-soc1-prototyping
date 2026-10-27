@@ -1287,3 +1287,16 @@ one review of the set's structure, and wrote the plan (`PLAN2.md`); page owners 
   `python3`, 3.7.9) ship without a CA bundle until their `Install Certificates.command` runs, and then every page reads
   `unreachable` with `CERTIFICATE_VERIFY_FAILED`, which looks like an outage. On a Mac, run it with
   `SSL_CERT_FILE=/etc/ssl/cert.pem`.
+- **A new space takes the account's default tier, not the rule, and `MIRROR.md` can say otherwise for days**
+  (26 October 2026, Q126). The E63 page `et-soc1-bitflip-camera` was created on 23 October with no `visibility`
+  argument, so it took the account's own default for new pages and came up `signed_in`, while §8.4's rule makes a lab
+  report public, its MIRROR row said `public`, and three hubs linked it as public. Nobody saw it, because
+  `check-mirror.py` could not check the row's visibility: the space was outside the 50 that `spacesheep list` returns.
+  **Pass `--visibility public` (or the MCP `access.visibility`) on every new report's first deploy**, and read the
+  tier back with `get_space` rather than trusting the MIRROR row. Re-tiering a live space is `share_space`, never a
+  redeploy: `deploy` ignores `access.visibility` on an update, so a page deployed again keeps the tier it has.
+- **A rebuilt reduction is not always byte-identical** (26 October 2026, Q126). E63 session 1's RED was made on the
+  Intel and not kept; rebuilt on aifoundry2 from the same raw capture with the same `reduce_hm.py`, it reads the same
+  48,005 packets and 3,841 bins but finds 244 shutter events against the committed `ffc.json`'s 243 — one borderline
+  step on the other side of the 40 mK threshold under a different numpy. Keep the RED of anything published, or say in
+  the data README which numbers a rebuild moves (here: one no-verdict amplitude, 13.4 → 14.2 mK against an SE of 47).
