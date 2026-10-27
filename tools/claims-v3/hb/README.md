@@ -176,6 +176,16 @@ normally, since its `preheat` is above zero (A8 only exempts a pass with no appr
 D1 is scored on the regression of the switching difference against the launch reading across all three readings,
 with its CI; a span this short may only **bound** the coefficient, and the result says so.
 
+**A10, Mon 26 Oct 2026, 17:5x PDT (a code correction *toward* the registration, made after block C's data and
+disclosed here).** `reduce_ladder.py`'s printed C1 verdict tested `abs(a₀(randn) − a₀(zeros)) > 3·SE` for the
+second branch, where the **registered rule's second branch is signed**: "if a₀(randn) − a₀(zeros) > 0.5 W and
+> 3 SE, part of it **is** the kernel's own switching". A *negative* difference cannot mean the randn kernel carries
+extra fixed switching, so the code's string was wrong against the rule it implements. The measured difference is
+−0.52 W, which the code called "part of it is the kernel's switching" and the registered rule calls **undecided**
+(it is 0.02 W outside the first branch and the wrong sign for the second). The code now prints the registered
+rule's verdict. The rule itself is unchanged and nothing was re-registered; the README reports the registered
+verdict, the raw number and why the sign matters.
+
 ## Files
 
 `make_ladder.py` (block C's two protocols), `protocol-randn.json`, `protocol-zeros.json` (frozen with this commit),

@@ -204,10 +204,14 @@ def main():
         if ar["intercept_W"] is not None and az["intercept_W"] is not None:
             d = ar["intercept_W"] - az["intercept_W"]
             se = ((ar["intercept_se_W"] or 0) ** 2 + (az["intercept_se_W"] or 0) ** 2) ** 0.5
+            # A10: the registered rule's second branch is SIGNED -- a randn intercept ABOVE the zeros one is what
+            # would mean the kernel's own switching. This string used abs(d) and so would have called a negative
+            # difference "the kernel's switching", which it cannot be. Corrected to the registered text.
             res["C1"] = {"d_intercept_W": d, "se_W": se or None,
-                         "verdict": ("not the data's switching (|d| < 0.5 W)" if abs(d) < 0.5 else
-                                     ("part of it is the kernel's switching" if se and abs(d) > 3 * se
-                                      else "undecided"))}
+                         "verdict": ("not the data's switching (the two intercepts are within 0.5 W)"
+                                     if abs(d) < 0.5 else
+                                     ("part of it is the kernel's switching" if (se and d > 0.5 and d > 3 * se)
+                                      else "undecided (outside both branches of the registered rule)"))}
             res["C2"] = {"intercept_randn_W": ar["intercept_W"],
                          "verdict": ("scales with f.V^2 like switching" if 2.5 <= ar["intercept_W"] <= 3.8 else
                                      ("fixed across card and clock" if 5.0 <= ar["intercept_W"] <= 6.6
