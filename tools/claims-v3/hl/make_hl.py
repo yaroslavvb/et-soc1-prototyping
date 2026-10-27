@@ -38,6 +38,9 @@ Families (item names in manifest.json):
                        holds an A word for two micro-ops, so A flips every SECOND cycle and the designed count is
                        2,048 A bits per multiply-add, half of B's 4,096. Every position shares one base word
                        (bit 30's is the exponent-64 one), so an item minus its zero differs in that bit alone
+       alq_h<k>        E70 (Q129, amendment A18): the A-side multi-bit ladder — A's low k mantissa bits flip
+                       together (B = 1.0, the quiet partner), the analogue of lq_h<k> on the other operand.
+                       Same shared A base word as abit_<j>, so alq_h1 is byte-identical to abit_0; zero aq_h0
        ap_h0           A constant, B = pi — the zero of the busy-partner A scan
        abp_<j>         A's bit j alternates with the busy partner B = pi (j = 0, 8, 11, 16, 22)
        ix_z            the interaction grid's base: A constant, B constant, one base for all 25 cells
@@ -278,8 +281,9 @@ def write_img(path, regs):
 
 
 # ---------------------------------------------------------------- the item list
-LADDER_H = [0, 1, 2, 4, 8, 12, 16, 23]
-SPREAD_H = [2, 4, 8, 12, 16]
+LADDER_H = [0, 1, 2, 3, 4, 6, 8, 12, 16, 23]   # E70 (Q129, A18): h = 3 and 6 fill the saturation ladder's low end
+SPREAD_H = [2, 3, 4, 6, 8, 12, 16]             # E70: the spread layout at every h the low layout has, 2..16
+A_LADDER_K = [1, 2, 4, 8, 12, 16, 23]          # E70: the A-side multi-bit ladder (alq), the analogue of lq on A
 BITS = list(range(32))        # E65 amendment A4: every bit position (E60 built 13 and ran 6)
 BITS_PI = [0, 8, 11, 16, 22]  # E65 amendment A4: the same single-bit flip with the busy partner A = pi
 EC_H = [0, 4, 8, 16, 24, 32]
@@ -333,6 +337,12 @@ def build(out):
         write_tiles(f"{out}/tiles/{nm}.bin", A, B)
         items.append({"name": nm, "kind": "fma", "family": "abit", "bit": j, "partner_b": "1.0",
                       "zero": "aq_e64" if j == 30 else "aq_h0", "flips": fma_flips(A, B)})
+    for k in A_LADDER_K:    # E70 (Q129, A18): the A-side multi-bit ladder — A's low k mantissa bits flip together,
+        A, B = a_tiles(a0, a0 ^ low_mask(k), ONE)   # B = 1.0 (the quiet partner). alq_h1 is byte-identical to abit_0.
+        nm = f"alq_h{k}"
+        write_tiles(f"{out}/tiles/{nm}.bin", A, B)
+        items.append({"name": nm, "kind": "fma", "family": "alq", "h": k, "mask": hex(low_mask(k)),
+                      "partner_b": "1.0", "zero": "aq_h0", "flips": fma_flips(A, B)})
     for j in BITS_PI:                                  # block 2: the same five positions with the busy partner
         assert j != 30
         A, B = a_tiles(a0, a0 ^ (1 << j), PI)

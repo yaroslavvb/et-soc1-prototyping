@@ -32,7 +32,8 @@ import numpy as np
 
 E_CHARGE = 1.602176634e-19
 ZERO = {"lq": "lq_h0", "lb": "lb_h0", "ls": "lq_h0", "bit": "lq_h0", "xin": "xin_h0", "xio": "xin_h0", "xnz": "xin_h0",
-        "ain": "ain_h0", "bpi": "lb_h0"}   # bpi (E65, A4): the single-bit flip with A = pi, against lb_h0
+        "ain": "ain_h0", "bpi": "lb_h0",   # bpi (E65, A4): the single-bit flip with A = pi, against lb_h0
+        "alq": "aq_h0"}                    # alq (E70, A19): the A-side multi-bit ladder, against the constant-A zero
 IX_BITS = [0, 8, 16, 22]                   # E67 (Q128, A12): the interaction grid's positions
 
 
@@ -281,6 +282,8 @@ def main():
                     for n in names:
                         if n not in val[p]:
                             continue
+                        if reg in ("bus", "nets") and n not in pred:
+                            continue   # E70 (A19): a rung with no RTL replay (lq_h3, lq_h6) has no bus/nets regressor
                         rate = val[p][n]["rate"]
                         if reg == "designed":
                             x = man[n]["flips"]["b_all"] + man[n]["flips"]["a_all"]
@@ -321,7 +324,7 @@ def main():
             C[fam] = out
         # ---- ls: paired equal-Hamming contrasts against lq
         C["ls_vs_lq"] = {}
-        for h in (2, 4, 8, 12, 16):
+        for h in (2, 3, 4, 6, 8, 12, 16):   # E70 (A19): h = 3 and 6 added; a rung that did not run writes no key
             a_, b_ = f"ls_h{h}", f"lq_h{h}"
             d = [val[p][a_]["p80"] - val[p][b_]["p80"] for p in passes if a_ in val[p] and b_ in val[p]]
             if d:
