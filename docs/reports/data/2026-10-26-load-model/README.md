@@ -248,7 +248,7 @@ parameter; on the joined model's base, 1.1%. The other three prices barely move 
 the clock term. The in-sample bias flips sign — −0.054 W free, +0.011 W pinned — which says the free fit was
 buying a little of the base with the bus column.
 
-### The per-card spread: it collapses, and on three cards it is cheaper
+### The per-card spread: it collapses, and what that costs depends on the base
 
 Three cards is the question item 10 actually asks. The only committed board powers measured on more than one
 card are the version-3 check of 26 September, ABL-R's own 14 rows (8 fp32 patterns + 6 structured matrices)
@@ -267,27 +267,43 @@ and the spread is the card's, not the rail's.
 |---|---|---|---|
 | free, c0 = 0 (4 parameters) | 0.947 | 0.930 | 0.933 |
 | **pinned, c0 = 0 (3 parameters)** | **0.905** | **0.835** | **0.863** |
+| *pinning's cost at c0 = 0* | *−4.5%* | *−10.3%* | *−7.5%* |
+| free, c0 = −1.18 W (4 parameters) | 1.081 | 0.855 | 0.937 |
+| **pinned, c0 = −1.18 W (3 parameters)** | **1.132** | **0.806** | **0.976** |
+| *pinning's cost at c0 = −1.18 W* | *+4.7%* | *−5.8%* | *+4.2%* |
 | the published ABL-R refit (5 parameters) | 1.005 | 0.907 | 0.966 |
 
-**The spread collapses and nothing pays for it.** The free bus term moves 1.70× across the three cards — the
-loosest term in the model, as item 10 says. Pinned, the leave-one-out improves on **every** card, and on
-three free parameters it beats the published five-parameter per-card refit (non-negative least squares with a
-free constant) on every card too.
+**The spread collapses; what it costs depends on the base.** The free bus term moves 1.70× across the three
+cards — the loosest term in the model, as item 10 says. Pinning removes that spread by construction, and
+**at c0 = 0 it is better than free on every card** (−4.5 / −10.3 / −7.5%), on one parameter fewer; on three free
+parameters it also beats the published five-parameter per-card refit (non-negative least squares with a free
+constant) on every card. **At c0 = −1.18 W — the joined model's own per-kernel offset, which is the base the
+chain's load model actually runs on — it is not free: the leave-one-out worsens on two cards of three**
+(aifoundry2 +4.7%, aifoundry1-c1 +4.2%) and improves only on aifoundry3 (−5.8%). Both bases are in the table
+above and in [`pin_bus.json`](pin_bus.json) (`per_card.arms[…].leave_one_out_rms_w`); the single-population
+14-pattern fit behaves the other way round, costing 8.0% at c0 = 0 and only 1.1% at c0 = −1.18 W. Pinning is
+worth it, but the claim that it is free is a c0 = 0 claim, not a general one.
 
 **And the spread does not simply move somewhere else.** The other three prices spread 1.29 / 1.27 / 1.25×
 (`ffclk` / `mult` / `rest`) in the free arm and 1.28 / 1.26 / 1.31× pinned — unchanged to within a few points.
 That residual ~1.3× is the card-to-card term the model already has a name for (E38's switching scale, 0.958–
 0.969 for aifoundry3) plus the launch-temperature difference below; it is not the bus term in disguise.
 
-Three things this does **not** settle.
+Four things this does **not** settle.
 
-1. **It does not rescue the cross-card claim.** 0.835–0.905 W is still well above ABL-R's registered 0.6 W
-   leave-one-out bound. Pinning makes the model smaller and more honest, not accurate across cards.
-2. **The three cards launched at different die temperatures** (80.9 / 55.8 / 80.9 °C registered; 80.1 / 57.4 /
+1. **The gain is base-dependent, and nothing here says which base is right.** The whole per-card case for
+   pinning rests on c0 = 0; at the joined model's own offset two of the three cards get worse. The two bases
+   differ only in a constant watt per kernel, so a fit that is helped by the pin at one and hurt at the other
+   is telling you the bus column and the constant are partly interchangeable on 14 rows — which is the same
+   illness item 10 names, not a cure for it. Settling it needs more rows per card, not a better prior.
+2. **It does not rescue the cross-card claim.** 0.835–0.905 W pinned at c0 = 0, and 0.806–1.132 W pinned at
+   c0 = −1.18 W, are both still well above ABL-R's registered 0.6 W leave-one-out bound. Pinning makes the
+   model smaller and more honest, not accurate across cards.
+3. **The three cards launched at different die temperatures** (80.9 / 55.8 / 80.9 °C registered; 80.1 / 57.4 /
    80.0 °C mean reading). Each card's switching is measured against its own idle at its own temperature, so
    each fit is internally matched, but the across-card comparison carries that difference. It carries it
    identically in both arms, so the free-against-pinned comparison is unaffected.
-3. **The bus term's spread across *populations* is still the larger number.** Counting the fits now on
+4. **The bus term's spread across *populations* is still the larger number.** Counting the fits now on
    record at c0 = 0 — 16.09 (14 fp32 patterns), 16.72 and 14.16 (the two recount rungs), and 31.17 / 18.35 /
    28.59 (the three cards) — the free bus runs 14.16 to 31.17 fJ, **2.2×**. That is the spread pinning is for.
 
