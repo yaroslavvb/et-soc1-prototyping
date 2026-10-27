@@ -384,10 +384,28 @@ def recount_counts(path=None):
     """Read job (b)'s recount of the bench's toggles, if it is on main yet; None while the file does not exist,
     so everything here keeps working without it.
 
-    Every per-toggle price in this project is a measured watt divided by one of these counts, and the two
-    counters disagree 2.9x (the bench's 21,331 toggles a random multiply-add against the recount's 7,160-7,470,
-    and 602.5 clocked bits against the netlist's 1,586). A refit on whichever count survives moves the four
-    prices but not the watts, so it is a SECOND, separately reported pass, not a change to this one.
+    Every per-toggle price in this project is a measured watt divided by one of these counts, and the counters
+    disagree. 🛑 THE NUMBERS BELOW ARE THE SETTLED ONES (corrected 26 Oct 2026, Q128(e); this docstring first
+    said "the two counters disagree 2.9x ... against the recount's 7,160-7,470", which was the dispute as it
+    stood before job (b) finished and before job (e)'s netlist existed):
+
+      * the bench's 21,331 is a count of NAMES under one Verilator, not of wires, and 2.94x of it is a
+        counter defect measured inside a single traced run -- 21,297 from the coverage counter against 7,233
+        in that same run's own VCD, the whole gap in txfma_csa and txfma_4_2_compressor (8.45x; every other
+        module 0.98x). The same bench on the same tiles reads 7,014 under Verilator 5.052;
+      * counting each PHYSICAL net once gives 1,301 per random multiply-add (1,325 at a 512-cycle window) --
+        job (b)'s figure to quote, and a floor;
+      * the open netlist, an independent count on real wires, gives 3,299 unique nets for the whole unit
+        (3,623 with the hierarchy kept) -- so two physical counts still disagree 2.5x, which is the live
+        dispute, not the 2.9x one;
+      * clocked register bits: 595.2 a multiply-add in stream, 71% of this RTL's 838 a lane, against the
+        netlist's 1,586 of 1,851, 86%.
+
+    docs/findings/05-claims.md carries each of these with its file and field (Q126(b), Q126(c), Q126(e)).
+    A refit on whichever count survives moves the four prices but not the watts, so it is a SECOND,
+    separately reported pass, not a change to this one -- scores.json's `toggle_recount_refit` and
+    refit_on_recount.json are that pass, and on the 14 measured board powers the deduplicated counts fit
+    WORSE than the bench's own.
 
     EXPECTED SHAPE -- the loosest thing that can be read without guessing:
         {"per_pattern": {"<pattern>": {"ffclk": <per op>, "mult": ..., "rest": ..., "bus": ...}, ...}}

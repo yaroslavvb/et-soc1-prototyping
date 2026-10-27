@@ -258,6 +258,15 @@ cell-output transition; uniform `when`-state weighting; the open synthesis made 
 multiplier against the tape-out flow's 4,487, so its histogram is used as the *mix*, not the count;
 and ASAP7 is a predictive 7 nm PDK, not TSMC N7.
 
+> **Corrected Mon 26 Oct 2026 (Q128(e)).** That `7,967 against 4,487` is a hierarchy artefact and is
+> restated in the JSON's `census_weighted_mix.caveat`. The 7,967 keeps all 182 module boundaries;
+> counted like for like, on the netlist flattened except the four multiplier blocks, the open flow
+> makes **4,989 cells against the tape-out flow's 4,487 — 1.11×, not 1.77×** (and 42,758 transistors
+> against 49,755, 0.86×). The census table is in
+> [`../2026-10-26-open-netlist/README.md`](../2026-10-26-open-netlist/README.md). Nothing computed on
+> this page changes: the histogram was only ever used as the mix. What changes is how far the two
+> netlists were thought to be apart.
+
 ## Does the short-circuit path close at 0.517 V?
 
 The 20 October plan hoped it might: "It vanishes if the supply is below the two thresholds added

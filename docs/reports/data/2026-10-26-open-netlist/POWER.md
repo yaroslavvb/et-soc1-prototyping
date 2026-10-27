@@ -217,9 +217,13 @@ It is **switching energy on the half of the design the simulation can name**, an
 that sentence push the same way.
 
 - **Capacitance coverage, in farads, not net counts.** For `randn`, 10,460 of the 20,383 extracted
-  nets are found in the simulation and priced — but those carry **23,762 fF of the design's
-  47,093 fF, so 50.5% of the capacitance is unpriced** (`coverage.cap_fraction_priced` in every
-  `power/*.json`). The shortfall is not idle nets: every net the simulation names and that the
+  nets are found in the simulation and priced — but those carry only **23,762 fF of the design's
+  47,093 fF, so 50.5% of the capacitance is priced and 49.5% is not** (`coverage.cap_fraction_priced`
+  = 0.5046 in `power/power_gr_randn.json`; `tools/open-flow/txfma/power.py:271` computes it as
+  `cap_priced_fF / cap_all_fF`, so the field names what IS priced).
+  🛑 **Corrected Mon 26 Oct 2026 (Q128(e)).** This sentence and the table row below read the field as
+  the unpriced share. The arithmetic was always right — 23,762 ÷ 47,093 = 50.5% — and so was the
+  conclusion, because the unpriced half is 49.5%; only the label was inverted. The shortfall is not idle nets: every net the simulation names and that the
   extractor knows is active here. It is the 9,923 nets CTS and `repair_design` created after the
   netlist was simulated, plus nets the simulator folded away. They switch, so leaving them out is
   an underestimate of the same order as the number itself.
@@ -318,7 +322,7 @@ tree — still rests on the tape-out flow alone.
 | "the multiplier's 1,200.8 physical toggles … stand against the tape-out flow's 1,244 — 3.5% apart" | scope error: 1,244 is tree-only. Tree against tree is **628.2 vs 1,244, 1.98× apart** on the comparable netlist (716.3, 1.74×, on the hierarchy-kept one) |
 | "35.4 fJ per flipped operand bit … E60 measured 116.7 fJ … about 30%" | three errors (denominator, partner, two-point). The fitted slope per designed bit is **38.5 fJ busy / 32.9 fJ quiet**, against E60's **129.9 / 116.7**: **30% / 28%** on switching alone, **42% / 40%** with the cells' internal energy. The arithmetic of the answer barely moved; every step to it was wrong |
 | "1250 ps (800 MHz), 0.517 V" as the operating point | the design **misses** 1250 ps by **wns −1,219 ps**, so it would run near **400 MHz**; and the liberty is TT at 0.7 V while the energy is priced at the 0.517 V rail |
-| "leaving them out makes this an underestimate" (coverage, by net count) | **50.5% of the capacitance, in farads, is unpriced** |
+| "leaving them out makes this an underestimate" (coverage, by net count) | **49.5% of the capacitance, in farads, is unpriced**; `coverage.cap_fraction_priced` = 0.5046 is the share that IS priced (corrected 26 Oct, Q128(e) — this row first stated it the other way round) |
 | `power.py`: internal energy is "a few per cent of a delivered bit" | OpenROAD's own `report_power` on this netlist: **internal is 55% of the dynamic power**. The liberty's internal term adds **28%** to `randn` for the combinational cells alone |
 | "DRT-0255 … on a block pin", fix suggested: "a `-exclude` region for the pins" | the failing nets are named — `clock`, `trans_coefficients[51]`, `out_data_res[0/29]` — and ten configurations are tabulated above, including the two that showed matching the layer ranges does not help |
 | the flow could not be re-run: no tile generator, no pinned versions | `mktiles.sh` is committed with the exact flags; `setup.sh` pins every tool and fetches each sha by name |
