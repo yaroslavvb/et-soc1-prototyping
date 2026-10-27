@@ -267,11 +267,31 @@
       const d = clocks.map((c, i) => (i ? 'L' : 'M') + X(c).toFixed(1) + ',' + Y(m[k][String(c)]).toFixed(1)).join(' ');
       el('path', {d, fill: 'none', stroke: col, 'stroke-width': hot ? 2.6 : 1.2, opacity: hot ? 1 : 0.65}, s);
       clocks.forEach(c => el('circle', {cx: X(c), cy: Y(m[k][String(c)]), r: hot ? 3.6 : 2.2, fill: col, opacity: hot ? 1 : 0.65}, s));
-      if (narrow) return;                               // no room for a label gutter on a phone
-      const t = tx(s, W - Rt + 9, Y(m[k]['800']) + 4, (nice[k] || k) + '  ' + num(m[k]['800'], 1) + ' W', 'tick');
-      t.setAttribute('fill', hot ? col : 'var(--ink-2)');
-      if (hot) t.setAttribute('font-weight', '700');
     });
+    if (!narrow) {
+      /* Three patterns sit within 4 W of each other at 800 MHz, so their right-hand labels used to print
+         on top of one another. Place them in y order with a minimum gap, nudging down then back up. */
+      const GAP = 15, top0 = T + 4, bot0 = H - B;
+      const lab = keys.map(k => ({k, y: Y(m[k]['800']) + 4})).sort((a, b) => a.y - b.y);
+      for (let i = 1; i < lab.length; i++) if (lab[i].y - lab[i - 1].y < GAP) lab[i].y = lab[i - 1].y + GAP;
+      const over = lab[lab.length - 1].y - bot0;
+      if (over > 0) for (let i = lab.length - 1; i >= 0; i--) {
+        lab[i].y -= over;
+        if (i && lab[i].y - lab[i - 1].y >= GAP) break;
+      }
+      if (lab[0].y < top0) lab[0].y = top0;
+      lab.forEach(function (q) {
+        const hot = q.k === 'randn' || q.k === 'zeros';
+        const col = q.k === 'randn' ? 'var(--c2)' : q.k === 'zeros' ? 'var(--c1)' : 'var(--ref)';
+        const yline = Y(m[q.k]['800']);
+        if (Math.abs(q.y - 4 - yline) > 2)              // a nudged label gets a leader to its own point
+          el('line', {x1: W - Rt + 2, x2: W - Rt + 7, y1: yline, y2: q.y - 4,
+            stroke: 'var(--axis)', 'stroke-width': 1}, s);
+        const t = tx(s, W - Rt + 9, q.y, (nice[q.k] || q.k) + '  ' + num(m[q.k]['800'], 1) + ' W', 'tick');
+        t.setAttribute('fill', hot ? col : 'var(--ink-2)');
+        if (hot) t.setAttribute('font-weight', '700');
+      });
+    }
     if (narrow) {                                       // label the two lines that carry the finding
       [['randn', -11, 'var(--c2)'], ['zeros', 17, 'var(--c1)']].forEach(function (q) {
         const t = tx(s, X(800) - 6, Y(m[q[0]]['800']) + q[1],
