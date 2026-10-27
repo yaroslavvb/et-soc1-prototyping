@@ -67,14 +67,18 @@ were measured, all `ones`, all 9 × 8 s back to back, the mean over the last 40 
 | 65 | **62** | 649.8 | 790.3 | 61.2 | 52.1 | 8 | 0 | 0.93 |
 | **50** | 65 | 700.0 | 769.6 | 61.2 | 50.0 | **0** | **11** | 0.70 |
 
-- **Raising the threshold closes the sustained gap, exactly as predicted.** At the card's own 65 °C the die is
+800 MHz is this card's **top VMIN point**, so a prediction of 800.0 cannot be exceeded and any throttle-free
+run returns exactly 800.0: the thr-70 row's zero error is a **ceiling artefact**, and what carries information
+there is its thermal-step count and its share of the window at 800 MHz (A5).
+
+- **Raising the threshold closes the sustained gap, and the clamp's own counters say why.** At the card's own 65 °C the die is
   pinned **at 65 °C in every one of the last twenty 2 s bins** while the clock dithers 740–800 MHz: a textbook
   clamp, 11 thermal throttle-down events, 763.4 MHz. Raise the threshold five degrees and the same work holds
   **800 MHz in every bin for the whole 76 s with zero thermal steps**, the die settling at 63–66 °C under the
   new threshold. Q128 called the sustained gap "a clamp, right in order but with no number to test"; the number
   is **36.6 MHz of sustained clock, and it belongs to the threshold** — 800.0 − 763.4, between two cells that
-  ran 20 s apart in the same session (14:28:51 and 14:30:27), so the session-to-session offset below is
-  common-mode. Three caveats, none of them optional: each cell is **n = 1 with no interval**, neither was
+  ran back to back in the same session, the control starting 20 s after the raised-threshold cell ended
+  (14:28:51→14:30:07 and 14:30:27→14:31:44), so the session-to-session offset below is common-mode. Three caveats, none of them optional: each cell is **n = 1 with no interval**, neither was
   replicated; the raised-threshold cell sits **at the 800 MHz ceiling**, so 36.6 MHz is a **lower bound** on
   the threshold's effect at this work point; and this is a **measured 65 → 70 °C sensitivity**, not the Levels
   tab's "775 predicted vs 738 measured" model gap, which is a different quantity that E69 does not close (see
