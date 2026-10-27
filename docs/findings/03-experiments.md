@@ -2750,6 +2750,105 @@ must have its items registered in every block it compares.
 [`docs/findings/14-card-behaviour.md`](14-card-behaviour.md) as AGENT.md §10 routes them.
 **Report:** the data README, [`docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/`](../reports/data/2026-10-26-e65-bit-prices-hart-ladder/README.md); no public page was made.
 
+## E67 — ha: the A side of the price list, the busy partner, and the interaction grid (Q128; card runs 2026-10-26 from 21:04 PDT, aifoundry3) — pre-registered
+
+**Asked (Q128):** "fill the missing pieces needed to address my original queries (tracking down difference in
+multiplication speed down to cost of individual transistor switching) … run the experiments on aifoundry machines".
+The card piece of that is the half of the operand price list nobody had measured. E65 priced all 32 positions of
+**B** with the quiet partner A = 1.0; the **A side — the Booth-recoded operand, broadcast to all eight lanes and
+driving the recoder that selects each partial product — had never been priced**, so every summed per-bit model was
+assuming the two sides match, and nothing had ever tested whether per-bit prices may be summed at all.
+**Pre-registered** in [`tools/claims-v3/ha/README.md`](../../tools/claims-v3/ha/README.md) (blocks 1–4, departures
+D1–D4, predictions P1–P8, decision rules), committed as `2e9ad85a` at 21:01:37 PDT — **2 min 32 s before the card
+was claimed and 3 min 51 s before the first measured launch** — with amendments A11 and A12 in that commit (the
+seven new operand families; the per-item zero the reduction needed), and A13 (`ee9faed6`), A14 (`655082c7`) and
+A15 (`4443402b`) each written before the data it touches: A13 and A14 after block 1's first pass and before any
+block-3 data, A15 while block 3 ran and before its data was reduced. All three add reported quantities; none moves
+a registered band, rule or number. One card: **aifoundry3**, latched at 600 MHz by `et-board-clock-guard`,
+521.9 mV on every sample — deliberately E65's card, clock and rail. **Every one of the 87 operand files E60 and
+E65 ran is byte-identical in the new set**, checked before the first launch.
+**Departures:** D1, one shared A base word (E60 and E65 drew a fresh random base per position, so an item minus
+its zero carried the flip *and* the difference between two random words); bit 30, the exponent MSB, cannot flip
+from exponent 127 and uses the exponent-64 twin of the same mantissa with a zero of its own. D2, no RTL
+predictions for the new items (no Verilator on this host). D3, the grid is 4 × 4 on mantissa bits. D4, E65's
+launch pair (58 °C after 59 °C) unchanged.
+
+**The hardware fact that sets the A side's units.** The issue order (PRM 9.4, `make_hl.py:issue_streams`) is: for
+each B row k, for each A row i, two micro-ops. **A[i][k] is held across both** while B alternates every micro-op,
+so an A word can change only every *second* cycle: **2,048 designed A-bit flips per multiply-add against B's
+4,096**. A scan that assumed both operands flip every cycle would have reported every A-side price exactly 2× too
+low and nothing would have errored.
+
+**Results** (card runs 21:04–23:02 PDT, 1 h 58 min; claimed in #community-lab at 21:03, released after the last
+pass). 14 passes, **10 kept** by the registered gates, 424 of 554 runs. Data, both reductions and every pass's
+telemetry: `docs/reports/data/2026-10-27-e67-a-side-bit-prices/`.
+- **The A side at all 32 positions** (B = 1.0, above the shared-base constant-A zero): the same shape as the B
+  side, a flat low mantissa rising to a dear top — **153 fJ** per flipped A bit at bit 4 to **1,440 fJ** at bit 22,
+  a **9.4× span**, Spearman ρ(bit, price) **0.851** over the mantissa. Exponent bits average 265 fJ, the sign bit
+  247 fJ.
+- **A costs more per flipped bit than B, but only modestly**: median A/B ratio **1.60** over the 23 mantissa
+  positions (1.24 on the clean passes), 19 of 23 inside the registered factor-of-3 band, and the two lists are
+  strongly rank-correlated (ρ **0.833**). The Booth-recoded operand is not a different kind of cost; it is the
+  same cost at half the flip rate and a somewhat higher price per flip.
+- **The tie to E65 holds to 0.13 W** on the three items both ran (`anchor_pi` 36.39 → 36.28, `lq_h0` 36.49 →
+  36.51, `lb_h0` 36.47 → 36.60, four hours apart), which is what lets the A and B price lists be added without a
+  conversion.
+- **The busy partner costs more at all five shared positions** (B = π over B = 1.0), `abp_22` reaching 1,566 fJ;
+  `abp_11`, the A-side mirror of the flow-M case, is **856 fJ** (971 on the clean passes) against E65's `bpi_11`
+  at 745 ± 56 fJ, a ratio of 1.15 — the two operands' flow-M prices agree within 30%.
+- 🛑 **Per-bit prices do not add, and the failure is saturation, not an offset.** All 16 grid cells are
+  sub-additive: mean excess over the sum of their two margins **−1.351 ± 0.281 W** (4.8 SE), largest −4.05 W, and
+  the excess tracks the size of the flips (Pearson r **−0.739** against the sum; `cell = 0.94 W + 0.64 × sum`,
+  residual rms 0.73 W), so a cell costs **62–96%** of its margins' sum, median 83%.
+- 🛑 **And the shortfall deepens with the number of simultaneous flips, which is what a real workload does.**
+  Summing the measured per-position prices over the counted flip histograms of `nrd_a` (A random, 27,648 A bits
+  per multiply-add) and `nrd_b` (B random, 56,784 B bits) over-predicts their measured steps by **2.3× and 2.0×**
+  (measured/predicted 0.43 and 0.50; 0.50 and 0.49 on the clean passes). Scaling by the grid's own pair ratio
+  (0.80) leaves 1.6–1.8×. **So the per-bit price list is an upper bound on a random workload, high by about 2×.**
+- **The two operand paths, though, do add.** Both operands random is **16.48 W** above the constant-operand level
+  where one random side plus the other sums to **18.14 W** — a ratio of **0.91** against a 0.33 W noise floor. What
+  fails is decomposing one operand into independent bits, not separating A from B.
+- **The anchors on this card at 600 MHz:** zeros **27.86 W**, ones 36.23, π 36.28, random fp32 **52.88 W** — a
+  random-against-zeros step of **25.02 W**, which reproduces the 21 Sep step (38.29 → 63.40 W, 25.1 W) on a
+  different card to 0.4%.
+- **Decision rules:** P1 PASS (ρ 0.851, span 9.4× against a 5× mark); P2 PASS (ρ 0.833, 19/23 in band); **P3 FAIL**
+  (the sign bit ranks 8th of 32, and 92 mantissa-below-16 bits cost at least as much as an exponent bit — the same
+  way E65's A3 failed on the B side); **P4 FAIL on significance** (busy − quiet is positive at 5 of 5 positions but
+  0 of 5 reach 2 SE on the registered passes; 5 of 5 do on the clean ones); P5 PASS (856 fJ, ratio 1.15);
+  **P6 FAIL, sub-additive** (mean excess −1.351 ± 0.281 W, 8 of 16 cells within 20%); P7 PASS (0.687 against
+  [0.3, 0.8]); **P8 FAIL** (0.43 and 0.50 against a factor-of-2 band).
+
+**Deviations and findings beside the rules:** (1) 🛑 **The registered pass gate fires on the wrong passes.** It is
+E60's `anchor_pi` first-versus-last drift over 0.3 W. E67 runs six items whose operands never change —
+`aq_h0`, `aq_e64`, `ap_h0`, `lq_h0`, `lb_h0`, `ix_z` — plus `anchor_pi` twice, one physical state by several
+routes, and their **spread within a pass** is the honest measure: 0.17–0.37 W in passes 750–753 and **0.62, 2.02,
+1.12, 0.97 W** in 754–757. The registered gate sets aside 754 (the 0.62 W one) and **keeps 755 at 2.02 W**,
+because `anchor_pi`'s own two runs agree there. The cause is in the launch records: from pass 754 the host-side
+launch overhead grew (calibration 18 → 23 ms, inter-launch gap 1.5 → 10–15 ms, rate 1.121 → 1.085 Gop/s) and a
+minority of runs read 1–2 W **low** at an unchanged clock, rail, launch reading and cycles-per-op, so no per-run
+gate sees them; the pass median never moves, so bad runs dip and never rise. Amendment A15 adds
+`ha/constspread.py` and a **labelled post-hoc sensitivity** over the passes whose spread is ≤ 0.40 W (7 of 14,
+277 of 277 runs). **The registered reduction is the result**; only P3 (FAIL → PARTIAL) and P4 (FAIL → PASS) move,
+both toward the registered expectation, and every headline is unchanged. The lesson is filed for the next
+experiment: a pass gate must watch every item that should not move, not one item's drift.
+(2) **Amendment A13's turn-on correction is refuted by the block it was registered against.** A13 reasoned that a
+price measured against a constant-operand zero is `T + e·n·rate`, so summing it charges the fixed turn-on once per
+flipped position (13.5 times for `nrd_a`), and that the grid's excess would measure `−T`. The arithmetic is right
+and the model is wrong: the excess is not constant but proportional to the flips, so subtracting a constant
+1.35 W per position over-corrects and drives most positions negative (corrected closure −3.17 and 2.31 against the
+raw 0.50 and 0.49). It is reported as a failed correction, not quietly dropped.
+(3) **A14's bias is real and in the stated direction**: because the A side's designed count is half the B side's,
+any fixed per-item cost inflates an A-side price twice as much per bit, so the raw A/B ratio of 1.60 is an upper
+bound on the marginal one. With saturation rather than a constant turn-on, the marginal ratio cannot be read off
+by subtraction, and the honest statement is that the two sides' **marginal** prices are within a factor of about 2
+and the raw ones within a factor of 3 at 19 of 23 positions.
+(4) **One shared base word per operand side is worth the extra zero.** E60 and E65's per-position random bases put
+the difference between two random words into every price; E67's items differ in one bit alone, and the cost is one
+extra item (`aq_e64`, for bit 30's exponent base).
+**Report:** the data README,
+[`docs/reports/data/2026-10-27-e67-a-side-bit-prices/`](../reports/data/2026-10-27-e67-a-side-bit-prices/README.md);
+the Q128 page carries E67 and E68 together.
+
 ## E68 — sm: the stage map, which pipeline stage spends a flipped bit's energy (Q128; card runs 2026-10-26 from 21:11 PDT, aifoundry2) — pre-registered
 
 **Asked (Q128):** "fill the missing pieces needed to address my original queries (tracking down difference in

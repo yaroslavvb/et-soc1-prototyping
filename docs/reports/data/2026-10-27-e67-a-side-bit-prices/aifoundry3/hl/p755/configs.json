@@ -1,0 +1,886 @@
+{
+ "card": "aifoundry3",
+ "args": {
+  "out": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/hl/p755",
+  "root": "/home/yaroslavvb/aifoundry",
+  "gen": "/home/yaroslavvb/aifoundry/build/hl-gen4",
+  "items": "anchor_pi,anchor_zeros,anchor_ones,anchor_randn,lq_h0,lb_h0,aq_,ap_h0,abit_,abp_,nrd_",
+  "tel_live": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/hl/p755/telemetry.jsonl.raw",
+  "heater": "build/sparsity/host/sparsity_host",
+  "sparsity": "build/sparsity/host/sparsity_host",
+  "enercat": "build/enercat-hl/host/enercat_host",
+  "blocks": 1,
+  "first_block": 755,
+  "seed": 755,
+  "target": 58.0,
+  "preheat": 59.0,
+  "max_heats": 15,
+  "max_wait": 600.0,
+  "max_c": 78.0,
+  "stale_s": 3.0,
+  "fma_s": 4.0,
+  "ec_s": 4.0,
+  "burnin": 2,
+  "card": "aifoundry3",
+  "dry": false,
+  "list": false
+ },
+ "items": [
+  {
+   "name": "anchor_zeros",
+   "kind": "fma",
+   "family": "anchor",
+   "values": "zeros"
+  },
+  {
+   "name": "anchor_ones",
+   "kind": "fma",
+   "family": "anchor",
+   "values": "ones"
+  },
+  {
+   "name": "anchor_pi",
+   "kind": "fma",
+   "family": "anchor",
+   "values": "pi"
+  },
+  {
+   "name": "anchor_randn",
+   "kind": "fma",
+   "family": "anchor",
+   "values": "randn"
+  },
+  {
+   "name": "lq_h0",
+   "kind": "fma",
+   "family": "lq",
+   "h": 0,
+   "mask": "0x0",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 0
+   }
+  },
+  {
+   "name": "lb_h0",
+   "kind": "fma",
+   "family": "lb",
+   "h": 0,
+   "mask": "0x0",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 0
+   }
+  },
+  {
+   "name": "aq_h0",
+   "kind": "fma",
+   "family": "aq",
+   "a_base": "0x3fbbc9e4",
+   "partner_b": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 0
+   }
+  },
+  {
+   "name": "aq_e64",
+   "kind": "fma",
+   "family": "aq",
+   "a_base": "0x203bc9e4",
+   "partner_b": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 0
+   }
+  },
+  {
+   "name": "ap_h0",
+   "kind": "fma",
+   "family": "ap",
+   "a_base": "0x3fbbc9e4",
+   "partner_b": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 0
+   }
+  },
+  {
+   "name": "abit_0",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 0,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_1",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 1,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_2",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 2,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_3",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 3,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_4",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 4,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_5",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 5,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_6",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 6,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_7",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 7,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_8",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 8,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_9",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 9,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_10",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 10,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_11",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 11,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_12",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 12,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_13",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 13,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_14",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 14,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_15",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 15,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_16",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 16,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_17",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 17,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_18",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 18,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_19",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 19,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_20",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 20,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_21",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 21,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_22",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 22,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_23",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 23,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 2048,
+    "a_mant": 0,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_24",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 24,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 2048,
+    "a_mant": 0,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_25",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 25,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 2048,
+    "a_mant": 0,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_26",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 26,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 2048,
+    "a_mant": 0,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_27",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 27,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 2048,
+    "a_mant": 0,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_28",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 28,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 2048,
+    "a_mant": 0,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_29",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 29,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 2048,
+    "a_mant": 0,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_30",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 30,
+   "partner_b": "1.0",
+   "zero": "aq_e64",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 2048,
+    "a_mant": 0,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abit_31",
+   "kind": "fma",
+   "family": "abit",
+   "bit": 31,
+   "partner_b": "1.0",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 2048,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abp_0",
+   "kind": "fma",
+   "family": "abp",
+   "bit": 0,
+   "partner_b": "pi",
+   "zero": "ap_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abp_8",
+   "kind": "fma",
+   "family": "abp",
+   "bit": 8,
+   "partner_b": "pi",
+   "zero": "ap_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abp_11",
+   "kind": "fma",
+   "family": "abp",
+   "bit": 11,
+   "partner_b": "pi",
+   "zero": "ap_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abp_16",
+   "kind": "fma",
+   "family": "abp",
+   "bit": 16,
+   "partner_b": "pi",
+   "zero": "ap_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "abp_22",
+   "kind": "fma",
+   "family": "abp",
+   "bit": 22,
+   "partner_b": "pi",
+   "zero": "ap_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 2048,
+    "a_all": 2048,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 2048
+   }
+  },
+  {
+   "name": "nrd_a",
+   "kind": "fma",
+   "family": "nrd",
+   "side": "a",
+   "zero": "aq_h0",
+   "flips": {
+    "a_sign": 1056,
+    "a_exp": 3216,
+    "a_mant": 23376,
+    "a_all": 27648,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 27648
+   }
+  },
+  {
+   "name": "nrd_b",
+   "kind": "fma",
+   "family": "nrd",
+   "side": "b",
+   "zero": "lq_h0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 1852,
+    "b_exp": 7894,
+    "b_mant": 47038,
+    "b_all": 56784,
+    "total": 56784
+   }
+  }
+ ],
+ "et_devices": null
+}

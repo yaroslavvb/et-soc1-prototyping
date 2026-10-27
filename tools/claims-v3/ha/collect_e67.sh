@@ -40,6 +40,10 @@ else
   echo "E65 hl.json not found at $E65: the closure test needs the B-side price list" | tee "$OUT/closure.txt"
 fi
 
+"$PY" tools/claims-v3/ha/report_e67.py --e67 "$OUT/hl.json" --e65 "$E65" \
+  --closure "$OUT/closure.json" --out "$OUT/results.md" --json "$OUT/scored.json" > /dev/null 2>&1 &&
+  echo "results.md written" || echo "report_e67 failed"
+
 cp "$GEN/manifest.json" "$OUT/manifest.json"
 for f in e67-as.log e67-as-750.log e67-as-755.log e67-ix.log e67-chain3.log q128-gen4.log; do
   [ -f "$ROOT/build/$f" ] && cp "$ROOT/build/$f" "$OUT/logs/$f"
