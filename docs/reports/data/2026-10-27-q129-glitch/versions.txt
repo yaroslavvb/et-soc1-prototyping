@@ -1,0 +1,46 @@
+# Q129(b) the glitch factor: tools, inputs and their hashes
+# run on the lab's EDA host, CPU only, nice -n 19, no card and no /dev/et* opened
+
+[host]
+kernel      7.0.0-38-generic
+cores       16  (this work used at most 4 at once, under nice -n 19)
+python      Python 3.12.3
+
+[simulators]
+iverilog    Icarus Verilog version 14.0 (devel) (s20260301-713-gf9111a949-dirty)
+            built from oss-cad-suite 2026-10-26, the pin setup.sh already uses
+gsim.py     tools/open-flow/txfma/gsim.py, this request (no external dependency)
+
+[inputs, from Q129(a) docs/reports/data/2026-10-27-q129-routed-netlist]
+mixed      txfma_routed.v          2964798 B  sha256 6fa59d506554dec7978217071e2ca2d3a4face0961bfb06d699f7eceeac29d60
+mixed      txfma_routed.sdf       14812136 B  sha256 aa3195667417395332722892ef3c72a569e9d2df2cfaa89b6776b07fa6a9db53
+keep       txfma_routed.v          6096628 B  sha256 5ad5d68b38db8462ea5eed94aa0dda50984ac23e6c32f0d5b4cb0101ef7a4b26
+keep       txfma_routed.sdf       20920057 B  sha256 1af9bd16d931aefce57656b5fd67b1c58489d922730ddb505c82c132fe08a998
+
+[stimulus]
+randn.vec                          112812 B  md5 56f45fbf1590c9bad87f788c7542a2f8
+   recorded by tb_gate.sv +vectors= on the Q126(e) zero-delay bench (the 21 Sep randn
+   tile, --seed 1 --iters-before 1000); 2212 lines, one per 1 ns step; the measured op
+   is steps 1106-2210, the first half is warm-up.
+
+[capacitance]
+net_caps_spef_mixed.txt.gz         245182 B  sha256 d18a6ac607c528cd73ac13c337f2c2f596baeff189f94f7f6865b0f76fff14bc
+net_caps_spef_keep.txt.gz          305705 B  sha256 45058cfbaadf87aa670309a34665187a1b6a3b4857e28dc309e9ed258b3e5f88
+   ground + k*coupling + pin load, from Q129(a)'s OpenRCX extraction and OpenSTA's own
+   pin_cap table. Energy at 0.517 V, 1/2 C V^2 per transition.
+
+[cell models]
+asap7sc7p5t_AO_RVT_TT_201020.v               sha256 7d60ca80e150189367085daffcca59e2eb768ac4739c50ad04c318d8a3bb9d48
+asap7sc7p5t_INVBUF_RVT_TT_201020.v           sha256 8804a647af1e2161c13fffcaef9ec50786494534872ec50adaae593967a3b459
+asap7sc7p5t_OA_RVT_TT_201020.v               sha256 d98d028cdc47061912c4dffe12af420b65d3ce3f89f728c5a03d9819967b77b4
+asap7sc7p5t_SIMPLE_RVT_TT_201020.v           sha256 849946d9b648ef58f39a97027de5e7f24051f6ef4fded598dec861e3257ea4b6
+asap7sc7p5t_SEQ_RVT_TT_220101.v              sha256 6e63ff4b5587097a76bf395c6f2383035368d5c8d95dbf551ba324d3a9537fde
+   ASAP7 RVT TT. gsim.py reads their and/or/not/buf primitives directly; the
+   flip-flop and the latch are the two cells built on sequential UDPs and are named on
+   the command line (--seq-model DFFHQx4...=dff, DLLx1...=latch), their function copied
+   from those same models.
+
+[what ran]
+mixed netlist  17,122 nets  16,484 instances  42,486 cell input pins  59 cell types
+keep  netlist  21,435 nets  20,656 instances  52,169 cell input pins
+one gsim pass: about 25 s (zero delay) to 45 s (full SDF), 24-30 M events, under 1 GB

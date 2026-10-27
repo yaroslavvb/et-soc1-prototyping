@@ -339,8 +339,28 @@ because both omissions scale with activity. Everything this directory concludes 
      at all), or a smaller SDF — annotating one block rather than all 19,822 cells would show
      whether the abort is a size problem or a structural one.
 
-Until then the glitch ratio in the record — 1.5× the toggles and 1.4× the energy in the multiplier
-tree — still rests on the tape-out flow alone.
+   ✅ **Cleared Tue 27 Oct 2026 (Q129(b))**, and that slicing test answers its own question: the
+   abort is **structural, not a size problem** — twenty `(INTERCONNECT ...)` entries abort exactly
+   as 42,525 do, while all 16,480 cell blocks with none of them run to the end. Two further faults
+   were found alongside it: `-gspecify` was not the only missing flag (`-ginterconnect` is needed,
+   and Icarus says so itself before asserting), and **`$sdf_annotate(sdf)` with no scope argument
+   annotates nothing at all**, because it resolves instance names in the calling module — so the
+   timed figure this bench would have produced was never going to be right. With
+   `$sdf_annotate(sdf, dut)` and the interconnect and `(COND ...)` entries removed, Icarus does
+   annotate 37,732 cell paths and runs. The measurement itself was made with a small event-driven
+   simulator written for it, validated by reproducing Icarus's own zero-delay VCD **exactly, net
+   by net, on both netlists**. The glitch factor, the Icarus diagnosis in full and two SDF traps:
+   [`../2026-10-27-q129-glitch/`](../2026-10-27-q129-glitch/README.md). New flow scripts:
+   `tools/open-flow/txfma/{gsim.py,glitch.py}`.
+
+The glitch ratio in the record — 1.5× the toggles and 1.4× the energy in the multiplier tree — no
+longer rests on the tape-out flow alone, and it does **not** transfer: measured on this netlist the
+tree's factor is **×2.39 in toggles and ×2.33 in energy**, while the **whole unit**'s is ×1.57 and
+×1.33. The two flows' *timed* tree counts are 1.25× apart where their zero-delay counts were 1.98×
+apart, so counting the glitches is what brings them together. Applying the measured factors to this
+file's ledger takes a random multiply-add's bottom-up total from Q129(a)'s 1.810 to **2.598 pJ** and
+the closure against the board from 31.3% to **44.9%** — the largest single step these open-flow
+measurements have made.
 
 ## What the first version got wrong
 

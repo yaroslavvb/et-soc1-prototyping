@@ -1,0 +1,90 @@
+THE GLITCH FACTOR OF THE OPEN TensorFMA32, MEASURED        Q129(b), 27 Oct 2026
+====================================================================================================
+One random fp32 multiply-add (randn, 512 micro-ops), ASAP7 RVT TT, energy at 0.517 V.
+Numerator: every physical edge in a timed gate-level run with the detailed-route SDF.
+Denominator: the settled value per 1 ns vector step, which is what a zero-delay
+simulator reports and what the published ledger priced.
+
+VALIDATION OF THE ENGINE (the zero-delay pass against Icarus's own zero-delay VCD)
+  mixed  gsim 2,115,833 toggles over 9,841 nets; Icarus 2,115,833 over 9,841; nets differing 0; EXACT = True
+  keep   gsim 2,337,966 toggles over 11,118 nets; Icarus 2,337,966 over 11,118; nets differing 0; EXACT = True
+
+HEADLINE, the `mixed` netlist (the comparator), full SDF: cells + interconnect + COND
+scope                      toggles/MAC        timed   ratio           pJ/MAC at Miller k=1   ratio
+unit                          4132.5 ->    6494.8  x1.572    1.5119 ->  2.0121 pJ  x1.331
+signal                        3473.8 ->    5836.2  x1.680    1.0149 ->  1.5151 pJ  x1.493
+clock                          658.6 ->     658.6  x1.000    0.4970 ->  0.4970 pJ  x1.000
+multiplier                     954.7 ->    2003.4  x2.098    0.2535 ->  0.4644 pJ  x1.832
+wallace_tree                   628.2 ->    1499.9  x2.387    0.1392 ->  0.3242 pJ  x2.329
+ppg                            281.1 ->     392.3  x1.396    0.1049 ->  0.1171 pJ  x1.116
+wallace1                       408.7 ->    1188.9  x2.909    0.0885 ->  0.2525 pJ  x2.854
+wallace2                       219.5 ->     311.0  x1.417    0.0508 ->  0.0717 pJ  x1.413
+prod_adder_64b                  45.4 ->     111.2  x2.450    0.0094 ->  0.0230 pJ  x2.453
+
+  nets that glitch: 6,265 of 10,376 that toggle at all; nets that toggle LESS with delays: 0
+  the energy ratio over the Miller band: k=0 1.334, k=1 1.331, k=2 1.328  (it barely moves: glitches are a count, not a capacitance)
+  CAPACITANCE COVERAGE: 100.0% of the extracted 38,850.1 fF is named by this simulation (16,440 extracted nets, 17,122 netlist nets), against 50.5%/56.3% published and 43.6%/51.8% in Q129(a).
+  of those farads, 24,203.7 fF (62.3%) belongs to a net that toggles at all in a random multiply-add.
+
+SENSITIVITIES AND A SECOND INSTRUMENT (unit / Wallace tree, toggles then k=1 energy)
+  full SDF, mixed  (the number)  unit x1.572 / x1.331    tree x2.387 / x2.329
+    - no interconnect delay      unit x1.553 / x1.318    tree x2.339 / x2.282
+    - no (COND ...) paths        unit x1.578 / x1.333    tree x2.424 / x2.364
+  full SDF, keep netlist         unit x1.495 / x1.287    tree x2.086 / x2.070
+  Icarus, cell delays only*      unit x1.762 / x1.444    tree x2.940 / x2.871
+  zero-delay delta events**      unit x1.808 / x1.486    tree x2.659 / x2.621
+   * Icarus cannot annotate any SDF containing an (INTERCONNECT ...) entry on this
+     design, drops every (COND ...) path and has no CLK->Q delay on the behavioural
+     flip-flop, and rounds every delay to the 10 ps precision of the bench's timescale.
+     An upper bound, and an independent one.
+  ** every zero-delay delta event counted instead of the settled value: a counting
+     convention, not a measurement. It is LARGER than the timed count, so the glitch
+     factor below is not an artefact of counting every edge.
+
+AGAINST THE RECORD
+  tape-out flow (tfma.glitch): tree 1244 -> 1871 toggles/MAC, x1.504, x1.4 in energy
+  open flow, this run:         tree 628.2 -> 1499.9 toggles/MAC, x2.387, x2.329 in energy
+  so the open tree glitches 1.59x as hard, and its energy factor is 1.66x the record's.
+  BUT the two flows' TIMED tree counts are 1.25x apart, against 1.98x at zero delay: counting glitches brings them together.
+  Q124's "glitches add about 40% to the tree's energy" is the x1.4 above. In the tree it is x2.33; at the WHOLE UNIT it is x1.33, so a page that applied 1.4 to a unit-level
+  figure was about right and one that applied it to the tree understated by 1.7x.
+
+WHAT IT DOES TO THE WATERFALL
+  the multipliers used: signal capacitance x1.4929, signal transitions x1.6800;
+  the clock tree does not glitch (x1.000 measured), so it is carried through unchanged.
+
+  (A) the PUBLISHED ledger: wire between the cells 0.590 pJ
+      switching 1.516 -> 2.019 pJ   (clock 0.496 held, signal 1.020 -> 1.523)
+      cells' internal 0.431 -> 0.724 pJ
+      BOTTOM-UP TOTAL 1.947 -> 2.743 pJ
+      unaccounted against the board's 5.783: 3.836 -> 3.040 pJ   (closure 33.7% -> 47.4%)
+      unaccounted against the rail's 4.337: 2.390 -> 1.594 pJ
+
+  (B) Q129(a)'s revision: wire between the cells 0.453 pJ
+      switching 1.379 -> 1.877 pJ   (clock 0.368 held, signal 1.011 -> 1.509)
+      cells' internal 0.429 -> 0.721 pJ
+      BOTTOM-UP TOTAL 1.808 -> 2.598 pJ
+      unaccounted against the board's 5.783: 3.975 -> 3.185 pJ   (closure 31.3% -> 44.9%)
+      unaccounted against the rail's 4.337: 2.529 -> 1.739 pJ
+
+  (C) MEASURED END TO END on this run - no published term reused, 100% of the
+      extracted capacitance priced, the routed netlist simulated as built:
+      Miller k=0: switching 1.2686 -> 1.6929 pJ, internal 0.4127 -> 0.6933 pJ, bottom-up 1.6813 -> 2.3862 pJ;
+                 unaccounted 4.1017 -> 3.3968 pJ, closure 29.1% -> 41.3%
+      Miller k=1: switching 1.5119 -> 2.0121 pJ, internal 0.4127 -> 0.6933 pJ, bottom-up 1.9246 -> 2.7055 pJ;
+                 unaccounted 3.8584 -> 3.0775 pJ, closure 33.3% -> 46.8%
+      Miller k=2: switching 1.7552 -> 2.3313 pJ, internal 0.4127 -> 0.6933 pJ, bottom-up 2.1679 -> 3.0247 pJ;
+                 unaccounted 3.6151 -> 2.7583 pJ, closure 37.5% -> 52.3%
+
+  Note (C)'s zero-delay bottom-up lands within 1% of the published 1.947 pJ by a
+  coincidence of two errors cancelling: the published figure priced half the farads at
+  a Steiner estimate that is 20% high, this one prices all of them at the extraction.
+
+WHAT THIS DOES NOT SETTLE
+  - one stimulus (randn) and one netlist pair; the Hamming-ladder rungs were not run,
+    so whether the fJ-per-flipped-bit slope carries the same factor is NOT measured.
+  - the design misses its 1250 ps SDC by about 2x, so these delays belong to a netlist
+    that would not run at 800 MHz; and the SDF is ASAP7 TT at 0.700 V while the energy
+    is priced at the 0.517 V rail, where every delay would be longer.
+  - inertial delay with full pulse rejection is the conservative model; a transport
+    model would report more glitches.

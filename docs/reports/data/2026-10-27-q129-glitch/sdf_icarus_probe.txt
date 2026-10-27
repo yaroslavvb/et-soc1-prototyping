@@ -1,0 +1,79 @@
+WHY ICARUS 14 CANNOT ANNOTATE THIS SDF, AND WHAT IT CAN                Q129(b), 27 Oct 2026
+===========================================================================================
+Q126(e) left this open: "annotating one block rather than all 19,822 cells would show whether
+the abort is a size problem or a structural one". It is STRUCTURAL, and there are three
+separate faults, two of which are repairable.
+
+The design: the detailed-routed `mixed` netlist (16,484 instances) and its SDF (14.8 MB,
+16,480 cell blocks, 89,358 IOPATH entries of which 51,626 are inside a (COND ...),
+42,525 INTERCONNECT entries). Simulator: Icarus Verilog 14.0 (devel) s20260301-713-gf9111a949.
+Bench: tb_timed.v / tb_timed2.v replaying the recorded pin vectors.
+
+FAULT 1 - $sdf_annotate with no scope argument annotates NOTHING, silently-ish
+  tb_timed.v calls $sdf_annotate(sdf) with the file alone, on the advice of a comment saying an
+  explicit scope made Icarus assert in vpi_scan. With no scope it resolves instance names in the
+  CALLING module, so every cell block reports
+      SDF ERROR: ...:15: Unable to find _08184_ in scope tbt.
+  and not one delay is applied. The fix is $sdf_annotate(sdf, dut).
+
+FAULT 2 - any (INTERCONNECT ...) entry aborts the run. SIZE IS NOT THE CAUSE.
+  The SDF was sliced and each slice annotated:
+
+    slice                                      cells      ic   result
+    one cell block only                            1       0   runs
+    200 cell blocks                              200       0   runs
+    every cell block, no top-level block      16,480       0   runs
+    the top-level block, 20 INTERCONNECT only      1      20   ABORT
+    the top-level block, port-sourced ic only      1     333   ABORT
+    the top-level block, pin-sourced ic only       1  42,192   ABORT
+    the top-level block, whole                     1  42,525   ABORT
+    cells + pin-sourced interconnect          16,480  42,192   ABORT
+
+  Twenty interconnect entries abort exactly as 42,525 do, and 16,480 cell blocks with none run
+  to the end: the abort is in the INTERCONNECT path, not in the file's size or the cell count.
+  The abort is
+      ERROR: NULL handle passed to vpi_scan.
+      vvp: vpi_iter.cc:71: __vpiHandle* vpi_scan(vpiHandle): Assertion `0' failed.
+  Without -ginterconnect the error before it is "Error: Could not find net. Did you run iverilog
+  with '-ginterconnect'?" - so -gspecify is NOT the only flag Q126(e) was missing. WITH
+  -ginterconnect the error becomes "Could not find intermodpath!" on every entry and then the
+  same assertion: Icarus's intermodpath wants a path between two MODULE ports, and this netlist
+  is flat, so there is nothing for it to sit on. Not repairable from outside the simulator.
+
+FAULT 3 - (COND (expr) ...) is rejected; (COND signal ...) is accepted
+  OpenSTA writes the state-dependent paths as
+      (COND (~A1 & ~A2)
+       (IOPATH B Y (14.4322:16.5430:18.6537) (17.5811:19.6624:21.7437)))
+  and Icarus answers "Invalid/malformed COND" and then "Invalid/malformed delay type" on the
+  two following lines, 1,391 times before it gives up. Dropping the outer parentheses does not
+  help. 46,066 of the 51,626 conditional entries are of this parenthesised form.
+  Consequence beyond the error: XOR2x2 and XNOR2x2 carry NO unconditional `ifnone` path at all
+  (2,780 of 42,486 input pins), so with the COND entries dropped those 1,390 cells run at ZERO
+  delay in Icarus - in the middle of the Wallace tree, which is why its Icarus glitch count is
+  an upper bound.
+
+SO WHAT ICARUS CAN DO, exactly
+  iverilog -g2012 -gspecify -ginterconnect ... with $sdf_annotate(sdf, dut) and an SDF whose
+  top-level (INSTANCE) block and every (COND ...) have been removed: it runs in 44 s and
+  annotates 37,732 unconditional IOPATHs. It still cannot annotate
+    - any interconnect delay (fault 2),
+    - any conditional path (fault 3),
+    - CLK->Q on the flip-flop, because the behavioural stand-in asap7_seq_behav.v carries no
+      specify block ("Unable to match ModPath CLK -> Q in tbt.dut._17348_", 1,987 times), while
+      ASAP7's own SEQ model is the one Icarus refuses to compile in the first place,
+  and it rounds every delay to the 10 ps precision of the bench's `timescale 1ns/10ps`, which is
+  coarse against IOPATH delays of 14-77 ps.
+  That run is reported in this directory as `glitch_mixed_icarus.json` and it reads HIGHER than
+  the measurement (unit x1.762 against x1.572): zero-delay XORs, simultaneous flip-flops and a
+  10 ps grid all add glitches.
+
+TWO SDF TRAPS FOR ANY TOOL READING THIS FILE
+  1. Instance and pin names are ESCAPED with backslashes where they contain the divider or a
+     dot: `txfmafrac0_top\.txfma0_f2\.prod_adder_64b\/_237_/A`. 5,187 of the 16,481 (INSTANCE)
+     lines and 15,404 of the 42,525 INTERCONNECT lines carry one. Splitting an interconnect
+     destination on the LAST '/' without honouring the escapes loses the delay of every cell in
+     the multiplier - which is the part a glitch measurement is about - and the loss is silent.
+  2. An INTERCONNECT source is spelled as a DRIVER PIN for a cell (`_08184_/Y`, 42,192 of them)
+     and as a NET for a top-level port (`in_data[0]`, 333). Keying the table on the source
+     therefore binds 333 entries of 42,525 and, again, says nothing. Key it on the destination
+     pin, which has exactly one driver. (42,525 = 42,486 cell input pins + 39 output ports.)

@@ -35,7 +35,9 @@ stand-in that is legal to publish, not a copy of the real thing. Every number he
 | `tb_gate.sv`, `asap7_seq_behav.v`, `gatesim.sh` | the fma_toggle stimulus driven into the netlist (Verilator, zero delay), writing a SAIF, and optionally a recording of the unit's pins. |
 | `power.py` | prices every extracted net at 1/2 C V^2 per toggle at 0.517 V, per block, with the clock tree's share, the capacitance coverage in farads, and (with `--cell-energies`) the cells' own internal energy from ASAP7's liberty. |
 | `ladder.py` | fits the Hamming ladder the way E60's own reducer does — a slope over h >= 1 with a free intercept, against the designed flips and against the counted bus bits — and prints it beside the card measurement. |
-| `tb_timed.v`, `gatesim_sdf.sh`, `vcd_toggles.py` | the timed pass: replays that recording under Icarus with the post-CTS SDF and counts every edge. Its SDF half aborts in Icarus 14 — see POWER.md. |
+| `tb_timed.v`, `gatesim_sdf.sh`, `vcd_toggles.py` | the timed pass: replays that recording under Icarus with the post-CTS SDF and counts every edge. Its SDF half aborts in Icarus 14 — see POWER.md, and `gsim.py` below for what the abort actually is. |
+| `gsim.py` | **the timed pass that works.** An event-driven gate-level simulator over the routed netlist, with the SDF's `IOPATH`, `(COND ...)` and `INTERCONNECT` delays in integer femtoseconds and an inertial delay model. One engine runs both passes: `--sdf` is the only difference, and with no SDF it reproduces Icarus's own zero-delay VCD exactly, net by net. |
+| `glitch.py` | counts a VCD's toggles per net bit (`vcd`), runs that validation (`check`), and prices timed against zero-delay transitions at the extracted capacitance per scope and Miller factor (`price`). |
 
 ```bash
 export SCRATCH=$HOME/scratch-open-flow          # anywhere outside a synced folder
@@ -68,7 +70,45 @@ done
 Results and the comparison with the tape-out flow's numbers:
 [`docs/reports/data/2026-10-26-open-netlist/`](../../../docs/reports/data/2026-10-26-open-netlist/README.md).
 
-## Six things that cost time, so you do not pay them again
+## The timed pass, and the glitch factor
+
+`route_docker.sh` (Q129(a)) writes `txfma_routed.v` and `txfma_routed.sdf` with the extracted
+parasitics. `tb_gate.sv +vectors=<file>` records the unit's own pins from the zero-delay bench,
+one line per 1 ns step; `gsim.py` replays that recording into the routed netlist twice, once with
+the SDF and once without, and `glitch.py price` divides one by the other.
+
+```bash
+export SCRATCH=$HOME/scratch-open-flow
+M=$SCRATCH/orfs/flow/platforms/asap7/verilog/stdcell
+R=$SCRATCH/work/pnr-route-mixed                      # route_docker.sh's output
+
+# the zero-delay reference, from Icarus, for the validation gate (iverilog CAN do this)
+TB=tools/open-flow/txfma/tb_gate.sv TILES=$SCRATCH/work/tiles/randn.hex TAG=randn \
+    EXTRA="+vectors=$SCRATCH/work/sim/randn.vec" bash tools/open-flow/txfma/gatesim.sh
+
+for pass in zero timed; do
+  [ $pass = timed ] && SDF="--sdf $R/txfma_routed.sdf" || SDF=
+  python3 -I tools/open-flow/txfma/gsim.py \
+      --netlist $R/txfma_routed.v \
+      --models $M/asap7sc7p5t_{AO,INVBUF,OA,SIMPLE,SEQ}_RVT_TT_*.v \
+      --seq-model DFFHQx4_ASAP7_75t_R=dff --seq-model DLLx1_ASAP7_75t_R=latch \
+      --vectors $SCRATCH/work/sim/randn.vec $SDF --out gsim_$pass.json
+done
+python3 -I tools/open-flow/txfma/glitch.py check --gsim gsim_zero.json --vcd vcd_zero.json
+python3 -I tools/open-flow/txfma/glitch.py price --zero gsim_zero.json --timed gsim_timed.json \
+      --netcap docs/reports/data/2026-10-27-q129-routed-netlist/net_caps_spef_mixed.txt.gz \
+      --muladds 512 --out glitch.json
+```
+
+**Do not trust a timed count whose zero-delay twin has not passed `check`.** Two bugs in the first
+draft of `gsim.py` — input pins mapped to the wrong slot of a cell's model, and two flip-flops in
+series racing through a zero-delay clock tree of unequal depth — were each caught by that gate and
+by nothing else. The second showed up as 12 toggles on 6 nets out of 2.1 million.
+
+Results, the Icarus diagnosis and the two SDF traps that cost the most time:
+[`docs/reports/data/2026-10-27-q129-glitch/`](../../../docs/reports/data/2026-10-27-q129-glitch/README.md).
+
+## Seven things that cost time, so you do not pay them again
 
 1. **core-et's RTL is not strict SystemVerilog.** Files under `txfma_7s` use the Verilog-1995
    single-value parameter form (`txfma_csa #64 inst(...)`), and they rely on one compilation unit
@@ -94,7 +134,15 @@ Results and the comparison with the tape-out flow's numbers:
    118 flip-flops survive that flattening prunes. That is why `synth.sh` writes a third netlist,
    `mixed`, which marks only the four multiplier blocks `keep_hierarchy` and flattens the rest —
    the per-block numbers in the results directory come from that one.
-6. **Pin the tools, not "latest".** `Verilator` alone moves a toggle count by 3× between 5.042 and
+6. **An SDF written by OpenSTA escapes names, and spells an interconnect's two ends
+   differently.** Instance and pin names that contain the divider or a dot come out as
+   `txfmafrac0_top\.txfma0_f2\.prod_adder_64b\/_237_/A` — 5,187 of 16,481 `(INSTANCE)` lines on
+   the `mixed` netlist. Splitting an interconnect destination on the last `/` without honouring
+   the escapes loses the delay of every cell inside the kept multiplier blocks, silently. And an
+   `(INTERCONNECT ...)` source is a *driver pin* for a cell (`_08184_/Y`) but a *net* for a
+   top-level port (`in_data[0]`), so a table keyed on the source binds 333 entries of 42,525 and
+   says nothing about it. Key it on the destination pin, which has exactly one driver.
+7. **Pin the tools, not "latest".** `Verilator` alone moves a toggle count by 3× between 5.042 and
    5.052 (Q126(b)), the litex-hub conda `openroad` is a 2022 build whose TritonRoute behaves
    differently from a current one, and a `--depth 1` clone of a moving branch cannot be checked
    out at the sha a report quotes. `setup.sh` now fetches each pinned sha by name instead.
