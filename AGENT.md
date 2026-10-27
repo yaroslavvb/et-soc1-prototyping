@@ -184,7 +184,7 @@ reason:
 | Look first: `et-who`, `who`, `uptime`; hold card N's lock for your run (`flock -n /run/lock/etsoc-shire<N>.lock <cmd>`, which fails at once if someone holds it) | the management node is single-opener, and a second user of a card corrupts both measurements |
 | Never hold a device for more than 10 s: `timeout 10` on every launch (per device-opening process; release the card lock between sub-tests) | long holds block everyone else, and a card that hangs needs a power cycle only the lab admin can do |
 | Stop tools with Ctrl-C or a plain `kill`, never `kill -9` | a sampler killed mid-request poisons the card's management queue for the next user |
-| Never reset a card, retrain or re-speed its PCIe link, or change its TDP, clocks, firmware or driver | a software reset can hang a card; a link retrain on aifoundry1 on 30 Sep hung the whole host until someone power-cycled it on site; a configuration change silently alters other people's runs |
+| Never reset a card, retrain or re-speed its PCIe link, or touch its firmware, driver or clocks — no OTA, no flashing, no PMIC commands, no `SET_FREQUENCY`. **The governor is the one exception:** the owner may authorize a governor move — the static TDP level and the software temperature threshold — for one named run, and it then follows the ET-SoC-1 firmware field manual (private; on the lab boxes in `~/claude/aifoundry-setup/field-manual/`): its pre-flight gates with a change record (PASS / FAIL / UNKNOWN per gate, UNKNOWN never PASS), the card exclusive for the window, and the original values read first, restored afterwards and read back | a software reset can hang a card; a link retrain on aifoundry1 on 30 Sep hung the whole host until someone power-cycled it on site; a configuration change silently alters other people's runs — so an authorized governor move is a measurement with a receipt and an owner, never a setting left behind, and a clock is reached only through the governor, never set directly |
 | Keep disk and memory small: sources only, `nice -j4` builds | the machines are shared, and aifoundry1's `/home` is one pool with the system that filled up once (99% until 30 September; 116 GB free since) |
 | An agent that only writes code never reaches a card: `V3_DRY=1`, then check `et-who` | on 25 September a code-only agent ran a real block because a `cd` in a backgrounded chain did not apply |
 
@@ -424,6 +424,14 @@ copy it here too.
 *Every edit to this file adds one line here, newest first, in the same commit (the owner's rule of 10 October 2026 for
 agent instruction files). It starts on 14 October 2026; earlier changes are in `git log -- AGENT.md`.*
 
+- **2026-10-27 (Tue, week 44)** — Section 5's rule against changing a card's TDP, clocks, firmware or driver is amended:
+  resets, PCIe retrains, firmware, OTA, flashing, PMIC commands, driver reloads and direct clock sets stay forbidden, but
+  the owner may authorize a **governor move** (the static TDP level and the software temperature threshold) for one named
+  run, which then follows the ET-SoC-1 firmware field manual (private; on the lab boxes in
+  `~/claude/aifoundry-setup/field-manual/`) — its pre-flight gates with a change record, the card exclusive for the
+  window, and the original values read first, restored and read back. *Why:* the owner's authorization of that day, with
+  the field manual the lab lead handed him: the governor's cap had never been moved, so every claim that it causes the
+  600/800 MHz gap was read from the governor's own log (Q128 §5, the knob test).
 - **2026-10-14 (Wed, week 42)** — Section 4 gains "When a card goes out of service or comes back": a pointer to the
   checklist in `docs/lab-start/README.md` ("Keeping it current"), which now names the new-user page's Machine field,
   and to the check `docs/lab-start/make_page_data.py` runs on that field. This changelog starts. *Why:* the owner's ask
