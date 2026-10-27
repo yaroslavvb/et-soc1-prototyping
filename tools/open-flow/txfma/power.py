@@ -3,16 +3,26 @@
 
     power.py --saif <activity.saif> --spef <txfma.spef> [--vcd <dump.vcd>]
              --strip tb/lane[0]/txfma --cycles <n> --period-ns <f> [--vdd 0.517]
-             --out power.json
+             [--cell-energies asap7-cell-energies.json] --out power.json
 
 Energy per net = 1/2 * C * V^2 per toggle, C the net's total capacitance from the SPEF (wire,
 coupling to ground and the pin capacitances of everything it drives). Clock nets are reported
 separately: they toggle twice a cycle, so their C*V^2 per cycle is the clock tree's share.
 
-This is the switching energy only. The cells' own internal (short-circuit and internal-node)
-energy is not in it; ASAP7's liberty carries it and the as-built work puts it at a few per cent
-of a delivered bit, so the number here is a floor, and the ratio between two runs - which is what
-the glitch question asks - is unaffected.
+`energy_J` is the SWITCHING energy only, and it is a FLOOR, not an estimate, for two measured
+reasons - do not quote it as the dynamic energy:
+
+  1. The cells' own internal (short-circuit and internal-node) energy is not in it. It is not
+     small: OpenROAD's own report_power on this netlist reads internal 1.47e-02 W against
+     switching 1.20e-02 W, so internal is 55% of the dynamic power at its default activity
+     (work/pnr/pnr.log). With --cell-energies this script adds an `internal_estimate` block
+     from ASAP7's own liberty (Q126(d)'s census-weighted figure) for the COMBINATIONAL output
+     transitions; the sequential cells' clock-pin energy is on top of even that.
+  2. Only the nets the simulation knows are priced. On randn that is 10,460 of 20,383 extracted
+     nets and 23,762 fF of the design's 47,093 fF: half the capacitance, by farads, is unpriced.
+
+The RATIO between two runs - which is what the glitch question and the ladder's slope ask - is
+much less affected than the absolute, because both omissions scale with activity.
 
 Blocks are the leading components of each net's hierarchical name, so the table reads
 per stage (txfma0_f1 ...) and per block (ppg, wallace1, wallace2, prod_adder_64b).
@@ -154,6 +164,10 @@ def main():
     ap.add_argument("--block-depth", type=int, default=3,
                     help="hierarchy levels to group blocks by: 3 separates ppg, wallace1, "
                          "wallace2 and the product adder inside a stage")
+    ap.add_argument("--cell-energies",
+                    help="Q126(d)'s asap7-cell-energies.json: adds an internal_estimate block, "
+                         "the combinational cells' own internal energy at this netlist's own "
+                         "cell mix (docs/reports/data/2026-10-26-asap7-cell-energies/)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
 
@@ -214,7 +228,9 @@ def main():
     matched = unmatched = 0
     unmatched_tc = 0
     cts_nets = 0
+    cap_all_fF = cap_found_fF = 0.0
     for net, c in cap.items():
+        cap_all_fF += c
         n, how = activity(net)
         if n is None:
             unmatched += 1
@@ -222,6 +238,7 @@ def main():
         if how == "cts":
             cts_nets += 1
         matched += 1
+        cap_found_fF += c
         if n == 0:
             continue
         e = 0.5 * c * 1e-15 * V2 * n      # J
@@ -239,18 +256,50 @@ def main():
             by_block[b]["clock_energy_J"] += e
 
     e_tot = tot["signal_energy_J"] + tot["clock_energy_J"]
+    cap_priced_fF = tot["signal_cap_fF"] + tot["clock_cap_fF"]
     out = {
         "source": {"saif": a.saif, "cap": src, "vdd": a.vdd},
         "coverage": {"extracted_nets_found_in_sim": matched,
                      "extracted_nets_not_in_sim": unmatched,
                      "cts_nets_priced_from_their_source": cts_nets,
-                     "extracted_nets": len(cap), "simulated_names": len(sim)},
+                     "extracted_nets": len(cap), "simulated_names": len(sim),
+                     # Coverage by net COUNT flatters the result: the nets the simulation does
+                     # not know are not evenly sized. Quote the farad figure.
+                     "cap_fF_extracted": cap_all_fF,
+                     "cap_fF_found_in_sim": cap_found_fF,
+                     "cap_fF_priced": cap_priced_fF,
+                     "cap_fraction_priced": (cap_priced_fF / cap_all_fF) if cap_all_fF else 0.0},
         "total": {k: v for k, v in sorted(tot.items())},
         "energy_J": e_tot,
         "clock_share": (tot["clock_energy_J"] / e_tot) if e_tot else 0.0,
         "blocks": {b: dict(v) for b, v in sorted(by_block.items(),
                                                  key=lambda kv: -kv[1]["energy_J"])},
     }
+    # The cells' own internal energy, at this netlist's own cell mix. ASAP7's liberty is
+    # characterised at 0.7 V and its internal energies scale as V^2 (Q126(d) § conventions),
+    # so the mix figure is scaled by (vdd/0.7)^2. This covers COMBINATIONAL output transitions
+    # only - Q126(d) skips the sequential and tie cells - so it is itself a floor on internal.
+    if a.cell_energies:
+        with open(a.cell_energies) as fh:
+            ce = json.load(fh)
+        mix = ce["census_weighted_mix"]
+        v_lib = float(ce["operating_point"]["VDD_liberty_V"])
+        e_mix_0p7 = float(mix["weighted_E_int_per_transition_VDDonly_fJ_0p7"])
+        e_mix = e_mix_0p7 * (a.vdd / v_lib) ** 2
+        e_int_sig = tot["signal_toggles"] * e_mix * 1e-15
+        out["internal_estimate"] = {
+            "source": a.cell_energies,
+            "E_int_per_transition_fJ_at_vdd": e_mix,
+            "E_int_per_transition_fJ_at_0p7": e_mix_0p7,
+            "combinational_cells_priced": mix.get("combinational_cells_priced"),
+            "sequential_and_tie_cells_skipped": mix.get("sequential_and_tie_cells_skipped"),
+            "internal_J_signal_transitions": e_int_sig,
+            "switching_plus_internal_J": e_tot + e_int_sig,
+            "ratio_to_switching_only": (e_tot + e_int_sig) / e_tot if e_tot else 0.0,
+            "caveat": "combinational output transitions only, at the mix-weighted VDD-group "
+                      "internal energy; the sequential cells' clock-pin energy and the "
+                      "unpriced half of the capacitance are both on top of this.",
+        }
     if a.muladds:
         out["per_muladd"] = {
             "toggles": (tot["signal_toggles"] + tot["clock_toggles"]) / a.muladds,
@@ -258,6 +307,9 @@ def main():
             "energy_J": e_tot / a.muladds,
             "energy_pJ": e_tot / a.muladds * 1e12,
         }
+        if "internal_estimate" in out:
+            out["per_muladd"]["switching_plus_internal_pJ"] = \
+                out["internal_estimate"]["switching_plus_internal_J"] / a.muladds * 1e12
     with open(a.out, "w") as fh:
         json.dump(out, fh, indent=1)
     print(json.dumps({k: out[k] for k in ("coverage", "total", "energy_J", "clock_share")

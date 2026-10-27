@@ -34,6 +34,7 @@ stand-in that is legal to publish, not a copy of the real thing. Every number he
 | `pnr.tcl` | OpenROAD: floorplan, place, CTS, global route, per-net capacitance, then detailed route, OpenRCX extraction and SPEF. Detailed routing does not close in the 2022 OpenROAD this machine can install — POWER.md § blockers has the five variants tried and what they proved. |
 | `tb_gate.sv`, `asap7_seq_behav.v`, `gatesim.sh` | the fma_toggle stimulus driven into the netlist (Verilator, zero delay), writing a SAIF, and optionally a recording of the unit's pins. |
 | `power.py` | prices every extracted net at 1/2 C V^2 per toggle at 0.517 V, per block, with the clock tree's share, the capacitance coverage in farads, and (with `--cell-energies`) the cells' own internal energy from ASAP7's liberty. |
+| `ladder.py` | fits the Hamming ladder the way E60's own reducer does — a slope over h >= 1 with a free intercept, against the designed flips and against the counted bus bits — and prints it beside the card measurement. |
 | `tb_timed.v`, `gatesim_sdf.sh`, `vcd_toggles.py` | the timed pass: replays that recording under Icarus with the post-CTS SDF and counts every edge. Its SDF half aborts in Icarus 14 — see POWER.md. |
 
 ```bash
