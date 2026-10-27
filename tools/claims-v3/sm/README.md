@@ -228,3 +228,18 @@ rule or band.
 2. **E66 measures the slope properly tonight.** `tools/claims-v3/idle/` fits this card's idle law over
    51–67 °C in the same session, so the morning reduction can be re-run with `--leak <E66's value>`. That
    re-run is reported as a sensitivity, never as a replacement for the registered scoring.
+
+**A5, Mon 26 Oct 2026, 21:3x PDT — A3's arithmetic was wrong, and this corrects the committed record.**
+
+A3 says *"passes 4–18 ran in 7.5 minutes, about 30 s each"*. They did not. **Passes 4–7** ran in those 7.5
+minutes — **about 1.9 min a pass**, the same rate as passes 1–3 (6.0 min for three) and the rate A2 assumed.
+The sweep never reached pass 18: it was still on pass 8 at 21:26:51 when this session killed its tmux session
+by mistake, believing it had finished (the log line it read, `[aifoundry2] done`, is run_hl's end-of-pass
+marker, not the sweep's). The block's TERM trap did its job — the sampler was stopped, `block_end failed
+"signal"` was written, and the card lock was released — and the pass was restarted as p8 at 21:28:08 after
+`et-who` showed the card free. **p8's first attempt is in the data as a non-ok pass and the reduction drops
+it**, as it drops any pass whose `block.json` is not `ok`.
+
+So A3's *conclusion* stands — the window allows far more than 18 passes — but its number does not. At 1.9 min
+a pass the window to 22:30 allows about **40 passes in total**, not 150. No rule, gate, band or item changes;
+this amendment exists because A3 went out with a false measurement in it.
