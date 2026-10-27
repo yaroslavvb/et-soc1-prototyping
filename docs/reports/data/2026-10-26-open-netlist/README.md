@@ -3,6 +3,9 @@
 26 October 2026, on aifoundry2. The flow and how to re-run it:
 [`tools/open-flow/txfma/`](../../../../tools/open-flow/txfma/README.md).
 
+Place and route, the parasitics and the switching power of this netlist are in
+[`POWER.md`](POWER.md) beside it.
+
 **Why.** Every gate-level number this project has published about the multiply-add — cells,
 transistors, flip-flops clocked per multiply-add, the glitch ratio — came from a netlist built with
 a tape-out flow that is not public. A reader can neither check it nor extend it. This is the same
@@ -86,6 +89,7 @@ worth remembering before any clock-share number from this flow is quoted to two 
 | `stat_flat.txt` | Yosys `stat -liberty` for the flattened netlist (the cell-type table) |
 | `stat_hierqn.txt` | the same with `DFFHQx4` forbidden, for the sensitivity above |
 | `versions.txt` | every tool and repository commit used |
+| `POWER.md`, `power/`, `net_cap_globalroute.txt.gz` | place and route, per-net capacitance and the switching energy per multiply-add |
 
 The netlists themselves (2.4 MB of Verilog each) are not committed: `tools/open-flow/txfma/synth.sh`
 rebuilds them in about a minute from the commits in `versions.txt`.
