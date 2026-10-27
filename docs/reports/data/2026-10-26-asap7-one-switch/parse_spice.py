@@ -302,7 +302,7 @@ def main():
     res["device_check"]["verdict"] = (
         "The BSIM-CMG cards load and run as the kit intends: the DRIVE "
         "CURRENTS and the SUBTHRESHOLD SLOPE land within 5% of the ASAP7 "
-        "paper's own table, while the OFF-CURRENTS are 9% (NMOS) and 19% "
+        "paper's own table, while the OFF-CURRENTS are 8.8% (NMOS) and 19.1% "
         "(PMOS) under it. The paper prints I_off to two significant figures "
         "and an off-current is exponentially sensitive to the threshold, so "
         "that is the expected size of disagreement -- but it is not 5%, and "

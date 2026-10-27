@@ -81,11 +81,11 @@ One fin of each RVT device, TT, swept in DC, against the paper's own Tables 3 an
 | I_dsat NMOS (µA) | 35.87 | **37.85** | −5.2% | 34.60 |
 | SS NMOS (mV/decade) | 61.8 | **63.03** | −2.0% | 73.2 |
 | I_dsat PMOS (µA) | 31.86 | **32.88** | −3.1% | 30.10 |
-| I_off NMOS (nA) | 0.0173 | **0.019** | **−8.9%** | 0.1240 |
-| I_off PMOS (nA) | 0.0186 | **0.023** | **−19.1%** | 0.2752 |
+| I_off NMOS (nA) | 0.01733 | **0.019** | **−8.8%** | 0.1240 |
+| I_off PMOS (nA) | 0.01861 | **0.023** | **−19.1%** | 0.2752 |
 
-**The drive currents and the subthreshold slope land within 5%; the off-currents do not — 9% and
-19% under.** The paper prints I_off to two significant figures, and an off-current is exponentially
+**The drive currents and the subthreshold slope land within 5%; the off-currents do not — 8.8% and
+19.1% under.** The paper prints I_off to two significant figures, and an off-current is exponentially
 sensitive to the threshold, so a disagreement of that size is expected rather than alarming. But it
 is not 5%, and **the leakage section below is built on those off-currents**, so the wider tolerance
 travels with it. With that said, the models are loading and running as ASAP7 intends, despite the
@@ -277,7 +277,7 @@ BSIM-CMG cards enable it (`igcmod = 1`), so it wants a dedicated gate-current sw
 
 Both were found in review on the same day and settled by the 28-deck fix-up run, not by argument.
 
-**1. "Every figure is within about 5% of the paper's" was false for the off-currents** — 8.9% (NMOS)
+**1. "Every figure is within about 5% of the paper's" was false for the off-currents** — 8.8% (NMOS)
 and 19.1% (PMOS). The validation still stands, but the tolerance is per quantity, and the leakage
 section depends on exactly the figures with the wider error. Restated above and in the JSON's
 `device_check.deviation_vs_paper_25C`.
