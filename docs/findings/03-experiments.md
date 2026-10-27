@@ -2608,8 +2608,8 @@ for the re-run and finds 244 shutter events against the committed 243, which mov
 (a) the square drive's third harmonic, which the registered fit carries as a nuisance column and throws away, read out
 as **a second transfer point at 0.15 Hz**: pooled over the four top-rung blocks as a vector mean of the complex
 transfer, **18.4 ± 5.4 mK/W at 151° against 52.7 ± 2.0 at 95° at 0.05 Hz**, a ratio of **0.34 ± 0.10** — the board is
-rolling off between the two, **6.3 SE from flat**, no faster than a single pole of ~12 s (1 σ from 3.2 s up and open
-above, because a one-pole ratio bottoms out at 1/3 and the measurement sits on that floor), and the measured 87–109°
+rolling off between the two, **6.3 SE from flat**, as a single pole of ~12 s would or any pole longer (1 σ: τ ≥ 3.2 s,
+no upper bound, because a one-pole ratio bottoms out at 1/3 and the measurement sits on that floor), and the 87–109°
 lag at f is in any case more phase than one pole can give, so the pole is a scale and not a model.
 No top-rung block's camera third harmonic clears 2 SE on its own (8.3 ± 10.2 to 19.5 ± 13.0 mK, 0.8–1.5 SE); the
 middle rung's best is 21.3 ± 9.8 mK, 2.2 SE, and the board's own third harmonics are 4.3–14.3 SE.

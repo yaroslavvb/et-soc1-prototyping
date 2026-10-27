@@ -276,8 +276,9 @@ rung) to 800.0, and both now go into `summary.json` as `clock` beside the price.
 [`posthoc/`](posthoc/README.md), Mon 26 Oct 2026 (Q126): the third harmonic of the square drive, which the
 registered fit carries as a nuisance column and discards, read out as a **second transfer point at 0.15 Hz**
 (pooled over the four top-rung blocks as vector means of the complex transfer: 18.4 ± 5.4 mK/W at 151° against
-52.7 ± 2.0 at 95° at 0.05 Hz, a ratio of 0.34 ± 0.10 — 6.3 SE from flat — the roll-off of a pole no faster than
-~12 s, though the measured 87–109° lag is more phase than one pole can give); and the card's
+52.7 ± 2.0 at 95° at 0.05 Hz, a ratio of 0.34 ± 0.10 — 6.3 SE from flat — the roll-off of a ~12 s pole or any
+longer one (1 σ: τ ≥ 3.2 s, no upper bound), though the measured 87–109° lag is more phase than one pole can
+give); and the card's
 own **minion, SRAM and NoC rails** demodulated beside the board, which put **84–86% of every rung block's board
 step on the minion rail** and under 1% on each of the other two. Neither re-scores a rule. (The transfer and the
 ratio were published hours earlier as 19.0 ± 5.2, 54.1 ± 1.8 and "3.3 SE from flat", from a mean of magnitudes and
