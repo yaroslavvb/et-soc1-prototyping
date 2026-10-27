@@ -20,9 +20,11 @@ side, and says which hold.
 
 Starting from board power the chain closes to **0.3%** on both the burst and the sustained ratio.
 Starting one link lower, from the price of a single flipped bit, the two defensible readings of that
-price list **bracket** the measurement rather than pinning it: 1.06–1.19 against 1.150 measured
-(burst), 1.24–1.33 against 1.337 (sustained). The width of that bracket is this work's main
-remaining gap, and §3 says exactly which experiment closes it.
+price list give a **range** rather than a number: 1.063–1.190 for the burst ratio, which contains the
+measured 1.150, and 1.239–1.333 for the sustained one, which sits just under the measured 1.337. The
+sustained range is the weaker test of the two: both readings put random at the governor's 600 MHz
+floor, so its upper end is the floor and not a fitted value. The width of that range is this work's
+main remaining gap, and §3 says exactly which experiment closes it.
 
 ## The chain, link by link, with what this directory adds
 
