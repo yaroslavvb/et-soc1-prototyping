@@ -14,8 +14,8 @@
  "leak_W_per_C": 0.2936,
  "measured": {
   "lq_h2_h8_secant_fJ_items": 75.41772467621172,
-  "lq_h2_h8_secant_fJ_per_pass_mean": 79.17566750845862,
-  "lq_h2_h8_secant_fJ_se": 3.0854645397042004,
+  "lq_h2_h8_secant_fJ_per_pass_mean": 75.4171080026212,
+  "lq_h2_h8_secant_fJ_se": 2.5347831355345027,
   "n_passes_secant": 5,
   "lq_h2_h8_secant_rail_fJ_items": 63.265378429718226,
   "lq_h2_h8_secant_rail_fJ_per_pass_mean": 63.26619820288354,
@@ -161,8 +161,8 @@
     70.697
    ],
    "measured": 75.41772467621172,
-   "measured_per_pass": 79.17566750845862,
-   "se": 3.0854645397042004,
+   "measured_per_pass": 75.4171080026212,
+   "se": 2.5347831355345027,
    "verdict": "FAIL"
   },
   "V2": {
@@ -232,6 +232,30 @@
    "measured": 2.965501168744411,
    "verdict": "PASS"
   },
+  "G1": {
+   "claim": "the governor is pinned: TDP 0 means the power-down branch fires on any load and the power-up branch can never fire, so the clock never leaves the vmin-LUT floor",
+   "predicted": "600 MHz in 100% of samples; zero 'Power throttle up' lines while TDP 0 is set",
+   "pass_if": "exactly that, with no sample at any other clock",
+   "halves": {
+    "every_sample_at_the_floor": {
+     "evidence": {
+      "runs": {
+       "kept_runs_all_at_pinned_clock": "125/125",
+       "clock_gate_failures": []
+      },
+      "smoke_clock_histogram": {
+       "600": 215
+      }
+     },
+     "verdict": "PASS"
+    },
+    "zero_Power_throttle_up_lines_in_the_governor_log": {
+     "evidence": "no governor log exists for these passes: hl/block.sh does not dump the service processor's trace ring and a per-run dump was not in the registered protocol",
+     "verdict": "UNMEASURED"
+    }
+   },
+   "verdict": "PARTIAL (PASS on the clock; the governor-log half UNMEASURED)"
+  },
   "G2": {
    "predicted": 0.519,
    "band": [
@@ -240,8 +264,80 @@
    ],
    "measured": 0.5179175578947368,
    "verdict": "PASS"
+  },
+  "G3": {
+   "claim": "restore: both governor fields read back at their originals and the card steps normally afterwards",
+   "predicted": "TDP 65 W, software threshold 65 C, and a post-restore burst that reaches >= 700 MHz with at least one 'Power throttle up' event",
+   "pass_if": "exactly that",
+   "halves": {
+    "both_fields_read_back_at_their_originals": {
+     "evidence": {
+      "original": {
+       "minion_mhz": 600,
+       "minion_mv": 519,
+       "power_state": 3,
+       "power_state_name": "low_power",
+       "tdp_w": 65,
+       "temp_threshold_c": 65
+      },
+      "after_restore": {
+       "minion_mhz": 600,
+       "minion_mv": 519,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "tdp_w": 65,
+       "temp_threshold_c": 65
+      },
+      "independent_back_check": {
+       "minion_mhz": 600,
+       "minion_mv": 519,
+       "power_state": 3,
+       "power_state_name": "low_power",
+       "tdp_w": 65,
+       "temp_threshold_c": 65
+      }
+     },
+     "verdict": "PASS"
+    },
+    "post_restore_burst_reaches_700_MHz_or_more": {
+     "evidence": {
+      "burst_clock_histogram": {
+       "600": 114,
+       "700": 2,
+       "800": 98
+      },
+      "pinned_smoke_for_contrast": {
+       "600": 215
+      }
+     },
+     "verdict": "PASS"
+    },
+    "at_least_one_Power_throttle_up_event": {
+     "evidence": "the same missing trace-ring dump as G1's second half; the clock step from 600 to 800 MHz inside one 6 s launch is consistent with it but is not the registered evidence",
+     "verdict": "UNMEASURED"
+    }
+   },
+   "verdict": "PARTIAL (PASS on the read-back, PASS on the clock step; the 'Power throttle up' half UNMEASURED)"
   }
  },
  "gate_failures": [],
- "passes_set_aside": []
+ "passes_set_aside": [],
+ "summary": {
+  "fully_passed": [
+   "G2",
+   "V2",
+   "V4",
+   "V5",
+   "V6"
+  ],
+  "failed": [
+   "V1",
+   "V3"
+  ],
+  "partial_half_unmeasured": [
+   "G1",
+   "G3"
+  ],
+  "line": "5 of the 9 registered rules pass in full (G2, V2, V4, V5, V6); V1, V3 fails as registered; G1 and G3 are PARTIAL - the governor-log half was never measured, and UNMEASURED is not PASS"
+ }
 }

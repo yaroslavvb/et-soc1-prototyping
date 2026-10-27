@@ -1,5 +1,14 @@
 # ET-SOC1 change record — E72, the 600 MHz pin (aifoundry2 card 0)
 
+> **Corrected at the desk 2026-10-27, 23:05–23:5x UTC / 16:05–16:5x PDT**, after an independent review.
+> Four timestamps in this record were wrong (below, each marked *corrected*), G3 was recorded as a PASS
+> with half of its registered text dropped, the vmin-LUT floor was listed as a coded bound when the code
+> emits UNKNOWN and proceeds, two pieces of evidence were described as kept with the data when they were
+> only printed, and the `#community-lab` claim's release was damaged in the channel after it was made.
+> **No card was touched for this correction and no gate verdict about the card's state changed**: the one
+> write, both read-backs, the restore and the rule-8 source argument are exactly as they were, and an
+> independent reviewer re-read the card at 15:46:51 PDT and found the governor at its originals.
+
 Filled from `templates/change-record.md` of Roman's ET-SoC-1 firmware rebuild / OTA field manual
 (`reference/etsoc1-firmware-field-manual/`, evidence through 12 Oct 2026, compiled 21 Oct UTC). Every
 gate carries **PASS / FAIL / UNKNOWN / N-A** with a timestamp and its evidence. **UNKNOWN is not PASS.**
@@ -24,8 +33,10 @@ value's own safety is argued from the source here and not inherited.
 
 ## Identity / authorization
 
-- **Record ID / UTC and local:** `E72-pin600-2026-10-27`. Opened 2026-10-27 **22:28 UTC / 15:28 PDT**
-  (Tue, ISO week 44). All local stamps America/Los_Angeles, PDT (UTC−7).
+- **Record ID / UTC and local:** `E72-pin600-2026-10-27`. Opened 2026-10-27 **before 21:58:51 UTC /
+  14:58:51 PDT** — the record was already in the pre-registration commit `001811ab`, whose commit time
+  that is; the "15:28" first written here was wrong by half an hour and is *corrected*. All local stamps
+  America/Los_Angeles, PDT (UTC−7).
 - **Operator:** an AI Foundry agent (`a2-e72-600mhz`) in the Q129 workflow, on the Intel (`Intel-mbp`),
   over ssh. **Hardware owner / authoriser:** the lab's owner. **Independent reviewer:** none for the run
   itself — stated as a limitation, not a pass; the pre-registration ([`README.md`](README.md)) and the
@@ -144,8 +155,9 @@ value's own safety is argued from the source here and not inherited.
   sent**. **N-A for this operation**: no PMIC write path is reachable from the one command used (rule 8).
 - **PCIe / link / BAR / DM / ops / thermal / clock / TDP baseline:** read fresh by `gov_e72.py gates`
   into `gov.jsonl` `{"event": "original"}`. **The gate refuses to proceed unless `ettelem config` reads
-  `tdp_w: 65` and `temp_threshold_c: 65`** — the values E69 restored and read back at 14:42 PDT — and
-  unless the vmin-LUT floor reads **600 MHz**.
+  `tdp_w: 65` and `temp_threshold_c: 65`** — the values E69 restored and read back at 14:42 PDT. *(The
+  vmin-LUT floor was meant to be a coded refusal too and is **not**: `gov_e72.py` notes UNKNOWN on a null
+  floor and proceeds. Corrected below and in the release gate.)*
   **Read 14:59:39 PDT, under the card lock:** `{"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3,
   "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519}`. **Both governor fields are at
   their originals. These are the values to restore: TDP 65 W, software threshold 65 °C.** **PASS**
@@ -154,10 +166,16 @@ value's own safety is argued from the source here and not inherited.
   points — 600, 700 and 800 MHz** — and eight zero points. So
   `mnn_frequency_min_limit = 600` and `mnn_frequency_max_limit = 800`, which is also exactly the
   600 → 700 → 800 stepping E69 read out of the governor's own log. **The pin lands on 600 MHz and can go
-  no lower. PASS** — this gate was UNKNOWN on the first attempt (the tool writes the LUT to a binary file
-  rather than to stdout, so the text parse found nothing) and was resolved by parsing the binary; the raw
-  LUT stays out of the public repo as per-card calibration data and only the frequency points are
-  published.
+  no lower. UNKNOWN IN CODE, RESOLVED BY HAND** *(corrected — this had read "PASS")*:
+  `dev_mngt_service` writes the LUT to a binary file rather than to stdout, so `gov_e72.py`'s text parse
+  found nothing, wrote `{"event": "vmin_floor", "floor_mhz": null}` to `gov.jsonl` and **proceeded with
+  an UNKNOWN note**; the floor was established by parsing that binary by hand before the write. The
+  published evidence is now `docs/reports/data/2026-10-27-e72-600mhz/vmin-lut.json` — the file's sha256
+  and mtime, the three frequency points and three independent parses (the session's, the reviewer's at
+  ~15:5x and the correction pass's at 16:06:42 PDT). The raw LUT stays out of the public repo as per-card
+  calibration data; only the frequency points are published. **`gov.jsonl` is left exactly as the session
+  wrote it**: a machine log of what a run did is not edited afterwards. The remedy is in the harness, not
+  the record — parse the binary in `gov_e72.py` and make the floor a real coded refusal.
 - **Live query allowlist; unsafe queries intentionally omitted:** allowed — `GET_MODULE_*` identity,
   `GET_MODULE_FIRMWARE_REVISIONS`, `GET_ASIC_CHIP_REVISION`, `GET_MODULE_UPTIME`, `GET_MODULE_POWER`,
   `GET_MODULE_CURRENT_TEMPERATURE`, `GET_ASIC_FREQUENCIES`, `GET_MODULE_STATIC_TDP_LEVEL`,
@@ -312,10 +330,16 @@ against E60's published `gen.sha256`. The one command sent is the stock `dev_mng
   `ettelem config`. **No reset is planned or permitted. No clock or voltage command is sent.**
 - **Bounds enforced in code, not only in prose:** `gov_e72.py` writes only the literal values 0 and 65
   (`TDP_PIN_W`, `ORIG_TDP_W`); it refuses to run if the threshold is not 65 °C and refuses to continue if
-  a set moved the threshold; the vmin-LUT floor must read 600 MHz; the pass stops at a 78 °C reading
-  (lib.sh) and the session aborts and restores above **85 W** board (E69's bound, not raised).
-- **GO / NO-GO / UNKNOWN:** **GO**, 2026-10-27 **15:06 PDT**, on the gates above, with the two standing residuals
-  (build identity; no independent hardware recovery path for this fleet) and E69's dated health flag.
+  a set moved the threshold; the pass stops at a 78 °C reading (lib.sh) and the session aborts and
+  restores above **85 W** board (E69's bound, not raised). *Corrected: the vmin-LUT floor was listed here
+  and does **not** belong — the code emits UNKNOWN on a null floor and proceeds, so that one bound was
+  enforced in prose and by hand, not in code.*
+- **GO / NO-GO / UNKNOWN:** **GO**, recorded in commit `20c4249f`, committed 2026-10-27 **22:01:22 UTC /
+  15:01:22 PDT**, on the gate reads of 14:59:39–15:00 — **ten seconds before the one write at
+  15:01:32.038**, which is the ordering that matters and which an independent reviewer re-verified. *The
+  "15:06 PDT" first written here was wrong and, read literally, put the GO after both the commit that
+  recorded it and the write it authorises; corrected.* The two standing residuals (build identity; no
+  independent hardware recovery path for this fleet) and E69's dated health flag stand.
 - **Operator releasing this operation:** the owner's authorization of 27 Oct 2026 for the governor on
   this card, naming E72's TDP-0 pin specifically, recorded verbatim above. No "it built, therefore run
   it" step exists here.
@@ -335,7 +359,7 @@ rc and an ISO-millisecond timestamp) and `restore`. Filled from it after the ses
 | Command exit statuses | **both rc 0** |
 | **Read-back mismatches** | **0** — each set was followed by `ettelem config` and compared field by field; the session also refuses to continue if a set moved the threshold |
 | Restore | 15:24:07.531 PDT, **`ok: true`**, equal to the originals; `release` written, watchdog logged *"released by the session, nothing to do"* |
-| Independent read-back after the last run | 15:24:48 PDT, a separate `ettelem config`: TDP **65 W**, threshold **65 °C**, `low_power`, 600 MHz, 519 mV |
+| Independent read-back after the last run | **Committed:** `gov.jsonl`'s `back_check` at **15:24:31.194 PDT** — TDP **65 W**, threshold **65 °C**, `low_power`, 600 MHz, 519 mV. *Corrected: a further separate `ettelem config` at 15:24:48 was printed to the session and **not retained**, so it is not evidence anyone can check; an independent reviewer repeated the read under the card lock at **15:46:51 PDT** and got the same five fields (`handoff-evidence.json`).* |
 
 ## Activation and acceptance
 
@@ -348,7 +372,11 @@ rc and an ISO-millisecond timestamp) and `restore`. Filled from it after the ses
 - **Configuration / clock / TDP policy checks:** `ettelem config` after the set, after the restore, and
   the per-sample clock gate inside every pass's reduction.
 - **Fresh management / thermal / error results:** the end queries; the kernel log before the first set
-  and after the last run, both kept with the data.
+  and after the last run. *Corrected: those two readings were **counted on the host and reported, not
+  kept with the data** — no dmesg file was committed. What is committed is `handoff-evidence.json`, which
+  says so plainly and records two later independent read-only checks (the reviewer's, and the correction
+  pass's at 16:06:35 PDT) that both still read 234, with the last such line at host uptime 84,342 s
+  ≈ 14:38 PDT, before E72 began.*
 - **Hardware-mode evidence:** every launch is a real PCIe device process (`sparsity_host` with the card's
   own kernel ELF); there is no SYSEMU path in this harness.
 
@@ -362,13 +390,20 @@ rc and an ISO-millisecond timestamp) and `restore`. Filled from it after the ses
   BL1 **0.22.0**, BL2 **0.22.0**, PMIC **1.5.0**, Master / Worker / Machine Minion **0.25.1**; driver
   `et-soc1` srcversion `47D26A305A0428B29FB7FC4`. No bank was read or written.
 - **Governor fields at handoff: TDP 65 W, software threshold 65 °C — equal to the originals.** The
-  threshold was never written at all. Read back twice: by the restore itself at 15:24:07.531 (`ok: true`)
-  and by an independent `ettelem config` at 15:24:48. **Module uptime 1 d 0 h 12 m**, so the service
-  processor never reset: the restored value is a real write, not a reboot's default.
+  threshold was never written at all. Read back by the restore itself at 15:24:07.531 (`ok: true`) and by
+  the committed `back_check` at 15:24:31.194; a third read at 15:24:48 and the **module uptime of 1 d 0 h
+  12 m** (so the service processor never reset, and the restored value is a real write rather than a
+  reboot's default) were printed and **not retained** — *corrected*, with an independent reviewer's read
+  at 15:46:51 PDT standing in their place.
 - **The back check.** One short burst at the restored settings (`e72back-smoke/p901`, 15:24:07 → 15:24:31)
   stepped the clock **600 → 700 → 800 MHz** — 114 samples at 600, 2 at 700, 98 at 800, voltage to 619 mV,
   board to 59.7 W. Against the pinned smoke's **215 of 215 samples at 600 MHz**, that is the governor's
-  power-up branch working the moment the cap was back, with no reset. **G3: PASS.**
+  power-up branch working the moment the cap was back, with no reset. **G3: PARTIAL** *(corrected — this
+  had read "PASS")*: the registered rule is *"65 W, 65 °C, and a post-restore burst that reaches
+  ≥ 700 MHz **with at least one `Power throttle up` event**"*. The read-back half and the clock-step half
+  PASS on the evidence above; **the throttle-up half is UNMEASURED**, for exactly the reason G1's second
+  half is — nothing dumped the service processor's trace ring — and **UNKNOWN is not PASS**. Both rules
+  are now scored half by half in `verdicts.json`.
 - **Guest / excluded memory / packet / core state:** none existed and none was created.
 - **Error events across the whole operation:** the host kernel log's `Error Event Detected` count was
   **234 before the first set and 234 after the last run — E72 added none.** No AER, no link error, no
@@ -377,10 +412,16 @@ rc and an ISO-millisecond timestamp) and `restore`. Filled from it after the ses
   `gov_e72.py status` poll running while a measurement pass held the card lock and the single-open
   management node. The poll returned `null`, nothing else happened, and the lesson is not to poll the
   governor during a pass.
-- **Card lock and claim:** the lock was taken per stage (gates, the set, each pass, the restore) and is
+- **Card lock and claim:** the lock was taken per stage (gates, the set, each pass, the restore) and was
   free at handoff — `et-who`: *"No process holds an ET-SoC-1 device node or card lock."* The
-  `#community-lab` claim (`1564760469741510737`, 14:59:27 PDT) is released after the data README is
-  pushed.
+  `#community-lab` claim (`1564760469741510737`, 14:59:27 PDT) was released by an edit at ~15:32 PDT
+  after the data README was pushed, and that edit was read back. **Corrected:** by 15:35:15 PDT the
+  message in the channel held only its first 83 characters with no release suffix — a concurrent edit on
+  the shared browser tab damaged this claim and E69's at the same minute — so for about half an hour the
+  channel showed an open claim on a card this experiment had finished with. It was repaired at
+  **16:04:52 PDT**; the message now carries the claim, the release and the data link, and
+  `lab_reservations` reads the reservation as closed. The lesson is the README's C11: on a shared tab,
+  read the claim back once more at the end of the session, not only at the moment of the edit.
 - **Services restored:** the dashboard collector resumes by itself; it was never stopped, signalled or
   killed. The deadline watchdog exited cleanly without acting.
 - **Logs / artefacts:** `docs/reports/data/2026-10-27-e72-600mhz/`, all committed to the public repo,
@@ -393,7 +434,12 @@ rc and an ISO-millisecond timestamp) and `restore`. Filled from it after the ses
   operation. **One thing E72 establishes that a future session may want:** aifoundry3's 600 MHz pin is a
   boot-time policy writing TDP 0, not a firmware latch, so writing its TDP back would un-pin it — that is
   a *different card* and needs its own authorization and its own change record.
-- **Signoff:** 2026-10-27 **22:50 UTC / 15:50 PDT** (Tue, ISO week 44). Operator: the AI Foundry agent
-  `a2-e72-600mhz`. Independent reviewer: **none** — stated as a limitation of this record, not as a pass.
+- **Signoff:** 2026-10-27 **22:31:37 UTC / 15:31:37 PDT** (Tue, ISO week 44) — the commit `48f7466d`
+  that published this record; *the "15:50" first written here was 19 minutes in the future when it was
+  committed, and is corrected*. **Correction pass signed off 2026-10-27 23:5x UTC / 16:5x PDT** by the
+  desk agent `fix-a2-e72-600mhz`, which touched no card. Operator of the operation: the AI Foundry agent
+  `a2-e72-600mhz`. Independent reviewer **of the run itself: none** — stated as a limitation of this
+  record, not as a pass; an independent adversarial review of the *record and the data* ran 15:36–15:55
+  PDT, returned holds-with-fixes, and its eleven faults are answered in the README's Corrections.
   The governor is at its defaults, the card is healthy and stepping normally, the firmware is untouched,
   and no flash, PMIC, reset, driver, PCIe, clock or voltage action was performed at any point.

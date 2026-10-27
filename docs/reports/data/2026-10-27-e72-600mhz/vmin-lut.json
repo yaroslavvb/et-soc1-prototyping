@@ -1,0 +1,38 @@
+{
+ "what": "the minion frequency points of aifoundry2 card 0's vmin LUT, read at E72's gate time",
+ "why_this_file_exists": "gov.jsonl's machine record of the gate reads {\"event\": \"vmin_floor\", \"floor_mhz\": null}: gov_e72.py parses the LUT out of the command's TEXT output, and dev_mngt_service writes the LUT to a binary file instead, so the coded gate produced UNKNOWN and proceeded (its own rule is that UNKNOWN is not PASS). The floor was established BY HAND from that binary before the one write, and the change record said so, but the published evidence was the null. This file is that evidence, written at the desk on 27 Oct 2026 as a correction. The coded gate is still UNKNOWN-resolved-by-hand and is labelled that way in the change record.",
+ "minion_frequency_points_mhz": [600, 700, 800],
+ "floor_mhz": 600,
+ "max_mhz": 800,
+ "non_zero_points": 3,
+ "all_zero_points": 11,
+ "point_size_bytes": 18,
+ "file_bytes": 256,
+ "source": {
+  "command": "DM_CMD_GET_VMIN_LUT (a memcpy out of the service processor's RAM copy, driver/flashfs.c:2073 at BL2 0.22.0 - no SPI, no erase, no programming mode; its sibling SET is a full config-sector erase and is never sent)",
+  "file_on_the_host": "build/claims-v3/e72-gov/dev0_vmin_lut.bin on aifoundry2 (not committed: the rest of the LUT is per-card calibration data)",
+  "file_mtime": "2026-10-27T14:59:39.780385853-07:00",
+  "file_sha256": "c9359513ce4d37691cfe601ed3b01118599478d49a85611bc0ae52126a3a6540",
+  "gov_jsonl_event": "vmin_floor at 2026-10-27T14:59:39.782-0700, the same read"
+ },
+ "parses": [
+  {
+   "when": "2026-10-27 ~15:00 PDT",
+   "by": "the producing session, by hand, after the coded text parse returned nothing",
+   "result": "three non-zero 18-byte points: 600, 700, 800 MHz",
+   "recorded_in": "tools/claims-v3/lq6/CHANGE-RECORD.md"
+  },
+  {
+   "when": "2026-10-27 ~15:5x PDT",
+   "by": "an independent verifier, from the same file on the host",
+   "result": "three non-zero 18-byte points beginning 600, 700, 800; everything after zero"
+  },
+  {
+   "when": "2026-10-27 16:06:42 PDT",
+   "by": "the desk correction pass (this file), read-only, no device node opened and no card lock taken",
+   "result": "14 points of 18 bytes in 256 bytes; 3 non-zero at indices 0-2 reading 600, 700, 800 MHz; indices 3-13 all zero",
+   "note": "only the frequency field of each point is read and published; the per-card voltage calibration is not copied anywhere"
+  }
+ ],
+ "what_it_establishes": "TDP 0 steps the governor down to the LUT's lowest minion point and no further (reduce_minion_operating_point steps to the previous LUT point and the down branch is gated on f > mnn_frequency_min_limit), so the pin lands on 600 MHz and the card cannot be driven below it by this knob."
+}

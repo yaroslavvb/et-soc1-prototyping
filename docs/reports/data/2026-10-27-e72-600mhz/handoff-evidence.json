@@ -1,0 +1,45 @@
+{
+ "what": "the card-state evidence behind E72's handoff claims, with what is committed and what is not",
+ "written": "2026-10-27 (Tue, week 44) at the desk, as a correction: the first write-up cited a kernel-log pair and a 15:24:48 read-back as 'kept with the data', and neither was ever committed.",
+ "committed_in_this_directory": {
+  "gov.jsonl back_check": {
+   "t": "2026-10-27T15:24:31.194-0700",
+   "config": {"tdp_w": 65, "temp_threshold_c": 65, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519},
+   "equals_the_originals_read_at": "2026-10-27T14:59:39.664-0700"
+  },
+  "gov.jsonl restore": {"t": "2026-10-27T15:24:07.531-0700", "ok": true, "rc": 0, "threshold_written": false},
+  "return_burst_telemetry": "aifoundry2/e72back-smoke/p901 - 114 samples at 600, 2 at 700, 98 at 800 MHz",
+  "pinned_smoke_telemetry": "aifoundry2/e72-smoke/p900 - 215 of 215 samples at 600 MHz"
+ },
+ "read_at_the_time_but_NOT_retained": {
+  "independent_ettelem_config": {
+   "t": "2026-10-27 15:24:48 PDT",
+   "reported": {"tdp_w": 65, "temp_threshold_c": 65, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519},
+   "status": "the raw output was printed to the session and not saved; the committed back_check 17 s earlier carries the same five fields, and two later independent reads below agree"
+  },
+  "module_uptime": {"t": "2026-10-27 15:24:48 PDT", "reported": "1 d 0 h 12 m",
+                    "means": "the service processor had not reset since the host booted, so the restored 65 W is a real write and not a reboot default",
+                    "status": "not retained"},
+  "kernel_log_error_event_counts": {"before_the_first_set": 234, "after_the_last_run": 234,
+                                    "status": "counted on the host at the time and reported; the dmesg output itself was not saved"}
+ },
+ "independent_reads_afterwards": [
+  {
+   "t": "2026-10-27 15:46:51 PDT",
+   "by": "the verifier, one read-only ettelem config under the card lock (flock -w 5, timeout 10), et-who empty before and after",
+   "result": {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519},
+   "kernel_log": "Error Event Detected count 234; last one at host uptime 84342 s (about 14:38 PDT, before E72's window)"
+  },
+  {
+   "t": "2026-10-27 16:06:35 PDT",
+   "by": "the desk correction pass, read-only on the host only - no device node opened, no card lock taken, no card touched (another experiment held the card at the time)",
+   "kernel_log": {"error_event_detected_count": 234,
+                  "last_line": "[84342.235537] ET 0000:02:00.0: Error Event Detected",
+                  "mgmt_open_lines_total": 3},
+   "means": "the count has not moved since before E72 started, so E72 added none; of the three 'Mgmt: Tried to open same device multiple times' lines only the one at host uptime 85783.9 s (about 15:02:27 PDT) is inside E72's window, and E72 recorded it as self-inflicted"
+  }
+ ],
+ "firmware_at_handoff": {"release": "1.4.0", "bl1": "0.22.0", "bl2": "0.22.0", "pmic": "1.5.0", "minions": "0.25.1",
+                         "status": "re-read after the last run and reported; unchanged by construction - no flash, PMIC, reset, driver, PCIe, clock or voltage action was performed"},
+ "lesson": "a gate's evidence is only as good as the file it lands in: print-and-report is not committed evidence. The governor harness should write every end-of-session read into gov.jsonl, as it does for the sets."
+}

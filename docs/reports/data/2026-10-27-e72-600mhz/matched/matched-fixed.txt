@@ -1,0 +1,81 @@
+E72 vs E60, SAME CARD (aifoundry2 card 0), same operand files, same reducer.
+E60 ran it at 800 MHz / 0.6174 V; E72 at 600 MHz / 0.5179 V.  (V600/V800)^2 = 0.7037 ; x 600/800 = 0.5278  (the alternative is n = 3.637)
+
+CORRECTED 27 Oct 2026 at the desk: the matched rows below are reduced on a FIXED E60 pass set
+   [2, 3, 4, 6, 7, 8, 9, 10] (the intersection of the sets the five slopes keep), so a row-to-row move is a
+   slope move and not a change of sample. E60's kept passes by slope, as reduce_hl.py chooses them:
+      k=0.441955   passes [1, 2, 3, 4, 6, 7, 8, 9, 10]
+      k=0          passes [2, 3, 4, 6, 7, 8, 9, 10]
+      k=0.0982328  passes [2, 3, 4, 6, 7, 8, 9, 10]
+      k=0.2936     passes [2, 3, 4, 6, 7, 8, 9, 10]
+      k=0.442      passes [1, 2, 3, 4, 6, 7, 8, 9, 10]
+   E72 keeps all 5 passes / 125 runs at every slope. Every number carries the per-pass SE.
+
+A. the h2 -> h8 secant, board, fJ per designed flipped B mantissa bit
+
+   leakage slope                         E60 800        E72 600        ratio          n (board)
+ * the registered reduction: each expe  121.26+-0.61   79.18+-3.09  0.6529+-0.0257  2.43+-0.22
+   0.000 (no leakage correction)        126.44+-0.97   81.07+-3.57  0.6411+-0.0286  2.53+-0.25
+   0.098 (E72's own auto fit)           125.29+-0.89   79.18+-3.09  0.6320+-0.0250  2.61+-0.23
+   0.2936 (E66, measured idle on THIS   122.99+-0.76   75.42+-2.53  0.6132+-0.0210  2.78+-0.19
+   0.4420 (E60's own auto fit)          121.25+-0.69   72.56+-2.64  0.5985+-0.0220  2.92+-0.21
+   * the registered row: E60 at its own auto slope on 9 passes, E72 at its own on 5 - the two sides
+     are NOT at the same slope, which is why it is kept apart from the matched family.
+
+B. the SAME +-10% test as the registered V1, with the prediction moved to the SAME slope
+   (pred = E60(slope) x (V600/V800)^2 at the measured voltages)
+
+   leakage slope                        pred      band                measured   err     verdict
+   the registered reduction: each expe  85.33  [ 76.80, 93.86]    79.18    -7.2%  PASS
+   0.000 (no leakage correction)        88.98  [ 80.08, 97.87]    81.07    -8.9%  PASS
+   0.098 (E72's own auto fit)           88.16  [ 79.35, 96.98]    79.18   -10.2%  FAIL
+   0.2936 (E66, measured idle on THIS   86.55  [ 77.89, 95.20]    75.42   -12.9%  FAIL
+   0.4420 (E60's own auto fit)          85.32  [ 76.79, 93.85]    72.56   -15.0%  FAIL
+   The registered verdict is the first row and stands as registered. The matched family is a
+   POST-HOC re-test: it fails at three of the four matched slopes, passing only at slope 0.
+
+C. the exponent n in (V600/V800)^n, with the SE propagated from both per-pass SEs
+
+   leakage slope                        n board          |n-2|   n rail           |n-2|
+   the registered reduction: each expe 2.43+-0.22       1.9 SE   1.72+-0.31       0.9 SE
+   0.000 (no leakage correction)       2.53+-0.25       2.1 SE   1.60+-0.32       1.2 SE
+   0.098 (E72's own auto fit)          2.61+-0.23       2.7 SE   1.60+-0.32       1.2 SE
+   0.2936 (E66, measured idle on THIS  2.78+-0.19       4.0 SE   1.60+-0.32       1.2 SE
+   0.4420 (E60's own auto fit)         2.92+-0.21       4.4 SE   1.60+-0.32       1.2 SE
+   n = 2 is NOT the point estimate of any row. The board family runs 2.4-2.9 and the rail family
+   1.6-1.7: the two bracket 2 from opposite sides. The clock-scaling alternative (n = 3.64) is
+   excluded by every row, board and rail, at 3 SE or more - that half of the identification stands.
+
+D. the rail is not slope-free, it is UNCORRECTED (reduce_hl.py corrects the board only), and it is
+   read over a window one second later than the board's because the rail telemetry is a 1 s running
+   average. Re-extracted from the committed telemetry (reproduces runs.csv exactly):
+
+   E60 @ 800 MHz, fixed 8 passes
+      rail window is +0.575 C hotter than the board window
+      rail secant over the published window :  83.827 +- 4.133 fJ
+      the same over the BOARD's window      :  70.547 +- 3.429 fJ  (biased: it reaches into the 1 s average's past)
+      within-run power-vs-temperature fit   : board 0.4420, rail 5.5224 W/C - the rail's is a launch transient, not leakage,
+                                              which is why the rail cannot be self-corrected
+   E72 @ 600 MHz, 5 passes
+      rail window is -0.028 C hotter than the board window
+      rail secant over the published window :  63.266 +- 1.690 fJ
+      the same over the BOARD's window      :  58.585 +- 3.752 fJ  (biased: it reaches into the 1 s average's past)
+      within-run power-vs-temperature fit   : board 0.0982, rail 1.1130 W/C - the rail's is a launch transient, not leakage,
+                                              which is why the rail cannot be self-corrected
+
+   if the rail DID carry a leakage slope of the same size as the board's:
+      assumed slope   E60 rail        E72 rail        ratio            n (rail)
+      0.0000          83.83+-4.13   63.27+-1.69  0.7547+-0.0423  1.60+-0.32
+      0.0982          82.30+-4.02   61.02+-2.33  0.7414+-0.0460  1.70+-0.35
+      0.2936          79.27+-3.80   56.55+-3.81  0.7134+-0.0590  1.92+-0.47
+      0.4420          76.97+-3.65   53.16+-4.99  0.6906+-0.0726  2.11+-0.60
+   So the rail moves by 16% across the same slope ladder the board moves 10% across. 'Quote the
+   rail, it is slope-free' is withdrawn: neither side is slope-free, and only the board has an
+   independently measured idle slope (E66, 0.2936 W/C on this card) to be corrected at.
+
+E. the die-temperature difference the board correction actually acts on
+   E72 (t_h8 - t_h2) per pass, board window: [0.85, 0.0, 0.8, 0.05, 0.95]  mean 0.530 C
+   E72 per-pass secants at the registered slope: [74.9, 78.5, 80.6, 71.9, 90.0] fJ
+   E60 (t_h8 - t_h2) per pass, board window: [0.5, 0.55, 0.4, 0.4, 0.4, 0.65, 0.35, 0.4, 0.3]
+   The die sensor reports whole degrees. The whole leakage-slope sensitivity of the board price
+   rests on that 0.53 C mean difference, which is exactly 0 in one of the five passes.

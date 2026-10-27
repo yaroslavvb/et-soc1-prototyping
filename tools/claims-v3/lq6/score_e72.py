@@ -2,7 +2,15 @@
 """Score E72 against its frozen predictions, and nothing else.
 
     python3 tools/claims-v3/lq6/score_e72.py --results <results.json> --csv <runs.csv> \
-            --pred tools/claims-v3/lq6/predictions.json --out <verdicts.json>
+            --pred tools/claims-v3/lq6/predictions.json --out <verdicts.json> [--data <data dir>]
+
+Corrected 27 Oct 2026 at the desk, after an independent review: G1 and G3 were not scored by this file
+at all and their verdicts lived only in prose, where G3's registered "with at least one 'Power throttle
+up' event" had been dropped and the rule written up as a plain PASS. Both are now scored here, HALF BY
+HALF, from the committed evidence (`--data`, the experiment's data directory): the clock halves from the
+smoke, measurement and return-burst telemetry; the read-back half from `gov.jsonl`. Neither governor-log
+half can be scored at all - `hl/block.sh` never dumped the service processor's trace ring - and
+UNMEASURED is not PASS, so each of those two rules is PARTIAL, not PASS.
 
 `reduce_e72.py` (= E60's reducer) produces the measurements. This file only compares them with
 [`predictions.json`](predictions.json) and prints PASS / FAIL / INCONCLUSIVE per registered rule. It
@@ -17,11 +25,43 @@ pass, whose scatter gives the standard error - the unit of replication is the pa
 """
 import argparse
 import csv
+import gzip
 import json
 import math
+import os
 from collections import defaultdict
 
 H2_FLIPS, H8_FLIPS = 8192, 32768
+
+
+def clock_histogram(path):
+    """{MHz: samples} over a pass's telemetry, from the field the reducer's clock gate reads."""
+    if not os.path.exists(path) and os.path.exists(path + ".gz"):
+        path += ".gz"
+    if not os.path.exists(path):
+        return None
+    op = gzip.open if path.endswith(".gz") else open
+    hist = defaultdict(int)
+    for line in op(path, "rt"):
+        if not line.startswith("{"):
+            continue
+        try:
+            hist[int(json.loads(line)["mhz"]["minion"])] += 1
+        except (ValueError, KeyError, TypeError):
+            pass
+    return dict(sorted(hist.items()))
+
+
+def gov_events(path):
+    out = []
+    if os.path.exists(path):
+        for line in open(path):
+            if line.startswith("{"):
+                try:
+                    out.append(json.loads(line))
+                except ValueError:
+                    pass
+    return out
 
 
 def mean_se(v):
@@ -50,8 +90,13 @@ def verdict(x, band, alt_band=None):
     return "FAIL"
 
 
-def per_pass_values(csv_path, card, set_aside):
-    """{pass: {item: {p80, rail, rate}}} over the runs E60's own gates kept."""
+def per_pass_values(csv_path, card, set_aside, leak=None):
+    """{pass: {item: {p80, rail, rate}}} over the runs E60's own gates kept.
+
+    `leak` recomputes p80 at that slope with the reducer's own formula, p80 = p_raw - k (t_win -
+    t_launch). Corrected 27 Oct: without it a sensitivity run scored its own slope's secant against the
+    REGISTERED slope's per-pass scatter, because runs.csv holds the registered p80 column.
+    """
     out = defaultdict(lambda: defaultdict(list))
     with open(csv_path) as f:
         for r in csv.DictReader(f):
@@ -60,7 +105,11 @@ def per_pass_values(csv_path, card, set_aside):
             p = int(r["pass"])
             if p in set_aside:
                 continue
-            out[p][r["item"]].append({"p80": float(r["p80"]), "rate": float(r["rate"]),
+            p80 = float(r["p80"])
+            if leak is not None:
+                base = float(r["start_c"]) if r["start_c"] not in ("", "None") else float(r["t_win"])
+                p80 = float(r["p_raw"]) - leak * (float(r["t_win"]) - base)
+            out[p][r["item"]].append({"p80": p80, "rate": float(r["rate"]),
                                       "rail": float(r["rail"]) if r["rail"] not in ("", "None") else None})
     val = {}
     for p, items in out.items():
@@ -85,6 +134,10 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--card", default="aifoundry2")
     ap.add_argument("--label", default="registered")
+    ap.add_argument("--data", help="the experiment's data directory, for the G1/G3 evidence "
+                                   "(gov.jsonl, the smoke and return-burst telemetry)")
+    ap.add_argument("--leak", type=float, help="recompute the per-pass p80 at this leakage slope "
+                                               "(a sensitivity run must pass its own slope here)")
     a = ap.parse_args()
 
     res = json.load(open(a.results))
@@ -99,7 +152,7 @@ def main():
     sec_items_rail = secant(C["items"], key="d_rail")
 
     # --- and per pass, for the standard error -----------------------------------------------------
-    val = per_pass_values(a.csv, a.card, set_aside)
+    val = per_pass_values(a.csv, a.card, set_aside, leak=a.leak)
     per_pass, per_pass_rail = [], []
     for p, items in sorted(val.items()):
         z = items.get("lq_h0")
@@ -130,6 +183,50 @@ def main():
 
     alt = R["V1"]["alternative_if_it_scaled_with_f_too"]
     alt_band = [alt * 0.9, alt * 1.1]
+
+    # --- G1 and G3, half by half, from the committed evidence (corrected 27 Oct) -------------------
+    D = a.data
+    smoke = clock_histogram(os.path.join(D, a.card, "e72-smoke/p900/telemetry.jsonl")) if D else None
+    burst = clock_histogram(os.path.join(D, a.card, "e72back-smoke/p901/telemetry.jsonl")) if D else None
+    gov = gov_events(os.path.join(D, "gov.jsonl")) if D else []
+    restore = next((e for e in gov if e.get("event") == "restore"), None)
+    back = next((e for e in gov if e.get("event") == "back_check"), None)
+    orig = next((e for e in gov if e.get("event") == "original"), None)
+    runs_at_clock = {"kept_runs_all_at_pinned_clock": f"{g['kept']}/{g['runs']}",
+                     "clock_gate_failures": [f for f in g["failed"] if any("clock" in str(x) for x in f[3])]}
+    g1_clock = ("PASS" if (g["kept"] == g["runs"] and not runs_at_clock["clock_gate_failures"]
+                           and g["clock_mhz"] == 600
+                           and (smoke is None or list(smoke) == [600])) else "FAIL")
+    g1 = {"claim": R["G1"]["claim"], "predicted": R["G1"]["predicted"], "pass_if": R["G1"]["pass_if"],
+          "halves": {
+              "every_sample_at_the_floor": {"evidence": {"runs": runs_at_clock, "smoke_clock_histogram": smoke},
+                                            "verdict": g1_clock},
+              "zero_Power_throttle_up_lines_in_the_governor_log": {
+                  "evidence": "no governor log exists for these passes: hl/block.sh does not dump the service "
+                              "processor's trace ring and a per-run dump was not in the registered protocol",
+                  "verdict": "UNMEASURED"}},
+          "verdict": f"PARTIAL ({g1_clock} on the clock; the governor-log half UNMEASURED)"}
+    restored_ok = bool(restore and restore.get("ok") and orig
+                       and restore["after"].get("tdp_w") == orig["config"].get("tdp_w")
+                       and restore["after"].get("temp_threshold_c") == orig["config"].get("temp_threshold_c"))
+    burst_top = max(burst) if burst else None
+    g3_step = "PASS" if (burst_top is not None and burst_top >= 700) else ("UNMEASURED" if burst is None else "FAIL")
+    g3_read = "PASS" if restored_ok else "FAIL"
+    g3 = {"claim": R["G3"]["claim"], "predicted": R["G3"]["predicted"], "pass_if": R["G3"]["pass_if"],
+          "halves": {
+              "both_fields_read_back_at_their_originals": {
+                  "evidence": {"original": orig and orig.get("config"), "after_restore": restore and restore.get("after"),
+                               "independent_back_check": back and back.get("config")},
+                  "verdict": g3_read},
+              "post_restore_burst_reaches_700_MHz_or_more": {
+                  "evidence": {"burst_clock_histogram": burst, "pinned_smoke_for_contrast": smoke},
+                  "verdict": g3_step},
+              "at_least_one_Power_throttle_up_event": {
+                  "evidence": "the same missing trace-ring dump as G1's second half; the clock step from 600 to "
+                              "800 MHz inside one 6 s launch is consistent with it but is not the registered evidence",
+                  "verdict": "UNMEASURED"}},
+          "verdict": (f"PARTIAL ({g3_read} on the read-back, {g3_step} on the clock step; "
+                      "the 'Power throttle up' half UNMEASURED)")}
 
     out = {
         "label": a.label,
@@ -184,11 +281,23 @@ def main():
                    "lb_measured": lb_full, "verdict": verdict(lb_over_lq, R["V5"]["band"])},
             "V6": {"predicted": R["V6"]["predicted"], "band": R["V6"]["band"], "measured": turnon,
                    "verdict": verdict(turnon, R["V6"]["band"])},
+            "G1": g1,
             "G2": {"predicted": R["G2"]["predicted"], "band": R["G2"]["band"], "measured": C["v_mean"],
                    "verdict": verdict(C["v_mean"], R["G2"]["band"])},
+            "G3": g3,
         },
         "gate_failures": g["failed"], "passes_set_aside": g.get("passes_set_aside"),
     }
+    full = [k for k, v in out["rules"].items() if v["verdict"] == "PASS"]
+    failed = [k for k, v in out["rules"].items() if v["verdict"].startswith("FAIL")]
+    partial = [k for k, v in out["rules"].items() if v["verdict"].startswith("PARTIAL")]
+    out["summary"] = {
+        "fully_passed": sorted(full), "failed": sorted(failed), "partial_half_unmeasured": sorted(partial),
+        "line": (f"{len(full)} of the 9 registered rules pass in full ({', '.join(sorted(full))}); "
+                 f"{', '.join(sorted(failed)) or 'none'} fails as registered; "
+                 f"{' and '.join(sorted(partial)) or 'none'} "
+                 f"{'are' if len(partial) != 1 else 'is'} PARTIAL - the governor-log half was never "
+                 f"measured, and UNMEASURED is not PASS")}
     with open(a.out, "w") as f:
         json.dump(out, f, indent=1)
         f.write("\n")
