@@ -173,3 +173,33 @@ uses for its short cycle.
 *What it costs.* The long dwell at the floor is gone from every cycle after 11 (about 300 s per cycle at
 49–50 °C remains, and ~17 cycles give more floor samples in total than four long ones did). L5 (IDLE-d, a
 73 °C bin) was already out of reach tonight at a 70 °C plateau (A1) and stays so.
+
+## How to reduce this in the morning
+
+The pass set tonight is **p13 upward** (A2: p11 and p12 were aborted and carry no `block.json`, so both
+reducers drop them; p1–p3 are E44's short cycles of 25 Sep and are used only where a short cycle counts).
+
+```bash
+cd ~/claude/et-soc1-prototyping
+# 1. IDLE-L and IDLE-d, the registered scoring E44 left INSUFFICIENT
+python3 tools/claims-v3/idle/reduce.py --data build/claims-v3 \
+        --out docs/reports/data/2026-10-27-e66-idle-long/verdicts.json
+# 2. L1-L4, including the 51-67 C fixed/leakage share Q128(b) asked for
+python3 tools/claims-v3/idle/e66_split.py --data build/claims-v3/aifoundry2/idle \
+        --out docs/reports/data/2026-10-27-e66-idle-long/e66-split.json
+# 3. this card's idle leakage slope, the number E68's correction needs
+python3 tools/claims-v3/idle/idle_slope.py
+```
+
+Then write the Results section into this README, and **re-run E68 with the measured slope as a labelled
+sensitivity, never as a replacement for its registered scoring**:
+
+```bash
+python3 tools/claims-v3/sm/reduce_sm.py --data build/claims-v3/aifoundry2/sm --gen build/sm-gen \
+        --pred docs/reports/data/2026-10-27-e68-stage-map/predictions.json \
+        --leak <the 51-58 C slope> --out <a sensitivity path, not verdicts.json>
+```
+
+**Two cycles already agree on that slope**: p11 reads 0.2960 W/°C over 51–58 °C (rms 0.116 W, 2,248 samples)
+and p13 reads 0.2946 (rms 0.116, 638 samples). E68's published prices already carry both ends of the band
+(amendment A7), so this re-run confirms rather than changes them.

@@ -109,13 +109,19 @@ def ci99(v):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", required=True, help="$DATA_ROOT/idle")
-    ap.add_argument("--passes", default="", help="comma-separated pass numbers; default every p1[1-9]")
+    ap.add_argument("--passes", default="",
+                    help="comma-separated pass numbers; default every IDLE-LONG pass, p11 upward")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     if a.passes:
         dirs = [os.path.join(a.data, f"p{p.strip()}") for p in a.passes.split(",")]
     else:
-        dirs = sorted(glob.glob(os.path.join(a.data, "p1[1-9]")))
+        # Every IDLE-LONG pass, p11 upward, numerically ordered. Q128(b) amendment A3 shortened the cooling
+        # to 900 s and widened block.sh's long-variant range to p49, so the old "p1[1-9]" glob would have
+        # silently dropped every pass past 19 - most of the night.
+        dirs = sorted((d for d in glob.glob(os.path.join(a.data, "p*"))
+                       if os.path.basename(d)[1:].isdigit() and int(os.path.basename(d)[1:]) >= 11),
+                      key=lambda d: int(os.path.basename(d)[1:]))
     cycles, floors, dropped = [], [], []
     for d in dirs:
         if not os.path.isdir(d):
