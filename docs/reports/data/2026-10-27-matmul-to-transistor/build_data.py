@@ -40,11 +40,23 @@ o["speed"] = {
 }
 
 # ---- level 1: the governor --------------------------------------------------
+# chain.json's own clamp note says the window holds "every candidate cap". It does not: E64's measured
+# sustained randn point, 54.4 W, is above it. Carry the object, but do not carry a claim this page
+# contradicts two sections later -- the original wording is kept beside it so nothing is quietly dropped.
+_clamp = dict(ch["sustained_is_a_clamp"])
+_clamp["note_as_written_in_chain_json"] = _clamp.get("note")
+_clamp["note"] = (
+    "Three of the four candidate caps are inside the window; for those, zeros clamps high and random "
+    "clamps low, so the ratio is 800/600 by construction and the 0.3% residual is E64's rounding of "
+    "12.3 x 600/800 = 9.225 to 9.2. The fourth, E64's own measured sustained randn point at 54.4 W, is "
+    "ABOVE the window: at that cap random would settle above the 600 MHz floor and the ratio would fall "
+    "to about 1.30. The prediction that survives either way is ordinal."
+)
 o["governor"] = {
     "cap_W": ch["power_cap_W"], "cap_source": ch["power_cap_source"],
     "tau_s": ch["governor"]["tau_s"], "rms_mhz": ch["governor"]["rms_mhz"], "n": ch["governor"]["n"],
     "trip_C": 66.0, "die_line": ch["die_line"], "sustained_cap_W": ch["sustained_cap_W"],
-    "clamp": ch["sustained_is_a_clamp"], "cap_sensitivity": ch["burst_cap_sensitivity"],
+    "clamp": _clamp, "cap_sensitivity": ch["burst_cap_sensitivity"],
 }
 
 # ---- level 2: board power ---------------------------------------------------
