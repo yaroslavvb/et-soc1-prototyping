@@ -1,0 +1,506 @@
+{
+ "what": "The frozen predictions of frozen_predictions.json against the committed measurements, plus the 14-pattern fit and the E64 and E62 re-scores.",
+ "request": "Q126",
+ "scored_utc": "2026-10-26",
+ "frozen_from_commit": "69334e8ade3fc88ed6a6d6aacf0c3a7f161d6b03",
+ "loads": {
+  "E59_sparse_parity": {
+   "rows": [
+    {
+     "size": "L1 (512,4,0.3,448)",
+     "measured_over_idle_w": 12.73731,
+     "predicted_over_idle_w": 9.804366811158616,
+     "err_w": -2.932943188841385,
+     "err_pct": -23.026394025436964,
+     "measured_j_per_solve_over_idle": 1.66008,
+     "predicted_j_per_solve_over_idle": 1.3391931282401026,
+     "err_j": -0.3208868717598974,
+     "err_j_pct": -19.329602896239784,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.8429592005916378,
+      "tensor": 1.4106917353553183,
+      "scratchpad": 7.550715875211659
+     },
+     "source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l1/energy.json"
+    },
+    {
+     "size": "L2 (512,4,0.4,1850)",
+     "measured_over_idle_w": 14.65611,
+     "predicted_over_idle_w": 12.68873227526675,
+     "err_w": -1.9673777247332502,
+     "err_pct": -13.42360097415515,
+     "measured_j_per_solve_over_idle": 6.19562,
+     "predicted_j_per_solve_over_idle": 5.431587806714931,
+     "err_j": -0.7640321932850691,
+     "err_j_pct": -12.331811719974258,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.8429592005916378,
+      "tensor": 1.864103783636162,
+      "scratchpad": 9.98166929103895
+     },
+     "source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l2/energy.json"
+    },
+    {
+     "size": "(256,5,0.4,1925) first half",
+     "measured_over_idle_w": 13.91582,
+     "predicted_over_idle_w": 11.182037751616209,
+     "err_w": -2.7337822483837915,
+     "err_pct": -19.6451394771116,
+     "measured_j_per_solve_over_idle": 12.60488,
+     "predicted_j_per_solve_over_idle": 10.57803211769578,
+     "err_j": -2.026847882304219,
+     "err_j_pct": -16.079866546164812,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.8429592005916378,
+      "tensor": 1.6292395211338746,
+      "scratchpad": 8.709839029890697
+     },
+     "source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h0/energy.json"
+    },
+    {
+     "size": "(256,5,0.4,1925) second half",
+     "measured_over_idle_w": 10.4561,
+     "predicted_over_idle_w": 6.395730759563722,
+     "err_w": -4.060369240436278,
+     "err_pct": -38.83254024384119,
+     "measured_j_per_solve_over_idle": 15.8177,
+     "predicted_j_per_solve_over_idle": 9.888266480463392,
+     "err_j": -5.929433519536609,
+     "err_j_pct": -37.48606636575867,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.8429592005916378,
+      "tensor": 0.8741092121868549,
+      "scratchpad": 4.678662346785229
+     },
+     "source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h1/energy.json"
+    }
+   ],
+   "rms_w": 3.017983375161594,
+   "bias_w": -2.9236181005986763,
+   "worst": "(256,5,0.4,1925) second half",
+   "residual_signs": "----"
+  },
+  "E43_relay": {
+   "pooled": [
+    {
+     "route": "DRAM, read back next stage",
+     "measured_pj_per_byte": 116.24255551845505,
+     "measured_ci99": [
+      104.51511978044431,
+      135.34229296777235
+     ],
+     "predicted_pj_per_byte": 115.30772448041256,
+     "err_pj_per_byte": -0.9348310380424891,
+     "err_pct": -0.8042072319152277,
+     "inside_ci99": true,
+     "source": "docs/reports/data/2026-09-23-energy-manual/reruns.json relay_pj_per_byte; watts from docs/findings/18-on-chip-relay.md"
+    },
+    {
+     "route": "the next shire's scratchpad",
+     "measured_pj_per_byte": 8.923582506521505,
+     "measured_ci99": [
+      7.6270285839601835,
+      10.18113347694409
+     ],
+     "predicted_pj_per_byte": 9.180647885946728,
+     "err_pj_per_byte": 0.2570653794252227,
+     "err_pct": 2.8807418907972773,
+     "inside_ci99": true,
+     "source": "docs/reports/data/2026-09-23-energy-manual/reruns.json relay_pj_per_byte; watts from docs/findings/18-on-chip-relay.md"
+    },
+    {
+     "route": "this shire's own scratchpad",
+     "measured_pj_per_byte": 4.339209375643921,
+     "measured_ci99": [
+      3.753476120868425,
+      5.066738443632174
+     ],
+     "predicted_pj_per_byte": 4.041528436110435,
+     "err_pj_per_byte": -0.2976809395334854,
+     "err_pct": -6.860257566836373,
+     "inside_ci99": true,
+     "source": "docs/reports/data/2026-09-23-energy-manual/reruns.json relay_pj_per_byte; watts from docs/findings/18-on-chip-relay.md"
+    }
+   ],
+   "per_card": [
+    {
+     "route": "DRAM, read back next stage",
+     "card": "aifoundry2",
+     "measured_pj_per_byte": 111.3281663543358,
+     "predicted_pj_per_byte": 112.2646234245041,
+     "err_pct": 0.841168143547544
+    },
+    {
+     "route": "the next shire's scratchpad",
+     "card": "aifoundry2",
+     "measured_pj_per_byte": 8.608549346870072,
+     "predicted_pj_per_byte": 8.795419643000196,
+     "err_pct": 2.170752453176874
+    },
+    {
+     "route": "this shire's own scratchpad",
+     "card": "aifoundry2",
+     "measured_pj_per_byte": 4.050365654538507,
+     "predicted_pj_per_byte": 3.8342485845191567,
+     "err_pct": -5.335742213229253
+    },
+    {
+     "route": "DRAM, read back next stage",
+     "card": "aifoundry3",
+     "measured_pj_per_byte": 107.51770941307711,
+     "predicted_pj_per_byte": 106.33016854795115,
+     "err_pct": -1.1045072217484666
+    },
+    {
+     "route": "the next shire's scratchpad",
+     "card": "aifoundry3",
+     "measured_pj_per_byte": 8.274636261732022,
+     "predicted_pj_per_byte": 8.377103373907122,
+     "err_pct": 1.2383276911999521
+    },
+    {
+     "route": "this shire's own scratchpad",
+     "card": "aifoundry3",
+     "measured_pj_per_byte": 4.110582178647211,
+     "predicted_pj_per_byte": 3.786293349750147,
+     "err_pct": -7.889121657307111
+    },
+    {
+     "route": "DRAM, read back next stage",
+     "card": "aifoundry1-c1",
+     "measured_pj_per_byte": 129.8817907879522,
+     "predicted_pj_per_byte": 127.32838146878245,
+     "err_pct": -1.9659486550647503
+    },
+    {
+     "route": "the next shire's scratchpad",
+     "card": "aifoundry1-c1",
+     "measured_pj_per_byte": 9.88756191096242,
+     "predicted_pj_per_byte": 10.36942064093287,
+     "err_pct": 4.8733826833105205
+    },
+    {
+     "route": "this shire's own scratchpad",
+     "card": "aifoundry1-c1",
+     "measured_pj_per_byte": 4.856680293746044,
+     "predicted_pj_per_byte": 4.504043374062,
+     "err_pct": -7.2608633542985155
+    }
+   ],
+   "rms_pct_pj_per_byte": 4.320823879639728,
+   "worst_pct": -6.860257566836373,
+   "watts_note": "finding 18's own table is not internally consistent: 104.8 pJ/B x 48.4 GB/s is 5.07 W, and it prints 4.34 W over idle for the same run (17% apart), so the model is scored on pJ per byte, the manual's primary quantity, and the watts are reported beside it.",
+   "watts_err_pct_aifoundry2": [
+    41.06551621445762,
+    33.561989508965574,
+    20.330382166274262
+   ]
+  },
+  "E39_gemv_sparsity_ladder": {
+   "rows": [
+    {
+     "card": "aifoundry2",
+     "measured_slope_w": 14.974,
+     "predicted_slope_w": 15.589350673922203,
+     "slope_err_w": 0.6153506739222028,
+     "slope_err_pct": 4.109460891693621,
+     "slope_inside_ci99": false,
+     "measured_intercept_w": 2.3,
+     "predicted_intercept_w": 0.6886356299614628,
+     "intercept_err_w": -1.6113643700385372,
+     "measured_dense_w": 17.508,
+     "predicted_dense_w": 16.277986303883665,
+     "dense_err_w": -1.230013696116334,
+     "measured_zero_w": 2.47,
+     "predicted_zero_w": 0.6886356299614624,
+     "zero_err_w": -1.7813643700385378
+    },
+    {
+     "card": "aifoundry3",
+     "measured_slope_w": 14.496,
+     "predicted_slope_w": 13.890894266532042,
+     "slope_err_w": -0.6051057334679584,
+     "slope_err_pct": -4.174294518956667,
+     "slope_inside_ci99": true,
+     "measured_intercept_w": 0.925,
+     "predicted_intercept_w": 0.8429592005916374,
+     "intercept_err_w": -0.08204079940836262,
+     "measured_dense_w": 15.534,
+     "predicted_dense_w": 14.733853467123678,
+     "dense_err_w": -0.8001465328763224,
+     "measured_zero_w": 1.03,
+     "predicted_zero_w": 0.8429592005916378,
+     "zero_err_w": -0.18704079940836227
+    },
+    {
+     "card": "aifoundry1-c1",
+     "measured_slope_w": 15.782,
+     "predicted_slope_w": 14.424846971311709,
+     "slope_err_w": -1.3571530286882911,
+     "slope_err_pct": -8.59937288485801,
+     "slope_inside_ci99": false,
+     "measured_intercept_w": 1.476,
+     "predicted_intercept_w": 0.016596573795703524,
+     "intercept_err_w": -1.4594034262042965,
+     "measured_dense_w": 17.302,
+     "predicted_dense_w": 14.441443545107413,
+     "dense_err_w": -2.8605564548925866,
+     "measured_zero_w": 1.386,
+     "predicted_zero_w": 0.016596573795702563,
+     "zero_err_w": -1.3694034262042973
+    }
+   ],
+   "rms_w": 1.3765663306329081,
+   "bias_w": -1.0606868302851402,
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.json items ABLB-3c, ABLB-3ab"
+  },
+  "E37_mmbench_fp32_from_DRAM": {
+   "rows": [
+    {
+     "card": "aifoundry2",
+     "measured_over_idle_w": 8.78283,
+     "measured_ci99": [
+      8.0669,
+      9.49876
+     ],
+     "predicted_over_idle_w": 10.775085057687711,
+     "err_w": 1.9922550576877107,
+     "err_pct": 22.68352066119589,
+     "bracket_w": [
+      6.178096685737593,
+      15.372073429637831
+     ],
+     "measured_inside_bracket": true,
+     "bytes_per_op_implied": 1604.216154141198,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.6886356299614624,
+      "tensor": 0.8924726838260114,
+      "dram": 9.193976743900238
+     }
+    },
+    {
+     "card": "aifoundry3",
+     "measured_over_idle_w": 8.35519,
+     "measured_ci99": [
+      8.19703,
+      8.51335
+     ],
+     "predicted_over_idle_w": 10.357581931307763,
+     "err_w": 2.0023919313077627,
+     "err_pct": 23.965845555968958,
+     "bracket_w": [
+      6.005154346821984,
+      14.710009515793542
+     ],
+     "measured_inside_bracket": true,
+     "bytes_per_op_implied": 1576.8952434342682,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.8429592005916378,
+      "tensor": 0.8097675617445667,
+      "dram": 8.704855168971559
+     }
+    },
+    {
+     "card": "aifoundry1-c1",
+     "measured_over_idle_w": 8.86504,
+     "measured_ci99": [
+      8.47312,
+      9.25696
+     ],
+     "predicted_over_idle_w": 11.258480660296707,
+     "err_w": 2.393440660296706,
+     "err_pct": 26.998644792315726,
+     "bracket_w": [
+      6.040709991385074,
+      16.47625132920834
+     ],
+     "measured_inside_bracket": true,
+     "bytes_per_op_implied": 1578.2815336928072,
+     "parts_w": {
+      "kernel_offset_and_state_machines": 0.016596573795702563,
+      "tensor": 0.8063427486777395,
+      "dram": 10.435541337823265
+     }
+    }
+   ],
+   "rms_w": 2.137538448450322,
+   "bias_w": 2.12936254976406,
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c fp32-tensor-DRAM"
+  }
+ },
+ "fp32_14_patterns": {
+  "patterns": [
+   "zeros",
+   "checker",
+   "sparse75",
+   "ternary",
+   "sparse50",
+   "ones",
+   "pi",
+   "signs",
+   "pow2",
+   "a_randn_b_ones",
+   "a_ones_b_randn",
+   "mant",
+   "uniform",
+   "randn"
+  ],
+  "in_sample_rms_w": 0.6519750471377854,
+  "in_sample_bias_w": -0.19659459353132952,
+  "leave_one_out_rms_w": 0.7391422478152747,
+  "leave_one_out_bias_w": -0.17116050794998625,
+  "leave_one_out_worst": {
+   "pattern": "checker",
+   "err_w": -1.3771129924706713
+  },
+  "stock_prices_rms_w": 1.1135890541676043,
+  "refit_prices_fJ": {
+   "ffclk": 3.6188056841861846,
+   "mult": 0.03213354105553118,
+   "rest": 0.6285171076485537,
+   "bus": 25.335513568443083
+  },
+  "note": "aifoundry2 only: the 21 Sep board table is the one committed set of 14 measured patterns. E38's published per-card leave-one-out is 1.008 / 0.906 / 0.966 W (FAIL against a registered 0.6 W).",
+  "e38_published_loo_w": [
+   1.008,
+   0.906,
+   0.966
+  ]
+ },
+ "e64_rescore": {
+  "n_points": 103,
+  "e64_own_fit_rms_w": 0.824238968378753,
+  "e64_published_rms_w": 0.8242388715772772,
+  "joined_static_measured_c_rms_w": 0.9244051591709952,
+  "joined_static_bias_w": 0.017825284914015325,
+  "whole_chain_rms_w": 1.434991311541125,
+  "whole_chain_n": 85,
+  "whole_chain_bias_w": 0.6720996435916389,
+  "whole_chain_by_pattern_mean_w": {
+   "a_ones_b_randn": 0.09689140172998023,
+   "a_randn_b_ones": 0.9500749172408179,
+   "mant": 0.23298355346312505,
+   "ones": 2.1580131956350863,
+   "pow2": -0.6765038375974631,
+   "randn": 0.17459105162267033,
+   "signs": 1.1776613637400988,
+   "sparse75": 1.3672699820551635,
+   "uniform": -0.10681010639450388,
+   "zeros": 2.0298080092253747
+  },
+  "before_q126_static_rms_w": 4.045630068112623,
+  "note": "p_ref is each run's board power at that clock referred to a 58 C die (surface_hpl.py). 'before Q126' is the old static part: the 21 Sep idle law plus p_sm, the same at every clock, which is the 27.11 W the recap's item 4 names."
+ },
+ "e62_rescore": {
+  "raw": {
+   "measured_intercept_w": 5.79583333333333,
+   "measured_slope_mw_per_hart": 55.771484375000014,
+   "model_intercept_w": 5.327629396397479,
+   "model_slope_mw_per_hart": 50.46822047554556,
+   "rms_w": 2.009428136923073,
+   "per_rung": [
+    {
+     "harts": 128,
+     "measured_w": 12.75,
+     "model_w": 11.787561617267311,
+     "err_w": -0.9624383827326888
+    },
+    {
+     "harts": 128,
+     "measured_w": 13.0,
+     "model_w": 11.787561617267311,
+     "err_w": -1.2124383827326888
+    },
+    {
+     "harts": 128,
+     "measured_w": 13.26,
+     "model_w": 11.787561617267311,
+     "err_w": -1.4724383827326886
+    },
+    {
+     "harts": 256,
+     "measured_w": 20.02,
+     "model_w": 18.24749383813714,
+     "err_w": -1.7725061618628608
+    },
+    {
+     "harts": 384,
+     "measured_w": 26.7,
+     "model_w": 24.70742605900697,
+     "err_w": -1.9925739409930294
+    },
+    {
+     "harts": 512,
+     "measured_w": 34.71,
+     "model_w": 31.1673582798768,
+     "err_w": -3.5426417201232
+    }
+   ]
+  },
+  "de-leaked k=0.442": {
+   "measured_intercept_w": 5.3538333333333314,
+   "measured_slope_mw_per_hart": 46.275390625,
+   "model_intercept_w": 5.327629396397479,
+   "model_slope_mw_per_hart": 50.46822047554556,
+   "rms_w": 1.2462495750478257,
+   "per_rung": [
+    {
+     "harts": 128,
+     "measured_w": 11.424,
+     "model_w": 11.787561617267311,
+     "err_w": 0.36356161726731173
+    },
+    {
+     "harts": 128,
+     "measured_w": 11.232,
+     "model_w": 11.787561617267311,
+     "err_w": 0.5555616172673119
+    },
+    {
+     "harts": 128,
+     "measured_w": 11.491999999999999,
+     "model_w": 11.787561617267311,
+     "err_w": 0.2955616172673121
+    },
+    {
+     "harts": 256,
+     "measured_w": 16.926,
+     "model_w": 18.24749383813714,
+     "err_w": 1.3214938381371404
+    },
+    {
+     "harts": 384,
+     "measured_w": 22.721999999999998,
+     "model_w": 24.70742605900697,
+     "err_w": 1.985426059006972
+    },
+    {
+     "harts": 512,
+     "measured_w": 29.406,
+     "model_w": 31.1673582798768,
+     "err_w": 1.7613582798768022
+    }
+   ]
+  },
+  "before_q126": {
+   "model_intercept_w": 0.0,
+   "note": "the old model had no clock-dependent static term and no per-kernel offset, so it predicted 0.00 W at zero harts against a measured 5.35-5.80 W (recap item 5)."
+  }
+ },
+ "toggle_recount_refit": {
+  "bench_counts": {
+   "prices_fJ": {
+    "ffclk": 3.6188056841861846,
+    "mult": 0.03213354105553118,
+    "rest": 0.6285171076485537,
+    "bus": 25.335513568443083
+   },
+   "in_sample_rms_w": 0.6519750471377854,
+   "leave_one_out_rms_w": 0.7391422478152747,
+   "counts_used": "the bench's own counts"
+  },
+  "recount_present": false,
+  "recount_path": "docs/reports/data/2026-10-26-toggle-recount/counts.json",
+  "recount_note": "job (b)'s recount is not on main yet; rerun this script once it is, and report the refit as a separate pass."
+ }
+}

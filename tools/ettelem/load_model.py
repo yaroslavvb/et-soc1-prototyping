@@ -320,18 +320,100 @@ def flip_w(flips, active=1024, f_mhz=600.0, volts=None, card="aifoundry2", die_c
                   zero_word_frac of lanes whose operand word is zero (a zero word gates the lane's clocks).
     """
     v = volts_of(card, f_mhz) if volts is None else volts
-    s = sfv(f_mhz, v)
     k_T = 1.0 + temp_coeff * (die_c - T_FIT)
     k_c = CARDS[card]["scale"] if card_scale is None else card_scale
     e = dict(K.e_fJ if e_fJ is None else e_fJ)
     if pin_bus:
         e["bus"] = K.e_readport * 1e15
     g = (1.0 - zero_word_frac) if gate == "hard" else 1.0
+    # s(f, V) = (f/600) * (V/0.517)^2 enters once: the f/600 as a faster op rate, the V^2 as a dearer event.
     rate = F_OP * (f_mhz / 600.0) * active
-    parts = {c: e[c] * flips.get(c, 0.0) * g * rate / 1e15 for c in CLASSES}
-    for c in parts:
-        parts[c] *= s * k_T * k_c
+    k_v = (v / V_REF) ** 2
+    parts = {c: e[c] * flips.get(c, 0.0) * g * rate / 1e15 * k_v * k_T * k_c for c in CLASSES}
     return sum(parts.values()), parts
+
+
+# ---------------------------------------------------------------------------- the hook for job (b)'s recount
+RECOUNT_DIR = os.path.join(DATA, "2026-10-26-toggle-recount")
+
+
+def recount_counts(path=None):
+    """Read job (b)'s recount of the bench's toggles, if it is on main yet; None while the file does not exist,
+    so everything here keeps working without it.
+
+    Every per-toggle price in this project is a measured watt divided by one of these counts, and the two
+    counters disagree 2.9x (the bench's 21,331 toggles a random multiply-add against the recount's 7,160-7,470,
+    and 602.5 clocked bits against the netlist's 1,586). A refit on whichever count survives moves the four
+    prices but not the watts, so it is a SECOND, separately reported pass, not a change to this one.
+
+    EXPECTED SHAPE -- the loosest thing that can be read without guessing:
+        {"per_pattern": {"<pattern>": {"ffclk": <per op>, "mult": ..., "rest": ..., "bus": ...}, ...}}
+    or a scale per class, applied to the bench's own counts:
+        {"scale": {"ffclk": 2.63, "mult": 2.94, "rest": 1.0, "bus": 1.0}}
+    Anything else is returned as {"unreadable": why}, and the caller says so rather than guessing.
+    """
+    p = path or os.path.join(RECOUNT_DIR, "counts.json")
+    if not os.path.exists(p):
+        return None
+    d = json.load(open(p))
+    if "per_pattern" in d or "scale" in d:
+        return d
+    return {"unreadable": f"{p} has neither 'per_pattern' nor 'scale'; see load_model.recount_counts"}
+
+
+def _lsq(A, b):
+    """Normal equations, Gauss-Jordan. Small and well conditioned here."""
+    n = len(A[0])
+    M = [[sum(A[k][i] * A[k][j] for k in range(len(A))) for j in range(n)]
+         + [sum(A[k][i] * b[k] for k in range(len(A)))] for i in range(n)]
+    for i in range(n):
+        p = max(range(i, n), key=lambda r: abs(M[r][i]))
+        M[i], M[p] = M[p], M[i]
+        d = M[i][i]
+        M[i] = [x / d for x in M[i]]
+        for r in range(n):
+            if r != i and M[r][i]:
+                f = M[r][i]
+                M[r] = [x - f * y for x, y in zip(M[r], M[i])]
+    return [M[i][n] for i in range(n)]
+
+
+def refit_prices(measured_board_w, idle_w, counts=None, active=1024, f_mhz=600.0, volts=V_REF,
+                 kernel_offset=None):
+    """Refit the four per-event prices on measured board powers; the hook job (b)'s recount plugs into.
+
+    measured_board_w : {pattern: W}.  idle_w : the measured idle those launches sat on.
+    counts           : None for the bench's own counts, or recount_counts()'s dict.
+    Returns {prices_fJ, in_sample_rms_w, leave_one_out_rms_w, counts_used}.
+    """
+    tog = load(D21, "toggles.json")
+    pats = list(measured_board_w)
+
+    def row(pat):
+        if counts and "per_pattern" in counts and pat in counts["per_pattern"]:
+            fl = counts["per_pattern"][pat]
+        else:
+            fl = flips_from_toggles(tog, pat)
+            if counts and "scale" in counts:
+                fl = {c: fl[c] * counts["scale"].get(c, 1.0) for c in CLASSES}
+        r = F_OP * (f_mhz / 600.0) * active * (volts / V_REF) ** 2 / 1e15
+        return [fl[c] * r for c in CLASSES]
+
+    c0 = STATIC["c0_w"] if kernel_offset is None else kernel_offset
+    base = c0 + K.p_sm + idle_w
+    A = [row(p) for p in pats]
+    b = [measured_board_w[p] - base for p in pats]
+    e = _lsq(A, b)
+    ins = [sum(a * x for a, x in zip(A[i], e)) + base - measured_board_w[pats[i]] for i in range(len(pats))]
+    loo = []
+    for i in range(len(pats)):
+        ei = _lsq([A[j] for j in range(len(pats)) if j != i], [b[j] for j in range(len(pats)) if j != i])
+        loo.append(sum(a * x for a, x in zip(A[i], ei)) + base - measured_board_w[pats[i]])
+    n = len(pats)
+    return {"prices_fJ": dict(zip(CLASSES, e)),
+            "in_sample_rms_w": math.sqrt(sum(x * x for x in ins) / n),
+            "leave_one_out_rms_w": math.sqrt(sum(x * x for x in loo) / n),
+            "counts_used": ("job (b)'s recount" if counts else "the bench's own counts")}
 
 
 # ---------------------------------------------------------------------------- the catalogue part

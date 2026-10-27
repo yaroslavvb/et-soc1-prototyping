@@ -9,6 +9,13 @@ kinds of flip per op; (2) turn flip rates into switching watts with the fitted e
 die temperature and run the fitted thermal network forward from an idle die at --start degrees.
 Prints the flip counts, the switching power, the board power at the start temperature, the temperature after
 10 s, 1 min and 10 min, the time to --cap, and the duty cycle that would hold the die at the start temperature.
+
+Since Q126 (26 Oct 2026) the operating point is an argument instead of a correction applied by hand afterwards:
+--f-mhz, --volts, --card and --temp-coeff. **Their defaults reproduce this script's earlier numbers to the
+digit** (600 MHz, 0.517 V, no card scale, no temperature drift: every multiplier is exactly 1.0), so anything
+that called it before gets what it got before. For loads outside the fp32 multiply-add -- other number types,
+memory, the mesh, a mixed kernel -- and for the governor and the heat path wrapped around the answer, use
+tools/ettelem/predict_load.py, which is built on tools/ettelem/load_model.py.
 """
 import argparse
 import json
@@ -23,6 +30,11 @@ FMA = os.path.join(HERE, "..", "..", "rtl-sim", "fma_toggle")
 F_OP = 600e6 / 546.0
 CLASSES = ["ffclk", "mult", "rest", "bus"]
 MULT_BLOCKS = ("csa", "compressor", "wallace", "booth")
+V_REF = 0.517          # the volts the four prices were fitted at (aifoundry2, 600 MHz, 21 Sep)
+T_FIT = 80.96          # the die reading they were fitted at
+# E38's switching scale between cards at a matched die temperature; 1.0 is "no card correction", the old default.
+CARD_SCALE = {"none": 1.0, "aifoundry2": 1.0, "aifoundry3": 0.963,
+              "aifoundry1-c0": 1.0, "aifoundry1-c1": 1.0}
 
 
 def flips_from_tiles(path):
@@ -42,12 +54,19 @@ def flips_from_toggles(tog, pattern):
     return {"ffclk": m["ff_clocked"], "mult": mult, "rest": m["nets"] - mult, "bus": m["bus"], "valid": m["lane_valid"]}
 
 
-def predict(model, flips, active=1024, start=80.0, cap=90.0, seconds=600.0):
+def predict(model, flips, active=1024, start=80.0, cap=90.0, seconds=600.0,
+            f_mhz=600.0, volts=V_REF, card_scale=1.0, temp_coeff=0.0):
+    """f_mhz, volts, card_scale and temp_coeff default to the point the prices were fitted at, where
+    s = (f/600)*(V/0.517)^2 = 1.0, the card scale is 1.0 and the temperature factor is 1.0: with the defaults
+    every line below is arithmetically what it was before Q126."""
     pw, taus, R, T_amb = model["power"], model["taus"], model["R"], model["T_amb"]
     e = pw["e_fJ"]
-    rate = {c: flips[c] * F_OP * active / 1e15 for c in CLASSES}                  # 1e15 events per second, chip-wide
-    parts = {c: e[c] * rate[c] for c in CLASSES}                                  # watts
-    p_dyn = sum(parts.values()) + pw["p_sm_full_chip"] * active / 1024.0
+    s = (f_mhz / 600.0) * (volts / V_REF) ** 2                                    # the f*V^2 referral
+    k_T = 1.0 + temp_coeff * (start - T_FIT)                                      # switching drift with the die
+    k = s * k_T * card_scale
+    rate = {c: flips[c] * F_OP * (f_mhz / 600.0) * active / 1e15 for c in CLASSES}  # 1e15 events/s, chip-wide
+    parts = {c: e[c] * rate[c] * (volts / V_REF) ** 2 * k_T * card_scale for c in CLASSES}   # watts
+    p_dyn = sum(parts.values()) + pw["p_sm_full_chip"] * active / 1024.0 * k
     leak = lambda T: pw["A_leak_at_80"] * math.exp((min(T, 110.0) - 80.0) / pw["T_L"])
     p_idle = pw["P_fix"] + leak(start)
     # an idle die at `start`: fast stages settled at idle power, the rest of the rise held by the slow stages
@@ -85,13 +104,22 @@ def main():
     ap.add_argument("--start", type=float, default=80.0)
     ap.add_argument("--cap", type=float, default=90.0)
     ap.add_argument("--seconds", type=float, default=600.0)
+    # Q126: the operating point. The defaults are the point the prices were fitted at, so they change nothing.
+    ap.add_argument("--f-mhz", type=float, default=600.0, help="clock in MHz (default 600, the fitted point)")
+    ap.add_argument("--volts", type=float, default=V_REF, help="minion rail volts (default 0.517, the fitted point)")
+    ap.add_argument("--card", default="none", choices=sorted(CARD_SCALE),
+                    help="apply E38's switching scale for this card (default none = 1.0, as before)")
+    ap.add_argument("--card-scale", type=float, help="override the card scale outright")
+    ap.add_argument("--temp-coeff", type=float, default=0.0,
+                    help="switching drift per C away from the 80.96 C fit (E45: 0.003-0.005; default 0)")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
     model = json.load(open(a.model))
     if "T_amb" not in model:
         model["T_amb"] = model["sessions"][0]["T_amb"]
     flips = flips_from_tiles(a.tiles) if a.tiles else flips_from_toggles(json.load(open(a.toggles)), a.pattern)
-    r = predict(model, flips, a.active, a.start, a.cap, a.seconds)
+    scale = CARD_SCALE[a.card] if a.card_scale is None else a.card_scale
+    r = predict(model, flips, a.active, a.start, a.cap, a.seconds, a.f_mhz, a.volts, scale, a.temp_coeff)
     if a.json:
         print(json.dumps({"flips_per_op": flips, **r}))
         return
@@ -99,7 +127,8 @@ def main():
           f"{flips['mult']/1e6:.1f} M tree toggles; {flips['rest']/1e6:.2f} M other toggles; {flips['bus']/1e3:.0f} k operand-word toggles")
     names = {"ffclk": "register clocking", "mult": "multiplier tree", "rest": "rest of the unit", "bus": "operand words"}
     print("switching power: " + ", ".join(f"{names[k]} {v:.1f} W" for k, v in r["watts_by_class"].items())
-          + f", state machines {model['power']['p_sm_full_chip'] * a.active / 1024:.1f} W; total {r['p_switching']:.1f} W on {a.active} minions")
+          + f", state machines {r['p_switching'] - sum(r['watts_by_class'].values()):.1f} W;"
+            f" total {r['p_switching']:.1f} W on {a.active} minions")
     print(f"board power at {a.start:.0f} C: {r['p_board_at_start']:.1f} W (idle {r['p_idle_at_start']:.1f} W)")
     print("die temperature from an idle die at %.0f C: " % a.start + ", ".join(f"{k} s: {v:.1f} C" for k, v in r["T_at"].items())
           + (f"; reaches {a.cap:.0f} C after {r['t_cap']:.0f} s" if r["t_cap"] else f"; stays under {a.cap:.0f} C for {a.seconds:.0f} s"))
