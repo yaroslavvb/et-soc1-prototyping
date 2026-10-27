@@ -231,5 +231,9 @@ python3 tools/claims-v3/sm/reduce_sm.py --data build/claims-v3/aifoundry2/sm --g
 ```
 
 **Two cycles already agree on that slope**: p11 reads 0.2960 W/°C over 51–58 °C (rms 0.116 W, 2,248 samples)
-and p13 reads 0.2946 (rms 0.116, 638 samples). E68's published prices already carry both ends of the band
+and p13, the first complete 900 s cycle, reads **0.2923** (rms 0.117 W, 1,776 samples). p13 also gives the
+first scoreable fit: T_L 27.8 °C, B 16.03 W, A80 20.06 W, floor 49.0 °C, leakage share 0.306 at 51 °C rising
+to 0.439 at 67 °C — against the published law's 0.451 and 0.562. If that holds over the night, **this card's
+resting draw is more fixed and less leakage than the law assumes**, which by L3's registered reading means
+more of the governor's 65 W is available for switching than the model currently allows. L4 already PASSes. E68's published prices already carry both ends of the band
 (amendment A7), so this re-run confirms rather than changes them.
