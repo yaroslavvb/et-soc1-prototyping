@@ -18,6 +18,10 @@ It refuses to write if the serialised output still carries anything a public pag
 on a private network, a session link, an address, a home path, a word about machine access, a
 spacesheep page that is not public, a name that is not a published author of cited work, or any
 mention of the private design archive beyond the fact that a study happened.
+
+A second gate reads the curated asks instead of the output, for the two faults the first cannot
+see because the same string is legitimate elsewhere on the page: a host named inside his quoted
+words in a spelling he dictated, and a role substitution glued into a compound. See ASK_ONLY.
 """
 import json, os, re, sys, math, datetime, collections
 
@@ -50,6 +54,45 @@ PEOPLE_OK = {'horace he', 'horace', 'bill dally', 'dally', 'horowitz', 'mark hor
              'yaroslav bulatov', 'yaroslavvb', 'horace hay', 'build daily'}   # published authors of cited work
 PEOPLE_BAD = re.compile(r'\b(roman|shaposhnik|tanya|dadasheva|padgett|kanter|tondwalkar|glick|saquib|misha|'
                         r'ivan|nahmias|mitchell)\b', re.I)
+
+# ------------------------------------------------------- the curation gate
+# A second gate, over the curated inputs rather than the serialised output. It exists because the
+# first two builds shipped three faults the gate above cannot see, each of them a legitimate string
+# somewhere else on the page:
+#   - a card host named inside one of his quoted asks in a spelling he dictated ("AI Foundry2",
+#     "aistudio2"), while the asks on either side had it replaced by "[a card host]". FORBIDDEN
+#     cannot simply ban the name: the machine keys, session titles, commit subjects and public page
+#     slugs carry "aifoundry2" legitimately more than 950 times;
+#   - the private archive host dictated as "MoreDesk", which FORBIDDEN's \bmordast\b cannot match,
+#     on a page whose §5 promises the archive appears only as dates and spans.
+# Both are only ever wrong inside a quoted ask, so that is where this looks. A phonetic list can
+# never be complete; it catches the spellings that have actually appeared, and the asks still have
+# to be read.
+ASK_ONLY = [
+    (r'\bai[ -]?(?:foundry|studio)[ -]?[0-9]\b', 'a card host named in an ask - use "[a card host]"'),
+    (r'\bmore[ -]?desk\b|\bmor[ea][ -]?das[kt]\b|\bmordas\w*|\bnekko\b|\bainekko\b',
+     'the private archive host in an ask - use "[a host]"'),
+]
+# A role stands in for a name ("a lab user", "the lab's admin"). Glued into a hyphenated compound or
+# a possessive, that substitution silently rewrites a technical term instead: E60's registered
+# "max-flip order" shipped as "a lab user-flip order", because Max is also a lab user's name.
+GLUED_ROLE = re.compile(r"\w-(?:a lab user|the lab's admin)|(?:a lab user|the lab's admin)-\w", re.I)
+
+
+def scan_curation(QS, blob):
+    hits = []
+    for q in QS['questions']:
+        for fld in ('summary', 'text'):
+            v = q.get(fld) or ''
+            for pat, why in ASK_ONLY:
+                m = re.search(pat, v, re.I)
+                if m:
+                    hits.append((why, '%s.%s: %s' % (q['id'], fld,
+                                                     v[max(0, m.start() - 40):m.end() + 40])))
+    for m in GLUED_ROLE.finditer(blob):
+        hits.append(('a role glued into a compound, rewriting a word',
+                     blob[max(0, m.start() - 60):m.end() + 60]))
+    return hits
 
 
 def scan(text, public_slugs):
@@ -412,6 +455,12 @@ def main(ddir):
         for why, ctx in hits[:40]:
             print('PRIVATE: %-56s %s' % (why, ctx[:140]), file=sys.stderr)
         raise SystemExit('%d things a public page must not carry; nothing written' % len(hits))
+    bad = scan_curation(QS, blob)
+    if bad:
+        for why, ctx in bad[:40]:
+            print('CURATION: %-56s %s' % (why, ctx[:140]), file=sys.stderr)
+        raise SystemExit('%d curated inputs disagree with the page\'s own rule; nothing written'
+                         % len(bad))
     with open(os.path.join(ddir, 'timeline.json'), 'w') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
     print('timeline.json: %d questions, %d sessions in %d lanes, %d experiment runs on %d cards, '

@@ -1365,6 +1365,7 @@ function words(text, lost, k) {
     `The tick row is every commit the lab repository took over these seven weeks, ${num(art.commits, 0)} of them.`,
 
     `<b>What is not here.</b> No machine of mine is named by its address and no link points at one; no session link; no credentials or access paths. ` +
+    `Inside my own words a card host appears by its role, the way the charts label it; the lab's own page names, report titles and commit subjects keep the hosts' names, which are public. ` +
     `The private design archive appears only as dates and spans. The only people named are the published authors whose work these reports cite — ` +
     `Horace He, whose blog post started this; Bill Dally, whose rule of thumb everything is measured against; and, inside my own words, ` +
     `Mark Horowitz and Jeff Dean, whose reference numbers I asked for by name. Everyone else appears by role. ` +
