@@ -740,6 +740,29 @@ sessions are one lane with dates and spans and nothing else. Checks on the day: 
 of. The E63 page is linked: its space read `signed_in` when the documents were gathered at 16:58 PDT and `public`
 when the page was built, because a Q126 pass had re-tiered it at 16:49 (see the last note in this file).
 
+## Q126 published no page: five data directories and two tool trees (26 October 2026)
+
+Q126's seven parts produced **no new space and changed no page's bytes**. Everything they made is reachable
+only as repository files, which is the right shape for what they are — raw data, reductions and the scripts
+that made them — but it means nothing here appears in [MIRROR.md](../reports/MIRROR.md), and a reader who
+knows only the published pages will not find any of it. Recorded so the next session does not go looking for
+a page that was never built.
+
+| What | Where | What is in it |
+|---|---|---|
+| E65, the card run | [`reports/data/2026-10-26-e65-bit-prices-hart-ladder/`](../reports/data/2026-10-26-e65-bit-prices-hart-ladder/README.md) | every pass's telemetry and manifest, four reductions, `hl.json`, `ladder.json`, and the scored predictions. Registered rules and amendments A4–A11: `tools/claims-v3/hb/README.md` |
+| The toggle recount | [`reports/data/2026-10-26-toggle-recount/`](../reports/data/2026-10-26-toggle-recount/README.md) | the settled counter's five readings per pattern, the window-convergence sweep, and both Verilator versions on the same bench. Bench and counter: `rtl-sim/fma_toggle/` |
+| The joined load model | [`reports/data/2026-10-26-load-model/`](../reports/data/2026-10-26-load-model/README.md) | `frozen_predictions.json` (frozen by commit `92b30b8d` before scoring, untouched since), `scores.json`, `fit.txt`, `operand_stats.json`, `refit_on_recount.json`. Model and tools: `tools/ettelem/load_model.py`, `predict_load.py`, `score_load_predictions.py`, `freeze_load_predictions.py`, `refit_on_recount.py` |
+| ASAP7's cell energies | [`reports/data/2026-10-26-asap7-cell-energies/`](../reports/data/2026-10-26-asap7-cell-energies/README.md) | the per-cell price list (`table.md`), the liberty reader and its JSON. The kit itself is **not** committed; `setup.sh` in the sibling directory fetches it |
+| One switch in SPICE | [`reports/data/2026-10-26-asap7-one-switch/`](../reports/data/2026-10-26-asap7-one-switch/README.md) | the decks, both run logs, the parser and `asap7-one-switch.json`: device validation, energy against load and rail, short circuit, FO4 and leakage |
+| Track C, the open netlist | [`reports/data/2026-10-26-open-netlist/`](../reports/data/2026-10-26-open-netlist/README.md) | three censuses, the global-route capacitances, 13 patterns on each of two netlists, and `POWER.md`. Flow: `tools/open-flow/txfma/` (`setup.sh` pins every tool version; `mktiles.sh` carries the stimulus with its seed) |
+
+The netlists, the ASAP7 kit and core-et are fetched, not committed, so a re-run needs `setup.sh` and the
+versions each directory records. Nothing in these six directories names a person, an address, a path into a
+private tree or a foundry identifier; the one place that did — two other lab users' handles in an E65
+amendment — was redacted the same day in `90693c8a`, though the handles remain in the git history of the
+seven commits before it, which only a history rewrite of a public repository would clear.
+
 ## The camera and the details panel (30 September)
 
 For Q74–Q76: the memory levels and the chip diagram (the pages of 28 and 27 September) jumped in the middle of their

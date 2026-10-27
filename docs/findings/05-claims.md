@@ -16,6 +16,12 @@ missed: before that it stopped at E59, while those five experiments' own numbers
 E61 **refuted** are marked dead where their replacements sit: **44.4 fJ per result bit**, **14.2 fJ per carry** and
 the **8.94 pJ zero gate on `fmadd.ps`**. And where the flip model's accuracy is quoted, the held-out figure is
 E38's **0.906–1.008 W rms, scored FAIL**, not E9's in-sample 0.32 W.
+Five further sections, added the same day, carry the rest of **Q126**: **E65** (every bit position, the
+flow-M case and the hart ladder, on aifoundry3) and four pieces of desk work with no card time — what the
+RTL bench's toggle count counts, the joined load model and its frozen predictions, one transistor flip
+priced from the open ASAP7 kit and simulated in SPICE, and the multiply-add put through an open synthesis
+flow. Everything in those four is kind `S`, `F`, `D` or `P`: **nothing in them is a measurement of this
+chip**, and where they meet a measured number the row says which is which.
 Rows that cite R3 for the governor describe the firmware source at `353f20e`; the cards' own trace strings match an
 older build (R3), so what the card runs may differ. Since 28 September the section "The governor on the cards' own
 build, and DV2" has the cards' builds read from source, E51's development data and, since 29 September, its frozen
@@ -889,6 +895,113 @@ registered rules and the full tables are [`tools/claims-v3/hlc/README.md`](../..
 | **The data-independent floor by clock** (58 °C die) | **25.46 / 28.24 / 33.61 W** at 600 / 700 / 800 MHz. The flip model predicts 27.1 W at all three (it has no clock argument): −19% at 800 MHz | M | E64 | same, the floor table |
 | Horace's effect by Horace's mechanism | on a cool die zeros run **13% faster** than random normal fp32 (800 against 710 MHz); sustained, **33% faster** (12.3 against 9.2 TFLOPS) | M | E64 | same |
 | A power throttle-down is not sticky | P5 refuted | M | E64 | same |
+
+## Every bit position, the flow-M case and the hart ladder (E65, 26 Oct; pre-registered, aifoundry3)
+
+aifoundry3 at 600 MHz and a 521.9 mV minion rail, pre-registered 2 min 42 s before the first card touch;
+five of seven passes kept in blocks A and B (205 of 287 runs), five of fourteen in block D. `E65` means
+`docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/`; the registered rules, every amendment and the
+scored predictions are [`tools/claims-v3/hb/README.md`](../../tools/claims-v3/hb/README.md) and that
+directory's README.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **All 32 bit positions priced** | **83 fJ at bit 6 to 1,008 fJ at bit 22** per flipped B bit, a **12.2× span**, with A = 1.0 | M, D | E65 | `E65/hl.json`, `cards.aifoundry3.bits.*.J_per_alternating_bit` |
+| The mantissa is two regimes, not a ramp | bits 0–9 flat at **83–136 fJ** (mean 109), then climbing to **1,008 ± 21 fJ** at bit 22 | M, D | E65 | same |
+| The exponent and the sign | exponent bits 23–30 average **174 fJ** (111–231); the **sign bit 123 fJ** — dearer than every mantissa bit below 10, cheaper than every one above it. Registered prediction A3 (the exponent would be dearest) **fails both halves** | M, D | E65 | same; `E65/README.md`, A3 |
+| **The flow-M case, measured on silicon** | b bit 11 alternating against a = π: **+3.421 ± 0.258 W** over `lb_h0` = **745 ± 56 fJ per flipped bit at the board** — against the chip diagram's gate-level price for the same flip (0.11–0.13 pJ at zero delay, ×1.4 for glitches = 0.15–0.18 pJ), **the multiplier itself is about 23% of what the board pays** | M, D | E65 | `E65/hl.json`, `cards.aifoundry3.bits_pi.11`; the fact `tfma.flip.energy` in `docs/reports/data/2026-09-27-chip-diagram/research/tensorfma32.json` |
+| The busy-partner premium | **1.59× to 4.73×** (A = π over A = 1.0) across bits 0, 8, 11, 16 and 22; all five at ≥ 2 SE | M, D | E65 | `E65/hl.json`, `bits_pi` against `bits` |
+| The hart ladder, with an idle bracket on both sides of every rung | randn **−0.511 ± 0.026 W + 27.13 ± 0.005 mW per hart**; zeros **+0.013 ± 0.016 W + 2.08 ± 0.012 mW per hart**, 64–1,024 harts, 3 laps, mean per-lap residual rms 0.271 and 0.014 W | M, F | E65 | `E65/ladder.json`, `sessions.*.fit.deleaked` and `.fits_per_lap` |
+| **E62's 5.80 W fixed cost is not on this card** | scaled here by f·V² = 0.537, E62's 5.80 W + 55.8 mW/hart is 3.12 W + 30.0 mW/hart: **the slope lands (27.1) and the offset does not (−0.51 W)**. It belonged to E62's baseline — one pre-session idle at a 49 °C die while its rungs ran at 52–61 °C — not to the kernel, the clock or the card | M, D | E65 | `E65/ladder.json`; the data README, block C |
+| The RTL flip model's high bias reproduces | on the 13 items E60 had replays for, **rms 0.78 W at measured/predicted 0.820** — the recap's 0.832 | M, P | E65 | `E65/hl.json`, `cards.aifoundry3.rtl_score` |
+| The switching drift with temperature (D1) | **+22.0 ± 36.1 mW/°C = +0.47 ± 0.78 %/°C**, five gated passes at 58.00 °C against five at 61.00 °C: the registered +0.3–0.5 %/°C band, zero and +1.9 %/°C all sit inside. **CONSISTENT, UNDECIDED — and on a departure contrast**, `bit_22` − `lq_h0`, because the registered `lq_h8` − `lq_h0` was never run in blocks A and B (0 runs against block D's 14) and so was unmeasurable by construction. The interval is normal-approximate on ten passes | M, F | E65 | `E65/runs.csv` and `runs-blockD.csv`; amendment A11 and the ledger's deviation (7) |
+| What the card would not give | the approach tops out at **59–61 °C** under this heater (107 of 123 peaks at exactly 60.0), not E60's probed 64 °C; and a regime with no approach is rejected by the registered 0.3 W anchor drift gate **8 of 8 by construction**, because the within-pass climb that makes the temperature spread is the climb that trips the gate. Those passes launched at **55–62 °C**, climbing monotonically pass by pass — published first as "59 °C", corrected 26 Oct | M | E65 | `E65/runs-blockD.csv`, `start_c` over passes 671–678; `E65/logs/queue-ab.log`; [14-card-behaviour.md](14-card-behaviour.md) |
+| Card time and etiquette | **97 minutes**, 16:45–18:22 PDT against a 2.5 h cap, with no other user on the card at any point; every launch under the card lock and a `timeout 10` | M | E65 | `E65/reduce.txt`, `reduce-blockD.txt`, each pass's `block.json` |
+
+## What the RTL bench's toggle count counts (Q126(b), 26 Oct; simulated, no card)
+
+The flip model's four prices are fitted against a toggle count from `rtl-sim/fma_toggle`. Re-running that
+bench with a settled counter, a VCD-identifier merge and a hierarchy merge says what the count is a count
+of. `TR` means `docs/reports/data/2026-10-26-toggle-recount/`. No card was opened for any row here.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **21,331 toggles per random fp32 multiply-add is a count of names under one Verilator, not of wires** | the published 21,331 (21 Sep) re-runs on aifoundry2's Verilator 5.042 as **21,379**, and the same bench on the same tiles reads **7,014** under 5.052 | S | Q126(b) | `docs/reports/data/2026-09-21-horace-aifoundry2/toggles.json`; `TR/verilator-5042-aifoundry2.json`; `TR/toggles-5052.json` |
+| **The physical figure to quote — and a floor, not a best estimate** | **1,301 nets** per random multiply-add, merging each name with its ancestor scope's (1,325 at a 512-cycle window). It is a floor because the tree-only gate-level count, 1,244, sits just under this whole-unit number | S | Q126(b) | `TR/recount.json`, `randn.mean.nets_hier`; `TR/window-convergence.json` |
+| The other three readings of the same run | per VCD identifier **3,968**; VCD settled per RTL name **7,083**; per distinct waveform **1,007** — a lower bound, and it collapses on regular stimulus | S | Q126(b) | `TR/recount.json`, `randn.mean.*` |
+| **The Verilator defect, measured rather than inferred** | one traced run under 5.042 carries both counters: its coverage counter says **21,297** while its own VCD holds **7,233** — **2.94× apart inside a single simulation**, and only in `txfma_csa` and `txfma_4_2_compressor` (**8.45×**; every other module 0.98×). The VCD's contents match 5.052's to 1.02×, so the circuit's activity is identical and only the counter moved | S | Q126(b) | `TR/verilator-5042-vcd.json` |
+| The tool version reaches the merged counts too | 1,427 nets under 5.042 against 1,300 under 5.052, **1.10×** | S | Q126(b) | same, against `TR/recount.json` |
+| Register bits per lane, and how many the clock reaches | **838** in this RTL, and complete (every register in `txfma_7s` is an `en_ff`, `rst_en_ff` or `rst_ff` instance; the directory holds no `always_ff`); **595.2 clocked per multiply-add in stream, 71%**, against the netlist's 1,586 of 1,851, 86% | S | Q126(b) | `TR/recount.json`, `randn.mean.ff_present` and `.ff_clocked` |
+| The over-count sitting under every fitted femtojoule | **8× to 16×** — 16× against the per-net floor, 8× against the names-per-net route | D | Q126(b) | `TR/README.md`, "What the physical number is" |
+| 🛑 `by_block_hier` is **not** a per-block net count | a net is credited to the outermost module that names it, so the multiplier's share reads **54.8%** of `by_block_settled` but **22.8%** of `by_block_hier` on randn and **0.0%** on `pow2` and `signs`. Split price classes from `by_block_settled` and scale the whole unit by one factor; dividing by the per-module factors is wrong and the file now says so | S | Q126(b) | `TR/recount.json`; `TR/hier-factors.json`, `_how_to_use` |
+
+## Pricing a whole load: the joined model and its frozen predictions (Q126(c), 26 Oct; no new card time)
+
+One model that joins the flip prices, the energy catalogue, a clock-and-voltage static term and the leakage
+law into watts, a clock and a die temperature for a whole load. Four predictions were frozen by commit
+(`92b30b8d`) before their measurements were opened, then scored. 🛑 **The freeze is by commit order, not
+blind**: the session read the four experiments' records while choosing their operating points, and three
+constants in the model come from those same held-out loads (`load_model.HELD_OUT_LEAKS` names them; E39's
+own rail voltage made E39's worst number worse, not better). `LM` means
+`docs/reports/data/2026-10-26-load-model/`.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| E43, the on-chip relay, on pJ per byte | **4.3% rms**, worst −6.9% over the nine card-and-route pairs; all three pooled routes inside the measurement's 99% interval | P→M | Q126(c) | `LM/scores.json`, `loads.E43_relay` |
+| The same load on **watts**, which is what the model exists to predict | **+41.1 / +33.6 / +20.3%** on aifoundry2, decomposed into finding 18's own 17% internal inconsistency (+29.6 / +19.7 / +21.5 points), the +0.69 W static offset (+15.9 / +15.6 / +13.0) and the pJ/B error (−4.4 / −1.7 / −14.1) | P→M | Q126(c) | same, `loads.E43_relay.watts_decomposed` |
+| E39, the gemv sparsity ladder | **1.10 W rms**, bias −0.75 W, over the six independent predictions (three slopes and three intercepts); **2 of 3 slopes fall outside** the measurement's own 99% interval. Pooling all twelve comparisons double-counts and reads 1.38 W | P→M | Q126(c) | same, `loads.E39_gemv_sparsity_ladder` |
+| E37, mmbench fp32 from DRAM | **2.14 W rms** at +22.7 / +24.0 / +27.0%; back-solving the byte count gives 1,577–1,604 B an op on three cards, agreeing to 2%, so one assumption carries the load | P→M | Q126(c) | same, `loads.E37_mmbench_fp32_from_DRAM` |
+| E59, sparse parity | **3.02 W rms**, bias −2.92 W, all four residuals the same sign. The shortfall is not a flat per-hart floor: it spans 2.06× as a constant and tightens to 1.59× divided by (1 − duty) | P→M | Q126(c) | same, `loads.E59_sparse_parity` |
+| E64's floors re-scored | the static part goes from **4.05 W rms to 0.92 W** over 103 points, against E64's own fit at 0.82 W; the whole chain reads 1.44 W over 85 points. Not held out: three of the four observations the static part is fitted on are E64's own floors | M, F | Q126(c) | same, `e64_rescore` |
+| 🛑 **E62's zero-hart intercept is a fit target, not a prediction** | the static fit solves the clock term from it in closed form, so the model matches it to **8.9e-16 W by construction**. What the same fit does earn is E64's three floors to **0.42 W rms on four observations and three parameters**. (The 0.026 W once read as agreement is an internal inconsistency: the fit refers the clock with s(800) = 1.905174, the prediction path with f·V² = 1.901544) | F | Q126(c) | same, `e62_rescore.intercept_is_a_fit_target`; `LM/fit.txt` |
+| The 14 fp32 patterns argue **against** a negative per-kernel offset | at c0 = 0 the refit reproduces the published 21 Sep fit (leave-one-out **0.458 W**, bus 16.09 fJ); at the joined c0 = −1.18 W it reads **0.739 W** and 25.34 fJ, **61% worse**. E64's floors and E62's intercept argue for the offset; these patterns argue against it, and the matter is open | F | Q126(c) | same, `fp32_14_patterns` |
+| **Refitting on physical nets costs accuracy — and gives the honest price of a wire** | leave-one-out **0.458 → 0.698 W** on the recount's best reading. Energy per physical wire **2.367 fJ (17.7 fF effective, at 0.517 V)** per merged RTL net, against **0.140 fJ (1.05 fF)** per bench-counted name. Every rung agrees on the total, 5.42–5.76 pJ a multiply-add: only the divisor moves | F, D | Q126(c) | `LM/refit_on_recount.json`, `rungs.bench` and `rungs.hier_one_factor` |
+| On an independent net count | on Q126(e)'s open-netlist **3,299** unique physical nets a multiply-add, **0.954 fJ (7.1 fF) per wire** — itself an upper bound, because the board fit carries **3.7–3.8×** the energy the netlist's own power analysis puts on the unit | D | Q126(c), Q126(e) | same, `cross_check_against_the_open_netlist` |
+| The systematic over-prediction is **not** a counting artefact | E60's 26 frozen items on aifoundry3 go from 0.832 to **0.854** of predicted (rms 1.28 → 1.15 W) with **25 of 26 residuals still sharing a sign**, and the same direction on the other two cards (0.632 → 0.706, 0.721 → 0.817). The currency conversion's own band moves that ratio 0.933 to 0.746 — wider than the shift | D | Q126(c) | same, `e60_rescore` |
+| A withdrawn number | "settled ÷ hierarchy factors, leave-one-out 0.707 W" **cannot be re-run and is withdrawn**: the corrected `hier-factors.json` nulls the 12 of 40 modules that hold no merged net, and says in so many words not to divide by those factors | — | Q126(c) | same, `verification_of_the_first_pass.settled_over_hf` |
+
+## One transistor flip from an open 7 nm kit (Q126(d), 26 Oct; simulated, no card)
+
+ASAP7 is a predictive, academic 7 nm kit — the closest open stand-in for this chip's process, and **not**
+its process; nothing here is a measurement of the ET-SoC-1. Part 1 reads its liberty, part 2 simulates one
+switch in ngspice on ASAP7's own BSIM-CMG device cards. Internal energy is per output transition, averaged
+over rise and fall and over each arc's mutually exclusive `when` states, **VDD group only**. `A7C` and `A7S`
+mean `docs/reports/data/2026-10-26-asap7-cell-energies/` and `docs/reports/data/2026-10-26-asap7-one-switch/`.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **The flow-M flip priced from the kit alone** | **0.162 pJ** at 2 fF per net (0.111 at 1 fF, 0.264 at 4 fF), on the cell mix Q126(e) measured for this unit with its own flop. As a law: **E(C) = 60.0 fJ + 50.9 fJ/fF × C** at 0.517 V, zero delay | S, D | Q126(d) | `A7C/asap7-cell-energies.json`, `flow_m_flip_estimate.headline` |
+| Against the one like-for-like figure | the estimate **brackets** Q124's 0.11–0.13 pJ from the real cells (same 381 wires, same scope, same zero-delay basis); inverting the law puts Q124's whole band at a per-net load of **0.98–1.37 fF**, a plausible wire plus pin | S, D | Q126(d) | same, `compare_like_for_like` and `implied_net_load_fF` |
+| Against E60, stated honestly | matching E60's **96.9 fJ** at the minion rail (a = π) would need a 0.72 fF net load at zero delay, or 0.18 fF carrying the 1.4× glitch factor — neither is a real wire. The estimate sits **above** E60 once board-against-rail, the cascade E60 includes and zero-delay-against-silicon are stated: a scope gap to close, not agreement to claim | S, D | Q126(d) | same, `compare_to_E60`; [03-experiments.md](03-experiments.md), E60 |
+| Census-weighted internal energy for this unit's mix | **0.2179 fJ per transition** at 0.7 V, over all 33 combinational cell types and 14,119 cells, none missing | S | Q126(d) | same, `census_weighted_mix` |
+| Key cell prices (10 ps slew, 2 fF load, RVT TT) | internal, VDD only, per transition at 0.7 V: INVx1 **0.0487**, NAND2x1 0.1103, NOR2x1 0.1166, XOR2x1 0.2448, FAx1 0.1421, MAJIxp5 0.1056, DFFHQNx1 0.4965, DFFHQx4 **0.9892** fJ. INVx1's input pin is **0.620 fF** | S | Q126(d) | `A7C/table.md`; `A7C/asap7-cell-energies.json`, `cells.*` |
+| 🛑 **The liberty's factor of two, settled in SPICE** | INVx1 at 2 fF and 0.7 V: SPICE **0.0875 fJ per cycle** against the liberty's VDD-only 0.0974 and its VDD+VSS sum 0.195. **The VDD group alone is the rail energy**; summing the two power groups double-counts, and every per-toggle number taken from a liberty should use the VDD group | S | Q126(d) | `A7S/asap7-one-switch.json`, `energy.INVx1.0p700.2p0` |
+| A schematic SPICE energy bounds the liberty **neither way** | with the arc, the `when` state **and** the set of driven outputs all matched, eight cases run **0.90× to 1.36×** of the liberty, with no systematic sign. The 2.04× schematic-against-extracted figure (FO4 9.63 ps in SPICE against 19.60 ps from the liberty) is a **delay** ratio with no measured energy twin | S | Q126(d) | same, `fixups.spice_vs_liberty_0p7V` and `.spice_vs_liberty_verdict`; `fo4` |
+| A full adder's energy depends on its hold state as much as on its kind | FAx1's A arc spans **1.81×** across its four states — 0.3148 to 0.5710 fJ per cycle at 0.7 V, 1.88× at 0.517 V. The price list's row is its cheapest state | S | Q126(d) | same, `fixups.FAx1_by_hold_state` |
+| Internal energy falls a little **faster** than V² | measured **0.474–0.515** between 0.7 V and 0.517 V against the V² rule's 0.5455 — 6–13% steeper, so a 0.517 V column scaled by V² errs high | S | Q126(d) | same, `fixups.voltage_scaling_check` |
+| The devices validate, but not to one tolerance | per fin, RVT TT at 25 °C against the ASAP7 paper: Idsat_n −5.2%, Idsat_p −3.1%, SS_n −2.0% — but **Ioff_n −8.8% and Ioff_p −19.1%**, and the leakage rows below rest on those off-currents | S | Q126(d) | same, `device_check.deviation_vs_paper_25C` |
+| Short circuit does not close at this chip's rail | the two thresholds sum to **0.33 V** in saturation (0.38 V linear), so 0.517 V never opens both devices at once: at 0.7 V a 200 ps edge costs **+0.0639 fJ** (about 70% over the cheapest edge), while at 0.517 V the excess never becomes positive out to 200 ps | S | Q126(d) | same, `short_circuit` |
+| Leakage, and the card against the kit | INVx1 leaks **37.0 pW** at 0.7 V/25 °C and **257.4 pW** at 0.517 V/80 °C (×11–13 over that temperature step). Per transistor the card is **6.4–9.3× leakier** than all-RVT ASAP7 over its source's 20–29 W range (7.5× at the best fit's 23.3 W) | S, D | Q126(d) | same, `leakage`; [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
+
+## The multiply-add on an open synthesis flow (Track C, Q126(e), 26 Oct; simulated, no card)
+
+core-et's `txfma_top` synthesised with Yosys onto ASAP7 and placed with OpenROAD, to get a physical net
+count and a switching energy that do not depend on the RTL bench's counter. 🛑 Detailed routing does not
+close in this OpenROAD, so **there is no SPEF**: every capacitance below is the global route's Steiner
+estimate, with no coupling term. `ON` means `docs/reports/data/2026-10-26-open-netlist/`; the flow is
+`tools/open-flow/txfma/`.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **The multiplier's cells, like for like** | **4,989 cells and 42,758 transistors** on the comparable netlist (flattened except the four multiplier blocks) against the tape-out flow's 4,487 and 49,755 — **1.11× the cells, 0.86× the transistors**. With all 182 module boundaries kept it is 7,967 and 58,060, so the earlier 1.77× was the hierarchy, not the library | S | Q126(e) | `ON/census_mixed.json` against `ON/census_keep.json`; the fact `tfma.asbuilt.cells` |
+| Flip-flops in the whole unit | **1,953** flattened and 1,974 on the comparable netlist, against the tape-out flow's 1,851 — 5.5% and 6.6% apart | S | Q126(e) | `ON/census_flat.json`, `ON/census_mixed.json`; the fact `tfma.regs.stage` |
+| **Tree against tree, the two flows disagree** | **628.2** physical toggles per random multiply-add in the Wallace tree (716.3 with hierarchy kept) against `tfma.glitch`'s **1,244** — **1.98× apart**. An earlier draft read 3.5% by putting a Booth-plus-tree-plus-adder figure against a tree-only one | S | Q126(e) | `ON/power-mixed/power_gr_randn.json`; `ON/POWER.md` |
+| The whole unit's physical nets | **3,299** per random multiply-add (3,623 with hierarchy kept), against Q126(b)'s whole-unit 1,301–2,778 and the RTL bench's 21,331 | S | Q126(e) | same |
+| Energy per flipped operand bit, fitted the way E60 fits it | **38.5 fJ** per designed bit with a busy partner and **32.9 fJ** quiet (54.9 and 46.3 fJ with the cells' internal energy), against E60's measured **129.9 and 116.7 fJ** at the board — **30% and 28%** on switching alone, 42% and 40% with internal | S, D | Q126(e) | `ON/POWER.md`; `tools/open-flow/txfma/ladder.py` over `ON/power/power_gr_l{q,b}_h*.json` |
+| Switching energy per random fp32 multiply-add — **a floor** | **1.516 pJ** (1.468 on the comparable netlist), or 1.946 pJ with the combinational cells' internal term. The clock tree is 32.7% of it, and zero gating shuts 57% of the tree's capacitance | S | Q126(e) | `ON/power/power_gr_randn.json` |
+| Why it is only a floor | **about half the design's capacitance, in farads, is unpriced**: 23,762 fF of 47,093 is priced, `cap_fraction_priced` **0.505**, and the rest belongs to nets CTS and `repair_design` made after the netlist was simulated. (`POWER.md` reads that field the wrong way round in one sentence, calling 50.5% *unpriced*; the two halves are near enough equal that nothing downstream turns on it.) And OpenROAD's own `report_power` on this netlist puts **internal at 55% of dynamic power** | S | Q126(e) | `coverage.cap_fraction_priced` in each `ON/power/*.json`; `ON/POWER.md` |
+| The operating point this netlist actually has | the placed design **misses** its 1250 ps SDC by **wns −1,219 ps** (tns −44,409 ps), so it would run near **400 MHz**, not 800; and the liberty is TT at 0.7 V while the energy is priced at the 0.517 V minion rail | S | Q126(e) | `ON/POWER.md`, "What ran" |
+| Not established by this flow | **no SPEF and no parasitic-extracted energy** — detailed routing fails on top-level port nets at the die boundary in all ten configurations tried — and **no glitch ratio**, because Icarus aborts inside `$sdf_annotate` | — | Q126(e) | `ON/POWER.md`, the blockers |
 
 ## Ridge points (derived; no card time)
 

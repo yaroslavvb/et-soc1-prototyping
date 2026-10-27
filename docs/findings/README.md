@@ -198,6 +198,30 @@ Read [Terms](#terms) first.
    that drives the card). → [03-experiments.md](03-experiments.md), E59;
    [`workloads/sparseparity/`](../../workloads/sparseparity/README.md)
 
+25. **Every bit position of an fp32 operand has its own price, and the mantissa is two regimes** (E65,
+   26 October, pre-registered, aifoundry3). Flipping one B bit against a constant partner costs **83 fJ at bit 6
+   and 1,008 fJ at bit 22, a 12.2× span**: bits 0–9 sit flat at 83–136 fJ, then the price climbs to the top of the
+   mantissa, while the exponent averages 174 fJ and the sign bit 123 — so the registered guess that the exponent
+   would be dearest fails both halves. The case the chip diagram models — b bit 11 against a = π — is **745 ± 56 fJ
+   at the board**, about four times the gate-level multiplier price, and a busy partner costs 1.6–4.7× a quiet one.
+   An idle-bracketed hart ladder reads **−0.51 ± 0.03 W + 27.1 mW per hart** on random data and **+0.013 ± 0.016 W
+   + 2.08 mW per hart** on zeros: E62's 5.80 W fixed cost scales to 3.12 W here and **is not there** — its slope
+   lands and its offset was E62's own baseline. → [03-experiments.md](03-experiments.md), E65;
+   [05-claims.md](05-claims.md); [`reports/data/2026-10-26-e65-bit-prices-hart-ladder/`](../reports/data/2026-10-26-e65-bit-prices-hart-ladder/README.md)
+26. **The toggle count under the flip model is a count of names under one Verilator, not of wires** (26 October,
+   simulated, no card). The bench's **21,331 toggles per random fp32 multiply-add** re-runs as 21,379 on the lab
+   host's Verilator 5.042 and **7,014** under 5.052 on the same tiles; one traced run carries both counters at once
+   and its coverage says 21,297 where its own waveform holds 7,233 — 2.94× apart inside a single simulation, and
+   only in two modules. Merging each name with its ancestor scope gives **1,301 physical nets**, a floor, so the
+   number under every fitted femtojoule is **8–16× too large**. Independently, the same RTL synthesised and placed
+   on an open 7 nm flow gives **3,299** physical nets and **38.5 fJ per flipped operand bit** against the card's
+   measured 129.9 — about 30% of the board price on switching alone. Refitting the watts on the smaller counts
+   costs accuracy (leave-one-out 0.46 → 0.70 W) and moves the model's standing over-prediction barely at all
+   (0.832 → 0.854 of measured, 25 of 26 residuals still one sign), so the missing term is not a counting
+   artefact. → [05-claims.md](05-claims.md); [`reports/data/2026-10-26-toggle-recount/`](../reports/data/2026-10-26-toggle-recount/README.md),
+   [`2026-10-26-open-netlist/`](../reports/data/2026-10-26-open-netlist/README.md),
+   [`2026-10-26-load-model/`](../reports/data/2026-10-26-load-model/README.md)
+
 ## Terms
 
 The chip in brief. The ET-SoC-1 is Esperanto's RISC-V accelerator, now open-sourced by AI Foundry. Its compute
@@ -253,9 +277,9 @@ Four kinds of thing have IDs, and every claim cites them:
 | Prefix | Meaning | File |
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
-| **Q1–Q66** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E59** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation on 28–29 September; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3 (E55–E57 also on aifoundry2 as a third card); E59 the sparse parity solver on aifoundry3, 29 September, an engineering benchmark) | [03-experiments.md](03-experiments.md) |
-| **A1–A21** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused; A20 the session timeline; A21 the sparse parity page) | [04-artifacts.md](04-artifacts.md) |
+| **Q1–Q127** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E65** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation on 28–29 September; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3 (E55–E57 also on aifoundry2 as a third card); E59 the sparse parity solver on aifoundry3, 29 September, an engineering benchmark; E60–E64 the October campaign — the bit-flip ladder, the deterministic transistor flips, the heat movies, the camera half of the ladder and Horace's power limit; E65 every bit position, the flow-M case and the hart ladder, 26 October) | [03-experiments.md](03-experiments.md) |
+| **A1–A23** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused; A20 the session timeline; A21 the sparse parity page; A22 the heatsink study; A23 the transistor-heat timeline) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
 
