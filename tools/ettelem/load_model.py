@@ -398,8 +398,13 @@ def recount_counts(path=None):
       * the open netlist, an independent count on real wires, gives 3,299 unique nets for the whole unit
         (3,623 with the hierarchy kept) -- so two physical counts still disagree 2.5x, which is the live
         dispute, not the 2.9x one;
-      * clocked register bits: 595.2 a multiply-add in stream, 71% of this RTL's 838 a lane, against the
-        netlist's 1,586 of 1,851, 86%.
+      * clocked register bits: 595.2 a multiply-add in stream. That 838 denominator is NOT the unit's
+        register count (corrected later the same evening): ff_present sees only the 83 en_ff/rst_en_ff/rst_ff
+        instances ff_acct.sv stands in for, which the open netlist also prices at exactly 838 flip-flops.
+        The other 1,233 bits use core-et's `FF macro (rtl/inc/macros.vh, 135 uses in txfma_f0-f6 and
+        txfma_c0) and are invisible to the bench; 838 + 1,233 = 2,071, the whole unit. So 595.2/838 = 71% is
+        a fraction OF THE ENABLE-GATED SUBSET, not the whole-unit 1,586/1,851 = 86% it used to be set
+        against. The counts themselves did not move, so no price here changes.
 
     docs/findings/05-claims.md carries each of these with its file and field (Q126(b), Q126(c), Q126(e)).
     A refit on whichever count survives moves the four prices but not the watts, so it is a SECOND,

@@ -101,12 +101,19 @@ properly the whole-unit range from the two routes that measure it is **1,300 to 
 multiply-add**, against 21,331: a factor of **8 to 16**.
 
 **Read 1,301 as a floor, not a best estimate.** A tree-only gate-level count of 1,244 sits just under a
-whole-unit merged count of 1,301, which cannot both be right if the two designs were the same size — and
-they are not. The netlist is the chip's own, larger design (its 1,851 multiply-add flip-flops against this
-RTL's 838 register bits a lane; see the next section), and the hierarchy merge errs toward merging: two
-nets that happen to carry the same waveform over the window and are named in nested scopes are counted
-once. So the true whole-unit figure is at least 1,301 and plausibly nearer the 2,778 the names-per-net
-route gives. Job (c) should fit against `nets_hier` as a total, treat the resulting energy per net as an
+whole-unit merged count of 1,301, which is impossible unless the merge is losing nets — and it is: two nets
+that happen to carry the same waveform over the window and are named in nested scopes are counted once.
+*(The first version of this paragraph blamed the gap on the netlist being "the chip's own, larger design",
+citing its 1,851 flip-flops against "this RTL's 838". That support is withdrawn — 838 was a subset, the open
+RTL has 2,071 register bits hierarchy-kept and 1,953 flattened, so on flip-flops this RTL is the larger of
+the two. The floor reading does not depend on it.)*
+
+Two independent checks put the floor well below the truth. The open netlist of the same RTL counts **3,299**
+physical nets switching per random multiply-add (`../2026-10-26-open-netlist/`), 2.5x the merge's 1,301. And
+dividing this run's own VCD name count by the chip-diagram research's separately measured names-per-wire
+ratio agrees with it: 7,232.7 names ÷ 2.55 names a wire = **2,836 wires**, which is the names-per-net route's
+2,778 to 2%, while 7,232.7 ÷ 1,300.8 would make a wire carry 5.56 names, 2.2x the measured 2.55. So the true
+whole-unit figure is at least 1,301 and plausibly 2,800–3,300. Job (c) should fit against `nets_hier` as a total, treat the resulting energy per net as an
 upper bound, and take its per-class split from `by_block_settled` rather than `by_block_hier` — see the
 warning under "Files" for why the latter breaks a fit.
 
@@ -116,26 +123,72 @@ femtofarad-per-wire range of a standard-cell input, which is where the recap pre
 
 ## The clocked-bit half of the dispute
 
-The bench counts **602.5** register bits clocked per multiply-add; the chip's netlist
-says 1,586 of 1,851 flip-flops. Most of that gap is the denominator. **This RTL has
-838 register bits per lane**, not 1,851 — measured here directly as the bits the
-unit's clock reaches each cycle (`ff_present`, added to `ff_acct.sv` for this job). In steady stream
-595.2 of those 838 are enabled, so the fractions nearly
-agree — **71%** here against 86% in the netlist — while the
-absolute counts do not. (The bench's 602.5 is a whole-op average, fill and drain
-included; 595.2 is the figure inside the stream.) So the clocked-bit term is not a
-counting defect at all: it is the open Erbium RTL having fewer registers than the chip's own. A price fitted
-on 602.5 and applied to a 1,851-flop unit is wrong by the register count, not by the gating model.
+> **Corrected Mon 26 Oct 2026 by Q128(e), and it closes rather than opens a dispute.** The first version of
+> this section read `ff_present` = **838** as a complete count of this RTL's register bits and called the
+> chip-diagram research's "1,739 of 2,071" a third, unreconciled number, 2.5x away. That was wrong, and the
+> error was ours: **838 is the count of register bits in the 83 library instances the bench replaces, not the
+> unit's register count.** The unit has **2,071**, exactly the figure the chip diagram quotes. The paragraphs
+> below are rewritten; the measurement itself did not change, only what it is a count of.
 
-**The 838 is a complete count of this RTL's registers, and a third number is still unreconciled.**
-Complete, because every register in `txfma_7s` is an instance of the `libs/registers` modules
-`en_ff` (63), `rst_en_ff` (14) or `rst_ff` (6) — the three that `ff_acct.sv` replaces — and the directory
-contains no `always_ff` and no `always @(posedge)` at all, so nothing clocks outside the counter.
-Unreconciled, because the chip-diagram research's own note on fact `tfma.clocked` gives "the RTL view" as
-**1,739 of 2,071** register bits, 2.5x this count, and its harness is not public. Either it counted more
-than `txfma_top` (the lane's operand and bypass registers would do it) or one of the two counts is wrong.
-Whoever owns Q124 should settle it; until then the clocked-bit price carries that 2.5x, and only the
-*fraction* (71% here, 86% in the netlist) should be reused across designs.
+The bench counts **602.5** register bits clocked per multiply-add; the chip's netlist
+says 1,586 of 1,851 flip-flops. **Neither the numerator nor the denominator is the whole unit**, because
+`ff_present` and `ff_clocked` see only the registers `ff_acct.sv` stands in for.
+
+**What `ff_present` = 838 actually counts.** `ff_acct.sv` is a drop-in replacement for three
+`libs/registers` modules, and only instances of those three report themselves. The RTL instantiates exactly
+83 of them — `en_ff` (63), `rst_en_ff` (14), `rst_ff` (6) — and the open netlist of the very same RTL prices
+those 83 instances at **766 + 66 + 6 = 838 flip-flops**, the same number the bench reports, instance for
+instance (`../2026-10-26-open-netlist/census_keep.json`, grouped by module). So the counter is right about
+what it sees.
+
+**The other 1,233 bits the counter never sees, and why the completeness check missed them.** The first
+version argued 838 was complete because the `txfma_7s` directory "contains no `always_ff` and no
+`always @(posedge)`". It does not contain those strings — it reaches them through a macro. The pipeline
+modules declare their registers with core-et's `` `FF `` family, defined in `rtl/inc/macros.vh`:
+
+```verilog
+`define FF(CLK, DATAOUT, DATAIN) \
+    always @ (posedge CLK) \
+        DATAOUT <= DATAIN;
+```
+
+A grep of the source never sees the expansion. `txfma_7s` uses that family **135 times** (124 `` `FF ``,
+10 `` `EN_FF ``, 1 `` `RST_FF ``), in `txfma_f0`–`f6` and `txfma_c0`, and the open netlist puts
+**1,233 flip-flops** in exactly those eight modules — f1 516, f0 213, f3 188, f2 133, f4 88, f5 49, c0 42,
+f6 4. These are the stage registers behind the unit's 13 fine-grain clock gates. 124 of the 135 uses are the
+plain `` `FF `` with no enable at all, so they load whenever their gated clock ticks; the 11 in `txfma_c0`
+are `` `EN_FF ``/`` `RST_FF `` and do carry one.
+
+**The two counts reconcile exactly, and the chip diagram's denominator is the right one.**
+
+| | register bits |
+|---|---:|
+| the 83 `en_ff`/`rst_en_ff`/`rst_ff` instances — what the bench instruments (`ff_present`) | 838 |
+| the 135 `` `FF ``-family macro banks in `txfma_f0`–`f6`, `txfma_c0` — invisible to the bench | 1,233 |
+| **the unit, hierarchy kept (`census_keep.json`, `total.flops`)** | **2,071** |
+
+838 + 1,233 = 2,071 to the bit. So the chip-diagram note on `tfma.clocked`, "the RTL view: 1,739 of 2,071
+register bits load per multiply-add", uses the **correct** denominator, and the 2.5x this section used to
+report against it was an artefact of our own subset, not a disagreement between harnesses. The numerators
+look consistent too, though this bench cannot measure that half: **if** every macro bank sees its gated
+clock in a dense stream, the whole-unit figure would be 1,233 + 595.2 = **1,828 per multiply-add** against
+the research's 1,739 — 5% apart, on two harnesses that share no code, and an upper reading, since the 11
+enabled banks in `txfma_c0` need not all open. Measuring it properly means instrumenting the `` `FF ``
+macro, which is one line in `rtl/inc/macros.vh` and the obvious next pass. Either way nothing here
+contradicts the chip diagram.
+
+**What this changes downstream.** The gating *fraction* this bench measures, 595.2/838 = **71%**, is a
+fraction **of the enable-gated subset only**; the netlist's 1,586/1,851 = 86% is a whole-unit fraction, so
+the two were never the like-for-like pair the first version took them for. Nothing in the price fits moves
+— `ff_clocked` enters them as a count of bits, and that count is unchanged — but a clocked-bit price fitted
+on 595.2 must be applied to the enable-gated population, not to a whole unit. This bench has no whole-unit
+number of its own to put against the netlist's 1,586 of 1,851 until the `` `FF `` macro is instrumented;
+1,828 of 2,071 is the arithmetic ceiling, not a measurement.
+
+🛑 **`docs/findings/05-claims.md` still carries the withdrawn wording** in its Q126(b) row "Register bits per
+lane, and how many the clock reaches" — "**838** in this RTL, and complete". Q128(e) was not allowed to edit
+the findings files, so that row is the one place the old claim survives and it should be replaced by this
+section's reading.
 
 ## Method, and what would make it wrong
 
@@ -274,8 +327,10 @@ are the VCD counts (seeds 1-2, a 254-cycle window at each of two accumulator poi
 
 ### Register bits per multiply-add
 
-`present` is every register bit the unit's clock reaches that cycle; `clocked` is the subset whose
-enable is high, the bench's `ff_clocked`; `changed` is `ff_toggles`. Per lane.
+`present` is every register bit **in the 83 instrumented `libs/registers` instances** (838 of the unit's
+2,071 — see "The clocked-bit half" above); `clocked` is the subset of those whose enable is high, the bench's
+`ff_clocked`; `changed` is `ff_toggles`. The 1,233 bits declared with the `` `FF `` macro are not in any of
+these columns. Per lane.
 
 | pattern | clocked | present | fraction | changed |
 |---|---:|---:|---:|---:|

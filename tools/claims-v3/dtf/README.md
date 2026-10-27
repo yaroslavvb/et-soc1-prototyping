@@ -133,7 +133,7 @@ re-measurement.
 | S12 | C48 C49 C51 C52 C81 | **REFUTED / unsourced** | 19.65 W card idle (measured ~31.8 W at 73 °C, ~36 W at 80 °C); "0.03 W power floor" is the *zeros* pattern's run-to-run repeat spread, not a sensor floor (the documented detection line is σ/precision = 3.33 W); 167 mA and 49.5 mK/W have no provenance; 3.2 mK is the camera's **20 s** figure, not its 5-minute one (1.3 mK at 60 s, 0.6 at 300 s), so E-D7 is ~5× easier than claimed and the printed number is still wrong. |
 | S13 | C10 C82 | **REFUTED** | 1,088 minions in 34 shires, 1,024 running kernels. Worse for E-D7: the host's own `MESH` table (`main.cpp:321-327`) puts shires 0–15 in **every** mesh column (0–5, re-verified), so "West 0–15 / East 16–31" is not a spatial split and would modulate the whole die. No 16/16 vertical or horizontal cut exists; see §10. |
 | S14 | C24 C25 C27(1–6) C32 C36 C37 C39 C40 C41 C66 C80 | **HOLDS** (the page's mining, where data exists) | 13.148 / 13.158 / 13.661 ✓; +7.353 / +5.995 / +5.859, gap 24% ✓; six rows to ±0.01 pJ ✓; `fsll.pi` +4.657, `fswizz.ps` +5.311, `fbcx.ps` +5.237 ✓; `fadd.pi` const − zeros +0.054 ✓ (the one real const value on the page); every E-D6 bit pattern decodes, 23/24 = 95.8% ✓. C39's 2.09× is arithmetic but not a width-only comparison (the flip counts also differ 4×). |
-| S15 | C06 C09 | **PARTLY** (denominator superseded, 26 Oct 2026 — see the note under this table) | ~1,050 toggles per flipped input bit is arithmetically real and sourced — 21,331 counted toggles ÷ 20.3 bits on **`txfma_top`**, the tensor unit, not the vector `fmadd.ps` the page attaches it to. 🛑 But 21,331 is now known to be a count of **names under one Verilator, not of wires**, so both it and the ~1,050 it divides down to are superseded: see the note below. 8.8 fF per clocked bit is the one figure corroborated across documents; 8.0–11.8 fF per logic toggle is 9–13× the only per-toggle capacitance with a fit behind it (0.90 fF). |
+| S15 | C06 C09 | **PARTLY** (denominator superseded, 26 Oct 2026 — see the note under this table) | ~1,050 toggles per flipped input bit is arithmetically real and sourced — 21,331 counted toggles ÷ 20.3 bits on **`txfma_top`**, the tensor unit, not the vector `fmadd.ps` the page attaches it to. 🛑 But 21,331 is now known to be a count of **names under one Verilator, not of wires**, so as a stream average ~1,050 falls to ~356 names; both are RTL names, not wires, and the separate isolated-flip measurement of 1,037 names is untouched. See the note below. 8.8 fF per clocked bit is the one figure corroborated across documents; 8.0–11.8 fF per logic toggle is 9–13× the only per-toggle capacitance with a fit behind it (0.90 fF). |
 | S16 | C17 C18 C44 | **SETTLED BY E60** | The split is 1.50 : 1, not 6.81 : 1; the sum (50.90 fJ) was the only thing the catalogue ever fixed, and the page got it to 98% while splitting it wrongly. 0.517 V is aifoundry2's 21 Sep point; the only clock-pinned card is aifoundry3 at 0.522 V, and the page puts every run on aifoundry2, which is governor-free at 800 MHz / 0.617 V (C59 again). |
 | S17 | C92 C93 | **PARTLY** | Paths are right and "zero firmware changes" is right — tonight's build tests it. But "extend `enercat.c` with op_id 31..42" does not describe this harness: bodies are generated into an `.inc` and dispatched by name, the catalogue already holds 392 configurations, and four of the page's experiments need no new kernel at all because `--operands file:<256 B>` already exists. |
 
@@ -153,9 +153,29 @@ figure here with the denominator below, not with 21,331.
 
 `TR/` is `docs/reports/data/2026-10-26-toggle-recount/`. Two physical counts still disagree 2.5× (1,301
 against 3,299) and that is the live dispute; the 2.9× one this file was written under is settled. Each row
-is in `docs/findings/05-claims.md` with its file and field (Q126(b), Q126(e)). So **~1,050 toggles per
-flipped input bit** is 21,331 ÷ 20.3 and inherits the whole defect: on the per-net floor the same division
-gives ~64, on the open netlist's whole-unit count ~163.
+is in `docs/findings/05-claims.md` with its file and field (Q126(b), Q126(e)).
+
+🛑 **Keep names and wires apart when you re-derive — the rows above are not one ladder.** The first four
+count **RTL names**, the last counts **physical wires**, and dividing one by 20.3 does not convert it into
+the other. Stated per changed input bit, in each unit:
+
+| | per changed bit |
+|---|---|
+| RTL names, as this file quotes it | 21,331 ÷ 20.3 = **~1,050** — superseded with its numerator |
+| RTL names, same bench and tiles, the traced run's own VCD | 7,232.7 ÷ 20.3 = **~356** |
+| physical wires, merged-net floor | 1,300.8 ÷ 20.3 = **~64** — a floor, and the lowest of the three wire counts |
+| physical wires, open netlist | 3,299 ÷ 20.3 = **~163** |
+
+So ~1,050 is superseded **as a stream average**: with the counter defect out it is ~356 names, not ~1,050.
+What that does *not* touch is the separate claim ~1,050 is usually quoted for — one isolated bit flip's
+cascade — which has its own measurement, 1,037 RTL names in the tree over 192,000 single-bit flips, and
+stands on its own. The two agreed only by coincidence; corrected, they no longer do, and anything quoting
+~1,050 should say which of the two it means and cite the isolated-flip run for it.
+
+One cross-check falls out of the same table: 7,232.7 names ÷ 3,299 wires = **2.19 names a wire**, against the
+independently measured 2.55 for the whole unit — 14% apart, which is the best agreement any two of these
+routes reach. Against the merged-net floor it would be 5.56, 2.2× the measured ratio, which is another reason
+to read 1,301 as a floor.
 
 ---
 

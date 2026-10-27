@@ -175,21 +175,33 @@ window long enough to separate nets, and `window-convergence.json` shows `nets_h
   so quote 1,301 as a lower bound. `nets_distinct` (1,007) is lower still and collapses under a regular
   stimulus — it is a diagnostic, not a figure to publish.
 
-`ff_clocked` is disputed the same way: 602.5 register bits per multiply-add here (595.2 inside the
-stream) against 1,586 of 1,851 flip-flops in the chip's netlist. Part of that is the denominator —
-**this RTL has 838 register bits per lane** (`ff_present`), not 1,851, so the *fractions* are 71% and
-86%, not 2.6x apart. 838 is complete for this RTL: every register in `txfma_7s` is an `en_ff`, `rst_en_ff`
-or `rst_ff` instance, the modules `ff_acct.sv` replaces, and the directory holds no `always_ff` at all.
-The rest is a difference between the designs, not between the counters — though the chip-diagram
-research's note on `tfma.clocked` gives a third number for "the RTL view", 1,739 of 2,071, which nobody
-has yet reconciled with this one.
+`ff_clocked` and `ff_present` **count only the registers this bench stands in for**, and that is the whole
+of the apparent dispute (corrected Mon 26 Oct 2026 by Q128(e); the first version of this paragraph read
+`ff_present` = 838 as the unit's register count, and it is not). `ff_acct.sv` replaces three
+`libs/registers` modules, so only instances of those three report: the RTL has 83 of them — `en_ff` (63),
+`rst_en_ff` (14), `rst_ff` (6) — and the open netlist of the same RTL prices exactly those at
+766 + 66 + 6 = **838** flip-flops, matching the bench instance for instance.
+
+The remaining **1,233** register bits are declared with core-et's `` `FF `` macro family from
+`rtl/inc/macros.vh` (`` `define FF(CLK,DATAOUT,DATAIN) always @ (posedge CLK) DATAOUT <= DATAIN; ``), used
+135 times in `txfma_f0`–`f6` and `txfma_c0`. A grep of `txfma_7s` for `always @(posedge` finds nothing
+because the expansion lives in the include — which is why the first version's completeness check passed.
+**838 + 1,233 = 2,071**, exactly the open netlist's hierarchy-kept flip-flop count and exactly the
+denominator the chip-diagram note on `tfma.clocked` uses, so its "1,739 of 2,071" is reconciled, not a
+third number: in a dense stream the 1,233 macro banks all see their gated clock and 595.2 of the 838
+enable-gated bits load, 1,828 against 1,739, 5% apart.
+
+Read the fractions accordingly: 595.2/838 = 71% is of the **enable-gated subset**, while the netlist's
+1,586/1,851 = 86% is whole-unit. The counts themselves are unchanged, so no fitted price moves; but a price
+fitted on `ff_clocked` belongs to that subset. Full working:
+`docs/reports/data/2026-10-26-toggle-recount/README.md`, "The clocked-bit half of the dispute".
 
 ## Files
 
 | File | |
 | --- | --- |
 | `tb.sv` | the stimulus: 8 lanes of `txfma_top`, the TensorFMA32 micro-op order, lane gating, the clock gate. `+dump=<f>` opens a VCD window of `+dump_uops` cycles and ends the run there |
-| `ff_acct.sv`, `acct.cpp` | drop-in `libs/registers` models that report clocked, present and changed bits |
+| `ff_acct.sv`, `acct.cpp` | drop-in `libs/registers` models that report clocked, present and changed bits — **of the 83 instances of those three modules only** (838 of the unit's 2,071 bits; the rest use the `` `FF `` macro and are invisible here) |
 | `tiles.py` | operand tiles for one pattern, or the raw tiles the card ran |
 | `toggles.py` | the coverage counter, per pattern, into `toggles.json` |
 | `settle_count.cpp` | the VCD counter: raw, settled, per identifier, **per net** (`hier`), per distinct waveform, by module |
