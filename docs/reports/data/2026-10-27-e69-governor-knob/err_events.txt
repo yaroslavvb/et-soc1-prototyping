@@ -1,0 +1,301 @@
+E69 - the host kernel log's ET error events, descriptions and syndromes only
+
+aifoundry2, PCI 0000:02:00.0. Read READ-ONLY from the host's kernel ring buffer (`dmesg`) at 2026-10-27 15:14 PDT,
+after the experiment, in the fix pass of the same day: no card node was opened and nothing was set for this read.
+The buffer still reaches back past the host's boot-time events, so every event of the session is here.
+Kernel timestamps are converted with the host's own boot epoch, 2026-10-26T15:13:03.080007-07:00 (now - /proc/uptime); they carry about a half-second of absolute uncertainty.
+
+TOTAL EVENTS IN THE BUFFER: 234
+
+Distinct (Level, Desc, Count, Syndrome text) over all of them:
+   234 x  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: N
+
+A2's replacement abort condition was: abort on an event whose Desc is anything other than `SP Runtime Error` with `Count 0`.
+  Events meeting it: 0  ->  the condition was NEVER MET.
+
+COUNT AT EACH GATE (events with a wall clock before the gate):
+     6  before record opened / first identity reads (13:54-13:58)
+     6  before the first SMOKE session starts, 14:20:45.103
+    18  before the FIRST SET of a governor field, smoke2 14:23:30.707
+    36  before the registered session's first set, s1 14:24:04.282
+   222  before the last restore read-back, s3 14:38:43.780
+   234  in the buffer at the 15:14 read
+
+BURSTS (events more than 1 s apart start a new burst). Each burst follows a cluster of host
+management traffic - a run's set/end queries and SP-ring dump, or a session's open/close.
+
+  #   n  first (PDT)   last (PDT)       kernel s  syndrome N
+  1   6  13:56:28.343  13:56:28.346    81805.264  1..6
+  2   6  14:20:46.608  14:20:46.608    83263.528  7..12
+  3   6  14:23:25.158  14:23:25.161    83422.079  13..18
+  4   6  14:23:32.168  14:23:32.171    83429.089  19..24
+  5  12  14:23:38.950  14:23:39.020    83435.870  25..36
+  6   6  14:24:05.744  14:24:05.747    83462.665  37..42
+  7   6  14:24:17.794  14:24:17.797    83474.714  43..48
+  8   6  14:24:29.810  14:24:29.812    83486.730  49..54
+  9   6  14:24:41.774  14:24:41.777    83498.695  55..60
+ 10   6  14:24:53.743  14:24:53.746    83510.664  61..66
+ 11   6  14:25:05.464  14:25:05.467    83522.385  67..72
+ 12   6  14:25:17.252  14:25:17.255    83534.172  73..78
+ 13   6  14:25:29.122  14:25:29.125    83546.042  79..84
+ 14   6  14:25:41.084  14:25:41.087    83558.004  85..90
+ 15   6  14:25:53.019  14:25:53.022    83569.940  91..96
+ 16   6  14:26:04.961  14:26:04.964    83581.881  97..102
+ 17   6  14:26:16.999  14:26:17.001    83593.919  103..108
+ 18   6  14:26:28.730  14:26:28.733    83605.650  109..114
+ 19   6  14:26:40.454  14:26:40.457    83617.374  115..120
+ 20   6  14:26:52.520  14:26:52.523    83629.441  121..126
+ 21   6  14:27:04.233  14:27:04.236    83641.153  127..132
+ 22   6  14:27:16.197  14:27:16.200    83653.117  133..138
+ 23   6  14:27:28.188  14:27:28.191    83665.108  139..144
+ 24   6  14:27:40.142  14:27:40.145    83677.063  145..150
+ 25   6  14:27:52.099  14:27:52.102    83689.020  151..156
+ 26   6  14:28:03.920  14:28:03.923    83700.841  157..162
+ 27   6  14:28:15.955  14:28:15.958    83712.875  163..168
+ 28   6  14:28:28.003  14:28:28.006    83724.923  169..174
+ 29   6  14:28:40.020  14:28:40.023    83736.940  175..180
+ 30   6  14:28:51.736  14:28:51.739    83748.657  181..186
+ 31   6  14:30:15.597  14:30:15.600    83832.518  187..192
+ 32   6  14:31:51.799  14:31:51.802    83928.719  193..198
+ 33   6  14:33:40.858  14:33:40.861    84037.778  199..204
+ 34   6  14:35:03.913  14:35:03.916    84120.833  205..210
+ 35   6  14:37:09.288  14:37:09.288    84246.208  211..216
+ 36   6  14:38:33.233  14:38:33.236    84330.153  217..222
+ 37  12  14:38:45.241  14:38:45.315    84342.162  223..234
+
+FULL LISTING - one line per event: kernel timestamp, wall clock, Level, Desc, Count, Syndrome
+
+81805.263604  2026-10-27 13:56:28.343  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 1
+81805.263633  2026-10-27 13:56:28.343  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 2
+81805.265034  2026-10-27 13:56:28.345  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 3
+81805.265056  2026-10-27 13:56:28.345  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 4
+81805.266470  2026-10-27 13:56:28.346  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 5
+81805.266494  2026-10-27 13:56:28.346  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 6
+83263.528482  2026-10-27 14:20:46.608  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 7
+83263.528504  2026-10-27 14:20:46.608  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 8
+83263.528576  2026-10-27 14:20:46.608  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 9
+83263.528601  2026-10-27 14:20:46.608  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 10
+83263.528671  2026-10-27 14:20:46.608  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 11
+83263.528695  2026-10-27 14:20:46.608  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 12
+83422.078673  2026-10-27 14:23:25.158  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 13
+83422.078733  2026-10-27 14:23:25.158  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 14
+83422.080011  2026-10-27 14:23:25.160  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 15
+83422.080016  2026-10-27 14:23:25.160  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 16
+83422.081328  2026-10-27 14:23:25.161  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 17
+83422.081333  2026-10-27 14:23:25.161  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 18
+83429.088585  2026-10-27 14:23:32.168  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 19
+83429.088592  2026-10-27 14:23:32.168  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 20
+83429.090030  2026-10-27 14:23:32.170  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 21
+83429.090035  2026-10-27 14:23:32.170  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 22
+83429.091480  2026-10-27 14:23:32.171  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 23
+83429.091486  2026-10-27 14:23:32.171  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 24
+83435.870245  2026-10-27 14:23:38.950  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 25
+83435.870267  2026-10-27 14:23:38.950  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 26
+83435.871656  2026-10-27 14:23:38.951  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 27
+83435.871679  2026-10-27 14:23:38.951  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 28
+83435.873076  2026-10-27 14:23:38.953  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 29
+83435.873100  2026-10-27 14:23:38.953  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 30
+83435.937586  2026-10-27 14:23:39.017  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 31
+83435.937609  2026-10-27 14:23:39.017  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 32
+83435.939021  2026-10-27 14:23:39.019  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 33
+83435.939044  2026-10-27 14:23:39.019  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 34
+83435.940432  2026-10-27 14:23:39.020  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 35
+83435.940455  2026-10-27 14:23:39.020  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 36
+83462.664905  2026-10-27 14:24:05.744  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 37
+83462.664913  2026-10-27 14:24:05.744  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 38
+83462.666305  2026-10-27 14:24:05.746  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 39
+83462.666313  2026-10-27 14:24:05.746  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 40
+83462.667723  2026-10-27 14:24:05.747  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 41
+83462.667779  2026-10-27 14:24:05.747  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 42
+83474.714236  2026-10-27 14:24:17.794  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 43
+83474.714250  2026-10-27 14:24:17.794  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 44
+83474.715701  2026-10-27 14:24:17.795  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 45
+83474.715717  2026-10-27 14:24:17.795  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 46
+83474.717156  2026-10-27 14:24:17.797  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 47
+83474.717161  2026-10-27 14:24:17.797  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 48
+83486.730022  2026-10-27 14:24:29.810  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 49
+83486.730045  2026-10-27 14:24:29.810  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 50
+83486.731462  2026-10-27 14:24:29.811  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 51
+83486.731486  2026-10-27 14:24:29.811  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 52
+83486.732893  2026-10-27 14:24:29.812  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 53
+83486.732917  2026-10-27 14:24:29.812  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 54
+83498.694677  2026-10-27 14:24:41.774  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 55
+83498.694700  2026-10-27 14:24:41.774  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 56
+83498.696106  2026-10-27 14:24:41.776  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 57
+83498.696131  2026-10-27 14:24:41.776  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 58
+83498.697525  2026-10-27 14:24:41.777  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 59
+83498.697595  2026-10-27 14:24:41.777  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 60
+83510.663565  2026-10-27 14:24:53.743  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 61
+83510.663588  2026-10-27 14:24:53.743  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 62
+83510.665021  2026-10-27 14:24:53.745  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 63
+83510.665025  2026-10-27 14:24:53.745  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 64
+83510.666425  2026-10-27 14:24:53.746  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 65
+83510.666489  2026-10-27 14:24:53.746  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 66
+83522.384829  2026-10-27 14:25:05.464  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 67
+83522.384851  2026-10-27 14:25:05.464  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 68
+83522.386266  2026-10-27 14:25:05.466  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 69
+83522.386281  2026-10-27 14:25:05.466  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 70
+83522.387685  2026-10-27 14:25:05.467  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 71
+83522.387707  2026-10-27 14:25:05.467  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 72
+83534.172433  2026-10-27 14:25:17.252  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 73
+83534.172455  2026-10-27 14:25:17.252  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 74
+83534.173876  2026-10-27 14:25:17.253  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 75
+83534.173890  2026-10-27 14:25:17.253  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 76
+83534.175304  2026-10-27 14:25:17.255  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 77
+83534.175328  2026-10-27 14:25:17.255  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 78
+83546.042386  2026-10-27 14:25:29.122  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 79
+83546.042404  2026-10-27 14:25:29.122  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 80
+83546.043820  2026-10-27 14:25:29.123  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 81
+83546.043837  2026-10-27 14:25:29.123  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 82
+83546.045231  2026-10-27 14:25:29.125  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 83
+83546.045253  2026-10-27 14:25:29.125  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 84
+83558.004142  2026-10-27 14:25:41.084  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 85
+83558.004165  2026-10-27 14:25:41.084  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 86
+83558.005574  2026-10-27 14:25:41.085  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 87
+83558.005596  2026-10-27 14:25:41.085  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 88
+83558.007039  2026-10-27 14:25:41.087  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 89
+83558.007064  2026-10-27 14:25:41.087  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 90
+83569.939859  2026-10-27 14:25:53.019  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 91
+83569.939882  2026-10-27 14:25:53.019  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 92
+83569.941301  2026-10-27 14:25:53.021  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 93
+83569.941323  2026-10-27 14:25:53.021  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 94
+83569.942715  2026-10-27 14:25:53.022  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 95
+83569.942739  2026-10-27 14:25:53.022  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 96
+83581.881322  2026-10-27 14:26:04.961  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 97
+83581.881345  2026-10-27 14:26:04.961  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 98
+83581.882813  2026-10-27 14:26:04.962  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 99
+83581.882836  2026-10-27 14:26:04.962  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 100
+83581.884232  2026-10-27 14:26:04.964  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 101
+83581.884262  2026-10-27 14:26:04.964  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 102
+83593.919046  2026-10-27 14:26:16.999  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 103
+83593.919069  2026-10-27 14:26:16.999  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 104
+83593.920467  2026-10-27 14:26:17.000  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 105
+83593.920485  2026-10-27 14:26:17.000  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 106
+83593.921883  2026-10-27 14:26:17.001  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 107
+83593.921904  2026-10-27 14:26:17.001  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 108
+83605.650094  2026-10-27 14:26:28.730  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 109
+83605.650108  2026-10-27 14:26:28.730  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 110
+83605.651611  2026-10-27 14:26:28.731  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 111
+83605.651617  2026-10-27 14:26:28.731  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 112
+83605.653015  2026-10-27 14:26:28.733  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 113
+83605.653027  2026-10-27 14:26:28.733  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 114
+83617.374297  2026-10-27 14:26:40.454  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 115
+83617.374305  2026-10-27 14:26:40.454  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 116
+83617.375704  2026-10-27 14:26:40.455  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 117
+83617.375727  2026-10-27 14:26:40.455  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 118
+83617.377124  2026-10-27 14:26:40.457  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 119
+83617.377139  2026-10-27 14:26:40.457  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 120
+83629.440955  2026-10-27 14:26:52.520  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 121
+83629.440962  2026-10-27 14:26:52.520  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 122
+83629.442387  2026-10-27 14:26:52.522  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 123
+83629.442392  2026-10-27 14:26:52.522  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 124
+83629.443798  2026-10-27 14:26:52.523  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 125
+83629.443861  2026-10-27 14:26:52.523  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 126
+83641.153375  2026-10-27 14:27:04.233  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 127
+83641.153396  2026-10-27 14:27:04.233  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 128
+83641.154817  2026-10-27 14:27:04.234  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 129
+83641.154839  2026-10-27 14:27:04.234  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 130
+83641.156236  2026-10-27 14:27:04.236  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 131
+83641.156259  2026-10-27 14:27:04.236  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 132
+83653.117113  2026-10-27 14:27:16.197  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 133
+83653.117125  2026-10-27 14:27:16.197  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 134
+83653.118603  2026-10-27 14:27:16.198  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 135
+83653.118609  2026-10-27 14:27:16.198  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 136
+83653.120037  2026-10-27 14:27:16.200  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 137
+83653.120043  2026-10-27 14:27:16.200  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 138
+83665.108320  2026-10-27 14:27:28.188  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 139
+83665.108341  2026-10-27 14:27:28.188  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 140
+83665.109732  2026-10-27 14:27:28.189  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 141
+83665.109755  2026-10-27 14:27:28.189  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 142
+83665.111149  2026-10-27 14:27:28.191  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 143
+83665.111166  2026-10-27 14:27:28.191  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 144
+83677.062868  2026-10-27 14:27:40.142  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 145
+83677.062889  2026-10-27 14:27:40.142  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 146
+83677.064333  2026-10-27 14:27:40.144  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 147
+83677.064339  2026-10-27 14:27:40.144  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 148
+83677.065712  2026-10-27 14:27:40.145  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 149
+83677.065733  2026-10-27 14:27:40.145  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 150
+83689.019568  2026-10-27 14:27:52.099  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 151
+83689.019586  2026-10-27 14:27:52.099  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 152
+83689.021050  2026-10-27 14:27:52.101  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 153
+83689.021057  2026-10-27 14:27:52.101  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 154
+83689.022472  2026-10-27 14:27:52.102  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 155
+83689.022481  2026-10-27 14:27:52.102  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 156
+83700.840979  2026-10-27 14:28:03.920  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 157
+83700.841001  2026-10-27 14:28:03.921  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 158
+83700.842408  2026-10-27 14:28:03.922  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 159
+83700.842431  2026-10-27 14:28:03.922  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 160
+83700.843874  2026-10-27 14:28:03.923  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 161
+83700.843898  2026-10-27 14:28:03.923  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 162
+83712.875285  2026-10-27 14:28:15.955  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 163
+83712.875292  2026-10-27 14:28:15.955  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 164
+83712.876707  2026-10-27 14:28:15.956  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 165
+83712.876713  2026-10-27 14:28:15.956  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 166
+83712.878097  2026-10-27 14:28:15.958  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 167
+83712.878119  2026-10-27 14:28:15.958  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 168
+83724.923363  2026-10-27 14:28:28.003  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 169
+83724.923385  2026-10-27 14:28:28.003  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 170
+83724.924801  2026-10-27 14:28:28.004  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 171
+83724.924821  2026-10-27 14:28:28.004  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 172
+83724.926215  2026-10-27 14:28:28.006  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 173
+83724.926238  2026-10-27 14:28:28.006  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 174
+83736.940476  2026-10-27 14:28:40.020  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 175
+83736.940499  2026-10-27 14:28:40.020  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 176
+83736.941890  2026-10-27 14:28:40.021  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 177
+83736.941915  2026-10-27 14:28:40.021  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 178
+83736.943344  2026-10-27 14:28:40.023  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 179
+83736.943350  2026-10-27 14:28:40.023  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 180
+83748.656501  2026-10-27 14:28:51.736  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 181
+83748.656509  2026-10-27 14:28:51.736  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 182
+83748.657813  2026-10-27 14:28:51.737  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 183
+83748.657833  2026-10-27 14:28:51.737  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 184
+83748.659215  2026-10-27 14:28:51.739  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 185
+83748.659221  2026-10-27 14:28:51.739  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 186
+83832.517888  2026-10-27 14:30:15.597  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 187
+83832.517913  2026-10-27 14:30:15.597  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 188
+83832.519302  2026-10-27 14:30:15.599  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 189
+83832.519324  2026-10-27 14:30:15.599  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 190
+83832.520762  2026-10-27 14:30:15.600  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 191
+83832.520785  2026-10-27 14:30:15.600  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 192
+83928.719379  2026-10-27 14:31:51.799  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 193
+83928.719399  2026-10-27 14:31:51.799  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 194
+83928.720801  2026-10-27 14:31:51.800  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 195
+83928.720824  2026-10-27 14:31:51.800  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 196
+83928.722230  2026-10-27 14:31:51.802  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 197
+83928.722255  2026-10-27 14:31:51.802  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 198
+84037.778381  2026-10-27 14:33:40.858  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 199
+84037.778404  2026-10-27 14:33:40.858  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 200
+84037.779808  2026-10-27 14:33:40.859  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 201
+84037.779830  2026-10-27 14:33:40.859  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 202
+84037.781241  2026-10-27 14:33:40.861  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 203
+84037.781265  2026-10-27 14:33:40.861  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 204
+84120.833310  2026-10-27 14:35:03.913  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 205
+84120.833333  2026-10-27 14:35:03.913  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 206
+84120.834729  2026-10-27 14:35:03.914  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 207
+84120.834753  2026-10-27 14:35:03.914  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 208
+84120.836144  2026-10-27 14:35:03.916  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 209
+84120.836168  2026-10-27 14:35:03.916  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 210
+84246.207994  2026-10-27 14:37:09.288  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 211
+84246.208016  2026-10-27 14:37:09.288  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 212
+84246.208086  2026-10-27 14:37:09.288  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 213
+84246.208110  2026-10-27 14:37:09.288  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 214
+84246.208183  2026-10-27 14:37:09.288  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 215
+84246.208207  2026-10-27 14:37:09.288  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 216
+84330.153224  2026-10-27 14:38:33.233  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 217
+84330.153241  2026-10-27 14:38:33.233  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 218
+84330.154640  2026-10-27 14:38:33.234  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 219
+84330.154646  2026-10-27 14:38:33.234  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 220
+84330.156054  2026-10-27 14:38:33.236  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 221
+84330.156063  2026-10-27 14:38:33.236  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 222
+84342.161837  2026-10-27 14:38:45.241  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 223
+84342.161850  2026-10-27 14:38:45.241  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 224
+84342.163247  2026-10-27 14:38:45.243  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 225
+84342.163258  2026-10-27 14:38:45.243  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 226
+84342.164662  2026-10-27 14:38:45.244  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 227
+84342.164675  2026-10-27 14:38:45.244  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 228
+84342.232658  2026-10-27 14:38:45.312  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 229
+84342.232682  2026-10-27 14:38:45.312  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 230
+84342.234086  2026-10-27 14:38:45.314  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 231
+84342.234110  2026-10-27 14:38:45.314  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 232
+84342.235515  2026-10-27 14:38:45.315  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 233
+84342.235537  2026-10-27 14:38:45.315  Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: 234

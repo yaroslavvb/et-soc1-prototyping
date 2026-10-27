@@ -1,7 +1,11 @@
 # V3-KNOB: the governor knob test (E69, Q129)
 
 Pre-registration. Written Tue 27 Oct 2026 (week 44), early afternoon PDT, on aifoundry2's card 0.
-**Committed and pushed before the first card access**, as the lab's rules require.
+**Committed and pushed before the first governor write and before the first launch** (`2d35d1b9`,
+14:19:40 PDT; first launch 14:20:45.103, first set 14:23:30.707), as the lab's rules require. It did **not**
+precede the first *read-only* card access — identity, firmware and `ettelem config` reads ran 13:55–13:58 PDT,
+about 22 minutes earlier, and are recorded under G0 of the change record. (Corrected in A5; the original
+sentence said "before the first card access".)
 
 E64 (Fri 23 Oct, [data](../../docs/reports/data/2026-10-23-e64-horace-power-limit/README.md)) read the
 governor's own log through 43 runs and concluded that on a cool die the board's power against the 65 W TDP
@@ -33,13 +37,23 @@ Each cell is one (TDP, threshold, operand pattern). Two filters cut the grid dow
 from the Esperanto archive's own incident record (the E64 archive review, held outside this repository, read 27 Oct;
 paraphrased, with no archive numbers or ids):
 
-1. **The power loop's exit must be reachable.** The governor's power-down loop leaves only when the averaged
-   board power falls under 1.05 × TDP (or the clock reaches 300 MHz, which this card's VMIN table has no point
-   for). A cap at or below a pattern's own 600 MHz power therefore traps the loop: it is the mechanism that
-   left aifoundry3's governor latched at a boot-time TDP of 0, and Esperanto filed two of their own incidents
-   against it — a service-processor and master-minion hang during power throttling, and a case where the
-   clocks dropped and stayed down through a hot reset. A cell is **dropped** unless its 600 MHz board power is
-   at least 2 W below 1.05 × TDP. That drops `ones` at 35 W, and every `randn` below 55 W.
+1. **The power loop's exit must be reachable.** *As registered, and as implemented:* the governor's
+   power-down loop leaves only when the averaged board power falls under 1.05 × TDP (or the clock reaches
+   300 MHz, which this card's VMIN table has no point for). A cap at or below a pattern's own 600 MHz power
+   therefore traps the loop: it is the mechanism that left aifoundry3's governor latched at a boot-time TDP of
+   0, and Esperanto filed two of their own incidents against it — a service-processor and master-minion hang
+   during power throttling, and a case where the clocks dropped and stayed down through a hot reset. A cell is
+   **dropped** unless its 600 MHz board power is at least 2 W below 1.05 × TDP. That drops `ones` at 35 W, and
+   every `randn` below 55 W.
+   > ⚠️ **[A5, 27 Oct 15:30] This premise is BL2 0.20.0's, not this card's 0.22.0.** At 0.22.0 there is no
+   > loop and no 1.05: the check is single-pass, called once per DM-task pass, and steps one VMIN point
+   > (`thermal_pwr_mgmt.c:864-926`, `:1888-1907`; `rtos_task/dm_task.c:267`), with the clock simply **pinned
+   > at the VMIN floor** once `minion_curr_frequency > minion_min_frequency` fails. The filter is left exactly
+   > as it ran — it only ever *dropped* cells, so E69's grid is conservative either way — and the rationale
+   > that survives on 0.22.0 is different: such a cell can only read the floor (no information about the cap)
+   > while the firmware's power arm has no step left and the card sits over its cap. **Nothing about
+   > aifoundry3 or about TDP 0 should be carried from this paragraph**; the corrected statement, and what it
+   > means for E72, is in [`CHANGE-RECORD.md`](CHANGE-RECORD.md) § "The power branch at this build".
 2. **The thermal loop's exit must stay as reachable as it already is.** A *lowered* threshold that puts a
    pattern's 600 MHz die above it would make the thermal loop spin for the whole run; cells like that are
    dropped (`ones` at 62 °C survives, `randn` does not, so the lowered-threshold arm is `ones` only). At the
@@ -128,7 +142,8 @@ moved cells are the numbers:
 **Honest limitation, stated before the runs.** The sustained rule's level is anchored on each pattern's own
 E64 sustained mean, so the two **control** cells are partly self-fitting and are not an independent test of
 the rule (they do reproduce E64 to 1.4 MHz, which is a check that the card has not drifted, not that the rule
-is right). The rule's force is entirely in the four moved cells, where the knob changes and the anchor does
+is right). *[A5: that drift check **failed** — the sustained control read 763.4 MHz against E64's 737.9, and
++2.5 W at the same pinned die temperature. See the data README, "The control cells did not reproduce E64".]* The rule's force is entirely in the four moved cells, where the knob changes and the anchor does
 not. The burst predictions carry no such circularity: `simulate()` is E64's own validated call and the control
 cells are a genuine out-of-sample check of it against E64's measurements.
 
@@ -207,8 +222,10 @@ data still rebuilds from it.
 Anything that departs from the above is added here, dated, with its reason, and committed before it is relied
 on.
 
-### A1 — the abort temperature splits in two (27 Oct 2026, 14:25 PDT, after the first SMOKE attempt, before
-any knob was moved)
+### A1 — the abort temperature splits in two (27 Oct 2026, written after the first SMOKE attempt ended at
+14:20:46 and **committed at 14:23:04 PDT** in `4e0522f1`, before any knob was moved and before the registered
+session's first set at 14:24:04. *The header first read "14:25 PDT", which is after its own commit — corrected
+in A5.*)
 
 **What happened.** The first `SMOKE` attempt ended on its first run with `safety:die 73 C >= 72 C`, before any
 governor field had been changed (the only set was the card's own 65 W / 65 °C, and the restore read back
@@ -232,7 +249,8 @@ the 72 °C I registered an hour earlier. The loosening is confined to a field th
 reason is the field manual's own warning about that field. Nothing about the predictions, the cells, the rules
 or the restore changes.
 
-### A2 — what an SP error event means here (27 Oct 2026, 14:29 PDT, before the registered session)
+### A2 — what an SP error event means here (27 Oct 2026, **committed at 14:23:04 PDT** in `4e0522f1`,
+before the registered session. *The header first read "14:29 PDT", after its own commit — corrected in A5.*)
 
 The pre-registration said *"any new `Error Event Detected` line during the session is treated as an abort"*.
 Measurement before the session shows that rule would abort everything and measure nothing, so it is replaced
@@ -240,11 +258,17 @@ rather than quietly dropped.
 
 **What was seen.** The host kernel log holds `ET 0000:02:00.0: Error Event Detected / Level Critical /
 Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: N` in bursts of six, N
-counting up from 1. The first burst (N = 1…6) landed at host uptime 81,805 s (≈13:58 PDT), alongside a crash
-of the owner's own one-off `lab-monitor` reader inside `libDM.so`. The second burst (N = 7…12) landed at
-83,263 s (≈14:27 PDT) — during **this session's own 20 s `ettelem sample`**, with no kernel launched and no
-governor field moved. So the events accompany ordinary host telemetry reads draining the service processor's
-error queue; they are not caused by the knob and they are not caused by a workload. `Count` is 0 in every
+counting up from 1. The first burst (N = 1…6) landed at host uptime 81,805 s, which is **13:56:28 PDT**
+(`A5`: the amendment first said ≈13:58; the host booted 26 Oct 15:13:03, and 81,805 s after it is 13:56:28),
+alongside a crash of the owner's own one-off `lab-monitor` reader inside `libDM.so`. The second burst
+(N = 7…12) landed at 83,263 s, which is **14:20:46.6 PDT** (`A5`: the amendment first said ≈14:27 and placed
+it in a 20 s `ettelem sample` — it is six minutes earlier than that and it is a different event). What was
+happening at 14:20:46.6: the **first SMOKE attempt closing** — it had aborted at its temperature gate seconds
+earlier, before any kernel launched, and its restore was writing the card's own 65 W / 65 °C back. So the
+events accompany ordinary host management traffic draining the service processor's error queue; they are not
+caused by the knob (the first set came three minutes later) and they are not caused by a workload.
+The whole operation's 234 events, each with its wall clock, are committed as `err_events.txt` beside the
+data: 37 bursts, one per run or session boundary, every one the same syndrome. `Count` is 0 in every
 one. `docs/findings/14-card-behaviour.md` records the same syndrome on this card and notes that its earlier
 occurrences "did not stop the card, so the event need not be the hang's".
 
@@ -294,10 +318,65 @@ bound is not raised; `randn` is not retried.
 
 Also measured in `s2` before the abort, and reported as a miss: **`S-tdp50-thr65-fp32-ones` read 770.2 MHz
 against 700.0 predicted**, outside its 675–725 band, with a sustained board power of 49.73 W — *under* the
-50 W cap. The cap never bound. The prediction assumed `ones` would be trying for 800 MHz in the sustained
+50 W cap. *[A5: those two figures came from an interim reduction run in scratch minutes after the session. The
+committed reducer — E64's own `reduce_hpl.py` over the registered last-40 s window — gives **769.6 MHz and
+49.95 W**, which is what `results.json` and the data README carry and what should be quoted. Neither the miss
+nor its size changes.]* The cap never bound. The prediction assumed `ones` would be trying for 800 MHz in the sustained
 regime, where it would draw about 56 W; in fact the heat clamp already holds it near 765 MHz, where it draws
 under 50 W. The sustained ladder's one-ratio scaling over-stated `ones`' power by about 6 W, which is the
 model error this cell exposes. A cap below about 48 W would bind, and is a cell for another experiment.
 
 `protocol_s3.json` then runs the last registered sustained cell, `tdp65-thr62-ones` (the threshold lowered;
 `ones` peaks near 52 W, far below the bound) and the `BACK` return check.
+
+
+<a id="a5"></a>
+
+### A5 — the correction pass after an independent adversarial review (27 Oct 2026, 15:30 PDT; desk only)
+
+An independent agent of the same workflow reviewed this experiment between **14:44 and 15:05 PDT**: it
+re-derived every burst and sustained clock from the committed traces, re-read the rule-8 source line by line,
+parsed all five `gov.jsonl`, read the Discord claim back, and took one permitted read-only read of the card at
+**14:58:09 PDT** (TDP 65 W, threshold 65 °C, `low_power`, 600 MHz, 519 mV — the originals, card free). Its
+verdict: **holds-with-fixes**, with 17 faults, none of them fabrication and none of them a broken safety rule.
+
+This amendment records what it found and what was done. **Nothing was re-run**: no card node was opened for
+the fix pass (the one host access was a read-only `dmesg` at 15:14), no measurement changed, and the two
+faults that would need a card are closed as open issues rather than fixed.
+
+**Confirmed by the review, and unchanged:** the pre-registration precedes the claim, the first launch, the
+first set and every data file; 24 of 24 burst clocks reproduce exactly from the raw traces; all four sustained
+cells reproduce; the headline causal result (`ones` at 45 W: 758 and 739.6 MHz with 10 and 9 power-down events
+against 0 and 0 at 65 W, 733.3 predicted) reproduces; 39 governor writes, all rc 0, zero read-back mismatches,
+all inside the code-enforced bounds; the restore in all five sessions and on the card afterwards; the rule-8
+flash-write argument; both corrections to the findings file; and that every failure is reported as a failure.
+
+| # | Fault | What was done |
+|---:|---|---|
+| M1 | the 1.05 × TDP loop-trap premise behind the cell filter is **BL2 0.20.0**, not the 0.22.0 this card reports — and it was being handed to E72 | the premise is marked where it appears (above, and `predict_knob.py`'s docstring); the 0.22.0 behaviour is derived from source in `CHANGE-RECORD.md` § "The power branch at this build", with the corrected TDP-0 statement for E72 (**pin at the VMIN floor, released by restoring the TDP**, not an inescapable loop) and aifoundry3's latch demoted to an observation whose mechanism is unestablished. The filter itself is untouched: it only dropped cells |
+| M2 | the before/after error-event evidence the record promised was half-missing, so A2's abort condition was unverifiable across 228 new events | all 234 events committed as `err_events.txt` (descriptions and syndromes only, with wall clocks and the burst table) plus `err_count_before.txt`; the counts corrected (6 → **18** before the first set, 222 by the last restore); **A2's abort condition shown never met**; A2's own "≈14:27, during a 20 s sample" corrected to 14:20:46.6 at the first SMOKE attempt's close |
+| M3 | the `BACK` return burst's "peak 84.4 W" was its `p800_w`; the real peak was 86.61 W with 12 samples at or above E69's own 85 W bound | corrected in the change record and the result, with the 12 samples and the longest consecutive breach (2, so the 3-sample abort correctly did not fire) stated beside the rule. It is the highest board sample of all 29 reduced runs |
+| M4 | K3 was scored on the 24 runs, not the 12 registered cells — the permissive direction, undated | `reduce_knob.py` now scores K3 **as registered** (12 cells, cell means) with the per-run figures as a secondary statistic; `results.json` regenerated. **12/12 in band, rms 11.50 MHz**; PASS either way |
+| m1 | the sustained control did not reproduce E64 (+25.5 MHz, +2.5 W) and this was logged as a prediction error, not as the registered drift check | a new section in the data README reports the **drift check as FAILED**, with the burst control's matching shift, the identical `die_start`, and the thermal-path reading; every sustained cell is marked **n = 1, no interval** |
+| m2 | A1 and A2 are headed 14:25 and 14:29 but both entered in a commit timed 14:23:04; A2's uptime→clock arithmetic was ~6 min out | both headers corrected to the commit time with the original wording named; both conversions redone against the host's own boot time (13:56:28 and 14:20:46.6) |
+| m3 | "about 20 card-minutes" | **11.4** (8.1 + 1.5 + 1.6 + 0.0 + 0.2), corrected in both places it was used |
+| m4 | "23 set commands" was `s1`'s set-*event* count | **39 DM writes across five sessions** (2 / 3 / 26 / 4 / 4), with `s1`'s breakdown kept |
+| m5 | "the originals read before the first set at 14:24:04.235" named the wrong read | the first set of all was `smoke2` 14:23:30.707; the reads preceding it (14:20:45.103, 14:23:23.649, both 65/65) are now named |
+| m6 | "committed and pushed before the first card access" was false in four committed places | all corrected to "before the first write and before the first launch", with the 13:55–13:58 read-only access recorded separately |
+| m7 | a Mac home path in `results.json` | `reduce_knob.py` records the repo-relative path and the predictions file's sha256; `results.json` regenerated |
+| m8 | K4's "predicted 800.0, measured 800.0" sits at the clock ceiling | K4 is presented on the thermal-step count (11 → 0) and the 800-share (1.00), with the 0.0 MHz error named a ceiling artefact |
+| m9 | numbers disagreeing between committed files | A4's 770.2 MHz / 49.73 W reconciled to the reducer's 769.6 / 49.95 and dated; the governor table's six settings corrected to **seven**; the "uptime 23 h 19 m" row relabelled as the post-abort ≈14:32 reading, with the 14:42 one (23 h 29 m) separate; rule 8's "exactly four call sites" corrected to **five** |
+| m10 | K1's ±5 MHz tolerance and K2's `≥ 775` are looser than the registered text | named as departures at their call sites in `reduce_knob.py` and here. Both rules **FAIL under either reading**, so no verdict turns on them; the implementations are left as they ran |
+| m11 | "the number is 36.6 MHz" was identified with the Levels tab's 775-vs-738 *model* gap | the 36.6 MHz is now stated as the **measured 65 → 70 °C sensitivity**, within-session, n = 1 per cell, a **lower bound** because the top cell is at the ceiling — and explicitly not the model gap, which E69 does not close |
+| m12 | the required Discord `lockf` wrapper is not visible in the artefacts | recorded as **UNKNOWN, not PASS**, in the change record's "Card lock and claim". The scripts are not edited after the fact — a wrapper added now would prove nothing about what ran then; the lesson is that the wrapper belongs inside the post/edit scripts, where it is auditable |
+| m13 | archive-derived paraphrase in a public repo — declared, id-free, number-free, but a judgement call | left in place and **flagged for the hardware owner's ruling** in the change record's final handoff; the editing artefact at the paraphrase ("its own ticket one of their tickets") fixed |
+
+**Not fixed here, and recorded as open because each needs a card:** both sustained `randn` cells remain
+unmeasured (the pattern breaches the 85 W bound at the card's own defaults, and the bound was not raised), and
+the 62 °C cell remains inconclusive (it never reached equilibrium inside 76 s). K1, K2 and K5 remain
+**FAILED as registered**.
+
+**One thing the fix pass found on its own:** `predict_knob.py` prints the digest of the predictions JSON
+*without* the trailing newline it writes, so the digest in the change record
+(`2894d778…`) is not the committed file's (`7de3fd8f…`). Both are now recorded, and `git log` confirms
+`predictions.json` has not been touched since the pre-registration commit.

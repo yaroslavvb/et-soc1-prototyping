@@ -5,6 +5,13 @@ Filled from `templates/change-record.md` of Roman's ET-SoC-1 firmware rebuild / 
 carries **PASS / FAIL / UNKNOWN / N-A** with a timestamp and its evidence. **UNKNOWN is not PASS.** Where a
 gate is marked N-A the reason is written out; "not applicable" is never used to hide a missing check.
 
+> **Corrected 2026-10-27, 15:30 PDT (amendment A5).** An independent agent of the same workflow reviewed this
+> record and the data between 14:44 and 15:05 PDT and returned **holds-with-fixes**: the governor move, the
+> restore (confirmed by its own card read at 14:58:09), the rule-8 source argument line by line, and every
+> measured clock reproduce; 17 faults were raised against the write-up, the arithmetic and one safety premise.
+> Each correction below is marked **[A5]** where it changes a number or a sentence in this record. No card was
+> touched and no measurement changed in the fix pass.
+
 **What this operation is, in the field manual's own classification** (runbook § 1): *authorized live
 observation* plus two *state-changing management writes that are not persistent*. The two writes are
 `DM_CMD_SET_MODULE_STATIC_TDP_LEVEL` (26) and `DM_CMD_SET_MODULE_TEMPERATURE_THRESHOLDS` (22). It is **not**
@@ -22,8 +29,13 @@ next update) exists for persistent writes; the parts that still bind here are re
 - **Operator:** an AI Foundry agent (`a2-e69-knob`) in the Q129 workflow, on the Intel (`Intel-mbp`), working
   over ssh. **Hardware owner / authoriser:** the lab's owner (Yaroslav Bulatov). **Independent reviewer:**
   none for the run itself — stated as a limitation, not a pass; the pre-registration
-  ([`README.md`](README.md)) is the reviewable artefact and was committed and pushed before the first card
-  access. **Recovery operator:** none on site; see "Restore before risk".
+  ([`README.md`](README.md)) is the reviewable artefact and was committed and pushed **before the first
+  governor write and before the first launch** (`2d35d1b9`, 14:19:40 PDT; first write 14:23:30.707, first
+  launch 14:20:45). **[A5]** It did *not* precede the first **read-only** card access: identity, firmware and
+  `ettelem config` reads ran 13:55–13:58 PDT, about 22 minutes earlier, and are recorded under G0 below.
+  **After** the run an independent agent re-derived every number from the committed data and took its own
+  read of the card (14:58:09 PDT: TDP 65 W, threshold 65 °C, `low_power`, 600 MHz, 519 mV — equal to the
+  originals); its 17 findings are amendment A5 in [`README.md`](README.md#a5). **Recovery operator:** none on site; see "Restore before risk".
 - **Explicit authorization reference and scope:** the owner, Tue 27 Oct 2026 ~13:40 PDT: *"Feel free to move
   the governor, by following the instructions of Roman in Discord"*, with Roman's field manual attached, and
   Roman's own words: *"it is extremely important to make sure your agents don't deviate from many gates
@@ -167,8 +179,8 @@ out of the git objects with `git show HEAD:<path>`.
 **And nothing on those paths can reach flash.** The only writers of flash in the whole BL2 0.22.0 tree live in
 `driver/flashfs.c` (`flash_fs_write_partition`, `flash_fs_erase_partition`, `flash_fs_set_part_number`,
 `flash_fs_set_vmin_lut`, `flash_fs_write_config_region`, `flash_fs_increment_*_boot_count`). Searching every
-other file in `src/ServiceProcessorBL2` for calls to them finds exactly four call sites, none of them on
-either set path: `common/main.c:488` and `rtos_task/flash_fs.c:121` (the boot counter),
+other file in `src/ServiceProcessorBL2` for calls to them finds exactly **five** call sites **[A5 — this said
+"four" and listed five; the count was wrong, the list was right]**, none of them on either set path: `common/main.c:488` and `rtos_task/flash_fs.c:121` (the boot counter),
 `services/asset_track.c:87` (`flash_fs_set_vmin_lut`, reached only by the VMIN-LUT asset command),
 `services/asset_track_mgmt.c:39` (the part number), and `services/firmware_update.c:752`
 (`flash_fs_write_config_region`, the OTA's config copy). `thermal_pwr_mgmt.c` touches `flash_fs_*` data only
@@ -187,10 +199,60 @@ binary on the card. Two things reduce the residual: (1) the BL2 **0.20.0** revie
 reached the identical conclusion — RAM only, "all of these live in RAM and are lost at an SP reset"
 (`docs/reports/data/2026-09-28-dvfs2-aifoundry2/plan/review-governor.md` § 1.3, § 8, citing
 `C:tpm:537-552`, `:599-604`) — so the two builds that could plausibly be running agree; (2) the Esperanto
-archive's own user documentation for these knobs describes them as runtime settings, and its own ticket
-one of their tickets records a test that set the TDP level and never restored it, with the level persisting in
-the running firmware until changed — a volatile, sticky RAM field, not a flashed one. **Rule 8: PASS, with
-the build-identity residual named.**
+archive's own user documentation for these knobs describes them as runtime settings, and one of their tickets
+records a test that set the TDP level and never restored it, with the level persisting in the running firmware
+until changed — a volatile, sticky RAM field, not a flashed one. **[A5: the sentence had a duplicated clause.]**
+
+**[A5] Two facts about the source copy that belong in this residual, and were not in it.** The et-platform
+clone on the Intel is a **single shallow commit** (`git rev-list --count HEAD` = 1, `.git/shallow` present),
+so `836a4ab` was the only revision available to read — it was not selected from a history as "the one matching
+the card". And in that snapshot 0.22.0 is the **in-development** version after 0.21.0 (2024-09-25): its
+`CHANGELOG.md` `[Unreleased]` section carries `[SW-21990] fix of retry logic in thermal power monitor to avoid
+infinite retries` and `[SW-22147] Fix conversion in check_power_throttle_conditions function`, i.e. the power
+path was being changed inside the 0.22.0 line itself. Neither touches the two SET paths — both of which are
+one assignment to a `.data` object — so **Rule 8: PASS, with the build-identity residual named**; but it means
+"both plausible builds agree" was established for the **set paths only**, and emphatically not for the
+governor's power branch (next section).
+
+## [A5] The power branch at this build — and the hazard E72 is handed
+
+This operation's cell-drop filter (`predict_knob.py:187,205`, and the pre-registration's "Why these cells and
+no others") rests on a premise that is **not in the build this card reports**: *"the governor's power-down loop
+leaves only when the averaged board power falls under 1.05 × TDP"*. That is **BL2 0.20.0** behaviour
+(`docs/reports/data/2026-09-28-dvfs2-aifoundry2/plan/review-governor.md:199`, citing `:2238-2246` and the
+macro at `:289`; repeated in `docs/findings/14-card-behaviour.md:228,245`). **The repo was already right and
+the experiment read the wrong column:** `docs/findings/14-card-behaviour.md`'s governor table has `353f20e`
+(= `836a4ab`, the 0.22.0 snapshot) as its *first* column, and that column already says "one table point down
+per pass" and "the PMIC's average" — while the blocking loops and the 1.05 exit sit in its **0.20.0** column,
+which the same table still labels "aifoundry2 and aifoundry3". That label is exactly what Correction 1 of the
+data README corrects. In the 0.22.0 snapshot read for rule 8:
+
+| At BL2 0.22.0 | Source |
+|---|---|
+| the check is a **single-pass** `if / else if` — thermal first, then power-down on `avg_soc_pwr_mW > tdp_level_mW`, then power-up on `<` — with **no loop, no re-read and no margin**; its only floor is `minion_curr_frequency > minion_min_frequency` | `services/thermal_pwr_mgmt.c:864-926` |
+| it is called **once per DM-task pass**, from the sampling loop, not in a spin | `rtos_task/dm_task.c:267` |
+| `POWER_DOWN` notifies the power-management task, which steps **one** VMIN point and returns | `thermal_pwr_mgmt.c:1888-1907`, dispatcher `:2182-2190` |
+| no `1.05`, no `TDP_MARGIN` and no scaling of `tdp_level_mW` anywhere in the BL2 tree | grep over `src/ServiceProcessorBL2` |
+| the 0.22.0 line itself carries a fix to this area: *"fix of retry logic in thermal power monitor to avoid infinite retries"* (`SW-21990`) and *"Fix conversion in `check_power_throttle_conditions`"* (`SW-22147`) | `device-bootloaders/CHANGELOG.md` `[Unreleased]` |
+
+**Effect on E69: none that is unsafe.** The filter only ever *dropped* cells, so a wrong premise made the grid
+more conservative, not less. Its conclusion survives on 0.22.0 for a different reason: with the cap under a
+pattern's own 600 MHz power the cell can only read the VMIN floor (no information about where the cap sits)
+while the firmware's power arm has no step left and the card sits over its cap — the host's 85 W abort is then
+the only guard.
+
+**Effect on E72 (the 600 MHz pin at TDP 0), stated so it cannot be mis-carried:** on 0.22.0, TDP 0 makes the
+power-down branch true on every pass under any load, so the clock walks down one VMIN point per pass to
+`mnn_frequency_min_limit` — **600 MHz on this card**, the floor E72 read out of the VMIN LUT — and the
+`minion_curr_frequency > minion_min_frequency` guard then stops the branch notifying at all. The state is a
+**pin at the floor, released by restoring the TDP level**, not a loop that cannot exit. aifoundry3's observed
+latch (boot-time TDP 0, a card that never leaves 600 MHz) is the same *observation*; the *mechanism* it was
+attributed to is 0.20.0 source, and that card's firmware was never queried, so nothing about aifoundry3 should
+be carried to aifoundry2 as established. What remains a real hazard for any TDP-0 arm: the build-identity
+residual above (a card reporting 0.22.0 may carry a pre-`SW-21990`/`SW-22147` binary), and the fact that at the
+floor the firmware's power arm has no further step — the host-side power abort is the only remaining guard.
+A separate desk note in this workflow, `docs/reports/data/2026-10-27-q129-throttle-wrap-gate/README.md`,
+derives the companion gate for any arm that *raises* the cap.
 
 ## Restore before risk (this operation's G1)
 
@@ -223,8 +285,14 @@ the build-identity residual named.**
 **N-A in full: there is no candidate artefact.** No image is built, composed, staged, hashed for release or
 written. The only software this operation introduces is host-side and in the public repo: `run_knob.py`,
 `predict_knob.py`, `protocol.json`, `predictions.json`, this record and `README.md`, all committed and pushed
-**before the first card access**. The frozen predictions' sha256 is
-`2894d77827640a3d280215984f7fab0974c461f22884cb58118344ee6b8c358e` (`predictions.json`). The two
+**before the first governor write and before the first launch** (`2d35d1b9`, 14:19:40 PDT) — **[A5]** not
+before the first read-only card access, which was 13:55–13:58. The frozen predictions' digest is
+`2894d77827640a3d280215984f7fab0974c461f22884cb58118344ee6b8c358e`, which is what `predict_knob.py` prints:
+it hashes the JSON text **without** the trailing newline it then writes. **[A5]** The digest of the file as
+committed is `7de3fd8ffca41eea93dfc0952df5a041765e8e7566815d1532c2bb0f5633f562`
+(`shasum -a 256 tools/claims-v3/knob/predictions.json`); both are recorded because the mismatch otherwise
+looks like a changed file. `predictions.json` has not been touched since `2d35d1b9`, which `git log` on the
+path confirms. The two
 commands sent are the stock `dev_mngt_service`'s own, at the digest recorded above.
 
 ## Immediate release gate (G4)
@@ -258,12 +326,17 @@ The machine-readable record is `gov.jsonl` in the session directory: one line pe
 (with `asked`, `before`, `after`, and each command's argv, rc and ISO timestamp) and `restore`. The table
 below is filled from it after the session.
 
+**[A5] Across all five sessions** (`smoke`, `smoke2`, `s1`, `s2`, `s3`): **39 DM commands sent** — 2, 3, 26,
+4 and 4, each including that session's two restore commands — **every one rc 0**, **zero read-back
+mismatches**, seven distinct asked settings. The first set of all is in `smoke2` at **14:23:30.707**; the
+originals were read before it, at 14:20:45.103 (`smoke`) and 14:23:23.649 (`smoke2`), both 65 W / 65 °C.
+
 Summary of `s1/gov.jsonl` (29 events), with `s2` and `s3` the same shape:
 
 | Item | Value |
 |---|---|
-| Originals read under the lock, before any set | 2026-10-27 **14:24:04.235 PDT** — TDP **65 W**, software threshold **65 °C**, power state `low_power`, 600 MHz, 519 mV |
-| Set events | 27; of these **23 sent a command** (4 were already at the target, so nothing was sent) |
+| Originals read under the lock, before any set **of this session** | 2026-10-27 **14:24:04.235 PDT** — TDP **65 W**, software threshold **65 °C**, power state `low_power`, 600 MHz, 519 mV. **[A5]** The first set of the whole operation was 34 s earlier, in `smoke2`; its own originals read is 14:23:23.649 |
+| Set events | 27; of these **23 sent a command** (4 were already at the target, so nothing was sent). Those 23 events sent **24** commands (one moved both fields); with the restore's 2, `s1` sent **26** |
 | First set | 14:24:04.311 — asked TDP 35 W / 65 °C, read back **35 / 65** |
 | Last set | 14:31:50.353 — asked TDP 65 W / 70 °C, read back **65 / 70** |
 | Distinct settings used across `s1`–`s3` | (35, 65), (45, 65), (50, 65), (55, 65), (65, 62), (65, 65), (65, 70) W / °C |
@@ -306,31 +379,74 @@ either way.
   "minion_mv": 519}`. The module's uptime read **23 h 19 m** after the first abort and the host has been up
   22 h 41 m since 26 Oct, so **the service processor never reset**: the restored values are a real write, not
   a reboot's defaults. The `BACK` return check then ran one 6 s `randn` burst at the restored settings and the
-  card stepped normally (706.3 MHz mean, 10 power-down and 12 power-up events, peak 84.4 W, die 58 → 65 °C —
-  the same behaviour as the TDP-65 control cells), with `tdp level: 65000` back in the governor's log. `s3`
-  exited 0.
+  card stepped normally (706.3 MHz mean, 10 power-down and 12 power-up events, die 58 → 65 °C — the same
+  behaviour as the TDP-65 control cells), with `tdp level: 65000` back in the governor's log. `s3` exited 0.
+  **[A5] Its board power peaked at 86.61 W**, with **12 samples at or above the registered 85 W bound** and a
+  longest consecutive breach of **2**, so the abort rule ("85 W on 3 consecutive samples") correctly did not
+  fire — but it fired no alarm in the write-up either, and it should have: this is the highest board sample in
+  all 29 reduced runs, higher than both aborts (85.2 and 85.8 W), on the final `randn` burst at the card's own
+  restored settings. The earlier figure "peak 84.4 W" was `p800_w` — the power at the 800 MHz point — not a
+  peak. Recomputed from that run's own committed trace (`results_hpl.json`, `BACK-00-back-randn-r1`). It is
+  the same fact A4 records for sustained `randn`: this pattern reaches the mid-80s W on this card at its own
+  defaults.
 - **Guest / excluded memory / packet / core state:** none existed and none was created.
 - **Card lock and claim:** the lock is released only after the restore has been read back; the Discord claim
-  in `#community-lab` is released after the data README is pushed.
+  in `#community-lab` is released after the data README is pushed. **[A5] One process gate is UNKNOWN, not
+  PASS:** the workflow requires every Discord post and edit to run under a shared `lockf` wrapper, and the
+  wrapper is not visible in the committed post/edit scripts, so whether it was applied at the call site cannot
+  be established from the artefacts. Both posts landed, the claim's words were kept and no collision occurred,
+  but the gate is recorded as unproven and the wrapper belongs inside the scripts next time.
 - **Services restored:** the dashboard collector resumes by itself the moment the card lock is released; it
   was never stopped, signalled or killed.
 - **Logs / artefacts:** the session directory under `docs/reports/data/2026-10-27-e69-governor-knob/`, all
   committed to the public repo.
 - **Unresolved risks / prohibited next actions:** the build-identity residual on rule 8 (the card exposes no
-  BL2 git hash through an allowed query) and the absence of any independent hardware recovery path for this
-  fleet. Prohibited next actions without fresh authorization: raising the TDP level above the card's default,
+  BL2 git hash through an allowed query, and the source copy read is a single shallow commit of an
+  in-development 0.22.0) and the absence of any independent hardware recovery path for this fleet. **[A5]**
+  Added: the governor's **power branch** differs between the two plausible builds, so the 1.05 × TDP
+  loop-trap premise this experiment's cell filter was built on must not be carried forward — see
+  "The power branch at this build" above, which states what TDP 0 does on 0.22.0 and what E72 must treat as
+  established and as unproven. Prohibited next actions without fresh authorization: raising the TDP level above the card's default,
   setting it to 0 or near a pattern's 600 MHz draw, lowering the threshold below a pattern's 600 MHz die,
   touching active power management, and every reset, PMIC, flash and OTA operation.
-- **Error events across the whole operation (amendment A2):** the host kernel log's
-  `Error Event Detected` count went from **6** before the first set to **234** after the last run, every one
-  of them the same `Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond
-  Threshold: N` with N simply counting up. The count tracks telemetry volume, not the knob: the sessions
-  sampled at 10 Hz for about 20 card-minutes. No event of any other description, no AER, no link error, no
-  all-ones read. A2's abort condition was never met.
+- **Error events across the whole operation (amendment A2), with the evidence now committed [A5]:** the
+  host kernel log's `Error Event Detected` count was **6** when this record was opened (the first burst at
+  13:56:28, with the pre-session identity reads), **18** before the first set of a governor field
+  (`smoke2`, 14:23:30.707), **36** before the registered session's first set, **222** by the last restore and
+  **234** now. **All 234 are the same** `Level Critical / Desc SP Runtime Error / Count 0 / Syndrome Runtime
+  Error Count Beyond Threshold: N`, N counting 1…234, so **A2's abort condition — an event whose description
+  is anything other than `SP Runtime Error` with `Count 0` — was never met**. That is now checkable rather
+  than asserted: every event, with its kernel timestamp, wall clock, level, description, count and syndrome,
+  is in `err_events.txt` beside the data (read read-only from the host's kernel ring buffer at 15:14 PDT in
+  the fix pass; the buffer still reaches past the host's boot, so nothing is missing). The 234 arrive in **37
+  bursts** — 35 of six and 2 of twelve — each following a cluster of host management traffic: one per run
+  during the BURST block, at the 12 s run cadence, and one at each session's open and close. The count tracks
+  **management-command clusters**, not the knob and not a workload: the first burst preceded any launch and
+  any set, and the one burst the earlier write-up placed "at ≈14:27, during this session's own 20 s `ettelem`
+  sample" was in fact at **14:20:46.6**, at the first SMOKE attempt's close — that attempt aborted at its
+  temperature gate before any kernel launched, and its restore wrote the card's own 65 W / 65 °C back.
+  **[A5]** The total card time was **11.4 card-minutes** (8.1 + 1.5 + 1.6 + 0.0 + 0.2 from the five
+  `end.json`), not the "about 20" the first write-up used in this very sentence. No event of any other
+  description, no AER, no link error, no all-ones read.
 - **Three runs did not happen and are closed, not deferred:** the two sustained `randn` cells (aborted on the
   85 W board bound, which the pattern breaches at the card's own defaults — amendment A4) and the `SMOKE`
   block's analysis (never intended to be analysed).
+- **[A5] Open judgement call for the hardware owner, named not buried:** this record and the
+  pre-registration paraphrase the Esperanto archive's user documentation and two of its incident tickets in a
+  **public** repository. Every mention is labelled as paraphrase and carries no ids, no numbers and no
+  foundry, process or library identifier, and the workflow's brief permits "names and paraphrases" while
+  forbidding "vault/archive content or numbers" — these sit in the overlap. They are left in place and flagged
+  for the owner's ruling; removing them would also remove the stated reason two arms of this experiment were
+  dropped.
+
 - **Signoff:** 2026-10-27 **21:42 UTC / 14:42 PDT** (Tue, ISO week 44). Operator: the AI Foundry agent
-  `a2-e69-knob`. Independent reviewer: **none** — stated as a limitation of this record, not as a pass. The
-  governor is at its defaults, the card is healthy, the firmware is untouched, and no flash, PMIC, reset,
-  driver or PCIe action was performed at any point.
+  `a2-e69-knob`. Independent reviewer at the time of the run: **none** — stated as a limitation of this
+  record, not as a pass. The governor is at its defaults, the card is healthy, the firmware is untouched, and
+  no flash, PMIC, reset, driver or PCIe action was performed at any point.
+- **[A5] Correction pass:** 2026-10-27 **22:30 UTC / 15:30 PDT**, agent `fix-a2-e69-knob`, desk only — no
+  card node opened, no run repeated, no measurement changed. It acts on an independent adversarial review
+  (14:44–15:05 PDT, verdict *holds-with-fixes*, 17 faults) whose own card read at 14:58:09 PDT found the
+  governor still at TDP 65 W / threshold 65 °C. Every correction is marked **[A5]** in this file and listed
+  in [`README.md` § A5](README.md#a5); the data README carries the reader-facing table. Two faults are **not**
+  closed here because they would need a card: nothing in them is retried, and both stay recorded as open
+  (the two unmeasured sustained `randn` cells, and the 62 °C cell that never reached equilibrium).

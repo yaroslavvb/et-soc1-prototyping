@@ -20,10 +20,20 @@ thin margin the governor dithers between the two, as E64 measured for `ones`, an
 with the pair as its band.
 
 SAFETY FILTER (the archive's own incident record; see README "Why these cells and no others"): a cell is dropped
-its 600 MHz board power is at least 2 W below 1.05 x TDP. At or above that line the power-down loop's exit test
-can never be satisfied while the kernel runs - the mechanism that latched aifoundry3's governor at TDP 0 - and
+unless its 600 MHz board power is at least 2 W below 1.05 x TDP. At or above that line the power-down loop's exit
+test can never be satisfied while the kernel runs - the mechanism that latched aifoundry3's governor at TDP 0 - and
 Esperanto filed two of their own incidents against it (ids and details stay out of this public repo). No cell raises the cap above the card's own
 65 W default: their service-processor hang was seen with card power pinned just above 75 W.
+
+  !! CORRECTED 27 Oct 2026 (amendment A5), AFTER the runs: the "power-down loop with a 1.05 x TDP exit" is BL2
+  0.20.0 behaviour. The card reports BL2 0.22.0, whose check is single-pass, is called once per DM-task pass and
+  steps one VMIN point, with no loop and no 1.05 (services/thermal_pwr_mgmt.c:864-926, :1888-1907;
+  rtos_task/dm_task.c:267). This code is LEFT EXACTLY AS IT RAN - the filter only ever dropped cells, so the grid
+  is conservative under either build - but the rationale that survives at 0.22.0 is different: such a cell can
+  only read the VMIN floor (no information about where the cap sits) while the firmware's power arm has no step
+  left and the card sits over its cap. Do not carry the loop-trap premise, or anything about aifoundry3's latch,
+  out of this file: CHANGE-RECORD.md "The power branch at this build" has the corrected statement and what it
+  means for a TDP-0 arm (E72).
 
     python3 tools/claims-v3/knob/predict_knob.py \
         --figures docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json \

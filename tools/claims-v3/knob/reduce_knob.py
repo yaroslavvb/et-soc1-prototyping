@@ -12,9 +12,21 @@ on the exact VMIN points - with the identical definition.
 
 E64's own rules R1-R4 in `results_hpl.json` were written for a card with nothing set and are NOT applicable
 to E69's moved cells; this tool ignores them and says so in its output.
+
+Corrected 27 Oct 2026 in the fix pass (amendment A5, `README.md`), without re-running anything on the card:
+  * K3 is scored on the 12 registered CELLS (cell means), as the pre-registration states, with the 24
+    per-run figures kept beside it as a secondary statistic. It was first scored on the 24 runs, which
+    applied a 10-of-12 bar to 24 - the permissive direction, and not a departure anyone had dated.
+  * `predictions_source` records the repo-relative path and the predictions file's sha256, not the
+    absolute path of whatever machine ran the reduction.
+K1's +-5 MHz tolerance and K2's `>= 775` reading of "800 MHz" are implementation choices looser than the
+registered text; they are left exactly as they ran (both rules FAIL under either reading) and are named at
+their call sites and in A5.
 """
 import argparse
+import hashlib
 import json
+import os
 import statistics as st
 import sys
 
@@ -67,8 +79,14 @@ def main():
     pb = {(c["tdp_w"], c["threshold_c"], c["type"], c["values"]): c for c in pred["burst"]}
     ps = {(c["tdp_w"], c["threshold_c"], c["type"], c["values"]): c for c in pred["sustained"]}
 
+    # The repo-relative path, so a public data file does not carry the operator's home directory.
+    repo = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
+    psrc = os.path.abspath(a.predictions)
+    psrc = os.path.relpath(psrc, repo) if psrc.startswith(repo + os.sep) else os.path.basename(psrc)
     out = {"experiment": "E69", "request": "Q129", "card": "aifoundry2 card 0",
-           "predictions_source": a.predictions, "cells": [], "rules": {}, "unmatched": [],
+           "predictions_source": psrc,
+           "predictions_sha256": hashlib.sha256(open(a.predictions, "rb").read()).hexdigest(),
+           "cells": [], "rules": {}, "unmatched": [],
            "note": "E64's rules R1-R4 in the input file were written for an unmoved governor and do not "
                    "apply to E69; they are ignored here."}
 
@@ -118,7 +136,9 @@ def main():
         return g
 
     # K1: within each pattern, the mean clock is non-decreasing in the cap, and strictly up wherever the
-    # model separates two caps by more than 25 MHz
+    # model separates two caps by more than 25 MHz.
+    # DEPARTURE (named, not silent - A5): the registered text has no tolerance; this implementation allows
+    # +-5 MHz on both halves. K1 FAILS under either reading, so the verdict does not turn on it.
     k1 = {"patterns": {}, "pass": True}
     for vals in sorted({c["values"] for c in B}):
         pts = []
@@ -143,7 +163,10 @@ def main():
             k1["pass"] = False
     out["rules"]["K1"] = k1
 
-    # K2: ones at 45 W throttles where at 65 W it did not
+    # K2: ones at 45 W throttles where at 65 W it did not.
+    # DEPARTURE (named, not silent - A5): the registered text says "where at 65 W it has 800 MHz and none";
+    # this implementation reads that as >= 775 MHz. K2 FAILS under either reading (the 65 W ones cell has a
+    # run at 756 MHz), so the verdict does not turn on it.
     o65 = [c for c in B if c["values"] == "ones" and c["tdp_w"] == 65]
     o45 = [c for c in B if c["values"] == "ones" and c["tdp_w"] == 45]
     out["rules"]["K2"] = {
@@ -155,12 +178,32 @@ def main():
         and all(c["meas_mhz"] is not None and c["meas_mhz"] < 775 for c in o45)
         and any(c["n_work_power_down"] > 0 for c in o45)}
 
-    # K3: the cap table - at least 10 of 12 cells in band, rms of the signed error at most 25 MHz
-    errs = [c["err_mhz"] for c in B if c["err_mhz"] is not None]
-    inb = sum(1 for c in B if c["in_band"])
-    rms = round((sum(e * e for e in errs) / len(errs)) ** 0.5, 1) if errs else None
-    out["rules"]["K3"] = {"cells": len(B), "in_band": inb, "rms_mhz": rms,
-                          "pass": bool(errs) and inb >= 10 and rms is not None and rms <= 25}
+    # K3: the cap table - "at least 10 of the 12 BURST CELLS land inside their registered bands, and the
+    # signed error over all 12 has rms at most 25 MHz" (pre-registration). Scored on the 12 cells, each
+    # cell being the mean of its 2 runs; the 24 per-run figures follow as a secondary statistic.
+    # (Corrected 27 Oct in the fix pass - it was first scored on the 24 runs: amendment A5.)
+    k3cells = []
+    for (tdp, v), cs in sorted(cellmean(B).items()):
+        ms = [c["meas_mhz"] for c in cs if c["meas_mhz"] is not None]
+        if not ms:
+            continue
+        mean = round(st.mean(ms), 2)
+        lo, hi = cs[0]["band_mhz"]
+        k3cells.append({"cell": cs[0]["cell"], "tdp_w": tdp, "values": v, "runs": ms,
+                        "mean_mhz": mean, "pred_mhz": cs[0]["pred_mhz"], "band_mhz": [lo, hi],
+                        "err_mhz": round(mean - cs[0]["pred_mhz"], 2), "in_band": lo <= mean <= hi})
+    cerr = [c["err_mhz"] for c in k3cells]
+    cinb = sum(1 for c in k3cells if c["in_band"])
+    crms = round((sum(e * e for e in cerr) / len(cerr)) ** 0.5, 2) if cerr else None
+    rerrs = [c["err_mhz"] for c in B if c["err_mhz"] is not None]
+    rrms = round((sum(e * e for e in rerrs) / len(rerrs)) ** 0.5, 1) if rerrs else None
+    out["rules"]["K3"] = {"scored_on": "the 12 registered cells, each the mean of its 2 runs",
+                          "cells": len(k3cells), "in_band": cinb, "rms_mhz": crms,
+                          "per_cell": k3cells,
+                          "by_run": {"runs": len(B), "in_band": sum(1 for c in B if c["in_band"]),
+                                     "rms_mhz": rrms,
+                                     "note": "secondary: the registered bar is 10 of 12 CELLS"},
+                          "pass": bool(cerr) and cinb >= 10 and crms is not None and crms <= 25}
 
     # K4: the sustained clamp is thermal - ones at threshold 70 reaches 775 MHz or more
     s70 = [c for c in S if c["values"] == "ones" and c["threshold_c"] == 70]
