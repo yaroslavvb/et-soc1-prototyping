@@ -69,8 +69,9 @@ quieter.) Pooled over the four top-rung blocks:
 **Pool the complex transfer, not the magnitude.** Each block's H(3f) is a complex number whose jackknife cloud
 is most of its own length, and the magnitude of such a quantity averages above the magnitude of its mean
 (E|Z| > |E Z|), so an inverse-variance mean of four magnitudes sits above the coherent transfer they share.
-The first pass published that mean, 19.0 ± 5.2; the vector mean is 18.4 ± 5.4, 3% lower. At 0.05 Hz, where the
-blocks have SNR 14–21, the two routes agree to 2.6%, which is the check that the machinery is not inventing
+The first pass published that mean, 19.0 ± 5.2; the vector mean is 18.4 ± 5.4, 3.2% lower. At 0.05 Hz, where the
+four blocks' camera fundamentals have SNR 21.4, 19.6, 9.1 and 4.8 and the transfer is 4–20 SE from zero, the two
+routes agree to 2.6% — the bias is there too but small, which is the check that the machinery is not inventing
 the gap at 3f. The SE quoted is along the pooled vector's own direction, taken from each block's cloud
 projected onto it, so it is comparable with a magnitude's.
 
