@@ -47,7 +47,8 @@ CELLS = [
     ("MAJx2",     "SIMPLE", "majority gate, non-inverting"),
     ("HAxp5",     "SIMPLE", "half adder"),
     ("FAx1",      "SIMPLE", "full adder (28-transistor mirror type)"),
-    ("DFFHQNx1",  "SEQ",    "D flip-flop, inverting output"),
+    ("DFFHQNx1",  "SEQ",    "D flip-flop, inverting output, minimum drive"),
+    ("DFFHQx4",   "SEQ",    "D flip-flop, x4 drive (the only flop in the Q126(e) census)"),
     ("ICGx1",     "SEQ",    "integrated clock gate"),
 ]
 
@@ -126,20 +127,49 @@ Q124 = {
     "tfma.asbuilt.cells": {"cells": 4487, "transistors": 49755,
                            "full_adders": 248, "fa_mirror": 162, "fa_tg": 86},
 }
-E60 = {"board_fJ": [116.7, 129.9], "rail_fJ": [87.5, 96.9],
-       "what": "E60's measured cost of one flipped mantissa bit per multiply-add"}
+# E60's Hamming ladder, docs/findings/03-experiments.md: the two numbers are
+# two OPERAND CASES, not an uncertainty band.  Q124's flip-gate count -- and so
+# this estimate -- is the a = pi case, so 129.9 fJ board / 96.9 fJ rail is the
+# figure that matches; 116.7 / 87.5 is a different multiply (a = 1.0).
+E60 = {
+    "source": "docs/findings/03-experiments.md, E60 Hamming ladder "
+              "(aifoundry3, 600 MHz, 0.522 V, h >= 1, 4 passes)",
+    "a_eq_pi":  {"board_fJ": 129.9, "board_sigma_fJ": 0.5,
+                 "rail_fJ": 96.9, "matches_this_estimate": True},
+    "a_eq_1p0": {"board_fJ": 116.7, "board_sigma_fJ": 0.6,
+                 "rail_fJ": 87.5, "matches_this_estimate": False},
+    "what": "E60's measured cost of one flipped mantissa B bit per multiply-add",
+    "scope_differences": [
+        ("E60 is BOARD energy (the 129.9 fJ figure) including the regulator's "
+         "conversion loss; the minion-rail figure, 96.9 fJ, is the one to set "
+         "against a cell-level estimate, and even that is the whole rail, not "
+         "the one unit."),
+        ("E60 is measured 'the cascade included', while this estimate and "
+         "Q124 cover the Booth rows, the Wallace tree and the product adder "
+         "only."),
+        ("E60 is silicon and therefore contains glitches; this estimate and "
+         "Q124 are zero-delay. tfma.glitch puts the timed tree at 1.4x the "
+         "energy, so the comparable number is this estimate x 1.4."),
+    ],
+}
 
 
 # ---------------------------------------------------------------- extraction
 def pg_detail(groups, which, slew, load):
-    """An internal_power event, split by related_pg_pin.
+    """One internal_power EVENT, summed over its related_pg_pin groups.
+
+    The groups handed in must all describe the same event -- the same
+    (related_pin, output pin, `when`) -- because summing is only correct
+    across the pg pins of one event.  Mutually exclusive `when` states are
+    averaged by the caller, never summed.
 
     ASAP7 characterises each event against both rails: INVx1's output rise is
-    +0.120 fJ on VDD and -0.028 fJ on VSS.  Two readings are in use and they
-    differ by about 2x, so both are carried:
-      'vdd'  -- the VDD group alone, which is what a rail sensor would see;
-      'sum'  -- VDD + VSS, the total internal energy a power tool reports.
-    Part 2 settles which matches SPICE on the real cell netlist.
+    +0.120 fJ on VDD and -0.028 fJ on VSS.  Two readings are carried:
+      'vdd'  -- the VDD group alone, which is the energy drawn from the rail
+                (part 2's SPICE run confirms this is the right one);
+      'sum'  -- VDD + VSS, what a power tool reports as total internal
+                energy.  It double-counts the same charge in and out, so it
+                is kept only as a labelled reference column.
     """
     out = {"vdd": None, "vss": None, "sum": None}
     tot, seen = 0.0, False
@@ -157,10 +187,6 @@ def pg_detail(groups, which, slew, load):
         seen = True
     out["sum"] = tot if seen else None
     return out
-
-
-def pg_sum(groups, which, slew, load):
-    return pg_detail(groups, which, slew, load)["sum"]
 
 
 def cell_record(lib, base, blurb, slew=SLEW, load=CLOAD):
@@ -197,65 +223,110 @@ def cell_record(lib, base, blurb, slew=SLEW, load=CLOAD):
                 for ip in ips:
                     key = L.attr1(ip, "when") or "(any)"
                     by_when.setdefault(key, []).append(ip)
+                # the `when` states here are the held data/enable values, and
+                # they too are averaged, not summed
                 ev = {}
                 for key, grp in by_when.items():
                     dr = pg_detail(grp, "rise_power", slew, load)
                     df = pg_detail(grp, "fall_power", slew, load)
                     ev[key] = {
-                        "rise_fJ": dr["sum"], "fall_fJ": df["sum"],
-                        "per_clock_cycle_fJ": (dr["sum"] or 0.0) + (df["sum"] or 0.0),
-                        "per_clock_cycle_VDDonly_fJ": (dr["vdd"] or 0.0) + (df["vdd"] or 0.0),
+                        "per_clock_cycle_VDDonly_fJ": ((dr["vdd"] or 0.0)
+                                                       + (df["vdd"] or 0.0)),
+                        "per_clock_cycle_summed_reference_fJ": ((dr["sum"] or 0.0)
+                                                                + (df["sum"] or 0.0)),
                     }
-                vals = [v["per_clock_cycle_fJ"] for v in ev.values()]
                 vv = [v["per_clock_cycle_VDDonly_fJ"] for v in ev.values()]
+                vals = [v["per_clock_cycle_summed_reference_fJ"] for v in ev.values()]
                 rec["clock_pin_energy"][pin.name] = {
                     "by_state": ev,
-                    "mean_per_cycle_fJ": sum(vals) / len(vals),
+                    "n_when_states": len(ev),
+                    "state_weighting": "uniform over the held-data states",
                     "mean_per_cycle_VDDonly_fJ": sum(vv) / len(vv),
+                    "mean_per_cycle_summed_reference_fJ": sum(vals) / len(vals),
                 }
         elif direction == "output":
             for ip in pin.find("internal_power"):
                 rel = L.attr1(ip, "related_pin")
                 if rel is None:
                     continue
+                when = L.attr1(ip, "when") or "(any)"
                 for r in rel.split():
                     key = f"{r}->{pin.name}"
-                    rec["arcs"].setdefault(key, {"groups": []})["groups"].append(ip)
+                    rec["arcs"].setdefault(key, {}).setdefault(when, []).append(ip)
 
-    # collapse the arc groups into numbers
+    # Collapse the arc groups into numbers.
+    #
+    # An arc's `when` groups are MUTUALLY EXCLUSIVE side-input states -- FAx1's
+    # A->SN carries four, (B*CI), (B*!CI), (!B*CI), (!B*!CI) -- and exactly one
+    # of them holds at any moment.  So they are AVERAGED over states, never
+    # summed; only the related_pg_pin groups WITHIN one state are summed.
+    # Summing across states inflated every state-conditioned cell here by the
+    # number of its states, 1.5x to 8.7x (found in review, same day).
     arcs = {}
-    for key, d in rec["arcs"].items():
-        grp = d["groups"]
-        dr = pg_detail(grp, "rise_power", slew, load)
-        df = pg_detail(grp, "fall_power", slew, load)
-        er, ef = dr["sum"], df["sum"]
-        if er is None and ef is None:
+    for key, bystate in rec["arcs"].items():
+        states = {}
+        for when, grp in bystate.items():
+            dr = pg_detail(grp, "rise_power", slew, load)
+            df = pg_detail(grp, "fall_power", slew, load)
+            if dr["sum"] is None and df["sum"] is None:
+                continue
+            vr, vf = dr["vdd"] or 0.0, df["vdd"] or 0.0
+            sr, sf = dr["sum"] or 0.0, df["sum"] or 0.0
+            states[when] = {
+                "E_int_rise_VDDonly_fJ": vr, "E_int_fall_VDDonly_fJ": vf,
+                "E_int_per_transition_VDDonly_fJ": 0.5 * (vr + vf),
+                "E_int_per_cycle_VDDonly_fJ": vr + vf,
+                "E_int_rise_summed_fJ": sr, "E_int_fall_summed_fJ": sf,
+                "E_int_per_transition_summed_fJ": 0.5 * (sr + sf),
+            }
+        if not states:
             continue
-        er, ef = er or 0.0, ef or 0.0
-        mean = 0.5 * (er + ef)
-        vr, vf = dr["vdd"] or 0.0, df["vdd"] or 0.0
+        n = len(states)
+        mv = sum(s["E_int_per_transition_VDDonly_fJ"]
+                 for s in states.values()) / n
+        ms = sum(s["E_int_per_transition_summed_fJ"]
+                 for s in states.values()) / n
+
+        by_load = {}
+        for c in LOAD_SWEEP:
+            vals = []
+            for when, grp in bystate.items():
+                dr = pg_detail(grp, "rise_power", slew, c)
+                df = pg_detail(grp, "fall_power", slew, c)
+                if dr["sum"] is None and df["sum"] is None:
+                    continue
+                vals.append(0.5 * ((dr["vdd"] or 0.0) + (df["vdd"] or 0.0)))
+            if not vals:
+                continue
+            m = sum(vals) / len(vals)
+            by_load[f"{c}"] = {
+                "E_int_per_transition_VDDonly_fJ": m,
+                "E_transition_0p7_fJ": m + 0.5 * c * VDD_LIB ** 2,
+                "E_transition_0p517_fJ": (m + 0.5 * c * VDD_LIB ** 2) * VSCALE,
+            }
+
         arcs[key] = {
-            "E_int_rise_fJ": er, "E_int_fall_fJ": ef, "E_int_mean_fJ": mean,
-            "E_int_per_cycle_fJ": er + ef,
-            "E_int_rise_VDDonly_fJ": vr, "E_int_fall_VDDonly_fJ": vf,
-            "E_int_mean_VDDonly_fJ": 0.5 * (vr + vf),
-            "E_int_per_cycle_VDDonly_fJ": vr + vf,
-            "by_load_fJ": {
-                f"{c}": {
-                    "E_int_mean_fJ": 0.5 * ((pg_sum(grp, "rise_power", slew, c) or 0.0)
-                                            + (pg_sum(grp, "fall_power", slew, c) or 0.0)),
-                    "E_transition_0p7_fJ": 0.5 * ((pg_sum(grp, "rise_power", slew, c) or 0.0)
-                                                  + (pg_sum(grp, "fall_power", slew, c) or 0.0))
-                    + 0.5 * c * VDD_LIB ** 2,
-                } for c in LOAD_SWEEP},
-            "E_transition_0p7_fJ": mean + 0.5 * load * VDD_LIB ** 2,
-            "E_transition_0p517_fJ": (mean + 0.5 * load * VDD_LIB ** 2) * VSCALE,
+            "n_when_states": n,
+            "when_states": sorted(states),
+            "state_weighting": ("uniform over the mutually exclusive `when` "
+                                "states; the liberty carries no state "
+                                "probabilities"),
+            "by_state": states,
+            "E_int_per_transition_VDDonly_fJ": mv,
+            "E_int_per_cycle_VDDonly_fJ": 2.0 * mv,
+            "E_int_per_transition_summed_fJ": ms,
+            "by_load_fJ": by_load,
+            "E_transition_0p7_fJ": mv + 0.5 * load * VDD_LIB ** 2,
+            "E_transition_0p517_fJ": (mv + 0.5 * load * VDD_LIB ** 2) * VSCALE,
+            "E_transition_0p7_summed_reference_fJ": ms + 0.5 * load * VDD_LIB ** 2,
         }
     rec["arcs"] = arcs
-    rec["E_int_mean_over_arcs_fJ"] = (
-        sum(a["E_int_mean_fJ"] for a in arcs.values()) / len(arcs)) if arcs else None
-    rec["E_int_mean_over_arcs_VDDonly_fJ"] = (
-        sum(a["E_int_mean_VDDonly_fJ"] for a in arcs.values()) / len(arcs)) if arcs else None
+    rec["E_int_per_transition_VDDonly_fJ"] = (
+        sum(a["E_int_per_transition_VDDonly_fJ"] for a in arcs.values())
+        / len(arcs)) if arcs else None
+    rec["E_int_per_transition_summed_fJ"] = (
+        sum(a["E_int_per_transition_summed_fJ"] for a in arcs.values())
+        / len(arcs)) if arcs else None
     return rec
 
 
@@ -307,26 +378,49 @@ def flip_estimate(recs, census=None):
         "min_drive": ["INVxp33", "NAND2xp33", "NOR2xp33", "XOR2xp5",
                       "XNOR2xp5", "AOI21xp33", "OAI21xp33", "MAJIxp5"],
     }
-    # the flip-flop's data-switching energy only: the clock runs on every
-    # multiply-add either way (tfma.clocked), so the clock pin is not marginal
-    ff_arc = next(iter(recs["DFFHQNx1"]["arcs"].values()))
+    # The flip-flop's data-switching energy only: the clock runs on every
+    # multiply-add either way (tfma.clocked), so the clock pin is not marginal.
+    #
+    # Which flop matters: the Q126(e) census's netlist contains exactly one
+    # flop type, DFFHQx4 (1,953 of them), whose internal energy is 2.0x
+    # DFFHQNx1's.  So the census mix is priced with the census's own flop, and
+    # the two hand-built pools keep the minimum-drive DFFHQNx1 that matches
+    # their own spirit.  Both are reported, and the swap is carried as a
+    # sensitivity (found in review, same day: the estimate had used DFFHQNx1
+    # while claiming the census's mix).
+    FF_FOR_MIX = {"x1_drive": "DFFHQNx1", "min_drive": "DFFHQNx1",
+                  "census": "DFFHQx4"}
+
+    def ff_energy(name, fld):
+        arcs = recs[name]["arcs"]
+        arc = "CLK->Q" if "CLK->Q" in arcs else "CLK->QN"
+        return arc, arcs[arc][fld]
 
     out = {"method": flip_estimate.__doc__.strip(),
            "wires": {"total": Q124["tfma.flip.gate"]["wires_total"],
                      "combinational": comb, "flip_flop_outputs": flops},
+           "flop_choice": {
+               "census_mix": ("DFFHQx4 -- the only flop type in Q126(e)'s "
+                              "histogram, 1,953 of them"),
+               "hand_built_pools": ("DFFHQNx1, the minimum-drive flop, to "
+                                    "match those pools' minimum-drive cells"),
+               "sensitivity": "see flop_sensitivity below"},
            "mixes": {}, "headline": {}}
 
     for conv, fld, ffld, cfld in (
-            ("sum", "E_int_mean_over_arcs_fJ", "E_int_mean_fJ",
-             "weighted_E_int_mean_fJ_0p7"),
-            ("vdd_only", "E_int_mean_over_arcs_VDDonly_fJ",
-             "E_int_mean_VDDonly_fJ", "weighted_E_int_mean_VDDonly_fJ_0p7")):
-        e_ff_int = ff_arc[ffld]
+            ("summed_reference", "E_int_per_transition_summed_fJ",
+             "E_int_per_transition_summed_fJ",
+             "weighted_E_int_per_transition_summed_fJ_0p7"),
+            ("vdd_only", "E_int_per_transition_VDDonly_fJ",
+             "E_int_per_transition_VDDonly_fJ",
+             "weighted_E_int_per_transition_VDDonly_fJ_0p7")):
         cases = [(m, {n: recs[n][fld] for n in names if n in recs}, None)
                  for m, names in MIXES.items()]
         if census and census.get(cfld):
             cases.append(("census", None, census[cfld]))
         for mix, pool, forced in cases:
+            ff_name = FF_FOR_MIX[mix]
+            ff_arc_name, e_ff_int = ff_energy(ff_name, ffld)
             if forced is not None:
                 e_mean = forced
                 lo = hi = forced
@@ -334,7 +428,8 @@ def flip_estimate(recs, census=None):
             else:
                 e_mean = sum(pool.values()) / len(pool)
                 lo, hi = min(pool.values()), max(pool.values())
-            rec = {"cell_pool_fJ_0p7": pool, "E_int_mean_fJ_0p7": e_mean,
+            rec = {"cell_pool_fJ_0p7": pool, "E_int_per_transition_fJ_0p7": e_mean,
+                   "flop_cell": ff_name, "flop_arc": ff_arc_name,
                    "E_int_flop_fJ_0p7": e_ff_int, "loads_fF": {}}
             for cl in (1.0, 2.0, 4.0):
                 e_load = 0.5 * cl * VDD_MIN ** 2                 # fJ at 0.517 V
@@ -357,20 +452,97 @@ def flip_estimate(recs, census=None):
             out["mixes"][f"{conv}/{mix}"] = rec
 
     allv = [r["loads_fF"][c]["E_flip_total_pJ"]
-            for r in out["mixes"].values() for c in ("1.0", "2.0", "4.0")]
+            for k, r in out["mixes"].items() if k.startswith("vdd_only/")
+            for c in ("1.0", "2.0", "4.0")]
     best = ("vdd_only/census" if "vdd_only/census" in out["mixes"]
             else "vdd_only/min_drive")
+    band = out["mixes"][best]["load_band_1_to_4fF_pJ"]
+    glitch = Q124["tfma.glitch"]["energy_ratio"]
     out["headline"] = {
-        "full_range_pJ": [min(allv), max(allv)],
+        "full_range_vdd_only_pJ": [min(allv), max(allv)],
         "central_key": best,
         "central_pJ": out["mixes"][best]["loads_fF"]["2.0"]["E_flip_total_pJ"],
-        "central_band_1_to_4fF_pJ": out["mixes"][best]["load_band_1_to_4fF_pJ"],
-        "central_what": ("VDD-only internal energy (the convention SPICE "
-                         "confirms in part 2), the cell mix Q126(e) measured "
-                         "for this unit, 2 fF per net"),
-        "q124_pJ": [Q124["tfma.flip.energy"]["pJ_low"],
-                    Q124["tfma.flip.energy"]["pJ_high"]],
-        "e60_rail_fJ": E60["rail_fJ"], "e60_board_fJ": E60["board_fJ"],
+        "central_band_1_to_4fF_pJ": band,
+        "central_what": ("VDD-only internal energy, `when`-state averaged "
+                         "(the convention SPICE confirms in part 2), the cell "
+                         "mix Q126(e) measured for this unit with its own "
+                         "flop DFFHQx4, 2 fF per net, zero delay"),
+        "compare_like_for_like": {
+            "what": ("Q124 is the only like-for-like check: same 381-wire "
+                     "count, same scope (Booth rows, tree, product adder), "
+                     "same zero-delay basis."),
+            "this_estimate_pJ": band,
+            "q124_pJ": [Q124["tfma.flip.energy"]["pJ_low"],
+                        Q124["tfma.flip.energy"]["pJ_high"]],
+            "verdict": ("The estimate BRACKETS Q124 rather than erring dear: "
+                        "its light-load end sits on Q124's low end, and it "
+                        "runs above Q124 only for the heavier net loads."),
+        },
+        "compare_to_E60": {
+            "operand_case": "a = pi, b bit 11 -- the case Q124 counted",
+            "e60_board_fJ": E60["a_eq_pi"]["board_fJ"],
+            "e60_minion_rail_fJ": E60["a_eq_pi"]["rail_fJ"],
+            "not_this_case_a_eq_1p0_fJ": [E60["a_eq_1p0"]["board_fJ"],
+                                          E60["a_eq_1p0"]["rail_fJ"]],
+            "this_estimate_x_glitch_pJ": [b * glitch for b in band],
+            "glitch_factor": glitch,
+            "scope_differences": E60["scope_differences"],
+        },
+    }
+    # Invert the model: what per-net load would make it hit each target?
+    # The estimate is linear in the net load, so this is the single clearest
+    # statement of how it compares with a measured or counted number.
+    cen = out["mixes"][best]
+    e_base = (cen["E_int_per_transition_fJ_0p7"] * VSCALE * comb
+              + cen["E_int_flop_fJ_0p7"] * VSCALE * flops)      # fJ at C = 0
+    per_fF = 0.5 * VDD_MIN ** 2 * (comb + flops)                # fJ per fF
+
+    def implied(target_fJ, glitch=1.0):
+        return (target_fJ / glitch - e_base) / per_fF
+
+    out["headline"]["implied_net_load_fF"] = {
+        "model": (f"E_flip(C) = {e_base:.2f} fJ + {per_fF:.2f} fJ/fF x C, "
+                  "at 0.517 V, census mix, VDD only, zero delay"),
+        "cell_only_fJ_at_zero_load": e_base,
+        "fJ_per_fF_of_net_load": per_fF,
+        "to_hit_q124_low_0p11pJ": implied(110.0),
+        "to_hit_q124_high_0p13pJ": implied(130.0),
+        "to_hit_e60_rail_96p9fJ_zero_delay": implied(
+            E60["a_eq_pi"]["rail_fJ"]),
+        "to_hit_e60_rail_96p9fJ_with_1p4x_glitch": implied(
+            E60["a_eq_pi"]["rail_fJ"], glitch),
+        "note": ("Q124's band corresponds to a per-net load of about 1.0 to "
+                 "1.4 fF, which is squarely in the plausible range for a "
+                 "tree-level wire plus a pin. E60's rail figure needs a "
+                 "lighter load still, and once the 1.4x glitch factor is "
+                 "carried it needs a load below any real wire -- but E60 "
+                 "measures a different scope (the cascade included, the "
+                 "whole rail, silicon not zero-delay), so that is a scope "
+                 "gap, not a contradiction."),
+    }
+
+    # what the flop choice is worth, both ways round
+    fs = {}
+    for ffn in ("DFFHQNx1", "DFFHQx4"):
+        if ffn not in recs:
+            continue
+        an, e = ff_energy(ffn, "E_int_per_transition_VDDonly_fJ")
+        e_mean = (census["weighted_E_int_per_transition_VDDonly_fJ_0p7"]
+                  if census else
+                  sum(recs[n]["E_int_per_transition_VDDonly_fJ"]
+                      for n in MIXES["min_drive"] if n in recs)
+                  / len(MIXES["min_drive"]))
+        e_load2 = 0.5 * 2.0 * VDD_MIN ** 2
+        fs[ffn] = {
+            "arc": an, "E_int_per_transition_VDDonly_fJ_0p7": e,
+            "census_mix_flip_at_2fF_pJ": ((e_mean * VSCALE + e_load2) * comb
+                                          + (e * VSCALE + e_load2) * flops) / 1000.0,
+        }
+    out["flop_sensitivity"] = {
+        "by_flop": fs,
+        "note": ("35 of the 381 toggling wires are flop outputs, so the flop "
+                 "choice moves the headline by about 6%, against 2.2x for the "
+                 "per-net load."),
     }
     out["assumptions"] = [
         "One toggling physical wire = one cell-output transition.",
@@ -381,16 +553,25 @@ def flip_estimate(recs, census=None):
          "the minimum drives (xp33/xp5) a dense synthesized tree fills up "
          "with. The real mix is not in the public data, so the min-to-max "
          "spread over each pool is carried too."),
-        ("Internal energy is reported both ways -- VDD+VSS summed, and the "
-         "VDD group alone. They differ by about 2x and part 2 settles which "
-         "matches SPICE on the real netlist."),
+        ("Internal energy is the VDD group alone, which part 2's SPICE run "
+         "confirms is the energy drawn from the rail. The VDD+VSS sum is "
+         "carried as a labelled reference only -- it double-counts the same "
+         "charge in through VDD and out through VSS, and is what a power "
+         "tool reports as 'total internal'."),
+        ("An arc's mutually exclusive `when` states are AVERAGED, uniformly, "
+         "never summed. The liberty carries no state probabilities, so a "
+         "real workload's state statistics would shift the per-cell numbers "
+         "within the by_state spread each arc carries."),
         ("Load per net = pin capacitance of what it drives plus its wire. "
          "ASAP7's own input pins are 0.62 fF (INVx1) to about 2 fF (FAx1); "
          "wire inside a 30 um tree level at 0.2 fF/um is roughly 0.5-1.5 fF. "
          "1, 2 and 4 fF bracket it; 2 fF is the headline."),
-        ("Flip-flops: the data-switching (QN) arc only. The clock reaches "
-         "1,586 of 1,851 flops on every multiply-add either way "
-         "(tfma.clocked), so the clock-pin energy is not marginal to a flip."),
+        ("Flip-flops: the data-switching (CLK->Q or CLK->QN) arc only. The "
+         "clock reaches 1,586 of 1,851 flops on every multiply-add either "
+         "way (tfma.clocked), so the clock-pin energy is not marginal to a "
+         "flip. The census mix uses the census's own flop, DFFHQx4; the two "
+         "hand-built pools use the minimum-drive DFFHQNx1. See "
+         "flop_sensitivity."),
         ("Zero-delay, like Q124's count: no glitches. tfma.glitch puts the "
          "timed tree at 1.5x the toggles and 1.4x the energy."),
         ("Internal energy is scaled from 0.7 V by (0.517/0.7)^2 = 0.5454. "
@@ -434,10 +615,14 @@ def census_mix(libs, census_path, slew=SLEW, load=CLOAD):
         if not r or not r["arcs"]:
             missing.append(name)
             continue
-        e = r["E_int_mean_over_arcs_fJ"]
-        ev = r["E_int_mean_over_arcs_VDDonly_fJ"]
-        priced[name] = {"count": n, "E_int_mean_fJ": e,
-                        "E_int_mean_VDDonly_fJ": ev,
+        e = r["E_int_per_transition_summed_fJ"]
+        ev = r["E_int_per_transition_VDDonly_fJ"]
+        nstates = max((a["n_when_states"] for a in r["arcs"].values()),
+                      default=1)
+        priced[name] = {"count": n,
+                        "E_int_per_transition_VDDonly_fJ": ev,
+                        "E_int_per_transition_summed_fJ": e,
+                        "max_when_states_per_arc": nstates,
                         "leakage_pW": r.get("leakage_pW")}
         tot_n += n
         tot_e += n * e
@@ -450,8 +635,10 @@ def census_mix(libs, census_path, slew=SLEW, load=CLOAD):
         "cell_types_priced": len(priced),
         "cell_types_missing": missing,
         "sequential_and_tie_cells_skipped": skipped,
-        "weighted_E_int_mean_fJ_0p7": tot_e / tot_n if tot_n else None,
-        "weighted_E_int_mean_VDDonly_fJ_0p7": tot_evdd / tot_n if tot_n else None,
+        "weighted_E_int_per_transition_VDDonly_fJ_0p7":
+            tot_evdd / tot_n if tot_n else None,
+        "weighted_E_int_per_transition_summed_fJ_0p7":
+            tot_e / tot_n if tot_n else None,
         "by_cell": priced,
         "caveat": ("The open synthesis made 7,967 cells for the multiplier "
                    "against the tape-out flow's 4,487, so this is the mix of "
@@ -498,18 +685,32 @@ def main():
             "V2_scale_0p517_over_0p7": VSCALE,
         },
         "conventions": {
-            "internal_energy": ("An internal_power event is summed over its "
-                                "related_pg_pin groups (VDD and VSS), which is "
-                                "what a power tool does for total internal "
-                                "energy. ASAP7 splits each event between the "
-                                "two rails with a negative cross term: INVx1's "
-                                "output rise is +0.120 fJ on VDD and -0.028 fJ "
-                                "on VSS. rise/fall is the OUTPUT pin's "
-                                "direction."),
-            "E_transition": ("E_int_mean + 1/2 C_load V^2, the task's formula: "
-                             "the energy DISSIPATED per output transition, "
-                             "averaged over a rise and a fall. Over a full "
-                             "cycle the load dissipates C_load V^2 in all."),
+            "internal_energy": ("THE HEADLINE NUMBER IS THE VDD GROUP ALONE. "
+                                "ASAP7 splits each internal_power event "
+                                "between VDD and VSS with a negative cross "
+                                "term (INVx1's output rise is +0.120 fJ on "
+                                "VDD and -0.028 fJ on VSS). Summing the two "
+                                "double-counts the same charge in through "
+                                "VDD and out through VSS; part 2's SPICE run "
+                                "measures the rail directly and lands on the "
+                                "VDD-only reading. Every "
+                                "'..._summed_reference_fJ' key is the other "
+                                "convention, kept only because a reader "
+                                "coming from a power tool will see it. "
+                                "rise/fall is the OUTPUT pin's direction."),
+            "when_states": ("An arc's `when` groups are MUTUALLY EXCLUSIVE "
+                            "side-input states and are AVERAGED over, "
+                            "uniformly -- never summed. FAx1's A->SN carries "
+                            "four of them. Summing inflates a "
+                            "state-conditioned cell by the number of its "
+                            "states (1.5x to 8.7x across the cells here); "
+                            "each arc's `by_state` carries the spread."),
+            "E_transition": ("E_int_per_transition (VDD only) + "
+                             "1/2 C_load V^2, the task's formula: the energy "
+                             "drawn from the rail per output transition, "
+                             "averaged over a rise and a fall and over the "
+                             "arc's `when` states. Over a full cycle the "
+                             "load costs C_load V^2 in all."),
             "drawing_scale": ("ASAP7's layout is drawn at 4x: every length in "
                               "the GDS, the LEF and the QRC techfile is four "
                               "times the real dimension (the kit is drawn on a "
@@ -587,16 +788,28 @@ def main():
         capstr = ", ".join(f"{n} {v:.3f}" for n, v in sorted(ins.items()) if v)
         arcs = r["arcs"]
         if arcs:
-            mean = r["E_int_mean_over_arcs_fJ"]
-            mvdd = r["E_int_mean_over_arcs_VDDonly_fJ"]
-            etr = mean + 0.5 * CLOAD * VDD_LIB ** 2
-            rows.append((base, blurb, capstr, r.get("leakage_pW"),
-                         mean, mvdd, etr, etr * VSCALE))
-    lines = ["| cell | what | input pin cap (fF) | leakage (pW) | internal E/transition, VDD+VSS (fJ) | internal E/transition, VDD only (fJ) | E/transition @0.7 V (fJ) | @0.517 V (fJ) |",
-             "|---|---|---|---:|---:|---:|---:|---:|"]
-    for base, blurb, capstr, lk, mean, mvdd, etr, e517 in rows:
-        lines.append(f"| {base} | {blurb} | {capstr} | {lk:.1f} | {mean:.4f} | "
-                     f"{mvdd:.4f} | {etr:.4f} | {e517:.4f} |")
+            mvdd = r["E_int_per_transition_VDDonly_fJ"]
+            msum = r["E_int_per_transition_summed_fJ"]
+            nst = max(a["n_when_states"] for a in arcs.values())
+            etr = mvdd + 0.5 * CLOAD * VDD_LIB ** 2
+            rows.append((base, blurb, capstr, r.get("leakage_pW"), nst,
+                         mvdd, msum, etr, etr * VSCALE))
+    lines = [
+        "Internal energy is per OUTPUT TRANSITION, averaged over rise and fall",
+        "and over the arc's mutually exclusive `when` states, then over the",
+        "cell's arcs. **The headline convention is the VDD group alone**; the",
+        "summed column is VDD+VSS, what a power tool reports, and it",
+        "double-counts (part 2 settles it in SPICE). 10 ps input slew, 2.0 fF",
+        "output load, RVT TT 0.7 V 25 C.",
+        "",
+        "| cell | what | input pin cap (fF) | leakage (pW) | when states | **internal E/transition, VDD only (fJ)** | summed reference, VDD+VSS (fJ) | **E/transition @0.7 V (fJ)** | **@0.517 V (fJ)** |",
+        "|---|---|---|---:|---:|---:|---:|---:|---:|"]
+    for base, blurb, capstr, lk, nst, mvdd, msum, etr, e517 in rows:
+        lines.append(f"| {base} | {blurb} | {capstr} | {lk:.1f} | {nst} | "
+                     f"{mvdd:.4f} | {msum:.4f} | {etr:.4f} | {e517:.4f} |")
+    lines += ["",
+              "`E/transition` = internal (VDD only) + 1/2 C_load V^2 at "
+              "2.0 fF; the @0.517 V column scales the whole by (0.517/0.7)^2."]
     with open(os.path.join(outdir, "table.md"), "w") as fh:
         fh.write("\n".join(lines) + "\n")
     print("\n".join(lines))
@@ -613,10 +826,18 @@ def main():
         print(f"  {k:22s} 1 fF {r['loads_fF']['1.0']['E_flip_total_pJ']:.3f}  "
               f"2 fF {r['loads_fF']['2.0']['E_flip_total_pJ']:.3f}  "
               f"4 fF {r['loads_fF']['4.0']['E_flip_total_pJ']:.3f}")
-    print("  full range", [round(x, 3) for x in fe["headline"]["full_range_pJ"]],
-          "| Q124", fe["headline"]["q124_pJ"],
-          "| E60 rail", [x / 1000 for x in E60["rail_fJ"]],
-          "board", [x / 1000 for x in E60["board_fJ"]], "pJ")
+    h = fe["headline"]
+    print("  VDD-only range",
+          [round(x, 3) for x in h["full_range_vdd_only_pJ"]],
+          "| central", round(h["central_pJ"], 4),
+          "| Q124", h["compare_like_for_like"]["q124_pJ"], "pJ")
+    print("  E60 (a = pi, the matching case): board",
+          E60["a_eq_pi"]["board_fJ"] / 1000, "pJ, minion rail",
+          E60["a_eq_pi"]["rail_fJ"] / 1000, "pJ; this estimate x1.4 glitch",
+          [round(x, 3) for x in h["compare_to_E60"]["this_estimate_x_glitch_pJ"]])
+    print("  flop sensitivity:",
+          {k: round(v["census_mix_flip_at_2fF_pJ"], 4)
+           for k, v in fe["flop_sensitivity"]["by_flop"].items()})
     print("short circuit: Vtn+|Vtp| =",
           out["short_circuit_window"]["sum_sat_V"], "V vs VDD", VDD_MIN, "V")
 

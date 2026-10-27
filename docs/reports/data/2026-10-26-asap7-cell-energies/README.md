@@ -4,6 +4,12 @@
 [ASAP7](https://github.com/The-OpenROAD-Project/asap7) kit alone. No card, no lab box, no private
 file was touched.
 
+> **Corrected the same day, after review.** The first version of this directory summed each arc's
+> mutually exclusive `when` states instead of averaging them, and built its headline `E/transition`
+> columns from the VDD+VSS sum its own text called double-counting. Both are fixed below; every
+> published number was regenerated. What changed, and by how much, is in
+> [What the first version got wrong](#what-the-first-version-got-wrong) at the foot of this file.
+
 The Horace project wants a model that turns a load into watts, and the price list below the gate was
 a gap in it: the counted toggles had no per-kind price from a source anyone can re-run. This
 directory prices each kind of gate the ET-SoC-1's multiply-add is built from, out of ASAP7's
@@ -12,8 +18,7 @@ BSD-3-Clause 7 nm standard-cell library, and sets the result beside the chip dia
 
 Part 2, the same cells in SPICE, is
 [`../2026-10-26-asap7-one-switch/`](../2026-10-26-asap7-one-switch/). It settles a factor-of-two
-convention question this part could only flag, and its answer is already folded into the headline
-here.
+convention question this part could only flag, and its answer is folded into the headline here.
 
 ## Files
 
@@ -22,7 +27,7 @@ here.
 | `asap7_cell_energies.py` | the whole of part 1: reads the liberty, writes the JSON and the table |
 | `libparse.py` | a small Liberty reader (group tree, LUT interpolation) |
 | `asap7-cell-energies.json` | every number, with its units, conventions and caveats |
-| `table.md` | the headline table below |
+| `table.md` | the headline table below, as generated |
 
 **To re-run.** Clone `asap7sc7p5t_28` and `asap7_pdk_r1p7`, unpack the six `*_RVT_TT_nldm_*.lib.7z`
 files from `asap7sc7p5t_28/LIB/NLDM/` into one directory, then:
@@ -39,7 +44,7 @@ python3.12 -I asap7_cell_energies.py <libdir> <outdir> [<vtdir>] [<census_flat.j
 ASAP7 7.5-track, **RVT, typical (TT) corner, NLDM, 0.7 V, 25 °C**. Liberty's derived energy unit
 here is 1 V × 1 mA × 1 ps = **1 fJ**; capacitance is fF, leakage pW, time ps.
 
-Three conventions decide what the numbers mean, and all three bit:
+**Four conventions decide what the numbers mean, and all four bit.**
 
 1. **The 4× drawing scale does not touch the liberty.** ASAP7's layout is drawn at four times the
    real dimensions, so every length in the GDS, the LEF and the QRC techfile must be divided by 4
@@ -48,54 +53,69 @@ Three conventions decide what the numbers mean, and all three bit:
    other side — the ORFS `asap7` platform is already 1×, so the 4× must *not* be applied there.
 2. **Internal energy is split between the rails, and summing double-counts.** ASAP7 characterises
    each event against both VDD and VSS, with a negative cross term: INVx1's output rise is
-   +0.120 fJ on VDD and −0.028 fJ on VSS. Summing the two (what a power tool reports as total
-   internal energy) gives 0.0975 fJ per transition; the VDD group alone gives 0.0487 fJ. **Part 2
-   settles it: SPICE on the kit's own transistor netlist measures 0.0875 fJ of internal energy per
-   full cycle for INVx1 at 2 fF and 0.7 V, against 0.0974 fJ for the VDD-only reading and 0.195 fJ
-   for the summed one.** So **the VDD-only column is the energy drawn from the rail**, and it is
-   the one the headline uses. Both are in the table and in the JSON, because a reader coming from a
-   power tool will see the other.
-3. **Leakage is not scaled to 0.517 V.** It falls with voltage through DIBL and the subthreshold
+   +0.120 fJ on VDD and −0.028 fJ on VSS. **Part 2 settles it: SPICE on the kit's own transistor
+   netlist measures 0.0875 fJ of internal energy per full cycle for INVx1 at 2 fF and 0.7 V,
+   against 0.0974 fJ for the VDD-only reading and 0.195 fJ for the summed one.** So **the VDD group
+   alone is the energy drawn from the rail**, and it is what every headline column here uses. The
+   summed column is kept, labelled `summed reference`, because a reader coming from a power tool
+   will see it.
+3. **An arc's `when` states are mutually exclusive, so they are averaged, not summed.** FAx1's
+   `A→SN` arc carries four of them — `(B·CI)`, `(B·!CI)`, `(!B·CI)`, `(!B·!CI)` — and exactly one
+   holds at any moment. The averaging is **uniform**: the liberty carries no state probabilities, so
+   a real workload's state statistics would move a cell within the spread its `by_state` block
+   carries (FAx1's `A→SN` runs 0.129 to 0.148 fJ per transition across its four states, a 15%
+   spread; XOR2x1's `A→Y` runs 0.166 to 0.326, a factor of 2).
+4. **Leakage is not scaled to 0.517 V.** It falls with voltage through DIBL and the subthreshold
    slope, not as V². Part 2 measures it: INVx1 leaks 37.0 pW at 0.7 V and 20.4 pW at 0.517 V
    (25 °C), a factor 1.8 for a factor 1.35 in voltage — nothing like V².
 
-`E per transition` below is the task's formula, `internal + ½·C_load·V²`, at a **stated operating
-point: 10 ps input slew (10–90%) and 2.0 fF output load**, bilinearly interpolated in the cell's own
-7×7 tables. The `@0.517 V` column scales by (0.517/0.7)² = 0.5454, which is exact for the capacitive
-part and slightly optimistic for the short-circuit part. The JSON carries the full tables, the
-per-arc rise and fall, and a load sweep from 0.5 to 8 fF.
+`E per transition` below is the task's formula, `internal (VDD only) + ½·C_load·V²`, at a **stated
+operating point: 10 ps input slew (10–90%) and 2.0 fF output load**, bilinearly interpolated in the
+cell's own 7×7 tables. The `@0.517 V` column scales by (0.517/0.7)² = 0.5454, which is exact for the
+capacitive part and slightly optimistic for the short-circuit part. The JSON carries the full
+tables, the per-arc rise and fall, the per-state breakdown and a load sweep from 0.5 to 8 fF.
 
 ## The table
 
-See `table.md` for the generated copy. Internal energy is per output transition, averaged over rise
-and fall; leakage is the state-averaged VDD entry at 0.7 V and 25 °C.
+Generated copy: `table.md`. Internal energy is per output transition, averaged over rise and fall,
+over the arc's `when` states, then over the cell's arcs; leakage is the state-averaged VDD entry at
+0.7 V and 25 °C.
 
-| cell | input pin cap (fF) | leakage (pW) | internal E/transition, VDD only (fJ) | summed (fJ) | E/transition @0.7 V (fJ) | @0.517 V (fJ) |
-|---|---|---:|---:|---:|---:|---:|
-| INVx1 | A 0.620 | 51.2 | 0.0487 | 0.0975 | 0.5875 | 0.3205 |
-| INVxp33 | A 0.276 | 17.1 | 0.0243 | 0.0484 | 0.5384 | 0.2937 |
-| BUFx2 | A 0.534 | 136.4 | 0.2517 | 0.5033 | 0.9933 | 0.5418 |
-| NAND2x1 | A 0.990, B 0.990 | 91.2 | 0.1103 | 0.2232 | 0.7132 | 0.3890 |
-| NOR2x1 | A 1.001, B 1.017 | 82.1 | 0.1166 | 0.2293 | 0.7193 | 0.3924 |
-| XOR2x1 | A 1.519, B 1.523 | 232.1 | 0.4896 | 0.9763 | 1.4663 | 0.7998 |
-| XNOR2x1 | A 1.520, B 1.516 | 232.3 | 0.4858 | 0.9742 | 1.4642 | 0.7987 |
-| AOI21x1 | A1 1.113, A2 0.963, B 1.134 | 127.0 | 0.2214 | 0.4413 | 0.9313 | 0.5080 |
-| MAJIxp5 | A 0.595, B 1.122, C 0.963 | 94.3 | 0.2112 | 0.4219 | 0.9119 | 0.4974 |
-| FAx1 | A 1.827, B 1.997, CI 1.494 | 212.2 | 0.4255 | 0.8503 | 1.3403 | 0.7311 |
-| DFFHQNx1 | CLK 0.475, D 0.559 | 229.7 | 0.4965 | 1.1010 | 1.5910 | 0.8679 |
-| ICGx1 | CLK 2.191, ENA 0.427, SE 0.428 | 319.2 | 0.6517 | 0.8090 | 1.2990 | 0.7086 |
+| cell | input pin cap (fF) | leakage (pW) | when states | **internal E/transition, VDD only (fJ)** | summed reference (fJ) | **E/transition @0.7 V (fJ)** | **@0.517 V (fJ)** |
+|---|---|---:|---:|---:|---:|---:|---:|
+| INVx1 | A 0.620 | 51.2 | 1 | **0.0487** | 0.0975 | 0.5387 | 0.2939 |
+| INVxp33 | A 0.276 | 17.1 | 1 | **0.0243** | 0.0484 | 0.5143 | 0.2806 |
+| BUFx2 | A 0.534 | 136.4 | 1 | **0.2517** | 0.5033 | 0.7417 | 0.4046 |
+| NAND2x1 | A 0.990, B 0.990 | 91.2 | 1 | **0.1103** | 0.2232 | 0.6003 | 0.3274 |
+| NOR2x1 | A 1.001, B 1.017 | 82.1 | 1 | **0.1166** | 0.2293 | 0.6066 | 0.3309 |
+| XOR2x1 | A 1.519, B 1.523 | 232.1 | 2 | **0.2448** | 0.4881 | 0.7348 | 0.4008 |
+| XNOR2x1 | A 1.520, B 1.516 | 232.3 | 2 | **0.2429** | 0.4871 | 0.7329 | 0.3998 |
+| AOI21x1 | A1 1.113, A2 0.963, B 1.134 | 127.0 | 3 | **0.1426** | 0.2834 | 0.6326 | 0.3451 |
+| OAI21x1 | A1 1.112, A2 0.952, B 1.251 | 140.1 | 3 | **0.1439** | 0.2889 | 0.6339 | 0.3458 |
+| MAJIxp5 | A 0.595, B 1.122, C 0.963 | 94.3 | 2 | **0.1056** | 0.2110 | 0.5956 | 0.3249 |
+| MAJx2 | A 0.598, B 1.128, C 0.959 | 196.6 | 2 | **0.3146** | 0.6292 | 0.8046 | 0.4389 |
+| HAxp5 | A 0.981, B 0.914 | 137.0 | 2 | **0.1023** | 0.2052 | 0.5923 | 0.3231 |
+| FAx1 | A 1.827, B 1.997, CI 1.494 | 212.2 | 4 | **0.1421** | 0.2840 | 0.6321 | 0.3448 |
+| DFFHQNx1 | CLK 0.475, D 0.559 | 229.7 | 1 | **0.4965** | 1.1010 | 0.9865 | 0.5381 |
+| DFFHQx4 | CLK 0.476, D 0.559 | 485.5 | 1 | **0.9892** | 2.0865 | 1.4792 | 0.8069 |
+| ICGx1 | CLK 2.191, ENA 0.427, SE 0.428 | 319.2 | 2 | **0.3258** | 0.4045 | 0.8158 | 0.4450 |
 
 The smaller drives (`INVxp33`, `NAND2xp33`, `NOR2xp33`, `AOI21xp33`, `OAI21xp33`, `XOR2xp5`,
-`XNOR2xp5`, `HAxp5`) and `MAJx2`, `OAI21x1` are in `table.md` and the JSON.
+`XNOR2xp5`) are in `table.md` and the JSON. The two flops are both here because they differ by 2.0×
+and the census netlist contains only the larger one (see the flip estimate below).
 
 **The sequential cells carry two separate prices,** and only the first is marginal to a data flip:
 
 - `DFFHQNx1`, **output switching** (CLK→QN): 0.4965 fJ per transition, VDD only.
-- `DFFHQNx1`, **clock pin with the data held**: 0.49–0.60 fJ per clock cycle, VDD only
-  (0.88–1.20 fJ summed), by state. This is the cost a clocked bit pays whether or not it changes.
-  The 20 October plan's "0.6 fJ a cycle even with its data held" is this number, on the VDD-only
-  reading, and it checks out.
-- `ICGx1`, clock pin: 0.41 fJ per clock cycle, VDD only (0.59 fJ summed), averaged over states.
+  `DFFHQx4` (CLK→Q): 0.9892 fJ, almost exactly 2×.
+- `DFFHQNx1`, **clock pin with the data held**: 0.49–0.60 fJ per clock cycle by state, mean
+  0.565 fJ, VDD only. This is the cost a clocked bit pays whether or not it changes. The
+  20 October plan's "0.6 fJ a cycle even with its data held" is this number, and it checks out.
+  `DFFHQx4`'s clock pin is the same to three figures (0.566 fJ), which makes sense — the clock pin
+  drives the master latch, not the output drive.
+- `ICGx1`, clock pin: 0.41 fJ per clock cycle, VDD only, averaged over its enable states (0.17 fJ
+  disabled, 0.65 fJ enabled — a clock gate that is actually gating costs a quarter of one that is
+  passing).
 
 Four numbers the 20 October plan had already quoted from ASAP7 reproduce exactly: inverter input
 0.62 fF, full-adder input 2.0 fF, flip-flop clock pin 0.475 fF, clock gate 2.19 fF.
@@ -128,7 +148,7 @@ under CC BY-NC-ND.
 
 - **Gate leakage.** The paper gives no figure. Its I_off is drain current at V_gs = 0, not gate
   leakage. The BSIM-CMG cards do enable it (`igcmod = 1` in `models/hspice/7nm_TT_160803.pm`), so a
-  number needs a SPICE sweep.
+  number needs a SPICE sweep, which part 2 did not have time for either.
 - **FO4.** The paper prints none, so it is computed here from the liberty itself — an INVx1 driving
   four INVx1 input pins, with the input slew iterated until it equals the stage's own output slew,
   which is what a chain of these cells settles at:
@@ -140,8 +160,9 @@ under CC BY-NC-ND.
 🛑 **The brief for this request quoted "about 8.1 ps RVT at 0.7 V" as the kit's FO4. No threshold
 flavour gives that from the liberty.** Part 2 resolves it: SPICE on the kit's *schematic* (LVS)
 netlist gives **9.63 ps** at 0.7 V, close to 8.1, while the liberty — characterised on the
-*parasitic-extracted* netlist — says 19.60 ps. The 8.1 ps class of number is pre-layout; the
-parasitics roughly double it. Anyone quoting an ASAP7 FO4 has to say which.
+*parasitic-extracted* netlist — says 19.60 ps. The 8.1 ps class of number is pre-layout. Anyone
+quoting an ASAP7 FO4 has to say which netlist it came from. **This is a delay ratio and nothing
+else**: part 2 measured no matching energy ratio, and what it did measure went both ways by cell.
 
 ## Pricing the flow-M flip from ASAP7 alone
 
@@ -160,8 +181,9 @@ The cell mix is the one **Q126(e) measured on this very unit** the same day: cor
 synthesized onto this library with Yosys, 16,087 cells flattened
 (`../2026-10-26-open-netlist/census_flat.json`). All 33 combinational cell types in that histogram
 are priced here, none missing, covering 14,119 cells; the weighted mean internal energy per
-transition is **0.379 fJ at 0.7 V, VDD only**. Two hand-built pools (the x1 drives, and the minimum
-drives) are carried as a sensitivity.
+transition is **0.218 fJ at 0.7 V, VDD only**. The flop is that netlist's own flop, **DFFHQx4** —
+the only flop type it contains, 1,953 of them. Two hand-built pools (the x1 drives, and the minimum
+drives, both with the minimum-drive DFFHQNx1) are carried as a sensitivity.
 
 Flip-flops contribute their **data-switching** arc only: the clock reaches 1,586 of the lane's 1,851
 flops on every multiply-add either way (`tfma.clocked`), so the clock-pin energy is not marginal to
@@ -169,31 +191,68 @@ a flip.
 
 | per-net load | 1 fF | 2 fF | 4 fF |
 |---|---:|---:|---:|
-| **census mix, VDD only (headline)** | **0.132 pJ** | **0.183 pJ** | **0.285 pJ** |
-| minimum-drive pool, VDD only | 0.086 pJ | 0.137 pJ | 0.239 pJ |
-| x1 pool, VDD only | 0.105 pJ | 0.156 pJ | 0.258 pJ |
+| **census mix + DFFHQx4, VDD only (headline)** | **0.111 pJ** | **0.162 pJ** | **0.264 pJ** |
+| minimum-drive pool + DFFHQNx1, VDD only | 0.075 pJ | 0.126 pJ | 0.228 pJ |
+| x1 pool + DFFHQNx1, VDD only | 0.088 pJ | 0.139 pJ | 0.240 pJ |
 
-**Against the two things it can be checked on:**
+The model is linear in the net load, which is the clearest way to state it:
 
-| | pJ per flip |
-|---|---|
-| **This estimate, ASAP7 alone** | 0.13 – 0.28 (census mix, 1–4 fF per net) |
-| **Q124, priced with the real cells** (`tfma.flip.energy`) | 0.11 – 0.13 |
-| **E60, measured at the board** | 0.117 – 0.130 |
-| **E60, measured at the minion rail** | 0.0875 – 0.0969 |
+```
+E_flip(C) = 60.0 fJ  +  50.9 fJ/fF · C          (0.517 V, census mix, VDD only, zero delay)
+```
 
-So **ASAP7 alone lands within about 1.0–2.2× of the real-cell figure, erring dear**, and the light
-end of the net-load assumption (1 fF) sits right on Q124's top. That is the right order from a
-predictive kit that knows nothing about the ET-SoC-1, and it is the first outside check on the
-flip price.
+60.0 fJ is what the cells cost with no net capacitance at all; everything above that is wire and pin.
 
-**The dominant uncertainty is the per-net load, not the cells.** Going from 1 fF to 4 fF per net
-moves the answer by 2.2×; swapping the whole cell mix moves it by 1.5×. A real extraction of the
-unit's wires would settle it, and that is the gap this estimate leaves open.
+### Against Q124 — the one like-for-like check
+
+Q124 priced the same 381 wires, over the same scope (Booth rows, Wallace tree, product adder), on
+the same zero-delay basis, using the **real** cells' energies. It is the only comparison here that
+needs no correction.
+
+| | pJ per flip | implied per-net load |
+|---|---|---|
+| **This estimate, ASAP7 alone** | 0.111 – 0.264 (1–4 fF per net) | — |
+| **Q124, priced with the real cells** (`tfma.flip.energy`) | 0.11 – 0.13 | **0.98 – 1.37 fF** |
+
+So **the estimate brackets Q124 rather than erring dear**: its light-load end lands on Q124's low
+end, and Q124's whole band corresponds to a per-net load of **about 1.0 to 1.4 fF** in this model —
+squarely in the plausible range for a tree-level wire plus the pin it drives. That is a good outcome
+from a predictive kit that knows nothing about the ET-SoC-1, and it is the first outside check on
+the flip price.
+
+### Against E60 — three scope differences, and only one operand case matches
+
+E60's Hamming ladder reports **two operand cases, not an uncertainty band**
+(`docs/findings/03-experiments.md`). The case Q124 counted, and therefore the case this estimate
+models, is **a = π**:
+
+| E60, aifoundry3, 600 MHz, 0.522 V | board | minion rail |
+|---|---:|---:|
+| **a = π, b bit 11 — the case modelled here** | **129.9 ± 0.5 fJ** | **96.9 fJ** |
+| a = 1.0 — a different multiply, not this one | 116.7 ± 0.6 fJ | 87.5 fJ |
+
+Three things still separate the estimate from that measurement, and they do not cancel:
+
+1. **Board versus rail.** 129.9 fJ is board energy, including the regulator's conversion loss. The
+   minion-rail figure, 96.9 fJ, is the one to set beside a cell-level estimate — and even that is
+   the whole rail, not the one unit.
+2. **Scope.** E60 is measured "the cascade included"; the estimate and Q124 cover the Booth rows,
+   the tree and the product adder only.
+3. **Glitches.** E60 is silicon and contains them; the estimate and Q124 are zero-delay.
+   `tfma.glitch` puts the timed tree at 1.4× the energy, so the comparable number is this estimate
+   **× 1.4**, which is 0.155 – 0.369 pJ for 1–4 fF.
+
+On those terms the estimate sits **above** E60's rail figure: hitting 96.9 fJ would need a per-net
+load of 0.72 fF zero-delay, or 0.18 fF once the glitch factor is carried, and neither is a real
+wire. That is a scope gap to be closed, not a contradiction — but it is the honest reading, and it
+says the next thing to measure is the unit's actual net capacitances.
+
+**The dominant uncertainty is still the per-net load, not the cells.** Going from 1 fF to 4 fF per
+net moves the answer by 2.4×; swapping the whole combinational cell mix moves it by 1.5×, and the
+flop choice (DFFHQx4 against DFFHQNx1, 35 wires of 381) by 6%.
 
 Other things the estimate assumes, all listed in the JSON's `assumptions`: one toggling wire is one
-cell-output transition; zero delay, like Q124's count, so no glitches (`tfma.glitch` puts the timed
-tree at 1.5× the toggles and 1.4× the energy); the open synthesis made 7,967 cells for the
+cell-output transition; uniform `when`-state weighting; the open synthesis made 7,967 cells for the
 multiplier against the tape-out flow's 4,487, so its histogram is used as the *mix*, not the count;
 and ASAP7 is a predictive 7 nm PDK, not TSMC N7.
 
@@ -218,7 +277,47 @@ edge costs **+0.064 fJ per cycle, about 70% above its fast-edge internal energy*
   and 0.517 V, with leakage beside it.
 - The factor-of-two in liberty internal energy is closed: **the VDD group alone is the rail energy**,
   and anything quoting a summed internal power against a rail measurement is double-counting.
-- The flip price has its first outside check: 0.13–0.28 pJ from open data against 0.11–0.13 pJ from
-  the real cells and 0.117–0.130 pJ measured.
+- A second, independent factor is closed with it: **`when` states are averaged, not summed** — the
+  trap that makes a full adder look three times dearer than it is.
+- The flip price has its first outside check: 0.111–0.264 pJ from open data, which brackets Q124's
+  0.11–0.13 pJ at a per-net load of 1.0–1.4 fF.
 - Still open: the unit's real wire capacitances. Every number here is one extraction away from being
-  a prediction rather than a bracket.
+  a prediction rather than a bracket, and the gap to E60's rail figure cannot be read until it is.
+
+## What the first version got wrong
+
+Both defects were found in review on the same day, before anything was published outside this
+repository. They are recorded here because each is a trap any later liberty reader will meet.
+
+**1. Mutually exclusive `when` states were summed, not averaged.** The reader keyed each arc only by
+`related_pin → output_pin`, so a cell whose arc is characterised separately for each side-input
+state had all those states added together. The inflation is exactly the number of states:
+
+| cell | published before | corrected | factor |
+|---|---:|---:|---:|
+| INVx1, NAND2x1 (no `when`) | 0.0487, 0.1103 | 0.0487, 0.1103 | 1.00× |
+| HAxp5 | 0.1517 | 0.1023 | 1.48× |
+| AOI21x1 | 0.2214 | 0.1426 | 1.55× |
+| XOR2x1, MAJIxp5 | 0.4896, 0.2112 | 0.2448, 0.1056 | 2.00× |
+| FAx1 | 0.4255 | 0.1421 | 2.99× |
+| AO221x1 (census) | 0.9024 | 0.2146 | 4.20× |
+| AO222x2 (census) | 2.9595 | 0.3406 | 8.69× |
+
+The census-weighted mean went from 0.3792 to **0.2179 fJ**, a 1.74× inflation, and the headline flip
+estimate from 0.132–0.285 pJ to 0.111–0.264 pJ.
+
+Part 2's own SPICE data would have caught it: SPICE measures FAx1's `A→SN` arc (with B = CI = 0) at
+0.324 fJ per cycle against the published liberty figure of 0.851 fJ per cycle, 2.6× apart, while the
+correctly averaged liberty value for that exact state is 0.272 fJ per cycle — 1.19× apart, which is
+the ordinary schematic-versus-liberty scatter part 2 now measures across eight cases.
+
+**2. The headline `E/transition` columns used the summed convention this file calls double-counting.**
+The text said the VDD group alone is the rail energy, and then built `E/transition = internal +
+½C_load V²` from the VDD+VSS sum. Corrected, with the `when` fix as well: FAx1 1.3403 → **0.6321 fJ**,
+XOR2x1 1.4663 → **0.7348**, DFFHQNx1 1.5910 → **0.9865**, INVx1 0.5875 → **0.5387**.
+
+**3. Smaller, same review.** The flip estimate priced its 35 flop outputs with `DFFHQNx1` while
+claiming the Q126(e) census's mix; that census contains only `DFFHQx4`, at 2.0× the energy. It now
+uses the census's own flop and carries the swap as an explicit sensitivity (+6%). The E60 comparison
+quoted "0.117–0.130 pJ" as though it were an uncertainty band, when those are two different operand
+cases and only a = π matches; it is now split out with its three scope differences stated.
