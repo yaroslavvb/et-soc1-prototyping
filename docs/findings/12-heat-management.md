@@ -107,6 +107,29 @@ within about 10% in the median out to a few minutes, worse near the budget where
 seconds, and 3–5 °C too hot at ten minutes (pessimistic: it wrongly had two of the five ten-minute held-out runs
 reaching 90 °C).
 
+## Pricing a whole load, not just a tile
+
+`predict_heat.py` prices one fp32 TensorFMA32 tile pair at 600 MHz on the card the prices were fitted on. For a
+load that runs at another clock, on another card, at a duty cycle, or that spends most of its watts moving bytes
+rather than multiplying, use [`tools/ettelem/load_model.py`](../../tools/ettelem/load_model.py) and its command
+line [`predict_load.py`](../../tools/ettelem/predict_load.py) (Q126, 26 Oct 2026). It joins the flip model to the
+energy manual's catalogue, E60/E61's measured per-flip prices and E64's governor and heat path, and returns board
+watts, the governor's clock, the die temperature, the speed and the energy per unit of work. The clock, the rail
+voltage, the card, the die temperature, the switching-temperature coefficient and the card scale are arguments;
+`predict_heat.py` now takes the first four as `--f-mhz --volts --card --temp-coeff`, with defaults that reproduce
+every number it printed before.
+
+Two things in the formula changed and this page's numbers above do not yet reflect them: the static part is no
+longer one figure at every clock (a clock-dependent term cuts E64's 103-point static rms from 4.05 W to 0.92 W),
+and the idle law is re-anchored on E64's own 600 MHz floor, 24.46 W at 58 °C against the 21 Sep law's 25.26 W.
+
+What it gets right and wrong on loads it had never seen, with the fit's own circularities named:
+[`docs/reports/data/2026-10-26-load-model/`](../reports/data/2026-10-26-load-model/README.md). In short: a relay
+between shires to 4.3% in pJ per byte but +20 to +41% in watts; a gemv sparsity ladder's slopes to ±9%, two of
+three outside the measurement's own interval; a DRAM-streamed matmul 23–27% high on one byte-count assumption;
+and a sparse-parity solve 13–39% **low**, because the model still has no term for a hart that is awake and not
+issuing tensor work.
+
 ## Levers, in order of effect
 
 1. **Gate the multiply-adds.** A zero operand word costs nothing at all: 1.9 W for a full-rate matmul against

@@ -228,6 +228,7 @@ The same glossary is on the hub, [Limits of observability](https://spacesheep.de
 |---|---|
 | Quote a number and know it is right | [05-claims.md](05-claims.md) — every value, its kind (measured / simulated / fitted / predicted / derived / read from source / external / **assumed**), and the file and field that hold the evidence |
 | Predict the heat of your own kernel | [12-heat-management.md](12-heat-management.md), then `tools/ettelem/predict_heat.py` |
+| Predict a whole load's watts, clock, die temperature and energy per unit of work | [12-heat-management.md](12-heat-management.md) § "Pricing a whole load, not just a tile", then `tools/ettelem/predict_load.py`; what it got right and wrong on four loads it had never seen is [2026-10-26-load-model](../reports/data/2026-10-26-load-model/README.md) |
 | Measure power on one of these cards | [14-card-behaviour.md](14-card-behaviour.md) — the protocol, the telemetry fields, and the traps |
 | Understand the model or improve it | [11-thermal-model.md](11-thermal-model.md) |
 | Argue about efficiency against a GPU | [13-why-low-power.md](13-why-low-power.md), and read its caveats first |
