@@ -8,14 +8,24 @@ Reads the power.py outputs of tools/open-flow/scope/gatesim.sh runs on the scope
      data-dependent part from the part that is there whether the data moves or not;
   2. fits the Hamming ladder the way E60's own reducer fits it, so the transport's per-flipped-
      operand-bit price can be added to the arithmetic's 32.9 / 38.5 fJ and set against E60's
-     board measurement of 116.7 / 129.9 fJ;
+     board measurement of 116.7 / 129.9 fJ -- against BOTH benches' bus counters, because the
+     two count the same operand files differently (--acct-arith);
   3. takes the register-index term and the result-path term by difference against the two
      controls (+accfix, +resfix), against E61's 369-452 fJ per index bit and E60's 31.2 fJ
      per result bit;
-  4. says how much of Q128's unaccounted 2.39 pJ (rail) and 3.84 pJ (board) the parts name.
+  4. says how much of Q128's unaccounted 2.39 pJ (rail) and 3.84 pJ (board) the parts name,
+     and checks the zero-operand floor against the card's own whole-board `zeros` measurement.
 
   python3 ledger_scope.py --power <dir of power_gr_*.json> --acct <dir of *_o1.log>
           --census <census_mixed.json> --out ledger-scope.json
+          [--acct-arith <2026-10-26-open-netlist/power/sim_acct.txt>]
+          [--cell-energies <asap7-cell-energies.json>]
+
+Amended Tue 27 Oct 2026 after verification, in four places, each marked `AMENDED` below:
+the gap arithmetic's lower reading (the zero-operand floor is 34% clock and 66% signal, not
+"the clock gates"), the data-dependent internal term (differenced, not scaled), the index-alone
+bound (priced at the bus-bit slope, not the designed-bit slope this file itself calls unfit),
+and the card's `zeros` bound on the register-file model.
 """
 import argparse
 import json
@@ -49,6 +59,16 @@ BOARD = {
     "index_bit_board_fJ_lo": 369.0, "index_bit_board_fJ_hi": 452.0,
     # Q126(b): the RTL bench's register bits clocked per multiply-add
     "ff_clocked_per_mac": 602.5,
+    # E38/E39, the `zeros` pattern: the WHOLE BOARD's cost per multiply-add over idle, three-card
+    # registered mean (Q128 data.json /permac/mean_zeros_pJ; per card 0.1633 / 0.4034 / 0.2512).
+    # Same instruction stream as this bench's `zeros` run, with zero operand data - so it is an
+    # upper bound on what ONE LANE's transport can cost in that run.
+    "mac_board_zeros_pJ": 0.27,
+    "mac_board_zeros_per_card_pJ": [0.1633, 0.4034, 0.2512],
+    # the arithmetic's own per-counted-bus-bit slopes (POWER.md ll. 131-134), for the common-
+    # denominator addition in section 2
+    "arith_flip_lq_bus_fJ": 20.0, "arith_flip_lb_bus_fJ": 27.5,
+    "arith_flip_lq_bus_internal_fJ": 28.1, "arith_flip_lb_bus_internal_fJ": 39.2,
 }
 
 # --- which net prefix belongs to which part ---------------------------------------------
@@ -107,13 +127,40 @@ def load_acct(d, tag):
     return {}
 
 
+def load_acct_table(path):
+    """A whole sim_acct.txt: `<tag> ACCT {json}` per line. Used for --acct-arith, so the
+    transport's bus-bit slope can be refitted against the ARITHMETIC bench's own counts."""
+    out = {}
+    if not path or not os.path.exists(path):
+        return out
+    for line in open(path):
+        if "ACCT" not in line:
+            continue
+        tag, body = line.split()[0], line.split("ACCT", 1)[1].strip()
+        try:
+            out[tag] = json.loads(body)
+        except ValueError:
+            pass
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--power", required=True)
     ap.add_argument("--acct", required=True)
+    ap.add_argument("--acct-arith", dest="acct_arith",
+                    help="the ARITHMETIC bench's sim_acct.txt "
+                         "(docs/reports/data/2026-10-26-open-netlist/power/sim_acct.txt): its "
+                         "bus_toggles for the same operand files, so the two ladders' bus-bit "
+                         "slopes can be fitted on one denominator before they are added")
+    ap.add_argument("--cell-energies", dest="cell_energies",
+                    help="Q126(d)'s asap7-cell-energies.json: re-weights the internal-energy "
+                         "estimate on THIS netlist's cell mix as a stated sensitivity (power.py "
+                         "applies the txfma mix, which is what lets the two ledgers add)")
     ap.add_argument("--census")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
+    arith_acct = load_acct_table(a.acct_arith)
 
     out = {"method": __doc__.strip().splitlines()[0], "board": BOARD, "muladds": MULADDS}
 
@@ -159,11 +206,16 @@ def main():
             "pJ_per_mac_switching": v["energy_J"] / MULADDS * 1e12,
             "pJ_per_mac_clock": v["clock_energy_J"] / MULADDS * 1e12,
             "pJ_per_mac_signal": (v["energy_J"] - v["clock_energy_J"]) / MULADDS * 1e12,
-            # zeros is the same netlist with every operand word zero: the clock gates shut and
-            # the data stands still, so (randn - zeros) is the DATA-DEPENDENT part and zeros is
-            # what the part costs for being clocked at all.
+            # zeros is the same netlist and the same micro-op stream with every operand word
+            # zero, so (randn - zeros) is the DATA-DEPENDENT part. AMENDED: `zeros` is NOT "what
+            # the part costs for being clocked at all" - the accumulator index sweeps in that run
+            # too, so most of the zeros column is signal switching the instruction stream causes.
+            # Its own clock/signal split is given beside it.
             "pJ_per_mac_data_dependent": (v["energy_J"] - zz.get("energy_J", 0.0)) / MULADDS * 1e12,
             "pJ_per_mac_zeros": zz.get("energy_J", 0.0) / MULADDS * 1e12,
+            "pJ_per_mac_zeros_clock": zz.get("clock_energy_J", 0.0) / MULADDS * 1e12,
+            "pJ_per_mac_zeros_signal": (zz.get("energy_J", 0.0)
+                                        - zz.get("clock_energy_J", 0.0)) / MULADDS * 1e12,
             "pJ_per_mac_internal_est": (e_int * sig / sig_tot / MULADDS * 1e12) if sig_tot else 0.0,
             "signal_toggles_per_mac": sig / MULADDS,
             "clock_toggles_per_mac": v["clock_toggles"] / MULADDS,
@@ -199,28 +251,43 @@ def main():
             pts.append((h, d["energy_J"] / MULADDS,
                         d["internal_estimate"]["switching_plus_internal_J"] / MULADDS
                         if "internal_estimate" in d else None,
-                        ai.get("bus_toggles", 0) / MULADDS))
+                        ai.get("bus_toggles", 0) / MULADDS,
+                        arith_acct.get(f"{fam}_h{h}", {}).get("bus_toggles", 0) / MULADDS))
         if len(pts) < 3:
             continue
         ez = z["energy_J"] / MULADDS
         ezi = (z["internal_estimate"]["switching_plus_internal_J"] / MULADDS
                if "internal_estimate" in z else None)
         bz = load_acct(a.acct, f"{fam}_h0").get("bus_toggles", 0) / MULADDS
+        bza = arith_acct.get(f"{fam}_h0", {}).get("bus_toggles", 0) / MULADDS
         row = {}
-        for reg, xs in (("designed", [h for h, *_ in pts]),
-                        ("bus", [b - bz for *_, b in pts])):
-            ys = [(e - ez) * 1e15 for _, e, _, _ in pts]
+        # AMENDED: three regressors, not two. The two benches count the SAME operand files'
+        # bus bits differently (lb_h1 -26%, lb_h8 +40%), so the scope's own counter is not the
+        # denominator the arithmetic's 20.0 / 27.5 fJ was fitted on. `bus_arith` refits the
+        # transport's energies against the arithmetic bench's counts, which is the only pair
+        # that may be added.
+        regs = [("designed", [h for h, *_ in pts]),
+                ("bus", [b - bz for *_, b, _ in pts])]
+        if arith_acct:
+            regs.append(("bus_arith", [b - bza for *_, b in pts]))
+        for reg, xs in regs:
+            ys = [(e - ez) * 1e15 for _, e, _, _, _ in pts]
             s, c, se = fit(xs, ys)
             row[reg] = {"slope_fJ": s, "intercept_fJ": c, "slope_se_fJ": se}
             if ezi is not None:
-                yi = [(e - ezi) * 1e15 for _, _, e, _ in pts]
+                yi = [(e - ezi) * 1e15 for _, _, e, _, _ in pts]
                 si, ci, sei = fit(xs, yi)
                 row[reg]["slope_with_internal_fJ"] = si
                 row[reg]["intercept_with_internal_fJ"] = ci
                 row[reg]["slope_with_internal_se_fJ"] = sei
-        row["rungs"] = [{"h": h, "pJ": e * 1e12, "bus_bits_per_mac": b} for h, e, _, b in pts]
+        row["rungs"] = [{"h": h, "pJ": e * 1e12, "bus_bits_per_mac": b,
+                         "arith_bench_bus_bits_per_mac": ba,
+                         "bus_bits_ratio_scope_over_arith": (b / ba) if ba else None}
+                        for h, e, _, b, ba in pts]
         row["h0_pJ"] = ez * 1e12
         row["h0_bus_bits_per_mac"] = bz
+        row["h0_arith_bench_bus_bits_per_mac"] = bza
+        row["monotone"] = all(pts[i][1] <= pts[i + 1][1] for i in range(len(pts) - 1))
         lad[fam] = row
     out["ladder"] = lad
 
@@ -251,6 +318,28 @@ def main():
                 (BOARD[arith_int_key] + ti) / (board * BOARD["rail_ratio"]),
             "arith_alone_closure_vs_board": BOARD[arith_key] / board,
         }
+        # AMENDED: the per-counted-bus-bit addition, on each of the two denominators. E60's own
+        # amendment-A2 regressor is the counted bus bit, and for `lq` the designed-bit fit here is
+        # unresolved (SE 57% of the slope) - but the arithmetic's 20.0 / 27.5 fJ were fitted on the
+        # ARITHMETIC bench's counter, so only the `bus_arith` row is a like-for-like sum.
+        bb = BOARD[f"flip_{fam}_bus_board_fJ"]
+        for reg, lab in (("bus", "scope_bench_counts"), ("bus_arith", "arith_bench_counts")):
+            if reg not in lad[fam]:
+                continue
+            s = lad[fam][reg]["slope_fJ"]
+            si = lad[fam][reg].get("slope_with_internal_fJ", s)
+            ab = BOARD[f"arith_flip_{fam}_bus_fJ"]
+            abi = BOARD[f"arith_flip_{fam}_bus_internal_fJ"]
+            clos[fam][f"per_bus_bit_{lab}"] = {
+                "transport_fJ": s, "transport_se_fJ": lad[fam][reg]["slope_se_fJ"],
+                "transport_with_internal_fJ": si,
+                "arithmetic_fJ": ab, "sum_fJ": ab + s, "sum_with_internal_fJ": abi + si,
+                "board_fJ": bb, "rail_fJ": bb * BOARD["rail_ratio"],
+                "closure_vs_board": (ab + s) / bb,
+                "closure_vs_board_with_internal": (abi + si) / bb,
+                "closure_vs_rail_with_internal": (abi + si) / (bb * BOARD["rail_ratio"]),
+                "like_for_like": reg == "bus_arith",
+            }
     out["flip_closure"] = clos
 
     # ---------- 3. the two controls: the index term and the result term ------------------
@@ -307,20 +396,34 @@ def main():
             # accumulator-read bits at the transport's own fitted per-operand-bit slope
             # (the two ladder families bracket it). A negative lower bound means this design
             # cannot resolve the index from the data it drags, which is E61's own verdict.
+            #
+            # AMENDED: the bits subtracted are COUNTED bits (acc_rd_toggles), so they must be
+            # priced at a per-counted-bit slope. The first version priced them at the DESIGNED-
+            # bit slope - fJ per designed h-flip, a different unit, and the regressor this same
+            # file reports as unfit - which put the bound at 72-136 fJ and supported the opposite
+            # conclusion. At the counted-bus-bit slope the bound is 166-175 fJ, i.e. most of the
+            # composite IS the index term.
             nb = c["also_changed_per_mac"]["accumulator_read_bits"]
             ib = c["bits_changed_per_mac"]
-            bnds = []
-            for fam in ("lq", "lb"):
-                if fam in lad:
-                    sl = lad[fam]["designed"]["slope_fJ"]
-                    bnds.append((c["delta_pJ_per_mac"] * 1e3 - nb * sl) / ib if ib else None)
-            if bnds:
-                c["index_alone_fJ_per_bit_bounds"] = sorted(b for b in bnds if b is not None)
-                c["index_alone_note"] = ("the composite minus the accumulator-read bits priced "
-                                         "at the transport's own fitted operand-bit slope "
-                                         "(lq and lb bracket it); the read path through the "
-                                         "64 x 32 array is not the same path a B bit takes, so "
-                                         "this is a bound, not a measurement")
+            bounds = {}
+            for reg in ("bus", "bus_arith", "designed"):
+                bnds = [(c["delta_pJ_per_mac"] * 1e3 - nb * lad[fam][reg]["slope_fJ"]) / ib
+                        for fam in ("lq", "lb") if fam in lad and reg in lad[fam] and ib]
+                if bnds:
+                    bounds[reg] = sorted(bnds)
+            if "bus" in bounds:
+                c["index_alone_fJ_per_bit_bounds"] = bounds["bus"]
+                c["index_alone_regressor"] = "bus (counted operand-bus bits, scope bench)"
+                c["index_alone_share_of_composite"] = [b / c["fJ_per_bit"] for b in bounds["bus"]]
+                c["index_alone_fJ_per_bit_bounds_by_regressor"] = bounds
+                c["index_alone_note"] = (
+                    "the composite minus the 13.75 COUNTED accumulator-read bits, priced at the "
+                    "transport's own fitted per-counted-bus-bit slope (lq and lb bracket it). "
+                    "The designed-bit entry is a sensitivity only: it prices counted bits at a "
+                    "per-designed-flip slope, which is the wrong unit and the regressor this "
+                    "ladder reports as unfit. Either way this is a bound, not a measurement - "
+                    "an accumulator bit read through the 64 x 32 array does not take the path a "
+                    "B-mantissa bit takes.")
     if "result_word" in ctrl:
         c = ctrl["result_word"]
         c["board_fJ_per_result_bit"] = BOARD["result_bit_board_fJ"]
@@ -334,6 +437,22 @@ def main():
     sw = rn["energy_J"] / MULADDS * 1e12
     swi = (rn["internal_estimate"]["switching_plus_internal_J"] / MULADDS * 1e12
            if "internal_estimate" in rn else sw)
+    # the clock/signal split of the TOTAL, which is what decides the lower reading
+    clk = rn["total"].get("clock_energy_J", 0.0) / MULADDS * 1e12
+    sig = rn["total"].get("signal_energy_J", 0.0) / MULADDS * 1e12
+    zsw = (zr["energy_J"] / MULADDS * 1e12) if zr else None
+    zswi = ((zr["internal_estimate"]["switching_plus_internal_J"] / MULADDS * 1e12)
+            if zr and "internal_estimate" in zr else zsw)
+    zclk = (zr["total"].get("clock_energy_J", 0.0) / MULADDS * 1e12) if zr else None
+    zsig = (zr["total"].get("signal_energy_J", 0.0) / MULADDS * 1e12) if zr else None
+    # AMENDED: the LOWER reading. The first version charged the card only for the data-dependent
+    # part (randn - zeros), on the ground that the zero-operand floor "may already be inside the
+    # idle E38 subtracts". But only 34% of that floor is clock-net energy; the other 66% is
+    # ordinary signal switching that the instruction stream causes - the accumulator index sweeps
+    # 2i+h in EVERY pattern (idx_toggles = 992 per op with zero data), so the 64-entry read mux
+    # tree keeps switching. An idle subtract cannot contain switching no idle performs. So the
+    # defensible lower reading removes the clock NETS only.
+    excl_clk = sig + (swi - sw)
     # the shared blocks (A file, TMP file, and the per-lane control's own clock root) are
     # instantiated once for VPU_LANE_NUM lanes, so a per-lane-MAC charge divides by 8.
     shared = {"tensor A register file, 32 b x 2", "tensor TMP register file, 32 b x 8"}
@@ -344,16 +463,40 @@ def main():
     tenc = sum(r["pJ_per_mac_switching"] for r in table
                if r["part"].startswith("TIMA accumulator"))
     dd = out["totals"].get("data_dependent_pJ_per_mac")
-    dd_i = (dd * swi / sw) if (dd and sw) else None
+    # AMENDED: the data-dependent figure WITH internal energy is a DIFFERENCE, not a scaling.
+    # power.py's internal estimate is signal_toggles x a constant fJ per transition, so the
+    # data-dependent internal is (randn - zeros) toggles x that constant. The first version
+    # scaled the switching difference by the whole-design +internal ratio, which reads 0.5443
+    # against the differenced 0.5176 - 5.2% high, and the same document differences both
+    # controls and both ladder fits correctly.
+    dd_i = (swi - zswi) if (zswi is not None) else None
+    dd_i_scaled_superseded = (dd * swi / sw) if (dd and sw) else None
     out["gap"] = {
         "transport_switching_pJ_per_mac": sw,
-        # Two readings, and the honest answer is a range between them. The upper one charges the
-        # card for the whole transport netlist; the lower one charges it only for the part that
-        # moves with the data, because the transport's clocked floor (0.65 pJ/MAC here, mostly
-        # the latch arrays' own clock gates) may already sit inside the idle that E38 subtracts -
-        # the same trap 2026-10-27-transistor-ledger flags for the `zeros` pattern.
+        "transport_clock_net_pJ_per_mac": clk,
+        "transport_signal_switching_pJ_per_mac": sig,
+        "zeros_switching_pJ_per_mac": zsw,
+        "zeros_clock_net_pJ_per_mac": zclk,
+        "zeros_signal_switching_pJ_per_mac": zsig,
+        "zeros_clock_share": (zclk / zsw) if zsw else None,
+        # Two readings, and the honest answer is a range between them. The UPPER one charges the
+        # card for the whole transport netlist. The LOWER one removes the clock-NET energy only
+        # (0.223 pJ/MAC), because that is the only part of the zero-operand floor an idle subtract
+        # could already contain - the rest of the floor is the accumulator index sweep, which the
+        # card's instruction stream performs too. The data-dependent figure below is reported as
+        # its own quantity (how much of the transport moves with the operands), NOT as the lower
+        # end of the gap-closure range.
+        "transport_excl_clock_nets_with_internal_pJ_per_mac": excl_clk,
+        "share_of_board_gap_excl_clock_nets": excl_clk / BOARD["unaccounted_board_pJ"],
+        "share_of_rail_gap_excl_clock_nets": excl_clk / BOARD["unaccounted_rail_pJ"],
+        "new_ledger_total_excl_clock_nets_pJ": BOARD["arith_pJ"] + excl_clk,
+        "new_closure_vs_board_excl_clock_nets":
+            (BOARD["arith_pJ"] + excl_clk) / BOARD["mac_board_pJ"],
+        "new_closure_vs_rail_excl_clock_nets":
+            (BOARD["arith_pJ"] + excl_clk) / BOARD["mac_rail_pJ"],
         "transport_data_dependent_pJ_per_mac": dd,
         "transport_data_dependent_with_internal_pJ_per_mac": dd_i,
+        "transport_data_dependent_with_internal_scaled_superseded_pJ": dd_i_scaled_superseded,
         "share_of_board_gap_data_dependent": (dd_i / BOARD["unaccounted_board_pJ"]) if dd_i else None,
         "share_of_rail_gap_data_dependent": (dd_i / BOARD["unaccounted_rail_pJ"]) if dd_i else None,
         "new_ledger_total_data_dependent_pJ": (BOARD["arith_pJ"] + dd_i) if dd_i else None,
@@ -379,7 +522,82 @@ def main():
         "new_closure_vs_rail": (BOARD["arith_pJ"] + swi) / BOARD["mac_rail_pJ"],
         "old_closure_vs_board": BOARD["arith_pJ"] / BOARD["mac_board_pJ"],
         "old_closure_vs_rail": BOARD["arith_pJ"] / BOARD["mac_rail_pJ"],
+        "charging_convention": ("the per-part table and every total charge the shared files "
+                                "(TENA, TMP) and the one-lane netlist's whole clock root to this "
+                                "one lane; transport_charged_per_lane_mac_pJ divides the two "
+                                "shared files by VPU_LANE_NUM = 8 instead (a 0.0062 pJ/MAC "
+                                "difference). The clock root is not divided in either: an 8-lane "
+                                "netlist's root is not 8x this one's."),
     }
+
+    # AMENDED: the card's own `zeros` measurement bounds the register-file model FROM ABOVE.
+    # E38 ran the same instruction stream with zero operand data and the WHOLE BOARD cost
+    # 0.27 pJ per multiply-add over idle. One lane's transport cannot cost more than the whole
+    # board in the same run - and this model does, by 2.4x, or 1.6x counting its signal part
+    # alone. Even the register-file array row by itself exceeds it.
+    if zsw is not None:
+        zb = BOARD["mac_board_zeros_pJ"]
+        arr = next((r for r in table if r["is_model"]
+                    and r["part"].startswith("VPU register file array")), None)
+        out["gap"]["card_zeros_bound"] = {
+            "board_zeros_pJ_per_mac": zb,
+            "board_zeros_per_card_pJ": BOARD["mac_board_zeros_per_card_pJ"],
+            "transport_zeros_pJ_per_mac": zsw,
+            "ratio_transport_over_board": zsw / zb,
+            "transport_zeros_signal_only_pJ_per_mac": zsig,
+            "ratio_signal_only_over_board": (zsig / zb) if zsig is not None else None,
+            "rf_array_zeros_pJ_per_mac": arr["pJ_per_mac_zeros"] if arr else None,
+            "rf_array_zeros_clock_pJ_per_mac": arr["pJ_per_mac_zeros_clock"] if arr else None,
+            "ratio_rf_array_over_board": (arr["pJ_per_mac_zeros"] / zb) if arr else None,
+            "verdict": ("the latch-array model is not merely an unbounded ceiling: a card "
+                        "measurement puts it above what the board permits. Whichever way the "
+                        "idle subtract falls - if the lane's clocks run at idle the card figure "
+                        "excludes clock and the comparison is against the 0.431 pJ signal part; "
+                        "if they are gated at idle the comparison is against the whole 0.654 - "
+                        "the model over-prices. Over-pricing of the array's write port is "
+                        "therefore the leading explanation for the result-bit term reading 101% "
+                        "of its card number."),
+        }
+
+    # m2: the internal-energy estimate is weighted by the ARITHMETIC netlist's cell mix (which is
+    # what lets the two ledgers add). Re-weighting on this netlist's own mix as a sensitivity.
+    if a.cell_energies and a.census:
+        try:
+            ce = json.load(open(a.cell_energies))["census_weighted_mix"]
+            by = ce["by_cell"]
+            cen = json.load(open(a.census)).get("by_cell_type", {})
+            num = den = 0.0
+            missing = {}
+            for cell, n in cen.items():
+                e = by.get(cell)
+                if e is None:
+                    missing[cell] = n
+                    continue
+                num += n * float(e["E_int_per_transition_VDDonly_fJ"])
+                den += n
+            if den:
+                e_this = (num / den) * (0.517 / 0.7) ** 2
+                e_used = rn["internal_estimate"]["E_int_per_transition_fJ_at_vdd"]
+                st = rn["total"]["signal_toggles"] / MULADDS
+                out["internal_mix_sensitivity"] = {
+                    "mix_used_by_power_py": "the arithmetic netlist's (txfma_top flattened)",
+                    "mix_source": ce.get("source"),
+                    "E_int_per_transition_fJ_used": e_used,
+                    "E_int_per_transition_fJ_this_netlist_mix": e_this,
+                    "relative_difference": e_this / e_used - 1.0,
+                    "internal_pJ_per_mac_used": st * e_used / 1e3,
+                    "internal_pJ_per_mac_this_netlist_mix": st * e_this / 1e3,
+                    "combinational_cells_this_netlist": den,
+                    "cells_with_no_liberty_entry": missing,
+                    "note": ("power.py's own census fields in every power JSON "
+                             "(combinational_cells_priced, sequential_and_tie_cells_skipped) are "
+                             "the MIX's provenance census, not this netlist's. Kept as the tool "
+                             "produced them, because applying the txfma mix unchanged is the "
+                             "precondition for adding the two ledgers; this row says what it "
+                             "costs."),
+                }
+        except (KeyError, ValueError, OSError) as exc:
+            out["internal_mix_sensitivity"] = {"error": repr(exc)}
 
     if a.census:
         c = json.load(open(a.census))
@@ -454,22 +672,46 @@ def main():
               f"{r['sum_fJ']:.1f} fJ  vs board {r['board_fJ']:.1f} fJ "
               f"({r['closure_vs_board']*100:.0f}%, was {r['arith_alone_closure_vs_board']*100:.0f}%)"
               f"; with internal {r['sum_with_internal_fJ']:.1f} fJ "
-              f"({r['closure_vs_board_with_internal']*100:.0f}%)")
+              f"({r['closure_vs_board_with_internal']*100:.0f}%)   [designed-bit regressor]")
+        for lab in ("arith_bench_counts", "scope_bench_counts"):
+            b = r.get(f"per_bus_bit_{lab}")
+            if b:
+                print(f"  per bus bit, {lab:18}: {b['arithmetic_fJ']:.1f} + "
+                      f"{b['transport_fJ']:.1f} +- {b['transport_se_fJ']:.1f} = {b['sum_fJ']:.1f} fJ "
+                      f"vs {b['board_fJ']:.1f} ({b['closure_vs_board']*100:.0f}%)"
+                      f"{'  <- like for like' if b['like_for_like'] else ''}")
     for k, r in ctrl.items():
         print(f"\n{k}: {r['delta_pJ_per_mac']*1000:.1f} fJ/MAC over {r['bits_changed_per_mac']:.2f} "
               f"bits = {r['fJ_per_bit'] if r['fJ_per_bit'] is None else round(r['fJ_per_bit'],2)} fJ/bit")
     g = out["gap"]
     print(f"\ncap priced: {out['totals']['cap_fraction_priced']*100:.1f}% of "
           f"{out['totals']['cap_fF_extracted']:.0f} fF")
-    print(f"data-dependent only: {g['transport_data_dependent_with_internal_pJ_per_mac']:.4f} pJ -> "
-          f"{g['share_of_board_gap_data_dependent']*100:.1f}% of the board gap, "
-          f"{g['share_of_rail_gap_data_dependent']*100:.1f}% of the rail gap; "
-          f"closure {g['new_closure_vs_board_data_dependent']*100:.0f}% of the board")
-    print(f"\nwhole netlist: names {g['share_of_board_gap_with_internal']*100:.1f}% of the 3.837 pJ board gap, "
-          f"{g['share_of_rail_gap_with_internal']*100:.1f}% of the 2.391 pJ rail gap; "
-          f"ledger {BOARD['arith_pJ']:.3f} -> {g['new_ledger_total_pJ']:.3f} pJ, "
-          f"closure {g['old_closure_vs_board']*100:.0f}% -> {g['new_closure_vs_board']*100:.0f}% "
-          f"of the board")
+    print(f"zero-operand floor {g['zeros_switching_pJ_per_mac']:.4f} pJ = clock nets "
+          f"{g['zeros_clock_net_pJ_per_mac']:.4f} ({g['zeros_clock_share']*100:.0f}%) + signal "
+          f"{g['zeros_signal_switching_pJ_per_mac']:.4f} (the index sweeps in every pattern)")
+    z = g.get("card_zeros_bound")
+    if z:
+        print(f"CARD BOUND: the whole board's `zeros` MAC is {z['board_zeros_pJ_per_mac']:.2f} pJ, "
+              f"so one lane's {z['transport_zeros_pJ_per_mac']:.4f} is "
+              f"{z['ratio_transport_over_board']:.2f}x it "
+              f"({z['ratio_signal_only_over_board']:.2f}x on signal alone; the RF-array row alone "
+              f"is {z['ratio_rf_array_over_board']:.2f}x) -- the model over-prices")
+    print(f"\nRANGE, + the cells' internal energy:")
+    print(f"  upper (whole netlist)            {g['transport_switching_plus_internal_pJ_per_mac']:.4f} pJ -> "
+          f"{g['share_of_board_gap_with_internal']*100:.1f}% of the 3.837 pJ board gap, "
+          f"{g['share_of_rail_gap_with_internal']*100:.1f}% of the rail gap; ledger "
+          f"{g['new_ledger_total_pJ']:.3f}, closure {g['new_closure_vs_board']*100:.0f}% board / "
+          f"{g['new_closure_vs_rail']*100:.0f}% rail")
+    print(f"  lower (less the clock nets)      {g['transport_excl_clock_nets_with_internal_pJ_per_mac']:.4f} pJ -> "
+          f"{g['share_of_board_gap_excl_clock_nets']*100:.1f}% of the board gap, "
+          f"{g['share_of_rail_gap_excl_clock_nets']*100:.1f}% of the rail gap; ledger "
+          f"{g['new_ledger_total_excl_clock_nets_pJ']:.3f}, closure "
+          f"{g['new_closure_vs_board_excl_clock_nets']*100:.0f}% board / "
+          f"{g['new_closure_vs_rail_excl_clock_nets']*100:.0f}% rail")
+    print(f"  of which moves with the operands {g['transport_data_dependent_with_internal_pJ_per_mac']:.4f} pJ "
+          f"(a separate quantity, NOT the bottom of the range)")
+    print(f"  closure was {g['old_closure_vs_board']*100:.0f}% of the board, "
+          f"{g['old_closure_vs_rail']*100:.0f}% of the rail (arithmetic alone)")
 
 
 if __name__ == "__main__":

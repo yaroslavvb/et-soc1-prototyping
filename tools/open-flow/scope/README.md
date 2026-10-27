@@ -28,7 +28,7 @@ from ASU, not the process the ET-SoC-1 was built in.
 | `asap7_seq_behav_scope.v` | behavioural stand-ins for the three ASAP7 sequential cells this netlist uses. `DHLx1` is new and necessary: it is what the latch arrays in `rtl/libs/rf_latches` map to, 3,143 of them |
 | `gatesim.sh` | drives the operand stream into the gate netlist under Verilator and writes a SAIF, twice per pattern (`_o1` with the measured ops, `_o0` with none, so the difference is the op) |
 | `reduce.sh` | prices all 15 runs with `../txfma/power.py` and then builds the ledger |
-| `ledger_scope.py` | the per-part table, the Hamming-ladder fits with standard errors, both controls with what each composite contains, the census join, and what the parts name of Q128's 2.39 pJ rail and 3.84 pJ board gaps — in both readings (see trap 3) |
+| `ledger_scope.py` | the per-part table with each part's clock/signal split, the Hamming-ladder fits with standard errors **against both benches' bus counters** (`--acct-arith`, trap 8), both controls with what each composite contains, the census join, the internal-mix sensitivity (`--cell-energies`), the card's `zeros` bound on the models (trap 6), and what the parts name of Q128's 2.39 pJ rail and 3.84 pJ board gaps — as a range over the clock-net term (trap 3) |
 
 ```bash
 export SCRATCH=$HOME/scratch-q129-scope          # anywhere outside a synced folder
@@ -59,11 +59,12 @@ bash tools/open-flow/scope/reduce.sh
 On a 16-core box at `nice -n 19` with four build jobs, the Verilator build of the gate netlist is
 about 15 minutes and the 30 simulations about 20.
 
-## Five things that cost time, so you do not pay them again
+## Eight things that cost time, so you do not pay them again
 
 The six in [`../txfma/README.md`](../txfma/README.md) all still apply — `--single-unit --compat
 vcs`, one `-liberty` per ASAP7 group, no 4× scale on the ORFS platform, hierarchy, `mixed` not
-`keep`, pinned tools. These are the ones this directory added.
+`keep`, pinned tools. These are the ones this directory added; 3 and 6–8 were learned the hard way,
+from an adversarial verification of the results directory the same day it was published.
 
 1. **Only `txfma_top.v` includes `soc.vh`, and none of the VPU files do.** `vpu_bypass.v` opens with
    `` `VPU_LANE_NUM `` and `vpu_input_t` and includes nothing at all. Elaborating it on its own gives
@@ -78,12 +79,34 @@ vcs`, one `-liberty` per ASAP7 group, no 4× scale on the ORFS platform, hierarc
    the same job, which is what `q129_scope_top.v` substitutes at the same geometry. **A latch array
    is an upper bound on a macro, by roughly an order of magnitude in area**, so say which rows are
    models in every table.
-3. **`zeros` is not an idle baseline here, and the choice is worth a factor of 2.7.** 63% of this
-   netlist's switching energy survives with every operand word zero, because the latch arrays' own
-   per-entry clock gates and the clock root still run. On a card that floor may already be inside
-   the idle the board measurement subtracts. `ledger_scope.py` therefore reports the gap arithmetic
-   twice, on the whole netlist and on the data-dependent part alone, and the honest answer is the
-   range.
+3. **`zeros` is not an idle baseline here — and it is not a clock-only baseline either.** 63% of
+   this netlist's switching energy survives with every operand word zero, and the first version of
+   this file said that was the latch arrays' clock gates and the clock root. It is not: the split
+   is **34% clock nets, 66% signal switching**, because the accumulator index keeps sweeping
+   2 i + h (`idx_toggles` = 992 per op in every pattern, `zeros` included) and a 64-entry read mux
+   tree switches on the index with zero data. Only the clock part could already be inside the idle
+   a board measurement subtracts; a card sweeps the index too. So `ledger_scope.py` reports the gap
+   arithmetic as a **range over the clock-net term** (`transport_switching_plus_internal_pJ_per_mac`
+   down to `transport_excl_clock_nets_with_internal_pJ_per_mac`, 1.48 → 1.26 pJ/MAC) and keeps the
+   data-dependent figure as a separate quantity, not as the bottom of that range. Check a
+   zero-operand figure's clock/signal split before you call it a clocked floor.
+6. **A card measurement can bound a model from above, and it is worth looking for one.** The
+   latch-array register file is "a ceiling" — but the board's own `zeros` run (0.27 pJ per
+   multiply-add over idle, whole board) costs *less than this one lane's transport model does in
+   the same stimulus*, by 2.4×. `ledger_scope.py` now runs that check
+   (`gap.card_zeros_bound`) and it changes what the model's numbers may be used for. A model block
+   is worth checking against every card number whose stimulus it shares, not only against the one
+   it was built to predict.
+7. **A counted bit and a designed bit are different units.** The `+accfix` control drags 13.75
+   counted accumulator-read bits along with its 1.94 index bits, and subtracting them at the
+   *designed*-bit ladder slope — fJ per designed h-flip — put the index-alone bound at 72–136 fJ
+   where the per-counted-bit slope puts it at 166–175 fJ, reversing the conclusion. The two
+   regressors are both in `ladder.<fam>`; pick the one whose denominator matches the bits being
+   subtracted.
+8. **Two benches on the same operand files do not have to agree on a toggle count.** This bench's
+   `bus_toggles` and `../txfma/tb_gate.sv`'s differ by −26% to +40% per ladder rung while agreeing
+   to 0.3% on `randn`. Before adding two slopes fitted on two counters, refit one of them on the
+   other's counts (`--acct-arith`).
 4. **A generate block's instance path carries its index.** `vpu_lane.v`'s two TIMA files come
    through as `LANE_TIMA[0].tenb_rf`, which matches neither `LANE_TIMA/` nor `LANE_TIMA.` — so a
    prefix rule built on `/` and `.` silently folds them into the top-level bucket, where their 334
@@ -94,9 +117,12 @@ vcs`, one `-liberty` per ASAP7 group, no 4× scale on the ORFS platform, hierarc
 
 ## What this does not answer
 
-- **the register file's real cost.** The model bounds it from above; nothing bounds it from below
-  except zero. A compiled-macro energy figure, or a card measurement of the register file alone,
-  is what would close it. E74 in the Q129 series is the register-file-cells experiment;
+- **the register file's real cost.** The model bounds it from above, and the card's own `zeros`
+  measurement bounds the model: one lane's transport model costs 2.4× what the whole board costs
+  per multiply-add on that pattern, so the model **over-prices** and nothing yet bounds the real
+  figure from below except zero. A compiled-macro energy figure, or a card measurement of the
+  register file alone, is what would close it. E74 in the Q129 series is the register-file-cells
+  experiment;
 - **the index term, separated from the data it selects.** `+accfix` moves 1.94 index bits and
   13.75 accumulator-word bits together, exactly as E61's card ladder did, and E61 scored its own
   attempt under-resolved. A design that changes the index while holding the *contents* of both

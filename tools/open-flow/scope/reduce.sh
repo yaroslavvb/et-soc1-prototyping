@@ -20,4 +20,6 @@ for p in randn zeros ones lq_h0 lq_h1 lq_h2 lq_h4 lq_h8 lb_h0 lb_h1 lb_h2 lb_h4 
 done
 nice -n 19 python3 -I "$L/tools/open-flow/scope/ledger_scope.py" \
     --power "$OUT" --acct "$W/sim/out" --census "$W/res/census_mixed.json" \
+    --acct-arith "$L/docs/reports/data/2026-10-26-open-netlist/power/sim_acct.txt" \
+    --cell-energies "$CE" \
     --out "$W/res/ledger-scope.json"
