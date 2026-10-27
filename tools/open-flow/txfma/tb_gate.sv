@@ -128,6 +128,13 @@ module tb;
     for (int g = 0; g < gap; g++) issue(0, 0, 0, 0, 0);
   endtask
 
+  // +vectors=<file>: every time step of the unit's own pins, so a plain-Verilog bench can
+  // replay exactly this stimulus into the same netlist with delays annotated (tb_timed.v).
+  string vectors = "";
+  integer vf = 0;
+  always @(clock or clock_txfma or reset or lane_valid or in_data)
+    if (vf) $fwrite(vf, "%b %b %b %b %h\n", clock, clock_txfma, reset, lane_valid[0], in_data[0]);
+
   string tiles, saif = "activity.saif";
   int n_ops = 1, n_warm = 1, first_mul = 0, gap = 34;
   initial begin
@@ -138,6 +145,7 @@ module tb;
     void'($value$plusargs("gap=%d", gap));
     void'($value$plusargs("check=%d", check_max));
     void'($value$plusargs("saif=%s", saif));
+    if ($value$plusargs("vectors=%s", vectors)) vf = $fopen(vectors, "w");
     $readmemh(tiles, mem);
     for (int i = 0; i < 16; i++)
       for (int j = 0; j < 16; j++) begin
@@ -163,6 +171,7 @@ module tb;
     @(negedge clock);
     $dumpoff;
     measuring = 0;
+    if (vf) $fclose(vf);
     $display("ACCT {\"lanes\":%0d,\"ops\":%0d,\"cycles\":%0d,\"clock_on\":%0d,\"uop_cycles\":%0d,\"lane_valid\":%0d,\"bus_toggles\":%0d}",
              LANES, n_ops, cycles, clock_on, uop_cycles, lane_valid_cycles, bus_toggles);
     $finish;

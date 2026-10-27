@@ -30,7 +30,10 @@ stand-in that is legal to publish, not a copy of the real thing. Every number he
 | `synth.sh` | Elaborates `txfma_top` with yosys-slang and maps it onto ASAP7 RVT, TT corner. Writes a hierarchical netlist (module boundaries kept, so the census can be read per block) and a flat one. |
 | `census.py` | Cells, transistors, fins, flip-flops, latches, area and clock-pin capacitance, for the whole unit and for every block, from the Yosys JSON netlist plus ASAP7's own CDL and liberty. |
 | `show_blocks.py` | Prints the block table from `census.py`'s JSON. |
-| `pnr.tcl` | OpenROAD: floorplan, place, CTS, route, OpenRCX extraction, SPEF. |
+| `pnr.tcl` | OpenROAD: floorplan, place, CTS, route, OpenRCX extraction, SPEF, per-net capacitance. |
+| `tb_gate.sv`, `asap7_seq_behav.v`, `gatesim.sh` | the fma_toggle stimulus driven into the netlist (Verilator, zero delay), writing a SAIF, and optionally a recording of the unit's pins. |
+| `power.py` | prices every extracted net at 1/2 C V^2 per toggle at 0.517 V, per block, with the clock tree's share. |
+| `tb_timed.v`, `gatesim_sdf.sh`, `vcd_toggles.py` | the timed pass: replays that recording under Icarus with the post-CTS SDF and counts every edge. Its SDF half aborts in Icarus 14 — see POWER.md. |
 
 ```bash
 export SCRATCH=$HOME/scratch-open-flow          # anywhere outside a synced folder
@@ -43,6 +46,11 @@ python3 tools/open-flow/txfma/census.py \
     --out   census_keep.json
 python3 tools/open-flow/txfma/show_blocks.py census_keep.json 3
 openroad -no_init -exit tools/open-flow/txfma/pnr.tcl
+
+TB=tools/open-flow/txfma/tb_gate.sv TILES=$SCRATCH/work/tiles/randn.hex TAG=randn \
+    bash tools/open-flow/txfma/gatesim.sh
+python3 tools/open-flow/txfma/power.py --saif .../randn_o1.saif --saif-base .../randn_o0.saif \
+    --netcap $SCRATCH/work/pnr/net_cap_globalroute.txt --muladds 512 --out power_randn.json
 ```
 
 Results and the comparison with the tape-out flow's numbers:

@@ -19,7 +19,8 @@ anyone can repeat.
 | Global route, Steiner parasitics, per-net capacitance for all 20,383 nets | done |
 | SDF written for the timed pass | done, 18 MB |
 | **Detailed route (TritonRoute), OpenRCX, SPEF with coupling caps** | **blocked** |
-| **The timed (SDF-annotated) pass, and so the glitch ratio** | **blocked** |
+| The timed bench itself (`tb_timed.v`), and its zero-delay run under Icarus | done |
+| **SDF annotation, and so the glitch ratio** | **blocked: Icarus aborts** |
 
 Both blockers are written up at the end. Everything below therefore uses the **global-route
 Steiner estimate** of wire capacitance, not an extraction: it has no coupling term, so it is a
@@ -113,14 +114,28 @@ them out makes this an underestimate.
    (the ORFS Docker image, or a source build — neither was available here: Docker is not running on
    the Intel and a source build needs root), or a `-exclude` region for the pins. With it,
    `pnr.tcl` already runs `extract_parasitics` and `write_spef` and re-reads the SPEF.
-2. **No timed pass, so no glitch number.** Icarus is the only simulator here that can take the SDF,
-   and it refuses two things: ASAP7's own sequential models (`sorry: ifnone with an edge-sensitive
-   path is not supported`, `asap7sc7p5t_SEQ_RVT_TT_220101.v:83`) and core-et's
-   `rtl/inc/shire_assert.vh:104` (a syntax error under `-g2012`). Verilator, which does compile
-   both the netlist and the bench, has no delay model at all. **What would clear it:** strip the
-   `specify` blocks from a copy of the ASAP7 SEQ models and give the bench a cut-down header
-   without `shire_assert.vh`, or use any simulator with full SDF support. The SDF itself is
-   written and waiting (`work/pnr/txfma.sdf`, 18 MB, post-CTS).
+2. **No timed pass, so no glitch number — but the bench for it now exists and runs.** Three
+   obstacles were cleared and one was not.
+   - Icarus will not compile `tb_gate.sv`: core-et's `rtl/inc` headers use SystemVerilog `inside`
+     expressions (`uc_types.vh:104`) and assertion properties (`shire_assert.vh:104`).
+     *Cleared* by `tb_timed.v`, a plain Verilog-2001 bench that replays a recording of the unit's
+     pins (`tb_gate.sv +vectors=<file>`, one line per time step) instead of rebuilding the
+     stimulus from those headers. `-DET_ASSERT_OFF` also silences the properties.
+   - Icarus refuses ASAP7's sequential models (`sorry: ifnone with an edge-sensitive path is not
+     supported`, `asap7sc7p5t_SEQ_RVT_TT_220101.v:83`). *Cleared* by `asap7_seq_behav.v`, the two
+     cells this netlist uses written behaviourally; the combinational models keep their `specify`
+     blocks, which is where the SDF delays land.
+   - Without `-gspecify` Icarus ignores every `specify` block, `$sdf_annotate` changes nothing and
+     the timed run comes out byte-identical to the zero-delay one. *Cleared.*
+   - **Not cleared:** with `-gspecify`, `$sdf_annotate` on this design aborts —
+     `ERROR: NULL handle passed to vpi_scan` / `vvp: vpi_iter.cc:71: Assertion 0 failed`, in
+     Icarus 14.0 devel (`s20260301-713-gf9111a949`), both with an explicit scope argument and
+     without one. The zero-delay half of the same bench runs to the end and its counts are in
+     `power/toggles_zero_iverilog.json` (9,388,830 pin transitions over 39,259 traced signals in
+     the measured op, every cell pin counted separately, so comparable only against its own timed
+     twin). **What would clear it:** a different simulator with SDF (Verilator has no delay model
+     at all), or a smaller SDF — annotating one block rather than all 19,822 cells would show
+     whether the abort is a size problem or a structural one.
 
-Until then the glitch ratio in the record — 1.5× the toggles and 1.4× the energy in the multiplier
+Until then the glitch ratio in the record — 1.5x the toggles and 1.4x the energy in the multiplier
 tree — still rests on the tape-out flow alone.
