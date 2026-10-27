@@ -1,0 +1,313 @@
+{
+ "version": 2,
+ "experiment": "E65",
+ "revision": "E65-LADDER-zeros",
+ "card": "aifoundry3",
+ "request": "Q126",
+ "session": {
+  "pre_idle_s": 60,
+  "post_idle_s": 60,
+  "block_gap_s": 0
+ },
+ "heater": {
+  "bin": "build/sparsity/host/sparsity_host",
+  "kernel": "build/sparsity/kernel/sparsity.elf",
+  "test": "fma",
+  "type": "fp32",
+  "pattern": "none",
+  "values": "zeros",
+  "seconds": 8,
+  "budget": 9.5,
+  "seed": 1,
+  "expected_launch_s": 8.4,
+  "note": "aifoundry3's build of the same sources as aifoundry2's build/sparsity_t2 (lib.sh:35-43); the arguments are E62's heater block and hp/hplib.sh:400 verbatim apart from --values."
+ },
+ "sets": {
+  "IDLE": {
+   "idle": true,
+   "mask": "0x00000000",
+   "harts": 0,
+   "note": "no launch: the bracket that de-trends leakage for the rung on either side"
+  },
+  "H64": {
+   "shires": [
+    0,
+    16
+   ],
+   "mask": "0x00010001",
+   "per_shire": 32,
+   "harts": 64,
+   "note": "2 shires spread round(i*32/2), one hart per minion"
+  },
+  "H128": {
+   "shires": [
+    0,
+    8,
+    16,
+    24
+   ],
+   "mask": "0x01010101",
+   "per_shire": 32,
+   "harts": 128,
+   "note": "4 shires spread round(i*32/4), one hart per minion"
+  },
+  "H256": {
+   "shires": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    28
+   ],
+   "mask": "0x11111111",
+   "per_shire": 32,
+   "harts": 256,
+   "note": "8 shires spread round(i*32/8), one hart per minion"
+  },
+  "H384": {
+   "shires": [
+    0,
+    3,
+    5,
+    8,
+    11,
+    13,
+    16,
+    19,
+    21,
+    24,
+    27,
+    29
+   ],
+   "mask": "0x29292929",
+   "per_shire": 32,
+   "harts": 384,
+   "note": "12 shires spread round(i*32/12), one hart per minion"
+  },
+  "H512": {
+   "shires": [
+    0,
+    2,
+    4,
+    6,
+    8,
+    10,
+    12,
+    14,
+    16,
+    18,
+    20,
+    22,
+    24,
+    26,
+    28,
+    30
+   ],
+   "mask": "0x55555555",
+   "per_shire": 32,
+   "harts": 512,
+   "note": "16 shires spread round(i*32/16), one hart per minion"
+  },
+  "H768": {
+   "shires": [
+    0,
+    1,
+    3,
+    4,
+    5,
+    7,
+    8,
+    9,
+    11,
+    12,
+    13,
+    15,
+    16,
+    17,
+    19,
+    20,
+    21,
+    23,
+    24,
+    25,
+    27,
+    28,
+    29,
+    31
+   ],
+   "mask": "0xbbbbbbbb",
+   "per_shire": 32,
+   "harts": 768,
+   "note": "24 shires spread round(i*32/24), one hart per minion"
+  },
+  "H1024": {
+   "shires": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31
+   ],
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "harts": 1024,
+   "note": "32 shires spread round(i*32/32), one hart per minion"
+  }
+ },
+ "blocks": [
+  {
+   "id": "E65-LADDER-zeros",
+   "name": "E65-LADDER-zeros",
+   "title": "Hart ladder, zeros operands, idle-bracketed",
+   "kind": "calibration",
+   "phases": [
+    {
+     "set": "IDLE",
+     "dwell_s": 20.0,
+     "launches": 0,
+     "timed": true
+    },
+    {
+     "set": "H64",
+     "dwell_s": 8.5,
+     "launches": 1
+    },
+    {
+     "set": "IDLE",
+     "dwell_s": 20.0,
+     "launches": 0,
+     "timed": true
+    },
+    {
+     "set": "H128",
+     "dwell_s": 8.5,
+     "launches": 1
+    },
+    {
+     "set": "IDLE",
+     "dwell_s": 20.0,
+     "launches": 0,
+     "timed": true
+    },
+    {
+     "set": "H256",
+     "dwell_s": 8.5,
+     "launches": 1
+    },
+    {
+     "set": "IDLE",
+     "dwell_s": 20.0,
+     "launches": 0,
+     "timed": true
+    },
+    {
+     "set": "H384",
+     "dwell_s": 8.5,
+     "launches": 1
+    },
+    {
+     "set": "IDLE",
+     "dwell_s": 20.0,
+     "launches": 0,
+     "timed": true
+    },
+    {
+     "set": "H512",
+     "dwell_s": 8.5,
+     "launches": 1
+    },
+    {
+     "set": "IDLE",
+     "dwell_s": 20.0,
+     "launches": 0,
+     "timed": true
+    },
+    {
+     "set": "H768",
+     "dwell_s": 8.5,
+     "launches": 1
+    },
+    {
+     "set": "IDLE",
+     "dwell_s": 20.0,
+     "launches": 0,
+     "timed": true
+    },
+    {
+     "set": "H1024",
+     "dwell_s": 8.5,
+     "launches": 1
+    },
+    {
+     "set": "IDLE",
+     "dwell_s": 20.0,
+     "launches": 0,
+     "timed": true
+    }
+   ],
+   "cycles": 3,
+   "warmup_cycles": 0,
+   "order": "alternate",
+   "movie": false,
+   "predicted": {
+    "what": "Board power over the bracketing idles is linear in harts. Scaling E62's 800 MHz line (5.80 W + 55.8 mW/hart on aifoundry2) to this card by f.V^2 = (600/800)(0.523/0.618)^2 = 0.537 gives 3.12 W + 30.0 mW/hart if the offset is switching work, or 5.80 W + 30.0 mW/hart if the offset is a fixed cost of having a launch open at all. The zeros session's slope is 10-40% of the randn session's; its intercept is the test.",
+    "direction": "no spatial claim",
+    "basis": "E62's CAL ladder and finding 11; E64's zeros-vs-random per-multiply-add energies"
+   },
+   "pass_rule": "README.md block C, rules C1-C4. Every rung's statistic is the MEDIAN of the 10 Hz board samples in the last 4.0 s of its launch, minus the mean of the two bracketing idles' last 10 s medians; the raw line (no bracket subtraction) is reported beside it."
+  }
+ ],
+ "safety": {
+  "abs_stop_c": 78,
+  "board_cap_w": 80,
+  "cap_consecutive": 2,
+  "die_consecutive": 1,
+  "sampler_stale_s": 3,
+  "bloom_cycle_stop_c": 72,
+  "note": "aifoundry3 is pinned at 600 MHz, so there is no governor step to protect; 72 C on a full-card phase and 78 C absolute keep the die well inside the lab's 90 C rule."
+ },
+ "cooldown_gate": {
+  "enter_below_c": 60,
+  "gap_s": 0,
+  "max_gap_s": 75,
+  "applies_when": "the next block's dwell-weighted switched power exceeds the previous block's; with one block per session it is never called"
+ },
+ "budget": {
+  "card_held_cap_min": 40,
+  "card_session_wall_cap_min": 60
+ },
+ "conventions": {
+  "power_window": "the last 4.0 s of a launch, median of the 10 Hz samples (E62-CAL)",
+  "idle_window": "the last 10.0 s of an IDLE phase, median"
+ }
+}
