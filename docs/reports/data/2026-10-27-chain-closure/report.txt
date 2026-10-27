@@ -1,0 +1,192 @@
+======================================================================================
+1. THE PRICE LAW — one flipped operand bit, aifoundry3, 600 MHz, 521.9 mV
+======================================================================================
+  B side (E65 block A, quiet partner A=1.0): 32 positions, 83-1008 fJ, span 12.2x
+  A side (E67 block 1, quiet partner B=1.0): 32 positions, 153-1440 fJ, span 9.4x
+  independent check — E60's 6 B positions, same card and clock, six days earlier:
+    bit 0: 138 vs 136  bit 8: 102 vs 114  bit 16: 542 vs 609  bit 22: 1019 vs 1008  bit 23: 169 vs 173  bit 31: 119 vs 123
+    E65/E60 ratio: median 1.029, range 0.986-1.122
+  shape  B: low-mantissa mean 109 fJ, bit 22 1008 fJ, exponent mean 174 fJ, sign 123 fJ
+         A: low-mantissa mean 305 fJ, bit 22 1440 fJ, exponent mean 265 fJ, sign 247 fJ
+
+======================================================================================
+2. SATURATION — E60's lq ladder: the h low mantissa bits of B flipping in one word
+======================================================================================
+   m   measured W     SE    measured fJ/bit   price-list fJ/bit   measured/list
+   1       0.594   0.011           129.3               136.2            0.949
+   2       0.841   0.131            91.6               123.9            0.739
+   4       1.712   0.012            93.2               110.3            0.845
+   8       3.206   0.054            87.3               105.8            0.825
+  12       5.536   0.027           100.5               128.5            0.782
+  16       8.299   0.025           113.0               205.9            0.549
+  23      12.261   0.021           116.1               382.4            0.304
+
+  The measured price per flipped bit barely moves — 87 to 129 fJ over m = 1 to 23 — while the
+  single-bit price list says it should run from 106 to 382 fJ per bit over the same masks.
+  The position premium is a SINGLE-BIT effect: it does not add when bits flip together.
+
+  three candidate laws on these seven rungs:
+    flat, 107 fJ per flipped bit, position ignored rms  14.4%   worst  22.7%
+    price list x m^(alpha-1), alpha = 0.775        rms  28.5%   worst  62.5%
+    free power law, 0.481 W x m^0.993              rms  13.3%   worst  19.1%
+  >>> the flat law wins, and the free power law's exponent 0.993 is 1.00 within its scatter:
+      inside one word, board power counts flipped bits and all but ignores which ones.
+
+======================================================================================
+3. CROSS-OPERAND — E67's 4x4 grid (one A bit AND one B bit flipping at once)
+======================================================================================
+  16 cells: cell/sum median 0.828, range 0.621-0.962, pooled 0.787
+  affine fit  cell = 0.941 W + 0.639 x sum  (rms 0.734 W)
+  whole-operand test (E67, ~13.5 + ~13.9 bits): both random 16.185 W, one side + the other 18.372 W, ratio 0.881
+  >>> cross-operand sub-additivity is about the same size at 1+1 bits (0.79) and at 13.5+13.9 (0.88).
+
+======================================================================================
+4. SUPERPOSITION — do the per-bit prices add up to the Horace step?
+======================================================================================
+  flipped bits of a random normal operand, counted on the committed tiles (seed 20261020):
+    A stream 27648 flips / 2048 transitions = 13.50 bits each; B stream 56784 / 4096 = 13.86 bits each
+    sign and mantissa flip on about half the transitions; the exponent's top bits almost never:
+      A bits 23..30 [1104, 960, 448, 192, 128, 128, 128, 128]   B bits 23..30 [1990, 1902, 1122, 704, 544, 544, 544, 544]
+
+  one side random, the other constant — the two measured stimuli that can be counted exactly:
+    nrd_a (A random, B=1.0)  naive 17.296 W  compressed list  9.623  flat law  5.331   measured  7.482 +- 0.227
+                                                   (1.29x)            (0.71x)
+    nrd_b (A=1.0, B random)  naive 21.845 W  compressed list 12.081  flat law  6.737   measured 10.890 +- 0.022
+                                                   (1.11x)            (0.62x)
+  both operands random (anchor_randn above the constant-operand level):
+    naive sum of the two price lists      39.141 W   2.42x measured
+    compressed list, x g(m) then x 0.881   19.120 W   1.18x
+    flat in-company price, x 0.881         10.631 W   0.66x
+    measured                              16.185 W
+  >>> the two laws BRACKET the measurement: 10.6 W to 19.1 W against 16.2 W measured (-34% / +18%).
+      Neither is right. The flat law is fitted on contiguous LOW mantissa bits; random operands
+      also flip the dear high-mantissa bits, which the flat law prices at the floor. The
+      compressed list keeps too much of the single-bit premium. The missing experiment is below.
+
+  E67's registered anchors (aifoundry3, 600 MHz, board W): zeros 27.828, ones 36.046, pi 36.324, randn 52.487
+    the Horace step (random - zeros) 24.659 W = clocking (ones - zeros) 8.217 + data (random - ones) 16.442
+    price list predicts the data term  19.120 W = 116% of it; the whole step to 111%.
+
+======================================================================================
+5. THE PER-MULTIPLY-ADD BUDGET — aifoundry3, 600 MHz, 1,024 harts
+======================================================================================
+  1.107e+09 minion-ops/s x 4096 lanes = 4.533e+12 multiply-adds/s = 9.07 TFLOP/s at 600 MHz
+
+  term                                             board W    pJ per multiply-add   source
+  ------------------------------------------------ -------    -------------------   ------
+  card idle, no kernel                               24.60          -               E65 hart ladder
+  leakage slope                                      0.182 W/C     -               E65 gates
+  per hart, zeros                                    2.081 mW      -               E65 hart ladder
+  per hart, random normal                           27.135 mW      -               E65 hart ladder
+  zeros, whole board at 1,024 harts                  27.83        6.139           E67 anchor
+  clocking (ones - zeros)                             8.22        1.813           E67 anchors
+  data (random - ones)                               16.44        3.627           E67 anchors
+  random normal, whole board                         52.49       11.579           E67 anchor
+
+  E38 (21 Sep, aifoundry2) measured the same three terms per multiply-add over idle:
+    zeros 0.27 pJ, ones 2.13 pJ, random 5.78 pJ -> clocking 1.86 pJ, data 3.65 pJ
+    this work, on the other card five weeks later: clocking 1.81 pJ, data 3.63 pJ  (97% and 99%)
+  and the hart ladder says the data term is linear in harts: 27.1 mW/hart random against 2.1 zeros,
+  intercept -0.51 W, i.e. no fixed per-kernel offset (E65 C1/C2: 'neither band').
+
+======================================================================================
+6. END TO END — 600 MHz board power -> 800 MHz -> E64's governor -> clock -> TFLOPS
+======================================================================================
+  operating points (E60): 600 MHz 0.5219 V; 800 MHz 0.6039 V (aifoundry1-c0), 0.6174 V (aifoundry2), mean 0.6106
+  so a flip's energy should scale by V^2 = 1.369; the six bit prices measured at both clocks give
+  1.46, 1.54, 1.50, 1.30, 1.44, 1.32, mean 1.425 (a cross-card comparison, hence the spread).
+  E64's static board line B(f) = {600: 25.46, 700: 28.24, 800: 33.61} W; die line T = 41.88 + 0.4696 x W; governor {'tau_s': 1.3, 'pass_s': 0.24, 'rms_mhz': 3.3, 'n': 26}
+
+  predicted board power (W), aifoundry3 levels on E64's static line:
+    f     zeros   ones   randn(M)  randn(P)  randn(F)   E64 measured, aifoundry2: zeros/ones/randn
+   600    27.83  36.05    52.49     55.17     46.68     26.28 /  34.36 /  49.51
+   700    31.49  42.78    65.36     69.04     57.38     29.94 /  41.55 /  64.84
+   800    37.93  52.93    82.94     87.83     72.34     35.31 /  52.27 /  83.07
+  the card-independent quantity is the step; predicted vs E64 measured (random - zeros):
+    600 MHz  predicted  24.66 W   measured  23.23 W   ratio 1.062
+    700 MHz  predicted  33.87 W   measured  34.90 W   ratio 0.970
+    800 MHz  predicted  45.01 W   measured  47.76 W   ratio 0.942
+
+  governor: the ~1.3 s average of board power is held to 65 W; the die trips at 66 C,
+  so the sustained board cap is (66 - 41.88)/0.4696 = 51.4 W.
+
+  workload                burst MHz   burst TFLOPS   sustained MHz   sustained TFLOPS
+  zeros                         800.0       12.30           800.0          12.30
+  ones                          800.0       12.30           785.1          12.07
+  random (measured 600 level)   697.4       10.72           600.0           9.22
+  random, compressed price list  672.5       10.34           600.0           9.22
+  random, flat in-company price  752.4       11.57           645.6           9.93
+
+  E64 measured, fp32, 1,024 harts: zeros 800 MHz 12.3/12.3 TFLOPS; ones 738 MHz 12.3/11.1;
+                                   random 706 MHz burst, 600 MHz sustained, 10.7/9.2 TFLOPS
+
+  ZEROS / RANDOM speed ratio, from E67's measured 600 MHz anchors  burst 1.147 (+15%), sustained 1.333 (+33%)
+  ZEROS / RANDOM speed ratio, bit prices only, compressed list     burst 1.190 (+19%), sustained 1.333 (+33%)
+  ZEROS / RANDOM speed ratio, bit prices only, flat in-company     burst 1.063 (+6%), sustained 1.239 (+24%)
+  MEASURED (E64)                                                     burst 1.150 (+15%), sustained 1.337 (+34%)
+
+wrote chain.json
+ m   dW (W)     SE     measured fJ/bit   naive fJ/bit   meas/naive
+  1    0.594   0.011        129.3           136.2        0.949
+  2    0.841   0.131         91.6           123.9        0.739
+  4    1.712   0.012         93.2           110.3        0.845
+  8    3.206   0.054         87.3           105.8        0.825
+ 12    5.536   0.027        100.5           128.5        0.782
+ 16    8.299   0.025        113.0           205.9        0.549
+ 23   12.261   0.021        116.1           382.4        0.304
+
+ m    measured   A: flat/bit   B: pos x m^(a-1)   C: c*m^beta
+  1      0.594      0.492         0.625              0.481
+  2      0.841      0.983         0.973              0.957
+  4      1.712      1.967         1.482              1.905
+  8      3.206      3.933         2.432              3.794
+ 12      5.536      5.900         4.044              5.675
+ 16      8.299      7.866         8.096              7.553
+ 23     12.261     11.308        19.924             10.832
+  A  flat per flipped bit, 107.1 fJ              rms  14.4%  worst  22.7%
+  B  position-weighted x m^(a-1), a=0.775        rms  28.5%  worst  62.5%
+  C  c*m^beta, c=0.481 W beta=0.993              rms  13.3%  worst  19.1%
+
+flat law carried to random operands (B side, same stimulus family):
+  nrd_b  flat 107.1 fJ x 56784 flips x rate = 6.737 W   measured 10.890 W   pred/meas 0.62
+  nrd_a  A side has no ladder; scale the flat price by the A/B single-bit ratio 1.64 -> 175.4 fJ
+         5.331 W   measured 7.482 W   pred/meas 0.71
+  both random  0.881 x (5.331 + 6.737) = 10.631 W   measured 16.185 W   pred/meas 0.66
+The effective price of ONE flipped operand bit, by how much company it has
+(aifoundry3, 600 MHz, 0.522 V; every row is a measured board power over its own zero)
+
+ item                      side  m bits   flips/op   measured W   effective fJ   price-list fJ   eff/list
+ ------------------------- ----  ------   --------   ----------   ------------   -------------   --------
+ lq_h1                     B       1.00       4096        0.594          129.3           136.2   0.95
+ lq_h2                     B       2.00       8192        0.841           91.6           123.9   0.74
+ ix grid (16 cells, mean)  A+B     2.00       6144        5.003          735.9           934.6   0.79
+ lq_h4                     B       4.00      16384        1.712           93.2           110.3   0.85
+ lq_h8                     B       8.00      32768        3.206           87.3           105.8   0.83
+ lq_h12                    B      12.00      49152        5.536          100.5           128.5   0.78
+ nrd_a                     A      13.50      27648        7.482          246.1           568.9   0.43
+ nrd_b                     B      13.86      56784       10.890          173.1           347.2   0.50
+ lq_h16                    B      16.00      65536        8.299          113.0           205.9   0.55
+ lq_h23                    B      23.00      94208       12.261          116.1           382.4   0.30
+
+ single-bit price list, for comparison:  B side 83-1008 fJ (span 12.2x), A side 153-1440 fJ (span 9.4x)
+ effective prices with m>1:  87-736 fJ, span 8.4x
+WHICH BITS, AT A FIXED NUMBER OF BITS  (aifoundry2, 800 MHz, 9 passes each, zero lq_h0)
+
+  item     m   bit positions   measured dW (W)    SE
+  lq_h2    2   [0, 1]            1.962        0.059
+  ls_h2    2   [0, 12]           4.207        0.033
+
+  measured ls/lq ratio                 2.144 +- 0.066
+  the single-bit price list predicts   1.926   (aifoundry3's 32-position list, 600 MHz)
+  measured / predicted                 1.113
+
+  So at m = 2 the position premium is paid IN FULL: swapping bit 1 for bit 12 more than
+  doubles the cost of the same two flips. Compare the far end of the lq ladder, where
+  bits 16-22 are added in company:
+    lq_h16 -> lq_h23 adds 7 bits (16..22) for 3.963 W, i.e. 0.566 W each;
+    the same seven bits cost 3.609 W each on their own (E65, same card and clock).
+    a 6.4x discount.
+
+  >>> the position premium is paid in full at m = 2 and is 84% gone by m = 23.
+      That is the compression, and it is a function of m. Only ONE spread rung has ever run
+      (ls_h2, on one card); make_hl.py already builds ls_h4, ls_h8, ls_h12 and ls_h16.
