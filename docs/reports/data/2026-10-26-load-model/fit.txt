@@ -3,11 +3,13 @@ THE JOINED LOAD MODEL -- fitted constants, all from committed files
 ====================================================================================================
 E62 hart line, raw            :  5.796 W + 55.77 mW/hart   (published 5.80 + 55.8)
 E62 hart line, de-leaked k=.442:  5.354 W + 46.28 mW/hart   over 6 rungs
+  ^ this intercept is a FIT TARGET: k_clk*(s800-1) + c0*s800 = 5.353833 W against 5.353833 W, residual 8.9e-16 W. It is matched by construction and is not evidence.
 
 idle anchor at 58 C        : 24.456 W   (the 21 Sep law reads 25.257 W there, +0.801 W)
 per-kernel offset c0          : -1.180 W at 600 MHz / 0.517 V
 clock-dependent static k_clk  : 8.398 W per unit of (s(f) - 1)
 static fit rms over 4 points  : 0.419 W; residuals 600 MHz +0.325 W, 700 MHz -0.591 W, 800 MHz +0.266 W
+  (4 observations, 3 parameters, 1 degree of freedom. The E62 row is matched exactly; the evidence is the 3 E64 floors above.)
 
   B(600) model  25.145 W   E64 measured  25.456 W   err -0.311 W
   B(700) model  28.834 W   E64 measured  28.243 W   err +0.591 W
@@ -22,3 +24,14 @@ governor: tau 1.3 s, pass 0.24 s, 3.3 MHz rms over 26 runs
 heat path: die = 41.88 + 0.4696 * board W
 levels pJ/B: dram 114.593, l1 0.746, l2 3.108, l3 14.732, scp-local 3.326, scp-remote 8.465
 catalogue rows: 392
+
+what this model takes from the four held-out loads (HELD_OUT_LEAKS):
+  hop_pj_per_byte = 1.753: from E43 RL-a, the pooled mesh slope per hop (finding 20)
+    reaches hop_w() and predict_load.py --hops. NOT any frozen E43 prediction: the relay rows are priced from the energy manual's level prices, not from the hop slope.
+    effect on the score: none -- no scored number reads it
+  CARDS['aifoundry1-c1']['volts'] = 0.4979: from E39 ablb.runs.json idle_by_card busy_mv -- the only committed rail voltage for that card
+    reaches every prediction on aifoundry1-c1: E39's own line, E43's third card, E37's third card
+    effect on the score: it made E39 WORSE, not better. At this voltage the predicted aifoundry1-c1 slope is 14.425 W, -8.60% against the measured 15.782 and the worst number in the E39 row; at a neutral 0.517 V it would be 15.553 W, -1.45%.
+  E59_CYCLES_IDEAL = 280.35: from E37 MMB-a, the measured int8 shared-tile cycles an op
+    reaches freeze_load_predictions.py: it sets E59's tensor duty, and so its tensor term
+    effect on the score: the tensor term is 9-14% of each E59 prediction, and E59 misses low by 13-39%, so the leak cannot be what carries that load.

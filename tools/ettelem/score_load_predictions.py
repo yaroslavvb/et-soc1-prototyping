@@ -113,21 +113,65 @@ def score(frozen):
     # E59
     m = meas_e59()
     rows, errs = [], []
+    shortfalls = []
     for r in P["E59_sparse_parity"]["rows"]:
         mm = m[r["size"]]
         e = r["predicted_over_idle_w"] - mm["over_idle_w"]
         ej = r["predicted_j_per_solve_over_idle"] - mm["j_per_solve_over_idle"]
         errs.append(e)
+        # E59's largest term is E59_BYTES_PER_OP = 4,096, and unlike E37's byte assumption the freeze gave it
+        # no bracket. Half and double it here, AFTER the fact -- this bracket is not frozen and is marked so.
+        scp = r["parts_w"]["scratchpad"]
+        base = r["predicted_over_idle_w"]
+        lo, hi = base - 0.5 * scp, base + scp
+        need_bytes = 4096.0 * (mm["over_idle_w"] - (base - scp)) / scp if scp else None
+        duty = r["tensor_duty"]
+        shortfalls.append({"size": r["size"], "duty": duty, "shortfall_w": -e,
+                           "shortfall_over_one_minus_duty_w": -e / (1.0 - duty)})
         rows.append({"size": r["size"], "measured_over_idle_w": mm["over_idle_w"],
                      "predicted_over_idle_w": r["predicted_over_idle_w"], "err_w": e,
                      "err_pct": 100 * e / mm["over_idle_w"],
                      "measured_j_per_solve_over_idle": mm["j_per_solve_over_idle"],
                      "predicted_j_per_solve_over_idle": r["predicted_j_per_solve_over_idle"],
                      "err_j": ej, "err_j_pct": 100 * ej / mm["j_per_solve_over_idle"],
+                     "tensor_duty": duty,
+                     "scratchpad_share_of_prediction_pct": 100 * scp / base,
+                     "posthoc_bracket_w_bytes_2048_to_8192": [lo, hi],
+                     "posthoc_bracket_contains_measurement": lo <= mm["over_idle_w"] <= hi,
+                     "bytes_per_op_that_would_close_the_miss": need_bytes,
                      "parts_w": r["parts_w"], "source": mm["source"]})
-    res["E59_sparse_parity"] = {"rows": rows, "rms_w": rms(errs), "bias_w": sum(errs) / len(errs),
-                                "worst": max(rows, key=lambda x: abs(x["err_w"]))["size"],
-                                "residual_signs": "".join("+" if e > 0 else "-" for e in errs)}
+    v = [s["shortfall_over_one_minus_duty_w"] for s in shortfalls]
+    c = [s["shortfall_w"] for s in shortfalls]
+    res["E59_sparse_parity"] = {
+        "rows": rows, "rms_w": rms(errs), "bias_w": sum(errs) / len(errs),
+        "worst": max(rows, key=lambda x: abs(x["err_w"]))["size"],
+        "residual_signs": "".join("+" if e > 0 else "-" for e in errs),
+        "byte_assumption": {
+            "frozen_bytes_per_op": 4096,
+            "share_of_the_prediction_pct": [round(r["scratchpad_share_of_prediction_pct"], 1) for r in rows],
+            "posthoc_bracket": "half and double, 2,048 to 8,192 B an op. NOT frozen: the freeze gave E59 no "
+                               "bracket where it gave E37 one, and this is computed after the measurements "
+                               "were read.",
+            "bracket_contains_all_four": all(r["posthoc_bracket_contains_measurement"] for r in rows),
+            "bytes_per_op_that_would_close_each_miss":
+                [round(r["bytes_per_op_that_would_close_the_miss"]) for r in rows],
+            "verdict": "the byte count CAN absorb the whole miss -- the half-to-double bracket contains all "
+                       "four measurements -- but not as one fixed factor: it would need 4,903 to 7,651 B an "
+                       "op, a 1.56x spread that grows as the tensor duty falls. E37's analogous back-solve "
+                       "agreed to 2% across three cards; this one does not, so the byte count is not the "
+                       "whole story."},
+        "duty_shape": {
+            "shortfalls_w": [round(s["shortfall_w"], 3) for s in shortfalls],
+            "duties": [round(s["duty"], 3) for s in shortfalls],
+            "as_a_constant_spread_x": max(c) / min(c),
+            "divided_by_one_minus_duty_w": [round(x, 3) for x in v],
+            "divided_by_one_minus_duty_spread_x": max(v) / min(v),
+            "verdict": "the missing term is not a constant per-hart floor: over four runs of the same kernel "
+                       f"on the same card the shortfall itself spans {max(c)/min(c):.2f}x. Divided by "
+                       f"(1 - tensor duty) -- the share of the time the tensor unit is NOT issuing -- it "
+                       f"tightens to {max(v)/min(v):.2f}x. So what is missing scales with the time the core "
+                       "is awake and not issuing tensor work, which is the per-hart instruction term the "
+                       "energy manual's catalogue could price."}}
 
     # E43
     m = meas_e43()
@@ -152,18 +196,44 @@ def score(frozen):
         wm = meas_e43()[r["route"]]["w_over_idle_first_run"]
         if r["card"] == "aifoundry2":
             e_w.append(100 * (w - wm) / wm)
+    # The watts, decomposed. The pJ/B score is the headline, but the model exists to predict watts, and on
+    # watts E43 misses by +20 to +41%. That is reported here and in the README, not buried in an array.
+    wrows = []
+    for r in P["E43_relay"]["rows"]:
+        if r["card"] != "aifoundry2":
+            continue
+        mr = meas_e43()[r["route"]]
+        wm = mr["w_over_idle_first_run"]
+        wp = r["predicted_w_over_idle"]
+        gbs = r["measured_gb_s_used_for_watts"]
+        traffic = r["predicted_pj_per_byte"] * gbs * 1e9 * 1e-12
+        static = wp - traffic
+        # what the measurement's OWN pJ/B times its OWN GB/s comes to -- finding 18's internal inconsistency
+        w_self = mr["pooled_pj_per_byte"] * gbs * 1e9 * 1e-12
+        wrows.append({
+            "route": r["route"], "measured_w_over_idle": wm, "predicted_w_over_idle": wp,
+            "err_pct": 100 * (wp - wm) / wm,
+            "decomposition_w": {"traffic_at_predicted_pj_per_byte": traffic,
+                                "kernel_offset_and_state_machines": static},
+            "finding18_own_pj_per_byte_times_own_gb_s_w": w_self,
+            "pct_points_from_finding18_inconsistency": 100 * (w_self - wm) / wm,
+            "pct_points_from_the_static_offset": 100 * static / wm,
+            "pct_points_from_the_pj_per_byte_error": 100 * (traffic - w_self) / wm})
     res["E43_relay"] = {"pooled": rows, "per_card": percard,
                         "rms_pct_pj_per_byte": rms(e_pj), "worst_pct": max(e_pj, key=abs),
                         "watts_note":
-                            "finding 18's own table is not internally consistent: 104.8 pJ/B x 48.4 GB/s is "
-                            "5.07 W, and it prints 4.34 W over idle for the same run (17% apart), so the model "
-                            "is scored on pJ per byte, the manual's primary quantity, and the watts are "
-                            "reported beside it.",
+                            "E43 is the model's best held-out load on pJ per byte and one of its worst on "
+                            "WATTS: +41.1 / +33.6 / +20.3% on aifoundry2. The headline is on pJ per byte "
+                            "because finding 18's own table is not internally consistent -- 104.8 pJ/B x "
+                            "48.4 GB/s is 5.07 W beside its printed 4.34 W over idle, 17% apart -- but a 17% "
+                            "source inconsistency does not cover a 41% miss. watts_decomposed splits each "
+                            "route's miss into the three parts that make it.",
+                        "watts_decomposed": wrows,
                         "watts_err_pct_aifoundry2": e_w}
 
     # E39
     m = meas_e39()
-    rows, errs = [], []
+    rows, errs, errs_line, errs_end = [], [], [], []
     for r in P["E39_gemv_sparsity_ladder"]["lines"]:
         mm = m["slope_intercept"].get(r["card"])
         ep = m["endpoints"].get(r["card"], {})
@@ -173,6 +243,8 @@ def score(frozen):
         di = r["predicted_intercept_w"] - mm["intercept_w"]
         dd = (r["predicted_dense_w"] - ep["dense_w"]) if ep else None
         dz = (r["predicted_zero_w"] - ep["zero_w"]) if ep else None
+        errs_line += [ds, di]
+        errs_end += [v for v in (dd, dz) if v is not None]
         for v in (ds, di, dd, dz):
             if v is not None:
                 errs.append(v)
@@ -184,8 +256,26 @@ def score(frozen):
                      "measured_dense_w": ep.get("dense_w"), "predicted_dense_w": r["predicted_dense_w"],
                      "dense_err_w": dd, "measured_zero_w": ep.get("zero_w"),
                      "predicted_zero_w": r["predicted_zero_w"], "zero_err_w": dz})
-    res["E39_gemv_sparsity_ladder"] = {"rows": rows, "rms_w": rms(errs), "bias_w": sum(errs) / len(errs),
-                                       "source": m["source"]}
+    n_out = sum(1 for r in rows if not r["slope_inside_ci99"])
+    res["E39_gemv_sparsity_ladder"] = {
+        "rows": rows,
+        # The primary figure, over the SIX independent predictions. The model's predicted_zero_w equals its
+        # predicted_intercept_w and predicted_dense_w equals intercept + slope, exactly, so the endpoint rows
+        # re-score the same two predictions against a second reduction (ABLB-3ab instead of ABLB-3c). Pooling
+        # all twelve, as the first version did, counts each prediction twice.
+        "rms_w": rms(errs_line), "bias_w": sum(errs_line) / len(errs_line),
+        "n_independent_predictions": len(errs_line),
+        "slopes_outside_ci99": n_out, "n_slopes": len(rows),
+        "slope_ci99_note": f"{n_out} of {len(rows)} predicted slopes fall OUTSIDE the measurement's own 99% "
+                           "interval (aifoundry2 +4.1%, aifoundry1-c1 -8.6%; aifoundry3 is inside). "
+                           "ABLB-3c's intervals are tight, so a small percentage error still misses.",
+        "endpoint_crosscheck": {
+            "rms_w": rms(errs_end), "bias_w": sum(errs_end) / len(errs_end) if errs_end else None,
+            "n": len(errs_end),
+            "note": "the dense and all-zero rungs scored against ABLB-3ab -- the SAME two line parameters "
+                    "against a different reduction, not new predictions."},
+        "rms_w_all_twelve_pooled": rms(errs), "bias_w_all_twelve_pooled": sum(errs) / len(errs),
+        "source": m["source"]}
 
     # E37
     m = meas_e37()
@@ -227,15 +317,12 @@ def design_row(pat):
 lsq = LM._lsq
 
 
-def fit14():
-    """In-sample and E38-style leave-one-out on the 14 fp32 patterns of 21 Sep (aifoundry2, 600 MHz).
-
-    The joined model's static terms at 600 MHz on the card they were fitted on are one constant, which a refit
-    absorbs, so this leg CANNOT move: it is reported to show that the new terms neither help nor hurt where the
-    old model already lived, and that the honest held-out figure is still about 1 W."""
+def fit14_at(c0):
+    """The 14-pattern fit on a given per-kernel offset. The design matrix is four flip-rate columns and NO
+    constant column, so c0 is NOT absorbed: it is subtracted into the base and the four prices take it up."""
     pats = list(MEAS14)
     A = [design_row(p) for p in pats]
-    base = LM.STATIC["c0_w"] + LM.K.p_sm + IDLE21
+    base = c0 + LM.K.p_sm + IDLE21
     b = [MEAS14[p] - base for p in pats]
     e = lsq(A, b)
     ins = [sum(a * x for a, x in zip(A[i], e)) + base - MEAS14[pats[i]] for i in range(len(pats))]
@@ -247,16 +334,57 @@ def fit14():
         loo.append(sum(a * x for a, x in zip(A[i], ei)) + base - MEAS14[pats[i]])
     stock = [sum(a * x for a, x in zip(A[i], [LM.K.e_fJ[c] for c in LM.CLASSES])) + base - MEAS14[pats[i]]
              for i in range(len(pats))]
-    return {"patterns": pats,
+    return {"kernel_offset_w": c0, "base_w": base,
             "in_sample_rms_w": rms(ins), "in_sample_bias_w": sum(ins) / len(ins),
             "leave_one_out_rms_w": rms(loo), "leave_one_out_bias_w": sum(loo) / len(loo),
             "leave_one_out_worst": {"pattern": pats[max(range(len(loo)), key=lambda i: abs(loo[i]))],
                                     "err_w": max(loo, key=abs)},
             "stock_prices_rms_w": rms(stock),
-            "refit_prices_fJ": dict(zip(LM.CLASSES, e)),
+            "refit_prices_fJ": dict(zip(LM.CLASSES, e))}
+
+
+def fit14():
+    """In-sample and E38-style leave-one-out on the 14 fp32 patterns of 21 Sep (aifoundry2, 600 MHz).
+
+    🛑 The first version of this script said "this leg cannot move: at 600 MHz on the card the prices were
+    fitted on, every new term is one constant, which a refit absorbs." That is FALSE, and the check that
+    found it is the one below. The design matrix has four flip-rate columns and no constant column, so a
+    constant in the base is not absorbed -- the four prices have to take it up through regressors that cannot
+    represent one. Running the identical code at two offsets:
+
+        c0 = 0      (the base the 21 Sep prices were fitted on)   LOO 0.458 W, bus 16.09 fJ
+        c0 = -1.18  (the joined model's per-kernel offset)        LOO 0.739 W, bus 25.34 fJ
+
+    So the 14 fp32 patterns DO NOT SUPPORT a negative per-kernel offset: adding it makes the published
+    leave-one-out 61% worse and swings the fitted operand-bus price 58% up. That is a real result and it
+    cuts against the E64 and E62 evidence that does support c0 < 0; both are reported, neither is hidden."""
+    at0 = fit14_at(0.0)
+    atc = fit14_at(LM.STATIC["c0_w"])
+    return {"patterns": list(MEAS14),
+            "primary": "at_c0_zero",
+            "at_c0_zero": at0,
+            "at_joined_c0": atc,
+            "what_c0_costs": {
+                "leave_one_out_w": [at0["leave_one_out_rms_w"], atc["leave_one_out_rms_w"]],
+                "leave_one_out_worse_by_pct": 100 * (atc["leave_one_out_rms_w"] / at0["leave_one_out_rms_w"]
+                                                     - 1.0),
+                "in_sample_w": [at0["in_sample_rms_w"], atc["in_sample_rms_w"]],
+                "bus_price_fJ": [at0["refit_prices_fJ"]["bus"], atc["refit_prices_fJ"]["bus"]],
+                "published_prices_rms_w": [at0["stock_prices_rms_w"], atc["stock_prices_rms_w"]],
+                "verdict": "the 14 fp32 patterns do not support the joined model's negative per-kernel "
+                           "offset. At c0 = 0 the refit reproduces the published 21 Sep fit (3.14 / 0.0315 / "
+                           "0.742 / 16.09 fJ against the published 3.179 / 0.0250 / 0.801 / 15.539) and the "
+                           "published prices read 0.451 W rms on their own base. Nothing about the bus price "
+                           "being 'loose' follows from the 25.34 fJ figure: that number is c0 being absorbed."},
+            # kept for backward reference: these are the at_c0_zero figures, which are the honest ones
+            "in_sample_rms_w": at0["in_sample_rms_w"],
+            "leave_one_out_rms_w": at0["leave_one_out_rms_w"],
+            "leave_one_out_worst": at0["leave_one_out_worst"],
+            "stock_prices_rms_w": at0["stock_prices_rms_w"],
+            "refit_prices_fJ": at0["refit_prices_fJ"],
             "note": "aifoundry2 only: the 21 Sep board table is the one committed set of 14 measured patterns. "
                     "E38's published per-card leave-one-out is 1.008 / 0.906 / 0.966 W (FAIL against a "
-                    "registered 0.6 W).",
+                    "registered 0.6 W). The top-level figures here are the c0 = 0 ones.",
             "e38_published_loo_w": [1.008, 0.906, 0.966]}
 
 
@@ -295,6 +423,17 @@ def rescore_e64():
             chain_n += 1
             per_pat.setdefault(vals, []).append(w - (b_m + c_pred))
     return {"n_points": len(own),
+            "in_sample_warning": "E64's three floors B(600), B(700), B(800) are three of the FOUR "
+                                 "observations the joined static part is fitted on, so (b) is not held out "
+                                 "either. The joined static part has three free parameters (idle58, c0, "
+                                 "k_clk) where E64's own fit has three free floors, and must in addition "
+                                 "match E62's intercept, which it does exactly. Read (b) against (a) as "
+                                 "'the same three numbers, reached through a two-parameter clock law plus "
+                                 "an offset tied to another experiment, cost 0.10 W of rms' -- not as a "
+                                 "prediction. STATIC['resid_w'] is where that cost shows: 0.42 W rms over "
+                                 "the four observations, one degree of freedom.",
+            "static_fit_residuals_w": LM.STATIC["resid_w"], "static_fit_rms_w": LM.STATIC["rms_w"],
+            "static_fit_n_obs": 4, "static_fit_n_params": 3,
             "e64_own_fit_rms_w": rms(own), "e64_published_rms_w": LM.K.rms64_own,
             "joined_static_measured_c_rms_w": rms(mod), "joined_static_bias_w": sum(mod) / len(mod),
             "whole_chain_rms_w": rms(chain), "whole_chain_n": chain_n,
@@ -308,8 +447,38 @@ def rescore_e64():
 
 
 def rescore_e62():
-    """E62's hart ladder against the joined model, rung by rung."""
+    """E62's hart ladder against the joined model, rung by rung.
+
+    🛑 THE INTERCEPT IS A FIT TARGET. load_model.fit_static() solves k_clk in closed form from E62's de-leaked
+    0-hart intercept at every trial c0, so the model reproduces that intercept to ~1e-15 W by construction.
+    The first version of the README called this "right to 0.02 W, from terms fitted on E64 rather than on
+    E62's own line"; it is neither right-to-0.02 nor fitted elsewhere. What is scored here is the SLOPE and
+    the per-rung residuals, which are not fit targets."""
     out = {}
+    i62, _, _ = LM.fit_hart_line()
+    s_fit = LM.K.s64[800]                                          # E64's fitted referral, what fit_static uses
+    s_mod = LM.sfv(800.0, LM.volts_of("aifoundry2", 800.0))        # the model's own f*V^2, what predict uses
+    ident = LM.STATIC["k_clk_w"] * (s_fit - 1.0) + LM.STATIC["c0_w"] * s_fit
+    pred = LM.STATIC["k_clk_w"] * (s_mod - 1.0) + LM.STATIC["c0_w"] * s_mod
+    out["intercept_is_a_fit_target"] = {
+        "yes": True,
+        "identity_in_the_fit_w": ident, "measured_de_leaked_intercept_w": i62,
+        "residual_in_the_fit_w": ident - i62,
+        "where": "load_model.fit_static(): k_clk = (i62 - c0*s(800)) / (s(800) - 1), solved in closed form "
+                 "at every trial c0, so the fit matches this measurement to 1e-15 W by construction.",
+        "s_800_in_the_fit": s_fit, "s_800_in_the_model": s_mod,
+        "model_intercept_at_the_model_s_w": pred,
+        "what_the_0_02_W_gap_really_is":
+            f"the first README read the 5.33 vs 5.35 W agreement as 'right to 0.02 W, from terms fitted on "
+            f"E64 rather than on E62's own line'. It is neither. The intercept IS E62's own line -- it is "
+            f"fit observation number four -- and the {i62 - pred:+.3f} W that remains is an internal "
+            f"inconsistency in the model, not a prediction error: fit_static() refers the clock with E64's "
+            f"fitted s(800) = {s_fit:.6f}, while static_w() and predict() refer it with the model's own "
+            f"f*V^2 = {s_mod:.6f}, 0.19% apart. (At 600 MHz the same mismatch is 0.155% the other way, "
+            f"s64 1.0 against sfv 1.00155, which moves each frozen over-idle prediction by about 0.001 W.)",
+        "so": "nothing about E62's intercept is evidence for this model. The evidence from the same fit is "
+              "that it reproduces E64's three floors to 0.42 W rms (e64_rescore.static_fit_rms_w) with one "
+              "degree of freedom left, and the evidence here is the slope and the rung residuals below."}
     for k, lab in ((0.0, "raw"), (0.442, "de-leaked k=0.442")):
         i, sl, n = LM.fit_hart_line(leak_k=k)
         xs = [r["harts"] for r in LM.K.e62_rungs]
@@ -333,31 +502,122 @@ def rescore_e62():
     out["before_q126"] = {"model_intercept_w": 0.0,
                           "note": "the old model had no clock-dependent static term and no per-kernel offset, "
                                   "so it predicted 0.00 W at zero harts against a measured 5.35-5.80 W "
-                                  "(recap item 5)."}
+                                  "(recap item 5). The joined model now has somewhere to put that offset -- "
+                                  "but it was PUT there from this very measurement, see "
+                                  "intercept_is_a_fit_target."}
     return out
 
 
 def refit_pass(path=None):
-    """The hook for job (b)'s toggle recount (docs/reports/data/2026-10-26-toggle-recount/counts.json).
+    """The second pass: the four per-event prices refitted on job (b)'s toggle recount.
 
-    While that file is not on main this reports the bench-count fit and says the recount is not here yet. Once
-    it is, the same call refits the four prices on the new counts and prints both, as a second pass: a recount
-    changes the price per toggle, not the watts, so nothing above it moves."""
+    A recount changes the price per toggle and not the watts, so nothing above this moves. Both bases are
+    reported (c0 = 0 and the joined model's c0), because fit14 shows the base is worth more than the counts.
+
+    Job (b) landed on main as dc3a5820 and b2e180b9 and shipped recount.json, not the counts.json this hook
+    first expected, and it publishes no four-class split of its own. load_model.recount_reading() builds one
+    at two rungs of job (b)'s ladder; both are scored here, and the split is named as this file's."""
+    out = {"bench_counts": {str(c0): LM.refit_prices(MEAS14, IDLE21, kernel_offset=c0)
+                            for c0 in (0.0, LM.STATIC["c0_w"])},
+           "recount_path_first_expected": os.path.relpath(os.path.join(LM.RECOUNT_DIR, "counts.json"),
+                                                          LM.REPO)}
     c = LM.recount_counts(path)
-    base = LM.refit_prices(MEAS14, IDLE21)
-    out = {"bench_counts": base,
-           "recount_present": bool(c) and "unreadable" not in (c or {}),
-           "recount_path": path or os.path.relpath(os.path.join(LM.RECOUNT_DIR, "counts.json"), LM.REPO)}
     if c and "unreadable" in c:
-        out["recount_note"] = c["unreadable"]
+        out["counts_json_note"] = c["unreadable"]
     elif c:
-        out["recount"] = LM.refit_prices(MEAS14, IDLE21, counts=c)
-        a, b = base["prices_fJ"], out["recount"]["prices_fJ"]
-        out["price_ratio_recount_over_bench"] = {k: (b[k] / a[k] if a[k] else None) for k in a}
+        out["counts_json"] = {str(c0): LM.refit_prices(MEAS14, IDLE21, counts=c, kernel_offset=c0)
+                              for c0 in (0.0, LM.STATIC["c0_w"])}
+
+    rungs = {}
+    for rung in ("hier", "settled_over_hf"):
+        r = LM.recount_reading(rung)
+        if r is None:
+            continue
+        if "unreadable" in r:
+            rungs[rung] = {"unreadable": r["unreadable"]}
+            continue
+        per = {p: v for p, v in r["per_pattern"].items() if p in MEAS14}
+        if len(per) < len(MEAS14):
+            rungs[rung] = {"unreadable": f"only {len(per)} of the 14 patterns are in the recount"}
+            continue
+        fits = {str(c0): LM.refit_prices(MEAS14, IDLE21, counts={"per_pattern": per, "rung": rung},
+                                         kernel_offset=c0)
+                for c0 in (0.0, LM.STATIC["c0_w"])}
+        bench0 = out["bench_counts"]["0.0"]["prices_fJ"]
+        rungs[rung] = {"how": r["how"], "source": r["source"], "caveat": r["caveat"], "fits": fits,
+                       "price_ratio_recount_over_bench_at_c0_zero":
+                           {k: (fits["0.0"]["prices_fJ"][k] / bench0[k] if bench0[k] else None)
+                            for k in bench0}}
+    out["recount_present"] = bool(rungs)
+    out["recount_rungs"] = rungs
+    if rungs:
+        h = rungs.get("hier", {}).get("fits", {}).get("0.0", {})
+        s = rungs.get("settled_over_hf", {}).get("fits", {}).get("0.0", {})
+        b0 = out["bench_counts"]["0.0"]
+        out["verdict"] = (
+            "Job (b)'s deduplicated counts fit the 14 measured board powers WORSE than the bench's own "
+            f"counts, on the same base. Leave-one-out at c0 = 0: bench {b0['leave_one_out_rms_w']:.3f} W, "
+            f"settled/hier-factors {s.get('leave_one_out_rms_w', float('nan')):.3f} W, per-net (hier) "
+            f"{h.get('leave_one_out_rms_w', float('nan')):.3f} W -- and on the per-net reading the "
+            f"multiplier-tree price comes out NEGATIVE "
+            f"({h.get('prices_fJ', {}).get('mult', float('nan')):.3f} fJ), which is unphysical. A refit does "
+            "not just rescale when the per-pattern shape changes: removing the hierarchy's duplicates "
+            "removes them unevenly across the patterns, and the four classes no longer separate. Job (b)'s "
+            "count is the right count of wires; it is not, as read here, a better regressor for board power. "
+            "What the recount does settle is that the ABSOLUTE fJ figures quoted from the 21 Sep fit are "
+            "prices per counted NAME, not per net, and should be quoted that way.")
     else:
-        out["recount_note"] = ("job (b)'s recount is not on main yet; rerun this script once it is, and report "
-                               "the refit as a separate pass.")
+        out["recount_note"] = ("job (b)'s recount is not on main yet; rerun this script once it is, and "
+                               "report the refit as a separate pass.")
     return out
+
+
+def freeze_reproduction(frozen):
+    """Re-run the freeze with today's load_model.py and say, exactly, how far it lands from the committed
+    file. The README claimed "reproduces all of them to the last float digit"; it is one unit in the last
+    place out on 15 of the E39 numbers, from the flip_w f/600 fix of a83b2c2a. Says so rather than rounding."""
+    import importlib
+    import freeze_load_predictions as FZ  # noqa: E402
+    importlib.reload(FZ)
+    pm1 = FZ.int8_pm1_coefficient()
+    now = {"E59_sparse_parity": {"rows": FZ.predict_e59(pm1)}}
+    e43, e43p = FZ.predict_e43()
+    now["E43_relay"] = {"rows": e43, "pooled": e43p}
+    e39, e39l = FZ.predict_e39()
+    now["E39_gemv_sparsity_ladder"] = {"rows": e39, "lines": e39l}
+    now["E37_mmbench_fp32_from_DRAM"] = {"rows": FZ.predict_e37()}
+
+    diffs, n = [], 0
+
+    def walk(x, y, p):
+        nonlocal n
+        if isinstance(x, dict) and isinstance(y, dict):
+            for k in x:
+                if k in y:
+                    walk(x[k], y[k], f"{p}/{k}")
+        elif isinstance(x, list) and isinstance(y, list) and len(x) == len(y):
+            for i, (u, v) in enumerate(zip(x, y)):
+                walk(u, v, f"{p}[{i}]")
+        elif isinstance(x, (int, float)) and isinstance(y, (int, float)) and not isinstance(x, bool):
+            n += 1
+            if x != y:
+                diffs.append({"path": p, "committed": x, "recomputed": y, "abs_w": abs(x - y),
+                              "ulps": abs(x - y) / math.ulp(float(x)) if x else None})
+    walk(frozen["predictions"], now, "")
+    mx = max((d["abs_w"] for d in diffs), default=0.0)
+    return {"numbers_compared": n, "numbers_that_differ": len(diffs),
+            "max_absolute_difference_w": mx,
+            "max_relative_difference": max((d["abs_w"] / abs(d["committed"]) for d in diffs
+                                            if d["committed"]), default=0.0),
+            "max_ulps": max((d["ulps"] for d in diffs if d["ulps"] is not None), default=0.0),
+            "differences": diffs,
+            "note": "the committed frozen_predictions.json was written at 92b30b8d, before the flip_w f/600 "
+                    "double-apply fix of a83b2c2a. The first README said re-running the freeze 'reproduces "
+                    f"all of them to the last float digit'. It does not, quite: {len(diffs)} of {n} numbers "
+                    f"differ, all of them E39's, by at most {mx:.1e} W -- a few units in the last place of a "
+                    "double, amplified where a least-squares intercept subtracts two close numbers. No "
+                    "prediction changes at any precision anyone can measure, but 'to the last float digit' "
+                    "was wrong and this field is the replacement."}
 
 
 def main():
@@ -373,7 +633,9 @@ def main():
            "fp32_14_patterns": fit14(),
            "e64_rescore": rescore_e64(),
            "e62_rescore": rescore_e62(),
-           "toggle_recount_refit": refit_pass()}
+           "toggle_recount_refit": refit_pass(),
+           "freeze_reproduction": freeze_reproduction(frozen),
+           "held_out_leaks": LM.HELD_OUT_LEAKS}
     with open(os.path.join(OUT_DIR, "scores.json"), "w") as f:
         json.dump(doc, f, indent=1)
     print("wrote", os.path.join(OUT_DIR, "scores.json"))
@@ -392,14 +654,25 @@ def main():
               f"{r['predicted_pj_per_byte']:8.3f}  {r['err_pct']:+5.1f}%  "
               f"{'inside' if r['inside_ci99'] else 'OUTSIDE'} the 99% interval")
     print(f"  rms {L['E43_relay']['rms_pct_pj_per_byte']:.1f}%, worst {L['E43_relay']['worst_pct']:+.1f}%")
+    print("  but on WATTS, which is what the model is for (aifoundry2):")
+    for r in L["E43_relay"]["watts_decomposed"]:
+        print(f"    {r['route'][:34]:34s} meas {r['measured_w_over_idle']:5.2f} W  pred "
+              f"{r['predicted_w_over_idle']:5.2f}  {r['err_pct']:+5.1f}%  = "
+              f"{r['pct_points_from_finding18_inconsistency']:+5.1f} pts finding 18's own inconsistency "
+              f"{r['pct_points_from_the_static_offset']:+5.1f} static "
+              f"{r['pct_points_from_the_pj_per_byte_error']:+5.1f} pJ/B")
     print("\nE39 gemv sparsity ladder:")
     for r in L["E39_gemv_sparsity_ladder"]["rows"]:
         print(f"  {r['card']:14s} slope meas {r['measured_slope_w']:6.2f} pred {r['predicted_slope_w']:6.2f} "
               f"({r['slope_err_pct']:+5.1f}%, {'inside' if r['slope_inside_ci99'] else 'OUTSIDE'})   "
               f"intercept meas {r['measured_intercept_w']:+5.2f} pred {r['predicted_intercept_w']:+5.2f}  "
               f"dense {r['dense_err_w']:+5.2f} W")
-    print(f"  rms {L['E39_gemv_sparsity_ladder']['rms_w']:.2f} W, "
-          f"bias {L['E39_gemv_sparsity_ladder']['bias_w']:+.2f} W")
+    g = L["E39_gemv_sparsity_ladder"]
+    print(f"  rms over the {g['n_independent_predictions']} independent predictions (3 slopes, 3 intercepts) "
+          f"{g['rms_w']:.2f} W, bias {g['bias_w']:+.2f} W")
+    print(f"  endpoint cross-check against ABLB-3ab (the SAME two parameters, a different reduction): "
+          f"{g['endpoint_crosscheck']['rms_w']:.2f} W; all twelve pooled {g['rms_w_all_twelve_pooled']:.2f} W")
+    print(f"  {g['slopes_outside_ci99']} of {g['n_slopes']} slopes fall OUTSIDE the measurement's 99% interval")
     print("\nE37 mmbench fp32 from DRAM (W over idle):")
     for r in L["E37_mmbench_fp32_from_DRAM"]["rows"]:
         print(f"  {r['card']:14s} meas {r['measured_over_idle_w']:6.2f}  pred "
@@ -409,11 +682,21 @@ def main():
     print(f"  rms {L['E37_mmbench_fp32_from_DRAM']['rms_w']:.2f} W, "
           f"bias {L['E37_mmbench_fp32_from_DRAM']['bias_w']:+.2f} W")
 
+    print("\nE59's byte assumption and the shape of its miss:")
+    e59 = L["E59_sparse_parity"]
+    print(f"  {e59['byte_assumption']['verdict']}")
+    print(f"  {e59['duty_shape']['verdict']}")
+
     f14 = doc["fp32_14_patterns"]
-    print(f"\n14 fp32 patterns, aifoundry2: in sample {f14['in_sample_rms_w']:.3f} W rms, "
-          f"leave-one-out {f14['leave_one_out_rms_w']:.3f} W rms "
-          f"(worst {f14['leave_one_out_worst']['pattern']} {f14['leave_one_out_worst']['err_w']:+.2f} W); "
-          f"E38 published {f14['e38_published_loo_w']}")
+    print("\n14 fp32 patterns, aifoundry2, at two per-kernel offsets:")
+    for k, lab in (("at_c0_zero", "c0 = 0 (the published base)"), ("at_joined_c0", "c0 = the joined offset")):
+        v = f14[k]
+        print(f"  {lab:30s} c0 {v['kernel_offset_w']:+6.3f} W  in sample {v['in_sample_rms_w']:.3f}  "
+              f"LOO {v['leave_one_out_rms_w']:.3f}  published prices {v['stock_prices_rms_w']:.3f}  "
+              f"bus {v['refit_prices_fJ']['bus']:.2f} fJ  "
+              f"(worst {v['leave_one_out_worst']['pattern']} {v['leave_one_out_worst']['err_w']:+.2f} W)")
+    print(f"  {f14['what_c0_costs']['verdict']}")
+    print(f"  E38 published per-card LOO {f14['e38_published_loo_w']}")
     e = doc["e64_rescore"]
     print(f"\nE64, {e['n_points']} points: its own fit {e['e64_own_fit_rms_w']:.3f} W "
           f"(published {e['e64_published_rms_w']:.3f}); joined static + measured c "
@@ -426,6 +709,27 @@ def main():
         print(f"E62 {k:18s}: measured {v['measured_intercept_w']:5.2f} W + "
               f"{v['measured_slope_mw_per_hart']:5.2f} mW/hart | model {v['model_intercept_w']:5.2f} W + "
               f"{v['model_slope_mw_per_hart']:5.2f} mW/hart | rms {v['rms_w']:.2f} W")
+    t = g["intercept_is_a_fit_target"]
+    print(f"  the de-leaked intercept is a FIT TARGET: in the fit's own referral it is "
+          f"{t['identity_in_the_fit_w']:.6f} W against a measured "
+          f"{t['measured_de_leaked_intercept_w']:.6f}, residual {t['residual_in_the_fit_w']:.1e} W -- "
+          "arithmetic, not evidence.")
+    print(f"  {t['what_the_0_02_W_gap_really_is']}")
+
+    r = doc["toggle_recount_refit"]
+    print("\nSecond pass -- the four prices refitted on job (b)'s recount:")
+    b0 = r["bench_counts"]["0.0"]
+    print(f"  bench counts, c0=0        " + ", ".join(f"{k} {v:.4f}" for k, v in b0["prices_fJ"].items())
+          + f"   LOO {b0['leave_one_out_rms_w']:.3f} W")
+    for rung, v in (r.get("recount_rungs") or {}).items():
+        if "unreadable" in v:
+            print(f"  {rung:24s}  {v['unreadable']}")
+            continue
+        f0 = v["fits"]["0.0"]
+        print(f"  {rung:24s}  " + ", ".join(f"{k} {x:.4f}" for k, x in f0["prices_fJ"].items())
+              + f"   LOO {f0['leave_one_out_rms_w']:.3f} W")
+    if r.get("verdict"):
+        print(f"  {r['verdict']}")
 
 
 if __name__ == "__main__":

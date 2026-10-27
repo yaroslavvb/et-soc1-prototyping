@@ -16,6 +16,14 @@
      "predicted_j_per_solve_over_idle": 1.3391931282401026,
      "err_j": -0.3208868717598974,
      "err_j_pct": -19.329602896239784,
+     "tensor_duty": 0.2738933536695645,
+     "scratchpad_share_of_prediction_pct": 77.01380436539752,
+     "posthoc_bracket_w_bytes_2048_to_8192": [
+      6.029008873552787,
+      17.355082686370274
+     ],
+     "posthoc_bracket_contains_measurement": true,
+     "bytes_per_op_that_would_close_the_miss": 5687.0193814778595,
      "parts_w": {
       "kernel_offset_and_state_machines": 0.8429592005916378,
       "tensor": 1.4106917353553183,
@@ -33,6 +41,14 @@
      "predicted_j_per_solve_over_idle": 5.431587806714931,
      "err_j": -0.7640321932850691,
      "err_j_pct": -12.331811719974258,
+     "tensor_duty": 0.36207333483681453,
+     "scratchpad_share_of_prediction_pct": 78.6656150866664,
+     "posthoc_bracket_w_bytes_2048_to_8192": [
+      7.697897629747275,
+      22.6704015663057
+     ],
+     "posthoc_bracket_contains_measurement": true,
+     "bytes_per_op_that_would_close_the_miss": 4903.317786789611,
      "parts_w": {
       "kernel_offset_and_state_machines": 0.8429592005916378,
       "tensor": 1.864103783636162,
@@ -50,6 +66,14 @@
      "predicted_j_per_solve_over_idle": 10.57803211769578,
      "err_j": -2.026847882304219,
      "err_j_pct": -16.079866546164812,
+     "tensor_duty": 0.3159391852698944,
+     "scratchpad_share_of_prediction_pct": 77.89133987346635,
+     "posthoc_bracket_w_bytes_2048_to_8192": [
+      6.82711823667086,
+      19.891876781506905
+     ],
+     "posthoc_bracket_contains_measurement": true,
+     "bytes_per_op_that_would_close_the_miss": 5381.6233107123835,
      "parts_w": {
       "kernel_offset_and_state_machines": 0.8429592005916378,
       "tensor": 1.6292395211338746,
@@ -67,6 +91,14 @@
      "predicted_j_per_solve_over_idle": 9.888266480463392,
      "err_j": -5.929433519536609,
      "err_j_pct": -37.48606636575867,
+     "tensor_duty": 0.16971298377885266,
+     "scratchpad_share_of_prediction_pct": 73.15289718519013,
+     "posthoc_bracket_w_bytes_2048_to_8192": [
+      4.056399586171107,
+      11.07439310634895
+     ],
+     "posthoc_bracket_contains_measurement": true,
+     "bytes_per_op_that_would_close_the_miss": 7650.706703777109,
      "parts_w": {
       "kernel_offset_and_state_machines": 0.8429592005916378,
       "tensor": 0.8741092121868549,
@@ -78,7 +110,48 @@
    "rms_w": 3.017983375161594,
    "bias_w": -2.9236181005986763,
    "worst": "(256,5,0.4,1925) second half",
-   "residual_signs": "----"
+   "residual_signs": "----",
+   "byte_assumption": {
+    "frozen_bytes_per_op": 4096,
+    "share_of_the_prediction_pct": [
+     77.0,
+     78.7,
+     77.9,
+     73.2
+    ],
+    "posthoc_bracket": "half and double, 2,048 to 8,192 B an op. NOT frozen: the freeze gave E59 no bracket where it gave E37 one, and this is computed after the measurements were read.",
+    "bracket_contains_all_four": true,
+    "bytes_per_op_that_would_close_each_miss": [
+     5687,
+     4903,
+     5382,
+     7651
+    ],
+    "verdict": "the byte count CAN absorb the whole miss -- the half-to-double bracket contains all four measurements -- but not as one fixed factor: it would need 4,903 to 7,651 B an op, a 1.56x spread that grows as the tensor duty falls. E37's analogous back-solve agreed to 2% across three cards; this one does not, so the byte count is not the whole story."
+   },
+   "duty_shape": {
+    "shortfalls_w": [
+     2.933,
+     1.967,
+     2.734,
+     4.06
+    ],
+    "duties": [
+     0.274,
+     0.362,
+     0.316,
+     0.17
+    ],
+    "as_a_constant_spread_x": 2.06384833445586,
+    "divided_by_one_minus_duty_w": [
+     4.039,
+     3.084,
+     3.996,
+     4.89
+    ],
+    "divided_by_one_minus_duty_spread_x": 1.585697306690568,
+    "verdict": "the missing term is not a constant per-hart floor: over four runs of the same kernel on the same card the shortfall itself spans 2.06x. Divided by (1 - tensor duty) -- the share of the time the tensor unit is NOT issuing -- it tightens to 1.59x. So what is missing scales with the time the core is awake and not issuing tensor work, which is the per-hart instruction term the energy manual's catalogue could price."
+   }
   },
   "E43_relay": {
    "pooled": [
@@ -189,7 +262,51 @@
    ],
    "rms_pct_pj_per_byte": 4.320823879639728,
    "worst_pct": -6.860257566836373,
-   "watts_note": "finding 18's own table is not internally consistent: 104.8 pJ/B x 48.4 GB/s is 5.07 W, and it prints 4.34 W over idle for the same run (17% apart), so the model is scored on pJ per byte, the manual's primary quantity, and the watts are reported beside it.",
+   "watts_note": "E43 is the model's best held-out load on pJ per byte and one of its worst on WATTS: +41.1 / +33.6 / +20.3% on aifoundry2. The headline is on pJ per byte because finding 18's own table is not internally consistent -- 104.8 pJ/B x 48.4 GB/s is 5.07 W beside its printed 4.34 W over idle, 17% apart -- but a 17% source inconsistency does not cover a 41% miss. watts_decomposed splits each route's miss into the three parts that make it.",
+   "watts_decomposed": [
+    {
+     "route": "DRAM, read back next stage",
+     "measured_w_over_idle": 4.34,
+     "predicted_w_over_idle": 6.1222434037074605,
+     "err_pct": 41.06551621445762,
+     "decomposition_w": {
+      "traffic_at_predicted_pj_per_byte": 5.433607773745998,
+      "kernel_offset_and_state_machines": 0.6886356299614622
+     },
+     "finding18_own_pj_per_byte_times_own_gb_s_w": 5.626139687093223,
+     "pct_points_from_finding18_inconsistency": 29.634555002148012,
+     "pct_points_from_the_static_offset": 15.867180413858575,
+     "pct_points_from_the_pj_per_byte_error": -4.436219201548968
+    },
+    {
+     "route": "the next shire's scratchpad",
+     "measured_w_over_idle": 4.42,
+     "predicted_w_over_idle": 5.903439936296278,
+     "err_pct": 33.561989508965574,
+     "decomposition_w": {
+      "traffic_at_predicted_pj_per_byte": 5.214804306334816,
+      "kernel_offset_and_state_machines": 0.6886356299614622
+     },
+     "finding18_own_pj_per_byte_times_own_gb_s_w": 5.2907920681166,
+     "pct_points_from_finding18_inconsistency": 19.701178011687787,
+     "pct_points_from_the_static_offset": 15.57999162808738,
+     "pct_points_from_the_pj_per_byte_error": -1.7191801308095906
+    },
+    {
+     "route": "this shire's own scratchpad",
+     "measured_w_over_idle": 5.3,
+     "predicted_w_over_idle": 6.3775102548125355,
+     "err_pct": 20.330382166274262,
+     "decomposition_w": {
+      "traffic_at_predicted_pj_per_byte": 5.688874624851073,
+      "kernel_offset_and_state_machines": 0.6886356299614622
+     },
+     "finding18_own_pj_per_byte_times_own_gb_s_w": 6.438084950642885,
+     "pct_points_from_finding18_inconsistency": 21.47330095552614,
+     "pct_points_from_the_static_offset": 12.993125093612493,
+     "pct_points_from_the_pj_per_byte_error": -14.136043882864376
+    }
+   ],
    "watts_err_pct_aifoundry2": [
     41.06551621445762,
     33.561989508965574,
@@ -250,8 +367,20 @@
      "zero_err_w": -1.3694034262042973
     }
    ],
-   "rms_w": 1.3765663306329081,
-   "bias_w": -1.0606868302851402,
+   "rms_w": 1.1045178382492065,
+   "bias_w": -0.7499527806475405,
+   "n_independent_predictions": 6,
+   "slopes_outside_ci99": 2,
+   "n_slopes": 3,
+   "slope_ci99_note": "2 of 3 predicted slopes fall OUTSIDE the measurement's own 99% interval (aifoundry2 +4.1%, aifoundry1-c1 -8.6%; aifoundry3 is inside). ABLB-3c's intervals are tight, so a small percentage error still misses.",
+   "endpoint_crosscheck": {
+    "rms_w": 1.6030939056254936,
+    "bias_w": -1.3714208799227399,
+    "n": 6,
+    "note": "the dense and all-zero rungs scored against ABLB-3ab -- the SAME two line parameters against a different reduction, not new predictions."
+   },
+   "rms_w_all_twelve_pooled": 1.3765663306329081,
+   "bias_w_all_twelve_pooled": -1.0606868302851402,
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.json items ABLB-3c, ABLB-3ab"
   },
   "E37_mmbench_fp32_from_DRAM": {
@@ -345,22 +474,79 @@
    "uniform",
    "randn"
   ],
-  "in_sample_rms_w": 0.6519750471377854,
-  "in_sample_bias_w": -0.19659459353132952,
-  "leave_one_out_rms_w": 0.7391422478152747,
-  "leave_one_out_bias_w": -0.17116050794998625,
+  "primary": "at_c0_zero",
+  "at_c0_zero": {
+   "kernel_offset_w": 0.0,
+   "base_w": 38.14459087977374,
+   "in_sample_rms_w": 0.3592837203931772,
+   "in_sample_bias_w": -0.05424156778287476,
+   "leave_one_out_rms_w": 0.4583104579513761,
+   "leave_one_out_bias_w": -0.04950611995411285,
+   "leave_one_out_worst": {
+    "pattern": "pow2",
+    "err_w": 0.9738396393919473
+   },
+   "stock_prices_rms_w": 0.45095945498783135,
+   "refit_prices_fJ": {
+    "ffclk": 3.142473779514844,
+    "mult": 0.03151332576108275,
+    "rest": 0.7416833473482705,
+    "bus": 16.08788192539163
+   }
+  },
+  "at_joined_c0": {
+   "kernel_offset_w": -1.18,
+   "base_w": 36.96459087977374,
+   "in_sample_rms_w": 0.6519750471377854,
+   "in_sample_bias_w": -0.19659459353132952,
+   "leave_one_out_rms_w": 0.7391422478152747,
+   "leave_one_out_bias_w": -0.17116050794998625,
+   "leave_one_out_worst": {
+    "pattern": "checker",
+    "err_w": -1.3771129924706713
+   },
+   "stock_prices_rms_w": 1.1135890541676043,
+   "refit_prices_fJ": {
+    "ffclk": 3.6188056841861846,
+    "mult": 0.03213354105553118,
+    "rest": 0.6285171076485537,
+    "bus": 25.335513568443083
+   }
+  },
+  "what_c0_costs": {
+   "leave_one_out_w": [
+    0.4583104579513761,
+    0.7391422478152747
+   ],
+   "leave_one_out_worse_by_pct": 61.27544876876738,
+   "in_sample_w": [
+    0.3592837203931772,
+    0.6519750471377854
+   ],
+   "bus_price_fJ": [
+    16.08788192539163,
+    25.335513568443083
+   ],
+   "published_prices_rms_w": [
+    0.45095945498783135,
+    1.1135890541676043
+   ],
+   "verdict": "the 14 fp32 patterns do not support the joined model's negative per-kernel offset. At c0 = 0 the refit reproduces the published 21 Sep fit (3.14 / 0.0315 / 0.742 / 16.09 fJ against the published 3.179 / 0.0250 / 0.801 / 15.539) and the published prices read 0.451 W rms on their own base. Nothing about the bus price being 'loose' follows from the 25.34 fJ figure: that number is c0 being absorbed."
+  },
+  "in_sample_rms_w": 0.3592837203931772,
+  "leave_one_out_rms_w": 0.4583104579513761,
   "leave_one_out_worst": {
-   "pattern": "checker",
-   "err_w": -1.3771129924706713
+   "pattern": "pow2",
+   "err_w": 0.9738396393919473
   },
-  "stock_prices_rms_w": 1.1135890541676043,
+  "stock_prices_rms_w": 0.45095945498783135,
   "refit_prices_fJ": {
-   "ffclk": 3.6188056841861846,
-   "mult": 0.03213354105553118,
-   "rest": 0.6285171076485537,
-   "bus": 25.335513568443083
+   "ffclk": 3.142473779514844,
+   "mult": 0.03151332576108275,
+   "rest": 0.7416833473482705,
+   "bus": 16.08788192539163
   },
-  "note": "aifoundry2 only: the 21 Sep board table is the one committed set of 14 measured patterns. E38's published per-card leave-one-out is 1.008 / 0.906 / 0.966 W (FAIL against a registered 0.6 W).",
+  "note": "aifoundry2 only: the 21 Sep board table is the one committed set of 14 measured patterns. E38's published per-card leave-one-out is 1.008 / 0.906 / 0.966 W (FAIL against a registered 0.6 W). The top-level figures here are the c0 = 0 ones.",
   "e38_published_loo_w": [
    1.008,
    0.906,
@@ -369,6 +555,15 @@
  },
  "e64_rescore": {
   "n_points": 103,
+  "in_sample_warning": "E64's three floors B(600), B(700), B(800) are three of the FOUR observations the joined static part is fitted on, so (b) is not held out either. The joined static part has three free parameters (idle58, c0, k_clk) where E64's own fit has three free floors, and must in addition match E62's intercept, which it does exactly. Read (b) against (a) as 'the same three numbers, reached through a two-parameter clock law plus an offset tied to another experiment, cost 0.10 W of rms' -- not as a prediction. STATIC['resid_w'] is where that cost shows: 0.42 W rms over the four observations, one degree of freedom.",
+  "static_fit_residuals_w": {
+   "600": 0.324821939967304,
+   "700": -0.5910356448731804,
+   "800": 0.2662137049058799
+  },
+  "static_fit_rms_w": 0.41860966817728495,
+  "static_fit_n_obs": 4,
+  "static_fit_n_params": 3,
   "e64_own_fit_rms_w": 0.824238968378753,
   "e64_published_rms_w": 0.8242388715772772,
   "joined_static_measured_c_rms_w": 0.9244051591709952,
@@ -392,6 +587,18 @@
   "note": "p_ref is each run's board power at that clock referred to a 58 C die (surface_hpl.py). 'before Q126' is the old static part: the 21 Sep idle law plus p_sm, the same at every clock, which is the 27.11 W the recap's item 4 names."
  },
  "e62_rescore": {
+  "intercept_is_a_fit_target": {
+   "yes": true,
+   "identity_in_the_fit_w": 5.353833333333332,
+   "measured_de_leaked_intercept_w": 5.3538333333333314,
+   "residual_in_the_fit_w": 8.881784197001252e-16,
+   "where": "load_model.fit_static(): k_clk = (i62 - c0*s(800)) / (s(800) - 1), solved in closed form at every trial c0, so the fit matches this measurement to 1e-15 W by construction.",
+   "s_800_in_the_fit": 1.90517380064275,
+   "s_800_in_the_model": 1.9015436013435087,
+   "model_intercept_at_the_model_s_w": 5.327629396397482,
+   "what_the_0_02_W_gap_really_is": "the first README read the 5.33 vs 5.35 W agreement as 'right to 0.02 W, from terms fitted on E64 rather than on E62's own line'. It is neither. The intercept IS E62's own line -- it is fit observation number four -- and the +0.026 W that remains is an internal inconsistency in the model, not a prediction error: fit_static() refers the clock with E64's fitted s(800) = 1.905174, while static_w() and predict() refer it with the model's own f*V^2 = 1.901544, 0.19% apart. (At 600 MHz the same mismatch is 0.155% the other way, s64 1.0 against sfv 1.00155, which moves each frozen over-idle prediction by about 0.001 W.)",
+   "so": "nothing about E62's intercept is evidence for this model. The evidence from the same fit is that it reproduces E64's three floors to 0.42 W rms (e64_rescore.static_fit_rms_w) with one degree of freedom left, and the evidence here is the slope and the rung residuals below."
+  },
   "raw": {
    "measured_intercept_w": 5.79583333333333,
    "measured_slope_mw_per_hart": 55.771484375000014,
@@ -484,23 +691,252 @@
   },
   "before_q126": {
    "model_intercept_w": 0.0,
-   "note": "the old model had no clock-dependent static term and no per-kernel offset, so it predicted 0.00 W at zero harts against a measured 5.35-5.80 W (recap item 5)."
+   "note": "the old model had no clock-dependent static term and no per-kernel offset, so it predicted 0.00 W at zero harts against a measured 5.35-5.80 W (recap item 5). The joined model now has somewhere to put that offset -- but it was PUT there from this very measurement, see intercept_is_a_fit_target."
   }
  },
  "toggle_recount_refit": {
   "bench_counts": {
-   "prices_fJ": {
-    "ffclk": 3.6188056841861846,
-    "mult": 0.03213354105553118,
-    "rest": 0.6285171076485537,
-    "bus": 25.335513568443083
+   "0.0": {
+    "prices_fJ": {
+     "ffclk": 3.142473779514844,
+     "mult": 0.03151332576108275,
+     "rest": 0.7416833473482705,
+     "bus": 16.08788192539163
+    },
+    "in_sample_rms_w": 0.3592837203931772,
+    "leave_one_out_rms_w": 0.4583104579513761,
+    "kernel_offset_w": 0.0,
+    "base_w": 38.14459087977374,
+    "counts_used": "the bench's own counts"
    },
-   "in_sample_rms_w": 0.6519750471377854,
-   "leave_one_out_rms_w": 0.7391422478152747,
-   "counts_used": "the bench's own counts"
+   "-1.18": {
+    "prices_fJ": {
+     "ffclk": 3.6188056841861846,
+     "mult": 0.03213354105553118,
+     "rest": 0.6285171076485537,
+     "bus": 25.335513568443083
+    },
+    "in_sample_rms_w": 0.6519750471377854,
+    "leave_one_out_rms_w": 0.7391422478152747,
+    "kernel_offset_w": -1.18,
+    "base_w": 36.96459087977374,
+    "counts_used": "the bench's own counts"
+   }
   },
-  "recount_present": false,
-  "recount_path": "docs/reports/data/2026-10-26-toggle-recount/counts.json",
-  "recount_note": "job (b)'s recount is not on main yet; rerun this script once it is, and report the refit as a separate pass."
+  "recount_path_first_expected": "docs/reports/data/2026-10-26-toggle-recount/counts.json",
+  "recount_present": true,
+  "recount_rungs": {
+   "hier": {
+    "how": "nets_hier and by_block_hier: once per net, merging a name with its ancestor scope's name",
+    "source": "docs/reports/data/2026-10-26-toggle-recount/recount.json",
+    "caveat": "the four-class split is load_model's, not job (b)'s: job (b) counts toggles and publishes no price classes.",
+    "fits": {
+     "0.0": {
+      "prices_fJ": {
+       "ffclk": 3.344381758331615,
+       "mult": -1.7694263827069001,
+       "rest": 3.7159783521073155,
+       "bus": 16.724165417165512
+      },
+      "in_sample_rms_w": 0.7880433710220276,
+      "leave_one_out_rms_w": 1.3471800677645365,
+      "kernel_offset_w": 0.0,
+      "base_w": 38.14459087977374,
+      "counts_used": "hier"
+     },
+     "-1.18": {
+      "prices_fJ": {
+       "ffclk": 3.8041671912851767,
+       "mult": -1.2927017410618284,
+       "rest": 3.196597983044718,
+       "bus": 25.750643118732476
+      },
+      "in_sample_rms_w": 0.8895656996601468,
+      "leave_one_out_rms_w": 1.3125805543776907,
+      "kernel_offset_w": -1.18,
+      "base_w": 36.96459087977374,
+      "counts_used": "hier"
+     }
+    },
+    "price_ratio_recount_over_bench_at_c0_zero": {
+     "ffclk": 1.0642512851286043,
+     "mult": -56.14851304878922,
+     "rest": 5.010195207150057,
+     "bus": 1.0395504824516166
+    }
+   },
+   "settled_over_hf": {
+    "how": "by_block_settled divided by hier-factors.json's per-module factor, summed for the total",
+    "source": "docs/reports/data/2026-10-26-toggle-recount/recount.json",
+    "caveat": "the four-class split is load_model's, not job (b)'s: job (b) counts toggles and publishes no price classes.",
+    "fits": {
+     "0.0": {
+      "prices_fJ": {
+       "ffclk": 3.239355590751635,
+       "mult": 0.27488291413509813,
+       "rest": 2.3544069306466735,
+       "bus": 14.1612454942668
+      },
+      "in_sample_rms_w": 0.5024254973084116,
+      "leave_one_out_rms_w": 0.7070153105283562,
+      "kernel_offset_w": 0.0,
+      "base_w": 38.14459087977374,
+      "counts_used": "settled_over_hf"
+     },
+     "-1.18": {
+      "prices_fJ": {
+       "ffclk": 3.718209348990579,
+       "mult": 0.28857125195872646,
+       "rest": 1.9965316034227227,
+       "bus": 23.699560938510015
+      },
+      "in_sample_rms_w": 0.7311963649644841,
+      "leave_one_out_rms_w": 0.892977446046653,
+      "kernel_offset_w": -1.18,
+      "base_w": 36.96459087977374,
+      "counts_used": "settled_over_hf"
+     }
+    },
+    "price_ratio_recount_over_bench_at_c0_zero": {
+     "ffclk": 1.030829791442762,
+     "mult": 8.72275164541864,
+     "rest": 3.174409859766098,
+     "bus": 0.8802430027731615
+    }
+   }
+  },
+  "verdict": "Job (b)'s deduplicated counts fit the 14 measured board powers WORSE than the bench's own counts, on the same base. Leave-one-out at c0 = 0: bench 0.458 W, settled/hier-factors 0.707 W, per-net (hier) 1.347 W -- and on the per-net reading the multiplier-tree price comes out NEGATIVE (-1.769 fJ), which is unphysical. A refit does not just rescale when the per-pattern shape changes: removing the hierarchy's duplicates removes them unevenly across the patterns, and the four classes no longer separate. Job (b)'s count is the right count of wires; it is not, as read here, a better regressor for board power. What the recount does settle is that the ABSOLUTE fJ figures quoted from the 21 Sep fit are prices per counted NAME, not per net, and should be quoted that way."
+ },
+ "freeze_reproduction": {
+  "numbers_compared": 234,
+  "numbers_that_differ": 15,
+  "max_absolute_difference_w": 7.105427357601002e-15,
+  "max_relative_difference": 5.159061663712226e-15,
+  "max_ulps": 32.0,
+  "differences": [
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[0]/bracket_w[1]",
+    "committed": 24.3267889619854,
+    "recomputed": 24.326788961985397,
+    "abs_w": 3.552713678800501e-15,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[1]/predicted_over_idle_w",
+    "committed": 8.530079018944331,
+    "recomputed": 8.53007901894433,
+    "abs_w": 1.7763568394002505e-15,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[1]/bracket_w[1]",
+    "committed": 12.578626755969502,
+    "recomputed": 12.5786267559695,
+    "abs_w": 1.7763568394002505e-15,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[2]/predicted_over_idle_w",
+    "committed": 8.483310966922565,
+    "recomputed": 8.483310966922563,
+    "abs_w": 1.7763568394002505e-15,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[2]/bracket_w[1]",
+    "committed": 12.50771229597343,
+    "recomputed": 12.507712295973429,
+    "abs_w": 1.7763568394002505e-15,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[3]/predicted_over_idle_w",
+    "committed": 7.5167712251393874,
+    "recomputed": 7.516771225139387,
+    "abs_w": 8.881784197001252e-16,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[3]/bracket_w[1]",
+    "committed": 11.042146789387946,
+    "recomputed": 11.042146789387944,
+    "abs_w": 1.7763568394002505e-15,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[4]/predicted_over_idle_w",
+    "committed": 2.325517450723294,
+    "recomputed": 2.3255174507232934,
+    "abs_w": 4.440892098500626e-16,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[12]/bracket_w[1]",
+    "committed": 21.889011379964103,
+    "recomputed": 21.8890113799641,
+    "abs_w": 3.552713678800501e-15,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[13]/bracket_w[1]",
+    "committed": 11.018421221298407,
+    "recomputed": 11.018421221298405,
+    "abs_w": 1.7763568394002505e-15,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[14]/bracket_w[1]",
+    "committed": 10.952803976879903,
+    "recomputed": 10.9528039768799,
+    "abs_w": 1.7763568394002505e-15,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[15]/bracket_w[1]",
+    "committed": 9.596714258897462,
+    "recomputed": 9.59671425889746,
+    "abs_w": 1.7763568394002505e-15,
+    "ulps": 1.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/rows[16]/bracket_w[1]",
+    "committed": 2.313200128443385,
+    "recomputed": 2.313200128443384,
+    "abs_w": 8.881784197001252e-16,
+    "ulps": 2.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/lines[0]/predicted_slope_w",
+    "committed": 15.589350673922203,
+    "recomputed": 15.589350673922196,
+    "abs_w": 7.105427357601002e-15,
+    "ulps": 4.0
+   },
+   {
+    "path": "/E39_gemv_sparsity_ladder/lines[0]/predicted_intercept_w",
+    "committed": 0.6886356299614628,
+    "recomputed": 0.6886356299614663,
+    "abs_w": 3.552713678800501e-15,
+    "ulps": 32.0
+   }
+  ],
+  "note": "the committed frozen_predictions.json was written at 92b30b8d, before the flip_w f/600 double-apply fix of a83b2c2a. The first README said re-running the freeze 'reproduces all of them to the last float digit'. It does not, quite: 15 of 234 numbers differ, all of them E39's, by at most 7.1e-15 W -- a few units in the last place of a double, amplified where a least-squares intercept subtracts two close numbers. No prediction changes at any precision anyone can measure, but 'to the last float digit' was wrong and this field is the replacement."
+ },
+ "held_out_leaks": {
+  "hop_pj_per_byte = 1.753": {
+   "from": "E43 RL-a, the pooled mesh slope per hop (finding 20)",
+   "reaches": "hop_w() and predict_load.py --hops. NOT any frozen E43 prediction: the relay rows are priced from the energy manual's level prices, not from the hop slope.",
+   "effect_on_the_score": "none -- no scored number reads it"
+  },
+  "CARDS['aifoundry1-c1']['volts'] = 0.4979": {
+   "from": "E39 ablb.runs.json idle_by_card busy_mv -- the only committed rail voltage for that card",
+   "reaches": "every prediction on aifoundry1-c1: E39's own line, E43's third card, E37's third card",
+   "effect_on_the_score": "it made E39 WORSE, not better. At this voltage the predicted aifoundry1-c1 slope is 14.425 W, -8.60% against the measured 15.782 and the worst number in the E39 row; at a neutral 0.517 V it would be 15.553 W, -1.45%."
+  },
+  "E59_CYCLES_IDEAL = 280.35": {
+   "from": "E37 MMB-a, the measured int8 shared-tile cycles an op",
+   "reaches": "freeze_load_predictions.py: it sets E59's tensor duty, and so its tensor term",
+   "effect_on_the_score": "the tensor term is 9-14% of each E59 prediction, and E59 misses low by 13-39%, so the leak cannot be what carries that load."
+  }
  }
 }

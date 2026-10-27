@@ -18,8 +18,11 @@ the instruction-and-byte catalogue (docs/energy-manual/), E60/E61's measured per
     k_card  = the card scale (E38)
 
 Every coefficient is read from a committed file and carries the experiment it came from in COEFF_SOURCES.
-Nothing here is fitted on E37, E39, E43 or E59: those four are the held-out loads of
-docs/reports/data/2026-10-26-load-model/.
+
+E37, E39, E43 and E59 are the held-out loads of docs/reports/data/2026-10-26-load-model/. The first version of
+this file said "nothing here is fitted on" them; that was wrong, and the exact list of what does come from them
+is HELD_OUT_LEAKS below. None of the three is fitted -- each is a single constant read from the other
+experiment's record -- but a held-out test has to name them.
 
 Import it, or run it for the fitted constants:
     /usr/local/bin/python3.12 load_model.py            # print the fit and its residuals
@@ -50,7 +53,8 @@ T_REF = 58.0                        # the die reading E60 and E64 refer their po
 
 # Cards: volts by clock, the card scale, the leakage slope, and what share of the board the minion rail carries.
 # volts  : aifoundry2 from surface_hpl.py:31 (E64); aifoundry3 and aifoundry1-c0 from hl.json cards.*.v_mean (E60);
-#          aifoundry1-c1 from ablb.runs.json idle_by_card (E39's busy_mv, the only committed figure for that card).
+#          aifoundry1-c1 from ablb.runs.json idle_by_card (E39's busy_mv, the only committed figure for that
+#          card) -- a HELD_OUT_LEAK, see above: it is E39's own number and it makes E39's prediction worse.
 # scale  : E38's switching ratio at a matched die temperature; 1.0 on the card the prices were fitted on.
 # leak   : E60 reduce.txt per card; aifoundry3 and aifoundry1 fall back to aifoundry2's.
 # idle_offset_w: how far the card idles above aifoundry2's law in the version-3 idle cycles
@@ -83,6 +87,30 @@ COEFF_SOURCES = {
     "governor tau, pass":             "E64 figures.json governor",
     "heat path":                      "E64 figures.json thermal (T = a_c + k_c_per_w * P)",
     "card scale":                     "E38 (05-claims.md): aifoundry3 switches 0.958-0.969 of aifoundry2",
+}
+
+# What this model takes from the four loads it is scored on. Named here because a held-out test that does not
+# name its leaks is not one (found by a check of the first version's blanket "nothing here is fitted on them").
+HELD_OUT_LEAKS = {
+    "hop_pj_per_byte = 1.753": {
+        "from": "E43 RL-a, the pooled mesh slope per hop (finding 20)",
+        "reaches": "hop_w() and predict_load.py --hops. NOT any frozen E43 prediction: the relay rows are "
+                   "priced from the energy manual's level prices, not from the hop slope.",
+        "effect_on_the_score": "none -- no scored number reads it",
+    },
+    "CARDS['aifoundry1-c1']['volts'] = 0.4979": {
+        "from": "E39 ablb.runs.json idle_by_card busy_mv -- the only committed rail voltage for that card",
+        "reaches": "every prediction on aifoundry1-c1: E39's own line, E43's third card, E37's third card",
+        "effect_on_the_score": "it made E39 WORSE, not better. At this voltage the predicted aifoundry1-c1 "
+                               "slope is 14.425 W, -8.60% against the measured 15.782 and the worst number in "
+                               "the E39 row; at a neutral 0.517 V it would be 15.553 W, -1.45%.",
+    },
+    "E59_CYCLES_IDEAL = 280.35": {
+        "from": "E37 MMB-a, the measured int8 shared-tile cycles an op",
+        "reaches": "freeze_load_predictions.py: it sets E59's tensor duty, and so its tensor term",
+        "effect_on_the_score": "the tensor term is 9-14% of each E59 prediction, and E59 misses low by "
+                               "13-39%, so the leak cannot be what carries that load.",
+    },
 }
 
 
@@ -226,6 +254,12 @@ def fit_static():
       B64(f) = idle58 + k_clk*(s(f)-1) + (c0 + p_sm)*s(f)
       I62    = k_clk*(s(800)-1) + c0*s(800)
     (I62 is measured over the card's own idle, so the idle anchor drops out of it.)
+
+    🛑 I62 IS A FIT TARGET, NOT A PREDICTION. k_clk is solved from the E62 row in closed form at every trial c0
+    (the line below), so the fitted model reproduces E62's de-leaked 0-hart intercept to 1e-15 W BY
+    CONSTRUCTION. Nothing about E62's intercept is evidence for this model; what is evidence is that the same
+    three parameters then reproduce E64's three floors to 0.42 W rms (STATIC['resid_w']), one degree of freedom
+    over four observations. scores.json records the identity as e62_rescore['intercept_is_a_fit_target'].
     """
     i62, slope62, _ = fit_hart_line()
     s = {f: K.s64[f] for f in (600, 700, 800)}
@@ -273,14 +307,23 @@ def idle_w(T, card="aifoundry2", law="e64"):
     law='e64'  : the 21 Sep leakage shape re-anchored so it passes through the fitted idle58 (the default;
                  the 21 Sep law read at 58 C is ~0.6 W above E64's own floor, recap item 13).
     law='21sep': the 21 Sep law as predict_heat.py has always read it.
-    law='cool' : the leakage refitted on E44's 51-67 C bins, where committed data allow.
+    law='cool' : the leakage refitted on E44's 51-67 C bins, where committed data allow. The refit is on
+                 aifoundry3's OWN measured idle, so it is that card's absolute curve; another card is reached
+                 by the difference of the two idle offsets, exactly as the 'e64' branch does. (Until this fix
+                 the branch returned aifoundry3's curve for every card: 25.97 W for aifoundry1-c0 at 58 C,
+                 where that card idles 8.6 W higher.)
+
+    No published number in docs/reports/data/2026-10-26-load-model/ uses law='cool': the freeze, the scoring
+    and predict() all run on 'e64'. It is exposed by predict_load.py --law cool and reported in the README as
+    a refit, nothing more.
     """
     off = CARDS.get(card, {}).get("idle_offset_w", 0.0)
     if law == "21sep":
         return K.P_fix_21 + leak_w(T) + off
     if law == "cool" and LEAK_COOL:
         P0, A, T_L = LEAK_COOL[0], LEAK_COOL[1], LEAK_COOL[2]
-        return P0 + A * math.exp((min(T, 110.0) - 80.0) / T_L)   # already aifoundry3's own measured idle
+        off_a3 = CARDS["aifoundry3"]["idle_offset_w"]
+        return P0 + A * math.exp((min(T, 110.0) - 80.0) / T_L) + (off - off_a3)
     return STATIC["idle58_w"] + (leak_w(T) - leak_w(T_REF)) + off
 
 
@@ -351,6 +394,15 @@ def recount_counts(path=None):
     or a scale per class, applied to the bench's own counts:
         {"scale": {"ffclk": 2.63, "mult": 2.94, "rest": 1.0, "bus": 1.0}}
     Anything else is returned as {"unreadable": why}, and the caller says so rather than guessing.
+
+    WHAT JOB (b) ACTUALLY SHIPPED (26 Oct 2026, commits dc3a5820 and b2e180b9): not counts.json but
+    recount.json, 14 patterns x {nets, nets_settled, nets_ids, nets_hier, nets_distinct, ff_clocked, bus,
+    by_block_* for each}, plus hier-factors.json. It publishes no four-class split of its own, so
+    recount_reading() builds one the same way flips_from_toggles does, and the caller must say which rung of
+    job (b)'s ladder it read. Two are defensible and both are scored:
+      'hier'            nets_hier / by_block_hier -- job (b)'s "figure to quote", once per net
+      'settled_over_hf' by_block_settled divided by hier-factors.json, which is the recipe that file's own
+                        _note gives for a pattern whose stream is too regular to separate nets
     """
     p = path or os.path.join(RECOUNT_DIR, "counts.json")
     if not os.path.exists(p):
@@ -359,6 +411,46 @@ def recount_counts(path=None):
     if "per_pattern" in d or "scale" in d:
         return d
     return {"unreadable": f"{p} has neither 'per_pattern' nor 'scale'; see load_model.recount_counts"}
+
+
+def recount_reading(rung="hier", directory=None):
+    """Job (b)'s recount.json read into the four classes, at one rung of its ladder. None if it is not here.
+
+    Returns {"per_pattern": {...}, "rung": ..., "how": ...} so refit_prices() can take it directly. The split
+    is this file's, not job (b)'s: job (b) measured counts, it did not price them."""
+    d = directory or RECOUNT_DIR
+    rc_p = os.path.join(d, "recount.json")
+    if not os.path.exists(rc_p):
+        return None
+    rc = json.load(open(rc_p))
+    hf = {}
+    hf_p = os.path.join(d, "hier-factors.json")
+    if os.path.exists(hf_p):
+        hf = json.load(open(hf_p)).get("by_module", {})
+    if rung == "settled_over_hf" and not hf:
+        return {"unreadable": f"{hf_p} is missing, so the settled_over_hf rung cannot be built"}
+    out = {}
+    for pat, v in rc.items():
+        m = v.get("mean") or {}
+        if rung == "hier":
+            bb, tot = m.get("by_block_hier"), m.get("nets_hier")
+        elif rung == "settled_over_hf":
+            raw = m.get("by_block_settled") or {}
+            bb = {k: (x / hf[k] if k in hf else x) for k, x in raw.items()}
+            tot = sum(bb.values())
+        else:
+            return {"unreadable": f"unknown rung {rung!r}; use 'hier' or 'settled_over_hf'"}
+        if bb is None or tot is None:
+            return {"unreadable": f"recount.json[{pat!r}].mean has no {rung} fields"}
+        mult = sum(x for k, x in bb.items() if any(b in k for b in MULT_BLOCKS))
+        out[pat] = {"ffclk": m["ff_clocked"], "mult": mult, "rest": tot - mult, "bus": m["bus"]}
+    how = ("nets_hier and by_block_hier: once per net, merging a name with its ancestor scope's name"
+           if rung == "hier" else
+           "by_block_settled divided by hier-factors.json's per-module factor, summed for the total")
+    return {"per_pattern": out, "rung": rung, "how": how,
+            "source": os.path.relpath(rc_p, REPO),
+            "caveat": "the four-class split is load_model's, not job (b)'s: job (b) counts toggles and "
+                      "publishes no price classes."}
 
 
 def _lsq(A, b):
@@ -383,8 +475,16 @@ def refit_prices(measured_board_w, idle_w, counts=None, active=1024, f_mhz=600.0
     """Refit the four per-event prices on measured board powers; the hook job (b)'s recount plugs into.
 
     measured_board_w : {pattern: W}.  idle_w : the measured idle those launches sat on.
-    counts           : None for the bench's own counts, or recount_counts()'s dict.
-    Returns {prices_fJ, in_sample_rms_w, leave_one_out_rms_w, counts_used}.
+    counts           : None for the bench's own counts, or recount_counts()/recount_reading()'s dict.
+    kernel_offset    : the per-kernel offset subtracted into the base. 🛑 THIS MATTERS A LOT. The design
+                       matrix is four flip-rate columns and NO constant column, so a constant put into `base`
+                       is NOT absorbed harmlessly -- the four prices have to take it up through regressors
+                       that cannot represent a constant. On the 14 fp32 patterns, c0 = 0 gives a leave-one-out
+                       of 0.458 W and a bus price of 16.09 fJ (reproducing the published 21 Sep fit), while
+                       c0 = -1.18 W gives 0.739 W and 25.34 fJ. Pass 0.0 to fit on the base the published
+                       prices were fitted on; pass STATIC['c0_w'] (the default) to ask what the joined model's
+                       offset does to them. Both are reported in scores.json.
+    Returns {prices_fJ, in_sample_rms_w, leave_one_out_rms_w, counts_used, base_w, kernel_offset_w}.
     """
     tog = load(D21, "toggles.json")
     pats = list(measured_board_w)
@@ -413,19 +513,26 @@ def refit_prices(measured_board_w, idle_w, counts=None, active=1024, f_mhz=600.0
     return {"prices_fJ": dict(zip(CLASSES, e)),
             "in_sample_rms_w": math.sqrt(sum(x * x for x in ins) / n),
             "leave_one_out_rms_w": math.sqrt(sum(x * x for x in loo) / n),
-            "counts_used": ("job (b)'s recount" if counts else "the bench's own counts")}
+            "kernel_offset_w": c0, "base_w": base,
+            "counts_used": (counts.get("rung", "job (b)'s recount") if counts else "the bench's own counts")}
 
 
 # ---------------------------------------------------------------------------- the catalogue part
 def mem_w(bytes_per_s, level, card="aifoundry2", f_mhz=600.0, volts=None, card_scale=None):
     """Watts to move bytes through one level of the hierarchy, from the energy manual's measured pJ per byte.
-    Levels: l1, l2, l3, dram, scp-local, scp-remote. Per card where the manual gives a per-card figure."""
-    pj = K.levels_per_card.get(level, {}).get(card) or K.levels_pj_per_byte[level]
-    return bytes_per_s * pj * 1e-12, pj
+    Levels: l1, l2, l3, dram, scp-local, scp-remote. Per card where the manual gives a per-card figure.
+
+    Returns (watts, pJ per byte, per_card). `per_card` is True when the price is this card's OWN measurement,
+    in which case the caller must NOT also apply the card's switching scale -- the card is already in the
+    number. predict() used to multiply both, so a catalogue row on aifoundry3 came out 3.7% low."""
+    own = K.levels_per_card.get(level, {}).get(card)
+    pj = own or K.levels_pj_per_byte[level]
+    return bytes_per_s * pj * 1e-12, pj, bool(own)
 
 
 def hop_w(bytes_per_s, hops, card="aifoundry2"):
-    """Watts to carry bytes `hops` mesh hops (E43's pooled per-hop slope, 1.753 pJ/B per hop)."""
+    """Watts to carry bytes `hops` mesh hops (E43's pooled per-hop slope, 1.753 pJ/B per hop).
+    Pooled over the three cards, so the caller DOES apply the card scale. See HELD_OUT_LEAKS."""
     return bytes_per_s * hops * K.hop_pj_per_byte * 1e-12
 
 
@@ -440,8 +547,12 @@ def instr_pj(name, values="random", harts="h2", card=None):
 
 
 def instr_w(ops_per_s, name, values="random", harts="h2", card=None):
+    """Returns (watts, pJ per op, per_card). As in mem_w, a per-card price already carries the card, so the
+    caller must not apply the card's switching scale on top of it."""
+    row = K.catalogue.get(f"{name}/{values}/{harts}")
+    own = bool(card and row and card in row.get("per_card", {}))
     pj = instr_pj(name, values, harts, card)
-    return (None if pj is None else ops_per_s * pj * 1e-12), pj
+    return (None if pj is None else ops_per_s * pj * 1e-12), pj, own
 
 
 # ---------------------------------------------------------------------------- the governor and the heat path
@@ -539,15 +650,18 @@ def predict(load):
             sw += w * load.get("duty", 1.0)
         if load.get("c_w") is not None:
             sw += load["c_w"] * s * (1.0 + temp_coeff * (T - T_REF)) * k_c * load.get("duty", 1.0)
+        # A catalogue price that is the card's OWN measurement already carries the card: scaling it again by
+        # k_c double-counts. Only a pooled price takes the scale.
         for level, bps in (load.get("bytes_per_s") or {}).items():
-            w, _ = mem_w(bps, level, card)
-            sw += w * s / sfv(600.0, V_REF) * k_c if load.get("scale_cat_with_clock") else w * k_c
+            w, _, own = mem_w(bps, level, card)
+            k = 1.0 if own else k_c
+            sw += w * k * (s / sfv(600.0, V_REF) if load.get("scale_cat_with_clock") else 1.0)
         for bps, hops in (load.get("hops") or []):
-            sw += hop_w(bps, hops, card) * k_c
+            sw += hop_w(bps, hops, card) * k_c        # E43's hop slope is pooled over the cards
         for ops, name, values, h in (load.get("instrs") or []):
-            w, _ = instr_w(ops, name, values, h, card if load.get("per_card_instr") else None)
+            w, _, own = instr_w(ops, name, values, h, card if load.get("per_card_instr") else None)
             if w:
-                sw += w * k_c
+                sw += w * (1.0 if own else k_c)
         return p + sw
 
     tdp = load.get("tdp_w")
@@ -586,6 +700,10 @@ def main():
     raw_i, raw_s, _ = fit_hart_line(leak_k=0.0)
     print(f"E62 hart line, raw            : {raw_i:6.3f} W + {raw_s*1000:5.2f} mW/hart   (published 5.80 + 55.8)")
     print(f"E62 hart line, de-leaked k=.442: {i62:6.3f} W + {s62*1000:5.2f} mW/hart   over {n62} rungs")
+    s800 = K.s64[800]
+    ident = STATIC["k_clk_w"] * (s800 - 1.0) + STATIC["c0_w"] * s800
+    print(f"  ^ this intercept is a FIT TARGET: k_clk*(s800-1) + c0*s800 = {ident:.6f} W against "
+          f"{i62:.6f} W, residual {ident - i62:.1e} W. It is matched by construction and is not evidence.")
     print()
     print(f"idle anchor at {T_REF:.0f} C        : {STATIC['idle58_w']:.3f} W   "
           f"(the 21 Sep law reads {K.P_fix_21 + leak_w(T_REF):.3f} W there, "
@@ -594,6 +712,8 @@ def main():
     print(f"clock-dependent static k_clk  : {STATIC['k_clk_w']:.3f} W per unit of (s(f) - 1)")
     print(f"static fit rms over 4 points  : {STATIC['rms_w']:.3f} W; residuals " +
           ", ".join(f"{f} MHz {r:+.3f} W" for f, r in STATIC["resid_w"].items()))
+    print("  (4 observations, 3 parameters, 1 degree of freedom. The E62 row is matched exactly; the "
+          "evidence is the 3 E64 floors above.)")
     print()
     for f in PTS:
         print(f"  B({f}) model {static_w(f, T_REF, 'aifoundry2', 1024):7.3f} W   "
@@ -617,6 +737,12 @@ def main():
     print(f"heat path: die = {K.thermal['a_c']:.2f} + {K.thermal['k_c_per_w']:.4f} * board W")
     print(f"levels pJ/B: " + ", ".join(f"{k} {v:.3f}" for k, v in sorted(K.levels_pj_per_byte.items())))
     print(f"catalogue rows: {len(K.catalogue)}")
+    print()
+    print("what this model takes from the four held-out loads (HELD_OUT_LEAKS):")
+    for k, v in HELD_OUT_LEAKS.items():
+        print(f"  {k}: from {v['from']}")
+        print(f"    reaches {v['reaches']}")
+        print(f"    effect on the score: {v['effect_on_the_score']}")
 
 
 if __name__ == "__main__":
