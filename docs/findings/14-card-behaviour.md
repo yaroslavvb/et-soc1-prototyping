@@ -827,6 +827,37 @@ Three host facts from the same afternoon, each read on all three hosts:
   10 October). aifoundry3 never did, and no host did at the cold reboots of 26 October. In such a boot the OS never sees a
   short press of the power button, so shut down from a shell, or hold the button for a forced off.
 
+## aifoundry3's working temperature under the hl heater, and the gate that rules out its own protocol (26 October 2026, E65)
+
+E65 ran 123 approach launches and 48 no-approach launches on aifoundry3's card at the latched 600 MHz, 521.7 mV,
+through E60's `hl/block.sh` heater. Two things about this card and this protocol came out of it. Data:
+`docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/` (`logs/queue-ab.log`, `logs/queue-d-a7.log`,
+`runs-blockD.csv`, `reduce-blockD.txt`).
+
+- **The approach tops out at 59–61 °C, not E60's probed 64 °C.** Every approach in E65's blocks A and B peaked at
+  **59.0 °C ×3, 60.0 °C ×107, 61.0 °C ×13** before idling back to the 58 °C launch — 107 of 123 at exactly 60.0.
+  E60's heat probe had put this card's plateau at 64 °C under 2 s heater bursts, and E65's block D was registered
+  for a 65 °C launch on the strength of it. It was never reached, and the block had to be rewritten mid-run
+  (amendment A7). **Plan a block on this card for a 60–61 °C ceiling under the `hl` duty cycle**, and treat E60's
+  64 °C as an upper bound from a different burst pattern, not as a usable setpoint. Whether an approach can *hold*
+  63–65 °C here is still untested: A7 inferred it could not and switched to no approach at all, so no 63–65 °C
+  setpoint attempt exists.
+- **A run-to-run climb is available for free, and the standard drift gate throws it away.** With no approach between
+  runs (`--preheat 0`), the card warms monotonically: E65's eight A7 passes launched across **55–62 °C** (55 ×2,
+  56 ×1, 57 ×5, 58 ×4, 59 ×8, 60 ×13, 61 ×12, 62 ×3; median 60), about 2 °C within each pass and 7 °C from the first
+  pass to the eighth. That is more temperature leverage than any approach regime on this card can buy. **But all
+  eight passes were then rejected by the standard pass-level gate** — `anchor_pi` must not drift more than 0.3 W from
+  a pass's first run to its last — with drifts of **+0.57 to +0.74 W**, every one the same sign, at a measured leakage
+  slope of 0.069 W/°C. The climb that makes the spread is the climb that trips the gate, so **a no-approach regime is
+  rejected by that gate by construction, 8 of 8**, and the regime measures nothing.
+
+  **The rule this implies:** a no-approach regime must have its drift gate restated *before the data* as a rate —
+  watts per degree of the pass's own climb, tested against the leakage slope — or be replaced by a within-pass
+  control. A gate written for an approach regime silently voids a protocol that removes the approach. E65's
+  amendment A8 caught the sibling problem (the launch-*reading* gate also assumes a setpoint) and missed this one;
+  the usable block-D data came only from A9's gated 61 °C setpoint regime, which reached 61.0 °C with zero skipped
+  runs in 36 and passed the gate on five of its six passes.
+
 ## Traps that cost time here
 
 - **A kernel's issue rate is set by where its loop sits, not by its data (E61, 21 October 2026).** In enercat's
