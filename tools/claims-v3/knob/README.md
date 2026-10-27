@@ -206,3 +206,49 @@ data still rebuilds from it.
 
 Anything that departs from the above is added here, dated, with its reason, and committed before it is relied
 on.
+
+### A1 — the abort temperature splits in two (27 Oct 2026, 14:25 PDT, after the first SMOKE attempt, before
+any knob was moved)
+
+**What happened.** The first `SMOKE` attempt ended on its first run with `safety:die 73 C >= 72 C`, before any
+governor field had been changed (the only set was the card's own 65 W / 65 °C, and the restore read back
+correct). The card was **not** hot: a 20 s idle sample under the card lock immediately afterwards read a die
+**mean of 47 °C** in all 20 samples, board 22.0–22.3 W, 600 MHz. The 73 came from
+`temp_c.minshire[2]`, the **high-water mark**, which runs since the last `pvt_hilo_reset` — the field manual
+says so in as many words ("latched extrema span earlier jobs, not just the current test") — and this
+experiment deliberately never sends a reset, because the only way to clear it (`ettelem --reset-ms`) also
+silently disables the SP's statistics trace. Other stale latches read at the same time: io-shire high 71 °C,
+`sp.minion_c` max 71 °C, `sp.board_max_w` **88.54 W**. All predate this session; the most recent heating on
+this card was E66's cooling cycles.
+
+**The change.** `abs_stop_c` (72 °C) now applies to the **die mean** — the number the governor itself
+compares, the number E64 reported, and the number the lab's 90 °C rule is about. The latched high-water mark
+gets its own bound, the new `high_stop_c` = **80 °C**: it is not a live reading and cannot serve as the live
+abort, but a genuinely new single-sensor excursion past 80 is still worth stopping for. The board-power abort
+is unchanged at 85 W on 3 consecutive samples.
+
+**Said plainly:** on the mean this is *tighter* than E64, which used 85 °C; on the latch it is *looser* than
+the 72 °C I registered an hour earlier. The loosening is confined to a field that reports history, and its
+reason is the field manual's own warning about that field. Nothing about the predictions, the cells, the rules
+or the restore changes.
+
+### A2 — what an SP error event means here (27 Oct 2026, 14:29 PDT, before the registered session)
+
+The pre-registration said *"any new `Error Event Detected` line during the session is treated as an abort"*.
+Measurement before the session shows that rule would abort everything and measure nothing, so it is replaced
+rather than quietly dropped.
+
+**What was seen.** The host kernel log holds `ET 0000:02:00.0: Error Event Detected / Level Critical /
+Desc SP Runtime Error / Count 0 / Syndrome Runtime Error Count Beyond Threshold: N` in bursts of six, N
+counting up from 1. The first burst (N = 1…6) landed at host uptime 81,805 s (≈13:58 PDT), alongside a crash
+of the owner's own one-off `lab-monitor` reader inside `libDM.so`. The second burst (N = 7…12) landed at
+83,263 s (≈14:27 PDT) — during **this session's own 20 s `ettelem sample`**, with no kernel launched and no
+governor field moved. So the events accompany ordinary host telemetry reads draining the service processor's
+error queue; they are not caused by the knob and they are not caused by a workload. `Count` is 0 in every
+one. `docs/findings/14-card-behaviour.md` records the same syndrome on this card and notes that its earlier
+occurrences "did not stop the card, so the event need not be the hang's".
+
+**The replacement rule.** The kernel log's error-event count is read before the first set and after the last
+run and both are reported with the results, as a dated observation. The session aborts on an event whose
+**description is anything other than `SP Runtime Error` with `Count 0`**, on any AER or link error, or on a
+management query failing — not on another burst of the known one.

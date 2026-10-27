@@ -364,6 +364,7 @@ class Watcher(threading.Thread):
 
     def run(self):
         sf = self.s.proto.get("safety", {})
+        high_stop_c = num(sf.get("high_stop_c", 80))
         stop_c = num(sf.get("abs_stop_c", 85))
         cap_w = num(sf.get("board_cap_w", 97))
         need = int(sf.get("cap_consecutive", 3))
@@ -387,9 +388,14 @@ class Watcher(threading.Thread):
                             with self.lock:
                                 self.last, self.last_host_ms = t, now_ms()
                             _, die, high, w, _ = t
-                            hot = [x for x in (die, high) if x is not None and x >= stop_c]
-                            if hot and not self.trip:
-                                self.fire(f"die {max(hot):.0f} C >= {stop_c:g} C")
+                            # A1 (27 Oct 2026): the die MEAN carries abs_stop_c. `temp_c.minshire[2]` is a
+                            # high-WATER latch since the last pvt_hilo_reset, not a live reading (it reached
+                            # back to earlier jobs at 73 C here, and this experiment never sends a reset), so
+                            # it carries its own larger bound instead of the live one.
+                            if die is not None and die >= stop_c and not self.trip:
+                                self.fire(f"die mean {die:.0f} C >= {stop_c:g} C")
+                            if high is not None and high >= high_stop_c and not self.trip:
+                                self.fire(f"die high-water {high:.0f} C >= {high_stop_c:g} C")
                             if w is not None and w > cap_w:
                                 self.over += 1
                                 if self.over >= need and not self.trip:
