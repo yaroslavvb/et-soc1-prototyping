@@ -85,6 +85,11 @@ def runs_of_pass(d, man, gov_free=False, busy_mhz=800):
     marks = [m for m in load_jsonl(os.path.join(d, "marks.jsonl")) if m.get("kind") == "run"]
     cfg = json.load(open(os.path.join(d, "configs.json")))
     target = cfg["args"]["target"]
+    # E65 amendment A8: a pass run with no approach (--preheat 0, the sentinel --target 200 of E65 block D) has no
+    # launch setpoint, so the "within 0.5 C of the target" gate cannot apply. Its launch reading is a covariate,
+    # not a gate; target None switches the gate to "a reading was recorded". Every E60 pass keeps its setpoint.
+    if float(cfg["args"].get("preheat", 1)) <= 0:
+        target = None
     card = cfg.get("card") or os.path.basename(os.path.dirname(os.path.dirname(d)))
     by = defaultdict(list)
     for r in recs:
@@ -183,7 +188,8 @@ def main():
                 why.append(f"ramp {r['ramp_ms']:.0f} ms")
             if abs(r["mv"] - med_mv[r["pass"]]) > 3:
                 why.append(f"mv {r['mv']:.1f}")
-            if not r["on_protocol"] or r["start_c"] is None or abs(r["start_c"] - r["target"]) > 0.5:
+            if r["start_c"] is None or (r["target"] is not None
+                                        and (not r["on_protocol"] or abs(r["start_c"] - r["target"]) > 0.5)):
                 why.append(f"launch {r['start_c']}")
             if not r["ok_records"]:
                 why.append("record not ok")

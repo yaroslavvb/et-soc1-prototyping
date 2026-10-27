@@ -157,6 +157,14 @@ instead of 2 (a pass is about a minute without the approach). Each run still rec
 setpoints would have been. The temperature contrast is therefore whatever the card gives, and the result states
 it; if it is under 2 °C the block is reported as having too little leverage to score D1.
 
+**A8, Mon 26 Oct 2026, 17:3x PDT (before any block-D data; blocks A, B and C's randn session had run).**
+`reduce_hl.py`'s launch gate is "an on-protocol launch within 0.5 °C of the target". A7's block D has **no
+approach and therefore no setpoint** (`--preheat 0`, the sentinel `--target 200`), so that gate would have failed
+every one of its runs and set every block-D pass aside. **Changed:** a pass whose `preheat` is 0 has `target`
+None, and its launch gate becomes "a reading was recorded"; the reading is then a covariate, as A7 says, not a
+setpoint. Every E60 and E65 pass with an approach keeps the 0.5 °C gate unchanged, and blocks A and B are
+re-reduced with this code to confirm their numbers do not move.
+
 ## Files
 
 `make_ladder.py` (block C's two protocols), `protocol-randn.json`, `protocol-zeros.json` (frozen with this commit),
