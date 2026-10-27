@@ -115,7 +115,18 @@ def per_item(kept, man):
                 pw.append(p)
         m, se, n = mean_se(ds)
         mr, ser, _ = mean_se(dr)
+        # The per-flipped-bit price, in E60's and E65's unit, so the numbers are comparable across cards:
+        # (item - zero) / (bits per multiply-add x 4,096 multiply-adds per op x ops per second).
+        rate = [r["rate"] for r in kept if r["item"] == name and r["rate"]]
+        bits = it.get("mask_bits") or 0
+        e = None
+        if m is not None and rate and bits:
+            e = m / (bits * 4096.0 * float(np.mean(rate))) * 1e15
         out[name] = {"dP_W": m, "se_W": se, "passes": n, "dP_raw_W": mr, "se_raw_W": ser,
+                     "mask_bits": bits, "minion_ops_per_s": float(np.mean(rate)) if rate else None,
+                     "fJ_per_flipped_bit": e,
+                     "se_fJ": (se / (bits * 4096.0 * float(np.mean(rate))) * 1e15
+                               if se is not None and rate and bits else None),
                      "per_pass": dict(zip(pw, ds)), "zero": z}
     return out
 
@@ -283,12 +294,15 @@ def main():
                         f"{r['cycles_per_op'] or ''},{r['rate']:.0f}\n")
     print(f"card {card}: {len(runs)} runs, {len(kept)} kept, leak {k:.3f} W/C ({nk} kept runs), "
           f"highest board {maxw:.1f} W (kept {maxk:.1f} W)" if maxw else f"card {card}: no runs")
-    print(f"\n{'item':12s} {'dP (W)':>9s} {'SE':>7s} {'passes':>7s} {'dP raw':>9s} {'SE raw':>7s}")
+    print(f"\n{'item':12s} {'dP (W)':>9s} {'SE':>7s} {'n':>3s} {'dP raw':>9s} {'SE raw':>7s} "
+          f"{'bits':>5s} {'fJ/bit':>8s} {'SE':>7s}")
     for n, v in items.items():
         if v["dP_W"] is None:
             continue
-        print(f"{n:12s} {v['dP_W']:9.3f} {(v['se_W'] or float('nan')):7.3f} {v['passes']:7d} "
-              f"{v['dP_raw_W']:9.3f} {(v['se_raw_W'] or float('nan')):7.3f}")
+        nan = float("nan")
+        print(f"{n:12s} {v['dP_W']:9.3f} {(v['se_W'] or nan):7.3f} {v['passes']:3d} "
+              f"{v['dP_raw_W']:9.3f} {(v['se_raw_W'] or nan):7.3f} {v['mask_bits']:5d} "
+              f"{(v['fJ_per_flipped_bit'] or nan):8.1f} {(v['se_fJ'] or nan):7.1f}")
     if fit:
         print(f"\nfit over {len(fit['items'])} items: b_mul {fit['beta_mul_W_per_Mtoggle']:.4f} +- {fit['se_mul']:.4f}, "
               f"b_back {fit['beta_back_W_per_Mtoggle']:.4f} +- {fit['se_back']:.4f} W per million toggles/op; "

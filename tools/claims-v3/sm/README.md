@@ -243,3 +243,15 @@ it**, as it drops any pass whose `block.json` is not `ok`.
 So A3's *conclusion* stands — the window allows far more than 18 passes — but its number does not. At 1.9 min
 a pass the window to 22:30 allows about **40 passes in total**, not 150. No rule, gate, band or item changes;
 this amendment exists because A3 went out with a false measurement in it.
+
+**A6, Mon 26 Oct 2026, 21:4x PDT (a reporting addition, like A4; no rule, band or prediction changes).**
+Every item's price is also reported **per flipped bit**, in E60's and E65's unit, so the three experiments are
+directly comparable across cards:
+
+  fJ per flipped bit = ΔP / (mask bits per multiply-add × 4,096 multiply-adds per op × ops per second),
+
+with the ops per second taken from the item's own kept runs (`rate` in `runs.csv`, which carries the measured
+`minions: 512` and the 546 cycles per op the card reports for every data pattern). E60's ladder on aifoundry1's
+card 0 at 800 MHz read 116.7 fJ and E65's busy-partner ladder 129.9 fJ; a 12-bit mantissa mask here is the same
+quantity measured a different way, and the single-bit `sm_sgn` is the same quantity for a bit that does **no**
+work in the multiplier at all.
