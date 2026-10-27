@@ -1,0 +1,471 @@
+{
+ "experiment": "E73",
+ "request": "Q129",
+ "frozen": "Tue 27 Oct 2026 (week 44), before the first launch",
+ "anchors": {
+  "H_f_mk_per_w": 52.7058820253343,
+  "se_H_f": 1.9800290175146842,
+  "lag_f_deg": 99.11206421624695,
+  "f_ref_hz": 0.05,
+  "ratio_3f_over_f": 0.3432192359564515,
+  "se_ratio": 0.10435780010272477,
+  "lag_3f_deg": 150.55585702413788,
+  "board_step_w": 4.02,
+  "source": "docs/reports/data/2026-10-23-e63-camera-hamming-ladder/posthoc/h3-rails-pooled.json (Q126) and E63 A1's measured 4.02 W step"
+ },
+ "models": {
+  "M1": {
+   "name": "one pole and a transport delay",
+   "tau_s": 12.185787435844631,
+   "delay_s": 1.3195231357703614,
+   "group_delay_s": 13.505310571614991,
+   "fitted_to": "the magnitude ratio 0.343 (tau) and the lag 99.1 deg at f (Td)",
+   "predicted_lag_3f_deg": 156.27797890974082,
+   "measured_lag_3f_deg": 150.55585702413788
+  },
+  "M2": {
+   "name": "two poles, no delay",
+   "tau1_s": 3.734318711342779,
+   "tau2_s": 3.734318711342779,
+   "group_delay_s": 7.468637422685558,
+   "fitted_to": "the two measured lags, 99.1 deg at f and 150.6 deg at 3f",
+   "predicted_ratio_3f": 0.17751067878299012,
+   "measured_ratio_3f": 0.3432192359564515,
+   "se_measured_ratio": 0.10435780010272477,
+   "sigma_low": 1.5878885623340648,
+   "ratio_ceiling_if_forced_through_lag": 0.3042094193450557,
+   "ceiling_note": "a two-pole model made to give 99.1 deg at f cannot give a magnitude ratio above this; the measured 0.343 +- 0.104 sits 0.37 SE above it, so the existing two points leave a two-pole picture alive but pinned against its own boundary (one pole running away to infinity)",
+   "sigma_above_ceiling": 0.3738083456435113
+  },
+  "discriminator": {
+   "quantity": "the low-frequency group delay, read off the phase, which the camera's drifting gain cannot touch",
+   "M1_group_delay_s": 13.505310571614991,
+   "M2_group_delay_s": 7.468637422685558,
+   "lag_at_0p01_M1_deg": 42.18996037978516,
+   "lag_at_0p01_M2_deg": 26.409371461144566,
+   "H_over_ref_at_0p01_M1": 3.141619223806739,
+   "H_over_ref_at_0p01_M2": 2.25233173047977
+  }
+ },
+ "blocks": [
+  {
+   "id": "E73-REF1",
+   "n_per_arm": 1,
+   "lap_s": 20.0,
+   "f0_hz": 0.05,
+   "laps_total": 15,
+   "laps_analysed": 12,
+   "analysed_s": 240.0,
+   "harmonics": [
+    {
+     "k": 1,
+     "f_hz": 0.05,
+     "drive_rel": 0.6271400749738336,
+     "board_w": 2.521103101394811,
+     "M1_H_over_ref": 1.0,
+     "M1_lag_deg": 99.11206421624695,
+     "M2_H_over_ref": 1.0,
+     "M2_lag_deg": 99.11206421624695,
+     "M1_camera_mk": 132.87696263581932,
+     "M2_camera_mk": 132.87696263581932
+    },
+    {
+     "k": 3,
+     "f_hz": 0.15000000000000002,
+     "drive_rel": 0.18432933233098292,
+     "board_w": 0.7410039159705513,
+     "M1_H_over_ref": 0.3432192359564515,
+     "M1_lag_deg": 156.27797890974082,
+     "M2_H_over_ref": 0.17751067878299012,
+     "M2_lag_deg": 148.27709476785037,
+     "M1_camera_mk": 13.404518204952288,
+     "M2_camera_mk": 6.932726595842487
+    },
+    {
+     "k": 5,
+     "f_hz": 0.25,
+     "drive_rel": 0.08269029373850631,
+     "board_w": 0.33241498082879534,
+     "M1_H_over_ref": 0.2064291815507485,
+     "M1_lag_deg": -154.23349152039754,
+     "M2_H_over_ref": 0.0671123297311911,
+     "M2_lag_deg": 160.65065983098174,
+     "M1_camera_mk": 3.6166856584146005,
+     "M2_camera_mk": 1.1758231012601261
+    },
+    {
+     "k": 7,
+     "f_hz": 0.35000000000000003,
+     "drive_rel": 0.03214701065491674,
+     "board_w": 0.1292309828327653,
+     "M1_H_over_ref": 0.14754780111294974,
+     "M1_lag_deg": -105.87715936807011,
+     "M2_H_over_ref": 0.03472127778737278,
+     "M2_lag_deg": 166.1145347435156,
+     "M1_camera_mk": 1.0049824424571177,
+     "M2_camera_mk": 0.23649471081764173
+    },
+    {
+     "k": 9,
+     "f_hz": 0.45,
+     "drive_rel": 0.0011110654190618716,
+     "board_w": 0.004466482984628723,
+     "M1_H_over_ref": 0.11479093601269089,
+     "M1_lag_deg": -57.89972557507419,
+     "M2_H_over_ref": 0.0211261778280043,
+     "M2_lag_deg": 169.17930030136517,
+     "M1_camera_mk": 0.027022925666814357,
+     "M2_camera_mk": 0.004973311943435551
+    }
+   ]
+  },
+  {
+   "id": "E73-F25",
+   "n_per_arm": 2,
+   "lap_s": 40.0,
+   "f0_hz": 0.025,
+   "laps_total": 12,
+   "laps_analysed": 10,
+   "analysed_s": 400.0,
+   "harmonics": [
+    {
+     "k": 1,
+     "f_hz": 0.025,
+     "drive_rel": 0.5793138137468011,
+     "board_w": 2.32884153126214,
+     "M1_H_over_ref": 1.8321477542017293,
+     "M1_lag_deg": 74.2918769318952,
+     "M2_H_over_ref": 1.767994060757693,
+     "M2_lag_deg": 60.790528154120125,
+     "M1_camera_mk": 224.88449719797924,
+     "M2_camera_mk": 217.0100388959842
+    },
+    {
+     "k": 3,
+     "f_hz": 0.07500000000000001,
+     "drive_rel": 0.2595052064335476,
+     "board_w": 1.0432109298628611,
+     "M1_H_over_ref": 0.6788196866938726,
+     "M1_lag_deg": 115.74854625006928,
+     "M2_H_over_ref": 0.5800535589350587,
+     "M2_lag_deg": 120.78428076138081,
+     "M1_camera_mk": 37.32378191167257,
+     "M2_camera_mk": 31.893289123986552
+    },
+    {
+     "k": 5,
+     "f_hz": 0.125,
+     "drive_rel": 0.06232296675742943,
+     "board_w": 0.2505383263648663,
+     "M1_H_over_ref": 0.41118298873606646,
+     "M1_lag_deg": 143.41360018476428,
+     "M2_H_over_ref": 0.24748121774426676,
+     "M2_lag_deg": 142.34573204473122,
+     "M1_camera_mk": 5.429607004695797,
+     "M2_camera_mk": 3.267950742625295
+    },
+    {
+     "k": 7,
+     "f_hz": 0.17500000000000002,
+     "drive_rel": 0.12652384790201807,
+     "board_w": 0.5086258685661126,
+     "M1_H_over_ref": 0.29448199506873174,
+     "M1_lag_deg": 168.86173836987138,
+     "M2_H_over_ref": 0.13305288263776693,
+     "M2_lag_deg": 152.6252574447911,
+     "M1_camera_mk": 7.894348175927612,
+     "M2_camera_mk": 3.5668251334286563
+    },
+    {
+     "k": 9,
+     "f_hz": 0.225,
+     "drive_rel": 0.0007856661239541495,
+     "board_w": 0.0031583778182956808,
+     "M1_H_over_ref": 0.22929257117837545,
+     "M1_lag_deg": -166.44077854946588,
+     "M2_H_over_ref": 0.08230945516351564,
+     "M2_lag_deg": 158.54820069962935,
+     "M1_camera_mk": 0.038169208195452414,
+     "M2_camera_mk": 0.013701650753204935
+    }
+   ]
+  },
+  {
+   "id": "E73-REF2",
+   "n_per_arm": 1,
+   "lap_s": 20.0,
+   "f0_hz": 0.05,
+   "laps_total": 15,
+   "laps_analysed": 12,
+   "analysed_s": 240.0,
+   "harmonics": [
+    {
+     "k": 1,
+     "f_hz": 0.05,
+     "drive_rel": 0.6271400749738336,
+     "board_w": 2.521103101394811,
+     "M1_H_over_ref": 1.0,
+     "M1_lag_deg": 99.11206421624695,
+     "M2_H_over_ref": 1.0,
+     "M2_lag_deg": 99.11206421624695,
+     "M1_camera_mk": 132.87696263581932,
+     "M2_camera_mk": 132.87696263581932
+    },
+    {
+     "k": 3,
+     "f_hz": 0.15000000000000002,
+     "drive_rel": 0.18432933233098292,
+     "board_w": 0.7410039159705513,
+     "M1_H_over_ref": 0.3432192359564515,
+     "M1_lag_deg": 156.27797890974082,
+     "M2_H_over_ref": 0.17751067878299012,
+     "M2_lag_deg": 148.27709476785037,
+     "M1_camera_mk": 13.404518204952288,
+     "M2_camera_mk": 6.932726595842487
+    },
+    {
+     "k": 5,
+     "f_hz": 0.25,
+     "drive_rel": 0.08269029373850631,
+     "board_w": 0.33241498082879534,
+     "M1_H_over_ref": 0.2064291815507485,
+     "M1_lag_deg": -154.23349152039754,
+     "M2_H_over_ref": 0.0671123297311911,
+     "M2_lag_deg": 160.65065983098174,
+     "M1_camera_mk": 3.6166856584146005,
+     "M2_camera_mk": 1.1758231012601261
+    },
+    {
+     "k": 7,
+     "f_hz": 0.35000000000000003,
+     "drive_rel": 0.03214701065491674,
+     "board_w": 0.1292309828327653,
+     "M1_H_over_ref": 0.14754780111294974,
+     "M1_lag_deg": -105.87715936807011,
+     "M2_H_over_ref": 0.03472127778737278,
+     "M2_lag_deg": 166.1145347435156,
+     "M1_camera_mk": 1.0049824424571177,
+     "M2_camera_mk": 0.23649471081764173
+    },
+    {
+     "k": 9,
+     "f_hz": 0.45,
+     "drive_rel": 0.0011110654190618716,
+     "board_w": 0.004466482984628723,
+     "M1_H_over_ref": 0.11479093601269089,
+     "M1_lag_deg": -57.89972557507419,
+     "M2_H_over_ref": 0.0211261778280043,
+     "M2_lag_deg": 169.17930030136517,
+     "M1_camera_mk": 0.027022925666814357,
+     "M2_camera_mk": 0.004973311943435551
+    }
+   ]
+  },
+  {
+   "id": "E73-F10",
+   "n_per_arm": 5,
+   "lap_s": 100.0,
+   "f0_hz": 0.01,
+   "laps_total": 11,
+   "laps_analysed": 10,
+   "analysed_s": 1000.0,
+   "harmonics": [
+    {
+     "k": 1,
+     "f_hz": 0.01,
+     "drive_rel": 0.5685441154679526,
+     "board_w": 2.285547344181169,
+     "M1_H_over_ref": 3.141619223806739,
+     "M1_lag_deg": 42.18996037978516,
+     "M2_H_over_ref": 2.25233173047977,
+     "M2_lag_deg": 26.409371461144566,
+     "M1_camera_mk": 378.4450710692308,
+     "M2_camera_mk": 271.31990896721595
+    },
+    {
+     "k": 3,
+     "f_hz": 0.03,
+     "drive_rel": 0.19511189526179154,
+     "board_w": 0.7843498189524019,
+     "M1_H_over_ref": 1.5794031381835285,
+     "M1_lag_deg": 80.72462417055411,
+     "M2_H_over_ref": 1.5890094234668166,
+     "M2_lag_deg": 70.28361989570014,
+     "M1_camera_mk": 65.29228728100891,
+     "M2_camera_mk": 65.68940966430438
+    },
+    {
+     "k": 5,
+     "f_hz": 0.05,
+     "drive_rel": 0.12542801499476675,
+     "board_w": 0.5042206202789623,
+     "M1_H_over_ref": 1.0,
+     "M1_lag_deg": 99.11206421624695,
+     "M2_H_over_ref": 1.0,
+     "M2_lag_deg": 99.11206421624695,
+     "M1_camera_mk": 26.57539252716387,
+     "M2_camera_mk": 26.57539252716387
+    },
+    {
+     "k": 7,
+     "f_hz": 0.07,
+     "drive_rel": 0.10412620601220868,
+     "board_w": 0.41858734816907883,
+     "M1_H_over_ref": 0.7257282877068764,
+     "M1_lag_deg": 112.6831771249989,
+     "M2_H_over_ref": 0.6426670507938312,
+     "M2_lag_deg": 117.32966282793751,
+     "M1_camera_mk": 16.011028652272707,
+     "M2_camera_mk": 14.178530365193224
+    },
+    {
+     "k": 9,
+     "f_hz": 0.09,
+     "drive_rel": 0.1339645256445688,
+     "board_w": 0.5385373930911664,
+     "M1_H_over_ref": 0.5682440799517406,
+     "M1_lag_deg": 124.49548943037934,
+     "M2_H_over_ref": 0.4352803630027561,
+     "M2_lag_deg": 129.32016888927402,
+     "M1_camera_mk": 16.1290901449927,
+     "M2_camera_mk": 12.355036261553035
+    }
+   ]
+  },
+  {
+   "id": "E73-REF3",
+   "n_per_arm": 1,
+   "lap_s": 20.0,
+   "f0_hz": 0.05,
+   "laps_total": 15,
+   "laps_analysed": 12,
+   "analysed_s": 240.0,
+   "harmonics": [
+    {
+     "k": 1,
+     "f_hz": 0.05,
+     "drive_rel": 0.6271400749738336,
+     "board_w": 2.521103101394811,
+     "M1_H_over_ref": 1.0,
+     "M1_lag_deg": 99.11206421624695,
+     "M2_H_over_ref": 1.0,
+     "M2_lag_deg": 99.11206421624695,
+     "M1_camera_mk": 132.87696263581932,
+     "M2_camera_mk": 132.87696263581932
+    },
+    {
+     "k": 3,
+     "f_hz": 0.15000000000000002,
+     "drive_rel": 0.18432933233098292,
+     "board_w": 0.7410039159705513,
+     "M1_H_over_ref": 0.3432192359564515,
+     "M1_lag_deg": 156.27797890974082,
+     "M2_H_over_ref": 0.17751067878299012,
+     "M2_lag_deg": 148.27709476785037,
+     "M1_camera_mk": 13.404518204952288,
+     "M2_camera_mk": 6.932726595842487
+    },
+    {
+     "k": 5,
+     "f_hz": 0.25,
+     "drive_rel": 0.08269029373850631,
+     "board_w": 0.33241498082879534,
+     "M1_H_over_ref": 0.2064291815507485,
+     "M1_lag_deg": -154.23349152039754,
+     "M2_H_over_ref": 0.0671123297311911,
+     "M2_lag_deg": 160.65065983098174,
+     "M1_camera_mk": 3.6166856584146005,
+     "M2_camera_mk": 1.1758231012601261
+    },
+    {
+     "k": 7,
+     "f_hz": 0.35000000000000003,
+     "drive_rel": 0.03214701065491674,
+     "board_w": 0.1292309828327653,
+     "M1_H_over_ref": 0.14754780111294974,
+     "M1_lag_deg": -105.87715936807011,
+     "M2_H_over_ref": 0.03472127778737278,
+     "M2_lag_deg": 166.1145347435156,
+     "M1_camera_mk": 1.0049824424571177,
+     "M2_camera_mk": 0.23649471081764173
+    },
+    {
+     "k": 9,
+     "f_hz": 0.45,
+     "drive_rel": 0.0011110654190618716,
+     "board_w": 0.004466482984628723,
+     "M1_H_over_ref": 0.11479093601269089,
+     "M1_lag_deg": -57.89972557507419,
+     "M2_H_over_ref": 0.0211261778280043,
+     "M2_lag_deg": 169.17930030136517,
+     "M1_camera_mk": 0.027022925666814357,
+     "M2_camera_mk": 0.004973311943435551
+    }
+   ]
+  }
+ ],
+ "frequency_grid": {
+  "0.01": [
+   "E73-F10:k1"
+  ],
+  "0.025": [
+   "E73-F25:k1"
+  ],
+  "0.03": [
+   "E73-F10:k3"
+  ],
+  "0.05": [
+   "E73-REF1:k1",
+   "E73-REF2:k1",
+   "E73-F10:k5",
+   "E73-REF3:k1"
+  ],
+  "0.07": [
+   "E73-F10:k7"
+  ],
+  "0.075": [
+   "E73-F25:k3"
+  ],
+  "0.09": [
+   "E73-F10:k9"
+  ],
+  "0.125": [
+   "E73-F25:k5"
+  ],
+  "0.15": [
+   "E73-REF1:k3",
+   "E73-REF2:k3",
+   "E73-REF3:k3"
+  ],
+  "0.175": [
+   "E73-F25:k7"
+  ],
+  "0.225": [
+   "E73-F25:k9"
+  ],
+  "0.25": [
+   "E73-REF1:k5",
+   "E73-REF2:k5",
+   "E73-REF3:k5"
+  ],
+  "0.35": [
+   "E73-REF1:k7",
+   "E73-REF2:k7",
+   "E73-REF3:k7"
+  ],
+  "0.45": [
+   "E73-REF1:k9",
+   "E73-REF2:k9",
+   "E73-REF3:k9"
+  ]
+ },
+ "rules": {
+  "R1": "E73-F10's ROI fundamental (0.01 Hz) is at least 3 SE from zero with sign-flip p <= 0.01, and its board fundamental at least 5 SE. Otherwise the 0.01 Hz point is reported as a non-detection and R3/R4 are not scored.",
+  "R2": "the three 0.05 Hz reference blocks' |H| agree with a straight line in time within 3 SE each; that line is what every ratio to 0.05 Hz is taken against, and its slope is the session's gain drift.",
+  "R3": "the heat path is low-pass: |H(0.025)|/|H_ref(0.05)| > 1 and |H(0.01)|/|H_ref(0.05)| > |H(0.025)|/|H_ref(0.05)|, each by at least 1 SE. A flat or falling ratio refutes the picture E63 built.",
+  "R4": "the discriminator, which has no PASS: the measured lag at 0.01 Hz is compared with M1's 42.6 deg and M2's 26.4 deg, and the surviving model is named. Both may fail.",
+  "R5": "0.05 Hz, measured twice over: E73-F10's fifth harmonic agrees with the reference line's H(0.05) within 3 SE of the complex difference.",
+  "R6": "hold: at least 95% of the in-launch telemetry samples of every block's analysed laps read 790 MHz or more, and the block's die mean stays under 65 C. The per-launch one-second dips are counted and reported WITHOUT a verdict, which is E63's lesson: a per-launch gate fails on the governor's idle-reset dip at any load.",
+  "inclusion": "a transfer point enters the across-frequency fit only when its board amplitude is at least 5 SE; otherwise the ratio's denominator is unstable. Points that fail it are published with their errors and left out of the fit."
+ }
+}
