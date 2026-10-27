@@ -153,6 +153,35 @@ Refit on the bench's own counts, for comparison when it lands: ffclk 3.62, mult 
 25.34 fJ** — against the published 15.54 and E60's measured 20.83 fJ read-port bit. Recap item 10's point stands:
 the operand-bus term is the loosest in the model.
 
+## The operand-statistics front end (recap item 2b)
+
+[`tools/ettelem/operand_stats.py`](../../../../tools/ettelem/operand_stats.py) predicts the four counted classes
+from the operands alone — **no Verilator, no card**. Five features with a reason each: an intercept, the
+zero-gated live multiply-adds (computed exactly, as the count of `(i, k, j)` with both operands nonzero), the
+operand bits that flip word to word, the partial products the tree has to add (mantissa populations multiplied),
+and the partial products that *change*. Fitted on the 14 fp32 patterns of 21 Sep, scored on the structured
+matrices **without refitting**.
+
+| | rms |
+|---|---|
+| The zero gate alone, predicted live multiply-adds against the bench's `lane_valid` | **7.9 of 4,096** |
+| Switching watts on the 14 structured matrices, from operand statistics | **1.61 W** |
+| The same from the RTL bench's own counts | 0.97 W |
+
+The 14 matrices span 2.28 to 27.64 W measured, so **replacing the bench with arithmetic on the operands costs
+about 0.6 W of rms**. Worst: `dct` −3.20 W, `negzero` +2.49 W, `fft_cos` +2.36 W; `fft_cos` is the one the bench
+itself misses most (−2.95 W), the cancelling cos/sin pair of recap item 9. Per class the fit is tight on the
+clocked bits (0.3%) and loose on the operand bus (49%), which is the term recap item 10 already calls the
+loosest in the model.
+
+`predict_load.py --tiles-bin <file>` prices a raw tile pair this way. One approximation is named in the script:
+the 14 patterns' own tiles were drawn on the card and not kept, so they are re-drawn from the same distributions
+with `rtl-sim/fma_toggle/tiles.py` over seeds 1–5. Every feature is distributional, so a re-draw reproduces it to
+sampling noise, and four of the fourteen patterns are deterministic. The structured matrices' tiles are the
+actual bytes the card was given, so their side is exact.
+
+`operand_stats.py` needs numpy; on the Intel only `/usr/bin/python3` has it.
+
 ## The files
 
 | File | What |

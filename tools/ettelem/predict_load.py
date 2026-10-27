@@ -49,6 +49,9 @@ def main():
     ap.add_argument("--toggles", help="a toggles.json from the RTL bench (relative to docs/reports/data or absolute)")
     ap.add_argument("--pattern", help="which pattern in that file")
     ap.add_argument("--tiles", help="a tile file to replay through the bench (needs Verilator; see predict_heat.py)")
+    ap.add_argument("--tiles-bin", help="a raw 2 x 1024-byte tile pair, priced from its operand statistics "
+                                        "alone -- no Verilator, no card (tools/ettelem/operand_stats.py; "
+                                        "1.61 W rms against 0.97 W for the bench itself, on 14 matrices)")
     ap.add_argument("--c-w", type=float, help="a measured switching coefficient at 600 MHz / 0.517 V, in watts")
     ap.add_argument("--duty", type=float, default=1.0, help="share of the time the unit is issuing (default 1)")
     ap.add_argument("--kind", choices=("fp32", "fp16", "int8"), help="number type, for the speed")
@@ -86,6 +89,16 @@ def main():
         sys.path.insert(0, os.path.join(LM.REPO, "rtl-sim", "fma_toggle"))
         import predict_heat  # noqa: E402  (shares the bench call)
         flips = predict_heat.flips_from_tiles(a.tiles)
+    elif a.tiles_bin:
+        import operand_stats as OS  # noqa: E402  (needs numpy: /usr/bin/python3 on the Intel)
+        import numpy as np  # noqa: E402
+        w = np.frombuffer(open(a.tiles_bin, "rb").read(), dtype=np.uint32)[:512]
+        st = OS.stats(w)
+        coef = json.load(open(os.path.join(LM.DATA, "2026-10-26-load-model",
+                                           "operand_stats.json")))["fit"]["coefficients"]
+        d = OS.design(st)
+        flips = {c: max(0.0, sum(x * y for x, y in zip(d, coef[c]))) for c in LM.CLASSES}
+        flips["valid"] = st["valid_frac"] * 4096
 
     hops = []
     for h in a.hops or []:
