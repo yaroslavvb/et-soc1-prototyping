@@ -42,6 +42,8 @@ done
 "$PY" tools/claims-v3/hs/report_e70.py --hl "$OUT/hl.json" --pred "$E70PRED" \
   --leak "$OUT/hl-leak0.2.json,$OUT/hl-leak0.3.json,$OUT/hl-leak0.4.json" \
   --load "$ROOT/build/e70-load.jsonl" --runs "$OUT/runs.csv" \
+  --blocks "$ROOT/build/claims-v3/aifoundry3/hl" \
+  --closure "$ROOT/docs/reports/data/2026-10-27-e67-a-side-bit-prices/closure.json" \
   --out "$OUT/report.md" --json "$OUT/scored.json" > "$OUT/report.txt" 2>&1 &&
   echo "report.md written" || { echo "report_e70 failed"; tail -20 "$OUT/report.txt"; }
 
