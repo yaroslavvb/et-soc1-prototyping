@@ -252,3 +252,33 @@ occurrences "did not stop the card, so the event need not be the hang's".
 run and both are reported with the results, as a dated observation. The session aborts on an event whose
 **description is anything other than `SP Runtime Error` with `Count 0`**, on any AER or link error, or on a
 management query failing — not on another burst of the known one.
+
+
+### A3 — the `randn` cell at threshold 70 °C aborted on board power and is not retried (27 Oct 2026,
+14:32 PDT)
+
+**What happened.** Session `s1` ran 26 of its 31 runs and then ended on a registered abort rule, in the 27th:
+`safety:board 85.2 W > 85 W on 3 samples`, in `SUS-03-tdp65-thr70-randn-r1`. The restore ran in the session's
+`finally` and read back TDP 65 W and threshold 65 °C, equal to the originals. The card is healthy: firmware
+identities unchanged, module uptime 23 h 19 m (so **no SP reset**), idle die mean 54 °C at 24 W and 600 MHz,
+no AER, no link error, no new kind of error event.
+
+**Why, and why it is a result rather than a mishap.** The cell's prediction was that raising the threshold to
+70 °C would leave `randn` at 600 MHz, held there by the 65 W cap, because 700 MHz draws about 6 W more than
+the cap. What the card did instead is the interesting part: with the heat clamp lifted, the governor let the
+clock climb, and `randn`'s **instantaneous** board power overshot to 85.2 W — because the power trigger
+compares a ~1.3 s average, and the archive's own analysis says there is no hardware fast throttle. So the
+thermal clamp had been doing the work of holding this pattern's board power down, and the power cap alone
+does not bound the peak. That is exactly the band the archive flagged (a service-processor hang seen with card
+power pinned just above the firmware's 75 W catastrophic threshold), which is why the abort is set where it
+is and why the cell is **not retried**: the prediction is recorded as refuted, the measurement stands, and the
+cell is closed.
+
+**What follows.** `s2` runs the three sustained cells the abort left and the `BACK` return check, under
+`protocol_s2.json`, pre-registered by this amendment and committed before its first launch. Every one of them
+*lowers* a limit relative to what has already run, so each reduces board power:
+`tdp65-thr65-randn` (the control: the card's own everyday setting, which E64 measured at 600 MHz),
+`tdp65-thr62-ones` (threshold lowered), `tdp50-thr65-ones` (cap lowered). The predictions for all three are
+unchanged from `predictions.json`; nothing is re-derived. `S-tdp65-thr70-fp32-randn` is reported as
+**ABORTED**, and K5's first half, which depended on it, is reported as **not established** rather than scored
+either way.

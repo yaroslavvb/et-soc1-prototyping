@@ -1,0 +1,98 @@
+{
+  "experiment": "E69",
+  "request": "Q129",
+  "card": "aifoundry2",
+  "order_seed": 169,
+  "tools": {
+    "heater": "build/sparsity_t2/host/sparsity_host",
+    "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+    "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "sampler": {
+    "every_ms": 100
+  },
+  "safety": {
+    "abs_stop_c": 72,
+    "high_stop_c": 80,
+    "board_cap_w": 85,
+    "cap_consecutive": 3
+  },
+  "caps": {
+    "max_card_min": 30
+  },
+  "blocks": [
+    {
+      "name": "SUS",
+      "title": "A3: the sustained cells left after the thr70-randn abort - the control, the threshold lowered to 62 C, and the cap lowered to 50 W; every one reduces board power",
+      "passes": 1,
+      "shuffle": true,
+      "start": {
+        "mode": "cool",
+        "max_c": 57,
+        "max_wait_s": 300
+      },
+      "launch": {
+        "seconds": 8,
+        "budget": 9.5,
+        "processes": 9
+      },
+      "tail_s": 6,
+      "runs": [
+        {
+          "type": "fp32",
+          "values": "randn",
+          "label": "tdp65-thr65-randn",
+          "governor": {
+            "tdp_w": 65,
+            "threshold_c": 65
+          }
+        },
+        {
+          "type": "fp32",
+          "values": "ones",
+          "label": "tdp65-thr62-ones",
+          "governor": {
+            "tdp_w": 65,
+            "threshold_c": 62
+          }
+        },
+        {
+          "type": "fp32",
+          "values": "ones",
+          "label": "tdp50-thr65-ones",
+          "governor": {
+            "tdp_w": 50,
+            "threshold_c": 65
+          }
+        }
+      ]
+    },
+    {
+      "name": "BACK",
+      "title": "the return check: the card's own settings restored, one 6 s randn burst, normal stepping and the default TDP in the governor's log",
+      "passes": 1,
+      "start": {
+        "mode": "cool",
+        "max_c": 57,
+        "max_wait_s": 300
+      },
+      "launch": {
+        "seconds": 6,
+        "budget": 7.5,
+        "processes": 1
+      },
+      "tail_s": 4,
+      "runs": [
+        {
+          "type": "fp32",
+          "values": "randn",
+          "label": "back-randn",
+          "governor": {
+            "tdp_w": 65,
+            "threshold_c": 65
+          }
+        }
+      ]
+    }
+  ]
+}
