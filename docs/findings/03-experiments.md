@@ -2950,3 +2950,78 @@ killed at 21:11:22 by a `USER: unbound variable` fault in `lib.sh` under a tmux 
 variable, and `p8.attempt-1793075288`, killed by this session's own error. `gather` reads only `p<digits>`
 directories, so neither can reach a number.
 **Report:** pending — the Q128 page carries E67 and E68 together.
+
+## E70 — hs: the saturation ladder and the A-side multi-bit ladder (Q129; card runs 2026-10-27, 14:08–14:43 PDT, aifoundry3) — pre-registered
+
+**Asked (Q129):** "Go through Horace's hub and fill in unresolved pieces … For instance, '5. What is still open'
+section … reduce the gap between what's observed and what's accounted for, bottom up." Two of that section's items
+are card work on one knob each: **item 2**, the saturation ladder (the per-bit price list over-predicts a whole
+random word ~2×, and Q128 named two candidate causes without testing either), and **item 4's third point** (no
+A-side multi-bit ladder, so the carry-over between operands was a choice between two defensible numbers that moves
+the prediction by 6%). **Pre-registered** in [`tools/claims-v3/hs/README.md`](../../tools/claims-v3/hs/README.md)
+(three candidate laws with a per-rung prediction from each, discriminators D1–D5, predictions P1–P8, decision rules,
+departures D-a…D-d, amendments A18 and A19), committed as `bd39b335` at 14:07:07 PDT — **42 s before the card was
+claimed** (14:07:49 PDT, from the Discord message's own snowflake) **and 1 min 33 s before the first measured
+launch** (14:08:40 PDT). One card: **aifoundry3**, latched at 600 MHz by its boot-time TDP 0, 521.6 mV on every
+sample — deliberately E65's and E67's card, clock and rail, so the three price lists add without a conversion.
+**Every operand file E60, E65 and E67 ran is byte-identical in the new set** (154 of 154 against `build/hl-gen4`,
+87 of 87 against `build/hl-gen3`), and `alq_h1` is byte-identical to E67's `abit_0` by construction.
+**No card setting was changed: no clock was set and the governor was not touched.**
+
+**The one knob that separates the two causes.** `lq_h<h>` flips B's **low h** mantissa bits together; `ls_h<h>`
+flips **h bits spread** over the 23 mantissa positions. At h = 8 the sum of their constituent single-bit prices is
+3.886 W against 12.628 W — a factor of 3.2 — while the Hamming weight is identical. A law in *how many* bits flip
+must give the same step for both; a law in *which* bits flip must not. At h = 23 the two masks are the same mask,
+so the ladder's top rung is a built-in tie. `alq_h<k>` is the same ladder on the **A** operand (A's low k mantissa
+bits, B = 1.0), the first multi-bit measurement on that side.
+
+**Results** (7 passes 790–796, 34.7 min of card time, 203 of 203 runs through every per-run gate; **6 passes kept**
+— pass 792 set aside by departure D-a). Data, the registered six-pass report, the seven-pass `reduce_hl.py` output
+and three leakage sensitivities: `docs/reports/data/2026-10-27-e70-saturation-ladder/`.
+- **It is the wires, not the count.** Over the 15 B-side rungs, one saturating curve in the additive sum,
+  `ΔW = W∞(1 − e^(−S/W∞))`, leaves a residual rms of **0.232 W**; the best *any* law in h alone can do (a free value
+  per h) is **1.358 W**; summing the single-bit prices leaves **6.062 W**. With the ceiling frozen before the run at
+  the value fitted on E60's own lq ladder (12.58 W), the same curve leaves 0.595 W.
+- **D1, the matched-h contrast:** the spread layout costs **3.860 ± 0.052 W** more than the low layout at h = 8 —
+  **74 SE** from the zero a "how many" law requires. The contrast rises, peaks at h = 8–12 and falls back toward the
+  zero h = 23 forces by construction; no law in h can produce that shape at all.
+- **The ceiling belongs to the operand's flip rate, not to the multiplier array:** **10.52 ± 0.19 W** on the B side
+  (4,096 designed flips per multiply-add) against **6.38 ± 0.07 W** on the A side (2,048), a ratio of **0.51**. The
+  registered primary — one shared ceiling — **fails**, and the registered alternative (6.29 W) is what the card says.
+- **The two ceilings sum to the whole random-data step.** 10.52 + 6.38 = **16.90 ± 0.20 W**, against the 16.1 W of
+  operand-flip switching between the constant-operand level (36.4 W) and `anchor_randn` (52.49 W, E67, same card and
+  protocol). The 24.66 W zeros→random board step splits into **8.6 W of lane un-gating** and **16.1 W of flips**, and
+  random fp32 data already sits at **95% of the flip ceiling** — the card-level reason more entropy buys nothing.
+- **A single turn-on is not enough:** the `T` an offset law would need runs **0.091 → 1.219 W** across the rungs, a
+  factor of 13.4, with 10 of 15 rungs more than 3 SE from the 1.351 ± 0.281 W E67's interaction grid measured.
+- **The carry-over between operands, measured:** ρ (A price per flipped bit over B's, at matched h) = **1.29 ± 0.06**
+  over h = 12, 16, 23 (1.266 ± 0.011, 1.365 ± 0.033, 1.246 ± 0.020), against the 1.57 and 1.01 Q128 had to choose
+  between. **The price per flipped bit is not a function of h** in either layout: it falls 132 → 82 then climbs to
+  115 fJ in the low layout (each rung adds a dearer bit, which cancels the saturation) and falls monotonically
+  227 → 133 fJ in the spread one. The quantity that behaves is measured/additive, and it is one function of the
+  additive sum in all three ladders.
+- **The closure E67 failed** (0.43 and 0.50) reads **0.77** (`nrd_a`) and **1.04** (`nrd_b`) with the frozen-ceiling
+  law, and 1.21 and 1.17 with each side's own refitted ceiling.
+- **Departure D-a earned its place on the first run.** Pass 792's four constant-operand runs span 0.489 W against the
+  registered 0.45, while its `anchor_pi` drift is only +0.110 W — E67's registered gate would have kept it. That is
+  the failure mode A15 described, caught by the gate written for it.
+- **Departure D-b saw nothing to report, which is itself the result:** the host's 1-minute load average stayed
+  0.72–1.32 against the registered 4.0 and the measured op rate held at 1.1208–1.1210 Gop/s per minion across all
+  seven passes, so E67's A16 disturbance did not recur.
+- **The replicate holds.** E60's seven `lq` rungs on this card, a week earlier and from a different operand-set
+  directory, reproduce within **0.207 W** (and `lq_h23` within 0.116 W).
+
+**Scored as registered: P1, P2, P4, P6, P7, P8 PASS; P3 and P5 FAIL.** P3's first clause holds
+(ρ(ΔW/S, S) = −0.804) and its second cannot work on this design — within a layout h and S rise together, so a
+univariate rank correlation cannot separate them and the one against h came out marginally larger (0.836); the
+question is answered by D1 and D2, which the registration itself named as deciding the verdict. P5 fails in both
+clauses: its bend metric compared the A side's per-position price at k = 23 with k = 1, and because the A-side
+single-bit prices rise steeply with position the low-k mask picks up dear bits as k grows and that price *rises*,
+even though the ladder's measured/additive ratio falls 0.615 → 0.230; and the A-side ceiling really is half the B
+side's. Neither failure is reinterpreted.
+
+**What it changes.** Q128 §5 item 2 is closed with a cause, a law and its parameter per operand side; item 4's
+third point is closed with a measured carry-over in place of a 6% choice. **It moves no pJ in the bottom-up
+gate-level ledger** — it is a card-side measurement — but it removes the 2× discrepancy that made the measured price
+list unusable as the bridge between the card and that ledger.
+**Report:** pending — the Q129 page carries E70 with the rest of the week-44 card work.
