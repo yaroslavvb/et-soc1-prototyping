@@ -4,9 +4,11 @@
     python3 tools/claims-v3/sm/reduce_sm.py --data build/claims-v3/aifoundry2/sm --gen build/sm-gen \
         --pred docs/reports/data/2026-10-27-e68-stage-map/predictions.json --out sm.json [--csv runs.csv]
 
-Power extraction and the run gates are E60's, imported unchanged from `hl/reduce_hl.py` (`runs_of_pass`,
-`leak_slope`): P = mean board power over [t0+1 s, t0+3 s) corrected to the launch reading with the card's
-leakage slope. On top of them, the registered gates of this experiment (README "Pre-registered analysis"):
+Power extraction and the run gates are E60's, imported from `hl/reduce_hl.py` (`runs_of_pass`, `leak_slope`):
+P = mean board power over [t0+1 s, t0+3 s) corrected to the launch reading with the card's leakage slope. The
+one change is **amendment A1**: the slope is fitted on the gate-passing runs, because this card's clock ramps
+600 -> 800 MHz inside the first second and a slope fitted across the ramp measures the ramp (see `apply_leak`).
+On top of them, the registered gates of this experiment (README "Pre-registered analysis"):
 
   * every sample in the run's window at 800 MHz (P7), voltage within 3 mV of the pass median,
     `on_protocol`, all records ok, and fma cycles per op within 0.5 % of the family's zero in the same pass;
@@ -32,7 +34,7 @@ BUSY_MHZ = 800
 GROUPS_BACK = ("align", "add", "norm", "round")
 
 
-def gather(data, man, leak_arg="auto"):
+def gather(data, man):
     passes = sorted((p for p in os.listdir(data) if p.startswith("p") and p[1:].isdigit()),
                     key=lambda p: int(p[1:]))
     allruns, card = [], None
@@ -44,10 +46,19 @@ def gather(data, man, leak_arg="auto"):
         rr, c = runs_of_pass(d, man, gov_free=False, busy_mhz=BUSY_MHZ)
         card = card or c
         allruns += rr
-    k, nk = leak_slope(allruns) if leak_arg == "auto" else (float(leak_arg), -1)
+    return allruns, card
+
+
+def apply_leak(allruns, kept, leak_arg="auto"):
+    """Amendment A1: the leakage slope comes from the gate-passing runs, whose window holds no clock ramp.
+
+    This card idles at 600 MHz and the governor raises it to 800 during the launch, so a slope fitted across a
+    run that still holds the ramp measures the ramp (4.91 W/C on passes 1-3), not leakage (0.456 W/C on the
+    steady runs; E44 measured this card's idle rails at 0.5-0.6 W/C)."""
+    k, nk = leak_slope(kept) if leak_arg == "auto" else (float(leak_arg), -1)
     for r in allruns:
         r["p80"] = r["p_raw"] - k * (r["t_win"] - (r["start_c"] if r["start_c"] is not None else r["t_win"]))
-    return allruns, card, k, nk
+    return k, nk
 
 
 def gate(runs):
@@ -234,8 +245,9 @@ def main():
     a = ap.parse_args()
     man = {i["name"]: i for i in json.load(open(os.path.join(a.gen, "manifest.json")))["items"]}
     pred = json.load(open(a.pred))["minus_zero"]
-    runs, card, k, nk = gather(a.data, man, a.leak)
-    kept, dropped = gate(runs)
+    runs, card = gather(a.data, man)
+    kept, dropped = gate(runs)          # the gates read no corrected power, so they run before the correction
+    k, nk = apply_leak(runs, kept, a.leak)
     maxw = max((r["p_raw"] for r in runs), default=None)
     gates = {"runs": len(runs), "kept": len(kept), "dropped": dropped, "leak_W_per_C": k, "leak_runs": nk,
              "max_board_w": maxw, "card": card}

@@ -174,3 +174,31 @@ A block whose passes do not survive the gates is reported as not run, never re-r
 | `predict_sm.py` | the RTL design matrix: the fma_toggle bench per item, by stage, minus each item's own zero |
 | `reduce_sm.py` | the registered reduction: per-pass ΔP, the weighted fit, and P1–P7 |
 | `README.md` | this file |
+
+## Amendments
+
+**A1, Mon 26 Oct 2026, 21:2x PDT (after passes 1–3, before passes 4 and later; it changes how 1–3 are read too,
+and that is stated here rather than hidden).** The leakage slope is estimated from **gate-passing runs only**
+(every sample in the window at 800 MHz), not from every run.
+
+*Why.* This card idles at 600 MHz and the governor raises the clock to 800 during the launch, so a slope fitted
+across a run whose window still holds the ramp measures the ramp, not leakage. Measured on passes 1–3, 28 runs:
+
+| runs | n | median slope |
+|---|---:|---:|
+| all | 28 | **3.810 W/°C** |
+| steady at 800 MHz in the window | 16 | **0.456 W/°C** |
+| with a ramp in the window | 12 | 4.911 W/°C |
+
+E44 measured this card's idle rails at about 0.5–0.6 W/°C, so 0.456 is the leakage and 3.810 is an artefact.
+It matters because the correction is `p80 = p_raw − k·(t_win − t_launch)` and a busier item heats more inside its
+own window, so k = 3.81 would subtract more from exactly the items with the largest signal and compress every
+price. Nothing else changes: the window, the gates and the per-pass differencing stand as registered, and the
+runs the ramp spoils are still dropped by the registered clock gate, not rescued by this.
+
+**A2, Mon 26 Oct 2026, 21:2x PDT (before passes 4 and later).** The pass count rises from 3 to **as many as the
+card window allows, target 18**. The registered clock gate drops the runs whose window still holds the ramp —
+12 of 28 in passes 1–3 — so three passes leave 1–2 kept runs per item, too few for the between-pass SE every
+prediction is scored against. Passes cost about 1.7 min each (the card is already at the launch reading, so the
+approaches are instant), the order is reshuffled per pass by the registered seed, and no gate, window or band
+changes. The number of passes actually run is reported with the results.
