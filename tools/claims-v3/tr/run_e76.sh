@@ -25,9 +25,13 @@ stage=${1:?build|static|setup|probe|price}
 
 case "$stage" in
 build)
+  # About two minutes of compiling. On a card host run it BEFORE the lane's measurements, never during one: CPU
+  # work on the same host splits passes (E67). nice -n 19 and -j2 keep it out of the way; the campaign's rule is
+  # that heavy desk compute belongs on aifoundry1, and this build is here only because the binary must exist on
+  # the box that launches it.
   nice -n 19 cmake -S workloads/enercat -B build/enercat-tr -DCMAKE_PREFIX_PATH=/opt/et -DENERCAT_TR=ON -Wno-dev \
     > build/enercat-tr.cmake.log 2>&1 || { echo "CMAKE FAILED"; tail -25 build/enercat-tr.cmake.log; exit 1; }
-  nice -n 19 cmake --build build/enercat-tr -j4 > build/enercat-tr.build.log 2>&1 ||
+  nice -n 19 cmake --build build/enercat-tr -j2 > build/enercat-tr.build.log 2>&1 ||
     { echo "BUILD FAILED"; grep -nE "[Ee]rror" build/enercat-tr.build.log | head -30; exit 1; }
   echo "built $EN"
   bash tools/claims-v3/text_hash.sh "$EN"
