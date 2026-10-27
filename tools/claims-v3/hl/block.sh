@@ -53,9 +53,9 @@ HERE=tools/claims-v3/hl
 GEN=${HL_GEN:-$V3_ROOT/build/hl-gen}
 ENERCAT_HL=build/enercat-hl/host/enercat_host
 TARGET=${HL_TARGET:-58}; PREHEAT=${HL_PREHEAT:-59}; BURNIN=${HL_BURNIN:-2}; MAXC=${HL_MAX_C:-78}
-FMA_S=4; EC_S=4; EXPN=hl
+FMA_S=4; EC_S=4; EXPN=${HL_EXPN:-hl}
 if [ -n "$SMOKE" ]; then
-  PREHEAT=0; TARGET=200; FMA_S=2; EC_S=2; BURNIN=0; EXPN=hl-smoke
+  PREHEAT=0; TARGET=200; FMA_S=2; EC_S=2; BURNIN=0; EXPN=${HL_EXPN:-hl}-smoke
   ITEMS=anchor_pi,lq_h8; [ -x "$ENERCAT_HL" ] && ITEMS=$ITEMS,xin_h16
 fi
 
@@ -97,7 +97,8 @@ on_signal() { [ -n "$RUNNER" ] && kill -TERM "$RUNNER" 2>/dev/null; wait "$RUNNE
 trap on_signal TERM INT HUP
 python3 "$HERE/run_hl.py" "$OUT" --root "$V3_ROOT" --gen "$GEN" --items "$ITEMS" --tel-live "$OUT/telemetry.jsonl.raw" \
   --heater "$HEATER" --sparsity "$SPARSITY" --enercat "$ENERCAT_HL" --blocks 1 --first-block "$PASS" --seed "$PASS" \
-  --target "$TARGET" --preheat "$PREHEAT" --max-c "$MAXC" --fma-s "$FMA_S" --ec-s "$EC_S" --burnin "$BURNIN" --card "$CARD" &
+  --target "$TARGET" --preheat "$PREHEAT" --max-c "$MAXC" --fma-s "$FMA_S" --ec-s "$EC_S" --burnin "$BURNIN" --card "$CARD" \
+  --shires "${HL_SHIRES:-0xffffffff}" --per-shire "${HL_PER_SHIRE:-32}" &
 RUNNER=$!
 wait "$RUNNER"; rc=$?
 RUNNER=

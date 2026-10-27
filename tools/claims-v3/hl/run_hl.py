@@ -96,6 +96,8 @@ def main():
     ap.add_argument("--max-c", type=float, default=78.0, help="stop the pass at this minion-shire (or PMIC) reading")
     ap.add_argument("--stale-s", type=float, default=3.0, help="a telemetry line older than this means the sampler is gone")
     ap.add_argument("--fma-s", type=float, default=4.0)
+    ap.add_argument("--shires", default="0xffffffff", help="fma launch geometry (default: every shire)")
+    ap.add_argument("--per-shire", default="32", help="minions per shire (default 32: 1,024 minions)")
     ap.add_argument("--ec-s", type=float, default=4.0)
     ap.add_argument("--burnin", type=int, default=2)
     ap.add_argument("--card", default=None)
@@ -209,7 +211,7 @@ def main():
         if it["kind"] == "fma":
             vals = it["values"] if it["family"] == "anchor" else "file:" + os.path.join(a.gen, "tiles", it["name"] + ".bin")
             cmd = [a.sparsity, "--test", "fma", "--type", "fp32", "--pattern", "none", "--values", vals,
-                   "--shires", "0xffffffff", "--per-shire", "32", "--seconds", str(a.fma_s), "--seed", str(blk + 1),
+                   "--shires", a.shires, "--per-shire", a.per_shire, "--seconds", str(a.fma_s), "--seed", str(blk + 1),
                    "--stop-file", stop_file]
             dump = os.path.join(a.out, "tiles", f"{it['name']}.b{blk}.bin")
             if it["family"] == "anchor" or not any(f.startswith(it["name"] + ".") for f in os.listdir(os.path.join(a.out, "tiles"))):
