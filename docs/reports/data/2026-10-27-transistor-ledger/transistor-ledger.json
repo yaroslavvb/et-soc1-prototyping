@@ -1,0 +1,413 @@
+{
+ "convention": {
+  "cycle_vs_toggle": "a cycle is one rise + one fall; a toggle is one edge. A capacitor C takes C.VDD^2 from the rail per cycle, so 0.5 C VDD^2 per toggle",
+  "electrons": "charge / e, with charge = energy / VDD and e = 1.602176634e-19 C",
+  "electrons_of_a_board_figure": "a board energy is not delivered at the die's rail, so its electron count is a convention, not a measurement. Every electron figure here divides by the same 0.517 V. The cards that produced E60, E65 and E38 ran at 521.9 mV, so an electron count taken at their own rail would be 0.9% lower.",
+  "energy": "the energy drawn from VDD by one event, at 0.517 V (the minion rail)",
+  "note_on_E60s_electron_column": "docs/reports/data/2026-10-20-bitflip-ladder/reduce.txt prints electrons as C.V/e, i.e. 2E/(V.e) -- the charge of the equivalent capacitor. Under the convention here (E/(V.e)) every one of its electron figures halves. Both appear below, labelled.",
+  "temperature": "25 C for every SPICE number (ASAP7's TT corner); the die temperature only enters Landauer's floor, where it is stated"
+ },
+ "date": "2026-10-27",
+ "one_physical_net_toggle": {
+  "clock_nets": {
+   "C_pin_fF": 4.672652122331773,
+   "C_total_fF": 7.793509162831535,
+   "C_transistor_gates_fF": 1.3300801011734475,
+   "C_wire_between_cells_fF": 3.1208570404997613,
+   "C_wire_inside_the_cells_fF": 3.342572021158326,
+   "E_per_toggle_fJ": 1.0415596353120393,
+   "E_per_toggle_on_the_transistors_fJ": 0.17775789008127485,
+   "cross_check_route_B": {
+    "A_over_B": 0.7692838691628975,
+    "C_transistor_gates_fF": 1.7289847798586822,
+    "route_A_share_transistor": 0.17066511033525278,
+    "schematic_over_liberty": 0.3700221490051509,
+    "share_transistor": 0.2218493291962087,
+    "what": "C_pin x (SPICE schematic pin capacitance / liberty pin capacitance), mix-weighted over the driven cells"
+   },
+   "electrons_per_toggle": 12574.282234801036,
+   "gate_pins_driven": 9.56224540812563,
+   "nets": 242,
+   "share_transistor": 0.17066511033525278,
+   "share_wire_between_cells": 0.4004431091687961,
+   "share_wire_inside_the_cells": 0.428891780495951,
+   "toggles_per_muladd": 476.59765625,
+   "transistor_fins_behind_them": 39.7572556122909
+  },
+  "def_coverage": {
+   "check_liberty_pin_sum_over_extractor_pin_column": 0.9291928284179636,
+   "comment": "the capacitance table names nets hierarchically and the written Verilog is flat, so fanout has to come from the DEF. On the nets the DEF names, the sum of the liberty's own pin capacitances reproduces the extractor's pin column, which is the check that the join is right. The 'including' row reads fanout 0 for the rest and so is a floor.",
+   "nets_in_the_capacitance_table": 20383,
+   "nets_the_DEF_names": 16799
+  },
+  "per_fin_capacitance_used_for_the_split": {
+   "C_per_fin_fF": 0.03345502803675049,
+   "Q_per_fin_aC_static": 17.296249495,
+   "from": "the mean of the four isolated-device cases (nmos/pmos, drain held at 0 and at VDD), which is a static capacitance like the liberty's own pin column",
+   "spread_over_the_four_aC": [
+    15.543445822999999,
+    19.100907409
+   ]
+  },
+  "reproduces_Q126e": {
+   "clock_toggles_per_muladd": {
+    "power_gr_randn.json": 476.59765625,
+    "this_join": 476.59765625
+   },
+   "comment": "the weights here are power.py's own, so these must agree exactly; they do",
+   "fJ_per_clock_toggle": {
+    "power_gr_randn.json_energy_over_toggles": 1.0415596353120393,
+    "this_join_half_CV2": 1.0415596353120393
+   },
+   "fJ_per_signal_toggle": {
+    "power_gr_randn.json_energy_over_toggles": 0.2813569667258421,
+    "this_join_half_CV2": 0.28135696672584226
+   },
+   "signal_toggles_per_muladd": {
+    "power_gr_randn.json": 3623.361328125,
+    "this_join": 3623.361328125
+   },
+   "total_extracted_cap_fF": {
+    "power_gr_randn.json": 47093.20546652248,
+    "this_join": 47093.205466522624
+   }
+  },
+  "signal_nets": {
+   "C_pin_fF": 1.3770426820427497,
+   "C_total_fF": 2.233284943503055,
+   "C_transistor_gates_fF": 0.48492551366683095,
+   "C_wire_between_cells_fF": 0.8562422614603054,
+   "C_wire_inside_the_cells_fF": 0.8921171683759188,
+   "E_per_toggle_fJ": 0.2984662496319941,
+   "E_per_toggle_on_the_transistors_fJ": 0.0648076278112468,
+   "cross_check_route_B": {
+    "A_over_B": 0.9516996548084974,
+    "C_transistor_gates_fF": 0.509536292481275,
+    "route_A_share_transistor": 0.21713553170971242,
+    "schematic_over_liberty": 0.3700221490051509,
+    "share_transistor": 0.22815552218877794,
+    "what": "C_pin x (SPICE schematic pin capacitance / liberty pin capacitance), mix-weighted over the driven cells"
+   },
+   "electrons_per_toggle": 3603.249140228941,
+   "gate_pins_driven": 2.355813261856303,
+   "nets": 8509,
+   "share_transistor": 0.21713553170971242,
+   "share_wire_between_cells": 0.38340036453979437,
+   "share_wire_inside_the_cells": 0.39946410375049324,
+   "toggles_per_muladd": 3106.330078125,
+   "transistor_fins_behind_them": 14.494847026705171
+  },
+  "signal_nets_including_those_the_DEF_does_not_name": {
+   "C_pin_fF": 1.320147712060195,
+   "C_total_fF": 2.1052640903729087,
+   "C_transistor_gates_fF": 0.41572964226920917,
+   "C_wire_between_cells_fF": 0.7851163783127139,
+   "C_wire_inside_the_cells_fF": 0.9044180697909858,
+   "E_per_toggle_fJ": 0.28135696672584226,
+   "E_per_toggle_on_the_transistors_fJ": 0.05555998017624733,
+   "electrons_per_toggle": 3396.6964429054146,
+   "gate_pins_driven": 2.0196532807664673,
+   "nets": 10223,
+   "share_transistor": 0.19747149261239255,
+   "share_wire_between_cells": 0.37293011451767316,
+   "share_wire_inside_the_cells": 0.42959839286993434,
+   "toggles_per_muladd": 3623.361328125,
+   "transistor_fins_behind_them": 12.426522010758095
+  },
+  "the_wire_is_a_lower_bound": "the between-cell capacitance is the global-route Steiner estimate with no coupling term (detailed routing never closed, Q126(e)), so the wire share is a floor and the transistor share a ceiling.",
+  "what": "what one toggle of one physical net in the TensorFMA32 lane charges, activity-weighted over a random fp32 multiply-add"
+ },
+ "one_transistor_switching": {
+  "charge_returns_at_the_fall": {
+   "comment": "the integrator comes back to zero, so the gate is a capacitor: nothing is lost in the device itself, the energy is lost in whatever drives it",
+   "nmos_drain_at_0_C": -1.00609e-21
+  },
+  "in_a_real_cell_mix_weighted": {
+   "E_from_VDD_per_driven_pin_aJ": 57.32814463739364,
+   "E_from_VDD_per_fin_aJ": 9.41846691825706,
+   "Q_per_driven_pin_aC": 110.88615984021979,
+   "Q_per_fin_aC": 18.21753755949141,
+   "comment": "a fin inside a working cell costs the driver MORE than the same fin measured alone, because the cell's output swings against the input (Miller) and the internal nodes move with it. That excess is real energy and it is transistor, not wire -- but it is not capacitance sitting on the net, so the capacitance split above uses the static figure instead. The per-hold-state spread in by_cell_pin is the size of the Miller term: a cell whose output cannot move in either state (AO21x1 driven on A1, MAJx2) shows none.",
+   "electrons_per_driven_pin": 692.0969728748386,
+   "electrons_per_fin": 113.70492599189544,
+   "fins_per_driven_pin": 6.086780909774913,
+   "liberty_pin_fF": 0.5796409762702115,
+   "over_the_isolated_device_static_mean": 1.0532651928244754,
+   "schematic_pin_fF": 0.21447999969094733,
+   "schematic_pin_over_liberty_pin": 0.3700221490051509,
+   "the_split_inside_the_pin": "the liberty's pin capacitance was characterised on ASAP7's parasitic-extracted netlist; the SPICE here is the LVS (schematic) one. The ratio is what the cell's own layout interconnect adds to its transistors -- wire, inside the cell.",
+   "what": "the same gate, measured at the pin of the cells this multiply-add actually drives (15 types, 88.3% of the toggle-weighted driven pins)"
+  },
+  "inverter_per_edge_at_0p517V": {
+   "by_load_fJ_per_cycle": {
+    "0p517_0p596fF": 0.200804233641,
+    "0p517_0p785fF": 0.25241582664100004,
+    "0p517_1p32fF": 0.396977815641,
+    "0p517_2p105fF": 0.607745273641,
+    "0p517_7p793fF": 2.1293279736926998
+   },
+   "cross_check": "this request re-ran the same deck shape at 0.596 and 2.105 fF and reads internal 0.0415 and 0.0451 fJ per cycle, against Q126(d)'s 0.0407 at 0.5 fF and 0.0450 at 2 fF -- the same measurement, to 2%",
+   "no_load_internal_fJ_per_cycle_from_Q126d": 0.0241,
+   "with_a_typical_net_2p105fF": {
+    "E_rail_fJ_per_cycle": 0.607745273641,
+    "E_rail_fJ_per_toggle": 0.3038726368205,
+    "electrons_per_cycle": 7337.036054914779,
+    "internal_share": 0.07421189534028683,
+    "of_which_the_cell_s_own_internal_fJ": 0.045101928640999864,
+    "of_which_the_load_CV2_fJ": 0.5626433450000001
+   }
+  },
+  "isolated_device_at_0p517V": {
+   "mean_over_the_four_aJ": 8.942160988915,
+   "mean_over_the_four_electrons": 107.95469817717989,
+   "nmos_drain_at_0": {
+    "Cgg_fF": 0.03453462282398452,
+    "E_from_VDD_aJ": 9.2307248,
+    "Qg_aC": 17.8544,
+    "electrons": 111.43839961905225
+   },
+   "nmos_drain_at_VDD": {
+    "Cgg_fF": 0.03006469211411992,
+    "E_from_VDD_aJ": 8.035961490491001,
+    "Qg_aC": 15.543445822999999,
+    "electrons": 97.01455815264374
+   },
+   "pmos_drain_at_0": {
+    "Cgg_fF": 0.03227513490909092,
+    "E_from_VDD_aJ": 8.626788534716,
+    "Qg_aC": 16.686244748000004,
+    "electrons": 104.14734801331527
+   },
+   "pmos_drain_at_VDD": {
+    "Cgg_fF": 0.03694566229980658,
+    "E_from_VDD_aJ": 9.875169130453,
+    "Qg_aC": 19.100907409,
+    "electrons": 119.21848692370831
+   },
+   "range_aJ": [
+    8.035961490491001,
+    9.875169130453
+   ]
+  },
+  "per_fin_linearity_check": {
+   "comment": "the gate charge is linear in fins to 0.01%, so 'per fin' is the right unit and a wider device is simply more of them",
+   "three_fins_over_one": 2.999994399139708
+  },
+  "short_circuit_share": {
+   "at_0p517V": {
+    "1": 0.02509861257186884,
+    "10": 0.02041751388653001,
+    "100": 0.0,
+    "2": 0.02453559917686511,
+    "20": 0.016154967452096148,
+    "5": 0.022917463292733597,
+    "50": 0.007414687198894118
+   },
+   "at_0p700V": {
+    "1": 0.02558067578594654,
+    "10": 0.013958817899296715,
+    "100": 0.010691567998219801,
+    "2": 0.023991041324501257,
+    "20": 0.006332900787841752,
+    "5": 0.019706113647725208,
+    "50": 0.0
+   },
+   "measured_as": "excess rail energy over the cheapest input edge, INVx1 at the 2.105 fF a real net carries, edges 1-100 ps",
+   "verdict": "at 0.517 V the curve still falls monotonically out to a 100 ps edge, so short circuit is not separable from Miller coupling here; the whole spread across 1-100 ps edges is at most 2.5% of the net's 0.608 fJ per cycle, which bounds the short-circuit term above. Q126(d)'s '+70%' is the 0.7 V case with a 200 ps edge, and does not describe this rail."
+  },
+  "what": "one minimum-size ASAP7 RVT device (Lg 20 nm, one fin), gate driven 0 -> VDD through an ammeter and the current integrated"
+ },
+ "request": "Q128(d)",
+ "sources": {
+  "board": "E60 docs/reports/data/2026-10-20-bitflip-ladder/reduce.txt; E65 docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/; E38/E39 docs/findings/05-claims.md",
+  "multiply_add": "Q126(e), docs/reports/data/2026-10-26-open-netlist/power/",
+  "net": "this request's join of the placed DEF, the global-route Steiner capacitance and the bench SAIF, with Q126(e)'s own reader",
+  "transistor": "this request's SPICE on ASAP7's BSIM-CMG devices and LVS cell netlists, run on aifoundry2 in the Q126(d) environment"
+ },
+ "the_floor": {
+  "kT_ln2": {
+   "die at E65's block temperature, 58 C": {
+    "T_K": 331.15,
+    "kT_ln2_J": 3.169082192646065e-21,
+    "kT_ln2_zJ": 3.169082192646065
+   },
+   "die at the governor's trip, 66 C": {
+    "T_K": 339.15,
+    "kT_ln2_J": 3.245641629581497e-21,
+    "kT_ln2_zJ": 3.245641629581497
+   },
+   "the SPICE corner, 25 C": {
+    "T_K": 298.15,
+    "kT_ln2_J": 2.8532745152874053e-21,
+    "kT_ln2_zJ": 2.853274515287405
+   },
+   "the leakage corner, 80 C": {
+    "T_K": 353.15,
+    "kT_ln2_J": 3.379620644218504e-21,
+    "kT_ln2_zJ": 3.379620644218504
+   }
+  },
+  "rungs": {
+   "one electron across the rail (e x 0.517 V)": {
+    "E_J": 8.28325319778e-20,
+    "electrons": 1.0,
+    "over_Landauer_at_66C": 25.521157734373983
+   },
+   "one flipped operand bit, E60 at the board": {
+    "E_J": 1.16746e-13,
+    "electrons": 1409422.0858936096,
+    "over_Landauer_at_66C": 35970083.36840121
+   },
+   "one flipped operand bit, E65's flow-M at the board": {
+    "E_J": 7.450000000000001e-13,
+    "electrons": 8994050.793952163,
+    "over_Landauer_at_66C": 229538588.98342472
+   },
+   "one flipped operand bit, open netlist, quiet partner": {
+    "E_J": 3.287079655582491e-14,
+    "electrons": 396834.38102115045,
+    "over_Landauer_at_66C": 10127672.832463445
+   },
+   "one gate pin of the cells this unit drives": {
+    "E_J": 5.732814463739365e-17,
+    "electrons": 692.0969728748387,
+    "over_Landauer_at_66C": 17663.116012221508
+   },
+   "one minimum device's gate, isolated (mean of the four bias cases)": {
+    "E_J": 8.942160988915003e-18,
+    "electrons": 107.95469817717992,
+    "over_Landauer_at_66C": 2755.128880346544
+   },
+   "one random fp32 multiply-add, E38 at the board": {
+    "E_J": 5.783e-12,
+    "electrons": 69815564.75359109,
+    "over_Landauer_at_66C": 1781774040.3907988
+   },
+   "one random fp32 multiply-add, open netlist": {
+    "E_J": 1.946468662361173e-12,
+    "electrons": 23498842.97733223,
+    "over_Landauer_at_66C": 599717678.1997823
+   },
+   "one toggle of an average clock net": {
+    "E_J": 1.0415596353120394e-15,
+    "electrons": 12574.282234801038,
+    "over_Landauer_at_66C": 320910.24031089386
+   },
+   "one toggle of an average signal net": {
+    "E_J": 2.984662496319941e-16,
+    "electrons": 3603.249140228941,
+    "over_Landauer_at_66C": 91959.08966403024
+   },
+   "one transistor fin, driven inside a working cell": {
+    "E_J": 9.418466918257061e-18,
+    "electrons": 113.70492599189544,
+    "over_Landauer_at_66C": 2901.8813514144836
+   }
+  },
+  "the_one_sentence": "moving a single electron across this chip's 0.517 V rail already costs 25.5 Landauer quanta at the die's 66 C, and the smallest switch in the design -- one minimum transistor's gate -- moves 108 of them, so the floor is 2755x below one transistor and 1.8e+09 x below one random fp32 multiply-add at the board.",
+  "what": "Landauer's kT ln2, at the die's own temperature, against every rung"
+ },
+ "up_to_the_board": {
+  "E38": {
+   "per_card_randn_pJ": {
+    "aifoundry1_c1": 6.06,
+    "aifoundry2": 5.92,
+    "aifoundry3": 5.37
+   },
+   "per_muladd_over_idle_pJ": {
+    "ones": 2.13,
+    "randn": 5.783,
+    "zeros": 0.27
+   },
+   "what": "E38/E39's registered V3-ABL-A values, three cards; the chain's 0.27 / 2.13 / 5.78 pJ are the three-card means of them (docs/findings/05-claims.md)"
+  },
+  "E65_not_closed_here": {
+   "bit22_fJ": 1008,
+   "bit6_fJ": 83,
+   "flow_M_b_bit11_vs_a_pi_fJ": 745,
+   "note": "E65 prices 32 individual B-side bit positions and the flow-M flip. The open flow was only run on the ladder's own h = 0,1,2,4,8 rungs, so there is no like-for-like bottom-up number for a named bit position yet; running mktiles.sh on E65's own operand files would give one.",
+   "se": 56,
+   "what": "E65, aifoundry3, 600 MHz, 521.9 mV, per designed flipped bit at the board"
+  },
+  "per_flipped_operand_bit": {
+   "lb": {
+    "board_fJ": 129.918,
+    "board_se_fJ": 0.48,
+    "closure_switching": {
+     "vs_board": 0.29627326830042405,
+     "vs_rail": 0.3974313936092359
+    },
+    "closure_with_internal": {
+     "vs_board": 0.42226746445411123,
+     "vs_rail": 0.566444444470307
+    },
+    "electrons_at_the_board": 1568441.7329512448,
+    "electrons_at_the_board_in_E60s_own_column": 3136883.4659024896,
+    "electrons_bottom_up": 464687.3583602461,
+    "open_netlist_switching_fJ": 38.49123047105449,
+    "open_netlist_with_cell_internal_fJ": 54.86014444694923,
+    "rail_fJ": 96.85,
+    "rail_over_board": 0.745470219677027,
+    "what": "E60, busy partner A = pi, per designed flipped bit, same card"
+   },
+   "lq": {
+    "board_fJ": 116.746,
+    "board_se_fJ": 0.613,
+    "closure_switching": {
+     "vs_board": 0.2815582251710972,
+     "vs_rail": 0.3755803994038495
+    },
+    "closure_with_internal": {
+     "vs_board": 0.3963622905907507,
+     "vs_rail": 0.5287215719527854
+    },
+    "electrons_at_the_board": 1409422.0858936096,
+    "electrons_at_the_board_in_E60s_own_column": 2818844.171787219,
+    "electrons_bottom_up": 396834.38102115045,
+    "open_netlist_switching_fJ": 32.87079655582491,
+    "open_netlist_with_cell_internal_fJ": 46.27371197730778,
+    "rail_fJ": 87.52,
+    "rail_over_board": 0.7496616586435509,
+    "what": "E60, quiet partner A = 1.0, per designed flipped bit, aifoundry3 at 600 MHz and 521.9 mV, 4 passes"
+   }
+  },
+  "per_random_fp32_multiply_add": {
+   "board_pJ": 5.783,
+   "capacitance_priced": 0.5045833956772056,
+   "cells_own_internal_pJ": 0.43060582869388164,
+   "clock_share": 0.32747348243467517,
+   "closure_switching": {
+    "vs_board": 0.2621239553289454,
+    "vs_rail": 0.34949860710526054
+   },
+   "closure_total": {
+    "vs_board": 0.336584586263388,
+    "vs_rail": 0.448779448351184
+   },
+   "electrons_at_the_board": 69815564.75359109,
+   "electrons_bottom_up": 23498842.97733223,
+   "of_which_clock_tree_pJ": 0.4964048810343226,
+   "of_which_signal_pJ": 1.0194579526329686,
+   "open_netlist_switching_pJ": 1.5158628336672912,
+   "open_netlist_total_pJ": 1.9464686623611729,
+   "rail_pJ": 4.33725,
+   "signal_toggles_per_muladd": 3623.361328125,
+   "switching_by_what_it_charges_pJ": {
+    "note": "the cells' own internal energy (0.431 pJ) sits on top of all three and is not split here",
+    "transistor_gates": 0.3060795383933351,
+    "wire_between_the_cells": 0.589642464640423,
+    "wire_inside_the_cells": 0.620140830633533
+   },
+   "switching_by_what_it_charges_share": {
+    "transistor_gates": 0.20191770099201137,
+    "wire_between_the_cells": 0.3889814114736984,
+    "wire_inside_the_cells": 0.40910088753429025
+   },
+   "toggles_per_muladd": 4099.958984375,
+   "what": "one random fp32 multiply-add in one lane, against what the card pays for one over idle",
+   "zeros_caution": "the open flow prices the zeros pattern at 0.217 pJ, against E38's 0.27 pJ over idle, but these are not the same quantity: the open flow's zeros figure is the ungated root of this lane's clock tree, which on a card is already inside the idle the measurement subtracts. Do not read it as 80% closure."
+  },
+  "what_the_missing_energy_is": "the bottom-up figure is a floor three times over: half the design's capacitance is unpriced (CTS and repair_design made those nets after the netlist was simulated), the between-cell wire has no coupling term, and the ledger covers one lane's arithmetic while the board pays for the register file's read ports, the operand bus, the result path and leakage as well."
+ },
+ "what": "the bottom of the Horace chain priced from open data: one transistor switching, one physical-net toggle, one random fp32 multiply-add, and Landauer's floor"
+}
