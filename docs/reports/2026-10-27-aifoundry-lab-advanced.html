@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>Advanced: keeping your Claude up through restarts</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%AD%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f3f5f6; --paper:#ffffff; --ink:#15232b; --ink-2:#3d4f5a; --muted:#6c7c86;
+  --rule:#d5dde2; --accent:#1f6f66; --accent-2:#a8631e; --accent-soft:#e3efec; --warm-soft:#f6ecdd;
+  --code-bg:#eaeff1; --shadow:0 1px 0 rgba(21,35,43,.06); --bad:#b3452f; --bad-soft:#f7e6e1;
+  --log-week:#96550f; --log-day:#5c6b75;
+  --serif:"Charter","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --sans:"Avenir Next","Seravek","Gill Sans","Helvetica Neue",system-ui,-apple-system,sans-serif;
+  --mono:"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f171c; --paper:#151f26; --ink:#e6ecef; --ink-2:#c1ccd3; --muted:#8a9aa4;
+    --rule:#28363f; --accent:#5fbcae; --accent-2:#e0a35c; --accent-soft:#183531; --warm-soft:#33291b;
+    --code-bg:#1d2a32; --shadow:none; --bad:#e2705a; --bad-soft:#3a2420;
+    --log-week:#e6b25a; --log-day:#8a9aa4;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f171c; --paper:#151f26; --ink:#e6ecef; --ink-2:#c1ccd3; --muted:#8a9aa4;
+  --rule:#28363f; --accent:#5fbcae; --accent-2:#e0a35c; --accent-soft:#183531; --warm-soft:#33291b;
+  --code-bg:#1d2a32; --shadow:none; --bad:#e2705a; --bad-soft:#3a2420;
+  --log-week:#e6b25a; --log-day:#8a9aa4;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.55}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+a:hover,a:focus-visible{border-bottom-color:var(--accent);outline:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+header.mast{padding:52px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:26px}
+.eyebrow{font-family:var(--sans);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1.title{font-family:var(--sans);font-weight:600;font-size:clamp(30px,4.6vw,46px);line-height:1.08;letter-spacing:-.01em;margin:0 0 18px;text-wrap:balance;max-width:28ch}
+.lede{font-size:19px;line-height:1.45;color:var(--ink-2);max-width:62ch;margin:0 0 18px}
+.sources{font-family:var(--sans);font-size:13.5px;line-height:1.5;color:var(--muted);max-width:78ch;margin:0 0 10px}
+.todo{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:0 6px 6px 0;padding:14px 18px;margin:22px 0 0;max-width:72ch}
+.todo p{margin:0 0 8px;font-family:var(--sans);font-size:15.5px;line-height:1.45}
+.todo p:last-child{margin:0}
+.todo strong{font-weight:700}
+nav.toc{margin:0 0 40px;padding:18px 20px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;box-shadow:var(--shadow)}
+nav.toc .lbl{font-family:var(--sans);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 22px;font-family:var(--sans);font-size:14.5px;line-height:1.35}
+nav.toc a{border:none;color:var(--ink-2)}
+nav.toc a:hover{color:var(--accent)}
+main{display:block}
+main h2{font-family:var(--sans);font-weight:600;font-size:clamp(23px,2.6vw,29px);line-height:1.15;margin:64px 0 16px;padding-top:22px;border-top:2px solid var(--ink);text-wrap:balance}
+main h3{font-family:var(--sans);font-weight:600;font-size:18.5px;line-height:1.25;margin:34px 0 10px;color:var(--ink);text-wrap:balance}
+main p{margin:0 0 14px;max-width:72ch}
+main ul,main ol{margin:0 0 16px;padding-left:1.35em;max-width:72ch}
+main li{margin:0 0 7px}
+main strong{font-weight:700}
+main hr{border:0;border-top:1px solid var(--rule);margin:40px 0}
+main blockquote{margin:18px 0 22px;padding:14px 18px;background:var(--warm-soft);border-left:3px solid var(--accent-2);border-radius:0 4px 4px 0;font-size:16px;color:var(--ink);max-width:72ch}
+q{quotes:"\201C" "\201D"}
+code{font-family:var(--mono);font-size:.85em;background:var(--code-bg);padding:.12em .4em;border-radius:4px}
+main pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;margin:0 0 20px;overflow-x:auto;max-width:80ch}
+main pre code{background:none;padding:0;font-size:13px;line-height:1.5;white-space:pre}
+img{max-width:100%;height:auto}
+main figure{margin:26px 0 32px;max-width:820px}
+main figure a{display:block;border:none}
+main figure img{display:block;width:100%;border:1px solid var(--rule);border-radius:6px}
+main figcaption{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:72ch}
+.tablewrap{overflow-x:auto;margin:18px 0 24px}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:14.5px;line-height:1.45;background:var(--paper)}
+th,td{border:1px solid var(--rule);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);font-weight:600}
+td.t{font-family:var(--mono);font-size:13px;white-space:nowrap;color:var(--ink-2)}
+.ok{color:var(--accent);font-weight:700}
+.bad{color:var(--bad);font-weight:700}
+.mid{color:var(--accent-2);font-weight:700}
+details{margin:14px 0 22px;padding:12px 16px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;max-width:80ch}
+details summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:10px}
+details p,details li{font-size:15.5px}
+/* a hub Log entry's fold (md2report lift_folds, Sat 24 Oct 2026): one quiet line until opened */
+details.fold{margin:2px 0 8px;padding:2px 10px;background:transparent}
+details.fold summary{font-size:13.5px;font-weight:500;color:var(--muted)}
+details.fold[open]{background:var(--paper)}
+.kicker{font-family:var(--sans);font-size:14px;color:var(--muted);margin:-6px 0 14px}
+footer{max-width:1080px;margin:0 auto;padding:24px 20px 60px;color:var(--muted);font-family:var(--sans);font-size:13px;border-top:1px solid var(--rule)}
+/* MathJax, loaded by md2report only on pages that contain equations (2026-09-17, week 38).
+   A display equation gets its own scroll box: an over-wide matrix must not widen the page
+   on the phone.  Inline math inherits the prose colour in both themes. */
+.math-display{overflow-x:auto;overflow-y:hidden;max-width:100%;margin:20px 0 24px;padding:2px 0}
+mjx-container{color:var(--ink)}
+mjx-container[display="true"]{margin:0!important;text-align:left}
+
+/* A numbered table row linked as #row-N (a ledger tag on a page; Tue 20 Oct 2026) lands below the top
+   edge and is tinted, so he sees which row the link meant. */
+tr[id^="row-"]{scroll-margin-top:72px}
+tr:target > td{background:var(--accent-soft)}
+
+/* Tabs (md2report, Tue 20 Oct 2026): a hub is a tabbed page with its Log first (gyroscope protocol.md § Hubs),
+   drawn like the Esperanto archive's top bar: plain words, the open tab underlined, sticky while you scroll,
+   sideways-scrolling on a phone. Closed panels hide only once the script has run (.tabs-js). */
+.tabbed header.mast{border-bottom:0;margin-bottom:0;padding-bottom:14px}
+.tabbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--rule);margin:6px 0 30px}
+.tabbar-in{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;font-family:var(--sans);font-size:16px}
+.tabbar-in::-webkit-scrollbar{display:none}
+.tabbar a{flex:0 0 auto;display:flex;align-items:center;min-height:46px;padding:0 13px;border:0;color:var(--ink-2);font-weight:500;white-space:nowrap;box-shadow:inset 0 -3px 0 transparent}
+.tabbar a:hover,.tabbar a:focus-visible{color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.tabbar a.on{color:var(--accent);font-weight:650;box-shadow:inset 0 -3px 0 var(--accent)}
+.tabs-js:not(.tabs-ready) .tabpanel:not(.on){display:none}
+.tabpanel{scroll-margin-top:60px}
+.tabbed main [id]{scroll-margin-top:64px}
+.tabpanel > h2:first-child{margin-top:4px;padding-top:0;border-top:0}
+@media print{.tabbar{display:none}}
+/* The Log tab: a week heading, then one entry per thing added, each opening with **day, time · kind**. */
+.tabpanel.log h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--log-day);margin:30px 0 0;padding:0 0 7px;border-bottom:1px solid var(--rule)}
+.tabpanel.log h3 + ul,.tabpanel.log h3 + ol{list-style:none;padding-left:0;margin-top:0;max-width:80ch}
+.tabpanel.log h3 + ul > li{margin:0;padding:11px 0 12px;border-bottom:1px solid var(--rule)}
+.tabpanel.log h3 + ul > li > strong:first-child{display:block;font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--log-day);margin:0 0 2px}
+/* The week number in gold, the days in grey (his ask, Tue 20 Oct 2026 18:56, week 43: "I want the week number
+   to be more prominent. Maybe it should be gray for the day number and then orange or like gold for the week
+   number"). md2report wraps "Week 43" (or a day heading's "(week 43)") in .wk. Both tokens hold 5:1 or better
+   on --bg and --paper, light and dark. */
+.wkhead .wk{color:var(--log-week);font-weight:700}
+.wkhead .wkdays{color:var(--log-day)}
+.tabpanel.log h3.wkhead .wk{font-size:17px;letter-spacing:.06em}
+p.wkhead{font-family:var(--sans)}
+.subtabbar{margin:0 0 24px}
+.subtabbar-in{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--sans);font-size:15px}
+.subtabbar a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid var(--rule);border-radius:999px;color:var(--ink-2);font-weight:500;text-decoration:none;background:var(--paper)}
+.subtabbar a:hover,.subtabbar a:focus-visible{color:var(--accent);border-color:var(--accent)}
+.subtabbar a.on{color:var(--accent);border-color:var(--accent);font-weight:650;background:color-mix(in srgb,var(--accent) 10%,var(--paper))}
+.tabs-js:not(.tabs-ready) .subpanel:not(.on){display:none}
+.subpanel{scroll-margin-top:60px}
+.subpanel > h2:first-child{margin-top:4px;padding-top:0;border-top:0}
+@media print{.subtabbar{display:none}}
+.tabbar.more .tabbar-in{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent)}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header class="mast">
+<p class="eyebrow">AI Foundry ET-SoC-1 lab</p>
+<h1 class="title">Advanced: keeping your Claude up through restarts</h1>
+</header>
+<main>
+<p data-ss-id="nav-lab-dashboard" data-ss-react="off"><a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard">← AI Foundry lab dashboard</a> › <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard#worklog">Worklog</a> · <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-start">New user? Start here</a></p>
+
+<p class="lede">The lab machines restart now and then: kernel updates, power cuts, and a self-check right after boot. Step 2 of
+<strong>New user? Start here</strong> set you up so that your Claude comes back by itself. These tips explain what comes back and
+what doesn't, and what to do when something doesn't. In the commands, <code>&lt;you&gt;</code> is your username and <code>&lt;machine&gt;</code> is the
+lab machine.</p>
+<h2 id="1-your-claude-is-brought-back-every-minute">1. Your Claude is brought back every minute</h2>
+<p><strong>You'd see:</strong> after a restart, your tmux session is back and Claude has picked up your last conversation.
+<strong>What does it:</strong> a crontab line runs <code>~/.local/bin/lab-sessions</code> every minute. It starts the tmux session <code>claude</code>
+when it's missing. Once you've signed in, it also keeps a Remote Control server running in <code>claude-rc</code>. It only
+starts things, and only your own.
+<strong>Check:</strong> <code>crontab -l | grep lab-sessions</code>. <strong>Bring it back now:</strong> <code>~/.local/bin/lab-sessions</code>.
+<strong>Why:</strong> without it, a restart left people with no session until they redid step 2 by hand. Set up before 13 October?
+Run step 2 again: it's safe to repeat.</p>
+<h2 id="2-attach-by-exact-name">2. Attach by exact name</h2>
+<p><strong>You'd see:</strong> <code>tmux attach -t claude</code> drops you into a window with a server log in it, not Claude.
+<strong>Why:</strong> tmux matches session names by prefix. If <code>claude</code> isn't back yet, <code>claude</code> matches <code>claude-rc</code>.
+<strong>Do:</strong> <code>ssh -t &lt;you&gt;@&lt;machine&gt; tmux attach -t =claude</code>. Don't press Ctrl-C in <code>claude-rc</code>: that stops your server.</p>
+<h2 id="3-linger-keeps-tmux-alive-when-your-connection-drops">3. Linger keeps tmux alive when your connection drops</h2>
+<p><strong>You'd see:</strong> without linger, a short network blip that ends your last login also kills tmux and every Claude in
+it.
+<strong>What does it:</strong> step 1 turned on linger for your account.
+<strong>Check:</strong> <code>loginctl show-user "$USER" -p Linger</code> should say <code>Linger=yes</code>. If not: <code>loginctl enable-linger</code>.</p>
+<h2 id="4-what-comes-back-is-a-conversation-not-running-work">4. What comes back is a conversation, not running work</h2>
+<p><strong>You'd see:</strong> Claude is back, but a command it was running is gone.
+<strong>Why:</strong> a restart ends every process. <code>lab-sessions</code> runs <code>claude --continue</code>, which reopens the most recent
+conversation in your home folder, nothing else. <code>/tmp</code> is cleared at every boot.
+<strong>Do:</strong> keep notes, logs and results in files under <code>~</code>. Reopen an older conversation with <code>claude --resume</code>.</p>
+<h2 id="5-long-jobs-dont-come-back">5. Long jobs don't come back</h2>
+<p><strong>You'd see:</strong> a job started with <code>setsid nohup</code> survived your logout but not the restart.
+<strong>Do:</strong> check when the machine last booted with <code>uptime -s</code>. Write long jobs so they can resume from their own log.
+Restart them yourself, under the card rules.</p>
+<h2 id="6-connected-yet-new-sessions-fail">6. "Connected", yet new sessions fail</h2>
+<p><strong>You'd see:</strong> the Claude app lists the machine, but a new session "didn't finish connecting".
+<strong>Two causes:</strong> Claude Code's update cleanup deleted the build the server was started from, so it can't start new
+sessions; or the server is full (32 sessions by default), which looks the same. <code>lab-sessions</code> only restarts a server
+that has stopped, so it won't catch either.
+<strong>Check:</strong> <code>ls -l /proc/$(pgrep -u "$(id -u)" -f '^([^ ]*/)?claude remote-control' | head -1)/exe</code>. "(deleted)" is the
+first cause.
+<strong>Fix:</strong> <code>tmux kill-session -t =claude-rc</code>. <code>lab-sessions</code> starts a fresh server within a minute, or within 10 minutes
+if it restarted one recently.</p>
+<h2 id="7-your-sign-in-runs-out-after-about-30-days">7. Your sign-in runs out after about 30 days</h2>
+<p><strong>You'd see:</strong> Claude asks you to sign in, and the app stops offering the machine.
+<strong>Do:</strong> attach (tip 2) and type <code>/login</code>, in a browser signed in to your own Claude account. <strong>Check:</strong>
+<code>claude auth status</code>. A token from <code>claude setup-token</code> can't run Remote Control, so a browser sign-in is the only way.</p>
+<h2 id="8-a-restarted-claude-starts-in-your-default-mode">8. A restarted Claude starts in your default mode</h2>
+<p><strong>You'd see:</strong> you had switched modes with Shift+Tab, and after the restart it asks for permission again.
+<strong>Why:</strong> <code>lab-sessions</code> passes no mode, so both Claude and the server's sessions start in your settings' default.
+<strong>Do:</strong> set <code>permissions.defaultMode</code> in <code>~/.claude/settings.json</code> to the mode you want after every restart. Keep to the
+brief's rules whatever the mode.</p>
+<h2 id="9-the-machine-may-restart-itself-once-right-after-boot">9. The machine may restart itself once right after boot</h2>
+<p><strong>What does it:</strong> if a card's link came up bad, the machine does one cold reboot in its first 20 minutes. It does this
+only when no card is held and nobody is at a terminal, and at most twice a day. A kernel panic reboots after 10
+seconds, and after a power cut the machines start by themselves.
+<strong>Check:</strong> <code>et-boot-check --status</code> and <code>uptime -s</code>. A machine that hangs still needs a person: tell the lab admin.</p>
+<h2 id="on-your-own-machines">On your own machines</h2>
+<ul>
+<li>Run a Remote Control server inside a loop that restarts it, plus a per-minute cron check under <code>flock</code>. Close the
+  lock's descriptor (<code>9&gt;&amp;-</code>) on any command that can start a tmux server, or that server holds the lock for good.</li>
+<li>Cron's PATH is bare. Set it yourself, including <code>/snap/bin</code> where tmux is a snap.</li>
+<li>A tmux window inherits the tmux server's environment, not yours. With two Claude accounts, name the account on every
+  command line.</li>
+<li>Inside a git repository, folder trust stops at the repo's own folder. A server started there waits at a trust
+  prompt until you answer it once. Start it with <code>--spawn=same-dir</code>.</li>
+</ul>
+</main>
+</div>
+<footer>
+The AI Foundry ET-SoC-1 lab · advanced tips for lab users · 27 October 2026
+</footer>
+
+</body>
+</html>

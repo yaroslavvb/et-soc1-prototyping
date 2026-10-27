@@ -281,7 +281,11 @@ when the lab adopts the onboarding page (the lab problems report's request DI1),
 and the 2 October banners are installed (step 3's caution about the installed copy can then go), or when a new trap
 costs someone time. Bump its "Version of" line (the page shows it), rebuild, and redeploy the page. Keep `et-lab-start`'s per-host
 card facts and its printed Remote Control steps and rules in step with START.md. The facts it states are dated in `AGENT.md` §4, `docs/lab-access.md` and
-`docs/findings/14-card-behaviour.md`; where those change, this changes.
+`docs/findings/14-card-behaviour.md`; where those change, this changes. **When `lab-sessions` or the boot self-check
+(`tools/lab/host-recovery/`) changes, update the advanced tips page too** (`docs/reports/2026-10-27-aifoundry-lab-advanced.md`,
+linked under the page's restart line since 27 October 2026; rebuild and deploy it as `docs/reports/MIRROR.md` says). Its
+tip 2 tells people to attach with `tmux attach -t =claude`; the page's own attach command still has no `=`, so before
+`claude` is back it can land in `claude-rc` (a START.md change, so it waits for the next edition).
 
 **When a card goes out of service or comes back** (aifoundry2's card went out on 2 and 7 October and came back on 6
 and 9 October; aifoundry1's card 0 came back on 2 October), change all of these in one commit, then redeploy the
