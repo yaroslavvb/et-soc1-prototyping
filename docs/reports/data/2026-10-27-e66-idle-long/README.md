@@ -182,6 +182,28 @@ cycles, L3's top end would have been a claim resting on seconds. It is A3's ~17 
 that make the band measured: ~16 minutes above 59 °C instead of ~3.7. Where the morning's fit still rests
 on thin bins at the top, say so with the per-degree sample counts beside it.
 
+**A4, Mon 26 Oct 2026, 23:2x PDT — the night runs from pass 13, not pass 12, and the driver now sets `USER`.
+Written before pass 13's cooling data was read.**
+
+A3 says it is written "before the first pass it touches (pass 12)". Pass 12 did start under A3, at 23:14:32,
+and was **aborted at 23:16:16, 104 s in, still in its heat phase with no cooling data**. Its directory
+`build/claims-v3/aifoundry2/idle/p12/` has no `block.json`, so both reducers drop it exactly as they drop p11.
+**The night's measured passes are p13 upward.**
+
+*Why it was aborted.* The driver's log filled with `lib.sh: line 64: USER: unbound variable`. `tmux
+new-session` starts its pane with no `USER` in the environment, and both `lib.sh`'s `others_present` and
+`block.sh`'s `other_logins` read `"$USER"` under `set -u`. The fault is inside a `$( )`, so only the subshell
+dies and the pass runs on — but the variable reads empty, and the **"another user is logged in" guard silently
+passes every time**. For a seven-hour unattended run on a shared lab card that is not acceptable, so the pass
+was stopped while it had produced nothing, `USER` and `LOGNAME` were exported in `run_e66b.sh`, and the run
+restarted at pass 13 at 23:16:24. The log has carried no such line since.
+
+This is the same fault that killed E68's `p1.attempt-1793074293` at 21:11:22 (E68 amendment A7, item 4). The
+device-level guards — `scan_procs`, the `et_soc1` use count, and the card lock — were never affected by it;
+only the logged-in-user check was.
+
+*Nothing else changes.* Same cooling length, same heater, same bands, same reduction, same 06:30 PT stop.
+
 ## How to reduce this in the morning
 
 The pass set tonight is **p13 upward** (A2: p11 and p12 were aborted and carry no `block.json`, so both
