@@ -130,9 +130,11 @@ field in isolation, and neither could E60's or E61's card design.
 | **a changed read index** | **252.4 fJ** (440.2 with internal) | 1.94 index bits/MAC **and the 13.75 accumulator-word bits the new index selects** | E61 **369–452 fJ** | 277–339 fJ | **74–91%** |
 
 - **The result path closes.** 23.58 fJ per result bit bottom-up against 23.4 fJ at the minion rail
-  is 101% — the first rung of this project's chain to meet a card measurement rather than fall short
-  of it. Read it with its ceiling warning: 0.48 pJ/MAC of the netlist it is measured on is the
-  register-file **model**, and the result bit's path runs through that model's write port.
+  is 101% — the first **energy** rung in this project's chain to meet a card measurement rather than
+  fall short of it. Read it with its ceiling warning: 0.48 pJ/MAC of the netlist it is measured on
+  is the register-file **model**, and the result bit's path runs through that model's write port.
+  One rung meeting its measurement after every other has fallen short is also the kind of result
+  that is worth re-running before it is leaned on.
   It is also the composite above, not the write side alone: this design cannot separate the result
   word from the accumulator read-back it causes one pass later.
 - **The register index does not close, and E61 said it would not.** E61 scored its own
