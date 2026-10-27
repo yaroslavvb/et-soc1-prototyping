@@ -219,6 +219,22 @@ def main():
             w(f"Random against zeros on this card at 600 MHz: "
               f"**{anc['anchor_randn']['p80'] - anc['anchor_zeros']['p80']:.2f} W** "
               f"({anc['anchor_zeros']['p80']:.2f} → {anc['anchor_randn']['p80']:.2f} W).\n")
+        # Additivity at the WHOLE-OPERAND level, beside the grid's per-bit additivity: one random side plus the
+        # other, against both random at once. The four constant-operand items (anchor_pi, lq_h0, aq_h0, ix_z)
+        # are the same state by four routes, so their spread is this comparison's own noise floor.
+        base = [anc[n]["p80"] for n in ("anchor_pi", "lq_h0", "aq_h0", "aq_e64", "ap_h0", "ix_z")
+                if anc.get(n, {}).get("p80") is not None]
+        if anc.get("anchor_randn", {}).get("p80") and za.get("dW_vs_zero") and zb.get("dW_vs_zero") and base:
+            both = anc["anchor_randn"]["p80"] - (sum(base) / len(base))
+            summed = za["dW_vs_zero"] + zb["dW_vs_zero"]
+            S["whole_operand_additivity"] = {"both_random_W": both, "sum_of_one_sided_W": summed,
+                                             "ratio": both / summed if summed else None,
+                                             "constant_operand_spread_W": max(base) - min(base), "n_bases": len(base)}
+            w(f"**Additivity at the whole-operand level** (beside the grid's per-bit additivity): both operands "
+              f"random is **{both:.2f} W** above the constant-operand level, where one random side plus the other "
+              f"sums to **{summed:.2f} W** — a ratio of **{both/summed:.2f}**. The {len(base)} constant-operand "
+              f"items (`anchor_pi`, `lq_h0`, `aq_h0`, `aq_e64`, `ap_h0`, `ix_z`: the same state by six routes) "
+              f"span {max(base)-min(base):.2f} W, which is this comparison's own noise floor.\n")
 
     # ---- closure
     if cl.get("items"):
