@@ -2823,14 +2823,25 @@ E60's `anchor_pi` first-versus-last drift over 0.3 W. E67 runs six items whose o
 `aq_h0`, `aq_e64`, `ap_h0`, `lq_h0`, `lb_h0`, `ix_z` — plus `anchor_pi` twice, one physical state by several
 routes, and their **spread within a pass** is the honest measure: 0.17–0.37 W in passes 750–753 and **0.62, 2.02,
 1.12, 0.97 W** in 754–757. The registered gate sets aside 754 (the 0.62 W one) and **keeps 755 at 2.02 W**,
-because `anchor_pi`'s own two runs agree there. The cause is in the launch records: from pass 754 the host-side
+because `anchor_pi`'s own two runs agree there. The symptom is in the launch records: from pass 754 the host-side
 launch overhead grew (calibration 18 → 23 ms, inter-launch gap 1.5 → 10–15 ms, rate 1.121 → 1.085 Gop/s) and a
 minority of runs read 1–2 W **low** at an unchanged clock, rail, launch reading and cycles-per-op, so no per-run
-gate sees them; the pass median never moves, so bad runs dip and never rise. Amendment A15 adds
+gate sees them; the pass median never moves, so bad runs dip and never rise. 🛑 **The cause was the host, not the
+card:** another lab user began CPU work on aifoundry3's **host** in four waves — 4 processes at **21:42:40**, 4 at
+22:06:41 and 12 at 22:28:59–22:29:27, 20 in all on 16 cores at about 75% of a core each, load average about 22 —
+and **never held the card**, so `et-who` read "no holder" throughout and the protocol's card-scoped other-user
+test (departure D1) correctly did not block. Nothing in the protocol watches the host's CPU. The first wave lands
+inside pass 754, the first degraded pass, and the rate fell then and never recovered; the correlation is not
+monotone, though — the two highest-load grid passes, 774 and 775, have the session's smallest spreads — so host
+contention is the well-supported cause of the sustained rate change and the likely but unproven cause of the
+intermittent dips. Amendment A15 adds
 `ha/constspread.py` and a **labelled post-hoc sensitivity** over the passes whose spread is ≤ 0.40 W (7 of 14,
 277 of 277 runs). **The registered reduction is the result**; only P3 (FAIL → PARTIAL) and P4 (FAIL → PASS) move,
 both toward the registered expectation, and every headline is unchanged. The lesson is filed for the next
-experiment: a pass gate must watch every item that should not move, not one item's drift.
+experiment: a pass gate must watch every item that should not move, not one item's drift, and a pass should
+record the host's load average beside its telemetry — the card being free is not the same as the host being free.
+(This card-and-host trap belongs in [`docs/findings/14-card-behaviour.md`](14-card-behaviour.md) under AGENT.md
+§10; it is not filed there yet.)
 (2) **Amendment A13's turn-on correction is refuted by the block it was registered against.** A13 reasoned that a
 price measured against a constant-operand zero is `T + e·n·rate`, so summing it charges the fixed turn-on once per
 flipped position (13.5 times for `nrd_a`), and that the grid's excess would measure `−T`. The arithmetic is right

@@ -212,3 +212,17 @@ read 1–2 W low at an unchanged clock, rail, launch reading and cycles-per-op, 
 lesson for the next experiment is that the pass gate should be the spread of **all** constant-operand runs, not
 one item's first-versus-last drift; E67 is the first of these experiments to carry enough constant-operand items
 for that to be possible.
+
+**A16, Mon 26 Oct 2026, 23:2x PDT (after all the data, disclosed as such; it records a cause, and changes no
+rule, no code path that touched the card, and no measured number).** A15 described the pass-health split and
+named its symptom. The cause was found afterwards, by reading the host: **another lab user began CPU work on
+aifoundry3's host** in four waves — 4 processes at 21:42:40, 4 at 22:06:41 and 12 at 22:28:59–22:29:27, 20 in
+all on 16 cores at about 75% of a core each, load average about 22 at 23:15 — and **never held the card**, so
+`et-who` read "no holder" throughout and the card-scoped other-user test (E60's departure D1) correctly did not
+block. The first wave lands inside pass 754, the first degraded pass, and the measured rate fell 1.121 → 1.085
+Gop/s at that point and never recovered. The correlation is not monotone — grid passes 774 and 775 ran at the
+highest load and have the session's smallest spreads — so this is the well-supported cause of the sustained rate
+change and the likely but unproven cause of the intermittent per-run dips, and the README says so in those words.
+**Nothing in this protocol, or E60's or E65's, watches the host's CPU.** The next experiment should record the
+host's load average and run queue beside its telemetry, and report a sustained between-pass change in the
+measured op rate the way a clock change is already reported.

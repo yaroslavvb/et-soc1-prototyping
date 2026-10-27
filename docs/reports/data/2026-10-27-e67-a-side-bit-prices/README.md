@@ -378,11 +378,22 @@ with the registered gate (`ha/constspread.py`, `constspread.txt`):
 | 771, 772, 773 | 3 each | 0.43–0.98 | 35.61–36.42 | −0.326 … +0.981 | 1.084–1.091 | **set aside** |
 
 **The registered gate fires on the wrong passes.** It sets aside 754 at a 0.62 W spread and keeps 755 at 2.02 W,
-because `anchor_pi`'s own two runs happen to agree there. The cause is visible in the launch records: from pass
-754 the host-side launch overhead grew — the calibration launch 18 → 23 ms, the gap between launches 1.5 → 10–15 ms,
-the rate 1.121 → 1.085 Gop/s — and a minority of runs then read 1–2 W **low** at an unchanged clock, rail, launch
+because `anchor_pi`'s own two runs happen to agree there. The symptom is in the launch records: from pass 754 the
+host-side launch overhead grew — the calibration launch 18 → 23 ms, the gap between launches 1.5 → 10–15 ms, the
+rate 1.121 → 1.085 Gop/s — and a minority of runs then read 1–2 W **low** at an unchanged clock, rail, launch
 reading and cycles-per-op, so no per-run gate sees them. The pass median never moves, so the bad runs dip and
 never rise.
+
+**And the host, not the card, is what changed.** Another lab user began CPU work on aifoundry3's **host** in four
+waves — 4 processes at **21:42:40**, 4 more at 22:06:41, and 12 at 22:28:59–22:29:27, 20 in all on 16 cores,
+each near 75% of a core, taking the host's load average to about 22 (read at 23:15, after the last pass).
+**None of them ever held the card**: `et-who` reported no holder throughout, so the protocol's card-scoped
+other-user test (E60's departure D1) correctly did not block, and nothing in the protocol watches the host's CPU
+at all. The first wave lands **inside pass 754**, which ran 21:40–21:48 and is the first degraded pass, and the
+rate fell at that point and never recovered. The correlation is not monotone, though, and the write-up says so:
+the two highest-load grid passes, 774 and 775, have the smallest spreads of the session (0.09 and 0.12 W, on 3
+constant runs each against the A-scan's 7). So host contention is the well-supported cause of the **sustained
+rate change** and the likely but unproven cause of the **intermittent per-run dips**.
 
 So the results are given **twice**: the **registered** reduction over every pass the registered gates keep (10 of
 14), and a **post-hoc sensitivity** over the passes whose constant-operand spread is ≤ 0.40 W (7 of 14, 277 of 277
@@ -444,6 +455,12 @@ saturation, not noise.
   kept the worst pass of this session and discarded a better one. The replacement is in `ha/constspread.py`: the
   spread of all constant-operand runs in the pass. E67 is the first of these experiments to carry enough
   constant-operand items for that to be possible — six, by six different routes — and they cost one run each.
+- 🛑 **The card being free is not the same as the host being free.** Every one of these experiments checks that no
+  other user holds the card, and none of them looks at the host's CPU. Another user's 20 host processes on 16
+  cores cost this session a measurable, sustained drop in launch rate and one set-aside pass, while `et-who`
+  correctly read "no holder" the whole time. A pass should record the host's load average and run queue beside
+  its telemetry, and a sustained change in the measured op rate between passes should be reported the way a
+  clock change already is.
 - **A price list measured one knob at a time cannot be summed without testing that it can be.** The only way to
   find the 2× was to turn two knobs at once and then to compare against a counted random workload. Both cost
   little card time (25 items and 2 items) next to the 32-position scan, and both changed the conclusion.
