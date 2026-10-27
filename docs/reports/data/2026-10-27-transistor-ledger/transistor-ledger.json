@@ -1,11 +1,12 @@
 {
  "convention": {
-  "cycle_vs_toggle": "a cycle is one rise + one fall; a toggle is one edge. A capacitor C takes C.VDD^2 from the rail per cycle, so 0.5 C VDD^2 per toggle",
+  "cycle_vs_toggle": "a cycle is one rise + one fall; a toggle is one edge; a rise is the 0 -> 1 edge. A capacitor C takes C.VDD^2 from the rail on the rise and nothing on the fall, so a toggle -- the per-edge average -- costs 0.5 C VDD^2",
   "electrons": "charge / e, with charge = energy / VDD and e = 1.602176634e-19 C",
   "electrons_of_a_board_figure": "a board energy is not delivered at the die's rail, so its electron count is a convention, not a measurement. Every electron figure here divides by the same 0.517 V. The cards that produced E60, E65 and E38 ran at 521.9 mV, so an electron count taken at their own rail would be 0.9% lower.",
   "energy": "the energy drawn from VDD by one event, at 0.517 V (the minion rail)",
   "note_on_E60s_electron_column": "docs/reports/data/2026-10-20-bitflip-ladder/reduce.txt prints electrons as C.V/e, i.e. 2E/(V.e) -- the charge of the equivalent capacitor. Under the convention here (E/(V.e)) every one of its electron figures halves. Both appear below, labelled.",
-  "temperature": "25 C for every SPICE number (ASAP7's TT corner); the die temperature only enters Landauer's floor, where it is stated"
+  "temperature": "25 C for every SPICE number (ASAP7's TT corner); the die temperature only enters Landauer's floor, where it is stated",
+  "which_unit_each_section_uses": "one_transistor_switching and the_floor's rungs are PER RISE (C.VDD^2), because that is what a device deck measures. one_physical_net_toggle is PER TOGGLE (0.5 C VDD^2), because that is what the SAIF counts; its C_total_fF x VDD^2 gives the per-rise figure, exactly twice the per-toggle one. up_to_the_board's figures are sums over a whole event and belong to neither unit."
  },
  "date": "2026-10-27",
  "one_physical_net_toggle": {
@@ -193,6 +194,76 @@
    "comment": "the gate charge is linear in fins to 0.01%, so 'per fin' is the right unit and a wider device is simply more of them",
    "three_fins_over_one": 2.999994399139708
   },
+  "short_circuit_bracketed": {
+   "0p517": {
+    "E_switching_at_the_minimum_fJ": 0.5905022874622142,
+    "VDD_V": 0.517,
+    "cheapest_edge_ps": 300,
+    "excess_share_by_input_edge_ps": {
+     "1": 0.030414950342172703,
+     "10": 0.02575099050428837,
+     "100": 0.00545595495323983,
+     "1000": 0.02341039418905302,
+     "1500": 0.04825912233523551,
+     "2": 0.029854992739683,
+     "20": 0.021520038655676078,
+     "200": 0.00047510514080938675,
+     "2000": 0.07485172792721188,
+     "300": 0.0,
+     "5": 0.02823737934390811,
+     "50": 0.012828094691195526,
+     "500": 0.0038237868253708776,
+     "700": 0.010575696569595786
+    },
+    "max_excess_share": 0.07485172792721188,
+    "minimum_is_bracketed": true,
+    "output_slew_20_80_ps": {
+     "fall_80_20_ps": 17.039999999999974,
+     "rise_20_80_ps": 23.379999999999974,
+     "what": "INVx1 driving the same 2.105 fF, input edge 5 ps"
+    },
+    "static_leakage_nA": {
+     "hi": 0.04327374999999999,
+     "lo": 0.035454285714285716
+    },
+    "worst_relative_difference_against_the_first_sweep": 4.964929174547329e-06
+   },
+   "0p700": {
+    "E_switching_at_the_minimum_fJ": 1.097092100662,
+    "VDD_V": 0.7,
+    "cheapest_edge_ps": 50,
+    "excess_share_by_input_edge_ps": {
+     "1": 0.025580998671630793,
+     "10": 0.013964335971981984,
+     "100": 0.010702443870951636,
+     "1000": 0.382647307174376,
+     "1500": 0.5044337476947562,
+     "2": 0.023997290487047337,
+     "20": 0.006331812563716951,
+     "200": 0.05345238723300743,
+     "2000": 0.5882013783597196,
+     "300": 0.10276886888755472,
+     "5": 0.019705893576444932,
+     "50": 0.0,
+     "500": 0.198194096296487,
+     "700": 0.2813506394560697
+    },
+    "max_excess_share": 0.5882013783597196,
+    "minimum_is_bracketed": true,
+    "output_slew_20_80_ps": {
+     "fall_80_20_ps": 10.249999999999835,
+     "rise_20_80_ps": 13.040000000000195,
+     "what": "INVx1 driving the same 2.105 fF, input edge 5 ps"
+    },
+    "static_leakage_nA": {
+     "hi": 0.054437071428571425,
+     "lo": 0.05127917142857142
+    },
+    "worst_relative_difference_against_the_first_sweep": 3.46033561000374e-06
+   },
+   "verdict": "the minimum is real at both rails: 300 ps at 0.517 V and 50 ps at 0.700 V. Over the whole 1 ps - 2 ns range the spread is 7.5% of a cycle at 0.517 V against 59% at 0.700 V, so short circuit is the term that blows up at the higher rail and is worth a couple of percent at the minion's. This inverter's own output edge into this load is 23.4 ps (20-80%), where it sits 2.2% above its minimum.",
+   "what": "the same inverter and load swept 1 ps to 2 ns of input edge, on one measurement window shared by every deck, with each input state's static leakage measured and subtracted (one-switch4.json)"
+  },
   "short_circuit_share": {
    "at_0p517V": {
     "1": 0.02509861257186884,
@@ -213,7 +284,7 @@
     "50": 0.0
    },
    "measured_as": "excess rail energy over the cheapest input edge, INVx1 at the 2.105 fF a real net carries, edges 1-100 ps",
-   "verdict": "at 0.517 V the curve still falls monotonically out to a 100 ps edge, so short circuit is not separable from Miller coupling here; the whole spread across 1-100 ps edges is at most 2.5% of the net's 0.608 fJ per cycle, which bounds the short-circuit term above. Q126(d)'s '+70%' is the 0.7 V case with a 200 ps edge, and does not describe this rail."
+   "verdict": "over the 1-100 ps edges this first sweep covers, the spread is at most 2.5% of the net's 0.608 fJ per cycle -- but at 0.517 V the curve was still falling at its slowest edge, so that was the sampled spread and not a bound. The extended sweep below finds the minimum."
   },
   "what": "one minimum-size ASAP7 RVT device (Lg 20 nm, one fin), gate driven 0 -> VDD through an ammeter and the current integrated"
  },
@@ -288,15 +359,15 @@
     "electrons": 23498842.97733223,
     "over_Landauer_at_66C": 599717678.1997823
    },
-   "one toggle of an average clock net": {
-    "E_J": 1.0415596353120394e-15,
-    "electrons": 12574.282234801038,
-    "over_Landauer_at_66C": 320910.24031089386
+   "one rise (0 -> 1) of an average clock net": {
+    "E_J": 2.083119270624079e-15,
+    "electrons": 25148.564469602075,
+    "over_Landauer_at_66C": 641820.4806217877
    },
-   "one toggle of an average signal net": {
-    "E_J": 2.984662496319941e-16,
-    "electrons": 3603.249140228941,
-    "over_Landauer_at_66C": 91959.08966403024
+   "one rise (0 -> 1) of an average signal net": {
+    "E_J": 5.969324992639882e-16,
+    "electrons": 7206.498280457882,
+    "over_Landauer_at_66C": 183918.17932806048
    },
    "one transistor fin, driven inside a working cell": {
     "E_J": 9.418466918257061e-18,
@@ -305,6 +376,7 @@
    }
   },
   "the_one_sentence": "moving a single electron across this chip's 0.517 V rail already costs 25.5 Landauer quanta at the die's 66 C, and the smallest switch in the design -- one minimum transistor's gate -- moves 108 of them, so the floor is 2755x below one transistor and 1.8e+09 x below one random fp32 multiply-add at the board.",
+  "unit": "every single-edge rung here is ONE RISE (C.VDD^2 from the rail); the rungs from a flipped bit upwards are whole composite events. Section one_physical_net_toggle's per-toggle figures are half the two net rungs.",
   "what": "Landauer's kT ln2, at the die's own temperature, against every rung"
  },
  "up_to_the_board": {

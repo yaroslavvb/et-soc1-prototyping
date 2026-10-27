@@ -4,10 +4,13 @@
 One convention throughout:
   * every energy is the energy DRAWN FROM VDD by one event, at 0.517 V;
   * electrons = charge / e, with charge = energy / VDD;
-  * a "cycle" is one rise plus one fall; a "transition"/"toggle" is one edge.
-    A capacitor C driven through a gate takes C x VDD^2 from the rail per
-    cycle, so 1/2 C VDD^2 per toggle -- which is also what the open-netlist
-    power accounting charges per toggle, so the two agree by construction.
+  * a "cycle" is one rise plus one fall; a "transition"/"toggle" is one edge;
+    a "rise" is the 0 -> 1 edge.  A capacitor C driven through a gate takes
+    C x VDD^2 from the rail on the RISE and nothing on the fall, so a toggle
+    -- the per-edge average -- costs 1/2 C VDD^2, which is also what the
+    open-netlist power accounting charges per toggle.
+  * the transistor section and the Landauer ladder are PER RISE, the net
+    section is PER TOGGLE, and each says so; they differ by exactly 2x.
 
 Builds docs/reports/data/2026-10-27-transistor-ledger/transistor-ledger.json
 from
@@ -18,6 +21,7 @@ from
   * E60's and E65's committed card measurements  -- the board.
 
   ledger.py <repo_root> <one-switch3.json> <fanout2.json> <pinq.json|-> <out.json>
+            [one-switch4.json]
 """
 import json
 import math
@@ -44,6 +48,7 @@ def main():
     sw = json.load(open(swp))
     fan = json.load(open(fanp))
     pq = json.load(open(pinqp)) if pinqp != "-" else None
+    sw4 = json.load(open(sys.argv[6])) if len(sys.argv) > 6 else None
     pdir = os.path.join(repo, "docs/reports/data/2026-10-26-open-netlist/power")
 
     def pwr(tag):
@@ -58,9 +63,17 @@ def main():
         "convention": {
             "energy": "the energy drawn from VDD by one event, at 0.517 V (the minion rail)",
             "electrons": "charge / e, with charge = energy / VDD and e = 1.602176634e-19 C",
-            "cycle_vs_toggle": "a cycle is one rise + one fall; a toggle is one edge. A "
-                               "capacitor C takes C.VDD^2 from the rail per cycle, so "
-                               "0.5 C VDD^2 per toggle",
+            "cycle_vs_toggle": "a cycle is one rise + one fall; a toggle is one edge; a "
+                               "rise is the 0 -> 1 edge. A capacitor C takes C.VDD^2 from "
+                               "the rail on the rise and nothing on the fall, so a toggle "
+                               "-- the per-edge average -- costs 0.5 C VDD^2",
+            "which_unit_each_section_uses":
+                "one_transistor_switching and the_floor's rungs are PER RISE (C.VDD^2), "
+                "because that is what a device deck measures. one_physical_net_toggle is "
+                "PER TOGGLE (0.5 C VDD^2), because that is what the SAIF counts; its "
+                "C_total_fF x VDD^2 gives the per-rise figure, exactly twice the per-toggle "
+                "one. up_to_the_board's figures are sums over a whole event and belong to "
+                "neither unit.",
             "note_on_E60s_electron_column":
                 "docs/reports/data/2026-10-20-bitflip-ladder/reduce.txt prints electrons as "
                 "C.V/e, i.e. 2E/(V.e) -- the charge of the equivalent capacitor. Under the "
@@ -155,13 +168,49 @@ def main():
             "at_0p517V": sw["short_circuit_at_a_real_net_load"]["0p517"]["excess_share_over_cheapest"],
             "at_0p700V": sw["short_circuit_at_a_real_net_load"]["0p700"]["excess_share_over_cheapest"],
             "verdict":
-                "at 0.517 V the curve still falls monotonically out to a 100 ps edge, so "
-                "short circuit is not separable from Miller coupling here; the whole spread "
-                "across 1-100 ps edges is at most 2.5% of the net's 0.608 fJ per cycle, "
-                "which bounds the short-circuit term above. Q126(d)'s '+70%' is the 0.7 V "
-                "case with a 200 ps edge, and does not describe this rail.",
+                "over the 1-100 ps edges this first sweep covers, the spread is at most "
+                "2.5% of the net's 0.608 fJ per cycle -- but at 0.517 V the curve was "
+                "still falling at its slowest edge, so that was the sampled spread and "
+                "not a bound. The extended sweep below finds the minimum.",
         },
     }
+    if sw4:
+        sc4 = {}
+        for v in ("0p517", "0p700"):
+            s = sw4[v]
+            slew = s["excess_at_the_design_s_own_edge"]["output_slew"]
+            sc4[v] = {
+                "VDD_V": s["VDD_V"],
+                "minimum_is_bracketed": s["minimum_is_bracketed"],
+                "cheapest_edge_ps": s["cheapest_edge_ps"],
+                "E_switching_at_the_minimum_fJ": s["E_switching_at_the_minimum_fJ"],
+                "excess_share_by_input_edge_ps": {
+                    k: r["excess_share"] for k, r in s["by_input_edge_ps"].items()},
+                "max_excess_share": s["max_excess_share"],
+                "output_slew_20_80_ps": slew,
+                "static_leakage_nA": {k: leak["I_nA"] for k, leak
+                                      in s["static_leakage"].items()},
+                "worst_relative_difference_against_the_first_sweep":
+                    s["against_the_first_sweep"]["worst_relative_difference"],
+            }
+        one["short_circuit_bracketed"] = dict(
+            sc4,
+            what="the same inverter and load swept 1 ps to 2 ns of input edge, on one "
+                 "measurement window shared by every deck, with each input state's "
+                 "static leakage measured and subtracted (one-switch4.json)",
+            verdict=(
+                "the minimum is real at both rails: %d ps at 0.517 V and %d ps at 0.700 V. "
+                "Over the whole 1 ps - 2 ns range the spread is %.1f%% of a cycle at "
+                "0.517 V against %.0f%% at 0.700 V, so short circuit is the term that "
+                "blows up at the higher rail and is worth a couple of percent at the "
+                "minion's. This inverter's own output edge into this load is %.1f ps "
+                "(20-80%%), where it sits %.1f%% above its minimum."
+                % (sc4["0p517"]["cheapest_edge_ps"], sc4["0p700"]["cheapest_edge_ps"],
+                   100 * sc4["0p517"]["max_excess_share"],
+                   100 * sc4["0p700"]["max_excess_share"],
+                   sc4["0p517"]["output_slew_20_80_ps"]["rise_20_80_ps"],
+                   100 * sc4["0p517"]["excess_share_by_input_edge_ps"]["20"])))
+
     if pq:
         mw = pq["mix_weighted_0p517"]
         one["in_a_real_cell_mix_weighted"] = {
@@ -456,8 +505,12 @@ def main():
             pq["mix_weighted_0p517"]["Q_per_fin_aC"] * 1e-18 * VDD
         rungs["one gate pin of the cells this unit drives"] = \
             pq["mix_weighted_0p517"]["E_from_VDD_per_driven_pin_rising_edge_aJ"] * 1e-18
-    rungs["one toggle of an average signal net"] = sg["E_per_toggle_fJ"] * 1e-15
-    rungs["one toggle of an average clock net"] = ck["E_per_toggle_fJ"] * 1e-15
+    # Per RISE, like every rung above: a net's C takes C.VDD^2 on the 0 -> 1
+    # edge, which is twice the per-toggle figure section 2 reports.  Mixing the
+    # two units here is what made 14.5 fins x 108 electrons read as 43% of a
+    # net instead of the 21.7% the capacitances actually say.
+    rungs["one rise (0 -> 1) of an average signal net"] = 2 * sg["E_per_toggle_fJ"] * 1e-15
+    rungs["one rise (0 -> 1) of an average clock net"] = 2 * ck["E_per_toggle_fJ"] * 1e-15
     rungs["one flipped operand bit, open netlist, quiet partner"] = \
         ladder["lq"]["fJ_per_designed_bit_switching"] * 1e-15
     rungs["one flipped operand bit, E60 at the board"] = BOARD["lq"]["fJ"] * 1e-15
@@ -468,6 +521,9 @@ def main():
 
     R["the_floor"] = {
         "what": "Landauer's kT ln2, at the die's own temperature, against every rung",
+        "unit": "every single-edge rung here is ONE RISE (C.VDD^2 from the rail); the "
+                "rungs from a flipped bit upwards are whole composite events. Section "
+                "one_physical_net_toggle's per-toggle figures are half the two net rungs.",
         "kT_ln2": floors,
         "rungs": {k: {"E_J": v, "over_Landauer_at_66C": v / kt,
                       "electrons": v / VDD / E} for k, v in rungs.items()},

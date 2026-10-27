@@ -1,7 +1,7 @@
 # The transistor ledger: one switch, one net, one multiply-add, and Landauer's floor
 
 **Request Q128(d). Monday 26 – Tuesday 27 October 2026 (week 44).** Run on **aifoundry2**, under
-`nice`, in `$HOME/q128d` — CPU only, no card, no `/dev/et*`. Everything here is **open data**:
+`nice`, in `$HOME/q128d` and `$HOME/q128dfix` — CPU only, no card, no `/dev/et*`. Everything here is **open data**:
 ASAP7's own device models and cell netlists, the open synthesis and placement of the public RTL
 ([Q126(e)](../2026-10-26-open-netlist/)), and the card measurements already in this repository.
 
@@ -12,13 +12,22 @@ a gap at the bottom. [Q126(d)](../2026-10-26-asap7-cell-energies/) priced a *cel
 much is wire. This closes that, and then carries it up: one device → one gate pin → one physical
 net → one random fp32 multiply-add → the board → Landauer.
 
+**Amended the same night, 22:45 PDT**, after a check against the committed files found four things, all
+fixed here: the Landauer ladder was priced per *toggle* while §1 was priced per *rise*, exactly 2×
+apart (§4 is now per rise throughout, and the convention table says which unit each section uses);
+the unpriced share of the design's capacitance was printed as 50.5% when 50.5% is the *priced* share;
+the short-circuit bound rested on a minimum that was never bracketed (34 more decks now bracket it);
+and the attribution of E60's two board numbers is spelled out in §3, because another record on `main`
+has them on the wrong card. No measured quantity moved.
+
 ## One convention, held throughout
 
 | | |
 |---|---|
 | **Energy** | the energy **drawn from VDD** by one event, at **0.517 V** (the minion rail the open flow prices at) |
 | **Electrons** | charge / e, with charge = energy / VDD and e = 1.602176634 × 10⁻¹⁹ C |
-| **Cycle vs toggle** | a *cycle* is one rise plus one fall; a *toggle* is one edge. A capacitance C takes C·VDD² from the rail per cycle, so **½CV² per toggle** — which is exactly what Q126(e)'s power accounting charges, so the two agree by construction |
+| **Cycle, toggle, rise** | a *cycle* is one rise plus one fall; a *toggle* is one edge; a *rise* is the 0 → 1 edge. A capacitance C takes **C·VDD² from the rail on the rise and nothing on the fall**, so a *toggle* — the per-edge average over a cycle — costs **½CV²**, which is exactly what Q126(e)'s power accounting charges, so the two agree by construction |
+| 🛑 **which unit each section uses** | **§1 and §4's ladder price one rise**, because that is the event a device SPICE deck measures and the event anyone means by "one transistor switching". **§2's net table prices one toggle**, because that is the event the SAIF counts. The two differ by exactly 2×, every table says which it is, and §2 gives both. The totals in §3 are sums over a whole multiply-add and belong to neither |
 | **Temperature** | 25 °C for every SPICE number (ASAP7's TT corner). The die temperature enters only Landauer's floor, where it is stated |
 
 🛑 **One convention this page does not share.** `docs/reports/data/2026-10-20-bitflip-ladder/reduce.txt`
@@ -33,16 +42,20 @@ match the convention above, and both forms are in the JSON.
 | `transistor-ledger.json` | every number on this page, with its provenance |
 | `ledger.py` | builds that JSON from the three measurements below plus the committed card data |
 | `gen_decks3.py`, `parse3.py`, `spice3.log` | the 50 SPICE decks: gate charge, the inverter by load, short circuit, a net as built |
+| `gen_sc4.py`, `gen_sc5.py`, `parse_sc4.py`, `sc4.log`, `sc5.log`, `one-switch4.json` | 34 more decks that bracket the short-circuit minimum out to a 2 ns edge, measure the static leakage that has to come out of it, and measure the output edge this inverter actually delivers |
 | `gen_pinq.py`, `parse_pinq.py`, `pinq.log`, `pinq-meta.json` | the per-cell pin-charge run on the 15 cell types this multiply-add actually drives |
-| `one-switch3.json`, `pinq.json` | the two SPICE runs, parsed |
+| `one-switch3.json`, `pinq.json` | the first two SPICE runs, parsed |
 | `fanout2.py`, `fanout2_randn_keep.json` | the DEF × capacitance × SAIF join: what one net toggle charges |
-| `strip_logs.py` | takes ngspice's `Reference value :` progress chatter out of the two logs before they are committed; the parsers read the stripped files to the same digits |
+| `strip_logs.py` | takes ngspice's `Reference value :` progress chatter out of each log before it is committed; the parsers read the stripped files to the same digits |
+| `check_page.py` | asserts every number printed on this page against the two JSONs — run it after any edit to either |
 
 The ASAP7 kit is not committed: `../2026-10-26-asap7-one-switch/setup.sh` fetches it and builds
 ngspice with OSDI. To re-run the arithmetic alone:
 
 ```
-python3.12 -I ledger.py <repo root> one-switch3.json fanout2_randn_keep.json pinq.json out.json
+python3.12 -I ledger.py <repo root> one-switch3.json fanout2_randn_keep.json pinq.json \
+           out.json one-switch4.json
+python3.12 -I parse_sc4.py one-switch4.json one-switch3.json sc4.log sc5.log   # the sweep alone
 ```
 
 ## 1. One transistor switching
@@ -118,32 +131,55 @@ transistors — wire, inside the cell.
 | the cell's share | 100% | 20.7% | 16.9% | 11.1% | **7.4%** | 2.2% |
 
 The loads are not round numbers because they are the ones §2 measures: **2.105 fF is what an
-average toggling signal net in this design actually carries**, 1.32 fF its pin half, 0.785 fF its
-wire half, 7.793 fF an average clock net, 0.596 fF one driven gate pin.
+average toggling signal net in this design carries**, 1.32 fF its pin half, 0.785 fF its wire half,
+7.793 fF an average clock net, 0.596 fF one driven gate pin. (2.105 fF is the mean over **all**
+20,383 extracted nets, which is what the decks were cut against; §2's headline row restricts to the
+16,799 the DEF names and reads 2.233 fF. Both rows are in the JSON. Nothing here turns on which:
+the two differ by 6%, and this table is about the *shape* of the split, not the net's exact size.)
 
 **With a real net on it, an INVx1 costs 0.608 fJ per cycle — 7,337 electrons — and 92.6% of that is
 the net, not the cell.** The 0 fF column is Q126(d)'s; the rest is this run, and it reproduces
 Q126(d)'s own table where they overlap (0.0415 fJ at 0.596 fF against its 0.0407 at 0.5 fF;
 0.0451 at 2.105 against its 0.0450 at 2 fF).
 
-### The short-circuit share, at a real net's load
+### The short-circuit share, at a real net's load, with the minimum bracketed
 
-The same inverter at 2.105 fF, swept over input edge time, rail energy per cycle above the
-cheapest edge:
+The same inverter at 2.105 fF, swept over input edge time. The first sweep went to 100 ps
+(`one-switch3.json`) and at 0.517 V was **still falling at its slowest edge**, so its "2.5%" was the
+spread over the edges sampled and not a bound on anything. The sweep was redone out to **2 ns**
+(`one-switch4.json`, 34 more decks): one measurement window shared by every deck, 0.95 → 14.95 ns,
+and the static leakage of each input state measured in its own deck and subtracted, because a slower
+edge spends less of a fixed window in the steady state and that difference is the same size as the
+term being measured. Rail energy per cycle, leakage out:
 
-| input edge | 1 ps | 2 ps | 5 ps | 10 ps | 20 ps | 50 ps | 100 ps |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| **0.517 V**, excess (fJ) | 0.0153 | 0.0149 | 0.0139 | 0.0124 | 0.0098 | 0.0044 | **0** |
-| as a share of the cycle | 2.5% | 2.5% | 2.3% | 2.0% | 1.6% | 0.7% | — |
-| **0.700 V**, excess (fJ) | 0.0288 | 0.0270 | 0.0221 | 0.0155 | 0.0070 | **0** | 0.0119 |
-| as a share of the cycle | 2.6% | 2.4% | 2.0% | 1.4% | 0.6% | — | 1.1% |
+| input edge | 1 ps | 5 ps | 20 ps | 50 ps | 100 ps | 200 ps | 300 ps | 500 ps | 1 ns | 2 ns |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **0.517 V**, fJ/cycle | 0.6090 | 0.6077 | 0.6035 | 0.5982 | 0.5937 | 0.5908 | **0.5905** | 0.5928 | 0.6047 | 0.6383 |
+| above its own minimum | 3.0% | 2.8% | 2.2% | 1.3% | 0.5% | 0.05% | **—** | 0.4% | 2.3% | **7.5%** |
+| **0.700 V**, fJ/cycle | 1.1259 | 1.1191 | 1.1041 | **1.0971** | 1.1090 | 1.1590 | 1.2228 | 1.3683 | 1.7771 | 2.6641 |
+| above its own minimum | 2.6% | 2.0% | 0.6% | **—** | 1.1% | 5.3% | 10.3% | 19.8% | 38.3% | **58.8%** |
 
-🛑 **At 0.517 V the curve still falls monotonically out to a 100 ps edge**, so short circuit is not
-separable from gate–drain (Miller) coupling by this method; what the table bounds is their sum, and
-that sum is **at most 2.5% of the 0.608 fJ a real net costs**. Q126(d)'s "+70% for a slow edge" is
-the **0.7 V** case at **2 fF** with a **200 ps** edge, and it does not describe this rail at this
-load. On the question the chain asks — does short circuit explain why some switches cost more? — the
-answer at the minion's rail is **no, not at the percent level**.
+**Both curves are U-shaped and both minima are now inside the window: 300 ps at 0.517 V, 50 ps at
+0.700 V.** Below the minimum the cost rises through gate–drain (Miller) coupling, above it through
+short circuit — and that second arm is the whole difference between the two rails. At 0.700 V a 2 ns
+edge costs **+59%**; at 0.517 V the same edge costs **+7.5%**, and the entire 1 ps – 2 ns range spans
+7.5% of a cycle. 🛑 **So short circuit does not explain why one switch costs more than another at
+the minion's rail; at 0.7 V it would.**
+
+**And this design never gets near the slow arm.** The same INVx1 driving the same 2.105 fF puts out
+an edge of **23.4 ps rising and 17.0 ps falling** (20–80%) — that is the input edge the next gate
+actually sees, and it is the same 20–80% time as a linear ramp of 39 and 28 ps. Over 1–50 ps the
+inverter sits **1.3 – 3.0% above its own minimum**, which is the honest size of short circuit plus
+Miller together here: a couple of percent of a switch, the same couple of percent for every switch.
+
+Three things check out. The extended run **reproduces the first sweep to 5 × 10⁻⁶ relative** at all
+seven shared edges on both rails, once both are de-leaked with the measured currents (0.035 nA input
+low, 0.043 nA input high at 0.517 V — 0.00028 fJ over the 14 ns window, 0.05% of a cycle, and exactly
+the 0.0002 fJ by which the two runs' *raw* numbers differ). At 0.700 V and a 200 ps edge it reads
+**+0.0620 fJ** against Q126(d)'s **+0.0639 fJ** at 2.0 fF. And Q126(d)'s headline **"+70% for a slow
+edge"** is that same +0.064 fJ expressed over the cell's own *internal* energy (0.0875 fJ), not over
+a cycle: the two runs agree, and what is new here is that the 0.517 V curve, which Q126(d) saw
+falling out to 200 ps, turns at 300 ps and is still only 7.5% up at 2 ns.
 
 ## 2. One physical-net toggle: what it charges
 
@@ -171,9 +207,16 @@ on the net.
 | — the transistor gates | 0.485 fF (**21.7%**) | 1.330 fF (**17.1%**) |
 | — wire inside the cells | 0.892 fF (**39.9%**) | 3.343 fF (**42.9%**) |
 | — wire between the cells | 0.856 fF (**38.3%**) | 3.121 fF (**40.0%**) |
-| **energy per toggle** | **0.2985 fJ** | **1.0416 fJ** |
+| **energy per toggle** (½CV²) | **0.2985 fJ** | **1.0416 fJ** |
 | **electrons per toggle** | **3,603** | **12,574** |
+| *the same per rise* (C·V², §4's unit) | *0.5969 fJ, 7,206 electrons* | *2.0831 fJ, 25,149 electrons* |
 | toggles per multiply-add | 3,106 (3,623 with the nets the DEF does not name) | 476.6 |
+
+The two unit rows are one measurement in two units: a net that toggles *n* times rises *n*/2 times,
+and (per toggle × toggles) = (per rise × rises) exactly. §3's **1.019 pJ** of signal switching is
+that product over all 20,383 nets — 0.2814 fJ × 3,623 toggles, or 0.5627 fJ × 1,812 rises. The
+per-rise row is the one that lines up with §1: **14.5 fins × 108 electrons = 1,565 against the net's
+7,206 — 21.7%**, exactly the transistor share in the table.
 
 **So about one fifth of what a toggle costs is transistor, and four fifths is wire** — and that is
 the *generous* reading, because the between-cell capacitance is a Steiner estimate with no coupling
@@ -213,6 +256,16 @@ over h ≥ 1 against the *designed* flip count, free intercept), against the car
 E60's own rail column is 0.750 and 0.745 of its board column, which is where the chain's "≈ 0.75"
 comes from; it is measured, not assumed.
 
+🛑 **Both board numbers are E60's, and both are the same card.** `lq` 116.746 ± 0.613 fJ and `lb`
+129.918 ± 0.480 fJ are the two ladders of E60's **aifoundry3** block —
+[`reduce.txt`](../2026-10-20-bitflip-ladder/reduce.txt), 600 MHz, 521.8 mV, 4 passes each. They are
+not two experiments and not two cards. aifoundry1's card 0 ran the same `lq` ladder at 800 MHz and
+603.9 mV and read **102.490 ± 4.418 fJ**; E65's own flip, flow-M (`b` bit 11 against `a` = π), is
+**745 ± 56 fJ** ([05-claims.md](../../../findings/05-claims.md)). `tools/claims-v3/sm/README.md`'s
+amendment A6 of 26 Oct attributes 116.7 fJ to aifoundry1's card 0 at 800 MHz and 129.9 fJ to E65;
+the attribution above is the one to quote. It is not bookkeeping: this page's electron counts all
+divide by 0.517 V, which is 0.9% from aifoundry3's rail and 17% from aifoundry1 card 0's.
+
 **Per random fp32 multiply-add.**
 
 | | pJ |
@@ -251,9 +304,9 @@ everywhere above is itself a floor.
 
 ### Why the bottom-up number is a floor, three times over
 
-1. **Half the capacitance is unpriced.** 23,762 fF of the design's 47,093 fF are on nets the
-   simulation can name; the other 50.5% belongs to nets CTS and `repair_design` made after the
-   netlist was simulated. They switch.
+1. **Half the capacitance is unpriced.** Only **50.5%** of the design's farads are priced here:
+   23,762 fF of 47,093 fF are on nets the simulation can name, and the other **23,331 fF — 49.5%**
+   — belongs to nets CTS and `repair_design` made after the netlist was simulated. They switch.
 2. **The between-cell wire has no coupling term.** Detailed routing never closed, so there is no
    SPEF; the Steiner estimate is a lower bound on every wire.
 3. **The ledger is one lane's arithmetic.** The board also pays for the register file's read ports,
@@ -283,7 +336,9 @@ kT ln 2, at the temperatures this chip actually runs at:
 |---|---:|---:|---:|---:|
 | kT ln 2 | 2.853 zJ | 3.169 zJ | **3.246 zJ** | 3.379 zJ |
 
-Every rung of the chain against the 66 °C floor:
+Every rung of the chain against the 66 °C floor. **Every single-edge rung is one rise** (0 → 1,
+C·V² from the rail), which is the event §1 measures; the composite rungs below them are whole
+events. The per-*toggle* figures of §2 are half the two net rungs, by definition:
 
 | rung | energy | **× Landauer** | electrons |
 |---|---:|---:|---:|
@@ -291,8 +346,8 @@ Every rung of the chain against the 66 °C floor:
 | one minimum device's gate, isolated | 8.94 aJ | **2,755** | 108 |
 | one transistor fin, driven inside a working cell | 9.42 aJ | 2,902 | 114 |
 | one gate pin of the cells this unit drives | 57.3 aJ | 1.8 × 10⁴ | 692 |
-| one toggle of an average signal net | 0.2985 fJ | 9.2 × 10⁴ | 3,603 |
-| one toggle of an average clock net | 1.042 fJ | 3.2 × 10⁵ | 12,574 |
+| one **rise** of an average signal net (2.233 fF) | 0.5969 fJ | 1.8 × 10⁵ | 7,206 |
+| one **rise** of an average clock net (7.794 fF) | 2.083 fJ | 6.4 × 10⁵ | 25,149 |
 | one flipped operand bit, open netlist (`lq`) | 32.9 fJ | 1.0 × 10⁷ | 3.97 × 10⁵ |
 | one flipped operand bit, E60 at the board | 116.7 fJ | 3.6 × 10⁷ | 1.40 × 10⁶ |
 | E65's flow-M flip at the board | 745 fJ | 2.3 × 10⁸ | 9.0 × 10⁶ |
@@ -303,8 +358,8 @@ Every rung of the chain against the 66 °C floor:
 across this chip's 0.517 V rail already costs **25.5 kT ln 2** at the die's 66 °C. The smallest
 switch in the design moves **108 of them**. 25.5 × 108 = 2,755, and that is the whole distance from
 Landauer to one transistor. Everything above it — the 14.5 fins a net drives, the wire that is four
-fifths of a toggle, the 3,623 toggles a multiply-add makes, the clock tree, and the 3× the board
-charges over the lane — is the other six orders of magnitude.
+fifths of a net, the **1,812 signal rises** a multiply-add makes (3,623 toggles), the clock tree, and
+the 3× the board charges over the lane — is the other six orders of magnitude.
 
 Neither factor is a thermodynamic limit. The 25.5 is the rail divided by kT; the 108 is a gate
 capacitance, which is geometry. Both are design, and both are what the rest of this chain measures.
