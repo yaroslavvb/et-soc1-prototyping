@@ -1,0 +1,1646 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From matmul speed to one transistor switch · ET-SoC-1</title>
+<meta name="description" content="Horace He's observation — a matmul runs faster on zeros than on random numbers — followed down nine steps on the ET-SoC-1: 15% faster burst and 33% sustained, because the governor regulates board power to a cap and random data draws 35 against 83 W at a fixed 800 MHz; 5.78 against 0.27 pJ per multiply-add; 118–136 fJ per flipped operand bit, 83 to 1,440 fJ depending which bit; about 4,100 net toggles per multiply-add on a placed open netlist, a fifth of whose energy is transistor gate; 8.94 aJ and 108 electrons for one minimum transistor's gate at 0.517 V, 2,755 times Landauer's floor. The bottom-up count names a third of what the card pays, and the remainder is shown rather than hidden.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; --ref: #8c8b85;
+  --ok: #008300; --warn: #eda100; --bad: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+    --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+  --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-text-size-adjust: 100%; }
+main { max-width: 940px; margin: 0 auto; padding: 28px 16px 72px; }
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; margin: 44px 0 10px; }
+h3 { font-size: 1rem; margin: 22px 0 8px; }
+.byline { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 22px; }
+.lede { font-size: 1.05rem; }
+.small { font-size: 0.85rem; color: var(--ink-2); }
+a { color: var(--c1); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre code { padding: 0; background: none; border-radius: 0; font-size: inherit; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.kpi .lab { color: var(--ink-2); font-size: 0.8rem; }
+.kpi .val { font-size: 1.5rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi .sub { color: var(--ink-2); font-size: 0.8rem; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.chart.scroll svg { min-width: 640px; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 320px; display: none; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lab { fill: var(--ink-2); font-size: 12px; }
+.lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.lvl { font-weight: 600; white-space: nowrap; }
+.wide table { min-width: 760px; }
+.chip { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid transparent; }
+.chip.works_now { color: var(--ok); border-color: var(--ok); }
+.chip.needs_fw_change { color: var(--c1); border-color: var(--c1); }
+.chip.needs_tooling { color: var(--warn); border-color: var(--warn); }
+.chip.research_only { color: var(--muted); border-color: var(--muted); }
+.chip.impossible_on_silicon { color: var(--bad); border-color: var(--bad); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.82rem; color: var(--ink-2); margin: 6px 0 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 6px; }
+.controls button { font: inherit; font-size: 0.82rem; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; min-height: 30px; }
+.controls button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.verif { font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+.verif.confirmed::before { content: "✓ "; color: var(--ok); }
+.verif.disputed::before { content: "± "; color: var(--warn); }
+.verif.unverified::before { content: "· "; }
+ol li, ul li { margin: 5px 0; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; }
+.chart-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.s1 { stroke: var(--c1); } .s2 { stroke: var(--c2); } .s3 { stroke: var(--c3); } .s4 { stroke: var(--c4); } .s5 { stroke: var(--c5); }
+.ln { fill: none; stroke-width: 2; stroke-linejoin: round; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.math-display { display: block; overflow-x: auto; overflow-y: hidden; max-width: 100%; margin: 16px 0 18px;
+  padding: 2px 0; text-align: center; color: var(--ink); }
+.math-display svg { max-width: none; }
+.math-inline { color: var(--ink); }
+.math-inline svg, .math-display svg { vertical-align: middle; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+/* chartkit:css:begin (the chart toolkit's CSS; scripts/paste-chartkit.py copies this block into standalone pages) */
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-sortable th[aria-sort] { padding: 0; }
+.ck-sortable th .ck-sort { font: inherit; font-weight: inherit; color: inherit; text-align: inherit; background: none; border: 0;
+  width: 100%; min-height: 32px; padding: inherit; padding: 6px 8px; cursor: pointer; }
+.ck-sortable th .ck-sort::after { content: ' \2195'; color: var(--muted); font-weight: 400; }
+.ck-sortable th[aria-sort="ascending"] .ck-sort::after { content: ' \2191'; color: var(--ink); }
+.ck-sortable th[aria-sort="descending"] .ck-sort::after { content: ' \2193'; color: var(--ink); }
+.ck-sortable th .ck-sort:focus-visible { outline: 2px solid var(--c1); outline-offset: -2px; }
+.ck-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 0 6px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-filter input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 8px; padding: 4px 8px; min-height: 32px; width: min(260px, 100%); }
+.ck-filter input:focus-visible { outline: 2px solid var(--c1); outline-offset: 1px; }
+.ck-filter-n { color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
+/* chartkit:css:end */
+</style>
+</head>
+<body>
+<main>
+<style>
+main>p,main>ul,main>ol,main>h1,main>h2,main>h3,main>.links,main>.tiles,main>figure,main>details,main>.note,main>.vbox{max-width:900px}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:10px;margin:14px 0 6px}
+.links a{display:block;border:1px solid var(--axis);border-radius:6px;padding:9px 12px;background:var(--surface);color:inherit;text-decoration:none}
+.links a b{display:block}.links a span{font-size:.86rem;color:var(--ink-2)}
+.links a:hover,.links a:focus-visible{border-color:var(--c1)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px;margin:16px 0 10px}
+.tile{border:1px solid var(--axis);border-radius:8px;padding:12px 14px;background:var(--surface)}
+.tile .n{font-size:clamp(1.5rem,5.5vw,2rem);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.tile .u{font-size:.9rem;color:var(--ink-2);font-weight:400}
+.tile .l{font-size:.85rem;color:var(--ink-2);margin-top:5px;line-height:1.35}
+.tile.hi .n{color:var(--c1)}
+figure{margin:18px 0 10px}
+figcaption{font-size:.88rem;color:var(--ink-2);margin-top:6px;line-height:1.45}
+figure h3,.lv h3{margin:0 0 2px;font-size:1.02rem}
+.chartbox{overflow-x:auto}
+.chartbox svg{display:block;width:100%;height:auto;max-width:900px}
+.lv{border:1px solid var(--axis);border-left:3px solid var(--c1);border-radius:6px;padding:12px 14px;background:var(--surface);margin:14px 0}
+.lv .step{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.lv .big{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums;margin:6px 0 2px}
+.lv dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:9px 0 0;font-size:.93rem}
+.lv dt{color:var(--ink-2);white-space:nowrap}
+.lv dd{margin:0}
+.lv.weak{border-left-color:var(--warn)}
+.lv.gap{border-left-color:var(--bad)}
+.conf{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--axis);border-radius:999px;padding:1px 9px;color:var(--ink-2)}
+.conf.m{border-color:var(--ok);color:var(--ok)}
+.conf.d{border-color:var(--warn);color:var(--warn)}
+.conf.g{border-color:var(--bad);color:var(--bad)}
+.tblwrap{overflow-x:auto;max-width:900px}
+table.t{width:100%;border-collapse:collapse;margin:8px 0 14px;font-size:.93rem}
+table.t th,table.t td{padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.t tr.tot td{font-weight:700;border-top:1px solid var(--axis)}
+.note{border:1px solid var(--axis);border-radius:6px;padding:10px 13px;background:var(--surface);margin:12px 0;font-size:.94rem}
+.note b.k{color:var(--c2)}
+details{margin:10px 0}
+details>summary{cursor:pointer;font-weight:600}
+.vbox{border:1px dashed var(--c7);border-radius:6px;padding:11px 14px;margin:14px 0;background:var(--surface)}
+.vbox .vt{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c7)}
+.vbox h4{margin:5px 0 6px;font-size:1rem}
+.vbox table{width:100%;border-collapse:collapse;font-size:.92rem}
+.vbox td{padding:4px 8px;border-bottom:1px solid var(--border)}
+.vbox td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.foot{margin-top:24px;font-size:.92rem;color:var(--ink-2)}
+@media (max-width:520px){.lv dl{grid-template-columns:1fr}.lv dt{margin-top:6px}}
+</style>
+
+<h1>From matmul speed to one transistor switch</h1>
+<p class="byline">Tuesday 27 October 2026 · the ET-SoC-1 at AI Foundry · every number below is a committed
+measurement or a model built on one, in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">the repository</a></p>
+
+<p class="lede">Horace He's observation is that a matrix multiply runs faster on zeros than on random numbers,
+although it does exactly the same arithmetic. On this card it does: 15% faster in the first seconds, 33% faster
+once the die is hot. Nothing about the instructions changed — only how many wires inside the chip had to move.
+This page follows that one difference all the way down: from TFLOPS to the governor, to watts at the board, to
+picojoules per multiply-add, to femtojoules per flipped bit of an operand, to the toggles of individual wires,
+to the gates they charge, to one transistor's gate, to the electrons in it and to the thermodynamic floor
+underneath. Nine steps. Six of them are measured on silicon, three are modelled, and the gap that is left is
+shown rather than hidden.</p>
+
+<div class="links">
+  <a href="#answer"><b>The answer</b><span>One paragraph and eight numbers.</span></a>
+  <a href="#chain"><b>The chain</b><span>Each step, its number, its evidence.</span></a>
+  <a href="#closure"><b>Where the energy goes</b><span>The waterfall, with the unaccounted part.</span></a>
+  <a href="#back"><b>Back up the ladder</b><span>Predicting the speed gap from the bottom.</span></a>
+  <a href="#open"><b>What is still open</b><span>Including the one causal test not yet run.</span></a>
+</div>
+
+<h2 id="answer">1. The answer</h2>
+
+<p>Random fp32 data makes about 13.5 of the 32 bits of each operand change from one multiply-add to the next;
+zeros make none change. Every changed bit drives a cascade of wires through the multiplier's Wallace tree, and
+every wire that moves charges a capacitance. That is the whole mechanism: <b>the card's clock governor regulates
+board power to a cap, random data draws more power for the same arithmetic, so the governor gives it a lower
+clock, and a lower clock is fewer FLOPS.</b> The numbers below are the same difference restated at each depth.</p>
+
+<div class="tiles" id="tiles"></div>
+
+<p id="answer-prose">On a cool die, in the first eight seconds, the card does <b id="a-burst"></b> on zeros
+against <b id="a-burstr"></b> on random fp32 — <b id="a-burstpct"></b> faster. Once it is hot and the thermal
+test takes over, zeros hold 800 MHz while random data sits on the governor's 600 MHz floor, and the gap becomes
+<b id="a-sus"></b>. At 800 MHz the board draws <b id="a-wz"></b> on zeros and <b id="a-wr"></b> on random data.
+Divided by the multiply-adds those watts buy, that is <b id="a-pz"></b> against <b id="a-pr"></b> of energy per
+multiply-add over idle. Divided again by the roughly 27 operand bits that change, one flipped bit of an operand
+costs <b id="a-bit"></b> at the board. Underneath that bit, a bottom-up count on an open synthesis of the same
+RTL finds <b id="a-tog"></b> physical net toggles per random multiply-add; the gates they charge hold
+<b id="a-fins"></b> transistor fins per signal net; and one minimum transistor's gate takes
+<b id="a-tr"></b> — about <b id="a-el"></b> electrons across the 0.517 V rail, which is
+<b id="a-land"></b> times Landauer's floor at the die's own temperature.</p>
+
+<h2 id="chain">2. The chain, step by step</h2>
+
+<p>Each rung below carries its number, how it was obtained, where to check it, how far to trust it, and what is
+still missing. The ladder is to scale in orders of magnitude: eleven of them separate one electron from one
+multiply-add at the board.</p>
+
+<figure>
+  <h3>Nine steps from a TFLOPS gap to one transistor</h3>
+  <div class="chartbox" id="ladder"></div>
+  <figcaption>Energy per event, logarithmic. Solid marks are measured on a card; hollow marks are modelled or
+  simulated. The dashed line is Landauer's <span style="white-space:nowrap">kT&nbsp;ln&nbsp;2</span> at the die's
+  66&nbsp;°C trip.</figcaption>
+</figure>
+
+<div class="lv" id="lv0">
+  <div class="step">Step 0 · speed</div>
+  <h3>Zeros run faster than random data, on the same instructions</h3>
+  <div class="big" id="lv0-big"></div>
+  <dl>
+    <dt>How</dt><dd>E64: 47 runs on aifoundry2's card, fp32/fp16/int8 against zeros, ones and random data,
+      burst and sustained, with the governor's own trace read back.</dd>
+    <dt>Source</dt><dd><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-limit">The power limit, not the
+      temperature limit</a> · <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-10-23-e64-horace-power-limit">data</a></dd>
+    <dt>Confidence</dt><dd><span class="conf m">measured</span> on one card. Four ways of reading the same gap
+      give <span id="lv0-range"></span>, depending on whether you read TFLOPS or clocks.</dd>
+    <dt>Open</dt><dd>No GPU run of the same kind has been logged beside it, so the comparison with Horace's
+      original A100 result is still from his numbers, not ours.</dd>
+  </dl>
+</div>
+
+<div class="lv" id="lv1">
+  <div class="step">Step 1 · the governor</div>
+  <h3>Because a controller regulates board power to a cap, and die temperature to a trip</h3>
+  <div class="big" id="lv1-big"></div>
+  <dl>
+    <dt>How</dt><dd>The governor's log names which test acted at every step. Below 65&nbsp;°C only the power
+      test fires, on a running average of about <span id="lv1-tau"></span> of board power; at a 66&nbsp;°C
+      reading only the thermal test fires, even for zeros. A model of that controller reproduces the mean clock
+      of <span id="lv1-n"></span> runs to <span id="lv1-rms"></span>.</dd>
+    <dt>Source</dt><dd>E64, as above. The cap is the TDP the card reads back, not a fitted number.</dd>
+    <dt>Confidence</dt><dd><span class="conf m">measured</span> for the mechanism,
+      <span class="conf d">modelled</span> for the cap axis.</dd>
+    <dt>Open</dt><dd><b>The cap has never been moved.</b> Every number here reads the governor at its one
+      factory setting; the table of clocks under caps of 35–85&nbsp;W is an extrapolation from that single
+      point. The test that would make this causal is <a href="#knob">in §5</a> and waits on the card's owner.</dd>
+  </dl>
+</div>
+
+<div class="lv" id="lv2">
+  <div class="step">Step 2 · the board</div>
+  <h3>Random data draws more watts for exactly the same arithmetic</h3>
+  <div class="big" id="lv2-big"></div>
+  <dl>
+    <dt>How</dt><dd>Board power from the card's own telemetry, at fixed clock, over ten operand patterns and
+      three clock frequencies. The static part of the draw — everything that does not depend on the data — is
+      <span id="lv2-static"></span> at 600/700/800&nbsp;MHz.</dd>
+    <dt>Source</dt><dd>E64 and E67's anchors; the chain's own refit, <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-chain-closure/README.md">chain-closure</a>.</dd>
+    <dt>Confidence</dt><dd><span class="conf m">measured</span>, and reproduced across five weeks: the
+      zeros-to-random step at 600&nbsp;MHz reads <span id="lv2-step"></span>, against a 25.1&nbsp;W step
+      measured on 21 September — agreement to within 2%.</dd>
+    <dt>Open</dt><dd>The static term is fitted jointly over runs that include the ones this chain then
+      predicts, so that part of the agreement is in-sample.</dd>
+  </dl>
+</div>
+
+<figure>
+  <h3>The gap at the board, by operand pattern and clock</h3>
+  <div class="chartbox" id="boardchart"></div>
+  <figcaption>Measured board power on aifoundry2's card (E64), ten operand patterns at three clocks. Zeros is
+  the lowest line at every clock; random fp32 the highest. The spread between them is the whole of Horace's
+  effect, before the governor ever sees it.</figcaption>
+</figure>
+
+<div class="lv" id="lv3">
+  <div class="step">Step 3 · board to die</div>
+  <h3>Most, but not all, of that goes to the part of the chip that computes</h3>
+  <div class="big" id="lv3-big"></div>
+  <dl>
+    <dt>How</dt><dd>Two routes. The rails are logged beside the board figure in E60's ladders, giving
+      <span id="lv3-pair"></span> of each step; and the camera half of the Hamming ladder put 84–86% of every
+      rung's board step on the minion rail.</dd>
+    <dt>Source</dt><dd><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-10-20-bitflip-ladder">E60</a> ·
+      <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-camera">the camera ladder (E63)</a></dd>
+    <dt>Confidence</dt><dd><span class="conf d">a range, not a number.</span> Everything below this rung
+      inherits a 0.70–0.89 uncertainty when carried up to the board.</dd>
+    <dt>Open</dt><dd>The regulators have never been measured, and the share has never been read at the
+      launch temperature rather than a settled one.</dd>
+  </dl>
+</div>
+
+<div class="lv" id="lv4">
+  <div class="step">Step 4 · one multiply-add</div>
+  <h3>What one fp32 multiply-add costs, over idle</h3>
+  <div class="big" id="lv4-big"></div>
+  <dl>
+    <dt>How</dt><dd>E38 ran the same kernel on three cards with operands held at zeros, all-ones and random,
+      and divided the power step by the multiply-add rate. This work's independent budget at 600&nbsp;MHz —
+      built from E67's anchors and a hart ladder, not from E38 — splits that step into
+      <span id="lv4-split"></span>.</dd>
+    <dt>Source</dt><dd><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">Sparse compute (E38)</a>,
+      registered values read at build time from the page's own data block.</dd>
+    <dt>Confidence</dt><dd><span class="conf m">measured</span> on three cards, and the two routes agree:
+      this work's clocking and data terms are 98% and 99% of aifoundry2's registered pair, and 103% and 105%
+      of aifoundry3's own pair on the very card that produced the ladders.</dd>
+    <dt>Open</dt><dd>The three cards disagree by a factor of 1.5 on the zeros term, which is the smallest and
+      hardest to measure.</dd>
+  </dl>
+</div>
+
+<div class="lv" id="lv5">
+  <div class="step">Step 5 · one flipped bit</div>
+  <h3>What one changed bit of an operand costs</h3>
+  <div class="big" id="lv5-big"></div>
+  <dl>
+    <dt>How</dt><dd>A Hamming ladder: the same kernel, with operand words that differ from their predecessor in
+      a designed number of bit positions, so the only thing that changes between rungs is how many bits flip.
+      Then a scan of all 32 positions of each operand, one at a time.</dd>
+    <dt>Source</dt><dd><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-10-20-bitflip-ladder">E60, the ladder</a> ·
+      <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/README.md">E65, 32 B-side positions</a> ·
+      <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-e67-a-side-bit-prices/README.md">E67, 32 A-side positions</a> ·
+      <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-e68-stage-map/README.md">E68, the stage map</a></dd>
+    <dt>Confidence</dt><dd><span class="conf m">measured</span>, on three experiments, two cards and three
+      operand designs, agreeing to about 10%. The largest single uncertainty is not the card: it is the leakage
+      slope used to correct each run for die temperature, which moves the price by 15%.</dd>
+    <dt>Open</dt><dd>Which bit flips matters enormously — see the chart — and the single-bit prices do
+      <em>not</em> add up to the price of flipping many at once.</dd>
+  </dl>
+</div>
+
+<figure>
+  <h3>A flipped bit costs twelve times more at the top of the mantissa than at the bottom</h3>
+  <div class="chartbox" id="bitchart"></div>
+  <figcaption>Energy at the board for flipping one bit position of one operand, all 32 positions of each side,
+  on aifoundry3 at 600&nbsp;MHz. Bits 0–22 are the mantissa, 23–30 the exponent, 31 the sign. The cost climbs
+  monotonically up the mantissa because a higher bit feeds more of the multiplier's partial-product array. The
+  A side (the multiplicand) is dearer than the B side at most positions.</figcaption>
+</figure>
+
+<div class="note">
+  <p><b class="k">The one rule that does not hold.</b> If each bit had a fixed price you could add them: 13.5
+  changed bits in a random operand, times the price list, would give the energy of a random word. It does not.
+  Summed naively over both operands the price list predicts <span id="sat-naive"></span> where the card draws
+  <span id="sat-meas"></span> — <span id="sat-x"></span> too much. Within one word the measured cost per
+  flipped bit is almost flat (<span id="sat-flat"></span>) while the single-bit list, applied to the same
+  masks, would predict <span id="sat-pred"></span>. Something saturates. A free-exponent power law fits the
+  ladder best (exponent <span id="sat-beta"></span>, indistinguishable from linear), and the experiment that
+  would separate <em>how many</em> bits flip from <em>which</em> ones is written, costs about 20 minutes of
+  card time, and has not been run.</p>
+</div>
+
+<div class="lv" id="lv6">
+  <div class="step">Step 6 · toggles</div>
+  <h3>How many wires actually move</h3>
+  <div class="big" id="lv6-big"></div>
+  <dl>
+    <dt>How</dt><dd>The same RTL — core-et's open <code>txfma_top</code> — synthesised and placed on an open
+      7&nbsp;nm cell library with Yosys and OpenROAD, then simulated at the gate level on the same operand
+      streams, counting every net transition. A separate recount settled what the earlier RTL bench's 21,331
+      was counting: a simulator over-count, not physical wires.</dd>
+    <dt>Source</dt><dd><a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-26-open-netlist/README.md">The open netlist</a> ·
+      <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-26-toggle-recount/README.md">the toggle recount</a></dd>
+    <dt>Confidence</dt><dd><span class="conf d">a stand-in, simulated.</span> It is not this chip's netlist; it
+      is the same logic built with an open kit at a comparable node. Two independent routes to the number of
+      physical wires agree to 14%.</dd>
+    <dt>Open</dt><dd>Detailed routing never closed in the open flow, so there is no extracted parasitic file
+      and no glitch measurement; both would raise the count.</dd>
+  </dl>
+</div>
+
+<div class="lv" id="lv7">
+  <div class="step">Step 7 · gates and wires</div>
+  <h3>What one wire's toggle charges, and how little of it is transistor</h3>
+  <div class="big" id="lv7-big"></div>
+  <dl>
+    <dt>How</dt><dd>Every net in the placed design joined to the capacitance the extractor gives it, split
+      three ways: the transistor gates at its far end, the wire inside the cells, and the wire between them.
+      The split is weighted by how often each net actually toggles in a random multiply-add.</dd>
+    <dt>Source</dt><dd><a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-transistor-ledger/README.md">The transistor ledger</a> ·
+      <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-26-asap7-cell-energies/README.md">the cell energy table</a></dd>
+    <dt>Confidence</dt><dd><span class="conf d">modelled</span>, and checked two ways that agree within 5% on
+      signal nets.</dd>
+    <dt>Open</dt><dd>The between-cell wire has no coupling term, so <b>the transistor share is a ceiling and
+      the wire share a floor</b>. Half the design's capacitance is unpriced: the clock tree and the timing
+      repair add nets after the point the simulation saw.</dd>
+  </dl>
+</div>
+
+<figure>
+  <h3>Only a fifth of the switching energy is transistor; the rest is wire</h3>
+  <div class="chartbox" id="splitchart"></div>
+  <figcaption>What one random fp32 multiply-add's switching energy charges, in the placed open netlist. "Wire
+  inside the cells" is the layout interconnect within each standard cell, measured as the ratio between the
+  library's extracted pin capacitance and the same cell's schematic-only capacitance in SPICE.</figcaption>
+</figure>
+
+<div class="lv" id="lv8">
+  <div class="step">Step 8 · one transistor</div>
+  <h3>One minimum transistor's gate, switched</h3>
+  <div class="big" id="lv8-big"></div>
+  <dl>
+    <dt>How</dt><dd>SPICE on the open kit's own BSIM-CMG FinFET device cards at 0.517&nbsp;V — the minion
+      rail — integrating the current out of the supply while the gate is driven, in all four bias cases
+      (n- and p-type, drain held low and high). The gate charge is linear in fins to 0.01%, so "per fin" is the
+      right unit. Inside a real cell the same fin costs its driver more, because the output swings against the
+      input: <span id="lv8-cell"></span>.</dd>
+    <dt>Source</dt><dd><a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-26-asap7-one-switch/README.md">One switch, in SPICE</a></dd>
+    <dt>Confidence</dt><dd><span class="conf d">simulated</span> on an open kit, not on this chip's devices.
+      The four bias cases span <span id="lv8-span"></span>, which is the honest width of "one transistor".</dd>
+    <dt>Open</dt><dd>Short-circuit current — the brief moment both halves of a gate conduct — was bracketed
+      rather than assumed: at this rail it adds at most <span id="lv8-sc"></span> over a 1&nbsp;ps–2&nbsp;ns
+      range of input edge, against 59% at 0.700&nbsp;V. Low voltage is what makes it negligible here.</dd>
+  </dl>
+</div>
+
+<div class="lv" id="lv9">
+  <div class="step">Step 9 · electrons, and the floor</div>
+  <h3>Where thermodynamics finally stops us</h3>
+  <div class="big" id="lv9-big"></div>
+  <dl>
+    <dt>How</dt><dd>Charge divided by the elementary charge, at the 0.517&nbsp;V rail; Landauer's
+      <span style="white-space:nowrap">kT&nbsp;ln&nbsp;2</span> evaluated at the die's own temperature rather
+      than at room temperature.</dd>
+    <dt>Source</dt><dd>The ledger's <code>the_floor</code> block, every rung in one table.</dd>
+    <dt>Confidence</dt><dd><span class="conf m">arithmetic</span>, once the rungs above are granted. The one
+      trap is units: a rise and a toggle differ by exactly two, and an electron count taken from a board figure
+      is a convention, not a measurement, because board power is not delivered at the die's rail.</dd>
+    <dt>Open</dt><dd>Nothing in this work touches phonons: how the switch's energy actually becomes lattice
+      heat is a level below anything measured here.</dd>
+  </dl>
+</div>
+
+<div class="tblwrap">
+<table class="t" id="floortab">
+  <thead><tr><th>Event</th><th class="n">Energy</th><th class="n">Electrons</th><th class="n">× Landauer at 66 °C</th></tr></thead>
+  <tbody></tbody>
+</table>
+</div>
+
+<h2 id="closure">3. Where a random multiply-add's energy goes</h2>
+
+<p>The honest way to present a chain like this is to show what it fails to account for. Below is one random
+fp32 multiply-add as the card pays for it, against what the bottom-up count can name.</p>
+
+<figure>
+  <h3>The bottom-up count names a third of what the card pays</h3>
+  <div class="chartbox" id="waterfall"></div>
+  <figcaption>One random fp32 multiply-add, energy over idle. Left: what the card pays at the board (E38) and
+  what reaches the minion rail. Right: what the placed netlist can name, split by what the energy charges, with
+  the remainder shown.</figcaption>
+</figure>
+
+<div class="note">
+  <p><b class="k">Why the remainder is expected, and what would shrink it.</b> The bottom-up figure is a floor
+  three times over. <b>One</b>, half the design's capacitance is unpriced — <span id="cl-cap"></span> of the
+  farads sit on nets that the clock-tree build and the timing repair created after the netlist was simulated.
+  <b>Two</b>, the between-cell wire is a global-route estimate with no coupling term, because detailed routing
+  never closed. <b>Three</b>, the ledger covers one lane's arithmetic, while the board also pays for the
+  register file's read ports, the operand bus, the result path and leakage. The remainder is not a measurement
+  error; it is the parts of the chip this count does not yet reach.</p>
+</div>
+
+<h2 id="back">4. Back up the ladder: predicting the speed gap from below</h2>
+
+<p>A chain is only worth having if it runs in both directions. Starting from board power and the governor's
+own cap, the model predicts the clock each pattern settles at, and therefore the TFLOPS gap it produces.</p>
+
+<div class="tiles" id="predtiles"></div>
+
+<p><b>The burst gap is a real prediction and it lands.</b> The model predicts <span id="pb-pred"></span>
+against a measurement of <span id="pb-meas"></span>, depending on which of four published readings you take —
+first-eight-second TFLOPS, whole-run TFLOPS, burst clocks, or mean clock after the first 1.5&nbsp;s. The point
+estimate sits inside that spread; the model cannot tell the four readings apart. Two inputs set how sharp it
+can be: the cap (64&nbsp;W would give 1.159, 67&nbsp;W would give 1.127) and the drift of the price list
+between cards, which carried as a band gives <span id="pb-band"></span>.</p>
+
+<p><b>The sustained gap is not a prediction at all, and saying so is the honest result.</b> Once the thermal
+test takes over, zeros clamp to the top of the clock range and random data clamps to the bottom, so the
+predicted ratio is 800/600 = 1.333 for <em>any</em> cap in a <span id="ps-win"></span> window — and every
+candidate cap on the record is inside it. The measurement is the same number by the same construction. What
+the chain does predict here is ordinal, and it is still a real claim: random data reaches the governor's floor
+and zeros does not.</p>
+
+<div class="tblwrap">
+<table class="t" id="predtab">
+  <thead><tr><th>Pattern</th><th class="n">Burst clock</th><th class="n">Burst TFLOPS</th><th class="n">Sustained clock</th><th class="n">Sustained TFLOPS</th></tr></thead>
+  <tbody></tbody>
+</table>
+</div>
+
+<p id="back-bottom">Starting one rung lower — from the price of a single flipped bit rather than from measured
+board power — the same arithmetic gives a <em>range</em> for the burst gap, <span id="pb-bu"></span>, because
+the saturation law under step 5 is not yet pinned. Closing that range is the cheapest unrun experiment in this
+whole chain.</p>
+
+<h2 id="open">5. What is still open</h2>
+
+<p>In the order that closing them would most change the picture.</p>
+
+<div class="lv gap" id="knob">
+  <div class="step">Waits on the card's owner</div>
+  <h3>The knob test: move the cap and see whether the gap moves with it</h3>
+  <p>Everything in §1 and §2 says the governor's power cap causes the speed gap. That is read from the
+  governor's own log, which is strong evidence, but it is still observational: the cap has never actually been
+  changed. Raising the TDP, then the thermal threshold, on aifoundry2 and re-running the same four patterns
+  would turn the whole chain's top rung from a correlation into a controlled result — and it would test the
+  model's own extrapolated 35–85&nbsp;W cap table at the same time. It costs about half an hour of card time.
+  It is not an agent's call to make: the lab's rule is that nobody sets a TDP, threshold or clock on a shared
+  card. aifoundry3's governor is latched by a boot-time TDP of 0&nbsp;W and never steps, and aifoundry1's card 1
+  never reaches 800&nbsp;MHz, so it is aifoundry2 or nowhere.</p>
+</div>
+
+<div class="lv weak">
+  <div class="step">Cheap, written, not run</div>
+  <h3>The saturation ladder: how many bits, rather than which bits</h3>
+  <p>The single-bit price list over-predicts a whole random word by a factor of about two, and nothing in the
+  record separates the two candidate causes — that simultaneous flips share wires, or that the price of a flip
+  depends on what else is flipping. A ladder in the <em>number</em> of simultaneously flipping positions
+  (2, 3, 4, 6, 8, 12) on one base, against the existing rungs, settles it. The masks are built and committed.
+  About 20 minutes of card time.</p>
+</div>
+
+<div class="lv weak">
+  <div class="step">Measured tonight, needs one more pass</div>
+  <h3>The leakage slope, which is the largest uncertainty in every per-bit price</h3>
+  <p>Each run's power is corrected for the die temperature it ran at, using a leakage slope. The registered
+  estimator fits that slope inside each run's own two-second window, while the kernel is running, so it reads a
+  busy transient rather than idle leakage — and it returned 1.508&nbsp;W/°C. An overnight idle heat-and-cool
+  cycle measured this card's real idle leakage directly at <span id="op-leak"></span>, five times smaller, in
+  agreement with three other estimates. Every price on this page is therefore published as a band. Re-running
+  the reduction with the measured slope — as a labelled sensitivity, not as a replacement for the registered
+  scoring — is a morning's desk work.</p>
+</div>
+
+<div class="lv weak">
+  <div class="step">Structural</div>
+  <h3>The three things that keep the bottom-up count a floor</h3>
+  <p>Detailed routing has never closed in the open flow, so there is no extracted parasitic file, no coupling
+  capacitance and no measured glitch factor. Half the design's capacitance was created after the point the
+  gate-level simulation saw. And the A side of the multiplier has no multi-bit ladder, so the carry-over from
+  one operand to the other is a choice between two defensible numbers that moves the prediction by 6%.</p>
+</div>
+
+<div class="lv weak">
+  <div class="step">Beyond this unit</div>
+  <h3>Memory, and the instructions that trap</h3>
+  <p>No flip ladder has run against a memory path. A DRAM tensor load costs 94–134&nbsp;pJ per byte against a
+  multiply-add's 5.8&nbsp;pJ, so for most real work this chain prices the small half. Thirteen instructions —
+  divide, square root, reciprocal square root, sine, the integer divides — trap in user mode and have no energy
+  figure at all, and they are the normalisation half of a real kernel.</p>
+</div>
+
+<h2 id="sources">6. Sources and method</h2>
+
+<details>
+  <summary>Every number on this page, and where it comes from</summary>
+  <div class="tblwrap">
+  <table class="t" id="srctab">
+    <thead><tr><th>Step</th><th>Experiment or model</th><th>Where</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  </div>
+  <p>Each experiment on a card was pre-registered by commit before the first launch, claimed in the lab's
+  channel while it held the card, and scored against the rules it registered. Where a later pass found an
+  error, the correction is in the same data directory as the original and the original is not quietly
+  replaced.</p>
+</details>
+
+<details>
+  <summary>Conventions, and the two places it is easy to go wrong</summary>
+  <p><b>A rise is not a toggle.</b> A capacitance <i>C</i> takes <i>C·V</i>² from the rail when its net rises
+  and nothing when it falls, so a toggle — the per-edge average — costs <i>½C·V</i>². Every single-edge figure
+  on this page is <b>per rise</b>; per-toggle figures are half of it and are labelled where they appear. A
+  table that mixes the two is out by exactly a factor of two, which is large enough to matter and small enough
+  to miss.</p>
+  <p><b>An electron count from a board figure is a convention.</b> Board power is not delivered at the die's
+  rail, so dividing a board energy by 0.517&nbsp;V gives a number of electrons that is useful for comparison
+  and is not a count of anything. Every electron figure here uses the same 0.517&nbsp;V; the cards that
+  produced these measurements ran at 521.9&nbsp;mV, so a count at their own rail would be 0.9% lower.</p>
+  <p><b>Temperature.</b> Every SPICE number is at the kit's 25&nbsp;°C corner. The die temperature enters only
+  at Landauer's floor, where it is stated.</p>
+</details>
+
+<div id="vaultzone"></div>
+
+<p class="foot">Built from the repository's own committed data directories: every figure on this page is read
+at build time from the JSON a scored experiment wrote, so the page cannot drift from the record.</p>
+
+<script>
+/* chart toolkit: docs/reports/sources/chartkit.js */
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame.
+   Added 26 Sep 2026: sortTable (sortable, filterable tables) and the card registry (cards, card, cardsIn, cardSeg,
+   pick, cardMark, cardLegend): aifoundry2 --c1 dot, aifoundry3 --c2 ring, aifoundry1-c1 --c3 diamond, all cards --ink. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'diamond' ? el('polygon', {points: '9,0 14,5 9,10 4,5'}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box' || m === 'diamond') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (it.dash) e.style.strokeDasharray = it.dash; else if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    api.quiet = v => set(v, false);  // show v as selected without calling onChange
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- cards: one registry for every page (fixed colour, mark and label per card), a shared card selector and a picker
+     for values shaped {mean, se, n, per_card: {<card>: {mean, se, n}}}. aifoundry1-c0 is kept for old data only: it is
+     excluded from the version-3 campaign (amendment A4) and never offered by cardSeg unless a page passes it. ---- */
+  const CARDS = [
+    {id: 'aifoundry2', short: 'a2', label: 'aifoundry2', color: 'var(--c1)', mark: 'dot'},
+    {id: 'aifoundry3', short: 'a3', label: 'aifoundry3', color: 'var(--c2)', mark: 'ring'},
+    {id: 'aifoundry1-c1', short: 'a1c1', label: 'aifoundry1 card 1', color: 'var(--c3)', mark: 'diamond'},
+    {id: 'aifoundry1-c0', short: 'a1c0', label: 'aifoundry1 card 0', color: 'var(--ref)', mark: 'box'},
+  ];
+  const POOLED = {id: 'pooled', short: 'all', label: 'all cards', color: 'var(--ink)', mark: 'dot'};
+  const cardIndex = {};
+  CARDS.forEach(c => { cardIndex[c.id] = c; cardIndex[c.short] = c; });
+  /* The registry entry for a card id or short name; an unknown card gets --ref and its own name. */
+  function card(id) {
+    if (id === 'pooled' || id === 'all') return POOLED;
+    return cardIndex[id] || {id, short: id, label: id, color: 'var(--ref)', mark: 'box'};
+  }
+  /* The cards present in an object's keys (or a list), in registry order, then any others in their order. */
+  function cardsIn(keysOrObj) {
+    const ks = Array.isArray(keysOrObj) ? keysOrObj : Object.keys(keysOrObj || {});
+    const norm = ks.map(k => (cardIndex[k] ? cardIndex[k].id : k));
+    return CARDS.map(c => c.id).filter(id => norm.includes(id)).concat(norm.filter(k => !cardIndex[k]));
+  }
+  /* A card selector on bus('card'): options are o.cards (default: every registered card but aifoundry1-c0), with
+     "all cards" first when o.pooled. Every cardSeg on a page follows the others. */
+  function cardSeg(hostEl, o) {
+    o = o || {};
+    const ids = (o.cards || CARDS.filter(c => c.id !== 'aifoundry1-c0').map(c => c.id)).map(k => card(k).id);
+    const opts = (o.pooled ? [['pooled', o.pooledLabel || POOLED.label]] : []).concat(ids.map(id => [id, card(id).label]));
+    const b = bus(o.bus || 'card');
+    const start = b.value != null && opts.some(x => x[0] === b.value) ? b.value : (o.value || opts[0][0]);
+    const api = seg(hostEl, {label: o.label == null ? 'Card' : o.label, options: opts, value: start,
+      onChange: v => { b.emit(v, api); if (o.onChange) o.onChange(v); }});
+    b.on((v, from) => { if (from !== api && opts.some(x => x[0] === v) && api.value !== v) { api.quiet(v); if (o.onChange) o.onChange(v); } });
+    return api;
+  }
+  /* {mean, se, n, card} of v for a card ('pooled' = v itself), or null when the card has no value (never a zero). */
+  function pick(v, id) {
+    if (v == null) return null;
+    if (typeof v === 'number') return {mean: v, se: null, n: null, card: 'pooled'};
+    const c = id == null || id === 'pooled' || id === 'all' ? null : card(id).id;
+    const src = c == null ? v : (v.per_card || {})[c];
+    if (src == null) return null;
+    const m = typeof src === 'number' ? src : src.mean;
+    if (m == null || !isFinite(m)) return null;
+    return {mean: m, se: typeof src === 'number' ? null : (src.se == null ? null : src.se), n: typeof src === 'number' ? null : (src.n == null ? null : src.n), card: c || 'pooled'};
+  }
+  /* A card's mark at (x, y) in an SVG group: dot, ring, diamond or box, in the card's colour (or colour, if given). */
+  function cardMark(g, id, x, y, r, colour) {
+    const c = Object.assign({}, card(id)), R = r || 4;
+    if (colour) c.color = colour;
+    let e;
+    if (c.mark === 'diamond') e = el('polygon', {points: `${x},${y - R * 1.25} ${x + R * 1.25},${y} ${x},${y + R * 1.25} ${x - R * 1.25},${y}`}, g);
+    else if (c.mark === 'box') e = el('rect', {x: x - R, y: y - R, width: 2 * R, height: 2 * R}, g);
+    else e = el('circle', {cx: x, cy: y, r: c.mark === 'ring' ? R - 0.5 : R}, g);
+    if (c.mark === 'ring') { e.style.fill = 'var(--surface)'; e.style.stroke = c.color; e.style.strokeWidth = '2'; }
+    else e.style.fill = c.color;
+    return e;
+  }
+  /* Legend items for a list of cards (for legend()). */
+  const cardLegend = ids => ids.map(id => { const c = card(id); return {key: c.id, label: c.label, color: c.color, mark: c.mark}; });
+
+  /* ---- a sortable, filterable table: click a header to sort (aria-sort), numbers parsed with the true minus, thin
+     spaces and thousands commas; o.filter adds a text box that hides rows not containing it. Rows keep their DOM
+     nodes, so any listeners on them survive. A header with data-nosort is left alone. ---- */
+  function cellValue(td) {
+    const raw = (td.getAttribute('data-sort') != null ? td.getAttribute('data-sort') : td.textContent).trim();
+    const t = raw.replace(/−/g, '-').replace(/[   ,]/g, '').replace(/^[~≈<>≤≥]\s*/, '');
+    const m = t.match(/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i);
+    return m && (t.length === m[0].length || /^[\s%×x°a-zA-Zµ/()]/.test(t.slice(m[0].length))) ? {n: parseFloat(m[0])} : {s: raw.toLowerCase()};
+  }
+  function sortTable(table, o) {
+    o = o || {};
+    const t = $(table), tb = t.tBodies[0], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (!tb || !hr) return null;
+    const orig = [...tb.rows];
+    let col = -1, dir = 0;
+    const heads = [...hr.cells];
+    let k = 0;
+    const colOf = heads.map(h => { const c = k; k += h.colSpan || 1; return c; });
+    heads.forEach((h, i) => {
+      if (h.hasAttribute('data-nosort') || (h.colSpan || 1) > 1) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ck-sort';
+      while (h.firstChild) b.appendChild(h.firstChild);
+      h.appendChild(b); h.setAttribute('aria-sort', 'none');
+      b.addEventListener('click', () => {
+        dir = col === colOf[i] ? (dir === 1 ? -1 : dir === -1 ? 0 : 1) : 1; col = colOf[i];
+        heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none'));
+        if (dir) h.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+        const rows = dir ? [...orig].sort((a, b2) => {
+          const ca = a.cells[col], cb = b2.cells[col];
+          if (!ca || !cb) return 0;
+          const va = cellValue(ca), vb = cellValue(cb);
+          if (va.n != null && vb.n != null) return dir * (va.n - vb.n);
+          if (va.n != null) return -1;
+          if (vb.n != null) return 1;
+          return dir * va.s.localeCompare(vb.s);
+        }) : orig;
+        rows.forEach(r => tb.appendChild(r));
+      });
+    });
+    if (o.filter) {
+      const w = document.createElement('div'); w.className = 'ck-filter';
+      const id = 'ck-f' + (++uid), lab = document.createElement('label'), inp = document.createElement('input');
+      lab.htmlFor = id; lab.textContent = o.filterLabel || 'Filter rows'; inp.id = id; inp.type = 'search';
+      const cnt = document.createElement('span'); cnt.className = 'ck-filter-n'; cnt.setAttribute('aria-live', 'polite');
+      inp.addEventListener('input', () => {
+        const q = inp.value.trim().toLowerCase(); let n = 0;
+        orig.forEach(r => { const on = !q || r.textContent.toLowerCase().includes(q); r.classList.toggle('ck-hidden', !on); if (on) n++; });
+        cnt.textContent = q ? `${n} of ${orig.length} rows` : '';
+      });
+      w.append(lab, inp, cnt);
+      const ref = t.closest('.wide, .scroll, .ck-table-wrap') || t; ref.parentNode.insertBefore(w, ref);
+    }
+    t.classList.add('ck-sortable');
+    return {table: t, reset() { col = -1; dir = 0; heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none')); orig.forEach(r => tb.appendChild(r)); }};
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
+})();
+
+</script>
+<script>
+const D = {"board":{"anchors_600_W":{"anchor_ones":36.045532467532475,"anchor_pi":36.32374581339713,"anchor_randn":52.487415584415594,"anchor_zeros":27.82805194805195,"ap_h0":36.312344155844166,"aq_e64":36.42425974025974,"aq_h0":36.073681818181825,"ix_z":36.18528787878788,"lb_h0":36.06643506493507,"lq_h0":36.49777922077923,"nrd_a":43.55526623376625,"nrd_b":47.38783116883118},"clocking_W":8.217480519480524,"data_W":16.44188311688312,"measured":{"a_ones_b_randn":{"600":45.150000000000006,"700":58.75,"800":74.30000000000001},"a_randn_b_ones":{"600":41.215,"700":53.765,"800":67.05},"mant":{"600":47.115,"700":61.989999999999995,"800":79.235},"ones":{"600":34.36,"700":41.55,"800":52.27},"pow2":{"600":39.540000000000006,"700":49.055,"800":63.865},"randn":{"600":49.51,"700":64.83500000000001,"800":83.07},"signs":{"600":38.78,"700":47.715,"800":61.44499999999999},"sparse75":{"600":28.9,"700":33.51,"800":40.56},"uniform":{"600":49.145,"700":62.769999999999996,"800":79.965},"zeros":{"600":26.28,"700":29.935000000000002,"800":35.31}},"predicted":{"600":{"ones":36.045532467532475,"randn":52.487415584415594,"randn_F":46.67690853125019,"randn_P":55.16520210242706,"zeros":27.82805194805195},"700":{"ones":42.7784774058529,"randn":65.36023670210497,"randn_F":57.379917736753406,"randn_P":69.03798639577552,"zeros":31.49235124905006},"800":{"ones":52.93070984275824,"randn":82.94042866835208,"randn_F":72.33509339987712,"randn_P":87.8279236048642,"zeros":37.9321675169596}},"static_B_W":{"600":25.46,"700":28.24,"800":33.61},"step_W":24.659363636363643},"closure":{"bottom_up_burst":[1.06,1.19],"burst_band":[1.1040614932032364,1.2010296841608614],"burst_measured":[1.149532710280374,1.1413760603204524,1.13314447592068,1.1267605633802817],"burst_pred":1.14711286213546,"candidate_caps":{"E64 measured sustained ones":49.4,"E64 measured sustained randn":54.4,"E64 registered cap_w_at_65_5":50.3,"a 66 C trip on the die line":51.362862010221455},"clamp_width_W":14.555248067455992,"clamp_window_W":[37.9321675169596,52.487415584415594],"results":{"ones":{"burst_mhz":800.0,"burst_tflops":12.3,"sustained_mhz":774.8965696723584,"sustained_tflops":11.914034758712512},"randn_F":{"burst_mhz":752.4038286019085,"burst_tflops":11.568208864754343,"sustained_mhz":635.5400933092299,"sustained_tflops":9.771428934629409},"randn_M":{"burst_mhz":697.4030423743342,"burst_tflops":10.722571776505388,"sustained_mhz":600.0,"sustained_tflops":9.225},"randn_P":{"burst_mhz":672.4994745869674,"burst_tflops":10.339679421774624,"sustained_mhz":600.0,"sustained_tflops":9.225},"zeros":{"burst_mhz":800.0,"burst_tflops":12.3,"sustained_mhz":800.0,"sustained_tflops":12.3}},"superposition":{"bracket_W":[10.631376063717715,19.119669634894585],"cross_operand_W":19.119669634894585,"low_arm_W":[10.631376063717715,12.69660993621341],"m_A":13.5,"m_B":13.86328125,"measured_W":{"both_random":16.184565813207264,"nrd_a":7.481584415584427,"nrd_b":10.890051948051958},"naive_W":{"A":17.29637827944671,"B":21.84508181807007,"both":39.141460097516784},"within_word_W":{"A":9.6226230795136,"B":12.080746784045024,"both":21.703369863558624}},"sustained_pred":1.3333333333333333},"floor":{"kT_ln2":{"die at E65's block temperature, 58 C":{"T_K":331.15,"kT_ln2_J":3.169082192646065e-21,"kT_ln2_zJ":3.169082192646065},"die at the governor's trip, 66 C":{"T_K":339.15,"kT_ln2_J":3.245641629581497e-21,"kT_ln2_zJ":3.245641629581497},"the SPICE corner, 25 C":{"T_K":298.15,"kT_ln2_J":2.8532745152874053e-21,"kT_ln2_zJ":2.853274515287405},"the leakage corner, 80 C":{"T_K":353.15,"kT_ln2_J":3.379620644218504e-21,"kT_ln2_zJ":3.379620644218504}},"land66_J":3.245641629581497e-21,"land66_zJ":3.245641629581497,"one_sentence":"moving a single electron across this chip's 0.517 V rail already costs 25.5 Landauer quanta at the die's 66 C, and the smallest switch in the design -- one minimum transistor's gate -- moves 108 of them, so the floor is 2755x below one transistor and 1.8e+09 x below one random fp32 multiply-add at the board.","order":["mac_board","mac_netlist","bit_flowM","bit_board","bit_netlist","clock_rise","signal_rise","gate_pin","fin_in_cell","transistor","electron"],"rungs":{"bit_board":{"E_J":1.16746e-13,"electrons":1409422.0858936096,"label":"One flipped operand bit, E60's quiet ladder, at the board","over_Landauer_at_66C":35970083.36840121},"bit_flowM":{"E_J":7.450000000000001e-13,"electrons":8994050.793952163,"label":"One flipped operand bit, E65's flow-M case, at the board","over_Landauer_at_66C":229538588.98342472},"bit_netlist":{"E_J":3.287079655582491e-14,"electrons":396834.38102115045,"label":"One flipped operand bit, counted on the open netlist","over_Landauer_at_66C":10127672.832463445},"clock_rise":{"E_J":2.083119270624079e-15,"electrons":25148.564469602075,"label":"One rise of an average clock net","over_Landauer_at_66C":641820.4806217877},"electron":{"E_J":8.28325319778e-20,"electrons":1.0,"label":"One electron across the 0.517 V rail","over_Landauer_at_66C":25.521157734373983},"fin_in_cell":{"E_J":9.418466918257061e-18,"electrons":113.70492599189544,"label":"One transistor fin, driven inside a working cell","over_Landauer_at_66C":2901.8813514144836},"gate_pin":{"E_J":5.732814463739365e-17,"electrons":692.0969728748387,"label":"One gate pin of the cells this unit drives","over_Landauer_at_66C":17663.116012221508},"mac_board":{"E_J":5.783e-12,"electrons":69815564.75359109,"label":"One random fp32 multiply-add, at the board (E38)","over_Landauer_at_66C":1781774040.3907988},"mac_netlist":{"E_J":1.946468662361173e-12,"electrons":23498842.97733223,"label":"One random fp32 multiply-add, counted on the open netlist","over_Landauer_at_66C":599717678.1997823},"signal_rise":{"E_J":5.969324992639882e-16,"electrons":7206.498280457882,"label":"One rise of an average signal net","over_Landauer_at_66C":183918.17932806048},"transistor":{"E_J":8.942160988915003e-18,"electrons":107.95469817717992,"label":"One minimum transistor's gate, isolated","over_Landauer_at_66C":2755.128880346544}},"unit":"every single-edge rung here is ONE RISE (C.VDD^2 from the rail); the rungs from a flipped bit upwards are whole composite events. Section one_physical_net_toggle's per-toggle figures are half the two net rungs."},"gates":{"board_pJ":5.783,"capacitance_priced":0.5045833956772056,"clock":{"C_pin_fF":4.672652122331773,"C_total_fF":7.793509162831535,"C_transistor_gates_fF":1.3300801011734475,"C_wire_between_cells_fF":3.1208570404997613,"C_wire_inside_the_cells_fF":3.342572021158326,"E_per_toggle_fJ":1.0415596353120393,"E_per_toggle_on_the_transistors_fJ":0.17775789008127485,"cross_check_route_B":{"A_over_B":0.7692838691628975,"C_transistor_gates_fF":1.7289847798586822,"route_A_share_transistor":0.17066511033525278,"schematic_over_liberty":0.3700221490051509,"share_transistor":0.2218493291962087,"what":"C_pin x (SPICE schematic pin capacitance / liberty pin capacitance), mix-weighted over the driven cells"},"electrons_per_toggle":12574.282234801036,"gate_pins_driven":9.56224540812563,"nets":242,"share_transistor":0.17066511033525278,"share_wire_between_cells":0.4004431091687961,"share_wire_inside_the_cells":0.428891780495951,"toggles_per_muladd":476.59765625,"transistor_fins_behind_them":39.7572556122909},"clock_share":0.32747348243467517,"driven_pin":{"E_from_VDD_per_driven_pin_aJ":57.32814463739364,"E_from_VDD_per_fin_aJ":9.41846691825706,"Q_per_driven_pin_aC":110.88615984021979,"Q_per_fin_aC":18.21753755949141,"comment":"a fin inside a working cell costs the driver MORE than the same fin measured alone, because the cell's output swings against the input (Miller) and the internal nodes move with it. That excess is real energy and it is transistor, not wire -- but it is not capacitance sitting on the net, so the capacitance split above uses the static figure instead. The per-hold-state spread in by_cell_pin is the size of the Miller term: a cell whose output cannot move in either state (AO21x1 driven on A1, MAJx2) shows none.","electrons_per_driven_pin":692.0969728748386,"electrons_per_fin":113.70492599189544,"fins_per_driven_pin":6.086780909774913,"liberty_pin_fF":0.5796409762702115,"over_the_isolated_device_static_mean":1.0532651928244754,"schematic_pin_fF":0.21447999969094733,"schematic_pin_over_liberty_pin":0.3700221490051509,"the_split_inside_the_pin":"the liberty's pin capacitance was characterised on ASAP7's parasitic-extracted netlist; the SPICE here is the LVS (schematic) one. The ratio is what the cell's own layout interconnect adds to its transistors -- wire, inside the cell.","what":"the same gate, measured at the pin of the cells this multiply-add actually drives (15 types, 88.3% of the toggle-weighted driven pins)"},"internal_pJ":0.43060582869388164,"rail_pJ":4.33725,"signal":{"C_pin_fF":1.3770426820427497,"C_total_fF":2.233284943503055,"C_transistor_gates_fF":0.48492551366683095,"C_wire_between_cells_fF":0.8562422614603054,"C_wire_inside_the_cells_fF":0.8921171683759188,"E_per_toggle_fJ":0.2984662496319941,"E_per_toggle_on_the_transistors_fJ":0.0648076278112468,"cross_check_route_B":{"A_over_B":0.9516996548084974,"C_transistor_gates_fF":0.509536292481275,"route_A_share_transistor":0.21713553170971242,"schematic_over_liberty":0.3700221490051509,"share_transistor":0.22815552218877794,"what":"C_pin x (SPICE schematic pin capacitance / liberty pin capacitance), mix-weighted over the driven cells"},"electrons_per_toggle":3603.249140228941,"gate_pins_driven":2.355813261856303,"nets":8509,"share_transistor":0.21713553170971242,"share_wire_between_cells":0.38340036453979437,"share_wire_inside_the_cells":0.39946410375049324,"toggles_per_muladd":3106.330078125,"transistor_fins_behind_them":14.494847026705171},"split_pJ":{"note":"the cells' own internal energy (0.431 pJ) sits on top of all three and is not split here","transistor_gates":0.3060795383933351,"wire_between_the_cells":0.589642464640423,"wire_inside_the_cells":0.620140830633533},"split_share":{"transistor_gates":0.20191770099201137,"wire_between_the_cells":0.3889814114736984,"wire_inside_the_cells":0.40910088753429025},"switching_pJ":1.5158628336672912,"total_pJ":1.9464686623611729,"wire_is_a_floor":"the between-cell capacitance is the global-route Steiner estimate with no coupling term (detailed routing never closed, Q126(e)), so the wire share is a floor and the transistor share a ceiling."},"governor":{"cap_W":65.0,"cap_sensitivity":{"64.0":1.1591858343597234,"65.0":1.14711286213546,"65.5":1.1414757021208422,"66.0":1.1365729981984802,"67.0":1.126948293590291},"cap_source":"the TDP the card reads back (E64 README); the literal E64's own surface_hpl.py passes to simulate(). Not fitted here.","clamp":{"candidate_caps_W":{"E64 measured sustained ones":49.4,"E64 measured sustained randn":54.4,"E64 registered cap_w_at_65_5":50.3,"a 66 C trip on the die line":51.362862010221455},"clamp_window_W":[37.9321675169596,52.487415584415594],"measured_sustained_ratio_unrounded":1.3333333333333333,"note":"zeros clamps high and random clamps low for every candidate cap, so the sustained ratio is 800/600 by construction and the 0.3% residual is E64's rounding of 12.3 x 600/800 = 9.225 to 9.2. The prediction is ordinal.","ratio_anywhere_in_window":1.3333333333333333,"window_width_W":14.555248067455992},"die_line":{"a_c":41.88,"cap_w_at_65_5":50.3,"k_c_per_w":0.4696},"n":26,"rms_mhz":3.3,"sustained_cap_W":50.3,"tau_s":1.3,"trip_C":66.0},"meta":{"date":"2026-10-27","private":false,"repo":"https://github.com/yaroslavvb/et-soc1-prototyping"},"perbit":{"A_fJ":{"0":202.71367009290103,"1":502.99545399443053,"10":374.98292111986814,"11":557.7928385550866,"12":428.70903920662425,"13":883.413159924795,"14":648.0019112766238,"15":1079.4426413696315,"16":834.3837488134702,"17":663.4904984910318,"18":1100.0471212075972,"19":1177.5487777924695,"2":209.0852809255134,"20":1116.2530655007122,"21":1162.1432175968525,"22":1440.3520676669773,"23":280.85852263863814,"24":270.16563902755735,"25":158.03064170070382,"26":291.05589801288215,"27":234.71732824157795,"28":322.1283233408352,"29":386.4857007530472,"3":476.1110182190375,"30":177.88968678354394,"31":247.35315249716612,"4":152.5236048783839,"5":313.92670540518117,"6":437.31046398213607,"7":256.61493610969274,"8":166.56918058954938,"9":332.69630684425147},"A_max":1440.3520676669773,"A_min":152.5236048783839,"A_se_fJ":{"0":106.60245667263476,"1":105.71792215611985,"10":119.85042261260752,"11":101.64359433872355,"12":79.01079149976441,"13":76.27855698647004,"14":126.22465066940025,"15":116.07171557362277,"16":111.81856266571884,"17":138.18032236964189,"18":172.31548356907652,"19":105.947908531671,"2":88.72296627095584,"20":117.9498845179496,"21":107.4913535219107,"22":74.25776643172428,"23":64.57931166341147,"24":95.93258873531387,"25":152.13669851878183,"26":70.35723214494062,"27":137.2185274111757,"28":77.80320538090815,"29":80.13013677101553,"3":80.59763650104284,"30":28.418162744814982,"31":80.06356850161744,"4":104.40260413192213,"5":36.30392451587202,"6":99.04825442530871,"7":97.22200634603197,"8":76.19330203535533,"9":168.31716470713843},"A_span":9.443469873502238,"B_fJ":{"0":136.24616800074492,"1":111.58779952292679,"10":210.17289259460938,"11":239.0906579603133,"12":341.0987198242054,"13":386.99547706274126,"14":469.7173375589312,"15":554.0149250612301,"16":608.5632545229864,"17":618.0917007503564,"18":686.6577764140137,"19":809.439989069986,"2":88.34284749787204,"20":865.3056463842605,"21":906.2776044702509,"22":1007.8453866134234,"23":173.42810984915758,"24":172.9178749763774,"25":149.01844344447187,"26":188.82752901865658,"27":110.97501548015417,"28":207.36379296760015,"29":231.1057535883335,"3":104.98577297415515,"30":160.53865119763566,"31":122.59600864790846,"4":105.35220362481732,"5":100.41796802684529,"6":82.9382432361089,"7":116.48908771712554,"8":114.18140347478037,"9":131.9761732175443},"B_max":1007.8453866134234,"B_min":82.9382432361089,"B_se_fJ":{"0":4.606880977013888,"1":3.8261237017698524,"10":10.01514060519324,"11":17.929420226150402,"12":7.4382681283094145,"13":6.7538992217770195,"14":7.4572913494234925,"15":5.996111001464413,"16":6.0299106213457225,"17":23.34412163386437,"18":35.20100439483394,"19":6.278782037475765,"2":4.6534670493653225,"20":6.509880763916055,"21":17.06695612131617,"22":21.338323737153495,"23":5.034207925948511,"24":4.56573098278802,"25":4.82797504243071,"26":7.945051665781447,"27":2.74777845046844,"28":22.45885906566226,"29":5.296405983925921,"3":5.612117190268472,"30":12.137505390823321,"31":5.325275761034224,"4":4.15979038067111,"5":4.5180014367151795,"6":20.642030898538867,"7":4.938098351968674,"8":3.659977528646517,"9":8.232299331248417},"B_span":12.151757106119133,"a1_leak_W_per_C":1.508,"beta":0.9934753845827351,"e60_cards":{"aifoundry1 card 0, 800 MHz":102.49,"aifoundry2 800 MHz":121.3,"aifoundry3 600 MHz, busy partner":129.918,"aifoundry3 600 MHz, quiet partner":116.746},"e60_lb_fJ":129.918,"e60_lb_se":0.48,"e60_lq_fJ":116.746,"e60_lq_se":0.613,"e66_leak_W_per_C":0.296,"e68_band_fJ":[117.5,135.9],"e68_vs_e60_same_card":[133.7,121.3],"flat_fJ_per_bit":107.09189303076909,"flat_marginal_fJ":116.80052714191335,"flowM_A_side_fJ":856.0,"flowM_fJ":745.0,"flowM_se":56.0,"ladder_rows":[{"dW":0.5938044871794883,"flips":4096,"h":1,"meas_J":5.297980359318625e-10,"meas_fJ_per_bit":129.34522361617738,"naive_J":5.580643041310512e-10,"naive_fJ_per_bit":136.24616800074492,"ratio":0.9493494423672171,"se":0.010791519998856516},{"dW":0.8409775641025625,"flips":8192,"h":2,"meas_J":7.503282163471164e-10,"meas_fJ_per_bit":91.5927998470601,"naive_J":1.0151279309769593e-09,"naive_fJ_per_bit":123.91698376183585,"ratio":0.7391464597225695,"se":0.13055967814417943},{"dW":1.7118226495726478,"flips":16384,"h":4,"meas_J":1.5273045205755282e-09,"meas_fJ_per_bit":93.21927005465871,"naive_J":1.8070019604303828e-09,"naive_fJ_per_bit":110.29064699892473,"ratio":0.8452146450420909,"se":0.011868920587094843},{"dW":3.206491452991454,"flips":32768,"h":8,"meas_J":2.8608623051945465e-09,"meas_fJ_per_bit":87.30658890364217,"naive_J":3.4666909311000414e-09,"naive_fJ_per_bit":105.79501132507451,"ratio":0.8252429657139193,"se":0.05389970262130366},{"dW":5.535733974358978,"flips":49152,"h":12,"meas_J":4.9390347334478305e-09,"meas_fJ_per_bit":100.48491889338847,"naive_J":6.315135868304766e-09,"naive_fJ_per_bit":128.48176815398693,"ratio":0.7820947698428006,"se":0.027221951765472405},{"dW":8.298516025641021,"flips":65536,"h":16,"meas_J":7.404015271788885e-09,"meas_fJ_per_bit":112.9763072477552,"naive_J":1.349061704644588e-08,"naive_fJ_per_bit":205.85047983468445,"ratio":0.5488270289118823,"se":0.02523582947786513},{"dW":12.261077991452986,"flips":94208,"h":23,"meas_J":1.0939450911080223e-08,"meas_fJ_per_bit":116.12019054730195,"naive_J":3.602755188973662e-08,"naive_fJ_per_bit":382.4256102426187,"ratio":0.3036412505784665,"se":0.020956785691215958}],"laws":{"flat":{"rms":14.383422053541569,"worst":22.66186822275627},"free_power":{"rms":13.306561281421647,"worst":19.05115164861547},"in_sample":true,"price_list_compressed":{"rms":28.47969709765918,"worst":62.496853613879885}},"shape":{"A":{"bit22":1440.3520676669773,"exponent_mean":265.1664675623482,"low_mantissa_mean":305.0546621041077,"sign":247.35315249716612},"B":{"bit22":1007.8453866134234,"exponent_mean":174.27189631529836,"low_mantissa_mean":109.25176672929206,"sign":122.59600864790846}}},"permac":{"budget_600_pJ":{"clocking":1.8128525474328396,"data":3.6272321695651333,"randn_board":11.579211514381424,"zeros_board":6.139126797383452},"e38_registered":{"aifoundry1-c1":{"clocking":1.9595083080705606,"data":3.84714986448192,"ones":2.210740475205587,"random":6.057890339687507,"zeros":0.2512321671350261},"aifoundry2":{"clocking":1.8545746088264141,"data":3.662052571741511,"ones":2.2579778702438995,"random":5.920030441985411,"zeros":0.4034032614174854},"aifoundry3":{"clocking":1.7618395583973774,"data":3.4437162009754116,"ones":1.925183786548728,"random":5.36889998752414,"zeros":0.16334422815135063}},"e38_source":"docs/reports/2026-09-18-et-soc1-sparsity.html <script id=sparsity-data> .v3.operands.<card>.patterns.<p>.pj_mac.mean; registered in docs/findings/05-claims.md line 486 (V3-ABL-A, E38)","mean_ones_pJ":2.13,"mean_randn_pJ":5.783,"mean_zeros_pJ":0.27,"this_work_clocking_pJ":1.8128525474328396,"this_work_data_pJ":3.6272321695651333},"rail":{"lb_ratio":0.745470219677027,"lq_ratio":0.7496616586435509,"range":[0.7,0.89]},"speed":{"burst":{"pct":14.953271028037406,"randn_tflops":10.7,"ratio":1.149532710280374,"zeros_tflops":12.3},"comparators":{"LAD mean MHz after 1.5 s 800/710":1.1267605633802817,"LAD whole-run TFLOPS 12.11/10.61":1.1413760603204524,"SUS 'cool die, first 8 s' TFLOPS 12.3/10.7":1.149532710280374,"surface.txt burst clocks 800/706":1.13314447592068},"sustained":{"exact_in_clocks":true,"pct":33.33333333333333,"randn_mhz":600,"randn_tflops":9.2,"ratio":1.3333333333333333,"zeros_mhz":800,"zeros_tflops":12.3}},"toggles":{"bench_overcount":21331,"clock_per_mac":476.59765625,"closure_lb":0.29627326830042405,"closure_lb_total":0.42226746445411123,"closure_lq":0.2815582251710972,"closure_lq_total":0.3963622905907507,"merged_floor":1300.8,"names_per_wire":2.1923916338284326,"names_per_wire_measured":2.55,"open_netlist_wires":3299,"per_designed_bit_switching_fJ":38.49123047105449,"per_designed_bit_total_fJ":54.86014444694923,"rtl_names_traced":7232.7,"signal_per_mac":3106.330078125,"signal_per_mac_all":3623.361328125,"total_per_mac":4099.958984375},"transistor":{"Cgg_fF":0.03345502803675049,"E_aJ":8.942160988915,"Q_per_fin_aC":17.296249495,"VDD":0.517,"electrons":107.95469817717989,"fins_per_clock_net":39.7572556122909,"fins_per_signal_net":14.494847026705171,"in_a_cell":{"E_per_fin_aJ":9.41846691825706,"Q_per_fin_aC":18.21753755949141,"electrons_per_fin":113.70492599189544},"range_aJ":[8.035961490491001,9.875169130453],"short_circuit":{"0p517":{"E_switching_at_the_minimum_fJ":0.5905022874622142,"VDD_V":0.517,"cheapest_edge_ps":300,"excess_share_by_input_edge_ps":{"1":0.030414950342172703,"10":0.02575099050428837,"100":0.00545595495323983,"1000":0.02341039418905302,"1500":0.04825912233523551,"2":0.029854992739683,"20":0.021520038655676078,"200":0.00047510514080938675,"2000":0.07485172792721188,"300":0.0,"5":0.02823737934390811,"50":0.012828094691195526,"500":0.0038237868253708776,"700":0.010575696569595786},"max_excess_share":0.07485172792721188,"minimum_is_bracketed":true,"output_slew_20_80_ps":{"fall_80_20_ps":17.039999999999974,"rise_20_80_ps":23.379999999999974,"what":"INVx1 driving the same 2.105 fF, input edge 5 ps"},"static_leakage_nA":{"hi":0.04327374999999999,"lo":0.035454285714285716},"worst_relative_difference_against_the_first_sweep":4.964929174547329e-06},"0p700":{"E_switching_at_the_minimum_fJ":1.097092100662,"VDD_V":0.7,"cheapest_edge_ps":50,"excess_share_by_input_edge_ps":{"1":0.025580998671630793,"10":0.013964335971981984,"100":0.010702443870951636,"1000":0.382647307174376,"1500":0.5044337476947562,"2":0.023997290487047337,"20":0.006331812563716951,"200":0.05345238723300743,"2000":0.5882013783597196,"300":0.10276886888755472,"5":0.019705893576444932,"50":0.0,"500":0.198194096296487,"700":0.2813506394560697},"max_excess_share":0.5882013783597196,"minimum_is_bracketed":true,"output_slew_20_80_ps":{"fall_80_20_ps":10.249999999999835,"rise_20_80_ps":13.040000000000195,"what":"INVx1 driving the same 2.105 fF, input edge 5 ps"},"static_leakage_nA":{"hi":0.054437071428571425,"lo":0.05127917142857142},"worst_relative_difference_against_the_first_sweep":3.46033561000374e-06},"verdict":"the minimum is real at both rails: 300 ps at 0.517 V and 50 ps at 0.700 V. Over the whole 1 ps - 2 ns range the spread is 7.5% of a cycle at 0.517 V against 59% at 0.700 V, so short circuit is the term that blows up at the higher rail and is worth a couple of percent at the minion's. This inverter's own output edge into this load is 23.4 ps (20-80%), where it sits 2.2% above its minimum.","what":"the same inverter and load swept 1 ps to 2 ns of input edge, on one measurement window shared by every deck, with each input state's static leakage measured and subtracted (one-switch4.json)"},"transistor_share":0.21713553170971242},"waterfall":{"accounted_pJ":1.9464686623611729,"board_pJ":5.783,"rail_pJ":4.33725,"steps":[{"k":"transistor gates","pJ":0.3060795383933351},{"k":"wire inside the cells","pJ":0.620140830633533},{"k":"wire between the cells","pJ":0.589642464640423},{"k":"the cells' own internal energy","pJ":0.43060582869388164}],"unaccounted_pJ":3.8365313376388275,"why":"the bottom-up figure is a floor three times over: half the design's capacitance is unpriced (CTS and repair_design made those nets after the netlist was simulated), the between-cell wire has no coupling term, and the ledger covers one lane's arithmetic while the board pays for the register file's read ports, the operand bus, the result path and leakage as well.","zeros_pJ":0.27}};
+/* The matmul-to-transistor page. Every value comes from D, which build_data.py assembles from the
+   committed data directories; nothing numeric is written here. The vault block at the end renders
+   whatever an optional D.vault carries and nothing at all when it is absent. */
+(function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = id => document.getElementById(id);
+  const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a || {}) if (a[k] != null) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+  const tx = (p, x, y, s, cls, an) => { const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': an || 'start'}, p); t.textContent = s; return t; };
+  const set = (id, s) => { const e = $(id); if (e) e.textContent = s; };
+  const MINUS = '−', NB = ' ', TIMES = '×', PM = '±', DEG = '°';
+
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '—';
+    if (dp == null) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: dp, maximumFractionDigits: dp});
+    return s.replace('-', MINUS);
+  }
+  const pct = (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%';
+  /* an energy in joules, printed in the unit that suits it */
+  function eng(J) {
+    const u = [[1e-12, 'pJ'], [1e-15, 'fJ'], [1e-18, 'aJ'], [1e-21, 'zJ']];
+    for (const [s, n] of u) if (Math.abs(J) >= s) return num(J / s, Math.abs(J / s) >= 100 ? 0 : 2) + NB + n;
+    return num(J / 1e-24, 2) + NB + 'yJ';
+  }
+  function sci(v) {
+    if (v < 1e4) return num(v, 0);
+    const e = Math.floor(Math.log10(v)), m = v / Math.pow(10, e);
+    return num(m, 1) + NB + TIMES + NB + '10' + String(e).split('').map(c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c]).join('');
+  }
+  const tile = (n, u, l, hi) =>
+    '<div class="tile' + (hi ? ' hi' : '') + '"><div class="n">' + n + (u ? ' <span class="u">' + u + '</span>' : '') +
+    '</div><div class="l">' + l + '</div></div>';
+
+  /* ---------------------------------------------------------------- 1. tiles */
+  const sp = D.speed, bd = D.board, pm = D.permac, pb = D.perbit, tg = D.toggles, ga = D.gates, tr = D.transistor;
+  const w800 = bd.measured.zeros['800'], r800 = bd.measured.randn['800'];
+  $('tiles').innerHTML = [
+    tile(num(sp.burst.pct, 0) + '%', 'faster', 'Zeros against random fp32, first 8 s on a cool die: ' +
+      num(sp.burst.zeros_tflops, 1) + ' against ' + num(sp.burst.randn_tflops, 1) + ' TFLOPS', 1),
+    tile(num(sp.sustained.pct, 0) + '%', 'faster', 'Sustained, once the thermal test takes over: ' +
+      num(sp.sustained.zeros_tflops, 1) + ' against ' + num(sp.sustained.randn_tflops, 1) + ' TFLOPS', 1),
+    tile(TIMES + num(r800 / w800, 2), 'the power', 'Board power at a fixed 800 MHz: ' + num(w800, 1) +
+      ' against ' + num(r800, 1) + ' W'),
+    tile(num(pm.mean_randn_pJ, 2), 'pJ', 'Per random fp32 multiply-add over idle, against ' +
+      num(pm.mean_zeros_pJ, 2) + ' pJ on zeros'),
+    tile(num(pb.e68_band_fJ[0], 0) + MINUS.replace(MINUS, '–') + num(pb.e68_band_fJ[1], 0), 'fJ',
+      'Per flipped bit of an operand, at the board'),
+    tile(num(tg.total_per_mac, 0), 'toggles', 'Physical net transitions per random multiply-add, on a placed open netlist'),
+    tile(num(tr.electrons, 0), 'electrons', 'One minimum transistor’s gate, at the 0.517 V rail — ' +
+      num(tr.E_aJ, 2) + ' aJ'),
+    tile(sci(D.floor.rungs.transistor.over_Landauer_at_66C),
+      TIMES + ' Landauer', 'The same switch against kT ln 2 at the die’s 66 ' + DEG + 'C trip')
+  ].join('');
+
+  set('a-burst', num(sp.burst.zeros_tflops, 1) + ' TFLOPS');
+  set('a-burstr', num(sp.burst.randn_tflops, 1) + ' TFLOPS');
+  set('a-burstpct', num(sp.burst.pct, 0) + '%');
+  set('a-sus', num(sp.sustained.zeros_tflops, 1) + ' against ' + num(sp.sustained.randn_tflops, 1) + ' TFLOPS, ' + num(sp.sustained.pct, 0) + '%');
+  set('a-wz', num(w800, 1) + ' W');
+  set('a-wr', num(r800, 1) + ' W');
+  set('a-pz', num(pm.mean_zeros_pJ, 2) + ' pJ');
+  set('a-pr', num(pm.mean_randn_pJ, 2) + ' pJ');
+  set('a-bit', num(pb.e68_band_fJ[0], 0) + '–' + num(pb.e68_band_fJ[1], 0) + ' fJ');
+  set('a-tog', num(tg.total_per_mac, 0));
+  set('a-fins', num(tr.fins_per_signal_net, 1));
+  set('a-tr', num(tr.E_aJ, 2) + ' aJ');
+  set('a-el', num(tr.electrons, 0));
+  set('a-land', sci(D.floor.rungs.transistor.over_Landauer_at_66C));
+
+  /* ------------------------------------------------------------- 2. the ladder */
+  (function ladder() {
+    const R = D.floor.rungs;
+    const rows = [
+      ['mac_board', 1, '0\u20134'], ['mac_netlist', 0, '6\u20137'],
+      ['bit_board', 1, '5'], ['bit_netlist', 0, '6'],
+      ['clock_rise', 0, '7'], ['signal_rise', 0, '7'], ['gate_pin', 0, '7'],
+      ['fin_in_cell', 0, '8'], ['transistor', 0, '8'], ['electron', 0, '9']
+    ].map(r => [R[r[0]].label, R[r[0]].E_J, r[1], r[2]]);
+
+    const land = D.floor.land66_J;
+    const W = 900, rowH = 30, top = 26, H = top + rows.length * rowH + 42;
+    const x0 = 300, x1 = W - 70;
+    const lo = Math.log10(land) - 0.4, hi = Math.log10(rows[0][1]) + 0.4;
+    const X = v => x0 + (Math.log10(v) - lo) * (x1 - x0) / (hi - lo);
+    const s = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img',
+      'aria-label': 'A logarithmic ladder of energy per event, from one electron across the rail at 83 zeptojoules up to one random floating-point multiply-add at the board at 5.8 picojoules, eleven orders of magnitude apart, with Landauer’s floor marked below all of them.'}, $('ladder'));
+    for (let e = Math.ceil(lo); e <= Math.floor(hi); e++) {
+      const x = X(Math.pow(10, e));
+      el('line', {x1: x, x2: x, y1: top - 10, y2: top + rows.length * rowH - 8, stroke: 'var(--grid)'}, s);
+      tx(s, x, H - 22, '10' + (e < 0 ? '−' : '') + String(Math.abs(e)).split('').map(c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c]).join(''), 'tick', 'middle')
+        .setAttribute('fill', 'var(--muted)');
+    }
+    tx(s, (x0 + x1) / 2, H - 5, 'joules per event', 'tick', 'middle').setAttribute('fill', 'var(--ink-2)');
+    const lx = X(land);
+    el('line', {x1: lx, x2: lx, y1: top - 14, y2: top + rows.length * rowH - 4, stroke: 'var(--ref)', 'stroke-dasharray': '4 3'}, s);
+    tx(s, lx + 4, top - 17, 'Landauer, 66 ' + DEG + 'C', 'tick').setAttribute('fill', 'var(--ref)');
+    rows.forEach((r, i) => {
+      const y = top + i * rowH + 6;
+      tx(s, x0 - 10, y + 4, r[0], 'tick', 'end').setAttribute('fill', 'var(--ink)');
+      tx(s, 6, y + 4, 'step ' + r[3], 'tick').setAttribute('fill', 'var(--muted)');
+      el('line', {x1: lx, x2: X(r[1]), y1: y, y2: y, stroke: 'var(--grid)'}, s);
+      el('circle', {cx: X(r[1]), cy: y, r: 5.5, fill: r[2] ? 'var(--c1)' : 'var(--page)',
+        stroke: r[2] ? 'var(--c1)' : 'var(--c2)', 'stroke-width': 2}, s);
+      tx(s, X(r[1]) + 11, y + 4, eng(r[1]), 'tick').setAttribute('fill', 'var(--ink-2)');
+    });
+  }());
+
+  /* ---------------------------------------------------- 3. per-level fill-ins */
+  set('lv0-big', num(sp.burst.zeros_tflops, 1) + ' against ' + num(sp.burst.randn_tflops, 1) +
+    ' TFLOPS burst (' + num(sp.burst.pct, 0) + '%), ' + num(sp.sustained.zeros_tflops, 1) + ' against ' +
+    num(sp.sustained.randn_tflops, 1) + ' sustained (' + num(sp.sustained.pct, 0) + '%)');
+  const comp = Object.values(sp.comparators);
+  set('lv0-range', TIMES + num(Math.min.apply(null, comp), 3) + ' to ' + TIMES + num(Math.max.apply(null, comp), 3));
+
+  const gv = D.governor;
+  set('lv1-big', num(gv.cap_W, 0) + ' W on a ' + num(gv.tau_s, 1) + ' s average of board power; a ' +
+    num(gv.trip_C, 0) + ' ' + DEG + 'C die reading');
+  set('lv1-tau', num(gv.tau_s, 1) + ' s');
+  set('lv1-n', gv.n);
+  set('lv1-rms', num(gv.rms_mhz, 1) + ' MHz rms');
+
+  set('lv2-big', num(w800, 1) + ' W on zeros against ' + num(r800, 1) + ' W on random fp32, at a fixed 800 MHz');
+  set('lv2-static', num(bd.static_B_W['600'], 2) + ' / ' + num(bd.static_B_W['700'], 2) + ' / ' + num(bd.static_B_W['800'], 2) + ' W');
+  set('lv2-step', num(bd.step_W, 2) + ' W');
+
+  set('lv3-big', num(D.rail.range[0], 2) + '–' + num(D.rail.range[1], 2) + ' of the board step reaches the minion rail');
+  set('lv3-pair', num(D.rail.lq_ratio, 3) + ' and ' + num(D.rail.lb_ratio, 3));
+
+  set('lv4-big', num(pm.mean_randn_pJ, 2) + ' pJ random, ' + num(pm.mean_ones_pJ, 2) + ' pJ all-ones, ' +
+    num(pm.mean_zeros_pJ, 2) + ' pJ zeros');
+  set('lv4-split', num(pm.budget_600_pJ.clocking, 2) + ' pJ of clocking and ' +
+    num(pm.budget_600_pJ.data, 2) + ' pJ of data switching');
+
+  set('lv5-big', num(pb.e68_band_fJ[0], 1) + '–' + num(pb.e68_band_fJ[1], 1) +
+    ' fJ at the board; ' + num(pb.B_min, 0) + ' fJ to ' + num(pb.B_max, 0) + ' fJ depending on which bit');
+  set('sat-naive', num(D.closure.superposition.naive_W.both, 1) + ' W');
+  set('sat-meas', num(D.closure.superposition.measured_W.both_random, 1) + ' W');
+  set('sat-x', TIMES + num(D.closure.superposition.naive_W.both / D.closure.superposition.measured_W.both_random, 2));
+  const rows5 = pb.ladder_rows;
+  set('sat-flat', num(Math.min.apply(null, rows5.map(r => r.meas_fJ_per_bit)), 0) + '–' +
+    num(Math.max.apply(null, rows5.map(r => r.meas_fJ_per_bit)), 0) + ' fJ');
+  set('sat-pred', num(Math.min.apply(null, rows5.map(r => r.naive_fJ_per_bit)), 0) + '–' +
+    num(Math.max.apply(null, rows5.map(r => r.naive_fJ_per_bit)), 0) + ' fJ');
+  set('sat-beta', num(pb.beta, 3));
+
+  set('lv6-big', num(tg.total_per_mac, 0) + ' net toggles per random multiply-add, on about ' +
+    num(tg.open_netlist_wires, 0) + ' distinct wires');
+  set('lv7-big', num(ga.signal.E_per_toggle_fJ, 3) + ' fJ per signal-net toggle, ' +
+    pct(ga.signal.share_transistor) + ' of it transistor gate; over the whole multiply-add, ' +
+    pct(ga.split_share.transistor_gates));
+  set('lv8-big', num(tr.E_aJ, 2) + ' aJ, ' + num(tr.Q_per_fin_aC, 1) + ' aC, ' + num(tr.electrons, 0) + ' electrons');
+  set('lv8-cell', num(tr.in_a_cell.E_per_fin_aJ, 2) + ' aJ and ' + num(tr.in_a_cell.electrons_per_fin, 0) + ' electrons per fin');
+  set('lv8-span', num(tr.range_aJ[0], 2) + '–' + num(tr.range_aJ[1], 2) + ' aJ');
+  set('lv8-sc', pct(tr.short_circuit['0p517'].max_excess_share, 1));
+  set('lv9-big', num(D.floor.land66_zJ, 3) +
+    ' zJ is the floor; one electron across the rail is already ' +
+    num(D.floor.rungs.electron.over_Landauer_at_66C, 1) + TIMES + ' it');
+
+  /* -------------------------------------------------------- 4. the floor table */
+  (function floortab() {
+    const R = D.floor.rungs;
+    $('floortab').querySelector('tbody').innerHTML = D.floor.order.map(k => {
+      const r = R[k];
+      return '<tr><td>' + r.label + '</td><td class="n">' + eng(r.E_J) + '</td><td class="n">' +
+        sci(r.electrons) + '</td><td class="n">' + sci(r.over_Landauer_at_66C) + '</td></tr>';
+    }).join('');
+  }());
+
+  /* ------------------------------------------------------------- 5. the charts */
+  function frame(host, w, h, label) {
+    const s = el('svg', {viewBox: '0 0 ' + w + ' ' + h, role: 'img', 'aria-label': label}, $(host));
+    return s;
+  }
+
+  /* 5a. board power by pattern and clock */
+  (function boardchart() {
+    const m = bd.measured, clocks = [600, 700, 800];
+    const keys = Object.keys(m).sort((a, b) => m[a]['800'] - m[b]['800']);
+    const nice = {randn: 'random fp32', zeros: 'zeros', ones: 'all ones', signs: 'sign bits only',
+      uniform: 'uniform', mant: 'mantissa bits', pow2: 'powers of two', sparse75: '75% sparse',
+      a_randn_b_ones: 'a random, b ones', a_ones_b_randn: 'a ones, b random'};
+    const W = 900, H = 330, L = 56, Rt = 210, T = 16, B = 40;
+    const vals = keys.map(k => clocks.map(c => m[k][String(c)])).flat();
+    const ymax = Math.ceil(Math.max.apply(null, vals) / 10) * 10;
+    const X = c => L + (c - 600) * (W - Rt - L) / 200, Y = v => H - B - v * (H - B - T) / ymax;
+    const s = frame('boardchart', W, H,
+      'Board power against clock for ten operand patterns. Zeros is the lowest line at every clock and random floating-point data the highest; the two diverge as the clock rises.');
+    for (let v = 0; v <= ymax; v += 20) {
+      el('line', {x1: L, x2: W - Rt, y1: Y(v), y2: Y(v), stroke: 'var(--grid)'}, s);
+      tx(s, L - 8, Y(v) + 4, num(v, 0), 'tick', 'end').setAttribute('fill', 'var(--muted)');
+    }
+    clocks.forEach(c => tx(s, X(c), H - B + 18, c + ' MHz', 'tick', 'middle').setAttribute('fill', 'var(--muted)'));
+    tx(s, L - 8, T + 2, 'W', 'tick', 'end').setAttribute('fill', 'var(--ink-2)');
+    keys.forEach(k => {
+      const hot = k === 'randn' || k === 'zeros';
+      const col = k === 'randn' ? 'var(--c2)' : k === 'zeros' ? 'var(--c1)' : 'var(--ref)';
+      const d = clocks.map((c, i) => (i ? 'L' : 'M') + X(c).toFixed(1) + ',' + Y(m[k][String(c)]).toFixed(1)).join(' ');
+      el('path', {d, fill: 'none', stroke: col, 'stroke-width': hot ? 2.6 : 1.2, opacity: hot ? 1 : 0.65}, s);
+      clocks.forEach(c => el('circle', {cx: X(c), cy: Y(m[k][String(c)]), r: hot ? 3.6 : 2.2, fill: col, opacity: hot ? 1 : 0.65}, s));
+      const t = tx(s, W - Rt + 9, Y(m[k]['800']) + 4, (nice[k] || k) + '  ' + num(m[k]['800'], 1) + ' W', 'tick');
+      t.setAttribute('fill', hot ? col : 'var(--ink-2)');
+      if (hot) t.setAttribute('font-weight', '700');
+    });
+  }());
+
+  /* 5b. the per-bit price list */
+  (function bitchart() {
+    const W = 900, H = 320, L = 52, Rt = 14, T = 20, B = 44;
+    const ymax = Math.max(pb.A_max, pb.B_max) * 1.05;
+    const X = i => L + i * (W - Rt - L) / 31, Y = v => H - B - v * (H - B - T) / ymax;
+    const s = frame('bitchart', W, H,
+      'Energy to flip one bit position, for all 32 positions of each operand. Both sides climb steeply from about 80 to 150 femtojoules at the bottom of the mantissa to 1,008 and 1,440 femtojoules at bit 22, then drop back for the exponent and sign bits.');
+    for (let v = 0; v <= ymax; v += 250) {
+      el('line', {x1: L, x2: W - Rt, y1: Y(v), y2: Y(v), stroke: 'var(--grid)'}, s);
+      tx(s, L - 8, Y(v) + 4, num(v, 0), 'tick', 'end').setAttribute('fill', 'var(--muted)');
+    }
+    tx(s, L - 8, T - 4, 'fJ', 'tick', 'end').setAttribute('fill', 'var(--ink-2)');
+    [[0, 22, 'mantissa'], [23, 30, 'exponent'], [31, 31, 'sign']].forEach(g => {
+      const xa = X(g[0]) - 6, xb = X(g[1]) + 6;
+      el('line', {x1: xa, x2: xb, y1: H - B + 20, y2: H - B + 20, stroke: 'var(--axis)'}, s);
+      tx(s, (xa + xb) / 2, H - B + 34, g[2], 'tick', 'middle').setAttribute('fill', 'var(--muted)');
+    });
+    [0, 8, 16, 22, 31].forEach(i => tx(s, X(i), H - B + 14, String(i), 'tick', 'middle').setAttribute('fill', 'var(--muted)'));
+    [['B_fJ', 'var(--c1)', 'B side (multiplier)'], ['A_fJ', 'var(--c2)', 'A side (multiplicand)']].forEach(ser => {
+      const o = pb[ser[0]];
+      const d = Array.from({length: 32}, (_, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(o[String(i)]).toFixed(1)).join(' ');
+      el('path', {d, fill: 'none', stroke: ser[1], 'stroke-width': 2.2}, s);
+      for (let i = 0; i < 32; i++) el('circle', {cx: X(i), cy: Y(o[String(i)]), r: 2.8, fill: ser[1]}, s);
+    });
+    tx(s, X(22) - 10, Y(pb.A_fJ['22']) - 9, 'A bit 22: ' + num(pb.A_max, 0) + ' fJ', 'tick', 'end').setAttribute('fill', 'var(--c2)');
+    tx(s, X(22) + 8, Y(pb.B_fJ['22']) + 2, 'B bit 22: ' + num(pb.B_max, 0) + ' fJ', 'tick', 'end').setAttribute('fill', 'var(--c1)');
+    tx(s, X(5), Y(pb.B_min) - 12, 'B bit 6: ' + num(pb.B_min, 0) + ' fJ', 'tick').setAttribute('fill', 'var(--c1)');
+  }());
+
+  /* 5c. what the switching energy charges */
+  (function splitchart() {
+    const sh = ga.split_share, pj = ga.split_pJ;
+    const keys = ['transistor gates', 'wire inside the cells', 'wire between the cells'];
+    const W = 900, H = 150, L = 190, Rt = 150;
+    const s = frame('splitchart', W, H,
+      'Of one random multiply-add’s switching energy, 20% charges transistor gates, 41% the wire inside the standard cells and 39% the wire between them.');
+    const bw = W - L - Rt;
+    keys.forEach((k, i) => {
+      const y = 22 + i * 40;
+      tx(s, L - 10, y + 15, k, 'tick', 'end').setAttribute('fill', 'var(--ink)');
+      el('rect', {x: L, y, width: bw, height: 22, fill: 'var(--grid)', rx: 3}, s);
+      el('rect', {x: L, y, width: Math.max(2, bw * sh[k.replace(/ /g, '_')]), height: 22,
+        fill: i === 0 ? 'var(--c1)' : 'var(--ref)', rx: 3}, s);
+      tx(s, L + bw + 10, y + 15, pct(sh[k.replace(/ /g, '_')], 1) + '  ·  ' + num(pj[k.replace(/ /g, '_')], 3) + ' pJ', 'tick')
+        .setAttribute('fill', i === 0 ? 'var(--c1)' : 'var(--ink-2)');
+    });
+  }());
+
+  /* 5d. the waterfall */
+  (function waterfall() {
+    const wf = D.waterfall;
+    const W = 900, H = 300, T = 28, B = 56, L = 56, gap = 54;
+    const ymax = wf.board_pJ * 1.12;
+    const Y = v => H - B - v * (H - B - T) / ymax;
+    const s = frame('waterfall', W, H,
+      'A random multiply-add costs 5.78 picojoules at the board. The bottom-up count names 1.95 of them — 0.31 transistor gates, 0.62 wire inside the cells, 0.59 wire between the cells and 0.43 the cells’ own internal energy — leaving 3.84 picojoules, two thirds, unaccounted.');
+    for (let v = 0; v <= 6; v += 1) {
+      el('line', {x1: L, x2: W - 10, y1: Y(v), y2: Y(v), stroke: 'var(--grid)'}, s);
+      tx(s, L - 8, Y(v) + 4, num(v, 0), 'tick', 'end').setAttribute('fill', 'var(--muted)');
+    }
+    tx(s, L - 8, T - 8, 'pJ', 'tick', 'end').setAttribute('fill', 'var(--ink-2)');
+    const barw = 86;
+    let x = L + 18;
+    const col = (lab, v, c, sub) => {
+      el('rect', {x, y: Y(v), width: barw, height: H - B - Y(v), fill: c, rx: 3}, s);
+      tx(s, x + barw / 2, Y(v) - 7, num(v, 2), 'tick', 'middle').setAttribute('fill', 'var(--ink)');
+      lab.split('|').forEach((ln, i) => tx(s, x + barw / 2, H - B + 16 + i * 13, ln, 'tick', 'middle').setAttribute('fill', 'var(--ink-2)'));
+      if (sub) tx(s, x + barw / 2, H - B + 16 + lab.split('|').length * 13, sub, 'tick', 'middle').setAttribute('fill', 'var(--muted)');
+      x += barw + 14;
+    };
+    col('at the|board', wf.board_pJ, 'var(--c2)', '(E38)');
+    col('at the|minion rail', D.gates.rail_pJ, 'var(--ref)', '');
+    x += gap;
+    // stacked accounted bar
+    const stackx = x, cols = ['var(--c1)', 'var(--c3)', 'var(--c4)', 'var(--c7)'];
+    let acc = 0;
+    wf.steps.forEach((st, i) => {
+      el('rect', {x: stackx, y: Y(acc + st.pJ), width: barw, height: Y(acc) - Y(acc + st.pJ), fill: cols[i]}, s);
+      acc += st.pJ;
+    });
+    el('rect', {x: stackx, y: Y(acc), width: barw, height: H - B - Y(acc), fill: 'none', stroke: 'var(--axis)'}, s);
+    tx(s, stackx + barw / 2, Y(acc) - 7, num(acc, 2), 'tick', 'middle').setAttribute('fill', 'var(--ink)');
+    ['counted|bottom-up'].forEach(l => l.split('|').forEach((ln, i) =>
+      tx(s, stackx + barw / 2, H - B + 16 + i * 13, ln, 'tick', 'middle').setAttribute('fill', 'var(--ink-2)')));
+    x = stackx + barw + 14;
+    // the remainder, hatched
+    const d = el('defs', {}, s), p = el('pattern', {id: 'wfh', width: 7, height: 7, patternUnits: 'userSpaceOnUse',
+      patternTransform: 'rotate(45)'}, d);
+    el('rect', {width: 7, height: 7, fill: 'var(--surface)'}, p);
+    el('line', {x1: 0, y1: 0, x2: 0, y2: 7, stroke: 'var(--axis)', 'stroke-width': 2.5}, p);
+    el('rect', {x, y: Y(wf.unaccounted_pJ), width: barw, height: H - B - Y(wf.unaccounted_pJ),
+      fill: 'url(#wfh)', stroke: 'var(--axis)', rx: 3}, s);
+    tx(s, x + barw / 2, Y(wf.unaccounted_pJ) - 7, num(wf.unaccounted_pJ, 2), 'tick', 'middle').setAttribute('fill', 'var(--ink)');
+    ['not yet|accounted'].forEach(l => l.split('|').forEach((ln, i) =>
+      tx(s, x + barw / 2, H - B + 16 + i * 13, ln, 'tick', 'middle').setAttribute('fill', 'var(--ink-2)')));
+    tx(s, x + barw / 2, H - B + 42, pct(wf.unaccounted_pJ / wf.board_pJ) + ' of the board', 'tick', 'middle')
+      .setAttribute('fill', 'var(--muted)');
+    // legend for the stack
+    let ly = T + 2;
+    wf.steps.forEach((st, i) => {
+      el('rect', {x: W - 232, y: ly - 9, width: 11, height: 11, fill: cols[i], rx: 2}, s);
+      tx(s, W - 216, ly, st.k + '  ' + num(st.pJ, 3) + ' pJ', 'tick').setAttribute('fill', 'var(--ink-2)');
+      ly += 17;
+    });
+  }());
+
+  set('cl-cap', pct(1 - ga.capacitance_priced, 1));
+
+  /* --------------------------------------------------- 6. back up the ladder */
+  const cl = D.closure;
+  $('predtiles').innerHTML = [
+    tile(TIMES + num(cl.burst_pred, 3), 'predicted', 'Burst gap, zeros over random, from board power and the governor’s cap', 1),
+    tile(TIMES + num(Math.min.apply(null, cl.burst_measured), 3) + '–' + num(Math.max.apply(null, cl.burst_measured), 3),
+      'measured', 'The same gap, over four published ways of reading it'),
+    tile(TIMES + num(cl.sustained_pred, 3), 'a clamp', 'Sustained gap: both patterns are pinned to an end of the clock range, so the ratio is 800/600 by construction'),
+    tile(TIMES + num(cl.bottom_up_burst[0], 2) + '–' + num(cl.bottom_up_burst[1], 2), 'from one bit',
+      'Starting from the price of a single flipped bit instead: a range, because the saturation law is not pinned')
+  ].join('');
+  set('pb-pred', TIMES + num(cl.burst_pred, 3));
+  set('pb-meas', TIMES + num(Math.min.apply(null, cl.burst_measured), 3) + ' to ' + TIMES + num(Math.max.apply(null, cl.burst_measured), 3));
+  set('pb-band', TIMES + num(cl.burst_band[0], 3) + ' to ' + TIMES + num(cl.burst_band[1], 3));
+  set('ps-win', num(cl.clamp_width_W, 1) + ' W');
+  set('pb-bu', TIMES + num(cl.bottom_up_burst[0], 2) + ' to ' + TIMES + num(cl.bottom_up_burst[1], 2));
+  (function predtab() {
+    const r = cl.results, nice = {zeros: 'zeros', ones: 'all ones', randn_M: 'random fp32'};
+    $('predtab').querySelector('tbody').innerHTML = Object.keys(nice).filter(k => r[k]).map(k =>
+      '<tr><td>' + nice[k] + '</td><td class="n">' + num(r[k].burst_mhz, 0) + ' MHz</td><td class="n">' +
+      num(r[k].burst_tflops, 2) + '</td><td class="n">' + num(r[k].sustained_mhz, 0) + ' MHz</td><td class="n">' +
+      num(r[k].sustained_tflops, 2) + '</td></tr>').join('');
+  }());
+  set('op-leak', num(pb.e66_leak_W_per_C, 3) + ' W/' + DEG + 'C against the registered estimator’s ' + num(pb.a1_leak_W_per_C, 3));
+
+  /* ------------------------------------------------------------- 7. sources */
+  (function srctab() {
+    const g = 'https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/';
+    const rows = [
+      ['0–2', 'E64 · the power limit, not the temperature limit', g + '2026-10-23-e64-horace-power-limit/README.md'],
+      ['3, 5', 'E60 · the bit-flip Hamming ladder', g + '2026-10-20-bitflip-ladder/README.md'],
+      ['3', 'E63 · the camera half of the ladder', g + '2026-10-23-e63-camera-hamming-ladder/README.md'],
+      ['4', 'E38 · operand sparsity on three cards', 'https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute'],
+      ['5', 'E65 · 32 B-side bit positions, the flow-M flip, the hart ladder', g + '2026-10-26-e65-bit-prices-hart-ladder/README.md'],
+      ['5', 'E67 · 32 A-side bit positions and the operand grid', g + '2026-10-27-e67-a-side-bit-prices/README.md'],
+      ['5', 'E68 · the stage map, and the price as a band', g + '2026-10-27-e68-stage-map/README.md'],
+      ['5', 'E66 · the overnight idle leakage measurement', g + '2026-10-27-e66-idle-long/README.md'],
+      ['6', 'The toggle recount: what the bench’s 21,331 counted', g + '2026-10-26-toggle-recount/README.md'],
+      ['6–7', 'The open netlist: the same RTL through Yosys and OpenROAD', g + '2026-10-26-open-netlist/README.md'],
+      ['7', 'The cell energy table from an open 7 nm kit', g + '2026-10-26-asap7-cell-energies/README.md'],
+      ['7–9', 'The transistor ledger: nets, gates, fins, electrons, the floor', g + '2026-10-27-transistor-ledger/README.md'],
+      ['8', 'One switch, in SPICE on BSIM-CMG devices at 0.517 V', g + '2026-10-26-asap7-one-switch/README.md'],
+      ['2–5', 'The load-to-watts model', g + '2026-10-26-load-model/README.md'],
+      ['all', 'The chain closure: every rung joined and scored', g + '2026-10-27-chain-closure/README.md'],
+      ['context', 'The multiply-add drawn as built, down to one gate’s transistors',
+        'https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram#flow=m-tensorfma32'],
+      ['context', 'Seven weeks of this work as a timeline', 'https://spacesheep.dev/@yaroslavvb/transistor-heat-timeline']
+    ];
+    $('srctab').querySelector('tbody').innerHTML = rows.map(r =>
+      '<tr><td class="n">' + r[0] + '</td><td>' + r[1] + '</td><td><a href="' + r[2] + '">' +
+      (r[2].indexOf('spacesheep') > 0 ? 'page' : 'data') + '</a></td></tr>').join('');
+  }());
+
+  /* ------------------------------------------- 8. the optional private boxes */
+  if (D.vault && D.vault.boxes) {
+    const v = D.vault;
+    const box = b => '<div class="vbox"><div class="vt">' + v.label + '</div><h4>' + b.title + '</h4><table><tbody>' +
+      b.rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</tbody></table></div>';
+    v.boxes.forEach(b => {
+      const anchor = $('lv' + ({permac: 4, perbit: 5, toggles: 6, transistor: 8, closure: 9}[b.at] != null
+        ? {permac: 4, perbit: 5, toggles: 6, transistor: 8, closure: 9}[b.at] : 9));
+      const d = document.createElement('div');
+      d.innerHTML = box(b);
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(d.firstChild, anchor.nextSibling);
+      else $('vaultzone').appendChild(d.firstChild);
+    });
+    const note = document.createElement('div');
+    note.className = 'vbox';
+    note.innerHTML = '<div class="vt">' + v.label + '</div><h4>What these boxes are</h4><p>' + v.note + '</p>';
+    $('vaultzone').appendChild(note);
+  }
+}());
+
+</script>
+<script>
+/* Section anchors. Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links. Runs after the section-anchor
+   script above, whose h2 ids the contents list links to. Pages not built from this template paste both blocks
+   before </main>.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].parentNode.insertBefore(nav, h2s[0]);
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
+</script>
+</body>
+</html>
