@@ -161,3 +161,21 @@ generator writes `build/hl-gen4`.
   `nrd_b` sit on opposite sides.
 - New reported sections `a_bits`, `a_bits_pi`, `a_partner`, `ix` and `anchors`. The A-side per-bit price divides
   by the item's **own** designed count from the manifest (2,048), not by the B side's 4,096.
+
+**A13, Mon 26 Oct 2026, 21:2x PDT (written after pass 750 of blocks 1+2+4 and before any block-3 data; it adds
+a reported quantity, changes no registered rule and no measured number).** `closure.py` and `report_e67.py`, the
+two tools that read the reductions, land with this amendment: `collect_e67.sh` (reduce every finished pass and
+assemble the data directory), `closure.py` (walk the issue order of `nrd_a` and `nrd_b` out of their own operand
+files, count the flips at each of the 32 positions, price that histogram with E67's A list and E65's B list, and
+compare against the measured step: P8) and `report_e67.py` (the results tables and the scored rules).
+- *Added, post hoc and labelled as such:* a **turn-on-corrected** closure beside the registered one. A price
+  measured against a constant-operand zero is `ΔW_j = T + e_j·n_j·rate`, where `T` is the fixed cost of making
+  the operand move at all — E60's own amendment A1 warned that the bit scan "is quoted as item minus `lq_h0`,
+  not as a per-flip price". Summing those prices over a random workload therefore charges `T` once for **every
+  position that flips**, about 13.5 times for `nrd_a`, instead of once. The interaction grid measures `T`
+  directly: if every single-flip item carries the same turn-on, the registered excess
+  (cell − A-only − B-only + base) **is −T**. So the closure is reported twice, as registered and with `T` taken
+  out of every price and added back once. *Why:* pass 750's reduction over-predicted both one-sided anchors by
+  about 2.0×, the same factor on both sides, which the turn-on explains arithmetically and which block 3 can
+  measure rather than assume. **P6 and P8 keep their registered bands and are scored against them**; the
+  corrected ratio is reported beside P8's, never in place of it.
