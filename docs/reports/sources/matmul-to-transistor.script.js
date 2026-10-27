@@ -77,33 +77,40 @@
       ['clock_rise', 0, '7'], ['signal_rise', 0, '7'], ['gate_pin', 0, '7'],
       ['fin_in_cell', 0, '8'], ['transistor', 0, '8'], ['electron', 0, '9']
     ].map(r => [R[r[0]].label, R[r[0]].E_J, r[1], r[2]]);
-
     const land = D.floor.land66_J;
-    const W = 900, rowH = 30, top = 26, H = top + rows.length * rowH + 42;
-    const x0 = 300, x1 = W - 70;
-    const lo = Math.log10(land) - 0.4, hi = Math.log10(rows[0][1]) + 0.4;
-    const X = v => x0 + (Math.log10(v) - lo) * (x1 - x0) / (hi - lo);
+    const W = 760, ROW = 42, top = 38, H = top + rows.length * ROW + 34;
+    const L = 14, VX = W - 96, Rx = VX - 22;           // axis ends before the value column
+    const lo = Math.log10(land) - 0.3, hi = Math.log10(rows[0][1]) + 0.25;
+    const X = v => L + (Math.log10(v) - lo) * (Rx - L) / (hi - lo);
     const s = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img',
-      'aria-label': 'A logarithmic ladder of energy per event, from one electron across the rail at 83 zeptojoules up to one random floating-point multiply-add at the board at 5.8 picojoules, eleven orders of magnitude apart, with Landauer’s floor marked below all of them.'}, $('ladder'));
-    for (let e = Math.ceil(lo); e <= Math.floor(hi); e++) {
+      'aria-label': 'A logarithmic ladder of energy per event, from one electron across the rail at 83 zeptojoules up to one random floating-point multiply-add at the board at 5.8 picojoules \u2014 eleven orders of magnitude \u2014 with Landauer\u2019s floor marked below all of them.'}, $('ladder'));
+    const sup = e => '10' + (e < 0 ? '\u2212' : '') + String(Math.abs(e)).split('').map(c => '\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079'[+c]).join('');
+    for (let e = Math.ceil(lo); e <= Math.floor(hi); e += 1) {
       const x = X(Math.pow(10, e));
-      el('line', {x1: x, x2: x, y1: top - 10, y2: top + rows.length * rowH - 8, stroke: 'var(--grid)'}, s);
-      tx(s, x, H - 22, '10' + (e < 0 ? '−' : '') + String(Math.abs(e)).split('').map(c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c]).join(''), 'tick', 'middle')
-        .setAttribute('fill', 'var(--muted)');
+      el('line', {x1: x, x2: x, y1: top + 4, y2: H - 30, stroke: 'var(--grid)'}, s);
+      if (e % 3 === 0) tx(s, x, H - 14, sup(e), 'tick', 'middle').setAttribute('fill', 'var(--muted)');
     }
-    tx(s, (x0 + x1) / 2, H - 5, 'joules per event', 'tick', 'middle').setAttribute('fill', 'var(--ink-2)');
+    tx(s, L, H - 14, 'joules per event', 'tick').setAttribute('fill', 'var(--ink-2)');
     const lx = X(land);
-    el('line', {x1: lx, x2: lx, y1: top - 14, y2: top + rows.length * rowH - 4, stroke: 'var(--ref)', 'stroke-dasharray': '4 3'}, s);
-    tx(s, lx + 4, top - 17, 'Landauer, 66 ' + DEG + 'C', 'tick').setAttribute('fill', 'var(--ref)');
+    el('line', {x1: lx, x2: lx, y1: top - 4, y2: H - 30, stroke: 'var(--ref)', 'stroke-dasharray': '4 3'}, s);
+    tx(s, lx, top - 12, 'Landauer\u2019s floor, 66 ' + DEG + 'C', 'tick').setAttribute('fill', 'var(--ref)');
     rows.forEach((r, i) => {
-      const y = top + i * rowH + 6;
-      tx(s, x0 - 10, y + 4, r[0], 'tick', 'end').setAttribute('fill', 'var(--ink)');
-      tx(s, 6, y + 4, 'step ' + r[3], 'tick').setAttribute('fill', 'var(--muted)');
-      el('line', {x1: lx, x2: X(r[1]), y1: y, y2: y, stroke: 'var(--grid)'}, s);
-      el('circle', {cx: X(r[1]), cy: y, r: 5.5, fill: r[2] ? 'var(--c1)' : 'var(--page)',
+      const yl = top + 14 + i * ROW, ya = yl + 15;
+      const t = tx(s, L, yl, r[0], 'tick');
+      t.setAttribute('fill', 'var(--ink)');
+      if (r[2]) t.setAttribute('font-weight', '600');
+      tx(s, VX + 76, yl, 'step ' + r[3], 'tick', 'end').setAttribute('fill', 'var(--muted)');
+      el('line', {x1: lx, x2: X(r[1]), y1: ya, y2: ya, stroke: 'var(--grid)', 'stroke-width': 2}, s);
+      el('circle', {cx: X(r[1]), cy: ya, r: 5.5, fill: r[2] ? 'var(--c1)' : 'var(--page)',
         stroke: r[2] ? 'var(--c1)' : 'var(--c2)', 'stroke-width': 2}, s);
-      tx(s, X(r[1]) + 11, y + 4, eng(r[1]), 'tick').setAttribute('fill', 'var(--ink-2)');
+      tx(s, VX + 76, ya + 4, eng(r[1]), 'tick', 'end')
+        .setAttribute('fill', r[2] ? 'var(--c1)' : 'var(--ink-2)');
     });
+    const ly = H - 30;
+    el('circle', {cx: L + 6, cy: ly - 2, r: 5, fill: 'var(--c1)'}, s);
+    tx(s, L + 16, ly + 2, 'measured on a card', 'tick').setAttribute('fill', 'var(--ink-2)');
+    el('circle', {cx: L + 150, cy: ly - 2, r: 5, fill: 'var(--page)', stroke: 'var(--c2)', 'stroke-width': 2}, s);
+    tx(s, L + 160, ly + 2, 'modelled or simulated', 'tick').setAttribute('fill', 'var(--ink-2)');
   }());
 
   /* ---------------------------------------------------- 3. per-level fill-ins */
@@ -367,7 +374,9 @@
   /* ------------------------------------------- 8. the optional private boxes */
   if (D.vault && D.vault.boxes) {
     const v = D.vault;
-    const box = b => '<div class="vbox"><div class="vt">' + v.label + '</div><h4>' + b.title + '</h4><table><tbody>' +
+    const slug = t => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').split('-').slice(0, 6).join('-');
+    const box = b => '<div class="vbox" data-ss-id="archive-' + slug(b.title) + '"><div class="vt">' + v.label +
+      '</div><h4>' + b.title + '</h4><table><tbody>' +
       b.rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</tbody></table></div>';
     v.boxes.forEach(b => {
       const anchor = $('lv' + ({permac: 4, perbit: 5, toggles: 6, transistor: 8, closure: 9}[b.at] != null
@@ -379,6 +388,7 @@
     });
     const note = document.createElement('div');
     note.className = 'vbox';
+    note.setAttribute('data-ss-id', 'archive-what-these-boxes-are');
     note.innerHTML = '<div class="vt">' + v.label + '</div><h4>What these boxes are</h4><p>' + v.note + '</p>';
     $('vaultzone').appendChild(note);
   }

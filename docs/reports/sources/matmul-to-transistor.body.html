@@ -13,16 +13,17 @@ main>p,main>ul,main>ol,main>h1,main>h2,main>h3,main>.links,main>.tiles,main>figu
 figure{margin:18px 0 10px}
 figcaption{font-size:.88rem;color:var(--ink-2);margin-top:6px;line-height:1.45}
 figure h3,.lv h3{margin:0 0 2px;font-size:1.02rem}
-.chartbox{overflow-x:auto}
-.chartbox svg{display:block;width:100%;height:auto;max-width:900px}
-.lv{border:1px solid var(--axis);border-left:3px solid var(--c1);border-radius:6px;padding:12px 14px;background:var(--surface);margin:14px 0}
+.chartbox{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.chartbox svg{display:block;width:100%;height:auto;min-width:660px;max-width:900px}
+.lv{border:1px solid var(--axis);border-radius:6px;padding:12px 14px;background:var(--surface);margin:14px 0}
 .lv .step{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
 .lv .big{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums;margin:6px 0 2px}
 .lv dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:9px 0 0;font-size:.93rem}
 .lv dt{color:var(--ink-2);white-space:nowrap}
 .lv dd{margin:0}
-.lv.weak{border-left-color:var(--warn)}
-.lv.gap{border-left-color:var(--bad)}
+.lv.weak .step{color:var(--warn)}
+.lv.gap .step{color:var(--bad)}
+.lv.gap{border-color:var(--bad)}
 .conf{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--axis);border-radius:999px;padding:1px 9px;color:var(--ink-2)}
 .conf.m{border-color:var(--ok);color:var(--ok)}
 .conf.d{border-color:var(--warn);color:var(--warn)}
@@ -46,11 +47,11 @@ details>summary{cursor:pointer;font-weight:600}
 @media (max-width:520px){.lv dl{grid-template-columns:1fr}.lv dt{margin-top:6px}}
 </style>
 
-<h1>From matmul speed to one transistor switch</h1>
+<h1 data-ss-id="title">From matmul speed to one transistor switch</h1>
 <p class="byline">Tuesday 27 October 2026 · the ET-SoC-1 at AI Foundry · every number below is a committed
 measurement or a model built on one, in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">the repository</a></p>
 
-<p class="lede">Horace He's observation is that a matrix multiply runs faster on zeros than on random numbers,
+<p class="lede" data-ss-id="lede">Horace He's observation is that a matrix multiply runs faster on zeros than on random numbers,
 although it does exactly the same arithmetic. On this card it does: 15% faster in the first seconds, 33% faster
 once the die is hot. Nothing about the instructions changed — only how many wires inside the chip had to move.
 This page follows that one difference all the way down: from TFLOPS to the governor, to watts at the board, to
@@ -59,7 +60,7 @@ to the gates they charge, to one transistor's gate, to the electrons in it and t
 underneath. Nine steps. Six of them are measured on silicon, three are modelled, and the gap that is left is
 shown rather than hidden.</p>
 
-<div class="links">
+<div class="links" data-ss-id="nav-sections" data-ss-react="off">
   <a href="#answer"><b>The answer</b><span>One paragraph and eight numbers.</span></a>
   <a href="#chain"><b>The chain</b><span>Each step, its number, its evidence.</span></a>
   <a href="#closure"><b>Where the energy goes</b><span>The waterfall, with the unaccounted part.</span></a>
@@ -67,7 +68,7 @@ shown rather than hidden.</p>
   <a href="#open"><b>What is still open</b><span>Including the one causal test not yet run.</span></a>
 </div>
 
-<h2 id="answer">1. The answer</h2>
+<h2 id="answer" data-ss-id="answer">1. The answer</h2>
 
 <p>Random fp32 data makes about 13.5 of the 32 bits of each operand change from one multiply-add to the next;
 zeros make none change. Every changed bit drives a cascade of wires through the multiplier's Wallace tree, and
@@ -75,9 +76,9 @@ every wire that moves charges a capacitance. That is the whole mechanism: <b>the
 board power to a cap, random data draws more power for the same arithmetic, so the governor gives it a lower
 clock, and a lower clock is fewer FLOPS.</b> The numbers below are the same difference restated at each depth.</p>
 
-<div class="tiles" id="tiles"></div>
+<div class="tiles" id="tiles" data-ss-id="tiles"></div>
 
-<p id="answer-prose">On a cool die, in the first eight seconds, the card does <b id="a-burst"></b> on zeros
+<p id="answer-prose" data-ss-id="answer-prose">On a cool die, in the first eight seconds, the card does <b id="a-burst"></b> on zeros
 against <b id="a-burstr"></b> on random fp32 — <b id="a-burstpct"></b> faster. Once it is hot and the thermal
 test takes over, zeros hold 800 MHz while random data sits on the governor's 600 MHz floor, and the gap becomes
 <b id="a-sus"></b>. At 800 MHz the board draws <b id="a-wz"></b> on zeros and <b id="a-wr"></b> on random data.
@@ -89,13 +90,13 @@ RTL finds <b id="a-tog"></b> physical net toggles per random multiply-add; the g
 <b id="a-tr"></b> — about <b id="a-el"></b> electrons across the 0.517 V rail, which is
 <b id="a-land"></b> times Landauer's floor at the die's own temperature.</p>
 
-<h2 id="chain">2. The chain, step by step</h2>
+<h2 id="chain" data-ss-id="chain">2. The chain, step by step</h2>
 
 <p>Each rung below carries its number, how it was obtained, where to check it, how far to trust it, and what is
 still missing. The ladder is to scale in orders of magnitude: eleven of them separate one electron from one
 multiply-add at the board.</p>
 
-<figure>
+<figure data-ss-id="nine-steps-from-tflops-gap-transistor">
   <h3>Nine steps from a TFLOPS gap to one transistor</h3>
   <div class="chartbox" id="ladder"></div>
   <figcaption>Energy per event, logarithmic. Solid marks are measured on a card; hollow marks are modelled or
@@ -103,9 +104,9 @@ multiply-add at the board.</p>
   66&nbsp;°C trip.</figcaption>
 </figure>
 
-<div class="lv" id="lv0">
+<div class="lv" id="lv0" data-ss-id="lv0">
   <div class="step">Step 0 · speed</div>
-  <h3>Zeros run faster than random data, on the same instructions</h3>
+  <h3 data-ss-id="zeros-run-faster-than-random-data">Zeros run faster than random data, on the same instructions</h3>
   <div class="big" id="lv0-big"></div>
   <dl>
     <dt>How</dt><dd>E64: 47 runs on aifoundry2's card, fp32/fp16/int8 against zeros, ones and random data,
@@ -119,9 +120,9 @@ multiply-add at the board.</p>
   </dl>
 </div>
 
-<div class="lv" id="lv1">
+<div class="lv" id="lv1" data-ss-id="lv1">
   <div class="step">Step 1 · the governor</div>
-  <h3>Because a controller regulates board power to a cap, and die temperature to a trip</h3>
+  <h3 data-ss-id="because-controller-regulates-board-power-cap">Because a controller regulates board power to a cap, and die temperature to a trip</h3>
   <div class="big" id="lv1-big"></div>
   <dl>
     <dt>How</dt><dd>The governor's log names which test acted at every step. Below 65&nbsp;°C only the power
@@ -137,9 +138,9 @@ multiply-add at the board.</p>
   </dl>
 </div>
 
-<div class="lv" id="lv2">
+<div class="lv" id="lv2" data-ss-id="lv2">
   <div class="step">Step 2 · the board</div>
-  <h3>Random data draws more watts for exactly the same arithmetic</h3>
+  <h3 data-ss-id="random-data-draws-more-watts-exactly">Random data draws more watts for exactly the same arithmetic</h3>
   <div class="big" id="lv2-big"></div>
   <dl>
     <dt>How</dt><dd>Board power from the card's own telemetry, at fixed clock, over ten operand patterns and
@@ -154,7 +155,7 @@ multiply-add at the board.</p>
   </dl>
 </div>
 
-<figure>
+<figure data-ss-id="gap-board-operand-pattern-clock-measured">
   <h3>The gap at the board, by operand pattern and clock</h3>
   <div class="chartbox" id="boardchart"></div>
   <figcaption>Measured board power on aifoundry2's card (E64), ten operand patterns at three clocks. Zeros is
@@ -162,9 +163,9 @@ multiply-add at the board.</p>
   effect, before the governor ever sees it.</figcaption>
 </figure>
 
-<div class="lv" id="lv3">
+<div class="lv" id="lv3" data-ss-id="lv3">
   <div class="step">Step 3 · board to die</div>
-  <h3>Most, but not all, of that goes to the part of the chip that computes</h3>
+  <h3 data-ss-id="most-but-not-all-goes-part">Most, but not all, of that goes to the part of the chip that computes</h3>
   <div class="big" id="lv3-big"></div>
   <dl>
     <dt>How</dt><dd>Two routes. The rails are logged beside the board figure in E60's ladders, giving
@@ -179,9 +180,9 @@ multiply-add at the board.</p>
   </dl>
 </div>
 
-<div class="lv" id="lv4">
+<div class="lv" id="lv4" data-ss-id="lv4">
   <div class="step">Step 4 · one multiply-add</div>
-  <h3>What one fp32 multiply-add costs, over idle</h3>
+  <h3 data-ss-id="fp32-multiply-add-costs-over-idle">What one fp32 multiply-add costs, over idle</h3>
   <div class="big" id="lv4-big"></div>
   <dl>
     <dt>How</dt><dd>E38 ran the same kernel on three cards with operands held at zeros, all-ones and random,
@@ -198,9 +199,9 @@ multiply-add at the board.</p>
   </dl>
 </div>
 
-<div class="lv" id="lv5">
+<div class="lv" id="lv5" data-ss-id="lv5">
   <div class="step">Step 5 · one flipped bit</div>
-  <h3>What one changed bit of an operand costs</h3>
+  <h3 data-ss-id="changed-bit-operand-costs-howa-hamming">What one changed bit of an operand costs</h3>
   <div class="big" id="lv5-big"></div>
   <dl>
     <dt>How</dt><dd>A Hamming ladder: the same kernel, with operand words that differ from their predecessor in
@@ -218,7 +219,7 @@ multiply-add at the board.</p>
   </dl>
 </div>
 
-<figure>
+<figure data-ss-id="flipped-bit-costs-twelve-times-more">
   <h3>A flipped bit costs twelve times more at the top of the mantissa than at the bottom</h3>
   <div class="chartbox" id="bitchart"></div>
   <figcaption>Energy at the board for flipping one bit position of one operand, all 32 positions of each side,
@@ -227,8 +228,8 @@ multiply-add at the board.</p>
   A side (the multiplicand) is dearer than the B side at most positions.</figcaption>
 </figure>
 
-<div class="note">
-  <p><b class="k">The one rule that does not hold.</b> If each bit had a fixed price you could add them: 13.5
+<div class="note" data-ss-id="rule-does-not-hold-if-each-2">
+  <p data-ss-id="rule-does-not-hold-if-each"><b class="k">The one rule that does not hold.</b> If each bit had a fixed price you could add them: 13.5
   changed bits in a random operand, times the price list, would give the energy of a random word. It does not.
   Summed naively over both operands the price list predicts <span id="sat-naive"></span> where the card draws
   <span id="sat-meas"></span> — <span id="sat-x"></span> too much. Within one word the measured cost per
@@ -239,9 +240,9 @@ multiply-add at the board.</p>
   card time, and has not been run.</p>
 </div>
 
-<div class="lv" id="lv6">
+<div class="lv" id="lv6" data-ss-id="lv6">
   <div class="step">Step 6 · toggles</div>
-  <h3>How many wires actually move</h3>
+  <h3 data-ss-id="many-wires-actually-move-howthe-same">How many wires actually move</h3>
   <div class="big" id="lv6-big"></div>
   <dl>
     <dt>How</dt><dd>The same RTL — core-et's open <code>txfma_top</code> — synthesised and placed on an open
@@ -258,9 +259,9 @@ multiply-add at the board.</p>
   </dl>
 </div>
 
-<div class="lv" id="lv7">
+<div class="lv" id="lv7" data-ss-id="lv7">
   <div class="step">Step 7 · gates and wires</div>
-  <h3>What one wire's toggle charges, and how little of it is transistor</h3>
+  <h3 data-ss-id="wire-s-toggle-charges-little-transistor">What one wire's toggle charges, and how little of it is transistor</h3>
   <div class="big" id="lv7-big"></div>
   <dl>
     <dt>How</dt><dd>Every net in the placed design joined to the capacitance the extractor gives it, split
@@ -272,11 +273,12 @@ multiply-add at the board.</p>
       signal nets.</dd>
     <dt>Open</dt><dd>The between-cell wire has no coupling term, so <b>the transistor share is a ceiling and
       the wire share a floor</b>. Half the design's capacitance is unpriced: the clock tree and the timing
-      repair add nets after the point the simulation saw.</dd>
+      repair add nets after the point the simulation saw. A private archive cross-check of the same
+      quantities was run on 26 October 2026; it is not reported here.</dd>
   </dl>
 </div>
 
-<figure>
+<figure data-ss-id="only-fifth-switching-energy-transistor-rest">
   <h3>Only a fifth of the switching energy is transistor; the rest is wire</h3>
   <div class="chartbox" id="splitchart"></div>
   <figcaption>What one random fp32 multiply-add's switching energy charges, in the placed open netlist. "Wire
@@ -284,9 +286,9 @@ multiply-add at the board.</p>
   library's extracted pin capacitance and the same cell's schematic-only capacitance in SPICE.</figcaption>
 </figure>
 
-<div class="lv" id="lv8">
+<div class="lv" id="lv8" data-ss-id="lv8">
   <div class="step">Step 8 · one transistor</div>
-  <h3>One minimum transistor's gate, switched</h3>
+  <h3 data-ss-id="minimum-transistor-s-gate-switched-howspice">One minimum transistor's gate, switched</h3>
   <div class="big" id="lv8-big"></div>
   <dl>
     <dt>How</dt><dd>SPICE on the open kit's own BSIM-CMG FinFET device cards at 0.517&nbsp;V — the minion
@@ -303,9 +305,9 @@ multiply-add at the board.</p>
   </dl>
 </div>
 
-<div class="lv" id="lv9">
+<div class="lv" id="lv9" data-ss-id="lv9">
   <div class="step">Step 9 · electrons, and the floor</div>
-  <h3>Where thermodynamics finally stops us</h3>
+  <h3 data-ss-id="where-thermodynamics-finally-stops-us-howcharge">Where thermodynamics finally stops us</h3>
   <div class="big" id="lv9-big"></div>
   <dl>
     <dt>How</dt><dd>Charge divided by the elementary charge, at the 0.517&nbsp;V rail; Landauer's
@@ -320,19 +322,19 @@ multiply-add at the board.</p>
   </dl>
 </div>
 
-<div class="tblwrap">
-<table class="t" id="floortab">
+<div class="tblwrap" data-ss-id="eventenergyelectrons-landauer-66-c-th">
+<table class="t" id="floortab" data-ss-id="floortab">
   <thead><tr><th>Event</th><th class="n">Energy</th><th class="n">Electrons</th><th class="n">× Landauer at 66 °C</th></tr></thead>
   <tbody></tbody>
 </table>
 </div>
 
-<h2 id="closure">3. Where a random multiply-add's energy goes</h2>
+<h2 id="closure" data-ss-id="closure">3. Where a random multiply-add's energy goes</h2>
 
 <p>The honest way to present a chain like this is to show what it fails to account for. Below is one random
 fp32 multiply-add as the card pays for it, against what the bottom-up count can name.</p>
 
-<figure>
+<figure data-ss-id="bottom-up-count-names-third-card">
   <h3>The bottom-up count names a third of what the card pays</h3>
   <div class="chartbox" id="waterfall"></div>
   <figcaption>One random fp32 multiply-add, energy over idle. Left: what the card pays at the board (E38) and
@@ -340,8 +342,8 @@ fp32 multiply-add as the card pays for it, against what the bottom-up count can 
   the remainder shown.</figcaption>
 </figure>
 
-<div class="note">
-  <p><b class="k">Why the remainder is expected, and what would shrink it.</b> The bottom-up figure is a floor
+<div class="note" data-ss-id="why-remainder-expected-would-shrink-bottom-2">
+  <p data-ss-id="why-remainder-expected-would-shrink-bottom"><b class="k">Why the remainder is expected, and what would shrink it.</b> The bottom-up figure is a floor
   three times over. <b>One</b>, half the design's capacitance is unpriced — <span id="cl-cap"></span> of the
   farads sit on nets that the clock-tree build and the timing repair created after the netlist was simulated.
   <b>Two</b>, the between-cell wire is a global-route estimate with no coupling term, because detailed routing
@@ -350,47 +352,47 @@ fp32 multiply-add as the card pays for it, against what the bottom-up count can 
   error; it is the parts of the chip this count does not yet reach.</p>
 </div>
 
-<h2 id="back">4. Back up the ladder: predicting the speed gap from below</h2>
+<h2 id="back" data-ss-id="back">4. Back up the ladder: predicting the speed gap from below</h2>
 
 <p>A chain is only worth having if it runs in both directions. Starting from board power and the governor's
 own cap, the model predicts the clock each pattern settles at, and therefore the TFLOPS gap it produces.</p>
 
-<div class="tiles" id="predtiles"></div>
+<div class="tiles" id="predtiles" data-ss-id="predtiles"></div>
 
-<p><b>The burst gap is a real prediction and it lands.</b> The model predicts <span id="pb-pred"></span>
+<p data-ss-id="burst-gap-real-prediction-lands-model"><b>The burst gap is a real prediction and it lands.</b> The model predicts <span id="pb-pred"></span>
 against a measurement of <span id="pb-meas"></span>, depending on which of four published readings you take —
 first-eight-second TFLOPS, whole-run TFLOPS, burst clocks, or mean clock after the first 1.5&nbsp;s. The point
 estimate sits inside that spread; the model cannot tell the four readings apart. Two inputs set how sharp it
 can be: the cap (64&nbsp;W would give 1.159, 67&nbsp;W would give 1.127) and the drift of the price list
 between cards, which carried as a band gives <span id="pb-band"></span>.</p>
 
-<p><b>The sustained gap is not a prediction at all, and saying so is the honest result.</b> Once the thermal
+<p data-ss-id="sustained-gap-not-prediction-all-saying"><b>The sustained gap is not a prediction at all, and saying so is the honest result.</b> Once the thermal
 test takes over, zeros clamp to the top of the clock range and random data clamps to the bottom, so the
 predicted ratio is 800/600 = 1.333 for <em>any</em> cap in a <span id="ps-win"></span> window — and every
 candidate cap on the record is inside it. The measurement is the same number by the same construction. What
 the chain does predict here is ordinal, and it is still a real claim: random data reaches the governor's floor
 and zeros does not.</p>
 
-<div class="tblwrap">
-<table class="t" id="predtab">
+<div class="tblwrap" data-ss-id="patternburst-clockburst-tflopssustained-clock-th">
+<table class="t" id="predtab" data-ss-id="predtab">
   <thead><tr><th>Pattern</th><th class="n">Burst clock</th><th class="n">Burst TFLOPS</th><th class="n">Sustained clock</th><th class="n">Sustained TFLOPS</th></tr></thead>
   <tbody></tbody>
 </table>
 </div>
 
-<p id="back-bottom">Starting one rung lower — from the price of a single flipped bit rather than from measured
+<p id="back-bottom" data-ss-id="back-bottom">Starting one rung lower — from the price of a single flipped bit rather than from measured
 board power — the same arithmetic gives a <em>range</em> for the burst gap, <span id="pb-bu"></span>, because
 the saturation law under step 5 is not yet pinned. Closing that range is the cheapest unrun experiment in this
 whole chain.</p>
 
-<h2 id="open">5. What is still open</h2>
+<h2 id="open" data-ss-id="open">5. What is still open</h2>
 
 <p>In the order that closing them would most change the picture.</p>
 
-<div class="lv gap" id="knob">
+<div class="lv gap" id="knob" data-ss-id="knob">
   <div class="step">Waits on the card's owner</div>
   <h3>The knob test: move the cap and see whether the gap moves with it</h3>
-  <p>Everything in §1 and §2 says the governor's power cap causes the speed gap. That is read from the
+  <p data-ss-id="everything-1-2-says-governor-s">Everything in §1 and §2 says the governor's power cap causes the speed gap. That is read from the
   governor's own log, which is strong evidence, but it is still observational: the cap has never actually been
   changed. Raising the TDP, then the thermal threshold, on aifoundry2 and re-running the same four patterns
   would turn the whole chain's top rung from a correlation into a controlled result — and it would test the
@@ -400,9 +402,9 @@ whole chain.</p>
   never reaches 800&nbsp;MHz, so it is aifoundry2 or nowhere.</p>
 </div>
 
-<div class="lv weak">
+<div class="lv weak" data-ss-id="cheap-written-not-run-saturation-ladder">
   <div class="step">Cheap, written, not run</div>
-  <h3>The saturation ladder: how many bits, rather than which bits</h3>
+  <h3 data-ss-id="saturation-ladder-many-bits-rather-than">The saturation ladder: how many bits, rather than which bits</h3>
   <p>The single-bit price list over-predicts a whole random word by a factor of about two, and nothing in the
   record separates the two candidate causes — that simultaneous flips share wires, or that the price of a flip
   depends on what else is flipping. A ladder in the <em>number</em> of simultaneously flipping positions
@@ -410,9 +412,9 @@ whole chain.</p>
   About 20 minutes of card time.</p>
 </div>
 
-<div class="lv weak">
+<div class="lv weak" data-ss-id="measured-tonight-needs-more-pass-leakage">
   <div class="step">Measured tonight, needs one more pass</div>
-  <h3>The leakage slope, which is the largest uncertainty in every per-bit price</h3>
+  <h3 data-ss-id="leakage-slope-which-largest-uncertainty-every">The leakage slope, which is the largest uncertainty in every per-bit price</h3>
   <p>Each run's power is corrected for the die temperature it ran at, using a leakage slope. The registered
   estimator fits that slope inside each run's own two-second window, while the kernel is running, so it reads a
   busy transient rather than idle leakage — and it returned 1.508&nbsp;W/°C. An overnight idle heat-and-cool
@@ -422,52 +424,56 @@ whole chain.</p>
   scoring — is a morning's desk work.</p>
 </div>
 
-<div class="lv weak">
+<div class="lv weak" data-ss-id="structural-three-things-keep-bottom-up">
   <div class="step">Structural</div>
-  <h3>The three things that keep the bottom-up count a floor</h3>
+  <h3 data-ss-id="three-things-keep-bottom-up-count">The three things that keep the bottom-up count a floor</h3>
   <p>Detailed routing has never closed in the open flow, so there is no extracted parasitic file, no coupling
   capacitance and no measured glitch factor. Half the design's capacitance was created after the point the
   gate-level simulation saw. And the A side of the multiplier has no multi-bit ladder, so the carry-over from
   one operand to the other is a choice between two defensible numbers that moves the prediction by 6%.</p>
 </div>
 
-<div class="lv weak">
+<div class="lv weak" data-ss-id="beyond-unit-memory-instructions-trap-no">
   <div class="step">Beyond this unit</div>
-  <h3>Memory, and the instructions that trap</h3>
+  <h3 data-ss-id="memory-instructions-trap-no-flip-ladder">Memory, and the instructions that trap</h3>
   <p>No flip ladder has run against a memory path. A DRAM tensor load costs 94–134&nbsp;pJ per byte against a
   multiply-add's 5.8&nbsp;pJ, so for most real work this chain prices the small half. Thirteen instructions —
   divide, square root, reciprocal square root, sine, the integer divides — trap in user mode and have no energy
   figure at all, and they are the normalisation half of a real kernel.</p>
 </div>
 
-<h2 id="sources">6. Sources and method</h2>
+<h2 id="sources" data-ss-id="sources">6. Sources and method</h2>
 
 <details>
   <summary>Every number on this page, and where it comes from</summary>
-  <div class="tblwrap">
-  <table class="t" id="srctab">
+  <div class="tblwrap" data-ss-id="stepexperiment-or-modelwhere">
+  <table class="t" id="srctab" data-ss-id="srctab">
     <thead><tr><th>Step</th><th>Experiment or model</th><th>Where</th></tr></thead>
     <tbody></tbody>
   </table>
   </div>
-  <p>Each experiment on a card was pre-registered by commit before the first launch, claimed in the lab's
+  <p data-ss-id="an-open-stand-in-and-a-private-cross-check">Steps 6 to 8 rest on an open stand-in: the
+  same RTL, built with a public cell library, because this chip’s own netlist is not public.
+  <b>A private archive cross-check</b> of the same multiply-add was run on <b>26 October 2026</b> against
+  the same quantities; it is not part of this page and nothing from it is quoted here.</p>
+  <p data-ss-id="each-experiment-card-was-pre-registered">Each experiment on a card was pre-registered by commit before the first launch, claimed in the lab's
   channel while it held the card, and scored against the rules it registered. Where a later pass found an
   error, the correction is in the same data directory as the original and the original is not quietly
   replaced.</p>
 </details>
 
-<details>
+<details data-ss-id="conventions-two-places-easy-go-wrong">
   <summary>Conventions, and the two places it is easy to go wrong</summary>
   <p><b>A rise is not a toggle.</b> A capacitance <i>C</i> takes <i>C·V</i>² from the rail when its net rises
   and nothing when it falls, so a toggle — the per-edge average — costs <i>½C·V</i>². Every single-edge figure
   on this page is <b>per rise</b>; per-toggle figures are half of it and are labelled where they appear. A
   table that mixes the two is out by exactly a factor of two, which is large enough to matter and small enough
   to miss.</p>
-  <p><b>An electron count from a board figure is a convention.</b> Board power is not delivered at the die's
+  <p data-ss-id="electron-count-from-board-figure-convention"><b>An electron count from a board figure is a convention.</b> Board power is not delivered at the die's
   rail, so dividing a board energy by 0.517&nbsp;V gives a number of electrons that is useful for comparison
   and is not a count of anything. Every electron figure here uses the same 0.517&nbsp;V; the cards that
   produced these measurements ran at 521.9&nbsp;mV, so a count at their own rail would be 0.9% lower.</p>
-  <p><b>Temperature.</b> Every SPICE number is at the kit's 25&nbsp;°C corner. The die temperature enters only
+  <p data-ss-id="temperature-every-spice-number-kit-s"><b>Temperature.</b> Every SPICE number is at the kit's 25&nbsp;°C corner. The die temperature enters only
   at Landauer's floor, where it is stated.</p>
 </details>
 

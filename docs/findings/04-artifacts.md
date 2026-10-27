@@ -4,7 +4,7 @@ Three kinds of artifact came out of this work: **published reports** (HTML, depl
 **repostable images**, and **tools** that can be re-run. Commits are listed at the end so any artifact can be
 tied to the state of the tree that produced it. Cite as **A1**...**A21** (A9 and A10 were never assigned):
 A1–A5, A11, A13–A15, A17 and A19 are reports · A6–A8 images · A12 math rendering · A16 the rerun tools · A18 the
-wire tools · A20 the session timeline, page and tools · A21 the sparse parity page and its workload · A23 the transistor-heat timeline, its page, data and builder. The public index
+wire tools · A20 the session timeline, page and tools · A21 the sparse parity page and its workload · A23 the transistor-heat timeline, its page, data and builder · A24 the matmul-to-transistor chain page, its data block and builder. The public index
 of every report is the hub, [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports) (A2).
 
 Reports A2–A5, A11, A13–A15 and A17 are assembled by `scripts/build-report.py <name> <data.json> <out.html>` from
@@ -23,6 +23,20 @@ rewrites; the two 2026-09-22 briefs are plain hand-written HTML (the L2 brief is
 the prose in the HTML. Every page with charts carries the shared chart toolkit (A12): the source-built pages get it
 from `scripts/build-report.py`, and the standalone pages from `scripts/paste-chartkit.py PAGE`, which refreshes the
 marked block and changes nothing else (`--check` reports a missing or stale block).
+
+**A24 · From matmul speed to one transistor switch** (27 October 2026, Q128). The nine-step chain on one
+page: speed, the governor, board watts, picojoules per multiply-add, femtojoules per flipped operand bit,
+net toggles, gate and wire capacitance, one transistor's gate, electrons and Landauer's floor — each rung
+with its number, its evidence, its confidence and what is missing, and a waterfall that draws the two thirds
+of a random multiply-add's energy the bottom-up count cannot yet name. Built by `scripts/build-report.py`
+from `docs/reports/sources/matmul-to-transistor.{meta.json,body.html,script.js}` and the data block
+`docs/reports/data/2026-10-27-matmul-to-transistor/data.json`, which `build_data.py <repo root> <out.json>`
+in that directory regenerates by reading every figure out of a scored experiment's own committed JSON — so
+the page cannot drift from the record, and a correction to a data directory changes the page on rebuild.
+Two figures are literals in the builder with their source named there (E68's price band, chain-closure's
+bottom-up burst range). Space `5576af71-35da-4958-b437-aba8d59e2ee0`, public, unlisted. The page's script
+also renders an optional `vault` block of extra boxes when its data carries one; nothing in this repository
+writes that block and the committed data has none.
 
 **Visibility.** Every space the hub links is public (Q40); the one exception, the David Kanter notes, is private and
 no longer linked (below). After any deploy, compare `spacesheep list` with the record.
