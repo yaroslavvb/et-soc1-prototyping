@@ -25,7 +25,34 @@
    "SS_n_mV_dec": 63.03,
    "SS_p_mV_dec": 64.48
   },
-  "verdict": "The BSIM-CMG cards load and reproduce the ASAP7 paper's own device table to within a few per cent, which is the check that the models are running as the kit intends."
+  "deviation_vs_paper_25C": {
+   "Idsat_n_uA": {
+    "error_pct": -5.240158520475569,
+    "paper": 37.85,
+    "spice": 35.8666
+   },
+   "Idsat_p_uA": {
+    "error_pct": -3.097931873479327,
+    "paper": 32.88,
+    "spice": 31.8614
+   },
+   "Ioff_n_nA": {
+    "error_pct": -8.797894736842098,
+    "paper": 0.019,
+    "spice": 0.0173284
+   },
+   "Ioff_p_nA": {
+    "error_pct": -19.076521739130428,
+    "paper": 0.023,
+    "spice": 0.0186124
+   },
+   "SS_n_mV_dec": {
+    "error_pct": -1.9879422497223547,
+    "paper": 63.03,
+    "spice": 61.777
+   }
+  },
+  "verdict": "The BSIM-CMG cards load and run as the kit intends: the DRIVE CURRENTS and the SUBTHRESHOLD SLOPE land within 5% of the ASAP7 paper's own table, while the OFF-CURRENTS are 9% (NMOS) and 19% (PMOS) under it. The paper prints I_off to two significant figures and an off-current is exponentially sensitive to the threshold, so that is the expected size of disagreement -- but it is not 5%, and the leakage section below is built on those off-currents, so the wider tolerance travels with it. (The first version of this file said 'every figure within about 5%'; corrected in review the same day.)"
  },
  "energy": {
   "FAx1": {
@@ -514,6 +541,343 @@
     }
    }
   }
+ },
+ "energy_note": "These are the FIRST run's decks. Two caveats, both settled by the fix-up run in `fixups`: the FAx1 decks hang Ccout = 0.5 fF on the carry-out pin, which `internal = rail - C_load V^2` does not subtract (worth +0.0007 fJ per cycle at 0.7 V, 0.2%), and the FAx1 rows are the B = CI = 0 hold state only, which is the cheapest of four by 1.8x. Use `fixups.FAx1_no_CON_load` and `fixups.FAx1_by_hold_state` for the full adder. NAND2x1 is B = 1, the only state in which Y follows A.",
+ "fixups": {
+  "FAx1_CON_load_contamination": {
+   "0p517": {
+    "CON_swing_with_Ccout_V": [
+     0.472247,
+     0.560548
+    ],
+    "CON_swing_without_Ccout_V": [
+     0.450991,
+     0.581256
+    ],
+    "contamination_fJ": 0.00037224000000002366,
+    "with_Ccout_0p5fF_E_internal_fJ": 0.15423120993499995,
+    "without_Ccout_E_internal_fJ": 0.15385896993499992
+   },
+   "0p700": {
+    "CON_swing_with_Ccout_V": [
+     0.645498,
+     0.751158
+    ],
+    "CON_swing_without_Ccout_V": [
+     0.631434,
+     0.767028
+    ],
+    "contamination_fJ": 0.0006790000000000962,
+    "with_Ccout_0p5fF_E_internal_fJ": 0.32473769929999974,
+    "without_Ccout_E_internal_fJ": 0.32405869929999964
+   }
+  },
+  "FAx1_CON_note": "CON is the INVERTED carry-out, so with B = CI = 0 it sits HIGH and never switches -- it only glitches as A toggles. The committed energy decks hang Ccout = 0.5 fF on it, and that glitch charge was booked as FAx1's internal energy. The corrected FAx1 energies, with no CON load, are in FAx1_no_CON_load.",
+  "FAx1_by_hold_state": {
+   "0p517": {
+    "by_state": {
+     "B=0 CI=0": {
+      "E_internal_per_cycle_fJ": 0.15385896993499992,
+      "E_load_per_cycle_fJ": 0.5345780000000001,
+      "E_rail_per_cycle_fJ": 0.688436969935
+     },
+     "B=0 CI=1": {
+      "E_internal_per_cycle_fJ": 0.27172092407899995,
+      "E_load_per_cycle_fJ": 0.5345780000000001,
+      "E_rail_per_cycle_fJ": 0.8062989240790001
+     },
+     "B=1 CI=0": {
+      "E_internal_per_cycle_fJ": 0.28083424955299996,
+      "E_load_per_cycle_fJ": 0.5345780000000001,
+      "E_rail_per_cycle_fJ": 0.8154122495530001
+     },
+     "B=1 CI=1": {
+      "E_internal_per_cycle_fJ": 0.14910459398999987,
+      "E_load_per_cycle_fJ": 0.5345780000000001,
+      "E_rail_per_cycle_fJ": 0.68368259399
+     }
+    },
+    "max_fJ": 0.28083424955299996,
+    "mean_fJ": 0.21387968438924992,
+    "min_fJ": 0.14910459398999987,
+    "spread_x": 1.883471474875113
+   },
+   "0p700": {
+    "by_state": {
+     "B=0 CI=0": {
+      "E_internal_per_cycle_fJ": 0.32405869929999964,
+      "E_load_per_cycle_fJ": 0.98,
+      "E_rail_per_cycle_fJ": 1.3040586992999996
+     },
+     "B=0 CI=1": {
+      "E_internal_per_cycle_fJ": 0.5555538079,
+      "E_load_per_cycle_fJ": 0.98,
+      "E_rail_per_cycle_fJ": 1.5355538079
+     },
+     "B=1 CI=0": {
+      "E_internal_per_cycle_fJ": 0.5709507642999998,
+      "E_load_per_cycle_fJ": 0.98,
+      "E_rail_per_cycle_fJ": 1.5509507642999998
+     },
+     "B=1 CI=1": {
+      "E_internal_per_cycle_fJ": 0.3147967004000001,
+      "E_load_per_cycle_fJ": 0.98,
+      "E_rail_per_cycle_fJ": 1.2947967004
+     }
+    },
+    "max_fJ": 0.5709507642999998,
+    "mean_fJ": 0.4413399929749999,
+    "min_fJ": 0.3147967004000001,
+    "spread_x": 1.813712670985797
+   }
+  },
+  "FAx1_no_CON_load": {
+   "0p517": {
+    "0p0": {
+     "CON_swing_V": [
+      0.437262,
+      0.583463
+     ],
+     "Cload_fF": 0.0,
+     "E_internal_per_cycle_fJ": 0.15179200393500003,
+     "E_load_per_cycle_fJ": 0.0,
+     "E_rail_per_cycle_fJ": 0.15179200393500003
+    },
+    "0p5": {
+     "CON_swing_V": [
+      0.446627,
+      0.582093
+     ],
+     "Cload_fF": 0.5,
+     "E_internal_per_cycle_fJ": 0.15334041893499997,
+     "E_load_per_cycle_fJ": 0.13364450000000003,
+     "E_rail_per_cycle_fJ": 0.286984918935
+    },
+    "1p0": {
+     "CON_swing_V": [
+      0.449166,
+      0.581622
+     ],
+     "Cload_fF": 1.0,
+     "E_internal_per_cycle_fJ": 0.15368474093499995,
+     "E_load_per_cycle_fJ": 0.26728900000000005,
+     "E_rail_per_cycle_fJ": 0.420973740935
+    },
+    "2p0": {
+     "CON_swing_V": [
+      0.450991,
+      0.581256
+     ],
+     "Cload_fF": 2.0,
+     "E_internal_per_cycle_fJ": 0.15385896993499992,
+     "E_load_per_cycle_fJ": 0.5345780000000001,
+     "E_rail_per_cycle_fJ": 0.688436969935
+    },
+    "4p0": {
+     "CON_swing_V": [
+      0.452112,
+      0.58102
+     ],
+     "Cload_fF": 4.0,
+     "E_internal_per_cycle_fJ": 0.1539003299349997,
+     "E_load_per_cycle_fJ": 1.0691560000000002,
+     "E_rail_per_cycle_fJ": 1.223056329935
+    },
+    "8p0": {
+     "CON_swing_V": [
+      0.452738,
+      0.580885
+     ],
+     "Cload_fF": 8.0,
+     "E_internal_per_cycle_fJ": 0.15373488993499995,
+     "E_load_per_cycle_fJ": 2.1383120000000004,
+     "E_rail_per_cycle_fJ": 2.2920468899350004
+    }
+   },
+   "0p700": {
+    "0p0": {
+     "CON_swing_V": [
+      0.622634,
+      0.768462
+     ],
+     "Cload_fF": 0.0,
+     "E_internal_per_cycle_fJ": 0.3149530993,
+     "E_load_per_cycle_fJ": 0.0,
+     "E_rail_per_cycle_fJ": 0.3149530993
+    },
+    "0p5": {
+     "CON_swing_V": [
+      0.628166,
+      0.767651
+     ],
+     "Cload_fF": 0.5,
+     "E_internal_per_cycle_fJ": 0.3209023993,
+     "E_load_per_cycle_fJ": 0.245,
+     "E_rail_per_cycle_fJ": 0.5659023993
+    },
+    "1p0": {
+     "CON_swing_V": [
+      0.629989,
+      0.767311
+     ],
+     "Cload_fF": 1.0,
+     "E_internal_per_cycle_fJ": 0.3227356992999999,
+     "E_load_per_cycle_fJ": 0.49,
+     "E_rail_per_cycle_fJ": 0.8127356992999999
+    },
+    "2p0": {
+     "CON_swing_V": [
+      0.631434,
+      0.767028
+     ],
+     "Cload_fF": 2.0,
+     "E_internal_per_cycle_fJ": 0.32405869929999964,
+     "E_load_per_cycle_fJ": 0.98,
+     "E_rail_per_cycle_fJ": 1.3040586992999996
+    },
+    "4p0": {
+     "CON_swing_V": [
+      0.632386,
+      0.766836
+     ],
+     "Cload_fF": 4.0,
+     "E_internal_per_cycle_fJ": 0.3248216992999997,
+     "E_load_per_cycle_fJ": 1.96,
+     "E_rail_per_cycle_fJ": 2.2848216992999997
+    },
+    "8p0": {
+     "CON_swing_V": [
+      0.63294,
+      0.766723
+     ],
+     "Cload_fF": 8.0,
+     "E_internal_per_cycle_fJ": 0.3251156993000004,
+     "E_load_per_cycle_fJ": 3.92,
+     "E_rail_per_cycle_fJ": 4.2451156993
+    }
+   }
+  },
+  "spice_vs_liberty_0p7V": {
+   "FAx1 A [(!B * !CI)]": {
+    "SPICE_E_internal_per_cycle_fJ": 0.32405869929999964,
+    "liberty_E_int_per_cycle_VDDonly_fJ": 0.2718915111111111,
+    "liberty_arcs_summed": [
+     "A->SN"
+    ],
+    "spice_over_liberty": 1.191867660655172
+   },
+   "FAx1 A [(!B * CI)]": {
+    "SPICE_E_internal_per_cycle_fJ": 0.5555538079,
+    "liberty_E_int_per_cycle_VDDonly_fJ": 0.5866015555555555,
+    "liberty_arcs_summed": [
+     "A->CON",
+     "A->SN"
+    ],
+    "spice_over_liberty": 0.947071828634769
+   },
+   "FAx1 A [(B * !CI)]": {
+    "SPICE_E_internal_per_cycle_fJ": 0.5709507642999998,
+    "liberty_E_int_per_cycle_VDDonly_fJ": 0.5906235055555555,
+    "liberty_arcs_summed": [
+     "A->CON",
+     "A->SN"
+    ],
+    "spice_over_liberty": 0.9666915707375191
+   },
+   "FAx1 A [(B * CI)]": {
+    "SPICE_E_internal_per_cycle_fJ": 0.3147967004000001,
+    "liberty_E_int_per_cycle_VDDonly_fJ": 0.25742094444444447,
+    "liberty_arcs_summed": [
+     "A->SN"
+    ],
+    "spice_over_liberty": 1.222886898653028
+   },
+   "INVx1 A [(any)]": {
+    "SPICE_E_internal_per_cycle_fJ": 0.08747631018000018,
+    "liberty_E_int_per_cycle_VDDonly_fJ": 0.0974275888888889,
+    "liberty_arcs_summed": [
+     "A->Y"
+    ],
+    "spice_over_liberty": 0.8978597456595417
+   },
+   "NAND2x1 A [(any)]": {
+    "SPICE_E_internal_per_cycle_fJ": 0.24969682360000012,
+    "liberty_E_int_per_cycle_VDDonly_fJ": 0.27096220000000004,
+    "liberty_arcs_summed": [
+     "A->Y"
+    ],
+    "spice_over_liberty": 0.9215190295915817
+   },
+   "XOR2x1 A [!B]": {
+    "SPICE_E_internal_per_cycle_fJ": 0.6609345924999999,
+    "liberty_E_int_per_cycle_VDDonly_fJ": 0.6519131666666667,
+    "liberty_arcs_summed": [
+     "A->Y"
+    ],
+    "spice_over_liberty": 1.0138383856848008
+   },
+   "XOR2x1 A [B]": {
+    "SPICE_E_internal_per_cycle_fJ": 0.4530779252999999,
+    "liberty_E_int_per_cycle_VDDonly_fJ": 0.3328732277777778,
+    "liberty_arcs_summed": [
+     "A->Y"
+    ],
+    "spice_over_liberty": 1.361112542227245
+   }
+  },
+  "spice_vs_liberty_caveat": "The decks drive a 5 ps (0-100%) input edge while the liberty figures are interpolated at a 10 ps (10-90%) slew; from the short-circuit sweep that is worth under 0.01 fJ per cycle for INVx1, so it does not change the sign of any row. The liberty is characterised at 0.7 V, so only the 0.7 V decks are compared with it.",
+  "spice_vs_liberty_verdict": "At 0.7 V and 2 fF, with the arc, the state and the set of outputs driven all matched, the schematic netlist runs 0.90x (INVx1 A [(any)]) to 1.36x (XOR2x1 A [B]) of the liberty's VDD-only figure, over 8 cases. IT GOES BOTH WAYS. So a schematic SPICE energy is NOT a general lower bound on the extracted one: the first version of this file said it was, generalising from the inverter alone, and carried the 2.04x schematic-vs-extracted DELAY ratio across to energy with no measurement behind it. Corrected in review the same day. The only honest statement is that the two agree to within about +-35% per case, with no systematic sign.",
+  "voltage_scaling_check": {
+   "V2_ratio_assumed": 0.545487755102041,
+   "by_case": {
+    "FAx1 A [(!B * !CI)]": {
+     "E_0p517_fJ": 0.15385896993499992,
+     "E_0p700_fJ": 0.32405869929999964,
+     "measured_ratio": 0.47478734645097087
+    },
+    "FAx1 A [(!B * CI)]": {
+     "E_0p517_fJ": 0.27172092407899995,
+     "E_0p700_fJ": 0.5555538079,
+     "measured_ratio": 0.4890992019406874
+    },
+    "FAx1 A [(B * !CI)]": {
+     "E_0p517_fJ": 0.28083424955299996,
+     "E_0p700_fJ": 0.5709507642999998,
+     "measured_ratio": 0.49187122097526204
+    },
+    "FAx1 A [(B * CI)]": {
+     "E_0p517_fJ": 0.14910459398999987,
+     "E_0p700_fJ": 0.3147967004000001,
+     "measured_ratio": 0.4736536113642182
+    },
+    "INVx1 A [(any)]": {
+     "E_0p517_fJ": 0.04501662364099994,
+     "E_0p700_fJ": 0.08747631018000018,
+     "measured_ratio": 0.5146150260381255
+    },
+    "NAND2x1 A [(any)]": {
+     "E_0p517_fJ": 0.12010439656159988,
+     "E_0p700_fJ": 0.24969682360000012,
+     "measured_ratio": 0.48100089872989404
+    },
+    "XOR2x1 A [!B]": {
+     "E_0p517_fJ": 0.3277621699769999,
+     "E_0p700_fJ": 0.6609345924999999,
+     "measured_ratio": 0.49590711954904976
+    },
+    "XOR2x1 A [B]": {
+     "E_0p517_fJ": 0.21733048916699993,
+     "E_0p700_fJ": 0.4530779252999999,
+     "measured_ratio": 0.4796757401568334
+    }
+   },
+   "measured_range": [
+    0.4736536113642182,
+    0.5146150260381255
+   ],
+   "verdict": "Part 1 scales internal energy from 0.7 V to 0.517 V by (0.517/0.7)^2 = 0.5455. SPICE measures 0.474 to 0.515 for the same cells, so the V^2 rule is CONSERVATIVE by 13-6% -- the short-circuit and internal-node terms fall faster than V^2, as the short-circuit sweep also shows. Part 1's 0.517 V column is therefore a slight overestimate, in the direction it already claims."
+  },
+  "what": "The second run, added after review.\n\n    Three things the first version could not say:\n      1. how much of FAx1's measured internal energy was the 0.5 fF load the\n         deck hung on its carry-out pin, which `internal = rail - C_load V^2`\n         never subtracted;\n      2. how far a full adder's arc energy moves with its hold state;\n      3. whether the schematic netlist really runs UNDER the liberty for\n         every cell, which the first version generalised from one."
  },
  "fo4": {
   "0p517": {
