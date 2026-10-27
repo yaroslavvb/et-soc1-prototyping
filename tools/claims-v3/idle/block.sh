@@ -146,6 +146,30 @@ abort() {  # abort <exit code> <note>; exit code 3 = someone else is on the card
   exit "$1"
 }
 
+# E71 (Q129, 27 Oct 2026) departure D1, the same one hl/block.sh carries: on aifoundry3 and aifoundry1 a user who
+# is only LOGGED IN does not block (three other users keep idle tmux logins on aifoundry3, so lib.sh's who-based
+# test would refuse every cycle there); another user on THIS card does, and so does any other user's device process
+# on a one-card host. Fails closed when et-holders is unreadable. aifoundry2 keeps lib.sh's own test unchanged, so
+# E66's passes would run exactly as they did. The device-level guards below (ours_running, the et_soc1 use count,
+# scan_procs during the heat and the cooling, the card lock in block_begin) are untouched, and a login that appears
+# during the cooling is still recorded by the `login` mark.
+case "$CARD" in aifoundry3|aifoundry1-c*)
+  if [ -z "${V3_DRY:-}" ]; then
+  others_present() {
+    local procs= holders= out n=${V3_DEVICE:-0}
+    if [ -z "${V3_DEVICE:-}" ]; then
+      procs=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$OTHER_COMM" '$1 != me && $3 ~ re {print $1":"$2":"$3}' | tr '\n' ' ')
+    fi
+    out=$(sudo -n /usr/local/sbin/et-holders 9>&- 8>&- 2>&1) || { log "others present: et-holders unreadable: ${out:0:120}"; return 0; }
+    holders=$(printf '%s\n' "$out" | grep -v 'et-holders' |
+              awk -v me="$USER" -v d="/dev/et${n}_" -v l="lock:etsoc-shire${n}.lock" \
+                  'index($1, d) == 1 || $1 == l { if ($2 != me && $2 != "") print $2":"$3 }' | tr '\n' ' ')
+    if [ -n "${procs// /}${holders// /}" ]; then log "others present: procs=[$procs] holders=[$holders]"; return 0; fi
+    return 1
+  }
+  fi ;;
+esac
+
 # ---- 1. the card must be free
 others_present && exit 3
 # a device process of this user on this card (another session, a leftover): the heater would land on its measurement
