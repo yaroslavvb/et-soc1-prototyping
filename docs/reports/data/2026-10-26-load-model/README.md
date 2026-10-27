@@ -220,6 +220,77 @@ patterns' own leave-one-out) and E38's 0.91–1.01 W across cards — still a FA
 cross-card test. What the new terms buy is everywhere else: other clocks, other cards, other die temperatures,
 and loads that are not an fp32 tile at all.
 
+## Pinning the operand bus to E60's measured read-port bit (recap item 10)
+
+Q126 shipped `--pin-bus` in `flip_w()` and `predict_load.py` and never scored a fit with it. This is that
+fit: [`pin_bus.json`](pin_bus.json), written by
+[`tools/ettelem/pin_bus_fit.py`](../../../../tools/ettelem/pin_bus_fit.py). The bus column is moved out of
+the design matrix and into the target, so the pinned arm fits **three** prices against the same measurements
+with the fourth held at E60/E61's measured register-file read-port bit, **20.83 fJ**. The free arms reproduce
+[`scores.json`](scores.json)'s `fp32_14_patterns` to the last float digit — 12 comparisons, asserted in the
+file as `reproduction_check` — so the two arms differ only in the pin.
+
+### The 14 fp32 patterns (aifoundry2, 21 Sep)
+
+| | free bus | bus pinned at 20.83 fJ |
+|---|---|---|
+| **at c0 = 0** — fitted bus | 16.09 fJ | 20.83 fJ (held) |
+| in sample | 0.359 W | 0.411 W |
+| leave one out | **0.458 W** | **0.495 W** (+8.0%) |
+| free parameters | 4 | 3 |
+| **at c0 = −1.18 W** — fitted bus | 25.34 fJ | 20.83 fJ (held) |
+| in sample | 0.652 W | 0.679 W |
+| leave one out | **0.739 W** | **0.748 W** (+1.1%) |
+
+**Pinning is nearly free.** On the base the prices were fitted on it costs 8.0% of the leave-one-out and one
+parameter; on the joined model's base, 1.1%. The other three prices barely move (`ffclk` 3.142 → 3.153,
+`mult` 0.0315 → 0.0326, `rest` 0.742 → 0.680 at c0 = 0), so the pinned watt comes out of `rest`, not out of
+the clock term. The in-sample bias flips sign — −0.054 W free, +0.011 W pinned — which says the free fit was
+buying a little of the base with the bus column.
+
+### The per-card spread: it collapses, and on three cards it is cheaper
+
+Three cards is the question item 10 actually asks. The only committed board powers measured on more than one
+card are the version-3 check of 26 September, ABL-R's own 14 rows (8 fp32 patterns + 6 structured matrices)
+on aifoundry2, aifoundry3 and aifoundry1's card 1 — 4 kept busy runs each, 1,024 minions at 600 MHz, each
+card fitted on **its own** measured idle and **its own** measured rail, so the prices are referred to 0.517 V
+and the spread is the card's, not the rail's.
+
+| bus price, fJ | aifoundry2 | aifoundry3 | aifoundry1-c1 | max ÷ min |
+|---|---|---|---|---|
+| free, c0 = 0 | 31.17 | 18.35 | 28.59 | **1.70×** |
+| free, c0 = −1.18 W | 41.64 | 28.65 | 39.89 | 1.45× |
+| pinned | 20.83 | 20.83 | 20.83 | **1.00×** |
+| the published ABL-R refit, for reference | 30.56 | 28.03 | 32.79 | 1.17× |
+
+| leave-one-out rms, W | aifoundry2 | aifoundry3 | aifoundry1-c1 |
+|---|---|---|---|
+| free, c0 = 0 (4 parameters) | 0.947 | 0.930 | 0.933 |
+| **pinned, c0 = 0 (3 parameters)** | **0.905** | **0.835** | **0.863** |
+| the published ABL-R refit (5 parameters) | 1.005 | 0.907 | 0.966 |
+
+**The spread collapses and nothing pays for it.** The free bus term moves 1.70× across the three cards — the
+loosest term in the model, as item 10 says. Pinned, the leave-one-out improves on **every** card, and on
+three free parameters it beats the published five-parameter per-card refit (non-negative least squares with a
+free constant) on every card too.
+
+**And the spread does not simply move somewhere else.** The other three prices spread 1.29 / 1.27 / 1.25×
+(`ffclk` / `mult` / `rest`) in the free arm and 1.28 / 1.26 / 1.31× pinned — unchanged to within a few points.
+That residual ~1.3× is the card-to-card term the model already has a name for (E38's switching scale, 0.958–
+0.969 for aifoundry3) plus the launch-temperature difference below; it is not the bus term in disguise.
+
+Three things this does **not** settle.
+
+1. **It does not rescue the cross-card claim.** 0.835–0.905 W is still well above ABL-R's registered 0.6 W
+   leave-one-out bound. Pinning makes the model smaller and more honest, not accurate across cards.
+2. **The three cards launched at different die temperatures** (80.9 / 55.8 / 80.9 °C registered; 80.1 / 57.4 /
+   80.0 °C mean reading). Each card's switching is measured against its own idle at its own temperature, so
+   each fit is internally matched, but the across-card comparison carries that difference. It carries it
+   identically in both arms, so the free-against-pinned comparison is unaffected.
+3. **The bus term's spread across *populations* is still the larger number.** Counting the fits now on
+   record at c0 = 0 — 16.09 (14 fp32 patterns), 16.72 and 14.16 (the two recount rungs), and 31.17 / 18.35 /
+   28.59 (the three cards) — the free bus runs 14.16 to 31.17 fJ, **2.2×**. That is the spread pinning is for.
+
 ## The second pass: job (b)'s toggle recount, verified and corrected
 
 Job (b) landed on `main` while the first pass was running (`dc3a5820`, `b2e180b9`) and shipped
@@ -351,7 +422,13 @@ with `rtl-sim/fma_toggle/tiles.py` over seeds 1–5. Every feature is distributi
 sampling noise, and four of the fourteen patterns are deterministic. The structured matrices' tiles are the
 actual bytes the card was given, so their side is exact.
 
-`operand_stats.py` needs numpy; on the Intel only `/usr/bin/python3` has it.
+`operand_stats.py` needs numpy. Since Q128(e) it carries a `uv run --script` shebang with a PEP 723
+block, so `./operand_stats.py` fetches its own interpreter and numpy and needs nothing installed; the
+block pins python < 3.13 (3.13 dedents docstrings, and this script publishes one into the JSON) and
+numpy == 1.26.4 (the version the committed JSON was made with). `python3 operand_stats.py` still works
+under any interpreter that already has numpy — on the Intel that is `/usr/bin/python3`, not
+`/usr/local/bin/python3.12`. A re-run reproduces the committed JSON to about 1e-12, not to the byte:
+the system numpy links Accelerate and uv's wheel links OpenBLAS.
 
 ## The files
 
@@ -362,6 +439,7 @@ actual bytes the card was given, so their side is exact.
 | `refit_on_recount.json` | the second pass in full: every rung of job (b)'s ladder refitted, the capacitance each price implies, E60's ladder re-scored under each, and a re-run of what the first pass published. Written by `tools/ettelem/refit_on_recount.py`; it changes no frozen prediction and no score |
 | `fit.txt` | the fitted constants and their residuals, as `load_model.py` prints them |
 | `operand_stats.json` | the stretch: an operand-statistics front end, fitted without the RTL bench |
+| `pin_bus.json` | the operand bus pinned at E60's measured read-port bit, 20.83 fJ: the 14-pattern fit and the three-card fit, free against pinned, at both per-kernel offsets, with the reproduction check against `scores.json`. Written by `tools/ettelem/pin_bus_fit.py` |
 
 ## How frozen the predictions are, and what the model takes from the four loads
 
