@@ -174,6 +174,14 @@ uses for its short cycle.
 49–50 °C remains, and ~17 cycles give more floor samples in total than four long ones did). L5 (IDLE-d, a
 73 °C bin) was already out of reach tonight at a 70 °C plateau (A1) and stays so.
 
+🛑 *And it corrects A1's wording.* A1 said the 5,400 s cooling meant *"the whole 51–67 °C band Q128(b) asks
+for is measured rather than extrapolated"*. On the profile above that was true only of **51–58 °C**: a
+single cycle spends 225 s there but just **55 s** above 59 °C, and 1.2 s at 65 °C, so four cycles would have
+given about three and a half minutes in the band's upper half and nothing above 69 °C. Scored on four long
+cycles, L3's top end would have been a claim resting on seconds. It is A3's ~17 cycles, not A1's length,
+that make the band measured: ~16 minutes above 59 °C instead of ~3.7. Where the morning's fit still rests
+on thin bins at the top, say so with the per-degree sample counts beside it.
+
 ## How to reduce this in the morning
 
 The pass set tonight is **p13 upward** (A2: p11 and p12 were aborted and carry no `block.json`, so both
