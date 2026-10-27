@@ -704,7 +704,7 @@ The page for Q70: can a lab card run with its heatsink off, so that a sensor can
 [Tracking heat down to transistor flips](https://spacesheep.dev/@yaroslavvb/transistor-heat-timeline), built for the
 stand-up of 27 October, where the owner had promised to talk about tracking heat generation down to individual
 transistor flips. It is A20's shape applied to a whole project rather than to one session: **51 days**, 6 September to
-26 October, four tracks on one axis — **the questions** (154 asks of his, each with a twelve-word summary and, in a
+26 October, four tracks on one axis — **the questions** (155 asks of his, each with a twelve-word summary and, in a
 reader, its own words), **the sessions** (61 across five machines and two harnesses, grouped into ten named lanes),
 **the experiments** (871 intervals in which a card was held, over 48 of the register's experiments, shaded by family)
 and **the documents** (39 write-ups, 24 of them public, one lane each, with 374 commits as a tick row). It opens on a
