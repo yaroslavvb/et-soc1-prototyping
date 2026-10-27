@@ -4,7 +4,7 @@ Three kinds of artifact came out of this work: **published reports** (HTML, depl
 **repostable images**, and **tools** that can be re-run. Commits are listed at the end so any artifact can be
 tied to the state of the tree that produced it. Cite as **A1**...**A21** (A9 and A10 were never assigned):
 A1–A5, A11, A13–A15, A17 and A19 are reports · A6–A8 images · A12 math rendering · A16 the rerun tools · A18 the
-wire tools · A20 the session timeline, page and tools · A21 the sparse parity page and its workload. The public index
+wire tools · A20 the session timeline, page and tools · A21 the sparse parity page and its workload · A23 the transistor-heat timeline, its page, data and builder. The public index
 of every report is the hub, [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports) (A2).
 
 Reports A2–A5, A11, A13–A15 and A17 are assembled by `scripts/build-report.py <name> <data.json> <out.html>` from
@@ -444,6 +444,7 @@ their repo files.
 | `tools/claims-v3/tau/`, `tools/ettelem/deconv.py` (2026-09-28) | tau (E58), hub rung 4: each rail's averaging time constant, fitted to burst edges, and `deconv.py`, which inverts the first-order filter to recover square bursts from the rail readings; `calibrate.py`, `offline.py` (the fit on stored data), stand-ins for dry runs |
 | `tools/lab/et-lab-health` rev 3, `tools/lab/et-reset` (2026-09-28) | The lab tools' third revision: the health check counts logins through logind, counts the journal's boots correctly and runs safely from a timer; `et-reset` is a checked management reset of one card. Both written and dry-tested, **not installed** ([`tools/lab/README.md`](../../tools/lab/README.md)) |
 | `tools/timeline/` (2026-09-28) | The session timeline's extraction, privacy scan and build (A20) |
+| `tools/timeline/build_transistor_timeline.py` (2026-10-26) | The transistor-heat timeline's build and privacy scan, from curated JSON (A23) |
 | `workloads/sparsity/host/main.cpp` | Extended in this work with `--values` (operand patterns, including `file:<path>` for custom tiles), `--dump-tiles`, `--stop-file` and fp16/int8 value fills |
 
 ## A16 — The rerun and attribution tools (2026-09-23)
@@ -697,6 +698,47 @@ The page for Q70: can a lab card run with its heatsink off, so that a sensor can
   error budget) and its printout `nohs_calc.out`; `card0_guard.py`/`.out` (card 0's idle law at 300 MHz);
   `make_page_data.py` (writes `page.json`, `--check`); the README.
 - **Commits:** `51b571e`.
+
+## A23 — Tracking heat down to transistor flips: the thread's timeline (26 October 2026, Q127)
+
+[Tracking heat down to transistor flips](https://spacesheep.dev/@yaroslavvb/transistor-heat-timeline), built for the
+stand-up of 27 October, where the owner had promised to talk about tracking heat generation down to individual
+transistor flips. It is A20's shape applied to a whole project rather than to one session: **51 days**, 6 September to
+26 October, four tracks on one axis — **the questions** (154 asks of his, each with a twelve-word summary and, in a
+reader, its own words), **the sessions** (61 across five machines and two harnesses, grouped into ten named lanes),
+**the experiments** (871 intervals in which a card was held, over 48 of the register's experiments, shaded by family)
+and **the documents** (39 write-ups, 24 of them public, one lane each, with 374 commits as a tick row). It opens on a
+“story so far” of the measured numbers it is about — 116.7 fJ a flipped multiply-add input bit (E60), +0.68 W from
+the order of the same arithmetic, ~154 fJ weighed by the camera (E63), 13% then 33% faster on zeros (E64), 1.8 mm of
+wire per bit, 1,946 RTL bits toggling for one flip (Q124) — and ends on what is still missing.
+
+**How it differs from A20.** A20's pipeline extracts one session's transcripts on one machine; this thread ran on five
+machines under three harnesses, two of which leave no transcript those scripts can read. So the inputs are **curated,
+not extracted**: six small JSON files assembled from this repository's own ledgers and from the project's hub, all
+committed in `docs/reports/data/2026-10-26-transistor-heat-timeline/`, which any checkout can rebuild the page from.
+`tools/timeline/build_transistor_timeline.py` turns them into exactly A20's `timeline.json` contract, so the page
+script is A20's with the changes listed in its header: the month of a day comes from `meta.day_iso` (A20's heuristic
+reads the day number and would mislabel a span crossing two months), the day buttons become week buttons, the four
+track headings become QUESTIONS / SESSIONS / EXPERIMENTS / DOCUMENTS, §3 groups by ISO week, the documents lane opens
+per page, and the token section is gone, because no token count was collected for this thread. Three blocks are
+reinterpreted rather than added: `human` is the questions, `cards` the experiments, `artifacts` the documents.
+
+**The two estimates, said so on the page.** A session's busy time runs from four minutes before each recorded act of
+work to twenty-six minutes after it, with gaps under 45 minutes bridged — no harness records attention. An ask's
+writing time is its length at 200 characters a minute. Everything else is exact: a card interval is read from the
+experiment's own committed data file, and 13 registered experiments that left no timestamps are listed in §5 rather
+than drawn.
+
+**The privacy gate.** The builder refuses to write `timeline.json` if the serialised output carries a link on a
+private network, a session link, a private address, a home path, an e-mail address, a word about machine access, a
+page of the owner's that is not public, a space uuid, a foundry identifier, any mention of the private design archive
+beyond the bare fact that a study happened on a date, or a person who is not a published author of cited work (here:
+Horace He, Bill Dally and, inside the owner's own words, Mark Horowitz and Jeff Dean). The thirteen private-archive
+sessions are one lane with dates and spans and nothing else. Checks on the day: both `check_page.sh` passes read OK at
+1280 and 390 px, light and dark; `gestures/suite.mjs` is clean on two phone profiles and the desktop;
+`gestures/prompts.mjs` passes every check but the one that tests A20's second message list, which this page has none
+of. The E63 page is linked: its space read `signed_in` when the documents were gathered at 16:58 PDT and `public`
+when the page was built, because a Q126 pass had re-tiered it at 16:49 (see the last note in this file).
 
 ## The camera and the details panel (30 September)
 

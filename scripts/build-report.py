@@ -32,6 +32,21 @@ REQUIRED = {
                               "(the full chain is in the page's Method section and docs/getting-started.md)",
                      "dv2": "run tools/ettelem/build_dv2_data.py --data docs/reports/data/2026-09-28-dvfs2-aifoundry2 "
                             "--merge <dvfs.json> after build_cards_data.py (the page's 'Reproduce this')"},
+    # the transistor-heat timeline's script reads every one of these without a guard, so a missing block would
+    # throw in the reader's browser instead of failing here
+    "transistor-heat-timeline": {
+        "meta": "run tools/timeline/build_transistor_timeline.py <data dir>",
+        "human": "no questions block: run tools/timeline/build_transistor_timeline.py <data dir>",
+        "main": "no session spine: the same build step",
+        "conc": "no sessions-at-once series: the same build step",
+        "agents": "no per-machine session rows: the same build step",
+        "cards": "no experiments block: the same build step",
+        "artifacts": "no documents block: the same build step",
+        "neighbors": "no session lanes: the same build step",
+        "perday": "no per-day rows: the same build step",
+        "perweek": "no per-week rows: the same build step",
+        "highlights": "no turning points: the same build step",
+        "who": "no totals: the same build step"},
 }
 data = json.load(open(data_path))
 missing = [f"no '{k}' block: {how}" for k, how in REQUIRED.get(name, {}).items() if k not in data]
