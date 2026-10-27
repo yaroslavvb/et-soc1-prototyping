@@ -1,0 +1,139 @@
+{
+ "experiment": "E72",
+ "what": "the same card's price per flipped B mantissa bit at 600 MHz (governor pinned by TDP 0)",
+ "card": "aifoundry2 card 0",
+ "frozen_utc": null,
+ "reference": {
+  "e60_hl_json": "docs/reports/data/2026-10-20-bitflip-ladder/hl.json",
+  "e60_aifoundry2_800MHz": {
+   "v_mean": 0.6174109375000001,
+   "clock_mhz": 800,
+   "passes": 9,
+   "lq_fJ_per_designed_bit": 121.27218685292272,
+   "lq_fJ_se": 0.6134756697617761,
+   "lq_rail_fJ_per_designed_bit": 85.62385637122411,
+   "lq_rail_fJ_se": 4.059532676059079,
+   "estimator": "h2 -> h8 secant (only lq_h0/h2/h8 were run there: E60 departure D5)",
+   "leak_W_per_C_fitted_there": null,
+   "d_p80_W": {
+    "lq_h2": 1.9622022727272719,
+    "lq_h8": 6.41162222222222
+   }
+  },
+  "e60_aifoundry3_600MHz_shapes": {
+   "lq_full_ladder_fJ": 116.74616241888968,
+   "lq_h2_h8_secant_fJ": 85.85623790785668,
+   "bend_full_over_secant": 1.3597866068180735,
+   "lb_over_lq_full_ladder": 1.1128271664592342,
+   "lb_h1_over_lq_h1_turnon_W": 3.291368673320127
+  }
+ },
+ "voltages": {
+  "v800_measured_e60": 0.6174109375000001,
+  "v600_expected": 0.519,
+  "v600_tol": 0.003,
+  "ratio_v2": 0.7066202484272245,
+  "ratio_f_times_v2": 0.5299651863204183
+ },
+ "rules": {
+  "V1": {
+   "claim": "the price per flipped mantissa bit at 600 MHz equals this card's own 800 MHz price times (V600/V800)^2 - the flip's energy follows the voltage, not the clock",
+   "quantity": "lq h2 -> h8 secant, board, fJ per designed flipped bit",
+   "predicted": 85.693,
+   "band": [
+    77.124,
+    94.2627
+   ],
+   "alternative_if_it_scaled_with_f_too": 64.27,
+   "pass_if": "measured inside the band AND outside the alternative's own +-10% band"
+  },
+  "V2": {
+   "claim": "the same on the minion rail",
+   "quantity": "lq h2 -> h8 secant, minion rail, fJ per designed flipped bit",
+   "predicted": 60.504,
+   "band": [
+    51.428,
+    69.5791
+   ],
+   "pass_if": "measured inside the band"
+  },
+  "V3": {
+   "claim": "the watts of each rung scale as f*V^2 (the clock is in the watts, not in the energy): the line through this card's own 800 MHz lq_h2 and lq_h8",
+   "quantity": "d_p80 (W over lq_h0) at 600 MHz",
+   "predicted_W": {
+    "lq_h1": 0.6469,
+    "lq_h2": 1.0399,
+    "lq_h4": 1.8259,
+    "lq_h8": 3.3979
+   },
+   "band_frac": 0.1,
+   "pass_if": "lq_h2 and lq_h8 inside +-10%; h1 and h4 are reported, not scored (E60 never ran them on this card, so their line is an interpolation)"
+  },
+  "V4": {
+   "claim": "the ladder is bent the same way as on E60's 600 MHz card: the full h >= 1 slope exceeds the h2 -> h8 secant",
+   "quantity": "(full-ladder slope) / (h2 -> h8 secant), board",
+   "predicted": 1.3598,
+   "band": [
+    1.1598,
+    1.5598
+   ],
+   "and_so_full_ladder_fJ": 116.525,
+   "full_ladder_band": [
+    99.046,
+    134.0034
+   ],
+   "pass_if": "the ratio is inside the band"
+  },
+  "V5": {
+   "claim": "the busy ladder lb - which this card cannot run at 800 MHz at all - costs more per bit than lq, by the factor E60 measured at 600 MHz on the other card",
+   "quantity": "lb full-ladder slope / lq full-ladder slope, board",
+   "predicted": 1.1128,
+   "band": [
+    0.9628,
+    1.2628
+   ],
+   "and_so_lb_fJ": 129.672,
+   "lb_band": [
+    110.2211,
+    149.1226
+   ],
+   "pass_if": "the ratio is inside the band"
+  },
+  "V6": {
+   "claim": "the turn-on (the first flipped bit, which wakes the multiplier tree) is dearer with a busy partner, by about the factor E60 measured at 600 MHz",
+   "quantity": "lb_h1 / lq_h1 in watts over their own zeros",
+   "predicted": 3.291,
+   "band": [
+    1.975,
+    4.608
+   ],
+   "pass_if": "the ratio is inside the band"
+  },
+  "G1": {
+   "claim": "the governor is pinned: TDP 0 means the power-down branch fires on any load and the power-up branch can never fire, so the clock never leaves the vmin-LUT floor",
+   "quantity": "every telemetry sample of every launch, and the governor's own log",
+   "predicted": "600 MHz in 100% of samples; zero 'Power throttle up' lines while TDP 0 is set",
+   "pass_if": "exactly that, with no sample at any other clock"
+  },
+  "G2": {
+   "claim": "the voltage at the pinned point is the LUT's 600 MHz voltage",
+   "predicted": 0.519,
+   "band": [
+    0.516,
+    0.522
+   ],
+   "pass_if": "the mean measured minion voltage is inside the band"
+  },
+  "G3": {
+   "claim": "restore: both governor fields read back at their originals and the card steps normally afterwards",
+   "predicted": "TDP 65 W, software threshold 65 C, and a post-restore burst that reaches >= 700 MHz with at least one 'Power throttle up' event",
+   "pass_if": "exactly that"
+  }
+ },
+ "leak_slopes_reported": {
+  "registered": "auto (reduce_hl.py's own within-run fit, as E60 and E68 registered it)",
+  "e66_measured": 0.2936,
+  "e60_fitted_on_this_card": null,
+  "note": "the price is a difference between two rungs in the same pass, so the leakage slope enters only through the small difference in within-run heating between rungs; all three are reported and the registered one is the verdict"
+ }
+}
