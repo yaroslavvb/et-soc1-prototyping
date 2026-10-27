@@ -211,8 +211,8 @@ verdict, the raw number and why the sign matters.
 **A5 to `tools/claims-v3/hm/run_hm.py` (Mon 26 Oct 2026, 16:5x PDT, written after blocks A and B had started and
 before any block-C data; its own amendment A2).** On `aifoundry3` and `aifoundry1` the runner's other-user test
 becomes the card-scoped one of E60's departure D1: another user holding **this card's** device nodes or its lock,
-from `sudo -n /usr/local/sbin/et-holders`, failing **closed** when the helper cannot be read. *Why:* two lab users
-(`nkarpov`, `likelytobelaura`) keep idle tmux shell logins on aifoundry3, and `run_hm.py`'s `who`-based test would
+from `sudo -n /usr/local/sbin/et-holders`, failing **closed** when the helper cannot be read. *Why:* two other lab
+users keep idle tmux shell logins on aifoundry3, and `run_hm.py`'s `who`-based test would
 have refused every block-C session with `other_user` while nobody was on the card — exactly the case E60's D1 was
 written for, and the case `hl/block.sh` (which blocks A, B and D run through) already handles. aifoundry2 keeps
 `lib.sh`'s login test, so E62 is unchanged. Nothing else about the check changes: the device-process test, the
