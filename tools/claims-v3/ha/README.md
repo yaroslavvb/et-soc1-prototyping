@@ -189,3 +189,26 @@ measure rather than assume. `report_e67.py` now prints the marginal ratio — `e
 with `T` from the grid — beside the raw one. **P2 keeps its registered band and is scored on the raw prices**;
 if removing `T` drives a position's marginal price below zero, that is reported as a bound on `T`, not as a
 price for that position.
+
+**A15, Mon 26 Oct 2026, 22:3x PDT (written while block 3 was running, before its data was reduced; it adds a
+diagnostic and a labelled sensitivity, and changes no registered gate, rule or number).** Blocks 1, 2 and 4's
+eight passes are not equally healthy, and **the registered pass gate does not say so**. Every pass runs several
+items whose operands never change — `aq_h0`, `aq_e64`, `ap_h0`, `lq_h0`, `lb_h0`, `ix_z` and `anchor_pi` twice —
+which are one physical state reached by several routes and must read one power. Their **spread within a pass** is
+0.17–0.37 W in passes 750–753 and **0.62, 2.02, 1.12 and 0.97 W** in 754–757, while the registered gate
+(`anchor_pi` first versus last, 0.3 W) fires on 754 alone and **misses the three worse passes**, because
+`anchor_pi`'s own two runs happen to agree there. The pass median is 36.44–36.46 W throughout, so the bad runs
+dip and never rise.
+- `ha/constspread.py` reports the spread per pass, with the registered drift beside it, and names the runs that
+  sit more than 0.8 W below their pass's median.
+- `collect_e67.sh` then writes a **second, clearly labelled reduction** over the passes whose spread is ≤ 0.40 W
+  (`hl-clean.json`, `results-clean.md`, `scored-clean.json`), as a **post-hoc sensitivity**.
+- 🛑 **The registered result is the one over every pass the registered gates keep**, and that is what the scored
+  rules in the README's Results section report. The clean-subset numbers sit beside them and are never
+  substituted for them.
+*Why:* from pass 754 the card's host-side launch overhead grew — the calibration launch went 18 → 23 ms, the
+gap between launches 1.5 → 10–15 ms, and the measured rate 1.121 → 1.085 Gop/s — and a minority of runs then
+read 1–2 W low at an unchanged clock, rail, launch reading and cycles-per-op, so no per-run gate sees them. The
+lesson for the next experiment is that the pass gate should be the spread of **all** constant-operand runs, not
+one item's first-versus-last drift; E67 is the first of these experiments to carry enough constant-operand items
+for that to be possible.

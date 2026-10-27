@@ -237,6 +237,24 @@ def main():
             d = x.get("dW_vs_zero")
             w(f"| `{n}` | {WHAT.get(n,'')} | {x['p80']:.2f} | {x['se'] or 0:.2f} | "
               f"{(f'{d:+.2f}' if d is not None else '—')} | {x['A_bits_per_op'] or 0} | {x['B_bits_per_op'] or 0} |")
+        # The tie to E65: the items both experiments ran, four hours apart on the same card at the same clock
+        # and rail. These are a comparison of two committed reductions, not a new analysis.
+        tie = []
+        for n in ("anchor_pi", "lq_h0", "lb_h0"):
+            e67v = anc.get(n, {}).get("p80")
+            e65v = (B.get("items", {}).get(n) or {}).get("p80")
+            if e67v is not None and e65v is not None:
+                tie.append((n, e65v, e67v, e67v - e65v))
+        if tie:
+            w("\n**The tie to E65**, the items both experiments ran on this card — this is what lets the two "
+              "price lists be added without a conversion:\n")
+            w("| item | E65 (W) | E67 (W) | difference |")
+            w("|---|---|---|---|")
+            for n, v5, v7, d_ in tie:
+                w(f"| `{n}` | {v5:.2f} | {v7:.2f} | {d_:+.2f} |")
+            S["tie_to_e65"] = {n: {"e65_W": v5, "e67_W": v7, "diff_W": d_} for n, v5, v7, d_ in tie}
+            w(f"\nLargest disagreement {max(abs(d_) for _, _, _, d_ in tie):.2f} W over "
+              f"{len(tie)} shared items.\n")
         za, zb = anc.get("nrd_a", {}), anc.get("nrd_b", {})
         if za.get("dW_vs_zero") and zb.get("dW_vs_zero"):
             r = za["dW_vs_zero"] / zb["dW_vs_zero"]

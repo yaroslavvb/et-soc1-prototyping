@@ -47,3 +47,29 @@ done
 for d in "${ok[@]}"; do cp -r "$d" "$OUT/aifoundry3/hl/"; done
 du -sh "$OUT"
 echo "done: $OUT"
+
+# ---- the constant-operand spread (a diagnostic, not a gate: ha/constspread.py says why) and, on the passes it
+# calls clean, a labelled post-hoc sensitivity reduction beside the registered one.
+"$PY" tools/claims-v3/ha/constspread.py "$OUT/runs.csv" --json "$OUT/constspread.json" \
+  > "$OUT/constspread.txt" 2>&1
+cat "$OUT/constspread.txt"
+CLEAN=$("$PY" -c 'import json,sys; print(" ".join(str(p) for p in json.load(open(sys.argv[1]))["clean_passes"]))' \
+  "$OUT/constspread.json" 2>/dev/null)
+if [ -n "${CLEAN// /}" ]; then
+  sel=()
+  for p in $CLEAN; do
+    d="$ROOT/build/claims-v3/aifoundry3/hl/p$p"
+    [ -d "$d" ] && sel+=("$d")
+  done
+  echo "sensitivity reduction over the clean passes: ${CLEAN}"
+  "$PY" tools/claims-v3/hl/reduce_hl.py "${sel[@]}" --gen "$GEN" --pred "$PRED" \
+    --out "$OUT/hl-clean.json" --csv "$OUT/runs-clean.csv" > "$OUT/reduce-clean.txt" 2>&1
+  if [ -f "$E65" ]; then
+    "$PY" tools/claims-v3/ha/closure.py --gen "$GEN" --e67 "$OUT/hl-clean.json" --e65 "$E65" \
+      --out "$OUT/closure-clean.json" > "$OUT/closure-clean.txt" 2>&1
+    "$PY" tools/claims-v3/ha/report_e67.py --e67 "$OUT/hl-clean.json" --e65 "$E65" \
+      --closure "$OUT/closure-clean.json" --out "$OUT/results-clean.md" --json "$OUT/scored-clean.json" \
+      > /dev/null 2>&1
+  fi
+  echo "clean reduction written"
+fi
