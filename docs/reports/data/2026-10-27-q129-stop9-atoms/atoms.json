@@ -33,12 +33,55 @@
    "divisor_2ln2": 1.3862943611198906
   },
   "reproduced": 24509.417090791267,
-  "C_implied_from_83aJ_F": 6.21050623108321e-16,
-  "C_implied_from_2000e_F": 6.197975373307543e-16,
   "direct_ratio": 24558.96940444709,
-  "vs_one_fin_gate": 18.53882457039764,
-  "vs_INVx1_pin_2fin": 9.26941228519882,
-  "vs_average_signal_net": 0.278123879582768
+  "C_as_the_plan_states_it_F": 6.2e-16,
+  "C_liberty_INVx1_pin_F": 6.19928e-16,
+  "C_stated_over_liberty": 1.0001161425197767,
+  "from_the_liberty_value": {
+   "E_edge_J": 8.2849967596e-17,
+   "electrons": 2000.4209847938653,
+   "x_floor_80C": 24514.576136742126,
+   "x_floor_58C": 26143.205685310226
+  },
+  "rounding": {
+   "exact_E_edge_from_liberty_aJ": 82.849967596,
+   "plan_rounds_to_aJ": 83.0,
+   "exact_electrons": 2000.4209847938653,
+   "plan_rounds_to_electrons": 2000,
+   "route_via_electrons": 24509.417090791267,
+   "route_via_83aJ": 24558.96940444709,
+   "both_are_the_same_number": "the 0.2% between them is 83/82.85, a two-figure rounding"
+  },
+  "repo_settled_reading": {
+   "where": "docs/findings/05-claims.md, 'What one transistor switching costs on this chip' -- Corrected 26 Oct 2026",
+   "reads": "83 aJ, about 2,000 electrons, some 26,000x kT ln 2 = 3.17 zJ at 58 C",
+   "x_floor_58C_rederived": 26143.205685310226,
+   "delta_against_the_plan": "the same energy; the plan divides by the 80 C floor and 05-claims.md by the 58 C one (E60/E65's launch temperature). 24,515 against 26,143 -- a 6.6% floor choice, not a physics disagreement"
+  },
+  "what_it_prices": {
+   "INVx1_is_not_the_minimum_inverter": {
+    "INVx1_nfin": 6,
+    "INVxp33_nfin": 2,
+    "leakage_ratio": 2.999425428876303,
+    "liberty_pin_ratio": 2.2483724607667837,
+    "note": "ASAP7's LVS netlist gives INVx1 nfin=3 on each device and INVxp33 nfin=1; the leakage ratio is exactly 3.00.  The plan's words 'a minimum inverter' name a 3x cell"
+   },
+   "the_liberty_pin_carries_the_cell's_own_wire": {
+    "schematic_over_liberty_mix_weighted": 0.3700221490051509,
+    "INVx1_schematic_pin_F": 2.821276595744681e-16,
+    "INVx1_schematic_over_liberty": 0.45509746224475767,
+    "INVx1_bare_static_gate_F": 2.01e-16,
+    "note": "ASAP7's liberty was characterised on the parasitic-extracted netlist, so the pin capacitance includes the cell's own layout interconnect.  Q128's SPICE on the LVS (schematic) netlist reads 0.370 of it, mix-weighted"
+   },
+   "it_is_a_predictive_kit_at_another_voltage": "05-claims.md's own caveat: ASAP7 is a predictive 7 nm kit characterised at 0.7 V, not a measurement of this chip"
+  },
+  "liberty_pin_vs": {
+   "one_minimum_fin_bare_gate": 18.50531343283582,
+   "INVx1_six_fins_of_bare_gate": 3.0842189054726363,
+   "INVx1_same_pin_in_SPICE": 2.197331523378582,
+   "INVxp33_liberty_pin": 2.2483724607667837,
+   "the_average_signal_net": 0.2776211374832064
+  }
  },
  "ratio_table": [
   {
@@ -89,7 +132,7 @@
    "C_F": 3.35e-17
   },
   {
-   "event": "an INVx1's own input pin, 2 fins, heat per edge",
+   "event": "INVxp33 (the library's minimum inverter), its 2 fins of bare gate, heat per edge",
    "energy_J": 8.94e-18,
    "convention": "edge",
    "floor_C": 80.0,
@@ -105,12 +148,44 @@
    "C_F": 6.7e-17
   },
   {
-   "event": "THE PLAN'S ROW: 'minimum inverter', C assumed 0.62 fF, heat per edge",
-   "energy_J": 8.3e-17,
+   "event": "INVx1's input pin, its 6 fins of bare gate (6 x 0.0335 fF)",
+   "energy_J": 2.68625445e-17,
    "convention": "edge",
    "floor_C": 80.0,
    "floor_J": 3.379620644218504e-21,
-   "x_floor": 24558.96940444709,
+   "x_floor": 7948.390463868655,
+   "electrons": 648,
+   "factorisation": {
+    "electrons": 648,
+    "one_electron_x_floor": 24.509417090791267,
+    "convention_factor": 0.5,
+    "product": 7941.051137416371
+   },
+   "C_F": 2.01e-16
+  },
+  {
+   "event": "INVx1's input pin, measured in SPICE on the schematic netlist (6 x 24.31 aC)",
+   "energy_J": 3.7704810000000004e-17,
+   "convention": "edge",
+   "floor_C": 80.0,
+   "floor_J": 3.379620644218504e-21,
+   "x_floor": 11156.521387837238,
+   "electrons": 910,
+   "factorisation": {
+    "electrons": 910,
+    "one_electron_x_floor": 24.509417090791267,
+    "convention_factor": 0.5,
+    "product": 11151.784776310027
+   },
+   "C_F": 2.821276595744681e-16
+  },
+  {
+   "event": "INVx1's input pin, ASAP7's liberty (0.620 fF) = THE PLAN'S ROW, heat per edge",
+   "energy_J": 8.2849967596e-17,
+   "convention": "edge",
+   "floor_C": 80.0,
+   "floor_J": 3.379620644218504e-21,
+   "x_floor": 24514.576136742126,
    "electrons": 2000,
    "factorisation": {
     "electrons": 2000,
@@ -118,10 +193,26 @@
     "convention_factor": 0.5,
     "product": 24509.417090791267
    },
-   "C_F": 6.21050623108321e-16
+   "C_F": 6.19928e-16
   },
   {
-   "event": "CORRECTED: an INVx1 toggling this design's average signal net",
+   "event": "the same, at the 58 C floor = 05-claims.md's settled reading",
+   "energy_J": 8.2849967596e-17,
+   "convention": "edge",
+   "floor_C": 58.0,
+   "floor_J": 3.169082192646065e-21,
+   "x_floor": 26143.205685310226,
+   "electrons": 2000,
+   "factorisation": {
+    "electrons": 2000,
+    "one_electron_x_floor": 26.137703897366553,
+    "convention_factor": 0.5,
+    "product": 26137.70389736655
+   },
+   "C_F": 6.19928e-16
+  },
+  {
+   "event": "an INVx1 toggling this design's average signal net",
    "energy_J": 2.9845e-16,
    "convention": "edge",
    "floor_C": 80.0,
@@ -387,23 +478,77 @@
    ]
   },
   "E63_board": {
-   "lockin_Hz": 0.05,
-   "phase_deg": 87.0,
-   "one_pole_tau_s": 60.73714447328104,
-   "caveat": "a diffusive path is not one pole; this is an order-of-magnitude read"
+   "pooled_complex_transfer": {
+    "0.05_Hz": {
+     "mK_per_W": 52.7,
+     "sigma": 2.0,
+     "phase_deg": 95.0
+    },
+    "0.15_Hz": {
+     "mK_per_W": 18.4,
+     "sigma": 5.4,
+     "phase_deg": 151.0
+    },
+    "ratio": 0.349146110056926,
+    "ratio_sigma": 0.10331996351863192
+   },
+   "the_drift_at_0p05_Hz": {
+    "transfer_mK_per_W": [
+     59.0,
+     52.9,
+     47.8,
+     42.4
+    ],
+    "phase_deg": [
+     87.0,
+     109.0
+    ],
+    "what": "one hour, four top-rung blocks, board and camera warming"
+   },
+   "repo_roll_off_read": {
+    "single_pole_s": 12.0,
+    "lower_bound_1sigma_s": 3.2,
+    "upper_bound": null,
+    "note": "05-claims.md: 'a single pole of 12 s, or any pole longer (1 sigma: tau >= 3.2 s, with no upper bound)'.  At the pooled 95 degrees no single pole exists at all"
+   },
+   "phase_only_order_of_magnitude": {
+    "from_phase_deg": 87.0,
+    "at_Hz": 0.05,
+    "one_pole_tau_s": 60.73714447328104,
+    "caveat": "a phase-only read of the ONE value just under 90 degrees, and a diffusive path is not one pole.  The repo's 12 s amplitude read is the one to quote"
+   }
+  },
+  "camera_vs_die": {
+   "die_vertical_s": 0.00024962001689189184,
+   "shire_lateral_s": 0.011094222972972972,
+   "lockin_periods_s": {
+    "0.05_Hz": 20.0,
+    "0.15_Hz": 6.666666666666667
+   },
+   "slower_by": {
+    "min": 600.9133476862299,
+    "max": 80121.77969149733
+   },
+   "quote_as": "6 x 10^2 to 8 x 10^4",
+   "to_resolve_the_die_Hz": 4006.0889845748666,
+   "to_resolve_the_die_Hz_band": [
+    637.5888643610816,
+    4006.0889845748666
+   ],
+   "band_note": "1/(2 pi tau) to 1/tau for the 0.25 ms vertical path: of order a kilohertz"
   }
  },
  "wire": {
   "C_per_um_F": 1.6579e-16,
   "R_per_um_ohm": 26.5684,
+  "R_per_um_is": "the ORFS AVERAGE SIGNAL wire (set_wire_rc -signal), not the tightest metal -- corrected Tue 27 Oct 2026 after review",
   "between_cell_C_F": 8.560000000000001e-16,
+  "between_cell_only": "this prices the BETWEEN-cell wire alone.  The 78.2% wire share of the net's capacitance also counts 0.892 fF of in-cell wire, whose resistance is not in this split at all (and which Q128 warns is Miller charge moving to the output, not capacitance on the net)",
   "implied_length_um": 5.163158212196152,
   "R_on_one_fin_ohm": 14413.158628380263,
   "R_wire_ohm": 137.17685264491226,
   "wire_share_of_dissipation_lumped": 0.00942774500449162,
   "wire_share_of_dissipation_distributed": 0.0047361983373534425,
-  "crossover_length_um_tight_metal": 1084.9850671007862,
-  "crossover_length_um_M8": 3412.3474879712735,
   "RC_per_um2_s": 4.404775036e-15,
   "Cu_electron_MFP_nm": 39.9,
   "M1_width_nm": 18.0,
@@ -411,7 +556,143 @@
   "Cu_kappa_from_Wiedemann_Franz_300K": 430.5882352941177,
   "lowk_vs_Si_kappa_ratio": 211.42857142857144,
   "lowk_porous_vs_Si_kappa_ratio": 1480.0,
-  "fin_vs_bulk_kappa_ratio": 5.92
+  "fin_vs_bulk_kappa_ratio": 5.92,
+  "min_current_to_charge_the_net_in_one_edge_A": 5.0193956521739126e-05,
+  "min_fins_from_that_current": 1.3993297050944835,
+  "fins_per_driven_pin_repo": 6.086780909774913,
+  "INVx1_nfin": 6,
+  "sensitivity": {
+   "avg_signal": {
+    "R_per_um_ohm": 26.5684,
+    "R_wire_ohm": 137.17685264491226,
+    "by_driver_fins": {
+     "1": {
+      "R_driver_ohm": 14413.158628380263,
+      "wire_share_distributed": 0.0047361983373534425,
+      "channel_share_distributed": 0.9952638016626466,
+      "crossover_length_um": 1084.9850671007862
+     },
+     "2": {
+      "R_driver_ohm": 7206.579314190131,
+      "wire_share_distributed": 0.00942774500449162,
+      "channel_share_distributed": 0.9905722549955084,
+      "crossover_length_um": 542.4925335503931
+     },
+     "6": {
+      "R_driver_ohm": 2402.1931047300436,
+      "wire_share_distributed": 0.027759810189790003,
+      "channel_share_distributed": 0.97224018981021,
+      "crossover_length_um": 180.83084451679767
+     }
+    }
+   },
+   "M2": {
+    "R_per_um_ohm": 29.7127,
+    "R_wire_ohm": 153.41137101152063,
+    "by_driver_fins": {
+     "1": {
+      "R_driver_ohm": 14413.158628380263,
+      "wire_share_distributed": 0.005293747673830956,
+      "channel_share_distributed": 0.994706252326169,
+      "crossover_length_um": 970.1682195411566
+     },
+     "2": {
+      "R_driver_ohm": 7206.579314190131,
+      "wire_share_distributed": 0.010531742957877264,
+      "channel_share_distributed": 0.9894682570421228,
+      "crossover_length_um": 485.0841097705783
+     },
+     "6": {
+      "R_driver_ohm": 2402.1931047300436,
+      "wire_share_distributed": 0.030943451910137778,
+      "channel_share_distributed": 0.9690565480898622,
+      "crossover_length_um": 161.6947032568594
+     }
+    }
+   },
+   "M1": {
+    "R_per_um_ohm": 70.4175,
+    "R_wire_ohm": 363.5766934073226,
+    "by_driver_fins": {
+     "1": {
+      "R_driver_ohm": 14413.158628380263,
+      "wire_share_distributed": 0.012455567465507423,
+      "channel_share_distributed": 0.9875444325344926,
+      "crossover_length_um": 409.36297449867607
+     },
+     "2": {
+      "R_driver_ohm": 7206.579314190131,
+      "wire_share_distributed": 0.02460466980627624,
+      "channel_share_distributed": 0.9753953301937238,
+      "crossover_length_um": 204.68148724933803
+     },
+     "6": {
+      "R_driver_ohm": 2402.1931047300436,
+      "wire_share_distributed": 0.07035203236571115,
+      "channel_share_distributed": 0.9296479676342888,
+      "crossover_length_um": 68.227162416446
+     }
+    }
+   },
+   "M8": {
+    "R_per_um_ohm": 8.44765,
+    "R_wire_ohm": 43.616553471258825,
+    "by_driver_fins": {
+     "1": {
+      "R_driver_ohm": 14413.158628380263,
+      "wire_share_distributed": 0.0015107950630562476,
+      "channel_share_distributed": 0.9984892049369437,
+      "crossover_length_um": 3412.3474879712735
+     },
+     "2": {
+      "R_driver_ohm": 7206.579314190131,
+      "wire_share_distributed": 0.003017032009048143,
+      "channel_share_distributed": 0.9969829679909519,
+      "crossover_length_um": 1706.1737439856367
+     },
+     "6": {
+      "R_driver_ohm": 2402.1931047300436,
+      "wire_share_distributed": 0.00899680870744514,
+      "channel_share_distributed": 0.9910031912925548,
+      "crossover_length_um": 568.7245813285455
+     }
+    }
+   }
+  },
+  "headline": {
+   "central": "6-fin driver (INVx1, and the repo's 6.09 fins per driven pin) on the average signal wire",
+   "channel_share_central": 0.97224018981021,
+   "channel_share_range_over_fins_and_layers": [
+    0.9296479676342888,
+    0.9952638016626466
+   ],
+   "crossover_range_um_signal_layers": [
+    161.6947032568594,
+    1084.9850671007862
+   ]
+  },
+  "slab_cross_check": {
+   "cross_section_nm": [
+    18.0,
+    36.0
+   ],
+   "aspect_ratio_assumed": 2.0,
+   "area_m2": 6.48e-16,
+   "R_per_um_at_bulk_Cu_ohm": 26.23456790123457,
+   "ORFS_avg_signal_over_that": 1.012724894117647,
+   "ORFS_M1_over_that": 2.684149411764706,
+   "reading": "the ORFS average-signal value is what a BULK-resistivity conductor of that cross-section gives (1.0x).  M1's own value is 2.7x it, which is where the narrow-wire resistivity rise of section 3 shows up.  Both statements hold, on different layers"
+  },
+  "if_Q129a_extraction_is_used": {
+   "steiner_over_extracted": 1.2016824920872897,
+   "between_cell_C_F": 7.123345855802155e-16,
+   "length_um": 4.29660766982457,
+   "average_net_C_F": 2.0893345855802154e-15,
+   "net_change": -0.06433740009842581,
+   "x_floor_80C_edge": 82621.1298301331,
+   "optical_phonons_per_edge": 26995.71123496691,
+   "note": "Q128's published ledger is still 2.233 fF, so the note's numbers stay on it and this row says what moves if the extraction replaces the Steiner estimate"
+  }
  },
  "mac": {
   "board_J": 5.783e-12,
@@ -421,7 +702,17 @@
   "electrons_rail": 52361673.56519332,
   "x_floor_66C": 1781774040.3907988,
   "at_9p18_TFLOPS_MAC_per_s": 4590000000000.0,
-  "phonons_per_second_rail": 1.92469904716447e+21
+  "phonons_per_second_rail": 1.92469904716447e+21,
+  "rail_share_used": 0.75,
+  "rail_share_range": [
+   0.7,
+   0.89
+  ],
+  "optical_phonons_rail_range": [
+   391369450.4038137,
+   497598301.22770613
+  ],
+  "quote_as": "4.2 x 10^8 on the 0.75 share; 3.9-5.0 x 10^8 over the registered 0.70-0.89"
  },
  "sources": [
   "Pop, Sinha, Goodson, Proc. IEEE 94(8) 1587-1601 (2006), doi:10.1109/JPROC.2006.879794",
