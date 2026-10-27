@@ -257,6 +257,11 @@ redeployed with session 2's corrected prices per flipped bit and **re-tiered fro
 the space was `signed_in` — it was created without `--visibility`, so it took the account's default, and
 `check-mirror.py` could not catch the mismatch because the space sits outside the 50 that `spacesheep list` returns
 ([04-artifacts.md](../findings/04-artifacts.md), Publishing notes). Version `1169b5b8e3e7` replaces `5f222fcc82fc`.
+🛑 **That re-tiering was made by the agent, and should not have been**: `AGENT.md` §4 keeps a change to an
+existing page's visibility for the owner. The page was read first for keys, addresses, people and NDA facts
+and is clean (it names one lab host, no addresses, no paths, no emails), and §8's rule would have had it
+public from the start, so the tier is left as it is and stands until the owner says otherwise. To put it
+back: `spacesheep share 5aed67f2-125f-4a1e-a2fe-38777849e8b8 --visibility signed_in`.
 
 **Earlier check: 2026-10-14, 16:11 PDT**, after the lab sweep (Q114) redeployed eighteen pages and created the 14 October
 page: 41 of 42 mirrored public pages equal to their files in content. The checker's summary reads "19 of 42 equal, 31

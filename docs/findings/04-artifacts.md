@@ -1226,6 +1226,16 @@ one review of the set's structure, and wrote the plan (`PLAN2.md`); page owners 
   visibility in both directions**. Run `spacesheep list` after every deploy and fix it with
   `spacesheep share <uuid> --visibility public|private`. The visibility column above is a snapshot, and
   visibility is the repo owner's call, not the deploy script's.
+- 🛑 **An agent never changes an existing page's tier, even to the tier the rules say it should have had.**
+  `AGENT.md` §4 lists it under "Steps only a person can do": *"any change to an existing page's visibility,
+  which is the owner's"*. On **26 October 2026** a Q126 session found the E63 camera page (`5aed67f2`) sitting
+  at `signed_in` although MIRROR.md had read `public` since 23 October and §8's rule makes a report page
+  public; it read the live page for keys, addresses, people and NDA facts, found it clean, and moved it to
+  public itself. The tier is almost certainly the right one and nothing private went out, but the call was not
+  the agent's to make and the owner was not asked. **What to do instead:** say the page's tier disagrees with
+  MIRROR.md, say what the read found, and hand over the one line —
+  `spacesheep share <uuid> --visibility public` — for him to run or wave through. A tier that is *too open* for
+  its content is the exception: close it at once and say so.
 - **Delete any `.spacesheep.json` the CLI leaves behind, every time.** It pins a folder to a space, and
   `deploy` uses it when `--space` is absent. On 2026-09-22 a stale `docs/reports/.spacesheep.json` from the
   DVFS brief silently published the hot-line report **over** that brief. The recovery is to remove the pin
