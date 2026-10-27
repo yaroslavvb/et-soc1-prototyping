@@ -12,16 +12,32 @@ iverilog    Icarus Verilog version 14.0 (devel) (s20260301-713-gf9111a949-dirty)
 gsim.py     tools/open-flow/txfma/gsim.py, this request (no external dependency)
 
 [inputs, from Q129(a) docs/reports/data/2026-10-27-q129-routed-netlist]
+   NOT COMMITTED - 3 to 21 MB each; route_docker.sh / post_route.tcl regenerate them,
+   and these hashes identify the exact files this run read.
 mixed      txfma_routed.v          2964798 B  sha256 6fa59d506554dec7978217071e2ca2d3a4face0961bfb06d699f7eceeac29d60
 mixed      txfma_routed.sdf       14812136 B  sha256 aa3195667417395332722892ef3c72a569e9d2df2cfaa89b6776b07fa6a9db53
 keep       txfma_routed.v          6096628 B  sha256 5ad5d68b38db8462ea5eed94aa0dda50984ac23e6c32f0d5b4cb0101ef7a4b26
 keep       txfma_routed.sdf       20920057 B  sha256 1af9bd16d931aefce57656b5fd67b1c58489d922730ddb505c82c132fe08a998
 
-[stimulus]
-randn.vec                          112812 B  md5 56f45fbf1590c9bad87f788c7542a2f8
+[stimulus]   all eleven are COMMITTED, gzipped, in stimulus/ (corrected 27 Oct: the first
+             version of this directory committed none of them and said otherwise)
+   md5 of each file as gsim reads it, i.e. after gunzip; 112,812 B each, 2212 lines,
+   one per 1 ns step; the measured op is steps 1106-2210, the first half is warm-up.
    recorded by tb_gate.sv +vectors= on the Q126(e) zero-delay bench (the 21 Sep randn
-   tile, --seed 1 --iters-before 1000); 2212 lines, one per 1 ns step; the measured op
-   is steps 1106-2210, the first half is warm-up.
+   tile for randn, --seed 1 --iters-before 1000; the V3-HL masks for the rungs).
+randn.vec    md5 56f45fbf1590c9bad87f788c7542a2f8
+lq_h0.vec    md5 e1cee0bf3a655d25e35eb7233bea2502
+lq_h1.vec    md5 5fdbef25d5c61c5252dd55c5b80d1e39
+lq_h2.vec    md5 c0cc77787416905f59893e58fc779124
+lq_h4.vec    md5 82628d21ae167bdd408c084d43ca348e
+lq_h8.vec    md5 8a981f437cd0639ea8fdccc31f44439c
+lb_h0.vec    md5 f9bcc81657385784bf3ffbde4bee7611
+lb_h1.vec    md5 61787280c91ed725a6f8a150e0494214
+lb_h2.vec    md5 db09b1099e3efde5273f355fd399da2e
+lb_h4.vec    md5 9cf4f668477a41b775e4963de010b5e5
+lb_h8.vec    md5 fcc17735f3ff9ce7123a0fac031347cb
+   the re-recording of randn on the EDA host reproduces the original byte for byte
+   (same md5), which is what the no-compute-on-a-card-host claim rests on.
 
 [capacitance]
 net_caps_spef_mixed.txt.gz         245182 B  sha256 d18a6ac607c528cd73ac13c337f2c2f596baeff189f94f7f6865b0f76fff14bc

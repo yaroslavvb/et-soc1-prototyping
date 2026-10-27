@@ -23,7 +23,17 @@ prod_adder_64b                  45.4 ->     111.2  x2.450    0.0094 ->  0.0230 p
 
   nets that glitch: 6,265 of 10,376 that toggle at all; nets that toggle LESS with delays: 0
   the energy ratio over the Miller band: k=0 1.334, k=1 1.331, k=2 1.328  (it barely moves: glitches are a count, not a capacitance)
-  CAPACITANCE COVERAGE: 100.0% of the extracted 38,850.1 fF is named by this simulation (16,440 extracted nets, 17,122 netlist nets), against 50.5%/56.3% published and 43.6%/51.8% in Q129(a).
+  CAPACITANCE COVERAGE: 100.0% of the EXTRACTED 38,850.1 fF is named by this simulation (16,440 extracted nets, 17,122 netlist nets).
+    EXACT BUT NARROWER THAN IT READS: 682 netlist net names (4.0%) have NO extraction entry at all and
+    are priced at zero. Exactly one of them moves - wallace_fC41_f2a_h[63], 16
+    transitions against a settled count of 0, so a pure glitch - and its omission
+    can therefore only understate the timed energy, by a nil amount.
+    AND THE FRACTIONS IT IS COMPARED AGAINST COME FROM A DIFFERENT EXTRACTION:
+    the published 50.5% is 23,762 of 47,093 fF of Steiner estimate on the keep
+    netlist (56.3% the same on mixed), 43.6%/51.8% are Q129(a)'s, and this 100% is
+    of the SPEF extraction's 38,850 fF at k=1. One question, three
+    denominators. What is strictly true here: no net this netlist contains is left
+    unpriced for want of an extraction of it.
   of those farads, 24,203.7 fF (62.3%) belongs to a net that toggles at all in a random multiply-add.
 
 SENSITIVITIES AND A SECOND INSTRUMENT (unit / Wallace tree, toggles then k=1 energy)
@@ -41,6 +51,23 @@ SENSITIVITIES AND A SECOND INSTRUMENT (unit / Wallace tree, toggles then k=1 ene
      convention, not a measurement. It is LARGER than the timed count, so the glitch
      factor below is not an artefact of counting every edge.
 
+  THE SPREAD TO QUOTE. One instrument over two netlists and two SDF options reads
+  x1.50-1.58 in toggles and x1.29-1.33 in energy at the unit. That is a hierarchy-and-
+  options band, NOT an uncertainty: the second instrument in this very directory reads
+  x1.762 / x1.444. ACROSS INSTRUMENTS the spread is x1.55-1.76 in toggles and
+  x1.32-1.44 in energy, and that is the band to quote beside x1.572.
+  The nearest matched pair is gsim cells-only (COND kept) x1.553 against Icarus
+  cells-only (COND dropped) x1.762 - 13.5% apart. Of the three mechanisms the probe
+  names, ONE CANNOT EXPLAIN IT: gsim has no CLK->Q delay either (sdf_bind
+  iopath_missing = 1,974 of 42,486 input pins, the flip-flops and the clock
+  gates), so simultaneous launch is COMMON to both instruments and makes both
+  conservative. What is left is Icarus running 1,390 XOR2x2/XNOR2x2 at ZERO delay in
+  the middle of the tree (gsim back-fills those pins from the conditional entries,
+  iopath_from_cond = 2,780) and its 10 ps delay grid against gsim's femtoseconds.
+  No run here separates the two, and --no-cond would NOT reproduce Icarus's zeroed
+  XOR paths, so a like-for-like pass needs a change to gsim and not just a flag.
+  Open, and recorded as such.
+
 AGAINST THE RECORD
   tape-out flow (tfma.glitch): tree 1244 -> 1871 toggles/MAC, x1.504, x1.4 in energy
   open flow, this run:         tree 628.2 -> 1499.9 toggles/MAC, x2.387, x2.329 in energy
@@ -52,6 +79,33 @@ AGAINST THE RECORD
 WHAT IT DOES TO THE WATERFALL
   the multipliers used: signal capacitance x1.4929, signal transitions x1.6800;
   the clock tree does not glitch (x1.000 measured), so it is carried through unchanged.
+
+  (C) MEASURED END TO END on this run, and THE ONE TO USE - no published term
+      reused, 100% of the extracted capacitance priced, the routed netlist
+      simulated as built. It is self-contained: do not compose it with Q129(a)'s
+      or eda-cap's deltas, and do not quote (A) or (B) as this result's headline.
+      Miller k=0: switching 1.2686 -> 1.6929 pJ, internal 0.4127 -> 0.6933 pJ, bottom-up 1.6813 -> 2.3862 pJ;
+                 unaccounted 4.1017 -> 3.3968 pJ, closure 29.1% -> 41.3%
+      Miller k=1: switching 1.5119 -> 2.0121 pJ, internal 0.4127 -> 0.6933 pJ, bottom-up 1.9246 -> 2.7055 pJ;
+                 unaccounted 3.8584 -> 3.0775 pJ, closure 33.3% -> 46.8%
+      Miller k=2: switching 1.7552 -> 2.3313 pJ, internal 0.4127 -> 0.6933 pJ, bottom-up 2.1679 -> 3.0247 pJ;
+                 unaccounted 3.6151 -> 2.7583 pJ, closure 37.5% -> 52.3%
+      SO: +0.781 pJ at k=1 moves from unaccounted to accounted,
+      and the closure against the board goes 33.3% -> 46.8% (band 41.3% at k=0 to 52.3% at k=2).
+
+  Note (C)'s zero-delay bottom-up lands within 1% of the published 1.947 pJ by a
+  coincidence of two errors cancelling: the published figure priced half the farads at
+  a Steiner estimate that is 20% high, this one prices all of them at the extraction.
+
+  (A) and (B) are BRIDGES ONLY - what this run's multipliers do to someone else's
+      ledger, kept so the published and Q129(a) numbers can be followed. Each one
+      composes this run's ratio onto a switching total from a different simulation,
+      and each splits that total with a clock share that is NOT this run's.
+      THE MISMATCH, as a number: this run measures the clock at 32.88% of the
+      unit's switching energy (k=1, zero delay, post-CTS routed netlist), against the
+      32.7% (A) uses and the 26.7% (B) uses - 23% relative on (B),
+      because Q129(a) repriced PRE-CTS toggle counts (477 clock toggles/MAC) against
+      post-route capacitance while this run simulates the post-CTS netlist (658.6).
 
   (A) the PUBLISHED ledger: wire between the cells 0.590 pJ
       switching 1.516 -> 2.019 pJ   (clock 0.496 held, signal 1.020 -> 1.523)
@@ -67,43 +121,94 @@ WHAT IT DOES TO THE WATERFALL
       unaccounted against the board's 5.783: 3.975 -> 3.185 pJ   (closure 31.3% -> 44.9%)
       unaccounted against the rail's 4.337: 2.529 -> 1.739 pJ
 
-  (C) MEASURED END TO END on this run - no published term reused, 100% of the
-      extracted capacitance priced, the routed netlist simulated as built:
-      Miller k=0: switching 1.2686 -> 1.6929 pJ, internal 0.4127 -> 0.6933 pJ, bottom-up 1.6813 -> 2.3862 pJ;
-                 unaccounted 4.1017 -> 3.3968 pJ, closure 29.1% -> 41.3%
-      Miller k=1: switching 1.5119 -> 2.0121 pJ, internal 0.4127 -> 0.6933 pJ, bottom-up 1.9246 -> 2.7055 pJ;
-                 unaccounted 3.8584 -> 3.0775 pJ, closure 33.3% -> 46.8%
-      Miller k=2: switching 1.7552 -> 2.3313 pJ, internal 0.4127 -> 0.6933 pJ, bottom-up 2.1679 -> 3.0247 pJ;
-                 unaccounted 3.6151 -> 2.7583 pJ, closure 37.5% -> 52.3%
-
-  Note (C)'s zero-delay bottom-up lands within 1% of the published 1.947 pJ by a
-  coincidence of two errors cancelling: the published figure priced half the farads at
-  a Steiner estimate that is 20% high, this one prices all of them at the extraction.
+  (B) re-run with this run's own 32.88% clock share instead of 26.7%:
+      BOTTOM-UP TOTAL 1.808 -> 2.556 pJ, closure 44.2% (not 2.598 pJ and 44.9%). The three
+      waterfalls agree to within 0.11 pJ at k=1, which is the size of this
+      inconsistency; (C) carries none of it.
 
 THE HAMMING LADDER: DOES THE fJ-PER-FLIPPED-BIT SLOPE CARRY THE SAME FACTOR?
   Both partners, h = 0, 1, 2, 4, 8, on the same routed netlist. Fitted the way E60's own
   reducer fits it: a line over h >= 1 with a free intercept, against the DESIGNED flips.
-         slope, switching only              slope, + cells internal              E60 at the board
-  lq      35.10 ->  44.85 fJ  x1.278       48.12 ->  63.67 fJ  x1.323         116.7 fJ   (quiet partner A = 1.0)
-         share of the board: switching 30.1% -> 38.4%, with internal 41.2% -> 54.6%
-  lb      36.81 ->  49.18 fJ  x1.336       51.56 ->  71.15 fJ  x1.380         129.9 fJ   (busy  partner A = pi )
-         share of the board: switching 28.3% -> 37.9%, with internal 39.7% -> 54.8%
+  Every slope carries the fit's own standard error (2 dof). The ladder is markedly
+  non-linear (POWER.md's own trap 3), so the residuals are large and structured and
+  these intervals are wide: every share below is good to about +-2 percentage
+  points and no better, before and after.
+         slope, switching only                    slope, + cells internal                    E60 at the board
+  lq      35.10+-2.23 ->  44.85+-2.30 fJ  x1.278    48.12+-3.23 ->  63.67+-3.22 fJ  x1.323     116.7 fJ   (quiet partner A = 1.0)
+         share of the board: switching 30.1+-1.9% -> 38.4+-2.0%, with internal 41.2+-2.8% -> 54.6+-2.8%  (1 sigma)
+         residuals of the timed fit, fJ: h1=-4.7, h2=-4.6, h4=+15.1, h8=-5.8
+  lb      36.81+-3.27 ->  49.18+-2.02 fJ  x1.336    51.56+-4.73 ->  71.15+-2.92 fJ  x1.380     129.9 fJ   (busy  partner A = pi )
+         share of the board: switching 28.3+-2.5% -> 37.9+-1.6%, with internal 39.7+-3.6% -> 54.8+-2.2%  (1 sigma)
+         residuals of the timed fit, fJ: h1=+5.4, h2=+2.4, h4=-13.1, h8=+5.3
   rung by rung, pJ per multiply-add at k=1 (zero delay -> timed):
     lq  h0=0.5079->0.5080  h1=0.5689->0.5841  h2=0.6042->0.6290  h4=0.6934->0.7384  h8=0.8136->0.8969
     lb  h0=0.5084->0.5088  h1=0.7066->0.7383  h2=0.7496->0.7844  h4=0.7923->0.8673  h8=0.9683->1.0824
   the unit's own glitch factor by rung (toggles): lq_h0 x1.002, lq_h1 x1.061, lq_h2 x1.094, lq_h4 x1.145, lq_h8 x1.232
-  so it is strongly ACTIVITY-DEPENDENT: x1.00 with the operands held still (the clock
-  is 97.6% of that rung and the clock does not glitch), x1.23 at h = 8, x1.57 at randn.
+  so it is strongly ACTIVITY-DEPENDENT: x1.00 with the operands held still - at h0
+  the clock is 97.9% (lq) and 97.8% (lb) of the rung's energy MEASURED HERE, on this
+  routed netlist, and the clock does not glitch - then x1.23 at h = 8, x1.57 at randn.
+  (POWER.md's 97.6%/97.7% for the same rungs is its own keep-netlist figure, not this
+  run's; the first version of this file quoted it as if it were measured here.)
   The SLOPE - the marginal cost of one more flipped bit, which is what the project's
   30%-of-the-board claim rests on - carries x1.28 (quiet) to x1.34 (busy) on switching,
   and x1.32 to x1.38 with the cells' internal energy. So the published
-  "about 30% of what the board pays, about 40% with internal energy" becomes about
-  38% and about 55%.
+  "about 30% of what the board pays, about 40% with internal energy" becomes
+  ABOUT 38% (1 sigma +-2 pp) and ABOUT 55% (+-3 pp). Those two words carry the
+  precision: 38.4% and 54.6% do not.
+  FIT WINDOWS. On POWER.md's own window (h >= 1, four rungs) the ratio is x1.278
+  (lq) and x1.336 (lb). Leave one rung out and it runs x1.237-1.285 (lq) and
+  x1.309-1.554 (lb); the widest excursion in both is the window that drops h = 8,
+  the longest lever. Include h = 0 and the ratio holds (x1.271 / x1.281) but the
+  absolute share jumps (lb 37.4% -> 48.0%), which is why the h >= 1 window is kept:
+  it is the convention POWER.md's own figure was fitted on, so the before/after is
+  like-for-like. ABOUT 1.3 is what these fits support, not 1.278 and 1.336.
+
+A FUNCTIONAL CHECK ON THE TIMED RUN (positive evidence, and a caveat)
+  the timed run's own SETTLED count is 2,118,201 against the zero run's
+  2,115,833: +0.112% over 32 nets of 17,122. So the two passes compute the same
+  function to 1 part in 900, which they must for the ratio to mean anything - worth
+  stating because the netlist misses its SDC by about 2x. Using the timed run's own
+  settled as the denominator instead gives x1.5699 at the whole design against
+  x1.5716: a 0.1% effect on the headline, and the published convention (the
+  zero-delay pass is the denominator) is the one used.
 
 WHAT THIS DOES NOT SETTLE
-  - one tile per pattern and one netlist pair; no repeat, so no interval on any ratio.
+  - one tile per pattern and one netlist pair; no repeat, so no repeat-variance
+    interval. The LADDER fits do carry a regression interval and it is printed above
+    (4-9% on the slopes); the headline ratios carry no interval at all.
   - the design misses its 1250 ps SDC by about 2x, so these delays belong to a netlist
     that would not run at 800 MHz; and the SDF is ASAP7 TT at 0.700 V while the energy
     is priced at the 0.517 V rail, where every delay would be longer.
   - inertial delay with full pulse rejection is the conservative model; a transport
     model would report more glitches.
+  - 4.6% of the 'timed' netlist ran at ZERO delay in gsim too: sdf_bind
+    iopath_missing = 1,974 of 42,486 input-pin paths, essentially every flip-flop's and
+    clock gate's CLK->Q, because the behavioural stand-in asap7_seq_behav.v carries no
+    specify block. gsim therefore launches every flip-flop simultaneously, removing the
+    launch skew that would deepen these glitches: x1.572 is conservative on that axis
+    too. The probe faults Icarus for exactly this; it is only fair to fault gsim for it.
+  - WHICH FLOOR-REASON EACH RUN RETIRED, of Q126(e)'s three: Q129(a) retired the
+    coupling/SPEF one (detailed route closed, coupling extracted, and the wire turned
+    out not to be a floor at all); THIS run retires the coverage one (the routed
+    netlist is what is simulated, so no extracted net goes unpriced). The third - the
+    ledger covers one lane's arithmetic while the board also pays for the register-file
+    read ports, the operand bus, the result path, pipeline registers and leakage -
+    stands untouched by either.
+
+WHAT THE FIRST VERSION OF THIS FILE GOT WRONG   (corrected 27 Oct, after verification)
+  1. It led with waterfall (B) - 1.810 -> 2.598 pJ, closure 31.3% -> 44.9%, '+0.790 pJ'
+     - the composition its own open issues told the integrator not to make, and (B)
+     splits Q129(a)'s switching total with Q129(a)'s 26.7% clock share while this run
+     measures 32.88% on the same netlist. (C) now leads: 1.925 -> 2.706 pJ, +0.781 pJ,
+     closure 33.3% -> 46.8%.
+  2. It quoted x1.50-1.57 / x1.29-1.33 as 'the honest band' while its own second
+     instrument read x1.762 / x1.444. The cross-instrument spread is now quoted.
+  3. It quoted the ladder slopes to four figures with no interval. The regression SEs
+     are now printed: 4-9% on the slopes, +-2 pp on the headline share.
+  4. It said 'the clock is 97.6% of that rung' as if measured here; 97.6%/97.7% is
+     POWER.md's keep-netlist figure. This run measures 97.9% (lq) and 97.8% (lb).
+  5. 'the committed randn.vec' was false - no .vec was committed. All eleven are now,
+     gzipped, in stimulus/ (the netlists and the SDF still are not: 3-21 MB each,
+     identified by sha256 in versions.txt and regenerable from Q129(a)'s flow).
+  6. '100% of the extracted capacitance' needed the clause now beside it, and the
+     settled-divergence and CLK->Q checks above were not stated at all.

@@ -357,17 +357,27 @@ The glitch ratio in the record — 1.5× the toggles and 1.4× the energy in the
 longer rests on the tape-out flow alone, and it does **not** transfer: measured on this netlist the
 tree's factor is **×2.39 in toggles and ×2.33 in energy**, while the **whole unit**'s is ×1.57 and
 ×1.33. The two flows' *timed* tree counts are 1.25× apart where their zero-delay counts were 1.98×
-apart, so counting the glitches is what brings them together. Applying the measured factors to this
-file's ledger takes a random multiply-add's bottom-up total from Q129(a)'s 1.810 to **2.598 pJ** and
-the closure against the board from 31.3% to **44.9%** — the largest single step these open-flow
-measurements have made. The **ladder above moves too**: both partners were re-run at h = 0, 1, 2,
-4, 8 with the delays, and the fitted slope per designed flipped bit goes 35.10 → 44.85 fJ (`lq`,
-×1.278) and 36.81 → 49.18 fJ (`lb`, ×1.336) on switching alone, so this file's *"the arithmetic
-inside one lane's multiply-add is about 30% of what the board pays for a flipped operand bit on
-switching alone, and about 40% once the cells' own internal energy is added"* becomes about
-**38%** and about **55%**. The glitch factor is strongly activity-dependent — ×1.00 at `h0`, where
-the clock is 97.6% of the energy and the clock does not glitch, rising to ×1.23 at `h8` and ×1.57
-at `randn` — so no single factor can be applied to this table as a whole.
+apart, so counting the glitches is what brings them together. **Measured end to end on the routed
+netlist** — Q129(b) simulates `txfma_routed.v` itself, so it reuses no term from this file and
+prices 100% of the extracted capacitance — a random multiply-add's bottom-up total goes
+**1.925 → 2.706 pJ** and the closure against the board **33.3% → 46.8%** (41.3% at Miller k = 0 to
+52.3% at k = 2): **+0.781 pJ**, the largest single step these open-flow measurements have made.
+That figure *replaces* this file's 1.516 pJ switching term rather than scaling it, and must not be
+composed with Q129(a)'s wire delta. (Composing it instead onto Q129(a)'s ledger — a bridge, not the
+result — reads 1.810 → 2.598 pJ and 44.9%, but that composition splits Q129(a)'s switching total
+with Q129(a)'s 26.7% clock share while Q129(b) measures 32.88% on the same netlist; with 32.88% the
+bridge reads 2.556 pJ and 44.2%. The three agree to within 0.11 pJ.) The **ladder above moves
+too**: both partners were re-run at h = 0, 1, 2, 4, 8 with the delays, and the fitted slope per
+designed flipped bit goes 35.10 ± 2.23 → **44.85 ± 2.30 fJ** (`lq`, ×1.28) and 36.81 ± 3.27 →
+**49.18 ± 2.02 fJ** (`lb`, ×1.34) on switching alone — ± being the fit's own standard error, 2 dof,
+which this ladder's non-linearity makes 4–9% — so this file's *"the arithmetic inside one lane's
+multiply-add is about 30% of what the board pays for a flipped operand bit on switching alone, and
+about 40% once the cells' own internal energy is added"* becomes **about 38%** and **about 55%**,
+each good to about ±2 percentage points. The glitch factor is strongly activity-dependent — ×1.00
+at `h0`, where the clock is nearly all of the energy (97.6%/97.7% in the table above, 97.8%/97.9%
+on the routed netlist Q129(b) simulates) and does not glitch, rising to ×1.23 at `h8` and ×1.57 at
+`randn` — so no single factor can be applied to this table as a whole. And ×1.572 itself carries a
+cross-instrument spread of ×1.55–1.76, not the ×1.50–1.57 of one engine over two netlists.
 
 ## What the first version got wrong
 

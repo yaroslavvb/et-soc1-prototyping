@@ -100,6 +100,12 @@ python3 -I tools/open-flow/txfma/glitch.py price --zero gsim_zero.json --timed g
       --muladds 512 --out glitch.json
 ```
 
+The recording step can be skipped: the eleven stimuli Q129(b) used are committed, gzipped, at
+[`docs/reports/data/2026-10-27-q129-glitch/stimulus/`](../../../docs/reports/data/2026-10-27-q129-glitch/README.md)
+(`randn` and both ladders at h = 0, 1, 2, 4, 8) — `gunzip` one and pass it to `--vectors`. The
+netlists and SDFs are not committed (3–21 MB each); `route_docker.sh` regenerates them, and their
+sha256 are in that directory's `versions.txt`.
+
 **Do not trust a timed count whose zero-delay twin has not passed `check`.** Two bugs in the first
 draft of `gsim.py` — input pins mapped to the wrong slot of a cell's model, and two flip-flops in
 series racing through a zero-delay clock tree of unequal depth — were each caught by that gate and
