@@ -83,3 +83,31 @@ README. UNDECIDED where an interval straddles a band edge, where fewer than 3 cy
 temperature band was not reached (L4). A cycle whose `block.json` is not `ok` — an intrusion, three failed heater
 bursts in a row, a sampler failure or a failed check — is dropped by `reduce.py` and named in `verdicts.json`
 `passes`; it is never re-registered.
+
+## Amendments
+
+**A1, Mon 26 Oct 2026, 22:4x PDT (written during pass 11's cooling, which began at 22:37:37; before any E66
+cooling data had been fitted, and before passes 12 and later).** The plateau this card reaches tonight is
+**70 °C, not 88 °C**, and that changes how L2 must be read.
+
+Pass 11 heated for 398 s and stopped on the registered 150-burst cap, not on the 88 °C target
+(`marks.jsonl`: `heat_end die_c 70, reason "bursts", bursts 150`). Stopping on the cap *is* the registered
+method; what is new is where the die stops climbing. E64 measured this card's governor tripping on a **66 °C**
+die reading, so a 1,024-minion random-data heater cannot take it much past that — E44's 88 °C on 25 Sep is not
+reproducible here tonight, and E64 saw the same ceiling ("a random-data heater cannot take this die past
+~67 °C, because the two limits hold it there").
+
+What it costs and what it does not:
+
+- **L3 and L4 are unaffected, and in fact better served.** The cooling runs 5,400 s from 70 °C, so the whole
+  **51–67 °C** band Q128(b) asks for is measured rather than extrapolated, and none of the 90 minutes is spent
+  above it.
+- **L1 (T_L) is unaffected in kind** — it is fitted over whatever range the cooling covers — though the range
+  is now about 19 °C wide instead of 37, so its interval will be wider than a cooling from 88 °C would give.
+- 🛑 **L2 (A80) becomes an extrapolation.** A80 is the law's amplitude *at 80 °C*, 10 °C above anything
+  measured tonight. Its registered bands ([19, 29] W, identified only if the interval is narrower than ±3 W)
+  therefore test an extrapolated parameter, and the result must say so. The directly measured equivalent — the
+  leakage term at the top of the measured range — is reported beside it.
+
+No rule, band or command changes; `e66_split.py` already fits whatever bins the cooling provides and reports
+each cycle's lowest reading, which is what L4 scores.
