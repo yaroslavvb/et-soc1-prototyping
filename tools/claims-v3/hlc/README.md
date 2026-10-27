@@ -248,8 +248,10 @@ mean (3.4–7.0 by minute) and followed it (detrended r 0.58, VTEMP's 0.06), as 
 176; its 0.25 K at f for the top rung is the signal, seen by the sensor's own statistic. (4) **The clock dips**
 (`dips_hlc.py`): in 8 of 360 launches (4 per session; TOP 3 and 1, NULL 1 and 3, MID and TOP2 none) the clock fell from
 800 MHz straight to 600 MHz for 0.6–1.5 s and climbed back through 700, the SRAM rail 830 → 704 mV, anywhere from 1.4 to
-8.4 s into a launch (session 1's four all at 7.2–7.3 s), at 36–42 W and a 54–57 °C die (not the thermal step and not the
-65 W TDP), the sampler's command taking 38–132 ms at the onset against a median of 22. The heater's own internal launches
+8.4 s into a launch (session 1's four all at 7.2–7.3 s), at every load and a 54–57 °C die (not the thermal step and not
+the 65 W TDP; the six the sampler caught started at **34.1–41.6 W**, two have no reading — corrected 26 Oct 2026 from
+"36–42 W", which three of the six are under), the sampler's command taking 38–132 ms at the onset against a median
+of 22. The heater's own internal launches
 ran on without a gap over 2 ms and its cycle counters read 0.60 GHz through each one. Their shape is the governor's idle
 reset and climb (`docs/findings/14-card-behaviour.md`); why it fires mid-launch is not known.
 
@@ -273,7 +275,10 @@ rung) to 800.0, and both now go into `summary.json` as `clock` beside the price.
 
 [`posthoc/`](posthoc/README.md), Mon 26 Oct 2026 (Q126): the third harmonic of the square drive, which the
 registered fit carries as a nuisance column and discards, read out as a **second transfer point at 0.15 Hz**
-(pooled over the four top-rung blocks: 19.0 ± 5.2 mK/W against 54.1 ± 1.8 at 0.05 Hz, a ratio of 0.35 ± 0.10, the
-roll-off of a ~8.9 s pole, though the measured 87–109° lag is more phase than one pole can give); and the card's
+(pooled over the four top-rung blocks as vector means of the complex transfer: 18.4 ± 5.4 mK/W at 151° against
+52.7 ± 2.0 at 95° at 0.05 Hz, a ratio of 0.34 ± 0.10 — 6.3 SE from flat — the roll-off of a pole no faster than
+~12 s, though the measured 87–109° lag is more phase than one pole can give); and the card's
 own **minion, SRAM and NoC rails** demodulated beside the board, which put **84–86% of every rung block's board
-step on the minion rail** and under 1% on each of the other two. Neither re-scores a rule.
+step on the minion rail** and under 1% on each of the other two. Neither re-scores a rule. (The transfer and the
+ratio were published hours earlier as 19.0 ± 5.2, 54.1 ± 1.8 and "3.3 SE from flat", from a mean of magnitudes and
+a distance from zero; [`posthoc/README.md`](posthoc/README.md) has both routes.)

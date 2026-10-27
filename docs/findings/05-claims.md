@@ -873,11 +873,11 @@ registered rules and the full tables are [`tools/claims-v3/hlc/README.md`](../..
 | **A flipped bit weighed as heat, per designed flipped B bit** | **154.0 and 154.4 fJ** (session 1, 256 minions) and **151.7 and 152.4 fJ** (session 2, 192), the middle rung 121.7 and 120.3 fJ, at 0.618 V. The two sessions agree to 1.5%. Compare E60's 116.7 fJ at 0.522 V: × V² is ≈ 163 fJ, within about 5%. **Corrected 26 Oct 2026 (Q126)**: session 2 was published as 113.8 / 114.3 / 90.2 fJ, computed on 256 minions when it ran 192 | M, D | E63 | `E63/s*/summary.json`, `blocks.*.fj_per_flip` with `.minions` and `.mhz` |
 | The back of the board follows the flips | **194.2 ± 9.1 mK** at 0.05 Hz over the die (256 minions; p at the 20,000-draw floor, SNR 21) and **118.7 ± 13.0 mK** (192); the null reads 1.9 ± 15.0 and −13.6 ± 8.4 along the top rung's phase | M | E63 | `E63/s*/analysis/lockin.json`, `blocks.*.roi` |
 | **The board's thermal transfer at 0.05 Hz** | **59.0 ± 3.0 mK per watt** of fundamental at first, the heat **87 ± 5°** (about 5 s) behind the power. It **drifts**: 59.0 → 52.9 → 47.8 → 42.4 mK/W over the four top-rung blocks of the hour, the lag 87° → 109°. A camera wattmeter needs its own top rung near every reading | M, F | E63 | `E63/s*/analysis/lockin.json`, `blocks.*.transfer_roi` |
-| The same transfer at 0.15 Hz (**post hoc, no verdict**) | **19.0 ± 5.2 mK/W** pooled over the four top-rung blocks against **54.1 ± 1.8** at 0.05 Hz: a ratio of **0.35 ± 0.10**, the roll-off of an 8.9 s single pole — but the measured 87–109° lag at f is more phase than one pole can give. No single block's third harmonic clears 2 SE | M, F | E63 (Q126) | `E63/posthoc/h3-rails-pooled.json`; `E63/s*/posthoc/h3-rails.json`; [`tools/claims-v3/hlc/posthoc/`](../../tools/claims-v3/hlc/posthoc/README.md) |
+| The same transfer at 0.15 Hz (**post hoc, no verdict**) | **18.4 ± 5.4 mK/W** at 151° pooled over the four top-rung blocks against **52.7 ± 2.0** at 95° at 0.05 Hz, both vector means of the complex transfer; the ratio **0.34 ± 0.10**, which is **6.3 SE from flat**. The board rolls off between the two, no faster than a single pole of **12 s** (1 σ from 3.2 s up, open above: a one-pole ratio bottoms out at 1/3 and the measurement sits on that floor), and the 87–109° lag at f is in any case more phase than one pole can give. **No top-rung block's camera third harmonic clears 2 SE** (0.8–1.5 SE each); the middle rung's 21.3 ± 9.8 mK is 2.2, and the board's own third harmonics are 4.3–14.3 SE. **Corrected 26 Oct 2026**: first published as 19.0 ± 5.2 against 54.1 ± 1.8, an inverse-variance mean of four *magnitudes*, which is biased upward, and "3.3 SE from flat", which was the ratio's distance from *zero* | M, F | E63 (Q126) | `E63/posthoc/h3-rails-pooled.json`, `pooled.H_3f_mk_per_w` and `distance_from_flat`; `E63/s*/posthoc/h3-rails.json`; [`tools/claims-v3/hlc/posthoc/`](../../tools/claims-v3/hlc/posthoc/README.md) |
 | **Which rail the flips' watts land on** (post hoc, no verdict) | of each rung block's board step: the **minion rail 84.3–86.1%**, the SRAM rail 0.39–0.92%, the NoC rail 0.32–1.39%, the three together 85.3–88.3%. The missing 12–15% is the board's conversion loss and the rails the sampler does not break out | M, D | E63 (Q126) | `E63/s*/posthoc/h3-rails.json`, `blocks.*.steps` |
 | The signal is heat on the board, not the camera | the in-phase map carries the capacitor field's emissivity pattern (high-passed correlation with E62's bloom map 0.90–0.92); the focal plane's thermistor shows nothing at f; the shutter fired 2.8–10.7 a minute at no preferred phase | M | E63 | `E63/s*/analysis/lockin.json`, `blocks.*.spatial`, `.fpa`, `.ffc` |
 | 800 MHz, and what the launch records say | the median minion clock over the steady windows is **800 MHz in all eight blocks** (mean 797.4–800.0; the one-second dips pull it down). 🛑 `launches.jsonl`'s own `mhz_minion` is sampled before the launch opens and reads **600 MHz in all 360 records of both sessions** — never price a flip from it | M | E63 | `E63/s*/summary.json`, `blocks.*.clock`; `E63/s*/session/launches.jsonl` |
-| The one-second clock dip | in 8 of 360 launches the clock fell 800 → 600 MHz for 0.6–1.5 s, 1.4–8.4 s into a launch, at 36–42 W and a 54–57 °C die; the governor's idle-reset shape, not heat and not the 65 W level. It is what failed the hold gate on 256 minions (39 of 42 launches held, 92.9% against 95%) | M | E63 | `E63/dips.json`; `14-card-behaviour.md` |
+| The one-second clock dip | in 8 of 360 launches the clock fell 800 → 600 MHz for 0.6–1.5 s, 1.4–8.4 s into a launch, **at every load** (34.1–41.6 W in the six the sampler caught, two unrecorded) and a 54–57 °C die; the governor's idle-reset shape, not heat and not the 65 W level. It is what failed the hold gate on 256 minions (39 of 42 launches held, 92.9% against 95%) | M | E63 | `E63/dips.json`; `14-card-behaviour.md` |
 
 ## Horace's power limit: which limit sets the matmul's speed (E64, 23 Oct; pre-registered, aifoundry2)
 
@@ -968,10 +968,16 @@ Two corrections to earlier reports came out of this, both verified in the raw da
   one number, so either the count or the cascade model is wrong. Until the denominator is settled, no "fJ per net
   toggle" from this work is quotable, and neither is "about 1,050 toggles per flipped bit", which is a stream average
   over a whole kernel and not one flip's cascade.
-- **What one transistor switching costs on this chip, at its own 0.517 V.** Never measured and never simulated. The
-  closest stand-in is ASAP7, a predictive 7 nm kit characterised at 0.7 V: a minimum inverter's input toggling is
-  83 aJ there (C = 0.62 fF, about 2,000 electrons), about 24,500× Landauer's kT ln 2 = 3.2 zJ at 58 °C. That is a
-  stand-in for a different process at a different voltage, not a measurement of this chip.
+- **What one transistor switching costs on this chip, at its own 0.517 V.** Never measured on this silicon. The
+  closest stand-in is ASAP7, a predictive 7 nm kit characterised at 0.7 V, where a minimum inverter's input pin
+  presents **0.620 fF** (Q126(d), `2026-10-26-asap7-cell-energies/asap7-cell-energies.json`,
+  `cells.INVx1.inputs.A.cap_fF`, read from `asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib`, RVT TT). Charging that
+  through this chip's own 0.517 V is ½CV² = **83 aJ**, about **2,000 electrons**, some **26,000×** Landauer's
+  kT ln 2 = 3.17 zJ at 58 °C; at the kit's own 0.7 V it is 152 aJ and 2,710 electrons. Driving the gate is not all
+  of it: the same cell's internal energy is 0.049 fJ a transition at 0.7 V, and Q126(d) part 2 measures 0.0875 fJ
+  per cycle in SPICE on the kit's own devices. All of that is a different process at a different voltage, not a
+  measurement of this chip. (**Corrected 26 Oct 2026**: first written as "83 aJ there … about 24,500×", which
+  attributed the 0.517 V figures to 0.7 V and divided by Landauer at 80 °C under a 58 °C label.)
 - **The flip model has no argument for clock, supply voltage, die temperature or card** (E9, E17; measured against
   E64). Its static term is one number, 27.1 W, where the card's data-independent floor is 25.46 / 28.24 / 33.61 W at
   600 / 700 / 800 MHz: **−19% at 800 MHz**. Nothing in the model knows about the governor either. Its held-out error
@@ -981,8 +987,9 @@ Two corrections to earlier reports came out of this, both verified in the raw da
   routes to it disagree by 64%), so every camera finding is a direction and an amplitude, never a distance on the die.
 - **A steady camera gain** (E63). The transfer drifted 59.0 → 52.9 → 47.8 → 42.4 mK/W over one hour as the board and
   the camera warmed, the lag 87° → 109°, so a thermal camera used as a wattmeter needs its own reference rung near
-  every reading. The post-hoc second point at 0.15 Hz (19.0 ± 5.2 mK/W, a ratio of 0.35 ± 0.10) is two points of a
-  transfer function, not a calibrated instrument.
+  every reading. The post-hoc second point at 0.15 Hz (18.4 ± 5.4 mK/W, a ratio of 0.34 ± 0.10) is two points of a
+  transfer function, not a calibrated instrument: it rests on four camera third harmonics none of which clears 2 SE
+  on its own, and the single pole fitted to it is bounded below and not above.
 - **Phonons, and anything between the transistor and the heat the camera sees.** The word does not appear in this
   repository; the chain from a switching device to a millikelvin on the back of the board is not written down.
 - **Whether the heat-per-mm "ones" cost is resting-at-zero logic or precharged structures**, and how a hop's

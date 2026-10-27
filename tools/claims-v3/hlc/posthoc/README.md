@@ -29,6 +29,13 @@ step is measured with, so each rail's share of the board step is measurable.
 | `h3_rails_hlc.py` | one session: the camera's and every electrical series' third harmonic, the two transfer points, and the rails' steps and shares. Needs the session's RED (its frames), so it runs on aifoundry2. numpy only |
 | `pool_h3.py` | both sessions' JSON: pools the four top-rung blocks by inverse variance — the ratio H(3f)/H(f) first, in which the camera's drifting gain divides out — and reports the single pole that would give that ratio. Standard library only |
 
+Both scripts were run twice. The **second pass, the same day and after review**, changed how the pooling is
+done and nothing about the data: `h3_rails_hlc.py` now writes H(3f) as a complex number and its jackknife
+cloud, and gives the ratio |H(3f)|/|H(f)| **one** leave-one-lap-out jackknife with each lap dropped from both
+harmonics; `pool_h3.py` pools the **complex** transfer, not the magnitude. Every per-block number below is
+unchanged by it; the pooled ones moved by a few percent, and are marked. Why both changes were needed is
+under [What came out](#what-came-out-both-sessions-fri-23-oct-2026s-data).
+
 ```bash
 # on aifoundry2, from build/e63/code (the frozen copy), with this directory as posthoc/
 python3 posthoc/h3_rails_hlc.py <RED>  --protocol protocol.json    \
@@ -45,22 +52,44 @@ are, not taken from the design matrix: the camera's noise is not white, and a de
 ## What came out (both sessions, Fri 23 Oct 2026's data)
 
 **The third harmonic is at the noise floor in every single block**, and only the pooled number says anything.
-Per top-rung block the camera reads 8.3 ± 10.2 to 19.5 ± 13.0 mK at 0.15 Hz, none of them 2 SE from zero, on
-a board third harmonic of 0.53–0.89 W. Pooled over the four top-rung blocks (the middle rungs are a quarter
-the size on the same floor; the null switches no watts):
+Per top-rung block the camera reads 8.3 ± 10.2 to 19.5 ± 13.0 mK at 0.15 Hz — 0.8, 1.0, 1.2 and 1.5 SE, none
+of them 2 SE from zero — on a board third harmonic of 0.53–0.89 W, which is itself 6.1–14.3 SE. (The *middle*
+rungs are not all under 2 SE: session 1's reads 21.3 ± 9.8 mK, 2.2 SE. They are left out of the pool because
+their board third harmonic is a quarter of a top rung's on the same camera floor, not because they are
+quieter.) Pooled over the four top-rung blocks:
 
 | | 0.05 Hz | 0.15 Hz |
 |---|---|---|
-| transfer, mK per W | **54.1 ± 1.8** | **19.0 ± 5.2** |
-| the ratio H(3f)/H(f) | — | **0.35 ± 0.10** |
+| transfer, mK per W (vector mean) | **52.7 ± 2.0** at 95° | **18.4 ± 5.4** at 151° |
+| — the same as a mean of magnitudes | 54.1 ± 1.8 | 19.0 ± 5.2 |
+| the ratio H(3f)/H(f) | — | **0.343 ± 0.104** |
+| — the first pass's quadrature SE | — | 0.352 ± 0.100 |
 | lag | 87–109° (4.8–6.0 s) | 113–179° (2.1–3.3 s) |
 
+**Pool the complex transfer, not the magnitude.** Each block's H(3f) is a complex number whose jackknife cloud
+is most of its own length, and the magnitude of such a quantity averages above the magnitude of its mean
+(E|Z| > |E Z|), so an inverse-variance mean of four magnitudes sits above the coherent transfer they share.
+The first pass published that mean, 19.0 ± 5.2; the vector mean is 18.4 ± 5.4, 3% lower. At 0.05 Hz, where the
+blocks have SNR 14–21, the two routes agree to 2.6%, which is the check that the machinery is not inventing
+the gap at 3f. The SE quoted is along the pooled vector's own direction, taken from each block's cloud
+projected onto it, so it is comparable with a magnitude's.
+
+**And give the ratio one jackknife, not two SEs in quadrature.** H(3f) and H(f) are two coefficients of the
+same fit on the same frames and share the camera's gain, which is the ratio's whole reason for existing, so
+the first pass's quadrature treated as independent two errors that are not. Dropping each lap from both
+harmonics at once gives 0.343 ± 0.104, against the quadrature's 0.352 ± 0.100 — the correction is smaller than
+the error it corrects, which is worth knowing but does not change the reading.
+
 So the board's answer at 0.15 Hz is about a third of its answer at 0.05 Hz: it is rolling off between the two,
-and 3.3 SE from flat. A single pole with **tau ≈ 8.9 s** reproduces that ratio — which is the first measured
-number for the time constant E63's result was read against (E62's bloom suggested 15–20 s, and the registered
-write-up already noted that 59 mK/W at 0.05 Hz was too fast for that). But a single pole cannot lag more than
-90°, and the measured lag at f is 87–109° (99° on average), so one pole is a scale, not a model: the extra
-phase is what a spreading, diffusive board gives.
+**6.3 SE from flat** (a ratio of 1; the first pass said "3.3 SE from flat", which was the ratio's distance
+from *zero*, 3.3 SE — a different and much weaker statement). A single pole with **tau ≈ 12 s** reproduces the
+ratio, and that is the first measured number for the time constant E63's result was read against (E62's bloom
+suggested 15–20 s, and the registered write-up already noted that 59 mK/W at 0.05 Hz was too fast for that).
+Two things keep it from being a fitted time constant. A one-pole ratio falls from 1 only to **1/3** as the
+pole grows, and 0.343 ± 0.104 sits on that floor: the 1 σ band runs from 3.2 s **upward with no end**, since
+every longer pole fits as well. And a single pole cannot lag more than 90°, while the measured lag at f is
+87–109° (99° on average). One pole is a scale, not a model: the extra phase is what a spreading, diffusive
+board gives.
 
 **The flips' watts land on the minion rail, and almost nowhere else.** In all four rung blocks of both sessions,
 of the board's step between the two arms:

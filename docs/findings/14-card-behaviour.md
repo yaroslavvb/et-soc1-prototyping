@@ -295,14 +295,16 @@ every run. The ring names the cause of every step, so no step had to be inferred
 
 ## A one-second idle reset inside a launch (aifoundry2, 23 October 2026, E63)
 
-E63 ran one 8.5 s heater launch per 10 s phase, each after a ~1 s idle gap, on 256 and then 192 minions (36–42 W on the
-board, die 54–57 °C, PMIC 54–57 °C). In 8 of its 360 launches (4 in each session, in the top-rung and null blocks) the
+E63 ran one 8.5 s heater launch per 10 s phase, each after a ~1 s idle gap, on 256 and then 192 minions (about
+34–42 W on the board, die 54–57 °C, PMIC 54–57 °C). In 8 of its 360 launches (4 in each session, in the top-rung and null blocks) the
 clock fell from 800 MHz straight to the boot point, 600 MHz, for 0.6–1.5 s and climbed back through 700 MHz, the SRAM rail
 stepping 830 → 704 mV with it, anywhere from 1.4 to 8.4 s into the launch (the first session's four all at 7.2–7.3 s);
 the board power fell by 9–12 W while it lasted, and the sampler's command took 38–132 ms at its onset against a median
 of 22. The heater's own internal launches ran on without a gap over 2 ms, and its cycle counters read 0.60 GHz through each
 dip, so the work continued at the lower clock. It is not the thermal loop (the die read 54–57 °C, against 65) and not the
-power test (36–42 W against the firmware's 65 W TDP). Its shape is the governor's idle reset and climb (above: launch to
+power test: the six dips the sampler caught a reading for started at 34.1–41.6 W, against the firmware's 65 W TDP,
+and the other two have no reading (corrected 26 Oct 2026 from "36–42 W", which three of the six are under).
+Its shape is the governor's idle reset and climb (above: launch to
 800 MHz a median 0.67 s, at most 1.2 s), as if the service processor saw the card idle for an instant; why it fires
 mid-launch is not known. E62's back-to-back launches showed nothing like it. For a power measurement: allow for a ~1 s
 step to 600 MHz in about one launch in 45 when launches follow idle gaps, or read the clock per sample, as E60's

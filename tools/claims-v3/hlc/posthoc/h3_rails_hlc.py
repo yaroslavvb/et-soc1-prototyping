@@ -21,6 +21,11 @@ computed and threw away, and one it never looked at.
    which is what compares with the 0.05 Hz lag.
    Errors are jackknifed over laps (leave one lap out, refit everything), as the registered fundamental's are,
    not taken from the design: the camera's noise is not white and a design SE would be optimistic.
+   H(3f) is written out as a complex number as well as a magnitude, and the ratio |H(3f)|/|H(f)| gets its
+   own single jackknife, each left-out lap dropped from both harmonics at once. Both were added on the
+   second pass (Mon 26 Oct 2026, after review): a magnitude whose cloud is a sizeable fraction of itself
+   cannot be averaged across blocks (E|Z| > |E Z|), and combining the two harmonics' separate SEs in
+   quadrature treats as independent two coefficients of the same fit that share the camera's gain.
 
 2. **The rails.** The 10 Hz sampler logs the card's own minion, SRAM and NoC rail watts (`sp.minion_w`,
    `sp.sram_w`, `sp.noc_w`, each [avg, min, max]) in every run, beside the board input watts the experiment
@@ -136,10 +141,13 @@ def _h3_of(X, seg, y, nl, demean_only):
 
 
 def harmonic_block(t, lapj, phi, seg, y, nl, demean_only):
-    """Z3 of one series, with a leave-one-lap-out jackknife SE."""
+    """Z3 of one series, with a leave-one-lap-out jackknife SE.
+
+    Returns the summary, the replicate array, and the lap index each replicate leaves out, so a ratio
+    taken against another series can be jackknifed lap by lap on the same left-out laps."""
     X, _ = L.design(t, lapj, phi, nl, harm3=True)
     Z3 = _h3_of(X, seg, y, nl, demean_only)
-    js = []
+    js, ks = [], []
     for k in range(nl):
         m = lapj != k
         if m.sum() < 50:
@@ -148,15 +156,21 @@ def harmonic_block(t, lapj, phi, seg, y, nl, demean_only):
         lj[lj > k] -= 1
         Xk, _ = L.design(t[m], lj, phi[m], nl - 1, harm3=True)
         js.append(_h3_of(Xk, seg[m], y[m], nl - 1, demean_only))
+        ks.append(k)
     js = np.array(js)
     n = len(js)
     se = float(np.sqrt((n - 1) / n * (np.abs(js - js.mean()) ** 2).sum())) if n >= 3 else None
     return dict(Z3_re=Z3.real, Z3_im=Z3.imag, amp=abs(Z3), phase_deg=math.degrees(np.angle(Z3)),
-                se=se, n_jack=n), js
+                se=se, n_jack=n), js, np.array(ks, int)
 
 
 def ratio_jack(num, num_js, den, den_js):
-    """H = num/den with a leave-one-lap-out SE, as lockin_hlc.jackknife_ratio does for the fundamental."""
+    """H = num/den with a leave-one-lap-out SE, as lockin_hlc.jackknife_ratio does for the fundamental.
+
+    `se` is the SE of the complex H (the length of the jackknife cloud); `se_mag` is the SE of |H|, which
+    is what a magnitude is quoted with. Both are kept because they answer different questions, and the
+    complex one is what a pooled value must be built from: |mean of H| is not mean of |H| when the cloud
+    is a sizeable fraction of H, which it is here."""
     if den == 0 or len(num_js) != len(den_js) or len(num_js) < 3:
         return None
     H = num / den
@@ -165,8 +179,47 @@ def ratio_jack(num, num_js, den, den_js):
     se = float(np.sqrt((n - 1) / n * (np.abs(hs - hs.mean()) ** 2).sum()))
     se_mag = float(np.sqrt((n - 1) / n * ((np.abs(hs) - np.abs(hs).mean()) ** 2).sum()))
     se_ph = float(np.sqrt((n - 1) / n * (np.angle(hs * np.conj(H)) ** 2).sum()))
-    return dict(mag=abs(H), phase_deg=math.degrees(np.angle(H)), se=se, se_mag=se_mag,
+    return dict(H_re=float(H.real), H_im=float(H.imag),
+                mag=abs(H), phase_deg=math.degrees(np.angle(H)), se=se, se_mag=se_mag,
                 se_phase_deg=math.degrees(se_ph), n_laps=n)
+
+
+def _h1_replicates(z, wz, p, wp):
+    """The per-lap leave-one-out replicates of lockin_hlc.jackknife_ratio's H = <z>/<p>, with the lap
+    index each one leaves out. The registered script computes the same cloud and reports only its width;
+    the replicates are needed here to jackknife |H(3f)|/|H(f)| on the same left-out laps."""
+    ok = np.isfinite(z) & np.isfinite(p) & (wz > 0) & (wp > 0)
+    idx = np.nonzero(ok)[0]
+    z, wz, p, wp = z[ok], wz[ok], p[ok], wp[ok]
+    n = len(z)
+    if n < 3:
+        return np.array([]), np.array([], int)
+    hs = np.array([((np.delete(wz, k) * np.delete(z, k)).sum() / np.delete(wz, k).sum())
+                   / ((np.delete(wp, k) * np.delete(p, k)).sum() / np.delete(wp, k).sum())
+                   for k in range(n)])
+    return hs, idx
+
+
+def ratio_of_mags_jack(h3, h3_js, h3_ks, h1, h1_js, h1_ks):
+    """|H(3f)| / |H(f)| with ONE leave-one-lap-out jackknife over the laps both clouds share.
+
+    The quadrature of the two magnitudes' relative SEs is not the right error here: H(3f) and H(f) are two
+    coefficients of the SAME fit on the SAME frames, and the camera's gain, which is the ratio's whole
+    reason for existing, is common to both and cancels. Dropping a lap drops it from both, so this is the
+    error of the quantity actually quoted."""
+    common = sorted(set(h3_ks.tolist()) & set(h1_ks.tolist()))
+    if len(common) < 3 or abs(h1) == 0:
+        return None
+    i3 = {k: i for i, k in enumerate(h3_ks.tolist())}
+    i1 = {k: i for i, k in enumerate(h1_ks.tolist())}
+    rs = np.array([abs(h3_js[i3[k]]) / abs(h1_js[i1[k]]) for k in common])
+    n = len(rs)
+    r = abs(h3) / abs(h1)
+    se = float(np.sqrt((n - 1) / n * ((rs - rs.mean()) ** 2).sum()))
+    # no jackknife bias correction is reported: n*r - (n-1)*mean(rs) is unstable for a ratio whose
+    # numerator sits near 1 SE (it reads 0.04 against 0.30 on the first block), so it would be a
+    # number nothing uses and a reader could quote.
+    return dict(ratio=float(r), se=se, n_laps=n, jack_mean=float(rs.mean()))
 
 
 # --------------------------------------------------------------------------------- one block
@@ -191,7 +244,7 @@ def do_block(R, tel, block, roi, rng):
         return out
     t = R["t"][idx]
     yroi = R["mk"][idx][:, roi].mean(axis=1).astype(np.float64)
-    cam, cam_js = harmonic_block(t, lapj, phi, seg, yroi, nl, demean_only=False)
+    cam, cam_js, cam_ks = harmonic_block(t, lapj, phi, seg, yroi, nl, demean_only=False)
 
     # the electrical series, each on the RED's bins inside the analysed laps, one stretch
     sel = np.zeros(len(R["t"]), bool)
@@ -200,7 +253,7 @@ def do_block(R, tel, block, roi, rng):
     series = {"board": binned(R, tel, 1, R["t"])}
     for i, rail in enumerate(RAILS):
         series[rail] = binned(R, tel, 2 + i, R["t"])
-    elec, elec_js = {}, {}
+    elec, elec_js, elec_ks = {}, {}, {}
     for name, P in series.items():
         s = sel & np.isfinite(P)
         ip = np.nonzero(s)[0]
@@ -212,8 +265,9 @@ def do_block(R, tel, block, roi, rng):
             m = (R["t"][ip] >= t0) & (R["t"][ip] < t1)
             lp[m] = j
             pp[m] = 2 * math.pi * (R["t"][ip][m] - t0) / (t1 - t0)
-        elec[name], elec_js[name] = harmonic_block(R["t"][ip], lp, pp, np.zeros(len(ip), int),
-                                                   P[ip], nl, demean_only=True)
+        elec[name], elec_js[name], elec_ks[name] = harmonic_block(R["t"][ip], lp, pp,
+                                                                  np.zeros(len(ip), int),
+                                                                  P[ip], nl, demean_only=True)
         # the fundamental, through the registered path, for the rails (the board's is in lockin.json)
         Xp, _ = L.design(R["t"][ip], lp, pp, nl, harm3=True)
         Xp = Xp - Xp.mean(axis=0)
@@ -244,6 +298,27 @@ def do_block(R, tel, block, roi, rng):
             H["se_lag_s"] = H["se_phase_deg"] / 360.0 * per
     out["transfer"] = {"f": H1, "3f": H3}
     out["transfer"]["ratio_3f_over_f"] = (H3["mag"] / H1["mag"]) if (H1 and H3) else None
+    # the same ratio with its own leave-one-lap-out error, dropping each lap from BOTH harmonics
+    out["transfer"]["ratio_jackknifed"] = None
+    out["transfer"]["jack_clouds"] = None
+    if H1 and H3:
+        bk = elec_ks["board"]
+        shared = sorted(set(cam_ks.tolist()) & set(bk.tolist()))
+        ic = {k: i for i, k in enumerate(cam_ks.tolist())}
+        ib = {k: i for i, k in enumerate(bk.tolist())}
+        h3_js = np.array([cam_js[ic[k]] / elec_js["board"][ib[k]] for k in shared])
+        h3_ks = np.array(shared, int)
+        h3c = (complex(cam["Z3_re"], cam["Z3_im"])
+               / complex(elec["board"]["Z3_re"], elec["board"]["Z3_im"]))
+        h1_js, h1_ks = _h1_replicates(zc[:, 0], wc, elec["board"]["_z1"], elec["board"]["_w"])
+        if len(h1_js):
+            out["transfer"]["ratio_jackknifed"] = ratio_of_mags_jack(
+                h3c, h3_js, h3_ks, complex(H1["H_re"], H1["H_im"]), h1_js, h1_ks)
+            # the clouds themselves, so a pool across blocks can take each block's error along whatever
+            # direction the pooled transfer points in, instead of assuming the cloud is a circle
+            out["transfer"]["jack_clouds"] = dict(
+                laps_3f=h3_ks.tolist(), H_3f=[[z.real, z.imag] for z in h3_js],
+                laps_f=h1_ks.tolist(), H_f=[[z.real, z.imag] for z in h1_js])
 
     # the rails' share of the board step, and of its fundamental
     steps = {name: rail_steps(R, tel, col, block, okl)
@@ -319,6 +394,10 @@ def main(argv=None):
               f"({H1['lag_s']:.2f} s), H(3f) "
               + (f"{H3['mag']:.1f} ± {H3['se_mag']:.1f} mK/W at {H3['phase_deg']:.0f}° ({H3['lag_s']:.2f} s)"
                  if H3 else "–"))
+        rj = r["transfer"].get("ratio_jackknifed")
+        if rj:
+            print(f"     |H(3f)|/|H(f)| = {rj['ratio']:.3f} ± {rj['se']:.3f} "
+                  f"(one jackknife over {rj['n_laps']} laps, both harmonics)")
         s = r["steps"]
         print(f"     step: board {s['board']['step_w']:+.3f} W; minion {s['minion']['step_w']:+.3f} "
               f"({100 * s['minion']['share_of_board']:.1f}%), SRAM {s['sram']['step_w']:+.3f} "

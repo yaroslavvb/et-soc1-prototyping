@@ -2606,10 +2606,17 @@ for the re-run and finds 244 shutter events against the committed 243, which mov
 13.4 → 14.2 mK against an SE of 47.
 **Post hoc, no verdict (Q126,** [`tools/claims-v3/hlc/posthoc/`](../../tools/claims-v3/hlc/posthoc/README.md)**):**
 (a) the square drive's third harmonic, which the registered fit carries as a nuisance column and throws away, read out
-as **a second transfer point at 0.15 Hz**: pooled over the four top-rung blocks, **19.0 ± 5.2 mK/W against 54.1 ± 1.8 at
-0.05 Hz**, a ratio of **0.35 ± 0.10** — the board is rolling off between the two, at the rate of a ~8.9 s single pole,
-though the measured 87–109° lag at f is more phase than one pole can give, so the pole is a scale and not a model.
-No single block's third harmonic clears 2 SE on its own (the camera reads 8.3 ± 10.2 to 19.5 ± 13.0 mK there).
+as **a second transfer point at 0.15 Hz**: pooled over the four top-rung blocks as a vector mean of the complex
+transfer, **18.4 ± 5.4 mK/W at 151° against 52.7 ± 2.0 at 95° at 0.05 Hz**, a ratio of **0.34 ± 0.10** — the board is
+rolling off between the two, **6.3 SE from flat**, no faster than a single pole of ~12 s (1 σ from 3.2 s up and open
+above, because a one-pole ratio bottoms out at 1/3 and the measurement sits on that floor), and the measured 87–109°
+lag at f is in any case more phase than one pole can give, so the pole is a scale and not a model.
+No top-rung block's camera third harmonic clears 2 SE on its own (8.3 ± 10.2 to 19.5 ± 13.0 mK, 0.8–1.5 SE); the
+middle rung's best is 21.3 ± 9.8 mK, 2.2 SE, and the board's own third harmonics are 4.3–14.3 SE.
+*(Second pass, the same day: first published as 19.0 ± 5.2 against 54.1 ± 1.8, inverse-variance means of four
+magnitudes — biased upward, since |Z| of a noisy complex quantity averages above the magnitude of its mean — and as
+"3.3 SE from flat", which was the ratio's distance from zero. The ratio now carries one leave-one-lap-out jackknife
+over both harmonics at once, 0.343 ± 0.104, against the first pass's quadrature of two SEs, 0.352 ± 0.100.)*
 (b) The card's own rails, demodulated from the same 10 Hz telemetry: **84–86% of every rung block's board step is on
 the minion rail**, under 1% on each of the SRAM and NoC rails, 85–88% on the three together, the remaining 12–15% being
 the board's conversion loss and the rails the sampler does not break out.
