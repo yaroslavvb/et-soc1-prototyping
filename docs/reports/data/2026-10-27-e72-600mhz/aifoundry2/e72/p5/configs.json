@@ -1,0 +1,437 @@
+{
+ "card": "aifoundry2",
+ "args": {
+  "out": "/home/yaroslavvb/claude/et-soc1-prototyping/build/claims-v3/aifoundry2/e72/p5",
+  "root": "/home/yaroslavvb/claude/et-soc1-prototyping",
+  "gen": "/home/yaroslavvb/claude/et-soc1-prototyping/build/hl-gen",
+  "items": "anchor_pi,anchor_ones,anchor_zeros,anchor_randn,lq_,lb_",
+  "tel_live": "/home/yaroslavvb/claude/et-soc1-prototyping/build/claims-v3/aifoundry2/e72/p5/telemetry.jsonl.raw",
+  "heater": "build/sparsity_t2/host/sparsity_host",
+  "sparsity": "build/sparsity/host/sparsity_host",
+  "enercat": "build/enercat-hl/host/enercat_host",
+  "blocks": 1,
+  "first_block": 5,
+  "seed": 5,
+  "target": 58.0,
+  "preheat": 59.0,
+  "max_heats": 15,
+  "max_wait": 600.0,
+  "max_c": 78.0,
+  "stale_s": 3.0,
+  "fma_s": 4.0,
+  "shires": "0xffffffff",
+  "per_shire": "32",
+  "ec_s": 4.0,
+  "burnin": 2,
+  "card": "aifoundry2",
+  "dry": false,
+  "list": false
+ },
+ "items": [
+  {
+   "name": "anchor_zeros",
+   "kind": "fma",
+   "family": "anchor",
+   "values": "zeros"
+  },
+  {
+   "name": "anchor_ones",
+   "kind": "fma",
+   "family": "anchor",
+   "values": "ones"
+  },
+  {
+   "name": "anchor_pi",
+   "kind": "fma",
+   "family": "anchor",
+   "values": "pi"
+  },
+  {
+   "name": "anchor_randn",
+   "kind": "fma",
+   "family": "anchor",
+   "values": "randn"
+  },
+  {
+   "name": "lq_h0",
+   "kind": "fma",
+   "family": "lq",
+   "h": 0,
+   "mask": "0x0",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 0
+   }
+  },
+  {
+   "name": "lq_h1",
+   "kind": "fma",
+   "family": "lq",
+   "h": 1,
+   "mask": "0x1",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 4096,
+    "b_all": 4096,
+    "total": 4096
+   }
+  },
+  {
+   "name": "lq_h2",
+   "kind": "fma",
+   "family": "lq",
+   "h": 2,
+   "mask": "0x3",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 8192,
+    "b_all": 8192,
+    "total": 8192
+   }
+  },
+  {
+   "name": "lq_h3",
+   "kind": "fma",
+   "family": "lq",
+   "h": 3,
+   "mask": "0x7",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 12288,
+    "b_all": 12288,
+    "total": 12288
+   }
+  },
+  {
+   "name": "lq_h4",
+   "kind": "fma",
+   "family": "lq",
+   "h": 4,
+   "mask": "0xf",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 16384,
+    "b_all": 16384,
+    "total": 16384
+   }
+  },
+  {
+   "name": "lq_h6",
+   "kind": "fma",
+   "family": "lq",
+   "h": 6,
+   "mask": "0x3f",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 24576,
+    "b_all": 24576,
+    "total": 24576
+   }
+  },
+  {
+   "name": "lq_h8",
+   "kind": "fma",
+   "family": "lq",
+   "h": 8,
+   "mask": "0xff",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 32768,
+    "b_all": 32768,
+    "total": 32768
+   }
+  },
+  {
+   "name": "lq_h12",
+   "kind": "fma",
+   "family": "lq",
+   "h": 12,
+   "mask": "0xfff",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 49152,
+    "b_all": 49152,
+    "total": 49152
+   }
+  },
+  {
+   "name": "lq_h16",
+   "kind": "fma",
+   "family": "lq",
+   "h": 16,
+   "mask": "0xffff",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 65536,
+    "b_all": 65536,
+    "total": 65536
+   }
+  },
+  {
+   "name": "lq_h23",
+   "kind": "fma",
+   "family": "lq",
+   "h": 23,
+   "mask": "0x7fffff",
+   "partner": "1.0",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 94208,
+    "b_all": 94208,
+    "total": 94208
+   }
+  },
+  {
+   "name": "lb_h0",
+   "kind": "fma",
+   "family": "lb",
+   "h": 0,
+   "mask": "0x0",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 0,
+    "b_all": 0,
+    "total": 0
+   }
+  },
+  {
+   "name": "lb_h1",
+   "kind": "fma",
+   "family": "lb",
+   "h": 1,
+   "mask": "0x1",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 4096,
+    "b_all": 4096,
+    "total": 4096
+   }
+  },
+  {
+   "name": "lb_h2",
+   "kind": "fma",
+   "family": "lb",
+   "h": 2,
+   "mask": "0x3",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 8192,
+    "b_all": 8192,
+    "total": 8192
+   }
+  },
+  {
+   "name": "lb_h3",
+   "kind": "fma",
+   "family": "lb",
+   "h": 3,
+   "mask": "0x7",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 12288,
+    "b_all": 12288,
+    "total": 12288
+   }
+  },
+  {
+   "name": "lb_h4",
+   "kind": "fma",
+   "family": "lb",
+   "h": 4,
+   "mask": "0xf",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 16384,
+    "b_all": 16384,
+    "total": 16384
+   }
+  },
+  {
+   "name": "lb_h6",
+   "kind": "fma",
+   "family": "lb",
+   "h": 6,
+   "mask": "0x3f",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 24576,
+    "b_all": 24576,
+    "total": 24576
+   }
+  },
+  {
+   "name": "lb_h8",
+   "kind": "fma",
+   "family": "lb",
+   "h": 8,
+   "mask": "0xff",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 32768,
+    "b_all": 32768,
+    "total": 32768
+   }
+  },
+  {
+   "name": "lb_h12",
+   "kind": "fma",
+   "family": "lb",
+   "h": 12,
+   "mask": "0xfff",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 49152,
+    "b_all": 49152,
+    "total": 49152
+   }
+  },
+  {
+   "name": "lb_h16",
+   "kind": "fma",
+   "family": "lb",
+   "h": 16,
+   "mask": "0xffff",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 65536,
+    "b_all": 65536,
+    "total": 65536
+   }
+  },
+  {
+   "name": "lb_h23",
+   "kind": "fma",
+   "family": "lb",
+   "h": 23,
+   "mask": "0x7fffff",
+   "partner": "pi",
+   "flips": {
+    "a_sign": 0,
+    "a_exp": 0,
+    "a_mant": 0,
+    "a_all": 0,
+    "b_sign": 0,
+    "b_exp": 0,
+    "b_mant": 94208,
+    "b_all": 94208,
+    "total": 94208
+   }
+  }
+ ],
+ "et_devices": null
+}

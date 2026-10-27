@@ -1,0 +1,13 @@
+E72 vs E60, SAME CARD (aifoundry2 card 0), same operand files, same reducer, matched leakage slope.
+E60 ran it at 800 MHz / 0.6174 V; E72 at 600 MHz / 0.5179 V.  (V600/V800)^2 = 0.7037 ; x 600/800 = 0.5278
+
+leakage slope W/C                    E60 800   E72 600   ratio |  E60 rail  E72 rail   ratio |  n_bd  n_rl
+each experiment's own --leak auto     121.26     79.18  0.6529 |     85.62     63.27  0.7389 |  2.43  1.72
+0.000                                 126.44     81.07  0.6411 |     83.83     63.27  0.7547 |  2.53  1.60
+0.098 (E72's auto)                    125.29     79.18  0.6320 |     83.83     63.27  0.7547 |  2.61  1.60
+0.2936 (E66 measured, this card)      122.99     75.42  0.6132 |     83.83     63.27  0.7547 |  2.78  1.60
+0.4420 (E60's auto, this card at 800)    121.26     72.56  0.5984 |     85.62     63.27  0.7389 |  2.92  1.72
+
+fJ per designed flipped B mantissa bit (lq h2 -> h8 secant, E60's own estimator).
+n is the exponent that reproduces the measured ratio as (V600/V800)^n: the registered law is n = 2,
+and 'the energy scaled with the clock too' is equivalent to n = 3.64.

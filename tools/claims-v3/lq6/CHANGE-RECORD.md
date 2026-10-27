@@ -330,10 +330,12 @@ rc and an ISO-millisecond timestamp) and `restore`. Filled from it after the ses
 |---|---|
 | Originals read under the lock, before any set | 2026-10-27 **14:59:39 PDT** — TDP **65 W**, software threshold **65 °C**, power state `low_power`, 600 MHz, 519 mV |
 | vmin-LUT minion frequency floor | **600 MHz** (points 600 / 700 / 800), read 14:59:39 PDT |
-| Sets sent | *filled* |
-| Command exit statuses | *filled* |
-| Read-back mismatches | *filled* |
-| Restore | *filled* |
+| Watchdog armed (before the set) | 15:01:31.999 PDT, 4,500 s deadline, detached |
+| Sets sent | **two**: `-l 0` at **15:01:32.038 PDT** (read back `tdp_w: 0`, threshold still 65 °C) and `-l 65` at **15:24:07.531** (read back `tdp_w: 65`, threshold 65 °C) |
+| Command exit statuses | **both rc 0** |
+| **Read-back mismatches** | **0** — each set was followed by `ettelem config` and compared field by field; the session also refuses to continue if a set moved the threshold |
+| Restore | 15:24:07.531 PDT, **`ok: true`**, equal to the originals; `release` written, watchdog logged *"released by the session, nothing to do"* |
+| Independent read-back after the last run | 15:24:48 PDT, a separate `ettelem config`: TDP **65 W**, threshold **65 °C**, `low_power`, 600 MHz, 519 mV |
 
 ## Activation and acceptance
 
@@ -356,6 +358,42 @@ rc and an ISO-millisecond timestamp) and `restore`. Filled from it after the ses
 
 ## Final handoff
 
-*Filled at signoff: retained firmware / module / PMIC / bank state; the governor fields at handoff with
-their read-backs; the back-check burst; error events before and after; the card lock and claim; services;
-logs; unresolved risks and prohibited next actions; signoff timestamp and operator.*
+- **Retained firmware / module / PMIC / bank state:** unchanged, re-read 15:24:48 PDT — release **1.4.0**,
+  BL1 **0.22.0**, BL2 **0.22.0**, PMIC **1.5.0**, Master / Worker / Machine Minion **0.25.1**; driver
+  `et-soc1` srcversion `47D26A305A0428B29FB7FC4`. No bank was read or written.
+- **Governor fields at handoff: TDP 65 W, software threshold 65 °C — equal to the originals.** The
+  threshold was never written at all. Read back twice: by the restore itself at 15:24:07.531 (`ok: true`)
+  and by an independent `ettelem config` at 15:24:48. **Module uptime 1 d 0 h 12 m**, so the service
+  processor never reset: the restored value is a real write, not a reboot's default.
+- **The back check.** One short burst at the restored settings (`e72back-smoke/p901`, 15:24:07 → 15:24:31)
+  stepped the clock **600 → 700 → 800 MHz** — 114 samples at 600, 2 at 700, 98 at 800, voltage to 619 mV,
+  board to 59.7 W. Against the pinned smoke's **215 of 215 samples at 600 MHz**, that is the governor's
+  power-up branch working the moment the cap was back, with no reset. **G3: PASS.**
+- **Guest / excluded memory / packet / core state:** none existed and none was created.
+- **Error events across the whole operation:** the host kernel log's `Error Event Detected` count was
+  **234 before the first set and 234 after the last run — E72 added none.** No AER, no link error, no
+  all-ones read. One new line of another kind, recorded not hidden: `ET 0000:02:00.0: Mgmt: Tried to open
+  same device multiple times` at host uptime 85,783 s (≈15:03 PDT), which is **this session's own**
+  `gov_e72.py status` poll running while a measurement pass held the card lock and the single-open
+  management node. The poll returned `null`, nothing else happened, and the lesson is not to poll the
+  governor during a pass.
+- **Card lock and claim:** the lock was taken per stage (gates, the set, each pass, the restore) and is
+  free at handoff — `et-who`: *"No process holds an ET-SoC-1 device node or card lock."* The
+  `#community-lab` claim (`1564760469741510737`, 14:59:27 PDT) is released after the data README is
+  pushed.
+- **Services restored:** the dashboard collector resumes by itself; it was never stopped, signalled or
+  killed. The deadline watchdog exited cleanly without acting.
+- **Logs / artefacts:** `docs/reports/data/2026-10-27-e72-600mhz/`, all committed to the public repo,
+  including `gov.jsonl` with every governor event's argv, rc and millisecond timestamp.
+- **Unresolved risks / prohibited next actions:** the build-identity residual on rule 8 (the card exposes
+  no BL2 git hash through an allowed query); the absence of any independent hardware recovery path for
+  this fleet; no independent reviewer saw the run. Prohibited without fresh authorization: raising the
+  TDP level above the card's default, lowering the software threshold below a pattern's die temperature,
+  `SET_FREQUENCY`, `SET_VMIN_LUT`, touching active power management, and every reset, PMIC, flash and OTA
+  operation. **One thing E72 establishes that a future session may want:** aifoundry3's 600 MHz pin is a
+  boot-time policy writing TDP 0, not a firmware latch, so writing its TDP back would un-pin it — that is
+  a *different card* and needs its own authorization and its own change record.
+- **Signoff:** 2026-10-27 **22:50 UTC / 15:50 PDT** (Tue, ISO week 44). Operator: the AI Foundry agent
+  `a2-e72-600mhz`. Independent reviewer: **none** — stated as a limitation of this record, not as a pass.
+  The governor is at its defaults, the card is healthy and stepping normally, the firmware is untouched,
+  and no flash, PMIC, reset, driver, PCIe, clock or voltage action was performed at any point.
