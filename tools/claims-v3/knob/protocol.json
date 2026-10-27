@@ -1,0 +1,73 @@
+{
+  "experiment": "E69",
+  "request": "Q129",
+  "card": "aifoundry2",
+  "order_seed": 69,
+  "tools": {
+    "heater": "build/sparsity_t2/host/sparsity_host",
+    "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+    "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "sampler": {"every_ms": 100},
+  "safety": {"abs_stop_c": 72, "board_cap_w": 85, "cap_consecutive": 3},
+  "caps": {"max_card_min": 110},
+  "blocks": [
+    {
+      "name": "SMOKE",
+      "title": "one 2 s launch at the card's own settings, then one at TDP 55 W: the set path works and the read-back agrees",
+      "default": false, "passes": 1,
+      "start": {"mode": "cool", "max_c": 99, "max_wait_s": 5},
+      "launch": {"seconds": 2, "budget": 3.5, "processes": 1}, "tail_s": 3,
+      "runs": [
+        {"type": "fp32", "values": "randn", "label": "fp32-randn-ctl", "governor": {"tdp_w": 65, "threshold_c": 65}},
+        {"type": "fp32", "values": "randn", "label": "fp32-randn-tdp55", "governor": {"tdp_w": 55, "threshold_c": 65}}
+      ]
+    },
+    {
+      "name": "BURST",
+      "title": "the cap test: the E64 cool-die ladder's conditions, four operand patterns, at four TDP levels",
+      "passes": 2, "shuffle": true,
+      "start": {"mode": "cool", "max_c": 55, "max_wait_s": 300},
+      "launch": {"seconds": 6, "budget": 7.5, "processes": 1}, "tail_s": 4,
+      "runs": [
+        {"type": "fp32", "values": "zeros",          "label": "tdp65-zeros",          "governor": {"tdp_w": 65, "threshold_c": 65}},
+        {"type": "fp32", "values": "ones",           "label": "tdp65-ones",           "governor": {"tdp_w": 65, "threshold_c": 65}},
+        {"type": "fp32", "values": "a_ones_b_randn", "label": "tdp65-a_ones_b_randn", "governor": {"tdp_w": 65, "threshold_c": 65}},
+        {"type": "fp32", "values": "randn",          "label": "tdp65-randn",          "governor": {"tdp_w": 65, "threshold_c": 65}},
+        {"type": "fp32", "values": "zeros",          "label": "tdp55-zeros",          "governor": {"tdp_w": 55, "threshold_c": 65}},
+        {"type": "fp32", "values": "ones",           "label": "tdp55-ones",           "governor": {"tdp_w": 55, "threshold_c": 65}},
+        {"type": "fp32", "values": "a_ones_b_randn", "label": "tdp55-a_ones_b_randn", "governor": {"tdp_w": 55, "threshold_c": 65}},
+        {"type": "fp32", "values": "randn",          "label": "tdp55-randn",          "governor": {"tdp_w": 55, "threshold_c": 65}},
+        {"type": "fp32", "values": "zeros",          "label": "tdp45-zeros",          "governor": {"tdp_w": 45, "threshold_c": 65}},
+        {"type": "fp32", "values": "ones",           "label": "tdp45-ones",           "governor": {"tdp_w": 45, "threshold_c": 65}},
+        {"type": "fp32", "values": "a_ones_b_randn", "label": "tdp45-a_ones_b_randn", "governor": {"tdp_w": 45, "threshold_c": 65}},
+        {"type": "fp32", "values": "zeros",          "label": "tdp35-zeros",          "governor": {"tdp_w": 35, "threshold_c": 65}}
+      ]
+    },
+    {
+      "name": "SUS",
+      "title": "the sustained test: the E64 SUS conditions, the threshold raised to 70 C, lowered to 62 C, and the cap lowered to 50 W",
+      "passes": 1, "shuffle": true,
+      "start": {"mode": "cool", "max_c": 57, "max_wait_s": 300},
+      "launch": {"seconds": 8, "budget": 9.5, "processes": 9}, "tail_s": 6,
+      "runs": [
+        {"type": "fp32", "values": "ones",  "label": "tdp65-thr65-ones",  "governor": {"tdp_w": 65, "threshold_c": 65}},
+        {"type": "fp32", "values": "randn", "label": "tdp65-thr65-randn", "governor": {"tdp_w": 65, "threshold_c": 65}},
+        {"type": "fp32", "values": "ones",  "label": "tdp65-thr70-ones",  "governor": {"tdp_w": 65, "threshold_c": 70}},
+        {"type": "fp32", "values": "randn", "label": "tdp65-thr70-randn", "governor": {"tdp_w": 65, "threshold_c": 70}},
+        {"type": "fp32", "values": "ones",  "label": "tdp65-thr62-ones",  "governor": {"tdp_w": 65, "threshold_c": 62}},
+        {"type": "fp32", "values": "ones",  "label": "tdp50-thr65-ones",  "governor": {"tdp_w": 50, "threshold_c": 65}}
+      ]
+    },
+    {
+      "name": "BACK",
+      "title": "the return check: the card's own settings restored, one 6 s randn burst, normal stepping and the default TDP in the governor's log",
+      "passes": 1,
+      "start": {"mode": "cool", "max_c": 57, "max_wait_s": 300},
+      "launch": {"seconds": 6, "budget": 7.5, "processes": 1}, "tail_s": 4,
+      "runs": [
+        {"type": "fp32", "values": "randn", "label": "back-randn", "governor": {"tdp_w": 65, "threshold_c": 65}}
+      ]
+    }
+  ]
+}
