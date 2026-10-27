@@ -186,7 +186,7 @@ second branch, where the **registered rule's second branch is signed**: "if a₀
 extra fixed switching, so the code's string was wrong against the rule it implements. The measured difference is
 −0.52 W, which the code called "part of it is the kernel's switching" and the registered rule calls **undecided**
 (it is 0.02 W outside the first branch and the wrong sign for the second). The code now prints the registered
-rule's verdict. The rule itself is unchanged and nothing was re-registered; the README reports the registered
+rule's verdict. The rule itself is unchanged and nothing was re-registered *by this amendment*; the README reports the registered
 verdict, the raw number and why the sign matters.
 
 **A11, Mon 26 Oct 2026, 18:5x PDT (a correction to this record, made after all the data and changing no rule, no

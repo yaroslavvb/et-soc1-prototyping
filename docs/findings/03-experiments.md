@@ -2679,8 +2679,11 @@ second launch temperature (gap 4).
 **Pre-registered** in [`tools/claims-v3/hb/README.md`](../../tools/claims-v3/hb/README.md) (blocks A–D, departures
 D1–D4, predictions A1–A3, B1–B2, C1–C4, D1, decision rules), committed as `6da964d2` before the first measured pass,
 with amendments `b27d323c` (A5), `e53c9945` (A6), `0adf4a3d` (A7), `5136a5ef` (A8) and `768b2cf5` (A9), each pushed
-before the data it touches, and one post-data code correction, `658ae590` (A10), which brought `reduce_ladder.py`'s
-printed C1 verdict back in line with the registered rule's signed second branch and is disclosed as such. One card: **aifoundry3**, latched at 600 MHz by `et-board-clock-guard`, 521.9 mV on every sample.
+before the data it touches, and two post-data corrections, both disclosed as such: `658ae590` (A10),
+which brought `reduce_ladder.py`'s printed C1 verdict back in line with the registered rule's signed second branch,
+and `cd62ed56` (A11), which corrects three statements in the write-up that the committed data contradicts —
+A9's launch temperature, D1's contrast (a departure, deviation 7) and A2's reference — changing no rule, no code
+and no measured number. One card: **aifoundry3**, latched at 600 MHz by `et-board-clock-guard`, 521.9 mV on every sample.
 **Departures:** D1, E62's and hp's heater are one program on this card (`lib.sh:35-43` builds `sparsity_t2` only on
 aifoundry2), so the ladder's two arms are two operand sets through the one kernel — `randn`, which is E62's and hp's
 stimulus argument for argument, and `zeros`. D3, no RTL predictions for the new items (no Verilator on this host),
@@ -2688,21 +2691,24 @@ so blocks A and B are registered against measured E60 anchors and the Q124 gate-
 registered 65 °C launch is unreachable (the card plateaus at 60–61 °C), so it runs with no approach at all.
 
 **Results** (card runs 16:45–18:22 PDT; claimed in #community-lab at 16:45, released after the last pass). Data, the four reductions and every pass's telemetry: `docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/`.
-- **Which bit, all 32 positions** (A = 1.0, above constant operands, 5 passes after the gates, 205 runs): the mantissa is **two regimes**. Bits 0–9 are flat at about 109 fJ per flipped bit; from bit 10 the price climbs monotonically to **1008 fJ** at bit 22. The exponent bits (23–30) average 174 fJ — dearer than the low mantissa but cheaper than every mantissa bit above 10 — and the sign bit costs 123 fJ. Span over all 32 positions **12.2×** (83 fJ at bit 6, 1008 fJ at bit 22). E60's six positions reproduce on the same card and clock within 1.12×, six days on.
+- **Which bit, all 32 positions** (A = 1.0, above constant operands, 5 passes after the gates, 205 runs): the mantissa is **two regimes**. Bits 0–9 are flat at about 109 fJ per flipped bit; from bit 10 the price climbs monotonically to **1008 fJ** at bit 22. The exponent bits (23–30) average 174 fJ — dearer than the low mantissa but cheaper than every mantissa bit above 10 — and the sign bit costs 123 fJ. Span over all 32 positions **12.2×** (83 fJ at bit 6, 1008 fJ at bit 22). E60's six positions reproduce on the same card and clock within 1.122×, six days on — and within 1.106× of E60's aifoundry1 card 0 rescaled by f·V², which is the test A2 registered.
 - **The flow-M case** (`b` bit 11 alternating, `a` = π, the stimulus the chip diagram priced at the gate level): **3.42 ± 0.26 W = 745 ± 56 fJ per flipped bit** at the board, all-in. Against `tfma.flip.energy`'s 0.11–0.13 pJ in the multiplier (0.15–0.18 pJ with that page's ×1.4 for glitches) the board is 6.2× and 4.4×, so **the Booth rows, the tree and the product adder are about 23% of what a flipped operand bit costs**; the rest is the bus, the read ports, the result path, the accumulator and the clocked bits.
 - **The busy partner** costs more at every shared position: A = π over A = 1.0 is 1.59–4.73×, 5 of 5 at ≥ 2 SE — far more than E60's +11% on the ladder slope.
 - **The hart ladder, and E62's 5.80 W offset: it is not there.** With an IDLE bracket on both sides of every rung, 64–1,024 harts: randn **-0.51 ± 0.03 W + 27.1 mW/hart** (residual rms 0.271 W), zeros **+0.013 ± 0.016 W + 2.08 mW/hart** (residual rms 0.014 W). E62's 5.80 W + 55.8 mW/hart at 800 MHz scales to this card by f·V² = 0.537 as 3.12 W + 30.0 mW/hart: **the slope lands, the offset does not**. The zeros intercept is zero to ±0.02 W, so the fixed cost of having a kernel running at all is under a watt here and independent of how hard the data switches; the randn line's small negative intercept is its own convexity (the per-hart price rises 24.4 → 27.0 mW/hart across the rungs, as the die goes 55 → 61 °C), not a negative fixed cost. E62's own baseline was one pre-session idle at a 49 °C die while its rungs ran at 52–61 °C.
-- **The switching drift with temperature** (block D): the registered 65 °C launch is unreachable on this card, so
-A7 ran eight no-approach passes and A9 six at a 61 °C setpoint. **All eight A7 passes were set aside by the
-registered anchor-drift gate** (+0.57 to +0.74 W, every one the same sign): a pass that never idles back down warms
-monotonically, so A7 changed the protocol and left the gate that assumes it. A9's passes reached 61.0 °C with zero
+- **The switching drift with temperature** (block D): the registered 65 °C launch was judged unreachable on this
+card, so A7 ran eight no-approach passes and A9 six at a 61 °C setpoint. A7's runs launched across **55–62 °C**,
+climbing monotonically pass by pass — 7 °C of spread — but **all eight passes were set aside by the registered
+anchor-drift gate** (+0.57 to +0.74 W, every one the same sign): a pass that never idles back down warms
+monotonically, so the climb that produced the spread is the climb that tripped the gate. A7 changed the protocol
+and left the gate that assumes it. A9's passes reached 61.0 °C with zero
 skipped runs, five of six surviving the gate, giving a gated 3.00 °C contrast against blocks A and B's 58 °C on
-`bit_22` − `lq_h0`: **+22.0 ± 36.1 mW/°C = +0.47 ± 0.78 %/°C**, 95% CI −1.05 to +1.99 %/°C. The point estimate is
+**`bit_22` − `lq_h0`** — a **departure** from the registered `lq_h8` − `lq_h0`, which blocks A and B never ran
+(deviation 7 below): **+22.0 ± 36.1 mW/°C = +0.47 ± 0.78 %/°C**, 95% CI −1.05 to +1.99 %/°C. The point estimate is
 the registered band's own value and the interval contains zero, so **D1 is CONSISTENT but UNDECIDED**. Block C saw
 the same term with better leverage and a confound: the randn ladder's per-hart price rises 24.4 → 27.0 mW/hart
 (+11%) as its die goes 55.0 → 60.7 °C, where the zeros ladder is flat at a die that barely moves.
 - **Decision rules:** A1 PASS (Spearman ρ 0.927 over the mantissa, span 12.2× against the 5× mark); A2 PASS (E60's
-six positions reproduce within 1.12×, and on the same card and clock, so with no rescaling); **A3 FAIL on both
+six positions reproduce within **1.106×** under the registered rescaled test and **1.122×** same-card); **A3 FAIL on both
 halves** (the sign bit is 10th of 32, not among the four cheapest; mantissa bits 11–15 cost more than every exponent
 bit); **B1 FAIL on its band** (745 fJ against a registered 100–250 fJ) and PASS on board ≥ gate; B2 PASS (5 of 5 at
 ≥ 2 SE, against a 3-of-5 mark); **C1 UNDECIDED** (the intercepts differ by −0.52 W, 0.02 W outside the first branch
@@ -2715,15 +2721,31 @@ cheapest positions (it is 10th of 32), and mantissa bits 11–15 cost more than 
 is dearer than the low mantissa" holds only below bit 10. (2) **B1's registered band was mis-anchored**: 100–250 fJ
 came from the *marginal* ladder slope, while the item is measured against the constant-operand zero and therefore
 carries the turn-on, which E60's own amendment A1 had already warned about ("the bit scan is quoted as 'item minus
-lq_h0', not as a per-flip price"). The number is reported both ways. (3) **E60's "Per card" table is stale against
-its own amendment A1**: it lists the `bit_` family on aifoundry1's card 0, but A1 moved the scan to aifoundry3
-passes 5–8 and the E60 entry above reports it there — which is why A2 could be scored as a direct same-card
-replication with no rescaling. (4) **aifoundry3's plateau under this duty cycle is 59–61 °C**, not E60's probed
-64 °C: every approach in blocks A and B reached 60–61 °C before idling down, and the no-approach block-D passes
-launched at 59 °C, which is why A9 added a 61 °C setpoint regime. (5) **The randn hart ladder is convex and the
+lq_h0', not as a per-flip price"). The number is reported both ways. (3) **E60 ran its six positions on *both*
+cards**, so A2 is scorable two ways and passes both: its committed `hl.json` carries all six under
+`aifoundry1-c0` *and* `aifoundry3`, because E60's amendment A1 **added** the family to aifoundry3 passes 5–8
+while keeping aifoundry1 card 0's registered list. The registered rule as written — E60's aifoundry1-c0 values
+rescaled by f·V² = 0.562 — gives a worst ratio of **1.106**, and the same-card reading **1.122**, both inside the
+registered 1.5. E60's "Per card" table is an accurate record of its own registration and is left untouched.
+(4) **aifoundry3 reaches 59–62 °C under this duty cycle**, not E60's probed 64 °C, and the block-D obstacle was a
+gate, not a ceiling: blocks A and B's approaches peaked at **59–61 °C** (107 of 123 at 60.0) before idling down,
+and the no-approach block-D passes launched across **55–62 °C** (median 60), climbing monotonically pass by pass —
+**7 °C of spread**, more than the 3 °C D1 was finally scored on. All eight were then set aside by the registered
+0.3 W `anchor_pi` drift gate, because the same within-pass warming that makes the spread trips the gate; that,
+not a lack of temperature, is why A9's gated 61 °C setpoint regime was needed. (Amendment A9 states this as
+"59 °C on every run" and "under 2 °C"; A11 corrects it against the committed log.) (5) **The randn hart ladder is convex and the
 zeros ladder is not** (24.4 → 27.0 mW/hart against 2.3 → 2.1), and the randn rungs heat the die 55 → 61 °C while
 the zeros rungs sit at 52–53 °C, so the convexity tracks the die temperature rather than the hart count — the same
 switching-against-temperature term block D measures. (6) **E60's departures live in `hl/block.sh`, not in the
 shared library**: running E62's `run_hm.py` and E60's `reduce_hl.py` outside their home block each needed one
 aifoundry3-specific fix the block script already had (the idle-login test, A5; the launch-reading gate, A8).
+(7) 🛑 **D1 was scored on a contrast the registration does not name.** Registered D1 is `lq_h8` − `lq_h0` across
+58 °C and 65 °C, but `lq_h8` was registered in block D alone — blocks A and B, the only blocks at 58 °C, run
+`bit_<j>` against `lq_h0` and `bpi_<j>` against `lb_h0`, and `runs.csv` has 0 `lq_h8` runs against block D's 14 —
+so the registered contrast had data at one temperature and was unmeasurable by construction. D1 is scored on
+**`bit_22` − `lq_h0`**, the only item pair the three blocks share. That is a **departure**, disclosed in
+amendment A11 and in the data README, not the registered rule; the lesson is that an across-regime prediction
+must have its items registered in every block it compares.
+**Card-behaviour lessons** (the plateau and the drift gate) are filed in
+[`docs/findings/14-card-behaviour.md`](14-card-behaviour.md) as AGENT.md §10 routes them.
 **Report:** the data README, [`docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/`](../reports/data/2026-10-26-e65-bit-prices-hart-ladder/README.md); no public page was made.
