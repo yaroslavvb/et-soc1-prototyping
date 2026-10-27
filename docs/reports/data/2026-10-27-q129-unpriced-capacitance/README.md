@@ -9,9 +9,16 @@ gate-level simulation."*
 
 ## The answer, first
 
-**The unpriced half is worth 0.080 pJ per random fp32 multiply-add** (switching), **0.101 pJ** with
-the cells' own internal energy — not the "two to three times" `POWER.md` warned the figure might
-be short by.
+**The unpriced half is worth 0.0880 pJ per random fp32 multiply-add** (switching), **0.101 pJ**
+with the cells' own internal energy — not the "two to three times" `POWER.md` warned the figure
+might be short by. The number the ledger *quotes* moves **+0.0802 pJ**, which is a different
+quantity: correcting the join also takes **0.0078 pJ back out**, because the published number had
+mis-priced it (§ [the arithmetic](#the-arithmetic-in-full-three-parts-not-two)).
+
+🛑 **Every absolute on this page is priced on the global-route Steiner wire column**, which
+[Q129(a)](../2026-10-27-q129-routed-netlist/README.md) measured ~20% **high** the same afternoon.
+Every *ratio* here is unaffected by that; the absolutes are pending the per-net join named in
+["Still a floor" item 1](#still-a-floor--four-things-this-does-not-fix).
 
 | | published (Q126(e), Q128's ledger) | with every farad priced | change |
 | --- | ---: | ---: | ---: |
@@ -34,13 +41,29 @@ minion rail's 4.337 pJ at Q128's 0.75 rail ratio:
 | closure against the rail | 44.88% | **47.20%** |
 
 So 0.10 pJ of the 3.84 pJ gap moves from unaccounted to accounted: **2.6% of the gap**. This leg of
-Q128 §5 item 4 is closed; the other two legs of that item (no detailed route, so no SPEF and no
-coupling; no timed pass, so no glitch factor) stand untouched.
+Q128 §5 item 4 is closed. Of the item's other two legs, "no timed pass, so no glitch factor"
+stands; "no detailed route, so no SPEF and no coupling" was itself closed the same afternoon by
+Q129(a) — which is where the 🛑 above comes from, and it moves the wire **down**.
 
 ## …and the gap was not what `POWER.md` said it was
 
-`POWER.md` attributed all 9,923 unpriced nets to clock-tree synthesis and `repair_design`. Walking
-the pre-route netlist's own instance tree and the post-CTS netlist's structure says otherwise:
+`POWER.md`'s sentence, in full (`POWER.md`:232–237): *"The shortfall is not idle nets: every net
+the simulation names and that the extractor knows is active here. It is the 9,923 nets CTS and
+`repair_design` created after the netlist was simulated, **plus nets the simulator folded away**.
+They switch, so leaving them out is an underestimate of the same order as the number itself."*
+The folding clause is right — folded nets are part of the 414-net row below. The other four claims
+are not:
+
+1. *"the shortfall is not idle nets"* — **39.93% of the design's farads are idle nets the
+   simulation already names** (8,888 nets, 18,806.0 fF). They read as "not in sim" only because
+   `power.py:179` drops zero-activity nets after differencing the two SAIFs.
+2. *"the 9,923 nets CTS and `repair_design` created"* — CTS and `repair_design` created **252**
+   nets, 4.86% of the farads, and 236 of those were already priced.
+3. *"they switch"* — **43.1 of the 49.5 percentage points carry no switching energy at all**
+   (idle nets plus tied constants).
+4. *"an underestimate of the same order as the number itself"* — it is **5.3%** (0.0802 of 1.5159).
+
+Walking the pre-route netlist's own instance tree and the post-CTS netlist's structure:
 **252 of the 20,383 extracted nets are what CTS and `repair_design` created** — 2,286.4 fF,
 **4.86%** of the design's 47,093.2 fF, not 49.5% — and **236 of those (the clock tree, 1,837.5 fF)
 were already priced**, by `power.py`'s own `clknet_<n>_<source>` name-strip rule, inside the
@@ -51,7 +74,8 @@ The 252 are **241 `clknet_*` nets** (CTS's tree, 1,899.7 fF) and **11 `net<n>` n
 every added cell is a buffer: 190 `BUFx5` and 52 `BUFx2` (CTS's `-buf_list`) and 5 `BUFx24`,
 4 `BUFx6f`, 1 `BUFx12f` (`repair_design`'s), with 20 clock inverters (`CKINVDC*`) swapped in on top.
 Worth saying plainly, because it is the opposite of what "repair" sounds like: **on this design
-`repair_design` is overwhelmingly a *downsize* pass** — 3,317 cells in, 3,065 out, and the traffic
+`repair_design` is overwhelmingly a *downsize* pass** — 3,317 cells swapped **in** against 3,065
+swapped **out** (a net gain of 252, not a reduction), and the traffic
 runs `NOR2x1`→`NOR2xp33`, `XNOR2x2`→`XNOR2xp5`, `OAI21x1`→`OAI21xp33`, i.e. to *weaker* drives
 (this netlist misses its 1250 ps SDC by 2×, so it has no slack to spend and plenty of drive to give
 back). That is why the post-CTS netlist uses 100 cell types against the pre-route netlist's 37
@@ -63,7 +87,7 @@ What the 9,923 nets and their 23,330.8 fF actually are, for `randn`:
 | --- | ---: | ---: | ---: | ---: |
 | named by the simulation, **zero** activity in the measured window | 8,888 | 18,806.0 | 39.93% | 0 |
 | **constants** — driven by `TIELOx1`/`TIEHIx1`; one net carries 1,131 fF, the zero rail of stage f1's Wallace tree | 23 | 1,498.3 | 3.18% | 0 |
-| the simulator's **bit renumbering** — Verilator renumbers a vector whose declared LSB is not 0 from 0 in its SAIF, so the extractor's `bus[32]` and the SAIF's `bus[0]` are one wire | 598 | 1,875.9 | 3.98% | **0.0857** |
+| the simulator's **bit renumbering** — Verilator renumbers a vector whose declared LSB is not 0 from 0 in its SAIF, so the extractor's `bus[32]` and the SAIF's `bus[0]` are one wire. The same renumbering made the published join price the **wrong** bit on those vectors' *overlapping* indices: [§ A second published error](#a-second-published-error-the-join-priced-the-wrong-bit-on-the-renumbered-buses) | 598 | 1,875.9 | 3.98% | **0.0857** |
 | resolved from **the driver's input** — CTS's and `repair_design`'s own new nets, plus pre-route nets the simulator folded, each driven by a one-input cell (BUF/INV/CKINVDC), so at zero delay it toggles exactly as its input | 414 | 1,150.6 | 2.44% | **0.0022** |
 | **total unpriced** | **9,923** | **23,330.8** | **49.54%** | **0.0880** |
 
@@ -100,24 +124,54 @@ same for all 13 patterns (20,286 nets checked at `zeros`, 17,339 at `lb_h8`, …
 right, and it is right for a reason: a buffer's output carries its input's toggle count, and a
 vector's bits are the same wires under either numbering.
 
-The structural route's total for `randn` is 1.6038 pJ against the re-simulation's 1.5961. That
-0.0077 pJ is **not** the mapping: it is the two Verilator runs disagreeing on the nets they both
-name (−20.01 toggles/multiply-add, −0.0077 pJ), which is the scatter between two simulations of
-logically identical netlists. Per pattern it runs from −0.0002 pJ (`ones`) to −0.0229 pJ (`lq_h8`).
-The re-simulation is the number to quote; the structural route is the check on it.
+## A second published error: the join priced the wrong bit on the renumbered buses
 
-So the headline arithmetic separates cleanly, and it is worth stating in full because the two parts
-answer different questions:
+The structural route's total for `randn` is 1.6038 pJ against the re-simulation's 1.5961. That
+−0.0077 pJ sits on the 384 nets (of 10,224) that the two SAIFs **both** name and disagree about,
+−20.01 toggles/multiply-add.
+
+🛑 **Corrected here, 27 Oct 2026.** This page first called that residual "the scatter between two
+simulations of logically identical netlists". It is not scatter. It is a **second error in the
+published join**, on the *same* renumbered vectors whose high bits it was already missing:
+
+- **362 of the 384 disagreeing nets** (−0.00748 pJ, **96.6%** of the residual) sit on **14 vector
+  bases whose declared LSB is not 0** — 13 of them the very vectors in the `bitshift` row above.
+- A vector declared `[63:12]` is named `bus[12]…bus[63]` by the extractor and `bus[0]…bus[51]` by
+  Verilator. `bus[52]…bus[63]` have no SAIF name at all — that is the `bitshift` row, 598 nets
+  never priced. But `bus[12]…bus[51]` **exist in both namespaces and mean different physical
+  bits**, so `power.py` matched them by name and charged each wire the activity of the bit 12
+  places up.
+- The shift *predicts* the published value: for **349 of the 362**, the pre-route SAIF's value for
+  `bus[i]` is bit-identical to the post-CTS value for `bus[i + lsb]`. The other 13 are the same
+  two vectors, off by a few toggles.
+- The signature is systematic, not noise. `zeros` disagrees by **exactly 0.0**; `ones` by
+  −0.0002 pJ; and it grows with datapath activity on those vectors to −0.0229 pJ at `lq_h8`. It
+  can run either way — `lb_h4` is **+0.0009 pJ** — which is what pricing the *wrong* bit does.
+  **Across all 13 patterns nothing is left over**: the mis-join is 100% of the residual in twelve
+  of them, and 96.6% at `randn` (`crosscheck/misjoin_per_pattern.json`, `code/misjoin.py`).
+- The one exception, and it is not scatter either: at `randn` a further **−0.00026 pJ** is
+  `txfmaexp0_top/txfma0_e2/_205_[0]`, 3.84 fF, 260 toggles. It is one of the **three** extracted
+  nets the post-CTS run does not name (1-bit vectors Verilator traces as scalars), so the
+  re-simulation prices it at zero where the published join had it right.
+
+**Consequence for the cross-check.** The structural route reuses the pre-route SAIF for the nets
+the published join already matched, so it inherits the same mis-join. It is therefore **not** an
+independent check on the *total* — only on the 9,923 nets it infers, where it is exact.
+
+## The arithmetic in full: three parts, not two
 
 | | pJ / multiply-add |
 | --- | ---: |
 | the 9,923 nets the published join left unpriced, **priced** | **+0.0880** |
-| the nets it did price, re-measured on the post-CTS netlist | **−0.0078** (the inter-simulation scatter above) |
+| the mis-join corrected: 362 overlapping indices of 14 renumbered vectors | **−0.0075** |
+| one 1-bit vector the post-CTS run cannot name (`_205_[0]`) | **−0.0003** |
 | published 1.5159 → complete **1.5961** | **+0.0802** |
 
-**The unpriced half is worth 0.0880 pJ, and both routes give that figure to four decimal places**
-(the structural rules infer it from the pre-route SAIF; the post-CTS simulation measures it). The
-+0.0802 that the quoted number moves is that 0.0880 net of the scatter.
+**The unpriced half is worth 0.0880 pJ.** The post-CTS simulation reproduces the toggle count of
+**every one of the 9,923 nets exactly**, so the two routes' totals for that half are identical by
+construction — the strength of the cross-check is the per-net equality, not a second independent
+measurement of the sum. The **+0.0802** the quoted number moves is that 0.0880 less the two
+corrections above, and **0.0000 of it is simulator noise**.
 
 ## Which part is data-dependent and which is clocking
 
@@ -137,12 +191,19 @@ The waterfall is random over idle, so the split matters.
 `DLLx1` latch plus its AND, all of them in the fraction block, making 13 gated clocks —
 `ctrl_f0…ctrl_f5_clk`, `ctrl_frf_clk`, `multype_f0_clk`, `multype_f1_clk`, `opa_frf_clk`,
 `opb_frf_clk`, `opc_frf_clk`, `trans_frf_clk`. The exponent and control blocks' flops hang off the
-ungated root. CTS's 242 clock nets in the table split **95 on the ungated root (802.1 fF, always
-toggling)** and **147 on the 13 gated branches (1,106.3 fF, of which 1,044.1 fF toggles when the
-lane has valid data)**; 2,084 flop and latch clock pins sit on 200 distinct CLK nets. With every
-operand word zero the 13 gates stay shut and 802.1 of 1,846.2 fF toggles — the tree loses
-**56.6%**, which is `POWER.md`'s "57%", now confirmed on the complete table rather than the half of
-it the simulation could name.
+ungated root. The clock regex matches **242 nets** in the table — **241 that CTS created**
+(`clknet_*`) plus the pre-existing top-level `clock` root — and they split **95 on the ungated root
+(802.1 fF, always toggling)** and **147 on the 13 gated branches (1,106.3 fF, of which 1,044.1 fF
+toggles when the lane has valid data)**; 2,084 flop and latch clock pins sit on 200 distinct CLK
+nets.
+
+With every operand word zero the 13 gates stay shut and 802.1 of 1,846.2 fF of toggling clock
+capacitance survives. That is a **56.6% capacitance-weighted** drop — and it is **not a new
+measurement**: `POWER.md`'s "57%" is the same 1,846 → 802 fF ratio, and because the complete table
+added nothing at all to the clock (the `clknet_` rule had already reached all 236 of CTS's clock
+nets), the figure **stands exactly as published**. Named alongside its denominator, the same shut
+measured three ways is **56.6% of the toggling clock capacitance, 56.2% of the clock energy
+(0.4964 → 0.2173 pJ) and 59.6% of the clock toggles (476.6 → 192.6 per multiply-add)**.
 
 ## The Hamming ladder, refit on the complete capacitance
 
@@ -181,21 +242,40 @@ missing was datapath activity on buses the join could not name.
    🛑 **Amended the same afternoon, 27 Oct 2026, by [Q129(a)](../2026-10-27-q129-routed-netlist/README.md).**
    This row first said "so the wire half of each net remains a lower bound", repeating the published
    pages. That is wrong, and Q129(a) measured it: detailed routing closes in a current OpenROAD,
-   OpenRCX extracts the coupling, and on this same hierarchy-kept netlist the extracted wire
-   capacitance at Miller k = 1 is **0.812 ×** the Steiner estimate — the estimator's 0.1658 fF/µm
-   already has the neighbour coupling bundled in and grounded, so the estimate runs **20% high**,
-   not low. **First-order effect on this directory:** 54.8% of the 0.0880 pJ correction is wire
-   capacitance, so scaling the wire column by 0.812 puts the correction at **0.0789 pJ** and the
-   complete `randn` figure at **1.4783 pJ** switching. Both numbers here are therefore priced on an
-   over-estimate of the wire; Q129(a)'s `reprice-keep/` holds the proper re-pricing at k = 0 / 1 / 2,
-   and the two corrections compose — its wire scale on this directory's complete activity. Nothing
-   above changes in *ratio* (the clock share, the ladder's slope, the decomposition of the unpriced
-   half), because the scale applies to both sides of every comparison.
+   OpenRCX extracts the coupling, and the extracted wire capacitance at Miller k = 1 is **0.812 ×**
+   the Steiner estimate — the estimator's 0.1658 fF/µm already has the neighbour coupling bundled in
+   and grounded, so the estimate runs **20% high**, not low.
+
+   🛑 **Corrected here, 27 Oct 2026: that 0.812 does not transport to this page.** This row first
+   said Q129(a) measured it "on this same hierarchy-kept netlist". It is the same *synthesis*, but
+   **a different place-and-route**: Q129(a)'s run has 20,570 extracted nets against this table's
+   20,383, 350 clock nets against 242, **+10.5% pin capacitance and −7.6% Steiner wire**
+   (15,532.8 fF against 16,801.7 fF). 0.812 is extracted ÷ **its own** Steiner column, and Q129(a)
+   says as much itself ("this run's own Steiner estimate is lower than the published one").
+   Three defensible scalars, none of them the right one:
+
+   | wire scale | what it is | complete `randn` | the correction |
+   | ---: | --- | ---: | ---: |
+   | **0.812** | Q129(a)'s extracted ÷ its own Steiner, by capacitance | 1.478 pJ | 0.0789 pJ |
+   | 0.768 | Q129(a)'s own within-run wire **energy** ratio on `keep` (0.4238 → 0.3252 pJ) | 1.451 pJ | 0.0767 pJ |
+   | **0.750** | Q129(a)'s extracted wire (12,605.2 fF) ÷ **this** table's Steiner column | 1.440 pJ | 0.0759 pJ |
+
+   54.8% of the 0.0880 pJ correction is wire capacitance, computed from the per-net wire column, so
+   **the honest statement is a range: complete `randn` switching 1.44 – 1.48 pJ and the correction
+   0.076 – 0.079 pJ**, not the single 1.4783 pJ this row first gave — which does not reproduce
+   either: the per-net wire column is 39.135% of complete `randn` switching, which gives 1.4786 pJ
+   at a 0.812 scale, not 1.4783. Q129(a)'s `reprice-keep/` holds
+   the proper re-pricing at k = 0 / 1 / 2, and the clean number is this directory's complete activity
+   on **Q129(a)'s own per-net extracted table** — one `power.py` invocation once both files sit in
+   one tree, and run by neither agent. Nothing above changes in *ratio* (the clock share, the
+   ladder's slope, the decomposition of the unpriced half), because the scale applies to both sides
+   of every comparison.
 2. **No timed pass, so no glitches.** Icarus's `$sdf_annotate` aborts on this design; the tape-out
    flow's 1.5× toggles / 1.4× energy in the multiplier tree is still the only measurement.
 3. **The cells' internal energy is still signal-only.** Q126(d)'s census-weighted figure
    (0.1188 fJ per transition at 0.517 V) is applied to combinational output transitions; the
-   clock-pin energy of this netlist's 2,071 flip-flops, 13 latches and CTS's 242 buffers is in
+   clock-pin energy of this netlist's 2,071 flip-flops, 13 latches and CTS's 242 inserted buffers
+   (190 `BUFx5` + 52 `BUFx2` — a coincidence with the 242 clock nets above) is in
    neither the published number nor the one above. Priced at that same figure it is **+0.0566 pJ
    per multiply-add**, which would take accounted to **2.1038 pJ** and closure against the board to
    **36.4%**. It is recorded in the summary JSON as a *labelled sensitivity, not a measurement*,
@@ -249,13 +329,16 @@ computed independently). Every pattern's baseline in `structural/` likewise repr
 | `power-postcts/power_pnr_<pattern>.json` | the published `power.py`, unchanged, on the **post-CTS** netlist's own SAIFs against the committed capacitance table. 13 patterns |
 | `structural/q129_syn_<pattern>.json` | the structural route: every extracted net resolved to a labelled activity from the **pre-route** SAIF, with `baseline_power_py` reproducing the published join |
 | `structural/q129_syn_randn-nets.json.gz` | per net, for `randn`: capacitance, toggles, which rule resolved it, and whether CTS or `repair_design` created it |
-| `crosscheck/cmp_<pattern>.json` | inferred against directly simulated, net by net, and the scatter between the two simulations on the nets both name |
+| `crosscheck/cmp_<pattern>.json` | inferred against directly simulated, net by net, and the residual between the two routes on the nets both name |
+| `crosscheck/misjoin_per_pattern.json` | that residual decomposed, all 13 patterns: the published join's mis-join on the renumbered vectors, the one net the post-CTS run cannot name, and what is left (nothing) |
+| `crosscheck/misjoin_randn-nets.json` | the 384 disagreeing nets at `randn`, each with its declared LSB, both toggle counts, the shift-predicted bit and its count |
 | `netlist/txfma_pnr_keep.v.gz` | the post-CTS, post-`repair_design` netlist OpenROAD wrote — the one the capacitance table describes (20,074 cells, 100 cell types against the pre-route netlist's 37: `repair_design` resized as well as buffered) |
 | `netlist/txfma_syn_keep.v.gz` | the pre-route hierarchical netlist, which is where the alias classes and the vectors' declared LSBs come from |
 | `code/nlparse.py` | the flat post-CTS netlist: wires, ports, instances, connections, and so each net's driver |
 | `code/hierparse.py` | the hierarchical netlist: alias classes of one physical net, every net's flat name, and the declared LSB of every vector |
 | `code/price_q129.py` | resolves every extracted net to a labelled activity and prices it at ½CV² per toggle, 0.517 V |
 | `code/cmp_map.py` | the cross-check against the post-CTS simulation |
+| `code/misjoin.py` | classifies every disagreeing net by the shift its vector's declared LSB predicts — the test that the residual is a mis-join and not simulator scatter |
 | `code/saif_reduce.py` | a SAIF pair → a compact `{net: toggles}`, using `power.py`'s own reader |
 | `code/resim_postcts.sh` | the re-simulation (see the departure above) |
 | `code/structure.py` | the cell-count delta, the nets place-and-route created, and the clock tree split into the ungated root and the 13 gated branches |
@@ -276,4 +359,7 @@ python3 tools/open-flow/txfma/power.py --saif pnrsim/randn_o1.saif --saif-base p
     --netcap $SCRATCH/work/pnr/net_cap_globalroute.txt --muladds 512 \
     --cell-energies ../2026-10-26-asap7-cell-energies/asap7-cell-energies.json \
     --out power_pnr_randn.json
+
+# why the two routes' TOTALS differ: the published join's mis-join on the renumbered vectors
+python3 code/misjoin.py <the working root with in/ and in/red/> <outdir>
 ```

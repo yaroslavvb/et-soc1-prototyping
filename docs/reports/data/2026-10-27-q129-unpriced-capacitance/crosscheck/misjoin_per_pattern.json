@@ -1,0 +1,189 @@
+{
+ "question": "Q129",
+ "date": "2026-10-27",
+ "what": "the residual between the published join (pre-route SAIF) and the direct post-CTS simulation, on the nets they both name, decomposed. It is the published join pricing the wrong physical bit on vectors whose declared LSB is not 0, not inter-simulation scatter.",
+ "mechanism": "Verilator renumbers a vector declared [msb:lsb] from 0 in its SAIF. The extractor's bus[i] for lsb <= i <= msb-lsb exists in both namespaces and means a different physical bit in each, so power.py's name join charges that wire the activity of bus[i+lsb]. The test: the pre-route value of bus[i] equals the post-CTS value of bus[i+lsb].",
+ "vector_bases_affected": {
+  "txfmafrac0_top/comb_add_f5a_h": 36,
+  "txfmafrac0_top/comb_c_f4a_h": 24,
+  "txfmafrac0_top/comb_s_f4a_h": 40,
+  "txfmafrac0_top/mergd_frac_res_hi_f6a_h": 4,
+  "txfmafrac0_top/txfma0_f3/align1_gfx_f3a_h": 39,
+  "txfmafrac0_top/txfma0_f3/align_in_48b_f3a_h": 32,
+  "txfmafrac0_top/txfma0_f3/aligned_48b_f3a_h": 31,
+  "txfmafrac0_top/txfma0_f3/comb_c_f3a_h": 24,
+  "txfmafrac0_top/txfma0_f3/comb_s_f3a_h": 40,
+  "txfmafrac0_top/txfma0_f3/csa_in1_f3a_h": 22,
+  "txfmafrac0_top/txfma0_f4/comb_add_cleared_f4a_h": 23,
+  "txfmafrac0_top/txfma0_f4/comb_add_f4a_h": 36,
+  "txfmafrac0_top/txfma0_f5/mergd_frac_res_hi_f5a_h": 4,
+  "txfmafrac0_top/txfma0_f5/norm_shift_out_f5a_h": 7
+ },
+ "per_pattern": {
+  "randn": {
+   "nets_disagreeing": 384,
+   "residual_pJ_per_muladd": -0.007739932660303336,
+   "misjoin_pJ_per_muladd": -0.007479545841637145,
+   "misjoin_share_of_the_residual": 0.9663579994692116,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": -0.0002603868186661903,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 21,
+    "net_the_post_cts_sim_does_not_name": 1,
+    "misjoin_shift_predicted_exactly": 349,
+    "misjoin_same_vector_not_exact": 13
+   }
+  },
+  "zeros": {
+   "nets_disagreeing": 0,
+   "residual_pJ_per_muladd": 0,
+   "misjoin_pJ_per_muladd": 0.0,
+   "misjoin_share_of_the_residual": 0.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {}
+  },
+  "ones": {
+   "nets_disagreeing": 35,
+   "residual_pJ_per_muladd": -0.0001755540091911925,
+   "misjoin_pJ_per_muladd": -0.0001755540091911925,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 29
+   }
+  },
+  "lb_h0": {
+   "nets_disagreeing": 116,
+   "residual_pJ_per_muladd": -0.000349573215108819,
+   "misjoin_pJ_per_muladd": -0.000349573215108819,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 100,
+    "misjoin_same_vector_not_exact": 10
+   }
+  },
+  "lb_h1": {
+   "nets_disagreeing": 117,
+   "residual_pJ_per_muladd": -0.000752930834542032,
+   "misjoin_pJ_per_muladd": -0.000752930834542032,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 101,
+    "misjoin_same_vector_not_exact": 10
+   }
+  },
+  "lb_h2": {
+   "nets_disagreeing": 125,
+   "residual_pJ_per_muladd": -0.0020755519666017584,
+   "misjoin_pJ_per_muladd": -0.0020755519666017584,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 109,
+    "misjoin_same_vector_not_exact": 10
+   }
+  },
+  "lb_h4": {
+   "nets_disagreeing": 120,
+   "residual_pJ_per_muladd": 0.0008672002692623917,
+   "misjoin_pJ_per_muladd": 0.0008672002692623917,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 104,
+    "misjoin_same_vector_not_exact": 10
+   }
+  },
+  "lb_h8": {
+   "nets_disagreeing": 121,
+   "residual_pJ_per_muladd": -0.0008274553356168849,
+   "misjoin_pJ_per_muladd": -0.0008274553356168849,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 105,
+    "misjoin_same_vector_not_exact": 10
+   }
+  },
+  "lq_h0": {
+   "nets_disagreeing": 91,
+   "residual_pJ_per_muladd": -0.00048472152134854005,
+   "misjoin_pJ_per_muladd": -0.00048472152134854005,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 77,
+    "misjoin_same_vector_not_exact": 8
+   }
+  },
+  "lq_h1": {
+   "nets_disagreeing": 98,
+   "residual_pJ_per_muladd": -0.0005366642042835784,
+   "misjoin_pJ_per_muladd": -0.0005366642042835784,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 83,
+    "misjoin_same_vector_not_exact": 9
+   }
+  },
+  "lq_h2": {
+   "nets_disagreeing": 112,
+   "residual_pJ_per_muladd": -0.0037972195337452404,
+   "misjoin_pJ_per_muladd": -0.0037972195337452404,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 96,
+    "misjoin_same_vector_not_exact": 10
+   }
+  },
+  "lq_h4": {
+   "nets_disagreeing": 118,
+   "residual_pJ_per_muladd": -0.012459480506022549,
+   "misjoin_pJ_per_muladd": -0.012459480506022549,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 104,
+    "misjoin_same_vector_not_exact": 8
+   }
+  },
+  "lq_h8": {
+   "nets_disagreeing": 149,
+   "residual_pJ_per_muladd": -0.022852063138017457,
+   "misjoin_pJ_per_muladd": -0.022852063138017457,
+   "misjoin_share_of_the_residual": 1.0,
+   "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+   "unexplained_pJ_per_muladd": 0.0,
+   "nets": {
+    "unexplained": 6,
+    "misjoin_shift_predicted_exactly": 135,
+    "misjoin_same_vector_not_exact": 8
+   }
+  }
+ }
+}

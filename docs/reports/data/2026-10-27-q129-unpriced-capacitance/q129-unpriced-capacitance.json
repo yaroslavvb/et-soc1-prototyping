@@ -765,7 +765,22 @@
     "fraction_of_the_tree_toggling": 0.9673873220799407
    }
   },
-  "zero_gating_shuts": 0.5655296051133982
+  "zero_gating_shuts": {
+   "capacitance_weighted": 0.5655296051133982,
+   "capacitance_weighted_fF": [
+    1846.2175223749277,
+    802.1268559927984
+   ],
+   "clock_energy_weighted": 0.5621901814203096,
+   "clock_toggle_weighted": 0.5958904670966896,
+   "note": "NOT a new measurement. POWER.md's '57%' is this same capacitance-weighted 1,846 -> 802 fF ratio, and the complete table added nothing at all to the clock (power.py's clknet_ rule had already reached all 236 of CTS's clock nets), so the figure stands exactly as published. The denominator matters: 56.6% of the toggling clock CAPACITANCE, 56.2% of the clock ENERGY, 59.6% of the clock TOGGLES."
+  },
+  "clock_nets_in_the_regex": {
+   "total": 242,
+   "created_by_cts": 241,
+   "pre_existing": 1,
+   "note": "the clock regex matches 242 nets in the capacitance table: 241 clknet_* that CTS created, plus the pre-existing top-level 'clock' root. 'CTS's 242 clock nets' was one too many."
+  }
  },
  "design": {
   "extracted_nets": 20383,
@@ -785,7 +800,7 @@
   "switching_pJ_per_muladd_measured_both_ways": {
    "structural_from_the_pre_route_saif": 0.08795701229447724,
    "direct_post_cts_simulation": 0.08795701229447,
-   "note": "the two routes give the same figure to four decimal places; the quoted total moves +0.0802 because the nets the published join DID price read 0.0078 pJ lower on the post-CTS simulation (the inter-simulation scatter)"
+   "note": "the post-CTS simulation reproduces the toggle count of every one of the 9,923 nets EXACTLY, so the two routes' totals for the unpriced half are identical by construction (14 digits, not four): the strength of the cross-check is the per-net equality, not a second independent measurement of the sum. The quoted total moves +0.0802 rather than +0.0880 because correcting the join also takes 0.0078 pJ back OUT - see residual_between_the_two_routes. None of it is inter-simulation scatter."
   }
  },
  "structure": {
@@ -890,14 +905,15 @@
   },
   "cells_added_total": 3317,
   "cells_removed_total": 3065,
-  "comment": "repair_design is overwhelmingly a DOWNSIZE pass on this netlist: the traffic runs to weaker drives, and the only cells it and CTS actually insert are buffers",
+  "comment": "repair_design is overwhelmingly a DOWNSIZE pass on this netlist: the traffic runs to weaker drives, and the only cells it and CTS actually insert are buffers. cells_added_total / cells_removed_total are cells SWAPPED IN and SWAPPED OUT - 3,317 in against 3,065 out is a net GAIN of 252 cells, not a reduction.",
   "nets_place_and_route_created": {
    "total": 252,
    "cap_fF": 2286.4345941102697,
    "clknet": 241,
    "clknet_cap_fF": 1899.7388256593808,
    "repair_netN": 11,
-   "repair_netN_cap_fF": 386.69576845088915
+   "repair_netN_cap_fF": 386.69576845088915,
+   "note": "241 clknet_* created by CTS plus 11 net<n> from repair_design = 252. The clock regex matches 242 nets, because the pre-existing top-level 'clock' root is in it too."
   }
  },
  "provenance": {
@@ -910,11 +926,251 @@
   "bench_counters_identical_to_the_pre_route_run": "all 13 patterns: cycles 547, clock_on 519, uop_cycles 512, lane_valid 512 (0 for zeros) and bus_toggles identical to power/sim_acct.txt"
  },
  "amended_by_q129a": {
-  "what": "Q129(a) closed detailed routing and extracted the coupling the same afternoon: on this hierarchy-kept netlist the extracted wire capacitance at Miller k=1 is 0.812 x the global-route Steiner estimate, so the Steiner wire column used here runs 20% HIGH, not low as the published pages said",
-  "wire_share_of_the_correction": 0.548,
-  "correction_pJ_at_wire_scaled_0p812": 0.0789,
-  "complete_randn_switching_pJ_at_wire_scaled_0p812": 1.4783,
-  "see": "docs/reports/data/2026-10-27-q129-routed-netlist/ (reprice-keep/ holds the proper re-pricing at k = 0 / 1 / 2); the two corrections compose, its wire scale on this directory's complete activity",
+  "what": "Q129(a) closed detailed routing and extracted the coupling the same afternoon: the extracted wire capacitance at Miller k=1 is 0.812 x its own global-route Steiner estimate, so a Steiner wire column runs ~20% HIGH, not low as the published pages said. Every absolute in this directory is priced on a Steiner wire column.",
+  "corrected": "2026-10-27: this block first said Q129(a) measured 0.812 'on this same hierarchy-kept netlist'. It is the same SYNTHESIS but a DIFFERENT place-and-route, so the scalar does not transport.",
+  "why_it_does_not_transport": {
+   "q129a_extracted_nets": 20570,
+   "this_table_extracted_nets": 20383,
+   "q129a_clock_nets": 350,
+   "this_table_clock_nets": 242,
+   "q129a_pin_fF": 33469.6,
+   "this_table_pin_fF": 30291.484866522624,
+   "q129a_steiner_wire_fF": 15532.8,
+   "this_table_steiner_wire_fF": 16801.7206,
+   "q129a_steiner_over_this_steiner": 0.9244767467446161,
+   "note": "0.812 is extracted divided by Q129(a)'s OWN Steiner column, which is 7.6% lower than this one on 187 more nets and 10.5% more pin capacitance. Q129(a)'s README says so itself: 'this run's own Steiner estimate is lower than the published one'."
+  },
+  "wire_share_of_the_correction": 0.5482402248788958,
+  "candidate_scalars": {
+   "0.812_q129a_within_run_capacitance_ratio": {
+    "wire_scale": 0.8115214256283478,
+    "complete_randn_switching_pJ": 1.4783518994175262,
+    "correction_pJ": 0.07886827911226155
+   },
+   "0.768_q129a_within_run_wire_ENERGY_ratio_on_keep": {
+    "wire_scale": 0.7673430863614912,
+    "complete_randn_switching_pJ": 1.4507571016750396,
+    "correction_pJ": 0.07673793013562871
+   },
+   "0.750_q129a_extracted_wire_over_THIS_steiner_column": {
+    "wire_scale": 0.750232687478448,
+    "complete_randn_switching_pJ": 1.4400695565045702,
+    "correction_pJ": 0.07591283980051924
+   }
+  },
+  "honest_statement": "a range, not a point: complete randn switching 1.44 - 1.48 pJ and the correction 0.076 - 0.079 pJ. The single 1.4783 pJ this block first gave is withdrawn (it is also not reproducible as described: the per-net wire column gives 1.4786 at a 0.812 scale, from a 39.135% wire share).",
+  "complete_randn_wire_share_of_switching": 0.39134807072910105,
+  "see": "docs/reports/data/2026-10-27-q129-routed-netlist/ (reprice-keep/ holds the proper re-pricing at k = 0 / 1 / 2). The clean number is this directory's complete activity on Q129(a)'s OWN per-net extracted table - one power.py invocation once both files sit in one tree, run by neither agent.",
   "ratios_unaffected": "the clock share, the ladder slopes and the decomposition of the unpriced half are ratios, so the wire scale cancels in them"
+ },
+ "residual_between_the_two_routes": {
+  "corrected": "2026-10-27: this directory first called the -0.0077 pJ/MAC residual 'the scatter between two simulations of logically identical netlists'. It is not scatter. It is a SECOND error in the published join, on the same vectors whose high bits it was already missing.",
+  "mechanism": "Verilator renumbers a vector declared [msb:lsb] from 0 in its SAIF. The extractor's bus[i] for lsb <= i <= msb-lsb exists in both namespaces and means a different physical bit in each, so power.py's name join charges that wire the activity of bus[i+lsb]. The test: the pre-route value of bus[i] equals the post-CTS value of bus[i+lsb].",
+  "randn": {
+   "nets_both_saifs_name": 10224,
+   "nets_disagreeing": 384,
+   "residual_pJ_per_muladd": -0.007739932660303336,
+   "misjoin_pJ_per_muladd": -0.007479545841637145,
+   "misjoin_share_of_the_residual": 0.9663579994692116,
+   "misjoin_nets": 362,
+   "misjoin_nets_the_shift_predicts_exactly": 349,
+   "vector_bases_with_a_non_zero_declared_lsb": 14,
+   "of_those_also_in_the_bitshift_row": 13,
+   "one_net_the_post_cts_sim_does_not_name_pJ_per_muladd": -0.0002603868186661903,
+   "which_net": "txfmaexp0_top/txfma0_e2/_205_[0], 3.84 fF, 260 toggles: one of the three extracted nets the post-CTS run cannot name (a 1-bit vector Verilator traces as a scalar), so the re-simulation prices it at zero where the published join had it right",
+   "unexplained_pJ_per_muladd": 0.0
+  },
+  "per_pattern": {
+   "randn": {
+    "nets_disagreeing": 384,
+    "residual_pJ_per_muladd": -0.007739932660303336,
+    "misjoin_pJ_per_muladd": -0.007479545841637145,
+    "misjoin_share_of_the_residual": 0.9663579994692116,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": -0.0002603868186661903,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 21,
+     "net_the_post_cts_sim_does_not_name": 1,
+     "misjoin_shift_predicted_exactly": 349,
+     "misjoin_same_vector_not_exact": 13
+    }
+   },
+   "zeros": {
+    "nets_disagreeing": 0,
+    "residual_pJ_per_muladd": 0,
+    "misjoin_pJ_per_muladd": 0.0,
+    "misjoin_share_of_the_residual": 0.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {}
+   },
+   "ones": {
+    "nets_disagreeing": 35,
+    "residual_pJ_per_muladd": -0.0001755540091911925,
+    "misjoin_pJ_per_muladd": -0.0001755540091911925,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 29
+    }
+   },
+   "lb_h0": {
+    "nets_disagreeing": 116,
+    "residual_pJ_per_muladd": -0.000349573215108819,
+    "misjoin_pJ_per_muladd": -0.000349573215108819,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 100,
+     "misjoin_same_vector_not_exact": 10
+    }
+   },
+   "lb_h1": {
+    "nets_disagreeing": 117,
+    "residual_pJ_per_muladd": -0.000752930834542032,
+    "misjoin_pJ_per_muladd": -0.000752930834542032,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 101,
+     "misjoin_same_vector_not_exact": 10
+    }
+   },
+   "lb_h2": {
+    "nets_disagreeing": 125,
+    "residual_pJ_per_muladd": -0.0020755519666017584,
+    "misjoin_pJ_per_muladd": -0.0020755519666017584,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 109,
+     "misjoin_same_vector_not_exact": 10
+    }
+   },
+   "lb_h4": {
+    "nets_disagreeing": 120,
+    "residual_pJ_per_muladd": 0.0008672002692623917,
+    "misjoin_pJ_per_muladd": 0.0008672002692623917,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 104,
+     "misjoin_same_vector_not_exact": 10
+    }
+   },
+   "lb_h8": {
+    "nets_disagreeing": 121,
+    "residual_pJ_per_muladd": -0.0008274553356168849,
+    "misjoin_pJ_per_muladd": -0.0008274553356168849,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 105,
+     "misjoin_same_vector_not_exact": 10
+    }
+   },
+   "lq_h0": {
+    "nets_disagreeing": 91,
+    "residual_pJ_per_muladd": -0.00048472152134854005,
+    "misjoin_pJ_per_muladd": -0.00048472152134854005,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 77,
+     "misjoin_same_vector_not_exact": 8
+    }
+   },
+   "lq_h1": {
+    "nets_disagreeing": 98,
+    "residual_pJ_per_muladd": -0.0005366642042835784,
+    "misjoin_pJ_per_muladd": -0.0005366642042835784,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 83,
+     "misjoin_same_vector_not_exact": 9
+    }
+   },
+   "lq_h2": {
+    "nets_disagreeing": 112,
+    "residual_pJ_per_muladd": -0.0037972195337452404,
+    "misjoin_pJ_per_muladd": -0.0037972195337452404,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 96,
+     "misjoin_same_vector_not_exact": 10
+    }
+   },
+   "lq_h4": {
+    "nets_disagreeing": 118,
+    "residual_pJ_per_muladd": -0.012459480506022549,
+    "misjoin_pJ_per_muladd": -0.012459480506022549,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 104,
+     "misjoin_same_vector_not_exact": 8
+    }
+   },
+   "lq_h8": {
+    "nets_disagreeing": 149,
+    "residual_pJ_per_muladd": -0.022852063138017457,
+    "misjoin_pJ_per_muladd": -0.022852063138017457,
+    "misjoin_share_of_the_residual": 1.0,
+    "net_the_post_cts_sim_does_not_name_pJ_per_muladd": 0.0,
+    "unexplained_pJ_per_muladd": 0.0,
+    "nets": {
+     "unexplained": 6,
+     "misjoin_shift_predicted_exactly": 135,
+     "misjoin_same_vector_not_exact": 8
+    }
+   }
+  },
+  "vector_bases_affected": {
+   "txfmafrac0_top/comb_add_f5a_h": 36,
+   "txfmafrac0_top/comb_c_f4a_h": 24,
+   "txfmafrac0_top/comb_s_f4a_h": 40,
+   "txfmafrac0_top/mergd_frac_res_hi_f6a_h": 4,
+   "txfmafrac0_top/txfma0_f3/align1_gfx_f3a_h": 39,
+   "txfmafrac0_top/txfma0_f3/align_in_48b_f3a_h": 32,
+   "txfmafrac0_top/txfma0_f3/aligned_48b_f3a_h": 31,
+   "txfmafrac0_top/txfma0_f3/comb_c_f3a_h": 24,
+   "txfmafrac0_top/txfma0_f3/comb_s_f3a_h": 40,
+   "txfmafrac0_top/txfma0_f3/csa_in1_f3a_h": 22,
+   "txfmafrac0_top/txfma0_f4/comb_add_cleared_f4a_h": 23,
+   "txfmafrac0_top/txfma0_f4/comb_add_f4a_h": 36,
+   "txfmafrac0_top/txfma0_f5/mergd_frac_res_hi_f5a_h": 4,
+   "txfmafrac0_top/txfma0_f5/norm_shift_out_f5a_h": 7
+  },
+  "consequence_for_the_cross_check": "the structural route reuses the pre-route SAIF for the nets the published join already matched, so it inherits the same mis-join: it is NOT an independent check on the total, only on the 9,923 nets it infers, where it is exact (9,923 of 9,923, all 13 patterns)",
+  "arithmetic_in_full_pJ_per_muladd": {
+   "the_9923_nets_never_priced": 0.08795701229447724,
+   "the_misjoin_corrected": -0.007479545841637145,
+   "the_one_net_the_post_cts_run_cannot_name": -0.0002603868186661903,
+   "net_move_in_the_quoted_total": 0.0802170796341739,
+   "simulator_noise": 0.0
+  },
+  "evidence": "crosscheck/misjoin_per_pattern.json, crosscheck/misjoin_randn-nets.json, code/misjoin.py"
  }
 }
