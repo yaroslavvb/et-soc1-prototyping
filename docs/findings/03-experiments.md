@@ -2749,3 +2749,67 @@ must have its items registered in every block it compares.
 **Card-behaviour lessons** (the plateau and the drift gate) are filed in
 [`docs/findings/14-card-behaviour.md`](14-card-behaviour.md) as AGENT.md §10 routes them.
 **Report:** the data README, [`docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/`](../reports/data/2026-10-26-e65-bit-prices-hart-ladder/README.md); no public page was made.
+
+## E68 — sm: the stage map, which pipeline stage spends a flipped bit's energy (Q128; card runs 2026-10-26 from 21:11 PDT, aifoundry2) — pre-registered
+
+**Asked (Q128):** "fill the missing pieces needed to address my original queries (tracking down difference in
+multiplication speed down to cost of individual transistor switching) [...] run the experiments on aifoundry
+machines"; job (b): "which pipeline stage spends a flipped bit's energy [...] a card-level split of a flipped bit's
+cost into multiplier against align / add / normalize / round, to test the gate-level stage splits."
+**Pre-registered** in [`tools/claims-v3/sm/`](../../tools/claims-v3/sm/README.md), commit `b88c6bdc` (pushed before
+the first measured launch at 21:11:45): eleven operand families, one shared base, each differing from its family's
+zero in **its mask alone**, run through E60's `hl/block.sh` with two default-preserving knobs (`HL_EXPN`,
+`HL_SHIRES`/`HL_PER_SHIRE`). The lever is exact arithmetic rather than a model: an fp32 multiplier never sees a sign
+or an exponent, so two B words sharing their significand drive bit-identical switching through the Booth rows, the
+Wallace tree, its register and the product adder — **f1 and f2 frozen by construction** — while f3–f6 see two
+different results every cycle. The RTL design matrix (`predictions.json`, the `rtl-sim/fma_toggle` bench under
+Verilator 5.052 on the Intel, not aifoundry2's 5.042) was frozen in the same commit and confirms the construction:
+`sm_sgn`, `sm_e1`, `sm_e16`, `sm_e64` and `sm_pi_sgn` show **exactly 0** toggles in every tree-only module above
+their zero, and `sm_sgnlo`'s stage vector equals `sm_lo12`'s plus `sm_sgn`'s to the last toggle in every column.
+Every item ran on **512 minions at 800 MHz** so the governor's ~65 W limit never acted. Amendments, each dated:
+**A1** (`351a73f5`, after passes 1–3: the leakage slope is fitted on gate-passing runs — this card idles at 600 MHz
+and the governor raises it during the launch, so a slope fitted across the ramp reads 4.911 W/°C against the steady
+runs' 0.456), **A2** and **A3** (more passes), **A5** (`a9fffd69`: A3's pass rate was wrong — passes 4–7, not 4–18,
+ran in 7.5 minutes — and this session killed a running pass by misreading run_hl's end-of-pass marker as the
+sweep's; the block's TERM trap released the lock and the pass is in the data as a non-ok pass the reduction drops),
+**A4** and **A6** (`270985c4`: `dP_raw_W` and the per-flipped-bit price are reported beside the registered `dP_W`).
+41 passes, 574 runs, 453 kept; claimed in #community-lab at 21:09 (`1564491254660595715`), released in the morning
+after E66.
+**Result** (data in [`docs/reports/data/2026-10-27-e68-stage-map/`](../reports/data/2026-10-27-e68-stage-map/README.md)):
+**the multiplier is about half of a mantissa flip's in-unit cost, a flipped bit that never enters the multiplier
+costs as much as one that does, and energy is not proportional to toggle counts — but it is additive across
+stimuli.** Every kept run held 800 MHz and the highest kept board reading was 51.1 W; 121 runs were dropped by the
+registered clock gate, which is the 600→800 MHz ramp inside the window. Prices per flipped bit: `sm_lo12`
+(12 mantissa bits) **117.5 ± 2.8 fJ**, which sits on E60's 116.7 fJ and beside E65's 129.9 fJ on a different card
+with a different minion count — the strongest cross-card check the bit-flip price has had; `sm_hi12` 173.3 ± 4.3,
+`sm_sp12` 187.4 ± 3.8, `sm_sgnlo` 119.7 ± 2.9, and the frozen-tree items `sm_sgn` **179.3 ± 36.3**, `sm_e1`
+201.9 ± 46.1, `sm_e16` 112.8 ± 31.7, `sm_e64` 282.5 ± 32.0, `sm_pi_sgn` 125.3 ± 39.3. **P2 PASS** (the result the
+power model needed): the RTL says a sign flip and twelve mantissa flips add exactly, and the card says their
+*energies* add too — `sm_lo12` + `sm_sgn` = 4.860 W against `sm_sgnlo`'s 4.756 W, +0.105 W in 4.8, about 2 %, inside
+a 0.476 W tolerance. **P3 PASS**: `sm_sgn` costs 0.548 ± 0.111 W, 4.9 SE above zero, with zero tree toggles — 0.127
+of a 12-bit mantissa flip for one twelfth the bits. **P6 PASS**: `sm_sp12` − `sm_lo12` = +2.558 W at 15 SE, so
+twelve bits are not twelve bits. **P7 PASS**. **P1 FAIL**: the registered two-column fit wants a *negative*
+multiplier coefficient (b_mul −0.177 ± 0.160, b_back +2.480 ± 0.284 W per million toggles/op), and it does so at
+every leakage slope tried (−0.086 at 0 W/°C through −0.177 at A1's 1.508), so it is the column definition, not the
+correction: the bench counts **by file**, and `txfma_csa` and `txfma_adder` each sit in both the fraction path and
+the exponent path, so for `sm_e16` the 201,216 `txfma_adder` toggles are the exponent adder's while the registered
+map books them to f4. Post-hoc, with each item's ambiguous files assigned by whether its own arithmetic changes the
+significand and the four wrapper files dropped, the fit is sensible: **b_mul +0.517 ± 0.161, b_back +0.957 ± 0.264
+W per million toggles/op — a back-end toggle costs 1.85× a multiplier toggle — and s_mul = 0.504**, so about half a
+12-bit mantissa flip's in-unit cost is the multiplier, against the gate level's 15–17 % of a *board* flip, whose
+remainder is the operand bus, the register file's read ports, the result path and the accumulator, all outside the
+unit. **P5 FAIL**, and it falsifies something worth keeping: the RTL's back-end counts rise monotonically with the
+exponent step (573 k, 708 k, 990 k toggles for ±1, ∓16, ∓64) and the energy does not — `sm_e16` costs 0.345 ± 0.097 W
+where `sm_e1` costs 0.617 ± 0.141, a 2.2× spread in watts per toggle inside one family whose tree is frozen and
+whose only difference is how far the aligner shifts. **P4 FAIL** on a difference that is not there: 0.166 W against
+a combined SE of 0.163 W, 1.0 SE, which is the null P4 predicted; the registered rule had no SE clause, so the
+tighter of its two bands (25 % of `sm_sgn`) scored a null as a failure.
+**Deviations and findings beside the rules:** (1) this card's clock ramps 600→800 MHz inside the measurement
+window, so 21 % of runs are dropped by the registered clock gate and the leakage slope must be fitted on the rest
+(A1); (2) the leakage coefficient is the one number not measured on this experiment's own data, and it moves the
+busy items most (`sm_sp12` reads 8.19 W uncorrected and 6.87 W at A1's slope), which **E66 fixes the same night**
+by measuring this card's idle law over 51–67 °C — the morning can re-run with `--leak <E66's value>` as a
+sensitivity; (3) `txfma_csa` and `txfma_adder` cannot be split by file, so any by-file stage attribution of this
+bench is wrong for stimuli that move the exponent path; (4) a pass was killed by this session's own error and is
+kept in the data as a non-ok pass (A5).
+**Report:** pending — the Q128 page carries E67 and E68 together.

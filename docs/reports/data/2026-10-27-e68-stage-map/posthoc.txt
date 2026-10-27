@@ -1,0 +1,30 @@
+574 runs, 453 kept, leak 1.508 W/C
+
+item           n    dP (W)      SE         MUL        BACK   wrappers   W/Mtog
+sm_lo12       24     4.312   0.101     4674048     2481664     889803    0.603
+sm_hi12       22     6.352   0.156     4736000     3115776    1141664    0.809
+sm_sp12       23     6.870   0.138     5840128     3475712    1217441    0.737
+sm_sgn        25     0.548   0.111           0      332032     258048    1.651
+sm_e1         25     0.617   0.141           0      573184     360688    1.077
+sm_e16        25     0.345   0.097           0      707840     423920    0.487
+sm_e64        24     0.863   0.098           0      989696     492528    0.872
+sm_sgnlo      24     4.756   0.116     4674048     2813696    1147851    0.635
+sm_pi_sgn     25     0.383   0.120           0      338176     258048    1.131
+
+post-hoc fit over 9 items:
+  b_mul  +0.5166 +- 0.1613 W per million toggles/op
+  b_back +0.9574 +- 0.2642
+  back/mul 1.85
+  residual rms 0.429 W
+  s_mul for sm_lo12 = 0.504  (multiplier share of a 12-bit mantissa flip's in-unit cost)
+
+item          resid (W)
+sm_lo12          -0.479
+sm_hi12           0.923
+sm_sp12           0.525
+sm_sgn            0.230
+sm_e1             0.068
+sm_e16           -0.333
+sm_e64           -0.085
+sm_sgnlo         -0.353
+sm_pi_sgn         0.059
