@@ -52,21 +52,26 @@ value's own safety is argued from the source here and not inherited.
 - **Host/machine identity:** `aifoundry2`. Re-read fresh at gate time (`uptime`, `et-lab-manifest`);
   E69's reading of 13:55 PDT today — Ubuntu 24.04 family, kernel 7.0.0-38-generic, 11th Gen Intel Core
   i5-11600, 12 threads, 63 GiB, boot id `42dcb8e5-a96f-45a5-8edc-78c987be4073` — stands as the "before".
-  **Filled at gate time.**
+  Re-read **14:59:39 PDT**: `aifoundry2`, host up **23 h 46 m**, load 0.58, four idle shell logins and no
+  other user's device process. **PASS**
 - **Card asset / serial / revision / form factor / DRAM:** re-read fresh by `gov_e72.py gates`
   (`DM_CMD_GET_MODULE_*`); E69's 13:56:26 PDT reading is the "before" (Esperanto, part `0x11345663`,
   module revision `0x2211ab44`, form factor PCIE, DDR 32 GB, ASIC revision 597; the lot id stays in the
   session's own queries and is not reproduced in the public repo). **Module uptime is re-read, and it
   must still show no service-processor reset since the host booted** — if the SP had reset, E69's
   restored values would be boot defaults rather than a real write and the "originals" would need
-  re-establishing. **Filled at gate time.**
+  re-establishing. Re-read **14:59:39 PDT** by `gov_e72.py gates`: **module uptime 0 d 23 h 46 m**, so
+  the service processor has not reset since the host booted on 26 Oct and E69's restored values are a
+  real write rather than a reboot's defaults. **PASS**
 - **PCI domain:BDF ↔ device number ↔ node:** `0000:02:00.0` ↔ device 0 ↔ `/dev/et0_mgmt`, `/dev/et0_ops`;
   link 16.0 GT/s PCIe x8; driver in use `ET`. One card on this host, so no second card shares the driver
   or root port (contrast aifoundry1, where a module unload affects both). Re-checked fresh.
 - **Firmware identities:** re-read fresh (`DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`). E69's 13:56:26 PDT
   reading is the "before": release **1.4.0**, BL1 **0.22.0**, BL2 **0.22.0**, PMIC **1.5.0**, Master /
   Worker / Machine Minion **0.25.1**. A different reading at gate time is a **NO-GO**, because the rule-8
-  source read below is pinned to BL2 0.22.0. **Filled at gate time.**
+  source read below is pinned to BL2 0.22.0. Re-read **14:59:39 PDT**: release **1.4.0**, BL1 **0.22.0**,
+  BL2 **0.22.0**, PMIC **1.5.0**, minions **0.25.1** — equal to E69's reading, so the rule-8 source read
+  applies. **PASS**
   *(Standing correction, from E69: `docs/findings/14-card-behaviour.md`'s card table still says 1.3.1 /
   BL2 0.20.0 / minion 0.23.0 for this card, which was true before the 10 Oct thermal-v2 update. The
   0.20.0 in the host manifest is the **host driver's** version, not the firmware's.)*
@@ -77,11 +82,17 @@ value's own safety is argued from the source here and not inherited.
   and the heater, with their digests recorded in each pass's `manifest.txt` and the operand set's hashes
   in each pass's `gen.sha256`. **The operand files are checked byte for byte against E60's published
   `gen.sha256`** by `run_e72.sh setup`, so the 600 MHz rungs and the 800 MHz rungs they are compared
-  against are literally the same bytes. **Filled at gate time.**
+  against are literally the same bytes. Run **14:59:40 PDT**: **59 of 59 operand files byte-identical to
+  E60's published hashes, 0 missing**; the 60th line of E60's `gen.sha256` is `manifest.json`, which
+  **differs and is expected to** — `make_hl.py` has gained item families since E60 (E70's `alq_`/`aq_` A-side
+  ladder among them), so the manifest has grown while every `tiles/*.bin` and `srcs/*.bin` E60 ran is
+  unchanged. `make_hl.py --check` re-derived every designed flip count from the files. **PASS**
 - **Other affected cards / root-port devices / outlet loads:** none. No work on aifoundry1 or aifoundry3
   is part of E72. **PASS**
 - **Existing guest / session / volatile contents:** checked fresh — no Maxion guest, no packet endpoint,
-  no resident Linux/9front on this card; `et-who` must report no holder. **Filled at gate time.**
+  no resident Linux/9front on this card. `et-who` at **14:59:39 PDT**: *"No process holds an ET-SoC-1
+  device node or card lock."* The card lock was free and `gov_e72.py gates` took it exclusively for the
+  reads. **PASS**
 - **Locks / guards / monitors / CI / services, and how races are excluded:** the mechanism is E69's and
   is unchanged, re-stated because the field manual (hosts § 8) warns that *telemetry and DM do not
   coexist on a single-open management node*:
@@ -134,7 +145,19 @@ value's own safety is argued from the source here and not inherited.
 - **PCIe / link / BAR / DM / ops / thermal / clock / TDP baseline:** read fresh by `gov_e72.py gates`
   into `gov.jsonl` `{"event": "original"}`. **The gate refuses to proceed unless `ettelem config` reads
   `tdp_w: 65` and `temp_threshold_c: 65`** — the values E69 restored and read back at 14:42 PDT — and
-  unless the vmin-LUT floor reads **600 MHz**. **Filled at gate time.**
+  unless the vmin-LUT floor reads **600 MHz**.
+  **Read 14:59:39 PDT, under the card lock:** `{"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3,
+  "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519}`. **Both governor fields are at
+  their originals. These are the values to restore: TDP 65 W, software threshold 65 °C.** **PASS**
+  **vmin LUT, read the same second** (`DM_CMD_GET_VMIN_LUT`, parsed against
+  `ESPERANTO_VMIN_LUT_SINGLE_POINT_t`, 18 bytes a point, the minion pair first): **three non-zero minion
+  points — 600, 700 and 800 MHz** — and eight zero points. So
+  `mnn_frequency_min_limit = 600` and `mnn_frequency_max_limit = 800`, which is also exactly the
+  600 → 700 → 800 stepping E69 read out of the governor's own log. **The pin lands on 600 MHz and can go
+  no lower. PASS** — this gate was UNKNOWN on the first attempt (the tool writes the LUT to a binary file
+  rather than to stdout, so the text parse found nothing) and was resolved by parsing the binary; the raw
+  LUT stays out of the public repo as per-card calibration data and only the frequency points are
+  published.
 - **Live query allowlist; unsafe queries intentionally omitted:** allowed — `GET_MODULE_*` identity,
   `GET_MODULE_FIRMWARE_REVISIONS`, `GET_ASIC_CHIP_REVISION`, `GET_MODULE_UPTIME`, `GET_MODULE_POWER`,
   `GET_MODULE_CURRENT_TEMPERATURE`, `GET_ASIC_FREQUENCIES`, `GET_MODULE_STATIC_TDP_LEVEL`,
@@ -291,7 +314,7 @@ against E60's published `gen.sha256`. The one command sent is the stock `dev_mng
   (`TDP_PIN_W`, `ORIG_TDP_W`); it refuses to run if the threshold is not 65 °C and refuses to continue if
   a set moved the threshold; the vmin-LUT floor must read 600 MHz; the pass stops at a 78 °C reading
   (lib.sh) and the session aborts and restores above **85 W** board (E69's bound, not raised).
-- **GO / NO-GO / UNKNOWN:** **filled at gate time**, on the gates above, with the two standing residuals
+- **GO / NO-GO / UNKNOWN:** **GO**, 2026-10-27 **15:06 PDT**, on the gates above, with the two standing residuals
   (build identity; no independent hardware recovery path for this fleet) and E69's dated health flag.
 - **Operator releasing this operation:** the owner's authorization of 27 Oct 2026 for the governor on
   this card, naming E72's TDP-0 pin specifically, recorded verbatim above. No "it built, therefore run
@@ -305,8 +328,8 @@ rc and an ISO-millisecond timestamp) and `restore`. Filled from it after the ses
 
 | Item | Value |
 |---|---|
-| Originals read under the lock, before any set | *filled at gate time* |
-| vmin-LUT minion frequency floor | *filled at gate time* |
+| Originals read under the lock, before any set | 2026-10-27 **14:59:39 PDT** — TDP **65 W**, software threshold **65 °C**, power state `low_power`, 600 MHz, 519 mV |
+| vmin-LUT minion frequency floor | **600 MHz** (points 600 / 700 / 800), read 14:59:39 PDT |
 | Sets sent | *filled* |
 | Command exit statuses | *filled* |
 | Read-back mismatches | *filled* |
