@@ -166,7 +166,10 @@ setpoint. Every E60 and E65 pass with an approach keeps the 0.5 °C gate unchang
 re-reduced with this code to confirm their numbers do not move.
 
 **A9, Mon 26 Oct 2026, 17:45 PDT (written while block D's no-approach passes were running, before any data of the
-second regime it adds).** A7's no-approach block D launches at **59 °C**, one degree above blocks A and B's 58 °C
+second regime it adds).** 🛑 *The first sentence of this amendment is factually wrong and is corrected by A11
+below: A7's passes launched at 55–62 °C, not 59 °C, and the reason a second regime was needed is the drift gate,
+not a lack of spread. The text is left as written because it is the registered record of what was believed at
+17:45; the regime it adds is unchanged and its data stands.* A7's no-approach block D launches at **59 °C**, one degree above blocks A and B's 58 °C
 (`build/e65-d.log`, "start 59.0 C" on every run): that is the plateau this duty cycle actually reaches, and by A7's
 own words it is "under 2 °C" and cannot score D1. **Added:** a second block-D regime with a real setpoint,
 `HL_PREHEAT=62 HL_TARGET=61`, six passes of the same four items, so the block has three launch readings (58 °C from
@@ -185,6 +188,43 @@ extra fixed switching, so the code's string was wrong against the rule it implem
 (it is 0.02 W outside the first branch and the wrong sign for the second). The code now prints the registered
 rule's verdict. The rule itself is unchanged and nothing was re-registered; the README reports the registered
 verdict, the raw number and why the sign matters.
+
+**A11, Mon 26 Oct 2026, 18:5x PDT (a correction to this record, made after all the data and changing no rule, no
+code and no number).** A review of the published E65 write-up found three statements in it that the committed data
+contradicts. Nothing measured moves; what changes is what this file and the results documents *claim*. In order:
+
+- **A9's launch temperature was wrong, and so was its stated reason.** A9 says "A7's no-approach block D launches
+  at **59 °C** … (`build/e65-d.log`, 'start 59.0 C' on every run)". The committed copy of that log
+  (`docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/logs/queue-d-a7.log`) and `runs-blockD.csv` both say
+  otherwise: over passes 671–678 the launch readings are **55–62 °C**, distributed 55 ×2, 56 ×1, 57 ×5, 58 ×4,
+  59 ×8, 60 ×13, 61 ×12, 62 ×3 — only 8 of 48 runs at 59.0, median and mode 60 — and they **climb monotonically
+  pass by pass** (671 = 55–57, 678 = 60–62) as the card warms with no idle between passes. So A7 did **not** give
+  "under 2 °C" of leverage; it gave **7 °C**, more than twice the 3 °C D1 was finally scored on. A9's premise is
+  therefore false, and the regime it added still turned out to be necessary, for a reason A9 did not state and
+  could not yet see at 17:45: **A7's launch spread is produced by the same within-pass warming that the registered
+  0.3 W `anchor_pi` drift gate rejects**, so every one of those eight passes was later set aside (drift +0.57 to
+  +0.74 W) and none of their 7 °C was admissible. The honest justification for A9 is "the no-approach regime cannot
+  pass the registered drift gate, so a gated regime at a real setpoint is needed", not "the card has no spread".
+  For the record, blocks A and B's approaches peaked at **59–61 °C** (`logs/queue-ab.log`: 59.0 ×3, 60.0 ×107,
+  61.0 ×13), not uniformly 60–61 as A7 says.
+- **D1 was scored on a contrast this registration never names, and that is a departure, not the registered rule.**
+  Registered D1 is "the switching difference **`lq_h8` − `lq_h0`** grows by +0.3 to +0.5 %/°C between the 58 °C and
+  the 65 °C launch". But blocks A and B — the only blocks that run at 58 °C — were registered with the items
+  `bit_<j>` against `lq_h0` and `bpi_<j>` against `lb_h0`; `lq_h8` appears in **block D alone** (14 runs, 0 in
+  `runs.csv`). The registered contrast therefore has data at one temperature only and was **unmeasurable by
+  construction** — a flaw in the registration itself, not in the run. D1 was scored instead on **`bit_22` − `lq_h0`**,
+  the only item pair that blocks A, B and D share. That substitution is a **departure**, disclosed here; it was not
+  registered before the data and neither A7 nor A9 names it. The lesson for the next card block: an across-regime
+  prediction must have its *items* registered in every block it is meant to compare.
+- **A2's reference was misdescribed, and A2 passes either way.** The results documents say E60's amendment A1
+  "moved" the bit scan off aifoundry1's card 0 to aifoundry3, which would make E60's own "Per card" table stale.
+  It did not. E60's A1 **added** the family to aifoundry3 passes 5–8 while keeping "aifoundry2, passes 6–10 and
+  aifoundry1 card 0, passes 6–10: the registered lists again", and E60's committed `hl.json` carries all six
+  positions under **both** `aifoundry1-c0` and `aifoundry3`. E60's "Per card" table is an accurate record of its
+  registration and must not be edited. A2 was scored as a same-card replication (worst ratio **1.122**); under the
+  **literal registered test** — E60's aifoundry1-c0 values rescaled by f·V² = 0.562 — the worst ratio is **1.106**,
+  also inside the registered 1.5. **A2 is PASS on the registered rule as written**, and the same-card reading is
+  reported beside it as the harder test, not in place of it.
 
 ## Files
 
