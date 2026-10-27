@@ -32,6 +32,45 @@
     '<div class="tile' + (hi ? ' hi' : '') + '"><div class="n">' + n + (u ? ' <span class="u">' + u + '</span>' : '') +
     '</div><div class="l">' + l + '</div></div>';
 
+  /* Every chart is drawn into a viewBox as wide as its own container, so one user unit is one CSS pixel and
+     12px chart type stays 12px on a phone. Before this the charts were fixed at 760-900 units behind a
+     min-width of 660, which meant a 390px phone saw about half of each one -- the ladder lost its whole
+     value column and the waterfall's last label was cut mid-word. Each draw() therefore takes its width and
+     lays itself out for it, and the chart is redrawn when the container changes size. */
+  function responsive(host, draw) {
+    const box = $(host);
+    if (!box) return;
+    let last = -1;
+    const run = () => {
+      const w = Math.max(300, Math.min(900, Math.round(box.clientWidth || 900)));
+      if (Math.abs(w - last) < 8) return;
+      last = w;
+      while (box.firstChild) box.removeChild(box.firstChild);
+      draw(w);
+    };
+    run();
+    if (window.ResizeObserver) new window.ResizeObserver(run).observe(box);
+    else window.addEventListener('resize', run);
+  }
+
+  /* The same, for an element the callback rewrites itself (a table that transposes on a phone rather than
+     scrolling sideways and hiding its last two columns). */
+  function onWidth(host, draw) {
+    const e = $(host);
+    if (!e) return;
+    const box = e.parentNode || e;
+    let last = -1;
+    const run = () => {
+      const w = Math.max(300, Math.round(box.clientWidth || 900));
+      if (Math.abs(w - last) < 8) return;
+      last = w;
+      draw(w);
+    };
+    run();
+    if (window.ResizeObserver) new window.ResizeObserver(run).observe(box);
+    else window.addEventListener('resize', run);
+  }
+
   /* ---------------------------------------------------------------- 1. tiles */
   const sp = D.speed, bd = D.board, pm = D.permac, pb = D.perbit, tg = D.toggles, ga = D.gates, tr = D.transistor;
   const w800 = bd.measured.zeros['800'], r800 = bd.measured.randn['800'];
@@ -62,6 +101,9 @@
   set('a-pz', num(pm.mean_zeros_pJ, 2) + ' pJ');
   set('a-pr', num(pm.mean_randn_pJ, 2) + ' pJ');
   set('a-bit', num(pb.e68_band_fJ[0], 0) + '–' + num(pb.e68_band_fJ[1], 0) + ' fJ');
+  set('a-pdata', num(pm.this_work_data_pJ, 2) + ' pJ');
+  set('a-bits', num(pm.changed_bits, 1));
+  set('a-perbit-chk', num(pm.data_per_changed_bit_fJ, 0) + ' fJ');
   set('a-tog', num(tg.total_per_mac, 0));
   set('a-fins', num(tr.fins_per_signal_net, 1));
   set('a-tr', num(tr.E_aJ, 2) + ' aJ');
@@ -69,49 +111,66 @@
   set('a-land', sci(D.floor.rungs.transistor.over_Landauer_at_66C));
 
   /* ------------------------------------------------------------- 2. the ladder */
-  (function ladder() {
+  const DECADES = Math.log10(D.floor.rungs.mac_board.E_J / D.floor.rungs.electron.E_J);
+  const DECW = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+    'eleven', 'twelve'][Math.round(DECADES)] || num(DECADES, 1);
+  /* "just under eight", not the "eleven" this page carried on its first build: the ladder runs from
+     8.28e-20 J to 5.78e-12 J, which is 7.84 decades, and the chart's own axis shows it. */
+  const DECPHRASE = (DECADES < Math.round(DECADES) ? 'just under ' : 'just over ') + DECW;
+  set('a-dec', DECPHRASE);
+
+  responsive('ladder', function (W) {
     const R = D.floor.rungs;
     const rows = [
       ['mac_board', 1, '0\u20134'], ['mac_netlist', 0, '6\u20137'],
       ['bit_board', 1, '5'], ['bit_netlist', 0, '6'],
       ['clock_rise', 0, '7'], ['signal_rise', 0, '7'], ['gate_pin', 0, '7'],
       ['fin_in_cell', 0, '8'], ['transistor', 0, '8'], ['electron', 0, '9']
-    ].map(r => [R[r[0]].label, R[r[0]].E_J, r[1], r[2]]);
+    ].map(r => [R[r[0]].label, R[r[0]].E_J, r[1], r[2], R[r[0]].short || R[r[0]].label]);
     const land = D.floor.land66_J;
-    const W = 760, ROW = 42, top = 38, H = top + rows.length * ROW + 34;
-    const L = 14, VX = W - 96, Rx = VX - 22;           // axis ends before the value column
+    const narrow = W < 620;
+    const ROW = narrow ? 46 : 42, top = 38, padR = 6;
+    const valW = narrow ? 58 : 76, VALX = W - padR;
+    const legRows = narrow ? 2 : 1;
+    const H = top + rows.length * ROW + 20 + legRows * 17;
+    const L = 14, Rx = VALX - valW - 10;               // axis ends before the value column
     const lo = Math.log10(land) - 0.3, hi = Math.log10(rows[0][1]) + 0.25;
     const X = v => L + (Math.log10(v) - lo) * (Rx - L) / (hi - lo);
+    const base = top + rows.length * ROW + 6;          // below the last rung: ticks, then the legend
     const s = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img',
-      'aria-label': 'A logarithmic ladder of energy per event, from one electron across the rail at 83 zeptojoules up to one random floating-point multiply-add at the board at 5.8 picojoules \u2014 eleven orders of magnitude \u2014 with Landauer\u2019s floor marked below all of them.'}, $('ladder'));
+      'aria-label': 'A logarithmic ladder of energy per event, from one electron across the rail at 83 zeptojoules up to one random floating-point multiply-add at the board at 5.8 picojoules \u2014 ' +
+        DECPHRASE + ' orders of magnitude \u2014 with Landauer\u2019s floor marked below all of them.'}, $('ladder'));
     const sup = e => '10' + (e < 0 ? '\u2212' : '') + String(Math.abs(e)).split('').map(c => '\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079'[+c]).join('');
+    const every = narrow ? 3 : 3;
     for (let e = Math.ceil(lo); e <= Math.floor(hi); e += 1) {
       const x = X(Math.pow(10, e));
-      el('line', {x1: x, x2: x, y1: top + 4, y2: H - 30, stroke: 'var(--grid)'}, s);
-      if (e % 3 === 0) tx(s, x, H - 14, sup(e), 'tick', 'middle').setAttribute('fill', 'var(--muted)');
+      el('line', {x1: x, x2: x, y1: top + 4, y2: base - 10, stroke: 'var(--grid)'}, s);
+      if (e % every === 0) tx(s, x, base + 4, sup(e), 'tick', 'middle').setAttribute('fill', 'var(--muted)');
     }
-    tx(s, L, H - 14, 'joules per event', 'tick').setAttribute('fill', 'var(--ink-2)');
+    if (!narrow) tx(s, L, base + 4, 'joules per event', 'tick').setAttribute('fill', 'var(--ink-2)');
     const lx = X(land);
-    el('line', {x1: lx, x2: lx, y1: top - 4, y2: H - 30, stroke: 'var(--ref)', 'stroke-dasharray': '4 3'}, s);
-    tx(s, lx, top - 12, 'Landauer\u2019s floor, 66 ' + DEG + 'C', 'tick').setAttribute('fill', 'var(--ref)');
+    el('line', {x1: lx, x2: lx, y1: top - 4, y2: base - 10, stroke: 'var(--ref)', 'stroke-dasharray': '4 3'}, s);
+    tx(s, lx, top - 12, narrow ? 'Landauer' : 'Landauer\u2019s floor, 66 ' + DEG + 'C', 'tick')
+      .setAttribute('fill', 'var(--ref)');
     rows.forEach((r, i) => {
-      const yl = top + 14 + i * ROW, ya = yl + 15;
-      const t = tx(s, L, yl, r[0], 'tick');
+      const yl = top + 14 + i * ROW, ya = yl + 16;
+      const t = tx(s, L, yl, narrow ? r[4] : r[0], narrow ? 'tick sm' : 'tick');
       t.setAttribute('fill', 'var(--ink)');
       if (r[2]) t.setAttribute('font-weight', '600');
-      tx(s, VX + 76, yl, 'step ' + r[3], 'tick', 'end').setAttribute('fill', 'var(--muted)');
+      if (!narrow) tx(s, VALX, yl, 'step ' + r[3], 'tick', 'end').setAttribute('fill', 'var(--muted)');
       el('line', {x1: lx, x2: X(r[1]), y1: ya, y2: ya, stroke: 'var(--grid)', 'stroke-width': 2}, s);
       el('circle', {cx: X(r[1]), cy: ya, r: 5.5, fill: r[2] ? 'var(--c1)' : 'var(--page)',
         stroke: r[2] ? 'var(--c1)' : 'var(--c2)', 'stroke-width': 2}, s);
-      tx(s, VX + 76, ya + 4, eng(r[1]), 'tick', 'end')
+      tx(s, VALX, ya + 4, eng(r[1]), 'tick', 'end')
         .setAttribute('fill', r[2] ? 'var(--c1)' : 'var(--ink-2)');
     });
-    const ly = H - 30;
-    el('circle', {cx: L + 6, cy: ly - 2, r: 5, fill: 'var(--c1)'}, s);
-    tx(s, L + 16, ly + 2, 'measured on a card', 'tick').setAttribute('fill', 'var(--ink-2)');
-    el('circle', {cx: L + 150, cy: ly - 2, r: 5, fill: 'var(--page)', stroke: 'var(--c2)', 'stroke-width': 2}, s);
-    tx(s, L + 160, ly + 2, 'modelled or simulated', 'tick').setAttribute('fill', 'var(--ink-2)');
-  }());
+    const ly = base + 21;
+    el('circle', {cx: L + 6, cy: ly - 4, r: 5, fill: 'var(--c1)'}, s);
+    tx(s, L + 16, ly, 'measured on a card', 'tick').setAttribute('fill', 'var(--ink-2)');
+    const l2x = narrow ? L + 6 : L + 150, l2y = narrow ? ly + 17 : ly;
+    el('circle', {cx: l2x, cy: l2y - 4, r: 5, fill: 'var(--page)', stroke: 'var(--c2)', 'stroke-width': 2}, s);
+    tx(s, l2x + 10, l2y, 'modelled or simulated', 'tick').setAttribute('fill', 'var(--ink-2)');
+  });
 
   /* ---------------------------------------------------- 3. per-level fill-ins */
   set('lv0-big', num(sp.burst.zeros_tflops, 1) + ' against ' + num(sp.burst.randn_tflops, 1) +
@@ -181,13 +240,14 @@
   }
 
   /* 5a. board power by pattern and clock */
-  (function boardchart() {
+  responsive('boardchart', function (W) {
     const m = bd.measured, clocks = [600, 700, 800];
     const keys = Object.keys(m).sort((a, b) => m[a]['800'] - m[b]['800']);
     const nice = {randn: 'random fp32', zeros: 'zeros', ones: 'all ones', signs: 'sign bits only',
       uniform: 'uniform', mant: 'mantissa bits', pow2: 'powers of two', sparse75: '75% sparse',
       a_randn_b_ones: 'a random, b ones', a_ones_b_randn: 'a ones, b random'};
-    const W = 900, H = 330, L = 56, Rt = 210, T = 16, B = 40;
+    const narrow = W < 700;
+    const H = narrow ? 290 : 330, L = narrow ? 40 : 56, Rt = narrow ? 10 : 210, T = narrow ? 26 : 16, B = 40;
     const vals = keys.map(k => clocks.map(c => m[k][String(c)])).flat();
     const ymax = Math.ceil(Math.max.apply(null, vals) / 10) * 10;
     const X = c => L + (c - 600) * (W - Rt - L) / 200, Y = v => H - B - v * (H - B - T) / ymax;
@@ -195,94 +255,137 @@
       'Board power against clock for ten operand patterns. Zeros is the lowest line at every clock and random floating-point data the highest; the two diverge as the clock rises.');
     for (let v = 0; v <= ymax; v += 20) {
       el('line', {x1: L, x2: W - Rt, y1: Y(v), y2: Y(v), stroke: 'var(--grid)'}, s);
-      tx(s, L - 8, Y(v) + 4, num(v, 0), 'tick', 'end').setAttribute('fill', 'var(--muted)');
+      tx(s, L - 6, Y(v) + 4, num(v, 0), 'tick', 'end').setAttribute('fill', 'var(--muted)');
     }
-    clocks.forEach(c => tx(s, X(c), H - B + 18, c + ' MHz', 'tick', 'middle').setAttribute('fill', 'var(--muted)'));
-    tx(s, L - 8, T + 2, 'W', 'tick', 'end').setAttribute('fill', 'var(--ink-2)');
+    clocks.forEach((c, i) => tx(s, X(c), H - B + 18, narrow ? String(c) : c + ' MHz', 'tick',
+      narrow ? (i === 0 ? 'start' : i === 2 ? 'end' : 'middle') : 'middle').setAttribute('fill', 'var(--muted)'));
+    if (narrow) tx(s, W - Rt, H - B + 31, 'MHz', 'tick', 'end').setAttribute('fill', 'var(--muted)');
+    tx(s, L - 6, T - 6, 'W', 'tick', 'end').setAttribute('fill', 'var(--ink-2)');
     keys.forEach(k => {
       const hot = k === 'randn' || k === 'zeros';
       const col = k === 'randn' ? 'var(--c2)' : k === 'zeros' ? 'var(--c1)' : 'var(--ref)';
       const d = clocks.map((c, i) => (i ? 'L' : 'M') + X(c).toFixed(1) + ',' + Y(m[k][String(c)]).toFixed(1)).join(' ');
       el('path', {d, fill: 'none', stroke: col, 'stroke-width': hot ? 2.6 : 1.2, opacity: hot ? 1 : 0.65}, s);
       clocks.forEach(c => el('circle', {cx: X(c), cy: Y(m[k][String(c)]), r: hot ? 3.6 : 2.2, fill: col, opacity: hot ? 1 : 0.65}, s));
+      if (narrow) return;                               // no room for a label gutter on a phone
       const t = tx(s, W - Rt + 9, Y(m[k]['800']) + 4, (nice[k] || k) + '  ' + num(m[k]['800'], 1) + ' W', 'tick');
       t.setAttribute('fill', hot ? col : 'var(--ink-2)');
       if (hot) t.setAttribute('font-weight', '700');
     });
-  }());
+    if (narrow) {                                       // label the two lines that carry the finding
+      [['randn', -11, 'var(--c2)'], ['zeros', 17, 'var(--c1)']].forEach(function (q) {
+        const t = tx(s, X(800) - 6, Y(m[q[0]]['800']) + q[1],
+          nice[q[0]] + ' ' + num(m[q[0]]['800'], 1) + ' W', 'tick', 'end');
+        t.setAttribute('fill', q[2]);
+        t.setAttribute('font-weight', '700');
+      });
+      tx(s, L, T - 12, 'eight more patterns in grey', 'tick').setAttribute('fill', 'var(--muted)');
+    }
+  });
 
   /* 5b. the per-bit price list */
-  (function bitchart() {
-    const W = 900, H = 320, L = 52, Rt = 14, T = 20, B = 44;
+  responsive('bitchart', function (W) {
+    const narrow = W < 620;
+    const H = narrow ? 280 : 320, L = narrow ? 40 : 52, Rt = narrow ? 10 : 14, T = 20, B = 44;
     const ymax = Math.max(pb.A_max, pb.B_max) * 1.05;
     const X = i => L + i * (W - Rt - L) / 31, Y = v => H - B - v * (H - B - T) / ymax;
     const s = frame('bitchart', W, H,
       'Energy to flip one bit position, for all 32 positions of each operand. Both sides climb steeply from about 80 to 150 femtojoules at the bottom of the mantissa to 1,008 and 1,440 femtojoules at bit 22, then drop back for the exponent and sign bits.');
-    for (let v = 0; v <= ymax; v += 250) {
+    for (let v = 0; v <= ymax; v += (narrow ? 500 : 250)) {
       el('line', {x1: L, x2: W - Rt, y1: Y(v), y2: Y(v), stroke: 'var(--grid)'}, s);
-      tx(s, L - 8, Y(v) + 4, num(v, 0), 'tick', 'end').setAttribute('fill', 'var(--muted)');
+      tx(s, L - 6, Y(v) + 4, num(v, 0), 'tick', 'end').setAttribute('fill', 'var(--muted)');
     }
-    tx(s, L - 8, T - 4, 'fJ', 'tick', 'end').setAttribute('fill', 'var(--ink-2)');
-    [[0, 22, 'mantissa'], [23, 30, 'exponent'], [31, 31, 'sign']].forEach(g => {
+    tx(s, L - 6, T - 4, 'fJ', 'tick', 'end').setAttribute('fill', 'var(--ink-2)');
+    [[0, 22, 'mantissa'], [23, 30, narrow ? 'exp' : 'exponent'], [31, 31, narrow ? 'sgn' : 'sign']].forEach(g => {
       const xa = X(g[0]) - 6, xb = X(g[1]) + 6;
       el('line', {x1: xa, x2: xb, y1: H - B + 20, y2: H - B + 20, stroke: 'var(--axis)'}, s);
-      tx(s, (xa + xb) / 2, H - B + 34, g[2], 'tick', 'middle').setAttribute('fill', 'var(--muted)');
+      tx(s, Math.min((xa + xb) / 2, W - 14), H - B + 34, g[2], 'tick', 'middle').setAttribute('fill', 'var(--muted)');
     });
-    [0, 8, 16, 22, 31].forEach(i => tx(s, X(i), H - B + 14, String(i), 'tick', 'middle').setAttribute('fill', 'var(--muted)'));
+    (narrow ? [0, 8, 16, 22, 31] : [0, 8, 16, 22, 31]).forEach(i =>
+      tx(s, X(i), H - B + 14, String(i), 'tick', 'middle').setAttribute('fill', 'var(--muted)'));
     [['B_fJ', 'var(--c1)', 'B side (multiplier)'], ['A_fJ', 'var(--c2)', 'A side (multiplicand)']].forEach(ser => {
       const o = pb[ser[0]];
       const d = Array.from({length: 32}, (_, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(o[String(i)]).toFixed(1)).join(' ');
-      el('path', {d, fill: 'none', stroke: ser[1], 'stroke-width': 2.2}, s);
-      for (let i = 0; i < 32; i++) el('circle', {cx: X(i), cy: Y(o[String(i)]), r: 2.8, fill: ser[1]}, s);
+      el('path', {d, fill: 'none', stroke: ser[1], 'stroke-width': narrow ? 1.8 : 2.2}, s);
+      for (let i = 0; i < 32; i++) el('circle', {cx: X(i), cy: Y(o[String(i)]), r: narrow ? 1.9 : 2.8, fill: ser[1]}, s);
     });
-    tx(s, X(22) - 10, Y(pb.A_fJ['22']) - 9, 'A bit 22: ' + num(pb.A_max, 0) + ' fJ', 'tick', 'end').setAttribute('fill', 'var(--c2)');
-    tx(s, X(22) + 8, Y(pb.B_fJ['22']) + 2, 'B bit 22: ' + num(pb.B_max, 0) + ' fJ', 'tick', 'end').setAttribute('fill', 'var(--c1)');
-    tx(s, X(5), Y(pb.B_min) - 12, 'B bit 6: ' + num(pb.B_min, 0) + ' fJ', 'tick').setAttribute('fill', 'var(--c1)');
-  }());
+    if (narrow) {
+      /* The two peaks sit on top of each other at this width, so their callouts go in the empty corner
+         above the low mantissa bits instead of next to the points. */
+      tx(s, L + 4, T + 8, 'A bit 22: ' + num(pb.A_max, 0) + ' fJ', 'tick sm').setAttribute('fill', 'var(--c2)');
+      tx(s, L + 4, T + 23, 'B bit 22: ' + num(pb.B_max, 0) + ' fJ', 'tick sm').setAttribute('fill', 'var(--c1)');
+      tx(s, L + 4, T + 38, 'B bit 6: ' + num(pb.B_min, 0) + ' fJ', 'tick sm').setAttribute('fill', 'var(--muted)');
+    } else {
+      tx(s, X(22) - 10, Y(pb.A_fJ['22']) - 9, 'A bit 22: ' + num(pb.A_max, 0) + ' fJ', 'tick', 'end').setAttribute('fill', 'var(--c2)');
+      tx(s, X(22) + 8, Y(pb.B_fJ['22']) + 2, 'B bit 22: ' + num(pb.B_max, 0) + ' fJ', 'tick', 'end').setAttribute('fill', 'var(--c1)');
+      tx(s, X(5), Y(pb.B_min) - 12, 'B bit 6: ' + num(pb.B_min, 0) + ' fJ', 'tick').setAttribute('fill', 'var(--c1)');
+    }
+  });
 
   /* 5c. what the switching energy charges */
-  (function splitchart() {
+  responsive('splitchart', function (W) {
     const sh = ga.split_share, pj = ga.split_pJ;
     const keys = ['transistor gates', 'wire inside the cells', 'wire between the cells'];
-    const W = 900, H = 150, L = 190, Rt = 150;
+    const narrow = W < 680;
+    const ROW = narrow ? 54 : 40, H = (narrow ? 14 : 22) + keys.length * ROW + (narrow ? 4 : 10);
+    const L = narrow ? 0 : 190, Rt = narrow ? 0 : 150;
     const s = frame('splitchart', W, H,
       'Of one random multiply-add’s switching energy, 20% charges transistor gates, 41% the wire inside the standard cells and 39% the wire between them.');
     const bw = W - L - Rt;
     keys.forEach((k, i) => {
-      const y = 22 + i * 40;
+      const key = k.replace(/ /g, '_');
+      const col = i === 0 ? 'var(--c1)' : 'var(--ref)';
+      const val = pct(sh[key], 1) + '  ·  ' + num(pj[key], 3) + ' pJ';
+      if (narrow) {                                     // label over the bar, value at the right of it
+        const y = 14 + i * ROW;
+        tx(s, 0, y, k, 'tick').setAttribute('fill', 'var(--ink)');
+        tx(s, W - 2, y, val, 'tick', 'end').setAttribute('fill', col);
+        el('rect', {x: 0, y: y + 8, width: bw, height: 20, fill: 'var(--grid)', rx: 3}, s);
+        el('rect', {x: 0, y: y + 8, width: Math.max(2, bw * sh[key]), height: 20, fill: col, rx: 3}, s);
+        return;
+      }
+      const y = 22 + i * ROW;
       tx(s, L - 10, y + 15, k, 'tick', 'end').setAttribute('fill', 'var(--ink)');
       el('rect', {x: L, y, width: bw, height: 22, fill: 'var(--grid)', rx: 3}, s);
-      el('rect', {x: L, y, width: Math.max(2, bw * sh[k.replace(/ /g, '_')]), height: 22,
-        fill: i === 0 ? 'var(--c1)' : 'var(--ref)', rx: 3}, s);
-      tx(s, L + bw + 10, y + 15, pct(sh[k.replace(/ /g, '_')], 1) + '  ·  ' + num(pj[k.replace(/ /g, '_')], 3) + ' pJ', 'tick')
-        .setAttribute('fill', i === 0 ? 'var(--c1)' : 'var(--ink-2)');
+      el('rect', {x: L, y, width: Math.max(2, bw * sh[key]), height: 22, fill: col, rx: 3}, s);
+      tx(s, L + bw + 10, y + 15, val, 'tick').setAttribute('fill', i === 0 ? 'var(--c1)' : 'var(--ink-2)');
     });
-  }());
+  });
 
   /* 5d. the waterfall */
-  (function waterfall() {
+  responsive('waterfall', function (W) {
     const wf = D.waterfall;
-    const W = 900, H = 300, T = 28, B = 56, L = 56, gap = 54;
+    const narrow = W < 700;
+    /* On a phone the four bars and their labels have to fit the screen, and the stack's legend moves under
+       the axis instead of into a right-hand gutter. */
+    const T = 28, L = narrow ? 32 : 56, padR = narrow ? 4 : 10;
+    const inner = narrow ? 8 : 14, gap = narrow ? 16 : 54;
+    const B = narrow ? 128 : 56, H = narrow ? 340 : 300;
+    const startx = L + (narrow ? 4 : 18);
+    const barw = narrow
+      ? Math.max(30, Math.floor((W - padR - startx - 2 * inner - (inner + gap)) / 4))
+      : 86;
     const ymax = wf.board_pJ * 1.12;
     const Y = v => H - B - v * (H - B - T) / ymax;
     const s = frame('waterfall', W, H,
       'A random multiply-add costs 5.78 picojoules at the board. The bottom-up count names 1.95 of them — 0.31 transistor gates, 0.62 wire inside the cells, 0.59 wire between the cells and 0.43 the cells’ own internal energy — leaving 3.84 picojoules, two thirds, unaccounted.');
     for (let v = 0; v <= 6; v += 1) {
-      el('line', {x1: L, x2: W - 10, y1: Y(v), y2: Y(v), stroke: 'var(--grid)'}, s);
-      tx(s, L - 8, Y(v) + 4, num(v, 0), 'tick', 'end').setAttribute('fill', 'var(--muted)');
+      el('line', {x1: L, x2: W - padR, y1: Y(v), y2: Y(v), stroke: 'var(--grid)'}, s);
+      tx(s, L - 6, Y(v) + 4, num(v, 0), 'tick', 'end').setAttribute('fill', 'var(--muted)');
     }
-    tx(s, L - 8, T - 8, 'pJ', 'tick', 'end').setAttribute('fill', 'var(--ink-2)');
-    const barw = 86;
-    let x = L + 18;
+    tx(s, L - 6, T - 8, 'pJ', 'tick', 'end').setAttribute('fill', 'var(--ink-2)');
+    let x = startx;
     const col = (lab, v, c, sub) => {
       el('rect', {x, y: Y(v), width: barw, height: H - B - Y(v), fill: c, rx: 3}, s);
       tx(s, x + barw / 2, Y(v) - 7, num(v, 2), 'tick', 'middle').setAttribute('fill', 'var(--ink)');
-      lab.split('|').forEach((ln, i) => tx(s, x + barw / 2, H - B + 16 + i * 13, ln, 'tick', 'middle').setAttribute('fill', 'var(--ink-2)'));
-      if (sub) tx(s, x + barw / 2, H - B + 16 + lab.split('|').length * 13, sub, 'tick', 'middle').setAttribute('fill', 'var(--muted)');
-      x += barw + 14;
+      lab.split('|').forEach((ln, i) => tx(s, x + barw / 2, H - B + 16 + i * 13, ln,
+        narrow ? 'tick sm' : 'tick', 'middle').setAttribute('fill', 'var(--ink-2)'));
+      if (sub) tx(s, x + barw / 2, H - B + 16 + lab.split('|').length * 13, sub,
+        narrow ? 'tick sm' : 'tick', 'middle').setAttribute('fill', 'var(--muted)');
+      x += barw + inner;
     };
     col('at the|board', wf.board_pJ, 'var(--c2)', '(E38)');
-    col('at the|minion rail', D.gates.rail_pJ, 'var(--ref)', '');
+    col(narrow ? 'at the|rail' : 'at the|minion rail', D.gates.rail_pJ, 'var(--ref)', '');
     x += gap;
     // stacked accounted bar
     const stackx = x, cols = ['var(--c1)', 'var(--c3)', 'var(--c4)', 'var(--c7)'];
@@ -294,8 +397,9 @@
     el('rect', {x: stackx, y: Y(acc), width: barw, height: H - B - Y(acc), fill: 'none', stroke: 'var(--axis)'}, s);
     tx(s, stackx + barw / 2, Y(acc) - 7, num(acc, 2), 'tick', 'middle').setAttribute('fill', 'var(--ink)');
     ['counted|bottom-up'].forEach(l => l.split('|').forEach((ln, i) =>
-      tx(s, stackx + barw / 2, H - B + 16 + i * 13, ln, 'tick', 'middle').setAttribute('fill', 'var(--ink-2)')));
-    x = stackx + barw + 14;
+      tx(s, stackx + barw / 2, H - B + 16 + i * 13, ln, narrow ? 'tick sm' : 'tick', 'middle')
+        .setAttribute('fill', 'var(--ink-2)')));
+    x = stackx + barw + inner;
     // the remainder, hatched
     const d = el('defs', {}, s), p = el('pattern', {id: 'wfh', width: 7, height: 7, patternUnits: 'userSpaceOnUse',
       patternTransform: 'rotate(45)'}, d);
@@ -305,17 +409,21 @@
       fill: 'url(#wfh)', stroke: 'var(--axis)', rx: 3}, s);
     tx(s, x + barw / 2, Y(wf.unaccounted_pJ) - 7, num(wf.unaccounted_pJ, 2), 'tick', 'middle').setAttribute('fill', 'var(--ink)');
     ['not yet|accounted'].forEach(l => l.split('|').forEach((ln, i) =>
-      tx(s, x + barw / 2, H - B + 16 + i * 13, ln, 'tick', 'middle').setAttribute('fill', 'var(--ink-2)')));
-    tx(s, x + barw / 2, H - B + 42, pct(wf.unaccounted_pJ / wf.board_pJ) + ' of the board', 'tick', 'middle')
-      .setAttribute('fill', 'var(--muted)');
-    // legend for the stack
-    let ly = T + 2;
+      tx(s, x + barw / 2, H - B + 16 + i * 13, ln, narrow ? 'tick sm' : 'tick', 'middle')
+        .setAttribute('fill', 'var(--ink-2)')));
+    tx(s, Math.min(x + barw / 2, W - padR - 24), H - B + 42,
+      pct(wf.unaccounted_pJ / wf.board_pJ) + (narrow ? '' : ' of the board'),
+      narrow ? 'tick sm' : 'tick', 'middle').setAttribute('fill', 'var(--muted)');
+    // legend for the stack: a right-hand gutter when there is one, otherwise under the axis
+    let ly = narrow ? H - B + 70 : T + 2;
+    const lgx = narrow ? L - 24 : W - 232;
     wf.steps.forEach((st, i) => {
-      el('rect', {x: W - 232, y: ly - 9, width: 11, height: 11, fill: cols[i], rx: 2}, s);
-      tx(s, W - 216, ly, st.k + '  ' + num(st.pJ, 3) + ' pJ', 'tick').setAttribute('fill', 'var(--ink-2)');
+      el('rect', {x: lgx, y: ly - 9, width: 11, height: 11, fill: cols[i], rx: 2}, s);
+      tx(s, lgx + 16, ly, st.k + '  ' + num(st.pJ, 3) + ' pJ', narrow ? 'tick sm' : 'tick')
+        .setAttribute('fill', 'var(--ink-2)');
       ly += 17;
     });
-  }());
+  });
 
   set('cl-cap', pct(1 - ga.capacitance_priced, 1));
 
@@ -334,12 +442,80 @@
   set('pb-band', TIMES + num(cl.burst_band[0], 3) + ' to ' + TIMES + num(cl.burst_band[1], 3));
   set('ps-win', num(cl.clamp_width_W, 1) + ' W');
   set('pb-bu', TIMES + num(cl.bottom_up_burst[0], 2) + ' to ' + TIMES + num(cl.bottom_up_burst[1], 2));
+
+  /* Which candidate caps are inside the clamp window, counted from the data. The page said "every" one of
+     them until 2026-10-27; E64's own measured sustained randn point is above the window, and at that cap
+     random would settle above the 600 MHz floor instead of on it. */
+  (function caps() {
+    const ins = Object.keys(cl.caps_inside || {}), out = Object.keys(cl.caps_outside || {});
+    const nw = ['no', 'one', 'two', 'three', 'four', 'five', 'six'];
+    set('ps-caps', nw[ins.length] || String(ins.length));
+    set('ps-capn', nw[ins.length + out.length] || String(ins.length + out.length));
+    if (!out.length) { const w = $('ps-exc-wrap'); if (w) w.style.display = 'none'; return; }
+    const hi = cl.clamp_window_W[1];
+    set('ps-exc', 'The fourth — ' + out.map(k => k + ', at ' + num(cl.caps_outside[k], 1) + NB + 'W')
+      .join('; and ') + ' — is above the window, which ends at ' + num(hi, 1) + NB + 'W. At that cap ' +
+      'random data would settle above the governor’s floor instead of on it, and the ratio would fall ' +
+      'to about ' + TIMES + '1.30. So the clamp holds for ' + (nw[ins.length] || ins.length) + ' of the ' +
+      (nw[ins.length + out.length] || (ins.length + out.length)) + ' caps, not all of them, and the ' +
+      'ordinal claim is the part that survives either way. The reason that cap is on the list at all: ' +
+      cl.cap_source_note);
+  }());
+
   (function predtab() {
-    const r = cl.results, nice = {zeros: 'zeros', ones: 'all ones', randn_M: 'random fp32'};
-    $('predtab').querySelector('tbody').innerHTML = Object.keys(nice).filter(k => r[k]).map(k =>
-      '<tr><td>' + nice[k] + '</td><td class="n">' + num(r[k].burst_mhz, 0) + ' MHz</td><td class="n">' +
-      num(r[k].burst_tflops, 2) + '</td><td class="n">' + num(r[k].sustained_mhz, 0) + ' MHz</td><td class="n">' +
-      num(r[k].sustained_tflops, 2) + '</td></tr>').join('');
+    const r = cl.results, mm = cl.measured_mhz || {}, mt = cl.measured_tflops || {};
+    const nice = {zeros: 'zeros', ones: 'all ones', randn_M: 'random fp32'};
+    /* measured_mhz / measured_tflops are keyed on the pattern, with random split burst/sustained */
+    const meas = {
+      zeros: {bm: mm.zeros, bt: (mt.zeros || [])[0], sm: mm.zeros, st: (mt.zeros || [])[1]},
+      ones: {bm: null, bt: (mt.ones || [])[0], sm: mm.ones, st: (mt.ones || [])[1]},
+      randn_M: {bm: mm.randn_burst, bt: (mt.randn || [])[0], sm: mm.randn_sustained, st: (mt.randn || [])[1]}
+    };
+    const MISS = 0.03;                                  // flag a prediction more than 3% off the measurement
+    const cell = (p, m, unit, dp) => {
+      const pv = num(p, dp) + (unit || ''), off = (p != null && m != null && m) ? Math.abs(p / m - 1) : 0;
+      if (m == null) return '<td class="n">' + pv + '</td>';
+      return '<td class="n">' + pv + '<br><span class="' + (off > MISS ? 'miss' : 'ms') + '">' +
+        num(m, dp) + (unit || '') + '</span></td>';
+    };
+    const pats = Object.keys(nice).filter(k => r[k]);
+    const metrics = [
+      ['Burst clock', 'burst_mhz', 'bm', ' MHz', 0], ['Burst TFLOPS', 'burst_tflops', 'bt', '', 2],
+      ['Sustained clock', 'sustained_mhz', 'sm', ' MHz', 0], ['Sustained TFLOPS', 'sustained_tflops', 'st', '', 2]
+    ];
+    const SUB = '<span class="sub">predicted · measured</span>';
+    /* Five columns scroll off a phone, and the two that scroll off are the sustained pair -- the only place
+       the chain actually misses. So the table transposes instead: patterns across, metrics down. */
+    onWidth('predtab', function (w) {
+      const narrow = w < 620;
+      if (narrow) {
+        const shrt = {zeros: 'zeros', ones: 'ones', randn_M: 'random'};
+        $('predtab').innerHTML =
+          '<thead><tr><th>' + SUB + '</th>' + pats.map(k => '<th class="n">' + shrt[k] + '</th>').join('') +
+          '</tr></thead><tbody>' + metrics.map(mt =>
+            '<tr><td>' + mt[0] + '</td>' +
+            pats.map(k => cell(r[k][mt[1]], meas[k][mt[2]], mt[3], mt[4])).join('') + '</tr>').join('') +
+          '</tbody>';
+        return;
+      }
+      $('predtab').innerHTML =
+        '<thead><tr><th>Pattern</th>' + metrics.map(mt => '<th class="n">' + mt[0] + '<br>' + SUB + '</th>').join('') +
+        '</tr></thead><tbody>' + pats.map(k =>
+          '<tr><td>' + nice[k] + '</td>' + metrics.map(mt => cell(r[k][mt[1]], meas[k][mt[2]], mt[3], mt[4])).join('') +
+          '</tr>').join('') + '</tbody>';
+    });
+    const pmhz = r.ones && r.ones.sustained_mhz, mmhz = mm.ones;
+    if (pmhz && mmhz) {
+      set('pm-miss', 'All-ones operands sustained, in red above: the chain predicts ' + num(pmhz, 0) +
+        NB + 'MHz and the card held ' + num(mmhz, 0) + NB + 'MHz, ' +
+        pct(pmhz / mmhz - 1, 1) + ' high. It is the only quantitative prediction here that misses, and it ' +
+        'is not the price list’s fault: E64’s own measured surface misses the same point further, ' +
+        'at 791' + NB + 'MHz. What is missing is a temperature term in the static power B(f) — the ' +
+        'sustained points run 6–8' + DEG + 'C hotter than the ladder runs that fixed it, and E65’s ' +
+        '0.18' + NB + 'W/' + DEG + 'C leakage slope covers only about 1.4' + NB + 'W of the roughly 4' + NB +
+        'W needed. Zeros and random both clamp to an end of the clock range, so all-ones is the one row ' +
+        'where the model is free to be wrong.');
+    }
   }());
   set('op-leak', num(pb.e66_leak_W_per_C, 3) + ' W/' + DEG + 'C against the registered estimator’s ' + num(pb.a1_leak_W_per_C, 3));
 
@@ -372,6 +548,25 @@
   }());
 
   /* ------------------------------------------- 8. the optional private boxes */
+  /* A build that carries archive boxes says so above the fold as well as beside each box: the rule for a
+     page holding vault material is that it is marked Confidential, deployed private and shared by name,
+     and until 2026-10-27 the private build's first screen was indistinguishable from the public one's,
+     so a screenshot or a print of it could not be told apart. */
+  if (D.meta && D.meta.private) {
+    const h1 = document.querySelector('h1[data-ss-id="title"]') || document.querySelector('main h1');
+    if (h1) {
+      if (D.vault && D.vault.title_suffix) h1.textContent = h1.textContent + D.vault.title_suffix;
+      const b = document.createElement('p');
+      b.className = 'cbanner';
+      b.setAttribute('data-ss-id', 'confidential');
+      b.setAttribute('data-ss-react', 'off');
+      b.innerHTML = '<b>Confidential · ' + ((D.vault && D.vault.label) || 'NDA') + '</b><span>' +
+        ((D.vault && D.vault.banner) ||
+          'This build carries material from a private development archive. Do not forward, re-post or ' +
+          'publish it; the public build of the same page is the one to share.') + '</span>';
+      h1.parentNode.insertBefore(b, h1);
+    }
+  }
   if (D.vault && D.vault.boxes) {
     const v = D.vault;
     const slug = t => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').split('-').slice(0, 6).join('-');

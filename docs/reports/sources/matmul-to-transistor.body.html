@@ -13,8 +13,18 @@ main>p,main>ul,main>ol,main>h1,main>h2,main>h3,main>.links,main>.tiles,main>figu
 figure{margin:18px 0 10px}
 figcaption{font-size:.88rem;color:var(--ink-2);margin-top:6px;line-height:1.45}
 figure h3,.lv h3{margin:0 0 2px;font-size:1.02rem}
+/* The charts are drawn into a viewBox that tracks the container's own width, so one SVG user unit is one
+   CSS pixel and 12px chart type renders at 12px on a phone as well as on a desktop. No min-width: a chart
+   that had to be scrolled sideways lost its value column to every phone reader. */
 .chartbox{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.chartbox svg{display:block;width:100%;height:auto;min-width:660px;max-width:900px}
+.chartbox svg{display:block;width:100%;height:auto;max-width:900px}
+.chartbox svg text.sm{font-size:11px}
+table.t th .sub{display:block;font-weight:400;font-size:.8em;color:var(--muted);white-space:nowrap}
+table.t td .ms{color:var(--ink-2)}
+table.t td .miss{color:var(--bad);font-weight:700}
+.cbanner{border:2px solid var(--bad);border-radius:6px;padding:9px 13px;margin:0 0 14px;background:var(--surface)}
+.cbanner b{color:var(--bad);letter-spacing:.06em;text-transform:uppercase;font-size:.76rem}
+.cbanner span{display:block;font-size:.9rem;color:var(--ink-2);margin-top:3px}
 .lv{border:1px solid var(--axis);border-radius:6px;padding:12px 14px;background:var(--surface);margin:14px 0}
 .lv .step{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
 .lv .big{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums;margin:6px 0 2px}
@@ -45,6 +55,8 @@ details>summary{cursor:pointer;font-weight:600}
 .vbox td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .foot{margin-top:24px;font-size:.92rem;color:var(--ink-2)}
 @media (max-width:520px){.lv dl{grid-template-columns:1fr}.lv dt{margin-top:6px}}
+/* the transposed prediction table has to fit a phone without scrolling: that is where its one red cell is */
+@media (max-width:620px){#predtab{font-size:.85rem}#predtab th,#predtab td{padding:6px 5px}}
 </style>
 
 <h1 data-ss-id="title">From matmul speed to one transistor switch</h1>
@@ -82,9 +94,13 @@ clock, and a lower clock is fewer FLOPS.</b> The numbers below are the same diff
 against <b id="a-burstr"></b> on random fp32 — <b id="a-burstpct"></b> faster. Once it is hot and the thermal
 test takes over, zeros hold 800 MHz while random data sits on the governor's 600 MHz floor, and the gap becomes
 <b id="a-sus"></b>. At 800 MHz the board draws <b id="a-wz"></b> on zeros and <b id="a-wr"></b> on random data.
-Divided by the multiply-adds those watts buy, that is <b id="a-pz"></b> against <b id="a-pr"></b> of energy per
-multiply-add over idle. Divided again by the roughly 27 operand bits that change, one flipped bit of an operand
-costs <b id="a-bit"></b> at the board. Underneath that bit, a bottom-up count on an open synthesis of the same
+The rungs below that are each measured in their own experiment rather than divided out of it: a random
+multiply-add costs <b id="a-pr"></b> over idle against <b id="a-pz"></b> on zeros, and one flipped bit of an
+operand costs <b id="a-bit"></b> at the board. They do agree where they can be made to meet — the
+operand-dependent half of the per-multiply-add budget, <b id="a-pdata"></b>, spread over the
+<b id="a-bits"></b> operand bits a random pair changes, is <b id="a-perbit-chk"></b> per bit, inside that
+band — but no rung here is a quotient of the one above it, and §5 shows why the per-bit prices cannot simply
+be added up. Underneath that bit, a bottom-up count on an open synthesis of the same
 RTL finds <b id="a-tog"></b> physical net toggles per random multiply-add; the gates they charge hold
 <b id="a-fins"></b> transistor fins per signal net; and one minimum transistor's gate takes
 <b id="a-tr"></b> — about <b id="a-el"></b> electrons across the 0.517 V rail, which is
@@ -93,8 +109,8 @@ RTL finds <b id="a-tog"></b> physical net toggles per random multiply-add; the g
 <h2 id="chain" data-ss-id="chain">2. The chain, step by step</h2>
 
 <p>Each rung below carries its number, how it was obtained, where to check it, how far to trust it, and what is
-still missing. The ladder is to scale in orders of magnitude: eleven of them separate one electron from one
-multiply-add at the board.</p>
+still missing. The ladder is to scale in orders of magnitude: <b id="a-dec"></b> of them separate one electron
+from one multiply-add at the board.</p>
 
 <figure data-ss-id="nine-steps-from-tflops-gap-transistor">
   <h3>Nine steps from a TFLOPS gap to one transistor</h3>
@@ -368,17 +384,28 @@ between cards, which carried as a band gives <span id="pb-band"></span>.</p>
 
 <p data-ss-id="sustained-gap-not-prediction-all-saying"><b>The sustained gap is not a prediction at all, and saying so is the honest result.</b> Once the thermal
 test takes over, zeros clamp to the top of the clock range and random data clamps to the bottom, so the
-predicted ratio is 800/600 = 1.333 for <em>any</em> cap in a <span id="ps-win"></span> window — and every
-candidate cap on the record is inside it. The measurement is the same number by the same construction. What
-the chain does predict here is ordinal, and it is still a real claim: random data reaches the governor's floor
-and zeros does not.</p>
+predicted ratio is 800/600 = 1.333 for <em>any</em> cap in a <span id="ps-win"></span> window — and
+<span id="ps-caps"></span> of the <span id="ps-capn"></span> candidate caps on the record sit inside it. The
+measurement is the same number by the same construction. What the chain does predict here is ordinal, and it
+is still a real claim: random data reaches the governor's floor and zeros does not.</p>
+
+<p class="note" id="ps-exc-wrap" data-ss-id="ps-exc-wrap"><b class="k">The one cap that is not inside.</b>
+<span id="ps-exc"></span></p>
 
 <div class="tblwrap" data-ss-id="patternburst-clockburst-tflopssustained-clock-th">
+<!-- the script writes this table's head and body, and transposes it below 620px so the sustained columns,
+     which carry the one real miss, cannot scroll off the side of a phone -->
 <table class="t" id="predtab" data-ss-id="predtab">
-  <thead><tr><th>Pattern</th><th class="n">Burst clock</th><th class="n">Burst TFLOPS</th><th class="n">Sustained clock</th><th class="n">Sustained TFLOPS</th></tr></thead>
+  <thead><tr><th>Pattern</th><th class="n">Burst clock<br><span class="sub">predicted · measured</span></th>
+    <th class="n">Burst TFLOPS<br><span class="sub">predicted · measured</span></th>
+    <th class="n">Sustained clock<br><span class="sub">predicted · measured</span></th>
+    <th class="n">Sustained TFLOPS<br><span class="sub">predicted · measured</span></th></tr></thead>
   <tbody></tbody>
 </table>
 </div>
+
+<p class="note" data-ss-id="chain-one-real-miss"><b class="k">The chain's one real miss is in that table.</b>
+<span id="pm-miss"></span></p>
 
 <p id="back-bottom" data-ss-id="back-bottom">Starting one rung lower — from the price of a single flipped bit rather than from measured
 board power — the same arithmetic gives a <em>range</em> for the burst gap, <span id="pb-bu"></span>, because

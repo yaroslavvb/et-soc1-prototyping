@@ -8,6 +8,7 @@ script also renders an optional `vault` block of {title, rows} boxes when a buil
 repository writes that block, and the page built here has none.
 """
 import json
+import math
 import sys
 
 root, out = sys.argv[1], sys.argv[2]
@@ -69,6 +70,11 @@ o["permac"] = {
     "this_work_clocking_pJ": bud["pJ_per_mac"]["clocking"],
     "this_work_data_pJ": bud["pJ_per_mac"]["data"],
 }
+# The per-multiply-add figure and the per-bit price are measured in different experiments, so the page must
+# not present one as a quotient of the other. What IS a fair consistency check: the DATA half of the budget
+# (the clocking half does not depend on the operands) over the bits that actually change.
+o["permac"]["changed_bits"] = sup["m_A"] + sup["m_B"]
+o["permac"]["data_per_changed_bit_fJ"] = 1000.0 * bud["pJ_per_mac"]["data"] / o["permac"]["changed_bits"]
 
 # ---- level 5: per flipped bit ----------------------------------------------
 B, A = pl["B_fJ"], pl["A_fJ"]
@@ -169,10 +175,26 @@ LABEL = {
     "transistor": "One minimum transistor's gate, isolated",
     "electron": "One electron across the 0.517 V rail",
 }
+# The same rungs named short enough to fit beside their value column on a phone, where the chart has about
+# 330px of label room rather than 700.
+SHORT = {
+    "mac_board": "One random fp32 multiply-add, at the board",
+    "mac_netlist": "The same, counted on the open netlist",
+    "bit_flowM": "One flipped bit (E65 flow-M), at the board",
+    "bit_board": "One flipped operand bit, at the board",
+    "bit_netlist": "The same, counted on the netlist",
+    "clock_rise": "One rise of an average clock net",
+    "signal_rise": "One rise of an average signal net",
+    "gate_pin": "One gate pin of the cells driven",
+    "fin_in_cell": "One transistor fin, inside a cell",
+    "transistor": "One transistor's gate, isolated",
+    "electron": "One electron across the rail",
+}
 rungs = {}
 for k, long in RUNG.items():
     r = dict(floor["rungs"][long])
     r["label"] = LABEL[k]
+    r["short"] = SHORT[k]
     rungs[k] = r
 land = [v for key, v in floor["kT_ln2"].items() if "66" in key][0]
 o["floor"] = {
@@ -181,6 +203,10 @@ o["floor"] = {
     "kT_ln2": floor["kT_ln2"], "unit": floor["unit"],
     "one_sentence": floor["the_one_sentence"],
 }
+# How many decades the ladder actually spans, computed rather than asserted: the page said "eleven" from
+# 2026-10-27 until this build, and the real figure is 7.84.
+o["floor"]["decades"] = math.log10(rungs["mac_board"]["E_J"] / rungs["electron"]["E_J"])
+o["floor"]["decades_from_landauer"] = math.log10(rungs["mac_board"]["E_J"] / land["kT_ln2_J"])
 
 # ---- the closure ------------------------------------------------------------
 o["closure"] = {
@@ -198,7 +224,16 @@ o["closure"] = {
                       "low_arm_W": sup["low_arm_range_W"], "bracket_W": sup["bracket_both_random_W"],
                       "m_A": sup["m_A"], "m_B": sup["m_B"]},
     "results": ch["results"],
+    "measured_mhz": ch["measured_mhz"],
+    "measured_tflops": ch["measured_tflops"],
+    "cap_source_note": ch["sustained_cap_source"],
 }
+# Which candidate caps actually sit inside the clamp window, counted rather than asserted. E64's own
+# measured sustained randn point, 54.4 W, is ABOVE the window: at that cap random would settle above the
+# 600 MHz floor and the ratio would fall to about 1.30, so the clamp argument holds for three of the four.
+_lo, _hi = o["closure"]["clamp_window_W"]
+o["closure"]["caps_inside"] = {k: v for k, v in sorted(o["closure"]["candidate_caps"].items()) if _lo <= v <= _hi}
+o["closure"]["caps_outside"] = {k: v for k, v in sorted(o["closure"]["candidate_caps"].items()) if not (_lo <= v <= _hi)}
 
 # ---- the waterfall ----------------------------------------------------------
 sw = board["per_random_fp32_multiply_add"]

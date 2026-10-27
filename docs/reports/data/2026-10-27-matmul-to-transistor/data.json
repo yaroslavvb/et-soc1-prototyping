@@ -120,11 +120,40 @@
    "E64 registered cap_w_at_65_5": 50.3,
    "a 66 C trip on the die line": 51.362862010221455
   },
+  "cap_source_note": "E64's registered thermal cap_w_at_65_5 (surface.txt), the board power at which its die line reads 65.5 C. E64's own sustained fp32 randn point is 67.1 C at 54.4 W, so 66 C is not a hard trip.",
+  "caps_inside": {
+   "E64 measured sustained ones": 49.4,
+   "E64 registered cap_w_at_65_5": 50.3,
+   "a 66 C trip on the die line": 51.362862010221455
+  },
+  "caps_outside": {
+   "E64 measured sustained randn": 54.4
+  },
   "clamp_width_W": 14.555248067455992,
   "clamp_window_W": [
    37.9321675169596,
    52.487415584415594
   ],
+  "measured_mhz": {
+   "ones": 738,
+   "randn_burst": 706,
+   "randn_sustained": 600,
+   "zeros": 800
+  },
+  "measured_tflops": {
+   "ones": [
+    12.3,
+    11.1
+   ],
+   "randn": [
+    10.7,
+    9.2
+   ],
+   "zeros": [
+    12.3,
+    12.3
+   ]
+  },
   "results": {
    "ones": {
     "burst_mhz": 800.0,
@@ -188,6 +217,8 @@
   "sustained_pred": 1.3333333333333333
  },
  "floor": {
+  "decades": 7.843952255474666,
+  "decades_from_landauer": 9.250852627179182,
   "kT_ln2": {
    "die at E65's block temperature, 58 C": {
     "T_K": 331.15,
@@ -231,67 +262,78 @@
     "E_J": 1.16746e-13,
     "electrons": 1409422.0858936096,
     "label": "One flipped operand bit, E60's quiet ladder, at the board",
-    "over_Landauer_at_66C": 35970083.36840121
+    "over_Landauer_at_66C": 35970083.36840121,
+    "short": "One flipped operand bit, at the board"
    },
    "bit_flowM": {
     "E_J": 7.450000000000001e-13,
     "electrons": 8994050.793952163,
     "label": "One flipped operand bit, E65's flow-M case, at the board",
-    "over_Landauer_at_66C": 229538588.98342472
+    "over_Landauer_at_66C": 229538588.98342472,
+    "short": "One flipped bit (E65 flow-M), at the board"
    },
    "bit_netlist": {
     "E_J": 3.287079655582491e-14,
     "electrons": 396834.38102115045,
     "label": "One flipped operand bit, counted on the open netlist",
-    "over_Landauer_at_66C": 10127672.832463445
+    "over_Landauer_at_66C": 10127672.832463445,
+    "short": "The same, counted on the netlist"
    },
    "clock_rise": {
     "E_J": 2.083119270624079e-15,
     "electrons": 25148.564469602075,
     "label": "One rise of an average clock net",
-    "over_Landauer_at_66C": 641820.4806217877
+    "over_Landauer_at_66C": 641820.4806217877,
+    "short": "One rise of an average clock net"
    },
    "electron": {
     "E_J": 8.28325319778e-20,
     "electrons": 1.0,
     "label": "One electron across the 0.517 V rail",
-    "over_Landauer_at_66C": 25.521157734373983
+    "over_Landauer_at_66C": 25.521157734373983,
+    "short": "One electron across the rail"
    },
    "fin_in_cell": {
     "E_J": 9.418466918257061e-18,
     "electrons": 113.70492599189544,
     "label": "One transistor fin, driven inside a working cell",
-    "over_Landauer_at_66C": 2901.8813514144836
+    "over_Landauer_at_66C": 2901.8813514144836,
+    "short": "One transistor fin, inside a cell"
    },
    "gate_pin": {
     "E_J": 5.732814463739365e-17,
     "electrons": 692.0969728748387,
     "label": "One gate pin of the cells this unit drives",
-    "over_Landauer_at_66C": 17663.116012221508
+    "over_Landauer_at_66C": 17663.116012221508,
+    "short": "One gate pin of the cells driven"
    },
    "mac_board": {
     "E_J": 5.783e-12,
     "electrons": 69815564.75359109,
     "label": "One random fp32 multiply-add, at the board (E38)",
-    "over_Landauer_at_66C": 1781774040.3907988
+    "over_Landauer_at_66C": 1781774040.3907988,
+    "short": "One random fp32 multiply-add, at the board"
    },
    "mac_netlist": {
     "E_J": 1.946468662361173e-12,
     "electrons": 23498842.97733223,
     "label": "One random fp32 multiply-add, counted on the open netlist",
-    "over_Landauer_at_66C": 599717678.1997823
+    "over_Landauer_at_66C": 599717678.1997823,
+    "short": "The same, counted on the open netlist"
    },
    "signal_rise": {
     "E_J": 5.969324992639882e-16,
     "electrons": 7206.498280457882,
     "label": "One rise of an average signal net",
-    "over_Landauer_at_66C": 183918.17932806048
+    "over_Landauer_at_66C": 183918.17932806048,
+    "short": "One rise of an average signal net"
    },
    "transistor": {
     "E_J": 8.942160988915003e-18,
     "electrons": 107.95469817717992,
     "label": "One minimum transistor's gate, isolated",
-    "over_Landauer_at_66C": 2755.128880346544
+    "over_Landauer_at_66C": 2755.128880346544,
+    "short": "One transistor's gate, isolated"
    }
   },
   "unit": "every single-edge rung here is ONE RISE (C.VDD^2 from the rail); the rungs from a flipped bit upwards are whole composite events. Section one_physical_net_toggle's per-toggle figures are half the two net rungs."
@@ -710,6 +752,8 @@
    "randn_board": 11.579211514381424,
    "zeros_board": 6.139126797383452
   },
+  "changed_bits": 27.36328125,
+  "data_per_changed_bit_fJ": 132.55837764577788,
   "e38_registered": {
    "aifoundry1-c1": {
     "clocking": 1.9595083080705606,
