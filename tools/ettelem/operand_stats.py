@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.9,<3.13"
+# dependencies = ["numpy==1.26.4"]
+# ///
 """An operand-statistics front end: the load model's flip counts without the RTL bench. Q126, 26 Oct 2026.
 
 Recap item 2b. The flip model's only activity input is a replay of dumped fp32 tiles through one Verilator
@@ -11,7 +15,22 @@ words, the mantissa population, per side -- and then feeds load_model.py as the 
              report.json), WITHOUT refitting
     output : docs/reports/data/2026-10-26-load-model/operand_stats.json
 
-    /usr/bin/python3 operand_stats.py        # needs numpy; on the Intel only /usr/bin/python3 has it
+    ./operand_stats.py                       # the shebang runs it under `uv run --script`, which
+                                             # fetches its own numpy -- nothing to install
+    /usr/bin/python3 operand_stats.py        # any interpreter that already has numpy. On the Intel
+                                             # /usr/local/bin/python3.12 does NOT; /usr/bin/python3
+                                             # (3.9.6, numpy 1.26.4) does, and the lab boxes do.
+
+The PEP 723 block above pins BOTH python (< 3.13) and numpy (== 1.26.4), and both pins earn their
+keep (Q128(e), 26 Oct 2026, the run that proved the shebang):
+  * python < 3.13 -- 3.13 dedents docstrings at compile time, and this script publishes its own
+    `features` docstring into the JSON, so a newer interpreter silently rewrites a committed field;
+  * numpy == 1.26.4 -- the version the committed operand_stats.json was made with (numpy 2.5.4
+    moved the last digits of every lstsq coefficient).
+Even pinned, the re-run is not byte-identical: the macOS system numpy links Accelerate and uv's
+wheel links OpenBLAS, so the solve differs in the last digits -- measured max relative difference
+3.7e-12 over every number in the file, with every non-numeric field identical. Re-running this
+script therefore reproduces the committed JSON to ~1e-12, not to the byte; do not commit that churn.
 
 The operands. The structured matrices' tiles are on disk as the raw pairs the card was given
 (2026-09-21-horace-aifoundry2/structured_tiles/<kind>.<seed>.bin), so their statistics are exact. The 14

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["numpy"]
+# ///
 """E63: derived numbers for the write-up, from the registered lock-in's output (lockin.json) and the RED.
 
     python3 summary_hlc.py RED ANA --out summary.json

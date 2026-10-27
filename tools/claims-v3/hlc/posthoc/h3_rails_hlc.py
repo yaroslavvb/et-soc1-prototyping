@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["numpy"]
+# ///
 """E63, post hoc (Q126, Mon 26 Oct 2026): the drive's third harmonic as a second transfer point, and the
 card's own rails demodulated beside the board.
 

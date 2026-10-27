@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["numpy"]
+# ///
 """V3-HL (the bit-flip ladder): writes every operand file the experiment runs, and its designed flip counts.
 
     python3 tools/claims-v3/hl/make_hl.py <out-dir>            # tiles/, srcs/, manifest.json

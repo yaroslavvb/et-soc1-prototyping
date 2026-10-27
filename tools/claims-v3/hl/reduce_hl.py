@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["numpy"]
+# ///
 """V3-HL reduction, as pre-registered in README.md ("Pre-registered analysis", amendment A1).
 
     python3 tools/claims-v3/hl/reduce_hl.py <pass dir> [<pass dir> ...] --gen <make_hl.py dir> --pred predictions.json
