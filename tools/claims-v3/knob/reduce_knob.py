@@ -57,6 +57,8 @@ def main():
     ap.add_argument("results_hpl")
     ap.add_argument("--predictions", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--end", nargs="*", default=[],
+                    help="each session's end.json, for K6's restore read-back")
     a = ap.parse_args()
     res = json.load(open(a.results_hpl))
     pred = json.load(open(a.predictions))
@@ -186,9 +188,20 @@ def main():
         "half_a_pass": half_a, "half_b_pass": half_b, "pass": half_a and half_b}
 
     # K6: restore - read straight out of the session's end.json by the caller and passed in res
-    out["rules"]["K6"] = {"note": "scored from the session's end.json governor_restore; see results.md",
-                          "restore": res.get("governor_restore"), "original": res.get("governor_original"),
-                          "pass": bool((res.get("governor_restore") or {}).get("ok"))}
+    ends = []
+    for f in a.end:
+        d = json.load(open(f))
+        orig, rest = d.get("governor_original") or {}, d.get("governor_restore") or {}
+        af = rest.get("after") or {}
+        ends.append({"file": f, "exit": d.get("exit"), "reason": d.get("reason"),
+                     "card_min": d.get("card_min"),
+                     "original": {"tdp_w": orig.get("tdp_w"), "temp_threshold_c": orig.get("temp_threshold_c")},
+                     "after": {"tdp_w": af.get("tdp_w"), "temp_threshold_c": af.get("temp_threshold_c")},
+                     "restore_ok": bool(rest.get("ok")),
+                     "equal_to_original": (af.get("tdp_w") == orig.get("tdp_w")
+                                           and af.get("temp_threshold_c") == orig.get("temp_threshold_c"))})
+    out["rules"]["K6"] = {"sessions": ends,
+                          "pass": bool(ends) and all(e["restore_ok"] and e["equal_to_original"] for e in ends)}
 
     json.dump(out, open(a.out, "w"), indent=1)
 
