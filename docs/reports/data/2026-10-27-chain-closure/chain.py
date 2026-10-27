@@ -28,6 +28,15 @@ E67C = load("2026-10-27-e67-a-side-bit-prices/closure.json")
 E67S = load("2026-10-27-e67-a-side-bit-prices/scored.json")
 E60 = load("2026-10-20-bitflip-ladder/hl.json")["cards"]
 
+# E38's per-multiply-add energies. Read from the committed sparsity page's own data block, which
+# is the source docs/findings/05-claims.md line 486 ("The Sparse compute page's power figures")
+# cites for the registered V3-ABL-A values — four 7 s runs per card, operands -3..3, over idle.
+_sp = open(os.path.join(REPO, "docs/reports/2026-09-18-et-soc1-sparsity.html"), encoding="utf-8").read()
+_m = re.search(r'id="sparsity-data"[^>]*>', _sp)
+_ops = json.loads(_sp[_m.end():_sp.index("</script>", _m.end())].strip())["v3"]["operands"]
+E38 = {c: {p: _ops[c]["patterns"][p]["pj_mac"]["mean"] for p in ("zeros", "ones", "randn")}
+       for c in _ops}
+
 LANES, B_PRES, A_PRES = 4096, 4096, 2048
 PEAK_TFLOPS = 12.3            # E64, fp32, 1,024 harts, 800 MHz
 
@@ -110,10 +119,22 @@ say("  The measured price per flipped bit barely moves — %.0f to %.0f fJ over 
     % (min(r["meas_fJ_per_bit"] for r in lq_rows), max(r["meas_fJ_per_bit"] for r in lq_rows)))
 say("  single-bit price list says it should run from %.0f to %.0f fJ per bit over the same masks."
     % (min(r["naive_fJ_per_bit"] for r in lq_rows), max(r["naive_fJ_per_bit"] for r in lq_rows)))
-say("  The position premium is a SINGLE-BIT effect: it does not add when bits flip together.")
+say("  Along this ladder the position premium does not add when bits flip together. It is NOT\n"
+    "  gone in general: at a fixed m = 2 it is paid in full (position.py), so the compression is\n"
+    "  a function of m, and this ladder always takes the lowest bits.")
 
 # three candidate laws, scored on the same seven rungs
 C_FLAT = sum(r["meas_J"] for r in lq_rows) / sum(r["flips"] for r in lq_rows) * 1e15     # fJ/bit, flat
+# E60's own reading of the same ladder: a line with an intercept. Its marginal slope is the
+# registered lq.designed figure, and forcing the intercept to zero is exactly what drops it to C_FLAT.
+C_LIN = a3["lq"]["linear"]["W_per_h"] / rate60 / B_PRES * 1e15
+say("")
+say("  two defensible flat prices from this same ladder:")
+say("    zero-intercept pooled (used below)      %.1f fJ per flipped bit" % C_FLAT)
+say("    E60's own marginal slope %.4f W per h  %.1f fJ  (registered lq.designed %.1f fJ;"
+    % (a3["lq"]["linear"]["W_per_h"], C_LIN, a3["lq"]["designed"]["fJ"]))
+say("      its intercept is %+.3f W, %.0f%% of the m=1 rung, which is the whole difference)"
+    % (a3["lq"]["linear"]["intercept_W"], 100 * abs(a3["lq"]["linear"]["intercept_W"]) / lq_rows[0]["dW"]))
 pred_flat = [C_FLAT * 1e-15 * r["flips"] * rate60 for r in lq_rows]
 pts = [(math.log(r["h"]), math.log(r["ratio"])) for r in lq_rows if r["h"] > 1]
 slope = sum(x * y for x, y in pts) / sum(x * x for x, _ in pts)
@@ -135,15 +156,21 @@ laws = [("flat, %.0f fJ per flipped bit, position ignored" % C_FLAT, pred_flat, 
         ("price list x m^(alpha-1), alpha = %.3f" % ALPHA, pred_pos, score(pred_pos)),
         ("free power law, %.3f W x m^%.3f" % (C_POW, BETA), pred_pow, score(pred_pow))]
 say("")
-say("  three candidate laws on these seven rungs:")
+say("  three candidate laws, FITTED ON AND SCORED ON these same seven rungs (in-sample, not a test):")
 for nm, _, (rms_, mx_) in laws:
     say("    %-46s rms %5.1f%%   worst %5.1f%%" % (nm, rms_, mx_))
-say("  >>> the flat law wins, and the free power law's exponent %.3f is 1.00 within its scatter:" % BETA)
-say("      inside one word, board power counts flipped bits and all but ignores which ones.")
+say("  >>> the finding is the free exponent, %.3f, which is 1.00 within its scatter; the two" % BETA)
+say("      one-parameter-equivalent laws (flat, and c x m^beta) are indistinguishable on seven")
+say("      in-sample rungs and neither 'wins'. Only the price-list law is clearly worse.")
+say("      Along THIS ladder, board power counts flipped bits and all but ignores which ones.")
+say("      The out-of-sample test is nrd_a / nrd_b in part 4, and both laws miss there.")
 R["saturation"] = {
     "lq_rows": lq_rows,
     "flat_fJ_per_bit": C_FLAT, "alpha": ALPHA, "beta": BETA, "c_pow_W": C_POW,
-    "law_scores_pct": {"flat": {"rms": laws[0][2][0], "worst": laws[0][2][1]},
+    "flat_fJ_per_bit_marginal": C_LIN,
+    "e60_lq_linear": a3["lq"]["linear"], "e60_lq_designed_fJ": a3["lq"]["designed"]["fJ"],
+    "law_scores_pct": {"in_sample": True,
+                       "flat": {"rms": laws[0][2][0], "worst": laws[0][2][1]},
                        "price_list_compressed": {"rms": laws[1][2][0], "worst": laws[1][2][1]},
                        "free_power": {"rms": laws[2][2][0], "worst": laws[2][2][1]}},
     "finding": "within one word the per-bit price is flat (87-129 fJ) while the single-bit list "
@@ -223,6 +250,23 @@ say("  >>> the two laws BRACKET the measurement: %.1f W to %.1f W against %.1f W
 say("      Neither is right. The flat law is fitted on contiguous LOW mantissa bits; random operands")
 say("      also flip the dear high-mantissa bits, which the flat law prices at the floor. The")
 say("      compressed list keeps too much of the single-bit premium. The missing experiment is below.")
+# the low arm is not one number: it depends on two choices neither of which the data settles.
+AB_MEAN = sum(pA_fJ[j] / pB_fJ[j] for j in pA_fJ) / len(pA_fJ)
+say("")
+say("  the low arm's own sensitivity — the flat law needs a per-bit price and an A-side carry-over,")
+say("  and the data settles neither. All four combinations, x kappa %.3f:" % KAPPA)
+LOW = {}
+for cf, cfn in ((C_FLAT, "%.1f fJ zero-intercept" % C_FLAT), (C_LIN, "%.1f fJ E60 marginal" % C_LIN)):
+    for ab, abn in ((AB, "A/B %.3f sum-weighted" % AB), (AB_MEAN, "A/B %.3f position mean" % AB_MEAN)):
+        t = KAPPA * (cf * ab * 1e-15 * sum(Ah) * na["rate_ops_s"] + cf * 1e-15 * sum(Bh) * nb["rate_ops_s"])
+        LOW["%s | %s" % (cfn, abn)] = t
+        say("    %-26s %-28s  %6.3f W   %+.0f%%" % (cfn, abn, t, 100 * (t / both_meas - 1)))
+say("    A law that says position stops mattering in company arguably should not then import a")
+say("    position-weighted A/B ratio, and E60's own fit of this ladder keeps an intercept. So the")
+say("    low arm is %.1f-%.1f W, %+.0f%% to %+.0f%%, and the bracket is %+.0f%%/%+.0f%% to %+.0f%%."
+    % (min(LOW.values()), max(LOW.values()), 100 * (min(LOW.values()) / both_meas - 1),
+       100 * (max(LOW.values()) / both_meas - 1), 100 * (min(LOW.values()) / both_meas - 1),
+       100 * (max(LOW.values()) / both_meas - 1), 100 * (both_pred / both_meas - 1)))
 anch = {k: v["p80"] for k, v in E67H["anchors"].items()}
 ase = {k: v["se"] for k, v in E67H["anchors"].items()}
 zeros_W, ones_W, randn_W = anch["anchor_zeros"], anch["anchor_ones"], anch["anchor_randn"]
@@ -237,6 +281,9 @@ say("    price list predicts the data term  %.3f W = %.0f%% of it; the whole ste
     % (both_pred, 100 * both_pred / data_meas, 100 * (clocking + both_pred) / step_meas))
 R["superposition"] = {"flat_law_W": {"A": fa_, "B": fb_, "both": both_flat},
                       "A_over_B_single_bit_ratio": AB,
+                      "A_over_B_position_mean": AB_MEAN,
+                      "low_arm_sensitivity_W": LOW,
+                      "low_arm_range_W": [min(LOW.values()), max(LOW.values())],
                       "bracket_both_random_W": [both_flat, both_pred],
                       "m_A": mA, "m_B": mB, "A_hist": Ah, "B_hist": Bh,
                       "naive_W": {"A": S_A, "B": S_B, "both": S_A + S_B},
@@ -274,10 +321,21 @@ say("  clocking (ones - zeros)                           %6.2f       %6.3f      
 say("  data (random - ones)                              %6.2f       %6.3f           E67 anchors" % (data_meas, pj(data_meas)))
 say("  random normal, whole board                        %6.2f       %6.3f           E67 anchor" % (randn_W, pj(randn_W)))
 say("")
-say("  E38 (21 Sep, aifoundry2) measured the same three terms per multiply-add over idle:")
-say("    zeros 0.27 pJ, ones 2.13 pJ, random 5.78 pJ -> clocking 1.86 pJ, data 3.65 pJ")
-say("    this work, on the other card five weeks later: clocking %.2f pJ, data %.2f pJ  (%.0f%% and %.0f%%)"
-    % (pj(clocking), pj(data_meas), 100 * pj(clocking) / 1.86, 100 * pj(data_meas) / 3.65))
+say("  E38 (V3-ABL-A, 21 Sep, four 7 s runs per card, 600 MHz boot clock) measured the same three")
+say("  terms per multiply-add over idle. REGISTERED values, docs/findings/05-claims.md line 486,")
+say("  read here from the sparsity page's own data block:")
+e38 = {}
+for c in ("aifoundry2", "aifoundry3", "aifoundry1-c1"):
+    z, o, rn = E38[c]["zeros"], E38[c]["ones"], E38[c]["randn"]
+    e38[c] = {"zeros": z, "ones": o, "random": rn, "clocking": o - z, "data": rn - o}
+    say("    %-14s zeros %.2f  ones %.2f  random %.2f pJ  ->  clocking %.2f, data %.2f"
+        % (c, z, o, rn, o - z, rn - o))
+say("    this work (aifoundry3, 600 MHz, E67's anchors):                 clocking %.2f, data %.2f"
+    % (pj(clocking), pj(data_meas)))
+for c in ("aifoundry2", "aifoundry3"):
+    say("      against %-14s (%s): %3.0f%% and %3.0f%%"
+        % (c, "the other card, five weeks" if c == "aifoundry2" else "the SAME card, five weeks",
+           100 * pj(clocking) / e38[c]["clocking"], 100 * pj(data_meas) / e38[c]["data"]))
 say("  and the hart ladder says the data term is linear in harts: %.1f mW/hart random against %.1f zeros,"
     % (b_rn * 1000, b_zr * 1000))
 say("  intercept %.2f W, i.e. no fixed per-kernel offset (E65 C1/C2: 'neither band')."
@@ -288,7 +346,10 @@ R["budget_600"] = {"leak_W_per_C": LEAK, "rate_minion_ops_s": rate67, "mac_per_s
                    "clocking_W": clocking, "data_W": data_meas,
                    "pJ_per_mac": {"zeros_board": pj(zeros_W), "clocking": pj(clocking),
                                   "data": pj(data_meas), "randn_board": pj(randn_W)},
-                   "e38_pJ": {"zeros": 0.27, "ones": 2.13, "random": 5.78, "clocking": 1.86, "data": 3.65}}
+                   "e38_pJ_registered_per_card": e38,
+                   "e38_source": "docs/reports/2026-09-18-et-soc1-sparsity.html <script id=sparsity-data> "
+                                 ".v3.operands.<card>.patterns.<p>.pj_mac.mean; registered in "
+                                 "docs/findings/05-claims.md line 486 (V3-ABL-A, E38)"}
 
 # ═════════════════════════════════════ 6. the chain end to end
 say("")
@@ -308,8 +369,17 @@ say("  so a flip's energy should scale by V^2 = %.3f; the six bit prices measure
 say("  %s, mean %.3f (a cross-card comparison, hence the spread)." % (", ".join("%.2f" % x for x in r8), sum(r8) / len(r8)))
 say("  E64's static board line B(f) = %s W; die line T = %.2f + %.4f x W; governor %s"
     % (Bf, THERM["a_c"], THERM["k_c_per_w"], GOV))
-P_CAP, T_TRIP = 65.0, 66.0
-W_SUS = (T_TRIP - THERM["a_c"]) / THERM["k_c_per_w"]
+say("  NOT INDEPENDENT: B(f) is E64's own joint fit over 103 points, and those points include the")
+say("  fp32 zeros/ones/randn LAD runs whose clocks this section then predicts. So the absolute-power")
+say("  agreement below is partly in-sample; the step comparison above it is the independent one.")
+# the two caps, both sourced, neither fitted here:
+#   P_CAP  — the TDP the card reads back (E64 README: "TDP 65 W and threshold 65 C read back after
+#            every run"), and the literal E64's own surface_hpl.py passes to simulate().
+#   W_SUS  — E64's REGISTERED thermal reading cap_w_at_65_5: the board power at which its die line
+#            reads 65.5 C. Parsed above, and used here instead of a 66 C trip: E64's own sustained
+#            fp32 randn point sits at 67.1 C and 54.4 W, so 66 C is not a hard trip.
+P_CAP = 65.0
+W_SUS = THERM["cap_w_at_65_5"]
 
 
 def vlin(f):
@@ -360,13 +430,26 @@ for f in (600, 700, 800):
         % (f, row["zeros"], row["ones"], row["randn"], row["randn_P"], row["randn_F"],
            E64P["zeros"][f], E64P["ones"][f], E64P["randn"][f]))
 say("  the card-independent quantity is the step; predicted vs E64 measured (random - zeros):")
+sr = {}
 for f in (600, 700, 800):
     pm = tabs[f]["randn"] - tabs[f]["zeros"]; em = E64P["randn"][f] - E64P["zeros"][f]
+    sr[f] = pm / em
     say("    %3d MHz  predicted %6.2f W   measured %6.2f W   ratio %.3f" % (f, pm, em, pm / em))
+DRIFT = sr[800] / sr[600]
+say("    At 600 MHz NOTHING IS REFERRED — the model simply uses E67's own measured anchors — so")
+say("    %+.0f%% there is the pure aifoundry3-against-aifoundry2 card offset, not a referral error."
+    % (100 * (sr[600] - 1)))
+say("    The referral's own error is the DRIFT off that anchor: %.3f / %.3f = %.3f, i.e. %+.0f%% over"
+    % (sr[800], sr[600], DRIFT, 100 * (DRIFT - 1)))
+say("    200 MHz, and it is monotone, not scatter. %+.0f%% is what propagates into the clocks below."
+    % (100 * (DRIFT - 1)))
 say("")
-say("  governor: the ~%.1f s average of board power is held to %.0f W; the die trips at %.0f C,"
-    % (GOV["tau_s"], P_CAP, T_TRIP))
-say("  so the sustained board cap is (%.0f - %.2f)/%.4f = %.1f W." % (T_TRIP, THERM["a_c"], THERM["k_c_per_w"], W_SUS))
+say("  governor: the ~%.1f s average of board power is held to %.0f W (the TDP the card reads back,"
+    % (GOV["tau_s"], P_CAP))
+say("  and the literal E64's own surface_hpl.py simulates with); the sustained cap is E64's")
+say("  registered cap_w_at_65_5 = %.1f W, the board power at which its die line reads 65.5 C." % W_SUS)
+say("  (E64's sustained fp32 randn point sits at 67.1 C and 54.4 W, so there is no hard 66 C trip,")
+say("  and its three measured sustained board powers are 36.4 / 49.4 / 54.4 W — not one cap.)")
 say("")
 say("  workload                burst MHz   burst TFLOPS   sustained MHz   sustained TFLOPS")
 res = {}
@@ -392,10 +475,80 @@ for key, lab in (("randn_M", "from E67's measured 600 MHz anchors"),
         % (lab, rb, 100 * (rb - 1), rs, 100 * (rs - 1)))
 say("  MEASURED (E64)                                                     "
     "burst %.3f (+15%%), sustained %.3f (+34%%)" % (12.3 / 10.7, 12.3 / 9.2))
+
+# ───────────────────── how much of that agreement is real: three things to disclose
+say("")
+say("  " + "-" * 82)
+say("  (a) THE SUSTAINED RATIO IS A CLAMP, NOT A FIT. settle() returns an endpoint when the cap")
+lo_e, hi_e = P_of(800, dynM["zeros"]), P_of(600, dynM["randn"])
+say("      lies outside [600, 800]. Zeros at 800 MHz draws %.2f W and random at 600 MHz draws %.2f W,"
+    % (lo_e, hi_e))
+say("      so ANY sustained cap in a %.1f W window, %.1f to %.1f W, returns exactly 800/600 = %.4f."
+    % (hi_e - lo_e, lo_e, hi_e, 800 / 600))
+CAND = {"E64 registered cap_w_at_65_5": W_SUS, "a 66 C trip on the die line": (66.0 - THERM["a_c"]) / THERM["k_c_per_w"],
+        "E64 measured sustained ones": 49.4, "E64 measured sustained randn": 54.4}
+for nm, c in CAND.items():
+    say("        cap %5.2f W (%-28s) -> zeros %5.1f / random %5.1f MHz, ratio %.4f"
+        % (c, nm, settle(dynM["zeros"], c), settle(dynM["randn"], c),
+           settle(dynM["zeros"], c) / settle(dynM["randn"], c)))
+say("      And the measurement is the same number: E64 reports sustained 800 and 600 MHz, and its")
+say("      12.3 / 9.2 TFLOPS is 12.3 x 600/800 = %.3f rounded to 9.2. Unrounded the" % (12.3 * 600 / 800))
+say("      measured ratio is %.4f — identical to the prediction. The published '0.3%%' was E64's" % (800 / 600))
+say("      rounding, not an agreement. The sustained result carries ONE bit: random reaches the")
+say("      floor and zeros does not. That is ordinal, and it is still a real prediction.")
+say("")
+say("  (b) THE BURST CAP MATTERS, and E64 offers four measured comparators, not one.")
+CAPS = (64.0, 65.0, 65.5, 66.0, 67.0)
+say("      predicted burst ratio against the power cap:")
+say("        " + "   ".join("%.1f W: %.4f" % (c, settle(dynM["zeros"], c) / settle(dynM["randn"], c)) for c in CAPS))
+COMP = {"SUS 'cool die, first 8 s' TFLOPS 12.3/10.7": 12.3 / 10.7,
+        "LAD whole-run TFLOPS 12.11/10.61": 12.11 / 10.61,
+        "surface.txt burst clocks 800/706": 800 / 706,
+        "LAD mean MHz after 1.5 s 800/710": 800 / 710}
+rb_M = res["zeros"]["burst_tflops"] / res["randn_M"]["burst_tflops"]
+for nm, v in COMP.items():
+    say("        measured %-44s %.4f   predicted/measured %+.1f%%" % (nm, v, 100 * (rb_M / v - 1)))
+say("      The published 0.3%% is the smallest of those four. Honest range: predicted %.3f against" % rb_M)
+say("      measured %.3f-%.3f depending on whether you read TFLOPS or clocks."
+    % (min(COMP.values()), max(COMP.values())))
+say("")
+say("  (c) THE REFERRAL BAND, carried through. The referral's own error is the %+.0f%% drift from 600"
+    % (100 * (DRIFT - 1)))
+say("      to 800 MHz, so put a band of that size on the random dynamic term and re-settle:")
+BAND = {}
+for s, nm in ((1 / DRIFT, "random costs %+.0f%% more" % (100 * (1 / DRIFT - 1))), (1.0, "as published"),
+              (DRIFT, "random costs %+.0f%% less" % (100 * (DRIFT - 1)))):
+    fb2 = settle(dynM["randn"] * s, P_CAP)
+    BAND[nm] = {"scale": s, "burst_mhz": fb2, "ratio": res["zeros"]["burst_mhz"] / fb2}
+    say("        x %.3f (%-22s) burst %5.1f MHz   ratio %.4f" % (s, nm, fb2, res["zeros"]["burst_mhz"] / fb2))
+bb = sorted(v["ratio"] for v in BAND.values())
+say("      So the burst prediction with the referral's own error carried is %.3f-%.3f, which" % (bb[0], bb[-1]))
+say("      contains every measured comparator above. The point estimate agrees with the headline")
+say("      comparator to 0.2%, but the model's resolution cannot tell the four measurements apart.")
 R["chain"] = {"v600": v600, "v800_mean": v800, "v800_cards": {"aifoundry1-c0": v800a, "aifoundry2": v800b},
               "v2_scale": vv, "e60_price_ratio_800_over_600": dict(zip(sh, r8)),
               "e60_price_ratio_mean": sum(r8) / len(r8), "B_f_W": Bf, "governor": GOV, "die_line": THERM,
-              "power_cap_W": P_CAP, "trip_C": T_TRIP, "sustained_cap_W": W_SUS,
+              "power_cap_W": P_CAP,
+              "power_cap_source": "the TDP the card reads back (E64 README); the literal E64's own "
+                                  "surface_hpl.py passes to simulate(). Not fitted here.",
+              "sustained_cap_W": W_SUS,
+              "sustained_cap_source": "E64's registered thermal cap_w_at_65_5 (surface.txt), the board "
+                                      "power at which its die line reads 65.5 C. E64's own sustained "
+                                      "fp32 randn point is 67.1 C at 54.4 W, so 66 C is not a hard trip.",
+              "sustained_is_a_clamp": {
+                  "clamp_window_W": [P_of(800, dynM["zeros"]), P_of(600, dynM["randn"])],
+                  "window_width_W": P_of(600, dynM["randn"]) - P_of(800, dynM["zeros"]),
+                  "ratio_anywhere_in_window": 800 / 600,
+                  "candidate_caps_W": CAND,
+                  "measured_sustained_ratio_unrounded": 800 / 600,
+                  "note": "zeros clamps high and random clamps low for every candidate cap, so the "
+                          "sustained ratio is 800/600 by construction and the 0.3% residual is E64's "
+                          "rounding of 12.3 x 600/800 = 9.225 to 9.2. The prediction is ordinal."},
+              "burst_cap_sensitivity": {str(c): settle(dynM["zeros"], c) / settle(dynM["randn"], c) for c in CAPS},
+              "burst_measured_comparators": COMP,
+              "referral_step_ratio": {str(f): sr[f] for f in sr},
+              "referral_drift_600_to_800": DRIFT,
+              "burst_referral_band": BAND,
               "predicted_board_W": {str(f): tabs[f] for f in tabs},
               "e64_measured_board_W": {k: {str(f): v[f] for f in v} for k, v in E64P.items()},
               "results": res,

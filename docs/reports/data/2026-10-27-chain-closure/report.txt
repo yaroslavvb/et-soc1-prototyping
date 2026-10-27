@@ -23,14 +23,24 @@
 
   The measured price per flipped bit barely moves — 87 to 129 fJ over m = 1 to 23 — while the
   single-bit price list says it should run from 106 to 382 fJ per bit over the same masks.
-  The position premium is a SINGLE-BIT effect: it does not add when bits flip together.
+  Along this ladder the position premium does not add when bits flip together. It is NOT
+  gone in general: at a fixed m = 2 it is paid in full (position.py), so the compression is
+  a function of m, and this ladder always takes the lowest bits.
 
-  three candidate laws on these seven rungs:
+  two defensible flat prices from this same ladder:
+    zero-intercept pooled (used below)      107.1 fJ per flipped bit
+    E60's own marginal slope 0.5362 W per h  116.8 fJ  (registered lq.designed 116.7 fJ;
+      its intercept is -0.420 W, 71% of the m=1 rung, which is the whole difference)
+
+  three candidate laws, FITTED ON AND SCORED ON these same seven rungs (in-sample, not a test):
     flat, 107 fJ per flipped bit, position ignored rms  14.4%   worst  22.7%
     price list x m^(alpha-1), alpha = 0.775        rms  28.5%   worst  62.5%
     free power law, 0.481 W x m^0.993              rms  13.3%   worst  19.1%
-  >>> the flat law wins, and the free power law's exponent 0.993 is 1.00 within its scatter:
-      inside one word, board power counts flipped bits and all but ignores which ones.
+  >>> the finding is the free exponent, 0.993, which is 1.00 within its scatter; the two
+      one-parameter-equivalent laws (flat, and c x m^beta) are indistinguishable on seven
+      in-sample rungs and neither 'wins'. Only the price-list law is clearly worse.
+      Along THIS ladder, board power counts flipped bits and all but ignores which ones.
+      The out-of-sample test is nrd_a / nrd_b in part 4, and both laws miss there.
 
 ======================================================================================
 3. CROSS-OPERAND — E67's 4x4 grid (one A bit AND one B bit flipping at once)
@@ -63,6 +73,16 @@
       also flip the dear high-mantissa bits, which the flat law prices at the floor. The
       compressed list keeps too much of the single-bit premium. The missing experiment is below.
 
+  the low arm's own sensitivity — the flat law needs a per-bit price and an A-side carry-over,
+  and the data settles neither. All four combinations, x kappa 0.881:
+    107.1 fJ zero-intercept    A/B 1.637 sum-weighted        10.631 W   -34%
+    107.1 fJ zero-intercept    A/B 1.990 position mean       11.641 W   -28%
+    116.8 fJ E60 marginal      A/B 1.637 sum-weighted        11.595 W   -28%
+    116.8 fJ E60 marginal      A/B 1.990 position mean       12.697 W   -22%
+    A law that says position stops mattering in company arguably should not then import a
+    position-weighted A/B ratio, and E60's own fit of this ladder keeps an intercept. So the
+    low arm is 10.6-12.7 W, -34% to -22%, and the bracket is -34%/-22% to +18%.
+
   E67's registered anchors (aifoundry3, 600 MHz, board W): zeros 27.828, ones 36.046, pi 36.324, randn 52.487
     the Horace step (random - zeros) 24.659 W = clocking (ones - zeros) 8.217 + data (random - ones) 16.442
     price list predicts the data term  19.120 W = 116% of it; the whole step to 111%.
@@ -83,9 +103,15 @@
   data (random - ones)                               16.44        3.627           E67 anchors
   random normal, whole board                         52.49       11.579           E67 anchor
 
-  E38 (21 Sep, aifoundry2) measured the same three terms per multiply-add over idle:
-    zeros 0.27 pJ, ones 2.13 pJ, random 5.78 pJ -> clocking 1.86 pJ, data 3.65 pJ
-    this work, on the other card five weeks later: clocking 1.81 pJ, data 3.63 pJ  (97% and 99%)
+  E38 (V3-ABL-A, 21 Sep, four 7 s runs per card, 600 MHz boot clock) measured the same three
+  terms per multiply-add over idle. REGISTERED values, docs/findings/05-claims.md line 486,
+  read here from the sparsity page's own data block:
+    aifoundry2     zeros 0.40  ones 2.26  random 5.92 pJ  ->  clocking 1.85, data 3.66
+    aifoundry3     zeros 0.16  ones 1.93  random 5.37 pJ  ->  clocking 1.76, data 3.44
+    aifoundry1-c1  zeros 0.25  ones 2.21  random 6.06 pJ  ->  clocking 1.96, data 3.85
+    this work (aifoundry3, 600 MHz, E67's anchors):                 clocking 1.81, data 3.63
+      against aifoundry2     (the other card, five weeks):  98% and  99%
+      against aifoundry3     (the SAME card, five weeks): 103% and 105%
   and the hart ladder says the data term is linear in harts: 27.1 mW/hart random against 2.1 zeros,
   intercept -0.51 W, i.e. no fixed per-kernel offset (E65 C1/C2: 'neither band').
 
@@ -96,6 +122,9 @@
   so a flip's energy should scale by V^2 = 1.369; the six bit prices measured at both clocks give
   1.46, 1.54, 1.50, 1.30, 1.44, 1.32, mean 1.425 (a cross-card comparison, hence the spread).
   E64's static board line B(f) = {600: 25.46, 700: 28.24, 800: 33.61} W; die line T = 41.88 + 0.4696 x W; governor {'tau_s': 1.3, 'pass_s': 0.24, 'rms_mhz': 3.3, 'n': 26}
+  NOT INDEPENDENT: B(f) is E64's own joint fit over 103 points, and those points include the
+  fp32 zeros/ones/randn LAD runs whose clocks this section then predicts. So the absolute-power
+  agreement below is partly in-sample; the step comparison above it is the independent one.
 
   predicted board power (W), aifoundry3 levels on E64's static line:
     f     zeros   ones   randn(M)  randn(P)  randn(F)   E64 measured, aifoundry2: zeros/ones/randn
@@ -106,24 +135,64 @@
     600 MHz  predicted  24.66 W   measured  23.23 W   ratio 1.062
     700 MHz  predicted  33.87 W   measured  34.90 W   ratio 0.970
     800 MHz  predicted  45.01 W   measured  47.76 W   ratio 0.942
+    At 600 MHz NOTHING IS REFERRED — the model simply uses E67's own measured anchors — so
+    +6% there is the pure aifoundry3-against-aifoundry2 card offset, not a referral error.
+    The referral's own error is the DRIFT off that anchor: 0.942 / 1.062 = 0.888, i.e. -11% over
+    200 MHz, and it is monotone, not scatter. -11% is what propagates into the clocks below.
 
-  governor: the ~1.3 s average of board power is held to 65 W; the die trips at 66 C,
-  so the sustained board cap is (66 - 41.88)/0.4696 = 51.4 W.
+  governor: the ~1.3 s average of board power is held to 65 W (the TDP the card reads back,
+  and the literal E64's own surface_hpl.py simulates with); the sustained cap is E64's
+  registered cap_w_at_65_5 = 50.3 W, the board power at which its die line reads 65.5 C.
+  (E64's sustained fp32 randn point sits at 67.1 C and 54.4 W, so there is no hard 66 C trip,
+  and its three measured sustained board powers are 36.4 / 49.4 / 54.4 W — not one cap.)
 
   workload                burst MHz   burst TFLOPS   sustained MHz   sustained TFLOPS
   zeros                         800.0       12.30           800.0          12.30
-  ones                          800.0       12.30           785.1          12.07
+  ones                          800.0       12.30           774.9          11.91
   random (measured 600 level)   697.4       10.72           600.0           9.22
   random, compressed price list  672.5       10.34           600.0           9.22
-  random, flat in-company price  752.4       11.57           645.6           9.93
+  random, flat in-company price  752.4       11.57           635.5           9.77
 
   E64 measured, fp32, 1,024 harts: zeros 800 MHz 12.3/12.3 TFLOPS; ones 738 MHz 12.3/11.1;
                                    random 706 MHz burst, 600 MHz sustained, 10.7/9.2 TFLOPS
 
   ZEROS / RANDOM speed ratio, from E67's measured 600 MHz anchors  burst 1.147 (+15%), sustained 1.333 (+33%)
   ZEROS / RANDOM speed ratio, bit prices only, compressed list     burst 1.190 (+19%), sustained 1.333 (+33%)
-  ZEROS / RANDOM speed ratio, bit prices only, flat in-company     burst 1.063 (+6%), sustained 1.239 (+24%)
+  ZEROS / RANDOM speed ratio, bit prices only, flat in-company     burst 1.063 (+6%), sustained 1.259 (+26%)
   MEASURED (E64)                                                     burst 1.150 (+15%), sustained 1.337 (+34%)
+
+  ----------------------------------------------------------------------------------
+  (a) THE SUSTAINED RATIO IS A CLAMP, NOT A FIT. settle() returns an endpoint when the cap
+      lies outside [600, 800]. Zeros at 800 MHz draws 37.93 W and random at 600 MHz draws 52.49 W,
+      so ANY sustained cap in a 14.6 W window, 37.9 to 52.5 W, returns exactly 800/600 = 1.3333.
+        cap 50.30 W (E64 registered cap_w_at_65_5) -> zeros 800.0 / random 600.0 MHz, ratio 1.3333
+        cap 51.36 W (a 66 C trip on the die line ) -> zeros 800.0 / random 600.0 MHz, ratio 1.3333
+        cap 49.40 W (E64 measured sustained ones ) -> zeros 800.0 / random 600.0 MHz, ratio 1.3333
+        cap 54.40 W (E64 measured sustained randn) -> zeros 800.0 / random 615.9 MHz, ratio 1.2989
+      And the measurement is the same number: E64 reports sustained 800 and 600 MHz, and its
+      12.3 / 9.2 TFLOPS is 12.3 x 600/800 = 9.225 rounded to 9.2. Unrounded the
+      measured ratio is 1.3333 — identical to the prediction. The published '0.3%' was E64's
+      rounding, not an agreement. The sustained result carries ONE bit: random reaches the
+      floor and zeros does not. That is ordinal, and it is still a real prediction.
+
+  (b) THE BURST CAP MATTERS, and E64 offers four measured comparators, not one.
+      predicted burst ratio against the power cap:
+        64.0 W: 1.1592   65.0 W: 1.1471   65.5 W: 1.1415   66.0 W: 1.1366   67.0 W: 1.1269
+        measured SUS 'cool die, first 8 s' TFLOPS 12.3/10.7   1.1495   predicted/measured -0.2%
+        measured LAD whole-run TFLOPS 12.11/10.61             1.1414   predicted/measured +0.5%
+        measured surface.txt burst clocks 800/706             1.1331   predicted/measured +1.2%
+        measured LAD mean MHz after 1.5 s 800/710             1.1268   predicted/measured +1.8%
+      The published 0.3% is the smallest of those four. Honest range: predicted 1.147 against
+      measured 1.127-1.150 depending on whether you read TFLOPS or clocks.
+
+  (c) THE REFERRAL BAND, carried through. The referral's own error is the -11% drift from 600
+      to 800 MHz, so put a band of that size on the random dynamic term and re-settle:
+        x 1.126 (random costs +13% more) burst 666.1 MHz   ratio 1.2010
+        x 1.000 (as published          ) burst 697.4 MHz   ratio 1.1471
+        x 0.888 (random costs -11% less) burst 724.6 MHz   ratio 1.1041
+      So the burst prediction with the referral's own error carried is 1.104-1.201, which
+      contains every measured comparator above. The point estimate agrees with the headline
+      comparator to 0.2%, but the model's resolution cannot tell the four measurements apart.
 
 wrote chain.json
  m   dW (W)     SE     measured fJ/bit   naive fJ/bit   meas/naive
@@ -180,13 +249,23 @@ WHICH BITS, AT A FIXED NUMBER OF BITS  (aifoundry2, 800 MHz, 9 passes each, zero
   the single-bit price list predicts   1.926   (aifoundry3's 32-position list, 600 MHz)
   measured / predicted                 1.113
 
-  So at m = 2 the position premium is paid IN FULL: swapping bit 1 for bit 12 more than
-  doubles the cost of the same two flips. Compare the far end of the lq ladder, where
-  bits 16-22 are added in company:
+  CROSS-CARD AND CROSS-CLOCK, and no on-card control exists: the measurement is aifoundry2
+  at 800 MHz, the prediction is aifoundry3's list at 600 MHz. E60 measured NO single-bit
+  prices on aifoundry2 (its bits list is empty), and aifoundry1-c0's 800 MHz list covers
+  bits [0, 8, 16, 22, 23, 31], which excludes both bit 1 and bit 12. The 800/600 price ratio
+  spans 1.30-1.54 across positions, so a position-dependent clock scaling of that size puts
+  the 111% anywhere in roughly 97-128%.
+
+  So at m = 2 the position premium is paid in full, within a cross-card systematic of order
+  15%: swapping bit 1 for bit 12 more than doubles the cost of the same two flips. The
+  direction is safe; the precision is not. Compare the far end of the ladder — a DIFFERENT
+  card and clock, aifoundry3 at 600 MHz — where bits 16-22 are added in company:
     lq_h16 -> lq_h23 adds 7 bits (16..22) for 3.963 W, i.e. 0.566 W each;
-    the same seven bits cost 3.609 W each on their own (E65, same card and clock).
+    the same seven bits cost 3.609 W each on their own (E65, aifoundry3 600 MHz too, so
+    this comparison IS on one card at one clock).
     a 6.4x discount.
 
-  >>> the position premium is paid in full at m = 2 and is 84% gone by m = 23.
+  >>> the position premium is paid in full at m = 2 (aifoundry2, 800 MHz) and is 84% gone
+      by m = 23 (aifoundry3, 600 MHz).
       That is the compression, and it is a function of m. Only ONE spread rung has ever run
       (ls_h2, on one card); make_hl.py already builds ls_h4, ls_h8, ls_h12 and ls_h16.

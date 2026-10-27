@@ -262,7 +262,16 @@
   "alpha": 0.774702209810226,
   "beta": 0.9934753845827351,
   "c_pow_W": 0.4806778938306406,
+  "flat_fJ_per_bit_marginal": 116.80052714191335,
+  "e60_lq_linear": {
+   "W_per_h": 0.5362136705380688,
+   "intercept_W": -0.4202397300304854,
+   "residual_rms_W": 0.3916112815807671,
+   "span_W": 11.667273504273497
+  },
+  "e60_lq_designed_fJ": 116.74616241888968,
   "law_scores_pct": {
+   "in_sample": true,
    "flat": {
     "rms": 14.383422053541569,
     "worst": 22.66186822275627
@@ -299,6 +308,17 @@
    "both": 10.631376063717715
   },
   "A_over_B_single_bit_ratio": 1.637400623213453,
+  "A_over_B_position_mean": 1.9895072001372889,
+  "low_arm_sensitivity_W": {
+   "107.1 fJ zero-intercept | A/B 1.637 sum-weighted": 10.631376063717715,
+   "107.1 fJ zero-intercept | A/B 1.990 position mean": 11.641248771851155,
+   "116.8 fJ E60 marginal | A/B 1.637 sum-weighted": 11.595185156820188,
+   "116.8 fJ E60 marginal | A/B 1.990 position mean": 12.69660993621341
+  },
+  "low_arm_range_W": [
+   10.631376063717715,
+   12.69660993621341
+  ],
   "bracket_both_random_W": [
    10.631376063717715,
    19.119669634894585
@@ -445,13 +465,30 @@
    "data": 3.6272321695651333,
    "randn_board": 11.579211514381424
   },
-  "e38_pJ": {
-   "zeros": 0.27,
-   "ones": 2.13,
-   "random": 5.78,
-   "clocking": 1.86,
-   "data": 3.65
-  }
+  "e38_pJ_registered_per_card": {
+   "aifoundry2": {
+    "zeros": 0.4034032614174854,
+    "ones": 2.2579778702438995,
+    "random": 5.920030441985411,
+    "clocking": 1.8545746088264141,
+    "data": 3.662052571741511
+   },
+   "aifoundry3": {
+    "zeros": 0.16334422815135063,
+    "ones": 1.925183786548728,
+    "random": 5.36889998752414,
+    "clocking": 1.7618395583973774,
+    "data": 3.4437162009754116
+   },
+   "aifoundry1-c1": {
+    "zeros": 0.2512321671350261,
+    "ones": 2.210740475205587,
+    "random": 6.057890339687507,
+    "clocking": 1.9595083080705606,
+    "data": 3.84714986448192
+   }
+  },
+  "e38_source": "docs/reports/2026-09-18-et-soc1-sparsity.html <script id=sparsity-data> .v3.operands.<card>.patterns.<p>.pj_mac.mean; registered in docs/findings/05-claims.md line 486 (V3-ABL-A, E38)"
  },
  "chain": {
   "v600": 0.5219139024390245,
@@ -487,8 +524,61 @@
    "cap_w_at_65_5": 50.3
   },
   "power_cap_W": 65.0,
-  "trip_C": 66.0,
-  "sustained_cap_W": 51.362862010221455,
+  "power_cap_source": "the TDP the card reads back (E64 README); the literal E64's own surface_hpl.py passes to simulate(). Not fitted here.",
+  "sustained_cap_W": 50.3,
+  "sustained_cap_source": "E64's registered thermal cap_w_at_65_5 (surface.txt), the board power at which its die line reads 65.5 C. E64's own sustained fp32 randn point is 67.1 C at 54.4 W, so 66 C is not a hard trip.",
+  "sustained_is_a_clamp": {
+   "clamp_window_W": [
+    37.9321675169596,
+    52.487415584415594
+   ],
+   "window_width_W": 14.555248067455992,
+   "ratio_anywhere_in_window": 1.3333333333333333,
+   "candidate_caps_W": {
+    "E64 registered cap_w_at_65_5": 50.3,
+    "a 66 C trip on the die line": 51.362862010221455,
+    "E64 measured sustained ones": 49.4,
+    "E64 measured sustained randn": 54.4
+   },
+   "measured_sustained_ratio_unrounded": 1.3333333333333333,
+   "note": "zeros clamps high and random clamps low for every candidate cap, so the sustained ratio is 800/600 by construction and the 0.3% residual is E64's rounding of 12.3 x 600/800 = 9.225 to 9.2. The prediction is ordinal."
+  },
+  "burst_cap_sensitivity": {
+   "64.0": 1.1591858343597234,
+   "65.0": 1.14711286213546,
+   "65.5": 1.1414757021208422,
+   "66.0": 1.1365729981984802,
+   "67.0": 1.126948293590291
+  },
+  "burst_measured_comparators": {
+   "SUS 'cool die, first 8 s' TFLOPS 12.3/10.7": 1.149532710280374,
+   "LAD whole-run TFLOPS 12.11/10.61": 1.1413760603204524,
+   "surface.txt burst clocks 800/706": 1.13314447592068,
+   "LAD mean MHz after 1.5 s 800/710": 1.1267605633802817
+  },
+  "referral_step_ratio": {
+   "600": 1.0615309357022664,
+   "700": 0.9704265172795101,
+   "800": 0.9423840274579667
+  },
+  "referral_drift_600_to_800": 0.8877593631640355,
+  "burst_referral_band": {
+   "random costs +13% more": {
+    "scale": 1.1264313748670938,
+    "burst_mhz": 666.0951103460412,
+    "ratio": 1.2010296841608614
+   },
+   "as published": {
+    "scale": 1.0,
+    "burst_mhz": 697.4030423743342,
+    "ratio": 1.14711286213546
+   },
+   "random costs -11% less": {
+    "scale": 0.8877593631640355,
+    "burst_mhz": 724.5973208239909,
+    "ratio": 1.1040614932032364
+   }
+  },
   "predicted_board_W": {
    "600": {
     "zeros": 27.82805194805195,
@@ -573,9 +663,9 @@
    },
    "ones": {
     "burst_mhz": 800.0,
-    "sustained_mhz": 785.103852769306,
+    "sustained_mhz": 774.8965696723584,
     "burst_tflops": 12.3,
-    "sustained_tflops": 12.07097173632808
+    "sustained_tflops": 11.914034758712512
    },
    "randn_M": {
     "burst_mhz": 697.4030423743342,
@@ -591,9 +681,9 @@
    },
    "randn_F": {
     "burst_mhz": 752.4038286019085,
-    "sustained_mhz": 645.6165397228788,
+    "sustained_mhz": 635.5400933092299,
     "burst_tflops": 11.568208864754343,
-    "sustained_tflops": 9.926354298239263
+    "sustained_tflops": 9.771428934629409
    }
   },
   "predicted_ratio": {
@@ -607,7 +697,7 @@
    },
    "from_price_list_flat": {
     "burst": 1.0632588107459968,
-    "sustained": 1.239125627641739
+    "sustained": 1.258771883036418
    }
   },
   "measured_ratio": {
