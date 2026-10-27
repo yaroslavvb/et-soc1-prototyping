@@ -29,6 +29,17 @@ import numpy as np
 E_CHARGE = 1.602176634e-19
 ZERO = {"lq": "lq_h0", "lb": "lb_h0", "ls": "lq_h0", "bit": "lq_h0", "xin": "xin_h0", "xio": "xin_h0", "xnz": "xin_h0",
         "ain": "ain_h0", "bpi": "lb_h0"}   # bpi (E65, A4): the single-bit flip with A = pi, against lb_h0
+IX_BITS = [0, 8, 16, 22]                   # E67 (Q128, A12): the interaction grid's positions
+
+
+def item_zero(man, item, fam):
+    """The item's own zero. E67 amendment A12: make_hl.py writes a per-item `zero` for the A-side families, whose
+    zero is not one per family (bit 30's base is the exponent-64 one, and nrd_a / nrd_b sit on opposite sides), and
+    that field wins when it is present. Every E60 and E65 item has no such field and keeps the family map."""
+    it = man.get(item, {})
+    if "zero" in it:
+        return it["zero"]
+    return f"ord_gray_{it['pos']}" if fam == "ord" else ZERO.get(fam)
 
 
 def load_jsonl(path):
@@ -199,7 +210,7 @@ def main():
             for r in R:
                 if r["pass"] != p or not r["cycles_per_op"]:
                     continue
-                z = ZERO.get(r["family"])
+                z = item_zero(man, r["item"], r["family"])
                 if z in zc and abs(r["cycles_per_op"] / zc[z] - 1) > 0.005:
                     r["fail"].append(f"cycles/op {r['cycles_per_op']:.2f} vs {zc[z]:.2f}")
         passes_out = []
@@ -229,7 +240,7 @@ def main():
         items = defaultdict(dict)
         for item in sorted({i for p in passes for i in val[p]}):
             fam = man.get(item, {}).get("family")
-            z = ZERO.get(fam) if fam != "ord" else f"ord_gray_{man[item]['pos']}"
+            z = item_zero(man, item, fam)
             ent = {"family": fam}
             for key in ("p80", "p_raw", "rail"):
                 m_, se, n = mean_se([val[p][item][key] for p in passes if item in val[p]])
@@ -341,6 +352,77 @@ def main():
                     C[key_][it["bit"]] = {"dW": items[n]["d_p80"], "se": items[n]["d_p80_se"], "n": items[n]["d_n"],
                                           "J_per_alternating_bit": items[n]["d_p80"] / (4096 * rate),
                                           "zero": z_b, "pred_dW": dpred(n, z_b)}
+        # ---- E67 (Q128, A12): the A side. abit_<j> is A's bit j alternating with the quiet partner B = 1.0,
+        # against its own constant-A zero; abp_<j> is the same with the busy partner B = pi, against ap_h0. The
+        # per-bit price divides by the item's OWN designed A-bit count from the manifest (2,048 per multiply-add:
+        # the issue order holds an A word for two micro-ops, so A can only flip every second cycle), never a
+        # constant, so the A and B sides are per-flipped-bit numbers on one footing.
+        for fam_, key_ in (("abit", "a_bits"), ("abp", "a_bits_pi")):
+            C[key_] = {}
+            for n, it in man.items():
+                if it.get("family") != fam_ or n not in items or items[n].get("d_p80") is None:
+                    continue
+                rate = items[n]["rate"] or 1
+                nb = it["flips"]["a_all"]
+                C[key_][it["bit"]] = {"dW": items[n]["d_p80"], "se": items[n]["d_p80_se"], "n": items[n]["d_n"],
+                                      "designed_A_bits_per_op": nb, "zero": items[n]["zero"], "rate": rate,
+                                      "J_per_alternating_bit": items[n]["d_p80"] / (nb * rate),
+                                      **{"e_" + k_: v_ for k_, v_ in units(items[n]["d_p80"] / (nb * rate), v).items()}}
+        # the busy partner's premium at a shared position, paired per pass
+        C["a_partner"] = {}
+        for n, it in man.items():
+            if it.get("family") != "abp":
+                continue
+            q_ = f"abit_{it['bit']}"
+            d = [(val[p][n]["p80"] - val[p]["ap_h0"]["p80"]) - (val[p][q_]["p80"] - val[p][man[q_]["zero"]]["p80"])
+                 for p in passes if all(x in val[p] for x in (n, q_, "ap_h0", man[q_]["zero"]))]
+            if d:
+                m_, se, n_ = mean_se(d)
+                C["a_partner"][it["bit"]] = {"W": m_, "se": se, "n": n_}
+        # ---- E67 (Q128, A12): the interaction grid. The cell's excess over the sum of its two margins is the
+        # paired contrast (cell - A-only - B-only + base) per pass, which cancels the base and every pass offset.
+        if "ix_z" in items:
+            g = {"base_W": items["ix_z"].get("p80"), "cells": {}, "margins": {}}
+            for b_ in IX_BITS:
+                for side, nm in (("a", f"ix_a{b_}"), ("b", f"ix_b{b_}")):
+                    if nm in items and items[nm].get("d_p80") is not None:
+                        nbits = man[nm]["flips"]["a_all" if side == "a" else "b_all"]
+                        rate = items[nm]["rate"] or 1
+                        g["margins"][nm] = {"dW": items[nm]["d_p80"], "se": items[nm]["d_p80_se"],
+                                            "side": side, "bit": b_, "designed_bits_per_op": nbits,
+                                            "J_per_alternating_bit": items[nm]["d_p80"] / (nbits * rate)}
+            for i_ in IX_BITS:
+                for j_ in IX_BITS:
+                    c_, a_, b2_ = f"ix_{i_}_{j_}", f"ix_a{i_}", f"ix_b{j_}"
+                    if not all(x in items and items[x].get("d_p80") is not None for x in (c_, a_, b2_)):
+                        continue
+                    d = [val[p][c_]["p80"] - val[p][a_]["p80"] - val[p][b2_]["p80"] + val[p]["ix_z"]["p80"]
+                         for p in passes if all(x in val[p] for x in (c_, a_, b2_, "ix_z"))]
+                    m_, se, n_ = mean_se(d)
+                    sum_ = items[a_]["d_p80"] + items[b2_]["d_p80"]
+                    g["cells"][f"{i_}_{j_}"] = {"a_bit": i_, "b_bit": j_, "cell_dW": items[c_]["d_p80"],
+                                                "cell_se": items[c_]["d_p80_se"], "a_dW": items[a_]["d_p80"],
+                                                "b_dW": items[b2_]["d_p80"], "sum_dW": sum_,
+                                                "excess_W": m_, "excess_se": se, "n": n_,
+                                                "excess_frac_of_sum": (m_ / sum_) if sum_ else None}
+            ex = [x["excess_W"] for x in g["cells"].values() if x["excess_W"] is not None]
+            fr = [x["excess_frac_of_sum"] for x in g["cells"].values() if x["excess_frac_of_sum"] is not None]
+            if ex:
+                g["excess_mean_W"], g["excess_mean_se"], g["n_cells"] = mean_se(ex)
+                g["excess_frac_mean"] = float(np.mean(fr)) if fr else None
+                g["excess_abs_max_W"] = max(abs(x) for x in ex)
+            C["ix"] = g
+        # ---- E67 (Q128, A12): the anchors, and the one-side-random pair the closure test reads
+        C["anchors"] = {n: {"p80": items[n].get("p80"), "se": items[n].get("p80_se"), "n": items[n].get("n"),
+                            "p_raw": items[n].get("p_raw"), "rail": items[n].get("rail"),
+                            "rate": items[n].get("rate"),
+                            "A_bits_per_op": man.get(n, {}).get("flips", {}).get("a_all"),
+                            "B_bits_per_op": man.get(n, {}).get("flips", {}).get("b_all"),
+                            "dW_vs_zero": items[n].get("d_p80"), "dW_se": items[n].get("d_p80_se"),
+                            "zero": items[n].get("zero")}
+                        for n in sorted(items)
+                        if man.get(n, {}).get("family") in ("anchor", "nrd")
+                        or n in ("lq_h0", "lb_h0", "aq_h0", "aq_e64", "ap_h0", "ix_z")}
         # ---- ec: per-pass slopes, e_in from xin (and ain), e_out from xio and xnz
         ec = {}
         for fam, excl in (("xin", ()), ("ain", ("ain_h32",)), ("xio", ()), ("xnz", ())):
@@ -461,6 +543,18 @@ def main():
                 q = e["maxflip"]
                 pr_ = "n/a" if q.get("pred_W") is None else f"{q['pred_W']:.3f}"
                 print(f"  ord pos {pos}: max-flip - Gray = {q['W']:.3f} +- {q['se'] or 0:.3f} W (raw {q['raw_W']:.3f}), pred {pr_}, n {q['n']}")
+        for key_, lbl_ in (("a_bits", "A bits (B=1.0)"), ("a_bits_pi", "A bits (B=pi)")):
+            if C.get(key_):
+                print(f"  {lbl_}: " + ", ".join(f"{b}:{x['dW']:.2f}W/{x['e_fJ']:.0f}fJ" for b, x in sorted(C[key_].items())))
+        if C.get("ix"):
+            g = C["ix"]
+            print(f"  grid: base {g['base_W']:.2f} W, {g.get('n_cells')} cells, mean excess over the sum "
+                  f"{g.get('excess_mean_W') if g.get('excess_mean_W') is None else round(g['excess_mean_W'], 3)} "
+                  f"+- {g.get('excess_mean_se') if g.get('excess_mean_se') is None else round(g['excess_mean_se'], 3)} W, "
+                  f"|max| {g.get('excess_abs_max_W') if g.get('excess_abs_max_W') is None else round(g['excess_abs_max_W'], 3)} W")
+        if C.get("anchors"):
+            print("  anchors: " + ", ".join(f"{n}:{a_['p80']:.2f}" for n, a_ in sorted(C["anchors"].items())
+                                            if a_.get("p80") is not None))
         for key_, lbl_ in (("bits", "bits (A=1.0)"), ("bits_pi", "bits (A=pi)")):
             if C.get(key_):
                 print(f"  {lbl_}: " + ", ".join(f"{b}:{x['dW']:.2f}" for b, x in sorted(C[key_].items())))

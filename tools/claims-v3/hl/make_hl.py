@@ -28,6 +28,20 @@ Families (item names in manifest.json):
        bit_<j>         one bit j of B flips every cycle (A = 1.0); exponent bits use a base whose flip stays normal
        bpi_<j>         the same single-bit flip with the busy partner A = pi (E65 amendment A4): bit_<j> and
                        bpi_<j> share their B words, so the pair isolates what the partner costs at one position
+       aq_h0, aq_e64   E67 (Q128, amendment A11): A constant, B = 1.0 — the A-side scan's own zero (aq_e64 is
+                       the exponent-64 base that bit 30 needs, so that position has a zero of its own)
+       abit_<j>        A's bit j alternates down the rows, B = 1.0: the A side of the price list. The issue order
+                       holds an A word for two micro-ops, so A flips every SECOND cycle and the designed count is
+                       2,048 A bits per multiply-add, half of B's 4,096. Every position shares one base word
+                       (bit 30's is the exponent-64 one), so an item minus its zero differs in that bit alone
+       ap_h0           A constant, B = pi — the zero of the busy-partner A scan
+       abp_<j>         A's bit j alternates with the busy partner B = pi (j = 0, 8, 11, 16, 22)
+       ix_z            the interaction grid's base: A constant, B constant, one base for all 25 cells
+       ix_a<i>         only A's bit i alternates, on the grid's base
+       ix_b<j>         only B's bit j alternates, on the grid's base
+       ix_<i>_<j>      both at once: how far two flips depart from the sum of each alone
+       nrd_a, nrd_b    one side random fp32, the other 1.0 (nrd_a: A random; nrd_b: B random) — the anchors the
+                       closure test reads the summed per-bit prices against
   ec   xin_h<h>        fxor.pi, f0..f7 = x, y, x, y, ... with y = x ^ m(h): 2h bits per lane flip on the read
                        ports per op, the result (m) never changes
        xio_h<h>        fxor.pi, f0..f7 = x, x, y, y, x, x, y, y: h bits per lane on the ports and h in the result
@@ -164,6 +178,47 @@ def bit_tiles(j, partner=ONE):
     return ladder_tiles(partner, 1 << j, base)
 
 
+# ------------------------------------------------- E67 (Q128, amendment A11): the A side of the price list
+# The issue order (`issue_streams`) is: for each B row k, for each A row i, two micro-ops. So A[i][k] is held for
+# two consecutive micro-ops and B alternates every one. An A word can therefore flip at most every SECOND cycle:
+# 16 transitions per B row, 16 B rows, 8 lanes = 2,048 designed A bits per multiply-add against B's 4,096. Every
+# count below is re-derived from the written files by fma_flips, so the per-bit price divides by the true number.
+A_EXP, A_EXP30 = 127, 64              # bit 30 is the exponent MSB: 127 -> 255 is Inf, 64 <-> 192 are both normal
+GRID_BITS = [0, 8, 16, 22]            # the interaction grid's positions (all mantissa, so one base word serves)
+
+
+def a_base_words():
+    """The one A base word every A-side item shares, and the exponent-64 twin bit 30 needs (same mantissa)."""
+    m = int(np.random.default_rng(SEED + 300).integers(0, 1 << 23))
+    return (A_EXP << 23) | m, (A_EXP30 << 23) | m
+
+
+def a_tiles(a0, a1, partner=ONE, bpair=None):
+    """A[i][k] alternates a0 (even rows) / a1 (odd rows); B is `partner` everywhere, or the per-lane pair
+    bpair = (lo, hi) with B[k][l] = lo[l] and B[k][8+l] = hi[l] (B then alternates every micro-op)."""
+    A = [[(a0 if i % 2 == 0 else a1) for _ in range(N)] for i in range(N)]
+    if bpair is None:
+        B = [[partner] * N for _ in range(N)]
+    else:
+        lo, hi = bpair
+        B = [[0] * N for _ in range(N)]
+        for k in range(N):
+            for l in range(8):
+                B[k][l], B[k][8 + l] = lo[l], hi[l]
+    return A, B
+
+
+def randn_words(n, rng):
+    """n normal, finite, nonzero fp32 words drawn from a standard normal (the kernel's own randn, in a file)."""
+    out = []
+    while len(out) < n:
+        v = np.float32(rng.standard_normal())
+        w = int(struct.unpack("<I", struct.pack("<f", float(v)))[0])
+        if w != 0 and is_normal(w):
+            out.append(w)
+    return out
+
+
 def write_tiles(path, A, B):
     for M in (A, B):
         for row in M:
@@ -259,6 +314,46 @@ def build(out):
         write_tiles(f"{out}/tiles/{name}.bin", A, B)
         items.append({"name": name, "kind": "fma", "family": "bpi", "bit": j, "partner": "pi",
                       "flips": fma_flips(A, B)})
+    # ---- E67 (Q128, amendment A11): the A side, the busy partner, the interaction grid and the random anchors
+    a0, a0_30 = a_base_words()
+    for nm, aw, partner, fam in (("aq_h0", a0, ONE, "aq"), ("aq_e64", a0_30, ONE, "aq"), ("ap_h0", a0, PI, "ap")):
+        A, B = a_tiles(aw, aw, partner)
+        write_tiles(f"{out}/tiles/{nm}.bin", A, B)
+        items.append({"name": nm, "kind": "fma", "family": fam, "a_base": hex(aw),
+                      "partner_b": "1.0" if partner == ONE else "pi", "flips": fma_flips(A, B)})
+    for j in BITS:                                     # block 1: all 32 A positions, quiet partner B = 1.0
+        base = a0_30 if j == 30 else a0
+        assert is_normal(base) and is_normal(base ^ (1 << j)), (j, hex(base))
+        A, B = a_tiles(base, base ^ (1 << j), ONE)
+        nm = f"abit_{j}"
+        write_tiles(f"{out}/tiles/{nm}.bin", A, B)
+        items.append({"name": nm, "kind": "fma", "family": "abit", "bit": j, "partner_b": "1.0",
+                      "zero": "aq_e64" if j == 30 else "aq_h0", "flips": fma_flips(A, B)})
+    for j in BITS_PI:                                  # block 2: the same five positions with the busy partner
+        assert j != 30
+        A, B = a_tiles(a0, a0 ^ (1 << j), PI)
+        nm = f"abp_{j}"
+        write_tiles(f"{out}/tiles/{nm}.bin", A, B)
+        items.append({"name": nm, "kind": "fma", "family": "abp", "bit": j, "partner_b": "pi",
+                      "zero": "ap_h0", "flips": fma_flips(A, B)})
+    ga = (A_EXP << 23) | int(np.random.default_rng(SEED + 301).integers(0, 1 << 23))   # block 3: one base, 25 cells
+    gb = base_b(np.random.default_rng(SEED + 302))
+    for i in [None] + GRID_BITS:
+        for j in [None] + GRID_BITS:
+            nm = "ix_z" if i is None and j is None else (f"ix_a{i}" if j is None else
+                                                         (f"ix_b{j}" if i is None else f"ix_{i}_{j}"))
+            A, B = a_tiles(ga, ga if i is None else ga ^ (1 << i), bpair=(gb, gb if j is None else [w ^ (1 << j) for w in gb]))
+            write_tiles(f"{out}/tiles/{nm}.bin", A, B)
+            items.append({"name": nm, "kind": "fma", "family": "ix", "a_bit": i, "b_bit": j,
+                          "zero": None if nm == "ix_z" else "ix_z", "flips": fma_flips(A, B)})
+    for nm, side in (("nrd_a", "a"), ("nrd_b", "b")):  # block 4: one side random fp32, the other 1.0
+        rng = np.random.default_rng(SEED + 400 + (0 if side == "a" else 1))
+        w = randn_words(N * N, rng)
+        M = [w[r * N:(r + 1) * N] for r in range(N)]
+        A, B = (M, [[ONE] * N for _ in range(N)]) if side == "a" else ([[ONE] * N for _ in range(N)], M)
+        write_tiles(f"{out}/tiles/{nm}.bin", A, B)
+        items.append({"name": nm, "kind": "fma", "family": "nrd", "side": side,
+                      "zero": "aq_h0" if side == "a" else "lq_h0", "flips": fma_flips(A, B)})
     for pat, hs in (("xin", EC_H), ("xio", EC_H[1:]), ("ain", EC_H), ("xnz", [4, 8, 16, 24])):   # xio_h0 would equal xin_h0; ain_h0 is fand.pi's own zero
         for h in hs:
             regs, op = ec_image(pat, h, np.random.default_rng(SEED + 200 + h))
