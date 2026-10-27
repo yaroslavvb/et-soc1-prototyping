@@ -177,6 +177,9 @@ int64_t entry_point(const struct EcArgs* a)
 #ifdef ENERCAT_DF
 #include "enercat_df.inc"   // V3-DTF modes 300+ (build/enercat-df only): gen_df.py, tools/claims-v3/dtf/README.md
 #endif
+#ifdef ENERCAT_TR
+#include "enercat_tr.inc"   // V3-TR modes 500+ (build/enercat-tr only): gen_tr.py, tools/claims-v3/tr/README.md
+#endif
 
     case EC_TLOAD_PAT: {
         // `access_bytes` per tensor load (1 or 16 lines), `stride` apart, wrapping every `region` bytes.

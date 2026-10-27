@@ -1,0 +1,59 @@
+{
+ "exp": "E76",
+ "title": "the thirteen instructions that trap in U-mode: what the trap costs, and what the operations cost instead",
+ "question": "Q128 section 5 item 5: thirteen instructions trap in U-mode and have no energy figure",
+ "registered_utc": "2026-10-27T22:00:00Z",
+ "registered_by": "kern-dev (Q129 workflow), on aifoundry1: build, firmware source reading and dry run only",
+ "card": "aifoundry3",
+ "card_state": "600 MHz pinned; harts 1; probe items --window 0 --seconds 0.001 (one launch, one 64-op block)",
+ "structural_finding": {
+  "claim": "there is no emulation path, so no per-instruction energy exists for these thirteen",
+  "evidence": [
+   "device-minion-runtime/src/MachineMinion/src/trap_routine.c: EXCEPTION_ILLEGAL_INSTRUCTION is emulated only for csrrs mhartid; everything else sets delegate = true and returns stvec",
+   "device-minion-runtime/src/WorkerMinion/src/exception.c exception_handler: for a U-mode exception it saves the context, evicts the S-mode and U-mode trace buffers, sends CM_TO_MM_MESSAGE_ID_KERNEL_EXCEPTION once per shire, and calls return_from_kernel(0, KERNEL_RETURN_EXCEPTION)",
+   "so one trapping instruction ends that hart's kernel; it never returns to mepc+4"
+  ],
+  "source": "Apache-2.0, installed on the lab boxes at /opt/et-platform; counted ELFs at /opt/et/lib/esperanto-fw/*/"
+ },
+ "counted_27_oct_2026_aifoundry1": {
+  "trap_path_instructions": {"MachineMinion.trap_handler": 22, "MachineMinion.trap_routine": 56,
+                             "WorkerMinion.trap_handler": 6, "WorkerMinion.exception_handler": 465,
+                             "WorkerMinion.Trace_Evict_CM_Buffer": 59,
+                             "WorkerMinion.Trace_Evict_UMode_Buffer": 84,
+                             "WorkerMinion.return_from_kernel": 66, "total": 758},
+  "not_on_this_path": {"MachineMinion.syscall_handler": 827, "WorkerMinion.syscall_handler": 127,
+                       "MasterMinion.exception_handler": 217, "note": "the ecall path and the management side"},
+  "library_routines": {"libgcc.__divsf3": {"instructions": 299, "traps": false},
+                       "libgcc.__divdf3": {"instructions": 335, "traps": false},
+                       "libgcc.__fixunssfdi": {"instructions": 12, "traps": "fcvt.l.s"},
+                       "libm.sqrtf": {"instructions": 25, "traps": "fdiv.s"},
+                       "libm.__ieee754_sqrtf": {"instructions": 81, "traps": "fdiv.s"},
+                       "libm.fmodf": {"instructions": 29, "traps": "fdiv.s"},
+                       "libm.__ieee754_fmodf": {"instructions": 146, "traps": "fdiv.s"},
+                       "libm.sinf": {"instructions": 43, "traps": false},
+                       "libm.__kernel_sinf": {"instructions": 43, "traps": false},
+                       "libm.__ieee754_rem_pio2f": {"instructions": 208, "traps": false}},
+  "consequence": "in a U-mode kernel on this silicon a float a/b is safe (299 instructions of libgcc soft float) and sqrtf(x) is fatal (libm's own fdiv.s)"
+ },
+ "predictions": {
+  "P1_all_thirteen_trap": {"traps_expected": 13, "controls_expected_ok": 7,
+                           "rule": "trp_ of a trapping mode records ok:false with zero ops; every trp_tr_ctl_* records ok:true with 64 ops"},
+  "P2_build_independence": "trx_fdiv_ps and trx_fsqrt_ps (the catalogue's own hand-written modes) behave as their tr. counterparts",
+  "P3_wall_s_excess_ms": [0.5, 50],
+  "P4_no_lasting_harm": "controls after a trapping launch in the same block still record ok:true; et-who clean; the pass ends ok. A card that stops answering is a FAIL, reported as one",
+  "P5_no_energy_figure": {"per_trap_per_hart_nJ_counted": [4.5, 8.3], "whole_chip_per_launch_uJ": [4.6, 8.5],
+                          "note": "a count at 6-11 pJ per instruction, NOT a measurement; the board meter is 3-4 orders of magnitude short"},
+  "P6_substitute_price": {"fp32_divide_instructions": 299, "fp32_divide_nJ": [1.8, 3.3],
+                          "in_multiply_adds_at_5.783pJ": [310, 570],
+                          "sqrt": "not callable from libm; needs frcp.ps or a hand-written iteration"}
+ },
+ "decision": {
+  "P1_is_a_count": "each item's verdict is the modal ok over passes; a non-unanimous item is reported unstable with its per-pass values",
+  "P3_instrument": "median wall_s difference over passes with the full range; the host clock, not the board meter; process startup removed by differencing against the control in the same block",
+  "stop_rule": "if a control after a trapping launch does not record ok:true, the queue stops (build/tr-STOP), the claim stays open, notify.py --unblock is used. NO card reset, NO driver reload, NO PCIe retrain, ever",
+  "L_strand": "a trl_ item is launched only for a mode the probe cleared, named explicitly",
+  "passes_target": 2,
+  "passes_extend_to": 3
+ },
+ "waterfall": "closes the second half of section 5 item 5 with a structural answer instead of thirteen energies; does not move the 3.837 pJ unaccounted on the multiply-add"
+}

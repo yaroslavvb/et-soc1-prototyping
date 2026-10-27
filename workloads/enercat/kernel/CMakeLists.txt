@@ -26,3 +26,9 @@ option(ENERCAT_DF "compile the deterministic-flip modes (300+)" OFF)
 if(ENERCAT_DF)
   target_compile_definitions(enercat.elf PRIVATE ENERCAT_DF)
 endif()
+# Trapping instructions (V3-TR, E76): only with -DENERCAT_TR=ON (build/enercat-tr); the cases live in
+# enercat_tr.inc. Thirteen of these mnemonics trap in U-mode, so this kernel is the only one that can carry them.
+option(ENERCAT_TR "compile the trapping-instruction modes (500+)" OFF)
+if(ENERCAT_TR)
+  target_compile_definitions(enercat.elf PRIVATE ENERCAT_TR)
+endif()

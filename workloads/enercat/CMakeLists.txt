@@ -13,6 +13,9 @@ include(ExternalProject)
 option(ENERCAT_GS "compile the gather/scatter modes (400+)" OFF)
 # -DENERCAT_DF=ON adds the V3-DTF modes (300+, gen_df.py); build it in build/enercat-df for the same reason.
 option(ENERCAT_DF "compile the deterministic-flip modes (300+)" OFF)
+# -DENERCAT_TR=ON adds the V3-TR modes (500+, gen_tr.py): the thirteen instructions that trap in U-mode, each
+# beside a control of the same shape. Build it in build/enercat-tr, for the same reason again.
+option(ENERCAT_TR "compile the trapping-instruction modes (500+)" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_PREFIX_PATH}/lib/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_PREFIX_PATH}/lib/cmake/cmake-modules")
@@ -29,6 +32,7 @@ ExternalProject_Add(enercat_kernel
         -DCMAKE_INSTALL_LIBDIR=lib
         -DENERCAT_GS=${ENERCAT_GS}
         -DENERCAT_DF=${ENERCAT_DF}
+        -DENERCAT_TR=${ENERCAT_TR}
     INSTALL_COMMAND ""
     BUILD_ALWAYS TRUE
     BUILD_BYPRODUCTS ${KERNEL_BINARY_DIR}/enercat.elf

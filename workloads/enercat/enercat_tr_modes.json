@@ -1,0 +1,185 @@
+{
+ "first": 500,
+ "modes": [
+  {
+   "name": "tr.fdiv.s",
+   "mode": 500,
+   "ops_per_iter": 64,
+   "shape": "sca2",
+   "insn": "fdiv.s",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: scalar float divide"
+  },
+  {
+   "name": "tr.fsqrt.s",
+   "mode": 501,
+   "ops_per_iter": 64,
+   "shape": "sca1",
+   "insn": "fsqrt.s",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: scalar float square root"
+  },
+  {
+   "name": "tr.fdiv.ps",
+   "mode": 502,
+   "ops_per_iter": 64,
+   "shape": "vec2",
+   "insn": "fdiv.ps",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: packed float divide (also EC_FDIV_PS)"
+  },
+  {
+   "name": "tr.fsqrt.ps",
+   "mode": 503,
+   "ops_per_iter": 64,
+   "shape": "vec1",
+   "insn": "fsqrt.ps",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: packed float square root (also EC_FSQRT_PS)"
+  },
+  {
+   "name": "tr.frsq.ps",
+   "mode": 504,
+   "ops_per_iter": 64,
+   "shape": "vec1",
+   "insn": "frsq.ps",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: packed reciprocal square root"
+  },
+  {
+   "name": "tr.fsin.ps",
+   "mode": 505,
+   "ops_per_iter": 64,
+   "shape": "vec1",
+   "insn": "fsin.ps",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: packed sine"
+  },
+  {
+   "name": "tr.fdiv.pi",
+   "mode": 506,
+   "ops_per_iter": 64,
+   "shape": "vec2",
+   "insn": "fdiv.pi",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: packed integer divide"
+  },
+  {
+   "name": "tr.fdivu.pi",
+   "mode": 507,
+   "ops_per_iter": 64,
+   "shape": "vec2",
+   "insn": "fdivu.pi",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: packed unsigned divide"
+  },
+  {
+   "name": "tr.frem.pi",
+   "mode": 508,
+   "ops_per_iter": 64,
+   "shape": "vec2",
+   "insn": "frem.pi",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: packed integer remainder"
+  },
+  {
+   "name": "tr.fremu.pi",
+   "mode": 509,
+   "ops_per_iter": 64,
+   "shape": "vec2",
+   "insn": "fremu.pi",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: packed unsigned remainder"
+  },
+  {
+   "name": "tr.fcvt.l.s",
+   "mode": 510,
+   "ops_per_iter": 64,
+   "shape": "f2x",
+   "insn": "fcvt.l.s",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: float to 64-bit integer"
+  },
+  {
+   "name": "tr.fcvt.s.l",
+   "mode": 511,
+   "ops_per_iter": 64,
+   "shape": "x2f",
+   "insn": "fcvt.s.l",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: 64-bit integer to float"
+  },
+  {
+   "name": "tr.csrr.cycle",
+   "mode": 512,
+   "ops_per_iter": 64,
+   "shape": "csr",
+   "insn": "0xc00",
+   "expected_to_trap": true,
+   "note": "one of the thirteen: reading the cycle CSR"
+  },
+  {
+   "name": "tr.ctl.fmul.s",
+   "mode": 513,
+   "ops_per_iter": 64,
+   "shape": "sca2",
+   "insn": "fmul.s",
+   "expected_to_trap": false,
+   "note": "control for the sca2 shape: 9.8 pJ in 3.1"
+  },
+  {
+   "name": "tr.ctl.fsgnj.s",
+   "mode": 514,
+   "ops_per_iter": 64,
+   "shape": "sca1c",
+   "insn": "fsgnj.s",
+   "expected_to_trap": false,
+   "note": "control for the sca1 shape: fsgnj.s rd, rs, rs (the same source twice)"
+  },
+  {
+   "name": "tr.ctl.fmul.ps",
+   "mode": 515,
+   "ops_per_iter": 64,
+   "shape": "vec2",
+   "insn": "fmul.ps",
+   "expected_to_trap": false,
+   "note": "control for the vec2 shape"
+  },
+  {
+   "name": "tr.ctl.frcp.ps",
+   "mode": 516,
+   "ops_per_iter": 64,
+   "shape": "vec1",
+   "insn": "frcp.ps",
+   "expected_to_trap": false,
+   "note": "control for the vec1 shape, and the hardware reciprocal the software divide is built on"
+  },
+  {
+   "name": "tr.ctl.fmv.x.w",
+   "mode": 517,
+   "ops_per_iter": 64,
+   "shape": "f2x",
+   "insn": "fmv.x.w",
+   "expected_to_trap": false,
+   "note": "control for the f2x shape"
+  },
+  {
+   "name": "tr.ctl.fmv.w.x",
+   "mode": 518,
+   "ops_per_iter": 64,
+   "shape": "x2f",
+   "insn": "fmv.w.x",
+   "expected_to_trap": false,
+   "note": "control for the x2f shape"
+  },
+  {
+   "name": "tr.ctl.csrr.fccnb",
+   "mode": 519,
+   "ops_per_iter": 64,
+   "shape": "csr",
+   "insn": "0xcc0",
+   "expected_to_trap": false,
+   "note": "control for the csr shape: the FCC non-blocking counter reads fine"
+  }
+ ]
+}

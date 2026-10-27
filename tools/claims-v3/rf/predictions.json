@@ -1,0 +1,49 @@
+{
+ "exp": "E74",
+ "title": "register-file cell ladder: what one stored bit costs to change",
+ "question": "Horace Hub Levels tab stop 4 / Q128 section 2: the register file's own cells are unpriced in the 1.946 pJ bottom-up ledger",
+ "registered_utc": "2026-10-27T22:00:00Z",
+ "registered_by": "kern-dev (Q129 workflow), on aifoundry1, build and dry run only",
+ "card": "aifoundry3",
+ "card_state": "600 MHz, pinned by et-board-clock-guard; harts 1; board energy above idle",
+ "mode": "df.un1b.fnot (gen_df.py mode 305), -DENERCAT_DF=ON; the null arm df.un1a.fnot (mode 304)",
+ "design": {
+  "ladder_cell_bits_per_op": [32, 64, 96, 128, 160, 192],
+  "port_bits_per_op_fixed": 96,
+  "ones_per_register_fixed": 128,
+  "register_bits": 256,
+  "ops_per_iter": 16,
+  "null_items": ["rfz_k32", "rfz_k96", "rfz_k192"],
+  "identity": "one mode, one .text, across every rung: only the 256 B operand image changes"
+ },
+ "anchors": {
+  "e_port_fJ_E60": [20.73, 20.93],
+  "e_out_fJ_E60": [30.0, 31.17],
+  "e_cell_fJ_E61_aifoundry3": {"value": 1.267, "se": 0.151, "passes": 12, "t": 8.39,
+   "note": "cross-kernel estimator (family V, A2.3); NOT IDENTIFIED on aifoundry2 and aifoundry1 card 0"},
+  "half_CV2_prior_fJ": [0.3, 3.0],
+  "ops_per_cycle_per_hart_un1b": 0.7574,
+  "ops_per_cycle_per_hart_un1a": 0.7356,
+  "ops_per_s_un1b_1024_harts_600MHz": 4.6535e11,
+  "W_per_bit_per_op_per_fJ": 4.6535e-4
+ },
+ "predictions": {
+  "P1_e_cell_fJ": [0.8, 1.8],
+  "P2_board_W_k192_minus_k32": [0.060, 0.134],
+  "P3_linearity": {"resid_rms_W_max": 0.020, "no_monotone_curvature_at_SE": 3},
+  "P4_null_rfz": {"rule": "abs(slope over rfz rungs) < 0.3 x the rf slope, and flat within 2 SE"},
+  "P5_rate": {"rf_ops_per_cycle_per_hart": [0.7554, 0.7594], "rfz_ops_per_cycle_per_hart": [0.7336, 0.7376]},
+  "P6_cell_capacitance_fF": [5.9, 13.2]
+ },
+ "decision": {
+  "estimator": "within-pass least squares of board power on cell bits per op over the six rf_ rungs, averaged over passes; two-sided t interval on the between-pass scatter, df = passes - 1; the rail fit reported beside it",
+  "rate_gate": "a run more than 0.2% from its item's median ops_per_cycle_per_hart is dropped; a rung losing more than one run in a pass voids the pass",
+  "null_gate": "P4 fails -> e_cell is reported NOT IDENTIFIED by this design and the slope is published as a bound, with the failure named",
+  "temperature": "preheat 59 C, launch at the first reading <= 58 C, cap 78 C (run_hl.py); three unreachable runs in a row void the pass; the slope is reported with and without a temperature covariate",
+  "resolution_stated_in_advance": {"se_fJ_5_passes": 0.23, "se_fJ_10_passes": 0.16,
+   "note": "5 passes separate P1 from 0 and from 3 fJ, and do NOT separate 1.27 from 0.8"},
+  "passes_target": 6,
+  "passes_extend_to": 10
+ },
+ "waterfall": "e_cell x 256 bits of register content per .pi op puts the register file's cell energy near 0.3 pJ per 256-bit op; it enters Q128's unaccounted 3.837 pJ through the 'register-file read ports, operand bus, result path, pipeline registers' line, not through the gate or wire ledger"
+}

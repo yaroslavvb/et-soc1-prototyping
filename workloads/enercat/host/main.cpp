@@ -36,6 +36,9 @@
 #ifdef ENERCAT_DF
 #include "enercat_df.h"   // V3-DTF modes 300+ (build/enercat-df only): gen_df.py
 #endif
+#ifdef ENERCAT_TR
+#include "enercat_tr.h"   // V3-TR modes 500+ (build/enercat-tr only): gen_tr.py
+#endif
 #ifdef ENERCAT_GS
 #include <functional>
 #include <set>
@@ -320,6 +323,11 @@ Pat lookup(const std::string& name) {
     if (name == g.name) return Pat{g.mode, g.ops_per_iter, g.unit, g.hart0};
   }
 #endif
+#ifdef ENERCAT_TR
+  for (const auto& g : EC_TR_MODES) {
+    if (name == g.name) return Pat{g.mode, g.ops_per_iter, g.unit, g.hart0};
+  }
+#endif
   if (name == "tload_pat") return Pat{EC_TLOAD_PAT, 8, "tensor_load", true};
   if (name == "flw_pat") return Pat{EC_FLW_PAT, 8, "flw.ps", false};
   throw std::runtime_error("unknown --pattern " + name);
@@ -544,6 +552,9 @@ int main(int argc, char** argv) {
       for (const auto& g : EC_GEN_MODES) std::printf("%s\t%s\n", g.name, g.note);
 #ifdef ENERCAT_DF
       for (const auto& g : EC_DF_MODES) std::printf("%s\t%s\n", g.name, g.note);
+#endif
+#ifdef ENERCAT_TR
+      for (const auto& g : EC_TR_MODES) std::printf("%s\t%s\n", g.name, g.note);
 #endif
       return 0;
     }

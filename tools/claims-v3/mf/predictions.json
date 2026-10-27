@@ -1,0 +1,38 @@
+{
+ "exp": "E75",
+ "title": "memory-path flip ladder: pJ per flipped bit, and per carried one, at four levels",
+ "question": "Q128 section 5 item 5: no flip ladder on a memory path; a DRAM tensor load costs 94-134 pJ/B against a MAC's 5.783 pJ",
+ "registered_utc": "2026-10-27T22:00:00Z",
+ "registered_by": "kern-dev (Q129 workflow), on aifoundry1, build and dry run only",
+ "card": "aifoundry3",
+ "card_state": "600 MHz pinned; harts 1 (1,024 harts, 32 per shire); board energy above idle",
+ "patterns": {"l1": "ld_l1 (EC_LD_L1): 8 x flw.ps over the 256 B image, L1 hit",
+              "l2_l3_dram": "flw_pat (EC_FLW_PAT): 32 B vector loads, --stride 64, one 64 B line per load"},
+ "levels": {"l1": "the 256 B image", "l2": "8 KB per hart = 256 KB per shire (half the L2)",
+            "l3": "24 KB per hart = 24 MB in all", "dram": "128 KB per hart = 128 MB in all, 4x the 32 MB L3 (labelled dram_4x_l3)"},
+ "random_operand_law": {"changes_per_32b_word": 11.944, "ones_per_32b_word": 18.167,
+                        "changes_per_256b_block": 95.6, "ones_per_256b_block": 145.3,
+                        "changes_per_512b_line": 191.1, "ones_per_512b_line": 290.7},
+ "anchors_pJ_per_B": {"l1_zeros": 0.39, "l1_random": 0.54, "scratchpad_zeros": 2.12, "scratchpad_random": 4.43,
+                      "dram_zeros": 94.6, "dram_random": 132.6, "l2_random_only": 3.11, "l3_random_only": 14.7},
+ "chord_slopes_pJ_per_changed_bit": {"l1": 0.0502, "own_scratchpad": 0.774, "dram": 12.73},
+ "predictions": {
+  "P1_l1_small_k_slope_pJ_per_bit": [0.03, 0.12],
+  "P2_dram_small_k_slope_pJ_per_bit": [6.0, 25.0],
+  "P3_dram_saturation_percent_below_line_at_k512": [20, 60],
+  "P4_random_anchor_within_percent": 15,
+  "P5_closure_pJ_per_line_dram": {"expr": "191.1*e_flip + 290.7*e_one", "target": 2432, "tolerance": 600},
+  "P6_ordering": "e_flip monotone l1 < l2 < l3 < dram, spanning at least 100x",
+  "P7_rates": {"l1_TB_per_s": [10.9, 18.1], "dram_GB_per_s": [57, 95], "took_ms_drop_above": 60}
+ },
+ "decision": {
+  "estimator": "per level, within-pass least squares of board power on changed bits per transfer over the k-arm; averaged over passes; two-sided t on the between-pass scatter; converted with each run's own measured bytes_per_s, never an assumed rate; the w-arm fitted the same way for e_one",
+  "saturation": "signed departure of the top rung from the line through the two lowest rungs, with its interval",
+  "burst_gate": "drop a run whose telemetry median took_ms > 60 ms; a level losing more than a third of its runs in a pass is reported unresolved, not averaged",
+  "temperature": "preheat 59 C, launch at the first reading <= 58 C, cap 78 C; three unreachable runs in a row void the pass; slopes with and without a temperature covariate",
+  "passes_target": 3,
+  "passes_extend_to": 5,
+  "scratchpad": "OUT OF SCOPE and why: the host cannot seed a scratchpad (--scp makes the kernel read EC_SCP_ADDR, which no host fill reaches); a scratchpad rung needs a kernel mode that copies the image in first"
+ },
+ "waterfall": "does not move the 3.837 pJ unaccounted on the multiply-add (that is arithmetic); it closes the second half of section 5 item 5, turns the load-to-watts model's memory term into a measured coefficient, and splits the published zeros-vs-random chord into a per-flipped-bit and a per-carried-one price at four levels"
+}
