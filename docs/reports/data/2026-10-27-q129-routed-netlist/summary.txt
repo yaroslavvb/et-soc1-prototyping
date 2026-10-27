@@ -1,0 +1,154 @@
+
+=== mixed netlist: the design's capacitance, fF ===
+  nets                               16440   (clock 332)
+  pin, from the liberty              26844.3  (unchanged by routing)
+  wire, global-route Steiner         14427.4
+  wire, extracted to ground           5028.1
+  wire, extracted coupling            3495.8   (each cap once: 251162 caps)
+  wire, ground + coupling k=1        12005.8   (each cap charged to both its nets)
+  wire, extractor's own per-net      12019.6   (= sum of *D_NET)
+  ratio extracted(k=1)/Steiner         0.832
+  coupling / extracted wire             41.0%
+  CLOCK nets only: pin 1443.9  Steiner 733.8  ground 282.8  coupling(both) 175.2
+  CLOCK total cap: Steiner 2177.7 -> extracted k=1 1901.9
+  CLOCK cap that TOGGLES at randn (POWER.md's 1,846 fF row, kept netlist):
+    gr          1275.9 fF  (wire   415.2  pin   860.7)
+    spef_k0     1019.1 fF  (wire   158.3  pin   860.7)
+    spef_k1     1121.0 fF  (wire   260.3  pin   860.7)
+    spef_k2     1223.0 fF  (wire   362.3  pin   860.7)
+  detailed route: 82358 um of wire, 166805 vias
+  extracted fF per um: 0.1035 physical (each cap once), 0.1458 as each driver sees it
+  setRC's own unit capacitance: 0.1658 signal, 0.1454 clock fF/um
+  so the Steiner estimate assumes 87642 um (1.064x the routed length) at 1.137x the
+  extracted fF/um -> 1.210x, against the measured Steiner/extracted(k=1) of 1.202x
+
+=== mixed netlist: pJ per random multiply-add (randn), switching ===
+  variant       total      wire       pin     clock     clk%   priced
+  gr           1.3276    0.4675    0.8601    0.3413    25.7%    51.8%
+  spef_k0      1.0247    0.1646    0.8601    0.2725    26.6%    51.7%
+  spef_k1      1.2321    0.3719    0.8601    0.2998    24.3%    51.8%
+  spef_k2      1.4394    0.5793    0.8601    0.3271    22.7%    51.9%
+  published (2022 OpenROAD, POWER.md): 1.4680 pJ, clock 32.0%, priced 56.3%
+  wire ratio within this run, extracted(k=1)/Steiner: 0.7956
+  wire ratio k=0/Steiner 0.3520   k=2/Steiner 1.2392
+
+=== mixed netlist: every pattern, pJ per multiply-add ===
+  pattern       gr      k=0      k=1      k=2 |  gr wire  k0 wire  k1 wire  k2 wire
+  randn     1.3276   1.0247   1.2321   1.4394 |   0.4675   0.1646   0.3719   0.5793
+  ones      0.3452   0.2758   0.3035   0.3313 |   0.1121   0.0427   0.0705   0.0982
+  zeros     0.0153   0.0094   0.0110   0.0126 |   0.0111   0.0051   0.0068   0.0084
+  lq_h0     0.3470   0.2770   0.3052   0.3334 |   0.1129   0.0430   0.0711   0.0993
+  lq_h1     0.4086   0.3227   0.3630   0.4032 |   0.1369   0.0511   0.0913   0.1315
+  lq_h2     0.4445   0.3487   0.3969   0.4451 |   0.1520   0.0562   0.1044   0.1526
+  lq_h4     0.5323   0.4126   0.4800   0.5473 |   0.1883   0.0686   0.1359   0.2033
+  lq_h8     0.6526   0.5004   0.5939   0.6873 |   0.2375   0.0853   0.1788   0.2722
+  lb_h0     0.3475   0.2774   0.3057   0.3340 |   0.1131   0.0430   0.0714   0.0997
+  lb_h1     0.5467   0.4275   0.4923   0.5572 |   0.1886   0.0694   0.1343   0.1991
+  lb_h2     0.5901   0.4604   0.5335   0.6065 |   0.2045   0.0749   0.1479   0.2210
+  lb_h4     0.6376   0.4988   0.5777   0.6565 |   0.2186   0.0798   0.1586   0.2375
+  lb_h8     0.8143   0.6339   0.7448   0.8556 |   0.2819   0.1015   0.2124   0.3232
+
+=== mixed netlist: the Hamming ladder, fJ per DESIGNED flipped bit ===
+  (OLS over h = 1,2,4,8 with a free intercept, E60's reducer's convention)
+  ladder variant     slope fJ intercept fJ
+  lq     gr             34.96     378.39
+  lq     spef_k0        25.47     300.60
+  lq     spef_k1        33.09     334.34
+  lq     spef_k2        40.71     368.08
+  lq     gr(pub)        34.80   (published, 2022 OpenROAD)
+  lb     gr             37.72     505.73
+  lb     spef_k0        29.14     395.90
+  lb     spef_k1        35.56     453.71
+  lb     spef_k2        41.98     511.52
+  lb     gr(pub)        38.30   (published, 2022 OpenROAD)
+
+=== keep netlist: the design's capacitance, fF ===
+  nets                               20570   (clock 350)
+  pin, from the liberty              33469.6  (unchanged by routing)
+  wire, global-route Steiner         15532.8
+  wire, extracted to ground           5344.1
+  wire, extracted coupling            3633.1   (each cap once: 273581 caps)
+  wire, ground + coupling k=1        12605.2   (each cap charged to both its nets)
+  wire, extractor's own per-net      12610.3   (= sum of *D_NET)
+  ratio extracted(k=1)/Steiner         0.812
+  coupling / extracted wire             40.5%
+  CLOCK nets only: pin 1554.6  Steiner 815.6  ground 313.1  coupling(both) 188.2
+  CLOCK total cap: Steiner 2370.2 -> extracted k=1 2055.9
+  CLOCK cap that TOGGLES at randn (POWER.md's 1,846 fF row, kept netlist):
+    gr          1377.5 fF  (wire   460.8  pin   916.7)
+    spef_k0     1095.8 fF  (wire   179.1  pin   916.7)
+    spef_k1     1202.3 fF  (wire   285.5  pin   916.7)
+    spef_k2     1308.7 fF  (wire   392.0  pin   916.7)
+  detailed route: 88248 um of wire, 200870 vias
+  extracted fF per um: 0.1017 physical (each cap once), 0.1428 as each driver sees it
+  setRC's own unit capacitance: 0.1658 signal, 0.1454 clock fF/um
+  so the Steiner estimate assumes 94378 um (1.069x the routed length) at 1.161x the
+  extracted fF/um -> 1.241x, against the measured Steiner/extracted(k=1) of 1.232x
+
+=== keep netlist: pJ per random multiply-add (randn), switching ===
+  variant       total      wire       pin     clock     clk%   priced
+  gr           1.3009    0.4238    0.8772    0.3684    28.3%    43.6%
+  spef_k0      1.0276    0.1504    0.8772    0.2930    28.5%    43.6%
+  spef_k1      1.2024    0.3252    0.8772    0.3215    26.7%    43.7%
+  spef_k2      1.3772    0.5001    0.8772    0.3500    25.4%    43.7%
+  published (2022 OpenROAD, POWER.md): 1.5160 pJ, clock 32.7%, priced 50.5%
+  wire ratio within this run, extracted(k=1)/Steiner: 0.7675
+  wire ratio k=0/Steiner 0.3550   k=2/Steiner 1.1801
+  this run's Steiner wire energy 0.4238 pJ against the ledger's own 0.5900 pJ (same netlist, 2022 tool): 0.718x
+
+=== keep netlist: every pattern, pJ per multiply-add ===
+  pattern       gr      k=0      k=1      k=2 |  gr wire  k0 wire  k1 wire  k2 wire
+  randn     1.3009   1.0276   1.2024   1.3772 |   0.4238   0.1504   0.3252   0.5001
+  ones      0.3727   0.2966   0.3255   0.3544 |   0.1244   0.0483   0.0772   0.1061
+  zeros     0.0157   0.0098   0.0108   0.0118 |   0.0117   0.0058   0.0068   0.0078
+  lq_h0     0.3742   0.2976   0.3269   0.3562 |   0.1250   0.0485   0.0778   0.1071
+  lq_h1     0.4304   0.3414   0.3790   0.4167 |   0.1439   0.0549   0.0925   0.1302
+  lq_h2     0.4614   0.3642   0.4078   0.4514 |   0.1563   0.0591   0.1027   0.1462
+  lq_h4     0.5381   0.4215   0.4799   0.5382 |   0.1857   0.0691   0.1274   0.1858
+  lq_h8     0.6305   0.4913   0.5677   0.6440 |   0.2191   0.0799   0.1563   0.2327
+  lb_h0     0.3746   0.2979   0.3273   0.3567 |   0.1252   0.0486   0.0779   0.1073
+  lb_h1     0.5465   0.4339   0.4877   0.5415 |   0.1799   0.0672   0.1210   0.1748
+  lb_h2     0.5932   0.4707   0.5311   0.5915 |   0.1947   0.0722   0.1326   0.1930
+  lb_h4     0.6327   0.5023   0.5693   0.6363 |   0.2069   0.0765   0.1435   0.2104
+  lb_h8     0.7844   0.6237   0.7126   0.8015 |   0.2528   0.0920   0.1809   0.2699
+
+=== keep netlist: the Hamming ladder, fJ per DESIGNED flipped bit ===
+  (OLS over h = 1,2,4,8 with a free intercept, E60's reducer's convention)
+  ladder variant     slope fJ intercept fJ
+  lq     gr             28.63     407.74
+  lq     spef_k0        21.47     324.09
+  lq     spef_k1        27.01     357.30
+  lq     spef_k2        32.55     390.51
+  lq     gr(pub)        32.90   (published, 2022 OpenROAD)
+  lb     gr             33.07     515.18
+  lb     spef_k0        26.41     408.63
+  lb     spef_k1        31.31     457.75
+  lb     spef_k2        36.21     506.88
+  lb     gr(pub)        38.50   (published, 2022 OpenROAD)
+
+=== the Q128 waterfall for one random fp32 multiply-add, pJ ===
+  (A) the published ledger, with ONLY the between-cell wire re-priced by the
+      within-run extracted/Steiner ratio on the same (kept) netlist
+                             published      k=0      k=1      k=2
+  transistor gates              0.306    0.306    0.306    0.306
+  wire inside the cells         0.620    0.620    0.620    0.620
+  wire between the cells        0.590    0.209    0.453    0.696
+  switching total               1.516    1.135    1.379    1.622
+  the cells' internal           0.431    0.431    0.431    0.431
+  bottom-up total               1.947    1.566    1.810    2.053
+  unaccounted vs the board      3.836    4.217    3.973    3.730
+  unaccounted vs the rail       2.390    2.771    2.527    2.284
+  ratios applied: k=0 0.3550  k=1 0.7675  k=2 1.1801
+
+  (B) the whole thing re-measured on the current tool, kept netlist, routed.
+      The pin half's own split (gates vs wire-inside-cells) is NOT re-measured: it is
+      carried at the ledger's measured share, 33.0% of the pin energy on gates.
+                                   gr      k=0      k=1      k=2
+  transistor gates              0.290    0.290    0.290    0.290
+  wire inside the cells         0.587    0.587    0.587    0.587
+  wire between the cells        0.424    0.150    0.325    0.500
+  switching total               1.301    1.028    1.202    1.377
+  the cells' internal           0.429    0.429    0.429    0.429
+  bottom-up total               1.730    1.457    1.632    1.807
+  unaccounted vs the board      4.053    4.326    4.151    3.976
+  closure vs the board, %      29.921   25.195   28.218   31.241

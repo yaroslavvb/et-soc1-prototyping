@@ -58,6 +58,17 @@ Everything below therefore uses the **global-route Steiner estimate** of wire ca
 extraction: it has no coupling term, so it is a lower bound on the wire half of each net, while the
 pin half comes from ASAP7's liberty and is exact.
 
+> 🛑 **Corrected Tue 27 Oct 2026 (Q129(a)).** The second clause of that sentence is wrong. The
+> estimate does carry a coupling term: the ORFS asap7 `setRC.tcl` hands the estimator **0.1658 fF
+> per micron** for a signal wire, which is a layer's *total* capacitance at nominal spacing, with
+> the neighbour coupling already bundled in and grounded. Detailed routing now closes
+> ([`../2026-10-27-q129-routed-netlist/`](../2026-10-27-q129-routed-netlist/README.md)) and the
+> extraction puts the Steiner estimate **17–20% above** it, not below: 14,427 fF against 12,006 fF
+> on `mixed` at a Miller factor of 1, and 15,533 against 12,605 on the kept netlist. The wire half
+> below is therefore **not** a floor, and the between-cell wire energy of a random multiply-add
+> falls by about a quarter when it is extracted. The pin half is exactly as described, and routing
+> does not move it at all.
+
 ## Toggles and energy per multiply-add
 
 One lane, one TensorFMA32 op (512 micro-ops, 547 cycles), ASAP7 RVT TT, 0.517 V. Energy is
@@ -289,6 +300,17 @@ because both omissions scale with activity. Everything this directory concludes 
    that gives the I/O pins a proper ring instead of bare die-edge slots.
    `pnr.tcl` already runs `extract_parasitics` and `write_spef` and re-reads the SPEF once routing
    closes.
+
+   ✅ **Cleared Tue 27 Oct 2026 (Q129(a))**, by the first of those two: the ORFS container
+   `openroad/orfs:26Q4-229-g64939f371`, whose ORFS checkout is the **same commit this flow pins**
+   (`64939f371`), so the platform files are identical and only the tool moved. On aifoundry1 it
+   routes **both** netlists to **zero DRC violations** in 193 s each, with no floorplan change and
+   no I/O ring — row 10's configuration exactly. OpenRCX then extracts 251,162 (`mixed`) and
+   273,581 (`keep`) coupling capacitors, the SPEF is written and read back, and an SDF annotated
+   with the extracted parasitics exists for the glitch bench. Results, the per-net capacitance
+   tables, the Miller-factor band and the revised Q128 waterfall:
+   [`../2026-10-27-q129-routed-netlist/`](../2026-10-27-q129-routed-netlist/README.md). New flow
+   scripts: `tools/open-flow/txfma/{route_docker.sh,pnr_route.tcl,post_route.tcl,spef_caps.py,reprice.py}`.
 2. **No timed pass, so no glitch number — but the bench for it now exists and runs.** Three
    obstacles were cleared and one was not.
    - Icarus will not compile `tb_gate.sv`: core-et's `rtl/inc` headers use SystemVerilog `inside`

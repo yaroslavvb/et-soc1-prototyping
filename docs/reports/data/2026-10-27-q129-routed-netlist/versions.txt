@@ -1,0 +1,81 @@
+Q129(a): detailed route, OpenRCX extraction with coupling, SPEF and SDF of the open TensorFMA32
+Tue 27 Oct 2026 (week 44), 13:54-14:14 PDT, on aifoundry1 (CPU only, no card, no /dev/et*)
+
+--- host ---
+host: aifoundry1 Linux 7.0.0-38-generic 16 cpus; nice -n 19, docker --cpus 8 --cpu-shares 256
+scratch: $HOME/scratch-q129-route  (not synced, not /tmp)
+docker: 28.5.1, run as root (the login is not in the docker group on this host; no package,
+        group or daemon configuration was changed, so there is nothing to undo)
+
+--- the tool that moved ---
+image:        openroad/orfs:26Q4-229-g64939f371
+image digest: sha256:6810dbf0e03dddbc89ed8c0a1e13cad09ce4c98d40c4ac0ab99fdc04b0676347
+image id:     sha256:a1dbb1cddaf8a07e702fb57cfac6a50b9fa6cc6cccf333ccc85feb5b856d3c6f
+image built:  2026-10-25T05:32:04Z
+openroad binary: /OpenROAD-flow-scripts/tools/install/OpenROAD/bin/openroad
+openroad binary sha256: 0a4cdf08482bab2d99543e8b32b4b142e013becc7f2c1598afb39ba058193f53
+openroad -version:  "unknown"  <-- this CI image carries no version string; the image digest
+                                   and the binary sha256 above are the identifiers to quote.
+                                   Features: -GPU +GUI -Python
+SPEF writer self-identifies as: *VENDOR "The OpenROAD Project" *PROGRAM "OpenROAD" *VERSION "unknown"
+SDF writer self-identifies as:  (VENDOR "Parallax") (PROGRAM "STA") (VERSION "3.1.0")
+
+  Q126(e) used openroad=2.0_3175_gf12e2f474=20220317_162926 from the litex-hub conda channel,
+  a 2022 build, which is the one that stops with DRT-0255 on the top-level port nets.
+
+--- the platform that did NOT move ---
+The image's tag names ORFS commit 64939f371, which IS Q126(e)'s pinned ORFS_SHA
+64939f3717ad7c694199ba04cb98924b98022868 (docs/reports/data/2026-10-26-open-netlist/
+versions.txt). So the LEF, the liberty, setRC.tcl and the RCX rules are the same files the
+published run read, and the tool is the only pin that moved. Their hashes, from inside the
+image:
+
+7694bf4f8ef2f9745e4579f454788a0cf048e8605320f32d1d83ec540ed4ca41  lef/asap7_tech_1x_201209.lef
+32a117e5e866d3de1406e8f18d65b6f1857781f156638941a4769e25ef5252cc  rcx_patterns.rules
+ce6e29fe23b648839009c53035901066653d5850f9419ba85169c715b2cebd14  setRC.tcl
+fe9f1c18e88ab129d63ad82adc256f3a85c7e38e47dabbe0a96749b41087dea1  lib/NLDM/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib.gz
+8d6db2c2f83c3c162be54a5e102b2d379fcaaaef2db5f0b1d4152c395d01fea1  lib/NLDM/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib.gz
+bbe6d904d58c7367de1ed7639e4eae386c65fa0a5af26ae62dc5e4e2ec52b08b  lib/NLDM/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib.gz
+073ac4b6b08f272b6953b0ad54d1d9743767a7d15a0e2964ed86cf44c3dbe00e  lib/NLDM/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib.gz
+57a0b403485b99ebd676942af4673ac086b86c7c75fbdc3e5c0038501dd22ba3  lib/NLDM/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib
+
+--- the netlists routed (Q126(e)'s own, not re-synthesized) ---
+Built by tools/open-flow/txfma/synth.sh on aifoundry2 on 26 Oct 2026 from core-et
+b38a1a31da67efe00c61e983e64b892c58080115 (branch erbium) with Yosys 0.70+221 / slang 12.0.0,
+copied to aifoundry1 unchanged:
+7d1510dacb7d4855fcabaad9584c8eb9bf481deaab6429dd0a79243afeef3724  txfma_mixed.v
+c41bf1151a4488336a13e5dc26f9de1fbc0a58f9192dcb2e8e4baf2a8cbda078  txfma_keep.v
+
+--- the activity (not re-simulated) ---
+Q126(e)'s own SAIFs, from Verilator 5.053 devel rev v5.052-604-gcecfb4384 (mod) on aifoundry2,
+26 Oct: $HOME/scratch-q126-e/work/sim/outm/<pattern>_o{0,1}.saif (mixed netlist) and
+.../sim/out/... (kept). 13 patterns x 2 runs x 2 netlists. Nothing about the stimulus changed,
+which is the point: the activity is held fixed and only the capacitance is re-measured.
+Internal energy: docs/reports/data/2026-10-26-asap7-cell-energies/asap7-cell-energies.json.
+
+--- what ran ---
+tools/open-flow/txfma/route_docker.sh   the container, the mounts, the cpu cap
+tools/open-flow/txfma/pnr_route.tcl     floorplan -> placement -> CTS -> GRT (+Steiner SPEF)
+                                        -> detailed route -> OpenRCX -> SPEF
+tools/open-flow/txfma/post_route.tcl    routed DEF + SPEF -> SDF, net-cap table, reports
+tools/open-flow/txfma/spef_caps.py      SPEF -> per-net ground / coupling / pin table
+tools/open-flow/txfma/reprice.py        one SAIF priced against four capacitance tables
+summarize.py                            every table on README.md, from the committed JSONs
+
+Configuration, identical to POWER.md's table row 10 except the tool: utilisation 30%,
+aspect ratio 1, core_space 2 um, site asap7sc7p5t, placement density 0.55, pins M4/M5,
+global route signal M2-M7 / clock M4-M7, detailed route M2-M9, droute_end_iter 10,
+coupling_threshold 0.02 fF, SDC 1250 ps on `clock`, energies at VDD 0.517 V.
+
+--- artefacts left on aifoundry1 (too large to commit, paths for the glitch bench) ---
+$HOME/scratch-q129-route/work/pnr-route-mixed/
+  txfma_routed.sdf   14,812,136 B  sha256 aa3195667417395332722892ef3c72a569e9d2df2cfaa89b6776b07fa6a9db53
+  txfma_routed.v      2,964,798 B  (the netlist that SDF annotates: post-CTS, post-repair_design)
+  txfma_coupled.spef 27,470,204 B  sha256 5b5dd9eaa7929aa6bc8878126ca3c8c1248ad85cd453bcb027d1e4b55c57bdf1
+  txfma_routed.def   15,864,002 B
+$HOME/scratch-q129-route/work/pnr-route-keep/
+  txfma_routed.sdf   20,920,057 B  sha256 1af9bd16d931aefce57656b5fd67b1c58489d922730ddb505c82c132fe08a998
+  txfma_routed.v      6,096,628 B
+  txfma_coupled.spef 31,578,923 B  sha256 c4261f61ab5809fc719722c57a54518dbad7967360e8e5b029ccff4e3d1070e0
+  txfma_routed.def   21,690,646 B
+The mixed SPEF is committed here gzipped (txfma_mixed_coupled.spef.gz, 7,870,493 B).
