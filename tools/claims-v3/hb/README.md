@@ -165,6 +165,17 @@ None, and its launch gate becomes "a reading was recorded"; the reading is then 
 setpoint. Every E60 and E65 pass with an approach keeps the 0.5 °C gate unchanged, and blocks A and B are
 re-reduced with this code to confirm their numbers do not move.
 
+**A9, Mon 26 Oct 2026, 17:45 PDT (written while block D's no-approach passes were running, before any data of the
+second regime it adds).** A7's no-approach block D launches at **59 °C**, one degree above blocks A and B's 58 °C
+(`build/e65-d.log`, "start 59.0 C" on every run): that is the plateau this duty cycle actually reaches, and by A7's
+own words it is "under 2 °C" and cannot score D1. **Added:** a second block-D regime with a real setpoint,
+`HL_PREHEAT=62 HL_TARGET=61`, six passes of the same four items, so the block has three launch readings (58 °C from
+blocks A and B, 59 °C from the plateau passes, 61 °C from these). The 0.5 °C launch gate applies to this regime
+normally, since its `preheat` is above zero (A8 only exempts a pass with no approach). If the approach cannot reach
+62 °C the passes skip and the queue stops at exit 7, which is reported as such and costs nothing already measured.
+D1 is scored on the regression of the switching difference against the launch reading across all three readings,
+with its CI; a span this short may only **bound** the coefficient, and the result says so.
+
 ## Files
 
 `make_ladder.py` (block C's two protocols), `protocol-randn.json`, `protocol-zeros.json` (frozen with this commit),
