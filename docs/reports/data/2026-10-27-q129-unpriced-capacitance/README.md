@@ -106,6 +106,19 @@ name (−20.01 toggles/multiply-add, −0.0077 pJ), which is the scatter between
 logically identical netlists. Per pattern it runs from −0.0002 pJ (`ones`) to −0.0229 pJ (`lq_h8`).
 The re-simulation is the number to quote; the structural route is the check on it.
 
+So the headline arithmetic separates cleanly, and it is worth stating in full because the two parts
+answer different questions:
+
+| | pJ / multiply-add |
+| --- | ---: |
+| the 9,923 nets the published join left unpriced, **priced** | **+0.0880** |
+| the nets it did price, re-measured on the post-CTS netlist | **−0.0078** (the inter-simulation scatter above) |
+| published 1.5159 → complete **1.5961** | **+0.0802** |
+
+**The unpriced half is worth 0.0880 pJ, and both routes give that figure to four decimal places**
+(the structural rules infer it from the pre-route SAIF; the post-CTS simulation measures it). The
++0.0802 that the quoted number moves is that 0.0880 net of the scatter.
+
 ## Which part is data-dependent and which is clocking
 
 The waterfall is random over idle, so the split matters.
@@ -164,10 +177,20 @@ missing was datapath activity on buses the join could not name.
 
 ## Still a floor — four things this does not fix
 
-1. **No detailed route, so no coupling.** Every per-net wire capacitance here is a global-route
-   Steiner estimate, so the wire half of each net remains a lower bound.
-   [`POWER.md` § blockers](../2026-10-26-open-netlist/POWER.md#the-two-blockers-and-what-would-clear-them)
-   has the ten configurations that failed and what would clear them.
+1. **Every wire capacitance here is the global-route Steiner estimate.**
+   🛑 **Amended the same afternoon, 27 Oct 2026, by [Q129(a)](../2026-10-27-q129-routed-netlist/README.md).**
+   This row first said "so the wire half of each net remains a lower bound", repeating the published
+   pages. That is wrong, and Q129(a) measured it: detailed routing closes in a current OpenROAD,
+   OpenRCX extracts the coupling, and on this same hierarchy-kept netlist the extracted wire
+   capacitance at Miller k = 1 is **0.812 ×** the Steiner estimate — the estimator's 0.1658 fF/µm
+   already has the neighbour coupling bundled in and grounded, so the estimate runs **20% high**,
+   not low. **First-order effect on this directory:** 54.8% of the 0.0880 pJ correction is wire
+   capacitance, so scaling the wire column by 0.812 puts the correction at **0.0789 pJ** and the
+   complete `randn` figure at **1.4783 pJ** switching. Both numbers here are therefore priced on an
+   over-estimate of the wire; Q129(a)'s `reprice-keep/` holds the proper re-pricing at k = 0 / 1 / 2,
+   and the two corrections compose — its wire scale on this directory's complete activity. Nothing
+   above changes in *ratio* (the clock share, the ladder's slope, the decomposition of the unpriced
+   half), because the scale applies to both sides of every comparison.
 2. **No timed pass, so no glitches.** Icarus's `$sdf_annotate` aborts on this design; the tape-out
    flow's 1.5× toggles / 1.4× energy in the multiplier tree is still the only measurement.
 3. **The cells' internal energy is still signal-only.** Q126(d)'s census-weighted figure

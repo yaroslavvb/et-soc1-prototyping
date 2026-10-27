@@ -781,7 +781,12 @@
   "cap_fraction": 0.49541660432279644,
   "nets": 9923.0,
   "switching_pJ_per_muladd_it_was_worth": 0.08795701229447724,
-  "carries_no_switching_energy_cap_fraction": 0.43115110433709114
+  "carries_no_switching_energy_cap_fraction": 0.43115110433709114,
+  "switching_pJ_per_muladd_measured_both_ways": {
+   "structural_from_the_pre_route_saif": 0.08795701229447724,
+   "direct_post_cts_simulation": 0.08795701229447,
+   "note": "the two routes give the same figure to four decimal places; the quoted total moves +0.0802 because the nets the published join DID price read 0.0078 pJ lower on the post-CTS simulation (the inter-simulation scatter)"
+  }
  },
  "structure": {
   "pre_route": 19822,
@@ -903,5 +908,13 @@
   "ran_on": "aifoundry1, nice -n 19, verilator -j 4; no card was used",
   "verilator": "5.053 devel rev v5.052-604-gcecfb4384 (the pinned oss-cad-suite of tools/open-flow/txfma/setup.sh)",
   "bench_counters_identical_to_the_pre_route_run": "all 13 patterns: cycles 547, clock_on 519, uop_cycles 512, lane_valid 512 (0 for zeros) and bus_toggles identical to power/sim_acct.txt"
+ },
+ "amended_by_q129a": {
+  "what": "Q129(a) closed detailed routing and extracted the coupling the same afternoon: on this hierarchy-kept netlist the extracted wire capacitance at Miller k=1 is 0.812 x the global-route Steiner estimate, so the Steiner wire column used here runs 20% HIGH, not low as the published pages said",
+  "wire_share_of_the_correction": 0.548,
+  "correction_pJ_at_wire_scaled_0p812": 0.0789,
+  "complete_randn_switching_pJ_at_wire_scaled_0p812": 1.4783,
+  "see": "docs/reports/data/2026-10-27-q129-routed-netlist/ (reprice-keep/ holds the proper re-pricing at k = 0 / 1 / 2); the two corrections compose, its wire scale on this directory's complete activity",
+  "ratios_unaffected": "the clock share, the ladder slopes and the decomposition of the unpriced half are ratios, so the wire scale cancels in them"
  }
 }
