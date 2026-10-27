@@ -237,3 +237,50 @@ to 0.439 at 67 °C — against the published law's 0.451 and 0.562. If that hold
 resting draw is more fixed and less leakage than the law assumes**, which by L3's registered reading means
 more of the governor's 65 W is available for switching than the model currently allows. L4 already PASSes. E68's published prices already carry both ends of the band
 (amendment A7), so this re-run confirms rather than changes them.
+
+## Results
+
+*Reduced Tue 27 Oct 2026 (week 44), 07:1x PDT, with the three commands above, run on aifoundry2 against the passes as
+they stood. The card was released in `#community-lab` at 07:12 by editing the claim message.*
+
+**The session.** 18 complete cycles, `p13`–`p30`, each a heating burst to the governor's ~70 °C plateau and a 900 s
+cooling (A3), from Mon 26 Oct 22:3x to Tue 27 Oct ~06:30 PDT, at 600 MHz and 519 mV (firmware 1.3.1). `p11` and `p12`
+were aborted (A2, A4) and carry no `block.json`; `p1`–`p3` are E44's short cycles of 25 Sep. Every reducer below takes
+`p13` upward.
+
+**The slope E68's correction needed** (`idle_slope.py`, 51–58 °C, one fit per cycle): **0.2936 W/°C**, the median of
+18 cycles (mean 0.2935, sd 0.0012, range 0.2917–0.2961). The night's first cycles, `p11` at 0.2960 and `p13` at 0.2923,
+bracket it. It is a fifth of the 1.508 W/°C that E68's registered `--leak auto` used.
+
+**E68 at that slope**, a labelled sensitivity beside its registered scoring
+([`sensitivity-e66-final-slope.json`](../2026-10-27-e68-stage-map/sensitivity-e66-final-slope.json); E68's
+`verdicts.json` is untouched): `sm_lo12` reads **135.9 ± 2.7 fJ** per flipped mantissa bit, the upper end of the band
+E68 already publishes (118–136 fJ), so the band stands. P1 still FAILs (s_mul −0.08), the column-definition fault
+E68's own README diagnoses.
+
+**L1–L4, the fixed and leakage share** (`e66-split.json`, 18 cycles):
+
+| Rule | Reading | 95% interval | Band | Verdict |
+|---|---|---|---|---|
+| L1 | T_L 29.8 °C | 27.7–32.0 | 30–45 | UNDECIDED |
+| L2a | A80 20.41 W | 20.11–20.72 | 19–29 | PASS |
+| L2b | B 15.37 W | 14.74–16.01 | 9–16 | UNDECIDED |
+| L3a | leakage share at 51 °C 0.334 | 0.306–0.361 | 0.38–0.52 | FAIL |
+| L3b | leakage share at 67 °C 0.462 | 0.440–0.483 | 0.49–0.63 | FAIL |
+| L3c | rise 51 → 67 °C 0.128 | 0.122–0.134 | 0.06–0.16 | PASS |
+| L1, L2 identified | 99% half-widths 2.13 °C and 0.31 W | | ≤ 8 °C, ≤ 3 W | PASS |
+| L4 | lowest reading 47.0 °C | | ≤ 53 °C | PASS |
+
+**What it says.** At 51 °C a third of this card's resting board power is leakage, not the 45% the published law
+gives (0.451 at 51 °C, 0.562 at 67 °C): the resting draw is more fixed and less leakage than the law assumes, so by
+L3's registered reading more of the governor's 65 W is available for switching than the model allows. The law's
+leakage share is the one input this changes; its A80 is inside L2a's band.
+
+**The registered IDLE scoring** (`verdicts.json`): IDLE-L stays INSUFFICIENT for the pair of cards because aifoundry3
+ran no cycle, while aifoundry2's half is identified (T_L 27 [25, 29] °C, A80 20.5 [20.2, 20.8] W, slope at 80 °C
+0.775 [0.722, 0.829] W/°C over 18 passes). IDLE-b FAILs (twelve of 22 bins, 48–55 °C and 79–82 °C, outside the law's
+−0.23 ± 0.3 W; cycle mean 0.06 W), IDLE-c PASSes (unsensed idle slope 74–88 °C 0.100 [0.056, 0.145] W/°C), IDLE-k
+FAILs on the cooling from 86 °C and above, and IDLE-0, a, d, e and f stay INSUFFICIENT.
+
+**What is still open.** aifoundry3's cycles (IDLE-0, a, e, f and the pair half of IDLE-L), and L5's 73 °C bin, which the
+governor's 66 °C trip keeps out of reach: no cycle tonight passed the ~70 °C plateau.
