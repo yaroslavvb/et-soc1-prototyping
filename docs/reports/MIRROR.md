@@ -81,6 +81,7 @@ are listed but not mirrored.
 | Page | Space | Visibility | Repo file | Deploy |
 |---|---|---|---|---|
 | [Two weeks with the ET-SoC-1: the session timeline](https://spacesheep.dev/@yaroslavvb/et-soc1-session-timeline) (27 Sep; refreshed 1 Oct, and on 5 Oct to 19 Sep–5 Oct: the main session and every other Claude session on the lab's machine, on both of the owner's Claude accounts, in lanes of their own; the owner's messages as summaries and, on hover and in a reader, their own words, with access details, addresses, other people's names and private links removed and marked; aifoundry2's card off the bus and the hosts down; every deploy and commit; built by `tools/timeline/`, whose README has the pipeline) | `b0669cbd-6132-4ac6-b35a-9b928a2ef926` | public | `docs/reports/2026-09-27-session-timeline.html` | file |
+| [Tracking heat down to transistor flips: the session timeline](https://spacesheep.dev/@yaroslavvb/transistor-heat-timeline) (26 Oct, Q127: the whole thread from Horace He's predictable-data result to femtojoules per flipped bit, on one axis — 51 days, 154 asks of the owner's with their own words, 61 sessions in ten lanes, 871 card intervals over 48 experiments, 39 write-ups and every commit; built from this repository's ledgers by `tools/timeline/build_transistor_timeline.py`, not from transcripts; A23) | `76958f6f-f76c-468f-9b80-db0bb3455aa0` | public | `docs/reports/2026-10-26-transistor-heat-timeline.html` | file |
 
 ### The lab, day by day
 
