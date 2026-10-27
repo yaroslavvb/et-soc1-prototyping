@@ -109,6 +109,34 @@ def main():
       f"A/B ratio runs {min(rl):.2f}–{max(rl):.2f}, median {sorted(rl)[len(rl)//2]:.2f}.\n")
     S["P1"] = {"rho_mantissa": rho_j, "span": span, "positions_excluded_from_span": excluded,
                "verdict": "PASS" if (rho_j > 0.5 and span > 5) else "FAIL"}
+    # ---- post hoc (amendment A14, written before the grid's data): the raw A/B ratio is not a ratio of
+    # MARGINAL prices. Each per-position price is p = e + T/(n·rate), and the A side's n is 2,048 against the
+    # B side's 4,096, so the same fixed turn-on T inflates an A-side price TWICE as much per bit as a B-side
+    # one. With T from the grid (minus the mean interaction excess), e = p − T/(n·rate) on each side, and the
+    # marginal ratio is reported beside the raw one. P2 keeps its registered scoring on the raw prices.
+    ixg = C.get("ix") or {}
+    T = -ixg["excess_mean_W"] if ixg.get("excess_mean_W") is not None else None
+    rate0 = A[0]["rate"] if 0 in A else None
+    if T is not None and rate0:
+        eA = {j: fj(A[j]) - T / (2048 * rate0) * 1e15 for j in A}
+        eB = {j: fj(BB[j]) - T / (4096 * rate0) * 1e15 for j in BB}
+        mr = [eA[j] / eB[j] for j in sorted(eA) if j in eB and eB[j] > 0 and j <= 22]
+        S["marginal_A_over_B"] = {"turn_on_W": T, "turn_on_fJ_per_A_bit": T / (2048 * rate0) * 1e15,
+                                  "turn_on_fJ_per_B_bit": T / (4096 * rate0) * 1e15,
+                                  "ratios": {j: eA[j] / eB[j] for j in sorted(eA) if j in eB and eB[j] > 0},
+                                  "median_mantissa": sorted(mr)[len(mr) // 2] if mr else None,
+                                  "n_negative_A": sum(1 for v in eA.values() if v < 0),
+                                  "n_negative_B": sum(1 for v in eB.values() if v < 0)}
+        w(f"**Marginal prices** (post hoc, amendment A14): every per-position price is `e + T/(n·rate)`, and the "
+          f"A side's n is 2,048 against the B side's 4,096, so one fixed turn-on inflates an A-side price twice "
+          f"as much per bit. With **T = {T:.3f} W** from the grid, that is "
+          f"{T/(2048*rate0)*1e15:.0f} fJ on every A price and {T/(4096*rate0)*1e15:.0f} fJ on every B one. "
+          f"Taking it out, the A/B ratio over the mantissa has median "
+          f"**{(sorted(mr)[len(mr)//2] if mr else float('nan')):.2f}** against the raw "
+          f"{sorted(rm)[len(rm)//2]:.2f}"
+          + (f"; {S['marginal_A_over_B']['n_negative_A']} A and {S['marginal_A_over_B']['n_negative_B']} B "
+             f"positions go negative once T is removed, which bounds T rather than pricing those positions."
+             if (S["marginal_A_over_B"]["n_negative_A"] or S["marginal_A_over_B"]["n_negative_B"]) else ".") + "\n")
     S["P2"] = {"rho_A_vs_B": rho_ab, "n_in_band": inband, "n": len(rm),
                "ratio_min": min(rl), "ratio_max": max(rl), "ratio_median": sorted(rl)[len(rl) // 2],
                "verdict": "PASS" if (rho_ab > 0.5 and inband > len(rm) / 2) else "FAIL"}

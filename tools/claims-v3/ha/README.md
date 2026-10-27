@@ -179,3 +179,13 @@ compare against the measured step: P8) and `report_e67.py` (the results tables a
   about 2.0×, the same factor on both sides, which the turn-on explains arithmetically and which block 3 can
   measure rather than assume. **P6 and P8 keep their registered bands and are scored against them**; the
   corrected ratio is reported beside P8's, never in place of it.
+
+**A14, Mon 26 Oct 2026, 21:3x PDT (written before any block-3 data; a reported quantity, no registered rule or
+number changes).** The same turn-on argument applies to P2's A-against-B comparison, and in the one direction
+that matters. Each per-position price is `p = e + T/(n·rate)`, and the A side's `n` is **2,048** against the B
+side's **4,096**, so one and the same fixed turn-on inflates an A-side price **twice as much per bit** as a
+B-side one. The raw ratio P2 scores is therefore biased upward by construction, by an amount this experiment can
+measure rather than assume. `report_e67.py` now prints the marginal ratio — `e = p − T/(n·rate)` on each side,
+with `T` from the grid — beside the raw one. **P2 keeps its registered band and is scored on the raw prices**;
+if removing `T` drives a position's marginal price below zero, that is reported as a bound on `T`, not as a
+price for that position.
