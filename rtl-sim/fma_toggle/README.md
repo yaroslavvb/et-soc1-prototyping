@@ -8,9 +8,12 @@ The ET-SoC-1 draws 38 W multiplying matrices of zeros and 66 W multiplying rando
 > **Read this before quoting `nets`.** The headline figure of **21,331 toggles per random multiply-add**,
 > published in `docs/reports/data/2026-09-21-horace-aifoundry2/toggles.json`, is **a count of RTL names
 > under one version of Verilator, not a count of wires.** Re-run on the same RTL and the same card-dumped
-> tiles it is 6,900–7,000 under Verilator 5.052, and about 900 once each physical net is counted once.
-> [The settled count](#the-settled-count) has the ladder and the method. Every per-toggle energy fitted
-> against `nets` carries whichever number it was fitted to.
+> tiles it is about 7,000 under Verilator 5.052, and **about 1,300 once each physical net is counted
+> once** (`nets_hier`, the figure to quote). [The settled count](#the-settled-count) has the ladder and
+> the method; **the authority on all of it is
+> [`docs/reports/data/2026-10-26-toggle-recount/README.md`](../../docs/reports/data/2026-10-26-toggle-recount/README.md)**,
+> which carries the per-pattern tables, the caveats and the comparison with the chip's gate-level netlist.
+> Every per-toggle energy fitted against `nets` carries whichever number it was fitted to.
 
 What is modelled, from the RTL:
 
@@ -52,6 +55,11 @@ Verilator 5 is the only dependency, plus numpy for `tiles.py`.
 ```
 make CORE_ET=../../external/core-et          # builds obj_dir/Vtb, about 1 minute
 ```
+
+🛑 **That Verilator is 5.042, and its toggle coverage over-counts this design 3.04x** (the compressor
+cells, below). A `nets` measured on aifoundry2 is not comparable with one measured anywhere newer — note
+the version beside any number taken there, or upgrade the box. The VCD counts are unaffected (they agree
+across the two releases to 1.02x).
 
 **On a Mac (verified on the Intel, 26 Oct 2026, macOS 15 / x86_64).** There is no Homebrew formula that
 gives Verilator 5 here; conda-forge does, in user space, with no admin rights and nothing on the system
@@ -110,7 +118,7 @@ python3 scope_modules.py /tmp/t.vcd --rtl ../../external/core-et/rtl --extra ff_
 python3 recount.py --out recount.json --tiles-dir <tiles> --uops 64 --jobs 5   # all of it, per pattern
 ```
 
-`settle_count` reads the VCD and counts four ways. `scope_modules.py` resolves each VCD scope (an
+`settle_count` reads the VCD and counts five ways. `scope_modules.py` resolves each VCD scope (an
 *instance* name) to the RTL module it instantiates, by reading the instantiation statements out of the
 Verilog, so the split is comparable with the coverage counter's split by file.
 
@@ -119,44 +127,62 @@ Verilog, so the split is comparable with the coverage counter's split by file.
 | `nets_vcd_raw` | every value change in the VCD, per RTL name — the coverage counter's unit, re-derived |
 | `nets_settled` | changes between consecutive **settled** samples, at most one per bit per cycle, per RTL name |
 | `nets_ids` | the same, once per VCD identifier: merges only the aliases Verilator itself collapsed |
-| `nets_distinct` | the same, once per **distinct waveform**: two bits that change in exactly the same cycles are one net. The physical-net proxy |
+| `nets_hier` | the same, once per **net**: two names with the same waveform are one net when one scope is an ancestor of the other, which is what a port carried up the hierarchy looks like. **The figure to quote** |
+| `nets_distinct` | the same, once per **distinct waveform**, ancestry ignored: a **lower bound** on the net count. It collapses whenever the stimulus has period 2 (every rung of E60's ladder), so do not quote it as the physical figure |
 
 The settled sample is the end of each negedge time step: the testbench drives operands at the negedge and
 clocks registers at the posedge, so everything combinational has settled there. `settle_count` finds the
 VCD's time unit from the first two timestamps rather than assuming one.
 
-**What the four counts say** (random fp32 tiles the card ran, 21 Sep seed 1, accumulators at 1e3 ops;
-`docs/reports/data/2026-10-26-toggle-recount/`):
+**What the counts say.** One point, so the commands above reproduce it: random fp32 tiles the card ran
+(21 Sep seed 1), accumulators at 1e3 ops, a **255-cycle window** (`+dump_uops=255`, 254 sampled
+transitions). *Ladder* is the published figure over the whole 21 Sep recipe — two seeds, two accumulator
+points — which is what the data README quotes and what a refit should use.
 
-| Per random multiply-add | |
-| --- | --- |
-| 21,331 | `nets`, as published 21 Sep — Verilator **5.042** on aifoundry2 (re-measured 26 Oct: 21,379) |
-| 6,886 | `nets`, same bench, same tiles, Verilator **5.052** on the Intel |
-| 7,280 | `nets_vcd_raw` |
-| 6,978 | `nets_settled` |
-| 3,900 | `nets_ids` |
-| 904 | `nets_distinct` |
+| Per random multiply-add | this point | ladder | from |
+| --- | ---: | ---: | --- |
+| `nets`, as published 21 Sep — Verilator **5.042** on aifoundry2 | 21,308 | 21,331 | `verilator-5042-vcd.json`, `2026-09-21-horace-aifoundry2/toggles.json` |
+| `nets`, same bench and tiles, Verilator **5.052** on the Intel | 6,962 | 7,014 | `recount.json`, `toggles-5052.json` |
+| `nets_vcd_raw` | 7,079 | 7,109 | `recount.json` |
+| `nets_settled` | 7,054 | 7,083 | `recount.json` |
+| `nets_ids` | 3,951 | 3,968 | `recount.json` |
+| **`nets_hier` — the figure to quote** | **1,319** | **1,301** | `recount.json` |
+| `nets_distinct` (lower bound) | 1,023 | 1,007 | `recount.json` |
 
-- **The 3.1x between the two Verilator versions is entirely inside two modules.** `txfma_csa` and
-  `txfma_4_2_compressor` count 7.9x and 9.0x higher under 5.042; every other module agrees within 1%. Those
-  two are the compressor cell and the full adder inside it, whose 64-wide carry chain 5.042 re-evaluated
-  several times per cycle and counted each time. This is the defect the chip-diagram research named ("counts
-  transient values while the model settles", `docs/reports/data/2026-09-27-chip-diagram/research/tensorfma32.json`,
-  fact `tfma.lab`) — confirmed, and localised. Under 5.052 it is gone: `nets_settled` and `nets` differ by 0.2%.
+Every number above is a stored field: `recount.json` key `randn.points[n0=1000, seed=1]` for the point
+column and `randn.mean` for the ladder, both divided by 4,096. Window length matters — the merges need a
+window long enough to separate nets, and `window-convergence.json` shows `nets_hier` climbing from 943 at
+16 cycles to 1,325 at 512.
+
+- **The 3.04x between the two Verilator versions is the counter, not the circuit, and it is entirely
+  inside two modules.** `txfma_csa` and `txfma_4_2_compressor` count 7.9x and 9.0x higher under 5.042;
+  every other module agrees within 1%. Those two are the compressor cell and the full adder inside it,
+  wired 64 deep into a ripple-carry chain. Traced under 5.042 itself, one run's coverage counter says
+  21,297 while its own VCD holds 7,233 value changes — so about 14,000 counts a multiply-add never
+  corresponded to a recorded value change, while the VCD's contents are the same under both releases
+  (1.02x). This is the defect the chip-diagram research named ("counts transient values while the model
+  settles", `docs/reports/data/2026-09-27-chip-diagram/research/tensorfma32.json`, fact `tfma.lab`) —
+  measured, not inferred. Under 5.052 it is gone: `nets_settled` and `nets` differ by 0.2%.
 - **The hierarchy counts each compressor net exactly twice.** `txfma_4_2_compressor` instantiates two
   `txfma_csa`, connected positionally, so its nine nets (`x0..x3`, `cin`, `cout`, `c`, `s`, `s0`) carry
   eighteen names and Verilator gives them nineteen VCD identifiers, of which only one pair is merged.
   `txfma_4_2_compressor_array` names six of them a third time. This is the "double counting of txfma_csa
   inside txfma_4_2_compressor" suspect — confirmed, and it is exact, not approximate.
-- **`nets_distinct` lands near the gate-level figure.** 904 per multiply-add against the 1,244 physical
-  toggles a zero-delay gate-level simulation of the chip's own netlist reports (`tfma.glitch`), 1,871 with
-  gate delays. An identical-waveform merge is a lower bound on physical nets, so 904 < 1,244 is the right
-  side to be on, and the two agree far better than 21,331 does with anything.
+- **`nets_hier` is the physical figure, and it is a floor.** 1,301 per multiply-add for the whole unit;
+  288 of it in the multiplier tree, against the 1,244 physical toggles a zero-delay gate-level simulation
+  of the chip's own *larger* netlist reports for the tree alone (`tfma.glitch`), 1,871 with gate delays.
+  The routes agree to 2.14x on the whole unit and only 4.3x on the tree; the merge errs toward merging,
+  so quote 1,301 as a lower bound. `nets_distinct` (1,007) is lower still and collapses under a regular
+  stimulus — it is a diagnostic, not a figure to publish.
 
-`ff_clocked` is disputed the same way: 602.5 register bits per multiply-add here against 1,586 of 1,851
-flip-flops in the chip's netlist. Part of that is the denominator — **this RTL has 838 register bits per
-lane** (`ff_present`), not 1,851, so the *fractions* are 72% and 86%, not 2.6x apart. The rest is a
-difference between the designs, not between the counters.
+`ff_clocked` is disputed the same way: 602.5 register bits per multiply-add here (595.2 inside the
+stream) against 1,586 of 1,851 flip-flops in the chip's netlist. Part of that is the denominator —
+**this RTL has 838 register bits per lane** (`ff_present`), not 1,851, so the *fractions* are 71% and
+86%, not 2.6x apart. 838 is complete for this RTL: every register in `txfma_7s` is an `en_ff`, `rst_en_ff`
+or `rst_ff` instance, the modules `ff_acct.sv` replaces, and the directory holds no `always_ff` at all.
+The rest is a difference between the designs, not between the counters — though the chip-diagram
+research's note on `tfma.clocked` gives a third number for "the RTL view", 1,739 of 2,071, which nobody
+has yet reconciled with this one.
 
 ## Files
 
@@ -166,6 +192,6 @@ difference between the designs, not between the counters.
 | `ff_acct.sv`, `acct.cpp` | drop-in `libs/registers` models that report clocked, present and changed bits |
 | `tiles.py` | operand tiles for one pattern, or the raw tiles the card ran |
 | `toggles.py` | the coverage counter, per pattern, into `toggles.json` |
-| `settle_count.cpp` | the VCD counter: raw, settled, per identifier, per distinct waveform, by module |
+| `settle_count.cpp` | the VCD counter: raw, settled, per identifier, **per net** (`hier`), per distinct waveform, by module |
 | `scope_modules.py` | VCD scope (an instance path) to RTL module, from the Verilog's instantiations |
 | `recount.py` | all five counts for every pattern, in `toggles.json`'s schema plus the new fields |

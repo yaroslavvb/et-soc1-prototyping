@@ -3,14 +3,17 @@
 // Verilator's --coverage-toggle counter, which rtl-sim/fma_toggle uses, counts every assignment the
 // scheduler makes, including the intermediate values a combinational net takes while a cycle settles,
 // and it counts a net once for every RTL name it carries (a module port is a new name at each level of
-// the hierarchy). This reads a VCD of the same run and counts three things instead:
+// the hierarchy). This reads a VCD of the same run and counts four things instead:
 //
 //   names    bit changes between consecutive SETTLED samples, one sample per clock cycle, per RTL name
 //            (the same unit as the coverage counter, with the settling transients removed)
 //   ids      the same, counted once per VCD identifier: Verilator gives aliased signals one id, so this
 //            removes the hierarchy's name multiplicity wherever Verilator could see the alias
-//   distinct the same, counted once per distinct waveform over the window: two bits that change in
-//            exactly the same cycles are one physical net. The physical-net proxy.
+//   hier     the same, counted once per net: two names with the same waveform are one net when one
+//            scope is an ancestor of the other, which is what a port carried up the hierarchy looks
+//            like. THE FIGURE TO QUOTE as a net count — see docs/reports/data/2026-10-26-toggle-recount/
+//   distinct the same, counted once per distinct waveform over the window, ancestry ignored: a LOWER
+//            BOUND on the net count, and it collapses badly under a stimulus of period 2.
 //
 // It also reports the RAW count (every value change in the VCD, settling transients included) so the
 // two can be differenced block by block, and the clocked-register bits per cycle.

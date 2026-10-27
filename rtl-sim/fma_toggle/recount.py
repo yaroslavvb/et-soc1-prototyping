@@ -14,7 +14,11 @@ window open and counts, per RTL module:
   nets_vcd_raw    every value change in the VCD, per RTL name: the coverage counter's unit, re-derived
   nets_settled    changes between consecutive settled cycles, at most one per bit per cycle, per RTL name
   nets_ids        the same, counted once per VCD identifier (Verilator's own alias merging)
-  nets_distinct   the same, counted once per distinct waveform: the physical-net proxy
+  nets_hier       the same, counted once per NET: names with one waveform are merged when one scope is an
+                  ancestor of the other, which is a port carried up the hierarchy. THE FIGURE TO QUOTE,
+                  and the one a refit should use -- see docs/reports/data/2026-10-26-toggle-recount/
+  n_hier          how many switching nets a lane that leaves, after the merge
+  nets_distinct   the same with ancestry ignored: a LOWER BOUND, and it collapses under a period-2 stream
   n_distinct      how many distinct switching waveforms the window held
 
 Everything is scaled to one TensorFMA32 op on one minion (512 micro-ops x 8 lanes = 4,096 multiply-adds),

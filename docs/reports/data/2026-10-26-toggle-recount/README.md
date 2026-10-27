@@ -7,9 +7,10 @@ disputed 2.9x", on the public RTL alone: no vault data, no card time, nothing pr
 
 ## The answer, in one ladder
 
-**21,331 toggles per random fp32 multiply-add is not reproducible, and it was never a count of
-wires.** Two separate things sit between it and the number a power model wants, and they are now measured
-rather than argued.
+**21,331 toggles per random fp32 multiply-add reproduces only under the Verilator it was measured
+with, and it was never a count of wires.** On aifoundry2's Verilator 5.042 it comes back to 0.2%; on a
+current Verilator, on the same sources and the same card-dumped tiles, it is a third of that. Two separate
+things sit between it and the number a power model wants, and they are now measured rather than argued.
 
 | Per random multiply-add | | |
 |---:|---|---|
@@ -22,9 +23,11 @@ rather than argued.
 | **1,301** | once per net, merging a name with its ancestor scope's name | **the figure to quote** |
 | **1,007** | once per distinct waveform anywhere | a lower bound, see the caveat |
 
-The first drop, 3.04x, is a simulator version. The second, 5.4x,
-is the RTL hierarchy naming the same wire at four levels. Together, **the count under every fitted
-femtojoule is 16x too large.**
+The first drop, 3.04x, is a simulator version — and it is the counter, not the circuit: traced under
+5.042 itself, one run's coverage counter and its own VCD disagree by the same 2.94x (defect 1 below).
+The second, 5.4x, is the RTL hierarchy naming the same wire at four levels. Together, **the count under
+every fitted femtojoule is 8 to 16x too large** — 16x against the per-net count, which is a floor, and 8x
+against the names-per-net route ("What the physical number is").
 
 ## The two defects
 
@@ -38,13 +41,32 @@ Between Verilator 5.042 and 5.052, on identical sources and identical card-dumpe
 | every other module together | 5,236 | 5,094 | 1.03 |
 
 Those two are the 4:2 compressor cell and the full adder inside it. `txfma_4_2_compressor_array` wires 64 of
-them into a ripple-carry chain (`connect_carry[i]` into `connect_carry[i+1]`), and 5.042's scheduler
-re-evaluated the cells as that carry settled, counting every intermediate value. This is the defect the
-chip-diagram research named — *"the coverage tool ... counts transient values while the model settles (30
-counted where 2 changes happened)"*,
-[`tensorfma32.json`](../2026-09-27-chip-diagram/research/tensorfma32.json), fact `tfma.lab` — **confirmed,
-localised to two modules, and already fixed upstream.** Under 5.052 the coverage count and the settled VCD
-count differ by 1.0%, so nothing is left to remove.
+them into a ripple-carry chain (`connect_carry[i]` into `connect_carry[i+1]`).
+
+**The decisive measurement was then taken under 5.042 itself** (`verilator-5042-vcd.json`): the same
+bench built with aifoundry2's Verilator 5.042, traced, so that one run carries both counters over the same
+cycles. The coverage counter says **21,297** per multiply-add and **the VCD of that very run holds 7,233**
+value changes per RTL name. The two counters disagree 2.94x *inside one simulation*, and again only in
+those two modules:
+
+| 5.042, one run, two counters | coverage | VCD, every value change | ratio |
+|---|---:|---:|---:|
+| `txfma_csa` + `txfma_4_2_compressor` | 16,101 | 1,904 | 8.45 |
+| every other module together | 5,196 | 5,328 | 0.98 |
+| **total** | **21,297** | **7,233** | **2.94** |
+
+(The tracing build does not change what 5.042 counts: its coverage total, 21,297, and its compressor pair,
+16,101, match the untraced 21 Sep binary's 21,379 and 16,096 — so tracing is not what moved the number.)
+
+And the VCD's own contents barely move across the two releases — 7,233 against 7,084 raw, 7,205 against
+7,059 settled, both 1.02x — so **the circuit's activity is the same under both; only the counter changed.**
+Under 5.042 the counter scored about 14,000 assignments per multiply-add that the trace never recorded,
+which is what a value taken while a cycle settles looks like: the trace writes the value a time step ends
+on, the coverage counter scored each one on the way there. That is the defect the chip-diagram research
+named — *"the coverage tool ... counts transient values while the model settles (30 counted where 2 changes
+happened)"*, [`tensorfma32.json`](../2026-09-27-chip-diagram/research/tensorfma32.json), fact `tfma.lab` —
+**confirmed by measurement, localised to two modules, and fixed upstream.** Under 5.052 the coverage count
+and the settled VCD count differ by 1.0%, so nothing is left to remove.
 
 **2. Every net inside a compressor carries two names, and the counter counts both.** This was the suspect
 named for this job and it is exact, not approximate. `txfma_4_2_compressor` has nine nets — `x0`, `x1`, `x2`,
@@ -63,23 +85,34 @@ in the VCD alike. The tool counts those ports twice over; it does not miss them.
 
 ## What the physical number is
 
-This is RTL, so no count here is a wire. Three independent routes:
+This is RTL, so no count here is a wire. Three routes, and they must be compared **on the same scope** —
+two of them measure the whole multiply-add unit, the third measures the multiplier tree alone:
 
-- the hierarchy merge, which is this file's own measurement: **1,301** net-toggles per
-  multiply-add in the whole unit, over 3,358 switching nets a lane;
-- the settled RTL-name count divided by the chip-diagram research's measured names-per-net
-  (`tfma.names`: 2.55 over the unit, 3.70 and 3.48 in the two tree modules): **2,778** for the
-  unit, **906** for the tree (3,169 name-toggles / 3.5);
-- that research's own gate-level simulation of the chip's netlist at zero delay: **1,244** physical toggles
-  per random multiply-add *in the tree*, 1,871 with gate delays (`tfma.glitch`).
+| | whole unit | the tree alone |
+|---|---:|---:|
+| the hierarchy merge, this file's own measurement | **1,301** (3,358 switching nets a lane) | **288** |
+| settled RTL names ÷ the research's names-per-net (`tfma.names`: 2.55 for the unit, ~3.5 in the tree) | **2,778** | **906** (3,169 / 3.5) |
+| that research's gate-level simulation of the chip's netlist, zero delay (`tfma.glitch`) | not measured | **1,244** (1,871 with gate delays) |
 
-So the physical figure for the whole unit is of order **1,200 to 2,800 per random multiply-add**, against
-21,331: a factor of **8 to 18**. The three routes do not agree to better than about 2x and this
-file does not claim they do — the RTL hierarchy duplicates more than a synthesis that keeps its modules
-does, and an identical-waveform merge is a lower bound. What is settled is the sign and the order: every
-per-toggle energy fitted against `nets` is an order of magnitude too small per wire, and the correction is
-large enough to move the tree's fitted price into the femtofarad-per-wire range of a standard-cell input,
-which is where the recap predicted it would land.
+**On the two whole-unit routes the spread is 2.14x; on the tree, where all three can be compared, it is
+4.3x** (288 to 1,244). The earlier draft of this file quoted a range of "1,200 to 2,800" for the whole
+unit with 1,244 at its low end; that was a category error, since 1,244 is a tree-only figure. Scoped
+properly the whole-unit range from the two routes that measure it is **1,300 to 2,800 per random
+multiply-add**, against 21,331: a factor of **8 to 16**.
+
+**Read 1,301 as a floor, not a best estimate.** A tree-only gate-level count of 1,244 sits just under a
+whole-unit merged count of 1,301, which cannot both be right if the two designs were the same size — and
+they are not. The netlist is the chip's own, larger design (its 1,851 multiply-add flip-flops against this
+RTL's 838 register bits a lane; see the next section), and the hierarchy merge errs toward merging: two
+nets that happen to carry the same waveform over the window and are named in nested scopes are counted
+once. So the true whole-unit figure is at least 1,301 and plausibly nearer the 2,778 the names-per-net
+route gives. Job (c) should fit against `nets_hier` as a total, treat the resulting energy per net as an
+upper bound, and take its per-class split from `by_block_settled` rather than `by_block_hier` — see the
+warning under "Files" for why the latter breaks a fit.
+
+What is settled is the sign and the order: every per-toggle energy fitted against `nets` is an order of
+magnitude too small per wire, and the correction is large enough to move the tree's fitted price into the
+femtofarad-per-wire range of a standard-cell input, which is where the recap predicted it would land.
 
 ## The clocked-bit half of the dispute
 
@@ -94,16 +127,31 @@ included; 595.2 is the figure inside the stream.) So the clocked-bit term is not
 counting defect at all: it is the open Erbium RTL having fewer registers than the chip's own. A price fitted
 on 602.5 and applied to a 1,851-flop unit is wrong by the register count, not by the gating model.
 
+**The 838 is a complete count of this RTL's registers, and a third number is still unreconciled.**
+Complete, because every register in `txfma_7s` is an instance of the `libs/registers` modules
+`en_ff` (63), `rst_en_ff` (14) or `rst_ff` (6) — the three that `ff_acct.sv` replaces — and the directory
+contains no `always_ff` and no `always @(posedge)` at all, so nothing clocks outside the counter.
+Unreconciled, because the chip-diagram research's own note on fact `tfma.clocked` gives "the RTL view" as
+**1,739 of 2,071** register bits, 2.5x this count, and its harness is not public. Either it counted more
+than `txfma_top` (the lane's operand and bypass registers would do it) or one of the two counts is wrong.
+Whoever owns Q124 should settle it; until then the clocked-bit price carries that 2.5x, and only the
+*fraction* (71% here, 86% in the netlist) should be reused across designs.
+
 ## Method, and what would make it wrong
 
 One tracing build of the same testbench, so the coverage counter and the VCD cover exactly the same cycles:
 `+dump=<file>` opens a VCD at the start of the measured stream and ends the run after `+dump_uops` cycles.
-`settle_count.cpp` reads the VCD and counts the four ways above; `scope_modules.py` resolves each VCD scope
+`settle_count.cpp` reads the VCD and counts the five ways above; `scope_modules.py` resolves each VCD scope
 (an instance path) to the RTL module it instantiates by reading the Verilog's own instantiation statements,
 so the split is comparable with the coverage counter's split by file. The settled sample is the end of each
 negedge step: the testbench drives operands at the negedge and clocks registers at the posedge, so the
 combinational logic has settled there, and hardware evaluates once per cycle. Recipe, and how Verilator 5 was
 put on the Intel: [`rtl-sim/fma_toggle/README.md`](../../../../rtl-sim/fma_toggle/README.md).
+
+The 5.042 half of defect 1 is the same build and the same commands run on aifoundry2 against that box's
+own Verilator 5.042 (`~/.local/verilator`), CPU only under `nice -n 19`, no card touched and nothing in
+that box's checkout changed: randn, the 21 Sep card tiles, seed 1, three accumulator points, a 255-cycle
+window, into `verilator-5042-vcd.json`.
 
 **Caveats.**
 - Both merges key on a bit's waveform over the window, so a stimulus that does not separate nets over-merges.
@@ -119,6 +167,11 @@ put on the Intel: [`rtl-sim/fma_toggle/README.md`](../../../../rtl-sim/fma_toggl
   `txfma_f1`, `txfmafrac_top` and `txfma_top` name the tree's wires through their ports before the tree does.
 - Everything is zero delay, so glitches are absent here as they were before (`tfma.glitch` puts them at
   1.5x the toggles in the tree).
+- **The merged counts themselves carry about 10% of tool version.** The same window and the same point
+  measured under 5.042 (`verilator-5042-vcd.json`) give 1,427 per net against 5.052's 1,300, and 1,110
+  distinct against 1,008 — 1.10x on both — because the two releases hand the VCD different identifier
+  aliasing (`nets_ids` moves the other way, 3,339 against 3,953). The raw and settled name counts agree
+  to 1.02x, so this is a property of the merge's input, not of the circuit.
 - The window is 256 micro-op cycles (254 sampled transitions) inside a 512-micro-op op, at two accumulator
   points and two seeds, where
   21 Sep used four whole ops at three points and five seeds. The coverage column of `recount.json` can be
@@ -130,13 +183,36 @@ put on the Intel: [`rtl-sim/fma_toggle/README.md`](../../../../rtl-sim/fma_toggl
 |---|---|
 | `toggles-5052.json` | the 21 Sep bench re-run on the Intel with Verilator 5.052: same patterns, same card tiles, same seeds, `toggles.py`'s schema |
 | `verilator-5042-aifoundry2.json` | the 21 Sep binary re-run on aifoundry2 on 26 Oct: 14 patterns, seed 1, accumulators at 1e3 ops |
+| `verilator-5042-vcd.json` | the same bench **built and traced under 5.042** on aifoundry2: randn, seed 1, three accumulator points, a 255-cycle window — one run carrying both the coverage counter and the VCD counts, which is what shows the two disagreeing 2.94x inside one simulation |
 | `recount.json` | the four VCD counts for the 14 fp32 patterns, `toggles.json`'s schema plus `nets_vcd_raw`, `nets_settled`, `nets_ids`, `nets_hier`, `nets_distinct`, `n_hier`, `n_distinct`, `ff_present` and their `by_block_*` siblings |
 | `recount-hl.json` | the same for E60's 42 bit-flip ladder items (`tools/claims-v3/hl/make_hl.py`) |
 | `window-convergence.json` | the merged counts against window length, 16 to 512 cycles, for four patterns |
-| `hier-factors.json` | settled RTL names per merged net, by module, measured on randn at a 512-cycle window: the factor to apply to a pattern whose own stream is too regular to separate nets |
+| `hier-factors.json` | settled RTL names per merged net, by module, measured on randn at a 512-cycle window. **Attribution ratios, not names-per-net**: read its `_how_to_use` before dividing by anything |
 
 **The counts file for a refit is `recount.json`**, key `<pattern>.mean.nets_hier`, per TensorFMA32 op on one
 minion; divide by 4,096 for per multiply-add. `nets` is kept beside it so a refit can be run both ways.
+`nets_hier` exists for every pattern and every ladder item measured here, so **a refit needs no factor at
+all.**
+
+🛑 **`nets_hier` is sound as a total. `by_block_hier` is not a per-block net count — do not split
+price classes with it.** Under the hierarchy merge a net is credited to the **outermost** module that
+names it, and the tree's wires are named by `txfma_f1`, `txfmafrac_top` and `txfma_top` through their
+ports before the tree names them. So the multiplier's share of the activity reads 54.8% of the settled
+name count but **22.8%** of `by_block_hier` on randn — and **0.0%** on `pow2` and `signs`, where the few
+switching nets are all named from outside first. A least-squares fit over patterns whose multiplier share
+jumps between 0% and 29% for an attribution reason has no multiplier column left to fit, which is the
+likely source of the **negative** multiplier price (−1.769 fJ) the load model's per-net rung reports
+([`2026-10-26-load-model/README.md`](../2026-10-26-load-model/README.md)). **To split classes, take the
+shares from `by_block_settled` (names, attributed where they switch) and scale the whole unit by
+`nets_hier / nets_settled`** — one factor for the unit, 5.33 on randn.
+
+The same trap voids the per-module factors in `hier-factors.json`: 12 of the 40 switching modules hold no
+merged nets and so have no factor at all (`txfma_csa` and `txfma_booth_ppg_32r4` among them, 22% of the
+settled toggles between them), and 7 more carry factors above 10 — up to 274.6 for `txfma_adder` — that are
+attribution artefacts, not names-per-net. The file's old `_note` said to divide `by_block_settled` by them
+module by module; done literally that leaves the 12 undivided (name counts mixed into a net total) and
+crushes the 7 to nothing. `hier-factors.json` now lists all 40, nulls the 12, flags the 7, and its
+`_how_to_use` says to use the whole-unit factor instead.
 
 ### Per random multiply-add, pattern by pattern
 
