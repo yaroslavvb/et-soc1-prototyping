@@ -191,10 +191,11 @@ The honest statement of the limit is not that the card is too cold. A7 reached 5
 very duty cycle, 7 °C, with no hotter kernel at all; what it could not do is pass the registered drift gate while
 doing so, because the climb that makes the spread is the climb that trips the gate. The next block should either
 register a drift gate stated per degree of the pass's own climb, or reach each setpoint by an approach (as A9
-does) and buy its spread in setpoints rather than in drift — six A9-style setpoints from 55 °C to 65 °C would
-give the 10 °C with every pass admissible. Whether this card's duty cycle can be *held* at 65 °C by an approach
-is untested: A7 inferred it could not from E60's 64 °C probe and from blocks A and B's 59–61 °C peaks, and that
-inference was never checked against a real 63–65 °C setpoint attempt.
+does) and buy its spread in setpoints rather than in drift — a ladder of A9-style setpoints from 55 °C upward
+would keep every pass admissible, and reaches 10 °C only if the approach can hold the top of that range.
+Whether this card's duty cycle can be *held* above 61 °C by an approach is untested: A7 inferred it could not
+from E60's 64 °C probe and from blocks A and B's 59–61 °C peaks, and that inference was never checked against a
+real 62–65 °C setpoint attempt. A7's own regime did *reach* 62 °C, which is weak evidence that it can.
 
 ### The registered predictions, scored
 
