@@ -1,8 +1,11 @@
 #!/bin/bash
 # Q126(e): elaborate core-et's txfma_top with yosys-slang and map it onto ASAP7 RVT, TT corner.
 #   SCRATCH=$HOME/scratch-open-flow [PERIOD=1250] bash tools/open-flow/txfma/synth.sh
-# Writes $SCRATCH/work/syn/txfma_keep.{v,json}  hierarchy kept, for the per-block census
-#        $SCRATCH/work/syn/txfma_flat.{v,json}  flattened, the netlist a normal flow would hand on
+# Writes $SCRATCH/work/syn/txfma_keep.{v,json}   hierarchy kept, for the per-block census
+#        $SCRATCH/work/syn/txfma_flat.{v,json}   flattened, the netlist a normal flow would hand on
+#        $SCRATCH/work/syn/txfma_mixed.{v,json}  flattened EXCEPT the four multiplier blocks, so
+#                                                the multiplier's cell count can be compared with
+#                                                a tape-out flow's without the hierarchy penalty
 set -u
 S=${SCRATCH:?set SCRATCH}
 W=$S/work
@@ -42,7 +45,12 @@ for d in rf_latches compressors floating_point fixed_point registers; do
   for f in "$R/libs/$d"/*.v; do [ -e "$f" ] && echo "$f" >> "$FL"; done
 done
 
-synth_one() {   # synth_one <tag> <slang hierarchy flag or empty>
+# The four blocks the per-block census needs by name. slang mangles a kept module's name to
+# <module>$<instance path>, which is what `setattr -mod` has to match; txfma_adder is used in
+# more than one place, so the product adder is named by its full instance path.
+KEEPMODS='txfma_booth_ppg_32r4$* txfma_wallace1$* txfma_wallace2$* txfma_adder$txfma_top.txfmafrac0_top.txfma0_f2.prod_adder_64b'
+
+synth_one() {   # synth_one <tag> <slang hierarchy flag or empty> [extra synth flags] [keep-mods]
   local tag=$1 hier=$2
   { echo "plugin -i slang"
     printf 'read_slang --std 1800-2017 --single-unit --compat vcs --allow-use-before-declare'
@@ -50,6 +58,9 @@ synth_one() {   # synth_one <tag> <slang hierarchy flag or empty>
     while read -r f; do printf '  %s \\\n' "$f"; done < "$FL"
     echo "  --error-limit=200"
     echo "hierarchy -check -top txfma_top"
+    # flatten honours the keep_hierarchy attribute, so `mixed` gets cross-boundary optimisation
+    # everywhere except the four blocks the census has to report separately.
+    [ -n "${4:-}" ] && echo "setattr -mod -set keep_hierarchy 1 $4"
     echo "synth -top txfma_top${3:-}"
     echo "opt -purge"
     echo "dfflibmap $LIBARGS $DU"
@@ -69,7 +80,8 @@ synth_one() {   # synth_one <tag> <slang hierarchy flag or empty>
   echo "rc=$? $tag" >> "$LOG"
 }
 
-synth_one keep "--keep-hierarchy" ""
-synth_one flat ""                 " -flatten"
+synth_one keep  "--keep-hierarchy" ""
+synth_one flat  ""                 " -flatten"
+synth_one mixed "--keep-hierarchy" " -flatten" "$KEEPMODS"
 grep "^rc=" "$LOG"
 grep -A2 "Chip area for top module\|Chip area for module ..txfma_top" "$W/syn/stat_keep.txt" | tail -4

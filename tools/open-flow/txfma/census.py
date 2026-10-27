@@ -9,9 +9,14 @@ Counts, for the whole unit and for every block of the hierarchy:
   fins           fins over those MOSFETs (ASAP7 draws 3 fins on an x1 device, not 2)
   flops          sequential cells (a liberty ff() group)
   latches        liberty latch() groups, which is what an et_clk_gate becomes
-  area           liberty cell areas, in the library's own (4x-drawn) square microns;
-                 divide by 16 for drawn 7 nm microns
-Blocks are the instance paths of the hierarchy, aggregated at each depth.
+  area           liberty cell areas, in DRAWN 7 nm square microns, needing no correction: the
+                 ORFS asap7 platform ships the 1x LEF and its liberty areas match it (INVx1 is
+                 SIZE 0.162 BY 0.27 = 0.04374 um2, the liberty's own area). ASAP7's 4x drawing
+                 scale bites only on a length taken from the raw GDS or the QRC techfile.
+Blocks are the instance paths of the hierarchy, aggregated at each depth, so a netlist that kept
+every boundary gives a count per block but no cross-boundary optimisation. synth.sh's third
+variant, `mixed`, flattens everything EXCEPT the four multiplier blocks: run this on that netlist
+to read a per-block count off a netlist that was optimised the way a normal flow optimises one.
 """
 import argparse
 import json
@@ -161,8 +166,11 @@ def main():
         "by_cell_type": dict(sorted(by_cell.items(), key=lambda kv: -kv[1])),
         "blocks": blocks,
         "cells_without_cdl": sorted(unknown),
-        "note": ("area and lengths are in ASAP7's 4x drawing scale: divide area by 16 and length by 4 "
-                 "for drawn 7 nm units. Capacitances in the liberty are already in real fF."),
+        "note": ("areas are drawn 7 nm square microns and need NO correction: the ORFS asap7 "
+                 "platform ships the 1x LEF (INVx1 is 0.162 x 0.27 um = 0.04374 um2, exactly "
+                 "its liberty area), so ASAP7's 4x drawing scale is already taken out. Only a "
+                 "length read from the raw GDS or the QRC techfile needs the 0.25. Liberty "
+                 "capacitances are real fF and were never scaled."),
     }
     with open(a.out, "w") as fh:
         json.dump(out, fh, indent=1)

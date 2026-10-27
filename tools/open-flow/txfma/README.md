@@ -26,37 +26,48 @@ stand-in that is legal to publish, not a copy of the real thing. Every number he
 
 | Script | What it does |
 | --- | --- |
-| `setup.sh` | Fetches everything into `$SCRATCH`: oss-cad-suite (Yosys + yosys-slang + Verilator + Icarus), OpenROAD from the litex-hub conda channel, the ORFS `asap7` platform, ASAP7's CDL netlists, and core-et. Nothing is installed system-wide. |
-| `synth.sh` | Elaborates `txfma_top` with yosys-slang and maps it onto ASAP7 RVT, TT corner. Writes a hierarchical netlist (module boundaries kept, so the census can be read per block) and a flat one. |
+| `setup.sh` | Fetches everything into `$SCRATCH`: oss-cad-suite (Yosys + yosys-slang + Verilator + Icarus), OpenROAD from the litex-hub conda channel, the ORFS `asap7` platform, ASAP7's CDL netlists, and core-et. Nothing is installed system-wide. **Every version is pinned** to the one the published run used (`OSS_REL`, `OPENROAD_PKG`, `ORFS_SHA`, `ASAP7_SHA`, `COREET_SHA` at the top of the file); override one to re-measure on a newer tool. |
+| `synth.sh` | Elaborates `txfma_top` with yosys-slang and maps it onto ASAP7 RVT, TT corner. Writes three netlists: `keep` (every module boundary kept, so the census reads per block), `flat`, and `mixed` (flattened everywhere except the four multiplier blocks, which is the one the cell counts should be compared on — see trap 5). |
+| `mktiles.sh` | **The stimulus.** Writes every operand file the bench runs, with the exact flags: the 21 Sep `randn`/`ones`/`zeros` patterns at `--seed 1 --iters-before 1000`, V3-HL's Hamming-ladder tiles (`make_hl.py`), and each rung converted with `--from-bin`. Nothing downstream is reproducible without it. |
 | `census.py` | Cells, transistors, fins, flip-flops, latches, area and clock-pin capacitance, for the whole unit and for every block, from the Yosys JSON netlist plus ASAP7's own CDL and liberty. |
 | `show_blocks.py` | Prints the block table from `census.py`'s JSON. |
-| `pnr.tcl` | OpenROAD: floorplan, place, CTS, route, OpenRCX extraction, SPEF, per-net capacitance. |
+| `pnr.tcl` | OpenROAD: floorplan, place, CTS, global route, per-net capacitance, then detailed route, OpenRCX extraction and SPEF. Detailed routing does not close in the 2022 OpenROAD this machine can install — POWER.md § blockers has the five variants tried and what they proved. |
 | `tb_gate.sv`, `asap7_seq_behav.v`, `gatesim.sh` | the fma_toggle stimulus driven into the netlist (Verilator, zero delay), writing a SAIF, and optionally a recording of the unit's pins. |
-| `power.py` | prices every extracted net at 1/2 C V^2 per toggle at 0.517 V, per block, with the clock tree's share. |
+| `power.py` | prices every extracted net at 1/2 C V^2 per toggle at 0.517 V, per block, with the clock tree's share, the capacitance coverage in farads, and (with `--cell-energies`) the cells' own internal energy from ASAP7's liberty. |
 | `tb_timed.v`, `gatesim_sdf.sh`, `vcd_toggles.py` | the timed pass: replays that recording under Icarus with the post-CTS SDF and counts every edge. Its SDF half aborts in Icarus 14 — see POWER.md. |
 
 ```bash
 export SCRATCH=$HOME/scratch-open-flow          # anywhere outside a synced folder
+export LAB=$PWD                                 # this checkout of et-soc1-prototyping
 bash tools/open-flow/txfma/setup.sh
-bash tools/open-flow/txfma/synth.sh             # ~1 minute
-python3 tools/open-flow/txfma/census.py \
-    --json  $SCRATCH/work/syn/txfma_keep.json \
-    --cdl   $SCRATCH/asap7cells/CDL/LVS/asap7sc7p5t_28_R.cdl \
-    --lib   $SCRATCH/work/lib \
-    --out   census_keep.json
-python3 tools/open-flow/txfma/show_blocks.py census_keep.json 3
+bash tools/open-flow/txfma/synth.sh             # ~3 minutes, three netlists
+bash tools/open-flow/txfma/mktiles.sh           # the operand files, with their seeds
+
+for tag in keep flat mixed; do
+  python3 tools/open-flow/txfma/census.py \
+      --json  $SCRATCH/work/syn/txfma_$tag.json \
+      --cdl   $SCRATCH/asap7cells/CDL/LVS/asap7sc7p5t_28_R.cdl \
+      --lib   $SCRATCH/work/lib \
+      --out   census_$tag.json
+done
+python3 tools/open-flow/txfma/show_blocks.py census_mixed.json 3
 openroad -no_init -exit tools/open-flow/txfma/pnr.tcl
 
-TB=tools/open-flow/txfma/tb_gate.sv TILES=$SCRATCH/work/tiles/randn.hex TAG=randn \
-    bash tools/open-flow/txfma/gatesim.sh
-python3 tools/open-flow/txfma/power.py --saif .../randn_o1.saif --saif-base .../randn_o0.saif \
-    --netcap $SCRATCH/work/pnr/net_cap_globalroute.txt --muladds 512 --out power_randn.json
+for p in randn ones zeros lq_h0 lq_h8 lb_h0 lb_h8; do
+  TB=tools/open-flow/txfma/tb_gate.sv TILES=$SCRATCH/work/tiles/$p.hex TAG=$p \
+      bash tools/open-flow/txfma/gatesim.sh
+  python3 tools/open-flow/txfma/power.py \
+      --saif $SCRATCH/work/sim/out/${p}_o1.saif --saif-base $SCRATCH/work/sim/out/${p}_o0.saif \
+      --netcap $SCRATCH/work/pnr/net_cap_globalroute.txt --muladds 512 \
+      --cell-energies docs/reports/data/2026-10-26-asap7-cell-energies/asap7-cell-energies.json \
+      --out power_gr_$p.json
+done
 ```
 
 Results and the comparison with the tape-out flow's numbers:
 [`docs/reports/data/2026-10-26-open-netlist/`](../../../docs/reports/data/2026-10-26-open-netlist/README.md).
 
-## Four things that cost time, so you do not pay them again
+## Six things that cost time, so you do not pay them again
 
 1. **core-et's RTL is not strict SystemVerilog.** Files under `txfma_7s` use the Verilog-1995
    single-value parameter form (`txfma_csa #64 inst(...)`), and they rely on one compilation unit
@@ -76,3 +87,13 @@ Results and the comparison with the tape-out flow's numbers:
    instance to `_13280_` and the block each cell came from is gone. yosys-slang inlines the
    hierarchy by default; `--keep-hierarchy` (or `--best-effort-hierarchy`) is what preserves it,
    and `hierarchy -check` alone will not bring it back.
+5. **…but a fully kept hierarchy inflates every count, so do not compare one against a normal
+   flow's.** Keeping all 182 boundaries blocks constant propagation and resource sharing across
+   each of them: the same design is 19,822 cells kept against 16,087 flattened, 19% apart, and
+   118 flip-flops survive that flattening prunes. That is why `synth.sh` writes a third netlist,
+   `mixed`, which marks only the four multiplier blocks `keep_hierarchy` and flattens the rest —
+   the per-block numbers in the results directory come from that one.
+6. **Pin the tools, not "latest".** `Verilator` alone moves a toggle count by 3× between 5.042 and
+   5.052 (Q126(b)), the litex-hub conda `openroad` is a 2022 build whose TritonRoute behaves
+   differently from a current one, and a `--depth 1` clone of a moving branch cannot be checked
+   out at the sha a report quotes. `setup.sh` now fetches each pinned sha by name instead.

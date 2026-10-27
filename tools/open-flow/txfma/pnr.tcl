@@ -8,7 +8,7 @@ set NET [expr {[info exists ::env(NETLIST)] ? $::env(NETLIST) : "$W/syn/txfma_ke
 set UTIL [expr {[info exists ::env(UTIL)] ? $::env(UTIL) : 30}]
 set DENS [expr {[info exists ::env(DENS)] ? $::env(DENS) : 0.55}]
 set TOP txfma_top
-set OUT $W/pnr
+set OUT [expr {[info exists ::env(PNROUT)] ? $::env(PNROUT) : "$W/pnr"}]
 file mkdir $OUT
 
 read_lef $P/lef/asap7_tech_1x_201209.lef
@@ -48,8 +48,11 @@ detailed_placement
 check_placement -verbose
 
 puts "=== global route"
-# TritonRoute is held to M2-M7 below, so the global route has to be held to the same range:
-# otherwise it hands over a guide on M8 and detailed routing stops with DRT-0155.
+# Signal M2-M7, clock M4-M7. NOTE the detailed router below is given M2-M9, which is NOT the
+# same range: holding both to M2-M7 only trades one failure for another, because the global
+# route emits an M8 guide for an I/O net anyway and TritonRoute then stops with DRT-0155
+# ("Guide in net in_data[48] uses layer M8 ... outside the allowed routing range"). Five
+# variants of this pair were tried; POWER.md § blockers has the table.
 set_routing_layers -signal M2-M7 -clock M4-M7
 global_route -congestion_iterations 100
 estimate_parasitics -global_routing
