@@ -92,6 +92,7 @@ with `--stop-file`, stops at a 78 °C reading or on telemetry older than 3 s, wr
 does not block; another user *on this card* does, failing closed) stands. Before the first launch:
 `et-boot-check --status`, `et-who`, `who`, `uptime`, and a `V3_DRY=1` dry run of both lists. The card is claimed
 in `#community-lab` before the first launch and released after. If anyone else takes the card, stop and wait.
+(Post-run note A17: the release has to be an edit that **keeps the claim's words**; see below.)
 Card time at most 2.5 h in total. Operand set `build/hl-gen4`; every file E60 and E65 ran is byte-identical in it
 (87 of 87, checked before the first launch).
 
@@ -226,3 +227,16 @@ change and the likely but unproven cause of the intermittent per-run dips, and t
 **Nothing in this protocol, or E60's or E65's, watches the host's CPU.** The next experiment should record the
 host's load average and run queue beside its telemetry, and report a sustained between-pass change in the
 measured op rate the way a clock change is already reported.
+
+**A17, Tue 27 Oct 2026, 00:0x PDT (after all the data; record-keeping only — it changes no rule, no code path,
+no reduction and no measured number).** The protocol above says the card is "claimed in `#community-lab` before
+the first launch and released after", and does not say *how* to release. E67 released it by **replacing** the
+claim message's text with "`<ai> released aifoundry3: …`". flush-util `lab_reservations`, which feeds the lab
+dashboard's reservation timeline, closes a claim at the edit that adds "released" **to the claim itself**: its
+`classify()` reaches that branch only while the message still matches a claim word (`using`, `taking`,
+`reserved`, …). With every claim word replaced, the message reads as a release with no open claim, and **no
+span was drawn for E67's 1 h 58 min hold** — nor for E65's earlier the same day, released the same way. The
+rule for the next run: **edit the claim by appending, never replacing** —
+"`<ai> using aifoundryN (about 2 h): … — released, [data](<url>)`" — and read the message back afterwards, as
+the `<ai>` rule already requires. Nothing was reposted for E67: the card is free, the channel reads correctly
+for people, and a third edit would have closed the span at the edit's own time rather than the real release.

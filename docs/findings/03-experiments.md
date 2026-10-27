@@ -2759,14 +2759,15 @@ The card piece of that is the half of the operand price list nobody had measured
 driving the recoder that selects each partial product — had never been priced**, so every summed per-bit model was
 assuming the two sides match, and nothing had ever tested whether per-bit prices may be summed at all.
 **Pre-registered** in [`tools/claims-v3/ha/README.md`](../../tools/claims-v3/ha/README.md) (blocks 1–4, departures
-D1–D4, predictions P1–P8, decision rules), committed as `2e9ad85a` at 21:01:37 PDT — **2 min 32 s before the card
-was claimed and 3 min 51 s before the first measured launch** — with amendments A11 and A12 in that commit (the
-seven new operand families; the per-item zero the reduction needed), and A13 (`ee9faed6`), A14 (`655082c7`) and
-A15 (`4443402b`) each written before the data it touches: A13 and A14 after block 1's first pass and before any
-block-3 data, A15 while block 3 ran and before its data was reduced. All three add reported quantities; none moves
-a registered band, rule or number. One card: **aifoundry3**, latched at 600 MHz by `et-board-clock-guard`,
-521.9 mV on every sample — deliberately E65's card, clock and rail. **Every one of the 87 operand files E60 and
-E65 ran is byte-identical in the new set**, checked before the first launch.
+D1–D4, predictions P1–P8, decision rules), committed as `2e9ad85a` at 21:01:37 PDT — **2 min 09 s before the card
+was claimed** (21:03:46 PDT, from the Discord message's own snowflake) **and 3 min 11 s before the first measured
+launch** (21:04:48 PDT, the earliest `t_start_ms` in the committed runs) — with amendments A11 and A12 in that
+commit (the seven new operand families; the per-item zero the reduction needed), and A13 (`ee9faed6`), A14
+(`655082c7`) and A15 (`4443402b`) each written before the data it touches: A13 and A14 after block 1's first pass
+and before any block-3 data, A15 while block 3 ran and before its data was reduced. All three add reported
+quantities; none moves a registered band, rule or number. One card: **aifoundry3**, latched at 600 MHz by
+`et-board-clock-guard`, 521.9 mV on every sample — deliberately E65's card, clock and rail. **Every one of the 87
+operand files E60 and E65 ran is byte-identical in the new set**, checked before the first launch.
 **Departures:** D1, one shared A base word (E60 and E65 drew a fresh random base per position, so an item minus
 its zero carried the flip *and* the difference between two random words); bit 30, the exponent MSB, cannot flip
 from exponent 127 and uses the exponent-64 twin of the same mantissa with a zero of its own. D2, no RTL
@@ -2790,9 +2791,11 @@ telemetry: `docs/reports/data/2026-10-27-e67-a-side-bit-prices/`.
   positions (1.24 on the clean passes), 19 of 23 inside the registered factor-of-3 band, and the two lists are
   strongly rank-correlated (ρ **0.833**). The Booth-recoded operand is not a different kind of cost; it is the
   same cost at half the flip rate and a somewhat higher price per flip.
-- **The tie to E65 holds to 0.13 W** on the three items both ran (`anchor_pi` 36.39 → 36.28, `lq_h0` 36.49 →
-  36.51, `lb_h0` 36.47 → 36.60, four hours apart), which is what lets the A and B price lists be added without a
-  conversion.
+- **The tie to E65 holds to 0.40 W on the registered passes** (0.13 W on the clean ones) over the three items
+  both ran (`anchor_pi` 36.39 → 36.32, `lq_h0` 36.49 → 36.50, `lb_h0` 36.47 → 36.07, four hours apart), which is
+  what lets the A and B price lists be added without a conversion. That registered 0.40 W cross-experiment offset
+  is itself the size of the cheapest A-side prices (`abit_4` 0.35 W, `abit_25` 0.36 W, `abit_8` 0.38 W), so a
+  position below about 0.5 W carries that much cross-list uncertainty when the two lists are summed.
 - **The busy partner costs more at all five shared positions** (B = π over B = 1.0), `abp_22` reaching 1,566 fJ;
   `abp_11`, the A-side mirror of the flow-M case, is **856 fJ** (971 on the clean passes) against E65's `bpi_11`
   at 745 ± 56 fJ, a ratio of 1.15 — the two operands' flow-M prices agree within 30%.
@@ -2805,12 +2808,13 @@ telemetry: `docs/reports/data/2026-10-27-e67-a-side-bit-prices/`.
   per multiply-add) and `nrd_b` (B random, 56,784 B bits) over-predicts their measured steps by **2.3× and 2.0×**
   (measured/predicted 0.43 and 0.50; 0.50 and 0.49 on the clean passes). Scaling by the grid's own pair ratio
   (0.80) leaves 1.6–1.8×. **So the per-bit price list is an upper bound on a random workload, high by about 2×.**
-- **The two operand paths, though, do add.** Both operands random is **16.48 W** above the constant-operand level
-  where one random side plus the other sums to **18.14 W** — a ratio of **0.91** against a 0.33 W noise floor. What
-  fails is decomposing one operand into independent bits, not separating A from B.
-- **The anchors on this card at 600 MHz:** zeros **27.86 W**, ones 36.23, π 36.28, random fp32 **52.88 W** — a
-  random-against-zeros step of **25.02 W**, which reproduces the 21 Sep step (38.29 → 63.40 W, 25.1 W) on a
-  different card to 0.4%.
+- **The two operand paths, though, do add.** Both operands random is **16.18 W** above the constant-operand level
+  where one random side plus the other sums to **18.37 W** — a ratio of **0.88** against a 0.42 W noise floor
+  (16.48 W, 18.14 W, 0.91 and 0.33 W on the clean passes). What fails is decomposing one operand into independent
+  bits, not separating A from B.
+- **The anchors on this card at 600 MHz:** zeros **27.83 W**, ones 36.05, π 36.32, random fp32 **52.49 W** — a
+  random-against-zeros step of **24.66 W** (27.86 → 52.88 W, a 25.02 W step, on the clean passes), which
+  reproduces the 21 Sep step (38.29 → 63.40 W, 25.1 W) on a different card to within 2% (0.4% clean).
 - **Decision rules:** P1 PASS (ρ 0.851, span 9.4× against a 5× mark); P2 PASS (ρ 0.833, 19/23 in band); **P3 FAIL**
   (the sign bit ranks 8th of 32, and 92 mantissa-below-16 bits cost at least as much as an exponent bit — the same
   way E65's A3 failed on the B side); **P4 FAIL on significance** (busy − quiet is positive at 5 of 5 positions but
@@ -2846,8 +2850,11 @@ record the host's load average beside its telemetry — the card being free is n
 price measured against a constant-operand zero is `T + e·n·rate`, so summing it charges the fixed turn-on once per
 flipped position (13.5 times for `nrd_a`), and that the grid's excess would measure `−T`. The arithmetic is right
 and the model is wrong: the excess is not constant but proportional to the flips, so subtracting a constant
-1.35 W per position over-corrects and drives most positions negative (corrected closure −3.17 and 2.31 against the
-raw 0.50 and 0.49). It is reported as a failed correction, not quietly dropped.
+1.35 W per position over-corrects and drives most positions negative (22 of 32 A positions and 21 of 32 B
+positions on the registered passes), leaving a corrected closure of **18.37 and 2.44** against the raw 0.43 and
+0.50 — and −3.17 and 2.31 against 0.50 and 0.49 on the clean passes, where the over-correction drives the
+`nrd_a` prediction below zero. The over-shoot even changes sign with the pass set, which is itself a sign the
+correction measures nothing. It is reported as a failed correction, not quietly dropped.
 (3) **A14's bias is real and in the stated direction**: because the A side's designed count is half the B side's,
 any fixed per-item cost inflates an A-side price twice as much per bit, so the raw A/B ratio of 1.60 is an upper
 bound on the marginal one. With saturation rather than a constant turn-on, the marginal ratio cannot be read off

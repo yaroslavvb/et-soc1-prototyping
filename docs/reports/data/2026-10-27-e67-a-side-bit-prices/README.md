@@ -2,12 +2,13 @@
 
 *Pre-registered in [`tools/claims-v3/ha/README.md`](../../../tools/claims-v3/ha/README.md) (blocks 1–4, departures
 D1–D4, predictions P1–P8, decision rules, amendments A11 and A12 with the registration and A13 after pass 750 and
-before block 3's data), committed as `2e9ad85a` at **21:01:37 PDT — 2 min 32 s before the card was claimed and
-3 min 51 s before the first measured launch**, with A13 as `ee9faed6` at 21:15:43, after block 1's first pass and
-before any block-3 data. Card runs 2026-10-26 from 21:04 PDT on **aifoundry3 only**, whose governor is latched
-at 600 MHz by `et-board-clock-guard`, so every number here is a 600 MHz, 521.9 mV number — the same card, clock and
-voltage as E65's B-side scan, which is the point. Claimed in `#community-lab` at 21:03 PDT and released after the
-last pass.*
+before block 3's data), committed as `2e9ad85a` at **21:01:37 PDT — 2 min 09 s before the card was claimed
+(21:03:46 PDT, from the Discord message's own snowflake) and 3 min 11 s before the first measured launch (21:04:48
+PDT, the earliest `t_start_ms` in the committed runs)**, with A13 as `ee9faed6` at 21:15:43, after block 1's first
+pass and before any block-3 data. Card runs 2026-10-26 from 21:04 PDT on **aifoundry3 only**, whose governor is
+latched at 600 MHz by `et-board-clock-guard`, so every number here is a 600 MHz, 521.9 mV number — the same card,
+clock and voltage as E65's B-side scan, which is the point. Claimed in `#community-lab` at 21:03 PDT and released
+after the last pass.*
 
 ## Why it ran
 
@@ -408,8 +409,12 @@ more board power; E60 and E65 priced a flipped **B** bit; this prices a flipped 
 and tests whether they add.
 
 1. **Half the operand bits now have a price**, measured on the same card, clock and rail as the other half. The
-   tie is tight: the three items both experiments ran agree to **0.13 W** (`anchor_pi` 36.39 → 36.28, `lq_h0`
-   36.49 → 36.51, `lb_h0` 36.47 → 36.60, four hours apart), so the two lists add with no conversion.
+   tie is real, but looser than the clean subset alone suggests: the three items both experiments ran agree to
+   **0.40 W on the registered passes** (0.13 W on the clean ones) — `anchor_pi` 36.39 → 36.32, `lq_h0`
+   36.49 → 36.50, `lb_h0` 36.47 → 36.07, four hours apart. The lists still add with no conversion, but that
+   registered 0.40 W offset is the size of the cheapest A-side prices themselves (`abit_4` 0.35 W, `abit_25`
+   0.36 W, `abit_8` 0.38 W), so a position below about 0.5 W carries that much cross-list uncertainty when the
+   two are summed.
 2. **The A side flips at half the rate of the B side**, by the issue order — 2,048 designed transitions per
    multiply-add against 4,096. A Hamming-distance model has to carry that before any price difference.
 3. 🛑 **Per-bit prices do not add.** Every one of the 16 grid cells is sub-additive, and not by a constant: the
@@ -417,15 +422,17 @@ and tests whether they add.
    `cell = 0.94 W + 0.64 × sum`, residual rms 0.73 W), so a cell costs **62–96% of the sum of its two margins**,
    median 83%. This is **saturation, not a fixed turn-on**: amendment A13's constant-`T` correction is refuted by
    the grid that was meant to measure `T` — taking a constant 1.35 W out of every position over-corrects and
-   drives most positions negative (the corrected closure reads −3.17 and 2.31, worse than the raw 0.50 and 0.49).
+   drives most positions negative (22 of 32 A and 21 of 32 B positions on the registered passes). The corrected
+   closure reads **18.37 and 2.44** against the raw 0.43 and 0.50 on the registered passes, and −3.17 and 2.31
+   against 0.50 and 0.49 on the clean ones — the over-shoot even changes sign with the pass set.
 4. **And the shortfall deepens with how many positions flip at once.** Two positions give a 17% shortfall on
    average; a random operand, which flips about 13.5 positions per multiply-add, gives **2.0–2.3×** — the summed
    price list over-predicts `nrd_a` by 2.3× and `nrd_b` by 2.0×. Scaling by the grid's own pair ratio (0.80) only
    takes that to 1.6–1.8×, so pairwise saturation does not by itself account for the many-flip case.
-5. **But the two operand *paths* do add.** At the whole-operand level, both operands random is **16.48 W** above
-   the constant-operand level where one random side plus the other sums to **18.14 W** — a ratio of **0.91**
-   against a 0.33 W noise floor. So the A and B paths are nearly independent; what fails is the decomposition of
-   one operand into independent **bits**.
+5. **But the two operand *paths* do add.** At the whole-operand level, both operands random is **16.18 W** above
+   the constant-operand level where one random side plus the other sums to **18.37 W** — a ratio of **0.88**
+   against a 0.42 W noise floor (16.48 W, 18.14 W, 0.91 and 0.33 W on the clean passes). So the A and B paths are
+   nearly independent; what fails is the decomposition of one operand into independent **bits**.
 
 That is the correction the chain needed. Step 5 → 6 cannot be "multiply a Hamming distance by a per-bit price":
 the per-bit price list is an upper bound that over-states a random workload by about 2×, and the gap is measured
@@ -445,6 +452,16 @@ saturation, not noise.
 - **The turn-on correction (A13) was wrong, and is reported as wrong.** It was registered before the grid ran, on
   a hypothesis the grid then refuted. The arithmetic stands — a price measured against a constant-operand zero is
   not a marginal price — but the correction is not a constant subtraction.
+- 🛑 **The release edit must keep the claim's own words, or the lab timeline loses the span.** The card was
+  claimed with "`<ai> using aifoundry3 (about 2 h): bit-flip prices, A side, E67`" and released by **replacing**
+  that whole text with "`<ai> released aifoundry3: …`". flush-util `lab_reservations` closes a claim at the edit
+  that adds "released" **to the claim itself**, so a claim word (`using`, `taking`, `reserved`, …) has to survive
+  the edit; with every claim word gone the message classifies as a release with no open claim, and the lab
+  dashboard's reservation timeline drew no span at all for the 1 h 58 min hold. E65 was released the same way
+  earlier the same day, so two runs on this card are missing from the public timeline. **Append instead of
+  replacing**: "`<ai> using aifoundry3 (about 2 h): bit-flip prices, A side, E67 — released, [data](<url>)`".
+  Nothing was reposted to repair it — the card is free and the channel reads correctly for people, and a third
+  edit would have drawn the span out to that edit's own time rather than the real release.
 
 ## Lessons
 
