@@ -1,0 +1,441 @@
+{
+ "floors": {
+  "25.0": {
+   "kT_ln2_J": 2.8532745152874053e-21,
+   "kT_eV": 0.02569257912108585,
+   "eVDD_over_kT": 20.12254190454936,
+   "one_electron_x_floor": 29.03069141577372
+  },
+  "58.0": {
+   "kT_ln2_J": 3.169082192646065e-21,
+   "kT_eV": 0.02853629909759376,
+   "eVDD_over_kT": 18.11727576277032,
+   "one_electron_x_floor": 26.137703897366553
+  },
+  "66.0": {
+   "kT_ln2_J": 3.245641629581497e-21,
+   "kT_eV": 0.029225685758565368,
+   "eVDD_over_kT": 17.689918528206967,
+   "one_electron_x_floor": 25.521157734373983
+  },
+  "80.0": {
+   "kT_ln2_J": 3.379620644218504e-21,
+   "kT_eV": 0.030432112415265694,
+   "eVDD_over_kT": 16.988633353649703,
+   "one_electron_x_floor": 24.509417090791267
+  }
+ },
+ "plan_25000x": {
+  "quoted": 24500,
+  "inputs": {
+   "electrons": 2000,
+   "eVDD_over_kT_80C": 16.988633353649703,
+   "divisor_2ln2": 1.3862943611198906
+  },
+  "reproduced": 24509.417090791267,
+  "C_implied_from_83aJ_F": 6.21050623108321e-16,
+  "C_implied_from_2000e_F": 6.197975373307543e-16,
+  "direct_ratio": 24558.96940444709,
+  "vs_one_fin_gate": 18.53882457039764,
+  "vs_INVx1_pin_2fin": 9.26941228519882,
+  "vs_average_signal_net": 0.278123879582768
+ },
+ "ratio_table": [
+  {
+   "event": "one electron across the 0.517 V rail",
+   "energy_J": 8.28325319778e-20,
+   "convention": "rise",
+   "floor_C": 66.0,
+   "floor_J": 3.245641629581497e-21,
+   "x_floor": 25.521157734373983,
+   "electrons": 1,
+   "factorisation": {
+    "electrons": 1,
+    "one_electron_x_floor": 25.521157734373983,
+    "convention_factor": 1.0,
+    "product": 25.521157734373983
+   }
+  },
+  {
+   "event": "one minimum device's gate (Q128 prints 2,755x)",
+   "energy_J": 8.94e-18,
+   "convention": "rise",
+   "floor_C": 66.0,
+   "floor_J": 3.245641629581497e-21,
+   "x_floor": 2754.4630678010967,
+   "electrons": 108,
+   "factorisation": {
+    "electrons": 108,
+    "one_electron_x_floor": 25.521157734373983,
+    "convention_factor": 1.0,
+    "product": 2756.28503531239
+   },
+   "C_F": 3.35e-17
+  },
+  {
+   "event": "the same gate, heat per edge (the flip page prints 1,410x)",
+   "energy_J": 4.47e-18,
+   "convention": "edge",
+   "floor_C": 58.0,
+   "floor_J": 3.169082192646065e-21,
+   "x_floor": 1410.5030189411773,
+   "electrons": 108,
+   "factorisation": {
+    "electrons": 108,
+    "one_electron_x_floor": 26.137703897366553,
+    "convention_factor": 0.5,
+    "product": 1411.4360104577938
+   },
+   "C_F": 3.35e-17
+  },
+  {
+   "event": "an INVx1's own input pin, 2 fins, heat per edge",
+   "energy_J": 8.94e-18,
+   "convention": "edge",
+   "floor_C": 80.0,
+   "floor_J": 3.379620644218504e-21,
+   "x_floor": 2645.267306936831,
+   "electrons": 216,
+   "factorisation": {
+    "electrons": 216,
+    "one_electron_x_floor": 24.509417090791267,
+    "convention_factor": 0.5,
+    "product": 2647.0170458054567
+   },
+   "C_F": 6.7e-17
+  },
+  {
+   "event": "THE PLAN'S ROW: 'minimum inverter', C assumed 0.62 fF, heat per edge",
+   "energy_J": 8.3e-17,
+   "convention": "edge",
+   "floor_C": 80.0,
+   "floor_J": 3.379620644218504e-21,
+   "x_floor": 24558.96940444709,
+   "electrons": 2000,
+   "factorisation": {
+    "electrons": 2000,
+    "one_electron_x_floor": 24.509417090791267,
+    "convention_factor": 0.5,
+    "product": 24509.417090791267
+   },
+   "C_F": 6.21050623108321e-16
+  },
+  {
+   "event": "CORRECTED: an INVx1 toggling this design's average signal net",
+   "energy_J": 2.9845e-16,
+   "convention": "edge",
+   "floor_C": 80.0,
+   "floor_J": 3.379620644218504e-21,
+   "x_floor": 88308.72793683414,
+   "electrons": 7206,
+   "factorisation": {
+    "electrons": 7206,
+    "one_electron_x_floor": 24.509417090791267,
+    "convention_factor": 0.5,
+    "product": 88307.42977812093
+   },
+   "C_F": 2.233e-15
+  },
+  {
+   "event": "one rise of that net",
+   "energy_J": 5.969e-16,
+   "convention": "rise",
+   "floor_C": 66.0,
+   "floor_J": 3.245641629581497e-21,
+   "x_floor": 183908.16612645128,
+   "electrons": 7206,
+   "factorisation": {
+    "electrons": 7206,
+    "one_electron_x_floor": 25.521157734373983,
+    "convention_factor": 1.0,
+    "product": 183905.46263389892
+   },
+   "C_F": 2.233e-15
+  },
+  {
+   "event": "one rise of an average clock net",
+   "energy_J": 2.083e-15,
+   "convention": "rise",
+   "floor_C": 66.0,
+   "floor_J": 3.245641629581497e-21,
+   "x_floor": 641783.7326878841,
+   "electrons": 25147,
+   "factorisation": {
+    "electrons": 25147,
+    "one_electron_x_floor": 25.521157734373983,
+    "convention_factor": 1.0,
+    "product": 641780.5535463025
+   },
+   "C_F": 7.794e-15
+  },
+  {
+   "event": "one flipped MAC input bit, a = 1.0, board (E60)",
+   "energy_J": 1.167e-13,
+   "convention": "event",
+   "floor_C": 66.0,
+   "floor_J": 3.245641629581497e-21,
+   "x_floor": 35955910.51592706
+  },
+  {
+   "event": "E65's flow-M flip, board",
+   "energy_J": 7.45e-13,
+   "convention": "event",
+   "floor_C": 66.0,
+   "floor_J": 3.245641629581497e-21,
+   "x_floor": 229538588.9834247
+  },
+  {
+   "event": "one random fp32 MAC, bottom-up (Q128)",
+   "energy_J": 1.946e-12,
+   "convention": "event",
+   "floor_C": 66.0,
+   "floor_J": 3.245641629581497e-21,
+   "x_floor": 599573280.7540194
+  },
+  {
+   "event": "one random fp32 MAC, board (E38)",
+   "energy_J": 5.783e-12,
+   "convention": "event",
+   "floor_C": 66.0,
+   "floor_J": 3.245641629581497e-21,
+   "x_floor": 1781774040.3907988
+  }
+ ],
+ "same_event_four_floors": {
+  "25.0": {
+   "gate_rise_x": 3133.2421581242384,
+   "gate_edge_x": 1566.6210790621192,
+   "net_edge_x": 104599.11880225716
+  },
+  "58.0": {
+   "gate_rise_x": 2821.0060378823546,
+   "gate_edge_x": 1410.5030189411773,
+   "net_edge_x": 94175.53154429403
+  },
+  "66.0": {
+   "gate_rise_x": 2754.4630678010967,
+   "gate_edge_x": 1377.2315339005484,
+   "net_edge_x": 91954.08306322564
+  },
+  "80.0": {
+   "gate_rise_x": 2645.267306936831,
+   "gate_edge_x": 1322.6336534684156,
+   "net_edge_x": 88308.72793683414
+  }
+ },
+ "phonons": {
+  "optical_mode_cm1": 520.7,
+  "optical_mode_eV": 0.06455857210688001,
+  "optical_mode_J": 1.034342357540473e-20,
+  "optical_mode_THz": 15.610193288060001,
+  "phonons_per_electron_full_rail": 8.008231643414915,
+  "phonons_per_electron_per_edge": 4.004115821707457,
+  "per_event": {
+   "one fin's gate, per edge": {
+    "energy_J": 4.47e-18,
+    "optical_phonons": 432.1586530236525
+   },
+   "average signal net, per edge": {
+    "energy_J": 2.9845e-16,
+    "optical_phonons": 28854.08277291031
+   },
+   "average clock net, per edge": {
+    "energy_J": 1.0415e-15,
+    "optical_phonons": 100691.99935662956
+   },
+   "one flipped MAC input bit, rail share of E60": {
+    "energy_J": 8.7525e-14,
+    "optical_phonons": 8461898.457694672
+   },
+   "one random fp32 MAC, rail share of E38": {
+    "energy_J": 4.33725e-12,
+    "optical_phonons": 419324411.1469434
+   }
+  },
+  "generation_split_bulk_Si_high_field": {
+   "LO": "just over 1/2",
+   "LA": "~1/3",
+   "TO": "~1/10"
+  },
+  "ballistic_in_2ps": {
+   "optical_nm": 2.0,
+   "TA_nm": 10.0,
+   "LA_nm": 18.0
+  }
+ },
+ "fin": {
+  "Si_atoms_per_m3": 4.993966883477332e+28,
+  "Si_atoms_per_cm3": 4.993966883477332e+22,
+  "volume_channel_m3": 4.160000000000001e-24,
+  "volume_channel_nm3": 4160.000000000001,
+  "atoms_channel": 207749.02235265705,
+  "atoms_inversion_shell": 105622.39958554557,
+  "atoms_block": 2329985.189155184,
+  "atoms_drain_10nm_cube": 49939.66883477333,
+  "electrons_on_gate_per_rise": 108,
+  "atoms_per_electron_channel": 1923.6020588208985,
+  "dopants_at_1e17_per_cm3": 0.4160000000000001,
+  "dopants_at_1e18_per_cm3": 4.160000000000001,
+  "C_th_channel_J_per_K": 6.830491200000001e-18,
+  "C_th_block_J_per_K": 7.660658592000001e-17,
+  "C_th_drain10_J_per_K": 1.641945e-18,
+  "dT_if_deposited": {
+   "one fin's gate, per edge": {
+    "channel_K": 0.6544185284947003,
+    "channel_per_fin_if_6_fin_driver_K": 0.10906975474911672,
+    "block_K": 0.05835007455714063,
+    "drain_10nm_cube_K": 2.7223810785379534,
+    "energy_per_channel_atom_meV": 0.13429447343188802,
+    "energy_per_channel_atom_over_kT66": 0.004595083740422735
+   },
+   "average signal net, per edge": {
+    "channel_K": 43.693782959562256,
+    "channel_per_fin_if_6_fin_driver_K": 7.282297159927043,
+    "block_K": 3.8958791390556198,
+    "drain_10nm_cube_K": 181.76613711177902,
+    "energy_per_channel_atom_meV": 8.96648447332147,
+    "energy_per_channel_atom_over_kT66": 0.3068015083510437
+   }
+  },
+  "lumped_model_volume": {
+   "assumed_tau_s": 1e-09,
+   "C_th_implied_J_per_K": 9.523809523809525e-13,
+   "volume_m3": 5.800321888863223e-19,
+   "cube_side_nm": 833.9705188902938
+  }
+ },
+ "self_heating": {
+  "Rth_K_per_W": {
+   "total_300K": 1050.0,
+   "total_350K": 1100.0,
+   "drain_node": 1960.0,
+   "substrate_node": 1180.0
+  },
+  "edge_rise_s": 2.3e-11,
+  "mean_power_during_one_edge_W": 1.2976086956521738e-05,
+  "quasi_steady_dT_if_Rth_applied_K": 0.013624891304347825,
+  "one_fin_at_Idsat": {
+   "power_W": 1.8544790000000002e-05,
+   "dT_K": 0.0194720295
+  },
+  "a_net_toggling_at_10pc_800MHz": {
+   "power_W": 4.7751999999999996e-08,
+   "dT_K": 5.01396e-05
+  }
+ },
+ "ladder": {
+  "alpha_Si_m2_per_s": 9.013700215293448e-05,
+  "alpha_narrow_fin_m2_per_s": 1.5225844958265959e-05,
+  "alpha_lowk_dense_m2_per_s": 5.384615384615384e-07,
+  "steps": [
+   {
+    "what": "across the fin (6.5 nm)",
+    "length_m": 6.5e-09,
+    "alpha_m2_per_s": 1.5225844958265959e-05,
+    "time_s": 2.77488705e-12,
+    "note": "shorter than one phonon MFP: not diffusion"
+   },
+   {
+    "what": "along the gate (20 nm)",
+    "length_m": 2e-08,
+    "alpha_m2_per_s": 1.5225844958265959e-05,
+    "time_s": 2.6271120000000004e-11,
+    "note": "shorter than one phonon MFP: not diffusion"
+   },
+   {
+    "what": "one heat-carrying phonon MFP (300 nm)",
+    "length_m": 3e-07,
+    "alpha_m2_per_s": 9.013700215293448e-05,
+    "time_s": 9.984800675675674e-10,
+    "note": "the shortest length at which Fourier conduction starts to mean anything"
+   },
+   {
+    "what": "through the dense low-k stack (3 um)",
+    "length_m": 3e-06,
+    "alpha_m2_per_s": 5.384615384615384e-07,
+    "time_s": 1.6714285714285716e-05,
+    "note": "the wire's own heat path"
+   },
+   {
+    "what": "half a 300 um die",
+    "length_m": 0.00015,
+    "alpha_m2_per_s": 9.013700215293448e-05,
+    "time_s": 0.00024962001689189184,
+    "note": "die to spreader"
+   },
+   {
+    "what": "across one shire (1 mm, lateral)",
+    "length_m": 0.001,
+    "alpha_m2_per_s": 9.013700215293448e-05,
+    "time_s": 0.011094222972972972,
+    "note": "what the camera sees move"
+   }
+  ],
+  "ballistic": {
+   "optical_phonon_lifetime_s": 2e-12,
+   "optical_travel_in_one_lifetime_nm": 2.0,
+   "heat_phonon_lifetime_s": 3e-11,
+   "heat_phonon_MFP_nm": 300.0,
+   "implied_velocity_m_per_s": 10000.0,
+   "electron_inelastic_MFP_nm": [
+    5.0,
+    10.0
+   ],
+   "electron_phonon_scattering_time_s": [
+    5e-14,
+    1e-13
+   ]
+  },
+  "E63_board": {
+   "lockin_Hz": 0.05,
+   "phase_deg": 87.0,
+   "one_pole_tau_s": 60.73714447328104,
+   "caveat": "a diffusive path is not one pole; this is an order-of-magnitude read"
+  }
+ },
+ "wire": {
+  "C_per_um_F": 1.6579e-16,
+  "R_per_um_ohm": 26.5684,
+  "between_cell_C_F": 8.560000000000001e-16,
+  "implied_length_um": 5.163158212196152,
+  "R_on_one_fin_ohm": 14413.158628380263,
+  "R_wire_ohm": 137.17685264491226,
+  "wire_share_of_dissipation_lumped": 0.00942774500449162,
+  "wire_share_of_dissipation_distributed": 0.0047361983373534425,
+  "crossover_length_um_tight_metal": 1084.9850671007862,
+  "crossover_length_um_M8": 3412.3474879712735,
+  "RC_per_um2_s": 4.404775036e-15,
+  "Cu_electron_MFP_nm": 39.9,
+  "M1_width_nm": 18.0,
+  "MFP_over_width": 2.216666666666667,
+  "Cu_kappa_from_Wiedemann_Franz_300K": 430.5882352941177,
+  "lowk_vs_Si_kappa_ratio": 211.42857142857144,
+  "lowk_porous_vs_Si_kappa_ratio": 1480.0,
+  "fin_vs_bulk_kappa_ratio": 5.92
+ },
+ "mac": {
+  "board_J": 5.783e-12,
+  "rail_J": 4.33725e-12,
+  "optical_phonons_rail": 419324411.1469434,
+  "net_toggles": 4100,
+  "electrons_rail": 52361673.56519332,
+  "x_floor_66C": 1781774040.3907988,
+  "at_9p18_TFLOPS_MAC_per_s": 4590000000000.0,
+  "phonons_per_second_rail": 1.92469904716447e+21
+ },
+ "sources": [
+  "Pop, Sinha, Goodson, Proc. IEEE 94(8) 1587-1601 (2006), doi:10.1109/JPROC.2006.879794",
+  "Cahill, Wang, Kang, Watanabe, Koh, Letcher, Daly, 'Phonon lifetimes in silicon from 50 GHz to 15 THz', MRS Fall 2009; primary: APL 90 252104 (2007), PRB 80 174112 (2009), PRB 71 235202 (2005), JAP 104 024905 (2008)",
+  "Regner et al., Nat. Commun. 4, 1640 (2013), doi:10.1038/ncomms2630",
+  "Yoo, Kim, Kang, Shin, J. Semicond. Technol. Sci. 16(2) 204-209 (2016), doi:10.5573/JSTS.2016.16.2.204",
+  "Prasad, Ramey, Jiang, IRPS 2017 6A-4.1-6A-4.7, doi:10.1109/IRPS.2017.7936336",
+  "Karmokar, Tam, Dinh, Chhabria, Harjani, Sapatnekar, ICCAD 2024, doi:10.1145/3676536.3676829",
+  "Chhabria, Sapatnekar, ISQED 2019 235-240, doi:10.1109/ISQED.2019.8697786",
+  "Alam, Pulavarthy, Bielefeld, King, Haque, J. Electron. Mater. 43(3) 746-754 (2014), doi:10.1007/s11664-013-2949-5",
+  "Gall, J. Appl. Phys. 119, 085101 (2016), doi:10.1063/1.4942216",
+  "Clark et al., Microelectronics Journal 53, 105-115 (2016), doi:10.1016/j.mejo.2016.04.006",
+  "Glassbrenner, Slack, Phys. Rev. 134, A1058 (1964), doi:10.1103/PhysRev.134.A1058",
+  "Landauer, IBM J. Res. Dev. 5, 183 (1961), doi:10.1147/rd.53.0183",
+  "OpenROAD-flow-scripts, flow/platforms/asap7 (setRC.tcl, asap7_tech_1x_201209.lef)"
+ ]
+}
