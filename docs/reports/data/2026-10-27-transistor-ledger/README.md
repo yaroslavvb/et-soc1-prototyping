@@ -243,6 +243,12 @@ arithmetic.** The rest is wire inside the cells, wire between them, the clock tr
 internal nodes, and everything outside the lane that the board pays for and this netlist does not
 contain.
 
+The 0.431 pJ of internal energy is Q126(e)'s `internal_estimate`: every signal transition priced at
+Q126(d)'s census-weighted VDD-group internal energy, 0.1188 fJ at 0.517 V. It covers the 14,119
+**combinational** cells' output transitions and skips the 1,953 flip-flops' and 13 clock gates' own
+clock-pin energy, on a design whose clock is a third of the switching — so the "+ internal" column
+everywhere above is itself a floor.
+
 ### Why the bottom-up number is a floor, three times over
 
 1. **Half the capacitance is unpriced.** 23,762 fF of the design's 47,093 fF are on nets the
