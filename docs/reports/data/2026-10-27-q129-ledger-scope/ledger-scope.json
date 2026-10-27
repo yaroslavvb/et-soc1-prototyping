@@ -1,0 +1,609 @@
+{
+ "method": "Q129: the bottom-up ledger for the lane's TRANSPORT, and what it names of Q128's gap.",
+ "board": {
+  "mac_board_pJ": 5.783,
+  "rail_ratio": 0.75,
+  "mac_rail_pJ": 4.33725,
+  "arith_pJ": 1.946,
+  "arith_switching_pJ": 1.516,
+  "unaccounted_board_pJ": 3.837,
+  "unaccounted_rail_pJ": 2.391,
+  "flip_lq_board_fJ": 116.746,
+  "flip_lq_se": 0.613,
+  "flip_lb_board_fJ": 129.918,
+  "flip_lb_se": 0.48,
+  "flip_lq_bus_board_fJ": 74.658,
+  "flip_lb_bus_board_fJ": 85.578,
+  "readport_bit_board_fJ": 20.83,
+  "readport_bit_se": 0.1,
+  "result_bit_board_fJ": 31.17,
+  "result_bit_se": 0.17,
+  "arith_flip_lq_fJ": 32.9,
+  "arith_flip_lb_fJ": 38.5,
+  "arith_flip_lq_internal_fJ": 46.3,
+  "arith_flip_lb_internal_fJ": 54.9,
+  "index_bit_board_fJ_lo": 369.0,
+  "index_bit_board_fJ_hi": 452.0,
+  "ff_clocked_per_mac": 602.5
+ },
+ "muladds": 512.0,
+ "acct": {
+  "randn": {
+   "accfix": 0,
+   "resfix": 0,
+   "ops": 1,
+   "cycles": 529,
+   "uop_cycles": 512,
+   "bus_toggles": 17394,
+   "idx_toggles": 992,
+   "res_toggles": 7064,
+   "acc_rd_toggles": 7080,
+   "muladds": 512
+  },
+  "zeros": {
+   "accfix": 0,
+   "resfix": 0,
+   "ops": 1,
+   "cycles": 529,
+   "uop_cycles": 512,
+   "bus_toggles": 0,
+   "idx_toggles": 992,
+   "res_toggles": 0,
+   "acc_rd_toggles": 0,
+   "muladds": 512
+  },
+  "ones": {
+   "accfix": 0,
+   "resfix": 0,
+   "ops": 1,
+   "cycles": 529,
+   "uop_cycles": 512,
+   "bus_toggles": 68,
+   "idx_toggles": 992,
+   "res_toggles": 16,
+   "acc_rd_toggles": 16,
+   "muladds": 512
+  },
+  "randn_accfix": {
+   "accfix": 1,
+   "resfix": 0,
+   "ops": 1,
+   "cycles": 529,
+   "uop_cycles": 512,
+   "bus_toggles": 10354,
+   "idx_toggles": 0,
+   "res_toggles": 7064,
+   "acc_rd_toggles": 40,
+   "muladds": 512
+  },
+  "randn_resfix": {
+   "accfix": 0,
+   "resfix": 1,
+   "ops": 1,
+   "cycles": 529,
+   "uop_cycles": 512,
+   "bus_toggles": 10294,
+   "idx_toggles": 992,
+   "res_toggles": 0,
+   "acc_rd_toggles": 14,
+   "muladds": 512
+  }
+ },
+ "per_part": [
+  {
+   "part": "VPU register file array, 64 x 32 (MODEL)",
+   "blocks": [
+    "vrf/arr"
+   ],
+   "is_model": true,
+   "pJ_per_mac_switching": 0.48149762527924844,
+   "pJ_per_mac_clock": 0.0,
+   "pJ_per_mac_signal": 0.48149762527924844,
+   "pJ_per_mac_data_dependent": 0.17647377621640778,
+   "pJ_per_mac_zeros": 0.3050238490628407,
+   "pJ_per_mac_internal_est": 0.31768153268918214,
+   "signal_toggles_per_mac": 2673.15234375,
+   "clock_toggles_per_mac": 0.0,
+   "cap_fF": 12651.398493869061,
+   "census": {
+    "cells": 15685.0,
+    "transistors": 138440.0,
+    "area_um2": 1718.0926,
+    "flops": 0.0,
+    "latches": 2243.0,
+    "clk_cap_fF": 1065.6163
+   }
+  },
+  {
+   "part": "top-level nets, the clock root and the lane control's own ports",
+   "blocks": [
+    "(top)",
+    "clknet_0_LANE_TIMA[0].tenb_rf/rf_buffer_array",
+    "clknet_0_LANE_TIMA[1].tenb_rf/rf_buffer_array",
+    "clknet_0_tena_rf/rf_buffer_array",
+    "clknet_0_vrf/arr",
+    "clknet_1_0__leaf_LANE_TIMA[0].tenb_rf/rf_buffer_array"
+   ],
+   "is_model": false,
+   "pJ_per_mac_switching": 0.36763400344801905,
+   "pJ_per_mac_clock": 0.2230687948806115,
+   "pJ_per_mac_signal": 0.14456520856740754,
+   "pJ_per_mac_data_dependent": 0.11143081291649375,
+   "pJ_per_mac_zeros": 0.2562031905315253,
+   "pJ_per_mac_internal_est": 0.02643574279623362,
+   "signal_toggles_per_mac": 222.4453125,
+   "clock_toggles_per_mac": 289.68359375,
+   "cap_fF": 5210.128816082222
+  },
+  {
+   "part": "operand bus + F4..F8 result pipeline",
+   "blocks": [
+    "bypass"
+   ],
+   "is_model": false,
+   "pJ_per_mac_switching": 0.13490960379155922,
+   "pJ_per_mac_clock": 0.0,
+   "pJ_per_mac_signal": 0.13490960379155922,
+   "pJ_per_mac_data_dependent": 0.055017788173251064,
+   "pJ_per_mac_zeros": 0.07989181561830815,
+   "pJ_per_mac_internal_est": 0.07953562696727963,
+   "signal_toggles_per_mac": 669.2578125,
+   "clock_toggles_per_mac": 0.0,
+   "cap_fF": 2442.407901835728,
+   "census": {
+    "cells": 2306.0,
+    "transistors": 21184.0,
+    "area_um2": 277.0346,
+    "flops": 190.0,
+    "latches": 0.0,
+    "clk_cap_fF": 90.353
+   }
+  },
+  {
+   "part": "VPU register file collision bypass",
+   "blocks": [
+    "vrf"
+   ],
+   "is_model": false,
+   "pJ_per_mac_switching": 0.03533546928105068,
+   "pJ_per_mac_clock": 0.0,
+   "pJ_per_mac_signal": 0.03533546928105068,
+   "pJ_per_mac_data_dependent": 0.03186003855749048,
+   "pJ_per_mac_zeros": 0.0034754307235602038,
+   "pJ_per_mac_internal_est": 0.019075923558859828,
+   "signal_toggles_per_mac": 160.515625,
+   "clock_toggles_per_mac": 0.0,
+   "cap_fF": 571.8444773231596,
+   "census": {
+    "cells": 585.0,
+    "transistors": 6006.0,
+    "area_um2": 80.17540000000008,
+    "flops": 99.0,
+    "latches": 0.0,
+    "clk_cap_fF": 47.078700000000026
+   }
+  },
+  {
+   "part": "tensor A register file, 32 b x 2",
+   "blocks": [
+    "tena_rf",
+    "tena_rf/rf_buffer_array"
+   ],
+   "is_model": false,
+   "pJ_per_mac_switching": 0.0067933860740879,
+   "pJ_per_mac_clock": 0.0,
+   "pJ_per_mac_signal": 0.0067933860740879,
+   "pJ_per_mac_data_dependent": 0.0032095606292952806,
+   "pJ_per_mac_zeros": 0.003583825444792619,
+   "pJ_per_mac_internal_est": 0.004472341272414476,
+   "signal_toggles_per_mac": 37.6328125,
+   "clock_toggles_per_mac": 0.0,
+   "cap_fF": 160.74002880833862,
+   "census": {
+    "cells": 176.0,
+    "transistors": 2120.0,
+    "area_um2": 28.5039,
+    "flops": 0.0,
+    "latches": 101.0,
+    "clk_cap_fF": 48.1275
+   }
+  },
+  {
+   "part": "tensor B register files, 32 b x 4, x2",
+   "blocks": [
+    "LANE_TIMA[0].tenb_rf",
+    "LANE_TIMA[0].tenb_rf/rf_buffer_array",
+    "LANE_TIMA[1].tenb_rf",
+    "LANE_TIMA[1].tenb_rf/rf_buffer_array"
+   ],
+   "is_model": false,
+   "pJ_per_mac_switching": 0.00602056042029006,
+   "pJ_per_mac_clock": 0.0,
+   "pJ_per_mac_signal": 0.00602056042029006,
+   "pJ_per_mac_data_dependent": 0.000822805322615913,
+   "pJ_per_mac_zeros": 0.0051977550976741475,
+   "pJ_per_mac_internal_est": 0.0035503909125416135,
+   "signal_toggles_per_mac": 29.875,
+   "clock_toggles_per_mac": 0.0,
+   "cap_fF": 740.1411837007738,
+   "census": {
+    "cells": 688.0,
+    "transistors": 7976.0,
+    "area_um2": 104.6552,
+    "flops": 0.0,
+    "latches": 334.0,
+    "clk_cap_fF": 158.9274
+   }
+  },
+  {
+   "part": "TIMA accumulator file, 32 b x 16 (MODEL)",
+   "blocks": [
+    "tenc_rf/arr"
+   ],
+   "is_model": true,
+   "pJ_per_mac_switching": 0.00033110852319382804,
+   "pJ_per_mac_clock": 0.0,
+   "pJ_per_mac_signal": 0.00033110852319382804,
+   "pJ_per_mac_data_dependent": 0.0,
+   "pJ_per_mac_zeros": 0.00033110852319382804,
+   "pJ_per_mac_internal_est": 0.00023768307364295318,
+   "signal_toggles_per_mac": 2.0,
+   "clock_toggles_per_mac": 0.0,
+   "cap_fF": 1.2387659918433906,
+   "census": {
+    "cells": 1344.0,
+    "transistors": 15114.0,
+    "area_um2": 195.649,
+    "flops": 0.0,
+    "latches": 562.0,
+    "clk_cap_fF": 267.0013
+   }
+  },
+  {
+   "part": "tensor TMP register file, 32 b x 8",
+   "blocks": [
+    "tentmp_rf/rf_buffer_array"
+   ],
+   "is_model": false,
+   "pJ_per_mac_switching": 0.0003229766798873415,
+   "pJ_per_mac_clock": 0.0,
+   "pJ_per_mac_signal": 0.0003229766798873415,
+   "pJ_per_mac_data_dependent": 0.0,
+   "pJ_per_mac_zeros": 0.0003229766798873415,
+   "pJ_per_mac_internal_est": 0.00023768307364295318,
+   "signal_toggles_per_mac": 2.0,
+   "clock_toggles_per_mac": 0.0,
+   "cap_fF": 1.208342580081266,
+   "census": {
+    "cells": 681.0,
+    "transistors": 7712.0,
+    "area_um2": 101.7538,
+    "flops": 0.0,
+    "latches": 299.0,
+    "clk_cap_fF": 142.1362
+   }
+  },
+  {
+   "part": "per-lane control pipeline (MODEL)",
+   "blocks": [
+    "ctl"
+   ],
+   "is_model": true,
+   "pJ_per_mac_switching": 1.8817558300885286e-05,
+   "pJ_per_mac_clock": 0.0,
+   "pJ_per_mac_signal": 1.8817558300885286e-05,
+   "pJ_per_mac_data_dependent": 0.0,
+   "pJ_per_mac_zeros": 1.8817558300885286e-05,
+   "pJ_per_mac_internal_est": 1.2998293089849003e-05,
+   "signal_toggles_per_mac": 0.109375,
+   "clock_toggles_per_mac": 0.0,
+   "cap_fF": 36.045590540775216,
+   "census": {
+    "cells": 73.0,
+    "transistors": 1484.0,
+    "area_um2": 20.6307,
+    "flops": 51.0,
+    "latches": 1.0,
+    "clk_cap_fF": 24.7325
+   }
+  }
+ ],
+ "totals": {
+  "switching_pJ_per_mac": 1.0328635510556332,
+  "internal_est_pJ_per_mac": 0.451239922636887,
+  "switching_plus_internal_pJ_per_mac": 1.4841034736925203,
+  "clock_share": 0.21597121386714163,
+  "zeros_switching_pJ_per_mac": 0.6540487692400841,
+  "data_dependent_pJ_per_mac": 0.3788147818155491,
+  "cap_fraction_priced": 0.36964073096653577,
+  "cap_fF_extracted": 59017.18012430543
+ },
+ "ladder": {
+  "lq": {
+   "designed": {
+    "slope_fJ": 16.41786517165725,
+    "intercept_fJ": 28.35600069019638,
+    "slope_se_fJ": 9.31559658075774,
+    "slope_with_internal_fJ": 20.997515023328702,
+    "intercept_with_internal_fJ": 37.091277503958395,
+    "slope_with_internal_se_fJ": 11.885859523037517
+   },
+   "bus": {
+    "slope_fJ": 10.851239725861404,
+    "intercept_fJ": 5.825887208485199,
+    "slope_se_fJ": 2.6795098888756077,
+    "slope_with_internal_fJ": 13.869583564511409,
+    "intercept_with_internal_fJ": 8.342686216477617,
+    "slope_with_internal_se_fJ": 3.4149395868242083
+   },
+   "rungs": [
+    {
+     "h": 1,
+     "pJ": 0.7341249965122125,
+     "bus_bits_per_mac": 2.23046875
+    },
+    {
+     "h": 2,
+     "pJ": 0.7597378834720352,
+     "bus_bits_per_mac": 4.234375
+    },
+    {
+     "h": 4,
+     "pJ": 0.8671043644238726,
+     "bus_bits_per_mac": 11.23828125
+    },
+    {
+     "h": 8,
+     "pJ": 0.8479111927208998,
+     "bus_bits_per_mac": 14.203125
+    }
+   ],
+   "h0_pJ": 0.7122966141983439,
+   "h0_bus_bits_per_mac": 0.2265625
+  },
+  "lb": {
+   "designed": {
+    "slope_fJ": 25.381770608299473,
+    "intercept_fJ": 3.1163227464942054,
+    "slope_se_fJ": 6.3567539505333785,
+    "slope_with_internal_fJ": 32.17673327617963,
+    "intercept_with_internal_fJ": 3.912770953521374,
+    "slope_with_internal_se_fJ": 7.819122525512846
+   },
+   "bus": {
+    "slope_fJ": 12.112427592298243,
+    "intercept_fJ": -1.322023002007569,
+    "slope_se_fJ": 1.1478387896627362,
+    "slope_with_internal_fJ": 15.323603941354332,
+    "intercept_with_internal_fJ": -1.4551358956547915,
+    "slope_with_internal_se_fJ": 1.3478873817306567
+   },
+   "rungs": [
+    {
+     "h": 1,
+     "pJ": 0.7393956448961541,
+     "bus_bits_per_mac": 2.265625
+    },
+    {
+     "h": 2,
+     "pJ": 0.8024183860889867,
+     "bus_bits_per_mac": 6.25
+    },
+    {
+     "h": 4,
+     "pJ": 0.787427396894854,
+     "bus_bits_per_mac": 7.24609375
+    },
+    {
+     "h": 8,
+     "pJ": 0.9342210011494227,
+     "bus_bits_per_mac": 18.19921875
+    }
+   ],
+   "h0_pJ": 0.7175676447297372,
+   "h0_bus_bits_per_mac": 0.265625
+  }
+ },
+ "flip_closure": {
+  "lq": {
+   "transport_fJ_per_designed_bit": 16.41786517165725,
+   "transport_se_fJ": 9.31559658075774,
+   "transport_with_internal_fJ": 20.997515023328702,
+   "arithmetic_fJ": 32.9,
+   "arithmetic_with_internal_fJ": 46.3,
+   "sum_fJ": 49.317865171657246,
+   "sum_with_internal_fJ": 67.2975150233287,
+   "board_fJ": 116.746,
+   "rail_fJ": 87.5595,
+   "closure_vs_board": 0.4224373012493554,
+   "closure_vs_board_with_internal": 0.5764438612314657,
+   "closure_vs_rail": 0.5632497349991405,
+   "closure_vs_rail_with_internal": 0.7685918149752876,
+   "arith_alone_closure_vs_board": 0.28180837030819045
+  },
+  "lb": {
+   "transport_fJ_per_designed_bit": 25.381770608299473,
+   "transport_se_fJ": 6.3567539505333785,
+   "transport_with_internal_fJ": 32.17673327617963,
+   "arithmetic_fJ": 38.5,
+   "arithmetic_with_internal_fJ": 54.9,
+   "sum_fJ": 63.881770608299476,
+   "sum_with_internal_fJ": 87.07673327617962,
+   "board_fJ": 129.918,
+   "rail_fJ": 97.4385,
+   "closure_vs_board": 0.4917083899713625,
+   "closure_vs_board_with_internal": 0.6702437943639805,
+   "closure_vs_rail": 0.6556111866284833,
+   "closure_vs_rail_with_internal": 0.8936583924853073,
+   "arith_alone_closure_vs_board": 0.296340768792623
+  }
+ },
+ "controls": {
+  "register_index": {
+   "control": "randn_accfix",
+   "delta_pJ_per_mac": 0.4890709781224606,
+   "delta_pJ_per_mac_with_internal": 0.8529544793747579,
+   "bits_changed_per_mac": 1.9375,
+   "fJ_per_bit": 252.42373064385063,
+   "fJ_per_bit_with_internal": 440.2345699998751,
+   "also_changed_per_mac": {
+    "operand_bus_bits": 13.75,
+    "accumulator_read_bits": 13.75,
+    "result_bits": 0.0,
+    "index_bits": 1.9375
+   },
+   "is_composite": true,
+   "board_fJ_per_index_bit_range": [
+    369.0,
+    452.0
+   ],
+   "board_rail_fJ_per_index_bit_range": [
+    276.75,
+    339.0
+   ],
+   "closure_vs_board_lo": 0.558459581070466,
+   "closure_vs_board_hi": 0.6840751507963432,
+   "closure_vs_rail_lo": 0.7446127747606214,
+   "closure_vs_rail_hi": 0.9121002010617909,
+   "index_alone_fJ_per_bit_bounds": [
+    72.29503600430598,
+    135.90984878047658
+   ],
+   "index_alone_note": "the composite minus the accumulator-read bits priced at the transport's own fitted operand-bit slope (lq and lb bracket it); the read path through the 64 x 32 array is not the same path a B bit takes, so this is a bound, not a measurement"
+  },
+  "result_word": {
+   "control": "randn_resfix",
+   "delta_pJ_per_mac": 0.3253207507538668,
+   "delta_pJ_per_mac_with_internal": 0.4340681845415693,
+   "bits_changed_per_mac": 13.796875,
+   "fJ_per_bit": 23.579306962907673,
+   "fJ_per_bit_with_internal": 31.461340668924617,
+   "also_changed_per_mac": {
+    "operand_bus_bits": 13.8671875,
+    "accumulator_read_bits": 13.80078125,
+    "result_bits": 13.796875,
+    "index_bits": 0.0
+   },
+   "is_composite": true,
+   "board_fJ_per_result_bit": 31.17,
+   "closure_vs_board": 0.7564743972700568,
+   "closure_vs_rail": 1.008632529693409
+  }
+ },
+ "gap": {
+  "transport_switching_pJ_per_mac": 1.0328635510556332,
+  "transport_data_dependent_pJ_per_mac": 0.3788147818155491,
+  "transport_data_dependent_with_internal_pJ_per_mac": 0.5443122985644487,
+  "share_of_board_gap_data_dependent": 0.14185882162221755,
+  "share_of_rail_gap_data_dependent": 0.22765048036990745,
+  "new_ledger_total_data_dependent_pJ": 2.4903122985644486,
+  "new_closure_vs_board_data_dependent": 0.43062637014775174,
+  "new_closure_vs_rail_data_dependent": 0.5741684935303357,
+  "transport_switching_plus_internal_pJ_per_mac": 1.4841034736925203,
+  "transport_charged_per_lane_mac_pJ": 1.0266367336459092,
+  "shared_blocks_pJ_as_built": 0.007116362753975242,
+  "shared_blocks_divided_by_lanes_pJ": 0.0008895453442469052,
+  "tenc_not_on_fp32_path_pJ": 0.00033110852319382804,
+  "unaccounted_board_pJ": 3.837,
+  "unaccounted_rail_pJ": 2.391,
+  "share_of_board_gap_switching": 0.26918518401241415,
+  "share_of_board_gap_with_internal": 0.3867874573084494,
+  "share_of_rail_gap_switching": 0.4319797369534225,
+  "share_of_rail_gap_with_internal": 0.6207040877007612,
+  "share_of_board_gap_charged_per_lane": 0.26756234913888693,
+  "share_of_rail_gap_charged_per_lane": 0.4293754636745752,
+  "new_ledger_total_pJ": 3.43010347369252,
+  "new_closure_vs_board": 0.5931356516846827,
+  "new_closure_vs_rail": 0.790847535579577,
+  "old_closure_vs_board": 0.3365035448729033,
+  "old_closure_vs_rail": 0.4486713931638711
+ },
+ "census_total": {
+  "cells": 21608,
+  "transistors": 200504,
+  "fins": 575471,
+  "area": 2532.4439,
+  "flops": 340,
+  "latches": 3540,
+  "clk_cap_ff": 1843.973
+ },
+ "census_per_part": {
+  "VPU register file collision bypass": {
+   "cells": 585.0,
+   "transistors": 6006.0,
+   "area_um2": 80.17540000000008,
+   "flops": 99.0,
+   "latches": 0.0,
+   "clk_cap_fF": 47.078700000000026
+  },
+  "operand bus + F4..F8 result pipeline": {
+   "cells": 2306.0,
+   "transistors": 21184.0,
+   "area_um2": 277.0346,
+   "flops": 190.0,
+   "latches": 0.0,
+   "clk_cap_fF": 90.353
+  },
+  "TIMA accumulator file, 32 b x 16 (MODEL)": {
+   "cells": 1344.0,
+   "transistors": 15114.0,
+   "area_um2": 195.649,
+   "flops": 0.0,
+   "latches": 562.0,
+   "clk_cap_fF": 267.0013
+  },
+  "tensor TMP register file, 32 b x 8": {
+   "cells": 681.0,
+   "transistors": 7712.0,
+   "area_um2": 101.7538,
+   "flops": 0.0,
+   "latches": 299.0,
+   "clk_cap_fF": 142.1362
+  },
+  "tensor B register files, 32 b x 4, x2": {
+   "cells": 688.0,
+   "transistors": 7976.0,
+   "area_um2": 104.6552,
+   "flops": 0.0,
+   "latches": 334.0,
+   "clk_cap_fF": 158.9274
+  },
+  "tensor A register file, 32 b x 2": {
+   "cells": 176.0,
+   "transistors": 2120.0,
+   "area_um2": 28.5039,
+   "flops": 0.0,
+   "latches": 101.0,
+   "clk_cap_fF": 48.1275
+  },
+  "per-lane control pipeline (MODEL)": {
+   "cells": 73.0,
+   "transistors": 1484.0,
+   "area_um2": 20.6307,
+   "flops": 51.0,
+   "latches": 1.0,
+   "clk_cap_fF": 24.7325
+  },
+  "VPU register file array, 64 x 32 (MODEL)": {
+   "cells": 15685.0,
+   "transistors": 138440.0,
+   "area_um2": 1718.0926,
+   "flops": 0.0,
+   "latches": 2243.0,
+   "clk_cap_fF": 1065.6163
+  }
+ },
+ "sequential": {
+  "transport_flops": 340,
+  "transport_latches": 3540,
+  "transport_sequential_bits": 3880,
+  "transport_clk_pin_cap_fF": 1843.973,
+  "arithmetic_flops": 1974,
+  "arithmetic_latches": 13,
+  "arithmetic_clk_pin_cap_fF": 945.0,
+  "arithmetic_cells": 15805,
+  "arithmetic_transistors": 159896,
+  "arithmetic_area_um2": 2126.1,
+  "note": "Q126(b)'s 602.5 register bits clocked per multiply-add is counted inside txfma_7s only (the 83 libs/registers instances ff_acct.sv stands in for, 838 bits). None of the sequential bits in this netlist are in that scope, so the transport's clocked bits are additional to the 602.5, not part of it."
+ }
+}
