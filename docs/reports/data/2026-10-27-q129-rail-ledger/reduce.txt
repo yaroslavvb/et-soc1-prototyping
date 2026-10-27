@@ -1,0 +1,104 @@
+aifoundry2: 54 runs kept, screened out {'S2_rails_not_settled': 38}
+aifoundry3: 98 runs kept, screened out {'S2_rails_not_settled': 1}
+aifoundry1-c1: 0 runs kept, screened out {'S2_rails_not_settled': 92}
+wrote docs/reports/data/2026-10-27-q129-rail-ledger/rail-ledger.json
+
+== launch window: pJ per unit, per rail, per card ==
+config         card        unit     board  minion    sram     noc   rails offrail  min/bd   off%   deliv  unattr
+fp32_zeros     aifoundry2  MAC     0.407  0.329  0.020  0.001  0.350  0.057  0.808   14.1  0.063 -0.005
+fp32_zeros     aifoundry3  MAC     0.429  0.373  0.021  0.003  0.397  0.033  0.869    7.7  0.069 -0.036
+fp32_ones      aifoundry2  MAC     2.449  1.944  0.037  0.029  2.010  0.438  0.794   17.9  0.375  0.063
+fp32_ones      aifoundry3  MAC     2.277  1.957  0.029  0.017  2.004  0.273  0.860   12.0  0.361 -0.088
+fp32_randn     aifoundry2  MAC     6.421  4.881  0.070  0.086  5.037  1.384  0.760   21.6  0.944  0.440
+fp32_randn     aifoundry3  MAC     5.930  4.835  0.046  0.046  4.927  1.003  0.815   16.9  0.891  0.113
+fp32_randn_16  aifoundry2  MAC     6.029  4.775  0.060  0.072  4.906  1.123  0.792   18.6  0.920  0.203
+fp32_randn_16  aifoundry3  MAC     5.600  4.772  0.039  0.044  4.855  0.745  0.852   13.3  0.878 -0.133
+fp32_randn_8   aifoundry2  MAC     5.653  4.599  0.047  0.055  4.701  0.952  0.814   16.8  0.882  0.070
+fp32_randn_8   aifoundry3  MAC     5.388  4.694  0.037  0.043  4.775  0.613  0.871   11.4  0.864 -0.251
+fp16_randn     aifoundry2  MAC     2.888  2.208  0.032  0.038  2.277  0.611  0.764   21.1  0.427  0.184
+fp16_randn     aifoundry3  MAC     2.671  2.185  0.022  0.020  2.227  0.444  0.818   16.6  0.402  0.042
+int8_randn     aifoundry2  MAC     0.336  0.271  0.003  0.003  0.277  0.059  0.806   17.6  0.052  0.007
+int8_randn     aifoundry3  MAC     0.312  0.269  0.002  0.002  0.273  0.039  0.863   12.4  0.049 -0.011
+spin           aifoundry2  instruction  8.310  7.031  0.157 -0.040  7.148  1.163  0.846   14.0  1.315 -0.152
+spin           aifoundry3  instruction  8.925  7.689  0.190  0.019  7.898  1.027  0.861   11.5  1.405 -0.378
+
+== late window: pJ per unit, per rail, per card ==
+config         card        unit     board  minion    sram     noc   rails offrail  min/bd   off%   deliv  unattr
+fp32_zeros     aifoundry2  MAC     0.393  0.325  0.019  0.001  0.346  0.048  0.827   12.1  0.062 -0.015
+fp32_zeros     aifoundry3  MAC     0.432  0.375  0.021  0.004  0.399  0.032  0.867    7.5  0.070 -0.037
+fp32_ones      aifoundry2  MAC     2.577  1.981  0.047  0.046  2.074  0.503  0.769   19.5  0.387  0.116
+fp32_ones      aifoundry3  MAC     2.364  1.967  0.035  0.028  2.030  0.334  0.832   14.1  0.366 -0.031
+fp32_randn     aifoundry2  MAC     6.870  5.003  0.100  0.141  5.243  1.627  0.728   23.7  0.984  0.642
+fp32_randn     aifoundry3  MAC     6.163  4.879  0.063  0.072  5.014  1.149  0.792   18.6  0.907  0.242
+fp32_randn_16  aifoundry2  MAC     6.410  4.882  0.085  0.122  5.089  1.320  0.762   20.6  0.956  0.365
+fp32_randn_16  aifoundry3  MAC     5.754  4.823  0.053  0.068  4.944  0.810  0.838   14.1  0.895 -0.085
+fp32_randn_8   aifoundry2  MAC     5.880  4.671  0.065  0.080  4.815  1.064  0.794   18.1  0.903  0.161
+fp32_randn_8   aifoundry3  MAC     5.559  4.737  0.050  0.067  4.853  0.705  0.852   12.7  0.879 -0.174
+fp16_randn     aifoundry2  MAC     3.096  2.264  0.046  0.064  2.373  0.723  0.731   23.3  0.445  0.277
+fp16_randn     aifoundry3  MAC     2.776  2.217  0.030  0.033  2.279  0.497  0.799   17.9  0.412  0.085
+int8_randn     aifoundry2  MAC     0.353  0.274  0.004  0.005  0.283  0.069  0.777   19.6  0.053  0.016
+int8_randn     aifoundry3  MAC     0.321  0.271  0.003  0.004  0.277  0.044  0.843   13.7  0.050 -0.006
+spin           aifoundry2  instruction  7.789  6.756  0.110 -0.101  6.765  1.025  0.867   13.2  1.244 -0.219
+spin           aifoundry3  instruction  9.024  7.607  0.197  0.029  7.832  1.192  0.843   13.2  1.394 -0.202
+
+== one random fp32 multiply-add, mean over aifoundry2, aifoundry3 (pJ) ==
+launch  board 6.176  minion 4.858  sram 0.058  noc 0.066  rails 4.982  off-rail 1.194  minion/board 0.788  rails/board 0.808
+        off-rail splits as delivery+in-step 0.918 + unattributed 0.276
+        on Q128's 5.783 pJ board: minion 4.549 (Q128 carried 4.337)  sram 0.054  noc 0.062  off-rail 1.118 (delivery 0.859 + unattributed 0.259)  [scale 0.9364]
+late    board 6.517  minion 4.941  sram 0.081  noc 0.107  rails 5.129  off-rail 1.388  minion/board 0.760  rails/board 0.788
+        off-rail splits as delivery+in-step 0.946 + unattributed 0.442
+        on Q128's 5.783 pJ board: minion 4.385 (Q128 carried 4.337)  sram 0.072  noc 0.095  off-rail 1.232 (delivery 0.839 + unattributed 0.393)  [scale 0.8874]
+
+== within-run drift against the die reading, W per C (pooled over the card's heating runs) ==
+aifoundry2    board +0.725+-0.019  minion +0.268+-0.033  sram +0.063+-0.001  noc +0.120+-0.003  rails +0.451  offrail +0.275  offrail_share_per_run +0.373+-0.059
+              off-rail share of the board's drift 0.38 (per run 0.37+-0.06, n 6, mean rise 3.0 C, 3 configurations)
+aifoundry3    board +0.358+-0.093  minion +0.114+-0.067  sram +0.037+-0.001  noc +0.063+-0.002  rails +0.213  offrail +0.145  offrail_share_per_run +0.895+-0.366
+              off-rail share of the board's drift 0.41 (per run 0.90+-0.37, n 8, mean rise 3.0 C, 2 configurations)
+
+== idle split, W (fp32_randn's own pre-launch brackets) ==
+aifoundry2    board  36.31  minion  13.54  sram  2.53  noc  4.49  rails  20.57  off-rail  15.74 (43%)
+aifoundry3    board  25.78  minion   7.97  sram  2.22  noc  2.50  rails  12.69  off-rail  13.08 (51%)
+
+== E60's rail window, measured: its raw delta over the settled delta (fp32_randn) ==
+aifoundry2    minion 0.891+-0.002 (n3)  noc 0.539+-0.005 (n3)
+aifoundry3    minion 0.895+-0.001 (n4)
+
+== E64 sustained on aifoundry2: off-rail share by the clock the governor held ==
+run                                 MHz   mV  die C  board W minion W   off W  min/bd   off%     s
+LAD-04-fp32-pow2-1024-r2            800  617   61.7    39.33    29.54    7.41   0.751   18.8   5.7
+MIN-01-fp32-randn-640-r2            800  618   61.6    39.31    29.44    7.53   0.749   19.1   5.7
+LAD-03-fp32-signs-1024-r2           800  617   61.3    37.39    27.38    7.68   0.732   20.5   5.6
+MIN-02-fp32-randn-512-r2            800  618   60.6    32.17    24.28    5.70   0.755   17.7   5.6
+SUS-01-fp32-ones-1024-r1            800  618   63.9    29.34    22.08    4.55   0.753   15.5  26.8
+SUS-08-int8-randn-1024-r1           800  618   63.6    28.44    21.42    4.32   0.753   15.2  42.4
+SUS-04-fp16-ones-1024-r1            800  618   63.8    28.37    21.38    4.61   0.754   16.3  23.7
+HOT2-01-fp32-zeros-hot66-r2         600  517   65.9    27.33    21.51    5.30   0.787   19.4   5.8
+HOT-03-fp32-zeros-edge63-r1         600  517   65.8    27.27    18.83    7.94   0.691   29.1  10.5
+SUS-02-fp32-randn-1024-r1           600  517   66.0    27.06    21.43    5.17   0.792   19.1   7.8
+SUS-05-fp16-randn-1024-r1           600  517   66.3    25.34    19.60    5.07   0.774   20.0  25.6
+SUS-05-fp16-randn-1024-r1           600  517   65.9    25.00    19.53    4.89   0.781   19.6  16.8
+LAD-01-fp32-sparse75-1024-r1        800  618   58.0    15.61    11.12    2.51   0.712   16.0   6.6
+LAD-01-fp32-sparse75-1024-r2        800  618   58.0    15.57    10.97    2.64   0.705   17.0   5.7
+SUS-07-int8-ones-1024-r1            800  618   61.4    15.40    11.49    1.97   0.746   12.8  65.6
+SUS-07-int8-ones-1024-r1            800  618   60.0    14.80    11.12    1.96   0.751   13.2   7.7
+SUS-06-int8-zeros-1024-r1           800  618   59.0    12.82     9.20    1.45   0.717   11.3  40.6
+SUS-06-int8-zeros-1024-r1           800  618   58.9    12.70     9.11    1.45   0.718   11.4  32.6
+HOT2-01-fp32-zeros-hot66-r2         800  618   64.0    11.98     8.27    1.37   0.690   11.4   6.0
+HOT2-01-fp32-zeros-hot66-r1         800  618   63.6    11.97     8.00    1.64   0.668   13.7   6.9
+HOT-03-fp32-zeros-edge63-r1         800  618   64.0    11.92     7.92    1.70   0.665   14.3   5.7
+HOT-03-fp32-zeros-edge63-r2         800  618   64.0    11.88     7.86    1.77   0.661   14.9   6.6
+LAD-00-fp32-zeros-1024-r2           800  619   57.0    10.51     6.93    1.65   0.660   15.7   6.5
+SUS-00-fp32-zeros-1024-r1           800  619   59.0     9.59     6.78    1.13   0.708   11.8  75.7
+SUS-03-fp16-zeros-1024-r1           800  618   59.0     9.38     6.70    1.01   0.714   10.8  58.6
+SUS-03-fp16-zeros-1024-r1           800  619   59.0     9.31     6.65    1.02   0.714   11.0  16.5
+
+== off-rail remainder: linear in the rails, or quadratic? (catalogue, non-DRAM) ==
+aifoundry2    n 375  max sum of rails 21.9 W
+              linear: 0.1878 minion + 0.0405 sram + 0.2670 noc, rms 0.2659 W
+              +square: 0.1946 / 0.0422 / 0.2788 + -0.00055+-0.00035 per W^2, rms 0.2650 W, t -1.57
+aifoundry3    n 375  max sum of rails 21.6 W
+              linear: 0.1808 minion + 0.0491 sram + 0.2699 noc, rms 0.2324 W
+              +square: 0.1737 / 0.0473 / 0.2580 + 0.00059+-0.00032 per W^2, rms 0.2313 W, t +1.85
+aifoundry1-c1 n 375  max sum of rails 22.7 W
+              linear: 0.1019 minion + 0.5540 sram + 0.1784 noc, rms 0.4175 W
+              +square: 0.0991 / 0.5540 / 0.1736 + 0.00022+-0.00053 per W^2, rms 0.4174 W, t +0.41
