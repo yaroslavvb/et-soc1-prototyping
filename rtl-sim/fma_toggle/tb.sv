@@ -80,6 +80,15 @@ module tb;
   logic [31:0] pa = 0; logic [LANES-1:0][31:0] pb = '0, pc = '0;
   bit measuring = 0;
 
+  // Optional VCD window for the settled counter (settle_count.cpp, README "The settled count").
+  // Off unless +dump=<file> is given, so every run without it is bit-identical to before. When it is
+  // given the run stops at the end of the window, so the toggle coverage of that run covers exactly
+  // the cycles the VCD holds and the two counters can be differenced directly.
+  string           dump_file;
+  int              dump_uops = 64;
+  bit              dump_on = 0;
+  longint unsigned dump_cycles = 0;
+
   task automatic issue(input bit valid, input bit mul, input int k, input int i, input int h);
     @(negedge clock);
     uop_prev  = valid & uop_valid & (mul == uop_mul);
@@ -122,6 +131,14 @@ module tb;
       bus_toggles += longint'(LANES * $countones(uop_a ^ pa)) + longint'($countones(uop_b ^ pb)) + longint'($countones(uop_c ^ pc));
     end
     pa <= uop_a; pb <= uop_b; pc <= uop_c;
+    if (dump_on) begin
+      dump_cycles++;
+      if (dump_cycles >= longint'(dump_uops)) begin
+        dump_on <= 0;
+        report(0);
+        $finish;
+      end
+    end
   end
 
   task automatic one_op(input bit mul, input int gap);
@@ -129,6 +146,11 @@ module tb;
       for (int i = 0; i < 16; i++)
         for (int h = 0; h < 2; h++) issue(1, mul, k, i, h);
     for (int g = 0; g < gap; g++) issue(0, 0, 0, 0, 0);
+  endtask
+
+  task automatic report(input int n);
+    $display("ACCT {\"ops\":%0d,\"cycles\":%0d,\"clock_on\":%0d,\"uop_cycles\":%0d,\"lane_valid\":%0d,\"bus_toggles\":%0d,\"ff_clocked_bits\":%0d,\"ff_toggles\":%0d,\"ff_present_bits\":%0d,\"lanes\":%0d}",
+             n, cycles, clock_on, uop_cycles, lane_valid_cycles, bus_toggles, acct_get(0), acct_get(1), acct_get(2), LANES);
   endtask
 
   string tiles;
@@ -153,12 +175,17 @@ module tb;
     for (int n = 0; n < n_warm; n++) one_op(first_mul != 0 && n == 0, gap);
     @(negedge clock);
     acct_reset();
+    if ($value$plusargs("dump=%s", dump_file)) begin
+      void'($value$plusargs("dump_uops=%d", dump_uops));
+      $dumpfile(dump_file);
+      $dumpvars();          // a scope argument is ignored here, so the whole design is traced
+      dump_on = 1;
+    end
     measuring = 1;
     for (int n = 0; n < n_ops; n++) one_op(first_mul != 0 && n_warm == 0 && n == 0, gap);
     @(negedge clock);
     measuring = 0;
-    $display("ACCT {\"ops\":%0d,\"cycles\":%0d,\"clock_on\":%0d,\"uop_cycles\":%0d,\"lane_valid\":%0d,\"bus_toggles\":%0d,\"ff_clocked_bits\":%0d,\"ff_toggles\":%0d}",
-             n_ops, cycles, clock_on, uop_cycles, lane_valid_cycles, bus_toggles, acct_get(0), acct_get(1));
+    report(n_ops);
     for (int i = 0; i < 16; i++)
       for (int j = 0; j < 16; j++) $display("C %0d %0d %08x", i, j, C[i][j]);
     $finish;
