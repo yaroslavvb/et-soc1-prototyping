@@ -1,5 +1,139 @@
 # E71 — the idle leakage slope of the second card, over the band E65 and E67 ran in (Q129)
 
+## Results
+
+*Six cycles, `p21`–`p26`, Tue 27 Oct 2026 15:05–16:33 PDT on aifoundry3, 600 MHz and 523 mV. Every one
+`block.json` `"status":"ok"`; none aborted, none dropped. The card was released in `#community-lab` after this
+README was pushed. Reduced with the three commands in "Pre-registered analysis", unchanged.*
+
+**aifoundry3's idle leakage slope over 58–62 °C, the band E65 and E67 launched in, is**
+
+> ### 0.3803 ± 0.0036 W/°C
+> median of 6 cycles; mean 0.3804, sd 0.0036, range 0.3749–0.3854; 95 % t ±0.0038, 99 % t ±0.0060;
+> 791–856 admissible idle samples per cycle, rms 0.167–0.184 W, span 4 °C.
+
+It replicates E44's three September cycles on this card (0.3799, sd 0.0006) **to 0.0004 W/°C after a month and
+some two hundred intervening card sessions.** And it is **1.30 ×** the 0.2936 W/°C E66 measured on aifoundry2 —
+but almost two thirds of that gap is the *band*, not the card:
+
+| | 51–58 °C | 54–58 °C | 58–62 °C | 58–65 °C | 56–66 °C |
+|---|---:|---:|---:|---:|---:|
+| **aifoundry3, E71, 6 cycles** | 0.3200 ± 0.0038 † | 0.3276 ± 0.0024 | **0.3803 ± 0.0036** | 0.3957 ± 0.0025 | 0.3858 ± 0.0016 |
+| aifoundry3, E44, 3 cycles (25–26 Sep) | 0.2943 † | 0.2943 † | 0.3799 | 0.3949 | 0.3808 |
+| **aifoundry2, E66's 18 cycles, re-fitted** | **0.2936** (E66's published number) | 0.3053 | **0.3452 ± 0.0056** | 0.3452 | 0.3351 |
+
+Medians of per-cycle fits, W/°C, ± the 95 % t half-width over cycles. † a band the cooling does not fully cover:
+E71's floor is 52–53 °C and E44's 54–55 °C, so their "51–58" fits span 5–6 and 3–4 degrees, not 7.
+
+**The slope is a strong function of temperature, on both cards.** Walking up the bands on aifoundry2 alone takes
+0.2936 → 0.3053 → 0.3452 W/°C; on aifoundry3, 0.3200 → 0.3276 → 0.3803 → 0.3957. So of the +0.0867 W/°C between
+E66's published figure and E71's, **+0.0516 (60 %) is the move from 51–58 °C to 58–62 °C on one card**, and
+**+0.0351 (40 %) is the difference between the two cards at a common band.** The practical consequence: E66's
+0.2936 W/°C was never the right correction for E65 or E67, even as an approximation for the other card — it is
+77 % of the slope their runs actually needed.
+
+Reading the number off this card's own exponential idle law also fails. The published law
+(`2026-09-21-horace-aifoundry2/model.json`, fitted on aifoundry2) gives dP/dT = (A80/T_L)·e^((T−80)/T_L) =
+0.459 W/°C at 60 °C — 21 % above what this card shows at 58–62 °C, and in the wrong direction from E66's figure.
+The measured slope is between the two, and neither extrapolation substitutes for it.
+
+### Scoring
+
+| Rule | Reading | Band | Verdict |
+|---|---|---|---|
+| **S1** the slope over 58–62 °C | median **0.3803** W/°C, sd **0.0036**, range 0.3749–0.3854 | [0.355, 0.405], sd ≤ 0.010 | **PASS** |
+| **S2** identified | 6 cycles kept, all admissible; 99 % half-width **0.0060** | ≥ 5 cycles, ≤ 0.02 | **PASS** |
+| **S3a** slope rises with temperature | 58–65 minus 54–58 = **+0.0681** (E71's own cycles); +0.1014 against E44's September 54–58, the registered wording | ≥ +0.04 | **PASS** |
+| **S3b** the two cards at a common band | aifoundry2 58–62 median 0.3452 vs 0.3803: **+0.0351** | within ±0.06 | **PASS** |
+| **S4** measured, not extrapolated | every cycle cooled to 52–53 °C; 791–856 samples in band | ≤ 58 °C, ≥ 300 samples | **PASS** |
+| **S5** the price sensitivity | max abs shift **0.2411 W** (E67 clean, `nrd_b`); max relative **−8.97 %** (`abit_0`); no kept-pass set changed in any of the four reductions | ≤ 0.25 W, ≤ 10 %, unchanged | **PASS** |
+| **S6** no verdict of E65 or E67 changes | none flips; D1 moves +0.47 → +0.71 %/°C and stays UNDECIDED (below) | — | **PASS** |
+
+S5 passes on both thresholds but not by much on the relative one (−8.97 % against a registered ≤ 10 %), and the
+shifts are **systematic, not noise**: in E65's blocks A and B, 22 of 37 prices move by more than their own
+published SE and 11 by more than 2 SE (worst `bit_16`, 3.6 SE). The registration predicted the direction and the
+reason, and both hold: an item's measurement window runs warmer than its own constant-operand zero's (mean
++0.32 °C in E65, +0.17 to +1.14 °C in E67), because it burns more power in the same two seconds, so a larger k
+subtracts more from the item than from its zero.
+
+### What it does to the two price lists (labelled sensitivities — nothing published is rewritten)
+
+`leak_sensitivity.py` reproduced every published price **exactly** (worst |published − recomputed| = 0.000e+00 W)
+at each reduction's own `auto` k before re-pricing, on all four reductions. The files are
+`sensitivity-e65-ab.json`, `sensitivity-e65-blockD.json`, `sensitivity-e67.json`, `sensitivity-e67-clean.json`
+(and `.txt`, per item). E65's `hl.json`, `hl-blockD.json`, `ladder.json` and E67's `hl.json`, `scored.json`,
+`closure.json` are **untouched**.
+
+| | k auto → 0.3803 | mean shift | the group that moves most | the group that moves least |
+|---|---|---:|---|---|
+| **E65 blocks A+B** (B-side, 32 positions + `bpi`) | 0.1824 → 0.3803 | −0.059 W | bits 0–9, the flat floor: 0.502 → 0.476 W, **−5.2 %** | sign bit 31, −0.7 % |
+| **E67 registered** (A-side, 32 positions + grid + closures) | 0.1755 → 0.3803 | −0.070 W | A-side bits 0–9: 0.691 → 0.658 W, **−4.8 %** | `nrd_a`/`nrd_b`, −2.1 % |
+| **E65 block D** | 0.0692 → 0.3803 | −0.034 W | `bit_22`, −1.5 % | `lq_h2`, 0.0 % |
+
+Because fJ per flipped bit is the price divided by the designed flips and the measured rate, and neither moves
+with k, **the relative shifts above are exactly the shifts in the published energies**. So, in E65's block A
+terms: the flat floor of the mantissa price list reads about **103 fJ instead of 109**, `bit_22` **986 fJ instead
+of 1008**, the exponent bits **166 instead of 174**, the sign bit 122 instead of 123 — and the span across the 32
+positions **widens from 12.2× to 12.8×**, because the cheap positions lose a larger fraction than the dear ones.
+The two-regime shape, the position of the knee at bit 10, and the exponent bits sitting above the low mantissa
+and below bit 10's climb all survive unchanged.
+
+**E65's block C (the hart ladder, C1–C3) is unaffected at all:** `hb/reduce_ladder.py` de-leaks each rung with
+the mean of its two bracketing IDLE phases, not with a slope, so −0.51 ± 0.03 W + 27.1 mW/hart and the zeros line
+stand exactly as published.
+
+**E65's D1 is the one published number that moves materially, and it was called out in advance** (S6). D1 is
+itself a temperature coefficient, so it is first order in k — and E65 scored it across two reductions that each
+took their own `auto` value (**0.1824 W/°C for the 58 °C arm, 0.0692 for the 61 °C arm**). With one measured
+slope for both arms (`d1_refit.py`, `d1-sensitivity.json`):
+
+| | 58 °C arm | 61 °C arm | contrast over 3.00 °C | D1 |
+|---|---:|---:|---:|---|
+| as published (auto per arm) | 4.6272 W | 4.6931 W | +0.0659 W | **+22.0 ± 36.1 mW/°C = +0.47 ± 0.78 %/°C**, 95 % CI −1.05 to +1.99 |
+| at E71's slope, one k | 4.5242 W | 4.6215 W | +0.0973 W | **+32.4 ± 39.6 mW/°C = +0.71 ± 0.87 %/°C**, 95 % CI −0.99 to +2.41 |
+
+The verdict does not change — **CONSISTENT, UNDECIDED**: the registered band +0.3 to +0.5 %/°C still sits inside
+the interval, and so does zero. But the point estimate moves half way toward the ~1.9 %/°C that E65's own
+within-pass warming suggested, which strengthens E65's reading that 3 °C of gated leverage cannot separate this
+drift from nothing and that a 10 °C ladder of setpoints is what would.
+
+**E67's closure (the ~2× over-prediction of a random word) is essentially untouched**, because both sides of the
+ratio move together: the A-side price list −4.3 %, its measured `nrd_a` step −2.1 %, so measured/predicted goes
+0.433 → 0.443; on the B side 0.499 → 0.509. E70 settled that over-count as shared wires rather than interaction,
+and E71's slope leaves that conclusion where it was.
+
+### What it changes in Q128's chain, and what it does not
+
+**It moves no pJ from "unaccounted" to "accounted".** Q128's waterfall rests on E38's registered random-MAC
+means (5.783 pJ board, 4.337 pJ rail over idle, 3 cards), not on E65's or E67's per-position prices, and E38 is
+untouched by this slope. What E71 changes is the **price list's own calibration**, two levels down the chain:
+
+- The **single-bit price list that the bottom-up ledger is compared against** is 2–5 % cheaper than published,
+  with the cheap positions cheapest: the measured flat floor is ~103 fJ, so the measured/predicted comparisons
+  that use it tighten by a few per cent in the direction of the open-netlist figure, not away from it.
+- The **registered 0.294 W/°C sensitivity E66 offered for aifoundry3's runs should not be used**: at E65/E67's
+  band this card is 0.3803, and 0.294 is 77 % of it. Any further reduction of an aifoundry3 run corrected to a
+  launch reading should use 0.3803 ± 0.0036 (58–62 °C) or 0.3957 (58–65 °C) and say which.
+- **Q128 §5 item 3 closes for the second card.** Both cards' idle slopes are now measured on their own
+  coolings: aifoundry2 0.2936 (51–58 °C) / 0.3452 (58–62 °C), aifoundry3 0.3200 (52–58 °C) / 0.3803 (58–62 °C).
+  The 1.508 W/°C the registered estimator used is 4–5 × every one of them.
+- **A new caution for the Levels tab:** a leakage slope is not a card constant. It rises ~0.009 W/°C per °C of
+  die temperature over 51–65 °C on aifoundry2 and ~0.011 on aifoundry3, so any correction quoted without its band
+  is ambiguous at the 20–30 % level — which is larger than the card-to-card difference it is usually invoked for.
+
+### Departures from the registration
+
+- **None in rule, band, code or command.** The two harness changes (the 420 s cooling through E66's
+  `IDLE_COOL_S`, departure D1 for the logged-in users) were registered before the first launch and are described
+  in Method.
+- **The heater reached 82–84 °C, not the registered 90 °C target**, stopping on the 150-burst cap in all six
+  cycles, where E44's September cycles reached 88–90 °C in 344–409 s. Registered method either way (the cap *is*
+  the rule), and it costs nothing: the band of interest is 58–62 °C and every cycle swept it with 791–856
+  samples. It does mean the cooling started ~6 °C lower and ran faster — each cycle reached 52–53 °C within its
+  420 s where September needed 878 s to reach 54–55 — so E71's own 51–58 °C fit spans 5–6 degrees, not 7, and is
+  marked † above.
+- **Six cycles, not more.** The driver's deadline stopped it after `p26`; the registered minimum was 5.
+
 *Pre-registered Tue 27 Oct 2026 (week 44), 15:3x PDT on aifoundry3, **before the first E71 launch**. Any change
 after this commit goes in the Amendments section at the end, dated, before the data it touches. Request Q129,
 experiment E71; Q128 §5 item 3.*
@@ -173,5 +307,8 @@ such, with the affected tables named.
 | `aifoundry2-58-62.json` | aifoundry2's 18 E66 passes re-fitted over 58–62 °C: S3(b), the card-to-card comparison at a common band |
 | `predicted-sensitivity-*.json` | S5's predicted shifts at p1–p3's slope, frozen with this registration |
 | `sensitivity-*.json` | the same at the measured slope, after the run — labelled sensitivities, beside E65's and E67's registered scoring |
-| `passes/` | per kept pass: `cycle.json`, `block.json`, `marks.jsonl`, `heat.jsonl`, `launches.jsonl`, `check.json`, `code.sha256` (the 10 Hz telemetry stays on the box: ~1.7 MB gzipped per pass) |
+| `passes/` | per kept pass: `cycle.json`, `block.json`, `marks.jsonl`, `heat.jsonl`, `launches.jsonl`, `check.json`,
+  `code.sha256` (the 10 Hz telemetry stays on the box: ~1.3 MB gzipped per pass). Each `login` mark's `users` field —
+  the other lab logins `who` showed during the cooling — is replaced by their count, as this repository is public |
+| `d1_refit.py`, `d1-sensitivity.json` | E65's D1 re-fitted with one measured slope for both arms (it reproduces the published pair first) |
 | `e71.log` | the driver's log |
