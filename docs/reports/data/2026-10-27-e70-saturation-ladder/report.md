@@ -52,6 +52,8 @@ Passes run [790, 791, 792, 793, 794, 795, 796]; kept [790, 791, 793, 794, 795, 7
 | `alq_h16` | 16 | 32768 | 5.709 | 0.136 | 155 | 0.357 | 15.913 | 0.359 | 9.030 | 15.913 | — |
 | `alq_h23` | 23 | 47104 | 7.560 | 0.042 | 143 | 0.329 | 32.852 | 0.230 | 11.657 | 32.852 | — |
 
+**What the fJ-per-flipped-bit column is, exactly** (inherited from E65/E67 so that the additive sums `S` stay addable): `fJ_per_bit = 1e15 · ΔW / (designed_bits_per_op · rate)`, where ΔW is a **board** power step for the whole card, `designed_bits_per_op` is the manifest's per-operand-tile flip count and `rate` is the measured op rate **per minion**. The three are not referred to one common denominator, so these figures are a within-experiment currency for comparing rungs — **they must not be carried into Q128's gate-level per-flip ledger** until that scope is settled. No E70 verdict uses them: every discriminator below is in watts or dimensionless.
+
 ## D1 — the matched-h layout contrast (the sharpest discriminator)
 
 | h | measured ΔW(ls) − ΔW(lq) | SE | SE from zero | law A / H-offset predict | law W predicts | H-strong predicts |
@@ -66,50 +68,82 @@ Passes run [790, 791, 792, 793, 794, 795, 796]; kept [790, 791, 793, 794, 795, 7
 
 ## D2 — which variable the two layouts collapse on
 
+Fit set: **8 lq (h = 1..16) + 7 ls = 15; lq_h23 excluded as registered (both layouts own it)**. The fitted rungs span ΔW = 0.606 … 9.749 W.
+
 - `R_h` (best any "how many" law can do: free value per h) over 15 rungs: **1.358 W**; over the matched-h pairs only: 1.406 W
 - `R_S` (one-parameter coverage curve in the additive sum, ceiling refitted on E70's own rungs, W∞ = 10.52 W): **0.232 W**
 - the same curve with the ceiling **frozen** at E60's 12.58 W: 0.595 W
 - pure additivity (law A): 6.062 W
 - **verdict: shared wires (which bits): the layouts collapse on the additive sum, not on h**
 
+**The excluded top rung, as a check on the two ceilings.** `lq_h23` (ΔW 12.145 ± 0.158 W) is out of the fit by registration, so it tests both curves out of sample: the **refitted** ceiling misses it by **+1.851 W** (11.7 SE, 8.0× the fit's own 0.232 W rms), while the **frozen** 12.58 W curve predicts it to +0.072 W (0.5 SE). The rung also sits +1.625 W (10.3 SE) **above the refitted asymptote itself** — so W∞ is the fit's curvature parameter, not a bound on power. Refitting with the rung included gives W∞ = 11.36 W at rms 0.424 W (reported for context; the registered fit is the 15-rung one).
+
 ## D3 — is one shared turn-on enough?
 
-`T_implied = (S − ΔW)/(h − 1)` over the B-side rungs: 0.091 … 1.219 W, a factor of 13.4, against the grid's 1.351 ± 0.281 W. H-offset needs one constant.
+`T_implied = (S − ΔW)/(h − 1)` over the 14 B-side rungs with h > 1 (it is undefined at h = 1, so one of the 15 fitted rungs drops out): 0.091 … 1.219 W, a factor of 13.4, against the grid's 1.351 ± 0.281 W. H-offset needs one constant.
 
 ## D4 — the carry-over between operands, measured at each Hamming weight
 
-| h | ρ = A price per bit / B price per bit | SE | ΔW(alq) | ΔW(lq) | law A predicts | law W predicts |
-|---|---|---|---|---|---|---|
-| 1 | 0.932 | 0.233 | 0.282 | 0.606 | 1.47 | 1.48 |
-| 2 | 1.821 | 0.253 | 0.829 | 0.928 | 2.81 | 2.76 |
-| 4 | 2.602 | 0.755 | 1.578 | 1.505 | 3.11 | 2.98 |
-| 8 | 1.205 | 0.041 | 1.957 | 3.248 | 2.98 | 2.77 |
-| 12 | 1.266 | 0.011 | 3.482 | 5.502 | 2.55 | 2.38 |
-| 16 | 1.365 | 0.033 | 5.709 | 8.364 | 2.10 | 2.05 |
-| 23 | 1.246 | 0.020 | 7.560 | 12.145 | — | — |
+| h | ρ = A price per bit / B price per bit (mean of per-pass ratios) | SE | ρ, ratio of means | ΔW(alq) | ΔW(lq) | law A predicts | law W predicts |
+|---|---|---|---|---|---|---|---|
+| 1 | 0.932 | 0.233 | 0.931 | 0.282 | 0.606 | 1.47 | 1.48 |
+| 2 | 1.821 | 0.253 | 1.787 | 0.829 | 0.928 | 2.81 | 2.76 |
+| 4 | 2.602 | 0.755 | 2.097 | 1.578 | 1.505 | 3.11 | 2.98 |
+| 8 | 1.205 | 0.041 | 1.205 | 1.957 | 3.248 | 2.98 | 2.77 |
+| 12 | 1.266 | 0.011 | 1.266 | 3.482 | 5.502 | 2.55 | 2.38 |
+| 16 | 1.365 | 0.033 | 1.365 | 5.709 | 8.364 | 2.10 | 2.05 |
+| 23 | 1.246 | 0.020 | 1.245 | 7.560 | 12.145 | — | — |
 
+The headline ρ is a **mean of per-pass ratios**; the ratio of the two means is given beside it because the denominator is noisy at low h (at h = 4 the two read 2.602 against 2.097; from h = 8 up they agree to 0.001).
 The two numbers Q128 had to choose between: raw single-bit median 1.57, turn-on-corrected median 1.01.
 
-A-side ceiling fitted on the alq rungs: **6.37 W** (fit rms 1.063 W) against the B side's 12.58 W — ratio 0.51; a flip-rate-scaled ceiling would be 6.29 W.
+**The number Q128's chain should use.** On the registered window — h = 12 and 16 (P6: near a random fp32 word's 13.9 average Hamming distance) — ρ = **1.316**, the mean of ρ(12) = 1.266 ± 0.011 and ρ(16) = 1.365 ± 0.033. The two differ by more than their own SEs, so the honest dispersion is the **between-h spread, 0.070** — not a standard error (the propagated per-h SE is 0.017). **ρ(12) = 1.266 ± 0.011** is the cleanest single number at a random fp32 word's Hamming weight. Averaging h = 23 in as well gives 1.293 (between-h SD 0.064) and is a departure from the registered window.
+
+## The A-side fit, and why its saturating form is rejected
+
+A coverage curve fitted on the seven `alq` rungs gives W∞ = **6.37 W** at a fit rms of 1.063 W — 4.6× the B side's. **That form does not describe the A side**: the fitted asymptote lies 1.187 W (28 SE) **below** the ladder's own top rung `alq_h23` (7.560 ± 0.042 W), and the ladder's increments **accelerate** where saturation requires them to decay (+0.547, +0.749, +0.380, +1.525, +2.226, +1.851 W).
+
+| rung | k | residual vs the A curve (W) | in SE |
+|---|---|---|---|
+| `alq_h1` | 1 | -0.160 | -2.3 |
+| `alq_h2` | 2 | -0.585 | -6.0 |
+| `alq_h4` | 4 | -0.908 | -53.4 |
+| `alq_h8` | 8 | -1.844 | -26.3 |
+| `alq_h12` | 12 | -1.344 | -83.8 |
+| `alq_h16` | 16 | -0.139 | -1.0 |
+| `alq_h23` | 23 | +1.224 | 29.1 |
+
+The A fit is therefore reported as a **fitted parameter of a rejected form**, not as a measured ceiling. For P5's ceiling clause the ratio to the B side is 0.51 against the **frozen** B ceiling (12.58 W) and 0.61 against the **refitted** one (10.52 W) — outside 1.5× of either, so P5's second clause fails whichever B ceiling is used. A flip-rate-scaled prediction is 6.29 W from the frozen ceiling and 5.26 W from the refitted one; the A fit (6.37 W) is near the first and 21% off the second, so flip-rate scaling is a statement about the frozen ceiling only and is **not** established by E70.
+
+### The two fitted W∞, with between-pass scatter
+
+| side | pooled fit | per-pass fits | per-pass mean ± SE |
+|---|---|---|---|
+| B (15 rungs) | 10.521 W | 10.63, 10.72, 10.72, 10.54, 10.93, 9.61 | **10.52 ± 0.19 W** (6 passes) |
+| A (7 rungs) | 6.373 W | 6.51, 6.08, 6.48, 6.49, 6.39, 6.30 | **6.38 ± 0.07 W** (6 passes) |
+
+🛑 W_inf is the fitted curvature of the coverage curve, NOT an upper bound on power, and the two sides' values are not added: nrd_a and nrd_b (the measured random-operand steps) and the ladders' own top rungs both exceed them. See A_ceiling.form_verdict and D2.excluded_rung.
 
 ## D5 — the closure: do the price lists reproduce a random-word step once the law is applied?
 
-| item | additive sum S | measured ΔW (E70) | ratio additive | law W (frozen) | ratio | E67's ratio |
+| item | additive sum S | measured ΔW (E70) | ratio additive | selected law (refit W∞), ratio | frozen W∞, ratio | E67's ratio |
 |---|---|---|---|---|---|---|
-| `nrd_a` | 17.30 | 7.209 ± 0.015 | 0.42 | 9.40 | 0.77 | 0.43 |
-| `nrd_b` | 21.85 | 10.785 ± 0.024 | 0.49 | 10.36 | 1.04 | 0.50 |
+| `nrd_a` | 17.30 | 7.209 ± 0.015 | 0.42 | 8.49 W, **0.85** | 9.40 W, 0.77 | 0.43 |
+| `nrd_b` | 21.85 | 10.785 ± 0.024 | 0.49 | 9.20 W, **1.17** | 10.36 W, 1.04 | 0.50 |
+
+Both measured random-operand steps exceed their own side's fitted W∞ — `nrd_a` 7.209 ± 0.015 W against the A fit's 6.37 W, `nrd_b` 10.785 ± 0.024 W against the refitted 10.52 W — which is the same evidence as the top rungs: the fitted W∞ is a curvature, not a cap.
 
 ## The registered rules, scored
 
 | rule | what it asked | measured | verdict |
 |---|---|---|---|
 | **P1** | dW_ls - dW_lq > 2.0 W at >= 3 SE at h = 8 (H-strong needs 0) | 3.860 +- 0.052 W (73.9 SE from zero) | **PASS** |
-| **P2** | ls rms vs law W's frozen curve <= 2.0 W, and <= law A's rms / 3 | law W rms 0.832 W, law A rms 8.468 W, factor 10.18 | **PASS** |
-| **P3** | Spearman rho(dW/S, S) < -0.7, and |rho vs S| > |rho vs h| | rho vs S -0.804, rho vs h -0.836 | **FAIL** |
-| **P4** | T_implied spans > 4x over the B-side rungs, and >= 1 rung > 3 SE from the grid's 1.351 W | span 13.4x (0.091..1.219 W), 10 rungs beyond 3 SE | **PASS** |
-| **P5** | dW_alq(23)/23 below dW_alq(1) by >= 2x, and the A ceiling within 1.5x of the B ceiling | bend factor 0.86x, A ceiling 6.37 W vs B 12.58 W (ratio 0.51) | **FAIL** |
-| **P6** | rho(12) and rho(16) in [0.7, 2.5], and rho(16) < rho(2) | rho(2) 1.82, rho(12) 1.27, rho(16) 1.37 | **PASS** |
-| **P7** | both closure ratios in [0.7, 1.4] with the selected law (E67's raw: 0.43, 0.50) | nrd_a 0.77, nrd_b 1.04 (frozen ceiling) | **PASS** |
+| **P2** | ls rms vs law W's frozen curve <= 2.0 W, and <= law A's rms / 3 — over the 7 ls rungs (the registration's prose says 6, a count stale after amendment A18 added ls h = 3 and 6; its own prediction table lists 7) | law W rms 0.832 W, law A rms 8.468 W, factor 10.18 | **PASS** |
+| **P3** | Spearman rho(dW/S, S) < -0.7, and the partial relation of dW/S with h at fixed S weaker than with S at fixed h (the two Spearman rho of the residuals of a single-variable fit) | clause 1: rho vs S -0.804. clause 2 (registered partial, level-space residuals): rho(resid-after-S, h) -0.149 vs rho(resid-after-h, S) -0.229 -> holds; residualising in RANK space instead gives -0.250 vs -0.075 -> fails (the registration does not name the space). The two UNIVARIATE rho, which this script compared when E70 was first published and which are not the registered clause: -0.804 vs -0.836 | **PASS** |
+| **P4** | T_implied spans > 4x over the B-side rungs, and >= 1 rung > 3 SE from the grid's 1.351 W | span 13.4x (0.091..1.219 W), 10 of 14 rungs beyond 3 SE (T_implied is undefined at h = 1, so the D3 set is 14 of the 15 fitted rungs) | **PASS** |
+| **P5** | dW_alq(23)/23 below dW_alq(1) by >= 2x, and the A ceiling within 1.5x of the B ceiling | bend factor 0.86x (no bend by that metric), A fit 6.37 W against B frozen 12.58 W (ratio 0.51) and B refit 10.52 W (ratio 0.61) — outside 1.5x of either; and the A-side saturating FORM is rejected outright: its asymptote lies 1.19 W (28 SE) BELOW alq_h23 | **FAIL** |
+| **P6** | rho(12) and rho(16) in [0.7, 2.5], and rho(16) < rho(2); the measured rho(12..16) is the number Q128's chain should use, with its interval | rho(2) 1.82, rho(12) 1.266 +- 0.011, rho(16) 1.365 +- 0.033; registered window mean 1.316 (between-h spread 0.070, a spread and not an SE) | **PASS** |
+| **P7** | both closure ratios in [0.7, 1.4] with the law D2 selects (E67's raw: 0.43, 0.50) | selected law (coverage curve, ceiling refitted on E70's 15 rungs): nrd_a 0.85, nrd_b 1.17; with the ceiling frozen at 12.58 W: 0.77, 1.04; with each side's own fitted ceiling: 1.21, 1.17 | **PASS** |
 | **P8** | E60's 7 lq rungs reproduce within 0.6 W (lq_h23 within 1.0 W) | largest |E70 - E60| below h=23: 0.207 W; lq_h23 0.116 W | **PASS** |
 
 ## Leakage sensitivity (departure D-d)

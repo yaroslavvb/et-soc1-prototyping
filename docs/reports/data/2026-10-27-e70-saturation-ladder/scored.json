@@ -662,6 +662,11 @@
  ],
  "D2": {
   "n_rungs": 15,
+  "n_lq_rungs": 8,
+  "n_ls_rungs": 7,
+  "fit_set": "8 lq (h = 1..16) + 7 ls = 15; lq_h23 excluded as registered (both layouts own it)",
+  "fitted_dW_min_W": 0.6061458333333292,
+  "fitted_dW_max_W": 9.74899999999998,
   "R_h_W": 1.3578963580923717,
   "R_h_matched_only_W": 1.4055562648139375,
   "R_S_refit_W": 0.23218553757254362,
@@ -670,7 +675,20 @@
   "R_additive_W": 6.062225821544705,
   "ls_rms_vs_law_A_W": 8.467913340322047,
   "ls_rms_vs_law_W_frozen_W": 0.8315520329632334,
-  "verdict": "shared wires (which bits): the layouts collapse on the additive sum, not on h"
+  "Winf_refit_16rung_W": 11.361581829943935,
+  "R_S_refit_16rung_W": 0.4239750240179201,
+  "verdict": "shared wires (which bits): the layouts collapse on the additive sum, not on h",
+  "excluded_rung": {
+   "item": "lq_h23",
+   "dW": 12.145458333333314,
+   "se": 0.15754894962448332,
+   "resid_vs_refit_W": 1.8510308263953963,
+   "resid_vs_refit_SE": 11.748925212178905,
+   "resid_vs_frozen_W": 0.07232551008292987,
+   "resid_vs_frozen_SE": 0.4590669138405375,
+   "above_refit_asymptote_W": 1.6245492922607525,
+   "above_refit_asymptote_SE": 10.311393989822546
+  }
  },
  "D3": {
   "T_implied": {
@@ -701,6 +719,8 @@
    "rho_per_bit": 0.9322921462039412,
    "se": 0.23284738126817608,
    "n_passes": 6,
+   "estimator": "mean of per-pass ratios",
+   "rho_ratio_of_means": 0.9313627771094661,
    "dW_alq": 0.28227083333333053,
    "dW_lq": 0.6061458333333292,
    "pred_law_A_per_bit": 1.4673937455149497,
@@ -711,6 +731,8 @@
    "rho_per_bit": 1.8212564262232516,
    "se": 0.25326386069512696,
    "n_passes": 6,
+   "estimator": "mean of per-pass ratios",
+   "rho_ratio_of_means": 1.7874758546336558,
    "dW_alq": 0.8289791666666583,
    "dW_lq": 0.9275416666666617,
    "pred_law_A_per_bit": 2.8107596968078385,
@@ -721,6 +743,8 @@
    "rho_per_bit": 2.6019190382847888,
    "se": 0.7550016679497515,
    "n_passes": 6,
+   "estimator": "mean of per-pass ratios",
+   "rho_ratio_of_means": 2.0970010799435186,
    "dW_alq": 1.5776874999999972,
    "dW_lq": 1.504708333333325,
    "pred_law_A_per_bit": 3.110360102187162,
@@ -731,6 +755,8 @@
    "rho_per_bit": 1.205191562257191,
    "se": 0.04122488969347307,
    "n_passes": 6,
+   "estimator": "mean of per-pass ratios",
+   "rho_ratio_of_means": 1.2053907041783727,
    "dW_alq": 1.9574791666666609,
    "dW_lq": 3.247874999999991,
    "pred_law_A_per_bit": 2.9768911597411036,
@@ -741,6 +767,8 @@
    "rho_per_bit": 1.2663502778560682,
    "se": 0.011499011203320085,
    "n_passes": 6,
+   "estimator": "mean of per-pass ratios",
+   "rho_ratio_of_means": 1.2659800060587683,
    "dW_alq": 3.482499999999991,
    "dW_lq": 5.501666666666661,
    "pred_law_A_per_bit": 2.5499009398318235,
@@ -751,6 +779,8 @@
    "rho_per_bit": 1.3650978073361868,
    "se": 0.03277645206888036,
    "n_passes": 6,
+   "estimator": "mean of per-pass ratios",
+   "rho_ratio_of_means": 1.3650323175212045,
    "dW_alq": 5.708749999999999,
    "dW_lq": 8.36427083333332,
    "pred_law_A_per_bit": 2.104572316536248,
@@ -761,6 +791,8 @@
    "rho_per_bit": 1.2461096136369607,
    "se": 0.02013290347598972,
    "n_passes": 6,
+   "estimator": "mean of per-pass ratios",
+   "rho_ratio_of_means": 1.2448789156440514,
    "dW_alq": 7.559812499999992,
    "dW_lq": 12.145458333333314,
    "pred_law_A_per_bit": null,
@@ -775,12 +807,113 @@
   "n_marginal_usable": 10,
   "note": "the two defensible numbers Q128 had to choose between; E70's matched-h alq vs lq measures it"
  },
+ "carry_over_measured": {
+  "registered_window": "h = 12 and 16 (P6: near a random fp32 word's 13.9 average Hamming distance)",
+  "rho_mean_12_16": 1.3157240425961274,
+  "between_h_SD_12_16": 0.06982504772081034,
+  "propagated_SE_12_16": 0.017367520468374954,
+  "rho_h12": 1.2663502778560682,
+  "rho_h12_se": 0.011499011203320085,
+  "rho_h16": 1.3650978073361868,
+  "rho_h16_se": 0.03277645206888036,
+  "rho_mean_12_16_23": 1.292519232943072,
+  "between_h_SD_12_16_23": 0.06366441877305053,
+  "note": "the +- on the window mean is a BETWEEN-h spread (the two h differ by more than their own SEs), not a standard error; rho(12) = 1.266 +- 0.011 is the cleanest single number at a random word's Hamming weight. Averaging h = 23 in as well is a departure from the registered window."
+ },
  "A_ceiling": {
   "Winf_A_W": 6.372671279052524,
   "fit_rms_W": 1.0633921184793005,
-  "B_ceiling_W": 12.580877193317162,
-  "ratio_A_over_B": 0.5065363234320118,
-  "half_ceiling_W": 6.290438596658581
+  "B_ceiling_frozen_W": 12.580877193317162,
+  "B_ceiling_refit_W": 10.520909041072562,
+  "ratio_A_over_B_frozen": 0.5065363234320118,
+  "ratio_A_over_B_refit": 0.6057148915720364,
+  "flip_rate_pred_from_frozen_W": 6.290438596658581,
+  "flip_rate_pred_from_refit_W": 5.260454520536281,
+  "residuals": [
+   {
+    "item": "alq_h1",
+    "k": 1,
+    "resid_W": -0.16049227304939484,
+    "resid_SE": -2.297136358890178
+   },
+   {
+    "item": "alq_h2",
+    "k": 2,
+    "resid_W": -0.5853069653764195,
+    "resid_SE": -6.0178835715428765
+   },
+   {
+    "item": "alq_h4",
+    "k": 4,
+    "resid_W": -0.9076735181439564,
+    "resid_SE": -53.40346055263028
+   },
+   {
+    "item": "alq_h8",
+    "k": 8,
+    "resid_W": -1.8439161951068466,
+    "resid_SE": -26.285162241725974
+   },
+   {
+    "item": "alq_h12",
+    "k": 12,
+    "resid_W": -1.3438820118969872,
+    "resid_SE": -83.81343145981481
+   },
+   {
+    "item": "alq_h16",
+    "k": 16,
+    "resid_W": -0.13929372651109784,
+    "resid_SE": -1.0233116023136417
+   },
+   {
+    "item": "alq_h23",
+    "k": 23,
+    "resid_W": 1.2239108692293605,
+    "resid_SE": 29.09026837710063
+   }
+  ],
+  "top_rung": "alq_h23",
+  "top_rung_dW": 7.559812499999992,
+  "top_rung_se": 0.04207286276508891,
+  "top_rung_above_asymptote_W": 1.1871412209474679,
+  "top_rung_above_asymptote_SE": 28.216316716449594,
+  "increments_W": [
+   0.5467083333333278,
+   0.748708333333339,
+   0.37979166666666364,
+   1.5250208333333302,
+   2.2262500000000083,
+   1.8510624999999923
+  ],
+  "form_verdict": "REJECTED: the fitted asymptote lies below the ladder's own top rung and the residuals are systematic (S-shaped), so the saturating form does not describe the A side"
+ },
+ "ceilings": {
+  "B_pooled_W": 10.520909041072562,
+  "B_per_pass_W": [
+   10.626931982376822,
+   10.716100140345972,
+   10.716100140345972,
+   10.538505788395645,
+   10.933168296314793,
+   9.613057744671517
+  ],
+  "B_per_pass_mean_W": 10.523977348741786,
+  "B_per_pass_se_W": 0.1898986416406134,
+  "B_n_passes": 6,
+  "A_pooled_W": 6.372671279052524,
+  "A_per_pass_W": [
+   6.512632307894126,
+   6.081348430107596,
+   6.480063204314074,
+   6.490901434584744,
+   6.394006329908412,
+   6.2985576593529595
+  ],
+  "A_per_pass_mean_W": 6.376251561026986,
+  "A_per_pass_se_W": 0.06729056142487332,
+  "A_n_passes": 6,
+  "note": "W_inf is the fitted curvature of the coverage curve, NOT an upper bound on power, and the two sides' values are not added: nrd_a and nrd_b (the measured random-operand steps) and the ladders' own top rungs both exceed them. See A_ceiling.form_verdict and D2.excluded_rung."
  },
  "D5": {
   "nrd_a": {
@@ -816,7 +949,19 @@
  },
  "P3": {
   "rho_ratio_vs_S": -0.8035714285714286,
-  "rho_ratio_vs_h": -0.8355960411549352
+  "rho_ratio_vs_h": -0.8355960411549352,
+  "univariate_note": "the two univariate rho; NOT the registered clause 2, kept for the record",
+  "partial_level_space": {
+   "rho_resid_after_S_vs_h": -0.14914940089432177,
+   "rho_resid_after_h_vs_S": -0.22857142857142856,
+   "clause2_holds": true
+  },
+  "partial_rank_space": {
+   "rho_resid_after_S_vs_h": -0.25,
+   "rho_resid_after_h_vs_S": -0.075,
+   "clause2_holds": false
+  },
+  "registered_partial": "level_space"
  },
  "leak_sensitivity": {
   "hl-leak0.2.json": {
@@ -917,33 +1062,34 @@
    "verdict": "PASS"
   },
   "P2": {
-   "asked": "ls rms vs law W's frozen curve <= 2.0 W, and <= law A's rms / 3",
+   "asked": "ls rms vs law W's frozen curve <= 2.0 W, and <= law A's rms / 3 \u2014 over the 7 ls rungs (the registration's prose says 6, a count stale after amendment A18 added ls h = 3 and 6; its own prediction table lists 7)",
    "measured": "law W rms 0.832 W, law A rms 8.468 W, factor 10.18",
    "verdict": "PASS"
   },
   "P3": {
-   "asked": "Spearman rho(dW/S, S) < -0.7, and |rho vs S| > |rho vs h|",
-   "measured": "rho vs S -0.804, rho vs h -0.836",
-   "verdict": "FAIL"
+   "asked": "Spearman rho(dW/S, S) < -0.7, and the partial relation of dW/S with h at fixed S weaker than with S at fixed h (the two Spearman rho of the residuals of a single-variable fit)",
+   "measured": "clause 1: rho vs S -0.804. clause 2 (registered partial, level-space residuals): rho(resid-after-S, h) -0.149 vs rho(resid-after-h, S) -0.229 -> holds; residualising in RANK space instead gives -0.250 vs -0.075 -> fails (the registration does not name the space). The two UNIVARIATE rho, which this script compared when E70 was first published and which are not the registered clause: -0.804 vs -0.836",
+   "verdict": "PASS",
+   "verdict_rank_space_residuals": "FAIL"
   },
   "P4": {
    "asked": "T_implied spans > 4x over the B-side rungs, and >= 1 rung > 3 SE from the grid's 1.351 W",
-   "measured": "span 13.4x (0.091..1.219 W), 10 rungs beyond 3 SE",
+   "measured": "span 13.4x (0.091..1.219 W), 10 of 14 rungs beyond 3 SE (T_implied is undefined at h = 1, so the D3 set is 14 of the 15 fitted rungs)",
    "verdict": "PASS"
   },
   "P5": {
    "asked": "dW_alq(23)/23 below dW_alq(1) by >= 2x, and the A ceiling within 1.5x of the B ceiling",
-   "measured": "bend factor 0.86x, A ceiling 6.37 W vs B 12.58 W (ratio 0.51)",
+   "measured": "bend factor 0.86x (no bend by that metric), A fit 6.37 W against B frozen 12.58 W (ratio 0.51) and B refit 10.52 W (ratio 0.61) \u2014 outside 1.5x of either; and the A-side saturating FORM is rejected outright: its asymptote lies 1.19 W (28 SE) BELOW alq_h23",
    "verdict": "FAIL"
   },
   "P6": {
-   "asked": "rho(12) and rho(16) in [0.7, 2.5], and rho(16) < rho(2)",
-   "measured": "rho(2) 1.82, rho(12) 1.27, rho(16) 1.37",
+   "asked": "rho(12) and rho(16) in [0.7, 2.5], and rho(16) < rho(2); the measured rho(12..16) is the number Q128's chain should use, with its interval",
+   "measured": "rho(2) 1.82, rho(12) 1.266 +- 0.011, rho(16) 1.365 +- 0.033; registered window mean 1.316 (between-h spread 0.070, a spread and not an SE)",
    "verdict": "PASS"
   },
   "P7": {
-   "asked": "both closure ratios in [0.7, 1.4] with the selected law (E67's raw: 0.43, 0.50)",
-   "measured": "nrd_a 0.77, nrd_b 1.04 (frozen ceiling)",
+   "asked": "both closure ratios in [0.7, 1.4] with the law D2 selects (E67's raw: 0.43, 0.50)",
+   "measured": "selected law (coverage curve, ceiling refitted on E70's 15 rungs): nrd_a 0.85, nrd_b 1.17; with the ceiling frozen at 12.58 W: 0.77, 1.04; with each side's own fitted ceiling: 1.21, 1.17",
    "verdict": "PASS"
   },
   "P8": {

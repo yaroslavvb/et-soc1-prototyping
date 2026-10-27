@@ -2978,30 +2978,49 @@ bits, B = 1.0), the first multi-bit measurement on that side.
 **Results** (7 passes 790–796, 34.7 min of card time, 203 of 203 runs through every per-run gate; **6 passes kept**
 — pass 792 set aside by departure D-a). Data, the registered six-pass report, the seven-pass `reduce_hl.py` output
 and three leakage sensitivities: `docs/reports/data/2026-10-27-e70-saturation-ladder/`.
-- **It is the wires, not the count.** Over the 15 B-side rungs, one saturating curve in the additive sum,
-  `ΔW = W∞(1 − e^(−S/W∞))`, leaves a residual rms of **0.232 W**; the best *any* law in h alone can do (a free value
-  per h) is **1.358 W**; summing the single-bit prices leaves **6.062 W**. With the ceiling frozen before the run at
-  the value fitted on E60's own lq ladder (12.58 W), the same curve leaves 0.595 W.
+- **It is the wires, not the count.** Over the 15 B-side rungs — **8 `lq` (h = 1…16) + 7 `ls`**, the shared
+  `lq_h23` excluded as registered — one saturating curve in the additive sum, `ΔW = W∞(1 − e^(−S/W∞))`, leaves a
+  residual rms of **0.232 W**; the best *any* law in h alone can do (a free value per h) is **1.358 W**; summing the
+  single-bit prices leaves **6.062 W**. With `W∞` frozen before the run at the value fitted on E60's own lq ladder
+  (12.58 W), the same curve leaves 0.595 W. The fitted rungs span ΔW = 0.61 → 9.75 W. The excluded top rung tests
+  both curves out of sample, and they part company there: the **refitted** curve misses `lq_h23` by **+1.851 W
+  (11.7 SE, 8× its own rms)**, the **frozen** one predicts it to **+0.072 W (0.5 SE)**.
 - **D1, the matched-h contrast:** the spread layout costs **3.860 ± 0.052 W** more than the low layout at h = 8 —
   **74 SE** from the zero a "how many" law requires. The contrast rises, peaks at h = 8–12 and falls back toward the
   zero h = 23 forces by construction; no law in h can produce that shape at all.
-- **The ceiling belongs to the operand's flip rate, not to the multiplier array:** **10.52 ± 0.19 W** on the B side
-  (4,096 designed flips per multiply-add) against **6.38 ± 0.07 W** on the A side (2,048), a ratio of **0.51**. The
-  registered primary — one shared ceiling — **fails**, and the registered alternative (6.29 W) is what the card says.
-- **The two ceilings sum to the whole random-data step.** 10.52 + 6.38 = **16.90 ± 0.20 W**, against the 16.1 W of
-  operand-flip switching between the constant-operand level (36.4 W) and `anchor_randn` (52.49 W, E67, same card and
-  protocol). The 24.66 W zeros→random board step splits into **8.6 W of lane un-gating** and **16.1 W of flips**, and
-  random fp32 data already sits at **95% of the flip ceiling** — the card-level reason more entropy buys nothing.
+- **`W∞` is the curve's curvature, not a ceiling** (correction C1, below): the B-side fit gives 10.52 ± 0.19 W
+  (per-pass; pooled 10.52) and the A-side fit 6.38 ± 0.07 W (pooled 6.37) — but each ladder's own top rung sits
+  *above* its fit's asymptote (`lq_h23` 12.145 ± 0.158 W, +10.3 SE; `alq_h23` 7.560 ± 0.042 W, +28 SE), and so do
+  both measured random-operand steps (`nrd_a` 7.209 ± 0.015, `nrd_b` 10.785 ± 0.024 W). The two are not added and
+  bound nothing.
+- **The A side's saturating form is rejected.** Fit rms 1.063 W (4.6× the B side's), systematic residuals
+  (−0.16 … −1.84 … **+1.22 W**, to 84 SE) and increments that **accelerate** (+0.38, +1.53, +2.23 W at k = 8, 12, 16)
+  where saturation requires decay. **P5 fails in both clauses**, and its ceiling clause fails against either B value
+  (0.51 to the frozen 12.58 W, 0.61 to the refitted 10.52 W). Flip-rate scaling of the ceiling is *consistent with*
+  the frozen value (6.29 W predicted against a 6.37 W fit) and **not established**: against the refitted B it
+  predicts 5.26 W and misses by 21%. What the A side's real shape is, E70 does not answer.
+- **The zeros→random step splits, and that part needs no law:** E67's `anchor_zeros` 27.83 W, E70's own
+  constant-operand level 36.40 W (within 0.4 W of E67's) and E67's `anchor_randn` 52.49 W give **8.6 W of lane
+  un-gating** plus **16.1 W of operand flips** = 24.66 W. Whether 16.1 W is near a saturation limit is not settled
+  by E70.
 - **A single turn-on is not enough:** the `T` an offset law would need runs **0.091 → 1.219 W** across the rungs, a
-  factor of 13.4, with 10 of 15 rungs more than 3 SE from the 1.351 ± 0.281 W E67's interaction grid measured.
-- **The carry-over between operands, measured:** ρ (A price per flipped bit over B's, at matched h) = **1.29 ± 0.06**
-  over h = 12, 16, 23 (1.266 ± 0.011, 1.365 ± 0.033, 1.246 ± 0.020), against the 1.57 and 1.01 Q128 had to choose
-  between. **The price per flipped bit is not a function of h** in either layout: it falls 132 → 82 then climbs to
-  115 fJ in the low layout (each rung adds a dearer bit, which cancels the saturation) and falls monotonically
-  227 → 133 fJ in the spread one. The quantity that behaves is measured/additive, and it is one function of the
-  additive sum in all three ladders.
-- **The closure E67 failed** (0.43 and 0.50) reads **0.77** (`nrd_a`) and **1.04** (`nrd_b`) with the frozen-ceiling
-  law, and 1.21 and 1.17 with each side's own refitted ceiling.
+  factor of 13.4, with **10 of 14** rungs more than 3 SE from the 1.351 ± 0.281 W E67's interaction grid measured
+  (`T_implied` is undefined at h = 1).
+- **The carry-over between operands, measured:** on P6's registered window, h = 12 and 16, ρ (A price per flipped
+  bit over B's, at matched h) = **1.316** — ρ(12) = 1.266 ± 0.011 and ρ(16) = 1.365 ± 0.033, whose mean carries a
+  **between-h spread of 0.070** (a spread, not an SE: the propagated per-h SE is 0.017). **ρ(12) = 1.266 ± 0.011**
+  is the cleanest single number at a random fp32 word's Hamming weight; against the 1.57 and 1.01 Q128 had to
+  choose between. (Averaging h = 23 in as well gives 1.293 and is a departure from the registered window.) ρ is a
+  mean of per-pass ratios, biased up at low h where the denominator is noisy — the ratio of means reads 2.097 at
+  h = 4 against 2.602 — and the h ≥ 8 window is unaffected. **The price per flipped bit is not a function of h** in
+  either layout: it falls 132 → 82 then climbs to 115 fJ in the low layout (each rung adds a dearer bit, which
+  cancels the saturation) and falls monotonically 227 → 133 fJ in the spread one. The quantity that behaves is
+  measured/additive, one function of the additive sum in all three ladders. (Those fJ figures divide **board**
+  watts by a per-operand-tile bit count and a per-minion rate; they are a within-experiment currency and must not
+  be carried into Q128's gate-level per-flip ledger until that scope is settled.)
+- **The closure E67 failed** (0.43 and 0.50) reads **0.85** (`nrd_a`) and **1.17** (`nrd_b`) with the law D2 selects
+  (refitted `W∞`), 0.77 and 1.04 with `W∞` frozen at 12.58 W, and 1.21 and 1.17 with each side's own fit — all six
+  inside P7's [0.7, 1.4].
 - **Departure D-a earned its place on the first run.** Pass 792's four constant-operand runs span 0.489 W against the
   registered 0.45, while its `anchor_pi` drift is only +0.110 W — E67's registered gate would have kept it. That is
   the failure mode A15 described, caught by the gate written for it.
@@ -3011,17 +3030,33 @@ and three leakage sensitivities: `docs/reports/data/2026-10-27-e70-saturation-la
 - **The replicate holds.** E60's seven `lq` rungs on this card, a week earlier and from a different operand-set
   directory, reproduce within **0.207 W** (and `lq_h23` within 0.116 W).
 
-**Scored as registered: P1, P2, P4, P6, P7, P8 PASS; P3 and P5 FAIL.** P3's first clause holds
-(ρ(ΔW/S, S) = −0.804) and its second cannot work on this design — within a layout h and S rise together, so a
-univariate rank correlation cannot separate them and the one against h came out marginally larger (0.836); the
-question is answered by D1 and D2, which the registration itself named as deciding the verdict. P5 fails in both
-clauses: its bend metric compared the A side's per-position price at k = 23 with k = 1, and because the A-side
-single-bit prices rise steeply with position the low-k mask picks up dear bits as k grows and that price *rises*,
-even though the ladder's measured/additive ratio falls 0.615 → 0.230; and the A-side ceiling really is half the B
-side's. Neither failure is reinterpreted.
+**Scored: P1, P2, P3, P4, P6, P7, P8 PASS; P5 FAIL.** P3 is scored with the metric the registration actually names
+— a **partial** relation, "the two Spearman ρ of the residuals of a single-variable fit" — which gives
+ρ(resid-after-S, h) = −0.149 against ρ(resid-after-h, S) = −0.229, so its second clause holds and the rule passes;
+residualising in rank space instead reverses that clause (−0.250 vs −0.075) and the registration does not name the
+space, so both are published. **E70 as first committed scored P3 by comparing two univariate ρ (−0.804 vs −0.836)
+and reported FAIL under a sentence claiming it had been scored as registered — that was wrong and is corrected
+here (C5).** P5 fails in both clauses: its bend metric compared the A side's per-position price at k = 23 with
+k = 1, and because the A-side single-bit prices rise steeply with position the low-k mask picks up dear bits as k
+grows and that price *rises*, even though the ladder's measured/additive ratio falls 0.615 → 0.230; and the A fit
+is outside 1.5× of the B value whichever B value is used. That failure is not reinterpreted, and it does not
+establish the registered alternative either.
 
-**What it changes.** Q128 §5 item 2 is closed with a cause, a law and its parameter per operand side; item 4's
-third point is closed with a measured carry-over in place of a 6% choice. **It moves no pJ in the bottom-up
-gate-level ledger** — it is a card-side measurement — but it removes the 2× discrepancy that made the measured price
-list unusable as the bridge between the card and that ledger.
+**Corrections, 2026-10-27, desk-only (C1–C11).** A second agent checked E70 line by line against `runs.csv` and
+the registration commit and found eleven faults; all are fixed in the data directory's README, `report.md`,
+`scored.json` and `report_e70.py`, with no card touched and nothing re-measured (the pre-correction script
+reproduces the first published outputs byte-for-byte). The three that changed public claims: **C1**, the fitted
+`W∞` were called ceilings, summed into a "16.90 ± 0.20 W cap" and read as "random data sits at 95% of the cap" —
+**withdrawn**, since the data exceed both asymptotes and the percentage tracked whichever B value was chosen;
+**C2**, a ratio computed against the frozen B ceiling was printed beside the refitted one, which is what the
+flip-rate claim rested on; **C5**, P3 above. The rest correct the fit set's description (8 + 7 = 15, not 9 + 7),
+the fitted span (0.61–9.75 W, not 0.6–12.1), a between-h SD presented as an interval, a mean-of-ratios bias, "10 of
+15" → "10 of 14", P7's law, P2's rung count, and the fJ denominator's scope. **Unchanged by all of it:** the
+verdict on Q128 §5 item 2, D1, the D2 residual table, every per-rung ΔW and SE, the gates and the replicate.
+
+**What it changes.** Q128 §5 item 2 is closed **on the B side** with a cause and a one-parameter law; the A side's
+shape is not described by that law and stays open. Item 4's third point is closed with a measured carry-over in
+place of a 6% choice. **It moves no pJ in the bottom-up gate-level ledger** — it is a card-side measurement — but
+it removes the 2× discrepancy that made the measured price list unusable as the bridge between the card and that
+ledger.
 **Report:** pending — the Q129 page carries E70 with the rest of the week-44 card work.
