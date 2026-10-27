@@ -48,6 +48,9 @@ files, same 0.517 V — so the two numbers add.
 | **closure, was (arithmetic alone)** | **34% of the board, 45% of the rail** |
 | **closure, now** | **55–59% of the board, 74–79% of the rail** |
 
+*(Rail figures on Q128's 4.337 pJ. On Q129's own corrected rail footing, 4.77 pJ, the rail closure
+is 67–72% — §6's last paragraph.)*
+
 The answer is a **range** because 0.223 pJ/MAC of the transport is clock-net energy that may
 already sit inside the idle E38 subtracts, and because the big part of it is a model that §2 shows
 is over-priced. §6 has the arithmetic; the numbers in this table are the end points, not a
@@ -285,6 +288,14 @@ model's 0.48 pJ/MAC, which §2 shows is above what the card's own `zeros` figure
 accounting therefore sits below the bottom of this range by whatever that model over-prices, and
 only E74 can say by how much. The measurement that would collapse the *range* is different again:
 whether the lane's register files are clock-gated at idle on silicon, which decides the 0.223 pJ.
+
+**Every rail figure on this page uses Q128's 4.337 pJ** (board × 0.750). Q129's own rail ledger,
+published the same day, puts the minion rail at **4.77 pJ, band 4.55–4.95** on a corrected leakage
+footing ([`../2026-10-27-q129-rail-ledger/README.md`](../2026-10-27-q129-rail-ledger/README.md)).
+On that footing the rail gap is 2.82 pJ rather than 2.39, and this directory's rail numbers become:
+transport names **44.7–52.6%** of the rail gap (from 52.7–62.1%), closure **67–72% of the rail**
+(from 74–79%). The board numbers are untouched. Which footing the chain carries is Q128's call, not
+this directory's; both are stated so the substitution is one line.
 
 ### 7. Why this is still a floor, and one new reason
 
