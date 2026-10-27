@@ -12,8 +12,8 @@ README was pushed. Reduced with the three commands in "Pre-registered analysis",
 > median of 6 cycles; mean 0.3804, sd 0.0036, range 0.3749–0.3854; 95 % t ±0.0038, 99 % t ±0.0060;
 > 791–856 admissible idle samples per cycle, rms 0.167–0.184 W, span 4 °C.
 
-It replicates E44's three September cycles on this card (0.3799, sd 0.0006) **to 0.0004 W/°C after a month and
-some two hundred intervening card sessions.** And it is **1.30 ×** the 0.2936 W/°C E66 measured on aifoundry2 —
+It replicates E44's three September cycles on this card (0.3799, sd 0.0006) **to 0.0004 W/°C after a month** of
+intervening sessions on this card (E60, E63, E65, E67 and E70 among them). And it is **1.30 ×** the 0.2936 W/°C E66 measured on aifoundry2 —
 but almost two thirds of that gap is the *band*, not the card:
 
 | | 51–58 °C | 54–58 °C | 58–62 °C | 58–65 °C | 56–66 °C |
@@ -32,10 +32,14 @@ E66's published figure and E71's, **+0.0516 (60 %) is the move from 51–58 °C 
 0.2936 W/°C was never the right correction for E65 or E67, even as an approximation for the other card — it is
 77 % of the slope their runs actually needed.
 
-Reading the number off this card's own exponential idle law also fails. The published law
-(`2026-09-21-horace-aifoundry2/model.json`, fitted on aifoundry2) gives dP/dT = (A80/T_L)·e^((T−80)/T_L) =
-0.459 W/°C at 60 °C — 21 % above what this card shows at 58–62 °C, and in the wrong direction from E66's figure.
-The measured slope is between the two, and neither extrapolation substitutes for it.
+**The published idle law gets the band dependence right and the level wrong by under 10 %.** The law in the
+power model (`2026-09-21-horace-aifoundry2/model.json`, fitted on aifoundry2: P = 12.6349 + 23.2568·e^((T−80)/36) W)
+has a mean slope of **0.3186 W/°C over 51–58 °C and 0.3708 over 58–62** — a +16 % rise across the two bands,
+against the +18 % aifoundry2 measures and the +19 % aifoundry3 measures. Against the measurements its level is
+8.5 % high for aifoundry2 at 51–58 (0.3186 vs 0.2936), 7.4 % high for aifoundry2 at 58–62 (0.3708 vs 0.3452),
+and 2.5 % **low** for aifoundry3 at 58–62 (0.3708 vs 0.3803). So the law is a usable stand-in to within ~10 %
+*if it is evaluated over the band in question* — and that, not the card, is what E66's single constant was
+missing.
 
 ### Scoring
 
@@ -117,9 +121,10 @@ untouched by this slope. What E71 changes is the **price list's own calibration*
 - **Q128 §5 item 3 closes for the second card.** Both cards' idle slopes are now measured on their own
   coolings: aifoundry2 0.2936 (51–58 °C) / 0.3452 (58–62 °C), aifoundry3 0.3200 (52–58 °C) / 0.3803 (58–62 °C).
   The 1.508 W/°C the registered estimator used is 4–5 × every one of them.
-- **A new caution for the Levels tab:** a leakage slope is not a card constant. It rises ~0.009 W/°C per °C of
-  die temperature over 51–65 °C on aifoundry2 and ~0.011 on aifoundry3, so any correction quoted without its band
-  is ambiguous at the 20–30 % level — which is larger than the card-to-card difference it is usually invoked for.
+- **A new caution for the Levels tab:** a leakage slope is not a card constant. Over 51–65 °C it rises about
+  0.009 W/°C per °C of die temperature on aifoundry2 and 0.011 on aifoundry3, so a correction quoted without its
+  band is ambiguous at the 20–30 % level — **larger than the 10 % card-to-card difference it is usually invoked
+  for, and larger than the error of simply evaluating the published idle law over the right band.**
 
 ### Departures from the registration
 
