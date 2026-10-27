@@ -248,8 +248,10 @@ wire. That is a scope gap to be closed, not a contradiction — but it is the ho
 says the next thing to measure is the unit's actual net capacitances.
 
 **The dominant uncertainty is still the per-net load, not the cells.** Going from 1 fF to 4 fF per
-net moves the answer by 2.4×; swapping the whole combinational cell mix moves it by 1.5×, and the
-flop choice (DFFHQx4 against DFFHQNx1, 35 wires of 381) by 6%.
+net moves the answer by **2.4×**. Swapping the whole combinational cell mix moves it by only
+**1.3×** at 2 fF (0.126 to 0.162 pJ) even though the pools' mean cell energies differ by 2.8×
+(0.077 to 0.218 fJ), because the net load dominates; and the flop choice (DFFHQx4 against
+DFFHQNx1, 35 wires of 381) by **6%**.
 
 Other things the estimate assumes, all listed in the JSON's `assumptions`: one toggling wire is one
 cell-output transition; uniform `when`-state weighting; the open synthesis made 7,967 cells for the
