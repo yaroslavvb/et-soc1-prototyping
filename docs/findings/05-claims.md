@@ -10,6 +10,12 @@ source code (firmware or RTL) · `X` external source · `A` assumption. Combined
 input and a fitted slope; `P→M` is a prediction later measured.
 
 Where a later session re-measured a number, the older row says so and points to the newer one; quote the newer.
+Since 26 October 2026 (Q126) five sections at the end carry **E60–E64** — the bit-flip ladder, the deterministic
+transistor flips, the heat movies, the camera half of the ladder and Horace's power limit — which the index had
+missed: before that it stopped at E59, while those five experiments' own numbers were in circulation. Three figures
+E61 **refuted** are marked dead where their replacements sit: **44.4 fJ per result bit**, **14.2 fJ per carry** and
+the **8.94 pJ zero gate on `fmadd.ps`**. And where the flip model's accuracy is quoted, the held-out figure is
+E38's **0.906–1.008 W rms, scored FAIL**, not E9's in-sample 0.32 W.
 Rows that cite R3 for the governor describe the firmware source at `353f20e`; the cards' own trace strings match an
 older build (R3), so what the card runs may differ. Since 28 September the section "The governor on the cards' own
 build, and DV2" has the cards' builds read from source, E51's development data and, since 29 September, its frozen
@@ -99,16 +105,17 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
 | Drift of busy power within the hot 7 s runs of the strict protocol | **0.807 W/°C** on aifoundry2 (14 runs at 82–86 °C, standard error 0.013); aifoundry3 0.547 W/°C (7 runs at 57–61 °C, standard error 0.145: not pinned down) | M, F | E9, E20 (`DATA/horace3.json` and `DATA3/horace3.json` → `leak_w_per_c`; `DATA/report.json` 0.807; recomputed run by run by `tools/ettelem/summarize_power_session.py` → `docs/reports/data/2026-09-20-power-aifoundry2/summary.json` `context.busy_drift_cards`) |
 | Slope of board power under load, first uncontrolled Horace session (20 Sep, 22 run averages from 30 runs at 79–90 °C; superseded by the rows above) | 0.78 W/°C board, 0.38 minion rail | F | E7 |
 | Tensor state machines, all 1,024 minions | 1.85 W | F | E17 |
-| Energy per register bit clocked | **3.18 fJ** | F | E17 (`power.e_fJ.ffclk`) |
-| Energy per net toggle in the multiplier tree | 0.025 fJ | F | E17 |
-| Energy per other net toggle in the unit | **0.80 fJ** | F | E17 |
-| Energy per operand-word bit outside the unit | 15.5 fJ | F | E17 |
+| Energy per register bit clocked | 3.18 fJ. **Superseded by E38's per-card refit** ("Flip model refitted per card, leave-one-out" below): 3.02 fJ on aifoundry3, where the same four prices are refitted with each pattern left out in turn and miss by 0.906–1.008 W rms against a registered ≤ 0.6 W (**FAIL**). These four are fitted coefficients of one model, not separately measured energies: they move together when the fit is redone, and no card has measured any of them on its own. The measured per-flip prices are E60's and E61's, in their sections below | F | E17 (`power.e_fJ.ffclk`), E38 |
+| Energy per net toggle in the multiplier tree | 0.025 fJ. **Superseded by E38** as above: 0.032 fJ on aifoundry3. E60 measures 0.301 fJ (quiet partner) or 0.119 (busy) per counted RTL net toggle — 4–12× this, and 2.5× apart from each other, so the toggle denominator is not settled | F | E17, E38, E60 |
+| Energy per other net toggle in the unit | 0.80 fJ. **Superseded by E38** as above: 0.557 fJ on aifoundry3 | F | E17, E38 |
+| Energy per operand-word bit outside the unit | 15.5 fJ. **Superseded by E38** as above: 27.8 fJ on aifoundry3 — the term that moves most between cards, and the one E60's measured read-port bit (20.83 ± 0.10 fJ) is the natural anchor for | F | E17, E38 |
 | Thermal resistance, total | **1.47 °C/W** | F | E17 (`R_total`) |
 | Thermal stages | 0.106 @1.5 s, 0.050 @4 s, 0.234 @60 s, 0.136 @150 s, 0.860 @400 s, 0.081 @2,500 s °C/W | F | E17 (`taus`, `R`) |
 | Leakage loop gain at 80 °C | **0.95**; passes 1 at 82 °C | F | E17 (`loop_gain_at_80`) |
 | Degrees per sustained watt, with leakage feedback | 0.25 @10 s, 0.62 @1 min, 3.12 @10 min | F | E17 (`step_closed`) |
-| Power-model error, fitted to 14 patterns | 0.32 W rms | F | E9 (`power_model.models`) |
-| Power-model error, leave-one-out | **0.50 W rms** | F | E9 (`loo_rms`) |
+| Power-model error, fitted to 14 patterns | 0.32 W rms — **in sample**: these are the patterns the four prices were fitted to. 🛑 The held-out figure is E38's, the next row but one | F | E9 (`power_model.models`) |
+| Power-model error, leave-one-out | 0.50 W rms on this card's own fit. **Superseded as the held-out number by E38**, which refits per card and leaves each pattern out in turn: **1.008 / 0.906 / 0.966 W rms** on aifoundry2 / aifoundry3 / aifoundry1's card 1, against the registered ≤ 0.6 W: **FAIL** | F | E9 (`loo_rms`), E38 |
+| 🛑 Which accuracy to quote for the flip model | **the held-out one, 0.906–1.008 W rms, scored FAIL** (E38, `V3R/abla.json`, `[item=ABL-R].per_card.<card>.refit_switching.loo_rms`), beside the in-sample 0.32 W and the one frozen out-of-sample test the model has passed, the 14 structured matrices at 0.92 W rms (next section). Every page that quotes 0.32 or 0.50 W alone is quoting an in-sample number | F | E9, E38, E14 → E15 |
 | Sustainable switching power before runaway | **about 3 W** at 82 °C, at the fitted 22.8 °C intercept of 21 September's session; less in a warmer room | F | E17, corroborated by E12 |
 
 ## Predictions made before measurement
@@ -359,6 +366,7 @@ three cards (`wire3.json` beside `WIRE`): "Version 3" below.
 | Claim | Value | Kind | Source | Verify at |
 |---|---|---|---|---|
 | One mesh hop | **3.72 mm** (3.64–3.74); x 3.73, y 3.70 | A (estimate from the die plot) | R14 | `WREP`, `inputs.hop_mm`; `research/geometry/pitch.json` |
+| 🛑 **"37 fJ per bit·mm" is not one number — say which of these you mean** (added 26 Oct 2026, Q126, because the hubs and the summaries quote the one headline for three different quantities) | All on the **mesh rail**, free links, 0.485 V, one hop = 3.72 mm. **(1) A random bit carried a millimetre: 36.2 fJ** — finding 20's headline, the one rounded to 37 (board 46.7). It splits into **24.6 fJ of data-dependent cost + 11.7 fJ that is paid whatever the bits are** (board 32.7 + 14.0), i.e. **91.5 + 43.5 fJ per bit per hop** (board 121.6 + 52.1); the 43.5 is the number sometimes quoted as "43.7". **(2) A bit that *differs from the previous flit*: 26.3 fJ per bit·mm** (*a* = 98 fJ per hop; board 40.6 per bit·mm, 151 per hop). **(3) A *one carried*, whether or not it changed: 34.7 fJ per bit·mm** (*b* = 129 fJ per hop; board 51.6, 192). (2) and (3) are coefficients of the three-term model over 1–6 hops, a different decomposition from (1)'s, so they do not add to it; (1) is what random data pays on average. Quote the one you mean and say "per bit·mm" or "per bit per hop" | D (arithmetic on the rows below) | E32, E42 | the *a*, *b* and free-link rows below, ÷ or × 3.72 mm |
 | A random bit per mm, free links, 0.485 V | **36.2 fJ** on the mesh rail (24.6 data + 11.7 fixed); 46.7 on board power (32.7 + 14.0). E42 (three cards): the board total is resolved on each card (46.7, 44.4, 51.1 fJ; the Version 3 row), its split into data and fixed parts is not resolved per card with the leakage correction | M, F (slopes) | E32, E42 | `WREP`, `headline["uncontended/noc_rail"]`, `["uncontended/board"]` |
 | A random bit per mm, loaded mesh | **50.4 fJ** mesh rail (30.6 + 19.8); 72.9 board (46.1 + 26.8) | F (3-term model) | E32 | `WREP`, `headline["v2/noc_rail"]`, `["v2/board"]` |
 | Per bit differing from the previous flit, per hop (*a*) | 98 [92–103] fJ mesh rail; 151 [139–162] board | F | E32 | `WIRE`, `model.v2.*.toggle_fj_per_bit_transition_hop` |
@@ -791,6 +799,97 @@ its solve alone. The CPU is aifoundry3's host (i7-11700K), at most 6 threads.
 | What limits the card | hart 1's row generation (F5's second half ran 1,629 cycles per op on the busiest minion, against 270–280 for the op alone); the shire's bandwidth for streamed A, about 512 cycles per op at 32 minions per shire (E37's 511.94 with private tiles), which bounds L2's one-stage scan at 0.28 s from the ops alone, 0.30 s with the staged rows counted (`DESIGN.md`, Amendments); the epilogue, 1,606 cycles per output tile with the tensor unit idle (fitted) | M; F | E59 (M3, M4); E37 | `SPD`card-m4/`f5-b/h1.log` `cycles_per_op_busiest`; `workloads/sparseparity/tools/cycle_model.py` |
 | The cycle model | two harts per minion, 19 constants fitted to M1–M3's per-hart records (33 runs, 146 sampled minions, before M4 and M5), rms 1.8% of a minion's cycles; M3's busiest minion within +1.4% (L1) and +3.6% (L2), held out +5.0% and +7.5% | F | E59 (M4) | `workloads/sparseparity/tools/cycle_model.py`, the comment above `FITTED` (lines 86–88; `check`, `fit`, `validate`); `workloads/sparseparity/README.md`, "The model's uncertainty" |
 
+## The bit-flip ladder: what one flipped operand bit costs (E60, 20 Oct; pre-registered, three cards)
+
+Added 26 October 2026 (Q126): between 14 October and this edit the index stopped at E59, while E60–E64 published
+their own numbers. Board energy unless a row says the minion rail. `HL` means
+`docs/reports/data/2026-10-20-bitflip-ladder/hl.json`; the ladder's slope is per **designed** flipped B mantissa bit
+per multiply-add per minion, from the straight line through h ≥ 1, aifoundry3 pinned at 600 MHz and 0.522 V. The
+pre-registration, the departures and the decision rules are [`tools/claims-v3/hl/README.md`](../../tools/claims-v3/hl/README.md).
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **One flipped operand bit of an fp32 multiply-add, quiet partner (A = 1.0)** | **116.7 ± 0.6 fJ** board, 87.5 fJ on the minion rail, the whole cascade included (predicted 122). The lab's best-measured per-flip number | M, F (slope) | E60 | `HL`, the quiet ladder's slope (`reduce.txt`, `runs.csv`) |
+| The same with a busy partner (A = π) | **129.9 ± 0.5 fJ** board, 96.9 rail (predicted 128) | M, F | E60 | same |
+| Per RTL-counted operand-bus bit (A1's primary measure, accumulator reads included) | 74.7 ± 0.4 (quiet) and 85.6 ± 0.3 fJ (busy) | M, F, D | E60 | same |
+| Per counted RTL net toggle | 0.301 (quiet) and 0.119 fJ (busy) — 2.5× apart, so the toggle denominator is not settled; do not quote one of these as the price of a net toggle | D | E60 | same; the counts in `docs/reports/data/2026-10-20-bitflip-ladder/` |
+| The first flipped bit (h = 0 → 1) | +1.95 W with A = π, 3.3× that ladder's per-bit slope; +0.59 W with A = 1.0, 1.1× | M | E60 | `HL`, h = 0 and h = 1 |
+| Which bit flips (aifoundry3, above constant operands) | sign +0.55, exponent bit 23 +0.78 W; mantissa bits 0 / 8 / 16 / 22 **+0.63 / +0.47 / +2.49 / +4.68 W** (about 102 fJ at bit 8 to 1,019 fJ at bit 22). Six positions, no law | M | E60 | `HL`, the bit-position scan |
+| Two flipped bits spread over the mantissa against two low bits, equal Hamming weight | **+2.25 ± 0.05 W** (aifoundry2, 800 MHz, h = 2, 9 passes) | M | E60 | `HL`, the spread masks |
+| The same 4,096 multiply-adds in max-flip order against Gray | aifoundry3 **+0.682 ± 0.010 W** (bits 0–3) and +0.716 ± 0.023 (bits 19–22); aifoundry2 at 800 MHz +1.291 ± 0.009 and +1.311 ± 0.131. Registered CONFIRMED on both cards | M | E60 | `HL`, the order families |
+| **A register-file read-port bit into an XOR** (one gate deep, vector integer unit) | **20.83 ± 0.10 fJ** board, 16.3 rail. Replicated by E61's separate build at 20.70 ± 0.13 | M, F | E60, E61 | `HL`, `fxor.pi`; `docs/reports/data/2026-10-21-dtf/reduce.txt` |
+| The same into an AND (`fand.pi`) | 28.1 ± 0.7 fJ from the one rung kept (h = 8); 26–31 fJ over E60 and E61, card-dependent | M | E60, E61 | same |
+| A flipped result bit | E60: 31.17 ± 0.17 fJ (`xnz`) and 30.00 ± 0.16 (`xio`), about 24 fJ on the rail. **Superseded by E61** below, whose joint fit reads 29.67 ± 0.15 | M, F | E60, E61 | same |
+| ½CV² across the cards' own operating points, minion rail | the 800 MHz cards over aifoundry3's: read port 1.38× (card 0; V² 1.34×) and 1.43× (a2; V² 1.40×); multiply-add h 2 → 8 1.45× and 1.35×. Registered SUPPORTED: all 8 ratios inside 1.18–1.59, none near the 1.8–1.9 of a clock-dependent price | M, D | E60 | `HL`, the per-card ladders |
+| The RTL predictions against the ladder | 1.28 W rms over 26 frozen items against a 1.5 W mark (PASS), but measured differences are **0.832 of predicted** and 25 of 26 residuals have one sign | P→M | E60 | `HL`, `reduce.txt` |
+
+## Verifying the deterministic transistor flips (E61, 21 Oct; pre-registered, three cards)
+
+E61 re-measured E60's one-gate numbers in a separate build and scored fifteen registered rows: 1 CONFIRMED,
+1 CONFIRMED-ours, **4 REFUTED**, 5 OPEN, 3 under-resolved, 1 not scored. `DTF` means
+`docs/reports/data/2026-10-21-dtf/`; board energy on aifoundry3 at 600 MHz unless noted.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **A flipped result bit** | **29.67 ± 0.15 fJ** from the registered joint fit (26.7 ± 0.3 inside one kernel family). 🛑 **This supersedes the 44.4 fJ per result bit** published before E61, which E61 REFUTED; 44.4 fJ is dead and must not be quoted | M, F | E61 | `DTF/reduce.txt`; `tools/claims-v3/dtf/README.md` |
+| An input bit plus an output bit (`fnot.pi`) | **50.7 ± 0.6 fJ**, so the old page's sum of 50.9 fJ holds — but its 6.81 : 1 split into input and output does not | M | E61 | same |
+| **One carry position of the 32-bit adder** | **0.98 ± 0.80 fJ** (3.48 ± 0.74 with the changed-word term removed). 🛑 **This supersedes 14.2 fJ per carry**, REFUTED (CONFIRMED-ours); 14.2 fJ is dead | M, F | E61 | same |
+| **`fmadd.ps` has no zero gate on the vector unit** | **0.23 ± 0.16 pJ per op**. 🛑 **This supersedes the 8.94 pJ zero gate**, REFUTED; 8.94 pJ is dead. Zero skipping still saves 82–97% on the tensor path (E39, the Sparse compute rows above) — the refuted number is the vector unit's gate, not the tensor unit's saving | M | E61 | same |
+| The gate's own kind at equal flips (OR, ADD, XOR) | within 2.7 fJ of about 53 fJ, not ordered by depth: the gate is **≤ about 5%** of the cost of delivering a bit to it | M | E61 | same |
+| One register-file cell | 0.76 ± 0.32 fJ — under-resolved, not a usable price | M | E61 | same |
+| Changing which register is read | 369–452 fJ per index bit, 12–14× the page's 32 fJ, with no linear law over three matched-rate rungs. **An upper bound with a constant inside**; never quote it as the price of an address bit | M | E61 | same |
+| The Miller patterns | monotone the wrong way (−0.22 ± 0.06 W over four k_adj levels): REFUTED as a delivered design | M | E61 | same |
+| Two-hart interleaving | destroys operand sharing (ρ = 1.117 ± 0.024, aifoundry1 card 0) | M | E61 | same |
+| The vector unit's issue rate | one op per cycle per hart; the harness's 0.58 / 0.61 ops a cycle is its loop overhead, set by the loop head's address mod 32 | M | E61 | same |
+| Two independent pipelines over the same data | agree on 48 quantities within 1.6 SE | M | E61 | `DTF/independent/notes.md` |
+
+## Heat movies: where on the die the work runs (E62, 21 Oct; pre-registered, aifoundry2)
+
+Camera numbers are differences of phase-averaged images in millikelvin on the back of the board, not die
+temperatures; the camera result is exploratory in the lab's grading. `HM` means
+`docs/reports/data/2026-10-21-e62-heat-movies/`.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **The card's power against active harts** | **5.80 ± 0.30 W + 55.8 ± 1.0 mW per hart** at 800 MHz — linear in harts, **not** 40.6 mW per hart from zero, which the design assumed. De-leaked: 5.35–5.46 W + 46–49 mW | M, F | E62 | `HM`, E62-CAL |
+| Power follows harts, not geometry | three 128-hart legs at 4 × 32, 8 × 16 and 16 × 8 shires agree within **0.51 W** | M | E62 | same |
+| The camera's view of the die | turned **−88.0 ± 2.8°**, not mirrored (−90.2 ± 1.1° from ORBIT's corners fitted by hand) | M, F | E62 | `HM`, the orientation fit |
+| Moving 192 harts west → east at constant total power | **+525 ± 22 mK** on the warm half (4 laps; post hoc, cross-session template) | M | E62 | `HM`, E62-WE42 |
+| The same 24 shires split north/south | **+511 ± 7 mK**, the pattern turned **94°** (98° by lobe centroids; registered band 90 ± 10°) | M | E62 | `HM`, E62-NS42 |
+| The controls | the same mask in both arms **+4 ± 11 mK**; 12 shires against their 180° rotation **−8 ± 9 mK** | M | E62 | `HM`, E62-NULLAA, E62-NULLGEO |
+| The bloom: all 32 shires on and off | the whole frame warms **+7.1 K** at the end of a 42.3 s on-phase, half the rise **14.8 s** after the step, +39 W switched as measured (the governor throttled it; the clean power law would have drawn 49 W) | M | E62 | `HM`, E62-BLOOM |
+| Millimetres | **not established**: the registered 10% gate for a scale bar was not met (two routes disagree by 64%). Every E62 finding is a direction | — | E62 | the prereg's §scale |
+| Per-lap camera noise | 66–80 mK, 2.4–3.0× the registered prior of 27 mK; it replaces the prior in every E62 error bar | M | E62 | `HM` |
+
+## The camera half of the ladder: weighing a flip as heat (E63, 23 Oct; pre-registered, aifoundry2)
+
+Two sessions, 256 and 192 minions, at 800 MHz and 0.618 V; the camera amplitudes are the 0.05 Hz component over
+the die ± its SE over laps. `E63` means `docs/reports/data/2026-10-23-e63-camera-hamming-ladder/`; the five
+registered rules and the full tables are [`tools/claims-v3/hlc/README.md`](../../tools/claims-v3/hlc/README.md).
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| The flips' watts, top rung against its zero | **+5.443 ± 0.008 W** on 256 minions, **+4.020 ± 0.014 W** on 192; the middle rung +1.496 and +1.109 W; the null of equal watts −0.044 and −0.033 W | M | E63 | `E63/s*/analysis/lockin.json`, `blocks.*.board_step_w` |
+| **A flipped bit weighed as heat, per designed flipped B bit** | **154.0 and 154.4 fJ** (session 1, 256 minions) and **151.7 and 152.4 fJ** (session 2, 192), the middle rung 121.7 and 120.3 fJ, at 0.618 V. The two sessions agree to 1.5%. Compare E60's 116.7 fJ at 0.522 V: × V² is ≈ 163 fJ, within about 5%. **Corrected 26 Oct 2026 (Q126)**: session 2 was published as 113.8 / 114.3 / 90.2 fJ, computed on 256 minions when it ran 192 | M, D | E63 | `E63/s*/summary.json`, `blocks.*.fj_per_flip` with `.minions` and `.mhz` |
+| The back of the board follows the flips | **194.2 ± 9.1 mK** at 0.05 Hz over the die (256 minions; p at the 20,000-draw floor, SNR 21) and **118.7 ± 13.0 mK** (192); the null reads 1.9 ± 15.0 and −13.6 ± 8.4 along the top rung's phase | M | E63 | `E63/s*/analysis/lockin.json`, `blocks.*.roi` |
+| **The board's thermal transfer at 0.05 Hz** | **59.0 ± 3.0 mK per watt** of fundamental at first, the heat **87 ± 5°** (about 5 s) behind the power. It **drifts**: 59.0 → 52.9 → 47.8 → 42.4 mK/W over the four top-rung blocks of the hour, the lag 87° → 109°. A camera wattmeter needs its own top rung near every reading | M, F | E63 | `E63/s*/analysis/lockin.json`, `blocks.*.transfer_roi` |
+| The same transfer at 0.15 Hz (**post hoc, no verdict**) | **19.0 ± 5.2 mK/W** pooled over the four top-rung blocks against **54.1 ± 1.8** at 0.05 Hz: a ratio of **0.35 ± 0.10**, the roll-off of an 8.9 s single pole — but the measured 87–109° lag at f is more phase than one pole can give. No single block's third harmonic clears 2 SE | M, F | E63 (Q126) | `E63/posthoc/h3-rails-pooled.json`; `E63/s*/posthoc/h3-rails.json`; [`tools/claims-v3/hlc/posthoc/`](../../tools/claims-v3/hlc/posthoc/README.md) |
+| **Which rail the flips' watts land on** (post hoc, no verdict) | of each rung block's board step: the **minion rail 84.3–86.1%**, the SRAM rail 0.39–0.92%, the NoC rail 0.32–1.39%, the three together 85.3–88.3%. The missing 12–15% is the board's conversion loss and the rails the sampler does not break out | M, D | E63 (Q126) | `E63/s*/posthoc/h3-rails.json`, `blocks.*.steps` |
+| The signal is heat on the board, not the camera | the in-phase map carries the capacitor field's emissivity pattern (high-passed correlation with E62's bloom map 0.90–0.92); the focal plane's thermistor shows nothing at f; the shutter fired 2.8–10.7 a minute at no preferred phase | M | E63 | `E63/s*/analysis/lockin.json`, `blocks.*.spatial`, `.fpa`, `.ffc` |
+| 800 MHz, and what the launch records say | the median minion clock over the steady windows is **800 MHz in all eight blocks** (mean 797.4–800.0; the one-second dips pull it down). 🛑 `launches.jsonl`'s own `mhz_minion` is sampled before the launch opens and reads **600 MHz in all 360 records of both sessions** — never price a flip from it | M | E63 | `E63/s*/summary.json`, `blocks.*.clock`; `E63/s*/session/launches.jsonl` |
+| The one-second clock dip | in 8 of 360 launches the clock fell 800 → 600 MHz for 0.6–1.5 s, 1.4–8.4 s into a launch, at 36–42 W and a 54–57 °C die; the governor's idle-reset shape, not heat and not the 65 W level. It is what failed the hold gate on 256 minions (39 of 42 launches held, 92.9% against 95%) | M | E63 | `E63/dips.json`; `14-card-behaviour.md` |
+
+## Horace's power limit: which limit sets the matmul's speed (E64, 23 Oct; pre-registered, aifoundry2)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **Both limits act, each on its own** | on a cool die the **power** test steps first (10 of 10 runs drawing 67 W or more at 800 MHz; 98 power throttle-downs at a 57–63 °C die, the governor reading 65.0–67.9 W); none of the 10 runs under 62 W got one. R1 and R2 PASS | M | E64 | `docs/reports/data/2026-10-23-e64-horace-power-limit/README.md`, R1, R2 |
+| The power loop's input | a **~1 s running average**, not the instantaneous reading the source names: a 1.3 s first-order average compared with 65 W once per 0.24 s pass reproduces the mean clock of all 26 cool-die runs to **3.3 MHz rms**. The loop is a dither, 800 → 700 → 600 → 700 MHz (about 82 / 64 / 50 W) | M, F | E64 | same, the governor model |
+| In sustained work heat wins | the line through the runs' last 40 s reads **65.5 °C at 50.3 W**, under the 65 W level: random fp32 and fp16 end pinned at 600 MHz at a 66–67 °C die, ones and int8 settle at 737–763 MHz, zeros hold 800 MHz at 59 °C. R3 and R4 PASS | M | E64 | same, R3, R4 |
+| **The data-independent floor by clock** (58 °C die) | **25.46 / 28.24 / 33.61 W** at 600 / 700 / 800 MHz. The flip model predicts 27.1 W at all three (it has no clock argument): −19% at 800 MHz | M | E64 | same, the floor table |
+| Horace's effect by Horace's mechanism | on a cool die zeros run **13% faster** than random normal fp32 (800 against 710 MHz); sustained, **33% faster** (12.3 against 9.2 TFLOPS) | M | E64 | same |
+| A power throttle-down is not sticky | P5 refuted | M | E64 | same |
+
 ## Ridge points (derived; no card time)
 
 Peak compute divided by each level's measured bandwidth, at 600 MHz on 1,024 minions. Kind `D`: arithmetic on
@@ -855,17 +954,47 @@ Two corrections to earlier reports came out of this, both verified in the raw da
   campaign measured it. It did not settle the question: E40's hot-against-cool test reads "not separated" on every
   card, and E45 puts the catalogue's temperature coefficient at +0.48 [0.07–0.90] %/°C on aifoundry2 and +0.30
   [0.18–0.42] on aifoundry3, which the registered rule reads as temperature, not the card.
-- **Per-flip energies outside the tensor unit and the mesh links** (E11–E17, E31–E32), and the split of the
-  unsensed 15 W of idle. E30 attributes the unmetered part of what a workload adds above idle (delivery losses plus
-  a DRAM term, fitted over configuration means) and meters DRAM by droop; the idle 12–16 W (12–13 W on aifoundry3 at
-  51–56 °C, 14–16 W on aifoundry2 at 66–82 °C) and the DRAM term's split below its regulator stay inferred.
+- ~~**Per-flip energies outside the tensor unit and the mesh links**~~ **Partly established on 2026-10-20 and 10-21
+  (E60, E61):** the vector integer unit's one-gate prices are measured — a read-port bit into an XOR 20.83 ± 0.10 fJ,
+  a result bit 29.67 ± 0.15, an input plus an output bit 50.7 ± 0.6, a carry 0.98 ± 0.80, a register-file cell
+  0.76 ± 0.32 (under-resolved), and the gate's own kind at most 2.7 fJ of about 53. Still not established: any
+  per-flip price in the load/store path, the register file's own cells to better than ±40%, the clock tree's share,
+  and **the split of the unsensed 15 W of idle**. E30 attributes the unmetered part of what a workload adds above
+  idle (delivery losses plus a DRAM term, fitted over configuration means) and meters DRAM by droop; the idle
+  12–16 W (12–13 W on aifoundry3 at 51–56 °C, 14–16 W on aifoundry2 at 66–82 °C) and the DRAM term's split below its
+  regulator stay inferred.
+- **How many transistor-level toggles one flipped operand bit causes** (E60, 2026-10-20). Dividing the measured
+  116.7 / 129.9 fJ by the RTL's counted net toggles gives 0.301 and 0.119 fJ a toggle — 2.5× apart for what should be
+  one number, so either the count or the cascade model is wrong. Until the denominator is settled, no "fJ per net
+  toggle" from this work is quotable, and neither is "about 1,050 toggles per flipped bit", which is a stream average
+  over a whole kernel and not one flip's cascade.
+- **What one transistor switching costs on this chip, at its own 0.517 V.** Never measured and never simulated. The
+  closest stand-in is ASAP7, a predictive 7 nm kit characterised at 0.7 V: a minimum inverter's input toggling is
+  83 aJ there (C = 0.62 fF, about 2,000 electrons), about 24,500× Landauer's kT ln 2 = 3.2 zJ at 58 °C. That is a
+  stand-in for a different process at a different voltage, not a measurement of this chip.
+- **The flip model has no argument for clock, supply voltage, die temperature or card** (E9, E17; measured against
+  E64). Its static term is one number, 27.1 W, where the card's data-independent floor is 25.46 / 28.24 / 33.61 W at
+  600 / 700 / 800 MHz: **−19% at 800 MHz**. Nothing in the model knows about the governor either. Its held-out error
+  is 0.906–1.008 W rms (E38, FAIL against a registered 0.6 W), and it has never been scored on fp16, int8, memory,
+  mesh or gather loads at all.
+- **Millimetres, anywhere in the camera work** (E62, E63). The registered 10% gate for a scale bar was not met (two
+  routes to it disagree by 64%), so every camera finding is a direction and an amplitude, never a distance on the die.
+- **A steady camera gain** (E63). The transfer drifted 59.0 → 52.9 → 47.8 → 42.4 mK/W over one hour as the board and
+  the camera warmed, the lag 87° → 109°, so a thermal camera used as a wattmeter needs its own reference rung near
+  every reading. The post-hoc second point at 0.15 Hz (19.0 ± 5.2 mK/W, a ratio of 0.35 ± 0.10) is two points of a
+  transfer function, not a calibrated instrument.
+- **Phonons, and anything between the transistor and the heat the camera sees.** The word does not appear in this
+  repository; the chain from a switching device to a millikelvin on the back of the board is not written down.
 - **Whether the heat-per-mm "ones" cost is resting-at-zero logic or precharged structures**, and how a hop's
   energy splits between router and wire (E31, E32). The mesh rail's meter gain has not been checked independently,
   and whether the links are low-swing, which the V² scaling assumes they are not, is unknown.
 - **Whether a refresh or another stream's access closed each hart's row between its visits, or the activation is
   merely small**; E28 cannot tell. (The controller runs an open-page policy: rows close at a refresh or at another
   row's access, not on a timer; E1.)
-- **Any table at 700 or 800 MHz.** The V²f ratios say what to expect; nothing was re-measured there.
+- **Any *catalogue* table at 700 or 800 MHz.** The V²f ratios say what to expect, and since 20 October some
+  individual numbers are measured there — E60's ladders and one-gate prices on the two governor-free cards at 800 MHz
+  and 0.604–0.618 V, E63's 154 fJ per flipped bit, E64's floor at 600 / 700 / 800 MHz — but the energy catalogue, the
+  memory levels and the mesh rows were all taken at 600 MHz and have not been re-measured at another clock.
 - **A relay whose working set exceeds the 80 MB of scratchpad.** That is where on-chip hand-off would be the
   only option rather than the faster one; the flow control for it was not built.
 - **Why Ivan's 6% differs from both of our numbers.** His code was not run.
