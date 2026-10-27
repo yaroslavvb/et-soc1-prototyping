@@ -255,3 +255,66 @@ with the ops per second taken from the item's own kept runs (`rate` in `runs.csv
 card 0 at 800 MHz read 116.7 fJ and E65's busy-partner ladder 129.9 fJ; a 12-bit mantissa mask here is the same
 quantity measured a different way, and the single-bit `sm_sgn` is the same quantity for a bit that does **no**
 work in the multiplier at all.
+
+**A7, Mon 26 Oct 2026, 23:3x PDT — four corrections to the committed record, after a review of the results.
+No rule, band, gate or prediction changes, and nothing here re-scores a verdict; A6's and the data README's
+*claims* are corrected, in the manner of A5.**
+
+**1. A6's cross-card comparison named the wrong card, the wrong clock and the wrong experiment.** A6 says
+*"E60's ladder on aifoundry1's card 0 at 800 MHz read 116.7 fJ and E65's busy-partner ladder 129.9 fJ"*. Both
+numbers are **E60's `aifoundry3` card at 600 MHz** — its quiet (A = 1.0) and busy (A = π) ladders — as E60's own
+`03-experiments.md` §E60 states and `2026-10-20-bitflip-ladder/hl.json` confirms (`lq.designed.fJ` 116.746,
+`lb.designed.fJ` 129.918). E60's three cards read, per designed flipped bit:
+
+| E60 card | clock | fJ per flipped bit | its own leakage slope |
+|---|---:|---:|---:|
+| `aifoundry1-c0` | 800 MHz | 102.5 ± 4.4 | 0.327 W/°C |
+| **`aifoundry2` (E68's card)** | **800 MHz** | **121.3 ± 0.6** | **0.442 W/°C** |
+| `aifoundry3` | 600 MHz | 116.7 ± 0.6 (quiet), 129.9 ± 0.5 (busy) | 0.203 W/°C |
+
+So the comparison E68 should have made — same card, same clock — is against **121.3 ± 0.6 fJ**, and it was
+absent from both documents. E65 priced single B-side positions (83 fJ at bit 6 to 1,008 fJ at bit 22) and the
+flow-M flip (745 ± 56 fJ); it has no 129.9 fJ ladder.
+
+**2. The price quoted as the headline exists only at A1's leakage slope, which is 5.1× what this card measures.**
+A1 diagnosed correctly that a slope fitted across the 600→800 MHz ramp reads ~4.9 W/°C and is an artefact, and
+argued for the steady subset's **0.456 W/°C** on passes 1–3. But the registered reduction runs `--leak auto`,
+which re-fits at reduction time over all 433 gate-passing runs and returns **1.508 W/°C** — 3.3× the number A1
+argued for. Nothing in A1 says so, and the data README published 117.5 fJ as if it were slope-free.
+
+The estimator is `reduce_hl.leak_slope`: for each run it fits board power against die temperature **inside that
+run's own 2 s window** (median rise 1.65 °C) and takes the median of the per-run slopes. Inside the window the
+kernel is running, so what it measures is a busy run's power-against-temperature drift — the governor's and the
+workload's transient — not the card's idle leakage.
+
+**E66 measured the card's idle leakage directly the same night**, on the same card, over the band E68 ran in:
+**0.296 W/°C over 51–58 °C** (rms 0.116 W, 2,248 idle samples at 600 MHz) and 0.311 W/°C over 51–67 °C
+(E66 pass 11's cooling). Every independent estimate agrees with it and not with 1.508: E60's own fit on this card
+0.442, the published idle law at 59 °C 0.36, E44's idle rails 0.5–0.6.
+
+Every price is therefore a **band**, published at both slopes in the data README and at eight slopes in
+`leak-sensitivity.txt`. For a 12-bit mantissa flip: **117.5 ± 2.8 fJ** at A1's applied 1.508 and
+**135.9 ± 2.7 fJ** at E66's measured 0.296 — call it **118–136 fJ**, with the upper end better supported.
+Corrected at E60's own same-card slope (0.442) for a like-for-like comparison, E68 reads **133.7 ± 2.5 fJ against
+E60's 121.3 ± 0.6 fJ, about 10 % higher**. The registered scoring is unchanged and stays at `--leak auto`.
+
+*What this does not touch.* P2's additivity holds at every slope (+0.102 to +0.105 W against a 0.48–0.54 W
+tolerance), P3, P6 and P7 hold, and P1's and P5's failures hold — `b_mul` is negative at all eight slopes and
+`sm_e16` costs less than `sm_e1` at all eight. The leakage correction moves the *level* of every price, not the
+comparisons the predictions are about.
+
+**3. The post-hoc column definition fits worse than the registered one it replaces, and `s_mul` had no
+uncertainty.** `posthoc.txt`'s residual rms is **0.429 W**; the registered fit's, at the same slope, is
+**0.179 W** (`leak-sensitivity.txt`), and the gap holds at every slope. The data README quoted the first without
+the second. The post-hoc residuals are structured (`sm_hi12` +0.923, `sm_sp12` +0.525, `sm_lo12` −0.479), so the
+post-hoc split buys a positive `b_mul` at the cost of fit quality and is a **diagnosis of the column definition,
+not a better model**. And `s_mul = 0.504` is a point estimate from a 2-parameter fit on 9 items whose columns are
+96 % anti-correlated (corr −0.957): by the delta method it is **0.50 ± 0.15**, i.e. between about a third and two
+thirds. It is, however, the one number here stable against the leakage slope (0.50 at 1.508 to 0.56 at 0).
+
+**4. There were two aborted attempts, not one, and neither was in the published tree.** A5 records the pass this
+session killed by hand. A second attempt had already failed earlier: `p1.attempt-1793074293` began at 21:10:12
+and died at 21:11:22 on a `USER: unbound variable` fault in `lib.sh`, which reads `$USER` under `set -u` while
+the sweep ran in a tmux session started without that variable. Both are now published under
+`docs/reports/data/2026-10-27-e68-stage-map/aifoundry2/sm/`, so the data README's sentence is true of the tree a
+reader downloads. Neither can reach a number: `gather` reads only directories named `p` followed by digits.

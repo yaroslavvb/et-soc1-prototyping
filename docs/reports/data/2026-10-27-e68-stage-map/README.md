@@ -28,33 +28,62 @@ launched at 58 °C after 59 °C, under the card lock with `timeout 10` on every 
 **51.1 W**, far under the governor's ~65 W limit — the 512-minion sizing did its job. 121 runs were dropped by
 the registered clock gate: this card idles at 600 MHz and the governor raises it during the launch, so a run
 whose [t₀+1 s, t₀+3 s) window still holds the ramp is not a 800 MHz measurement (its voltage gate fires on the
-same runs). One pass was interrupted by this session's own mistake and is in the data as a non-ok pass the
-reduction drops (amendment A5).
+same runs). **Two passes were aborted and restarted, and both are published here** as non-ok passes:
+`aifoundry2/sm/p1.attempt-1793074293` (21:10:12, 72 run records over 6 items, killed at 21:11:22 by a
+`USER: unbound variable` fault in `lib.sh`, which reads `$USER` under `set -u` in a tmux session started
+without it) and `aifoundry2/sm/p8.attempt-1793075288` (21:26:00, 96 run records, killed by hand by this
+session — amendment A5, which named only this one). Both carry `"status":"failed","note":"signal"`, and
+neither can reach a number: `reduce_sm.py`'s `gather` reads only directories named `p` followed by digits,
+so an `attempt` directory is skipped before any gate runs. The 41 scored passes are `p1`–`p41`.
 
 ## Prices
 
 Registered `dP_W` (per-pass difference from the item's own zero, leakage-corrected at A1's 1.508 W/°C from 433
-kept runs), with the per-flipped-bit price in E60's and E65's unit (A6):
+kept runs), with the per-flipped-bit price in E60's unit (A6).
 
-| item | what moves | dP (W) | SE | passes | fJ per flipped bit | SE |
+🛑 **The leakage slope is the one number in this reduction not measured on this experiment's own data, and it
+moves every price.** A1's `--leak auto` estimator returned **1.508 W/°C**; E66 measured this card's idle
+leakage the same night, on the same card, over the band E68 ran in, at **0.296 W/°C** (51–58 °C, rms 0.116 W,
+2,248 samples) and 0.311 W/°C over 51–67 °C — **5.1× smaller**. Every price is therefore given at both, and
+the second is the better-supported one (A7). The registered scoring stays at A1's slope, as registered.
+
+| item | what moves | passes | dP (W) at A1's 1.508 | fJ/bit at A1's 1.508 | dP (W) at E66's 0.296 | fJ/bit at E66's 0.296 |
 |---|---|---:|---:|---:|---:|---:|
-| `sm_lo12` | f1/f2, mantissa 0–11 | 4.312 | 0.101 | 24 | **117.5** | 2.8 |
-| `sm_hi12` | f1/f2, mantissa 11–22 | 6.352 | 0.156 | 22 | 173.3 | 4.3 |
-| `sm_sp12` | f1/f2, 12 bits spread | 6.870 | 0.138 | 23 | 187.4 | 3.8 |
-| `sm_sgn` | **f3–f6 only** | 0.548 | 0.111 | 25 | **179.3** | 36.3 |
-| `sm_e1` | f3–f6 only, shift 1 | 0.617 | 0.141 | 25 | 201.9 | 46.1 |
-| `sm_e16` | f3–f6 only, shift 16 | 0.345 | 0.097 | 25 | 112.8 | 31.7 |
-| `sm_e64` | f3–f6 only, saturating | 0.863 | 0.098 | 24 | 282.5 | 32.0 |
-| `sm_sgnlo` | both | 4.756 | 0.116 | 24 | 119.7 | 2.9 |
-| `sm_pi_sgn` | f3–f6 only, busy partner | 0.383 | 0.120 | 25 | 125.3 | 39.3 |
+| `sm_lo12` | f1/f2, mantissa 0–11 | 24 | 4.312 ± 0.101 | 117.5 ± 2.8 | 4.987 ± 0.098 | **135.9 ± 2.7** |
+| `sm_hi12` | f1/f2, mantissa 11–22 | 22 | 6.352 ± 0.156 | 173.3 ± 4.3 | 7.127 ± 0.120 | 194.4 ± 3.3 |
+| `sm_sp12` | f1/f2, 12 bits spread | 23 | 6.870 ± 0.138 | 187.4 ± 3.8 | 7.932 ± 0.144 | 216.3 ± 3.9 |
+| `sm_sgn` | **f3–f6 only** | 25 | 0.548 ± 0.111 | 179.3 ± 36.3 | 0.495 ± 0.085 | **161.8 ± 27.7** |
+| `sm_e1` | f3–f6 only, shift 1 | 25 | 0.617 ± 0.141 | 201.9 ± 46.1 | 0.683 ± 0.113 | 223.3 ± 37.0 |
+| `sm_e16` | f3–f6 only, shift 16 | 25 | 0.345 ± 0.097 | 112.8 ± 31.7 | 0.376 ± 0.084 | 123.2 ± 27.6 |
+| `sm_e64` | f3–f6 only, saturating | 24 | 0.863 ± 0.098 | 282.5 ± 32.0 | 0.844 ± 0.095 | 276.4 ± 31.0 |
+| `sm_sgnlo` | both | 24 | 4.756 ± 0.116 | 119.7 ± 2.9 | 5.379 ± 0.097 | 135.4 ± 2.4 |
+| `sm_pi_sgn` | f3–f6 only, busy partner | 25 | 0.383 ± 0.120 | 125.3 ± 39.3 | 0.451 ± 0.132 | 147.6 ± 43.2 |
 
-**The ladder reproduces.** `sm_lo12`'s 117.5 ± 2.8 fJ per flipped bit sits on E60's 116.7 fJ and beside E65's
-129.9 fJ — a different card, a different minion count and a 12-bit mask instead of single bits, same price.
-That is the strongest cross-card check the bit-flip price has had.
+The busy items (whose window heats most) move 16 %; the frozen-tree items move the other way and by less.
+Full table at eight slopes, with both fits: [`leak-sensitivity.txt`](leak-sensitivity.txt).
 
-**And a bit that never enters the multiplier costs as much as one that does.** `sm_sgn` is 179.3 ± 36.3 fJ
-against `sm_lo12`'s 117.5 ± 2.8, with **zero** tree toggles. Whatever a flipped bit costs, the multiplier is
-not where most of it goes.
+**The ladder reproduces to about 10 %, and the earlier claim that it reproduced exactly was an artefact of
+the leakage slope** (corrected here; the first version of this file, and A6, got the comparison wrong — A7).
+Two things were wrong with it. First the attribution: **116.7 and 129.9 fJ are both E60's `aifoundry3` card at
+600 MHz**, its quiet (A = 1.0) and busy (A = π) ladders (`03-experiments.md` §E60; `hl.json` `lq`/`lb`) —
+not aifoundry1 at 800 MHz, and 129.9 is not E65's. Second, the comparison that matters was never made:
+E60 ran **this same card**, aifoundry2 at 800 MHz, and read **121.3 ± 0.6 fJ** per designed flipped bit.
+
+Against that, corrected at the same leakage slope E60 itself fitted on this card (0.442 W/°C), E68 reads
+**133.7 ± 2.5 fJ against E60's 121.3 ± 0.6 — about 10 % higher**, with a 12-bit mask instead of single bits
+and half the minions. At A1's 1.508 W/°C it reads 117.5, 3 % *below* E60; the apparent bullseye on "116.7"
+was a coincidence of quoting the wrong card against an over-corrected price. The defensible statement is
+that **a flipped mantissa bit costs 118–136 fJ at the board on this card, about 10 % more than E60 measured
+on it when both are corrected alike** — a reproduction across experiments and operand designs, not an
+identity, and the leakage correction is a larger uncertainty than the difference between the two cards.
+
+**And a bit that never enters the multiplier costs about as much, per bit, as one that does.** `sm_sgn` is
+**161.8 ± 27.7 fJ** per flipped bit against `sm_lo12`'s 135.9 ± 2.7 at E66's measured slope, with **zero**
+tree toggles — a difference of 25.9 ± 27.8 fJ, i.e. the two are indistinguishable. (At A1's 1.508 the pair
+reads 179.3 ± 36.3 against 117.5 ± 2.8, which would make the frozen bit look 1.5× dearer; the measured slope
+makes the weaker and safer claim, and it is the one to quote.) Whatever a flipped bit costs, the multiplier
+is not where most of it goes. In **watts** the sign bit is of course far cheaper — 0.495 ± 0.085 W against
+4.987 ± 0.098 W — because it is one bit against twelve; it is the per-bit price that matches.
 
 ## The registered verdicts
 
@@ -86,12 +115,23 @@ multiplier, and a sign-and-exponent-frozen item leaves the exponent path still. 
 `txfma_adder` on the side the item's own arithmetic dictates, and dropping the four wrapper files whose nets
 are their children's ports named again one level up:
 
-- **b_mul = +0.517 ± 0.161 W per million toggles/op**
-- **b_back = +0.957 ± 0.264**, i.e. a back-end toggle costs **1.85×** a multiplier toggle
-- **s_mul = 0.504** for a 12-bit mantissa flip: about **half** its in-unit cost is the multiplier
-- residual rms 0.429 W over nine items spanning 0.35–6.87 W
+- **b_mul = +0.517 ± 0.161 W per million toggles/op** (+0.650 ± 0.188 at E66's slope)
+- **b_back = +0.957 ± 0.264** (+1.000 ± 0.305), i.e. a back-end toggle costs **1.85×** a multiplier toggle
+  — but that ratio is itself slope-dependent, 1.54 at E66's measured 0.296
+- **s_mul = 0.50 ± 0.15** for a 12-bit mantissa flip (0.55 ± 0.15 at E66's slope): between about a third and
+  two thirds of its in-unit cost is the multiplier. This is the one quantity here that is **stable against the
+  leakage slope** (0.50–0.56 across all eight), which is why it survives as the result
+- residual rms **0.429 W** over nine items spanning 0.35–6.87 W
 
-Both coefficients are positive and about 3.2 SE from zero. The gate level said the multiplier is 0.11–0.13 pJ
+🛑 **Two caveats, both against this fit.** (1) It fits the nine items *worse* than the registered columns it
+replaces — **rms 0.429 W against the registered fit's 0.179 W** at the same slope, and the gap holds at every
+slope (0.429–0.478 against 0.179–0.184). Its residuals are structured, not noise: `sm_hi12` +0.923,
+`sm_sp12` +0.525, `sm_lo12` −0.479 — the three mantissa items that span the data, alternating in sign — and
+the rms exceeds the whole measured price of `sm_sgn` (0.548 W) and `sm_e16` (0.345 W). So the post-hoc split
+buys a positive `b_mul` at the cost of fit quality: it is a **diagnosis of the column definition, not a better
+model**. (2) The two columns are **96 % anti-correlated** (corr −0.957), so the split between them is the
+weakest part of the result; both coefficients are only ~3.2 SE from zero, and a 1 SE excursion on the pair
+spans s_mul ≈ 0.35–0.65. The gate level said the multiplier is 0.11–0.13 pJ
 of a 745 fJ board flip (15–17 %); in-unit, measured, it is about half — the rest of the board number is the
 operand bus, the register file's read ports, the result path and the accumulator, all outside the unit.
 
@@ -118,8 +158,9 @@ ruled out in principle; what fails is pricing its columns by counting RTL names.
 | `verdicts.json` | the registered reduction: gates, per-item prices, the fit, P1–P7 |
 | `runs.csv` | every run: raw and corrected board power, launch and window readings, clock, voltage, cycles per op, rate |
 | `posthoc.txt` | the post-hoc column definition and its fit |
-| `leak-sensitivity.txt` | every price and the fit under five leakage slopes |
+| `leak-sensitivity.txt` | every price in W and in fJ per flipped bit, and both fits, under eight leakage slopes, with E66's direct measurement of this card's idle leakage beneath |
 | `operands-manifest.json` | the eleven items, their masks, designed flip counts and frozen-significand flags |
+| `aifoundry2/sm/p*.attempt-*/` | the two aborted, restarted attempts, published so the record matches the tree; `gather` never reads them |
 | `aifoundry2/sm/p*/` | the 41 kept passes: telemetry, marks, runs, configs, the lab manifest and the operand checksums. The per-pass `tiles/` are left out (identical in every pass; `gen.sha256` pins them and `make_sm.py` regenerates them) and `runs.jsonl` is gzipped |
 
 Reproduce: `python3 tools/claims-v3/sm/make_sm.py build/sm-gen --check`, then
