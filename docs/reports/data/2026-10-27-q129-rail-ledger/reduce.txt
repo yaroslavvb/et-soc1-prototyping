@@ -1,6 +1,6 @@
-aifoundry2: 54 runs kept, screened out {'S2_rails_not_settled': 38}
-aifoundry3: 98 runs kept, screened out {'S2_rails_not_settled': 1}
-aifoundry1-c1: 0 runs kept, screened out {'S2_rails_not_settled': 92}
+aifoundry2: 54 runs kept, screened out {'S2_rails_not_settled': 38, 'S2_leg_settle_only': 37, 'S2_leg_both': 1}
+aifoundry3: 98 runs kept, screened out {'S2_rails_not_settled': 1, 'S2_leg_settle_only': 1}
+aifoundry1-c1: 0 runs kept, screened out {'S2_rails_not_settled': 92, 'S2_leg_settle_only': 72, 'S2_leg_both': 20}
 wrote docs/reports/data/2026-10-27-q129-rail-ledger/rail-ledger.json
 
 == launch window: pJ per unit, per rail, per card ==
@@ -49,11 +49,45 @@ late    board 6.517  minion 4.941  sram 0.081  noc 0.107  rails 5.129  off-rail 
         off-rail splits as delivery+in-step 0.946 + unattributed 0.442
         on Q128's 5.783 pJ board: minion 4.385 (Q128 carried 4.337)  sram 0.072  noc 0.095  off-rail 1.232 (delivery 0.839 + unattributed 0.393)  [scale 0.8874]
 
+== ONE RANDOM FP32 MULTIPLY-ADD ON THREE LEAKAGE FOOTINGS (launch window, pJ) ==
+footing          board  minion    sram     noc  offrail   deliv   resid  min/bd   on Q128's 5.783 pJ board: minion
+uncorrected      6.176   4.858   0.058   0.066    1.194   0.918   0.276   0.787   4.549 pJ  (per card 4.396 / 4.715)
+drift_split      5.674   4.684   0.011  -0.019    0.998   0.859   0.139   0.825   4.774 pJ  (per card 4.623 / 4.934)
+board_only       5.674   4.858   0.058   0.066    0.692   0.918  -0.225   0.856   4.951 pJ  (per card 4.837 / 5.072)
+  >> the minion rail is 4.77 pJ, band 4.55-4.95 over the leakage treatment; Q128 carries 4.337
+  >> the board denominator is a THREE-card mean and the ratio a TWO-card one: if aifoundry1-c1's ratio equalled aifoundry2's, 4.726 pJ (-0.052)
+  leak slope registered           aifoundry2 0.810 aifoundry3 0.550  -> minion 4.774 pJ (ratio 0.825)
+  leak slope measured_within_run  aifoundry2 0.725 aifoundry3 0.358  -> minion 4.723 pJ (ratio 0.817)
+  leak slope e66_idle             aifoundry2 0.294 aifoundry3 0.550  -> minion 4.690 pJ (ratio 0.811)
+
+== the off-rail fit's RESIDUAL across configurations (launch, pJ per unit) ==
+   (the quantity the first version of this ledger called 'on no meter and attributed to nothing')
+aifoundry2    15 configurations over 1 pJ: uncorrected +0.028 (fp16_ones) to +0.440 (fp32_randn) pJ, NEGATIVE in 0 of them and 2 of all 21; on the central footing -0.027 to +0.289 (negative in 5)
+              fp32_randn       1024 harts  residual +0.440 pJ (corrected +0.289); the window's own off-rail heating is +0.198 pJ = 45% of it
+              fp32_randn_16     512 harts  residual +0.203 pJ (corrected +0.111); the window's own off-rail heating is +0.120 pJ = 59% of it
+              fp32_randn_8      256 harts  residual +0.070 pJ (corrected -0.021); the window's own off-rail heating is +0.120 pJ = 171% of it
+aifoundry3    16 configurations over 1 pJ: uncorrected -0.251 (fp32_randn_8) to +0.137 (m_kaleidoscope) pJ, NEGATIVE in 12 of them and 18 of all 22; on the central footing -0.356 to +0.015 (negative in 15)
+              fp32_randn       1024 harts  residual +0.113 pJ (corrected -0.010); the window's own off-rail heating is +0.110 pJ = 98% of it
+              fp32_randn_16     512 harts  residual -0.133 pJ (corrected -0.254); the window's own off-rail heating is +0.109 pJ = -82% of it
+              fp32_randn_8      256 harts  residual -0.251 pJ (corrected -0.356); the window's own off-rail heating is +0.095 pJ = -38% of it
+
+== the minion rail against active harts at 600 MHz, measured here (what E77 matches on) ==
+aifoundry2    1024h 22.41 W  512h 10.96 W  256h 5.28 W   -> minion rail -0.446 W + 22.31 mW/hart  (board -1.332 W + 30.03 mW/hart)
+aifoundry3    1024h 22.21 W  512h 10.96 W  256h 5.39 W   -> minion rail -0.234 W + 21.91 mW/hart  (board -1.001 W + 27.50 mW/hart)
+  f.V^2 to 800 MHz: x1.913 per hart, so an 800 MHz arm needs 0.523 x the harts for the same rail watts
+  check: that transfer predicts 57.4 mW/hart at the board at 800 MHz; E62-CAL measured 55.8 +- 1.0
+
+== the deconvolution's closure check: a quiet pattern's deconvolved launch vs its settled late reading (absolute W) ==
+aifoundry2    launch deconvolved 15.042 W  vs  late raw 15.024 W   -> +17 mW
+aifoundry3    launch deconvolved 9.611 W  vs  late raw 9.618 W   -> -7 mW
+
 == within-run drift against the die reading, W per C (pooled over the card's heating runs) ==
-aifoundry2    board +0.725+-0.019  minion +0.268+-0.033  sram +0.063+-0.001  noc +0.120+-0.003  rails +0.451  offrail +0.275  offrail_share_per_run +0.373+-0.059
-              off-rail share of the board's drift 0.38 (per run 0.37+-0.06, n 6, mean rise 3.0 C, 3 configurations)
-aifoundry3    board +0.358+-0.093  minion +0.114+-0.067  sram +0.037+-0.001  noc +0.063+-0.002  rails +0.213  offrail +0.145  offrail_share_per_run +0.895+-0.366
-              off-rail share of the board's drift 0.41 (per run 0.90+-0.37, n 8, mean rise 3.0 C, 2 configurations)
+aifoundry2    board +0.725+-0.019  minion +0.268+-0.033  sram +0.063+-0.001  noc +0.120+-0.003  rails +0.451+-0.033  offrail +0.275+-0.038  offrail_share_per_run +0.373+-0.059
+              off-rail share of the board's drift 0.38+-0.05 (per run 0.37+-0.06, n 6, mean rise 3.0 C, 3 configurations)
+              over body windows t0+1.5 0.46, t0+2.5 0.49, t0+3.5 0.34   |  RAW rails (no deconvolution): share -1.92 (rails +2.118 W/C) - the launch step is still settling here, so this is a bound on the deconvolution, not a reading
+aifoundry3    board +0.358+-0.093  minion +0.114+-0.067  sram +0.037+-0.001  noc +0.063+-0.002  rails +0.213+-0.068  offrail +0.145+-0.115  offrail_share_per_run +0.895+-0.366
+              off-rail share of the board's drift 0.41+-0.34 (per run 0.90+-0.37, n 8, mean rise 3.0 C, 2 configurations)
+              over body windows t0+1.5 0.60, t0+2.5 0.47, t0+3.5 0.76   |  RAW rails (no deconvolution): share -4.79 (rails +2.076 W/C) - the launch step is still settling here, so this is a bound on the deconvolution, not a reading
 
 == idle split, W (fp32_randn's own pre-launch brackets) ==
 aifoundry2    board  36.31  minion  13.54  sram  2.53  noc  4.49  rails  20.57  off-rail  15.74 (43%)
@@ -62,6 +96,8 @@ aifoundry3    board  25.78  minion   7.97  sram  2.22  noc  2.50  rails  12.69  
 == E60's rail window, measured: its raw delta over the settled delta (fp32_randn) ==
 aifoundry2    minion 0.891+-0.002 (n3)  noc 0.539+-0.005 (n3)
 aifoundry3    minion 0.895+-0.001 (n4)
+  E60 ran on aifoundry3, so its own attenuation is 0.8947: its [0.7455, 0.7497] would become 0.833 / 0.838, an UPPER BOUND - two further biases in E60's own reduction push the same way and are NOT removed here: its board is the leakage-corrected p80 while its rail is raw, and its rail window sits 1 s later and hotter than its board window.  Both raise E60's measured ratio, so dividing by the window attenuation alone over-corrects
+  and one tau does not explain every rail: the NoC returns 0.539 on the same runs and the same window, so the single-time-constant picture is incomplete
 
 == E64 sustained on aifoundry2: off-rail share by the clock the governor held ==
 run                                 MHz   mV  die C  board W minion W   off W  min/bd   off%     s
