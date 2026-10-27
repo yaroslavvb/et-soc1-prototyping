@@ -92,22 +92,31 @@ def gate(runs):
 
 
 def per_item(kept, man):
-    """DeltaP per item per pass, then mean +- SE over passes."""
-    byp = {}
+    """DeltaP per item per pass, then mean +- SE over passes.
+
+    dP_W is the registered quantity (leakage-corrected p80). dP_raw_W is the same difference on the
+    uncorrected board power, reported beside it because the correction's coefficient is the one number here
+    that is not measured on this experiment's own data: a busier item heats more inside its own window, so a
+    wrong slope moves the busy items most. E66 measures this card's idle leakage slope over 51-67 C tonight."""
+    byp, byr = {}, {}
     for r in kept:
         byp.setdefault(r["pass"], {}).setdefault(r["item"], []).append(r["p80"])
+        byr.setdefault(r["pass"], {}).setdefault(r["item"], []).append(r["p_raw"])
     out = {}
     for name, it in man.items():
         z = it.get("zero")
         if not z or name in ("smz_q", "smz_b"):
             continue
-        ds, pw = [], []
+        ds, dr, pw = [], [], []
         for p, items in sorted(byp.items()):
             if name in items and z in items:
                 ds.append(float(np.mean(items[name])) - float(np.mean(items[z])))
+                dr.append(float(np.mean(byr[p][name])) - float(np.mean(byr[p][z])))
                 pw.append(p)
         m, se, n = mean_se(ds)
-        out[name] = {"dP_W": m, "se_W": se, "passes": n, "per_pass": dict(zip(pw, ds)), "zero": z}
+        mr, ser, _ = mean_se(dr)
+        out[name] = {"dP_W": m, "se_W": se, "passes": n, "dP_raw_W": mr, "se_raw_W": ser,
+                     "per_pass": dict(zip(pw, ds)), "zero": z}
     return out
 
 
@@ -224,13 +233,18 @@ def verdicts(items, fit, pred, gates):
     else:
         put("P6", "UNDECIDED", "an item is missing")
 
-    # P7 the clock held
+    # P7 the clock held. As registered: "every KEPT run is at 800 MHz throughout its window and every item's
+    # board maximum is below 60 W. Runs that are not are dropped, counted, and named in the results." So the
+    # runs the gate dropped are information, not a failure -- the gate is what makes the statement true.
     off = [r for r in gates["dropped"] if "clock" in r.get("_why", "")]
-    hot = gates.get("max_board_w")
-    ok = not off and (hot is None or hot < 60)
+    hot = gates.get("max_board_w_kept")
+    bad = [r for r in gates.get("kept", []) if r["mhz"] != [BUSY_MHZ]]
+    ok = not bad and (hot is None or hot < 60)
     put("P7", "PASS" if ok else "FAIL",
-        f"{len(off)} runs off {BUSY_MHZ} MHz; highest board reading {hot:.1f} W" if hot else f"{len(off)} off-clock runs",
-        off_clock_runs=len(off), max_board_w=hot)
+        f"every kept run at {BUSY_MHZ} MHz ({len(bad)} not); highest kept board reading {hot:.1f} W; "
+        f"{len(off)} of {gates['runs']} runs dropped for a clock ramp in the window"
+        if hot else f"{len(off)} off-clock runs",
+        off_clock_runs_dropped=len(off), kept_off_clock=len(bad), max_board_w_kept=hot)
     return V
 
 
@@ -249,12 +263,14 @@ def main():
     kept, dropped = gate(runs)          # the gates read no corrected power, so they run before the correction
     k, nk = apply_leak(runs, kept, a.leak)
     maxw = max((r["p_raw"] for r in runs), default=None)
-    gates = {"runs": len(runs), "kept": len(kept), "dropped": dropped, "leak_W_per_C": k, "leak_runs": nk,
-             "max_board_w": maxw, "card": card}
+    maxk = max((r["p_raw"] for r in kept), default=None)
+    gates = {"runs": len(runs), "kept": kept, "n_kept": len(kept), "dropped": dropped, "leak_W_per_C": k,
+             "leak_runs": nk, "max_board_w": maxw, "max_board_w_kept": maxk, "card": card}
     items = per_item(kept, man)
     fit = fit_stages(items, pred)
     V = verdicts(items, fit, pred, gates)
-    out = {"card": card, "gates": {x: gates[x] for x in ("runs", "kept", "leak_W_per_C", "leak_runs", "max_board_w")},
+    out = {"card": card, "gates": {x: gates[x] for x in ("runs", "n_kept", "leak_W_per_C", "leak_runs",
+                                                         "max_board_w", "max_board_w_kept")},
            "dropped": [{x: r[x] for x in ("pass", "item", "_why", "mhz", "mv", "start_c")} for r in dropped],
            "items": items, "fit": fit, "verdicts": V}
     json.dump(out, open(a.out, "w"), indent=1, default=float)
@@ -265,13 +281,14 @@ def main():
                 f.write(f"{r['card']},{r['pass']},{r['item']},{r['p_raw']:.3f},{r['p80']:.3f},{r['start_c']},"
                         f"{r['t_win']:.2f},{'|'.join(str(x) for x in r['mhz'])},{r['mv']:.1f},"
                         f"{r['cycles_per_op'] or ''},{r['rate']:.0f}\n")
-    print(f"card {card}: {len(runs)} runs, {len(kept)} kept, leak {k:.3f} W/C ({nk} runs), "
-          f"highest board {maxw:.1f} W" if maxw else f"card {card}: no runs")
-    print(f"\n{'item':12s} {'dP (W)':>9s} {'SE':>7s} {'passes':>7s}")
+    print(f"card {card}: {len(runs)} runs, {len(kept)} kept, leak {k:.3f} W/C ({nk} kept runs), "
+          f"highest board {maxw:.1f} W (kept {maxk:.1f} W)" if maxw else f"card {card}: no runs")
+    print(f"\n{'item':12s} {'dP (W)':>9s} {'SE':>7s} {'passes':>7s} {'dP raw':>9s} {'SE raw':>7s}")
     for n, v in items.items():
         if v["dP_W"] is None:
             continue
-        print(f"{n:12s} {v['dP_W']:9.3f} {(v['se_W'] or float('nan')):7.3f} {v['passes']:7d}")
+        print(f"{n:12s} {v['dP_W']:9.3f} {(v['se_W'] or float('nan')):7.3f} {v['passes']:7d} "
+              f"{v['dP_raw_W']:9.3f} {(v['se_raw_W'] or float('nan')):7.3f}")
     if fit:
         print(f"\nfit over {len(fit['items'])} items: b_mul {fit['beta_mul_W_per_Mtoggle']:.4f} +- {fit['se_mul']:.4f}, "
               f"b_back {fit['beta_back_W_per_Mtoggle']:.4f} +- {fit['se_back']:.4f} W per million toggles/op; "

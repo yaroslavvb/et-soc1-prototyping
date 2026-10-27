@@ -202,3 +202,29 @@ card window allows, target 18**. The registered clock gate drops the runs whose 
 prediction is scored against. Passes cost about 1.7 min each (the card is already at the launch reading, so the
 approaches are instant), the order is reshuffled per pass by the registered seed, and no gate, window or band
 changes. The number of passes actually run is reported with the results.
+
+**A3, Mon 26 Oct 2026, 21:3x PDT (after passes 1–18, before pass 19).** The pass target rises from 18 to **as
+many as fit before 22:30 PDT**, when the card goes to E66.
+
+*Why.* A2 budgeted 1.7 min a pass from the first three; passes 4–18 ran in **7.5 minutes, about 30 s each**,
+because the card stays at the launch reading and every approach is instant. The window therefore allows
+roughly 150 passes rather than 18, and the statistics need them: after 18 passes the per-item pass counts are
+1–5, `sm_e16` rests on a single pass at −0.70 W (a negative price, which is noise), and the registered
+two-column fit is unstable in sign — `b_mul` reads +1.41 W per million toggles at a 0 W/°C leakage slope and
+−0.15 at A1's 1.424, with residual rms 0.50–1.03 W against item prices of 0.4–7.8 W.
+
+Nothing but the pass count changes: same items, same gates, same windows, same bands, same per-pass
+differencing, order reshuffled per pass by the registered seed. The number of passes run, and the kept-run
+count per item, are reported with the results.
+
+**A4, Mon 26 Oct 2026, 21:3x PDT (before pass 19).** Two reporting additions, neither a change to a registered
+rule or band.
+1. **`dP_raw_W` is reported beside `dP_W`** — the same per-pass difference on *uncorrected* board power. The
+   leakage coefficient is the one number in this reduction not measured on this experiment's own data, and the
+   items heat unequally inside their own windows (2.15 °C for `sm_hi12`, 1.47 °C for its zero), so the
+   correction moves the busy items most. Measured sensitivity after 18 passes: `sm_sp12` reads 7.84 W at
+   k = 0 and 6.56 W at k = 1.424, while `sm_sgn` reads 0.39 W and 0.07 W. Both numbers are published and the
+   verdicts are scored on the registered `dP_W`.
+2. **E66 measures the slope properly tonight.** `tools/claims-v3/idle/` fits this card's idle law over
+   51–67 °C in the same session, so the morning reduction can be re-run with `--leak <E66's value>`. That
+   re-run is reported as a sensitivity, never as a replacement for the registered scoring.
