@@ -4,6 +4,16 @@
 Collects E60's (re-reduced here), E68's (already published as a sensitivity) and E63's (re-reduced here)
 prices at E66's measured idle slope and at each source's own registered slope, and prints the band.
 
+TWO LABELS THAT ARE NOT THE SLOPE (raised by Q129's verifier, 27 Oct, and fixed here):
+
+  * E68's sensitivity table has no 0.2936 column. Its nearest column is 0.294, headed "E66 p11 cooling
+    51-58 C" in that file, i.e. E66's slope printed to three decimals. The rows below are therefore
+    labelled `e68_column` 0.294, and the 0.0004 W/C difference is below E68's last published digit
+    (it moves a 136 fJ price by under 0.01 fJ).
+  * the convergence of the mantissa-flip prices is reported as the two SPREADS (relative half-width
+    about the midpoint, on each source's own slope and on one slope), not as a pass against a
+    threshold. `convergence` in the output json holds both, with the rows they are taken over.
+
   python3 band.py <repo-root> <e60-sens.json> <e63-s1.json> <e63-s2.json> --out per-bit-band.json
 """
 import argparse
@@ -69,7 +79,12 @@ def main():
         rows.append({"source": "E68", "gate": "registered", "item": f"E68 {name}, per flipped bit",
                      "registered_slope": 1.508, "registered_fJ": d["1.508"][0],
                      "registered_se_fJ": d["1.508"][1],
-                     "e66_slope": 0.294, "e66_fJ": d["0.294"][0], "e66_se_fJ": d["0.294"][1],
+                     # E68's table has no 0.2936 column; 0.294 is E66's slope to three decimals, and
+                     # that is the column these numbers are read from. Labelled, not relabelled.
+                     "e66_slope": 0.294, "e68_column": "0.294",
+                     "e66_slope_label": "E68's 0.294 column (E66's 0.2936 to 3 dp; the 0.0004 W/C "
+                                        "difference is below E68's last published digit)",
+                     "e66_fJ": d["0.294"][0], "e66_se_fJ": d["0.294"][1],
                      "passes": None, "runs_kept": 453})
 
     # ── E63, the camera session's board step. Its published prices carry NO leakage correction at all.
@@ -84,7 +99,14 @@ def main():
                          "registered_se_fJ": e["slopes"]["0.0"]["fj_se"],
                          "e66_slope": E66_SLOPE, "e66_fJ": e["slopes"]["0.2936"]["fj_per_flip"],
                          "e66_se_fJ": e["slopes"]["0.2936"]["fj_se"],
-                         "dT_c": e["dT_c_mean"], "passes": None, "runs_kept": e["n_laps"]})
+                         # the correction's sensor sensitivity: the same arithmetic with dT taken in the
+                         # other minion-shire variable (see posthoc_e63.py's header)
+                         "die_sensor": e.get("die_sensor"),
+                         "e66_fJ_other_sensor": e.get("slopes_alt", {}).get(
+                             "0.2936", {}).get("fj_per_flip"),
+                         "dT_c": e["dT_c_mean"], "dT_c_sensor0": e.get("dT_c_mean_sensor0"),
+                         "dT_c_sensormean": e.get("dT_c_mean_sensormean"),
+                         "passes": None, "runs_kept": e["n_laps"]})
 
     def band(sel):
         v = [r["e66_fJ"] for r in rows if sel(r)]
@@ -92,13 +114,40 @@ def main():
 
     whole = lambda r: ("designed flipped B bit" in r["item"]) and r.get("gate") in ("live", "registered")
     stage = lambda r: r["source"] == "E68"
+    alt = [r["e66_fJ_other_sensor"] for r in rows if r.get("e66_fJ_other_sensor")]
+
+    # ── the mantissa-flip prices, the one set the three experiments can be compared on: E60's whole-word
+    #    lq (live gate), E63's six camera blocks, and E68's two low-mantissa groups. Reported as the two
+    #    SPREADS, not as a pass against a threshold.
+    def spread(vals):
+        lo, hi = min(vals), max(vals)
+        mid = (lo + hi) / 2
+        return {"lo_fJ": round(lo, 3), "hi_fJ": round(hi, 3), "midpoint_fJ": round(mid, 2),
+                "half_width_fJ": round((hi - lo) / 2, 2),
+                "half_width_pct_of_midpoint": round((hi - lo) / 2 / mid * 100, 1), "n": len(vals)}
+
+    mant = [r for r in rows
+            if (r["source"] == "E60" and r["gate"] == "live" and "per designed flipped B bit" in r["item"])
+            or r["source"].startswith("E63")
+            or (r["source"] == "E68" and any(k in r["item"] for k in ("sm_lo12", "sm_sgnlo")))]
+    conv = {"rows": [r["item"] for r in mant],
+            "on_each_source_own_slope": spread([r["registered_fJ"] for r in mant]),
+            "on_one_slope_e66": spread([r["e66_fJ"] for r in mant]),
+            "note": ("the mantissa-flip prices from E60, E63 and E68. The claim is the pair of spreads, "
+                     "not a threshold: putting the three experiments on one measured slope narrows the "
+                     "relative half-width about the midpoint by the difference printed below.")}
     out = {"e66_slope_W_per_C": E66_SLOPE, "e66_slope_range": E66_RANGE, "rows": rows,
            "band_whole_word_designed_bit_fJ": band(whole),
            "band_e68_stage_resolved_fJ": band(stage),
+           "band_whole_word_other_die_sensor_fJ": ((round(min(alt), 1), round(max(alt), 1), len(alt))
+                                                   if alt else None),
+           "convergence": conv,
            "note": ("Every row is aifoundry2, the card E66 measured. A price 'per designed flipped B bit' "
                     "divides the measured watts by the designed B-side flips per op; E68's rows are the "
                     "stage-resolved prices for named bit groups, so they bracket the whole-word number "
-                    "from both sides rather than agreeing with it.")}
+                    "from both sides rather than agreeing with it. E63's rows carry a second column, "
+                    "`e66_fJ_other_sensor`, which is the same correction with dT taken in the other "
+                    "minion-shire variable; E68's are read from its 0.294 column.")}
     with open(a.out, "w") as f:
         json.dump(out, f, indent=1)
     print("Every aifoundry2 per-flipped-bit price, at its own registered leakage slope and at E66's "
@@ -113,8 +162,20 @@ def main():
     print("")
     print("band, whole-word designed-bit prices at E66's slope: %s-%s fJ over %d rows"
           % out["band_whole_word_designed_bit_fJ"])
-    print("band, E68's stage-resolved prices at E66's slope:    %s-%s fJ over %d rows"
+    print("band, E68's stage-resolved prices (its 0.294 column): %s-%s fJ over %d rows"
           % out["band_e68_stage_resolved_fJ"])
+    if out["band_whole_word_other_die_sensor_fJ"]:
+        print("   E63's rows with dT in the other minion-shire variable: %s-%s fJ over %d rows"
+              % out["band_whole_word_other_die_sensor_fJ"])
+    print("")
+    print("the mantissa-flip prices from E60, E63 and E68, over %d rows — the two spreads:"
+          % conv["on_one_slope_e66"]["n"])
+    for k, lab in (("on_each_source_own_slope", "each source's own slope"),
+                   ("on_one_slope_e66", "one slope (E66's 0.2936)")):
+        s = conv[k]
+        print("   %-26s %7.1f-%7.1f fJ  midpoint %6.1f  half-width %5.2f fJ = %4.1f%%"
+              % (lab, s["lo_fJ"], s["hi_fJ"], s["midpoint_fJ"], s["half_width_fJ"],
+                 s["half_width_pct_of_midpoint"]))
     return 0
 
 

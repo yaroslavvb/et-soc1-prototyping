@@ -40,6 +40,25 @@ E64-T1 adds the one physical term that is missing, measured since: leakage's tem
 
 Everything else is E64's: PTS, V, s_f, the lag search, the alternating least squares, the die line, the
 burst window (mean clock 1.5-6.5 s) and the sustained window (the last 40 s of ~80 s).
+
+THREE DEPARTURES FROM E64 THAT ARE NOT THE TEMPERATURE TERM, named here because they are easy to miss
+(all three were raised by Q129's verifier on 27 Oct and are now either fixed or declared):
+
+  * MEDIAN ROUNDING. E64's `powers()` rounds each clock's median to 2 decimals. The T1 variants keep 3,
+    because the leakage referral moves a sample by millwatts and 2 dp quantises it. The REGISTERED
+    COMPARISON column is therefore built at E64's own 2 dp (`MEDIAN_DP_E64`), so the port check is
+    bit-exact against E64's published fit (rms 0.8242388715772772 W) rather than close to it.
+  * THE BURST HOLDOUT. Through 27 Oct 14:24 the burst "leave-one-label-out" column paired a held-out
+    B_f with the switching term from the IN-SAMPLE fit, so it was not a holdout. It is now solved
+    against the held-out B_f from the run's own samples (`c_run_against`), exactly as the sustained
+    path already did through `c_against`. The old, mixed-sample number is kept beside it as
+    `t1_oos_cinfit_mhz` / `burst_oos_cinfit_rms_mhz` so the change is visible.
+  * THE GOVERNOR CALIBRATION IS LIMB-FREE. `calibrate_governor()` fits tau and the pass length with the
+    thermal limb switched OFF, and the burst and sustained predictions then run with it on. That is
+    defensible on E64's 6.5 s bursts against tau_th = 14 s (the die barely moves inside the window the
+    calibration scores), and it keeps tau comparable with E64's registered 1.3 s, but it is a mismatch
+    between the calibration model and the prediction model. `calibrate_on_measured()` -- the column
+    quoted against E64's 3.3 MHz -- does carry the limb.
 """
 import argparse
 import json
@@ -64,8 +83,10 @@ E66 = {"B_W": 15.37, "A80_W": 20.41, "T_L_C": 29.8, "V_idle_V": 0.519,
        "source": "docs/reports/data/2026-10-27-e66-idle-long (18 cooling cycles, 51-58 C)"}
 # E64's registered constant, kept only as the comparison column
 E60_SLOPE = 0.442
-T_TRIP = 66.0           # E64's R3: the die reading the governor trips on
+T_TRIP = 66.0           # E64's R3: the die reading the governor trips on (declared; --trip sweeps it)
 GAMMAS = (0.0, 2.0, 3.0)   # 0: E66 idle law literally; 2: scaled like the dynamic term; 3: what E64 own hot traces measure
+MEDIAN_DP_E64 = 2       # E64's own rounding of a clock's median power: used for the comparison column
+MEDIAN_DP_T1 = 3        # T1's own, because the leakage referral moves a sample by milliwatts
 
 
 def rate_t(typ, mhz, minions=1024):
@@ -89,9 +110,10 @@ def refer(T, f, gamma, mode):
     return lam(T, V[f], gamma) - lam(T_REF, V[f], gamma)
 
 
-def powers(m, gamma=None, mode="law", ref=True):
+def powers(m, gamma=None, mode="law", ref=True, dp=MEDIAN_DP_T1):
     """{f: W} at each clock and the lag, E64's own lag search. ref=False gives the powers the governor
-    saw (no referral), ref=True refers each sample to T_REF with `mode`."""
+    saw (no referral), ref=True refers each sample to T_REF with `mode`. `dp` is the rounding of each
+    clock's median: E64 uses 2 (MEDIAN_DP_E64), T1 keeps 3 (MEDIAN_DP_T1)."""
     tr = [x for x in m["trace"] if 0 <= x[0] <= m["work_s"] + 0.2 and x[2] is not None and x[3] in PTS
           and x[1] is not None]
     if len(tr) < 6:
@@ -109,7 +131,7 @@ def powers(m, gamma=None, mode="law", ref=True):
         if best is None or score < best[0]:
             best = (score, L, groups)
     _, L, groups = best
-    return {f: (round(st.median(v), 3) if v else None) for f, v in groups.items()}, L
+    return {f: (round(st.median(v), dp) if v else None) for f, v in groups.items()}, L
 
 
 def fit_linear(rows):
@@ -292,7 +314,13 @@ def calibrate_on_measured(per, cal, gamma, therm=None, tau_th=None, trip=T_TRIP)
 
 def calibrate_governor(per, cal, B, c, gamma, mode):
     """tau and the pass length, on the LAD/MIN runs' measured mean clock after the ramp — E64's own
-    calibration, at the card's 65 W, with the die held at each run's launch reading."""
+    calibration, at the card's 65 W, with the die held at each run's launch reading.
+
+    NOTE (declared, not an oversight): this calibration is LIMB-FREE — `simulate` is called with no
+    therm/tau_th/trip, so the die does not move and only the power limb acts, which is what keeps tau
+    comparable with E64's registered 1.3 s. The predictions that use the tau it returns DO carry the
+    limb. On a 6.5 s burst against tau_th = 14 s the die moves little inside the scored window, so the
+    mismatch is small, but it is a mismatch. `calibrate_on_measured` is the limb-carrying counterpart."""
     best = None
     for tau in [0.4 + 0.1 * i for i in range(27)]:
         for dt in (0.13, 0.16, 0.2, 0.24):
@@ -312,15 +340,15 @@ def calibrate_governor(per, cal, B, c, gamma, mode):
     return {"tau_s": round(best[1], 2), "pass_s": best[2], "rms_mhz": round(best[0], 2)} if best else None
 
 
-def build(runs, gamma, mode="law", drop_labels=(), drop_runs=()):
+def build(runs, gamma, mode="law", drop_labels=(), drop_runs=(), dp=MEDIAN_DP_T1):
     """One fit of the model on the runs that survive the holdout, and everything it needs to predict."""
     keep = [m for m in runs if m.get("label") not in drop_labels and m["run"] not in drop_runs]
     per, rows = {}, []
     for m in keep:
         if not m.get("trace"):
             continue
-        pw, L = powers(m, gamma, mode, ref=False)
-        pref, _ = powers(m, gamma, mode, ref=True)
+        pw, L = powers(m, gamma, mode, ref=False, dp=dp)
+        pref, _ = powers(m, gamma, mode, ref=True, dp=dp)
         steady = [x[3] for x in m["trace"] if 1.5 <= x[0] <= m["work_s"] and x[3] in PTS]
         per[m["run"]] = {"p": pw, "p_ref": pref, "lag": L,
                          "mhz_steady": round(st.mean(steady), 1) if steady else None}
@@ -335,7 +363,7 @@ def build(runs, gamma, mode="law", drop_labels=(), drop_runs=()):
     cal = [m for m in keep if m["block"] in ("LAD", "MIN") and per.get(m["run"], {}).get("mhz_steady")]
     gov = calibrate_governor(per, cal, B, c, gamma, mode)
     return {"B": B, "c": c, "rms_w": rms, "n_points": len(rows), "per": per,
-            "die_line": dl, "tau_th": tth, "governor": gov,
+            "die_line": dl, "tau_th": tth, "governor": gov, "median_dp": dp,
             "n_runs": len(keep), "dropped_labels": list(drop_labels)}
 
 
@@ -344,6 +372,19 @@ def c_for(fit, runs, label, blocks=("LAD", "MIN")):
     v = [fit["c"][m["run"]] for m in runs
          if m.get("label") == label and m["block"] in blocks and m["run"] in fit["c"]]
     return st.mean(v) if v else None
+
+
+def c_run_against(B, m, gamma, mode="law", dp=MEDIAN_DP_T1):
+    """ONE run's switching term, solved against a B_f that run had no part in fitting, from its own
+    referred powers. This is the burst holdout: B_f, the die line, tau_th and the governor's tau all
+    come from a fit the run's whole label was dropped from, and the only thing taken from the run
+    itself is its own three measured powers, which are the cell's identity and cannot be held out."""
+    pref, _ = powers(m, gamma, mode, ref=True, dp=dp)
+    if not pref:
+        return None
+    num = sum(S[f] * (pref[f] - B[f]) for f in PTS if pref.get(f) is not None)
+    den = sum(S[f] ** 2 for f in PTS if pref.get(f) is not None)
+    return num / den if den else None
 
 
 def c_against(B, per, runs, label, gamma, mode="law", blocks=("LAD", "MIN")):
@@ -376,18 +417,29 @@ def main():
            "leak_law": E66, "e60_slope_W_per_C": E60_SLOPE, "s_f": S,
            "variants": {}, "registered_comparison": {}}
 
-    # ── the registered referral, as a column: E64's constant slope, no die state, no thermal limb
-    base = build(runs, None, mode="e60")
+    # ── the registered referral, as a column: E64's constant slope, no die state, no thermal limb.
+    #    Built at E64's OWN median rounding (2 dp), so this column is a bit-exact port of its fit and
+    #    not a near miss. The T1 variants below keep 3 dp; `median_dp` records which is which.
+    base = build(runs, None, mode="e60", dp=MEDIAN_DP_E64)
     cal_all = [m for m in runs if m["block"] in ("LAD", "MIN")
                and base["per"].get(m["run"], {}).get("mhz_steady")]
     port_check = calibrate_on_measured(base["per"], cal_all, None)
+    base3 = build(runs, None, mode="e60", dp=MEDIAN_DP_T1)
     out["registered_comparison"] = {
         "referral": "0.442 W/C constant (E64)", "B": base["B"], "rms_w": base["rms_w"],
         "n_points": base["n_points"], "die_line": base["die_line"], "governor": base["governor"],
+        "median_dp": MEDIAN_DP_E64,
+        "rms_w_at_t1_rounding": base3["rms_w"], "B_at_t1_rounding": base3["B"],
         "port_check_governor_on_measured_powers": port_check,
-        "port_check_note": ("E64's registered surface.txt publishes tau 1.3 s, pass 0.24 s, rms 3.3 MHz "
-                            "over 26 runs for exactly this calibration; reproducing it is the check that "
-                            "this file's simulate() is E64's with the temperature term switched off.")}
+        "port_check_note": ("E64's registered figures.json gives rms 0.8242388715772772 W over 103 points "
+                            "and surface.txt publishes tau 1.3 s, pass 0.24 s, rms 3.3 MHz for exactly this "
+                            "calibration; reproducing them is the check that this file's simulate() is "
+                            "E64's with the temperature term switched off. This column is computed at "
+                            "E64's own 2 dp median rounding; `rms_w_at_t1_rounding` is the same fit at "
+                            "T1's 3 dp, which is the 0.8248 W the first Q129 draft quoted as the port."),
+        "port_check_n_note": ("E64's surface.txt prints n 26 for that calibration, but two of its 26 "
+                              "cool-die runs have a missing power point and its own loop skips them, so "
+                              "the 3.3 MHz rms is over 24 runs; `n` here is the honest count.")}
 
     # ── gamma: 0 (E66's idle law literally), 1, 2 (scaled like the dynamic term), and the best of a scan
     scan = []
@@ -436,18 +488,28 @@ def main():
                               T0=m.get("die_start") or T_REF, therm=dl, tau_th=tth["tau_th_s"],
                               trip=a.trip)
             ho = build(runs, g, drop_labels=(m["label"],))
-            c_ho = st.mean([fit["c"][m["run"]]]) if m["run"] in fit["c"] else None
-            # out of sample: the label's own powers are gone from B_f and from the governor's calibration;
-            # its switching term is the only thing taken from its own runs.
+            # out of sample: the label's own powers are gone from B_f, the die line, tau_th and the
+            # governor's calibration, and the run's switching term is SOLVED AGAINST the held-out B_f
+            # from its own three measured powers (c_run_against). Through 27 Oct 14:24 this line instead
+            # reused the in-sample fit's c, which made the column a mixed sample; that number is kept as
+            # `t1_oos_cinfit_mhz` so the correction is visible rather than silent.
+            c_ho = c_run_against(ho["B"], m, g)
+            c_infit = fit["c"].get(m["run"])
             sim_ho = simulate(p_maker(ho["B"], c_ho, g), 65.0, ho["governor"]["tau_s"],
                               ho["governor"]["pass_s"], t_end=m["work_s"],
                               T0=m.get("die_start") or T_REF, therm=ho["die_line"],
-                              tau_th=ho["tau_th"]["tau_th_s"], trip=a.trip)
+                              tau_th=ho["tau_th"]["tau_th_s"], trip=a.trip) if c_ho is not None else None
+            sim_ho_old = simulate(p_maker(ho["B"], c_infit, g), 65.0, ho["governor"]["tau_s"],
+                                  ho["governor"]["pass_s"], t_end=m["work_s"],
+                                  T0=m.get("die_start") or T_REF, therm=ho["die_line"],
+                                  tau_th=ho["tau_th"]["tau_th_s"], trip=a.trip) if c_infit is not None else None
             V_["burst"].append({"run": m["run"], "label": m["label"], "die_start": m.get("die_start"),
                                 "meas_mhz": fit["per"][m["run"]]["mhz_steady"],
                                 "t1_mhz": round(sim_in["mhz"], 1), "t1_die_c": round(sim_in["die_c"], 2),
                                 "t1_oos_mhz": round(sim_ho["mhz"], 1) if sim_ho else None,
-                                "c_w": round(fit["c"][m["run"]], 3)})
+                                "t1_oos_cinfit_mhz": round(sim_ho_old["mhz"], 1) if sim_ho_old else None,
+                                "c_w": round(fit["c"][m["run"]], 3),
+                                "c_w_oos": round(c_ho, 3) if c_ho is not None else None})
         # ── sustained cells: the last 40 s of ~80 s, in sample and with the label held out
         for m in sus_all:
             lab = m["label"]
@@ -495,14 +557,43 @@ def main():
                 "registered_cap_mhz": round(reg, 1) if reg else None,
                 "c_w": round(c_in, 3) if c_in is not None else None,
                 "c_w_from_burst_holdout": round(c_burst, 3) if c_burst is not None else None})
+        # ── a sustained cell is a CLAMP CELL when both models already sit on the measurement (the
+        #    governor is pinned at 800 or at its 600 MHz floor and neither model has anywhere to go).
+        #    Those cells enter the nine-cell rms as exact zeros and dilute it, so the rms over the
+        #    cells that actually discriminate is published beside it.
+        def _clamped(x):
+            return all(y is not None and abs(y - x["meas_mhz"]) < 0.05
+                       for y in (x["registered_cap_mhz"], x["t1_oos_mhz"], x["t1_mhz"]))
+        for x in V_["sustained"]:
+            x["clamp_cell_both_models"] = _clamped(x)
+        infor = [x for x in V_["sustained"] if not x["clamp_cell_both_models"]]
+        V_["sustained_n_cells"] = len(V_["sustained"])
+        V_["sustained_n_clamp_cells"] = len(V_["sustained"]) - len(infor)
+        V_["sustained_n_informative_cells"] = len(infor)
         for key, pred in (("burst_rms_mhz", [(x["meas_mhz"], x["t1_mhz"]) for x in V_["burst"]]),
                           ("burst_oos_rms_mhz", [(x["meas_mhz"], x["t1_oos_mhz"]) for x in V_["burst"]]),
+                          ("burst_oos_cinfit_rms_mhz",
+                           [(x["meas_mhz"], x["t1_oos_cinfit_mhz"]) for x in V_["burst"]]),
                           ("sustained_rms_mhz", [(x["meas_mhz"], x["t1_mhz"]) for x in V_["sustained"]]),
                           ("sustained_oos_rms_mhz", [(x["meas_mhz"], x["t1_oos_mhz"]) for x in V_["sustained"]]),
                           ("sustained_registered_rms_mhz",
-                           [(x["meas_mhz"], x["registered_cap_mhz"]) for x in V_["sustained"]])):
+                           [(x["meas_mhz"], x["registered_cap_mhz"]) for x in V_["sustained"]]),
+                          ("sustained_informative_oos_rms_mhz",
+                           [(x["meas_mhz"], x["t1_oos_mhz"]) for x in infor]),
+                          ("sustained_informative_rms_mhz",
+                           [(x["meas_mhz"], x["t1_mhz"]) for x in infor]),
+                          ("sustained_informative_registered_rms_mhz",
+                           [(x["meas_mhz"], x["registered_cap_mhz"]) for x in infor])):
             e = [(b - a_) for a_, b in pred if a_ is not None and b is not None]
             V_[key] = round((sum(x * x for x in e) / len(e)) ** 0.5, 1) if e else None
+        V_["notes"] = {
+            "burst_oos": ("the run's switching term is solved against the held-out B_f from its own "
+                          "powers (c_run_against); burst_oos_cinfit_* is the superseded column that "
+                          "took c from the in-sample fit"),
+            "governor_calibration": ("tau and the pass length are fitted with the thermal limb OFF "
+                                     "(calibrate_governor); the predictions carry the limb"),
+            "clamp_cells": ("sustained cells where the registered cap and T1 both sit on the "
+                            "measurement; they are exact zeros in the nine-cell rms")}
         out["variants"][str(g)] = V_
     with open(a.out, "w") as f:
         json.dump(out, f, indent=1)
@@ -511,8 +602,11 @@ def main():
     print(f"model {MODEL_ID}; T_ref {T_REF} C; trip {a.trip} C")
     print("E66 law: A80 %.2f W, T_L %.1f C at %.3f V; local slope 51-58 C %.4f W/C"
           % (E66["A80_W"], E66["T_L_C"], E66["V_idle_V"], E66["slope_51_58_W_per_C"]))
-    print("registered referral (0.442 W/C): B %s  rms %.3f W over %d points"
+    print("registered referral (0.442 W/C): B %s  rms %.7f W over %d points  [at E64's own 2 dp median "
+          "rounding, so this is a bit-exact port of its figures.json 0.8242388715772772]"
           % ({k: round(v, 2) for k, v in base["B"].items()}, base["rms_w"], base["n_points"]))
+    print("   the same fit at T1's 3 dp rounding: rms %.7f W (the 0.8248 the first Q129 draft quoted)"
+          % base3["rms_w"])
     print("gamma scan (rms W of the one power curve over E64's hot and cool samples):")
     print("   " + "  ".join("%.2f:%.3f" % (x["gamma"], x["rms_w"]) for x in scan))
     print("   best gamma %.2f (the dynamic term uses V^2)" % g_fit)
@@ -534,15 +628,23 @@ def main():
         print("    leak slope at 58 C: %s W/C; at 65 C: %s"
               % ({k: round(v, 3) for k, v in Vv["leak_slope_at_58C_W_per_C"].items()},
                  {k: round(v, 3) for k, v in Vv["leak_slope_at_65C_W_per_C"].items()}))
-        print("    SUSTAINED  %-26s %7s %9s %9s %9s %8s" % ("label", "meas", "T1", "T1 oos", "E64 cap", "die"))
+        print("    SUSTAINED  %-26s %7s %9s %9s %9s %8s %6s"
+              % ("label", "meas", "T1", "T1 oos", "E64 cap", "die", "clamp"))
         for x in Vv["sustained"]:
-            print("               %-26s %7.1f %9s %9s %9s %8s"
+            print("               %-26s %7.1f %9s %9s %9s %8s %6s"
                   % (x["label"], x["meas_mhz"], x["t1_mhz"], x["t1_oos_mhz"], x["registered_cap_mhz"],
-                     x["t1_die_c"]))
-        print("    sustained rms: T1 %s MHz, T1 out of sample %s, E64's cap %s"
-              % (Vv["sustained_rms_mhz"], Vv["sustained_oos_rms_mhz"], Vv["sustained_registered_rms_mhz"]))
-        print("    burst rms, whole model: T1 %s MHz, T1 leave-one-label-out %s"
-              % (Vv["burst_rms_mhz"], Vv["burst_oos_rms_mhz"]))
+                     x["t1_die_c"], "yes" if x["clamp_cell_both_models"] else ""))
+        print("    sustained rms over all %d cells: T1 %s MHz, T1 out of sample %s, E64's cap %s"
+              % (Vv["sustained_n_cells"], Vv["sustained_rms_mhz"], Vv["sustained_oos_rms_mhz"],
+                 Vv["sustained_registered_rms_mhz"]))
+        print("    sustained rms over the %d cells that DISCRIMINATE (%d are clamps both models hit "
+              "exactly): T1 %s MHz, T1 out of sample %s, E64's cap %s"
+              % (Vv["sustained_n_informative_cells"], Vv["sustained_n_clamp_cells"],
+                 Vv["sustained_informative_rms_mhz"], Vv["sustained_informative_oos_rms_mhz"],
+                 Vv["sustained_informative_registered_rms_mhz"]))
+        print("    burst rms, whole model: T1 %s MHz, T1 leave-one-label-out %s "
+              "(superseded column, c from the in-sample fit: %s)"
+              % (Vv["burst_rms_mhz"], Vv["burst_oos_rms_mhz"], Vv["burst_oos_cinfit_rms_mhz"]))
         print("    burst rms, governor only on each run's own measured powers: %s "
               "(E64 registered, temperature term off: %s)"
               % (Vv["governor_on_measured_powers"],

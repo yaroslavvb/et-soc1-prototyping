@@ -1,0 +1,20 @@
+E64-T1 over its two DECLARED parameters: the voltage exponent gamma and the thermal trip.
+Every number is out of sample. 'informative' excludes the sustained cells where the
+registered cap and T1 both already sit on the measurement (pure clamps, exact zeros).
+
+                                     65.5_g0.0   65.5_g2.0   65.5_g3.0   65.5_g5.5   66.0_g0.0   66.0_g2.0   66.0_g3.0   66.0_g5.5
+sustained rms, 9 cells                     5.6         4.8         5.0         9.3         9.6         7.1         6.2         8.0
+sustained rms, 5 informative               7.5         6.5         6.8        12.5        12.9         9.6         8.3        10.8
+burst rms, leave-one-label-out             6.9         6.1         6.4         5.3         6.9         6.1         6.4         5.3
+E64 registered cap, 9 cells               23.0        23.0        23.0        23.0        23.0        23.0        23.0        23.0
+E64 registered cap, 5 informative         30.8        30.8        30.8        30.8        30.8        30.8        30.8        30.8
+
+cell                  meas   E64 cap T1 out of sample, MHz (miss)
+int8-randn-1024      763.2     792.7  65.5_g0.0 758.4(-4.8)  65.5_g2.0 756.0(-7.2)  65.5_g3.0 754.5(-8.7)  65.5_g5.5 751.0(-12.2)  66.0_g0.0 766.4(+3.2)  66.0_g2.0 763.5(+0.3)  66.0_g3.0 761.1(-2.1)  66.0_g5.5 756.0(-7.2)
+fp16-ones-1024       737.1     780.6  65.5_g0.0 750.4(+13.3)  65.5_g2.0 747.5(+10.4)  65.5_g3.0 744.9(+7.8)  65.5_g5.5 742.0(+4.9)  66.0_g0.0 758.4(+21.3)  66.0_g2.0 756.5(+19.4)  66.0_g3.0 754.5(+17.4)  66.0_g5.5 750.0(+12.9)
+fp32-ones-1024       737.9     780.6  65.5_g0.0 745.2(+7.3)  65.5_g2.0 733.5(-4.4)  65.5_g3.0 730.1(-7.8)  65.5_g5.5 714.0(-23.9)  66.0_g0.0 756.4(+18.5)  66.0_g2.0 745.0(+7.1)  66.0_g3.0 735.5(-2.4)  66.0_g5.5 720.0(-17.9)
+fp16-randn-1024      600.5     612.3  65.5_g0.0 600.0(-0.5)  65.5_g2.0 600.0(-0.5)  65.5_g3.0 600.0(-0.5)  65.5_g5.5 600.0(-0.5)  66.0_g0.0 600.0(-0.5)  66.0_g2.0 600.0(-0.5)  66.0_g3.0 600.0(-0.5)  66.0_g5.5 604.0(+3.5)
+fp16-zeros-1024      794.4     800.0  65.5_g0.0 800.0(+5.6)  65.5_g2.0 800.0(+5.6)  65.5_g3.0 800.0(+5.6)  65.5_g5.5 800.0(+5.6)  66.0_g0.0 800.0(+5.6)  66.0_g2.0 800.0(+5.6)  66.0_g3.0 800.0(+5.6)  66.0_g5.5 800.0(+5.6)
+
+sustained rms over the 9 cells: E64's cap 23.0 MHz -> T1 4.8-9.6, a factor of 2.4-4.8
+over the 5 that discriminate:   E64's cap 30.8 MHz -> T1 6.5-12.9, a factor of 2.4-4.7

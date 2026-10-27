@@ -7,6 +7,10 @@ held at the 58 C the referral used. chain.py itself is untouched; its committed 
 input, so nothing here is refitted.
 
   python3 chain_t.py <chain.json> <figures-t1.json> --out <chain-t1.json>
+
+The figures-t1.json argument supplies NO number here — every input is chain.json's — so it is used as a
+consistency gate instead: the run stops if the leakage law or T_ref written into it differs from the one
+coded below, which is what would silently decouple the chain's variants from the model's.
 """
 import argparse
 import json
@@ -30,6 +34,14 @@ def main():
     ap.add_argument("t1")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
+    # the gate: this file's law must be the model's law, or the two halves of the result disagree
+    T1 = json.load(open(a.t1))
+    law = T1["leak_law"]
+    for got, want, name in ((law["A80_W"], A80, "A80_W"), (law["T_L_C"], T_L, "T_L_C"),
+                            (law["V_idle_V"], V_IDLE, "V_idle_V"), (T1["t_ref_c"], T_REF, "t_ref_c")):
+        if abs(got - want) > 1e-9:
+            raise SystemExit("figures-t1.json %s is %s, this file codes %s — refusing to run"
+                             % (name, got, want))
     C = json.load(open(a.chain))["chain"]
     Bf = {int(k): v for k, v in C["B_f_W"].items()}
     TH = C["die_line"]
