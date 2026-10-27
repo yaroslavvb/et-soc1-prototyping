@@ -29,6 +29,40 @@ def load(name):
     return json.load(open(p)) if os.path.exists(p) else None
 
 
+def _fit(xs, ys):
+    n = len(xs)
+    sx, sy = sum(xs), sum(ys)
+    sxx = sum(x * x for x in xs)
+    sxy = sum(x * y for x, y in zip(xs, ys))
+    m = (n * sxy - sx * sy) / (n * sxx - sx * sx)
+    return m, (sy - m * sx) / n
+
+
+def ladder():
+    """The ladder rungs, fitted over h >= 1 with a free intercept, zero delay against timed."""
+    out = {}
+    for part in ("lq", "lb"):
+        z, t, zi, ti, rt = {}, {}, {}, {}, {}
+        for h in (0, 1, 2, 4, 8):
+            d = load(f"glitch_mixed_{part}_h{h}.json")
+            if not d:
+                return None
+            u, s = d["scopes"]["unit"], d["scopes"]["signal"]
+            z[h] = u["k1"]["zero_pJ_per_muladd"]
+            t[h] = u["k1"]["timed_pJ_per_muladd"]
+            zi[h] = z[h] + s["zero_toggles_per_muladd"] * INTERNAL_FJ / 1000.0
+            ti[h] = t[h] + s["timed_toggles_per_muladd"] * INTERNAL_FJ / 1000.0
+            rt[h] = u["glitch_toggle_ratio"]
+        hs = [1, 2, 4, 8]
+        mz, bz = _fit(hs, [z[h] for h in hs])
+        mt, bt = _fit(hs, [t[h] for h in hs])
+        mzi, _ = _fit(hs, [zi[h] for h in hs])
+        mti, _ = _fit(hs, [ti[h] for h in hs])
+        out[part] = {"z": z, "t": t, "rt": rt, "mz": mz * 1000, "mt": mt * 1000,
+                     "mzi": mzi * 1000, "mti": mti * 1000, "bz": bz * 1000, "bt": bt * 1000}
+    return out
+
+
 def row(label, s, w=26):
     t = s["glitch_toggle_ratio"]
     e = s["k1"]["glitch_energy_ratio"]
@@ -177,9 +211,40 @@ def main():
     p("  coincidence of two errors cancelling: the published figure priced half the farads at")
     p("  a Steiner estimate that is 20% high, this one prices all of them at the extraction.")
     p("")
+    p("THE HAMMING LADDER: DOES THE fJ-PER-FLIPPED-BIT SLOPE CARRY THE SAME FACTOR?")
+    p("  Both partners, h = 0, 1, 2, 4, 8, on the same routed netlist. Fitted the way E60's own")
+    p("  reducer fits it: a line over h >= 1 with a free intercept, against the DESIGNED flips.")
+    lad = ladder()
+    if not lad:
+        p("  not run")
+    else:
+        p(f"  {'':<6} {'slope, switching only':<34} {'slope, + cells internal':<34} "
+          f"{'E60 at the board':>18}")
+        for part, lab, e60 in (("lq", "quiet partner A = 1.0", 116.7),
+                               ("lb", "busy  partner A = pi ", 129.9)):
+            r = lad[part]
+            p(f"  {part:<6} {r['mz']:6.2f} -> {r['mt']:6.2f} fJ  x{r['mt'] / r['mz']:.3f}      "
+              f"{r['mzi']:6.2f} -> {r['mti']:6.2f} fJ  x{r['mti'] / r['mzi']:.3f}      "
+              f"{e60:8.1f} fJ   ({lab})")
+            p(f"         share of the board: switching {r['mz'] / e60 * 100:.1f}% -> "
+              f"{r['mt'] / e60 * 100:.1f}%, with internal {r['mzi'] / e60 * 100:.1f}% -> "
+              f"{r['mti'] / e60 * 100:.1f}%")
+        p("  rung by rung, pJ per multiply-add at k=1 (zero delay -> timed):")
+        for part in ("lq", "lb"):
+            p(f"    {part}  " + "  ".join(
+                f"h{h}={lad[part]['z'][h]:.4f}->{lad[part]['t'][h]:.4f}" for h in (0, 1, 2, 4, 8)))
+        p("  the unit's own glitch factor by rung (toggles): " + ", ".join(
+            f"lq_h{h} x{lad['lq']['rt'][h]:.3f}" for h in (0, 1, 2, 4, 8)))
+        p("  so it is strongly ACTIVITY-DEPENDENT: x1.00 with the operands held still (the clock")
+        p("  is 97.6% of that rung and the clock does not glitch), x1.23 at h = 8, x1.57 at randn.")
+        p("  The SLOPE - the marginal cost of one more flipped bit, which is what the project's")
+        p("  30%-of-the-board claim rests on - carries x1.28 (quiet) to x1.34 (busy) on switching,")
+        p("  and x1.32 to x1.38 with the cells' internal energy. So the published")
+        p('  "about 30% of what the board pays, about 40% with internal energy" becomes about')
+        p("  38% and about 55%.")
+    p("")
     p("WHAT THIS DOES NOT SETTLE")
-    p("  - one stimulus (randn) and one netlist pair; the Hamming-ladder rungs were not run,")
-    p("    so whether the fJ-per-flipped-bit slope carries the same factor is NOT measured.")
+    p("  - one tile per pattern and one netlist pair; no repeat, so no interval on any ratio.")
     p("  - the design misses its 1250 ps SDC by about 2x, so these delays belong to a netlist")
     p("    that would not run at 800 MHz; and the SDF is ASAP7 TT at 0.700 V while the energy")
     p("    is priced at the 0.517 V rail, where every delay would be longer.")

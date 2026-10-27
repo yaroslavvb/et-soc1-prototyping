@@ -68,6 +68,33 @@ cancelling, not by agreement: the published figure priced **half** the farads at
 estimate that Q129(a) showed to be **20% high**, and this one prices **all** of them at the
 extraction.
 
+## The Hamming ladder: the slope the project rests on carries ×1.28–1.38
+
+The glitch factor is **strongly activity-dependent**, so one number for "the unit" would be
+misleading on its own. Both ladder partners were run at h = 0, 1, 2, 4, 8 — ten more pairs — and
+fitted the way E60's own reducer fits them, a line over h ≥ 1 with a free intercept against the
+*designed* flip count:
+
+| | unit's toggle factor, h = 0 → 8 | slope, switching | slope, + cells' internal | E60 at the board | share of the board |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `lq` (quiet, A = 1.0) | ×1.002 → ×1.232 | 35.10 → **44.85** fJ (**×1.278**) | 48.12 → **63.67** fJ (×1.323) | 116.7 fJ | 30.1% → **38.4%**; with internal 41.2% → **54.6%** |
+| `lb` (busy, A = π) | ×1.003 → ×1.227 | 36.81 → **49.18** fJ (**×1.336**) | 51.56 → **71.15** fJ (×1.380) | 129.9 fJ | 28.3% → **37.9%**; with internal 39.7% → **54.8%** |
+
+With the operands held still (`h0`) the factor is **×1.00**: the clock is 97.6% of that rung and
+the clock does not glitch. It climbs ×1.06, ×1.09, ×1.15, ×1.23 through the ladder and reaches
+×1.57 at `randn`. The *marginal* cost of one more flipped bit — which is what
+[POWER.md](../2026-10-26-open-netlist/POWER.md)'s "about **30%** of what the board pays for a
+flipped operand bit on switching alone, and about **40%** with the cells' internal energy" is made
+of — carries ×1.28 to ×1.38.
+
+**So that claim becomes "about 38% on switching alone and about 55% with internal energy".** The
+lane's own arithmetic is a bigger share of the board's per-flipped-bit price than the project has
+been saying, and glitches are the whole of the difference.
+
+(The zero-delay slopes above, 35.10 and 36.81 fJ, are this run's independent reproduction of
+POWER.md's `mixed` figures of 34.8 and 38.3 fJ — within 1% and 4%, on a different netlist stage,
+different capacitances and a different simulator.)
+
 ## Against the record, and against Q124
 
 | | the tape-out flow (`tfma.glitch`) | this run, open flow |
@@ -170,6 +197,7 @@ out of 2.1 million.
 | `glitch_keep_full.json` | the same on the hierarchy-kept netlist |
 | `glitch_mixed_icarus.json` | the Icarus cell-delay-only pair, as an upper bound |
 | `glitch_mixed_zerodelta.json` | zero-delay delta events against settled values, as a diagnostic |
+| `glitch_mixed_l{q,b}_h{0,1,2,4,8}.json` | the ten Hamming-ladder rungs, both partners |
 | `check_mixed.json`, `check_keep.json` | the validation gate, net by net |
 | `toggles_mixed_zero.json.gz`, `toggles_mixed_timed.json.gz` | the per-net toggle tables both passes produced, 17,122 nets |
 | `sdf_icarus_probe.txt` | why Icarus aborts, the slice table, and two SDF traps worth propagating |
@@ -180,13 +208,10 @@ Reproduce it with the commands in
 
 ## What this does not settle
 
-- **One stimulus.** Only `randn` ran. The Hamming-ladder rungs would need the Verilator bench
-  re-run to record their pin streams, which was not done, so **whether the fJ-per-flipped-bit
-  slope carries the same factor is not measured** — and that slope is what the project's
-  "one lane's arithmetic is about 30% of what the board pays" rests on. At `lb_h0`/`lq_h0` the
-  clock is 97.6% of the switching energy and the clock does not glitch, so the factor there must
-  be close to 1; the ladder's slope therefore probably carries a *larger* factor than ×1.33, which
-  would raise the open flow's share of the board further. Unmeasured either way.
+- **One tile per pattern, and no repeat**, so there is no interval on any ratio here. Eleven
+  stimuli ran (`randn` and both ladders at h = 0, 1, 2, 4, 8) on one netlist pair, each once; the
+  engine is deterministic, so a repeat would reproduce the number exactly and tell you nothing.
+  What is missing is a second *tile* and a second *seed*.
 - **These delays are not the card's.** The SDF is ASAP7 RVT TT at 0.700 V and 25 °C, while the
   energy is priced at the 0.517 V minion rail, where every delay would be longer and the glitches
   deeper. And the placed design misses its 1250 ps SDC by about 2× (`wns` −1,322 ps after

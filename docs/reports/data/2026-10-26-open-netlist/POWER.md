@@ -360,7 +360,14 @@ tree's factor is **×2.39 in toggles and ×2.33 in energy**, while the **whole u
 apart, so counting the glitches is what brings them together. Applying the measured factors to this
 file's ledger takes a random multiply-add's bottom-up total from Q129(a)'s 1.810 to **2.598 pJ** and
 the closure against the board from 31.3% to **44.9%** — the largest single step these open-flow
-measurements have made.
+measurements have made. The **ladder above moves too**: both partners were re-run at h = 0, 1, 2,
+4, 8 with the delays, and the fitted slope per designed flipped bit goes 35.10 → 44.85 fJ (`lq`,
+×1.278) and 36.81 → 49.18 fJ (`lb`, ×1.336) on switching alone, so this file's *"the arithmetic
+inside one lane's multiply-add is about 30% of what the board pays for a flipped operand bit on
+switching alone, and about 40% once the cells' own internal energy is added"* becomes about
+**38%** and about **55%**. The glitch factor is strongly activity-dependent — ×1.00 at `h0`, where
+the clock is 97.6% of the energy and the clock does not glitch, rising to ×1.23 at `h8` and ×1.57
+at `randn` — so no single factor can be applied to this table as a whole.
 
 ## What the first version got wrong
 
