@@ -222,6 +222,25 @@ Read [Terms](#terms) first.
    [`2026-10-26-open-netlist/`](../reports/data/2026-10-26-open-netlist/README.md),
    [`2026-10-26-load-model/`](../reports/data/2026-10-26-load-model/README.md)
 
+27. **Four fifths of a random multiply-add's energy is now accounted for bottom up, and the biggest row added
+   over-prices** (Q129, 27–28 October, seven card experiments on aifoundry2 and aifoundry3 plus desk work). Routing
+   the open netlist, pricing the farads the ledger had left out, measuring the glitch factor and counting one lane's
+   transport takes the bottom-up total from **1.946 pJ to 3.966–4.190 pJ** and the remainder from **3.837 pJ to
+   0.718–0.941 pJ** against the board's 5.783 pJ; the minion rail is now **measured at 4.774 pJ** [4.549–4.951]
+   rather than scaled. 🛑 **Two closures against the board are published and a summary must say which it means:**
+   the bottom-up rows alone are **68.6–72.4%** (against 33.7% on 27 October, the comparison that is like for like),
+   and **83.7–87.6%** once the measured board-to-rail step's regulator row is counted — which is a named account,
+   not a bottom-up term. 🛑 And the closure's upper half rests on a register-file **model** the card's own
+   measurement contradicts: one lane's transport model costs 0.654 pJ per multiply-add in the zeros stimulus where
+   the **whole board** costs 0.27 pJ over idle, so a true accounting sits **below** the bottom of every range here.
+   Three things also stopped being inferences: the governor's cap and threshold were **moved** (the sustained clamp
+   is the thermal threshold — 763.4 MHz with 11 thermal steps at 65 °C against 800.0 and none at 70 °C), the price
+   list's 2× over-count of a random word is **shared wires, not interaction** (+3.860 ± 0.052 W between two layouts
+   at the same Hamming weight), and the thirteen trapping instructions have **no energy at all**, because each ends
+   its hart's kernel. → [03-experiments.md](03-experiments.md), E69–E76; [05-claims.md](05-claims.md), "Q129";
+   [14-card-behaviour.md](14-card-behaviour.md), "The governor's two knobs";
+   [`reports/data/2026-10-28-q129-waterfall/`](../reports/data/2026-10-28-q129-waterfall/README.md)
+
 ## Terms
 
 The chip in brief. The ET-SoC-1 is Esperanto's RISC-V accelerator, now open-sourced by AI Foundry. Its compute
@@ -277,9 +296,9 @@ Four kinds of thing have IDs, and every claim cites them:
 | Prefix | Meaning | File |
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
-| **Q1–Q127** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E65** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation on 28–29 September; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3 (E55–E57 also on aifoundry2 as a third card); E59 the sparse parity solver on aifoundry3, 29 September, an engineering benchmark; E60–E64 the October campaign — the bit-flip ladder, the deterministic transistor flips, the heat movies, the camera half of the ladder and Horace's power limit; E65 every bit position, the flow-M case and the hart ladder, 26 October) | [03-experiments.md](03-experiments.md) |
-| **A1–A23** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused; A20 the session timeline; A21 the sparse parity page; A22 the heatsink study; A23 the transistor-heat timeline) | [04-artifacts.md](04-artifacts.md) |
+| **Q1–Q129** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E76** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation on 28–29 September; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3 (E55–E57 also on aifoundry2 as a third card); E59 the sparse parity solver on aifoundry3, 29 September, an engineering benchmark; E60–E64 the October campaign — the bit-flip ladder, the deterministic transistor flips, the heat movies, the camera half of the ladder and Horace's power limit; E65 every bit position, the flow-M case and the hart ladder, 26 October) | [03-experiments.md](03-experiments.md) |
+| **A1–A24** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused; A20 the session timeline; A21 the sparse parity page; A22 the heatsink study; A23 the transistor-heat timeline) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
 

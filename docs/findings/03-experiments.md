@@ -2951,6 +2951,98 @@ variable, and `p8.attempt-1793075288`, killed by this session's own error. `gath
 directories, so neither can reach a number.
 **Report:** pending — the Q128 page carries E67 and E68 together.
 
+## E69 — knob: the governor's cap and threshold, moved for the first time (Q129; card runs 2026-10-27, 14:20–14:42 PDT, aifoundry2) — pre-registered
+
+**Asked (Q129):** "Go through Horace's hub and fill in unresolved pieces … For instance, '5. What is still open'
+section", with the owner's added authorization of about 13:40 PDT — *"Feel free to move the governor, by following
+the instructions of Roman in Discord"*. Q128 §5's **item 1** is the one item that cannot be answered from a log:
+every statement that the governor's cap causes the burst speed gap was read off the governor's own throttle lines,
+with the cap never moved. aifoundry3's governor is latched at a boot-time TDP of 0 and aifoundry1's card 1 never
+reaches 800 MHz, so the test exists on aifoundry2 or nowhere.
+
+**The first authorized governor move in this project.** Two fields were written and nothing else:
+`DM_CMD_SET_MODULE_STATIC_TDP_LEVEL` and `DM_CMD_SET_MODULE_TEMPERATURE_THRESHOLDS`, under the ET-SoC-1 firmware
+field manual's G0–G4 gates, with a signed change record committed beside the data
+([`tools/claims-v3/knob/CHANGE-RECORD.md`](../../tools/claims-v3/knob/CHANGE-RECORD.md): PASS / FAIL / UNKNOWN per
+gate, UNKNOWN never read as PASS). **Pre-registered** in
+[`tools/claims-v3/knob/README.md`](../../tools/claims-v3/knob/README.md) (rules K1–K5, the extrapolated 35–85 W cap
+table, the abort bounds) and committed as `2d35d1b9` at 14:19:40 PDT — **before the first governor write and before
+the first launch**; amendments A1–A5 are dated in their own commits (`4e0522f1`, `8fbc3c7f`, `4f3da00b`, `400cd56b`,
+`bd217ece`). **No OTA, flash, PMIC command, card reset, PCIe action, driver reload or clock set at any point**, and
+every setting stayed inside the code-enforced bounds (TDP 30–65 W, threshold 60–70 °C). 11.4 card-minutes across
+five sessions; 39 DM set/restore commands, all `rc 0`, **zero read-back mismatches**, seven distinct (TDP, threshold)
+settings; the originals (65 W / 65 °C) restored and read back in all five, and independently re-read on the card by
+another agent at 14:58:09 PDT. Data: [`docs/reports/data/2026-10-27-e69-governor-knob/`](../reports/data/2026-10-27-e69-governor-knob/README.md).
+
+**Results.**
+- **The cap moves the burst clock, in the predicted direction and by about the predicted amount.** `a_ones_b_randn`
+  reads **764.3 → 698.8 → 604.1 MHz** at caps of 65 → 55 → 45 W (predicted 742.9 → 681.0 → 600.0); `randn`
+  **709 → 638.7** at 65 → 55 W (predicted 704.8 → 633.3). **K3 passes as registered: 12 of 12 cells in band**
+  (bar 10) with an rms of **11.50 MHz** over the twelve signed cell errors (bar 25), from a table extrapolated from
+  65 W measurements alone. The per-run restatement — 22 of 24, rms 13.9 MHz — is secondary; the first write-up led
+  with it and that is corrected (A5).
+- **The pattern that had never thrown a power step throws them when the cap drops.** `ones` has shown **0 and 0**
+  power-down steps at this card's own 65 W cap (as in E64's two runs); at a 45 W cap the same work reads **758 and
+  739.6 MHz with 10 and 9 power steps** (733.3 predicted).
+- **The sustained clamp is the thermal threshold, and it is now a measured sensitivity.** At the default 65 °C
+  threshold sustained `ones` is pinned at a 65.2 °C die, **763.4 MHz, 51.89 W, 11 thermal steps, 0 power steps**; at
+  a 70 °C threshold the same work **holds 800.0 MHz for 76 s with 0 thermal steps** (800-share 1.00) at a 64.2 °C
+  die and 54.71 W. The 65 → 70 °C sensitivity is therefore **at least 36.6 MHz** of sustained clock — *a lower
+  bound*, because the upper cell sits at the 800 MHz VMIN ceiling, with n = 1 per cell, no interval, inside one
+  session. K4 passes on the thermal-step count and the 800-share; its 0.0 MHz prediction error is a ceiling
+  artefact.
+- **Which limiter acts is separately switchable.** At a 50 W cap sustained `ones` holds **769.6 MHz at 49.95 W with
+  0 thermal and 11 power steps**, against the control's 11 and 0 — the same clock, the other cause.
+- **`zeros` at a 35 W cap did not throttle at all** (800 and 800 MHz, 0 power steps, peaks 32.8 and 34.6 W, under
+  the cap): the cell is in band but its mechanism never triggered. A cap near 30 W would, and is not in this
+  authorization.
+
+**Scored: K3 and K4 PASS; K1, K2 and K5 FAIL as registered; the registered drift check FAILS.** K1 and K2 fail on
+one run of 24 (`BURST-01-tdp65-ones-r1` read 756 MHz with zero throttle events of either kind; the SP ring shows a
+governor idle reset 1.5 s into the work, confirmed independently), and A5 records that K1's implementation carries
+an undocumented ±5 MHz tolerance and K2 reads "800 MHz" as "≥ 775" — both fail under either reading, so no verdict
+turns on them. K5 fails because half of it depended on an unmeasured cell and the other half's clock landed outside
+its band. 🛑 **The registered drift check against E64 fails and is reported as a failure, not as a prediction
+error:** the sustained control reads **763.4 MHz / 51.89 W against E64's 737.9 / 49.38** at identical nominal
+settings and an identical starting die (58 °C), and the burst control shifts the same way (+20 to +26 MHz). Same
+pinned die temperature, 2.5 W more carried — about 1.4 °C less rise than E64's own thermal line gives, so a
+thermal-path change rather than a governor change; E69 measured no ambient. **Every cross-session comparison with
+E64 carries at least that offset**, and no sustained cell in E69 was replicated.
+
+**Not measured, and why.** Both sustained `randn` cells are **unmeasured**: one aborted at 85.2 W board power and
+the other — the control, at the card's own defaults — at 85.8 W (amendment A4; A3's first reading is withdrawn). The
+85 W bound was *not* raised (field manual rule 11) and `randn` was not retried, so **E69 concludes nothing about the
+threshold's effect on `randn`**. The lowered-threshold cell (62 °C) is **inconclusive**: 790.3 MHz against 649.8
+predicted, but its last-40 s bins show the die still climbing 59 → 62 °C with the clock at 800 for fourteen bins —
+it never reached equilibrium inside 76 s. The same board-power property appears a third time in the return burst at
+the restored defaults, which peaked at **86.61 W** with 12 samples at or above 85 W and a longest consecutive breach
+of 2, so the registered three-sample abort correctly did not fire; that is the highest board sample of all 29 reduced
+runs, and the earlier "peak 84.4 W" was that run's `p800_w`, not a peak (A5).
+
+**Two firmware corrections this run forced**, both in [14-card-behaviour.md](14-card-behaviour.md): the card reports
+**release 1.4.0 / BL1–BL2 0.22.0 / PMIC 1.5.0 / minions 0.25.1**, not 1.3.1 / BL2 0.20.0 / 0.23.0 (the `0.20.0` in
+`et-lab-manifest` is the host driver's version); and at that build there is **no 1.05 × TDP power-down loop** — the
+throttle check is a single pass per DM-task pass, so a TDP of 0 pins the clock at the VMIN floor and writing the TDP
+back releases it. The ~1.3 s averaging the power trigger shows is 0.22.0 behaviour (`avg_soc_pwr_mW`), not 0.20.0's
+instantaneous reading.
+
+**Side observation, recorded not hidden:** the SP's error-event count went 6 (before the session) → 18 (before the
+first set) → 222 (by the last restore) → 234, in 37 bursts following management-command clusters. All 234 are
+Level Critical / Desc `SP Runtime Error` / Count 0 / Syndrome "Runtime Error Count Beyond Threshold", so amendment
+A2's abort condition was never met.
+
+**What it changes.** Q128 §5 item 1 **closes for the cap and for the threshold raised**: "the cap causes the burst
+gap" stops being a reading of the governor's log and becomes a measured response, and "the sustained gap is a heat
+clamp" gets its first testable number. **It moves no pJ** between accounted and unaccounted — this is the governor,
+not the ledger. It does **not** close the Horace Hub's "temperature term in the governor's power curve": that is a
+model-against-measurement gap (775 MHz predicted against 738 measured) and E69's 36.6 MHz is a
+measurement-against-measurement sensitivity, numerically close by coincidence, with E69's own 65 °C baseline
+separated from "measured 738" by the drift above. The sustained model still lacks a thermal time constant: its one
+purely structural prediction (the raised threshold) was exact at the ceiling, and both duty-cycle predictions were
+70 and 140 MHz low from the same hole.
+**Report:** [From matmul speed to one transistor switch](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor)
+(A24, rebuilt 28 October with Q129).
+
 ## E70 — hs: the saturation ladder and the A-side multi-bit ladder (Q129; card runs 2026-10-27, 14:08–14:43 PDT, aifoundry3) — pre-registered
 
 **Asked (Q129):** "Go through Horace's hub and fill in unresolved pieces … For instance, '5. What is still open'
@@ -3059,4 +3151,333 @@ shape is not described by that law and stays open. Item 4's third point is close
 place of a 6% choice. **It moves no pJ in the bottom-up gate-level ledger** — it is a card-side measurement — but
 it removes the 2× discrepancy that made the measured price list unusable as the bridge between the card and that
 ledger.
-**Report:** pending — the Q129 page carries E70 with the rest of the week-44 card work.
+**Report:** [From matmul speed to one transistor switch](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor)
+(A24, rebuilt 28 October with Q129): section 3's ledger carries E70's carry-over and section 5 its verdict on
+item 2.
+
+## E71 — idle: aifoundry3's idle leakage slope, in the band E65 and E67 ran in (Q129; card runs 2026-10-27, 15:04–16:33 PDT, aifoundry3) — pre-registered
+
+**Asked (Q129):** Q128 §5's **item 3**. Every per-flipped-bit price is corrected for die temperature with a slope;
+the registered estimator read **1.508 W/°C**, which E66 showed is a busy transient fitted inside each run's own 2 s
+window. E66 measured aifoundry2's real idle slope (0.2936 W/°C over 51–58 °C), but E65 and E67 ran on **aifoundry3**,
+whose idle slope had never been measured. **Pre-registered** as `8fab3404` (predictions S1–S6, E66's identification
+rules reused unchanged, the predicted sensitivities, `idle_slope.py`'s four default-preserving options, departure D1)
+— pushed before the first launch. **No governor setting was read or written, no clock set, no reset, no driver or
+PCIe action**: the card stayed on its boot TDP-0 pin at 600 MHz / 523 mV. Data:
+[`docs/reports/data/2026-10-27-e71-idle-slope-aifoundry3/`](../reports/data/2026-10-27-e71-idle-slope-aifoundry3/README.md).
+
+**Results** (six heat-and-cool cycles p21–p26, all `ok`, the card lock released between passes).
+- **aifoundry3's idle leakage slope over 58–62 °C is 0.3803 ± 0.0036 W/°C** — the median of six cycles (mean 0.3804,
+  sd 0.0036, range 0.3749–0.3854; 95% t ±0.0038, 99% t ±0.0060; 791–856 admissible samples per cycle, rms
+  0.167–0.184 W). The band is the one E65 and E67 launched in (every admissible run at 58.0 °C, windows to 62.4 °C).
+- **It replicates September.** E44's three idle cycles on this card, re-fitted with the same tool, give **0.3799
+  W/°C** (sd 0.0006) — 0.0004 W/°C apart after a month. Disclosed in the registration, so S1 was a replication test,
+  not a blind one.
+- 🛑 **It is the band, not the card.** Re-fitting aifoundry2's 18 E66 passes with the same tool: **0.2936** over
+  51–58 °C (reproducing E66's published line exactly) and **0.3452 ± 0.0056** over 58–62 °C. aifoundry3: 0.3200
+  (52–58), 0.3276 (54–58), **0.3803** (58–62), 0.3957 (58–65). Of the +0.0867 W/°C between E66's figure and E71's,
+  **+0.0516 (60%) is the band and +0.0351 (40%) is the card**. E66's 0.2936 is 77% of the slope E65 and E67 needed,
+  and **must not be reused as aifoundry3's sensitivity**.
+- **The published idle law gets the band dependence right and the level wrong by under 10%**: mean slope 0.3186
+  W/°C over 51–58 and 0.3708 over 58–62, so evaluating that law over the right band beats any single constant.
+- **Prices move a few per cent, and systematically.** E65 blocks A+B: mean −0.059 W, max 0.172 W (`bpi_22`), bits
+  0–9 −5.2%, bits 10–22 −2.9%, exponent −4.6%, sign −0.7%, span 12.15× → 12.81×. E67 registered: mean −0.070 W, max
+  0.234 W (`nrd_b`); clean: max relative −8.97% (`abit_0`). Restated as energies: E65's flat mantissa floor
+  **109 → ~103 fJ**, bit 22 1008 → 986, exponent 174 → 166, sign 123 → 122. 22 of 37 E65 prices move by more than
+  their own published SE, 11 by more than 2 SE — the mechanism was registered in advance and confirmed (an item's
+  window runs warmer than its own zero's, so a larger slope subtracts more from the item than from its zero).
+- **The one number that moves materially is E65's D1**, itself a temperature coefficient: with one measured slope
+  for both arms it reads **+32.4 ± 39.6 mW/°C (+0.71 ± 0.87 %/°C)** instead of +22.0 ± 36.1 (+0.47 ± 0.78). Verdict
+  unchanged: consistent, undecided.
+- **E67's 2× over-prediction is untouched** (A-side closure 0.433 → 0.443, B-side 0.499 → 0.509), because both
+  sides of the ratio move together — so E70's verdict on it stands.
+
+**Scored: S1–S6 all PASS**, S5 narrowly (max relative price shift −8.97% against a registered ≤ 10%).
+`leak_sensitivity.py` reproduced every published price **exactly** (0.000e+00 W) at each reduction's own auto slope
+before re-pricing, and no kept-pass set changes anywhere. **Four dated departures:** a 420 s cooling (registered via
+E66's amendment A3) instead of aifoundry3's registered 2,700 s, which leaves 51–58 °C uncovered and floors the
+cooling at 52–53 °C; `hl/block.sh`'s own departure D1 for the box's logged-in users; the heater reached 82–84 °C
+rather than the registered 90 °C target, stopping on the 150-burst cap in all six cycles (the cap *is* the rule);
+and six cycles rather than more, the driver's deadline stopping it after p26 against a registered minimum of five.
+**Two text corrections** followed in `0b6e81da` (an arithmetic error in the idle-law derivative comparison, an
+unsupported session count); no measured value, verdict or sensitivity changed.
+
+**What it changes.** Q128 §5 item 3 **closes for the second card and for the band each experiment ran in**, and the
+1.508 W/°C the registered estimator applied is **4–5× every measured idle slope**. **It moves 0.00 pJ** in the
+waterfall, which rests on E38's registered means, but it moves the *measured* side of the comparison a few per cent
+**toward** the open-netlist figure. New caution, larger than the card-to-card difference it is usually invoked for:
+**a leakage slope is not a card constant** — it rises about 0.009 W/°C per °C of die temperature on aifoundry2 and
+0.011 on aifoundry3 over 51–65 °C, so a correction quoted without its band is ambiguous at the 20–30% level.
+**Report:** [From matmul speed to one transistor switch](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor)
+(A24, rebuilt 28 October with Q129); the full re-reduction of every aifoundry3 experiment at this slope is
+[`docs/reports/data/2026-10-27-q129-leak-sensitivity/`](../reports/data/2026-10-27-q129-leak-sensitivity/README.md)
+(`9155fabc`): E60's rows 116.746 → 115.049 fJ (`lq`) and 129.918 → 127.687 (`lb`), E65's flow-M flip 745 ± 56 →
+**722 ± 61 fJ**, E67's grid 8/16 → 9/16 cells within 20%, E70's `W∞` refit 10.52 → 10.16 W and its carry-over
+ρ(12) 1.266 → **1.246 ± 0.014** — and **not one of E67's or E70's sixteen registered verdicts moves**, with Q128's
+whole 1.946 pJ bottom-up ledger byte-identical (275 other numbers move).
+
+## E72 — lq6: the same card at 600 MHz, pinned by a TDP of 0 (Q129; card runs 2026-10-27, 14:59–15:24 PDT, aifoundry2) — pre-registered
+
+**Asked (Q129):** the Horace Hub's Levels tab wanted "a second card at 600 MHz", because every comparison of a
+flipped bit's price across clocks had the card and the clock changing together. aifoundry2 has never run below
+800 MHz under load. **Pre-registered** as `001811ab`, committed and pushed at 14:58:51 PDT — **before the first card
+access at 14:59:39** — and byte-identical since; the G0 gates were filled and committed as `20c4249f` at 15:01:22,
+**ten seconds before the one write**. A governor move under the field manual's gates, change record in
+[`tools/claims-v3/lq6/CHANGE-RECORD.md`](../../tools/claims-v3/lq6/CHANGE-RECORD.md): **one field, two commands**
+(`-l 0` at 15:01:32.038, `-l 65` at 15:24:07.531), both `rc 0`, zero read-back mismatches, the temperature threshold
+**never written**, and no clock ever set directly. Data:
+[`docs/reports/data/2026-10-27-e72-600mhz/`](../reports/data/2026-10-27-e72-600mhz/README.md).
+
+**Results.**
+- **The pin holds exactly.** 125 of 125 kept runs and 215 of 215 smoke samples at **exactly 600 MHz**, 517.9 mV
+  (517–519 mV over all runs), zero clock-gate failures, zero passes set aside. After the restore the card stepped
+  **600 → 700 → 800 MHz inside one 6 s launch** (114 / 2 / 98 samples, 619 mV, 59.7 W) — no reset.
+- **A flipped mantissa bit costs 79.18 ± 3.09 fJ at 600 MHz** against this same card's **121.27 ± 0.61 fJ** at
+  800 MHz (the `lq` h2→h8 secant at the board). **V1 passes as registered** (prediction 85.69, band 77.12–94.26).
+- 🛑 **But the same test at matched leakage slopes FAILS at three of four slopes.** The registered reduction leaks a
+  different slope into each side of the ratio. Re-run with the prediction moved onto the measurement's slope on a
+  **fixed** pass set: slope 0.000 → −8.9% (PASS), 0.098 → **−10.2% FAIL**, 0.2936 → **−12.9% FAIL**, 0.4420 →
+  **−15.0% FAIL**. The honest same-card reading is that the 600 MHz board price is **10–15% below a pure V²
+  extrapolation**, which is also what V3 reports.
+- 🛑 **The exponent is bracketed, not pinned at 2.** In `(V600/V800)^n`: board **2.43 ± 0.22** (registered, mixed
+  slope) to **2.92 ± 0.21**; rail **1.60 ± 0.32** to **1.72 ± 0.31**. n = 2 is inside 95% only in the registered
+  board row and the rail rows, and **outside in all four matched board rows** (2.1–4.4 SE). **What survives
+  everywhere:** the clock-scaling alternative **n = 3.637 is excluded by every row, board and rail, at 3.4 SE or
+  more** (minimum over ten rows 3.41 SE). Quote E72 as *"the price follows the voltage, not the clock"*, never as
+  "the exponent is 2".
+- 🛑 **"The rail is slope-free, quote the rail" is WITHDRAWN.** The rail is merely *uncorrected*: at the same assumed
+  slopes it moves 16% where the board moves 10% (ratio 0.7547 → 0.6906), its window is 0.575 °C **hotter** than the
+  board's on E60 and 0.028 °C cooler on E72 — asymmetric between the two sides of the ratio — and its own
+  within-run power-against-temperature fit is 5.52 W/°C (E60) and 1.11 (E72), a launch transient rather than
+  leakage, so it cannot be corrected from this data. Anyone quoting either number must name its slope and its
+  window.
+- **The second card at 600 MHz closes:** aifoundry2 **113.22 ± 0.47 fJ** against aifoundry3's 116.75 ± 0.61 =
+  **0.970** (rail 0.972, busy 0.966), at 0.5179 V against 0.5218 V, every rung inside 0.90–1.09. The full h ≥ 1
+  `lq` ladder and the whole busy `lb` ladder now exist on this card, and its bend (1.430 against aifoundry3's 1.360)
+  says again that a single-bit price is a **local slope**.
+- **The VMIN table has exactly three minion points** — 600, 700, 800 MHz — published with its evidence
+  (`vmin-lut.json`: a 256-byte binary of 14 × 18-byte points, 11 all-zero, three independent parses).
+- **The whole leakage sensitivity rests on 0.53 °C.** The per-pass `t_h8 − t_h2` is +0.85, 0.00, +0.80, +0.05,
+  +0.95 °C from a sensor that reports whole degrees, and the five per-pass secants spread 71.9–90.0 fJ around 79.18.
+
+**Scored: six of nine registered rules PASS in full (V1, V2, V4, V5, V6, G2); V3 FAILS as registered; G1 and G3 are
+PARTIAL.** V3 fails on one of its two scored rungs (`lq_h2` 0.913 W against 1.040 predicted, 12.2% low on a ±10%
+band; `lq_h8` 3.094 against 3.398, inside). G1 and G3 are partial for the same reason: their clock halves are
+measured, their **governor-log halves are not**, because `hl/block.sh` does not dump the service processor's trace
+ring and a per-run dump was not in the registered protocol. The first write-up reported "seven of eight scorable
+rules pass" and scored G3 as PASS with its registered "at least one Power throttle up event" clause dropped; both are
+corrected in `56cd6e50` (desk-only, no card touched; `rematch_e72.py --selftest` reproduces 12 of 12 published
+reduction figures exactly). **The committed read-back is `gov.jsonl`'s `back_check` at 15:24:31.194**; a further
+`ettelem config` at 15:24:48 and the module uptime were printed and **not retained**, so an independent reviewer's
+read under the card lock at 15:46:51 PDT stands in their place and `handoff-evidence.json` states which is which.
+
+**What it changes.** **No pJ moves.** What moves is the confidence the bit-price rung may claim: the cross-card
+reading is replaced by a same-card measurement, the rival "it scaled with the clock too" is refuted everywhere, and
+the exponent is bracketed rather than measured. It also adds a caution to the board-to-rail share: the
+board/rail bracket around V² is **partly an estimator asymmetry**, so that share cannot be read off E72's two ratios
+alone. The reusable firmware findings are in [14-card-behaviour.md](14-card-behaviour.md).
+**Report:** [From matmul speed to one transistor switch](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor)
+(A24, rebuilt 28 October with Q129).
+
+## E73 — hlf: the camera's heat path at two more lock-in frequencies (Q129; card runs 2026-10-27, 16:0x–16:4x PDT, aifoundry2) — pre-registered
+
+**Asked (Q129):** the Horace Hub's Levels tab listed "the camera's heat-path time constants (a further lock-in
+frequency)" as missing — E63 ran 0.05 Hz and Q126 added a 0.15 Hz point, which is not enough to tell one thermal
+pole from two. **Pre-registered** in `tools/claims-v3/hlf/` (rules R1–R6, two rival heat-path models frozen with
+their predicted group delays, the registered phase discriminator at 0.01 Hz). Data:
+[`docs/reports/data/2026-10-27-e73-camera-frequencies/`](../reports/data/2026-10-27-e73-camera-frequencies/README.md)
+(`0953f14b`, corrected in `4baa3e6f`). **No governor, clock, reset, driver or PCIe action**; aifoundry2's governor
+stayed where E72 had restored it.
+
+**The run.** 248 launches in 5 blocks, **43.4 min of card time** inside a 52 card-minute cap, `stop_reason done`;
+25,004 telemetry samples; camera 65,004 packets at 25.0006 fps with **0 gaps and 0 reconnects**, 287 shutter events
+(6.6/min, nothing bridged). The lane's first session died on account quota at 16:45 while copying data off the host;
+the data was recovered on 28 October with no further card access, and the registered reduction re-run on the box
+with the **committed** `lockin_hlf.py` reproduced `lockin.json` byte-identically (sha256 `d29e801f263fa42a…`), with
+`fit.txt` and all five `maps.npz` identical.
+
+**Results** (the corrected numbers; use only these).
+- **H(0.01 Hz) = 145.2 ± 16.5 mK/W at a lag of 59.4 ± 4.3°** (ROI 322.8 ± 20.6 mK = 15.7 SE; sign-flip p = 0.0029),
+  and **H(0.025 Hz) = 88.7 ± 11.0 mK/W at 75.6 ± 7.8°**. The 0.05 Hz reference line reads **58.58 ± 3.55 mK/W** with
+  a constant 98.60° phase and a worst residual of 0.45 SE (R2 PASS). Ratios to that line: 1.396 ± 0.255 at
+  0.025 Hz and 2.610 ± 0.391 at 0.01 Hz (R3 PASS).
+- **The heat path is one 16.0 s pole plus about a second of extra lag:** τ = **15.98 s [13.34, 19.12]**, delay
+  **1.009 s [0.78, 1.24]**, zero-frequency gain **250.5 mK/W [217, 292]**, χ² 21.67/25; **group delay 16.99 s
+  [14.47, 20.13]**. **One pole alone is excluded** (ΔAIC **+17.02**, Δχ² 19.02 for one extra parameter). Whether the
+  extra second is a transport delay or a 1.0 s second pole is **undecided** (ΔAIC 1.48).
+- 🛑 **Both pre-registered rivals are refuted by the phase**, which is what R4 was built to do: the measured lag
+  59.364 ± 4.315° against M1's 42.190° (**3.98 SE**) and M2's 26.409° (**7.64 SE**); the magnitude separates nothing
+  (2.610 ± 0.391 against 3.142 and 2.252, 1.36 and 0.91 SE). R4 is **reported with both models refuted**, not
+  passed.
+- **At 0.05 Hz the response is 0.1953 of the steady one** (63% of a step in 17.0 s, 95% in 49 s) — so a reader must
+  say **which** steady gain is meant: the fit's **G0 = 250.5 mK/W**, whose own 0.05 Hz value (48.9) sits **2.71
+  line-SE (16.5%) below** the measured line, **or** the **~300 mK/W** that the measured line implies through the
+  fitted attenuation (~270 from E63's anchor). The 17% between them is itself a finding.
+- **The camera's gain drift is not established by this session:** −44.1 ± 34.9 %/h is 1.3 σ, though it has the sign
+  of E63's measured 59 → 42 mK/W. So a reference block minutes away stays mandatory for every absolute mK/W.
+- **R6 (the hold) passes:** in-launch samples at ≥ 790 MHz are 100 / 99.6 / 99.4 / 99.7 / 97.7% per block, die means
+  55.1–56.9 °C, max 58.3 against a 65 °C bar; 9 of 248 launches carried the one-second idle-reset dip, 8 of them on
+  the zero arm — counted, no verdict, as registered.
+- **How many frequencies:** 25 published points at **fourteen** distinct frequencies; 14 points at ten frequencies
+  clear the board ≥ 5 SE inclusion rule and enter the fit. "Nine" is the design table's count up to 0.15 Hz, not the
+  fit's.
+
+**Scored: R1, R2, R3, R5, R6 PASS; R4 REPORTED with both models refuted.** 🛑 **A correction that re-issued the whole
+table** (`4baa3e6f`): the frozen fit's χ² was **half** the proper one, because `se_H` is a total complex SE that the
+frozen script weighted as if per-component, so every interval and both ΔAIC headlines are re-issued from
+`posthoc/fit_sigma.py` — one pole alone loses by ΔAIC 17.02 where the frozen script printed 7.51. The point values
+are identical; only the intervals and χ² change, and at the frozen σ the new exact gain profile returns the published
+interval, so the move to [217, 292] is the σ fix alone. **The frozen outputs are left byte-reproducible on purpose**:
+`analysis/fit.txt` and `fit.json` still print half the χ² and ~√2-wide intervals, the corrected table lives in
+`posthoc/sigma-corrected.json`, and anyone reading `fit.json` directly must read the CORRECTION box first.
+
+**What it changes.** **Zero pJ moves** — E73 measures the heat path from the die to the back of the board, not the
+price of a flip. It **closes** the Levels tab's "heat-path time constants" item and **opens a sharper one**: the
+fitted family is strained in two places, the 0.01 Hz lag (2.46 SE in the lag alone; complex residual 2.39 against a
+null of √2) and the 0.05 Hz magnitude (2.71 line-SE low), both pointing at a third, longer pole or a diffusive path
+— **suggested, not established**. Settling it needs a frequency **below 0.01 Hz** (a half period of 10 launches is
+200 s; E73's 0.01 Hz block alone cost 16.7 min of card time for 11 laps). The chain's heat-path sentence reads "a
+16 s pole and about a second of extra lag", not "two poles".
+**Report:** the committed README is the deliverable; the reduced cube (`frames.npz`, 191.9 MB) and the raw stream
+(2.85 GB) stay on the host, with all 535 files' sha256 in `left-on-aifoundry2.sha256`.
+
+## E74 — rf: what the register file's own cells cost (Q129; card runs 2026-10-28, 11:14–11:57 PDT, aifoundry3) — pre-registered
+
+**Asked (Q129):** the Horace Hub's Levels tab, stop 4 — "what the register file's own cells cost" — and Q128 §2's
+list of terms the one-lane bottom-up ledger does not reach. **Pre-registered** as `2be3f07e` and `547f4ae3` (rules
+P1–P6, rule 5 publishing a **bound** if the board fit does not resolve the slope, rule 6 fixing the 64-bits-per-MAC
+basis, the minion rail registered as a figure **reported beside the board and never instead of it**), both confirmed
+on `origin/main` with `git merge-base --is-ancestor` **before the first launch**. Data:
+[`docs/reports/data/2026-10-28-e74-register-file-cells/`](../reports/data/2026-10-28-e74-register-file-cells/README.md)
+(`3d9e33d4`, corrected in `e0f8ecf8` and `1b0391b7`). **The governor was never touched** (aifoundry3 stayed on its
+boot TDP 0, 600 MHz / 522 mV; the clock-guard line reads `600 400 0` in the first and last pass manifest of the day,
+`boot_id` unchanged), no reset, no driver reload, no PCIe retrain, no firmware or PMIC command.
+
+**Results** (6 passes, 11.6 card-minutes; the first pass set aside on anchor drift).
+- 🛑 **The board does not resolve it, so the result is a bound: e_cell < 2.73 fJ per flipped cell bit at 95%.** The
+  point estimate is **0.855 fJ, 95% t [−1.02, +2.73]** over five kept passes, where the registration expected
+  ±0.23 fJ and got ±1.87. A die-temperature covariate does not resolve it either (**1.359 fJ, SE 0.81, 95%
+  [−0.31, +3.03]**; 1.383 under pass fixed effects).
+- **Only the minion rail arm excludes zero: 1.643 fJ, 95% [0.704, 2.583]** — four times tighter on the same runs
+  (SE 1.6e-4 against the board's 3.1e-4 W per bit per op).
+- **Per multiply-add the cells are 0.055 pJ at the point and at most 0.175 pJ at 95%** (64 bits of register content,
+  the registered basis) — **1.4% of Q128's 3.837 pJ remainder, at most 4.6%**. The useful part is the ceiling: the
+  cells **cannot** be the explanation.
+- **Both falsification tests pass.** The null arm's slope is 0.036× the real one with an interval spanning zero
+  (P4), and `ops_per_cycle_per_hart` is 0.7574 on all 36 `rf` runs and 0.7356 on all 18 `rfz` runs with min = max
+  (P5) — so **E61's 3% issue-rate confound is gone by construction**.
+- **On E61:** its 1.267 ± 0.151 fJ sits inside every interval here, but the board arm **fails to contradict E61
+  rather than confirming it**, since [−1.02, +2.73] contains 0 and 0.2 as readily as 1.27.
+- **The leverage is disclosed, not hidden.** Per-pass `e_cell` is 0.576, 3.405, 0.822, −0.163, −0.365 fJ. Dropping
+  p7411 (residual rms 243 mW, 7.6× E60) gives 0.218 fJ and a **1.13 fJ** bound instead of 2.73, and inside that pass
+  the leverage is one reading (`rf_k96` 31.583 W against 32.188–32.327 W elsewhere). **Keeping it is the conservative
+  direction**, because it raises the published bound. Putting the set-aside pass back: 0.850 fJ [−0.57, +2.27].
+
+**Scored: P1 NOT RESOLVED (a bound), P2 FAIL (span +48.9 mW against a registered 60–134), P3 FAIL (residual rms
+83.4 mW against ≤ 20; the curvature clause passes at −1.8 σ), P4 PASS, P5 PASS, P6 6.28 fF inside 5.9–13.2 but it
+inherits P1.** Resolving `e_cell` on the board needs about **40 passes (~80 card-minutes)** from the measured
+between-pass SE, or a re-registration with the **rail** as the estimator and the board as the check.
+
+**What it changes.** Levels stop 4 moves from missing to **bounded on the board, resolved on the rail, consistent
+with E61**, with the cost of resolving it stated. **It adds no row to the bottom-up ledger**, because the section-3
+transport row already models those cells and counting them again would double-count. It **narrows** that row's
+caveat without removing it: in the zeros stimulus the cells' stored bits do not change at all, yet the transport
+model still charges 0.654 pJ per MAC where the whole board costs 0.27 — so the over-pricing lives in the **read
+ports, the read mux tree and the clocking**, which E74 does not price. That is the single most valuable measurement
+left in the waterfall.
+**Report:** [From matmul speed to one transistor switch](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor)
+(A24, rebuilt 28 October with Q129; its kernels block is read whole from `rf.json`).
+
+## E75 — mf: a flip ladder on the memory path (Q129; card runs 2026-10-28, 11:14–11:57 PDT, aifoundry3) — pre-registered
+
+**Asked (Q129):** Q128 §5's **item 5**, first half — no flip ladder had ever been run on a memory path, although a
+DRAM tensor load costs 94–134 pJ per byte against a multiply-add's 5.8 pJ. **Pre-registered** as `2be3f07e` /
+`547f4ae3` (rules P1–P7, two designed counts per image — changed bits `k` and carried ones `w` — at four levels).
+Data: [`docs/reports/data/2026-10-28-e75-memory-flip-ladder/`](../reports/data/2026-10-28-e75-memory-flip-ladder/README.md)
+(`4fa0bf81`, corrected in `e0f8ecf8` and `1b0391b7`). **Governor untouched**, as E74.
+
+**Results** (5 passes, 21.5 card-minutes; the first pass set aside on anchor drift; ± figures are SEs of the pass
+mean, brackets 95% t at df 3).
+- **Per changed bit, two levels resolved and two not.** **L1 0.0492 pJ [0.0482, 0.0501]** and **L2 0.274
+  [0.183, 0.366]** are coefficients. 🛑 **L3 and DRAM are NOT RESOLVED** — their `k`-arms are **non-monotone in every
+  kept pass** (DRAM reads 34.302, 34.239, 34.094, 34.063, 34.574 W over k = 0…512, so the whole positive slope rests
+  on the top rung), with registered small-k slopes of −0.47 and −0.32 pJ/bit. **Quote them as bounds: < 0.37 pJ and
+  < 0.42 pJ at 95%**, DRAM's also correction-dependent (0.323 / 0.181 / 0.135 across the three leakage settings).
+  Bounds are rounded **away** from zero so rounding never understates a ceiling. L2's and L3's are the first
+  data-dependence figures of any kind for those levels.
+- **Per carried one, the first such prices: nothing at L1** (−0.0001 pJ, 95% [−0.0014, +0.0011]) **and 3.255 pJ at
+  DRAM** [2.97, 3.55]. Of the **1,008 pJ per 64 B line** the two designed counts explain, **94% is the ones term**
+  (946 pJ) and 62 pJ the unresolved changed-bit term. The point ratio is 10.1×, but its denominator is unresolved —
+  **quote the 94% share, never a clean factor of ten**.
+- **The chord reproduces the published figure on-chip and overshoots it off-chip:** L1 1.778 W = **0.1489 pJ/B**
+  against the catalogue's 0.15; DRAM 3.250 W = **43.3 pJ per line byte** against 38 (**+14%**), per *line* byte
+  because that is the basis the registration fixed.
+- 🛑 **Bit-counting is nearly complete on-chip and two thirds incomplete off it:** the two arms explain **98.3%** of
+  L1's zeros-to-random chord (error −1.7%, 95% [−6.4, +3.0]) and only **36.6%** of DRAM's (95% [30.0, 43.3]).
+
+**Scored: P1 PASS; P2 FAIL (−0.32 against a registered 6–25 pJ/bit); P3 FAIL / not resolved (saturation −120%, and
+both the DRAM and L3 k-arms non-monotone in every pass); P4 PASS at L1 on both bases and at DRAM PASS on the
+registered basis (−3.06%, 95% [−3.14, −2.98], of the random anchor) while failing only on the stricter chord basis
+the reducer substituted on the day — so P4-at-DRAM is NOT a pre-registered failure; P5 FAIL (1,008 against
+2,432 ± 600 pJ/line); P6 PASS on the order ONLY as L1 < {L2, L3, DRAM} (the upper three overlap at 95%) and FAIL on
+the span (6.6× not 100×); P7 PASS (L1 11.94 TB/s in 10.9–18.1; DRAM 75.07 GB/s of 64 B lines in 57–95; worst
+`took_ms` 22 ≤ 60).** Departure D-M3 is dated: P4 is now scored on **both** bases, because the registration stated
+the percentage without its denominator.
+
+**What it changes.** **It moves nothing in the multiply-add waterfall** — that is arithmetic — and closes the first
+half of §5 item 5 with coefficients where the data resolve them and bounds where it does not. What it changes is
+**what the 94–134 pJ/B DRAM figure means**: the data-dependent part is **carried ones**, so reducing transitions is
+the small lever off-chip and **packing zeros is the big one**. Newly open, with no experiment number yet: a third
+image at the same `k` and `w` but a longer period, to test whether a two-value alternating image is compressible on
+the link or in DRAM in a way random data is not. The scratchpad rung stays out of scope for the registered reason
+(no host fill reaches the scratchpad address).
+**Report:** [From matmul speed to one transistor switch](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor)
+(A24, rebuilt 28 October with Q129; its kernels block is read whole from `mf.json`).
+
+## E76 — tr: the thirteen instructions that trap, and what they cost (Q129; source read 2026-10-27, card probe 2026-10-28, 11:14–11:57 PDT, aifoundry3) — pre-registered
+
+**Asked (Q129):** Q128 §5's **item 5**, second half — thirteen instructions (fdiv, fsqrt, frsq, fsin, the integer
+divides…) trap in U-mode and had no energy figure. **Pre-registered** as `2be3f07e` / `547f4ae3` (a probe stage that
+gates a price stage: the price stage launches only for a mode the probe clears). Data:
+[`docs/reports/data/2026-10-28-e76-trapped-instructions/`](../reports/data/2026-10-28-e76-trapped-instructions/README.md)
+(`737841fe`, corrected in `e0f8ecf8` and `1b0391b7`). **Governor untouched**, as E74.
+
+**The central question was answered from the firmware source before any card ran: there is no emulation path.** A
+U-mode illegal instruction is delegated M → S, and the handler calls `return_from_kernel(KERNEL_RETURN_EXCEPTION)`
+— **758 instructions on the installed build** — which **ends that hart's kernel**. So the thirteen have no
+per-instruction energy at all: what they cost is what their substitutes cost. The library audit that follows from
+it: libgcc's `__divsf3` (299 instructions) contains **none** of the thirteen, so **a C float divide is safe**, at
+310–570 multiply-adds; libm's `sqrtf` and `fmodf` and libgcc's `__fixunssfdi` **do** contain them, so **`sqrtf` is
+fatal** to the kernel that calls it.
+
+**Confirmed on silicon** (2 probe passes, 84 probe runs, 7.7 card-minutes).
+- **13 of 13 trapping modes end the kernel**: `ok:false` with **0 ops** and host exit 1, unanimous over both
+  passes, and the `trx_` modes agree with their `tr.` counterparts (P1, P2 PASS).
+- **7 of 7 controls return normally** with 65,536 ops (64 per hart × 1,024).
+- **No lasting harm** (P4 PASS): 33 runs after a trapping launch, 0 not-ok; both passes `ok`; after thirteen
+  kernel-killing launches the drift anchor still records its ten; `et-who` clean.
+- **P3 FAILS, low rather than high:** the trap's wall-clock excess is a median **0.45 ms** (range 0.10–0.70, n = 26)
+  against a registered 0.5–50 ms.
+- **The price stage and the L strand did not run — by the registered rule, not against it:** they launch only for a
+  mode the probe clears, and the probe cleared none.
+
+**Not closed:** the static stage was not re-run on aifoundry3, so the instruction counts quoted are the
+registration's, taken on aifoundry1 on 27 October (both boxes run the same driver and `srcversion`, and running
+`objdump` on a card host during a measurement would have split passes). Cheap to close later, with no card.
+
+**What it changes.** §5 item 5's second half closes **structurally**: there is no row to add to the waterfall,
+because the hardware never executes these instructions. **It moves no pJ.**
+**Report:** [From matmul speed to one transistor switch](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor)
+(A24, rebuilt 28 October with Q129; its kernels block is read whole from `tr.json`).
+
+**Lane lessons from E74–E76, recorded for the next registration.** In **both** E74 and E75 the pass set aside was
+the **first** one, on anchor drift (−0.39 W and −0.55 W against +0.07 to +0.23 afterwards): a card coming off idle
+has one transient pass in it, so budget n + 1 or queue a throwaway. A **fixed** idle leakage slope is not a safe
+correction for a power-dependent ladder on this card — it doubled E74's `e_cell` and broke a null arm that has no
+signal in it. The harness's `runitems.py --list` card-minute figures are a **4–6× ceiling** (41 card-minutes against
+a priced 256), which is what had made E76 look unaffordable; `--list` charges 50 s of approach per run where the card
+needs 8.5 s. And a test whose basis is only implied ("within ±15% of the ladder") gets re-specified on the day:
+**registrations should state the denominator of every percentage test.** Harness faults F1–F4 still want an
+amendment, chiefly that `BUILD-HASHES-2026-10-27.md`'s cross-box "code" rule is unsatisfiable for the host binary
+(each box statically links its own device layer) and that `mf/block.sh` and `tr/block.sh` dropped `rf/block.sh`'s
+`ET_DEVICES` preflight, which is latent on two-card hosts.

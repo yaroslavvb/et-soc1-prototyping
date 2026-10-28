@@ -220,7 +220,7 @@ The pages first described the governor at et-platform `353f20e` (R3). The cards 
 27 September in the same clone (`external/et-platform`, `device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c`
 at each commit). The table is read from source; the entries marked *seen* have card evidence.
 
-| | `353f20e` (= `836a4ab`) | BL2 0.20.0: release 1.3.1, aifoundry2 and aifoundry3 (closest public source `ffca4cbb4` = `cafe03fc3^`, 17 May 2024) | BL2 0.18.0: release 1.2.0, aifoundry1's card 1 (closest `da192816a`, 27 March 2024) |
+| | `353f20e` (= `836a4ab`) | BL2 0.20.0: release 1.3.1 — 🛑 **which card runs it is no longer established: aifoundry2 reported release 1.4.0 / BL1–BL2 0.22.0 when E69 read it fresh on 27 Oct 2026, and aifoundry3 was not re-read** (“The governor's two knobs”, below) (closest public source `ffca4cbb4` = `cafe03fc3^`, 17 May 2024) | BL2 0.18.0: release 1.2.0, aifoundry1's card 1 (closest `da192816a`, 27 March 2024) |
 |---|---|---|---|
 | When the thermal test acts | only while a kernel runs | **always, busy or idle** (*seen*: 18 of the 20 thermal entries of E51's night came after the SP's own idle line; in its validation 51 idle entries, I5 PASS) | as 0.20.0 |
 | Thermal response | one table point down per pass | **a blocking loop**: one point down, sleep 1,000 ticks (about 0.40 s), read the mean again, repeat while it is above 65; meanwhile the power branch, the idle reset included, cannot act (*seen*: 17 of 17 idle episodes under 60 s lasted k × 0.4053 s to within 1.4 ms, k = 0–3, E51; in its validation 44 of 46 within 10.9 ms, and the two longest, 20 and 21 periods, 17–21 ms short, so TH2 is untested; E10's down-steps paired 0.4–0.5 s apart) | as 0.20.0 |
@@ -241,7 +241,7 @@ What each card shows:
   followed at once by the idle reset" (TH7) fell; the THERMAL_DOWN counter added whole episodes (6 intervals within
   0.2 ms: TH8 survived), and the launch and end latencies fit the Master Minion's heartbeat (launch to 800 MHz a median
   0.67 s, at most 1.2 s; kernel end to 600 MHz at most 1.09 s: TH4 survived).
-- **aifoundry3's governor is latched.** Under 0.20.0 its boot-time TDP of 0 W sends the first kernel after boot into a
+- **aifoundry3's governor is latched.** (🛑 **The mechanism below is 0.20.0's and is build-specific:** at BL2 0.22.0 there is no such loop at all — the throttle check is a single pass per DM-task pass and the 1.05 guardband macros are never used — so on that build a TDP of 0 is a *reversible pin* at the VMIN floor, as E72 measured on aifoundry2. aifoundry3's own build was not queried in Q129; see “The governor's two knobs”, below.) Under 0.20.0 its boot-time TDP of 0 W sends the first kernel after boot into a
   power-down loop that can never exit (the exit needs an average under 1.05 × 0 W, or 300 MHz, and the clock is already
   at the bottom point), so the power task spins; the first time the mean then passes 65 °C the thermal state is set and
   nothing clears it, and no governor line is ever logged again. That fits the record: 26 throttle-down and 27 idle lines
@@ -292,6 +292,105 @@ every run. The ring names the cause of every step, so no step had to be inferred
   operating point's. Shift it before reading power per clock (`surface_hpl.py` picks the shift per run).
 - **A random-data heater cannot take this die past about 67 °C** on the bracket's cooling: the power test holds it near
   65 W, and above 65 °C the thermal test holds it at 600 MHz, where random data draws about 50 W (E64 amendment A2).
+
+## The governor's two knobs, moved for the first time (aifoundry2, 27 October 2026, E69 and E72)
+
+Everything above about the cap was read from the governor's own log, with the cap never moved. On 27 October 2026 the
+owner authorized one card's governor to be moved (Q129), and E69 and E72 moved it under the ET-SoC-1 firmware field
+manual's G0–G4 gates, each with a change record committed beside its data
+([`tools/claims-v3/knob/CHANGE-RECORD.md`](../../tools/claims-v3/knob/CHANGE-RECORD.md),
+[`tools/claims-v3/lq6/CHANGE-RECORD.md`](../../tools/claims-v3/lq6/CHANGE-RECORD.md); PASS / FAIL / UNKNOWN per gate,
+UNKNOWN never read as PASS). Only two fields were ever written — `DM_CMD_SET_MODULE_STATIC_TDP_LEVEL` and
+`DM_CMD_SET_MODULE_TEMPERATURE_THRESHOLDS` — in **41 DM set/restore commands** (E69's 39 across five sessions, E72's
+2), every one `rc 0`, with **zero read-back mismatches**, inside the code-enforced bounds (TDP 30–65 W, threshold
+60–70 °C). **No OTA, flash, PMIC command, card reset, PCIe recovery, driver reload or clock set at any point.** The
+measurements are in [03-experiments.md](03-experiments.md), E69 and E72; what belongs here is what the cards and the
+firmware turned out to be.
+
+**Firmware read fresh, and the card table above was stale.** Under E69's G0 gate (13:56–13:58 PDT) aifoundry2's card
+reports **release 1.4.0, BL1 and BL2 0.22.0, PMIC 1.5.0, minions 0.25.1** — not the 1.3.1 / BL2 0.20.0 / minion
+0.23.0 this file carried — and the `0.20.0` in `et-lab-manifest` is the **host driver's** version, not the card's.
+aifoundry3's card was **not** re-read in Q129, so the "aifoundry2 and aifoundry3" mapping that the 0.20.0 column of
+"The clock governor, by firmware build" used to carry no longer maps a card to a build: **read each card's own
+versions before citing a source behaviour.** E64's measurements stand; the source citations under them point at the
+wrong build. (The `353f20e` column is itself fine — it is the 0.22.0 snapshot, and it already says "one table point
+down per pass" and "the PMIC's average", which is what the card does.)
+
+**Both set paths write one service-processor RAM word and never flash (BL2 0.22.0; field-manual rule 8).** The two
+commands land in `g_soc_power_reg` and `g_pmic_power_reg`, `volatile` structures in the service processor's plain
+`.data` RAM (`services/thermal_pwr_mgmt.c:143-144`) — not a memory-mapped window, not flash — so a governor setting
+is **lost at an SP reset**. Every flash writer in the whole BL2 0.22.0 tree lives in `driver/flashfs.c`
+(`flash_fs_write_partition`, `flash_fs_erase_partition`, `flash_fs_set_part_number`, `flash_fs_set_vmin_lut`,
+`flash_fs_write_config_region`, `flash_fs_increment_*_boot_count`) and **none of them is reachable from either set
+path**. That is what makes a governor move legal under rule 8, and it is **build-specific**: at BL2 0.18.0 (release
+1.2.0, aifoundry1's card 1) a NoC **voltage** set did write the flash ("Setting a rail's voltage", above, and
+[05-claims.md](05-claims.md) § NV). 🛑 Two residuals E69 records rather than hides: the card exposes **no BL2 git
+hash** through any allowed query, so the source read establishes the behaviour of *a* 0.22.0; and the `et-platform`
+copy read was a **single shallow commit** of an in-development 0.22.0 whose `[Unreleased]` changelog carries both
+SW-21990 and SW-22147 — so "both plausible builds agree" holds for the two **set** paths and emphatically **not** for
+the governor's power branch.
+
+**A TDP of 0 pins this card at 600 MHz, and writing the TDP back releases it.** E72 wrote one field twice. 125 of 125
+kept runs and 215 of 215 smoke samples sat at exactly **600 MHz, 517.9 mV**; after the restore the card stepped
+**600 → 700 → 800 MHz inside one 6 s launch** (114 / 2 / 98 samples, 619 mV, 59.7 W) with no reset. That is
+aifoundry3's boot policy reproduced deliberately on another card — but **the mechanism is not the never-exiting
+power-down loop** described for 0.20.0 above. At BL2 0.22.0 `check_power_throttle_conditions`
+(`services/thermal_pwr_mgmt.c:864-926`) is a **single-pass if/else-if** called once per DM-task pass
+(`rtos_task/dm_task.c:267`) whose POWER_DOWN steps one VMIN point and returns; the
+`UPPER/LOWER_POWER_THRESHOLD_GUARDBAND` macros are **defined and never used**, so there is no 1.05 × TDP exit
+condition anywhere in the tree; and POWER_UP is "always allowed" from any throttle state (`:2267-2270`). At the floor
+the firmware's power arm simply has **no step left**, so the **host harness's own power abort is the only guard** —
+and the clock is released on the next governor pass when the original TDP is written back. 0.20.0's loop, and
+aifoundry3's latch, were read in that older source and are **not** contradicted here; what is gone is the assumption
+that one build's mechanism describes the other's. aifoundry3 could in principle be un-pinned the same way, by
+writing its TDP back — a different card, needing its own authorization and change record, and its boot service would
+re-pin it at the next boot. The power trigger's observed **~1.3 s averaging** is 0.22.0 behaviour (`avg_soc_pwr_mW`),
+not 0.20.0's instantaneous reading. The VMIN table has exactly **three** minion points, 600, 700 and 800 MHz, now
+published with its parse evidence (E72's `vmin-lut.json`); `DM_CMD_GET_VMIN_LUT` is a safe read (a memcpy out of the
+SP's RAM copy, `driver/flashfs.c:2073`), and 🛑 **its sibling SET is a full config-sector erase and must never be
+sent.**
+
+**The restore procedure, as it was actually run — follow it.** Read both fields **before** anything is written
+(`ettelem config`: TDP, `sw_temperature_c`, power state) and record them in the change record; hold the card lock and
+an exclusive window for every launch (`et-who` empty, and no telemetry client holding the single-open management
+node); write the originals back after the last run and **read them back in the same session**; run one short burst to
+see the governor step normally again; and record the **module's uptime**, which is what proves the restored values
+are a real write rather than a reboot's defaults (23 h 29 m at E69's final read, 23 h 46 m at E72's, so the service
+processor never reset). Both runs restored aifoundry2 to **TDP 65 W / threshold 65 °C** and were independently
+re-read on the card afterwards by another agent (14:58:09 and 15:46:51 PDT), and the card read the same again at
+11:04 on 28 October. 🛑 **A card reset would also restore the defaults and must never be used for that**: if a restore
+fails or the card stops answering, stop, keep the claim, write it up and alert — do not reset. Two further working
+rules this pair produced: **dump the service processor's trace ring per run**, as the knob harness does, because the
+only two registered rules E72 could not score in full are exactly the two that needed it; and **never poll the
+governor during a measurement pass** — `ettelem`/`gov status` against the single-open management node while a pass
+held the card lock produced the one benign kernel line E72 added ("Mgmt: Tried to open same device multiple times").
+
+**🛑 The hazard a raised cap has to pass first: above 65.536 W an affected build's power arm inverts.** A C cast to a
+16-bit type **wraps**; it does not saturate. The averaged system power field is 16-bit in units of 10 mW
+(`et-trace/include/et-trace/layout.h:467`, so the field itself reaches 655.35 W) and the conversion to milliwatts is
+a plain `×10` macro, but on a build whose throttle check narrows the **measured average** (only the average; the TDP
+level was already a 32-bit local) to 16-bit milliwatts, **66.0 W reads as 0.464 W**: the throttle-**down** test
+(`avg > tdp`) goes false and the throttle-**up** test (`avg < tdp`) goes **true**, so above 65.536 W there is
+effectively **no firmware power throttle at all and the power arm pushes the clock up while the card is over its
+cap**. In 0.22.0 both locals are 32-bit (`thermal_pwr_mgmt.c:869-871`) and the changelog carries `[SW-22147] Fix
+conversion in check_power_throttle_conditions` under *Unreleased*, so **the gate is answered for the card E69 used
+and open for every other card until its own build is read**. What still guards an affected build: the **thermal**
+arm, which is evaluated first in the same function and is unaffected; the boot-time PMIC catastrophic power alarm;
+and whatever the host harness enforces — in Q129, an 85 W board-power abort. The full reading, with every citation in
+the open `et-platform` repository, is
+[`../reports/data/2026-10-27-q129-throttle-wrap-gate/`](../reports/data/2026-10-27-q129-throttle-wrap-gate/README.md).
+A first pass over the firmware had reported this hazard with the wrong mechanism (saturation), the wrong field (both
+operands) and the **wrong direction** (more throttling); all three are corrected there.
+
+**Two card facts this pair added.** 🛑 **Sustained `randn` reaches the mid-80s W on aifoundry2 at its own default
+settings**, so an 85 W board bound stops it: both of E69's sustained `randn` cells aborted (85.2 and 85.8 W) and the
+return burst at the restored defaults peaked at **86.61 W**, the highest board sample of all 29 reduced runs — E64
+had used a 97 W bound, and anything budgeted at 85 W must expect to lose those cells. And **management commands
+generate service-processor error events**: E69's count went 6 → 18 (before the first set) → 222 (by the last restore)
+→ 234, in 37 bursts following management-command clusters, every one of the 234 being Level Critical / Desc
+`SP Runtime Error` / Count 0 / Syndrome "Runtime Error Count Beyond Threshold". None of them indicates a fault from
+the governor move, and the abort condition the registration set on them was never met — but a session that counts
+these events must expect its own commands to raise them.
 
 ## A one-second idle reset inside a launch (aifoundry2, 23 October 2026, E63)
 
@@ -472,7 +571,7 @@ Take the card lock before starting such a tool and the collector stays off the c
 
 | | aifoundry2 | aifoundry3 | aifoundry1 card 0 | aifoundry1 card 1 |
 |---|---|---|---|---|
-| Firmware release (BL / PMIC / minion) | 1.3.1 (0.20.0 / 1.5.0 / 0.23.0) | 1.3.1 (the same) | 1.4.1 (0.21.2 / 1.6.1 / 0.24.0) | 1.2.0 (0.18.0 / 1.3.0 / 0.22.0) |
+| Firmware release (BL / PMIC / minion) | **1.4.0 (BL1/BL2 0.22.0 / PMIC 1.5.0 / minions 0.25.1)**, read fresh 27 Oct 2026 under E69's G0 gate; 1.3.1 (0.20.0 / 1.5.0 / 0.23.0) in every earlier record here, and the `0.20.0` in `et-lab-manifest` is the **host driver's** version, not the card's | 1.3.1 (0.20.0 / 1.5.0 / 0.23.0) as last read; 🛑 **not re-read since aifoundry2 turned out to differ — do not assume it matches** | 1.4.1 (0.21.2 / 1.6.1 / 0.24.0) | 1.2.0 (0.18.0 / 1.3.0 / 0.22.0) |
 | TDP the driver reports | 65 W | 65 W | 65 W | 65 W |
 | **TDP the firmware uses** | **65 W** | **0 W**, set at every boot (below) | 65 W | 65 W |
 | Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C. In this chassis the die never read below 65 °C in the version-3 campaign (336,070 samples, 25–26 Sep), and over DV2's 20 h validation (28–29 Sep) it idled at 71–76 °C in 327 of 378 cycles, so it runs at 600 MHz unless it starts cold | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry); its governor is latched by the zero TDP: no governor line in its trace since 25 Sep (E41 TEL-G), and its throttle residencies all 0 after 2 d 8 h up (28 Sep; E51, development); it makes no thermal step at any temperature | firmware DVFS; **idles at 300 MHz** (`low_power`); its 0.21.x governor acts only while a kernel runs (firmware source, 27 Sep) | **600 MHz in all 318,667 samples of the three-card check (25–26 Sep)**, and in the SP's own minimum and maximum, although 9,461 were busy at 45–65 W at 64 °C or less and the mean reached 88 °C: its governor does not raise the clock (active power management off, or latched; asked the lab). Its build steps 50 MHz between 300 and 700 MHz, so it could never reach 800 |
@@ -495,7 +594,7 @@ throttle-down at every kernel start, and nothing can ever step it up. The card's
 down event, current pwr 35380  tdp level: 0`, 26 times in one 8 KB window, alternating with idle events, with no
 step-up event at all. A second reading agrees: `get_power_state()` classifies a card as `MAX_POWER` exactly when
 power exceeds the TDP, and aifoundry3 reports `max_power` while drawing 23 W. Since 25 September it logs nothing at
-all: under its own 0.20.0 build the zero TDP leaves the power task in a loop that cannot exit, and the first mean
+all: under its own 0.20.0 build the zero TDP leaves the power task in a loop that cannot exit (🛑 **a 0.20.0 reading; BL2 0.22.0 has no such loop, and there a TDP of 0 is released by writing the TDP back — E72, below**), and the first mean
 above 65 °C then latches the thermal state for good ("The clock governor, by firmware build", above).
 
 **Correction (2026-09-25): the zero is not flashed.** Until then this file said the TDP was flashed. A boot

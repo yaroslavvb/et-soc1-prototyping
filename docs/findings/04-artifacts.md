@@ -37,6 +37,26 @@ Two figures are literals in the builder with their source named there (E68's pri
 bottom-up burst range). Space `5576af71-35da-4958-b437-aba8d59e2ee0`, public, unlisted. The page's script
 also renders an optional `vault` block of extra boxes when its data carries one; nothing in this repository
 writes that block and the committed data has none.
+**Rebuilt in place twice on 28 October 2026 for Q129** — the same space, slug and visibility, version
+`976cd5ad3f3e` at 20:31Z replacing `4ca541df9c3e`, then `e29a5cd2398c` at 20:54Z — with a measured
+board-to-rail step, routed wires, every farad priced, a measured glitch factor, the lane's transport, and
+E74–E76 folded in. Section 3's ledger table gained the regulators' 0.875 pJ row and **two** closures against
+the board (bottom-up rows only, 34% → 69–72%, and 84–88% with that row counted, each labelled), so its bottom
+rows follow from the rows above them; the glitch step is published split into its measured switching half and
+its scaled internal half; the shared CTS root is named as a second ceiling on the transport range; and the
+footer now says **which half of the page is read from JSON** — 26 figures across six Q129 lane directories are
+re-checked on every build and the build fails if one is absent, while the kernels block is read whole from
+`rf.json`, `mf.json` and `tr.json` and the rest of the Q129 block stays transcribed from the directory named on
+each line. Every registered prediction that failed is printed on the page. `check_page.sh` ran clean at 1,280
+and 390 px in both themes after each rebuild (0 JS errors, 0 bad anchors, 0 empty fields, 94 `q-*` ids with no
+duplicates, all 61 `data-q` keys set), and `check-mirror.py --via https --only et-soc1-matmul-to-transistor`
+exits 0. **Recoverability:** `data-2026-10-27-q128.json` was not edited, `data.json`'s `waterfall.v1` still
+carries Q128's four steps, its 4.337 pJ rail and its 3.837 pJ remainder, and every new span sits inside the
+script's `if (D.q129)` guard, so the 27 October page still rebuilds from either file. The private build
+`et-soc1-matmul-to-transistor-private` was **not** touched. 🛑 The host's automated classifier flagged the
+public space 4 s after the second deploy (`flag_reasons llm:S9`); anonymous access is unaffected (the viewer
+answers 200, the raw host serves all 254,376 B, `check-mirror` exits 0), `spacesheep list --json` carries no
+flag field, and there is nothing to do on the content — recorded for whoever owns the space.
 
 **Visibility.** Every space the hub links is public (Q40); the one exception, the David Kanter notes, is private and
 no longer linked (below). After any deploy, compare `spacesheep list` with the record.
@@ -791,6 +811,38 @@ versions each directory records. Nothing in these six directories names a person
 private tree or a foundry identifier; the one place that did — two other lab users' handles in an E65
 amendment — was redacted the same day in `90693c8a`, though the handles remain in the git history of the
 seven commits before it, which only a history rewrite of a public repository would clear.
+
+## Q129 published no new page: eighteen data directories and A24 rebuilt in place (27–28 October 2026)
+
+Q129 built **no new space**. Its whole output is eighteen data directories in this repository plus **A24 updated in
+place** — the same space, the same slug, the same visibility — so a reader who knows only the published pages will
+find Q129 only through that one page. Recorded here, as Q126's was, so nobody goes looking for a page that was never
+built.
+
+| What | Where | What is in it |
+|---|---|---|
+| **E69**, the first authorized governor move | [`reports/data/2026-10-27-e69-governor-knob/`](../reports/data/2026-10-27-e69-governor-knob/README.md) | the 29 reduced runs at seven (TDP, threshold) settings, `results.json`, `results_hpl.json`, `reduce.txt`, and the SP error-event counts before and after. Registration, rules K1–K5 and the **signed change record**: `tools/claims-v3/knob/` (`README.md`, `CHANGE-RECORD.md`, `predict_knob.py`, `reduce_knob.py`, `predictions.json`) |
+| **E70**, the saturation ladder | [`reports/data/2026-10-27-e70-saturation-ladder/`](../reports/data/2026-10-27-e70-saturation-ladder/README.md) | seven passes' telemetry and manifests, `runs.csv`, the registered six-pass report, the seven-pass output, three leakage sensitivities, `scored.json`, `report_e70.py` (the pre-correction script reproduces the first published outputs byte-for-byte). Registration: `tools/claims-v3/hs/README.md` |
+| **E71**, aifoundry3's idle leakage slope | [`reports/data/2026-10-27-e71-idle-slope-aifoundry3/`](../reports/data/2026-10-27-e71-idle-slope-aifoundry3/README.md) | `slopes.json`/`.txt` over six cycles, the aifoundry2 re-fit at the same band, E44's September cycles, four labelled price sensitivities, E65's D1 re-fit. Tools: `idle_slope.py`, `leak_sensitivity.py`, `d1_refit.py` |
+| **E72**, the same card at 600 MHz | [`reports/data/2026-10-27-e72-600mhz/`](../reports/data/2026-10-27-e72-600mhz/README.md) | `verdicts.json`, `matched/matched-fixed.{txt,json}` (the V² test at four matched slopes on a fixed pass set), `vmin-lut.json` with its parse evidence, `handoff-evidence.json` (which readings are committed and which were only printed), three per-slope sensitivity verdict files. Tools and the change record: `tools/claims-v3/lq6/` |
+| **E73**, the camera at two more frequencies | [`reports/data/2026-10-27-e73-camera-frequencies/`](../reports/data/2026-10-27-e73-camera-frequencies/README.md) | `analysis/{fit,lockin}.json` (deliberately **frozen**, carrying the halved χ²), `posthoc/sigma-corrected.{json,txt}` (the corrected table — read the README's CORRECTION box first), `posthoc/prior-anchors.*`, `session/tel.jsonl.gz`, and `left-on-aifoundry2.sha256`: all 535 files left on the host with their sha256, including the 2.85 GB raw stream and the 191.9 MB reduced cube |
+| **E74**, the register file's own cells | [`reports/data/2026-10-28-e74-register-file-cells/`](../reports/data/2026-10-28-e74-register-file-cells/README.md) | `rf.json` at three leakage settings (the bound, the rail arm, the covariate, the drop-one jackknife), `runs.csv`, `reduce.sh`, the queue log. Harness: `tools/claims-v3/rf/` |
+| **E75**, the memory-path flip ladder | [`reports/data/2026-10-28-e75-memory-flip-ladder/`](../reports/data/2026-10-28-e75-memory-flip-ladder/README.md) | `mf.json` (four levels × two designed counts, the monotonicity flags, P4 on both bases), `runs.csv`, `reduce.sh`, the queue log. Harness: `tools/claims-v3/mf/` |
+| **E76**, the instructions that trap | [`reports/data/2026-10-28-e76-trapped-instructions/`](../reports/data/2026-10-28-e76-trapped-instructions/README.md) | `tr.json` (13 of 13 trapping, 7 of 7 controls, the no-lasting-harm arm), the static instruction counts from the registration, the probe logs. Harness: `tools/claims-v3/tr/` |
+| Detailed routing and the SPEF | [`reports/data/2026-10-27-q129-routed-netlist/`](../reports/data/2026-10-27-q129-routed-netlist/README.md) | both netlists routed to 0 DRC violations in an ORFS container at the commit this flow already pins, the extracted coupling capacitors, and the mixed SPEF committed gzipped |
+| The glitch factor, measured | [`reports/data/2026-10-27-q129-glitch/`](../reports/data/2026-10-27-q129-glitch/README.md) | the SDF-annotated run against its zero-delay twin per scope, the cross-instrument spread, and the split of the step into its measured switching half and its scaled internal half |
+| The unpriced capacitance, priced | [`reports/data/2026-10-27-q129-unpriced-capacitance/`](../reports/data/2026-10-27-q129-unpriced-capacitance/README.md) | the net-by-net account of the 49.5%: the idle and tied-constant share, the renumbered-bus row, the 252 nets place-and-route created, and the mis-priced join it corrected |
+| The ledger's scope: the lane's transport | [`reports/data/2026-10-27-q129-ledger-scope/`](../reports/data/2026-10-27-q129-ledger-scope/README.md) | `ledger-scope.json`: the register files, operand bus, result path and control priced, the zero-operand floor split into clock and signal, and the card's own zeros bound that the model violates |
+| The rail ledger | [`reports/data/2026-10-27-q129-rail-ledger/`](../reports/data/2026-10-27-q129-rail-ledger/README.md) | `rail-ledger.json`: the measured minion rail per multiply-add, the four rows of the board-to-rail step, the two withdrawn rows, and the three-footing leakage sensitivity |
+| Stop 9: phonons, fins and the floor | [`reports/data/2026-10-27-q129-stop9-atoms/`](../reports/data/2026-10-27-q129-stop9-atoms/README.md) | the liberty pin the 25,000× prices, the two transistor-only rungs beside it, the channel's share of a local flip's heat, and the optical-phonon count per edge |
+| Every aifoundry3 reduction at the measured slope | [`reports/data/2026-10-27-q129-leak-sensitivity/`](../reports/data/2026-10-27-q129-leak-sensitivity/README.md) | the four per-experiment `leak-sensitivity-e71.{txt,json}` files, `q128-data-at-0.3803.json` and `q128-data-diff.txt` (275 numbers move; the waterfall and the whole bottom-up ledger are byte-identical), plus the reproduction checks at each published slope |
+| The governor's temperature term | [`reports/data/2026-10-27-q129-governor-temperature/`](../reports/data/2026-10-27-q129-governor-temperature/README.md) | model E64-T1 over both its declared and its unidentified parameters, the out-of-sample misses, and the statement that γ and the thermal trip are jointly unidentified |
+| 🛑 The gate every raised-cap arm must pass | [`reports/data/2026-10-27-q129-throttle-wrap-gate/`](../reports/data/2026-10-27-q129-throttle-wrap-gate/README.md) | the public half of a firmware hazard corrected in mechanism, field and direction: a 16-bit cast **wraps** at 65.536 W, so on an affected build the power arm **inverts**. Every citation is in the open `et-platform` repository |
+| The waterfall, rebuilt | [`reports/data/2026-10-28-q129-waterfall/`](../reports/data/2026-10-28-q129-waterfall/README.md) | `waterfall.py` and `waterfall-v2.json`: the ledger assembled from the lanes above, with the two closures against the board, the glitch split and the reconciliation of the two roads asserted in code (the build fails if they disagree by more than 0.02 pJ) |
+
+Nothing in these eighteen directories names a person, an address, a path into a private tree, or a foundry, process
+or library identifier beyond the open ASAP7 kit and the open `et-platform` repository. The archive cross-check that
+ran beside them is **not** here, by design; its one publishable half is the throttle-wrap gate above.
 
 ## The camera and the details panel (30 September)
 
