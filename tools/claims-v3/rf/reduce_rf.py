@@ -31,7 +31,9 @@ from reduce_hl import fit_line, leak_slope, load_jsonl, mean_se, runs_of_pass, u
 
 # two-sided 97.5% points of Student's t, so no scipy is needed
 T975 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262, 10: 2.228,
-        11: 2.201, 12: 2.179, 13: 2.160, 14: 2.145, 15: 2.131}
+        11: 2.201, 12: 2.179, 13: 2.160, 14: 2.145, 15: 2.131, 16: 2.120, 17: 2.110, 18: 2.101, 19: 2.093,
+        20: 2.086, 21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064, 25: 2.060, 26: 2.056, 27: 2.052, 28: 2.048,
+        29: 2.045, 30: 2.042}
 V_REG = 0.5218           # the registered rail voltage for the capacitance conversion (P6)
 
 
@@ -202,9 +204,65 @@ def main():
     ys = [r["p_raw"] for r in G if r["fam"] == "rf"]
     if len(xs) >= 6:
         X = np.column_stack([np.ones(len(xs)), [x[0] for x in xs], [x[1] for x in xs]])
-        c, *_ = np.linalg.lstsq(X, np.asarray(ys, float), rcond=None)
+        yv = np.asarray(ys, float)
+        c, *_ = np.linalg.lstsq(X, yv, rcond=None)
+        # classical OLS standard errors, so the covariate fit carries an interval like every other estimator
+        # here (amendment 28 Oct 2026: it was quoted as a bare point before). dof = runs - 3.
+        rsd = yv - X @ c
+        dof = len(xs) - X.shape[1]
+        s2 = float(rsd @ rsd) / dof if dof > 0 else None
+        xtxi = np.linalg.inv(X.T @ X)
+        se_b = math.sqrt(s2 * xtxi[1][1]) if s2 else None
+        se_t = math.sqrt(s2 * xtxi[2][2]) if s2 else None
+        tt = t975(dof)
         tcov = {"slope_W_per_bit_per_op": float(c[1]), "W_per_C": float(c[2]),
-                "e_cell_fJ": float(c[1] / ops_s * 1e15) if ops_s else None, "n_runs": len(xs)}
+                "e_cell_fJ": float(c[1] / ops_s * 1e15) if ops_s else None, "n_runs": len(xs),
+                "dof": dof, "t975": tt,
+                "e_cell_se_fJ": float(se_b / ops_s * 1e15) if (se_b and ops_s) else None,
+                "e_cell_lo_fJ": float((c[1] - tt * se_b) / ops_s * 1e15) if (se_b and ops_s) else None,
+                "e_cell_hi_fJ": float((c[1] + tt * se_b) / ops_s * 1e15) if (se_b and ops_s) else None,
+                "W_per_C_se": float(se_t) if se_t else None,
+                "resolved_excludes_zero": bool(se_b and abs(c[1]) > tt * se_b),
+                "t_win_span_C": float(max(x[1] for x in xs) - min(x[1] for x in xs)),
+                "note": "pooled over the kept rf_ runs; the die-temperature span is ~1 C and quantised, so this "
+                        "is indicative: it does not resolve e_cell either (its interval spans zero)"}
+
+    # leverage: drop one pass at a time, so the published point and bound carry their own sensitivity to the
+    # single pass that dominates them (amendment 28 Oct 2026, after the verifier found it undisclosed).
+    lev = None
+    if slope["n"] and slope["n"] >= 3 and ops_s:
+        drops = []
+        for q in per_pass:
+            rest = [r["board"]["slope_W_per_bit_per_op"] for r in per_pass if r["pass"] != q["pass"]]
+            d = ci(rest)
+            drops.append({"dropped_pass": q["pass"], "n": d["n"],
+                          "e_cell_fJ": float(d["mean"] / ops_s * 1e15) if d["mean"] is not None else None,
+                          "lo_fJ": float(d["lo"] / ops_s * 1e15) if d["lo"] is not None else None,
+                          "hi_fJ": float(d["hi"] / ops_s * 1e15) if d["hi"] is not None else None,
+                          "resid_rms_W": q["board"].get("resid_rms_W")})
+        worst = max(drops, key=lambda d: abs((d["e_cell_fJ"] or 0.0) - (e_cell["mean"] or 0.0)))
+        rung = None
+        wp = worst["dropped_pass"]
+        wrow = next((r for r in per_pass if r["pass"] == wp), None)
+        if wrow and wrow["board"]["slope_W_per_bit_per_op"] is not None:
+            a0, b0 = wrow["board"]["intercept_W"], wrow["board"]["slope_W_per_bit_per_op"]
+            cand = []
+            for n in rf_names:
+                y = item_mean(wp, n)
+                if y is None:
+                    continue
+                others = [item_mean(p2, n) for p2 in passes if p2 != wp and item_mean(p2, n) is not None]
+                cand.append({"item": n, "k": man[n]["k"], "p80_W": y,
+                             "resid_W": y - (a0 + b0 * man[n]["k"]),
+                             "other_passes_mean_W": float(np.mean(others)) if others else None,
+                             "other_passes_min_W": min(others) if others else None,
+                             "other_passes_max_W": max(others) if others else None})
+            rung = max(cand, key=lambda q: abs(q["resid_W"])) if cand else None
+        lev = {"drop_one_pass": drops, "max_influence_pass": wp,
+               "e_cell_fJ_without_it": worst["e_cell_fJ"], "bound_fJ_without_it": worst["hi_fJ"],
+               "highest_leverage_rung_in_it": rung,
+               "note": "keeping the high-leverage pass is the conservative direction: it widens the interval and "
+                       "raises the published 95 % bound"}
 
     rate = {}
     for fam in ("rf", "rfz"):
@@ -277,7 +335,8 @@ def main():
            "e_cell_fJ": e_cell, "e_cell_rail_fJ": e_rail,
            "span_W_k192_minus_k32": span, "resid_rms_W": rms, "curvature_sigma": quad,
            "rfz_slope_W_per_bit_per_op": rfz_slope, "capacitance": {"at_measured_V": cap, "at_registered_V": cap_reg},
-           "temperature_covariate": tcov, "rate": rate, "rule5_resolution": rule5, "scored": scored}
+           "temperature_covariate": tcov, "leverage": lev, "rate": rate, "rule5_resolution": rule5,
+           "scored": scored}
     json.dump(res, open(a.out, "w"), indent=1, default=float)
 
     if a.csv:

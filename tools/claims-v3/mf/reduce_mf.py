@@ -12,6 +12,11 @@ mean_se — and adds only the registered estimator:
   rule 1  per level, within-pass least squares of leakage-corrected board power on changed bits per transfer over
           the k-arm; the mean over passes with a two-sided t interval on the between-pass scatter (df = n - 1);
           the slope converted with each run's OWN measured rate, never an assumed one. The w-arm the same way.
+          Implementation note (amendment 28 Oct 2026, departure D-M6): the W-per-bit slope is converted to pJ
+          with the MEAN of the level's own measured rates (mean over the pass's runs, then over passes), not run
+          by run, because the slope itself is a per-pass quantity. No rate is ever assumed. Measured size of the
+          difference: the within-level spread of ops_per_s is 1e-5 to 2e-3 relative (L2 9.8e-6, L1 3.6e-4,
+          DRAM 1.3e-4, L3 2.1e-3), so it moves no published digit.
   rule 2  saturation = the signed departure of the top rung from the line through the two lowest rungs, with its
           own interval, as a number.
   rule 3  burst gate: a run whose telemetry median took_ms in its window exceeds 60 ms is dropped; a level losing
@@ -229,7 +234,7 @@ def main():
         # comparison is made on the chord ABOVE the zeros anchor, not on absolute board power: 15 % of 34 W is
         # 5 W, which would pass anything, while the whole chord is ~3 W.
         p4, two_term = None, []
-        rel = []
+        rel, rel_anchor = [], []
         for p, r in zip(passes, per_pass):
             pts = []
             for n in names_k + names_w:
@@ -250,9 +255,15 @@ def main():
                 pred_chord = pred_rand - pred_zero
                 row.update({"pred_chord_W": float(pred_chord), "obs_chord_W": float(obs_chord),
                             "chord_accounted_pct": float(100.0 * pred_chord / obs_chord) if obs_chord else None,
-                            "zeros_residual_W": float(r["zeros_W"] - pred_zero)})
+                            "zeros_residual_W": float(r["zeros_W"] - pred_zero),
+                            # P4 on the REGISTERED basis (amendment 28 Oct 2026, departure D-M3): the registered
+                            # wording is a percent of the random anchor itself, i.e. of absolute board power at
+                            # the random-equivalent k and the matching W. Both bases are now reported.
+                            "pred_random_W": float(pred_rand), "obs_random_W": float(r["random_W"]),
+                            "random_anchor_pct_error": float(100.0 * (pred_rand - r["random_W"]) / r["random_W"])})
                 if obs_chord:
                     rel.append(100.0 * (pred_chord - obs_chord) / obs_chord)
+                rel_anchor.append(row["random_anchor_pct_error"])
             two_term.append(row)
         if rel:
             p4 = ci(rel)
@@ -266,6 +277,11 @@ def main():
             "saturation_pct_below_line": ci([r.get("saturation_pct") for r in per_pass]),
             "chord_W_random_minus_zeros": chord,
             "chord_vs_two_term_model_pct": p4, "two_term_model": two_term,
+            "random_anchor_vs_two_term_model_pct": (ci(rel_anchor) if rel_anchor else None),
+            # whether the k-arm is monotone in every kept pass. Where it is not, the whole-arm slope is a shape,
+            # not a measured per-changed-bit coefficient (amendment 28 Oct 2026).
+            "k_arm_monotone": all(all(b >= a for a, b in zip(r["k"]["p80_W"], r["k"]["p80_W"][1:]))
+                                  for r in per_pass if r["k"]["p80_W"]),
             "unresolved_in_passes": unresolved.get(lvl, []),
             "pJ_per_B": {"zeros": None, "random": None},
         }
@@ -286,6 +302,14 @@ def main():
     order = [(res_levels[l] or {}).get("e_flip_pJ_per_bit", {}).get("mean") for l in LEVELS]
     mono = all(order[i] is not None and order[i + 1] is not None and order[i] < order[i + 1]
                for i in range(len(order) - 1))
+    # which pairs of the ordering are actually resolved at 95 %, not merely ordered on point estimates
+    resolved_pairs = {}
+    for i in range(len(LEVELS)):
+        for j in range(i + 1, len(LEVELS)):
+            a_ = (res_levels[LEVELS[i]].get("e_flip_pJ_per_bit") or {})
+            b_ = (res_levels[LEVELS[j]].get("e_flip_pJ_per_bit") or {})
+            resolved_pairs["%s<%s" % (LEVELS[i], LEVELS[j])] = (
+                None if (a_.get("hi") is None or b_.get("lo") is None) else bool(a_["hi"] < b_["lo"]))
     scored = {
         "P1_l1_small_k_slope_pJ_per_bit": {"registered": P["P1_l1_small_k_slope_pJ_per_bit"],
                                            "measured": (l1.get("e_flip_small_k_pJ_per_bit") or {}).get("mean"),
@@ -302,31 +326,84 @@ def main():
         "P3_dram_saturation_percent_below_line_at_k512": {
             "registered": P["P3_dram_saturation_percent_below_line_at_k512"],
             "measured_pct": (dr.get("saturation_pct_below_line") or {}).get("mean"),
-            "measured_W": (dr.get("saturation_W") or {}).get("mean")},
+            "measured_W": (dr.get("saturation_W") or {}).get("mean"),
+            "k_arm_monotone": dr.get("k_arm_monotone"),
+            "pass": inrange((dr.get("saturation_pct_below_line") or {}).get("mean"),
+                            P["P3_dram_saturation_percent_below_line_at_k512"]),
+            "note": "not resolved rather than merely failed: the DRAM k-arm is not monotone in any kept pass, so "
+                    "the top rung sits above the line through the two lowest and the registered small-k slope is "
+                    "negative"},
         "P4_random_anchor_within_percent": {
             "registered": P["P4_random_anchor_within_percent"],
-            "rule": "the two-arm additive model P = a + b.k + c.w, fitted on the k- and w-arms only, must "
-                    "predict the measured zeros-to-random chord to within 15 %",
+            "registered_basis": "a percent of the random anchor itself: 'the random anchor lands within +-15 % of "
+                                "the ladder interpolated to the random-equivalent k and the matching W'",
+            "rule": "the two-arm additive model P = a + b.k + c.w is fitted on the k- and w-arms only (never on "
+                    "the anchors) and used to predict the random anchor. Both bases are reported: the registered "
+                    "one (percent of the anchor's absolute board power) and the chord one (percent of the "
+                    "zeros-to-random difference), which is the stricter test and the informative number",
             "l1_pct_error": (l1.get("chord_vs_two_term_model_pct") or {}).get("mean"),
             "l1_interval": [(l1.get("chord_vs_two_term_model_pct") or {}).get("lo"),
                             (l1.get("chord_vs_two_term_model_pct") or {}).get("hi")],
             "dram_pct_error": (dr.get("chord_vs_two_term_model_pct") or {}).get("mean"),
             "dram_interval": [(dr.get("chord_vs_two_term_model_pct") or {}).get("lo"),
                               (dr.get("chord_vs_two_term_model_pct") or {}).get("hi")],
+            "l1_pct_error_anchor_basis": (l1.get("random_anchor_vs_two_term_model_pct") or {}).get("mean"),
+            "l1_interval_anchor_basis": [(l1.get("random_anchor_vs_two_term_model_pct") or {}).get("lo"),
+                                         (l1.get("random_anchor_vs_two_term_model_pct") or {}).get("hi")],
+            "dram_pct_error_anchor_basis": (dr.get("random_anchor_vs_two_term_model_pct") or {}).get("mean"),
+            "dram_interval_anchor_basis": [(dr.get("random_anchor_vs_two_term_model_pct") or {}).get("lo"),
+                                           (dr.get("random_anchor_vs_two_term_model_pct") or {}).get("hi")],
             "pass_l1": None if (l1.get("chord_vs_two_term_model_pct") or {}).get("mean") is None else
             bool(abs(l1["chord_vs_two_term_model_pct"]["mean"]) <= P["P4_random_anchor_within_percent"]),
             "pass_dram": None if (dr.get("chord_vs_two_term_model_pct") or {}).get("mean") is None else
-            bool(abs(dr["chord_vs_two_term_model_pct"]["mean"]) <= P["P4_random_anchor_within_percent"])},
+            bool(abs(dr["chord_vs_two_term_model_pct"]["mean"]) <= P["P4_random_anchor_within_percent"]),
+            "pass_l1_anchor_basis": None if (l1.get("random_anchor_vs_two_term_model_pct") or {}).get("mean")
+            is None else bool(abs(l1["random_anchor_vs_two_term_model_pct"]["mean"])
+                              <= P["P4_random_anchor_within_percent"]),
+            "pass_dram_anchor_basis": None if (dr.get("random_anchor_vs_two_term_model_pct") or {}).get("mean")
+            is None else bool(abs(dr["random_anchor_vs_two_term_model_pct"]["mean"])
+                              <= P["P4_random_anchor_within_percent"])},
         "P5_closure_pJ_per_line_dram": {"registered": P["P5_closure_pJ_per_line_dram"], "measured": closure,
                                         "pass": None if closure is None else
                                         bool(abs(closure - P["P5_closure_pJ_per_line_dram"]["target"])
                                              <= P["P5_closure_pJ_per_line_dram"]["tolerance"])},
         "P6_ordering": {"registered": P["P6_ordering"], "e_flip_by_level": dict(zip(LEVELS, order)),
                         "monotone": mono,
-                        "span": (order[-1] / order[0]) if (order[0] and order[-1]) else None},
+                        "span": (order[-1] / order[0]) if (order[0] and order[-1]) else None,
+                        "intervals_by_level": {l_: [(res_levels[l_]["e_flip_pJ_per_bit"] or {}).get("lo"),
+                                                    (res_levels[l_]["e_flip_pJ_per_bit"] or {}).get("hi")]
+                                               for l_ in LEVELS},
+                        # monotone on point estimates is not the same as an ordering resolved at 95 %: a pair is
+                        # resolved only when the lower level's interval sits entirely below the higher one's
+                        # (amendment 28 Oct 2026).
+                        "resolved_pairs_at_95": resolved_pairs,
+                        "pass_order_points": mono,
+                        "pass_order_resolved_at_95": all(resolved_pairs.values()),
+                        "pass_l1_below_rest_at_95": all(v for k_, v in resolved_pairs.items()
+                                                        if k_.startswith("l1<")),
+                        "pass_span": (None if not (order[0] and order[-1]) else
+                                      bool(order[-1] / order[0] >= 100.0)),
+                        "note": "PASS on the order only as L1 < {L2, L3, DRAM}; the upper three are unresolved at "
+                                "95 % (their intervals overlap almost completely). FAIL on the span"},
         "P7_rates": {"registered": P["P7_rates"],
                      "l1_bytes_per_s": l1.get("bytes_per_s"), "dram_bytes_per_s": dr.get("bytes_per_s"),
-                     "took_ms_med_max": max([r.get("took_ms_med") or 0 for r in R]) if R else None},
+                     # the registered DRAM band is a LINE rate; bytes_per_s counts the 32 B each load asks for,
+                     # half the 64 B line the stride-64 access actually fetches (amendment 28 Oct 2026).
+                     "dram_line_bytes_per_s": (2.0 * dr["bytes_per_s"]) if dr.get("bytes_per_s") else None,
+                     "basis": "l1_bytes_per_s is compared directly; the DRAM band [57, 95] GB/s is the line rate, "
+                              "so dram_line_bytes_per_s = 2 x dram_bytes_per_s (32 B requested per 64 B line) is "
+                              "the quantity scored",
+                     "took_ms_med_max": max([r.get("took_ms_med") or 0 for r in R]) if R else None,
+                     "pass_l1": inrange((l1.get("bytes_per_s") or 0) / 1e12, P["P7_rates"]["l1_TB_per_s"]),
+                     "pass_dram": inrange((2.0 * dr["bytes_per_s"] / 1e9) if dr.get("bytes_per_s") else None,
+                                          P["P7_rates"]["dram_GB_per_s"]),
+                     "pass_took_ms": bool((max([r.get("took_ms_med") or 0 for r in R]) if R else 0)
+                                          <= P["P7_rates"]["took_ms_drop_above"]),
+                     "pass": bool(inrange((l1.get("bytes_per_s") or 0) / 1e12, P["P7_rates"]["l1_TB_per_s"])
+                                  and inrange((2.0 * dr["bytes_per_s"] / 1e9) if dr.get("bytes_per_s") else None,
+                                              P["P7_rates"]["dram_GB_per_s"])
+                                  and (max([r.get("took_ms_med") or 0 for r in R]) if R else 0)
+                                  <= P["P7_rates"]["took_ms_drop_above"])},
     }
 
     res = {"exp": "E75", "card": card, "dirs": a.dirs, "passes_used": passes, "passes_set_aside": set_aside,

@@ -5,7 +5,9 @@
 *Six passes, `p7410`–`p7415`, Wed 28 Oct 2026 11:14:05–11:25:40 PDT on aifoundry3 card 0, 600 MHz and 522 mV,
 `--harts 1` (1,024 harts). **11.6 card-minutes** in all. Every pass `block.json` `"status":"ok"`; one pass set
 aside by its own registered rule. Pre-registered Tue 27 Oct in `2be3f07e` / `547f4ae3`, both on `origin/main`
-before the first launch. Reduced with `reduce.sh`, unchanged.*
+before the first launch. Reduced with `reduce.sh`, whose three commands are unchanged; the reducer itself was
+amended the same day after an adversarial review and the reduction re-run, with no published number changing
+(D-R5).*
 
 **The board ladder does not resolve the cell bit. Rule 5 therefore publishes a bound:**
 
@@ -13,8 +15,11 @@ before the first launch. Reduced with `reduce.sh`, unchanged.*
 > point estimate **0.855 fJ**, 95 % t interval **[−1.02, +2.73] fJ** over 5 kept passes (df 4).
 > The registered resolution was ±0.23 fJ at 5 passes; the measured half-width is **±1.87 fJ**, 8× worse.
 >
-> **The minion rail, fitted the same way, does resolve it: 1.643 fJ, 95 % [0.704, 2.583]**, and the board fit
-> with a die-temperature covariate gives **1.359 fJ**. E61's cross-kernel 1.267 ± 0.151 fJ sits inside all three.
+> **The minion rail, fitted the same way, does resolve it: 1.643 fJ, 95 % [0.704, 2.583]** — it is the only arm
+> here that excludes zero. The board fit with a die-temperature covariate gives **1.359 fJ, 95 % [−0.31, +3.03]**
+> (SE 0.81, dof 27), so it does not resolve e_cell either. E61's cross-kernel 1.267 ± 0.151 fJ sits inside all
+> three intervals; the board arm therefore **fails to contradict E61 rather than confirming it**, and the
+> order-of-1-fJ reading is the rail's.
 
 The design worked and the meter did not. The two falsification tests the registration cared about both came back
 clean, which is the substantive result:
@@ -35,7 +40,7 @@ the board meter. The whole span is 49 mW on a card drawing 32 W.
 |---|---:|---:|---:|
 | board, point | 0.855 fJ | 0.219 pJ | **0.055 pJ** |
 | board, 95 % upper bound | 2.728 fJ | 0.698 pJ | **0.175 pJ** |
-| board with a temperature covariate | 1.359 fJ | 0.348 pJ | 0.087 pJ |
+| board with a temperature covariate (indicative: 95 % [−0.31, +3.03] fJ, over a 1.0 °C quantised span) | 1.359 fJ | 0.348 pJ | 0.087 pJ |
 | minion rail | 1.643 fJ | 0.421 pJ | 0.105 pJ |
 | E61 (21 Oct, cross-kernel, same card) | 1.267 ± 0.151 fJ | 0.324 pJ | 0.081 pJ |
 
@@ -50,6 +55,11 @@ the board meter. The whole span is 49 mW on a card drawing 32 W.
 | **P5** issue rate | `rf` **0.7574** (36 runs, min = max), `rfz` **0.7356** (18 runs, min = max) | 0.7574 ± 0.0020 / 0.7356 ± 0.0020 | **PASS** |
 | **P6** cell capacitance | **6.28 fF** at 0.5218 V (6.28 at the measured 522 mV) | 5.9–13.2 fF | inside the band, but it is 2 e/V² of an unresolved e_cell and inherits P1's verdict |
 
+The temperature covariate is reported for what it is: **indicative**. All 30 kept `rf_` runs launch at 58.0 °C and
+their window means take nine distinct values inside a 1.0 °C span, so the covariate is fitted over almost no
+temperature range. It survives pass fixed effects (1.383 fJ, 0.218 W/°C, SE 0.81), so it is not merely absorbing
+between-pass offsets — but its own interval spans zero, and it is not a resolution of e_cell.
+
 ### Why the scatter, and what it would cost to close
 
 The five kept passes give slopes 2.68, 15.84, 3.83, −0.76 and −1.70 (× 10⁻⁴ W per bit/op). Their within-pass
@@ -57,6 +67,16 @@ residual rms is 36.7, **243.2**, 36.1, 74.7 and 26.0 mW — E60 worked at 32 mW,
 noise and one (`p7411`) is 7.6×. Rule 5 said in advance that a scatter worse than E60's turns the result into a
 bound, and it did. At the measured between-pass SE the half-width falls as 1/√n: **≈ 40 passes** of this harness
 (about 80 card-minutes) would bring the board interval to ±0.6 fJ, and ~250 passes to the registered ±0.23 fJ.
+**One pass carries the point estimate and the bound, and inside it one reading.** Per-pass e_cell runs 0.576,
+3.405 (`p7411`), 0.822, −0.163 and −0.365 fJ: dropping `p7411` — the pass whose residual rms is 243 mW, 7.6× E60's
+— moves the point from **0.855 to 0.218 fJ** and the published 95 % bound from **2.73 to 1.13 fJ**. Inside `p7411`
+the leverage is a single reading: `rf_k96` reads **31.583 W** there, 0.53 W below that pass's own fit line, where
+the other five passes read 32.188–32.327 W at the same rung. Nothing in the registration allows dropping it (its
+pass passed every gate, and the run-level gates passed too), and keeping it is the **conservative** direction: it
+widens the interval and raises the bound this README publishes. The jackknife over all five kept passes is in
+`rf.json` under `leverage`. For contrast, the pass that *was* set aside is innocent: putting `p7412` back (its own
+e_cell is 0.828 fJ) moves the result 0.855 → **0.850 fJ, 95 % [−0.57, +2.27]**.
+
 The cheaper route is the one this run stumbled on: **the minion rail is 4× tighter than the board** on the same
 runs (SE 1.6 × 10⁻⁴ against 3.1 × 10⁻⁴ W per bit/op), because it does not carry the board's fan and regulator
 noise. A follow-up should pre-register the rail as the estimator and the board as the check, not the reverse.
@@ -111,6 +131,13 @@ the data rather than imposing it) gives 1.359 fJ.
   58–62 °C) hours before this run; it is added to the registered 0.2936 W/°C sensitivity rather than replacing
   the registered `auto` estimator.
 - **Not extended to 10 passes** (the registration's option). Named above with its consequence: the bound.
+- **D-R5 (28 Oct 2026) — the reducer was amended after an adversarial review of this result, and the reduction
+  re-run.** Two things the review found undisclosed are now computed rather than argued: `temperature_covariate`
+  carries its own OLS standard error and 95 % interval (which spans zero), and a new `leverage` block jackknifes
+  the passes and names the highest-leverage rung inside the most influential one. **No published number changed**:
+  every pre-existing field of `rf.json`, `rf-leak0.2936.json`, `rf-leak0.3803.json` and `runs.csv` reproduces
+  bit-for-bit (checked field by field against the committed files), and the three reduction commands in
+  `reduce.sh` are unchanged.
 
 ## What it changes
 
@@ -119,11 +146,15 @@ the data rather than imposing it) gives 1.359 fJ.
    content per fp32 multiply-add the cells cost **0.055 pJ/MAC (point), at most 0.175 pJ/MAC at 95 %** — so they
    can account for **1.4 % of the 3.837 pJ unaccounted, and at most 4.6 %.** A ceiling is what the waterfall
    needs here: it says this term cannot be the explanation.
-2. **E61's number survives the removal of its confound.** E61 reached the cell only by subtracting two kernels
-   whose issue rates differ by 3 %, and was "not identified" on the other two cards. E74 removes that subtraction
-   by construction and confirms the design is clean (P5 exact, P4 flat), and every estimator here — rail 1.643
-   [0.704, 2.583], covariate 1.359, board point 0.855 — contains E61's 1.267 ± 0.151 fJ. The cell price is real
-   and of order 1 fJ; it is not an artefact of the cross-kernel step.
+2. **E61's number is not contradicted once its confound is removed, and the rail arm puts the cell at order 1 fJ.**
+   E61 reached the cell only by subtracting two kernels whose issue rates differ by 3 %, and was "not identified"
+   on the other two cards. E74 removes that subtraction by construction and confirms the design is clean (P5
+   exact, P4 flat), and E61's 1.267 ± 0.151 fJ sits inside every interval here. Say exactly what that is worth:
+   the **board** interval [−1.02, +2.73] fJ contains 0 and 0.2 fJ as readily as 1.27, so it *fails to contradict*
+   E61 — it does not confirm it; the **covariate** fit [−0.31, +3.03] is the same story. Only the **minion rail**,
+   registered as a figure reported beside the board and never instead of it, excludes zero: **1.643 fJ, 95 %
+   [0.704, 2.583]**. On that arm the cell price is real and of order 1 fJ, and on that arm it is not an artefact
+   of the cross-kernel step.
 3. **Levels tab stop 4** moves from "what the register file's own cells cost — missing" to *bounded, consistent
    with E61, resolved on the rail and not on the board*, with the price of resolving it stated: pre-register the
    rail, or ~40 passes (80 card-minutes) of the board.
