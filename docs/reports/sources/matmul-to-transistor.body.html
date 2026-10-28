@@ -504,8 +504,15 @@ unchanged from <code>data-2026-10-27-q128.json</code>.</p>
   <b>And it over-prices:</b> in the zeros stimulus one lane's transport model costs
   <span id="q-transport-bound" data-q="transport-bound"></span>. Its register-file array is a standard-cell latch array standing in for
   a compiled macro, so this is a <em>violated</em> ceiling, and a true accounting sits below the bottom of
-  every range here by whatever that model over-prices. E74 (28 October) bounds the cell bit at
-  <span id="q-e74" data-q="e74"></span>, but not the array's own per-multiply-add energy.</p>
+  every range here by whatever that model over-prices. E74 (28 October) measured on the card the one part of
+  that array a zeros stimulus cannot reach — the cells' own stored bits, which do not change while the
+  operands do not — and it bounds them at <span id="q-e74" data-q="e74"></span>; the minion rail arm,
+  registered as a figure reported beside the board and never instead of it, is the only one that excludes
+  zero, at <span id="q-e74-rail" data-q="e74-rail"></span>. In per-multiply-add terms those cells are
+  <span id="q-e74-mac" data-q="e74-mac"></span>. So the cells are <em>not</em> where this row over-prices:
+  the read ports, the read mux tree and the clocking are, and they are still modelled rather than measured.
+  That is why E74 narrows this row's caveat without removing it, and why nothing from it is added to the
+  ledger — the model already charges for the term E74 bounded.</p>
 
   <p data-ss-id="clock-tree-and-leakage-already-inside"><b class="k">Two things are inside already, and are not
   rows.</b> <b>The clock network</b> is inside the arithmetic row and always was — 0.496&nbsp;pJ of the
@@ -542,7 +549,10 @@ unchanged from <code>data-2026-10-27-q128.json</code>.</p>
   rest, in the order they matter: the register-file array measured rather than modelled; a matched hart ladder
   (E77) to split the regulators' 0.875&nbsp;pJ delivery loss from off-rail logic; a route, an SDF and a glitch
   measurement on the transport netlist; and whether the lane's register files are clock-gated at idle, worth
-  0.223&nbsp;pJ. The remainder is still not a measurement error. It is the parts of the chip this count does
+  0.223&nbsp;pJ. The first of those four is narrower than it was on 27 October but not closed: E74 measured
+  the array's storage cells and bounded them, and storage is the small part — the ports, the mux tree and
+  the clocking are what the card's zeros measurement says the model over-prices, and they are what a
+  compiled-macro measurement would have to reach. The remainder is still not a measurement error. It is the parts of the chip this count does
   not yet reach — and there are fewer of them than there were.</p>
 </div>
 
@@ -720,7 +730,7 @@ including three things that are open <em>because</em> an experiment ran.</p>
 </div>
 
 <div class="lv" data-ss-id="beyond-unit-memory-instructions-trap-no">
-  <div class="step">Measured 28 October 2026 · being folded in</div>
+  <div class="step">Measured and folded in · 28 October 2026</div>
   <h3 data-ss-id="memory-instructions-trap-no-flip-ladder">Memory, and the instructions that trap</h3>
   <p>No flip ladder had run against a memory path. A DRAM tensor load costs 94–134&nbsp;pJ per byte against a
   multiply-add's 5.8&nbsp;pJ, so for most real work this chain prices the small half. And thirteen
@@ -733,11 +743,40 @@ including three things that are open <em>because</em> an experiment ran.</p>
   substitutes cost — a C float divide is safe (libgcc's own routine contains no trapping instruction, 299
   instructions, 310–570 multiply-adds), while <code>sqrtf</code> is fatal, because libm's version contains
   one. E76 then confirmed it on silicon: <span id="q-e76" data-q="e76"></span>.</p>
-  <p data-ss-id="kernels-being-folded-in"><b>Three card runs landed on 28 October and are not yet in the
-  ledger above.</b> <span id="q-kernels" data-q="kernels"></span>. E74 priced a register file's own cells, which is the row §3
-  most needs measured rather than modelled, and its board ladder does not resolve it — so it publishes a
-  bound, <span id="q-e74-2" data-q="e74"></span>. E75 ran the first flip ladder on four memory paths. Folding all three into
-  the chain is a separate step, so the waterfall in §3 does not yet carry them.
+  <p data-ss-id="memory-half-measured-two-ends-differ"><b>The memory half is measured, and the two ends of
+  the hierarchy answer differently.</b> E75 ran the first flip ladder on four memory paths, on two arms at
+  once: the number of bits that <em>change</em> between consecutive words, and the number of ones each word
+  <em>carries</em>. Per changed bit, <span id="q-e75" data-q="e75"></span>. Per carried one,
+  <span id="q-e75-ones" data-q="e75-ones"></span> — so the L1 path pays for transitions and the DRAM path
+  pays for ones, by a wide margin: <span id="q-e75-share" data-q="e75-share"></span>. Two
+  of the four changed-bit prices are <em>bounds</em> and not coefficients, because their ladders are not
+  monotone — the middle rung reads below the bottom one in every pass, so the whole positive slope rests on
+  the top rung. <b>What it changes is what this page's own 94–134&nbsp;pJ per byte means.</b> The
+  zeros-to-random chord that was the only handle before is reproduced and then explained only at one end:
+  <span id="q-e75-chord" data-q="e75-chord"></span>. So a bit-counting energy model is complete on the
+  on-chip path and two thirds incomplete off it, the missing part being a property of the pattern rather
+  than of its counts; and anyone saving DRAM energy by reducing transitions is working on the small term,
+  while packing zeros is the lever.</p>
+
+  <p data-ss-id="kernels-folded-in-no-new-row"><b>All three are folded in, and none of them is a new row in
+  §3.</b> <span id="q-kernels" data-q="kernels"></span>. The reasons are different, and worth separating.
+  E74's bound is on the register-file <em>cells</em>' own stored bits — part of what §3's transport row
+  already models, so counting it again would double-count; and at
+  <span id="q-e74-mac-2" data-q="e74-mac-short"></span> it is a ceiling worth having, because it says this
+  term cannot be the explanation for what is left. E75 prices a memory path and not a multiply-add, so
+  the arithmetic waterfall is untouched by design. E76's thirteen have no energy at all. What the three move
+  is this list and the Levels tab, not the ledger.</p>
+
+  <p data-ss-id="kernels-what-failed-and-what-is-left"><b>What failed, and what is still open.</b> E74's
+  board ladder does not resolve the cell at all: resolving it would take about forty passes of the board
+  meter, or a re-registration with the rail as the estimator. On E74,
+  <span id="q-e74-failed" data-q="e74-failed"></span>; and
+  <span id="q-e74-lev" data-q="e74-leverage"></span>. On E75,
+  <span id="q-e75-failed" data-q="e75-failed"></span>. On E76,
+  <span id="q-e76-failed" data-q="e76-failed"></span>; and
+  <span id="q-e76-norun" data-q="e76-did-not-run"></span>. Newly open from this block: whether a
+  two-value alternating image is compressible on the DRAM link in a way random data is not, which is what
+  the unexplained two thirds of that chord points at, and it needs its own experiment.
   <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-28-e74-register-file-cells/README.md">E74</a> ·
   <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-28-e75-memory-flip-ladder/README.md">E75</a> ·
   <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-28-e76-trapped-instructions/README.md">E76</a></p>
@@ -758,8 +797,11 @@ including three things that are open <em>because</em> an experiment ran.</p>
       leakage measurement, which exists for no card.</dd>
     <dt>The remaining unaccounted share</dt><dd><span id="q-wf-unacc-3" data-q="wf-unacc"></span>, and the honest reading is that
       it is <em>larger</em> than that by whatever the transport's register-file model over-prices — a model
-      the card's own zeros measurement already contradicts. Measuring that array is the single most valuable
-      thing left in §3.</dd>
+      the card's own zeros measurement already contradicts. E74 measured that array's storage cells on
+      28 October and bounded them at <span id="q-e74-mac-3" data-q="e74-mac-short"></span>, which is the
+      small part of it: what over-prices is the ports, the read mux tree and the clocking, and measuring
+      those is the single most valuable thing left in §3.</dd>
+    <dt>The DRAM path's pattern</dt><dd><span id="q-e75-pattern" data-q="e75-dram-pattern"></span></dd>
     <dt>The heat path's model</dt><dd>One pole alone is excluded and both pre-registered rivals are refuted,
       but the preferred family is strained in two places at once and whether the extra second of lag is
       transport or a second short pole is undecided. Settling it needs a lock-in frequency below
@@ -818,4 +860,6 @@ they cannot drift from the record. The 28 October additions from the Q129 lanes 
 measured terms quoted beside the ledger — are transcribed from the README or summary of the data directory
 named on each line, because several of those lanes publish the figure only in prose; a sample of them —
 <span id="q-sampled" data-q="sampled"></span> — is re-checked against those directories' own JSON on every build, and the build
-fails if one does not match.</p>
+fails if one does not match. Three of those lanes are not transcribed at all:
+<span id="q-read-whole" data-q="read-whole"></span>, read from their reduction JSON the way §3's waterfall
+is.</p>

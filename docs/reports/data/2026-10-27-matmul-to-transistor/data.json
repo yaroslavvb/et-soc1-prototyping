@@ -849,16 +849,135 @@
    "say_which": "the 0.05 Hz transfer the camera ladder quotes is 0.1953 of the steady-state response, so a steady gain must name itself: the fit's G0 = 250.5 mK/W [217, 292], whose own 0.05 Hz value sits 2.71 line-SE (16.5%) BELOW the measured line, or the ~300 mK/W that measured line implies through the fitted attenuation. The 17% between them is itself a finding, and the fitted family is strained in two places"
   },
   "kernels": {
+   "e74_bits_per_mac": 64,
    "e74_bound_conf": 0.95,
-   "e74_bound_fJ": 2.73,
+   "e74_bound_fJ": 2.7280701086424686,
    "e74_card_minutes": 11.6,
+   "e74_ci_fJ": [
+    -1.018115784245545,
+    2.7280701086424686
+   ],
+   "e74_cost_to_resolve": "about 40 passes of the board meter, 80 card-minutes, or a re-registration with the minion rail as the estimator, which was 4x tighter on these same runs",
+   "e74_covariate_ci_fJ": [
+    -0.3121848576588666,
+    3.030003641987058
+   ],
+   "e74_covariate_fJ": 1.3589093921640956,
+   "e74_e61": "E61's cross-kernel 1.267 +- 0.151 fJ sits inside all three intervals here, and E74 removes E61's confound by construction: the issue rate read 0.7574 ops per cycle per hart on all 36 rf runs and 0.7356 on all 18 null runs, minimum equal to maximum. But the board interval contains 0 and 0.2 fJ as readily as 1.27, so it fails to contradict E61 rather than confirming it; the order-of-1-fJ reading is the rail's",
+   "e74_e61_fJ": 1.267,
+   "e74_e61_se_fJ": 0.151,
+   "e74_failed": "two registered predictions failed \u2014 P2, the ladder's own span (+48.9 mW against a registered 60-134 mW), and P3, linearity (residual rms 83.4 mW against a registered 20 mW or less)",
+   "e74_leverage": "the point and the bound both rest on one of the five kept passes, and inside it on one reading: without that pass e_cell is 0.22 fJ and the bound 1.13 fJ instead of 2.73. Keeping it is the conservative direction",
+   "e74_per_mac_bound_pJ": 0.174596486953118,
+   "e74_per_mac_pJ": 0.05471853838070155,
+   "e74_point_fJ": 0.8549771621984618,
+   "e74_rail_ci_fJ": [
+    0.7037105434873763,
+    2.58276527810155
+   ],
+   "e74_rail_fJ": 1.643237910794463,
+   "e74_resolved_on_the_board": false,
+   "e74_share_of_v1_remainder": 0.014262502652820185,
+   "e74_share_of_v1_remainder_bound": 0.04550894325825381,
    "e75_card_minutes": 21.5,
+   "e75_catalogue_chord_pJ_per_B": {
+    "dram": 38.0,
+    "l1": 0.15
+   },
+   "e75_chord_basis": "chord_pJ_per_B is per byte the kernel asks for; DRAM's figure is also given per 64 B line byte, which is the basis the registration fixed, and is half the requested-byte figure because each load asks for 32 B of a 64 B line",
+   "e75_dram_chord_pJ_per_line_B": 43.288799587040586,
+   "e75_dram_chord_share_ci_pct": [
+    29.96789298566665,
+    43.283195781942354
+   ],
+   "e75_dram_closure_pJ_per_line": 1008.104794567992,
+   "e75_dram_newly_open": "The unexplained two thirds of DRAM's chord is a property of the pattern and not of its counts: the next step is a third image with the same counts and a longer period, to test whether a two-value alternating image is compressible on the link or in DRAM in a way random data is not.",
+   "e75_dram_ones_pJ_per_line": 946.3175235683095,
+   "e75_dram_ones_share": 0.9387094761054474,
+   "e75_dram_point_ratio": 10.06823917185869,
+   "e75_failed": "four failed \u2014 P2, the DRAM small-k slope (-0.32 pJ per bit against a registered 6-25); P3, saturation at the top rung (-120% against a registered 20-60% below the line, and not resolved rather than merely failed, because that arm is non-monotone); P5, the per-line closure (1,008 pJ against a registered 2,432 +- 600); and P6's span (6.6x, not the registered 100x). P6's ordering passes only as L1 below the other three, whose intervals overlap at 95%, and P4 passes at L1 on both bases and at DRAM on the registered basis (-3.1% of the random anchor): it is the stricter chord basis, substituted on the day, that fails at DRAM, so P4-at-DRAM is not a pre-registered failure",
+   "e75_levels": [
+    {
+     "chord_accounted_pct": 98.29293571341556,
+     "chord_pJ_per_B": 0.1489360959468327,
+     "e_flip_ci_pJ": [
+      0.0482180817026435,
+      0.05013834904510038
+     ],
+     "e_flip_pJ": 0.04917821537387194,
+     "e_flip_resolved": true,
+     "e_flip_small_k_pJ": 0.06546777472003978,
+     "e_one_ci_pJ": [
+      -0.0013974988078999287,
+      0.0011381915714303496
+     ],
+     "e_one_pJ": -0.00012965361823478943,
+     "level": "L1",
+     "unit": "L1 hit, flw.ps 32 B"
+    },
+    {
+     "chord_accounted_pct": null,
+     "chord_pJ_per_B": 15.828770162757362,
+     "e_flip_ci_pJ": [
+      0.1828930425496426,
+      0.36556313820415953
+     ],
+     "e_flip_pJ": 0.27422809037690105,
+     "e_flip_resolved": true,
+     "e_flip_small_k_pJ": 0.29432480590524845,
+     "e_one_ci_pJ": null,
+     "e_one_pJ": null,
+     "level": "L2",
+     "unit": "L2, 256 KB per shire"
+    },
+    {
+     "chord_accounted_pct": null,
+     "chord_pJ_per_B": 79.95307901123283,
+     "e_flip_ci_pJ": [
+      0.20471366624578152,
+      0.36452588131934127
+     ],
+     "e_flip_pJ": 0.28461977378256137,
+     "e_flip_resolved": false,
+     "e_flip_small_k_pJ": -0.4745210317216775,
+     "e_one_ci_pJ": null,
+     "e_one_pJ": null,
+     "level": "L3",
+     "unit": "L3, 24 MB in all"
+    },
+    {
+     "chord_accounted_pct": 36.6255443838045,
+     "chord_pJ_per_B": 86.57759917408117,
+     "e_flip_ci_pJ": [
+      0.23334639610357066,
+      0.4133021753216781
+     ],
+     "e_flip_pJ": 0.3233242857126244,
+     "e_flip_resolved": false,
+     "e_flip_small_k_pJ": -0.32137604749715754,
+     "e_one_ci_pJ": [
+      2.965848563862817,
+      3.544763913387335
+     ],
+     "e_one_pJ": 3.2553062386250757,
+     "level": "DRAM",
+     "unit": "DRAM, 128 MB in all"
+    }
+   ],
+   "e75_still_out_of_scope": "the scratchpad rung, for the registered reason: no host fill reaches that address space, so it needs a kernel mode that copies the image in first",
+   "e75_what_it_means": "the data-dependent part of the DRAM figure is carried ones, not bit flips: reducing transitions is the small lever off-chip and packing zeros is the big one. The point ratio runs 10x, but its denominator is unresolved, so the share is the number to quote, not the factor",
    "e76_card_minutes": 7.7,
    "e76_confirmed": "all thirteen trap on silicon, 13 of 13, each ending the kernel with 0 ops",
+   "e76_controls": 7,
+   "e76_did_not_run": "its price stage and its long-kernel strand did not run, by the registered rule rather than against it: they launch only for a mode the probe clears, and the probe cleared none; the static instruction counts are the registration's, taken on the sister box on 27 October on the same driver build",
+   "e76_failed": "one failed, and low rather than high \u2014 P3, the wall-clock excess a trap costs (median 0.45 ms against a registered 0.5-50 ms): the trap is cheaper in time than the registration allowed for",
    "e76_probe_passes": 2,
    "e76_source": "there is no emulation path in the firmware, so the thirteen instructions have no per-instruction energy at all: a U-mode illegal instruction is delegated M->S and the exception handler calls return_from_kernel(KERNEL_RETURN_EXCEPTION), 758 instructions counted on the installed build, and that ends the hart's kernel. libgcc's __divsf3 (299 instructions) contains no trapping instruction, so a C float divide is safe and costs 310-570 multiply-adds; libm's sqrtf and fmodf and libgcc's __fixunssfdi do contain them, so sqrtf(x) is fatal",
    "e76_trapped": 13,
-   "status": "measured Wed 28 Oct 2026 on aifoundry3; being folded into the chain"
+   "gates": "216 power runs (E74 66 + E75 150) with no run-level gate failure; E76's 84 probe runs are scored by its own P1 and P4 instead, 26 of them not-ok by design \u2014 that is the result. The governor was never touched and no card was reset",
+   "moves_the_waterfall": false,
+   "status": "measured and folded in on Wed 28 Oct 2026, 41 card-minutes on aifoundry3's card 0",
+   "why_no_row": "E74 bounds the register-file cells' own stored bits, which is part of what \u00a73's transport row already models, so it is a check on that row and not an addition; E75 prices a memory path rather than a multiply-add; and E76's thirteen have no per-instruction energy, because the hardware never executes them"
   },
   "knob": {
    "a_ones_b_randn_mhz": {
@@ -958,7 +1077,13 @@
   "sampled_against_lane_json": {
    "directories": 6,
    "figures": 26,
-   "how": "each of these figures is present as a value in its own data directory's committed JSON, re-read at build time; the rest of this block is transcribed from the README or summary of the directory named on its line, and \u00a73's waterfall is read from waterfall-v2.json whole."
+   "how": "each of these figures is present as a value in its own data directory's committed JSON, re-read at build time; the rest of this block is transcribed from the README or summary of the directory named on its line, and \u00a73's waterfall is read from waterfall-v2.json whole. The three 28 October card runs in the kernels block are read whole too, from rf.json, mf.json and tr.json, so nothing in that block is transcribed.",
+   "read_whole": [
+    "2026-10-28-e74-register-file-cells",
+    "2026-10-28-e75-memory-flip-ladder",
+    "2026-10-28-e76-trapped-instructions"
+   ],
+   "read_whole_n": 3
   },
   "saturation": {
    "a_side": "the saturating form is REJECTED: its fitted asymptote lies 28.6 SE BELOW its own top rung, the fit rms is 4.7x the B side's, and the increments accelerate where saturation requires decay. E70 measured the A-side ladder but did not find the law that describes it, so the A side's shape is newly open",

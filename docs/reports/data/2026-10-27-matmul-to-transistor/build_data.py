@@ -25,6 +25,14 @@ led = json.load(open(f"{D}/2026-10-27-transistor-ledger/transistor-ledger.json")
 # bottom-up count rebuilt with routed wires, all of the capacitance, the measured glitch factor and the lane's
 # transport. Its own script asserts the arithmetic; see that directory's README for which rows overlap.
 wf2 = json.load(open(f"{D}/2026-10-28-q129-waterfall/waterfall-v2.json"))
+# E74, E75 and E76 (28 Oct 2026, aifoundry3 card 0): the register-file cell ladder, the memory-path flip
+# ladder and the trapped-instruction probe. These three are READ from their own reduction JSON, like the
+# waterfall above and unlike the rest of the Q129 block, so the figures in §5's kernels block cannot drift
+# from the record either. Each reducer scored its own registered predictions; the pass/fail fields below
+# come from those files, not from this script.
+e74rf = json.load(open(f"{D}/2026-10-28-e74-register-file-cells/rf.json"))
+e75mf = json.load(open(f"{D}/2026-10-28-e75-memory-flip-ladder/mf.json"))
+e76tr = json.load(open(f"{D}/2026-10-28-e76-trapped-instructions/tr.json"))
 
 pl = chain["price_list"]
 sat = chain["saturation"]
@@ -331,6 +339,41 @@ o["waterfall"] = {
     "v1": v1,
 }
 
+# ---- the E74-E76 terms, derived from the three reduction JSONs -------------
+# E74's per-multiply-add share: its registration (rf/README rule 6) fixes the basis at 64 bits of register
+# content per fp32 multiply-add, so the per-MAC figure is the cell-bit figure times 64, and the share is
+# taken against Q128's own remainder (v1's 3.837 pJ) so the two cannot drift apart.
+_e74_bits_per_mac = 64
+_e74_cell = e74rf["e_cell_fJ"]
+_e74_bound = e74rf["rule5_resolution"]["bound_95pct_fJ"]
+_e74_mac = _e74_bits_per_mac * _e74_cell["mean"] / 1000.0
+_e74_mac_bound = _e74_bits_per_mac * _e74_bound / 1000.0
+# E75: per level, the changed-bit price, whether its k-arm is monotone (two are not, and those two slopes are
+# bounds and not coefficients), and the per-carried-one price where a w-arm was registered (L1 and DRAM only).
+_e75_levels = []
+for _name, _lab in (("l1", "L1"), ("l2", "L2"), ("l3", "L3"), ("dram", "DRAM")):
+    _lv = e75mf["levels"][_name]
+    _f, _w = _lv["e_flip_pJ_per_bit"], _lv["e_one_pJ_per_bit"]
+    _e75_levels.append({
+        "level": _lab, "unit": _lv["unit"],
+        "e_flip_pJ": _f["mean"], "e_flip_ci_pJ": [_f["lo"], _f["hi"]],
+        "e_flip_resolved": bool(_lv["k_arm_monotone"]),
+        "e_flip_small_k_pJ": _lv["e_flip_small_k_pJ_per_bit"]["mean"],
+        "e_one_pJ": _w["mean"], "e_one_ci_pJ": None if _w["mean"] is None else [_w["lo"], _w["hi"]],
+        "chord_pJ_per_B": _lv["chord_W_random_minus_zeros"]["mean"] / _lv["bytes_per_s"] * 1e12,
+        "chord_accounted_pct": None if _lv["chord_vs_two_term_model_pct"] is None
+        else 100.0 + _lv["chord_vs_two_term_model_pct"]["mean"],
+    })
+_e75_dram = e75mf["levels"]["dram"]
+# DRAM's chord is quoted per LINE byte, which is the basis the registration itself fixed (P5's target is
+# 38 pJ/B x 64 B); the reducer's own line rate is twice the requested-byte rate, 32 B asked per 64 B line.
+_e75_dram_line_chord = (_e75_dram["chord_W_random_minus_zeros"]["mean"]
+                        / e75mf["scored"]["P7_rates"]["dram_line_bytes_per_s"] * 1e12)
+_e75_dram_chord_share_ci = [100.0 + _e75_dram["chord_vs_two_term_model_pct"]["lo"],
+                            100.0 + _e75_dram["chord_vs_two_term_model_pct"]["hi"]]
+_e75_closure = e75mf["scored"]["P5_closure_pJ_per_line_dram"]["measured"]
+_e75_ones_pJ_per_line = 290.7 * _e75_dram["e_one_pJ_per_bit"]["mean"]
+
 # ---- Q129, 28 October 2026 --------------------------------------------------
 # What the Q129 experiments and desk reductions changed in the rungs above. Each value is the figure its own
 # data directory publishes after its correction pass; the directory is named on every line, in the same
@@ -439,13 +482,96 @@ o["q129"] = {
                   "is 2,645x",
     },
     # E74-E76, measured on aifoundry3 on Wed 28 Oct (2026-10-28-e74-register-file-cells,
-    # -e75-memory-flip-ladder, -e76-trapped-instructions). Their full fold-in to this chain is a separate
-    # step and is not in the ledger above; what is here is the part that bears on sections 2 and 5.
+    # -e75-memory-flip-ladder, -e76-trapped-instructions) and folded in the same day. Read from rf.json,
+    # mf.json and tr.json, not transcribed. NOTHING HERE IS A NEW ROW OF §3's WATERFALL, and the three
+    # reasons are different: E74 bounds a term the transport row already models (the register-file cells'
+    # own stored bits), so adding it would double-count; E75 prices a memory path and not a multiply-add;
+    # E76's thirteen instructions have no energy at all, because they are never executed.
     "kernels": {
-        "status": "measured Wed 28 Oct 2026 on aifoundry3; being folded into the chain",
-        "e74_bound_fJ": 2.73, "e74_bound_conf": 0.95,
+        "status": "measured and folded in on Wed 28 Oct 2026, 41 card-minutes on aifoundry3's card 0",
+        "moves_the_waterfall": False,
+        "why_no_row": "E74 bounds the register-file cells' own stored bits, which is part of what §3's "
+                      "transport row already models, so it is a check on that row and not an addition; "
+                      "E75 prices a memory path rather than a multiply-add; and E76's thirteen have no "
+                      "per-instruction energy, because the hardware never executes them",
+        "gates": "216 power runs (E74 66 + E75 150) with no run-level gate failure; E76's 84 probe runs "
+                 "are scored by its own P1 and P4 instead, 26 of them not-ok by design — that is the "
+                 "result. The governor was never touched and no card was reset",
+        # E74. The registered estimator is the board meter; its interval spans zero, so the registered
+        # rule 5 publishes a bound. The minion rail was registered as a figure reported beside the board
+        # and never instead of it, and it is the only arm here that excludes zero.
+        "e74_point_fJ": _e74_cell["mean"], "e74_ci_fJ": [_e74_cell["lo"], _e74_cell["hi"]],
+        "e74_bound_fJ": _e74_bound, "e74_bound_conf": 0.95,
+        "e74_resolved_on_the_board": e74rf["rule5_resolution"]["resolved_excludes_zero"],
+        "e74_rail_fJ": e74rf["e_cell_rail_fJ"]["mean"],
+        "e74_rail_ci_fJ": [e74rf["e_cell_rail_fJ"]["lo"], e74rf["e_cell_rail_fJ"]["hi"]],
+        "e74_covariate_fJ": e74rf["temperature_covariate"]["e_cell_fJ"],
+        "e74_covariate_ci_fJ": [e74rf["temperature_covariate"]["e_cell_lo_fJ"],
+                                e74rf["temperature_covariate"]["e_cell_hi_fJ"]],
+        "e74_bits_per_mac": _e74_bits_per_mac,
+        "e74_per_mac_pJ": _e74_mac, "e74_per_mac_bound_pJ": _e74_mac_bound,
+        "e74_share_of_v1_remainder": _e74_mac / v1["unaccounted_pJ"],
+        "e74_share_of_v1_remainder_bound": _e74_mac_bound / v1["unaccounted_pJ"],
+        "e74_e61_fJ": 1.267, "e74_e61_se_fJ": 0.151,
+        "e74_e61": "E61's cross-kernel 1.267 +- 0.151 fJ sits inside all three intervals here, and E74 "
+                   "removes E61's confound by construction: the issue rate read 0.7574 ops per cycle per "
+                   "hart on all 36 rf runs and 0.7356 on all 18 null runs, minimum equal to maximum. But "
+                   "the board interval contains 0 and 0.2 fJ as readily as 1.27, so it fails to "
+                   "contradict E61 rather than confirming it; the order-of-1-fJ reading is the rail's",
+        "e74_leverage": "the point and the bound both rest on one of the five kept passes, and inside it "
+                        "on one reading: without that pass e_cell is 0.22 fJ and the bound 1.13 fJ "
+                        "instead of 2.73. Keeping it is the conservative direction",
+        "e74_failed": "two registered predictions failed — P2, the ladder's own span (+48.9 mW against a "
+                      "registered 60-134 mW), and P3, linearity (residual rms 83.4 mW against a "
+                      "registered 20 mW or less)",
+        "e74_cost_to_resolve": "about 40 passes of the board meter, 80 card-minutes, or a "
+                               "re-registration with the minion rail as the estimator, which was 4x "
+                               "tighter on these same runs",
+        # E75. Two of the four changed-bit prices are coefficients and two are bounds, because their
+        # k-arms are not monotone in any kept pass; a w-arm (carried ones) was registered at L1 and DRAM.
+        "e75_levels": _e75_levels,
+        "e75_chord_basis": "chord_pJ_per_B is per byte the kernel asks for; DRAM's figure is also given "
+                           "per 64 B line byte, which is the basis the registration fixed, and is half "
+                           "the requested-byte figure because each load asks for 32 B of a 64 B line",
+        "e75_dram_chord_pJ_per_line_B": _e75_dram_line_chord,
+        "e75_dram_chord_share_ci_pct": _e75_dram_chord_share_ci,
+        "e75_dram_newly_open": "The unexplained two thirds of DRAM's chord is a property of the pattern "
+                               "and not of its counts: the next step is a third image with the same "
+                               "counts and a longer period, to test whether a two-value alternating "
+                               "image is compressible on the link or in DRAM in a way random data is not.",
+        "e75_dram_closure_pJ_per_line": _e75_closure,
+        "e75_dram_ones_pJ_per_line": _e75_ones_pJ_per_line,
+        "e75_dram_ones_share": _e75_ones_pJ_per_line / _e75_closure,
+        "e75_dram_point_ratio": _e75_dram["e_one_pJ_per_bit"]["mean"] / _e75_dram["e_flip_pJ_per_bit"]["mean"],
+        "e75_catalogue_chord_pJ_per_B": {"l1": 0.15, "dram": 38.0},
+        "e75_what_it_means": "the data-dependent part of the DRAM figure is carried ones, not bit flips: "
+                             "reducing transitions is the small lever off-chip and packing zeros is the "
+                             "big one. The point ratio runs 10x, but its denominator is unresolved, so "
+                             "the share is the number to quote, not the factor",
+        "e75_failed": "four failed — P2, the DRAM small-k slope (-0.32 pJ per bit against a registered "
+                      "6-25); P3, saturation at the top rung (-120% against a registered 20-60% below "
+                      "the line, and not resolved rather than merely failed, because that arm is "
+                      "non-monotone); P5, the per-line closure (1,008 pJ against a registered 2,432 "
+                      "+- 600); and P6's span (6.6x, not the registered 100x). P6's ordering passes only "
+                      "as L1 below the other three, whose intervals overlap at 95%, and P4 passes at L1 "
+                      "on both bases and at DRAM on the registered basis (-3.1% of the random anchor): "
+                      "it is the stricter chord basis, substituted on the day, that fails at DRAM, so "
+                      "P4-at-DRAM is not a pre-registered failure",
+        "e75_still_out_of_scope": "the scratchpad rung, for the registered reason: no host fill reaches "
+                                  "that address space, so it needs a kernel mode that copies the image "
+                                  "in first",
         "e74_card_minutes": 11.6, "e75_card_minutes": 21.5, "e76_card_minutes": 7.7,
-        "e76_trapped": 13, "e76_probe_passes": 2,
+        "e76_trapped": e76tr["scored"]["P1_all_thirteen_trap"]["trapping_items_found"],
+        "e76_controls": e76tr["scored"]["P1_all_thirteen_trap"]["controls_found"],
+        "e76_probe_passes": 2,
+        "e76_failed": "one failed, and low rather than high — P3, the wall-clock excess a trap costs "
+                      "(median 0.45 ms against a registered 0.5-50 ms): the trap is cheaper in time than "
+                      "the registration allowed for",
+        "e76_did_not_run": "its price stage and its long-kernel strand did not run, by the registered "
+                           "rule rather than against it: they launch only for a mode the probe clears, "
+                           "and the probe cleared none; the static instruction counts are the "
+                           "registration's, taken on the sister box on 27 October on the same driver "
+                           "build",
         "e76_source": "there is no emulation path in the firmware, so the thirteen instructions have no "
                       "per-instruction energy at all: a U-mode illegal instruction is delegated M->S and "
                       "the exception handler calls return_from_kernel(KERNEL_RETURN_EXCEPTION), 758 "
@@ -519,11 +645,18 @@ for _d, _vals in _sample.items():
     for _v in _vals:
         assert any(abs(x - _v) <= max(5e-4, abs(_v) * 2e-4) for x in _L), (_d, _v)
         _checked += 1
+_read_whole = ["2026-10-28-e74-register-file-cells", "2026-10-28-e75-memory-flip-ladder",
+               "2026-10-28-e76-trapped-instructions"]
+for _d in _read_whole:
+    assert _lane_numbers(_d), _d
 _q["sampled_against_lane_json"] = {
     "figures": _checked, "directories": len(_sample),
+    "read_whole": _read_whole, "read_whole_n": len(_read_whole),
     "how": "each of these figures is present as a value in its own data directory's committed JSON, "
            "re-read at build time; the rest of this block is transcribed from the README or summary of "
-           "the directory named on its line, and §3's waterfall is read from waterfall-v2.json whole.",
+           "the directory named on its line, and §3's waterfall is read from waterfall-v2.json whole. "
+           "The three 28 October card runs in the kernels block are read whole too, from rf.json, "
+           "mf.json and tr.json, so nothing in that block is transcribed.",
 }
 
 o["meta"] = {

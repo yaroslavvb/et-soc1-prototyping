@@ -568,6 +568,10 @@
     /* the footer: how much of this block the build re-checks against the lane directories' own JSON */
     set('sampled', num(q.sampled_against_lane_json.figures, 0) + ' figures across '
       + num(q.sampled_against_lane_json.directories, 0) + ' of those directories');
+    /* named from the directory list itself, so the footer cannot claim a lane the build does not read */
+    set('read-whole', q.sampled_against_lane_json.read_whole.map(function (d) {
+      const m = /-e(\d+)-/.exec(d); return m ? 'E' + m[1] : d;
+    }).join(', ').replace(/, ([^,]*)$/, ' and $1'));
 
     /* §1 and §4: the knob, and the temperature term */
     set('knob', num(k.cells_in_band[0], 0) + ' of ' + num(k.cells_in_band[1], 0) + ' cells inside their '
@@ -706,12 +710,57 @@
       + 'own 0.05' + NB + 'Hz value sits 2.7 line-standard-errors below the measured line, or about '
       + num(hp.line_implies_mK_per_W, 0) + NB + 'mK/W if that measured line is taken through the fitted '
       + num(hp.attenuation_at_0p05Hz, 4) + ' attenuation');
-    set('kernels', kr.status + ': E74 in ' + num(kr.e74_card_minutes, 1) + ', E75 in '
-      + num(kr.e75_card_minutes, 1) + ' and E76 in ' + num(kr.e76_card_minutes, 1) + ' card-minutes');
+    set('kernels', 'E74 in ' + num(kr.e74_card_minutes, 1) + ', E75 in '
+      + num(kr.e75_card_minutes, 1) + ' and E76 in ' + num(kr.e76_card_minutes, 1)
+      + ' card-minutes, 41 in all on one card');
     set('e74', 'e_cell < ' + num(kr.e74_bound_fJ, 2) + NB + 'fJ per flipped cell bit at '
-      + pct(kr.e74_bound_conf) + ' — a bound, because the board ladder does not resolve it');
+      + pct(kr.e74_bound_conf) + ' — a bound, because the board ladder does not resolve it: the point is '
+      + num(kr.e74_point_fJ, 3) + NB + 'fJ with a 95% interval of [' + MINUS
+      + num(-kr.e74_ci_fJ[0], 2) + ', +' + num(kr.e74_ci_fJ[1], 2) + '] that contains zero');
+    /* the rail arm is reported beside the board one, never instead of it — that is how it was registered */
+    set('e74-rail', num(kr.e74_rail_fJ, 3) + NB + 'fJ, 95% [' + band(kr.e74_rail_ci_fJ, 3) + ']');
+    set('e74-mac', num(kr.e74_per_mac_pJ, 3) + NB + 'pJ per multiply-add at the point and at most '
+      + num(kr.e74_per_mac_bound_pJ, 3) + ' at 95%, on ' + num(kr.e74_bits_per_mac, 0)
+      + ' bits of register content — ' + pct(kr.e74_share_of_v1_remainder, 1) + ' of the 27 October '
+      + 'remainder and at most ' + pct(kr.e74_share_of_v1_remainder_bound, 1));
+    set('e74-mac-short', num(kr.e74_per_mac_pJ, 3) + NB + 'pJ per multiply-add, at most '
+      + num(kr.e74_per_mac_bound_pJ, 3) + ' at 95%');
+    /* E75: two of the four changed-bit prices are coefficients, two are bounds (non-monotone k-arms), and
+       a bound is rounded away from zero so that rounding never understates a ceiling. An interval that
+       spans zero is written with a comma, because an en dash between a negative and a positive misreads. */
+    const ci = (a, dp) => a[0] < 0 ? num(a[0], dp) + ', ' + (a[1] >= 0 ? '+' : '') + num(a[1], dp)
+      : band(a, dp);
+    const up = (v, dp) => num(Math.ceil(v * Math.pow(10, dp)) / Math.pow(10, dp), dp);
+    set('e75', kr.e75_levels.map(function (l) {
+      const dp = Math.abs(l.e_flip_pJ) < 0.1 ? 4 : 3;
+      return l.level + ' ' + (l.e_flip_resolved
+        ? num(l.e_flip_pJ, dp) + NB + 'pJ [' + ci(l.e_flip_ci_pJ, dp) + ']'
+        : '< ' + up(l.e_flip_ci_pJ[1], 2) + NB + 'pJ (not resolved)');
+    }).join(', '));
+    set('e75-ones', 'nothing at L1 (' + num(kr.e75_levels[0].e_one_pJ, 4) + NB + 'pJ, 95% ['
+      + ci(kr.e75_levels[0].e_one_ci_pJ, 4) + ']) and ' + num(kr.e75_levels[3].e_one_pJ, 3)
+      + NB + 'pJ at DRAM [' + ci(kr.e75_levels[3].e_one_ci_pJ, 3) + ']');
+    set('e75-share', 'of the ' + num(kr.e75_dram_closure_pJ_per_line, 0) + NB
+      + 'pJ per 64' + NB + 'B line the two counts explain, ' + pct(kr.e75_dram_ones_share)
+      + ' is carried ones');
+    set('e75-chord', num(kr.e75_levels[0].chord_pJ_per_B, 3) + NB + 'pJ/B at L1 against the catalogue’s '
+      + num(kr.e75_catalogue_chord_pJ_per_B.l1, 2) + ', and ' + num(kr.e75_dram_chord_pJ_per_line_B, 1)
+      + NB + 'pJ per line byte at DRAM against ' + num(kr.e75_catalogue_chord_pJ_per_B.dram, 0)
+      + '; the two arms account for ' + num(kr.e75_levels[0].chord_accounted_pct, 1) + '% of the first and '
+      + num(kr.e75_levels[3].chord_accounted_pct, 1) + '% of the second');
     set('e76', num(kr.e76_trapped, 0) + ' of ' + num(kr.e76_trapped, 0)
-      + ' trap on silicon, each ending the hart’s kernel with 0 ops');
+      + ' trap on silicon, each ending the hart’s kernel with 0 ops, with '
+      + num(kr.e76_controls, 0) + ' of ' + num(kr.e76_controls, 0) + ' controls returning normally');
+    /* the registered predictions that failed, and what did not run — the strings the data block carries,
+       so a summary of this page cannot soften them */
+    set('e74-failed', kr.e74_failed);
+    set('e74-leverage', kr.e74_leverage);
+    set('e75-failed', kr.e75_failed);
+    set('e76-failed', kr.e76_failed);
+    set('e76-did-not-run', kr.e76_did_not_run);
+    set('e75-dram-pattern', 'the two designed arms explain '
+      + num(kr.e75_levels[3].chord_accounted_pct, 1) + '% of DRAM’s zeros-to-random chord, 95% ['
+      + band(kr.e75_dram_chord_share_ci_pct, 1, '%') + ']. ' + kr.e75_dram_newly_open);
     set('archive', q.archive.say);
     set('archive-when', q.archive.when);
     set('wf-unacc-v1', num(wf.v1.unaccounted_pJ, 2) + NB + 'pJ against the board and '
