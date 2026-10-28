@@ -201,4 +201,25 @@ left alone.
 
 ## Amendments
 
-*None yet.*
+*None to the design or the analysis: the session of Tue 27 Oct 2026, 15:57–16:40 PDT, ran the protocol
+above and was scored by the frozen `fit_hlf.py`. The entries below are after-the-data notes, dated, and
+they change no registered number.*
+
+- **Wed 28 Oct 2026 — the frozen copy on the card host is one edit behind this commit, with no
+  numerical effect.** `run_e73.sh stage` copied `lockin_hlf.py` at 15:52 Tue; the committed file carries
+  a 15:53 edit whose whole content is the seven lines that let it find `lockin_hlc.py` in either layout
+  (the repo's sibling `hlc/`, or the subdirectory the staging builds). On 28 Oct the lock-in and the fit
+  were re-run on aifoundry2 from the same RED with the **committed** file: `lockin.json` came back
+  byte-identical (sha256 `d29e801f…`), `fit.txt` identical, all five `*-maps.npz` identical, `fit.json`
+  different only in the input path it records.
+- **Wed 28 Oct 2026 — `posthoc/fit_priors.py`, post hoc and no verdict.** The registered fit uses E73's
+  own points with one gain. This script adds the two anchors the pre-registration names (E63 A1's
+  0.05 Hz and Q126's 0.15 Hz) to the same fit under a second gain, with a circular error for the pooled
+  anchors, and profiles the Δχ² = 1 interval of the group delay and of the zero-frequency gain, which
+  the frozen script reports as point values. Both added choices were made after the data were seen; the
+  conclusion is the same as the registered fit's. See
+  [`docs/reports/data/2026-10-27-e73-camera-frequencies`](../../../docs/reports/data/2026-10-27-e73-camera-frequencies/README.md)
+  § Departures, items 3 and 4.
+- **Wed 28 Oct 2026 — files.** `reduce_e73.sh` (the reduction in order, run on the card host) and
+  `posthoc/fit_priors.py` are committed with the data; they were written during and after the session
+  and are not part of what the predictions were frozen against.
