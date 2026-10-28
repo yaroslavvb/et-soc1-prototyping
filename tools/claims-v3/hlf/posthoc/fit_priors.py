@@ -353,7 +353,7 @@ def main():
                  g["dc_gain_mk_per_w"],
                  ", ".join("%.1f" % x if x else "-" for x in g["dc_gain_ci68"]),
                  g["chi2"], g["dof"], g["aic"]))
-    print("wrote %s" % a.out)
+    print("wrote %s" % os.path.relpath(a.out))   # relative: an absolute home path has no business in a public repo
 
 
 if __name__ == "__main__":

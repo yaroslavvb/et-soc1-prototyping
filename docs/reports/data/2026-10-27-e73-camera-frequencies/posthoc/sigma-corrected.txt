@@ -1,0 +1,24 @@
+E73, the registered fits re-run with the per-component error (sigma = se_H/sqrt(2))
+14 included points, dof = 2n - npar - 1 as before
+
+model parameters (dchi2=1)               G0 / mK/W                  chi2   dof    red      AIC    dAIC
+P1    tau_s=24.822 [20.92, 29.99]        352.3 [303.07, 417.24]    40.69    26  1.565    44.69   17.02
+      group delay 24.82 s [20.92, 29.99]   (frozen: chi2 20.34, dAIC +7.51, group 24.82 s)
+P1D   tau_s=15.984 [13.34, 19.12] delay_s=1.009 [0.78, 1.24] 250.5 [217.19, 292.10]    21.67    25  0.867    27.67    0.00
+      group delay 16.99 s [14.47, 20.13]   (frozen: chi2 10.83, dAIC +0.00, group 16.99 s)
+P2    tau1_s=15.573 [12.74, 19.00] tau2_s=1.005 [0.75, 1.29] 252.5 [217.00, 295.65]    23.15    25  0.926    29.15    1.48
+      group delay 16.58 s [13.83, 20.03]   (frozen: chi2 11.57, dAIC +0.74, group 16.58 s)
+P2D   tau1_s=15.935 [13.17, 19.25] tau2_s=0.205 [-, -] delay_s=0.806 [0.23, 1.18] 250.3 [215.72, 291.95]    21.66    24  0.902    29.66    1.99
+      group delay 16.14 s [14.60, 17.30]   (frozen: chi2 10.83, dAIC +1.99, group 16.14 s)
+
+preferred by AIC: P1D ; dchi2(P1 - P1D) = 19.02 for one extra parameter
+0.01 Hz: model lag 48.76 deg, data 59.36 +- 4.31 -> 2.46 SE in the lag alone; complex norm 2.39 (null sqrt2 = 1.41)
+0.05 Hz: attenuation 0.19530, model 48.93 mK/W vs the measured line 58.58 +- 3.55 -> 2.71 line-SE (16.5%) low; the line under this shape implies G0 = 299.9 mK/W
+
+the post-hoc anchors fit with the same correction:
+  P1   31.369 chi2   62.00/29 AIC   68.00 dAIC +38.09 group 31.37 s
+  P1D  15.809 1.081 chi2   21.91/28 AIC   29.91 dAIC  +0.00 group 16.89 s
+  P2   15.225 1.117 chi2   24.13/28 AIC   32.13 dAIC  +2.22 group 16.34 s
+  P2D  15.773 0.177 0.906 chi2   21.90/27 AIC   31.90 dAIC  +1.99 group 15.95 s
+
+wrote posthoc/sigma-corrected.json

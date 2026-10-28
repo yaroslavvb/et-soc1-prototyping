@@ -220,6 +220,31 @@ they change no registered number.*
   conclusion is the same as the registered fit's. See
   [`docs/reports/data/2026-10-27-e73-camera-frequencies`](../../../docs/reports/data/2026-10-27-e73-camera-frequencies/README.md)
   § Departures, items 3 and 4.
-- **Wed 28 Oct 2026 — files.** `reduce_e73.sh` (the reduction in order, run on the card host) and
-  `posthoc/fit_priors.py` are committed with the data; they were written during and after the session
-  and are not part of what the predictions were frozen against.
+- **Wed 28 Oct 2026 — the frozen fit's χ² is half the proper χ²: a known fault of this harness, fixed
+  post hoc, not in the frozen code.** `lockin_hlf.py` reports `se_H` as the **total** complex jackknife
+  SE (`se_H² = var(Re) + var(Im)`), while `fit_hlf.py` weights the two-component residual
+  `|H − G·s|²` by `1/se_H²` and counts `dof = 2n − npar − 1`. With an isotropic error the per-component
+  σ is `se_H/√2`, so the frozen χ² is **half** the proper one and every reduced χ², Δχ² = 1 interval and
+  ΔAIC it prints is out by ≈ 2 (intervals ≈ √2 too wide, ΔAIC half). **No fitted parameter is affected**
+  — a constant factor on all the weights cannot move the minimum — and **no registered rule is affected**:
+  R1–R6 are scored on the lock-in's own SEs, never on a model χ². `posthoc/fit_sigma.py` re-runs the same
+  fits at σ = `se_corr/√2` and is what E73's README quotes; the frozen outputs stay byte-reproducible.
+  **A later rule in this family must either weight by `se_H²/2` or write the expectation of the frozen χ²
+  as `n_points − npar/2`.** Found by Q129's adversarial verifier on Wed 28 Oct, after the data commit.
+  That script also profiles G₀'s Δχ² = 1 interval exactly (the shape profiled out in closed form at each
+  gain) instead of `fit_priors.profile_gain`'s stepped grid, which becomes granular once the χ² is the
+  proper one; at the frozen σ the exact profile reproduces the published interval.
+- **Wed 28 Oct 2026 — R5's SE is conservative by one term, as registered.** `fit_hlf.py` folds the
+  reference line's relative SE into each point's `se_corr` (line 241) and then adds the line's
+  `se_mag_at_mid` in quadrature **again** when it forms R5's complex difference (line 339): 15.515 mK/W
+  where one line term gives 15.10, i.e. 0.213 SE instead of 0.219. It is inside the frozen code, so E73
+  is scored with it and the verdict (PASS, far inside 3 SE) does not depend on it. **A later rule must not
+  inherit it**: count the line's uncertainty once.
+- **Wed 28 Oct 2026 — how many frequencies.** The design table above lists the **nine** frequencies the
+  five blocks reach up to 0.15 Hz. The realised table runs the odd harmonics to k = 9 and so holds **25
+  points at fourteen distinct frequencies**, of which **14 points at ten frequencies** clear the board
+  ≥ 5 SE inclusion rule and enter the fit. E73's README quotes ten and fourteen; "nine frequencies" is
+  the design figure only.
+- **Wed 28 Oct 2026 — files.** `reduce_e73.sh` (the reduction in order, run on the card host),
+  `posthoc/fit_priors.py` and `posthoc/fit_sigma.py` are committed with the data; they were written
+  during and after the session and are not part of what the predictions were frozen against.

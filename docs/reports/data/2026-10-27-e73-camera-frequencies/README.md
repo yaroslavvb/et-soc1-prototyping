@@ -15,8 +15,10 @@ launch, every launch ran under `timeout 10`, and `et_who` was empty at the start
 
 ## RESULTS
 
-**1. 0.01 Hz exists.** `E73-F10`'s ROI fundamental is **322.8 ± 20.6 mK** (15.7 SE, sign-flip p = 0.0029) on a
-4.16 W board step; the transfer is **H(0.01 Hz) = 145.2 ± 16.5 mK/W at a lag of 59.4 ± 4.3°**. R1 **PASS**.
+**1. 0.01 Hz exists.** `E73-F10`'s ROI fundamental is **322.8 ± 20.6 mK** (15.7 SE, sign-flip p = 0.0029); the
+drive is a **4.161 ± 0.019 W ON–OFF step** whose own fundamental at 0.01 Hz is **2.223 ± 0.052 W (42.7 SE)** — two
+different quantities, and it is the fundamental that divides into the camera's. The transfer is
+**H(0.01 Hz) = 145.2 ± 16.5 mK/W at a lag of 59.4 ± 4.3°**. R1 **PASS**.
 
 **2. The heat path is low-pass, measured rather than assumed.** Against the session's own 0.05 Hz reference line
 (58.58 ± 3.55 mK/W at the session mid-time), |H| rises to **1.396 ± 0.255** at 0.025 Hz and **2.610 ± 0.391** at
@@ -29,47 +31,79 @@ neither survives at 2 SE. The magnitude, as the registration predicted, does not
 against M1's 3.142 (1.36 SE) and M2's 2.252 (0.91 SE) — the phase does, and it refuses both. The real path lags
 *more* at 0.01 Hz than either rival fitted to the old two points.
 
-**4. Across all nine frequencies the data choose a ~16 s pole plus about a second of extra lag, and cannot say what
-the second is.** Weighted complex least squares over the 14 included transfer points, one real positive gain, exactly
-as registered (`analysis/fit.txt`, `analysis/fit.json`):
+**4. Across ten frequencies the data choose a ~16 s pole plus about a second of extra lag, and cannot say what the
+second is.** Weighted complex least squares over the **14 included transfer points** (ten distinct frequencies, out
+of 25 points at fourteen), one real positive gain, exactly as registered — with the error convention **corrected**,
+see the box below (`posthoc/sigma-corrected.json`; the frozen `analysis/fit.txt`, `analysis/fit.json` print the same
+parameters with half the χ²):
 
-| model | parameters (Δχ² = 1) | G₀ / mK/W | χ² / dof | AIC | ΔAIC | group delay / s |
+| model | parameters (Δχ² = 1) | G₀ / mK/W | χ² / dof (red) | AIC | ΔAIC | group delay / s |
 |---|---|---|---|---|---|---|
-| P1 one pole | τ = **24.8** [19.7, 32.8] | 352 [284, 441] | 20.34 / 26 | 24.34 | **+7.51** | 24.8 [19.7, 32.8] |
-| **P1D one pole + delay** | τ = **15.98** [12.56, 20.91], T_d = **1.009** [0.696, 1.320] | **250.5** [205, 307] | 10.83 / 25 | **16.83** | — | **16.99** [13.62, 21.58] |
-| P2 two poles | τ₁ = **15.57** [11.75, 20.78], τ₂ = **1.005** [0.646, 1.452] | 252 [208, 308] | 11.57 / 25 | 17.57 | +0.74 | 16.58 [12.89, 21.69] |
-| P2D two poles + delay | τ₁ = 15.94, τ₂ = 0.205, T_d = 0.806 | 250 [204, 309] | 10.83 / 24 | 18.83 | +2.00 | 16.14 [13.47, 21.54] |
+| P1 one pole | τ = **24.8** [20.9, 30.0] | 352 [303, 417] | 40.69 / 26 (1.57) | 44.69 | **+17.02** | 24.8 [20.9, 30.0] |
+| **P1D one pole + delay** | τ = **15.98** [13.34, 19.12], T_d = **1.009** [0.78, 1.24] | **250.5** [217, 292] | 21.67 / 25 (0.87) | **27.67** | — | **16.99** [14.47, 20.13] |
+| P2 two poles | τ₁ = **15.57** [12.74, 19.00], τ₂ = **1.005** [0.75, 1.29] | 252 [217, 296] | 23.15 / 25 (0.93) | 29.15 | +1.48 | 16.58 [13.83, 20.03] |
+| P2D two poles + delay | τ₁ = 15.94, τ₂ = 0.205, T_d = 0.806 | 250 [216, 292] | 21.66 / 24 (0.90) | 29.66 | +1.99 | 16.14 [14.60, 17.30] |
 
-- **one pole alone is excluded**: Δχ² = 9.51 for one extra parameter, ΔAIC +7.51;
-- **P1D and P2 are not distinguishable** (ΔAIC 0.74): the extra second is either a transport delay of
-  1.01 s [0.70, 1.32] or a second pole of 1.00 s [0.65, 1.45], and 14 points at this noise cannot tell them apart;
-- the **group delay is 17.0 s [13.6, 21.6]**, longer than M1's 13.51 s (just outside the 68% interval) and 2.3× M2's
+- **one pole alone is excluded**: Δχ² = **19.02** for one extra parameter, ΔAIC **+17.02**;
+- **P1D and P2 are not distinguishable** (ΔAIC 1.48): the extra second is either a transport delay of
+  1.01 s [0.78, 1.24] or a second pole of 1.00 s [0.75, 1.29], and 14 points at this noise cannot tell them apart;
+- the **group delay is 17.0 s [14.5, 20.1]**, longer than M1's 13.51 s (outside the 68% interval) and 2.3× M2's
   7.47 s. That is the quantity the registration named, and it comes out bigger than either rival.
-- the `Δχ² = 1` intervals of the group delay and of G₀ are profiled in `posthoc/prior-anchors.json`
-  (`registered_group_delay`), because the frozen script reports those two as point values only.
+- the `Δχ² = 1` intervals of the group delay and of G₀ are profiled, because the frozen script reports those two as
+  point values only — the group delay in `posthoc/prior-anchors.json` (`registered_group_delay`, at the frozen
+  error) and both, corrected, in `posthoc/sigma-corrected.json`.
+
+> **CORRECTION, Wed 28 Oct 2026 (found by the Q129 verifier, departure 7).** `lockin_hlf.py` reports `se_H` as the
+> **total** complex jackknife SE (`se_H² = var(Re) + var(Im)`), and the frozen `fit_hlf.py` weights a two-component
+> residual by `1/se_H²` while counting `dof = 2n − npar − 1`. The two conventions do not match: with an isotropic
+> error the per-component σ is `se_H/√2`, so **every χ², reduced χ², Δχ² = 1 interval and ΔAIC the frozen script
+> prints is out by a factor ≈ 2** — intervals ≈ √2 too wide, ΔAIC half. The table above is the same fit with
+> σ = `se_corr/√2` (`posthoc/fit_sigma.py` → `posthoc/sigma-corrected.json`); the frozen outputs are left untouched
+> and byte-reproducible. **No fitted parameter moves** (τ, T_d, G₀ and the group delay are unchanged point values:
+> a constant factor on all weights cannot move the minimum) and **no registered verdict moves** — none of R1–R6 uses
+> a model χ². What moves: the intervals tighten, the one-pole exclusion gets **stronger** (ΔAIC +7.51 → +17.02), P2
+> moves a little further from P1D (0.74 → 1.48), and the 0.01 Hz residual grows (result 8). G₀'s interval is also
+> profiled exactly here rather than by the frozen script's stepped grid; the exact profile at the **frozen** σ gives
+> [203.5, 312.0], which is the published [205, 307], so the method agrees where the conventions agree.
 
 **5. The two prior anchors, in the same fit, say the same thing** (post hoc, `posthoc/prior-anchors.json`, no
 verdict). With E63 A1's 0.05 Hz point (52.71 ± 1.98 mK/W at 99.11°) and Q126's 0.15 Hz third harmonic
 (18.41 ± 5.45 at 150.56°) added under their own gain — the camera's absolute gain is not the same on two afternoons —
 P1D gives τ = 15.73 s [12.61, 19.97], T_d = 1.105 s [0.90, 1.32], group delay 16.83 s [13.63, 21.37], and one pole
 alone loses by ΔAIC 27. The anchors' fitted gain is **1.075×** E73's, and E73's own 0.05 Hz reference line sits
-1.44 SE above E63's anchor: the two sessions agree.
+1.44 SE above E63's anchor: the two sessions agree. Under the corrected error of the box above (E73's points at
+`se_corr/√2`, the anchors' isotropic SEs already per-direction) the same fit gives τ = 15.81 s, T_d = 1.081 s,
+group delay 16.89 s, and one pole loses by **ΔAIC 38.1** — `posthoc/sigma-corrected.json`, `anchors_sensitivity`;
+the intervals in that file stay at the frozen error and are therefore ≈ √2 too wide.
 
-**6. What the camera reads is about a fifth of what the board holds.** The preferred shape attenuates 0.05 Hz to
-**0.195** of its zero-frequency response, so the 0.05 Hz number E63 and Q128's coda quote (58.6 ± 3.6 mK/W here,
-52.7 ± 2.0 in E63 A1) is a *fifth* of the steady rise: **G₀ = 250.5 mK/W [205, 307]** per sustained watt on the
-board, 63% of it reached in 17.0 s and 95% in 49 s. This is an extrapolation of the fitted family below 0.01 Hz,
-where nothing is measured — see result 8.
+**6. What the camera reads at 0.05 Hz is about a fifth of what the board holds — and the two ways of saying it do
+not give the same number.** The preferred shape attenuates 0.05 Hz to **0.1953** of its zero-frequency response,
+63% of a step reached in 17.0 s and 95% in 49 s. Two statements follow, and they differ by 17%, so the coda must
+say which it means:
+
+- **the fitted family's own steady gain is G₀ = 250.5 mK/W [217, 292]**, whose value at 0.05 Hz is
+  **48.9 mK/W** — **2.71 line-SE (16.5%) below** E73's measured reference line of 58.58 ± 3.55 mK/W, and below all
+  four drift-corrected 0.05 Hz readings (62.72, 57.55, 58.70, 60.52). G₀ is the fit's compromise across ten
+  frequencies, not a rescaling of the 0.05 Hz point;
+- **the measured 0.05 Hz reading, taken through the fitted shape, implies a steady ≈ 300 mK/W** (58.58 / 0.1953),
+  or ≈ 270 from E63 A1's 52.71 ± 1.98 mK/W.
+
+Either way the camera's 0.05 Hz figure is a *fifth* of the steady rise; the steady number itself is 250 mK/W if the
+shape is believed over the whole band and ~300 if the 0.05 Hz anchor is believed and only the shape's attenuation is
+used. That 2.7-SE undershoot is the **second** place the fitted family strains, alongside the 0.01 Hz lag of
+result 8. All of it is an extrapolation below 0.01 Hz, where nothing is measured.
 
 **7. 0.05 Hz was measured twice over, by two routes, and they agree.** `E73-F10`'s fifth harmonic against the
 reference line: complex difference **3.31 ± 15.52 mK/W (0.21 SE)**. R5 **PASS**. The reference line itself holds
 (R2 **PASS**): three blocks on a straight line, worst residual 0.45 SE, χ² 0.31/1, a constant phase of 98.60°
-(χ² 0.006/2), and a gain drift of **−44.1%/h** — E63's drift is still there and still uncorrected for by anything
-but this line.
+(χ² 0.006/2), and a gain drift of **−44.1 ± 34.9%/h** — **1.3σ from zero, so this session does not establish a
+drift**; it has the sign of E63's measured 59 → 42 mK/W, and the line corrects for whatever drift there is either
+way.
 
-**8. The one thing the fit does not swallow.** The 0.01 Hz lag sits **1.7σ above** the preferred model's own curve
-(P1D gives 48.8° there, the data 59.4 ± 4.3 — 2.4 SE on that point's error alone), and it is the largest residual in
-every fit. The fitted family wants more low-frequency lag than it can produce while still matching 0.07–0.175 Hz. A
+**8. The one thing the fit does not swallow.** The 0.01 Hz lag sits **2.5 SE above** the preferred model's own
+curve — P1D gives 48.76° there against the measured 59.36 ± 4.31°, i.e. **2.46 SE in the lag alone**; the
+two-component residual at that point is **2.39** (against a null expectation of √2 = 1.41, and 1.69 at the frozen
+error), and it is the largest residual in every fit. The fitted family wants more low-frequency lag than it can produce while still matching 0.07–0.175 Hz. A
 third, longer pole or a distributed (diffusive) path would do it; nothing below 0.01 Hz is measured, so that is
 **suggested, not established**, and it is the new open item this experiment leaves.
 
@@ -86,15 +120,18 @@ reported **without a verdict**, which is both the registered rule and E63's less
   2.39 pJ (rail) moves. E73 measures the path from the die to the back of the board, not the price of a flip.
 - **In the coda of Q128's chain ("Back out", the camera weighs the flips).** The coda's camera numbers — 194 mK at
   0.05 Hz for 5.44 W, 59 ± 3 mK/W, "the heat 87–99° behind" — now have a path attached rather than a single
-  frequency: a **16.0 s [12.6, 20.9] pole with 1.0 s [0.7, 1.3] of extra lag**, a **group delay of 17.0 s
-  [13.6, 21.6]**, and an attenuation of **0.195 at 0.05 Hz**, so the coda's mK/W is a fifth of the steady-state
-  **250 mK/W [205, 307]**. The lag at 0.05 Hz that "one pole cannot give" is now explained without a free-running
+  frequency: a **16.0 s [13.3, 19.1] pole with 1.0 s [0.78, 1.24] of extra lag**, a **group delay of 17.0 s
+  [14.5, 20.1]**, and an attenuation of **0.1953 at 0.05 Hz**, so the coda's mK/W is a fifth of the steady rise.
+  Which steady number: **G₀ = 250.5 mK/W [217, 292]** from the fit, whose own 0.05 Hz value (48.9) is 17% below the
+  measured line, **or ≈ 300 mK/W** if the measured 0.05 Hz line is taken through the fitted attenuation (≈ 270 from
+  E63's anchor) — result 6. The lag at 0.05 Hz that "one pole cannot give" is now explained without a free-running
   second pole: one pole and about a second of transport (or a 1 s second pole — the data do not choose).
 - **In the Horace Hub's Levels tab, row "Coda · Back out".** Its Missing cell loses *"the heat path's time constants
-  (the same lock-in at a second frequency)"*: three frequencies and nine harmonics in one session, with intervals,
-  and both pre-registered rivals refuted by the phase. What stays missing in that cell: **a gain that holds still**
-  (it drifted −44.1%/h here, as it drifted 59 → 42 mK/W in E63), **millimetres** (a rigid mount, a fiducial or a
-  measured lens distance), and the new item from result 8 — **a frequency below 0.01 Hz**, where the extra
+  (the same lock-in at a second frequency)"*: three drive frequencies and their odd harmonics in one session — ten
+  distinct frequencies in the fit, fourteen in the published table — with intervals, and both pre-registered rivals
+  refuted by the phase. What stays missing in that cell: **a gain that holds still** (−44.1 ± 34.9%/h here, 1.3σ, so
+  consistent with no drift this session, but E63 measured 59 → 42 mK/W), **millimetres** (a rigid mount, a fiducial
+  or a measured lens distance), and the new item from result 8 — **a frequency below 0.01 Hz**, where the extra
   low-frequency lag would be either confirmed as a longer third pole or ruled out.
 
 ## What was registered and what happened
@@ -172,6 +209,22 @@ camera.
    dip at any load (E63's lesson, which is why A1 exists).
 6. The post-hoc fit was run on the Intel with the system python (3.9.6, numpy 1.26.4); the registered reduction ran
    on aifoundry2 (python 3.12.3). Nothing in the registered numbers depends on the Intel.
+7. **Wed 28 Oct — the frozen fit's χ² is half the proper χ², and the published table is now the corrected one**
+   (the CORRECTION box in result 4; `posthoc/fit_sigma.py` → `posthoc/sigma-corrected.json`). `se_H` is a total
+   complex SE, the frozen weighting treats it as per-component. Found by this question's adversarial verifier after
+   the data were committed (`0953f14b`). The frozen `analysis/fit.txt` and `analysis/fit.json` are **left exactly as
+   the registered script produced them** — departure 3's byte-for-byte reproducibility is worth more than a tidy
+   table — and everything quoted in this README, in result 8's residual and in the hub's hand-over is the corrected
+   number. No fitted parameter and no R1–R6 verdict changes; the one-pole exclusion strengthens from ΔAIC +7.51 to
+   +17.02. The same file also profiles G₀'s interval exactly instead of by the frozen script's stepped grid, which
+   is a method fix on top of the σ fix (at the frozen σ the exact profile returns the published [205, 307]).
+8. **Wed 28 Oct — three text corrections in the same pass, no number behind them changed.** (a) Result 4 said "all
+   nine frequencies": the fit holds 14 points at **ten** distinct frequencies and the published table 25 points at
+   fourteen — the nine are the design table's, up to 0.15 Hz (`tools/claims-v3/hlf/README.md`). (b) Result 1 welded
+   the 0.01 Hz **board fundamental** (2.223 ± 0.052 W, 42.7 SE) to the **ON–OFF step** (4.161 ± 0.019 W): they are
+   now named separately. (c) `posthoc/prior-anchors.txt`'s last line recorded an absolute path on the Mac that ran
+   it; it is relativized, and `fit_priors.py` now prints `os.path.relpath`, because an absolute home path has no
+   business in a public repo.
 
 ## Files
 
@@ -185,6 +238,7 @@ camera.
 | `dips.json` | the one-second clock dips inside launches (`dips_hlc.py`), reported with no verdict |
 | `camcheck/` | the 95 s camera-only recording of 15:44 PDT, no card involved: the stream's health and the view's registration against E62 |
 | `posthoc/prior-anchors.json` | **post hoc, Wed 28 Oct 2026, no verdict**: the same shapes fitted with E63's 0.05 Hz and Q126's 0.15 Hz anchors included under their own gain, the sensitivities, and the Δχ² = 1 intervals of the group delay and G₀ for the registered E73-only fits ([`tools/claims-v3/hlf/posthoc/`](../../../../tools/claims-v3/hlf/posthoc/fit_priors.py)) |
+| `posthoc/sigma-corrected.json`, `posthoc/sigma-corrected.txt` | **post hoc, Wed 28 Oct 2026, no verdict**: the same registered fits re-run with the per-component error σ = `se_corr/√2` (the CORRECTION box in result 4), with the exact Δχ² = 1 profile of G₀, the group delay, the per-point residuals as both a complex norm and a lag deviation, the 0.05 Hz undershoot, and the anchors fit under the same correction; the `.txt` is that run's own stdout ([`tools/claims-v3/hlf/posthoc/fit_sigma.py`](../../../../tools/claims-v3/hlf/posthoc/fit_sigma.py)) |
 | `left-on-aifoundry2.sha256` | the sha256 of all 535 files of the run left on the box, paths relative to the lab checkout there |
 
 ## Left on aifoundry2, not committed
@@ -222,6 +276,10 @@ python3 tools/claims-v3/hlf/posthoc/fit_priors.py <ANA>/fit.json \
     --predictions tools/claims-v3/hlf/predictions.json \
     --pooled docs/reports/data/2026-10-23-e63-camera-hamming-ladder/posthoc/h3-rails-pooled.json \
     --out posthoc/prior-anchors.json
+# the error-convention correction (result 4's box), from the same committed fit.json:
+python3 tools/claims-v3/hlf/posthoc/fit_sigma.py <ANA>/fit.json --out posthoc/sigma-corrected.json \
+    --predictions tools/claims-v3/hlf/predictions.json \
+    --pooled docs/reports/data/2026-10-23-e63-camera-hamming-ladder/posthoc/h3-rails-pooled.json
 ```
 
 `reduce_e73.sh` in `tools/claims-v3/hlf/` runs the first five in order against one run directory.

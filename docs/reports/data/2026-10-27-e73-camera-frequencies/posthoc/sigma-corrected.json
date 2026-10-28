@@ -1,0 +1,1080 @@
+{
+ "experiment": "E73",
+ "request": "Q129",
+ "post_hoc": true,
+ "verdict": null,
+ "written": "Wed 28 Oct 2026 (week 44)",
+ "what": "the registered fits re-run with sigma = se_H/sqrt(2), the per-component error",
+ "why": "lockin_hlf.py's se_H is the TOTAL complex jackknife SE (var_re + var_im) while fit_hlf.py weights a two-component residual by 1/se_H^2 and counts dof = 2n - npar - 1; the frozen chi2 is therefore half the proper chi2 and every interval is ~sqrt(2) too wide and every dAIC half. Found by the Q129 verifier, Wed 28 Oct 2026.",
+ "registered_fit": "fit.json",
+ "rules_affected": "none: R1-R6 are scored on the lock-in's own SEs, not on a model chi2",
+ "n_points": 14,
+ "points": [
+  "E73-REF1 k1",
+  "E73-REF1 k3",
+  "E73-REF1 k9",
+  "E73-F25 k1",
+  "E73-F25 k3",
+  "E73-F25 k7",
+  "E73-REF2 k1",
+  "E73-F10 k1",
+  "E73-F10 k3",
+  "E73-F10 k5",
+  "E73-F10 k7",
+  "E73-F10 k9",
+  "E73-REF3 k1",
+  "E73-REF3 k3"
+ ],
+ "sigma_convention": {
+  "frozen": "se_corr (total complex)",
+  "corrected": "se_corr / sqrt(2)",
+  "dof": "2*n_points - npar - 1 (unchanged)"
+ },
+ "fits": {
+  "P1": {
+   "name": "P1",
+   "label": "one pole",
+   "params": [
+    24.82249291678302
+   ],
+   "gain": 352.2642528436006,
+   "chi2": 40.6858533848762,
+   "n_points": 14,
+   "dof": 26,
+   "chi2_red": 1.5648405148029307,
+   "aic": 44.6858533848762,
+   "param_names": [
+    "tau_s"
+   ],
+   "param_ci68": [
+    [
+     20.92395144702298,
+     29.98827586508673
+    ]
+   ],
+   "group_delay_s": 24.82249291678302,
+   "group_delay_ci68": [
+    20.92395144702298,
+    29.98827586508673
+   ],
+   "dc_gain_ci68": [
+    303.07282822861526,
+    417.2439852559519
+   ],
+   "dc_gain_ci68_method": "the gain's dchi2 = 1 interval with the shape profiled out exactly (gain_profile_exact), not fit_priors' stepped grid",
+   "dc_gain_mk_per_w": 352.2642528436006,
+   "residuals": [
+    {
+     "point": "E73-REF1 k1",
+     "f_hz": 0.04999999999999999,
+     "resid_sigma_cplx": 2.0465447308372338,
+     "model_mag_mk_per_w": 44.80552406647307,
+     "model_lag_deg": 82.69258731820895,
+     "data_lag_deg": 98.09300732503573,
+     "se_lag_deg": 12.531318178006233,
+     "lag_dev_se": 1.2289545112545397,
+     "data_mag_mk_per_w": 62.72280806563843,
+     "se_mag_mk_per_w": 15.800878619003889
+    },
+    {
+     "point": "E73-REF1 k3",
+     "f_hz": 0.14999999999999997,
+     "resid_sigma_cplx": 0.7959655442375556,
+     "model_mag_mk_per_w": 15.043734466357357,
+     "model_lag_deg": 87.55239227004199,
+     "data_lag_deg": 37.315944957514525,
+     "se_lag_deg": 64.37028597732323,
+     "lag_dev_se": -0.7804291459917558,
+     "data_mag_mk_per_w": 23.130607905770933,
+     "se_mag_mk_per_w": 31.593800886916394
+    },
+    {
+     "point": "E73-REF1 k9",
+     "f_hz": 0.4499999999999999,
+     "resid_sigma_cplx": 0.42462876016959694,
+     "model_mag_mk_per_w": 5.018647781365757,
+     "model_lag_deg": 89.18368933932766,
+     "data_lag_deg": 15.108109923768952,
+     "se_lag_deg": 282.0415902390277,
+     "lag_dev_se": -0.2626406245716468,
+     "data_mag_mk_per_w": 4.2820393010337305,
+     "se_mag_mk_per_w": 18.760418308378522
+    },
+    {
+     "point": "E73-F25 k1",
+     "f_hz": 0.02499950000999981,
+     "resid_sigma_cplx": 0.5422469544814624,
+     "model_mag_mk_per_w": 87.51417873136663,
+     "model_lag_deg": 75.61517636633371,
+     "data_lag_deg": 75.60025135014304,
+     "se_lag_deg": 7.8181303061661325,
+     "lag_dev_se": -0.0019090262768966945,
+     "data_mag_mk_per_w": 81.78228431674054,
+     "se_mag_mk_per_w": 14.949245290086658
+    },
+    {
+     "point": "E73-F25 k3",
+     "f_hz": 0.07499850002999943,
+     "resid_sigma_cplx": 1.0481739828418337,
+     "model_mag_mk_per_w": 30.0060912029949,
+     "model_lag_deg": 85.1135880867613,
+     "data_lag_deg": 112.57798260444692,
+     "se_lag_deg": 30.06567387336051,
+     "lag_dev_se": 0.9134800913948669,
+     "data_mag_mk_per_w": 32.26946140086686,
+     "se_mag_mk_per_w": 20.165161506704166
+    },
+    {
+     "point": "E73-F25 k7",
+     "f_hz": 0.17499650006999867,
+     "resid_sigma_cplx": 1.0016651519100224,
+     "model_mag_mk_per_w": 12.898007894423305,
+     "model_lag_deg": 87.90167003565351,
+     "data_lag_deg": 112.39040180030334,
+     "se_lag_deg": 33.2332020840326,
+     "lag_dev_se": 0.7368754808136835,
+     "data_mag_mk_per_w": 19.779001248183494,
+     "se_mag_mk_per_w": 13.633503735276774
+    },
+    {
+     "point": "E73-REF2 k1",
+     "f_hz": 0.04999875003124922,
+     "resid_sigma_cplx": 3.207340454457047,
+     "model_mag_mk_per_w": 44.8066260822642,
+     "model_lag_deg": 82.69240660757542,
+     "data_lag_deg": 98.89506881690528,
+     "se_lag_deg": 6.798622893187978,
+     "lag_dev_se": 2.3832270834678084,
+     "data_mag_mk_per_w": 57.550116293344374,
+     "se_mag_mk_per_w": 8.44975823540801
+    },
+    {
+     "point": "E73-F10 k1",
+     "f_hz": 0.009999800003999922,
+     "resid_sigma_cplx": 2.328382016799851,
+     "model_mag_mk_per_w": 190.13859430706663,
+     "model_lag_deg": 57.3326122543035,
+     "data_lag_deg": 59.364632361692415,
+     "se_lag_deg": 4.314949706029937,
+     "lag_dev_se": 0.47092556016336995,
+     "data_mag_mk_per_w": 152.89584520301543,
+     "se_mag_mk_per_w": 22.91671593500676
+    },
+    {
+     "point": "E73-F10 k3",
+     "f_hz": 0.029999400011999765,
+     "resid_sigma_cplx": 1.122953054794734,
+     "model_mag_mk_per_w": 73.62602922773411,
+     "model_lag_deg": 77.9357780955565,
+     "data_lag_deg": 79.6885328076078,
+     "se_lag_deg": 9.437192185643502,
+     "lag_dev_se": 0.1857284113295593,
+     "data_mag_mk_per_w": 89.08753933762989,
+     "se_mag_mk_per_w": 19.72014736369156
+    },
+    {
+     "point": "E73-F10 k5",
+     "f_hz": 0.04999900001999961,
+     "resid_sigma_cplx": 1.6785795260277112,
+     "model_mag_mk_per_w": 44.80640567921294,
+     "model_lag_deg": 82.69244274969044,
+     "data_lag_deg": 95.36729496177566,
+     "se_lag_deg": 11.545587637105411,
+     "lag_dev_se": 1.0978091900104374,
+     "data_mag_mk_per_w": 58.70353365590785,
+     "se_mag_mk_per_w": 15.10239559394905
+    },
+    {
+     "point": "E73-F10 k7",
+     "f_hz": 0.06999860002799946,
+     "resid_sigma_cplx": 2.4526005351830156,
+     "model_mag_mk_per_w": 32.13214027510116,
+     "model_lag_deg": 84.76643278414994,
+     "data_lag_deg": 117.84956764528889,
+     "se_lag_deg": 16.258076536900337,
+     "lag_dev_se": 2.034873853991978,
+     "data_mag_mk_per_w": 41.05497814393799,
+     "se_mag_mk_per_w": 12.9880031228223
+    },
+    {
+     "point": "E73-F10 k9",
+     "f_hz": 0.08999820003599929,
+     "resid_sigma_cplx": 0.4661876148311171,
+     "model_mag_mk_per_w": 25.03284069946829,
+     "model_lag_deg": 85.92497387780845,
+     "data_lag_deg": 94.90171298595874,
+     "se_lag_deg": 22.33781721042761,
+     "lag_dev_se": 0.4018628599019879,
+     "data_mag_mk_per_w": 24.522214509798992,
+     "se_mag_mk_per_w": 11.86516534164638
+    },
+    {
+     "point": "E73-REF3 k1",
+     "f_hz": 0.04999916668055534,
+     "resid_sigma_cplx": 1.4147942521517058,
+     "model_mag_mk_per_w": 44.80625874381571,
+     "model_lag_deg": 82.69246684443702,
+     "data_lag_deg": 97.81619664030347,
+     "se_lag_deg": 15.923803750299257,
+     "lag_dev_se": 0.949756103065653,
+     "data_mag_mk_per_w": 60.518176366275824,
+     "se_mag_mk_per_w": 20.840861450251857
+    },
+    {
+     "point": "E73-REF3 k3",
+     "f_hz": 0.149997500041666,
+     "resid_sigma_cplx": 2.294849087572161,
+     "model_mag_mk_per_w": 15.043984737977532,
+     "model_lag_deg": 87.55235152619221,
+     "data_lag_deg": -150.13507416899054,
+     "se_lag_deg": 38.29970963320125,
+     "lag_dev_se": -6.205985057629165,
+     "data_mag_mk_per_w": 26.087091521586665,
+     "se_mag_mk_per_w": 22.444064216260823
+    }
+   ],
+   "resid_note": "resid_sigma_cplx is the two-component norm, whose null expectation is sqrt(2) = 1.41, not 1; lag_dev_se is the lag alone against that point's own phase SE and is NOT wrapped to +-180 deg, so it is meaningless where the measured phase has wrapped (the two 0.15 Hz REF k3 points)"
+  },
+  "P1D": {
+   "name": "P1D",
+   "label": "one pole and a delay",
+   "params": [
+    15.98429721852648,
+    1.0091544536422041
+   ],
+   "gain": 250.54739652678978,
+   "chi2": 21.669940494907614,
+   "n_points": 14,
+   "dof": 25,
+   "chi2_red": 0.8667976197963045,
+   "aic": 27.669940494907614,
+   "param_names": [
+    "tau_s",
+    "delay_s"
+   ],
+   "param_ci68": [
+    [
+     13.339115995968706,
+     19.11957676856583
+    ],
+    [
+     0.7770924700859253,
+     1.2436738152343834
+    ]
+   ],
+   "group_delay_s": 16.993451672168685,
+   "group_delay_ci68": [
+    14.469206483993236,
+    20.125420119671194
+   ],
+   "dc_gain_ci68": [
+    217.18682939360122,
+    292.0988385867952
+   ],
+   "dc_gain_ci68_method": "the gain's dchi2 = 1 interval with the shape profiled out exactly (gain_profile_exact), not fit_priors' stepped grid",
+   "dc_gain_mk_per_w": 250.54739652678978,
+   "residuals": [
+    {
+     "point": "E73-REF1 k1",
+     "f_hz": 0.04999999999999999,
+     "resid_sigma_cplx": 1.2385152907070083,
+     "model_mag_mk_per_w": 48.93296838827481,
+     "model_lag_deg": 96.90228328639509,
+     "data_lag_deg": 98.09300732503573,
+     "se_lag_deg": 12.531318178006233,
+     "lag_dev_se": 0.09501985519212841,
+     "data_mag_mk_per_w": 62.72280806563843,
+     "se_mag_mk_per_w": 15.800878619003889
+    },
+    {
+     "point": "E73-REF1 k3",
+     "f_hz": 0.14999999999999997,
+     "resid_sigma_cplx": 1.4070417514178002,
+     "model_mag_mk_per_w": 16.594742348355393,
+     "model_lag_deg": 140.69663484405547,
+     "data_lag_deg": 37.315944957514525,
+     "se_lag_deg": 64.37028597732323,
+     "lag_dev_se": -1.6060312350167365,
+     "data_mag_mk_per_w": 23.130607905770933,
+     "se_mag_mk_per_w": 31.593800886916394
+    },
+    {
+     "point": "E73-REF1 k9",
+     "f_hz": 0.4499999999999999,
+     "resid_sigma_cplx": 0.6520984727152691,
+     "model_mag_mk_per_w": 5.542397622738909,
+     "model_lag_deg": -107.78453068320907,
+     "data_lag_deg": 15.108109923768952,
+     "se_lag_deg": 282.0415902390277,
+     "lag_dev_se": 0.4357252435813726,
+     "data_mag_mk_per_w": 4.2820393010337305,
+     "se_mag_mk_per_w": 18.760418308378522
+    },
+    {
+     "point": "E73-F25 k1",
+     "f_hz": 0.02499950000999981,
+     "resid_sigma_cplx": 1.0641880491534512,
+     "model_mag_mk_per_w": 92.70697618759621,
+     "model_lag_deg": 77.36549836910778,
+     "data_lag_deg": 75.60025135014304,
+     "se_lag_deg": 7.8181303061661325,
+     "lag_dev_se": -0.225788897068203,
+     "data_mag_mk_per_w": 81.78228431674054,
+     "se_mag_mk_per_w": 14.949245290086658
+    },
+    {
+     "point": "E73-F25 k3",
+     "f_hz": 0.07499850002999943,
+     "resid_sigma_cplx": 0.12565002078693135,
+     "model_mag_mk_per_w": 32.97386491917761,
+     "model_lag_deg": 109.68414373901763,
+     "data_lag_deg": 112.57798260444692,
+     "se_lag_deg": 30.06567387336051,
+     "lag_dev_se": 0.0962505905444998,
+     "data_mag_mk_per_w": 32.26946140086686,
+     "se_mag_mk_per_w": 20.165161506704166
+    },
+    {
+     "point": "E73-F25 k7",
+     "f_hz": 0.17499650006999867,
+     "resid_sigma_cplx": 1.2690952710130896,
+     "model_mag_mk_per_w": 14.23263338921146,
+     "model_lag_deg": 150.31895330526334,
+     "data_lag_deg": 112.39040180030334,
+     "se_lag_deg": 33.2332020840326,
+     "lag_dev_se": -1.1412848936149718,
+     "data_mag_mk_per_w": 19.779001248183494,
+     "se_mag_mk_per_w": 13.633503735276774
+    },
+    {
+     "point": "E73-REF2 k1",
+     "f_hz": 0.04999875003124922,
+     "resid_sigma_cplx": 1.4747694457377256,
+     "model_mag_mk_per_w": 48.93414504863419,
+     "model_lag_deg": 96.90155481307156,
+     "data_lag_deg": 98.89506881690528,
+     "se_lag_deg": 6.798622893187978,
+     "lag_dev_se": 0.29322320639833793,
+     "data_mag_mk_per_w": 57.550116293344374,
+     "se_mag_mk_per_w": 8.44975823540801
+    },
+    {
+     "point": "E73-F10 k1",
+     "f_hz": 0.009999800003999922,
+     "resid_sigma_cplx": 2.3857582292736508,
+     "model_mag_mk_per_w": 176.78301251742639,
+     "model_lag_deg": 48.75588835887089,
+     "data_lag_deg": 59.364632361692415,
+     "se_lag_deg": 4.314949706029937,
+     "lag_dev_se": 2.4586020059506857,
+     "data_mag_mk_per_w": 152.89584520301543,
+     "se_mag_mk_per_w": 22.91671593500676
+    },
+    {
+     "point": "E73-F10 k3",
+     "f_hz": 0.029999400011999765,
+     "resid_sigma_cplx": 0.7877792025497168,
+     "model_mag_mk_per_w": 78.92433281438502,
+     "model_lag_deg": 82.53737782849436,
+     "data_lag_deg": 79.6885328076078,
+     "se_lag_deg": 9.437192185643502,
+     "lag_dev_se": -0.3018742190309967,
+     "data_mag_mk_per_w": 89.08753933762989,
+     "se_mag_mk_per_w": 19.72014736369156
+    },
+    {
+     "point": "E73-F10 k5",
+     "f_hz": 0.04999900001999961,
+     "resid_sigma_cplx": 0.9246641024144867,
+     "model_mag_mk_per_w": 48.9339097168316,
+     "model_lag_deg": 96.90170050587801,
+     "data_lag_deg": 95.36729496177566,
+     "se_lag_deg": 11.545587637105411,
+     "lag_dev_se": -0.13289973558132773,
+     "data_mag_mk_per_w": 58.70353365590785,
+     "se_mag_mk_per_w": 15.10239559394905
+    },
+    {
+     "point": "E73-F10 k7",
+     "f_hz": 0.06999860002799946,
+     "resid_sigma_cplx": 0.9857494427023474,
+     "model_mag_mk_per_w": 35.283958389325946,
+     "model_lag_deg": 107.33445188125567,
+     "data_lag_deg": 117.84956764528889,
+     "se_lag_deg": 16.258076536900337,
+     "lag_dev_se": 0.6467625945890619,
+     "data_mag_mk_per_w": 41.05497814393799,
+     "se_mag_mk_per_w": 12.9880031228223
+    },
+    {
+     "point": "E73-F10 k9",
+     "f_hz": 0.08999820003599929,
+     "resid_sigma_cplx": 1.2098428460998667,
+     "model_mag_mk_per_w": 27.551223100424377,
+     "model_lag_deg": 116.38270333128737,
+     "data_lag_deg": 94.90171298595874,
+     "se_lag_deg": 22.33781721042761,
+     "lag_dev_se": -0.9616423190758766,
+     "data_mag_mk_per_w": 24.522214509798992,
+     "se_mag_mk_per_w": 11.86516534164638
+    },
+    {
+     "point": "E73-REF3 k1",
+     "f_hz": 0.04999916668055534,
+     "resid_sigma_cplx": 0.7882986503748145,
+     "model_mag_mk_per_w": 48.93375282888841,
+     "model_lag_deg": 96.90179763493182,
+     "data_lag_deg": 97.81619664030347,
+     "se_lag_deg": 15.923803750299257,
+     "lag_dev_se": 0.0574234033344241,
+     "data_mag_mk_per_w": 60.518176366275824,
+     "se_mag_mk_per_w": 20.840861450251857
+    },
+    {
+     "point": "E73-REF3 k3",
+     "f_hz": 0.149997500041666,
+     "resid_sigma_cplx": 1.6040296329954098,
+     "model_mag_mk_per_w": 16.595017714029943,
+     "model_lag_deg": 140.6956635103175,
+     "data_lag_deg": -150.13507416899054,
+     "se_lag_deg": 38.29970963320125,
+     "lag_dev_se": -7.5935494149854526,
+     "data_mag_mk_per_w": 26.087091521586665,
+     "se_mag_mk_per_w": 22.444064216260823
+    }
+   ],
+   "resid_note": "resid_sigma_cplx is the two-component norm, whose null expectation is sqrt(2) = 1.41, not 1; lag_dev_se is the lag alone against that point's own phase SE and is NOT wrapped to +-180 deg, so it is meaningless where the measured phase has wrapped (the two 0.15 Hz REF k3 points)"
+  },
+  "P2": {
+   "name": "P2",
+   "label": "two poles",
+   "params": [
+    15.573299172598656,
+    1.004576008535559
+   ],
+   "gain": 252.5137130466412,
+   "chi2": 23.1452631725564,
+   "n_points": 14,
+   "dof": 25,
+   "chi2_red": 0.9258105269022561,
+   "aic": 29.1452631725564,
+   "param_names": [
+    "tau1_s",
+    "tau2_s"
+   ],
+   "param_ci68": [
+    [
+     12.737509434545652,
+     19.002384539534795
+    ],
+    [
+     0.7505911602127892,
+     1.2883004147727068
+    ]
+   ],
+   "group_delay_s": 16.577875181134214,
+   "group_delay_ci68": [
+    13.834464974258365,
+    20.027879385663923
+   ],
+   "dc_gain_ci68": [
+    216.99518712187015,
+    295.6481067195387
+   ],
+   "dc_gain_ci68_method": "the gain's dchi2 = 1 interval with the shape profiled out exactly (gain_profile_exact), not fit_priors' stepped grid",
+   "dc_gain_mk_per_w": 252.5137130466412,
+   "residuals": [
+    {
+     "point": "E73-REF1 k1",
+     "f_hz": 0.04999999999999999,
+     "resid_sigma_cplx": 1.3106402027676616,
+     "model_mag_mk_per_w": 48.222465726048036,
+     "model_lag_deg": 95.96369618536835,
+     "data_lag_deg": 98.09300732503573,
+     "se_lag_deg": 12.531318178006233,
+     "lag_dev_se": 0.16991916647719807,
+     "data_mag_mk_per_w": 62.72280806563843,
+     "se_mag_mk_per_w": 15.800878619003889
+    },
+    {
+     "point": "E73-REF1 k3",
+     "f_hz": 0.14999999999999997,
+     "resid_sigma_cplx": 1.1950153563195733,
+     "model_mag_mk_per_w": 12.464107172662894,
+     "model_lag_deg": 129.53676256659588,
+     "data_lag_deg": 37.315944957514525,
+     "se_lag_deg": 64.37028597732323,
+     "lag_dev_se": -1.4326613003019668,
+     "data_mag_mk_per_w": 23.130607905770933,
+     "se_mag_mk_per_w": 31.593800886916394
+    },
+    {
+     "point": "E73-REF1 k9",
+     "f_hz": 0.4499999999999999,
+     "resid_sigma_cplx": 0.44714658210497665,
+     "model_mag_mk_per_w": 1.9039307121325295,
+     "model_lag_deg": 159.30354372499323,
+     "data_lag_deg": 15.108109923768952,
+     "se_lag_deg": 282.0415902390277,
+     "lag_dev_se": -0.5112559239189509,
+     "data_mag_mk_per_w": 4.2820393010337305,
+     "se_mag_mk_per_w": 18.760418308378522
+    },
+    {
+     "point": "E73-F25 k1",
+     "f_hz": 0.02499950000999981,
+     "resid_sigma_cplx": 1.2033390730456681,
+     "model_mag_mk_per_w": 94.3834068269526,
+     "model_lag_deg": 76.732447487993,
+     "data_lag_deg": 75.60025135014304,
+     "se_lag_deg": 7.8181303061661325,
+     "lag_dev_se": -0.14481673923457125,
+     "data_mag_mk_per_w": 81.78228431674054,
+     "se_mag_mk_per_w": 14.949245290086658
+    },
+    {
+     "point": "E73-F25 k3",
+     "f_hz": 0.07499850002999943,
+     "resid_sigma_cplx": 0.21840543059448103,
+     "model_mag_mk_per_w": 30.815512335362918,
+     "model_lag_deg": 107.57254737392529,
+     "data_lag_deg": 112.57798260444692,
+     "se_lag_deg": 30.06567387336051,
+     "lag_dev_se": 0.16648338738739063,
+     "data_mag_mk_per_w": 32.26946140086686,
+     "se_mag_mk_per_w": 20.165161506704166
+    },
+    {
+     "point": "E73-F25 k7",
+     "f_hz": 0.17499650006999867,
+     "resid_sigma_cplx": 1.1677405332879933,
+     "model_mag_mk_per_w": 9.880357042647143,
+     "model_lag_deg": 134.50218637702153,
+     "data_lag_deg": 112.39040180030334,
+     "se_lag_deg": 33.2332020840326,
+     "lag_dev_se": -0.6653522137531893,
+     "data_mag_mk_per_w": 19.779001248183494,
+     "se_mag_mk_per_w": 13.633503735276774
+    },
+    {
+     "point": "E73-REF2 k1",
+     "f_hz": 0.04999875003124922,
+     "resid_sigma_cplx": 1.624823606812897,
+     "model_mag_mk_per_w": 48.22373213883197,
+     "model_lag_deg": 95.96300405011259,
+     "data_lag_deg": 98.89506881690528,
+     "se_lag_deg": 6.798622893187978,
+     "lag_dev_se": 0.43127333474114815,
+     "data_mag_mk_per_w": 57.550116293344374,
+     "se_mag_mk_per_w": 8.44975823540801
+    },
+    {
+     "point": "E73-F10 k1",
+     "f_hz": 0.009999800003999922,
+     "resid_sigma_cplx": 2.6353730768871984,
+     "model_mag_mk_per_w": 180.1272045980885,
+     "model_lag_deg": 47.988417073013586,
+     "data_lag_deg": 59.364632361692415,
+     "se_lag_deg": 4.314949706029937,
+     "lag_dev_se": 2.636465327227594,
+     "data_mag_mk_per_w": 152.89584520301543,
+     "se_mag_mk_per_w": 22.91671593500676
+    },
+    {
+     "point": "E73-F10 k3",
+     "f_hz": 0.029999400011999765,
+     "resid_sigma_cplx": 0.692316861380747,
+     "model_mag_mk_per_w": 80.00555235959024,
+     "model_lag_deg": 81.91010115423248,
+     "data_lag_deg": 79.6885328076078,
+     "se_lag_deg": 9.437192185643502,
+     "lag_dev_se": -0.23540564851527337,
+     "data_mag_mk_per_w": 89.08753933762989,
+     "se_mag_mk_per_w": 19.72014736369156
+    },
+    {
+     "point": "E73-F10 k5",
+     "f_hz": 0.04999900001999961,
+     "resid_sigma_cplx": 0.9827366838416652,
+     "model_mag_mk_per_w": 48.22347885673016,
+     "model_lag_deg": 95.96314247562321,
+     "data_lag_deg": 95.36729496177566,
+     "se_lag_deg": 11.545587637105411,
+     "lag_dev_se": -0.051608244861665944,
+     "data_mag_mk_per_w": 58.70353365590785,
+     "se_mag_mk_per_w": 15.10239559394905
+    },
+    {
+     "point": "E73-F10 k7",
+     "f_hz": 0.06999860002799946,
+     "resid_sigma_cplx": 1.2035292939323874,
+     "model_mag_mk_per_w": 33.36820430298884,
+     "model_lag_deg": 105.53068070034932,
+     "data_lag_deg": 117.84956764528889,
+     "se_lag_deg": 16.258076536900337,
+     "lag_dev_se": 0.7577087558285174,
+     "data_mag_mk_per_w": 41.05497814393799,
+     "se_mag_mk_per_w": 12.9880031228223
+    },
+    {
+     "point": "E73-F10 k9",
+     "f_hz": 0.08999820003599929,
+     "resid_sigma_cplx": 0.9306965767838418,
+     "model_mag_mk_per_w": 24.7729970812362,
+     "model_lag_deg": 113.12084089533012,
+     "data_lag_deg": 94.90171298595874,
+     "se_lag_deg": 22.33781721042761,
+     "lag_dev_se": -0.8156180945408772,
+     "data_mag_mk_per_w": 24.522214509798992,
+     "se_mag_mk_per_w": 11.86516534164638
+    },
+    {
+     "point": "E73-REF3 k1",
+     "f_hz": 0.04999916668055534,
+     "resid_sigma_cplx": 0.8426820863694466,
+     "model_mag_mk_per_w": 48.22331000186925,
+     "model_lag_deg": 95.9632347597249,
+     "data_lag_deg": 97.81619664030347,
+     "se_lag_deg": 15.923803750299257,
+     "lag_dev_se": 0.11636427512137312,
+     "data_mag_mk_per_w": 60.518176366275824,
+     "se_mag_mk_per_w": 20.840861450251857
+    },
+    {
+     "point": "E73-REF3 k3",
+     "f_hz": 0.149997500041666,
+     "resid_sigma_cplx": 1.6985378540866862,
+     "model_mag_mk_per_w": 12.464412142271122,
+     "model_lag_deg": 129.53622105856766,
+     "data_lag_deg": -150.13507416899054,
+     "se_lag_deg": 38.29970963320125,
+     "lag_dev_se": -7.302177951373206,
+     "data_mag_mk_per_w": 26.087091521586665,
+     "se_mag_mk_per_w": 22.444064216260823
+    }
+   ],
+   "resid_note": "resid_sigma_cplx is the two-component norm, whose null expectation is sqrt(2) = 1.41, not 1; lag_dev_se is the lag alone against that point's own phase SE and is NOT wrapped to +-180 deg, so it is meaningless where the measured phase has wrapped (the two 0.15 Hz REF k3 points)"
+  },
+  "P2D": {
+   "name": "P2D",
+   "label": "two poles and a delay",
+   "params": [
+    15.935043281908653,
+    0.20526396634187657,
+    0.8063084467734354
+   ],
+   "gain": 250.318334629366,
+   "chi2": 21.65822336290431,
+   "n_points": 14,
+   "dof": 24,
+   "chi2_red": 0.9024259734543462,
+   "aic": 29.65822336290431,
+   "param_names": [
+    "tau1_s",
+    "tau2_s",
+    "delay_s"
+   ],
+   "param_ci68": [
+    [
+     13.165032778974984,
+     19.251268414578913
+    ],
+    [
+     null,
+     0.913100927605146
+    ],
+    [
+     0.23422332665262088,
+     1.1768291387969974
+    ]
+   ],
+   "group_delay_s": 16.14030724825053,
+   "group_delay_ci68": [
+    14.597004560452461,
+    17.30459399471841
+   ],
+   "dc_gain_ci68": [
+    215.71503622475845,
+    291.9505714269262
+   ],
+   "dc_gain_ci68_method": "the gain's dchi2 = 1 interval with the shape profiled out exactly (gain_profile_exact), not fit_priors' stepped grid",
+   "dc_gain_mk_per_w": 250.318334629366,
+   "residuals": [
+    {
+     "point": "E73-REF1 k1",
+     "f_hz": 0.04999999999999999,
+     "resid_sigma_cplx": 1.238576556232775,
+     "model_mag_mk_per_w": 48.93191816569575,
+     "model_lag_deg": 96.90678023551256,
+     "data_lag_deg": 98.09300732503573,
+     "se_lag_deg": 12.531318178006233,
+     "lag_dev_se": 0.09466099836209758,
+     "data_mag_mk_per_w": 62.72280806563843,
+     "se_mag_mk_per_w": 15.800878619003889
+    },
+    {
+     "point": "E73-REF1 k3",
+     "f_hz": 0.14999999999999997,
+     "resid_sigma_cplx": 1.398576123609471,
+     "model_mag_mk_per_w": 16.327858223277893,
+     "model_lag_deg": 140.6802472309857,
+     "data_lag_deg": 37.315944957514525,
+     "se_lag_deg": 64.37028597732323,
+     "lag_dev_se": -1.605776651510994,
+     "data_mag_mk_per_w": 23.130607905770933,
+     "se_mag_mk_per_w": 31.593800886916394
+    },
+    {
+     "point": "E73-REF1 k9",
+     "f_hz": 0.4499999999999999,
+     "resid_sigma_cplx": 0.6095301778375606,
+     "model_mag_mk_per_w": 4.803989697070355,
+     "model_lag_deg": -110.51989849422228,
+     "data_lag_deg": 15.108109923768952,
+     "se_lag_deg": 282.0415902390277,
+     "lag_dev_se": 0.4454236990775815,
+     "data_mag_mk_per_w": 4.2820393010337305,
+     "se_mag_mk_per_w": 18.760418308378522
+    },
+    {
+     "point": "E73-F25 k1",
+     "f_hz": 0.02499950000999981,
+     "resid_sigma_cplx": 1.0733602270930502,
+     "model_mag_mk_per_w": 92.82091986497149,
+     "model_lag_deg": 77.32576764252171,
+     "data_lag_deg": 75.60025135014304,
+     "se_lag_deg": 7.8181303061661325,
+     "lag_dev_se": -0.22070702646357307,
+     "data_mag_mk_per_w": 81.78228431674054,
+     "se_mag_mk_per_w": 14.949245290086658
+    },
+    {
+     "point": "E73-F25 k3",
+     "f_hz": 0.07499850002999943,
+     "resid_sigma_cplx": 0.12239402330102929,
+     "model_mag_mk_per_w": 32.89027084153816,
+     "model_lag_deg": 109.70913676908553,
+     "data_lag_deg": 112.57798260444692,
+     "se_lag_deg": 30.06567387336051,
+     "lag_dev_se": 0.09541930932415607,
+     "data_mag_mk_per_w": 32.26946140086686,
+     "se_mag_mk_per_w": 20.165161506704166
+    },
+    {
+     "point": "E73-F25 k7",
+     "f_hz": 0.17499650006999867,
+     "resid_sigma_cplx": 1.2714574434782633,
+     "model_mag_mk_per_w": 13.913467996138811,
+     "model_lag_deg": 150.24814653490574,
+     "data_lag_deg": 112.39040180030334,
+     "se_lag_deg": 33.2332020840326,
+     "lag_dev_se": -1.1391542903051084,
+     "data_mag_mk_per_w": 19.779001248183494,
+     "se_mag_mk_per_w": 13.633503735276774
+    },
+    {
+     "point": "E73-REF2 k1",
+     "f_hz": 0.04999875003124922,
+     "resid_sigma_cplx": 1.4747940292340183,
+     "model_mag_mk_per_w": 48.93309958879531,
+     "model_lag_deg": 96.90605027357084,
+     "data_lag_deg": 98.89506881690528,
+     "se_lag_deg": 6.798622893187978,
+     "lag_dev_se": 0.2925619753564177,
+     "data_mag_mk_per_w": 57.550116293344374,
+     "se_mag_mk_per_w": 8.44975823540801
+    },
+    {
+     "point": "E73-F10 k1",
+     "f_hz": 0.009999800003999922,
+     "resid_sigma_cplx": 2.400930819863321,
+     "model_mag_mk_per_w": 176.88018132528018,
+     "model_lag_deg": 48.67614048809274,
+     "data_lag_deg": 59.364632361692415,
+     "se_lag_deg": 4.314949706029937,
+     "lag_dev_se": 2.477083767317847,
+     "data_mag_mk_per_w": 152.89584520301543,
+     "se_mag_mk_per_w": 22.91671593500676
+    },
+    {
+     "point": "E73-F10 k3",
+     "f_hz": 0.029999400011999765,
+     "resid_sigma_cplx": 0.780880376672441,
+     "model_mag_mk_per_w": 79.0124992273234,
+     "model_lag_deg": 82.50945571800273,
+     "data_lag_deg": 79.6885328076078,
+     "se_lag_deg": 9.437192185643502,
+     "lag_dev_se": -0.2989154883044881,
+     "data_mag_mk_per_w": 89.08753933762989,
+     "se_mag_mk_per_w": 19.72014736369156
+    },
+    {
+     "point": "E73-F10 k5",
+     "f_hz": 0.04999900001999961,
+     "resid_sigma_cplx": 0.9248181523187561,
+     "model_mag_mk_per_w": 48.93286330445701,
+     "model_lag_deg": 96.90619626409926,
+     "data_lag_deg": 95.36729496177566,
+     "se_lag_deg": 11.545587637105411,
+     "lag_dev_se": -0.13328912747393307,
+     "data_mag_mk_per_w": 58.70353365590785,
+     "se_mag_mk_per_w": 15.10239559394905
+    },
+    {
+     "point": "E73-F10 k7",
+     "f_hz": 0.06999860002799946,
+     "resid_sigma_cplx": 0.9887395864556341,
+     "model_mag_mk_per_w": 35.215276465295254,
+     "model_lag_deg": 107.3567092575411,
+     "data_lag_deg": 117.84956764528889,
+     "se_lag_deg": 16.258076536900337,
+     "lag_dev_se": 0.6453935903138693,
+     "data_mag_mk_per_w": 41.05497814393799,
+     "se_mag_mk_per_w": 12.9880031228223
+    },
+    {
+     "point": "E73-F10 k9",
+     "f_hz": 0.08999820003599929,
+     "resid_sigma_cplx": 1.2044444236371192,
+     "model_mag_mk_per_w": 27.425949835647575,
+     "model_lag_deg": 116.4120610836455,
+     "data_lag_deg": 94.90171298595874,
+     "se_lag_deg": 22.33781721042761,
+     "lag_dev_se": -0.9629565814356035,
+     "data_mag_mk_per_w": 24.522214509798992,
+     "se_mag_mk_per_w": 11.86516534164638
+    },
+    {
+     "point": "E73-REF3 k1",
+     "f_hz": 0.04999916668055534,
+     "resid_sigma_cplx": 0.7883478481603107,
+     "model_mag_mk_per_w": 48.93270578148658,
+     "model_lag_deg": 96.90629359163485,
+     "data_lag_deg": 97.81619664030347,
+     "se_lag_deg": 15.923803750299257,
+     "lag_dev_se": 0.057141061453456106,
+     "data_mag_mk_per_w": 60.518176366275824,
+     "se_mag_mk_per_w": 20.840861450251857
+    },
+    {
+     "point": "E73-REF3 k3",
+     "f_hz": 0.149997500041666,
+     "resid_sigma_cplx": 1.5995590280730834,
+     "model_mag_mk_per_w": 16.328138970189745,
+     "model_lag_deg": 140.67928019203,
+     "data_lag_deg": -150.13507416899054,
+     "se_lag_deg": 38.29970963320125,
+     "lag_dev_se": -7.593121648862826,
+     "data_mag_mk_per_w": 26.087091521586665,
+     "se_mag_mk_per_w": 22.444064216260823
+    }
+   ],
+   "resid_note": "resid_sigma_cplx is the two-component norm, whose null expectation is sqrt(2) = 1.41, not 1; lag_dev_se is the lag alone against that point's own phase SE and is NOT wrapped to +-180 deg, so it is meaningless where the measured phase has wrapped (the two 0.15 Hz REF k3 points)"
+  }
+ },
+ "frozen_fits": {
+  "P1": {
+   "params": [
+    24.82249291678302
+   ],
+   "gain": 352.2642528436007,
+   "chi2": 20.342926692438102,
+   "dof": 26,
+   "chi2_red": 0.7824202574014655,
+   "aic": 24.342926692438102,
+   "param_ci68": [
+    [
+     19.699484934402463,
+     32.79773566684123
+    ]
+   ],
+   "group_delay_s": 24.82249291678302,
+   "dc_gain_ci68_exact": [
+    284.9655780720532,
+    451.12425839484035
+   ]
+  },
+  "P1D": {
+   "params": [
+    15.98429721852648,
+    1.0091544536422041
+   ],
+   "gain": 250.54739652678973,
+   "chi2": 10.834970247453809,
+   "dof": 25,
+   "chi2_red": 0.4333988098981523,
+   "aic": 16.83497024745381,
+   "param_ci68": [
+    [
+     12.558512920761885,
+     20.910799531738498
+    ],
+    [
+     0.695760615564326,
+     1.3201848156461227
+    ]
+   ],
+   "group_delay_s": 16.993451672168685,
+   "dc_gain_ci68_exact": [
+    203.45520206594568,
+    311.9773460684473
+   ]
+  },
+  "P2": {
+   "params": [
+    15.573299172598658,
+    1.004576008535559
+   ],
+   "gain": 252.5137130466412,
+   "chi2": 11.572631586278202,
+   "dof": 25,
+   "chi2_red": 0.4629052634511281,
+   "aic": 17.572631586278202,
+   "param_ci68": [
+    [
+     11.753469250952577,
+     20.7826281167742
+    ],
+    [
+     0.645552198260907,
+     1.4516891536952845
+    ]
+   ],
+   "group_delay_s": 16.577875181134218,
+   "dc_gain_ci68_exact": [
+    203.85806240861234,
+    316.8054990389558
+   ]
+  },
+  "P2D": {
+   "params": [
+    15.935043281908655,
+    0.2052639663418765,
+    0.8063084467734354
+   ],
+   "gain": 250.31833462936606,
+   "chi2": 10.829111681452156,
+   "dof": 24,
+   "chi2_red": 0.4512129867271732,
+   "aic": 18.829111681452154,
+   "param_ci68": [
+    [
+     12.270670857342248,
+     20.846365094572832
+    ],
+    [
+     null,
+     1.0600818300691233
+    ],
+    [
+     0.12945136260691165,
+     1.2617201230939081
+    ]
+   ],
+   "group_delay_s": 16.140307248250533,
+   "dc_gain_ci68_exact": [
+    203.0015569514624,
+    312.93119775913107
+   ]
+  }
+ },
+ "delta_aic": {
+  "P1": 17.015912889968583,
+  "P1D": 0.0,
+  "P2": 1.475322677648787,
+  "P2D": 1.9882828679966948
+ },
+ "frozen_delta_aic": {
+  "P1": 7.507956444984291,
+  "P1D": 0.0,
+  "P2": 0.7376613388243918,
+  "P2D": 1.9941414339983439
+ },
+ "preferred": "P1D",
+ "delta_chi2_P1_over_P1D": 19.015912889968583,
+ "at_0p05_hz": {
+  "model": "P1D",
+  "attenuation": 0.19530423810667155,
+  "model_mag_mk_per_w": 48.9329683882748,
+  "model_lag_deg": 96.9022832863951,
+  "reference_line_mk_per_w": 58.577948738755445,
+  "se_reference_line": 3.5548021468385516,
+  "undershoot_line_se": 2.7132256457812614,
+  "undershoot_frac": 0.16465206717113123,
+  "g0_implied_by_the_line": 299.93178492502176,
+  "note": "the fitted family's own 0.05 Hz value is BELOW the measured reference line: either quote G0 with that undershoot stated, or quote the steady gain the measured line implies under the fitted shape (line / attenuation). The two are not the same number and the coda must say which it means."
+ },
+ "step_response": {
+  "t63_s": null,
+  "t63_s_shape": 16.993451672168685,
+  "t95_s_approx": 48.962046109221646
+ },
+ "anchors_sensitivity": {
+  "note": "the post-hoc anchors fit (prior-anchors.json) with E73's per-component sigma; the anchors' own isotropic SEs are already per-direction and are left alone. Params and chi2/AIC only, no profiled intervals.",
+  "fits": {
+   "P1": {
+    "params": [
+     31.369002054211517
+    ],
+    "gains": [
+     432.6739259919183,
+     500.72610321531323
+    ],
+    "chi2": 61.99700096862654,
+    "dof": 29,
+    "aic": 67.99700096862654,
+    "group_delay_s": 31.369002054211517
+   },
+   "P1D": {
+    "params": [
+     15.80938371097574,
+     1.0806251044943909
+    ],
+    "gains": [
+     248.32918486453724,
+     267.08033750293436
+    ],
+    "chi2": 21.910801343325545,
+    "dof": 28,
+    "aic": 29.910801343325545,
+    "group_delay_s": 16.89000881547013
+   },
+   "P2": {
+    "params": [
+     15.224629024929346,
+     1.1172624299407332
+    ],
+    "gains": [
+     249.5714239205192,
+     273.60663259046413
+    ],
+    "chi2": 24.131675009476933,
+    "dof": 28,
+    "aic": 32.131675009476936,
+    "group_delay_s": 16.34189145487008
+   },
+   "P2D": {
+    "params": [
+     15.773260934206773,
+     0.17653232202837454,
+     0.9057223802481158
+    ],
+    "gains": [
+     248.16477737110208,
+     266.95066470599886
+    ],
+    "chi2": 21.901301643210974,
+    "dof": 27,
+    "aic": 31.901301643210974,
+    "group_delay_s": 15.949793256235147
+   }
+  },
+  "preferred": "P1D",
+  "delta_aic": {
+   "P1": 38.08619962530099,
+   "P1D": 0.0,
+   "P2": 2.220873666151391,
+   "P2D": 1.9905002998854293
+  }
+ }
+}
