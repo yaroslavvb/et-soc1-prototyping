@@ -57,6 +57,10 @@ script's `if (D.q129)` guard, so the 27 October page still rebuilds from either 
 public space 4 s after the second deploy (`flag_reasons llm:S9`); anonymous access is unaffected (the viewer
 answers 200, the raw host serves all 254,376 B, `check-mirror` exits 0), `spacesheep list --json` carries no
 flag field, and there is nothing to do on the content — recorded for whoever owns the space.
+**A third deploy followed the same day from another lane** (`989d91ee`, which lets a private box name any
+element of the page as its anchor), so the two versions above are the record of the Q129 rebuilds and not
+necessarily the live version: [MIRROR.md](../reports/MIRROR.md) and `check-mirror.py` are the authority, and they
+read 1 of 1 equal when this entry was written (28 Oct 2026).
 
 **Visibility.** Every space the hub links is public (Q40); the one exception, the David Kanter notes, is private and
 no longer linked (below). After any deploy, compare `spacesheep list` with the record.
