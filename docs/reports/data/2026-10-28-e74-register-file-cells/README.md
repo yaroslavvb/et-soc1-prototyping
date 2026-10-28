@@ -67,6 +67,7 @@ residual rms is 36.7, **243.2**, 36.1, 74.7 and 26.0 mW — E60 worked at 32 mW,
 noise and one (`p7411`) is 7.6×. Rule 5 said in advance that a scatter worse than E60's turns the result into a
 bound, and it did. At the measured between-pass SE the half-width falls as 1/√n: **≈ 40 passes** of this harness
 (about 80 card-minutes) would bring the board interval to ±0.6 fJ, and ~250 passes to the registered ±0.23 fJ.
+
 **One pass carries the point estimate and the bound, and inside it one reading.** Per-pass e_cell runs 0.576,
 3.405 (`p7411`), 0.822, −0.163 and −0.365 fJ: dropping `p7411` — the pass whose residual rms is 243 mW, 7.6× E60's
 — moves the point from **0.855 to 0.218 fJ** and the published 95 % bound from **2.73 to 1.13 fJ**. Inside `p7411`

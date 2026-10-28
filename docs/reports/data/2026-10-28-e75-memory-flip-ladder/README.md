@@ -7,7 +7,7 @@
 one set aside by its own registered rule, so **4 passes are in the numbers**. Pre-registered Tue 27 Oct in
 `2be3f07e` / `547f4ae3`. Reduced with `reduce.sh`, whose three commands are unchanged; the reducer itself was
 amended the same day after an adversarial review and the reduction re-run, with no published number changing
-(D-M7).*
+(D-M6).*
 
 **The two arms separate, and the answer is different at the two ends of the hierarchy:**
 
@@ -120,13 +120,23 @@ single-bit arithmetic prices show.
   at −1.7 % and DRAM fails at −63.4 %. **So "P4 failed at DRAM" is not a pre-registered failure** — it is a
   failure of the stricter test this run substituted, and the thing worth carrying forward is the finding under
   its own name: *the two designed arms explain 36.6 % of DRAM's zeros-to-random chord* (95 % [30.0, 43.3]).
-- **D-M6 (28 Oct 2026) — rule 1's rate conversion is applied with the level's mean measured rate, not run by
+- **D-M4 (28 Oct 2026) — a third leakage sensitivity.** E71's measured slope for this card (0.3803 W/°C over
+  58–62 °C) is added beside the registered 0.2936 W/°C one; `mf.json` is the registered `auto` estimator (which
+  reads 0.022 W/°C from 39 qualifying runs — these launches barely heat). The choice matters least where the
+  signal is largest and most where it is smallest, which is the expected shape and is worth stating as a number:
+  across `auto` / 0.2936 / 0.3803 W/°C, L1's e_flip moves **0.0492 → 0.0466 → 0.0458** (−7 %), L1's e_one and
+  L2's e_flip do not move at all, DRAM's e_one moves **3.255 → 3.696 → 3.837** (+18 %), and the two small
+  quantities are reshuffled: DRAM's e_flip **0.323 → 0.181 → 0.135** and L3's **0.285 → 0.469 → 0.528**. So the
+  headline — at DRAM the data-dependent energy is carried ones — holds under every setting (the ones term is
+  94–99 % of what the two arms explain; the point ratio runs 10×, 20×, 28×), while the DRAM e_flip's own value is
+  correction-dependent as well as unresolved, and should be read as "small, under 0.42 pJ at 95 %".
+- **D-M5 (28 Oct 2026) — rule 1's rate conversion is applied with the level's mean measured rate, not run by
   run.** Rule 1 registered "the slope converted with each run's OWN measured rate, never an assumed one".
   `reduce_mf.py` fits the slope per pass and converts with the mean of that level's measured rates (mean over the
   pass's runs, then over passes). No rate is assumed, and the difference is nil: the within-level spread of
   `ops_per_s` is 9.8e−6 (L2), 1.3e−4 (DRAM), 3.6e−4 (L1) and 2.1e−3 (L3) relative, so it moves no published
   digit. Named because the registered wording is per run.
-- **D-M7 (28 Oct 2026) — the reducer was amended after an adversarial review of this result, and the reduction
+- **D-M6 (28 Oct 2026) — the reducer was amended after an adversarial review of this result, and the reduction
   re-run.** Added: P3, P6 and P7 now carry machine-readable `pass` fields (a reader of `mf.json` alone would have
   scored P7 a FAIL, because the registered DRAM band is a **line** rate and `dram_bytes_per_s` counts the 32 B
   each load asks for — `dram_line_bytes_per_s` = 75.1 GB/s is the quantity scored, and the basis is now stated
@@ -135,15 +145,6 @@ single-bit arithmetic prices show.
   field of `mf.json`, `mf-leak0.2936.json`, `mf-leak0.3803.json` and `runs.csv` reproduces bit-for-bit, checked
   field by field against the committed files; the one pre-existing field that differs is P4's `rule` string,
   rewritten to name both bases.
-- **D-M4 (28 Oct 2026) — a third leakage sensitivity.** E71's measured slope for this card (0.3803 W/°C over
-  58–62 °C) is added beside the registered 0.2936 W/°C one; `mf.json` is the registered `auto` estimator (which
-  reads 0.022 W/°C from 39 qualifying runs — these launches barely heat). The choice matters least where the
-  signal is largest and most where it is smallest, which is the expected shape and is worth stating as a number:
-  across `auto` / 0.2936 / 0.3803 W/°C, L1's e_flip moves **0.0492 → 0.0466 → 0.0458** (−7 %), L1's e_one and
-  L2's e_flip do not move at all, DRAM's e_one moves **3.255 → 3.696 → 3.837** (+18 %), and the two small
-  quantities are reshuffled: DRAM's e_flip **0.323 → 0.181 → 0.135** and L3's **0.285 → 0.469 → 0.528**. So the
-  headline — ones dominate changes at DRAM by about 10× — holds under every setting (the ratio runs 10×, 20×,
-  28×), while the DRAM e_flip's own value is correction-dependent and should be read as "small, under 0.4 pJ".
 - **The run is a day later than the registration** (yesterday's lane agent died in setup with 0 launches), so the
   data directory carries the date of the run.
 

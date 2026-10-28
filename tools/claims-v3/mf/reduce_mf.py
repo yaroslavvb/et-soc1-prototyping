@@ -12,7 +12,7 @@ mean_se — and adds only the registered estimator:
   rule 1  per level, within-pass least squares of leakage-corrected board power on changed bits per transfer over
           the k-arm; the mean over passes with a two-sided t interval on the between-pass scatter (df = n - 1);
           the slope converted with each run's OWN measured rate, never an assumed one. The w-arm the same way.
-          Implementation note (amendment 28 Oct 2026, departure D-M6): the W-per-bit slope is converted to pJ
+          Implementation note (amendment 28 Oct 2026, departure D-M5): the W-per-bit slope is converted to pJ
           with the MEAN of the level's own measured rates (mean over the pass's runs, then over passes), not run
           by run, because the slope itself is a per-pass quantity. No rate is ever assumed. Measured size of the
           difference: the within-level spread of ops_per_s is 1e-5 to 2e-3 relative (L2 9.8e-6, L1 3.6e-4,
