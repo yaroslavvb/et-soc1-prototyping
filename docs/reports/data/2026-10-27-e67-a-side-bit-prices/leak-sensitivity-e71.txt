@@ -18,15 +18,26 @@ A re-run at the published auto k reproduces hl.json, closure.json and scored.jso
     base ix_z                        36.19 W -> 35.86 W
     P6 asks every cell within +-0.5 W, the mean within +-0.3 W and >= 12 of 16 within 20%: it FAILS at both
     slopes (sub-additive), and the mean excess is still 4.4x its own registered +-0.3 W band (was 4.5x). The T
-    the grid implies, T = -mean excess, falls 1.351 -> 1.310 W (-3.0%), so A14's marginal correction takes 582 fJ
+    the grid implies, T = -mean excess, falls 1.351 -> 1.310 W (-3.0%), so A14's marginal correction takes 579 fJ
     off every A price and 289 fJ off every B one instead of 597 and 298 fJ -- still an over-correction that
-    sends most positions negative, so it still bounds T rather than pricing them.
+    sends most positions negative, so it still bounds T rather than pricing them. The four figures are
+    marginal_A_over_B.{published,at_measured_slope}.turn_on_fJ_per_{A,B}_bit in this directory's
+    leak-sensitivity-e71.json: 596.847 -> 578.804 and 298.424 -> 289.402 fJ, both scaled by the same
+    1.3103/1.3511 = 0.9698.
+    CORRECTED 2026-10-28 after review: the A figure read 582 fJ, which the committed JSON does not support.
 
-  THE CLOSURE (an independent check of E71's closure_refit.py, by a different route: full re-reduce + E67's own
-  closure.py over the same operand files, rather than flip-weighting the committed histograms). The two agree:
+  THE CLOSURE, by a second route: a full re-reduce plus E67's own closure.py over the rebuilt operand tiles,
+  rather than flip-weighting the committed histograms as E71's closure_refit.py does. The two agree:
     nrd_a predicted 17.2964 -> 16.6282 W (-3.86%), measured 7.4816 -> 7.3265 W (-2.07%), ratio 0.4326 -> 0.4406
     nrd_b predicted 21.8451 -> 21.1417 W (-3.22%), measured 10.8901 -> 10.6559 W (-2.15%), ratio 0.4985 -> 0.5040
     The 2.0-2.3x over-prediction stands: both sides of the ratio move together.
+    What that agreement is and is not: both routes take the SAME re-reduced measured powers and the SAME
+    re-priced position lists, and the closure ratio is linear in both, so agreeing to four digits is close to
+    structural -- it is NOT an independent confirmation of the correction's size. What the second route does
+    establish is that the committed per-pass tiles/<item>.b<pass>.bin copies ARE the files the published
+    closure used: rebuilt from them, closure.py at the published auto k reproduces the committed closure.json
+    to worst absolute 0.0 W.
+    CORRECTED 2026-10-28 after review: this block called itself "an independent check".
 
   whole-operand additivity: both random 16.18 -> 15.82 W, sum of one-sided 18.37 -> 17.98 W, ratio 0.881 -> 0.880;
   the 6 constant-operand items' spread (this comparison's noise floor) 0.424 -> 0.404 W.

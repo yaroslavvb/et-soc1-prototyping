@@ -8,13 +8,23 @@ docs/reports/data/2026-10-27-q129-leak-sensitivity/refit.sh.
 E65 (bit prices + hart ladder, 2026-10-26), aifoundry3, blocks A+B. k 0.182377 -> 0.3803 W/C.
 E71 already published the per-position PRICE shifts (sensitivity-e65-ab.json in its own directory). What is
 added here is the full re-reduction of the same passes through hl/reduce_hl.py, which also re-prices the
-flow-M row and gives the B list its own span. A re-run at the published auto k reproduces hl.json exactly.
+flow-M row and gives the B list its own span. A re-run at the published auto k reproduces every PRICE
+NUMBER in hl.json exactly (205/287 passes kept, 654 and 656 set aside). It is not byte-for-byte: the re-run
+also carries 33 anchors/* keys the committed file does not (e.g. anchors/lq_h0/rate, anchors/anchor_pi/p80),
+and 554 runs[i]/dir path strings differ. Neither enters a price.
+CORRECTED 2026-10-28 after review: this read "reproduces hl.json exactly".
 
   THE FLOW-M ROW (b bit 11 alternating against a = pi), the one number Q128 carries as flowM_fJ:
-    745 +- 56 fJ  ->  722 fJ   (-3.07%);  dW 3.421 -> 3.316 W.  The gate-level comparison it anchors
-    (0.11-0.13 pJ zero-delay in the multiplier, 0.15-0.18 pJ glitched) moves from 6.2x/4.4x to 6.0x/4.2x,
-    i.e. the multiplier's share of a flipped operand bit rises from about 23% to about 24%. B1 still FAILS
-    its registered 100-250 fJ band (2.9x its top instead of 3.0x) and still PASSES board >= gate.
+    745 +- 56 fJ  ->  722 fJ   (-3.07%);  dW 3.421 -> 3.316 W.  The gate-level comparison it anchors moves
+    from 6.2x/4.4x to 6.0x/4.3x.  The published convention is zero-delay 120 fJ (the midpoint of 0.11-0.13 pJ
+    in the multiplier) and glitched 1.4 x 120 = 168 fJ, which is what reproduces E65's own 6.2x and 4.4x
+    (745.1/120 = 6.21, 745.1/168 = 4.44); at 722.2 those are 722.2/120 = 6.02 and 722.2/168 = 4.30.
+    The multiplier's share of a flipped operand bit is UNCHANGED at about 23%: 168/745.1 = 22.6% ->
+    168/722.2 = 23.3%.  A -3.07% shift in the denominator moves the ratio by exactly -3.07% and the share
+    by +3.17%; neither can reach 4.2x (which would need -4.5%) or 24%.
+    B1 still FAILS its registered 100-250 fJ band (2.9x its top instead of 3.0x) and still PASSES board >= gate.
+    CORRECTED 2026-10-28 after review: this read "6.0x/4.2x" and "rises from about 23% to about 24%".
+    4.2x would need a -4.5% shift, and both shares round to 23%.
 
   the whole B = pi row (fJ per alternating bit):
                 published    at 0.3803    shift

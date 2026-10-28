@@ -7,7 +7,14 @@ docs/reports/data/2026-10-27-q129-leak-sensitivity/refit.sh.
 
 E60 (bitflip ladder, 2026-10-20), aifoundry3 card 0, 600 MHz, 521.8 mV.
 k 0.202650 (its own auto k, 149 runs) -> 0.3803 W/C. Kept runs 220 -> 220; the set-aside pass list is unchanged.
-A re-run at the published auto k reproduces hl.json exactly (lq 116.746 +- 0.613 fJ, lb 129.918 +- 0.480 fJ).
+A re-run at the published auto k reproduces every PRICE NUMBER in hl.json exactly (lq 116.746 +- 0.613 fJ,
+lb 129.918 +- 0.480 fJ, lq per bus 74.6579 to 1e-9). It is not byte-for-byte: the re-run's cards/aifoundry3
+block loses the xnz family -- xnz_h4/h8/h16/h24 come back without their xin_h0 zero or family fields, and
+ec/xnz has n_passes 4 -> 0 with J_per_bit 2.600e-14, rail_J_per_bit 2.030e-14 and both se_J nulled: 13
+differing leaves. Nothing downstream reads them (xnz appears in no downstream script -- not chain.py, not
+build_data.py, not ledger.py), and the splice of this block into the Q128 shadow is lossless: the same splice
+machinery run on the PUBLISHED-k re-reductions reproduces the committed data.json to worst relative 0.0.
+CORRECTED 2026-10-28 after review: this read "reproduces hl.json exactly".
 
                             published    at 0.3803    shift
   lq per designed fJ         116.7462     115.0493   -1.45%   (se 0.6129 -> 0.5382)
