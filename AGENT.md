@@ -171,7 +171,11 @@ approval); anything that needs a GitHub key, such as a push; any admin action on
 card resets, services), which is the lab admin's; any change to an existing page's visibility, which is the owner's (new report pages are published public by default,
 the owner's rule of 29 September; §8); and
 claiming a machine on the AI Foundry Discord (#community-lab: "using aifoundryN", then "released"), the lab's own norm
-(getting-started.md §2).
+(getting-started.md §2). **The owner's agents post exactly twice per card, each `<ai>` plus one short line naming the
+box:** `<ai> using aifoundry3 [doc](<https://spacesheep.dev/@yaroslavvb/…>)` when they reserve it, then a new post
+`<ai> released aifoundry3 [doc](<…>)` when they release it, with at most that one small link, to the public
+spacesheep page that describes the run. No plan, numbers or progress in the channel, and no edit of the reservation
+to add detail: the page holds it (the owner's rule of 28 October 2026).
 
 ## 5. The lab's etiquette, and why
 
@@ -424,6 +428,12 @@ copy it here too.
 *Every edit to this file adds one line here, newest first, in the same commit (the owner's rule of 10 October 2026 for
 agent instruction files). It starts on 14 October 2026; earlier changes are in `git log -- AGENT.md`.*
 
+- **2026-10-28 (Wed, week 44)** — Section 4: the owner's agents post exactly twice per card in #community-lab, a
+  one-line reservation and a separate one-line release, each naming the box, with at most one small link to the public
+  spacesheep page that describes the run; no detail in the channel and no edit of the reservation. *Why:* preference —
+  the owner's words that day, *"I basically just want you to post when you reserve the card and when you release it, and
+  each post may have a small link to the spacesheep doc, which describes what you're doing"*, after he deleted four Q129
+  claims of 27 October *"because they were too wordy"*.
 - **2026-10-27 (Tue, week 44, correction)** — Section 5's governor exception gains what a reader could not find in it:
   the numeric envelope the owner set (TDP ≤ 75 W; a raised software threshold ≤ 70 °C; abort at a die ≥ 72 °C or board
   power ≥ 85 W; lowering safe thermally, but a TDP at or below a pattern's own 600 MHz power latches the governor, as
