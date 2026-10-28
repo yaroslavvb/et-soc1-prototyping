@@ -14,7 +14,8 @@ README was pushed. Reduced with the three commands in "Pre-registered analysis",
 
 It replicates E44's three September cycles on this card (0.3799, sd 0.0006) **to 0.0004 W/°C after a month** of
 intervening sessions on this card (E60, E63, E65, E67 and E70 among them). And it is **1.30 ×** the 0.2936 W/°C E66 measured on aifoundry2 —
-but almost two thirds of that gap is the *band*, not the card:
+but about **three fifths** of that gap is the *band*, not the card (and 70 % of it if the split is measured on
+aifoundry3's own bands instead — both paths below):
 
 | | 51–58 °C | 54–58 °C | 58–62 °C | 58–65 °C | 56–66 °C |
 |---|---:|---:|---:|---:|---:|
@@ -27,8 +28,11 @@ E71's floor is 52–53 °C and E44's 54–55 °C, so their "51–58" fits span 5
 
 **The slope is a strong function of temperature, on both cards.** Walking up the bands on aifoundry2 alone takes
 0.2936 → 0.3053 → 0.3452 W/°C; on aifoundry3, 0.3200 → 0.3276 → 0.3803 → 0.3957. So of the +0.0867 W/°C between
-E66's published figure and E71's, **+0.0516 (60 %) is the move from 51–58 °C to 58–62 °C on one card**, and
-**+0.0351 (40 %) is the difference between the two cards at a common band.** The practical consequence: E66's
+E66's published figure and E71's, **+0.0516 (59.5 %) is the move from 51–58 °C to 58–62 °C on one card**, and
+**+0.0351 (40.5 %) is the difference between the two cards at a common band.** That decomposition walks the band
+on **aifoundry2** (0.2936 → 0.3452 → 0.3803); walking it on aifoundry3 instead (0.2936 → 0.3200 → 0.3803) puts
+**+0.0602 (69.5 %)** on the band and +0.0265 (30.5 %) on the card. The quoted split is the conservative one — the
+one that credits the band least — and both are recomputable from the table above. The practical consequence: E66's
 0.2936 W/°C was never the right correction for E65 or E67, even as an approximation for the other card — it is
 77 % of the slope their runs actually needed.
 
@@ -50,15 +54,31 @@ missing.
 | **S3a** slope rises with temperature | 58–65 minus 54–58 = **+0.0681** (E71's own cycles); +0.1014 against E44's September 54–58, the registered wording | ≥ +0.04 | **PASS** |
 | **S3b** the two cards at a common band | aifoundry2 58–62 median 0.3452 vs 0.3803: **+0.0351** | within ±0.06 | **PASS** |
 | **S4** measured, not extrapolated | every cycle cooled to 52–53 °C; 791–856 samples in band | ≤ 58 °C, ≥ 300 samples | **PASS** |
-| **S5** the price sensitivity | max abs shift **0.2411 W** (E67 clean, `nrd_b`); max relative **−8.97 %** (`abit_0`); no kept-pass set changed in any of the four reductions | ≤ 0.25 W, ≤ 10 %, unchanged | **PASS** |
+| **S5a** no kept-pass set changes | `kept_passes_changed false` in all four reductions | unchanged | **PASS** |
+| **S5b** largest absolute shift | **0.2411 W** (E67 clean, `nrd_b`) | ≤ 0.25 W | **PASS** |
+| **S5c** largest relative shift | **−8.97 %** (E67 clean, `abit_0`) | ≤ 10 % | **PASS** |
+| **S5d** *every price moves downward* | 164 of 166 items fall; `lq_h2` (E65 block D) does not move at all; **`abit_26` (E67 clean) rises +0.0185 W, +3.95 %** | every item down | **FAIL** (1 of 166 rises, 1 flat) |
 | **S6** no verdict of E65 or E67 changes | none flips; D1 moves +0.47 → +0.71 %/°C and stays UNDECIDED (below) | — | **PASS** |
 
-S5 passes on both thresholds but not by much on the relative one (−8.97 % against a registered ≤ 10 %), and the
-shifts are **systematic, not noise**: in E65's blocks A and B, 22 of 37 prices move by more than their own
-published SE and 11 by more than 2 SE (worst `bit_16`, 3.6 SE). The registration predicted the direction and the
-reason, and both hold: an item's measurement window runs warmer than its own constant-operand zero's (mean
-+0.32 °C in E65, +0.17 to +1.14 °C in E67), because it burns more power in the same two seconds, so a larger k
-subtracts more from the item than from its zero.
+**S5's magnitude legs pass; its direction leg fails on one item of 166, and it is reported as failed.** The
+registration said *every* price moves downward. 164 do. `lq_h2` (E65 block D) does not move at all — its window
+and its zero's sit at exactly the same temperature (`d_t_win` 0.0000 °C), so k cancels. And **`abit_26` in E67's
+clean reduction rises**: 0.4694 → 0.4879 W, **+0.0185 W (+3.95 %)**, because that item's `d_t_win` is
+**−0.0875 °C** — the one admissible item whose window ran *cooler* than its own zero's, so a larger k subtracts
+more from the zero than from the item. The rise is 0.9 × that item's own published SE (0.0210 W) and it is the
+only sign reversal anywhere in the four reductions; in E67's *registered* reduction the same item falls
+(−1.77 %, `d_t_win` +0.0571 °C over 7 passes, against 4 in the clean set). It changes no verdict (S6), but the
+registered leg is **FAIL**, not PASS.
+
+On the magnitude legs S5 passes, though not by much on the relative one (−8.97 % against a registered ≤ 10 %),
+and the shifts are **systematic, not noise**: in E65's blocks A and B, 22 of 37 prices move by more than their own
+published SE and 11 by more than 2 SE (worst `bit_16`, 3.6 SE). The registered *mechanism* holds — an item's
+measurement window runs warmer than its own constant-operand zero's, because it burns more power in the same two
+seconds, so a larger k subtracts more from the item than from its zero. Its descriptors, recomputed from the
+committed sensitivity files (the registration's "+0.32 °C" and "+0.3 to +1.1 °C" were loose): mean `d_t_win`
+**+0.296 °C** across E65's 37 items (+0.251 across the 32 bit positions), **+0.340 °C** across E67's 63 items,
+with a per-item range of **+0.021 to +1.143 °C** in E67 (+0.167 is only the `ix` family's minimum) and
+**−0.088 to +1.138 °C** in E67's clean reduction — the one negative being `abit_26` above.
 
 ### What it does to the two price lists (labelled sensitivities — nothing published is rewritten)
 
@@ -73,6 +93,20 @@ at each reduction's own `auto` k before re-pricing, on all four reductions. The 
 | **E65 blocks A+B** (B-side, 32 positions + `bpi`) | 0.1824 → 0.3803 | −0.059 W | bits 0–9, the flat floor: 0.502 → 0.476 W, **−5.2 %** | sign bit 31, −0.7 % |
 | **E67 registered** (A-side, 32 positions + grid + closures) | 0.1755 → 0.3803 | −0.070 W | A-side bits 0–9: 0.691 → 0.658 W, **−4.8 %** | `nrd_a`/`nrd_b`, −2.1 % |
 | **E65 block D** | 0.0692 → 0.3803 | −0.034 W | `bit_22`, −1.5 % | `lq_h2`, 0.0 % |
+
+**Those are group means: −0.7 % to −5.2 % by group, while individual items span +4.0 % to −9.0 %.** Of the 166
+items across the four reductions, **61 fall outside the −2…−5 % band** that describes most of the groups, so
+"2–5 % cheaper" is a statement about groups of positions and never about a single price. The extremes are
+`abit_0` **−8.97 %** and `abit_26` **+3.95 %** (both in E67's clean reduction, the one with the fewest passes per
+item), with `bit_31` −0.70 %, `lq_h2` 0.00 % and block D's `bit_22` −1.52 % at the quiet end.
+
+**One of the four reductions is re-priced outside the band the slope was measured in, and it is the loosest of
+the four.** E65 blocks A+B, E67 registered and E67 clean launched every admissible run at 58.0 °C with windows at
+58.00–61.40 °C — inside 58–62 °C. E65's **block D** is the A9 61 °C arm: its kept passes (`681`–`685`) launched
+at **61.0 °C** with windows at **61.9–62.4 °C**, so a 58–62 °C slope is applied there about 0.4 °C past the band's
+top (and `runs-blockD.csv` as a whole, the A9 setpoint sweep, spans launches 55.0–62.0 °C and windows
+55.0–62.4 °C — the source of the 62.4 °C top quoted in "Why this pass"). Block D's shifts are also the smallest
+of the four (`bit_22` −1.5 %), so the looseness costs little, but it is where this slope is least applicable.
 
 Because fJ per flipped bit is the price divided by the designed flips and the measured rate, and neither moves
 with k, **the relative shifts above are exactly the shifts in the published energies**. So, in E65's block A
@@ -102,9 +136,12 @@ within-pass warming suggested, which strengthens E65's reading that 3 °C of gat
 drift from nothing and that a 10 °C ladder of setpoints is what would.
 
 **E67's closure (the ~2× over-prediction of a random word) is essentially untouched**, because both sides of the
-ratio move together: the A-side price list −4.3 %, its measured `nrd_a` step −2.1 %, so measured/predicted goes
-0.433 → 0.443; on the B side 0.499 → 0.509. E70 settled that over-count as shared wires rather than interaction,
-and E71's slope leaves that conclusion where it was.
+ratio move together. Re-priced position by position and flip-weighted by the closure's own histograms
+(`closure_refit.py`, `closure-sensitivity.json`, which first reproduces `closure.json`'s published `predicted_W`
+and ratio to 4e-15 W): the predicted side falls **−3.9 %** on the A side against its measured `nrd_a` step's
+−2.1 %, so measured/predicted goes **0.433 → 0.441**; on the B side −3.2 % against −2.2 %, **0.499 → 0.504**.
+E70 settled that over-count as shared wires rather than interaction, and E71's slope leaves that conclusion where
+it was — the over-prediction is still a factor of 2.0–2.3, not 1.
 
 ### What it changes in Q128's chain, and what it does not
 
@@ -112,8 +149,9 @@ and E71's slope leaves that conclusion where it was.
 means (5.783 pJ board, 4.337 pJ rail over idle, 3 cards), not on E65's or E67's per-position prices, and E38 is
 untouched by this slope. What E71 changes is the **price list's own calibration**, two levels down the chain:
 
-- The **single-bit price list that the bottom-up ledger is compared against** is 2–5 % cheaper than published,
-  with the cheap positions cheapest: the measured flat floor is ~103 fJ, so the measured/predicted comparisons
+- The **single-bit price list that the bottom-up ledger is compared against** is cheaper than published by
+  **0.7–5.2 % group by group** (individual positions span +4.0 % to −9.0 %), with the cheap positions cheapest:
+  the measured flat floor is ~103 fJ, so the measured/predicted comparisons
   that use it tighten by a few per cent in the direction of the open-netlist figure, not away from it.
 - The **registered 0.294 W/°C sensitivity E66 offered for aifoundry3's runs should not be used**: at E65/E67's
   band this card is 0.3803, and 0.294 is 77 % of it. Any further reduction of an aifoundry3 run corrected to a
@@ -139,7 +177,8 @@ untouched by this slope. What E71 changes is the **price list's own calibration*
   marked † above.
 - **Six cycles, not more.** The driver's deadline stopped it after `p26`; the registered minimum was 5.
 
-*Pre-registered Tue 27 Oct 2026 (week 44), 15:3x PDT on aifoundry3, **before the first E71 launch**. Any change
+*Pre-registered Tue 27 Oct 2026 (week 44), **15:04 PDT** on aifoundry3 (commit `8fab3404`, 15:04:09; the
+`#community-lab` claim 15:04:38; the first heater sample of `p21` 15:05:17), **before the first E71 launch**. Any change
 after this commit goes in the Amendments section at the end, dated, before the data it touches. Request Q129,
 experiment E71; Q128 §5 item 3.*
 
@@ -316,4 +355,34 @@ such, with the affected tables named.
   `code.sha256` (the 10 Hz telemetry stays on the box: ~1.3 MB gzipped per pass). Each `login` mark's `users` field —
   the other lab logins `who` showed during the cooling — is replaced by their count, as this repository is public |
 | `d1_refit.py`, `d1-sensitivity.json` | E65's D1 re-fitted with one measured slope for both arms (it reproduces the published pair first) |
+| `closure_refit.py`, `closure-sensitivity.json` | E67's two random-word closures re-priced at the measured slope, flip-weighted by their own histograms (it reproduces `closure.json`'s published `predicted_W` and ratio first) |
 | `e71.log` | the driver's log |
+
+## Corrections — Wed 28 Oct 2026 (week 44)
+
+An adversarial re-derivation of this experiment from the committed files (it reproduced the headline, the
+interval, all 36 per-pass/per-band fits, the aifoundry2 re-fit, the four sensitivity checks, the D1 refit and the
+pre-registration order) found six faults in the **text**, all fixed above. **No number from the run changed**:
+`slopes.json`, `sep-p1p3.json`, `aifoundry2-58-62.json`, the four `sensitivity-*.json` and `d1-sensitivity.json`
+are byte-identical to the results commit, and nothing of E65's or E67's is touched.
+
+1. **S5's registered direction leg is now scored, and it FAILS** (it was silently dropped from a bare "PASS").
+   164 of 166 items fall; `lq_h2` does not move; `abit_26` in E67's clean reduction rises +0.0185 W / +3.95 %.
+   The registered magnitude legs still pass, and no E65/E67 verdict flips, but a registered rule that fails is
+   reported as failed.
+2. **"2–5 % cheaper" is labelled as a group-mean statement** (groups −0.7 % to −5.2 %, items +4.0 % to −9.0 %,
+   61 of 166 items outside the −2…−5 % band), in the price-list section and in the Q128 chain section.
+3. **The closure sensitivity is now computed by a committed script** (`closure_refit.py`). Its numbers correct
+   the prose: the A-side list moves **−3.9 %** (not −4.3 %) and the ratios go **0.433 → 0.441** and
+   **0.499 → 0.504** (not 0.443 / 0.509). The conclusion — closure essentially untouched, E70's verdict stands —
+   is unchanged.
+4. **The registration's own timestamp read "15:3x PDT"**, which postdates the first launch; git has the real
+   order (commit 15:04:09, claim 15:04:38, first heater sample 15:05:17) and the line now says 15:04 PDT.
+5. **The mechanism's descriptors are recomputed from the sensitivity files**: mean `d_t_win` +0.296 °C over
+   E65's 37 items (+0.251 over the 32 bit positions), not +0.32; E67's per-item range +0.021 to +1.143 °C, not
+   "+0.17 to +1.14". Added: **block D's kept arm launches at 61.0 °C with windows at 61.9–62.4 °C**, so it is the
+   one reduction re-priced past the top of the 58–62 °C band, and the loosest application of this slope. The
+   frozen registration text above is left exactly as it was committed at 15:04; these corrections are here and in
+   the Results section, not inside it.
+6. **"Almost two thirds of that gap is the band"** is now "about three fifths", with both decomposition paths
+   given (59.5 % walking aifoundry2's bands, 69.5 % walking aifoundry3's) and the conservative one named.
