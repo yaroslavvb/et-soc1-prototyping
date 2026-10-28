@@ -822,9 +822,12 @@
     const box = b => '<div class="vbox" data-ss-id="archive-' + slug(b.title) + '"><div class="vt">' + v.label +
       '</div><h4>' + b.title + '</h4><table><tbody>' +
       b.rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</tbody></table></div>';
+    /* A box says where it goes: one of the chain-stop keys below, or, since 2026-10-28, any element id on
+       this page (the ledger table, a later stop), so a build can place a box beside a section these five
+       keys never foresaw. An unknown name falls back to the last stop, as it always did. */
+    const LVAT = {permac: 4, perbit: 5, toggles: 6, transistor: 8, closure: 9};
     v.boxes.forEach(b => {
-      const anchor = $('lv' + ({permac: 4, perbit: 5, toggles: 6, transistor: 8, closure: 9}[b.at] != null
-        ? {permac: 4, perbit: 5, toggles: 6, transistor: 8, closure: 9}[b.at] : 9));
+      const anchor = (LVAT[b.at] != null ? $('lv' + LVAT[b.at]) : $(b.at)) || $('lv9');
       const d = document.createElement('div');
       d.innerHTML = box(b);
       if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(d.firstChild, anchor.nextSibling);
