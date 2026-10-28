@@ -1,0 +1,904 @@
+{
+ "exp": "E76",
+ "stage": "probe",
+ "card": "aifoundry3",
+ "dirs": [
+  "docs/reports/data/2026-10-28-e76-trapped-instructions/passes/p7610",
+  "docs/reports/data/2026-10-28-e76-trapped-instructions/passes/p7611"
+ ],
+ "block_status": {
+  "p7610": "ok",
+  "p7611": "ok"
+ },
+ "structural_finding": {
+  "claim": "there is no emulation path, so no per-instruction energy exists for these thirteen",
+  "evidence": [
+   "device-minion-runtime/src/MachineMinion/src/trap_routine.c: EXCEPTION_ILLEGAL_INSTRUCTION is emulated only for csrrs mhartid; everything else sets delegate = true and returns stvec",
+   "device-minion-runtime/src/WorkerMinion/src/exception.c exception_handler: for a U-mode exception it saves the context, evicts the S-mode and U-mode trace buffers, sends CM_TO_MM_MESSAGE_ID_KERNEL_EXCEPTION once per shire, and calls return_from_kernel(0, KERNEL_RETURN_EXCEPTION)",
+   "so one trapping instruction ends that hart's kernel; it never returns to mepc+4"
+  ],
+  "source": "Apache-2.0, installed on the lab boxes at /opt/et-platform; counted ELFs at /opt/et/lib/esperanto-fw/*/"
+ },
+ "counted_registration": {
+  "trap_path_instructions": {
+   "MachineMinion.trap_handler": 22,
+   "MachineMinion.trap_routine": 56,
+   "WorkerMinion.trap_handler": 6,
+   "WorkerMinion.exception_handler": 465,
+   "WorkerMinion.Trace_Evict_CM_Buffer": 59,
+   "WorkerMinion.Trace_Evict_UMode_Buffer": 84,
+   "WorkerMinion.return_from_kernel": 66,
+   "total": 758
+  },
+  "not_on_this_path": {
+   "MachineMinion.syscall_handler": 827,
+   "WorkerMinion.syscall_handler": 127,
+   "MasterMinion.exception_handler": 217,
+   "note": "the ecall path and the management side"
+  },
+  "library_routines": {
+   "libgcc.__divsf3": {
+    "instructions": 299,
+    "traps": false
+   },
+   "libgcc.__divdf3": {
+    "instructions": 335,
+    "traps": false
+   },
+   "libgcc.__fixunssfdi": {
+    "instructions": 12,
+    "traps": "fcvt.l.s"
+   },
+   "libm.sqrtf": {
+    "instructions": 25,
+    "traps": "fdiv.s"
+   },
+   "libm.__ieee754_sqrtf": {
+    "instructions": 81,
+    "traps": "fdiv.s"
+   },
+   "libm.fmodf": {
+    "instructions": 29,
+    "traps": "fdiv.s"
+   },
+   "libm.__ieee754_fmodf": {
+    "instructions": 146,
+    "traps": "fdiv.s"
+   },
+   "libm.sinf": {
+    "instructions": 43,
+    "traps": false
+   },
+   "libm.__kernel_sinf": {
+    "instructions": 43,
+    "traps": false
+   },
+   "libm.__ieee754_rem_pio2f": {
+    "instructions": 208,
+    "traps": false
+   }
+  },
+  "consequence": "in a U-mode kernel on this silicon a float a/b is safe (299 instructions of libgcc soft float) and sqrtf(x) is fatal (libm's own fdiv.s)"
+ },
+ "per_item": {
+  "anchor_pi": {
+   "designed_trap": null,
+   "n_runs": 40,
+   "ok_values": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "modal_ok": true,
+   "unanimous": true,
+   "ops": [
+    20000,
+    540044,
+    540044,
+    540044,
+    540044,
+    540044,
+    540044,
+    540044,
+    540044,
+    540044,
+    20000,
+    541085,
+    541085,
+    541085,
+    541085,
+    541085,
+    541085,
+    541085,
+    541085,
+    541085,
+    20000,
+    540466,
+    540466,
+    540466,
+    540466,
+    540466,
+    540466,
+    540466,
+    540466,
+    540466,
+    20000,
+    538021,
+    538021,
+    538021,
+    538021,
+    538021,
+    538021,
+    538021,
+    538021,
+    538021
+   ],
+   "wall_s_median": 0.49190900000000004,
+   "rc": [
+    0
+   ],
+   "launches": [
+    10
+   ]
+  },
+  "trp_tr_csrr_cycle": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.00115,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_ctl_csrr_fccnb": {
+   "designed_trap": false,
+   "n_runs": 2,
+   "ok_values": [
+    true,
+    true
+   ],
+   "modal_ok": true,
+   "unanimous": true,
+   "ops": [
+    65536,
+    65536
+   ],
+   "wall_s_median": 0.00045,
+   "rc": [
+    0
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_ctl_fmul_ps": {
+   "designed_trap": false,
+   "n_runs": 2,
+   "ok_values": [
+    true,
+    true
+   ],
+   "modal_ok": true,
+   "unanimous": true,
+   "ops": [
+    65536,
+    65536
+   ],
+   "wall_s_median": 0.00045,
+   "rc": [
+    0
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_ctl_fmul_s": {
+   "designed_trap": false,
+   "n_runs": 2,
+   "ok_values": [
+    true,
+    true
+   ],
+   "modal_ok": true,
+   "unanimous": true,
+   "ops": [
+    65536,
+    65536
+   ],
+   "wall_s_median": 0.00045,
+   "rc": [
+    0
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_ctl_fmv_w_x": {
+   "designed_trap": false,
+   "n_runs": 2,
+   "ok_values": [
+    true,
+    true
+   ],
+   "modal_ok": true,
+   "unanimous": true,
+   "ops": [
+    65536,
+    65536
+   ],
+   "wall_s_median": 0.0007,
+   "rc": [
+    0
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_ctl_fmv_x_w": {
+   "designed_trap": false,
+   "n_runs": 2,
+   "ok_values": [
+    true,
+    true
+   ],
+   "modal_ok": true,
+   "unanimous": true,
+   "ops": [
+    65536,
+    65536
+   ],
+   "wall_s_median": 0.0006,
+   "rc": [
+    0
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_ctl_frcp_ps": {
+   "designed_trap": false,
+   "n_runs": 2,
+   "ok_values": [
+    true,
+    true
+   ],
+   "modal_ok": true,
+   "unanimous": true,
+   "ops": [
+    65536,
+    65536
+   ],
+   "wall_s_median": 0.00065,
+   "rc": [
+    0
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_ctl_fsgnj_s": {
+   "designed_trap": false,
+   "n_runs": 2,
+   "ok_values": [
+    true,
+    true
+   ],
+   "modal_ok": true,
+   "unanimous": true,
+   "ops": [
+    65536,
+    65536
+   ],
+   "wall_s_median": 0.00045,
+   "rc": [
+    0
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_fcvt_l_s": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.0010500000000000002,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_fcvt_s_l": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.001,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_fdiv_pi": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.001,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_fdiv_ps": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.0011,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_fdiv_s": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.0011,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_fdivu_pi": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.0010500000000000002,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_frem_pi": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.0010500000000000002,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_fremu_pi": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.0010999999999999998,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_frsq_ps": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.001,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_fsin_ps": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.0009,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_fsqrt_ps": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.001,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trp_tr_fsqrt_s": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.001,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trx_fdiv_ps": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.0011,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  },
+  "trx_fsqrt_ps": {
+   "designed_trap": true,
+   "n_runs": 2,
+   "ok_values": [
+    false,
+    false
+   ],
+   "modal_ok": false,
+   "unanimous": true,
+   "ops": [
+    0,
+    0
+   ],
+   "wall_s_median": 0.0012000000000000001,
+   "rc": [
+    1
+   ],
+   "launches": [
+    1
+   ]
+  }
+ },
+ "scored": {
+  "P1_all_thirteen_trap": {
+   "registered": {
+    "traps_expected": 13,
+    "controls_expected_ok": 7,
+    "rule": "trp_ of a trapping mode records ok:false with zero ops; every trp_tr_ctl_* records ok:true with 64 ops"
+   },
+   "trapping_items_found": 13,
+   "controls_found": 7,
+   "trapping_that_trapped": [
+    "trp_tr_csrr_cycle",
+    "trp_tr_fcvt_l_s",
+    "trp_tr_fcvt_s_l",
+    "trp_tr_fdiv_pi",
+    "trp_tr_fdiv_ps",
+    "trp_tr_fdiv_s",
+    "trp_tr_fdivu_pi",
+    "trp_tr_frem_pi",
+    "trp_tr_fremu_pi",
+    "trp_tr_frsq_ps",
+    "trp_tr_fsin_ps",
+    "trp_tr_fsqrt_ps",
+    "trp_tr_fsqrt_s"
+   ],
+   "trapping_that_did_NOT_trap": [],
+   "controls_ok": [
+    "trp_tr_ctl_csrr_fccnb",
+    "trp_tr_ctl_fmul_ps",
+    "trp_tr_ctl_fmul_s",
+    "trp_tr_ctl_fmv_w_x",
+    "trp_tr_ctl_fmv_x_w",
+    "trp_tr_ctl_frcp_ps",
+    "trp_tr_ctl_fsgnj_s"
+   ],
+   "controls_not_ok": [],
+   "unstable": [],
+   "trap_ops_all_zero": true,
+   "control_ops": {
+    "trp_tr_ctl_csrr_fccnb": [
+     65536
+    ],
+    "trp_tr_ctl_fmul_ps": [
+     65536
+    ],
+    "trp_tr_ctl_fmul_s": [
+     65536
+    ],
+    "trp_tr_ctl_fmv_w_x": [
+     65536
+    ],
+    "trp_tr_ctl_fmv_x_w": [
+     65536
+    ],
+    "trp_tr_ctl_frcp_ps": [
+     65536
+    ],
+    "trp_tr_ctl_fsgnj_s": [
+     65536
+    ]
+   },
+   "pass": true
+  },
+  "P2_build_independence": {
+   "pairs": {
+    "trx_fdiv_ps": {
+     "trx_modal_ok": false,
+     "tr_modal_ok": false,
+     "agree": true
+    },
+    "trx_fsqrt_ps": {
+     "trx_modal_ok": false,
+     "tr_modal_ok": false,
+     "agree": true
+    }
+   },
+   "pass": true
+  },
+  "P3_wall_s_excess_ms": {
+   "registered_ms": [
+    0.5,
+    50
+   ],
+   "median_ms": 0.45000000000000007,
+   "min_ms": 0.10000000000000005,
+   "max_ms": 0.7,
+   "n": 26,
+   "per_item": [
+    {
+     "pass": 7610,
+     "item": "trp_tr_frem_pi",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_fdiv_s",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_fsqrt_ps",
+     "excess_ms": 0.30000000000000004
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_fcvt_l_s",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_fsin_ps",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_fremu_pi",
+     "excess_ms": 0.4000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_fdiv_ps",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_fdivu_pi",
+     "excess_ms": 0.4000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_fcvt_s_l",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_fdiv_pi",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_csrr_cycle",
+     "excess_ms": 0.4000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_frsq_ps",
+     "excess_ms": 0.4000000000000001
+    },
+    {
+     "pass": 7610,
+     "item": "trp_tr_fsqrt_s",
+     "excess_ms": 0.4000000000000001
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_fdiv_ps",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_fdiv_pi",
+     "excess_ms": 0.30000000000000004
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_fcvt_l_s",
+     "excess_ms": 0.4000000000000001
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_fsqrt_ps",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_frsq_ps",
+     "excess_ms": 0.4000000000000001
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_frem_pi",
+     "excess_ms": 0.4000000000000001
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_fremu_pi",
+     "excess_ms": 0.6
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_fsin_ps",
+     "excess_ms": 0.10000000000000005
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_fdiv_s",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_csrr_cycle",
+     "excess_ms": 0.7
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_fdivu_pi",
+     "excess_ms": 0.5000000000000001
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_fcvt_s_l",
+     "excess_ms": 0.30000000000000004
+    },
+    {
+     "pass": 7611,
+     "item": "trp_tr_fsqrt_s",
+     "excess_ms": 0.4000000000000001
+    }
+   ],
+   "pass": false
+  },
+  "P4_no_lasting_harm": {
+   "runs_after_a_trap": 33,
+   "any_not_ok": [],
+   "pass_status": {
+    "p7610": "ok",
+    "p7611": "ok"
+   },
+   "pass": true
+  },
+  "P5_no_energy_figure": {
+   "registered": {
+    "per_trap_per_hart_nJ_counted": [
+     4.5,
+     8.3
+    ],
+    "whole_chip_per_launch_uJ": [
+     4.6,
+     8.5
+    ],
+    "note": "a count at 6-11 pJ per instruction, NOT a measurement; the board meter is 3-4 orders of magnitude short"
+   },
+   "measured": null,
+   "note": "not measurable with the board meter and not attempted: the probe's deliverable is the count, not an energy"
+  },
+  "P6_substitute_price": {
+   "registered": {
+    "fp32_divide_instructions": 299,
+    "fp32_divide_nJ": [
+     1.8,
+     3.3
+    ],
+    "in_multiply_adds_at_5.783pJ": [
+     310,
+     570
+    ],
+    "sqrt": "not callable from libm; needs frcp.ps or a hand-written iteration"
+   },
+   "note": "static, from the firmware and library ELFs; no card stage in this run"
+  }
+ }
+}
