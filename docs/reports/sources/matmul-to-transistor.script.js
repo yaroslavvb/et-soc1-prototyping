@@ -565,6 +565,10 @@
     const band = (a, dp, u) => num(a[0], dp) + '–' + num(a[1], dp) + (u || '');
     const rng = (a, dp, u) => num(Math.min.apply(null, a), dp) + '–' + num(Math.max.apply(null, a), dp) + (u || '');
 
+    /* the footer: how much of this block the build re-checks against the lane directories' own JSON */
+    set('sampled', num(q.sampled_against_lane_json.figures, 0) + ' figures across '
+      + num(q.sampled_against_lane_json.directories, 0) + ' of those directories');
+
     /* §1 and §4: the knob, and the temperature term */
     set('knob', num(k.cells_in_band[0], 0) + ' of ' + num(k.cells_in_band[1], 0) + ' cells inside their '
       + 'registered band, with an error of ' + num(k.rms_mhz, 2) + NB + 'MHz against a ' + num(k.bar_mhz, 0)
@@ -633,12 +637,31 @@
       + band(wf.unaccounted_band_pJ, 2) + ' against the rail');
     set('wf-unacc-band', band(wf.unaccounted_vs_board_band_pJ, 2) + NB + 'pJ');
     set('wf-closure-short', band(wf.closure_vs_board.map(x => 100 * x), 0, '%'));
+    /* the bottom-up rows alone, which is the number 27 October's 34% can be compared with: the row above
+       counts the measured board-to-rail step's regulator term, which is a named account but not a
+       bottom-up one. */
+    set('wf-closure-rail', band(wf.closure_vs_rail.map(x => 100 * x), 0, '%') + ' of it (band '
+      + band(wf.closure_vs_rail_band.map(x => 100 * x), 0, '%') + ')');
+    set('wf-closure-bottomup', band(wf.closure_vs_board_bottom_up.map(x => 100 * x), 0, '%'));
+    set('wf-closure-bottomup-band', band(wf.closure_vs_board_bottom_up_band.map(x => 100 * x), 0, '%'));
+    set('wf-closure-v1-bottomup', pct(wf.closure_v1_vs_board_bottom_up));
+    set('wf-regulators', num(wf.regulators_pJ, 3) + NB + 'pJ');
+    set('wf-regulators-band', band(wf.regulators_band_pJ, 3));
     set('wf-closure', band(wf.closure_vs_board.map(x => 100 * x), 0, '%') + ' of the board (band '
       + band(wf.closure_vs_board_band.map(x => 100 * x), 0, '%') + ') and '
       + band(wf.closure_vs_rail.map(x => 100 * x), 0, '%') + ' of the rail');
+    /* The step is part measurement and part scaling, and the sentence says which is which: x1.331 is the
+       MEASURED energy ratio of the switching term alone (+0.500 pJ), while the cells' internal energy is
+       scaled by the signal-transition count (x1.680, +0.281 pJ) because the glitch run does not price
+       internal energy. x1.331 x the zero-delay figure does not reach 2.705; the composite x1.406 does. */
     set('glitch', TIMES + num(wf.glitch_toggle_ratio, 3) + ' the toggles and ' + TIMES
-      + num(wf.glitch_energy_ratio, 3) + ' the energy of its zero-delay twin, worth +'
-      + num(wf.glitch_moved_pJ, 3) + NB + 'pJ');
+      + num(wf.glitch_energy_ratio, 3) + ' the energy of its zero-delay twin on the switching term, worth +'
+      + num(wf.glitch_split.switching_measured_pJ, 3) + NB + 'pJ measured — and +'
+      + num(wf.glitch_moved_pJ, 3) + NB + 'pJ in all, because the cells’ internal energy is not measured '
+      + 'glitched but scaled by the ' + TIMES + num(wf.glitch_split.internal_scale_applied, 3)
+      + ' transition count (' + pct(wf.glitch_split.scaled_share_of_step) + ' of the step, so the factor '
+      + 'the ledger applies is the composite ' + TIMES
+      + num(wf.glitch_split.composite_ratio_applied, 3) + ')');
     set('recon', num(wf.v1.accounted_pJ, 4) + ' ' + MINUS + num(-wf.reconciliation.routed_wire_delta_pJ, 4)
       + ' + ' + num(wf.reconciliation.unpriced_capacitance_delta_pJ, 4) + ' = '
       + num(wf.reconciliation.walked_forward_pJ, 4) + NB + 'pJ against a measured '

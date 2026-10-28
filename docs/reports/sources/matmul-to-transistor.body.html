@@ -341,11 +341,14 @@ from one multiply-add at the board.</p>
       energy) and the clock tree, measured, does not glitch at all. The factor is strongly
       activity-dependent — ×1.00 with the operands held still, ×1.23 at eight flipped bits, ×1.57 at random —
       so no single number transfers to a load whose activity is not random's.</dd>
-    <dt>Open</dt><dd>The glitch measurement is a floor on three further axes, each named in its data
+    <dt>Open</dt><dd>The glitch measurement is a floor on several further axes, each named in its data
       directory: the delays are characterised at 0.700&nbsp;V while the energy is priced at the 0.517&nbsp;V
       rail, the design still misses its timing constraint by about 2×, and 4.6% of the “timed” netlist ran at
       zero delay in the simulator too. A second instrument reads ×1.76 where this one reads ×1.55 on the
-      nearest matched pair, and the 13.5% between them is not attributed.</dd>
+      nearest matched pair, and the 13.5% between them is not attributed. And only the switching half of the
+      step is measured: the cells' <em>internal</em> energy is scaled by the signal-transition count, because
+      the run prices no internal energy at all — a glitch on a cell input costs internal energy whether or
+      not the output moves, and nothing here prices that. About a third of the step is that scaled half.</dd>
   </dl>
 </div>
 
@@ -469,9 +472,11 @@ unchanged from <code>data-2026-10-27-q128.json</code>.</p>
     <tr><td>at the minion rail</td><td class="n">4.34 pJ <span class="sub">from E60</span></td><td class="n"><b>4.77 pJ</b> <span class="sub">measured</span><br><span class="sub">4.55–4.95</span></td></tr>
     <tr><td>its arithmetic, bottom up</td><td class="n">1.95 pJ</td><td class="n"><b>2.71 pJ</b><br><span class="sub">2.39–3.03</span></td></tr>
     <tr><td>its transport</td><td class="n">not counted</td><td class="n"><b>1.26–1.48 pJ</b></td></tr>
-    <tr><td>accounted, on the rail</td><td class="n">1.95 pJ</td><td class="n"><b><span id="q-wf-acc" data-q="wf-acc"></span></b><br><span class="sub">3.65–4.51</span></td></tr>
+    <tr><td>accounted on the rail, bottom up <span class="sub">arithmetic + transport</span></td><td class="n">1.95 pJ</td><td class="n"><b><span id="q-wf-acc" data-q="wf-acc"></span></b><br><span class="sub">3.65–4.51</span></td></tr>
+    <tr><td>the regulators' delivery loss, and logic in step with the rails <span class="sub">a named account, not a bottom-up one</span></td><td class="n">not counted</td><td class="n"><b><span id="q-wf-reg" data-q="wf-regulators"></span></b><br><span class="sub"><span id="q-wf-reg-band" data-q="wf-regulators-band"></span></span></td></tr>
     <tr><td>not accounted, vs the board</td><td class="n">3.84 pJ</td><td class="n"><b><span id="q-wf-unacc-board" data-q="wf-unacc-board"></span></b><br><span class="sub"><span id="q-wf-unacc-band" data-q="wf-unacc-band"></span></span></td></tr>
-    <tr><td>closure</td><td class="n">34% of the board</td><td class="n"><b><span id="q-wf-closure-2" data-q="wf-closure-short"></span></b><br><span class="sub">of the board</span></td></tr>
+    <tr><td>closure vs the board, bottom-up rows only</td><td class="n"><span id="q-wf-closure-v1" data-q="wf-closure-v1-bottomup"></span></td><td class="n"><b><span id="q-wf-closure-bu" data-q="wf-closure-bottomup"></span></b><br><span class="sub"><span id="q-wf-closure-bu-band" data-q="wf-closure-bottomup-band"></span></span></td></tr>
+    <tr><td>closure vs the board, with the regulators' step counted</td><td class="n"><span id="q-wf-closure-v1-2" data-q="wf-closure-v1-bottomup"></span> <span class="sub">no such row</span></td><td class="n"><b><span id="q-wf-closure-2" data-q="wf-closure-short"></span></b><br><span class="sub">of the board</span></td></tr>
   </tbody>
 </table>
 </div>
@@ -506,13 +511,28 @@ unchanged from <code>data-2026-10-27-q128.json</code>.</p>
   rows.</b> <b>The clock network</b> is inside the arithmetic row and always was — 0.496&nbsp;pJ of the
   multiply-add, about a third of its switching energy — and the glitch pass measured its glitch factor at
   exactly ×1.000. The transport's own clock nets are the one clock term that is <em>not</em> inside, which is
-  why they are drawn separately. <b>Leakage</b> is not a row either: “over idle” is already a
+  why they are drawn separately — with one caveat that makes the top of that range a ceiling for a second
+  reason: both netlists were built with their own clock-tree root for the same lane clock, and the
+  transport's 0.223&nbsp;pJ is that second root plus its gated branches, undivided. So up to a root's worth
+  of the high end is a term the arithmetic row may already carry, independently of whether those branches
+  are gated at idle. <b>Leakage</b> is not a row either: “over idle” is already a
   leakage-corrected quantity, because the registered reduction subtracts a slope times the window's own die
   rise before anything divides it. What 28 October adds is that slope's band — re-footing the whole rail
   ledger on three slopes gives <span id="q-leakrow" data-q="leakrow"></span>, smaller than every other band on this page.</p>
 </div>
 
 <div class="note" data-ss-id="why-remainder-expected-q129">
+  <p data-ss-id="two-closures-against-the-board"><b class="k">Two of those rows are a closure and one of them
+  is not bottom up.</b> Against the <em>rail</em>, the closure is bottom-up throughout: the arithmetic and
+  transport rows against a measured 4.77&nbsp;pJ, <span id="q-wf-closure-rail-2" data-q="wf-closure-rail"></span>. Against the
+  <em>board</em> there are two answers and the table gives both. The bottom-up rows alone reach
+  <span id="q-wf-closure-bu-2" data-q="wf-closure-bottomup"></span> of the board, against
+  <span id="q-wf-closure-v1-3" data-q="wf-closure-v1-bottomup"></span> on 27 October — that is the comparison to make. Counting the
+  measured board-to-rail step's regulator row as well reaches <span id="q-wf-closure-3" data-q="wf-closure-short"></span>, but those
+  <span id="q-wf-reg-2" data-q="wf-regulators"></span> are a <em>named</em> account, not a bottom-up one: no netlist priced them, a
+  three-rail fit did. About 15 of the percentage points between 34% and the high figure are that
+  re-categorisation rather than bottom-up progress.</p>
+
   <p data-ss-id="what-is-left-and-what-would-close-it"><b class="k">What is left, and what would close it.</b>
   <span id="q-wf-unacc-2" data-q="wf-unacc"></span>, where 27 October had 3.84 and 2.39. Of the three reasons the bottom-up count
   was a floor, two are now closed: the routing and coupling one — which pointed the other way — and the
@@ -792,5 +812,10 @@ including three things that are open <em>because</em> an experiment ran.</p>
 
 <div id="vaultzone"></div>
 
-<p class="foot">Built from the repository's own committed data directories: every figure on this page is read
-at build time from the JSON a scored experiment wrote, so the page cannot drift from the record.</p>
+<p class="foot">Built from the repository's own committed data directories. The chain in §2, the ledger and
+waterfall in §3 and the predictions in §4 are read at build time from the JSON a scored experiment wrote, so
+they cannot drift from the record. The 28 October additions from the Q129 lanes — in §§1, 4 and 5, and the
+measured terms quoted beside the ledger — are transcribed from the README or summary of the data directory
+named on each line, because several of those lanes publish the figure only in prose; a sample of them —
+<span id="q-sampled" data-q="sampled"></span> — is re-checked against those directories' own JSON on every build, and the build
+fails if one does not match.</p>

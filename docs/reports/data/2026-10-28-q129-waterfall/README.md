@@ -24,7 +24,8 @@ headline, and it is why no single closure percentage appears here without its ba
 | the lane's transport | *not counted* | **1.261–1.484 pJ** | — |
 | accounted, on the rail | 1.946 pJ | **3.966–4.190 pJ** | 3.65–4.51 |
 | closure against the rail | 44.9% | **83.1–87.8%** | 73.7–99.1% |
-| closure against the board, with the regulators' step | 33.7% | **83.7–87.6%** | 77.9–94.1% |
+| closure against the board, **bottom-up rows only** | 33.7% | **68.6–72.4%** | 63.1–78.0% |
+| closure against the board, with the regulators' step | 33.7% *(no such row)* | **83.7–87.6%** | 77.9–94.1% |
 
 ## The rows, and what each one is
 
@@ -62,10 +63,12 @@ ledger; the first two are the reconciliation that shows it is the same measureme
 | **walked forward** | **1.910** | |
 | **Q129(b)'s own measured zero-delay** | **1.925** | the routed netlist against the extracted per-net table |
 | | **+0.015** | how far apart the two roads land |
-| **+ the measured glitch factor** | **+0.781** | ×1.331 energy, ×1.572 toggles at the whole unit |
+| + the glitch factor, **measured** on switching | +0.500 | ×1.331 energy, ×1.572 toggles at the whole unit |
+| + the cells' internal energy, **scaled** by the transition count | +0.281 | ×1.680, not measured: the run prices no internal energy |
+| **= the glitch step** | **+0.781** | composite ×1.406 on the zero-delay figure; 36% of the step is the scaled half |
 | **= the lane's arithmetic** | **2.705** | band 2.39 (*k*=0) – 3.03 (*k*=2) |
 
-**Do not add the first two rows to the last.** Q129(b) simulates the *routed* netlist against the
+**Do not add the routed-wire and unpriced-capacitance rows to the arithmetic row.** Q129(b) simulates the *routed* netlist against the
 extracted per-net table, so it prices 100% of the extracted farads and every glitch in one pass: both
 earlier deltas are inside it. Adding them again double-counts.
 
@@ -75,6 +78,13 @@ neighbour coupling bundled in and grounded, so it runs **20–23% above** the ex
 routing blocker *widened* the gap by 0.137 pJ. And the glitch factor is strongly activity-dependent:
 ×1.002 with the operands held still, ×1.232 at *h*=8, ×1.572 at random, with a measured ×1.000 on the
 clock tree. No single factor transfers to a load whose activity is not random's.
+
+And only the switching half of that step is measured. The ×1.331 is the energy ratio of the
+switching term alone (1.512 → 2.012 pJ, +0.500); the cells' internal energy is scaled by the
+signal-transition count (0.4127 → 0.6933 pJ, ×1.680, +0.281) because the glitch run prices no internal
+energy at all — a glitch on a cell input costs internal energy whether or not the output moves, which
+nothing here prices. So 36% of the +0.781 pJ is a scaling, the factor the ledger applies to the
+zero-delay figure is the composite ×1.406, and ×1.331 × 1.925 = 2.562 pJ is *not* this row.
 
 ### The lane's transport: 1.261–1.484 pJ, the biggest single mover, and the weakest row
 
@@ -88,7 +98,11 @@ operands (0.654 of 1.033 pJ): 0.223 pJ of clock nets and 0.431 pJ of signal. The
 accumulator index sweeping 2*i*+*h* through a 64-entry read mux tree, which the card performs in the same
 micro-op order with zero data, so no idle subtract can contain it — it belongs in "over idle". The clock
 third belongs there only if the lane's register-file clock branches are gated when the card idles, and
-that is unmeasured on silicon. Hence 1.261 pJ (clock nets removed) to 1.484 pJ (all of it).
+that is unmeasured on silicon. Hence 1.261 pJ (clock nets removed) to 1.484 pJ (all of it). There is a
+second reason the top of that range is a ceiling: both netlists were built with their own clock-tree root
+for the same lane clock, and the transport's 0.223 pJ/MAC is that second root plus its gated branches,
+undivided (Q129(scope) README item 5), so up to a root's worth of the high end may be a term the
+arithmetic row already carries.
 
 *The glitch factor is deliberately not applied to it.* That netlist has no detailed route, no SDF and
 37.0% of its capacitance priced, so no glitch factor was measured on it. At ×1.33 the ledger would read
@@ -184,6 +198,8 @@ rebuilds from either file.
   asserted in code rather than scored against a frozen prediction.
 - **D2 (28 Oct).** The internal-energy terms of Q129(b)'s waterfall (C) — 0.4127 pJ zero-delay and
   0.6933 pJ timed — are read as constants from that directory's `summary.txt` rather than from a JSON,
-  because it publishes them only there. Every other number is read from a JSON.
+  because it publishes them only there. Every other number is read from a JSON. The timed one is also
+  the one term of this ledger that is scaled rather than measured — x1.680, the signal-transition
+  count — and it is 36% of the glitch step, which is why the step is published split.
 - **D3 (28 Oct).** The transport row's internal-energy estimate uses the *arithmetic* netlist's cell mix,
   deliberately: it is what lets the two ledgers add. Its own mix would raise that row 2.1%.

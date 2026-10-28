@@ -3,10 +3,15 @@
 
     build_data.py <repo root> <out.json>
 
-Every value comes from a committed data directory, so the page cannot drift from the record. The page's
+Every value comes from a committed data directory. Most are read from that directory's JSON here, so they
+cannot drift from the record at all; the Q129 block added on 28 Oct 2026 is transcribed from the README or
+summary of the directory named on each of its lines, because several of those lanes publish the figure only
+in prose, and a sample of it is re-checked against those directories' JSON at the bottom of this file. The
+page's footer says which half is which. The page's
 script also renders an optional `vault` block of {title, rows} boxes when a build adds one; nothing in this
 repository writes that block, and the page built here has none.
 """
+import glob
 import json
 import math
 import sys
@@ -296,15 +301,29 @@ o["waterfall"] = {
     "rail_band_pJ": wf2["rail"]["band_pJ"],
     "closure_vs_rail": [_lo["closure_vs_rail"], _hi["closure_vs_rail"]],
     "closure_vs_rail_band": [_blo["closure_vs_rail"], _bhi["closure_vs_rail"]],
+    # Two closures against the board, and they answer different questions. `closure_vs_board` counts the
+    # 0.875 pJ regulators-and-in-step-logic row of the measured board-to-rail step, which is a named
+    # account but not a bottom-up one; `closure_vs_board_bottom_up` is the arithmetic and transport rows
+    # alone, which is what Q128's 33.7% was. Quote the second against 27 October, or label the first.
     "closure_vs_board": [_lo["closure_vs_board"], _hi["closure_vs_board"]],
     "closure_vs_board_band": [_blo["closure_vs_board"], _bhi["closure_vs_board"]],
+    "closure_vs_board_bottom_up": [_lo["bottom_up_only_closure_vs_board"],
+                                   _hi["bottom_up_only_closure_vs_board"]],
+    "closure_vs_board_bottom_up_band": [_blo["bottom_up_only_closure_vs_board"],
+                                        _bhi["bottom_up_only_closure_vs_board"]],
+    "closure_v1_vs_board_bottom_up": sw["open_netlist_total_pJ"] / sw["board_pJ"],
     "unaccounted_vs_board_pJ": [_hi["unaccounted_vs_board_pJ"], _lo["unaccounted_vs_board_pJ"]],
     "unaccounted_vs_board_band_pJ": [_bhi["unaccounted_vs_board_pJ"], _blo["unaccounted_vs_board_pJ"]],
     "regulators_pJ": _hi["regulators_and_instep_logic_pJ"],
+    "regulators_band_pJ": [_blo["regulators_and_instep_logic_pJ"],
+                           _bhi["regulators_and_instep_logic_pJ"]],
     "board_to_rail": wf2["board_to_rail_step"]["by_footing"][wf2["board_to_rail_step"]["footing_used"]],
     "glitch_energy_ratio": wf2["arithmetic"]["glitch_energy_ratio"],
     "glitch_toggle_ratio": wf2["arithmetic"]["glitch_toggle_ratio"],
     "glitch_moved_pJ": wf2["arithmetic"]["glitch_moved_pJ"],
+    # the step is part measurement and part scaling: x1.331 is the measured energy ratio of the switching
+    # term alone, and the cells' internal energy is scaled by the signal-transition count (x1.680)
+    "glitch_split": wf2["arithmetic"]["glitch_split"],
     "reconciliation": wf2["arithmetic"]["reconciliation"],
     "transport": _tr,
     "leakage": wf2["leakage"],
@@ -442,6 +461,69 @@ o["q129"] = {
         "say": "A private archive cross-check of the same quantities was run; it is not part of this page "
                "and nothing from it is quoted here.",
     },
+}
+
+# ---- the q129 block, sampled against the lane directories' own JSON ---------
+# Everything in §3's waterfall is read from waterfall-v2.json, whose own script asserts its arithmetic. The
+# o["q129"] block above is different: several of those lanes publish the figure this page quotes only in
+# their README or summary (E73's pole and E74's bound are in prose), so the block is transcribed, with the
+# directory named on every line. This check re-reads the JSON those directories DO carry and refuses to
+# build the page if a transcribed figure is not a value in its own directory's data. It is a sample, not a
+# proof of every line, and the count of what it covers is written into the block.
+def _leaves(o_, out):
+    if isinstance(o_, dict):
+        for v in o_.values():
+            _leaves(v, out)
+    elif isinstance(o_, list):
+        for v in o_:
+            _leaves(v, out)
+    elif isinstance(o_, (int, float)) and not isinstance(o_, bool):
+        out.append(float(o_))
+
+
+def _lane_numbers(d):
+    vals = []
+    for f in sorted(glob.glob(f"{D}/{d}/*.json")):
+        try:
+            _leaves(json.load(open(f)), vals)
+        except (ValueError, OSError):
+            pass
+    return vals
+
+
+_q = o["q129"]
+_sample = {
+    "2026-10-27-e69-governor-knob": [
+        _q["knob"]["rms_mhz"], _q["knob"]["ones_at_45W_mhz"][0], _q["knob"]["ones_at_45W_mhz"][1],
+        _q["knob"]["sustained_thr65_mhz"], _q["knob"]["cause_flip_at_50W"]["mhz"]],
+    "2026-10-27-q129-governor-temperature": [
+        _q["temperature_term"]["all_ones_measured_mhz"], _q["temperature_term"]["chain_pred_mhz"]],
+    "2026-10-27-e70-saturation-ladder": [
+        _q["saturation"]["layout_contrast_W"], _q["saturation"]["layout_contrast_SE"],
+        _q["saturation"]["law_rms_W"], _q["saturation"]["law_rms_frozen_W"],
+        _q["saturation"]["carry_over"], _q["saturation"]["best_in_h_alone_W"],
+        _q["saturation"]["pure_additivity_W"]],
+    "2026-10-27-e72-600mhz": [
+        _q["voltage"]["clock_scaling_exponent"], _q["voltage"]["fJ_600"]],
+    "2026-10-27-e71-idle-slope-aifoundry3": [
+        _q["leak"]["a3_58_62"], _q["leak"]["a3_58_62_se"], _q["leak"]["a3_52_58"],
+        _q["leak"]["a2_58_62"]],
+    "2026-10-27-q129-stop9-atoms": [
+        _q["atoms"]["aJ_per_edge"], _q["atoms"]["electrons"], _q["atoms"]["landauer_x"],
+        _q["atoms"]["landauer_x_at_58C"], _q["atoms"]["bare_fins_x"], _q["atoms"]["min_inverter_x"]],
+}
+_checked = 0
+for _d, _vals in _sample.items():
+    _L = _lane_numbers(_d)
+    assert _L, _d
+    for _v in _vals:
+        assert any(abs(x - _v) <= max(5e-4, abs(_v) * 2e-4) for x in _L), (_d, _v)
+        _checked += 1
+_q["sampled_against_lane_json"] = {
+    "figures": _checked, "directories": len(_sample),
+    "how": "each of these figures is present as a value in its own data directory's committed JSON, "
+           "re-read at build time; the rest of this block is transcribed from the README or summary of "
+           "the directory named on its line, and §3's waterfall is read from waterfall-v2.json whole.",
 }
 
 o["meta"] = {

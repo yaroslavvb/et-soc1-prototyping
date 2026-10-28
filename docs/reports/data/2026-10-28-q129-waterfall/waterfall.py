@@ -102,6 +102,33 @@ for k in ("k0", "k1", "k2"):
 ARITH = arith["k1"]["total_pJ"]
 arith_band = [arith["k0"]["total_pJ"], arith["k2"]["total_pJ"]]
 
+# How the +0.781 pJ glitch step splits, because the two halves are not the same kind of number. The x1.331
+# energy ratio is MEASURED, and it is the switching term alone (1.512 -> 2.012 pJ, +0.500). The cells'
+# internal energy is not measured glitched: it is scaled by the signal-transition count (0.4127 -> 0.6933 pJ,
+# x1.680), which Q129(b)'s own limitations list as a limitation -- a glitch on a cell input costs internal
+# energy whether or not the output moves, and that is not priced at all. So the factor the ledger actually
+# applies to the zero-delay figure is the composite x1.406, not x1.331.
+glitch_split = {
+    "switching_measured_pJ": arith["k1"]["switching_timed_pJ"] - arith["k1"]["switching_zero_pJ"],
+    "switching_measured_ratio": arith["k1"]["glitch_energy_ratio"],
+    "internal_scaled_pJ": INT["timed"] - INT["zero"],
+    "internal_scale_applied": INT["timed"] / INT["zero"],
+    "composite_ratio_applied": ARITH / arith["k1"]["zero_delay_total_pJ"],
+    "internal_is_scaled_not_measured":
+        "the internal half is scaled by the signal-transition count, not measured. 2026-10-27-q129-glitch's "
+        "own limitations: 'the internal-energy term is scaled, not measured ... a glitch on a cell input "
+        "costs internal energy whether or not the output moves, which this does not price at all.' So the "
+        "step is part measurement and part scaling, and the scaled share is given here.",
+}
+glitch_split["scaled_share_of_step"] = (
+    glitch_split["internal_scaled_pJ"]
+    / (glitch_split["switching_measured_pJ"] + glitch_split["internal_scaled_pJ"]))
+# the two halves are the whole step, and x1.331 alone does not reach the ledger's figure
+assert abs(glitch_split["switching_measured_pJ"] + glitch_split["internal_scaled_pJ"]
+           - (ARITH - arith["k1"]["zero_delay_total_pJ"])) < 1e-9, glitch_split
+assert abs(glitch_split["switching_measured_ratio"] * arith["k1"]["zero_delay_total_pJ"]
+           - ARITH) > 0.1, glitch_split
+
 # the reconciliation: Q128's own ledger walked forward by the two deltas that (C) subsumes
 WIRE_DELTA = -0.1371          # Q129(a) summary.txt, mixed netlist at Miller k=1 (0.590 -> 0.453 pJ)
 recon = {
@@ -239,6 +266,7 @@ o = {
                    "glitch_toggle_ratio": U["glitch_toggle_ratio"],
                    "glitch_energy_ratio": arith["k1"]["glitch_energy_ratio"],
                    "glitch_moved_pJ": ARITH - arith["k1"]["zero_delay_total_pJ"],
+                   "glitch_split": glitch_split,
                    "clock_tree_glitch_ratio": glit["scopes"]["clock"]["glitch_toggle_ratio"],
                    "wallace_tree_energy_ratio": glit["scopes"]["wallace_tree"]["k1"]["glitch_energy_ratio"],
                    "capacitance_priced": glit["coverage"],
@@ -276,6 +304,13 @@ print(f"  rail        {RAIL:.3f} pJ  [{min(rail_band):.3f}, {max(rail_band):.3f}
       f"ratio {RAIL / BOARD:.3f}")
 print(f"  arithmetic  {ARITH:.3f} pJ  [{arith_band[0]:.3f}, {arith_band[1]:.3f}]  "
       f"(zero-delay {arith['k1']['zero_delay_total_pJ']:.3f}, glitch x{arith['k1']['glitch_energy_ratio']:.3f})")
+print(f"  glitch step {ARITH - arith['k1']['zero_delay_total_pJ']:+.3f} pJ = "
+      f"{glitch_split['switching_measured_pJ']:+.3f} measured on switching (x"
+      f"{glitch_split['switching_measured_ratio']:.3f}) and "
+      f"{glitch_split['internal_scaled_pJ']:+.3f} from scaling the internal term (x"
+      f"{glitch_split['internal_scale_applied']:.3f}); composite x"
+      f"{glitch_split['composite_ratio_applied']:.3f}, "
+      f"{100 * glitch_split['scaled_share_of_step']:.0f}% of the step scaled")
 print(f"  transport   {transport['low_pJ']:.3f} to {transport['high_pJ']:.3f} pJ")
 for k, v in cl.items():
     print(f"  {k:24s} accounted {v['accounted_on_the_rail_pJ']:.3f} pJ = "
