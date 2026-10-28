@@ -1,0 +1,36 @@
+Labelled leakage sensitivity (Q129, desk-only, 2026-10-28). The registered reduction and every published
+verdict stand; this file only says what the numbers would be if the de-leaking slope k were aifoundry3's
+MEASURED idle slope, E71's 0.3803 W/C over 58-62 C (6 cycles, sd 0.0036), instead of this reduction's own
+within-run auto k. It replaces nothing. Reproduce with the commands in
+docs/reports/data/2026-10-27-q129-leak-sensitivity/refit.sh.
+
+
+E60 (bitflip ladder, 2026-10-20), aifoundry3 card 0, 600 MHz, 521.8 mV.
+k 0.202650 (its own auto k, 149 runs) -> 0.3803 W/C. Kept runs 220 -> 220; the set-aside pass list is unchanged.
+A re-run at the published auto k reproduces hl.json exactly (lq 116.746 +- 0.613 fJ, lb 129.918 +- 0.480 fJ).
+
+                            published    at 0.3803    shift
+  lq per designed fJ         116.7462     115.0493   -1.45%   (se 0.6129 -> 0.5382)
+  lq per bus fJ               74.6579      73.5734   -1.45%   (se 0.3940 -> 0.3463)
+  lq per net fJ                0.3009       0.2952   -1.86%   (se 0.0007 -> 0.0011)
+  lb per designed fJ         129.9183     127.6865   -1.72%   (se 0.4798 -> 0.4236)
+  lb per bus fJ               85.5779      84.1075   -1.72%   (se 0.3216 -> 0.2828)
+  lb per net fJ                0.1186       0.1165   -1.79%   (se 0.0006 -> 0.0005)
+  lq first flip W              0.5938       0.5472   -7.85%
+  lq marginal W per h          0.5362       0.5284   -1.46%
+  lq intercept W              -0.4202      -0.4443
+  lb first flip W              1.9544       1.9078   -2.39%
+  lb marginal W per h          0.5964       0.5862   -1.72%
+  lb intercept W               0.9405       0.9182
+
+  the 6 B positions E60 priced (fJ per alternating bit):
+    bit 0        138.2      133.8   -3.15%
+    bit 8        102.4       99.1   -3.30%
+    bit 16       542.2      524.3   -3.30%
+    bit 22      1019.5     1000.1   -1.90%
+    bit 23       169.0      165.9   -1.82%
+    bit 31       119.2      116.3   -2.44%
+
+  What it changes downstream: e60_lq_fJ 116.746 -> 115.049 and e60_lb_fJ 129.918 -> 127.687 in Q128's
+  perbit block, and the lq ladder rows those two sit on (the saturation laws re-fit: see the Q129 summary).
+  aifoundry1's and aifoundry2's rows are NOT touched: this slope is aifoundry3's.

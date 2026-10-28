@@ -1,0 +1,70 @@
+Labelled leakage sensitivity (Q129, desk-only, 2026-10-28). The registered reduction and every published
+verdict stand; this file only says what the numbers would be if the de-leaking slope k were aifoundry3's
+MEASURED idle slope, E71's 0.3803 W/C over 58-62 C (6 cycles, sd 0.0036), instead of this reduction's own
+within-run auto k. It replaces nothing. Reproduce with the commands in
+docs/reports/data/2026-10-27-q129-leak-sensitivity/refit.sh.
+
+
+E70 (saturation ladder + A-side multi-bit ladder, 2026-10-27), aifoundry3. k 0.197500 -> 0.3803 W/C.
+E70 committed three fixed-slope reductions (0.2, 0.3, 0.4 W/C) as departure D-d and said aifoundry3's own idle
+slope would be measured by E71. It now is, and 0.3803 lies inside that band. This file carries E70's REGISTERED
+scoring (hs/report_e70.py, six passes, every contrast paired per pass) at the measured slope. Re-running it at
+E70's own auto k reproduces the committed scored.json exactly (worst relative difference 0.0).
+
+  B-side low layout (lq) and spread layout (ls), and the A-side ladder (alq): dW in W, fJ per designed bit
+  rung      published at 0.3803    shift     fJ pub   fJ new
+  lq_h1      0.606+-0.017  0.565+-0.025   -6.79%      132.0    123.1
+  lq_h12     5.502+-0.041  5.386+-0.049   -2.10%       99.9     97.8
+  lq_h16     8.364+-0.028  8.180+-0.033   -2.20%      113.9    111.4
+  lq_h2      0.928+-0.042  0.882+-0.055   -4.93%      101.0     96.0
+  lq_h23    12.145+-0.158 11.886+-0.163   -2.13%      115.0    112.6
+  lq_h3      1.294+-0.016  1.230+-0.026   -4.92%       93.9     89.3
+  lq_h4      1.505+-0.201  1.441+-0.200   -4.25%       81.9     78.5
+  lq_h6      2.357+-0.083  2.252+-0.084   -4.46%       85.6     81.8
+  lq_h8      3.248+-0.028  3.135+-0.032   -3.47%       88.4     85.4
+  ls_h12     8.890+-0.050  8.704+-0.062   -2.09%      161.4    158.0
+  ls_h16     9.749+-0.250  9.524+-0.253   -2.31%      132.7    129.7
+  ls_h2      2.085+-0.012  2.032+-0.022   -2.56%      227.1    221.3
+  ls_h3      3.459+-0.096  3.355+-0.105   -2.99%      251.1    243.6
+  ls_h4      4.427+-0.036  4.322+-0.040   -2.37%      241.1    235.3
+  ls_h6      5.885+-0.118  5.768+-0.121   -1.99%      213.7    209.4
+  ls_h8      7.108+-0.049  6.979+-0.045   -1.82%      193.5    190.0
+  alq_h1     0.282+-0.070  0.250+-0.066  -11.33%      123.0    109.0
+  alq_h12    3.482+-0.016  3.355+-0.012   -3.67%      126.4    121.8
+  alq_h16    5.709+-0.136  5.575+-0.131   -2.35%      155.4    151.8
+  alq_h2     0.829+-0.097  0.757+-0.107   -8.64%      180.6    165.0
+  alq_h23    7.560+-0.042  7.397+-0.044   -2.16%      143.2    140.1
+  alq_h4     1.578+-0.017  1.485+-0.025   -5.89%      171.8    161.7
+  alq_h8     1.957+-0.070  1.855+-0.081   -5.21%      106.6    101.0
+
+  THE SATURATION LAW (D2, dW = Winf(1-exp(-S/Winf)) over 15 B-side rungs; lq_h23 excluded as registered):
+    Winf refit                 10.521 -> 10.158 W (-3.45%)
+    residual rms, refit        0.2322 -> 0.2355 W
+    residual rms, Winf FROZEN  0.5952 -> 0.6957 W   <- the one figure that degrades materially (+16.9%)
+    best law in h alone        1.358 -> 1.343 W
+    pure additivity            6.062 -> 6.162 W
+    The frozen ceiling, 12.581 W, was frozen from E60's ladder at E60's OWN auto k. Re-de-leaking E70's rungs
+    at 0.3803 while leaving that constant alone is the apples-to-oranges comparison the +16.9% measures: E60's
+    ladder at the same slope gives a marginal 0.5284 W per h instead of 0.5362 (-1.5%), so a consistently
+    re-frozen ceiling would fall with it. D2's VERDICT is unaffected: the refit still beats the best law in h
+    alone by 5.7x (was 5.8x) and pure additivity by 26x.
+
+  THE LAYOUT CONTRAST (D1, the registered decider): at h = 8, +3.860 +- 0.052 W -> +3.844 +- 0.035 W,
+  109 SE from the zero a "how many" law needs (was 74). The answer to Q128 section 5 item 2 -- shared wires,
+  not interaction -- is unchanged, and every rung of both layouts falls, so the contrast is preserved.
+
+  THE A SIDE: its saturating form is still REJECTED. Winf_A 6.373 -> 6.143 W, fit rms 1.063 -> 1.105 W (now 4.7x
+  the B side's), and its top rung still sits 28.6 SE ABOVE its own fitted asymptote (was 28.2).
+
+  THE CARRY-OVER (D4/P6's registered window h = 12 and 16): rho 1.316 -> 1.305; rho(12) = 1.266 +- 0.011 ->
+  1.246 +- 0.014, the cleanest single number at a random fp32 word's Hamming weight. Q128's old choice between
+  1.01 and 1.57 is replaced by 1.25 rather than 1.27 -- inside its own between-h spread either way.
+
+  D3 (the single turn-on an offset law needs) still runs over a 11.5x span (was 13.4x), 0.107 -> 1.234 W,
+  so the offset law is still rejected. NOTE: D3's and E70's grid_T_W stay at E67's PUBLISHED 1.351 W here,
+  because report_e70.py is given E67's committed closure.json; at the measured slope that T is 1.310 W
+  (see E67's own file), which moves D3's comparison value by 3% and no verdict.
+
+  VERDICTS: P1 PASS, P2 PASS, P3 PASS, P4 PASS, P5 FAIL, P6 PASS, P7 PASS, P8 PASS at BOTH slopes.
+  P5 still fails, for the same reason (the A side's form is rejected and its ceiling clause misses).
+  Six passes kept at both slopes; D-a's gate keeps the same set.

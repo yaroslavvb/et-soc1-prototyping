@@ -1,0 +1,180 @@
+========================================================================================================
+E60 (2026-10-20-bitflip-ladder) aifoundry3, auto k 0.20265 -> 0.3803 W/C
+========================================================================================================
+  lq per designed fJ                           116.7 -> 115 (se 0.613 -> 0.538)    -1.45%
+  lq per bus fJ                                74.66 -> 73.57 (se 0.394 -> 0.346)    -1.45%
+  lq per nets fJ                               0.3009 -> 0.2952 (se 0.001 -> 0.001)    -1.86%
+  lq first flip W                              0.5938 -> 0.5472 (se 0.0108 -> 0.0260)    -7.85%
+  lq marginal W per h                          0.5362 -> 0.5284     -1.46%
+  lq intercept W                               -0.4202 -> -0.4443     +5.74%
+  lb per designed fJ                           129.9 -> 127.7 (se 0.480 -> 0.424)    -1.72%
+  lb per bus fJ                                85.58 -> 84.11 (se 0.322 -> 0.283)    -1.72%
+  lb per nets fJ                               0.1186 -> 0.1165 (se 0.001 -> 0.001)    -1.79%
+  lb first flip W                              1.954 -> 1.908 (se 0.0135 -> 0.0172)    -2.39%
+  lb marginal W per h                          0.5964 -> 0.5862     -1.72%
+  lb intercept W                               0.9405 -> 0.9182     -2.38%
+  the 6 B positions E60 priced (fJ per alternating bit):
+    bit 0      138.2 ->    133.8 fJ   -3.15%
+    bit 8      102.4 ->     99.1 fJ   -3.30%
+    bit 16     542.2 ->    524.3 fJ   -3.30%
+    bit 22    1019.5 ->   1000.1 fJ   -1.90%
+    bit 23     169.0 ->    165.9 fJ   -1.82%
+    bit 31     119.2 ->    116.3 fJ   -2.44%
+  anchors (W): anchor_pi 36.40->36.16, anchor_randn 52.61->52.01, lb_h0 36.51->36.22, lq_h0 36.47->36.20
+  kept runs 220 -> 220; pass set-aside list changed: False
+========================================================================================================
+E65 blocks A+B, auto k 0.18238 -> 0.3803 W/C   (the flow-M row is bpi_11)
+========================================================================================================
+  bpi bit 0      444.7 ->    425.3 fJ   -4.36%   (dW 2.043 -> 1.954 W)
+  bpi bit 8      540.1 ->    518.1 fJ   -4.07%   (dW 2.480 -> 2.379 W)
+  bpi bit 11     745.1 ->    722.2 fJ   -3.07%   (dW 3.421 -> 3.316 W)
+  bpi bit 16    1244.3 ->   1220.6 fJ   -1.91%   (dW 5.713 -> 5.604 W)
+  bpi bit 22    1603.6 ->   1566.1 fJ   -2.34%   (dW 7.362 -> 7.190 W)
+  B list: low-mantissa mean 109.3 -> 103.6 fJ (-5.17%); bit22 1008 -> 985; span 12.15x -> 12.81x
+========================================================================================================
+E67 registered, auto k 0.17545 -> 0.3803 W/C   (block 3 = the interaction grid)
+========================================================================================================
+  abp bit 0      359.2 ->    344.9 fJ   -3.98%
+  abp bit 8      493.3 ->    476.0 fJ   -3.52%
+  abp bit 11     855.8 ->    827.4 fJ   -3.32%
+  abp bit 16    1159.5 ->   1127.8 fJ   -2.73%
+  abp bit 22    1566.1 ->   1530.6 fJ   -2.27%
+  grid base_W                                  36.19 -> 35.86     -0.89%
+  grid excess_mean_W                           -1.351 -> -1.31     -3.02%
+  grid excess_mean_se                          0.2812 -> 0.2778     -1.23%
+  grid excess_abs_max_W                        4.051 -> 3.975     -1.87%
+  grid excess_frac_mean                        -0.2015 -> -0.1994     -1.04%
+  grid cells within 20%: 8/16 -> 9/16; all |excess| <= 0.5 W: False -> False
+  E67 verdicts: P1 PASS->PASS P2 PASS->PASS P3 FAIL->FAIL P4 FAIL->FAIL P5 PASS->PASS P6 FAIL (sub-additive)->FAIL (sub-additive) P7 PASS->PASS P8 FAIL->FAIL
+  whole-operand both_random_W                  16.18 -> 15.82     -2.27%
+  whole-operand constant_operand_spread_W      0.4241 -> 0.4036     -4.83%
+  whole-operand n_bases                        6 -> 6     +0.00%
+  whole-operand ratio                          0.881 -> 0.8796     -0.16%
+  whole-operand sum_of_one_sided_W             18.37 -> 17.98     -2.12%
+========================================================================================================
+E67 closure (closure.py over the same operand files)
+========================================================================================================
+  nrd_a predicted 17.2964 -> 16.6282 W (-3.86%), measured 7.4816 -> 7.3265 W (-2.07%), ratio 0.4326 -> 0.4406
+  nrd_b predicted 21.8451 -> 21.1417 W (-3.22%), measured 10.8901 -> 10.6559 W (-2.15%), ratio 0.4985 -> 0.5040
+  turn_on_W (minus the grid's mean excess)     1.351 -> 1.31     -3.02%
+========================================================================================================
+E70 saturation ladder + A-side ladder, auto k 0.19750 -> 0.3803 W/C
+========================================================================================================
+  --- lq rungs (dW W, se, fJ/bit) ---
+    lq_h1        0.606 +- 0.017 ->   0.565 +- 0.025 W   -6.79%   fJ/bit  132.0 ->  123.1
+    lq_h2        0.928 +- 0.042 ->   0.882 +- 0.055 W   -4.93%   fJ/bit  101.0 ->   96.0
+    lq_h3        1.294 +- 0.016 ->   1.230 +- 0.026 W   -4.92%   fJ/bit   93.9 ->   89.3
+    lq_h4        1.505 +- 0.201 ->   1.441 +- 0.200 W   -4.25%   fJ/bit   81.9 ->   78.5
+    lq_h6        2.357 +- 0.083 ->   2.252 +- 0.084 W   -4.46%   fJ/bit   85.6 ->   81.8
+    lq_h8        3.248 +- 0.028 ->   3.135 +- 0.032 W   -3.47%   fJ/bit   88.4 ->   85.4
+    lq_h12       5.502 +- 0.041 ->   5.386 +- 0.049 W   -2.10%   fJ/bit   99.9 ->   97.8
+    lq_h16       8.364 +- 0.028 ->   8.180 +- 0.033 W   -2.20%   fJ/bit  113.9 ->  111.4
+    lq_h23      12.145 +- 0.158 ->  11.886 +- 0.163 W   -2.13%   fJ/bit  115.0 ->  112.6
+  --- ls rungs (dW W, se, fJ/bit) ---
+    ls_h2        2.085 +- 0.012 ->   2.032 +- 0.022 W   -2.56%   fJ/bit  227.1 ->  221.3
+    ls_h3        3.459 +- 0.096 ->   3.355 +- 0.105 W   -2.99%   fJ/bit  251.1 ->  243.6
+    ls_h4        4.427 +- 0.036 ->   4.322 +- 0.040 W   -2.37%   fJ/bit  241.1 ->  235.3
+    ls_h6        5.885 +- 0.118 ->   5.768 +- 0.121 W   -1.99%   fJ/bit  213.7 ->  209.4
+    ls_h8        7.108 +- 0.049 ->   6.979 +- 0.045 W   -1.82%   fJ/bit  193.5 ->  190.0
+    ls_h12       8.890 +- 0.050 ->   8.704 +- 0.062 W   -2.09%   fJ/bit  161.4 ->  158.0
+    ls_h16       9.749 +- 0.250 ->   9.524 +- 0.253 W   -2.31%   fJ/bit  132.7 ->  129.7
+  --- alq rungs (dW W, se, fJ/bit) ---
+    alq_h1       0.282 +- 0.070 ->   0.250 +- 0.066 W  -11.33%   fJ/bit  123.0 ->  109.0
+    alq_h2       0.829 +- 0.097 ->   0.757 +- 0.107 W   -8.64%   fJ/bit  180.6 ->  165.0
+    alq_h4       1.578 +- 0.017 ->   1.485 +- 0.025 W   -5.89%   fJ/bit  171.8 ->  161.7
+    alq_h8       1.957 +- 0.070 ->   1.855 +- 0.081 W   -5.21%   fJ/bit  106.6 ->  101.0
+    alq_h12      3.482 +- 0.016 ->   3.355 +- 0.012 W   -3.67%   fJ/bit  126.4 ->  121.8
+    alq_h16      5.709 +- 0.136 ->   5.575 +- 0.131 W   -2.35%   fJ/bit  155.4 ->  151.8
+    alq_h23      7.560 +- 0.042 ->   7.397 +- 0.044 W   -2.16%   fJ/bit  143.2 ->  140.1
+  D1 h=2 dW_ls_minus_lq                        1.158 -> 1.15     -0.66%
+  D1 h=3 dW_ls_minus_lq                        2.165 -> 2.125     -1.84%
+  D1 h=4 dW_ls_minus_lq                        2.922 -> 2.881     -1.41%
+  D1 h=6 dW_ls_minus_lq                        3.528 -> 3.516     -0.35%
+  D1 h=8 dW_ls_minus_lq                        3.86 -> 3.844     -0.43%
+  D1 h=12 dW_ls_minus_lq                       3.388 -> 3.318     -2.07%
+  D1 h=16 dW_ls_minus_lq                       1.385 -> 1.344     -2.97%
+  D2.R_S_frozen_W                              0.5952 -> 0.6957    +16.88%
+  D2.R_S_refit_16rung_W                        0.424 -> 0.4395     +3.66%
+  D2.R_S_refit_W                               0.2322 -> 0.2355     +1.43%
+  D2.R_additive_W                              6.062 -> 6.162     +1.65%
+  D2.R_h_W                                     1.358 -> 1.343     -1.11%
+  D2.R_h_matched_only_W                        1.406 -> 1.39     -1.11%
+  D2.Winf_refit_16rung_W                       11.36 -> 11.01     -3.13%
+  D2.Winf_refit_W                              10.52 -> 10.16     -3.45%
+  D2.fitted_dW_max_W                           9.749 -> 9.524     -2.31%
+  D2.fitted_dW_min_W                           0.6061 -> 0.565     -6.79%
+  D2.ls_rms_vs_law_A_W                         8.468 -> 8.594     +1.49%
+  D2.ls_rms_vs_law_W_frozen_W                  0.8316 -> 0.9561    +14.98%
+  D2.n_lq_rungs                                8 -> 8     +0.00%
+  D2.n_ls_rungs                                7 -> 7     +0.00%
+  D2.n_rungs                                   15 -> 15     +0.00%
+  D3.grid_T_W                                  1.351 -> 1.351     +0.00%
+  D3.grid_T_se_W                               0.2812 -> 0.2812     +0.00%
+  D3.max_W                                     1.219 -> 1.234     +1.23%
+  D3.min_W                                     0.09115 -> 0.1072    +17.67%
+  D3.span_factor                               13.38 -> 11.51    -13.97%
+  D4 h=1 rho_per_bit                           0.9323 -> 0.8901     -4.53%
+  D4 h=2 rho_per_bit                           1.821 -> 1.776     -2.47%
+  D4 h=4 rho_per_bit                           2.602 -> 2.59     -0.44%
+  D4 h=8 rho_per_bit                           1.205 -> 1.184     -1.75%
+  D4 h=12 rho_per_bit                          1.266 -> 1.246     -1.58%
+  D4 h=16 rho_per_bit                          1.365 -> 1.363     -0.14%
+  D4 h=23 rho_per_bit                          1.246 -> 1.246     -0.01%
+  P3.rho_ratio_vs_S                            -0.8036 -> -0.7143    -11.11%
+  P3.rho_ratio_vs_h                            -0.8356 -> -0.7745     -7.31%
+  ceilings.A_n_passes                          6 -> 6     +0.00%
+  ceilings.A_per_pass_mean_W                   6.376 -> 6.146     -3.61%
+  ceilings.A_per_pass_se_W                     0.06729 -> 0.06495     -3.47%
+  ceilings.A_pooled_W                          6.373 -> 6.143     -3.61%
+  ceilings.B_n_passes                          6 -> 6     +0.00%
+  ceilings.B_per_pass_mean_W                   10.52 -> 10.16     -3.44%
+  ceilings.B_per_pass_se_W                     0.1899 -> 0.1961     +3.28%
+  ceilings.B_pooled_W                          10.52 -> 10.16     -3.45%
+  A_ceiling.B_ceiling_frozen_W                 12.58 -> 12.58     +0.00%
+  A_ceiling.B_ceiling_refit_W                  10.52 -> 10.16     -3.45%
+  A_ceiling.Winf_A_W                           6.373 -> 6.143     -3.61%
+  A_ceiling.fit_rms_W                          1.063 -> 1.105     +3.91%
+  A_ceiling.flip_rate_pred_from_frozen_W       6.29 -> 6.29     +0.00%
+  A_ceiling.flip_rate_pred_from_refit_W        5.26 -> 5.079     -3.45%
+  A_ceiling.ratio_A_over_B_frozen              0.5065 -> 0.4883     -3.61%
+  A_ceiling.ratio_A_over_B_refit               0.6057 -> 0.6047     -0.17%
+  A_ceiling.top_rung_above_asymptote_SE        28.22 -> 28.63     +1.48%
+  A_ceiling.top_rung_above_asymptote_W         1.187 -> 1.254     +5.65%
+  A_ceiling.top_rung_dW                        7.56 -> 7.397     -2.16%
+  A_ceiling.top_rung_se                        0.04207 -> 0.0438     +4.10%
+  carry_over_measured.between_h_SD_12_16       0.06983 -> 0.08263    +18.34%
+  carry_over_measured.between_h_SD_12_16_23    0.06366 -> 0.06756     +6.12%
+  carry_over_measured.note: "the +- on the window mean is a BETWEEN-h spread (the two h differ by more than their own SEs), not a standard error; rho(12) = 1.266 +- 0.011 is the cleanest single number at a random word's Hamming weight. Averaging h = 23 in as well is a departure from the registered window." -> "the +- on the window mean is a BETWEEN-h spread (the two h differ by more than their own SEs), not a standard error; rho(12) = 1.246 +- 0.014 is the cleanest single number at a random word's Hamming weight. Averaging h = 23 in as well is a departure from the registered window."
+  carry_over_measured.propagated_SE_12_16      0.01737 -> 0.01771     +2.00%
+  carry_over_measured.rho_h12                  1.266 -> 1.246     -1.58%
+  carry_over_measured.rho_h12_se               0.0115 -> 0.01395    +21.34%
+  carry_over_measured.rho_h16                  1.365 -> 1.363     -0.14%
+  carry_over_measured.rho_h16_se               0.03278 -> 0.03257     -0.64%
+  carry_over_measured.rho_mean_12_16           1.316 -> 1.305     -0.84%
+  carry_over_measured.rho_mean_12_16_23        1.293 -> 1.285     -0.57%
+  law_W_frozen_Winf_W                          12.58 -> 12.58     +0.00%
+  turn_on_T_W                                  1.351 -> 1.351     +0.00%
+  turn_on_T_se_W                               0.2812 -> 0.2812     +0.00%
+  E70 verdicts: P1 PASS->PASS P2 PASS->PASS P3 PASS->PASS P4 PASS->PASS P5 FAIL->FAIL P6 PASS->PASS P7 PASS->PASS P8 PASS->PASS
+========================================================================================================
+Q128 data.json, rebuilt through chain.py + build_data.py at the measured slope
+========================================================================================================
+  flowM_fJ (E65 bpi_11)                        745.1 -> 722.2     -3.07%
+  flowM_A_side_fJ (E67 abp_11)                 855.8 -> 827.4     -3.32%
+  flat_fJ_per_bit                              107.1 -> 104.8     -2.11%
+  flat_marginal_fJ                             116.8 -> 115.1     -1.46%
+  beta                                         0.9935 -> 1.011     +1.72%
+  B_span                                       12.15 -> 12.81     +5.45%
+  A_span                                       9.443 -> 9.909     +4.93%
+  e60_lq_fJ                                    116.7 -> 115     -1.45%
+  e60_lb_fJ                                    129.9 -> 127.7     -1.72%
+  laws.flat.rms                                14.38 -> 14.3     -0.57%
+  laws.free_power.rms                          13.31 -> 12.5     -6.08%
+  laws.price_list_compressed.rms               28.48 -> 29.48     +3.52%
+  permac data pJ                               3.627 -> 3.545     -2.28%
+  permac clocking pJ                           1.813 -> 1.779     -1.87%
+  board step_W                                 24.66 -> 24.13     -2.14%
+  waterfall identical: True
+  transistor/floor/gates/rail/toggles identical: True
+
+wrote sensitivity.json

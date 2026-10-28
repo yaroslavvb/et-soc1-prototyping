@@ -1,0 +1,64 @@
+Labelled leakage sensitivity (Q129, desk-only, 2026-10-28). The registered reduction and every published
+verdict stand; this file only says what the numbers would be if the de-leaking slope k were aifoundry3's
+MEASURED idle slope, E71's 0.3803 W/C over 58-62 C (6 cycles, sd 0.0036), instead of this reduction's own
+within-run auto k. It replaces nothing. Reproduce with the commands in
+docs/reports/data/2026-10-27-q129-leak-sensitivity/refit.sh.
+
+
+E65 (bit prices + hart ladder, 2026-10-26), aifoundry3, blocks A+B. k 0.182377 -> 0.3803 W/C.
+E71 already published the per-position PRICE shifts (sensitivity-e65-ab.json in its own directory). What is
+added here is the full re-reduction of the same passes through hl/reduce_hl.py, which also re-prices the
+flow-M row and gives the B list its own span. A re-run at the published auto k reproduces hl.json exactly.
+
+  THE FLOW-M ROW (b bit 11 alternating against a = pi), the one number Q128 carries as flowM_fJ:
+    745 +- 56 fJ  ->  722 fJ   (-3.07%);  dW 3.421 -> 3.316 W.  The gate-level comparison it anchors
+    (0.11-0.13 pJ zero-delay in the multiplier, 0.15-0.18 pJ glitched) moves from 6.2x/4.4x to 6.0x/4.2x,
+    i.e. the multiplier's share of a flipped operand bit rises from about 23% to about 24%. B1 still FAILS
+    its registered 100-250 fJ band (2.9x its top instead of 3.0x) and still PASSES board >= gate.
+
+  the whole B = pi row (fJ per alternating bit):
+                published    at 0.3803    shift
+    bpi 0         444.7        425.3   -4.36%
+    bpi 8         540.1        518.1   -4.07%
+    bpi 11        745.1        722.2   -3.07%
+    bpi 16       1244.3       1220.6   -1.91%
+    bpi 22       1603.6       1566.1   -2.34%
+
+  the 32 B positions (A = 1.0), fJ per flipped bit:
+    bit 0        136.2        133.7   -1.90%
+    bit 1        111.6        104.7   -6.18%
+    bit 2         88.3         85.8   -2.93%
+    bit 3        105.0         99.0   -5.75%
+    bit 4        105.4        102.3   -2.86%
+    bit 5        100.4         93.1   -7.30%
+    bit 6         82.9         76.9   -7.28%
+    bit 7        116.5        109.2   -6.29%
+    bit 8        114.2        106.0   -7.17%
+    bit 9        132.0        125.5   -4.90%
+    bit 10       210.2        199.8   -4.92%
+    bit 11       239.1        229.6   -3.97%
+    bit 12       341.1        325.6   -4.55%
+    bit 13       387.0        371.5   -4.01%
+    bit 14       469.7        452.0   -3.76%
+    bit 15       554.0        534.2   -3.58%
+    bit 16       608.6        587.0   -3.54%
+    bit 17       618.1        597.4   -3.35%
+    bit 18       686.7        672.9   -2.01%
+    bit 19       809.4        795.6   -1.70%
+    bit 20       865.3        842.9   -2.59%
+    bit 21       906.3        883.9   -2.47%
+    bit 22      1007.8        985.4   -2.22%
+    bit 23       173.4        165.2   -4.72%
+    bit 24       172.9        170.3   -1.50%
+    bit 25       149.0        142.6   -4.34%
+    bit 26       188.8        182.8   -3.20%
+    bit 27       111.0        102.8   -7.38%
+    bit 28       207.4        197.0   -4.99%
+    bit 29       231.1        218.6   -5.41%
+    bit 30       160.5        151.5   -5.64%
+    bit 31       122.6        121.7   -0.70%
+
+  low-mantissa mean 109.3 -> 103.6 fJ (-5.17%); bit 22 1008 -> 985; span 12.15x -> 12.81x.
+  Block C (the hart ladder, ladder.json) is NOT affected: reduce_ladder de-leaks with IDLE brackets, not a slope.
+  Block D is re-priced by E71 (its kept arm launches at 61.0 C with windows 61.9-62.4 C, so a 58-65 C slope,
+  0.3957, is the better k for that arm); it is not re-done here.
