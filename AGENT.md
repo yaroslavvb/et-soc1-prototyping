@@ -171,11 +171,12 @@ approval); anything that needs a GitHub key, such as a push; any admin action on
 card resets, services), which is the lab admin's; any change to an existing page's visibility, which is the owner's (new report pages are published public by default,
 the owner's rule of 29 September; §8); and
 claiming a machine on the AI Foundry Discord (#community-lab: "using aifoundryN", then "released"), the lab's own norm
-(getting-started.md §2). **The owner's agents post exactly twice per card, each `<ai>` plus one short line naming the
-box:** `<ai> using aifoundry3 [doc](<https://spacesheep.dev/@yaroslavvb/…>)` when they reserve it, then a new post
-`<ai> released aifoundry3 [doc](<…>)` when they release it, with at most that one small link, to the public
-spacesheep page that describes the run. No plan, numbers or progress in the channel, and no edit of the reservation
-to add detail: the page holds it (the owner's rule of 28 October 2026).
+(getting-started.md §2). **The owner's agents post once per card, `<ai>` plus one short line naming the box,** with
+at most one small link to the public spacesheep page that describes the run:
+`<ai> using aifoundry3 [doc](<https://spacesheep.dev/@yaroslavvb/…>)` when they reserve it, and they edit that same post
+to append ` — released` when they release it, keeping its words (the lab dashboard's reservation reader closes a claim
+at the edit that adds "released" to it). No plan, numbers or progress in the channel, and no second post: the page
+holds it (the owner's rules of 28 October 2026).
 
 ## 5. The lab's etiquette, and why
 
@@ -428,6 +429,9 @@ copy it here too.
 *Every edit to this file adds one line here, newest first, in the same commit (the owner's rule of 10 October 2026 for
 agent instruction files). It starts on 14 October 2026; earlier changes are in `git log -- AGENT.md`.*
 
+- **2026-10-28 (Wed, week 44, correction)** — Section 4: the release is an edit of the reservation post appending
+  " — released", not a second post. *Why:* preference — the owner's words minutes after the entry below: *"No, instead
+  of posting a second time, it should edit the original post to know that it's been released."*
 - **2026-10-28 (Wed, week 44)** — Section 4: the owner's agents post exactly twice per card in #community-lab, a
   one-line reservation and a separate one-line release, each naming the box, with at most one small link to the public
   spacesheep page that describes the run; no detail in the channel and no edit of the reservation. *Why:* preference —
