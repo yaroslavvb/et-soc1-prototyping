@@ -465,7 +465,9 @@
  "meta": {
   "date": "2026-10-27",
   "private": false,
-  "repo": "https://github.com/yaroslavvb/et-soc1-prototyping"
+  "repo": "https://github.com/yaroslavvb/et-soc1-prototyping",
+  "updated": "2026-10-28",
+  "updated_with": "Q129"
  },
  "perbit": {
   "A_fJ": {
@@ -784,6 +786,254 @@
   "this_work_clocking_pJ": 1.8128525474328396,
   "this_work_data_pJ": 3.6272321695651333
  },
+ "q129": {
+  "archive": {
+   "say": "A private archive cross-check of the same quantities was run; it is not part of this page and nothing from it is quoted here.",
+   "when": "27-28 October 2026"
+  },
+  "atoms": {
+   "C_fF": 0.619928,
+   "aJ_per_edge": 82.85,
+   "bare_fins_x": 7948,
+   "channel_band_pct": [
+    93.0,
+    99.5
+   ],
+   "channel_share_pct": 97.2,
+   "crossover_um": [
+    68,
+    1085
+   ],
+   "electrons": 2000.4,
+   "landauer_x": 24515,
+   "landauer_x_at_58C": 26143,
+   "min_inverter_x": 2645,
+   "naming": "ASAP7's INVx1 is a 3x cell, not the library's minimum inverter: its LVS netlist gives nfin=3 per device (6 fins) against INVxp33's 1+1, and its leakage is exactly 3.00x. The 24,515x prices INVx1's liberty input pin, which carries the cell's own layout wire; the same pin's six bare fins are 7,948x and the library's real minimum inverter is 2,645x",
+   "optical_phonon_range": [
+    391000000.0,
+    498000000.0
+   ],
+   "phonon_meV": 64.6,
+   "phonons_per_edge": 4.0,
+   "phonons_per_mac": 420000000.0,
+   "wire_share_of_capacitance_pct": 78
+  },
+  "heat_path": {
+   "G0_ci": [
+    217,
+    292
+   ],
+   "G0_mK_per_W": 250.5,
+   "attenuation_at_0p05Hz": 0.1953,
+   "delay_ci_s": [
+    0.78,
+    1.24
+   ],
+   "delay_s": 1.009,
+   "group_delay_ci_s": [
+    14.47,
+    20.13
+   ],
+   "group_delay_s": 16.99,
+   "line_implies_mK_per_W": 300,
+   "one_pole_alone_dAIC": 17.02,
+   "pole_ci_s": [
+    13.34,
+    19.12
+   ],
+   "pole_s": 15.98,
+   "rivals_refuted_SE": [
+    3.98,
+    7.64
+   ],
+   "say_which": "the 0.05 Hz transfer the camera ladder quotes is 0.1953 of the steady-state response, so a steady gain must name itself: the fit's G0 = 250.5 mK/W [217, 292], whose own 0.05 Hz value sits 2.71 line-SE (16.5%) BELOW the measured line, or the ~300 mK/W that measured line implies through the fitted attenuation. The 17% between them is itself a finding, and the fitted family is strained in two places"
+  },
+  "kernels": {
+   "e74_bound_conf": 0.95,
+   "e74_bound_fJ": 2.73,
+   "e74_card_minutes": 11.6,
+   "e75_card_minutes": 21.5,
+   "e76_card_minutes": 7.7,
+   "e76_confirmed": "all thirteen trap on silicon, 13 of 13, each ending the kernel with 0 ops",
+   "e76_probe_passes": 2,
+   "e76_source": "there is no emulation path in the firmware, so the thirteen instructions have no per-instruction energy at all: a U-mode illegal instruction is delegated M->S and the exception handler calls return_from_kernel(KERNEL_RETURN_EXCEPTION), 758 instructions counted on the installed build, and that ends the hart's kernel. libgcc's __divsf3 (299 instructions) contains no trapping instruction, so a C float divide is safe and costs 310-570 multiply-adds; libm's sqrtf and fmodf and libgcc's __fixunssfdi do contain them, so sqrtf(x) is fatal",
+   "e76_trapped": 13,
+   "status": "measured Wed 28 Oct 2026 on aifoundry3; being folded into the chain"
+  },
+  "knob": {
+   "a_ones_b_randn_mhz": {
+    "45": 604.1,
+    "55": 698.8,
+    "65": 764.3
+   },
+   "a_ones_b_randn_pred_mhz": {
+    "45": 600.0,
+    "55": 681.0,
+    "65": 742.9
+   },
+   "bar_mhz": 25,
+   "card_minutes": 11.4,
+   "cause_flip_at_50W": {
+    "mhz": 769.6,
+    "power_steps": 11,
+    "thermal_steps": 0
+   },
+   "cells_in_band": [
+    12,
+    12
+   ],
+   "drift_vs_e64_W": 2.51,
+   "drift_vs_e64_mhz": 25.5,
+   "ones_at_45W_mhz": [
+    758.0,
+    739.6
+   ],
+   "ones_at_45W_pred_mhz": 733.3,
+   "ones_at_45W_steps": [
+    10,
+    9
+   ],
+   "ones_at_65W_steps": [
+    0,
+    0
+   ],
+   "randn_mhz": {
+    "55": 638.7,
+    "65": 709.0
+   },
+   "randn_pred_mhz": {
+    "55": 633.3,
+    "65": 704.8
+   },
+   "rms_mhz": 11.5,
+   "rules_failed": [
+    "K1",
+    "K2",
+    "K5"
+   ],
+   "rules_total": 6,
+   "sustained_thr65_mhz": 763.4,
+   "sustained_thr70_mhz": 800.0,
+   "thermal_steps_thr65": 11,
+   "thermal_steps_thr70": 0,
+   "threshold_sensitivity_mhz": 36.6,
+   "unmeasured": "both sustained randn cells aborted on an 85 W board bound, and the 62 C cell never reached equilibrium inside 76 s"
+  },
+  "leak": {
+   "a2_51_58": 0.2936,
+   "a2_58_62": 0.3452,
+   "a2_58_62_sd": 0.0112,
+   "a3_52_58": 0.32,
+   "a3_58_62": 0.3803,
+   "a3_58_62_se": 0.0036,
+   "band_share_of_the_gap_pct": [
+    59.5,
+    69.5
+   ],
+   "e60_a3_lq_fJ": [
+    116.746,
+    115.049
+   ],
+   "flat_floor_fJ": [
+    109.3,
+    103.6
+   ],
+   "flowM_fJ": [
+    745.0,
+    722.2
+   ],
+   "group_shifts_pct": [
+    -0.7,
+    -5.17
+   ],
+   "item_shifts_pct": [
+    3.95,
+    -8.97
+   ],
+   "registered": 1.508,
+   "rule_failed": "S5d, the registered leg 'every price moves downward', FAILS on one item of 166: abit_26 in E67's clean reduction rises 0.019 W (+4.0%, 0.9x its own SE) because its window ran 0.09 C cooler than its zero's, and lq_h2 does not move at all",
+   "verdicts_moved": 0,
+   "verdicts_scored": 16
+  },
+  "saturation": {
+   "a_side": "the saturating form is REJECTED: its fitted asymptote lies 28.6 SE BELOW its own top rung, the fit rms is 4.7x the B side's, and the increments accelerate where saturation requires decay. E70 measured the A-side ladder but did not find the law that describes it, so the A side's shape is newly open",
+   "answer": "shared wires, not interaction",
+   "best_in_h_alone_W": 1.358,
+   "carry_over": 1.246,
+   "carry_over_se": 0.014,
+   "carry_over_window": 1.305,
+   "law_rms_W": 0.232,
+   "law_rms_frozen_W": 0.595,
+   "layout_contrast_SE": 73.9,
+   "layout_contrast_W": 3.86,
+   "layout_contrast_se_W": 0.052,
+   "pure_additivity_W": 6.062,
+   "q128_choice": [
+    1.01,
+    1.57
+   ],
+   "rules": "P1-P8: PASS PASS PASS PASS FAIL PASS PASS PASS",
+   "step_split_W": {
+    "lane un-gating": 8.57,
+    "operand flips": 16.09,
+    "total": 24.66
+   },
+   "withdrawn": "the first version read the fitted W_inf as a 16.90 +- 0.20 W cap on operand-driven switching with random data at 95% of it. W_inf is the curve's curvature, not a bound: E70's own top rungs and both random-operand steps exceed it, and nrd_a + nrd_b is 107% of the withdrawn cap. No ceiling goes into this chain"
+  },
+  "temperature_term": {
+   "all_ones_measured_mhz": 737.9,
+   "chain_pred_mhz": 775.0,
+   "e64_cap_informative_rms_mhz": 30.8,
+   "e64_cap_pred_mhz": 780.6,
+   "e64_cap_rms_mhz": 23.0,
+   "fp16_miss_mhz": [
+    7.8,
+    21.3
+   ],
+   "informative_rms_mhz": [
+    6.5,
+    12.9
+   ],
+   "jointly_unidentified": "gamma, the voltage exponent of the leakage law, and the thermal trip (66.0 C is E64's R3 reading, 65.5 C its registered sustained one). Eight labelled pairings are published and no default is asserted; the miss crosses zero at two of them and is still +18.5 MHz at the least-assumption corner",
+   "nine_cell_rms_mhz": [
+    4.8,
+    9.6
+   ],
+   "t1_miss_mhz": [
+    -7.8,
+    18.5
+   ],
+   "tau_th_s": 14.0
+  },
+  "voltage": {
+   "clock_scaling_excluded_SE": 3.4,
+   "clock_scaling_exponent": 3.637,
+   "does_not_say": "that the exponent is 2. No reduction has 2 as its point estimate: the board family brackets it from above (2.43-2.92) and the rail family from below (1.60-1.72), and the registered +-10% test fails at three of four matched slopes once both sides are reduced at the same leakage slope",
+   "exponent_board": [
+    2.43,
+    2.92
+   ],
+   "exponent_rail": [
+    1.6,
+    1.72
+   ],
+   "fJ_600": 79.18,
+   "fJ_600_se": 3.09,
+   "fJ_800": 121.27,
+   "fJ_800_se": 0.61,
+   "matched_slope_misses_pct": [
+    -10.2,
+    -12.9,
+    -15.0
+   ],
+   "says": "the price follows the voltage, not the clock",
+   "second_card_fJ": [
+    113.22,
+    116.75
+   ],
+   "second_card_ratio": 0.97
+  }
+ },
  "rail": {
   "lb_ratio": 0.745470219677027,
   "lq_ratio": 0.7496616586435509,
@@ -923,29 +1173,181 @@
   "transistor_share": 0.21713553170971242
  },
  "waterfall": {
-  "accounted_pJ": 1.9464686623611729,
+  "accounted_band_pJ": [
+   3.966450919580331,
+   4.189519714460943
+  ],
+  "accounted_pJ": 4.189519714460943,
   "board_pJ": 5.783,
-  "rail_pJ": 4.33725,
+  "board_to_rail": {
+   "board_to_rail_pJ": 1.0093333009266647,
+   "fit_residual_pJ": 0.14215847245264304,
+   "minion_over_board": 0.8254654502980002,
+   "minion_pJ": 4.773666699073336,
+   "noc_rail_pJ": -0.01893323208484532,
+   "regulators_and_instep_logic_pJ": 0.8752176805691186,
+   "sram_rail_pJ": 0.010890379989747411
+  },
+  "closure_vs_board": [
+   0.8372243818345927,
+   0.875797578251783
+  ],
+  "closure_vs_board_band": [
+   0.779254897438624,
+   0.9413553368638928
+  ],
+  "closure_vs_rail": [
+   0.8309023586314266,
+   0.8776313845443404
+  ],
+  "closure_vs_rail_band": [
+   0.7366437125337426,
+   0.9911112112618289
+  ],
+  "glitch_energy_ratio": 1.330849814312535,
+  "glitch_moved_pJ": 0.7808129297191566,
+  "glitch_toggle_ratio": 1.5716443594555902,
+  "label": "Q129, 28 October 2026",
+  "leakage": {
+   "aifoundry2_58_62_remeasured_median": 0.3451909968641096,
+   "aifoundry2_58_62_spread": {
+    "n_passes": 18,
+    "per_pass_range": [
+     0.3183016489864491,
+     0.3612628789945065
+    ],
+    "sd": 0.0112
+   },
+   "aifoundry3_58_62_remeasured_median": 0.38026538882264205,
+   "aifoundry3_58_62_se": 0.0036,
+   "it_is_not_a_card_constant": "a slope rises about 0.009 W/C per C of die temperature on aifoundry2 and about 0.011 on aifoundry3 over 51-65 C, so a correction quoted without its band is ambiguous at the 20-30% level -- larger than the 10% card-to-card difference it is usually invoked for. About three fifths of the gap between E66's 0.2936 and E71's 0.3803 is the temperature band, not the card (69.5% measured the other way round).",
+   "measured_idle_slopes_W_per_C": {
+    "aifoundry2, 51-58 C (E66)": 0.2936,
+    "aifoundry2, 58-62 C (E71 re-fit)": 0.3452,
+    "aifoundry3, 52-58 C (E71)": 0.32,
+    "aifoundry3, 58-62 C (E71)": 0.3803
+   },
+   "note": "not a row. 'Over idle' is already leakage-corrected: E38's registered metric subtracts leak x (t_early - t_launch) from each window, so the window's own die heating is out of the board figure before anything here divides it. What Q129 adds is the slope's band.",
+   "rail_at_each_slope_pJ": {
+    "e66_idle": 4.689706946599207,
+    "measured_within_run": 4.722679165381701,
+    "registered": 4.773666699073336
+   },
+   "registered_estimator_W_per_C": 1.508,
+   "sensitivity_note": "E38's registered reduction uses 0.81 / 0.55 W/C; this ledger's own within-run board slope is 0.725 +- 0.019 / 0.358 +- 0.093; E66 measured aifoundry2's IDLE slope at 0.294 W/C over 51-58 C and aifoundry3's idle slope has never been measured, so that row keeps 0.55 for aifoundry3 and is a one-card sensitivity",
+   "slopes_used_W_per_C": {
+    "e66_idle": {
+     "aifoundry2": 0.294,
+     "aifoundry3": 0.55
+    },
+    "measured_within_run": {
+     "aifoundry2": 0.7252899764380797,
+     "aifoundry3": 0.358469771559839
+    },
+    "registered": {
+     "aifoundry2": 0.81,
+     "aifoundry3": 0.55
+    }
+   },
+   "spread_pJ": 0.08395975247412846
+  },
+  "rail_band_pJ": [
+   4.549175265442165,
+   4.951147976165577
+  ],
+  "rail_pJ": 4.773666699073336,
+  "reconciliation": {
+   "measured_zero_delay_pJ": 1.924603311049266,
+   "q128_bottom_up_pJ": 1.9464686623611729,
+   "routed_wire_delta_pJ": -0.1371,
+   "they_agree_to_pJ": 0.014551060246820402,
+   "unpriced_capacitance_delta_pJ": 0.10068358844127268,
+   "walked_forward_pJ": 1.9100522508024456
+  },
+  "regulators_pJ": 0.8752176805691186,
   "steps": [
    {
-    "k": "transistor gates",
-    "pJ": 0.3060795383933351
+    "band_pJ": [
+     2.386197347654628,
+     3.0246351338822164
+    ],
+    "k": "the lane's arithmetic, with routed wires and measured glitches",
+    "pJ": 2.7054162407684226,
+    "short": "the lane's arithmetic"
    },
    {
-    "k": "wire inside the cells",
-    "pJ": 0.620140830633533
+    "k": "the lane's transport, less its own clock nets",
+    "pJ": 1.2610346788119087,
+    "short": "its transport"
    },
    {
-    "k": "wire between the cells",
-    "pJ": 0.589642464640423
-   },
-   {
-    "k": "the cells' own internal energy",
-    "pJ": 0.43060582869388164
+    "k": "the transport's clock nets, if they are gated at idle",
+    "pJ": 0.2230687948806116,
+    "short": "its clock nets, if gated"
    }
   ],
-  "unaccounted_pJ": 3.8365313376388275,
-  "why": "the bottom-up figure is a floor TWICE over (corrected Tue 27 Oct 2026 by Q129(a); it said three times): half the design's capacitance is unpriced (CTS and repair_design made those nets after the netlist was simulated), and the ledger covers one lane's arithmetic while the board pays for the register file's read ports, the operand bus, the result path and leakage as well. The third reason once given here -- that the between-cell wire has no coupling term -- is WITHDRAWN: the global-route Steiner estimate carries coupling already and runs 20-23% above the extraction, so extracting the wire moves 0.137 pJ OUT of 'accounted' and widens the gap (1.9465 -> 1.8094 pJ bottom-up, closure against the board 33.7% -> 31.3%). Of the two reasons that remain, the unpriced half got slightly worse on a routed design, 43.6% of the farads priced against 50.5%. See docs/reports/data/2026-10-27-q129-routed-netlist/.",
+  "transport": {
+   "card_zeros_bound_pJ": 0.27,
+   "clock_net_pJ": 0.22306879488061152,
+   "high_pJ": 1.4841034736925203,
+   "low_pJ": 1.2610346788119087,
+   "moves_with_the_operand_words_pJ": 0.5176300528685915,
+   "operand_bus_and_result_path_pJ": 0.13490960379155922,
+   "register_file_model_pJ": 0.48149762527924844,
+   "register_file_model_zeros_pJ": 0.3050238490628407,
+   "switching_pJ": 1.0328635510556332,
+   "the_ceiling_is_violated": "one lane's transport model costs 0.654 pJ in the zeros stimulus where the WHOLE BOARD costs 0.27 pJ per multiply-add over idle (E38, per card 0.163 / 0.403 / 0.251), so the 0.4815 pJ register-file row over-prices and a true accounting sits BELOW the bottom of every range here.",
+   "why_a_range": "the 0.223 pJ its own clock nets cost: whether the lane's register-file clock branches are gated when the card idles decides whether that third of the zero-operand floor is inside the idle E38 subtracts. Unmeasured on silicon.",
+   "why_no_glitch_factor": "that netlist has no detailed route, no SDF and 37.0% of its capacitance priced, so no glitch factor was measured on it. x1.33 there would be an assumption: it would put the ledger at 4.38-4.68 pJ, 92-98% of the rail, on top of a register-file row the card's own zeros measurement already contradicts.",
+   "zero_operand_clock_pJ": 0.22306879488061152,
+   "zero_operand_floor_pJ": 0.6540487692400841,
+   "zero_operand_share_of_transport": 0.6332383097182748,
+   "zero_operand_signal_pJ": 0.4309799743594726
+  },
+  "unaccounted_band_pJ": [
+   0.584146984612393,
+   0.8072157794930046
+  ],
+  "unaccounted_of": "the minion rail",
+  "unaccounted_of_pJ": 4.773666699073336,
+  "unaccounted_pJ": 0.584146984612393,
+  "unaccounted_vs_board_band_pJ": [
+   0.3391420869161079,
+   1.2765689281124382
+  ],
+  "unaccounted_vs_board_pJ": [
+   0.7182626049699391,
+   0.9413313998505507
+  ],
+  "v1": {
+   "accounted_pJ": 1.9464686623611729,
+   "board_pJ": 5.783,
+   "label": "Q128, 27 October 2026",
+   "rail_pJ": 4.33725,
+   "steps": [
+    {
+     "k": "transistor gates",
+     "pJ": 0.3060795383933351
+    },
+    {
+     "k": "wire inside the cells",
+     "pJ": 0.620140830633533
+    },
+    {
+     "k": "wire between the cells",
+     "pJ": 0.589642464640423
+    },
+    {
+     "k": "the cells' own internal energy",
+     "pJ": 0.43060582869388164
+    }
+   ],
+   "unaccounted_pJ": 3.8365313376388275,
+   "why": "the bottom-up figure is a floor TWICE over (corrected Tue 27 Oct 2026 by Q129(a); it said three times): half the design's capacitance is unpriced (CTS and repair_design made those nets after the netlist was simulated), and the ledger covers one lane's arithmetic while the board pays for the register file's read ports, the operand bus, the result path and leakage as well. The third reason once given here -- that the between-cell wire has no coupling term -- is WITHDRAWN: the global-route Steiner estimate carries coupling already and runs 20-23% above the extraction, so extracting the wire moves 0.137 pJ OUT of 'accounted' and widens the gap (1.9465 -> 1.8094 pJ bottom-up, closure against the board 33.7% -> 31.3%). Of the two reasons that remain, the unpriced half got slightly worse on a routed design, 43.6% of the farads priced against 50.5%. See docs/reports/data/2026-10-27-q129-routed-netlist/.",
+   "zeros_pJ": 0.27
+  },
+  "version": "q129",
+  "why": "0.58-0.81 pJ against the rail and 0.72-0.94 pJ against the board on the central footing at Miller k=1 (0.04-1.30 and 0.34-1.28 over the whole band), where Q128 had 2.39 and 3.84. Two warnings travel with it. First, the largest single row added here, the lane's transport, carries a register-file model the card's own zeros measurement already contradicts, so the remainder is larger than these numbers say by whatever that model over-prices -- E74 measured a bound on the cell bit (e_cell < 2.73 fJ, 95%) but not the array's own per-MAC energy. Second, the transport netlist is itself a floor on the three axes the arithmetic netlist has now cleared: no detailed route, no glitch measurement, 37.0% of its capacitance priced.",
   "zeros_pJ": 0.27
  }
 }

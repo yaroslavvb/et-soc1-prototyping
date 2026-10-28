@@ -57,11 +57,26 @@ details>summary{cursor:pointer;font-weight:600}
 @media (max-width:520px){.lv dl{grid-template-columns:1fr}.lv dt{margin-top:6px}}
 /* the transposed prediction table has to fit a phone without scrolling: that is where its one red cell is */
 @media (max-width:620px){#predtab{font-size:.85rem}#predtab th,#predtab td{padding:6px 5px}}
+/* and so does the two-version ledger of 28 Oct 2026: three columns of numbers beside a long row label.
+   table.t gives .n cells white-space:nowrap, which a sub-line inside one cannot survive on a phone. */
+#ledgertab td.n .sub,#ledgertab th.n .sub{display:block;white-space:normal}
+#ledgertab td.n{white-space:normal}
+@media (max-width:620px){#ledgertab{font-size:.82rem}#ledgertab th,#ledgertab td{padding:5px 4px}}
 </style>
 
 <h1 data-ss-id="title">From matmul speed to one transistor switch</h1>
-<p class="byline">Tuesday 27 October 2026 · the ET-SoC-1 at AI Foundry · every number below is a committed
-measurement or a model built on one, in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">the repository</a></p>
+<p class="byline">Tuesday 27 October 2026 · <b>updated Wednesday 28 October 2026 with Q129</b> · the
+ET-SoC-1 at AI Foundry · every number below is a committed measurement or a model built on one, in
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping">the repository</a></p>
+
+<p class="note" data-ss-id="updated-28-oct-2026-q129"><b class="k">What the 28 October update changed.</b>
+Thirteen experiments and desk reductions ran against the five open items at the foot of this page. The two
+that move the picture most are both in §3: the board-to-rail step is now <em>measured</em> instead of carried
+across from a per-bit ratio, and the bottom-up count has routed wires, all of the design's capacitance, a
+measured glitch factor and — for the first time — the lane's transport. The remainder falls from
+<span id="q-wf-unacc-v1" data-q="wf-unacc-v1"></span> to <span id="q-wf-unacc" data-q="wf-unacc"></span>. Two of the three reasons that count was a
+floor are closed; the honest caveat is that the largest row now in it is a model the card's own zeros
+measurement already contradicts. §5 carries each open item's new status.</p>
 
 <p class="lede" data-ss-id="lede">Horace He's observation is that a matrix multiply runs faster on zeros than on random numbers,
 although it does exactly the same arithmetic. On this card it does: 15% faster in the first seconds, 33% faster
@@ -106,6 +121,16 @@ RTL finds <b id="a-tog"></b> physical net toggles per random multiply-add; the g
 <b id="a-tr"></b> — about <b id="a-el"></b> electrons across the 0.517 V rail, which is
 <b id="a-land"></b> times Landauer's floor at the die's own temperature.</p>
 
+<p class="note" data-ss-id="q129-top-cap-moved"><b class="k">Since 28 October the top rung is a controlled
+result.</b> The governor's cap had never been moved when this page was written; §1 and §2 read the cause from
+the governor's own log. E69 moved it, on aifoundry2 card 0, under the firmware field manual's gates:
+<span id="q-knob" data-q="knob"></span>. All-ones operands, which throw no power step at the card's own 65&nbsp;W cap, throttle
+to <span id="q-knob-ones" data-q="knob-ones"></span>. And the <em>sustained</em> clamp is the thermal threshold, not the power cap:
+the same work holds <span id="q-knob-thr" data-q="knob-thr"></span>. The cause is separately switchable — lower the cap to
+50&nbsp;W and the clock stays at <span id="q-knob-flip" data-q="knob-flip"></span>. Three of E69's six registered rules failed as
+written and both sustained random cells aborted on an 85&nbsp;W board bound, so this closes the cap and the
+raised threshold, and nothing about random data under a raised threshold.</p>
+
 <h2 id="chain" data-ss-id="chain">2. The chain, step by step</h2>
 
 <p>Each rung below carries its number, how it was obtained, where to check it, how far to trust it, and what is
@@ -148,9 +173,17 @@ from one multiply-add at the board.</p>
     <dt>Source</dt><dd>E64, as above. The cap is the TDP the card reads back, not a fitted number.</dd>
     <dt>Confidence</dt><dd><span class="conf m">measured</span> for the mechanism,
       <span class="conf d">modelled</span> for the cap axis.</dd>
-    <dt>Open</dt><dd><b>The cap has never been moved.</b> Every number here reads the governor at its one
-      factory setting; the table of clocks under caps of 35–85&nbsp;W is an extrapolation from that single
-      point. The test that would make this causal is <a href="#knob">in §5</a> and waits on the card's owner.</dd>
+    <dt>Measured since</dt><dd><b>The cap was moved on 28 October (E69), and the response is the
+      predicted one:</b> <span id="q-knob-2" data-q="knob"></span>, from a table extrapolated from 65&nbsp;W measurements
+      alone. Random operands read <span id="q-knob-randn" data-q="knob-randn"></span>. A second desk result, model E64-T1, adds
+      the temperature term the power curve was missing: it takes the all-ones sustained miss
+      <span id="q-temp" data-q="temp"></span>. Neither closes the item — see <a href="#knob">§5</a>.</dd>
+    <dt>Open</dt><dd>Three of E69's six registered rules failed as written, both sustained random cells
+      aborted on an 85&nbsp;W board bound, and E69's own control reads 25.5&nbsp;MHz and 2.5&nbsp;W away from
+      E64's four days earlier at identical settings — a thermal-path change, so no cross-session comparison is
+      tighter than that. In E64-T1 the voltage exponent and the thermal trip are <em>jointly</em>
+      unidentified: the miss crosses zero at two of eight labelled pairings and is still +18.5&nbsp;MHz at the
+      least-assumption corner.</dd>
   </dl>
 </div>
 
@@ -188,11 +221,24 @@ from one multiply-add at the board.</p>
       <span id="lv3-pair"></span> of each step; and the camera half of the Hamming ladder put 84–86% of every
       rung's board step on the minion rail.</dd>
     <dt>Source</dt><dd><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-10-20-bitflip-ladder">E60</a> ·
-      <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-camera">the camera ladder (E63)</a></dd>
-    <dt>Confidence</dt><dd><span class="conf d">a range, not a number.</span> Everything below this rung
-      inherits a 0.70–0.89 uncertainty when carried up to the board.</dd>
-    <dt>Open</dt><dd>The regulators have never been measured, and the share has never been read at the
-      launch temperature rather than a settled one.</dd>
+      <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-bitflip-camera">the camera ladder (E63)</a> ·
+      <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-e73-camera-frequencies/README.md">E73, the camera's heat path</a></dd>
+    <dt>Measured since</dt><dd><b>28 October: the rail is measured for this multiply-add rather than
+      carried across.</b> Q129's rail ledger reduces E38's own telemetry on two cards and gets
+      <span id="q-rail" data-q="rail"></span>. The whole band sits inside the 0.70–0.89 spread below, so nothing here is
+      contradicted — 0.75 was at the bottom of what the multiply-add shows. Because the rail is bigger the
+      step beneath it <em>shrinks</em>, to <span id="q-rail-step" data-q="rail-step"></span>. The SRAM and NoC rails are
+      withdrawn as per-MAC switching energies: their whole window delta is their own leakage rise.</dd>
+    <dt>Confidence</dt><dd><span class="conf m">measured</span> for the rail, at the launch
+      <em>window</em> and corrected to the launch temperature — by correction, not by measurement.
+      <span class="conf d">Still a range</span>: the choice between three leakage footings is the largest
+      single uncertainty in the step, worth 0.04 in the ratio.</dd>
+    <dt>Open</dt><dd>The regulators have still never been measured directly: the 0.875&nbsp;pJ row above is a
+      fit's coefficient, and splitting it from off-rail logic needs E77, which needs a governor move. One of
+      three cards has no usable rail data at all, so the three-card ledger is a two-card ledger. And a
+      reduction that corrects <em>board</em> power to a launch temperature and then applies a fixed rail ratio
+      double-counts, because a third or more of the within-run rise is off the metered rails — 0.23&nbsp;pJ on
+      a 5.8&nbsp;pJ multiply-add.</dd>
   </dl>
 </div>
 
@@ -230,8 +276,23 @@ from one multiply-add at the board.</p>
     <dt>Confidence</dt><dd><span class="conf m">measured</span>, on three experiments, two cards and three
       operand designs, agreeing to about 10%. The largest single uncertainty is not the card: it is the leakage
       slope used to correct each run for die temperature, which moves the price by 15%.</dd>
-    <dt>Open</dt><dd>Which bit flips matters enormously — see the chart — and the single-bit prices do
-      <em>not</em> add up to the price of flipping many at once.</dd>
+    <dt>Measured since</dt><dd><b>28 October, three results.</b> E70's ladder settles why the single-bit
+      prices do not add, on the B side: <span id="q-sat" data-q="sat"></span>. One saturating curve in the additive sum
+      fits both layouts to <span id="q-sat-law" data-q="sat-law"></span>, and the operand carry-over this chain had to choose
+      is measured at <span id="q-carry" data-q="carry"></span>. E72 ran the <em>same card</em> at 600&nbsp;MHz:
+      <span id="q-volt" data-q="volt"></span>, so the price follows the voltage and not the clock — the clock-scaling
+      exponent <span id="q-volt-clock" data-q="volt-clock"></span>. And E71 measured the idle leakage slope on the card E65 and
+      E67 ran on, in the temperature band they ran in: <span id="q-leak" data-q="leak"></span>. Re-priced at it, those
+      experiments' positions are cheaper by <span id="q-leak-prices" data-q="leak-prices"></span>.</dd>
+    <dt>Open</dt><dd>Which bit flips matters enormously — see the chart. Three things are newly open rather
+      than closed. <b>The A side's shape:</b> E70 measured its multi-bit ladder but the saturating form is
+      <em>rejected</em> there — the fitted asymptote lies 28.6 standard errors below its own top rung and the
+      increments accelerate where saturation requires decay — so no law describes it yet. <b>The voltage
+      exponent</b> is bracketed <span id="q-volt-n" data-q="volt-n"></span>. And <b>a leakage slope is not a card
+      constant:</b> it rises with die temperature, so about <span id="q-leak-band" data-q="leak-band"></span> of the gap between
+      the two cards' published figures is the temperature band rather than the card, and a correction quoted
+      without its band is ambiguous at the 20–30% level. One registered rule of the re-pricing failed: of 166
+      positions, 164 fall, one does not move and one rises.</dd>
   </dl>
 </div>
 
@@ -251,9 +312,12 @@ from one multiply-add at the board.</p>
   <span id="sat-meas"></span> — <span id="sat-x"></span> too much. Within one word the measured cost per
   flipped bit is almost flat (<span id="sat-flat"></span>) while the single-bit list, applied to the same
   masks, would predict <span id="sat-pred"></span>. Something saturates. A free-exponent power law fits the
-  ladder best (exponent <span id="sat-beta"></span>, indistinguishable from linear), and the experiment that
-  would separate <em>how many</em> bits flip from <em>which</em> ones is written, costs about 20 minutes of
-  card time, and has not been run.</p>
+  ladder best (exponent <span id="sat-beta"></span>, indistinguishable from linear).
+  <b>Answered 28 October:</b> the experiment that separates <em>how many</em> bits flip from <em>which</em>
+  ones ran, on aifoundry3, in 34.7 card-minutes. It is <span id="q-sat-2" data-q="sat"></span> — the same number of bits in
+  two layouts cost different amounts, which a “how many” law cannot produce. On the B side one saturating
+  curve in the additive sum then fits fifteen rungs to <span id="q-sat-law-2" data-q="sat-law"></span>. On the A side that form
+  is rejected and its shape is open.</p>
 </div>
 
 <div class="lv" id="lv6" data-ss-id="lv6">
@@ -270,8 +334,18 @@ from one multiply-add at the board.</p>
     <dt>Confidence</dt><dd><span class="conf d">a stand-in, simulated.</span> It is not this chip's netlist; it
       is the same logic built with an open kit at a comparable node. Two independent routes to the number of
       physical wires agree to 14%.</dd>
-    <dt>Open</dt><dd>Detailed routing never closed in the open flow, so there is no extracted parasitic file
-      and no glitch measurement; both would raise the count.</dd>
+    <dt>Measured since</dt><dd><b>Both closed on 28 October.</b> Detailed routing closes on both open
+      netlists — 0 DRC violations, 193&nbsp;s each — and the extraction found 251,162 coupling capacitors.
+      And the glitch factor is measured by simulating the routed netlist with and without its extracted
+      timing: the whole unit makes <span id="q-glitch" data-q="glitch"></span>. The Wallace tree glitches hardest (×2.33 in
+      energy) and the clock tree, measured, does not glitch at all. The factor is strongly
+      activity-dependent — ×1.00 with the operands held still, ×1.23 at eight flipped bits, ×1.57 at random —
+      so no single number transfers to a load whose activity is not random's.</dd>
+    <dt>Open</dt><dd>The glitch measurement is a floor on three further axes, each named in its data
+      directory: the delays are characterised at 0.700&nbsp;V while the energy is priced at the 0.517&nbsp;V
+      rail, the design still misses its timing constraint by about 2×, and 4.6% of the “timed” netlist ran at
+      zero delay in the simulator too. A second instrument reads ×1.76 where this one reads ×1.55 on the
+      nearest matched pair, and the 13.5% between them is not attributed.</dd>
   </dl>
 </div>
 
@@ -291,10 +365,16 @@ from one multiply-add at the board.</p>
       term, so the transistor share was a ceiling. It is the other way round. Detailed routing now closes,
       and the global-route estimate used here was never coupling-free — it runs <b>20–23% above</b> the
       extraction — so <b>the transistor share is a floor and the wire share a ceiling</b>: on this split the
-      signal-net transistor share goes from 21.7% to about 23.4% when the extracted wire is used. Half the
-      design's capacitance is still unpriced: the clock tree and the timing
-      repair add nets after the point the simulation saw. A private archive cross-check of the same
-      quantities was run on 26 October 2026; it is not reported here.</dd>
+      signal-net transistor share goes from 21.7% to about 23.4% when the extracted wire is used.
+      <b>Closed 28 October:</b> the design's unpriced capacitance is now priced in full, and it was not what
+      the earlier note said it was. 39.9% of those farads were idle nets the simulation already named, 3.2%
+      were tied constants, 4.0% were buses lost to the simulator's own renumbering, and only 4.9% were ever
+      made by the clock tree or the timing repair — 236 of those 252 nets already priced. The whole of it is
+      worth +0.088&nbsp;pJ per multiply-add (+0.101 with the cells' internal energy), not a doubling. The
+      same pass found a live bug in the pricing tool: it joins the extractor's net names to the simulator's
+      without remapping a vector whose declared least-significant bit is not zero, so it charges the wrong
+      physical bit on the overlapping indices. A private archive cross-check of the same quantities was run
+      on 26 October 2026 and again on <span id="q-archive-when" data-q="archive-when"></span>; <span id="q-archive" data-q="archive"></span></dd>
   </dl>
 </div>
 
@@ -337,8 +417,19 @@ from one multiply-add at the board.</p>
     <dt>Confidence</dt><dd><span class="conf m">arithmetic</span>, once the rungs above are granted. The one
       trap is units: a rise and a toggle differ by exactly two, and an electron count taken from a board figure
       is a convention, not a measurement, because board power is not delivered at the die's rail.</dd>
-    <dt>Open</dt><dd>Nothing in this work touches phonons: how the switch's energy actually becomes lattice
-      heat is a level below anything measured here.</dd>
+    <dt>Measured since</dt><dd><b>28 October: the step below this one is written down.</b> A desk note
+      follows the switch's energy into the lattice. The rung the project's own plan priced at “about
+      25,000&nbsp;×&nbsp;Landauer” is sourced and stands: it is an ASAP7 INVx1's liberty input pin, 0.620&nbsp;fF,
+      worth <span id="q-atoms" data-q="atoms"></span> — a floor temperature worth 6.6% on its own. What needed correcting is a
+      <em>word</em>: INVx1 is a 3× cell, so if a transistor-only number is wanted beside it the repo has two,
+      <span id="q-atoms-rungs" data-q="atoms-rungs"></span>. The energy becomes <span id="q-atoms-phonons" data-q="atoms-phonons"></span>, and the new
+      claim worth carrying is where it is born: about <span id="q-atoms-heat" data-q="atoms-heat"></span>. The wire decides how
+      much heat a flip makes; the transistor decides where it is born — which is why the heat movies see heat
+      follow the logic rather than the wiring.</dd>
+    <dt>Open</dt><dd>No measurement of <em>this</em> chip's thermal path below the board: every self-heating
+      figure is an open-literature 7&nbsp;nm-class value and the narrow fin's conductivity is a simulation
+      input. Every length below about a micrometre uses a diffusive model, which under-predicts a sub-micron
+      hot spot.</dd>
   </dl>
 </div>
 
@@ -352,27 +443,87 @@ from one multiply-add at the board.</p>
 <h2 id="closure" data-ss-id="closure">3. Where a random multiply-add's energy goes</h2>
 
 <p>The honest way to present a chain like this is to show what it fails to account for. Below is one random
-fp32 multiply-add as the card pays for it, against what the bottom-up count can name.</p>
+fp32 multiply-add as the card pays for it, against what the bottom-up count can name. <b>Rebuilt 28 October
+2026</b> from seven measurements that did not exist when this page was written; the version this page carried
+until then is in the same data block under <code>waterfall.v1</code>, and the 27 October page rebuilds
+unchanged from <code>data-2026-10-27-q128.json</code>.</p>
 
 <figure data-ss-id="bottom-up-count-names-third-card">
-  <h3>The bottom-up count names a third of what the card pays</h3>
+  <h3>The bottom-up count now names five sixths of what reaches the rail</h3>
   <div class="chartbox" id="waterfall"></div>
-  <figcaption>One random fp32 multiply-add, energy over idle. Left: what the card pays at the board (E38) and
-  what reaches the minion rail. Right: what the placed netlist can name, split by what the energy charges, with
-  the remainder shown.</figcaption>
+  <figcaption>One random fp32 multiply-add, energy over idle, as of 28 October 2026. Left: what the card pays
+  at the board (E38) and the <em>measured</em> minion rail. Right: the lane's arithmetic on the routed open
+  netlist with every farad priced and the glitch factor measured, plus the lane's transport — its register
+  files, operand bus, result path and control — with the remainder against the rail. The third segment is the
+  transport's own clock nets, which count only if the lane's register-file clock branches are gated when the
+  card idles: that is unmeasured, and it is the whole width of the range. On 27 October this chart read
+  1.95&nbsp;pJ counted and 3.84&nbsp;pJ unaccounted.</figcaption>
 </figure>
 
-<div class="note" data-ss-id="why-remainder-expected-would-shrink-bottom-2">
-  <p data-ss-id="why-remainder-expected-would-shrink-bottom"><b class="k">Why the remainder is expected, and what would shrink it.</b> The bottom-up figure is a floor
-  twice over — three, until 27 October 2026. <b>One</b>, half the design's capacitance is unpriced — <span id="cl-cap"></span> of the
-  farads sit on nets that the clock-tree build and the timing repair created after the netlist was simulated.
-  <b>Two</b>, the ledger covers one lane's arithmetic, while the board also pays for the
-  register file's read ports, the operand bus, the result path and leakage. <b>The third reason is
-  withdrawn:</b> this page said the between-cell wire is a global-route estimate with no coupling term,
-  because detailed routing never closed. Routing has now closed, and the estimate was never coupling-free —
-  it runs <b>20–23% above</b> the extraction, so extracting the wire moves <b>0.137 pJ out of
-  “accounted”</b> and widens this remainder to 3.97 pJ. The remainder is not a measurement
-  error; it is the parts of the chip this count does not yet reach.</p>
+<div class="tblwrap" data-ss-id="ledger-28-oct-against-27-oct">
+<table class="t" id="ledgertab" data-ss-id="ledger-two-versions">
+  <thead><tr><th>One random fp32 multiply-add, over idle</th><th class="n">27 Oct<br><span class="sub">Q128</span></th>
+    <th class="n">28 Oct<br><span class="sub">Q129</span></th></tr></thead>
+  <tbody>
+    <tr><td>at the board (E38, three cards)</td><td class="n">5.78 pJ</td><td class="n">5.78 pJ</td></tr>
+    <tr><td>at the minion rail</td><td class="n">4.34 pJ <span class="sub">from E60</span></td><td class="n"><b>4.77 pJ</b> <span class="sub">measured</span><br><span class="sub">4.55–4.95</span></td></tr>
+    <tr><td>its arithmetic, bottom up</td><td class="n">1.95 pJ</td><td class="n"><b>2.71 pJ</b><br><span class="sub">2.39–3.03</span></td></tr>
+    <tr><td>its transport</td><td class="n">not counted</td><td class="n"><b>1.26–1.48 pJ</b></td></tr>
+    <tr><td>accounted, on the rail</td><td class="n">1.95 pJ</td><td class="n"><b><span id="q-wf-acc" data-q="wf-acc"></span></b><br><span class="sub">3.65–4.51</span></td></tr>
+    <tr><td>not accounted, vs the board</td><td class="n">3.84 pJ</td><td class="n"><b><span id="q-wf-unacc-board" data-q="wf-unacc-board"></span></b><br><span class="sub"><span id="q-wf-unacc-band" data-q="wf-unacc-band"></span></span></td></tr>
+    <tr><td>closure</td><td class="n">34% of the board</td><td class="n"><b><span id="q-wf-closure-2" data-q="wf-closure-short"></span></b><br><span class="sub">of the board</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note" data-ss-id="what-moved-and-what-overlaps">
+  <p data-ss-id="three-wire-rows-are-one-row"><b class="k">Three of those rows are one row, and that matters
+  more than their size.</b> Three separate measurements priced the same capacitance at three stages of
+  knowledge, and only the last is in the ledger. Extracting the routed wire moved
+  <b>−0.137&nbsp;pJ</b> — the wrong way, because the global-route estimate it replaced was never
+  coupling-free and ran 20–23% <em>above</em> the extraction. Pricing the capacitance the simulation had never
+  seen moved <b>+0.101&nbsp;pJ</b>. Then the glitch measurement simulated the <em>routed</em> netlist against
+  the extracted per-net table, so it prices 100% of the extracted farads <em>and</em> every glitch in one
+  pass: both earlier deltas are already inside it, and adding them again would double-count. The two roads
+  agree, which is the check worth having: <span id="q-recon" data-q="recon"></span>. The glitch factor itself is the largest
+  single step any of these measurements has made, <span id="q-glitch-2" data-q="glitch"></span>.</p>
+
+  <p data-ss-id="transport-biggest-mover-weakest-row"><b class="k">The biggest mover is also the weakest
+  row.</b> The lane's transport — register files, operand bus, result path, control, on a second open netlist
+  Q128's ledger did not contain — is <span id="q-transport" data-q="transport"></span>, which is a third of Q128's entire gap,
+  more than the glitch factor, the routed wire and the unpriced capacitance together. Two cautions travel with
+  it and neither is small. <b>It is a range, and the range is its own clock nets:</b>
+  <span id="q-transport-zeros" data-q="transport-zeros"></span> survives zero operands, two thirds of that being the accumulator index
+  sweeping through a 64-entry read mux tree, which the card performs in the same order with zero data — so no
+  idle subtraction can contain it. Whether the clock third is inside the idle is unmeasured.
+  <b>And it over-prices:</b> in the zeros stimulus one lane's transport model costs
+  <span id="q-transport-bound" data-q="transport-bound"></span>. Its register-file array is a standard-cell latch array standing in for
+  a compiled macro, so this is a <em>violated</em> ceiling, and a true accounting sits below the bottom of
+  every range here by whatever that model over-prices. E74 (28 October) bounds the cell bit at
+  <span id="q-e74" data-q="e74"></span>, but not the array's own per-multiply-add energy.</p>
+
+  <p data-ss-id="clock-tree-and-leakage-already-inside"><b class="k">Two things are inside already, and are not
+  rows.</b> <b>The clock network</b> is inside the arithmetic row and always was — 0.496&nbsp;pJ of the
+  multiply-add, about a third of its switching energy — and the glitch pass measured its glitch factor at
+  exactly ×1.000. The transport's own clock nets are the one clock term that is <em>not</em> inside, which is
+  why they are drawn separately. <b>Leakage</b> is not a row either: “over idle” is already a
+  leakage-corrected quantity, because the registered reduction subtracts a slope times the window's own die
+  rise before anything divides it. What 28 October adds is that slope's band — re-footing the whole rail
+  ledger on three slopes gives <span id="q-leakrow" data-q="leakrow"></span>, smaller than every other band on this page.</p>
+</div>
+
+<div class="note" data-ss-id="why-remainder-expected-q129">
+  <p data-ss-id="what-is-left-and-what-would-close-it"><b class="k">What is left, and what would close it.</b>
+  <span id="q-wf-unacc-2" data-q="wf-unacc"></span>, where 27 October had 3.84 and 2.39. Of the three reasons the bottom-up count
+  was a floor, two are now closed: the routing and coupling one — which pointed the other way — and the
+  coverage one, at 100% of the extracted farads on a routed design. The third stands in a narrower form: the
+  <em>transport</em> netlist is itself a floor on exactly the three axes the arithmetic netlist has cleared,
+  with no detailed route, no glitch measurement and 37% of its capacitance priced. Four things would close the
+  rest, in the order they matter: the register-file array measured rather than modelled; a matched hart ladder
+  (E77) to split the regulators' 0.875&nbsp;pJ delivery loss from off-rail logic; a route, an SDF and a glitch
+  measurement on the transport netlist; and whether the lane's register files are clock-gated at idle, worth
+  0.223&nbsp;pJ. The remainder is still not a measurement error. It is the parts of the chip this count does
+  not yet reach — and there are fewer of them than there were.</p>
 </div>
 
 <h2 id="back" data-ss-id="back">4. Back up the ladder: predicting the speed gap from below</h2>
@@ -388,6 +539,12 @@ first-eight-second TFLOPS, whole-run TFLOPS, burst clocks, or mean clock after t
 estimate sits inside that spread; the model cannot tell the four readings apart. Two inputs set how sharp it
 can be: the cap (64&nbsp;W would give 1.159, 67&nbsp;W would give 1.127) and the drift of the price list
 between cards, which carried as a band gives <span id="pb-band"></span>.</p>
+
+<p class="note" data-ss-id="q129-cap-axis-is-now-measured"><b class="k">The cap axis is measured now, not
+extrapolated.</b> Both tiles above read the governor at one factory setting when this page was written. E69
+moved the cap on 28 October and the extrapolated table holds: <span id="q-knob-3" data-q="knob"></span>. All-ones operands
+throttle to <span id="q-knob-ones-2" data-q="knob-ones"></span>; random operands read <span id="q-knob-randn-2" data-q="knob-randn"></span>. So the burst
+prediction is no longer a prediction against a single point.</p>
 
 <p data-ss-id="sustained-gap-not-prediction-all-saying"><b>The sustained gap is not a prediction at all, and saying so is the honest result.</b> Once the thermal
 test takes over, zeros clamp to the top of the clock range and random data clamps to the bottom, so the
@@ -416,38 +573,87 @@ is still a real claim: random data reaches the governor's floor and zeros does n
 
 <p id="back-bottom" data-ss-id="back-bottom">Starting one rung lower — from the price of a single flipped bit rather than from measured
 board power — the same arithmetic gives a <em>range</em> for the burst gap, <span id="pb-bu"></span>, because
-the saturation law under step 5 is not yet pinned. Closing that range is the cheapest unrun experiment in this
-whole chain.</p>
+the saturation law under step 5 is not yet pinned. Closing that range was the cheapest unrun experiment in
+this whole chain.</p>
+
+<p class="note" data-ss-id="q129-saturation-ran-and-carry-over"><b class="k">It ran on 28 October, and half of
+that range closes.</b> E70's ladder gives the B side a law — <span id="q-sat-law-3" data-q="sat-law"></span> — and measures the
+operand carry-over this page had to choose between 1.01 and 1.57 at <span id="q-carry-2" data-q="carry"></span>, which pins the
+6% that choice was worth to roughly ±1.5–2%. The A side does <em>not</em> get a law: the same saturating form
+is rejected there, so the bottom-up burst range narrows but does not close, and the A side's shape is now an
+open question rather than a missing experiment. One claim E70 first made is withdrawn: its fitted asymptote is
+the curve's curvature, not a cap on operand-driven switching, because the experiment's own top rungs and both
+random-operand steps exceed it. No ceiling goes into this chain.</p>
+
+<p class="note" data-ss-id="q129-coda-camera-heat-path"><b class="k">The coda, and the camera.</b> Step 3's
+camera route reads heat at the back of the board, not at the die, and 28 October measured the path between
+them. It is a <span id="q-heat" data-q="heat"></span>. So the camera's 0.05&nbsp;Hz transfer is only
+0.1953 of the steady-state response, and any absolute figure in millikelvin per watt has to say which steady
+gain it means: <span id="q-heat-gain" data-q="heat-gain"></span>. The 17% between those two is itself a finding, and the fitted
+family is strained in two places at once. For the die's own thermal path the camera is the wrong instrument by
+two to five orders of magnitude — 0.25&nbsp;ms vertically and 11&nbsp;ms laterally, against a 0.05–0.15&nbsp;Hz
+lock-in — so a further camera frequency can only pin down the <em>board's</em> pole count, which is what this
+one did.</p>
 
 <h2 id="open" data-ss-id="open">5. What is still open</h2>
 
-<p>In the order that closing them would most change the picture.</p>
+<p>In the order that closing them would most change the picture. <b>Updated 28 October 2026:</b> every item
+below carries its new status — closed, narrowed, or still open — and the last block names what is newly open,
+including three things that are open <em>because</em> an experiment ran.</p>
 
-<div class="lv gap" id="knob" data-ss-id="knob">
-  <div class="step">Waits on the card's owner</div>
+<div class="lv" id="knob" data-ss-id="knob">
+  <div class="step">Narrowed · 28 October 2026</div>
   <h3>The knob test: move the cap and see whether the gap moves with it</h3>
-  <p data-ss-id="everything-1-2-says-governor-s">Everything in §1 and §2 says the governor's power cap causes the speed gap. That is read from the
-  governor's own log, which is strong evidence, but it is still observational: the cap has never actually been
-  changed. Raising the TDP, then the thermal threshold, on aifoundry2 and re-running the same four patterns
-  would turn the whole chain's top rung from a correlation into a controlled result — and it would test the
-  model's own extrapolated 35–85&nbsp;W cap table at the same time. It costs about half an hour of card time.
-  It is not an agent's call to make: the lab's rule is that nobody sets a TDP, threshold or clock on a shared
-  card. aifoundry3's governor is latched by a boot-time TDP of 0&nbsp;W and never steps, and aifoundry1's card 1
-  never reaches 800&nbsp;MHz, so it is aifoundry2 or nowhere.</p>
+  <p data-ss-id="everything-1-2-says-governor-s">Everything in §1 and §2 said the governor's power cap causes the speed gap, read from the governor's own
+  log: strong evidence, but observational. <b>The cap has now been moved</b> — on aifoundry2 card 0, with the
+  owner's authorization, under the firmware field manual's gates, in 11.4 card-minutes across five sessions
+  with 39 set-and-restore commands, every one read back. The extrapolated 35–85&nbsp;W table holds:
+  <span id="q-knob-4" data-q="knob"></span>. All-ones operands, which throw no power step at the card's own cap, throttle to
+  <span id="q-knob-ones-3" data-q="knob-ones"></span>, and the cause is separately switchable — at a 50&nbsp;W cap the clock stays
+  at <span id="q-knob-flip-2" data-q="knob-flip"></span>. The <em>sustained</em> clamp turns out to be the thermal threshold:
+  <span id="q-knob-thr-2" data-q="knob-thr"></span>.</p>
+  <p data-ss-id="knob-what-is-still-open"><b>Still open.</b> Three of six registered rules failed as written;
+  both sustained <em>random</em> cells aborted on an 85&nbsp;W board bound and were not retried, so nothing is
+  known about random data under a raised threshold; the lowered-threshold cell never reached equilibrium inside
+  its 76&nbsp;s; and the registered drift check against the four-day-old baseline failed by 25.5&nbsp;MHz and
+  2.5&nbsp;W at identical settings, which looks like a thermal-path change and bounds every cross-session
+  comparison. <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-e69-governor-knob/README.md">E69's data and change record</a></p>
 </div>
 
-<div class="lv weak" data-ss-id="cheap-written-not-run-saturation-ladder">
-  <div class="step">Cheap, written, not run</div>
+<div class="lv" data-ss-id="q129-temperature-term">
+  <div class="step">Narrowed · 28 October 2026</div>
+  <h3>The temperature term the governor's power curve was missing</h3>
+  <p data-ss-id="temperature-term-status">§4's one quantitative miss — all-ones operands sustained, predicted
+  775&nbsp;MHz against a measured 738 — is a missing temperature term in the static power, and a desk model
+  (E64-T1) now supplies one. It takes that miss <span id="q-temp-2" data-q="temp"></span>, a factor of two to five.
+  <b>It is not a closure.</b> The model's voltage exponent and its thermal trip are <em>jointly</em>
+  unidentified: the miss crosses zero at two of eight labelled pairings, is still +18.5&nbsp;MHz at the
+  least-assumption corner, and the lowest error in the whole surface is not the pairing the model's own first
+  write-up published. The fp16 all-ones cell never closes at any pairing. The sustained zeros-to-random ratio
+  is still a clamp — the term narrows its window but every candidate cap stays inside it, so that prediction
+  remains ordinal. <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-q129-governor-temperature/README.md">E64-T1</a></p>
+</div>
+
+<div class="lv" data-ss-id="cheap-written-not-run-saturation-ladder">
+  <div class="step">Closed on the B side · 28 October 2026</div>
   <h3 data-ss-id="saturation-ladder-many-bits-rather-than">The saturation ladder: how many bits, rather than which bits</h3>
-  <p>The single-bit price list over-predicts a whole random word by a factor of about two, and nothing in the
-  record separates the two candidate causes — that simultaneous flips share wires, or that the price of a flip
-  depends on what else is flipping. A ladder in the <em>number</em> of simultaneously flipping positions
-  (2, 3, 4, 6, 8, 12) on one base, against the existing rungs, settles it. The masks are built and committed.
-  About 20 minutes of card time.</p>
+  <p>The single-bit price list over-predicts a whole random word by about two, and the record did not separate
+  the two candidate causes. <b>It ran</b>, on aifoundry3, 34.7 card-minutes, 203 of 203 runs through every
+  gate. <b>The answer is <span id="q-sat-3" data-q="sat"></span></b> — the same number of flipped bits in two layouts cost
+  different amounts, which no law in “how many” can produce. On the B side one saturating curve in the
+  additive sum then fits fifteen rungs to <span id="q-sat-law-4" data-q="sat-law"></span>, so the price list is usable as the
+  bridge between the card and the netlist there, which it was not before. The operand carry-over is measured
+  at <span id="q-carry-3" data-q="carry"></span>, replacing a choice this page had to make.</p>
+  <p data-ss-id="saturation-a-side-open"><b>The A side is not closed, and is newly open.</b> Its multi-bit
+  ladder was measured, but the same saturating form is <em>rejected</em> there: the fitted asymptote lies 28.6
+  standard errors below the ladder's own top rung, the fit's error is 4.7× the B side's, and the increments
+  accelerate where saturation requires decay. So E70 measured the A-side ladder and did not find the law that
+  describes it. One of its eight registered rules failed, and one headline claim is withdrawn — the fitted
+  asymptote is a curvature, not a cap. <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-e70-saturation-ladder/README.md">E70</a></p>
 </div>
 
-<div class="lv weak" data-ss-id="measured-tonight-needs-more-pass-leakage">
-  <div class="step">Measured tonight, needs one more pass</div>
+<div class="lv" data-ss-id="measured-tonight-needs-more-pass-leakage">
+  <div class="step">Closed, and it taught something else · 28 October 2026</div>
   <h3 data-ss-id="leakage-slope-which-largest-uncertainty-every">The leakage slope, which is the largest uncertainty in every per-bit price</h3>
   <p>Each run's power is corrected for the die temperature it ran at, using a leakage slope. The registered
   estimator fits that slope inside each run's own two-second window, while the kernel is running, so it reads a
@@ -456,24 +662,96 @@ whole chain.</p>
   agreement with three other estimates. Every price on this page is therefore published as a band. Re-running
   the reduction with the measured slope — as a labelled sensitivity, not as a replacement for the registered
   scoring — is a morning's desk work.</p>
+  <p data-ss-id="leak-closed-28-oct"><b>Done, for both cards and in the band each experiment ran in.</b> E66
+  measured one card's idle slope; E71 measured the other's, on the card the 32-position price lists ran on and
+  over the temperature band they launched in: <span id="q-leak-2" data-q="leak"></span>. Every reduction on both cards has now
+  been re-run at its own card's measured slope as a labelled sensitivity. The prices are cheaper:
+  <span id="q-leak-prices-2" data-q="leak-prices"></span>. The registered 1.508&nbsp;W/°C estimator is 4–5× every measured idle slope
+  and stays refuted.</p>
+  <p data-ss-id="leak-new-caution"><b>What it taught, which is the part to carry:</b> a leakage slope is not a
+  card constant. It rises with die temperature — about 0.009&nbsp;W/°C per °C on one card, 0.011 on the other
+  over 51–65&nbsp;°C — so about <span id="q-leak-band-2" data-q="leak-band"></span> of the gap between the two cards' published
+  figures is the <em>temperature band</em>, not the card, and a slope quoted without its band is ambiguous at
+  the 20–30% level: larger than the 10% card-to-card difference it is usually invoked for. One registered rule
+  of the re-pricing failed and is reported as failed: of 166 re-priced positions 164 fall, one does not move,
+  and one rises 4.0% because its measurement window ran 0.09&nbsp;°C cooler than its own zero's. No published
+  verdict flips — 0 of 16. <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-e71-idle-slope-aifoundry3/README.md">E71</a> ·
+  <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-q129-leak-sensitivity/README.md">the re-reductions</a></p>
 </div>
 
-<div class="lv weak" data-ss-id="structural-three-things-keep-bottom-up">
-  <div class="step">Structural</div>
+<div class="lv" data-ss-id="structural-three-things-keep-bottom-up">
+  <div class="step">Two of three closed · 28 October 2026</div>
   <h3 data-ss-id="three-things-keep-bottom-up-count">The three things that keep the bottom-up count a floor</h3>
-  <p>Detailed routing has never closed in the open flow, so there is no extracted parasitic file, no coupling
-  capacitance and no measured glitch factor. Half the design's capacitance was created after the point the
-  gate-level simulation saw. And the A side of the multiplier has no multi-bit ladder, so the carry-over from
-  one operand to the other is a choice between two defensible numbers that moves the prediction by 6%.</p>
+  <p>Detailed routing had never closed in the open flow, so there was no extracted parasitic file, no coupling
+  capacitance and no measured glitch factor; half the design's capacitance was created after the point the
+  gate-level simulation saw; and the A side had no multi-bit ladder.</p>
+  <p data-ss-id="floor-reasons-status"><b>Routing closes</b> on both netlists, 0 DRC violations, 193&nbsp;s
+  each, with 251,162 coupling capacitors extracted — and it moved the count the <em>wrong</em> way, because
+  the estimate it replaced was never coupling-free. <b>The glitch factor is measured:</b>
+  <span id="q-glitch-3" data-q="glitch"></span>, the largest single step any of these measurements has made. <b>The capacitance
+  is priced in full</b>, and 43 of the 49.5 percentage points turned out to carry no switching energy at all.
+  <b>The A-side ladder ran</b> and pinned the carry-over, so the 6% choice is gone — but its shape is open, as
+  above. What keeps the count a floor now is one thing, narrower: the <em>transport</em> netlist in §3 has no
+  detailed route, no glitch measurement and 37% of its capacitance priced, exactly the three axes the
+  arithmetic netlist has cleared.
+  <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-q129-routed-netlist/README.md">the routed netlist</a> ·
+  <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-q129-glitch/README.md">the glitch factor</a> ·
+  <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-27-q129-unpriced-capacitance/README.md">the capacitance</a></p>
 </div>
 
-<div class="lv weak" data-ss-id="beyond-unit-memory-instructions-trap-no">
-  <div class="step">Beyond this unit</div>
+<div class="lv" data-ss-id="beyond-unit-memory-instructions-trap-no">
+  <div class="step">Measured 28 October 2026 · being folded in</div>
   <h3 data-ss-id="memory-instructions-trap-no-flip-ladder">Memory, and the instructions that trap</h3>
-  <p>No flip ladder has run against a memory path. A DRAM tensor load costs 94–134&nbsp;pJ per byte against a
-  multiply-add's 5.8&nbsp;pJ, so for most real work this chain prices the small half. Thirteen instructions —
-  divide, square root, reciprocal square root, sine, the integer divides — trap in user mode and have no energy
-  figure at all, and they are the normalisation half of a real kernel.</p>
+  <p>No flip ladder had run against a memory path. A DRAM tensor load costs 94–134&nbsp;pJ per byte against a
+  multiply-add's 5.8&nbsp;pJ, so for most real work this chain prices the small half. And thirteen
+  instructions — divide, square root, reciprocal square root, sine, the integer divides — trap in user mode,
+  with no energy figure at all, although they are the normalisation half of a real kernel.</p>
+  <p data-ss-id="traps-answered-from-the-firmware"><b>The trap half is answered, and the answer is structural
+  rather than thirteen energies.</b> There is <em>no emulation path</em> in the firmware: a user-mode illegal
+  instruction is delegated and the exception handler ends that hart's kernel, 758 instructions counted on the
+  installed build. So the thirteen have no per-instruction energy, and what they cost is what their software
+  substitutes cost — a C float divide is safe (libgcc's own routine contains no trapping instruction, 299
+  instructions, 310–570 multiply-adds), while <code>sqrtf</code> is fatal, because libm's version contains
+  one. E76 then confirmed it on silicon: <span id="q-e76" data-q="e76"></span>.</p>
+  <p data-ss-id="kernels-being-folded-in"><b>Three card runs landed on 28 October and are not yet in the
+  ledger above.</b> <span id="q-kernels" data-q="kernels"></span>. E74 priced a register file's own cells, which is the row §3
+  most needs measured rather than modelled, and its board ladder does not resolve it — so it publishes a
+  bound, <span id="q-e74-2" data-q="e74"></span>. E75 ran the first flip ladder on four memory paths. Folding all three into
+  the chain is a separate step, so the waterfall in §3 does not yet carry them.
+  <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-28-e74-register-file-cells/README.md">E74</a> ·
+  <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-28-e75-memory-flip-ladder/README.md">E75</a> ·
+  <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-10-28-e76-trapped-instructions/README.md">E76</a></p>
+</div>
+
+<div class="lv gap" data-ss-id="q129-newly-open">
+  <div class="step">Newly open · 28 October 2026</div>
+  <h3>What the 28 October pass opened</h3>
+  <p data-ss-id="newly-open-list">Three of these are open <em>because</em> an experiment ran, which is the
+  useful kind.</p>
+  <dl>
+    <dt>The A side's shape</dt><dd>Its multi-bit ladder is measured and the saturating form that fits the B
+      side is rejected on it — asymptote 28.6 standard errors below its own top rung, increments accelerating.
+      It needs a form that can be convex in the middle, and more rungs where the acceleration happens.</dd>
+    <dt>The voltage exponent</dt><dd><span id="q-volt-n-2" data-q="volt-n"></span>. What <em>is</em> settled is that the rival
+      reading — the price scaling with the clock as well — is excluded everywhere at
+      <span id="q-volt-clock-2" data-q="volt-clock"></span>. Separating the physics from the estimator needs a rail-side idle
+      leakage measurement, which exists for no card.</dd>
+    <dt>The remaining unaccounted share</dt><dd><span id="q-wf-unacc-3" data-q="wf-unacc"></span>, and the honest reading is that
+      it is <em>larger</em> than that by whatever the transport's register-file model over-prices — a model
+      the card's own zeros measurement already contradicts. Measuring that array is the single most valuable
+      thing left in §3.</dd>
+    <dt>The heat path's model</dt><dd>One pole alone is excluded and both pre-registered rivals are refuted,
+      but the preferred family is strained in two places at once and whether the extra second of lag is
+      transport or a second short pole is undecided. Settling it needs a lock-in frequency below
+      0.01&nbsp;Hz.</dd>
+    <dt>What the reviewers left open</dt><dd>Every result above was checked by an independent adversarial
+      pass, and the corrections are in the same data directories as the originals — including four claims
+      withdrawn outright (a ceiling on operand-driven switching, a “few per cent” of the board on no meter, a
+      closure of the result path, and a 95% figure that tracked whichever fitted value was chosen). Two
+      process items stay open rather than fixed: no independent reviewer saw either card <em>run</em>, only
+      the record and the data afterwards; and a leakage slope measured on a transient cooling cannot see the
+      board parts the die sensor does not — a shared systematic that neither card's measurement bounds.</dd>
+  </dl>
 </div>
 
 <h2 id="sources" data-ss-id="sources">6. Sources and method</h2>
@@ -488,8 +766,9 @@ whole chain.</p>
   </div>
   <p data-ss-id="an-open-stand-in-and-a-private-cross-check">Steps 6 to 8 rest on an open stand-in: the
   same RTL, built with a public cell library, because this chip’s own netlist is not public.
-  <b>A private archive cross-check</b> of the same multiply-add was run on <b>26 October 2026</b> against
-  the same quantities; it is not part of this page and nothing from it is quoted here.</p>
+  <b>A private archive cross-check</b> of the same multiply-add was run on <b>26 October 2026</b> and again on
+  <b><span id="q-archive-when-2" data-q="archive-when"></span></b> against the same quantities;
+  <span id="q-archive-2" data-q="archive"></span></p>
   <p data-ss-id="each-experiment-card-was-pre-registered">Each experiment on a card was pre-registered by commit before the first launch, claimed in the lab's
   channel while it held the card, and scored against the rules it registered. Where a later pass found an
   error, the correction is in the same data directory as the original and the original is not quietly

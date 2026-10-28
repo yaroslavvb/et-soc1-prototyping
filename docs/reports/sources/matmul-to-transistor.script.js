@@ -387,8 +387,14 @@
       : 86;
     const ymax = wf.board_pJ * 1.12;
     const Y = v => H - B - v * (H - B - T) / ymax;
+    /* The label is built from the data, so a rebuilt ledger cannot leave a screen reader on the old one. */
     const s = frame('waterfall', W, H,
-      'A random multiply-add costs 5.78 picojoules at the board. The bottom-up count names 1.95 of them — 0.31 transistor gates, 0.62 wire inside the cells, 0.59 wire between the cells and 0.43 the cells’ own internal energy — leaving 3.84 picojoules, two thirds, unaccounted.');
+      'A random multiply-add costs ' + num(wf.board_pJ, 2) + ' picojoules at the board and '
+      + num(wf.rail_pJ, 2) + ' reach the minion rail. The bottom-up count names '
+      + wf.steps.map(st => num(st.pJ, 2) + ' ' + st.k).join(', ') + ', leaving '
+      + num(wf.unaccounted_pJ, 2) + ' picojoules of the rail unaccounted'
+      + (wf.unaccounted_band_pJ ? ' — ' + num(wf.unaccounted_band_pJ[0], 2) + ' to '
+        + num(wf.unaccounted_band_pJ[1], 2) + ' over the transport reading' : '') + '.');
     for (let v = 0; v <= 6; v += 1) {
       el('line', {x1: L, x2: W - padR, y1: Y(v), y2: Y(v), stroke: 'var(--grid)'}, s);
       tx(s, L - 6, Y(v) + 4, num(v, 0), 'tick', 'end').setAttribute('fill', 'var(--muted)');
@@ -405,7 +411,9 @@
       x += barw + inner;
     };
     col('at the|board', wf.board_pJ, 'var(--c2)', '(E38)');
-    col(narrow ? 'at the|rail' : 'at the|minion rail', D.gates.rail_pJ, 'var(--ref)', '');
+    /* Q129 measured the rail instead of carrying it across, so the bar reads the waterfall's own figure. */
+    col(narrow ? 'at the|rail' : 'at the|minion rail', wf.rail_pJ, 'var(--ref)',
+      wf.version === 'q129' ? '(measured)' : '');
     x += gap;
     // stacked accounted bar
     const stackx = x, cols = ['var(--c1)', 'var(--c3)', 'var(--c4)', 'var(--c7)'];
@@ -431,15 +439,19 @@
     ['not yet|accounted'].forEach(l => l.split('|').forEach((ln, i) =>
       tx(s, x + barw / 2, H - B + 16 + i * 13, ln, narrow ? 'tick sm' : 'tick', 'middle')
         .setAttribute('fill', 'var(--ink-2)')));
+    /* Q128's remainder was against the board; Q129's is against the measured rail, because the
+       board-to-rail step now has its own account. The data names its own denominator. */
+    const den = wf.unaccounted_of_pJ || wf.board_pJ, denName = wf.unaccounted_of || 'the board';
     tx(s, Math.min(x + barw / 2, W - padR - 24), H - B + 42,
-      pct(wf.unaccounted_pJ / wf.board_pJ) + (narrow ? '' : ' of the board'),
+      pct(wf.unaccounted_pJ / den) + (narrow ? '' : ' of ' + denName),
       narrow ? 'tick sm' : 'tick', 'middle').setAttribute('fill', 'var(--muted)');
     // legend for the stack: a right-hand gutter when there is one, otherwise under the axis
     let ly = narrow ? H - B + 70 : T + 2;
     const lgx = narrow ? L - 24 : W - 232;
     wf.steps.forEach((st, i) => {
       el('rect', {x: lgx, y: ly - 9, width: 11, height: 11, fill: cols[i], rx: 2}, s);
-      tx(s, lgx + 16, ly, st.k + '  ' + num(st.pJ, 3) + ' pJ', narrow ? 'tick sm' : 'tick')
+      tx(s, lgx + 16, ly, (narrow && st.short ? st.short : st.k) + '  ' + num(st.pJ, 3) + ' pJ',
+        narrow ? 'tick sm' : 'tick')
         .setAttribute('fill', 'var(--ink-2)');
       ly += 17;
     });
@@ -538,6 +550,151 @@
     }
   }());
   set('op-leak', num(pb.e66_leak_W_per_C, 3) + ' W/' + DEG + 'C against the registered estimator’s ' + num(pb.a1_leak_W_per_C, 3));
+
+  /* ------------------------------------------- 6b. Q129, 28 October 2026
+     Every span the 28 October pass added, filled from D.q129 so the prose cannot drift from the data block
+     either. A page built from the 27 October data (data-2026-10-27-q128.json) has no q129 block, and set()
+     on a missing element and this guard together leave that build exactly as it was. */
+  if (D.q129) (function q129() {
+    const q = D.q129, wf = D.waterfall, k = q.knob, t = q.temperature_term, st = q.saturation,
+      v = q.voltage, lk = q.leak, hp = q.heat_path, at = q.atoms, kr = q.kernels;
+    /* Several of these are quoted in more than one section, so each is filled by its data-q key on every
+       occurrence rather than by id, which would reach only the first. */
+    const set = (k, v) => { const ns = document.querySelectorAll('[data-q="' + k + '"]');
+      for (let i = 0; i < ns.length; i++) ns[i].textContent = v; };
+    const band = (a, dp, u) => num(a[0], dp) + '–' + num(a[1], dp) + (u || '');
+    const rng = (a, dp, u) => num(Math.min.apply(null, a), dp) + '–' + num(Math.max.apply(null, a), dp) + (u || '');
+
+    /* §1 and §4: the knob, and the temperature term */
+    set('knob', num(k.cells_in_band[0], 0) + ' of ' + num(k.cells_in_band[1], 0) + ' cells inside their '
+      + 'registered band, with an error of ' + num(k.rms_mhz, 2) + NB + 'MHz against a ' + num(k.bar_mhz, 0)
+      + NB + 'MHz bar');
+    set('knob-ones', num(k.ones_at_45W_mhz[0], 0) + ' and ' + num(k.ones_at_45W_mhz[1], 1) + NB + 'MHz '
+      + '(predicted ' + num(k.ones_at_45W_pred_mhz, 1) + ') with ' + k.ones_at_45W_steps.join(' and ')
+      + ' power-down steps, where the card’s own 65' + NB + 'W cap gives it none at all');
+    set('knob-thr', num(k.sustained_thr65_mhz, 1) + NB + 'MHz with ' + num(k.thermal_steps_thr65, 0)
+      + ' thermal steps at a 65' + DEG + 'C threshold against ' + num(k.sustained_thr70_mhz, 1)
+      + NB + 'MHz and ' + num(k.thermal_steps_thr70, 0) + ' at 70' + DEG + 'C — at least '
+      + num(k.threshold_sensitivity_mhz, 1) + NB + 'MHz');
+    set('knob-flip', num(k.cause_flip_at_50W.mhz, 1) + NB + 'MHz with the limiter moving from '
+      + num(k.thermal_steps_thr65, 0) + ' thermal and 0 power steps to '
+      + num(k.cause_flip_at_50W.thermal_steps, 0) + ' and ' + num(k.cause_flip_at_50W.power_steps, 0));
+    set('knob-randn', num(k.randn_mhz['65'], 0) + ' and ' + num(k.randn_mhz['55'], 1) + NB + 'MHz at 65 and '
+      + '55' + NB + 'W (predicted ' + num(k.randn_pred_mhz['65'], 1) + ' and '
+      + num(k.randn_pred_mhz['55'], 1) + '), and with all-ones on one side '
+      + num(k.a_ones_b_randn_mhz['65'], 1) + ' → ' + num(k.a_ones_b_randn_mhz['55'], 1) + ' → '
+      + num(k.a_ones_b_randn_mhz['45'], 1) + NB + 'MHz at 65 → 55 → 45' + NB + 'W (predicted '
+      + num(k.a_ones_b_randn_pred_mhz['65'], 1) + ' → ' + num(k.a_ones_b_randn_pred_mhz['55'], 1) + ' → '
+      + num(k.a_ones_b_randn_pred_mhz['45'], 1) + ')');
+    set('temp', 'from ' + num(t.chain_pred_mhz, 0) + MINUS + num(t.all_ones_measured_mhz, 0) + ' = +'
+      + num(t.chain_pred_mhz - t.all_ones_measured_mhz, 0) + NB + 'MHz to between +'
+      + num(t.t1_miss_mhz[1], 1) + ' and ' + MINUS + num(-t.t1_miss_mhz[0], 1) + NB + 'MHz out of sample, '
+      + 'and the nine-cell error from ' + num(t.e64_cap_rms_mhz, 1) + ' to '
+      + band(t.nine_cell_rms_mhz, 1) + NB + 'MHz');
+
+    /* §2 step 3: the rail, measured */
+    set('rail', num(wf.rail_pJ, 2) + NB + 'pJ, band ' + band(wf.rail_band_pJ, 2) + NB + 'pJ ('
+      + num(wf.rail_pJ / wf.board_pJ, 3) + ' of the board), against the ' + num(wf.v1.rail_pJ, 3)
+      + NB + 'pJ this page carried from E60');
+    set('rail-step', num(wf.board_pJ - wf.rail_pJ, 2) + NB + 'pJ, of which '
+      + num(wf.regulators_pJ, 3) + NB + 'pJ is the regulators’ delivery loss and logic in step with the '
+      + 'rails, at most 0.13' + NB + 'pJ the SRAM and NoC rails together, and '
+      + num(wf.board_to_rail.fit_residual_pJ, 3) + NB + 'pJ the fit’s own residual');
+
+    /* §2 step 5: the price list */
+    set('sat', st.answer + ' — ' + num(st.layout_contrast_W, 3) + PM + num(st.layout_contrast_se_W, 3)
+      + NB + 'W between two layouts at the same Hamming weight, ' + num(st.layout_contrast_SE, 1)
+      + ' standard errors from the zero a “how many” law needs');
+    set('sat-law', num(st.law_rms_W, 3) + NB + 'W (' + num(st.law_rms_frozen_W, 3)
+      + ' with the curvature frozen before the run) against ' + num(st.best_in_h_alone_W, 3)
+      + NB + 'W for the best possible law in Hamming weight alone and ' + num(st.pure_additivity_W, 3)
+      + NB + 'W for pure additivity');
+    set('carry', num(st.carry_over, 3) + PM + num(st.carry_over_se, 3) + ', replacing the choice between '
+      + num(st.q128_choice[0], 2) + ' and ' + num(st.q128_choice[1], 2));
+    set('volt', num(v.fJ_600, 2) + PM + num(v.fJ_600_se, 2) + NB + 'fJ at 600' + NB + 'MHz against '
+      + num(v.fJ_800, 2) + PM + num(v.fJ_800_se, 2) + ' on the same card at 800');
+    set('volt-n', 'between ' + num(v.exponent_rail[0], 2) + ' and ' + num(v.exponent_board[1], 2)
+      + ', not pinned at 2 — the board family brackets it from above (' + band(v.exponent_board, 2)
+      + ') and the rail family from below (' + band(v.exponent_rail, 2) + ')');
+    set('volt-clock', num(v.clock_scaling_exponent, 3) + ', excluded by every reduction at '
+      + num(v.clock_scaling_excluded_SE, 1) + ' standard errors or more');
+    set('leak', num(lk.a3_58_62, 4) + PM + num(lk.a3_58_62_se, 4) + NB + 'W/' + DEG + 'C over 58–62'
+      + DEG + 'C on aifoundry3 and ' + num(lk.a2_58_62, 4) + ' over the same band on aifoundry2 (sd '
+      + num(lk.a2_58_62_sd, 4) + '), against ' + num(lk.a2_51_58, 4) + ' over 51–58' + DEG + 'C');
+    set('leak-band', rng(lk.band_share_of_the_gap_pct, 1, '%'));
+    set('leak-prices', 'group means ' + num(lk.group_shifts_pct[1], 1) + '% to '
+      + num(lk.group_shifts_pct[0], 1) + '%, individual positions +' + num(lk.item_shifts_pct[0], 1)
+      + '% to ' + num(lk.item_shifts_pct[1], 1) + '%, and ' + num(lk.verdicts_moved, 0) + ' of '
+      + num(lk.verdicts_scored, 0) + ' registered verdicts moved');
+
+    /* §3: the waterfall */
+    set('wf-acc', band(wf.accounted_band_pJ, 2) + NB + 'pJ');
+    set('wf-unacc', band(wf.unaccounted_vs_board_pJ, 2) + NB + 'pJ against the board and '
+      + band(wf.unaccounted_band_pJ, 2) + ' against the rail');
+    set('wf-unacc-band', band(wf.unaccounted_vs_board_band_pJ, 2) + NB + 'pJ');
+    set('wf-closure-short', band(wf.closure_vs_board.map(x => 100 * x), 0, '%'));
+    set('wf-closure', band(wf.closure_vs_board.map(x => 100 * x), 0, '%') + ' of the board (band '
+      + band(wf.closure_vs_board_band.map(x => 100 * x), 0, '%') + ') and '
+      + band(wf.closure_vs_rail.map(x => 100 * x), 0, '%') + ' of the rail');
+    set('glitch', TIMES + num(wf.glitch_toggle_ratio, 3) + ' the toggles and ' + TIMES
+      + num(wf.glitch_energy_ratio, 3) + ' the energy of its zero-delay twin, worth +'
+      + num(wf.glitch_moved_pJ, 3) + NB + 'pJ');
+    set('recon', num(wf.v1.accounted_pJ, 4) + ' ' + MINUS + num(-wf.reconciliation.routed_wire_delta_pJ, 4)
+      + ' + ' + num(wf.reconciliation.unpriced_capacitance_delta_pJ, 4) + ' = '
+      + num(wf.reconciliation.walked_forward_pJ, 4) + NB + 'pJ against a measured '
+      + num(wf.reconciliation.measured_zero_delay_pJ, 4) + ', '
+      + num(Math.abs(wf.reconciliation.they_agree_to_pJ), 4) + NB + 'pJ apart');
+    set('transport', num(wf.transport.low_pJ, 3) + ' to ' + num(wf.transport.high_pJ, 3) + NB + 'pJ');
+    set('transport-zeros', pct(wf.transport.zero_operand_share_of_transport) + ' of it ('
+      + num(wf.transport.zero_operand_floor_pJ, 3) + NB + 'pJ: '
+      + num(wf.transport.zero_operand_clock_pJ, 3) + ' of clock nets and '
+      + num(wf.transport.zero_operand_signal_pJ, 3) + ' of signal)');
+    set('transport-bound', num(wf.transport.zero_operand_floor_pJ, 3) + NB + 'pJ where the whole board '
+      + 'costs ' + num(wf.transport.card_zeros_bound_pJ, 2) + NB + 'pJ per multiply-add in the same '
+      + 'stimulus — ' + num(wf.transport.zero_operand_floor_pJ / wf.transport.card_zeros_bound_pJ, 2)
+      + TIMES + ' it');
+    set('leakrow', num(wf.leakage.rail_at_each_slope_pJ.registered, 3) + ', '
+      + num(wf.leakage.rail_at_each_slope_pJ.measured_within_run, 3) + ' and '
+      + num(wf.leakage.rail_at_each_slope_pJ.e66_idle, 3) + NB + 'pJ over the three slopes, a spread of '
+      + num(wf.leakage.spread_pJ, 3) + NB + 'pJ');
+
+    /* §2 step 9: stop 9 */
+    set('atoms', num(at.aJ_per_edge, 2) + NB + 'aJ per edge, ' + num(at.electrons, 0) + ' electrons, '
+      + num(at.landauer_x, 0) + TIMES + ' Landauer at an 80' + DEG + 'C floor and '
+      + num(at.landauer_x_at_58C, 0) + TIMES + ' at 58' + DEG + 'C');
+    set('atoms-rungs', num(at.bare_fins_x, 0) + TIMES + ' for that pin’s six bare fins and '
+      + num(at.min_inverter_x, 0) + TIMES + ' for the library’s real minimum inverter, INVxp33');
+    set('atoms-heat', num(at.channel_share_pct, 1) + '% (band ' + band(at.channel_band_pct, 0, '%')
+      + ' over the driver’s fin count and the metal layer) although ' + num(at.wire_share_of_capacitance_pct, 0)
+      + '% of the net’s capacitance is wire');
+    set('atoms-phonons', num(at.phonons_per_edge, 2) + ' optical phonons of '
+      + num(at.phonon_meV, 1) + NB + 'meV per edge, and about '
+      + (at.phonons_per_mac / 1e8).toFixed(1) + ' × 10⁸ per multiply-add (range '
+      + (at.optical_phonon_range[0] / 1e8).toFixed(1) + '–'
+      + (at.optical_phonon_range[1] / 1e8).toFixed(1) + ' over the rail share)');
+
+    /* §5: the heat path and the kernels */
+    set('heat', num(hp.pole_s, 1) + NB + 's pole [' + band(hp.pole_ci_s, 1) + '] plus '
+      + num(hp.delay_s, 2) + NB + 's of extra lag [' + band(hp.delay_ci_s, 2) + '], group delay '
+      + num(hp.group_delay_s, 2) + NB + 's; one pole alone is excluded at ΔAIC +'
+      + num(hp.one_pole_alone_dAIC, 2) + ' and both pre-registered rivals are refuted by the phase at '
+      + band(hp.rivals_refuted_SE, 2) + ' standard errors');
+    set('heat-gain', num(hp.G0_mK_per_W, 1) + NB + 'mK/W [' + band(hp.G0_ci, 0) + '] from the fit, whose '
+      + 'own 0.05' + NB + 'Hz value sits 2.7 line-standard-errors below the measured line, or about '
+      + num(hp.line_implies_mK_per_W, 0) + NB + 'mK/W if that measured line is taken through the fitted '
+      + num(hp.attenuation_at_0p05Hz, 4) + ' attenuation');
+    set('kernels', kr.status + ': E74 in ' + num(kr.e74_card_minutes, 1) + ', E75 in '
+      + num(kr.e75_card_minutes, 1) + ' and E76 in ' + num(kr.e76_card_minutes, 1) + ' card-minutes');
+    set('e74', 'e_cell < ' + num(kr.e74_bound_fJ, 2) + NB + 'fJ per flipped cell bit at '
+      + pct(kr.e74_bound_conf) + ' — a bound, because the board ladder does not resolve it');
+    set('e76', num(kr.e76_trapped, 0) + ' of ' + num(kr.e76_trapped, 0)
+      + ' trap on silicon, each ending the hart’s kernel with 0 ops');
+    set('archive', q.archive.say);
+    set('archive-when', q.archive.when);
+    set('wf-unacc-v1', num(wf.v1.unaccounted_pJ, 2) + NB + 'pJ against the board and '
+      + num(wf.v1.rail_pJ - wf.v1.accounted_pJ, 2) + ' against the rail');
+    set('wf-unacc-board', band(wf.unaccounted_vs_board_pJ, 2) + NB + 'pJ');
+  }());
 
   /* ------------------------------------------------------------- 7. sources */
   (function srctab() {
