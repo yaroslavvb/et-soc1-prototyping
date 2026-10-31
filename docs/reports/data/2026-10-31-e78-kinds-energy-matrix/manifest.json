@@ -11,14 +11,17 @@
  "knobs_written": "none",
  "registration": {
   "commit": "cfd9428509534afdb78ca49b0a3697ccb60c3869",
-  "pushed": "2026-10-31T12:45:37-07:00",
+  "committed": "2026-10-31T12:45:37-07:00",
+  "pushed": "2026-10-31T12:45:39-07:00",
   "amendment_A1": {
    "commit": "09c6e29b0ec7ad87910e1dae2058aee79902a84f",
-   "pushed": "2026-10-31T12:48:23-07:00",
+   "committed": "2026-10-31T12:48:23-07:00",
+   "pushed": "2026-10-31T12:48:24-07:00",
    "what": "plumbing only"
   },
   "file": "tools/claims-v3/kinds/E78.md",
-  "predictions_e78_json_sha256": "83d504bbde46917dd11e87af2dc1e06b4e3f4144a624fe9f2ef21ec4cda248fe"
+  "predictions_e78_json_sha256": "83d504bbde46917dd11e87af2dc1e06b4e3f4144a624fe9f2ef21ec4cda248fe",
+  "pushed_source": "GitHub's push record for main (repository activity), read Sat 31 Oct 2026; corrected after verification: the field held the commit times (C7d)"
  },
  "inputs_frozen": {
   "kinds_spec": {
@@ -104,6 +107,24 @@
    "NOT SCORED": 0
   }
  },
+ "corrections_after_verification": {
+  "date": "2026-10-31",
+  "after": "the Q130 workflow's adversarial verification of this directory",
+  "readme_section": "Corrections after verification",
+  "check": "corrections-check.py (output corrections-check.txt), reads committed files only",
+  "numbers_changed": "none in e78.json, its arms, scored.json, results.md or runs.csv",
+  "verdicts_changed": "none",
+  "frozen_inputs_changed": "none",
+  "items": {
+   "C1": "the heat column (dT_win) is limited by the die reading's whole-degree steps: resolved only above about 12 W of S (19 kinds, 0.113-0.129 C/W); the 32 kinds at or below 12 W, every int8 kind among them, are marked in the README tables; 10 cells have zero-width intervals; low-power heat given as S x 0.118 C/W, an extrapolation",
+   "C2": "the moving-bus-bit bound is the B side's (<= 12.5-13.0 fJ); the A side depends on an unvalidated counting convention (<= 19.7-20.9 fJ per slot-counted bit, <= 158-167 fJ per broadcast-word bit)",
+   "C3": "Q130(b) r2 over-predicts int8 by 2.1-2.9x on random-like tiles and up to 6.9x on constants, not an order of magnitude",
+   "C4": "E78-R3f: int8 inside +-0.30 W at 95% ([-0.050, +0.184]); fp16 and fp32 test only the sign bit; fp32 not resolved",
+   "C5": "intervals are one fixed tile's repeatability between passes at the primary leakage slope; the arms move D by up to 1.18 W; tile-draw spread from kinds.json replicates; fp16 nn_like and uniform01 tiles just outside their rule's 95% band",
+   "C6": "an interim reduction and scoring of passes 7810-7813 at 13:48:03-13:48:06, during pass 7814, disclosed as departure D6; nothing changed or decided on it",
+   "C7": "wording (int8 one-sided 0.31-0.50 W; E67 vs E79 constants); R3c counted once as registered gives 27 pass, 2 fail of 29; registration.pushed now holds push times"
+  }
+ },
  "commands": [
   "rsync -a --exclude __pycache__ tools/claims-v3/kinds/ aifoundry3:aifoundry/tools/claims-v3/kinds/",
   "bash tools/claims-v3/kinds/run_e78.sh setup",
@@ -116,8 +137,8 @@
  "files": [
   {
    "path": "README.md",
-   "bytes": 45781,
-   "sha256": "508fd5ab6e089f4339f558745d881624fb2ca81c45d2fd793fa8cb93eb77c04f"
+   "bytes": 59583,
+   "sha256": "673dbce5010450247453b4f81f48fed038a7ed3e3bc88bdc66825561bbb899d0"
   },
   {
    "path": "aifoundry3/kinds/kinds-smoke-p7801/block.json",
@@ -2133,6 +2154,16 @@
    "path": "code.sha256",
    "bytes": 2349,
    "sha256": "11771456e26d8acaa1558751334e483d910c27c8b1823f76618833d2cc2f7b7b"
+  },
+  {
+   "path": "corrections-check.py",
+   "bytes": 18776,
+   "sha256": "de3ecd9837814aa2f04fea922643c389cf8598e05424038bc3f141e02414c0ea"
+  },
+  {
+   "path": "corrections-check.txt",
+   "bytes": 34349,
+   "sha256": "49936873915015882e812efbc5b1fe59864a2e6a1c4610a8381505be49074735"
   },
   {
    "path": "e78-leak0.3803.json",

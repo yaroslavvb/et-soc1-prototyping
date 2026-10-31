@@ -1,0 +1,321 @@
+
+====================================================================================================
+[0] reading the registered numbers back (asserted)
+====================================================================================================
+D(fp32 randn) = 24.725 W; tally {'PASS': 28, 'FAIL': 2, 'INCONCLUSIVE': 0, 'NOT SCORED': 0} at the primary and both arms; k = 0.1994 / 0.0000 / 0.3803 W/C; 51 kinds + the tie
+
+====================================================================================================
+[C1] the heat column (dT_win) and the die reading's whole-degree steps
+====================================================================================================
+[C1.1] dT_win cells whose 95% interval has zero width (every pass read the same window mean):
+   fp16.wsparse50           dT 1.00 [+- 0.00]   S  9.090 W
+   fp32.pow2                dT 2.00 [+- 0.00]   S 15.984 W
+   fp32.sparse50            dT 1.00 [+- 0.00]   S  9.243 W
+   int8.gauss_q             dT 1.00 [+- 0.00]   S  9.161 W
+   int8.ones                dT 1.00 [+- 0.00]   S  4.146 W
+   int8.pos                 dT 1.00 [+- 0.00]   S  8.733 W
+   int8.smallint            dT 1.00 [+- 0.00]   S  8.628 W
+   int8.sorted              dT 1.00 [+- 0.00]   S  9.170 W
+   int8.sparse50            dT 1.00 [+- 0.00]   S  8.061 W
+   int8.ternary             dT 1.00 [+- 0.00]   S  7.727 W
+   10 of 51 kinds
+
+[C1.2] dT / S for every kind, sorted by S (C per W of switching over idle):
+   kind                         S W   dT C  +-95%    dT/S  per-pass dT
+   fp32.randn                26.701   3.16   0.08   0.118  3.12 3.10 3.18 3.07 3.23 3.25
+   fp32.randn_small          26.661   3.16   0.17   0.118  3.10 2.90 3.20 3.35 3.30 3.10
+   fp32.randn_large          26.657   3.02   0.25   0.113  2.85 2.90 3.15 3.30 3.25 2.70
+   fp32.randn_sorted         25.378   2.99   0.07   0.118  2.95 3.00 3.00 2.90 3.00 3.10
+   fp32.uniform01            24.636   2.87   0.03   0.117  2.90 2.85 2.85 2.84 2.90 2.90
+   fp16.randn_small          24.131   2.82   0.07   0.117  2.80 2.85 2.80 2.90 2.70 2.85
+   fp16.randn                24.102   2.80   0.05   0.116  2.80 2.87 2.74 2.78 2.83 2.77
+   fp16.randn_sorted         22.695   2.69   0.13   0.119  2.80 2.60 2.50 2.75 2.70 2.80
+   fp16.pair_half_zero       22.091   2.55   0.35   0.115  1.90 2.75 2.70 2.75 2.50 2.70
+   fp32.fp16grid             21.546   2.61   0.10   0.121  2.45 2.70 2.63 2.70 2.60 2.60
+   fp16.uniform01            21.371   2.60   0.21   0.122  2.70 2.70 2.75 2.65 2.20 2.60
+   fp32.bf16trunc            20.144   2.38   0.23   0.118  2.55 1.95 2.35 2.45 2.55 2.40
+   fp16.fp8grid              19.978   2.29   0.33   0.115  2.40 1.80 2.50 2.50 2.00 2.55
+   fp16.nn_like              19.480   2.23   0.21   0.114  2.20 2.45 1.85 2.35 2.25 2.25
+   fp16.smallint             18.926   2.25   0.17   0.119  2.00 2.30 2.10 2.40 2.40 2.30
+   fp32.smallint             16.023   1.98   0.06   0.123  2.00 2.00 2.00 1.85 2.00 2.00
+   fp32.pow2                 15.984   2.00   0.00   0.125  2.00 2.00 2.00 2.00 2.00 2.00
+   fp16.sparse50             15.220   1.83   0.43   0.120  2.00 2.00 2.00 2.00 2.00 1.00
+   fp32.nn_like              15.034   1.93   0.17   0.129  2.00 2.00 2.00 2.00 2.00 1.60
+   fp32.pi                   10.397   1.16   0.22   0.111  1.00 1.10 1.00 1.00 1.45 1.40
+   fp16.ones                 10.376   1.09   0.13   0.105  1.00 1.10 1.15 1.00 1.30 1.00
+   fp16.neg_ones             10.355   1.17   0.27   0.113  1.50 1.00 1.00 1.00 1.05 1.50
+   fp32.ones                 10.288   1.20   0.12   0.117  1.10 1.30 1.15 1.05 1.35 1.25
+   fp32.neg_ones             10.116   1.08   0.23   0.107  1.00 1.50 1.05 1.05 1.05 0.85
+   int8.full                  9.648   1.01   0.01   0.104  1.00 1.00 1.00 1.03 1.00 1.00
+   fp32.sparse50              9.243   1.00   0.00   0.108  1.00 1.00 1.00 1.00 1.00 1.00
+   int8.sorted                9.170   1.00   0.00   0.109  1.00 1.00 1.00 1.00 1.00 1.00
+   int8.gauss_q               9.161   1.00   0.00   0.109  1.00 1.00 1.00 1.00 1.00 1.00
+   fp16.wsparse50             9.090   1.00   0.00   0.110  1.00 1.00 1.00 1.00 1.00 1.00
+   int8.pos                   8.733   1.00   0.00   0.115  1.00 1.00 1.00 1.00 1.00 1.00
+   int8.smallint              8.628   1.00   0.00   0.116  1.00 1.00 1.00 1.00 1.00 1.00
+   int8.sparse50              8.061   1.00   0.00   0.124  1.00 1.00 1.00 1.00 1.00 1.00
+   int8.ternary               7.727   1.00   0.00   0.129  1.00 1.00 1.00 1.00 1.00 1.00
+   int8.highbit               5.853   0.83   0.43   0.142  1.00 1.00 1.00 1.00 0.00 1.00
+   int8.wsparse50             5.743   0.83   0.43   0.145  1.00 1.00 1.00 1.00 1.00 0.00
+   int8.neg_ones              4.176   0.81   0.42   0.194  0.90 1.00 0.00 1.00 1.00 0.95
+   int8.ones                  4.146   1.00   0.00   0.241  1.00 1.00 1.00 1.00 1.00 1.00
+   int8.sparse90              3.763   0.83   0.43   0.221  1.00 0.00 1.00 1.00 1.00 1.00
+   fp16.sparse90              3.380   0.37   0.46   0.108  0.45 0.00 0.75 0.00 0.00 1.00
+   int8.a_full_b_zeros        3.115   0.33   0.41   0.107  1.00 0.55 0.00 0.00 0.35 0.10
+   int8.wsparse90             3.079   0.37   0.40   0.119  0.65 0.75 0.05 0.00 0.75 0.00
+   int8.a_zeros_b_full        2.900   0.48   0.55   0.164  0.85 1.00 0.00 0.00 0.00 1.00
+   fp32.a_zeros_b_randn       2.839   0.17   0.17   0.059  0.40 0.00 0.25 0.25 0.10 0.00
+   fp16.a_zeros_b_randn       2.713   0.53   0.35   0.194  1.00 0.60 0.35 0.00 0.50 0.70
+   fp16.a_randn_b_zeros       2.669   0.21   0.37   0.078  0.00 0.10 0.00 0.00 0.90 0.25
+   fp16.wsparse90             2.643   0.27   0.39   0.101  0.55 0.05 0.10 0.90 0.00 0.00
+   int8.zeros                 2.605   0.22   0.19   0.083  0.27 0.07 0.07 0.53 0.08 0.27
+   fp32.a_randn_b_zeros       2.574  -0.08   0.21  -0.032  0.00 0.00 0.00 -0.50 0.00 0.00
+   fp32.sparse90              2.509   0.13   0.24   0.053  0.00 0.55 0.25 0.00 0.00 0.00
+   fp16.zeros                 1.987  -0.06   0.14  -0.028  0.00 0.00 -0.05 0.00 -0.32 0.03
+   fp32.zeros                 1.986   0.06   0.13   0.029  0.00 0.00 0.02 0.00 0.32 0.02
+
+   S > 12 W: 19 kinds (fp32 10, fp16 9, int8 0); S 15.03-26.70 W; dT/S 0.113-0.129 C/W; through the origin 0.1181 C/W
+   least squares on the same 19: dT = 0.240 (+- 0.075 SE) + 0.1072 (+- 0.0035 SE) x S; residual sd 0.058 C
+   S <= 12 W: 32 kinds; dT/S -0.032 to 0.241 C/W
+
+[C1.3] the same power, different readings; different power, the same reading:
+   fp32.pi  S 10.397 W  dT 1.16 +- 0.22   |   anchor_pi (the built-in pi tie, the same values)  S 10.398 W  dT 0.81 +- 0.19
+   int8.ones  S 4.146 W  dT 1.00 +- 0.00   |   int8.full  S 9.648 W  dT 1.01 +- 0.01
+   fp32.sparse50  S 9.243 W  dT 1.00 +- 0.00   |   fp16.wsparse50  S 9.090 W  dT 1.00 +- 0.00
+   the zeros (each type's own zero-data level):
+   fp32.zeros  S 1.986 W  dT 0.06 [-0.07, 0.19]
+   fp16.zeros  S 1.987 W  dT -0.06 [-0.19, 0.08]
+   int8.zeros  S 2.605 W  dT 0.22 [0.02, 0.41]
+
+[C1.4] S x 0.118 C/W for the kinds at S <= 12 W: an extrapolation of the resolved kinds' ratio, NOT a measurement
+   fp32.pi                  S 10.397 W -> 1.23 C   (window mean read 1.16)
+   fp16.ones                S 10.376 W -> 1.22 C   (window mean read 1.09)
+   fp16.neg_ones            S 10.355 W -> 1.22 C   (window mean read 1.17)
+   fp32.ones                S 10.288 W -> 1.21 C   (window mean read 1.20)
+   fp32.neg_ones            S 10.116 W -> 1.19 C   (window mean read 1.08)
+   int8.full                S  9.648 W -> 1.14 C   (window mean read 1.01)
+   fp32.sparse50            S  9.243 W -> 1.09 C   (window mean read 1.00)
+   int8.sorted              S  9.170 W -> 1.08 C   (window mean read 1.00)
+   int8.gauss_q             S  9.161 W -> 1.08 C   (window mean read 1.00)
+   fp16.wsparse50           S  9.090 W -> 1.07 C   (window mean read 1.00)
+   int8.pos                 S  8.733 W -> 1.03 C   (window mean read 1.00)
+   int8.smallint            S  8.628 W -> 1.02 C   (window mean read 1.00)
+   int8.sparse50            S  8.061 W -> 0.95 C   (window mean read 1.00)
+   int8.ternary             S  7.727 W -> 0.91 C   (window mean read 1.00)
+   int8.highbit             S  5.853 W -> 0.69 C   (window mean read 0.83)
+   int8.wsparse50           S  5.743 W -> 0.68 C   (window mean read 0.83)
+   int8.neg_ones            S  4.176 W -> 0.49 C   (window mean read 0.81)
+   int8.ones                S  4.146 W -> 0.49 C   (window mean read 1.00)
+   int8.sparse90            S  3.763 W -> 0.44 C   (window mean read 0.83)
+   fp16.sparse90            S  3.380 W -> 0.40 C   (window mean read 0.37)
+   int8.a_full_b_zeros      S  3.115 W -> 0.37 C   (window mean read 0.33)
+   int8.wsparse90           S  3.079 W -> 0.36 C   (window mean read 0.37)
+   int8.a_zeros_b_full      S  2.900 W -> 0.34 C   (window mean read 0.48)
+   fp32.a_zeros_b_randn     S  2.839 W -> 0.34 C   (window mean read 0.17)
+   fp16.a_zeros_b_randn     S  2.713 W -> 0.32 C   (window mean read 0.53)
+   fp16.a_randn_b_zeros     S  2.669 W -> 0.32 C   (window mean read 0.21)
+   fp16.wsparse90           S  2.643 W -> 0.31 C   (window mean read 0.27)
+   int8.zeros               S  2.605 W -> 0.31 C   (window mean read 0.22)
+   fp32.a_randn_b_zeros     S  2.574 W -> 0.30 C   (window mean read -0.08)
+   fp32.sparse90            S  2.509 W -> 0.30 C   (window mean read 0.13)
+   fp16.zeros               S  1.987 W -> 0.23 C   (window mean read -0.06)
+   fp32.zeros               S  1.986 W -> 0.23 C   (window mean read 0.06)
+
+====================================================================================================
+[C2] the derived price of a moving operand-bus bit in a gated lane (not registered)
+====================================================================================================
+kinds.json facts.hamming_convention:
+   a_figure: one broadcast word | bus_bits_per_op: slots*dA + sum over the slots of dB, summed over the transitions, with slots = 8 for fp32 and fp16 and 16 for int8
+   A_BROADCAST_IS_A_CONVENTION: counting the one broadcast A word once per column slot is inherited from tb.sv (LANES * $countones(uop_a ^ pa)) and make_hl.py fma_flips. It is NOT a measurement. The same multiplier sits on both sides, so an A-against-B comparison of bus_bits_per_op is exactly a comparison of mean dA against mean dB and the broadcast contributes nothing to the ratio. Physically, if the broadcast word travels one net with fanout rather than one register per lane, this convention overcounts the A side: E70 already measured shared-wire carry-over at 1.246. E78 must validate the A-side weight before any of this is quoted as energy.
+
+   cell                          D W  +-95%  bits/op      R op/s  fJ/bit           [95%]  counting
+   fp32.a_randn_b_zeros        0.616  0.122    27920  1.1212e+09    19.7 [  15.8,   23.6]  A moves; lane-counted (kinds.json convention)
+   fp32.a_randn_b_zeros        0.616  0.122     3490  1.1212e+09   157.5 [ 126.3,  188.6]  A moves; per broadcast word (bits / 8)
+   fp32.a_zeros_b_randn        0.810  0.065    55798  1.1206e+09    13.0 [  11.9,   14.0]  B moves; per slot (each slot its own word)
+   fp16.a_randn_b_zeros        0.659  0.080    28096  1.1208e+09    20.9 [  18.4,   23.5]  A moves; lane-counted (kinds.json convention)
+   fp16.a_randn_b_zeros        0.659  0.080     3512  1.1208e+09   167.3 [ 147.0,  187.6]  A moves; per broadcast word (bits / 8)
+   fp16.a_zeros_b_randn        0.782  0.063    55806  1.1208e+09    12.5 [  11.5,   13.5]  B moves; per slot (each slot its own word)
+   int8.a_full_b_zeros         0.497  0.085    65248  1.9257e+09     4.0 [   3.3,    4.6]  A moves; lane-counted (kinds.json convention); int8 bus counts provisional
+   int8.a_full_b_zeros         0.497  0.085     4078  1.9257e+09    63.3 [  52.5,   74.2]  A moves; per broadcast word (bits / 16); int8 bus counts provisional
+   int8.a_zeros_b_full         0.305  0.070     4140  1.9255e+09    38.3 [  29.5,   47.1]  B moves; per slot (each slot its own word); int8 bus counts provisional
+
+====================================================================================================
+[C3] Q130(b) r2 on int8: predicted / measured D32 (watts above fp32 zeros), both variants
+====================================================================================================
+ variant_A: mean error +6.245 W over 16 int8 kinds; ratio over the 12 kinds with measured D32 > 1.5 W: 1.55-6.91; below 1.5 W: wsparse90 0.37, a_full_b_zeros 0.06, a_zeros_b_full 0.00, zeros -0.00
+   int8.full              measured  7.667  predicted  16.018  ratio  2.09  error  +8.351
+   int8.sorted            measured  7.206  predicted  15.929  ratio  2.21  error  +8.723
+   int8.gauss_q           measured  7.202  predicted  16.008  ratio  2.22  error  +8.806
+   int8.pos               measured  6.761  predicted  15.687  ratio  2.32  error  +8.926
+   int8.smallint          measured  6.615  predicted  15.958  ratio  2.41  error  +9.343
+   int8.sparse50          measured  6.085  predicted  14.793  ratio  2.43  error  +8.708
+   int8.ternary           measured  5.790  predicted  15.700  ratio  2.71  error  +9.910
+   int8.highbit           measured  3.841  predicted  15.422  ratio  4.01  error +11.581
+   int8.wsparse50         measured  3.770  predicted   5.862  ratio  1.55  error  +2.092
+   int8.neg_ones          measured  2.237  predicted  15.003  ratio  6.71  error +12.766
+   int8.ones              measured  2.170  predicted  15.003  ratio  6.91  error +12.833
+   int8.sparse90          measured  1.743  predicted   2.934  ratio  1.68  error  +1.191
+   int8.wsparse90         measured  1.155  predicted   0.429  ratio  0.37  error  -0.726
+   int8.a_full_b_zeros    measured  1.130  predicted   0.066  ratio  0.06  error  -1.064
+   int8.a_zeros_b_full    measured  0.913  predicted   0.004  ratio  0.00  error  -0.909
+   int8.zeros             measured  0.612  predicted  -0.000  ratio -0.00  error  -0.612
+ variant_B: mean error +6.841 W over 16 int8 kinds; ratio over the 12 kinds with measured D32 > 1.5 W: 1.72-6.92; below 1.5 W: wsparse90 0.51, a_full_b_zeros 0.13, a_zeros_b_full 0.01, zeros -0.00
+   int8.full              measured  7.667  predicted  17.278  ratio  2.25  error  +9.611
+   int8.sorted            measured  7.206  predicted  17.081  ratio  2.37  error  +9.875
+   int8.gauss_q           measured  7.202  predicted  17.257  ratio  2.40  error +10.055
+   int8.pos               measured  6.761  predicted  16.543  ratio  2.45  error  +9.782
+   int8.smallint          measured  6.615  predicted  17.144  ratio  2.59  error +10.529
+   int8.sparse50          measured  6.085  predicted  15.844  ratio  2.60  error  +9.759
+   int8.ternary           measured  5.790  predicted  16.715  ratio  2.89  error +10.925
+   int8.highbit           measured  3.841  predicted  15.954  ratio  4.15  error +12.113
+   int8.wsparse50         measured  3.770  predicted   6.497  ratio  1.72  error  +2.727
+   int8.neg_ones          measured  2.237  predicted  15.020  ratio  6.71  error +12.783
+   int8.ones              measured  2.170  predicted  15.020  ratio  6.92  error +12.850
+   int8.sparse90          measured  1.743  predicted   3.255  ratio  1.87  error  +1.512
+   int8.wsparse90         measured  1.155  predicted   0.586  ratio  0.51  error  -0.569
+   int8.a_full_b_zeros    measured  1.130  predicted   0.147  ratio  0.13  error  -0.983
+   int8.a_zeros_b_full    measured  0.913  predicted   0.009  ratio  0.01  error  -0.904
+   int8.zeros             measured  0.612  predicted  -0.000  ratio -0.00  error  -0.612
+
+====================================================================================================
+[C4] E78-R3f, static bits: neg_ones - ones, against the registered +-0.30 W
+====================================================================================================
+   int8.neg_ones - int8.ones  +0.067 W, 95% [-0.050, +0.184]  inside +-0.30: True  -> PASS (registered); |bound| 0.184
+   fp32.neg_ones - fp32.ones  -0.113 W, 95% [-0.521, +0.295]  inside +-0.30: False  -> INCONCLUSIVE (reported); |bound| 0.521
+   fp16.neg_ones - fp16.ones  -0.067 W, 95% [-0.221, +0.087]  inside +-0.30: True  -> PASS (reported); |bound| 0.221
+   int8: -1 is 0xFF, +1 is 0x01: they differ in 7 bit(s) per element
+   fp16: -1 is 0xBC00, +1 is 0x3C00: they differ in 1 bit(s) per element
+   fp32: -1 is 0xBF800000, +1 is 0x3F800000: they differ in 1 bit(s) per element
+
+====================================================================================================
+[C5] what the +-95% covers: one fixed tile, between passes, at one leakage slope
+====================================================================================================
+ D, S and pJ/op(S) at the three leakage slopes (k = 0, auto 0.1994, 0.3803 W/C); span = |k=0 - k=0.3803|:
+   fp32.randn               D  25.344 /  24.725 /  24.163 (span 1.181, +-95% 0.082)   S  27.170 /  26.701 /  26.275   pJ/op(S)  24241 /  23823 /  23443
+   fp32.randn_small         D  25.368 /  24.764 /  24.216 (span 1.152, +-95% 0.463)   S  27.158 /  26.661 /  26.210   pJ/op(S)  24229 /  23786 /  23384
+   fp32.randn_large         D  25.312 /  24.711 /  24.166 (span 1.146, +-95% 0.084)   S  27.137 /  26.657 /  26.222   pJ/op(S)  24208 /  23779 /  23391
+   fp32.randn_sorted        D  23.977 /  23.384 /  22.847 (span 1.130, +-95% 0.376)   S  25.795 /  25.378 /  24.999   pJ/op(S)  23012 /  22639 /  22301
+   fp32.uniform01           D  23.208 /  22.646 /  22.136 (span 1.072, +-95% 0.093)   S  25.042 /  24.636 /  24.266   pJ/op(S)  22338 /  21975 /  21646
+   fp16.randn_small         D  22.770 /  22.209 /  21.700 (span 1.070, +-95% 0.086)   S  24.540 /  24.131 /  23.760   pJ/op(S)  21892 /  21528 /  21197
+   fp16.randn               D  22.733 /  22.162 /  21.645 (span 1.088, +-95% 0.054)   S  24.521 /  24.102 /  23.722   pJ/op(S)  21877 /  21504 /  21165
+   fp16.randn_sorted        D  21.317 /  20.748 /  20.233 (span 1.084, +-95% 0.426)   S  23.118 /  22.695 /  22.310   pJ/op(S)  20622 /  20244 /  19901
+   fp16.pair_half_zero      D  20.631 /  20.122 /  19.659 (span 0.972, +-95% 0.569)   S  22.476 /  22.091 /  21.741   pJ/op(S)  20051 /  19707 /  19395
+   fp32.fp16grid            D  20.142 /  19.624 /  19.154 (span 0.988, +-95% 0.065)   S  21.917 /  21.546 /  21.209   pJ/op(S)  19555 /  19224 /  18924
+   fp16.uniform01           D  19.953 /  19.426 /  18.948 (span 1.005, +-95% 0.086)   S  21.744 /  21.371 /  21.034   pJ/op(S)  19396 /  19064 /  18762
+   fp32.bf16trunc           D  18.589 /  18.136 /  17.725 (span 0.864, +-95% 0.046)   S  20.468 /  20.144 /  19.850   pJ/op(S)  18258 /  17969 /  17707
+   fp16.fp8grid             D  18.539 /  18.052 /  17.610 (span 0.930, +-95% 0.126)   S  20.298 /  19.978 /  19.687   pJ/op(S)  18110 /  17823 /  17564
+   fp16.nn_like             D  18.063 /  17.602 /  17.183 (span 0.880, +-95% 0.118)   S  19.817 /  19.480 /  19.174   pJ/op(S)  17684 /  17383 /  17110
+   fp16.smallint            D  17.459 /  17.000 /  16.585 (span 0.874, +-95% 0.302)   S  19.215 /  18.926 /  18.663   pJ/op(S)  17141 /  16883 /  16649
+   fp32.smallint            D  14.470 /  14.079 /  13.724 (span 0.746, +-95% 0.058)   S  16.267 /  16.023 /  15.801   pJ/op(S)  14514 /  14296 /  14098
+   fp32.pow2                D  14.382 /  13.985 /  13.624 (span 0.758, +-95% 0.159)   S  16.203 /  15.984 /  15.785   pJ/op(S)  14454 /  14258 /  14081
+   fp16.sparse50            D  13.564 /  13.196 /  12.862 (span 0.702, +-95% 0.540)   S  15.439 /  15.220 /  15.021   pJ/op(S)  13772 /  13576 /  13398
+   fp32.nn_like             D  13.418 /  13.036 /  12.688 (span 0.730, +-95% 0.066)   S  15.274 /  15.034 /  14.817   pJ/op(S)  13626 /  13413 /  13219
+   fp32.pi                  D   8.679 /   8.470 /   8.281 (span 0.397, +-95% 0.113)   S  10.518 /  10.397 /  10.286   pJ/op(S)   9383 /   9274 /   9176
+   fp16.ones                D   8.685 /   8.448 /   8.234 (span 0.451, +-95% 0.082)   S  10.441 /  10.376 /  10.317   pJ/op(S)   9314 /   9256 /   9203
+   fp16.neg_ones            D   8.619 /   8.382 /   8.166 (span 0.452, +-95% 0.133)   S  10.443 /  10.355 /  10.275   pJ/op(S)   9317 /   9239 /   9167
+   fp32.ones                D   8.492 /   8.257 /   8.043 (span 0.450, +-95% 0.221)   S  10.348 /  10.288 /  10.234   pJ/op(S)   9233 /   9179 /   9131
+   fp32.neg_ones            D   8.328 /   8.143 /   7.976 (span 0.352, +-95% 0.408)   S  10.183 /  10.116 /  10.056   pJ/op(S)   9084 /   9025 /   8971
+   int8.full                D   7.218 /   7.056 /   6.910 (span 0.309, +-95% 0.059)   S   9.735 /   9.648 /   9.570   pJ/op(S)   5055 /   5010 /   4970
+   fp32.sparse50            D   7.500 /   7.302 /   7.123 (span 0.377, +-95% 0.063)   S   9.322 /   9.243 /   9.170   pJ/op(S)   8316 /   8245 /   8180
+   int8.sorted              D   6.745 /   6.588 /   6.447 (span 0.298, +-95% 0.073)   S   9.250 /   9.170 /   9.098   pJ/op(S)   4804 /   4763 /   4725
+   int8.gauss_q             D   6.766 /   6.598 /   6.446 (span 0.320, +-95% 0.069)   S   9.221 /   9.161 /   9.107   pJ/op(S)   4789 /   4757 /   4729
+   fp16.wsparse50           D   7.254 /   7.058 /   6.880 (span 0.374, +-95% 0.035)   S   9.114 /   9.090 /   9.069   pJ/op(S)   8129 /   8109 /   8090
+   int8.pos                 D   6.334 /   6.171 /   6.023 (span 0.311, +-95% 0.206)   S   8.799 /   8.733 /   8.672   pJ/op(S)   4570 /   4536 /   4504
+   int8.smallint            D   6.173 /   6.003 /   5.849 (span 0.324, +-95% 0.142)   S   8.708 /   8.628 /   8.556   pJ/op(S)   4522 /   4481 /   4443
+   int8.sparse50            D   5.616 /   5.463 /   5.325 (span 0.290, +-95% 0.146)   S   8.154 /   8.061 /   7.977   pJ/op(S)   4235 /   4187 /   4143
+   int8.ternary             D   5.331 /   5.186 /   5.055 (span 0.276, +-95% 0.051)   S   7.750 /   7.727 /   7.706   pJ/op(S)   4025 /   4013 /   4002
+   int8.highbit             D   3.383 /   3.233 /   3.098 (span 0.285, +-95% 0.036)   S   5.869 /   5.853 /   5.837   pJ/op(S)   3048 /   3039 /   3032
+   int8.wsparse50           D   3.266 /   3.142 /   3.029 (span 0.238, +-95% 0.056)   S   5.760 /   5.743 /   5.728   pJ/op(S)   2991 /   2983 /   2975
+   int8.neg_ones            D   1.746 /   1.628 /   1.522 (span 0.224, +-95% 0.169)   S   4.224 /   4.176 /   4.132   pJ/op(S)   2194 /   2169 /   2146
+   int8.ones                D   1.727 /   1.561 /   1.411 (span 0.316, +-95% 0.069)   S   4.172 /   4.146 /   4.122   pJ/op(S)   2167 /   2153 /   2141
+   int8.sparse90            D   1.283 /   1.145 /   1.020 (span 0.262, +-95% 0.057)   S   3.780 /   3.763 /   3.748   pJ/op(S)   1963 /   1955 /   1947
+   fp16.sparse90            D   1.499 /   1.410 /   1.328 (span 0.171, +-95% 0.113)   S   3.307 /   3.380 /   3.446   pJ/op(S)   2950 /   3015 /   3074
+   int8.a_full_b_zeros      D   0.529 /   0.497 /   0.469 (span 0.060, +-95% 0.085)   S   3.049 /   3.115 /   3.175   pJ/op(S)   1583 /   1618 /   1649
+   int8.wsparse90           D   0.562 /   0.538 /   0.517 (span 0.045, +-95% 0.051)   S   3.006 /   3.079 /   3.146   pJ/op(S)   1561 /   1599 /   1634
+   int8.a_zeros_b_full      D   0.351 /   0.305 /   0.264 (span 0.086, +-95% 0.070)   S   2.875 /   2.900 /   2.923   pJ/op(S)   1493 /   1506 /   1518
+   fp32.a_zeros_b_randn     D   0.842 /   0.810 /   0.782 (span 0.060, +-95% 0.065)   S   2.693 /   2.839 /   2.971   pJ/op(S)   2403 /   2533 /   2652
+   fp16.a_zeros_b_randn     D   0.907 /   0.782 /   0.669 (span 0.238, +-95% 0.063)   S   2.641 /   2.713 /   2.778   pJ/op(S)   2357 /   2420 /   2478
+   fp16.a_randn_b_zeros     D   0.698 /   0.659 /   0.622 (span 0.076, +-95% 0.080)   S   2.568 /   2.669 /   2.761   pJ/op(S)   2291 /   2381 /   2463
+   fp16.wsparse90           D   0.829 /   0.743 /   0.666 (span 0.163, +-95% 0.111)   S   2.537 /   2.643 /   2.740   pJ/op(S)   2263 /   2358 /   2444
+   int8.zeros               D   0.000 /   0.000 /   0.000 (span 0.000, +-95% 0.000)   S   2.500 /   2.605 /   2.700   pJ/op(S)   1298 /   1353 /   1402
+   fp32.a_randn_b_zeros     D   0.598 /   0.616 /   0.633 (span 0.035, +-95% 0.122)   S   2.494 /   2.574 /   2.646   pJ/op(S)   2224 /   2295 /   2360
+   fp32.sparse90            D   0.601 /   0.577 /   0.556 (span 0.045, +-95% 0.073)   S   2.426 /   2.509 /   2.584   pJ/op(S)   2164 /   2238 /   2306
+   fp16.zeros               D   0.000 /   0.000 /   0.000 (span 0.000, +-95% 0.000)   S   1.827 /   1.987 /   2.133   pJ/op(S)   1630 /   1773 /   1903
+   fp32.zeros               D   0.000 /   0.000 /   0.000 (span 0.000, +-95% 0.000)   S   1.837 /   1.986 /   2.121   pJ/op(S)   1639 /   1772 /   1892
+   largest D spans: fp32.randn 1.18 W, fp32.randn_small 1.15 W, fp32.randn_large 1.15 W, fp32.randn_sorted 1.13 W
+   pJ/op(S), half the arm span as % of the primary: random data fp32.randn 1.68%, fp16.randn 1.66%, int8.full 0.86%; on the 19 kinds with S > 12 W at most 1.78%; over all kinds at most 7.71% (fp16.zeros, S 1.987 W +- 0.153 W)
+   the largest: fp16.zeros 7.7%, fp32.zeros 7.1%, fp32.a_zeros_b_randn 4.9%, int8.zeros 3.8%, fp16.wsparse90 3.8%, fp16.a_randn_b_zeros 3.6%
+
+ the spread between tile draws (kinds.json `replicates`: the same rule re-drawn with independent seeds; 2.5-97.5% of the draws), against this tile:
+   fp32.randn               n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  82214 (draws 81384-85840, sd 1.4% of the mean 83692)
+   fp32.randn_small         n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  82244 (draws 81078-84702, sd 1.1% of the mean 82828)
+   fp32.randn_large         n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  84896 (draws 83092-87472, sd 1.3% of the mean 85275)
+   fp32.uniform01           n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  77842 (draws 75710-79814, sd 1.3% of the mean 77714)
+   fp32.sparse50            n 400  gated 0.774 (draws 0.711-0.792)   bus bits/op  74550 (draws 70180-81002, sd 3.8% of the mean 75476)
+   fp32.sparse90            n 400  gated 0.992 (draws 0.984-0.995)   bus bits/op  17780 (draws 15180-25454, sd 13.3% of the mean 20280)
+   fp32.smallint            n 400  gated 0.118 (draws 0.084-0.159)   bus bits/op  19806 (draws 19454-23804, sd 5.3% of the mean 21642)
+   fp32.pow2                n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  25414 (draws 22692-26638, sd 4.0% of the mean 24511)
+   fp32.bf16trunc           n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  34980 (draws 32824-36262, sd 2.6% of the mean 34504)
+   fp32.fp16grid            n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  43136 (draws 41822-45496, sd 2.1% of the mean 43713)
+   fp32.a_randn_b_zeros     n 400  gated 1.000 (draws 1.000-1.000)   bus bits/op  27920 (draws 27120-28752, sd 1.6% of the mean 27890)
+   fp32.a_zeros_b_randn     n 400  gated 1.000 (draws 1.000-1.000)   bus bits/op  55798 (draws 53888-57808, sd 1.9% of the mean 55732)
+   fp32.randn_sorted        n  12  gated 0.000 (draws 0.000-0.000)   bus bits/op  60856 (draws 59734-61550, sd 1.0% of the mean 60671)
+   fp32.nn_like             n 400  gated 0.508 (draws 0.441-0.566)   bus bits/op  80426 (draws 77622-83800, sd 1.9% of the mean 80747)
+   fp16.randn               n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  84416 (draws 82180-86634, sd 1.3% of the mean 84432)
+   fp16.randn_small         n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  91126 (draws 88094-92778, sd 1.4% of the mean 90548)
+   fp16.uniform01           n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  77948 (draws 73534-77624, sd 1.4% of the mean 75549)   <- this tile outside the band: bus bits
+   fp16.sparse50            n 400  gated 0.414 (draws 0.376-0.491)   bus bits/op  71590 (draws 68074-76926, sd 3.1% of the mean 72328)
+   fp16.sparse90            n 400  gated 0.961 (draws 0.948-0.976)   bus bits/op  18412 (draws 15672-23096, sd 9.6% of the mean 19352)
+   fp16.wsparse50           n 400  gated 0.760 (draws 0.702-0.792)   bus bits/op  73444 (draws 66064-78182, sd 4.1% of the mean 72368)
+   fp16.wsparse90           n 400  gated 0.990 (draws 0.984-0.995)   bus bits/op  18192 (draws 14216-24734, sd 14.3% of the mean 19306)
+   fp16.smallint            n 400  gated 0.004 (draws 0.000-0.020)   bus bits/op  35980 (draws 33454-37060, sd 2.8% of the mean 35126)
+   fp16.fp8grid             n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  42486 (draws 39984-43312, sd 2.0% of the mean 41727)
+   fp16.a_randn_b_zeros     n 400  gated 1.000 (draws 1.000-1.000)   bus bits/op  28096 (draws 27312-28800, sd 1.4% of the mean 28090)
+   fp16.a_zeros_b_randn     n 400  gated 1.000 (draws 1.000-1.000)   bus bits/op  55806 (draws 54370-58104, sd 1.7% of the mean 56169)
+   fp16.pair_half_zero      n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  72796 (draws 68894-76102, sd 2.8% of the mean 72461)
+   fp16.randn_sorted        n  12  gated 0.000 (draws 0.000-0.000)   bus bits/op  61846 (draws 60356-62336, sd 0.9% of the mean 61489)
+   fp16.nn_like             n 400  gated 0.195 (draws 0.199-0.305)   bus bits/op  84348 (draws 79664-84702, sd 1.6% of the mean 82235)   <- this tile outside the band: gated
+   int8.full                n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  69312 (draws 68144-71038, sd 1.0% of the mean 69586)
+   int8.pos                 n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  61096 (draws 59588-62310, sd 1.2% of the mean 60911)
+   int8.smallint            n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  70526 (draws 67132-72402, sd 1.9% of the mean 69617)
+   int8.ternary             n 400  gated 0.008 (draws 0.000-0.027)   bus bits/op  58798 (draws 58108-66136, sd 3.4% of the mean 61933)
+   int8.sparse50            n 400  gated 0.070 (draws 0.039-0.098)   bus bits/op  53480 (draws 49606-54870, sd 2.5% of the mean 52253)
+   int8.sparse90            n 400  gated 0.822 (draws 0.762-0.848)   bus bits/op  12144 (draws 10850-15670, sd 9.5% of the mean 13206)
+   int8.wsparse50           n 400  gated 0.644 (draws 0.569-0.681)   bus bits/op  48766 (draws 47842-56300, sd 4.4% of the mean 52258)
+   int8.wsparse90           n 400  gated 0.980 (draws 0.968-0.990)   bus bits/op  16316 (draws 9050-17522, sd 17.6% of the mean 13313)
+   int8.highbit             n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op   8664 (draws 8226-9242, sd 3.1% of the mean 8720)
+   int8.gauss_q             n 400  gated 0.000 (draws 0.000-0.000)   bus bits/op  69544 (draws 67590-71634, sd 1.4% of the mean 69596)
+   int8.a_full_b_zeros      n 400  gated 1.000 (draws 1.000-1.000)   bus bits/op  65248 (draws 64032-66976, sd 1.1% of the mean 65549)
+   int8.a_zeros_b_full      n 400  gated 1.000 (draws 1.000-1.000)   bus bits/op   4140 (draws 4008-4186, sd 1.1% of the mean 4096)
+   int8.sorted              n  12  gated 0.000 (draws 0.000-0.000)   bus bits/op  53346 (draws 52730-53972, sd 0.8% of the mean 53347)
+   outside their rule's 2.5-97.5% band: 2 of 82 checks (about 4.1 expected by chance): fp16.uniform01 bus bits 77948 (draws 73534.0-77624.0); fp16.nn_like gated 0.195312 (draws 0.199219-0.304688)
+   no replicates (a deterministic tile): fp16.neg_ones, fp16.ones, fp16.zeros, fp32.neg_ones, fp32.ones, fp32.pi, fp32.zeros, int8.neg_ones, int8.ones, int8.zeros
+
+====================================================================================================
+[C6] the in-flight peek: pass 7814's runs around 13:48:03 PDT, and that pass's value for the run it overlapped
+====================================================================================================
+   heater  #-   fp16.wsparse50         13:47:52.755 -> 13:47:55.452   idle bracket 13:47:51.555-13:47:52.555, window 13:47:53.755-13:47:55.755
+   run     #41  fp16.wsparse50         13:47:58.358 -> 13:48:02.995   idle bracket 13:47:57.158-13:47:58.158, window 13:47:59.358-13:48:01.358
+   run     #42  fp16.pair_half_zero    13:48:05.007 -> 13:48:09.691   idle bracket 13:48:03.807-13:48:04.807, window 13:48:06.007-13:48:08.007
+   fp16.pair_half_zero: D by pass 7810 20.242, 7811 20.359, 7812 20.405, 7813 19.020, 7814 20.361, 7815 20.344; idle80 by pass 7810 25.814, 7811 25.940, 7812 25.967, 7813 25.919, 7814 25.960, 7815 25.837
+   fp16.wsparse50: D by pass 7810 7.085, 7811 7.060, 7812 7.030, 7813 7.083, 7814 7.006, 7815 7.082; idle80 by pass 7810 25.862, 7811 25.805, 7812 25.911, 7813 25.886, 7814 25.906, 7815 25.818
+
+====================================================================================================
+[C7] wording
+====================================================================================================
+(a) one operand all zero, D over the type's own zeros (E78-R3a):
+   fp32.a_randn_b_zeros/randn   D 0.616 W, ratio 0.025
+   fp32.a_zeros_b_randn/randn   D 0.810 W, ratio 0.033
+   fp16.a_randn_b_zeros/randn   D 0.659 W, ratio 0.030
+   fp16.a_zeros_b_randn/randn   D 0.782 W, ratio 0.035
+   int8.a_full_b_zeros/full     D 0.497 W, ratio 0.071
+   int8.a_zeros_b_full/full     D 0.305 W, ratio 0.043
+(b) replication targets (predictions-e78.json replication_targets) against E78:
+   fp32.ones    E78   8.257  target   8.217  |diff| 0.040 W   source: E67 hl.json cards.aifoundry3.anchors: anchor_ones - anchor_zeros (built-in values, 27 Oct)
+   fp32.pi      E78   8.470  target   8.496  |diff| 0.026 W   source: E67 hl.json: anchor_pi - anchor_zeros
+   fp32.randn   E78  24.725  target  24.659  |diff| 0.066 W   source: E67 hl.json: anchor_randn - anchor_zeros (kernel-generated randn, a new draw each pass; E78 runs one fixed tile whose operand-bit count is 1.8% under its rule's 400-draw mean)
+   fp16.ones    E78   8.448  target   8.736  |diff| 0.288 W   source: E79 scored.json switching.fp16: -(zeros_minus_h0_W), a constant random-significand tile against zeros, paired per pass (E79 labels it exploratory); E78's constant is 1.0
+   int8.ones    E78   1.561  target   1.834  |diff| 0.273 W   source: E79 scored.json switching.int8: -(zeros_minus_h0_W), bytes of popcount 4 against zeros (exploratory in E79); E78's constant is 0x01
+(c) the tally, as the frozen scorer counts it and as E78.md registers R3c:
+   registered R3c pass_if: 'both means inside [1/1.10, 1.10]; max/min of the three means reported'; scored.json emits 2 cell verdicts: ['PASS', 'PASS']
+   as registered (R3c one verdict): {'PASS': 27, 'FAIL': 2, 'INCONCLUSIVE': 0, 'NOT SCORED': 0} of 29; as the frozen scorer counts: {'PASS': 28, 'FAIL': 2, 'INCONCLUSIVE': 0, 'NOT SCORED': 0} of 30

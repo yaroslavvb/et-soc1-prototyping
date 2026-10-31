@@ -13,11 +13,16 @@ after this directory's first commit (`410c56f6`, 14:15:00), read back as `<ai> C
 1.5 h, until ~14:30 PDT doc — released (edited)`. The words "for 1.5 h, until ~14:30 PDT" were added to the post at
 13:15 PDT by an edit this lane did not make; the release kept every word.*
 
+*Corrected after verification, Sat 31 Oct 2026 (§ [Corrections after verification](#corrections-after-verification),
+C1–C7): the heat column is limited by the die reading's whole-degree steps below about 12 W of switching power, and
+six statements are narrowed or disclosed. No number in `e78.json`, `scored.json` or `results.md` changed, no verdict
+changed, and no frozen input changed.*
+
 > **What this is.** One protocol, one card, one clock, and **all 51 kinds** of
 > [`kinds.json`](../../../../tools/claims-v3/kinds/kinds.json) — 18 fp32, 17 fp16, 16 int8, every tile Q130(b) replayed
-> in the RTL and Q130(c) predicted — so the blog's kinds table has a measured **switching power**, **energy per
-> operation** and **heat** cell for every format × kind, with 95% intervals from six independent passes, and both
-> frozen models are scored against it.
+> in the RTL and Q130(c) predicted — so the blog's kinds table has a measured **switching power** and **energy per
+> operation** cell for every format × kind, with 95% intervals from six independent passes of one tile per kind, and
+> a **heat** cell that resolves the 19 kinds above about 12 W; both frozen models are scored against it.
 
 ## Results
 
@@ -29,9 +34,11 @@ slope (the registered `auto` primary) 0.1994 W/°C over 250 runs; idle 25.911 ±
 546.001 / 318.000** for fp32 / fp16 / int8 on every kind; duty 0.9959–0.9967 on every kind
 ([`e78.json`](e78.json) `leak`, `idle_level`, `cycles_per_op`, `checks.duty`).
 
-**Registered tally: 28 pass, 2 fail, 0 inconclusive, 0 not scored (30 verdicts)** — the same 28 / 2 at both
-registered leakage arms (E71's 0.3803 W/°C and 0), and no single verdict moves between arms
-([`scored.json`](scored.json) `tally`, `arms`). The two failures are both **E78-R2**, the accuracy of the frozen
+**Registered tally: 28 pass, 2 fail, 0 inconclusive, 0 not scored (30 verdicts)** as the frozen scorer counts
+them — the same 28 / 2 at both registered leakage arms (E71's 0.3803 W/°C and 0), and no single verdict moves between
+arms ([`scored.json`](scored.json) `tally`, `arms`). The scorer counts E78-R3c's two cells as two verdicts, where
+E78.md registers R3c as one ("both in [0.909, 1.10]"); counted as registered, the tally is **27 pass, 2 fail
+(29 verdicts)**, and both R3c cells pass (C7). The two failures are both **E78-R2**, the accuracy of the frozen
 empirical model Q130(c): rms **2.270 W** against a 2.0 W bound in fp32, **1.054 W** against 1.0 W in int8 (fp16
 passes at 1.757 W). Q130(c) ranks every format right (E78-R1, ρ = 0.941 / 0.948 / 0.867 ≥ 0.80). Scored as its own
 README says, Q130(c) passes 8 of its 10 pass/fail verdicts: **C-R1 fp32 fails** (0.533 of the out-of-sample fp32
@@ -50,7 +57,8 @@ minion's 16 × 16 TensorFMA, 4,096 / 8,192 / 16,384 multiply-adds):
 | **int8** | **7.056 ± 0.059 W** | 1.561 ± 0.069 W | 2.605 ± 0.028 W | **0.306 ± 0.003 pJ per MAC** (5,010 ± 42 pJ per op) |
 
 ([`e78.json`](e78.json) `items.<type>.<kind>.D`, `.S`, `.pj_mac_S`, `.pj_flop_S`, `.pj_op_S`; ± is the 95% interval
-over six passes.) A random fp32 multiply-add costs 2.2× a random fp16 one and 19× a random int8 one, per MAC.
+over six passes of one tile per kind, at the primary leakage slope; the registered arms move random data's D by about
+±0.6 W in fp32 and fp16 and ±0.15 W in int8: C5.) A random fp32 multiply-add costs 2.2× a random fp16 one and 19× a random int8 one, per MAC.
 
 **2. Which kinds are cheap, and why.** Three things set a kind's power, and a fourth barely moves it:
 
@@ -58,14 +66,17 @@ over six passes.) A random fp32 multiply-add costs 2.2× a random fp16 one and 1
   lane-cycles: zeros, either operand all zero, 90% element- or word-sparse. **One operand all zero costs 0.62–0.81 W
   in fp32 and 0.66–0.78 W in fp16, 2.5–3.5% of random data**, and 0.31–0.50 W in int8, 4.3–7.1% (E78-R3a, every
   cell ≤ 0.15 at 95%). The gate switches the lane off whichever side is zero. In fp32 and fp16 the other operand's
-  bus keeps moving 27,920–55,806 bits an op, and if all of the residual is that bus, it is **12.5–20.9 fJ per
-  moving bus bit** (derived below, not registered). So a gated lane pays almost none of what its moving operand
-  costs an ungated one: 0.6 W where Q130(c)'s bus arm said 5.2 W (C-R9).
+  bus keeps moving 27,920–55,806 bits an op (as kinds.json counts them), and if all of the residual is that bus, a
+  moving B-bus bit costs **at most 12.5–13.0 fJ** (derived below, not registered). The A side's figure depends on
+  how its one broadcast word is counted, which E78 does not validate (C2). So a gated lane pays almost none of what
+  its moving operand costs an ungated one: 0.6 W where Q130(c)'s bus arm said 5.2 W (C-R9).
 - **A lane switched on with nothing changing.** A constant (1.0, π, −1.0) costs **8.1–8.5 W** in fp32 and
   **8.4 W** in fp16 — 0.33× and 0.38× of random data — and only **1.56–1.63 W** in int8, 0.22× of random int8 and
   a fifth of the float constant. Nothing in the operands toggles; the lane is clocked and its accumulator still
-  walks. Static ones are free: int8 −1 (every bit set) against +1 (one bit a byte) is **+0.067 W [−0.050, +0.184]**
-  (E78-R3f PASS); fp16 −0.067 W [−0.221, +0.087]; fp32 −0.113 W [−0.521, +0.295] (inconclusive, reported only).
+  walks. Static set bits cost nothing measurable in int8: −1 (every bit set) against +1 (one bit a byte) is
+  **+0.067 W, 95% [−0.050, +0.184]**, inside the registered ±0.30 W (E78-R3f PASS). In fp16 and fp32, −1.0 and
+  +1.0 differ only in the sign bit: fp16 −0.067 W [−0.221, +0.087] is inside ±0.30 W (reported); fp32 −0.113 W
+  [−0.521, +0.295] is not resolved (inconclusive, reported only) (C4).
 - **Bits that change.** Everything above the constant is operand bits changing from one multiply-add to the next:
   16.5 W in fp32, 13.7 W in fp16, 5.5 W in int8. **Magnitude does not matter** (σ = 2⁻¹⁰ and 2¹⁰ against σ = 1:
   1.002× and 0.999×, E78-R3c). **Mantissa bits do**: zeroing the low 13 mantissa bits (`fp16grid`) saves 5.1 W,
@@ -89,9 +100,14 @@ pair gate**: one zero half in every two-term pair costs 0.908× random [0.883, 0
 
 **4. Speed and heat.** At a pinned clock the kind of number changes **power and heat, never speed**: all 51 kinds
 ran at 546.001 / 546.001 / 318.000 cycles per op with duty 0.996–0.997, so a matmul's speed depends on its data only
-where a governor turns power or heat into clock (E64, E80 on aifoundry2). Heat follows switching power: over the 2 s
-window from a 58 °C launch the die reading rises **3.16 °C** on random fp32, **2.80 °C** on fp16, **1.01 °C** on
-int8 and 0.06 °C on fp32 zeros, 0.08–0.13 °C per watt of S (`items.<…>.dT_win`).
+where a governor turns power or heat into clock (E64, E80 on aifoundry2). Heat follows switching power wherever the
+die reading can see it. The reading moves in whole degrees, so its mean over the 2 s window from a 58 °C launch
+resolves a kind only above about 12 W of S. On those 19 kinds (10 fp32, 9 fp16) it rises **0.113–0.129 °C per watt
+of S** (0.118 through the origin): **3.16 °C** on random fp32 and **2.80 °C** on random fp16 (`items.<…>.dT_win`).
+Below 12 W, which includes every int8 kind, the steps decide the reading. int8 ones (S 4.1 W) reads 1.00 °C, the same
+as random int8 (9.6 W, 1.01 °C), and `fp32.pi` and the built-in π tie read 1.16 and 0.81 °C at the same 10.40 W. At
+the resolved kinds' ratio, random int8 would warm about 1.1 °C, int8 ones about 0.5 °C and each type's zeros 0.2–0.3
+°C. That is an extrapolation from S, not a measurement (C1).
 
 **5. Both frozen models, against the card.** The empirical model (Q130(c)) gets the **order** of the kinds right
 but overstates what is left after truncating mantissas by 4–5 W (`bf16trunc` predicted 23.26 W, measured 18.14 W;
@@ -101,19 +117,21 @@ card says a quarter of the power. It also prices int8's constant at 0.571 W agai
 (as E79 had already found post-data, 1.834 W). The RTL toggle predictor (Q130(b) r2) ranks the kinds best (ρ =
 0.974 / 0.978 in fp32 / fp16) and gets the size of the mantissa steps nearer (predicted 2.30 W and 6.88 W for
 `fp16grid − bf16trunc` and `randn − fp16grid`, measured 1.49 and 5.10 W, against Q130(c)'s 0.69 and 0.26 W), but
-its int8 scale is off by an order of magnitude: it puts int8 ones 15.0 W above fp32 zeros against 2.17 W measured
-(mean error +6.2 to +6.8 W over the 16 int8 kinds). Its `g` re-fitted per format on E78's anchors is **1.023** of
-fp32's in fp16 (r2's E64 value 0.95 ± 0.10) and **0.110** in int8 (r2's 0.037 ± 0.048); and int8 zeros sit **0.612
-± 0.053 W** above fp32 zeros (E64: 0.68 ± 0.51 W; r2 predicts 0.00).
+it over-predicts int8: by about 2× on the random-like tiles (2.1–2.9×) and up to 7× on the constants. It puts int8
+ones 15.0 W above fp32 zeros against 2.17 W measured (6.9×), with a mean error of +6.2 to +6.8 W over the 16 int8
+kinds, and it under-predicts the four gated or all-zero int8 kinds (C3). Its `g` re-fitted per format on E78's
+anchors is **1.023** of fp32's in fp16 (r2's E64 value 0.95 ± 0.10) and **0.110** in int8 (r2's 0.037 ± 0.048); and
+int8 zeros sit **0.612 ± 0.053 W** above fp32 zeros (E64: 0.68 ± 0.51 W; r2 predicts 0.00).
 
 **6. Replication.** E67's anchors on this card four days ago reproduce: fp32 ones 8.257 W (E67 8.217), π 8.470 W
-(8.496), random 24.725 W (24.659), all inside ±0.6 / ±0.6 / ±1.0 W (E78-R4). So do E79's constant-to-zeros steps
-from this morning, with E78's different constants: fp16 8.448 W (8.736 ± 0.8), int8 1.561 W (1.834 ± 0.6). The
+(8.496), random 24.725 W (24.659), all inside ±0.6 / ±0.6 / ±1.0 W (E78-R4); the same two constants agree within
+0.04 W. So do E79's constant-to-zeros steps from this morning, which used other constants (a random-significand fp16
+tile, int8 bytes of popcount 4): fp16 8.448 W (8.736 ± 0.8), int8 1.561 W (1.834 ± 0.6), within 0.29 W (C7). The
 host's built-in π and the same bytes read from a file give the same power: −0.067 ± 0.104 W (E78-R4, ± 0.25 W).
 
 ## The tables — aifoundry3 card 0, 600 MHz, 521.7 mV, six passes
 
-D = switching power over the type's own zeros, paired within the pass (the three zeros runs interpolated in time); S = over the run's own idle bracket [t0 − 1.2, t0 − 0.2) s; pJ/op = 10¹² × W / R at the measured op rate R (one op = one minion's 16 × 16 TensorFMA, 4,096 / 8,192 / 16,384 MACs); ΔT = the die reading's mean over the window [t0 + 1, t0 + 3) s minus the 58 °C launch reading; rail D = the minion rail, deconvolved (τ 0.95 s), over the type's zeros — reported beside the board, never instead of it. ± is the 95% interval t(0.975, n − 1) × SE over passes. Sorted by D. Source: [`e78.json`](e78.json) › `items`.
+D = switching power over the type's own zeros, paired within the pass (the three zeros runs interpolated in time); S = over the run's own idle bracket [t0 − 1.2, t0 − 0.2) s; pJ/op = 10¹² × W / R at the measured op rate R (one op = one minion's 16 × 16 TensorFMA, 4,096 / 8,192 / 16,384 MACs); ΔT = the die reading's mean over the window [t0 + 1, t0 + 3) s minus the 58 °C launch reading. The reading is a whole number of degrees, so **a ΔT marked † (S ≤ 12 W) is limited by its 1 °C steps and does not rank the kinds** (C1). rail D = the minion rail, deconvolved (τ 0.95 s), over the type's zeros — reported beside the board, never instead of it. ± is the 95% interval t(0.975, n − 1) × SE over passes: **the repeatability of one fixed tile per kind, at the primary leakage slope**. It leaves out the registered leakage arms, which move D by up to ±0.6 W on the high-power kinds, and the spread between draws of the same rule (kinds.json `replicates`) (C5). Sorted by D. Source: [`e78.json`](e78.json) › `items`.
 
 ### fp32
 
@@ -129,15 +147,15 @@ D = switching power over the type's own zeros, paired within the pass (the three
 | smallint | 0.118 | 14.079 | 0.058 | 16.023 | 0.132 | 14296 | 118 | 3.490 | 1.745 | 12562 | 52 | 1.98 | 11.577 | 6 |
 | pow2 | 0.000 | 13.985 | 0.159 | 15.984 | 0.218 | 14258 | 193 | 3.481 | 1.741 | 12475 | 139 | 2.00 | 11.472 | 6 |
 | nn_like | 0.508 | 13.036 | 0.066 | 15.034 | 0.057 | 13413 | 51 | 3.275 | 1.637 | 11630 | 61 | 1.93 | 10.737 | 6 |
-| pi | 0.000 | 8.470 | 0.113 | 10.397 | 0.152 | 9274 | 136 | 2.264 | 1.132 | 7556 | 100 | 1.16 | 7.131 | 6 |
-| anchor_pi (the built-in pi tie) | 0.000 | 8.360 | 0.072 | 10.398 | 0.080 | 9277 | 72 | 2.265 | 1.132 | 7459 | 64 | 0.81 | 7.141 | 6 |
-| ones | 0.000 | 8.257 | 0.221 | 10.288 | 0.208 | 9179 | 184 | 2.241 | 1.121 | 7366 | 197 | 1.20 | 7.048 | 6 |
-| neg_ones | 0.000 | 8.143 | 0.408 | 10.116 | 0.435 | 9025 | 386 | 2.203 | 1.102 | 7264 | 363 | 1.08 | 7.045 | 6 |
-| sparse50 | 0.774 | 7.302 | 0.063 | 9.243 | 0.147 | 8245 | 134 | 2.013 | 1.006 | 6514 | 55 | 1.00 | 6.149 | 6 |
-| a_zeros_b_randn | 1.000 | 0.810 | 0.065 | 2.839 | 0.039 | 2533 | 35 | 0.618 | 0.309 | 723 | 58 | 0.17 | 0.687 | 6 |
-| a_randn_b_zeros | 1.000 | 0.616 | 0.122 | 2.574 | 0.169 | 2295 | 151 | 0.560 | 0.280 | 550 | 109 | -0.08 | 0.552 | 6 |
-| sparse90 | 0.992 | 0.577 | 0.073 | 2.509 | 0.138 | 2238 | 123 | 0.546 | 0.273 | 515 | 65 | 0.13 | 0.499 | 6 |
-| zeros | 1.000 | 0.000 | 0.000 | 1.986 | 0.059 | 1772 | 53 | 0.433 | 0.216 | 0 | 0 | 0.06 | 0.000 | 6 |
+| pi | 0.000 | 8.470 | 0.113 | 10.397 | 0.152 | 9274 | 136 | 2.264 | 1.132 | 7556 | 100 | 1.16† | 7.131 | 6 |
+| anchor_pi (the built-in pi tie) | 0.000 | 8.360 | 0.072 | 10.398 | 0.080 | 9277 | 72 | 2.265 | 1.132 | 7459 | 64 | 0.81† | 7.141 | 6 |
+| ones | 0.000 | 8.257 | 0.221 | 10.288 | 0.208 | 9179 | 184 | 2.241 | 1.121 | 7366 | 197 | 1.20† | 7.048 | 6 |
+| neg_ones | 0.000 | 8.143 | 0.408 | 10.116 | 0.435 | 9025 | 386 | 2.203 | 1.102 | 7264 | 363 | 1.08† | 7.045 | 6 |
+| sparse50 | 0.774 | 7.302 | 0.063 | 9.243 | 0.147 | 8245 | 134 | 2.013 | 1.006 | 6514 | 55 | 1.00† | 6.149 | 6 |
+| a_zeros_b_randn | 1.000 | 0.810 | 0.065 | 2.839 | 0.039 | 2533 | 35 | 0.618 | 0.309 | 723 | 58 | 0.17† | 0.687 | 6 |
+| a_randn_b_zeros | 1.000 | 0.616 | 0.122 | 2.574 | 0.169 | 2295 | 151 | 0.560 | 0.280 | 550 | 109 | -0.08† | 0.552 | 6 |
+| sparse90 | 0.992 | 0.577 | 0.073 | 2.509 | 0.138 | 2238 | 123 | 0.546 | 0.273 | 515 | 65 | 0.13† | 0.499 | 6 |
+| zeros | 1.000 | 0.000 | 0.000 | 1.986 | 0.059 | 1772 | 53 | 0.433 | 0.216 | 0 | 0 | 0.06† | 0.000 | 6 |
 
 fp32 zeros over idle (its zero-data level): S = 1.986 ± 0.059 W, D32 = 0.000 ± 0.000 W.
 
@@ -154,14 +172,14 @@ fp32 zeros over idle (its zero-data level): S = 1.986 ± 0.059 W, D32 = 0.000 ±
 | nn_like | 0.195 | 17.602 | 0.118 | 19.480 | 0.226 | 17383 | 201 | 2.122 | 1.061 | 15707 | 105 | 2.23 | 14.378 | 6 |
 | smallint | 0.004 | 17.000 | 0.302 | 18.926 | 0.235 | 16883 | 215 | 2.061 | 1.030 | 15166 | 274 | 2.25 | 14.056 | 6 |
 | sparse50 | 0.414 | 13.196 | 0.540 | 15.220 | 0.575 | 13576 | 510 | 1.657 | 0.829 | 11771 | 479 | 1.83 | 11.104 | 6 |
-| ones | 0.000 | 8.448 | 0.082 | 10.376 | 0.081 | 9256 | 75 | 1.130 | 0.565 | 7536 | 74 | 1.09 | 7.111 | 6 |
-| neg_ones | 0.000 | 8.382 | 0.133 | 10.355 | 0.103 | 9239 | 92 | 1.128 | 0.564 | 7478 | 119 | 1.17 | 7.033 | 6 |
-| wsparse50 | 0.760 | 7.058 | 0.035 | 9.090 | 0.091 | 8109 | 83 | 0.990 | 0.495 | 6295 | 32 | 1.00 | 5.965 | 6 |
-| sparse90 | 0.961 | 1.410 | 0.113 | 3.380 | 0.086 | 3015 | 76 | 0.368 | 0.184 | 1258 | 101 | 0.37 | 1.208 | 6 |
-| a_zeros_b_randn | 1.000 | 0.782 | 0.063 | 2.713 | 0.054 | 2420 | 48 | 0.295 | 0.148 | 698 | 57 | 0.53 | 0.630 | 6 |
-| wsparse90 | 0.990 | 0.743 | 0.111 | 2.643 | 0.109 | 2358 | 98 | 0.288 | 0.144 | 663 | 99 | 0.27 | 0.592 | 6 |
-| a_randn_b_zeros | 1.000 | 0.659 | 0.080 | 2.669 | 0.085 | 2381 | 75 | 0.291 | 0.145 | 588 | 72 | 0.21 | 0.558 | 6 |
-| zeros | 1.000 | 0.000 | 0.000 | 1.987 | 0.052 | 1773 | 46 | 0.216 | 0.108 | 0 | 0 | -0.06 | 0.000 | 6 |
+| ones | 0.000 | 8.448 | 0.082 | 10.376 | 0.081 | 9256 | 75 | 1.130 | 0.565 | 7536 | 74 | 1.09† | 7.111 | 6 |
+| neg_ones | 0.000 | 8.382 | 0.133 | 10.355 | 0.103 | 9239 | 92 | 1.128 | 0.564 | 7478 | 119 | 1.17† | 7.033 | 6 |
+| wsparse50 | 0.760 | 7.058 | 0.035 | 9.090 | 0.091 | 8109 | 83 | 0.990 | 0.495 | 6295 | 32 | 1.00† | 5.965 | 6 |
+| sparse90 | 0.961 | 1.410 | 0.113 | 3.380 | 0.086 | 3015 | 76 | 0.368 | 0.184 | 1258 | 101 | 0.37† | 1.208 | 6 |
+| a_zeros_b_randn | 1.000 | 0.782 | 0.063 | 2.713 | 0.054 | 2420 | 48 | 0.295 | 0.148 | 698 | 57 | 0.53† | 0.630 | 6 |
+| wsparse90 | 0.990 | 0.743 | 0.111 | 2.643 | 0.109 | 2358 | 98 | 0.288 | 0.144 | 663 | 99 | 0.27† | 0.592 | 6 |
+| a_randn_b_zeros | 1.000 | 0.659 | 0.080 | 2.669 | 0.085 | 2381 | 75 | 0.291 | 0.145 | 588 | 72 | 0.21† | 0.558 | 6 |
+| zeros | 1.000 | 0.000 | 0.000 | 1.987 | 0.052 | 1773 | 46 | 0.216 | 0.108 | 0 | 0 | -0.06† | 0.000 | 6 |
 
 fp16 zeros over idle (its zero-data level): S = 1.987 ± 0.052 W, D32 = -0.009 ± 0.031 W.
 
@@ -169,22 +187,22 @@ fp16 zeros over idle (its zero-data level): S = 1.987 ± 0.052 W, D32 = -0.009 �
 
 | kind | gated lane-cycles | D over own zeros (W) | ±95% | S over idle (W) | ±95% | pJ/op (S) | ±95% | pJ/MAC (S) | pJ/op (D) | ±95% | ΔT (°C) | rail D (W) | passes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| full | 0.000 | 7.056 | 0.059 | 9.648 | 0.081 | 5010 | 42 | 0.306 | 3664 | 30 | 1.01 | 5.943 | 6 |
-| gauss_q | 0.000 | 6.598 | 0.069 | 9.161 | 0.135 | 4757 | 69 | 0.290 | 3426 | 35 | 1.00 | 5.548 | 6 |
-| sorted | 0.000 | 6.588 | 0.073 | 9.170 | 0.118 | 4763 | 61 | 0.291 | 3422 | 37 | 1.00 | 5.500 | 6 |
-| pos | 0.000 | 6.171 | 0.206 | 8.733 | 0.207 | 4536 | 108 | 0.277 | 3205 | 107 | 1.00 | 5.239 | 6 |
-| smallint | 0.000 | 6.003 | 0.142 | 8.628 | 0.096 | 4481 | 51 | 0.273 | 3117 | 75 | 1.00 | 5.118 | 6 |
-| sparse50 | 0.070 | 5.463 | 0.146 | 8.061 | 0.126 | 4187 | 66 | 0.256 | 2838 | 76 | 1.00 | 4.593 | 6 |
-| ternary | 0.008 | 5.186 | 0.051 | 7.727 | 0.097 | 4013 | 50 | 0.245 | 2693 | 26 | 1.00 | 4.371 | 6 |
-| highbit | 0.000 | 3.233 | 0.036 | 5.853 | 0.068 | 3039 | 35 | 0.186 | 1679 | 19 | 0.83 | 2.746 | 6 |
-| wsparse50 | 0.644 | 3.142 | 0.056 | 5.743 | 0.088 | 2983 | 46 | 0.182 | 1632 | 29 | 0.83 | 2.710 | 6 |
-| neg_ones | 0.000 | 1.628 | 0.169 | 4.176 | 0.134 | 2169 | 69 | 0.132 | 846 | 88 | 0.81 | 1.448 | 6 |
-| ones | 0.000 | 1.561 | 0.069 | 4.146 | 0.078 | 2153 | 40 | 0.131 | 811 | 36 | 1.00 | 1.356 | 6 |
-| sparse90 | 0.822 | 1.145 | 0.057 | 3.763 | 0.083 | 1955 | 44 | 0.119 | 595 | 29 | 0.83 | 0.949 | 6 |
-| wsparse90 | 0.980 | 0.538 | 0.051 | 3.079 | 0.069 | 1599 | 36 | 0.098 | 280 | 27 | 0.37 | 0.454 | 6 |
-| a_full_b_zeros | 1.000 | 0.497 | 0.085 | 3.115 | 0.034 | 1618 | 18 | 0.099 | 258 | 44 | 0.33 | 0.391 | 6 |
-| a_zeros_b_full | 1.000 | 0.305 | 0.070 | 2.900 | 0.062 | 1506 | 32 | 0.092 | 159 | 37 | 0.48 | 0.253 | 6 |
-| zeros | 1.000 | 0.000 | 0.000 | 2.605 | 0.028 | 1353 | 15 | 0.083 | 0 | 0 | 0.22 | 0.000 | 6 |
+| full | 0.000 | 7.056 | 0.059 | 9.648 | 0.081 | 5010 | 42 | 0.306 | 3664 | 30 | 1.01† | 5.943 | 6 |
+| gauss_q | 0.000 | 6.598 | 0.069 | 9.161 | 0.135 | 4757 | 69 | 0.290 | 3426 | 35 | 1.00† | 5.548 | 6 |
+| sorted | 0.000 | 6.588 | 0.073 | 9.170 | 0.118 | 4763 | 61 | 0.291 | 3422 | 37 | 1.00† | 5.500 | 6 |
+| pos | 0.000 | 6.171 | 0.206 | 8.733 | 0.207 | 4536 | 108 | 0.277 | 3205 | 107 | 1.00† | 5.239 | 6 |
+| smallint | 0.000 | 6.003 | 0.142 | 8.628 | 0.096 | 4481 | 51 | 0.273 | 3117 | 75 | 1.00† | 5.118 | 6 |
+| sparse50 | 0.070 | 5.463 | 0.146 | 8.061 | 0.126 | 4187 | 66 | 0.256 | 2838 | 76 | 1.00† | 4.593 | 6 |
+| ternary | 0.008 | 5.186 | 0.051 | 7.727 | 0.097 | 4013 | 50 | 0.245 | 2693 | 26 | 1.00† | 4.371 | 6 |
+| highbit | 0.000 | 3.233 | 0.036 | 5.853 | 0.068 | 3039 | 35 | 0.186 | 1679 | 19 | 0.83† | 2.746 | 6 |
+| wsparse50 | 0.644 | 3.142 | 0.056 | 5.743 | 0.088 | 2983 | 46 | 0.182 | 1632 | 29 | 0.83† | 2.710 | 6 |
+| neg_ones | 0.000 | 1.628 | 0.169 | 4.176 | 0.134 | 2169 | 69 | 0.132 | 846 | 88 | 0.81† | 1.448 | 6 |
+| ones | 0.000 | 1.561 | 0.069 | 4.146 | 0.078 | 2153 | 40 | 0.131 | 811 | 36 | 1.00† | 1.356 | 6 |
+| sparse90 | 0.822 | 1.145 | 0.057 | 3.763 | 0.083 | 1955 | 44 | 0.119 | 595 | 29 | 0.83† | 0.949 | 6 |
+| wsparse90 | 0.980 | 0.538 | 0.051 | 3.079 | 0.069 | 1599 | 36 | 0.098 | 280 | 27 | 0.37† | 0.454 | 6 |
+| a_full_b_zeros | 1.000 | 0.497 | 0.085 | 3.115 | 0.034 | 1618 | 18 | 0.099 | 258 | 44 | 0.33† | 0.391 | 6 |
+| a_zeros_b_full | 1.000 | 0.305 | 0.070 | 2.900 | 0.062 | 1506 | 32 | 0.092 | 159 | 37 | 0.48† | 0.253 | 6 |
+| zeros | 1.000 | 0.000 | 0.000 | 2.605 | 0.028 | 1353 | 15 | 0.083 | 0 | 0 | 0.22† | 0.000 | 6 |
 
 int8 zeros over idle (its zero-data level): S = 2.605 ± 0.028 W, D32 = 0.612 ± 0.053 W.
 
@@ -244,7 +262,7 @@ int8 zeros over idle (its zero-data level): S = 2.605 ± 0.028 W, D32 = 0.612 ±
 | int8/a_zeros_b_full | 0.305 | 0.070 | 0.000 | [0.00, 0.30] | no | yes |
 | int8/zeros | 0.000 | 0.000 | 0.000 | [0.00, 0.30] | yes | no |
 
-`frozen 95%` is Q130(c)'s registered `switching_w_ci95`; the gated kinds' intervals are clipped at [0.00, 0.30] W, which is why the one-sided kinds miss on a real 0.6–0.8 W. `A1 out-of-sample` marks the kinds C-R1, C-R2, E78-R1 and E78-R2 are scored on.
+`frozen 95%` is Q130(c)'s registered `switching_w_ci95`; the gated kinds' intervals are clipped at [0.00, 0.30] W, which is why the one-sided kinds miss on a real 0.3–0.8 W (0.6–0.8 W in fp32 and fp16, 0.3–0.5 W in int8). `A1 out-of-sample` marks the kinds C-R1, C-R2, E78-R1 and E78-R2 are scored on.
 
 ### Predicted against measured: Q130(b) r2 (fcfe82a7) on D32, both variants
 
@@ -339,7 +357,7 @@ Error = predicted − measured D32 (watts above fp32 zeros), z = error / √(σ�
 | E78-R4 | int8.ones | 1.561 ± 0.069 | 1.834 ± 0.6 W | **PASS** | PASS | PASS |
 | E78-R4 | pi_builtin_vs_file | -0.067 ± 0.104 | within ± 0.25 W | **PASS** | PASS | PASS |
 
-Tally at the primary slope: **28 pass, 2 fail, 0 inconclusive, 0 not scored** (30 verdicts). The registered arms: at `leak0.3803`: 28 pass, 2 fail, 0 inconclusive, 0 not scored; at `leak0`: 28 pass, 2 fail, 0 inconclusive, 0 not scored.
+Tally at the primary slope: **28 pass, 2 fail, 0 inconclusive, 0 not scored** (30 verdicts). The registered arms: at `leak0.3803`: 28 pass, 2 fail, 0 inconclusive, 0 not scored; at `leak0`: 28 pass, 2 fail, 0 inconclusive, 0 not scored. That is how the frozen scorer counts (`score_e78.py` `tally()`), with E78-R3c's two cells as two verdicts. E78.md and `predictions-e78.json` register R3c as one ("both means inside [1/1.10, 1.10]"), so counted as registered the tally is **27 pass, 2 fail (29 verdicts)** at every arm; no verdict changes (C7).
 
 E78-R1 and R2 beside the primary (Q130(b) r2, not in the tally): ρ = 0.974 / 0.978 / 0.912 (A) and 0.974 / 0.978 / 0.934 (B); rms 1.826 / 1.868 / 7.845 W (A) and 1.826 / 1.408 / 8.511 W (B) — fp32 / fp16 / int8 ([`scored.json`](scored.json) `rules.E78-R1.by_model`, `rules.E78-R2.by_model`).
 
@@ -373,41 +391,139 @@ E78-R1 and R2 beside the primary (Q130(b) r2, not in the tally): ρ = 0.974 / 0.
 
 In the one-sided kinds every lane is gated while one operand's bus keeps moving; kinds.json counts those bits
 (`bus_bits_per_op`). Dividing the whole residual D by them, at the measured op rate R, bounds the price of a moving
-bus bit from above (it charges everything left to the bus):
+bus bit from above (it charges everything left to the bus), **provided the bits are counted as they physically
+move**. That holds on the B side, where each column slot carries its own word. It is not known on the A side:
+kinds.json counts the one broadcast A word once per column slot (8 in fp32 and fp16), a convention it says "is NOT a
+measurement … E78 must validate the A-side weight before any of this is quoted as energy"
+(`facts.hamming_convention.A_BROADCAST_IS_A_CONVENTION`), and E78 does not validate it. So the A side is given in
+both countings (corrected after verification, C2; [`corrections-check.txt`](corrections-check.txt) [C2]):
 
 | cell | D (W) | moving bus bits / op | R (op/s) | ≤ fJ per moving bus bit |
 |---|---|---|---|---|
-| fp32 `a_randn_b_zeros` (A moves) | 0.616 ± 0.122 | 27,920 | 1.1212 × 10⁹ | **19.7** [15.8, 23.6] |
-| fp32 `a_zeros_b_randn` (B moves) | 0.810 ± 0.065 | 55,798 | 1.1206 × 10⁹ | **13.0** [11.9, 14.0] |
-| fp16 `a_randn_b_zeros` (A moves) | 0.659 ± 0.080 | 28,096 | 1.1208 × 10⁹ | **20.9** [18.4, 23.5] |
-| fp16 `a_zeros_b_randn` (B moves) | 0.782 ± 0.063 | 55,806 | 1.1208 × 10⁹ | **12.5** [11.5, 13.5] |
+| fp32 `a_zeros_b_randn` (B moves, per slot) | 0.810 ± 0.065 | 55,798 | 1.1206 × 10⁹ | **13.0** [11.9, 14.0] |
+| fp16 `a_zeros_b_randn` (B moves, per slot) | 0.782 ± 0.063 | 55,806 | 1.1208 × 10⁹ | **12.5** [11.5, 13.5] |
+| fp32 `a_randn_b_zeros` (A moves, counted per slot: kinds.json's convention) | 0.616 ± 0.122 | 27,920 | 1.1212 × 10⁹ | 19.7 [15.8, 23.6] |
+| fp32 `a_randn_b_zeros` (A moves, counted once per broadcast word) | 0.616 ± 0.122 | 3,490 | 1.1212 × 10⁹ | 158 [126, 189] |
+| fp16 `a_randn_b_zeros` (A moves, counted per slot: kinds.json's convention) | 0.659 ± 0.080 | 28,096 | 1.1208 × 10⁹ | 20.9 [18.4, 23.5] |
+| fp16 `a_randn_b_zeros` (A moves, counted once per broadcast word) | 0.659 ± 0.080 | 3,512 | 1.1208 × 10⁹ | 167 [147, 188] |
 
-The two formats agree side for side. int8's bus counts are provisional in kinds.json, so int8 is not priced this way
-(4.0 and 38.3 fJ, which disagree with each other). For scale: E60 priced a read-port bit into an XOR at 20.8 fJ
-([`docs/findings/03-experiments.md`](../../../findings/03-experiments.md), § E60, `e_in`).
+The bound is the B side's: **at most 12.5–13.0 fJ per moving B-bus bit** in a gated lane, the same in fp32 and fp16.
+The A side's bound is 19.7–20.9 fJ per bit counted per slot, or 158–167 fJ per bit counted once per broadcast word;
+which counting matches the wires is not measured. int8's bus counts are provisional in kinds.json, so int8 is not
+priced this way (4.0 and 38.3 fJ per slot-counted bit, which disagree with each other). For scale: E60 priced a
+read-port bit into an XOR at 20.8 fJ ([`docs/findings/03-experiments.md`](../../../findings/03-experiments.md), § E60,
+`e_in`), above the B side's bound.
 
 ## What it changes
 
 - **For the blog's kinds table:** every format × kind cell now has a measured switching power (D over the type's own
-  zeros, S over idle), an energy per op, per MAC and per flop, and a heat column, with 95% intervals over six
-  passes, on one card at one clock. The table above is the source; `e78.json` › `items` holds every number with its
-  SE and n. The cheap kinds are cheap for three reasons of very different size: the zero gate (a 32-bit word test,
-  so it pays most in fp32), a lane that is on but sees nothing change (a third of random data in the floats, a
-  fifth in int8), and changing operand bits (mostly mantissa bits; magnitude is free, order is worth 5–7%).
+  zeros, S over idle) and an energy per op, per MAC and per flop, with 95% intervals over six passes of one tile per
+  kind (the repeatability of that tile, at the primary leakage slope: C5), on one card at one clock. The heat column
+  resolves the 19 kinds above about 12 W of S, at 0.113–0.129 °C per watt; below that the die reading's whole-degree
+  steps limit it, and the low-power kinds' heat is best estimated from S (C1). The table above is the source;
+  `e78.json` › `items` holds every number with its SE and n. The cheap kinds are cheap for three reasons of very
+  different size: the zero gate (a 32-bit word test, so it pays most in fp32), a lane that is on but sees nothing
+  change (a third of random data in the floats, a fifth in int8), and changing operand bits (mostly mantissa bits;
+  magnitude is free, order is worth 5–7%).
 - **Horace hub, Status item 9 ("fp16 and int8"):** the kinds half is closed on aifoundry3 at 600 MHz: fp16 and int8
   now have 17 and 16 measured kinds beside fp32's 18, on the same card, clock and voltage as E65/E67/E79. The fp16
   all-ones *sustained clock* cell named in that item is E80's (aifoundry2), not E78's.
 - **For the models:** neither frozen model is good enough to stand in for the table. Q130(c) is a ranking model
   (ρ 0.87–0.95) that misses mantissa truncation by 4–5 W; Q130(b) r2 ranks better and gets the truncation steps'
-  size nearer, but its int8 scale is wrong by an order of magnitude. Its `g` per format, re-fitted here, is the
-  number to carry: int8 0.110 of fp32's, not 0.037.
+  size nearer, but it over-predicts int8 by about 2× on random-like tiles and up to 7× on constants (C3). Its `g` per
+  format, re-fitted here, is the number to carry: int8 0.110 of fp32's, not 0.037.
 - **For E64's int8 cells:** E64's int8 `--values randn` and `--values uniform` are this table's `full` and `pos`.
+
+## Corrections after verification
+
+*Sat 31 Oct 2026, after the Q130 workflow's verifier checked this directory.* It reproduced every power, energy and
+verdict number from the raw data, by the frozen code and by an independent reducer, and found one major and six minor
+faults in how they were stated. Each is corrected in place above; this list says what changed and why. No number in
+`e78.json`, `scored.json` or `results.md` changed, no verdict changed, and no frozen input changed (their sha256 are in
+[`manifest.json`](manifest.json) › `inputs_frozen`). Every figure below is printed from the committed files by
+[`corrections-check.py`](corrections-check.py), whose output is [`corrections-check.txt`](corrections-check.txt) (its
+section in brackets); it gives the same output on Python 3.9, 3.12 and 3.14.
+
+- **C1 (major) — the heat column is limited by the die reading's whole-degree steps.** The die reading
+  (`temp_c.minshire[0]`) is an integer, and every run launches when it comes back to 58 °C after a 59 °C preheat, so
+  the window mean resolves a kind only when the die climbs through several steps.
+  - Above 12 W of S (19 kinds: 10 fp32, 9 fp16), ΔT/S is 0.113–0.129 °C/W, 0.118 through the origin [C1.2]. A
+    straight line gives 0.107 °C/W plus a 0.24 °C offset (SE 0.08), about the part-step bias a launch at the 58/59 °C
+    boundary would leave.
+  - At or below 12 W (the other 32 kinds, every int8 kind among them), ΔT/S runs from −0.03 to 0.24 °C/W. int8 ones
+    (S 4.15 W) reads 1.00 °C, the same as int8 full (9.65 W, 1.01 °C). `fp32.pi` and the built-in π tie read 1.16 and
+    0.81 °C at the same 10.40 W [C1.3].
+  - Ten cells read the same value in all six passes, so their 95% interval has zero width: int8 ones, gauss_q,
+    sorted, pos, smallint, sparse50 and ternary, fp32 sparse50 and fp16 wsparse50 at 1.00 °C, and fp32 pow2 at
+    2.00 °C [C1.1]. Their uncertainty is about one reading step (1 °C), not zero.
+  - Result 4 said heat follows switching power at "0.08–0.13 °C per watt of S" and set int8's 1.01 °C beside fp32's
+    3.16 °C as a measurement. It now quotes the ratio on the resolved kinds, the tables mark the step-limited ΔT
+    cells †, and the low-power kinds' heat is given as S × 0.118 °C/W, an extrapolation and not a measurement:
+    random int8 about 1.1 °C, int8 ones about 0.5 °C, each type's zeros 0.2–0.3 °C [C1.4].
+  - A measured heat cell for those 32 kinds needs a card run (a longer window, a launch away from a step, or a finer
+    reading).
+- **C2 — the price of a moving operand-bus bit.** Result 2 and § A derived reading said "at most 12.5–20.9 fJ per
+  moving bus bit".
+  - The B side's 12.5–13.0 fJ is a bound per moving B bit, each slot carrying its own word.
+  - The A side's 19.7 / 20.9 fJ divides by A bits counted once per column slot. kinds.json says that counting "is
+    NOT a measurement … E78 must validate the A-side weight before any of this is quoted as energy"
+    (`facts.hamming_convention.A_BROADCAST_IS_A_CONVENTION`), and E78 does not validate it: its one-sided kinds are
+    fully gated. Counted once per broadcast word, the same residual gives at most 158 fJ (fp32) and 167 fJ (fp16)
+    [C2].
+  - The bound is now quoted for the B side only, and the A side in both countings. The comparison with E60's
+    20.8 fJ is made for the B side only.
+- **C3 — "an order of magnitude".** Q130(b) r2 over-predicts int8, but not by 10× anywhere [C3]:
+  - 2.1–2.9× on the seven random-like tiles (full, sorted, gauss_q, pos, smallint, sparse50, ternary; variant A
+    2.09–2.71, B 2.25–2.89);
+  - 1.6–1.9× on wsparse50 and sparse90, 4.0–4.2× on highbit and 6.7–6.9× on the two constants;
+  - and it under-predicts the four gated or all-zero kinds (0.00–0.51×).
+
+  Result 5 and What it changes now say "about 2× on random-like tiles and up to 7× on constants".
+- **C4 — static bits.** E78-R3f's int8 clause passes because its 95% interval, [−0.050, +0.184] W, lies inside the
+  registered ±0.30 W, not because the point estimate is small. In fp16 and fp32, −1.0 and +1.0 differ only in the sign
+  bit, so those clauses test one static set bit per element, not seven. fp16 lies inside ±0.30 W ([−0.221, +0.087]);
+  fp32 is not resolved ([−0.521, +0.295]) [C4]. Result 2 now says this.
+- **C5 — what ± covers.** Every interval here is the repeatability between six passes of one fixed tile per kind, at
+  the primary leakage slope. It leaves out two things.
+  - **The leakage arms.** Between k = 0 and k = 0.3803 W/°C, D moves by up to 1.18 W (fp32 randn 25.344 / 24.725 /
+    24.163 W), about ±0.6 W around the primary on the high-power kinds against a ±0.08 W interval. pJ/op(S) moves by
+    ±1.7% on random data (at most ±1.8% above 12 W), and by up to ±7.7% on the zeros, whose S is small. No verdict
+    moves [C5].
+  - **The tile draw.** kinds.json re-draws each rule with independent seeds (400 draws; 12 for the three sorted
+    kinds). The middle 95% of the draws gate 0.711–0.792 of lane-cycles for fp32 sparse50 (this tile 0.774) and
+    0.376–0.491 for fp16 sparse50 (0.414), and a random fp32 tile's bus bits vary by 1.4% (sd).
+  - Two committed tiles sit just outside their rule's band (2 of 82 checks, against about 4 expected by chance).
+    fp16 nn_like gates 0.195 (draws 0.199–0.305), and fp16 uniform01 moves 77,948 bits an op (draws 73,534–77,624).
+
+  The tables' note now says what ± covers.
+- **C6 — an interim look, not disclosed before.** Between 13:48:03 and 13:48:06 PDT, during pass 7814, the lane copied
+  the box's pass directories to its scratch on the Intel (rsync over ssh). It ran the registered reducer and scorer
+  there on the four finished passes, 7810–7813, which gave the same 28 / 2 tally. Nothing was changed or decided on
+  it: the queue's budget rule ran all six passes, and the last amendment is A1 at 12:48. The copy overlaps the quiet
+  and idle bracket, and perhaps the launch, of pass 7814's run #42 (`fp16.pair_half_zero`). That run's D, 20.361 W,
+  sits with four of the other five passes (20.24–20.41 W; 7813 reads 19.02 W), and its idle bracket with all five
+  [C6]. It is now departure D6 and a line in How it ran.
+- **C7 — wording, and one manifest field.**
+  - (a) "0.6–0.8 W" for one operand all zero holds in fp32 and fp16; int8 is 0.31–0.50 W [C7a].
+  - (b) E67's same constants agree within 0.04 W (ones 0.040, π 0.026 W). E79's were other constants (int8 bytes of
+    popcount 4, a random-significand fp16 tile) and agree within 0.29 W [C7b].
+  - (c) The frozen scorer counts E78-R3c's two cells as two verdicts; E78.md and `predictions-e78.json` register R3c
+    as one ("both means inside [1/1.10, 1.10]"). Counted as registered, the tally is **27 pass, 2 fail (29
+    verdicts)** at every arm. Both R3c cells pass, so no verdict changes [C7c].
+  - (d) `manifest.json` › `registration.pushed` held the commit times. It now holds the push times GitHub recorded,
+    12:45:39 and 12:48:24 PDT, with the commit times beside them as `committed`.
+
+**Still open, and each needs the card:**
+
+- a measured heat cell for the 32 kinds under 12 W;
+- the spread between tile draws, which only more tiles per kind can measure;
+- the A-side weight in ungated lanes (E70's `nrd_a` / `nrd_b` remains that measurement).
 
 ## Registered against what happened
 
 | registered (E78.md, `predictions-e78.json`) | happened |
 |---|---|
-| freeze and A1 on origin/main before the claim and any launch | `cfd94285` 12:45:37, `09c6e29b` 12:48:23; claim 12:55:49; first device-opening command 12:56:13 |
+| freeze and A1 on origin/main before the claim and any launch | `cfd94285` committed 12:45:37, pushed 12:45:39; `09c6e29b` committed 12:48:23, pushed 12:48:24 (GitHub's push record); claim 12:55:49; first device-opening command 12:56:13 |
 | the harness copied into the aifoundry3 binaries tree (`~/aifoundry`) | rsync 12:54:22; all 68 files' sha256 identical on the box and the Intel ([`logs/box-harness.sha256`](logs/box-harness.sha256)) |
 | `run_e78.sh setup`, opening no device node | 12:54:36–12:54:45: `lib.sh` identical to the freeze's (`033d0776…`), `{"tiles": 51, "problems": []}`, the binary's five strings present, numpy 1.26.4, `dry rc=0`, 67 device launches in the dry pass ([`logs/e78-dry.log`](logs/e78-dry.log)) |
 | the smoke: six items, ok, cycles/op 546 / 546 / 318 | p7801, 12:56:34–12:57:14: 6 items × 6 launches, every record ok, 546.0 / 546.0 / 318.0 (each run's first launch 546.014–546.017 / 318.015, inside 0.5%) |
@@ -420,7 +536,7 @@ The two formats agree side for side. int8's bus counts are provisional in kinds.
 | the rail deconvolved (τ 0.95 s), arms 0.80 and 1.10 s; reported, never scored | rail D / board D 0.800–0.865 over the 36 kinds above 3 W; τ re-fit 0.95–1.00 s per pass (median 0.95), c 0.803–0.816 |
 | R5 checks: idle consistency ≤ 0.15 W; τ in [0.80, 1.15] s; duty in [0.990, 1.000]; carry-over; the pi tile | 0.064 W; 0.95 s; 0.9959–0.9967; slope 0.0008 ± 0.0009 W/W over 382 pairs; the host's built-in pi dumped equal to `fp32.pi`'s tile in all six passes. All five ok |
 | the scorer refuses to score on a changed frozen input | `frozen_inputs_verified: true` |
-| fewer than four kept passes makes every rule NOT SCORED | six kept: all 30 verdicts scored |
+| fewer than four kept passes makes every rule NOT SCORED | six kept: all 30 verdicts scored (29 counted as registered, R3c once: C7) |
 
 ## Departures (dated)
 
@@ -445,6 +561,15 @@ The two formats agree side for side. int8's bus counts are provisional in kinds.
   order, which reads the configuration inside each pass. Both were read-only, after the claim, under
   `flock -n /run/lock/etsoc-shire0.lock` and `timeout 10`: TDP 0, 65 °C, 600 MHz, 523 mV both times
   ([`ident/config_session_start.json`](ident/config_session_start.json), [`ident/config_session_end.json`](ident/config_session_end.json)).
+- **D6 — an interim look at four passes, not registered (Sat 31 Oct, 13:48; disclosed after verification, C6).**
+  Between 13:48:03 and 13:48:06 PDT, during pass 7814, the lane copied the box's pass directories to its scratch on
+  the Intel (rsync over ssh, with the running pass's raw telemetry left out). It ran `reduce_e78.py` and
+  `score_e78.py` there on passes 7810–7813: tally 28 pass, 2 fail. Nothing was changed or decided on it. The queue
+  ran on its own budget rule, all six passes ran, and the last amendment is A1 at 12:48. The copy's few seconds of
+  box I/O overlap the quiet, the idle bracket (13:48:03.8–13:48:04.8) and perhaps the launch (13:48:05.0) of pass
+  7814's run #42 (`fp16.pair_half_zero`). That run reads D 20.361 W and idle 25.960 W, against D 20.24–20.41 W in
+  four of the other five passes and idle 25.81–25.97 W in all five
+  ([`corrections-check.txt`](corrections-check.txt) [C6]).
 
 ## How it ran
 
@@ -461,8 +586,10 @@ bash tools/claims-v3/kinds/run_e78.sh go 7810 6    # 12:57:32, detached; queue d
 flock -n /run/lock/etsoc-shire0.lock timeout 10 build/ettelem/ettelem config < /dev/null   # 14:03:24, read only
 ```
 
-Waits were bounded remote loops of at most 525 s. The raw passes, the smoke, both logs and the two reads were copied
-to the Intel, and the registered collect ran there (A1):
+Waits were bounded remote loops of at most 525 s. At 13:48:03–13:48:06, during pass 7814, the lane also copied the
+pass directories to its scratch and reduced and scored the four finished passes there; nothing was decided on it
+(D6). The raw
+passes, the smoke, both logs and the two reads were copied to the Intel, and the registered collect ran there (A1):
 `PY=/usr/bin/python3 nice -n 10 bash tools/claims-v3/kinds/collect_e78.sh 'p78[1-9][0-9]' build/claims-v3/aifoundry3`.
 
 | pass | began | ended | minutes | die (block start → end) | runs | heater launches |
@@ -485,7 +612,9 @@ supplies more).
 - **A `file:` run's metadata is wrong and its math is unchecked** (`main.cpp:587-591`, `:614`): ignore `nnz_a`,
   `a_elems` and `fp16_one_sided_pairs` in `runs.jsonl`; use kinds.json. E78 verifies no arithmetic.
 - **One tile a cell is a draw.** Each cell is one fixed tile; quote kinds.json's `replicates` for a rule. E78's
-  `fp32.randn` tile moves 1.8% fewer operand bits than its rule's mean.
+  `fp32.randn` tile moves 1.8% fewer operand bits than its rule's mean. Two tiles sit just outside their rule's
+  2.5–97.5% band: `fp16.nn_like` gates 0.195 of lane-cycles (draws 0.199–0.305) and `fp16.uniform01` moves 77,948
+  bits an op (draws 73,534–77,624) (C5).
 - **int8's bus and Hamming counts are provisional** in kinds.json; its gated fractions are not.
 - **fp32 `smallint` is not zero-free** (1/16 of its words are zero, 11.8% of lane-cycles gate); `pow2` and
   `bf16trunc` are the zero-free low-entropy fp32 kinds.
@@ -493,8 +622,11 @@ supplies more).
   `nrd_a` / `nrd_b` pair is that measurement.
 - **S includes each type's zero-data level** (1.99 / 1.99 / 2.61 W); D does not. Quote S for "what a multiply-add
   costs over an idle card", D for "what the data costs".
-- **The ΔT column is the die reading's mean over the window minus the launch reading**, in whole-degree steps
-  (most int8 cells read 1.00 or 0.83 °C because of the steps).
+- **The ΔT column is the die reading's mean over the window minus the launch reading**, and the reading moves in
+  whole degrees. It resolves a kind only above about 12 W of S (19 kinds, 0.113–0.129 °C/W). Below that, which
+  includes every int8 kind, the steps decide the reading: most int8 cells read 1.00 or 0.83 °C, ten cells read the
+  same in all six passes, and the zero-width interval that gives is not a 95% interval (C1). For those kinds,
+  S × 0.118 °C/W is the estimate to use, and it is an extrapolation.
 
 ## Files
 
@@ -506,6 +638,7 @@ supplies more).
 | `e78-leak0.3803.json`, `e78-leak0.json` (+ csv, txt, log) | the registered leakage arms |
 | `e78-tau0.80.json`, `e78-tau1.10.json` | the registered rail-lag arms |
 | [`manifest.json`](manifest.json) | what ran, the frozen inputs' sha256, the claim, every file's sha256 |
+| [`corrections-check.py`](corrections-check.py), [`corrections-check.txt`](corrections-check.txt) | every number in § Corrections after verification, derived from the committed files (it changes nothing) |
 | [`code.sha256`](code.sha256) | the harness, as committed; each pass's own `code.sha256` records what ran on the box |
 | `ident/` | the two session `ettelem config` reads and the box's `et-lab-manifest` |
 | `logs/` | the queue log, the setup's dry-run log, the harness hashes on the box |
