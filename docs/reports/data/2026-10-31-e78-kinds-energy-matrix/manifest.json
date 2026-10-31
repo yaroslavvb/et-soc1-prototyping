@@ -1,0 +1,2260 @@
+{
+ "experiment": "E78",
+ "title": "the kinds-of-numbers energy matrix",
+ "request": "Q130",
+ "date": "2026-10-31",
+ "card": "aifoundry3 card 0",
+ "clock_mhz": 600,
+ "v_mean_mv": 521.7,
+ "tdp_w": 0,
+ "temp_threshold_c": 65,
+ "knobs_written": "none",
+ "registration": {
+  "commit": "cfd9428509534afdb78ca49b0a3697ccb60c3869",
+  "pushed": "2026-10-31T12:45:37-07:00",
+  "amendment_A1": {
+   "commit": "09c6e29b0ec7ad87910e1dae2058aee79902a84f",
+   "pushed": "2026-10-31T12:48:23-07:00",
+   "what": "plumbing only"
+  },
+  "file": "tools/claims-v3/kinds/E78.md",
+  "predictions_e78_json_sha256": "83d504bbde46917dd11e87af2dc1e06b4e3f4144a624fe9f2ef21ec4cda248fe"
+ },
+ "inputs_frozen": {
+  "kinds_spec": {
+   "path": "tools/claims-v3/kinds/kinds.json",
+   "sha256": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "commit": "7d9c0d9e",
+   "revision": 2,
+   "note": "revision 2 supersedes 654ee2ce; int8 figures of revision 1 are never quoted"
+  },
+  "q130c_predictions": {
+   "path": "docs/reports/data/2026-10-31-q130-kinds-model/predictions.json",
+   "sha256": "c5a66cb6d5f07a35d783d7db4be0f94a69482cf123defd2eccfda04fb6320a2c",
+   "commit": "2bbe03dd",
+   "role": "the empirical model (Q130C-M1), frozen; E78 scores it as its README and A1 say"
+  },
+  "q130c_amendment_a1": {
+   "path": "docs/reports/data/2026-10-31-q130-kinds-model/amendment-a1.json",
+   "sha256": "6ffc701b07d41f7ffbde9958bf44a03081cc82f784ff17202ebafbdc442c6d54",
+   "commit": "320f3fdd",
+   "role": "Q130(c)'s dated amendment, written before any E78 file existed: the scoring sets, R1-A1's interval, R3/R6/R9 readings"
+  },
+  "q130b_predictor_r2": {
+   "path": "docs/reports/data/2026-10-31-q130-rtl-formats/predictor-r2.json",
+   "sha256": "977d9ba4818cc1251055cf0ed5564594705d1d5cd6492f573f011951f4bdb949",
+   "commit": "fcfe82a7",
+   "role": "the RTL predictor, revision 2, both variants (A: one toggle factor, B: per-format factors), in watts ABOVE fp32 zeros; PROVISIONAL (its bench fails a functional check)"
+  },
+  "q130b_predictor_r1": {
+   "path": "docs/reports/data/2026-10-31-q130-rtl-formats/predictor.json",
+   "sha256": "f886b131f07406cfe25b784bff972603b16d70abb01ed3ef827829f7cb46aa83",
+   "commit": "e05f2a3b",
+   "role": "WITHDRAWN by Q130(b) r2 and kept as the record; NOT frozen as an E78 prediction and never scored"
+  }
+ },
+ "claim": {
+  "channel": "#community-lab",
+  "message_id": "1566178906489356342",
+  "posted": "2026-10-31T12:55:49-07:00",
+  "text": "<ai> **Claude says:** using aifoundry3 [doc](<https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor>)",
+  "release": "the same post edited to append ' — released', after this directory's commit"
+ },
+ "card_session": {
+  "first_device_open": "2026-10-31T12:56:13-07:00",
+  "last_device_open": "2026-10-31T14:03:25-07:00",
+  "smoke": "p7801 12:56:34-12:57:14",
+  "passes": "7810-7815 12:57:33-14:02:54",
+  "block_minutes": 64.76
+ },
+ "passes_kept": [
+  7810,
+  7811,
+  7812,
+  7813,
+  7814,
+  7815
+ ],
+ "runs": 388,
+ "runs_kept": 388,
+ "skipped_before_launch": [
+  "7811 #14 int8.zeros",
+  "7812 #64 anchor_pi"
+ ],
+ "tally": {
+  "PASS": 28,
+  "FAIL": 2,
+  "INCONCLUSIVE": 0,
+  "NOT SCORED": 0
+ },
+ "tally_arms": {
+  "leak0.3803": {
+   "PASS": 28,
+   "FAIL": 2,
+   "INCONCLUSIVE": 0,
+   "NOT SCORED": 0
+  },
+  "leak0": {
+   "PASS": 28,
+   "FAIL": 2,
+   "INCONCLUSIVE": 0,
+   "NOT SCORED": 0
+  }
+ },
+ "commands": [
+  "rsync -a --exclude __pycache__ tools/claims-v3/kinds/ aifoundry3:aifoundry/tools/claims-v3/kinds/",
+  "bash tools/claims-v3/kinds/run_e78.sh setup",
+  "flock -n /run/lock/etsoc-shire0.lock timeout 10 build/ettelem/ettelem config",
+  "bash tools/claims-v3/kinds/run_e78.sh smoke",
+  "bash tools/claims-v3/kinds/run_e78.sh go 7810 6",
+  "flock -n /run/lock/etsoc-shire0.lock timeout 10 build/ettelem/ettelem config",
+  "PY=/usr/bin/python3 nice -n 10 bash tools/claims-v3/kinds/collect_e78.sh 'p78[1-9][0-9]' build/claims-v3/aifoundry3"
+ ],
+ "files": [
+  {
+   "path": "README.md",
+   "bytes": 45454,
+   "sha256": "c9ff696ff6eea2eec8ea0320b09bc66112dbd38802f7983495f3ec9316327c28"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/block.json",
+   "bytes": 169,
+   "sha256": "a14fd9f840fa47a3c9ceff809a9da00ceea321b76b8506f997c484e3e62cd12e"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/code.sha256",
+   "bytes": 89,
+   "sha256": "46b963f12198e4817ec49bde360057bd76a746af581f248bc5ec742822655569"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/config_end.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/config_start.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/configs.json",
+   "bytes": 5214,
+   "sha256": "26b48aac89e498958d27fc59171c9bea8d3d4659a12ebe1893ea8164a2bce0f3"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/gen.sha256",
+   "bytes": 4683,
+   "sha256": "9737ac3cd1e55f1c7459cceb8f64da6f056947fb34dd29bf89be86d5d13a0a43"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/manifest.txt",
+   "bytes": 670,
+   "sha256": "fbe61cd09e54fd14c21b926699251af032f7590e1c0dc6462d6e1cf2cfe7b7fd"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/marks.jsonl",
+   "bytes": 1835,
+   "sha256": "4b247c3022d31865b3c0c578b0bfd21b4673c374a2a6c319dcd4dbd9f975fa3a"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/plan.json",
+   "bytes": 310,
+   "sha256": "451afa272505e7039a1ffdf58b4f9c0f09780c232fd2266e61f25986153748b0"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/run.log",
+   "bytes": 926,
+   "sha256": "f206a8ef1b64655593486aafcfb5b43c6d0e56fcefc17cf4c367e591cf59733a"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/runs.jsonl",
+   "bytes": 28556,
+   "sha256": "545b27dc162f197453dd2d5115beaf1f1cd1aa80381084b5225dee500895737e"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/telemetry.jsonl.gz",
+   "bytes": 7906,
+   "sha256": "cef0d6925563c829c68d4d6caa4073402676cedff751f3ffd4914046cd8a030c"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/tiles/anchor_pi.b7801.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/tiles/fp16.randn.b7801.bin",
+   "bytes": 2048,
+   "sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/tiles/fp32.a_randn_b_zeros.b7801.bin",
+   "bytes": 2048,
+   "sha256": "bba7e25f69eb94fb98d954428d8adf3b82e1372a85a1ebc3ad264d932e4d952d"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/tiles/fp32.randn.b7801.bin",
+   "bytes": 2048,
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/tiles/fp32.zeros.b7801.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/kinds-smoke-p7801/tiles/int8.full.b7801.bin",
+   "bytes": 2048,
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/block.json",
+   "bytes": 157,
+   "sha256": "36dd5de174a46271d5949aeb3f7af2a5d5561cf1226b759059ed2cee100b52ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/code.sha256",
+   "bytes": 1824,
+   "sha256": "7db996a1e4ed4b336e9f2aea62a7965eb91e2ed6b911f65d1f71a8b0d8b0d61e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/config_end.json",
+   "bytes": 114,
+   "sha256": "c8ea1243329c0cc642fd5b2f6ed518d9faf405c2e537abcc613d1aae292d6d33"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/config_start.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/configs.json",
+   "bytes": 41497,
+   "sha256": "72317e920d609fa405cc60e9574bc5b796c4e3ef7f41c8eb54c4b29a26963da8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/gen.sha256",
+   "bytes": 4683,
+   "sha256": "9737ac3cd1e55f1c7459cceb8f64da6f056947fb34dd29bf89be86d5d13a0a43"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/manifest.txt",
+   "bytes": 670,
+   "sha256": "4493b5f2693f536b93572c6fd45afca7496f11496f2fbfc77cc21bd89539dd73"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/marks.jsonl",
+   "bytes": 25470,
+   "sha256": "401e43091570b6f539168cfccdf8be8231b733b191ed18101038bc76034a88de"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/plan.json",
+   "bytes": 3473,
+   "sha256": "7f8ebc2474053639d434f382f6eb8b54f3a5dfa11542590eb031989659544167"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/run.log",
+   "bytes": 8333,
+   "sha256": "c61ff92bb08ddd2ebba6a8734d2d2189f718bfc0ae1630b1961ab98b93797d17"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/runs.jsonl",
+   "bytes": 524436,
+   "sha256": "08655a9ffcb9b3316065b4607270fa1bb384a0f684cc1b15e5b1877537a18210"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/telemetry.jsonl.gz",
+   "bytes": 140230,
+   "sha256": "bab6679bc817f679177d5f33be934cd058a3ee7315c6020ab98f480f06917291"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/anchor_pi.b7810.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.a_randn_b_zeros.b7810.bin",
+   "bytes": 2048,
+   "sha256": "51a7424e7f4c711ba546b3cadb34aaccc25bb36376f4b14e706fff32c7640d7f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.a_zeros_b_randn.b7810.bin",
+   "bytes": 2048,
+   "sha256": "ff2f88849f8c4a7b7aafefc0e29e74d4070492e7b3a41c4557f41e7e3f454af5"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.fp8grid.b7810.bin",
+   "bytes": 2048,
+   "sha256": "9baf7946148138bad5404bbada6fe8f8dc46d0162f18c7921827b29d097b144d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.neg_ones.b7810.bin",
+   "bytes": 2048,
+   "sha256": "4e325a49d476f9208c95dce54b1a59c147517f1d70617a193b93c0e10d8e8cc7"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.nn_like.b7810.bin",
+   "bytes": 2048,
+   "sha256": "1d11a28ba25bb7adc56eaf62ccc6330d523c82ee4a63b12adb349fdba1de3d27"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.ones.b7810.bin",
+   "bytes": 2048,
+   "sha256": "c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.pair_half_zero.b7810.bin",
+   "bytes": 2048,
+   "sha256": "463449da7eccd3457ee04840f01dfef52a68ed00f1913cbcaa5fe9093bceeb34"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.randn.b7810.bin",
+   "bytes": 2048,
+   "sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.randn_small.b7810.bin",
+   "bytes": 2048,
+   "sha256": "ab633bb9dfdff3d3e7f1acc7bf665c879d6a8b8b3be9f49f57d63e12f921401e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.randn_sorted.b7810.bin",
+   "bytes": 2048,
+   "sha256": "983c3ee3c2fb8af3bf3e3e10e78b8e945a18f333a960dfc3cde3dd08c6b164b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.smallint.b7810.bin",
+   "bytes": 2048,
+   "sha256": "74b75d643b356c1ad0801aded66c5dee5d6046d68df4be020a79dd111f195b53"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.sparse50.b7810.bin",
+   "bytes": 2048,
+   "sha256": "24fc0ea7988ea2e011d59388a9b6152fe68add28028ad0884e5eb2b588c1c11b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.sparse90.b7810.bin",
+   "bytes": 2048,
+   "sha256": "37f3df172b0dce9f6da14a538457d41c1779bdc44394a6734be40d0036c709b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.uniform01.b7810.bin",
+   "bytes": 2048,
+   "sha256": "f27e67543fabb0c7623c047fed941a5b9f15e23a137d421251f24ffeaa620c5c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.wsparse50.b7810.bin",
+   "bytes": 2048,
+   "sha256": "75fa5d0427231be1d8728ac5006a6bafc2f89c779a56b1bd438633192c45cc74"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.wsparse90.b7810.bin",
+   "bytes": 2048,
+   "sha256": "894e7b20333e9ae2516e2dfedbb9d04da980104e0cc44ee3bd701960cbdc8dc9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp16.zeros.b7810.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.a_randn_b_zeros.b7810.bin",
+   "bytes": 2048,
+   "sha256": "bba7e25f69eb94fb98d954428d8adf3b82e1372a85a1ebc3ad264d932e4d952d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.a_zeros_b_randn.b7810.bin",
+   "bytes": 2048,
+   "sha256": "1c0546e56600fb5af64610f3adeceb30cbb1384a8368153b24772630b4f8245d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.bf16trunc.b7810.bin",
+   "bytes": 2048,
+   "sha256": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.fp16grid.b7810.bin",
+   "bytes": 2048,
+   "sha256": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.neg_ones.b7810.bin",
+   "bytes": 2048,
+   "sha256": "d55e700e94f9d6b3ee9ab86dbdfca2df8a357a04ea5631c537cf494813306e2f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.nn_like.b7810.bin",
+   "bytes": 2048,
+   "sha256": "b1ac9635527ce0da9cd8f9e90f654a7f5d7d11d983619ced4a63d0fe30bfeeb8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.ones.b7810.bin",
+   "bytes": 2048,
+   "sha256": "fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.pi.b7810.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.pow2.b7810.bin",
+   "bytes": 2048,
+   "sha256": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.randn.b7810.bin",
+   "bytes": 2048,
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.randn_large.b7810.bin",
+   "bytes": 2048,
+   "sha256": "95e0e68b705437d589f012858bd7cb475d612c270ed7899d17b3083bba78ad3e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.randn_small.b7810.bin",
+   "bytes": 2048,
+   "sha256": "1bb5c90d00b5e2ecaf3d16e3522aab3311e6b50fa1e9222343cdf6a55497d901"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.randn_sorted.b7810.bin",
+   "bytes": 2048,
+   "sha256": "1f7af1fbac945df5eb217930df651917a9a1e3121b5dea5fa1af8b61ed9dd752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.smallint.b7810.bin",
+   "bytes": 2048,
+   "sha256": "fd3d049e5908934965a165afe1ed529db86501c92b3d1da5d50642e9b18d8b3c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.sparse50.b7810.bin",
+   "bytes": 2048,
+   "sha256": "43ababfe5f3fed0963600a119a5ec805b433636594616042cac4fbab1fd69530"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.sparse90.b7810.bin",
+   "bytes": 2048,
+   "sha256": "1ff8d98e3cd223fb18bdd24c1c294ed88d3853a568fd96b3fb46ce6d6b11a841"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.uniform01.b7810.bin",
+   "bytes": 2048,
+   "sha256": "a2f2cb094c70f185138cdd130ef1f4e9fffea226bfe7ee2d7f2f7f44e6a40b8c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/fp32.zeros.b7810.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.a_full_b_zeros.b7810.bin",
+   "bytes": 2048,
+   "sha256": "a3570b797a41bd8cc3bbda801bf232ac85a4d180d983bad75fcde8b10e24c030"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.a_zeros_b_full.b7810.bin",
+   "bytes": 2048,
+   "sha256": "cb1033cfe9ce08c2cc3f3fc5887ebdab9bf99479a79f483a499655530b6d7704"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.full.b7810.bin",
+   "bytes": 2048,
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.gauss_q.b7810.bin",
+   "bytes": 2048,
+   "sha256": "5a728a0ed9b67b24da11ddd034cbeb8b577e00088d0bbdec82dd1884328902a3"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.highbit.b7810.bin",
+   "bytes": 2048,
+   "sha256": "b29af488b581a8b07699f6ab35041e0f7d7db6bb667f35502e9fa2f5f0be28fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.neg_ones.b7810.bin",
+   "bytes": 2048,
+   "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.ones.b7810.bin",
+   "bytes": 2048,
+   "sha256": "7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.pos.b7810.bin",
+   "bytes": 2048,
+   "sha256": "c67fb76ffaa707949f4d1efd871739c3353224a79d40f092ec0f20ee395ecaf2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.smallint.b7810.bin",
+   "bytes": 2048,
+   "sha256": "940ecffb1175bfcc10e3a87ec8a6ba692a953d949b5b6d8623628885cc631aa1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.sorted.b7810.bin",
+   "bytes": 2048,
+   "sha256": "0f8f20bf3155dda98e51878cc999c21b45399266558b9d237903e3f530712948"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.sparse50.b7810.bin",
+   "bytes": 2048,
+   "sha256": "e235ed609c58b069f36412099d8d2fa890cae07bf5599f77b65904b6802d38a8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.sparse90.b7810.bin",
+   "bytes": 2048,
+   "sha256": "7f99abeaacd8ede601f37fad4dead098f7cdffe905af99e956b03fceddccb03b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.ternary.b7810.bin",
+   "bytes": 2048,
+   "sha256": "f5467ac1acee2fbf0fee0a0aff8ee1510af6e570829a08453ba0596b289cc607"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.wsparse50.b7810.bin",
+   "bytes": 2048,
+   "sha256": "c4e9c25698357a6e27b9327ddfa2a12589c84bedd3ad39bb06f88d86e581a752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.wsparse90.b7810.bin",
+   "bytes": 2048,
+   "sha256": "0180bfbf624d87a3426796b40c8890df5ca11784a8f3dc3afa6456cbb1a87da8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7810/tiles/int8.zeros.b7810.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/block.json",
+   "bytes": 157,
+   "sha256": "299da9bbc7eb6c37895d3e685f3a343c8e8c9aa86fa9c0a776c59c7bab9af6e4"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/code.sha256",
+   "bytes": 1824,
+   "sha256": "7db996a1e4ed4b336e9f2aea62a7965eb91e2ed6b911f65d1f71a8b0d8b0d61e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/config_end.json",
+   "bytes": 114,
+   "sha256": "c8ea1243329c0cc642fd5b2f6ed518d9faf405c2e537abcc613d1aae292d6d33"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/config_start.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/configs.json",
+   "bytes": 41497,
+   "sha256": "c6d13a48d9d07ffe49b6b1042bb964f417a1eb4a3a0a905b619eb0be6ba96d98"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/gen.sha256",
+   "bytes": 4683,
+   "sha256": "9737ac3cd1e55f1c7459cceb8f64da6f056947fb34dd29bf89be86d5d13a0a43"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/manifest.txt",
+   "bytes": 670,
+   "sha256": "d85bd4e5d91b33593b70d53714f4a0135e08ded98e0ae555edcbdc33844756a8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/marks.jsonl",
+   "bytes": 23308,
+   "sha256": "a18c645cd673fcd4f51462310e543926c236752343c6e82d7f646a2e985c3d4c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/plan.json",
+   "bytes": 3473,
+   "sha256": "fc89a9fc5f9317e0b41cd05895c4d3d5f5cf58c0bdf117830239999aed1457e1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/run.log",
+   "bytes": 8354,
+   "sha256": "eb65642756a3ad6fa2a6d5d598af0db9ebf897871eac6ad48575d992b541eaf8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/runs.jsonl",
+   "bytes": 516411,
+   "sha256": "e496a7db2715915d6955e7cb709f66d87c2284e842af259303e6a29719cc8e53"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/telemetry.jsonl.gz",
+   "bytes": 128092,
+   "sha256": "754b0f0ddc578b73fcc88028282b883d9bce9ab747d51f1e7a519210c9a451c7"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/anchor_pi.b7811.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.a_randn_b_zeros.b7811.bin",
+   "bytes": 2048,
+   "sha256": "51a7424e7f4c711ba546b3cadb34aaccc25bb36376f4b14e706fff32c7640d7f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.a_zeros_b_randn.b7811.bin",
+   "bytes": 2048,
+   "sha256": "ff2f88849f8c4a7b7aafefc0e29e74d4070492e7b3a41c4557f41e7e3f454af5"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.fp8grid.b7811.bin",
+   "bytes": 2048,
+   "sha256": "9baf7946148138bad5404bbada6fe8f8dc46d0162f18c7921827b29d097b144d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.neg_ones.b7811.bin",
+   "bytes": 2048,
+   "sha256": "4e325a49d476f9208c95dce54b1a59c147517f1d70617a193b93c0e10d8e8cc7"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.nn_like.b7811.bin",
+   "bytes": 2048,
+   "sha256": "1d11a28ba25bb7adc56eaf62ccc6330d523c82ee4a63b12adb349fdba1de3d27"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.ones.b7811.bin",
+   "bytes": 2048,
+   "sha256": "c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.pair_half_zero.b7811.bin",
+   "bytes": 2048,
+   "sha256": "463449da7eccd3457ee04840f01dfef52a68ed00f1913cbcaa5fe9093bceeb34"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.randn.b7811.bin",
+   "bytes": 2048,
+   "sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.randn_small.b7811.bin",
+   "bytes": 2048,
+   "sha256": "ab633bb9dfdff3d3e7f1acc7bf665c879d6a8b8b3be9f49f57d63e12f921401e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.randn_sorted.b7811.bin",
+   "bytes": 2048,
+   "sha256": "983c3ee3c2fb8af3bf3e3e10e78b8e945a18f333a960dfc3cde3dd08c6b164b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.smallint.b7811.bin",
+   "bytes": 2048,
+   "sha256": "74b75d643b356c1ad0801aded66c5dee5d6046d68df4be020a79dd111f195b53"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.sparse50.b7811.bin",
+   "bytes": 2048,
+   "sha256": "24fc0ea7988ea2e011d59388a9b6152fe68add28028ad0884e5eb2b588c1c11b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.sparse90.b7811.bin",
+   "bytes": 2048,
+   "sha256": "37f3df172b0dce9f6da14a538457d41c1779bdc44394a6734be40d0036c709b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.uniform01.b7811.bin",
+   "bytes": 2048,
+   "sha256": "f27e67543fabb0c7623c047fed941a5b9f15e23a137d421251f24ffeaa620c5c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.wsparse50.b7811.bin",
+   "bytes": 2048,
+   "sha256": "75fa5d0427231be1d8728ac5006a6bafc2f89c779a56b1bd438633192c45cc74"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.wsparse90.b7811.bin",
+   "bytes": 2048,
+   "sha256": "894e7b20333e9ae2516e2dfedbb9d04da980104e0cc44ee3bd701960cbdc8dc9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp16.zeros.b7811.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.a_randn_b_zeros.b7811.bin",
+   "bytes": 2048,
+   "sha256": "bba7e25f69eb94fb98d954428d8adf3b82e1372a85a1ebc3ad264d932e4d952d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.a_zeros_b_randn.b7811.bin",
+   "bytes": 2048,
+   "sha256": "1c0546e56600fb5af64610f3adeceb30cbb1384a8368153b24772630b4f8245d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.bf16trunc.b7811.bin",
+   "bytes": 2048,
+   "sha256": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.fp16grid.b7811.bin",
+   "bytes": 2048,
+   "sha256": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.neg_ones.b7811.bin",
+   "bytes": 2048,
+   "sha256": "d55e700e94f9d6b3ee9ab86dbdfca2df8a357a04ea5631c537cf494813306e2f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.nn_like.b7811.bin",
+   "bytes": 2048,
+   "sha256": "b1ac9635527ce0da9cd8f9e90f654a7f5d7d11d983619ced4a63d0fe30bfeeb8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.ones.b7811.bin",
+   "bytes": 2048,
+   "sha256": "fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.pi.b7811.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.pow2.b7811.bin",
+   "bytes": 2048,
+   "sha256": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.randn.b7811.bin",
+   "bytes": 2048,
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.randn_large.b7811.bin",
+   "bytes": 2048,
+   "sha256": "95e0e68b705437d589f012858bd7cb475d612c270ed7899d17b3083bba78ad3e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.randn_small.b7811.bin",
+   "bytes": 2048,
+   "sha256": "1bb5c90d00b5e2ecaf3d16e3522aab3311e6b50fa1e9222343cdf6a55497d901"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.randn_sorted.b7811.bin",
+   "bytes": 2048,
+   "sha256": "1f7af1fbac945df5eb217930df651917a9a1e3121b5dea5fa1af8b61ed9dd752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.smallint.b7811.bin",
+   "bytes": 2048,
+   "sha256": "fd3d049e5908934965a165afe1ed529db86501c92b3d1da5d50642e9b18d8b3c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.sparse50.b7811.bin",
+   "bytes": 2048,
+   "sha256": "43ababfe5f3fed0963600a119a5ec805b433636594616042cac4fbab1fd69530"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.sparse90.b7811.bin",
+   "bytes": 2048,
+   "sha256": "1ff8d98e3cd223fb18bdd24c1c294ed88d3853a568fd96b3fb46ce6d6b11a841"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.uniform01.b7811.bin",
+   "bytes": 2048,
+   "sha256": "a2f2cb094c70f185138cdd130ef1f4e9fffea226bfe7ee2d7f2f7f44e6a40b8c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/fp32.zeros.b7811.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.a_full_b_zeros.b7811.bin",
+   "bytes": 2048,
+   "sha256": "a3570b797a41bd8cc3bbda801bf232ac85a4d180d983bad75fcde8b10e24c030"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.a_zeros_b_full.b7811.bin",
+   "bytes": 2048,
+   "sha256": "cb1033cfe9ce08c2cc3f3fc5887ebdab9bf99479a79f483a499655530b6d7704"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.full.b7811.bin",
+   "bytes": 2048,
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.gauss_q.b7811.bin",
+   "bytes": 2048,
+   "sha256": "5a728a0ed9b67b24da11ddd034cbeb8b577e00088d0bbdec82dd1884328902a3"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.highbit.b7811.bin",
+   "bytes": 2048,
+   "sha256": "b29af488b581a8b07699f6ab35041e0f7d7db6bb667f35502e9fa2f5f0be28fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.neg_ones.b7811.bin",
+   "bytes": 2048,
+   "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.ones.b7811.bin",
+   "bytes": 2048,
+   "sha256": "7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.pos.b7811.bin",
+   "bytes": 2048,
+   "sha256": "c67fb76ffaa707949f4d1efd871739c3353224a79d40f092ec0f20ee395ecaf2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.smallint.b7811.bin",
+   "bytes": 2048,
+   "sha256": "940ecffb1175bfcc10e3a87ec8a6ba692a953d949b5b6d8623628885cc631aa1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.sorted.b7811.bin",
+   "bytes": 2048,
+   "sha256": "0f8f20bf3155dda98e51878cc999c21b45399266558b9d237903e3f530712948"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.sparse50.b7811.bin",
+   "bytes": 2048,
+   "sha256": "e235ed609c58b069f36412099d8d2fa890cae07bf5599f77b65904b6802d38a8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.sparse90.b7811.bin",
+   "bytes": 2048,
+   "sha256": "7f99abeaacd8ede601f37fad4dead098f7cdffe905af99e956b03fceddccb03b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.ternary.b7811.bin",
+   "bytes": 2048,
+   "sha256": "f5467ac1acee2fbf0fee0a0aff8ee1510af6e570829a08453ba0596b289cc607"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.wsparse50.b7811.bin",
+   "bytes": 2048,
+   "sha256": "c4e9c25698357a6e27b9327ddfa2a12589c84bedd3ad39bb06f88d86e581a752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.wsparse90.b7811.bin",
+   "bytes": 2048,
+   "sha256": "0180bfbf624d87a3426796b40c8890df5ca11784a8f3dc3afa6456cbb1a87da8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7811/tiles/int8.zeros.b7811.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/block.json",
+   "bytes": 157,
+   "sha256": "c17c4b6bf437d542c1ceedf3689333c35eed11506061362b2c5b138d55bf981e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/code.sha256",
+   "bytes": 1824,
+   "sha256": "7db996a1e4ed4b336e9f2aea62a7965eb91e2ed6b911f65d1f71a8b0d8b0d61e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/config_end.json",
+   "bytes": 114,
+   "sha256": "c8ea1243329c0cc642fd5b2f6ed518d9faf405c2e537abcc613d1aae292d6d33"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/config_start.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/configs.json",
+   "bytes": 41497,
+   "sha256": "7e53a02c515d7e11fae48228f5d19d25fe8d36c0ab1d9272926e301bef14396f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/gen.sha256",
+   "bytes": 4683,
+   "sha256": "9737ac3cd1e55f1c7459cceb8f64da6f056947fb34dd29bf89be86d5d13a0a43"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/manifest.txt",
+   "bytes": 670,
+   "sha256": "1edf610709ad83a3bd4f27d79f7f9443950d8a51b313b41b371c2c9154e84186"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/marks.jsonl",
+   "bytes": 23603,
+   "sha256": "14c3750f7a35e21410e2964510ba1ed89af02c1f3d0124c6816c998431255381"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/plan.json",
+   "bytes": 3473,
+   "sha256": "7793f202d4caaf7565393422dc659d625dc986ea9e8a25521ea781d1d246d60d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/run.log",
+   "bytes": 8353,
+   "sha256": "6a5d88cf2489c161351e876604114e5f2fedf7bec9cb196a324ab001c1452872"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/runs.jsonl",
+   "bytes": 517058,
+   "sha256": "5b00f72190afe0c4ecea5d62cd1f5f43e06ea4294a3084f53bbce0f5e7d418d5"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/telemetry.jsonl.gz",
+   "bytes": 128591,
+   "sha256": "0c425880b0009a0c010024bdb18b362924097e8380d9f3c66365a61352321c6d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/anchor_pi.b7812.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.a_randn_b_zeros.b7812.bin",
+   "bytes": 2048,
+   "sha256": "51a7424e7f4c711ba546b3cadb34aaccc25bb36376f4b14e706fff32c7640d7f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.a_zeros_b_randn.b7812.bin",
+   "bytes": 2048,
+   "sha256": "ff2f88849f8c4a7b7aafefc0e29e74d4070492e7b3a41c4557f41e7e3f454af5"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.fp8grid.b7812.bin",
+   "bytes": 2048,
+   "sha256": "9baf7946148138bad5404bbada6fe8f8dc46d0162f18c7921827b29d097b144d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.neg_ones.b7812.bin",
+   "bytes": 2048,
+   "sha256": "4e325a49d476f9208c95dce54b1a59c147517f1d70617a193b93c0e10d8e8cc7"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.nn_like.b7812.bin",
+   "bytes": 2048,
+   "sha256": "1d11a28ba25bb7adc56eaf62ccc6330d523c82ee4a63b12adb349fdba1de3d27"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.ones.b7812.bin",
+   "bytes": 2048,
+   "sha256": "c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.pair_half_zero.b7812.bin",
+   "bytes": 2048,
+   "sha256": "463449da7eccd3457ee04840f01dfef52a68ed00f1913cbcaa5fe9093bceeb34"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.randn.b7812.bin",
+   "bytes": 2048,
+   "sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.randn_small.b7812.bin",
+   "bytes": 2048,
+   "sha256": "ab633bb9dfdff3d3e7f1acc7bf665c879d6a8b8b3be9f49f57d63e12f921401e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.randn_sorted.b7812.bin",
+   "bytes": 2048,
+   "sha256": "983c3ee3c2fb8af3bf3e3e10e78b8e945a18f333a960dfc3cde3dd08c6b164b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.smallint.b7812.bin",
+   "bytes": 2048,
+   "sha256": "74b75d643b356c1ad0801aded66c5dee5d6046d68df4be020a79dd111f195b53"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.sparse50.b7812.bin",
+   "bytes": 2048,
+   "sha256": "24fc0ea7988ea2e011d59388a9b6152fe68add28028ad0884e5eb2b588c1c11b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.sparse90.b7812.bin",
+   "bytes": 2048,
+   "sha256": "37f3df172b0dce9f6da14a538457d41c1779bdc44394a6734be40d0036c709b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.uniform01.b7812.bin",
+   "bytes": 2048,
+   "sha256": "f27e67543fabb0c7623c047fed941a5b9f15e23a137d421251f24ffeaa620c5c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.wsparse50.b7812.bin",
+   "bytes": 2048,
+   "sha256": "75fa5d0427231be1d8728ac5006a6bafc2f89c779a56b1bd438633192c45cc74"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.wsparse90.b7812.bin",
+   "bytes": 2048,
+   "sha256": "894e7b20333e9ae2516e2dfedbb9d04da980104e0cc44ee3bd701960cbdc8dc9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp16.zeros.b7812.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.a_randn_b_zeros.b7812.bin",
+   "bytes": 2048,
+   "sha256": "bba7e25f69eb94fb98d954428d8adf3b82e1372a85a1ebc3ad264d932e4d952d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.a_zeros_b_randn.b7812.bin",
+   "bytes": 2048,
+   "sha256": "1c0546e56600fb5af64610f3adeceb30cbb1384a8368153b24772630b4f8245d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.bf16trunc.b7812.bin",
+   "bytes": 2048,
+   "sha256": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.fp16grid.b7812.bin",
+   "bytes": 2048,
+   "sha256": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.neg_ones.b7812.bin",
+   "bytes": 2048,
+   "sha256": "d55e700e94f9d6b3ee9ab86dbdfca2df8a357a04ea5631c537cf494813306e2f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.nn_like.b7812.bin",
+   "bytes": 2048,
+   "sha256": "b1ac9635527ce0da9cd8f9e90f654a7f5d7d11d983619ced4a63d0fe30bfeeb8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.ones.b7812.bin",
+   "bytes": 2048,
+   "sha256": "fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.pi.b7812.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.pow2.b7812.bin",
+   "bytes": 2048,
+   "sha256": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.randn.b7812.bin",
+   "bytes": 2048,
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.randn_large.b7812.bin",
+   "bytes": 2048,
+   "sha256": "95e0e68b705437d589f012858bd7cb475d612c270ed7899d17b3083bba78ad3e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.randn_small.b7812.bin",
+   "bytes": 2048,
+   "sha256": "1bb5c90d00b5e2ecaf3d16e3522aab3311e6b50fa1e9222343cdf6a55497d901"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.randn_sorted.b7812.bin",
+   "bytes": 2048,
+   "sha256": "1f7af1fbac945df5eb217930df651917a9a1e3121b5dea5fa1af8b61ed9dd752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.smallint.b7812.bin",
+   "bytes": 2048,
+   "sha256": "fd3d049e5908934965a165afe1ed529db86501c92b3d1da5d50642e9b18d8b3c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.sparse50.b7812.bin",
+   "bytes": 2048,
+   "sha256": "43ababfe5f3fed0963600a119a5ec805b433636594616042cac4fbab1fd69530"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.sparse90.b7812.bin",
+   "bytes": 2048,
+   "sha256": "1ff8d98e3cd223fb18bdd24c1c294ed88d3853a568fd96b3fb46ce6d6b11a841"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.uniform01.b7812.bin",
+   "bytes": 2048,
+   "sha256": "a2f2cb094c70f185138cdd130ef1f4e9fffea226bfe7ee2d7f2f7f44e6a40b8c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/fp32.zeros.b7812.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.a_full_b_zeros.b7812.bin",
+   "bytes": 2048,
+   "sha256": "a3570b797a41bd8cc3bbda801bf232ac85a4d180d983bad75fcde8b10e24c030"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.a_zeros_b_full.b7812.bin",
+   "bytes": 2048,
+   "sha256": "cb1033cfe9ce08c2cc3f3fc5887ebdab9bf99479a79f483a499655530b6d7704"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.full.b7812.bin",
+   "bytes": 2048,
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.gauss_q.b7812.bin",
+   "bytes": 2048,
+   "sha256": "5a728a0ed9b67b24da11ddd034cbeb8b577e00088d0bbdec82dd1884328902a3"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.highbit.b7812.bin",
+   "bytes": 2048,
+   "sha256": "b29af488b581a8b07699f6ab35041e0f7d7db6bb667f35502e9fa2f5f0be28fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.neg_ones.b7812.bin",
+   "bytes": 2048,
+   "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.ones.b7812.bin",
+   "bytes": 2048,
+   "sha256": "7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.pos.b7812.bin",
+   "bytes": 2048,
+   "sha256": "c67fb76ffaa707949f4d1efd871739c3353224a79d40f092ec0f20ee395ecaf2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.smallint.b7812.bin",
+   "bytes": 2048,
+   "sha256": "940ecffb1175bfcc10e3a87ec8a6ba692a953d949b5b6d8623628885cc631aa1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.sorted.b7812.bin",
+   "bytes": 2048,
+   "sha256": "0f8f20bf3155dda98e51878cc999c21b45399266558b9d237903e3f530712948"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.sparse50.b7812.bin",
+   "bytes": 2048,
+   "sha256": "e235ed609c58b069f36412099d8d2fa890cae07bf5599f77b65904b6802d38a8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.sparse90.b7812.bin",
+   "bytes": 2048,
+   "sha256": "7f99abeaacd8ede601f37fad4dead098f7cdffe905af99e956b03fceddccb03b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.ternary.b7812.bin",
+   "bytes": 2048,
+   "sha256": "f5467ac1acee2fbf0fee0a0aff8ee1510af6e570829a08453ba0596b289cc607"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.wsparse50.b7812.bin",
+   "bytes": 2048,
+   "sha256": "c4e9c25698357a6e27b9327ddfa2a12589c84bedd3ad39bb06f88d86e581a752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.wsparse90.b7812.bin",
+   "bytes": 2048,
+   "sha256": "0180bfbf624d87a3426796b40c8890df5ca11784a8f3dc3afa6456cbb1a87da8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7812/tiles/int8.zeros.b7812.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/block.json",
+   "bytes": 157,
+   "sha256": "257bc1fa0e2d7ecc4ad47072db465a49e478d3e25de548210652e137c348d631"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/code.sha256",
+   "bytes": 1824,
+   "sha256": "7db996a1e4ed4b336e9f2aea62a7965eb91e2ed6b911f65d1f71a8b0d8b0d61e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/config_end.json",
+   "bytes": 114,
+   "sha256": "c8ea1243329c0cc642fd5b2f6ed518d9faf405c2e537abcc613d1aae292d6d33"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/config_start.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/configs.json",
+   "bytes": 41497,
+   "sha256": "7a51445caf7a7134d582066ecf614a1b0ae630fd05c6a26dac63c9e72f3ab1ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/gen.sha256",
+   "bytes": 4683,
+   "sha256": "9737ac3cd1e55f1c7459cceb8f64da6f056947fb34dd29bf89be86d5d13a0a43"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/manifest.txt",
+   "bytes": 670,
+   "sha256": "6bf5a851ee1f61b56f1c743b63591a2d5365e9911fff2833be1fa0fe47f21a22"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/marks.jsonl",
+   "bytes": 23501,
+   "sha256": "ea1c61b3663b51d51c11b7541f2fa2420dd79d56af603e9d78de692443410a43"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/plan.json",
+   "bytes": 3473,
+   "sha256": "1ec1450e51b45cf96a2dd198f719ec8eca33615896ad95f43eb97963af71266e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/run.log",
+   "bytes": 8335,
+   "sha256": "62c35d0aab431816b6453dd32770f4ea562ced38a13b7c0be414a7a5a0d859e0"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/runs.jsonl",
+   "bytes": 524466,
+   "sha256": "422888073db245e6dafaaac01cb660a730ba3cea0ad88ad4b8795a849043bc8c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/telemetry.jsonl.gz",
+   "bytes": 131609,
+   "sha256": "b244c0a30b7d29e8e500c60b4bec1b40e22646e6746022ff6fb09aafaaa58fdf"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/anchor_pi.b7813.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.a_randn_b_zeros.b7813.bin",
+   "bytes": 2048,
+   "sha256": "51a7424e7f4c711ba546b3cadb34aaccc25bb36376f4b14e706fff32c7640d7f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.a_zeros_b_randn.b7813.bin",
+   "bytes": 2048,
+   "sha256": "ff2f88849f8c4a7b7aafefc0e29e74d4070492e7b3a41c4557f41e7e3f454af5"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.fp8grid.b7813.bin",
+   "bytes": 2048,
+   "sha256": "9baf7946148138bad5404bbada6fe8f8dc46d0162f18c7921827b29d097b144d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.neg_ones.b7813.bin",
+   "bytes": 2048,
+   "sha256": "4e325a49d476f9208c95dce54b1a59c147517f1d70617a193b93c0e10d8e8cc7"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.nn_like.b7813.bin",
+   "bytes": 2048,
+   "sha256": "1d11a28ba25bb7adc56eaf62ccc6330d523c82ee4a63b12adb349fdba1de3d27"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.ones.b7813.bin",
+   "bytes": 2048,
+   "sha256": "c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.pair_half_zero.b7813.bin",
+   "bytes": 2048,
+   "sha256": "463449da7eccd3457ee04840f01dfef52a68ed00f1913cbcaa5fe9093bceeb34"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.randn.b7813.bin",
+   "bytes": 2048,
+   "sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.randn_small.b7813.bin",
+   "bytes": 2048,
+   "sha256": "ab633bb9dfdff3d3e7f1acc7bf665c879d6a8b8b3be9f49f57d63e12f921401e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.randn_sorted.b7813.bin",
+   "bytes": 2048,
+   "sha256": "983c3ee3c2fb8af3bf3e3e10e78b8e945a18f333a960dfc3cde3dd08c6b164b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.smallint.b7813.bin",
+   "bytes": 2048,
+   "sha256": "74b75d643b356c1ad0801aded66c5dee5d6046d68df4be020a79dd111f195b53"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.sparse50.b7813.bin",
+   "bytes": 2048,
+   "sha256": "24fc0ea7988ea2e011d59388a9b6152fe68add28028ad0884e5eb2b588c1c11b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.sparse90.b7813.bin",
+   "bytes": 2048,
+   "sha256": "37f3df172b0dce9f6da14a538457d41c1779bdc44394a6734be40d0036c709b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.uniform01.b7813.bin",
+   "bytes": 2048,
+   "sha256": "f27e67543fabb0c7623c047fed941a5b9f15e23a137d421251f24ffeaa620c5c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.wsparse50.b7813.bin",
+   "bytes": 2048,
+   "sha256": "75fa5d0427231be1d8728ac5006a6bafc2f89c779a56b1bd438633192c45cc74"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.wsparse90.b7813.bin",
+   "bytes": 2048,
+   "sha256": "894e7b20333e9ae2516e2dfedbb9d04da980104e0cc44ee3bd701960cbdc8dc9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp16.zeros.b7813.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.a_randn_b_zeros.b7813.bin",
+   "bytes": 2048,
+   "sha256": "bba7e25f69eb94fb98d954428d8adf3b82e1372a85a1ebc3ad264d932e4d952d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.a_zeros_b_randn.b7813.bin",
+   "bytes": 2048,
+   "sha256": "1c0546e56600fb5af64610f3adeceb30cbb1384a8368153b24772630b4f8245d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.bf16trunc.b7813.bin",
+   "bytes": 2048,
+   "sha256": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.fp16grid.b7813.bin",
+   "bytes": 2048,
+   "sha256": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.neg_ones.b7813.bin",
+   "bytes": 2048,
+   "sha256": "d55e700e94f9d6b3ee9ab86dbdfca2df8a357a04ea5631c537cf494813306e2f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.nn_like.b7813.bin",
+   "bytes": 2048,
+   "sha256": "b1ac9635527ce0da9cd8f9e90f654a7f5d7d11d983619ced4a63d0fe30bfeeb8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.ones.b7813.bin",
+   "bytes": 2048,
+   "sha256": "fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.pi.b7813.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.pow2.b7813.bin",
+   "bytes": 2048,
+   "sha256": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.randn.b7813.bin",
+   "bytes": 2048,
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.randn_large.b7813.bin",
+   "bytes": 2048,
+   "sha256": "95e0e68b705437d589f012858bd7cb475d612c270ed7899d17b3083bba78ad3e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.randn_small.b7813.bin",
+   "bytes": 2048,
+   "sha256": "1bb5c90d00b5e2ecaf3d16e3522aab3311e6b50fa1e9222343cdf6a55497d901"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.randn_sorted.b7813.bin",
+   "bytes": 2048,
+   "sha256": "1f7af1fbac945df5eb217930df651917a9a1e3121b5dea5fa1af8b61ed9dd752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.smallint.b7813.bin",
+   "bytes": 2048,
+   "sha256": "fd3d049e5908934965a165afe1ed529db86501c92b3d1da5d50642e9b18d8b3c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.sparse50.b7813.bin",
+   "bytes": 2048,
+   "sha256": "43ababfe5f3fed0963600a119a5ec805b433636594616042cac4fbab1fd69530"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.sparse90.b7813.bin",
+   "bytes": 2048,
+   "sha256": "1ff8d98e3cd223fb18bdd24c1c294ed88d3853a568fd96b3fb46ce6d6b11a841"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.uniform01.b7813.bin",
+   "bytes": 2048,
+   "sha256": "a2f2cb094c70f185138cdd130ef1f4e9fffea226bfe7ee2d7f2f7f44e6a40b8c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/fp32.zeros.b7813.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.a_full_b_zeros.b7813.bin",
+   "bytes": 2048,
+   "sha256": "a3570b797a41bd8cc3bbda801bf232ac85a4d180d983bad75fcde8b10e24c030"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.a_zeros_b_full.b7813.bin",
+   "bytes": 2048,
+   "sha256": "cb1033cfe9ce08c2cc3f3fc5887ebdab9bf99479a79f483a499655530b6d7704"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.full.b7813.bin",
+   "bytes": 2048,
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.gauss_q.b7813.bin",
+   "bytes": 2048,
+   "sha256": "5a728a0ed9b67b24da11ddd034cbeb8b577e00088d0bbdec82dd1884328902a3"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.highbit.b7813.bin",
+   "bytes": 2048,
+   "sha256": "b29af488b581a8b07699f6ab35041e0f7d7db6bb667f35502e9fa2f5f0be28fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.neg_ones.b7813.bin",
+   "bytes": 2048,
+   "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.ones.b7813.bin",
+   "bytes": 2048,
+   "sha256": "7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.pos.b7813.bin",
+   "bytes": 2048,
+   "sha256": "c67fb76ffaa707949f4d1efd871739c3353224a79d40f092ec0f20ee395ecaf2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.smallint.b7813.bin",
+   "bytes": 2048,
+   "sha256": "940ecffb1175bfcc10e3a87ec8a6ba692a953d949b5b6d8623628885cc631aa1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.sorted.b7813.bin",
+   "bytes": 2048,
+   "sha256": "0f8f20bf3155dda98e51878cc999c21b45399266558b9d237903e3f530712948"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.sparse50.b7813.bin",
+   "bytes": 2048,
+   "sha256": "e235ed609c58b069f36412099d8d2fa890cae07bf5599f77b65904b6802d38a8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.sparse90.b7813.bin",
+   "bytes": 2048,
+   "sha256": "7f99abeaacd8ede601f37fad4dead098f7cdffe905af99e956b03fceddccb03b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.ternary.b7813.bin",
+   "bytes": 2048,
+   "sha256": "f5467ac1acee2fbf0fee0a0aff8ee1510af6e570829a08453ba0596b289cc607"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.wsparse50.b7813.bin",
+   "bytes": 2048,
+   "sha256": "c4e9c25698357a6e27b9327ddfa2a12589c84bedd3ad39bb06f88d86e581a752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.wsparse90.b7813.bin",
+   "bytes": 2048,
+   "sha256": "0180bfbf624d87a3426796b40c8890df5ca11784a8f3dc3afa6456cbb1a87da8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7813/tiles/int8.zeros.b7813.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/block.json",
+   "bytes": 157,
+   "sha256": "c86f6c75496f238e5a980a336323411247b61899028e30d495b06e28e12a18af"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/code.sha256",
+   "bytes": 1824,
+   "sha256": "7db996a1e4ed4b336e9f2aea62a7965eb91e2ed6b911f65d1f71a8b0d8b0d61e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/config_end.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/config_start.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/configs.json",
+   "bytes": 41497,
+   "sha256": "ecb55d6c8f199d2d7e8800a1b5bd691060f04807978ddc10bc5fd16fc52ffe2c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/gen.sha256",
+   "bytes": 4683,
+   "sha256": "9737ac3cd1e55f1c7459cceb8f64da6f056947fb34dd29bf89be86d5d13a0a43"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/manifest.txt",
+   "bytes": 670,
+   "sha256": "366c4e11328634af604173ae740a37a62bcd7998c3dc7344ecdd4499e5910c45"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/marks.jsonl",
+   "bytes": 23649,
+   "sha256": "04489f8dc4f51310b90dd7af15158c4f7b12589bcf7b919b317e45ad718e4e36"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/plan.json",
+   "bytes": 3473,
+   "sha256": "8d2bbe9951b31e0d74acea9bb4278a43c45657e0929fbae17cb67df6549b350d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/run.log",
+   "bytes": 8330,
+   "sha256": "74b6a7b080db8db15fb45149c44f52f7f165eb009b1de5d1e4f9ff621b69ac2b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/runs.jsonl",
+   "bytes": 524418,
+   "sha256": "c827d60028e240a22f664fe68ad2265c17a50b203ffb9dc50c614dc271cc26ef"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/telemetry.jsonl.gz",
+   "bytes": 132980,
+   "sha256": "f3b2b6f063a9b63b0df7b738d583069ce1a50668976477d3d6393e27069803c6"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/anchor_pi.b7814.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.a_randn_b_zeros.b7814.bin",
+   "bytes": 2048,
+   "sha256": "51a7424e7f4c711ba546b3cadb34aaccc25bb36376f4b14e706fff32c7640d7f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.a_zeros_b_randn.b7814.bin",
+   "bytes": 2048,
+   "sha256": "ff2f88849f8c4a7b7aafefc0e29e74d4070492e7b3a41c4557f41e7e3f454af5"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.fp8grid.b7814.bin",
+   "bytes": 2048,
+   "sha256": "9baf7946148138bad5404bbada6fe8f8dc46d0162f18c7921827b29d097b144d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.neg_ones.b7814.bin",
+   "bytes": 2048,
+   "sha256": "4e325a49d476f9208c95dce54b1a59c147517f1d70617a193b93c0e10d8e8cc7"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.nn_like.b7814.bin",
+   "bytes": 2048,
+   "sha256": "1d11a28ba25bb7adc56eaf62ccc6330d523c82ee4a63b12adb349fdba1de3d27"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.ones.b7814.bin",
+   "bytes": 2048,
+   "sha256": "c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.pair_half_zero.b7814.bin",
+   "bytes": 2048,
+   "sha256": "463449da7eccd3457ee04840f01dfef52a68ed00f1913cbcaa5fe9093bceeb34"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.randn.b7814.bin",
+   "bytes": 2048,
+   "sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.randn_small.b7814.bin",
+   "bytes": 2048,
+   "sha256": "ab633bb9dfdff3d3e7f1acc7bf665c879d6a8b8b3be9f49f57d63e12f921401e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.randn_sorted.b7814.bin",
+   "bytes": 2048,
+   "sha256": "983c3ee3c2fb8af3bf3e3e10e78b8e945a18f333a960dfc3cde3dd08c6b164b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.smallint.b7814.bin",
+   "bytes": 2048,
+   "sha256": "74b75d643b356c1ad0801aded66c5dee5d6046d68df4be020a79dd111f195b53"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.sparse50.b7814.bin",
+   "bytes": 2048,
+   "sha256": "24fc0ea7988ea2e011d59388a9b6152fe68add28028ad0884e5eb2b588c1c11b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.sparse90.b7814.bin",
+   "bytes": 2048,
+   "sha256": "37f3df172b0dce9f6da14a538457d41c1779bdc44394a6734be40d0036c709b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.uniform01.b7814.bin",
+   "bytes": 2048,
+   "sha256": "f27e67543fabb0c7623c047fed941a5b9f15e23a137d421251f24ffeaa620c5c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.wsparse50.b7814.bin",
+   "bytes": 2048,
+   "sha256": "75fa5d0427231be1d8728ac5006a6bafc2f89c779a56b1bd438633192c45cc74"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.wsparse90.b7814.bin",
+   "bytes": 2048,
+   "sha256": "894e7b20333e9ae2516e2dfedbb9d04da980104e0cc44ee3bd701960cbdc8dc9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp16.zeros.b7814.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.a_randn_b_zeros.b7814.bin",
+   "bytes": 2048,
+   "sha256": "bba7e25f69eb94fb98d954428d8adf3b82e1372a85a1ebc3ad264d932e4d952d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.a_zeros_b_randn.b7814.bin",
+   "bytes": 2048,
+   "sha256": "1c0546e56600fb5af64610f3adeceb30cbb1384a8368153b24772630b4f8245d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.bf16trunc.b7814.bin",
+   "bytes": 2048,
+   "sha256": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.fp16grid.b7814.bin",
+   "bytes": 2048,
+   "sha256": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.neg_ones.b7814.bin",
+   "bytes": 2048,
+   "sha256": "d55e700e94f9d6b3ee9ab86dbdfca2df8a357a04ea5631c537cf494813306e2f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.nn_like.b7814.bin",
+   "bytes": 2048,
+   "sha256": "b1ac9635527ce0da9cd8f9e90f654a7f5d7d11d983619ced4a63d0fe30bfeeb8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.ones.b7814.bin",
+   "bytes": 2048,
+   "sha256": "fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.pi.b7814.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.pow2.b7814.bin",
+   "bytes": 2048,
+   "sha256": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.randn.b7814.bin",
+   "bytes": 2048,
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.randn_large.b7814.bin",
+   "bytes": 2048,
+   "sha256": "95e0e68b705437d589f012858bd7cb475d612c270ed7899d17b3083bba78ad3e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.randn_small.b7814.bin",
+   "bytes": 2048,
+   "sha256": "1bb5c90d00b5e2ecaf3d16e3522aab3311e6b50fa1e9222343cdf6a55497d901"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.randn_sorted.b7814.bin",
+   "bytes": 2048,
+   "sha256": "1f7af1fbac945df5eb217930df651917a9a1e3121b5dea5fa1af8b61ed9dd752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.smallint.b7814.bin",
+   "bytes": 2048,
+   "sha256": "fd3d049e5908934965a165afe1ed529db86501c92b3d1da5d50642e9b18d8b3c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.sparse50.b7814.bin",
+   "bytes": 2048,
+   "sha256": "43ababfe5f3fed0963600a119a5ec805b433636594616042cac4fbab1fd69530"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.sparse90.b7814.bin",
+   "bytes": 2048,
+   "sha256": "1ff8d98e3cd223fb18bdd24c1c294ed88d3853a568fd96b3fb46ce6d6b11a841"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.uniform01.b7814.bin",
+   "bytes": 2048,
+   "sha256": "a2f2cb094c70f185138cdd130ef1f4e9fffea226bfe7ee2d7f2f7f44e6a40b8c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/fp32.zeros.b7814.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.a_full_b_zeros.b7814.bin",
+   "bytes": 2048,
+   "sha256": "a3570b797a41bd8cc3bbda801bf232ac85a4d180d983bad75fcde8b10e24c030"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.a_zeros_b_full.b7814.bin",
+   "bytes": 2048,
+   "sha256": "cb1033cfe9ce08c2cc3f3fc5887ebdab9bf99479a79f483a499655530b6d7704"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.full.b7814.bin",
+   "bytes": 2048,
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.gauss_q.b7814.bin",
+   "bytes": 2048,
+   "sha256": "5a728a0ed9b67b24da11ddd034cbeb8b577e00088d0bbdec82dd1884328902a3"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.highbit.b7814.bin",
+   "bytes": 2048,
+   "sha256": "b29af488b581a8b07699f6ab35041e0f7d7db6bb667f35502e9fa2f5f0be28fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.neg_ones.b7814.bin",
+   "bytes": 2048,
+   "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.ones.b7814.bin",
+   "bytes": 2048,
+   "sha256": "7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.pos.b7814.bin",
+   "bytes": 2048,
+   "sha256": "c67fb76ffaa707949f4d1efd871739c3353224a79d40f092ec0f20ee395ecaf2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.smallint.b7814.bin",
+   "bytes": 2048,
+   "sha256": "940ecffb1175bfcc10e3a87ec8a6ba692a953d949b5b6d8623628885cc631aa1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.sorted.b7814.bin",
+   "bytes": 2048,
+   "sha256": "0f8f20bf3155dda98e51878cc999c21b45399266558b9d237903e3f530712948"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.sparse50.b7814.bin",
+   "bytes": 2048,
+   "sha256": "e235ed609c58b069f36412099d8d2fa890cae07bf5599f77b65904b6802d38a8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.sparse90.b7814.bin",
+   "bytes": 2048,
+   "sha256": "7f99abeaacd8ede601f37fad4dead098f7cdffe905af99e956b03fceddccb03b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.ternary.b7814.bin",
+   "bytes": 2048,
+   "sha256": "f5467ac1acee2fbf0fee0a0aff8ee1510af6e570829a08453ba0596b289cc607"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.wsparse50.b7814.bin",
+   "bytes": 2048,
+   "sha256": "c4e9c25698357a6e27b9327ddfa2a12589c84bedd3ad39bb06f88d86e581a752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.wsparse90.b7814.bin",
+   "bytes": 2048,
+   "sha256": "0180bfbf624d87a3426796b40c8890df5ca11784a8f3dc3afa6456cbb1a87da8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7814/tiles/int8.zeros.b7814.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/block.json",
+   "bytes": 157,
+   "sha256": "9cd57ffa3d670d86330dc2826b830c0bae8485598e275f366746d89099d7eda3"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/code.sha256",
+   "bytes": 1824,
+   "sha256": "7db996a1e4ed4b336e9f2aea62a7965eb91e2ed6b911f65d1f71a8b0d8b0d61e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/config_end.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/config_start.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/configs.json",
+   "bytes": 41497,
+   "sha256": "0d805155d944217e714c095c57fadc67ceddb7165ca2bdc975240ac1c477a0a8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/gen.sha256",
+   "bytes": 4683,
+   "sha256": "9737ac3cd1e55f1c7459cceb8f64da6f056947fb34dd29bf89be86d5d13a0a43"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/manifest.txt",
+   "bytes": 670,
+   "sha256": "9a8aab21b3c0202a09920c51e276de04cb4285fc2291521a12ae5629e3de1857"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/marks.jsonl",
+   "bytes": 23637,
+   "sha256": "6d9a478167e62a06af39c527ffe92272b30253b1c8593d1de17f143010bf28fd"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/plan.json",
+   "bytes": 3473,
+   "sha256": "cfeecb247f82123bfa8b10b5c3e696d1641a46bc0927927e8e892b727cdc0962"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/run.log",
+   "bytes": 8335,
+   "sha256": "f3bcb84aeafb173d2f551bddf0f4551ac6aa49ea8a3c2549645e828ebf20f5ee"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/runs.jsonl",
+   "bytes": 524477,
+   "sha256": "1a1f6f0cee17cc94197cd04e0e5c58d80a8a78e8a583944801cf28da6cd003f5"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/telemetry.jsonl.gz",
+   "bytes": 133557,
+   "sha256": "89f154772ff64c8b49160900ee3d83e1ad554b7e96cf50f53ab96b3be2ba8dd1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/anchor_pi.b7815.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.a_randn_b_zeros.b7815.bin",
+   "bytes": 2048,
+   "sha256": "51a7424e7f4c711ba546b3cadb34aaccc25bb36376f4b14e706fff32c7640d7f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.a_zeros_b_randn.b7815.bin",
+   "bytes": 2048,
+   "sha256": "ff2f88849f8c4a7b7aafefc0e29e74d4070492e7b3a41c4557f41e7e3f454af5"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.fp8grid.b7815.bin",
+   "bytes": 2048,
+   "sha256": "9baf7946148138bad5404bbada6fe8f8dc46d0162f18c7921827b29d097b144d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.neg_ones.b7815.bin",
+   "bytes": 2048,
+   "sha256": "4e325a49d476f9208c95dce54b1a59c147517f1d70617a193b93c0e10d8e8cc7"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.nn_like.b7815.bin",
+   "bytes": 2048,
+   "sha256": "1d11a28ba25bb7adc56eaf62ccc6330d523c82ee4a63b12adb349fdba1de3d27"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.ones.b7815.bin",
+   "bytes": 2048,
+   "sha256": "c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.pair_half_zero.b7815.bin",
+   "bytes": 2048,
+   "sha256": "463449da7eccd3457ee04840f01dfef52a68ed00f1913cbcaa5fe9093bceeb34"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.randn.b7815.bin",
+   "bytes": 2048,
+   "sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.randn_small.b7815.bin",
+   "bytes": 2048,
+   "sha256": "ab633bb9dfdff3d3e7f1acc7bf665c879d6a8b8b3be9f49f57d63e12f921401e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.randn_sorted.b7815.bin",
+   "bytes": 2048,
+   "sha256": "983c3ee3c2fb8af3bf3e3e10e78b8e945a18f333a960dfc3cde3dd08c6b164b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.smallint.b7815.bin",
+   "bytes": 2048,
+   "sha256": "74b75d643b356c1ad0801aded66c5dee5d6046d68df4be020a79dd111f195b53"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.sparse50.b7815.bin",
+   "bytes": 2048,
+   "sha256": "24fc0ea7988ea2e011d59388a9b6152fe68add28028ad0884e5eb2b588c1c11b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.sparse90.b7815.bin",
+   "bytes": 2048,
+   "sha256": "37f3df172b0dce9f6da14a538457d41c1779bdc44394a6734be40d0036c709b9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.uniform01.b7815.bin",
+   "bytes": 2048,
+   "sha256": "f27e67543fabb0c7623c047fed941a5b9f15e23a137d421251f24ffeaa620c5c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.wsparse50.b7815.bin",
+   "bytes": 2048,
+   "sha256": "75fa5d0427231be1d8728ac5006a6bafc2f89c779a56b1bd438633192c45cc74"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.wsparse90.b7815.bin",
+   "bytes": 2048,
+   "sha256": "894e7b20333e9ae2516e2dfedbb9d04da980104e0cc44ee3bd701960cbdc8dc9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp16.zeros.b7815.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.a_randn_b_zeros.b7815.bin",
+   "bytes": 2048,
+   "sha256": "bba7e25f69eb94fb98d954428d8adf3b82e1372a85a1ebc3ad264d932e4d952d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.a_zeros_b_randn.b7815.bin",
+   "bytes": 2048,
+   "sha256": "1c0546e56600fb5af64610f3adeceb30cbb1384a8368153b24772630b4f8245d"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.bf16trunc.b7815.bin",
+   "bytes": 2048,
+   "sha256": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.fp16grid.b7815.bin",
+   "bytes": 2048,
+   "sha256": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.neg_ones.b7815.bin",
+   "bytes": 2048,
+   "sha256": "d55e700e94f9d6b3ee9ab86dbdfca2df8a357a04ea5631c537cf494813306e2f"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.nn_like.b7815.bin",
+   "bytes": 2048,
+   "sha256": "b1ac9635527ce0da9cd8f9e90f654a7f5d7d11d983619ced4a63d0fe30bfeeb8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.ones.b7815.bin",
+   "bytes": 2048,
+   "sha256": "fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.pi.b7815.bin",
+   "bytes": 2048,
+   "sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.pow2.b7815.bin",
+   "bytes": 2048,
+   "sha256": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.randn.b7815.bin",
+   "bytes": 2048,
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.randn_large.b7815.bin",
+   "bytes": 2048,
+   "sha256": "95e0e68b705437d589f012858bd7cb475d612c270ed7899d17b3083bba78ad3e"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.randn_small.b7815.bin",
+   "bytes": 2048,
+   "sha256": "1bb5c90d00b5e2ecaf3d16e3522aab3311e6b50fa1e9222343cdf6a55497d901"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.randn_sorted.b7815.bin",
+   "bytes": 2048,
+   "sha256": "1f7af1fbac945df5eb217930df651917a9a1e3121b5dea5fa1af8b61ed9dd752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.smallint.b7815.bin",
+   "bytes": 2048,
+   "sha256": "fd3d049e5908934965a165afe1ed529db86501c92b3d1da5d50642e9b18d8b3c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.sparse50.b7815.bin",
+   "bytes": 2048,
+   "sha256": "43ababfe5f3fed0963600a119a5ec805b433636594616042cac4fbab1fd69530"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.sparse90.b7815.bin",
+   "bytes": 2048,
+   "sha256": "1ff8d98e3cd223fb18bdd24c1c294ed88d3853a568fd96b3fb46ce6d6b11a841"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.uniform01.b7815.bin",
+   "bytes": 2048,
+   "sha256": "a2f2cb094c70f185138cdd130ef1f4e9fffea226bfe7ee2d7f2f7f44e6a40b8c"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/fp32.zeros.b7815.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.a_full_b_zeros.b7815.bin",
+   "bytes": 2048,
+   "sha256": "a3570b797a41bd8cc3bbda801bf232ac85a4d180d983bad75fcde8b10e24c030"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.a_zeros_b_full.b7815.bin",
+   "bytes": 2048,
+   "sha256": "cb1033cfe9ce08c2cc3f3fc5887ebdab9bf99479a79f483a499655530b6d7704"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.full.b7815.bin",
+   "bytes": 2048,
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.gauss_q.b7815.bin",
+   "bytes": 2048,
+   "sha256": "5a728a0ed9b67b24da11ddd034cbeb8b577e00088d0bbdec82dd1884328902a3"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.highbit.b7815.bin",
+   "bytes": 2048,
+   "sha256": "b29af488b581a8b07699f6ab35041e0f7d7db6bb667f35502e9fa2f5f0be28fa"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.neg_ones.b7815.bin",
+   "bytes": 2048,
+   "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.ones.b7815.bin",
+   "bytes": 2048,
+   "sha256": "7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.pos.b7815.bin",
+   "bytes": 2048,
+   "sha256": "c67fb76ffaa707949f4d1efd871739c3353224a79d40f092ec0f20ee395ecaf2"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.smallint.b7815.bin",
+   "bytes": 2048,
+   "sha256": "940ecffb1175bfcc10e3a87ec8a6ba692a953d949b5b6d8623628885cc631aa1"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.sorted.b7815.bin",
+   "bytes": 2048,
+   "sha256": "0f8f20bf3155dda98e51878cc999c21b45399266558b9d237903e3f530712948"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.sparse50.b7815.bin",
+   "bytes": 2048,
+   "sha256": "e235ed609c58b069f36412099d8d2fa890cae07bf5599f77b65904b6802d38a8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.sparse90.b7815.bin",
+   "bytes": 2048,
+   "sha256": "7f99abeaacd8ede601f37fad4dead098f7cdffe905af99e956b03fceddccb03b"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.ternary.b7815.bin",
+   "bytes": 2048,
+   "sha256": "f5467ac1acee2fbf0fee0a0aff8ee1510af6e570829a08453ba0596b289cc607"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.wsparse50.b7815.bin",
+   "bytes": 2048,
+   "sha256": "c4e9c25698357a6e27b9327ddfa2a12589c84bedd3ad39bb06f88d86e581a752"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.wsparse90.b7815.bin",
+   "bytes": 2048,
+   "sha256": "0180bfbf624d87a3426796b40c8890df5ca11784a8f3dc3afa6456cbb1a87da8"
+  },
+  {
+   "path": "aifoundry3/kinds/p7815/tiles/int8.zeros.b7815.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  },
+  {
+   "path": "code.sha256",
+   "bytes": 2349,
+   "sha256": "11771456e26d8acaa1558751334e483d910c27c8b1823f76618833d2cc2f7b7b"
+  },
+  {
+   "path": "e78-leak0.3803.json",
+   "bytes": 257600,
+   "sha256": "3598e33c33529f6640cad21d9b32e3b1534ba76cff4bdeb34005461f329a13b8"
+  },
+  {
+   "path": "e78-leak0.json",
+   "bytes": 257078,
+   "sha256": "370d8c058d0e3e8c938ba328bf83a4943a12e459b09d4272967049b4ae72ae59"
+  },
+  {
+   "path": "e78-tau0.80.json",
+   "bytes": 260410,
+   "sha256": "d3d28932326e9b28c8cf7192f59dd2cde868758e14ed0db4ca07022f2c2e0a6c"
+  },
+  {
+   "path": "e78-tau1.10.json",
+   "bytes": 260405,
+   "sha256": "ca1cb89e9a5de130772b5ac1cbc86c800a69e28be8d914243d5792622206a320"
+  },
+  {
+   "path": "e78.json",
+   "bytes": 261051,
+   "sha256": "b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5"
+  },
+  {
+   "path": "ident/config_session_end.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "ident/config_session_start.json",
+   "bytes": 114,
+   "sha256": "6933cf9ff720dbaa63e4853163c86f0f5948b72954547ceec91ad4500054632b"
+  },
+  {
+   "path": "ident/et-lab-manifest.txt",
+   "bytes": 670,
+   "sha256": "4493b5f2693f536b93572c6fd45afca7496f11496f2fbfc77cc21bd89539dd73"
+  },
+  {
+   "path": "logs/box-harness.sha256",
+   "bytes": 6103,
+   "sha256": "28bb82a90e070aac16fa2b5cd5e86a5e9a07e7d0724b0ecc2b703d99c796c887"
+  },
+  {
+   "path": "logs/e78-dry.log",
+   "bytes": 39057,
+   "sha256": "c36b5c690457b6a2590591aaf7382d1faef0ad25a15388bcb2ca841f24423bd2"
+  },
+  {
+   "path": "logs/e78-queue.log",
+   "bytes": 51842,
+   "sha256": "a08213d01e89664c95f8e8e57d2b3c20613299e25e2231bd77f9f8e0ac1e3fe4"
+  },
+  {
+   "path": "reduce-leak0.3803.log",
+   "bytes": 4607,
+   "sha256": "7d662a8d56ddcabdaab6eb927fc61e40c018df78bc1a612fd88393a5e333c25c"
+  },
+  {
+   "path": "reduce-leak0.3803.txt",
+   "bytes": 4607,
+   "sha256": "7d662a8d56ddcabdaab6eb927fc61e40c018df78bc1a612fd88393a5e333c25c"
+  },
+  {
+   "path": "reduce-leak0.log",
+   "bytes": 4604,
+   "sha256": "fd489a871085f31bc09911d89642bc44f549547614f0e8c2bb3c51e0a1bb21a9"
+  },
+  {
+   "path": "reduce-leak0.txt",
+   "bytes": 4604,
+   "sha256": "fd489a871085f31bc09911d89642bc44f549547614f0e8c2bb3c51e0a1bb21a9"
+  },
+  {
+   "path": "reduce-tau0.80.log",
+   "bytes": 4607,
+   "sha256": "8ac405bf71089ed2928f20f7738d30a6d6a4cab075d52a0f1ee1259bf2271470"
+  },
+  {
+   "path": "reduce-tau1.10.log",
+   "bytes": 4607,
+   "sha256": "8ac405bf71089ed2928f20f7738d30a6d6a4cab075d52a0f1ee1259bf2271470"
+  },
+  {
+   "path": "reduce.log",
+   "bytes": 4607,
+   "sha256": "c89bb9a7293a8f690d883ad85d6874b0ce57a7d6d306f9951a745774a35245b1"
+  },
+  {
+   "path": "reduce.txt",
+   "bytes": 4607,
+   "sha256": "c89bb9a7293a8f690d883ad85d6874b0ce57a7d6d306f9951a745774a35245b1"
+  },
+  {
+   "path": "results.md",
+   "bytes": 12842,
+   "sha256": "19b210605de4eaa315c1606c1a18bf1252e9f8a2171c60602a3f2f7e5a3af585"
+  },
+  {
+   "path": "runs-leak0.3803.csv",
+   "bytes": 196256,
+   "sha256": "e6620d1da66d9a23835796f0f9c9de3b48d3a30c30fe9dac08c38ac7b9d7b570"
+  },
+  {
+   "path": "runs-leak0.csv",
+   "bytes": 195371,
+   "sha256": "ed9dd2e1b5260aa9c8738e97951b0641a70ccf43fc7e436c22949fe1f27d0f67"
+  },
+  {
+   "path": "runs.csv",
+   "bytes": 199937,
+   "sha256": "2bebd178e759b61df16ee55dfec2ed9c2c369b9a3d07b56888e24dc98b925f53"
+  },
+  {
+   "path": "score.log",
+   "bytes": 4012,
+   "sha256": "49b88321d644c2c95fe7c2867b222c3d33e93d947b750bccf55005547b0c0b78"
+  },
+  {
+   "path": "scored.json",
+   "bytes": 106562,
+   "sha256": "c57e16dbdaf48535a7dbd739b050e5a56b8eb11ef38ca6b91dfac6edb8e73752"
+  }
+ ]
+}
