@@ -1,0 +1,62 @@
+E83 frozen predictions (aifoundry2 card 0, 65 W / 65 C as found). c: switching W at 600 MHz / 517 mV (Q130(c), c_E64 zeros + W/1.01865)
+relation burst: dither W* 66.15 W sigma 2.75 W (in-sample rms 0.94, LOO 1.4 MHz); hinge c0 16.375 W slope 9.85 MHz/W (in-sample 1.2, LOO 2.28 MHz)
+relation sustained: dither W* 49.75 W sigma 1.95 W (in-sample rms 8.01, LOO 9.02 MHz); hinge c0 8.125 W slope 14.0 MHz/W (in-sample 8.9, LOO 10.73 MHz)
+E80 points: kind, measured c, burst (A1 view) vs fit, sustained vs fit
+  fp16/zeros      c   1.61  burst  800.0 fit  800.0   sus  789.8 fit  800.0
+  fp16/ones       c   9.70  burst  800.0 fit  800.0   sus  781.6 fit  776.0
+  fp16/randn      c  23.07  burst  730.6 fit  732.1   sus  609.5 fit  612.6
+  fp16/sparse50   c  14.72  burst  800.0 fit  799.6   sus  717.1 fit  704.6
+  fp16/smallint   c  18.05  burst  782.7 fit  784.2   sus  650.6 fit  661.4
+  fp16/fp8grid    c  19.05  burst  773.2 fit  774.0   sus  661.5 fit  649.7
+  fp16/nn_like    c  18.59  burst  780.0 fit  778.9   sus  665.2 fit  655.0
+  int8/zeros      c   2.49  burst  800.0 fit  800.0   sus  800.0 fit  800.0
+  int8/neg_ones   c   3.54  burst  800.0 fit  800.0   sus  796.9 fit  800.0
+  int8/full       c   8.98  burst  800.0 fit  800.0   sus  793.4 fit  786.2
+  int8/smallint   c   7.99  burst  798.0 fit  800.0   sus  795.4 fit  795.8
+  int8/gauss_q    c   7.79  burst  800.0 fit  800.0   sus  794.4 fit  796.9
+  int8/sparse50   c   7.36  burst  800.0 fit  800.0   sus  789.3 fit  798.5
+  fp32/randn      c  25.55  burst  711.9 fit  709.9   sus  604.3 fit  602.3
+  fp32/bf16trunc  c  19.11  burst  774.0 fit  773.4   sus  639.1 fit  649.0
+  fp32/sparse90   c   2.23  burst  800.0 fit  800.0   sus  800.0 fit  800.0
+  fp32/smallint   c  15.18  burst  800.0 fit  799.1   sus  690.8 fit  698.6
+  fp32/nn_like    c  14.04  burst  800.0 fit  799.9   sus  700.0 fit  713.3
+
+kind                  role      c W c ci95        | (a) bur ci95      lim     rate | (a) sus ci95      sh800 limit   |  (b) b  (b) s (b) lim |  gov b   T1 s
+fp32/zeros            e83      1.44 1.44-1.74     |   800.0 800-800   none   12.29 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+fp32/ones             e83      9.84 9.28-10.39    |   800.0 800-800   none   12.29 |   773.8 765-782    0.74 thermal |    800    745 thermal |  800.0  776.6
+fp32/neg_ones         e83      9.84 9.28-10.39    |   800.0 800-800   none   12.29 |   773.8 765-782    0.74 thermal |    800    745 thermal |  800.0  776.6
+fp32/pi               e83      9.84 9.28-10.39    |   800.0 800-800   none   12.29 |   773.8 765-782    0.74 thermal |    800    745 thermal |  800.0  776.6
+fp32/randn            anchor  25.21 21.41-29.01   |   712.9 680-748   power  10.95 |   603.1 600-626    0.00 thermal |    700    600 thermal |  704.8  607.2
+fp32/randn_small      e83     25.44 21.59-29.30   |   710.8 677-747   power  10.92 |   602.5 600-624    0.00 thermal |    700    600 thermal |  704.8  606.0
+fp32/randn_large      e83     25.48 21.62-29.34   |   710.5 677-746   power  10.92 |   602.4 600-624    0.00 thermal |    700    600 thermal |  704.8  605.4
+fp32/uniform01        e83     21.43 18.54-24.32   |   748.2 721-779   power  11.50 |   625.3 606-656    0.00 thermal |    736    612 thermal |  742.9  637.7
+fp32/sparse50         e83     10.77 8.88-12.65    |   800.0 800-800   none   12.29 |   759.2 732-787    0.59 thermal |    800    728 thermal |  800.0  761.7
+fp32/pow2             e83     14.39 13.15-15.64   |   799.8 798-800   none   12.29 |   708.8 693-725    0.12 thermal |    800    681 thermal |  800.0  710.2
+fp32/fp16grid         e83     24.95 21.21-28.69   |   715.1 682-750   power  10.99 |   603.8 600-627    0.00 thermal |    700    600 thermal |  704.8  609.0
+fp32/a_randn_b_zeros  e83      1.44 1.44-1.74     |   800.0 800-800   none   12.29 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+fp32/a_zeros_b_randn  e83      1.44 1.44-1.74     |   800.0 800-800   none   12.29 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+fp32/randn_sorted     e83     23.79 20.33-27.25   |   725.5 695-760   power  11.15 |   608.4 600-636    0.00 thermal |    706    600 thermal |  723.8  618.6
+fp16/zeros            anchor   1.39 1.39-1.69     |   800.0 800-800   none   24.58 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+fp16/neg_ones         e83      9.70 7.33-12.07    |   800.0 800-800   none   24.58 |   776.0 740-799    0.76 thermal |    800    745 thermal |  800.0  779.6
+fp16/randn            anchor  23.28 19.96-26.61   |   730.2 701-764   power  22.44 |   611.2 601-640    0.00 thermal |    715    600 thermal |  728.6  622.2
+fp16/randn_small      e83     23.18 14.44-31.92   |   731.1 656-800   power  22.47 |   611.9 600-708    0.00 thermal |    718    600 thermal |  728.6  622.8
+fp16/uniform01        e83     17.82 12.23-23.41   |   786.4 729-800   power  24.16 |   664.3 610-738    0.00 thermal |    776    646 thermal |  785.7  670.7
+fp16/sparse90         e83      2.56 1.94-3.19     |   800.0 800-800   none   24.58 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+fp16/wsparse50        e83     10.27 5.91-14.63    |   800.0 800-800   none   24.58 |   767.0 706-800    0.67 thermal |    800    735 thermal |  800.0  768.9
+fp16/wsparse90        e83      1.84 1.47-2.22     |   800.0 800-800   none   24.58 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+fp16/a_randn_b_zeros  e83      1.39 1.39-1.69     |   800.0 800-800   none   24.58 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+fp16/a_zeros_b_randn  e83      1.39 1.39-1.69     |   800.0 800-800   none   24.58 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+fp16/pair_half_zero   e83     21.95 13.95-29.95   |   743.0 672-800   power  22.83 |   620.9 600-715    0.00 thermal |    727    608 thermal |  733.3  633.5
+fp16/randn_sorted     e83     22.44 14.15-30.74   |   738.1 665-800   power  22.68 |   616.9 600-712    0.00 thermal |    715    604 thermal |  733.3  629.3
+int8/zeros            anchor   2.12 2.12-2.42     |   800.0 800-800   none   84.41 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+int8/ones             e83      2.68 2.12-5.04     |   800.0 800-800   none   84.41 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+int8/full             anchor   9.10 5.79-12.41    |   800.0 800-800   none   84.41 |   784.7 735-800    0.85 thermal |    800    758 thermal |  800.0  792.2
+int8/pos              e83      5.51 2.43-8.58     |   800.0 800-800   none   84.41 |   800.0 791-800    1.00 none    |    800    800 power   |  800.0  800.0
+int8/ternary          e83      8.42 3.77-13.08    |   800.0 800-800   none   84.41 |   792.4 726-800    0.92 none    |    800    768 thermal |  800.0  800.0
+int8/sparse90         e83      2.90 2.20-3.60     |   800.0 800-800   none   84.41 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+int8/wsparse50        e83      5.33 3.04-7.62     |   800.0 800-800   none   84.41 |   800.0 798-800    1.00 none    |    800    800 power   |  800.0  800.0
+int8/wsparse90        e83      2.39 2.12-2.73     |   800.0 800-800   none   84.41 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+int8/highbit          e83      6.53 2.95-10.12    |   800.0 800-800   none   84.41 |   799.8 770-800    1.00 none    |    800    800 power   |  800.0  800.0
+int8/a_full_b_zeros   e83      2.12 2.12-2.42     |   800.0 800-800   none   84.41 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+int8/a_zeros_b_full   e83      2.12 2.12-2.42     |   800.0 800-800   none   84.41 |   800.0 800-800    1.00 none    |    800    800 power   |  800.0  800.0
+int8/sorted           e83      8.00 3.59-12.40    |   800.0 800-800   none   84.41 |   795.7 735-800    0.96 none    |    800    776 thermal |  800.0  800.0
