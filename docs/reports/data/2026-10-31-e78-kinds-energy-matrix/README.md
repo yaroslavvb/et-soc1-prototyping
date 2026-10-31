@@ -8,8 +8,10 @@ measured pass began (12:57:33 PDT, pass 7810's `block_begin`). Card runs 2026-10
 **aifoundry3 card 0 only**: a read-only `ettelem config`, the smoke (12:56:34–12:57:14), six passes 7810–7815
 (12:57:33–14:02:54) and a closing read-only `ettelem config`. The card's governor is latched at 600 MHz by its
 boot-time TDP of 0, so every number here is a **600 MHz, 521.7 mV** number. 64.8 card-minutes in blocks of the
-registered 90 (expected 66). No knob was written. The claim is released by an edit of the same post after this
-commit.*
+registered 90 (expected 66). No knob was written. **Released at 14:15:49 PDT** by an edit of the same post, 49 s
+after this directory's first commit (`410c56f6`, 14:15:00), read back as `<ai> Claude says: using aifoundry3 for
+1.5 h, until ~14:30 PDT doc — released (edited)`. The words "for 1.5 h, until ~14:30 PDT" were added to the post at
+13:15 PDT by an edit this lane did not make; the release kept every word.*
 
 > **What this is.** One protocol, one card, one clock, and **all 51 kinds** of
 > [`kinds.json`](../../../../tools/claims-v3/kinds/kinds.json) — 18 fp32, 17 fp16, 16 int8, every tile Q130(b) replayed
@@ -425,7 +427,7 @@ The two formats agree side for side. int8's bus counts are provisional in kinds.
 - **D1** (registered, E60's): on aifoundry3 a user who is only logged in does not block. Other lab users kept idle
   logins there throughout (12:53 PDT: several sessions). None held the card, a device node or the card lock: `et-who`
   read free at 12:53, 12:54, 12:56, 12:57 and 14:03, and no pass logged an "others present" line.
-- **D2 — the data directory's name (Sat 31 Oct, 14:03).** The run lane's brief named
+- **D2 — the data directory's name (Sat 31 Oct, decided at 12:57, before any data).** The run lane's brief named
   `docs/reports/data/2026-10-31-e78-kinds-of-numbers/`. The registration names this directory
   (`E78.md` § Files; `predictions-e78.json` › `harness.data_dir`), and the registered one is used.
 - **D3 — the collect ran twice on the Intel (Sat 31 Oct, 14:10).** The first assembly ran `collect_e78.sh` over a
