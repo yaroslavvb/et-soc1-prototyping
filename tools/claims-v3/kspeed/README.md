@@ -285,6 +285,10 @@ The data goes to [`docs/reports/data/2026-10-31-e80-kinds-speed/`](../../../docs
 | `run_kspeed.py` | the runner: E64's `run_hpl.py`, imported, plus `file:` tiles and a predicted-watts dry card |
 | `predict_kspeed.py`, `predictions.json`, `predictions.txt` | the frozen predictions and their console table |
 | `reduce_kspeed.py` | the registered reduction (per-run metrics from E64's `reduce_hpl.run_metrics`, unchanged) |
+| `posthoc_idle.py` | amendment A1's labelled post-hoc view: the idle reset inside a launch, found from the sampler alone |
+
+**Results:** [`docs/reports/data/2026-10-31-e80-kinds-speed/`](../../../docs/reports/data/2026-10-31-e80-kinds-speed/README.md)
+(the session ran 12:22–13:02 PDT on 31 Oct; one of the nine rules passes, E80-R1).
 
 Run, on aifoundry2, from the lab checkout:
 
