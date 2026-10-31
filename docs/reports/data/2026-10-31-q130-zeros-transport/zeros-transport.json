@@ -1,0 +1,284 @@
+{
+ "source": {
+  "q129_dir": "docs/reports/data/2026-10-27-q129-ledger-scope",
+  "macs_per_op": 512,
+  "note": "switching energy per fp32 multiply-add, one VPU lane, ASAP7 RVT TT, 0.517 V"
+ },
+ "read_factor": {
+  "sel_pin_transitions_bench": 2095104,
+  "sel_pin_transitions_rtl_wired_latch_array": 1495040,
+  "sel_pin_transitions_port2_only": 698368,
+  "per_port_rtl_wired": [
+   262144,
+   534528,
+   698368
+  ],
+  "f_read_silicon": 0.3333333333333333,
+  "f_read_model_rewired": 0.7135874877810362,
+  "mux_output_transitions_on_zeros": 0,
+  "addr_bit_flips_bench": 2976,
+  "q129_idx_toggles_per_op": 992,
+  "check": "addr_bit_flips_bench / 3 must equal Q129 sim_acct idx_toggles = 992"
+ },
+ "write_factor": {
+  "gated_uops_of_512_firstpass_is_mul": 480,
+  "gated_uops_of_512_all_madd": 512,
+  "f_write_firstpass_ungated": 0.0625,
+  "f_write_all_madd": 0.0,
+  "per_counter": {
+   "dec_tr": 0.0625,
+   "wr_clk_edges": 0.0625,
+   "entry_clk_edges": 0.0625,
+   "wrdata_clk_edges": 0.0625
+  }
+ },
+ "clock_bound": {
+  "clk_cap_fF_total": 1843.973,
+  "clk_cap_fF_latch_array_model_vpu_rf": 1065.6163,
+  "clk_cap_fF_latch_array_model_tenc": 267.0013,
+  "clk_cap_fF_bypass_gated_off_on_a_txfma": 90.353,
+  "clk_cap_fF_remaining": 421.0024,
+  "clk_cap_fF_remaining_detail": {
+   "tentmp_rf": 142.1362,
+   "LANE_TIMA[0].tenb_rf": 79.4637,
+   "LANE_TIMA[1].tenb_rf": 79.4637,
+   "tena_rf": 48.1275,
+   "ctl": 24.7325
+  },
+  "f_clock_lower": 0.22831267052174845,
+  "f_clock_upper": 1.0,
+  "why": "the chip's two biggest clock loads here are models: vpu_64x32_3r2w_vpurf and vpu_tensorc_rf_buffer_array are compiled macros with one clock pin each, not 2,243 + 562 latches behind per-entry gates, and vpu_bypass's clock is held off for the whole TensorFMA (vpu_ctrl.v ll.1244, 1334, 1403, 1463, 1538 -> vpu_lane.v l.218, l.245). The three real latch files (TENA, TENB x2, TMP) are rf_latch_1r_1w in the chip too and stay. Clock-tree energy tracks the pin load the tree drives, so the share of the pin load that survives bounds it below; the two macros' own clock pins are a few fF and are not added back"
+ },
+ "patterns": {
+  "zeros": {
+   "q129_parts_pJ_per_mac": {
+    "rf_array": 0.3050238490628407,
+    "top_clock": 0.2562031905315253,
+    "bypass": 0.07989181561830816,
+    "rf_bypass": 0.0034754307235602038,
+    "tena": 0.0035838254447926195,
+    "tenb": 0.0051977550976741475,
+    "tenc": 0.00033110852319382804,
+    "tentmp": 0.0003229766798873415,
+    "ctl": 1.8817558300885286e-05
+   },
+   "q129_total_switching_pJ_per_mac": 0.6540487692400841,
+   "q129_clock_net_pJ_per_mac": 0.22306879488061152,
+   "array_address_side_pJ_per_mac": 0.301611086485664,
+   "array_own_write_clock_pJ_per_mac": 0.0034127625771766894,
+   "array_data_dependent_pJ_per_mac": 0.0,
+   "f_data_read_port2_only": 0.0,
+   "f_write": 0.0625,
+   "bypass_clock_floor_removed_pJ_per_mac": 0.07989181561830816,
+   "corrected": {
+    "rf_array": 0.1007503264896282,
+    "rf_array_model_rewired_only": 0.21543919515328733,
+    "bypass": 0.0,
+    "top_clock_lower": 0.08406382792017432,
+    "top_clock_upper": 0.2562031905315253,
+    "other_parts": 0.012929914027409025,
+    "total_switching_lower_pJ_per_mac": 0.19774406843721157,
+    "total_switching_upper_pJ_per_mac": 0.3698834310485625,
+    "total_switching_upper_model_rewired_only_pJ_per_mac": 0.48457229971222165,
+    "total_plus_internal_lower_pJ_per_mac": 0.29220204250548765,
+    "total_plus_internal_upper_pJ_per_mac": 0.5465685767239378,
+    "internal_ratio_used": 1.477677913753801
+   },
+   "cut_vs_q129": {
+    "switching_lower": 0.45630470080287255,
+    "switching_upper": 0.2841653381915216,
+    "fraction_remaining_lower": 0.3023384153248439,
+    "fraction_remaining_upper": 0.5655288236048771
+   }
+  },
+  "ones": {
+   "q129_parts_pJ_per_mac": {
+    "rf_array": 0.306747672506067,
+    "top_clock": 0.26926039361265797,
+    "bypass": 0.09468005811533942,
+    "rf_bypass": 0.003496483949822397,
+    "tena": 0.003956279003950317,
+    "tenb": 0.005218558417762263,
+    "tenc": 0.00033110852319382804,
+    "tentmp": 0.0003229766798873415,
+    "ctl": 1.8817558300885286e-05
+   },
+   "q129_total_switching_pJ_per_mac": 0.6840323483669831,
+   "q129_clock_net_pJ_per_mac": 0.22306879488061152,
+   "array_address_side_pJ_per_mac": 0.301611086485664,
+   "array_own_write_clock_pJ_per_mac": 0.0034127625771766894,
+   "array_data_dependent_pJ_per_mac": 0.0017238234432263022,
+   "f_data_read_port2_only": 0.3333333333333333,
+   "f_write": 1.0,
+   "bypass_clock_floor_removed_pJ_per_mac": 0.07989181561830816,
+   "corrected": {
+    "rf_array": 0.10452439922014012,
+    "rf_array_model_rewired_only": 0.21924020262509966,
+    "bypass": 0.014788242497031256,
+    "top_clock_lower": 0.09712103100130699,
+    "top_clock_upper": 0.26926039361265797,
+    "other_parts": 0.013344224132917032,
+    "total_switching_lower_pJ_per_mac": 0.22977789685139538,
+    "total_switching_upper_pJ_per_mac": 0.40191725946274637,
+    "total_switching_upper_model_rewired_only_pJ_per_mac": 0.5166330628677059,
+    "total_plus_internal_lower_pJ_per_mac": 0.34158093849085747,
+    "total_plus_internal_upper_pJ_per_mac": 0.5974781585356157,
+    "internal_ratio_used": 1.4865700451239166
+   },
+   "cut_vs_q129": {
+    "switching_lower": 0.45425445151558774,
+    "switching_upper": 0.28211508890423675,
+    "fraction_remaining_lower": 0.33591671124904116,
+    "fraction_remaining_upper": 0.5875705446127789
+   }
+  },
+  "randn": {
+   "q129_parts_pJ_per_mac": {
+    "rf_array": 0.48149762527924844,
+    "top_clock": 0.3676340034480191,
+    "bypass": 0.13490960379155922,
+    "rf_bypass": 0.035335469281050684,
+    "tena": 0.0067933860740879,
+    "tenb": 0.006020560420290061,
+    "tenc": 0.00033110852319382804,
+    "tentmp": 0.0003229766798873415,
+    "ctl": 1.8817558300885286e-05
+   },
+   "q129_total_switching_pJ_per_mac": 1.0328635510556332,
+   "q129_clock_net_pJ_per_mac": 0.22306879488061152,
+   "array_address_side_pJ_per_mac": 0.301611086485664,
+   "array_own_write_clock_pJ_per_mac": 0.0034127625771766894,
+   "array_data_dependent_pJ_per_mac": 0.17647377621640775,
+   "f_data_read_port2_only": 0.3333333333333333,
+   "f_write": 1.0,
+   "bypass_clock_floor_removed_pJ_per_mac": 0.07989181561830816,
+   "corrected": {
+    "rf_array": 0.16277438347786727,
+    "rf_array_model_rewired_only": 0.3649601950154513,
+    "bypass": 0.055017788173251064,
+    "top_clock_lower": 0.19549464083666812,
+    "top_clock_upper": 0.3676340034480191,
+    "other_parts": 0.0488223185368107,
+    "total_switching_lower_pJ_per_mac": 0.4621091310245971,
+    "total_switching_upper_pJ_per_mac": 0.6342484936359482,
+    "total_switching_upper_model_rewired_only_pJ_per_mac": 0.8364343051735322,
+    "total_plus_internal_lower_pJ_per_mac": 0.6639964842187527,
+    "total_plus_internal_upper_pJ_per_mac": 0.9113405072986821,
+    "internal_ratio_used": 1.4368824150834827
+   },
+   "cut_vs_q129": {
+    "switching_lower": 0.5707544200310362,
+    "switching_upper": 0.39861505741968506,
+    "fraction_remaining_lower": 0.44740578806590736,
+    "fraction_remaining_upper": 0.6140680373392182
+   }
+  }
+ },
+ "gating_by_pattern": {
+  "ones_allmadd0": {
+   "uops": 512,
+   "gated": 0,
+   "fraction_gated": 0.0,
+   "first_pass_uops": 32
+  },
+  "ones_allmadd1": {
+   "uops": 512,
+   "gated": 0,
+   "fraction_gated": 0.0,
+   "first_pass_uops": 0
+  },
+  "randn_allmadd0": {
+   "uops": 512,
+   "gated": 0,
+   "fraction_gated": 0.0,
+   "first_pass_uops": 32
+  },
+  "randn_allmadd1": {
+   "uops": 512,
+   "gated": 0,
+   "fraction_gated": 0.0,
+   "first_pass_uops": 0
+  },
+  "sparse75_allmadd0": {
+   "uops": 512,
+   "gated": 454,
+   "fraction_gated": 0.88671875,
+   "first_pass_uops": 32
+  },
+  "sparse75_allmadd1": {
+   "uops": 512,
+   "gated": 480,
+   "fraction_gated": 0.9375,
+   "first_pass_uops": 0
+  },
+  "zeros_allmadd0": {
+   "uops": 512,
+   "gated": 480,
+   "fraction_gated": 0.9375,
+   "first_pass_uops": 32
+  },
+  "zeros_allmadd1": {
+   "uops": 512,
+   "gated": 512,
+   "fraction_gated": 1.0,
+   "first_pass_uops": 0
+  }
+ },
+ "card_check": {
+  "board_zeros_pJ_per_mac": 0.27,
+  "board_zeros_per_card_pJ": [
+   0.1633,
+   0.4034,
+   0.2512
+  ],
+  "q129_transport_zeros_pJ_per_mac": 0.6540487692400841,
+  "q129_ratio_over_board": 2.4224028490373484,
+  "q129_signal_only_pJ_per_mac": 0.4309799743594726,
+  "q129_ratio_signal_only_over_board": 1.5962221272573058,
+  "corrected_lower_pJ_per_mac": 0.19774406843721157,
+  "corrected_upper_pJ_per_mac": 0.3698834310485625,
+  "corrected_ratio_over_board_lower": 0.7323854386563391,
+  "corrected_ratio_over_board_upper": 1.3699386335131944,
+  "corrected_signal_only_lower_pJ_per_mac": 0.14681463616795104,
+  "corrected_signal_only_upper_pJ_per_mac": 0.146814636167951,
+  "corrected_ratio_signal_only_over_board": [
+   0.5437579117331519,
+   0.5437579117331519
+  ],
+  "reading": "E38's 0.27 pJ/MAC is measured over idle. If the lane's clocks run at idle the clock term is inside the subtract and the signal-only figure is what has to fit inside 0.27; if they are gated at idle the whole corrected figure has to. Q129's numbers failed both tests (2.42x and 1.60x). The corrected ones pass both."
+ },
+ "ledger_randn": {
+  "arithmetic_switching_pJ": 1.516,
+  "arithmetic_plus_internal_pJ": 1.946,
+  "q129_transport_switching_pJ": 1.0328635510556332,
+  "q129_transport_plus_internal_upper_pJ": 1.4841,
+  "q129_transport_plus_internal_excl_clock_pJ": 1.261,
+  "q129_total_range_pJ": [
+   3.207,
+   3.43
+  ],
+  "corrected_transport_switching_range_pJ": [
+   0.4621091310245971,
+   0.6342484936359482
+  ],
+  "corrected_transport_plus_internal_range_pJ": [
+   0.6639964842187527,
+   0.9113405072986821
+  ],
+  "corrected_total_range_pJ": [
+   2.609996484218753,
+   2.857340507298682
+  ],
+  "board_E38_pJ": 5.783,
+  "rail_Q128_pJ": 4.337,
+  "rail_Q129_corrected_footing_pJ": 4.77,
+  "corrected_closure_vs_board": [
+   0.4513222348640416,
+   0.4940931190210413
+  ],
+  "corrected_closure_vs_rail_Q128": [
+   0.6017976675625439,
+   0.6588288003916721
+  ]
+ }
+}
