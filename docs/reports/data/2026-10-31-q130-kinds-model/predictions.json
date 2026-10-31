@@ -1,0 +1,2938 @@
+{
+ "model_id": "Q130C-M1",
+ "date": "2026-10-31",
+ "lane": "Q130(c)",
+ "what": "switching power, energy and clock predicted per (format, kind) BEFORE E78 (aifoundry3, 600 MHz pinned) and E80 (aifoundry2, its own governor) run.  No card was touched; nothing here is a measurement.",
+ "basis": "every switching W is over that TYPE's OWN zero-data level (E67's `anchor_zeros`: a running kernel on zero operands), at 600 MHz and 521.8 mV on aifoundry3",
+ "kinds_spec": {
+  "revision": "2 (Sat 31 Oct 2026, after verification: int8's stream and gate corrected from the TIMA path, the two value-sort baselines committed, replicate bands added, tier counts fixed)",
+  "commit": "7d9c0d9e",
+  "path": "tools/claims-v3/kinds/kinds.json"
+ },
+ "inputs": {},
+ "calibration": {
+  "gating_arm": {
+   "selected": "gate",
+   "selected_on": "E64's fp32 sparse75, the only measured kind that is mostly gated",
+   "scores": {
+    "bus": {
+     "calibration": {
+      "wa_inf_w": 5.392404070784647,
+      "wb_inf_w": 6.964600171827604,
+      "lam": 0.0,
+      "sigma_w": 8.164624183156603,
+      "S_A_randn_w": 17.606656901041667,
+      "S_B_randn_w": 21.63861124674479,
+      "q": {
+       "nrd_a": 0.24772135416666666,
+       "nrd_b": 0.5060831705729166,
+       "randn": 0.5035196940104166,
+       "signs": 0.4914347330729167
+      },
+      "randn_flip_term_check": {
+       "predicted_w": 15.951,
+       "measured_w": 16.104,
+       "se_w": 0.37,
+       "resid_w": -0.153
+      }
+     },
+     "rows": [
+      {
+       "kind": "zeros",
+       "pred_w": 0.0,
+       "draw_sd_w": 0.0,
+       "e64_w": 0.0,
+       "resid_w": 0.0,
+       "in_sample": false
+      },
+      {
+       "kind": "ones",
+       "pred_w": 8.555,
+       "draw_sd_w": 0.0,
+       "e64_w": 8.895,
+       "resid_w": -0.34,
+       "in_sample": false
+      },
+      {
+       "kind": "randn",
+       "pred_w": 24.504,
+       "draw_sd_w": 0.17,
+       "e64_w": 24.649,
+       "resid_w": -0.145,
+       "in_sample": false
+      },
+      {
+       "kind": "sparse75",
+       "pred_w": 12.665,
+       "draw_sd_w": 0.568,
+       "e64_w": 2.529,
+       "resid_w": 10.136,
+       "in_sample": false
+      },
+      {
+       "kind": "signs",
+       "pred_w": 13.102,
+       "draw_sd_w": 0.206,
+       "e64_w": 13.102,
+       "resid_w": -0.0,
+       "in_sample": true
+      },
+      {
+       "kind": "pow2",
+       "pred_w": 12.981,
+       "draw_sd_w": 0.148,
+       "e64_w": 13.948,
+       "resid_w": -0.967,
+       "in_sample": false
+      },
+      {
+       "kind": "mant",
+       "pred_w": 20.278,
+       "draw_sd_w": 0.021,
+       "e64_w": 21.81,
+       "resid_w": -1.532,
+       "in_sample": false
+      },
+      {
+       "kind": "uniform",
+       "pred_w": 20.352,
+       "draw_sd_w": 0.016,
+       "e64_w": 22.615,
+       "resid_w": -2.263,
+       "in_sample": false
+      },
+      {
+       "kind": "a_randn_b_ones",
+       "pred_w": 15.764,
+       "draw_sd_w": 0.104,
+       "e64_w": 15.73,
+       "resid_w": 0.034,
+       "in_sample": false
+      },
+      {
+       "kind": "a_ones_b_randn",
+       "pred_w": 19.339,
+       "draw_sd_w": 0.33,
+       "e64_w": 19.314,
+       "resid_w": 0.024,
+       "in_sample": false
+      }
+     ],
+     "oos_rms_w": 3.73,
+     "sparse75_resid_w": 10.136
+    },
+    "gate": {
+     "calibration": {
+      "wa_inf_w": 5.392404070784647,
+      "wb_inf_w": 6.964600171827604,
+      "lam": 0.0,
+      "sigma_w": 8.164624183156603,
+      "S_A_randn_w": 17.606656901041667,
+      "S_B_randn_w": 21.63861124674479,
+      "q": {
+       "nrd_a": 0.24772135416666666,
+       "nrd_b": 0.5060831705729166,
+       "randn": 0.5035196940104166,
+       "signs": 0.4914347330729167
+      },
+      "randn_flip_term_check": {
+       "predicted_w": 15.951,
+       "measured_w": 16.104,
+       "se_w": 0.37,
+       "resid_w": -0.153
+      }
+     },
+     "rows": [
+      {
+       "kind": "zeros",
+       "pred_w": 0.0,
+       "draw_sd_w": 0.0,
+       "e64_w": 0.0,
+       "resid_w": 0.0,
+       "in_sample": false
+      },
+      {
+       "kind": "ones",
+       "pred_w": 8.555,
+       "draw_sd_w": 0.0,
+       "e64_w": 8.895,
+       "resid_w": -0.34,
+       "in_sample": false
+      },
+      {
+       "kind": "randn",
+       "pred_w": 24.504,
+       "draw_sd_w": 0.17,
+       "e64_w": 24.649,
+       "resid_w": -0.145,
+       "in_sample": false
+      },
+      {
+       "kind": "sparse75",
+       "pred_w": 3.358,
+       "draw_sd_w": 0.43,
+       "e64_w": 2.529,
+       "resid_w": 0.829,
+       "in_sample": false
+      },
+      {
+       "kind": "signs",
+       "pred_w": 13.102,
+       "draw_sd_w": 0.206,
+       "e64_w": 13.102,
+       "resid_w": -0.0,
+       "in_sample": true
+      },
+      {
+       "kind": "pow2",
+       "pred_w": 12.981,
+       "draw_sd_w": 0.148,
+       "e64_w": 13.948,
+       "resid_w": -0.967,
+       "in_sample": false
+      },
+      {
+       "kind": "mant",
+       "pred_w": 20.278,
+       "draw_sd_w": 0.021,
+       "e64_w": 21.81,
+       "resid_w": -1.532,
+       "in_sample": false
+      },
+      {
+       "kind": "uniform",
+       "pred_w": 20.352,
+       "draw_sd_w": 0.016,
+       "e64_w": 22.615,
+       "resid_w": -2.263,
+       "in_sample": false
+      },
+      {
+       "kind": "a_randn_b_ones",
+       "pred_w": 15.764,
+       "draw_sd_w": 0.104,
+       "e64_w": 15.73,
+       "resid_w": 0.034,
+       "in_sample": false
+      },
+      {
+       "kind": "a_ones_b_randn",
+       "pred_w": 19.339,
+       "draw_sd_w": 0.33,
+       "e64_w": 19.314,
+       "resid_w": 0.024,
+       "in_sample": false
+      }
+     ],
+     "oos_rms_w": 1.074,
+     "sparse75_resid_w": 0.829
+    }
+   },
+   "what_the_arms_are": "`bus`: a gated column-slot-cycle still pays its operand-bus flips.  `gate`: it pays none of them (vpu_lane.v clock-gates the lane, so its input registers do not capture).  E78's sparse kinds settle it."
+  },
+  "fp32": {
+   "wa_inf_w": 5.3924,
+   "wb_inf_w": 6.9646,
+   "lam": 0.0,
+   "sigma_w": 8.1646,
+   "u_w": 8.555,
+   "fitted_parameters": 3,
+   "anchored_on": {
+    "wa_inf": "E70 nrd_a 7.209 +- 0.015 W (random A, constant B)",
+    "wb_inf": "E70 nrd_b 10.785 +- 0.024 W (constant A, random B)",
+    "sigma": "E64's fp32 `signs` (+-1.0f), 13.10 W over zeros, carried to a3's voltage",
+    "lam": "DECLARED ZERO: a fitted overlap came out at -0.029, zero to within 3%",
+    "u": "E67/E70 anchors: a running kernel on zero data against one on a constant nonzero"
+   },
+   "randn_is_a_check": {
+    "predicted_w": 15.951,
+    "measured_w": 16.104,
+    "se_w": 0.37,
+    "resid_w": -0.153
+   },
+   "e70_fit_for_comparison": {
+    "winf_a_w": 6.37,
+    "winf_b_w": 10.52,
+    "note": "E70's own fits, which its own top rungs EXCEED (nrd_a 7.209 > 6.37, nrd_b 10.785 > 10.52) and whose A-side FORM E70 rejects; they are the sensitivity arm, not the primary"
+   },
+   "sign_term_reading": "sigma = 8.16 W is what a product-sign change costs when it happens on every one of the 4,096 column-slot-cycles.  The operand-bus price of the sign bit itself is 0.56 W a position (E65 bit 31) -- 15x less.  This is the term no per-position price list can carry, because E65 and E67 measured every mask against a CONSTANT other operand."
+  },
+  "fp32_out_of_sample": {
+   "kinds": [
+    "ones",
+    "randn",
+    "sparse75",
+    "pow2",
+    "mant",
+    "uniform",
+    "a_randn_b_ones",
+    "a_ones_b_randn"
+   ],
+   "rms_w": 1.074,
+   "median_rel": 0.0538,
+   "max_rel": 0.3278,
+   "what": "the model, with its four fp32 numbers fixed, against E64's measured kinds it was NOT fitted on.  a_randn_b_ones and a_ones_b_randn are the card-transfer check: E70's one-sided random-operand steps measured on aifoundry3 against E64's measured on aifoundry2."
+  },
+  "per_format": {
+   "fp16": {
+    "u_w": 8.463,
+    "u_se_w": 1.187,
+    "u_from": "E64 (c_ones - c_zeros) x 1.01865, ONE run each",
+    "randn_target_w": 22.298,
+    "calibrating_kind": "randn",
+    "r_t": 0.4583,
+    "alpha": 1.4728,
+    "beta": 0.675,
+    "alpha_reading": "alpha = 1 would mean the significand-width scaling r_T is exactly right; this is a prediction E79's own fp16/int8 price lists can falsify",
+    "zeros_check_w": 0.0,
+    "ones_check_w": 8.463
+   },
+   "int8": {
+    "u_w": 0.571,
+    "u_se_w": 1.187,
+    "u_from": "E64 (c_ones - c_zeros) x 1.01865, ONE run each",
+    "randn_target_w": 7.108,
+    "calibrating_kind": "full",
+    "r_t": 0.3333,
+    "alpha": 0.6703,
+    "beta": 0.2234,
+    "alpha_reading": "alpha = 1 would mean the significand-width scaling r_T is exactly right; this is a prediction E79's own fp16/int8 price lists can falsify",
+    "zeros_check_w": 0.0,
+    "ones_check_w": 0.571
+   }
+  },
+  "alt_gating_arm": {
+   "arm": "bus",
+   "wa_inf_w": 5.3924,
+   "wb_inf_w": 6.9646,
+   "sigma_w": 8.1646,
+   "alpha": {
+    "fp32": 1.0,
+    "fp16": 1.4728,
+    "int8": 0.6703
+   },
+   "what": "the whole model re-calibrated under the other reading of the gate, carried per kind as `switching_w_alt_gating_arm`.  The kinds where the two arms disagree most are exactly the ones E78 should run first: they settle whether a clock-gated lane still pays its operand bus."
+  },
+  "u_per_format": {
+   "fp32_w": 8.555,
+   "fp32_se_w": 0.06,
+   "fp16_w": 8.463,
+   "int8_w": 0.571,
+   "fp32_from_e64_for_comparison_w": 8.895,
+   "reading": "int8's lane un-gating term is 0.57 W against fp32's 8.555 -- 15x smaller.  int8 runs on TIMA with the txfma clock OFF (vpu_tensorfma.v:157-166, 626-628), so most of what fp32 pays merely to have a live lane is not switched on at all.  It rests on ONE E64 run per point, so its interval is +-1.19 W."
+  }
+ },
+ "checks": {
+  "kinds_json_reproduced": {
+   "kinds": 51,
+   "failures": [],
+   "what": "sha256 of all 51 tiles, plus this file's own stream, gate and bus counts against kinds.json's stats.bus_bits_per_op and stats.gated_lane_frac for every kind"
+  },
+  "e70_additive_sums": {
+   "rungs": [
+    {
+     "item": "lq_h1",
+     "e70_S_w": 0.625,
+     "from_this_file": 0.63,
+     "d_w": 0.005
+    },
+    {
+     "item": "lq_h2",
+     "e70_S_w": 1.138,
+     "from_this_file": 1.14,
+     "d_w": 0.002
+    },
+    {
+     "item": "lq_h3",
+     "e70_S_w": 1.543,
+     "from_this_file": 1.55,
+     "d_w": 0.007
+    },
+    {
+     "item": "lq_h4",
+     "e70_S_w": 2.026,
+     "from_this_file": 2.03,
+     "d_w": 0.004
+    },
+    {
+     "item": "lq_h6",
+     "e70_S_w": 2.97,
+     "from_this_file": 2.97,
+     "d_w": 0.0
+    },
+    {
+     "item": "lq_h8",
+     "e70_S_w": 3.886,
+     "from_this_file": 3.88,
+     "d_w": -0.006
+    },
+    {
+     "item": "lq_h12",
+     "e70_S_w": 7.078,
+     "from_this_file": 7.07,
+     "d_w": -0.008
+    },
+    {
+     "item": "lq_h16",
+     "e70_S_w": 15.122,
+     "from_this_file": 15.12,
+     "d_w": -0.002
+    },
+    {
+     "item": "lq_h23",
+     "e70_S_w": 40.384,
+     "from_this_file": 40.38,
+     "d_w": -0.004
+    },
+    {
+     "item": "alq_h1",
+     "e70_S_w": 0.459,
+     "from_this_file": 0.46,
+     "d_w": 0.001
+    },
+    {
+     "item": "alq_h2",
+     "e70_S_w": 1.599,
+     "from_this_file": 1.6,
+     "d_w": 0.001
+    },
+    {
+     "item": "alq_h4",
+     "e70_S_w": 3.15,
+     "from_this_file": 3.15,
+     "d_w": 0.0
+    },
+    {
+     "item": "alq_h8",
+     "e70_S_w": 5.784,
+     "from_this_file": 5.78,
+     "d_w": -0.004
+    },
+    {
+     "item": "alq_h12",
+     "e70_S_w": 9.025,
+     "from_this_file": 9.02,
+     "d_w": -0.005
+    },
+    {
+     "item": "alq_h16",
+     "e70_S_w": 15.913,
+     "from_this_file": 15.9,
+     "d_w": -0.013
+    },
+    {
+     "item": "alq_h23",
+     "e70_S_w": 32.852,
+     "from_this_file": 32.84,
+     "d_w": -0.012
+    }
+   ],
+   "n": 16,
+   "max_abs_d_w": 0.013,
+   "what": "E70's own additive sums S for its nine lq and seven alq rungs, re-derived from this file's E65/E67 price lists position by position.  The residual is the 2 dp rounding of the published lists.  E70's seven spread (ls) rungs use a mask its item table defines and are not re-derived here."
+  },
+  "simulate_port": {
+   "this_file_mhz": 700.0,
+   "surface_hpl_mhz": 700.0,
+   "e64_cap_table_fp32_randn_65w_mhz": 700.0,
+   "what": "this file's copy of E64's governor against the import, on E64's own fp32 randn powers"
+  },
+  "speed_on_e64_own_c": {
+   "rows": [
+    {
+     "cell": "fp16/ones",
+     "c_w": 9.702,
+     "burst_mhz": 800.0,
+     "sustained_mhz": 744.9,
+     "sustained_die_c": 65.98
+    },
+    {
+     "cell": "fp16/randn",
+     "c_w": 23.284,
+     "burst_mhz": 715.2,
+     "sustained_mhz": 600.0,
+     "sustained_die_c": 66.22
+    },
+    {
+     "cell": "fp16/zeros",
+     "c_w": 1.394,
+     "burst_mhz": 800.0,
+     "sustained_mhz": 800.0,
+     "sustained_die_c": 59.11
+    },
+    {
+     "cell": "fp32/ones",
+     "c_w": 10.172,
+     "burst_mhz": 800.0,
+     "sustained_mhz": 738.9,
+     "sustained_die_c": 65.97
+    },
+    {
+     "cell": "fp32/randn",
+     "c_w": 25.638,
+     "burst_mhz": 700.0,
+     "sustained_mhz": 600.0,
+     "sustained_die_c": 67.52
+    },
+    {
+     "cell": "fp32/zeros",
+     "c_w": 1.44,
+     "burst_mhz": 800.0,
+     "sustained_mhz": 800.0,
+     "sustained_die_c": 59.16
+    },
+    {
+     "cell": "int8/ones",
+     "c_w": 2.684,
+     "burst_mhz": 800.0,
+     "sustained_mhz": 800.0,
+     "sustained_die_c": 60.61
+    },
+    {
+     "cell": "int8/randn",
+     "c_w": 9.101,
+     "burst_mhz": 800.0,
+     "sustained_mhz": 758.1,
+     "sustained_die_c": 65.99
+    },
+    {
+     "cell": "int8/zeros",
+     "c_w": 2.123,
+     "burst_mhz": 800.0,
+     "sustained_mhz": 800.0,
+     "sustained_die_c": 59.95
+    }
+   ],
+   "measured_sustained_mhz": {
+    "fp32/zeros": 800.0,
+    "fp32/ones": 737.9,
+    "fp32/randn": 600.0,
+    "fp16/zeros": 794.4,
+    "fp16/ones": 737.1,
+    "fp16/randn": 600.5,
+    "int8/zeros": 800.0,
+    "int8/ones": 800.0,
+    "int8/randn": 763.2
+   },
+   "what": "the same two simulations on E64's OWN fitted c, against its measured SUS clocks"
+  }
+ },
+ "predictions": {
+  "fp32/a_randn_b_zeros": {
+   "type": "fp32",
+   "kind": "a_randn_b_zeros",
+   "tier": 1,
+   "rule": "A randn, B all +0.0: every accumulate lane gated by the B side",
+   "tile_sha256": "bba7e25f69eb94fb98d954428d8adf3b82e1372a85a1ebc3ad264d932e4d952d",
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 27920,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.0,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.0,
+   "switching_w_alt_gating_arm": 7.297,
+   "gating_arm_spread_w": 7.297,
+   "switching_w_ci68": [
+    0.0,
+    0.15
+   ],
+   "switching_w_ci95": [
+    0.0,
+    0.3
+   ],
+   "pj_per_op": 0.0,
+   "pj_per_mac": 0.0,
+   "pj_per_op_ci95": [
+    0.0,
+    267.7
+   ],
+   "c_w_a2_600mhz": 1.44,
+   "p_w_a2": {
+    "600": 26.9,
+    "700": 30.27,
+    "800": 36.35
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.16,
+   "sustained_board_w": 36.9,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/a_zeros_b_randn": {
+   "type": "fp32",
+   "kind": "a_zeros_b_randn",
+   "tier": 2,
+   "rule": "A all +0.0, B randn: gated by the A side, which is the broadcast one",
+   "tile_sha256": "1c0546e56600fb5af64610f3adeceb30cbb1384a8368153b24772630b4f8245d",
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 55798,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.0,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.0,
+   "switching_w_alt_gating_arm": 10.784,
+   "gating_arm_spread_w": 10.784,
+   "switching_w_ci68": [
+    0.0,
+    0.15
+   ],
+   "switching_w_ci95": [
+    0.0,
+    0.3
+   ],
+   "pj_per_op": 0.0,
+   "pj_per_mac": 0.0,
+   "pj_per_op_ci95": [
+    0.0,
+    267.7
+   ],
+   "c_w_a2_600mhz": 1.44,
+   "p_w_a2": {
+    "600": 26.9,
+    "700": 30.27,
+    "800": 36.35
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.16,
+   "sustained_board_w": 36.9,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/bf16trunc": {
+   "type": "fp32",
+   "kind": "bf16trunc",
+   "tier": 1,
+   "rule": "randn with the low 16 mantissa bits zeroed: bf16 precision in an fp32 word",
+   "tile_sha256": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 34980,
+   "product_sign_rate": 0.51562,
+   "S_A_w": 9.1982,
+   "S_B_w": 14.3844,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 10.4947,
+   "term_product_sign_w": 4.2099,
+   "switching_w_600mhz_a3": 23.26,
+   "switching_w_alt_gating_arm": 23.26,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    21.439,
+    25.08
+   ],
+   "switching_w_ci95": [
+    19.618,
+    26.901
+   ],
+   "pj_per_op": 20752.6,
+   "pj_per_mac": 5.0666,
+   "pj_per_op_ci95": [
+    17504.0,
+    24001.2
+   ],
+   "c_w_a2_600mhz": 24.274,
+   "p_w_a2": {
+    "600": 49.73,
+    "700": 62.43,
+    "800": 79.86
+   },
+   "burst_mhz_65w": 706.0,
+   "burst_mhz_t1": 695.0,
+   "sustained_mhz": 600.0,
+   "sustained_die_c": 66.78,
+   "sustained_board_w": 53.07,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/fp16grid": {
+   "type": "fp32",
+   "kind": "fp16grid",
+   "tier": 2,
+   "rule": "randn rounded to the nearest fp16 value: the low 13 mantissa bits zeroed",
+   "tile_sha256": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 43136,
+   "product_sign_rate": 0.51123,
+   "S_A_w": 12.1277,
+   "S_B_w": 17.5021,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 11.2238,
+   "term_product_sign_w": 4.174,
+   "switching_w_600mhz_a3": 23.953,
+   "switching_w_alt_gating_arm": 23.953,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    22.048,
+    25.857
+   ],
+   "switching_w_ci95": [
+    20.144,
+    27.761
+   ],
+   "pj_per_op": 21371.2,
+   "pj_per_mac": 5.2176,
+   "pj_per_op_ci95": [
+    17973.0,
+    24769.3
+   ],
+   "c_w_a2_600mhz": 24.954,
+   "p_w_a2": {
+    "600": 50.41,
+    "700": 63.38,
+    "800": 81.15
+   },
+   "burst_mhz_65w": 700.0,
+   "burst_mhz_t1": 700.0,
+   "sustained_mhz": 600.0,
+   "sustained_die_c": 67.14,
+   "sustained_board_w": 53.91,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/neg_ones": {
+   "type": "fp32",
+   "kind": "neg_ones",
+   "tier": 2,
+   "rule": "every element -1.0 (0xBF800000): `ones` with the sign bit set",
+   "tile_sha256": "d55e700e94f9d6b3ee9ab86dbdfca2df8a357a04ea5631c537cf494813306e2f",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 0,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 8.555,
+   "switching_w_alt_gating_arm": 8.555,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    8.272,
+    8.838
+   ],
+   "switching_w_ci95": [
+    7.99,
+    9.12
+   ],
+   "pj_per_op": 7632.9,
+   "pj_per_mac": 1.8635,
+   "pj_per_op_ci95": [
+    7128.5,
+    8137.4
+   ],
+   "c_w_a2_600mhz": 9.839,
+   "p_w_a2": {
+    "600": 35.29,
+    "700": 42.1,
+    "800": 52.35
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 745.0,
+   "sustained_die_c": 65.98,
+   "sustained_board_w": 51.34,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/nn_like": {
+   "type": "fp32",
+   "kind": "nn_like",
+   "tier": 1,
+   "rule": "A = relu(randn) activations (half exactly +0.0), B = 0.02*randn weights",
+   "tile_sha256": "b1ac9635527ce0da9cd8f9e90f654a7f5d7d11d983619ced4a63d0fe30bfeeb8",
+   "gated_lane_frac": 0.507812,
+   "bus_bits_per_op": 80426,
+   "product_sign_rate": 0.24561,
+   "S_A_w": 8.9837,
+   "S_B_w": 10.4698,
+   "term_ungating_w": 4.2107,
+   "term_operand_bits_w": 9.7889,
+   "term_product_sign_w": 2.0053,
+   "switching_w_600mhz_a3": 16.005,
+   "switching_w_alt_gating_arm": 19.88,
+   "gating_arm_spread_w": 3.875,
+   "switching_w_ci68": [
+    14.523,
+    17.487
+   ],
+   "switching_w_ci95": [
+    13.04,
+    18.969
+   ],
+   "pj_per_op": 14279.9,
+   "pj_per_mac": 3.4863,
+   "pj_per_op_ci95": [
+    11634.9,
+    16924.8
+   ],
+   "c_w_a2_600mhz": 17.152,
+   "p_w_a2": {
+    "600": 42.61,
+    "700": 52.4,
+    "800": 66.29
+   },
+   "burst_mhz_65w": 785.0,
+   "burst_mhz_t1": 771.0,
+   "sustained_mhz": 649.0,
+   "sustained_die_c": 66.06,
+   "sustained_board_w": 51.37,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/ones": {
+   "type": "fp32",
+   "kind": "ones",
+   "tier": 1,
+   "rule": "every element 1.0 (0x3F800000)",
+   "tile_sha256": "fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 0,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 8.555,
+   "switching_w_alt_gating_arm": 8.555,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    8.272,
+    8.838
+   ],
+   "switching_w_ci95": [
+    7.99,
+    9.12
+   ],
+   "pj_per_op": 7632.9,
+   "pj_per_mac": 1.8635,
+   "pj_per_op_ci95": [
+    7128.5,
+    8137.4
+   ],
+   "c_w_a2_600mhz": 9.839,
+   "p_w_a2": {
+    "600": 35.29,
+    "700": 42.1,
+    "800": 52.35
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 745.0,
+   "sustained_die_c": 65.98,
+   "sustained_board_w": 51.34,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/pi": {
+   "type": "fp32",
+   "kind": "pi",
+   "tier": 2,
+   "rule": "every element 3.14159274f (0x40490FDB), the host's `pi`",
+   "tile_sha256": "29a5aff802de58cbbc49f69481e22cc92e199d7ec7412e196887327a1f007666",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 0,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 8.555,
+   "switching_w_alt_gating_arm": 8.555,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    8.272,
+    8.838
+   ],
+   "switching_w_ci95": [
+    7.99,
+    9.12
+   ],
+   "pj_per_op": 7632.9,
+   "pj_per_mac": 1.8635,
+   "pj_per_op_ci95": [
+    7128.5,
+    8137.4
+   ],
+   "c_w_a2_600mhz": 9.839,
+   "p_w_a2": {
+    "600": 35.29,
+    "700": 42.1,
+    "800": 52.35
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 745.0,
+   "sustained_die_c": 65.98,
+   "sustained_board_w": 51.34,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/pow2": {
+   "type": "fp32",
+   "kind": "pow2",
+   "tier": 1,
+   "rule": "2^(U{0..16} - 8), the host's `pow2`: mantissa 0, exponent random, sign 0",
+   "tile_sha256": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 25414,
+   "product_sign_rate": 0.0,
+   "S_A_w": 2.5416,
+   "S_B_w": 3.2745,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 4.639,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 13.194,
+   "switching_w_alt_gating_arm": 13.194,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    12.56,
+    13.828
+   ],
+   "switching_w_ci95": [
+    11.926,
+    14.462
+   ],
+   "pj_per_op": 11772.0,
+   "pj_per_mac": 2.874,
+   "pj_per_op_ci95": [
+    10640.8,
+    12903.2
+   ],
+   "c_w_a2_600mhz": 14.393,
+   "p_w_a2": {
+    "600": 39.85,
+    "700": 48.51,
+    "800": 61.03
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 681.0,
+   "sustained_die_c": 66.01,
+   "sustained_board_w": 51.47,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/randn": {
+   "type": "fp32",
+   "kind": "randn",
+   "tier": 1,
+   "rule": "standard normal, sigma 1",
+   "tile_sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 82214,
+   "product_sign_rate": 0.47314,
+   "S_A_w": 17.473,
+   "S_B_w": 20.7471,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 11.7918,
+   "term_product_sign_w": 3.863,
+   "switching_w_600mhz_a3": 24.21,
+   "switching_w_alt_gating_arm": 24.21,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    22.274,
+    26.145
+   ],
+   "switching_w_ci95": [
+    20.339,
+    28.081
+   ],
+   "pj_per_op": 21600.5,
+   "pj_per_mac": 5.2736,
+   "pj_per_op_ci95": [
+    18146.8,
+    25054.1
+   ],
+   "c_w_a2_600mhz": 25.207,
+   "p_w_a2": {
+    "600": 50.66,
+    "700": 63.74,
+    "800": 81.63
+   },
+   "burst_mhz_65w": 700.0,
+   "burst_mhz_t1": 700.0,
+   "sustained_mhz": 600.0,
+   "sustained_die_c": 67.27,
+   "sustained_board_w": 54.22,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/randn_large": {
+   "type": "fp32",
+   "kind": "randn_large",
+   "tier": 2,
+   "rule": "normal, sigma 2^10: the same mantissas, an exponent band 10 higher",
+   "tile_sha256": "95e0e68b705437d589f012858bd7cb475d612c270ed7899d17b3083bba78ad3e",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 84896,
+   "product_sign_rate": 0.50293,
+   "S_A_w": 17.7418,
+   "S_B_w": 21.2542,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 11.8269,
+   "term_product_sign_w": 4.1062,
+   "switching_w_600mhz_a3": 24.488,
+   "switching_w_alt_gating_arm": 24.488,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    22.52,
+    26.456
+   ],
+   "switching_w_ci95": [
+    20.552,
+    28.424
+   ],
+   "pj_per_op": 21848.8,
+   "pj_per_mac": 5.3342,
+   "pj_per_op_ci95": [
+    18337.3,
+    25360.3
+   ],
+   "c_w_a2_600mhz": 25.48,
+   "p_w_a2": {
+    "600": 50.94,
+    "700": 64.12,
+    "800": 82.15
+   },
+   "burst_mhz_65w": 700.0,
+   "burst_mhz_t1": 700.0,
+   "sustained_mhz": 600.0,
+   "sustained_die_c": 67.42,
+   "sustained_board_w": 54.56,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/randn_small": {
+   "type": "fp32",
+   "kind": "randn_small",
+   "tier": 2,
+   "rule": "normal, sigma 2^-10: the same mantissas, an exponent band 10 lower",
+   "tile_sha256": "1bb5c90d00b5e2ecaf3d16e3522aab3311e6b50fa1e9222343cdf6a55497d901",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 82244,
+   "product_sign_rate": 0.49902,
+   "S_A_w": 17.3913,
+   "S_B_w": 21.444,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 11.8222,
+   "term_product_sign_w": 4.0743,
+   "switching_w_600mhz_a3": 24.452,
+   "switching_w_alt_gating_arm": 24.452,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    22.488,
+    26.415
+   ],
+   "switching_w_ci95": [
+    20.524,
+    28.379
+   ],
+   "pj_per_op": 21816.2,
+   "pj_per_mac": 5.3262,
+   "pj_per_op_ci95": [
+    18312.3,
+    25320.1
+   ],
+   "c_w_a2_600mhz": 25.444,
+   "p_w_a2": {
+    "600": 50.9,
+    "700": 64.07,
+    "800": 82.09
+   },
+   "burst_mhz_65w": 700.0,
+   "burst_mhz_t1": 700.0,
+   "sustained_mhz": 600.0,
+   "sustained_die_c": 67.4,
+   "sustained_board_w": 54.51,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/randn_sorted": {
+   "type": "fp32",
+   "kind": "randn_sorted",
+   "tier": 1,
+   "rule": "`randn`'s own 512 words, permuted into the unit's stream order of least change",
+   "tile_sha256": "1f7af1fbac945df5eb217930df651917a9a1e3121b5dea5fa1af8b61ed9dd752",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 60856,
+   "product_sign_rate": 0.37695,
+   "S_A_w": 12.7379,
+   "S_B_w": 15.839,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 11.1325,
+   "term_product_sign_w": 3.0777,
+   "switching_w_600mhz_a3": 22.765,
+   "switching_w_alt_gating_arm": 22.765,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    21.004,
+    24.526
+   ],
+   "switching_w_ci95": [
+    19.244,
+    26.287
+   ],
+   "pj_per_op": 20311.5,
+   "pj_per_mac": 4.9589,
+   "pj_per_op_ci95": [
+    17169.4,
+    23453.6
+   ],
+   "c_w_a2_600mhz": 23.789,
+   "p_w_a2": {
+    "600": 49.24,
+    "700": 61.74,
+    "800": 78.93
+   },
+   "burst_mhz_65w": 706.0,
+   "burst_mhz_t1": 695.0,
+   "sustained_mhz": 600.0,
+   "sustained_die_c": 66.5,
+   "sustained_board_w": 52.47,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/smallint": {
+   "type": "fp32",
+   "kind": "smallint",
+   "tier": 1,
+   "rule": "integers -8..7 drawn uniformly, as floats: the int4 range, 1/16 of them zero",
+   "tile_sha256": "fd3d049e5908934965a165afe1ed529db86501c92b3d1da5d50642e9b18d8b3c",
+   "gated_lane_frac": 0.117676,
+   "bus_bits_per_op": 19806,
+   "product_sign_rate": 0.45874,
+   "S_A_w": 3.7216,
+   "S_B_w": 4.6902,
+   "term_ungating_w": 7.5483,
+   "term_operand_bits_w": 6.1011,
+   "term_product_sign_w": 3.7454,
+   "switching_w_600mhz_a3": 17.395,
+   "switching_w_alt_gating_arm": 18.348,
+   "gating_arm_spread_w": 0.953,
+   "switching_w_ci68": [
+    16.151,
+    18.639
+   ],
+   "switching_w_ci95": [
+    14.907,
+    19.882
+   ],
+   "pj_per_op": 15520.0,
+   "pj_per_mac": 3.7891,
+   "pj_per_op_ci95": [
+    13300.6,
+    17739.4
+   ],
+   "c_w_a2_600mhz": 18.517,
+   "p_w_a2": {
+    "600": 43.97,
+    "700": 54.32,
+    "800": 68.89
+   },
+   "burst_mhz_65w": 770.0,
+   "burst_mhz_t1": 757.0,
+   "sustained_mhz": 639.0,
+   "sustained_die_c": 66.01,
+   "sustained_board_w": 51.42,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/sparse50": {
+   "type": "fp32",
+   "kind": "sparse50",
+   "tier": 1,
+   "rule": "randn with half the elements (= words, E=1) set to +0.0",
+   "tile_sha256": "43ababfe5f3fed0963600a119a5ec805b433636594616042cac4fbab1fd69530",
+   "gated_lane_frac": 0.77417,
+   "bus_bits_per_op": 74550,
+   "product_sign_rate": 0.11157,
+   "S_A_w": 4.3668,
+   "S_B_w": 5.2009,
+   "term_ungating_w": 1.932,
+   "term_operand_bits_w": 6.6572,
+   "term_product_sign_w": 0.9109,
+   "switching_w_600mhz_a3": 9.5,
+   "switching_w_alt_gating_arm": 16.632,
+   "gating_arm_spread_w": 7.132,
+   "switching_w_ci68": [
+    8.542,
+    10.458
+   ],
+   "switching_w_ci95": [
+    7.584,
+    11.416
+   ],
+   "pj_per_op": 8476.2,
+   "pj_per_mac": 2.0694,
+   "pj_per_op_ci95": [
+    6766.8,
+    10185.6
+   ],
+   "c_w_a2_600mhz": 10.766,
+   "p_w_a2": {
+    "600": 36.22,
+    "700": 43.4,
+    "800": 54.12
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 728.0,
+   "sustained_die_c": 65.97,
+   "sustained_board_w": 51.2,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/sparse90": {
+   "type": "fp32",
+   "kind": "sparse90",
+   "tier": 1,
+   "rule": "randn with 90% of the elements set to +0.0",
+   "tile_sha256": "1ff8d98e3cd223fb18bdd24c1c294ed88d3853a568fd96b3fb46ce6d6b11a841",
+   "gated_lane_frac": 0.991699,
+   "bus_bits_per_op": 17780,
+   "product_sign_rate": 0.00366,
+   "S_A_w": 0.1685,
+   "S_B_w": 0.1922,
+   "term_ungating_w": 0.071,
+   "term_operand_bits_w": 0.3555,
+   "term_product_sign_w": 0.0299,
+   "switching_w_600mhz_a3": 0.456,
+   "switching_w_alt_gating_arm": 6.71,
+   "gating_arm_spread_w": 6.254,
+   "switching_w_ci68": [
+    0.297,
+    0.616
+   ],
+   "switching_w_ci95": [
+    0.138,
+    0.775
+   ],
+   "pj_per_op": 407.2,
+   "pj_per_mac": 0.0994,
+   "pj_per_op_ci95": [
+    123.1,
+    691.3
+   ],
+   "c_w_a2_600mhz": 1.888,
+   "p_w_a2": {
+    "600": 27.34,
+    "700": 30.9,
+    "800": 37.21
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.68,
+   "sustained_board_w": 38.06,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/uniform01": {
+   "type": "fp32",
+   "kind": "uniform01",
+   "tier": 2,
+   "rule": "uniform [0, 1): sign always 0, exponent always below 127",
+   "tile_sha256": "a2f2cb094c70f185138cdd130ef1f4e9fffea226bfe7ee2d7f2f7f44e6a40b8c",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 77842,
+   "product_sign_rate": 0.0,
+   "S_A_w": 16.9492,
+   "S_B_w": 21.5726,
+   "term_ungating_w": 8.555,
+   "term_operand_bits_w": 11.8098,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 20.365,
+   "switching_w_alt_gating_arm": 20.365,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    18.893,
+    21.837
+   ],
+   "switching_w_ci95": [
+    17.421,
+    23.308
+   ],
+   "pj_per_op": 18169.9,
+   "pj_per_mac": 4.436,
+   "pj_per_op_ci95": [
+    15543.5,
+    20796.2
+   ],
+   "c_w_a2_600mhz": 21.432,
+   "p_w_a2": {
+    "600": 46.89,
+    "700": 58.42,
+    "800": 74.44
+   },
+   "burst_mhz_65w": 736.0,
+   "burst_mhz_t1": 724.0,
+   "sustained_mhz": 612.0,
+   "sustained_die_c": 66.04,
+   "sustained_board_w": 51.42,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp32/zeros": {
+   "type": "fp32",
+   "kind": "zeros",
+   "tier": 1,
+   "rule": "every element +0.0 (0x00000000): every lane gated on an accumulate pass",
+   "tile_sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 0,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.0,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.0,
+   "switching_w_alt_gating_arm": 0.0,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    0.0,
+    0.15
+   ],
+   "switching_w_ci95": [
+    0.0,
+    0.3
+   ],
+   "pj_per_op": 0.0,
+   "pj_per_mac": 0.0,
+   "pj_per_op_ci95": [
+    0.0,
+    267.7
+   ],
+   "c_w_a2_600mhz": 1.44,
+   "p_w_a2": {
+    "600": 26.9,
+    "700": 30.27,
+    "800": 36.35
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.16,
+   "sustained_board_w": 36.9,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/a_randn_b_zeros": {
+   "type": "fp16",
+   "kind": "a_randn_b_zeros",
+   "tier": 2,
+   "rule": "A randn, B all zero",
+   "tile_sha256": "51a7424e7f4c711ba546b3cadb34aaccc25bb36376f4b14e706fff32c7640d7f",
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 28096,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.0,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.0,
+   "switching_w_alt_gating_arm": 6.422,
+   "gating_arm_spread_w": 6.422,
+   "switching_w_ci68": [
+    0.0,
+    0.15
+   ],
+   "switching_w_ci95": [
+    0.0,
+    0.3
+   ],
+   "pj_per_op": 0.0,
+   "pj_per_mac": 0.0,
+   "pj_per_op_ci95": [
+    0.0,
+    267.7
+   ],
+   "c_w_a2_600mhz": 1.394,
+   "p_w_a2": {
+    "600": 26.85,
+    "700": 30.21,
+    "800": 36.27
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.11,
+   "sustained_board_w": 36.78,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/a_zeros_b_randn": {
+   "type": "fp16",
+   "kind": "a_zeros_b_randn",
+   "tier": 2,
+   "rule": "A all zero, B randn: the other orientation, the broadcast side gated",
+   "tile_sha256": "ff2f88849f8c4a7b7aafefc0e29e74d4070492e7b3a41c4557f41e7e3f454af5",
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 55806,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.0,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.0,
+   "switching_w_alt_gating_arm": 10.021,
+   "gating_arm_spread_w": 10.021,
+   "switching_w_ci68": [
+    0.0,
+    0.15
+   ],
+   "switching_w_ci95": [
+    0.0,
+    0.3
+   ],
+   "pj_per_op": 0.0,
+   "pj_per_mac": 0.0,
+   "pj_per_op_ci95": [
+    0.0,
+    267.7
+   ],
+   "c_w_a2_600mhz": 1.394,
+   "p_w_a2": {
+    "600": 26.85,
+    "700": 30.21,
+    "800": 36.27
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.11,
+   "sustained_board_w": 36.78,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/fp8grid": {
+   "type": "fp16",
+   "kind": "fp8grid",
+   "tier": 2,
+   "rule": "randn rounded to the nearest e4m3 value, held in fp16: 3 mantissa bits",
+   "tile_sha256": "9baf7946148138bad5404bbada6fe8f8dc46d0162f18c7921827b29d097b144d",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 42486,
+   "product_sign_rate": 1.02637,
+   "S_A_w": 7.0266,
+   "S_B_w": 10.6152,
+   "term_ungating_w": 8.463,
+   "term_operand_bits_w": 7.3215,
+   "term_product_sign_w": 5.6566,
+   "switching_w_600mhz_a3": 21.441,
+   "switching_w_alt_gating_arm": 21.441,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    17.215,
+    25.667
+   ],
+   "switching_w_ci95": [
+    12.99,
+    29.893
+   ],
+   "pj_per_op": 19130.2,
+   "pj_per_mac": 2.3352,
+   "pj_per_op_ci95": [
+    11589.7,
+    26670.7
+   ],
+   "c_w_a2_600mhz": 22.442,
+   "p_w_a2": {
+    "600": 47.9,
+    "700": 59.85,
+    "800": 76.37
+   },
+   "burst_mhz_65w": 715.0,
+   "burst_mhz_t1": 705.0,
+   "sustained_mhz": 604.0,
+   "sustained_die_c": 66.05,
+   "sustained_board_w": 51.47,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/neg_ones": {
+   "type": "fp16",
+   "kind": "neg_ones",
+   "tier": 2,
+   "rule": "every element -1.0 (0xBC00)",
+   "tile_sha256": "4e325a49d476f9208c95dce54b1a59c147517f1d70617a193b93c0e10d8e8cc7",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 0,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 8.463,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 8.463,
+   "switching_w_alt_gating_arm": 8.463,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    7.256,
+    9.67
+   ],
+   "switching_w_ci95": [
+    6.049,
+    10.877
+   ],
+   "pj_per_op": 7550.8,
+   "pj_per_mac": 0.9217,
+   "pj_per_op_ci95": [
+    5397.0,
+    9704.7
+   ],
+   "c_w_a2_600mhz": 9.702,
+   "p_w_a2": {
+    "600": 35.16,
+    "700": 41.91,
+    "800": 52.09
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 745.0,
+   "sustained_die_c": 65.98,
+   "sustained_board_w": 51.23,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/nn_like": {
+   "type": "fp16",
+   "kind": "nn_like",
+   "tier": 1,
+   "rule": "A = relu(randn), B = 0.02*randn, both in fp16",
+   "tile_sha256": "1d11a28ba25bb7adc56eaf62ccc6330d523c82ee4a63b12adb349fdba1de3d27",
+   "gated_lane_frac": 0.195312,
+   "bus_bits_per_op": 84348,
+   "product_sign_rate": 0.80566,
+   "S_A_w": 12.1591,
+   "S_B_w": 19.1473,
+   "term_ungating_w": 6.8101,
+   "term_operand_bits_w": 8.1323,
+   "term_product_sign_w": 4.4403,
+   "switching_w_600mhz_a3": 19.383,
+   "switching_w_alt_gating_arm": 20.469,
+   "gating_arm_spread_w": 1.087,
+   "switching_w_ci68": [
+    15.333,
+    23.432
+   ],
+   "switching_w_ci95": [
+    11.283,
+    27.482
+   ],
+   "pj_per_op": 17293.5,
+   "pj_per_mac": 2.111,
+   "pj_per_op_ci95": [
+    10067.3,
+    24519.8
+   ],
+   "c_w_a2_600mhz": 20.422,
+   "p_w_a2": {
+    "600": 45.88,
+    "700": 57.0,
+    "800": 72.52
+   },
+   "burst_mhz_65w": 752.0,
+   "burst_mhz_t1": 733.0,
+   "sustained_mhz": 621.0,
+   "sustained_die_c": 66.03,
+   "sustained_board_w": 51.45,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/ones": {
+   "type": "fp16",
+   "kind": "ones",
+   "tier": 1,
+   "rule": "every element 1.0 (0x3C00)",
+   "tile_sha256": "c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 0,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 8.463,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 8.463,
+   "switching_w_alt_gating_arm": 8.463,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    7.256,
+    9.67
+   ],
+   "switching_w_ci95": [
+    6.049,
+    10.877
+   ],
+   "pj_per_op": 7550.8,
+   "pj_per_mac": 0.9217,
+   "pj_per_op_ci95": [
+    5397.0,
+    9704.7
+   ],
+   "c_w_a2_600mhz": 9.702,
+   "p_w_a2": {
+    "600": 35.16,
+    "700": 41.91,
+    "800": 52.09
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 745.0,
+   "sustained_die_c": 65.98,
+   "sustained_board_w": 51.23,
+   "sustained_limit": "thermal",
+   "calibration_status": "in sample",
+   "provisional": false
+  },
+  "fp16/pair_half_zero": {
+   "type": "fp16",
+   "kind": "pair_half_zero",
+   "tier": 1,
+   "rule": "in every (a1, a2) pair exactly one half is zero: the word never gates, but PRM 9.4's two-term update is dropped on every one of the 4,096 updates",
+   "tile_sha256": "463449da7eccd3457ee04840f01dfef52a68ed00f1913cbcaa5fe9093bceeb34",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 72796,
+   "product_sign_rate": 0.7876,
+   "S_A_w": 12.9284,
+   "S_B_w": 17.8815,
+   "term_ungating_w": 8.463,
+   "term_operand_bits_w": 8.1321,
+   "term_product_sign_w": 4.3407,
+   "switching_w_600mhz_a3": 20.936,
+   "switching_w_alt_gating_arm": 20.936,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    16.861,
+    25.011
+   ],
+   "switching_w_ci95": [
+    12.786,
+    29.085
+   ],
+   "pj_per_op": 18679.3,
+   "pj_per_mac": 2.2802,
+   "pj_per_op_ci95": [
+    11408.0,
+    25950.5
+   ],
+   "c_w_a2_600mhz": 21.946,
+   "p_w_a2": {
+    "600": 47.4,
+    "700": 59.15,
+    "800": 75.42
+   },
+   "burst_mhz_65w": 727.0,
+   "burst_mhz_t1": 714.0,
+   "sustained_mhz": 608.0,
+   "sustained_die_c": 66.04,
+   "sustained_board_w": 51.5,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/randn": {
+   "type": "fp16",
+   "kind": "randn",
+   "tier": 1,
+   "rule": "standard normal, sigma 1, rounded to fp16",
+   "tile_sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 84416,
+   "product_sign_rate": 1.00928,
+   "S_A_w": 16.794,
+   "S_B_w": 23.4258,
+   "term_ungating_w": 8.463,
+   "term_operand_bits_w": 8.2729,
+   "term_product_sign_w": 5.5624,
+   "switching_w_600mhz_a3": 22.298,
+   "switching_w_alt_gating_arm": 22.298,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    20.605,
+    23.992
+   ],
+   "switching_w_ci95": [
+    18.912,
+    25.685
+   ],
+   "pj_per_op": 19895.0,
+   "pj_per_mac": 2.4286,
+   "pj_per_op_ci95": [
+    16873.7,
+    22916.4
+   ],
+   "c_w_a2_600mhz": 23.284,
+   "p_w_a2": {
+    "600": 48.74,
+    "700": 61.03,
+    "800": 77.97
+   },
+   "burst_mhz_65w": 715.0,
+   "burst_mhz_t1": 695.0,
+   "sustained_mhz": 600.0,
+   "sustained_die_c": 66.22,
+   "sustained_board_w": 51.84,
+   "sustained_limit": "thermal",
+   "calibration_status": "in sample",
+   "provisional": false
+  },
+  "fp16/randn_small": {
+   "type": "fp16",
+   "kind": "randn_small",
+   "tier": 2,
+   "rule": "normal, sigma 2^-6, rounded to fp16: fp16's exponent range is only 5 bits",
+   "tile_sha256": "ab633bb9dfdff3d3e7f1acc7bf665c879d6a8b8b3be9f49f57d63e12f921401e",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 91126,
+   "product_sign_rate": 0.98828,
+   "S_A_w": 17.0142,
+   "S_B_w": 24.346,
+   "term_ungating_w": 8.463,
+   "term_operand_bits_w": 8.2808,
+   "term_product_sign_w": 5.4467,
+   "switching_w_600mhz_a3": 22.19,
+   "switching_w_alt_gating_arm": 22.19,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    17.74,
+    26.641
+   ],
+   "switching_w_ci95": [
+    13.29,
+    31.091
+   ],
+   "pj_per_op": 19798.8,
+   "pj_per_mac": 2.4168,
+   "pj_per_op_ci95": [
+    11857.5,
+    27740.0
+   ],
+   "c_w_a2_600mhz": 23.178,
+   "p_w_a2": {
+    "600": 48.63,
+    "700": 60.88,
+    "800": 77.77
+   },
+   "burst_mhz_65w": 718.0,
+   "burst_mhz_t1": 695.0,
+   "sustained_mhz": 600.0,
+   "sustained_die_c": 66.16,
+   "sustained_board_w": 51.71,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/randn_sorted": {
+   "type": "fp16",
+   "kind": "randn_sorted",
+   "tier": 1,
+   "rule": "`randn`'s own words, permuted into the stream order of least change",
+   "tile_sha256": "983c3ee3c2fb8af3bf3e3e10e78b8e945a18f333a960dfc3cde3dd08c6b164b9",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 61846,
+   "product_sign_rate": 0.88428,
+   "S_A_w": 12.8526,
+   "S_B_w": 16.9384,
+   "term_ungating_w": 8.463,
+   "term_operand_bits_w": 8.1066,
+   "term_product_sign_w": 4.8735,
+   "switching_w_600mhz_a3": 21.443,
+   "switching_w_alt_gating_arm": 21.443,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    17.217,
+    25.669
+   ],
+   "switching_w_ci95": [
+    12.991,
+    29.896
+   ],
+   "pj_per_op": 19132.0,
+   "pj_per_mac": 2.3354,
+   "pj_per_op_ci95": [
+    11590.4,
+    26673.5
+   ],
+   "c_w_a2_600mhz": 22.444,
+   "p_w_a2": {
+    "600": 47.9,
+    "700": 59.85,
+    "800": 76.37
+   },
+   "burst_mhz_65w": 715.0,
+   "burst_mhz_t1": 705.0,
+   "sustained_mhz": 604.0,
+   "sustained_die_c": 66.05,
+   "sustained_board_w": 51.47,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/smallint": {
+   "type": "fp16",
+   "kind": "smallint",
+   "tier": 2,
+   "rule": "integers -8..7 as fp16 values",
+   "tile_sha256": "74b75d643b356c1ad0801aded66c5dee5d6046d68df4be020a79dd111f195b53",
+   "gated_lane_frac": 0.003906,
+   "bus_bits_per_op": 35980,
+   "product_sign_rate": 0.96533,
+   "S_A_w": 4.925,
+   "S_B_w": 7.1112,
+   "term_ungating_w": 8.4299,
+   "term_operand_bits_w": 6.3646,
+   "term_product_sign_w": 5.3202,
+   "switching_w_600mhz_a3": 20.115,
+   "switching_w_alt_gating_arm": 20.141,
+   "gating_arm_spread_w": 0.026,
+   "switching_w_ci68": [
+    16.275,
+    23.954
+   ],
+   "switching_w_ci95": [
+    12.436,
+    27.794
+   ],
+   "pj_per_op": 17946.8,
+   "pj_per_mac": 2.1908,
+   "pj_per_op_ci95": [
+    11095.5,
+    24798.2
+   ],
+   "c_w_a2_600mhz": 21.14,
+   "p_w_a2": {
+    "600": 46.6,
+    "700": 58.01,
+    "800": 73.89
+   },
+   "burst_mhz_65w": 739.0,
+   "burst_mhz_t1": 724.0,
+   "sustained_mhz": 614.0,
+   "sustained_die_c": 66.03,
+   "sustained_board_w": 51.41,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/sparse50": {
+   "type": "fp16",
+   "kind": "sparse50",
+   "tier": 1,
+   "rule": "randn with half the ELEMENTS zero: only 1/4 of the words gate",
+   "tile_sha256": "24fc0ea7988ea2e011d59388a9b6152fe68add28028ad0884e5eb2b588c1c11b",
+   "gated_lane_frac": 0.414307,
+   "bus_bits_per_op": 71590,
+   "product_sign_rate": 0.53125,
+   "S_A_w": 9.0137,
+   "S_B_w": 11.4878,
+   "term_ungating_w": 4.9567,
+   "term_operand_bits_w": 7.627,
+   "term_product_sign_w": 2.9279,
+   "switching_w_600mhz_a3": 15.512,
+   "switching_w_alt_gating_arm": 17.847,
+   "gating_arm_spread_w": 2.335,
+   "switching_w_ci68": [
+    12.132,
+    18.891
+   ],
+   "switching_w_ci95": [
+    8.752,
+    22.271
+   ],
+   "pj_per_op": 13839.7,
+   "pj_per_mac": 1.6894,
+   "pj_per_op_ci95": [
+    7808.6,
+    19870.9
+   ],
+   "c_w_a2_600mhz": 16.622,
+   "p_w_a2": {
+    "600": 42.08,
+    "700": 51.65,
+    "800": 65.28
+   },
+   "burst_mhz_65w": 794.0,
+   "burst_mhz_t1": 776.0,
+   "sustained_mhz": 656.0,
+   "sustained_die_c": 66.05,
+   "sustained_board_w": 51.47,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/sparse90": {
+   "type": "fp16",
+   "kind": "sparse90",
+   "tier": 2,
+   "rule": "randn with 90% of the elements zero: 81% of the words gate",
+   "tile_sha256": "37f3df172b0dce9f6da14a538457d41c1779bdc44394a6734be40d0036c709b9",
+   "gated_lane_frac": 0.960938,
+   "bus_bits_per_op": 18412,
+   "product_sign_rate": 0.0249,
+   "S_A_w": 0.3064,
+   "S_B_w": 0.4496,
+   "term_ungating_w": 0.3306,
+   "term_operand_bits_w": 0.7226,
+   "term_product_sign_w": 0.1372,
+   "switching_w_600mhz_a3": 1.19,
+   "switching_w_alt_gating_arm": 6.801,
+   "gating_arm_spread_w": 5.611,
+   "switching_w_ci68": [
+    0.874,
+    1.507
+   ],
+   "switching_w_ci95": [
+    0.557,
+    1.824
+   ],
+   "pj_per_op": 1062.1,
+   "pj_per_mac": 0.1297,
+   "pj_per_op_ci95": [
+    497.0,
+    1627.3
+   ],
+   "c_w_a2_600mhz": 2.563,
+   "p_w_a2": {
+    "600": 28.02,
+    "700": 31.85,
+    "800": 38.49
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 60.47,
+   "sustained_board_w": 39.81,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/uniform01": {
+   "type": "fp16",
+   "kind": "uniform01",
+   "tier": 2,
+   "rule": "uniform [0, 1), rounded to fp16",
+   "tile_sha256": "f27e67543fabb0c7623c047fed941a5b9f15e23a137d421251f24ffeaa620c5c",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 77948,
+   "product_sign_rate": 0.0,
+   "S_A_w": 16.4608,
+   "S_B_w": 23.4503,
+   "term_ungating_w": 8.463,
+   "term_operand_bits_w": 8.2696,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 16.733,
+   "switching_w_alt_gating_arm": 16.733,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    13.884,
+    19.581
+   ],
+   "switching_w_ci95": [
+    11.035,
+    22.43
+   ],
+   "pj_per_op": 14929.2,
+   "pj_per_mac": 1.8224,
+   "pj_per_op_ci95": [
+    9845.7,
+    20012.6
+   ],
+   "c_w_a2_600mhz": 17.82,
+   "p_w_a2": {
+    "600": 43.28,
+    "700": 53.34,
+    "800": 67.56
+   },
+   "burst_mhz_65w": 776.0,
+   "burst_mhz_t1": 767.0,
+   "sustained_mhz": 646.0,
+   "sustained_die_c": 66.0,
+   "sustained_board_w": 51.34,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/wsparse50": {
+   "type": "fp16",
+   "kind": "wsparse50",
+   "tier": 1,
+   "rule": "randn with half the WORDS zero: the kind that really gates half of fp16's lanes",
+   "tile_sha256": "75fa5d0427231be1d8728ac5006a6bafc2f89c779a56b1bd438633192c45cc74",
+   "gated_lane_frac": 0.76001,
+   "bus_bits_per_op": 73444,
+   "product_sign_rate": 0.24268,
+   "S_A_w": 3.6953,
+   "S_B_w": 5.8667,
+   "term_ungating_w": 2.031,
+   "term_operand_bits_w": 5.6726,
+   "term_product_sign_w": 1.3375,
+   "switching_w_600mhz_a3": 9.041,
+   "switching_w_alt_gating_arm": 15.055,
+   "gating_arm_spread_w": 6.014,
+   "switching_w_ci68": [
+    6.821,
+    11.261
+   ],
+   "switching_w_ci95": [
+    4.601,
+    13.482
+   ],
+   "pj_per_op": 8066.6,
+   "pj_per_mac": 0.9847,
+   "pj_per_op_ci95": [
+    4104.7,
+    12028.6
+   ],
+   "c_w_a2_600mhz": 10.27,
+   "p_w_a2": {
+    "600": 35.73,
+    "700": 42.7,
+    "800": 53.17
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 735.0,
+   "sustained_die_c": 65.97,
+   "sustained_board_w": 51.24,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/wsparse90": {
+   "type": "fp16",
+   "kind": "wsparse90",
+   "tier": 2,
+   "rule": "randn with 90% of the words zero",
+   "tile_sha256": "894e7b20333e9ae2516e2dfedbb9d04da980104e0cc44ee3bd701960cbdc8dc9",
+   "gated_lane_frac": 0.990234,
+   "bus_bits_per_op": 18192,
+   "product_sign_rate": 0.0083,
+   "S_A_w": 0.1196,
+   "S_B_w": 0.2179,
+   "term_ungating_w": 0.0826,
+   "term_operand_bits_w": 0.3306,
+   "term_product_sign_w": 0.0457,
+   "switching_w_600mhz_a3": 0.459,
+   "switching_w_alt_gating_arm": 6.369,
+   "gating_arm_spread_w": 5.911,
+   "switching_w_ci68": [
+    0.266,
+    0.652
+   ],
+   "switching_w_ci95": [
+    0.074,
+    0.844
+   ],
+   "pj_per_op": 409.5,
+   "pj_per_mac": 0.05,
+   "pj_per_op_ci95": [
+    66.0,
+    753.1
+   ],
+   "c_w_a2_600mhz": 1.845,
+   "p_w_a2": {
+    "600": 27.3,
+    "700": 30.84,
+    "800": 37.12
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.63,
+   "sustained_board_w": 37.94,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": false
+  },
+  "fp16/zeros": {
+   "type": "fp16",
+   "kind": "zeros",
+   "tier": 1,
+   "rule": "every element +0.0 (0x0000): every lane gated",
+   "tile_sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 0,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.0,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.0,
+   "switching_w_alt_gating_arm": 0.0,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    0.0,
+    0.15
+   ],
+   "switching_w_ci95": [
+    0.0,
+    0.3
+   ],
+   "pj_per_op": 0.0,
+   "pj_per_mac": 0.0,
+   "pj_per_op_ci95": [
+    0.0,
+    267.7
+   ],
+   "c_w_a2_600mhz": 1.394,
+   "p_w_a2": {
+    "600": 26.85,
+    "700": 30.21,
+    "800": 36.27
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.11,
+   "sustained_board_w": 36.78,
+   "sustained_limit": "power",
+   "calibration_status": "in sample",
+   "provisional": false
+  },
+  "int8/a_full_b_zeros": {
+   "type": "int8",
+   "kind": "a_full_b_zeros",
+   "tier": 2,
+   "rule": "A uniform -128..127, B all zero",
+   "tile_sha256": "a3570b797a41bd8cc3bbda801bf232ac85a4d180d983bad75fcde8b10e24c030",
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 65248,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.0,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.0,
+   "switching_w_alt_gating_arm": 5.991,
+   "gating_arm_spread_w": 5.991,
+   "switching_w_ci68": [
+    0.0,
+    0.15
+   ],
+   "switching_w_ci95": [
+    0.0,
+    0.3
+   ],
+   "pj_per_op": 0.0,
+   "pj_per_mac": 0.0,
+   "pj_per_op_ci95": [
+    0.0,
+    155.9
+   ],
+   "c_w_a2_600mhz": 2.123,
+   "p_w_a2": {
+    "600": 27.58,
+    "700": 31.23,
+    "800": 37.65
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.95,
+   "sustained_board_w": 38.66,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/a_zeros_b_full": {
+   "type": "int8",
+   "kind": "a_zeros_b_full",
+   "tier": 2,
+   "rule": "A all zero, B uniform -128..127: the broadcast side gated instead",
+   "tile_sha256": "cb1033cfe9ce08c2cc3f3fc5887ebdab9bf99479a79f483a499655530b6d7704",
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 4140,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.0,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.0,
+   "switching_w_alt_gating_arm": 0.813,
+   "gating_arm_spread_w": 0.813,
+   "switching_w_ci68": [
+    0.0,
+    0.15
+   ],
+   "switching_w_ci95": [
+    0.0,
+    0.3
+   ],
+   "pj_per_op": 0.0,
+   "pj_per_mac": 0.0,
+   "pj_per_op_ci95": [
+    0.0,
+    155.9
+   ],
+   "c_w_a2_600mhz": 2.123,
+   "p_w_a2": {
+    "600": 27.58,
+    "700": 31.23,
+    "800": 37.65
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.95,
+   "sustained_board_w": 38.66,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/full": {
+   "type": "int8",
+   "kind": "full",
+   "tier": 1,
+   "rule": "uniform over -128..127, the whole two's-complement range (E64's int8 `randn`)",
+   "tile_sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 69312,
+   "product_sign_rate": 2.00293,
+   "S_A_w": 7.741,
+   "S_B_w": 0.7104,
+   "term_ungating_w": 0.5715,
+   "term_operand_bits_w": 2.883,
+   "term_product_sign_w": 3.6538,
+   "switching_w_600mhz_a3": 7.108,
+   "switching_w_alt_gating_arm": 7.108,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    5.421,
+    8.795
+   ],
+   "switching_w_ci95": [
+    3.735,
+    10.482
+   ],
+   "pj_per_op": 3693.7,
+   "pj_per_mac": 0.2254,
+   "pj_per_op_ci95": [
+    1940.7,
+    5446.7
+   ],
+   "c_w_a2_600mhz": 9.101,
+   "p_w_a2": {
+    "600": 34.56,
+    "700": 41.06,
+    "800": 50.95
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 758.0,
+   "sustained_die_c": 65.99,
+   "sustained_board_w": 51.38,
+   "sustained_limit": "thermal",
+   "calibration_status": "in sample",
+   "provisional": true
+  },
+  "int8/gauss_q": {
+   "type": "int8",
+   "kind": "gauss_q",
+   "tier": 1,
+   "rule": "round(16*randn) clipped to +-127: a quantised weight, most bytes small",
+   "tile_sha256": "5a728a0ed9b67b24da11ddd034cbeb8b577e00088d0bbdec82dd1884328902a3",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 69544,
+   "product_sign_rate": 1.99902,
+   "S_A_w": 7.8106,
+   "S_B_w": 0.7113,
+   "term_ungating_w": 0.5715,
+   "term_operand_bits_w": 2.8863,
+   "term_product_sign_w": 3.6466,
+   "switching_w_600mhz_a3": 7.104,
+   "switching_w_alt_gating_arm": 7.104,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    4.519,
+    9.69
+   ],
+   "switching_w_ci95": [
+    1.934,
+    12.275
+   ],
+   "pj_per_op": 3691.8,
+   "pj_per_mac": 0.2253,
+   "pj_per_op_ci95": [
+    1004.7,
+    6378.8
+   ],
+   "c_w_a2_600mhz": 9.097,
+   "p_w_a2": {
+    "600": 34.55,
+    "700": 41.05,
+    "800": 50.94
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 758.0,
+   "sustained_die_c": 65.99,
+   "sustained_board_w": 51.38,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/highbit": {
+   "type": "int8",
+   "kind": "highbit",
+   "tier": 2,
+   "rule": "+64 or -64 (0x40 / 0xC0): one magnitude bit, the sign changing",
+   "tile_sha256": "b29af488b581a8b07699f6ab35041e0f7d7db6bb667f35502e9fa2f5f0be28fa",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 8664,
+   "product_sign_rate": 2.01172,
+   "S_A_w": 0.2493,
+   "S_B_w": 0.0154,
+   "term_ungating_w": 0.5715,
+   "term_operand_bits_w": 0.2521,
+   "term_product_sign_w": 3.6698,
+   "switching_w_600mhz_a3": 4.493,
+   "switching_w_alt_gating_arm": 4.493,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    2.669,
+    6.317
+   ],
+   "switching_w_ci95": [
+    0.845,
+    8.141
+   ],
+   "pj_per_op": 2335.0,
+   "pj_per_mac": 0.1425,
+   "pj_per_op_ci95": [
+    439.3,
+    4230.6
+   ],
+   "c_w_a2_600mhz": 6.534,
+   "p_w_a2": {
+    "600": 31.99,
+    "700": 37.44,
+    "800": 46.06
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 65.26,
+   "sustained_board_w": 50.49,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/neg_ones": {
+   "type": "int8",
+   "kind": "neg_ones",
+   "tier": 1,
+   "rule": "every byte -1 (0xFF), word 0xFFFFFFFF: every bit set",
+   "tile_sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 0,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.5715,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.571,
+   "switching_w_alt_gating_arm": 0.571,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    0.0,
+    1.769
+   ],
+   "switching_w_ci95": [
+    0.0,
+    2.967
+   ],
+   "pj_per_op": 297.0,
+   "pj_per_mac": 0.0181,
+   "pj_per_op_ci95": [
+    0.0,
+    1542.0
+   ],
+   "c_w_a2_600mhz": 2.684,
+   "p_w_a2": {
+    "600": 28.14,
+    "700": 32.02,
+    "800": 38.72
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 60.61,
+   "sustained_board_w": 40.12,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/ones": {
+   "type": "int8",
+   "kind": "ones",
+   "tier": 1,
+   "rule": "every byte +1 (0x01), word 0x01010101",
+   "tile_sha256": "7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 0,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.5715,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.571,
+   "switching_w_alt_gating_arm": 0.571,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    0.0,
+    1.769
+   ],
+   "switching_w_ci95": [
+    0.0,
+    2.967
+   ],
+   "pj_per_op": 297.0,
+   "pj_per_mac": 0.0181,
+   "pj_per_op_ci95": [
+    0.0,
+    1542.0
+   ],
+   "c_w_a2_600mhz": 2.684,
+   "p_w_a2": {
+    "600": 28.14,
+    "700": 32.02,
+    "800": 38.72
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 60.61,
+   "sustained_board_w": 40.12,
+   "sustained_limit": "power",
+   "calibration_status": "in sample",
+   "provisional": true
+  },
+  "int8/pos": {
+   "type": "int8",
+   "kind": "pos",
+   "tier": 1,
+   "rule": "uniform over 0..127, sign bit always 0 (E64's int8 `uniform`)",
+   "tile_sha256": "c67fb76ffaa707949f4d1efd871739c3353224a79d40f092ec0f20ee395ecaf2",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 61096,
+   "product_sign_rate": 0.0,
+   "S_A_w": 7.5971,
+   "S_B_w": 0.7086,
+   "term_ungating_w": 0.5715,
+   "term_operand_bits_w": 2.8759,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 3.447,
+   "switching_w_alt_gating_arm": 3.447,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    1.881,
+    5.013
+   ],
+   "switching_w_ci95": [
+    0.315,
+    6.579
+   ],
+   "pj_per_op": 1791.4,
+   "pj_per_mac": 0.1093,
+   "pj_per_op_ci95": [
+    163.9,
+    3418.9
+   ],
+   "c_w_a2_600mhz": 5.507,
+   "p_w_a2": {
+    "600": 30.96,
+    "700": 36.0,
+    "800": 44.1
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 63.99,
+   "sustained_board_w": 47.66,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/smallint": {
+   "type": "int8",
+   "kind": "smallint",
+   "tier": 1,
+   "rule": "uniform over -8..7: the int4 range inside an int8 byte",
+   "tile_sha256": "940ecffb1175bfcc10e3a87ec8a6ba692a953d949b5b6d8623628885cc631aa1",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 70526,
+   "product_sign_rate": 2.00342,
+   "S_A_w": 7.923,
+   "S_B_w": 0.7316,
+   "term_ungating_w": 0.5715,
+   "term_operand_bits_w": 2.9034,
+   "term_product_sign_w": 3.6546,
+   "switching_w_600mhz_a3": 7.129,
+   "switching_w_alt_gating_arm": 7.129,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    4.538,
+    9.721
+   ],
+   "switching_w_ci95": [
+    1.947,
+    12.312
+   ],
+   "pj_per_op": 3704.8,
+   "pj_per_mac": 0.2261,
+   "pj_per_op_ci95": [
+    1011.5,
+    6398.1
+   ],
+   "c_w_a2_600mhz": 9.122,
+   "p_w_a2": {
+    "600": 34.58,
+    "700": 41.09,
+    "800": 50.99
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 757.0,
+   "sustained_die_c": 65.99,
+   "sustained_board_w": 51.35,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/sorted": {
+   "type": "int8",
+   "kind": "sorted",
+   "tier": 1,
+   "rule": "`full`'s own words, permuted into the stream order of least change",
+   "tile_sha256": "0f8f20bf3155dda98e51878cc999c21b45399266558b9d237903e3f530712948",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 53346,
+   "product_sign_rate": 1.50293,
+   "S_A_w": 6.0524,
+   "S_B_w": 0.5412,
+   "term_ungating_w": 0.5715,
+   "term_operand_bits_w": 2.6712,
+   "term_product_sign_w": 2.7417,
+   "switching_w_600mhz_a3": 5.984,
+   "switching_w_alt_gating_arm": 5.984,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    3.74,
+    8.229
+   ],
+   "switching_w_ci95": [
+    1.495,
+    10.474
+   ],
+   "pj_per_op": 3109.7,
+   "pj_per_mac": 0.1898,
+   "pj_per_op_ci95": [
+    776.8,
+    5442.7
+   ],
+   "c_w_a2_600mhz": 7.998,
+   "p_w_a2": {
+    "600": 33.45,
+    "700": 39.51,
+    "800": 48.85
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 776.0,
+   "sustained_die_c": 65.98,
+   "sustained_board_w": 51.34,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/sparse50": {
+   "type": "int8",
+   "kind": "sparse50",
+   "tier": 1,
+   "rule": "`full` with half the BYTES zero: only 1/16 of the words gate",
+   "tile_sha256": "e235ed609c58b069f36412099d8d2fa890cae07bf5599f77b65904b6802d38a8",
+   "gated_lane_frac": 0.070312,
+   "bus_bits_per_op": 53480,
+   "product_sign_rate": 1.59131,
+   "S_A_w": 5.6875,
+   "S_B_w": 0.5267,
+   "term_ungating_w": 0.5313,
+   "term_operand_bits_w": 2.629,
+   "term_product_sign_w": 2.9029,
+   "switching_w_600mhz_a3": 6.063,
+   "switching_w_alt_gating_arm": 6.264,
+   "gating_arm_spread_w": 0.201,
+   "switching_w_ci68": [
+    3.825,
+    8.301
+   ],
+   "switching_w_ci95": [
+    1.588,
+    10.539
+   ],
+   "pj_per_op": 3150.7,
+   "pj_per_mac": 0.1923,
+   "pj_per_op_ci95": [
+    825.1,
+    5476.4
+   ],
+   "c_w_a2_600mhz": 8.075,
+   "p_w_a2": {
+    "600": 33.53,
+    "700": 39.61,
+    "800": 48.99
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 774.0,
+   "sustained_die_c": 65.98,
+   "sustained_board_w": 51.3,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/sparse90": {
+   "type": "int8",
+   "kind": "sparse90",
+   "tier": 2,
+   "rule": "`full` with 90% of the bytes zero: 65.6% of the words gate",
+   "tile_sha256": "7f99abeaacd8ede601f37fad4dead098f7cdffe905af99e956b03fceddccb03b",
+   "gated_lane_frac": 0.821777,
+   "bus_bits_per_op": 12144,
+   "product_sign_rate": 0.13794,
+   "S_A_w": 0.4598,
+   "S_B_w": 0.0212,
+   "term_ungating_w": 0.1018,
+   "term_operand_bits_w": 0.4396,
+   "term_product_sign_w": 0.2516,
+   "switching_w_600mhz_a3": 0.793,
+   "switching_w_alt_gating_arm": 2.035,
+   "gating_arm_spread_w": 1.242,
+   "switching_w_ci68": [
+    0.438,
+    1.149
+   ],
+   "switching_w_ci95": [
+    0.082,
+    1.504
+   ],
+   "pj_per_op": 412.1,
+   "pj_per_mac": 0.0252,
+   "pj_per_op_ci95": [
+    42.8,
+    781.5
+   ],
+   "c_w_a2_600mhz": 2.902,
+   "p_w_a2": {
+    "600": 28.36,
+    "700": 32.33,
+    "800": 39.14
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 60.87,
+   "sustained_board_w": 40.69,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/ternary": {
+   "type": "int8",
+   "kind": "ternary",
+   "tier": 1,
+   "rule": "-1, 0, +1 with equal probability: a ternary-quantised weight",
+   "tile_sha256": "f5467ac1acee2fbf0fee0a0aff8ee1510af6e570829a08453ba0596b289cc607",
+   "gated_lane_frac": 0.007812,
+   "bus_bits_per_op": 58798,
+   "product_sign_rate": 1.68018,
+   "S_A_w": 6.5361,
+   "S_B_w": 0.6556,
+   "term_ungating_w": 0.567,
+   "term_operand_bits_w": 2.7847,
+   "term_product_sign_w": 3.065,
+   "switching_w_600mhz_a3": 6.417,
+   "switching_w_alt_gating_arm": 6.425,
+   "gating_arm_spread_w": 0.009,
+   "switching_w_ci68": [
+    4.046,
+    8.788
+   ],
+   "switching_w_ci95": [
+    1.675,
+    11.159
+   ],
+   "pj_per_op": 3334.4,
+   "pj_per_mac": 0.2035,
+   "pj_per_op_ci95": [
+    870.2,
+    5798.6
+   ],
+   "c_w_a2_600mhz": 8.422,
+   "p_w_a2": {
+    "600": 33.88,
+    "700": 40.1,
+    "800": 49.66
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 768.0,
+   "sustained_die_c": 65.98,
+   "sustained_board_w": 51.29,
+   "sustained_limit": "thermal",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/wsparse50": {
+   "type": "int8",
+   "kind": "wsparse50",
+   "tier": 1,
+   "rule": "`full` with half the WORDS zero: still gates only ~5/8 of int8's lanes, because the gate wants BOTH words of the column pair",
+   "tile_sha256": "c4e9c25698357a6e27b9327ddfa2a12589c84bedd3ad39bb06f88d86e581a752",
+   "gated_lane_frac": 0.643555,
+   "bus_bits_per_op": 48766,
+   "product_sign_rate": 0.71655,
+   "S_A_w": 2.7613,
+   "S_B_w": 0.1193,
+   "term_ungating_w": 0.2037,
+   "term_operand_bits_w": 1.7584,
+   "term_product_sign_w": 1.3071,
+   "switching_w_600mhz_a3": 3.269,
+   "switching_w_alt_gating_arm": 5.504,
+   "gating_arm_spread_w": 2.235,
+   "switching_w_ci68": [
+    2.104,
+    4.435
+   ],
+   "switching_w_ci95": [
+    0.938,
+    5.6
+   ],
+   "pj_per_op": 1698.9,
+   "pj_per_mac": 0.1037,
+   "pj_per_op_ci95": [
+    487.7,
+    2910.0
+   ],
+   "c_w_a2_600mhz": 5.332,
+   "p_w_a2": {
+    "600": 30.79,
+    "700": 35.75,
+    "800": 43.77
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 63.78,
+   "sustained_board_w": 47.19,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/wsparse90": {
+   "type": "int8",
+   "kind": "wsparse90",
+   "tier": 2,
+   "rule": "`full` with 90% of the words zero",
+   "tile_sha256": "0180bfbf624d87a3426796b40c8890df5ca11784a8f3dc3afa6456cbb1a87da8",
+   "gated_lane_frac": 0.97998,
+   "bus_bits_per_op": 16316,
+   "product_sign_rate": 0.04639,
+   "S_A_w": 0.1661,
+   "S_B_w": 0.0129,
+   "term_ungating_w": 0.0114,
+   "term_operand_bits_w": 0.1734,
+   "term_product_sign_w": 0.0846,
+   "switching_w_600mhz_a3": 0.269,
+   "switching_w_alt_gating_arm": 2.322,
+   "gating_arm_spread_w": 2.052,
+   "switching_w_ci68": [
+    0.093,
+    0.446
+   ],
+   "switching_w_ci95": [
+    0.0,
+    0.623
+   ],
+   "pj_per_op": 140.0,
+   "pj_per_mac": 0.0085,
+   "pj_per_op_ci95": [
+    0.0,
+    323.8
+   ],
+   "c_w_a2_600mhz": 2.388,
+   "p_w_a2": {
+    "600": 27.84,
+    "700": 31.61,
+    "800": 38.16
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 60.26,
+   "sustained_board_w": 39.35,
+   "sustained_limit": "power",
+   "calibration_status": "out of sample",
+   "provisional": true
+  },
+  "int8/zeros": {
+   "type": "int8",
+   "kind": "zeros",
+   "tier": 1,
+   "rule": "every byte 0x00: every lane gated",
+   "tile_sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 0,
+   "product_sign_rate": 0.0,
+   "S_A_w": 0.0,
+   "S_B_w": 0.0,
+   "term_ungating_w": 0.0,
+   "term_operand_bits_w": 0.0,
+   "term_product_sign_w": 0.0,
+   "switching_w_600mhz_a3": 0.0,
+   "switching_w_alt_gating_arm": 0.0,
+   "gating_arm_spread_w": 0.0,
+   "switching_w_ci68": [
+    0.0,
+    0.15
+   ],
+   "switching_w_ci95": [
+    0.0,
+    0.3
+   ],
+   "pj_per_op": 0.0,
+   "pj_per_mac": 0.0,
+   "pj_per_op_ci95": [
+    0.0,
+    155.9
+   ],
+   "c_w_a2_600mhz": 2.123,
+   "p_w_a2": {
+    "600": 27.58,
+    "700": 31.23,
+    "800": 37.65
+   },
+   "burst_mhz_65w": 800.0,
+   "burst_mhz_t1": 800.0,
+   "sustained_mhz": 800.0,
+   "sustained_die_c": 59.95,
+   "sustained_board_w": 38.66,
+   "sustained_limit": "power",
+   "calibration_status": "in sample",
+   "provisional": true
+  }
+ },
+ "speed": {
+  "model": {
+   "burst": "surface_hpl.py simulate, tau 1.3 s, pass 0.24 s, 65 W, cool die, mean clock 4-12 s on p_f = E64's B_f + c*s_f",
+   "sustained": "surface_hpl_t.py at gamma 3.0, die a state on E64's thermal line, tau_th 14 s, thermal limb trip 66 C, mean clock 40-80 s",
+   "gamma": 3.0,
+   "B_t1": {
+    "600": 25.494329653589524,
+    "700": 28.366581061244577,
+    "800": 33.5033035788961
+   },
+   "governor_t1": {
+    "tau_s": 0.6,
+    "pass_s": 0.24,
+    "rms_mhz": 5.58
+   },
+   "die_line": {
+    "k_c_per_w": 0.4696251047397776,
+    "a_c": 41.88405637687316,
+    "n": 9,
+    "cap_w_at_65_5": 50.286799800050275
+   },
+   "tau_th": {
+    "tau_th_s": 14.0,
+    "rms_c": 0.2456,
+    "n_bins": 339
+   },
+   "e64_thermal_line": "die = 41.88 + 0.4696 C per W (surface.txt:27)",
+   "clamp_band_w": [
+    49.23,
+    51.36
+   ],
+   "clamp_band_source": "2026-10-31-q130-governor-thermal-branch/clamp-band.json"
+  }
+ },
+ "interval_rule": {
+  "rel_band": {
+   "fp32": 0.12,
+   "fp16": 0.3,
+   "int8": 0.3
+  },
+  "target_se_w": {
+   "fp32": 0.37,
+   "fp16": 1.187,
+   "int8": 1.187
+  },
+  "fp32_oos_median_rel": 0.0538,
+  "fp32_oos_max_rel": 0.3278,
+  "what": "1 sigma is the quadrature of: (i) a relative band on the (operand bits + product sign) terms, zero for a calibration kind, 12% for an out-of-sample fp32 kind (its own measured out-of-sample median miss is 6%, max 34% on the smallest value) and 30% for fp16/int8, whose whole price list is one fitted scalar; (ii) E70's law fit rms 0.232 W times the live fraction; (iii) U's error times the live fraction; (iv) the calibration TARGET's own error (fp32 the split's 0.37 W; fp16/int8 E64's single-run 1.19 W), pro-rated by size; (v) the gate rate's single-tile sd from kinds.json times U.  ci95 is 2 sigma.  It does NOT cover the two structural unknowns: the A-side broadcast weight, and int8's provisional stream."
+ },
+ "decision_rules": {
+  "R1": "E78: the measured switching power over the type's own zeros level is inside `switching_w_ci95` for at least 70% of the fp32 kinds run, and at least 50% of the fp16 and int8 kinds.",
+  "R2": "E78: the ORDER is right -- Spearman correlation of predicted against measured switching power >= 0.90 within each format, over every kind run.",
+  "R3": "E78: the gate's signature.  (sparse50 - wsparse50) switching power is >= 2 W in BOTH fp16 and int8 (wsparse50 gates more, so it must cost less), and |fp32 sparse50 - fp32 wsparse50| <= 1.0 W, because in fp32 element sparsity IS word sparsity and the two are one kind.",
+  "R4": "E78: int8 (ones - zeros) switching power <= 2.0 W, against fp32's 8.555 W.  This is the sharpest structural prediction in this file and the one most likely to fail, because it rests on a single E64 run per point (+- 1.19 W).",
+  "R5": "E79: alpha_fp16 and alpha_int8 land in [0.5, 2.0] when re-solved against E79's own measured fp16/int8 per-bit prices -- i.e. the significand-width scaling is right to a factor of two.",
+  "R6": "E78: the product-sign term is real.  fp32 `neg_ones` costs within 1 W of `ones` (no sign CHANGE: every element is -1.0, so the product's sign never moves), while int8 `ternary` and `highbit`, whose signs do change, cost at least 1 W more than int8 `ones`.",
+  "R9": "E78: the gate's reach.  fp32 `a_randn_b_zeros` is 100% gated by the B side while its A operand bus keeps moving (27,920 bits an op).  The `gate` arm says it costs ~0 W over zeros; the `bus` arm says it costs several watts.  Whichever E78 measures SELECTS the arm, and every kind's `switching_w_alt_gating_arm` is this file's prediction under the other one.  This is the single most informative cell in the matrix and E78 should run it first.",
+  "R7": "E80: predicted burst MHz within 25 MHz of measured for at least 70% of the cells run, and every cell predicted at 800 MHz measures >= 790 MHz.",
+  "R8": "E80: the sustained LIMIT is called right (thermal vs power) for every cell, and the predicted sustained MHz is within 40 MHz of measured for at least 70% of them.",
+  "failure_is_reported_as_failure": true
+ },
+ "departures": [
+  "E64's own tiles were never dumped, so the fp32 scoring tiles for its ten host kinds are STAND-INS drawn from the host's own rules (main.cpp:458-478) with numpy, not libstdc++'s distributions.  Each row carries its draw sd over 24 draws.",
+  "The law's curvature is anchored on E70's measured nrd_a / nrd_b rather than on E70's own fitted W-infinity, because E70's own top rungs and those two measurements both sit ABOVE its fit and it warns that the fit is not a ceiling.  E70's 6.37 / 10.52 W are the sensitivity arm.",
+  "E70 REJECTS the saturating FORM on the A side (its increments accelerate).  The A arm is declared, not selected.  rho = 1.246 is the alternative pricing and the x8 / x16 broadcast multiplier is a counting convention, not a measurement: E78 must validate the A-side weight.",
+  "The product-sign term is NEW here.  It makes E64's fp32 `signs` a calibration kind, so fp32 now has four fitted numbers (WA, WB, lam, sigma) against six out-of-sample measured kinds.",
+  "int8's bus and Hamming figures are PROVISIONAL in kinds.json (they rest on the reconstructed 256-micro-op / 16-slot TIMA stream), so every int8 switching prediction here is provisional with them.  Its gated_* figures are not.",
+  "gamma = 3.0 is this lane's declared choice among E64-T1's arms, on its out-of-sample sustained rms and E64's own within-run busy slope (3.12).  It is not a figure E64-T1 itself registers.",
+  "The sustained predictions inherit E69's FAILED drift check: the same cell read 49.38 W at 65.4 C on 23 Oct and 51.89 W at 65.2 C on 27 Oct, +2.51 W at one die temperature, more than the clamp band's whole 2.13 W width.  A sustained miss of that size is a thermal-path drift, not a model failure; E80 should re-read the die line before scoring R8."
+ ]
+}
