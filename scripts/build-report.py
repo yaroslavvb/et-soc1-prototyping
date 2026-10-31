@@ -3,7 +3,11 @@
 
     scripts/build-report.py <name> <data.json> <out.html>
 
-meta.json holds {"title", "description"}. The shared shell and CSS are in report.template.html; the body closes
+meta.json holds {"title", "description"}, and optionally "card_description": the one line (<= 200 characters) that
+spacesheep shows under the title on the space's dashboard card and on the owner's public profile. This script never
+reads it — it goes out as `spacesheep deploy --description`, which the CLI keeps on an update unless it is passed, so a
+card that is wrong stays wrong through any number of redeploys (MIRROR.md, "Deploying one page").
+The shared shell and CSS are in report.template.html; the body closes
 <main> itself, and the script sees the data as the constant D. The shared chart toolkit, sources/chartkit.js, is
 inlined in its own script just before the page script, so the script also sees CK (PLAN2 §2.5 lists its API).
 

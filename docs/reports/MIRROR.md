@@ -200,6 +200,16 @@ spacesheep list | grep "$SLUG"               # visibility and address unchanged?
 python3 scripts/check-mirror.py --only "$SLUG"
 ```
 
+- 🛑 **The dashboard card's line is not the page, and a redeploy does not refresh it.** A space carries its own
+  one-line `description` (at most 200 characters), shown under the title on the owner's public profile and on every
+  dashboard card; `check-mirror.py` compares files and never sees it. `spacesheep deploy` **keeps** it unless
+  `--description` is passed, so a line written at the first deploy outlives every later version of the page: the
+  Horace card still read "zeros 38 W, constants 48 W, random 67 W" on 31 October, from its 20 September first
+  version, against the page's own 38.29 / 46.73 / 63.40 W. **So: when a page's headline numbers move, pass
+  `--description` on the redeploy**, and keep its text in the page's own `sources/<name>.meta.json` under
+  `card_description` (`build-report.py` ignores the key, so the built HTML does not change) — Horace's is there now.
+  After the deploy read the card back: it is in `spacesheep list --json` as `description`, and on
+  `https://spacesheep.dev/@yaroslavvb` as the `pp-desc` of the page's row.
 - **Before any redeploy, check that the live page still equals the file** (`python3 scripts/check-mirror.py --only "$SLUG"`). If it differs, another session changed the page live: copy the live bytes into the file first (`spacesheep read <uuid> index.html -o <dir>`), then make your change. The CLI's deploy has no `base_sha`; for a small change prefer the MCP `edit` with `base_sha`, which refuses to apply to a page that moved on (7 October 2026: a redeploy of an older copy of the 6 October page erased two other sessions' sections until they were restored).
 - Deploy from a directory of its own, never from `docs/reports/` itself: the CLI writes a `.spacesheep.json` pin file
   into the deployed directory, and a stale pin once published one report over another (22 September).
@@ -220,6 +230,18 @@ python3 scripts/check-mirror.py --only "$SLUG"
   page links, `git ls-tree origin/main <path>` must list it.
 
 ## Checking that live equals repo
+
+**The Horace card, 2026-10-31 (Sat, week 44), Q130(f):** the Horace page's **dashboard card** was corrected, and
+nothing else: it had read "zeros 38 W, constants 48 W, random 67 W" since its 20 September first version, against the
+page's own 38.29 / 46.73 / 63.40 W, and now reads the line kept in `sources/horace-experiment.meta.json`
+(`card_description`). The page bytes did not move — `build-report.py horace-experiment` over
+`data/2026-09-21-horace-aifoundry2/report.json` rebuilds `docs/reports/2026-09-20-horace-experiment.html` byte for byte
+(sha256 `a4b867b3…`) both before and after the meta.json change — so the deploy answered `unchanged: true` and added **no
+new version**: the live version is still `e2a4e30fd570`, with `--description` applied to the space. `check-mirror.py
+--via https --only et-soc1-horace-experiment` reads **equal**, 3 folder files equal, 0 warnings; its exit 1 is the
+documented 50-row cut of `spacesheep list` (this space is older than the newest 50, so the checker could not read its
+visibility), and `get_space` confirms visibility `public`, `listed` true, slug unchanged. The card was read back on
+`https://spacesheep.dev/@yaroslavvb`.
 
 **TensorFMA32, 2026-10-25 (Sun, week 43), Q124:** the chip diagram at version `874d52e2697c` and the memory levels at `d62f44b18eb0` equal source commit `efd33a3b` (`check-mirror.py --via https --only et-soc1-chip-diagram et-soc1-memory-levels`, 2/2 equal, both folders' 7 files equal, no warnings); before the deploy both live pages equalled their files at `5b4347b5` (the chip at `f3c99d44d669`, the memory levels at `1ae95c541c4f`, the host's anchors aside), and both deploys carried `base_sha`. The GitHub Pages mirror rebuilt from `efd33a3b` (`gh-pages` `9fc25ee8`). On the deployed build, run on the Intel: `zoom_test.mjs` 791/791, `ml_ladder_test.mjs --chip` 149/150 (T13 at shire 0: the memory levels fold their first two crumbs into "…"; the same on the pages before this change, on this Mac), `ml_access_test.mjs` 28/28, `zoom_static.py` clean but for Pillow (missing there), `check_page.sh` OK on both at 1280 and 390 px, light and dark.
 
