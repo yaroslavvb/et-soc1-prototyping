@@ -215,7 +215,20 @@ bash tools/claims-v3/hlk/run_e85.sh reduce build/e85/runs/e85-card-1031
 | `lockin_hlk.py` | the registered analysis: E63's `analyse_block` verbatim, the reference line, the rules |
 | `selftest_hlk.py`, `test_spawn_hlk.py` | the synthetic check of the analysis and rules; the wrapper's test |
 | `run_e85.sh` | stage, check, dry, tiles, go, watch, reduce |
+| `figure_e85.py` | added after the run (no new numbers): the data folder's figure, from `analysis/` only |
 
 ## Amendments
 
-None yet.
+None. The session ran as registered.
+
+## Results
+
+Added Sat 31 Oct 2026 after the run; everything is in the data folder,
+[`docs/reports/data/2026-10-31-e85-camera-kinds/`](../../../docs/reports/data/2026-10-31-e85-camera-kinds/README.md).
+One session, 15:54–16:36 PDT, 240 launches, 42.0 card-minutes, `stop_reason done`, the governor read 65 W / 65 °C at
+both ends. **8 of the 9 rules pass in full; R1 fails for int8.** fp32 randn and fp16 randn warm the die's footprint by
+267.6 ± 19.9 and 227.0 ± 13.6 mK at 0.05 Hz, 52.10 ± 3.82 and 50.72 ± 3.21 mK per watt of fundamental, ratios to the
+drift-corrected reference of 0.869 ± 0.118 and 0.923 ± 0.080 (pooled with int8 0.895 ± 0.086), with the reference's
+lag. int8 full read 64.5 ± 28.3 mK, p 0.054, in the session's noisiest shutter block (R1 FAIL); fp32 sparse90 read
+29.4 ± 22.3 mK for its 0.24 W, as expected. Post hoc, 20 more synthetic seeds show the analysis reading R about 4% low
+with SEs 15–30% small (no verdict moves).

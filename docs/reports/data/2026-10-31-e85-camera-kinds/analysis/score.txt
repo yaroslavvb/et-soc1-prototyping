@@ -1,0 +1,49 @@
+E85 lock-in (E63's analyse_block, verbatim) and rules
+
+block      laps  ROI mK (SE)        phase   p        step W (SE)       fund W   H mK/W (SE)    lag    hold>=790  die mean/max  dips
+E85-REF1    12    151.0 ( 26.0)   100.8  7.3e-04    4.028 (0.021)   2.518   59.96 ( 9.38)   102.5  0.9779     56.2/57.3   3
+E85-F32     15    267.6 ( 19.9)    91.3  9.2e-05    8.316 (0.013)   5.135   52.10 ( 3.82)    92.7  0.9847     56.1/57.3   5
+E85-I8      18     64.5 ( 28.3)   108.7  5.4e-02    2.450 (0.008)   1.534   42.07 (19.27)   109.4  0.9933     54.1/55.3   5
+E85-REF2    12    145.0 ( 17.0)    96.7  1.7e-03    4.021 (0.011)   2.468   58.76 ( 7.85)    95.1  0.9988     56.1/57.3   2
+E85-F16     15    227.0 ( 13.6)    97.5  1.5e-04    7.466 (0.009)   4.477   50.72 ( 3.21)    97.2  0.9995     55.7/57.0   1
+E85-SP90    12     29.4 ( 22.3)    66.6  5.7e-01    0.236 (0.008)   0.165  177.83 (117.93)    60.6  0.9988     53.5/54.3   2
+E85-REF3    12    128.5 (  9.3)    97.5  7.3e-04    4.029 (0.019)   2.481   51.79 ( 3.50)    98.5  0.9815     56.2/57.3   7
+
+reference line: |H| 56.76 +- 4.27 mK/W at the session mid-time, slope -16.70 mK/W per hour (-29.4%/h), phase 98.8 +- 4.1 deg, chi2 0.12/1
+
+kind       R = H/Href(t) (SE)   lag - ref (SE)   camera-read step W (SE)  meter step W   mK/W of step
+E85-F32    0.869 (0.118)         -6.2 ( 6.2)      7.218 (0.985)           8.316        32.17
+E85-I8     0.723 (0.338)         10.6 (13.5)      1.795 (0.805)           2.450        26.33
+E85-F16    0.923 (0.080)         -1.7 ( 4.7)      6.683 (0.565)           7.466        30.41
+E85-SP90   3.329 (2.216)        -38.2 (62.4)      0.890 (0.676)           0.236        124.59
+
+rules:
+  E85-R1_seen [E85-F32]: PASS  {"p": 9.154994049253868e-05, "snr": 13.414647631566941, "lag_deg": 92.66700087741705}
+  E85-R1_seen [E85-I8]: FAIL  {"p": 0.05399730013499325, "snr": 2.2764504886565726, "lag_deg": 109.43614710521683}
+  E85-R1_seen [E85-F16]: PASS  {"p": 0.00015258323415423113, "snr": 16.65402643588354, "lag_deg": 97.1589284648519}
+  E85-R2_heat_follows_watts [E85-F32]: PASS  {"R": 0.8689816713778078, "se_R": 0.11800680539088831, "tolerance": 0.35402041617266494}
+  E85-R2_heat_follows_watts [E85-I8]: PASS  {"R": 0.7234852825552867, "se_R": 0.33785857436897143, "tolerance": 1.0135757231069142}
+  E85-R2_heat_follows_watts [E85-F16]: PASS  {"R": 0.9229586161570931, "se_R": 0.08018515567835459, "tolerance": 0.24055546703506375}
+  E85-R3_pooled: PASS  {"R_pooled": 0.8954099117950551, "se": 0.08635688672966414, "se_own": 0.04268671693271285, "se_line": 0.0750690088062077, "tolerance": 0.25907066018899244, "kinds": ["E85-F32", "E85-I8", "E85-F16"], "chi2_about_pooled": 
+  E85-R4_same_lag [E85-F32]: PASS  {"lag_minus_ref_deg": -6.159887411079524, "se": 6.220705720751273, "tolerance": 18.662117162253818}
+  E85-R4_same_lag [E85-I8]: PASS  {"lag_minus_ref_deg": 10.609258816720256, "se": 13.450220633989746, "tolerance": 40.35066190196924}
+  E85-R4_same_lag [E85-F16]: PASS  {"lag_minus_ref_deg": -1.6679598236446793, "se": 4.659322381421764, "tolerance": 15.0}
+  E85-R5_near_null: PASS  {"along_ref_mk": 24.98636442645877, "se_mk": 24.765718587380277, "expected_mk": 8.769858685997475, "board_step_w": 0.2358333333333329, "board_fundamental_w": 0.16522805573067875, "p_signflip": 0.5660239199414205}
+  E85-R6_electrical [E85-REF1]: PASS  {"step_w": 4.028333333333335, "se": 0.020601487720460252, "predicted": 4.022, "band": [3.619, 4.424]}
+  E85-R6_electrical [E85-F32]: PASS  {"step_w": 8.316333333333331, "se": 0.01274943716985775, "predicted": 9.125, "band": [7.3, 10.95]}
+  E85-R6_electrical [E85-I8]: PASS  {"step_w": 2.4502777777777776, "se": 0.008016882477866617, "predicted": 2.64, "band": [2.112, 3.168]}
+  E85-R6_electrical [E85-REF2]: PASS  {"step_w": 4.020833333333334, "se": 0.01094229392295292, "predicted": 4.022, "band": [3.619, 4.424]}
+  E85-R6_electrical [E85-F16]: PASS  {"step_w": 7.466000000000003, "se": 0.00931188010613921, "predicted": 7.938, "band": [6.35, 9.525]}
+  E85-R6_electrical [E85-SP90]: PASS  {"step_w": 0.2358333333333329, "se": 0.008182665734253095, "predicted": 0.274, "band": [0.219, 0.328]}
+  E85-R6_electrical [E85-REF3]: PASS  {"step_w": 4.028749999999999, "se": 0.018681588158160074, "predicted": 4.022, "band": [3.619, 4.424]}
+  E85-R7_reference_line: PASS  {"worst_residual_sigma": 0.2909888636096154, "chi2": 0.11614510115377683, "dof": 1, "mag_at_mid": 56.757992370121606, "se": 4.273190973545532, "drift_per_hour_frac": -0.29427701683030333, "phase_deg": 98.82688828849658}
+  E85-R8_hold [E85-REF1]: PASS  {"share_ge_790": 0.9778812572759022, "die_mean_c": 56.22176949941793, "die_max_c": 57.333333333333336, "launches_with_dip": 3}
+  E85-R8_hold [E85-F32]: PASS  {"share_ge_790": 0.9846796657381616, "die_mean_c": 56.09238625812442, "die_max_c": 57.333333333333336, "launches_with_dip": 5}
+  E85-R8_hold [E85-I8]: PASS  {"share_ge_790": 0.993304450571091, "die_mean_c": 54.0995142444532, "die_max_c": 55.333333333333336, "launches_with_dip": 5}
+  E85-R8_hold [E85-REF2]: PASS  {"share_ge_790": 0.9988425925925926, "die_mean_c": 56.1141975308642, "die_max_c": 57.333333333333336, "launches_with_dip": 2}
+  E85-R8_hold [E85-F16]: PASS  {"share_ge_790": 0.9995359628770302, "die_mean_c": 55.67888631090487, "die_max_c": 57.0, "launches_with_dip": 1}
+  E85-R8_hold [E85-SP90]: PASS  {"share_ge_790": 0.9988432620011567, "die_mean_c": 53.515326778484685, "die_max_c": 54.333333333333336, "launches_with_dip": 2}
+  E85-R8_hold [E85-REF3]: PASS  {"share_ge_790": 0.981460023174971, "die_mean_c": 56.20760911548861, "die_max_c": 57.333333333333336, "launches_with_dip": 7}
+  E85-R9_absolute [E85-F32]: PASS  {"camera_roi_mk": 267.570874379135, "predicted": 297.4, "band": [191.2, 481.5]}
+  E85-R9_absolute [E85-I8]: PASS  {"camera_roi_mk": 64.52145458695223, "predicted": 86.1, "band": [55.3, 139.3]}
+  E85-R9_absolute [E85-F16]: PASS  {"camera_roi_mk": 227.03350591137104, "predicted": 258.7, "band": [166.4, 418.8]}
