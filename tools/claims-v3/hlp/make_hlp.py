@@ -65,8 +65,12 @@ words normal: fp16 exponent 15 (value in [1, 2)), fp32 exponent 127. Bit 14 is f
 15 -> 31 is Inf, so that one position uses the exponent-7 twin of the same significand (7 <-> 23, both normal)
 and has its own zero, exactly as E65/E67 handled fp32's bit 30. int8 has no exponent: its base is a byte of
 popcount 4, so no single flip can make it zero. Every operand element of every file is nonzero and (fp16/fp32)
-normal, because the unit gates a lane whose operand word is zero and the fp16 pseudo-code's two-term update runs
-only when all four of a1, a2, b1, b2 are nonzero (`main.cpp:expectC`, `literal`).
+normal, because the unit gates a zero operand WORD: one 32-bit zero test taken when the tensor operand register is
+written, with one mask for the float unit and both integer units (core-et `vpu_ctrl.v:1230`, `:817-839`; settled by
+Q130(g) at `d8d7e19e`, which also shows the PRM's fp16 "two-term update only when all four of a1, a2, b1, b2 are
+nonzero" to be a documentation bug - E39 measured the correct sum from a pair with one zero half). Amendment A5
+replaces the earlier citation of that PRM rule; the design does not move, because every element here is nonzero and
+so every word is ungated under either rule.
 """
 import argparse
 import json
@@ -254,8 +258,9 @@ def kg_count_int8(nbits):
     the column-half boundary, costs 0.003 +- 0.02 W in int8 while the identical construction costs 4.7 W in fp16
     and 5.0 W in fp32 - under this structure a lane's two columns never change, so nothing alternates and the only
     difference left is static operand content. In the `kg` layout B changes at each of the 16 line-group
-    transitions and a changed read carries 8 int8 elements:
-        16 transitions x 8 lanes x 8 elements = 1,024 changed element reads per multiply-add, per flipped bit.
+    transitions and a changed read carries 4 int8 elements, on each of 8 lanes x 2 units:
+        16 transitions x (8 lanes x 2 units) x 4 elements = 1,024 changed element reads per multiply-add, per
+        flipped bit - the same number A4 registered by the other route, so no measured price moves.
     The generic `streams(ew=E)` model's count is kept beside it in `flips_generic` so the number can be re-divided
     if the structure is ever shown to be different."""
     return 1024 * nbits

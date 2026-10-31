@@ -102,6 +102,11 @@ gets its own zero — exactly how E65 and E67 handled fp32's bit 30. int8 has no
 popcount 4, so no single flip can make one zero. **Every operand element of every file is nonzero** (and normal,
 for the float formats), because the unit gates a lane whose operand word is zero and the fp16 pseudo-code's
 two-term update runs only when all four of a1, a2, b1, b2 are nonzero (`main.cpp:expectC`, `literal`).
+**Corrected by amendment A5:** that PRM rule is a documentation bug, and the gate is **one 32-bit zero test** taken
+when the tensor operand register is written, with one mask for the float unit and both integer units
+(`external/core-et` `vpu_ctrl.v:1230`, `:817-839`, settled by Q130(g) at `d8d7e19e`). It changes nothing here —
+every operand element of every file is nonzero, so every word is ungated under either rule — and the all-nonzero
+design is now justified by the real gate rather than the manual's.
 
 The base is a random significand rather than exactly 1.0 because E65's and E67's fp32 lists were measured on
 random-significand bases, and the point of this run is a like-for-like comparison with them; the *partner* is
@@ -215,7 +220,59 @@ block), `queue_hlp.sh` (passes in a row), `run_e79.sh` (the stages: `setup`, `id
 
 ## Amendments
 
-**A4, Sat 31 Oct 2026, 09:58 PDT** — written after pass **7910** and **before any data it touches** (block B,
+**A8, Sat 31 Oct 2026, 10:13 PDT** — **two more block-A passes, 7914 and 7915, of exactly the registered item
+list.** Why: the registered drift gate set **pass 7912** aside — zero failed runs, `anchor_pi` drift 0.4105 W
+against the 0.3 W bar — leaving block A with **three** kept passes, exactly the registered `min_passes` floor and
+no margin for a second one. The decision is driven by a **gate outcome**, not by any price: the gate ran as
+registered, the pass is not reinstated, and nothing about the analysis changes. Card budget after it: about 65 of
+the 75 registered card-minutes. **The final reduction uses every pass that passes the gates and no pass is chosen
+after the fact** — that is written here, before passes 7914 and 7915 exist, so it cannot be bent later.
+
+**A7, Sat 31 Oct 2026, 10:12 PDT** — **one reported quantity added; no band moves and no registered number
+changes.** The registered idle bracket is the second before each launch, after the approach has waited for the
+58 °C reading. Over block A's four passes it turns out to be **contaminated**: in a dense pass the previous run's
+power tail can still be inside it, so the h0 switching figure it feeds moves from 10.75 W (one pass) to
+9.49 W (four) in fp16 and from 4.32 W to 0.93 W in int8, and its spread is wide. The reduction therefore also
+reports **P(zeros) − P(h0)**, which is paired per pass and needs **no** idle bracket at all, and the report leads
+with it: it is the direct statement of what zeros buy in a format. **P4 is still scored exactly as registered**,
+on the idle-bracketed ratio, and its spread is printed beside it; the contamination is reported as a limitation of
+that bracket, not repaired after the fact.
+
+**A6, Sat 31 Oct 2026, 10:1x PDT** — **A4's structural wording replaced with the public RTL's own, its count
+unchanged.** A4 inferred int8's micro-op structure from power alone and described it as "each lane reading the
+eight contiguous bytes of columns 2*l* and 2*l*+1". `external/core-et` says it exactly, and says it better:
+
+- **`VPU_NUM_TIMA 2`** (`rtl/inc/vpu_defines.vh:210`) — **two** integer tensor units per lane, instantiated in a
+  `genvar` loop (`vpu_lane.v:408`, `LANE_TIMA`), against **one** float tensor FMA unit whose B column selector
+  `dc_read_b_col` is a single bit (`vpu_tensorfma.v:282`, "Which B col we are about to request").
+- **`TIMA_INT8_MUL_NUM 4`** (`rtl/inc/tima_defines.vh:8`) — each integer unit takes a **32-bit** operand and makes
+  four int8 products, summed in one adder (`tima/tima_top.v`, `F2_PROD` and `f2_prod_add`).
+
+So **8 lanes × 2 units × 4 multipliers = 64 int8 multiply-adds a cycle**, and 16,384 / 64 = **256** cycles of
+work, against the float path's 8 lanes × 1 unit (× 2 K-terms in fp16) = 16 MACs a cycle, **512** cycles. The
+measured totals are 318 and 546, so the fixed overhead is **62** cycles for int8 and **34** for the float path:
+the work accounts for 256 of 318 and 512 of 546, and **this amendment does not explain the 28-cycle difference
+between the two overheads**. That is the first *mechanism* this repo has for the
+546 / 546 / 318 the ablations have measured since E15 and E36: **int8 is faster because it has twice the units,
+each four multipliers wide.** The consequence for E79 is what A4 measured: in int8 a given (lane, unit) pair always
+drives the **same** C column, because both halves issue in the same cycle, so a flip placed on the column-half
+boundary never alternates in time — 0.003 W. **The designed count does not move:** 16 line-group transitions ×
+(8 lanes × 2 units) × 4 int8 elements = **1,024** changed element reads per multiply-add per flipped bit, the same
+number A4 registered by the other route, so every int8 B price stands as reduced.
+
+**A5, Sat 31 Oct 2026, 10:08 PDT** — a **citation correction only**, written while block B was still running,
+which is safe because it touches no data: it changes no item, no count, no band, no analysis and no measured number. The registration
+justified its all-nonzero operands partly by the PRM's fp16 rule that the two-term update happens only when all
+four of a1, a2, b1, b2 are nonzero. Q130(g) settled the gate from the public RTL that morning (`d8d7e19e`): there
+is **one 32-bit zero test**, taken when the tensor operand register is written, and **one mask drives the float
+unit and both integer units** (`external/core-et` `vpu_ctrl.v:1230`, `:817-839`); the PRM rule is a documentation
+bug, which E39 had already measured. The format therefore only sets how many numbers ride in a gated word — one
+fp32, two fp16, four int8 — so a zero is worth most in fp32 and least in int8. **E79's design is unaffected**:
+every operand element of every file is nonzero, so every word is ungated under either rule. The two justification
+sentences now cite the gate instead of the manual. E79's own P4 result is an independent silicon measurement of
+that conclusion (Result 6).
+
+**A4, Sat 31 Oct 2026, 09:49:45 PDT (commit `4216f1fb`)** — written after pass **7910** and **before any data it touches** (block B,
 passes 7920–7923). Pass 7910 produced two measured facts the registered design did not anticipate, and A4 adds the
 items that resolve them. **No registered band moves, and P6 is scored on block A's data exactly as registered —
 it fails, and the failure is reported as a failure.**
@@ -263,7 +320,7 @@ on the same card, so the comparison the brief asks for is like-for-like. The **m
 every list, and the order probe's ΔW ratios are reported as the evidence that the two are far apart. No price is
 quoted as "the energy of a flip" without that pair.
 
-**A1, Sat 31 Oct 2026, 09:33 PDT** — written during pass 7910 and **before any data it touches** (passes 7914
+**A1, Sat 31 Oct 2026, 09:31:52 PDT (commit `e66f7c1a`)** — written during pass 7910 and **before any data it touches** (passes 7914
 onward). *Four more passes, 7914–7917, of exactly the registered item list.* Why: a pass takes about **4.5 min**,
 not the ~12 min budgeted, because the card idles at 50 °C today, so the approach to the 58 °C launch reading is
 instant (`0 heats and 0.1 s` in every run of pass 7910) and a run costs its 4 s plus ~0.3 s of overhead. Eight
@@ -272,13 +329,13 @@ price is the between-pass scatter, which is what more passes reduce. **Nothing e
 operand files, the launch protocol, the gates, the analysis and every registered band are as committed in
 `2a72d352`. The `min_passes` floor of 3 and the stop rule stand.
 
-**A3, Sat 31 Oct 2026, 09:35 PDT** — written during pass 7910 and before any data it touches. **A1's four extra
+**A3, Sat 31 Oct 2026, 09:32:31 PDT (commit `270d2108`)** — written during pass 7910 and before any data it touches. **A1's four extra
 passes are cut to two: 7914 and 7915, six passes in all.** Why: A1's 4.5 min figure came from pass 7910's first 17
 runs, where the approach was instant; by run 24 the card has warmed and the wait for 58 °C costs 1–3 s, so the
 measured pace is **8.7 s a run — about 10 min a pass**. Eight passes would be ~82 card-minutes, past the
 registered 75-minute budget; six are ~63, plus the smoke and the identity read. The budget is the binding
 constraint and it is not moved. Nothing else changes.
 
-**A2, Sat 31 Oct 2026, 09:33 PDT** — the same commit, same reason, no data touched: `collect_e79.sh` is added
+**A2, Sat 31 Oct 2026, 09:31:52 PDT (commit `e66f7c1a`)** — the same commit, same reason, no data touched: `collect_e79.sh` is added
 (it reduces every finished pass, runs the registered E71-slope sensitivity arm and assembles the data directory).
 It is plumbing around the already-registered `reduce_hlp.py` and `report_e79.py` and changes no analysis.

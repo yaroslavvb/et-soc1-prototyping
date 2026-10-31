@@ -344,6 +344,16 @@ def main():
             C["switching"][fmt]["zeros_over_h0"] = rm
             C["switching"][fmt]["zeros_over_h0_ci95"] = rhw
             C["switching"][fmt]["zeros_over_h0_n"] = rn
+            # amendment A7: the idle-free quantity. P(zeros) - P(h0) is paired per pass and needs no idle
+            # bracket, so it is the robust statement of what zeros buy in this format; the idle-bracketed
+            # ratio above is kept because P4 is registered on it, with its own spread reported beside it.
+            zm, zse, zn, zhw = mean_ci([a_ - c_ for a_, _, c_, _ in zs])
+            C["switching"][fmt]["zeros_minus_h0_W"] = zm
+            C["switching"][fmt]["zeros_minus_h0_ci95"] = zhw
+            C["switching"][fmt]["zeros_minus_h0_n"] = zn
+            im, ise, iN, ihw = mean_ci([b_ for _, b_, _, _ in zs])
+            C["switching"][fmt]["idle_bracket_W"] = im
+            C["switching"][fmt]["idle_bracket_ci95"] = ihw
         # ---- additivity: the multi-bit rungs against the sum of their own single-bit rungs
         C["additivity"] = {}
         for fmt, fam_m, fam_b in (("fp16", "b16m", "b16"), ("int8", "b8m", "b8")):

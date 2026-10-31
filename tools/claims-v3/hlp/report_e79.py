@@ -255,10 +255,17 @@ def main():
                       f"± {(e['fJ_ci95'] or 0):.1f} | {e['n_passes']} |")
         md.append("")
     md.append("### Switching over the idle bracket\n")
-    md.append("| format | idle W | h0 W | h0 switching W | zeros switching W | zeros / h0 |")
-    md.append("|---|---|---|---|---|---|")
+    md.append("A7: the **zeros − h0** column is paired per pass and needs no idle bracket, so it is the robust "
+              "statement of what zeros buy. The idle-bracketed columns are kept because P4 is registered on them; "
+              "the bracket is the second before each launch and in a dense pass it can still carry the previous "
+              "run's tail, which is why its spread is wide.\n")
+    md.append("| format | zeros − h0 (W, idle-free) | 95% | idle bracket W | h0 switching W | zeros switching W | zeros / h0 |")
+    md.append("|---|---|---|---|---|---|---|")
     for fmt, s in SW.items():
-        md.append(f"| {fmt} | {(s.get('idle_W') or 0):.3f} | {(s.get('h0_W') or 0):.3f} | "
+        md.append(f"| {fmt} | "
+                  f"**{('%.3f' % s['zeros_minus_h0_W']) if s.get('zeros_minus_h0_W') is not None else '—'}** | "
+                  f"± {(s.get('zeros_minus_h0_ci95') or 0):.3f} | "
+                  f"{(s.get('idle_bracket_W') or s.get('idle_W') or 0):.3f} ± {(s.get('idle_bracket_ci95') or 0):.3f} | "
                   f"{(s.get('h0_switching_W') or 0):.3f} ± {(s.get('ci95') or 0):.3f} | "
                   f"{('%.3f' % s['zeros_switching_W']) if s.get('zeros_switching_W') is not None else '—'} | "
                   f"{('%.4f' % s['zeros_over_h0']) if s.get('zeros_over_h0') is not None else '—'} |")
