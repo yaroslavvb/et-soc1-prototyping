@@ -114,6 +114,7 @@ def main():
                     and l is None]
             r["burst_mhz_registered"] = m.get("burst_mhz")
             r["burst_mhz_without"] = round(st.mean(keep), 1) if keep else None
+            r["gov_own_mhz"] = m.get("gov_own_mhz")
         if m["block"] == "SUS":
             t_end = m["work_s"]
             last = [(x, l) for x, l in zip(tr, lab) if t_end - 40.0 <= x[0] <= t_end and x[3] in (600, 700, 800)]
@@ -160,6 +161,11 @@ def main():
         "R2_right_without": sum(1 for v in K.values() if v["sus_limits_without"] and all(
             (x if x != "power_or_other" else "power") == v["pred_limit"] for x in v["sus_limits_without"])),
         "R2_population": sum(1 for v in K.values() if v["sus_limits_without"]),
+        "S2_rms_without_mhz": rms([v["gov_own_mhz"] - v["burst_mhz_without"] for v in out["runs"].values()
+                                   if v["block"] == "BURST" and v.get("gov_own_mhz") is not None
+                                   and v.get("burst_mhz_without") is not None]),
+        "S2_population": sum(1 for v in out["runs"].values() if v["block"] == "BURST"
+                             and v.get("gov_own_mhz") is not None and v.get("burst_mhz_without") is not None),
         "dip_episodes": sum(v["dips"] for v in K.values()),
         "late_ramp_episodes": sum(v["late_ramps"] for v in K.values()),
         "processes": sum(len(m.get("proc_spans") or []) for m in R["runs"] if m.get("kind")),
