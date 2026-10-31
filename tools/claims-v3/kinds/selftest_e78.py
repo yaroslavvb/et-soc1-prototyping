@@ -158,7 +158,7 @@ def make_pass(out, p, D, rng, items):
         json.dump({"tdp_w": 0, "temp_threshold_c": 65, "minion_mhz": 600, "minion_mv": 522},
                   open(os.path.join(out, nm + ".json"), "w"))
     json.dump({"exp": "kinds", "pass": p, "card": "aifoundry3", "status": "ok", "note": "SYNTHETIC selftest"},
-              open(os.path.join(out, "block.json"), "w"))
+              open(os.path.join(out, "block.json"), "w"), separators=(",", ":"))   # lib.sh block_end's format
 
 
 def main():
