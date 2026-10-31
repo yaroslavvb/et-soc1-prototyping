@@ -271,6 +271,10 @@ sustained mean) and the limiting test. With E80 that is all 51 kinds measured on
 | `predict_e83.py`, `predictions.json`, `predictions.txt` | the frozen predictions, the fit and its console table |
 | `reduce_e83.py` | the registered reduction (per-run metrics from E80's and E64's code, unchanged) |
 
+**Results** (added after the data, Sat 31 Oct 2026; nothing above changed):
+[`docs/reports/data/2026-10-31-e83-kinds-speed-rest/`](../../../../docs/reports/data/2026-10-31-e83-kinds-speed-rest/README.md).
+The session ran 13:46–15:08 PDT, all 118 runs; six of the eight rules pass (R1–R5 and S1; S2 and S3 fail).
+
 Run, on aifoundry2, from the lab checkout:
 
 ```bash

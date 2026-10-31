@@ -1,0 +1,529 @@
+{
+ "experiment": "E83",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793479564575,
+ "protocol": {
+  "experiment": "E83",
+  "request": "Q130",
+  "card": "aifoundry2",
+  "order_seed": 83,
+  "note": "E80's design (tools/claims-v3/kspeed/protocol.json, itself E64's LAD and SUS shapes) on the 33 kinds of kinds.json E80 did not run, plus E80's anchors fp32 randn, fp16 randn, int8 full, fp16 zeros, int8 zeros; nothing is set on the card",
+  "tools": {
+   "heater": "build/sparsity_t2/host/sparsity_host",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "predictions": "tools/claims-v3/kspeed/e83/predictions.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 85,
+   "board_cap_w": 97,
+   "cap_consecutive": 3
+  },
+  "caps": {
+   "max_card_min": 95
+  },
+  "blocks": [
+   {
+    "name": "SMOKE",
+    "title": "one 2 s launch of a new file tile in each number type (not analysed)",
+    "default": false,
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 2,
+     "budget": 3.5,
+     "processes": 1
+    },
+    "tail_s": 3,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/a_zeros_b_randn.bin",
+      "label": "fp32-a_zeros_b_randn"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/pair_half_zero.bin",
+      "label": "fp16-pair_half_zero"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/highbit.bin",
+      "label": "int8-highbit"
+     }
+    ]
+   },
+   {
+    "name": "BURST",
+    "title": "a burst on a cool die: one 6 s process from a die reading <= 55 C (E80's BURST, E64's LAD shape)",
+    "passes": 2,
+    "shuffle": true,
+    "start": {
+     "mode": "cool",
+     "max_c": 55,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 6,
+     "budget": 7.5,
+     "processes": 1
+    },
+    "tail_s": 4,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "fp32-zeros"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+      "label": "fp32-ones"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/neg_ones.bin",
+      "label": "fp32-neg_ones"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/pi.bin",
+      "label": "fp32-pi"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "fp32-randn"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn_small.bin",
+      "label": "fp32-randn_small"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn_large.bin",
+      "label": "fp32-randn_large"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/uniform01.bin",
+      "label": "fp32-uniform01"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+      "label": "fp32-sparse50"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/pow2.bin",
+      "label": "fp32-pow2"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/fp16grid.bin",
+      "label": "fp32-fp16grid"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/a_randn_b_zeros.bin",
+      "label": "fp32-a_randn_b_zeros"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/a_zeros_b_randn.bin",
+      "label": "fp32-a_zeros_b_randn"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn_sorted.bin",
+      "label": "fp32-randn_sorted"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "fp16-zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/neg_ones.bin",
+      "label": "fp16-neg_ones"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "fp16-randn"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn_small.bin",
+      "label": "fp16-randn_small"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/uniform01.bin",
+      "label": "fp16-uniform01"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/sparse90.bin",
+      "label": "fp16-sparse90"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/wsparse50.bin",
+      "label": "fp16-wsparse50"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/wsparse90.bin",
+      "label": "fp16-wsparse90"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/a_randn_b_zeros.bin",
+      "label": "fp16-a_randn_b_zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/a_zeros_b_randn.bin",
+      "label": "fp16-a_zeros_b_randn"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/pair_half_zero.bin",
+      "label": "fp16-pair_half_zero"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn_sorted.bin",
+      "label": "fp16-randn_sorted"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "int8-zeros"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/ones.bin",
+      "label": "int8-ones"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/pos.bin",
+      "label": "int8-pos"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/ternary.bin",
+      "label": "int8-ternary"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/sparse90.bin",
+      "label": "int8-sparse90"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/wsparse50.bin",
+      "label": "int8-wsparse50"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/wsparse90.bin",
+      "label": "int8-wsparse90"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/highbit.bin",
+      "label": "int8-highbit"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/a_full_b_zeros.bin",
+      "label": "int8-a_full_b_zeros"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/a_zeros_b_full.bin",
+      "label": "int8-a_zeros_b_full"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/sorted.bin",
+      "label": "int8-sorted"
+     }
+    ]
+   },
+   {
+    "name": "SUS",
+    "title": "sustained: nine back-to-back 8 s processes (~76 s) from a die reading <= 57 C (E80's SUS, E64's SUS shape); fp32 ones, int8 ternary, fp32 sparse50 and fp16 wsparse50 twice",
+    "passes": 1,
+    "shuffle": true,
+    "start": {
+     "mode": "cool",
+     "max_c": 57,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 8,
+     "budget": 9.5,
+     "processes": 9
+    },
+    "tail_s": 6,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "fp32-zeros"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+      "label": "fp32-ones"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/neg_ones.bin",
+      "label": "fp32-neg_ones"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/pi.bin",
+      "label": "fp32-pi"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "fp32-randn"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn_small.bin",
+      "label": "fp32-randn_small"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn_large.bin",
+      "label": "fp32-randn_large"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/uniform01.bin",
+      "label": "fp32-uniform01"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+      "label": "fp32-sparse50"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/pow2.bin",
+      "label": "fp32-pow2"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/fp16grid.bin",
+      "label": "fp32-fp16grid"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/a_randn_b_zeros.bin",
+      "label": "fp32-a_randn_b_zeros"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/a_zeros_b_randn.bin",
+      "label": "fp32-a_zeros_b_randn"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn_sorted.bin",
+      "label": "fp32-randn_sorted"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "fp16-zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/neg_ones.bin",
+      "label": "fp16-neg_ones"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "fp16-randn"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn_small.bin",
+      "label": "fp16-randn_small"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/uniform01.bin",
+      "label": "fp16-uniform01"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/sparse90.bin",
+      "label": "fp16-sparse90"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/wsparse50.bin",
+      "label": "fp16-wsparse50"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/wsparse90.bin",
+      "label": "fp16-wsparse90"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/a_randn_b_zeros.bin",
+      "label": "fp16-a_randn_b_zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/a_zeros_b_randn.bin",
+      "label": "fp16-a_zeros_b_randn"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/pair_half_zero.bin",
+      "label": "fp16-pair_half_zero"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn_sorted.bin",
+      "label": "fp16-randn_sorted"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "int8-zeros"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/ones.bin",
+      "label": "int8-ones"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/pos.bin",
+      "label": "int8-pos"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/ternary.bin",
+      "label": "int8-ternary"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/sparse90.bin",
+      "label": "int8-sparse90"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/wsparse50.bin",
+      "label": "int8-wsparse50"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/wsparse90.bin",
+      "label": "int8-wsparse90"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/highbit.bin",
+      "label": "int8-highbit"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/a_full_b_zeros.bin",
+      "label": "int8-a_full_b_zeros"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/a_zeros_b_full.bin",
+      "label": "int8-a_zeros_b_full"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/sorted.bin",
+      "label": "int8-sorted"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+      "label": "fp32-ones-rep2"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/ternary.bin",
+      "label": "int8-ternary-rep2"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+      "label": "fp32-sparse50-rep2"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/wsparse50.bin",
+      "label": "fp16-wsparse50-rep2"
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "SMOKE-00-fp32-a_zeros_b_randn-r1",
+  "SMOKE-01-fp16-pair_half_zero-r1",
+  "SMOKE-02-int8-highbit-r1"
+ ],
+ "sha256": {
+  "heater": "7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "tools/claims-v3/kspeed/e83/run_e83.py",
+  "--protocol",
+  "tools/claims-v3/kspeed/e83/protocol.json",
+  "--out",
+  "build/e83/runs/smoke",
+  "--only",
+  "SMOKE",
+  "--max-card-min",
+  "5"
+ ],
+ "git_head": "c253bd1cf60b5fbf09226450fef47152bcd30d2a",
+ "git_dirty_hpl": ""
+}
