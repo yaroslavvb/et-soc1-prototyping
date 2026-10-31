@@ -1,0 +1,49 @@
+2026-10-31 13:46:04 PDT
+No process holds an ET-SoC-1 device node or card lock.
+2026-10-31T13:46:05 [aifoundry1-c1] kinds-smoke p8201 begins (die 52 C) -> /home/yaroslavvb/nekko/build/claims-v3/aifoundry1-c1/kinds-smoke/p8201
+13:46:08 [aifoundry1-c1] E78 pass 8201: 6 runs of 6 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 2 s quiet; cap 78 C; ET_DEVICES=1; tiles verified against kinds.json
+13:46:11 [aifoundry1-c1] pass 8201 #0 anchor_pi: 6 launches, start 52.0 C (hot 52.0) after 0 heats, 0.0 s, quiet 3600.15 s
+13:46:16 [aifoundry1-c1] pass 8201 #1 fp32.a_randn_b_zeros: 6 launches, start 52.0 C (hot 53.0) after 0 heats, 1.9 s, quiet 2.06 s
+13:46:21 [aifoundry1-c1] pass 8201 #2 fp32.zeros: 6 launches, start 52.0 C (hot 53.0) after 0 heats, 1.9 s, quiet 2.06 s
+13:46:25 [aifoundry1-c1] pass 8201 #3 fp32.randn: 6 launches, start 52.0 C (hot 52.0) after 0 heats, 1.9 s, quiet 2.06 s
+13:46:30 [aifoundry1-c1] pass 8201 #4 fp16.randn: 6 launches, start 54.0 C (hot 55.0) after 0 heats, 1.9 s, quiet 2.06 s
+13:46:35 [aifoundry1-c1] pass 8201 #5 int8.full: 6 launches, start 55.0 C (hot 56.0) after 0 heats, 1.9 s, quiet 2.06 s
+13:46:38 [aifoundry1-c1] done
+2026-10-31T13:46:44 [aifoundry1-c1] kinds-smoke p8201 ends: ok tiers 1,2 smoke
+  anchor_pi                fp32: 6 launches, cycles/op [546.0], ok True, launch coverage 0.9975, ghz [0.5993, 0.5994, 0.5995]
+  fp32.a_randn_b_zeros     fp32: 6 launches, cycles/op [546.0], ok True, launch coverage 0.9979, ghz [0.5993, 0.5994]
+  fp32.zeros               fp32: 6 launches, cycles/op [546.0], ok True, launch coverage 0.9975, ghz [0.5993, 0.5994, 0.5995]
+  fp32.randn               fp32: 6 launches, cycles/op [546.0], ok True, launch coverage 0.9979, ghz [0.5993, 0.5994]
+  fp16.randn               fp16: 6 launches, cycles/op [546.0], ok True, launch coverage 0.9979, ghz [0.5993, 0.5994, 0.5995]
+  int8.full                int8: 6 launches, cycles/op [318.0], ok True, launch coverage 0.9979, ghz [0.5993, 0.5994, 0.5995]
+== smoke block.json
+{"exp":"kinds-smoke","pass":8201,"card":"aifoundry1-c1","t0_ms":1793479564424,"t1_ms":1793479604290,"die_c_start":52,"die_c_end":54,"status":"ok","note":"tiers 1,2 smoke"}
+== configs
+{"tdp_w":65,"temp_threshold_c":65,"power_state":1,"power_state_name":"managed_power","minion_mhz":600,"minion_mv":499}
+{"tdp_w":65,"temp_threshold_c":65,"power_state":1,"power_state_name":"managed_power","minion_mhz":600,"minion_mv":499}
+== clock, voltage, die and board power inside each run (from the smoke's own telemetry)
+telemetry lines 375 mhz values over the whole block [600]
+run     anchor_pi               26 samples mhz [600] mV 499-499 die 52-53 board 30.4-40.6 W start_c 52.0
+run     fp32.a_randn_b_zeros    26 samples mhz [600] mV 499-499 die 52-53 board 30.5-33.3 W start_c 52.0
+run     fp32.zeros              26 samples mhz [600] mV 499-499 die 52-52 board 30.5-32.5 W start_c 52.0
+run     fp32.randn              27 samples mhz [600] mV 498-499 die 52-56 board 30.1-56.8 W start_c 52.0
+run     fp16.randn              27 samples mhz [600] mV 498-499 die 54-57 board 31.1-54.8 W start_c 54.0
+run     int8.full               26 samples mhz [600] mV 499-499 die 55-56 board 31.3-40.9 W start_c 55.0
+total 63
+drwxr-xr-x 3 yaroslavvb yaroslavvb    15 Oct 31 13:46 .
+drwxr-xr-x 3 yaroslavvb yaroslavvb     3 Oct 31 13:46 ..
+-rw-r--r-- 1 yaroslavvb yaroslavvb   172 Oct 31 13:46 block.json
+-rw-r--r-- 1 yaroslavvb yaroslavvb    89 Oct 31 13:46 code.sha256
+-rw-r--r-- 1 yaroslavvb yaroslavvb   119 Oct 31 13:46 config_end.json
+-rw-r--r-- 1 yaroslavvb yaroslavvb   119 Oct 31 13:46 config_start.json
+-rw-r--r-- 1 yaroslavvb yaroslavvb  5211 Oct 31 13:46 configs.json
+-rw-r--r-- 1 yaroslavvb yaroslavvb  4683 Oct 31 13:46 gen.sha256
+-rw-r--r-- 1 yaroslavvb yaroslavvb   625 Oct 31 13:46 manifest.txt
+-rw-r--r-- 1 yaroslavvb yaroslavvb  1835 Oct 31 13:46 marks.jsonl
+-rw-r--r-- 1 yaroslavvb yaroslavvb   310 Oct 31 13:46 plan.json
+-rw-r--r-- 1 yaroslavvb yaroslavvb   947 Oct 31 13:46 run.log
+-rw-r--r-- 1 yaroslavvb yaroslavvb 28544 Oct 31 13:46 runs.jsonl
+-rw-r--r-- 1 yaroslavvb yaroslavvb  7905 Oct 31 13:46 telemetry.jsonl.gz
+drwxr-xr-x 2 yaroslavvb yaroslavvb     8 Oct 31 13:46 tiles
+2026-10-31 13:46:44 PDT
+No process holds an ET-SoC-1 device node or card lock.

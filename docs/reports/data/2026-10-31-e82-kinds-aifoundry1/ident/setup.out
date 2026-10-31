@@ -1,0 +1,41 @@
+2026-10-31 13:44:16 PDT
+== host (no device access) ==
+aifoundry1
+ 13:44:16 up 4 days, 22:42,  2 users,  load average: 0.56, 0.53, 0.54
+No process holds an ET-SoC-1 device node or card lock.
+== tree ==
+root /home/yaroslavvb/nekko; V3_DEVICE=1
+lib.sh: identical to the freeze's (033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa)
+reused E78 files identical to the freeze's: all
+== tiles against kinds.json (sha256 of each file and of each half) ==
+{"tiles": 51, "problems": []}
+== the binary takes fp16 and int8 with file: operands, --dump-tiles and --stop-file ==
+  fp16: present
+  int8: present
+  file:: present
+  --dump-tiles: present
+  --stop-file: present
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 4021112 Sep 25 15:14 build/ettelem/ettelem
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3652752 Sep 28 20:56 build/sparsity/host/sparsity_host
+-rwxr-xr-x 1 yaroslavvb yaroslavvb   18552 Sep 22 12:11 build/sparsity/kernel/sparsity.elf
+numpy 1.26.4
+-rw-rw-rw- 1 root root 0 Oct 26 15:02 /run/lock/etsoc-shire1.lock
+== the plan of the first pass ==
+{"kinds": 51, "by_type": {"fp32": 18, "fp16": 17, "int8": 16}, "tier1": 30, "tier2": 21, "anchors": ["fp32.zeros", "fp32.randn", "fp16.zeros", "fp16.randn", "int8.zeros", "int8.full"], "tie": "anchor_pi", "runs_per_pass": 65, "tiers": [1, 2]}
+  0 s-1 anchor_pi
+  1 s+0 int8.zeros
+  2 s+0 fp32.randn
+  3 s+0 fp32.ones
+  4 s+0 int8.a_zeros_b_full
+  5 s+0 int8.full
+  6 s+0 fp32.sparse50
+  7 s+0 fp32.zeros
+== dry run of one whole pass (V3_DRY=1: lib.sh stubs every device call) ==
+dry rc=0
+device launches the pass would make: 67
+      1 ET_DEVICES=1
+13:44:20 [aifoundry1-c1] done
+DRY ettelem config
+2026-10-31T13:44:25 [aifoundry1-c1] kinds p8200 ends: ok tiers 1,2
+== et-who after setup
+No process holds an ET-SoC-1 device node or card lock.

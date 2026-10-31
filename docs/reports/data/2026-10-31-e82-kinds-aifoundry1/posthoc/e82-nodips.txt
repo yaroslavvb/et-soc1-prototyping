@@ -1,0 +1,59 @@
+E82: reduce_e78.py unchanged (config gate at card 1's registered 65 W / 65 C), via reduce_e82.py
+E78 aifoundry1-c1: 600 MHz, 498.7 mV, leak 0.2541 W/C (313 runs), runs kept 450/450, passes [8210, 8211, 8212, 8213, 8214, 8215, 8216], idle-invalid runs 0
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 33.09372854149494
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn_small           24.167  0.080    25.992      23192    5.662
+    fp32.randn                 24.002  0.065    25.845      23057    5.629
+    fp32.randn_large           23.962  0.143    25.776      22998    5.615
+    fp32.randn_sorted          22.787  0.151    24.668      22003    5.372
+    fp32.uniform01             21.953  0.136    23.831      21260    5.190
+    fp32.fp16grid              19.155  0.106    20.968      18704    4.566
+    fp32.bf16trunc             17.606  0.072    19.440      17341    4.234
+    fp32.smallint              13.665  0.080    15.522      13851    3.382
+    fp32.pow2                  13.658  0.051    15.480      13811    3.372
+    fp32.nn_like               12.720  0.114    14.569      12996    3.173
+    fp32.pi                     8.181  0.123     9.963       8889    2.170
+    anchor_pi                   8.135  0.091     9.995       8917    2.177
+    fp32.ones                   8.051  0.156     9.821       8760    2.139
+    fp32.neg_ones               7.943  0.143     9.898       8829    2.155
+    fp32.sparse50               7.029  0.183     8.909       7947    1.940
+    fp32.a_zeros_b_randn        0.720  0.057     2.644       2358    0.576
+    fp32.a_randn_b_zeros        0.643  0.043     2.506       2236    0.546
+    fp32.sparse90               0.598  0.114     2.450       2185    0.534
+    fp32.zeros                  0.000  0.000     1.846       1647    0.402
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn_small           21.598  0.123    23.462      20928    2.555
+    fp16.randn                 21.490  0.058    23.368      20850    2.545
+    fp16.randn_sorted          20.219  0.091    22.074      19691    2.404
+    fp16.pair_half_zero        19.782  0.094    21.654      19317    2.358
+    fp16.uniform01             18.846  0.068    20.664      18433    2.250
+    fp16.fp8grid               17.438  0.064    19.394      17299    2.112
+    fp16.nn_like               17.010  0.104    18.875      16839    2.056
+    fp16.smallint              16.437  0.077    18.236      16267    1.986
+    fp16.sparse50              13.081  0.042    14.978      13363    1.631
+    fp16.neg_ones               8.094  0.063     9.925       8854    1.081
+    fp16.ones                   8.019  0.040     9.812       8753    1.068
+    fp16.wsparse50              6.832  0.093     8.724       7783    0.950
+    fp16.sparse90               1.348  0.056     3.197       2852    0.348
+    fp16.a_zeros_b_randn        0.801  0.100     2.622       2339    0.286
+    fp16.a_randn_b_zeros        0.646  0.102     2.475       2208    0.270
+    fp16.wsparse90              0.636  0.076     2.494       2225    0.272
+    fp16.zeros                  0.000  0.000     1.890       1686    0.206
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   6.839  0.091     9.250       4805    0.293
+    int8.gauss_q                6.483  0.028     8.962       4656    0.284
+    int8.sorted                 6.399  0.113     8.789       4566    0.279
+    int8.pos                    5.967  0.088     8.360       4343    0.265
+    int8.smallint               5.880  0.082     8.299       4311    0.263
+    int8.sparse50               5.235  0.131     7.733       4018    0.245
+    int8.ternary                4.990  0.143     7.373       3831    0.234
+    int8.highbit                3.152  0.064     5.558       2888    0.176
+    int8.wsparse50              3.042  0.130     5.468       2841    0.173
+    int8.neg_ones               1.679  0.083     4.135       2148    0.131
+    int8.ones                   1.559  0.066     3.954       2054    0.125
+    int8.sparse90               1.132  0.043     3.512       1824    0.111
+    int8.wsparse90              0.492  0.160     2.874       1493    0.091
+    int8.a_full_b_zeros         0.380  0.146     2.807       1458    0.089
+    int8.a_zeros_b_full         0.343  0.140     2.782       1446    0.088
+    int8.zeros                  0.000  0.000     2.416       1255    0.077
+  idle consistency median |S - S0 - D| 0.07605560689006063 W; carry-over {'slope_w_per_w': 0.002011143085612559, 'se': 0.0005484879733822783, 'n': 443}; pi built-in - file -0.06362328615656208; rail tau re-fit median None
