@@ -245,6 +245,13 @@ afternoon ("a lower bound on every wire", README l.192 / METHOD l.78) and are fo
 correct; and the **deployed** copy of the Q128 page on spacesheep still shows the old prose until
 somebody redeploys it from the rebuilt HTML.
 
+**Both of those are now done** — this paragraph records 27 October, not today. The two ledger-scope copies
+were corrected on **Sat 31 Oct 2026 by Q130(f)**, commit `88e2f336`: by then the phrase had drifted to
+README l.310 and METHOD l.105, and both sites now carry Q129(a)'s measurement instead — the global-route
+estimate runs 20–23% *above* the extraction at Miller k = 1, so the wire rows there are a ceiling, not a
+floor. The deployed Q128 page was redeployed before that and shows the retirement in its own words
+("RETIRED Tue 27 Oct 2026 by Q129(a)"), read back from the live page on 31 Oct 2026.
+
 ## What ran, and what did not
 
 | Step | State |

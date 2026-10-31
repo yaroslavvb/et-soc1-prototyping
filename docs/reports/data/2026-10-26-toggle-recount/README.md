@@ -29,6 +29,15 @@ The second, 5.4x, is the RTL hierarchy naming the same wire at four levels. Toge
 every fitted femtojoule is 8 to 16x too large** — 16x against the per-net count, which is a floor, and 8x
 against the names-per-net route ("What the physical number is").
 
+**Where this correction has been applied since.** The chip diagram's two derived facts that rested on
+21,331 — `tfma.lab`'s stated cause and `tfma.owner.why`'s route to the owner's "~1,050" — were corrected
+against this file on **Sat 31 Oct 2026 by Q130(f)**, commit `36aaef68`, and the page was redeployed; a
+second pass the same day, after verification, put this directory into both facts' own `source` lines and
+stopped `tfma.owner.why` calling the merged-net quotient a count of wires. `tfma.clocked`'s "1,739 of
+2,071" was checked against "The clocked-bit half of the dispute" below and deliberately left standing,
+because that section confirms it (838 + 1,233 = 2,071). The one place the withdrawn wording still reads as
+current is `docs/findings/05-claims.md` — the 🛑 at the end of that section.
+
 ## The two defects
 
 **1. The compressor cells were counted several times per cycle, and that is the tool, not the circuit.**
