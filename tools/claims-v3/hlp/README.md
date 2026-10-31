@@ -224,6 +224,13 @@ price is the between-pass scatter, which is what more passes reduce. **Nothing e
 operand files, the launch protocol, the gates, the analysis and every registered band are as committed in
 `2a72d352`. The `min_passes` floor of 3 and the stop rule stand.
 
+**A3, Sat 31 Oct 2026, 09:35 PDT** — written during pass 7910 and before any data it touches. **A1's four extra
+passes are cut to two: 7914 and 7915, six passes in all.** Why: A1's 4.5 min figure came from pass 7910's first 17
+runs, where the approach was instant; by run 24 the card has warmed and the wait for 58 °C costs 1–3 s, so the
+measured pace is **8.7 s a run — about 10 min a pass**. Eight passes would be ~82 card-minutes, past the
+registered 75-minute budget; six are ~63, plus the smoke and the identity read. The budget is the binding
+constraint and it is not moved. Nothing else changes.
+
 **A2, Sat 31 Oct 2026, 09:33 PDT** — the same commit, same reason, no data touched: `collect_e79.sh` is added
 (it reduces every finished pass, runs the registered E71-slope sensitivity arm and assembles the data directory).
 It is plumbing around the already-registered `reduce_hlp.py` and `report_e79.py` and changes no analysis.
