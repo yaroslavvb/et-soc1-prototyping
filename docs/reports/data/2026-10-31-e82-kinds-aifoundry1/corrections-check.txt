@@ -1,0 +1,198 @@
+
+====================================================================================================
+[0] reading the registered numbers back (asserted)
+====================================================================================================
+D(fp32 randn) = 23.987 W; tally {'PASS': 23, 'FAIL': 4, 'INCONCLUSIVE': 0, 'NOT SCORED': 0}; arms leak0.545 {'PASS': 21, 'FAIL': 5, 'INCONCLUSIVE': 1, 'NOT SCORED': 0}; leak0.3803 {'PASS': 21, 'FAIL': 5, 'INCONCLUSIVE': 1, 'NOT SCORED': 0}; leak0 {'PASS': 23, 'FAIL': 3, 'INCONCLUSIVE': 1, 'NOT SCORED': 0}
+k = 0.2414 W/C (auto, 313 runs) / 0.545 / 0.3803 / 0; cross-card {'X1': 'PASS', 'X2a': 'FAIL', 'X2b': 'FAIL', 'X3': 'FAIL'}; median 1.0308; agreement 31 of 33; 51 kinds + the tie; kept passes [8211, 8212, 8213, 8214, 8215]
+   arm leak0.545: kept [8211, 8212, 8213, 8214, 8215]; set aside 8210 (fp16.randn spans 1.170 W); 8216 (fp32.randn spans 1.072 W, int8.full spans 1.034 W)
+   arm leak0.3803: kept [8211, 8212, 8213, 8214, 8215]; set aside 8210 (fp16.randn spans 1.211 W); 8216 (fp32.randn spans 1.072 W, int8.full spans 1.034 W)
+   arm leak0: kept [8211, 8212, 8214, 8215]; set aside 8210 (fp16.randn spans 1.306 W); 8213 (anchor_pi drifts +0.702 W); 8216 (fp32.randn spans 1.072 W, fp16.zeros departs +0.265 W from its straight line, int8.full spans 1.034 W)
+
+====================================================================================================
+[C1] the heat column (dT_win) and the die reading's whole-degree steps
+====================================================================================================
+[C1.1] dT_win cells whose 95% interval has zero width (every kept pass read the same window mean):
+   fp16.a_zeros_b_randn     dT 0.00 [+- 0.00]   S  2.585 W   n 5
+   fp16.sparse50            dT 2.00 [+- 0.00]   S 15.036 W   n 5
+   fp32.zeros               dT 0.00 [+- 0.00]   S  1.841 W   n 5
+   int8.neg_ones            dT 1.00 [+- 0.00]   S  4.169 W   n 5
+   int8.ternary             dT 1.00 [+- 0.00]   S  7.398 W   n 5
+   5 of 51 kinds
+
+[C1.2] dT / S for every kind, sorted by S (C per W of switching over idle); per-pass dT in pass order:
+   kind                           S W   dT C  +-95%    dT/S  n  class           per-pass dT
+   fp32.randn_small            25.873   3.40   0.22   0.131  5  resolved        3.40 3.50 3.55 3.10 3.45
+   fp32.randn                  25.819   3.41   0.06   0.132  5  resolved        3.45 3.37 3.35 3.45 3.43
+   fp32.randn_large            25.762   3.35   0.08   0.130  5  resolved        3.25 3.40 3.35 3.40 3.35
+   fp32.randn_sorted           24.482   3.14   0.46   0.128  5  resolved        3.40 3.15 2.50 3.30 3.35
+   fp32.uniform01              23.848   3.08   0.26   0.129  5  resolved        2.80 3.30 2.95 3.10 3.25
+   fp16.randn_small            23.502   2.98   0.37   0.127  5  resolved        2.80 3.10 2.55 3.20 3.25
+   fp16.randn                  23.304   2.95   0.15   0.127  5  resolved        2.82 3.00 3.12 2.85 2.98
+   fp16.randn_sorted           22.065   2.72   0.35   0.123  5  resolved        2.45 2.40 2.90 3.05 2.80
+   fp16.pair_half_zero         21.672   2.84   0.15   0.131  5  resolved        2.90 2.85 2.70 2.75 3.00
+   fp32.fp16grid               21.020   2.74   0.41   0.130  4  resolved        2.35 2.90 2.85 2.85
+   fp16.uniform01              20.688   2.79   0.07   0.135  5  resolved        2.80 2.80 2.85 2.80 2.70
+   fp32.bf16trunc              19.462   2.53   0.18   0.130  5  resolved        2.35 2.40 2.60 2.65 2.65
+   fp16.fp8grid                19.434   2.56   0.19   0.132  5  resolved        2.60 2.70 2.70 2.45 2.35
+   fp16.nn_like                18.785   2.39   0.47   0.127  5  resolved        2.65 2.60 2.35 2.60 1.75
+   fp16.smallint               18.148   2.28   0.34   0.126  5  resolved        2.15 2.65 2.45 1.95 2.20
+   fp32.pow2                   15.519   2.05   0.14   0.132  5  resolved        2.20 2.05 2.10 2.00 1.90
+   fp32.smallint               15.514   2.03   0.06   0.131  5  resolved        2.05 2.00 2.00 2.10 2.00
+   fp16.sparse50               15.036   2.00   0.00   0.133  5  resolved        2.00 2.00 2.00 2.00 2.00
+   fp32.nn_like                14.582   1.99   0.03   0.136  5  resolved        2.00 2.00 1.95 2.00 2.00
+   fp32.pi                      9.943   1.44   0.49   0.145  5  STEP-LIMITED    1.00 1.80 1.15 1.35 1.90
+   anchor_pi (the tie)          9.917   1.31   0.25   0.132  5  STEP-LIMITED    1.45 1.45 1.45 1.00 1.20
+   fp32.neg_ones                9.913   1.29   0.41   0.130  5  STEP-LIMITED    1.75 1.00 1.30 1.45 0.95
+   fp16.neg_ones                9.913   1.41   0.42   0.142  5  STEP-LIMITED    1.50 1.45 1.90 1.00 1.21
+   fp16.ones                    9.843   1.64   0.24   0.167  5  STEP-LIMITED    1.50 1.90 1.40 1.70 1.70
+   fp32.ones                    9.698   1.37   0.55   0.141  5  STEP-LIMITED    1.00 1.00 1.90 1.15 1.79
+   int8.full                    9.290   1.25   0.29   0.135  5  STEP-LIMITED    1.00 1.52 1.48 1.15 1.10
+   int8.gauss_q                 8.951   1.14   0.34   0.127  4  STEP-LIMITED    1.00 1.45 1.00 1.10
+   int8.sorted                  8.814   1.29   0.35   0.146  5  STEP-LIMITED    1.00 1.55 1.58 1.00 1.30
+   fp16.wsparse50               8.740   1.18   0.31   0.135  5  STEP-LIMITED    1.00 1.45 1.00 1.45 1.00
+   fp32.sparse50                8.625   1.11   0.25   0.129  5  STEP-LIMITED    1.00 1.35 1.00 1.30 0.90
+   int8.pos                     8.411   1.05   0.14   0.125  5  STEP-LIMITED    1.00 1.00 1.25 1.00 1.00
+   int8.smallint                8.302   1.01   0.03   0.122  5  STEP-LIMITED    1.00 1.00 1.05 1.00 1.00
+   int8.sparse50                7.760   1.01   0.03   0.130  5  STEP-LIMITED    1.00 1.00 1.00 1.00 1.05
+   int8.ternary                 7.398   1.00   0.00   0.135  5  STEP-LIMITED    1.00 1.00 1.00 1.00 1.00
+   int8.highbit                 5.538   0.84   0.44   0.152  5  STEP-LIMITED    0.20 1.00 1.00 1.00 1.00
+   int8.wsparse50               5.355   0.94   0.11   0.176  5  STEP-LIMITED    1.00 0.90 1.00 0.80 1.00
+   int8.neg_ones                4.169   1.00   0.00   0.240  5  STEP-LIMITED    1.00 1.00 1.00 1.00 1.00
+   int8.ones                    3.948   0.79   0.55   0.200  5  STEP-LIMITED    1.00 1.00 0.00 1.00 0.95
+   int8.sparse90                3.492   0.83   0.47   0.238  5  STEP-LIMITED    1.00 1.00 1.00 0.15 1.00
+   fp16.sparse90                3.218   0.63   0.43   0.196  5  STEP-LIMITED    0.25 1.00 0.40 0.50 1.00
+   int8.wsparse90               2.860   0.88   0.23   0.308  5  STEP-LIMITED    0.90 0.55 1.00 1.00 0.95
+   int8.a_full_b_zeros          2.828   0.42   0.49   0.149  5  STEP-LIMITED    0.55 0.00 0.75 0.00 0.80
+   int8.a_zeros_b_full          2.786   0.51   0.62   0.183  5  STEP-LIMITED    0.00 1.00 1.00 0.00 0.55
+   fp32.a_zeros_b_randn         2.684   0.37   0.51   0.138  5  STEP-LIMITED    -0.05 0.35 0.65 0.90 0.00
+   fp16.a_zeros_b_randn         2.585   0.00   0.00   0.000  5  STEP-LIMITED    0.00 0.00 0.00 0.00 0.00
+   fp16.wsparse90               2.505   0.12   0.30   0.048  5  STEP-LIMITED    0.05 0.55 0.00 0.00 0.00
+   fp32.a_randn_b_zeros         2.494   0.35   0.47   0.140  5  STEP-LIMITED    0.00 0.00 0.35 0.90 0.50
+   fp32.sparse90                2.456   0.34   0.42   0.137  4  STEP-LIMITED    0.20 0.35 0.70 0.10
+   fp16.a_randn_b_zeros         2.434   0.15   0.42   0.062  5  STEP-LIMITED    0.00 0.00 0.75 0.00 0.00
+   int8.zeros                   2.402   0.21   0.23   0.087  5  STEP-LIMITED    0.00 0.40 0.05 0.38 0.22
+   fp16.zeros                   1.873   0.03   0.04   0.018  5  STEP-LIMITED    0.08 0.00 0.02 0.05 0.02
+   fp32.zeros                   1.841   0.00   0.00   0.000  5  STEP-LIMITED    0.00 0.00 0.00 0.00 0.00
+
+[C1.3] above 12 W of S: 19 kinds (10 fp32, 9 fp16, 0 int8); dT/S 0.123-0.136 C/W; through the origin 0.1297 C/W; a straight line 0.1255 C/W (SE 0.0039) + 0.090 C (SE 0.083)
+   at or below 12 W: 32 kinds (8 fp32, 8 fp16, 16 int8) plus the tie (S 9.92 W); dT/S 0.000-0.308 C/W
+   lowest  fp16.a_zeros_b_randn: dT 0.00 C at S 2.58 W
+   highest int8.wsparse90: dT 0.88 C at S 2.86 W
+   int8.neg_ones: S 4.17 W, dT 1.00 C   |   fp16.a_zeros_b_randn: S 2.58 W, dT 0.00 C
+   int8.neg_ones: S 4.17 W, dT 1.00 C   |   int8.full: S 9.29 W, dT 1.25 C
+   int8.ones: S 3.95 W, dT 0.79 C   |   int8.ternary: S 7.40 W, dT 1.00 C
+   fp32.pi: S 9.94 W, dT 1.44 C   |   fp32.neg_ones: S 9.91 W, dT 1.29 C
+   the tie: anchor_pi S 9.92 W, dT 1.31 C against fp32.pi S 9.94 W, dT 1.44 C (the same bytes)
+
+[C1.4] the step-limited kinds' heat as an extrapolation, S x 0.130 C/W (not a measurement):
+   fp32.pi                  S  9.943 W -> 1.29 C (read 1.44)
+   fp32.neg_ones            S  9.913 W -> 1.29 C (read 1.29)
+   fp16.neg_ones            S  9.913 W -> 1.29 C (read 1.41)
+   fp16.ones                S  9.843 W -> 1.28 C (read 1.64)
+   fp32.ones                S  9.698 W -> 1.26 C (read 1.37)
+   int8.full                S  9.290 W -> 1.21 C (read 1.25)
+   int8.gauss_q             S  8.951 W -> 1.16 C (read 1.14)
+   int8.sorted              S  8.814 W -> 1.14 C (read 1.29)
+   fp16.wsparse50           S  8.740 W -> 1.13 C (read 1.18)
+   fp32.sparse50            S  8.625 W -> 1.12 C (read 1.11)
+   int8.pos                 S  8.411 W -> 1.09 C (read 1.05)
+   int8.smallint            S  8.302 W -> 1.08 C (read 1.01)
+   int8.sparse50            S  7.760 W -> 1.01 C (read 1.01)
+   int8.ternary             S  7.398 W -> 0.96 C (read 1.00)
+   int8.highbit             S  5.538 W -> 0.72 C (read 0.84)
+   int8.wsparse50           S  5.355 W -> 0.69 C (read 0.94)
+   int8.neg_ones            S  4.169 W -> 0.54 C (read 1.00)
+   int8.ones                S  3.948 W -> 0.51 C (read 0.79)
+   int8.sparse90            S  3.492 W -> 0.45 C (read 0.83)
+   fp16.sparse90            S  3.218 W -> 0.42 C (read 0.63)
+   int8.wsparse90           S  2.860 W -> 0.37 C (read 0.88)
+   int8.a_full_b_zeros      S  2.828 W -> 0.37 C (read 0.42)
+   int8.a_zeros_b_full      S  2.786 W -> 0.36 C (read 0.51)
+   fp32.a_zeros_b_randn     S  2.684 W -> 0.35 C (read 0.37)
+   fp16.a_zeros_b_randn     S  2.585 W -> 0.34 C (read 0.00)
+   fp16.wsparse90           S  2.505 W -> 0.32 C (read 0.12)
+   fp32.a_randn_b_zeros     S  2.494 W -> 0.32 C (read 0.35)
+   fp32.sparse90            S  2.456 W -> 0.32 C (read 0.34)
+   fp16.a_randn_b_zeros     S  2.434 W -> 0.32 C (read 0.15)
+   int8.zeros               S  2.402 W -> 0.31 C (read 0.21)
+   fp16.zeros               S  1.873 W -> 0.24 C (read 0.03)
+   fp32.zeros               S  1.841 W -> 0.24 C (read 0.00)
+   anchor_pi (the tie)      S  9.917 W -> 1.29 C (read 1.31)
+   beside: E78 (aifoundry3) on its 19 kinds above 12 W, dT/S 0.113-0.129, 0.1181 C/W through the origin
+
+====================================================================================================
+[C2] card 1 against September (E38's anchors, R4): what the comparison does and does not show
+====================================================================================================
+   fp32.randn: E38 target 26.662 W (tol 1.5); E82 D by leakage arm: auto 0.2414 23.987 W (-10.0%); leak0.545 22.952 W (-13.9%); leak0.3803 23.513 W (-11.8%); leak0 24.824 W (-6.9%)
+   fp32.ones: E38 target 8.996 W (tol 1.0); E82 D by leakage arm: auto 0.2414 7.918 W (-12.0%); leak0.545 7.503 W (-16.6%); leak0.3803 7.728 W (-14.1%); leak0 8.201 W (-8.8%)
+   E38 fp32_ones - fp32_zeros: 8.996 W = mean of 4 runs [9.98, 10.233, 10.511, 9.873] minus mean of 4 zeros runs [1.11, 1.03, 1.219, 1.255] (a difference of run means; no within-run leakage term)
+   E38 fp32_randn - fp32_zeros: 26.662 W = mean of 4 runs [27.744, 27.444, 27.912, 28.163] minus mean of 4 zeros runs [1.11, 1.03, 1.219, 1.255] (a difference of run means; no within-run leakage term)
+   cards-v3.json launch: card 1 reading 80.0 C, leak 0.81 W/C; aifoundry3 reading 57.4 C, leak 0.55 W/C
+   September randn - zeros (cards-v3.json patterns): card 1 26.662 W, aifoundry3 23.908 W
+   aifoundry3: E78 D(fp32 randn) 24.725 W = +3.4% against its September 23.908, +0.3% against E67's 24.659 (27 Oct, E78's R4 target)
+   card 1:     E82 D(fp32 randn) 23.987 W = -10.0% against its September 26.662
+   E82's window rise, fp32 randn over fp32 zeros: 3.41 C; x 0.2414 (E82 auto) = 0.82 W (the leak0 arm reads 0.837 W higher); x 0.81 (card 1 at its September launch) = 2.76 W
+   the gap to E38's target: 2.675 W at E82's primary slope, 1.838 W with no correction
+
+====================================================================================================
+[C3] verdicts that move between the registered leakage arms (E78.md: reported as slope-sensitive)
+====================================================================================================
+   /E78-R2/by_model/q130c/fp16/verdict: primary PASS; leak0.545 FAIL; leak0.3803 FAIL; leak0 PASS
+   /E78-R3f/cells/int8.neg_ones - int8.ones/verdict: primary PASS; leak0.545 INCONCLUSIVE; leak0.3803 INCONCLUSIVE; leak0 INCONCLUSIVE
+   /E78-R3f/verdict: primary PASS; leak0.545 INCONCLUSIVE; leak0.3803 INCONCLUSIVE; leak0 INCONCLUSIVE
+   /E78-R4/fp32.ones/verdict: primary FAIL; leak0.545 FAIL; leak0.3803 FAIL; leak0 PASS
+   R2.fp16: primary rms 1.987 W (bound 2.0); leak0.545 rms 2.412 W (bound 2.0); leak0.3803 rms 2.171 W (bound 2.0); leak0 rms 1.734 W (bound 2.0)
+   R3f.int8: primary 0.168 [0.055, 0.282] W (pass if inside +-0.30); leak0.545 0.134 [-0.109, 0.377] W (pass if inside +-0.30); leak0.3803 0.153 [-0.008, 0.313] W (pass if inside +-0.30); leak0 0.170 [-0.031, 0.371] W (pass if inside +-0.30)
+   R4.ones: primary 7.918 +- 0.427 W against 8.996 +- 1.0; leak0.545 7.503 +- 0.455 W against 8.996 +- 1.0; leak0.3803 7.728 +- 0.432 W against 8.996 +- 1.0; leak0 8.201 +- 0.635 W against 8.996 +- 1.0
+   E78 (aifoundry3), arms ['leak0.3803', 'leak0']: 0 verdict leaves move []
+   cross-card slope_sensitive (scored.json): []; arm medians own idle slopes (card 1 0.545, aifoundry3 0.3803) 1.053, same slope 0.3803 on both 1.028, no correction on both 1.021
+
+====================================================================================================
+[C4] counting the verdicts: as the frozen scorer counts them, and as E78.md registers them
+====================================================================================================
+   primary    scorer {'PASS': 23, 'FAIL': 4, 'INCONCLUSIVE': 0, 'NOT SCORED': 0} of 27; R3c once {'PASS': 22, 'FAIL': 4, 'INCONCLUSIVE': 0, 'NOT SCORED': 0} of 26
+   leak0.545  scorer {'PASS': 21, 'FAIL': 5, 'INCONCLUSIVE': 1, 'NOT SCORED': 0} of 27; R3c once {'PASS': 20, 'FAIL': 5, 'INCONCLUSIVE': 1, 'NOT SCORED': 0} of 26
+   leak0.3803 scorer {'PASS': 21, 'FAIL': 5, 'INCONCLUSIVE': 1, 'NOT SCORED': 0} of 27; R3c once {'PASS': 20, 'FAIL': 5, 'INCONCLUSIVE': 1, 'NOT SCORED': 0} of 26
+   leak0      scorer {'PASS': 23, 'FAIL': 3, 'INCONCLUSIVE': 1, 'NOT SCORED': 0} of 27; R3c once {'PASS': 22, 'FAIL': 3, 'INCONCLUSIVE': 1, 'NOT SCORED': 0} of 26
+   R3 verdicts: 18 as the scorer counts (18 PASS); 17 with R3c counted once
+   E78 (aifoundry3): scorer {'PASS': 28, 'FAIL': 2, 'INCONCLUSIVE': 0, 'NOT SCORED': 0} of 30; R3c once {'PASS': 27, 'FAIL': 2, 'INCONCLUSIVE': 0, 'NOT SCORED': 0} of 29
+   the scorer's agreement walk: 31 of 33 leaves the same; it counts R3e's and R3f's top verdicts and their 6 cells, among them R3f's reported fp32 and fp16 cells
+   in registered units: 24 of 26 the same; differing: E78-R4/fp32.ones (E82 FAIL, E78 PASS), E78-R4/fp32.randn (E82 FAIL, E78 PASS)
+
+====================================================================================================
+[C5] one card scale? the 32 per-kind ratios D(aifoundry3) / D(card 1) against one weighted mean
+====================================================================================================
+   32 kinds; inverse-variance weighted mean 1.0294; chi2 57.8 with 31 degrees of freedom (p 0.0024); SEs from each card's between-pass scatter (4-5 degrees of freedom), so p is approximate
+   largest |z|: fp16.ones              ratio 1.048  z 4.4
+   largest |z|: int8.gauss_q           ratio 1.015  z 3.0
+   largest |z|: fp32.fp16grid          ratio 1.021  z 2.6
+   largest |z|: fp32.pow2              ratio 1.020  z 2.0
+   median 1.0308; range 1.006-1.080; sd 1.18% (population) / 1.20% (sample) of the median; within +-1.5% of the median: 28 of 32
+   scored.json x3: median 1.0308, IQR [1.0249144477189613, 1.0338504957437646]
+
+====================================================================================================
+[C6] what the table cells' intervals cover: between-pass scatter at the primary slope only
+====================================================================================================
+   kinds whose D moves across the three arms by more than its 95% half-width: 40 of 51 (48 non-zero; each type's zeros is 0 by construction at every arm)
+   largest arm moves: fp32.randn 1.035 W; fp32.randn_small 1.032 W; fp32.randn_large 1.017 W
+   fp32 randn D: primary 23.9869 +- 0.1062 W; arms leak0.545 22.9518 (-1.0352); leak0.3803 23.5134 (-0.4736); leak0 24.8239 (+0.8369)
+   fp32 randn pj_mac_S: primary 5.6234 +- 0.0365 pJ/MAC; arms leak0.545 5.4587 (-0.1648); leak0.3803 5.5481 (-0.0754); leak0 5.7513 (+0.1279)
+   pJ/MAC (S), largest relative arm move: fp32.zeros 10.6%; fp16.zeros 13.7%; int8.zeros 7.5%; fp32.randn 2.9%; fp16.randn 2.8%; int8.full 1.4%
+   board against rail, fp32 randn: D 23.99 W (board), Drail 20.03 W (the minion rail, deconvolved)
+   kinds with fewer than five passes: fp32.fp16grid (n 4), fp32.sparse90 (n 4), int8.gauss_q (n 4) -> 9 table cells (D, pJ/MAC, dT)
+
+====================================================================================================
+[C7] wording
+====================================================================================================
+   X1 ranks 17 fp32 / 16 fp16 / 15 int8 = 48 non-zero kinds
+   ratio intervals, widest first: fp32.sparse50 1.080 +-0.075; fp32.ones 1.043 +-0.063; fp32.neg_ones 1.021 +-0.057; int8.sparse50 1.032 +-0.043; fp16.sparse50 1.006 +-0.041; fp32.randn_sorted 1.036 +-0.041
+   fp16.sparse50 rank among the 32 by width: 5
+   pJ/MAC (S) fp32.randn   aifoundry3 5.8161, card 1 5.6234: a3/c1 1.034
+   pJ/MAC (S) fp16.randn   aifoundry3 2.6250, card 1 2.5381: a3/c1 1.034
+   pJ/MAC (S) int8.full    aifoundry3 0.3058, card 1 0.2946: a3/c1 1.038
+   pJ/MAC (S) fp32.zeros   aifoundry3 0.4326, card 1 0.4010: a3/c1 1.079
+   pJ/MAC (S) fp16.zeros   aifoundry3 0.2164, card 1 0.2039: a3/c1 1.061
+   pJ/MAC (S) int8.zeros   aifoundry3 0.0826, card 1 0.0762: a3/c1 1.084
+   p8210: 14 dip samples in 9 events; inside runs 9 samples in 5 events (fp32.pi, int8.sparse50, fp16.sparse50, fp16.randn, fp16.ones); the first sample of each in-run event 47, 12, 37, 22, 61 ms after a launch boundary
+   all seven passes: 85 dip samples in 61 events; inside runs 62 samples in 41 events; in-run samples 12-150 ms after a launch boundary (median 73); first samples of in-run events 12-106 ms
+   dips.json totals: {'dips': 85, 'in_runs': 62, 'in_power_windows': 35}
