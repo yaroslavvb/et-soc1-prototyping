@@ -1,0 +1,50 @@
+2026-10-31T14:46:18 [aifoundry3] dp p8100 begins (die 80 C) -> /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/dp/p8100
+DRY start_sampler /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/dp/p8100/telemetry.jsonl 1702
+14:46:21 [aifoundry3] 12 items, 13 runs per block x 1 blocks, at most 13 min; launch at 58 C after 59 C; cap 78 C; ET_DEVICES=None
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/sparsity/host/sparsity_host --test fma --type fp32 --pattern none --values pi --shires 0xffffffff --per-shire 32 --seconds 4.0 --seed 0 --stop-file /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/dp/p8100/STOP
+14:46:21 [aifoundry3] burn-in 1/2: anchor_pi at 58.0 C (rc 0)
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/sparsity/host/sparsity_host --test fma --type fp32 --pattern none --values pi --shires 0xffffffff --per-shire 32 --seconds 4.0 --seed 0 --stop-file /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/dp/p8100/STOP
+14:46:21 [aifoundry3] burn-in 2/2: anchor_pi at 58.0 C (rc 0)
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/sparsity/host/sparsity_host --test fma --type fp32 --pattern none --values pi --shires 0xffffffff --per-shire 32 --seconds 4.0 --seed 8101 --stop-file /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/dp/p8100/STOP
+14:46:21 [aifoundry3] block 8100 #0 anchor_pi: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands file:/home/yaroslavvb/aifoundry/build/dp-gen/srcs/dp_s2r.bin --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #1 dp_s2r: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands file:/home/yaroslavvb/aifoundry/build/dp-gen/srcs/dp_s1.bin --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #2 dp_s1: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands bern:0.5 --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #3 dp_bern: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands file:/home/yaroslavvb/aifoundry/build/dp-gen/srcs/dp_s4.bin --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #4 dp_s4: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands random --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #5 dp_random: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands file:/home/yaroslavvb/aifoundry/build/dp-gen/srcs/dp_c2r.bin --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #6 dp_c2r: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands file:/home/yaroslavvb/aifoundry/build/dp-gen/srcs/dp_s2.bin --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #7 dp_s2: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands file:/home/yaroslavvb/aifoundry/build/dp-gen/srcs/dp_c2.bin --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #8 dp_c2: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands zeros --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #9 dp_zeros: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands file:/home/yaroslavvb/aifoundry/build/dp-gen/srcs/dp_c1.bin --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #10 dp_c1: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/enercat-hl/host/enercat_host --pattern flw_pat --harts 1 --seconds 4.0 --window 240000000 --operands file:/home/yaroslavvb/aifoundry/build/dp-gen/srcs/dp_c4.bin --stride 64 --slice-bytes 131072 --region 131072
+14:46:21 [aifoundry3] block 8100 #11 dp_c4: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/sparsity/host/sparsity_host --test fma --type fp32 --pattern none --values pi --shires 0xffffffff --per-shire 32 --seconds 4.0 --seed 8101 --stop-file /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/dp/p8100/STOP
+14:46:21 [aifoundry3] block 8100 #12 anchor_pi: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+14:46:21 [aifoundry3] done
+2026-10-31T14:46:26 [aifoundry3] dp p8100 ends: ok anchor_pi,dp_
