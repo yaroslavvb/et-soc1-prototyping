@@ -17,7 +17,7 @@
 | format | kind | burst MHz (2 passes) | burst rate | p800 W | burst die °C | burst limit | sustained MHz | sustained rate (kernel / wall) | sustained board W | sustained die °C | sustained limit | board pJ/op |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | fp16 | zeros | 800.0 (800.0/800.0) | 24.55 TFLOPS | 34.6 | 54→54, 55→56 | none | 789.8 | 24.23 / 23.57 TFLOPS | 35.1 | 57.7 | none | 1.45 |
-| fp16 | ones | 800.0 (800.0/800.0) | 24.55 TFLOPS | 50.7 | 53→57, 55→59 | none | 781.6 (792.9/770.3) | 23.83 / 23.10 TFLOPS | 53.2 | 64.8 | none/thermal | 2.23 |
+| fp16 | ones | 800.0 (800.0/800.0) | 24.55 TFLOPS | 50.7 | 53→57, 55→59 | none | 781.6 (792.9/770.3) | 23.83 / 23.10 TFLOPS | 53.2 | 64.8 | none (2 thermal steps) / thermal | 2.23 |
 | fp16 | randn | 730.6 (746.9/714.3) | 21.95 TFLOPS | 76.1 | 48→55, 56→62 | power | 609.5 | 18.68 / 18.12 TFLOPS | 52.3 | 66.0 | thermal | 2.80 |
 | fp16 | sparse50 | 800.0 (800.0/800.0) | 24.55 TFLOPS | 59.9 | 50→56, 56→61 | none | 717.1 | 21.62 / 20.99 TFLOPS | 54.9 | 65.5 | thermal | 2.54 |
 | fp16 | smallint | 782.7 (787.8/777.6) | 23.82 TFLOPS | 66.9 | 52→58, 55→62 | power | 650.6 | 19.71 / 19.09 TFLOPS | 51.9 | 65.6 | thermal | 2.63 |
@@ -25,7 +25,7 @@
 | fp16 | nn_like | 780.0 (784.0/776.0) | 23.70 TFLOPS | 68.0 | 52→59, 54→61 | power | 665.2 | 20.12 / 19.52 TFLOPS | 54.7 | 65.6 | thermal | 2.72 |
 | int8 | zeros | 800.0 (800.0/800.0) | 84.30 TOPS | 34.8 | 47→49, 55→57 | none | 800.0 | 84.33 / 81.96 TOPS | 37.0 | 58.0 | none | 0.44 |
 | int8 | neg_ones | 777.5 (755.1/800.0) | 81.68 TOPS | 39.4 | 55→56, 55→57 | none | 796.9 | 83.98 / 81.47 TOPS | 41.0 | 60.0 | none | 0.49 |
-| int8 | full | 800.0 (800.0/800.0) | 84.30 TOPS | 48.9 | 51→55, 56→59 | none | 793.4 (796.7/790.0) | 83.54 / 81.11 TOPS | 53.2 | 64.9 | none | 0.64 |
+| int8 | full | 800.0 (800.0/800.0) | 84.30 TOPS | 48.9 | 51→55, 56→59 | none | 793.4 (796.7/790.0) | 83.54 / 81.11 TOPS | 53.2 | 64.9 | none (6 thermal steps) / none (7 thermal steps) | 0.64 |
 | int8 | smallint | 798.0 (800.0/796.0) | 84.31 TOPS | 46.2 | 50→53, 54→58 | none | 795.4 | 83.80 / 81.08 TOPS | 51.0 | 64.4 | none | 0.61 |
 | int8 | gauss_q | 800.0 (800.0/800.0) | 84.31 TOPS | 48.0 | 53→56, 54→58 | none | 794.4 | 83.70 / 80.87 TOPS | 52.1 | 64.6 | none | 0.62 |
 | int8 | sparse50 | 800.0 (800.0/800.0) | 84.30 TOPS | 46.8 | 56→58, 56→59 | none | 789.3 | 83.15 / 80.88 TOPS | 49.0 | 63.6 | none | 0.59 |

@@ -339,3 +339,24 @@ python3 tools/claims-v3/kspeed/reduce_kspeed.py <data>/s1 --out <data>/results.j
   - each sustained run's limit with those samples left out (sampler-only, as A3 of E64);
   - R2 on those limits;
   - how many episodes there were, per kind and in all.
+
+## Corrections after verification (Sat 31 Oct 2026)
+
+*Written after the data, as corrections of this file's description. Nothing above is rewritten, and no prediction,
+rule, threshold, population or verdict changes. The data README's "Corrections after verification" has the full
+list ([`docs/reports/data/2026-10-31-e80-kinds-speed/`](../../../docs/reports/data/2026-10-31-e80-kinds-speed/README.md)).*
+
+- **Etiquette, "It caps every device process at `timeout 10` and never signals one."** That is true of every launch
+  and query process. The sampler (`ettelem sample`, [`../hpl/run_hpl.py`](../hpl/run_hpl.py) `start_sampler`) runs
+  for the whole run outside `timeout 10`. `stop_sampler` stops it with SIGTERM and waits up to 30 s, as `lib.sh`
+  does, and uses SIGKILL and one management-queue drain only if it ignores that. `run_hpl.py`'s own header says so.
+  In E80 no sampler ignored SIGTERM: every `sampler_stop` mark reads rc 0.
+- **"Q130(c)'s own E80 rules, scored exactly as Q130(c) registered them on its frozen numbers."** They are scored on
+  its frozen numbers, but with two departures from what Q130(c) registered:
+  - R7 compares Q130(c)'s 4–12 s burst numbers with E80's 1.5–6.5 s window, since a 6 s run has none longer;
+  - R8 is scored on the frozen die line, though Q130(c)'s README (`2bbe03dd`, item 7) asks E80 to re-read the die line
+    first.
+
+  The data README's Departures say what each changes: neither verdict.
+- **"against 49–51 °C then"** (What each prediction rests on): no committed file holds that range. E64's committed
+  first gates read 50 °C, at 22.88 W (`smoke2/run.log`) and 22.58 W (`s1/run.log`). This session's read 45 and 47 °C.

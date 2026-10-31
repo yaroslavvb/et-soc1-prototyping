@@ -1,0 +1,157 @@
+
+======== C1. The sustained runs: what holds each one below 800 MHz (E64's per-sample labels, last 40 s)
+The registered reduction (reduce_hpl.run_metrics) keeps the sampler readings that fall inside a kernel launch;
+sus_mhz, sus_w and sus_die are means over those readings. Here: their count, the die over them, the governor's
+throttle-down lines over the whole run (the trace ring covers the run from `ring from`), and the labels.
+run                               MHz lim        800 therm  ramp other | n_in die>=65 die>=66 maxdie | thermal_down power_down first66_s ring from
+SUS-06-fp16-nn_like-r1          665.2 thermal  0.115 0.885 0.000 0.000 |  391  391  100%  228       66   |    10 first 72.58      0        22.3     72.4  (placement run, matched 23/23)
+SUS-10-int8-smallint-r1         795.4 none     0.974 0.000 0.026 0.000 |  390  165   42%    0       65   |     0 first     -      0        None      0.2  (placement run, matched 9/9)
+SUS-14-fp32-bf16trunc-r1        639.1 thermal  0.020 0.980 0.000 0.000 |  391  391  100%  282       66   |    10 first 68.33      0         9.8     19.8  (placement run, matched 24/24)
+SUS-02-fp16-randn-r1            609.5 thermal  0.010 0.990 0.000 0.000 |  391  391  100%  370       67   |    10 first  42.9      0        10.2     22.6  (placement run, matched 24/24)
+SUS-20-int8-full-rep2-r1        796.7 none     0.967 0.033 0.000 0.000 |  391  328   84%    8       66   |     6 first 66.44      0        66.5      0.7  (placement run, matched 18/18)
+SUS-11-int8-gauss_q-r1          794.4 none     0.969 0.000 0.031 0.000 |  391  228   58%    0       65   |     0 first     -      0        None      1.0  (placement run, matched 6/6)
+SUS-08-int8-neg_ones-r1         796.9 none     0.985 0.000 0.000 0.015 |  391    0    0%    0       60   |     0 first     -      0        None     -1.2  (placement session, matched 0/3)
+SUS-01-fp16-ones-r1             792.9 none     0.957 0.010 0.000 0.033 |  392  200   51%    2       66   |     2 first 74.45      0        74.5      0.9  (placement run, matched 10/10)
+SUS-07-int8-zeros-r1            800.0 none     1.000 0.000 0.000 0.000 |  392    0    0%    0       58   |     0 first     -      0        None      0.7  (placement run, matched 6/6)
+SUS-13-fp32-randn-r1            608.4 thermal  0.010 0.990 0.000 0.000 |  391  391  100%  370       67   |    10 first 39.65      0        19.5     38.8  (placement run, matched 23/23)
+SUS-18-fp16-ones-rep2-r1        770.3 thermal  0.703 0.297 0.000 0.000 |  391  391  100%   79       66   |    11 first 72.16      0        39.9     71.9  (placement run, matched 23/23)
+SUS-12-int8-sparse50-r1         789.3 none     0.941 0.000 0.059 0.000 |  391    0    0%    0       64   |     0 first     -      0        None      1.0  (placement run, matched 9/9)
+SUS-15-fp32-sparse90-r1         800.0 none     1.000 0.000 0.000 0.000 |  391    0    0%    0       58   |     0 first     -      0        None      0.3  (placement run, matched 9/9)
+SUS-05-fp16-fp8grid-r1          661.5 thermal  0.079 0.921 0.000 0.000 |  392  392  100%  235       66   |    10 first 72.35      0        22.8     32.6  (placement run, matched 24/24)
+SUS-17-fp32-nn_like-r1          700.0 thermal  0.267 0.733 0.000 0.000 |  390  390  100%  189       66   |    10 first 71.62      0        11.5     71.5  (placement run, matched 23/23)
+SUS-09-int8-full-r1             790.0 none     0.928 0.072 0.000 0.000 |  391  356   91%    7       66   |     7 first 61.57      0        61.6      1.0  (placement run, matched 20/20)
+SUS-16-fp32-smallint-r1         690.8 thermal  0.223 0.777 0.000 0.000 |  391  391  100%  213       66   |    10 first 72.74      0        11.6     72.4  (placement run, matched 23/23)
+SUS-04-fp16-smallint-r1         650.6 thermal  0.041 0.959 0.000 0.000 |  391  391  100%  218       66   |    10 first 73.07      0        11.0     72.9  (placement run, matched 23/23)
+SUS-19-fp32-randn-rep2-r1       600.3 thermal  0.000 1.000 0.000 0.000 |  391  391  100%  388       67   |    11 first 18.17      0        10.1     17.5  (placement session, matched 2/23)
+SUS-00-fp16-zeros-r1            789.8 none     0.944 0.000 0.056 0.000 |  391    0    0%    0       58   |     0 first     -      0        None      0.9  (placement run, matched 9/9)
+SUS-03-fp16-sparse50-r1         717.1 thermal  0.355 0.645 0.000 0.000 |  391  383   98%  188       66   |    10 first  72.4      0        29.2     61.6  (placement run, matched 24/24)
+int8 full: thermal-down lines [6, 7] = 13 over its two runs; die >= 65 C in [0.839, 0.91] of its in-kernel last-40-s readings, >= 66 C in [8, 7] readings; thermal-labelled share of the last 40 s [0.033, 0.072]; clocks [796.7, 790.0] MHz, rates [83.922, 83.163] TOPS. Its registered label is `none` because >= 90% of the last 40 s read 800 MHz (README Decision rules).
+the other five int8 kinds: thermal-down lines [0] power-down lines [0] ; hottest in-kernel die reading in the last 40 s {'int8/smallint': 65, 'int8/gauss_q': 65, 'int8/neg_ones': 60, 'int8/zeros': 58, 'int8/sparse50': 64}
+power label anywhere in a sustained last 40 s: False
+
+======== C1b. Why the unthrottled kinds read below 800 MHz sustained (the samples below 800, last 40 s, in-kernel)
+  SUS-10-int8-smallint-r1        int8/smallint    795.4 MHz: labels {'800': 0.974, 'thermal': 0.0, 'power': 0.0, 'ramp': 0.026, 'other': 0.0}
+  SUS-11-int8-gauss_q-r1         int8/gauss_q     794.4 MHz: labels {'800': 0.969, 'thermal': 0.0, 'power': 0.0, 'ramp': 0.031, 'other': 0.0}
+  SUS-08-int8-neg_ones-r1        int8/neg_ones    796.9 MHz: labels {'800': 0.985, 'thermal': 0.0, 'power': 0.0, 'ramp': 0.0, 'other': 0.015}
+  SUS-12-int8-sparse50-r1        int8/sparse50    789.3 MHz: labels {'800': 0.941, 'thermal': 0.0, 'power': 0.0, 'ramp': 0.059, 'other': 0.0}
+  SUS-00-fp16-zeros-r1           fp16/zeros       789.8 MHz: labels {'800': 0.944, 'thermal': 0.0, 'power': 0.0, 'ramp': 0.056, 'other': 0.0}
+  `ramp` = a reading below 800 within 1.5 s of a process start (reduce_hpl RAMP_S): each of the nine 8 s
+  processes climbs 600 -> 700 -> 800 as it starts. int8 neg_ones' `other` is the idle-reset dip at 74.78 s (C6).
+  burst BURST-08-int8-neg_ones-r1     755.1 MHz; readings below 800 in the 1.5 s-to-end window: 12 (4.23 s 600, 4.33 s 600, 4.43 s 600 ...); work ends 6.36 s
+  burst BURST-08-int8-neg_ones-r2     800.0 MHz; readings below 800 in the 1.5 s-to-end window: 0 (); work ends 6.47 s
+  burst BURST-10-int8-smallint-r1     800.0 MHz; readings below 800 in the 1.5 s-to-end window: 0 (); work ends 6.28 s
+  burst BURST-10-int8-smallint-r2     796.0 MHz; readings below 800 in the 1.5 s-to-end window: 1 (6.43 s 600); work ends 6.43 s
+
+======== C2. E80-S1: which way each out-of-sample switching term missed
+  fp16/sparse50   measured  14.717 W (passes [14.799, 14.635]) predicted  16.622 [9.986, 23.257] -> inside; below the point by -1.905 W; passes inside: [True, True]
+  fp16/smallint   measured  18.054 W (passes [18.093, 18.016]) predicted  21.140 [13.602, 28.679] -> inside; below the point by -3.086 W; passes inside: [True, True]
+  fp16/fp8grid    measured  19.049 W (passes [19.057, 19.041]) predicted  22.442 [14.146, 30.740] -> inside; below the point by -3.393 W; passes inside: [True, True]
+  fp16/nn_like    measured  18.587 W (passes [18.619, 18.554]) predicted  20.422 [12.470, 28.373] -> inside; below the point by -1.835 W; passes inside: [True, True]
+  int8/neg_ones   measured   3.545 W (passes [3.905, 3.186]) predicted   2.684 [2.123, 5.036] -> inside; above the point by +0.861 W; passes inside: [True, True]
+  int8/smallint   measured   7.985 W (passes [8.032, 7.938]) predicted   9.122 [4.034, 14.210] -> inside; below the point by -1.137 W; passes inside: [True, True]
+  int8/gauss_q    measured   7.787 W (passes [8.482, 7.091]) predicted   9.097 [4.022, 14.173] -> inside; below the point by -1.310 W; passes inside: [True, True]
+  int8/sparse50   measured   7.358 W (passes [7.437, 7.279]) predicted   8.075 [3.682, 12.469] -> inside; below the point by -0.717 W; passes inside: [True, True]
+  fp32/bf16trunc  measured  19.109 W (passes [19.114, 19.104]) predicted  24.274 [20.699, 27.848] -> BELOW; below the point by -5.165 W; passes inside: [False, False]
+  fp32/sparse90   measured   2.230 W (passes [2.265, 2.195]) predicted   1.888 [1.575, 2.201] -> ABOVE; above the point by +0.342 W; passes inside: [False, True]
+  fp32/smallint   measured  15.177 W (passes [15.169, 15.185]) predicted  18.517 [16.074, 20.958] -> BELOW; below the point by -3.340 W; passes inside: [False, False]
+  fp32/nn_like    measured  14.044 W (passes [14.075, 14.013]) predicted  17.152 [14.241, 20.062] -> BELOW; below the point by -3.108 W; passes inside: [False, False]
+
+======== C3. E80-R1 (PASS as registered): what the 21.7 MHz rests on
+  all 18: rms 21.74 MHz. Predicted 800 and measured 800 (residual 0 by the cap): 8 -> ['fp16/zeros', 'fp16/ones', 'fp16/sparse50', 'int8/zeros', 'int8/full', 'int8/gauss_q', 'int8/sparse50', 'fp32/sparse90']
+  the other 10: rms 29.17 MHz; residuals (measured - predicted) fp32/bf16trunc +59.7, fp16/fp8grid +39.9, fp32/nn_like -34.4, fp16/smallint +30.3, int8/neg_ones -22.5, fp32/smallint +19.0, fp16/nn_like +18.1, fp32/randn +7.1, fp16/randn +2.0, int8/smallint -2.0
+  the same 10 with posthoc-idle.json's idle-reset and late-ramp samples set aside (post hoc): rms 26.16 MHz; residuals fp16/randn +2.0, fp16/smallint +30.3, fp16/fp8grid +39.9, fp16/nn_like +18.1, int8/neg_ones +0.0, int8/smallint -2.0, fp32/randn +7.1, fp32/bf16trunc +59.7, fp32/smallint +19.0, fp32/nn_like +4.8; the most negative is -2.0 MHz
+  all 18 that way: 19.50 MHz (posthoc-idle.json views.R1_rms_without_mhz 19.5)
+
+======== C4. Board energy per operation at the sustained point: which samples the numerator and denominator cover
+  published (tables.md): sus_w / sus_rate. sus_w is the mean board W over the in-kernel readings (C1's n_in of
+  the ~400 readings in the last 40 s) and sus_rate is the kernel's operations over its own wall time: both cover
+  the kernel only. Whole window: the mean over ALL readings in the last 40 s over the wall-clock rate (gaps
+  between the nine processes included). Mixed: in-kernel W over the wall-clock rate (it counts the gaps' time but
+  charges them the in-kernel power).
+  kind            in-kernel   whole   mixed whole/in | gap share (time) readings in/all   W in  W all W gaps
+  fp16/zeros          1.450   1.490   1.491    +2.7% |             2.7%     391 of 399      35.14  35.11  33.42
+  fp16/ones           2.233   2.293   2.304    +2.7% |             3.1% 392/391 of 400/400  53.21  52.96  41.17
+  fp16/randn          2.802   2.865   2.889    +2.3% |             3.0%     391 of 400      52.34  51.91  33.19
+  fp16/sparse50       2.540   2.612   2.617    +2.8% |             2.9%     391 of 400      54.93  54.83  50.59
+  fp16/smallint       2.631   2.701   2.717    +2.6% |             3.2%     391 of 399      51.86  51.54  36.09
+  fp16/fp8grid        2.715   2.806   2.821    +3.4% |             3.8%     392 of 400      54.24  53.96  40.00
+  fp16/nn_like        2.720   2.787   2.803    +2.5% |             3.0%     391 of 400      54.72  54.41  41.13
+  int8/zeros          0.439   0.451   0.452    +2.7% |             2.8%     392 of 400      37.05  36.98  33.82
+  int8/neg_ones       0.488   0.502   0.504    +2.9% |             3.0%     391 of 400      41.02  40.94  37.10
+  int8/full           0.636   0.653   0.656    +2.5% |             2.9% 391/391 of 399/400  53.17  52.93  41.74
+  int8/smallint       0.609   0.627   0.629    +3.0% |             3.2%     390 of 400      51.02  50.87  44.99
+  int8/gauss_q        0.622   0.642   0.644    +3.3% |             3.4%     391 of 400      52.06  51.94  46.91
+  int8/sparse50       0.590   0.605   0.606    +2.5% |             2.7%     391 of 399      49.02  48.89  42.36
+  fp32/randn          5.847   5.967   6.010    +2.1% |             2.7% 391/391 of 399/400  54.19  53.80  35.98
+  fp32/bf16trunc      5.327   5.504   5.515    +3.3% |             3.4%     391 of 399      51.68  51.57  46.15
+  fp32/sparse90       2.999   3.079   3.084    +2.7% |             2.8%     391 of 400      36.82  36.76  34.05
+  fp32/smallint       5.026   5.167   5.169    +2.8% |             2.8%     391 of 399      52.48  52.46  51.39
+  fp32/nn_like        4.974   5.091   5.109    +2.3% |             2.6%     390 of 400      52.51  52.32  45.04
+  whole-window over in-kernel: +2.1% to +3.4%; the mixed figure over the whole-window one: +0.0% to +0.8%
+
+======== C5. The idle die at each session's first gate, and the loaded die line (results.json posthoc.die_line_e80)
+  E80 smoke (31 Oct)   first gate 12:21:31: die 45.0 C (hottest sensor 53.0), board 21.75 W, 600.0 MHz  [smoke/run.log]
+  E80 s1 (31 Oct)      first gate 12:22:14: die 47.0 C (hottest sensor 55.0), board 22.06 W, 600.0 MHz  [s1/run.log]
+  E64 smoke2 (23 Oct)  first gate 20:31:57: die 50.0 C (hottest sensor 52.0), board 22.88 W, 600.0 MHz  [../2026-10-23-e64-horace-power-limit/smoke2/run.log]
+  E64 s1 (23 Oct)      first gate 20:37:02: die 50.0 C (hottest sensor 59.0), board 22.58 W, 600.0 MHz  [../2026-10-23-e64-horace-power-limit/s1/run.log]
+  loaded: E80 line 42.233 + 0.4349 C/W over 21 runs (rms 0.557 C), 65.5 C at 53.5 W against E64's 50.3 W (+3.2 W); at E64's slope -1.382 C
+  no ambient, inlet or fan reading exists in E80's or E64's committed sessions: the cause of the shift is not measured
+
+======== C6. The idle reset inside a launch (posthoc-idle.json), checked against the trace ring and the kernel's counters
+  BURST-17-fp32-nn_like-r1     dip at   5.23 s, 12 readings, die 58 C, board 60.23 W before; back at 800 6.43 (work ends 6.59 s); kernel GHz in the launch at the dip [0.603, 0.599]; state-0 (POWER_IDLE) record within -0.5..+0.3 s: [5.18]; throttle lines near it: none; ring covers from 2.21 s (placement run, matched 6/6)
+  BURST-08-int8-neg_ones-r1    dip at   4.23 s, 12 readings, die 56 C, board 39.77 W before; back at 800 5.43 (work ends 6.36 s); kernel GHz in the launch at the dip [0.601, 0.599]; state-0 (POWER_IDLE) record within -0.5..+0.3 s: [4.2]; throttle lines near it: none; ring covers from 0.11 s (placement run, matched 6/6)
+  SUS-08-int8-neg_ones-r1      dip at  74.78 s,  7 readings, die 59 C, board 41.27 W before; back at 800 not before the work ended (work ends 75.43 s); kernel GHz in the launch at the dip [0.601]; state-0 (POWER_IDLE) record within -0.5..+0.3 s: none; throttle lines near it: none; ring covers from -1.2 s (placement session, matched 0/3)
+  SUS-01-fp16-ones-r1          dip at  39.96 s, 13 readings, die 63 C, board 54.68 W before; back at 800 41.26 (work ends 76.63 s); kernel GHz in the launch at the dip [0.601, 0.617]; state-0 (POWER_IDLE) record within -0.5..+0.3 s: [39.92]; throttle lines near it: none; ring covers from 0.9 s (placement run, matched 10/10)
+  SUS-03-fp16-sparse50-r1      dip at  23.07 s, 13 readings, die 64 C, board 64.85 W before; back at 800 24.38 (work ends 76.44 s); kernel GHz in the launch at the dip [0.601, 0.6]; state-0 (POWER_IDLE) record within -0.5..+0.3 s: none; throttle lines near it: none; ring covers from 61.56 s (placement run, matched 24/24)
+  SUS-08's ring (placed by the session's clock fit, matched 0): [(-1.15, 700, 1), (-0.93, 800, 1), (72.89, 600, 0)]. Its start ramp reads 700 / 800 MHz in the sampler at 0.82 / 1.02 s, so that placement runs 1.96 s early; shifted by it the state-0 record sits at 74.85 s, against the dip's first 600 MHz reading at 74.78 s
+  BURST-08-int8-neg_ones-r1: the dip samples cost the 1.5 s-to-end mean 44.9 MHz  BURST-08-int8-neg_ones-r1: the late samples cost the 1.5 s-to-end mean 0.0 MHz; registered 755.1, both set aside 800
+  BURST-17-fp32-nn_like-r1: the dip samples cost the 1.5 s-to-end mean 43.1 MHz  BURST-17-fp32-nn_like-r1: the late samples cost the 1.5 s-to-end mean 35.3 MHz; registered 721.6, both set aside 800
+  late ramps: 14 (first 800 MHz reading more than 1.2 s after a process start, on a die under 65 C and a board under 65 W):
+    BURST-17-fp32-nn_like-r1       process at   0.00 s: first 800 at   2.53 s (+2.53 s), 13 reading(s) flagged
+    BURST-14-fp32-bf16trunc-r1     process at   0.00 s: first 800 at   1.43 s (+1.43 s), 2 reading(s) flagged
+    BURST-15-fp32-sparse90-r2      process at   0.00 s: first 800 at   1.43 s (+1.43 s), 2 reading(s) flagged
+    SUS-14-fp32-bf16trunc-r1       process at   0.00 s: first 800 at   1.43 s (+1.43 s), 2 reading(s) flagged
+    SUS-03-fp16-sparse50-r1        process at   0.00 s: first 800 at   1.43 s (+1.43 s), 2 reading(s) flagged
+    BURST-10-int8-smallint-r1      process at   0.00 s: first 800 at   1.33 s (+1.33 s), 1 reading(s) flagged
+    BURST-11-int8-gauss_q-r1       process at   0.00 s: first 800 at   1.33 s (+1.33 s), 1 reading(s) flagged
+    BURST-13-fp32-randn-r1         process at   0.00 s: first 800 at   1.33 s (+1.33 s), 1 reading(s) flagged
+    SUS-18-fp16-ones-rep2-r1       process at   0.00 s: first 800 at   1.33 s (+1.33 s), 1 reading(s) flagged
+    SUS-12-int8-sparse50-r1        process at   0.00 s: first 800 at   1.33 s (+1.33 s), 1 reading(s) flagged
+    SUS-00-fp16-zeros-r1           process at  50.93 s: first 800 at  52.26 s (+1.33 s), 1 reading(s) flagged
+    BURST-05-fp16-fp8grid-r1       process at   0.00 s: first 800 at   1.32 s (+1.32 s), 1 reading(s) flagged
+    BURST-00-fp16-zeros-r2         process at   0.00 s: first 800 at   1.32 s (+1.32 s), 1 reading(s) flagged
+    SUS-18-fp16-ones-rep2-r1       process at  17.03 s: first 800 at  18.34 s (+1.31 s), 1 reading(s) flagged
+  exposure: 7075 of 18304 work readings (39%) are at 800 MHz on a die under 65 C inside the detector's span, about 708 s of 1830 s at 10 Hz; 5 dips in 225 processes. E63 (14-card-behaviour.md): 8 in 360 launches of 8.5 s at 800 MHz, die 54-57 C, dips 1.4-8.4 s into a launch.
+
+======== C7. Q130(c)'s R7 and R8 against what Q130(c) registered (post hoc views, labelled; the verdicts stand)
+  R7's 25 MHz clause on Q130(c)'s 4-12 s numbers (as scored): 13 of 18; on the same model's 1.5-6.5 s numbers (E80's registered burst prediction, the window E80 measures): 14 of 18
+  Q130(c)'s burst 4-12 s minus its 1.5-6.5 s prediction: fp16/randn -13.6, fp16/sparse50 -6.0, fp16/smallint -13.4, fp16/fp8grid -18.3, fp16/nn_like -9.9, fp32/randn -4.8, fp32/bf16trunc -8.3, fp32/smallint -11.0, fp32/nn_like -10.2
+  criterion check (thermal when the simulated die mean is >= 65.5 C, else power), frozen line: 18 of 18 cells match Q130(c)'s frozen sustained_limit
+  R8 with the die line re-read IN SAMPLE (E80's own line, fitted on these 21 runs; Q130(c)'s frozen c): limit right 14 of 18, clock within 40 MHz 18 of 18 -> would read FAIL; as scored (frozen line): limit 13, clock 13, FAIL
+    fp16/zeros 800.0/power; fp16/ones 779.3/thermal (limit wrong); fp16/randn 622.2/thermal; fp16/sparse50 682.6/thermal; fp16/smallint 640.1/thermal; fp16/fp8grid 629.3/thermal; fp16/nn_like 647.3/thermal; int8/zeros 800.0/power; int8/neg_ones 800.0/power; int8/full 791.6/thermal (limit wrong); int8/smallint 791.0/thermal (limit wrong); int8/gauss_q 791.6/thermal (limit wrong); int8/sparse50 800.0/power; fp32/randn 607.5/thermal; fp32/bf16trunc 614.4/thermal; fp32/sparse90 800.0/power; fp32/smallint 663.5/thermal; fp32/nn_like 676.6/thermal
+
+======== C8. The burst passes: pass order against the die each pass started from
+  start die, pass 1: 47-56 C; pass 2: 54-56 C
+  fp16/randn      pass 1  746.9 MHz from 48 C, pass 2  714.3 MHz from 56 C: -32.6 MHz; p800 [74.45, 77.83] W
+  fp16/smallint   pass 1  787.8 MHz from 52 C, pass 2  777.6 MHz from 55 C: -10.2 MHz; p800 [66.18, 67.62] W
+  fp16/fp8grid    pass 1  776.5 MHz from 55 C, pass 2  770.0 MHz from 56 C: -6.5 MHz; p800 [69.46, 70.07] W
+  fp16/nn_like    pass 1  784.0 MHz from 52 C, pass 2  776.0 MHz from 54 C: -8.0 MHz; p800 [67.64, 68.4] W
+  fp32/randn      pass 1  715.7 MHz from 55 C, pass 2  708.0 MHz from 55 C: -7.7 MHz; p800 [82.9, 82.56] W
+  fp32/bf16trunc  pass 1  776.5 MHz from 54 C, pass 2  771.4 MHz from 54 C: -5.1 MHz; p800 [69.47, 69.59] W
+  power-limited kinds lower in pass 2: 6 of 6
+
+======== C9. The sampler: how each one was stopped (marks.jsonl)
+  smoke  sampler_stop marks 3, by rc {'0': 3}; marks naming SIGKILL / ignored SIGTERM: 0
+  s1     sampler_stop marks 57, by rc {'0': 57}; marks naming SIGKILL / ignored SIGTERM: 0
+
+======== C10. E80-S2's population (34 of 36 bursts) and its post-hoc view
+  left out: BURST-10-int8-smallint-r1 (p_raw_w {'600': 30.94, '700': None, '800': 45.86}; 1 reading at 700 MHz, so no pair of consecutive 700 MHz readings for surface_hpl.powers and no 700 MHz power for the simulation, which needs all three)
+  left out: BURST-12-int8-sparse50-r2 (p_raw_w {'600': 32.23, '700': None, '800': 47.38}; 1 reading at 700 MHz, so no pair of consecutive 700 MHz readings for surface_hpl.powers and no 700 MHz power for the simulation, which needs all three)
+  post hoc S2 (dip and late-ramp samples set aside, posthoc-idle.json): rms 2.65 over 34; 21 of them read 800 in both the simulation and the measurement; over the other 13: rms 4.29 MHz
+
+======== C11. bf16-truncated fp32 against random fp32: the two bases of the saving
+  measured c: bf16trunc 19.109, randn 25.55; E64 fp32 zeros c 1.442 (figures.json fit.c SUS-00-fp32-zeros-1024-r1)
+  saving over the zeros level: 26.7%; of the whole switching term: 25.2%
+  frozen: bf16trunc 24.274, randn 25.207: over zeros 3.9%, whole term 3.7%
+
+done

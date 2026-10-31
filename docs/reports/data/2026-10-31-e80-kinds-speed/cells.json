@@ -5,7 +5,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/zeros'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "800.0",
-  "interval": "two passes: 800.0/800.0",
+  "interval": "pass 1 800.0 from a 54 C die; pass 2 800.0 from a 55 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (zeros.bin); cool die, launched at a reading <= 55 C (54, 55)"
  },
@@ -45,7 +45,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/zeros'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "789.8",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: 800 except the climb at each process start, 5.6%",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (zeros.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -66,7 +66,17 @@
   "quantity": "board_W",
   "value": "35.1",
   "interval": "runs: 35.14",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (zeros.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp16",
+  "kind": "zeros",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/zeros'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "1.450",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (zeros.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -85,7 +95,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/zeros'].sus_limit_runs",
   "quantity": "limit",
   "value": "none",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.944, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.056, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): none; E64 R4 labels over the last 40 s: [{\"800\": 0.944, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.056, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (zeros.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -95,7 +105,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/ones'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "800.0",
-  "interval": "two passes: 800.0/800.0",
+  "interval": "pass 1 800.0 from a 53 C die; pass 2 800.0 from a 55 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (ones.bin); cool die, launched at a reading <= 55 C (53, 55)"
  },
@@ -135,7 +145,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/ones'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "781.6",
-  "interval": "2 runs: 792.9/770.3",
+  "interval": "2 runs: 792.9/770.3; below 800 MHz: 800 except 2 thermal steps, 1.0% thermal-labelled; an idle reset or other, 3.3% / held by the thermal test (30% of the last 40 s thermal-labelled)",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (ones.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -156,7 +166,17 @@
   "quantity": "board_W",
   "value": "53.2",
   "interval": "runs: 54.12/52.30",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (ones.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp16",
+  "kind": "ones",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/ones'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "2.233",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (ones.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -175,7 +195,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/ones'].sus_limit_runs",
   "quantity": "limit",
   "value": "none/thermal",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.957, \"thermal\": 0.01, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.033}, {\"800\": 0.703, \"thermal\": 0.297, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): none (2 thermal steps) / thermal; E64 R4 labels over the last 40 s: [{\"800\": 0.957, \"thermal\": 0.01, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.033}, {\"800\": 0.703, \"thermal\": 0.297, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (ones.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -185,7 +205,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/randn'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "730.6",
-  "interval": "two passes: 746.9/714.3",
+  "interval": "pass 1 746.9 from a 48 C die; pass 2 714.3 from a 56 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (randn.bin); cool die, launched at a reading <= 55 C (48, 56)"
  },
@@ -225,7 +245,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/randn'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "609.5",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: held by the thermal test (99% of the last 40 s thermal-labelled)",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (randn.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -246,7 +266,17 @@
   "quantity": "board_W",
   "value": "52.3",
   "interval": "runs: 52.34",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (randn.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp16",
+  "kind": "randn",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/randn'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "2.802",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (randn.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -265,7 +295,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/randn'].sus_limit_runs",
   "quantity": "limit",
   "value": "thermal",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.01, \"thermal\": 0.99, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): thermal; E64 R4 labels over the last 40 s: [{\"800\": 0.01, \"thermal\": 0.99, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (randn.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -275,7 +305,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/sparse50'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "800.0",
-  "interval": "two passes: 800.0/800.0",
+  "interval": "pass 1 800.0 from a 50 C die; pass 2 800.0 from a 56 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse50.bin); cool die, launched at a reading <= 55 C (50, 56)"
  },
@@ -315,7 +345,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/sparse50'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "717.1",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: held by the thermal test (64% of the last 40 s thermal-labelled)",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse50.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -336,7 +366,17 @@
   "quantity": "board_W",
   "value": "54.9",
   "interval": "runs: 54.93",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse50.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp16",
+  "kind": "sparse50",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/sparse50'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "2.540",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse50.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -355,7 +395,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/sparse50'].sus_limit_runs",
   "quantity": "limit",
   "value": "thermal",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.355, \"thermal\": 0.645, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): thermal; E64 R4 labels over the last 40 s: [{\"800\": 0.355, \"thermal\": 0.645, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse50.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -365,7 +405,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/smallint'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "782.7",
-  "interval": "two passes: 787.8/777.6",
+  "interval": "pass 1 787.8 from a 52 C die; pass 2 777.6 from a 55 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); cool die, launched at a reading <= 55 C (52, 55)"
  },
@@ -405,7 +445,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/smallint'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "650.6",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: held by the thermal test (96% of the last 40 s thermal-labelled)",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -426,7 +466,17 @@
   "quantity": "board_W",
   "value": "51.9",
   "interval": "runs: 51.86",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp16",
+  "kind": "smallint",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/smallint'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "2.631",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -445,7 +495,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/smallint'].sus_limit_runs",
   "quantity": "limit",
   "value": "thermal",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.041, \"thermal\": 0.959, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): thermal; E64 R4 labels over the last 40 s: [{\"800\": 0.041, \"thermal\": 0.959, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -455,7 +505,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/fp8grid'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "773.2",
-  "interval": "two passes: 776.5/770.0",
+  "interval": "pass 1 776.5 from a 55 C die; pass 2 770.0 from a 56 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (fp8grid.bin); cool die, launched at a reading <= 55 C (55, 56)"
  },
@@ -495,7 +545,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/fp8grid'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "661.5",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: held by the thermal test (92% of the last 40 s thermal-labelled)",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (fp8grid.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -516,7 +566,17 @@
   "quantity": "board_W",
   "value": "54.2",
   "interval": "runs: 54.24",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (fp8grid.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp16",
+  "kind": "fp8grid",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/fp8grid'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "2.715",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (fp8grid.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -535,7 +595,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/fp8grid'].sus_limit_runs",
   "quantity": "limit",
   "value": "thermal",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.079, \"thermal\": 0.921, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): thermal; E64 R4 labels over the last 40 s: [{\"800\": 0.079, \"thermal\": 0.921, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (fp8grid.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -545,7 +605,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/nn_like'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "780.0",
-  "interval": "two passes: 784.0/776.0",
+  "interval": "pass 1 784.0 from a 52 C die; pass 2 776.0 from a 54 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (nn_like.bin); cool die, launched at a reading <= 55 C (52, 54)"
  },
@@ -585,7 +645,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/nn_like'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "665.2",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: held by the thermal test (88% of the last 40 s thermal-labelled)",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (nn_like.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -606,7 +666,17 @@
   "quantity": "board_W",
   "value": "54.7",
   "interval": "runs: 54.72",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (nn_like.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp16",
+  "kind": "nn_like",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/nn_like'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "2.720",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (nn_like.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -625,7 +695,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp16/nn_like'].sus_limit_runs",
   "quantity": "limit",
   "value": "thermal",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.115, \"thermal\": 0.885, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): thermal; E64 R4 labels over the last 40 s: [{\"800\": 0.115, \"thermal\": 0.885, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (nn_like.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -635,7 +705,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/zeros'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "800.0",
-  "interval": "two passes: 800.0/800.0",
+  "interval": "pass 1 800.0 from a 47 C die; pass 2 800.0 from a 55 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (zeros.bin); cool die, launched at a reading <= 55 C (47, 55)"
  },
@@ -675,7 +745,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/zeros'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "800.0",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: at 800 throughout",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (zeros.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -696,7 +766,17 @@
   "quantity": "board_W",
   "value": "37.0",
   "interval": "runs: 37.05",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (zeros.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "int8",
+  "kind": "zeros",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/zeros'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "0.439",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per op, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (zeros.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -715,7 +795,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/zeros'].sus_limit_runs",
   "quantity": "limit",
   "value": "none",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 1.0, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): none; E64 R4 labels over the last 40 s: [{\"800\": 1.0, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (zeros.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -725,7 +805,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/neg_ones'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "777.5",
-  "interval": "two passes: 755.1/800.0",
+  "interval": "pass 1 755.1 from a 55 C die; pass 2 800.0 from a 55 C die; pass 1 holds an idle reset at 4.23 s (posthoc-idle.json); the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (neg_ones.bin); cool die, launched at a reading <= 55 C (55, 55)"
  },
@@ -765,7 +845,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/neg_ones'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "796.9",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: 800 except an idle reset or other, 1.5%",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (neg_ones.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -786,7 +866,17 @@
   "quantity": "board_W",
   "value": "41.0",
   "interval": "runs: 41.02",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (neg_ones.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "int8",
+  "kind": "neg_ones",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/neg_ones'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "0.488",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per op, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (neg_ones.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -805,7 +895,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/neg_ones'].sus_limit_runs",
   "quantity": "limit",
   "value": "none",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.985, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.015}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): none; E64 R4 labels over the last 40 s: [{\"800\": 0.985, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.015}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (neg_ones.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -815,7 +905,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/full'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "800.0",
-  "interval": "two passes: 800.0/800.0",
+  "interval": "pass 1 800.0 from a 51 C die; pass 2 800.0 from a 56 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (full.bin); cool die, launched at a reading <= 55 C (51, 56)"
  },
@@ -855,7 +945,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/full'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "793.4",
-  "interval": "2 runs: 796.7/790.0",
+  "interval": "2 runs: 796.7/790.0; below 800 MHz: 800 except 6 thermal steps, 3.3% thermal-labelled / 800 except 7 thermal steps, 7.2% thermal-labelled",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (full.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -876,7 +966,17 @@
   "quantity": "board_W",
   "value": "53.2",
   "interval": "runs: 53.45/52.89",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (full.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "int8",
+  "kind": "full",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/full'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "0.636",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per op, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (full.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -895,7 +995,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/full'].sus_limit_runs",
   "quantity": "limit",
   "value": "none",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.967, \"thermal\": 0.033, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}, {\"800\": 0.928, \"thermal\": 0.072, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): none (6 thermal steps) / none (7 thermal steps); E64 R4 labels over the last 40 s: [{\"800\": 0.967, \"thermal\": 0.033, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}, {\"800\": 0.928, \"thermal\": 0.072, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (full.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -905,7 +1005,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/smallint'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "798.0",
-  "interval": "two passes: 800.0/796.0",
+  "interval": "pass 1 800.0 from a 50 C die; pass 2 796.0 from a 54 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); cool die, launched at a reading <= 55 C (50, 54)"
  },
@@ -945,7 +1045,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/smallint'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "795.4",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: 800 except the climb at each process start, 2.6%",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -966,7 +1066,17 @@
   "quantity": "board_W",
   "value": "51.0",
   "interval": "runs: 51.02",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "int8",
+  "kind": "smallint",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/smallint'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "0.609",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per op, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -985,7 +1095,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/smallint'].sus_limit_runs",
   "quantity": "limit",
   "value": "none",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.974, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.026, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): none; E64 R4 labels over the last 40 s: [{\"800\": 0.974, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.026, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -995,7 +1105,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/gauss_q'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "800.0",
-  "interval": "two passes: 800.0/800.0",
+  "interval": "pass 1 800.0 from a 53 C die; pass 2 800.0 from a 54 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (gauss_q.bin); cool die, launched at a reading <= 55 C (53, 54)"
  },
@@ -1035,7 +1145,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/gauss_q'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "794.4",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: 800 except the climb at each process start, 3.1%",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (gauss_q.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1056,7 +1166,17 @@
   "quantity": "board_W",
   "value": "52.1",
   "interval": "runs: 52.06",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (gauss_q.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "int8",
+  "kind": "gauss_q",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/gauss_q'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "0.622",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per op, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (gauss_q.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -1075,7 +1195,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/gauss_q'].sus_limit_runs",
   "quantity": "limit",
   "value": "none",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.969, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.031, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): none; E64 R4 labels over the last 40 s: [{\"800\": 0.969, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.031, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (gauss_q.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1085,7 +1205,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/sparse50'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "800.0",
-  "interval": "two passes: 800.0/800.0",
+  "interval": "pass 1 800.0 from a 56 C die; pass 2 800.0 from a 56 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse50.bin); cool die, launched at a reading <= 55 C (56, 56)"
  },
@@ -1125,7 +1245,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/sparse50'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "789.3",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: 800 except the climb at each process start, 5.9%",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse50.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1146,7 +1266,17 @@
   "quantity": "board_W",
   "value": "49.0",
   "interval": "runs: 49.02",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse50.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "int8",
+  "kind": "sparse50",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/sparse50'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "0.590",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per op, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse50.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -1165,7 +1295,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['int8/sparse50'].sus_limit_runs",
   "quantity": "limit",
   "value": "none",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.941, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.059, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): none; E64 R4 labels over the last 40 s: [{\"800\": 0.941, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.059, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse50.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1175,7 +1305,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/randn'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "711.9",
-  "interval": "two passes: 715.7/708.0",
+  "interval": "pass 1 715.7 from a 55 C die; pass 2 708.0 from a 55 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (randn.bin); cool die, launched at a reading <= 55 C (55, 55)"
  },
@@ -1215,7 +1345,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/randn'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "604.3",
-  "interval": "2 runs: 608.4/600.3",
+  "interval": "2 runs: 608.4/600.3; below 800 MHz: held by the thermal test (99% of the last 40 s thermal-labelled) / held by the thermal test (100% of the last 40 s thermal-labelled)",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (randn.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1236,7 +1366,17 @@
   "quantity": "board_W",
   "value": "54.2",
   "interval": "runs: 54.71/53.67",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (randn.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp32",
+  "kind": "randn",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/randn'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "5.847",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (randn.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -1255,7 +1395,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/randn'].sus_limit_runs",
   "quantity": "limit",
   "value": "thermal",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.01, \"thermal\": 0.99, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}, {\"800\": 0.0, \"thermal\": 1.0, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): thermal; E64 R4 labels over the last 40 s: [{\"800\": 0.01, \"thermal\": 0.99, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}, {\"800\": 0.0, \"thermal\": 1.0, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (randn.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1265,7 +1405,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/bf16trunc'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "774.0",
-  "interval": "two passes: 776.5/771.4",
+  "interval": "pass 1 776.5 from a 54 C die; pass 2 771.4 from a 54 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (bf16trunc.bin); cool die, launched at a reading <= 55 C (54, 54)"
  },
@@ -1305,7 +1445,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/bf16trunc'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "639.1",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: held by the thermal test (98% of the last 40 s thermal-labelled)",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (bf16trunc.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1326,7 +1466,17 @@
   "quantity": "board_W",
   "value": "51.7",
   "interval": "runs: 51.68",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (bf16trunc.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp32",
+  "kind": "bf16trunc",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/bf16trunc'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "5.327",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (bf16trunc.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -1345,7 +1495,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/bf16trunc'].sus_limit_runs",
   "quantity": "limit",
   "value": "thermal",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.02, \"thermal\": 0.98, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): thermal; E64 R4 labels over the last 40 s: [{\"800\": 0.02, \"thermal\": 0.98, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (bf16trunc.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1355,7 +1505,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/sparse90'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "800.0",
-  "interval": "two passes: 800.0/800.0",
+  "interval": "pass 1 800.0 from a 52 C die; pass 2 800.0 from a 55 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse90.bin); cool die, launched at a reading <= 55 C (52, 55)"
  },
@@ -1395,7 +1545,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/sparse90'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "800.0",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: at 800 throughout",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse90.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1416,7 +1566,17 @@
   "quantity": "board_W",
   "value": "36.8",
   "interval": "runs: 36.82",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse90.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp32",
+  "kind": "sparse90",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/sparse90'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "2.999",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse90.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -1435,7 +1595,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/sparse90'].sus_limit_runs",
   "quantity": "limit",
   "value": "none",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 1.0, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): none; E64 R4 labels over the last 40 s: [{\"800\": 1.0, \"thermal\": 0.0, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (sparse90.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1445,7 +1605,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/smallint'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "800.0",
-  "interval": "two passes: 800.0/800.0",
+  "interval": "pass 1 800.0 from a 53 C die; pass 2 800.0 from a 55 C die; the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); cool die, launched at a reading <= 55 C (53, 55)"
  },
@@ -1485,7 +1645,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/smallint'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "690.8",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: held by the thermal test (78% of the last 40 s thermal-labelled)",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1506,7 +1666,17 @@
   "quantity": "board_W",
   "value": "52.5",
   "interval": "runs: 52.48",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp32",
+  "kind": "smallint",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/smallint'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "5.026",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -1525,7 +1695,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/smallint'].sus_limit_runs",
   "quantity": "limit",
   "value": "thermal",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.223, \"thermal\": 0.777, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): thermal; E64 R4 labels over the last 40 s: [{\"800\": 0.223, \"thermal\": 0.777, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (smallint.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1535,7 +1705,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/nn_like'].burst_mhz",
   "quantity": "burst_MHz",
   "value": "760.8",
-  "interval": "two passes: 721.6/800.0",
+  "interval": "pass 1 721.6 from a 54 C die; pass 2 800.0 from a 55 C die; pass 1 first reads 800 MHz only at 2.53 s (posthoc-idle.json); pass 1 holds an idle reset at 5.23 s (posthoc-idle.json); the passes share one warming block (pass 2 follows pass 1), so their spread is not replicate noise",
   "unit": "MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (nn_like.bin); cool die, launched at a reading <= 55 C (54, 55)"
  },
@@ -1575,7 +1745,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/nn_like'].sus_mhz",
   "quantity": "sustained_MHz",
   "value": "700.0",
-  "interval": "one run (single pass; E64's SUS reproducibility applies)",
+  "interval": "one run (single pass; E64's SUS reproducibility applies); below 800 MHz: held by the thermal test (73% of the last 40 s thermal-labelled)",
   "unit": "MHz, mean sampled clock over the last 40 s",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (nn_like.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
@@ -1596,7 +1766,17 @@
   "quantity": "board_W",
   "value": "52.5",
   "interval": "runs: 52.51",
-  "unit": "W, whole board, mean over the last 40 s",
+  "unit": "W, whole board, mean over the in-kernel readings of the last 40 s",
+  "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (nn_like.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
+ },
+ {
+  "format": "fp32",
+  "kind": "nn_like",
+  "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/nn_like'].sus_w / .sus_rate",
+  "quantity": "pJ_per_op",
+  "value": "4.974",
+  "interval": "derived: in-kernel board W over the kernel's own rate (both over the kernel only); counting the gaps between the nine processes adds 2.1-3.4% (corrections-check.txt C4)",
+  "unit": "pJ per FLOP, whole board, while the kernel runs",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (nn_like.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  },
  {
@@ -1615,7 +1795,7 @@
   "source": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json cells['fp32/nn_like'].sus_limit_runs",
   "quantity": "limit",
   "value": "thermal",
-  "interval": "E64 R4 labels over the last 40 s: [{\"800\": 0.267, \"thermal\": 0.733, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
+  "interval": "registered label per run (none = >= 90% of the last 40 s at 800 MHz): thermal; E64 R4 labels over the last 40 s: [{\"800\": 0.267, \"thermal\": 0.733, \"power\": 0.0, \"ramp\": 0.0, \"other\": 0.0}]",
   "unit": "the test that holds the sustained clock (none / thermal / power)",
   "conditions": "aifoundry2 card 0 under its own governor (65 W static TDP, 65 C threshold, read back 65/65 after every run, never set); E64's kernel, 1,024 minions; Q130(s) rev 2 tile (nn_like.bin); sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s"
  }
