@@ -172,11 +172,14 @@ card resets, services), which is the lab admin's; any change to an existing page
 the owner's rule of 29 September; §8); and
 claiming a machine on the AI Foundry Discord (#community-lab: "using aifoundryN", then "released"), the lab's own norm
 (getting-started.md §2). **The owner's agents post once per card, `<ai>` plus one short line naming the box,** with
-at most one small link to the public spacesheep page that describes the run:
-`<ai> using aifoundry3 [doc](<https://spacesheep.dev/@yaroslavvb/…>)` when they reserve it, and they edit that same post
-to append ` — released` when they release it, keeping its words (the lab dashboard's reservation reader closes a claim
-at the edit that adds "released" to it). No plan, numbers or progress in the channel, and no second post: the page
-holds it (the owner's rules of 28 October 2026).
+at most one small link to the public spacesheep page that describes the run, **and how long they hold the card**:
+`<ai> **Claude says:** using aifoundry3 for 1.5 h, until ~14:30 PDT [doc](<https://spacesheep.dev/@yaroslavvb/…>)` when
+they reserve it — the duration in digits after `for` (`for 2 h`, `for 1.5 h`; the reservation reader parses that form
+and misses `~2 h` or `about 2 h`) and the clock time it ends — and they edit that same post to append ` — released`
+when they release it, keeping its words (the lab dashboard's reservation reader closes a claim at the edit that adds
+"released" to it). A run that will overrun its estimate by more than 15 minutes replaces the post's text with the same
+line and a new estimate. No plan, numbers or progress in the channel, and no second post: the page holds it (the
+owner's rules of 28 October 2026; the estimate since 31 October 2026).
 
 ## 5. The lab's etiquette, and why
 
@@ -429,6 +432,12 @@ copy it here too.
 *Every edit to this file adds one line here, newest first, in the same commit (the owner's rule of 10 October 2026 for
 agent instruction files). It starts on 14 October 2026; earlier changes are in `git log -- AGENT.md`.*
 
+- **2026-10-31 (Sat, week 44)** — Section 4: a card reservation post says how long the card is held, as `for <N> h`
+  in digits plus the clock time it ends (`using aifoundry3 for 1.5 h, until ~14:30 PDT`), is re-estimated in place if
+  the run will overrun by more than 15 minutes, and carries the owner's "Claude says:" marking. *Why:* preference — the
+  owner's words that day, *"when reserving cards, add an estimate of when it's reserved until"*; constraint — the
+  dashboard's reservation reader reads a stated duration only as `for/next/in <number> h|min`, and draws an unreleased
+  claim without one for 3 h; re-check: the reader's duration pattern.
 - **2026-10-28 (Wed, week 44, correction)** — Section 4: the release is an edit of the reservation post appending
   " — released", not a second post. *Why:* preference — the owner's words minutes after the entry below: *"No, instead
   of posting a second time, it should edit the original post to know that it's been released."*
