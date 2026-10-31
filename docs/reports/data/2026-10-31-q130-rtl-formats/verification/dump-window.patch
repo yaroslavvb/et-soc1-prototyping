@@ -1,0 +1,61 @@
+--- a/rtl-sim/fma_toggle_formats/tb_fmt.sv
++++ b/rtl-sim/fma_toggle_formats/tb_fmt.sv
+@@ -146,6 +146,12 @@
+   longint unsigned bus_ab = 0, bus_c = 0;   // operand bits presented, A counted once per column slot
+   logic [31:0] pa = 0; logic [SLOTS-1:0][31:0] pb = '0, pc = '0;
+   bit measuring = 0;
++  // VCD window for the hierarchy-factor measurement (verification/dump-window.patch), as
++  // rtl-sim/fma_toggle/tb.sv lines 83-90, 134-141, 178-183 do it
++  string           dump_file;
++  int              dump_uops = 64;
++  bit              dump_on = 0;
++  longint unsigned dump_cycles = 0;
+   int TIMA_LAT = 3;                         // tima_top: F1 -> F3
+ 
+   task automatic issue(input bit valid, input bit mul, input int k, input int i, input int h);
+@@ -199,6 +205,14 @@
+       end
+     end
+     pa <= uop_a; pb <= uop_b; pc <= uop_c;
++    if (dump_on) begin
++      dump_cycles++;
++      if (dump_cycles >= longint'(dump_uops)) begin
++        dump_on <= 0;
++        report(1);
++        $finish;
++      end
++    end
+   end
+ 
+   task automatic one_op(input bit mul, input int gap);
+@@ -251,6 +265,12 @@
+     for (int n = 0; n < n_warm; n++) one_op(first_mul != 0 && n == 0, gap);
+     @(negedge clock);
+     acct_reset();
++    if ($value$plusargs("dump=%s", dump_file)) begin
++      void'($value$plusargs("dump_uops=%d", dump_uops));
++      $dumpfile(dump_file);
++      $dumpvars();
++      dump_on = 1;
++    end
+     measuring = 1;
+     for (int n = 0; n < n_ops; n++) one_op(first_mul != 0 && n_warm == 0 && n == 0, gap);
+     @(negedge clock);
+--- a/rtl-sim/fma_toggle_formats/Makefile
++++ b/rtl-sim/fma_toggle_formats/Makefile
+@@ -21,5 +21,15 @@
+ 	$(VERILATOR) --binary --timing --coverage-toggle --coverage-max-width 4096 $(VCOMMON) \
+ 	  ff_acct.sv tb_fmt.sv acct.cpp
+ 
++# VCD build for the hierarchy-factor measurement (verification/dump-window.patch): the `trace`
++# target of rtl-sim/fma_toggle/Makefile, plus that directory's settle_count.
++obj_dir_trace/Vtrace: tb_fmt.sv ff_acct.sv acct.cpp
++	$(VERILATOR) --binary --timing --coverage-toggle --coverage-max-width 4096 \
++	  --trace --trace-depth 99 --trace-max-width 4096 --trace-max-array 4096 \
++	  --Mdir obj_dir_trace -o Vtrace $(VCOMMON) ff_acct.sv tb_fmt.sv acct.cpp
++
++settle_count: ../fma_toggle/settle_count.cpp
++	$(if $(CXXOVERRIDE),$(CXXOVERRIDE),c++) -O2 -std=c++17 -o settle_count ../fma_toggle/settle_count.cpp
++
+ clean:
+ 	rm -rf obj_dir *.dat

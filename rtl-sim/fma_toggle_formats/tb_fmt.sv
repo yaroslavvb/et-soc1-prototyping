@@ -1,7 +1,22 @@
 // Switching activity of the ET-SoC-1 tensor multiply-add units for ONE data pattern in ONE number format.
 //
-// This is rtl-sim/fma_toggle's bench carried to the other two formats. It does NOT replace it: fp32 here
-// reproduces that bench exactly (same unit, same stream, same gate) and is kept only as the cross-check.
+// This is rtl-sim/fma_toggle's bench carried to the other two formats. It does NOT replace it. Its fp32 path
+// was meant to reproduce that bench; it does so on ungated kinds only (to 0.3%) and differs by up to 12% on
+// gated ones (docs/reports/data/2026-10-31-q130-rtl-formats/README.md section 0).
+//
+// KNOWN FAULTS, found in verification on Sat 31 Oct 2026. Every count this bench has produced is PROVISIONAL
+// until they are fixed and every kind is re-run (that README, section 0; reproduce with its verification/fcheck.py).
+//   1. A MADD micro-op does not return a*b + c. fp32 returns c exactly and fp16 adds one of its two products, so
+//      the accumulate path switches on wrong values (the MUL op is right). rtl-sim/fma_toggle has the same fault.
+//      Cause not yet found: start from the vpu_input_t / vpu_ctrl_sigs_t fields that vpu_ctrl.v drives.
+//   2. int8: f3_in3 is fed from the EX-stage uop_c and the result is taken at TIMA_LAT = 3, but the RTL reads
+//      TenC at F2 (vpu_lane_tima.v:60-71, rd_en f2_tima_in3_en) and f3_out is combinational at F3, so the
+//      accumulator adds another micro-op's C.
+//   3. q_valid (the write-back mask) is read from the always_comb slot_valid inside `issue`, right after uop_*
+//      change, so it can carry the previous micro-op's gate; rtl-sim/fma_toggle/tb.sv computes it from uop_*.
+//      This is the likely reason the two benches disagree on gated kinds only.
+// A fix should add a +check gate that fails the run unless every result equals the multiply-add of its operands.
+// (These notes are comments only: the logic below is byte-for-byte the code that produced counts.json.)
 //
 //   +fmt=fp32   8 x txfma_top, dtype VPU_DTYPE_F32     (vpu_uinst_decoder.v FMUL_PS / FMADD_PS)
 //   +fmt=fp16   8 x txfma_top, dtype VPU_DTYPE_F16_F32 (vpu_uinst_decoder.v:83-84 TMUL_PH_PS / TFMA_PH_PS)
@@ -106,7 +121,8 @@ module tb;
 
   // ---- int8: sixteen tima_top (vpu_lane_tima.v: 2 per lane, 4 int8 multipliers each) --------------
   // f1_mul_en is ex_tima_valid[l][t] (vpu_lane.v:427), the per-slot gate; f2_tima_en is its pipelined
-  // copy; f2_zap_opd3 = !f2_tima_ren3 zeroes the accumulator on a first pass (tima_top.v f3_in3_zapped).
+  // copy. The port f2_zap_opd3 KEEPS in3 when it is 1 (tima_top.v:111, f3_in3_zapped = {f3_zap_opd3} & f3_in3;
+  // vpu_lane_tima.v:100 drives it with !f2_tima_zap_opdc), so ~mul_f2 zeroes the accumulator on a first pass.
   logic [SLOTS-1:0] slot_valid_f2 = '0;
   logic             mul_f2 = 0;
   always @(posedge clock) begin slot_valid_f2 <= slot_valid; mul_f2 <= uop_mul; end

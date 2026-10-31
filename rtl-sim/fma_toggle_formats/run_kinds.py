@@ -4,8 +4,10 @@
     run_kinds.py --kinds <tools/claims-v3/kinds> --out counts.json [--types fp32,fp16,int8] [--jobs 4]
 
 For every kind it runs this directory's bench (obj_dir/Vtb) in that kind's own format, and - for fp32
-only - the committed bench rtl-sim/fma_toggle/obj_dir/Vtb on the same tiles, so the new bench's fp32
-path is checked against the old one rather than trusted.
+only - a local build of rtl-sim/fma_toggle (its obj_dir/Vtb; obj_dir/ is gitignored, so it is built, not
+committed) on the same tiles, as a cross-check of the new bench's fp32 path. The two agree on ungated kinds
+and not on gated ones, and both fail a functional check (docs/reports/data/2026-10-31-q130-rtl-formats/
+README.md section 0): until the bench passes one, every count it writes is PROVISIONAL.
 
 A tile file is 2,048 bytes: the A tile then the B tile, 1,024 each, 16 lines of 64 bytes, one 32-bit
 little-endian lane word per 4 bytes (tools/claims-v3/kinds/README.md section 2). The layout of a word is
@@ -13,8 +15,9 @@ the only thing that differs between formats, and the bench never looks inside a 
 serves all three.
 
 Toggle authority: docs/reports/data/2026-10-26-toggle-recount/README.md. `nets` is the raw Verilator
-toggle-coverage total, which that work showed is 5.33x the per-net count; `nets_hier` here is
-nets / hier-factors.json `_total`, NOT a VCD measurement of this run. Quote nets_hier.
+toggle-coverage total. The recount's whole-unit factor (5.33 names per merged net) does NOT transfer to
+this bench: settled VCD counts of its own runs give 4.62 (fp32 randn), 4.19 (fp16 randn) and 2.08 (int8
+full), and 2.0-7.3 across kinds (that README, verification/hier-measured.json). Convert per format and kind.
 """
 import argparse
 import collections
