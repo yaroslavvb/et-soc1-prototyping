@@ -15,7 +15,7 @@ ROOT=$PWD
 GEN=$ROOT/build/hlp-gen
 PY=${PY:-$ROOT/.venv/bin/python3}
 [ -x "$PY" ] || PY=python3
-ITEMS=anchor_pi,z16,z8,h16q,h16q_e7,b16_,b16p_,b16m,a16q,a16q_e7,a16_,h8q,b8_,b8p_,b8m,a8q,a8_,h32q,b32_
+ITEMS=anchor_pi,z16,z8,h16q,h16q_e7,b16_,b16p_,b16m2,b16m4,a16q,a16q_e7,a16_,h8q,b8_,b8p_,b8m2,b8m4,a8q,a8_,h32q,b32_
 stage=${1:?setup|ident|smoke|go}
 
 case "$stage" in
@@ -48,7 +48,7 @@ ident)
            DM_CMD_GET_MODULE_STATIC_TDP_LEVEL DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS; do
     echo "### $c"
     flock -w 120 /run/lock/etsoc-shire0.lock timeout 20 /opt/et/bin/dev_mngt_service \
-      -m "$c" -n /dev/et0_mgmt -u 5000 2>&1 | tail -25
+      -m "$c" -n "${V3_DEVICE:-0}" -u 5000 2>&1 | tail -25
   done > "$out/firmware.txt" 2>&1
   cat "$out/config.json"; echo; grep -v '^$' "$out/firmware.txt" | head -60
   ;;

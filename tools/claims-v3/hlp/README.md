@@ -215,4 +215,15 @@ block), `queue_hlp.sh` (passes in a row), `run_e79.sh` (the stages: `setup`, `id
 
 ## Amendments
 
-*(none yet; each one is dated and written before the data it touches)*
+**A1, Sat 31 Oct 2026, 09:33 PDT** — written during pass 7910 and **before any data it touches** (passes 7914
+onward). *Four more passes, 7914–7917, of exactly the registered item list.* Why: a pass takes about **4.5 min**,
+not the ~12 min budgeted, because the card idles at 50 °C today, so the approach to the 58 °C launch reading is
+instant (`0 heats and 0.1 s` in every run of pass 7910) and a run costs its 4 s plus ~0.3 s of overhead. Eight
+passes fit inside the registered 75 card-minute budget with room to spare, and the dominant uncertainty in every
+price is the between-pass scatter, which is what more passes reduce. **Nothing else changes:** the item list, the
+operand files, the launch protocol, the gates, the analysis and every registered band are as committed in
+`2a72d352`. The `min_passes` floor of 3 and the stop rule stand.
+
+**A2, Sat 31 Oct 2026, 09:33 PDT** — the same commit, same reason, no data touched: `collect_e79.sh` is added
+(it reduces every finished pass, runs the registered E71-slope sensitivity arm and assembles the data directory).
+It is plumbing around the already-registered `reduce_hlp.py` and `report_e79.py` and changes no analysis.
