@@ -2,6 +2,7 @@
  "experiment": "Q130(s)",
  "date": "2026-10-31",
  "seed": 20261031,
+ "revision": "2 (Sat 31 Oct 2026, after verification: int8's stream and gate corrected from the TIMA path, the two value-sort baselines committed, replicate bands added, tier counts fixed)",
  "generator": "tools/claims-v3/kinds/make_kinds.py",
  "used_by": [
   "E78 (energy matrix, aifoundry3)",
@@ -38,30 +39,70 @@
    "source": "workloads/sparsity/host/main.cpp makeTiles() and fillValues() (--values file:<path>)"
   },
   "stream_order": {
-   "loops": "for k in 0..15: for i in 0..15: for h in 0,1",
-   "a_operand": "Aword[i][k], broadcast to all 8 lanes",
-   "b_operand": "Bword[k][8*h + l] for lane l",
-   "microops_per_op": 512,
-   "lanes": 8,
-   "lane_cycles_per_op": 4096,
-   "a_changes_every": "2 cycles, walking down A's word-column k",
-   "b_changes_every": "1 cycle, alternating columns l and l+8 of the same B line, 16 times per k-group",
+   "warning": "THE STREAM IS NOT THE SAME IN ALL THREE TYPES. fp32 and fp16 run on txfma; int8 runs on TIMA and does all sixteen B columns in one micro-op, so it has no h half-pass loop. Corrected Sat 31 Oct 2026 after verification: the first version of this file asserted the txfma stream for all three types, which the measured 318 cycles an op refutes.",
+   "fp32": {
+    "loops": "for k in 0..15: for i in 0..15: for h in 0,1",
+    "a_operand": "Aword[i][k], broadcast to all 8 lanes",
+    "b_operand": "Bword[k][8*h + l] for lane l",
+    "microops_per_op": 512,
+    "column_slots_per_microop": 8,
+    "column_slot_cycles_per_op": 4096,
+    "a_changes_every": "2 micro-ops, walking down A's word-column k",
+    "b_changes_every": "1 micro-op, alternating columns l and l+8 of the same B line, 16 times per k-group"
+   },
+   "fp16": "identical to fp32 (the same txfma unit, vpu_tensorfma.v:622); only E and K differ",
+   "int8": {
+    "loops": "for p in 0..15: for i in 0..15        (NO h loop)",
+    "a_operand": "Aword[i][p], broadcast to all 16 column slots",
+    "b_operand": "the whole line Bword[p][0..15], one word per column slot",
+    "microops_per_op": 256,
+    "column_slots_per_microop": 16,
+    "column_slot_cycles_per_op": 4096,
+    "a_changes_every": "1 micro-op, walking down A's word-column p \u2014 the opposite of fp32",
+    "b_changes_every": "16 micro-ops: the line is held for its whole k-group, so only the 16 line boundaries cost anything on the B side",
+    "why": "fma_exec_last_b_col is forced true by req_int8 (vpu_tensorfma.v:412) and fma_exec_b_col_next never advances (:717-718, '// First go to next B col block (for INT8, we do all B cols at once)'), so there is one micro-op per (p, i), not two. 256 micro-ops fit the measured 318 cycles an op; 512 at one a cycle cannot. int8 also runs on a different unit: clock_en_txfma = enabled_int & ~req_int8, clock_en_tima = enabled_int & req_int8 (:157-166), and fma_en is clocked only when ~req_int8 (:626-628).",
+    "provisional": "the 256 micro-ops and the 16-column bus follow from the loop RTL and the 318 cycles, but they are a RECONSTRUCTION, not a cycle-accurate simulation: int8 has no bench. The GATED fractions do not depend on it (they depend only on the (A word, B column-pair) set and the gate rule); the int8 hamming and bus_bits_per_op figures do, and are marked provisional per kind."
+   },
    "cycles_per_op": {
     "fp32": 546,
     "fp16": 546,
     "int8": 318
    },
-   "source": "PRM 9.4; external/core-et/rtl/shire/minion/vpu/vpu_tensorfma.v; rtl-sim/fma_toggle/tb.sv task one_op (lines 144-149, 92-110); tools/claims-v3/hl/make_hl.py issue_streams()"
+   "macs_per_op": {
+    "fp32": 4096,
+    "fp16": 8192,
+    "int8": 16384
+   },
+   "source": "PRM 9.4; external/core-et/rtl/shire/minion/vpu/vpu_tensorfma.v lines 157-166, 412, 626-628, 717-718, 744-752, 863; rtl-sim/fma_toggle/tb.sv task one_op (lines 144-149, 92-110) for fp32/fp16; tools/claims-v3/hl/make_hl.py issue_streams(); the 546/546/318 cycles per op in docs/findings/05-claims.md E36 (line 463) and E39 (line 480)"
   },
   "zero_gating": {
-   "granularity_bits": 32,
-   "rule": "lane_valid[l] = uop_valid & (uop_mul | ((Aword != 32'b0) & (Bword[l] != 32'b0)))",
-   "a_side": "one flag broadcast to all 8 lanes: an A word of zero gates the whole micro-op",
-   "b_side": "per lane, on that lane's 32-bit slice of the B cache line",
-   "fp16": "BOTH halves must be zero for the lane to gate",
-   "int8": "ALL FOUR bytes must be zero for the lane to gate",
-   "first_op_not_gated": "the first op of a launch is a multiply pass (MUL) and is never gated",
-   "source": "external/core-et/rtl/shire/minion/vpu/vpu_ctrl.v lines 1230-1233 (f3_zero_data_a/b), 817 (ex_tensor_zero_mask), 837-839 (ex_fma_gate_mask, ex_txfma_valid); rtl-sim/fma_toggle/tb.sv line 56"
+   "rule": "ex_tensor_zero_mask = A_zero | (tenB_zero[raddr] & tenB_zero[raddr|1]); it clears ex_txfma_valid (fp32/fp16) or ex_tima_valid (int8), and only for VPU_FCMD_MADD",
+   "a_side": "one flag on the full 32-bit A word, broadcast to all 8 gate bits: an A word of zero gates the whole micro-op",
+   "b_side": "one gate bit per lane, on a 32-bit slice of a TenB row",
+   "gate_bits_per_microop": 8,
+   "zero_test_bits": 32,
+   "test_against_gate": "there is ONE zero test and it is 32 bits wide in every type, taken when the tensor operand register is written (vpu_ctrl.v:1229-1234) \u2014 so the word-zero RATE is p^E for element sparsity p. What differs is how many of those tests a GATE DECISION needs: one in fp32 and fp16, and in int8 two, ANDed. Do not quote the word-zero rate as the gated rate in int8: it is p^4 against p^8.",
+   "fp32": {
+    "granularity_bits": 32,
+    "rule": "the lane's own 32-bit B word must be zero",
+    "elements_that_must_be_zero": 1
+   },
+   "fp16": {
+    "granularity_bits": 32,
+    "rule": "BOTH halves of the lane's 32-bit B word must be zero",
+    "elements_that_must_be_zero": 2
+   },
+   "int8": {
+    "granularity_bits": 64,
+    "rule": "ALL EIGHT bytes of the column PAIR (l, l+8) must be zero \u2014 the mask ANDs the two TenB rows of the B line, and one gate bit covers both column slots",
+    "elements_that_must_be_zero": 8,
+    "why": "s1_tima_tenb_raddr = {fma_exec_b_rd_ptr, 1'b0} (vpu_tensorfma.v:863), so raddr and raddr|1 are the two halves of one 64-byte B line (a TenB row is VPU_DATA_SZ = 8*32 = 256 b = 8 words); ex_tensorb_zero_mask_tima1[l] is only forced to 1 when ~ex_tima_mask[l][1], and ex_tima_mask[l][t] = ex_fma_mask[(l>>1)+(t<<2)] = 1 for every (l, t) at cols_b = 3 (vpu_tensorfma.v:654-663, 899), so both TIMAs are live and the AND is real. For fp32 and fp16 ex_tima_valid_unqual is 0, both terms address ex_ra2_ten, and the AND is a no-op \u2014 which is why the 32-bit rule is right for those two types only.",
+    "corrected": "Sat 31 Oct 2026: the first version of this file said ALL FOUR bytes.",
+    "which_pair": "the pair is columns (l, l+8), because ex_tensor_zero_mask_ext[l][t] uses the SAME bit l for both TIMAs while tima0 reads TenB row raddr (words 0-7 = columns 0-7) and tima1 row raddr|1 (words 8-15 = columns 8-15); the enable mapping ex_tima_mask[l][t] = ex_fma_mask[(l>>1)+(t<<2)] puts unit (l, t) on column 2*((l>>1)+4t) + (l&1), which is column l at t=0 and column l+8 at t=1 \u2014 the same answer twice. E79 amendment A4 instead states the grouping as the eight CONTIGUOUS bytes of columns (2l, 2l+1). Both are 'eight bytes must be zero', so every kind here also carries stats.gated_lane_frac_alt_grouping under A4's reading: the two agree to within a per-tile band and no claim depends on which is right. Open for Q130(b)."
+   },
+   "bench_rule_is_fp32_only": "rtl-sim/fma_toggle/tb.sv:56 lane_valid[l] = uop_valid & (uop_mul | ((uop_a != 32'b0) & (uop_b[l] != 32'b0))) states the fp32/fp16 rule; the bench has no int8 path",
+   "first_op_not_gated": "the first op of a launch is a multiply pass (MUL) and is never gated; in int8 the gate also needs ex_tima_ren3 && ~ex_tima_last_pass (vpu_ctrl.v:827)",
+   "source": "external/core-et/rtl/shire/minion/vpu/vpu_ctrl.v lines 1229-1234 (f3_zero_data_a/b), 802-818 (ex_tensor_zero_mask), 824-832 (ex_tima_valid), 834-840 (ex_fma_gate_mask, ex_txfma_valid); external/core-et/rtl/inc/minion_defines.vh:189-192 (VPU_LANE_NUM 8, VPU_DATA_S_SZ 32, VPU_DATA_SZ 256); external/core-et/rtl/inc/vpu_defines.vh:210 (VPU_NUM_TIMA 2); external/core-et/rtl/shire/minion/vpu/vpu_tensorfma.v:863, 899; rtl-sim/fma_toggle/tb.sv line 56 (fp32/fp16 only)"
   },
   "fp16_two_term_rule": {
    "rule": "the two-term update c += a1*b1 + a2*b2 happens only when all four of a1, a2, b1, b2 are nonzero, except on the first op (MUL), which always multiplies",
@@ -70,14 +111,17 @@
    "source": "PRM 9.4 pseudo-code; workloads/sparsity/host/main.cpp expectC(..., literal=true)"
   },
   "hamming_convention": {
-   "transitions": "cyclic over the 512 micro-ops (micro-op t against t+1, the last against the next op's first), the convention of tools/claims-v3/hl/make_hl.py fma_flips",
+   "transitions": "cyclic over the micro-ops of one op (micro-op t against t+1, the last against the next op's first): 512 in fp32 and fp16, 256 in int8. The convention of tools/claims-v3/hl/make_hl.py fma_flips",
    "a_figure": "one broadcast word",
-   "b_figure": "mean over the eight lanes",
-   "bus_bits_per_op": "8*dA + sum over lanes of dB, summed over the 512 transitions"
+   "b_figure": "mean over the column slots (8 / 8 / 16)",
+   "bus_bits_per_op": "slots*dA + sum over the slots of dB, summed over the transitions, with slots = 8 for fp32 and fp16 and 16 for int8",
+   "A_BROADCAST_IS_A_CONVENTION": "counting the one broadcast A word once per column slot is inherited from tb.sv (LANES * $countones(uop_a ^ pa)) and make_hl.py fma_flips. It is NOT a measurement. The same multiplier sits on both sides, so an A-against-B comparison of bus_bits_per_op is exactly a comparison of mean dA against mean dB and the broadcast contributes nothing to the ratio. Physically, if the broadcast word travels one net with fanout rather than one register per lane, this convention overcounts the A side: E70 already measured shared-wire carry-over at 1.246. E78 must validate the A-side weight before any of this is quoted as energy."
   },
   "replay_in_rtl": {
    "how": "rtl-sim/fma_toggle/tiles.py --from-bin <file>, then obj_dir/Vtb +tiles=<hex>",
-   "caveat": "txfma_top is the fp32 unit, so an fp16 or int8 tile replays as the right OPERAND WORDS and the right gating, but fp32 arithmetic inside the unit: quote its bus and gate counts, not its multiplier-tree counts, for those two types"
+   "fp32": "exact: that is the unit and the stream the bench implements",
+   "fp16": "the right OPERAND WORDS, the right stream and the right gate, but fp32 arithmetic inside the unit: quote its bus and gate counts, not its multiplier-tree counts",
+   "int8": "DO NOT replay an int8 tile for gate or bus counts. The bench is txfma with the h half-pass loop and the 32-bit-word gate; int8 on the card runs on TIMA with 256 micro-ops, 16 column slots and a 64-bit column-pair gate. The bench would report the operand words correctly and everything derived from the stream or the gate wrongly. (Corrected Sat 31 Oct 2026: the first version of this file said int8 replays correctly.)"
   }
  },
  "types": {
@@ -272,6 +316,9 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4096,
      "gated_lane_frac": 1.0,
      "bus_bits_per_op": 0
@@ -444,6 +491,9 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 0
@@ -616,6 +666,9 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 0
@@ -788,6 +841,9 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 0
@@ -960,9 +1016,29 @@
       },
       "bus_bits_per_op": 54022
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 82214
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 83692.335,
+      "sd": 1194.355588,
+      "p2.5": 81384.0,
+      "p97.5": 85840.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "randn_small": {
@@ -1132,9 +1208,29 @@
       },
       "bus_bits_per_op": 54772
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 82244
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 82828.06,
+      "sd": 931.828169,
+      "p2.5": 81078.0,
+      "p97.5": 84702.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "randn_large": {
@@ -1304,9 +1400,29 @@
       },
       "bus_bits_per_op": 56368
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 84896
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 85275.045,
+      "sd": 1117.783735,
+      "p2.5": 83092.0,
+      "p97.5": 87472.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "uniform01": {
@@ -1476,9 +1592,29 @@
       },
       "bus_bits_per_op": 51922
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 77842
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 77714.055,
+      "sd": 1038.930637,
+      "p2.5": 75710.0,
+      "p97.5": 79814.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "sparse50": {
@@ -1648,9 +1784,29 @@
       },
       "bus_bits_per_op": 48582
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 3171,
      "gated_lane_frac": 0.77417,
      "bus_bits_per_op": 74550
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.750477,
+      "sd": 0.022006,
+      "p2.5": 0.710693,
+      "p97.5": 0.791504
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 75476.39,
+      "sd": 2882.21832,
+      "p2.5": 70180.0,
+      "p97.5": 81002.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "sparse90": {
@@ -1820,9 +1976,29 @@
       },
       "bus_bits_per_op": 12836
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4062,
      "gated_lane_frac": 0.991699,
      "bus_bits_per_op": 17780
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.989976,
+      "sd": 0.002916,
+      "p2.5": 0.983643,
+      "p97.5": 0.994629
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 20279.785,
+      "sd": 2691.724089,
+      "p2.5": 15180.0,
+      "p97.5": 25454.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "smallint": {
@@ -1992,9 +2168,29 @@
       },
       "bus_bits_per_op": 12510
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 482,
      "gated_lane_frac": 0.117676,
      "bus_bits_per_op": 19806
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.120968,
+      "sd": 0.020033,
+      "p2.5": 0.08374,
+      "p97.5": 0.15918
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 21641.685,
+      "sd": 1148.196743,
+      "p2.5": 19454.0,
+      "p97.5": 23804.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "pow2": {
@@ -2164,9 +2360,29 @@
       },
       "bus_bits_per_op": 16774
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 25414
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 24510.67,
+      "sd": 979.70812,
+      "p2.5": 22692.0,
+      "p97.5": 26638.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "bf16trunc": {
@@ -2336,9 +2552,29 @@
       },
       "bus_bits_per_op": 24036
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 34980
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 34503.515,
+      "sd": 894.120049,
+      "p2.5": 32824.0,
+      "p97.5": 36262.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "fp16grid": {
@@ -2508,9 +2744,29 @@
       },
       "bus_bits_per_op": 28768
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 43136
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 43713.1,
+      "sd": 914.796404,
+      "p2.5": 41822.0,
+      "p97.5": 45496.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "a_randn_b_zeros": {
@@ -2680,9 +2936,29 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4096,
      "gated_lane_frac": 1.0,
      "bus_bits_per_op": 27920
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 1.0,
+      "sd": 0.0,
+      "p2.5": 1.0,
+      "p97.5": 1.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 27889.76,
+      "sd": 434.383223,
+      "p2.5": 27120.0,
+      "p97.5": 28752.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "a_zeros_b_randn": {
@@ -2852,9 +3128,29 @@
       },
       "bus_bits_per_op": 55798
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4096,
      "gated_lane_frac": 1.0,
      "bus_bits_per_op": 55798
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 1.0,
+      "sd": 0.0,
+      "p2.5": 1.0,
+      "p97.5": 1.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 55731.795,
+      "sd": 1046.526518,
+      "p2.5": 53888.0,
+      "p97.5": 57808.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "randn_sorted": {
@@ -3024,6 +3320,9 @@
       },
       "bus_bits_per_op": 40072
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 60856
@@ -3035,6 +3334,23 @@
      "b_all_base": 13.189,
      "bus_bits_per_op_base": 82214,
      "bus_bits_per_op_ratio": 0.7402
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 12,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 12,
+      "mean": 60671.166667,
+      "sd": 586.572453,
+      "p2.5": 59734.0,
+      "p97.5": 61550.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "nn_like": {
@@ -3204,9 +3520,29 @@
       },
       "bus_bits_per_op": 55546
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 2080,
      "gated_lane_frac": 0.507812,
      "bus_bits_per_op": 80426
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.500918,
+      "sd": 0.033023,
+      "p2.5": 0.441406,
+      "p97.5": 0.566406
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 80746.82,
+      "sd": 1572.305278,
+      "p2.5": 77622.0,
+      "p97.5": 83800.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    }
   },
@@ -3346,6 +3682,9 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4096,
      "gated_lane_frac": 1.0,
      "bus_bits_per_op": 0,
@@ -3488,6 +3827,9 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 0,
@@ -3630,6 +3972,9 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 0,
@@ -3772,11 +4117,31 @@
       },
       "bus_bits_per_op": 56800
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 84416,
      "pair_any_zero": 0,
      "pair_any_zero_frac": 0.0
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 84431.535,
+      "sd": 1105.927132,
+      "p2.5": 82180.0,
+      "p97.5": 86634.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "randn_small": {
@@ -3914,11 +4279,31 @@
       },
       "bus_bits_per_op": 61318
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 91126,
      "pair_any_zero": 0,
      "pair_any_zero_frac": 0.0
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 90547.57,
+      "sd": 1248.678208,
+      "p2.5": 88094.0,
+      "p97.5": 92778.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "uniform01": {
@@ -4056,11 +4441,31 @@
       },
       "bus_bits_per_op": 52540
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 77948,
      "pair_any_zero": 0,
      "pair_any_zero_frac": 0.0
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 75548.55,
+      "sd": 1031.278224,
+      "p2.5": 73534.0,
+      "p97.5": 77624.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "sparse50": {
@@ -4198,11 +4603,31 @@
       },
       "bus_bits_per_op": 46374
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 1697,
      "gated_lane_frac": 0.414307,
      "bus_bits_per_op": 71590,
      "pair_any_zero": 3751,
      "pair_any_zero_frac": 0.915771
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.437252,
+      "sd": 0.029412,
+      "p2.5": 0.376465,
+      "p97.5": 0.490723
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 72327.515,
+      "sd": 2217.334604,
+      "p2.5": 68074.0,
+      "p97.5": 76926.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "sparse90": {
@@ -4340,15 +4765,35 @@
       },
       "bus_bits_per_op": 12028
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 3936,
      "gated_lane_frac": 0.960938,
      "bus_bits_per_op": 18412,
      "pair_any_zero": 4096,
      "pair_any_zero_frac": 1.0
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.963833,
+      "sd": 0.007128,
+      "p2.5": 0.948486,
+      "p97.5": 0.976318
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 19352.33,
+      "sd": 1866.136591,
+      "p2.5": 15672.0,
+      "p97.5": 23096.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "wsparse50": {
-    "rule": "randn with half the WORDS zero: the kind that gates exactly half the lanes",
+    "rule": "randn with half the WORDS zero: the kind that really gates half of fp16's lanes",
     "tier": 1,
     "file": "tiles/fp16/wsparse50.bin",
     "bytes": 2048,
@@ -4482,11 +4927,31 @@
       },
       "bus_bits_per_op": 51044
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 3113,
      "gated_lane_frac": 0.76001,
      "bus_bits_per_op": 73444,
      "pair_any_zero": 3113,
      "pair_any_zero_frac": 0.76001
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.749243,
+      "sd": 0.02357,
+      "p2.5": 0.701904,
+      "p97.5": 0.792236
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 72368.215,
+      "sd": 2974.752488,
+      "p2.5": 66064.0,
+      "p97.5": 78182.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "wsparse90": {
@@ -4624,11 +5089,31 @@
       },
       "bus_bits_per_op": 8544
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4056,
      "gated_lane_frac": 0.990234,
      "bus_bits_per_op": 18192,
      "pair_any_zero": 4056,
      "pair_any_zero_frac": 0.990234
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.990092,
+      "sd": 0.002991,
+      "p2.5": 0.983643,
+      "p97.5": 0.994629
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 19305.955,
+      "sd": 2756.088614,
+      "p2.5": 14216.0,
+      "p97.5": 24734.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "smallint": {
@@ -4766,11 +5251,31 @@
       },
       "bus_bits_per_op": 24332
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 16,
      "gated_lane_frac": 0.003906,
      "bus_bits_per_op": 35980,
      "pair_any_zero": 870,
      "pair_any_zero_frac": 0.212402
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.007593,
+      "sd": 0.005359,
+      "p2.5": 0.0,
+      "p97.5": 0.019531
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 35125.605,
+      "sd": 978.847153,
+      "p2.5": 33454.0,
+      "p97.5": 37060.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "fp8grid": {
@@ -4908,11 +5413,31 @@
       },
       "bus_bits_per_op": 28998
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 42486,
      "pair_any_zero": 0,
      "pair_any_zero_frac": 0.0
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 41727.215,
+      "sd": 848.108421,
+      "p2.5": 39984.0,
+      "p97.5": 43312.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "a_randn_b_zeros": {
@@ -5050,11 +5575,31 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4096,
      "gated_lane_frac": 1.0,
      "bus_bits_per_op": 28096,
      "pair_any_zero": 4096,
      "pair_any_zero_frac": 1.0
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 1.0,
+      "sd": 0.0,
+      "p2.5": 1.0,
+      "p97.5": 1.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 28089.52,
+      "sd": 401.099953,
+      "p2.5": 27312.0,
+      "p97.5": 28800.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "a_zeros_b_randn": {
@@ -5192,11 +5737,31 @@
       },
       "bus_bits_per_op": 55806
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4096,
      "gated_lane_frac": 1.0,
      "bus_bits_per_op": 55806,
      "pair_any_zero": 4096,
      "pair_any_zero_frac": 1.0
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 1.0,
+      "sd": 0.0,
+      "p2.5": 1.0,
+      "p97.5": 1.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 56169.49,
+      "sd": 965.907762,
+      "p2.5": 54370.0,
+      "p97.5": 58104.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "pair_half_zero": {
@@ -5334,11 +5899,31 @@
       },
       "bus_bits_per_op": 48780
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 72796,
      "pair_any_zero": 4096,
      "pair_any_zero_frac": 1.0
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 72460.635,
+      "sd": 2019.004074,
+      "p2.5": 68894.0,
+      "p97.5": 76102.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "randn_sorted": {
@@ -5476,6 +6061,9 @@
       },
       "bus_bits_per_op": 40758
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
      "bus_bits_per_op": 61846,
@@ -5489,6 +6077,23 @@
      "b_all_base": 13.8672,
      "bus_bits_per_op_base": 84416,
      "bus_bits_per_op_ratio": 0.7326
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 12,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 12,
+      "mean": 61489.333333,
+      "sd": 580.274125,
+      "p2.5": 60356.0,
+      "p97.5": 62336.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "nn_like": {
@@ -5626,11 +6231,31 @@
       },
       "bus_bits_per_op": 59676
      },
+     "microops_per_op": 512,
+     "gate_decisions_per_op": 4096,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 800,
      "gated_lane_frac": 0.195312,
      "bus_bits_per_op": 84348,
      "pair_any_zero": 2848,
      "pair_any_zero_frac": 0.695312
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.24875,
+      "sd": 0.028323,
+      "p2.5": 0.199219,
+      "p97.5": 0.304688
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 82234.865,
+      "sd": 1319.3472,
+      "p2.5": 79664.0,
+      "p97.5": 84702.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    }
   },
@@ -5752,8 +6377,13 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4096,
      "gated_lane_frac": 1.0,
+     "gated_lane_frac_alt_grouping": 1.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
      "bus_bits_per_op": 0,
      "int8_twos_complement": {
       "p1_bit": [
@@ -5770,6 +6400,13 @@
       "mean_value": 0.0,
       "mean_popcount": 0.0
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
     }
    },
    "ones": {
@@ -5889,8 +6526,13 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
+     "gated_lane_frac_alt_grouping": 0.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
      "bus_bits_per_op": 0,
      "int8_twos_complement": {
       "p1_bit": [
@@ -5907,6 +6549,13 @@
       "mean_value": 1.0,
       "mean_popcount": 1.0
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
     }
    },
    "neg_ones": {
@@ -6026,8 +6675,13 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
+     "gated_lane_frac_alt_grouping": 0.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
      "bus_bits_per_op": 0,
      "int8_twos_complement": {
       "p1_bit": [
@@ -6044,6 +6698,13 @@
       "mean_value": -1.0,
       "mean_popcount": 8.0
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
     }
    },
    "full": {
@@ -6103,11 +6764,11 @@
        0.529297
       ],
       "hamming": {
-       "all": 7.9648,
-       "sign": 0.9883,
-       "mag": 6.9766
+       "all": 15.9297,
+       "sign": 1.9766,
+       "mag": 13.9531
       },
-      "bus_bits_per_op": 32624
+      "bus_bits_per_op": 65248
      },
      "b": {
       "zero_word_frac": 0.0,
@@ -6157,15 +6818,20 @@
        0.549805
       ],
       "hamming": {
-       "all": 16.4629,
-       "sign": 1.9482,
-       "mag": 14.5146
+       "all": 0.9922,
+       "sign": 0.1323,
+       "mag": 0.8599
       },
-      "bus_bits_per_op": 67432
+      "bus_bits_per_op": 4064
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
-     "bus_bits_per_op": 100056,
+     "gated_lane_frac_alt_grouping": 0.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 69312,
      "int8_twos_complement": {
       "p1_bit": [
        0.511719,
@@ -6181,6 +6847,30 @@
       "mean_value": -4.5693,
       "mean_popcount": 4.0879
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 69585.645,
+      "sd": 730.175372,
+      "p2.5": 68144.0,
+      "p97.5": 71038.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "pos": {
@@ -6240,11 +6930,11 @@
        0.0
       ],
       "hamming": {
-       "all": 7.0195,
+       "all": 14.0391,
        "sign": 0.0,
-       "mag": 7.0195
+       "mag": 14.0391
       },
-      "bus_bits_per_op": 28752
+      "bus_bits_per_op": 57504
      },
      "b": {
       "zero_word_frac": 0.0,
@@ -6294,15 +6984,20 @@
        0.0
       ],
       "hamming": {
-       "all": 13.8892,
+       "all": 0.877,
        "sign": 0.0,
-       "mag": 13.8892
+       "mag": 0.877
       },
-      "bus_bits_per_op": 56890
+      "bus_bits_per_op": 3592
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
-     "bus_bits_per_op": 85642,
+     "gated_lane_frac_alt_grouping": 0.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 61096,
      "int8_twos_complement": {
       "p1_bit": [
        0.523926,
@@ -6318,6 +7013,30 @@
       "mean_value": 62.7554,
       "mean_popcount": 3.522
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 60911.425,
+      "sd": 709.726185,
+      "p2.5": 59588.0,
+      "p97.5": 62310.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "smallint": {
@@ -6377,11 +7096,11 @@
        0.501953
       ],
       "hamming": {
-       "all": 8.1016,
-       "sign": 1.0078,
-       "mag": 7.0938
+       "all": 16.2031,
+       "sign": 2.0156,
+       "mag": 14.1875
       },
-      "bus_bits_per_op": 33184
+      "bus_bits_per_op": 66368
      },
      "b": {
       "zero_word_frac": 0.0,
@@ -6431,15 +7150,20 @@
        0.487305
       ],
       "hamming": {
-       "all": 15.4707,
-       "sign": 1.9023,
-       "mag": 13.5684
+       "all": 1.0151,
+       "sign": 0.127,
+       "mag": 0.8882
       },
-      "bus_bits_per_op": 63368
+      "bus_bits_per_op": 4158
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
-     "bus_bits_per_op": 96552,
+     "gated_lane_frac_alt_grouping": 0.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 70526,
      "int8_twos_complement": {
       "p1_bit": [
        0.498047,
@@ -6455,6 +7179,30 @@
       "mean_value": -0.4678,
       "mean_popcount": 3.9644
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 69616.92,
+      "sd": 1314.953806,
+      "p2.5": 67132.0,
+      "p97.5": 72402.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "ternary": {
@@ -6514,11 +7262,11 @@
        0.311523
       ],
       "hamming": {
-       "all": 6.7227,
-       "sign": 0.8281,
-       "mag": 5.8945
+       "all": 13.4453,
+       "sign": 1.6562,
+       "mag": 11.7891
       },
-      "bus_bits_per_op": 27536
+      "bus_bits_per_op": 55072
      },
      "b": {
       "zero_word_frac": 0.01171875,
@@ -6568,15 +7316,20 @@
        0.3125
       ],
       "hamming": {
-       "all": 14.355,
-       "sign": 1.7798,
-       "mag": 12.5752
+       "all": 0.9097,
+       "sign": 0.1133,
+       "mag": 0.7964
       },
-      "bus_bits_per_op": 58798
+      "bus_bits_per_op": 3726
      },
-     "gated_lane_cycles": 80,
-     "gated_lane_frac": 0.019531,
-     "bus_bits_per_op": 86334,
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
+     "gated_lane_cycles": 32,
+     "gated_lane_frac": 0.007812,
+     "gated_lane_frac_alt_grouping": 0.007812,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 58798,
      "int8_twos_complement": {
       "p1_bit": [
        0.651367,
@@ -6592,6 +7345,30 @@
       "mean_value": 0.0273,
       "mean_popcount": 2.8354
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.012744,
+      "sd": 0.007006,
+      "p2.5": 0.0,
+      "p97.5": 0.027344
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 61932.885,
+      "sd": 2131.990141,
+      "p2.5": 58108.0,
+      "p97.5": 66136.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "sparse50": {
@@ -6651,11 +7428,11 @@
        0.264648
       ],
       "hamming": {
-       "all": 6.1367,
-       "sign": 0.8281,
-       "mag": 5.3086
+       "all": 12.2734,
+       "sign": 1.6562,
+       "mag": 10.6172
       },
-      "bus_bits_per_op": 25136
+      "bus_bits_per_op": 50272
      },
      "b": {
       "zero_word_frac": 0.0390625,
@@ -6705,15 +7482,20 @@
        0.260742
       ],
       "hamming": {
-       "all": 12.5483,
-       "sign": 1.5405,
-       "mag": 11.0078
+       "all": 0.7832,
+       "sign": 0.0923,
+       "mag": 0.6909
       },
-      "bus_bits_per_op": 51398
+      "bus_bits_per_op": 3208
      },
-     "gated_lane_cycles": 444,
-     "gated_lane_frac": 0.108398,
-     "bus_bits_per_op": 76534,
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
+     "gated_lane_cycles": 288,
+     "gated_lane_frac": 0.070312,
+     "gated_lane_frac_alt_grouping": 0.077637,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 53480,
      "int8_twos_complement": {
       "p1_bit": [
        0.273926,
@@ -6729,6 +7511,30 @@
       "mean_value": -1.3003,
       "mean_popcount": 2.0806
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.067211,
+      "sd": 0.015348,
+      "p2.5": 0.039062,
+      "p97.5": 0.097656
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 52252.775,
+      "sd": 1321.50092,
+      "p2.5": 49606.0,
+      "p97.5": 54870.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "sparse90": {
@@ -6788,11 +7594,11 @@
        0.052734
       ],
       "hamming": {
-       "all": 1.3867,
-       "sign": 0.2031,
-       "mag": 1.1836
+       "all": 2.7734,
+       "sign": 0.4062,
+       "mag": 2.3672
       },
-      "bus_bits_per_op": 5680
+      "bus_bits_per_op": 11360
      },
      "b": {
       "zero_word_frac": 0.66796875,
@@ -6842,15 +7648,20 @@
        0.057617
       ],
       "hamming": {
-       "all": 3.0527,
-       "sign": 0.4302,
-       "mag": 2.6226
+       "all": 0.1914,
+       "sign": 0.0264,
+       "mag": 0.165
       },
-      "bus_bits_per_op": 12504
+      "bus_bits_per_op": 784
      },
-     "gated_lane_cycles": 3676,
-     "gated_lane_frac": 0.897461,
-     "bus_bits_per_op": 18184,
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
+     "gated_lane_cycles": 3366,
+     "gated_lane_frac": 0.821777,
+     "gated_lane_frac_alt_grouping": 0.823242,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 12144,
      "int8_twos_complement": {
       "p1_bit": [
        0.047363,
@@ -6866,10 +7677,34 @@
       "mean_value": -1.2788,
       "mean_popcount": 0.3813
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.806543,
+      "sd": 0.023374,
+      "p2.5": 0.761719,
+      "p97.5": 0.848145
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 13206.1,
+      "sd": 1254.189031,
+      "p2.5": 10850.0,
+      "p97.5": 15670.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "wsparse50": {
-    "rule": "`full` with half the WORDS zero: gates exactly half the lanes",
+    "rule": "`full` with half the WORDS zero: still gates only ~5/8 of int8's lanes, because the gate wants BOTH words of the column pair",
     "tier": 1,
     "file": "tiles/int8/wsparse50.bin",
     "bytes": 2048,
@@ -6925,11 +7760,11 @@
        0.244141
       ],
       "hamming": {
-       "all": 5.5469,
-       "sign": 0.7031,
-       "mag": 4.8438
+       "all": 11.0938,
+       "sign": 1.4062,
+       "mag": 9.6875
       },
-      "bus_bits_per_op": 22720
+      "bus_bits_per_op": 45440
      },
      "b": {
       "zero_word_frac": 0.46875,
@@ -6979,15 +7814,20 @@
        0.304688
       ],
       "hamming": {
-       "all": 12.3794,
-       "sign": 1.5347,
-       "mag": 10.8447
+       "all": 0.812,
+       "sign": 0.1133,
+       "mag": 0.6987
       },
-      "bus_bits_per_op": 50706
+      "bus_bits_per_op": 3326
      },
-     "gated_lane_cycles": 3068,
-     "gated_lane_frac": 0.749023,
-     "bus_bits_per_op": 73426,
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
+     "gated_lane_cycles": 2636,
+     "gated_lane_frac": 0.643555,
+     "gated_lane_frac_alt_grouping": 0.641602,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 48766,
      "int8_twos_complement": {
       "p1_bit": [
        0.25293,
@@ -7003,6 +7843,30 @@
       "mean_value": -3.4785,
       "mean_popcount": 2.0356
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.624246,
+      "sd": 0.029108,
+      "p2.5": 0.569336,
+      "p97.5": 0.681152
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 52258.285,
+      "sd": 2299.556651,
+      "p2.5": 47842.0,
+      "p97.5": 56300.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "wsparse90": {
@@ -7062,11 +7926,11 @@
        0.066406
       ],
       "hamming": {
-       "all": 1.9219,
-       "sign": 0.2422,
-       "mag": 1.6797
+       "all": 3.8438,
+       "sign": 0.4844,
+       "mag": 3.3594
       },
-      "bus_bits_per_op": 7872
+      "bus_bits_per_op": 15744
      },
      "b": {
       "zero_word_frac": 0.92578125,
@@ -7116,15 +7980,20 @@
        0.039062
       ],
       "hamming": {
-       "all": 2.1191,
-       "sign": 0.2974,
-       "mag": 1.8218
+       "all": 0.1396,
+       "sign": 0.0186,
+       "mag": 0.1211
       },
-      "bus_bits_per_op": 8680
+      "bus_bits_per_op": 572
      },
-     "gated_lane_cycles": 4051,
-     "gated_lane_frac": 0.989014,
-     "bus_bits_per_op": 16552,
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
+     "gated_lane_cycles": 4014,
+     "gated_lane_frac": 0.97998,
+     "gated_lane_frac_alt_grouping": 0.978516,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 16316,
      "int8_twos_complement": {
       "p1_bit": [
        0.047363,
@@ -7140,6 +8009,30 @@
       "mean_value": -0.1587,
       "mean_popcount": 0.4004
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.98088,
+      "sd": 0.005673,
+      "p2.5": 0.968262,
+      "p97.5": 0.990234
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 13312.735,
+      "sd": 2342.778504,
+      "p2.5": 9050.0,
+      "p97.5": 17522.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "highbit": {
@@ -7199,11 +8092,11 @@
        0.514648
       ],
       "hamming": {
-       "all": 0.9961,
-       "sign": 0.9961,
+       "all": 1.9922,
+       "sign": 1.9922,
        "mag": 0.0
       },
-      "bus_bits_per_op": 4080
+      "bus_bits_per_op": 8160
      },
      "b": {
       "zero_word_frac": 0.0,
@@ -7253,15 +8146,20 @@
        0.474609
       ],
       "hamming": {
-       "all": 1.9697,
-       "sign": 1.9697,
+       "all": 0.123,
+       "sign": 0.123,
        "mag": 0.0
       },
-      "bus_bits_per_op": 8068
+      "bus_bits_per_op": 504
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
-     "bus_bits_per_op": 12148,
+     "gated_lane_frac_alt_grouping": 0.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 8664,
      "int8_twos_complement": {
       "p1_bit": [
        0.0,
@@ -7277,6 +8175,30 @@
       "mean_value": 0.6875,
       "mean_popcount": 1.4946
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 8720.03,
+      "sd": 272.32779,
+      "p2.5": 8226.0,
+      "p97.5": 9242.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "gauss_q": {
@@ -7336,11 +8258,11 @@
        0.504883
       ],
       "hamming": {
-       "all": 7.9961,
-       "sign": 1.0,
-       "mag": 6.9961
+       "all": 15.9922,
+       "sign": 2.0,
+       "mag": 13.9922
       },
-      "bus_bits_per_op": 32752
+      "bus_bits_per_op": 65504
      },
      "b": {
       "zero_word_frac": 0.0,
@@ -7390,15 +8312,20 @@
        0.487305
       ],
       "hamming": {
-       "all": 16.2598,
-       "sign": 1.9751,
-       "mag": 14.2847
+       "all": 0.9863,
+       "sign": 0.123,
+       "mag": 0.8633
       },
-      "bus_bits_per_op": 66600
+      "bus_bits_per_op": 4040
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
-     "bus_bits_per_op": 99352,
+     "gated_lane_frac_alt_grouping": 0.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 69544,
      "int8_twos_complement": {
       "p1_bit": [
        0.518066,
@@ -7414,6 +8341,30 @@
       "mean_value": 0.0562,
       "mean_popcount": 4.0459
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 69595.665,
+      "sd": 1002.949644,
+      "p2.5": 67590.0,
+      "p97.5": 71634.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "a_full_b_zeros": {
@@ -7473,11 +8424,11 @@
        0.501953
       ],
       "hamming": {
-       "all": 7.9648,
-       "sign": 1.0078,
-       "mag": 6.957
+       "all": 15.9297,
+       "sign": 2.0156,
+       "mag": 13.9141
       },
-      "bus_bits_per_op": 32624
+      "bus_bits_per_op": 65248
      },
      "b": {
       "zero_word_frac": 1.0,
@@ -7533,9 +8484,14 @@
       },
       "bus_bits_per_op": 0
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4096,
      "gated_lane_frac": 1.0,
-     "bus_bits_per_op": 32624,
+     "gated_lane_frac_alt_grouping": 1.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 65248,
      "int8_twos_complement": {
       "p1_bit": [
        0.260742,
@@ -7551,6 +8507,30 @@
       "mean_value": -0.6934,
       "mean_popcount": 2.0498
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 1.0,
+      "sd": 0.0,
+      "p2.5": 1.0,
+      "p97.5": 1.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 65549.44,
+      "sd": 730.291367,
+      "p2.5": 64032.0,
+      "p97.5": 66976.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "a_zeros_b_full": {
@@ -7664,15 +8644,20 @@
        0.504883
       ],
       "hamming": {
-       "all": 15.8335,
-       "sign": 1.9736,
-       "mag": 13.8599
+       "all": 1.0107,
+       "sign": 0.1265,
+       "mag": 0.8843
       },
-      "bus_bits_per_op": 64854
+      "bus_bits_per_op": 4140
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 4096,
      "gated_lane_frac": 1.0,
-     "bus_bits_per_op": 64854,
+     "gated_lane_frac_alt_grouping": 1.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 4140,
      "int8_twos_complement": {
       "p1_bit": [
        0.241211,
@@ -7688,6 +8673,30 @@
       "mean_value": 0.5,
       "mean_popcount": 2.0068
      }
+    },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 400,
+      "mean": 1.0,
+      "sd": 0.0,
+      "p2.5": 1.0,
+      "p97.5": 1.0
+     },
+     "bus_bits_per_op": {
+      "n": 400,
+      "mean": 4095.72,
+      "sd": 44.475688,
+      "p2.5": 4008.0,
+      "p97.5": 4186.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    },
    "sorted": {
@@ -7695,9 +8704,9 @@
     "tier": 1,
     "file": "tiles/int8/sorted.bin",
     "bytes": 2048,
-    "sha256": "5a1b11a784a9ab0ba0d461522923b91821831c6eadcaa1ca8864b22917e4c9b4",
+    "sha256": "0f8f20bf3155dda98e51878cc999c21b45399266558b9d237903e3f530712948",
     "sha256_a": "11f303220db25fafc373a448a9cec3ef9b5adf44b8e62434c7b1fd2b6d3305eb",
-    "sha256_b": "c71bbbf83a09ae5db5b4baf61e936f9964deaa1a878995be8608061702ab5e6f",
+    "sha256_b": "ad7093a4884c7075e06a46e96336b6015138ce2e14f004a8ef3dbbec143fd886",
     "stats": {
      "a": {
       "zero_word_frac": 0.0,
@@ -7747,11 +8756,11 @@
        0.529297
       ],
       "hamming": {
-       "all": 6.1367,
-       "sign": 0.75,
-       "mag": 5.3867
+       "all": 12.2734,
+       "sign": 1.5,
+       "mag": 10.7734
       },
-      "bus_bits_per_op": 25136
+      "bus_bits_per_op": 50272
      },
      "b": {
       "zero_word_frac": 0.0,
@@ -7801,15 +8810,20 @@
        0.549805
       ],
       "hamming": {
-       "all": 11.9058,
-       "sign": 1.417,
-       "mag": 10.4888
+       "all": 0.7505,
+       "sign": 0.0928,
+       "mag": 0.6577
       },
-      "bus_bits_per_op": 48766
+      "bus_bits_per_op": 3074
      },
+     "microops_per_op": 256,
+     "gate_decisions_per_op": 2048,
+     "column_slot_cycles_per_op": 4096,
      "gated_lane_cycles": 0,
      "gated_lane_frac": 0.0,
-     "bus_bits_per_op": 73902,
+     "gated_lane_frac_alt_grouping": 0.0,
+     "gated_lane_frac_alt_grouping_note": "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 amendment A4 states; kept as a cross-check, not as the spec's figure",
+     "bus_bits_per_op": 53346,
      "int8_twos_complement": {
       "p1_bit": [
        0.511719,
@@ -7826,13 +8840,37 @@
       "mean_popcount": 4.0879
      }
     },
+    "provisional": {
+     "gated_lane_cycles": false,
+     "gated_lane_frac": false,
+     "hamming": true,
+     "bus_bits_per_op": true,
+     "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only on it and on the (A word, B column-pair) set, so they are not provisional. The hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, facts.hamming_convention), so quote them as a design-time model, not a count."
+    },
     "permutation_of": "full",
     "multiset_identical_to_base": true,
     "hamming_vs_base": {
-     "a_all_base": 7.9648,
-     "b_all_base": 16.4629,
-     "bus_bits_per_op_base": 100056,
-     "bus_bits_per_op_ratio": 0.7386
+     "a_all_base": 15.9297,
+     "b_all_base": 0.9922,
+     "bus_bits_per_op_base": 69312,
+     "bus_bits_per_op_ratio": 0.7697
+    },
+    "replicates": {
+     "gated_lane_frac": {
+      "n": 12,
+      "mean": 0.0,
+      "sd": 0.0,
+      "p2.5": 0.0,
+      "p97.5": 0.0
+     },
+     "bus_bits_per_op": {
+      "n": 12,
+      "mean": 53346.833333,
+      "sd": 451.861973,
+      "p2.5": 52730.0,
+      "p97.5": 53972.0
+     },
+     "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"
     }
    }
   }
@@ -7899,19 +8937,57 @@
   "decoded_back_to_intended_values": true,
   "problems": []
  },
+ "sort_baselines": {
+  "fp32": {
+   "base_kind": "randn",
+   "base": 82214,
+   "stream_aware_minimiser": 60856,
+   "value_sort_naive": 84248,
+   "value_sort_pair_aware": 76872,
+   "stream_aware_minimiser_ratio": 0.7402,
+   "value_sort_naive_ratio": 1.0247,
+   "value_sort_pair_aware_ratio": 0.935,
+   "note": "value_sort_naive sorts each A word-column and each B line ascending in place and knows nothing about the stream; value_sort_pair_aware deals each sorted B line into the (l, l+8) pairs, so it already uses half of the stream fact. Both hold the base kind's operand multiset exactly."
+  },
+  "fp16": {
+   "base_kind": "randn",
+   "base": 84416,
+   "stream_aware_minimiser": 61846,
+   "value_sort_naive": 83412,
+   "value_sort_pair_aware": 78222,
+   "stream_aware_minimiser_ratio": 0.7326,
+   "value_sort_naive_ratio": 0.9881,
+   "value_sort_pair_aware_ratio": 0.9266,
+   "note": "value_sort_naive sorts each A word-column and each B line ascending in place and knows nothing about the stream; value_sort_pair_aware deals each sorted B line into the (l, l+8) pairs, so it already uses half of the stream fact. Both hold the base kind's operand multiset exactly."
+  },
+  "int8": {
+   "base_kind": "full",
+   "base": 69312,
+   "stream_aware_minimiser": 53346,
+   "value_sort_naive": 67426,
+   "stream_aware_minimiser_ratio": 0.7697,
+   "value_sort_naive_ratio": 0.9728,
+   "note": "value_sort_naive sorts each A word-column and each B line ascending in place and knows nothing about the stream; value_sort_pair_aware deals each sorted B line into the (l, l+8) pairs, so it already uses half of the stream fact. Both hold the base kind's operand multiset exactly."
+  }
+ },
  "counts": {
   "fp32": {
    "kinds": 18,
-   "tier1": 11
+   "tier1": 11,
+   "tier2": 7
   },
   "fp16": {
    "kinds": 17,
-   "tier1": 8
+   "tier1": 8,
+   "tier2": 9
   },
   "int8": {
    "kinds": 16,
-   "tier1": 11
+   "tier1": 11,
+   "tier2": 5
   },
-  "total_kinds": 51
+  "total_kinds": 51,
+  "tier1_total": 30,
+  "tier2_total": 21
  }
 }

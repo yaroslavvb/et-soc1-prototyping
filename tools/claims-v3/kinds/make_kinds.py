@@ -29,26 +29,49 @@ THE THREE FACTS EVERY OTHER LANE MUST GET RIGHT (sources in kinds.json["facts"])
    So in every type the tile is a 16x16 grid of 32-bit operand words, and the A word index EQUALS the B line
    index: both are the k-group.
 
-2. STREAM ORDER (PRM 9.4, `vpu_tensorfma.v`, and `rtl-sim/fma_toggle/tb.sv` task `one_op`):
+2. STREAM ORDER — AND IT IS NOT THE SAME IN ALL THREE TYPES.
+   fp32 and fp16 (txfma; PRM 9.4, `vpu_tensorfma.v`, `rtl-sim/fma_toggle/tb.sv` task `one_op`):
        for k in 0..15:            # the k-group: B line k, A word k
          for i in 0..15:          # A row
            for h in 0, 1:         # C columns 0-7, then 8-15
              A operand = Aword[i][k], BROADCAST to all eight lanes
              B operand of lane l  = Bword[k][8*h + l]
-   512 micro-ops, one a cycle, then a gap (546 cycles an op for fp32 and fp16, 318 for int8).  Therefore:
-   the A word changes every SECOND cycle and walks DOWN a column of A; lane l's B word ALTERNATES every cycle
-   between column l and column l+8 of the SAME B line, sixteen times, before the next k-group.  An ordering
-   that is "sorted" for the A side is a sort down each A word-column; for the B side it is a pairing of
-   column l with column l+8 inside each line.  Sorting the rows of the matrix is NOT the same thing.
+   512 micro-ops, one a cycle, then a gap (546 cycles an op).  So the A word changes every SECOND cycle and
+   walks DOWN a column of A; lane l's B word ALTERNATES every cycle between column l and column l+8 of the
+   SAME B line, sixteen times, before the next k-group.
+   int8 (TIMA) IS A DIFFERENT STREAM:
+       for p in 0..15:            # the k-group: B line p, A word p
+         for i in 0..15:          # A row     -- NO h loop
+             A operand = Aword[i][p], BROADCAST to all SIXTEEN column slots
+             B operand of column slot j = Bword[p][j]
+   `fma_exec_last_b_col` is forced true by `req_int8` (`vpu_tensorfma.v:412`) and `fma_exec_b_col_next` never
+   advances ("for INT8, we do all B cols at once", `:717-718`), so one micro-op covers all sixteen columns:
+   256 micro-ops, which is the only count that fits the MEASURED 318 cycles an op (E36/E39,
+   `docs/findings/05-claims.md:463` and `:480`).  int8 also runs on another unit entirely
+   (`clock_en_txfma = enabled_int & ~req_int8`, `clock_en_tima = enabled_int & req_int8`, `:157-166`).  So in
+   int8 the A word changes EVERY cycle and the B line is held for all sixteen micro-ops of its k-group —
+   the opposite of the fp32 picture, and int8's operand bus is A-dominated.
+   An ordering that is "sorted" for the A side is a path down each A word-column (all three types); for the B
+   side it is a pairing of column l with column l+8 inside each line (fp32/fp16) or an assignment across the
+   sixteen line boundaries (int8).  Sorting the rows of the matrix is NOT the same thing.
 
-3. ZERO GATING IS WORD-WIDE, NOT ELEMENT-WIDE (`vpu_ctrl.v` lines 1230-1233, 817, 837-839; `tb.sv` line 56:
-   `lane_valid[l] = uop_valid & (uop_mul | ((uop_a != 32'b0) & (uop_b[l] != 32'b0)))`).  The flags are
-   `f3_zero_data_a = {8{f3_tena_regfile_wdata_l == 32'b0}}` (one flag, broadcast: an A zero gates all eight
-   lanes) and `f3_zero_data_b[l] = (f3_tenb_regfile_wdata_l[32*l +: 32] == 32'b0)` (per lane).  So a lane is
-   gated when the WHOLE 32-bit word is zero: in fp16 both halves must be zero, in int8 all four bytes.  Half
-   the ELEMENTS zero gates half the lanes in fp32, a quarter in fp16 and a sixteenth in int8.  That is why
-   this spec carries both `sparse*` (element-granular, the data property) and `wsparse*` (word-granular, the
-   gate's property) for fp16 and int8.  The first op of a launch is a multiply pass and is not gated at all.
+3. ZERO GATING IS WORD-WIDE, NOT ELEMENT-WIDE — AND IN int8 IT IS TWO WORDS WIDE.
+   `ex_tensor_zero_mask = A_zero | (tenB_zero[raddr] & tenB_zero[raddr|1])` (`vpu_ctrl.v:802-818`), eight gate
+   bits, clearing `ex_txfma_valid` (fp32/fp16) or `ex_tima_valid` (int8) and only for `VPU_FCMD_MADD`.  The
+   flags are on full 32-bit words: `f3_zero_data_a = {8{f3_tena_regfile_wdata_l == 32'b0}}` (one flag,
+   broadcast: an A zero gates the whole micro-op) and `f3_zero_data_b[l]` per lane (`:1229-1234`).  So:
+     fp32  the lane's own 32-bit B word must be zero          — 1 element
+     fp16  BOTH halves of it must be zero                     — 2 elements
+     int8  ALL EIGHT bytes of the column PAIR (l, l+8) must be zero — 8 elements, because
+           `s1_tima_tenb_raddr = {fma_exec_b_rd_ptr, 1'b0}` (`vpu_tensorfma.v:863`) makes raddr and raddr|1
+           the two halves of ONE 64-byte B line, both TIMAs are live at `cols_b = 3`, and the AND is real.
+           For fp32 and fp16 `ex_tima_valid_unqual` is 0, both terms address the same row, and the AND is a
+           no-op — which is why `tb.sv:56`'s one-word rule is right for those two types only.
+   Half the ELEMENTS zero therefore gates about half the lanes in fp32, three eighths less in fp16 and almost
+   nothing in int8.  That is why this spec carries both `sparse*` (element-granular, the data property) and
+   `wsparse*` (word-granular) for fp16 and int8 — and why in int8 even `wsparse50` does not gate half the
+   lanes, since the gate wants BOTH words of the pair.  The first op of a launch is a multiply pass and is
+   not gated at all.
 
 Statistics recorded per tile, per side (A and B), in kinds.json:
   zero_word_frac      fraction of the 256 operand words that are all-zero  — what the gate sees
@@ -57,13 +80,20 @@ Statistics recorded per tile, per side (A and B), in kinds.json:
   p1_elem[W]          P(bit b of one element = 1), W = 32 / 16 / 8, two's complement for int8 (bit 7 = sign)
   hamming             mean bits that differ between CONSECUTIVE operands in the stream order of fact 2, per
                       32-bit word and per field (sign / exp / mant, or sign / mag for int8).  Cyclic over the
-                      512 micro-ops, the convention of `tools/claims-v3/hl/make_hl.py` `fma_flips`, so these
-                      numbers are directly comparable with E60/E65/E67/E70.  The A figure is one broadcast
-                      word; the B figure is the mean over the eight lanes.
-  bus_bits_per_op     8*dA + sum_l dB_l summed over the 512 micro-ops: the operand bits the unit's input bus
-                      flips in one TensorFMA, the quantity `rtl-sim/fma_toggle`'s `bus` counter measures.
-  gated_lane_cycles   of the 4,096 lane-cycles of one accumulate op, how many are gated (A word zero OR that
-                      lane's B word zero) — the clock-gated, flip-free fraction.
+                      micro-ops of one op (512 / 512 / 256), the convention of
+                      `tools/claims-v3/hl/make_hl.py` `fma_flips`, so the fp32 numbers are directly
+                      comparable with E60/E65/E67/E70.  The A figure is one broadcast word; the B figure is
+                      the mean over the column slots.
+  bus_bits_per_op     slots*dA + sum_j dB_j summed over the micro-ops, slots = 8 / 8 / 16: the operand bits
+                      the unit's input bus flips in one TensorFMA.  Counting the broadcast A word once per
+                      slot is a CONVENTION inherited from the bench, not a measurement — see
+                      kinds.json facts.hamming_convention.
+  gated_lane_cycles   of the 4,096 column-slot-cycles of one accumulate op, how many are gated.  There are
+                      eight gate bits a micro-op in every type, so that is 4,096 decisions in fp32/fp16 and
+                      2,048 in int8, each covering two column slots; `gated_lane_frac` is the same either way.
+  replicates          the SAME RULE re-drawn with independent seeds (default 400): the mean is the
+                      design-time expectation, and sd / p2.5 / p97.5 are the spread one tile can land in.
+                      E78 and E80 run one tile a cell, so the committed tile's count is itself a draw.
   pair_any_zero       fp16 only: of the 4,096 two-term updates of one op, how many have any of a1, a2, b1, b2
                       zero, which is where PRM 9.4's pseudo-code drops the update (host `expectC`, `literal`).
 """
@@ -87,6 +117,17 @@ TYPES = {
     "int8": (4, 1, "<i1", 64),
 }
 CYCLES_PER_OP = {"fp32": 546, "fp16": 546, "int8": 318}
+
+# Micro-ops in one TensorFMA op, and the column slots one micro-op drives.  fp32 and fp16 run on txfma: two
+# half-passes of eight lanes per (k, i), 512 micro-ops.  int8 runs on TIMA and does ALL SIXTEEN B columns in one
+# micro-op (`vpu_tensorfma.v:412` and `:717-718`), so there is no h loop: 256 micro-ops, which is the only one
+# of the two that fits the measured 318 cycles an op (`docs/findings/05-claims.md` E36/E39).
+MICROOPS_PER_OP = {"fp32": 512, "fp16": 512, "int8": 256}
+COLUMN_SLOTS = {"fp32": 8, "fp16": 8, "int8": 16}
+# Gate decisions per micro-op: always eight (`ex_tensor_zero_mask` is VPU_LANE_NUM = 8 bits wide).  In int8 one
+# decision covers the column PAIR (l, l+8), because the mask ANDs the two TenB rows of the B line.
+GATE_SLOTS_PER_DECISION = {"fp32": 1, "fp16": 1, "int8": 2}
+COLUMN_SLOT_CYCLES = {t: MICROOPS_PER_OP[t] * COLUMN_SLOTS[t] for t in MICROOPS_PER_OP}   # 4,096 in every type
 
 # Field masks over the 32-bit operand word, every element of the word at once.
 FIELDS = {
@@ -130,7 +171,7 @@ KINDS = {
         ("uniform01",      2, "uniform [0, 1), rounded to fp16"),
         ("sparse50",       1, "randn with half the ELEMENTS zero: only 1/4 of the words gate"),
         ("sparse90",       2, "randn with 90% of the elements zero: 81% of the words gate"),
-        ("wsparse50",      1, "randn with half the WORDS zero: the kind that gates exactly half the lanes"),
+        ("wsparse50",      1, "randn with half the WORDS zero: the kind that really gates half of fp16's lanes"),
         ("wsparse90",      2, "randn with 90% of the words zero"),
         ("smallint",       2, "integers -8..7 as fp16 values"),
         ("fp8grid",        2, "randn rounded to the nearest e4m3 value, held in fp16: 3 mantissa bits"),
@@ -151,7 +192,8 @@ KINDS = {
         ("ternary",        1, "-1, 0, +1 with equal probability: a ternary-quantised weight"),
         ("sparse50",       1, "`full` with half the BYTES zero: only 1/16 of the words gate"),
         ("sparse90",       2, "`full` with 90% of the bytes zero: 65.6% of the words gate"),
-        ("wsparse50",      1, "`full` with half the WORDS zero: gates exactly half the lanes"),
+        ("wsparse50",      1, "`full` with half the WORDS zero: still gates only ~5/8 of int8's lanes, because "
+                              "the gate wants BOTH words of the column pair"),
         ("wsparse90",      2, "`full` with 90% of the words zero"),
         ("highbit",        2, "+64 or -64 (0x40 / 0xC0): one magnitude bit, the sign changing"),
         ("gauss_q",        1, "round(16*randn) clipped to +-127: a quantised weight, most bytes small"),
@@ -350,15 +392,60 @@ def from_words(aw, bw):
 
 
 # ------------------------------------------------------------------ the stream of fact 2
-def issue_streams(aw, bw):
-    """Per micro-op, in issue order: the broadcast A word, and the eight lanes' B words."""
+def issue_streams(aw, bw, type_name):
+    """Per micro-op, in issue order: the broadcast A word, and the B word of each column slot.
+
+    fp32 / fp16 (txfma, 512 micro-ops):  for k: for i: for h in 0,1 -> A = Aword[i][k] broadcast, eight slots
+    carrying Bword[k][8h+l].  The A word is held two micro-ops; each lane's B word alternates every cycle
+    between columns l and l+8 of the same line.
+
+    int8 (TIMA, 256 micro-ops):  for p: for i -> A = Aword[i][p] broadcast, SIXTEEN slots carrying the whole
+    line Bword[p][0..15].  `fma_exec_last_b_col` is forced true by `req_int8` (`vpu_tensorfma.v:412`) and
+    `fma_exec_b_col_next` never advances ("for INT8, we do all B cols at once", `:717-718`), so the inner h
+    loop does not exist: A changes EVERY micro-op walking down A's word-column p, and the B line is held for
+    all sixteen of them.  That is the opposite of the fp32 picture, and it is the stream that fits the measured
+    318 cycles an op.
+    """
     a_seq, b_seq = [], []
-    for k in range(N):
-        for i in range(N):
-            for h in (0, 1):
-                a_seq.append(int(aw[i][k]))
-                b_seq.append([int(bw[k][8 * h + l]) for l in range(8)])
+    if type_name == "int8":
+        for p in range(N):
+            for i in range(N):
+                a_seq.append(int(aw[i][p]))
+                b_seq.append([int(bw[p][j]) for j in range(N)])
+    else:
+        for k in range(N):
+            for i in range(N):
+                for h in (0, 1):
+                    a_seq.append(int(aw[i][k]))
+                    b_seq.append([int(bw[k][8 * h + l]) for l in range(8)])
     return np.array(a_seq, dtype=np.uint64), np.array(b_seq, dtype=np.uint64)
+
+
+def issue_streams_fast(aw, bw, type_name):
+    """The same two streams as `issue_streams`, built with numpy indexing instead of python loops, for the
+    replicate draws.  `--check` asserts the two agree exactly, on one tile of every type."""
+    a = np.asarray(aw, dtype=np.uint64)
+    b = np.asarray(bw, dtype=np.uint64)
+    if type_name == "int8":
+        return a.T.reshape(-1).copy(), np.repeat(b, N, axis=0)
+    a_seq = np.repeat(a.T.reshape(-1), 2)                      # (k, i) major, each held two micro-ops
+    b3 = b.reshape(N, 2, 8)                                    # [k][h][l]
+    b_seq = np.broadcast_to(b3[:, None, :, :], (N, N, 2, 8)).reshape(-1, 8).copy()
+    return a_seq, b_seq
+
+
+def gate_mask(a_seq, b_seq, type_name):
+    """The per-micro-op gate decisions of one ACCUMULATE op: True = that gate slot is off.
+
+    `ex_tensor_zero_mask = A_mask | (tenB_zero[raddr] & tenB_zero[raddr|1])` (`vpu_ctrl.v:808-817`).  For fp32
+    and fp16 `ex_tima_valid_unqual` is 0, so both terms address the same TenB row and the AND is a no-op: the
+    gate is one 32-bit word per lane.  For int8 `s1_tima_tenb_raddr = {fma_exec_b_rd_ptr, 1'b0}`
+    (`vpu_tensorfma.v:863`), so raddr and raddr|1 are the two halves of ONE 64-byte B line and the AND covers
+    columns l and l+8 together: eight int8 bytes, not four.  Shape (micro-ops, 8) in every type.
+    """
+    if type_name == "int8":
+        return (a_seq[:, None] == 0) | ((b_seq[:, 0:8] == 0) & (b_seq[:, 8:16] == 0))
+    return (a_seq[:, None] == 0) | (b_seq == 0)
 
 
 def dist_matrix(words):
@@ -424,25 +511,70 @@ def best_matching(d):
     return pairs, int(cost)
 
 
+def best_assignment(d):
+    """A low-cost assignment of 16 items to 16 positions: greedy cheapest-first, then 2-swap to a local
+    optimum.  Returns `pos[item] = position`.  Used for the int8 B side, where a whole line changes at once."""
+    n = len(d)
+    order = np.dstack(np.unravel_index(np.argsort(d, axis=None), d.shape))[0]
+    pos = [-1] * n
+    taken = [False] * n
+    left = n
+    for it, p in order:
+        if left == 0:
+            break
+        if pos[it] == -1 and not taken[p]:
+            pos[it], taken[p], left = int(p), True, left - 1
+    improved = True
+    while improved:
+        improved = False
+        for x in range(n):
+            for y in range(x + 1, n):
+                cur = d[x][pos[x]] + d[y][pos[y]]
+                if d[x][pos[y]] + d[y][pos[x]] < cur:
+                    pos[x], pos[y] = pos[y], pos[x]
+                    improved = True
+    return pos
+
+
 def sort_for_stream(aw, bw, type_name):
     """Permute the words into the stream order of least change, keeping the multiset of every A column and
     every B line (so the whole tile's operand multiset is identical to the base kind's).
 
-    A: the stream walks i = 0..15 down one word-column k (each word held for two micro-ops), so the cost of a
-       column is a Hamiltonian PATH through its sixteen words -> greedy nearest neighbour + 2-opt.
-    B: lane l alternates between columns l and l+8 of one line for 31 of its 32 micro-ops in a k-group, so the
-       cost of a line is the sum of the eight pair distances -> the EXACT minimum-weight perfect matching.
-       The pairs are then ordered by key and the smaller member put at column l, which only touches the 16
-       group-boundary transitions (one in 32) and is not optimised.
+    A, all three types: the stream walks i = 0..15 down one word-column (held two micro-ops in fp32/fp16, one
+       in int8 — the same PATH objective either way), so the cost of a column is a Hamiltonian PATH through
+       its sixteen words -> greedy nearest neighbour from all sixteen starts + 2-opt.
+    B, fp32 and fp16: lane l alternates between columns l and l+8 of one line for 31 of its 32 micro-ops in a
+       k-group, so the cost of a line is the sum of the eight pair distances -> the EXACT minimum-weight
+       perfect matching.  The pairs are then ordered by key and the smaller member put at column l, which only
+       touches the 16 group-boundary transitions (one in 32) and is not optimised.
+    B, int8: the whole line is held for all sixteen micro-ops of its k-group, so NOTHING inside a group costs
+       anything and the only B cost is the sixteen line boundaries, where all sixteen words change at once.
+       The objective is therefore a chain of assignment problems down the lines, solved greedily with 2-swap
+       and three sweeps including the cyclic wrap.  int8's bus is A-dominated anyway (A changes every cycle),
+       so this side moves little.
     `hamming_vs_base` in kinds.json reports what this actually achieved against the same multiset in the base
-    kind's order.
+    kind's order, under the stream of that type.
     """
     a2, b2 = np.array(aw, dtype=np.uint64), np.array(bw, dtype=np.uint64)
-    exact_b = True
     for k in range(N):
         col = np.array(a2[:, k])
         path, _ = best_path(dist_matrix(col))
         a2[:, k] = col[path]
+    if type_name == "int8":
+        key = mono_key(np.array(b2[0, :]), type_name)
+        b2[0, :] = np.array(b2[0, :])[np.argsort(np.asarray(key, dtype=np.uint64), kind="stable")]
+        for _ in range(3):
+            for p in range(1, N + 1):
+                prev, cur = b2[(p - 1) % N, :], np.array(b2[p % N, :])
+                if p == N:                                  # the cyclic wrap: line 15 -> line 0
+                    continue
+                d = popcount32(((cur[:, None] ^ prev[None, :])).astype(np.uint32)).reshape(N, N)
+                pos = best_assignment(d)
+                out = np.empty(N, dtype=np.uint64)
+                for it, q in enumerate(pos):
+                    out[q] = cur[it]
+                b2[p % N, :] = out
+        return a2, b2
     for p in range(N):
         line = np.array(b2[p, :])
         pairs, _ = best_matching(dist_matrix(line))
@@ -451,6 +583,32 @@ def sort_for_stream(aw, bw, type_name):
         pairs.sort(key=lambda t: int(key[t[0]]))
         for l, (x, y) in enumerate(pairs):
             b2[p, l], b2[p, 8 + l] = line[x], line[y]
+    return a2, b2
+
+
+def value_sort(aw, bw, type_name, pair_aware):
+    """The honest baselines section 4 compares the stream-aware minimiser against — a plain VALUE sort of the
+    same multiset, which is what a reader assumes "sorted data" means.
+
+    `pair_aware=False`: sort each A word-column and each B line ascending in place (column j of a line gets
+        the j-th smallest word).  This knows nothing about the stream.
+    `pair_aware=True`: the same A sort, but each B line's sorted words are dealt s[2l] -> column l and
+        s[2l+1] -> column l+8, so the (l, l+8) pair the fp32/fp16 lane alternates between holds two ADJACENT
+        values.  That already uses half of fact 2, so it is not a naive sort; it is reported separately.
+        In int8 the pair has no meaning (a line is held whole), so it is not computed.
+    """
+    a2, b2 = np.array(aw, dtype=np.uint64), np.array(bw, dtype=np.uint64)
+    for k in range(N):
+        col = np.array(a2[:, k])
+        a2[:, k] = col[np.argsort(np.asarray(mono_key(col, type_name), dtype=np.uint64), kind="stable")]
+    for p in range(N):
+        line = np.array(b2[p, :])
+        s = line[np.argsort(np.asarray(mono_key(line, type_name), dtype=np.uint64), kind="stable")]
+        if pair_aware:
+            for l in range(8):
+                b2[p, l], b2[p, 8 + l] = s[2 * l], s[2 * l + 1]
+        else:
+            b2[p, :] = s
     return a2, b2
 
 
@@ -464,7 +622,8 @@ def word_sparsify(aw, bw, frac, rng):
 
 # ------------------------------------------------------------------ statistics
 def side_stats(words, seq, type_name, broadcast):
-    """words: the 16x16 word grid of one side. seq: its issue stream (512,) or (512, 8)."""
+    """words: the 16x16 word grid of one side.  seq: its issue stream, (microops,) for A and
+    (microops, slots) for B — 512x8 in fp32/fp16, 256x16 in int8."""
     E, size, dtype, K = TYPES[type_name]
     w = np.asarray(words, dtype=np.uint64).reshape(-1)
     ew = 32 // E                                              # bits in one element
@@ -482,22 +641,96 @@ def side_stats(words, seq, type_name, broadcast):
     for f, m in FIELDS[type_name].items():
         ham[f] = round(float(np.mean(popcount32((d & np.uint64(m)).astype(np.uint32)))), 4)
     stats["hamming"] = ham
-    lanes = 8 if broadcast else 1                              # the broadcast word is presented on 8 ports
-    stats["bus_bits_per_op"] = int(popcount32(d.astype(np.uint32)).sum() * lanes)
+    # CONVENTION, not a measurement: the broadcast word is counted once per column slot it is presented to,
+    # which is `tb.sv`'s and `make_hl.py fma_flips`'s rule (`LANES * $countones(uop_a ^ pa)`).  It is the same
+    # multiplier on both sides, so A/B comparisons of bus_bits_per_op are comparisons of dA against dB.
+    slots = COLUMN_SLOTS[type_name] if broadcast else 1
+    stats["bus_bits_per_op"] = int(popcount32(d.astype(np.uint32)).sum() * slots)
     return stats
+
+
+def two_numbers(aw, bw, type_name):
+    """Just the two quantities the kinds table quotes, for a replicate draw: the gated fraction and the
+    operand bits the input bus flips in one op."""
+    a_seq, b_seq = issue_streams_fast(aw, bw, type_name)
+    gated = gate_mask(a_seq, b_seq, type_name)
+    da = (a_seq ^ np.roll(a_seq, -1)).astype(np.uint32)
+    db = (b_seq ^ np.roll(b_seq, -1, axis=0)).astype(np.uint32)
+    bus = int(popcount32(da).sum() * COLUMN_SLOTS[type_name] + popcount32(db).sum())
+    return float(gated.mean()), bus
+
+
+def band(values):
+    v = np.sort(np.asarray(values, dtype=np.float64))
+    n = len(v)
+    lo = v[max(0, int(round(0.025 * (n - 1))))]
+    hi = v[min(n - 1, int(round(0.975 * (n - 1))))]
+    return {"n": n, "mean": round(float(v.mean()), 6), "sd": round(float(v.std(ddof=1)), 6),
+            "p2.5": round(float(lo), 6), "p97.5": round(float(hi), 6)}
+
+
+def replicate_draws(type_name, kind, n, base_kind, sorter=None):
+    """Re-draw the SAME RULE n times with independent seeds and return the spread of the gated fraction and of
+    bus_bits_per_op.  This is what makes the committed tile's figures a sample rather than a law: E78 and E80
+    run one tile per cell, so the tile's own count is one draw from this distribution.
+
+    Deterministic kinds (every element the same constant) return None: their figures have no spread.
+    """
+    E, size, dtype, K = TYPES[type_name]
+    gs, bs = [], []
+    for r in range(n):
+        rng = np.random.default_rng(int.from_bytes(
+            hashlib.sha256(f"{SEED}/{type_name}/{kind}/rep{r}".encode()).digest()[:8], "little"))
+        if kind.startswith("wsparse"):
+            el = draw_elements(type_name, base_kind, rng)
+            if el is None:
+                return None
+            aw, bw = words_of(encode(el[0], el[1], type_name))
+            aw, bw = word_sparsify(aw, bw, int(kind[len("wsparse"):]) / 100.0, rng)
+        elif sorter is not None:
+            el = draw_elements(type_name, base_kind, rng)
+            if el is None:
+                return None
+            aw, bw = sorter(*words_of(encode(el[0], el[1], type_name)), type_name)
+        else:
+            el = draw_elements(type_name, kind, rng)
+            if el is None:
+                return None
+            aw, bw = words_of(encode(el[0], el[1], type_name))
+        g, b = two_numbers(aw, bw, type_name)
+        gs.append(g); bs.append(b)
+    if max(bs) == min(bs) and max(gs) == min(gs):
+        return None                                            # deterministic rule: no spread to report
+    return {"gated_lane_frac": band(gs), "bus_bits_per_op": band(bs),
+            "what": "the same rule re-drawn with independent seeds; the committed tile is one such draw"}
 
 
 def tile_stats(raw, type_name):
     E, size, dtype, K = TYPES[type_name]
     aw, bw = words_of(raw)
-    a_seq, b_seq = issue_streams(aw, bw)
+    a_seq, b_seq = issue_streams(aw, bw, type_name)
     out = {
         "a": side_stats(aw, a_seq, type_name, broadcast=True),
         "b": side_stats(bw, b_seq, type_name, broadcast=False),
     }
-    gated = (a_seq[:, None] == 0) | (b_seq == 0)               # (512, 8) lane-cycles of one accumulate op
-    out["gated_lane_cycles"] = int(gated.sum())
-    out["gated_lane_frac"] = round(float(gated.mean()), 6)
+    gated = gate_mask(a_seq, b_seq, type_name)                 # (microops, 8) gate decisions, accumulate op
+    g = GATE_SLOTS_PER_DECISION[type_name]
+    out["microops_per_op"] = MICROOPS_PER_OP[type_name]
+    out["gate_decisions_per_op"] = int(gated.size)             # 4,096 in fp32/fp16, 2,048 in int8
+    out["column_slot_cycles_per_op"] = COLUMN_SLOT_CYCLES[type_name]   # 4,096 in every type
+    out["gated_lane_cycles"] = int(gated.sum()) * g            # in column-slot-cycles, out of 4,096
+    out["gated_lane_frac"] = round(float(gated.mean()), 6)     # identical either way: g is uniform
+    if type_name == "int8":
+        # Cross-check against E79 amendment A4, which reads the per-lane grouping as the eight CONTIGUOUS
+        # bytes of columns 2l and 2l+1 rather than columns l and l+8.  The RTL indexing says (l, l+8) — see
+        # facts.zero_gating.int8 — but the two groupings are both "eight bytes must be zero", so the gated
+        # fraction barely moves, and no headline depends on which is right.  Recorded so Q130(b) and E78 can
+        # see the size of the open question instead of inheriting one lane's choice.
+        alt = (a_seq[:, None] == 0) | ((b_seq[:, 0::2] == 0) & (b_seq[:, 1::2] == 0))
+        out["gated_lane_frac_alt_grouping"] = round(float(alt.mean()), 6)
+        out["gated_lane_frac_alt_grouping_note"] = (
+            "the same gate with the pair taken as columns (2l, 2l+1) instead of (l, l+8), the grouping E79 "
+            "amendment A4 states; kept as a cross-check, not as the spec's figure")
     out["bus_bits_per_op"] = out["a"]["bus_bits_per_op"] + out["b"]["bus_bits_per_op"]
     a, b = decode(raw, type_name)
     if type_name == "fp16":
@@ -565,28 +798,100 @@ FACTS = {
         "source": "workloads/sparsity/host/main.cpp makeTiles() and fillValues() (--values file:<path>)",
     },
     "stream_order": {
-        "loops": "for k in 0..15: for i in 0..15: for h in 0,1",
-        "a_operand": "Aword[i][k], broadcast to all 8 lanes",
-        "b_operand": "Bword[k][8*h + l] for lane l",
-        "microops_per_op": 512, "lanes": 8, "lane_cycles_per_op": 4096,
-        "a_changes_every": "2 cycles, walking down A's word-column k",
-        "b_changes_every": "1 cycle, alternating columns l and l+8 of the same B line, 16 times per k-group",
+        "warning": "THE STREAM IS NOT THE SAME IN ALL THREE TYPES. fp32 and fp16 run on txfma; int8 runs on "
+                   "TIMA and does all sixteen B columns in one micro-op, so it has no h half-pass loop. "
+                   "Corrected Sat 31 Oct 2026 after verification: the first version of this file asserted the "
+                   "txfma stream for all three types, which the measured 318 cycles an op refutes.",
+        "fp32": {
+            "loops": "for k in 0..15: for i in 0..15: for h in 0,1",
+            "a_operand": "Aword[i][k], broadcast to all 8 lanes",
+            "b_operand": "Bword[k][8*h + l] for lane l",
+            "microops_per_op": 512, "column_slots_per_microop": 8, "column_slot_cycles_per_op": 4096,
+            "a_changes_every": "2 micro-ops, walking down A's word-column k",
+            "b_changes_every": "1 micro-op, alternating columns l and l+8 of the same B line, 16 times "
+                               "per k-group",
+        },
+        "fp16": "identical to fp32 (the same txfma unit, vpu_tensorfma.v:622); only E and K differ",
+        "int8": {
+            "loops": "for p in 0..15: for i in 0..15        (NO h loop)",
+            "a_operand": "Aword[i][p], broadcast to all 16 column slots",
+            "b_operand": "the whole line Bword[p][0..15], one word per column slot",
+            "microops_per_op": 256, "column_slots_per_microop": 16, "column_slot_cycles_per_op": 4096,
+            "a_changes_every": "1 micro-op, walking down A's word-column p — the opposite of fp32",
+            "b_changes_every": "16 micro-ops: the line is held for its whole k-group, so only the 16 line "
+                               "boundaries cost anything on the B side",
+            "why": "fma_exec_last_b_col is forced true by req_int8 (vpu_tensorfma.v:412) and "
+                   "fma_exec_b_col_next never advances (:717-718, '// First go to next B col block (for "
+                   "INT8, we do all B cols at once)'), so there is one micro-op per (p, i), not two. 256 "
+                   "micro-ops fit the measured 318 cycles an op; 512 at one a cycle cannot. int8 also runs "
+                   "on a different unit: clock_en_txfma = enabled_int & ~req_int8, clock_en_tima = "
+                   "enabled_int & req_int8 (:157-166), and fma_en is clocked only when ~req_int8 (:626-628).",
+            "provisional": "the 256 micro-ops and the 16-column bus follow from the loop RTL and the 318 "
+                           "cycles, but they are a RECONSTRUCTION, not a cycle-accurate simulation: int8 has "
+                           "no bench. The GATED fractions do not depend on it (they depend only on the "
+                           "(A word, B column-pair) set and the gate rule); the int8 hamming and "
+                           "bus_bits_per_op figures do, and are marked provisional per kind.",
+        },
         "cycles_per_op": CYCLES_PER_OP,
-        "source": "PRM 9.4; external/core-et/rtl/shire/minion/vpu/vpu_tensorfma.v; "
-                  "rtl-sim/fma_toggle/tb.sv task one_op (lines 144-149, 92-110); "
-                  "tools/claims-v3/hl/make_hl.py issue_streams()",
+        "macs_per_op": {"fp32": 4096, "fp16": 8192, "int8": 16384},
+        "source": "PRM 9.4; external/core-et/rtl/shire/minion/vpu/vpu_tensorfma.v lines 157-166, 412, "
+                  "626-628, 717-718, 744-752, 863; rtl-sim/fma_toggle/tb.sv task one_op (lines 144-149, "
+                  "92-110) for fp32/fp16; tools/claims-v3/hl/make_hl.py issue_streams(); the 546/546/318 "
+                  "cycles per op in docs/findings/05-claims.md E36 (line 463) and E39 (line 480)",
     },
     "zero_gating": {
-        "granularity_bits": 32,
-        "rule": "lane_valid[l] = uop_valid & (uop_mul | ((Aword != 32'b0) & (Bword[l] != 32'b0)))",
-        "a_side": "one flag broadcast to all 8 lanes: an A word of zero gates the whole micro-op",
-        "b_side": "per lane, on that lane's 32-bit slice of the B cache line",
-        "fp16": "BOTH halves must be zero for the lane to gate",
-        "int8": "ALL FOUR bytes must be zero for the lane to gate",
-        "first_op_not_gated": "the first op of a launch is a multiply pass (MUL) and is never gated",
-        "source": "external/core-et/rtl/shire/minion/vpu/vpu_ctrl.v lines 1230-1233 (f3_zero_data_a/b), "
-                  "817 (ex_tensor_zero_mask), 837-839 (ex_fma_gate_mask, ex_txfma_valid); "
-                  "rtl-sim/fma_toggle/tb.sv line 56",
+        "rule": "ex_tensor_zero_mask = A_zero | (tenB_zero[raddr] & tenB_zero[raddr|1]); it clears "
+                "ex_txfma_valid (fp32/fp16) or ex_tima_valid (int8), and only for VPU_FCMD_MADD",
+        "a_side": "one flag on the full 32-bit A word, broadcast to all 8 gate bits: an A word of zero gates "
+                  "the whole micro-op",
+        "b_side": "one gate bit per lane, on a 32-bit slice of a TenB row",
+        "gate_bits_per_microop": 8,
+        "zero_test_bits": 32,
+        "test_against_gate": "there is ONE zero test and it is 32 bits wide in every type, taken when the "
+                             "tensor operand register is written (vpu_ctrl.v:1229-1234) — so the word-zero "
+                             "RATE is p^E for element sparsity p. What differs is how many of those tests a "
+                             "GATE DECISION needs: one in fp32 and fp16, and in int8 two, ANDed. Do not "
+                             "quote the word-zero rate as the gated rate in int8: it is p^4 against p^8.",
+        "fp32": {"granularity_bits": 32, "rule": "the lane's own 32-bit B word must be zero",
+                 "elements_that_must_be_zero": 1},
+        "fp16": {"granularity_bits": 32, "rule": "BOTH halves of the lane's 32-bit B word must be zero",
+                 "elements_that_must_be_zero": 2},
+        "int8": {"granularity_bits": 64,
+                 "rule": "ALL EIGHT bytes of the column PAIR (l, l+8) must be zero — the mask ANDs the two "
+                         "TenB rows of the B line, and one gate bit covers both column slots",
+                 "elements_that_must_be_zero": 8,
+                 "why": "s1_tima_tenb_raddr = {fma_exec_b_rd_ptr, 1'b0} (vpu_tensorfma.v:863), so raddr and "
+                        "raddr|1 are the two halves of one 64-byte B line (a TenB row is VPU_DATA_SZ = "
+                        "8*32 = 256 b = 8 words); ex_tensorb_zero_mask_tima1[l] is only forced to 1 when "
+                        "~ex_tima_mask[l][1], and ex_tima_mask[l][t] = ex_fma_mask[(l>>1)+(t<<2)] = 1 for "
+                        "every (l, t) at cols_b = 3 (vpu_tensorfma.v:654-663, 899), so both TIMAs are live "
+                        "and the AND is real. For fp32 and fp16 ex_tima_valid_unqual is 0, both terms "
+                        "address ex_ra2_ten, and the AND is a no-op — which is why the 32-bit rule is right "
+                        "for those two types only.",
+                 "corrected": "Sat 31 Oct 2026: the first version of this file said ALL FOUR bytes.",
+                 "which_pair": "the pair is columns (l, l+8), because ex_tensor_zero_mask_ext[l][t] uses the "
+                               "SAME bit l for both TIMAs while tima0 reads TenB row raddr (words 0-7 = "
+                               "columns 0-7) and tima1 row raddr|1 (words 8-15 = columns 8-15); the enable "
+                               "mapping ex_tima_mask[l][t] = ex_fma_mask[(l>>1)+(t<<2)] puts unit (l, t) on "
+                               "column 2*((l>>1)+4t) + (l&1), which is column l at t=0 and column l+8 at "
+                               "t=1 — the same answer twice. E79 amendment A4 instead states the grouping as "
+                               "the eight CONTIGUOUS bytes of columns (2l, 2l+1). Both are 'eight bytes must "
+                               "be zero', so every kind here also carries "
+                               "stats.gated_lane_frac_alt_grouping under A4's reading: the two agree to "
+                               "within a per-tile band and no claim depends on which is right. Open for "
+                               "Q130(b)."},
+        "bench_rule_is_fp32_only": "rtl-sim/fma_toggle/tb.sv:56 lane_valid[l] = uop_valid & (uop_mul | "
+                                   "((uop_a != 32'b0) & (uop_b[l] != 32'b0))) states the fp32/fp16 rule; the "
+                                   "bench has no int8 path",
+        "first_op_not_gated": "the first op of a launch is a multiply pass (MUL) and is never gated; in int8 "
+                              "the gate also needs ex_tima_ren3 && ~ex_tima_last_pass (vpu_ctrl.v:827)",
+        "source": "external/core-et/rtl/shire/minion/vpu/vpu_ctrl.v lines 1229-1234 (f3_zero_data_a/b), "
+                  "802-818 (ex_tensor_zero_mask), 824-832 (ex_tima_valid), 834-840 (ex_fma_gate_mask, "
+                  "ex_txfma_valid); external/core-et/rtl/inc/minion_defines.vh:189-192 "
+                  "(VPU_LANE_NUM 8, VPU_DATA_S_SZ 32, VPU_DATA_SZ 256); "
+                  "external/core-et/rtl/inc/vpu_defines.vh:210 (VPU_NUM_TIMA 2); "
+                  "external/core-et/rtl/shire/minion/vpu/vpu_tensorfma.v:863, 899; "
+                  "rtl-sim/fma_toggle/tb.sv line 56 (fp32/fp16 only)",
     },
     "fp16_two_term_rule": {
         "rule": "the two-term update c += a1*b1 + a2*b2 happens only when all four of a1, a2, b1, b2 are "
@@ -597,24 +902,43 @@ FACTS = {
         "source": "PRM 9.4 pseudo-code; workloads/sparsity/host/main.cpp expectC(..., literal=true)",
     },
     "hamming_convention": {
-        "transitions": "cyclic over the 512 micro-ops (micro-op t against t+1, the last against the next op's "
-                       "first), the convention of tools/claims-v3/hl/make_hl.py fma_flips",
-        "a_figure": "one broadcast word", "b_figure": "mean over the eight lanes",
-        "bus_bits_per_op": "8*dA + sum over lanes of dB, summed over the 512 transitions",
+        "transitions": "cyclic over the micro-ops of one op (micro-op t against t+1, the last against the "
+                       "next op's first): 512 in fp32 and fp16, 256 in int8. The convention of "
+                       "tools/claims-v3/hl/make_hl.py fma_flips",
+        "a_figure": "one broadcast word", "b_figure": "mean over the column slots (8 / 8 / 16)",
+        "bus_bits_per_op": "slots*dA + sum over the slots of dB, summed over the transitions, with slots = 8 "
+                           "for fp32 and fp16 and 16 for int8",
+        "A_BROADCAST_IS_A_CONVENTION": "counting the one broadcast A word once per column slot is inherited "
+                                       "from tb.sv (LANES * $countones(uop_a ^ pa)) and make_hl.py fma_flips. "
+                                       "It is NOT a measurement. The same multiplier sits on both sides, so "
+                                       "an A-against-B comparison of bus_bits_per_op is exactly a comparison "
+                                       "of mean dA against mean dB and the broadcast contributes nothing to "
+                                       "the ratio. Physically, if the broadcast word travels one net with "
+                                       "fanout rather than one register per lane, this convention overcounts "
+                                       "the A side: E70 already measured shared-wire carry-over at 1.246. "
+                                       "E78 must validate the A-side weight before any of this is quoted as "
+                                       "energy.",
     },
     "replay_in_rtl": {
         "how": "rtl-sim/fma_toggle/tiles.py --from-bin <file>, then obj_dir/Vtb +tiles=<hex>",
-        "caveat": "txfma_top is the fp32 unit, so an fp16 or int8 tile replays as the right OPERAND WORDS and "
-                  "the right gating, but fp32 arithmetic inside the unit: quote its bus and gate counts, not "
-                  "its multiplier-tree counts, for those two types",
+        "fp32": "exact: that is the unit and the stream the bench implements",
+        "fp16": "the right OPERAND WORDS, the right stream and the right gate, but fp32 arithmetic inside the "
+                "unit: quote its bus and gate counts, not its multiplier-tree counts",
+        "int8": "DO NOT replay an int8 tile for gate or bus counts. The bench is txfma with the h half-pass "
+                "loop and the 32-bit-word gate; int8 on the card runs on TIMA with 256 micro-ops, 16 column "
+                "slots and a 64-bit column-pair gate. The bench would report the operand words correctly and "
+                "everything derived from the stream or the gate wrongly. "
+                "(Corrected Sat 31 Oct 2026: the first version of this file said int8 replays correctly.)",
     },
 }
 
 
-def build(out_dir, check=False):
+def build(out_dir, check=False, replicates=400, sort_replicates=12):
     os.makedirs(out_dir, exist_ok=True)
     spec = {
         "experiment": "Q130(s)", "date": "2026-10-31", "seed": SEED,
+        "revision": "2 (Sat 31 Oct 2026, after verification: int8's stream and gate corrected from the TIMA "
+                    "path, the two value-sort baselines committed, replicate bands added, tier counts fixed)",
         "generator": "tools/claims-v3/kinds/make_kinds.py",
         "used_by": ["E78 (energy matrix, aifoundry3)", "E80 (speed under the governor, aifoundry2)",
                     "Q130(b) (RTL toggle counts)", "Q130(c) (the empirical model)"],
@@ -627,6 +951,13 @@ def build(out_dir, check=False):
     problems = []
     for type_name in ("fp32", "fp16", "int8"):
         E, size, dtype, K = TYPES[type_name]
+        if check:                                              # the fast stream must equal the explicit one
+            aw_t = np.arange(WORDS, dtype=np.uint64).reshape(N, N)
+            bw_t = (np.arange(WORDS, dtype=np.uint64) + 1000).reshape(N, N)
+            s1 = issue_streams(aw_t, bw_t, type_name)
+            s2 = issue_streams_fast(aw_t, bw_t, type_name)
+            if not (np.array_equal(s1[0], s2[0]) and np.array_equal(s1[1], s2[1])):
+                problems.append(f"{type_name}: issue_streams_fast differs from issue_streams")
         td = os.path.join(out_dir, "tiles", type_name)
         os.makedirs(td, exist_ok=True)
         raws = {}
@@ -673,6 +1004,16 @@ def build(out_dir, check=False):
                 "sha256_b": hashlib.sha256(raw[1024:]).hexdigest(),
                 "stats": tile_stats(raw, type_name),
             }
+            if type_name == "int8":
+                ent["provisional"] = {
+                    "gated_lane_cycles": False, "gated_lane_frac": False,
+                    "hamming": True, "bus_bits_per_op": True,
+                    "why": "the int8 gate rule is read straight off the RTL and the gated figures depend only "
+                          "on it and on the (A word, B column-pair) set, so they are not provisional. The "
+                          "hamming and bus figures depend on the reconstructed 256-micro-op TIMA stream and "
+                          "on the 16-slot A-broadcast convention (facts.stream_order.int8.provisional, "
+                          "facts.hamming_convention), so quote them as a design-time model, not a count.",
+                }
             if kind.endswith("_sorted") or kind == "sorted":
                 ent["permutation_of"] = base_kind
                 bw0, bw1 = words_of(raws[base_kind]), words_of(raw)
@@ -688,7 +1029,33 @@ def build(out_dir, check=False):
                     "bus_bits_per_op_ratio": round(ent["stats"]["bus_bits_per_op"]
                                                    / max(1, b0["bus_bits_per_op"]), 4),
                 }
+            n_rep = sort_replicates if (kind.endswith("_sorted") or kind == "sorted") else replicates
+            if n_rep:
+                rep = replicate_draws(type_name, kind, n_rep, base_kind,
+                                      sorter=sort_for_stream if (kind.endswith("_sorted") or kind == "sorted")
+                                      else None)
+                if rep is not None:
+                    ent["replicates"] = rep
             spec["kinds"][type_name][kind] = ent
+        # The two value-sort baselines section 4 of the README compares the stream-aware minimiser against.
+        sb = {"base_kind": base_kind,
+              "base": spec["kinds"][type_name][base_kind]["stats"]["bus_bits_per_op"],
+              "stream_aware_minimiser": spec["kinds"][type_name][
+                  "sorted" if type_name == "int8" else "randn_sorted"]["stats"]["bus_bits_per_op"]}
+        aw0, bw0 = words_of(raws[base_kind])
+        for name, pair_aware in (("value_sort_naive", False), ("value_sort_pair_aware", True)):
+            if pair_aware and type_name == "int8":
+                continue                                       # the (l, l+8) pair has no meaning in int8
+            g, b = two_numbers(*value_sort(aw0, bw0, type_name, pair_aware), type_name)
+            sb[name] = b
+        for k in list(sb):
+            if k not in ("base", "base_kind"):
+                sb[k + "_ratio"] = round(sb[k] / max(1, sb["base"]), 4)
+        sb["note"] = ("value_sort_naive sorts each A word-column and each B line ascending in place and knows "
+                      "nothing about the stream; value_sort_pair_aware deals each sorted B line into the "
+                      "(l, l+8) pairs, so it already uses half of the stream fact. Both hold the base kind's "
+                      "operand multiset exactly.")
+        spec.setdefault("sort_baselines", {})[type_name] = sb
         # fp32: the bit statistics against the host's own built-in kinds of the same name.
         if type_name == "fp32" and check:
             cmp = {}
@@ -720,9 +1087,16 @@ def build(out_dir, check=False):
             spec["checks"]["fp32_vs_host_builtin_p1"] = cmp
     spec["checks"]["decoded_back_to_intended_values"] = check and not problems
     spec["checks"]["problems"] = problems
-    spec["counts"] = {t: {"kinds": len(KINDS[t]), "tier1": sum(1 for _, x, _ in KINDS[t] if x == 1)}
+    spec["counts"] = {t: {"kinds": len(KINDS[t]),
+                          "tier1": sum(1 for _, x, _ in KINDS[t] if x == 1),
+                          "tier2": sum(1 for _, x, _ in KINDS[t] if x == 2)}
                       for t in KINDS}
     spec["counts"]["total_kinds"] = sum(len(KINDS[t]) for t in KINDS)
+    # tier1_total / tier2_total so no prose can drift from the data again (it did: the first version of the
+    # README, the result and for_integration all said 31 and 20).
+    spec["counts"]["tier1_total"] = sum(spec["counts"][t]["tier1"] for t in KINDS)
+    spec["counts"]["tier2_total"] = sum(spec["counts"][t]["tier2"] for t in KINDS)
+    assert spec["counts"]["tier1_total"] + spec["counts"]["tier2_total"] == spec["counts"]["total_kinds"]
     with open(os.path.join(out_dir, "kinds.json"), "w") as f:
         json.dump(spec, f, indent=1, sort_keys=False)
         f.write("\n")
@@ -734,6 +1108,11 @@ def main():
     ap.add_argument("out", nargs="?")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--replicates", type=int, default=400,
+                    help="re-draws of each random kind's rule, for the sampling band of the gated fraction "
+                         "and of bus_bits_per_op (0 = off)")
+    ap.add_argument("--sort-replicates", type=int, default=12,
+                    help="re-draws of the ordered kinds (the minimiser is the slow part)")
     a = ap.parse_args()
     if a.list:
         for t in KINDS:
@@ -743,9 +1122,12 @@ def main():
         return
     if not a.out:
         ap.error("give an output directory, or --list")
-    spec, problems = build(a.out, check=a.check)
+    spec, problems = build(a.out, check=a.check, replicates=a.replicates,
+                           sort_replicates=a.sort_replicates)
     for t in KINDS:
-        print(f"{t}: {len(KINDS[t])} kinds")
+        print(f"{t}: {len(KINDS[t])} kinds, {spec['counts'][t]['tier1']} tier 1, "
+              f"{spec['counts'][t]['tier2']} tier 2, stream {MICROOPS_PER_OP[t]} micro-ops x "
+              f"{COLUMN_SLOTS[t]} column slots")
         for k, tier, _ in KINDS[t]:
             s = spec["kinds"][t][k]["stats"]
             extra = ""
@@ -754,7 +1136,14 @@ def main():
             print(f"  [{tier}] {k:16s} zero_word A {s['a']['zero_word_frac']:.3f} B {s['b']['zero_word_frac']:.3f}"
                   f"  gated {s['gated_lane_frac']:.3f}  bus_bits/op {s['bus_bits_per_op']:7d}"
                   f"  dA {s['a']['hamming']['all']:6.2f} dB {s['b']['hamming']['all']:6.2f}{extra}")
-    print(f"total {spec['counts']['total_kinds']} kinds")
+    print(f"total {spec['counts']['total_kinds']} kinds, {spec['counts']['tier1_total']} tier 1, "
+          f"{spec['counts']['tier2_total']} tier 2")
+    for t, sb in spec.get("sort_baselines", {}).items():
+        print(f"{t} order: base {sb['base']}  naive value sort {sb['value_sort_naive']} "
+              f"({sb['value_sort_naive_ratio']})  "
+              + (f"pair-aware {sb['value_sort_pair_aware']} ({sb['value_sort_pair_aware_ratio']})  "
+                 if "value_sort_pair_aware" in sb else "")
+              + f"stream-aware {sb['stream_aware_minimiser']} ({sb['stream_aware_minimiser_ratio']})")
     if problems:
         print("PROBLEMS:", file=sys.stderr)
         for p in problems:
