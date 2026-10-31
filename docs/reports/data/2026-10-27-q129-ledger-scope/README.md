@@ -300,14 +300,24 @@ this directory's; both are stated so the substitution is one line.
 ### 7. Why this is still a floor, and one new reason
 
 Everything [`POWER.md`](../2026-10-26-open-netlist/POWER.md) says of the arithmetic's figure holds
-here, and one of the three is worse:
+here — one of its three blockers is worse (item 1), and one has since been corrected and points the
+other way (item 2):
 
 1. **Only 37.0% of this design's capacitance is priced** — 21.8 of 59.0 pF — against the
    arithmetic's 50.5%. The unpriced 63% is the nets CTS and `repair_design` made after the netlist
    was simulated. They switch. *(`ledger-scope.json` → `totals.cap_fraction_priced`.)*
-2. **No coupling term.** Detailed routing did not close on either scope netlist, same
-   `DRT-0255` family as Q126(e)'s ten configurations, so the between-cell wire is a global-route
-   Steiner estimate — a lower bound on every wire.
+2. 🛑 **No extracted wire — and this item is a ceiling, not a floor.** Detailed routing did not
+   close on either scope netlist, same `DRT-0255` family as Q126(e)'s ten configurations, so the
+   between-cell wire is a global-route Steiner estimate. This list used to call that estimate "a
+   lower bound on every wire"; **that reading is retired** (corrected here Sat 31 Oct 2026).
+   `setRC.tcl` hands the estimator a layer's *total* capacitance at nominal spacing, neighbour
+   coupling already bundled in and grounded, and Q129(a) measured the estimate running **20–23%
+   above** the extraction at Miller k = 1 (+20.2% on `mixed`, +23.2% on the kept netlist). The
+   wire rows here are over-priced by about that much, so routing these netlists would move energy
+   *out* of "accounted", as it did on the arithmetic (0.590 → 0.453 pJ).
+   *(Retired claim and correction: [`docs/findings/05-claims.md`](../../../findings/05-claims.md),
+   the Track-C preamble and the "Was / Now" row for "no coupling term". Measurement:
+   [`../2026-10-27-q129-routed-netlist/`](../2026-10-27-q129-routed-netlist/README.md).)*
 3. **No glitch factor.** Unchanged blocker.
 4. **The internal-energy estimate covers combinational transitions only.** On a netlist that is
    3,540 latches and 340 flip-flops, the sequential cells' own clock-pin internal energy — skipped

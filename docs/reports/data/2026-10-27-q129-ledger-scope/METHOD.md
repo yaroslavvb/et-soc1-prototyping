@@ -99,11 +99,21 @@ global route → per-net capacitance, then the operand stream driven into the ga
 Verilator with a SAIF, priced at **½CV² per toggle, CV² per clock cycle, at 0.517 V** — the
 minion rail — by the same `tools/open-flow/txfma/power.py`.
 
-Everything the arithmetic's `POWER.md` says about this flow holds here too, and nothing was fixed:
+Everything the arithmetic's `POWER.md` says about this flow holds here too, and nothing in the flow
+was fixed — but one of its *readings* was corrected, and item 1 carries the correction:
 
-1. **detailed routing does not close**, so there is no SPEF and **no coupling capacitance**: the
-   between-cell wire is a global-route Steiner estimate, a lower bound on every wire. Both scope
-   netlists failed the same way as the arithmetic's (`drok=0`);
+1. **detailed routing does not close**, so there is no SPEF and no *extracted* wire: the
+   between-cell wire is a global-route Steiner estimate. Both scope netlists failed the same way as
+   the arithmetic's (`drok=0`). 🛑 **This item read "no coupling capacitance … a lower bound on
+   every wire"; that reading is retired** (corrected Sat 31 Oct 2026). The estimate carries
+   coupling already — ORFS asap7's `setRC.tcl` hands it a layer's *total* capacitance at nominal
+   spacing, with the neighbour coupling bundled in and grounded — and Q129(a) measured it running
+   **20–23% above** the extraction at Miller k = 1 (+20.2% on `mixed`, +23.2% on the kept netlist;
+   [`../2026-10-27-q129-routed-netlist/`](../2026-10-27-q129-routed-netlist/README.md), and the
+   corrected block in [`../2026-10-26-open-netlist/POWER.md`](../2026-10-26-open-netlist/POWER.md)).
+   So this is a **ceiling** on the wire half, not a floor: the retired claim and its correction are
+   registered in [`docs/findings/05-claims.md`](../../../findings/05-claims.md) (the Track-C
+   preamble and the "Was / Now" row for "no coupling term");
 2. **half the capacitance is unpriced** — the nets CTS and `repair_design` made after the netlist
    was simulated. The coverage figure is in `ledger-scope.json` under `totals.cap_fraction_priced`;
 3. **no glitch factor** (the timed pass's Icarus blocker is unchanged);
