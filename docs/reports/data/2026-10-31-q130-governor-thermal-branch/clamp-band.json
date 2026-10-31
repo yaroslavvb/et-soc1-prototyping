@@ -5,6 +5,23 @@
   "k_C_per_W": 0.4696,
   "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/surface.txt:27"
  },
+ "die_line_uncertainty": {
+  "residual_C": [
+   0.05,
+   0.17,
+   -0.52,
+   0.21,
+   0.38,
+   0.33,
+   -0.37,
+   0.11,
+   -0.31
+  ],
+  "rms_C": 0.306,
+  "rms_W_per_edge": 0.65,
+  "max_abs_C": 0.518,
+  "max_abs_W_per_edge": 1.1
+ },
  "trip_semantics": {
   "test": "temperature_C > temperature_threshold_C",
   "source": "et-platform 836a4ab device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c:884",
@@ -14,7 +31,107 @@
  "clamp_band_board_W": {
   "at_65C": 49.23,
   "at_66C": 51.36,
-  "width_W": 2.13
+  "width_W": 2.13,
+  "uncertainty_per_edge_W_rms": 0.65,
+  "uncertainty_per_edge_W_max": 1.1,
+  "quote_as": "49.2 +- 0.7 to 51.4 +- 0.7 W",
+  "scope": "an E64-SESSION quantity (23 Oct 2026, aifoundry2), NOT a card constant: see transfer_bound_E69",
+  "at_a_70C_threshold": [
+   59.88,
+   62.01
+  ]
+ },
+ "transfer_bound_E69": {
+  "what": "E69's registered drift check FAILED (E69 README:101-118): the same cell read 49.38 W at 65.4 C on 23 Oct and 51.89 W at 65.2 C on 27 Oct, +2.51 W at the same die temperature -- more than the band's whole 2.13 W width, and 51.89 W is above the band's 51.36 W top. E69 reads it as a thermal-path change, not a governor change.",
+  "E64_line_vs_E69_cells": [
+   {
+    "cell": "control: TDP 65 / thr 65",
+    "tdp_w": 65,
+    "threshold_c": 65,
+    "measured_board_W": 51.89,
+    "measured_die_C": 65.2,
+    "E64_line_predicts_die_C": 66.25,
+    "residual_C": -1.05,
+    "residual_W": -2.23,
+    "measured_sustained_MHz": 763.4,
+    "E69_registered_prediction_MHz": 736.5,
+    "E69_verdict": "in the clamp, 11 thermal steps / 0 power steps; but 51.89 W is ABOVE E64 band top 51.36"
+   },
+   {
+    "cell": "TDP 65 / thr 70",
+    "tdp_w": 65,
+    "threshold_c": 70,
+    "measured_board_W": 54.71,
+    "measured_die_C": 64.2,
+    "E64_line_predicts_die_C": 67.57,
+    "residual_C": -3.37,
+    "residual_W": -7.18,
+    "measured_sustained_MHz": 800.0,
+    "E69_registered_prediction_MHz": 800.0,
+    "E69_verdict": "clamp gone: 0 thermal steps, share at 800 = 1.00; 800.0 is a CEILING artefact"
+   },
+   {
+    "cell": "TDP 65 / thr 62",
+    "tdp_w": 65,
+    "threshold_c": 62,
+    "measured_board_W": 52.11,
+    "measured_die_C": 61.2,
+    "E64_line_predicts_die_C": 66.35,
+    "residual_C": -5.15,
+    "residual_W": -10.97,
+    "measured_sustained_MHz": 790.3,
+    "E69_registered_prediction_MHz": 649.8,
+    "E69_verdict": "E69 reports INCONCLUSIVE, not a result: the die was still climbing 59->62 C at 76 s, so the cell never equilibrated against its own threshold and the die ended BELOW it"
+   },
+   {
+    "cell": "TDP 50 / thr 65",
+    "tdp_w": 50,
+    "threshold_c": 65,
+    "measured_board_W": 49.95,
+    "measured_die_C": 61.2,
+    "E64_line_predicts_die_C": 65.34,
+    "residual_C": -4.14,
+    "residual_W": -8.81,
+    "measured_sustained_MHz": 769.6,
+    "E69_registered_prediction_MHz": 700.0,
+    "E69_verdict": "limiter switched heat->power: 0 thermal steps / 11 power steps; E69 reports its own speed prediction REFUTED by 70 MHz"
+   }
+  ],
+  "residual_W_range": [
+   -10.97,
+   -2.23
+  ],
+  "consequence": "any cross-session use of this band carries at least this offset; the outcome claim (the clamp vanishes at a 70 C threshold) rests on E69's DIRECT measurement -- 0 thermal steps, share at 800 = 1.00 -- and needs no band arithmetic at all"
+ },
+ "agreement": {
+  "power_form": {
+   "claim": "a thermally clamped cell's measured sustained board power lies in the band",
+   "n_in_band": 4,
+   "cells_in_band": [
+    "fp16/ones 49.28 W",
+    "fp32/ones 49.38 W",
+    "int8/randn 50.67 W",
+    "fp16/randn 51.34 W"
+   ],
+   "of_the_three_discriminating_cells": 3
+  },
+  "clock_form": {
+   "claim": "the modelled bracket contains the measured sustained clock",
+   "n_discriminating_cells": 3,
+   "measured_above_bracket_top": 3,
+   "bias_MHz": {
+    "values": [
+     6.6,
+     4.4,
+     4.3
+    ],
+    "mean": 5.1,
+    "min": 4.3,
+    "max": 6.6
+   },
+   "why_one_sided": "linear-in-f interpolation under a convex P(f) must read low, so this is a BIAS, not an rms error; the bracket is a modelled column, not a measurement, and it is in-sample (each cell uses its own 600 and 800 MHz board powers)",
+   "honest_accuracy_number": "E64-T1's out-of-sample 4.8-9.6 MHz (docs/reports/data/2026-10-27-q129-governor-temperature/README.md:76-87)"
+  }
  },
  "vmin_points_MHz_V": [
   [
@@ -40,12 +157,17 @@
    "sustained_die_C": 59.0,
    "sustained_mean_MHz": 800,
    "share_at_800": 1.0,
+   "ramp_share": 0.0,
    "regime": "never trips: 800 MHz power is under the band",
-   "predicted_MHz_band": [
+   "regime_margin_W": 12.82,
+   "regime_decided_within_uncertainty": true,
+   "sustained_W_in_band": false,
+   "sustained_W_vs_band_W": -12.87,
+   "modelled_MHz_bracket": [
     800,
     800
    ],
-   "residual_MHz_vs_band_top": 0,
+   "bracket_bias_MHz": 0,
    "rate_at_800": 12.3,
    "rate_sustained": 12.3,
    "speed_kept": 1.0
@@ -59,15 +181,21 @@
    "sustained_die_C": 59.0,
    "sustained_mean_MHz": 794,
    "share_at_800": 0.97,
+   "ramp_share": 0.03,
    "regime": "never trips: 800 MHz power is under the band",
-   "predicted_MHz_band": [
+   "regime_margin_W": 12.81,
+   "regime_decided_within_uncertainty": true,
+   "sustained_W_in_band": false,
+   "sustained_W_vs_band_W": -13.14,
+   "modelled_MHz_bracket": [
     800,
     800
    ],
-   "residual_MHz_vs_band_top": -6,
+   "bracket_bias_MHz": -6,
    "rate_at_800": 24.6,
    "rate_sustained": 24.4,
-   "speed_kept": 0.992
+   "speed_kept": 0.992,
+   "note": "sustained mean 794 MHz, not 800: thermal share is 0.00 (it never trips) and the 6 MHz is E64's own ramp share of 0.03 (README.md:92)"
   },
   {
    "type": "int8",
@@ -78,12 +206,17 @@
    "sustained_die_C": 59.0,
    "sustained_mean_MHz": 800,
    "share_at_800": 1.0,
+   "ramp_share": 0.0,
    "regime": "never trips: 800 MHz power is under the band",
-   "predicted_MHz_band": [
+   "regime_margin_W": 11.64,
+   "regime_decided_within_uncertainty": true,
+   "sustained_W_in_band": false,
+   "sustained_W_vs_band_W": -11.67,
+   "modelled_MHz_bracket": [
     800,
     800
    ],
-   "residual_MHz_vs_band_top": 0,
+   "bracket_bias_MHz": 0,
    "rate_at_800": 84.4,
    "rate_sustained": 84.3,
    "speed_kept": 0.999
@@ -97,12 +230,17 @@
    "sustained_die_C": 61.7,
    "sustained_mean_MHz": 800,
    "share_at_800": 1.0,
+   "ramp_share": 0.0,
    "regime": "never trips: 800 MHz power is under the band",
-   "predicted_MHz_band": [
+   "regime_margin_W": 7.51,
+   "regime_decided_within_uncertainty": true,
+   "sustained_W_in_band": false,
+   "sustained_W_vs_band_W": -7.47,
+   "modelled_MHz_bracket": [
     800,
     800
    ],
-   "residual_MHz_vs_band_top": 0,
+   "bracket_bias_MHz": 0,
    "rate_at_800": 84.4,
    "rate_sustained": 84.3,
    "speed_kept": 0.999
@@ -116,12 +254,17 @@
    "sustained_die_C": 65.4,
    "sustained_mean_MHz": 737,
    "share_at_800": 0.48,
+   "ramp_share": 0.0,
    "regime": "in the clamp: the band falls inside the VMIN range",
-   "predicted_MHz_band": [
+   "regime_margin_W": null,
+   "regime_decided_within_uncertainty": null,
+   "sustained_W_in_band": true,
+   "sustained_W_vs_band_W": 0.0,
+   "modelled_MHz_bracket": [
     684.1,
     730.4
    ],
-   "residual_MHz_vs_band_top": 6.6,
+   "bracket_bias_MHz": 6.6,
    "rate_at_800": 24.6,
    "rate_sustained": 22.3,
    "speed_kept": 0.907
@@ -135,12 +278,17 @@
    "sustained_die_C": 65.4,
    "sustained_mean_MHz": 738,
    "share_at_800": 0.48,
+   "ramp_share": 0.0,
    "regime": "in the clamp: the band falls inside the VMIN range",
-   "predicted_MHz_band": [
+   "regime_margin_W": null,
+   "regime_decided_within_uncertainty": null,
+   "sustained_W_in_band": true,
+   "sustained_W_vs_band_W": 0.0,
+   "modelled_MHz_bracket": [
     687.6,
     733.6
    ],
-   "residual_MHz_vs_band_top": 4.4,
+   "bracket_bias_MHz": 4.4,
    "rate_at_800": 12.3,
    "rate_sustained": 11.1,
    "speed_kept": 0.902
@@ -154,12 +302,17 @@
    "sustained_die_C": 65.3,
    "sustained_mean_MHz": 763,
    "share_at_800": 0.66,
+   "ramp_share": 0.0,
    "regime": "in the clamp: the band falls inside the VMIN range",
-   "predicted_MHz_band": [
+   "regime_margin_W": null,
+   "regime_decided_within_uncertainty": null,
+   "sustained_W_in_band": true,
+   "sustained_W_vs_band_W": 0.0,
+   "modelled_MHz_bracket": [
     710.0,
     758.7
    ],
-   "residual_MHz_vs_band_top": 4.3,
+   "bracket_bias_MHz": 4.3,
    "rate_at_800": 84.4,
    "rate_sustained": 79.5,
    "speed_kept": 0.942
@@ -171,17 +324,23 @@
    "board_W_at_800": 63.87,
    "sustained_board_W": 51.34,
    "sustained_die_C": 66.1,
-   "sustained_mean_MHz": 600,
+   "sustained_mean_MHz": 600.5,
    "share_at_800": 0.0,
+   "ramp_share": 0.0,
    "regime": "pinned at the 600 MHz floor: even the floor is over the band",
-   "predicted_MHz_band": [
+   "regime_margin_W": 0.11,
+   "regime_decided_within_uncertainty": false,
+   "sustained_W_in_band": true,
+   "sustained_W_vs_band_W": 0.0,
+   "modelled_MHz_bracket": [
     600,
     600
    ],
-   "residual_MHz_vs_band_top": 0,
+   "bracket_bias_MHz": 0.5,
    "rate_at_800": 24.6,
    "rate_sustained": 18.4,
-   "speed_kept": 0.748
+   "speed_kept": 0.748,
+   "note": "the marginal cell: its 600 MHz power is only 0.11 W over the band top, inside the die line's own +-0.65 W, so the band arithmetic does NOT decide its regime -- the card does: sustained mean 600.5 MHz, 600 in every one of the last twenty 2 s bins but one (611.1 MHz at t=50 s)"
   },
   {
    "type": "fp32",
@@ -192,15 +351,21 @@
    "sustained_die_C": 67.1,
    "sustained_mean_MHz": 600,
    "share_at_800": 0.0,
+   "ramp_share": 0.0,
    "regime": "pinned at the 600 MHz floor: even the floor is over the band",
-   "predicted_MHz_band": [
+   "regime_margin_W": 2.91,
+   "regime_decided_within_uncertainty": true,
+   "sustained_W_in_band": false,
+   "sustained_W_vs_band_W": 3.0,
+   "modelled_MHz_bracket": [
     600,
     600
    ],
-   "residual_MHz_vs_band_top": 0,
+   "bracket_bias_MHz": 0,
    "rate_at_800": 12.3,
    "rate_sustained": 9.2,
-   "speed_kept": 0.748
+   "speed_kept": 0.748,
+   "note": "the deeply-over-trip cell: 2.91 W over the band top, 4.5x the die line's own uncertainty; exactly 600 MHz in every sustained bin, and its ring holds no governor decision at all after t=24.65 s"
   }
  ]
 }

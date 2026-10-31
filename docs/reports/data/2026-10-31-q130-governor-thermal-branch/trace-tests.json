@@ -19,6 +19,17 @@
   "700->600": 82,
   "800->700": 79
  },
+ "T2_thermal_steps_measured": 161,
+ "T2_thermal_steps_total": 162,
+ "T2_thermal_steps_without_a_from_to": [
+  {
+   "run": "HOT-03-fp32-zeros-edge63-r1",
+   "record_t_s": -45.2,
+   "clock_before": null,
+   "clock_in_record": 600,
+   "why": "no earlier operating point was seen in this ring, so no from->to could be formed"
+  }
+ ],
  "T3_thermal_step_at_600MHz": [],
  "T4_state_written_after": {
   "power_down": {
@@ -34,11 +45,17 @@
  "T5_thermal_idle_lines": 0,
  "T6_power_idle_with_numbers": 0,
  "T6_power_idle_without_numbers": 0,
+ "T6_patterns_the_committed_parser_holds": {
+  "numbered_0_20_0_form": "tools/claims-v3/dv2/sptrace_events.py:46 \u2014 rb\"Power idle state event, current pwr (\\d+)\\s+tdp level (\\d+)\"",
+  "bare_0_22_0_form": "tools/claims-v3/dv2/sptrace_events.py:47 \u2014 rb\"Power idle state event\"",
+  "so": "BOTH forms are tested. A bare match carries no values, so tools/claims-v3/hpl/sptrace_full.py:77-85 emits it with no pwr_mw and it would land in T6_power_idle_without_numbers. Both counts are zero: neither form is in these rings."
+ },
  "T7_seconds_between_governor_decisions": {
   "n": 852,
   "min": 0.16,
   "p50": 0.21,
   "mean": 0.816,
+  "p95": 2.06,
   "max": 59.92
  },
  "T7_seconds_between_consecutive_thermal_steps": {
@@ -46,13 +63,23 @@
   "min": 0.2,
   "p50": 0.46,
   "mean": 2.021,
+  "p95": 6.39,
   "max": 46.93
+ },
+ "T7_seconds_decision_to_record": {
+  "n": 928,
+  "min": 0.02,
+  "p50": 0.05,
+  "mean": 0.058,
+  "p95": 0.09,
+  "max": 0.14
  },
  "mean_C_in_the_record_of_a_thermal_step": {
   "n": 162,
   "min": 62,
   "p50": 66.0,
   "mean": 65.81,
+  "p95": 66,
   "max": 67
  },
  "mean_C_in_the_record_of_a_power_up_step": {
@@ -60,6 +87,7 @@
   "min": 47,
   "p50": 61.0,
   "mean": 60.54,
+  "p95": 65,
   "max": 66
  },
  "T8_decision_pairs": {
@@ -70,6 +98,57 @@
   "power_up->thermal_down": 132,
   "thermal_down->power_up": 132,
   "thermal_down->thermal_down": 27
+ },
+ "T8_after_a_thermal_step": {
+  "thermal_steps": 162,
+  "with_a_following_decision": 159,
+  "followed_by_power_up": 132,
+  "followed_by_another_thermal_step": 27,
+  "followed_by_a_power_down": 0,
+  "the_content": "never a power-down"
+ },
+ "T9_power_up_logged_at_the_floor": {
+  "power_ups_total": 542,
+  "logged_with_the_clock_at_600MHz": 199,
+  "in_runs": 40,
+  "clock_in_the_next_record": {
+   "700": 199
+  },
+  "undone_by_a_thermal_step_before_any_other_decision": 53,
+  "that_in_runs": 12,
+  "seconds_the_up_step_survived": {
+   "n": 53,
+   "min": 0.17,
+   "p50": 0.19,
+   "mean": 0.195,
+   "p95": 0.21,
+   "max": 0.23
+  },
+  "by_run": {
+   "HOT-00-fp32-ones-edge67-r2": 9,
+   "SUS-05-fp16-randn-1024-r1": 9,
+   "SUS-02-fp32-randn-1024-r1": 8,
+   "HOT2-01-fp32-zeros-hot66-r1": 5,
+   "HOT-03-fp32-zeros-edge63-r1": 4,
+   "HOT2-00-fp32-ones-hot66-r1": 4,
+   "HOT2-01-fp32-zeros-hot66-r2": 4,
+   "HOT-00-fp32-ones-edge67-r1": 3,
+   "HOT-02-fp32-zeros-edge67-r1": 3,
+   "HOT-01-fp32-ones-edge63-r2": 2,
+   "HOT-01-fp32-ones-edge63-r1": 1,
+   "HOT-02-fp32-zeros-edge67-r2": 1
+  },
+  "reading": "at the floor the chain swallows the pass only while the mean reads ABOVE the trip; because the mean dithers across one integer degree, some passes read at or below it, the power arm is reached, and the clock really rises one point before the next trip takes it back. So the floor is a 600<->700 ratchet with a near-zero duty cycle, not silence. It IS silence for a cell whose floor power is far over the band (fp32/randn: no decision at all after t=24.65 s)."
+ },
+ "pstat_throttle_state_census": {
+  "counts": {
+   "0": 98,
+   "1": 545,
+   "2": 390
+  },
+  "enum_at_0_22_0": "IDLE 0, UP 1, DOWN 2, SAFE 3 (836a4ab device-api/include/management-api/device_mgmt_api_spec.h:280-283)",
+  "fourth_signature_against_0_20_0": "state-0 records mean MM-idle transitions really happened; at 0.20.0 each writes a CRITICAL numbered \"Power idle state event\" line (@20:TPM:853-855), and these rings hold every other CRITICAL governor line (928 of them) and zero numbered idle lines",
+  "no_state_above_2": true
  },
  "per_run": [
   {
@@ -84,11 +163,14 @@
    "share_700": 0.016,
    "share_600": 0.016,
    "die_start": 50,
+   "die_end": 55,
    "die_max": 55,
    "p800_w": 49.0,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -102,11 +184,14 @@
    "share_700": 0.397,
    "share_600": 0.238,
    "die_start": 52,
+   "die_end": 59,
    "die_max": 59,
    "p800_w": 80.98,
    "thermal_down": 0,
    "power_down": 10,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 6,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -120,11 +205,14 @@
    "share_700": 0.032,
    "share_600": 0.048,
    "die_start": 54,
+   "die_end": 60,
    "die_max": 60,
    "p800_w": 59.28,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -138,11 +226,14 @@
    "share_700": 0.387,
    "share_600": 0.21,
    "die_start": 55,
+   "die_end": 61,
    "die_max": 62,
    "p800_w": 78.8,
    "thermal_down": 0,
    "power_down": 11,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 5,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -156,11 +247,14 @@
    "share_700": 0.032,
    "share_600": 0.016,
    "die_start": 55,
+   "die_end": 57,
    "die_max": 57,
    "p800_w": 34.99,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -174,11 +268,14 @@
    "share_700": 0.15,
    "share_600": 0.017,
    "die_start": 55,
+   "die_end": 62,
    "die_max": 62,
    "p800_w": 65.22,
    "thermal_down": 0,
    "power_down": 3,
-   "power_up": 5
+   "power_up": 5,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -192,11 +289,14 @@
    "share_700": 0.031,
    "share_600": 0.047,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 62,
    "p800_w": 62.53,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -210,11 +310,14 @@
    "share_700": 0.328,
    "share_600": 0.125,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 63,
    "p800_w": 72.71,
    "thermal_down": 0,
    "power_down": 9,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 3,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -228,11 +331,14 @@
    "share_700": 0.016,
    "share_600": 0.032,
    "die_start": 56,
+   "die_end": 58,
    "die_max": 58,
    "p800_w": 40.19,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -246,11 +352,14 @@
    "share_700": 0.349,
    "share_600": 0.27,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 63,
    "p800_w": 78.12,
    "thermal_down": 0,
    "power_down": 10,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 5,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -264,11 +373,14 @@
    "share_700": 0.359,
    "share_600": 0.359,
    "die_start": 56,
+   "die_end": 63,
    "die_max": 63,
    "p800_w": 83.5,
    "thermal_down": 0,
    "power_down": 10,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 5,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -282,11 +394,14 @@
    "share_700": 0.365,
    "share_600": 0.27,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 63,
    "p800_w": 77.82,
    "thermal_down": 0,
    "power_down": 10,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 5,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -300,11 +415,14 @@
    "share_700": 0.145,
    "share_600": 0.097,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 63,
    "p800_w": 65.73,
    "thermal_down": 0,
    "power_down": 3,
-   "power_up": 5
+   "power_up": 5,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -318,11 +436,14 @@
    "share_700": 0.033,
    "share_600": 0.05,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 62,
    "p800_w": 62.38,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -336,11 +457,14 @@
    "share_700": 0.032,
    "share_600": 0.032,
    "die_start": 56,
+   "die_end": 57,
    "die_max": 57,
    "p800_w": 35.09,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -354,11 +478,14 @@
    "share_700": 0.387,
    "share_600": 0.226,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 63,
    "p800_w": 79.54,
    "thermal_down": 0,
    "power_down": 10,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 5,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -372,11 +499,14 @@
    "share_700": 0.032,
    "share_600": 0.161,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 62,
    "p800_w": 60.68,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -390,11 +520,14 @@
    "share_700": 0.312,
    "share_600": 0.156,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 63,
    "p800_w": 72.78,
    "thermal_down": 0,
    "power_down": 9,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 3,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -408,11 +541,14 @@
    "share_700": 0.033,
    "share_600": 0.131,
    "die_start": 56,
+   "die_end": 58,
    "die_max": 58,
    "p800_w": 40.17,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -426,11 +562,14 @@
    "share_700": 0.033,
    "share_600": 0.115,
    "die_start": 56,
+   "die_end": 60,
    "die_max": 60,
    "p800_w": 51.31,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -444,11 +583,14 @@
    "share_700": 0.033,
    "share_600": 0.164,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 62,
    "p800_w": 62.57,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -462,11 +604,14 @@
    "share_700": 0.032,
    "share_600": 0.177,
    "die_start": 56,
+   "die_end": 61,
    "die_max": 61,
    "p800_w": 55.92,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -480,11 +625,14 @@
    "share_700": 0.234,
    "share_600": 0.156,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 62,
    "p800_w": 69.25,
    "thermal_down": 0,
    "power_down": 6,
-   "power_up": 8
+   "power_up": 8,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -498,11 +646,14 @@
    "share_700": 0.033,
    "share_600": 0.082,
    "die_start": 56,
+   "die_end": 62,
    "die_max": 62,
    "p800_w": 62.42,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -516,11 +667,14 @@
    "share_700": 0.033,
    "share_600": 0.082,
    "die_start": 56,
+   "die_end": 61,
    "die_max": 61,
    "p800_w": 55.76,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -534,11 +688,14 @@
    "share_700": 0.226,
    "share_600": 0.032,
    "die_start": 56,
+   "die_end": 63,
    "die_max": 63,
    "p800_w": 68.98,
    "thermal_down": 0,
    "power_down": 7,
-   "power_up": 9
+   "power_up": 9,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -552,11 +709,14 @@
    "share_700": 0.238,
    "share_600": 0.159,
    "die_start": 63,
+   "die_end": 65,
    "die_max": 66,
    "p800_w": 55.04,
    "thermal_down": 8,
    "power_down": 0,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 3,
+   "power_up_at_floor_undone_by_a_thermal_step": 1
   },
   {
    "exp": "E64",
@@ -570,11 +730,14 @@
    "share_700": 0.016,
    "share_600": 0.098,
    "die_start": 63,
+   "die_end": 64,
    "die_max": 64,
    "p800_w": 38.35,
    "thermal_down": 5,
    "power_down": 0,
-   "power_up": 13
+   "power_up": 13,
+   "power_up_at_floor": 12,
+   "power_up_at_floor_undone_by_a_thermal_step": 4
   },
   {
    "exp": "E64",
@@ -588,11 +751,14 @@
    "share_700": 0.403,
    "share_600": 0.419,
    "die_start": 66,
+   "die_end": 66,
    "die_max": 66,
    "p800_w": 45.43,
    "thermal_down": 10,
    "power_down": 0,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 7,
+   "power_up_at_floor_undone_by_a_thermal_step": 3
   },
   {
    "exp": "E64",
@@ -606,11 +772,14 @@
    "share_700": 0.082,
    "share_600": 0.098,
    "die_start": 66,
+   "die_end": 65,
    "die_max": 66,
    "p800_w": 33.8,
    "thermal_down": 7,
    "power_down": 0,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 6,
+   "power_up_at_floor_undone_by_a_thermal_step": 3
   },
   {
    "exp": "E64",
@@ -624,11 +793,14 @@
    "share_700": 0.177,
    "share_600": 0.306,
    "die_start": 66,
+   "die_end": 65,
    "die_max": 66,
    "p800_w": 33.75,
    "thermal_down": 6,
    "power_down": 0,
-   "power_up": 13
+   "power_up": 13,
+   "power_up_at_floor": 6,
+   "power_up_at_floor_undone_by_a_thermal_step": 1
   },
   {
    "exp": "E64",
@@ -642,11 +814,14 @@
    "share_700": 0.383,
    "share_600": 0.35,
    "die_start": 64,
+   "die_end": 65,
    "die_max": 66,
    "p800_w": 55.27,
    "thermal_down": 10,
    "power_down": 0,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 6,
+   "power_up_at_floor_undone_by_a_thermal_step": 2
   },
   {
    "exp": "E64",
@@ -660,11 +835,14 @@
    "share_700": 0.032,
    "share_600": 0.016,
    "die_start": 63,
+   "die_end": 64,
    "die_max": 64,
    "p800_w": 38.55,
    "thermal_down": 4,
    "power_down": 0,
-   "power_up": 6
+   "power_up": 6,
+   "power_up_at_floor": 2,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -678,11 +856,14 @@
    "share_700": 0.274,
    "share_600": 0.726,
    "die_start": 66,
+   "die_end": 65,
    "die_max": 66,
    "p800_w": null,
    "thermal_down": 11,
    "power_down": 0,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 9,
+   "power_up_at_floor_undone_by_a_thermal_step": 9
   },
   {
    "exp": "E64",
@@ -696,11 +877,14 @@
    "share_700": 0.003,
    "share_600": 0.011,
    "die_start": 58,
+   "die_end": 59,
    "die_max": 59,
    "p800_w": 35.95,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -714,11 +898,14 @@
    "share_700": 0.171,
    "share_600": 0.024,
    "die_start": 57,
+   "die_end": 66,
    "die_max": 66,
    "p800_w": 50.62,
    "thermal_down": 10,
    "power_down": 0,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 3,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -732,11 +919,14 @@
    "share_700": 0.234,
    "share_600": 0.087,
    "die_start": 58,
+   "die_end": 66,
    "die_max": 66,
    "p800_w": 52.32,
    "thermal_down": 10,
    "power_down": 0,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 4,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -750,11 +940,14 @@
    "share_700": 0.004,
    "share_600": 0.016,
    "die_start": 58,
+   "die_end": 62,
    "die_max": 62,
    "p800_w": 40.4,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 4
+   "power_up": 4,
+   "power_up_at_floor": 1,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -768,11 +961,14 @@
    "share_700": 0.246,
    "share_600": 0.078,
    "die_start": 58,
+   "die_end": 66,
    "die_max": 66,
    "p800_w": 52.5,
    "thermal_down": 10,
    "power_down": 0,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 4,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -786,11 +982,14 @@
    "share_700": 0.133,
    "share_600": 0.816,
    "die_start": 58,
+   "die_end": 67,
    "die_max": 67,
    "p800_w": 79.84,
    "thermal_down": 9,
    "power_down": 0,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 11,
+   "power_up_at_floor_undone_by_a_thermal_step": 9
   },
   {
    "exp": "E64",
@@ -804,11 +1003,14 @@
    "share_700": 0.077,
    "share_600": 0.881,
    "die_start": 58,
+   "die_end": 68,
    "die_max": 68,
    "p800_w": 84.69,
    "thermal_down": 10,
    "power_down": 0,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 10,
+   "power_up_at_floor_undone_by_a_thermal_step": 8
   },
   {
    "exp": "E64",
@@ -822,11 +1024,14 @@
    "share_700": 0.004,
    "share_600": 0.016,
    "die_start": 58,
+   "die_end": 59,
    "die_max": 60,
    "p800_w": 35.86,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 4
+   "power_up": 4,
+   "power_up_at_floor": 1,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -840,11 +1045,14 @@
    "share_700": 0.005,
    "share_600": 0.02,
    "die_start": 57,
+   "die_end": 59,
    "die_max": 59,
    "p800_w": 36.89,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 4
+   "power_up": 4,
+   "power_up_at_floor": 1,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -858,11 +1066,14 @@
    "share_700": 0.156,
    "share_600": 0.156,
    "die_start": 65,
+   "die_end": 66,
    "die_max": 66,
    "p800_w": 55.27,
    "thermal_down": 9,
    "power_down": 0,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 6,
+   "power_up_at_floor_undone_by_a_thermal_step": 4
   },
   {
    "exp": "E64",
@@ -876,11 +1087,14 @@
    "share_700": 0.031,
    "share_600": 0.016,
    "die_start": 65,
+   "die_end": 63,
    "die_max": 65,
    "p800_w": 38.84,
    "thermal_down": 8,
    "power_down": 0,
-   "power_up": 10
+   "power_up": 10,
+   "power_up_at_floor": 6,
+   "power_up_at_floor_undone_by_a_thermal_step": 5
   },
   {
    "exp": "E64",
@@ -894,11 +1108,14 @@
    "share_700": 0.371,
    "share_600": 0.194,
    "die_start": 65,
+   "die_end": 65,
    "die_max": 66,
    "p800_w": 55.55,
    "thermal_down": 10,
    "power_down": 0,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 2,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E64",
@@ -912,11 +1129,14 @@
    "share_700": 0.032,
    "share_600": 0.016,
    "die_start": 65,
+   "die_end": 64,
    "die_max": 65,
    "p800_w": 38.99,
    "thermal_down": 6,
    "power_down": 0,
-   "power_up": 8
+   "power_up": 8,
+   "power_up_at_floor": 5,
+   "power_up_at_floor_undone_by_a_thermal_step": 4
   },
   {
    "exp": "E69",
@@ -930,11 +1150,14 @@
    "share_700": 0.031,
    "share_600": 0.078,
    "die_start": 47,
+   "die_end": 49,
    "die_max": 49,
    "p800_w": 32.36,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -948,11 +1171,14 @@
    "share_700": 0.397,
    "share_600": 0.254,
    "die_start": 48,
+   "die_end": 54,
    "die_max": 54,
    "p800_w": 69.08,
    "thermal_down": 0,
    "power_down": 10,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 6,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -966,11 +1192,14 @@
    "share_700": 0.381,
    "share_600": 0.508,
    "die_start": 50,
+   "die_end": 55,
    "die_max": 55,
    "p800_w": 79.86,
    "thermal_down": 0,
    "power_down": 11,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 11,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -984,11 +1213,14 @@
    "share_700": 0.381,
    "share_600": 0.254,
    "die_start": 51,
+   "die_end": 58,
    "die_max": 58,
    "p800_w": 80.95,
    "thermal_down": 0,
    "power_down": 11,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 6,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1002,11 +1234,14 @@
    "share_700": 0.033,
    "share_600": 0.083,
    "die_start": 53,
+   "die_end": 57,
    "die_max": 57,
    "p800_w": 50.1,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1020,11 +1255,14 @@
    "share_700": 0.033,
    "share_600": 0.131,
    "die_start": 53,
+   "die_end": 54,
    "die_max": 54,
    "p800_w": 33.93,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1038,11 +1276,14 @@
    "share_700": 0.032,
    "share_600": 0.161,
    "die_start": 52,
+   "die_end": 53,
    "die_max": 53,
    "p800_w": 33.63,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1056,11 +1297,14 @@
    "share_700": 0.349,
    "share_600": 0.032,
    "die_start": 52,
+   "die_end": 55,
    "die_max": 55,
    "p800_w": 49.63,
    "thermal_down": 0,
    "power_down": 10,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1074,11 +1318,14 @@
    "share_700": 0.339,
    "share_600": 0.016,
    "die_start": 52,
+   "die_end": 59,
    "die_max": 59,
    "p800_w": 70.55,
    "thermal_down": 0,
    "power_down": 9,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1092,11 +1339,14 @@
    "share_700": 0.063,
    "share_600": 0.222,
    "die_start": 54,
+   "die_end": 58,
    "die_max": 58,
    "p800_w": 50.46,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 4
+   "power_up": 4,
+   "power_up_at_floor": 1,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1110,11 +1360,14 @@
    "share_700": 0.031,
    "share_600": 0.047,
    "die_start": 54,
+   "die_end": 55,
    "die_max": 55,
    "p800_w": 34.29,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1128,11 +1381,14 @@
    "share_700": 0.131,
    "share_600": 0.77,
    "die_start": 53,
+   "die_end": 57,
    "die_max": 57,
    "p800_w": 55.34,
    "thermal_down": 0,
    "power_down": 4,
-   "power_up": 5
+   "power_up": 5,
+   "power_up_at_floor": 3,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1146,11 +1402,14 @@
    "share_700": 0.033,
    "share_600": 0.083,
    "die_start": 53,
+   "die_end": 54,
    "die_max": 54,
    "p800_w": 34.1,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1164,11 +1423,14 @@
    "share_700": 0.281,
    "share_600": 0.125,
    "die_start": 53,
+   "die_end": 60,
    "die_max": 60,
    "p800_w": 71.28,
    "thermal_down": 0,
    "power_down": 8,
-   "power_up": 10
+   "power_up": 10,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1182,11 +1444,14 @@
    "share_700": 0.333,
    "share_600": 0.4,
    "die_start": 54,
+   "die_end": 59,
    "die_max": 59,
    "p800_w": 71.72,
    "thermal_down": 0,
    "power_down": 10,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 5,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1200,11 +1465,14 @@
    "share_700": 0.032,
    "share_600": 0.0,
    "die_start": 54,
+   "die_end": 55,
    "die_max": 55,
    "p800_w": 34.62,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1218,11 +1486,14 @@
    "share_700": 0.032,
    "share_600": 0.0,
    "die_start": 53,
+   "die_end": 55,
    "die_max": 55,
    "p800_w": 34.25,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1236,11 +1507,14 @@
    "share_700": 0.387,
    "share_600": 0.21,
    "die_start": 54,
+   "die_end": 60,
    "die_max": 61,
    "p800_w": 81.62,
    "thermal_down": 0,
    "power_down": 10,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 5,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1254,11 +1528,14 @@
    "share_700": 0.032,
    "share_600": 0.016,
    "die_start": 55,
+   "die_end": 59,
    "die_max": 59,
    "p800_w": 51.11,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1272,11 +1549,14 @@
    "share_700": 0.066,
    "share_600": 0.852,
    "die_start": 55,
+   "die_end": 58,
    "die_max": 58,
    "p800_w": 72.15,
    "thermal_down": 0,
    "power_down": 2,
-   "power_up": 4
+   "power_up": 4,
+   "power_up_at_floor": 1,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1290,11 +1570,14 @@
    "share_700": 0.032,
    "share_600": 0.048,
    "die_start": 55,
+   "die_end": 59,
    "die_max": 59,
    "p800_w": 51.06,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1308,11 +1591,14 @@
    "share_700": 0.031,
    "share_600": 0.047,
    "die_start": 55,
+   "die_end": 56,
    "die_max": 56,
    "p800_w": 34.77,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1326,11 +1612,14 @@
    "share_700": 0.317,
    "share_600": 0.571,
    "die_start": 54,
+   "die_end": 59,
    "die_max": 59,
    "p800_w": 81.79,
    "thermal_down": 0,
    "power_down": 11,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 10,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1344,11 +1633,14 @@
    "share_700": 0.383,
    "share_600": 0.1,
    "die_start": 55,
+   "die_end": 58,
    "die_max": 58,
    "p800_w": 51.01,
    "thermal_down": 0,
    "power_down": 9,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 2,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1362,11 +1654,14 @@
    "share_700": 0.003,
    "share_600": 0.007,
    "die_start": 55,
+   "die_end": 66,
    "die_max": 66,
    "p800_w": 51.0,
    "thermal_down": 0,
    "power_down": 0,
-   "power_up": 2
+   "power_up": 2,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1380,11 +1675,14 @@
    "share_700": 0.167,
    "share_600": 0.021,
    "die_start": 58,
+   "die_end": 66,
    "die_max": 66,
    "p800_w": 52.4,
    "thermal_down": 11,
    "power_down": 0,
-   "power_up": 10
+   "power_up": 10,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1398,11 +1696,14 @@
    "share_700": 0.235,
    "share_600": 0.031,
    "die_start": 51,
+   "die_end": 63,
    "die_max": 63,
    "p800_w": 49.44,
    "thermal_down": 0,
    "power_down": 11,
-   "power_up": 11
+   "power_up": 11,
+   "power_up_at_floor": 0,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1416,11 +1717,14 @@
    "share_700": 0.035,
    "share_600": 0.067,
    "die_start": 50,
+   "die_end": 62,
    "die_max": 63,
    "p800_w": 49.09,
    "thermal_down": 8,
    "power_down": 0,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 2,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   },
   {
    "exp": "E69",
@@ -1434,11 +1738,14 @@
    "share_700": 0.429,
    "share_600": 0.254,
    "die_start": 58,
+   "die_end": 64,
    "die_max": 65,
    "p800_w": 84.43,
    "thermal_down": 0,
    "power_down": 10,
-   "power_up": 12
+   "power_up": 12,
+   "power_up_at_floor": 5,
+   "power_up_at_floor_undone_by_a_thermal_step": 0
   }
  ]
 }
