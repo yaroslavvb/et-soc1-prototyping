@@ -2983,7 +2983,7 @@ FLOWS.L = {
       + `<p class="pn-what">One fp32 multiply-add in lane ${c.lane} of minion ${c.mi} (shire ${c.sid}), c + a × b with a = π, b = 1.2345678, c = 100, then the same with bit 11 of b’s fraction flipped. The difference runs through the seven stages; each stage counts the signals it changes. ${src('The design simulated', 'tfma.example')}: the ET-SoC-1’s own RTL.</p>`
       + legRows(TFROWS(), {cols: [[2, 'RTL bits'], [3, 'signals']], cls: 'pn-keep', head: 'Stage'})
       + `<p class="pn-what pn-keep small">How it is counted: <b>RTL bits</b> are every bit of every named RTL signal that changes, at zero delay (${src('a simulation of the RTL', 'tfma.flip.stages')}); <b>signals</b> count each distinct RTL signal once (one signal carries several names; gate-internal nets have no RTL name, so this is a lower bound on wires). The drawing lights signals; the counts are RTL bits.</p>`
-      + `<p class="pn-what small">The same flip in the gate-level netlist toggles ${n('tf_gate')} physical wires in the multiplier. Over every fraction bit of a and b the Wallace tree averages ${n('tf_avg')} RTL bits (a ${n('tf_avg_a')}, b ${n('tf_avg_b')}), ${n('tf_phys')} physical wires. The owner’s figure, ${n('tf_owner')}, is the lab’s toggle model’s per-bit figure: its ${n('tf_lab')} toggles per random multiply-add divided by the ~20 input bits that change between multiply-adds, so ${src('an average over a stream, not one flip’s cascade', 'tfma.owner.why')}.</p>`);
+      + `<p class="pn-what small">The same flip in the gate-level netlist toggles ${n('tf_gate')} physical wires in the multiplier. Over every fraction bit of a and b the Wallace tree averages ${n('tf_avg')} RTL bits (a ${n('tf_avg_a')}, b ${n('tf_avg_b')}), ${n('tf_phys')} physical wires. The owner’s figure, ${n('tf_owner')}, is that same count of RTL bits in the tree. It used to be read as the lab’s per-bit figure — its ${n('tf_lab')} toggles per random multiply-add divided by the ~20 input bits that change between multiply-adds — but ${src('that reading is retired', 'tfma.owner.why')}: ${n('tf_lab')} ${src('turns out to be a simulator artefact, 8 to 16 times too large, and never a count of wires', 'tfma.lab')}.</p>`);
     tfMeter0(c);
   },
   stages: [
@@ -3104,7 +3104,7 @@ FLOWS.L = {
           {t: `in the gate-level netlist: ${N.tf_gate.t} physical wires in the multiplier, ${N.tf_e.t}`, f: 'tfma.flip.gate tfma.flip.energy'},
           {t: `every fraction bit of a and b, on average: ${N.tf_avg.t} in the tree`, f: 'tfma.avg'},
           {t: `(a ${N.tf_avg_a.t}, b ${N.tf_avg_b.t}), ${N.tf_unit.t} in the unit, ${N.tf_phys.t} physical wires`, f: 'tfma.avg tfma.names'},
-          {t: `the owner’s figure, ${N.tf_owner.t}: a stream average, not one flip`, f: 'tfma.owner tfma.owner.why'}], {side: 'c', fs: 22, minW: 760});
+          {t: `the owner’s figure, ${N.tf_owner.t}: that tree average, one flip at a time`, f: 'tfma.owner tfma.owner.why'}], {side: 'c', fs: 22, minW: 760});
       }},
   ],
 };

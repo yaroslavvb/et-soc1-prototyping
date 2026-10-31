@@ -4021,9 +4021,9 @@
   },
   "tfma.lab": {
    "kind": "derived",
-   "note": "The simulator's toggle coverage, the lab's tool, misses the compressor cells' input ports and counts transient values while the model settles (30 counted where 2 changes happened), so its counts inside the tree are not reliable.",
+   "note": "Two defects, both measured, and neither one the circuit. 1. The toggle coverage counter scored values the model passed through while a cycle settled: in one traced run of the lab's own Verilator 5.042 the coverage counter says 21,297 per multiply-add where that very run's waveform holds 7,233 value changes — 2.94 times apart inside one simulation, and all of the gap is in the 4:2 compressor and the full adder inside it (16,101 against 1,904). Fixed upstream: on Verilator 5.052 the two counts differ by 1.0 %. 2. The RTL hierarchy names the same wire at up to four levels, so even the waveform's 7,014 is 5.4 times the per-net count. This page's earlier reading — that the tool “misses the compressor cells' input ports” and that 21,331 “was not reproduced” — is withdrawn: nothing was missed, and the number does reproduce on the simulator that made it.",
    "source": "a Verilator simulation of the multiply-add's RTL (one lane's txfma_top, the module core-et's Erbium branch also has; FMADD_PS, round to nearest even; it matches an exact fp32 fused multiply-add on 3,000 of 3,000 cases), research for this page, 23 October 2026, with the lab's stream pattern (rtl-sim/fma_toggle: 16×16×16 random tiles, a and b normal, 2 seeds, 3 accumulator scales); the lab's count: docs/reports/data/2026-09-21-horace-aifoundry2/toggles_all.json",
-   "statement": "The lab's count of 21,331 toggles per random multiply-add was not reproduced: on the same RTL and the same random TensorFMA32 pattern, this page's research counts 7,160-7,470 per multiply-add (5,820-6,090 with the lab's own counting tool), 55 % of them in the tree rather than 85 %."
+   "statement": "The lab's count of 21,331 toggles per random multiply-add reproduces to 0.2 % under the simulator it was measured with, and nowhere else, and it was never a count of wires: on the same RTL and the same card-dumped tiles a current Verilator counts 7,014, and merging each wire's names gives 1,301 nets, the figure to quote. Against the wires a power model wants, 21,331 is 8 to 16 times too large — 16 times against that 1,301, which is itself a floor, and 8 times against the 2,778 the measured names-per-wire ratio gives."
   },
   "tfma.names": {
    "cards_txt": "the design (RTL and netlists), not a card",
@@ -4038,14 +4038,14 @@
   },
   "tfma.owner": {
    "kind": "owner",
-   "note": "The lab's figure is its 21,331 counted toggles per random multiply-add divided by the 20.3 bits of a and b that change between consecutive multiply-adds: an average over a stream, not one flip's cascade (tfma.owner.why). Counted directly on the RTL, an isolated flip toggles 1,037 signal bits in the tree on average (tfma.avg).",
+   "note": "Counted directly on the RTL, an isolated flip toggles 1,037 signal bits in the tree on average (tfma.avg) — which is what this statement describes. The stream-average route that first supported it, the lab's 21,331 counted toggles divided by the 20.3 bits of a and b that change between consecutive multiply-adds, is retired, because 21,331 is a simulator artefact 8 to 16 times too large (tfma.lab, tfma.owner.why).",
    "source": "the owner, 23 Oct 2026; the same figure as the lab's RTL toggle model (tools/claims-v3/dtf/README.md, S15: 21,331 counted toggles ÷ 20.3 bits on txfma_top)",
    "statement": "One input bit flip in the 7-stage TensorFMA32 triggers an avalanche of about 1,050 toggles across the Wallace tree."
   },
   "tfma.owner.why": {
    "kind": "derived",
    "source": "the lab's RTL toggle model: tools/claims-v3/dtf/README.md (S15) and docs/reports/data/2026-09-21-horace-aifoundry2/toggles_all.json; a Verilator simulation of the multiply-add's RTL (one lane's txfma_top, the module core-et's Erbium branch also has; FMADD_PS, round to nearest even; it matches an exact fp32 fused multiply-add on 3,000 of 3,000 cases), research for this page, 23 October 2026: 20.0 bits of a and b change per multiply-add in the lab's stream pattern",
-   "statement": "The owner's ~1,050 is an average over a random stream: the lab's 21,331 counted toggles per random multiply-add divided by the ~20 bits of a and b that change from one multiply-add to the next (about 1,067), not one flipped bit's cascade."
+   "statement": "The owner's ~1,050 stands, but not on the arithmetic that first supported it. That route — the lab's 21,331 counted toggles per random multiply-add divided by the ~20 bits of a and b that change from one multiply-add to the next, about 1,067 — is retired: 21,331 is a simulator artefact 8 to 16 times too large (tfma.lab), and the same division on the figure to quote, 1,301 nets, gives about 65 wires per changed input bit. What carries ~1,050 now is this page's own direct count: one bit flipped alone toggles 1,037 RTL signal bits in the Wallace tree on average (tfma.avg), about 300 physical wires. So it is one flipped bit's cascade after all, counted in RTL signal bits rather than in physical wires."
   },
   "tfma.reg12": {
    "cards_txt": "the design (RTL and netlists), not a card",
