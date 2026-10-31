@@ -266,3 +266,22 @@ python3 tools/claims-v3/kspeed/e84/reduce_e84.py <data>/s1 --e80 docs/reports/da
 
   **No prediction, rule, threshold, population, design or code changes.** This read supersedes
   `predictions.json`'s `governor_reading.build_on_record`.
+
+## After the data (Sat 31 Oct 2026)
+
+*Added after the session. Nothing above is rewritten, and no prediction, rule, threshold or verdict changes.*
+
+**Results:** [`docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/`](../../../../docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/README.md).
+The session ran 15:43:32–16:06:38 PDT on 31 Oct, 35 of 35 runs. P1, P2, P3 and S1 all pass. fp32 random data on card 0
+is limited by the PMIC's 75 W over-power alarm, a third limit that the registered labels do not name (post hoc, in the
+data README).
+
+Two files were added after the data:
+
+| file | what |
+|---|---|
+| `collect_e84.sh` | copies the raw session from aifoundry1 into the data directory and runs `reduce_e84.py` (desk, on the Intel) |
+| `posthoc_pmic_e84.py` | post hoc, labelled, never a verdict: the PMIC alarm lines, the safe-state cycle, the clock shares and the kernel's effective clock per run |
+
+The data README's "Corrections of the pre-registration's description" corrects two sentences of the governor section
+above: the 300 MHz point is a PMIC safe state, not an idle point.

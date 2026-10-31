@@ -1,0 +1,268 @@
+{
+ "experiment": "E84",
+ "host": "aifoundry1",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793486570189,
+ "protocol": {
+  "experiment": "E84",
+  "request": "Q130",
+  "card": "aifoundry1-c0",
+  "order_seed": 84,
+  "note": "E80's runner and run shapes (tools/claims-v3/kspeed/protocol.json BURST and SUS, which are E64's LAD and SUS) on 11 of the Q130(s) tiles, on aifoundry1's card 0 (ET_DEVICES=0, /run/lock/etsoc-shire0.lock) under its own governor; nothing is set on the card",
+  "tools": {
+   "heater": "build/sparsity/host/sparsity_host",
+   "kernel": "build/sparsity/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-e84/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "predictions": "tools/claims-v3/kspeed/e84/predictions.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 85,
+   "board_cap_w": 97,
+   "cap_consecutive": 3
+  },
+  "caps": {
+   "max_card_min": 60
+  },
+  "blocks": [
+   {
+    "name": "SMOKE",
+    "title": "one 2 s launch of a file tile in each number type (not analysed): the file path, ET_DEVICES=0 and the trace ring on card 0",
+    "default": false,
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 2,
+     "budget": 3.5,
+     "processes": 1
+    },
+    "tail_s": 3,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "fp32-randn"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+      "label": "fp16-ones"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full"
+     }
+    ]
+   },
+   {
+    "name": "BURST",
+    "title": "a burst on a cool die: one 6 s process from a die reading <= 55 C (E80's BURST, E64's LAD shape)",
+    "passes": 2,
+    "shuffle": true,
+    "start": {
+     "mode": "cool",
+     "max_c": 55,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 6,
+     "budget": 7.5,
+     "processes": 1
+    },
+    "tail_s": 4,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "fp32-zeros"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+      "label": "fp32-ones"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "fp32-randn"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/sparse90.bin",
+      "label": "fp32-sparse90"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/bf16trunc.bin",
+      "label": "fp32-bf16trunc"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "fp16-zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+      "label": "fp16-ones"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "fp16-randn"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "int8-zeros"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/neg_ones.bin",
+      "label": "int8-neg_ones"
+     }
+    ]
+   },
+   {
+    "name": "SUS",
+    "title": "sustained: nine back-to-back 8 s processes (~76 s) from a die reading <= 57 C (E80's SUS, E64's SUS shape), each kind once",
+    "passes": 1,
+    "shuffle": true,
+    "start": {
+     "mode": "cool",
+     "max_c": 57,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 8,
+     "budget": 9.5,
+     "processes": 9
+    },
+    "tail_s": 6,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "fp32-zeros"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+      "label": "fp32-ones"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "fp32-randn"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/sparse90.bin",
+      "label": "fp32-sparse90"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/bf16trunc.bin",
+      "label": "fp32-bf16trunc"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "fp16-zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+      "label": "fp16-ones"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "fp16-randn"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "int8-zeros"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/neg_ones.bin",
+      "label": "int8-neg_ones"
+     }
+    ]
+   },
+   {
+    "name": "SUS2",
+    "title": "the sustained replicates, last, so that the 11 primary sustained runs come first under the cap: fp32 zeros and fp32 randn again",
+    "passes": 1,
+    "shuffle": true,
+    "start": {
+     "mode": "cool",
+     "max_c": 57,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 8,
+     "budget": 9.5,
+     "processes": 9
+    },
+    "tail_s": 6,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "fp32-zeros"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "fp32-randn"
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "SMOKE-00-fp32-randn-r1",
+  "SMOKE-01-fp16-ones-r1",
+  "SMOKE-02-int8-full-r1"
+ ],
+ "sha256": {
+  "heater": "e0fbecce35f252c546e6e8390f6a4694519674dc4d6dea359b0db9c4d1a3fbbe",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "87c1c38c995f0e3c6f442f361398dfc561ef1d4ed8b2304b9e9242d4a133dcc8",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "tools/claims-v3/kspeed/e84/run_e84.py",
+  "--protocol",
+  "tools/claims-v3/kspeed/e84/protocol.json",
+  "--out",
+  "/home/yaroslavvb/nekko/build/e84/runs/smoke",
+  "--only",
+  "SMOKE",
+  "--max-card-min",
+  "5"
+ ],
+ "git_head": "",
+ "git_dirty_hpl": ""
+}

@@ -1,0 +1,19 @@
+E84 on aifoundry1 card 0: per kind (burst = mean of passes; sustained = last 40 s, all samples)
+kind                    burst MHz    rate  p800 W  sw800     blim/pred      sus MHz nonramp  ramp  sus W   die       slim/pred    
+fp32/zeros             [800, 800]  12.275   29.59    0.0     none/none        794.3     800 0.034  29.45 55.55       none/none    
+fp32/ones              [800, 800]  12.275   43.97  14.38     none/none        793.5   798.7 0.028  47.09  64.7       none/none    
+fp32/randn         [667.4, 611.4]    8.73   72.97  43.38 power/none/power       548.1   544.1 0.108  45.27 62.15 unresolved/thermal 
+fp32/sparse90          [800, 800]  12.276   29.98   0.39     none/none        794.8     800 0.028  30.58  56.0       none/none    
+fp32/bf16trunc         [800, 800]  12.273   61.88  32.29     none/power       667.6   667.6   0.0  48.66  65.5    thermal/thermal 
+fp16/zeros             [800, 800]  24.548   29.46    0.0     none/none        794.1   794.1   0.0   29.6  56.0       none/none    
+fp16/ones              [800, 800]   24.55    43.5  14.04     none/none        795.6     800 0.026  46.72  63.9       none/none    
+fp16/randn         [778.4, 773.5]  23.529   68.59  39.13    power/power       631.9   631.9   0.0  49.04  65.8    thermal/thermal 
+int8/zeros             [800, 800]  84.297   29.81    0.0     none/none        794.6     800 0.031  30.87  56.9       none/none    
+int8/full              [800, 800]  84.297   42.17  12.36     none/none        788.7     800 0.062  44.42  62.8       none/none    
+int8/neg_ones          [800, 800]  84.298   33.25   3.44     none/none        794.1     800 0.034  34.31  58.9       none/none    
+E84-P1 PASS {"rows": [["fp32", "burst_mhz", 800, 639.4, 160.6, "ok"], ["fp32", "sus_mhz", 794.3, 548.1, 246.2, "ok"], ["fp16", "burst_mhz", 800, 776.0, 24.0, "ok"], ["fp16", "sus_mhz", 794.1, 631.9, 162.2, "ok"], ["int8", "burst_mhz", 800, 800, 0, "ok"], ["int8", "sus_mhz", 794.6, 788.7, 5.9, "ok"]], "tol_mhz": -10.0, "population": 6}
+E84-P2 PASS {"rows": [["burst_mhz", {"fp32": 160.6, "fp16": 24.0, "int8": 0}, "ok"], ["sus_mhz", {"fp32": 251.9, "fp16": 168.1, "int8": 11.3}, "ok"]], "tol_mhz": 5.0, "population": 2}
+E84-P3 PASS {"burst": {"population": 11, "right": 9, "wrong": [["fp32/randn", "power", ["power", "none"]], ["fp32/bf16trunc", "power", ["none", "none"]]], "verdict": "PASS"}, "sustained": {"population": 11, "right": 10, "wrong": [["fp32/randn", "thermal", ["unresolved", "unresolved"]]], "verdict": "PASS"}, "need": 9}
+E84-S1 PASS {"format_mean_deficit_mhz": {"fp32": 80.3, "fp16": 59.5, "int8": 7.5}}
+zeros/heavy clock ratio: {"fp32": {"burst_mhz": 1.2512, "sus_mhz": 1.4492}, "fp16": {"burst_mhz": 1.0309, "sus_mhz": 1.2567}, "int8": {"burst_mhz": 1.0, "sus_mhz": 1.0075}}
+aifoundry2 (E80) beside: {"fp32/randn": [711.9, 604.3, "power", "thermal"], "fp32/sparse90": [800, 800, "none", "none"], "fp32/bf16trunc": [774.0, 639.1, "power", "thermal"], "fp16/zeros": [800, 789.8, "none", "none"], "fp16/ones": [800, 781.6, "none", "none/thermal"], "fp16/randn": [730.6, 609.5, "power", "thermal"], "int8/zeros": [800, 800, "none", "none"], "int8/full": [800, 793.4, "none", "none"], "int8/neg_ones": [777.5, 796.9, "none", "none"]}
