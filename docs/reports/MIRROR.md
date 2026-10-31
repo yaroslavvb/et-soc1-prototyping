@@ -231,6 +231,25 @@ python3 scripts/check-mirror.py --only "$SLUG"
 
 ## Checking that live equals repo
 
+**The two facts' own sources, 2026-10-31 (Sat, week 44), Q130(f) after verification:** a second pass the same day,
+on two faults found when the morning's fix was verified. `tfma.lab` and `tfma.owner.why` now end their `source` with
+the directory that corrected them (`docs/reports/data/2026-10-26-toggle-recount/`), and `tfma.owner.why` no longer
+calls the merged-net quotient a count of wires (about 65 merged nets per changed input bit, about 139 on the
+names-per-wire route). The chip diagram is at version `1bc01254c64a` and equals source commit `cb1f6e4d`
+(`check-mirror.py --via https --only et-soc1-chip-diagram`, **exit 0**, 1/1 equal, 7 folder files equal, 0 warnings;
+the rollback target is `f73a3a4ac4b8`, this morning's version). The page grew 237 bytes to 1,496,025 against the
+1.5e6 budget, **3,975** to spare. `tfma.clocked` is still untouched, so the memory levels' `facts.json` and
+`ladder-img/` rebuild byte-identical and that page was again **not** redeployed. The GitHub Pages mirror rebuilt from
+`cb1f6e4d` (`gh-pages` `e9afd4d4`) and serves the same bytes.
+
+Tests on exactly the bytes that went live, on the Intel: `zoom_test.mjs` **791 passed / 0 failed** (the whole desktop
+suite — the morning's 791-pass run was on the build before a one-sentence refinement, with only `--only=T6,T11,T22`
+re-run on the final bytes), `guard_test.py` 6/6, `zoom_static.py` every T9/T10/T14 check PASS but the "Pillow is
+needed to read the images' metadata" FAIL this Mac has always had. 🛑 **The suite needs an `http://` address** for the
+page's lazily fetched `ladder-img/ladder-data.json`, and **this Mac has no `setsid`**: start the server in a call of
+its own (`python3 -m http.server <port> --bind 127.0.0.1 --directory <the staged folder>`) instead of backgrounding
+it inside the test script, or it never starts and nothing runs.
+
 **The toggle count's two facts, 2026-10-31 (Sat, week 44), Q130(f):** the chip diagram at version `f73a3a4ac4b8`
 equals source commit `36aaef68` (`check-mirror.py --via https --only et-soc1-chip-diagram`, **exit 0**, 1/1 equal,
 7 folder files equal, visibility and slug as listed, 0 warnings); before the deploy the live page equalled its file
