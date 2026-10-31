@@ -170,99 +170,122 @@ A7: the **zeros − h0** column is paired per pass and needs no idle bracket, so
 
 ### The registered rules, scored
 
-| rule | leg | what | test | measured | verdict |
-|---|---|---|---|---|---|
-| **P1a** | primary | fp16's B-side mantissa prices rise with position | Spearman rho(bit, fJ) over fp16 B bits 0-9 >= 0.60 | 1 | **PASS** |
-| **P1a_A** | secondary | the same on the A side | Spearman rho(bit, fJ) over fp16 A bits 0-9 >= 0.60 | 0.8545 | **PASS** |
-| **P1b** | primary | the fp16 mantissa spans a factor, as fp32's does | fJ(dearest fp16 B mantissa bit) / fJ(cheapest fp16 B mantissa bit whose price exceeds its own 95% half-width) >= 3.0 | 2.411 | **FAIL** |
-| **P1c** | primary | fp16 has no flat floor: its whole 10-bit mantissa is in fp32's rising regime, because fp32's floor ran from the LSB to 13 bits below the significand MSB and fp16's mantissa is only 10 bits deep | fJ(fp16 B bit 5) > fJ(fp16 B bit 0) with the two 95% intervals disjoint | bit5_lo 300.7, bit0_hi 206, gap_fJ 94.69 | **PASS** |
-| **P2b** | primary | fp16's dearest significand bit costs less than fp32's by roughly the significand-width ratio, B side | fJ(dearest fp16 B mantissa bit) / fJ(this run's b32_22) in [0.25, 0.80] | 0.4695 | **PASS** |
-| **P2b_e65** | secondary | the same against E65's published fp32 number instead of this run's tie | fJ(dearest fp16 B mantissa bit) / 1008 in [0.25, 0.80] | 0.49 | **PASS** |
-| **P2a** | primary | the same on the A side, against E67's published 1440 fJ | fJ(dearest fp16 A mantissa bit) / 1440 in [0.25, 0.80] | 0.4306 | **PASS** |
-| **P3a** | primary | int8 prices rise toward the high bits | Spearman rho(bit, fJ) over int8 B bits 0-6 >= 0.60 | 0.2857 | **FAIL** |
-| **P3a_A** | secondary | the same rise on the A side | Spearman rho(bit, fJ) over int8 A bits 0-6 >= 0.60 | 0.1429 | **FAIL** |
-| **P3b** | primary | int8's sign bit 7 is not cheaper than bit 6 | fJ(int8 B bit 7) >= fJ(int8 B bit 6) - the 95% half-width of the per-pass paired difference | bit7_fJ 0.8867, bit6_fJ 0.3789, allowance_fJ 4.488 | **PASS** |
-| **P4_fp16** | primary | the zeros rung costs at most 0.2x the h0 switching, fp16 | (P(z16) - P(idle)) / (P(h16q) - P(idle)) <= 0.20 | 0.2037 | **FAIL** |
-| **P4_int8** | primary | the same for int8 | (P(z8) - P(idle)) / (P(h8q) - P(idle)) <= 0.20 | 3.797 | **FAIL** |
-| **P5_fp16_2** | primary | two bits flipping together are sub-additive but not far from the sum (E70's saturating law at low Hamming weight) | dW(b16m2) / [dW(b16_8) + dW(b16_9)] in [0.55, 1.05] | 0.6146 | **PASS** |
-| **P5_fp16_4** | primary | four bits share more | dW(b16m4) / sum of dW(b16_6..b16_9) in [0.35, 1.00] | 0.4043 | **PASS** |
-| **P5_fp16_mono** | primary | the sharing grows with the Hamming weight | r4 <= r2 + 0.10 (fp16) | -0.2103 | **PASS** |
-| **P5_int8_2** | primary | the same at two bits, int8 | dW(b8m2) / [dW(b8_5) + dW(b8_6)] in [0.55, 1.05] | 0.6374 | **PASS** |
-| **P5_int8_4** | primary | the same at four bits, int8 | dW(b8m4) / sum of dW(b8_3..b8_6) in [0.35, 1.00] | 0.5963 | **PASS** |
-| **P5_int8_mono** | primary | the same monotonicity, int8 | r4 <= r2 + 0.10 (int8) | -0.04105 | **PASS** |
-| **P6_fp16** | primary | the registered issue order is the one the unit runs: the same flip in the group-parity layout costs the same per bit | fJ(b16p_9) / fJ(b16_9) in [0.80, 1.25] | 0.1808 | **FAIL** |
-| **P6_int8** | primary | the same for int8 | fJ(b8p_6) / fJ(b8_6) in [0.80, 1.25] | 4.119 | **FAIL** |
-| **P3a_kg** | A4 re-score | P3a on the layout that does alternate in int8 (amendment A4): int8 prices rise toward the high bits | Spearman rho(bit, fJ) over int8 B kg bits 0-6 >= 0.60 | 0.5 | **FAIL** |
-| **P3b_kg** | A4 re-score | P3b on the kg layout: int8's sign bit 7 is not cheaper than bit 6 | fJ(int8 B kg bit 7) >= fJ(int8 B kg bit 6) - the 95% half-width of the difference | bit7_fJ 16.75, bit6_fJ 49.16, allowance_fJ 164.2 | **PASS** |
-| **P8_kg** | A4 re-score | P8 on the kg layout: int8's dearest position costs about the 8/24 width ratio of fp32's | fJ(dearest int8 B kg position) / fJ(this run's b32_22) in [0.15, 0.60] | 0.08138 | **FAIL** |
-| **P7** | primary | the port reproduces E65 on the same card at the one fp32 position it reruns | fJ(b32_22) in [756, 1260] (1008 fJ +- 25%) | 1052 | **PASS** |
-| **P8** | primary | int8's dearest position costs about the 8/24 width ratio of fp32's | fJ(dearest int8 B position) / fJ(this run's b32_22) in [0.15, 0.60] | 0.002337 | **FAIL** |
+A rule is `not scored` when a derived ratio it tests rests on fewer than 3 passes or divides by a price (or an h0 switching figure) whose 95% interval contains zero — the registered resolution rule, applied to the derived quantities since the correction of 31 Oct (the first scoring applied it to the price lists only). A `vacuous` PASS compares a bound and would pass even if the price tested were zero.
 
-15 passed, **10 failed**, 0 not scored, of 25.
+| rule | leg | what | test | measured | verdict | note |
+|---|---|---|---|---|---|---|
+| **P1a** | primary | fp16's B-side mantissa prices rise with position | Spearman rho(bit, fJ) over fp16 B bits 0-9 >= 0.60 | 1 | **PASS** | 10 of 10 mantissa positions kept |
+| **P1a_A** | secondary | the same on the A side | Spearman rho(bit, fJ) over fp16 A bits 0-9 >= 0.60 | 0.8545 | **PASS** | 10 of 10 mantissa positions kept |
+| **P1b** | primary | the fp16 mantissa spans a factor, as fp32's does | fJ(dearest fp16 B mantissa bit) / fJ(cheapest fp16 B mantissa bit whose price exceeds its own 95% half-width) >= 3.0 | 2.411 | **FAIL** | bit 9 over bit 0 |
+| **P1c** | primary | fp16 has no flat floor: its whole 10-bit mantissa is in fp32's rising regime, because fp32's floor ran from the LSB to 13 bits below the significand MSB and fp16's mantissa is only 10 bits deep | fJ(fp16 B bit 5) > fJ(fp16 B bit 0) with the two 95% intervals disjoint | bit5_lo 300.7, bit0_hi 206, gap_fJ 94.69 | **PASS** |  |
+| **P2b** | primary | fp16's dearest significand bit costs less than fp32's by roughly the significand-width ratio, B side | fJ(dearest fp16 B mantissa bit) / fJ(this run's b32_22) in [0.25, 0.80] | 0.4695 | **PASS** | fp16 B bit 9 over this run's b32_22 |
+| **P2b_e65** | secondary | the same against E65's published fp32 number instead of this run's tie | fJ(dearest fp16 B mantissa bit) / 1008 in [0.25, 0.80] | 0.49 | **PASS** |  |
+| **P2a** | primary | the same on the A side, against E67's published 1440 fJ | fJ(dearest fp16 A mantissa bit) / 1440 in [0.25, 0.80] | 0.4306 | **PASS** | fp16 A bit 9 over E67's 1440 fJ |
+| **P3a** | primary | int8 prices rise toward the high bits | Spearman rho(bit, fJ) over int8 B bits 0-6 >= 0.60 | 0.2857 | **FAIL** | 7 of 7 magnitude positions kept; inputs that are bounds: bits [0, 1, 2, 3, 4, 5, 6] |
+| **P3a_A** | secondary | the same rise on the A side | Spearman rho(bit, fJ) over int8 A bits 0-6 >= 0.60 | 0.1429 | **FAIL** | 7 of 7 magnitude positions kept |
+| **P3b** | primary | int8's sign bit 7 is not cheaper than bit 6 | fJ(int8 B bit 7) >= fJ(int8 B bit 6) - the 95% half-width of the per-pass paired difference | bit7_fJ 0.8867, bit6_fJ 0.3789, allowance_fJ 4.488 | **PASS (vacuous)** | inputs that are bounds: bits [6, 7]; vacuous: the allowance exceeds bit 6's price, so the test passes even if bit 7 cost nothing |
+| **P4_fp16** | primary | the zeros rung costs at most 0.2x the h0 switching, fp16 | (P(z16) - P(idle)) / (P(h16q) - P(idle)) <= 0.20 | 0.2037 | **FAIL** | zeros 1.922776920062696 W, h0 9.581021106510887 W over idle 27.009974201606582 W, 4 passes |
+| **P4_int8** | primary | the same for int8 | (P(z8) - P(idle)) / (P(h8q) - P(idle)) <= 0.20 | — (would read 3.797) | **not scored** | the ratio rests on 2 passes |
+| **P5_fp16_2** | primary | two bits flipping together are sub-additive but not far from the sum (E70's saturating law at low Hamming weight) | dW(b16m2) / [dW(b16_8) + dW(b16_9)] in [0.55, 1.05] | 0.6146 | **PASS** | bits [8, 9] |
+| **P5_fp16_4** | primary | four bits share more | dW(b16m4) / sum of dW(b16_6..b16_9) in [0.35, 1.00] | 0.4043 | **PASS** | bits [6, 7, 8, 9] |
+| **P5_fp16_mono** | primary | the sharing grows with the Hamming weight | r4 <= r2 + 0.10 (fp16) | -0.2103 | **PASS** | r4 - r2 |
+| **P5_int8_2** | primary | the same at two bits, int8 | dW(b8m2) / [dW(b8_5) + dW(b8_6)] in [0.55, 1.05] | — (would read 0.6374) | **not scored** | the ratio rests on 2 passes; its denominator sums single-bit prices that are bounds (bits [5, 6]) |
+| **P5_int8_4** | primary | the same at four bits, int8 | dW(b8m4) / sum of dW(b8_3..b8_6) in [0.35, 1.00] | — (would read 0.5963) | **not scored** | the ratio rests on 2 passes; its denominator sums single-bit prices that are bounds (bits [3, 4, 5, 6]) |
+| **P5_int8_mono** | primary | the same monotonicity, int8 | r4 <= r2 + 0.10 (int8) | — (would read -0.04105) | **not scored** | r2 or r4 is not scored |
+| **P6_fp16** | primary | the registered issue order is the one the unit runs: the same flip in the group-parity layout costs the same per bit | fJ(b16p_9) / fJ(b16_9) in [0.80, 1.25] | 0.1808 | **FAIL** | control 87.83443754523032 fJ vs primary 493.9380153467443 fJ |
+| **P6_int8** | primary | the same for int8 | fJ(b8p_6) / fJ(b8_6) in [0.80, 1.25] | — (would read 4.119) | **not scored** | its denominator, the primary b8_6, is a bound |
+| **P3a_kg** | A4 re-score | P3a on the layout that does alternate in int8 (amendment A4): int8 prices rise toward the high bits | Spearman rho(bit, fJ) over int8 B kg bits 0-6 >= 0.60 | 0.5 | **FAIL** | 7 of 7 magnitude positions kept, kg layout |
+| **P3b_kg** | A4 re-score | P3b on the kg layout: int8's sign bit 7 is not cheaper than bit 6 | fJ(int8 B kg bit 7) >= fJ(int8 B kg bit 6) - the 95% half-width of the difference | bit7_fJ 16.75, bit6_fJ 49.16, allowance_fJ 164.2 | **PASS (vacuous)** | inputs that are bounds: bits [7]; vacuous: the allowance exceeds bit 6's price, so the test passes even if bit 7 cost nothing |
+| **P8_kg** | A4 re-score | P8 on the kg layout: int8's dearest position costs about the 8/24 width ratio of fp32's | fJ(dearest int8 B kg position) / fJ(this run's b32_22) in [0.15, 0.60] | 0.08138 | **FAIL** | int8 B kg bit 5 over this run's b32_22 |
+| **P7** | primary | the port reproduces E65 on the same card at the one fp32 position it reruns | fJ(b32_22) in [756, 1260] (1008 fJ +- 25%) | 1052 | **PASS** | 95% [983.6606381112914, 1120.4381465942292] |
+| **P8** | primary | int8's dearest position costs about the 8/24 width ratio of fp32's | fJ(dearest int8 B position) / fJ(this run's b32_22) in [0.15, 0.60] | 0.002337 | **FAIL** | int8 B bit 5 over this run's b32_22; the numerator (bit 5) is a bound, so the ratio lies in [-0.0014, 0.0061] |
+
+12 passed (2 of them vacuous: P3b, P3b_kg), **8 failed**, 5 not scored, of 25; of the 22 registered before the data (A4's three re-scores left out): 11 passed, 6 failed, 5 not scored.
+
+### The registered rules at E71's slope (the registered sensitivity arm)
+
+At 0.3803 W/°C: 12 passed (2 of them vacuous: P3b, P3b_kg), **8 failed**, 5 not scored, of 25; of the 22 registered before the data (A4's three re-scores left out): 11 passed, 6 failed, 5 not scored.
+
+No verdict moves between the two slopes.
 
 ### Sensitivity: every price at E71's measured idle slope 0.3803 W/°C
 
-| list | bit | fitted-slope fJ | E71-slope fJ | change |
+A **bound** is a price whose 95% interval contains zero. The change is quoted only for a price that is a coefficient at the fitted slope; a change in a bound means nothing.
+
+| list | bit | fitted-slope fJ [95%] | E71-slope fJ [95%] | change |
 |---|---|---|---|---|
-| fp16_a | 0 | 355 | 338 | -4.8% |
-| fp16_a | 1 | 251 | 240 | -4.2% |
-| fp16_a | 2 | 456 | 439 | -3.7% |
-| fp16_a | 3 | 296 | 278 | -6.0% |
-| fp16_a | 4 | 480 | 444 | -7.4% |
-| fp16_a | 5 | 408 | 398 | -2.6% |
-| fp16_a | 6 | 552 | 509 | -7.8% |
-| fp16_a | 7 | 502 | 471 | -6.1% |
-| fp16_a | 8 | 521 | 487 | -6.5% |
-| fp16_a | 9 | 620 | 585 | -5.7% |
-| fp16_a | 10 | 94 | 91 | -2.6% |
-| fp16_a | 11 | 81 | 81 | +0.0% |
-| fp16_a | 12 | 73 | 73 | +0.0% |
-| fp16_a | 13 | 93 | 88 | -5.2% |
-| fp16_a | 14 | 92 | 90 | -1.8% |
-| fp16_a | 15 | 71 | 71 | +0.0% |
-| fp16_b | 0 | 205 | 191 | -6.5% |
-| fp16_b | 1 | 224 | 205 | -8.3% |
-| fp16_b | 2 | 255 | 236 | -7.4% |
-| fp16_b | 3 | 295 | 273 | -7.4% |
-| fp16_b | 4 | 321 | 296 | -7.9% |
-| fp16_b | 5 | 334 | 309 | -7.7% |
-| fp16_b | 6 | 373 | 348 | -6.9% |
-| fp16_b | 7 | 386 | 358 | -7.3% |
-| fp16_b | 8 | 431 | 401 | -6.8% |
-| fp16_b | 9 | 494 | 464 | -6.1% |
-| fp16_b | 10 | 71 | 69 | -3.4% |
-| fp16_b | 11 | 67 | 61 | -8.4% |
-| fp16_b | 12 | 64 | 63 | -1.3% |
-| fp16_b | 13 | 83 | 77 | -7.3% |
-| fp16_b | 14 | 76 | 75 | -1.6% |
-| fp16_b | 15 | 34 | 33 | -2.4% |
-| fp16_b_jgp | 9 | 88 | 84 | -4.8% |
-| fp16_b_kg | 9 | 134 | 134 | +0.0% |
-| fp32_b | 22 | 1052 | 996 | -5.4% |
-| fp32_b_jgp | 22 | 150 | 149 | -0.6% |
-| fp32_b_kg | 22 | 159 | 159 | +0.0% |
-| int8_a | 0 | 86 | 85 | -1.1% |
-| int8_a | 1 | 75 | 74 | -1.3% |
-| int8_a | 2 | 71 | 74 | +3.6% |
-| int8_a | 3 | 88 | 87 | -1.1% |
-| int8_a | 4 | 92 | 95 | +3.3% |
-| int8_a | 5 | 84 | 83 | -1.1% |
-| int8_a | 6 | 78 | 77 | -1.2% |
-| int8_a | 7 | 152 | 151 | -0.6% |
-| int8_b | 0 | 1 | -2 | -259.4% |
-| int8_b | 1 | -4 | -4 | +6.2% |
-| int8_b | 2 | -2 | -5 | +154.0% |
-| int8_b | 3 | 2 | -1 | -145.3% |
-| int8_b | 4 | 1 | -3 | -309.9% |
-| int8_b | 5 | 2 | -1 | -153.2% |
-| int8_b | 6 | 0 | -2 | -590.0% |
-| int8_b | 7 | 1 | -5 | -676.6% |
-| int8_b_jgp | 6 | 3 | -1 | -118.8% |
-| int8_b_kg | 0 | 27 | 3 | -90.3% |
-| int8_b_kg | 1 | 62 | 13 | -79.5% |
-| int8_b_kg | 2 | 31 | 35 | +12.0% |
-| int8_b_kg | 3 | 72 | 5 | -93.7% |
-| int8_b_kg | 4 | 40 | 48 | +18.6% |
-| int8_b_kg | 5 | 86 | 39 | -55.0% |
-| int8_b_kg | 6 | 49 | 2 | -95.7% |
-| int8_b_kg | 7 | 17 | -2 | -112.4% |
+| fp16_a | 0 | 355 [315, 395] | 338 [299, 377] | -4.8% |
+| fp16_a | 1 | 251 [144, 358] | 240 [140, 341] | -4.2% |
+| fp16_a | 2 | 456 [415, 497] | 439 [407, 470] | -3.7% |
+| fp16_a | 3 | 296 [126, 466] | 278 [110, 446] | -6.0% |
+| fp16_a | 4 | 480 [363, 596] | 444 [323, 566] | -7.4% |
+| fp16_a | 5 | 408 [347, 470] | 398 [333, 463] | -2.6% |
+| fp16_a | 6 | 552 [518, 586] | 509 [471, 548] | -7.8% |
+| fp16_a | 7 | 502 [340, 664] | 471 [295, 647] | -6.1% |
+| fp16_a | 8 | 521 [484, 558] | 487 [448, 526] | -6.5% |
+| fp16_a | 9 | 620 [573, 667] | 585 [550, 619] | -5.7% |
+| fp16_a | 10 | 94 [49, 138] | 91 [47, 136] | -2.6% |
+| fp16_a | 11 | 81 [45, 117] | 81 [45, 117] | +0.0% |
+| fp16_a | 12 | 73 [16, 131] | 73 [16, 131] | +0.0% |
+| fp16_a | 13 | 93 [82, 104] | 88 [66, 110] | -5.2% |
+| fp16_a | 14 | 92 [34, 150] | 90 [33, 147] | -1.8% |
+| fp16_a | 15 | 71 [15, 128] | 71 [15, 128] | +0.0% |
+| fp16_b | 0 | 205 [204, 206] | 191 [177, 206] | -6.5% |
+| fp16_b | 1 | 224 [220, 227] | 205 [202, 208] | -8.3% |
+| fp16_b | 2 | 255 [249, 262] | 236 [226, 247] | -7.4% |
+| fp16_b | 3 | 295 [289, 300] | 273 [264, 282] | -7.4% |
+| fp16_b | 4 | 321 [315, 327] | 296 [294, 298] | -7.9% |
+| fp16_b | 5 | 334 [301, 368] | 309 [269, 348] | -7.7% |
+| fp16_b | 6 | 373 [367, 380] | 348 [339, 356] | -6.9% |
+| fp16_b | 7 | 386 [281, 490] | 358 [252, 463] | -7.3% |
+| fp16_b | 8 | 431 [310, 551] | 401 [282, 521] | -6.8% |
+| fp16_b | 9 | 494 [465, 523] | 464 [434, 494] | -6.1% |
+| fp16_b | 10 | 71 [67, 76] | 69 [66, 72] | -3.4% |
+| fp16_b | 11 | 67 [60, 74] | 61 [53, 69] | -8.4% |
+| fp16_b | 12 | 64 [60, 68] | 63 [59, 67] | -1.3% |
+| fp16_b | 13 | 83 [76, 90] | 77 [74, 80] | -7.3% |
+| fp16_b | 14 | 76 [47, 105] | 75 [48, 102] | -1.6% |
+| fp16_b | 15 | 34 [-22, 90] bound | 33 [-24, 90] bound | — |
+| fp16_b_jgp | 9 | 88 [58, 117] | 84 [55, 112] | -4.8% |
+| fp16_b_kg | 9 | 134 [-75, 342] bound | 134 [-75, 342] bound | — |
+| fp32_b | 22 | 1052 [984, 1120] | 996 [925, 1066] | -5.4% |
+| fp32_b_jgp | 22 | 150 [142, 159] | 149 [139, 160] | -0.6% |
+| fp32_b_kg | 22 | 159 [-328, 645] bound | 159 [-328, 645] bound | — |
+| int8_a | 0 | 86 [79, 93] | 85 [77, 94] | -1.1% |
+| int8_a | 1 | 75 [48, 102] | 74 [44, 104] | -1.3% |
+| int8_a | 2 | 71 [51, 92] | 74 [65, 83] | +3.6% |
+| int8_a | 3 | 88 [86, 91] | 87 [82, 92] | -1.1% |
+| int8_a | 4 | 92 [89, 95] | 95 [81, 110] | +3.3% |
+| int8_a | 5 | 84 [79, 88] | 83 [77, 89] | -1.1% |
+| int8_a | 6 | 78 [65, 91] | 77 [64, 89] | -1.2% |
+| int8_a | 7 | 152 [147, 157] | 151 [144, 158] | -0.6% |
+| int8_b | 0 | 1 [-1, 4] bound | -2 [-16, 11] bound | — |
+| int8_b | 1 | -4 [-13, 5] bound | -4 [-17, 8] bound | — |
+| int8_b | 2 | -2 [-14, 10] bound | -5 [-10, -0] bound | — |
+| int8_b | 3 | 2 [-1, 5] bound | -1 [-14, 12] bound | — |
+| int8_b | 4 | 1 [-1, 4] bound | -3 [-16, 10] bound | — |
+| int8_b | 5 | 2 [-2, 6] bound | -1 [-7, 4] bound | — |
+| int8_b | 6 | 0 [-2, 3] bound | -2 [-6, 2] bound | — |
+| int8_b | 7 | 1 [-3, 5] bound | -5 [-11, 1] bound | — |
+| int8_b_jgp | 6 | 3 [1, 4] | -1 [-4, 3] **bound** | -118.8% |
+| int8_b_kg | 0 | 27 [15, 40] | 3 [-147, 153] **bound** | -90.3% |
+| int8_b_kg | 1 | 62 [17, 106] | 13 [-140, 165] **bound** | -79.5% |
+| int8_b_kg | 2 | 31 [17, 45] | 35 [-65, 135] **bound** | +12.0% |
+| int8_b_kg | 3 | 72 [64, 81] | 5 [-96, 105] **bound** | -93.7% |
+| int8_b_kg | 4 | 40 [32, 49] | 48 [-46, 142] **bound** | +18.6% |
+| int8_b_kg | 5 | 86 [56, 116] | 39 [-196, 273] **bound** | -55.0% |
+| int8_b_kg | 6 | 49 [27, 71] | 2 [-188, 192] **bound** | -95.7% |
+| int8_b_kg | 7 | 17 [-146, 180] bound | -2 [-246, 242] bound | — |
+
+Per list, over the positions that are coefficients at the fitted slope:
+
+| list | positions | change at E71's slope | of them bounds at E71's slope |
+|---|---|---|---|
+| fp16_a | 16 | -7.8% to +0.0% | 0 |
+| fp16_b | 15 | -8.4% to -1.3% | 0 |
+| fp16_b_jgp | 1 | -4.8% to -4.8% | 0 |
+| fp32_b | 1 | -5.4% to -5.4% | 0 |
+| fp32_b_jgp | 1 | -0.6% to -0.6% | 0 |
+| int8_a | 8 | -1.3% to +3.6% | 0 |
+| int8_b_jgp | 1 | -118.8% to -118.8% | 1 |
+| int8_b_kg | 7 | -95.7% to +18.6% | 7 |

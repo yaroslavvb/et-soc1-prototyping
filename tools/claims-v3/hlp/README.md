@@ -220,6 +220,39 @@ block), `queue_hlp.sh` (passes in a row), `run_e79.sh` (the stages: `setup`, `id
 
 ## Amendments
 
+**Corrections after verification, Sat 31 Oct 2026 (after the data; desk only; no band, item, count or rule moves).**
+The full list is C1–C14 in the [data README](../../../docs/reports/data/2026-10-31-e79-fp16-int8-bit-prices/README.md#corrections-after-verification-sat-31-oct-2026).
+What touches this file:
+
+- **The scorer.** `report_e79.py` applied the resolution rule in *Decision rules* to the price lists but not to the
+  derived ratios that P4, P5 and P6 are scored on. It now does, so int8's P4, its three P5 rules and its P6 are
+  *not scored*, and the tally is **12 / 8 / 5 of 25** (11 / 6 / 5 of the 22 above), not 15 / 10 / 0. P3b and
+  P3b_kg are flagged *vacuous*. The same scoring runs on the E71-slope arm.
+- **The amendment stamps.** The stamps of A1, A3 and A4 were first written as 09:33, 09:35 and 09:58, times
+  later than their own commits, and were replaced by the commit times in `23197287` without a note. A5–A8's first
+  stamps (10:08, 10:1x, 10:12, 10:13) were replaced by 10:13:39 in `8d2fe956`. The commit times below are the
+  record, and `predictions.json`'s `amendment_A4.dated` now carries its commit time, with the first value kept
+  beside it.
+- **A4 and A7 are partly post hoc.** A4 was written during pass 7912, with 7910 and 7911 complete. Its *marginal*
+  block uses block-A rungs it had seen, and A7's *zeros − h0* uses block-A passes A7 had seen. Both quantities are
+  **exploratory**, not registered before their data. A4's added items ran only in block B, after it.
+- **A8 executes A3's plan.** A3 had already registered 7914 and 7915. The queue had been started for four passes
+  (`go 7910 4`, 09:28:21), so A8 ran A3's two passes; it did not add them.
+- **A5's last sentence is withdrawn.** An all-zero tile cannot tell a one-test-per-word gate from a per-element
+  gate, and E79 measured no fp32 zeros, so E79's P4 pair is not a silicon measurement of Q130(g)'s conclusion.
+- **The RTL citations** in A5 and A6 are to `core-et@b38a1a3`.
+- **Departures not written before.**
+  - **D2:** a read-only probe at 09:12:21 PDT, before this file was committed and before the claim, opened the
+    card's management device three times. Two of the opens (`ettelem --help`, `ettelem version`) were outside the
+    card lock.
+  - **D3:** the `ettelem config` reads in `block.sh` and the `ident` stage ran under `timeout 20`, not the
+    `timeout 10` that *Protocol* states, and `ident` took the lock with `flock -w 120`, not `-n`.
+  - **D4:** the `run_e79.sh` that pass 7910 ran was committed only with A1. It corrects this file's `b16m` and
+    `b8m` selectors, which select no item, to the registered `b16m2`/`b16m4`/`b8m2`/`b8m4`, and passes the
+    identity read's device as an index.
+  - **D5:** P6's registered consequence ("the registered stream order is wrong") holds for int8. For fp16 and fp32,
+    E79 reads the failure as the result path, a hypothesis it did not test.
+
 **A8, Sat 31 Oct 2026, 10:13:39 PDT (commit `23197287`, 3 min 01 s before pass 7914's first launch at 10:16:40)** — **two more block-A passes, 7914 and 7915, of exactly the registered item
 list.** Why: the registered drift gate set **pass 7912** aside — zero failed runs, `anchor_pi` drift 0.4105 W
 against the 0.3 W bar — leaving block A with **three** kept passes, exactly the registered `min_passes` floor and

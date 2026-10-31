@@ -75,7 +75,7 @@
    "test": "Spearman rho(bit, fJ) over int8 B bits 0-6 >= 0.60",
    "measured": 0.2857142857142857,
    "verdict": "FAIL",
-   "note": "7 of 7 magnitude positions kept"
+   "note": "7 of 7 magnitude positions kept; inputs that are bounds: bits [0, 1, 2, 3, 4, 5, 6]"
   },
   {
    "id": "P3a_A",
@@ -97,7 +97,8 @@
     "allowance_fJ": 4.488256790068376
    },
    "verdict": "PASS",
-   "note": ""
+   "note": "inputs that are bounds: bits [6, 7]; vacuous: the allowance exceeds bit 6's price, so the test passes even if bit 7 cost nothing",
+   "vacuous": true
   },
   {
    "id": "P4_fp16",
@@ -113,9 +114,10 @@
    "leg": "primary",
    "what": "the same for int8",
    "test": "(P(z8) - P(idle)) / (P(h8q) - P(idle)) <= 0.20",
-   "measured": 3.797418829898975,
-   "verdict": "FAIL",
-   "note": "zeros 1.311151920062703 W, h0 2.472766264204545 W over idle 27.8864730799373 W, 2 passes"
+   "measured": null,
+   "verdict": "not scored",
+   "note": "the ratio rests on 2 passes",
+   "unscored_value": 3.797418829898975
   },
   {
    "id": "P5_fp16_2",
@@ -149,27 +151,30 @@
    "leg": "primary",
    "what": "the same at two bits, int8",
    "test": "dW(b8m2) / [dW(b8_5) + dW(b8_6)] in [0.55, 1.05]",
-   "measured": 0.6373641761090378,
-   "verdict": "PASS",
-   "note": "bits [5, 6]"
+   "measured": null,
+   "verdict": "not scored",
+   "note": "the ratio rests on 2 passes; its denominator sums single-bit prices that are bounds (bits [5, 6])",
+   "unscored_value": 0.6373641761090378
   },
   {
    "id": "P5_int8_4",
    "leg": "primary",
    "what": "the same at four bits, int8",
    "test": "dW(b8m4) / sum of dW(b8_3..b8_6) in [0.35, 1.00]",
-   "measured": 0.596316372212842,
-   "verdict": "PASS",
-   "note": "bits [3, 4, 5, 6]"
+   "measured": null,
+   "verdict": "not scored",
+   "note": "the ratio rests on 2 passes; its denominator sums single-bit prices that are bounds (bits [3, 4, 5, 6])",
+   "unscored_value": 0.596316372212842
   },
   {
    "id": "P5_int8_mono",
    "leg": "primary",
    "what": "the same monotonicity, int8",
    "test": "r4 <= r2 + 0.10 (int8)",
-   "measured": -0.04104780389619589,
-   "verdict": "PASS",
-   "note": "r4 - r2"
+   "measured": null,
+   "verdict": "not scored",
+   "note": "r2 or r4 is not scored",
+   "unscored_value": -0.04104780389619589
   },
   {
    "id": "P6_fp16",
@@ -185,9 +190,10 @@
    "leg": "primary",
    "what": "the same for int8",
    "test": "fJ(b8p_6) / fJ(b8_6) in [0.80, 1.25]",
-   "measured": 4.118962937994559,
-   "verdict": "FAIL",
-   "note": "control 2.863252986489246 fJ vs primary 0.37886318354629334 fJ"
+   "measured": null,
+   "verdict": "not scored",
+   "note": "its denominator, the primary b8_6, is a bound",
+   "unscored_value": 4.118962937994559
   },
   {
    "id": "P3a_kg",
@@ -209,7 +215,8 @@
     "allowance_fJ": 164.21531840142822
    },
    "verdict": "PASS",
-   "note": ""
+   "note": "inputs that are bounds: bits [7]; vacuous: the allowance exceeds bit 6's price, so the test passes even if bit 7 cost nothing",
+   "vacuous": true
   },
   {
    "id": "P8_kg",
@@ -236,12 +243,291 @@
    "test": "fJ(dearest int8 B position) / fJ(this run's b32_22) in [0.15, 0.60]",
    "measured": 0.0023365298664710897,
    "verdict": "FAIL",
-   "note": "int8 B bit 5 over this run's b32_22"
+   "note": "int8 B bit 5 over this run's b32_22; the numerator (bit 5) is a bound, so the ratio lies in [-0.0014, 0.0061]"
   }
  ],
- "n_pass": 15,
- "n_fail": 10,
- "n_not_scored": 0,
+ "n_pass": 12,
+ "n_fail": 8,
+ "n_not_scored": 5,
+ "n_vacuous": 2,
+ "tally": {
+  "pass": 12,
+  "fail": 8,
+  "not_scored": 5,
+  "vacuous": [
+   "P3b",
+   "P3b_kg"
+  ],
+  "of": 25,
+  "registered": {
+   "pass": 11,
+   "fail": 6,
+   "not_scored": 5,
+   "of": 22
+  }
+ },
+ "rules_leak0.3803": [
+  {
+   "id": "P1a",
+   "leg": "primary",
+   "what": "fp16's B-side mantissa prices rise with position",
+   "test": "Spearman rho(bit, fJ) over fp16 B bits 0-9 >= 0.60",
+   "measured": 1.0,
+   "verdict": "PASS",
+   "note": "10 of 10 mantissa positions kept"
+  },
+  {
+   "id": "P1a_A",
+   "leg": "secondary",
+   "what": "the same on the A side",
+   "test": "Spearman rho(bit, fJ) over fp16 A bits 0-9 >= 0.60",
+   "measured": 0.8545454545454545,
+   "verdict": "PASS",
+   "note": "10 of 10 mantissa positions kept"
+  },
+  {
+   "id": "P1b",
+   "leg": "primary",
+   "what": "the fp16 mantissa spans a factor, as fp32's does",
+   "test": "fJ(dearest fp16 B mantissa bit) / fJ(cheapest fp16 B mantissa bit whose price exceeds its own 95% half-width) >= 3.0",
+   "measured": 2.423264453036157,
+   "verdict": "FAIL",
+   "note": "bit 9 over bit 0"
+  },
+  {
+   "id": "P1c",
+   "leg": "primary",
+   "what": "fp16 has no flat floor: its whole 10-bit mantissa is in fp32's rising regime, because fp32's floor ran from the LSB to 13 bits below the significand MSB and fp16's mantissa is only 10 bits deep",
+   "test": "fJ(fp16 B bit 5) > fJ(fp16 B bit 0) with the two 95% intervals disjoint",
+   "measured": {
+    "bit5_lo": 269.4816175678064,
+    "bit0_hi": 205.53330126386382,
+    "gap_fJ": 63.94831630394256
+   },
+   "verdict": "PASS",
+   "note": ""
+  },
+  {
+   "id": "P2b",
+   "leg": "primary",
+   "what": "fp16's dearest significand bit costs less than fp32's by roughly the significand-width ratio, B side",
+   "test": "fJ(dearest fp16 B mantissa bit) / fJ(this run's b32_22) in [0.25, 0.80]",
+   "measured": 0.4660939436834679,
+   "verdict": "PASS",
+   "note": "fp16 B bit 9 over this run's b32_22"
+  },
+  {
+   "id": "P2b_e65",
+   "leg": "secondary",
+   "what": "the same against E65's published fp32 number instead of this run's tie",
+   "test": "fJ(dearest fp16 B mantissa bit) / 1008 in [0.25, 0.80]",
+   "measured": 0.46034409078130706,
+   "verdict": "PASS",
+   "note": ""
+  },
+  {
+   "id": "P2a",
+   "leg": "primary",
+   "what": "the same on the A side, against E67's published 1440 fJ",
+   "test": "fJ(dearest fp16 A mantissa bit) / 1440 in [0.25, 0.80]",
+   "measured": 0.4059076061905573,
+   "verdict": "PASS",
+   "note": "fp16 A bit 9 over E67's 1440 fJ"
+  },
+  {
+   "id": "P3a",
+   "leg": "primary",
+   "what": "int8 prices rise toward the high bits",
+   "test": "Spearman rho(bit, fJ) over int8 B bits 0-6 >= 0.60",
+   "measured": 0.4642857142857143,
+   "verdict": "FAIL",
+   "note": "7 of 7 magnitude positions kept; inputs that are bounds: bits [0, 1, 2, 3, 4, 5, 6]"
+  },
+  {
+   "id": "P3a_A",
+   "leg": "secondary",
+   "what": "the same rise on the A side",
+   "test": "Spearman rho(bit, fJ) over int8 A bits 0-6 >= 0.60",
+   "measured": 0.17857142857142858,
+   "verdict": "FAIL",
+   "note": "7 of 7 magnitude positions kept"
+  },
+  {
+   "id": "P3b",
+   "leg": "primary",
+   "what": "int8's sign bit 7 is not cheaper than bit 6",
+   "test": "fJ(int8 B bit 7) >= fJ(int8 B bit 6) - the 95% half-width of the per-pass paired difference",
+   "measured": {
+    "bit7_fJ": -5.112363444431334,
+    "bit6_fJ": -1.8564562350200797,
+    "allowance_fJ": 7.3505606438239095
+   },
+   "verdict": "PASS",
+   "note": "inputs that are bounds: bits [6, 7]; vacuous: the allowance exceeds bit 6's price, so the test passes even if bit 7 cost nothing",
+   "vacuous": true
+  },
+  {
+   "id": "P4_fp16",
+   "leg": "primary",
+   "what": "the zeros rung costs at most 0.2x the h0 switching, fp16",
+   "test": "(P(z16) - P(idle)) / (P(h16q) - P(idle)) <= 0.20",
+   "measured": 0.23274420580720717,
+   "verdict": "FAIL",
+   "note": "zeros 2.190019999999998 W, h0 9.540192302631581 W over idle 26.75386625 W, 4 passes"
+  },
+  {
+   "id": "P4_int8",
+   "leg": "primary",
+   "what": "the same for int8",
+   "test": "(P(z8) - P(idle)) / (P(h8q) - P(idle)) <= 0.20",
+   "measured": null,
+   "verdict": "not scored",
+   "note": "the ratio rests on 2 passes",
+   "unscored_value": 2.7224306233140867
+  },
+  {
+   "id": "P5_fp16_2",
+   "leg": "primary",
+   "what": "two bits flipping together are sub-additive but not far from the sum (E70's saturating law at low Hamming weight)",
+   "test": "dW(b16m2) / [dW(b16_8) + dW(b16_9)] in [0.55, 1.05]",
+   "measured": 0.6192958742568868,
+   "verdict": "PASS",
+   "note": "bits [8, 9]"
+  },
+  {
+   "id": "P5_fp16_4",
+   "leg": "primary",
+   "what": "four bits share more",
+   "test": "dW(b16m4) / sum of dW(b16_6..b16_9) in [0.35, 1.00]",
+   "measured": 0.4128583853730806,
+   "verdict": "PASS",
+   "note": "bits [6, 7, 8, 9]"
+  },
+  {
+   "id": "P5_fp16_mono",
+   "leg": "primary",
+   "what": "the sharing grows with the Hamming weight",
+   "test": "r4 <= r2 + 0.10 (fp16)",
+   "measured": -0.2064374888838062,
+   "verdict": "PASS",
+   "note": "r4 - r2"
+  },
+  {
+   "id": "P5_int8_2",
+   "leg": "primary",
+   "what": "the same at two bits, int8",
+   "test": "dW(b8m2) / [dW(b8_5) + dW(b8_6)] in [0.55, 1.05]",
+   "measured": null,
+   "verdict": "not scored",
+   "note": "the ratio rests on 0 passes; its denominator sums single-bit prices that are bounds (bits [5, 6])",
+   "unscored_value": null
+  },
+  {
+   "id": "P5_int8_4",
+   "leg": "primary",
+   "what": "the same at four bits, int8",
+   "test": "dW(b8m4) / sum of dW(b8_3..b8_6) in [0.35, 1.00]",
+   "measured": null,
+   "verdict": "not scored",
+   "note": "the ratio rests on 1 passes; its denominator sums single-bit prices that are bounds (bits [3, 4, 5, 6])",
+   "unscored_value": 0.24745033648619846
+  },
+  {
+   "id": "P5_int8_mono",
+   "leg": "primary",
+   "what": "the same monotonicity, int8",
+   "test": "r4 <= r2 + 0.10 (int8)",
+   "measured": null,
+   "verdict": "not scored",
+   "note": "r2 or r4 is not scored",
+   "unscored_value": null
+  },
+  {
+   "id": "P6_fp16",
+   "leg": "primary",
+   "what": "the registered issue order is the one the unit runs: the same flip in the group-parity layout costs the same per bit",
+   "test": "fJ(b16p_9) / fJ(b16_9) in [0.80, 1.25]",
+   "measured": 0.18402626599683547,
+   "verdict": "FAIL",
+   "note": "control 83.66117139356423 fJ vs primary 464.0268435075575 fJ"
+  },
+  {
+   "id": "P6_int8",
+   "leg": "primary",
+   "what": "the same for int8",
+   "test": "fJ(b8p_6) / fJ(b8_6) in [0.80, 1.25]",
+   "measured": null,
+   "verdict": "not scored",
+   "note": "its denominator, the primary b8_6, is a bound",
+   "unscored_value": 0.8027024394053328
+  },
+  {
+   "id": "P3a_kg",
+   "leg": "A4 re-score",
+   "what": "P3a on the layout that does alternate in int8 (amendment A4): int8 prices rise toward the high bits",
+   "test": "Spearman rho(bit, fJ) over int8 B kg bits 0-6 >= 0.60",
+   "measured": 0.10714285714285714,
+   "verdict": "FAIL",
+   "note": "7 of 7 magnitude positions kept, kg layout; inputs that are bounds: bits [0, 1, 2, 3, 4, 5, 6]"
+  },
+  {
+   "id": "P3b_kg",
+   "leg": "A4 re-score",
+   "what": "P3b on the kg layout: int8's sign bit 7 is not cheaper than bit 6",
+   "test": "fJ(int8 B kg bit 7) >= fJ(int8 B kg bit 6) - the 95% half-width of the difference",
+   "measured": {
+    "bit7_fJ": -2.0691345620861856,
+    "bit6_fJ": 2.1062313370031114,
+    "allowance_fJ": 309.5738859731978
+   },
+   "verdict": "PASS",
+   "note": "inputs that are bounds: bits [6, 7]; vacuous: the allowance exceeds bit 6's price, so the test passes even if bit 7 cost nothing",
+   "vacuous": true
+  },
+  {
+   "id": "P8_kg",
+   "leg": "A4 re-score",
+   "what": "P8 on the kg layout: int8's dearest position costs about the 8/24 width ratio of fp32's",
+   "test": "fJ(dearest int8 B kg position) / fJ(this run's b32_22) in [0.15, 0.60]",
+   "measured": 0.048207569668480624,
+   "verdict": "FAIL",
+   "note": "int8 B kg bit 4 over this run's b32_22; the numerator (bit 4) is a bound, so the ratio lies in [-0.0464, 0.1428]"
+  },
+  {
+   "id": "P7",
+   "leg": "primary",
+   "what": "the port reproduces E65 on the same card at the one fp32 position it reruns",
+   "test": "fJ(b32_22) in [756, 1260] (1008 fJ +- 25%)",
+   "measured": 995.5650567789522,
+   "verdict": "PASS",
+   "note": "95% [925.1983197837023, 1065.931793774202]"
+  },
+  {
+   "id": "P8",
+   "leg": "primary",
+   "what": "int8's dearest position costs about the 8/24 width ratio of fp32's",
+   "test": "fJ(dearest int8 B position) / fJ(this run's b32_22) in [0.15, 0.60]",
+   "measured": -0.000994586024859518,
+   "verdict": "FAIL",
+   "note": "int8 B bit 3 over this run's b32_22; the numerator (bit 3) is a bound, so the ratio lies in [-0.0141, 0.0121]"
+  }
+ ],
+ "tally_leak0.3803": {
+  "pass": 12,
+  "fail": 8,
+  "not_scored": 5,
+  "vacuous": [
+   "P3b",
+   "P3b_kg"
+  ],
+  "of": 25,
+  "registered": {
+   "pass": 11,
+   "fail": 6,
+   "not_scored": 5,
+   "of": 22
+  }
+ },
  "prices": {
   "fp16_b": {
    "0": {
