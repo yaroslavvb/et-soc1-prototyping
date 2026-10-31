@@ -1,0 +1,70 @@
+A100 PCIe -- Hamming ladder on a memory-resident int8 matrix
+DERIVED from github.com/theo-gregersen/input-dependent-power-sc24
+(the authors state no per-flipped-bit price anywhere in the paper)
+
+  n  mean W   over n=0   within-trace sd   samples
+   0   224.75     +0.00         0.20             99
+   1   227.03     +2.28         0.19             99
+   2   229.32     +4.57         0.23             99
+   3   230.74     +5.99         0.23             99
+   4   232.77     +8.02         0.23             99
+   5   232.63     +7.88         0.22             99
+   6   232.41     +7.65         0.23             99
+   7   232.14     +7.39         0.24             99
+   8   231.23     +6.48         0.23             99
+   9   231.38     +6.63         0.23             99
+  10   231.35     +6.60         0.21             99
+  11   231.39     +6.64         0.22             99
+  12   230.98     +6.23         0.21             99
+  13   230.81     +6.06         0.23             99
+  14   230.88     +6.13         0.20             99
+  15   230.65     +5.90         0.25             99
+  16   231.20     +6.45         0.19             99
+  17   230.72     +5.97         0.20             99
+  18   230.76     +6.01         0.18             99
+  19   231.10     +6.35         0.21             99
+  20   231.16     +6.41         0.23             99
+  21   231.41     +6.66         0.20             99
+  22   231.45     +6.70         0.24             99
+  23   231.28     +6.53         0.20             99
+  24   231.32     +6.57         0.24             99
+  25   231.40     +6.65         0.22             99
+  26   231.61     +6.86         0.23             99
+  27   231.91     +7.16         0.24             99
+  28   232.09     +7.33         0.22             99
+  29   232.15     +7.40         0.19             99
+  30   231.93     +7.18         0.25             99
+  31   231.98     +7.23         0.23             99
+  32   232.56     +7.81         0.26             99
+
+IDENTICAL-WORKLOAD CONTROL  (n = 8..32: the int8_t store truncates the mask
+to 0xFF, so these 25 conditions are one workload run 25 times)
+  mean 231.39 W   min 230.65   max 232.56   spread 1.90   sd 0.490 W
+  => a single condition's run-to-run noise is about 0.49 W, and there is
+     ONE trace per n, so every rung below carries that much scatter.
+
+SLOPES  (10.4 s mean trace -> 2.58e+11 flips/s per mask bit position)
+  n=0..4, the RISING part : +1.9748 W/bit  +/- 0.1549 (control sd)  -> 7651 fJ per flipped bit
+  n=4..8, past the knee   : -0.3574 W/bit                        -> -1385 fJ (zero within noise)
+  n=0..8, SPANNING the knee: +0.8213 W/bit  <- the blend the first reduction quoted;
+                             it is not the price of anything.
+
+  marginal price, rising part: 7.65 pJ per flipped bit
+    fit uncertainty  +/- 0.60 pJ (control sd / sqrt(Sxx))
+    timing uncertainty +/-30% (trace-length runtime) dominates: 5.4 to 9.9 pJ
+
+KNEE
+  n=4 sits +1.38 W above the n>=8 plateau (231.39 W) = 2.8 control sd
+    step n=0 -> 1: +2.28 W
+    step n=1 -> 2: +2.29 W
+    step n=2 -> 3: +1.42 W
+    step n=3 -> 4: +2.03 W
+    step n=4 -> 5: -0.14 W
+    step n=5 -> 6: -0.22 W
+    step n=6 -> 7: -0.27 W
+    step n=7 -> 8: -0.91 W
+  the first four steps average +2.00 W; n=5..8 average -0.39 W
+
+WHAT PATH THIS PRICES: a bandwidth-bound XOR over a 16,384^2 int8 matrix in
+HBM2 -- load, flip, store.  It is NOT a flip inside an arithmetic unit, and
+it is not comparable to the ET-SoC-1's 118-136 fJ multiply-add input bit.

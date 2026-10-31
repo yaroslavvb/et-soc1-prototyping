@@ -1,0 +1,80 @@
+==============================================================================
+1. THE DATA EFFECT, IN TWO CONVENTIONS (one row cannot serve both)
+==============================================================================
+system / what varied                over idle   absolute    idle W
+------------------------------------------------------------------------------
+ET-SoC-1 fp32 zeros->randn (21 Sep)     13.55x      1.66x     36.29
+  same, the E67-session anchors         8.63x      1.89x     24.60
+A100 fp32 zeros->randn                  1.63x      1.47x     48.56
+A100 fp16 zeros->randn                  1.34x      1.26x     48.56
+A100 fp16-T zeros->randn                1.84x      1.62x     48.56
+A100 int8 zeros->randn                  1.67x      1.49x     48.56
+A100 fp32 quietest->busiest             1.70x      1.52x     48.56
+A100 fp16 quietest->busiest             1.64x      1.48x     48.56
+A100 fp16-T quietest->busiest           1.87x      1.64x     48.56
+A100 int8 quietest->busiest             1.79x      1.57x     48.56
+Bhalachandra A100 fixed->random           --      1.665x      none
+  the same at an ASSUMED idle           1.84x (assumed)      50.0
+Lucas & Juurlink, one kernel             n/a      1.658x      none
+Ujeniya H100/H200 const->random          n/a     +100 W      none
+
+  OVER IDLE, the four A100 datatypes quietest->busiest span
+    x1.64 to x1.87   <- the band the blog may quote, over idle
+  ABSOLUTE board, the same four plus Bhalachandra and Lucas
+    x1.48 to x1.67   <- and the ET-SoC-1 sits INSIDE this one (x1.66 / x1.89)
+
+  So the x13.6-against-x1.6 contrast is a statement about the QUIET-DATA
+  FLOOR, and only over idle.  The floor as a SHARE of each machine's own
+  busiest switching is the convention-robust way to say it:
+    A100 fp32    zeros  147.6 W of a  240.5 W switching budget = 61.3%
+    A100 fp16    zeros  149.1 W of a  199.7 W switching budget = 74.6%
+    A100 fp16-T  zeros  135.2 W of a  248.8 W switching budget = 54.4%
+    A100 int8    zeros  130.0 W of a  217.7 W switching budget = 59.7%
+    ET-SoC-1 fp32  zeros   2.00 W of a  27.11 W budget =  7.4%  (21 Sep)
+    ET-SoC-1 fp32  zeros   3.23 W of a  27.89 W budget = 11.6%  (E67 session)
+    ET-SoC-1 fp32  per MAC, E38's three cards: 3.0%, 4.1%, 6.8%
+  => the quietest data still costs the A100 54-75% of its busiest
+     switching; on the ET-SoC-1 it costs 3-12%.  THAT is the finding,
+     and the ratio is just its reciprocal (x8.6-x32.9 against x1.3-x1.8).
+  Note the A100 floor is a measured FLOOR -- the quietest data run -- not a
+  demonstrated data-independent component, so write 'as little as', not
+  'no matter what the numbers are'.
+
+==============================================================================
+2. SPAN AS A PERCENTAGE, A100 (what the paper's 38-40 pct headline is about)
+==============================================================================
+  fp32    quietest 196.13 -> busiest 298.78 W = -34.4%   (CUDA cores)
+  fp16    quietest 195.34 -> busiest 289.26 W = -32.5%   (CUDA cores)
+  fp16-T  quietest 182.33 -> busiest 299.04 W = -39.0%   (tensor cores; busiest cell has 6 samples/file)
+  int8    quietest 171.90 -> busiest 269.89 W = -36.3%   (CUDA cores)
+  fp16-T against its own 180-sample baseline (297.33 W): -38.7%
+  -> the paper states 'almost 40%' (abstract) / 'up to 38%' (intro) and
+     names NO datatype; this lands between the two, it does not reproduce
+     a statistic the paper claims.
+
+==============================================================================
+3. ENERGY PER MULTIPLY-ADD -- WHICH CONVENTION
+==============================================================================
+  ET-SoC-1 fp32, AT THE BOARD OVER IDLE (05-claims.md line 1094):
+    random 5.783 pJ   zeros 0.27 pJ   ratio x21.4
+    against Horowitz's 45 nm arithmetic-only 4.6 pJ: random x1.26, zeros x0.059 (17x BELOW)
+  ET-SoC-1 fp32, WHOLE BOARD (data.json /permac/budget_600_pJ/*_board):
+    random 11.579 pJ   zeros 6.139 pJ   ratio x1.89
+    against the same 4.6 pJ: random x2.52, zeros x1.33 -- BOTH ABOVE it
+    -> the '17x below the bare 45 nm arithmetic' line is TRUE over idle
+       and FALSE whole-board.  Horowitz's figure is a dynamic (switching)
+       energy with no idle or leakage term, so over-idle is the like-for-like
+       side -- but the convention has to be printed either way.
+
+  Per card, over idle (data.json /permac/e38_registered):
+    aifoundry2     random 5.920  zeros 0.4034  ratio x14.7
+    aifoundry3     random 5.369  zeros 0.1633  ratio x32.9
+    aifoundry1-c1  random 6.058  zeros 0.2512  ratio x24.1
+    across-card spread x14.7 to x32.9 (mean of ratios x23.9);
+    the 3-card MEANS give x21.4, which is NOT the mean of the ratios.
+    The spread is set by the zeros denominator: 0.1633 to 0.4034 pJ.
+
+  10-data-dependent-power.md line 58 states the same effect as
+  'a factor of 14-15 in energy per FLOP (0.22 against 2.95 pJ at 80 C,
+  3.31 on the run average)' -> x13.4 to x15.0, i.e. the 21 Sep session's
+  x13.55 over idle.  Reconciled: one session x13.6, three cards x14.7-x32.9.
