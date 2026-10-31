@@ -1,0 +1,544 @@
+{
+ "experiment": "E78",
+ "title": "the kinds-of-numbers energy matrix: switching power and energy per op of 51 (format, kind) tiles",
+ "request": "Q130 (AI Foundry, the Horace project)",
+ "date": "2026-10-31",
+ "registration": "tools/claims-v3/kinds/E78.md (this file's prose). Frozen with the commit that adds them, before the Discord claim and the first launch. Any change after it is a dated amendment in E78.md, written before the data it touches. No band below moves after this commit.",
+ "card": {
+  "host": "aifoundry3",
+  "device": 0,
+  "clock_mhz": 600,
+  "minion_mv_expected": 522,
+  "tdp_w": 0,
+  "temp_threshold_c": 65,
+  "pinned_by": "the boot-time TDP 0 that et-board-clock-guard writes",
+  "knobs_written": "none: no governor move, no TDP/threshold/clock set, no reset; the only management reads are `ettelem config` at both ends of every pass, inside the card lock, under timeout 10"
+ },
+ "inputs_frozen": {
+  "kinds_spec": {
+   "path": "tools/claims-v3/kinds/kinds.json",
+   "sha256": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "commit": "7d9c0d9e",
+   "revision": 2,
+   "note": "revision 2 supersedes 654ee2ce; int8 figures of revision 1 are never quoted"
+  },
+  "q130c_predictions": {
+   "path": "docs/reports/data/2026-10-31-q130-kinds-model/predictions.json",
+   "sha256": "c5a66cb6d5f07a35d783d7db4be0f94a69482cf123defd2eccfda04fb6320a2c",
+   "commit": "2bbe03dd",
+   "role": "the empirical model (Q130C-M1), frozen; E78 scores it as its README and A1 say"
+  },
+  "q130c_amendment_a1": {
+   "path": "docs/reports/data/2026-10-31-q130-kinds-model/amendment-a1.json",
+   "sha256": "6ffc701b07d41f7ffbde9958bf44a03081cc82f784ff17202ebafbdc442c6d54",
+   "commit": "320f3fdd",
+   "role": "Q130(c)'s dated amendment, written before any E78 file existed: the scoring sets, R1-A1's interval, R3/R6/R9 readings"
+  },
+  "q130b_predictor_r2": {
+   "path": "docs/reports/data/2026-10-31-q130-rtl-formats/predictor-r2.json",
+   "sha256": "977d9ba4818cc1251055cf0ed5564594705d1d5cd6492f573f011951f4bdb949",
+   "commit": "fcfe82a7",
+   "role": "the RTL predictor, revision 2, both variants (A: one toggle factor, B: per-format factors), in watts ABOVE fp32 zeros; PROVISIONAL (its bench fails a functional check)"
+  },
+  "q130b_predictor_r1": {
+   "path": "docs/reports/data/2026-10-31-q130-rtl-formats/predictor.json",
+   "sha256": "f886b131f07406cfe25b784bff972603b16d70abb01ed3ef827829f7cb46aa83",
+   "commit": "e05f2a3b",
+   "role": "WITHDRAWN by Q130(b) r2 and kept as the record; NOT frozen as an E78 prediction and never scored"
+  }
+ },
+ "harness": {
+  "dir": "tools/claims-v3/kinds/",
+  "files": [
+   "E78.md",
+   "predictions-e78.json",
+   "e78_common.py",
+   "run_e78.py",
+   "block_e78.sh",
+   "queue_e78.sh",
+   "run_e78.sh",
+   "reduce_e78.py",
+   "score_e78.py",
+   "collect_e78.sh",
+   "selftest_e78.py",
+   "selftest_e78.txt",
+   "e78_desk_checks.py",
+   "e78_desk_checks.txt"
+  ],
+  "ported_from": "tools/claims-v3/hlp/ (E79), itself tools/claims-v3/hl/ (E60/E65/E67/E70)",
+  "lib_sh_sha256": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+  "binary": "build/sparsity/host/sparsity_host in the aifoundry3 tree E67/E70/E79 ran from (~/aifoundry)",
+  "data_dir": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/",
+  "raw_data_on_box": "build/claims-v3/aifoundry3/kinds/p78<nn>/"
+ },
+ "plan": {
+  "kinds": 51,
+  "by_type": {
+   "fp32": 18,
+   "fp16": 17,
+   "int8": 16
+  },
+  "tier1": 30,
+  "tier2": 21,
+  "anchors": [
+   "fp32.zeros",
+   "fp32.randn",
+   "fp16.zeros",
+   "fp16.randn",
+   "int8.zeros",
+   "int8.full"
+  ],
+  "anchor_rule": "each anchor runs once in each of the three segments of every pass (three times a pass)",
+  "tie": "anchor_pi: the built-in fp32 --values pi, first and last in every pass (E60-E79's drift anchor)",
+  "order": "e78_common.pass_order: random.Random('E78|aifoundry3|<pass>') shuffles the 45 non-anchor kinds, deals them round-robin into three segments, adds the six anchors to each segment and shuffles each segment again; pass 7810 only puts fp32.a_randn_b_zeros first (Q130(c) R9)",
+  "runs_per_pass": 65,
+  "runs_per_pass_tier1_only": 44,
+  "burnin_runs": 2,
+  "passes_planned": [
+   7810,
+   7811,
+   7812,
+   7813,
+   7814,
+   7815
+  ],
+  "min_passes": 4,
+  "smoke_pass": 7801,
+  "smoke_items": [
+   "anchor_pi",
+   "fp32.a_randn_b_zeros",
+   "fp32.zeros",
+   "fp32.randn",
+   "fp16.randn",
+   "int8.full"
+  ],
+  "launch": {
+   "command": "sparsity_host --test fma --type <type> --pattern none --values file:<tile> --shires 0xffffffff --per-shire 32 --seconds 4 --seed <pass+1> --stop-file <STOP> [--dump-tiles <first run of each item>]",
+   "preheat_c": 59,
+   "target_c": 58,
+   "quiet_s": 2.0,
+   "heater": "2 s random-fp32 launches",
+   "max_c": 78
+  },
+  "windows": {
+   "power_s": [
+    1.0,
+    3.0
+   ],
+   "check_s": [
+    1.0,
+    4.0
+   ],
+   "idle_bracket_s": [
+    -1.2,
+    -0.2
+   ],
+   "rail": "the same windows, shifted by the rail's 0.2 s delay and deconvolved (tau 0.95 s)"
+  }
+ },
+ "card_budget": {
+  "cap_card_min": 90,
+  "expected_card_min": 66,
+  "expected_breakdown": "smoke ~1.5 min + 6 passes x ~10.7 min (65 runs + 2 burn-in at ~9.2 s a run: E79's measured 8.7 s a run (tools/claims-v3/hlp/README.md A3) plus 0.50 s for the quiet rule (tools/claims-v3/kinds/e78_desk_checks.txt [2]); sampler start, config reads, 15 s between passes)",
+  "queue_rule": "queue_e78.sh starts a full pass only if its projected end (the longest pass so far, 11 min before the first ends) is inside 85 card-minutes of the queue's start and before 19:15 PDT; with fewer than 4 passes done it runs a tier-1-only pass if that fits inside 88 card-minutes and the deadline; otherwise it stops. A pass in flight is never cut",
+  "deadline_local": "19:15 PDT (card runs must end by ~19:30 PDT)",
+  "below_minimum": "fewer than 4 kept passes: every rule is reported NOT SCORED, never passed"
+ },
+ "analysis": {
+  "primary_quantity": "D(type, kind) = p80(kind) - Zhat_type(t0): switching power over the type's own zero-data level, Zhat the type's zeros anchor interpolated linearly in time within the pass; one value per (pass, kind), mean over passes, 95% = t(0.975, n-1) x the between-pass SE",
+  "also": {
+   "D32": "the same over fp32's zeros (Q130(b) r2's reference)",
+   "S": "p80 - idle80 per run: switching power over idle, the idle bracket in front of the same run",
+   "rail": "Drail and Srail on the deconvolved minion rail, beside the board arm, never instead of it",
+   "energy": "pJ per op = 1e12 x W / R, R the host-record work rate in the power window (minion-ops/s); per MAC = / 4096 (fp32), 8192 (fp16), 16384 (int8); per flop = / (2 x MACs) for fp32 and fp16; duty = R / (600 MHz x 1024 / cycles_per_op) reported beside (expected ~0.996)",
+   "heat": "dT_win = the die reading's mean over the power window minus the launch reading"
+  },
+  "leak": {
+   "primary": "auto (the median within-run slope of runs heating >= 1 C, as E70/E79)",
+   "arms": [
+    0.3803,
+    0.0
+   ],
+   "arm_source": "E71's measured aifoundry3 idle slope; and no correction",
+   "verdicts": "every rule is scored at the primary; the arms' verdicts are reported beside"
+  },
+  "rail_model": {
+   "tau_s": 0.95,
+   "delay_s": 0.2,
+   "c_rb": 0.81,
+   "arms_tau_s": [
+    0.8,
+    1.1
+   ],
+   "source": "fitted on E79's ten committed passes before any E78 data (tools/claims-v3/kinds/e78_desk_checks.txt [3]): rail = a + c x IIR_tau(board(t - d)), tau median 0.950 s (0.95-1.00), d 0.2 s in every pass, c median 0.810 (0.800-0.829), rms 0.302-0.409 W against 3.259-4.047 W with no lag"
+  },
+  "idle_bracket_basis": "E79's committed passes (tools/claims-v3/kinds/e78_desk_checks.txt): board power falls to idle within 0.2 s of a process ending (a run's last 100 ms bin 34.8 W, +100 ms 26.33 W, +2 s 26.05 W; [1]), but in 109 of E79's 480 runs (22.7%) the bracket [t0-1.2, t0-0.2) began before the previous process had ended (median gap 1.91 s, p10 0.21 s; [2]): that is E79 A7's contamination. The quiet rule (2.0 s) makes the bracket begin >= 0.8 s after the previous process; on E79's gaps it would have added 495 ms a run on average ([2])",
+  "run_gates": {
+   "clock": "every sample of the power window at 600 MHz",
+   "voltage": "window mean within +-3 mV of the pass median",
+   "launch": "heated to >= 59 C, spawned at a reading of 58 C (within 0.5 C), >= 2.0 s quiet",
+   "records": "every launch record ok; every record's cycles_per_op within 0.5% of 546 / 546 / 318",
+   "window": ">= 15 telemetry samples in the power window, no gap > 0.5 s, and launch records covering it: the work done there >= 0.97 of 600 MHz x 1024 / cycles_per_op",
+   "tile": "the tile the host dumped on the item's first run in the pass equals kinds.json's sha256",
+   "idle_bracket_valid_for_S": ">= 8 samples, starting >= 0.8 s after the previous process, reading within 1.5 C of the launch reading"
+  },
+  "pass_gates": {
+   "failed_runs": "more than 2 runs fail a run gate",
+   "zero_line": "a type's zeros anchor's middle run departs > 0.25 W from the line through its first and third",
+   "zero_range": "a type's zeros anchor spans > 0.60 W, or anchor_pi drifts > 0.60 W first to last",
+   "random_range": "a random anchor (fp32/fp16 randn, int8 full) spans > 1.0 W",
+   "config": "ettelem config reads TDP other than 0 or threshold other than 65 at either end: reported separately, not pooled",
+   "basis": "E79's anchor_pi drifted 0.08-0.53 W first to last in a pass (its 0.3 W gate set 2 of 10 passes aside), E70's 0.03-0.24 W (tools/claims-v3/kinds/e78_desk_checks.txt [4]); E78 corrects drift by interpolating three zeros a pass, so its gate only catches drift too large or too bent to interpolate"
+  },
+  "unit_of_replication": "the pass; never samples inside one burst",
+  "resolution": "a quantity with fewer than 3 kept passes is unresolved and its rules are NOT SCORED"
+ },
+ "rules": {
+  "E78-R1": {
+   "name": "rank",
+   "what": "Spearman rho of predicted against measured switching power within each type",
+   "threshold": 0.8,
+   "pass_if": "rho >= 0.80 in each type, separately",
+   "sets": "Q130(c) A1's out-of-sample kinds (amendment-a1.json scoring_sets_a1.R1_R2_out_of_sample_kinds): fp32 15, fp16 14, int8 13",
+   "models": {
+    "q130c": "predictions[<type>/<kind>].switching_w_600mhz_a3 against D (primary model)",
+    "q130b_r2_A": "variants.A_r1_common_factor.predictions[<type>.<kind>].dW_above_fp32_zeros against D32",
+    "q130b_r2_B": "variants.B_measured_per_format.predictions[...] against D32"
+   },
+   "defense": "with 13-15 kinds rho = 0.80 rejects no association at p < 0.001 and allows only local swaps; Q130(c) registered 0.90 for itself, which is scored separately as its own R2"
+  },
+  "E78-R2": {
+   "name": "accuracy",
+   "what": "rms of (measured - predicted) switching power within each type, out of sample",
+   "bound_w": {
+    "fp32": 2.0,
+    "fp16": 2.0,
+    "int8": 1.0
+   },
+   "pass_if": "rms <= bound in each type, separately",
+   "sets": "the same as E78-R1",
+   "models": "the same as E78-R1 (Q130(c) primary)",
+   "defense": "8-9% of the random-data step Q130(c) predicts for fp32 and fp16 (24.2 and 22.3 W) and 14% of int8's (7.1 W); 1.4x the clean out-of-sample fp32 score Q130(c)'s A1 computed (1.46 W)"
+  },
+  "E78-R3a": {
+   "name": "one-sided zeros",
+   "cells": [
+    [
+     "fp32",
+     "a_randn_b_zeros",
+     "randn"
+    ],
+    [
+     "fp32",
+     "a_zeros_b_randn",
+     "randn"
+    ],
+    [
+     "fp16",
+     "a_randn_b_zeros",
+     "randn"
+    ],
+    [
+     "fp16",
+     "a_zeros_b_randn",
+     "randn"
+    ],
+    [
+     "int8",
+     "a_full_b_zeros",
+     "full"
+    ],
+    [
+     "int8",
+     "a_zeros_b_full",
+     "full"
+    ]
+   ],
+   "statistic": "D(kind) / D(ref), per pass, mean over passes",
+   "threshold": 0.15,
+   "pass_if": "mean <= 0.15 (per cell; the 95% interval says whether the verdict is resolved)",
+   "defense": "every lane is gated (kinds.json gated 1.000) while one operand bus keeps moving; Q130(c)'s gate arm says 0, its bus arm 0.21-0.45x randn in fp32 and fp16 (0.21-0.27x with A1's zero products unsigned; fp32 5.19/7.30 and 6.64/10.78 W): 0.15 sits between them. int8 a_zeros_b_full is non-discriminating (both arms <= 0.11x) and is reported, not used to choose an arm"
+  },
+  "E78-R3b": {
+   "name": "sparse90",
+   "cells": [
+    [
+     "fp32",
+     "sparse90",
+     "randn"
+    ],
+    [
+     "fp16",
+     "sparse90",
+     "randn"
+    ],
+    [
+     "int8",
+     "sparse90",
+     "full"
+    ]
+   ],
+   "statistic": "D(sparse90) / D(ref), per pass, mean",
+   "threshold": 0.25,
+   "pass_if": "mean <= 0.25",
+   "also_reported": [
+    [
+     "fp16",
+     "wsparse90",
+     "randn"
+    ],
+    [
+     "int8",
+     "wsparse90",
+     "full"
+    ]
+   ],
+   "defense": "90% of the elements zero gates 99.2 / 96.1 / 82.2% of the lane-cycles (kinds.json); gate arm 0.02 / 0.05 / 0.11x, bus arm 0.23-0.31x: at most a quarter of random data's switching should survive"
+  },
+  "E78-R3c": {
+   "name": "magnitude does not matter",
+   "cells": [
+    [
+     "fp32",
+     "randn_small",
+     "randn"
+    ],
+    [
+     "fp32",
+     "randn_large",
+     "randn"
+    ]
+   ],
+   "statistic": "D(kind) / D(randn), per pass, mean",
+   "band": [
+    0.909,
+    1.1
+   ],
+   "pass_if": "both means inside [1/1.10, 1.10]; max/min of the three means reported",
+   "defense": "sigma 2^-10, 1 and 2^10 flip 82,244 / 82,214 / 84,896 operand bits an op (max/min 1.033); a 10% band is three times that spread: bits matter, magnitude does not"
+  },
+  "E78-R3d": {
+   "name": "fewer mantissa bits cost less",
+   "type": "fp32",
+   "statistic": "per-pass paired differences d1 = D(fp16grid) - D(bf16trunc), d2 = D(randn) - D(fp16grid)",
+   "pass_if": "both lower 95% bounds > 0",
+   "fail_if": "either upper 95% bound < 0",
+   "else": "INCONCLUSIVE",
+   "defense": "operand bits 34,980 < 43,136 < 82,214 an op; Q130(c) predicts 23.26 < 23.95 < 24.21 W (frozen), Q130(b) r2 15.02 < 17.32 < 24.20 W: the size of the steps separates the models"
+  },
+  "E78-R3e": {
+   "name": "order alone",
+   "cells": [
+    [
+     "fp32",
+     "randn_sorted",
+     "randn"
+    ],
+    [
+     "fp16",
+     "randn_sorted",
+     "randn"
+    ],
+    [
+     "int8",
+     "sorted",
+     "full"
+    ]
+   ],
+   "statistic": "per-pass paired difference D(base) - D(sorted)",
+   "pass_if": "lower 95% bound > 0 (per cell)",
+   "fail_if": "upper 95% bound < 0",
+   "else": "INCONCLUSIVE",
+   "rule_verdict": "PASS if every cell passes; FAIL if any fails; else INCONCLUSIVE",
+   "also_reported": "the power saving as a fraction of the base, beside the operand-bit saving (0.260 / 0.267 / 0.230) - how much of the bus saving reaches the watts",
+   "defense": "identical operand multisets, verified word by word (kinds.json): only the stream order differs; Q130(c) predicts a 6 / 4 / 16% saving"
+  },
+  "E78-R3f": {
+   "name": "static bits are free",
+   "cells": [
+    [
+     "int8",
+     "neg_ones",
+     "ones"
+    ]
+   ],
+   "also_reported": [
+    [
+     "fp32",
+     "neg_ones",
+     "ones"
+    ],
+    [
+     "fp16",
+     "neg_ones",
+     "ones"
+    ]
+   ],
+   "statistic": "per-pass paired difference D(neg_ones) - D(ones)",
+   "margin_w": 0.3,
+   "pass_if": "the 95% interval lies inside [-0.30, +0.30] W (equivalence)",
+   "fail_if": "the 95% interval lies entirely outside it",
+   "else": "INCONCLUSIVE",
+   "defense": "0xFF bytes (every bit set) against 0x01, neither moving, neither gated, the same accumulator walk (+64 an op); E67's six constant routes spanned 0.33-0.42 W in fp32 (docs/reports/data/2026-10-27-e67-a-side-bit-prices/README.md), so 0.30 W is below what route alone has produced and 16% of int8's whole lane-on step (E79: 1.834 W)"
+  },
+  "E78-R3g": {
+   "name": "no pair gate in fp16",
+   "cells": [
+    [
+     "fp16",
+     "pair_half_zero",
+     "randn"
+    ]
+   ],
+   "statistic": "D(pair_half_zero) / D(randn), per pass, mean",
+   "threshold": 0.4,
+   "pass_if": "mean >= 0.40: one zero in a two-term pair does not gate the update",
+   "fail_if": "mean < 0.40: it does",
+   "defense": "the zero test is one 32-bit word (vpu_ctrl.v:1229-1234), which never fires on this tile (gated 0.000), and E36 measured the chip computing the plain sum; not gated, Q130(c) predicts 0.84-0.94x and the operand bits are 0.86x randn's; gated, it would sit with the fully gated kinds at 0-0.3x. 0.40 separates the two with margin on both sides"
+  },
+  "E78-R3h": {
+   "name": "a zero is worth most in fp32 and least in int8",
+   "statistic": "rho_t = D(sparse50) / D(random_t) per pass and type; d1 = rho_fp16 - rho_fp32, d2 = rho_int8 - rho_fp16, paired within the pass",
+   "pass_if": "both lower 95% bounds > 0",
+   "fail_if": "either upper 95% bound < 0",
+   "else": "INCONCLUSIVE",
+   "defense": "the same 50% element sparsity gates 0.774 / 0.414 / 0.070 of the lane-cycles (the RTL's gate rule on the tiles, kinds.json); Q130(c) predicts 0.39 / 0.70 / 0.85, r2 0.23 / 0.55 / 0.92"
+  },
+  "E78-R3i": {
+   "name": "the gate sees words",
+   "cells": [
+    [
+     "fp16",
+     "wsparse50",
+     "sparse50"
+    ],
+    [
+     "int8",
+     "wsparse50",
+     "sparse50"
+    ]
+   ],
+   "statistic": "per-pass paired difference D(sparse50) - D(wsparse50)",
+   "pass_if": "lower 95% bound > 0 (per cell)",
+   "fail_if": "upper 95% bound < 0",
+   "else": "INCONCLUSIVE",
+   "defense": "word sparsity gates 0.760 / 0.644 against element sparsity's 0.414 / 0.070 at the same 50%; Q130(c)'s R3 asks for >= 2.0 W and is scored separately"
+  },
+  "E78-R4": {
+   "name": "replication on this card",
+   "targets": "replication_targets",
+   "pass_if": "|D - target| <= tol, per cell",
+   "also": {
+    "pi_builtin_vs_file": {
+     "statistic": "p80(anchor_pi) - p80(fp32.pi), per pass, mean",
+     "tol_w": 0.25,
+     "why": "the same bytes (0x40490FDB) from the host's fill and from a file"
+    }
+   },
+   "defense": "same card, clock, voltage and protocol as E67 (27 Oct) and E79 (this morning); E70's constant anchors reproduced E67's within 0.4 W"
+  },
+  "E78-R5": {
+   "name": "instrument checks (reported, not predictions)",
+   "checks": {
+    "idle_consistency": "median |S(kind) - S(type zeros) - D(kind)| <= 0.15 W",
+    "rail_tau": "the rail's lag re-fitted on E78's own passes, median within [0.80, 1.15] s",
+    "duty": "R / (600 MHz x 1024 / cycles_per_op) within [0.990, 1.000] for every kind",
+    "carryover": "|slope| of a run's residual on the previous run's switching <= 0.01 W/W or < 3 SE",
+    "tie_dump": "the built-in pi tile the host dumps equals kinds.json's fp32 pi tile"
+   },
+   "consequence": "a failed check is reported with the quantity it qualifies; it moves no verdict"
+  }
+ },
+ "q130c_scoring": {
+  "as": "Q130(c) README 'The registered rules' + Amendment A1 (A1.1-A1.9)",
+  "C-R1": {
+   "rule": "E78: the measured switching power over the type's own zeros level is inside `switching_w_ci95` for at least 70% of the fp32 kinds run, and at least 50% of the fp16 and int8 kinds.",
+   "a1": "scored over the out-of-sample kinds only (A1.3) on the frozen switching_w_ci95; R1-A1 on interval_a1.switching_w_ci95_a1 beside it; the all-kinds score beside both",
+   "fractions": {
+    "fp32": 0.7,
+    "fp16": 0.5,
+    "int8": 0.5
+   }
+  },
+  "C-R2": {
+   "rule": "E78: the ORDER is right -- Spearman correlation of predicted against measured switching power >= 0.90 within each format, over every kind run.",
+   "a1": "over the out-of-sample kinds only (A1.3); all kinds beside",
+   "threshold": 0.9
+  },
+  "C-R3": {
+   "rule": "E78: the gate's signature.  (sparse50 - wsparse50) switching power is >= 2 W in BOTH fp16 and int8 (wsparse50 gates more, so it must cost less), and |fp32 sparse50 - fp32 wsparse50| <= 1.0 W, because in fp32 element sparsity IS word sparsity and the two are one kind.",
+   "a1": "fp32 clause dropped (A1.1); fp16 and int8 clauses >= 2.0 W; say whether int8's difference favours the frozen 2.79 W or zero-products-unsigned 1.73 W (A1.2)",
+   "threshold_w": 2.0,
+   "int8_accountings_w": {
+    "frozen": 2.79,
+    "zero_products_unsigned": 1.73
+   }
+  },
+  "C-R4": {
+   "rule": "E78: int8 (ones - zeros) switching power <= 2.0 W, against fp32's 8.555 W.  This is the sharpest structural prediction in this file and the one most likely to fail, because it rests on a single E64 run per point (+- 1.19 W).",
+   "threshold_w": 2.0
+  },
+  "C-R6": {
+   "rule": "E78: the product-sign term is real.  fp32 `neg_ones` costs within 1 W of `ones` (no sign CHANGE: every element is -1.0, so the product's sign never moves), while int8 `ternary` and `highbit`, whose signs do change, cost at least 1 W more than int8 `ones`.",
+   "a1": "read as random sign patterns against a constant (A1.6)",
+   "fp32_within_w": 1.0,
+   "int8_more_w": 1.0
+  },
+  "C-R9": {
+   "rule": "E78: the gate's reach.  fp32 `a_randn_b_zeros` is 100% gated by the B side while its A operand bus keeps moving (27,920 bits an op).  The `gate` arm says it costs ~0 W over zeros; the `bus` arm says it costs several watts.  Whichever E78 measures SELECTS the arm, and every kind's `switching_w_alt_gating_arm` is this file's prediction under the other one.  This is the single most informative cell in the matrix and E78 should run it first.",
+   "arms_w": {
+    "gate": 0.0,
+    "bus_a1": 5.19,
+    "bus_frozen": 7.3
+   },
+   "select": "the arm nearer the measured D(fp32.a_randn_b_zeros); boundary 2.60 W (midway between the gate arm and A1's bus arm); pass 7810's reading, where it runs first, is reported beside the mean"
+  },
+  "not_e78": [
+   "R5 (a post-data E79 comparison, A1.5)",
+   "R7, R8 (E80)"
+  ],
+  "also": "every kind's measured D beside its frozen switching_w_600mhz_a3, ci95, ci95_a1 and switching_w_alt_gating_arm; E78 reports each type's own zero-data level (S of the type's zeros) as Q130(c)'s for_integration asks"
+ },
+ "q130b_scoring": {
+  "as": "Q130(b) r2's README section 5: every cell an error in watts ABOVE fp32 zeros, both variants, never a ratio",
+  "per_kind": "error = predicted dW_above_fp32_zeros - measured D32; z = error / sqrt(sigma_W^2 + se(D32)^2)",
+  "per_type": "rms error, mean error, the fraction with |z| <= 2; E78-R1 and E78-R2 applied on the same sets",
+  "refit": "g per format on E78's own anchors, g_t = D(t.ones) / (4096 x R(t.ones)) live slot-cycles a second, reported as a ratio to fp32's (r2's held-out E64 values: fp16 0.95 +- 0.10, int8 0.037 +- 0.048)",
+  "int8_zero_level": "D32(int8.zeros): E64 put int8 zeros 0.68 +- 0.51 W above fp32 zeros (r2 predicts 0.00)"
+ },
+ "replication_targets": {
+  "fp32.ones": {
+   "target_w": 8.217,
+   "tol_w": 0.6,
+   "source": "E67 hl.json cards.aifoundry3.anchors: anchor_ones - anchor_zeros (built-in values, 27 Oct)"
+  },
+  "fp32.pi": {
+   "target_w": 8.496,
+   "tol_w": 0.6,
+   "source": "E67 hl.json: anchor_pi - anchor_zeros"
+  },
+  "fp32.randn": {
+   "target_w": 24.659,
+   "tol_w": 1.0,
+   "source": "E67 hl.json: anchor_randn - anchor_zeros (kernel-generated randn, a new draw each pass; E78 runs one fixed tile whose operand-bit count is 1.8% under its rule's 400-draw mean)"
+  },
+  "fp16.ones": {
+   "target_w": 8.736,
+   "tol_w": 0.8,
+   "source": "E79 scored.json switching.fp16: -(zeros_minus_h0_W), a constant random-significand tile against zeros, paired per pass (E79 labels it exploratory); E78's constant is 1.0"
+  },
+  "int8.ones": {
+   "target_w": 1.834,
+   "tol_w": 0.6,
+   "source": "E79 scored.json switching.int8: -(zeros_minus_h0_W), bytes of popcount 4 against zeros (exploratory in E79); E78's constant is 0x01"
+  }
+ },
+ "joins": {
+  "E64": {
+   "int8.full": "E64's int8 `--values randn` (uniform -128..127)",
+   "int8.pos": "E64's int8 `--values uniform` (uniform 0..127)",
+   "why": "the 23 Oct int8 cells join E78 only through these two names"
+  },
+  "file_runs": "a `--values file:` run prints nnz_a, a_elems and fp16_one_sided_pairs of a DISCARDED random fill and forces result 'unchecked' (main.cpp:587-591, :614): E78 ignores those fields, uses kinds.json's statistics, and verifies no arithmetic"
+ }
+}
