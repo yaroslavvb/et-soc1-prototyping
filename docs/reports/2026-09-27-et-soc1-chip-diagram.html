@@ -99,7 +99,6 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 h2, h3 { scroll-margin-top: 12px; }
 .hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
-/* chartkit:css:begin (the chart toolkit's CSS; scripts/paste-chartkit.py copies this block into standalone pages) */
 .ck-frame { position: relative; width: 100%; }
 .ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .ck-frame svg { display: block; max-width: none; height: auto; }
@@ -150,8 +149,6 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
   border-radius: 8px; padding: 4px 8px; min-height: 32px; width: min(260px, 100%); }
 .ck-filter input:focus-visible { outline: 2px solid var(--c1); outline-offset: 1px; }
 .ck-filter-n { color: var(--muted); font-variant-numeric: tabular-nums; }
-/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
-   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
 th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
 th.num { white-space: normal; }
 @media (max-width: 599px) {
@@ -165,7 +162,6 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
-/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
 details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
 details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
 details.more > summary::-webkit-details-marker { display: none; }
@@ -173,7 +169,6 @@ details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
 details.more[open] > summary::before { content: "\25BE\00a0"; }
 details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
 details.more[open] > summary { margin-bottom: 6px; }
-/* chartkit:css:end */
 </style>
 </head>
 <body>
@@ -181,17 +176,13 @@ details.more[open] > summary { margin-bottom: 6px; }
 <style>
 main{max-width:none;padding:0}
 .prose{max-width:940px;margin:0 auto;padding:28px 16px 72px}
-/* the text under the stage (its fact table has some 800 rows since the deep zoom) is laid out and painted only when
-   it is near the screen: the camera's frames never pay for it */
 .prose>.table-wrap,.prose>#summary-text,.prose>#honest-text{content-visibility:auto;contain-intrinsic-size:auto 1200px}
 .prose>.table-wrap.eltab{content-visibility:visible;contain-intrinsic-size:none}
-/* ---- the stage: one screen at 1920x1080 and 1280x720, nothing inside it scrolls but the details list ---- */
 #stage{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:7px;height:100vh;height:100dvh;min-height:560px;
   padding:10px 16px;background:var(--page);color:var(--ink);overflow:hidden;position:relative;
   --pnw:clamp(300px,24vw,470px)}
 #stage:fullscreen{width:100vw;height:100vh}
 #stage::backdrop{background:var(--page)}
-/* presenting inside the page's frame (the frame may forbid full screen): the stage covers the frame */
 html.et-pres,html.et-pres body{overflow:hidden}
 #stage.pres{position:fixed;inset:0;z-index:2147483000;height:100vh;height:100dvh;width:100vw}
 html.et-pres [data-ss-ui]{display:none!important}
@@ -201,8 +192,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 .st-title .t-short{display:none}
 .st-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .st-row .lab2{color:var(--ink-2);font-size:clamp(.78rem,.3vw + .66rem,.98rem);margin-right:2px}
-/* ---- controls: one radius (8 px) for every button; the one filled button is the primary action (Tour). A choice
-   that is on (the flow, the scale) is tinted; a toggle (Follow, Panel) shows a dot. ---- */
 .st-btn{font:inherit;font-size:clamp(.8rem,.32vw + .66rem,1.05rem);background:var(--surface);color:var(--ink);border:1px solid var(--border);
   border-radius:8px;padding:4px 12px;min-height:34px;cursor:pointer;white-space:nowrap;line-height:1.2}
 .st-btn:hover{border-color:var(--ink-2)}
@@ -211,26 +200,19 @@ html.et-pres [data-ss-ui]{display:none!important}
 .st-btn.tog[aria-pressed]::before{content:"";width:7px;height:7px;border-radius:50%;flex:none;box-sizing:border-box;border:1.5px solid var(--ink-2)}
 .st-btn.tog[aria-pressed="true"]{background:var(--surface);border-color:var(--ink-2);color:var(--ink)}
 .st-btn.tog[aria-pressed="true"]::before{background:var(--c1);border-color:var(--c1)}
-/* the fill is --c1 darkened toward --ink so that --page text on it passes 4.5:1 in both themes */
 .st-btn.primary{background:color-mix(in srgb,var(--c1) 80%,var(--ink));border-color:color-mix(in srgb,var(--c1) 80%,var(--ink));color:var(--page);font-weight:650}
 .st-btn.primary.on{background:transparent;border-color:var(--ink-2);color:var(--ink)}
 .st-btn:disabled,.st-btn.dis{opacity:.4;cursor:default}
 .st-btn .k{display:inline-block;margin-right:6px;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .st-btn[aria-pressed="true"] .k{color:color-mix(in srgb,var(--c1) 65%,var(--ink))}
 .w-play{min-width:5.2em}.w-tour{min-width:6.4em}.w-fs{min-width:6.6em}
-/* the replay's speed beside Play (1 Oct): as wide at 1× as at 2×, and at 2× tinted, a choice that is on */
 .st-bar .st-btn.spd{min-width:2.9em;padding-left:6px;padding-right:6px;font-variant-numeric:tabular-nums}
 .st-btn.spd.x2{background:color-mix(in srgb,var(--c1) 16%,var(--surface));border-color:var(--c1);font-weight:650}
-/* (a phone 360 wide, in spacesheep's frame too: the playback buttons a little tighter, so that Tour stays on their row) */
 @media (max-width:380px){#bar .st-btn{padding-left:7px;padding-right:7px}#bar .st-btn.spd{min-width:2.5em;padding-left:4px;padding-right:4px}}
 .st-btn:focus-visible,.pn button:focus-visible,.pn a:focus-visible,.pn select:focus-visible,.pn summary:focus-visible,.stg:focus-visible,.pip:focus-visible,.toast button:focus-visible{outline:3px solid var(--c1);outline-offset:2px}
 .st-body{display:grid;grid-template-columns:minmax(0,1fr) var(--pnw);gap:14px;min-height:0;min-width:0}
 .st-view{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;gap:6px}
 .st-svg{position:relative;flex:1 1 auto;min-height:0;min-width:0}
-/* ================= ladder.css: the Up bar, the zoom rows, the levels outside the chip and the copied circuits (1 October 2026) =================
-   Moved out of chip-diagram.body.html; a page's body pulls it into a <style> with an include line. */
-/* ---- the Up bar above the drawing (30 September): the wide button out, the breadcrumb, the scale readout, and − and +
-   at its right end (13 October) ---- */
 .upbar{flex:none;display:flex;align-items:center;gap:6px 10px;min-width:0;contain:layout style}
 .st-btn.up{flex:0 100 auto;min-width:min(30%,16em);max-width:50%;min-height:40px;text-align:left;display:flex;align-items:center;gap:8px;overflow:hidden;
   font-weight:600;background:color-mix(in srgb,var(--c1) 9%,var(--surface));border-color:color-mix(in srgb,var(--c1) 45%,var(--border))}
@@ -242,36 +224,21 @@ html.et-pres [data-ss-ui]{display:none!important}
 .crumbs button:hover{border-color:var(--border);background:var(--surface)}
 .crumbs button[aria-current="location"]{font-weight:650;cursor:default;border-color:transparent;background:none}
 .crumbs button.nx{color:var(--ink-2);font-style:italic}
-/* − and + keep one place on the screen (the owner, 13 Oct 2026: "make sure that the plus and minuses don't move"): they
-   come last, pinned to the bar's right end. Between the crumbs and the readout they slid with the readout's width, which
-   changes about ten times a second while the camera moves (up to 60 px at 1920 wide, and 33 px from one rest to the
-   next at 1100), so a second press landed on the readout and selected its text */
 .pmz{flex:none;display:flex;gap:3px;margin-left:auto;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 .pmz button{font:inherit;font-size:clamp(.8rem,.25vw + .7rem,1rem);font-weight:650;min-width:2.1em;min-height:30px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
 .pmz button:hover{border-color:var(--ink-2)}
 .pmz button.dis{opacity:.35;cursor:default}
 .crumbs .sep{color:var(--ink-2);padding:0 1px}
 .crumbs button:focus-visible,.pmz button:focus-visible,.crumb-menu button:focus-visible,.zpill button:focus-visible{outline:3px solid var(--c1);outline-offset:1px}
-/* the readout gives way last (13 Oct 2026): the Up button and the crumbs shrink a hundred times as readily, and only
-   when both are at their narrowest does the readout take an ellipsis, rather than push − and + off the bar's end (at
-   900 wide a quark's "< 4.3 × 10⁻¹⁹ m · no size measured" did, by 37 px) */
 .scale-ro{flex:0 1 auto;contain:layout paint style;color:var(--ink-2);font-size:clamp(.74rem,.22vw + .64rem,.94rem);white-space:nowrap;font-variant-numeric:tabular-nums;max-width:40%;overflow:hidden;text-overflow:ellipsis;min-width:9.5em;text-align:right}
 .scale-ro b{color:var(--ink);font-weight:600}
-/* a narrow desktop (900-1180 px wide, the panel beside the drawing): the Up label keeps its destination; its size
-   suffix goes (the readout and the button's name have it) and the readout takes only its width */
 @media (min-width:900px) and (max-width:1180px){.st-btn.up .up-s{display:none}.scale-ro{min-width:0}}
 .scale-ro .inf{text-decoration:underline dotted var(--muted);text-underline-offset:3px}
-/* the readout keeps one look while the camera moves (the owner, 13 Oct 2026: "The text sometimes changes in size ... when
-   I click while it's animating, it's larger, and then it goes back to the original size"): only its digits change.
-   Until then a move set it darker, and a jump larger and bold, until the camera rested */
 .crumb-menu{position:absolute;left:0;top:0;z-index:8;display:flex;flex-direction:column;min-width:12em;max-height:70%;overflow:auto;background:var(--surface);
   border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:4px}
 .crumb-menu[hidden]{display:none}
 .crumb-menu button{font:inherit;font-size:.9rem;text-align:left;background:none;border:0;border-radius:6px;color:var(--ink);padding:6px 10px;cursor:pointer;min-height:36px}
 .crumb-menu button:hover{background:var(--page)}
-/* a touch screen's strip under the drawing: the selected part's name with "Zoom in" and "Details", else a hint. Since
-   the review of 1 Oct it sits under the drawing, never over it: a pill beside the part covered its neighbours, and a
-   double-tap meant for one of them landed on the pill */
 .zstrip{display:none}
 #stage.touch .zstrip{display:flex;align-items:center;flex:none;min-height:46px;gap:6px;min-width:0}
 #stage.touch.present .zstrip{display:none}
@@ -281,9 +248,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 .zpill:not([hidden]) + .zs-hint{display:none}
 .zs-name{flex:1 1 auto;min-width:0;font-weight:600;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .zpill .st-btn{flex:none;min-height:40px;font-size:.92rem}
-/* the panel: a lead in plain words, the rest folded under "More detail and the sources" (moved from the chip diagram's
-   page on 1 October 2026, part 2: the memory levels' panels take the same shape) */
-/* the lead: what a part or a flow is, in plain words; the rest under Details */
 .pn-lead{margin:0 0 10px;font-size:1.06em;line-height:1.45}
 .pn details.pn-det{margin:10px 0 4px;border-top:1px solid var(--border);padding-top:6px}
 .pn details.pn-det>summary{cursor:pointer;font-size:.9em;font-weight:600;color:var(--ink-2);padding:3px 0;list-style:none;display:flex;align-items:center;gap:7px}
@@ -292,7 +256,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 .pn details.pn-det[open]>summary::before{transform:rotate(90deg)}
 .pn details.pn-det>summary:hover{color:var(--ink)}
 .pn details.pn-det[open]>summary{margin-bottom:6px}
-/* the panel's zoom row: the zooms of the part or scale, directly under its lead */
 .pn-zoom{margin:4px 0 10px;display:flex;flex-direction:column;gap:5px}
 .pn-zoom .zr{display:flex;flex-wrap:wrap;gap:5px 6px;align-items:center}
 .pn-zoom .zl{font-size:.86em;color:var(--ink-2);margin-right:2px}
@@ -312,7 +275,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 .kd.hypothesis{color:color-mix(in srgb,var(--warn) 55%,var(--ink));border-color:var(--warn);border-style:dashed}
 .kd.unknown{color:var(--ink-2);border-color:var(--ink-2);border-style:dashed}
 .kd.erbium{color:var(--ink-2);border-color:var(--border);font-weight:500}
-/* ---- the levels outside the chip (30 September): their type, their parts, the night sky ---- */
 #chip .o-t{font-size:32px;font-weight:700;fill:var(--ink)}
 #chip .o-l{font-size:21px;font-weight:600;fill:var(--ink)}
 #chip .o-s{font-size:18px;fill:var(--ink-2)}
@@ -360,9 +322,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 #chip .pkgb{fill:color-mix(in srgb,var(--c3) 12%,var(--page));stroke:var(--ink-2);stroke-width:2}
 #chip .diedash{fill:color-mix(in srgb,var(--c1) 10%,transparent);stroke:var(--c1);stroke-width:2.5;stroke-dasharray:9 6}
 #chip .ball{fill:color-mix(in srgb,var(--c5) 55%,var(--page))}
-/* ---- the memory levels' drawings inside the chip (circuitkit.js, 30 September): their type, tags, wires, transistors
-   and gates, as on that page; every label knocks out what runs under it (--kb), and no label is stroked while the
-   camera moves ---- */
 .pn-badge{margin:0 0 6px}
 .pn .cav{color:var(--ink-2);font-style:italic;font-size:.9em}
 #chip .t-smb{font-size:17px;font-weight:600;fill:var(--ink)}
@@ -378,7 +337,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 #chip .tg.generic rect{stroke:var(--ink-2);stroke-dasharray:2 4}
 #chip .tg.unknown rect{stroke:var(--warn);stroke-dasharray:7 5}
 #chip .tg.derived rect{stroke:var(--c7);stroke-dasharray:5 3}
-/* (review of 1 Oct: the Planck length's "a smallest length? open" had no rule: no border, and black text in dark mode) */
 #chip .tg.hypothesis rect{stroke:var(--warn);stroke-dasharray:3 3}
 #chip .tg text{font-size:17px;font-weight:600}
 #chip .tg.documented text{fill:var(--c1)}
@@ -386,7 +344,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 #chip .tg.unknown text{fill:color-mix(in srgb,var(--warn) 55%,var(--ink))}
 #chip .tg.derived text{fill:var(--c7)}
 #chip .tg.hypothesis text{fill:color-mix(in srgb,var(--warn) 55%,var(--ink))}
-/* (review of 23 Oct: the multiply-add's 'measured' tags had no rule either: green, the colour of 'measured' in the kind legend) */
 #chip .tg.measured rect{stroke:var(--ok)}
 #chip .tg.measured text{fill:var(--ok)}
 #chip .w{fill:none;stroke:var(--ink-2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -401,15 +358,12 @@ html.et-pres [data-ss-ui]{display:none!important}
 #chip .gate{fill:var(--surface);stroke:var(--ink);stroke-width:2}
 #chip .lvl{fill:var(--c2)}
 #chip .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
-/* a phone's view of an outside level is its middle 760 units: the type larger, never under 11 px */
 #stage.ph #chip .lay.oscn .o-t{font-size:38px}
 #stage.ph #chip .lay.oscn .o-l{font-size:27px}
 #stage.ph #chip .lay.oscn .o-s,#stage.ph #chip .lay.oscn .o-cr{font-size:24px}
 #stage.ph #chip .lay.oscn .o-tag{font-size:24px}
 #chip{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;touch-action:manipulation}
 #stage{touch-action:manipulation}
-/* ---- the shared ladder (1 October 2026): the levels between the city and the rack, the device, the atom and below, the
-   ring of sizes, the two-state electronics and the easter egg's "?" ---- */
 .crumbs button.egg{font-weight:700;color:var(--ink-2);letter-spacing:.05em}
 .scale-ro.ring,.scale-ro .ro-ring{color:var(--ink)}
 #chip .hood,#chip .map .st.hood{fill:color-mix(in srgb,var(--c2) 26%,var(--page));stroke:var(--c2);stroke-width:1.6;vector-effect:non-scaling-stroke}
@@ -426,8 +380,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 #chip .sumln{stroke:var(--c3);stroke-width:1.5;stroke-dasharray:3 6}
 #chip .xtick{stroke:var(--ink);stroke-width:2}
 #chip .cncb{fill:color-mix(in srgb,var(--c1) 22%,var(--page));stroke:var(--c1);stroke-width:1.5}
-/* Studio 45 from the measured plans of its 3D tour (13 Oct 2026): rooms, the stretch open over the warehouse, the lab's
-   room (dashed: which room is inferred), stairs, the upstairs floors in section, the ground line and the yard */
 #chip .s45r{fill:color-mix(in srgb,var(--ink-2) 5%,var(--page));stroke:var(--ink-2);stroke-width:1.5}
 #chip .s45void{fill:none;stroke:var(--ink-2);stroke-width:1.5;stroke-dasharray:4 6}
 #chip .s45lab{fill:color-mix(in srgb,var(--c2) 12%,var(--page));stroke:var(--c2);stroke-width:2.5;stroke-dasharray:9 6}
@@ -438,8 +390,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 #chip .rrun{fill:none;stroke:#ffd27a;stroke-width:6;stroke-linecap:round}
 #chip .exitb{fill:color-mix(in srgb,#ffd27a 12%,transparent);stroke:#ffd27a;stroke-width:1.5}
 #chip .lay.sky .rticks text{fill:#dfe6f7}
-/* the inner scenes' type: a title, body, labels and small notes; on a phone the picture's column is 760 units wide, so
-   every size here is at least 11 px on a 390 px screen */
 #chip .i-t{font-size:30px;font-weight:700;fill:var(--ink)}
 #chip .i-s{font-size:18px;fill:var(--ink-2)}
 #chip .i-l{font-size:19px;font-weight:600;fill:var(--ink)}
@@ -449,14 +399,11 @@ html.et-pres [data-ss-ui]{display:none!important}
 #stage.ph #chip .lay.inr .i-t{font-size:32px}
 #stage.ph #chip .lay.inr .i-s,#stage.ph #chip .lay.inr .i-l{font-size:25px}
 #stage.ph #chip .lay.inr .i-n,#stage.ph #chip .lay.inr .tg text{font-size:24px}
-/* the two-state electronics: the gate at 0 V or at the rail, a bit 0 or 1, a DRAM cell just written or 32 ms later;
-   one class on the drawing switches every scene's two drawn states with a 250 ms fade, and no script per frame */
 #chip .st-a,#chip .st-b,#mem .st-a,#mem .st-b{transition:opacity .25s}
 #chip .st-b,#mem .st-b{opacity:0}
 #chip.st-on .st-a,#mem.st-on .st-a{opacity:0}
 #chip.st-on .st-b,#mem.st-on .st-b{opacity:1}
 @media (prefers-reduced-motion: reduce){#chip .st-a,#chip .st-b,#mem .st-a,#mem .st-b{transition:none}}
-/* the memory levels: while an access is chosen its waveforms take the place of the stored-bit box (1 Oct) */
 #stage.accsel .bitst,#stage.accsel .stsw{display:none}
 #chip .stsw,#mem .stsw{cursor:pointer}
 #chip .stsw:focus,#mem .stsw:focus{outline:none}
@@ -468,8 +415,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 #stage.ph #chip .stsw-t,#stage.ph #mem .stsw-t{font-size:25px}
 #chip .stsw:focus-visible .stsw-bg,#chip .stsw:hover .stsw-bg,#mem .stsw:focus-visible .stsw-bg,#mem .stsw:hover .stsw-bg{stroke-width:3.5}
 .pn-act .st-btn[data-act="state"]{margin:2px 0 8px}
-/* ---- the path camera's look (moved from the chip diagram's page on 1 October 2026, part 2: the memory levels host the
-   same camera): its parts, the zoom's fades, the night sky ---- */
 #chip text,#pipsvg text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;text-rendering:geometricPrecision}
 #chip .comp{cursor:pointer}
 #chip .comp:focus{outline:none}
@@ -481,28 +426,20 @@ html.et-pres [data-ss-ui]{display:none!important}
 #chip .comp text{transition:fill .3s}
 #chip .shape.quiet{stroke-opacity:0;transition:stroke-opacity .2s,opacity .3s}
 #chip .comp:hover .shape.quiet,#chip .comp:focus-visible .shape.quiet{stroke-opacity:.7}
-/* set back, not switched off: less opacity taken away, colour drained instead; changes fade */
 #chip .dimmable{transition:opacity .3s cubic-bezier(.4,0,.2,1),filter .3s cubic-bezier(.4,0,.2,1)}
 #chip.dimming .dimmable:not(.hi){opacity:.35;filter:saturate(.15)}
 #chip.fdim .dimmable:not(.hi){opacity:.55;filter:saturate(.3)}
-/* dimmed parts stay visible on a dark page (and on a projector) */
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #chip.dimming .dimmable:not(.hi){opacity:.45}:root:not([data-theme="light"]) #chip.fdim .dimmable:not(.hi){opacity:.6}}
 :root[data-theme="dark"] #chip.dimming .dimmable:not(.hi){opacity:.45}
 :root[data-theme="dark"] #chip.fdim .dimmable:not(.hi){opacity:.6}
 #chip .hi .shape{stroke-width:4}
 #chip .lay.busy{pointer-events:none}
-/* the zoom (script: segOpen): labels of a view fade by --lab, the outer view's context by --ctx (--sat its colour, --ctxh
-   what stood out), the target (the tile or minion entered or left) by --tgt: all start from how the view looked */
 #chip .lay text,#chip .lay .mstop,#chip .lay .pk,#chip .lay .co,#chip .lay .band{opacity:var(--lab,1)}
 #chip .lay .zdim{opacity:var(--ctx,1)!important;transition:none!important;filter:none!important}
 #chip .lay.zsat .zdim{filter:saturate(var(--sat,1))!important}
 #chip .lay .zdim.zhi{opacity:var(--ctxh,1)!important;filter:none!important}
-/* (review of 1 Oct) a label drawn straight into a layer is context too, but fades with the labels, as on the memory levels'
-   own camera: never seen blown up at the context's 30%; and a two-state scene's other state stays hidden while it is
-   context (the "on" electrons showed in the channel during every move with the gate off) */
 #chip .lay text.zdim{opacity:calc(var(--ctx,1) * var(--lab,1))!important}
 #chip:not(.st-on) .lay .st-b.zdim,#chip.st-on .lay .st-a.zdim{opacity:0!important}
-/* a view whose labels are faded out (.nolab) does not paint them at all (the memory levels' rule of 30 Sep) */
 #chip .lay.nolab text,#chip .lay.nolab .pk,#chip .lay.nolab .co{visibility:hidden}
 #chip .lay .ztgt{opacity:var(--tgt,1)!important;transition:none!important;filter:none!important}
 #chip .lay.zsat .ztgt{filter:saturate(var(--tsat,1))!important}
@@ -510,30 +447,18 @@ html.et-pres [data-ss-ui]{display:none!important}
 #chip .lay .olab{opacity:var(--lab,1)}
 #chip .lay .mlside{opacity:var(--lab,1)}
 #chip .lay .mlside.zdim{opacity:calc(var(--ctx,1) * var(--lab,1))!important}
-/* the levels in space: the whole drawing box is night sky while the camera rests there or moves between two of them
-   (review of 1 Oct: on a wide window the page's colour showed at the sides, and flashed through every jump) */
 #chip{transition:background-color .35s}
 #chip.skyon{background-color:#070b17;border-radius:14px}
 @media (prefers-reduced-motion: reduce){#chip{transition:none}}
-/* ---- the Up bar on narrow screens and phones (moved from the chip diagram's page, as above) ---- */
 @media (max-width:899px){
   .upbar{flex-wrap:wrap;gap:4px 8px}
-  /* the Up button on a row of its own, then the crumbs, the readout and − and + at that row's right end. The crumbs'
-     basis is 0 and the readout at most 45% wide, so that row never wraps: − and + never leave it (13 Oct 2026: with the
-     crumbs' basis their content's width, a long trail took a row of its own and pushed − and + to a third, at 820 wide
-     729 px across and 34 px down) */
   .st-btn.up{flex:1 1 100%;max-width:none;min-height:44px}
   .crumbs{flex:1 1 0}
   .scale-ro{max-width:45%}
-  /* presenting on a narrow screen: the Up button and the readout only, in one row (the drawing keeps its height) */
   #stage.pres .crumbs,#stage.pres .pmz,#stage:fullscreen .crumbs,#stage:fullscreen .pmz{display:none}
   #stage.pres .st-btn.up,#stage:fullscreen .st-btn.up{flex:1 1 0;min-width:0}
 }
 @media (max-width:600px){
-  /* the Up bar in two rows: the Up button (its label wraps, the size goes: the readout beside it has it) and the
-     readout; then the crumbs with − and + (review of 1 Oct: at 360 px the label and the readout were cut). The first row
-     keeps one height, a two-line label's, and the readout at most two lines, so that − and + under them never move
-     (13 Oct 2026) */
   .st-btn.up{flex:1 1 0;min-width:52%;padding:4px 10px;min-height:max(44px,calc(2.4em + 10px))}
   .st-btn.up .up-t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2}
   .st-btn.up .up-s{display:none}
@@ -543,14 +468,12 @@ html.et-pres [data-ss-ui]{display:none!important}
   .pmz{order:3}
 }
 
-/* ---- the small picture of the die: a flow's stage on the die while the camera is inside a shire or a minion ---- */
 .pip{position:absolute;bottom:8px;right:8px;z-index:3;width:clamp(180px,20%,300px);border-radius:8px;overflow:hidden;cursor:pointer;
   background:var(--surface);border:1px solid var(--border);box-shadow:0 6px 20px rgba(0,0,0,.18)}
 .pip[hidden]{display:none}
 .pip svg{display:block;width:100%;height:auto}
 .pip .pip-cap{display:block;font-size:.78rem;color:var(--ink-2);padding:2px 8px 4px;border-top:1px solid var(--border)}
 .pip .co,.pip .band,.pip text{display:none}
-/* ---- the details panel: a scrolling list above a fixed legend ---- */
 .pn{display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;
   font-size:clamp(.84rem,.32vw + .72rem,1.05rem);line-height:1.45}
 .pn-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding:12px 14px 10px;overscroll-behavior:contain}
@@ -561,9 +484,7 @@ html.et-pres [data-ss-ui]{display:none!important}
 .pn-title{font-size:1.35em;font-weight:650;line-height:1.2;margin:2px 0 6px}
 .pn-what{margin:0 0 8px}
 .pn-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:6px;margin:6px 0 8px}
-/* four tiles: two by two, never three and one */
 .pn-kpis:has(>:nth-child(4):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}
-/* three tiles in a narrow panel: the first across the top, two under it (never two and an orphan) */
 .pn{container-type:inline-size}
 @container (max-width:390px){.pn-kpis:has(>:nth-child(3):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}.pn-kpis:has(>:nth-child(3):last-child)>:first-child{grid-column:1/-1}}
 .pn-kpi{border:1px solid var(--border);border-radius:8px;padding:5px 8px;background:var(--page)}
@@ -580,7 +501,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 .pn li.fact:hover{background:var(--page)}
 .pn .meta{display:flex;flex-wrap:wrap;gap:3px 8px;align-items:center;margin-top:3px;font-size:.86em;color:var(--ink-2)}
 .pn .fid{color:var(--ink-2);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
-/* what is inferred here, and what would settle it (the hub's asks): a quiet box, its state marked by a small dot */
 .pn details.asks{margin:8px 0;border:1px solid var(--border);border-radius:8px;padding:4px 10px;background:var(--page)}
 .pn details.asks>summary{font-size:.9em;font-weight:600;color:var(--ink);padding:3px 0}
 .pn details.asks>summary::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn);margin-left:8px;vertical-align:.1em}
@@ -612,8 +532,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 .lad .tr.done u{background:color-mix(in srgb,var(--c2) 38%,transparent)}
 .lad .tr.pale u{background:color-mix(in srgb,var(--c3) 45%,transparent)}
 .lad .tr s{position:absolute;left:6px;right:6px;top:0;line-height:1.6em;text-decoration:none;font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* ---- the control bar, under the drawing: playback, the active flow's stages (or the tour's still steps), the camera
-   and presenting. Past stages read as progress (a thin bar), the current one is the one strong mark ---- */
 .st-bar{display:flex;align-items:center;gap:6px 8px;min-width:0;border-top:1px solid var(--border);padding-top:7px}
 .st-bar .st-btn{min-height:32px}
 .stages{list-style:none;margin:0;padding:0;display:flex;gap:4px;flex:1 1 auto;min-width:0}
@@ -624,7 +542,6 @@ html.et-pres [data-ss-ui]{display:none!important}
 .stg:hover{border-color:var(--ink-2);color:var(--ink)}
 .stg .sn{flex:none;font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink-2)}
 .stg .st{min-width:0;overflow:hidden;line-height:1.1;overflow-wrap:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
-/* the tour's still steps: each chip as wide as its name, never a word broken */
 .stages li.tchip{flex:0 1 auto}
 .stages li.tchip .stg{padding:3px 12px}
 .stg.past{background:var(--surface);color:var(--ink)}
@@ -634,16 +551,12 @@ html.et-pres [data-ss-ui]{display:none!important}
 .stg.on .sn{color:color-mix(in srgb,var(--c2) 70%,var(--ink))}
 .stg.on::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--c2)}
 .bar-sep{flex:none;width:1px;align-self:stretch;background:var(--border);margin:0 2px}
-/* ---- caption: the kicker, the caption and the line under it, in the drawing's column; the scale control in the
-   panel's column ---- */
 .st-cap{display:grid;grid-template-columns:minmax(0,1fr) var(--pnw);align-items:start;gap:4px 14px;min-width:0}
 #stage.nopanel .st-cap{grid-template-columns:minmax(0,1fr) auto}
 .cap-txt{min-width:0}
 .cap-kick{display:flex;align-items:center;gap:6px 14px;min-height:18px;flex-wrap:wrap}
 #cap-k{font-size:clamp(12px,.3vw + 8px,14px);color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .cap-side{min-width:0;padding-top:1px}
-/* Copy link (1 Oct): the address of what the stage shows, at the top of the panel's column under the bar (a phone: under
-   the caption); where the frame forbids the clipboard, the link shown selected above the button */
 .lnk{position:relative;display:flex;justify-content:flex-end}
 .lnk-b{min-height:30px;padding:2px 10px;min-width:6.4em;font-size:clamp(.76rem,.22vw + .66rem,.92rem);color:var(--ink-2)}
 .lnk-b.done{color:var(--ink);border-color:var(--ok)}
@@ -662,44 +575,33 @@ html.et-pres [data-ss-ui]{display:none!important}
 .dots button:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
 #cap{margin:2px 0 0;font-size:clamp(17px,.95vw + 11px,32px);line-height:1.25;min-height:2.5em;display:flex;align-items:center;font-weight:560;overflow:hidden;letter-spacing:-.005em}
 #cap .cap-in{display:block;text-wrap:balance}
-/* the line under the caption wraps to a second line rather than losing its end (two lines are kept free, so the die
-   never jumps) */
 #cap-sub{margin:2px 0 0;font-size:clamp(13px,.5vw + 8.5px,19px);line-height:1.3;min-height:2.6em;color:var(--ink-2);overflow:hidden;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
 .num[data-f]{text-decoration:underline dotted var(--muted);text-underline-offset:3px;cursor:help}
 #cap .num,#cap-sub .num{white-space:nowrap}
-/* arrows in text: a font that draws them at a proper size (the system font on Linux draws a low dash); on buttons, an
-   inline SVG arrow */
 .arr{font-family:"DejaVu Sans","Segoe UI Symbol",system-ui,sans-serif;font-size:1.08em;line-height:1;font-weight:400}
 #chip tspan.arr,#pipsvg tspan.arr{font-family:"DejaVu Sans","Segoe UI Symbol",system-ui,sans-serif}
 svg.ar{display:inline-block;width:1.05em;height:.72em;vertical-align:-.02em;overflow:visible}
 svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .st-btn svg.ar{margin:0 .12em}
 #btn-prev svg.ar,#btn-next svg.ar{width:1.25em;height:.85em;margin:0}
-/* ---- a note over the stage (presenting inside the frame, a blocked window) ---- */
 .toast{position:absolute;left:50%;top:56px;transform:translateX(-50%);z-index:6;max-width:min(720px,calc(100% - 24px));background:var(--surface);color:var(--ink);
   border:1px solid var(--border);border-radius:10px;padding:10px 14px;box-shadow:0 8px 28px rgba(0,0,0,.2);font-size:clamp(.85rem,.3vw + .72rem,1.05rem);line-height:1.4}
 .toast[hidden]{display:none}
 .toast p{margin:0 0 6px}
 .toast .tb{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .toast kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--border);border-radius:4px;padding:0 5px;background:var(--page)}
-/* ---- legend ---- */
 .lg{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:.8em;color:var(--ink-2)}
 .lg span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .lg i{display:inline-block;width:12px;height:12px;border-radius:3px;border:2px solid;flex:none}
 .lg i.line{height:0;border-width:3px 0 0;width:16px;border-radius:0}
 .lg i.dash{border-style:dashed;background:none}
-/* ---- source tooltip ---- */
 #srctip{position:fixed;z-index:2147483600;pointer-events:none;display:none;max-width:min(460px,calc(100vw - 16px));background:var(--surface);color:var(--ink);
   border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;line-height:1.4;box-shadow:0 6px 22px rgba(0,0,0,.18)}
 #srctip .s{color:var(--ink-2);display:block;margin-top:4px;overflow-wrap:anywhere}
-/* ---- the SVG: one type scale (ids 32/650, titles 30/700, part names 24 and 20/600, labels 20, notes 17) and one
-   stroke scale (set in the script) ---- */
-/* a glide between two shires: their keys and edge labels would overlap in the gap, so they hide (review of 1 Oct) */
 #chip .shkey,#chip .nbrs,#chip .edgelab{transition:opacity .2s}
 #chip .lay.pan .shkey,#chip .lay.pan .nbrs,#chip .lay.pan .edgelab{opacity:0!important}
 @media (prefers-reduced-motion: reduce){#chip .shkey,#chip .nbrs,#chip .edgelab{transition:none}}
-/* a shire's edge labels are links to its neighbours (30 September): link-coloured, underlined on hover and focus */
 #chip .nbr{cursor:pointer}
 #chip .nbr:focus{outline:none}
 #chip .nbr text{fill:color-mix(in srgb,var(--c1) 72%,var(--ink));transition:fill .2s}
@@ -736,7 +638,6 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 :root[data-theme="dark"] #chip .bbar{fill-opacity:.88}
 :root[data-theme="dark"] #chip .btrack{fill:color-mix(in srgb,var(--grid) 70%,var(--ink-2))}
 :root[data-theme="dark"] .lad{--barmix:80%}
-/* the tour's mesh slide: the tiles' outlines set back, their labels (with halos) kept over the lit links */
 #chip.mesh-on .dimmable:not(.hi){opacity:1!important;filter:none!important}
 #chip.mesh-on .comp:not(.hi) .shape{opacity:.3}
 #chip.mesh-on .comp:not(.hi) text{fill:var(--ink-2)}
@@ -745,27 +646,19 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 :root[data-theme="dark"] #co-sh feDropShadow{flood-opacity:.5}
 .co-t{font-size:22px;fill:var(--ink)}
 .co-t.b{font-weight:650}
-/* the minion's header: the harts' numbers give way to a flow's note */
 #chip .lay:has(.note) .m-harts{opacity:0}
 @media (prefers-reduced-motion: reduce){#chip .dimmable,#chip .ring,#chip .shape.quiet,#chip .links .mlink{transition:none}}
-/* ---- presenting (the tour, full screen, the stage filling the frame): panel text at 18 px or more at 1920 wide, no
-   reference lists, no dotted numbers, no reader's instructions, no pointer effects ---- */
 #stage.present .pn{font-size:clamp(.95rem,.55vw + .5rem,1.3rem)}
 #stage.present .pn-kpi>span,#stage.present .pn-kick{font-size:.88em}
 #stage.present .legs,#stage.present .lad{font-size:1em}
-/* presenting, a range in a number column may break after its dash, so that the prose column keeps its width */
 #stage.present .legs td.num{white-space:normal}
 #stage.present .pn-fh,#stage.present .pn ul.facts,#stage.present .pn-foot{display:none}
 #stage.present .pn details.pn-det,#stage.present .pn details.asks,#stage.present .pn .pn-act,#stage.present .pn .pn-more,#stage.present .pn .pn-what.small{display:none}
-/* a flow's table says it stage by stage: its prose goes (it would push the table out of the panel) */
 #stage.present .pn-scroll:has(.legs) .pn-what{display:none}
 #stage.present .pn-kpi b{font-size:1.45em}
 #stage.present .pn .pn-key{display:none}
-/* presenting: a button that has nothing to do on a still slide takes no room; on a touch screen it keeps its room
-   (hidden), so that the arrows beside it stay under the thumb from a still slide to a flow's */
 #stage.present:not(.touch) #btn-play.void{display:none}
 #stage.present.touch #btn-play.void{visibility:hidden}
-/* a chart already drawn on the stage is not drawn again in the panel */
 #stage.present .pn .lad,#stage.present .pn .pn-h:has(+ .lad){display:none}
 #stage.present .num[data-f]{text-decoration:none;cursor:default}
 #stage.present .stg-hint,#stage.present #cap-sub.hint{visibility:hidden}
@@ -773,17 +666,13 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 #stage.present .st-title .t-short{display:inline}
 #stage.present #chip .comp:hover .shape{stroke-width:inherit}
 #stage.present.idle,#stage.present.idle *{cursor:none!important}
-/* ---- the panel hidden (P): the die takes the whole width ---- */
 #stage.nopanel .st-body{grid-template-columns:minmax(0,1fr)}
 #stage.nopanel .pn{display:none}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
-/* skip links for the keyboard: hidden until focused, then over the stage's top-left corner */
 .skip{position:absolute;left:16px;top:6px;z-index:7;display:flex;gap:6px}
 .skip a{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;background:var(--surface);color:var(--ink);
   border:2px solid var(--c1);border-radius:8px;padding:4px 10px;font-size:.95rem}
 .skip a:focus{position:static;width:auto;height:auto;clip-path:none;overflow:visible}
-/* in a frame that has not been clicked yet, the keys go to the host page: a one-line hint in the drawing's empty top
-   left corner says so (hidden once focused, and while presenting) */
 .kbd-hint{position:absolute;left:6px;top:4px;z-index:4;background:var(--surface);color:var(--ink);border:1px solid var(--border);
   border-radius:8px;padding:3px 10px;font-size:clamp(.76rem,.22vw + .66rem,.9rem);line-height:1.3;box-shadow:0 3px 12px rgba(0,0,0,.12);cursor:pointer;white-space:nowrap}
 .kbd-hint[hidden]{display:none}
@@ -792,16 +681,12 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 #facttab td{overflow-wrap:anywhere}
 #facttab th:nth-child(1){width:11%}#facttab th:nth-child(2){width:44%}#facttab th:nth-child(3){width:10%}#facttab th:nth-child(4){width:10%}#facttab th:nth-child(5){width:25%}
 #asktab td{overflow-wrap:anywhere}
-/* ---- narrow windows and phones: the stage stacks and the page scrolls ---- */
 @media (max-width:899px){
   #stage{display:flex;flex-direction:column;height:auto;min-height:0;overflow:visible;gap:8px}
   .st-body{display:contents}
   .st-head{order:0}.st-view{order:1}.st-bar{order:2}.st-cap{order:3}.pn{order:4}
   .st-row .lab2{display:none}
   .st-head .st-btn{padding:3px 9px;min-height:32px}
-  /* the drawing fits the width: nothing in it scrolls sideways. In a portrait window (a phone, #stage.ph) the script
-     gives each scale its own view and the box one shape for all of them (its inline aspect-ratio, set only when a flow
-     or the tour starts or stops); the text is set as on a short screen, the chip's labels larger still */
   .st-svg{overflow:hidden}
   #chip{height:auto;aspect-ratio:1400/792}
   .t-sm{font-size:21px}
@@ -810,11 +695,8 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .t-sm.t-fit{font-size:19px}
   .t-dcap{font-size:22px}
   #chip .bkey{font-size:21px}
-  /* a phone's shire (a view 784 units wide): its own labels a little larger (not a flow's, drawn in .fx) */
   #stage.ph .lay[data-level="1"] > :not(.fx) :is(.t-labb,.t-lab){font-size:24.5px}
   #stage.ph .lay[data-level="1"] > :not(.fx) .t-sm:not(.t-fit){font-size:24px}
-  /* a touch screen that cannot go full screen offers no Present; on a phone the panel shows under the stage, so its
-     button shows only while presenting, or once the panel is hidden (P, ?panel=off, or hidden while presenting) */
   #stage.nofs #btn-fs{display:none}
   #stage.ph:not(.pres):not(:fullscreen):not(.nopanel) #btn-panel{display:none}
   .pip{width:44%}
@@ -822,7 +704,6 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .stages{flex:1 1 100%;order:5;flex-wrap:wrap}
   .stages li{flex:1 1 30%}
   .bar-sep{display:none}
-  /* full screen or presenting on a narrow screen: the drawing fits the space left, the panel scrolls below it */
   #stage:fullscreen,#stage.pres{height:100vh;overflow:hidden}
   #stage:fullscreen .st-view,#stage.pres .st-view{flex:1 1 auto;min-height:0}
   #stage:fullscreen .st-svg,#stage.pres .st-svg{overflow:hidden}
@@ -834,8 +715,6 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   #cap{min-height:0}
   #cap-sub{white-space:normal}
 }
-/* a phone: the playback buttons in one row (Present, where it shows, after the stages), the stages in rows of three
-   of one width */
 @media (max-width:600px){
   .st-bar{gap:6px 5px}
   .st-bar .st-btn{padding:3px 10px}
@@ -846,19 +725,12 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
   .stages li.stg-hint{grid-column:1/-1}
 }
-/* in a frame on a phone, spacesheep's comment tab (29 px wide, fixed to the frame's left edge) covers the page's left
-   edge: the gutter there is wider than it */
 @media (max-width:640px){
   html.et-framed #stage{padding-left:32px;padding-right:12px}
   html.et-framed .prose{padding-left:32px;padding-right:14px}
 }
-/* where a stage's name may wrap (under 1700 wide) the bar keeps room for two lines whatever the flow, so that the
-   drawing above it never changes size between flows (a short screen keeps them to one line, below) */
 @media (min-width:900px) and (max-width:1700px) and (min-height:781px){.stg{min-height:calc(2.2em + 8px)}
-  /* and the hint that stands in for the stages before a flow is picked keeps the same room (13 Oct 2026: the bar grew
-     6.7 px when a flow started, and the drawing above it shrank to match, at 1440 x 900) */
   .stages li.stg-hint{min-height:calc(2.2 * clamp(.74rem,.27vw + .63rem,.98rem) + 8px)}}
-/* laptops and projectors, 900-1450 wide: tighter header buttons so that the header stays on one row */
 @media (min-width:900px) and (max-width:1450px){
   .st-head{gap:4px 10px}
   .st-row{gap:4px}
@@ -869,16 +741,11 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .st-title .t-long{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
   .st-title .t-short{display:inline}
 }
-/* 900-1199 wide: the stage bar shows every stage's number and the current stage's name (the names are in each
-   button's title and label) */
 @media (min-width:900px) and (max-width:1199px){
   .stages li:not(.on){flex:0 0 auto}
   .stages li:not(.on) .stg .st{display:none}
   .stages li.on{flex:1 1 auto}
 }
-/* a short screen (1280 x 720): the drawing is scaled to about 0.67, so its text is set larger; the kicker and the
-   tour's dots move beside the line under the caption (under the scale control), which keeps its two lines; the stage
-   names keep to one line, so that the bar, and the drawing above it, never change height */
 @media (max-height:780px) and (min-width:900px){
   #stage{gap:4px;padding-top:6px;padding-bottom:6px}
   .st-head{gap:4px 10px}
@@ -903,9 +770,6 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .t-dcap{font-size:22px}
   #chip .bkey{font-size:21px}
 }
-/* twelve flow buttons (eleven since the broadcast, 28 September; TensorFMA32, 25 October) on one header row wherever ten fitted: 900-1450 wide the flow
-   buttons a little smaller and tighter still, 1451-1760 wide (the full title) the "Flows" label goes and they are
-   tighter */
 @media (min-width:900px) and (max-width:1450px){
   .st-head .st-row{gap:3px}
   .st-head .st-row .st-btn{padding-left:6px;padding-right:6px;font-size:clamp(.78rem,.3vw + .62rem,1rem)}
@@ -915,8 +779,6 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .st-row .lab2{display:none}
   .st-head .st-row .st-btn{padding-left:9px;padding-right:9px}
 }
-/* TensorFMA32 (25 October): the twelfth flow button, and the header kept to one row: where the title and the twelve flow
-   buttons do not fit side by side the long title gives way to the short one, then the buttons tighten (fitHead) */
 .st-head .st-btn.tf32 .k{color:var(--c2)}
 .st-head .st-btn.tf32[aria-pressed="false"]{border-color:color-mix(in srgb,var(--c2) 45%,var(--border))}
 #stage .st-head.tight .t-long{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
@@ -929,9 +791,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 #stage .st-head.tightest .st-title{column-gap:6px}
 #stage .st-head.tightest .st-row{gap:2px}
 #stage .st-head.tightest .st-row .st-btn{padding-left:4px;padding-right:4px}
-/* where even the tightest buttons wrap (about 900-1100 wide) the title takes its own line and the twelve buttons the next one */
 #stage .st-head.tightest3 .st-title{flex:1 0 100%}
-/* and before that the twelfth button's label shortens, TensorFMA32 to FMA32, then to its key (the name stays for screen readers and in its title) */
 #stage .st-head.tfs .tf32 .tf1,#stage .st-head.tfk .tf32 .tf1,#stage .st-head.tfk .tf32 .tf2{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 #stage .st-head.tfk .st-row .tf32 .k{margin-right:0}
 .pn-tfn .pn-stage{margin:2px 0 8px;font-size:.94em;line-height:1.42}

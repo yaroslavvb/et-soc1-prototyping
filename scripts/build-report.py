@@ -417,6 +417,34 @@ if USED:
 if meta.get("strip_comments"):
     script = strip_comments(script)
 body = includes(body, ext=('.css',))
+
+
+# ---- the built page's CSS comments (31 Oct 2026, the chip diagram's first-visit pass: its <style> blocks carried
+# 13.8 KB of comments against 4 KB left in its 1.5 MB budget): a page whose meta.json has "strip_css_comments" ships
+# the template's and its body's <style> blocks without the comments that take whole lines, as "strip_comments" does
+# for the script; the sources keep them. A comment after a declaration on its line stays. No page's CSS has "/*"
+# inside a string, so a plain scan finds them.
+def strip_css(css):
+    out, last = [], 0
+    for m in re.finditer(r"/\*.*?\*/", css, flags=re.S):
+        s, e = m.span()
+        ls = css.rfind("\n", 0, s) + 1
+        if s < last or css[ls:s].strip():
+            continue                     # after code on its line: stays
+        le = css.find("\n", e)
+        le = len(css) if le < 0 else le
+        if css[e:le].strip():
+            continue                     # code after the comment on its last line: stays
+        out.append(css[last:ls])
+        last = le + 1 if le < len(css) else le
+    out.append(css[last:])
+    return "".join(out)
+
+
+if meta.get("strip_css_comments"):
+    css_blocks = re.compile(r"(<style\b[^>]*>)(.*?)(</style>)", re.S)
+    tpl = css_blocks.sub(lambda m: m.group(1) + strip_css(m.group(2)) + m.group(3), tpl)
+    body = css_blocks.sub(lambda m: m.group(1) + strip_css(m.group(2)) + m.group(3), body)
 html = (tpl.replace("__CHARTKIT__", open(os.path.join(S, "chartkit.js")).read())
         .replace("__TITLE__", meta["title"]).replace("__DESC__", meta["description"])
         .replace("__BODY__", body)
