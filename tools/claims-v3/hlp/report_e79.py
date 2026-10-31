@@ -192,7 +192,7 @@ def main():
          f"int8 B bit {d8b_bit} over this run's b32_22" if d8b else "")
 
     # ---------------------------------------------------------------- the tables
-    md.append(f"## Results — card {card}, {C['clock_mhz']} MHz, {C['v_mean']*1000:.1f} mV\n")
+    md.append(f"## The tables — card {card}, {C['clock_mhz']} MHz, {C['v_mean']*1000:.1f} mV\n")
     md.append(f"Passes kept {C['passes']} ({C['n_passes']}); runs kept {C['kept']} of {C['runs']}; leakage slope "
               f"{C['leak_W_per_C']:.4f} W/°C from {C['leak_runs']} runs; cycles per op {C['cycles_per_op']}.")
     if C["passes_set_aside"]:

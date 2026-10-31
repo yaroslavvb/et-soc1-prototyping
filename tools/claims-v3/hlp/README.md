@@ -220,7 +220,7 @@ block), `queue_hlp.sh` (passes in a row), `run_e79.sh` (the stages: `setup`, `id
 
 ## Amendments
 
-**A8, Sat 31 Oct 2026, 10:13 PDT** — **two more block-A passes, 7914 and 7915, of exactly the registered item
+**A8, Sat 31 Oct 2026, 10:13:39 PDT (commit `23197287`, 3 min 01 s before pass 7914's first launch at 10:16:40)** — **two more block-A passes, 7914 and 7915, of exactly the registered item
 list.** Why: the registered drift gate set **pass 7912** aside — zero failed runs, `anchor_pi` drift 0.4105 W
 against the 0.3 W bar — leaving block A with **three** kept passes, exactly the registered `min_passes` floor and
 no margin for a second one. The decision is driven by a **gate outcome**, not by any price: the gate ran as
@@ -228,7 +228,7 @@ registered, the pass is not reinstated, and nothing about the analysis changes. 
 the 75 registered card-minutes. **The final reduction uses every pass that passes the gates and no pass is chosen
 after the fact** — that is written here, before passes 7914 and 7915 exist, so it cannot be bent later.
 
-**A7, Sat 31 Oct 2026, 10:12 PDT** — **one reported quantity added; no band moves and no registered number
+**A7, Sat 31 Oct 2026, 10:13:39 PDT (commit `23197287`)** — **one reported quantity added; no band moves and no registered number
 changes.** The registered idle bracket is the second before each launch, after the approach has waited for the
 58 °C reading. Over block A's four passes it turns out to be **contaminated**: in a dense pass the previous run's
 power tail can still be inside it, so the h0 switching figure it feeds moves from 10.75 W (one pass) to
@@ -238,7 +238,7 @@ with it: it is the direct statement of what zeros buy in a format. **P4 is still
 on the idle-bracketed ratio, and its spread is printed beside it; the contamination is reported as a limitation of
 that bracket, not repaired after the fact.
 
-**A6, Sat 31 Oct 2026, 10:1x PDT** — **A4's structural wording replaced with the public RTL's own, its count
+**A6, Sat 31 Oct 2026, 10:13:39 PDT (commit `23197287`, while block B's last pass was running — it changes no count, no analysis and no measured number)** — **A4's structural wording replaced with the public RTL's own, its count
 unchanged.** A4 inferred int8's micro-op structure from power alone and described it as "each lane reading the
 eight contiguous bytes of columns 2*l* and 2*l*+1". `external/core-et` says it exactly, and says it better:
 
@@ -260,8 +260,8 @@ boundary never alternates in time — 0.003 W. **The designed count does not mov
 (8 lanes × 2 units) × 4 int8 elements = **1,024** changed element reads per multiply-add per flipped bit, the same
 number A4 registered by the other route, so every int8 B price stands as reduced.
 
-**A5, Sat 31 Oct 2026, 10:08 PDT** — a **citation correction only**, written while block B was still running,
-which is safe because it touches no data: it changes no item, no count, no band, no analysis and no measured number. The registration
+**A5, Sat 31 Oct 2026, 10:13:39 PDT (commit `23197287`)** — a **citation correction only**, written while block B was still
+running, which is safe because it touches no data: it changes no item, no count, no band, no analysis and no measured number. The registration
 justified its all-nonzero operands partly by the PRM's fp16 rule that the two-term update happens only when all
 four of a1, a2, b1, b2 are nonzero. Q130(g) settled the gate from the public RTL that morning (`d8d7e19e`): there
 is **one 32-bit zero test**, taken when the tensor operand register is written, and **one mask drives the float

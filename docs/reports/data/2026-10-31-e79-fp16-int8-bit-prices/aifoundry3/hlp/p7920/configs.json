@@ -1,0 +1,794 @@
+{
+ "card": "aifoundry3",
+ "args": {
+  "out": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/hlp/p7920",
+  "root": "/home/yaroslavvb/aifoundry",
+  "gen": "/home/yaroslavvb/aifoundry/build/hlp-gen2",
+  "items": "anchor_pi,h32q,b32_22,b32p_22,b32k_22,h16q,b16_9,b16p_9,b16k_9,h8q,b8_6,b8p_6,b8k_",
+  "tel_live": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/hlp/p7920/telemetry.jsonl.raw",
+  "heater": "build/sparsity/host/sparsity_host",
+  "sparsity": "build/sparsity/host/sparsity_host",
+  "enercat": "build/enercat-hl/host/enercat_host",
+  "blocks": 1,
+  "first_block": 7920,
+  "seed": 7920,
+  "target": 58.0,
+  "preheat": 59.0,
+  "max_heats": 15,
+  "max_wait": 600.0,
+  "max_c": 78.0,
+  "stale_s": 3.0,
+  "fma_s": 4.0,
+  "shires": "0xffffffff",
+  "per_shire": "32",
+  "ec_s": 4.0,
+  "burnin": 2,
+  "card": "aifoundry3",
+  "dry": false,
+  "list": false
+ },
+ "items": [
+  {
+   "name": "anchor_pi",
+   "kind": "fma",
+   "type": "fp32",
+   "family": "anchor",
+   "values": "pi",
+   "zero": null
+  },
+  {
+   "name": "h16q",
+   "kind": "fma",
+   "type": "fp16",
+   "family": "hq16",
+   "zero": null,
+   "flips": {
+    "a_mant": 0,
+    "a_exp": 0,
+    "a_sign": 0,
+    "a_all": 0,
+    "b_mant": 0,
+    "b_exp": 0,
+    "b_sign": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "side": "b",
+   "base": [
+    "0x3e72",
+    "0x3def",
+    "0x3f01",
+    "0x3c95",
+    "0x3c53",
+    "0x3dab",
+    "0x3dfa",
+    "0x3fce"
+   ]
+  },
+  {
+   "name": "b16_9",
+   "kind": "fma",
+   "type": "fp16",
+   "family": "b16",
+   "zero": "h16q",
+   "flips": {
+    "a_mant": 0,
+    "a_exp": 0,
+    "a_sign": 0,
+    "a_all": 0,
+    "b_mant": 8192,
+    "b_exp": 0,
+    "b_sign": 0,
+    "b_all": 8192,
+    "total": 8192
+   },
+   "side": "b",
+   "bit": 9,
+   "field": "mant",
+   "base": [
+    "0x3e72",
+    "0x3def",
+    "0x3f01",
+    "0x3c95",
+    "0x3c53",
+    "0x3dab",
+    "0x3dfa",
+    "0x3fce"
+   ]
+  },
+  {
+   "name": "b16p_9",
+   "kind": "fma",
+   "type": "fp16",
+   "family": "b16p",
+   "zero": "h16q",
+   "flips": {
+    "a_mant": 0,
+    "a_exp": 0,
+    "a_sign": 0,
+    "a_all": 0,
+    "b_mant": 7936,
+    "b_exp": 0,
+    "b_sign": 0,
+    "b_all": 7936,
+    "total": 7936
+   },
+   "side": "b",
+   "bit": 9,
+   "field": "mant",
+   "layout": "jgp",
+   "base": [
+    "0x3e72",
+    "0x3def",
+    "0x3f01",
+    "0x3c95",
+    "0x3c53",
+    "0x3dab",
+    "0x3dfa",
+    "0x3fce"
+   ]
+  },
+  {
+   "name": "b16k_9",
+   "kind": "fma",
+   "type": "fp16",
+   "family": "b16k",
+   "zero": "h16q",
+   "flips": {
+    "a_mant": 0,
+    "a_exp": 0,
+    "a_sign": 0,
+    "a_all": 0,
+    "b_mant": 256,
+    "b_exp": 0,
+    "b_sign": 0,
+    "b_all": 256,
+    "total": 256
+   },
+   "side": "b",
+   "bit": 9,
+   "field": "mant",
+   "layout": "kg",
+   "base": [
+    "0x3e72",
+    "0x3def",
+    "0x3f01",
+    "0x3c95",
+    "0x3c53",
+    "0x3dab",
+    "0x3dfa",
+    "0x3fce"
+   ]
+  },
+  {
+   "name": "h8q",
+   "kind": "fma",
+   "type": "int8",
+   "family": "hq8",
+   "zero": null,
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "side": "b",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 0,
+    "b_all": 0,
+    "total": 0
+   }
+  },
+  {
+   "name": "b8_6",
+   "kind": "fma",
+   "type": "int8",
+   "family": "b8",
+   "zero": "h8q",
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 16384,
+    "b_msb": 0,
+    "b_all": 16384,
+    "total": 16384
+   },
+   "side": "b",
+   "bit": 6,
+   "field": "mag",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 16384,
+    "b_msb": 0,
+    "b_all": 16384,
+    "total": 16384
+   }
+  },
+  {
+   "name": "b8p_6",
+   "kind": "fma",
+   "type": "int8",
+   "family": "b8p",
+   "zero": "h8q",
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 15872,
+    "b_msb": 0,
+    "b_all": 15872,
+    "total": 15872
+   },
+   "side": "b",
+   "bit": 6,
+   "field": "mag",
+   "layout": "jgp",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 16384,
+    "b_msb": 0,
+    "b_all": 16384,
+    "total": 16384
+   }
+  },
+  {
+   "name": "b8k_0",
+   "kind": "fma",
+   "type": "int8",
+   "family": "b8k",
+   "zero": "h8q",
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 1024,
+    "total": 512
+   },
+   "side": "b",
+   "bit": 0,
+   "field": "mag",
+   "layout": "kg",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "flips_generic": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 512,
+    "total": 512
+   },
+   "structure": "318-cycle: 256 micro-ops, lane l reads columns 2l and 2l+1, 8 bytes a read"
+  },
+  {
+   "name": "b8k_1",
+   "kind": "fma",
+   "type": "int8",
+   "family": "b8k",
+   "zero": "h8q",
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 1024,
+    "total": 512
+   },
+   "side": "b",
+   "bit": 1,
+   "field": "mag",
+   "layout": "kg",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "flips_generic": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 512,
+    "total": 512
+   },
+   "structure": "318-cycle: 256 micro-ops, lane l reads columns 2l and 2l+1, 8 bytes a read"
+  },
+  {
+   "name": "b8k_2",
+   "kind": "fma",
+   "type": "int8",
+   "family": "b8k",
+   "zero": "h8q",
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 1024,
+    "total": 512
+   },
+   "side": "b",
+   "bit": 2,
+   "field": "mag",
+   "layout": "kg",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "flips_generic": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 512,
+    "total": 512
+   },
+   "structure": "318-cycle: 256 micro-ops, lane l reads columns 2l and 2l+1, 8 bytes a read"
+  },
+  {
+   "name": "b8k_3",
+   "kind": "fma",
+   "type": "int8",
+   "family": "b8k",
+   "zero": "h8q",
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 1024,
+    "total": 512
+   },
+   "side": "b",
+   "bit": 3,
+   "field": "mag",
+   "layout": "kg",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "flips_generic": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 512,
+    "total": 512
+   },
+   "structure": "318-cycle: 256 micro-ops, lane l reads columns 2l and 2l+1, 8 bytes a read"
+  },
+  {
+   "name": "b8k_4",
+   "kind": "fma",
+   "type": "int8",
+   "family": "b8k",
+   "zero": "h8q",
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 1024,
+    "total": 512
+   },
+   "side": "b",
+   "bit": 4,
+   "field": "mag",
+   "layout": "kg",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "flips_generic": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 512,
+    "total": 512
+   },
+   "structure": "318-cycle: 256 micro-ops, lane l reads columns 2l and 2l+1, 8 bytes a read"
+  },
+  {
+   "name": "b8k_5",
+   "kind": "fma",
+   "type": "int8",
+   "family": "b8k",
+   "zero": "h8q",
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 1024,
+    "total": 512
+   },
+   "side": "b",
+   "bit": 5,
+   "field": "mag",
+   "layout": "kg",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "flips_generic": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 512,
+    "total": 512
+   },
+   "structure": "318-cycle: 256 micro-ops, lane l reads columns 2l and 2l+1, 8 bytes a read"
+  },
+  {
+   "name": "b8k_6",
+   "kind": "fma",
+   "type": "int8",
+   "family": "b8k",
+   "zero": "h8q",
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 1024,
+    "total": 512
+   },
+   "side": "b",
+   "bit": 6,
+   "field": "mag",
+   "layout": "kg",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "flips_generic": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 512,
+    "b_msb": 0,
+    "b_all": 512,
+    "total": 512
+   },
+   "structure": "318-cycle: 256 micro-ops, lane l reads columns 2l and 2l+1, 8 bytes a read"
+  },
+  {
+   "name": "b8k_7",
+   "kind": "fma",
+   "type": "int8",
+   "family": "b8k",
+   "zero": "h8q",
+   "flips": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 512,
+    "b_all": 1024,
+    "total": 512
+   },
+   "side": "b",
+   "bit": 7,
+   "field": "msb",
+   "layout": "kg",
+   "base": [
+    "0x93",
+    "0xc3",
+    "0xc6",
+    "0xac",
+    "0x55",
+    "0x66",
+    "0x1e",
+    "0x8d"
+   ],
+   "flips_ew8": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "flips_generic": {
+    "a_mag": 0,
+    "a_msb": 0,
+    "a_all": 0,
+    "b_mag": 0,
+    "b_msb": 512,
+    "b_all": 512,
+    "total": 512
+   },
+   "structure": "318-cycle: 256 micro-ops, lane l reads columns 2l and 2l+1, 8 bytes a read"
+  },
+  {
+   "name": "h32q",
+   "kind": "fma",
+   "type": "fp32",
+   "family": "hq32",
+   "zero": null,
+   "flips": {
+    "a_mant": 0,
+    "a_exp": 0,
+    "a_sign": 0,
+    "a_all": 0,
+    "b_mant": 0,
+    "b_exp": 0,
+    "b_sign": 0,
+    "b_all": 0,
+    "total": 0
+   },
+   "side": "b",
+   "base": [
+    "0x3fc07396",
+    "0x3faf86a3",
+    "0x3f8b284b",
+    "0x3fef0c01",
+    "0x3f93416d",
+    "0x3fc995f6",
+    "0x3fe0920a",
+    "0x3f9da339"
+   ]
+  },
+  {
+   "name": "b32_22",
+   "kind": "fma",
+   "type": "fp32",
+   "family": "b32",
+   "zero": "h32q",
+   "flips": {
+    "a_mant": 0,
+    "a_exp": 0,
+    "a_sign": 0,
+    "a_all": 0,
+    "b_mant": 4096,
+    "b_exp": 0,
+    "b_sign": 0,
+    "b_all": 4096,
+    "total": 4096
+   },
+   "side": "b",
+   "bit": 22,
+   "field": "mant",
+   "base": [
+    "0x3fc07396",
+    "0x3faf86a3",
+    "0x3f8b284b",
+    "0x3fef0c01",
+    "0x3f93416d",
+    "0x3fc995f6",
+    "0x3fe0920a",
+    "0x3f9da339"
+   ]
+  },
+  {
+   "name": "b32p_22",
+   "kind": "fma",
+   "type": "fp32",
+   "family": "b32p",
+   "zero": "h32q",
+   "flips": {
+    "a_mant": 0,
+    "a_exp": 0,
+    "a_sign": 0,
+    "a_all": 0,
+    "b_mant": 3968,
+    "b_exp": 0,
+    "b_sign": 0,
+    "b_all": 3968,
+    "total": 3968
+   },
+   "side": "b",
+   "bit": 22,
+   "field": "mant",
+   "layout": "jgp",
+   "base": [
+    "0x3fc07396",
+    "0x3faf86a3",
+    "0x3f8b284b",
+    "0x3fef0c01",
+    "0x3f93416d",
+    "0x3fc995f6",
+    "0x3fe0920a",
+    "0x3f9da339"
+   ]
+  },
+  {
+   "name": "b32k_22",
+   "kind": "fma",
+   "type": "fp32",
+   "family": "b32k",
+   "zero": "h32q",
+   "flips": {
+    "a_mant": 0,
+    "a_exp": 0,
+    "a_sign": 0,
+    "a_all": 0,
+    "b_mant": 128,
+    "b_exp": 0,
+    "b_sign": 0,
+    "b_all": 128,
+    "total": 128
+   },
+   "side": "b",
+   "bit": 22,
+   "field": "mant",
+   "layout": "kg",
+   "base": [
+    "0x3fc07396",
+    "0x3faf86a3",
+    "0x3f8b284b",
+    "0x3fef0c01",
+    "0x3f93416d",
+    "0x3fc995f6",
+    "0x3fe0920a",
+    "0x3f9da339"
+   ]
+  }
+ ],
+ "et_devices": null
+}
