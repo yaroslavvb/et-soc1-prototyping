@@ -81,7 +81,7 @@ def main():
         x, b = max(cand, key=lambda t: t[0]["fJ"])
         return x, b
 
-    rules, md = [], []
+    rules, md, PRICE_KEYS = [], [], []
 
     def score(rid, got, test, verdict, note=""):
         r = next((x for x in pred["rules"] if x["id"] == rid), {"id": rid, "what": "", "leg": "primary"})
@@ -171,6 +171,20 @@ def main():
              f"{(lc.get(nm) or {}).get('fJ_primary')} fJ")
 
     # ---------------------------------------------------------------- P7, P8
+    # amendment A4: the same three rules re-scored on the kg list, the only int8 B layout that alternates
+    xs = [b for b in MANT["int8"] if ok(price("int8_b_kg", b))]
+    atleast("P3a_kg", spearman(xs, [price("int8_b_kg", b)["fJ"] for b in xs]) if len(xs) >= 3 else None, 0.60,
+            f"{len(xs)} of 7 magnitude positions kept, kg layout")
+    y7, y6 = price("int8_b_kg", 7), price("int8_b_kg", 6)
+    if ok(y7) and ok(y6):
+        hw = math.hypot(y7.get("fJ_ci95") or 0, y6.get("fJ_ci95") or 0)
+        score("P3b_kg", {"bit7_fJ": y7["fJ"], "bit6_fJ": y6["fJ"], "allowance_fJ": hw},
+              "fJ(7) >= fJ(6) - allowance, kg layout", "PASS" if y7["fJ"] >= y6["fJ"] - hw else "FAIL")
+    else:
+        score("P3b_kg", None, "fJ(7) >= fJ(6) - allowance, kg layout", "not scored", "inputs unresolved")
+    d8k, d8k_bit = dearest("int8_b_kg", list(range(8)))
+    band("P8_kg", (d8k["fJ"] / tie["fJ"]) if (d8k and resolved(tie)) else None, 0.15, 0.60,
+         f"int8 B kg bit {d8k_bit} over this run's b32_22" if d8k else "")
     band("P7", tie["fJ"] if ok(tie) else None, 756, 1260,
          f"95% [{(tie or {}).get('fJ_lo')}, {(tie or {}).get('fJ_hi')}]" if ok(tie) else "")
     d8b, d8b_bit = dearest("int8_b", list(range(8)))
@@ -184,14 +198,21 @@ def main():
     if C["passes_set_aside"]:
         md.append(f"Passes set aside: {C['passes_set_aside']}.")
     md.append("")
-    for key, title, bits in (("fp16_b", "fp16, B side (A = 1.0)", list(range(16))),
+    for key, title, bits in (("fp16_b", "fp16, B side (A = 1.0), jg layout", list(range(16))),
                              ("fp16_a", "fp16, A side (B = 1.0)", list(range(16))),
-                             ("int8_b", "int8, B side (A = 1)", list(range(8))),
+                             ("int8_b", "int8, B side (A = 1), jg layout - does not alternate (A4)", list(range(8))),
+                             ("int8_b_kg", "int8, B side (A = 1), kg layout - the int8 B price list (A4)", list(range(8))),
                              ("int8_a", "int8, A side (B = 1)", list(range(8))),
-                             ("fp32_b", "fp32 tie, B side (A = 1.0)", [22])):
+                             ("fp32_b", "fp32 tie, B side (A = 1.0), jg layout", [22]),
+                             ("fp32_b_jgp", "fp32, B side, jgp layout (A4 order probe)", [22]),
+                             ("fp32_b_kg", "fp32, B side, kg layout (A4 order probe)", [22]),
+                             ("fp16_b_jgp", "fp16, B side, jgp layout (the registered control)", [9]),
+                             ("fp16_b_kg", "fp16, B side, kg layout (A4 order probe)", [9]),
+                             ("int8_b_jgp", "int8, B side, jgp layout", [6])):
         if key not in P:
             continue
         fmt = key.split("_")[0]
+        PRICE_KEYS.append(key)
         md.append(f"### {title}\n")
         md.append("| bit | field | ΔW over the zero | fJ per flipped bit | 95% | fF | electrons | passes |")
         md.append("|---|---|---|---|---|---|---|---|")
@@ -203,12 +224,36 @@ def main():
                       f"**{x['fJ']:.0f}** | [{x['fJ_lo']:.0f}, {x['fJ_hi']:.0f}] | {(x['C_fF'] or 0):.2f} | "
                       f"{(x['electrons'] or 0):.3g} | {x['n_passes']} |")
         xs = [b for b in MANT[fmt] if ok(price(key, b))]
-        if xs:
+        if len(xs) >= 3:
             rho = spearman(xs, [price(key, b)["fJ"] for b in xs])
             lo = min(price(key, b)["fJ"] for b in xs)
             hi = max(price(key, b)["fJ"] for b in xs)
-            md.append(f"\nSignificand Spearman ρ(bit, price) = **{rho:.3f}**; span over the kept significand "
-                      f"positions **{hi/lo:.1f}×** ({lo:.0f}–{hi:.0f} fJ).\n")
+            md.append(f"\nSignificand Spearman ρ(bit, price) = "
+                      f"**{('%.3f' % rho) if rho is not None else '—'}**; span over the kept significand "
+                      f"positions **{(hi/lo if lo else float('nan')):.1f}×** ({lo:.0f}–{hi:.0f} fJ).\n")
+    OP = C.get("order_probe", {})
+    if OP:
+        md.append("### The order probe: the same flip in three layouts (amendment A4)\n")
+        md.append("The dW ratios divide by no designed count, so they are order-free.\n")
+        md.append("| format | jg dW | jgp dW | kg dW | jgp/jg | kg/jg |")
+        md.append("|---|---|---|---|---|---|")
+        for fmt, e in OP.items():
+            g = lambda k: (f"{e[k]['dW']:.3f}" if k in e and e[k].get("dW") is not None else "—")
+            r = lambda k: (f"{e[k]:.3f}" if e.get(k) is not None else "—")
+            md.append(f"| {fmt} | {g('jg')} | {g('jgp')} | {g('kg')} | {r('dW_jgp_over_jg')} | "
+                      f"{r('dW_kg_over_jg')} |")
+        md.append("")
+    MG = C.get("marginal", {})
+    if MG:
+        md.append("### The marginal price of a further flipped bit (amendment A4)\n")
+        md.append("| format | from | dW per extra flipped bit | marginal fJ per bit | 95% | passes |")
+        md.append("|---|---|---|---|---|---|")
+        for fmt, e in MG.items():
+            md.append(f"| {fmt} | {' - '.join(e['from'])} | "
+                      f"{('%.3f' % e['dW_per_extra_bit']) if e['dW_per_extra_bit'] is not None else '—'} | "
+                      f"{('%.1f' % e['fJ']) if e['fJ'] is not None else '—'} | "
+                      f"± {(e['fJ_ci95'] or 0):.1f} | {e['n_passes']} |")
+        md.append("")
     md.append("### Switching over the idle bracket\n")
     md.append("| format | idle W | h0 W | h0 switching W | zeros switching W | zeros / h0 |")
     md.append("|---|---|---|---|---|---|")
@@ -262,7 +307,7 @@ def main():
         open(a.md, "w").write(out)
     if a.json:
         json.dump({"card": card, "rules": rules, "n_pass": n_pass, "n_fail": n_fail, "n_not_scored": n_ns,
-                   "prices": P, "switching": SW, "additivity": add, "layout_control": lc,
+                   "prices": P, "switching": SW, "additivity": add, "layout_control": lc, "order_probe": OP, "marginal": MG,
                    "passes": C["passes"], "kept": C["kept"], "runs": C["runs"],
                    "leak_W_per_C": C["leak_W_per_C"], "v_mean": C["v_mean"],
                    "cycles_per_op": C["cycles_per_op"]}, open(a.json, "w"), indent=1)

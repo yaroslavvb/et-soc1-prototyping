@@ -12,11 +12,13 @@
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/../../.."
 ROOT=$PWD
-GEN=$ROOT/build/hlp-gen
+GEN=${HLP_GEN:-$ROOT/build/hlp-gen}
 PY=${PY:-$ROOT/.venv/bin/python3}
 [ -x "$PY" ] || PY=python3
 ITEMS=anchor_pi,z16,z8,h16q,h16q_e7,b16_,b16p_,b16m2,b16m4,a16q,a16q_e7,a16_,h8q,b8_,b8p_,b8m2,b8m4,a8q,a8_,h32q,b32_
-stage=${1:?setup|ident|smoke|go}
+# amendment A4: block B, the order probe and the int8 kg price list, from the operand set build/hlp-gen2
+ITEMS_B=anchor_pi,h32q,b32_22,b32p_22,b32k_22,h16q,b16_9,b16p_9,b16k_9,h8q,b8_6,b8p_6,b8k_
+stage=${1:?setup|ident|smoke|go|setupB|goB}
 
 case "$stage" in
 setup)
@@ -61,6 +63,26 @@ go)
   setsid nohup bash tools/claims-v3/hlp/queue_hlp.sh "$p" "$n" "$ITEMS" \
     > "$ROOT/build/e79-queue.log" 2>&1 < /dev/null &
   echo "e79 queue started: passes $p..$((p + n - 1)), log $ROOT/build/e79-queue.log"
+  ;;
+setupB)
+  # amendment A4: generate build/hlp-gen2 and prove every operand file block A ran is byte-identical in it
+  GEN2=$ROOT/build/hlp-gen2
+  "$PY" tools/claims-v3/hlp/make_hlp.py "$GEN2" --check | tail -2
+  n=0; bad=0
+  for f in "$GEN"/tiles/*.bin; do
+    b=$(basename "$f")
+    if cmp -s "$f" "$GEN2/tiles/$b"; then n=$((n + 1)); else bad=$((bad + 1)); n=$((n + 1)); echo "DIFFERS: $b"; fi
+  done
+  echo "byte-identical against block A's set: $((n - bad))/$n"
+  HLP_GEN=$GEN2 V3_DRY=1 bash tools/claims-v3/hlp/block.sh 7919 "$ITEMS_B" 2>&1 | tail -3
+  "$PY" tools/claims-v3/hlp/run_hlp.py /dev/null --root "$ROOT" --gen "$GEN2" --items "$ITEMS_B" --list
+  ;;
+goB)
+  p=${2:?first pass}; n=${3:?passes}
+  export HLP_GEN=$ROOT/build/hlp-gen2
+  setsid nohup bash tools/claims-v3/hlp/queue_hlp.sh "$p" "$n" "$ITEMS_B" \
+    > "$ROOT/build/e79-queueB.log" 2>&1 < /dev/null &
+  echo "e79 block B started: passes $p..$((p + n - 1)), log $ROOT/build/e79-queueB.log"
   ;;
 *) echo "unknown stage $stage" >&2; exit 2 ;;
 esac

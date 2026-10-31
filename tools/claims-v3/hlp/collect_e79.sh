@@ -10,11 +10,11 @@
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/../../.."
 ROOT=$PWD
-GEN=$ROOT/build/hlp-gen
+GEN=${HLP_GEN:-$ROOT/build/hlp-gen2}   # A4: gen2 holds block A's 62 files byte-identical plus block B's
 PRED=$ROOT/tools/claims-v3/hlp/predictions.json
 PY=${PY:-$ROOT/.venv/bin/python3}
 [ -x "$PY" ] || PY=python3
-GLOB=${1:-p791[0-9]}
+GLOB=${1:-p79[12][0-9]}   # A4: block A (p791x) and block B (p792x)
 OUT=$ROOT/build/e79-out/2026-10-31-e79-fp16-int8-bit-prices
 rm -rf "${ROOT:?}/build/e79-out"
 mkdir -p "$OUT/aifoundry3/hlp" "$OUT/logs"

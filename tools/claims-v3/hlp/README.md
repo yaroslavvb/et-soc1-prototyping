@@ -215,6 +215,54 @@ block), `queue_hlp.sh` (passes in a row), `run_e79.sh` (the stages: `setup`, `id
 
 ## Amendments
 
+**A4, Sat 31 Oct 2026, 09:58 PDT** — written after pass **7910** and **before any data it touches** (block B,
+passes 7920–7923). Pass 7910 produced two measured facts the registered design did not anticipate, and A4 adds the
+items that resolve them. **No registered band moves, and P6 is scored on block A's data exactly as registered —
+it fails, and the failure is reported as a failure.**
+
+*Fact 1 — int8's B-side `jg` ladder does not alternate at all.* Every int8 B single-bit rung reads
+**0.003 ± 0.02 W** above its zero, where the identical construction reads **4.73 W** in fp16 and **5.00 W** in
+fp32. int8 takes **318** cycles per 16×16×64 multiply-add against 546, which is **256** micro-ops, not 512: one
+micro-op covers all sixteen C columns, each lane reading the eight contiguous bytes of columns 2*l* and 2*l*+1 at
+K-terms 4p…4p+3 (8 lanes × 2 columns × 4 K-terms = 64 MACs a micro-op; 256 × 64 = 16,384 = 16·16·64). Under that
+structure a lane's two columns **never change**, so a flip placed on the column-half boundary never enters the
+stream, and what is left is a static operand-content difference — which is what 0.003 W is. The 546-cycle formats
+do have the half index and do alternate, which is why they read 4.7–5.0 W. *So the 318-cycle structure is measured,
+not assumed.* **Added:** the `kg` layout, which carries the flip on the line-group parity alone, the same in every
+column, and is the only one of the three that alternates in int8 — `b8k_0` … `b8k_7`, the int8 B price list.
+Its designed count is the closed form the structure implies, **1,024 changed element reads per multiply-add per
+flipped bit** (16 line-group transitions × 8 lanes × 8 elements), written into the manifest with the generic
+model's count kept beside it in `flips_generic` so the number can be re-divided if the structure is ever shown to
+be different.
+
+*Fact 2 — two layouts of the same flip, at the same designed count, differ 5.4×.* `b16p_9` (the registered layout
+control, 7,936 designed flips) reads **0.880 W** where `b16_9` (8,192) reads **4.725 W**. The designed flip count
+therefore does **not** determine the step, and **P6_fp16 fails**. Two more measured facts frame it: the multi-bit
+rungs are deeply saturated (1 bit 4.73 W, 2 bits 5.33 W, 4 bits 6.18 W), so the **marginal** cost of a further
+flipped bit is about **46 fJ** against the 515 fJ a single-bit rung reports against a constant zero — E67's
+amendment A13 argument (a price measured this way is `T + e·n·rate`) with `T` dominant. The mechanism this points
+at is the **result path**, not the multiplier: in the `jg` layout the two C columns a lane alternates between
+accumulate *different* products (one sums the base, the other the base with the bit flipped), so the result bus
+swings by the accumulated difference every micro-op; in `jgp` and `kg` the two columns see the same mix and stay
+nearly equal. **Added, to test exactly that:** `b32p_22` (the same `jgp` control in fp32, where E65's published
+1,008 fJ is the independent anchor), `b32k_22` and `b16k_9` (the `kg` probe in fp32 and fp16). The reduction gains
+an **order probe** block reporting the three layouts' raw ΔW and their order-free ΔW ratios — they divide by no
+designed count — and a **marginal** block reporting (ΔW(4-bit) − ΔW(2-bit)) per extra flipped bit. Both are
+reported quantities; neither moves a band, exactly as E67's A13 and A14 added quantities beside their registered
+ones.
+
+*Block B, four passes (7920–7923), 20 items, ~3 min a pass:* `anchor_pi`, `h32q`, `b32_22`, `b32p_22`, `b32k_22`,
+`h16q`, `b16_9`, `b16p_9`, `b16k_9`, `h8q`, `b8_6`, `b8p_6`, `b8k_0` … `b8k_7`. Operand set `build/hlp-gen2`;
+**every one of the 62 operand files block A ran is byte-identical in it** (62 of 62, checked before the first
+block-B launch), so nothing already measured changes. Card budget after block B: about 56 of the 75 registered
+card-minutes.
+
+*How the lists are quoted, given P6's failure.* The fp16 and fp32 single-bit prices stay as measured and are
+labelled **all-in against a constant-operand zero, in the `jg` layout** — the same quantity E65 and E67 published,
+on the same card, so the comparison the brief asks for is like-for-like. The **marginal** price is reported beside
+every list, and the order probe's ΔW ratios are reported as the evidence that the two are far apart. No price is
+quoted as "the energy of a flip" without that pair.
+
 **A1, Sat 31 Oct 2026, 09:33 PDT** — written during pass 7910 and **before any data it touches** (passes 7914
 onward). *Four more passes, 7914–7917, of exactly the registered item list.* Why: a pass takes about **4.5 min**,
 not the ~12 min budgeted, because the card idles at 50 °C today, so the approach to the 58 °C launch reading is

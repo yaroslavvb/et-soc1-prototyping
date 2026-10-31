@@ -3,14 +3,55 @@
  "frozen": "2026-10-31, with the commit that adds this file, before the Discord claim and the first launch",
  "card": "aifoundry3 card 0, 600 MHz, ~523 mV, TDP 0 (boot-time, never changed)",
  "references": {
-  "fp32_B_dearest_fJ": {"value": 1008, "se": 21, "bit": 22, "source": "docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/README.md, block A table, bit 22"},
-  "fp32_B_floor_fJ": {"value": 109, "range": [83, 136], "bits": "0-9", "source": "same README, 'The shape'"},
-  "fp32_A_dearest_fJ": {"value": 1440, "se": 74, "bit": 22, "source": "docs/reports/data/2026-10-27-e67-a-side-bit-prices/README.md, block 1 table, bit 22"},
-  "significand_bits": {"fp32": 24, "fp16": 11, "int8": 8},
-  "width_ratio_to_fp32": {"fp16": 0.4583, "int8": 0.3333},
-  "cycles_per_op": {"fp32": 546.0, "fp16": 546.0, "int8": 318.0, "source": "docs/findings/05-claims.md E36/E39 rows; tools/claims-v3/hpl/surface_hpl.py CYC"},
-  "designed_flips_per_op": {"fp32_b": 4096, "fp32_a": 2048, "fp16_b": 8192, "fp16_a": 4096, "int8_b": 16384, "int8_a": 8192},
-  "ops_per_s_1024_minions_600MHz": {"fp32": 1.1253e9, "fp16": 1.1253e9, "int8": 1.9321e9}
+  "fp32_B_dearest_fJ": {
+   "value": 1008,
+   "se": 21,
+   "bit": 22,
+   "source": "docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/README.md, block A table, bit 22"
+  },
+  "fp32_B_floor_fJ": {
+   "value": 109,
+   "range": [
+    83,
+    136
+   ],
+   "bits": "0-9",
+   "source": "same README, 'The shape'"
+  },
+  "fp32_A_dearest_fJ": {
+   "value": 1440,
+   "se": 74,
+   "bit": 22,
+   "source": "docs/reports/data/2026-10-27-e67-a-side-bit-prices/README.md, block 1 table, bit 22"
+  },
+  "significand_bits": {
+   "fp32": 24,
+   "fp16": 11,
+   "int8": 8
+  },
+  "width_ratio_to_fp32": {
+   "fp16": 0.4583,
+   "int8": 0.3333
+  },
+  "cycles_per_op": {
+   "fp32": 546.0,
+   "fp16": 546.0,
+   "int8": 318.0,
+   "source": "docs/findings/05-claims.md E36/E39 rows; tools/claims-v3/hpl/surface_hpl.py CYC"
+  },
+  "designed_flips_per_op": {
+   "fp32_b": 4096,
+   "fp32_a": 2048,
+   "fp16_b": 8192,
+   "fp16_a": 4096,
+   "int8_b": 16384,
+   "int8_a": 8192
+  },
+  "ops_per_s_1024_minions_600MHz": {
+   "fp32": 1125300000.0,
+   "fp16": 1125300000.0,
+   "int8": 1932100000.0
+  }
  },
  "point_predictions_fJ_per_flipped_bit": {
   "fp16_b_bit9": 462,
@@ -28,28 +69,156 @@
   "note": "fJ x designed flips per op x ops per second. The int8 figure is the largest step this experiment designs; the pass stops at a 78 C reading as every hl pass does."
  },
  "rules": [
-  {"id": "P1a", "leg": "primary", "what": "fp16's B-side mantissa prices rise with position", "test": "Spearman rho(bit, fJ) over fp16 B bits 0-9 >= 0.60"},
-  {"id": "P1b", "leg": "primary", "what": "the fp16 mantissa spans a factor, as fp32's does", "test": "fJ(dearest fp16 B mantissa bit) / fJ(cheapest fp16 B mantissa bit whose price exceeds its own 95% half-width) >= 3.0"},
-  {"id": "P1c", "leg": "primary", "what": "fp16 has no flat floor: its whole 10-bit mantissa is in fp32's rising regime, because fp32's floor ran from the LSB to 13 bits below the significand MSB and fp16's mantissa is only 10 bits deep", "test": "fJ(fp16 B bit 5) > fJ(fp16 B bit 0) with the two 95% intervals disjoint"},
-  {"id": "P1a_A", "leg": "secondary", "what": "the same on the A side", "test": "Spearman rho(bit, fJ) over fp16 A bits 0-9 >= 0.60"},
-  {"id": "P2b", "leg": "primary", "what": "fp16's dearest significand bit costs less than fp32's by roughly the significand-width ratio, B side", "test": "fJ(dearest fp16 B mantissa bit) / fJ(this run's b32_22) in [0.25, 0.80]"},
-  {"id": "P2b_e65", "leg": "secondary", "what": "the same against E65's published fp32 number instead of this run's tie", "test": "fJ(dearest fp16 B mantissa bit) / 1008 in [0.25, 0.80]"},
-  {"id": "P2a", "leg": "primary", "what": "the same on the A side, against E67's published 1440 fJ", "test": "fJ(dearest fp16 A mantissa bit) / 1440 in [0.25, 0.80]"},
-  {"id": "P3a", "leg": "primary", "what": "int8 prices rise toward the high bits", "test": "Spearman rho(bit, fJ) over int8 B bits 0-6 >= 0.60"},
-  {"id": "P3b", "leg": "primary", "what": "int8's sign bit 7 is not cheaper than bit 6", "test": "fJ(int8 B bit 7) >= fJ(int8 B bit 6) - the 95% half-width of the per-pass paired difference"},
-  {"id": "P3a_A", "leg": "secondary", "what": "the same rise on the A side", "test": "Spearman rho(bit, fJ) over int8 A bits 0-6 >= 0.60"},
-  {"id": "P4_fp16", "leg": "primary", "what": "the zeros rung costs at most 0.2x the h0 switching, fp16", "test": "(P(z16) - P(idle)) / (P(h16q) - P(idle)) <= 0.20"},
-  {"id": "P4_int8", "leg": "primary", "what": "the same for int8", "test": "(P(z8) - P(idle)) / (P(h8q) - P(idle)) <= 0.20"},
-  {"id": "P5_fp16_2", "leg": "primary", "what": "two bits flipping together are sub-additive but not far from the sum (E70's saturating law at low Hamming weight)", "test": "dW(b16m2) / [dW(b16_8) + dW(b16_9)] in [0.55, 1.05]"},
-  {"id": "P5_fp16_4", "leg": "primary", "what": "four bits share more", "test": "dW(b16m4) / sum of dW(b16_6..b16_9) in [0.35, 1.00]"},
-  {"id": "P5_fp16_mono", "leg": "primary", "what": "the sharing grows with the Hamming weight", "test": "r4 <= r2 + 0.10 (fp16)"},
-  {"id": "P5_int8_2", "leg": "primary", "what": "the same at two bits, int8", "test": "dW(b8m2) / [dW(b8_5) + dW(b8_6)] in [0.55, 1.05]"},
-  {"id": "P5_int8_4", "leg": "primary", "what": "the same at four bits, int8", "test": "dW(b8m4) / sum of dW(b8_3..b8_6) in [0.35, 1.00]"},
-  {"id": "P5_int8_mono", "leg": "primary", "what": "the same monotonicity, int8", "test": "r4 <= r2 + 0.10 (int8)"},
-  {"id": "P6_fp16", "leg": "primary", "what": "the registered issue order is the one the unit runs: the same flip in the group-parity layout costs the same per bit", "test": "fJ(b16p_9) / fJ(b16_9) in [0.80, 1.25]"},
-  {"id": "P6_int8", "leg": "primary", "what": "the same for int8", "test": "fJ(b8p_6) / fJ(b8_6) in [0.80, 1.25]"},
-  {"id": "P7", "leg": "primary", "what": "the port reproduces E65 on the same card at the one fp32 position it reruns", "test": "fJ(b32_22) in [756, 1260] (1008 fJ +- 25%)"},
-  {"id": "P8", "leg": "primary", "what": "int8's dearest position costs about the 8/24 width ratio of fp32's", "test": "fJ(dearest int8 B position) / fJ(this run's b32_22) in [0.15, 0.60]"}
+  {
+   "id": "P1a",
+   "leg": "primary",
+   "what": "fp16's B-side mantissa prices rise with position",
+   "test": "Spearman rho(bit, fJ) over fp16 B bits 0-9 >= 0.60"
+  },
+  {
+   "id": "P1b",
+   "leg": "primary",
+   "what": "the fp16 mantissa spans a factor, as fp32's does",
+   "test": "fJ(dearest fp16 B mantissa bit) / fJ(cheapest fp16 B mantissa bit whose price exceeds its own 95% half-width) >= 3.0"
+  },
+  {
+   "id": "P1c",
+   "leg": "primary",
+   "what": "fp16 has no flat floor: its whole 10-bit mantissa is in fp32's rising regime, because fp32's floor ran from the LSB to 13 bits below the significand MSB and fp16's mantissa is only 10 bits deep",
+   "test": "fJ(fp16 B bit 5) > fJ(fp16 B bit 0) with the two 95% intervals disjoint"
+  },
+  {
+   "id": "P1a_A",
+   "leg": "secondary",
+   "what": "the same on the A side",
+   "test": "Spearman rho(bit, fJ) over fp16 A bits 0-9 >= 0.60"
+  },
+  {
+   "id": "P2b",
+   "leg": "primary",
+   "what": "fp16's dearest significand bit costs less than fp32's by roughly the significand-width ratio, B side",
+   "test": "fJ(dearest fp16 B mantissa bit) / fJ(this run's b32_22) in [0.25, 0.80]"
+  },
+  {
+   "id": "P2b_e65",
+   "leg": "secondary",
+   "what": "the same against E65's published fp32 number instead of this run's tie",
+   "test": "fJ(dearest fp16 B mantissa bit) / 1008 in [0.25, 0.80]"
+  },
+  {
+   "id": "P2a",
+   "leg": "primary",
+   "what": "the same on the A side, against E67's published 1440 fJ",
+   "test": "fJ(dearest fp16 A mantissa bit) / 1440 in [0.25, 0.80]"
+  },
+  {
+   "id": "P3a",
+   "leg": "primary",
+   "what": "int8 prices rise toward the high bits",
+   "test": "Spearman rho(bit, fJ) over int8 B bits 0-6 >= 0.60"
+  },
+  {
+   "id": "P3b",
+   "leg": "primary",
+   "what": "int8's sign bit 7 is not cheaper than bit 6",
+   "test": "fJ(int8 B bit 7) >= fJ(int8 B bit 6) - the 95% half-width of the per-pass paired difference"
+  },
+  {
+   "id": "P3a_A",
+   "leg": "secondary",
+   "what": "the same rise on the A side",
+   "test": "Spearman rho(bit, fJ) over int8 A bits 0-6 >= 0.60"
+  },
+  {
+   "id": "P4_fp16",
+   "leg": "primary",
+   "what": "the zeros rung costs at most 0.2x the h0 switching, fp16",
+   "test": "(P(z16) - P(idle)) / (P(h16q) - P(idle)) <= 0.20"
+  },
+  {
+   "id": "P4_int8",
+   "leg": "primary",
+   "what": "the same for int8",
+   "test": "(P(z8) - P(idle)) / (P(h8q) - P(idle)) <= 0.20"
+  },
+  {
+   "id": "P5_fp16_2",
+   "leg": "primary",
+   "what": "two bits flipping together are sub-additive but not far from the sum (E70's saturating law at low Hamming weight)",
+   "test": "dW(b16m2) / [dW(b16_8) + dW(b16_9)] in [0.55, 1.05]"
+  },
+  {
+   "id": "P5_fp16_4",
+   "leg": "primary",
+   "what": "four bits share more",
+   "test": "dW(b16m4) / sum of dW(b16_6..b16_9) in [0.35, 1.00]"
+  },
+  {
+   "id": "P5_fp16_mono",
+   "leg": "primary",
+   "what": "the sharing grows with the Hamming weight",
+   "test": "r4 <= r2 + 0.10 (fp16)"
+  },
+  {
+   "id": "P5_int8_2",
+   "leg": "primary",
+   "what": "the same at two bits, int8",
+   "test": "dW(b8m2) / [dW(b8_5) + dW(b8_6)] in [0.55, 1.05]"
+  },
+  {
+   "id": "P5_int8_4",
+   "leg": "primary",
+   "what": "the same at four bits, int8",
+   "test": "dW(b8m4) / sum of dW(b8_3..b8_6) in [0.35, 1.00]"
+  },
+  {
+   "id": "P5_int8_mono",
+   "leg": "primary",
+   "what": "the same monotonicity, int8",
+   "test": "r4 <= r2 + 0.10 (int8)"
+  },
+  {
+   "id": "P6_fp16",
+   "leg": "primary",
+   "what": "the registered issue order is the one the unit runs: the same flip in the group-parity layout costs the same per bit",
+   "test": "fJ(b16p_9) / fJ(b16_9) in [0.80, 1.25]"
+  },
+  {
+   "id": "P6_int8",
+   "leg": "primary",
+   "what": "the same for int8",
+   "test": "fJ(b8p_6) / fJ(b8_6) in [0.80, 1.25]"
+  },
+  {
+   "id": "P7",
+   "leg": "primary",
+   "what": "the port reproduces E65 on the same card at the one fp32 position it reruns",
+   "test": "fJ(b32_22) in [756, 1260] (1008 fJ +- 25%)"
+  },
+  {
+   "id": "P8",
+   "leg": "primary",
+   "what": "int8's dearest position costs about the 8/24 width ratio of fp32's",
+   "test": "fJ(dearest int8 B position) / fJ(this run's b32_22) in [0.15, 0.60]"
+  },
+  {
+   "id": "P3a_kg",
+   "leg": "A4 re-score",
+   "what": "P3a on the layout that does alternate in int8 (amendment A4): int8 prices rise toward the high bits",
+   "test": "Spearman rho(bit, fJ) over int8 B kg bits 0-6 >= 0.60"
+  },
+  {
+   "id": "P3b_kg",
+   "leg": "A4 re-score",
+   "what": "P3b on the kg layout: int8's sign bit 7 is not cheaper than bit 6",
+   "test": "fJ(int8 B kg bit 7) >= fJ(int8 B kg bit 6) - the 95% half-width of the difference"
+  },
+  {
+   "id": "P8_kg",
+   "leg": "A4 re-score",
+   "what": "P8 on the kg layout: int8's dearest position costs about the 8/24 width ratio of fp32's",
+   "test": "fJ(dearest int8 B kg position) / fJ(this run's b32_22) in [0.15, 0.60]"
+  }
  ],
  "resolution_rule": "A rung with fewer than 3 kept passes is reported as unresolved and takes no part in any scored rule. A rule whose inputs are unresolved is reported as not scored, never as passed.",
  "gates": {
@@ -59,6 +228,36 @@
   "cycles_per_op_within": 0.005,
   "pass_set_aside": "more than one failed run in the pass, or |anchor_pi drift| > 0.3 W first to last"
  },
- "card_budget": {"max_card_minutes": 75, "planned_passes": 4, "min_passes": 3,
-                 "stop_rule": "stop after the pass in flight at 70 card-minutes or 19:00 PDT, whichever comes first, and never go below 3 passes"}
+ "card_budget": {
+  "max_card_minutes": 75,
+  "planned_passes": 4,
+  "min_passes": 3,
+  "stop_rule": "stop after the pass in flight at 70 card-minutes or 19:00 PDT, whichever comes first, and never go below 3 passes"
+ },
+ "amendment_A4": {
+  "dated": "2026-10-31 09:58 PDT, after pass 7910 and before block B's data",
+  "why": "int8's jg B ladder measures nothing (0.003 +- 0.02 W) because its 318-cycle micro-op covers all sixteen columns, so no column-half flip enters the stream; and two layouts of the same fp16 flip at the same designed count differ 5.4x, so P6 fails as registered.",
+  "added_items": [
+   "b32p_22",
+   "b32k_22",
+   "b16k_9",
+   "b8k_0..b8k_7"
+  ],
+  "added_quantities": [
+   "order_probe (order-free dW ratios of jg / jgp / kg)",
+   "marginal (dW per extra flipped bit from the 2-bit and 4-bit rungs)"
+  ],
+  "scoring": "P3a, P3b and P8 are scored as registered on the jg list, where they fail because that list measures nothing, and re-scored on the kg list as P3a_kg, P3b_kg, P8_kg, labelled A4 re-score. No registered band moves.",
+  "int8_kg_designed_count_per_flipped_bit": 1024,
+  "block_B": {
+   "passes": [
+    7920,
+    7921,
+    7922,
+    7923
+   ],
+   "gen": "build/hlp-gen2",
+   "byte_identical_files": 62
+  }
+ }
 }

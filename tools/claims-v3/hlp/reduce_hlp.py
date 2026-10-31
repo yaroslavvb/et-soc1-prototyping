@@ -303,7 +303,10 @@ def main():
         # ---- the price lists, per format and side
         C["prices"] = {}
         for fmt, side, fam in (("fp16", "b", "b16"), ("fp16", "a", "a16"), ("int8", "b", "b8"),
-                               ("int8", "a", "a8"), ("fp32", "b", "b32")):
+                               ("int8", "a", "a8"), ("fp32", "b", "b32"),
+                               # amendment A4: the order probe's own lists, each divided by its own count
+                               ("fp16", "b_kg", "b16k"), ("int8", "b_kg", "b8k"), ("fp32", "b_kg", "b32k"),
+                               ("fp16", "b_jgp", "b16p"), ("int8", "b_jgp", "b8p"), ("fp32", "b_jgp", "b32p")):
             lst = {}
             for n_, it in man.items():
                 if it.get("family") != fam or n_ not in items or items[n_].get("e_fJ") is None:
@@ -371,6 +374,60 @@ def main():
                                        "ci95": hw, "n_passes": n,
                                        "dW": items[n_].get("d_p80"), "dW_ci95": items[n_].get("d_p80_ci95"),
                                        "fJ_per_bit": items[n_].get("e_fJ"), "fJ_ci95": items[n_].get("e_fJ_ci95")}
+        # ---- amendment A4: the order probe. For each format, the raw dW of the same single-bit flip in the three
+        # layouts at the probe position. These dW ratios are ORDER-FREE - they divide by no designed count - and
+        # they are what says which index the operand stream actually alternates on.
+        C["order_probe"] = {}
+        for fmt, jg, jgp, kg in (("fp16", "b16_9", "b16p_9", "b16k_9"), ("int8", "b8_6", "b8p_6", "b8k_6"),
+                                 ("fp32", "b32_22", "b32p_22", "b32k_22")):
+            ent = {}
+            for lbl, nm in (("jg", jg), ("jgp", jgp), ("kg", kg)):
+                if nm not in items:
+                    continue
+                e = items[nm]
+                ent[lbl] = {"item": nm, "dW": e.get("d_p80"), "dW_ci95": e.get("d_p80_ci95"),
+                            "n_passes": e.get("d_p80_n"), "designed_bits_per_op": e["designed_bits_per_op"],
+                            "fJ": e.get("e_fJ"), "fJ_ci95": e.get("e_fJ_ci95")}
+            for lbl in ("jgp", "kg"):
+                if lbl in ent and "jg" in ent:
+                    rr = []
+                    for pp in passes:
+                        a_, b_ = ent[lbl]["item"], ent["jg"]["item"]
+                        za, zb = man[a_]["zero"], man[b_]["zero"]
+                        if all(x in per[pp] for x in (a_, b_, za, zb)):
+                            d0 = per[pp][b_]["p80"] - per[pp][zb]["p80"]
+                            if abs(d0) > 0.05:
+                                rr.append((per[pp][a_]["p80"] - per[pp][za]["p80"]) / d0)
+                    m_, se, n, hw = mean_ci(rr)
+                    ent[f"dW_{lbl}_over_jg"] = m_
+                    ent[f"dW_{lbl}_over_jg_ci95"] = hw
+                    ent[f"dW_{lbl}_over_jg_n"] = n
+            C["order_probe"][fmt] = ent
+        # ---- amendment A4: the MARGINAL price of a flipped bit, from the multi-bit rungs. A single-bit rung
+        # against a constant-operand zero measures T + e.n.rate (E67's A13): with the response as saturated as it
+        # is here, most of that step is the turn-on T. The marginal price is the slope between the 2-bit and the
+        # 4-bit rung, which carries no T at all.
+        C["marginal"] = {}
+        for fmt, n2, n4 in (("fp16", "b16m2", "b16m4"), ("int8", "b8m2", "b8m4")):
+            if n2 not in man or n4 not in man:
+                continue
+            per_bit = man[n2]["flips"]["b_all"] // len(man[n2]["bits"])
+            ev, dv = [], []
+            for pp in passes:
+                z = man[n2]["zero"]
+                if not all(x in per[pp] for x in (n2, n4, z)):
+                    continue
+                d2 = per[pp][n2]["p80"] - per[pp][z]["p80"]
+                d4 = per[pp][n4]["p80"] - per[pp][z]["p80"]
+                nb = len(man[n4]["bits"]) - len(man[n2]["bits"])
+                dv.append((d4 - d2) / nb)
+                if per[pp][n4]["rate"]:
+                    ev.append((d4 - d2) / (nb * per_bit * per[pp][n4]["rate"]))
+            m_, se, n, hw = mean_ci(ev)
+            dm, dse, dn, dhw = mean_ci(dv)
+            C["marginal"][fmt] = {"from": [n2, n4], "per_bit_count": per_bit, "dW_per_extra_bit": dm,
+                                  "dW_ci95": dhw, "n_passes": n, "fJ": None if m_ is None else m_ * 1e15,
+                                  "fJ_ci95": None if hw is None else hw * 1e15}
         # ---- the layout control: the same position in the group-parity layout
         C["layout_control"] = {}
         for n_, it in man.items():
@@ -418,6 +475,15 @@ def main():
             lines.append("  additivity: " + ", ".join(
                 f"{n}({x['n_bits']}b) {x['ratio']:.3f}+-{(x['ci95'] or 0):.3f}" for n, x in C["additivity"].items()
                 if x["ratio"] is not None))
+        for fmt, e in C.get("order_probe", {}).items():
+            lines.append(f"  order probe {fmt}: " + ", ".join(
+                f"{k} dW {e[k]['dW']:.3f} ({e[k]['designed_bits_per_op']} bits, {(e[k]['fJ'] or 0):.0f} fJ)"
+                for k in ("jg", "jgp", "kg") if k in e and e[k]["dW"] is not None)
+                + "  ratios jgp/jg " + f"{e.get('dW_jgp_over_jg')}" + ", kg/jg " + f"{e.get('dW_kg_over_jg')}")
+        for fmt, e in C.get("marginal", {}).items():
+            lines.append(f"  marginal {fmt}: {('%.1f' % e['fJ']) if e['fJ'] is not None else '-'} fJ per extra "
+                         f"flipped bit ({('%.3f' % e['dW_per_extra_bit']) if e['dW_per_extra_bit'] is not None else '-'} W), "
+                         f"{e['n_passes']} passes")
         if C["layout_control"]:
             lines.append("  layout control: " + ", ".join(
                 f"{n} {x['ratio']:.3f}+-{(x['ci95'] or 0):.3f}" for n, x in C["layout_control"].items()

@@ -93,6 +93,9 @@ FIELD = {  # which field a bit position belongs to, for the tables
 }
 MULTI = {"fp16": {2: [8, 9], 4: [6, 7, 8, 9]}, "int8": {2: [5, 6], 4: [3, 4, 5, 6]}}
 CONTROL_BIT = {"fp16": 9, "int8": 6}
+# amendment A4: the `kg` (line-group parity) layout - one position for fp32 and fp16 as an order probe,
+# every position for int8, whose B side has no other layout that alternates at all.
+KG_BITS = {"fp32": [22], "fp16": [9], "int8": list(range(8))}
 
 
 def popcount(x):
@@ -177,7 +180,10 @@ def b_tiles(fmt, base_el, mask, layout="jg"):
     layout "jg"  (E65's): the upper column half carries the flip.
     layout "jgp" (the control): the flipping half is XORed with the line-group parity, so the per-lane operand
                  alternates under either nesting of (half, group) — and each lane still sees exactly the same two
-                 words one bit apart, so the designed count is unchanged."""
+                 words one bit apart, so the designed count is unchanged.
+    layout "kg"  (amendment A4): the flip is carried by the line-group parity ALONE, the same in every column, so
+                 the operand alternates with the K index and not with the column half. It is the only layout of
+                 the three that alternates at all in int8, whose micro-op covers all sixteen columns at once."""
     f = FMT[fmt]
     K, E = f["K"], f["E"]
     A = [[f["one"]] * K for _ in range(N)]
@@ -186,7 +192,7 @@ def b_tiles(fmt, base_el, mask, layout="jg"):
         g = k // E
         for j in range(N):
             hi = 1 if j >= 8 else 0
-            flip = hi ^ (g & 1) if layout == "jgp" else hi
+            flip = {"jg": hi, "jgp": hi ^ (g & 1), "kg": g & 1}[layout]
             B[k][j] = base_el[j % 8] ^ (mask if flip else 0)
     return A, B
 
@@ -237,6 +243,22 @@ def read_tiles(path, fmt):
                 off = 1024 + p * 64 + (j * E + e) * size
                 B[p * E + e][j] = int.from_bytes(raw[off:off + size], "little")
     return A, B
+
+
+# ------------------------------------------------------------------ amendment A4: int8's own micro-op structure
+def kg_count_int8(nbits):
+    """int8 takes **318** cycles per 16x16x64 multiply-add against fp32's and fp16's 546, which is 256 micro-ops
+    (16 line groups x 16 A rows), not 512: one micro-op covers all sixteen C columns, each lane reading the eight
+    contiguous bytes of columns 2l and 2l+1 at K-terms 4p..4p+3 (8 lanes x 2 columns x 4 K-terms = 64 MACs a
+    micro-op, 256 x 64 = 16,384 = 16x16x64). Pass 7910 measured exactly that: the `jg` layout, whose flip sits on
+    the column-half boundary, costs 0.003 +- 0.02 W in int8 while the identical construction costs 4.7 W in fp16
+    and 5.0 W in fp32 - under this structure a lane's two columns never change, so nothing alternates and the only
+    difference left is static operand content. In the `kg` layout B changes at each of the 16 line-group
+    transitions and a changed read carries 8 int8 elements:
+        16 transitions x 8 lanes x 8 elements = 1,024 changed element reads per multiply-add, per flipped bit.
+    The generic `streams(ew=E)` model's count is kept beside it in `flips_generic` so the number can be re-divided
+    if the structure is ever shown to be different."""
+    return 1024 * nbits
 
 
 # --------------------------------------------------------------------------------------------- the item list
@@ -310,6 +332,24 @@ def build(out):
                 A, B = b_tiles(fmt, bb, m)
                 add(f"b{tag}m{h}", fmt, f"b{tag}m", A, B, f"h{tag}q", side="b", bits=bits, mask=hex(m),
                     base=[hex(w) for w in bb])
+        # ---- amendment A4 (31 Oct 2026, after pass 7910 and before block B's data): the order probe. The `kg`
+        # layout carries the flip on the line-group parity alone, in every column; `b32p_22` adds the jgp control
+        # to fp32, where E65's published 1,008 fJ at this position is the independent anchor. These are the items
+        # that say which index the stream really alternates on, per format.
+        if fmt == "fp32":
+            A, B = b_tiles(fmt, bb, 1 << 22, layout="jgp")
+            add("b32p_22", fmt, "b32p", A, B, "h32q", side="b", bit=22, field=FIELD[fmt](22), layout="jgp",
+                base=[hex(w) for w in bb])
+        for j in KG_BITS.get(fmt, []):
+            bv = bb
+            assert all(is_normal(w, fmt) and is_normal(w ^ (1 << j), fmt) for w in bv), (fmt, j)
+            A, B = b_tiles(fmt, bv, 1 << j, layout="kg")
+            it = add(f"b{tag}k_{j}", fmt, f"b{tag}k", A, B, f"h{tag}q", side="b", bit=j, field=FIELD[fmt](j),
+                     layout="kg", base=[hex(w) for w in bv])
+            if fmt == "int8":
+                it["flips_generic"] = it["flips"]
+                it["flips"] = dict(it["flips"], b_all=kg_count_int8(1))
+                it["structure"] = "318-cycle: 256 micro-ops, lane l reads columns 2l and 2l+1, 8 bytes a read"
         # ---- A side (fp16 and int8 only; E67 already has fp32's)
         if fmt == "fp32":
             continue
@@ -344,12 +384,22 @@ def check(out, items):
         fmt = it["type"]
         A, B = read_tiles(f"{out}/tiles/{it['name']}.bin", fmt)
         got = count_flips(A, B, fmt)
-        assert got == it["flips"], (it["name"], got, it["flips"])
+        # the int8 kg items carry the closed-form count the 318-cycle structure implies (amendment A4) and keep
+        # the generic model's count in flips_generic; every other item's count is the generic model's.
+        assert got == it.get("flips_generic", it["flips"]), (it["name"], got, it["flips"])
         side = it["side"]
         nb = len(it["bits"]) if "bits" in it else (1 if "bit" in it else 0)
         want = DESIGNED[(fmt, side)] * nb
         other = "a" if side == "b" else "b"
         assert got[f"{other}_all"] == 0, (it["name"], "the quiet side flips", got)
+        if it["family"].endswith("k"):
+            # amendment A4: the kg layout alternates on the line-group parity, so its count is 1/32 (fp32),
+            # 1/32 (fp16) of the jg layout's under the registered order, and for int8 it is the closed form
+            # kg_count_int8() the 318-cycle structure implies. Each item is divided by its own count.
+            want_kg = {"fp32": 128, "fp16": 256, "int8": 1024}[fmt]
+            assert got[f"{side}_all"] == ({"fp32": 128, "fp16": 256, "int8": 512}[fmt]), (it["name"], got[f"{side}_all"])
+            assert it["flips"][f"{side}_all"] == want_kg, (it["name"], it["flips"][f"{side}_all"], want_kg)
+            continue
         if it["family"].endswith("p"):
             # the layout control: by construction the group-parity term cancels at every group boundary, so its
             # own count is 16/512 below the ideal and depends on the read grouping. The reduction divides by this
