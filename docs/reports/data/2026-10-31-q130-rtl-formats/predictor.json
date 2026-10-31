@@ -1,0 +1,663 @@
+{
+ "_what": "frozen prediction of E78's fp32/fp16/int8 switching watts per kind, from the RTL",
+ "_model": "W_switching(600 MHz, 1024 minions) = W0 + g*live_slot_cycles_per_s + k*nets_hier_per_s",
+ "_calibration": {
+  "fitted_on": "fp32 zeros, ones, randn only (E64 figures.json fit.c; aifoundry2, 600 MHz term)",
+  "fit_is_exact": "3 anchors, 3 parameters: the fp32 anchors are reproduced by construction",
+  "W0_w": 1.4402902659181422,
+  "g_w_per_live_slot_cycle_per_s": 1.893906602720133e-12,
+  "k_w_per_net_toggle_per_s": 2.4863838672194768e-15,
+  "k_fJ_per_toggled_net": 2.4863838672194767,
+  "hier_factor": 5.3271115221865095,
+  "hier_factor_source": "docs/reports/data/2026-10-26-toggle-recount/hier-factors.json `_total`",
+  "departures": [
+   "E64 ran on aifoundry2, not aifoundry3: these are the only committed fp32 zeros/ones/randn switching-watt anchors. E78 must REFIT W0, g and k on its own aifoundry3 anchors before quoting absolute watts; the per-kind ratios do not move.",
+   "the 5.3271 hierarchy factor was measured on fp32 randn and is reused for fp16 and TIMA",
+   "1024 minions and 600 MHz assumed, as E78 registers"
+  ]
+ },
+ "_inputs": {
+  "cycles_per_op": {
+   "fp32": 546,
+   "fp16": 546,
+   "int8": 318
+  },
+  "macs_per_op": {
+   "fp32": 4096,
+   "fp16": 8192,
+   "int8": 16384
+  },
+  "column_slots": {
+   "fp32": 8,
+   "fp16": 8,
+   "int8": 16
+  },
+  "f_hz": 600000000.0,
+  "minions": 1024
+ },
+ "predictions": {
+  "fp16.a_randn_b_zeros": {
+   "switching_W_600MHz_1024minions": 1.486,
+   "pJ_per_MAC": 0.1612,
+   "nets_hier_per_op": 16270.4,
+   "toggles_per_MAC": 1.99,
+   "live_slot_cycles_per_op": 0.0,
+   "gated_slot_frac": 1.0,
+   "bus_ab_per_op": 28096.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.a_zeros_b_randn": {
+   "switching_W_600MHz_1024minions": 1.53,
+   "pJ_per_MAC": 0.166,
+   "nets_hier_per_op": 32020.0,
+   "toggles_per_MAC": 3.91,
+   "live_slot_cycles_per_op": 0.0,
+   "gated_slot_frac": 1.0,
+   "bus_ab_per_op": 55806.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.fp8grid": {
+   "switching_W_600MHz_1024minions": 16.299,
+   "pJ_per_MAC": 1.7681,
+   "nets_hier_per_op": 2190736.1,
+   "toggles_per_MAC": 267.42,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 42486.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.neg_ones": {
+   "switching_W_600MHz_1024minions": 10.2,
+   "pJ_per_MAC": 1.1065,
+   "nets_hier_per_op": 10775.1,
+   "toggles_per_MAC": 1.32,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 0.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.nn_like": {
+   "switching_W_600MHz_1024minions": 17.04,
+   "pJ_per_MAC": 1.8485,
+   "nets_hier_per_op": 3064839.9,
+   "toggles_per_MAC": 374.13,
+   "live_slot_cycles_per_op": 3296.0,
+   "gated_slot_frac": 0.1953,
+   "bus_ab_per_op": 84348.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.ones": {
+   "switching_W_600MHz_1024minions": 10.2,
+   "pJ_per_MAC": 1.1065,
+   "nets_hier_per_op": 10775.1,
+   "toggles_per_MAC": 1.32,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 0.0,
+   "is_anchor": false,
+   "is_held_out": true
+  },
+  "fp16.pair_half_zero": {
+   "switching_W_600MHz_1024minions": 19.272,
+   "pJ_per_MAC": 2.0907,
+   "nets_hier_per_op": 3253530.5,
+   "toggles_per_MAC": 397.16,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 72796.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.randn": {
+   "switching_W_600MHz_1024minions": 21.852,
+   "pJ_per_MAC": 2.3705,
+   "nets_hier_per_op": 4175599.4,
+   "toggles_per_MAC": 509.72,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 84416.0,
+   "is_anchor": false,
+   "is_held_out": true
+  },
+  "fp16.randn_small": {
+   "switching_W_600MHz_1024minions": 21.628,
+   "pJ_per_MAC": 2.3462,
+   "nets_hier_per_op": 4095259.8,
+   "toggles_per_MAC": 499.91,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 91126.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.randn_sorted": {
+   "switching_W_600MHz_1024minions": 20.833,
+   "pJ_per_MAC": 2.2599,
+   "nets_hier_per_op": 3811137.5,
+   "toggles_per_MAC": 465.23,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 61846.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.smallint": {
+   "switching_W_600MHz_1024minions": 14.638,
+   "pJ_per_MAC": 1.5879,
+   "nets_hier_per_op": 1609117.1,
+   "toggles_per_MAC": 196.43,
+   "live_slot_cycles_per_op": 4080.0,
+   "gated_slot_frac": 0.0039,
+   "bus_ab_per_op": 35980.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.sparse50": {
+   "switching_W_600MHz_1024minions": 12.75,
+   "pJ_per_MAC": 1.3832,
+   "nets_hier_per_op": 2215078.2,
+   "toggles_per_MAC": 270.4,
+   "live_slot_cycles_per_op": 2399.0,
+   "gated_slot_frac": 0.4143,
+   "bus_ab_per_op": 71590.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.sparse90": {
+   "switching_W_600MHz_1024minions": 2.138,
+   "pJ_per_MAC": 0.2319,
+   "nets_hier_per_op": 127393.8,
+   "toggles_per_MAC": 15.55,
+   "live_slot_cycles_per_op": 160.0,
+   "gated_slot_frac": 0.9609,
+   "bus_ab_per_op": 18412.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.uniform01": {
+   "switching_W_600MHz_1024minions": 20.196,
+   "pJ_per_MAC": 2.1909,
+   "nets_hier_per_op": 3583759.4,
+   "toggles_per_MAC": 437.47,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 77948.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.wsparse50": {
+   "switching_W_600MHz_1024minions": 6.407,
+   "pJ_per_MAC": 0.695,
+   "nets_hier_per_op": 1026427.9,
+   "toggles_per_MAC": 125.3,
+   "live_slot_cycles_per_op": 983.0,
+   "gated_slot_frac": 0.76,
+   "bus_ab_per_op": 73444.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.wsparse90": {
+   "switching_W_600MHz_1024minions": 1.665,
+   "pJ_per_MAC": 0.1806,
+   "nets_hier_per_op": 49807.6,
+   "toggles_per_MAC": 6.08,
+   "live_slot_cycles_per_op": 40.0,
+   "gated_slot_frac": 0.9902,
+   "bus_ab_per_op": 18192.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp16.zeros": {
+   "switching_W_600MHz_1024minions": 1.44,
+   "pJ_per_MAC": 0.1562,
+   "nets_hier_per_op": 15.4,
+   "toggles_per_MAC": 0.0,
+   "live_slot_cycles_per_op": 0.0,
+   "gated_slot_frac": 1.0,
+   "bus_ab_per_op": 0.0,
+   "is_anchor": false,
+   "is_held_out": true
+  },
+  "fp32.a_randn_b_zeros": {
+   "switching_W_600MHz_1024minions": 1.486,
+   "pJ_per_MAC": 0.3224,
+   "nets_hier_per_op": 16314.3,
+   "toggles_per_MAC": 3.98,
+   "live_slot_cycles_per_op": 0.0,
+   "gated_slot_frac": 1.0,
+   "bus_ab_per_op": 27920.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.a_zeros_b_randn": {
+   "switching_W_600MHz_1024minions": 1.531,
+   "pJ_per_MAC": 0.3323,
+   "nets_hier_per_op": 32591.9,
+   "toggles_per_MAC": 7.96,
+   "live_slot_cycles_per_op": 0.0,
+   "gated_slot_frac": 1.0,
+   "bus_ab_per_op": 55798.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.bf16trunc": {
+   "switching_W_600MHz_1024minions": 16.456,
+   "pJ_per_MAC": 3.5703,
+   "nets_hier_per_op": 2246884.9,
+   "toggles_per_MAC": 548.56,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 34980.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.fp16grid": {
+   "switching_W_600MHz_1024minions": 18.766,
+   "pJ_per_MAC": 4.0714,
+   "nets_hier_per_op": 3072342.6,
+   "toggles_per_MAC": 750.08,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 43136.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.neg_ones": {
+   "switching_W_600MHz_1024minions": 10.172,
+   "pJ_per_MAC": 2.2069,
+   "nets_hier_per_op": 878.1,
+   "toggles_per_MAC": 0.21,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 0.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.nn_like": {
+   "switching_W_600MHz_1024minions": 13.818,
+   "pJ_per_MAC": 2.9979,
+   "nets_hier_per_op": 2888225.1,
+   "toggles_per_MAC": 705.13,
+   "live_slot_cycles_per_op": 2016.0,
+   "gated_slot_frac": 0.5078,
+   "bus_ab_per_op": 80426.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.ones": {
+   "switching_W_600MHz_1024minions": 10.172,
+   "pJ_per_MAC": 2.2069,
+   "nets_hier_per_op": 878.1,
+   "toggles_per_MAC": 0.21,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 0.0,
+   "is_anchor": true,
+   "is_held_out": false
+  },
+  "fp32.pi": {
+   "switching_W_600MHz_1024minions": 10.173,
+   "pJ_per_MAC": 2.2072,
+   "nets_hier_per_op": 1332.1,
+   "toggles_per_MAC": 0.33,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 0.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.pow2": {
+   "switching_W_600MHz_1024minions": 11.251,
+   "pJ_per_MAC": 2.4411,
+   "nets_hier_per_op": 386694.5,
+   "toggles_per_MAC": 94.41,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 25414.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.randn": {
+   "switching_W_600MHz_1024minions": 25.638,
+   "pJ_per_MAC": 5.5624,
+   "nets_hier_per_op": 5528664.7,
+   "toggles_per_MAC": 1349.77,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 82214.0,
+   "is_anchor": true,
+   "is_held_out": false
+  },
+  "fp32.randn_large": {
+   "switching_W_600MHz_1024minions": 25.372,
+   "pJ_per_MAC": 5.5047,
+   "nets_hier_per_op": 5433506.1,
+   "toggles_per_MAC": 1326.54,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 84896.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.randn_small": {
+   "switching_W_600MHz_1024minions": 25.36,
+   "pJ_per_MAC": 5.5021,
+   "nets_hier_per_op": 5429278.6,
+   "toggles_per_MAC": 1325.51,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 82244.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.randn_sorted": {
+   "switching_W_600MHz_1024minions": 24.266,
+   "pJ_per_MAC": 5.2648,
+   "nets_hier_per_op": 5038312.2,
+   "toggles_per_MAC": 1230.06,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 60856.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.smallint": {
+   "switching_W_600MHz_1024minions": 12.178,
+   "pJ_per_MAC": 2.6421,
+   "nets_hier_per_op": 1084981.5,
+   "toggles_per_MAC": 264.89,
+   "live_slot_cycles_per_op": 3614.0,
+   "gated_slot_frac": 0.1177,
+   "bus_ab_per_op": 19806.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.sparse50": {
+   "switching_W_600MHz_1024minions": 7.07,
+   "pJ_per_MAC": 1.534,
+   "nets_hier_per_op": 1307710.7,
+   "toggles_per_MAC": 319.27,
+   "live_slot_cycles_per_op": 925.0,
+   "gated_slot_frac": 0.7742,
+   "bus_ab_per_op": 74550.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.sparse90": {
+   "switching_W_600MHz_1024minions": 1.678,
+   "pJ_per_MAC": 0.3641,
+   "nets_hier_per_op": 59050.7,
+   "toggles_per_MAC": 14.42,
+   "live_slot_cycles_per_op": 34.0,
+   "gated_slot_frac": 0.9917,
+   "bus_ab_per_op": 17780.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.uniform01": {
+   "switching_W_600MHz_1024minions": 24.019,
+   "pJ_per_MAC": 5.2112,
+   "nets_hier_per_op": 4949962.8,
+   "toggles_per_MAC": 1208.49,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 77842.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "fp32.zeros": {
+   "switching_W_600MHz_1024minions": 1.44,
+   "pJ_per_MAC": 0.3125,
+   "nets_hier_per_op": 15.4,
+   "toggles_per_MAC": 0.0,
+   "live_slot_cycles_per_op": 0.0,
+   "gated_slot_frac": 1.0,
+   "bus_ab_per_op": 0.0,
+   "is_anchor": true,
+   "is_held_out": false
+  },
+  "int8.a_full_b_zeros": {
+   "switching_W_600MHz_1024minions": 1.507,
+   "pJ_per_MAC": 0.0476,
+   "nets_hier_per_op": 13800.3,
+   "toggles_per_MAC": 0.84,
+   "live_slot_cycles_per_op": 0.0,
+   "gated_slot_frac": 1.0,
+   "bus_ab_per_op": 65248.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.a_zeros_b_full": {
+   "switching_W_600MHz_1024minions": 1.445,
+   "pJ_per_MAC": 0.0456,
+   "nets_hier_per_op": 876.6,
+   "toggles_per_MAC": 0.05,
+   "live_slot_cycles_per_op": 0.0,
+   "gated_slot_frac": 1.0,
+   "bus_ab_per_op": 4140.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.full": {
+   "switching_W_600MHz_1024minions": 17.458,
+   "pJ_per_MAC": 0.5515,
+   "nets_hier_per_op": 214345.7,
+   "toggles_per_MAC": 13.08,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 69312.0,
+   "is_anchor": false,
+   "is_held_out": true
+  },
+  "int8.gauss_q": {
+   "switching_W_600MHz_1024minions": 17.448,
+   "pJ_per_MAC": 0.5512,
+   "nets_hier_per_op": 212376.6,
+   "toggles_per_MAC": 12.96,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 69544.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.highbit": {
+   "switching_W_600MHz_1024minions": 16.863,
+   "pJ_per_MAC": 0.5327,
+   "nets_hier_per_op": 90403.6,
+   "toggles_per_MAC": 5.52,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 8664.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.neg_ones": {
+   "switching_W_600MHz_1024minions": 16.443,
+   "pJ_per_MAC": 0.5194,
+   "nets_hier_per_op": 3038.8,
+   "toggles_per_MAC": 0.19,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 0.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.ones": {
+   "switching_W_600MHz_1024minions": 16.443,
+   "pJ_per_MAC": 0.5194,
+   "nets_hier_per_op": 3038.8,
+   "toggles_per_MAC": 0.19,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 0.0,
+   "is_anchor": false,
+   "is_held_out": true
+  },
+  "int8.pos": {
+   "switching_W_600MHz_1024minions": 17.128,
+   "pJ_per_MAC": 0.5411,
+   "nets_hier_per_op": 145589.2,
+   "toggles_per_MAC": 8.89,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 61096.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.smallint": {
+   "switching_W_600MHz_1024minions": 17.398,
+   "pJ_per_MAC": 0.5496,
+   "nets_hier_per_op": 201857.4,
+   "toggles_per_MAC": 12.32,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 70526.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.sorted": {
+   "switching_W_600MHz_1024minions": 17.369,
+   "pJ_per_MAC": 0.5487,
+   "nets_hier_per_op": 195911.1,
+   "toggles_per_MAC": 11.96,
+   "live_slot_cycles_per_op": 4096.0,
+   "gated_slot_frac": 0.0,
+   "bus_ab_per_op": 53346.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.sparse50": {
+   "switching_W_600MHz_1024minions": 16.233,
+   "pJ_per_MAC": 0.5128,
+   "nets_hier_per_op": 178815.9,
+   "toggles_per_MAC": 10.91,
+   "live_slot_cycles_per_op": 3808.0,
+   "gated_slot_frac": 0.0703,
+   "bus_ab_per_op": 53480.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.sparse90": {
+   "switching_W_600MHz_1024minions": 4.374,
+   "pJ_per_MAC": 0.1382,
+   "nets_hier_per_op": 54688.2,
+   "toggles_per_MAC": 3.34,
+   "live_slot_cycles_per_op": 730.0,
+   "gated_slot_frac": 0.8218,
+   "bus_ab_per_op": 12144.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.ternary": {
+   "switching_W_600MHz_1024minions": 17.14,
+   "pJ_per_MAC": 0.5415,
+   "nets_hier_per_op": 172620.3,
+   "toggles_per_MAC": 10.54,
+   "live_slot_cycles_per_op": 4064.0,
+   "gated_slot_frac": 0.0078,
+   "bus_ab_per_op": 58798.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.wsparse50": {
+   "switching_W_600MHz_1024minions": 7.302,
+   "pJ_per_MAC": 0.2307,
+   "nets_hier_per_op": 108130.0,
+   "toggles_per_MAC": 6.6,
+   "live_slot_cycles_per_op": 1460.0,
+   "gated_slot_frac": 0.6436,
+   "bus_ab_per_op": 48766.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.wsparse90": {
+   "switching_W_600MHz_1024minions": 1.869,
+   "pJ_per_MAC": 0.059,
+   "nets_hier_per_op": 26786.8,
+   "toggles_per_MAC": 1.63,
+   "live_slot_cycles_per_op": 82.0,
+   "gated_slot_frac": 0.98,
+   "bus_ab_per_op": 16316.0,
+   "is_anchor": false,
+   "is_held_out": false
+  },
+  "int8.zeros": {
+   "switching_W_600MHz_1024minions": 1.44,
+   "pJ_per_MAC": 0.0455,
+   "nets_hier_per_op": 2.3,
+   "toggles_per_MAC": 0.0,
+   "live_slot_cycles_per_op": 0.0,
+   "gated_slot_frac": 1.0,
+   "bus_ab_per_op": 0.0,
+   "is_anchor": false,
+   "is_held_out": true
+  }
+ },
+ "held_out_scoring": {
+  "fp16.zeros": {
+   "measured_W": 1.394,
+   "predicted_W": 1.44,
+   "err_W": 0.046,
+   "ratio": 1.033
+  },
+  "fp16.ones": {
+   "measured_W": 9.702,
+   "predicted_W": 10.2,
+   "err_W": 0.498,
+   "ratio": 1.051
+  },
+  "fp16.randn": {
+   "measured_W": 23.284,
+   "predicted_W": 21.852,
+   "err_W": -1.432,
+   "ratio": 0.939
+  },
+  "int8.zeros": {
+   "measured_W": 2.123,
+   "predicted_W": 1.44,
+   "err_W": -0.683,
+   "ratio": 0.678
+  },
+  "int8.ones": {
+   "measured_W": 2.684,
+   "predicted_W": 16.443,
+   "err_W": 13.759,
+   "ratio": 6.126
+  },
+  "int8.full": {
+   "measured_W": 9.101,
+   "predicted_W": 17.458,
+   "err_W": 8.357,
+   "ratio": 1.918
+  },
+  "_rms_W": 6.607,
+  "_worst_ratio": 6.126
+ },
+ "per_format_g_from_held_out": {
+  "_what": "g_fmt = (W(ones) - W(zeros)) / live_slot_cycles_per_s(ones); NOT FROZEN, uses held-out cells",
+  "_why": "a TIMA column slot is four 9x9 int8 multipliers; a txfma lane is one 24x24 fp32 multiply-add. The frozen fp32-only fit charges them the same and so overpredicts int8.",
+  "fp32": {
+   "W_zeros": 1.4403333333333332,
+   "W_ones": 10.171999999999999,
+   "g_w_per_live_slot_cycle_per_s": 1.89443031946818e-12,
+   "ratio_to_fp32_g": 1.0002765272306962
+  },
+  "fp16": {
+   "W_zeros": 1.394,
+   "W_ones": 9.702,
+   "g_w_per_live_slot_cycle_per_s": 1.802511215209961e-12,
+   "ratio_to_fp32_g": 0.9517423998739406
+  },
+  "int8": {
+   "W_zeros": 2.123,
+   "W_ones": 2.684,
+   "g_w_per_live_slot_cycle_per_s": 7.088899612426757e-14,
+   "ratio_to_fp32_g": 0.037430038008449254
+  }
+ }
+}
