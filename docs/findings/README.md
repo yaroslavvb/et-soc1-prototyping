@@ -241,6 +241,25 @@ Read [Terms](#terms) first.
    [14-card-behaviour.md](14-card-behaviour.md), "The governor's two knobs";
    [`reports/data/2026-10-28-q129-waterfall/`](../reports/data/2026-10-28-q129-waterfall/README.md)
 
+28. **The kind of number sets a matmul's power and heat at a fixed clock, and its speed only through the governor**
+   (Q130, 31 October, six card experiments on aifoundry3, aifoundry2 and aifoundry1's card 1 plus desk work). All 51
+   kinds of numbers in three formats — zeros, constants, random at three scales, sparse by element and by word, small
+   integers, truncated mantissas, powers of two, sign patterns, sorted streams, weight-like distributions — were
+   measured at a pinned 600 MHz: random data costs **5.816 / 2.625 / 0.306 pJ per multiply-add over idle** in fp32 /
+   fp16 / int8, every kind runs at the same cycles per op, and a second card ranks the kinds the same way (Spearman
+   0.995–1.000) at about one card scale. One operand all zero costs 2.5–3.5% of random in the floats, a constant about
+   a third, a bf16-truncated mantissa 73%, and magnitude nothing; and because the zero gate tests a whole 32-bit word,
+   **a zero is worth most in fp32 and least in int8** (half the elements zero: 0.30× / 0.60× / 0.77× of random power).
+   Under aifoundry2's own governor the same kinds set the speed through their power: on a cool die only the power test
+   acts (random fp32 712 MHz against 800 for sparse or small-integer data), in sustained work only the thermal test
+   (604 against 800 MHz), int8 barely throttles, and one power-to-clock relation gives 33 kinds' clocks from their
+   measured power to 7.5–7.9 MHz rms. 🛑 Both frozen explanation models failed parts of their scoring and are reported
+   as failing; heat is measured only above about 12 W of switching, because the die reads whole degrees; and the RTL
+   toggle counts are provisional, because neither bench computes a·b+c on a multiply-add. → [03-experiments.md](03-experiments.md),
+   E78–E85; [05-claims.md](05-claims.md), "Q130";
+   [`reports/data/2026-10-31-e78-kinds-energy-matrix/`](../reports/data/2026-10-31-e78-kinds-energy-matrix/README.md),
+   [`2026-10-31-e80-kinds-speed/`](../reports/data/2026-10-31-e80-kinds-speed/README.md)
+
 ## Terms
 
 The chip in brief. The ET-SoC-1 is Esperanto's RISC-V accelerator, now open-sourced by AI Foundry. Its compute
@@ -296,8 +315,8 @@ Four kinds of thing have IDs, and every claim cites them:
 | Prefix | Meaning | File |
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
-| **Q1–Q129** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E76** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation on 28–29 September; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3 (E55–E57 also on aifoundry2 as a third card); E59 the sparse parity solver on aifoundry3, 29 September, an engineering benchmark; E60–E64 the October campaign — the bit-flip ladder, the deterministic transistor flips, the heat movies, the camera half of the ladder and Horace's power limit; E65 every bit position, the flow-M case and the hart ladder, 26 October) | [03-experiments.md](03-experiments.md) |
+| **Q1–Q130** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E85** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation on 28–29 September; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3 (E55–E57 also on aifoundry2 as a third card); E59 the sparse parity solver on aifoundry3, 29 September, an engineering benchmark; E60–E64 the October campaign — the bit-flip ladder, the deterministic transistor flips, the heat movies, the camera half of the ladder and Horace's power limit; E65 every bit position, the flow-M case and the hart ladder, 26 October; E66–E76 the rest of the October campaign (Q128–Q129: aifoundry2's idle slope, the A side, the stage map, the governor moved, the saturation ladder, aifoundry3's idle slope, 600 MHz, the camera's heat path, the register file, the memory path, the trapping instructions); E77 reserved for the rail at one temperature, not registered; E78–E85 Q130's, 31 October — the kinds energy matrix, the fp16 and int8 bit prices and the DRAM pattern on aifoundry3, the kinds' speed under aifoundry2's own governor (E80, E83), the matrix on aifoundry1's card 1 (E82), and a speed replicate on aifoundry1's card 0 (E84) and the camera per kind (E85), in progress when recorded) | [03-experiments.md](03-experiments.md) |
 | **A1–A24** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused; A20 the session timeline; A21 the sparse parity page; A22 the heatsink study; A23 the transistor-heat timeline) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":

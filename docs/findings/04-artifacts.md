@@ -2,9 +2,9 @@
 
 Three kinds of artifact came out of this work: **published reports** (HTML, deployed to spacesheep.dev),
 **repostable images**, and **tools** that can be re-run. Commits are listed at the end so any artifact can be
-tied to the state of the tree that produced it. Cite as **A1**...**A21** (A9 and A10 were never assigned):
+tied to the state of the tree that produced it. Cite as **A1**...**A24** (A9 and A10 were never assigned):
 A1–A5, A11, A13–A15, A17 and A19 are reports · A6–A8 images · A12 math rendering · A16 the rerun tools · A18 the
-wire tools · A20 the session timeline, page and tools · A21 the sparse parity page and its workload · A23 the transistor-heat timeline, its page, data and builder · A24 the matmul-to-transistor chain page, its data block and builder. The public index
+wire tools · A20 the session timeline, page and tools · A21 the sparse parity page and its workload · A22 the heatsink feasibility study · A23 the transistor-heat timeline, its page, data and builder · A24 the matmul-to-transistor chain page, its data block and builder. The public index
 of every report is the hub, [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports) (A2).
 
 Reports A2–A5, A11, A13–A15 and A17 are assembled by `scripts/build-report.py <name> <data.json> <out.html>` from
@@ -847,6 +847,49 @@ built.
 Nothing in these eighteen directories names a person, an address, a path into a private tree, or a foundry, process
 or library identifier beyond the open ASAP7 kit and the open `et-platform` repository. The archive cross-check that
 ran beside them is **not** here, by design; its one publishable half is the throttle-wrap gate above.
+
+## Q130 published no new page: fifteen data directories, seven harness trees, one RTL bench, and two pages corrected in place (31 October 2026)
+
+Q130's lanes built **no new space**. Everything they made is in this repository, plus two in-place corrections of
+published pages, so — as with Q126 and Q129 — a reader who knows only the published pages will not find it. The
+blog-material page belongs to Q130's integration lane and is recorded in an addendum together with E84's and E85's
+verified results. The short names are the ones [05-claims.md](05-claims.md), "Q130", uses.
+
+| What | Where | What is in it |
+|---|---|---|
+| **The kinds spec** (Q130(s)) | [`tools/claims-v3/kinds/`](../../tools/claims-v3/kinds/README.md) (`654ee2ce`, corrected as revision 2 in `7d9c0d9e`); its data record [`reports/data/2026-10-31-q130s-kinds/`](../reports/data/2026-10-31-q130s-kinds/README.md) | `kinds.json` (51 kinds; the `facts` block with a source for each, per-kind operand statistics, tiers, 400-draw sampling bands, the sort baselines), `make_kinds.py` (seeded per kind, `--check`), `tiles/<type>/<kind>.bin` (2,048 B each, the A tile then the B tile, a sha256 for each half). 🛑 Quote revision 2: revision 1's int8 figures came from the wrong stream and the wrong gate |
+| **E78**, the kinds energy matrix | [`reports/data/2026-10-31-e78-kinds-energy-matrix/`](../reports/data/2026-10-31-e78-kinds-energy-matrix/README.md) | `e78.json` and four arms (leakage 0 and 0.3803 W/°C, τ 0.80 and 1.10 s), `scored.json`, `results.md`, `runs.csv`, `reduce.txt`, the manifest, `code.sha256`, the raw passes, `ident/`, `corrections-check.{py,txt}`. Registration and harness: `tools/claims-v3/kinds/E78.md`, `predictions-e78.json`, `run_e78.{py,sh}`, `block_e78.sh`, `queue_e78.sh`, `collect_e78.sh`, `reduce_e78.py`, `score_e78.py`, `selftest_e78.*`, `e78_desk_checks.*` |
+| **E79**, the fp16 and int8 bit prices | [`reports/data/2026-10-31-e79-fp16-int8-bit-prices/`](../reports/data/2026-10-31-e79-fp16-int8-bit-prices/README.md) | `hlp.json` and `hlp-leak0.3803.json`, `scored.json`, `results.md`, `runs.csv` and its leakage twin, `manifest.json`, `code.sha256`, `ident/` (aifoundry3's firmware and config reads), `corrections-check.{py,txt}`. Registration and harness: [`tools/claims-v3/hlp/`](../../tools/claims-v3/hlp/README.md) |
+| **E80**, speed under aifoundry2's own governor | [`reports/data/2026-10-31-e80-kinds-speed/`](../reports/data/2026-10-31-e80-kinds-speed/README.md) | `results.json`, `cells.json` (180 cells), `tables.{py,md}`, `posthoc-idle.{json,txt}`, `reduce.txt`, `s1/`, `smoke/`, `corrections-check.{py,txt}`. Registration and harness: [`tools/claims-v3/kspeed/`](../../tools/claims-v3/kspeed/README.md) (`predict_kspeed.py`, `predictions.json`, `protocol.json`, `run_kspeed.py`, `reduce_kspeed.py`, `posthoc_idle.py`) |
+| **E81**, the DRAM pattern | [`reports/data/2026-10-31-e81-dram-pattern/`](../reports/data/2026-10-31-e81-dram-pattern/README.md) | `dp.json` and its two leakage arms, `dips.json` and the labelled post-hoc dip view, `runs.csv`, `gen/` (the images' counts and manifest), `passes/`, `ident/`, `logs/`, `posthoc-counts.txt`, `posthoc-rail.txt`. Registration and harness: [`tools/claims-v3/dp/`](../../tools/claims-v3/dp/README.md) (`make_dp.py`, `src_replica.cpp`, `run_e81.sh`, `reduce_dp.py`, `posthoc_*.py`) |
+| **E82**, the matrix on aifoundry1's card 1 | [`reports/data/2026-10-31-e82-kinds-aifoundry1/`](../reports/data/2026-10-31-e82-kinds-aifoundry1/README.md) | `e82.json` and its arms, `scored.json`, `results.md`, `posthoc/` (the dips and a no-dip scoring), `corrections-check.{py,txt}`. Registration: `tools/claims-v3/kinds/E82.md`, `predictions-e82.json`, `reduce_e82.py`, `score_e82.py`, `run_e82.sh`, `collect_e82.sh`, `posthoc_dips_e82.py` |
+| **E83**, speed for the other 33 kinds | [`reports/data/2026-10-31-e83-kinds-speed-rest/`](../reports/data/2026-10-31-e83-kinds-speed-rest/README.md) | `results.json`, `cells.json`, `tables.{py,md}` (its last table is the speed column for all 51 kinds), `reduce.txt`, `s1/`, `smoke/`. `corrections-check.{py,txt}` (corrected after verification in `734e997f`; `cells.json`'s interval field now holds only an uncertainty). Registration: [`tools/claims-v3/kspeed/e83/`](../../tools/claims-v3/kspeed/e83/README.md) |
+| **E84**, a speed replicate on aifoundry1's card 0 — data committed, not yet verified | registration [`tools/claims-v3/kspeed/e84/`](../../tools/claims-v3/kspeed/e84/README.md) (`337b03b2`, amendment A1 `1713a3f9`); data [`reports/data/2026-10-31-e84-speed-aifoundry1-card0/`](../reports/data/2026-10-31-e84-speed-aifoundry1-card0/README.md) (`d6d1a0c8`, 16:13 PDT) | to follow in the addendum, after its verification |
+| **E85**, the camera per kind of number — registered, running | registration [`tools/claims-v3/hlk/`](../../tools/claims-v3/hlk/README.md) (`8b441fd9`) | to follow in the addendum |
+| The inventory (Q130(a)) | [`reports/data/2026-10-31-q130-kinds-inventory/`](../reports/data/2026-10-31-q130-kinds-inventory/README.md) (`7d9b73c5`, corrected in `bc0600ce`) | `inventory.json` (every cell of what existed before Q130 with its status and source, the row taxonomy, the holes H1–H10, the zeros-to-random split computed), `tables.md`, `build_inventory.py` |
+| The three formats in the RTL (Q130(b)) | [`reports/data/2026-10-31-q130-rtl-formats/`](../reports/data/2026-10-31-q130-rtl-formats/README.md) (`e05f2a3b`, corrected in `fcfe82a7`); the bench [`rtl-sim/fma_toggle_formats/`](../../rtl-sim/fma_toggle_formats/) | `predictor-r2.json` (frozen for E78, sha256 `977d9ba4…`), `predictor.json` (r1, withdrawn and kept unchanged), `counts.json` (all 51 kinds, provisional), `verification/` (`fcheck.py` and `fcheck.json`, the functional check both benches fail; `hier_probe.py`, `hier-measured.json`, `dump-window.patch`). `tb_fmt.sv`'s header lists the bench's three faults |
+| The kinds model (Q130(c)) | [`reports/data/2026-10-31-q130-kinds-model/`](../reports/data/2026-10-31-q130-kinds-model/README.md) (`2bbe03dd`; amendment A1 `320f3fdd`) | `predictions.json` (frozen, sha256 `c5a66cb6…`), `model.py`, `predictions.txt`, `amend_a1.py`, `amendment-a1.{json,txt}` (sha256 `6ffc701b…`) |
+| The governor's thermal branch at BL2 0.22.0 (Q130(d)) | [`reports/data/2026-10-31-q130-governor-thermal-branch/`](../reports/data/2026-10-31-q130-governor-thermal-branch/README.md) (`740a7a8d`, corrected in `5c740137`) | the arm read line by line, with every citation in the open `et-platform` repository; `trace_tests.py` → `trace-tests.json` (predicates T1–T9 on E64's and E69's committed trace rings), `clamp_model.py` → `clamp-band.json` |
+| The literature (Q130(e)) | [`reports/data/2026-10-31-q130-literature/`](../reports/data/2026-10-31-q130-literature/README.md) (`cfdd4a87`) | the reference file (its §0 lists what the first pass got wrong) and four reductions of a third party's published A100 traces, with their scripts: `a100-watts.txt`, `a100-bitflips-v2.txt`, `a100-permac.txt`, `ratio-conventions.txt` |
+| The zero gate, corrected (Q130(g)) | [`reports/data/2026-10-31-q130-zero-gate-correction/`](../reports/data/2026-10-31-q130-zero-gate-correction/README.md) (`d8d7e19e`) | one 32-bit word zero test, the gating table, fp16 exact and int8 gated, sourced only to the open RTL, the PRM and E39. 🛑 Its int8 row gives int8's word-zero rate (~p⁴) where the per-lane gate rate is ~p⁸ (Q130(s) revision 2) |
+| The zeros transport (Q130(i)) | [`reports/data/2026-10-31-q130-zeros-transport/`](../reports/data/2026-10-31-q130-zeros-transport/README.md) (`d567befb`, corrected in `b65e01d9`) | `zeros-transport.json` (the re-price of Q129's ledger-scope rows, `card_check.readings`, both internal-energy conventions), `reprice.py`, `sim/` (a structural Verilator bench with a read-tree self-check, `accum.py`, `counts.txt`) |
+
+**Pages corrected in place (Q130(f)).** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment)
+(A4): the space's own card line — which `spacesheep deploy` keeps unless `--description` is passed, so it outlived
+every redeploy since 20 September — read "zeros 38 W, constants 48 W, random 67 W … every run started at 80 °C"; it
+now carries the page's own 38.29 / 46.73 / 63.40 W, from the new `card_description` key in
+`docs/reports/sources/horace-experiment.meta.json` (`17efbe77`; the page's bytes unchanged, version `e2a4e30fd570`).
+[The ET-SoC-1, interactively](https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram): the toggle tool's cause and
+its "~1,050 toggles" label corrected against Q126(b) (`36aaef68`, version `f73a3a4ac4b8`, GitHub Pages `9565edd6`),
+then its two corrected facts made to cite the recount and its "65 wires" made 65 merged nets (`cb1f6e4d`, version
+`1bc01254c64a`, GitHub Pages `e9afd4d4`; `check-mirror --via https` exit 0); [MIRROR.md](../reports/MIRROR.md) records
+both deploys and the test recipe (`ca86be15`, `22c98029`). The memory levels page was not redeployed. Two data
+directories' text was corrected as well: the Q129 ledger-scope directory no longer calls the global-route estimate a
+lower bound on the wire (`88e2f336`), and the toggle recount's and the routed netlist's READMEs now link the fixes that
+answer them (`99295452`).
+
+The private-archive search that ran beside Q130 is **not** in this repository, by design; its one publishable half is
+Q130(g), sourced only to public material.
 
 ## The camera and the details panel (30 September)
 
