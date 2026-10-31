@@ -1,0 +1,36 @@
+{
+ "experiment": "E84",
+ "request": "Q130",
+ "card": "aifoundry1-c0",
+ "frozen": "Sat 31 Oct 2026, before the #community-lab claim and before any device access for E84",
+ "kinds_json_sha256": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+ "governor_reading": {
+  "build_on_record": "release 1.4.1: BL2 0.21.2, PMIC 1.6.1, minions 0.24.0 (docs/findings/14-card-behaviour.md card table, read 25 Sep); re-read read-only at the session's start (run_e84.sh ident) and recorded; card 1's record turned out stale today (E82 A1), so the start read decides which build was measured",
+  "public_source": "BL2 0.21.2 is not in the public et-platform history (branches master, docker_test, og; no 0.21.1 or 0.21.2 changelog entry). Read instead: 0.21.0's close, 50310b06 (2024-09-25), device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c check_power_throttle_conditions() at :853-915, and 0.22.0 (836a4ab) for the fixes after it",
+  "arms": "one decision per management pass, only while active power management is on AND the master minion is not idle (:866-868): thermal first, one table point down if the integer mean of the minion-shire sensors exceeds the 65 C threshold and f > f_min (:872-884); else power down one point if the PMIC's running average exceeds the TDP (:886-896); else power up one point if the average is under the TDP and f < f_max (:898-908)",
+  "wrap_hazard": "at 0.21.0 the average is truncated to uint16 mW (:858-859), so an average over 65.535 W reads as a few watts and can never step the clock down; 0.22.0 widened it to uint32 (SW-22147). Card evidence says card 0's build does not wrap: in E60's heater probe (docs/reports/data/2026-10-20-bitflip-ladder/aifoundry1-c0/hl-probe/p1/telemetry.jsonl.gz, t 7.8-8.5 s) the clock stepped 800 -> 700 MHz on the samples whose sp.board_avg_w read 65.8-65.9 W and back up at 64.8-65.0 W, with the die at 60 C",
+  "idle": "between processes card 0 drops to a 300 MHz / 398 mV point and climbs again at the next kernel (E60 probe; 14-card-behaviour.md 'Firmware 1.4.1 idles at 300 MHz'); public 0.21.0's idle handler goes to the flash boot frequency instead (:1968-1972), so 0.21.2 differs there. Inside one process the clock holds 800 across launch boundaries once reached (E60 hl/p8 runs.jsonl: anchor_pi launches 0-1 at 0.599-0.604 GHz, launch 2 at 0.743-0.745, then 0.799)",
+  "card_numbers_used": "card 0 at 800 MHz / 603 mV drew 72-74 W board on fp32 randn at a 55-61 C die (E60 probe), against E80's p800 of 81.6 W on aifoundry2: a factor 0.907 carried to the other kinds from E80's predicted p800 table (tools/claims-v3/kspeed/predictions.json). Die line from the same probe: 50 C idle at 19.5 W, +11 C over ~25 s at ~50 W mean -> about 0.44 C per W at tau_th 14 s"
+ },
+ "kinds": {
+  "fp32/zeros":     {"type": "fp32", "tile": "tools/claims-v3/kinds/tiles/fp32/zeros.bin",     "burst_limit": "none",  "sus_limit": "none",    "expect_p800_w": "30-36", "expect_burst_mhz": "790-800", "expect_sus_mhz_nonramp": "795-800"},
+  "fp32/ones":      {"type": "fp32", "tile": "tools/claims-v3/kinds/tiles/fp32/ones.bin",      "burst_limit": "none",  "sus_limit": "none",    "expect_p800_w": "44-53", "expect_burst_mhz": "790-800", "expect_sus_mhz_nonramp": "780-800"},
+  "fp32/randn":     {"type": "fp32", "tile": "tools/claims-v3/kinds/tiles/fp32/randn.bin",     "burst_limit": "power", "sus_limit": "thermal", "expect_p800_w": "70-76", "expect_burst_mhz": "720-790", "expect_sus_mhz_nonramp": "600-700"},
+  "fp32/sparse90":  {"type": "fp32", "tile": "tools/claims-v3/kinds/tiles/fp32/sparse90.bin",  "burst_limit": "none",  "sus_limit": "none",    "expect_p800_w": "31-37", "expect_burst_mhz": "790-800", "expect_sus_mhz_nonramp": "795-800"},
+  "fp32/bf16trunc": {"type": "fp32", "tile": "tools/claims-v3/kinds/tiles/fp32/bf16trunc.bin", "burst_limit": "power", "sus_limit": "thermal", "expect_p800_w": "68-75", "expect_burst_mhz": "725-795", "expect_sus_mhz_nonramp": "600-710"},
+  "fp16/zeros":     {"type": "fp16", "tile": "tools/claims-v3/kinds/tiles/fp16/zeros.bin",     "burst_limit": "none",  "sus_limit": "none",    "expect_p800_w": "30-36", "expect_burst_mhz": "790-800", "expect_sus_mhz_nonramp": "795-800"},
+  "fp16/ones":      {"type": "fp16", "tile": "tools/claims-v3/kinds/tiles/fp16/ones.bin",      "burst_limit": "none",  "sus_limit": "none",    "expect_p800_w": "43-51", "expect_burst_mhz": "790-800", "expect_sus_mhz_nonramp": "780-800"},
+  "fp16/randn":     {"type": "fp16", "tile": "tools/claims-v3/kinds/tiles/fp16/randn.bin",     "burst_limit": "power", "sus_limit": "thermal", "expect_p800_w": "66-74", "expect_burst_mhz": "730-800", "expect_sus_mhz_nonramp": "600-720"},
+  "int8/zeros":     {"type": "int8", "tile": "tools/claims-v3/kinds/tiles/int8/zeros.bin",     "burst_limit": "none",  "sus_limit": "none",    "expect_p800_w": "31-37", "expect_burst_mhz": "790-800", "expect_sus_mhz_nonramp": "795-800"},
+  "int8/full":      {"type": "int8", "tile": "tools/claims-v3/kinds/tiles/int8/full.bin",      "burst_limit": "none",  "sus_limit": "none",    "expect_p800_w": "42-50", "expect_burst_mhz": "790-800", "expect_sus_mhz_nonramp": "780-800"},
+  "int8/neg_ones":  {"type": "int8", "tile": "tools/claims-v3/kinds/tiles/int8/neg_ones.bin",  "burst_limit": "none",  "sus_limit": "none",    "expect_p800_w": "32-38", "expect_burst_mhz": "790-800", "expect_sus_mhz_nonramp": "795-800"}
+ },
+ "rules": {
+  "E84-P1": "zeros at least as fast as random data in every format: clock(zeros) - clock(heavy) >= -10 MHz for fp32 (heavy = randn), fp16 (randn) and int8 (full), in the burst cell and in the sustained cell (all samples of the last 40 s): six comparisons, all must hold",
+  "E84-P2": "int8 the least throttled: with deficit = 800 MHz - clock, deficit(int8 full) <= deficit(fp16 randn) + 5 MHz and <= deficit(fp32 randn) + 5 MHz, in the burst cells and in the sustained cells: both must hold",
+  "E84-P3": "the limiting test read from the trace ring (burst: the first throttle-down line in the work; sustained: the last-40-s labels of reduce_e84.py) equals this file's label for >= 9 of the 11 kinds in the burst block and >= 9 of 11 in the sustained block; a kind is right only if every one of its runs carries the label",
+  "E84-S1": "secondary: P2 on the format means of the sustained deficit over all the kinds measured (fp32 five kinds, fp16 three, int8 three)",
+  "under_resolved": "P1 with fewer than six comparisons, P2 with fewer than two, P3 with fewer than 11 kinds in a block cannot PASS (a FAIL already decided by the cells present stands)",
+  "not_scored": "the expect_* ranges are context for reading the result, never verdicts; nothing is fitted to the data"
+ }
+}
