@@ -1,0 +1,97 @@
+# e82_desk_checks.py: committed files only, before the E82 freeze; nothing here is an E82 measurement
+
+[1] idle leakage slope over the launch band 58-62 C (E44's idle bins, 28 Sep, 600 MHz; unweighted least squares)
+  aifoundry1-c1  bins [(58, 33.0), (59, 33.58), (60, 34.09), (61, 34.63), (62, 35.2)] -> 0.5450 W/C (n samples 5073)
+  aifoundry3     bins [(58, 25.93), (59, 26.3), (60, 26.68), (61, 27.08), (62, 27.44)] -> 0.3800 W/C (n samples 4587)
+  check: aifoundry3's E44 bins give 0.3800 against E71's measured 0.3803 +- 0.0036 W/C (docs/findings/05-claims.md, E71): difference -0.0003
+  => E82's card-1 leakage arm: 0.545 W/C (E78's arm on aifoundry3: 0.3803)
+
+[2] the September card scale, aifoundry3 over aifoundry1's card 1 (cards-v3.json; E38, 26 Sep)
+  registered fit scale         0.8871
+  registered ratio_to_ref      0.8872
+  at_launch fit scale          0.9654
+  at_launch ratio_to_ref       0.9650
+  at_launch_step fit scale     0.9545
+  at_launch_step ratio_to_ref  0.9546
+  per pattern, switching over each card's own zeros (registered values, launches at 57 C on aifoundry3 and 80 C on card 1):
+   ones 0.900, signs 0.915, pow2 0.899, a_randn_b_ones 0.907, a_ones_b_randn 0.905, mant 0.897, randn 0.897
+  minion mV: aifoundry3 521.6, card 1 497.9 (V^2 alone would give 1.097; the cards' measured scale is the other way)
+  range over the six readings 0.887-0.965; per-pattern range 0.897-0.915
+  => registered band for D(aifoundry3)/D(card 1): [0.88, 0.99]
+
+[3] E38's card-1 operand anchors (abla.json, ABL-T8 per_card.aifoundry1-c1.vs_aifoundry2_values; built-in values, 4 runs, launches near 80 C)
+  int8 randn pJ/MAC        0.309 pJ/MAC over idle, interval [0.261, 0.357] (reported beside E82)
+  fp16 randn pJ/MAC        2.700 pJ/MAC over idle, interval [2.486, 2.914] (reported beside E82)
+  fp32_ones - fp32_zeros   8.996 W, se 0.151, corrected interval [7.33, 10.662]
+  fp32_randn - fp32_zeros  26.662 W, se 0.159, corrected interval [24.848, 28.477]
+
+[4] card 1's configuration as last read (claims-v3 raw, 25-26 Sep)
+  tdp_w 65, temp_threshold_c 65, minion_mhz 600, minion_mv 499, managed_power
+
+[5] launch coverage inside a run on card 1 (claims-v3 raw abla p1-p4 runs.jsonl: consecutive launches of one run)
+  566 runs: busy fraction 0.9963-0.9984 (median 0.9979); gap between launches median 1 ms, max 2 ms
+  => the duty gate (work in the window >= 0.97 of nominal) can be met on this host
+
+[6] kinds eligible for X2/X3 (frozen Q130(c) switching_w_600mhz_a3 >= 5.0 W): 32
+  fp32 (14): bf16trunc, fp16grid, neg_ones, nn_like, ones, pi, pow2, randn, randn_large, randn_small, randn_sorted, smallint, sparse50, uniform01
+  fp16 (12): fp8grid, neg_ones, nn_like, ones, pair_half_zero, randn, randn_small, randn_sorted, smallint, sparse50, uniform01, wsparse50
+  int8 (6): full, gauss_q, smallint, sorted, sparse50, ternary
+  X1's sets (every kind but the type's zeros): fp32 17, fp16 16, int8 15
+
+[7] power of X1-X3 when the cards differ only by one scale s = D(aifoundry3)/D(card 1) and noise
+  truth: the frozen Q130(c) predictions (or their alt gating arm) as each kind's switching on aifoundry3;
+  noise per (pass, kind) value sd = a + 1% of D, a = 0.35 W fp32/fp16, 0.25 W int8 (E67's anchors, per-pass sd
+  0.11-0.38 W for zeros/pi/ones); 'x2' doubles it; 'dev' adds a 2% per-kind deviation from one common scale;
+  E78 6 passes, E82 n passes
+  columns: X1 fp32/fp16/int8 and all three | X2a | X2b | X3 (the probability each passes; 1,500 draws a row)
+  frozen predictions s 0.850 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.06) | X2b 0.49 (0.78) | X3 0.00
+  frozen predictions s 0.850 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.06) | X2b 0.08 (0.69) | X3 0.00
+  frozen predictions s 0.887 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.03 (median fraction 0.66) | X2b 1.00 (1.00) | X3 0.96
+  frozen predictions s 0.887 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 0.05 (median fraction 0.66) | X2b 1.00 (1.00) | X3 0.97
+  frozen predictions s 0.935 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 1.00 (median fraction 0.97) | X2b 1.00 (1.00) | X3 1.00
+  frozen predictions s 0.935 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 1.00 (median fraction 1.00) | X2b 1.00 (1.00) | X3 1.00
+  frozen predictions s 0.960 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.97 (median fraction 0.91) | X2b 1.00 (1.00) | X3 1.00
+  frozen predictions s 0.960 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 1.00 (median fraction 0.94) | X2b 1.00 (1.00) | X3 1.00
+  frozen predictions s 0.985 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.01 (median fraction 0.59) | X2b 1.00 (1.00) | X3 0.86
+  frozen predictions s 0.985 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 0.01 (median fraction 0.59) | X2b 1.00 (1.00) | X3 0.89
+  frozen predictions s 1.000 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.31) | X2b 1.00 (0.97) | X3 0.01
+  frozen predictions s 1.000 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.31) | X2b 1.00 (0.97) | X3 0.01
+  frozen predictions s 1.050 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.00) | X2b 0.00 (0.53) | X3 0.00
+  frozen predictions s 1.050 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.00) | X2b 0.00 (0.38) | X3 0.00
+  frozen predictions s 0.960 n 4 x2: X1 1.00/1.00/1.00 all 1.00 | X2a 0.16 (median fraction 0.72) | X2b 1.00 (1.00) | X3 1.00
+  frozen predictions s 0.960 n 4 dev: X1 1.00/1.00/1.00 all 1.00 | X2a 0.75 (median fraction 0.84) | X2b 1.00 (1.00) | X3 1.00
+  frozen predictions s 0.935 n 4 x2+dev: X1 1.00/1.00/1.00 all 1.00 | X2a 0.30 (median fraction 0.75) | X2b 1.00 (1.00) | X3 1.00
+  frozen predictions s 0.960 n 4 dev 5%: X1 1.00/1.00/1.00 all 1.00 | X2a 0.04 (median fraction 0.66) | X2b 1.00 (0.94) | X3 1.00
+  frozen predictions s 1.050 n 4 x2: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.09) | X2b 0.93 (0.88) | X3 0.00
+  alt gating arm     s 0.850 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.06) | X2b 0.40 (0.78) | X3 0.00
+  alt gating arm     s 0.850 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.03) | X2b 0.05 (0.69) | X3 0.00
+  alt gating arm     s 0.887 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.03 (median fraction 0.66) | X2b 1.00 (1.00) | X3 0.97
+  alt gating arm     s 0.887 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 0.05 (median fraction 0.66) | X2b 1.00 (1.00) | X3 0.98
+  alt gating arm     s 0.935 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 1.00 (median fraction 0.97) | X2b 1.00 (1.00) | X3 1.00
+  alt gating arm     s 0.935 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 1.00 (median fraction 1.00) | X2b 1.00 (1.00) | X3 1.00
+  alt gating arm     s 0.960 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.99 (median fraction 0.91) | X2b 1.00 (1.00) | X3 1.00
+  alt gating arm     s 0.960 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 1.00 (median fraction 0.94) | X2b 1.00 (1.00) | X3 1.00
+  alt gating arm     s 0.985 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.01 (median fraction 0.59) | X2b 1.00 (1.00) | X3 0.88
+  alt gating arm     s 0.985 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 0.01 (median fraction 0.62) | X2b 1.00 (1.00) | X3 0.90
+  alt gating arm     s 1.000 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.31) | X2b 1.00 (0.97) | X3 0.01
+  alt gating arm     s 1.000 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.31) | X2b 1.00 (0.97) | X3 0.00
+  alt gating arm     s 1.050 n 4: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.00) | X2b 0.00 (0.50) | X3 0.00
+  alt gating arm     s 1.050 n 6: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.00) | X2b 0.00 (0.34) | X3 0.00
+  alt gating arm     s 0.960 n 4 x2: X1 1.00/1.00/1.00 all 1.00 | X2a 0.19 (median fraction 0.75) | X2b 1.00 (1.00) | X3 1.00
+  alt gating arm     s 0.960 n 4 dev: X1 1.00/1.00/1.00 all 1.00 | X2a 0.75 (median fraction 0.84) | X2b 1.00 (1.00) | X3 1.00
+  alt gating arm     s 0.935 n 4 x2+dev: X1 1.00/1.00/0.99 all 0.99 | X2a 0.40 (median fraction 0.78) | X2b 1.00 (1.00) | X3 1.00
+  alt gating arm     s 0.960 n 4 dev 5%: X1 1.00/0.98/1.00 all 0.98 | X2a 0.05 (median fraction 0.66) | X2b 1.00 (0.94) | X3 1.00
+  alt gating arm     s 1.050 n 4 x2: X1 1.00/1.00/1.00 all 1.00 | X2a 0.00 (median fraction 0.09) | X2b 0.90 (0.88) | X3 0.00
+
+[8] E82's first pass (8210) on aifoundry1-c1: 65 runs, random.Random('E78|aifoundry1-c1|8210'); first ten: ['anchor_pi', 'int8.zeros', 'fp32.randn', 'fp32.ones', 'int8.a_zeros_b_full', 'int8.full', 'fp32.sparse50', 'fp32.zeros', 'int8.ternary', 'fp32.pow2']
+  (pass 8210 is not E78's 7810, so fp32.a_randn_b_zeros is NOT moved to the front: Q130(c)'s R9 asked that of E78)
+
+[9] the E78 code E82 runs unchanged (sha256)
+  033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa  tools/claims-v3/lib.sh
+  c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e  tools/claims-v3/kinds/e78_common.py
+  f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73  tools/claims-v3/kinds/run_e78.py
+  e6b39c2c4cfcd3eab7298d026e0d24b2fc84bbd688e218c111646d7298abfb3d  tools/claims-v3/kinds/block_e78.sh
+  0232c08c2ec204091c30c5c6a77991fddea7412cbe7a0928b5a427c62cc35a56  tools/claims-v3/kinds/queue_e78.sh
+  6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39  tools/claims-v3/kinds/reduce_e78.py
+  5f41917f5af3424cb098dfa355e512f83f32c9d62921ed4d63482d3394f4434e  tools/claims-v3/kinds/score_e78.py
+  9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337  tools/claims-v3/kinds/kinds.json
