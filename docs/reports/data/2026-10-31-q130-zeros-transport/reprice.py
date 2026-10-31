@@ -14,6 +14,18 @@ numbers quoted are E38's, through Q128's data.json.
 
     python3 reprice.py --q129 <dir> --counts <counts.txt> --out reprice.json
 
+CORRECTIONS of 31 Oct 2026, same day, after review (README § Corrections has the full list):
+  - the ledger now carries BOTH internal-energy conventions, because Q129's published
+    1.261 / 1.484 pJ add the whole internal estimate to the switching while this script's
+    `internal_ratio_used` scales it with the switching. Setting the two side by side without
+    saying so was not like-for-like;
+  - the clock-load breakdown gained the `vrf` wrapper's own clock pins, which were inside the
+    bound but missing from the printed detail (373.9 of 421.0 fF was shown);
+  - the card check carries the three registered cards' own figures, not only their mean, and the
+    strict "same netlist" upper (no read-enable pin, addresses fixed) as its own reading;
+  - `f_data_read`'s fallback when the bench's read tree is static is 1.0 (keep Q129's figure),
+    not 0.0. On `zeros` the term it multiplies is exactly 0, so no published number moves.
+
 SPDX-License-Identifier: Apache-2.0
 """
 import argparse
@@ -77,7 +89,17 @@ def main():
         "q129_dir": "docs/reports/data/2026-10-27-q129-ledger-scope",
         "macs_per_op": MACS,
         "note": "switching energy per fp32 multiply-add, one VPU lane, ASAP7 RVT TT, 0.517 V",
+        "counts_from": "sim/counts.txt, the corrected structural simulation of 31 Oct 2026",
+        "sim_read_path_self_check": "every row of sim/counts.txt carries rd_chk_fail = 0: the "
+                                    "read tree delivers rf[rd_addr] on all three ports every "
+                                    "cycle. The first version of the simulation had an off-by-one "
+                                    "in offs() and a testbench multiply-add that Verilator "
+                                    "silently turned into `return c`; both are fixed and both are "
+                                    "described in README § Corrections",
     }}
+    chk = sum(d.get("rd_chk_fail", -1) for d in counts.values())
+    if chk != 0:
+        raise SystemExit("counts.txt has rd_chk_fail != 0 (sum %s): the read tree is broken" % chk)
 
     # ---------------------------------------------------------------- the read-port factor
     cz = counts[("zeros", 0)]
@@ -118,19 +140,36 @@ def main():
     tenc_clk = census["tenc_rf/arr"]["clk_cap_ff"]     # model for vpu_tensorc_rf_buffer_array
     byp_clk = census["bypass"]["clk_cap_ff"]           # gated off for the whole TensorFMA
     tot_clk = census_total["clk_cap_ff"]
+    # the clock-NET capacitance the power run actually prices, for the bias note below
+    pwr_clk_cap = load(a.q129, "power-mixed", "zeros")["total"]["clock_cap_fF"]
     rem_clk = tot_clk - arr_clk - tenc_clk - byp_clk
     f_clock_lower = rem_clk / tot_clk
+    rem_detail = {k: census[k]["clk_cap_ff"] for k in
+                  ("tentmp_rf", "LANE_TIMA[0].tenb_rf", "LANE_TIMA[1].tenb_rf",
+                   "tena_rf", "ctl")}
+    # the vrf WRAPPER's own clock pins: inside the bound, but it was missing from this breakdown
+    rem_detail["vrf_wrapper_excl_arr"] = census["vrf"]["clk_cap_ff"] - arr_clk
     res["clock_bound"] = {
         "clk_cap_fF_total": tot_clk,
         "clk_cap_fF_latch_array_model_vpu_rf": arr_clk,
         "clk_cap_fF_latch_array_model_tenc": tenc_clk,
         "clk_cap_fF_bypass_gated_off_on_a_txfma": byp_clk,
         "clk_cap_fF_remaining": rem_clk,
-        "clk_cap_fF_remaining_detail": {k: census[k]["clk_cap_ff"] for k in
-                                        ("tentmp_rf", "LANE_TIMA[0].tenb_rf",
-                                         "LANE_TIMA[1].tenb_rf", "tena_rf", "ctl")},
+        "clk_cap_fF_remaining_detail": rem_detail,
+        "clk_cap_fF_remaining_detail_sum": sum(rem_detail.values()),
         "f_clock_lower": f_clock_lower,
         "f_clock_upper": 1.0,
+        "clk_cap_fF_power_run_nets": pwr_clk_cap,
+        "clk_cap_fF_tree_wiring": pwr_clk_cap - tot_clk,
+        "bias": ("the LOWER end is optimistic, in two named ways. (1) The denominator is the "
+                 "census's clock-PIN capacitance, %.1f fF, but the energy scaled is the power "
+                 "run's clock-NET energy, whose capacitance is %.1f fF -- about %.1f fF of it is "
+                 "tree wiring, not leaf pins. Re-running CTS on a smaller leaf load drops leaf "
+                 "wires and keeps the trunk, so the real reduction is LESS than proportional to "
+                 "leaf pin load. (2) The two compiled macros' own clock pins are removed with "
+                 "their models and never added back. Both push the true figure above the lower "
+                 "end, which is why the UPPER end is the one to quote against a card measurement"
+                 % (tot_clk, pwr_clk_cap, pwr_clk_cap - tot_clk)),
         "why": ("the chip's two biggest clock loads here are models: vpu_64x32_3r2w_vpurf and "
                 "vpu_tensorc_rf_buffer_array are compiled macros with one clock pin each, not "
                 "2,243 + 562 latches behind per-entry gates, and vpu_bypass's clock is held off "
@@ -157,10 +196,13 @@ def main():
         byp_clock_floor = part_energies(load(a.q129, "power-mixed", "zeros"))["bypass"]
 
         cz_p = counts[(pat, 0)]
-        # data-dependent read activity scales with the mux-output transitions of the ports kept
+        # data-dependent read activity scales with the mux-output transitions of the ports kept.
+        # With a static read tree (every entry holding the same word) there is no measured ratio;
+        # the fallback keeps Q129's figure in full, which is the ceiling-preserving choice. On
+        # `zeros` the term this multiplies is exactly 0, so the fallback never moves a number.
         mo_b = cz_p["bench"]["mux_out_tr"]
         mo_p2 = cz_p["rtl"]["mux_out_tr_p"][2]
-        f_data_read = (mo_p2 / mo_b) if mo_b else 0.0
+        f_data_read = (mo_p2 / mo_b) if mo_b else 1.0
         f_write = (cz_p["rtl"]["entry_clk_edges"] / cz_p["bench"]["entry_clk_edges"]
                    if cz_p["bench"]["entry_clk_edges"] else 0.0)
 
@@ -171,7 +213,7 @@ def main():
         arr_data = arr - arr_zeros                  # what the operand words add in this pattern
         arr_new = arr_addr * f_read_silicon + arr_wrclk * f_write + arr_data * f_data_read
         arr_new_model = arr_addr * f_read_model + arr_wrclk * f_write + arr_data * (
-            cz_p["rtl"]["mux_out_tr"] / mo_b if mo_b else 0.0)
+            cz_p["rtl"]["mux_out_tr"] / mo_b if mo_b else 1.0)
 
         # the bypass: its clock floor goes, its combinational data path stays
         byp_new = max(p["bypass"] - byp_clock_floor, 0.0)
@@ -230,17 +272,61 @@ def main():
             "fraction_gated": d["gated"] / d["uops"] if d["uops"] else 0.0,
             "first_pass_uops": d["first_pass_uops"],
         }
+    res["gating_rule"] = {
+        "rtl": "vpu_ctrl.v ll.805-818: ex_tensor_zero_mask = A-zero | (B-zero-tima0 & "
+               "B-zero-tima1), where tima0 indexes ex_tima_tenb_raddr and tima1 that address "
+               "OR 1 -- but only when ex_tima_valid_unqual is set",
+        "why_one_word_is_exact_on_fp32":
+            "vpu_tensorfma.v l.861 is `s1_tima_valid <= s0_fma_en_conv && req_int8`, so TIMA is "
+            "live on an int8 TensorFMA and nowhere else. On an fp32 TensorFMA32 "
+            "ex_tima_valid_unqual = 0, both paired terms index the SAME entry ex_ra2_ten "
+            "(ll.808, 811), the AND is idempotent, and the mask is exactly A-zero | B-zero. The "
+            "testbench's single-word B test is therefore exact for every number here, not a "
+            "simplification. On an int8 TIMA op the two addresses differ, the AND bites, and "
+            "this bench does not model it -- nothing here is int8",
+        "a_side": "f3_zero_data_a is {8{tena_word == 0}} (vpu_ctrl.v l.1230): one scalar A word "
+                  "broadcast to all eight lane bits. f3_zero_data_b[i] is per-lane (l.1233)",
+    }
+    res["corrections"] = {
+        "dated": "2026-10-31, same day, after review; README section Corrections has the detail",
+        "sim_offs_off_by_one": "rf3r2w_struct.sv offs() was NODES - (ENTRIES >> L) = -1 at L = 0 "
+                               "instead of 0, so the read tree was built one index low and its "
+                               "root was never assigned. Fixed to ENTRIES - (ENTRIES >> L); a "
+                               "new rd_chk_fail counter asserts rd_data[p] == rf[rd_addr[p]] on "
+                               "every port every cycle and reads 0 in every row",
+        "sim_shortreal_fma": "tb_gate_audit.sv computed the multiply-add with $bitstoshortreal / "
+                             "$shortrealtobits. Verilator does not support shortreal (it warns "
+                             "`Unsupported: shortreal being promoted to real`, which -Wno-lint "
+                             "hid), so the casts read a double's bit pattern, every product "
+                             "underflowed, and the multiply-add returned c unchanged: "
+                             "A=3f800000 B=3f800000 C=467a0000 fma=467a0000. The arithmetic now "
+                             "comes from sim/accum.py and the testbench holds no floating point",
+        "what_moved": "NOTHING in the headline or in any pattern total. The address side "
+                      "(sel_pin_tr, addr_tr) and the write side (dec_tr, the clock-edge "
+                      "counters, the zero-gate counts) never read the tree or the result. "
+                      "f_data_read is 1/3 exactly before and after, because the bench's three "
+                      "read ports and the RTL's port 2 carry the same address stream over the "
+                      "same file. What moved: the mux_out_tr and rd_data_tr columns, and the "
+                      "*_model_rewired_only figures built on their ratio (randn 0.829 -> "
+                      "0.849377, ones 0.349 -> 1.0)",
+        "cross_check": "the corrected counts agree digit for digit, on all eight rows and every "
+                       "counter, with two independent Python replicas of the two SystemVerilog "
+                       "files, one of them written by the reviewer before this fix",
+    }
 
     # ---------------------------------------------------------------- the card comparison
     zp = res["patterns"]["zeros"]
     z = zp["corrected"]
     board_zeros = 0.27          # E38 three-card registered mean, Q128 data.json /permac/mean_zeros_pJ
+    per_card = [0.1633, 0.4034, 0.2512]      # the same data.json, e38_registered
     clk_z = zp["q129_clock_net_pJ_per_mac"]
     sig_lo = z["total_switching_lower_pJ_per_mac"] - clk_z * res["clock_bound"]["f_clock_lower"]
     sig_hi = z["total_switching_upper_pJ_per_mac"] - clk_z
+    strict_hi = z["total_switching_upper_model_rewired_only_pJ_per_mac"]
     res["card_check"] = {
         "board_zeros_pJ_per_mac": board_zeros,
-        "board_zeros_per_card_pJ": [0.1633, 0.4034, 0.2512],
+        "board_zeros_per_card_pJ": per_card,
+        "board_zeros_per_card_spread_pJ": [min(per_card), max(per_card)],
         "q129_transport_zeros_pJ_per_mac": zp["q129_total_switching_pJ_per_mac"],
         "q129_ratio_over_board": zp["q129_total_switching_pJ_per_mac"] / board_zeros,
         "q129_signal_only_pJ_per_mac": 0.4309799743594726,
@@ -252,16 +338,61 @@ def main():
         "corrected_signal_only_lower_pJ_per_mac": sig_lo,
         "corrected_signal_only_upper_pJ_per_mac": sig_hi,
         "corrected_ratio_signal_only_over_board": [sig_lo / board_zeros, sig_hi / board_zeros],
-        "reading": ("E38's 0.27 pJ/MAC is measured over idle. If the lane's clocks run at idle the "
-                    "clock term is inside the subtract and the signal-only figure is what has to "
+        # the three readings, each named, each with its verdict
+        "readings": {
+            "signal_only_vs_board_mean": {
+                "pJ_per_mac": sig_lo, "ratio": sig_lo / board_zeros, "verdict": "PASSES",
+                "what": "the clock term is inside the idle subtract, so only signal switching "
+                        "has to fit inside the board's 0.27 pJ/MAC",
+            },
+            "with_clock_vs_board_mean": {
+                "pJ_per_mac": [z["total_switching_lower_pJ_per_mac"],
+                               z["total_switching_upper_pJ_per_mac"]],
+                "ratio": [z["total_switching_lower_pJ_per_mac"] / board_zeros,
+                          z["total_switching_upper_pJ_per_mac"] / board_zeros],
+                "verdict": "STRADDLES",
+                "what": "the lane's clocks are gated at idle, so the whole figure has to fit. "
+                        "The lower end fits at 0.73x; the UPPER end still exceeds the whole "
+                        "board by 37%, so this reading is narrowed, not settled",
+            },
+            "same_netlist_strict_vs_board_mean": {
+                "pJ_per_mac": strict_hi, "ratio": strict_hi / board_zeros, "verdict": "FAILS",
+                "what": "the strictest re-price of the SAME netlist: the latch array has no "
+                        "read-enable pin at all, so only the bench's three swept addresses are "
+                        "fixable and the whole clock term stands. 1.79x the board",
+            },
+            "with_clock_vs_lowest_registered_card": {
+                "pJ_per_mac": [z["total_switching_lower_pJ_per_mac"],
+                               z["total_switching_upper_pJ_per_mac"]],
+                "ratio": [z["total_switching_lower_pJ_per_mac"] / min(per_card),
+                          z["total_switching_upper_pJ_per_mac"] / min(per_card)],
+                "verdict": "FAILS",
+                "what": "against the lowest of the three registered cards (%.4f pJ/MAC, not the "
+                        "three-card mean) both ends exceed it" % min(per_card),
+            },
+        },
+        "reading": ("E38's 0.27 pJ/MAC is a three-card mean and the cards themselves run "
+                    "%.4f-%.4f pJ/MAC. It is measured over idle: if the lane's clocks run at idle "
+                    "the clock term is inside the subtract and only the signal-only figure has to "
                     "fit inside 0.27; if they are gated at idle the whole corrected figure has to. "
                     "Q129's numbers failed both tests (2.42x and 1.60x). The corrected ones pass "
-                    "both."),
+                    "the signal-only reading cleanly at 0.54x and STRADDLE the board on the other "
+                    "at 0.73x-1.37x -- so the contradiction is NARROWED, not resolved: one lane's "
+                    "transport at the top of its own bound still exceeds the whole board by 37%%, "
+                    "and against the lowest registered card, or on the strict same-netlist "
+                    "reading (%.4f, 1.79x), it still fails. See `readings` for all four."
+                    % (min(per_card), max(per_card), strict_hi)),
     }
 
     # ---------------------------------------------------------------- the ledger
     arith_sw, arith_int = 1.516, 1.946          # Q126(e), one lane, random fp32
     r = res["patterns"]["randn"]["corrected"]
+    # Q129's own internal estimate for randn, per MAC: it ADDS this to the switching, whatever
+    # the switching is. This script's `internal_ratio_used` instead scales it with the switching.
+    # Both rows are published, because Q129's 1.261 / 1.484 are on the additive convention and
+    # setting them beside a multiplicative row without saying so is not like-for-like.
+    dr = load(a.q129, "power-mixed", "randn")
+    int_add = dr["internal_estimate"]["internal_J_signal_transitions"] / MACS / PJ
     res["ledger_randn"] = {
         "arithmetic_switching_pJ": arith_sw,
         "arithmetic_plus_internal_pJ": arith_int,
@@ -271,10 +402,33 @@ def main():
         "q129_total_range_pJ": [3.207, 3.430],
         "corrected_transport_switching_range_pJ": [r["total_switching_lower_pJ_per_mac"],
                                                    r["total_switching_upper_pJ_per_mac"]],
+        "internal_convention": {
+            "multiplicative": {
+                "what": "the cells' internal energy is scaled by the same factor the switching "
+                        "moved (internal_ratio_used = %.6f). Defensible, because the transitions "
+                        "that carry the internal energy are the ones the gating removes -- but "
+                        "NOT the convention Q129 published on" % r["internal_ratio_used"],
+                "ratio_used": r["internal_ratio_used"],
+            },
+            "additive_q129": {
+                "what": "Q129's own convention: the whole internal estimate is ADDED to the "
+                        "switching, unchanged. Its published 1.261 = 0.80979 signal switching + "
+                        "%.5f internal, and 1.484 = 1.0329 + %.5f. Conservative here, because it "
+                        "keeps internal energy for transitions the gating removed"
+                        % (int_add, int_add),
+                "internal_pJ_per_mac_added": int_add,
+            },
+        },
         "corrected_transport_plus_internal_range_pJ": [r["total_plus_internal_lower_pJ_per_mac"],
                                                        r["total_plus_internal_upper_pJ_per_mac"]],
+        "corrected_transport_plus_internal_range_additive_q129_pJ": [
+            r["total_switching_lower_pJ_per_mac"] + int_add,
+            r["total_switching_upper_pJ_per_mac"] + int_add],
         "corrected_total_range_pJ": [arith_int + r["total_plus_internal_lower_pJ_per_mac"],
                                      arith_int + r["total_plus_internal_upper_pJ_per_mac"]],
+        "corrected_total_range_additive_q129_pJ": [
+            arith_int + r["total_switching_lower_pJ_per_mac"] + int_add,
+            arith_int + r["total_switching_upper_pJ_per_mac"] + int_add],
         "board_E38_pJ": 5.783,
         "rail_Q128_pJ": 4.337,
         "rail_Q129_corrected_footing_pJ": 4.77,
@@ -284,6 +438,20 @@ def main():
                                         lr["corrected_total_range_pJ"][1] / 5.783]
     lr["corrected_closure_vs_rail_Q128"] = [lr["corrected_total_range_pJ"][0] / 4.337,
                                             lr["corrected_total_range_pJ"][1] / 4.337]
+    lr["corrected_closure_vs_board_additive_q129"] = [
+        lr["corrected_total_range_additive_q129_pJ"][0] / 5.783,
+        lr["corrected_total_range_additive_q129_pJ"][1] / 5.783]
+    lr["corrected_closure_vs_rail_Q128_additive_q129"] = [
+        lr["corrected_total_range_additive_q129_pJ"][0] / 4.337,
+        lr["corrected_total_range_additive_q129_pJ"][1] / 4.337]
+    lr["note"] = ("Q129's published 55-59%% closure is on the additive convention. Like-for-like "
+                  "against it, the corrected closure is %.0f-%.0f%% of the board; on the "
+                  "multiplicative convention %.0f-%.0f%%. Both are a FALL from 55-59%%, which is "
+                  "the direction that matters: what came off was energy the chip does not spend."
+                  % (100 * lr["corrected_closure_vs_board_additive_q129"][0],
+                     100 * lr["corrected_closure_vs_board_additive_q129"][1],
+                     100 * lr["corrected_closure_vs_board"][0],
+                     100 * lr["corrected_closure_vs_board"][1]))
 
     with open(a.out, "w") as f:
         json.dump(res, f, indent=1, sort_keys=False)
@@ -293,8 +461,8 @@ def main():
           % (f_read_silicon, f_read_model))
     print("write factor on zeros: %.5f (k=0 pass ungated), %.5f (every pass MADD)"
           % (f_write_firstpass, f_write_allmadd))
-    print("clock-load bound: %.1f of %.1f fF survives -> f_clock in [%.4f, 1]"
-          % (tot_clk - arr_clk - byp_clk, tot_clk, f_clock_lower))
+    print("clock-load bound: %.1f of %.1f fF of clock-pin load survives -> f_clock in [%.4f, 1]; "
+          "the lower end is optimistic (clock_bound.bias)" % (rem_clk, tot_clk, f_clock_lower))
     print()
     for pat in ("zeros", "ones", "randn"):
         q = res["patterns"][pat]
@@ -311,12 +479,17 @@ def main():
                  c["other_parts"]))
     print()
     cc = res["card_check"]
-    print("zeros vs the card: board %.2f pJ/MAC; Q129 lane transport %.4f (%.2fx the board) -> "
-          "corrected %.4f..%.4f (%.2fx..%.2fx)"
-          % (cc["board_zeros_pJ_per_mac"], cc["q129_transport_zeros_pJ_per_mac"],
+    print("zeros vs the card: board %.2f pJ/MAC (three cards %.4f..%.4f); Q129 lane transport "
+          "%.4f (%.2fx the board) -> corrected %.4f..%.4f (%.2fx..%.2fx)"
+          % (cc["board_zeros_pJ_per_mac"], cc["board_zeros_per_card_spread_pJ"][0],
+             cc["board_zeros_per_card_spread_pJ"][1], cc["q129_transport_zeros_pJ_per_mac"],
              cc["q129_ratio_over_board"], cc["corrected_lower_pJ_per_mac"],
              cc["corrected_upper_pJ_per_mac"], cc["corrected_ratio_over_board_lower"],
              cc["corrected_ratio_over_board_upper"]))
+    for name, rd in cc["readings"].items():
+        print("   %-38s %-10s %s" % (name, rd["verdict"],
+              rd["ratio"] if isinstance(rd["ratio"], float) else
+              "%.2fx..%.2fx" % (rd["ratio"][0], rd["ratio"][1])))
     print("   signal only (clock inside the idle subtract): Q129 %.4f (%.2fx) -> corrected "
           "%.4f..%.4f (%.2fx..%.2fx)"
           % (cc["q129_signal_only_pJ_per_mac"], cc["q129_ratio_signal_only_over_board"],
@@ -325,12 +498,20 @@ def main():
              cc["corrected_ratio_signal_only_over_board"][1]))
     print("   zero gate fires on: " + ", ".join(
         "%s %.1f%%" % (k, 100 * v["fraction_gated"]) for k, v in res["gating_by_pattern"].items()))
-    print("randn ledger: arithmetic %.3f + transport %.3f..%.3f (+internal) = %.3f..%.3f pJ, "
-          "%.0f%%..%.0f%% of the board's 5.783"
+    print("randn ledger, internal scaled with the switching: arithmetic %.3f + transport "
+          "%.3f..%.3f = %.3f..%.3f pJ, %.0f%%..%.0f%% of the board's 5.783"
           % (arith_int, lr["corrected_transport_plus_internal_range_pJ"][0],
              lr["corrected_transport_plus_internal_range_pJ"][1],
              lr["corrected_total_range_pJ"][0], lr["corrected_total_range_pJ"][1],
              100 * lr["corrected_closure_vs_board"][0], 100 * lr["corrected_closure_vs_board"][1]))
+    print("randn ledger, Q129's additive convention (like-for-like with its 55-59%%): transport "
+          "%.3f..%.3f = %.3f..%.3f pJ, %.0f%%..%.0f%% of the board"
+          % (lr["corrected_transport_plus_internal_range_additive_q129_pJ"][0],
+             lr["corrected_transport_plus_internal_range_additive_q129_pJ"][1],
+             lr["corrected_total_range_additive_q129_pJ"][0],
+             lr["corrected_total_range_additive_q129_pJ"][1],
+             100 * lr["corrected_closure_vs_board_additive_q129"][0],
+             100 * lr["corrected_closure_vs_board_additive_q129"][1]))
     zc = res["patterns"]["zeros"]["corrected"]
     rc = res["patterns"]["randn"]["corrected"]
     print("zeros / randn, corrected transport switching: %.4f / %.4f = %.1f%%"

@@ -2,7 +2,9 @@
  "source": {
   "q129_dir": "docs/reports/data/2026-10-27-q129-ledger-scope",
   "macs_per_op": 512,
-  "note": "switching energy per fp32 multiply-add, one VPU lane, ASAP7 RVT TT, 0.517 V"
+  "note": "switching energy per fp32 multiply-add, one VPU lane, ASAP7 RVT TT, 0.517 V",
+  "counts_from": "sim/counts.txt, the corrected structural simulation of 31 Oct 2026",
+  "sim_read_path_self_check": "every row of sim/counts.txt carries rd_chk_fail = 0: the read tree delivers rf[rd_addr] on all three ports every cycle. The first version of the simulation had an off-by-one in offs() and a testbench multiply-add that Verilator silently turned into `return c`; both are fixed and both are described in README \u00a7 Corrections"
  },
  "read_factor": {
   "sel_pin_transitions_bench": 2095104,
@@ -43,10 +45,15 @@
    "LANE_TIMA[0].tenb_rf": 79.4637,
    "LANE_TIMA[1].tenb_rf": 79.4637,
    "tena_rf": 48.1275,
-   "ctl": 24.7325
+   "ctl": 24.7325,
+   "vrf_wrapper_excl_arr": 47.078700000000026
   },
+  "clk_cap_fF_remaining_detail_sum": 421.00230000000005,
   "f_clock_lower": 0.22831267052174845,
   "f_clock_upper": 1.0,
+  "clk_cap_fF_power_run_nets": 2766.670984747595,
+  "clk_cap_fF_tree_wiring": 922.697984747595,
+  "bias": "the LOWER end is optimistic, in two named ways. (1) The denominator is the census's clock-PIN capacitance, 1844.0 fF, but the energy scaled is the power run's clock-NET energy, whose capacitance is 2766.7 fF -- about 922.7 fF of it is tree wiring, not leaf pins. Re-running CTS on a smaller leaf load drops leaf wires and keeps the trunk, so the real reduction is LESS than proportional to leaf pin load. (2) The two compiled macros' own clock pins are removed with their models and never added back. Both push the true figure above the lower end, which is why the UPPER end is the one to quote against a card measurement",
   "why": "the chip's two biggest clock loads here are models: vpu_64x32_3r2w_vpurf and vpu_tensorc_rf_buffer_array are compiled macros with one clock pin each, not 2,243 + 562 latches behind per-entry gates, and vpu_bypass's clock is held off for the whole TensorFMA (vpu_ctrl.v ll.1244, 1334, 1403, 1463, 1538 -> vpu_lane.v l.218, l.245). The three real latch files (TENA, TENB x2, TMP) are rf_latch_1r_1w in the chip too and stay. Clock-tree energy tracks the pin load the tree drives, so the share of the pin load that survives bounds it below; the two macros' own clock pins are a few fF and are not added back"
  },
  "patterns": {
@@ -67,7 +74,7 @@
    "array_address_side_pJ_per_mac": 0.301611086485664,
    "array_own_write_clock_pJ_per_mac": 0.0034127625771766894,
    "array_data_dependent_pJ_per_mac": 0.0,
-   "f_data_read_port2_only": 0.0,
+   "f_data_read_port2_only": 1.0,
    "f_write": 0.0625,
    "bypass_clock_floor_removed_pJ_per_mac": 0.07989181561830816,
    "corrected": {
@@ -113,14 +120,14 @@
    "bypass_clock_floor_removed_pJ_per_mac": 0.07989181561830816,
    "corrected": {
     "rf_array": 0.10452439922014012,
-    "rf_array_model_rewired_only": 0.21924020262509966,
+    "rf_array_model_rewired_only": 0.22036248351261678,
     "bypass": 0.014788242497031256,
     "top_clock_lower": 0.09712103100130699,
     "top_clock_upper": 0.26926039361265797,
     "other_parts": 0.013344224132917032,
     "total_switching_lower_pJ_per_mac": 0.22977789685139538,
     "total_switching_upper_pJ_per_mac": 0.40191725946274637,
-    "total_switching_upper_model_rewired_only_pJ_per_mac": 0.5166330628677059,
+    "total_switching_upper_model_rewired_only_pJ_per_mac": 0.517755343755223,
     "total_plus_internal_lower_pJ_per_mac": 0.34158093849085747,
     "total_plus_internal_upper_pJ_per_mac": 0.5974781585356157,
     "internal_ratio_used": 1.4865700451239166
@@ -139,7 +146,7 @@
     "bypass": 0.13490960379155922,
     "rf_bypass": 0.035335469281050684,
     "tena": 0.0067933860740879,
-    "tenb": 0.006020560420290061,
+    "tenb": 0.006020560420290062,
     "tenc": 0.00033110852319382804,
     "tentmp": 0.0003229766798873415,
     "ctl": 1.8817558300885286e-05
@@ -154,14 +161,14 @@
    "bypass_clock_floor_removed_pJ_per_mac": 0.07989181561830816,
    "corrected": {
     "rf_array": 0.16277438347786727,
-    "rf_array_model_rewired_only": 0.3649601950154513,
+    "rf_array_model_rewired_only": 0.36853026590433824,
     "bypass": 0.055017788173251064,
     "top_clock_lower": 0.19549464083666812,
     "top_clock_upper": 0.3676340034480191,
     "other_parts": 0.0488223185368107,
     "total_switching_lower_pJ_per_mac": 0.4621091310245971,
     "total_switching_upper_pJ_per_mac": 0.6342484936359482,
-    "total_switching_upper_model_rewired_only_pJ_per_mac": 0.8364343051735322,
+    "total_switching_upper_model_rewired_only_pJ_per_mac": 0.8400043760624192,
     "total_plus_internal_lower_pJ_per_mac": 0.6639964842187527,
     "total_plus_internal_upper_pJ_per_mac": 0.9113405072986821,
     "internal_ratio_used": 1.4368824150834827
@@ -224,12 +231,28 @@
    "first_pass_uops": 0
   }
  },
+ "gating_rule": {
+  "rtl": "vpu_ctrl.v ll.805-818: ex_tensor_zero_mask = A-zero | (B-zero-tima0 & B-zero-tima1), where tima0 indexes ex_tima_tenb_raddr and tima1 that address OR 1 -- but only when ex_tima_valid_unqual is set",
+  "why_one_word_is_exact_on_fp32": "vpu_tensorfma.v l.861 is `s1_tima_valid <= s0_fma_en_conv && req_int8`, so TIMA is live on an int8 TensorFMA and nowhere else. On an fp32 TensorFMA32 ex_tima_valid_unqual = 0, both paired terms index the SAME entry ex_ra2_ten (ll.808, 811), the AND is idempotent, and the mask is exactly A-zero | B-zero. The testbench's single-word B test is therefore exact for every number here, not a simplification. On an int8 TIMA op the two addresses differ, the AND bites, and this bench does not model it -- nothing here is int8",
+  "a_side": "f3_zero_data_a is {8{tena_word == 0}} (vpu_ctrl.v l.1230): one scalar A word broadcast to all eight lane bits. f3_zero_data_b[i] is per-lane (l.1233)"
+ },
+ "corrections": {
+  "dated": "2026-10-31, same day, after review; README section Corrections has the detail",
+  "sim_offs_off_by_one": "rf3r2w_struct.sv offs() was NODES - (ENTRIES >> L) = -1 at L = 0 instead of 0, so the read tree was built one index low and its root was never assigned. Fixed to ENTRIES - (ENTRIES >> L); a new rd_chk_fail counter asserts rd_data[p] == rf[rd_addr[p]] on every port every cycle and reads 0 in every row",
+  "sim_shortreal_fma": "tb_gate_audit.sv computed the multiply-add with $bitstoshortreal / $shortrealtobits. Verilator does not support shortreal (it warns `Unsupported: shortreal being promoted to real`, which -Wno-lint hid), so the casts read a double's bit pattern, every product underflowed, and the multiply-add returned c unchanged: A=3f800000 B=3f800000 C=467a0000 fma=467a0000. The arithmetic now comes from sim/accum.py and the testbench holds no floating point",
+  "what_moved": "NOTHING in the headline or in any pattern total. The address side (sel_pin_tr, addr_tr) and the write side (dec_tr, the clock-edge counters, the zero-gate counts) never read the tree or the result. f_data_read is 1/3 exactly before and after, because the bench's three read ports and the RTL's port 2 carry the same address stream over the same file. What moved: the mux_out_tr and rd_data_tr columns, and the *_model_rewired_only figures built on their ratio (randn 0.829 -> 0.849377, ones 0.349 -> 1.0)",
+  "cross_check": "the corrected counts agree digit for digit, on all eight rows and every counter, with two independent Python replicas of the two SystemVerilog files, one of them written by the reviewer before this fix"
+ },
  "card_check": {
   "board_zeros_pJ_per_mac": 0.27,
   "board_zeros_per_card_pJ": [
    0.1633,
    0.4034,
    0.2512
+  ],
+  "board_zeros_per_card_spread_pJ": [
+   0.1633,
+   0.4034
   ],
   "q129_transport_zeros_pJ_per_mac": 0.6540487692400841,
   "q129_ratio_over_board": 2.4224028490373484,
@@ -245,7 +268,45 @@
    0.5437579117331519,
    0.5437579117331519
   ],
-  "reading": "E38's 0.27 pJ/MAC is measured over idle. If the lane's clocks run at idle the clock term is inside the subtract and the signal-only figure is what has to fit inside 0.27; if they are gated at idle the whole corrected figure has to. Q129's numbers failed both tests (2.42x and 1.60x). The corrected ones pass both."
+  "readings": {
+   "signal_only_vs_board_mean": {
+    "pJ_per_mac": 0.14681463616795104,
+    "ratio": 0.5437579117331519,
+    "verdict": "PASSES",
+    "what": "the clock term is inside the idle subtract, so only signal switching has to fit inside the board's 0.27 pJ/MAC"
+   },
+   "with_clock_vs_board_mean": {
+    "pJ_per_mac": [
+     0.19774406843721157,
+     0.3698834310485625
+    ],
+    "ratio": [
+     0.7323854386563391,
+     1.3699386335131944
+    ],
+    "verdict": "STRADDLES",
+    "what": "the lane's clocks are gated at idle, so the whole figure has to fit. The lower end fits at 0.73x; the UPPER end still exceeds the whole board by 37%, so this reading is narrowed, not settled"
+   },
+   "same_netlist_strict_vs_board_mean": {
+    "pJ_per_mac": 0.48457229971222165,
+    "ratio": 1.7947122211563764,
+    "verdict": "FAILS",
+    "what": "the strictest re-price of the SAME netlist: the latch array has no read-enable pin at all, so only the bench's three swept addresses are fixable and the whole clock term stands. 1.79x the board"
+   },
+   "with_clock_vs_lowest_registered_card": {
+    "pJ_per_mac": [
+     0.19774406843721157,
+     0.3698834310485625
+    ],
+    "ratio": [
+     1.210925097594682,
+     2.2650546910505973
+    ],
+    "verdict": "FAILS",
+    "what": "against the lowest of the three registered cards (0.1633 pJ/MAC, not the three-card mean) both ends exceed it"
+   }
+  },
+  "reading": "E38's 0.27 pJ/MAC is a three-card mean and the cards themselves run 0.1633-0.4034 pJ/MAC. It is measured over idle: if the lane's clocks run at idle the clock term is inside the subtract and only the signal-only figure has to fit inside 0.27; if they are gated at idle the whole corrected figure has to. Q129's numbers failed both tests (2.42x and 1.60x). The corrected ones pass the signal-only reading cleanly at 0.54x and STRADDLE the board on the other at 0.73x-1.37x -- so the contradiction is NARROWED, not resolved: one lane's transport at the top of its own bound still exceeds the whole board by 37%, and against the lowest registered card, or on the strict same-netlist reading (0.4846, 1.79x), it still fails. See `readings` for all four."
  },
  "ledger_randn": {
   "arithmetic_switching_pJ": 1.516,
@@ -261,13 +322,31 @@
    0.4621091310245971,
    0.6342484936359482
   ],
+  "internal_convention": {
+   "multiplicative": {
+    "what": "the cells' internal energy is scaled by the same factor the switching moved (internal_ratio_used = 1.436882). Defensible, because the transitions that carry the internal energy are the ones the gating removes -- but NOT the convention Q129 published on",
+    "ratio_used": 1.4368824150834827
+   },
+   "additive_q129": {
+    "what": "Q129's own convention: the whole internal estimate is ADDED to the switching, unchanged. Its published 1.261 = 0.80979 signal switching + 0.45124 internal, and 1.484 = 1.0329 + 0.45124. Conservative here, because it keeps internal energy for transitions the gating removed",
+    "internal_pJ_per_mac_added": 0.451239922636887
+   }
+  },
   "corrected_transport_plus_internal_range_pJ": [
    0.6639964842187527,
    0.9113405072986821
   ],
+  "corrected_transport_plus_internal_range_additive_q129_pJ": [
+   0.9133490536614841,
+   1.085488416272835
+  ],
   "corrected_total_range_pJ": [
    2.609996484218753,
    2.857340507298682
+  ],
+  "corrected_total_range_additive_q129_pJ": [
+   2.859349053661484,
+   3.0314884162728353
   ],
   "board_E38_pJ": 5.783,
   "rail_Q128_pJ": 4.337,
@@ -279,6 +358,15 @@
   "corrected_closure_vs_rail_Q128": [
    0.6017976675625439,
    0.6588288003916721
-  ]
+  ],
+  "corrected_closure_vs_board_additive_q129": [
+   0.49444043812233857,
+   0.5242068850549603
+  ],
+  "corrected_closure_vs_rail_Q128_additive_q129": [
+   0.6592919192210017,
+   0.698982802922028
+  ],
+  "note": "Q129's published 55-59% closure is on the additive convention. Like-for-like against it, the corrected closure is 49-52% of the board; on the multiplicative convention 45-49%. Both are a FALL from 55-59%, which is the direction that matters: what came off was energy the chip does not spend."
  }
 }

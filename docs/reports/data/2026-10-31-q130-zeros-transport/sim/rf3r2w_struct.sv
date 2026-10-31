@@ -19,6 +19,14 @@
 // has no such port), while the compiled macro `vpu_64x32_3r2w_vpurf` that the chip actually
 // contains takes it as `rd_enable0/1/2` (`vpu_rf.v` ll. 60, 63, 66).
 //
+// CORRECTION, 31 Oct 2026 (same day, after review): `offs()` read
+// `NODES - (ENTRIES >> L)`, which is -1 at L = 0 instead of 0, so the tree was built one index
+// low, level 0's first node write was out of range and dropped, and the root node `node[NODES-1]`
+// that `rd_data` reads was never assigned. `sel_pin_tr`, `addr_tr` and the whole write side never
+// read the tree and were unaffected; `mux_out_tr` and `rd_data_tr` were. It is now
+// `ENTRIES - (ENTRIES >> L)`, and `rd_chk_fail` asserts `rd_data[p] == rf[rd_addr[p]]` on every
+// port every cycle so the same mistake cannot pass silently again.
+//
 // SPDX-License-Identifier: Apache-2.0
 
 module rf3r2w_struct #(
@@ -41,7 +49,7 @@ module rf3r2w_struct #(
   // level L holds (32 >> L) nodes; node (L, n) is the mux that selects on rd_addr[L]
   localparam int NODES = 63;
   function automatic int offs(input int L);
-    offs = NODES - (ENTRIES >> L);     // L=0 -> 0, 1 -> 32, 2 -> 48, 3 -> 56, 4 -> 60, 5 -> 62
+    offs = ENTRIES - (ENTRIES >> L);   // L=0 -> 0, 1 -> 32, 2 -> 48, 3 -> 56, 4 -> 60, 5 -> 62
   endfunction
   function automatic int nlev(input int L);
     nlev = (ENTRIES / 2) >> L;         // 32, 16, 8, 4, 2, 1
@@ -92,6 +100,10 @@ module rf3r2w_struct #(
   longint unsigned dec_tr, entry_clk_edges, wr_clk_edges, wrdata_clk_edges;
   longint unsigned wrdata_latch_tr, wr_addr_tr;
   longint unsigned cycles;
+  // the read tree must deliver what the array holds. Checked every cycle on every port, because
+  // a wrong offs() silently drops a level and leaves the root node unwritten: this counter was
+  // zero in the first version of this file only because the counter did not exist. It must stay 0.
+  longint unsigned rd_chk_fail;
 
   logic [WIDTH-1:0]   p_node [3][NODES];
   logic [SIZE-1:0]    p_addr [3];
@@ -105,12 +117,20 @@ module rf3r2w_struct #(
       mux_out_tr[p] = 0; sel_pin_tr[p] = 0; addr_tr[p] = 0; rd_data_tr[p] = 0;
     end
     dec_tr = 0; entry_clk_edges = 0; wr_clk_edges = 0; wrdata_clk_edges = 0;
-    wrdata_latch_tr = 0; wr_addr_tr = 0; cycles = 0;
+    wrdata_latch_tr = 0; wr_addr_tr = 0; cycles = 0; rd_chk_fail = 0;
     for (int e = 0; e < ENTRIES; e++) rf[e] = '0;
     wr_data_a_1p = '0;
   end
 
   always @(posedge clk) begin
+    // the read path is purely combinational and has no enable, so this holds every cycle
+    for (int p = 0; p < 3; p++)
+      if (rd_data[p] !== rf[rd_addr[p]]) begin
+        rd_chk_fail++;
+        if (rd_chk_fail < 4)
+          $display("RD_CHK_FAIL port %0d: rd_data=%h rf[%0d]=%h", p, rd_data[p],
+                   rd_addr[p], rf[rd_addr[p]]);
+      end
     if (measuring) begin
       cycles++;
       for (int p = 0; p < 3; p++) begin

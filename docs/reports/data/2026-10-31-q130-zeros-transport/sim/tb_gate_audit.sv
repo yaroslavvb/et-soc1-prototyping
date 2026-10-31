@@ -25,17 +25,42 @@
 //     fma_exec_accum_reg = {a_row, b_col}; mat_a_reg = {4'b0, a_rd_ptr};
 //     mat_b_reg = {2'b01, b_rd_ptr, b_col}                                 (ll. 677-679)
 //   and the write mask is gated off when the operand word is zero:
-//     f3_zero_data_a/b   = (word == 0)                       (vpu_ctrl l. 1230-1233)
-//     ex_tensor_zero_mask = A-zero | B-zero                  (l. 817)
+//     f3_zero_data_a      = {8{tena_wdata == 0}}             (vpu_ctrl l. 1230: one scalar A word,
+//                                                             broadcast to all 8 lane bits)
+//     f3_zero_data_b[i]   = (tenb_wdata word i == 0)         (l. 1233: per-lane word)
+//     ex_tensor_zero_mask = A-zero | (B-zero-tima0 & B-zero-tima1)          (ll. 805-818)
 //     ex_fma_gate_mask    = zero_mask & (cmd == MADD)        (l. 837)
 //     ex_ml_mask_to_f2    = ~ex_fma_gate_mask & ex_ml_mask   (l. 844)
 //     f2_regfile_wmask    = f2_ml_mask                       (l. 1002)  -> F3..F8 -> wr_mask
 //
+//   `gate` below is `a_zero | b_zero` on ONE 32-bit B word, which is EXACTLY ll. 805-818 for an
+//   fp32 TensorFMA32 and is not a simplification. The paired-TENB AND only has two different
+//   operands when TIMA is live, and TIMA is int8-only:
+//     vpu_tensorfma.v l. 861  s1_tima_valid <= s0_fma_en_conv && req_int8   -> 0 on fp32
+//     vpu_ctrl.v     l. 808   tima0 = ex_tensorb_zero_mask[ex_tima_valid_unqual ? ...: ex_ra2_ten]
+//     vpu_ctrl.v     l. 811   tima1 = ex_tensorb_zero_mask[ex_tima_valid_unqual ? ...: ex_ra2_ten]
+//   With `ex_tima_valid_unqual` = 0 both index the SAME entry `ex_ra2_ten`, so `tima0 & tima1`
+//   is idempotent and the mask is `A-zero | B-zero`. (On an int8 TIMA op the two differ, the AND
+//   bites, and this bench would not model it; nothing here is int8.)
+//
 //   +tiles=<hex>   768 words: A row-major, B row-major, the initial C
+//   +res=<hex>     (warm+ops) x 512 fp32 multiply-add results, from sim/accum.py
 //   +ops=<n>       measured ops (default 1)      +warm=<n> unmeasured ops first (default 1)
 //   +lane=<l>      which of the 8 lanes (default 0)
 //   +allmadd=1     every pass is an accumulate, so no micro-op escapes the zero gate
 //                  (default: the k = 0 pass is the multiply pass and is not gated)
+//
+// NO FLOATING POINT HERE (corrected 31 Oct 2026, same day, after review). This file used to
+// compute the multiply-add itself with `$bitstoshortreal` / `$shortrealtobits`. Verilator does
+// not support `shortreal` -- it promotes it to `real` and warns `Unsupported: shortreal being
+// promoted to real`, which `-Wno-lint` hid -- so the bit-casts read a double's pattern, every
+// product underflowed, and the multiply-add silently returned `c`
+// (`A=3f800000 B=3f800000 C=467a0000 fma=467a0000`). The address side, the write gating and the
+// zero-gate counts never touched the result and were unaffected; `mux_out_tr`, `rd_data_tr` and
+// `wrdata_latch_tr` were measured on an accumulator that never accumulated. The arithmetic now
+// comes in from `sim/accum.py` as a stream of words, one per micro-op, and one stream serves both
+// wirings because a zero-operand micro-op's result is the accumulator unchanged (accum.py
+// --check asserts it).
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -48,8 +73,8 @@ module tb;
   logic [31:0] mem [0:767];
   logic [31:0] A [16][16];
   logic [31:0] B [16][16];
-  logic [31:0] Cb [16][16];        // the bench wiring's accumulators
-  logic [31:0] Cr [16][16];        // the rtl wiring's accumulators
+  logic [31:0] res [0:8191];       // the fp32 multiply-add results, from sim/accum.py
+  int unsigned rn = 0;             // how many valid micro-ops have been issued
   int unsigned lane = 0, allmadd = 0;
 
   logic measuring = 0;
@@ -78,12 +103,6 @@ module tb;
                        .wr_en_a(r_wen), .wr_addr_a(r_waddr), .wr_data_a(r_wdata),
                        .rd_data(r_rdata));
 
-  function automatic logic [31:0] fp32_fma(input logic [31:0] a, b, c);
-    shortreal ra, rb, rc;
-    ra = $bitstoshortreal(a); rb = $bitstoshortreal(b); rc = $bitstoshortreal(c);
-    fp32_fma = $shortrealtobits(ra * rb + rc);
-  endfunction
-
   // ---- the writeback queues ------------------------------------------------
   logic [LAT:0][31:0] qb_res = '0, qr_res = '0;
   logic [LAT:0]       qb_val = '0, qr_val = '0;
@@ -99,8 +118,8 @@ module tb;
     mat_a_reg = {4'b0, 1'(i & 1)};                             // {4'b0, a_rd_ptr}
     mat_b_reg = {2'b01, 2'(k & 2'b11), 1'(h)};                 // {2'b01, b_rd_ptr, b_col}
 
-    a_zero  = (A[i][k] == 32'b0);
-    b_zero  = (B[k][8*h + lane] == 32'b0);
+    a_zero  = (A[i][k] == 32'b0);                              // f3_zero_data_a, one scalar word
+    b_zero  = (B[k][8*h + lane] == 32'b0);                     // f3_zero_data_b[lane]
     is_madd = allmadd ? 1'b1 : (k != 0);                       // the k = 0 pass is the multiply
     gate    = valid & is_madd & (a_zero | b_zero);
 
@@ -125,8 +144,9 @@ module tb;
     qb_val = {qb_val[LAT-1:0], valid};
     qr_val = {qr_val[LAT-1:0], valid & ~gate};
     q_idx  = {q_idx [LAT-1:0], accum_reg};
-    qb_res = {qb_res[LAT-1:0], valid ? fp32_fma(A[i][k], B[k][8*h+lane], Cb[i][8*h+lane]) : 32'b0};
-    qr_res = {qr_res[LAT-1:0], valid ? fp32_fma(A[i][k], B[k][8*h+lane], Cr[i][8*h+lane]) : 32'b0};
+    qb_res = {qb_res[LAT-1:0], valid ? res[rn] : 32'b0};
+    qr_res = {qr_res[LAT-1:0], valid ? res[rn] : 32'b0};
+    if (valid) rn++;
 
     b_wen   = qb_val[LAT];
     b_waddr = {1'b0, q_idx[LAT]};
@@ -135,11 +155,6 @@ module tb;
     r_waddr = {1'b0, q_idx[LAT]};
     r_wdata = qr_res[LAT];
   endtask
-
-  always @(posedge clock) begin
-    if (qb_val[LAT]) Cb[q_idx[LAT] >> 1][8 * (q_idx[LAT] & 1) + lane] <= qb_res[LAT];
-    if (qr_val[LAT]) Cr[q_idx[LAT] >> 1][8 * (q_idx[LAT] & 1) + lane] <= qr_res[LAT];
-  end
 
   task automatic one_op();
     for (int k = 0; k < 16; k++)
@@ -151,20 +166,24 @@ module tb;
     sum3 = v[0] + v[1] + v[2];
   endfunction
 
-  string tiles;
+  string tiles, resfile;
   int ops = 1, warm = 1;
   initial begin
     if (!$value$plusargs("tiles=%s", tiles)) begin $display("no +tiles"); $finish; end
+    if (!$value$plusargs("res=%s", resfile)) begin $display("no +res"); $finish; end
     void'($value$plusargs("ops=%d", ops));
     void'($value$plusargs("warm=%d", warm));
     void'($value$plusargs("lane=%d", lane));
     void'($value$plusargs("allmadd=%d", allmadd));
     $readmemh(tiles, mem);
+    for (int r = 0; r < 8192; r++) res[r] = 32'hdeadbeef;
+    $readmemh(resfile, res);
+    if (res[(warm+ops)*512 - 1] === 32'hdeadbeef) begin
+      $display("res file short: needs %0d words", (warm+ops)*512); $finish;
+    end
     for (int i = 0; i < 16; i++) for (int j = 0; j < 16; j++) begin
       A[i][j]  = mem[16*i + j];
       B[i][j]  = mem[256 + 16*i + j];
-      Cb[i][j] = mem[512 + 16*i + j];
-      Cr[i][j] = mem[512 + 16*i + j];
     end
     repeat (4) issue(0, 0, 0, 0);
     for (int w = 0; w < warm; w++) one_op();
@@ -176,8 +195,9 @@ module tb;
     @(negedge clock);
     measuring = 0;
 
-    $display("CNT {\"tiles\":\"%s\",\"allmadd\":%0d,\"muladds\":%0d,\"uops\":%0d,\"gated\":%0d,\"first_pass_uops\":%0d,\"cycles\":%0d,%s%s}",
+    $display("CNT {\"tiles\":\"%s\",\"allmadd\":%0d,\"muladds\":%0d,\"uops\":%0d,\"gated\":%0d,\"first_pass_uops\":%0d,\"cycles\":%0d,\"rd_chk_fail\":%0d,%s%s}",
              tiles, allmadd, 512*ops, uops, gated, first_pass_uops, bench.cycles,
+             bench.rd_chk_fail + rtl.rd_chk_fail,
              $sformatf("\"bench\":{\"sel_pin_tr\":%0d,\"sel_pin_tr_p\":[%0d,%0d,%0d],\"mux_out_tr\":%0d,\"mux_out_tr_p\":[%0d,%0d,%0d],\"addr_tr\":%0d,\"rd_data_tr\":%0d,\"dec_tr\":%0d,\"wr_clk_edges\":%0d,\"entry_clk_edges\":%0d,\"wrdata_clk_edges\":%0d,\"wrdata_latch_tr\":%0d,\"wr_addr_tr\":%0d},",
                       sum3(bench.sel_pin_tr), bench.sel_pin_tr[0], bench.sel_pin_tr[1], bench.sel_pin_tr[2],
                       sum3(bench.mux_out_tr), bench.mux_out_tr[0], bench.mux_out_tr[1], bench.mux_out_tr[2],

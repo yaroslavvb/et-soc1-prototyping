@@ -12,6 +12,7 @@ OUT=${OUT:?set OUT to a writable scratch directory}
 TILES_DIR=${TILES_DIR:?set TILES_DIR}
 VERILATOR=${VERILATOR:-$HOME/.local/micromamba/envs/verilator/bin/verilator}
 CXXOVERRIDE=${CXXOVERRIDE:-/usr/bin/clang++}
+PYTHON=${PYTHON:-python3}        # accum.py needs no third-party module, so any python3 does
 JOBS=${JOBS:-4}
 mkdir -p "$OUT"
 
@@ -29,8 +30,13 @@ fi
 
 : > "$OUT/counts.txt"
 for p in ${@:-zeros ones randn sparse75}; do
+  # the fp32 multiply-add stream: done outside the testbench, because Verilator promotes
+  # shortreal to real and its bit-casts do not round-trip (see accum.py's header)
+  "$PYTHON" -I "$D/accum.py" "$TILES_DIR/$p.hex" "$OUT/$p.res.hex" --ops 1 --warm 1 --check \
+    >> "$OUT/accum.log" 2>&1 || { echo "accum.py failed on $p"; tail -5 "$OUT/accum.log"; exit 1; }
   for am in 0 1; do
-    nice -n 10 "$OUT/obj_dir/Vtb" +tiles="$TILES_DIR/$p.hex" +ops=1 +warm=1 +allmadd=$am \
+    nice -n 10 "$OUT/obj_dir/Vtb" +tiles="$TILES_DIR/$p.hex" +res="$OUT/$p.res.hex" \
+      +ops=1 +warm=1 +allmadd=$am \
       | grep -E '^CNT' | sed -e "s|^CNT ||" -e "s|\"tiles\":\"[^\"]*/|\"tiles\":\"|" >> "$OUT/counts.txt"
   done
 done
