@@ -1,0 +1,68 @@
+passes kept: [7910, 7911, 7913, 7915, 7920, 7921, 7922, 7923]
+check b16_9: 493.94 +- 29.19 (n 8) vs hlp.json 493.94 +- 29.19
+check b32_22: 1052.05 +- 68.39 (n 8) vs hlp.json 1052.05 +- 68.39
+check b16p_9: 87.83 +- 29.44 (n 8) vs hlp.json 87.83 +- 29.44
+check b8k_6: 49.16 +- 21.86 (n 4) vs hlp.json 49.16 +- 21.86
+check a8_7: 152.06 +- 4.95 (n 4) vs hlp.json 152.06 +- 4.95
+
+[1] b16p_9 per pass, board fJ: {7910: 97.4, 7911: 97.2, 7913: 106.5, 7915: 97.6, 7920: 96.1, 7921: 1.4, 7922: 107.8, 7923: 98.8}
+    b16p_9 per pass, rail fJ:  {7910: 78.3, 7911: 78.9, 7913: 72.8, 7915: 78.2, 7920: 76.5, 7921: 75.9, 7922: 78.8, 7923: 79.8}
+    without 7921: 100.2 +- 4.5 (n 7), range 96.1-107.8
+    rail arm, all 8: 77.4 +- 1.9
+
+[2] dW(b16_9)/dW(b32_22) paired per pass: 0.943 +- 0.070 (n 8); ratio of means 0.939
+
+[3] fp16 B dW bit j / E65 fp32 B dW bit j+13: {0: 1.058, 1: 0.952, 2: 0.921, 3: 0.968, 4: 1.039, 5: 0.975, 6: 0.923, 7: 0.892, 8: 0.951, 9: 0.98}
+    range 0.892-1.058, mean 0.966
+    width model predicts dW ratio 2 x 11/24 = 0.917; equal watts per word predicts 1.000
+
+[4] fJ(b16p_9)/fJ(b32p_22): paired over 4 block-B passes 0.511 +- 0.538; ratio of means 0.584 [0.39, 0.78] (first-order propagation)
+    per pass pairs: {7920: (96.1, 155.5), 7921: (1.4, 154.1), 7922: (107.8, 145.9), 7923: (98.8, 145.7)}
+
+[5] fitted slope: b8p_6 at 1,024: 44.4 +- 23.9 fJ [20, 68] (n 8); b8k_6 49.2 +- 21.9 (n 4)
+
+[5] E71 slope: b8p_6 at 1,024: -8.3 +- 52.3 fJ [-61, 44] (n 8); b8k_6 2.1 +- 190.1 (n 4)
+
+[6] int8 A per lane: MSB 152.1, magnitude 71.5-92.0, mean 82.05; MSB/mean 1.853
+    per unit (/2): MSB 76.0 [74, 79], magnitude 35.7-46.0
+
+[7] fp16: zeros - h0 -8.736 W at 1.121e+09 ops/s -> 7.794 nJ per op, 0.9515 pJ per MAC (8192 MACs an op)
+
+[7] int8: zeros - h0 -1.834 W at 1.925e+09 ops/s -> 0.952 nJ per op, 0.0581 pJ per MAC (16384 MACs an op)
+    ratios: W 4.76, per op 8.18, per MAC 16.37
+
+[8] rail/board: 66 priced items; resolved 52: 0.502-1.193 (median 0.810); steps >= 1 W 31: 0.754-0.987 (median 0.811)
+    extremes among resolved: [('b8k_0', 0.5018282922427277, 0.053453472766459065, True), ('b8k_6', 0.5369841482923926, 0.09694898608933755, True)] [('a8_1', 0.9866756365830912, 1.1813318377742927, True), ('b8k_1', 1.193318742894888, 0.12140694553291276, True)]
+    pooled d_rail/d_p80 over the >= 1 W steps: 0.808
+
+[9] E71-slope change per list (positions whose fitted-slope interval excludes zero):
+    fp16_a: -7.8% to +0.0% over 16 resolved positions
+    fp16_b: -8.4% to -1.3% over 15 resolved positions
+    fp16_b_jgp: -4.8% to -4.8% over 1 resolved positions
+    fp16_b_kg: no resolved position at the fitted slope
+    fp32_b: -5.4% to -5.4% over 1 resolved positions
+    fp32_b_jgp: -0.6% to -0.6% over 1 resolved positions
+    fp32_b_kg: no resolved position at the fitted slope
+    int8_a: -1.3% to +3.6% over 8 resolved positions
+    int8_b: no resolved position at the fitted slope
+    int8_b_jgp: -118.8% to -118.8% over 1 resolved positions
+    int8_b_kg: -95.7% to +18.6% over 7 resolved positions
+    int8_b_kg at E71's slope: {'0': '3 [-147, 153]', '1': '13 [-140, 165]', '2': '35 [-65, 135]', '3': '5 [-96, 105]', '4': '48 [-46, 142]', '5': '39 [-196, 273]', '6': '2 [-188, 192]', '7': '-2 [-246, 242]'}
+    int8_b_kg positions still resolved at E71's slope: 0 of 8
+    int8_b_jgp at E71's slope: {'6': '-0.5 [-3.9, 2.8]'}
+
+[10] fp32: jg/jgp per bit 7.00; kg 159 [-328, 645] = [-0.31, 0.61] of jg's per-bit price; jgp 150 inside kg's interval: True
+
+[10] fp16: jg/jgp per bit 5.62; kg 134 [-75, 342] = [-0.15, 0.69] of jg's per-bit price; jgp 88 inside kg's interval: True
+
+[11] marginal 56.2 +- 12.7; bits it adds 6, 7: 373, 386 (mean 380, 6.76x); bit 9 494 (8.79x)
+
+[12] ops/s fp16 1.121e+09, int8 1.925e+09: ops ratio 1.718; MACs/s ratio 3.435; cycles {'fp16': 546.0024000000001, 'fp32': 546.0024000000001, 'int8': 318.00149999999996}
+
+[13] int8 jg dW: -0.119 to +0.078 W; bit 6 0.012
+     fp16 jg bit 9 dW 4.536, fp32 jg bit 22 dW 4.830
+     fp16 B list: [205, 224, 255, 295, 321, 334, 373, 386, 431, 494]
+
+[14] fitted: int8 B kg odd mean 73.2, even mean 37.0, ratio 1.98
+
+[14] E71: int8 B kg odd mean 18.6, even mean 21.9, ratio 0.85
