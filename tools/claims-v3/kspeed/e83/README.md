@@ -287,3 +287,20 @@ python3 tools/claims-v3/kspeed/e83/reduce_e83.py <data>/s1 --out <data>/results.
 ## Amendments
 
 None yet.
+
+## Corrections after verification (Sat 31 Oct 2026)
+
+*Written after the data, as a correction of this file's description. Nothing above is rewritten, and no prediction,
+rule, threshold, population or verdict changes. The data README's "Corrections after verification" has the full list
+([`docs/reports/data/2026-10-31-e83-kinds-speed-rest/`](../../../../docs/reports/data/2026-10-31-e83-kinds-speed-rest/README.md)).*
+
+- **Etiquette: "it caps every device process at `timeout 10` and never signals one."** That holds for every launch
+  and every `ettelem config` read.
+  - *The sampler is outside `timeout 10`.* `ettelem sample` ([`../../hpl/run_hpl.py`](../../hpl/run_hpl.py)
+    `start_sampler`) runs for the whole run, started with `--seconds` set to the run's plan plus 900 s.
+  - *The runner stops it with SIGTERM at the end of each run.* `ettelem` handles that by finishing the reading in
+    flight and exiting 0. SIGKILL and one management-queue drain follow only if a sampler ignores SIGTERM for 30 s.
+  - *In E83 none needed more.* All 121 samplers exited rc 0 after the SIGTERM, with no `error` mark, no SIGKILL and no
+    drain (the data README's C8).
+
+  E80's tool README carries the same correction ([`../README.md`](../README.md), Corrections after verification).

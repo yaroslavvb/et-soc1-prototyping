@@ -6,6 +6,11 @@ sustained kernel rate and is labelled as derived.
 
     python3 tables.py results.json ../../../../tools/claims-v3/kspeed/e83/predictions.json \
         ../2026-10-31-e80-kinds-speed/results.json [--cells cells.json] > tables.md
+
+Corrected after verification (Sat 31 Oct 2026; README "Corrections after verification", C3 and C7): in cells.json
+`interval` holds only an uncertainty, either the runs themselves or, for a sustained cell of one run, one run's
+1-sigma from the replicate pairs (one_run_sigma below, the same arithmetic as corrections-check.py C3). The limits get
+no interval; their per-pass lines and labels moved to `conditions`. tables.md is unchanged by that correction.
 """
 import argparse
 import json
@@ -17,6 +22,28 @@ SRC80 = "docs/reports/data/2026-10-31-e80-kinds-speed/results.json"
 
 def f1(x, d=1):
     return "–" if x is None else (f"{x:.{d}f}" if isinstance(x, (int, float)) else str(x))
+
+
+def one_run_sigma(cell_sets):
+    """One sustained run's 1-sigma: sqrt(2) x the rms half-spread of the replicate pairs (a pair's half-spread is
+    each run's deviation from the pair mean, sigma / sqrt(2)). Clock: at or near a clamp if the pair's mean is
+    <= 615 or >= 790 MHz, else on the slope. Board W and die C: pooled over every pair, sqrt(sum d^2 / 2n)."""
+    sl, cl, dw, dd = [], [], [], []
+    for cells in cell_sets:
+        for c in cells.values():
+            r = c.get("sus_mhz_runs") or []
+            if len(r) != 2:
+                continue
+            m, h = (r[0] + r[1]) / 2, abs(r[0] - r[1]) / 2
+            (cl if (m <= 615 or m >= 790) else sl).append(h)
+            dw.append(abs(c["sus_w_runs"][0] - c["sus_w_runs"][1]))
+            dd.append(abs(c["sus_die_runs"][0] - c["sus_die_runs"][1]))
+
+    def rq(xs):
+        return (sum(x * x for x in xs) / len(xs)) ** 0.5
+    return {"slope": 2 ** 0.5 * rq(sl), "clamp": 2 ** 0.5 * rq(cl), "n_slope": len(sl), "n_clamp": len(cl),
+            "w": (sum(x * x for x in dw) / (2 * len(dw))) ** 0.5, "die": (sum(x * x for x in dd) / (2 * len(dd))) ** 0.5,
+            "n": len(dw)}
 
 
 def pj(c):
@@ -114,6 +141,13 @@ def main():
               f"| {f1(c.get('sus_die'), 1)} | {c.get('sus_limit')} |")
     print(f"\n{len(allk)} kinds.")
 
+    sig = one_run_sigma([E80["cells"], C])
+    bf = {int(f): w for f, w in P["constants"]["B_registered_w"].items()}
+    gate = {rep: [m["gate"]["reading"][0] for m in R["runs"] if m["block"] == "BURST" and m["rep"] == rep]
+            for rep in (1, 2)}
+    dgate = sum(gate[2]) / len(gate[2]) - sum(gate[1]) / len(gate[1])
+    rf = [C[x]["burst_mhz_runs"] for x in C if C[x].get("burst_limit") == "power" and not C[x].get("idle_resets_burst")]
+    dpass = sum(b - a for a, b in rf) / len(rf)
     cells = []
     for key in order:
         c = C[key]
@@ -127,9 +161,14 @@ def main():
         bruns = "/".join(f1(x) for x in c.get("burst_mhz_runs", []))
         if c.get("burst_mhz") is not None:
             ds = ", ".join(str(x) for x in c.get("burst_die_start", []))
+            po = (f"; the passes ran in two rounds (all pass-1 bursts, then all pass-2), pass 2 from a die {dgate:.1f} C "
+                  "warmer on average" + (f"; on a power-limited kind like this one the pass spread includes a "
+                                         f"pass-order effect of {dpass:+.1f} MHz on average (pass 2 minus pass 1 over "
+                                         f"the {len(rf)} power-limited kinds without an idle reset; "
+                                         "corrections-check.txt C6)" if c.get("burst_limit") == "power" else ""))
             cells.append(dict(base, quantity="burst_MHz", value=f1(c["burst_mhz"]), interval=f"two passes: {bruns}",
                               unit="MHz, mean sampled clock 1.5-6.5 s of a 6 s run",
-                              conditions=cond % (tile, f"cool die, launched at a reading <= 55 C ({ds})"),
+                              conditions=cond % (tile, f"cool die, launched at a reading <= 55 C ({ds})" + po),
                               source=SRC + f" cells['{key}'].burst_mhz"))
             cells.append(dict(base, quantity=u, value=f1(c.get("burst_rate"), 2),
                               interval="two passes: " + "/".join(f1(x, 2) for x in c.get("burst_rate_runs", [])),
@@ -139,42 +178,59 @@ def main():
                               interval="two passes: " + "/".join(f1(x, 1) for x in c.get("burst_p800_w_runs", [])),
                               unit="W, whole board, median at 800 MHz in the first 1 s after reaching 800",
                               conditions=cond % (tile, "burst, cool die"), source=SRC + f" cells['{key}'].burst_p800_w"))
-            cells.append(dict(base, quantity="burst_limit", value=c.get("burst_limit"),
-                              interval="first throttle-down line per pass: " + ", ".join(
-                                  str(x) for x in c.get("burst_first_down", [])),
+            cells.append(dict(base, quantity="burst_limit", value=c.get("burst_limit"), interval=None,
                               unit="which governor test stepped the clock first (power / thermal / none)",
-                              conditions=cond % (tile, "burst"), source=SRC + f" cells['{key}'].burst_first_down"))
+                              conditions=cond % (tile, "burst; first throttle-down line per pass: " + ", ".join(
+                                  str(x) for x in c.get("burst_first_down", []))),
+                              source=SRC + f" cells['{key}'].burst_first_down"))
             if c.get("c_w") is not None:
                 cells.append(dict(base, quantity="switching_term_c_W", value=f1(c["c_w"], 2),
                                   interval="two passes: " + "/".join(f1(x, 2) for x in c.get("c_w_runs", [])),
-                                  unit=("W, the switching term c of P_f = B_f + c s_f at 600 MHz / 517 mV, referred to "
-                                        "a 58 C die (E64's method; includes the type's zero-data level)"),
+                                  unit=("W, the switching term c of P_f = B_f + c s_f: board switching at 600 MHz and "
+                                        "517 mV, referred to a 58 C die, over E64's fitted baseline B_f ("
+                                        + " / ".join(f"{bf[f]:.2f}" for f in sorted(bf)) + " W at "
+                                        + " / ".join(str(f) for f in sorted(bf)) + " MHz), not over idle; the type's "
+                                        "zeros read 1.7-2.4 W on it, and at 700 / 800 MHz the same data switch 1.41 / "
+                                        "1.91 times as much (E64's method; corrections-check.txt C2)"),
                                   conditions=cond % (tile, "burst powers at 600/700/800 MHz"),
                                   source=SRC + f" cells['{key}'].c_w"))
         if c.get("sus_mhz") is not None:
             n = len(c.get("sus_mhz_runs", []))
             sruns = "/".join(f1(x) for x in c.get("sus_mhz_runs", []))
-            iv = f"{n} runs: {sruns}" if n > 1 else "one run (see the data README for the replicate spread)"
+            slope = c.get("sus_limit") == "thermal" and c["sus_mhz"] > 615
+            s1 = sig["slope"] if slope else sig["clamp"]
+            where = (f"on the slope (sqrt(2) x the rms half-spread of the {sig['n_slope']} knife-edge replicate pairs)"
+                     if slope else f"at or near a clamp (sqrt(2) x the rms half-spread of {sig['n_clamp']} replicate "
+                                   "pairs)")
+            iv = f"{n} runs: {sruns}" if n > 1 else f"+-{s1:.1f} MHz, 1 sigma for one run {where}; corrections-check.txt C3"
             cs = cond % (tile, "sustained: nine back-to-back 8 s processes from a die <= 57 C, last 40 s of ~76 s")
             cells.append(dict(base, quantity="sustained_MHz", value=f1(c["sus_mhz"]), interval=iv,
-                              unit="MHz, mean sampled clock over the last 40 s", conditions=cs,
+                              unit="MHz, mean sampled clock over the in-kernel readings of the last 40 s", conditions=cs,
                               source=SRC + f" cells['{key}'].sus_mhz"))
-            cells.append(dict(base, quantity=u, value=f1(c.get("sus_rate"), 2),
-                              interval=("runs: " + "/".join(f1(x, 2) for x in c.get("sus_rate_runs", [])))
-                              + f"; wall-clock (gaps included) {f1(c.get('sus_rate_wall'), 2)}",
-                              unit=f"{u}, kernel-counted over the last 40 s", conditions=cs,
+            sr = c.get("sus_rate")
+            cells.append(dict(base, quantity=u, value=f1(sr, 2),
+                              interval=(("runs: " + "/".join(f1(x, 2) for x in c.get("sus_rate_runs", []))) if n > 1
+                                        else f"+-{sr * s1 / c['sus_mhz']:.2f} {u}, 1 sigma for one run (the clock's, "
+                                             "scaled)"),
+                              unit=(f"{u}, kernel-counted over the last 40 s (over the wall clock, the gaps between the "
+                                    f"nine processes included: {f1(c.get('sus_rate_wall'), 2)})"), conditions=cs,
                               source=SRC + f" cells['{key}'].sus_rate"))
             cells.append(dict(base, quantity="board_W", value=f1(c.get("sus_w"), 1),
-                              interval="runs: " + "/".join(f1(x, 2) for x in c.get("sus_w_runs", [])),
-                              unit="W, whole board, mean over the last 40 s", conditions=cs,
+                              interval=(("runs: " + "/".join(f1(x, 2) for x in c.get("sus_w_runs", []))) if n > 1
+                                        else f"+-{sig['w']:.1f} W, 1 sigma for one run (pooled over {sig['n']} "
+                                             "replicate pairs; corrections-check.txt C3)"),
+                              unit="W, whole board, mean over the in-kernel readings of the last 40 s", conditions=cs,
                               source=SRC + f" cells['{key}'].sus_w"))
             cells.append(dict(base, quantity="die_C", value=f1(c.get("sus_die"), 1),
-                              interval="runs: " + "/".join(f1(x, 1) for x in c.get("sus_die_runs", [])),
-                              unit="C, mean of the minion-shire die reading over the last 40 s", conditions=cs,
-                              source=SRC + f" cells['{key}'].sus_die"))
-            cells.append(dict(base, quantity="limit", value=c.get("sus_limit"),
-                              interval="E64 R4 labels over the last 40 s: " + json.dumps(c.get("sus_last")),
-                              unit="the test that holds the sustained clock (none / thermal / power)", conditions=cs,
+                              interval=(("runs: " + "/".join(f1(x, 1) for x in c.get("sus_die_runs", []))) if n > 1
+                                        else f"+-{sig['die']:.1f} C, 1 sigma for one run (pooled over {sig['n']} "
+                                             "replicate pairs; corrections-check.txt C3)"),
+                              unit="C, mean of the minion-shire die reading over the in-kernel readings of the last 40 s",
+                              conditions=cs, source=SRC + f" cells['{key}'].sus_die"))
+            cells.append(dict(base, quantity="limit", value=c.get("sus_limit"), interval=None,
+                              unit="the test that holds the sustained clock (none / thermal / power)",
+                              conditions=cs + "; registered label per run: " + "/".join(c.get("sus_limit_runs", []))
+                              + "; E64 R4 labels over the last 40 s: " + json.dumps(c.get("sus_last")),
                               source=SRC + f" cells['{key}'].sus_limit_runs"))
     if a.cells:
         json.dump(cells, open(a.cells, "w"), indent=1)

@@ -1,0 +1,117 @@
+E83 corrections-check: every number quoted in the README's 'Corrections after verification', from the committed
+files. Times are PDT, Sat 31 Oct 2026.
+
+======== C1. The two interim looks: which runs were done, which run was running, and what the copy overlapped
+first look: copy issued 14:06:39; runs finished before it: 78 (76 BURST, 2 SUS); the next run's sampler started 14:07:17.860 (SUS-28-int8-full-r1)
+  running: SUS-09-fp32-pow2-r1 work 14:05:54.965-14:07:11.468; its last-40-s window 14:06:31.468-14:07:11.468; copy issued INSIDE it
+    in-kernel readings in the window: 390; in the 10 s from the copy: 98
+    the 10 s from the copy: 691.8 MHz, 52.40 W, die 65.62 C | the rest of the window: 682.2 MHz, 51.78 W, die 65.59 C
+    registered sustained cell: 684.6 MHz, 51.94 W, 65.6 C, limit thermal; without those 10 s (labelled, not a re-score): 682.2 MHz
+    the 10 s from the copy, readings (s after the copy, MHz, W, die): (0.0, 600, 53.5, 66), (0.5, 800, 53.3, 66), (1.0, 600, 53.5, 66), (1.5, 700, 43.5, 65), (2.0, 700, 66.9, 66), (2.5, 700, 43.4, 65), (3.0, 700, 66.9, 66), (3.5, 600, 53.5, 66), (4.0, 800, 53.1, 66), (4.5, 600, 53.4, 65), (5.0, 700, 43.4, 65), (5.5, 700, 66.6, 66), (6.0, 700, 43.2, 65), (6.5, 700, 66.8, 66), (7.2, 800, 53.0, 66), (7.7, 600, 53.4, 65), (8.2, 700, 43.5, 65), (8.7, 700, 67.1, 66), (9.2, 700, 43.3, 65), (9.7, 800, 53.1, 66)
+second look: copy issued 14:26:17; runs finished before it: 90 (76 BURST, 14 SUS); the next run's sampler started 14:26:25.116 (SUS-40-fp32-sparse50-rep2-r1)
+  running: SUS-11-fp32-a_randn_b_zeros-r1 work 14:25:02.443-14:26:18.733; its last-40-s window 14:25:38.733-14:26:18.733; copy issued INSIDE it
+    in-kernel readings in the window: 391; in the 10 s from the copy: 17
+    the 10 s from the copy: 800.0 MHz, 37.14 W, die 58.00 C | the rest of the window: 800.0 MHz, 37.22 W, die 58.34 C
+    registered sustained cell: 800 MHz, 37.22 W, 58.3 C, limit none; without those 10 s (labelled, not a re-score): 800.0 MHz
+    the 10 s from the copy, readings (s after the copy, MHz, W, die): (0.0, 800, 37.1, 58), (0.5, 800, 37.1, 58), (1.0, 800, 37.2, 58), (1.5, 800, 37.2, 58)
+Code that ran = code registered (sha256 of the file now, against the hash the session recorded or the hash at the pre-registration c253bd1c):
+  tools/claims-v3/kspeed/e83/run_e83.py: same as s1/e83.json wrapper_sha256 (390f7c7c1675)
+  tools/claims-v3/kspeed/e83/predictions.json: same as s1/e83.json predictions_sha256 (97f58c89344d)
+  tools/claims-v3/kspeed/run_kspeed.py: same as s1/e83.json run_kspeed_sha256 (d3d844c7912d)
+  tools/claims-v3/kspeed/e83/protocol.json: same as s1/kspeed.json protocol_sha256 (5932d99dad4c)
+  tools/claims-v3/hpl/run_hpl.py: same as s1/session.json sha256.runner (68493295504f)
+  tools/claims-v3/kspeed/e83/reduce_e83.py: same as c253bd1c (b1bfb65bae3f)
+  tools/claims-v3/kspeed/reduce_kspeed.py: same as c253bd1c (10fee8c153a2)
+  tools/claims-v3/kspeed/posthoc_idle.py: same as c253bd1c (f25e2f717acd)
+  tools/claims-v3/hpl/reduce_hpl.py: same as c253bd1c (e49b6c1b39d7)
+  session git_head c253bd1c, runs planned 118, runs done 118, in the planned order: True
+
+======== C2. What the switching term c is
+c is fitted per burst run as P_f = B_f + c s_f over the burst's 600/700/800 MHz board powers, each referred to a 58 C die with 0.442 W/C (reduce_kspeed.burst_extra; E64's method).
+  B_f (E64's registered baseline, not idle): 600 MHz 25.46 W, 700 MHz 28.24 W, 800 MHz 33.61 W
+  s_f = (V_f / 0.517)^2 f / 600: 600 MHz 1.000 (V 0.517 V), 700 MHz 1.408 (V 0.568 V), 800 MHz 1.905 (V 0.618 V)
+  fp32/zeros: c 1.716 W on that baseline
+  fp16/zeros: c 1.739 W on that baseline
+  int8/zeros: c 2.357 W on that baseline
+  fp32/randn: c 25.59 W; the same data's switching term at 700 / 800 MHz: 36.04 / 48.75 W
+  fp32/ones: c 9.596 W; the same data's switching term at 700 / 800 MHz: 13.51 / 18.28 W
+  fp32/a_zeros_b_randn: c 2.409 W; the same data's switching term at 700 / 800 MHz: 3.39 / 4.59 W
+
+======== C3. The uncertainty of one run, and of a burst cell
+sustained replicate pairs (E80's three and E83's four): kind, runs, half-spread |x1 - x2| / 2, class
+  E80 fp16/ones         792.9 /  770.3  mean  781.6  half-spread 11.30  slope  (limits ['none', 'thermal'])
+  E80 int8/full         796.7 /  790.0  mean  793.4  half-spread  3.35  clamp  (limits ['none', 'none'])
+  E80 fp32/randn        608.4 /  600.3  mean  604.3  half-spread  4.05  clamp  (limits ['thermal', 'thermal'])
+  E83 fp32/ones         771.7 /  793.1  mean  782.4  half-spread 10.70  slope  (limits ['thermal', 'none'])
+  E83 fp32/sparse50     800.0 /  787.2  mean  793.6  half-spread  6.40  clamp  (limits ['none', 'thermal'])
+  E83 fp16/wsparse50    792.9 /  794.9  mean  793.9  half-spread  1.00  clamp  (limits ['none', 'none'])
+  E83 int8/ternary      794.4 /  800.0  mean  797.2  half-spread  2.80  clamp  (limits ['none', 'none'])
+class rule (the README's): at or near a clamp if the pair's mean is <= 615 or >= 790 MHz, else on the slope
+  slope: n 2, rms half-spread 11.00 MHz -> one run's sigma = sqrt(2) x 11.00 = 15.6 MHz
+  clamp: n 5, rms half-spread 3.94 MHz -> one run's sigma = sqrt(2) x 3.94 = 5.6 MHz
+  (a pair's half-spread is the deviation of each run from the pair's mean: E[(x1 - x2)^2 / 4] = sigma^2 / 2)
+  board W over all 7 pairs: one run's sigma 0.82 W; die C: 0.81 C (sqrt(sum d^2 / 2n))
+cross-check: the relation on measured c (S1) over the 8 single-run slope cells (fp32/neg_ones, fp32/pi, fp32/uniform01, fp32/pow2, fp32/fp16grid, fp16/uniform01, fp16/pair_half_zero, fp16/randn_sorted): residual rms 11.2 MHz (noise and model error together)
+burst: the 11 power-limited kinds; 10 without an idle reset in either pass (1 with: ['fp32/randn_large'])
+  pass 2 - pass 1 over those 10: mean -7.9 MHz, sd 10.6 MHz, t -2.35 (9 df); one pass's random part sigma = sd / sqrt(2) = 7.5 MHz; a two-pass cell mean 5.3 MHz; a difference of two cell means 7.5 MHz (the pass-order offset cancels: every cell has one pass in each round)
+fp32 fp16grid against E83's fp32 randn anchor: burst 757.5 - 714.7 = +42.8 MHz (1 sigma 7.5); sustained 648.7 - 612.0 = +36.7 MHz (one run on the slope against one at the 600 MHz clamp: 1 sigma sqrt(15.6^2 + 5.6^2) = 16.5)
+
+======== C4. The rms figures with and without the cells pinned at 800 MHz
+kinds (a) puts below 799 MHz: burst 9 of 33 (24 at the 800 MHz clamp), sustained 18 of 33 (15 at the clamp)
+                                     all 33  below 799   at 800   (registered value in results.json)
+  burst (a) [E83-R1]                  11.78      19.83     6.59   11.78
+  burst (b) Q130(c) 4-12 s            12.59      21.58     6.59   None
+  burst, relation on measured c [S1]     7.89      10.61     6.59   None
+  sustained (a) [E83-R3]              14.26      18.34     6.60   14.26
+  sustained (b) Q130(c) [E83-R4]      23.43      31.14     6.62   None
+  sustained, relation on c [S1]        7.52       8.37     6.35   None
+  registered S1: {'population_burst': 33, 'population_sus': 33, 'burst_rms_mhz': 7.89, 'sus_rms_mhz': 7.52, 'bar': 15.0, 'beside_burst_a1_reset_free_rms_mhz': 5.48, 'verdict': 'PASS'}
+  registered R1 / R3 beside-values: {'beside_a1_reset_free_rms_mhz': 10.3, 'beside_b_q130c_4_12s_rms_mhz': 12.59, 'beside_gov_arm_rms_mhz': 12.36, 'beside_rms_over_kinds_a_puts_below_799_mhz': 19.83} {'beside_t1_e80line_arm_rms_mhz': 14.69, 'beside_rms_over_kinds_a_puts_below_799_mhz': 18.34}
+
+======== C5. Which side's zero: A (the broadcast side) zero against B zero
+  fp32: A zero [2.524, 2.295] (mean 2.409), B zero [2.128, 2.275] (mean 2.202); difference +0.208 W; largest pass spread 0.229 W; passes overlap: False; pooled t 1.53 (2 df), two-sided p 0.27
+  fp16: A zero [2.683, 2.376] (mean 2.529), B zero [2.228, 2.17] (mean 2.199); difference +0.330 W; largest pass spread 0.307 W; passes overlap: False; pooled t 2.12 (2 df), two-sided p 0.17
+  int8: A zero [2.641, 2.523] (mean 2.582), B zero [2.536, 2.424] (mean 2.480); difference +0.102 W; largest pass spread 0.118 W; passes overlap: True; pooled t 1.25 (2 df), two-sided p 0.34
+  all three differences have the same sign; three of three by chance alone: p = 2 x 0.5^3 = 0.25 (two-sided)
+
+======== C6. The two burst passes are two rounds, not exchangeable replicates
+run order: all 38 pass-1 bursts first (positions 1-38), then all 38 pass-2 bursts
+  launch die reading (gate): pass 1 mean 53.24 C (range 47-55), pass 2 mean 54.55 C (range 53-55); difference +1.32 C
+  the 10 power-limited kinds without an idle reset (kind: die at the first work reading, p1 -> p2; MHz p1 -> p2):
+    fp32/randn         die 55 -> 54  MHz  711.8 ->  717.6  (+5.8)
+    fp32/randn_small   die 56 -> 55  MHz  704.2 ->  707.8  (+3.6)
+    fp32/uniform01     die 53 -> 55  MHz  732.0 ->  712.2  (-19.8)
+    fp32/fp16grid      die 51 -> 56  MHz  766.0 ->  749.0  (-17.0)
+    fp32/randn_sorted  die 56 -> 54  MHz  717.6 ->  708.2  (-9.4)
+    fp16/randn         die 52 -> 56  MHz  729.2 ->  720.4  (-8.8)
+    fp16/randn_small   die 54 -> 56  MHz  720.4 ->  698.0  (-22.4)
+    fp16/uniform01     die 48 -> 55  MHz  776.0 ->  762.5  (-13.5)
+    fp16/pair_half_zero die 56 -> 55  MHz  740.0 ->  735.4  (-4.6)
+    fp16/randn_sorted  die 56 -> 55  MHz  730.6 ->  737.5  (+6.9)
+  mean die difference +1.40 C; mean clock difference -7.9 MHz; least-squares slope of the clock difference on the die difference -2.1 MHz per C (n 10, descriptive)
+  a check of scale: at 700 MHz, 1 C more of die costs 0.442 W of leakage under the 65 W cap, and the burst power of random fp32 rises about 12.7 W per 100 MHz (c x (s_800 - s_700)): about 3.5 MHz per C
+
+======== C7. table_cells / cells.json: what goes in `interval`
+  burst cells: the two passes. Single-run sustained cells: one run's sigma from C3 (slope 15.6 MHz, clamp 5.6 MHz; board W 0.8 W; die 0.8 C). Two-run cells: both runs. Limits: no interval.
+  of the 33: 29 single-run sustained cells (8 thermal-held above 615 MHz take the slope sigma, 21 the clamp sigma: limit none, or at most 615 MHz), 4 with two runs
+
+======== C8. The sampler: outside timeout 10 by E64's design, stopped by the runner's SIGTERM
+  smoke: 3 sampler_start (['attempt 1']), 3 sampler_stop (rc ['0']); other marks: none; stop - start 6.4-6.7 s
+  s1: 118 sampler_start (['attempt 1']), 118 sampler_stop (rc ['0']); other marks: none; stop - start 11.4-106.1 s
+  run_hpl.py run_one starts the sampler as `ettelem sample --seconds <plan + 900>` and calls stop_sampler at the
+  end of every run: a sampler still running gets SIGTERM (stop_sampler), and SIGKILL plus one queue drain only if it
+  is still alive 30 s later. ettelem's sample() catches SIGTERM, finishes the reading in flight and returns 0
+  (tools/ettelem/ettelem.cpp, the comment above sample()). Every stop came minutes before the --seconds bound, so
+  all of them were SIGTERM stops, and every one exited with rc 0 inside the 30 s grace: no `error` mark, no SIGKILL,
+  no drain.
+
+======== C9. Wording: the idle reset in bursts, int8's 796 MHz passes, and the launch-ramp count's window
+  idle resets (results.json posthoc.idle_resets): {"burst_runs": 3, "sus_dips": 4, "work_processes": 454}
+    BURST-06-fp32-randn_large-r1: burst 694.2 MHz (without the dip 717.5), dip at 3.53 s on a 61 C die; first throttle-down line power_down
+    BURST-33-int8-wsparse90-r2: burst 758.3 MHz (without the dip 800), dip at 5.33 s on a 56 C die; first throttle-down line None
+    BURST-37-int8-sorted-r2: burst 751.0 MHz (without the dip 800), dip at 4.23 s on a 58 C die; first throttle-down line None
+  int8 burst passes, E80 and E83 (all 16 int8 kinds; E83's anchors int8 zeros and full are E80 kinds):
+    32 passes over 16 kinds: 27 at 800 MHz; below 800 without an idle reset: [('E80', 'int8/smallint', 'pass 2', 796), ('E83', 'int8/wsparse50', 'pass 1', 796.1)]; with one: [('E80', 'int8/neg_ones', 'pass 1', 755.1), ('E83', 'int8/wsparse90', 'pass 2', 758.3), ('E83', 'int8/sorted', 'pass 2', 751.0)]
+  launch ramps, over the 17 sustained runs of kinds (a) puts at 800 MHz: readings below 800 in the last 40 s that sit within 1.5 s after one of the nine process starts:
+    every reading in the last 40 s (the gaps between processes included): 211 of 225 (94%)
+    the registered window (readings inside a kernel launch, as reduce_hpl.run_metrics keeps them): 190 of 204 (93%)
