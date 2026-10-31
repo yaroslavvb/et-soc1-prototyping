@@ -231,6 +231,17 @@ python3 scripts/check-mirror.py --only "$SLUG"
 
 ## Checking that live equals repo
 
+**The toggle count's two facts, 2026-10-31 (Sat, week 44), Q130(f):** the chip diagram at version `f73a3a4ac4b8`
+equals source commit `36aaef68` (`check-mirror.py --via https --only et-soc1-chip-diagram`, **exit 0**, 1/1 equal,
+7 folder files equal, visibility and slug as listed, 0 warnings); before the deploy the live page equalled its file
+at `4474270c` (version `874d52e2697c`, the rollback target). `tfma.lab`'s cause and `tfma.owner.why`'s derivation
+are corrected against Q126(b); `tfma.clocked` is deliberately unchanged, so the memory levels' `facts.json` and
+`ladder-img/` rebuild byte-identical and that page was **not** redeployed. On the deployed build, run on the Intel:
+`zoom_test.mjs` **791/791** on the page's own server (desktop; then `--only=T6,T11,T22` 44/44 on the final bytes),
+`guard_test.py` 6/6, `zoom_static.py` clean but for Pillow (missing here). The page is 1,495,788 bytes against the
+1.5e6 budget, 4,212 to spare. The GitHub Pages mirror rebuilt from `36aaef68` (`gh-pages` `9565edd6`) and serves the
+same bytes.
+
 **The Horace card, 2026-10-31 (Sat, week 44), Q130(f):** the Horace page's **dashboard card** was corrected, and
 nothing else: it had read "zeros 38 W, constants 48 W, random 67 W" since its 20 September first version, against the
 page's own 38.29 / 46.73 / 63.40 W, and now reads the line kept in `sources/horace-experiment.meta.json`
