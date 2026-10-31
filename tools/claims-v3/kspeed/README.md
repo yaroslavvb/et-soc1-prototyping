@@ -297,4 +297,41 @@ python3 tools/claims-v3/kspeed/reduce_kspeed.py <data>/s1 --out <data>/results.j
 
 ## Amendments
 
-*(none yet)*
+- **A1 (Sat 31 Oct 2026, about 12:35 PDT; written after the 36 BURST runs had been reduced and while the SUS block
+  ran, with one SUS run, fp16 nn_like, already seen in that partial reduction).** It adds a labelled post-hoc view.
+  **No registered rule, threshold, population or verdict changes.**
+
+  *What was seen.* Two of the 36 bursts fell from 800 MHz straight to 600 MHz in mid-launch, with no power or thermal
+  line in the governor's trace ring and the work running on at the lower clock:
+
+  | run | at | board W before → during | die |
+  |---|---|---|---|
+  | int8 neg_ones, pass 1 | 4.2 s | 39.9 → 28.8 W | 57 °C |
+  | fp32 nn_like, pass 1 | 5.2 s | 60.2 → 39.2 W | 58 °C |
+
+  For about 1 s each, the ring holds a power-status record in throttle state 0, POWER_IDLE. fp32 nn_like's pass 1
+  also sat at 600 MHz for 2.2 s after its start before climbing.
+
+  This is the behaviour [`docs/findings/14-card-behaviour.md`](../../../docs/findings/14-card-behaviour.md) records as
+  "A one-second idle reset inside a launch" (E63, 8 of 360 launches): the governor resets as if the card were idle.
+  It is neither of its two limits, and neither model has it.
+
+  *What the registered rules make of it.* R7's second clause ("every cell predicted at 800 measures ≥ 790") now hangs
+  on int8 neg_ones (777.5 MHz, from 755.1 and 800). E80-S2's governor-only rms carries both runs. R2's three-way label
+  counts an `unresolved` cell as wrong, and an idle reset in a sustained run could push a 800-MHz cell below 90%.
+  All of that is scored exactly as registered.
+
+  *What is added.* [`posthoc_idle.py`](posthoc_idle.py) finds these episodes from the sampler alone, in every run:
+
+  - a **dip** is a work sample at 600 MHz straight after one at 800 (a power step and a thermal step both go one
+    point at a time). It must come more than 1.5 s after its process started and more than 0.3 s before it ended,
+    with the die under 65 °C.
+  - a **late ramp** is a first 800 MHz sample more than 1.2 s after the process start (E63's measured maximum), while
+    the die reads under 65 °C and the board under 65 W.
+
+  It then reports, *beside* the registered numbers:
+
+  - each burst cell without those samples, and R1, R7 and S2 on those means;
+  - each sustained run's limit with those samples left out (sampler-only, as A3 of E64);
+  - R2 on those limits;
+  - how many episodes there were, per kind and in all.
