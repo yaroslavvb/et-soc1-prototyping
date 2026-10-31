@@ -1,0 +1,206 @@
+{
+ "what": "the 0.22.0 thermal arm as a constant-power clamp, on committed E64 numbers",
+ "die_line": {
+  "a_C": 41.88,
+  "k_C_per_W": 0.4696,
+  "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/surface.txt:27"
+ },
+ "trip_semantics": {
+  "test": "temperature_C > temperature_threshold_C",
+  "source": "et-platform 836a4ab device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c:884",
+  "last_passing_reading_C": 65,
+  "first_tripping_reading_C": 66
+ },
+ "clamp_band_board_W": {
+  "at_65C": 49.23,
+  "at_66C": 51.36,
+  "width_W": 2.13
+ },
+ "vmin_points_MHz_V": [
+  [
+   600,
+   0.517
+  ],
+  [
+   700,
+   0.568
+  ],
+  [
+   800,
+   0.618
+  ]
+ ],
+ "rows": [
+  {
+   "type": "fp32",
+   "kind": "zeros",
+   "board_W_at_600": 27.035,
+   "board_W_at_800": 36.41,
+   "sustained_board_W": 36.36,
+   "sustained_die_C": 59.0,
+   "sustained_mean_MHz": 800,
+   "share_at_800": 1.0,
+   "regime": "never trips: 800 MHz power is under the band",
+   "predicted_MHz_band": [
+    800,
+    800
+   ],
+   "residual_MHz_vs_band_top": 0,
+   "rate_at_800": 12.3,
+   "rate_sustained": 12.3,
+   "speed_kept": 1.0
+  },
+  {
+   "type": "fp16",
+   "kind": "zeros",
+   "board_W_at_600": 27.375,
+   "board_W_at_800": 36.42,
+   "sustained_board_W": 36.09,
+   "sustained_die_C": 59.0,
+   "sustained_mean_MHz": 794,
+   "share_at_800": 0.97,
+   "regime": "never trips: 800 MHz power is under the band",
+   "predicted_MHz_band": [
+    800,
+    800
+   ],
+   "residual_MHz_vs_band_top": -6,
+   "rate_at_800": 24.6,
+   "rate_sustained": 24.4,
+   "speed_kept": 0.992
+  },
+  {
+   "type": "int8",
+   "kind": "zeros",
+   "board_W_at_600": 27.88,
+   "board_W_at_800": 37.59,
+   "sustained_board_W": 37.56,
+   "sustained_die_C": 59.0,
+   "sustained_mean_MHz": 800,
+   "share_at_800": 1.0,
+   "regime": "never trips: 800 MHz power is under the band",
+   "predicted_MHz_band": [
+    800,
+    800
+   ],
+   "residual_MHz_vs_band_top": 0,
+   "rate_at_800": 84.4,
+   "rate_sustained": 84.3,
+   "speed_kept": 0.999
+  },
+  {
+   "type": "int8",
+   "kind": "ones",
+   "board_W_at_600": 29.89,
+   "board_W_at_800": 41.72,
+   "sustained_board_W": 41.76,
+   "sustained_die_C": 61.7,
+   "sustained_mean_MHz": 800,
+   "share_at_800": 1.0,
+   "regime": "never trips: 800 MHz power is under the band",
+   "predicted_MHz_band": [
+    800,
+    800
+   ],
+   "residual_MHz_vs_band_top": 0,
+   "rate_at_800": 84.4,
+   "rate_sustained": 84.3,
+   "speed_kept": 0.999
+  },
+  {
+   "type": "fp16",
+   "kind": "ones",
+   "board_W_at_600": 45.36,
+   "board_W_at_800": 54.57,
+   "sustained_board_W": 49.28,
+   "sustained_die_C": 65.4,
+   "sustained_mean_MHz": 737,
+   "share_at_800": 0.48,
+   "regime": "in the clamp: the band falls inside the VMIN range",
+   "predicted_MHz_band": [
+    684.1,
+    730.4
+   ],
+   "residual_MHz_vs_band_top": 6.6,
+   "rate_at_800": 24.6,
+   "rate_sustained": 22.3,
+   "speed_kept": 0.907
+  },
+  {
+   "type": "fp32",
+   "kind": "ones",
+   "board_W_at_600": 45.185,
+   "board_W_at_800": 54.43,
+   "sustained_board_W": 49.38,
+   "sustained_die_C": 65.4,
+   "sustained_mean_MHz": 738,
+   "share_at_800": 0.48,
+   "regime": "in the clamp: the band falls inside the VMIN range",
+   "predicted_MHz_band": [
+    687.6,
+    733.6
+   ],
+   "residual_MHz_vs_band_top": 4.4,
+   "rate_at_800": 12.3,
+   "rate_sustained": 11.1,
+   "speed_kept": 0.902
+  },
+  {
+   "type": "int8",
+   "kind": "randn",
+   "board_W_at_600": 44.42,
+   "board_W_at_800": 53.17,
+   "sustained_board_W": 50.67,
+   "sustained_die_C": 65.3,
+   "sustained_mean_MHz": 763,
+   "share_at_800": 0.66,
+   "regime": "in the clamp: the band falls inside the VMIN range",
+   "predicted_MHz_band": [
+    710.0,
+    758.7
+   ],
+   "residual_MHz_vs_band_top": 4.3,
+   "rate_at_800": 84.4,
+   "rate_sustained": 79.5,
+   "speed_kept": 0.942
+  },
+  {
+   "type": "fp16",
+   "kind": "randn",
+   "board_W_at_600": 51.47,
+   "board_W_at_800": 63.87,
+   "sustained_board_W": 51.34,
+   "sustained_die_C": 66.1,
+   "sustained_mean_MHz": 600,
+   "share_at_800": 0.0,
+   "regime": "pinned at the 600 MHz floor: even the floor is over the band",
+   "predicted_MHz_band": [
+    600,
+    600
+   ],
+   "residual_MHz_vs_band_top": 0,
+   "rate_at_800": 24.6,
+   "rate_sustained": 18.4,
+   "speed_kept": 0.748
+  },
+  {
+   "type": "fp32",
+   "kind": "randn",
+   "board_W_at_600": 54.27,
+   "board_W_at_800": 67.77,
+   "sustained_board_W": 54.36,
+   "sustained_die_C": 67.1,
+   "sustained_mean_MHz": 600,
+   "share_at_800": 0.0,
+   "regime": "pinned at the 600 MHz floor: even the floor is over the band",
+   "predicted_MHz_band": [
+    600,
+    600
+   ],
+   "residual_MHz_vs_band_top": 0,
+   "rate_at_800": 12.3,
+   "rate_sustained": 9.2,
+   "speed_kept": 0.748
+  }
+ ]
+}
