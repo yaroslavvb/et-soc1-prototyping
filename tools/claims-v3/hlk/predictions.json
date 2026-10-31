@@ -1,0 +1,449 @@
+{
+ "experiment": "E85",
+ "request": "Q130",
+ "frozen": "Sat 31 Oct 2026, before the claim and the first launch",
+ "inputs": {
+  "e80": {
+   "path": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json",
+   "sha256": "f8ab6fc08ef73a5f0e91fe518c2d33162fe14687235ab763ac50639dd49ae6fd"
+  },
+  "e83": {
+   "path": "docs/reports/data/2026-10-31-e83-kinds-speed-rest/results.json",
+   "sha256": "3717f1767bdb76f536b7af8dbedf01865984638e649f892c2893e47d59676b3e"
+  },
+  "e63s2": {
+   "path": "docs/reports/data/2026-10-23-e63-camera-hamming-ladder/s2/analysis/lockin.json",
+   "sha256": "30f7e8707dd0d87370777196d6325000eec479037b89b3c7f6f6809b1821f3a1"
+  },
+  "e63pool": {
+   "path": "docs/reports/data/2026-10-23-e63-camera-hamming-ladder/posthoc/h3-rails-pooled.json",
+   "sha256": "98a48db142d51156f572796582e34f5a7f750b324cce8f38cb4d3dd0cf372ba3"
+  },
+  "e73": {
+   "path": "docs/reports/data/2026-10-27-e73-camera-frequencies/analysis/lockin.json",
+   "sha256": "d29e801f263fa42aeed5d33e5388b191df95aa6abbfbb439197ba003dc8ae4c4"
+  },
+  "kinds": {
+   "path": "tools/claims-v3/kinds/kinds.json",
+   "sha256": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337"
+  }
+ },
+ "constants": {
+  "minions": 192,
+  "full_card_minions": 1024,
+  "scale": 0.1875,
+  "step_band": 0.2,
+  "ref_step_band": 0.1,
+  "fund_per_step": 0.6185,
+  "reference_step_w_prior": 4.022,
+  "H_e63_pooled_mk_per_w": 52.706,
+  "H_e63_pooled_se": 1.98,
+  "H_e63_pooled_lag_deg": 95.39,
+  "H_prior_192_range": [
+   42.36,
+   71.1
+  ],
+  "zeros_192_board_w": 30.72,
+  "ones_192_board_w": 33.98,
+  "die_line_e83": {
+   "k_c_per_w": 0.4631,
+   "a_c": 40.759,
+   "n": 42,
+   "rms_c": 0.704,
+   "cap_w_at_65_5": 53.43,
+   "a_c_at_e80_slope": 42.084,
+   "shift_c_at_e80_slope": -0.149,
+   "e80_line": {
+    "a_c": 42.233,
+    "k_c_per_w": 0.4349
+   }
+  }
+ },
+ "prior_reference_blocks": [
+  {
+   "source": "E63 s2",
+   "block": "E63-TOP",
+   "step_w": 4.0204761904761925,
+   "fund_w": 2.4849648376448332,
+   "fund_per_step": 0.6180772425742209,
+   "cam_mk": 118.71262399128113,
+   "se_cam_mk": 13.008820497035893,
+   "H": 47.77235564580182,
+   "se_H": 5.06616068703173,
+   "lag_deg": 99.95694094433983
+  },
+  {
+   "source": "E63 s2",
+   "block": "E63-MID",
+   "step_w": 1.108611111111111,
+   "fund_w": 0.6867008805862694,
+   "fund_per_step": 0.6194244976473491,
+   "cam_mk": 36.28762806271949,
+   "se_cam_mk": 3.3364253381037248,
+   "H": 52.84342730380513,
+   "se_H": 5.864943008915799,
+   "lag_deg": 103.68669677952877
+  },
+  {
+   "source": "E63 s2",
+   "block": "E63-TOP2",
+   "step_w": 4.038333333333332,
+   "fund_w": 2.450483563957278,
+   "fund_per_step": 0.606805669985294,
+   "cam_mk": 103.80454350887236,
+   "se_cam_mk": 21.83339009838871,
+   "H": 42.36084054415723,
+   "se_H": 9.684209873857293,
+   "lag_deg": 108.5806366174361
+  },
+  {
+   "source": "E73",
+   "block": "E73-REF1",
+   "step_w": 3.960833333333333,
+   "fund_w": 2.453455431413099,
+   "fund_per_step": 0.6194291011352239,
+   "cam_mk": 174.43703919618247,
+   "se_cam_mk": 14.938655181571697,
+   "H": 71.09851557226503,
+   "se_H": 6.04926665840582,
+   "lag_deg": 98.09300732503573
+  },
+  {
+   "source": "E73",
+   "block": "E73-REF2",
+   "step_w": 4.034583333333333,
+   "fund_w": 2.48229198256913,
+   "fund_per_step": 0.6152536154255822,
+   "cam_mk": 148.2815917499875,
+   "se_cam_mk": 7.3680647327299775,
+   "H": 59.73575743354677,
+   "se_H": 3.4943911855666228,
+   "lag_deg": 98.89506881690528
+  },
+  {
+   "source": "E73",
+   "block": "E73-REF3",
+   "step_w": 4.053333333333332,
+   "fund_w": 2.560910907123991,
+   "fund_per_step": 0.6318036777444058,
+   "cam_mk": 134.28613941864282,
+   "se_cam_mk": 16.178845894471042,
+   "H": 52.43686496280798,
+   "se_H": 6.532793669225213,
+   "lag_deg": 97.81619664030347
+  }
+ ],
+ "blocks": {
+  "E85-F32": {
+   "role": "kind",
+   "format": "fp32",
+   "kind": "randn",
+   "sets": [
+    "F32R",
+    "F32Z"
+   ],
+   "tiles_sha256": {
+    "F32R": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa",
+    "F32Z": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+   },
+   "p800_full_card_w": {
+    "kind": 82.755,
+    "kind_runs": [
+     82.73,
+     82.78
+    ],
+    "zeros": 34.09,
+    "zeros_runs": [
+     34.09
+    ]
+   },
+   "board_step_w": 9.125,
+   "board_step_band_w": [
+    7.3,
+    10.95
+   ],
+   "board_fundamental_w": 5.643,
+   "camera_roi_mk": 297.4,
+   "camera_roi_band_mk": [
+    191.2,
+    481.5
+   ],
+   "lag_deg_band": [
+    80.0,
+    120.0
+   ],
+   "ratio_to_reference": 1.0,
+   "board_levels_w": {
+    "loud_arm": 39.84,
+    "zeros_arm": 30.72,
+    "block_mean": 35.28
+   },
+   "die_mean_c_below": 59.2
+  },
+  "E85-I8": {
+   "role": "kind",
+   "format": "int8",
+   "kind": "full",
+   "sets": [
+    "I8F",
+    "I8Z"
+   ],
+   "tiles_sha256": {
+    "I8F": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9",
+    "I8Z": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+   },
+   "p800_full_card_w": {
+    "kind": 49.11,
+    "kind_runs": [
+     48.91,
+     49.31
+    ],
+    "zeros": 35.03,
+    "zeros_runs": [
+     34.83,
+     35.23
+    ]
+   },
+   "board_step_w": 2.64,
+   "board_step_band_w": [
+    2.112,
+    3.168
+   ],
+   "board_fundamental_w": 1.633,
+   "camera_roi_mk": 86.1,
+   "camera_roi_band_mk": [
+    55.3,
+    139.3
+   ],
+   "lag_deg_band": [
+    80.0,
+    120.0
+   ],
+   "ratio_to_reference": 1.0,
+   "board_levels_w": {
+    "loud_arm": 33.36,
+    "zeros_arm": 30.72,
+    "block_mean": 32.04
+   },
+   "die_mean_c_below": 56.2
+  },
+  "E85-F16": {
+   "role": "kind",
+   "format": "fp16",
+   "kind": "randn",
+   "sets": [
+    "F16R",
+    "F16Z"
+   ],
+   "tiles_sha256": {
+    "F16R": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974",
+    "F16Z": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+   },
+   "p800_full_card_w": {
+    "kind": 76.58,
+    "kind_runs": [
+     76.14,
+     77.02
+    ],
+    "zeros": 34.245,
+    "zeros_runs": [
+     34.6,
+     33.89
+    ]
+   },
+   "board_step_w": 7.938,
+   "board_step_band_w": [
+    6.35,
+    9.525
+   ],
+   "board_fundamental_w": 4.909,
+   "camera_roi_mk": 258.7,
+   "camera_roi_band_mk": [
+    166.4,
+    418.8
+   ],
+   "lag_deg_band": [
+    80.0,
+    120.0
+   ],
+   "ratio_to_reference": 1.0,
+   "board_levels_w": {
+    "loud_arm": 38.66,
+    "zeros_arm": 30.72,
+    "block_mean": 34.69
+   },
+   "die_mean_c_below": 58.7
+  },
+  "E85-SP90": {
+   "role": "kind",
+   "format": "fp32",
+   "kind": "sparse90",
+   "sets": [
+    "F32S90",
+    "F32Z"
+   ],
+   "tiles_sha256": {
+    "F32S90": "1ff8d98e3cd223fb18bdd24c1c294ed88d3853a568fd96b3fb46ce6d6b11a841",
+    "F32Z": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+   },
+   "p800_full_card_w": {
+    "kind": 35.55,
+    "kind_runs": [
+     35.55
+    ],
+    "zeros": 34.09,
+    "zeros_runs": [
+     34.09
+    ]
+   },
+   "board_step_w": 0.274,
+   "board_step_band_w": [
+    0.219,
+    0.328
+   ],
+   "board_fundamental_w": 0.169,
+   "camera_roi_mk": 8.9,
+   "camera_roi_band_mk": [
+    5.7,
+    14.4
+   ],
+   "lag_deg_band": [
+    80.0,
+    120.0
+   ],
+   "ratio_to_reference": 1.0,
+   "board_levels_w": {
+    "loud_arm": 30.99,
+    "zeros_arm": 30.72,
+    "block_mean": 30.85
+   },
+   "die_mean_c_below": 55.1
+  },
+  "E85-REF1": {
+   "role": "ref",
+   "format": "fp32",
+   "kind": "lq_h23",
+   "sets": [
+    "REF23",
+    "REF0"
+   ],
+   "board_step_w": 4.022,
+   "board_step_band_w": [
+    3.619,
+    4.424
+   ],
+   "board_fundamental_w": 2.487,
+   "camera_roi_mk": 131.1,
+   "camera_roi_band_mk": [
+    105.4,
+    176.8
+   ],
+   "transfer_mk_per_w": 52.71,
+   "transfer_band": [
+    42.36,
+    71.1
+   ],
+   "lag_deg_band": [
+    80.0,
+    120.0
+   ],
+   "board_levels_w": {
+    "loud_arm": 38.62,
+    "zeros_arm": 34.28,
+    "block_mean": 36.45
+   },
+   "die_mean_c_below": 60.0
+  },
+  "E85-REF2": {
+   "role": "ref",
+   "format": "fp32",
+   "kind": "lq_h23",
+   "sets": [
+    "REF23",
+    "REF0"
+   ],
+   "board_step_w": 4.022,
+   "board_step_band_w": [
+    3.619,
+    4.424
+   ],
+   "board_fundamental_w": 2.487,
+   "camera_roi_mk": 131.1,
+   "camera_roi_band_mk": [
+    105.4,
+    176.8
+   ],
+   "transfer_mk_per_w": 52.71,
+   "transfer_band": [
+    42.36,
+    71.1
+   ],
+   "lag_deg_band": [
+    80.0,
+    120.0
+   ],
+   "board_levels_w": {
+    "loud_arm": 38.62,
+    "zeros_arm": 34.28,
+    "block_mean": 36.45
+   },
+   "die_mean_c_below": 60.0
+  },
+  "E85-REF3": {
+   "role": "ref",
+   "format": "fp32",
+   "kind": "lq_h23",
+   "sets": [
+    "REF23",
+    "REF0"
+   ],
+   "board_step_w": 4.022,
+   "board_step_band_w": [
+    3.619,
+    4.424
+   ],
+   "board_fundamental_w": 2.487,
+   "camera_roi_mk": 131.1,
+   "camera_roi_band_mk": [
+    105.4,
+    176.8
+   ],
+   "transfer_mk_per_w": 52.71,
+   "transfer_band": [
+    42.36,
+    71.1
+   ],
+   "lag_deg_band": [
+    80.0,
+    120.0
+   ],
+   "board_levels_w": {
+    "loud_arm": 38.62,
+    "zeros_arm": 34.28,
+    "block_mean": 36.45
+   },
+   "die_mean_c_below": 60.0
+  }
+ },
+ "rules": {
+  "E85-R1_seen": "each main kind (F32, I8, F16): the ROI amplitude's sign-flip p < 0.001 and its transfer phase (lag behind the board power) in (0, 180) degrees: warming that follows the kind",
+  "E85-R2_heat_follows_watts": "each main kind: R = |H_kind| / Href(t_kind) equals 1 within max(3 SE_R, 0.10), where H_kind = the kind's camera fundamental over its own board fundamental (mK/W), Href(t) the reference line at the kind block's mid-time, and SE_R the quadrature of the kind's jackknife SE of |H| and the line's SE at t, both divided by Href(t)",
+  "E85-R3_pooled": "the inverse-variance mean of the three main kinds' R equals 1 within max(3 SE, 0.05)",
+  "E85-R4_same_lag": "each main kind's transfer phase equals the reference line's phase within max(3 SE, 15 degrees), SE = the kind's jackknife phase SE and the line's phase SE in quadrature",
+  "E85-R5_near_null": "E85-SP90 (no detection required): its ROI amplitude projected on the reference line's camera direction equals Href(t) x its own board fundamental projected on the reference power direction, within 3 SE (its own SE along that direction)",
+  "E85-R6_electrical": "each kind's measured board step (arm A's steady median minus arm B's, mean over analysed laps) inside its predicted band; each reference block's inside +-10% of the earlier 192-minion mean; scored per block",
+  "E85-R7_reference_line": "the three reference blocks' |H| lie on a weighted straight line in time: worst residual <= 3 SE (E73's R2); with fewer than three references it is not scored and R2-R5 use the line through what there is",
+  "E85-R8_hold": "every block: >= 95% of the 10 Hz samples from 1.5 s after each analysed launch's start to its end read >= 790 MHz, and the block's die mean is below 65 C (E73's R6); the per-launch idle-reset dips are counted and reported with no verdict",
+  "E85-R9_absolute": "each main kind's ROI amplitude inside its frozen band [H_lo x 0.8, H_hi x 1.2] x its predicted fundamental, H_lo..H_hi = the six earlier 192-minion transfers: E63's mK per W, not drift-corrected"
+ },
+ "main_kinds": [
+  "E85-F32",
+  "E85-I8",
+  "E85-F16"
+ ],
+ "reference_blocks": [
+  "E85-REF1",
+  "E85-REF2",
+  "E85-REF3"
+ ]
+}
