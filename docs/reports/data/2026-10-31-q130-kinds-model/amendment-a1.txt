@@ -1,0 +1,75 @@
+Q130(c) amendment A1 — checks, arms and post-data scores on the frozen model (freeze 2bbe03dd, sha c5a66cb6d5f0…)
+replica of the frozen calibration against predictions.json, max |d|: {'dw': 0.0, 'alt': 0.0, 'ci95': 0.0}
+
+1. the sign term on the model's own price-list rungs (dumped tiles; gate arm, frozen numbers)
+   E65 bit_31   q 1.000  measured 0.563 +- 0.024 W   model 8.703 W   (15.5x)
+   E67 abit_31  q 0.500  measured 0.561 +- 0.182 W   model 4.614 W   (8.2x)
+   E70 nrd_a    q 0.258  measured 7.209 +- 0.015 W   model 7.282 W   (1.0x)
+   E70 nrd_b    q 0.452  measured 10.785 +- 0.024 W   model 10.365 W   (1.0x)
+   rungs with no sign change: rms 0.355 W over 62
+   E67 anchors on dumped operands (model over anchor_zeros vs E67):
+     anchor_ones   tiles 7 (1 distinct)  model 8.555 (flip 0.000, sign 0.000, q 0.000)  E67 8.217  resid +0.338
+     anchor_pi     tiles 10 (1 distinct)  model 8.555 (flip 0.000, sign 0.000, q 0.000)  E67 8.496  resid +0.059
+     anchor_randn  tiles 7 (7 distinct)  model 24.423 (flip 11.849, sign 4.019, q 0.492)  E67 24.659  resid -0.236
+
+2. the law at the model's own W (WB 6.965, WA 5.392) on E70's ladder: rms B 15-rung 1.236 W, with lq_h23 1.767 W; A 7-rung 1.161 W
+   E70's own law on the same sets: B 0.232 W (E70: 0.232), A 1.063 W (E70: 1.063)
+   lq_h23   measured 12.145  model  6.943  resid -5.202  (E70 law 10.294)
+   ls_h16   measured  9.749  model  6.840  resid -2.909  (E70 law  9.788)
+   ls_h12   measured  8.890  model  6.570  resid -2.320  (E70 law  8.946)
+   lq_h16   measured  8.364  model  6.170  resid -2.194  (E70 law  8.021)
+   alq_h23  measured  7.560  model  5.380  resid -2.180  (E70 law  6.333)
+
+3. randn: lambda re-fitted -0.0288 (resid 0); declared 0 leaves -0.153 W; one-sided steps over-add by 1.890 W; without the sign term 17.994 W
+
+4. E64 rows relabelled; clean four ['ones', 'pow2', 'mant', 'uniform'] rms 1.459 W (published eight 1.074); outside own 95%: ['sparse75']
+   zeros           basis (both terms vanish by definition)                        pred   0.00  E64   0.00  resid  +0.00  1s 0.15  z None
+   ones            clean                                                          pred   8.55  E64   8.89  resid  -0.34  1s 0.28  z -1.2
+   randn           selected-on (lambda fitted on the split and dropped)           pred  24.50  E64  24.65  resid  -0.14  1s 1.97  z -0.07
+   sparse75        arm-selected (chose the gate arm)                              pred   3.36  E64   2.53  resid  +0.83  1s 0.37  z 2.22
+   signs           fitted (sigma)                                                 pred  13.10  E64  13.10  resid  -0.00  1s 0.30  z -0.0
+   pow2            clean                                                          pred  12.98  E64  13.95  resid  -0.97  1s 0.61  z -1.58
+   mant            clean                                                          pred  20.28  E64  21.81  resid  -1.53  1s 1.46  z -1.05
+   uniform         clean                                                          pred  20.35  E64  22.61  resid  -2.26  1s 1.47  z -1.54
+   a_randn_b_ones  by construction U + E70 nrd_a (only the card transfer is teste pred  15.76  E64  15.73  resid  +0.03  1s 0.93  z 0.04
+   a_ones_b_randn  by construction U + E70 nrd_b (only the card transfer is teste pred  19.34  E64  19.31  resid  +0.02  1s 1.35  z 0.02
+
+5. arms (gate arm; WA, WB, sigma, alpha16, alpha8; randn check; largest moves)
+   zero_products_unsigned   WA 5.392 WB 6.965 sigma 8.165 a16 1.473 a8 0.672 | randn 15.951 vs 16.104 | nrd_a {'model_on_e70_dumped_tile_w': 7.282, 'measured_w': 7.209} nrd_b {'model_on_e70_dumped_tile_w': 10.365, 'measured_w': 10.785}
+      largest moves: fp16/pair_half_zero -2.22, int8/sparse50 -1.44, fp16/sparse50 -1.06, int8/ternary -0.97, fp16/nn_like -0.89, int8/wsparse50 -0.38
+   e70_actual_nrd_tiles     WA 5.305 WB 7.484 sigma 8.164 a16 1.444 a8 0.673 | randn 16.292 vs 16.104 | nrd_a {'model_on_e70_dumped_tile_w': 7.209, 'measured_w': 7.209} nrd_b {'model_on_e70_dumped_tile_w': 10.785, 'measured_w': 10.785}
+      largest moves: fp32/uniform01 +0.34, fp32/randn_small +0.34, fp32/randn_large +0.34, fp32/randn +0.33, fp32/fp16grid +0.30, fp32/randn_sorted +0.27
+   e70_winf                 WA 6.370 WB 10.520 sigma 8.159 a16 1.227 a8 0.633 | randn 19.252 vs 16.104 | nrd_a {'model_on_e70_dumped_tile_w': 8.057, 'measured_w': 7.209} nrd_b {'model_on_e70_dumped_tile_w': 12.922, 'measured_w': 10.785}
+      largest moves: fp32/uniform01 +3.28, fp32/randn_small +3.28, fp32/randn_large +3.27, fp32/randn +3.22, fp32/fp16grid +2.72, fp32/randn_sorted +2.56
+   e71_slope                WA 5.162 WB 6.584 sigma 8.401 a16 1.499 a8 0.671 | randn 15.508 vs 15.738 | nrd_a {'model_on_e70_dumped_tile_w': 7.124, 'measured_w': 7.048} nrd_b {'model_on_e70_dumped_tile_w': 10.127, 'measured_w': 10.562}
+      largest moves: fp32/uniform01 -0.66, fp32/randn -0.55, fp32/randn_small -0.55, fp32/randn_large -0.55, fp32/randn_sorted -0.52, fp32/fp16grid -0.49
+   frozen_replica           WA 5.392 WB 6.965 sigma 8.165 a16 1.473 a8 0.670 | randn 15.951 vs 16.104 | nrd_a {'model_on_e70_dumped_tile_w': 7.282, 'measured_w': 7.209} nrd_b {'model_on_e70_dumped_tile_w': 10.365, 'measured_w': 10.785}
+
+6. zero products unsigned: R3 {"fp16": {"frozen_w": 6.471, "zero_products_unsigned_w": 5.378, "registered_threshold_w": 2.0}, "int8": {"frozen_w": 2.794, "zero_products_unsigned_w": 1.727, "registered_threshold_w": 2.0}}
+   R9 fp32/a_randn_b_zeros   gate 0.00 | bus frozen 7.30 (sign 2.10, q 0.258) -> bus A1 5.19
+   R9 fp32/a_zeros_b_randn   gate 0.00 | bus frozen 10.78 (sign 4.14, q 0.507) -> bus A1 6.64
+   R9 fp16/a_randn_b_zeros   gate 0.00 | bus frozen 6.42 (sign 2.82, q 0.512) -> bus A1 3.60
+   R9 fp16/a_zeros_b_randn   gate 0.00 | bus frozen 10.02 (sign 5.36, q 0.972) -> bus A1 4.67
+   R9 int8/a_full_b_zeros    gate 0.00 | bus frozen 5.99 (sign 3.68, q 2.016) -> bus A1 2.32
+   R9 int8/a_zeros_b_full    gate 0.00 | bus frozen 0.81 (sign 0.23, q 0.127) -> bus A1 0.58
+   R9 fp32/sparse50          gate 9.50 | bus frozen 16.63 (sign 3.32, q 0.407) -> bus A1 14.89
+   R9 fp32/sparse90          gate 0.46 | bus frozen 6.71 (sign 1.21, q 0.148) -> bus A1 5.57
+   R9 fp16/wsparse50         gate 9.04 | bus frozen 15.05 (sign 4.90, q 0.889) -> bus A1 12.27
+
+7. gamma arms: in-sample rms on E64's own c {'0': 10.9, '2': 6.46, '3': 3.65} MHz; max |d| vs gamma 3: g0 20.0, g2 9.0 MHz; E64-T1 out of sample {"0.0": {"sustained_oos_rms_mhz": 9.6, "sustained_informative_oos_rms_mhz": 12.9, "n_informative": 5}, "2.0": {"sustained_oos_rms_mhz": 7.1, "sustained_informative_oos_rms_mhz": 9.6, "n_informative": 5}, "3.0": {"sustained_oos_rms_mhz": 6.2, "sustained_informative_oos_rms_mhz": 8.3, "n_informative": 5}}
+
+8. R5 post-data (alpha from E79's lists)
+   fp16_b     jg (E65's construction)                        alpha sums 1.035  significand 1.047  top bit 1.069  (frozen 1.473)  frozen-model rms 2.879 W  rho e79 1.0 model 1.0  msb rank e79 16/16 model 15  dearer 10 of 10
+   fp16_a     A side (E67's construction)                    alpha sums 0.945  significand 0.973  top bit 0.953  (frozen 1.473)  frozen-model rms 1.5 W  rho e79 0.855 model 0.818  msb rank e79 16/16 model 14  dearer 8 of 10
+   int8_a     A side (E67's construction)                    alpha sums 0.491  significand 0.401  top bit 0.282  (frozen 0.670)  frozen-model rms 1.905 W  rho e79 0.143 model 0.857  msb rank e79 1/8 model 8  dearer 0 of 7
+   int8_b_kg  kg (balanced accumulators, NOT E65's footing;  alpha sums 0.352  significand 0.344  top bit 0.251  (frozen 0.670)  frozen-model rms 0.183 W  rho e79 0.5 model 1.0  msb rank e79 8/8 model 8  dearer 0 of 7
+   int8_b     jg (does not alternate in int8, E79 A4)        alpha sums None  significand None  top bit None  (frozen 0.670)  frozen-model rms 0.065 W  rho e79 0.286 model None  msb rank e79 5/8 model 1  dearer 0 of 7  [the model's own stream counts no flips here]
+
+9. U post-data: fp16 model 8.463 vs E79 8.736 +- 0.054; int8 model 0.571 vs E79 1.834 +- 0.113; fp32/int8 {'model': 15.0, 'with_e79_int8': 4.67, 'e79_fp16_over_int8': 4.76}
+
+10. numbers: {"op_rate_gop_s": {"fp32": 1.1208, "fp16": 1.1208, "int8": 1.9244, "rule": "E70's measured 1.1208 Gop/s at 546 cycles an op, times 546/318 for int8 (model.py line 661)"}, "card_transfer": {"e64_fp32_randn_minus_zeros_a2_w": 24.1977, "x_xfer_w": 24.6491, "e67_anchor_step_w": 24.659, "abs_diff_w": 0.0099, "frozen_text_24_661_is_unsourced": true, "components": {"e64_ones_minus_zeros_x_xfer_w": 8.895, "u_w": 8.555, "e64_a_step_x_xfer_w": 6.836, "e70_nrd_a_w": 7.209, "e64_b_step_x_xfer_w": 10.42, "e70_nrd_b_w": 10.785, "e64_ones_runs_c_w": [11.164, 9.648, 9.704]}, "dates": {"e64": "2026-10-23", "e70": "2026-10-27", "days_apart": 4}}, "term_maxima": {"fp32": {"operand_bits_w": [11.827, "fp32/randn_large"], "product_sign_w": [4.21, "fp32/bf16trunc"]}, "fp16": {"operand_bits_w": [8.281, "fp16/randn_small"], "product_sign_w": [5.657, "fp16/fp8grid"]}, "int8": {"operand_bits_w": [2.903, "int8/smallint"], "product_sign_w": [3.67, "int8/highbit"]}}, "fp32_spread": {"randn_w": 24.21, "sparse90_w": 0.456, "ratio": 53.1}, "sign_bit_rank_e65": {"bit_31_w": 0.56, "rank_dearest_first": 23, "rank_cheapest_first": 10, "cheaper_positions": [1, 2, 3, 4, 5, 6, 7, 8, 27], "cheapest": [6, 0.38], "e65_registered": "A3 FAIL: sign is rank 10 of 32 (the four cheapest are bits [6, 2, 5, 3])"}}
+    gate union at sparse50: {"fp32": {"gated_lane_frac": 0.77417, "a_zero_word_frac": 0.51171875, "b_zero_word_frac": 0.5390625}, "fp16": {"gated_lane_frac": 0.414307, "a_zero_word_frac": 0.19921875, "b_zero_word_frac": 0.26953125}, "int8": {"gated_lane_frac": 0.070312, "a_zero_word_frac": 0.0703125, "b_zero_word_frac": 0.0390625}}
+
+11. R1/R2 out-of-sample sets: {'fp32': 15, 'fp16': 14, 'int8': 13}
+
+amendment-a1.json sha256 6ffc701b07d41f7ffbde9958bf44a03081cc82f784ff17202ebafbdc442c6d54
