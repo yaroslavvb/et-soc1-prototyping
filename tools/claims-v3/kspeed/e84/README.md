@@ -244,4 +244,25 @@ python3 tools/claims-v3/kspeed/e84/reduce_e84.py <data>/s1 --e80 docs/reports/da
 
 ## Amendments
 
-*(none yet)*
+- **A1 (Sat 31 Oct 2026, 15:42 PDT).** Written after the claim (posted 15:41:50 PDT) and the read-only identity
+  reads (`run_e84.sh ident`, 15:42:00), before the smoke and before any launch.
+
+  *What was read.* Card 0 reads **release 1.4.0: BL1 0.22.0, BL2 0.22.0, PMIC 1.6.1, minions 0.25.1**. It does not
+  read 1.4.1 / BL2 0.21.2, as the card table says. The PMIC firmware (1.6.1) is card 0's on record (card 1 read
+  PMIC 1.3.0 under E82), so this is card 0's answer (`dev_mngt_service -n 0`, both locks held non-blocking). The rest
+  of the read: TDP 65 W, threshold 65 °C, boot clock 600 MHz, idle at 600 MHz / 519 mV, uptime 5 d 0 h 40 min. The raw
+  read is collected into the data directory (`ident/`).
+
+  *What it means.*
+  - The governor E84 measures is **BL2 0.22.0's**: the same build as aifoundry2's in E80 and card 1's in E82, whose
+    source the lab has read first-hand (Q130(d), `836a4ab`). It has the same single-pass structure the predictions
+    were derived from. The power arm differs from 0.21.0's close only by the `uint16` → `uint32` widening, and E60's
+    card-0 telemetry had already shown no wrap.
+  - The wrap-hazard paragraph and the remark that 0.21.2 differs at the idle handler describe a build card 0 does not
+    run. The card evidence they rest on stands.
+  - E84's three differences from aifoundry2 become two: **another card** (its voltage, its board, PMIC firmware 1.6.1
+    against 1.5.0) and **another cooling**, under the same governor build. That makes E84 a cleaner test of "the
+    numbers or one card's limits".
+
+  **No prediction, rule, threshold, population, design or code changes.** This read supersedes
+  `predictions.json`'s `governor_reading.build_on_record`.
