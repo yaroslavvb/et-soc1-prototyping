@@ -6,6 +6,7 @@
   "built_by": "docs/reports/data/2026-10-31-q130-kinds-inventory/build_inventory.py",
   "scope": "desk only; no card was touched; every number is read from a committed file or typed from a committed README with its citation",
   "repo_head_note": "run `git log -1` for the head this was built at",
+  "corrected": "2026-10-31, after adversarial verification of the first cut (commit 7d9b73c5): one set of row denominators in row_taxonomy (kinds of number, not configurations), the format-dependent MACs per TensorFMA, ABL-T1 at its own alpha with its two FAILs, the zeros->random split computed with an interval instead of typed, the fp16 all-ones target separated from fp32's, the September offset per quantity, E71's band label, and the scope of the measured-slope rule. See README 'What the verification changed'.",
   "cell_counts": {
    "operand_kind_cells": 1166,
    "bit_level_cells": 239,
@@ -15,21 +16,501 @@
     "predicted": 34,
     "missing": 2
    },
+   "rows_in_cell_list": 55,
+   "rows_run_sourced": 52,
+   "rows_with_a_measured_cell": 52,
+   "distinct_kinds_of_number_measured": 42,
    "distinct_format_kind_rows": 52,
+   "distinct_format_kind_rows_means": "rows with at least one run-sourced cell (= len(row_coverage)); NOT the number of kinds of number, and not the number of rows in the cell list",
+   "rows_with_measured_switching_W": 48,
+   "rows_with_switching_W_any_status": 53,
+   "typed_numbers": 5,
    "mechanisms": 8,
    "holes": 10
   }
  },
  "normalisation": {
-  "mac_vs_flop": "1 multiply-add = 2 flops. MAC/s = TFLOPS x 1e12 / 2. One 16x16x16 TensorFMA = 4096 multiply-adds, so MAC/s = ops/s x 4096.",
-  "cycles_per_op": "fp32 546, fp16 546, int8 318 (tools/claims-v3/hpl/surface_hpl.py; measured identical on three cards to 0.0002 cycle, claims-v3 ABLB-2a). int8 is therefore 6.9x fp32's MAC rate at the same clock, not 4x.",
+  "mac_vs_flop": "1 multiply-add = 2 flops, so in EVERY format MAC/s = TFLOPS or TOPS x 1e12 / 2. MACs per 16x16x16 TensorFMA are FORMAT-DEPENDENT: fp32 4096, fp16 8192, int8 16384 (tools/claims-v3/hpl/surface_hpl.py:32 gives flops per op 8192 / 16384 / 32768). So MAC/s = ops/s x 4,096 holds for fp32 ONLY: applied to fp16 it reports pJ per MAC 2x too high and to int8 4x too high. The claims-v3 `per_s` field is already MAC/s (its `unit` reads MAC) and needs no conversion: at one 600 MHz pin it reads 4.591e12 for fp32, 9.184e12 for fp16 (exactly 2x at the same 546 cycles per op) and 3.153e13 for int8 (318 cycles).",
+  "cycles_per_op": "fp32 546, fp16 546, int8 318 (tools/claims-v3/hpl/surface_hpl.py; measured identical on three cards to 0.0002 cycle, claims-v3 ABLB-2a). int8 is therefore 6.9x fp32's MAC rate at the same clock (546/318 x 16384/4096 = 6.87), not 1.7x (the cycle ratio alone) and not 4x (the MACs-per-op ratio alone).",
   "clock_600_vs_800": "NEVER scale a price by the clock ratio. E72 ran ONE card at both: 79.18 +- 3.09 fJ at 600 MHz / 0.5179 V against 121.27 +- 0.61 fJ at 800 MHz / 0.6174 V - the price follows the VOLTAGE, 10-15% below a pure V^2 extrapolation, exponent bracketed 1.60-2.92, and the clock-scaling rival n = 3.637 excluded at >= 3.4 SE. E64's own governor model uses (V/0.517)^2 x f/600, i.e. s(700) = 1.408 and s(800) = 1.905 over s(600) = 1.0; cells marked `modelled` that cross clocks use exactly that factor and say so.",
   "card_to_card": "at the SAME die temperature aifoundry3 switches 0.958-0.969 of aifoundry2 over the Horace patterns (E38's post-data note C2; E46's independent catalogue 0.972), and a2's 600 MHz per-bit price is 0.970 of a3's (E72). A cross-card quote carries about 3%. aifoundry1 card 1 idled at 50.15 W against a2's 36.34 and a3's 25.78 in September and borrows a2's leakage slope.",
-  "baseline": "THREE different zeros are in play and they are not interchangeable. (a) OVER IDLE: claims-v3 `switching` (board minus pre-launch idle minus leakage x the rise since launch), the September p_early - p_before, and E64's model term c. (b) OVER ZEROS: E67's anchors differenced against anchor_zeros, and the E15 rail column - these subtract a RUNNING kernel on zero data, so they omit the 8.6 W of lane un-gating. (c) OVER A CONSTANT OPERAND: every bit price in table 2 (lq_h0, aq_h0, lb_h0) - a constant NON-zero operand, so the lane is un-gated and only the flips are missing. (b) and (c) differ by that 8.6 W; (a) and (c) differ by the whole zeros level. Each cell's `conditions` names its own baseline.",
-  "leakage_slope": "a leakage slope is NOT a card constant (E71): it rises about 0.009 W/C per C on aifoundry2 and 0.011 on aifoundry3 over 51-65 C. Measured idle slopes: a2 0.2936 over 51-58 C (E66) and 0.3452 over 58-62; a3 0.3200 over 52-58 and 0.3803 +- 0.0036 over 58-62 (E71). The September campaign used 0.81 (a2, at an 80.9 C launch) and 0.55 (a3, at 55.8 C), fitted then. E68's registered estimator used 1.508 W/C, which is 4-5x every measured idle slope and is a busy transient, not leakage - its prices are published at both footings and the measured one is the better. Re-pricing the a3 ladders at E71's slope moves prices a few per cent and systematically (E65's flat mantissa floor 109 -> ~103 fJ, bit 22 1008 -> 986, the flow-M flip 745 +- 56 -> 722 +- 61 fJ) and moves none of the 16 registered verdicts.",
+  "baseline": "THREE different zeros are in play and they are not interchangeable. (a) OVER IDLE: claims-v3 `switching` (board minus pre-launch idle minus leakage x the rise since launch), the September p_early - p_before, and E64's model term c. (b) OVER ZEROS: E67's anchors differenced against anchor_zeros, and the E15 rail column - these subtract a RUNNING kernel on zero data, so they omit the 8.55 W of lane un-gating. (c) OVER A CONSTANT OPERAND: every bit price in table 2 (lq_h0, aq_h0, lb_h0) - a constant NON-zero operand, so the lane is un-gated and only the flips are missing. (b) and (c) differ by that 8.55 +- 0.06 W; (a) and (c) differ by the whole zeros level. Each cell's `conditions` names its own baseline.",
+  "leakage_slope": "a leakage slope is NOT a card constant (E71): it rises about 0.009 W/C per C on aifoundry2 and 0.011 on aifoundry3 over 51-65 C. Measured idle slopes: a2 0.2936 over 51-58 C (E66) and 0.3452 +- 0.0056 over 58-62; a3 0.3200 +- 0.0038 over 51-58 (E71's own band label; its floor is 52-53 C, so that fit spans 5-6 degrees, not 7) and 0.3803 +- 0.0036 over 58-62. THE SCOPE OF THIS RULE: it governs the a3 bit ladders, which launch at 58 C inside the measured bands, and E71's leak_sensitivity.py re-prices exactly those. It does NOT reach the claims-v3 / September cells that carry table 1A's spine: those launch at 80.9 C (a2) and 55.8 C (a3) on the campaign's own FITTED BUSY-DIE slopes, 0.81 and 0.55 W/C, which are 2.1-2.8x every measured idle slope and sit at a die temperature no measured band covers (the bands stop at 66 C). No re-reduction of the 80.9 C campaign onto a measured slope exists - that is this inventory's own hole H10, and until it is done every 1A cell carries that footing, not a measured-idle one. E68's registered estimator used 1.508 W/C, which is 4-5x every measured idle slope and is a busy transient, not leakage - its prices are published at both footings and the measured one is the better. Re-pricing the a3 ladders at E71's slope moves prices a few per cent and systematically (E65's flat mantissa floor 109 -> ~103 fJ, bit 22 1008 -> 986, the flow-M flip 745 +- 56 -> 722 +- 61 fJ) and moves none of the 16 registered verdicts.",
   "launch_temperature": "September a2 and a1c1 launched at 80.9 C and a3 at 55.8 C; E64 launched at 50-57 C; the bit ladders at 58 C. Switching power itself drifts with die temperature at +22.0 +- 36.1 mW/C (E65 D1, re-read as +32.4 +- 39.6 at E71's slope) - consistent with zero and UNDECIDED, so it is not corrected for anywhere; it is a stated uncertainty of about +-1%/10 C.",
   "toggles": "quote `nets_hier`, not `nets` (Q126(b)). The 21 Sep figure of 21,331 net toggles per random fp32 multiply-add reproduces only under the Verilator it was measured with (5.042, a coverage-counter defect in two compressor modules) and was never a count of wires; the figure to quote is about 1,301 per multiply-add, 8-16x smaller.",
-  "rail_vs_board": "the minion rail carries 4.774 pJ [4.549-4.951] of the board's 5.783 pJ per random fp32 multiply-add, ratio 0.825 [0.787-0.856] (Q129). The 1.009 pJ between them is mostly the regulators' delivery loss (0.875 pJ), which is a named account, not a bottom-up row."
+  "rail_vs_board": "the minion rail carries 4.774 pJ [4.549-4.951] of the board's 5.783 pJ per random fp32 multiply-add, ratio 0.825 [0.787-0.856] (Q129). The 1.009 pJ between them is mostly the regulators' delivery loss (0.875 pJ), which is a named account, not a bottom-up row.",
+  "september_basis": "the September strict cells are marked `basis: idle_raw` and \u02e2 in tables.md: p_early - p_before, NOT leakage-corrected. QUOTE THE OFFSET PER QUANTITY, because it is not one number: on fp32 randn (a2, 600 MHz) switching_W reads +8.6% high (29.52 against 27.18 W) and pJ per MAC +12.0% (6.630 against 5.920), the extra 3.1% being the denominator - the September pJ column implies 8.905 TFLOPS where the same record's `tflops` field reads 9.183. Table 1A puts September sparse75 (1.0966 pJ/MAC \u02e2) in the same column as the claims-v3 figures, so a reader comparing them across that mark is comparing bases that differ by about a tenth, not by 8%.",
+  "counting_kinds": "a configuration variant is not a kind of number. Seven fp32 rows are the same randn operand at a different minion count and three are TenB streaming arms; `row_taxonomy` folds them into their base kind with VARIANT_OF, and each such cell carries `variant_of` and `variant_is`. Quote `row_taxonomy.one_sentence` and nothing else for coverage."
+ },
+ "zeros_random_split": {
+  "zeros_level_W": {
+   "value": 27.828,
+   "se": 0.0427,
+   "n_passes": 7,
+   "source": "docs/reports/data/2026-10-27-e67-a-side-bit-prices/hl.json: cards.aifoundry3.anchors.anchor_zeros.p80"
+  },
+  "constant_operand_level_W": {
+   "value": 36.383,
+   "se": 0.0422,
+   "items": {
+    "lq_h0": 36.466,
+    "aq_h0": 36.328,
+    "anchor_pi": 36.354
+   },
+   "spread_W": 0.138,
+   "source": "docs/reports/data/2026-10-27-e70-saturation-ladder/hl.json: cards.aifoundry3.items[lq_h0, aq_h0, anchor_pi].p80 (mean of 3)"
+  },
+  "random_level_W": {
+   "value": 52.487,
+   "se": 0.364,
+   "n_passes": 7,
+   "source": "docs/reports/data/2026-10-27-e67-a-side-bit-prices/hl.json: cards.aifoundry3.anchors.anchor_randn.p80"
+  },
+  "lane_ungating_W": {
+   "value": 8.555,
+   "se": 0.06,
+   "range_over_constant_items_W": [
+    8.5,
+    8.638
+   ]
+  },
+  "operand_flips_W": {
+   "value": 16.105,
+   "se": 0.3665
+  },
+  "step_W": {
+   "value": 24.659,
+   "se": 0.3665
+  },
+  "slope_sensitivity_W": {
+   "ungating_at_k_0.1975": 8.555,
+   "ungating_at_k_0.3803": 8.451,
+   "note": "both levels re-reduced from the raw runs at ONE common slope: E70's registered 0.1975 W/C and E71's steepest measured idle slope on this card, 0.3803 W/C (58-62 C). The un-gating term moves 0.105 W between those two, against its own 0.060 W standard error, so the leakage footing is not what the split rests on - which is what 'no leakage term survives the difference' means here. At E70's own slope the re-reduction agrees with the published-anchor arithmetic above to 0.001 W. The reducers themselves used k = 0.1755 (E67) and 0.1975 (E70), solved from their own runs' p_raw, p80, t_win and start_c."
+  },
+  "published_as": "E70's README quotes this split as 8.6 W / 16.1 W / 24.66 W, from the same three levels with the constant-operand level rounded to 36.40 W",
+  "source": "docs/reports/data/2026-10-27-e70-saturation-ladder/README.md (the zeros->random step) recomputed from 2026-10-27-e67-a-side-bit-prices/hl.json and 2026-10-27-e70-saturation-ladder/hl.json"
+ },
+ "registered_items": {
+  "ABL-T1": {
+   "item": "ABL-T1",
+   "registered_outcome": "CARD-DIFFERENT",
+   "test_as_registered": "Welch, Bonferroni 0.01/19; negzero-zeros difference (> +6 W), negzero-ones equivalence (+-1.0 W)",
+   "per_card": [
+    {
+     "card": "aifoundry2",
+     "card_outcome": "PASS",
+     "subtest": "negzero - ones within +-1 W",
+     "point_W": -0.151,
+     "se_W": 0.066,
+     "df": 4.12,
+     "published_interval_W": [
+      -0.801,
+      0.5
+     ],
+     "published_alpha": 0.000526,
+     "interval_95_W": [
+      -0.333,
+      0.031
+     ],
+     "subtest_ok": true
+    },
+    {
+     "card": "aifoundry3",
+     "card_outcome": "FAIL",
+     "subtest": "negzero - ones within +-1 W",
+     "point_W": -0.039,
+     "se_W": 0.076,
+     "df": 3.172,
+     "published_interval_W": [
+      -1.14,
+      1.061
+     ],
+     "published_alpha": 0.000526,
+     "interval_95_W": [
+      -0.276,
+      0.198
+     ],
+     "subtest_ok": false
+    },
+    {
+     "card": "aifoundry1-c1",
+     "card_outcome": "FAIL",
+     "subtest": "negzero - ones within +-1 W",
+     "point_W": -0.144,
+     "se_W": 0.171,
+     "df": 5.22,
+     "published_interval_W": [
+      -1.438,
+      1.149
+     ],
+     "published_alpha": 0.000526,
+     "interval_95_W": [
+      -0.579,
+      0.291
+     ],
+     "subtest_ok": false
+    }
+   ],
+   "reading": "the registered outcome is CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 FAIL). The equivalence subtest 'negzero - ones within +-1 W' holds on aifoundry2 only: -0.15 W, published interval [-0.80, +0.50] at the family-wise alpha 0.000526 - NOT 95%; re-read at 95% it is [-0.33, +0.03]. It FAILS on aifoundry3 (-0.04 W, [-1.14, +1.06]) and aifoundry1-c1 (-0.14 W, [-1.44, +1.15]) on interval WIDTH, not on sign: every point estimate is within 0.15 W of zero and all three 95% intervals lie inside the +-1 W band.",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.json: [item=ABL-T1].per_card.*.subtests[negzero - ones within +-1 W].ci"
+  }
+ },
+ "row_taxonomy": {
+  "one_sentence": "52 (format, kind) rows have at least one run-sourced cell (fp32 43, fp16 4, int8 5); 3 more fp32 matrices are prediction-only, so the cell list holds 55 rows. Folding the 10 configuration variants (minion count, TenB streaming) into their base kind leaves 42 distinct KINDS OF NUMBER with a measured cell: fp32 36, fp16 3, int8 3.",
+  "rows_in_cell_list": {
+   "total": 55,
+   "fp32": 46,
+   "fp16": 4,
+   "int8": 5
+  },
+  "rows_run_sourced": {
+   "total": 52,
+   "fp32": 43,
+   "fp16": 4,
+   "int8": 5
+  },
+  "rows_with_a_measured_cell": {
+   "total": 52,
+   "fp32": 43,
+   "fp16": 4,
+   "int8": 5
+  },
+  "rows_prediction_only": [
+   "fp32/m_diagonal",
+   "fp32/m_hadamard_orth",
+   "fp32/m_permutation"
+  ],
+  "distinct_kinds_of_number_measured": {
+   "total": 42,
+   "fp32": 36,
+   "fp16": 3,
+   "int8": 3
+  },
+  "kinds_of_number_measured": [
+   "fp16/ones",
+   "fp16/randn",
+   "fp16/zeros",
+   "fp32/a_const_b_randn",
+   "fp32/a_ones_b_randn",
+   "fp32/a_randn_b_const",
+   "fp32/a_randn_b_ones",
+   "fp32/checker",
+   "fp32/m_block_diag",
+   "fp32/m_butterfly",
+   "fp32/m_circulant",
+   "fp32/m_dct",
+   "fp32/m_fft_cos",
+   "fp32/m_hadamard",
+   "fp32/m_identity",
+   "fp32/m_kaleidoscope",
+   "fp32/m_lowrank",
+   "fp32/m_negzero",
+   "fp32/m_quant4",
+   "fp32/m_relu",
+   "fp32/m_tridiagonal",
+   "fp32/m_upper",
+   "fp32/mant",
+   "fp32/ones",
+   "fp32/pi",
+   "fp32/pow2",
+   "fp32/randn",
+   "fp32/signs",
+   "fp32/small_dense_0pc",
+   "fp32/small_rowmask_half",
+   "fp32/small_sparse_100pc",
+   "fp32/small_sparse_50pc",
+   "fp32/small_sparse_69pc",
+   "fp32/small_sparse_90pc",
+   "fp32/sparse50",
+   "fp32/sparse75",
+   "fp32/ternary",
+   "fp32/uniform",
+   "fp32/zeros",
+   "int8/ones",
+   "int8/randn",
+   "int8/zeros"
+  ],
+  "configuration_variant_rows": {
+   "fp16/randn+TenB": {
+    "base_kind": "randn",
+    "variant_is": "TenB streaming on (claims-v3 ablb)"
+   },
+   "fp32/randn@256min": {
+    "base_kind": "randn",
+    "variant_is": "256 minions (claims-v3 abla)"
+   },
+   "fp32/randn@512min": {
+    "base_kind": "randn",
+    "variant_is": "512 minions (claims-v3 abla)"
+   },
+   "fp32/randn@640min": {
+    "base_kind": "randn",
+    "variant_is": "640 minions (E64's MIN sweep)"
+   },
+   "fp32/randn@768min": {
+    "base_kind": "randn",
+    "variant_is": "768 minions (E64's MIN sweep)"
+   },
+   "fp32/randn_16": {
+    "base_kind": "randn",
+    "variant_is": "512 minions (September E15; the same point as randn@512min)"
+   },
+   "fp32/randn_24": {
+    "base_kind": "randn",
+    "variant_is": "768 minions (September E15; the same point as randn@768min)"
+   },
+   "fp32/randn_8": {
+    "base_kind": "randn",
+    "variant_is": "256 minions (September E15; the same point as randn@256min)"
+   },
+   "int8/ones+TenB": {
+    "base_kind": "ones",
+    "variant_is": "TenB streaming on (claims-v3 ablb)"
+   },
+   "int8/randn+TenB": {
+    "base_kind": "randn",
+    "variant_is": "TenB streaming on (claims-v3 ablb)"
+   }
+  },
+  "rows_with_switching_W": {
+   "any_status": {
+    "total": 53,
+    "fp32": 44,
+    "fp16": 4,
+    "int8": 5
+   },
+   "measured": {
+    "total": 48,
+    "fp32": 39,
+    "fp16": 4,
+    "int8": 5
+   },
+   "never_measured": [
+    "fp32/m_diagonal",
+    "fp32/m_hadamard_orth",
+    "fp32/m_permutation",
+    "fp32/randn@640min",
+    "fp32/randn@768min"
+   ]
+  },
+  "rows_with_pJ_per_MAC": {
+   "any_status": {
+    "total": 50,
+    "fp32": 41,
+    "fp16": 4,
+    "int8": 5
+   },
+   "measured": {
+    "total": 48,
+    "fp32": 39,
+    "fp16": 4,
+    "int8": 5
+   }
+  },
+  "row_status": {
+   "fp16/ones": [
+    "measured",
+    "modelled"
+   ],
+   "fp16/randn": [
+    "measured",
+    "modelled"
+   ],
+   "fp16/randn+TenB": [
+    "measured"
+   ],
+   "fp16/zeros": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/a_const_b_randn": [
+    "measured"
+   ],
+   "fp32/a_ones_b_randn": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/a_randn_b_const": [
+    "measured"
+   ],
+   "fp32/a_randn_b_ones": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/checker": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/m_block_diag": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_butterfly": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_circulant": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_dct": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_diagonal": [
+    "predicted"
+   ],
+   "fp32/m_fft_cos": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_hadamard": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_hadamard_orth": [
+    "predicted"
+   ],
+   "fp32/m_identity": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_kaleidoscope": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_lowrank": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_negzero": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_permutation": [
+    "predicted"
+   ],
+   "fp32/m_quant4": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_relu": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_tridiagonal": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/m_upper": [
+    "measured",
+    "predicted"
+   ],
+   "fp32/mant": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/ones": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/pi": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/pow2": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/randn": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/randn@256min": [
+    "measured"
+   ],
+   "fp32/randn@512min": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/randn@640min": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/randn@768min": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/randn_16": [
+    "measured"
+   ],
+   "fp32/randn_24": [
+    "measured"
+   ],
+   "fp32/randn_8": [
+    "measured"
+   ],
+   "fp32/signs": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/small_dense_0pc": [
+    "measured"
+   ],
+   "fp32/small_rowmask_half": [
+    "measured"
+   ],
+   "fp32/small_sparse_100pc": [
+    "measured"
+   ],
+   "fp32/small_sparse_50pc": [
+    "measured"
+   ],
+   "fp32/small_sparse_69pc": [
+    "measured"
+   ],
+   "fp32/small_sparse_90pc": [
+    "measured"
+   ],
+   "fp32/sparse50": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/sparse75": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/ternary": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/uniform": [
+    "measured",
+    "modelled"
+   ],
+   "fp32/zeros": [
+    "measured",
+    "modelled"
+   ],
+   "int8/ones": [
+    "measured",
+    "modelled"
+   ],
+   "int8/ones+TenB": [
+    "measured"
+   ],
+   "int8/randn": [
+    "measured",
+    "modelled"
+   ],
+   "int8/randn+TenB": [
+    "measured"
+   ],
+   "int8/zeros": [
+    "measured",
+    "modelled"
+   ]
+  }
  },
  "typed_numbers": {
   "e64_idle_board_W_LAD": {
@@ -63,12 +544,6 @@
    "unit": "fraction",
    "note": "post-hoc column assignment; the registered two-column fit wants a negative multiplier term",
    "source": "docs/reports/data/2026-10-27-e68-stage-map/README.md (post-hoc fit); posthoc.txt"
-  },
-  "e70_lane_ungating_W": {
-   "value": 8.6,
-   "unit": "W",
-   "note": "E67 anchor_zeros 27.83 W to E70's constant-operand level 36.40 W, aifoundry3 600 MHz; the rest of the zeros->random step (16.1 W) is operand flips",
-   "source": "docs/reports/data/2026-10-27-e70-saturation-ladder/README.md (the zeros->random step)"
   }
  },
  "row_coverage": {
@@ -798,7 +1273,9 @@
    "conditions": "aifoundry2, 600 MHz, 512 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 36.34 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry2[config=fp32_randn_16].switching (mean of 4)",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -810,7 +1287,9 @@
    "conditions": "aifoundry2, 600 MHz, 512 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 36.34 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry2[config=fp32_randn_16].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -822,7 +1301,9 @@
    "conditions": "aifoundry2, 600 MHz, 512 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 36.34 W, n=4 passes; 1 MAC = 2 flops",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry2[config=fp32_randn_16].switching / (.per_s * 2)",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -834,7 +1315,9 @@
    "conditions": "aifoundry2, 600 MHz, 512 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 36.34 W, n=4 passes; fixed 600 MHz, no governor action",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry2[config=fp32_randn_16].per_s * 2",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -846,7 +1329,9 @@
    "conditions": "aifoundry2, 600 MHz, 256 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 36.34 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry2[config=fp32_randn_8].switching (mean of 4)",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -858,7 +1343,9 @@
    "conditions": "aifoundry2, 600 MHz, 256 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 36.34 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry2[config=fp32_randn_8].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -870,7 +1357,9 @@
    "conditions": "aifoundry2, 600 MHz, 256 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 36.34 W, n=4 passes; 1 MAC = 2 flops",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry2[config=fp32_randn_8].switching / (.per_s * 2)",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -882,7 +1371,9 @@
    "conditions": "aifoundry2, 600 MHz, 256 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 36.34 W, n=4 passes; fixed 600 MHz, no governor action",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry2[config=fp32_randn_8].per_s * 2",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -1854,7 +2345,9 @@
    "conditions": "aifoundry3, 600 MHz, 512 minions, launch 55.8 C, leak 0.55 W/C, over pre-launch idle 25.78 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry3[config=fp32_randn_16].switching (mean of 4)",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -1866,7 +2359,9 @@
    "conditions": "aifoundry3, 600 MHz, 512 minions, launch 55.8 C, leak 0.55 W/C, over pre-launch idle 25.78 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry3[config=fp32_randn_16].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -1878,7 +2373,9 @@
    "conditions": "aifoundry3, 600 MHz, 512 minions, launch 55.8 C, leak 0.55 W/C, over pre-launch idle 25.78 W, n=4 passes; 1 MAC = 2 flops",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry3[config=fp32_randn_16].switching / (.per_s * 2)",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -1890,7 +2387,9 @@
    "conditions": "aifoundry3, 600 MHz, 512 minions, launch 55.8 C, leak 0.55 W/C, over pre-launch idle 25.78 W, n=4 passes; fixed 600 MHz, no governor action",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry3[config=fp32_randn_16].per_s * 2",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -1902,7 +2401,9 @@
    "conditions": "aifoundry3, 600 MHz, 256 minions, launch 55.8 C, leak 0.55 W/C, over pre-launch idle 25.78 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry3[config=fp32_randn_8].switching (mean of 4)",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -1914,7 +2415,9 @@
    "conditions": "aifoundry3, 600 MHz, 256 minions, launch 55.8 C, leak 0.55 W/C, over pre-launch idle 25.78 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry3[config=fp32_randn_8].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -1926,7 +2429,9 @@
    "conditions": "aifoundry3, 600 MHz, 256 minions, launch 55.8 C, leak 0.55 W/C, over pre-launch idle 25.78 W, n=4 passes; 1 MAC = 2 flops",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry3[config=fp32_randn_8].switching / (.per_s * 2)",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -1938,7 +2443,9 @@
    "conditions": "aifoundry3, 600 MHz, 256 minions, launch 55.8 C, leak 0.55 W/C, over pre-launch idle 25.78 W, n=4 passes; fixed 600 MHz, no governor action",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry3[config=fp32_randn_8].per_s * 2",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -2910,7 +3417,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, 512 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 50.15 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry1-c1[config=fp32_randn_16].switching (mean of 4)",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -2922,7 +3431,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, 512 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 50.15 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry1-c1[config=fp32_randn_16].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -2934,7 +3445,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, 512 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 50.15 W, n=4 passes; 1 MAC = 2 flops",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry1-c1[config=fp32_randn_16].switching / (.per_s * 2)",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -2946,7 +3459,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, 512 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 50.15 W, n=4 passes; fixed 600 MHz, no governor action",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry1-c1[config=fp32_randn_16].per_s * 2",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -2958,7 +3473,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, 256 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 50.15 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry1-c1[config=fp32_randn_8].switching (mean of 4)",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -2970,7 +3487,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, 256 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 50.15 W, n=4 passes",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry1-c1[config=fp32_randn_8].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -2982,7 +3501,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, 256 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 50.15 W, n=4 passes; 1 MAC = 2 flops",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry1-c1[config=fp32_randn_8].switching / (.per_s * 2)",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -2994,7 +3515,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, 256 minions, launch 80.9 C, leak 0.81 W/C, over pre-launch idle 50.15 W, n=4 passes; fixed 600 MHz, no governor action",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.runs.json: runs.aifoundry1-c1[config=fp32_randn_8].per_s * 2",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "256 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -3702,7 +4225,9 @@
    "conditions": "aifoundry2, 600 MHz, fp16 nnz_a=512 of 256, row_mask=0xffff, over pre-launch idle 36.38 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry2[config=fp16_randn_tenb].switching",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "fp16",
@@ -3714,7 +4239,9 @@
    "conditions": "aifoundry2, 600 MHz, fp16 nnz_a=512 of 256, row_mask=0xffff, over pre-launch idle 36.38 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry2[config=fp16_randn_tenb].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -3750,7 +4277,9 @@
    "conditions": "aifoundry2, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 36.38 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry2[config=int8_ones_tenb].switching",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "ones",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -3762,7 +4291,9 @@
    "conditions": "aifoundry2, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 36.38 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry2[config=int8_ones_tenb].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "ones",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -3798,7 +4329,9 @@
    "conditions": "aifoundry2, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 36.38 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry2[config=int8_randn_tenb].switching",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -3810,7 +4343,9 @@
    "conditions": "aifoundry2, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 36.38 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry2[config=int8_randn_tenb].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "fp32",
@@ -3990,7 +4525,9 @@
    "conditions": "aifoundry3, 600 MHz, fp16 nnz_a=512 of 256, row_mask=0xffff, over pre-launch idle 25.77 W, leak 0.55 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry3[config=fp16_randn_tenb].switching",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "fp16",
@@ -4002,7 +4539,9 @@
    "conditions": "aifoundry3, 600 MHz, fp16 nnz_a=512 of 256, row_mask=0xffff, over pre-launch idle 25.77 W, leak 0.55 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry3[config=fp16_randn_tenb].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -4038,7 +4577,9 @@
    "conditions": "aifoundry3, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 25.77 W, leak 0.55 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry3[config=int8_ones_tenb].switching",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "ones",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -4050,7 +4591,9 @@
    "conditions": "aifoundry3, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 25.77 W, leak 0.55 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry3[config=int8_ones_tenb].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "ones",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -4086,7 +4629,9 @@
    "conditions": "aifoundry3, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 25.77 W, leak 0.55 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry3[config=int8_randn_tenb].switching",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -4098,7 +4643,9 @@
    "conditions": "aifoundry3, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 25.77 W, leak 0.55 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry3[config=int8_randn_tenb].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "fp32",
@@ -4278,7 +4825,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, fp16 nnz_a=512 of 256, row_mask=0xffff, over pre-launch idle 50.17 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry1-c1[config=fp16_randn_tenb].switching",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "fp16",
@@ -4290,7 +4839,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, fp16 nnz_a=512 of 256, row_mask=0xffff, over pre-launch idle 50.17 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry1-c1[config=fp16_randn_tenb].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -4326,7 +4877,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 50.17 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry1-c1[config=int8_ones_tenb].switching",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "ones",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -4338,7 +4891,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 50.17 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry1-c1[config=int8_ones_tenb].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "ones",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -4374,7 +4929,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 50.17 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry1-c1[config=int8_randn_tenb].switching",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "int8",
@@ -4386,7 +4943,9 @@
    "conditions": "aifoundry1-c1, 600 MHz, int8 nnz_a=1024 of 256, row_mask=0xffff, over pre-launch idle 50.17 W, leak 0.81 W/C, n=3 blocks",
    "source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.runs.json: runs.aifoundry1-c1[config=int8_randn_tenb].switching / .per_s",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "TenB streaming on (claims-v3 ablb)"
   },
   {
    "format": "fp32",
@@ -7158,7 +7717,9 @@
    "conditions": "aifoundry2, 600 MHz, 256 minions, launch ~80 C, 7 s, over idle 36.32 W, n=2; p80 (normalised to an 80 C die) minus the idle mean",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_8.dyn",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "256 minions (September E15; the same point as randn@256min)"
   },
   {
    "format": "fp32",
@@ -7170,7 +7731,9 @@
    "conditions": "aifoundry2, 600 MHz, 256 minions, launch ~80 C, 7 s, over idle 36.32 W, n=2",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_8.pj_per_unit_dyn",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "256 minions (September E15; the same point as randn@256min)"
   },
   {
    "format": "fp32",
@@ -7182,7 +7745,9 @@
    "conditions": "aifoundry2, 600 MHz, 256 minions, launch ~80 C, 7 s, over idle 36.32 W, n=2; minion rail minus the fp32_zeros config's rail (15.062 W), NOT over idle",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_8.rails_late.minion - configs.fp32_zeros.rails_late.minion",
    "status": "measured",
-   "basis": "zeros"
+   "basis": "zeros",
+   "variant_of": "randn",
+   "variant_is": "256 minions (September E15; the same point as randn@256min)"
   },
   {
    "format": "fp32",
@@ -7194,7 +7759,9 @@
    "conditions": "aifoundry2, 600 MHz, 256 minions, launch ~80 C, 7 s, over idle 36.32 W, n=2",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_8.rise",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "256 minions (September E15; the same point as randn@256min)"
   },
   {
    "format": "fp32",
@@ -7446,7 +8013,9 @@
    "conditions": "aifoundry2, 600 MHz, 512 minions, launch ~80 C, 7 s, over idle 36.29 W, n=2; p80 (normalised to an 80 C die) minus the idle mean",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_16.dyn",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "512 minions (September E15; the same point as randn@512min)"
   },
   {
    "format": "fp32",
@@ -7458,7 +8027,9 @@
    "conditions": "aifoundry2, 600 MHz, 512 minions, launch ~80 C, 7 s, over idle 36.29 W, n=2",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_16.pj_per_unit_dyn",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "512 minions (September E15; the same point as randn@512min)"
   },
   {
    "format": "fp32",
@@ -7470,7 +8041,9 @@
    "conditions": "aifoundry2, 600 MHz, 512 minions, launch ~80 C, 7 s, over idle 36.29 W, n=2; minion rail minus the fp32_zeros config's rail (15.062 W), NOT over idle",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_16.rails_late.minion - configs.fp32_zeros.rails_late.minion",
    "status": "measured",
-   "basis": "zeros"
+   "basis": "zeros",
+   "variant_of": "randn",
+   "variant_is": "512 minions (September E15; the same point as randn@512min)"
   },
   {
    "format": "fp32",
@@ -7482,7 +8055,9 @@
    "conditions": "aifoundry2, 600 MHz, 512 minions, launch ~80 C, 7 s, over idle 36.29 W, n=2",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_16.rise",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "512 minions (September E15; the same point as randn@512min)"
   },
   {
    "format": "fp32",
@@ -7686,7 +8261,9 @@
    "conditions": "aifoundry2, 600 MHz, 768 minions, launch ~80 C, 7 s, over idle 36.36 W, n=2; p80 (normalised to an 80 C die) minus the idle mean",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_24.dyn",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "768 minions (September E15; the same point as randn@768min)"
   },
   {
    "format": "fp32",
@@ -7698,7 +8275,9 @@
    "conditions": "aifoundry2, 600 MHz, 768 minions, launch ~80 C, 7 s, over idle 36.36 W, n=2",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_24.pj_per_unit_dyn",
    "status": "measured",
-   "basis": "idle_lc"
+   "basis": "idle_lc",
+   "variant_of": "randn",
+   "variant_is": "768 minions (September E15; the same point as randn@768min)"
   },
   {
    "format": "fp32",
@@ -7710,7 +8289,9 @@
    "conditions": "aifoundry2, 600 MHz, 768 minions, launch ~80 C, 7 s, over idle 36.36 W, n=2; minion rail minus the fp32_zeros config's rail (15.062 W), NOT over idle",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_24.rails_late.minion - configs.fp32_zeros.rails_late.minion",
    "status": "measured",
-   "basis": "zeros"
+   "basis": "zeros",
+   "variant_of": "randn",
+   "variant_is": "768 minions (September E15; the same point as randn@768min)"
   },
   {
    "format": "fp32",
@@ -7722,7 +8303,9 @@
    "conditions": "aifoundry2, 600 MHz, 768 minions, launch ~80 C, 7 s, over idle 36.36 W, n=2",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json: configs.fp32_randn_24.rise",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "768 minions (September E15; the same point as randn@768min)"
   },
   {
    "format": "fp16",
@@ -8922,7 +9505,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 512 minions, n=2 runs",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[block=MIN,fp32-randn-512].p800_w",
    "status": "measured",
-   "basis": "abs"
+   "basis": "abs",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -8934,7 +9519,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 512 minions, n=2 runs; the data-dependent term c x s(800) from the governor model (c is W at 600 MHz and 0.517 V, s(800)=1.9052); the model's busy offset B(600)=25.46 W is within 1.2 W of the card's measured idle at 57 C (25.02 W), so c is also switching over idle at 600 MHz",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: fit.c[<run>] x fit.s['800'] (mean of 2 runs)",
    "status": "modelled",
-   "basis": "model"
+   "basis": "model",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -8946,7 +9533,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 512 minions, n=2 runs; same model, at 600 MHz / 0.517 V",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: fit.c[<run>] (mean of 2 runs)",
    "status": "modelled",
-   "basis": "model"
+   "basis": "model",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -8958,7 +9547,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 512 minions, n=2 runs; mean over the whole 6 s run after the start ramp",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[...].mhz_mean",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -8970,7 +9561,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 512 minions, n=2 runs; whole run, kernel clock",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[...].rate_t",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -8982,7 +9575,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 512 minions, n=2 runs; switching_W / (rate x 1e12 / 2)",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: fit.c x fit.s['800'] / (runs[...].rate_t x 1e12 / 2)",
    "status": "modelled",
-   "basis": "model"
+   "basis": "model",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -8994,7 +9589,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 512 minions, n=2 runs; 0 power_down and 0 thermal_down steps over 2 runs",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[...].events / .first_down_kind",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "512 minions (claims-v3 abla)"
   },
   {
    "format": "fp32",
@@ -9006,7 +9603,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 640 minions, n=2 runs",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[block=MIN,fp32-randn-640].p800_w",
    "status": "measured",
-   "basis": "abs"
+   "basis": "abs",
+   "variant_of": "randn",
+   "variant_is": "640 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9018,7 +9617,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 640 minions, n=2 runs; the data-dependent term c x s(800) from the governor model (c is W at 600 MHz and 0.517 V, s(800)=1.9052); the model's busy offset B(600)=25.46 W is within 1.2 W of the card's measured idle at 57 C (25.02 W), so c is also switching over idle at 600 MHz",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: fit.c[<run>] x fit.s['800'] (mean of 2 runs)",
    "status": "modelled",
-   "basis": "model"
+   "basis": "model",
+   "variant_of": "randn",
+   "variant_is": "640 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9030,7 +9631,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 640 minions, n=2 runs; same model, at 600 MHz / 0.517 V",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: fit.c[<run>] (mean of 2 runs)",
    "status": "modelled",
-   "basis": "model"
+   "basis": "model",
+   "variant_of": "randn",
+   "variant_is": "640 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9042,7 +9645,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 640 minions, n=2 runs; mean over the whole 6 s run after the start ramp",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[...].mhz_mean",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "640 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9054,7 +9659,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 640 minions, n=2 runs; whole run, kernel clock",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[...].rate_t",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "640 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9066,7 +9673,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 640 minions, n=2 runs; switching_W / (rate x 1e12 / 2)",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: fit.c x fit.s['800'] / (runs[...].rate_t x 1e12 / 2)",
    "status": "modelled",
-   "basis": "model"
+   "basis": "model",
+   "variant_of": "randn",
+   "variant_is": "640 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9078,7 +9687,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 640 minions, n=2 runs; 0 power_down and 0 thermal_down steps over 2 runs",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[...].events / .first_down_kind",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "640 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9090,7 +9701,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 768 minions, n=2 runs",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[block=MIN,fp32-randn-768].p800_w",
    "status": "measured",
-   "basis": "abs"
+   "basis": "abs",
+   "variant_of": "randn",
+   "variant_is": "768 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9102,7 +9715,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 768 minions, n=2 runs; the data-dependent term c x s(800) from the governor model (c is W at 600 MHz and 0.517 V, s(800)=1.9052); the model's busy offset B(600)=25.46 W is within 1.2 W of the card's measured idle at 57 C (25.02 W), so c is also switching over idle at 600 MHz",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: fit.c[<run>] x fit.s['800'] (mean of 2 runs)",
    "status": "modelled",
-   "basis": "model"
+   "basis": "model",
+   "variant_of": "randn",
+   "variant_is": "768 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9114,7 +9729,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 768 minions, n=2 runs; same model, at 600 MHz / 0.517 V",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: fit.c[<run>] (mean of 2 runs)",
    "status": "modelled",
-   "basis": "model"
+   "basis": "model",
+   "variant_of": "randn",
+   "variant_is": "768 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9126,7 +9743,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 768 minions, n=2 runs; mean over the whole 6 s run after the start ramp",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[...].mhz_mean",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "768 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9138,7 +9757,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 768 minions, n=2 runs; whole run, kernel clock",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[...].rate_t",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "768 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9150,7 +9771,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 768 minions, n=2 runs; switching_W / (rate x 1e12 / 2)",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: fit.c x fit.s['800'] / (runs[...].rate_t x 1e12 / 2)",
    "status": "modelled",
-   "basis": "model"
+   "basis": "model",
+   "variant_of": "randn",
+   "variant_is": "768 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -9162,7 +9785,9 @@
    "conditions": "aifoundry2, own governor (TDP 65 W, threshold 65 C), cool die 50-56 C, 6 s launches, 768 minions, n=2 runs; 13 power_down and 0 thermal_down steps over 2 runs",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[...].events / .first_down_kind",
    "status": "measured",
-   "basis": "none"
+   "basis": "none",
+   "variant_of": "randn",
+   "variant_is": "768 minions (E64's MIN sweep)"
   },
   {
    "format": "fp32",
@@ -13443,7 +14068,7 @@
    "value": 13.68,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.hadamard.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13467,7 +14092,7 @@
    "value": 13.708,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.hadamard_orth.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13491,7 +14116,7 @@
    "value": 26.928,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.dct.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13515,7 +14140,7 @@
    "value": 10.489,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.fft_cos.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13539,7 +14164,7 @@
    "value": 3.026,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.butterfly.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13563,7 +14188,7 @@
    "value": 27.202,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.kaleidoscope.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13587,7 +14212,7 @@
    "value": 2.187,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.identity.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13611,7 +14236,7 @@
    "value": 2.187,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.permutation.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13635,7 +14260,7 @@
    "value": 2.447,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.diagonal.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13659,7 +14284,7 @@
    "value": 4.056,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.tridiagonal.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13683,7 +14308,7 @@
    "value": 4.869,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.block_diag.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13707,7 +14332,7 @@
    "value": 9.031,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.upper.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13731,7 +14356,7 @@
    "value": 26.67,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.lowrank.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13755,7 +14380,7 @@
    "value": 27.12,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.circulant.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13779,7 +14404,7 @@
    "value": 16.989,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.quant4.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13803,7 +14428,7 @@
    "value": 15.047,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.relu.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -13827,7 +14452,7 @@
    "value": 10.684,
    "interval": null,
    "unit": "W",
-   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33, 36 s before the first of these matrices launched",
+   "conditions": "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, written to disk at 2026-09-21T13:08:33 (the file's own made_at) - before any of these matrices had run on the card, per the file's `note`. The measured figures this is scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead time shorter than that is checkable from this repository: the same-afternoon session's t0 values (validation_afternoon.json) are relative offsets into session long2 with no absolute anchor committed",
    "source": "docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json: patterns.negzero.p_switching",
    "status": "predicted",
    "basis": "idle_lc"
@@ -17121,7 +17746,7 @@
    "value": 0.0875,
    "interval": "+-0.06",
    "unit": "W",
-   "conditions": "aifoundry3, 600 MHz: the vector fmadd.ps has NO zero gate - 0.087 +- 0.060 W, i.e. 0.23 +- 0.16 pJ/op, against the 8.94 pJ a zero gate would save. Zero gating in the TENSOR unit is real and worth 8.6 W of lane un-gating (E70's split of the zeros->random step); the vector unit's is not there.",
+   "conditions": "aifoundry3, 600 MHz: the vector fmadd.ps has NO zero gate - 0.087 +- 0.060 W, i.e. 0.23 +- 0.16 pJ/op, against the 8.94 pJ a zero gate would save. Zero gating in the TENSOR unit is real and worth 8.55 +- 0.06 W of lane un-gating (the zeros->random split); the vector unit's is not there.",
    "source": "docs/reports/data/2026-10-21-dtf/dtf.json: cards.aifoundry3.derived.zero_gate_step.value",
    "status": "measured"
   },
@@ -17226,19 +17851,18 @@
   {
    "mechanism": "zero gating (the tensor unit)",
    "what_it_does": "an all-zero operand word turns the lane's work off, so the die never sees the switching at all",
-   "size": "8.6 W of the zeros->random step at 600 MHz on aifoundry3, with 16.1 W of operand flips on top (24.66 W in all)",
+   "size": "8.55 +- 0.06 W of the zeros->random step at 600 MHz on aifoundry3, with 16.11 +- 0.37 W of operand flips on top (24.66 +- 0.37 W in all); all three levels are p80, referred to the same 58 C launch, so no leakage term survives the difference",
    "status": "measured",
-   "typed": true,
-   "source": "docs/reports/data/2026-10-27-e70-saturation-ladder/README.md (the zeros->random step)",
-   "notes": "the chip gates the all-zero BIT PATTERN only, so -0.0 is not gated: it costs +8.36 W over +0.0 and is indistinguishable from all-ones (claims-v3 abla ABL-T1). The VECTOR fmadd.ps has no zero gate at all (E61, 0.087 +- 0.060 W)."
+   "source": "docs/reports/data/2026-10-27-e70-saturation-ladder/README.md (the zeros->random step) recomputed from 2026-10-27-e67-a-side-bit-prices/hl.json and 2026-10-27-e70-saturation-ladder/hl.json",
+   "notes": "the chip gates the all-zero BIT PATTERN only, so -0.0 is not gated: it costs +8.36 W over +0.0 (ABL-T1 subtest 1, PASS on all three cards) and is indistinguishable from all-ones. The equivalence to all-ones is ONE CARD's registered pass: the registered outcome is CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 FAIL). The equivalence subtest 'negzero - ones within +-1 W' holds on aifoundry2 only: -0.15 W, published interval [-0.80, +0.50] at the family-wise alpha 0.000526 - NOT 95%; re-read at 95% it is [-0.33, +0.03]. It FAILS on aifoundry3 (-0.04 W, [-1.14, +1.06]) and aifoundry1-c1 (-0.14 W, [-1.44, +1.15]) on interval WIDTH, not on sign: every point estimate is within 0.15 W of zero and all three 95% intervals lie inside the +-1 W band. The VECTOR fmadd.ps has no zero gate at all (E61, 0.087 +- 0.060 W)."
   },
   {
    "mechanism": "order (which number follows which)",
    "what_it_does": "the SAME arithmetic costs more when consecutive operands differ in more bits, because the flips, not the values, are what is paid for",
-   "size": "max-flip minus Gray on the same 4,096 multiply-adds: +0.682 +- 0.010 W (aifoundry3, 600 MHz, bits 0-3) and +1.291 +- 0.009 W (aifoundry2, 800 MHz); the four orders rank by their flipped bits, and binary is indistinguishable from Gray at bits 0-3",
+   "size": "max-flip minus Gray on the same 4,096 multiply-adds: +0.682 +- 0.010 W at 600 MHz / 0.5218 V (aifoundry3, bits 0-3) and +1.291 +- 0.009 W at 800 MHz / 0.6174 V (aifoundry2); the four orders rank by their flipped bits, and binary is indistinguishable from Gray at bits 0-3",
    "status": "measured",
    "source": "docs/reports/data/2026-10-20-bitflip-ladder/hl.json: cards.aifoundry3.ord['0'].maxflip.W, cards.aifoundry2.ord['0'].maxflip.W",
-   "notes": "this is the cleanest single demonstration for a blog reader: identical results, identical count of operations, different energy."
+   "notes": "this is the cleanest single demonstration for a blog reader: identical results, identical count of operations, different energy. THE 1.9x BETWEEN THE TWO IS THE OPERATING POINT, NOT THE CARD: 0.6825 x s(800) = 1.90517 gives 1.300 W against aifoundry2's measured 1.291 W, so referred to one clock the two cards agree. Quote the clock and voltage with each figure."
   },
   {
    "mechanism": "shared wires (saturation)",
@@ -17283,10 +17907,10 @@
   {
    "mechanism": "the governor (power test, then thermal test)",
    "what_it_does": "the watts the data causes are turned into SPEED by the firmware, which regulates a ~1.3 s average of board power to the TDP and the die reading to the threshold",
-   "size": "on a cool die the power test alone acts, so zeros run 12.3 against random fp32's 10.7 TFLOPS in the first 8 s (15%); in 80 s runs the thermal test wins, because this card's cooling puts the die at 65 C at about 50 W, and zeros run 12.3 against 9.2 TFLOPS (33%)",
+   "size": "on a cool die the power test alone acts, so zeros run 12.1 against random fp32's 10.6 TFLOPS over a 6 s burst (zeros +14%, random -12%); in 80 s runs the thermal test wins, because this card's cooling puts the die at 65 C at about 50 W, and zeros run 12.278 against 9.209 TFLOPS - zeros +33.3%, random -25.0%. STATE THE DIRECTION: the two percentages are the same gap read from the two ends, and 'random is 33% slower' is wrong",
    "status": "measured",
    "source": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs / governor / thermal",
-   "notes": "the model is a first-order average, tau 1.3 s, compared once per 0.24 s pass, one step up or down, 3.3 MHz rms over 26 cool-die runs; the thermal line is die = 41.88 + 0.4696 C per board W. E69 moved the cap for the first time and 12 of 12 extrapolated cap-table cells held."
+   "notes": "the model is a first-order average, tau 1.3 s, compared once per 0.24 s pass, one step up or down, 3.3 MHz rms over 26 cool-die runs; the thermal line is die = 41.88 + 0.4696 C per board W. E69 moved the cap for the first time and 12 of 12 extrapolated cap-table cells held. WHICH CLOCK a switching figure belongs to decides whether it explains a governor run: random int8's switching term at the governor's own 800 MHz footing is 17.34 W (fit.c[SUS-08] 9.101 x s(800) 1.90517) against random fp32's 49.27 W (fit.c[SUS-02] 25.862 x s(800)), which is why int8 settles at a 65.3 C die holding 763 MHz while fp32 randn is pinned to the 600 MHz floor at 67.1 C. The 9.885 W figure for int8 randn is a PINNED 600 MHz measurement (claims-v3 abla) and must not be used to explain an 800 MHz governor run."
   }
  ],
  "holes": [
@@ -17316,7 +17940,7 @@
    "priority": 3,
    "hole": "burst and sustained clock, TFLOPS/TOPS and sustained die temperature exist for only 9 of E64's 16 (format, kind) pairs: the SUS block ran 3 kinds x 3 formats. The seven fp32 ladder kinds (sparse75, signs, pow2, mant, uniform, a_randn_b_ones, a_ones_b_randn) have a cool-die burst clock and NO sustained cell.",
    "cells_missing": "7 fp32 kinds x {sustained_MHz, TFLOPS_sustained, die_C_sustained, limit_sustained}, plus every new fp16/int8 kind",
-   "why_it_matters": "the blog's headline distinction is burst (power test) against sustained (thermal test), and the second is where the 33% gap lives.",
+   "why_it_matters": "the blog's headline distinction is burst (power test) against sustained (thermal test), and the second is where the big gap lives: sustained fp32 zeros are 33.3% faster than randn (randn 25.0% slower), against +14.2% / -12.4% on a 6 s cool-die burst.",
    "how": "E64's SUS block (~80 s runs, last 40 s) on the ladder kinds; no governor move.",
    "evidence": "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json: runs[block=SUS] has 9 rows against LAD's 10 kinds"
   },
@@ -17324,11 +17948,11 @@
    "id": "H4",
    "lane": "E80",
    "priority": 4,
-   "hole": "the fp16 all-ones sustained cell is the governor model's one standing miss: 775 MHz predicted against 738 measured; E64-T1's temperature term narrows it to +7.8 to +21.3 MHz but never closes it.",
+   "hole": "the fp16 all-ones sustained cell is the one sustained cell that NO (gamma, trip) pairing closes: measured 737.1 MHz against 744.9-758.4 MHz over Q129's six pairings, a +7.8 to +21.3 MHz miss (E64's own cap predicts 780.6, +43.5). n = 1 run.",
    "cells_missing": "1 cell, with a replicate",
-   "why_it_matters": "it is the only cell where the published governor model is wrong by more than its own rms, and it is an all-ONES cell - exactly the 'predictable data' case the blog is about.",
-   "how": "repeat the fp16 ones SUS run; E64 ran it once (n = 1).",
-   "evidence": "hub Status item 9 and Levels stop 1."
+   "why_it_matters": "it is an all-ONES cell - exactly the 'predictable data' case the blog is about - and the only sustained cell where every candidate governor surface is wrong in the same direction.",
+   "how": "repeat the fp16 ones SUS run; E64 ran it once (n = 1). E80's REGISTERED PREDICTION for this cell is 744.9-758.4 MHz, which is the fp16 row of Q129's trip surface. The 775 MHz figure (chain.py) belongs to the fp32 all-ones cell (measured 737.9), whose miss Q129 narrows from +37 to +18.5...-7.8 MHz; it closes only at the warm end of gamma, and gamma and the thermal trip are jointly unidentified. Do not carry 775 into an fp16 registration: the two cells both measure ~738 MHz, which is how they were welded together.",
+   "evidence": "docs/reports/data/2026-10-27-q129-governor-temperature/README.md lines 80-81 (the trip surface's fp32 and fp16 rows) and 97, 103 (the two misses); hub Status item 9 and Levels stop 1."
   },
   {
    "id": "H5",

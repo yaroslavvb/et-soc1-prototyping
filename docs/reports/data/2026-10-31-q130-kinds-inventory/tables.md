@@ -2,7 +2,9 @@
 
 ## Table 1 — every operand kind any experiment measured
 
-ᵐ modelled, ᵖ predicted, — missing. Baseline marks: no mark = over the pre-launch idle, leakage-normalised to a fixed launch temperature; ˢ = over the pre-launch idle but NOT leakage-corrected (the September strict runs; reads about 8% high on fp32 randn); ᶻ = over a RUNNING kernel on zero data (the 8.6 W of lane un-gating is NOT in it); ᶜ = over a constant NON-zero operand; ᵃ = absolute. A clock is never crossed by scaling (see §Units).
+ᵐ modelled, ᵖ predicted, — missing. Baseline marks: no mark = over the pre-launch idle, leakage-normalised to a fixed launch temperature; ˢ = over the pre-launch idle but NOT leakage-corrected (the September strict runs: on fp32 randn +8.6% on switching W and **+12.0% on pJ per MAC** against the leakage-normalised claims-v3 figures in the same columns); ᶻ = over a RUNNING kernel on zero data (the 8.55 ± 0.06 W of lane un-gating is NOT in it); ᶜ = over a constant NON-zero operand; ᵃ = absolute. A clock is never crossed by scaling (see §Units).
+
+Row counts, one set of denominators (`inventory.json` > `row_taxonomy`): 52 (format, kind) rows have at least one run-sourced cell (fp32 43, fp16 4, int8 5); 3 more fp32 matrices are prediction-only, so the cell list holds 55 rows. Folding the 10 configuration variants (minion count, TenB streaming) into their base kind leaves 42 distinct KINDS OF NUMBER with a measured cell: fp32 36, fp16 3, int8 3.
 
 ### 1A · aifoundry2 and aifoundry3 at 600 MHz (no governor action: a fixed pin)
 
@@ -68,6 +70,8 @@
 
 ### 1C · coverage: which quantity exists for which row
 
+**Every row of the cell list is here** — the blog rows first, then the configuration variants (ᵛ, the same operand stream at another minion count or with TenB streaming: they are rows, not kinds) and the prediction-only matrices. The first cut of this table showed only the 36 blog rows with no note that it was partial.
+
 | format | kind | switching W | pJ per MAC | pJ per MAC rail | burst MHz | sustained MHz | TFLOPS | die C sustained | limit | toggles per MAC |
 |---|---|---|---|---|---|---|---|---|---|---|
 | fp32 | zeros | M | M | · | M | M | M | M | M | m |
@@ -106,8 +110,29 @@
 | fp32 | m_lowrank | M | M | · | · | · | · | · | · | · |
 | fp32 | m_quant4 | M | M | · | · | · | · | · | · | · |
 | fp32 | m_relu | M | M | · | · | · | M | · | · | · |
+| fp32 | randn@512min ᵛ(= randn) | M | M | · | M | · | M | · | M | · |
+| fp32 | randn@256min ᵛ(= randn) | M | M | · | · | · | M | · | · | · |
+| fp32 | small_sparse_50pc | M | M | · | · | · | · | · | · | · |
+| fp32 | small_sparse_90pc | M | M | · | · | · | · | · | · | · |
+| fp32 | small_sparse_69pc | M | M | · | · | · | · | · | · | · |
+| fp32 | small_dense_0pc | M | M | · | · | · | · | · | · | · |
+| fp32 | small_rowmask_half | M | M | · | · | · | · | · | · | · |
+| fp32 | small_sparse_100pc | M | M | · | · | · | · | · | · | · |
+| fp16 | randn+TenB ᵛ(= randn) | M | M | · | · | · | · | · | · | · |
+| int8 | ones+TenB ᵛ(= ones) | M | M | · | · | · | · | · | · | · |
+| int8 | randn+TenB ᵛ(= randn) | M | M | · | · | · | · | · | · | · |
+| fp32 | randn_8 ᵛ(= randn) | M | M | · | · | · | · | · | · | · |
+| fp32 | randn_16 ᵛ(= randn) | M | M | · | · | · | · | · | · | · |
+| fp32 | randn_24 ᵛ(= randn) | M | M | · | · | · | · | · | · | · |
+| fp32 | randn@640min ᵛ(= randn) | m | m | · | M | · | M | · | M | · |
+| fp32 | randn@768min ᵛ(= randn) | m | m | · | M | · | M | · | M | · |
+| fp32 | a_randn_b_const ᵒ | · | · | · | · | · | · | · | · | · |
+| fp32 | a_const_b_randn ᵒ | · | · | · | · | · | · | · | · | · |
+| fp32 | m_hadamard_orth | p | · | · | · | · | · | · | · | · |
 
-M = measured, m = modelled, p = predicted, · = missing.
+M = measured, m = modelled, p = predicted, · = missing. ᵛ = a configuration variant of the named kind, folded into it by the kind counts. 55 rows, which is every row in `operand_kind_cells`.
+
+ᵒ carries no cell in any of the nine columns above, only: `fp32/a_randn_b_const` (switching_W_over_constant); `fp32/a_const_b_randn` (switching_W_over_constant). Nothing is hidden: these rows are in the table so the denominators match.
 
 ## Table 2 — the bit level
 
@@ -259,12 +284,12 @@ M = measured, m = modelled, p = predicted, · = missing.
 
 | mechanism | what it does | how big | status |
 |---|---|---|---|
-| **zero gating (the tensor unit)** | an all-zero operand word turns the lane's work off, so the die never sees the switching at all | 8.6 W of the zeros->random step at 600 MHz on aifoundry3, with 16.1 W of operand flips on top (24.66 W in all) | measured |
-| **order (which number follows which)** | the SAME arithmetic costs more when consecutive operands differ in more bits, because the flips, not the values, are what is paid for | max-flip minus Gray on the same 4,096 multiply-adds: +0.682 +- 0.010 W (aifoundry3, 600 MHz, bits 0-3) and +1.291 +- 0.009 W (aifoundry2, 800 MHz); the four orders rank by their flipped bits, and binary is indistinguishable from Gray at bits 0-3 | measured |
+| **zero gating (the tensor unit)** | an all-zero operand word turns the lane's work off, so the die never sees the switching at all | 8.55 +- 0.06 W of the zeros->random step at 600 MHz on aifoundry3, with 16.11 +- 0.37 W of operand flips on top (24.66 +- 0.37 W in all); all three levels are p80, referred to the same 58 C launch, so no leakage term survives the difference | measured |
+| **order (which number follows which)** | the SAME arithmetic costs more when consecutive operands differ in more bits, because the flips, not the values, are what is paid for | max-flip minus Gray on the same 4,096 multiply-adds: +0.682 +- 0.010 W at 600 MHz / 0.5218 V (aifoundry3, bits 0-3) and +1.291 +- 0.009 W at 800 MHz / 0.6174 V (aifoundry2); the four orders rank by their flipped bits, and binary is indistinguishable from Gray at bits 0-3 | measured |
 | **shared wires (saturation)** | two flips that travel the same wires do not cost twice one flip, so a word's price is a saturating function of the additive sum of its bits' prices | one curve dW = Winf(1 - e^(-S/Winf)) fits 15 B-side rungs to 0.232 W rms against 1.358 W for any law in Hamming weight alone and 6.062 W for pure additivity; summing per-bit prices over a random word over-predicts by about 2x | measured |
 | **position inside the word** | a high mantissa bit drives a wider slice of the multiplier tree than a low one, so the same single flip costs 12x more at bit 22 than at bit 6 | B side 83 fJ (bit 6) to 1,008 fJ (bit 22), span 12.2x; A side 153 fJ (bit 4) to 1,440 fJ (bit 22), span 9.4x; exponent bits average 174 (B) / 265 (A) fJ and the sign bit 123 / 247 fJ | measured |
 | **the busy partner** | a flipped bit costs more when the OTHER operand is a busy number, because the partial products it selects are themselves wide | A = pi over A = 1.0 is 1.59-4.73x at the five shared B positions (5 of 5 at >= 2 SE); B = pi over B = 1.0 reaches 1,566 fJ at A bit 22. On the ladder SLOPE the effect is only +11% (116.7 -> 129.9 fJ) | measured |
 | **voltage, not clock** | a flip's price follows the rail voltage the governor picks, not the clock it picks with it | the same card reads 79.18 +- 3.09 fJ at 600 MHz / 0.5179 V and 121.27 +- 0.61 fJ at 800 MHz / 0.6174 V; the board price is 10-15% below a pure V^2 extrapolation, the exponent is bracketed 1.60-2.92, and the clock-scaling rival n = 3.637 is excluded at >= 3.4 SE in every reduction | measured |
 | **carried ones, off chip** | on the DRAM path what costs is the NUMBER OF ONES in flight, not the number of bits that changed | 3.255 pJ per carried one at DRAM [2.97, 3.55] against nothing measurable at L1 (-0.0001 pJ); 94% of the 1,008 pJ per 64 B line the two counts explain is the ones term | measured |
-| **the governor (power test, then thermal test)** | the watts the data causes are turned into SPEED by the firmware, which regulates a ~1.3 s average of board power to the TDP and the die reading to the threshold | on a cool die the power test alone acts, so zeros run 12.3 against random fp32's 10.7 TFLOPS in the first 8 s (15%); in 80 s runs the thermal test wins, because this card's cooling puts the die at 65 C at about 50 W, and zeros run 12.3 against 9.2 TFLOPS (33%) | measured |
+| **the governor (power test, then thermal test)** | the watts the data causes are turned into SPEED by the firmware, which regulates a ~1.3 s average of board power to the TDP and the die reading to the threshold | on a cool die the power test alone acts, so zeros run 12.1 against random fp32's 10.6 TFLOPS over a 6 s burst (zeros +14%, random -12%); in 80 s runs the thermal test wins, because this card's cooling puts the die at 65 C at about 50 W, and zeros run 12.278 against 9.209 TFLOPS - zeros +33.3%, random -25.0%. STATE THE DIRECTION: the two percentages are the same gap read from the two ends, and 'random is 33% slower' is wrong | measured |
 

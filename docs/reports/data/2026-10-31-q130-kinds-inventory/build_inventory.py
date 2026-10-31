@@ -26,6 +26,7 @@ DATA = os.path.abspath(os.path.join(HERE, ".."))          # docs/reports/data
 
 # ---------------------------------------------------------------- source paths
 P_ABLA = "2026-09-25-claims-v3/results/abla.runs.json"
+P_ABLA_S = "2026-09-25-claims-v3/results/abla.json"      # the scored registered items
 P_ABLB = "2026-09-25-claims-v3/results/ablb.runs.json"
 P_H_A2 = "2026-09-21-horace-aifoundry2/horace3.json"
 P_H_A3 = "2026-09-22-horace-aifoundry3/horace3.json"
@@ -46,7 +47,14 @@ P_E74 = "2026-10-28-e74-register-file-cells/rf.json"
 P_E75 = "2026-10-28-e75-memory-flip-ladder/mf.json"
 P_E61 = "2026-10-21-dtf/dtf.json"
 
-MACS_PER_OP = 4096          # one 16x16x16 TensorFMA = 4,096 multiply-adds
+# MACs per 16x16x16 TensorFMA are FORMAT-DEPENDENT. tools/claims-v3/hpl/surface_hpl.py:32
+# gives flops per op (fp32 8192, fp16 16384, int8 32768) and one multiply-add is two
+# flops, so MACs per op are 4,096 / 8,192 / 16,384. MACS_PER_OP keeps the fp32 figure
+# because every use of it below is fp32 (E67's anchors and the RTL recount); anything
+# that crosses formats must take its divisor from MACS_PER_OP_BY_FMT, and anything that
+# starts from a rate must use MAC/s = TFLOPS or TOPS x 1e12 / 2, which holds in every format.
+MACS_PER_OP_BY_FMT = {"fp32": 4096, "fp16": 8192, "int8": 16384}
+MACS_PER_OP = MACS_PER_OP_BY_FMT["fp32"]
 FLOPS_PER_MAC = 2           # one multiply-add = two flops
 
 # Numbers with no machine-readable form in the repo, typed here with a citation.
@@ -79,13 +87,10 @@ TYPED = {
         "note": "post-hoc column assignment; the registered two-column fit wants a negative multiplier term",
         "source": "docs/reports/data/2026-10-27-e68-stage-map/README.md (post-hoc fit); posthoc.txt",
     },
-    "e70_lane_ungating_W": {
-        "value": 8.6, "unit": "W",
-        "note": "E67 anchor_zeros 27.83 W to E70's constant-operand level 36.40 W, aifoundry3 600 MHz; "
-                "the rest of the zeros->random step (16.1 W) is operand flips",
-        "source": "docs/reports/data/2026-10-27-e70-saturation-ladder/README.md (the zeros->random step)",
-    },
 }
+# The zeros->random split (lane un-gating against operand flips) was typed from E70's
+# README in the first cut of this file. It is arithmetic on three published levels, so it
+# is COMPUTED here instead, with an interval and a stated footing: ungating_split() below.
 
 
 def jload(rel):
@@ -108,14 +113,116 @@ def r(x, n=4):
         return x
 
 
+# ---------------------------------------- configuration variants, which are not kinds
+# Each of these rows is the SAME operand stream at a different minion count, or with TenB
+# streaming on. They are rows of the cell list; they are not kinds of number. Every cell's
+# `conditions` already carries the minion count or the nnz_a/row_mask that makes it a
+# variant; the kind counts in row_taxonomy() fold them into their base kind so that a
+# coverage claim counts kinds of number and nothing else.
+VARIANT_OF = {
+    ("fp32", "randn@256min"): ("randn", "256 minions (claims-v3 abla)"),
+    ("fp32", "randn@512min"): ("randn", "512 minions (claims-v3 abla)"),
+    ("fp32", "randn@640min"): ("randn", "640 minions (E64's MIN sweep)"),
+    ("fp32", "randn@768min"): ("randn", "768 minions (E64's MIN sweep)"),
+    ("fp32", "randn_8"): ("randn", "256 minions (September E15; the same point as randn@256min)"),
+    ("fp32", "randn_16"): ("randn", "512 minions (September E15; the same point as randn@512min)"),
+    ("fp32", "randn_24"): ("randn", "768 minions (September E15; the same point as randn@768min)"),
+    ("fp16", "randn+TenB"): ("randn", "TenB streaming on (claims-v3 ablb)"),
+    ("int8", "randn+TenB"): ("randn", "TenB streaming on (claims-v3 ablb)"),
+    ("int8", "ones+TenB"): ("ones", "TenB streaming on (claims-v3 ablb)"),
+}
+
+
+def ungating_split():
+    """The zeros->random board step, split into lane un-gating and operand flips.
+
+    Arithmetic on three published levels, all aifoundry3 at a pinned 600 MHz with a
+    58 C launch, as E70's README does it - but with the interval propagated and the
+    footing stated, which the README's bare "8.6 W / 16.1 W / 24.66 W" does not carry.
+
+    Every level is a `p80`: board power with that run's own leakage rise since launch
+    removed (p80 = p_raw - k (t_win - t_launch)). Both campaigns refer their levels to
+    the same 58 C launch, so no leakage term survives the difference; the two reducers
+    used k = 0.1755 (E67) and 0.1975 W/C (E70), and `slope_sensitivity_W` below says
+    how little that disagreement is worth.
+    """
+    e67 = jload(P_E67)["cards"]["aifoundry3"]["anchors"]
+    e70 = jload(P_E70)["cards"]["aifoundry3"]["items"]
+    z, rn = e67["anchor_zeros"], e67["anchor_randn"]
+    const = {k: (e70[k]["p80"], e70[k].get("p80_se", 0.0)) for k in ("lq_h0", "aq_h0", "anchor_pi")}
+    cvals = [v[0] for v in const.values()]
+    cm = st.mean(cvals)
+    cse = st.stdev(cvals) / math.sqrt(len(cvals))        # the spread BETWEEN the items dominates
+
+    def sens(k):
+        """both levels re-reduced from the raw runs at one common slope k."""
+        out = {}
+        for rel, items in ((P_E67, ("anchor_zeros",)), (P_E70, ("lq_h0", "aq_h0", "anchor_pi"))):
+            d = jload(rel)
+            for item in items:
+                byp = {}
+                for x in d["runs"]:
+                    if x["card"] != "aifoundry3" or x["item"] != item or x.get("fail"):
+                        continue
+                    byp.setdefault(x["pass"], []).append(x["p_raw"] - k * (x["t_win"] - x["start_c"]))
+                out[item] = st.mean([st.mean(v) for v in byp.values()])
+        return st.mean([out[i] for i in ("lq_h0", "aq_h0", "anchor_pi")]) - out["anchor_zeros"]
+
+    ung, flips = cm - z["p80"], rn["p80"] - cm
+    return {
+        "zeros_level_W": {"value": r(z["p80"], 3), "se": r(z["se"], 4), "n_passes": z["n"],
+                          "source": src(P_E67, "cards.aifoundry3.anchors.anchor_zeros.p80")},
+        "constant_operand_level_W": {
+            "value": r(cm, 3), "se": r(cse, 4),
+            "items": {k: r(v[0], 3) for k, v in const.items()},
+            "spread_W": r(max(cvals) - min(cvals), 3),
+            "source": src(P_E70, "cards.aifoundry3.items[lq_h0, aq_h0, anchor_pi].p80 (mean of 3)")},
+        "random_level_W": {"value": r(rn["p80"], 3), "se": r(rn["se"], 4), "n_passes": rn["n"],
+                           "source": src(P_E67, "cards.aifoundry3.anchors.anchor_randn.p80")},
+        "lane_ungating_W": {"value": r(ung, 3), "se": r(math.hypot(cse, z["se"]), 4),
+                            "range_over_constant_items_W": [r(min(cvals) - z["p80"], 3),
+                                                            r(max(cvals) - z["p80"], 3)]},
+        "operand_flips_W": {"value": r(flips, 3), "se": r(math.hypot(rn["se"], cse), 4)},
+        "step_W": {"value": r(rn["p80"] - z["p80"], 3), "se": r(math.hypot(rn["se"], z["se"]), 4)},
+        "slope_sensitivity_W": {
+            "ungating_at_k_0.1975": r(sens(0.1975), 3),
+            "ungating_at_k_0.3803": r(sens(0.3803), 3),
+            "note": "both levels re-reduced from the raw runs at ONE common slope: E70's registered "
+                    "0.1975 W/C and E71's steepest measured idle slope on this card, 0.3803 W/C "
+                    "(58-62 C). The un-gating term moves %.3f W between those two, against its own "
+                    "%.3f W standard error, so the leakage footing is not what the split rests on - "
+                    "which is what 'no leakage term survives the difference' means here. At E70's "
+                    "own slope the re-reduction agrees with the published-anchor arithmetic above "
+                    "to %.3f W. The reducers themselves used k = 0.1755 (E67) and 0.1975 (E70), "
+                    "solved from their own runs' p_raw, p80, t_win and start_c."
+                    % (abs(sens(0.1975) - sens(0.3803)), math.hypot(cse, z["se"]),
+                       abs(sens(0.1975) - (cm - z["p80"]))),
+        },
+        "published_as": "E70's README quotes this split as 8.6 W / 16.1 W / 24.66 W, from the same "
+                        "three levels with the constant-operand level rounded to 36.40 W",
+        "source": "docs/reports/data/2026-10-27-e70-saturation-ladder/README.md (the zeros->random "
+                  "step) recomputed from " + P_E67 + " and " + P_E70,
+    }
+
+
+SPLIT = ungating_split()
+UNG = SPLIT["lane_ungating_W"]["value"]
+UNG_SE = SPLIT["lane_ungating_W"]["se"]
+FLIPS = SPLIT["operand_flips_W"]["value"]
+STEP = SPLIT["step_W"]["value"]
+
 # Which zero a cell is measured against. Rendered as a superscript in tables.md.
 BASIS = {
     "idle_lc": "over the pre-launch idle, leakage-normalised to a fixed launch temperature",
-    "idle_raw": "over the pre-launch idle, NOT leakage-corrected (reads high on the busiest "
-                "kinds by roughly leak x the die rise: about +2.3 W on fp32 randn at 600 MHz on "
-                "aifoundry2, 8%)",
+    "idle_raw": "over the pre-launch idle, NOT leakage-corrected (reads high on the busiest kinds "
+                "by roughly leak x the die rise). The offset DIFFERS BY QUANTITY on fp32 randn at "
+                "600 MHz on aifoundry2: switching_W +2.34 W (+8.6%, 29.52 against the "
+                "leakage-normalised 27.18) and pJ per MAC +0.71 pJ (+12.0%, 6.630 against 5.920). "
+                "The extra 3.1% is the denominator: the September pJ column implies 8.905 TFLOPS "
+                "where the same record's `tflops` field reads 9.183",
     "idle_elec": "the September model's fitted electrical term, leakage and thermal terms removed",
-    "zeros": "over a RUNNING kernel on zero data, so the 8.6 W of lane un-gating is NOT in it",
+    "zeros": "over a RUNNING kernel on zero data, so the %.2f +- %.2f W of lane un-gating is NOT "
+             "in it" % (UNG, UNG_SE),
     "const": "over a constant NON-zero operand, so the lane is un-gated and only the flips are missing",
     "model": "E64's governor model's data-dependent term c x s(f), referred to a 58 C die",
     "abs": "absolute, no baseline subtracted",
@@ -131,6 +238,10 @@ def cell(fmt, kind, quantity, value, unit, conditions, source,
         "conditions": conditions, "source": source, "status": status,
         "basis": basis,
     }
+    if (fmt, kind) in VARIANT_OF:
+        base, what = VARIANT_OF[(fmt, kind)]
+        c["variant_of"] = base
+        c["variant_is"] = what
     if typed:
         c["typed"] = True
     if extra:
@@ -330,7 +441,13 @@ def e14_cells():
     for kind, p in d["patterns"].items():
         out.append(cell("fp32", "m_" + kind, "switching_W", r(p["p_switching"], 3), "W",
                         "aifoundry2, 600 MHz, predicted from E13 RTL flip counts through E17's model, "
-                        "written to disk at %s, 36 s before the first of these matrices launched" % d["made_at"],
+                        "written to disk at %s (the file's own made_at) - before any of these matrices "
+                        "had run on the card, per the file's `note`. The measured figures this is "
+                        "scored against are the claims-v3 abla runs of 26 Sep (earliest aifoundry2 "
+                        "run t0 1790391404.347 = 2026-09-26T02:56:44 UTC), five days later. NO lead "
+                        "time shorter than that is checkable from this repository: the same-afternoon "
+                        "session's t0 values (validation_afternoon.json) are relative offsets into "
+                        "session long2 with no absolute anchor committed" % d["made_at"],
                         src(P_PRED14, "patterns.%s.p_switching" % kind), status="predicted",
                         basis="idle_lc"))
         out.append(cell("fp32", "m_" + kind, "board_W", r(p["p_board_at_launch"], 3), "W",
@@ -820,9 +937,9 @@ def bit_cells():
     bc("fp32", "the zero gate", "fmadd.ps zero-gate step", "dW", r(zg["value"], 4), "W",
        "aifoundry3, 600 MHz: the vector fmadd.ps has NO zero gate - %.3f +- %.3f W, i.e. "
        "0.23 +- 0.16 pJ/op, against the 8.94 pJ a zero gate would save. Zero gating in the "
-       "TENSOR unit is real and worth 8.6 W of lane un-gating (E70's split of the "
-       "zeros->random step); the vector unit's is not there."
-       % (zg["value"], zg["se"]),
+       "TENSOR unit is real and worth %.2f +- %.2f W of lane un-gating (the zeros->random "
+       "split); the vector unit's is not there."
+       % (zg["value"], zg["se"], UNG, UNG_SE),
        src(P_E61, "cards.aifoundry3.derived.zero_gate_step.value"), interval="+-%.4g" % zg["se"])
 
     # ---- E74: the register file's own cells
@@ -882,34 +999,104 @@ def bit_cells():
 
 
 # =============================================================== the mechanisms
+# two-sided 95% t, df 1..30, for re-reading a published interval at 95%
+_T95 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306,
+        9: 2.262, 10: 2.228, 12: 2.179, 15: 2.131, 20: 2.086, 25: 2.060, 30: 2.042}
+
+
+def t95(df):
+    ks = sorted(_T95)
+    if df <= ks[0]:
+        return _T95[ks[0]]
+    if df >= ks[-1]:
+        return _T95[ks[-1]]
+    lo = max(k for k in ks if k <= df)
+    hi = min(k for k in ks if k >= df)
+    if lo == hi:
+        return _T95[lo]
+    return _T95[lo] + (df - lo) * (_T95[hi] - _T95[lo]) / (hi - lo)
+
+
+def abl_t1():
+    """ABL-T1 (-0.0 against +0.0 and against all-ones) as its own file scores it.
+
+    The published intervals are Bonferroni family-wise (alpha = 0.01/19 = 0.000526), NOT
+    95%, and the item's outcome is CARD-DIFFERENT, not a pass. Both are reported here,
+    with each published interval re-read at 95% from its own point, se and df.
+    """
+    d = jload(P_ABLA_S)
+    item = [x for x in d if x.get("item") == "ABL-T1"][0]
+    out = []
+    for card, c in item["per_card"].items():
+        s = [x for x in c["subtests"] if "ones" in x["test"]][0]
+        ci = s["ci"]
+        h = t95(ci["df"]) * ci["se"]
+        out.append({
+            "card": card, "card_outcome": c["outcome"], "subtest": s["test"],
+            "point_W": r(ci["point"], 4), "se_W": r(ci["se"], 4), "df": r(ci["df"], 3),
+            "published_interval_W": [r(ci["lo"], 3), r(ci["hi"], 3)],
+            "published_alpha": ci["alpha"],
+            "interval_95_W": [r(ci["point"] - h, 3), r(ci["point"] + h, 3)],
+            "subtest_ok": s.get("ok"),
+        })
+    by = {x["card"]: x for x in out}
+    a2, a3, a1 = by["aifoundry2"], by["aifoundry3"], by["aifoundry1-c1"]
+    reading = (
+        "the registered outcome is %s (a2 PASS, a3 FAIL, a1c1 FAIL). The equivalence subtest "
+        "'%s' holds on aifoundry2 only: %+.2f W, published interval [%+.2f, %+.2f] at the "
+        "family-wise alpha %s - NOT 95%%; re-read at 95%% it is [%+.2f, %+.2f]. It FAILS on "
+        "aifoundry3 (%+.2f W, [%+.2f, %+.2f]) and aifoundry1-c1 (%+.2f W, [%+.2f, %+.2f]) on "
+        "interval WIDTH, not on sign: every point estimate is within 0.15 W of zero and all three "
+        "95%% intervals lie inside the +-1 W band."
+        % (item["outcome"], a2["subtest"], a2["point_W"], a2["published_interval_W"][0],
+           a2["published_interval_W"][1], a2["published_alpha"], a2["interval_95_W"][0],
+           a2["interval_95_W"][1], a3["point_W"], a3["published_interval_W"][0],
+           a3["published_interval_W"][1], a1["point_W"], a1["published_interval_W"][0],
+           a1["published_interval_W"][1]))
+    return {
+        "item": "ABL-T1", "registered_outcome": item["outcome"],
+        "test_as_registered": item["test"], "per_card": out, "reading": reading,
+        "source": src(P_ABLA_S, "[item=ABL-T1].per_card.*.subtests"
+                                "[negzero - ones within +-1 W].ci"),
+    }
+
+
 def mechanisms():
     e70s = jload(P_E70S)
-    t = TYPED["e70_lane_ungating_W"]
+    t1 = abl_t1()
     return [
         {
             "mechanism": "zero gating (the tensor unit)",
             "what_it_does": "an all-zero operand word turns the lane's work off, so the die never "
                             "sees the switching at all",
-            "size": "%.1f W of the zeros->random step at 600 MHz on aifoundry3, with 16.1 W of "
-                    "operand flips on top (24.66 W in all)" % t["value"],
-            "status": "measured", "typed": True, "source": t["source"],
+            "size": "%.2f +- %.2f W of the zeros->random step at 600 MHz on aifoundry3, with "
+                    "%.2f +- %.2f W of operand flips on top (%.2f +- %.2f W in all); all three "
+                    "levels are p80, referred to the same 58 C launch, so no leakage term survives "
+                    "the difference"
+                    % (UNG, UNG_SE, FLIPS, SPLIT["operand_flips_W"]["se"],
+                       STEP, SPLIT["step_W"]["se"]),
+            "status": "measured", "source": SPLIT["source"],
             "notes": "the chip gates the all-zero BIT PATTERN only, so -0.0 is not gated: it costs "
-                     "+8.36 W over +0.0 and is indistinguishable from all-ones "
-                     "(claims-v3 abla ABL-T1). The VECTOR fmadd.ps has no zero gate at all "
-                     "(E61, 0.087 +- 0.060 W).",
+                     "+8.36 W over +0.0 (ABL-T1 subtest 1, PASS on all three cards) and is "
+                     "indistinguishable from all-ones. The equivalence to all-ones is ONE CARD's "
+                     "registered pass: " + t1["reading"] + " The VECTOR fmadd.ps has no zero gate "
+                     "at all (E61, 0.087 +- 0.060 W).",
         },
         {
             "mechanism": "order (which number follows which)",
             "what_it_does": "the SAME arithmetic costs more when consecutive operands differ in "
                             "more bits, because the flips, not the values, are what is paid for",
-            "size": "max-flip minus Gray on the same 4,096 multiply-adds: +0.682 +- 0.010 W "
-                    "(aifoundry3, 600 MHz, bits 0-3) and +1.291 +- 0.009 W (aifoundry2, 800 MHz); "
-                    "the four orders rank by their flipped bits, and binary is indistinguishable "
-                    "from Gray at bits 0-3",
+            "size": "max-flip minus Gray on the same 4,096 multiply-adds: +0.682 +- 0.010 W at "
+                    "600 MHz / 0.5218 V (aifoundry3, bits 0-3) and +1.291 +- 0.009 W at "
+                    "800 MHz / 0.6174 V (aifoundry2); the four orders rank by their flipped bits, "
+                    "and binary is indistinguishable from Gray at bits 0-3",
             "status": "measured",
             "source": src(P_E60, "cards.aifoundry3.ord['0'].maxflip.W, cards.aifoundry2.ord['0'].maxflip.W"),
             "notes": "this is the cleanest single demonstration for a blog reader: identical "
-                     "results, identical count of operations, different energy.",
+                     "results, identical count of operations, different energy. THE 1.9x BETWEEN "
+                     "THE TWO IS THE OPERATING POINT, NOT THE CARD: 0.6825 x s(800) = 1.90517 "
+                     "gives 1.300 W against aifoundry2's measured 1.291 W, so referred to one "
+                     "clock the two cards agree. Quote the clock and voltage with each figure.",
         },
         {
             "mechanism": "shared wires (saturation)",
@@ -979,15 +1166,24 @@ def mechanisms():
             "what_it_does": "the watts the data causes are turned into SPEED by the firmware, which "
                             "regulates a ~1.3 s average of board power to the TDP and the die "
                             "reading to the threshold",
-            "size": "on a cool die the power test alone acts, so zeros run 12.3 against random "
-                    "fp32's 10.7 TFLOPS in the first 8 s (15%); in 80 s runs the thermal test wins, "
-                    "because this card's cooling puts the die at 65 C at about 50 W, and zeros run "
-                    "12.3 against 9.2 TFLOPS (33%)",
+            "size": "on a cool die the power test alone acts, so zeros run 12.1 against random "
+                    "fp32's 10.6 TFLOPS over a 6 s burst (zeros +14%, random -12%); in 80 s runs "
+                    "the thermal test wins, because this card's cooling puts the die at 65 C at "
+                    "about 50 W, and zeros run 12.278 against 9.209 TFLOPS - zeros +33.3%, random "
+                    "-25.0%. STATE THE DIRECTION: the two percentages are the same gap read from "
+                    "the two ends, and 'random is 33% slower' is wrong",
             "status": "measured", "source": src(P_E64_F, "runs / governor / thermal"),
             "notes": "the model is a first-order average, tau 1.3 s, compared once per 0.24 s pass, "
                      "one step up or down, 3.3 MHz rms over 26 cool-die runs; the thermal line is "
                      "die = 41.88 + 0.4696 C per board W. E69 moved the cap for the first time and "
-                     "12 of 12 extrapolated cap-table cells held.",
+                     "12 of 12 extrapolated cap-table cells held. WHICH CLOCK a switching figure "
+                     "belongs to decides whether it explains a governor run: random int8's "
+                     "switching term at the governor's own 800 MHz footing is 17.34 W "
+                     "(fit.c[SUS-08] 9.101 x s(800) 1.90517) against random fp32's 49.27 W "
+                     "(fit.c[SUS-02] 25.862 x s(800)), which is why int8 settles at a 65.3 C die "
+                     "holding 763 MHz while fp32 randn is pinned to the 600 MHz floor at 67.1 C. "
+                     "The 9.885 W figure for int8 randn is a PINNED 600 MHz measurement "
+                     "(claims-v3 abla) and must not be used to explain an 800 MHz governor run.",
         },
     ]
 
@@ -1025,19 +1221,29 @@ def holes():
          "cells_missing": "7 fp32 kinds x {sustained_MHz, TFLOPS_sustained, die_C_sustained, "
                           "limit_sustained}, plus every new fp16/int8 kind",
          "why_it_matters": "the blog's headline distinction is burst (power test) against sustained "
-                           "(thermal test), and the second is where the 33% gap lives.",
+                           "(thermal test), and the second is where the big gap lives: sustained "
+                           "fp32 zeros are 33.3% faster than randn (randn 25.0% slower), against "
+                           "+14.2% / -12.4% on a 6 s cool-die burst.",
          "how": "E64's SUS block (~80 s runs, last 40 s) on the ladder kinds; no governor move.",
          "evidence": src(P_E64_F, "runs[block=SUS] has 9 rows against LAD's 10 kinds")},
         {"id": "H4", "lane": "E80", "priority": 4,
-         "hole": "the fp16 all-ones sustained cell is the governor model's one standing miss: "
-                 "775 MHz predicted against 738 measured; E64-T1's temperature term narrows it to "
-                 "+7.8 to +21.3 MHz but never closes it.",
+         "hole": "the fp16 all-ones sustained cell is the one sustained cell that NO (gamma, trip) "
+                 "pairing closes: measured 737.1 MHz against 744.9-758.4 MHz over Q129's six "
+                 "pairings, a +7.8 to +21.3 MHz miss (E64's own cap predicts 780.6, +43.5). n = 1 run.",
          "cells_missing": "1 cell, with a replicate",
-         "why_it_matters": "it is the only cell where the published governor model is wrong by more "
-                           "than its own rms, and it is an all-ONES cell - exactly the 'predictable "
-                           "data' case the blog is about.",
-         "how": "repeat the fp16 ones SUS run; E64 ran it once (n = 1).",
-         "evidence": "hub Status item 9 and Levels stop 1."},
+         "why_it_matters": "it is an all-ONES cell - exactly the 'predictable data' case the blog is "
+                           "about - and the only sustained cell where every candidate governor "
+                           "surface is wrong in the same direction.",
+         "how": "repeat the fp16 ones SUS run; E64 ran it once (n = 1). E80's REGISTERED PREDICTION "
+                "for this cell is 744.9-758.4 MHz, which is the fp16 row of Q129's trip surface. "
+                "The 775 MHz figure (chain.py) belongs to the fp32 all-ones cell (measured 737.9), "
+                "whose miss Q129 narrows from +37 to +18.5...-7.8 MHz; it closes only at the warm "
+                "end of gamma, and gamma and the thermal trip are jointly unidentified. Do not "
+                "carry 775 into an fp16 registration: the two cells both measure ~738 MHz, which "
+                "is how they were welded together.",
+         "evidence": "docs/reports/data/2026-10-27-q129-governor-temperature/README.md lines 80-81 "
+                     "(the trip surface's fp32 and fp16 rows) and 97, 103 (the two misses); hub "
+                     "Status item 9 and Levels stop 1."},
         {"id": "H5", "lane": "E78 (rail arm) / E77 (reserved, NOT this workflow)", "priority": 5,
          "hole": "energy per op AT THE MINION RAIL exists for four fp32 kinds on aifoundry3 "
                  "(E67's anchors, over zeros) and as absolute rail power for the September "
@@ -1108,6 +1314,74 @@ def holes():
     ]
 
 
+# =========================================== how many rows, and how many KINDS
+def row_taxonomy(cells, rows):
+    """One set of denominators, computed, so no two sentences can disagree.
+
+    Four different counts were being quoted as one in the first cut of this file:
+      - rows in the cell list                55 (fp32 46, fp16 4, int8 5)
+      - rows with at least one RUN-sourced   52 (fp32 43, fp16 4, int8 5)  = len(rows)
+        cell (what `row_coverage` holds)
+      - rows with at least one MEASURED cell 52 - the 3 prediction-only matrices
+      - distinct KINDS OF NUMBER measured    42 (fp32 36, fp16 3, int8 3), after folding
+        the configuration variants in VARIANT_OF into their base kind
+    The coverage claim a blog may quote is the LAST one.
+    """
+    def byfmt(keys):
+        c = {"total": len(keys)}
+        for f in ("fp32", "fp16", "int8"):
+            c[f] = sum(1 for k in keys if k[0] == f)
+        return c
+
+    all_rows, measured, status_of = {}, set(), {}
+    for c in cells:
+        k = (c["format"], c["kind"])
+        all_rows.setdefault(k, set()).add(c["status"])
+        if c["status"] == "measured":
+            measured.add(k)
+    for k, v in all_rows.items():
+        status_of[k] = sorted(v)
+
+    def q_rows(quantity, only_measured=False):
+        out = set()
+        for c in cells:
+            if c["quantity"] != quantity:
+                continue
+            if only_measured and c["status"] != "measured":
+                continue
+            out.add((c["format"], c["kind"]))
+        return out
+
+    pred_only = sorted(k for k, v in all_rows.items() if v == {"predicted"})
+    kinds = {(f, VARIANT_OF.get((f, k), (k, None))[0]) for f, k in measured}
+    variants = sorted(k for k in all_rows if k in VARIANT_OF)
+    sw_any, sw_meas = q_rows("switching_W"), q_rows("switching_W", True)
+    pj_any, pj_meas = q_rows("pJ_per_MAC"), q_rows("pJ_per_MAC", True)
+    return {
+        "one_sentence": (
+            "%d (format, kind) rows have at least one run-sourced cell (fp32 %d, fp16 %d, int8 %d); "
+            "%d more fp32 matrices are prediction-only, so the cell list holds %d rows. Folding the "
+            "%d configuration variants (minion count, TenB streaming) into their base kind leaves "
+            "%d distinct KINDS OF NUMBER with a measured cell: fp32 %d, fp16 %d, int8 %d."
+            % (byfmt(rows)["total"], byfmt(rows)["fp32"], byfmt(rows)["fp16"], byfmt(rows)["int8"],
+               len(pred_only), byfmt(all_rows)["total"], len(variants),
+               byfmt(kinds)["total"], byfmt(kinds)["fp32"], byfmt(kinds)["fp16"], byfmt(kinds)["int8"])),
+        "rows_in_cell_list": byfmt(all_rows),
+        "rows_run_sourced": byfmt(rows),
+        "rows_with_a_measured_cell": byfmt(measured),
+        "rows_prediction_only": ["%s/%s" % k for k in pred_only],
+        "distinct_kinds_of_number_measured": byfmt(kinds),
+        "kinds_of_number_measured": sorted("%s/%s" % k for k in kinds),
+        "configuration_variant_rows": {
+            "%s/%s" % k: {"base_kind": VARIANT_OF[k][0], "variant_is": VARIANT_OF[k][1]}
+            for k in variants},
+        "rows_with_switching_W": {"any_status": byfmt(sw_any), "measured": byfmt(sw_meas),
+                                  "never_measured": sorted("%s/%s" % k for k in (sw_any - sw_meas))},
+        "rows_with_pJ_per_MAC": {"any_status": byfmt(pj_any), "measured": byfmt(pj_meas)},
+        "row_status": {"%s/%s" % k: v for k, v in sorted(status_of.items())},
+    }
+
+
 # ================================================== the markdown the README uses
 # The blog's table is quoted at ONE clock per column group, because a clock change
 # is a voltage change and a price may not be scaled across it (see `normalisation`).
@@ -1166,10 +1440,15 @@ def write_tables(inv, out):
     L.append("")
     L.append("ᵐ modelled, ᵖ predicted, — missing. Baseline marks: no mark = over the "
              "pre-launch idle, leakage-normalised to a fixed launch temperature; ˢ = over the "
-             "pre-launch idle but NOT leakage-corrected (the September strict runs; reads about "
-             "8% high on fp32 randn); ᶻ = over a RUNNING kernel on zero data (the 8.6 W of lane "
-             "un-gating is NOT in it); ᶜ = over a constant NON-zero operand; ᵃ = absolute. "
-             "A clock is never crossed by scaling (see §Units).")
+             "pre-launch idle but NOT leakage-corrected (the September strict runs: on fp32 randn "
+             "+8.6%% on switching W and **+12.0%% on pJ per MAC** against the leakage-normalised "
+             "claims-v3 figures in the same columns); ᶻ = over a RUNNING kernel on zero data "
+             "(the %.2f ± %.2f W of lane un-gating is NOT in it); ᶜ = over a constant NON-zero "
+             "operand; ᵃ = absolute. A clock is never crossed by scaling (see §Units)."
+             % (UNG, UNG_SE))
+    L.append("")
+    L.append("Row counts, one set of denominators (`inventory.json` > `row_taxonomy`): "
+             + inv["row_taxonomy"]["one_sentence"])
     L.append("")
     L.append("### 1A · aifoundry2 and aifoundry3 at 600 MHz (no governor action: a fixed pin)")
     L.append("")
@@ -1216,24 +1495,53 @@ def write_tables(inv, out):
     L.append("")
     L.append("### 1C · coverage: which quantity exists for which row")
     L.append("")
+    L.append("**Every row of the cell list is here** — the blog rows first, then the "
+             "configuration variants (ᵛ, the same operand stream at another minion count or with "
+             "TenB streaming: they are rows, not kinds) and the prediction-only matrices. The "
+             "first cut of this table showed only the 36 blog rows with no note that it was "
+             "partial.")
+    L.append("")
     quants = ["switching_W", "pJ_per_MAC", "pJ_per_MAC_rail", "burst_MHz", "sustained_MHz",
               "TFLOPS", "die_C_sustained", "limit", "toggles_per_MAC"]
     L.append("| format | kind | " + " | ".join(q.replace("_", " ") for q in quants) + " |")
     L.append("|---|---|" + "---|" * len(quants))
     legend = {"measured": "M", "modelled": "m", "predicted": "p", "missing": "·"}
-    for fmt, kind in BLOG_ROWS:
+    ordered, seen = [], set()
+    present = [(c["format"], c["kind"]) for c in cells]
+    for k in BLOG_ROWS:
+        if k in present and k not in seen:
+            ordered.append(k)
+            seen.add(k)
+    for k in present:                       # first-appearance order for everything else
+        if k not in seen:
+            ordered.append(k)
+            seen.add(k)
+    other_only = []
+    for fmt, kind in ordered:
         marks = []
         for q in quants:
-            qq = q
-            if q == "TFLOPS" and fmt == "int8":
-                qq = "TFLOPS"      # abla/September emit TFLOPS for every format
-            c = pick(cells, fmt, kind, qq)
+            c = pick(cells, fmt, kind, q)
             marks.append(legend.get(c["status"], "?") if c else "·")
+        name = kind
+        if (fmt, kind) in VARIANT_OF:
+            name += " ᵛ(= %s)" % VARIANT_OF[(fmt, kind)][0]
         if set(marks) == {"·"}:
-            continue
-        L.append("| %s | %s | %s |" % (fmt, kind, " | ".join(marks)))
+            name += " ᵒ"
+            other_only.append((fmt, kind))
+        L.append("| %s | %s | %s |" % (fmt, name, " | ".join(marks)))
     L.append("")
-    L.append("M = measured, m = modelled, p = predicted, · = missing.")
+    L.append("M = measured, m = modelled, p = predicted, · = missing. "
+             "ᵛ = a configuration variant of the named kind, folded into it by the kind counts. "
+             "%d rows, which is every row in `operand_kind_cells`." % len(ordered))
+    if other_only:
+        L.append("")
+        bits_of = []
+        for fmt, kind in other_only:
+            qs = sorted({c["quantity"] for c in cells
+                         if c["format"] == fmt and c["kind"] == kind})
+            bits_of.append("`%s/%s` (%s)" % (fmt, kind, ", ".join(qs)))
+        L.append("ᵒ carries no cell in any of the nine columns above, only: " + "; ".join(bits_of)
+                 + ". Nothing is hidden: these rows are in the table so the denominators match.")
     L.append("")
     L.append("## Table 2 — the bit level")
     L.append("")
@@ -1330,14 +1638,32 @@ def main():
             "scope": "desk only; no card was touched; every number is read from a committed file "
                      "or typed from a committed README with its citation",
             "repo_head_note": "run `git log -1` for the head this was built at",
+            "corrected": "2026-10-31, after adversarial verification of the first cut (commit "
+                         "7d9b73c5): one set of row denominators in row_taxonomy (kinds of number, "
+                         "not configurations), the format-dependent MACs per TensorFMA, ABL-T1 at "
+                         "its own alpha with its two FAILs, the zeros->random split computed with "
+                         "an interval instead of typed, the fp16 all-ones target separated from "
+                         "fp32's, the September offset per quantity, E71's band label, and the "
+                         "scope of the measured-slope rule. See README 'What the verification "
+                         "changed'.",
         },
         "normalisation": {
-            "mac_vs_flop": "1 multiply-add = 2 flops. MAC/s = TFLOPS x 1e12 / 2. One 16x16x16 "
-                           "TensorFMA = %d multiply-adds, so MAC/s = ops/s x %d."
-                           % (MACS_PER_OP, MACS_PER_OP),
+            "mac_vs_flop": "1 multiply-add = 2 flops, so in EVERY format MAC/s = TFLOPS or TOPS "
+                           "x 1e12 / 2. MACs per 16x16x16 TensorFMA are FORMAT-DEPENDENT: "
+                           "fp32 %d, fp16 %d, int8 %d (tools/claims-v3/hpl/surface_hpl.py:32 gives "
+                           "flops per op 8192 / 16384 / 32768). So MAC/s = ops/s x 4,096 holds for "
+                           "fp32 ONLY: applied to fp16 it reports pJ per MAC 2x too high and to "
+                           "int8 4x too high. The claims-v3 `per_s` field is already MAC/s (its "
+                           "`unit` reads MAC) and needs no conversion: at one 600 MHz pin it reads "
+                           "4.591e12 for fp32, 9.184e12 for fp16 (exactly 2x at the same 546 cycles "
+                           "per op) and 3.153e13 for int8 (318 cycles)."
+                           % (MACS_PER_OP_BY_FMT["fp32"], MACS_PER_OP_BY_FMT["fp16"],
+                              MACS_PER_OP_BY_FMT["int8"]),
             "cycles_per_op": "fp32 546, fp16 546, int8 318 (tools/claims-v3/hpl/surface_hpl.py; "
                              "measured identical on three cards to 0.0002 cycle, claims-v3 ABLB-2a). "
-                             "int8 is therefore 6.9x fp32's MAC rate at the same clock, not 4x.",
+                             "int8 is therefore 6.9x fp32's MAC rate at the same clock "
+                             "(546/318 x 16384/4096 = 6.87), not 1.7x (the cycle ratio alone) and "
+                             "not 4x (the MACs-per-op ratio alone).",
             "clock_600_vs_800": "NEVER scale a price by the clock ratio. E72 ran ONE card at both: "
                                 "79.18 +- 3.09 fJ at 600 MHz / 0.5179 V against 121.27 +- 0.61 fJ at "
                                 "800 MHz / 0.6174 V - the price follows the VOLTAGE, 10-15% below a "
@@ -1357,17 +1683,28 @@ def main():
                         "leakage x the rise since launch), the September p_early - p_before, and "
                         "E64's model term c. (b) OVER ZEROS: E67's anchors differenced against "
                         "anchor_zeros, and the E15 rail column - these subtract a RUNNING kernel on "
-                        "zero data, so they omit the 8.6 W of lane un-gating. (c) OVER A CONSTANT "
+                        "zero data, so they omit the %.2f W of lane un-gating. (c) OVER A CONSTANT "
                         "OPERAND: every bit price in table 2 (lq_h0, aq_h0, lb_h0) - a constant "
                         "NON-zero operand, so the lane is un-gated and only the flips are missing. "
-                        "(b) and (c) differ by that 8.6 W; (a) and (c) differ by the whole zeros "
-                        "level. Each cell's `conditions` names its own baseline.",
+                        "(b) and (c) differ by that %.2f +- %.2f W; (a) and (c) differ by the whole "
+                        "zeros level. Each cell's `conditions` names its own baseline."
+                        % (UNG, UNG, UNG_SE),
             "leakage_slope": "a leakage slope is NOT a card constant (E71): it rises about 0.009 "
                              "W/C per C on aifoundry2 and 0.011 on aifoundry3 over 51-65 C. "
-                             "Measured idle slopes: a2 0.2936 over 51-58 C (E66) and 0.3452 over "
-                             "58-62; a3 0.3200 over 52-58 and 0.3803 +- 0.0036 over 58-62 (E71). "
-                             "The September campaign used 0.81 (a2, at an 80.9 C launch) and 0.55 "
-                             "(a3, at 55.8 C), fitted then. E68's registered estimator used 1.508 "
+                             "Measured idle slopes: a2 0.2936 over 51-58 C (E66) and 0.3452 +- "
+                             "0.0056 over 58-62; a3 0.3200 +- 0.0038 over 51-58 (E71's own band "
+                             "label; its floor is 52-53 C, so that fit spans 5-6 degrees, not 7) "
+                             "and 0.3803 +- 0.0036 over 58-62. THE SCOPE OF THIS RULE: it governs "
+                             "the a3 bit ladders, which launch at 58 C inside the measured bands, "
+                             "and E71's leak_sensitivity.py re-prices exactly those. It does NOT "
+                             "reach the claims-v3 / September cells that carry table 1A's spine: "
+                             "those launch at 80.9 C (a2) and 55.8 C (a3) on the campaign's own "
+                             "FITTED BUSY-DIE slopes, 0.81 and 0.55 W/C, which are 2.1-2.8x every "
+                             "measured idle slope and sit at a die temperature no measured band "
+                             "covers (the bands stop at 66 C). No re-reduction of the 80.9 C "
+                             "campaign onto a measured slope exists - that is this inventory's "
+                             "own hole H10, and until it is done every 1A cell carries that "
+                             "footing, not a measured-idle one. E68's registered estimator used 1.508 "
                              "W/C, which is 4-5x every measured idle slope and is a busy transient, "
                              "not leakage - its prices are published at both footings and the "
                              "measured one is the better. Re-pricing the a3 ladders at E71's slope "
@@ -1389,7 +1726,25 @@ def main():
                              "per random fp32 multiply-add, ratio 0.825 [0.787-0.856] (Q129). The "
                              "1.009 pJ between them is mostly the regulators' delivery loss "
                              "(0.875 pJ), which is a named account, not a bottom-up row.",
+            "september_basis": "the September strict cells are marked `basis: idle_raw` and ˢ in "
+                               "tables.md: p_early - p_before, NOT leakage-corrected. QUOTE THE "
+                               "OFFSET PER QUANTITY, because it is not one number: on fp32 randn "
+                               "(a2, 600 MHz) switching_W reads +8.6% high (29.52 against 27.18 W) "
+                               "and pJ per MAC +12.0% (6.630 against 5.920), the extra 3.1% being "
+                               "the denominator - the September pJ column implies 8.905 TFLOPS "
+                               "where the same record's `tflops` field reads 9.183. Table 1A puts "
+                               "September sparse75 (1.0966 pJ/MAC ˢ) in the same column as the "
+                               "claims-v3 figures, so a reader comparing them across that mark is "
+                               "comparing bases that differ by about a tenth, not by 8%.",
+            "counting_kinds": "a configuration variant is not a kind of number. Seven fp32 rows are "
+                              "the same randn operand at a different minion count and three are TenB "
+                              "streaming arms; `row_taxonomy` folds them into their base kind with "
+                              "VARIANT_OF, and each such cell carries `variant_of` and `variant_is`. "
+                              "Quote `row_taxonomy.one_sentence` and nothing else for coverage.",
         },
+        "zeros_random_split": SPLIT,
+        "registered_items": {"ABL-T1": abl_t1()},
+        "row_taxonomy": row_taxonomy(cells, rows),
         "typed_numbers": TYPED,
         "row_coverage": {"%s/%s" % k: sorted(v) for k, v in sorted(rows.items())},
         "operand_kind_cells": cells,
@@ -1401,9 +1756,23 @@ def main():
     counts = {}
     for c in cells + bits:
         counts[c["status"]] = counts.get(c["status"], 0) + 1
+    tax = inv["row_taxonomy"]
     inv["meta"]["cell_counts"] = {
         "operand_kind_cells": len(cells), "bit_level_cells": len(bits),
-        "by_status": counts, "distinct_format_kind_rows": len(rows),
+        "by_status": counts,
+        # four DIFFERENT denominators, each named for what it counts. Nothing may quote
+        # one of them against another: see row_taxonomy.one_sentence.
+        "rows_in_cell_list": tax["rows_in_cell_list"]["total"],
+        "rows_run_sourced": tax["rows_run_sourced"]["total"],
+        "rows_with_a_measured_cell": tax["rows_with_a_measured_cell"]["total"],
+        "distinct_kinds_of_number_measured": tax["distinct_kinds_of_number_measured"]["total"],
+        "distinct_format_kind_rows": len(rows),
+        "distinct_format_kind_rows_means": "rows with at least one run-sourced cell "
+                                           "(= len(row_coverage)); NOT the number of kinds of "
+                                           "number, and not the number of rows in the cell list",
+        "rows_with_measured_switching_W": tax["rows_with_switching_W"]["measured"]["total"],
+        "rows_with_switching_W_any_status": tax["rows_with_switching_W"]["any_status"]["total"],
+        "typed_numbers": len(TYPED),
         "mechanisms": len(inv["mechanisms"]), "holes": len(inv["holes"]),
     }
 
