@@ -1,0 +1,40 @@
+--- tools/claims-v3/kinds/selftest_e91.py (unchanged), its own output:
+ok   shared: dips injected (samples per pass): {'9110': 8, '9111': 8, '9112': 8, '9113': 8, '9114': 8}
+ok   shared: the primary removes them: {'p9110': 8, 'p9111': 8, 'p9112': 8, 'p9113': 8, 'p9114': 8}
+ok   shared: primary keeps every pass: [9110, 9111, 9112, 9113, 9114]
+ok   shared: config gate accepts card 1's 65/65: []
+ok   shared: 32 runs a pass, all kept: 160/160
+ok   shared: D recovered within 0.15 W (primary): 0.0881
+ok   shared: R1 PASS, 9 of 9 inside: 9
+ok   shared: R2 PASS: PASS
+ok   shared: R5 PASS (the tie to E82's cells): PASS
+ok   shared: S1 PASS: 9
+ok   shared: X4 PASS (real tiles share E82's scale): 1.0337615257428647
+ok   shared: X3 FAIL (E82's band, scale 1.03): 1.0332597764796791
+ok   shared: arms scored beside: {'dips_kept': 'NOT SCORED', 'leak0.545': 'PASS'}
+ok   unshared: X4 FAIL: 0.9745731449531433
+ok   unshared: R1 still PASS (wide intervals): 9
+informational (synthetic): dips-kept arm kept passes [] set aside [{'pass': 9110, 'why': ['fp32.randn spans 1.257 W', 'int8.zeros spans 1.059 W']}, {'pass': 9111, 'why': ['fp32.randn spans 1.167 W', 'int8.full spans 1.565 W']}, {'pass': 9112, 'why': ['fp32.randn spans 1.025 W', 'fp16.zeros departs +0.709 W from its straight line', 'fp16.zeros spans 1.368 W', 'int8.zeros departs -1.150 W from its straight line', 'int8.zeros spans 1.214 W', 'int8.full spans 1.416 W']}, {'pass': 9113, 'why': ['fp16.zeros spans 0.914 W', 'int8.zeros departs -0.838 W from its straight line', 'int8.zeros spans 0.885 W', 'int8.full spans 1.167 W']}, {'pass': 9114, 'why': ['fp16.zeros departs +0.400 W from its straight line', 'fp16.zeros spans 1.224 W']}] worst D error None
+informational (synthetic): R3 {'fp32': (0.9875, 'PASS'), 'fp16': (0.9834, 'PASS'), 'int8': (0.8297, 'PASS')} R4 PASS X1 PASS X2a FAIL X2b FAIL
+tallies on synthetic data (meaningless as a result): {'PASS': 8, 'FAIL': 3} {'PASS': 5, 'FAIL': 5, 'INCONCLUSIVE': 1}
+--- E112's checks:
+ok   card-1 view: watts = frozen / scale (rounded to 1e-4): 132 figures, worst 4.98e-05
+ok   card-1 view: ratio thresholds unchanged (C1, C3b, C10): True
+ok   shared: dips injected: {'11250': 8, '11251': 8, '11252': 8, '11253': 8}
+ok   shared: the primary removes them: {'p11250': 8, 'p11251': 8, 'p11252': 8, 'p11253': 8}
+ok   shared: config gate accepts card 1's 65/65: []
+ok   shared: every pass kept: [11250, 11251, 11252, 11253]
+ok   shared: 53 runs a pass, all kept: 212/212
+ok   shared: D recovered within 0.15 W: 0.1108
+ok   shared: no claim NOT SCORED: {'C1': 'FAIL', 'C2': 'PASS', 'C3a': 'PASS', 'C3b': 'PASS', 'C4': 'PASS', 'C5': 'INCONCLUSIVE', 'C6': 'PASS', 'C7': 'INCONCLUSIVE', 'C8': 'PASS', 'C9': 'PASS', 'C10': 'PASS', 'C11': 'PASS', 'C12': 'PASS'}
+ok   shared: C9 PASS (D far above the gated reading): 11.5619
+ok   shared: C7 port reads the scaled threshold: 0.3895
+ok   shared: C8 port reads the scaled threshold: 0.4868
+ok   shared: unscaled verdicts reported beside: True
+ok   shared: X1 PASS: {'fp32': 1.0, 'fp16': 0.964, 'int8': 1.0}
+ok   shared: X4 PASS: 1.0337340190397515
+ok   shared: X5 PASS: 33/33
+ok   shared: arms scored beside: ['dips_kept', 'leak0.545']
+ok   unshared: X4 FAIL (median about 0.97): 0.9735904611950429
+ok   (a): E91's own self-test passes on this desk: 0
+informational (synthetic): claims {'FAIL': 1, 'PASS': 10, 'INCONCLUSIVE': 2} cross {'PASS': 3} | unshared: {'FAIL': 2, 'PASS': 9, 'INCONCLUSIVE': 2} {'FAIL': 3}

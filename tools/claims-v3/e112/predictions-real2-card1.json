@@ -1,0 +1,3141 @@
+{
+ "experiment": "E112b (Q133): the card-1 view of Q132(r)'s frozen file",
+ "date": "2026-11-01",
+ "what": "FROZEN predictions and claims for the real2 tiles, made before any card ran them: (a) D at 600 MHz on aifoundry3 (E95) from Q130(n)'s frozen predictor with an interval fitted on its known out-of-sample misses; (a') its offset from a partner tile; (b) the burst and sustained clock under aifoundry2's own governor (E96) from E83's relation; (c) the gate law for gated tiles, separately; and the claims E95 and E96 test.",
+ "inputs_sha256": {
+  "tools/claims-v3/kinds/real/predictions-real.json": "bab33beee0bcefa3d1aae5bd9af72e2d1c1da0f76bb0947aa2f7a39c6b024941",
+  "tools/claims-v3/kinds/real/amendment-1.json": "f32e8a9087a9cf3bf60f29ff623c1a375537b43696df0dca24972ba220bc0d9e",
+  "tools/claims-v3/kinds/real/real.json": "eb36f4cd0d88d928d2c0c92165f4a48e23727221d5ac047bff3de3c8e0ad83c0",
+  "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json": "b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5",
+  "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+  "tools/claims-v3/kspeed/e83/predictions.json": "97f58c89344dc867b66e28c4ea9e969c4c610865700ea91221fed9c8f4f78cec",
+  "docs/reports/data/2026-10-31-q130-kinds-model/predictions.json": "c5a66cb6d5f07a35d783d7db4be0f94a69482cf123defd2eccfda04fb6320a2c",
+  "docs/reports/data/2026-10-23-e64-horace-power-limit/figures.json": "d430bfabd8f142d8fbb29b6f3f4ede71ff909d491b4de06526826d415828f9cb",
+  "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/scored.json": "498d5c70f01778248c7800d7d1d7e07b033db35f29b897d40f5a21787bef0b53",
+  "docs/reports/data/2026-10-31-e86-real-tensors-energy/scored.json": "1de068588aa741e10b4650f26f7939da04757aafd752195e6ac4e9d133def337",
+  "docs/reports/data/2026-10-31-e90-signs-spread/e90.json": "7a8b03cd3b8b5c1bbe1cf427732172a883a355cdc1660011d92826a515c847df",
+  "docs/reports/data/2026-10-31-e90-signs-spread/scored.json": "bdb7dce20042bd7bfb12260490c1e91e95edebf2a0c92318564de8634a79600c",
+  "tools/claims-v3/kinds/predictions-e90.json": "d5bdb8b298a7d4e0f90c19fa13b71a26f25c36d0f3ae8b69ae853ef579366344",
+  "docs/reports/data/2026-10-31-e91-real-tensors-aifoundry1/scored.json": "0af451c3021c58a9d00447223257114922ee78ec78f19568ec3377250cc9e9e8",
+  "docs/reports/data/2026-10-31-e87-real-tensors-speed/results.json": "274750b3a21011cb44af52c0535ba891bf76c489038e78b32d9acbf04c631f04"
+ },
+ "real2_json_sha256": "6e259fd2e9edaa3d4fdeb663461ec39389ec8c24436c114719536a51d26c8715",
+ "predictor": {
+  "source": "tools/claims-v3/kinds/real/predictions-real.json",
+  "per_type": {
+   "fp32": {
+    "selected": "u,N_sig,A,B,Vs_sig",
+    "cols": [
+     "u",
+     "N_sig",
+     "A",
+     "B",
+     "Vs_sig"
+    ],
+    "beta": [
+     8.286641,
+     1.382422,
+     1.815833,
+     0.0,
+     0.310279
+    ]
+   },
+   "fp16": {
+    "selected": "u,N_sig,A,B,Vs_sig",
+    "cols": [
+     "u",
+     "N_sig",
+     "A",
+     "B",
+     "Vs_sig"
+    ],
+    "beta": [
+     8.41465,
+     1.385839,
+     2.687123,
+     0.0,
+     0.015718
+    ]
+   },
+   "int8": {
+    "selected": "u,N_pop,A,B,Vp_pop",
+    "cols": [
+     "u",
+     "N_pop",
+     "A",
+     "B",
+     "Vp_pop"
+    ],
+    "beta": [
+     1.590715,
+     0.28944,
+     0.452136,
+     0.0,
+     0.397428
+    ]
+   }
+  },
+  "note": "unchanged. E90's correction binds: it tracks a re-draw's offset from a measured tile (0.28 W rms) and misses absolute prices by 0.6-2.0 W; the intervals below say so, and it is a post-hoc fit, not a mechanism"
+ },
+ "known_misses": {
+  "definition": "measured D minus Q130(n)'s frozen point, W, tiles the predictor was not fitted on",
+  "classes": {
+   "float_ungated/fp32": {
+    "tiles": {
+     "fp32.real_l0_mlp_up": -0.1094,
+     "fp32.real_l6_mlp_down": 0.1635,
+     "fp32.real_l6_attn_qk": -0.183,
+     "fp32.signs": 1.1366,
+     "fp32.abs_randn": -1.5912,
+     "fp32.negabs_randn": -1.7463,
+     "fp32.pm_pi": -0.7963
+    },
+    "n": 7,
+    "rms_w": 1.0406,
+    "mean_miss_w": -0.4466,
+    "t975": 2.365,
+    "halfwidth_w": 2.461
+   },
+   "float_ungated/fp16": {
+    "tiles": {
+     "fp16.real_l0_mlp_up": 0.252,
+     "fp16.real_l6_mlp_down": 0.6251,
+     "fp16.real_l6_attn_qk": -0.0992,
+     "fp16.signs": -0.331,
+     "fp16.abs_randn": -1.6961,
+     "fp16.negabs_randn": -1.6884,
+     "fp16.uniform01_d1": -2.0462,
+     "fp16.uniform01_d2": -1.9207,
+     "fp16.uniform01_d3": -1.825
+    },
+    "n": 9,
+    "rms_w": 1.3947,
+    "mean_miss_w": -0.9699,
+    "t975": 2.262,
+    "halfwidth_w": 3.155
+   },
+   "float_gated": {
+    "tiles": {
+     "fp32.sparse50_d1": 1.7116,
+     "fp32.sparse50_d2": 1.5924,
+     "fp32.sparse50_d3": 1.7294,
+     "fp16.nn_like_d1": 0.7728,
+     "fp16.nn_like_d2": 0.6666,
+     "fp16.nn_like_d3": 0.6378
+    },
+    "n": 6,
+    "rms_w": 1.2848,
+    "mean_miss_w": 1.1851,
+    "t975": 2.447,
+    "halfwidth_w": 3.144
+   },
+   "int8_ungated": {
+    "tiles": {
+     "int8.real_l0_mlp_up": 0.4012,
+     "int8.real_l6_mlp_down": 0.5646,
+     "int8.real_l6_attn_qk": -0.2064,
+     "int8.signs": -0.1389
+    },
+    "n": 4,
+    "rms_w": 0.368,
+    "mean_miss_w": 0.1551,
+    "t975": 2.776,
+    "halfwidth_w": 1.022
+   },
+   "int8_gated": {
+    "tiles": {
+     "e78.int8.sparse50": 0.273,
+     "e78.int8.sparse90": 0.441,
+     "e78.int8.wsparse50": 0.681,
+     "e78.int8.wsparse90": 0.402,
+     "e78.int8.a_full_b_zeros": 0.497,
+     "e78.int8.a_zeros_b_full": 0.305
+    },
+    "n": 6,
+    "rms_w": 0.4536,
+    "mean_miss_w": 0.4332,
+    "t975": 2.447,
+    "halfwidth_w": 1.11,
+    "note": "no E86 or E90 tile gates in int8, so this class uses E78's nested-LOO out-of-fold residuals (tools/claims-v3/kinds/real/amendment-1.json nested_loo.int8.nested_residual_w), measured minus predicted; flagged as the one class not fitted on E86/E90"
+   }
+  },
+  "e86_only_arm": {
+   "fp32": {
+    "n": 3,
+    "rms_w": 0.1551,
+    "t975": 3.182,
+    "halfwidth_w": 0.494
+   },
+   "fp16": {
+    "n": 3,
+    "rms_w": 0.3933,
+    "t975": 3.182,
+    "halfwidth_w": 1.252
+   },
+   "int8": {
+    "n": 3,
+    "rms_w": 0.4173,
+    "t975": 3.182,
+    "halfwidth_w": 1.328
+   }
+  }
+ },
+ "offset_rule": {
+  "e90_r5_rms_w": 0.2765,
+  "source": "docs/reports/data/2026-10-31-e90-signs-spread/scored.json rules.E90-R5.rms_w",
+  "t975_df9": 2.262,
+  "halfwidth_w": 0.626
+ },
+ "gate_law": {
+  "form": "D = g G + (1 - g) L; g = the tile's computed gated_lane_frac (make_kinds.tile_stats); no fitted parameter",
+  "per_type": {
+   "fp32": {
+    "L_w": 24.0044,
+    "L_source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp32.randn.D.mean",
+    "G_w": 0.6925,
+    "G_source": "mean of docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp32.a_randn_b_zeros.D.mean and items.fp32.a_zeros_b_randn.D.mean",
+    "known_misses": {
+     "e78.fp32.sparse50": {
+      "g": 0.77417,
+      "D_w": 7.0891,
+      "law_w": 5.957,
+      "miss_w": 1.1321
+     },
+     "e78.fp32.sparse90": {
+      "g": 0.991699,
+      "D_w": 0.5602,
+      "law_w": 0.886,
+      "miss_w": -0.3258
+     },
+     "e78.fp32.nn_like": {
+      "g": 0.507812,
+      "D_w": 12.6557,
+      "law_w": 12.1663,
+      "miss_w": 0.4893
+     },
+     "e90.fp32.sparse50_d1": {
+      "g": 0.744873,
+      "D_w": 7.9538,
+      "law_w": 6.64,
+      "miss_w": 1.3138
+     },
+     "e90.fp32.sparse50_d2": {
+      "g": 0.740723,
+      "D_w": 7.9401,
+      "law_w": 6.7368,
+      "miss_w": 1.2034
+     },
+     "e90.fp32.sparse50_d3": {
+      "g": 0.763428,
+      "D_w": 7.4003,
+      "law_w": 6.2075,
+      "miss_w": 1.1928
+     }
+    },
+    "n": 6,
+    "rms_w": 1.0491,
+    "mean_miss_w": 0.8593,
+    "t975": 2.447,
+    "halfwidth_w": 2.567,
+    "ratio_measured_over_law_range": [
+     0.632,
+     1.198
+    ],
+    "known_slope_of_D_on_live_share_over_L": 1.039
+   },
+   "fp16": {
+    "L_w": 21.4496,
+    "L_source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp16.randn.D.mean",
+    "G_w": 0.6972,
+    "G_source": "mean of docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp16.a_randn_b_zeros.D.mean and items.fp16.a_zeros_b_randn.D.mean",
+    "known_misses": {
+     "e78.fp16.sparse50": {
+      "g": 0.414307,
+      "D_w": 12.7716,
+      "law_w": 12.8517,
+      "miss_w": -0.0801
+     },
+     "e78.fp16.sparse90": {
+      "g": 0.960938,
+      "D_w": 1.3644,
+      "law_w": 1.5079,
+      "miss_w": -0.1435
+     },
+     "e78.fp16.wsparse50": {
+      "g": 0.76001,
+      "D_w": 6.8307,
+      "law_w": 5.6776,
+      "miss_w": 1.1532
+     },
+     "e78.fp16.wsparse90": {
+      "g": 0.990234,
+      "D_w": 0.7193,
+      "law_w": 0.8999,
+      "miss_w": -0.1806
+     },
+     "e78.fp16.nn_like": {
+      "g": 0.195312,
+      "D_w": 17.0359,
+      "law_w": 17.3964,
+      "miss_w": -0.3606
+     },
+     "e90.fp16.nn_like_d1": {
+      "g": 0.230469,
+      "D_w": 16.4143,
+      "law_w": 16.6668,
+      "miss_w": -0.2524
+     },
+     "e90.fp16.nn_like_d2": {
+      "g": 0.234375,
+      "D_w": 16.1993,
+      "law_w": 16.5857,
+      "miss_w": -0.3865
+     },
+     "e90.fp16.nn_like_d3": {
+      "g": 0.25,
+      "D_w": 15.8452,
+      "law_w": 16.2615,
+      "miss_w": -0.4163
+     }
+    },
+    "n": 8,
+    "rms_w": 0.5043,
+    "mean_miss_w": -0.0861,
+    "t975": 2.306,
+    "halfwidth_w": 1.163,
+    "ratio_measured_over_law_range": [
+     0.799,
+     1.203
+    ],
+    "known_slope_of_D_on_live_share_over_L": 0.937
+   },
+   "int8": {
+    "L_w": 6.8706,
+    "L_source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.int8.full.D.mean",
+    "G_w": 0.3908,
+    "G_source": "mean of docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.int8.a_full_b_zeros.D.mean and items.int8.a_zeros_b_full.D.mean",
+    "known_misses": {
+     "e78.int8.wsparse50": {
+      "g": 0.643555,
+      "D_w": 3.0589,
+      "law_w": 2.7005,
+      "miss_w": 0.3584
+     },
+     "e78.int8.sparse90": {
+      "g": 0.821777,
+      "D_w": 1.1147,
+      "law_w": 1.5457,
+      "miss_w": -0.4309
+     },
+     "e78.int8.wsparse90": {
+      "g": 0.97998,
+      "D_w": 0.5242,
+      "law_w": 0.5205,
+      "miss_w": 0.0037
+     }
+    },
+    "n": 3,
+    "rms_w": 0.3324,
+    "mean_miss_w": -0.0236,
+    "t975": 3.182,
+    "halfwidth_w": 1.058,
+    "ratio_measured_over_law_range": [
+     0.721,
+     1.133
+    ],
+    "known_slope_of_D_on_live_share_over_L": 1.107
+   }
+  },
+  "e86_real_tile_mean_D_w": {
+   "fp32": 24.389,
+   "fp16": 21.795,
+   "int8": 5.86
+  },
+  "gated_min": 0.02
+ },
+ "relation_e83": {
+  "source": "tools/claims-v3/kspeed/e83/predictions.json",
+  "burst": {
+   "W_star_w": 66.15,
+   "sigma_w": 2.75
+  },
+  "sustained": {
+   "W_star_w": 49.75,
+   "sigma_w": 1.95
+  },
+  "c_zeros_w": {
+   "fp32": 1.44,
+   "fp16": 1.394,
+   "int8": 2.123
+  },
+  "xfer": 1.0186548642106485,
+  "none_share_800": 0.9,
+  "relation_rms_mhz": {
+   "burst": 10.6,
+   "sustained": 8.4
+  },
+  "interval": "the clock at the ends of the (a) scoring interval, widened in quadrature by 1.96 x relation rms, clamped to [600, 800]; a range wholly at the cap stays [800, 800] (Amendment 1's rule)",
+  "e87_note": "E87 read this relation on real tiles: 10.7 / 6.1 MHz rms frozen; its session's heat path ran 0.5 C warmer than E80's, and single int8 sustained runs land either side of the 65 C trip whatever the data",
+  "random_kind_from_relation_mhz": {
+   "fp32": {
+    "burst_mhz": 708.5,
+    "sus_mhz": 602.0
+   },
+   "fp16": {
+    "burst_mhz": 731.4,
+    "sus_mhz": 612.0
+   },
+   "int8": {
+    "burst_mhz": 800.0,
+    "sus_mhz": 785.4
+   }
+  }
+ },
+ "references_e78": {
+  "fp32": {
+   "kind": "randn",
+   "D_measured_w": 24.0044,
+   "D_model_fit_w": 23.9251
+  },
+  "fp16": {
+   "kind": "randn",
+   "D_measured_w": 21.4496,
+   "D_model_fit_w": 21.0462
+  },
+  "int8": {
+   "kind": "full",
+   "D_measured_w": 6.8706,
+   "D_model_fit_w": 6.8555
+  }
+ },
+ "e86_tiles_rerun": {
+  "fp16.real_l6_mlp_down": {
+   "file": "tools/claims-v3/kinds/real/tiles/fp16/l6_mlp_down.bin",
+   "sha256": "193c36e9ef5b3bedae7ffc9f9cf30ad84743306a7bd1a1b7dd753dc1bf65b90a",
+   "frozen_point_w": 20.6701,
+   "e86_measured_D_w": 21.275,
+   "e86_measured_ci95_w": 0.1578,
+   "e86_ratio_to_ref": 0.9957,
+   "b_aifoundry2_governor": {
+    "c_w": 22.36,
+    "burst_mhz": 738.9,
+    "sus_mhz": 617.6,
+    "burst_limit": "power",
+    "sus_limit": "thermal"
+   }
+  },
+  "int8.real_l6_mlp_down": {
+   "file": "tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+   "sha256": "3af027ef38e00cce862b16e79f7778bd5384da93164539621790fef1d1a03558",
+   "frozen_point_w": 5.0464,
+   "e86_measured_D_w": 5.5965,
+   "e86_measured_ci95_w": 0.2551,
+   "e86_ratio_to_ref": 0.8109,
+   "b_aifoundry2_governor": {
+    "c_w": 7.211,
+    "burst_mhz": 800.0,
+    "sus_mhz": 798.9,
+    "burst_limit": "none",
+    "sus_limit": "none"
+   }
+  }
+ },
+ "e95_suggested": {
+  "items": "the 25 new tier-1 tiles as <type>.r2_<name>, E86's fp16.real_l6_mlp_down and int8.real_l6_mlp_down, E78's six anchors three times a pass, the anchor_pi tie twice: 47 runs and 2 burn-ins a pass",
+  "tier1": [
+   "fp32/resnet18_l2c1",
+   "fp32/resnet18_l3c1",
+   "fp32/vgg16_fc2",
+   "fp32/t5small_l0_down",
+   "fp32/gpt2_l3_mlp_down",
+   "fp32/gpt2_l9_attn_qk",
+   "fp32/bert_l6_up",
+   "fp32/vit_l5_down",
+   "fp32/t5small_l0_up",
+   "fp32/vit_l11_down",
+   "fp16/resnet18_l3c1",
+   "fp16/vgg16_fc2",
+   "fp16/t5small_l0_down",
+   "fp16/gpt2_l9_attn_qk",
+   "fp16/bert_l6_up",
+   "fp16/vit_l5_down",
+   "fp16/gpt2_l6_mlp_down_fp16fwd",
+   "int8/resnet18_l3c1",
+   "int8/vgg16_fc2",
+   "int8/gpt2_l6_down_per_token",
+   "int8/gpt2_l6_down_p9999",
+   "int8/gpt2_l6_down_p999",
+   "int8/gpt2_l11_down_maxabs",
+   "int8/gpt2_l11_down_p999",
+   "int8/vgg16_fc2_asym"
+  ],
+  "tier2": [
+   "fp32/gpt2_l6_mlp_down_bf16fwd",
+   "fp16/gpt2_l6_attn_qk_fp16fwd",
+   "int8/t5small_l0_down",
+   "int8/vit_l11_down",
+   "int8/gpt2_l11_down_asym"
+  ],
+  "smoke": [
+   "fp32/vgg16_fc2",
+   "fp16/t5small_l0_down",
+   "int8/gpt2_l11_down_maxabs"
+  ],
+  "estimate": "E86 ran 32 runs and 2 burn-ins in 6.0-6.7 min, about 12 s a run, so 49 runs is about 10 min a pass and four passes about 40 card-minutes, with the smoke inside the 45; tier 2 adds 5 runs, about 1 min a pass"
+ },
+ "e96_suggested": {
+  "bursts": "every tier-1 tile and E87's six anchors, two passes",
+  "sustained_first": [
+   "fp32/resnet18_l2c1",
+   "fp32/resnet18_l3c1",
+   "fp16/resnet18_l3c1",
+   "fp32/vgg16_fc2",
+   "fp16/vgg16_fc2",
+   "fp32/t5small_l0_down",
+   "fp16/t5small_l0_down",
+   "fp32/t5small_l0_up",
+   "fp32/vit_l11_down",
+   "fp32/bert_l6_up",
+   "fp16/vit_l5_down",
+   "int8/vgg16_fc2",
+   "int8/vgg16_fc2_asym",
+   "int8/gpt2_l11_down_maxabs",
+   "int8/gpt2_l11_down_p999"
+  ],
+  "why": "27 tiles in E87's full shape is about 75 card-minutes (E87: 13 s a burst, 100 s a sustained run). The ungated float tiles are predicted at random data's clock, so their sustained runs say least"
+ },
+ "tiles": {
+  "fp32/resnet18_l2c1": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/resnet18_l2c1.bin",
+   "tile_sha256": "a27b4f483651824a733fa9ccfca80d221c820173b7806890f1dd5cd5e35014db",
+   "group": "Z",
+   "tier": 1,
+   "gated_lane_frac": 0.191406,
+   "bus_bits_per_op": 80128,
+   "a_zero_word_frac": 0.19140625,
+   "a_zero_elem_frac": 0.19140625,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 19.089,
+    "class": "float_gated",
+    "scoring_interval_w": [
+     16.0366,
+     22.1414
+    ],
+    "scoring_halfwidth_w": 3.0524,
+    "e86_only_arm_w": [
+     18.6094,
+     19.5686
+    ],
+    "bias_arm_w": 20.2395,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 6.5057,
+     "N_sig": 4.4456,
+     "A": 3.8009,
+     "B": 0.0,
+     "Vs_sig": 4.3378
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "randn_sorted",
+    "nearest_e78_kind_D_w": 22.7025,
+    "ratio_to_ref_measured_e78": 0.7952,
+    "ratio_to_ref_model_fit": 0.7979,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 20.742,
+    "burst_mhz": 755.5,
+    "burst_share800": 0.555,
+    "burst_limit": "power",
+    "burst_rate": 11.607,
+    "burst_scoring_interval_mhz": [
+     718.7,
+     793.9
+    ],
+    "burst_D_propagated_range_mhz": [
+     725.2,
+     787.8
+    ],
+    "sus_mhz": 631.8,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 9.706,
+    "sus_scoring_interval_mhz": [
+     603.0,
+     670.1
+    ],
+    "sus_D_propagated_range_mhz": [
+     608.2,
+     666.3
+    ],
+    "rate_unit": "TFLOPS"
+   },
+   "c_gate_law": {
+    "g": 0.191406,
+    "live_share": 0.808594,
+    "D_w": 19.5424,
+    "scoring_interval_w": [
+     17.0502,
+     22.0346
+    ],
+    "halfwidth_w": 2.4922,
+    "D_w_with_L_from_e86_real_tiles": 19.2783,
+    "burst_mhz": 750.6,
+    "sus_mhz": 627.4
+   }
+  },
+  "fp32/resnet18_l3c1": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/resnet18_l3c1.bin",
+   "tile_sha256": "6d759159247cf20745b92d8d0bf55f94fd7c3595c2d9d00c7973f0b8164f0ac7",
+   "group": "Z",
+   "tier": 1,
+   "gated_lane_frac": 0.445312,
+   "bus_bits_per_op": 78630,
+   "a_zero_word_frac": 0.4453125,
+   "a_zero_elem_frac": 0.4453125,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 13.2542,
+    "class": "float_gated",
+    "scoring_interval_w": [
+     10.2018,
+     16.3065
+    ],
+    "scoring_halfwidth_w": 3.0524,
+    "e86_only_arm_w": [
+     12.7745,
+     13.7338
+    ],
+    "bias_arm_w": 14.4046,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 4.463,
+     "N_sig": 3.0495,
+     "A": 2.7912,
+     "B": 0.0,
+     "Vs_sig": 2.9504
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "nn_like",
+    "nearest_e78_kind_D_w": 12.6561,
+    "ratio_to_ref_measured_e78": 0.5522,
+    "ratio_to_ref_model_fit": 0.554,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 14.842,
+    "burst_mhz": 799.5,
+    "burst_share800": 0.995,
+    "burst_limit": "none",
+    "burst_rate": 12.283,
+    "burst_scoring_interval_mhz": [
+     774.4,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     785.4,
+     800.0
+    ],
+    "sus_mhz": 703.0,
+    "sus_share800": 0.087,
+    "sus_limit": "thermal",
+    "sus_rate": 10.801,
+    "sus_scoring_interval_mhz": [
+     659.7,
+     747.3
+    ],
+    "sus_D_propagated_range_mhz": [
+     662.9,
+     744.2
+    ],
+    "rate_unit": "TFLOPS"
+   },
+   "c_gate_law": {
+    "g": 0.445312,
+    "live_share": 0.554688,
+    "D_w": 13.6231,
+    "scoring_interval_w": [
+     11.1309,
+     16.1153
+    ],
+    "halfwidth_w": 2.4922,
+    "D_w_with_L_from_e86_real_tiles": 13.4425,
+    "burst_mhz": 799.1,
+    "sus_mhz": 698.1
+   }
+  },
+  "fp32/vgg16_fc2": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/vgg16_fc2.bin",
+   "tile_sha256": "26a2afc5740e01c31267e29cd253296b76a1384bd2679632c32a9c160056ff6f",
+   "group": "Z",
+   "tier": 1,
+   "gated_lane_frac": 0.722656,
+   "bus_bits_per_op": 71262,
+   "a_zero_word_frac": 0.72265625,
+   "a_zero_elem_frac": 0.72265625,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 6.8193,
+    "class": "float_gated",
+    "scoring_interval_w": [
+     3.7669,
+     9.8717
+    ],
+    "scoring_halfwidth_w": 3.0524,
+    "e86_only_arm_w": [
+     6.3397,
+     7.2989
+    ],
+    "bias_arm_w": 7.9698,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 2.231,
+     "N_sig": 1.5242,
+     "A": 1.5456,
+     "B": 0.0,
+     "Vs_sig": 1.5175
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "sparse50",
+    "nearest_e78_kind_D_w": 7.0892,
+    "ratio_to_ref_measured_e78": 0.2841,
+    "ratio_to_ref_model_fit": 0.285,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 8.335,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 12.291,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 793.2,
+    "sus_share800": 0.932,
+    "sus_limit": "none",
+    "sus_rate": 12.186,
+    "sus_scoring_interval_mhz": [
+     746.1,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     749.1,
+     800.0
+    ],
+    "rate_unit": "TFLOPS"
+   },
+   "c_gate_law": {
+    "g": 0.722656,
+    "live_share": 0.277344,
+    "D_w": 7.1581,
+    "scoring_interval_w": [
+     4.6659,
+     9.6503
+    ],
+    "halfwidth_w": 2.4922,
+    "D_w_with_L_from_e86_real_tiles": 7.0678,
+    "burst_mhz": 800.0,
+    "sus_mhz": 789.8
+   }
+  },
+  "fp32/t5small_l0_down": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/t5small_l0_down.bin",
+   "tile_sha256": "4c9e6d10f05808075953000601be1cf80a338fe2298df0b5cfacc15fc378f5a7",
+   "group": "Z",
+   "tier": 1,
+   "gated_lane_frac": 0.949219,
+   "bus_bits_per_op": 25680,
+   "a_zero_word_frac": 0.94921875,
+   "a_zero_elem_frac": 0.94921875,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 1.1437,
+    "class": "float_gated",
+    "scoring_interval_w": [
+     0.0,
+     4.196
+    ],
+    "scoring_halfwidth_w": 3.0524,
+    "e86_only_arm_w": [
+     0.6641,
+     1.6233
+    ],
+    "bias_arm_w": 2.2941,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 0.4087,
+     "N_sig": 0.2796,
+     "A": 0.2864,
+     "B": 0.0,
+     "Vs_sig": 0.1689
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "sparse90",
+    "nearest_e78_kind_D_w": 0.5602,
+    "ratio_to_ref_measured_e78": 0.0476,
+    "ratio_to_ref_model_fit": 0.0478,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 2.596,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 12.291,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 800.0,
+    "sus_share800": 1.0,
+    "sus_limit": "none",
+    "sus_rate": 12.291,
+    "sus_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "rate_unit": "TFLOPS"
+   },
+   "c_gate_law": {
+    "g": 0.949219,
+    "live_share": 0.050781,
+    "D_w": 1.8767,
+    "scoring_interval_w": [
+     0.0,
+     4.3689
+    ],
+    "halfwidth_w": 2.4922,
+    "D_w_with_L_from_e86_real_tiles": 1.8602,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0
+   }
+  },
+  "fp32/gpt2_l3_mlp_down": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin",
+   "tile_sha256": "08bef955e7e835a9d934a07b60c5ad1c50b77e2dae69adf157b8875aa7bc9cb1",
+   "group": "N",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 82110,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 23.6588,
+    "class": "float_ungated/fp32",
+    "scoring_interval_w": [
+     21.2696,
+     26.0481
+    ],
+    "scoring_halfwidth_w": 2.3893,
+    "e86_only_arm_w": [
+     23.1792,
+     24.1384
+    ],
+    "bias_arm_w": 23.2249,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.0455,
+     "N_sig": 5.497,
+     "A": 4.6824,
+     "B": 0.0,
+     "Vs_sig": 5.4339
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "uniform01",
+    "nearest_e78_kind_D_w": 21.986,
+    "ratio_to_ref_measured_e78": 0.9856,
+    "ratio_to_ref_model_fit": 0.9889,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 25.363,
+    "burst_mhz": 711.5,
+    "burst_share800": 0.14,
+    "burst_limit": "power",
+    "burst_rate": 10.932,
+    "burst_scoring_interval_mhz": [
+     681.8,
+     741.6
+    ],
+    "burst_D_propagated_range_mhz": [
+     690.3,
+     733.3
+    ],
+    "sus_mhz": 602.7,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 9.26,
+    "sus_scoring_interval_mhz": [
+     600.0,
+     622.3
+    ],
+    "sus_D_propagated_range_mhz": [
+     600.2,
+     613.4
+    ],
+    "rate_unit": "TFLOPS"
+   }
+  },
+  "fp32/gpt2_l9_attn_qk": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin",
+   "tile_sha256": "a7a67f4aa8d9835e44ccacca0c9c49345c4fa15e527196651ff5097e44e87d2e",
+   "group": "N",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 84644,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 23.7705,
+    "class": "float_ungated/fp32",
+    "scoring_interval_w": [
+     21.3812,
+     26.1598
+    ],
+    "scoring_halfwidth_w": 2.3893,
+    "e86_only_arm_w": [
+     23.2909,
+     24.2501
+    ],
+    "bias_arm_w": 23.3365,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.0455,
+     "N_sig": 5.497,
+     "A": 4.8659,
+     "B": 0.0,
+     "Vs_sig": 5.362
+    },
+    "features_outside_e78_range": {
+     "B": {
+      "tile": 5.7044,
+      "e78_range": [
+       0.0,
+       5.6368
+      ],
+      "beta": 0.0
+     }
+    },
+    "nearest_e78_kind": "randn_small",
+    "nearest_e78_kind_D_w": 24.0423,
+    "ratio_to_ref_measured_e78": 0.9903,
+    "ratio_to_ref_model_fit": 0.9935,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 25.476,
+    "burst_mhz": 710.5,
+    "burst_share800": 0.133,
+    "burst_limit": "power",
+    "burst_rate": 10.917,
+    "burst_scoring_interval_mhz": [
+     680.9,
+     740.6
+    ],
+    "burst_D_propagated_range_mhz": [
+     689.3,
+     732.2
+    ],
+    "sus_mhz": 602.4,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 9.256,
+    "sus_scoring_interval_mhz": [
+     600.0,
+     621.8
+    ],
+    "sus_D_propagated_range_mhz": [
+     600.2,
+     612.6
+    ],
+    "rate_unit": "TFLOPS"
+   }
+  },
+  "fp32/bert_l6_up": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin",
+   "tile_sha256": "312c34d32261d6519992fb1fff797a31bee0e92c72f95f2f2913bea629783b91",
+   "group": "N",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 82334,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 23.6899,
+    "class": "float_ungated/fp32",
+    "scoring_interval_w": [
+     21.3006,
+     26.0792
+    ],
+    "scoring_halfwidth_w": 2.3893,
+    "e86_only_arm_w": [
+     23.2103,
+     24.1695
+    ],
+    "bias_arm_w": 23.2559,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.0455,
+     "N_sig": 5.497,
+     "A": 4.7523,
+     "B": 0.0,
+     "Vs_sig": 5.3951
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "randn_small",
+    "nearest_e78_kind_D_w": 24.0423,
+    "ratio_to_ref_measured_e78": 0.9869,
+    "ratio_to_ref_model_fit": 0.9902,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 25.394,
+    "burst_mhz": 711.3,
+    "burst_share800": 0.138,
+    "burst_limit": "power",
+    "burst_rate": 10.927,
+    "burst_scoring_interval_mhz": [
+     681.6,
+     741.3
+    ],
+    "burst_D_propagated_range_mhz": [
+     690.1,
+     733.0
+    ],
+    "sus_mhz": 602.6,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 9.258,
+    "sus_scoring_interval_mhz": [
+     600.0,
+     622.2
+    ],
+    "sus_D_propagated_range_mhz": [
+     600.2,
+     613.2
+    ],
+    "rate_unit": "TFLOPS"
+   }
+  },
+  "fp32/vit_l5_down": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin",
+   "tile_sha256": "4f77d357a4d97a7f6e2326e0314dfd0e9343ea13be188489609037d4707105ce",
+   "group": "N",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 82206,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 23.6957,
+    "class": "float_ungated/fp32",
+    "scoring_interval_w": [
+     21.3064,
+     26.085
+    ],
+    "scoring_halfwidth_w": 2.3893,
+    "e86_only_arm_w": [
+     23.2161,
+     24.1753
+    ],
+    "bias_arm_w": 23.2618,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.0455,
+     "N_sig": 5.497,
+     "A": 4.7242,
+     "B": 0.0,
+     "Vs_sig": 5.4281
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "randn_small",
+    "nearest_e78_kind_D_w": 24.0423,
+    "ratio_to_ref_measured_e78": 0.9871,
+    "ratio_to_ref_model_fit": 0.9904,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 25.4,
+    "burst_mhz": 711.2,
+    "burst_share800": 0.138,
+    "burst_limit": "power",
+    "burst_rate": 10.927,
+    "burst_scoring_interval_mhz": [
+     681.5,
+     741.3
+    ],
+    "burst_D_propagated_range_mhz": [
+     690.0,
+     733.0
+    ],
+    "sus_mhz": 602.6,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 9.258,
+    "sus_scoring_interval_mhz": [
+     600.0,
+     622.1
+    ],
+    "sus_D_propagated_range_mhz": [
+     600.2,
+     613.1
+    ],
+    "rate_unit": "TFLOPS"
+   }
+  },
+  "fp32/t5small_l0_up": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/t5small_l0_up.bin",
+   "tile_sha256": "845dc5180fb0109a02fdcda2f04381874a1a2af37b1d676737fd4929919de7f7",
+   "group": "T",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 49830,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 21.8016,
+    "class": "float_ungated/fp32",
+    "scoring_interval_w": [
+     19.4123,
+     24.1909
+    ],
+    "scoring_halfwidth_w": 2.3893,
+    "e86_only_arm_w": [
+     21.322,
+     22.2812
+    ],
+    "bias_arm_w": 21.3676,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.0455,
+     "N_sig": 5.497,
+     "A": 4.8203,
+     "B": 0.0,
+     "Vs_sig": 3.4388
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "randn_small",
+    "nearest_e78_kind_D_w": 24.0423,
+    "ratio_to_ref_measured_e78": 0.9082,
+    "ratio_to_ref_model_fit": 0.9112,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 23.485,
+    "burst_mhz": 728.3,
+    "burst_share800": 0.286,
+    "burst_limit": "power",
+    "burst_rate": 11.189,
+    "burst_scoring_interval_mhz": [
+     698.4,
+     759.8
+    ],
+    "burst_D_propagated_range_mhz": [
+     706.8,
+     752.0
+    ],
+    "sus_mhz": 610.1,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 9.373,
+    "sus_scoring_interval_mhz": [
+     600.0,
+     634.9
+    ],
+    "sus_D_propagated_range_mhz": [
+     601.7,
+     628.6
+    ],
+    "rate_unit": "TFLOPS"
+   }
+  },
+  "fp32/vit_l11_down": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/vit_l11_down.bin",
+   "tile_sha256": "af7da866a3db13878e84ccb352d35e006b71578dd0d90af03ef3b7d28dbd4143",
+   "group": "M",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 70024,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 19.8278,
+    "class": "float_ungated/fp32",
+    "scoring_interval_w": [
+     17.4385,
+     22.2171
+    ],
+    "scoring_halfwidth_w": 2.3893,
+    "e86_only_arm_w": [
+     19.3482,
+     20.3074
+    ],
+    "bias_arm_w": 19.3939,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.0455,
+     "N_sig": 5.497,
+     "A": 2.6038,
+     "B": 0.0,
+     "Vs_sig": 3.6815
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "fp16grid",
+    "nearest_e78_kind_D_w": 19.0521,
+    "ratio_to_ref_measured_e78": 0.826,
+    "ratio_to_ref_model_fit": 0.8287,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 21.489,
+    "burst_mhz": 747.6,
+    "burst_share800": 0.477,
+    "burst_limit": "power",
+    "burst_rate": 11.487,
+    "burst_scoring_interval_mhz": [
+     716.5,
+     781.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     724.5,
+     773.8
+    ],
+    "sus_mhz": 624.8,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 9.599,
+    "sus_scoring_interval_mhz": [
+     601.2,
+     654.4
+    ],
+    "sus_D_propagated_range_mhz": [
+     607.8,
+     649.4
+    ],
+    "rate_unit": "TFLOPS"
+   },
+   "c_if_gate_took_numeric_zero": {
+    "g_numeric": 0.640625,
+    "D_w": 9.0698,
+    "scoring_interval_w": [
+     6.5776,
+     11.5619
+    ],
+    "note": "the gate as built tests word == 0, so -0.0 passes; this is what the law says if it did not"
+   }
+  },
+  "fp32/gpt2_l6_mlp_down_bf16fwd": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l6_mlp_down_bf16fwd.bin",
+   "tile_sha256": "da68af705b310b3599a8d629e9daead0d379309adcdbe0140c343042dc843cf2",
+   "group": "B",
+   "tier": 2,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 32384,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 16.7745,
+    "class": "float_ungated/fp32",
+    "scoring_interval_w": [
+     14.3852,
+     19.1638
+    ],
+    "scoring_halfwidth_w": 2.3893,
+    "e86_only_arm_w": [
+     16.2949,
+     17.2541
+    ],
+    "bias_arm_w": 16.3405,
+    "amendment1_halfwidth_w": 2.3427,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.0455,
+     "N_sig": 5.497,
+     "A": 1.7573,
+     "B": 0.0,
+     "Vs_sig": 1.4747
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "bf16trunc",
+    "nearest_e78_kind_D_w": 17.6075,
+    "ratio_to_ref_measured_e78": 0.6988,
+    "ratio_to_ref_model_fit": 0.7011,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 18.402,
+    "burst_mhz": 780.8,
+    "burst_share800": 0.808,
+    "burst_limit": "power",
+    "burst_rate": 11.997,
+    "burst_scoring_interval_mhz": [
+     747.4,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     754.7,
+     797.4
+    ],
+    "sus_mhz": 657.2,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 10.097,
+    "sus_scoring_interval_mhz": [
+     626.3,
+     692.1
+    ],
+    "sus_D_propagated_range_mhz": [
+     631.0,
+     688.0
+    ],
+    "rate_unit": "TFLOPS"
+   }
+  },
+  "fp16/resnet18_l3c1": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp16/resnet18_l3c1.bin",
+   "tile_sha256": "4206d172ad36b81a6d9e3f6f184786d322d3e69f7c0985eca6fb11f28b90ec97",
+   "group": "Z",
+   "tier": 1,
+   "gated_lane_frac": 0.367188,
+   "bus_bits_per_op": 78572,
+   "a_zero_word_frac": 0.3671875,
+   "a_zero_elem_frac": 0.548828125,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 12.7658,
+    "class": "float_gated",
+    "scoring_interval_w": [
+     9.7229,
+     15.8086
+    ],
+    "scoring_halfwidth_w": 3.0429,
+    "e86_only_arm_w": [
+     11.554,
+     13.9775
+    ],
+    "bias_arm_w": 13.9127,
+    "amendment1_halfwidth_w": 2.2764,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 5.1537,
+     "N_sig": 3.4765,
+     "A": 4.0136,
+     "B": 0.0,
+     "Vs_sig": 0.1219
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "sparse50",
+    "nearest_e78_kind_D_w": 12.7716,
+    "ratio_to_ref_measured_e78": 0.5952,
+    "ratio_to_ref_model_fit": 0.6066,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 14.342,
+    "burst_mhz": 799.8,
+    "burst_share800": 0.998,
+    "burst_limit": "none",
+    "burst_rate": 24.575,
+    "burst_scoring_interval_mhz": [
+     776.7,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     789.6,
+     800.0
+    ],
+    "sus_mhz": 709.5,
+    "sus_share800": 0.128,
+    "sus_limit": "thermal",
+    "sus_rate": 21.8,
+    "sus_scoring_interval_mhz": [
+     666.0,
+     754.7
+    ],
+    "sus_D_propagated_range_mhz": [
+     669.2,
+     751.6
+    ],
+    "rate_unit": "TFLOPS"
+   },
+   "c_gate_law": {
+    "g": 0.367188,
+    "live_share": 0.632812,
+    "D_w": 13.8294,
+    "scoring_interval_w": [
+     12.7038,
+     14.955
+    ],
+    "halfwidth_w": 1.1256,
+    "D_w_with_L_from_e86_real_tiles": 13.6049,
+    "burst_mhz": 798.7,
+    "sus_mhz": 695.4
+   }
+  },
+  "fp16/vgg16_fc2": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp16/vgg16_fc2.bin",
+   "tile_sha256": "0a3341897afc614968a11820600dd1760dbf7f9a4d672c0258037f35f329be91",
+   "group": "Z",
+   "tier": 1,
+   "gated_lane_frac": 0.550781,
+   "bus_bits_per_op": 74852,
+   "a_zero_word_frac": 0.55078125,
+   "a_zero_elem_frac": 0.748046875,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 8.545,
+    "class": "float_gated",
+    "scoring_interval_w": [
+     5.5022,
+     11.5879
+    ],
+    "scoring_halfwidth_w": 3.0429,
+    "e86_only_arm_w": [
+     7.3333,
+     9.7568
+    ],
+    "bias_arm_w": 9.6919,
+    "amendment1_halfwidth_w": 2.2764,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 3.6584,
+     "N_sig": 2.468,
+     "A": 2.3402,
+     "B": 0.0,
+     "Vs_sig": 0.0784
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "wsparse50",
+    "nearest_e78_kind_D_w": 6.831,
+    "ratio_to_ref_measured_e78": 0.3984,
+    "ratio_to_ref_model_fit": 0.406,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 10.061,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 24.582,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 770.3,
+    "sus_share800": 0.703,
+    "sus_limit": "thermal",
+    "sus_rate": 23.67,
+    "sus_scoring_interval_mhz": [
+     722.1,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     725.0,
+     799.3
+    ],
+    "rate_unit": "TFLOPS"
+   },
+   "c_gate_law": {
+    "g": 0.550781,
+    "live_share": 0.449219,
+    "D_w": 10.02,
+    "scoring_interval_w": [
+     8.8944,
+     11.1456
+    ],
+    "halfwidth_w": 1.1256,
+    "D_w_with_L_from_e86_real_tiles": 9.8603,
+    "burst_mhz": 800.0,
+    "sus_mhz": 747.1
+   }
+  },
+  "fp16/t5small_l0_down": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp16/t5small_l0_down.bin",
+   "tile_sha256": "7c1496680ccf1d69f640c15fc86daa65d0be4b88672711b5338a2397fdeb09bd",
+   "group": "Z",
+   "tier": 1,
+   "gated_lane_frac": 0.871094,
+   "bus_bits_per_op": 48432,
+   "a_zero_word_frac": 0.87109375,
+   "a_zero_elem_frac": 0.93359375,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 2.2831,
+    "class": "float_gated",
+    "scoring_interval_w": [
+     0.0,
+     5.326
+    ],
+    "scoring_halfwidth_w": 3.0429,
+    "e86_only_arm_w": [
+     1.0714,
+     3.4949
+    ],
+    "bias_arm_w": 3.43,
+    "amendment1_halfwidth_w": 2.2764,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 1.0501,
+     "N_sig": 0.7085,
+     "A": 0.5081,
+     "B": 0.0,
+     "Vs_sig": 0.0174
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "sparse90",
+    "nearest_e78_kind_D_w": 1.3646,
+    "ratio_to_ref_measured_e78": 0.1064,
+    "ratio_to_ref_model_fit": 0.1085,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 3.71,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 24.582,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 800.0,
+    "sus_share800": 1.0,
+    "sus_limit": "none",
+    "sus_rate": 24.582,
+    "sus_scoring_interval_mhz": [
+     783.5,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     799.6,
+     800.0
+    ],
+    "rate_unit": "TFLOPS"
+   },
+   "c_gate_law": {
+    "g": 0.871094,
+    "live_share": 0.128906,
+    "D_w": 3.3719,
+    "scoring_interval_w": [
+     2.2463,
+     4.4975
+    ],
+    "halfwidth_w": 1.1256,
+    "D_w_with_L_from_e86_real_tiles": 3.3265,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0
+   }
+  },
+  "fp16/gpt2_l9_attn_qk": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin",
+   "tile_sha256": "6cfef807543dba6c3aa26caf37a0a6b72d3fd309bd579d7330742d0c7e4b7b86",
+   "group": "N",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 83322,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 20.8162,
+    "class": "float_ungated/fp16",
+    "scoring_interval_w": [
+     17.7627,
+     23.8698
+    ],
+    "scoring_halfwidth_w": 3.0535,
+    "e86_only_arm_w": [
+     19.6045,
+     22.028
+    ],
+    "bias_arm_w": 19.8774,
+    "amendment1_halfwidth_w": 2.2764,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.1443,
+     "N_sig": 5.4934,
+     "A": 6.9529,
+     "B": 0.0,
+     "Vs_sig": 0.2255
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "randn",
+    "nearest_e78_kind_D_w": 21.4492,
+    "ratio_to_ref_measured_e78": 0.9705,
+    "ratio_to_ref_model_fit": 0.9891,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 22.508,
+    "burst_mhz": 737.5,
+    "burst_share800": 0.376,
+    "burst_limit": "power",
+    "burst_rate": 22.662,
+    "burst_scoring_interval_mhz": [
+     702.6,
+     776.1
+    ],
+    "burst_D_propagated_range_mhz": [
+     709.4,
+     770.0
+    ],
+    "sus_mhz": 616.5,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 18.942,
+    "sus_scoring_interval_mhz": [
+     600.0,
+     649.9
+    ],
+    "sus_D_propagated_range_mhz": [
+     602.2,
+     645.6
+    ],
+    "rate_unit": "TFLOPS"
+   }
+  },
+  "fp16/bert_l6_up": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin",
+   "tile_sha256": "a8c708293b5c8cd369ccefd8c4374f1a2aee907d971b7f6494731dd674a6aac0",
+   "group": "N",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 84270,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 20.8162,
+    "class": "float_ungated/fp16",
+    "scoring_interval_w": [
+     17.7627,
+     23.8698
+    ],
+    "scoring_halfwidth_w": 3.0535,
+    "e86_only_arm_w": [
+     19.6045,
+     22.028
+    ],
+    "bias_arm_w": 19.8774,
+    "amendment1_halfwidth_w": 2.2764,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.1443,
+     "N_sig": 5.4934,
+     "A": 6.9529,
+     "B": 0.0,
+     "Vs_sig": 0.2245
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "randn",
+    "nearest_e78_kind_D_w": 21.4492,
+    "ratio_to_ref_measured_e78": 0.9705,
+    "ratio_to_ref_model_fit": 0.9891,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 22.508,
+    "burst_mhz": 737.5,
+    "burst_share800": 0.376,
+    "burst_limit": "power",
+    "burst_rate": 22.662,
+    "burst_scoring_interval_mhz": [
+     702.6,
+     776.1
+    ],
+    "burst_D_propagated_range_mhz": [
+     709.4,
+     770.0
+    ],
+    "sus_mhz": 616.5,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 18.942,
+    "sus_scoring_interval_mhz": [
+     600.0,
+     649.9
+    ],
+    "sus_D_propagated_range_mhz": [
+     602.2,
+     645.6
+    ],
+    "rate_unit": "TFLOPS"
+   }
+  },
+  "fp16/vit_l5_down": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin",
+   "tile_sha256": "64985e6c2bd5457c70d050daa0bdcde6a3c1e8f5a48ad9f958c15801f8ea617b",
+   "group": "N",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 83684,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 20.9401,
+    "class": "float_ungated/fp16",
+    "scoring_interval_w": [
+     17.8866,
+     23.9936
+    ],
+    "scoring_halfwidth_w": 3.0535,
+    "e86_only_arm_w": [
+     19.7284,
+     22.1518
+    ],
+    "bias_arm_w": 20.0013,
+    "amendment1_halfwidth_w": 2.2764,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.1443,
+     "N_sig": 5.4934,
+     "A": 7.0778,
+     "B": 0.0,
+     "Vs_sig": 0.2236
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "randn",
+    "nearest_e78_kind_D_w": 21.4492,
+    "ratio_to_ref_measured_e78": 0.9762,
+    "ratio_to_ref_model_fit": 0.995,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 22.634,
+    "burst_mhz": 736.3,
+    "burst_share800": 0.364,
+    "burst_limit": "power",
+    "burst_rate": 22.624,
+    "burst_scoring_interval_mhz": [
+     701.4,
+     774.7
+    ],
+    "burst_D_propagated_range_mhz": [
+     708.3,
+     768.7
+    ],
+    "sus_mhz": 615.5,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 18.914,
+    "sus_scoring_interval_mhz": [
+     600.0,
+     648.6
+    ],
+    "sus_D_propagated_range_mhz": [
+     601.9,
+     644.2
+    ],
+    "rate_unit": "TFLOPS"
+   }
+  },
+  "fp16/gpt2_l6_mlp_down_fp16fwd": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin",
+   "tile_sha256": "8d75f3fdee196fe9d4e099927488c1b4d421d8a7275a8926bb788b02ab9a7f87",
+   "group": "F",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 82986,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 20.5694,
+    "class": "float_ungated/fp16",
+    "scoring_interval_w": [
+     17.5159,
+     23.623
+    ],
+    "scoring_halfwidth_w": 3.0535,
+    "e86_only_arm_w": [
+     19.3577,
+     21.7812
+    ],
+    "bias_arm_w": 19.6306,
+    "amendment1_halfwidth_w": 2.2764,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.1443,
+     "N_sig": 5.4934,
+     "A": 6.7081,
+     "B": 0.0,
+     "Vs_sig": 0.2245
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "uniform01",
+    "nearest_e78_kind_D_w": 18.8012,
+    "ratio_to_ref_measured_e78": 0.959,
+    "ratio_to_ref_model_fit": 0.9773,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 22.258,
+    "burst_mhz": 739.9,
+    "burst_share800": 0.4,
+    "burst_limit": "power",
+    "burst_rate": 22.737,
+    "burst_scoring_interval_mhz": [
+     704.8,
+     778.8
+    ],
+    "burst_D_propagated_range_mhz": [
+     711.6,
+     772.8
+    ],
+    "sus_mhz": 618.4,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 19.001,
+    "sus_scoring_interval_mhz": [
+     600.0,
+     652.6
+    ],
+    "sus_D_propagated_range_mhz": [
+     602.7,
+     648.4
+    ],
+    "rate_unit": "TFLOPS"
+   },
+   "a_prime_offset": {
+    "partner": "fp16.real_l6_mlp_down",
+    "offset_w": -0.1007,
+    "interval_w": [
+     -0.7065,
+     0.5052
+    ],
+    "halfwidth_w": 0.6059,
+    "halfwidth_rule": "t(0.975, 9) x E90-R5's rms 0.2765 W",
+    "anchored_on_e86_measured_partner_w": 21.1743
+   }
+  },
+  "fp16/gpt2_l6_attn_qk_fp16fwd": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_attn_qk_fp16fwd.bin",
+   "tile_sha256": "3da8b91fa51bf64800117d44bdf0d64a31add3a2dd3197c9a455768e5d2dedb0",
+   "group": "F",
+   "tier": 2,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 80964,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 20.6672,
+    "class": "float_ungated/fp16",
+    "scoring_interval_w": [
+     17.6137,
+     23.7207
+    ],
+    "scoring_halfwidth_w": 3.0535,
+    "e86_only_arm_w": [
+     19.4555,
+     21.8789
+    ],
+    "bias_arm_w": 19.7284,
+    "amendment1_halfwidth_w": 2.2764,
+    "model": "u,N_sig,A,B,Vs_sig",
+    "terms_w": {
+     "u": 8.1443,
+     "N_sig": 5.4934,
+     "A": 6.8116,
+     "B": 0.0,
+     "Vs_sig": 0.2178
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "uniform01",
+    "nearest_e78_kind_D_w": 18.8012,
+    "ratio_to_ref_measured_e78": 0.9635,
+    "ratio_to_ref_model_fit": 0.982,
+    "ref_kind": "randn"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 22.357,
+    "burst_mhz": 739.0,
+    "burst_share800": 0.39,
+    "burst_limit": "power",
+    "burst_rate": 22.707,
+    "burst_scoring_interval_mhz": [
+     703.9,
+     777.7
+    ],
+    "burst_D_propagated_range_mhz": [
+     710.7,
+     771.7
+    ],
+    "sus_mhz": 617.6,
+    "sus_share800": 0.0,
+    "sus_limit": "thermal",
+    "sus_rate": 18.978,
+    "sus_scoring_interval_mhz": [
+     600.0,
+     651.6
+    ],
+    "sus_D_propagated_range_mhz": [
+     602.5,
+     647.3
+    ],
+    "rate_unit": "TFLOPS"
+   },
+   "a_prime_offset": {
+    "partner": "fp16.real_l6_attn_qk",
+    "offset_w": -0.1771,
+    "interval_w": [
+     -0.783,
+     0.4288
+    ],
+    "halfwidth_w": 0.6059,
+    "halfwidth_rule": "t(0.975, 9) x E90-R5's rms 0.2765 W",
+    "anchored_on_e86_measured_partner_w": 20.5714
+   }
+  },
+  "int8/resnet18_l3c1": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/resnet18_l3c1.bin",
+   "tile_sha256": "27b8c649aab95813ae586537d2cff74fec8cf5ad2f59dd170b06729b95d925fc",
+   "group": "Z",
+   "tier": 1,
+   "gated_lane_frac": 0.175781,
+   "bus_bits_per_op": 26958,
+   "a_zero_word_frac": 0.17578125,
+   "a_zero_elem_frac": 0.5361328125,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 3.5207,
+    "class": "int8_gated",
+    "scoring_interval_w": [
+     2.44,
+     4.6015
+    ],
+    "scoring_halfwidth_w": 1.0808,
+    "e86_only_arm_w": [
+     2.2277,
+     4.8137
+    ],
+    "bias_arm_w": 3.9423,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 1.2765,
+     "N_pop": 0.9474,
+     "A": 0.9376,
+     "B": 0.0,
+     "Vp_pop": 0.3593
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "highbit",
+    "nearest_e78_kind_D_w": 3.1478,
+    "ratio_to_ref_measured_e78": 0.5124,
+    "ratio_to_ref_model_fit": 0.5136,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 5.673,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 800.0,
+    "sus_share800": 1.0,
+    "sus_limit": "none",
+    "sus_rate": 84.413,
+    "sus_scoring_interval_mhz": [
+     783.5,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     799.6,
+     800.0
+    ],
+    "rate_unit": "TOPS"
+   },
+   "c_gate_law": {
+    "g": 0.175781,
+    "live_share": 0.824219,
+    "D_w": 5.7319,
+    "scoring_interval_w": [
+     4.7018,
+     6.762
+    ],
+    "halfwidth_w": 1.0301,
+    "D_w_with_L_from_e86_real_tiles": 4.7719,
+    "burst_mhz": 800.0,
+    "sus_mhz": 796.3
+   }
+  },
+  "int8/vgg16_fc2": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/vgg16_fc2.bin",
+   "tile_sha256": "3b055155a98be6361146f84a1bdc017d2d408a6ad1f8811e74e497c4130e89fd",
+   "group": "Z",
+   "tier": 1,
+   "gated_lane_frac": 0.335938,
+   "bus_bits_per_op": 19732,
+   "a_zero_word_frac": 0.3359375,
+   "a_zero_elem_frac": 0.7646484375,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 2.6337,
+    "class": "int8_gated",
+    "scoring_interval_w": [
+     1.553,
+     3.7145
+    ],
+    "scoring_halfwidth_w": 1.0808,
+    "e86_only_arm_w": [
+     1.3407,
+     3.9267
+    ],
+    "bias_arm_w": 3.0553,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 1.0282,
+     "N_pop": 0.7624,
+     "A": 0.5637,
+     "B": 0.0,
+     "Vp_pop": 0.2794
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "highbit",
+    "nearest_e78_kind_D_w": 3.1478,
+    "ratio_to_ref_measured_e78": 0.3833,
+    "ratio_to_ref_model_fit": 0.3842,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 4.778,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 800.0,
+    "sus_share800": 1.0,
+    "sus_limit": "none",
+    "sus_rate": 84.414,
+    "sus_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "rate_unit": "TOPS"
+   },
+   "c_gate_law": {
+    "g": 0.335938,
+    "live_share": 0.664062,
+    "D_w": 4.694,
+    "scoring_interval_w": [
+     3.6638,
+     5.7241
+    ],
+    "halfwidth_w": 1.0301,
+    "D_w_with_L_from_e86_real_tiles": 3.9209,
+    "burst_mhz": 800.0,
+    "sus_mhz": 799.5
+   }
+  },
+  "int8/t5small_l0_down": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/t5small_l0_down.bin",
+   "tile_sha256": "8e0ede7d4c04cca32b76cb0ebd251d8f3d51396ff60174a07f8ff4a04fb43e21",
+   "group": "Z",
+   "tier": 2,
+   "gated_lane_frac": 0.765625,
+   "bus_bits_per_op": 6752,
+   "a_zero_word_frac": 0.765625,
+   "a_zero_elem_frac": 0.9345703125,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 0.7721,
+    "class": "int8_gated",
+    "scoring_interval_w": [
+     0.0,
+     1.8529
+    ],
+    "scoring_halfwidth_w": 1.0808,
+    "e86_only_arm_w": [
+     0.0,
+     2.0651
+    ],
+    "bias_arm_w": 1.1937,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 0.3632,
+     "N_pop": 0.2658,
+     "A": 0.0711,
+     "B": 0.0,
+     "Vp_pop": 0.0721
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "sparse90",
+    "nearest_e78_kind_D_w": 1.1148,
+    "ratio_to_ref_measured_e78": 0.1124,
+    "ratio_to_ref_model_fit": 0.1126,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 2.901,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 800.0,
+    "sus_share800": 1.0,
+    "sus_limit": "none",
+    "sus_rate": 84.414,
+    "sus_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "rate_unit": "TOPS"
+   },
+   "c_gate_law": {
+    "g": 0.765625,
+    "live_share": 0.234375,
+    "D_w": 1.9093,
+    "scoring_interval_w": [
+     0.8792,
+     2.9395
+    ],
+    "halfwidth_w": 1.0301,
+    "D_w_with_L_from_e86_real_tiles": 1.6367,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0
+   }
+  },
+  "int8/vit_l11_down": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/vit_l11_down.bin",
+   "tile_sha256": "ddc28d6e9818434ca17d4694aa7abdf8ad7247f7ed572f52714cefc52ddbb65d",
+   "group": "M",
+   "tier": 2,
+   "gated_lane_frac": 0.546875,
+   "bus_bits_per_op": 16434,
+   "a_zero_word_frac": 0.546875,
+   "a_zero_elem_frac": 0.8447265625,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 1.7204,
+    "class": "int8_gated",
+    "scoring_interval_w": [
+     0.6397,
+     2.8012
+    ],
+    "scoring_halfwidth_w": 1.0808,
+    "e86_only_arm_w": [
+     0.4274,
+     3.0135
+    ],
+    "bias_arm_w": 2.142,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 0.702,
+     "N_pop": 0.4508,
+     "A": 0.4304,
+     "B": 0.0,
+     "Vp_pop": 0.1373
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "wsparse50",
+    "nearest_e78_kind_D_w": 3.0592,
+    "ratio_to_ref_measured_e78": 0.2504,
+    "ratio_to_ref_model_fit": 0.251,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 3.858,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 800.0,
+    "sus_share800": 1.0,
+    "sus_limit": "none",
+    "sus_rate": 84.414,
+    "sus_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "rate_unit": "TOPS"
+   },
+   "c_gate_law": {
+    "g": 0.546875,
+    "live_share": 0.453125,
+    "D_w": 3.327,
+    "scoring_interval_w": [
+     2.2968,
+     4.3571
+    ],
+    "halfwidth_w": 1.0301,
+    "D_w_with_L_from_e86_real_tiles": 2.7992,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0
+   }
+  },
+  "int8/gpt2_l6_down_per_token": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin",
+   "tile_sha256": "9f7daf2842262797dc1c9ed41dd882a324c7645eb41377e143a6c02990e60da7",
+   "group": "C",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 46996,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.044921875,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 5.2129,
+    "class": "int8_ungated",
+    "scoring_interval_w": [
+     4.2179,
+     6.208
+    ],
+    "scoring_halfwidth_w": 0.9951,
+    "e86_only_arm_w": [
+     3.9199,
+     6.5059
+    ],
+    "bias_arm_w": 5.3638,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 1.5491,
+     "N_pop": 1.1548,
+     "A": 1.8879,
+     "B": 0.0,
+     "Vp_pop": 0.6222
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "sparse50",
+    "nearest_e78_kind_D_w": 5.3191,
+    "ratio_to_ref_measured_e78": 0.7587,
+    "ratio_to_ref_model_fit": 0.7604,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 7.379,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 798.5,
+    "sus_share800": 0.985,
+    "sus_limit": "none",
+    "sus_rate": 84.253,
+    "sus_scoring_interval_mhz": [
+     781.0,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     792.8,
+     799.9
+    ],
+    "rate_unit": "TOPS"
+   },
+   "a_prime_offset": {
+    "partner": "int8.real_l6_mlp_down",
+    "offset_w": 0.1665,
+    "interval_w": [
+     -0.443,
+     0.776
+    ],
+    "halfwidth_w": 0.6095,
+    "halfwidth_rule": "t(0.975, 9) x E90-R5's rms 0.2765 W",
+    "anchored_on_e86_measured_partner_w": 5.763
+   }
+  },
+  "int8/gpt2_l6_down_p9999": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin",
+   "tile_sha256": "deefd9cab63f5be939c3bb0093205cd977dcc398dc77941d8619339fcbd608f6",
+   "group": "C",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 44500,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0537109375,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 5.0864,
+    "class": "int8_ungated",
+    "scoring_interval_w": [
+     4.0913,
+     6.0814
+    ],
+    "scoring_halfwidth_w": 0.9951,
+    "e86_only_arm_w": [
+     3.7933,
+     6.3794
+    ],
+    "bias_arm_w": 5.2373,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 1.5491,
+     "N_pop": 1.1548,
+     "A": 1.7779,
+     "B": 0.0,
+     "Vp_pop": 0.6056
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "sparse50",
+    "nearest_e78_kind_D_w": 5.3191,
+    "ratio_to_ref_measured_e78": 0.7403,
+    "ratio_to_ref_model_fit": 0.7419,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 7.251,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 798.8,
+    "sus_share800": 0.988,
+    "sus_limit": "none",
+    "sus_rate": 84.288,
+    "sus_scoring_interval_mhz": [
+     781.6,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     793.8,
+     799.9
+    ],
+    "rate_unit": "TOPS"
+   },
+   "a_prime_offset": {
+    "partner": "int8.real_l6_mlp_down",
+    "offset_w": 0.0399,
+    "interval_w": [
+     -0.5696,
+     0.6494
+    ],
+    "halfwidth_w": 0.6095,
+    "halfwidth_rule": "t(0.975, 9) x E90-R5's rms 0.2765 W",
+    "anchored_on_e86_measured_partner_w": 5.6365
+   }
+  },
+  "int8/gpt2_l6_down_p999": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin",
+   "tile_sha256": "fda41dd9f32e7d439a9d765cfd5cdf223684b45d05178ce06efef4337be9e799",
+   "group": "C",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 47092,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0302734375,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 5.284,
+    "class": "int8_ungated",
+    "scoring_interval_w": [
+     4.2889,
+     6.2791
+    ],
+    "scoring_halfwidth_w": 0.9951,
+    "e86_only_arm_w": [
+     3.991,
+     6.577
+    ],
+    "bias_arm_w": 5.4349,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 1.5491,
+     "N_pop": 1.1548,
+     "A": 1.8918,
+     "B": 0.0,
+     "Vp_pop": 0.6884
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "sparse50",
+    "nearest_e78_kind_D_w": 5.3191,
+    "ratio_to_ref_measured_e78": 0.7691,
+    "ratio_to_ref_model_fit": 0.7708,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 7.451,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 798.2,
+    "sus_share800": 0.982,
+    "sus_limit": "none",
+    "sus_rate": 84.229,
+    "sus_scoring_interval_mhz": [
+     780.7,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     792.1,
+     799.8
+    ],
+    "rate_unit": "TOPS"
+   },
+   "a_prime_offset": {
+    "partner": "int8.real_l6_mlp_down",
+    "offset_w": 0.2376,
+    "interval_w": [
+     -0.3719,
+     0.8471
+    ],
+    "halfwidth_w": 0.6095,
+    "halfwidth_rule": "t(0.975, 9) x E90-R5's rms 0.2765 W",
+    "anchored_on_e86_measured_partner_w": 5.8341
+   }
+  },
+  "int8/gpt2_l11_down_maxabs": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_maxabs.bin",
+   "tile_sha256": "0ac8783bbffab8ecf7c4001b5c5a7a4014d955577a708f937865cd6658a9ef4d",
+   "group": "C",
+   "tier": 1,
+   "gated_lane_frac": 0.636719,
+   "bus_bits_per_op": 7330,
+   "a_zero_word_frac": 0.63671875,
+   "a_zero_elem_frac": 0.8779296875,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 1.1294,
+    "class": "int8_gated",
+    "scoring_interval_w": [
+     0.0487,
+     2.2102
+    ],
+    "scoring_halfwidth_w": 1.0808,
+    "e86_only_arm_w": [
+     0.0,
+     2.4224
+    ],
+    "bias_arm_w": 1.551,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 0.5628,
+     "N_pop": 0.3651,
+     "A": 0.1061,
+     "B": 0.0,
+     "Vp_pop": 0.0954
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "sparse90",
+    "nearest_e78_kind_D_w": 1.1148,
+    "ratio_to_ref_measured_e78": 0.1644,
+    "ratio_to_ref_model_fit": 0.1647,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 3.262,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 800.0,
+    "sus_share800": 1.0,
+    "sus_limit": "none",
+    "sus_rate": 84.414,
+    "sus_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "rate_unit": "TOPS"
+   },
+   "c_gate_law": {
+    "g": 0.636719,
+    "live_share": 0.363281,
+    "D_w": 2.7447,
+    "scoring_interval_w": [
+     1.7146,
+     3.7748
+    ],
+    "halfwidth_w": 1.0301,
+    "D_w_with_L_from_e86_real_tiles": 2.3222,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0
+   }
+  },
+  "int8/gpt2_l11_down_p999": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin",
+   "tile_sha256": "eea7ce0a6f183100f9fd4781e34e368b6e795b21e4bb601d32075d8c64e3224e",
+   "group": "C",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 42146,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.017578125,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 5.0182,
+    "class": "int8_ungated",
+    "scoring_interval_w": [
+     4.0231,
+     6.0133
+    ],
+    "scoring_halfwidth_w": 0.9951,
+    "e86_only_arm_w": [
+     3.7252,
+     6.3112
+    ],
+    "bias_arm_w": 5.1691,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 1.5491,
+     "N_pop": 1.1499,
+     "A": 1.6766,
+     "B": 0.0,
+     "Vp_pop": 0.6436
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "sparse50",
+    "nearest_e78_kind_D_w": 5.3191,
+    "ratio_to_ref_measured_e78": 0.7304,
+    "ratio_to_ref_model_fit": 0.732,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 7.183,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 799.0,
+    "sus_share800": 0.99,
+    "sus_limit": "none",
+    "sus_rate": 84.304,
+    "sus_scoring_interval_mhz": [
+     781.9,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     794.4,
+     799.9
+    ],
+    "rate_unit": "TOPS"
+   },
+   "a_prime_offset": {
+    "partner": "int8/gpt2_l11_down_maxabs",
+    "offset_w": 3.8888,
+    "interval_w": [
+     3.2793,
+     4.4983
+    ],
+    "halfwidth_w": 0.6095,
+    "halfwidth_rule": "t(0.975, 9) x E90-R5's rms 0.2765 W"
+   }
+  },
+  "int8/gpt2_l11_down_asym": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_asym.bin",
+   "tile_sha256": "efd2503511345055f9f876e2e03945858e0d475547de8f3f2eb72a6d2a8c5587",
+   "group": "C",
+   "tier": 2,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 14114,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 3.8703,
+    "class": "int8_ungated",
+    "scoring_interval_w": [
+     2.8752,
+     4.8653
+    ],
+    "scoring_halfwidth_w": 0.9951,
+    "e86_only_arm_w": [
+     2.5773,
+     5.1633
+    ],
+    "bias_arm_w": 4.0212,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 1.5491,
+     "N_pop": 1.0282,
+     "A": 0.442,
+     "B": 0.0,
+     "Vp_pop": 0.851
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "highbit",
+    "nearest_e78_kind_D_w": 3.1478,
+    "ratio_to_ref_measured_e78": 0.5633,
+    "ratio_to_ref_model_fit": 0.5646,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 6.025,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 800.0,
+    "sus_share800": 1.0,
+    "sus_limit": "none",
+    "sus_rate": 84.409,
+    "sus_scoring_interval_mhz": [
+     783.5,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     799.3,
+     800.0
+    ],
+    "rate_unit": "TOPS"
+   },
+   "a_prime_offset": {
+    "partner": "int8/gpt2_l11_down_maxabs",
+    "offset_w": 2.7408,
+    "interval_w": [
+     2.1313,
+     3.3503
+    ],
+    "halfwidth_w": 0.6095,
+    "halfwidth_rule": "t(0.975, 9) x E90-R5's rms 0.2765 W"
+   }
+  },
+  "int8/vgg16_fc2_asym": {
+   "tile": "tools/claims-v3/kinds/real2/tiles/int8/vgg16_fc2_asym.bin",
+   "tile_sha256": "b3d85b914f99477c98c0b92e7148e3014c01c4155fa7422a791b0ef8fa5275c5",
+   "group": "C",
+   "tier": 1,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 22836,
+   "a_zero_word_frac": 0.0,
+   "a_zero_elem_frac": 0.0,
+   "b_zero_word_frac": 0.0,
+   "a_aifoundry3_600mhz": {
+    "D_w": 3.9929,
+    "class": "int8_ungated",
+    "scoring_interval_w": [
+     2.9979,
+     4.988
+    ],
+    "scoring_halfwidth_w": 0.9951,
+    "e86_only_arm_w": [
+     2.6999,
+     5.286
+    ],
+    "bias_arm_w": 4.1439,
+    "amendment1_halfwidth_w": 1.2845,
+    "model": "u,N_pop,A,B,Vp_pop",
+    "terms_w": {
+     "u": 1.5491,
+     "N_pop": 1.0194,
+     "A": 0.8257,
+     "B": 0.0,
+     "Vp_pop": 0.5998
+    },
+    "features_outside_e78_range": {},
+    "nearest_e78_kind": "highbit",
+    "nearest_e78_kind_D_w": 3.1478,
+    "ratio_to_ref_measured_e78": 0.5812,
+    "ratio_to_ref_model_fit": 0.5824,
+    "ref_kind": "full"
+   },
+   "b_aifoundry2_governor": {
+    "c_w": 6.149,
+    "burst_mhz": 800.0,
+    "burst_share800": 1.0,
+    "burst_limit": "none",
+    "burst_rate": 84.414,
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 799.9,
+    "sus_share800": 0.999,
+    "sus_limit": "none",
+    "sus_rate": 84.407,
+    "sus_scoring_interval_mhz": [
+     783.4,
+     800.0
+    ],
+    "sus_D_propagated_range_mhz": [
+     799.0,
+     800.0
+    ],
+    "rate_unit": "TOPS"
+   },
+   "a_prime_offset": {
+    "partner": "int8/vgg16_fc2",
+    "offset_w": 1.3592,
+    "interval_w": [
+     0.7497,
+     1.9687
+    ],
+    "halfwidth_w": 0.6095,
+    "halfwidth_rule": "t(0.975, 9) x E90-R5's rms 0.2765 W"
+   }
+  }
+ },
+ "claims": {
+  "conventions": "All energy claims are on D, each tile's board power over its own type's all-zeros level, at the E95 lane's primary leakage slope, on aifoundry3 at 600 MHz. r(x) = per pass D(x) / D(ref), ref the same pass's fp32.randn, fp16.randn or int8.full (its three runs' mean). Intervals are t(0.975, n - 1) x SE over kept passes; a difference is paired within the pass. PASS, FAIL or INCONCLUSIVE as each claim says. Fewer than 3 kept passes: NOT SCORED. A lane that drops a tile says so, and a claim short of its population is UNDER-RESOLVED, never PASS.",
+  "E95": {
+   "C1_within_2pct": {
+    "claim": "Real fp32 and fp16 tiles with no exact zeros cost within 2% of random data of their format over its zeros, in every model",
+    "cells": {
+     "gpt2/fp32": [
+      "fp32/gpt2_l3_mlp_down",
+      "fp32/gpt2_l9_attn_qk"
+     ],
+     "gpt2/fp16": [
+      "fp16/gpt2_l9_attn_qk"
+     ],
+     "bert/fp32": [
+      "fp32/bert_l6_up"
+     ],
+     "bert/fp16": [
+      "fp16/bert_l6_up"
+     ],
+     "vit/fp32": [
+      "fp32/vit_l5_down"
+     ],
+     "vit/fp16": [
+      "fp16/vit_l5_down"
+     ]
+    },
+    "band": [
+     0.98,
+     1.02
+    ],
+    "rule": "per cell, mean r over its tiles per pass, its 95% interval over passes: cell PASS if inside the band, FAIL if entirely outside, else INCONCLUSIVE. Claim PASS if every cell passes, FAIL if any fails, else INCONCLUSIVE",
+    "predicted_ratio_per_cell_to_e78_ref": {
+     "gpt2/fp32": 0.9879,
+     "gpt2/fp16": 0.9705,
+     "bert/fp32": 0.9869,
+     "bert/fp16": 0.9705,
+     "vit/fp32": 0.9871,
+     "vit/fp16": 0.9762
+    },
+    "predicted_ratio_per_cell_to_ref_model_fit": {
+     "gpt2/fp32": 0.9912,
+     "gpt2/fp16": 0.9891,
+     "bert/fp32": 0.9902,
+     "bert/fp16": 0.9891,
+     "vit/fp32": 0.9904,
+     "vit/fp16": 0.995
+    },
+    "how_it_can_fail": "an attention tile in fp16 already read 0.971 and 0.966 (E86, E91), below the band; a model whose numbers sit further from random fails it"
+   },
+   "C2_below_random": {
+    "claim": "On average real fp32 and fp16 tiles with no exact zeros sit below random data of their format",
+    "tiles": {
+     "fp32": [
+      "fp32/gpt2_l3_mlp_down",
+      "fp32/gpt2_l9_attn_qk",
+      "fp32/bert_l6_up",
+      "fp32/vit_l5_down"
+     ],
+     "fp16": [
+      "fp16/gpt2_l9_attn_qk",
+      "fp16/bert_l6_up",
+      "fp16/vit_l5_down"
+     ]
+    },
+    "rule": "per format, mean r over its N tiles per pass: PASS if the 95% upper bound < 1, FAIL if the lower bound > 1, else INCONCLUSIVE (E86-R3's form). Both formats must pass",
+    "predicted_ratio_to_e78_ref": {
+     "fp32": 0.9875,
+     "fp16": 0.9724
+    }
+   },
+   "C3a_live_share_tiles": {
+    "claim": "A ReLU tile's power follows its live share: each fp32 and fp16 ReLU tile lies inside the gate law's interval",
+    "tiles": {
+     "fp32": [
+      "fp32/resnet18_l2c1",
+      "fp32/resnet18_l3c1",
+      "fp32/vgg16_fc2",
+      "fp32/t5small_l0_down"
+     ],
+     "fp16": [
+      "fp16/resnet18_l3c1",
+      "fp16/vgg16_fc2",
+      "fp16/t5small_l0_down"
+     ]
+    },
+    "rule": "count of tiles whose D lies inside c_gate_law.scoring_interval_w: PASS if all, FAIL if two or more lie outside, else INCONCLUSIVE",
+    "law": "D = g G + (1 - g) L, gate_law.<type>"
+   },
+   "C3b_live_share_slope": {
+    "claim": "Across the ReLU tiles of a format, D rises with the live share at about the random kind's full cost",
+    "tiles": {
+     "fp32": [
+      "fp32/resnet18_l2c1",
+      "fp32/resnet18_l3c1",
+      "fp32/vgg16_fc2",
+      "fp32/t5small_l0_down"
+     ],
+     "fp16": [
+      "fp16/resnet18_l3c1",
+      "fp16/vgg16_fc2",
+      "fp16/t5small_l0_down"
+     ]
+    },
+    "band_slope_over_L": [
+     0.85,
+     1.25
+    ],
+    "rule": "per format, the least-squares slope of D on (1 - g) over its tiles, divided by E78's L: PASS if both formats lie inside the band, FAIL if either lies outside",
+    "known_slope_over_L": {
+     "fp32": 1.039,
+     "fp16": 0.937
+    },
+    "known": "the same slope over E78's gated kinds and E90's gated re-draws: gate_law.<type>.known_misses",
+    "predicted_slope_over_L_from_a": {
+     "fp32": 0.984,
+     "fp16": 0.963
+    }
+   },
+   "C4_word_grouping": {
+    "claim": "The same numbers cost more in fp16 than in fp32 because a zero must fill the whole 32-bit word",
+    "pairs": {
+     "vgg16_fc2": [
+      "fp16/vgg16_fc2",
+      "fp32/vgg16_fc2"
+     ],
+     "resnet18_l3c1": [
+      "fp16/resnet18_l3c1",
+      "fp32/resnet18_l3c1"
+     ],
+     "t5small_l0_down": [
+      "fp16/t5small_l0_down",
+      "fp32/t5small_l0_down"
+     ]
+    },
+    "rule": "per pair, r(fp16) - r(fp32), paired: PASS if the 95% lower bound > 0, FAIL if the upper bound < 0, else INCONCLUSIVE. Claim PASS if all three pass, FAIL if any fails",
+    "predicted": {
+     "vgg16_fc2": {
+      "g_fp32": 0.722656,
+      "g_fp16": 0.550781,
+      "r_fp32": 0.2841,
+      "r_fp16": 0.3984
+     },
+     "resnet18_l3c1": {
+      "g_fp32": 0.445312,
+      "g_fp16": 0.367188,
+      "r_fp32": 0.5522,
+      "r_fp16": 0.5952
+     },
+     "t5small_l0_down": {
+      "g_fp32": 0.949219,
+      "g_fp16": 0.871094,
+      "r_fp32": 0.0476,
+      "r_fp16": 0.1064
+     }
+    }
+   },
+   "C5_int8_bits_or_gate": {
+    "claim": "In int8 a real ReLU tile's power follows its operand bits more than its live share: the predictor (a) lies nearer the measurement than the gate law (c)",
+    "tiles": [
+     "int8/resnet18_l3c1",
+     "int8/vgg16_fc2"
+    ],
+    "rule": "per tile, |D - (a)| against |D - (c)|: PASS if (a) is nearer on both tiles, FAIL if (c) is nearer on both, else INCONCLUSIVE",
+    "predicted": {
+     "int8/resnet18_l3c1": {
+      "a_w": 3.5207,
+      "c_w": 5.7319
+     },
+     "int8/vgg16_fc2": {
+      "a_w": 2.6337,
+      "c_w": 4.694
+     }
+    },
+    "why_this_side": "E78's int8 sparse50 gates 7% of its lane-cycles and its saving follows its bits; E86's real int8 tiles cost 0.78-0.89 of full with no gate at all"
+   },
+   "C6_calibration_lever": {
+    "claim": "On a GELU layer with one huge activation the calibration is a lever several times larger than any data effect: 99.9th percentile clip against max-abs",
+    "pair": [
+     "int8/gpt2_l11_down_p999",
+     "int8/gpt2_l11_down_maxabs"
+    ],
+    "threshold_w": 1.9473,
+    "predicted_w": 3.8888,
+    "rule": "paired D difference: PASS if the 95% lower bound >= 2.0 W, FAIL if the upper bound < 2.0 W, else INCONCLUSIVE"
+   },
+   "C7_calibration_rank": {
+    "claim": "On E86's window the calibrations rank committed < per-token < 99.9th percentile by power; the 99.99th percentile clip sits beside committed",
+    "reference": "int8.real_l6_mlp_down",
+    "predicted_offsets_w": {
+     "int8/gpt2_l6_down_p9999": 0.0399,
+     "int8/gpt2_l6_down_per_token": 0.1665,
+     "int8/gpt2_l6_down_p999": 0.2376
+    },
+    "rule": "paired differences against the reference: PASS if per-token's and 99.9th's lower bounds > 0 and p9999's interval lies inside +-0.40 W; FAIL if per-token's or 99.9th's upper bound < 0, or p9999's interval lies entirely outside +-0.40 W; else INCONCLUSIVE",
+    "note": "the predicted steps are 0.04-0.24 W, at the size of E86's paired noise, so INCONCLUSIVE is the likely outcome; beside the verdict report Spearman over the four and each tile's r",
+    "e112_threshold_w": 0.3895
+   },
+   "C8_asym_turns_the_gate_off": {
+    "claim": "TFLite-style asymmetric activations show the gate nothing on a ReLU tile, so the same numbers cost more than the symmetric tile",
+    "pair": [
+     "int8/vgg16_fc2_asym",
+     "int8/vgg16_fc2"
+    ],
+    "predicted_w": 1.3592,
+    "rule": "paired D difference: PASS if the 95% lower bound > 0.5 W, FAIL if the upper bound < 0, else INCONCLUSIVE",
+    "e112_threshold_w": 0.4868
+   },
+   "C9_negative_zero": {
+    "claim": "The gate tests word == 0, so -0.0 passes it: a tile whose A is 64% -0.0 (the layer: 55%) costs more than the gate law allows if the gate took numeric zeros",
+    "tile": "fp32/vit_l11_down",
+    "prediction_gate_blind_w": 19.8278,
+    "prediction_if_gate_took_numeric_zero": {
+     "g_numeric": 0.640625,
+     "D_w": 9.0698,
+     "scoring_interval_w": [
+      6.5776,
+      11.5619
+     ],
+     "note": "the gate as built tests word == 0, so -0.0 passes; this is what the law says if it did not"
+    },
+    "rule": "PASS if D's 95% lower bound > the upper end of c_if_gate_took_numeric_zero.scoring_interval_w, FAIL if D's 95% upper bound <= that end, else INCONCLUSIVE. Reported beside: r, which says what a live lane multiplying -0.0 costs"
+   },
+   "C10_bf16_weights": {
+    "claim": "T5's weights sit on the bf16 grid (all low 16 mantissa bits zero), so a no-zero T5 tile costs clearly less than random fp32, unlike E86's full-mantissa tiles",
+    "tile": "fp32/t5small_l0_up",
+    "threshold_r": 0.97,
+    "predicted_r": 0.9082,
+    "rule": "r: PASS if the 95% upper bound < 0.97, FAIL if the lower bound >= 0.97, else INCONCLUSIVE"
+   },
+   "C11_fp16_forward": {
+    "claim": "An fp16 forward pass costs what rounding the fp32 activations costs",
+    "pair": [
+     "fp16/gpt2_l6_mlp_down_fp16fwd",
+     "fp16.real_l6_mlp_down"
+    ],
+    "band_w": 0.4839,
+    "predicted_w": -0.1007,
+    "rule": "paired D difference: PASS if the 95% interval lies inside +-0.50 W, FAIL if entirely outside, else INCONCLUSIVE"
+   },
+   "C12_intervals": {
+    "claim": "The frozen (a) intervals hold",
+    "population": "the 25 new tier-1 tiles, and any tier-2 tile run, counted apart",
+    "rule": "count of new tier-1 tiles with D inside a_aifoundry3_600mhz.scoring_interval_w: PASS if >= 20 of 25, FAIL if < 18, else INCONCLUSIVE. Beside it, labelled: the count inside the E86-only arm; rms per class against the class's known rms; for the ungated float tiles the no-model baseline 'each tile costs E78's random kind'"
+   }
+  },
+  "E96": {
+   "S1_intervals": {
+    "claim": "E83's relation fed (a) holds the clocks",
+    "rule": "bursts: count inside b_aifoundry2_governor.burst_scoring_interval_mhz, sustained: count inside sus_scoring_interval_mhz; each PASS if >= 80% of the tiles run, FAIL if < 60%, else INCONCLUSIVE"
+   },
+   "S2_gate_buys_speed": {
+    "claim": "A gated float tile whose (a) is under 15 W bursts well above same-session random data of its format",
+    "tiles": [
+     "fp32/resnet18_l3c1",
+     "fp32/vgg16_fc2",
+     "fp32/t5small_l0_down",
+     "fp16/resnet18_l3c1",
+     "fp16/vgg16_fc2",
+     "fp16/t5small_l0_down"
+    ],
+    "predicted_burst_mhz": {
+     "fp32/resnet18_l3c1": 799.5,
+     "fp32/vgg16_fc2": 800.0,
+     "fp32/t5small_l0_down": 800.0,
+     "fp16/resnet18_l3c1": 799.8,
+     "fp16/vgg16_fc2": 800.0,
+     "fp16/t5small_l0_down": 800.0
+    },
+    "rule": "per tile, burst minus the same session's randn burst of its format: PASS if every tile >= +40 MHz, FAIL if any tile < +15 MHz, else INCONCLUSIVE"
+   },
+   "S2b_gate_buys_sustained_clock": {
+    "claim": "The same tiles also sustain well above same-session random data of their format",
+    "tiles": [
+     "fp32/resnet18_l3c1",
+     "fp32/vgg16_fc2",
+     "fp32/t5small_l0_down",
+     "fp16/resnet18_l3c1",
+     "fp16/vgg16_fc2",
+     "fp16/t5small_l0_down"
+    ],
+    "predicted_sus_mhz": {
+     "fp32/resnet18_l3c1": 703.0,
+     "fp32/vgg16_fc2": 793.2,
+     "fp32/t5small_l0_down": 800.0,
+     "fp16/resnet18_l3c1": 709.5,
+     "fp16/vgg16_fc2": 770.3,
+     "fp16/t5small_l0_down": 800.0
+    },
+    "rule": "per tile, sustained minus the same session's randn sustained of its format: PASS if every tile >= +50 MHz, FAIL if any tile < +15 MHz, else INCONCLUSIVE. One sustained run's 1 sigma is +-15.6 MHz on the slope (E83 C3)"
+   },
+   "S3_no_zero_runs_at_random_speed": {
+    "claim": "Real fp32 and fp16 tiles with no exact zeros burst within 15 MHz of same-session randn (E87-S2's form)",
+    "tiles": {
+     "fp32": [
+      "fp32/gpt2_l3_mlp_down",
+      "fp32/gpt2_l9_attn_qk",
+      "fp32/bert_l6_up",
+      "fp32/vit_l5_down"
+     ],
+     "fp16": [
+      "fp16/gpt2_l9_attn_qk",
+      "fp16/bert_l6_up",
+      "fp16/vit_l5_down"
+     ]
+    },
+    "rule": "per format, the tiles' mean burst minus randn's: PASS if |difference| <= 15 MHz in both formats, FAIL otherwise"
+   },
+   "S4_limits": {
+    "claim": "The sustained limit is called right",
+    "rule": "count of sus_limit right: PASS if >= 80% of the tiles run, FAIL if < 60%, else INCONCLUSIVE"
+   },
+   "S5_relation_on_measured_power": {
+    "claim": "E83's relation on each tile's measured c gives its clocks (E87-S1's form)",
+    "rule": "burst and sustained rms each <= 15 MHz: PASS; either > 25 MHz: FAIL; else INCONCLUSIVE"
+   }
+  }
+ },
+ "e112_card1_view": {
+  "of": {
+   "path": "tools/claims-v3/kinds/real2/predictions-real2.json",
+   "sha256": "0957e0c295990ac95cded56430697fb0683c9cf451d90f6943c8ff8d6a0b021a",
+   "commit": "6ae4c3d5"
+  },
+  "rule": "every watt figure a frozen E95 claim reads, divided by E82's per-type card scale of the tile's type (Q130(n)'s Amendment 1 did the same for E91); ratios, live shares, bus counts, clocks and r thresholds unchanged; known_misses as frozen (reported only); C7's +-0.40 W and C8's 0.5 W, which score_e95.py writes in its code, added scaled as e112_threshold_w",
+  "scale": {
+   "fp16": 1.033232,
+   "fp32": 1.030017,
+   "int8": 1.027062
+  },
+  "scale_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/scored.json cross_card.primary.x3.per_type_median",
+  "excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)",
+  "b_aifoundry2_governor": "aifoundry2's clock predictions are untouched and not used by E112"
+ }
+}
