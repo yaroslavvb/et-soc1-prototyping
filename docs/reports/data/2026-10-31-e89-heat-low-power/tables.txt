@@ -1,0 +1,112 @@
+## T1 the lock-in at 1/60 Hz (34-sensor mean), each kind against its reference
+
+| block | against | E78 W (D or S) | board fundamental (W) | over (2/π)·E78 W | temperature fundamental (°C) | H (°C per board W) | °C per W of E78's switching power | r = H / H_ref [95%] | phase (deg) | laps |
+|---|---|---|---|---|---|---|---|---|---|---|
+| int8 full (random) | int8.zeros | D 7.056 | 4.327 ± 0.147 | 0.963 | 0.899 ± 0.026 | 0.2077 ± 0.0042 | 0.2001 ± 0.0058 | 1.050 [1.019, 1.080] | -35.0 | 4 |
+| int8 gauss_q | int8.zeros | D 6.598 | 4.066 ± 0.146 | 0.968 | 0.837 ± 0.015 | 0.2060 ± 0.0092 | 0.1993 ± 0.0035 | 1.041 [0.989, 1.092] | -34.2 | 4 |
+| int8 smallint | int8.zeros | D 6.003 | 3.703 ± 0.168 | 0.969 | 0.776 ± 0.021 | 0.2095 ± 0.0069 | 0.2030 ± 0.0056 | 1.059 [1.017, 1.100] | -34.9 | 4 |
+| int8 sparse50 | int8.zeros | D 5.463 | 3.408 ± 0.154 | 0.980 | 0.718 ± 0.024 | 0.2107 ± 0.0028 | 0.2065 ± 0.0069 | 1.065 [1.038, 1.091] | -35.6 | 4 |
+| int8 neg_ones (−1) | int8.zeros | D 1.628 | 1.126 ± 0.129 | 1.086 | 0.232 ± 0.011 | 0.2064 ± 0.0147 | 0.2236 ± 0.0108 | 1.043 [0.965, 1.120] | -35.2 | 4 |
+| int8 zeros | idle | S 2.605 | 1.634 ± 0.035 | 0.985 | 0.360 ± 0.008 | 0.2202 ± 0.0082 | 0.2170 ± 0.0050 | 1.113 [1.065, 1.160] | -33.9 | 4 |
+| fp32 ones (1.0) | fp32.zeros | D 8.257 | 5.089 ± 0.046 | 0.968 | 1.071 ± 0.023 | 0.2104 ± 0.0046 | 0.2037 ± 0.0046 | 1.063 [1.031, 1.095] | -34.5 | 4 |
+| fp32 randn (reference) | fp32.zeros | D 24.725 | 15.321 ± 0.508 | 0.973 | 3.032 ± 0.056 | 0.1979 ± 0.0041 | 0.1926 ± 0.0036 | 1 (by definition) | -35.2 | 4 |
+
+## T2 the same blocks: E78's 2 s window and the 30 s swing on the fine reading, and the whole-degree reading
+
+| block | step2: 2 s rise (°C) | step2 per E78 W (°C/W) | r_step2 [95%] | swing30 (°C) | swing30 per E78 W (°C/W) | r_swing30 [95%] | whole-degree mean: temperature fundamental (°C) | r on the whole-degree mean [95%] |
+|---|---|---|---|---|---|---|---|---|
+| int8 full (random) | 0.863 ± 0.073 | 0.1223 ± 0.0104 | 1.035 [0.924, 1.147] | 1.891 ± 0.106 | 0.2680 ± 0.0151 | 1.064 [1.004, 1.124] | 0.883 ± 0.151 | 1.034 [0.851, 1.216] |
+| int8 gauss_q | 0.820 ± 0.151 | 0.1243 ± 0.0229 | 1.052 [0.846, 1.259] | 1.743 ± 0.057 | 0.2642 ± 0.0086 | 1.050 [1.015, 1.084] | 0.828 ± 0.066 | 1.031 [0.942, 1.120] |
+| int8 smallint | 0.725 ± 0.073 | 0.1207 ± 0.0122 | 1.022 [0.898, 1.146] | 1.614 ± 0.054 | 0.2689 ± 0.0090 | 1.068 [1.032, 1.104] | 0.825 ± 0.063 | 1.128 [0.994, 1.263] |
+| int8 sparse50 | 0.673 ± 0.078 | 0.1232 ± 0.0143 | 1.043 [0.904, 1.183] | 1.476 ± 0.035 | 0.2701 ± 0.0064 | 1.073 [1.047, 1.099] | 0.699 ± 0.229 | 1.037 [0.694, 1.381] |
+| int8 neg_ones (−1) | 0.222 ± 0.026 | 0.1361 ± 0.0158 | 1.153 [0.998, 1.307] | 0.461 ± 0.013 | 0.2828 ± 0.0079 | 1.123 [1.091, 1.155] | 0.347 ± 0.418 | 1.578 [-0.311, 3.466] |
+| int8 zeros | 0.340 ± 0.006 | 0.1304 ± 0.0023 | 1.104 [1.028, 1.180] | 0.671 ± 0.028 | 0.2576 ± 0.0107 | 1.023 [0.981, 1.066] | 0.411 ± 0.207 | 1.273 [0.625, 1.921] |
+| fp32 ones (1.0) | 1.059 ± 0.164 | 0.1282 ± 0.0199 | 1.086 [0.902, 1.269] | 2.169 ± 0.037 | 0.2627 ± 0.0045 | 1.043 [1.025, 1.062] | 1.058 ± 0.199 | 1.052 [0.849, 1.254] |
+| fp32 randn (reference) | 2.920 ± 0.194 | 0.1181 ± 0.0079 | — | 6.225 ± 0.035 | 0.2518 ± 0.0014 | — | 3.028 ± 0.067 | — |
+
+## T3 per pass (E78's convention: the pass is the unit, n = 2, t(0.975, 1) = 12.706)
+
+| block | H pass 8910 | H pass 8911 | mean ± 95% over passes |
+|---|---|---|---|
+| int8 full (random) | 0.2083 | 0.2071 | 0.2077 ± 0.0078 |
+| int8 gauss_q | 0.2085 | 0.2034 | 0.2060 ± 0.0328 |
+| int8 smallint | 0.2073 | 0.2117 | 0.2095 ± 0.0281 |
+| int8 sparse50 | 0.2108 | 0.2106 | 0.2107 ± 0.0012 |
+| int8 neg_ones (−1) | 0.2035 | 0.2092 | 0.2064 ± 0.0364 |
+| int8 zeros | 0.2198 | 0.2206 | 0.2202 ± 0.0052 |
+| fp32 ones (1.0) | 0.2113 | 0.2094 | 0.2104 ± 0.0122 |
+| fp32 randn (reference) | 0.1976 | 0.1982 | 0.1979 ± 0.0037 |
+
+## T4 per sensor: H of each of the 34 sensors (°C per W, on the reference phase)
+
+- int8 full (random): min 0.161, median 0.213, max 0.238 °C/W over 34 sensors; correlation with the reference's pattern 1.0
+- int8 gauss_q: min 0.160, median 0.210, max 0.237 °C/W over 34 sensors; correlation with the reference's pattern 0.999
+- int8 smallint: min 0.163, median 0.213, max 0.240 °C/W over 34 sensors; correlation with the reference's pattern 0.999
+- int8 sparse50: min 0.163, median 0.215, max 0.242 °C/W over 34 sensors; correlation with the reference's pattern 0.999
+- int8 neg_ones (−1): min 0.161, median 0.210, max 0.237 °C/W over 34 sensors; correlation with the reference's pattern 0.996
+- int8 zeros: min 0.170, median 0.224, max 0.253 °C/W over 34 sensors; correlation with the reference's pattern 0.999
+- fp32 ones (1.0): min 0.163, median 0.215, max 0.241 °C/W over 34 sensors; correlation with the reference's pattern 1.0
+- fp32 randn (reference): min 0.153, median 0.202, max 0.227 °C/W over 34 sensors; correlation with the reference's pattern 1.0
+
+Reference's 34 values (sensor 0..33): 0.153, 0.166, 0.174, 0.202, 0.182, 0.184, 0.209, 0.216, 0.198, 0.173, 0.168, 0.157, 0.188, 0.204, 0.205, 0.192, 0.179, 0.207, 0.208, 0.188, 0.198, 0.218, 0.222, 0.192, 0.209, 0.221, 0.223, 0.217, 0.208, 0.224, 0.227, 0.221, 0.200, 0.199
+
+## T5 verdicts
+
+| rule | cell | measured | band | verdict |
+|---|---|---|---|---|
+| E89-R0 | per-sensor reading (command 74) | share_with_34 1.0000, share_floor_mean_eq_firmware 0.9809 | share_with_34 >= 0.99 and floor(mean) == firmware in >= 0.95 | **PASS** |
+| E89-R1 | i8full | T_fund_C 0.8987, ci95 0.0260, n_laps 4 | 95% lower bound > 0 | **PASS** |
+| E89-R1 | i8gauss | T_fund_C 0.8371, ci95 0.0149, n_laps 4 | 95% lower bound > 0 | **PASS** |
+| E89-R1 | i8small | T_fund_C 0.7755, ci95 0.0213, n_laps 4 | 95% lower bound > 0 | **PASS** |
+| E89-R1 | i8sp50 | T_fund_C 0.7180, ci95 0.0239, n_laps 4 | 95% lower bound > 0 | **PASS** |
+| E89-R1 | i8neg1 | T_fund_C 0.2318, ci95 0.0112, n_laps 4 | 95% lower bound > 0 | **PASS** |
+| E89-R1 | i8zero | T_fund_C 0.3597, ci95 0.0081, n_laps 4 | 95% lower bound > 0 | **PASS** |
+| E89-R1 | f32ones | T_fund_C 1.0706, ci95 0.0234, n_laps 4 | 95% lower bound > 0 | **PASS** |
+| E89-R1 | f32randn | T_fund_C 3.0317, ci95 0.0563, n_laps 4 | 95% lower bound > 0 | **PASS** |
+| E89-R2 | i8full | 1.050 [1.019, 1.080] | 95% interval inside [0.8, 1.25] | **PASS** |
+| E89-R2 | i8gauss | 1.041 [0.989, 1.092] | 95% interval inside [0.8, 1.25] | **PASS** |
+| E89-R2 | i8small | 1.059 [1.017, 1.100] | 95% interval inside [0.8, 1.25] | **PASS** |
+| E89-R2 | i8sp50 | 1.065 [1.038, 1.091] | 95% interval inside [0.8, 1.25] | **PASS** |
+| E89-R2 | i8neg1 | 1.043 [0.965, 1.120] | 95% interval inside [0.8, 1.25] | **PASS** |
+| E89-R2 | i8zero | 1.113 [1.065, 1.160] | 95% interval inside [0.8, 1.25] | **PASS** |
+| E89-R2 | f32ones | 1.063 [1.031, 1.095] | 95% interval inside [0.8, 1.25] | **PASS** |
+| E89-R3 | f32randn | H 0.1979, ci95 0.0041 | 95% interval overlaps [0.141, 0.264] degC/W | **PASS** |
+| E89-R4 | i8full | 1.035 [0.924, 1.147] | 95% interval inside [0.7, 1.43] | **PASS** |
+| E89-R4 | i8gauss | 1.052 [0.846, 1.259] | 95% interval inside [0.7, 1.43] | **PASS** |
+| E89-R4 | i8small | 1.022 [0.898, 1.146] | 95% interval inside [0.7, 1.43] | **PASS** |
+| E89-R4 | i8sp50 | 1.043 [0.904, 1.183] | 95% interval inside [0.7, 1.43] | **PASS** |
+| E89-R4 | i8neg1 | 1.153 [0.998, 1.307] | 95% interval inside [0.7, 1.43] | **PASS** |
+| E89-R4 | i8zero | 1.104 [1.028, 1.180] | 95% interval inside [0.7, 1.43] | **PASS** |
+| E89-R4 | f32ones | 1.086 [0.902, 1.269] | 95% interval inside [0.7, 1.43] | **PASS** |
+
+tally: {'PASS': 24}
+
+## T6 the instrument
+
+- samples 22976, with all 34 sensors 22976 (1.0000); firmware integer mean rebuilt from the codes equals minshire_avg in 22537 (0.9809)
+- idle bracket, pass 8910: 150 samples; share of samples off each sensor's modal code: median 0.367, range 0.207-0.507; SD of the 34-sensor mean 0.0076 °C
+- idle bracket, pass 8911: 150 samples; share of samples off each sensor's modal code: median 0.893, range 0.873-0.913; SD of the 34-sensor mean 0.2289 °C
+- inside blocks: share of samples off each sensor's 1 s rolling median, mean over sensors 0.386-0.496 across blocks
+
+## T7 gates
+
+- pass 8910 gate: die 51.0 C, reached True, waited 0.0 s
+- pass 8910 i8full: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 274 (off 0)
+- pass 8910 i8sp50: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 272 (off 0)
+- pass 8910 i8small: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 275 (off 0)
+- pass 8910 f32ones: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 263 (off 0)
+- pass 8910 i8zero: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 8 (failures 0), cycles/op records 118 (off 0)
+- pass 8910 i8gauss: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 273 (off 0)
+- pass 8910 i8neg1: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 275 (off 0)
+- pass 8910 f32randn: ok True, clock600 True, mV 521.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 263 (off 0)
+- pass 8911 gate: die 59.0 C, reached True, waited 0.0 s
+- pass 8911 i8sp50: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 274 (off 0)
+- pass 8911 i8zero: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 8 (failures 0), cycles/op records 117 (off 0)
+- pass 8911 i8small: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 273 (off 0)
+- pass 8911 f32ones: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 263 (off 0)
+- pass 8911 i8neg1: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 273 (off 0)
+- pass 8911 i8gauss: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 274 (off 0)
+- pass 8911 i8full: ok True, clock600 True, mV 522.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 274 (off 0)
+- pass 8911 f32randn: ok True, clock600 True, mV 521.0-523.0, samples 1400 (1400 with 34), launches 19 (failures 0), cycles/op records 263 (off 0)
+
+reference phase -35.2 deg
