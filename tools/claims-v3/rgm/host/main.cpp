@@ -649,8 +649,9 @@ int testFma(const Options& o, Session& dev) {
 //          randn | sparse50 | e37    pair 0 is the first file's; the rest are drawn: normal (fp32, fp16) or uniform -128..127 (int8); that with half
 //                      the elements zero; +-1, +-2 as launchers/mmbench fills its tiles
 //   files  comma-separated tile files: raw A then raw B, 1,024 bytes each
-// A run's iters in its SPARSITY records is the ops per minion, so every reducer's work and rate stand. The last record, test "check", gives the
-// host's comparison of C with its own reference: exact, approx (inside 1e-4 of the sum of the absolute products) or wrong.
+// A run's iters in its SPARSITY records is the ops per minion, so every reducer's work and rate stand. On silicon the last launch, launch -3, is a short one for
+// the check: fp32 sums over a whole 0.5 s launch round by more than any honest tolerance, so C is compared after a few passes only, after the power window. The last
+// record, test "check", gives the host's comparison of that C with its own reference: exact, approx (inside 1e-4 of the sum of the absolute products) or wrong.
 
 struct ArmSpec {
   std::string arm, gen;
@@ -882,19 +883,23 @@ int testArm(const Options& o, Session& dev) {
     const bool ok = L.ok && sm.bad == 0 && sm.tensorErrors == 0;
     bad += !ok;
     lastIters = iters;
-    lastCpo = sm.cmean / double(ops);
+    const double cpoNow = sm.cmean / double(ops);
+    if (launchNo != -3) lastCpo = cpoNow;
     std::printf("SPARSITY {\"test\":\"fma\",\"arm\":\"%s\",\"gen\":\"%s\",\"type\":\"%s\",\"pattern\":\"none\",\"values\":\"%s\",\"b_stream\":%d,"
                 "\"minions\":%zu,\"shire_mask\":\"0x%llx\",\"iters\":%llu,\"passes\":%llu,\"launch\":%d,\"cycles_max\":%llu,"
                 "\"cycles_mean\":%.1f,\"cycles_per_op\":%.3f,\"wall_s\":%.6f,\"t_start_ms\":%lld,\"t_end_ms\":%lld,"
                 "\"ghz\":%.4f,\"tensor_errors\":%llu,\"result\":\"unchecked\",\"ok\":%s}\n",
                 s.arm.c_str(), s.gen.c_str(), o.type.c_str(), o.values.c_str(), int(s.tenb), harts.size(),
                 (unsigned long long)o.shireMask, (unsigned long long)ops, (unsigned long long)iters, launchNo, (unsigned long long)sm.cmax,
-                sm.cmean, lastCpo, L.wallS, L.t0Ms, L.t1Ms, L.ghz,
+                sm.cmean, cpoNow, L.wallS, L.t0Ms, L.t1Ms, L.ghz,
                 (unsigned long long)sm.tensorErrors, ok ? "true" : "false");
     std::fflush(stdout);
     return L.wallS;
   };
   repeatFor(o, dev, o.iters ? o.iters : firstIters, one);
+  if (!o.sysemu) {
+    one(s.gemm ? 1 : s.mm ? 2 : 32, -3);    // the short launch the check reads
+  }
 
   // The check: C of the last launch against the host's own reference, on a sample of the output tiles.
   CheckCount n;
