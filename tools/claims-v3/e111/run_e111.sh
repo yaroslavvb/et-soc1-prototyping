@@ -27,7 +27,7 @@ stage() {
   for f in record_cam.py reduce_hm.py p3rec.py; do cp -p "$T/hm/$f" "$CAM/$f"; done
   cp -p "$T/hlf/lockin_hlf.py" "$CAM/lockin_hlf.py"
   cp -p "$T"/hlc/prereg/*.npy "$CAM/prereg/"
-  for f in protocol-cam.json protocol-cam-dry.json predictions-e111.json; do cp -p "$T/e111/$f" "$CAM/$f"; done
+  for f in protocol-cam.json protocol-cam-dry.json predictions-e111.json run_hlc_e111.py idle_logins_e111.py; do cp -p "$T/e111/$f" "$CAM/$f"; done
   ( cd "$CAM" && sha256sum ./*.py ./*.json ./hlc/*.py ./prereg/*.npy > SHA256SUMS )
   echo "staged $CAM from $(git -C "$ROOT" rev-parse --short HEAD)"; cat "$CAM/SHA256SUMS"
 }
@@ -51,7 +51,8 @@ case "$cmd" in
     echo "== git =="; git log -1 --format='%h %s' | cut -c1-100; git status --porcelain -- tools/claims-v3/hpl tools/claims-v3/kspeed tools/claims-v3/hlc tools/claims-v3/hm tools/claims-v3/hlf | head
     echo "== plans =="
     for p in w1 w2 end smoke; do python3 "$T/e111/run_e111.py" --protocol "$T/e111/protocol-$p.json" --out /dev/null --list 2>&1 | tail -1; done
-    ( cd "$CAM" && python3 run_hlc.py --protocol protocol-cam.json --list 2>&1 | sed -n '1,4p' )
+    ( cd "$CAM" && python3 run_hlc_e111.py --protocol protocol-cam.json --list 2>&1 | sed -n '1,4p' )
+    echo "== amendment A1's decision (counts only) =="; python3 "$T/e111/idle_logins_e111.py"
     ;;
   dry)
     D="$B/dry-$(date +%H%M%S)"; mkdir -p "$D"

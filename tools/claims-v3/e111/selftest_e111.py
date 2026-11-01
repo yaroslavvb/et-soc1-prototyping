@@ -125,6 +125,24 @@ check("4 C1, C3, C4 PASS/INSIDE on a clean block", (c["C1"], c["C3"], c["C4"]) =
 for f in ("lockin.json",):
     os.remove(os.path.join(tmp, "CAM-ANA", f))
 
+# 6 (amendment A1) ---------------------------------------------------------------------------------
+import idle_logins_e111 as IL  # noqa: E402
+_orig = IL.sessions
+me = IL._me()
+for desc, ss, want in (("one idle 203 min", [("u1", 203, ""), (me, 0, "")], 0), ("one at 119 min", [("u1", 119, "")], 1),
+                       ("a new login (.)", [("u1", 0, "")], 1), ("idle unreadable", [("u1", None, "")], 1),
+                       ("two sessions, one fresh", [("u1", 300, ""), ("u1", 5, "")], 1), ("old", [("u1", 24 * 60, "")], 0)):
+    IL.sessions = lambda ss=ss: ss
+    check(f"6 A1: {desc} -> {want} blocking", len(IL.decide()[0]) == want)
+IL.sessions = lambda: None
+check("6 A1: who -u unreadable blocks", len(IL.decide()[0]) == 1)
+IL.sessions = _orig
+line = "someone   pts/8        Nov  1 10:12 02:33     3526857 (host)"
+import re as _re  # noqa: E402
+f = line.split()
+idle = next((f[i + 1] for i in range(2, len(f) - 1) if IL._HHMM.match(f[i])), None)
+check("6 A1: the idle column is read after the login time", idle == "02:33")
+
 # 5 ------------------------------------------------------------------------------------------------
 if len(sys.argv) > 1:
     d = sys.argv[1]

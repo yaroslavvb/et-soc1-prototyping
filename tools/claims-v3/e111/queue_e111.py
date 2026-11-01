@@ -11,14 +11,16 @@ Steps, in this order, on epoch ms (no local time is ever compared):
   W1   warm probe 1: run_e111.py protocol-w1.json (E98's REST, SUS and HOLD, the hold extended to H-I8)
   W2   warm probe 2: run_e111.py protocol-w2.json (E98's REST, SUS and HOLD, then H-F32)
   END  the idle after H-F32: run_e111.py protocol-end.json (E98's REST block)
-  CAM  the camera at 0.005 Hz: run_hlc.py protocol-cam.json from the staged copy build/e111/cam (E63's runner, as E73 ran it),
+  CAM  the camera at 0.005 Hz: run_hlc_e111.py (E63's run_hlc.py with amendment A1's `who`) protocol-cam.json from the staged copy
+       build/e111/cam (E63's runner, as E73 ran it),
        straight after END; then the registered camera reduction (reduce_hm.py, fpa_trace.py, lockin_hlf.py, dips_hlc.py) at nice 10
 
 Before each of W1, W2 and END, E98's rest rule: the card carried no launch for the step's rest (W1 15 min, W2 20 min, END 15
 min): the box's own 5 s history (~/live/history/<UTC date>.jsonl) holds no row with a die over 55 C or a board reading over 26 W
 and no two rows running with the card held, over the rest, and the previous step ended at least that long ago. The card lock must
-be free and nobody else logged in (`who`); otherwise it polls every 20 s, never taking the lock to wait. CAM needs only the lock free,
-nobody else logged in and the camera's /health reading ok and streaming.
+be free and nobody else logged in (`who`; by amendment A1 a user whose every session has been idle for at least 120 minutes does not
+count, idle_logins_e111.py); otherwise it polls every 20 s, never taking the lock to wait. CAM needs only the lock free, nobody else
+logged in by the same rule and the camera's /health reading ok and streaming.
 
 What stops a step from starting (each recorded): its latest start has passed (W1: schedule w1_latest_ms; every step: no start after
 no_start_after_ms, 18:00 PST); the card-minute budget (the steps' card_min so far, plus the step's plan, over budget_card_min, 120);
@@ -41,6 +43,9 @@ import sys
 import threading
 import time
 import urllib.request
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import idle_logins_e111 as IL  # noqa: E402
 
 LOCK = "/run/lock/etsoc-shire0.lock"
 ET_LIB = "/opt/et/lib"
@@ -92,6 +97,7 @@ class Queue:
         self.ettelem = os.path.join(self.root, "build/ettelem-hpl/ettelem")
         self.cam_code = os.path.join(self.root, "build/e111/cam")
         self.stop_phone = threading.Event()
+        os.environ["E111_IDLE_LOG"] = os.path.join(self.runs, "idle_logins.jsonl")   # A1's decisions, counts only, for every check
 
     def rec(self, kind, **kw):
         d = dict(t_ms=now_ms(), zone=time.strftime("%Z"), kind=kind, **kw)
@@ -164,12 +170,11 @@ class Queue:
         return rc == 0
 
     def others(self):
-        """How many other users `who` lists. A count: a login never goes in a record."""
+        """How many other users block, by amendment A1's rule (idle_logins_e111.py: a user whose every session has been idle for at
+        least 120 minutes does not). A count: a login never goes in a record."""
         if self.dry:
             return 0
-        me = os.environ.get("USER") or os.environ.get("LOGNAME") or ""
-        rc, so, _ = out(["who"], timeout=5)
-        return len({ln.split()[0] for ln in so.splitlines() if ln.split() and ln.split()[0] != me})
+        return IL.others_count()
 
     def snapshot(self, pdir, tag):
         snap = {"tag": tag, "t_ms": now_ms(), "zone": time.strftime("%Z"), "phone": health()}
@@ -266,7 +271,7 @@ class Queue:
         s0 = self.snapshot(pdir, "start")
         if name == "CAM":
             proto = "protocol-cam-dry.json" if self.dry else "protocol-cam.json"
-            cmd = [sys.executable, os.path.join(self.cam_code, "run_hlc.py"), "--protocol", os.path.join(self.cam_code, proto),
+            cmd = [sys.executable, os.path.join(self.cam_code, "run_hlc_e111.py"), "--protocol", os.path.join(self.cam_code, proto),
                    "--out", pdir, "--root", self.root, "--force"]
             cwd = self.cam_code
         else:

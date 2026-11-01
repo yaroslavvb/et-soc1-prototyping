@@ -6,6 +6,9 @@ run unchanged, exactly as ../kspeed/e98/run_e98.py runs it. Nothing is added to 
 Before the session it writes <RUNDIR>/e111.json: this wrapper's sha256, the protocol's, the predictions', run_kspeed.py's,
 and the zone the box's clock is in (every time in E111 is epoch ms; the zone is for the reader).
 
+Amendment A1 (before the claim and the first launch): run_hpl.py's other-user check asks `who`; that one call is answered by
+idle_logins_e111.py, which leaves out a user whose every session has been idle for at least 120 minutes. Nothing else changes.
+
 Everything that touches the card -- the card lock held for the session, the other-user checks before every launch process,
 `timeout 10` on every launch and config read, the sampler WITHOUT --reset-ms, the trace ring, residencies and `ettelem
 config` after every run, the safety stops (85 C; 97 W on three samples), and the end of the session unless the TDP and the
@@ -22,6 +25,8 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "kspeed"))
 import run_kspeed as K  # noqa: E402
+sys.path.insert(0, HERE)
+import idle_logins_e111 as IL  # noqa: E402
 
 H = K.H
 # The toy card's switching watts for these tiles, under --dry only (E98's DRY_C, with fp32 randn for the fp32 hold).
@@ -34,6 +39,8 @@ def sha256(path):
 
 
 def main():
+    if "--dry" not in sys.argv:
+        IL.patch(H, as_bytes=True)      # amendment A1: a login idle >= 120 min does not block; everything else as run_hpl.py
     if "--dry" in sys.argv:
         for k, c in DRY_C.items():
             t, v = k.split("/")
@@ -47,6 +54,7 @@ def main():
                        "protocol": os.path.basename(pr), "protocol_sha256": sha256(pr),
                        "predictions_sha256": sha256(os.path.join(HERE, "predictions-e111.json")),
                        "run_kspeed_sha256": sha256(K.__file__), "run_hpl_sha256": sha256(H.__file__),
+                       "idle_logins_sha256": sha256(IL.__file__), "amendment": "A1",
                        "t_ms": int(time.time() * 1000), "zone": time.strftime("%Z"), "argv": sys.argv},
                       open(os.path.join(rd, "e111.json"), "w"), indent=1)
     return K.main()
