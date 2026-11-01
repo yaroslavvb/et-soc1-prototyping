@@ -1,8 +1,32 @@
 # E101: the same kinds of numbers in a matmul that streams its operands
 
-*Sun 1 Nov 2026 (week 44), Q132, the top gap named by the previous round's final critic: every per-kind number on the [kinds page](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers) comes from one 16×16 TensorFMA repeating on resident tiles, and a real matmul also streams its tiles. Pre-registered in `bb860eb4` ([`tools/claims-v3/kinds/E101.md`](../../../../tools/claims-v3/kinds/E101.md), frozen numbers in `predictions-e101.json`, rules in `rules-e101.json`, scorer and self-test), before the claim and the first launch; amendments A1 `ddf59efa`, A2 `5057ccbc`, A3 `be2cb1a7` before the claim, A4 `c72e7e05` after the smoke and before the first pass. Session 1: aifoundry3 card 0 at 600 MHz, TDP 0 / threshold 65 °C / 600 MHz / 523 mV read under the card lock at the session's start (01:24:16 PST) and end (02:28:36 PST), never set. Nothing was written to the card and no `--reset-ms` was sent. Claim 1566382343843881015 in #community-lab, posted 01:24:12 PST, released 02:28 PST. Session 2, the clock under aifoundry2's own governor, has its own part below once it has run.*
+*Sun 1 Nov 2026 (week 44), Q132, the top gap named by the previous round's final critic: every per-kind number on the [kinds page](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers) comes from one 16×16 TensorFMA repeating on resident tiles, and a real matmul also streams its tiles. Pre-registered in `bb860eb4` ([`tools/claims-v3/kinds/E101.md`](../../../../tools/claims-v3/kinds/E101.md), frozen numbers in `predictions-e101.json`, rules in `rules-e101.json`, scorer and self-test), before the claim and the first launch; amendments A1 `ddf59efa`, A2 `5057ccbc`, A3 `be2cb1a7` before the claim, A4 `c72e7e05` after the smoke and before the first pass. Session 1: aifoundry3 card 0 at 600 MHz, TDP 0 / threshold 65 °C / 600 MHz / 523 mV read under the card lock at the session's start (01:24:16 PST) and end (02:28:36 PST), never set. Nothing was written to the card and no `--reset-ms` was sent. Claim 1566382343843881015 in #community-lab, posted 01:24:12 PST, released 02:28 PST. Session 2, the clock under aifoundry2's own governor (A5 `bc053660`), ran 04:20–05:03 PST and **ended on its registered 97 W stop at run 82 of 96.***
 
 **Which real matmul this is.** The critic took the benchmark's source to be outside the repo; it is in it (`kernels/mmbench`), and so, in the vendored SDK, is **the vendor's real GEMM**, `gp-sdk/device/sdk/libautogen/matmul_f32_1024_512_512`: C (1024 × 512) = A (1024 × 512) × B (512 × 512), fp32, with a partition under which one shire's operands come to 512 KB, the size of its L2, **cooperative loads** (the 8 minions of a neighbourhood load one A tile together, the 4 minions at one position load one B tile together), and a TensorStore per output tile. So this experiment runs a ladder, every rung on the same kinds and in E78's frame: `res` is the page's loop; `tenb` is E39's, B streamed; `mm16` is the benchmark's loop, op for op; **`gemm1` is the vendor kernel's partition, cooperative loads and stores, in all three formats, one block repeated inside a launch; `gemm16` walks 16 blocks, 48 MB of operands, past the 32 MB L3**; `gemmnc1` is `gemm1` with no cooperation; `mmp64` is the benchmark on private pools, from DRAM. **What stays different from a production GEMM:** only fp32 has a vendor kernel, and fp16 and int8 are that pattern with the type changed and K scaled, written here; tiles are packed where the vendor strides a row-major matrix; a block repeats where a production run walks new ones, and `gemm16` never accumulates C across blocks; a launch every 0.5 s. E101.md says all of it. The kernel is [`tools/claims-v3/rgm/`](../../../../tools/claims-v3/rgm/README.md).
+
+## The answer: do the page's headline gaps survive a real matmul?
+
+**Not as speed, in this real GEMM. The kind of number still sets the power, the heat and the clock, but here the memory sets the pace, so the clock buys little.** And "int8 hardly slows" is true of the loop and of the GEMM and false of the benchmark. Rates are the kernel's own, zeros over random, on aifoundry2 under its own governor (`results-speed.json` `rules.S1_fp32_burst.cells`, `rules.S2_fp32_sustained.cells`):
+
+| format | arm | zeros ÷ random, burst, rate | sustained, rate | the page's (the loop's) |
+|---|---|---|---|---|
+| fp32 | the loop, `res` | ×1.15 (clock ×1.12) | not reached | ×1.13–1.15, ×1.29–1.33 |
+| fp32 | the benchmark, `mm16` | not measured | not measured | |
+| fp32 | a real GEMM, `gemm1` | ×1.03 (clock ×1.06) | ×1.09 (clock ×1.27) | |
+| fp16 | the loop, `res` | ×1.12 (clock ×1.10) | not reached | ×1.12–1.13, ×1.30–1.32 |
+| fp16 | the benchmark, `mm16` | not measured | not measured | |
+| fp16 | a real GEMM, `gemm1` | ×1.01 (clock ×1.03) | ×1.06 (clock ×1.18) | |
+| int8 | the loop, `res` | ×1.00 (clock ×1.00) | not reached | ×1.00, ×1.01 |
+| int8 | the benchmark, `mm16` | ×1.17 (clock ×1.14) | ×1.32 (clock ×1.32) | |
+| int8 | a real GEMM, `gemm1` | ×1.00 (clock ×1.00) | ×1.00 (clock ×1.01) | |
+
+- **fp32:** the loop, re-read this session, is the page's: ×1.145 in the burst. **The real GEMM's gap is ×1.03 in the burst and ×1.09 sustained**, though its clocks part by ×1.06 and ×1.27: S1 SHRINKS and S2 FAILS, against a frozen prediction of about ×1.2 and ×1.33.
+- **fp16:** the GEMM's ×1.01 and ×1.06, clocks ×1.03 and ×1.18.
+- **int8:** the GEMM hardly slows, ×1.00 and ×1.00 (S3 HARDLY, against the frozen SLOWS), because the memory holds it far under both limits. **The benchmark slows like fp32 does on the page: ×1.17 and ×1.32 (S3 SLOWS),** 95.6 against 81.9 TOPS and 94.9 against 71.8.
+- **The benchmark's random fp32 and fp16 were not measured:** the session hit its 97 W stop on the way to them. On the measured watts the relation expects ×1.27 and ×1.22 by clock in the burst and ×1.33 sustained (`tools/claims-v3/kspeed/e101/predictions-session1.json`, labelled).
+- **So the gap belongs to the regime.** Where the multiplier sets the pace (the loop, the benchmark) the clock is the speed and the gap shows, in int8 too once the streaming watts reach the limits. Where the memory sets it (this GEMM) the gap all but goes. A production GEMM sits somewhere between, and E101 does not say where: **this GEMM is one block of the vendor's pattern, not the vendor's binary in a tuned run.**
+
+**What stays different from a production GEMM.** Only fp32 has a vendor kernel, and fp16 and int8 are its pattern with the type changed and K scaled, written here. Tiles are packed where the vendor strides a row-major matrix. One block repeats inside a launch at 0.5 s a launch; `gemm16` cycles 16 blocks without accumulating C across them. No helper threads (the vendor's are empty in this kernel). Nobody in this lab has timed the vendor's own binary, so nothing yet says its pace matches.
 
 ## Results of session 1: power at a pinned 600 MHz
 
@@ -111,22 +135,90 @@
 - Uploading the big pools just before the first launch did not disturb the idle bracket: `S − D` of the random cells reads 2.13 W in `gemm16` and 2.06 W in `mmp64`, against 2.13 W for fp32's resident zeros.
 - No run was skipped, retried or set aside. The tie, `anchor_pi`, stayed inside E78's gate.
 
-## What session 1 says about the page
+## Results of session 2: the clock under aifoundry2's own governor
 
-- **"The data never changes the cycle count" survives** a matmul that streams: it holds in all six streaming arms.
-- **"A random fp32 multiply-add costs 5.8 pJ" is the loop's.** It is 7.69 pJ in the benchmark, 8.37 in the GEMM and 10.09 past the L3. int8's 0.31 pJ becomes 0.77, 0.89 and 1.45.
-- **"Zeros cost 5–7% of random" is the loop's:** about 13% in the benchmark and 17–20% in the GEMM, in fp32 and fp16.
-- **"int8 hardly slows" cannot be read from E37's 27 W:** that is the benchmark's. In the production pattern int8 draws about what the loop does, because the memory holds it to a third of the benchmark's rate. Session 2 measures the clock.
-- **Closes:** the power half of the critic's top item. **Narrows:** section 11's item 12, zeros' transport (about 2.1 nJ per op, labelled) and the DRAM mechanism (the path's set-bit price also shows at the L2, labelled). **Opens:** why a GEMM block runs at 740 cycles and not 529. It is a memory question, unmeasured here: by the vendor's own sizing, one shire's operands come to the whole of its L2.
+*E80's design, E64's runner unchanged, 10 Hz sampler, no `--reset-ms`, 65 W / 65 °C read before and after every run and at both ends, nothing set. Slot 04:20–05:35 PST under claim 1566355908076765257, no post of its own; nobody else logged in (`who` showed none at 03:25 PST, and E64's check never fired). Smoke 04:20–04:21 PST, session 04:21:38–05:03:35 PST, `aifoundry2/`.*
+
+🛑 **The session ended on its registered safety stop, at run 82 of 96: board 101.15 W on three samples, over the 97 W cap.** The run was `mm16` fp16 random, on the hot start E101.md chose for the cells above the limit. **That choice was wrong:** it assumed a die heated to the trip holds the clock low. In fact, under the resident heater at the 65 °C trip, the clock cycled 600–700–800–700–600 MHz about once a second, and the board 53–67–87–68 W (`aifoundry2/s1/tel/SUS-19-mm16-fp16-randn-r1.jsonl.gz`). The work started on a rising edge: the clock read 700, then 800, then 700 MHz in its first half second, under a load the rule had put at 94.9 W at 800 MHz from a 58 °C reference. The watcher stopped the session within a second, as registered. The die read 66 °C. The card came back by itself: 26 W at +3 s, 22 W and a 46 °C die within minutes, its usual rest (`aifoundry2/rest-after-stop.txt`), and the config still read 65 W / 65 °C. **Lost, not run:** `mm16` random in fp32 and fp16, burst and sustained; resident fp32 random and int8 full sustained; the four replicates; `mm16` ones sustained. A safety stop is not a login, so the queue did not resume, as registered. The slot's last 31 minutes went unused. No run was retried; nothing else ran on the card from this lane.
+
+**In plain words.**
+
+- **Kinds still set power, heat and clock in the GEMM.** Sustained, random fp32 holds 621 MHz at 53.5 W and a 65.8 °C die, at the trip; zeros hold 789 MHz at 37.1 W and 56.9 °C.
+- **But the GEMM's rate hardly follows the clock.** 6.64 TFLOPS at 800 MHz, 6.01 at 621 MHz, and 5.93 at 600 MHz on aifoundry3. Its wall cycles per op (clock × minions × operations per op ÷ rate) rise with the clock: about 849 at 600 MHz on aifoundry3, 867 at 621 MHz, 983 at 756 MHz, 1011 at 800 MHz, the same in all three formats at one clock.
+- **The benchmark's count does not move:** 530 and 281 wall cycles per op at 800 MHz, as at 600. So the L2 keeps up with the minions, and what holds the GEMM back lies beyond it. Reading, not a measurement.
+- **The chain from kind to watts to clock carries over, once the watts are right.** E83's relation on session 1's measured watts misses by 14.8 MHz rms in the burst and 21.6 sustained, and on this session's measured c by 11.4 and 17.7. On the frozen watts, which gave `gemm1` the benchmark's cycles: 39.9 and 66.2 (S4 FAIL).
+- **Real tensors stream at random data's speed:** within 15.7 MHz, every format, burst and sustained (S5 PASS).
+- **The heat path sits where E80 left it:** E80's die line reads the 19 sustained cells to 0.93 °C rms, and `gemm1` random fp32's 53.5 W reads 65.8 °C against its 65.5 °C.
+- **Ties:** the resident bursts read 715.7 against 710.9 MHz (fp32 random) and 726.1 against 725.5 (fp16 random), 800 on the rest, on the new binary.
+
+| rule | registered | measured | verdict |
+|---|---|---|---|
+| S1 fp32 burst, `gemm1` | GROWS ≥ 1.20 (predicted), SURVIVES ≥ 1.10, SHRINKS below | ×1.030; `mm16` not measured | **SHRINKS**: the prediction failed |
+| S2 fp32 sustained, `gemm1` | SURVIVES in [1.20, 1.40] | ×1.093; `mm16` not measured | **FAILS** |
+| S3 int8, sustained | SLOWS ≥ 1.05 (predicted 1.19, 1.22), HARDLY < 1.03 | `gemm1` ×1.002; `mm16` ×1.322 | **HARDLY** (the prediction failed); **SLOWS** (it held) |
+| S4 relation on the frozen watts | ≤ 40 MHz rms, burst and sustained | 39.9, 66.2, over 25 and 19 cells | **FAIL** |
+| S5 real against random, `gemm1` | within 25 MHz | worst 15.7 | **PASS** |
+
+Every streaming cell's check of C read as at 600 MHz: exact on zeros, ones and int8, approx elsewhere, none wrong (`results-speed.json` `cells.<cell>.checks`). Wall cycles below are derived, by the formula above, from each cell's clock and rate. `results-speed.json`, `reduce-speed.txt`:
+
+| cell | burst MHz | burst T(FL)OP/s | wall cycles per op | sustained MHz | T(FL)OP/s | wall cycles per op | board W | die °C | limit | frozen clocks, burst / sustained | on session 1's watts |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `gemm1` fp32 zeros | 800 | 6.64 | 1011 | 789 | 6.57 | 1009 | 37.1 | 56.9 | none | 800 / 800 | 800 / 800 |
+| `gemm1` fp32 ones | 800 | 6.64 | 1011 | 795 | 6.58 | 1013 | 50.6 | 63.9 | none | 800 / 718 | 800 / 775 |
+| `gemm1` fp32 sparse50 | 800 | 6.59 | 1018 | 792 | 6.59 | 1007 | 53.5 | 64.8 | none | 800 / 725 | 800 / 744 |
+| `gemm1` fp32 real | 770 | 6.51 | 993 | 619 | 6.00 | 865 | 53.3 | 65.9 | thermal | 665 / 600 | 734 / 614 |
+| `gemm1` fp32 random | 756 | 6.44 | 983 | 621 | 6.01 | 867 | 53.5 | 65.8 | thermal | 664 / 600 | 726 / 609 |
+| `gemm1` fp16 zeros | 800 | 13.20 | 1016 | 794 | 13.15 | 1013 | 38.1 | 58.2 | none | 800 / 800 | 800 / 800 |
+| `gemm1` fp16 ones | 774 | 13.03 | 996 | 794 | 13.24 | 1007 | 50.5 | 63.6 | none | 800 / 718 | 800 / 765 |
+| `gemm1` fp16 sparse50 | 800 | 13.27 | 1011 | 727 | 12.71 | 960 | 53.1 | 65.4 | thermal | 773 / 649 | 798 / 694 |
+| `gemm1` fp16 real | 789 | 13.15 | 1007 | 659 | 12.26 | 902 | 54.8 | 65.6 | thermal | 692 / 600 | 754 / 630 |
+| `gemm1` fp16 random | 778 | 13.08 | 998 | 675 | 12.36 | 916 | 56.8 | 65.6 | thermal | 687 / 600 | 747 / 624 |
+| `gemm1` int8 zeros | 800 | 26.34 | 1019 | 795 | 26.27 | 1015 | 36.2 | 55.9 | none | 800 / 778 | 800 / 800 |
+| `gemm1` int8 ones | 800 | 26.32 | 1020 | 794 | 26.22 | 1017 | 38.6 | 57.0 | none | 800 / 752 | 800 / 800 |
+| `gemm1` int8 sparse50 | 800 | 26.39 | 1017 | 794 | 26.24 | 1016 | 45.9 | 61.9 | none | 795 / 679 | 800 / 791 |
+| `gemm1` int8 real | 800 | 26.39 | 1017 | 795 | 26.26 | 1016 | 46.8 | 62.0 | none | 795 / 679 | 800 / 782 |
+| `gemm1` int8 random | 800 | 26.36 | 1018 | 789 | 26.22 | 1010 | 48.8 | 62.9 | none | 778 / 654 | 800 / 773 |
+| `mm16` fp32 zeros | 800 | 12.67 | 530 | 800 | 12.67 | 530 | 41.8 | 60.0 | none | 800 / 800 | 800 / 800 |
+| `mm16` fp32 ones | 800 | 12.67 | 530 |  |  |  |  |  |  | 799 / 698 | 800 / 713 |
+| `mm16` fp32 sparse50 | 791 | 12.46 | 532 |  |  |  |  |  |  | 796 / 684 | 794 / 678 |
+| `mm16` fp16 zeros | 800 | 25.34 | 530 | 795 | 25.18 | 530 | 41.1 | 59.0 | none | 800 / 800 | 800 / 800 |
+| `mm16` fp16 ones | 800 | 25.34 | 530 |  |  |  |  |  |  | 799 / 698 | 800 / 713 |
+| `mm16` fp16 sparse50 | 723 | 22.40 | 542 |  |  |  |  |  |  | 740 / 618 | 742 / 620 |
+| `mm16` int8 zeros | 800 | 95.60 | 281 | 794 | 94.87 | 281 | 48.6 | 63.7 | none | 800 / 734 | 800 / 799 |
+| `mm16` int8 ones | 800 | 95.60 | 281 |  |  |  |  |  |  | 800 / 712 | 800 / 750 |
+| `mm16` int8 sparse50 | 732 | 86.25 | 285 |  |  |  |  |  |  | 737 / 616 | 741 / 619 |
+| `mm16` int8 random | 704 | 81.94 | 288 | 600 | 71.76 | 281 | 55.2 | 66.6 | thermal | 710 / 602 | 701 / 601 |
+| `res` fp32 zeros | 800 | 12.28 | 547 |  |  |  |  |  |  | 800 / 800 | 800 / 800 |
+| `res` fp32 random | 716 | 10.72 | 560 |  |  |  |  |  |  | 709 / 602 | 712 / 603 |
+| `res` fp16 zeros | 800 | 24.55 | 547 |  |  |  |  |  |  | 800 / 800 | 800 / 800 |
+| `res` fp16 random | 726 | 21.89 | 557 |  |  |  |  |  |  | 732 / 612 | 735 / 615 |
+| `res` int8 zeros | 800 | 84.30 | 318 |  |  |  |  |  |  | 800 / 800 | 800 / 800 |
+| `res` int8 random | 800 | 84.30 | 318 |  |  |  |  |  |  | 800 / 786 | 800 / 785 |
+
+**Departures, session 2.** The safety stop above: 15 of 96 runs never ran, and S1 and S2 stand on `gemm1` alone. The reduction ran on the mini, not the Intel: the Intel's load guard had stopped the reducer in its hot tier; the code and inputs are the committed ones. E98's lane gave up its P4 and P5 for this slot, and the session ended 31 minutes before the slot did, too late to give them back.
+
+## What E101 says about the page
+
+- **The lede and §1's speed gaps are the loop's.** In a real GEMM of this pattern: fp32 ×1.03 and ×1.09 in rate, fp16 ×1.01 and ×1.06. Clocks still part, ×1.27 sustained in fp32. The cards table needs a line for it, with its "one block, not the vendor's binary".
+- **§3's "int8 hardly slows" needs its arm:** true of the loop and of this GEMM, false of the benchmark (×1.17, ×1.32).
+- **"The data never changes the cycle count" survives** in all six streaming arms at 600 MHz and in the benchmark at 800. New: in the GEMM the count follows the clock, because the memory holds the time per op.
+- **§2's watts and "a random fp32 multiply-add costs 5.8 pJ" are the loop's.** It is 7.69 pJ in the benchmark, 8.37 in the GEMM and 10.09 past the L3, at 600 MHz. int8's 0.31 pJ becomes 0.77, 0.89 and 1.45.
+- **§7's "zeros cost 5–7% of random" is the loop's:** about 13% in the benchmark and 17–20% in the GEMM, in fp32 and fp16.
+- **§5.8, the memory path, grows from a footnote to a term:** 2.1 nJ per op on zeros and 7.5–7.9 on random in the benchmark, in every format (labelled), E75's changed-bit prices short by 2.2–2.8× (R5 FAIL), and a price for set bits at the L2 (R5b FAIL, labelled).
+- **§4, heat, stands:** a watt on the memory path heats the sensor as a watt on the lanes does (R10), and E80's die line holds on streaming cells.
+- **Section 11:** this closes the critic's top item for one GEMM pattern. Item 6, a model of every kind, gains a memory-path term. Item 12 narrows: zeros' transport about 2.1 nJ per op, labelled, and the set-bit price shows at the L2 as well as at DRAM. **New open items:** why a GEMM block runs at 740–1,019 cycles and not 529, and what the vendor's own binary does; the benchmark's random fp32 and fp16 speed, which needs a start that does not meet the 97 W stop.
 
 **For the post, in short sentences.**
 - Feed the matmul benchmark zeros and it draws 4.6 W over idle in fp32; feed it random numbers and it draws 36.5 W (`e101.json` `items.mm16.fp32.zeros`, `.randn`).
-- The kind of number never changes the cycle count, whether the operands sit in the minion or stream from memory (`scored.json` `rules.R9b_cycles`).
+- The kind of number never changes the cycle count at a given clock, whether the operands sit in the minion or stream from memory (`scored.json` `rules.R9b_cycles`).
 - Streaming a tile costs energy that depends on the data: about 2 nJ an op for zeros, about 8 nJ for random numbers, in every format (`posthoc-path.json`, post hoc).
-- A real GEMM in the vendor's pattern takes 740 cycles an op in every format, 5.9 TFLOPS in fp32 and 23.6 TOPS in int8 at 600 MHz, because memory sets the pace (`e101.json` `items.gemm1.*`).
+- A real GEMM in the vendor's pattern takes 740 cycles an op in every format at 600 MHz: 5.9 TFLOPS in fp32 and 23.6 TOPS in int8, because memory sets the pace (`e101.json` `items.gemm1.*`).
 - Its cooperative loads save about 5 W at the board and about 6 nJ an op, and cost about 4% in rate (`scored.json` `rules.R8_coop`; `e101.json` `items.gemmnc1.*`).
-- Past the L3 the same GEMM halves again, to about 1,490 cycles an op, and zeros still draw 4.8 W against random's 17.0 W in fp32 (`e101.json` `items.gemm16.*`).
+- Past the L3 the same GEMM halves again, and zeros still draw 4.8 W against random's 17.0 W in fp32 (`e101.json` `items.gemm16.*`).
+- Under the governor that GEMM's zeros beat random by only 3% in a burst and 9% sustained in fp32, though the clocks part by 6% and 27%, because the memory sets the pace (`results-speed.json` `rules.S1_fp32_burst`, `rules.S2_fp32_sustained`).
+- In the benchmark, where the memory keeps up, int8 zeros beat random by 17% in a burst and 32% sustained; in the loop and in that GEMM int8 hardly slows (`results-speed.json` `rules.S3_int8`).
+- Real tensors ran within 16 MHz of random numbers in that GEMM (`results-speed.json` `rules.S5_real`).
 
 ## Files
 
-`e101.json`, `runs.csv`, `reduce.txt` (E78's reduction, `reduce_e101.py`); `e101-leak*.json`, `runs-leak*.csv`, `reduce-leak*.txt` (the leakage arms); `scored.json`, `results.md` (`score_e101.py`); `posthoc-path.json`, `.txt` (labelled; `posthoc_path_e101.py`); `aifoundry3/kinds/p1011[0-3]/` (every pass's raw data: `runs.jsonl`, `marks.jsonl`, `telemetry.jsonl.gz`, `tiles/`, `config_*.json`, `manifest.txt`, `binaries.sha256`); `aifoundry3/kinds-smoke/`; `logs/` (the queue, `coop1.jsonl`, the build, both config reads); `code.sha256`.
+`e101.json`, `runs.csv`, `reduce.txt` (E78's reduction, `reduce_e101.py`); `e101-leak*.json`, `runs-leak*.csv`, `reduce-leak*.txt` (the leakage arms); `scored.json`, `results.md` (`score_e101.py`); `posthoc-path.json`, `.txt` (labelled; `posthoc_path_e101.py`); `aifoundry3/kinds/p1011[0-3]/` (every pass's raw data: `runs.jsonl`, `marks.jsonl`, `telemetry.jsonl.gz`, `tiles/`, `config_*.json`, `manifest.txt`, `binaries.sha256`); `aifoundry3/kinds-smoke/`; `logs/` (the queue, `coop1.jsonl`, the build, both config reads); `code.sha256`. Session 2: `results-speed.json`, `reduce-speed.txt` (`tools/claims-v3/kspeed/e101/reduce_e101s.py` with session 1's `e101.json`); `aifoundry2/` (`smoke/`, `s1/`: `runs.jsonl`, `marks.jsonl`, `launches.jsonl.gz`, `tel/`, `sp/`, the queue's `queue.jsonl`, `config-*.txt`, `sensors-*.json`, `history-before.jsonl`, `rest-after-stop.txt`, the binaries' sha256).
