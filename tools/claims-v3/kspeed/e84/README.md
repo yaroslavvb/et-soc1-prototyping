@@ -285,3 +285,30 @@ Two files were added after the data:
 
 The data README's "Corrections of the pre-registration's description" corrects two sentences of the governor section
 above: the 300 MHz point is a PMIC safe state, not an idle point.
+
+## Corrections after verification (Sat 31 Oct 2026)
+
+*Written after the data, as a correction of this file's description. Nothing above is rewritten, and no prediction,
+rule, threshold, population or verdict changes. The data README's "Corrections after verification" has the full list
+and its desk check ([`docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/`](../../../../docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/README.md),
+`corrections-check.txt` C5 and C6).*
+
+- **Design: "`timeout 10` on every device process".** That holds for every kernel launch: 139 processes, each
+  `timeout 10 … --stop-file`, all rc 0. It holds for the `ettelem config` and `uptime` reads too. Two device openers
+  were not under it:
+  - *The firmware read* (`run_e84.sh ident`) ran under `timeout 20`, with `dev_mngt_service`'s own 5,000 ms reply
+    timeout (`-u 5000`) inside it. It finished within the second it started (15:42:00).
+  - *The sampler* (`ettelem sample`, [`../../hpl/run_hpl.py`](../../hpl/run_hpl.py) `start_sampler`) runs for the
+    whole run with `--seconds` set to the plan plus 900 s, outside any `timeout`. The runner stops it with SIGTERM at
+    each run's end. SIGKILL and one management-queue drain follow only if it ignores SIGTERM for 30 s. All 35
+    samplers exited rc 0 after 11.8–87.7 s, with no `error` mark, no SIGKILL and no drain.
+
+  `run_e84.py`'s docstring already said the sampler is "stopped with SIGTERM", and `run_e84.sh`'s header names
+  `timeout 20`. The queue drain also uses `timeout 20`; it never ran. The scripts stay as they ran, so the committed
+  files remain the code of record. A re-use should put the firmware read under `timeout 10`, which its `-u 5000`
+  reply timeout fits.
+- **After the data: "the 300 MHz point is a PMIC safe state, not an idle point."** That overstates what is known.
+  - On 31 Oct card 0 idled at 600 MHz, and every 300 MHz reading followed a PMIC alarm.
+  - E60's committed card-0 telemetry of 20 Oct also idles at 600 MHz. 30 of the heater probe's 33 episodes at 300 MHz
+    match the alarm cycle and 3 do not. E60's rings are not committed, and card 0's firmware on 20 Oct is not known.
+  - The 300 MHz idle of 25 Sep, recorded in the card table under the 1.4.1 on record then, is not contradicted by E84.

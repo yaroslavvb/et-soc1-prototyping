@@ -1,0 +1,101 @@
+E84 corrections-check: every number quoted in the README's 'Corrections after verification', from the committed
+files. Post hoc, labelled, never a verdict. Times are PDT, Sat 31 Oct 2026. Card 0 = aifoundry1 card 0 (E84);
+aifoundry2 = its card under its own governor (E80, E83: the same day; E64: 23 Oct).
+results.json sha256 69c76c753a76, reduce.txt sha256 1ceba7d90c59 (the registered reduction, not changed by the corrections)
+
+======== C1. All-ones data against same-day aifoundry2, and the heat path per board watt
+fp32/ones sustained: card 0 793.5 MHz (n=1, limit none), 47.09 W, die 64.70 C (max [66]) | aifoundry2 E83 782.4 MHz (runs 771.7, 793.1, limits thermal/none), 53.34 W (runs 52.44, 54.25), die 64.95 C (runs 65.1, 64.8)
+   card 0 minus aifoundry2's mean: +11.1 MHz (1.4%); aifoundry2's own two runs differ by 21.4 MHz; board W: aifoundry2 +6.25 W at a die +0.25 C apart
+fp16/ones sustained: card 0 795.6 MHz (n=1, limit none), 46.72 W, die 63.90 C (max [65]) | aifoundry2 E80 781.6 MHz (runs 792.9, 770.3, limits none/thermal), 53.21 W (runs 54.12, 52.3), die 64.80 C (runs 64.4, 65.2)
+   card 0 minus aifoundry2's mean: +14.0 MHz (1.8%); aifoundry2's own two runs differ by 22.6 MHz; board W: aifoundry2 +6.49 W at a die +0.90 C apart
+E64 (23 Oct, aifoundry2) fp32-ones-1024 SUS: 737.9 MHz, 49.38 W, die 65.4 C (the stale comparison)
+E64 (23 Oct, aifoundry2) fp16-ones-1024 SUS: 737.1 MHz, 49.28 W, die 65.4 C (the stale comparison)
+aifoundry2's heat path moved between 23 Oct and 31 Oct: E80's die line sits -1.382 C off E64's at E64's slope (E80 results.json posthoc.die_line_e80.shift_c_at_e64_slope)
+card 0 die line over its 13 sustained runs (per-run sus_w_mean, sus_die_mean): die = 41.78 + 0.4753 C per W (slope s.e. 0.0238), rms 0.64 C, 65.5 C at 49.9 W
+   without the two PMIC-cycle runs (fp32 randn): die = 41.19 + 0.4963 C per W (s.e. 0.0165), rms 0.41 C, n 11, 65.5 C at 49.0 W
+   the fp32 randn runs sit -1.15, -1.14 C off the line (cooler than their board W says)
+E83 (aifoundry2, 13:47-15:08) die line: die = 40.76 + 0.4631 C per W (n 42, rms 0.70 C), 65.5 C at 53.4 W; card 0 sits +1.50 C off it at its slope; at 47.09 W: card 0's line 64.16 C, this line 62.57 C
+E80 (aifoundry2, 12:22-13:02) die line: die = 42.23 + 0.4349 C per W (n 21, rms 0.56 C), 65.5 C at 53.5 W; card 0 sits +1.13 C off it at its slope; at 47.09 W: card 0's line 64.16 C, this line 62.71 C
+
+======== C2. aifoundry2's fp32 zeros from the same day (E83), and the zeros-over-random speed ratios
+E83 fp32/zeros: burst 800, 800 MHz (passes), rate 12.276 TFLOPS (passes 12.276, 12.275), p800 34.09 W (passes 33.75, 34.42); sustained 789.3 MHz (n=1), 12.103 TFLOPS, limit none
+E83 fp32/ones: burst 800, 800 MHz (passes); sustained 782.4 MHz (runs 771.7, 793.1)
+random fp32 rates: E80 burst 10.689 (passes 10.785, 10.592), sustained 9.268 (runs 9.32, 9.215); E83 anchor burst 10.746 (passes 10.627, 10.865), sustained 9.359 (n=1)
+aifoundry2 fp32 E83 zeros / E80 randn: burst 1.148 (pass-paired 1.138-1.159), sustained 1.306 (runs 1.299-1.313)
+aifoundry2 fp32 E83 zeros / E83 randn: burst 1.142 (pass-paired 1.130-1.155), sustained 1.293 (n=1 / n=1, no interval)
+the stale aifoundry2 figures (E64 zeros 12.115 / 12.278 TFLOPS over E80 randn): burst 1.133, sustained 1.325
+README cells-table column, aifoundry2 burst / sustained MHz: fp32 zeros 800, 800 / 789.3 (E83); fp32 ones 800, 800 / 782.4 (E83)
+
+======== C3. Card 0's own idle level
+runs[].idle_w: 19.04-21.24 W over 35 runs (max SUS-08-int8-zeros-r1); idle_mhz [600]; idle_die 49-58.0 C; die at the cooling gates (gate.reading[0]) 49.0-57.0 C; burst runs alone 19.04-20.60 W
+
+======== C4. Intervals: the speed ratios and switching over zeros
+card 0 fp32 zeros over randn: burst 1.406 (pass-paired 1.348-1.470), sustained 1.668 (every pairing of the two replicates: 1.655-1.682)
+card 0 fp16 zeros over randn: burst 1.043 (pass-paired 1.039-1.047), sustained 1.275 (n=1 / n=1, no interval)
+card 0 int8 zeros over full: burst 1.000 (pass-paired 1.000-1.000), sustained 1.008 (n=1 / n=1, no interval)
+aifoundry2 fp32 zeros (E83) over randn (E80): burst 1.148 (pass-paired 1.138-1.159), sustained 1.306 (runs 1.299-1.313)
+aifoundry2 fp16 zeros (E80) over randn (E80): burst 1.119 (pass-paired 1.097-1.141), sustained 1.297 (n=1 / n=1, no interval)
+aifoundry2 int8 zeros (E80) over full (E80): burst 1.000 (pass-paired 1.000-1.000), sustained 1.009 (runs 1.005-1.014)
+E80's two int8 full sustained runs: 83.922, 83.163 TOPS, 0.9% apart (the size of the int8 effect itself)
+switching over zeros at 800 MHz, pass-paired (pass i of the kind minus pass i of the same format's zeros; the passes ran as two rounds, all pass 1 then all pass 2):
+   fp32/ones       p800_sw_w  14.38 W; pass-paired 13.58, 15.20
+   fp32/randn      p800_sw_w  43.38 W; pass-paired 42.72, 44.04
+   fp32/sparse90   p800_sw_w   0.39 W; pass-paired 0.01, 0.78
+   fp32/bf16trunc  p800_sw_w  32.29 W; pass-paired 31.95, 32.64
+   fp16/ones       p800_sw_w  14.04 W; pass-paired 13.74, 14.34
+   fp16/randn      p800_sw_w  39.13 W; pass-paired 39.45, 38.80
+   int8/full       p800_sw_w  12.36 W; pass-paired 12.82, 11.91
+   int8/neg_ones   p800_sw_w   3.44 W; pass-paired 3.85, 3.02
+
+======== C5. Device holds: which processes ran under timeout 10, and which did not
+kernel launch processes: 139 records; 139 start 'timeout 10', 139 carry --stop-file, 139 exited rc 0
+sampler (ettelem sample, run_hpl.py start_sampler, --seconds = plan + 900 s, no timeout wrapper): 35 starts, 35 stops, 35 of them 'rc 0', alive 11.8-87.7 s; marks: {'logins': 1, 'config_start': 1, 'sampler_start': 35, 'use_count_baseline': 35, 'sampler_stop': 35}
+   error / drain / SIGKILL marks: 0
+run_e84.sh:59: flock -n /run/lock/etsoc-shire0.lock timeout 10 "$ETT" config < /dev/null; echo "rc=$?"
+run_e84.sh:61: flock -n /run/lock/etsoc-shire0.lock timeout 10 "$ETT" uptime < /dev/null; echo "rc=$?"
+run_e84.sh:65: timeout 20 /opt/et/bin/dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS -n 0 -u 5000 < /dev/null 2>&1 \
+run_e84.sh:98: flock -n /run/lock/etsoc-shire0.lock timeout 10 "$ETT" config < /dev/null; echo "rc=$?"
+ident/ident-154200.out: first time stamp 15:42:00, last 15:42:00; dev_mngt_service rc=0; Firmware release revision: Major: 1 Minor: 4 Revision: 0; BL2 Firmware versions: Major: 0 Minor: 22 Revision: 0; PMIC Firmware versions: Major: 1 Minor: 6 Revision: 1
+
+======== C6. The 300 MHz point: E84, and E60's committed card-0 telemetry of 20 Oct
+E84: readings at 300 MHz by run: {'BURST-02-fp32-randn-r1': 7, 'BURST-02-fp32-randn-r2': 11, 'SUS-02-fp32-randn-r1': 210, 'SUS2-01-fp32-randn-r1': 208} (no other run); every run's idle_mhz is [600]; alarm runs (posthoc/pmic.json): ['BURST-02-fp32-randn-r1', 'BURST-02-fp32-randn-r2', 'SUS-02-fp32-randn-r1', 'SUS2-01-fp32-randn-r1']
+E60 heater probe (hl-probe/p1): 1771 readings, 33 episodes at 300 MHz (82 readings), each right after an 800 MHz reading in 32 of them
+   20 after the 600-700-800 climb, then a lagged reading under 70 W
+   10 after a board reading >= 70 W in the prior 0.4 s
+    3 after an idle-level reading at 800 MHz just before
+   the lagged readings before a 300 MHz episode: 44.9-60.2 W at 563-603 mV; the idle-level ones: 32.6 s (27.55 W, 604 mV); 41.7 s (27.85 W, 604 mV); 50.7 s (28.05 W, 604 mV)
+E60 card 0, all 12 committed telemetry files: readings under 25 W (idle) by clock {300: 1, 600: 6047, 700: 36, 800: 49} of 6133; all readings by clock {300: 127, 600: 8039, 700: 797, 800: 9900}
+E60's trace rings are not in the repository (the .bin files there are tiles), so the alarm cannot be confirmed for 20 Oct
+
+======== C7. fp32 random data on card 0 at 800 MHz, and what 1.67x means
+p800 (median board W, first second at 800 MHz): 72.37, 73.56 W (passes); highest board reading at 800 MHz per fp32 randn run: 74.26 (BURST-02-fp32-randn-r1), 74.62 (BURST-02-fp32-randn-r2), 60.60 (SUS-02-fp32-randn-r1), 74.59 (SUS2-01-fp32-randn-r1)
+PMIC's own readings at the alarm: [75000, 75250, 75500, 75750, 76000, 76250] mW; set point [75000] mW (posthoc/pmic.json summary)
+sustained rates: zeros 12.181 TFLOPS, random 7.303 TFLOPS: zeros 1.668x faster, i.e. random data takes 1.668x as long
+
+======== C8. Board power at 800 MHz, card 0 against aifoundry2: absolute, and split into zeros and switching over zeros
+   fp32/zeros      card 0  29.59 W | aifoundry2  34.09 W (E83) | absolute gap  4.50 W
+   fp32/ones       card 0  43.97 W | aifoundry2  51.49 W (E83) | absolute gap  7.52 W | over own zeros: card 0 14.38, aifoundry2 17.40 (zeros E83), gap 3.02 W
+   fp32/randn      card 0  72.97 W | aifoundry2  82.73 W (E80) | absolute gap  9.76 W | over own zeros: card 0 43.38, aifoundry2 48.64 (zeros E83), gap 5.26 W
+   fp32/sparse90   card 0  29.98 W | aifoundry2  35.55 W (E80) | absolute gap  5.57 W | over own zeros: card 0  0.39, aifoundry2  1.46 (zeros E83), gap 1.07 W
+   fp32/bf16trunc  card 0  61.88 W | aifoundry2  69.53 W (E80) | absolute gap  7.65 W | over own zeros: card 0 32.29, aifoundry2 35.44 (zeros E83), gap 3.15 W
+   fp16/zeros      card 0  29.46 W | aifoundry2  34.60 W (E80) | absolute gap  5.14 W
+   fp16/ones       card 0  43.50 W | aifoundry2  50.70 W (E80) | absolute gap  7.20 W | over own zeros: card 0 14.04, aifoundry2 16.10 (zeros E80), gap 2.06 W
+   fp16/randn      card 0  68.59 W | aifoundry2  76.14 W (E80) | absolute gap  7.55 W | over own zeros: card 0 39.13, aifoundry2 41.54 (zeros E80), gap 2.41 W
+   int8/zeros      card 0  29.81 W | aifoundry2  34.83 W (E80) | absolute gap  5.02 W
+   int8/full       card 0  42.17 W | aifoundry2  48.91 W (E80) | absolute gap  6.74 W | over own zeros: card 0 12.36, aifoundry2 14.08 (zeros E80), gap 1.72 W
+   int8/neg_ones   card 0  33.25 W | aifoundry2  39.39 W (E80) | absolute gap  6.14 W | over own zeros: card 0  3.44, aifoundry2  4.56 (zeros E80), gap 1.12 W
+absolute gap over the 11 kinds 4.50-9.76 W; the zeros themselves 4.50, 5.14, 5.02 W; over own zeros, the 8 other kinds 1.07-5.26 W (fp32 randn / fp16 randn / int8 full: 5.26 / 2.41 / 1.72 W)
+E83's fp32 randn anchor p800 82.78 W (E80 82.73 W)
+
+======== C10. E84-P3 split by what was predicted
+burst: 9 of 11 right (results.json rules.E84-P3.burst.right = 9); predicted limited: 1 of 3 right (fp32/randn power -> power/none; fp32/bf16trunc power -> none/none; fp16/randn power -> power/power); predicted none: 8 of 8 right
+sustained: 10 of 11 right (results.json rules.E84-P3.sustained.right = 10); predicted limited: 2 of 3 right (fp32/randn thermal -> unresolved/unresolved; fp32/bf16trunc thermal -> thermal; fp16/randn thermal -> thermal); predicted none: 8 of 8 right
+
+======== C11. The voltage behind p800 and switching over zeros
+minion rail at 800 MHz under load, median per burst run: 603-604 mV over 22 runs (E78/E82's switching_W is at 600 MHz, ~500-520 mV)
+
+======== C12. aifoundry2's committed trace rings and telemetry: no PMIC alarm, no 300 MHz
+E80: 64 ring dumps (59 in s1/), 0 alarm lines, 0 'New OP: Freq 300' lines; telemetry 24427 readings, 0 at 300 MHz
+E64: 58 ring dumps (45 in s1/), 0 alarm lines, 0 'New OP: Freq 300' lines; telemetry 20303 readings, 0 at 300 MHz
+E83: 125 ring dumps (120 in s1/), 0 alarm lines, 0 'New OP: Freq 300' lines; telemetry 48546 readings, 0 at 300 MHz
+E84: 42 ring dumps (37 in s1/), 47 alarm lines, 38 'New OP: Freq 300' lines; telemetry 13754 readings, 436 at 300 MHz
