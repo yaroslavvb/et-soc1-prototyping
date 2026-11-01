@@ -184,4 +184,9 @@ the GO before the first write.
 
 ## Amendments
 
-*None.*
+**A1, Sun 1 Nov 2026, 15:1x PST** (before the claim, the gate reads and any card access by E77): the throttle
+residencies read after each pass are raw states **2–4** (POWER_UP, POWER_DOWN, THERMAL_DOWN), not 2–6. E69's own rings
+on this card (`docs/reports/data/2026-10-27-e69-governor-knob/smoke2/sp/start.bin`, `end.bin`) show that every read
+of states 5 and 6 makes the service processor log "Unexpected power throtlling state" and "thermal pwr mgmt error:
+get_throttle_time()" — errors on the card for a read E77 does not need (POWER_SAFE and THERMAL_SAFE bear only on
+E117's alarm). One argument list in `run_e77.py`'s `queries()`; nothing else changes.

@@ -683,7 +683,7 @@ class Session:
             q["throttle_up_lines"] = len(re.findall(rb"[Tt]hrottle [Uu]p", blob))
             q["throttle_down_lines"] = len(re.findall(rb"[Tt]hrottle [Dd]own", blob))
             q["pmic_alarm_lines"] = len(re.findall(rb"Pmic_Controller_Handle_Pmic_Error_Event|POWER_SAFE", blob))
-        rc, so, se = self.tool("residency", "2", "3", "4", "5", "6")
+        rc, so, se = self.tool("residency", "2", "3", "4")      # A1: not 5 or 6 (they log SP errors, E69's ring)
         q["residency_rc"] = rc
         q["residency"] = [json.loads(l) for l in so.decode(errors="replace").splitlines() if l.startswith("{")]
         q["config"] = self.read_config()
