@@ -1,0 +1,31 @@
+== float: 283 rows, 151 kinds; M4 frozen, no refit: 0.215 W  fp32 0.209  fp16 0.222  card a3 0.186  card c1 0.233
+   plain LOKO F0_M4                  0.211  fp32 0.222  fp16 0.199  card a3 0.183  card c1 0.229
+   plain LOKO F1_split               0.213  fp32 0.221  fp16 0.204  card a3 0.185  card c1 0.231
+   plain LOKO F2_stages              0.208  fp32 0.223  fp16 0.189  card a3 0.174  card c1 0.228
+   plain LOKO F3_split_fft           0.215  fp32 0.223  fp16 0.206  card a3 0.187  card c1 0.233
+   plain LOKO F4_M4_abits            0.214  fp32 0.224  fp16 0.201  card a3 0.184  card c1 0.232
+   plain LOKO F5_split_abits         0.216  fp32 0.225  fp16 0.204  card a3 0.185  card c1 0.235
+   plain LOKO F6_split_abits_gtr     0.214  fp32 0.225  fp16 0.201  card a3 0.184  card c1 0.233
+   plain LOKO F7_M4_gtr              0.209  fp32 0.222  fp16 0.194  card a3 0.178  card c1 0.228
+   plain LOKO F8_stages_abits_gtr    0.208  fp32 0.221  fp16 0.193  card a3 0.180  card c1 0.226
+   plain LOKO F9_stages_gtr          0.208  fp32 0.223  fp16 0.188  card a3 0.174  card c1 0.228
+   plain LOKO F10_add_by_format      0.198  fp32 0.209  fp16 0.186  card a3 0.176  card c1 0.212
+   plain LOKO F11_core_by_format     0.199  fp32 0.211  fp16 0.186  card a3 0.178  card c1 0.213
+   plain LOKO F12_core_by_format_gtr 0.200  fp32 0.212  fp16 0.184  card a3 0.176  card c1 0.215
+   NESTED LOKO 0.201  picks {'F10_add_by_format': 150, 'F12_core_by_format_gtr': 1}  fp32 0.213  fp16 0.186  card a3 0.177  card c1 0.216
+   by experiment (nested / M4 form LOKO / M4 frozen): E103 n23 0.280/0.326/0.312; E104 n20 0.282/0.270/0.307; E106 n10 0.133/0.108/0.077; E78 n33 0.149/0.155/0.136; E82 n33 0.164/0.175/0.160; E86 n8 0.186/0.184/0.130; E88 n12 0.145/0.160/0.236; E90 n21 0.158/0.175/0.194; E91 n8 0.326/0.359/0.438; E92 n34 0.233/0.233/0.238; E93 n15 0.166/0.183/0.172; E94 n45 0.197/0.204/0.175; E95 n21 0.120/0.129/0.165
+   chosen F10_add_by_format: mult 1.555+-0.024, add32 1.620+-0.037, add16 1.498+-0.052, bus 7.567+-0.840, rest 2.415+-0.096, clk 1.054+-0.004 fJ; scale 0.9711; fit rms 0.187
+== int8: 78 rows, 44 kinds; M4 frozen, no refit: 0.243 W  int8 0.243  card a3 0.190  card c1 0.274
+   plain LOKO I0_I3                  0.253  int8 0.253  card a3 0.219  card c1 0.273
+   plain LOKO I1_fft                 0.256  int8 0.256  card a3 0.219  card c1 0.279
+   plain LOKO I2_abits               0.258  int8 0.258  card a3 0.223  card c1 0.280
+   plain LOKO I3_gtr                 0.254  int8 0.254  card a3 0.217  card c1 0.277
+   plain LOKO I4_abits_bbits         0.263  int8 0.263  card a3 0.216  card c1 0.291
+   NESTED LOKO 0.262  picks {'I0_I3': 42, 'I4_abits_bbits': 1, 'I3_gtr': 1}  int8 0.262  card a3 0.219  card c1 0.288
+   by experiment (nested / M4 form LOKO / M4 frozen): E103 n7 0.427/0.427/0.364; E78 n15 0.229/0.229/0.181; E82 n15 0.214/0.214/0.169; E86 n4 0.240/0.240/0.232; E88 n4 0.448/0.357/0.405; E90 n1 0.463/0.463/0.237; E91 n4 0.182/0.182/0.167; E93 n5 0.233/0.233/0.298; E94 n11 0.244/0.227/0.285; E95 n12 0.160/0.160/0.181
+   chosen I0_I3: nets_nobus 3.261+-0.211, bus 14.035+-3.081, clk 1.945+-0.170 fJ; scale 0.9735; fit rms 0.227
+missing: []
+
+real	1m26.483s
+user	1m24.560s
+sys	0m1.161s
