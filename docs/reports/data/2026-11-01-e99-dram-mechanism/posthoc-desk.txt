@@ -1,0 +1,62 @@
+E99 step 1, POST HOC: 18 measured points, 10 from E81 and 8 from E75, watts over each experiment's own zeros
+item        W/zeros       w       k      hi   t_enc   t_raw    half  k_chan
+dp_c1         2.046   256.0     0.0    32.0     2.0    16.0   256.0     0.0
+dp_s1         2.593   256.0     0.0   219.0   265.0   251.0   124.0     0.0
+dp_c2         1.866   256.0   256.0    32.0     5.0    40.0   128.0     0.0
+dp_s2         2.861   256.0   256.0   216.0   254.0   244.5   139.0     0.0
+dp_c4         1.768   256.0   256.0    32.0     7.5    60.0    64.0     0.0
+dp_s4         2.892   256.0   256.0   215.8   260.5   246.2   132.0     0.0
+dp_c2r        2.063   290.0   192.0    38.0     9.0    40.0   160.0     0.0
+dp_s2r        2.871   290.0   192.0   226.0   254.5   241.5   132.0     0.0
+dp_random     3.222   288.3   190.2   205.1   256.1   247.9    95.2   190.1
+dp_bern       3.501   256.0   256.1   209.2   258.2   247.9   128.0   255.4
+mf_k0         2.129   256.0     0.0    32.0     2.0    16.0   256.0     0.0
+mf_k128       2.081   256.0   128.0    32.0     5.0    40.0   192.0     0.0
+mf_k256       1.933   256.0   256.0    32.0     5.0    40.0   128.0     0.0
+mf_k384       2.127   256.0   384.0    32.0     5.0    40.0   192.0     0.0
+mf_k512       2.349   256.0   512.0    32.0     2.0    16.0   256.0     0.0
+mf_w128       1.405   128.0   256.0    16.0     3.0    24.0   128.0     0.0
+mf_w384       2.382   384.0   256.0    48.0     3.0    24.0   128.0     0.0
+mf_random     3.250   288.3   190.2   205.1   256.1   247.9    95.2   190.1
+
+Fits: floor + terms, watts; a term's price also in pJ per count at the measured line rate.
+bits             rms 0.516 W | floor +1.074 W | w 4.304 pJ  k 0.018 pJ
+   dp_bern-dp_c2 0.000 of 1.636 W (0 %) | arrangement s2-c2 0.000 of 0.996 | period bern-s2 0.000 of 0.640 | zeros-to-random: 2.533 of 3.222 W if the floor counts, 1.459 if it does not
+   residuals W: c1 -0.32 s1 +0.23 c2 -0.51 s2 +0.49 c4 -0.60 s4 +0.52 c2r -0.48 s2r +0.33 random +0.69 bern +1.13 mk0 -0.24 mk128 -0.29 mk256 -0.44 mk384 -0.25 mk512 -0.03 mw128 -0.32 mw384 -0.64 mrandom +0.72
+dbi              rms 0.266 W | floor +1.719 W | hi 8.065 pJ  t_enc -2.370 pJ
+   dp_bern-dp_c2 0.972 of 1.636 W (59 %) | arrangement s2-c2 1.048 of 0.996 | period bern-s2 -0.076 of 0.640 | zeros-to-random: 2.947 of 3.222 W if the floor counts, 1.228 if it does not
+   residuals W: c1 +0.03 s1 -0.46 c2 -0.14 s2 -0.20 c4 -0.23 s4 -0.14 c2r +0.01 s2r -0.28 random +0.27 bern +0.52 mk0 +0.11 mk128 +0.07 mk256 -0.08 mk384 +0.12 mk512 +0.33 mw128 -0.46 mw384 +0.22 mrandom +0.30
+bits+dbi         rms 0.198 W | floor +0.997 W | w 5.009 pJ  hi -15.101 pJ  t_enc 13.975 pJ
+   dp_bern-dp_c2 1.013 of 1.636 W (62 %) | arrangement s2-c2 0.823 of 0.996 | period bern-s2 0.190 of 0.640 | zeros-to-random: 3.257 of 3.222 W if the floor counts, 2.259 if it does not
+   residuals W: c1 +0.08 s1 -0.37 c2 -0.15 s2 +0.02 c4 -0.29 s4 -0.06 c2r -0.11 s2r +0.00 random -0.03 bern +0.47 mk0 +0.16 mk128 +0.06 mk256 -0.08 mk384 +0.11 mk512 +0.38 mw128 -0.11 mw384 -0.07 mrandom -0.01
+raw_pins         rms 0.231 W | floor +0.896 W | w 3.236 pJ  t_raw 3.770 pJ
+   dp_bern-dp_c2 0.920 of 1.636 W (56 %) | arrangement s2-c2 0.904 of 0.996 | period bern-s2 0.015 of 0.640 | zeros-to-random: 3.087 of 3.222 W if the floor counts, 2.191 if it does not
+   residuals W: c1 +0.11 s1 -0.39 c2 -0.18 s2 -0.09 c4 -0.37 s4 -0.07 c2r -0.11 s2r -0.19 random +0.13 bern +0.54 mk0 +0.19 mk128 +0.04 mk256 -0.11 mk384 +0.08 mk512 +0.41 mw128 -0.08 mw384 -0.08 mrandom +0.16
+bits+chan        rms 0.339 W | floor +1.183 W | w 3.424 pJ  k -0.025 pJ  k_chan 4.177 pJ
+   dp_bern-dp_c2 1.252 of 1.636 W (77 %) | arrangement s2-c2 0.000 of 0.996 | period bern-s2 1.252 of 0.640 | zeros-to-random: 3.267 of 3.222 W if the floor counts, 2.083 if it does not
+   residuals W: c1 -0.17 s1 +0.38 c2 -0.34 s2 +0.66 c4 -0.44 s4 +0.69 c2r -0.28 s2r +0.53 random -0.04 bern +0.05 mk0 -0.08 mk128 -0.13 mk256 -0.27 mk384 -0.07 mk512 +0.15 mw128 -0.29 mw384 -0.34 mrandom -0.02
+dbi+chan         rms 0.133 W | floor +1.210 W | hi 22.999 pJ  t_enc -14.234 pJ  k_chan 3.335 pJ
+   dp_bern-dp_c2 1.551 of 1.636 W (95 %) | arrangement s2-c2 0.806 of 0.996 | period bern-s2 0.745 of 0.640 | zeros-to-random: 3.209 of 3.222 W if the floor counts, 2.000 if it does not
+   residuals W: c1 +0.01 s1 -0.10 c2 -0.12 s2 +0.07 c4 -0.18 s4 +0.21 c2r -0.02 s2r -0.19 random +0.01 bern -0.04 mk0 +0.09 mk128 +0.09 mk256 -0.06 mk384 +0.14 mk512 +0.31 mw128 -0.19 mw384 -0.07 mrandom +0.04
+w+hi+chan        rms 0.140 W | floor +1.086 W | w 2.612 pJ  hi 3.499 pJ  k_chan 2.225 pJ
+   dp_bern-dp_c2 1.394 of 1.636 W (85 %) | arrangement s2-c2 0.755 of 0.996 | period bern-s2 0.639 of 0.640 | zeros-to-random: 3.307 of 3.222 W if the floor counts, 2.221 if it does not
+   residuals W: c1 +0.04 s1 -0.18 c2 -0.14 s2 +0.10 c4 -0.23 s4 +0.14 c2r -0.07 s2r -0.03 random -0.09 bern +0.11 mk0 +0.13 mk128 +0.08 mk256 -0.07 mk384 +0.13 mk512 +0.35 mw128 -0.14 mw384 -0.08 mrandom -0.06
+w+t_raw+chan     rms 0.164 W | floor +0.987 W | w 3.045 pJ  t_raw 2.898 pJ  k_chan 2.085 pJ
+   dp_bern-dp_c2 1.332 of 1.636 W (81 %) | arrangement s2-c2 0.695 of 0.996 | period bern-s2 0.636 of 0.640 | zeros-to-random: 3.325 of 3.222 W if the floor counts, 2.337 if it does not
+   residuals W: c1 +0.09 s1 -0.16 c2 -0.17 s2 +0.13 c4 -0.34 s4 +0.15 c2r -0.10 s2r +0.03 random -0.10 bern +0.13 mk0 +0.17 mk128 +0.04 mk256 -0.10 mk384 +0.09 mk512 +0.39 mw128 -0.12 mw384 -0.06 mrandom -0.07
+w+t_enc+chan     rms 0.145 W | floor +1.077 W | w 3.043 pJ  t_enc 2.536 pJ  k_chan 2.044 pJ
+   dp_bern-dp_c2 1.366 of 1.636 W (83 %) | arrangement s2-c2 0.741 of 0.996 | period bern-s2 0.625 of 0.640 | zeros-to-random: 3.323 of 3.222 W if the floor counts, 2.246 if it does not
+   residuals W: c1 +0.05 s1 -0.19 c2 -0.14 s2 +0.12 c4 -0.24 s4 +0.13 c2r -0.08 s2r +0.00 random -0.10 bern +0.13 mk0 +0.13 mk128 +0.08 mk256 -0.07 mk384 +0.12 mk512 +0.35 mw128 -0.14 mw384 -0.07 mrandom -0.07
+w+hi+t_enc+chan  rms 0.131 W | floor +1.125 W | w 0.939 pJ  hi 17.158 pJ  t_enc -9.980 pJ  k_chan 3.000 pJ
+   dp_bern-dp_c2 1.501 of 1.636 W (92 %) | arrangement s2-c2 0.788 of 0.996 | period bern-s2 0.712 of 0.640 | zeros-to-random: 3.241 of 3.222 W if the floor counts, 2.116 if it does not
+   residuals W: c1 +0.02 s1 -0.12 c2 -0.13 s2 +0.08 c4 -0.20 s4 +0.19 c2r -0.04 s2r -0.14 random -0.02 bern +0.01 mk0 +0.10 mk128 +0.09 mk256 -0.06 mk384 +0.13 mk512 +0.32 mw128 -0.15 mw384 -0.10 mrandom +0.01
+
+Correlations among the counts across these 18 points:
+             w      k     hi  t_enc  t_raw   half k_chan
+w         1.00  -0.03   0.18   0.12   0.12  -0.09   0.12
+k        -0.03   1.00  -0.14  -0.14  -0.13  -0.09   0.01
+hi        0.18  -0.14   1.00   1.00   0.99  -0.44   0.52
+t_enc     0.12  -0.14   1.00   1.00   1.00  -0.46   0.55
+t_raw     0.12  -0.13   0.99   1.00   1.00  -0.52   0.56
+half     -0.09  -0.09  -0.44  -0.46  -0.52   1.00  -0.35
+k_chan    0.12   0.01   0.52   0.55   0.56  -0.35   1.00
