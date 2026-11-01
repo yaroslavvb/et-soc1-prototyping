@@ -1,0 +1,163 @@
+{
+ "what": "E105 amendment A1, frozen before the claim on aifoundry3 and its first launch: E101's own session 1 tools, with the layout set by E101_GEMM, at 600 MHz",
+ "rate_k": {
+  "fp32": 8.372,
+  "fp16": 16.744,
+  "int8": 33.48
+ },
+ "cells": {
+  "gemmc1.fp32.zeros": {
+   "S_w": 5.2,
+   "c_w": 4.45
+  },
+  "gemmc1.fp32.ones": {
+   "S_w": 16.33,
+   "c_w": 15.38
+  },
+  "gemmc1.fp32.sparse50": {
+   "S_w": 19.17,
+   "c_w": 18.17
+  },
+  "gemmc1.fp32.randn": {
+   "S_w": 39.31,
+   "c_w": 37.94
+  },
+  "gemmc1.fp16.zeros": {
+   "S_w": 4.31,
+   "c_w": 3.63
+  },
+  "gemmc1.fp16.sparse50": {
+   "S_w": 25.13,
+   "c_w": 24.07
+  },
+  "gemmc1.fp16.randn": {
+   "S_w": 36.03,
+   "c_w": 34.77
+  },
+  "gemmc1.int8.zeros": {
+   "S_w": 8.07,
+   "c_w": 7.55
+  },
+  "gemmc1.int8.sparse50": {
+   "S_w": 24.49,
+   "c_w": 23.67
+  },
+  "gemmc1.int8.full": {
+   "S_w": 29.57,
+   "c_w": 28.66
+  },
+  "gemmv1.fp32.zeros": {
+   "S_w": 4.06,
+   "c_w": 3.33
+  },
+  "gemmv1.fp32.ones": {
+   "S_w": 12.42,
+   "c_w": 11.54
+  },
+  "gemmv1.fp32.sparse50": {
+   "S_w": 14.55,
+   "c_w": 13.63
+  },
+  "gemmv1.fp32.randn": {
+   "S_w": 29.65,
+   "c_w": 28.46
+  },
+  "gemmv1.fp16.zeros": {
+   "S_w": 3.38,
+   "c_w": 2.72
+  },
+  "gemmv1.fp16.sparse50": {
+   "S_w": 19.0,
+   "c_w": 18.05
+  },
+  "gemmv1.fp16.randn": {
+   "S_w": 27.17,
+   "c_w": 26.07
+  },
+  "gemmv1.int8.zeros": {
+   "S_w": 6.14,
+   "c_w": 5.66
+  },
+  "gemmv1.int8.sparse50": {
+   "S_w": 18.46,
+   "c_w": 17.75
+  },
+  "gemmv1.int8.full": {
+   "S_w": 22.27,
+   "c_w": 21.49
+  },
+  "gemmc1.fp32.rate": {
+   "rate_600": 9.495
+  },
+  "gemmc1.fp16.rate": {
+   "rate_600": 18.991
+  },
+  "gemmc1.int8.rate": {
+   "rate_600": 71.615
+  },
+  "gemmv1.fp32.rate": {
+   "rate_600": 8.036
+  },
+  "gemmv1.fp16.rate": {
+   "rate_600": 16.018
+  },
+  "gemmv1.int8.rate": {
+   "rate_600": 31.705
+  },
+  "gemmc16.fp32.rate": {
+   "rate_600": 4.538
+  },
+  "gemmc16.fp16.rate": {
+   "rate_600": 9.04
+  },
+  "gemmc16.int8.rate": {
+   "rate_600": 17.961
+  },
+  "gemmv16.fp32.rate": {
+   "rate_600": 3.981
+  },
+  "gemmv16.fp16.rate": {
+   "rate_600": 7.934
+  },
+  "gemmv16.int8.rate": {
+   "rate_600": 15.778
+  },
+  "gemm16.fp32.rate": {
+   "rate_600": 3.376
+  },
+  "gemm16.fp16.rate": {
+   "rate_600": 6.732
+  },
+  "gemm16.int8.rate": {
+   "rate_600": 13.397
+  }
+ },
+ "rules": {
+  "P1_rate": {
+   "text": "the rate at 600 MHz, zeros and random alike, within 5% of frozen for gemmc1, 15% for gemmv1, 25% for the cold gemmc16 and gemmv16. PASS or FAIL per layout and format.",
+   "bands": {
+    "gemmc1": 0.05,
+    "gemmv1": 0.15,
+    "gemmc16": 0.25,
+    "gemmv16": 0.25
+   }
+  },
+  "P2_premium": {
+   "text": "S of random in gemmc1 within 15% of frozen in each format. It tells whether by-column tiles draw what the benchmark draws.",
+   "band": 0.15
+  },
+  "P3_int8_premium": {
+   "text": "int8, S(gemmc1 full) - S(res full), this session, at least 12 W: the +18 W of the benchmark comes back when the tiles fit (E101's port read +0.8 W, the benchmark +17.45 W). Below 6 W it does not. Between, PARTIAL.",
+   "comes_back": 12,
+   "stays_gone": 6
+  },
+  "P4_refusal": {
+   "text": "fp32 by-column random: B_800 + s_800 x c, c from the measured S as E101's relation does. At or above 88 W the a2 rule refused rightly; below it the rule refused a cell it need not have, which is reported.",
+   "limit_w": 88
+  },
+  "P5_zeros": {
+   "text": "zeros / random, watts, gemmc1 within 0.05 of mm16's 0.126 / 0.138 / 0.280 per format. Above that the layout keeps a cost zeros still pay.",
+   "band": 0.05
+  }
+ }
+}
