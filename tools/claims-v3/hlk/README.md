@@ -215,7 +215,7 @@ bash tools/claims-v3/hlk/run_e85.sh reduce build/e85/runs/e85-card-1031
 | `lockin_hlk.py` | the registered analysis: E63's `analyse_block` verbatim, the reference line, the rules |
 | `selftest_hlk.py`, `test_spawn_hlk.py` | the synthetic check of the analysis and rules; the wrapper's test |
 | `run_e85.sh` | stage, check, dry, tiles, go, watch, reduce |
-| `figure_e85.py` | added after the run (no new numbers): the data folder's figure, from `analysis/` only |
+| `figure_e85.py` | added after the run (no new numbers): the data folder's figure, from `analysis/` only; retitled after verification (int8 marked "not detected") |
 
 ## Amendments
 
@@ -226,9 +226,24 @@ None. The session ran as registered.
 Added Sat 31 Oct 2026 after the run; everything is in the data folder,
 [`docs/reports/data/2026-10-31-e85-camera-kinds/`](../../../docs/reports/data/2026-10-31-e85-camera-kinds/README.md).
 One session, 15:54–16:36 PDT, 240 launches, 42.0 card-minutes, `stop_reason done`, the governor read 65 W / 65 °C at
-both ends. **8 of the 9 rules pass in full; R1 fails for int8.** fp32 randn and fp16 randn warm the die's footprint by
-267.6 ± 19.9 and 227.0 ± 13.6 mK at 0.05 Hz, 52.10 ± 3.82 and 50.72 ± 3.21 mK per watt of fundamental, ratios to the
-drift-corrected reference of 0.869 ± 0.118 and 0.923 ± 0.080 (pooled with int8 0.895 ± 0.086), with the reference's
-lag. int8 full read 64.5 ± 28.3 mK, p 0.054, in the session's noisiest shutter block (R1 FAIL); fp32 sparse90 read
-29.4 ± 22.3 mK for its 0.24 W, as expected. Post hoc, 20 more synthetic seeds show the analysis reading R about 4% low
-with SEs 15–30% small (no verdict moves).
+both ends. **8 of the 9 rules pass as registered; R1 fails for int8, so int8's R2, R4 and R9 passes carry no
+information.** fp32 randn and fp16 randn warm the die's footprint by 267.6 ± 19.9 and 227.0 ± 13.6 mK at 0.05 Hz,
+52.10 ± 3.82 and 50.72 ± 3.21 mK per watt of fundamental. Their ratios to the drift-corrected reference are
+0.869 ± 0.118 and 0.923 ± 0.080 (pooled with int8, 0.895 ± 0.086), with the reference's lag. The reference line's own
+slope, −29 ± 29 %/h, does not by itself resolve a drift; against a constant reference, post hoc, the ratios read 0.97
+and 0.95. int8 full read 64.5 ± 28.3 mK, p 0.054, in the session's noisiest shutter block (R1 FAIL, not detected);
+fp32 sparse90 read 29.4 ± 22.3 mK for its 0.24 W, as expected. Post hoc, 20 more synthetic seeds show the analysis
+reading R about 4% low with SEs 15–30% small (no verdict moves).
+
+## Correction after verification (Sat 31 Oct 2026)
+
+The pre-registered sentence "Nothing on the card is set" (Etiquette and safety, above, left as it was frozen) missed
+one write. The runner is E63's `run_hlc.py`, unchanged, and it starts its sampler as
+`ettelem sample --every-ms 100 --reset-ms 1000`. That sends the SP a statistics reset about once a second, and the SP
+passes each one to the PMIC as the PMIC's own statistics reset (0x47; `tools/ettelem/ettelem.cpp`, `resetStats`).
+E85's session sent it 2,205 times. No governor, TDP, threshold, clock, card reset, PCIe, driver or firmware command was
+sent. Whether the reset counts as PMIC work under Q130 is for the orchestrator and the owner to rule. Post hoc, the
+clock excursions cluster just after the resets. The data README's
+[Corrections after verification](../../../docs/reports/data/2026-10-31-e85-camera-kinds/README.md#corrections-after-verification-sat-31-oct-2026)
+covers this (C1, C9) and the other corrections. A later camera run on this tool should drop `--reset-ms`, as `kspeed`
+does, or pre-register it, and should run a ~1 min smoke run under the claim before `go` (C7).

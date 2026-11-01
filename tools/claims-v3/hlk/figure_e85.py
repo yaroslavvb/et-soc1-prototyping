@@ -9,6 +9,10 @@ reference line's transfer at the mid-time (+-1 SE band). Right: each kind's rati
 SE (thick) and its registered tolerance max(3 SE, 0.10) (thin), against the core prediction R = 1.
 Colors: the reference palette's categorical slots 1-4 in fixed order (validated: CVD dE >= 9.1 adjacent, contrast
 relief by direct labels and marker shapes); the reference rung is neutral gray.
+
+Corrected after verification (Sat 31 Oct 2026, no new numbers): the title claimed "each kind", but int8 full was not
+detected (E85-R1 FAIL). The title now names fp32 and fp16; a kind whose R1 failed is drawn with open markers and
+labelled "not detected"; the footnote gives the reference line's slope with its SE (E85 alone does not resolve a drift).
 """
 from __future__ import annotations
 
@@ -38,6 +42,10 @@ def main():
     with open(os.path.join(a.ana, "lockin.json")) as f:
         lk = json.load(f)
     rl = sc["reference_line"]
+    undetected = {k for k, v in sc["rules"].get("E85-R1_seen", {}).items() if v.get("verdict") == "FAIL"}
+
+    def label(bid, name):
+        return name + " (not detected)" if bid in undetected else name
 
     def line_at(t):
         return rl["mag_at_mid"] + rl["slope_mk_per_w_per_s"] * (t - rl["t_mid_s"])
@@ -74,10 +82,11 @@ def main():
             continue
         fac = rl["mag_at_mid"] / x["href_at_t"]
         y, ye, xw = x["camera_roi_mk"] * fac, x["se_camera_roi_mk"] * fac, x["board_fundamental_w"]
-        ax.errorbar(xw, y, yerr=ye, fmt=mk, ms=8.5, color=col, mec="#fcfcfb", mew=1.5, elinewidth=1.6, capsize=0,
-                    zorder=4, label=name)
+        face, edge = ("#fcfcfb", col) if bid in undetected else (col, "#fcfcfb")
+        ax.errorbar(xw, y, yerr=ye, fmt=mk, ms=8.5, color=col, mfc=face, mec=edge, mew=1.5, elinewidth=1.6,
+                    capsize=0, zorder=4, label=label(bid, name))
         off = {"E85-F16": (-78, 8), "E85-SP90": (10, 10)}.get(bid, (10, 4))
-        ax.annotate(name, (xw, y), xytext=off, textcoords="offset points", color=INK, fontsize=9, bbox=dict(boxstyle="round,pad=0.2", fc="#fcfcfb", ec="none", alpha=0.85))
+        ax.annotate(label(bid, name), (xw, y), xytext=off, textcoords="offset points", color=INK, fontsize=9, bbox=dict(boxstyle="round,pad=0.2", fc="#fcfcfb", ec="none", alpha=0.85))
         xmax = max(xmax, xw)
     xs = [0.0, xmax * 1.12]
     g, ge = rl["mag_at_mid"], rl["se_mag_at_mid"]
@@ -88,7 +97,7 @@ def main():
     ax.set_ylim(bottom=min(0, ax.get_ylim()[0]))
     ax.set_xlabel("board power at 0.05 Hz, fundamental (W)")
     ax.set_ylabel("camera at 0.05 Hz, die footprint (mK), drift-corrected")
-    ax.set_title("The camera weighs each kind as the meter does", color=INK, fontsize=11, loc="left")
+    ax.set_title("fp32 and fp16 random data heat the die as the meter says", color=INK, fontsize=11, loc="left")
     ax.legend(frameon=False, fontsize=8.5, loc="upper left", labelcolor=INK)
 
     # ---- right: the ratios
@@ -105,10 +114,11 @@ def main():
                         color=MUTED, fontsize=7.5, rotation=90, va="bottom")
         bx.plot([i, i], [x["ratio_R"] - x["se_R"], x["ratio_R"] + x["se_R"]], color=col, lw=4, solid_capstyle="round",
                 zorder=3)
-        bx.plot([i], [x["ratio_R"]], marker=mk, ms=9, color=col, mec="#fcfcfb", mew=1.5, zorder=4)
+        face, edge = ("#fcfcfb", col) if bid in undetected else (col, "#fcfcfb")
+        bx.plot([i], [x["ratio_R"]], marker=mk, ms=9, color=col, mfc=face, mec=edge, mew=1.5, zorder=4)
         bx.annotate("%.2f ± %.2f" % (x["ratio_R"], x["se_R"]), (i, x["ratio_R"]), xytext=(12, -4),
                     textcoords="offset points", color=INK, fontsize=9, bbox=dict(boxstyle="round,pad=0.2", fc="#fcfcfb", ec="none", alpha=0.85))
-        names.append(name)
+        names.append(name + ("\n(not detected)" if bid in undetected else ""))
         i += 1
     if "E85-R3_pooled" in sc["rules"]:
         p = sc["rules"]["E85-R3_pooled"]
@@ -128,10 +138,15 @@ def main():
     bx.set_xlim(-0.5, len(names) - 0.05)
     bx.set_ylabel("R = kind's mK/W ÷ reference's mK/W")
     bx.set_title("Ratio to the reference (prediction: 1)", color=INK, fontsize=11, loc="left")
-    fig.text(0.01, 0.005, "E85, aifoundry2, 192 minions at 800 MHz, each kind against its own type's zeros at 0.05 Hz. "
+    m = rl["mag_at_mid"]
+    drift = "Drift correction: the registered reference line, %+.0f ± %.0f %%/h (E85 alone resolves no drift)" % (
+        100 * rl["slope_mk_per_w_per_s"] * 3600 / m, 100 * rl["se_slope"] * 3600 / m)
+    fig.text(0.01, 0.034, "E85, aifoundry2, 192 minions at 800 MHz, each kind against its own type's zeros at 0.05 Hz. "
              "Thick bar: ±1 SE; thin: the registered tolerance max(3 SE, 0.10); band: ±10%.",
              color=MUTED, fontsize=8)
-    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    fig.text(0.01, 0.005, "Open markers: not detected (E85-R1 FAIL), so their ratio and lag carry no claim. " + drift + ".",
+             color=MUTED, fontsize=8)
+    fig.tight_layout(rect=(0, 0.06, 1, 1))
     fig.savefig(a.out, dpi=160)
     print("wrote", a.out)
 

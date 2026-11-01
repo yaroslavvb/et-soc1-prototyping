@@ -1,0 +1,79 @@
+E85 corrections after verification: the desk check (Sat 31 Oct 2026). No number in the registered outputs
+changes and no verdict moves; their sha256 (compare with the data commit cf9eba15):
+   95b1dd2e2ffdb41beb1b944389413089def84167eefcbbf71765b16c369479a1  analysis/score.json
+   f191386ab3e3620322c9f6df3eb80c9c8994f2ab97f9a0c14bc4d6537c416854  analysis/lockin.json
+   d862101a483c644b272603e5e12ccb19c0893954dbd19419d85fa80cee38e6bc  analysis/dips.json
+
+C1 (major). THE ONE WRITE: THE SAMPLER'S STATISTICS RESET
+   session/session.json sampler.args: 'sample --every-ms 100 --reset-ms 1000'
+   tools/ettelem/ettelem.cpp:90: // stats reset (0x47); what that does to the running average is untested.
+   tools/ettelem/ettelem.cpp:96: return dm->serviceRequest(0, DM_CMD_SET_STATS_RUN_CONTROL, reinterpret_cast<const char*>(in), sizeof(in), out, 1,
+   session/tel.jsonl.gz: 24247 samples over 2520.5 s; resets seen as a drop in since_reset_ms: 2204, plus the one ettelem sends when it starts; one per 1.144 s
+   end of a reset sample's reads to the next sample: median 121 ms (10-90% 120-121), which holds the reset call; after a sample with no reset: median 78 ms (the sleep to the next 100 ms tick). The next sample's since_reset_ms reads <= 10 ms after 2204 of 2204 resets: the call outlasts the tick.
+   pre/e85-config-start.txt: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519}
+   pre/e85-config-end.txt:   {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519}
+   So no governor, TDP, threshold or clock was set (both reads equal); the statistics reset is the one write.
+   tools/claims-v3/tel/README.md:150: 1. **ettelem `--reset-ms` switches the SP stats trace off. The block switches it back on.**
+   tools/claims-v3/kspeed/README.md:91: restarts the PMIC's running average, which the governor's power loop exits on.
+
+C2 (major). THE CAMERA'S DRIFT: WHAT E85 ALONE SAYS
+   E85-REF1: |H| 59.96 +- 9.38 mK/W at t 300 s
+   E85-REF2: |H| 58.76 +- 7.85 mK/W at t 1381 s
+   E85-REF3: |H| 51.79 +- 3.50 mK/W at t 2341 s
+   registered line: 56.76 +- 4.27 mK/W at mid-time, slope -29.4 +- 28.8 %/h (z -1.02), chi2 0.12/1  [score.json reference_line]
+   a constant (no drift) through the same three: 53.67 +- 3.02 mK/W, chi2 1.16/2
+   E85-F32 against the constant: R 0.971 +- 0.090; registered (the line) 0.869 +- 0.118
+   E85-I8 against the constant: R 0.784 +- 0.362; registered (the line) 0.723 +- 0.338
+   E85-F16 against the constant: R 0.945 +- 0.080; registered (the line) 0.923 +- 0.080
+   pooled against the constant (lockin_hlk.py's pooling): 0.953 +- 0.070; registered 0.895 +- 0.086
+
+C3. INT8: NOT DETECTED, SO ITS OTHER PASSES CARRY NO INFORMATION
+   E85-R1_seen[E85-I8]: {"p": 0.05399730013499325, "snr": 2.2764504886565726, "lag_deg": 109.43614710521683, "verdict": "FAIL"}
+   E85-R2_heat_follows_watts[E85-I8]: {"R": 0.7234852825552867, "se_R": 0.33785857436897143, "tolerance": 1.0135757231069142, "verdict": "PASS"}
+   E85-R4_same_lag[E85-I8]: {"lag_minus_ref_deg": 10.609258816720256, "se": 13.450220633989746, "tolerance": 40.35066190196924, "verdict": "PASS"}
+   E85-R9_absolute[E85-I8]: {"camera_roi_mk": 64.52145458695223, "predicted": 86.1, "band": [55.3, 139.3], "verdict": "PASS"}
+   R2's tolerance 1.014 >= 1.0: an R of 2.0 (|R - 1| = 1.0) would also have passed
+   tools/claims-v3/hlk/README.md:156: SE_R is expected near 0.08 for fp32 and fp16 randn and near 0.13–0.15 for int8 full (its ~86 mK signal): **R2 can
+   measured SE_R 0.338 = 2.3x the registered 0.13-0.15
+
+C4. 'FULL-CARD EQUIVALENTS' ARE A LINEAR x1024/192 SCALING, NOT A FULL-CARD MEASUREMENT
+   E85-F32: 8.316 W x 1024/192 = 44.35 W; E80/E83 p800 difference 48.66 W (-8.9%)
+   E85-F16: 7.466 W x 1024/192 = 39.82 W; E80/E83 p800 difference 42.34 W (-5.9%)
+   E85-I8: 2.450 W x 1024/192 = 13.07 W; E80/E83 p800 difference 14.08 W (-7.2%)
+   E85-SP90: 0.236 W x 1024/192 = 1.26 W; E80/E83 p800 difference 1.46 W (-13.9%)
+
+C5. THE CAMERA-READ WATTS ARE R RESTATED IN WATTS (calibrated on the reference rung's metered watts)
+   E85-F32: camera_read_step_w 7.2184; R x (kind's fundamental) / (references' fundamental per W of step, 0.6182) = 7.2184
+   E85-F16: camera_read_step_w 6.6833; R x (kind's fundamental) / (references' fundamental per W of step, 0.6182) = 6.6833
+   E85-I8: camera_read_step_w 1.7948; R x (kind's fundamental) / (references' fundamental per W of step, 0.6182) = 1.7948
+
+C6. THE FIRMWARE
+   docs/reports/data/2026-10-31-e85-camera-kinds/pre/e85-manifest.txt:6: et_soc1      version=0.20.0 srcversion=47D26A305A0428B29FB7FC4
+   (the manifest and both config reads carry no firmware version)
+   docs/reports/data/2026-10-31-e80-kinds-speed/README.md:284: - aifoundry2 card 0, release 1.4.0 / BL2 0.22.0 (E69's reading).
+   docs/reports/data/2026-10-31-e83-kinds-speed-rest/README.md:256: - aifoundry2 card 0, release 1.4.0 / BL2 0.22.0 (E69's reading); `et-lab-manifest` in `s1/manifest.txt` (kernel module
+
+C7. NO SMOKE RUN: DRY RUN, THEN THE OPERAND CHECK, THEN THE REGISTERED SESSION
+   dry/run.log: 15:45:23 [dry] plan: 5.7 min, 30 launches, 3 blocks [DRY] ... 15:51:04 [dry] stop_reason done, 30 launches, 5.7 min of card time -> exit 0
+   pre/tiles/tile_check.json: 9 sets, one --seconds 0 launch each, wall 1.83 s in all, failures 0
+   session/run.log: 15:54:17 [card] plan: 42.0 min, 240 launches, 7 blocks
+
+C8. SMALL NUMBERS
+   E85-F32: per-lap scatter along the phase, SE x sqrt(laps) 77 mK (weighted, what sets the SE); unweighted sd 103 mK; 15 laps
+   E85-F16: per-lap scatter along the phase, SE x sqrt(laps) 53 mK (weighted, what sets the SE); unweighted sd 95 mK; 15 laps
+   E85-I8: per-lap scatter along the phase, SE x sqrt(laps) 120 mK (weighted, what sets the SE); unweighted sd 115 mK; 18 laps
+   E85-I8 camera_read_step_w 1.79479 -> 1.79
+   session.json caps.max_card_min 44.0; card_s 2521.0 = 42.0 min
+
+C9 (found while fixing C1; post hoc, no verdict). THE CLOCK EXCURSIONS AND THE RESETS
+   dips.json: 29 of 240 launches; 23 late ramps (onset < 2 s), 6 mid-launch idle-reset dips; share of all samples with since_reset_ms 0 or 100: 0.181
+   late ramps: 13 of 47 launches whose 1.5 s check sample came right after a reset (since_reset_ms 0 or 100), against 10 of 193 otherwise; one-sided Fisher exact p 3.5e-05
+   mid-launch dip, launch 15 (E85-REF1, REF23), onset 3.22 s: since_reset_ms 100, the sampler's command took 42 ms (median 22)
+   mid-launch dip, launch 26 (E85-REF1, REF0), onset 3.20 s: since_reset_ms 300, the sampler's command took 59 ms (median 22)
+   mid-launch dip, launch 32 (E85-REF1, REF0), onset 3.21 s: since_reset_ms 900, the sampler's command took 52 ms (median 22)
+   mid-launch dip, launch 62 (E85-F32, F32Z), onset 4.26 s: since_reset_ms 0, the sampler's command took 54 ms (median 22)
+   mid-launch dip, launch 233 (E85-REF3, REF23), onset 7.15 s: since_reset_ms 0, the sampler's command took 134 ms (median 22)
+   mid-launch dip, launch 238 (E85-REF3, REF0), onset 4.17 s: since_reset_ms 100, the sampler's command took 73 ms (median 22)
+   4 of 6 mid-launch dips began right after a reset: P(>= 4 of 6 | 0.181) = 0.012 (the 0-or-100 window was chosen after seeing the data)
+   Reading: suggestive only. A run of the same design without --reset-ms would decide it. The excursions sit
+   in both arms and inside the board power that feeds every H, and R8 (hold) passed in every block.
