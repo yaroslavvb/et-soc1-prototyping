@@ -1,0 +1,221 @@
+{
+ "experiment": "E118",
+ "what": "aifoundry1 card 0's price per flipped B mantissa bit at 600 MHz (static TDP 0) against its own 800 MHz",
+ "card": "aifoundry1 card 0 (PCI 0000:01:00.0, /dev/et0_*)",
+ "telemetry_profile": "no-PMIC-read: sampler and config without GET_ASIC_VOLTAGE / GET_MODULE_VOLTAGE; voltages from sp.minion_mv[0]",
+ "reference": {
+  "e60_card0_800MHz": {
+   "data": "docs/reports/data/2026-10-20-bitflip-ladder/ (aifoundry1-c0, hl/p1-p10)",
+   "v_mean_sp": 0.6038689956331877,
+   "v_mean_die": 0.6038674672489084,
+   "v_sources_differ_mV": 0.0015283842793589741,
+   "runs_kept": 229,
+   "passes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "lq_fJ_per_designed_bit": 102.4903309995042,
+   "lq_fJ_se": 4.417988953553922,
+   "lq_rail_fJ": 91.91482497635052,
+   "lq_h2_h8_secant_fJ": 102.49323483862553,
+   "leak_auto_W_per_C": 0.3273459715639803,
+   "d_p80_W": {
+    "lq_h2": 1.912103317535547,
+    "lq_h8": 5.672445971563981
+   },
+   "note": "only lq_h0/h2/h8 ran on this card at 800 MHz, so the per-designed-bit slope is the h2 -> h8 secant"
+  },
+  "shapes_600MHz": {
+   "bend_full_over_secant": {
+    "e72_aifoundry2": 1.4299689014285557,
+    "e60_aifoundry3": 1.3597866068180735
+   },
+   "lb_over_lq_full": {
+    "e72_aifoundry2": 1.1080109788410728,
+    "e60_aifoundry3": 1.1128271664592342
+   },
+   "turnon_lb_h1_over_lq_h1": {
+    "e72_aifoundry2": 3.052247084351383,
+    "e60_aifoundry3": 3.291368673320127
+   }
+  }
+ },
+ "voltages": {
+  "v800_sp": 0.6038689956331877,
+  "v600_expected": 0.519,
+  "v600_tol": 0.003,
+  "ratio_v2": 0.7386679420417981,
+  "ratio_f_times_v2": 0.5540009565313486,
+  "source": "sp.minion_mv[0] on both sides"
+ },
+ "rules": {
+  "V1": {
+   "claim": "the 600 MHz price per flipped mantissa bit = card 0's own 800 MHz price x (V600/V800)^2: the flip's energy follows the voltage, not the clock (E72's registered form)",
+   "quantity": "lq h2 -> h8 secant, board, fJ per designed flipped bit, registered leak auto",
+   "predicted": 75.706,
+   "band": [
+    68.1357,
+    83.277
+   ],
+   "alternative": 56.78,
+   "alternative_band": [
+    51.1018,
+    62.4577
+   ],
+   "pass_if": "inside the band AND outside the alternative's band; inside both = INCONCLUSIVE"
+  },
+  "V1m": {
+   "claim": "PRIMARY. The same test with both sides reduced at the same leakage slope on fixed pass sets (E72 correction C2)",
+   "slopes_W_per_C": [
+    0.0,
+    0.327346
+   ],
+   "e60_fixed_passes": [
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    9,
+    10
+   ],
+   "e60_matched": {
+    "0.0": {
+     "secant_fJ": 105.06044693993218,
+     "passes": [
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10
+     ],
+     "designed_fJ": 105.06174927594797,
+     "designed_se_fJ": 5.701524374479867
+    },
+    "0.327346": {
+     "secant_fJ": 100.09732096711528,
+     "passes": [
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10
+     ],
+     "designed_fJ": 100.09861994773739,
+     "designed_se_fJ": 5.200767195346095
+    }
+   },
+   "predicted": {
+    "0.0": 77.605,
+    "0.327346": 73.939
+   },
+   "band": {
+    "0.0": [
+     69.8443,
+     85.3653
+    ],
+    "0.327346": [
+     66.5448,
+     81.3326
+    ]
+   },
+   "pass_if": "E118's secant at each registered slope (on E118's passes kept at both) inside that slope's band: PASS at both, PARTIAL at one, FAIL at neither; re-evaluated at the measured V600"
+  },
+  "V2": {
+   "claim": "the same on the minion rail (uncorrected, E72's caveat)",
+   "predicted": 67.895,
+   "band": [
+    57.7104,
+    78.0787
+   ],
+   "pass_if": "inside"
+  },
+  "V3": {
+   "claim": "the watts of a rung scale as f*V^2 (the clock is in the watts)",
+   "predicted_W": {
+    "lq_h2": 1.0593,
+    "lq_h8": 3.1425
+   },
+   "band_frac": 0.1,
+   "pass_if": "both inside +-10% (E72 missed lq_h2 by 12.2%)"
+  },
+  "V4": {
+   "claim": "the ladder bends as on the two cards measured at 600 MHz",
+   "predicted": 1.3949,
+   "band": [
+    1.1949,
+    1.5949
+   ],
+   "quantity": "full h >= 1 slope / h2 -> h8 secant, board",
+   "pass_if": "inside"
+  },
+  "V5": {
+   "claim": "the busy ladder costs more per bit than lq by the two cards' factor",
+   "predicted": 1.1104,
+   "band": [
+    0.9604,
+    1.2604
+   ],
+   "quantity": "lb full slope / lq full slope",
+   "pass_if": "inside"
+  },
+  "V6": {
+   "claim": "the turn-on is dearer with a busy partner",
+   "predicted": 3.172,
+   "band": [
+    1.903,
+    4.441
+   ],
+   "quantity": "lb_h1 / lq_h1 in watts over their zeros",
+   "pass_if": "inside"
+  },
+  "C1": {
+   "claim": "the same-session 800 MHz control agrees with E60's 20 Oct rows on this card",
+   "predicted_W": {
+    "lq_h2": 1.9121,
+    "lq_h8": 5.6724
+   },
+   "band_frac": 0.1,
+   "pass_if": "both d_p80 inside +-10%; else V1 is also reported against today's control, said so"
+  },
+  "G1": {
+   "claim": "the pin: TDP 0 holds the clock at the vmin-LUT floor",
+   "predicted": "600 MHz in 100% of samples of every pinned launch; zero 'Power throttle up' events in the SP ring between the dump before the pin and the dump after the last pinned pass",
+   "pass_if": "both halves; a ring that wrapped between the dumps leaves the log half UNMEASURED (not PASS)"
+  },
+  "G2": {
+   "claim": "the pinned voltage is the LUT's 600 MHz point",
+   "predicted": 0.519,
+   "band": [
+    0.516,
+    0.522
+   ],
+   "quantity": "mean sp.minion_mv[0] of the kept pinned runs",
+   "pass_if": "inside"
+  },
+  "G3": {
+   "claim": "the restore",
+   "predicted": "TDP 65 W and threshold 65 C read back; the return burst reaches >= 700 MHz; >= 1 'Power throttle up' event in the ring between the dump after the pinned passes and the dump after the return burst",
+   "pass_if": "all three halves"
+  },
+  "V1s": {
+   "claim": "REPORTED, NOT SCORED: V1 against today's 800 MHz control instead of E60's rows",
+   "quantity": "E118 600 MHz secant / E118 800 MHz control secant vs (V600/V800_session)^2"
+  }
+ }
+}
