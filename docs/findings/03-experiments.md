@@ -3402,7 +3402,7 @@ left in the waterfall.
 ## E75 — mf: a flip ladder on the memory path (Q129; card runs 2026-10-28, 11:14–11:57 PDT, aifoundry3) — pre-registered
 
 **Asked (Q129):** Q128 §5's **item 5**, first half — no flip ladder had ever been run on a memory path, although a
-DRAM tensor load costs 94–134 pJ per byte against a multiply-add's 5.8 pJ. **Pre-registered** as `2be3f07e` /
+DRAM tensor load costs 94–134 pJ per byte against a multiply-add's 5.8 pJ (the resident loop's; dated note, 1 Nov 2026, E101). **Pre-registered** as `2be3f07e` /
 `547f4ae3` (rules P1–P7, two designed counts per image — changed bits `k` and carried ones `w` — at four levels).
 Data: [`docs/reports/data/2026-10-28-e75-memory-flip-ladder/`](../reports/data/2026-10-28-e75-memory-flip-ladder/README.md)
 (`4fa0bf81`, corrected in `e0f8ecf8` and `1b0391b7`). **Governor untouched**, as E74.
@@ -3530,7 +3530,8 @@ k = 0 / 0.1994 / 0.3803 W/°C — and re-drawing a kind's rule moves its gated f
   duty 0.996–0.997.
 - **Random data over each type's own zeros: 24.725 ± 0.082 / 22.162 ± 0.054 / 7.056 ± 0.059 W** (fp32 / fp16 /
   int8), i.e. **5.816 / 2.625 / 0.306 pJ per multiply-add over idle** (one op is one minion's 16 × 16 TensorFMA:
-  4,096 / 8,192 / 16,384 multiply-adds). Each type's zeros over idle: 1.986 / 1.987 / 2.605 W.
+  4,096 / 8,192 / 16,384 multiply-adds; dated note, 1 Nov 2026: the resident loop's, and a matmul that streams costs more, E101
+  below). Each type's zeros over idle: 1.986 / 1.987 / 2.605 W.
 - **The zero gate shuts a lane whichever side is zero:** one operand all zero costs **0.62–0.81 W in fp32 and
   0.66–0.78 W in fp16** (2.5–3.5% of random) and 0.31–0.50 W in int8. Q130(c)'s registered decider C-R9 selects the
   gate arm (0.616 W against the bus arm's 5.19 W). If all of the residual is the moving operand's bus, a moving B-bus
@@ -3893,7 +3894,9 @@ ends, nothing set, no `--reset-ms`.
 
 **Results** (per pass, real ÷ random of the same format: D over the format's zeros, S over idle, and the whole board).
 - **Real float tiles cost what random data costs:** D 0.983–0.994 (fp32; three-tile mean 0.988 ± 0.010) and 0.971–0.996
-  (fp16; 0.987 ± 0.014); over idle 0.985–0.996 and 0.972–0.997; of the whole board 0.992–0.997 and 0.987–0.998. No real
+  (fp16; 0.987 ± 0.014); over idle 0.985–0.996 and 0.972–0.997; of the whole board 0.992–0.997 and 0.987–0.998. Dated note,
+  1 Nov 2026: that is 97–100% of random data's switching on three GPT-2 tiles, the attention tile's 0.983 ± 0.002 (fp32) and
+  0.971 ± 0.012 (fp16) exclude 1, and E95's thirty tiles fail it as a rule (below). No real
   tile holds a zero word, so nothing is gated. Layer 6's MLP down-projection in fp32 costs 99.4% ± 0.1% of random.
 - **Real int8 saves through small values:** D 0.782–0.888 (0.827 ± 0.050), over idle 0.852–0.920, of the whole board
   0.958–0.977 — 11–22% over int8's zeros, 8–15% over idle and 2.3–4.2% of the board. 1–9% of the values are zero and no
@@ -4355,9 +4358,9 @@ session 02:06:38–03:15:20 PST, 96 of 96 runs, exit 0, **68.7 card-minutes** (7
 65 W / 65 °C at all 100 per-run reads, nothing set, no `--reset-ms`.
 
 **Results** (aifoundry2's card, one night).
-- **The ReLU tiles' lower power buys clock.** Every gated tile held 800 MHz through a 6 s burst, where random fp32 and
+- **The ReLU tiles' lower power buys clock.** The six gating 37–95% held 800 MHz through a 6 s burst, where random fp32 and
   fp16 read 704 and 723 MHz (S2). Held 76 s they ran 677–795 MHz against random's 602 and 609, at or near the 600 MHz
-  floor, one run per tile, about ±16 MHz (S2b).
+  floor, one run per tile, about ±16 MHz (S2b). The one gating 19%, fp32 `resnet18_l2c1`, read 741 and 650 MHz.
 - **Frozen from each tile's bytes,** the seven gated float tiles land to 5.41 MHz rms in the burst, where six of seven
   simply sit at the cap, and 17.65 sustained; the gate law 3.60 and 12.37; "real = random" misses by 81.96 and 140.6.
   Given the power measured in the same session, E83's relation reads 4.75 and 11.61 MHz; its input is measured power,
@@ -4617,8 +4620,9 @@ card-minutes**, 81 of 96 runs recorded. **Status partial:** session 2 ended on i
 Nothing set on either card, no `--reset-ms`.
 
 **Results.**
-- **The data never changes the cycle count at a given clock:** every kind within 0.03% in the streaming arms, 0.41% from
-  DRAM (R9b), and C checked on every process. The count is the arm's: 546 / 546 / 318 in the loop, 529.0 / 529.0 / 280.3
+- **The data barely moves the cycle count at a given clock:** every kind within 0.03% in the streaming arms, 0.41% from
+  DRAM (R9b), and C checked on every process. Dated note, 1 Nov 2026: E105's cold strides read 0.41–0.77% (below), so up to
+  0.8% on walks that read DRAM. The count is the arm's: 546 / 546 / 318 in the loop, 529.0 / 529.0 / 280.3
   in the benchmark, 740 on a minion's mean and about 846 for the slowest in this port, in all three formats, at 600 MHz.
 - **Zeros ÷ random, rate (clock), under aifoundry2's governor.** fp32: the loop ×1.15 (×1.12) burst; this port **×1.03
   (×1.06) burst, ×1.09 (×1.27) sustained**. fp16: the loop ×1.12 (×1.10); this port ×1.01 (×1.03), ×1.06 (×1.18). int8:
@@ -4636,7 +4640,7 @@ Nothing set on either card, no `--reset-ms`.
   the L3; int8 0.306, 0.766, 0.886, 1.454. The port's figure carries its misses and stall time, so it is not a GEMM's
   price.
 - **Zeros' share of random is the arm's:** 0.081 / 0.085 / 0.263 in the loop, 0.126 / 0.138 / 0.280 in the benchmark,
-  0.170 / 0.199 / 0.362 in the port. Zeros save at least 59% in every arm (R7b's worst upper bound 0.409).
+  0.170 / 0.199 / 0.362 in the port. Zeros save at least 59% in the benchmark and the port (R7b, which covers only those two; worst upper bound 0.409), 70–74% on the cold walks in fp32 and fp16 (`gemm16` here, E105's `gemmc16` and `gemmv16`), 54–56% there in int8, and 39% in fp32 from DRAM (`mmp64`, 6.60 against 10.76 W). This said "in every arm" until the kinds page's verifier, 1 Nov 2026.
 - **The memory path's data-dependent power is larger than E75's prices said:** random over zeros 6.78 ± 0.20, 6.33 ±
   0.32, 11.66 ± 0.28 W in the benchmark, against 2.42, 2.38, 5.33 frozen (R5 **FAIL**, by 2.2–2.8×), and a constant
   costs the path 1.74–2.43 W more than zeros (R5b **FAIL**). Post hoc, labelled: about 2.1 nJ per op on zeros and
@@ -4798,7 +4802,7 @@ R8 PASS, S1 PASS; every outcome as expected and frozen. Corrected after verifica
 place the measurement does not show, and the first §5.4 text was false twice (`u_sub`'s operands are not fixed; fp16's
 `u_sub` walks 7 ulps an op).
 **What it changes.** Item 2 narrows and does not close: the named guess comes off the list, tested on silicon in both
-formats on designed tiles with C read back, and the adder alternating is a real cost. It is not most of the step. Kept open: the split is an estimate by subtraction across two cards; fp16 has no held tile with both operands' signs moving; the moving-sum ratio is unresolved (dated note, 1 Nov 2026: E106 ran the first two on one card, below, and reads a bracket by held tile). E92's README (C14–C24) and E88's result 6 are corrected on it. This also answers "no
+formats on designed tiles with C read back, and the adder alternating is a real cost. It is not most of the step: these tiles alternate 3,840 times an op and a random-sign tile about 2,000, so at a random sign's rate E92's budget reads 2.42 W in fp32 and E106's moving price about 1.1 W in fp32 and 1.8 W in fp16 (modelled; dated note, 1 Nov 2026). Kept open: the split is an estimate by subtraction across two cards; fp16 has no held tile with both operands' signs moving; the moving-sum ratio is unresolved (dated note, 1 Nov 2026: E106 ran the first two on one card, below, and reads a bracket by held tile). E92's README (C14–C24) and E88's result 6 are corrected on it. This also answers "no
 card has read C back" in the bench's and E103's READMEs, for these tiles.
 **Report:** no page of its own; the data README is the public record.
 
@@ -4836,8 +4840,9 @@ watts rest on one pass, by column's on two. Nothing set on either card, no `--re
   random ×1.029 (×1.057), ×1.088 (×1.248). Strides: fp32 random ×1.145 (×1.287) sustained. Cold: ×1.002 and ×0.999 in
   the burst, both kinds at 800 MHz, so there was no clock gap to pass. For sustained fp32 random by column the law gives
   ×1.32: expected, not measured.
-- **The kind still never changes the count at a given clock:** T at or above 790 MHz reads 0.6768–0.6783 µs by column
-  across kinds, 1.0222–1.0278 with strides.
+- **The kind still barely moves the count at a given clock:** T at or above 790 MHz reads 0.6768–0.6783 µs by column
+  across kinds, 1.0222–1.0278 with strides. At 600 MHz every arm reads within 0.03% except the cold strides, one pass:
+  0.41%, 0.53% and 0.77% in fp32, fp16 and int8 (1,945.1 against 1,960.1 cycles).
 - **Power at 600 MHz on aifoundry3, S over idle, random.** By column fp32 32.99 W, 7.08 pJ per multiply-add; fp16 30.06
   W, 3.22 pJ; int8 18.23 ± 4.67 W, 0.54 pJ. Strides fp32 26.68 W, 7.60 pJ. Cold by column fp32 15.27 W, 9.46 pJ. At the
   benchmark's rate by column draws less than the benchmark, 33.0 against 36.5 W and 18.2 against 27.4 W, and why is not

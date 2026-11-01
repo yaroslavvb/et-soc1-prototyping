@@ -629,6 +629,8 @@ is loud on one chip and faint on the other. The physics is identical; what diffe
 chip's work depends on the numbers at all. 🛑 And say **"as little as about 148 W of its 240 W, whatever the
 data"** — 147.6 W is the quietest run measured, a **floor**, not a demonstrated data-independent component.
 
+*Dated note, Sun 1 Nov 2026, from the kinds page's verifier: 3–12% is the ET-SoC-1's resident loop, by September's protocol, not the chip. Zeros' watts read 13–14% of random's in the benchmark, 26–30% on the cold walks in fp32 and fp16, 61% in the one fp32 arm from DRAM ([E101](../2026-11-01-e101-real-matmul/README.md), [E105](../2026-11-01-e105-gemm-layout/README.md)). An A100's matmul streams, so this ratio does not separate the chip from the kernel.*
+
 **One ratio, with its basis.** The first pass printed ×13.6 (switching power) and ×21.4 (energy per MAC) as
 two readings of one quantity; they are 57% apart because they are different measurements:
 

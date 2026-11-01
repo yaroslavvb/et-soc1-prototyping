@@ -135,7 +135,8 @@ job (b)'s deduplicated toggle recount (Q126, [`refit_on_recount.json`](../report
 leaves the watts alone and moves only the divisor: one *merged net* on random fp32 data costs **2.37 fJ**, an
 effective 17.7 fF at 0.517 V, against 0.140 fJ for one counted name — and the classes do not scale together
 (the multiplier price rises 38× on a count that falls 25×). Whichever way the wires are counted, the fit puts
-5.4–5.8 pJ on one random fp32 multiply-add. The deduplicated counts fit the 14 measured board powers *worse*
+5.4–5.8 pJ on one random fp32 multiply-add in the resident loop (dated note, Sun 1 Nov 2026: the streaming arms read 7.08–10.09 pJ over
+idle, [05-claims.md](05-claims.md), "Q132"). The deduplicated counts fit the 14 measured board powers *worse*
 (leave-one-out 0.458 → 0.698 W), and the merged count is a floor on the physical one: on Q126(e)'s open
 netlist, 3,299 unique physical nets a multiply-add, the same energy reads **0.95 fJ ≈ 7.1 fF** a wire. Even
 that is an upper bound — the board-power fit carries 3.7–3.8× the energy the netlist's own power analysis puts

@@ -46,7 +46,7 @@ Read [Terms](#terms) first.
 5. **The comparison.** Against an A100 this chip switches a similar capacitance per cycle, but at a third of
    the V² and about half the clock, and clock-gates everything idle (it stops switching but still leaks). It is
    **not** more efficient per FLOP at dense matmul: 7.0 pJ in fp32 and 3.3 pJ in fp16, against 1.28 for the
-   A100 in bf16. Only against the A100's fp32 CUDA-core datasheet figure is it better: about 2.9× on random data,
+   A100 at 16 bits, its format not stated ([R8](01-resources.md)). Only against the A100's fp32 CUDA-core datasheet figure is it better: about 2.9× on random data,
    3.4× on the matmul benchmark's ±1/±2 operands.
    → [13-why-low-power.md](13-why-low-power.md)
 6. **It transfers to another card.** Re-run on aifoundry3 — different silicon, a launch temperature 25 °C
@@ -226,7 +226,7 @@ Read [Terms](#terms) first.
    over-prices** (Q129, 27–28 October, seven card experiments on aifoundry2 and aifoundry3 plus desk work). Routing
    the open netlist, pricing the farads the ledger had left out, measuring the glitch factor and counting one lane's
    transport takes the bottom-up total from **1.946 pJ to 3.966–4.190 pJ** and the remainder from **3.837 pJ to
-   0.718–0.941 pJ** against the board's 5.783 pJ; the minion rail is now **measured at 4.774 pJ** [4.549–4.951]
+   0.718–0.941 pJ** against the board's 5.783 pJ in the resident loop; the minion rail is now **measured at 4.774 pJ** [4.549–4.951]
    rather than scaled. 🛑 **Two closures against the board are published and a summary must say which it means:**
    the bottom-up rows alone are **68.6–72.4%** (against 33.7% on 27 October, the comparison that is like for like),
    and **83.7–87.6%** once the measured board-to-rail step's regulator row is counted — which is a named account,
@@ -246,7 +246,7 @@ Read [Terms](#terms) first.
    kinds of numbers in three formats — zeros, constants, random at three scales, sparse by element and by word, small
    integers, truncated mantissas, powers of two, sign patterns, sorted streams, weight-like distributions — were
    measured at a pinned 600 MHz: random data costs **5.816 / 2.625 / 0.306 pJ per multiply-add over idle** in fp32 /
-   fp16 / int8, every kind runs at the same cycles per op, and a second card ranks the kinds the same way (Spearman
+   fp16 / int8 in the resident loop (a matmul that streams costs more, E101 below), every kind runs at the same cycles per op, and a second card ranks the kinds the same way (Spearman
    0.995–1.000) at about one card scale. One operand all zero costs 2.5–3.5% of random in the floats, a constant about
    a third, a bf16-truncated mantissa 73%, and magnitude nothing; and because the zero gate tests a whole 32-bit word,
    **a zero is worth most in fp32 and least in int8** (half the elements zero: 0.30× / 0.60× / 0.77× of random power).

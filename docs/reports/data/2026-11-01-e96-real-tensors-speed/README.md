@@ -159,7 +159,7 @@ It also feeds item 4 (a real −0.0 tile: the gate stays open, on c), item 6 (th
 
 **What the post may say**, each on aifoundry2 card 0, one night (`results.json`, `corrections-check.txt`):
 
-- On aifoundry2 card 0, one night: gated ReLU-network tiles held the 800 MHz cap through a 6 s burst, where random fp32 and fp16 read 704 and 723 MHz (`rules.E96-S2`).
+- On aifoundry2 card 0, one night: gated ReLU-network tiles held the 800 MHz cap through a 6 s burst, where random fp32 and fp16 read 704 and 723 MHz (`rules.E96-S2`). *(Dated note, Sun 1 Nov 2026, from the kinds page's verifier: this line and the next are the six tiles gating 37–95%. The one gating 19%, fp32 `resnet18_l2c1`, read 741.2 and 650.1 MHz, §2's table.)*
 - On aifoundry2 card 0, one night: held 76 s, they ran 677–795 MHz against random's 602 and 609, which sit at or near the 600 MHz floor; one run per tile, about ±16 MHz (`rules.E96-S2b`, C5).
 - On aifoundry2 card 0, one night: predictions frozen from each tile's bytes landed to about 5 MHz rms in the burst, where six of seven simply sit at the cap, and about 18 MHz sustained, or about 12 with the gate law. Given the power measured in the same session, the relation also lands to about 12. "Real = random" misses by 82 and 141 MHz (C2).
 - On aifoundry2 card 0, one night: GPT-2, BERT and ViT tiles with no exact zeros burst within 15 MHz of random numbers: −3.4 MHz in fp32, +10.2 in fp16 (`rules.E96-S3`).

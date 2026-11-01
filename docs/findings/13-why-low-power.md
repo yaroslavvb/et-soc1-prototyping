@@ -20,9 +20,9 @@ An A100 draws 330–400 W under a matmul. This card draws 38–64 W, and Esperan
   Nothing on these three cards is power-gated: the open RTL's per-minion sleep ports are tied off, no firmware line
   drives them, and no cache level shows a wake-up; whether the taped-out chip could gate its arrays is not
   established ([16](16-dvfs-and-leakage.md)).
-- It does 14 to 28 times fewer FLOPs per second (fp16 or fp32 here, against the A100's bf16).
+- It does 14 to 28 times fewer FLOPs per second (fp16 or fp32 here, against the A100's tensor cores, 16-bit by the A100's peaks, if his TFLOPS count as his script's do; which format is a question for him: [R8](01-resources.md), corrected Sun 1 Nov 2026).
 - It is **not** more efficient per FLOP at dense matmul: 7.0 pJ per FLOP in fp32 and 3.3 pJ in fp16, against the
-  A100's 1.28 in bf16, so the A100's tensor cores are 5.4× and 2.6× better. Only against the A100's fp32 CUDA-core
+  A100's 1.28 at 16 bits, so the A100's tensor cores are 5.4× and 2.6× better. Only against the A100's fp32 CUDA-core
   datasheet figure (19.5 TFLOPS at 400 W) is this card better: about 2.9× on random data and, on the matmul
   benchmark's ±1/±2 operands, 2.8–3.9× by card (3.3× on aifoundry2; [matmul efficiency](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency),
   E37, `docs/reports/data/2026-09-25-claims-v3/results/mmb.json`; 3.4× in its first run on aifoundry2, R4), a comparison
@@ -38,9 +38,9 @@ An A100 draws 330–400 W under a matmul. This card draws 38–64 W, and Esperan
 | | A100 (SXM4) | ET-SoC-1 card | Note |
 |---|---|---|---|
 | Process, transistors, die | 7 nm · 54.2 B · 826 mm² | 7 nm · >24 B · 570 mm² | same process generation |
-| Dense matmul, measured | 257 TFLOPS at 330 W | 9.18 TFLOPS at 63.9 W | A100: R8's pair, random data, a 16-bit format on tensor cores by its utilisation; the post names neither format nor size for the pair (corrected Sun 1 Nov 2026, below). ET: fp32 `TensorFMA`, random data, 80 °C |
-| Board energy per FLOP | **1.28 pJ** (16-bit, format not stated) | **7.0 pJ** (fp32) | the A100's tensor cores are 5.4× better |
-| Board energy per FLOP, 16-bit inputs (fp16 here; on the A100 a 16-bit format the post does not name) | 1.28 pJ | 3.3 pJ (fp16, 61.1 W at 18.4 TFLOPS, E15) | the closest like for like: the A100 is ~2.6× better; bf16 is not fp16 |
+| Dense matmul, measured | 257 TFLOPS at 330 W | 9.18 TFLOPS at 63.9 W | A100: R8's pair, random data, on tensor cores, 16-bit by the A100's peaks, if his TFLOPS count as his script's do; the post names neither format nor size for the pair ([R8](01-resources.md), corrected Sun 1 Nov 2026). ET: fp32 `TensorFMA`, random data, 80 °C |
+| Board energy per FLOP | **1.28 pJ** (16-bit by the peaks, format not stated) | **7.0 pJ** (fp32) | the A100's tensor cores are 5.4× better |
+| Board energy per FLOP, 16-bit inputs (fp16 here; on the A100 16-bit on that reading, in a format the post does not name) | 1.28 pJ | 3.3 pJ (fp16, 61.1 W at 18.4 TFLOPS, E15) | the closest like for like: the A100 is ~2.6× better; if his format is bf16, it is not fp16 |
 | Board energy per FLOP, fp32 by datasheet | 20.5 pJ (19.5 TFLOPS at 400 W, CUDA cores) | 7.0 pJ | this card is ~2.9× better (in the matmul benchmark 2.8–3.9× by card, 3.3× on aifoundry2, E37; 3.4× in its first run, R4) |
 | Idle | 88 W | 26.7 W at 62 °C, 36.3 W at 80 °C | |
 | Power per transistor under load | 6.1 nW | 2.7 nW | |
@@ -96,7 +96,7 @@ cliff, no floor beyond the card's idle.
 
 **Precision is the biggest lever inside the chip.** On random data an int8 multiply-add costs 0.32 pJ over
 idle, fp16 2.70 pJ, fp32 6.02 pJ: a factor of **19** between the type the chip was built for (int8) and fp32 (the A100
-figure here is bf16; this card's fp16 multiply-add costs 2.70 pJ). The int8 unit also runs 6.9× more multiply-adds
+figure here is 16-bit, its format not stated; this card's fp16 multiply-add costs 2.70 pJ). The int8 unit also runs 6.9× more multiply-adds
 per second.
 
 **The two outer operating points differ as CV²f says.** From a cool die the governor runs kernels at 800 MHz /
@@ -130,7 +130,7 @@ The A100 measured by R8 draws 330 W under load and 88 W idle, so ~242 W switches
 1,160–1,410 MHz: 237–288 nF of effective capacitance. This card's fp32 matmul switches 27.6 W at 0.52 V and
 600 MHz: 172 nF.
 
-| Term | A100 (bf16) | ET-SoC-1 (fp32) | Ratio |
+| Term | A100 (16-bit, format not stated) | ET-SoC-1 (fp32) | Ratio |
 |---|---|---|---|
 | Switched capacitance | 237–288 nF | 172 nF | 1.4–1.7× |
 | V² | 0.72 V² | 0.27 V² | 2.7× |
@@ -150,7 +150,7 @@ V², 2.35× from the clock), about 5.2–5.5× at the 1,160–1,230 MHz its capp
 1.4–1.7×, is switching less capacitance per cycle. Against the A100 this chip switches a comparable amount of
 capacitance per cycle, but at a third of the V² and under half the clock, and everything idle is clock-gated to
 nearly no switching power. What it does not have is efficiency per FLOP on dense floating-point matmul: in fp32 it
-switches about nine times more capacitance per FLOP than the A100's bf16 tensor cores (3.9× in fp16), and at
+switches about nine times more capacitance per FLOP than the A100's 16-bit tensor cores (3.9× in fp16), and at
 9 TFLOPS its idle floor is spread over very little work.
 
 On the workload it *was* designed for — int8 with sparse memory access — the arithmetic is 19× cheaper and the
@@ -159,7 +159,7 @@ comparison would be far closer. **That comparison was not run.**
 ## Caveats that matter
 
 - **No A100 was measured.** Every GPU number is from R7 (datasheet) or R8 (one person's measurement of one
-  GPU at a 330 W limit), and R8's run is bf16 on tensor cores, not fp32.
+  GPU at a 330 W limit). R8's run is on tensor cores, 16-bit by the A100's peaks, if his TFLOPS count as his script's do; the post names no format, and which one is a question for him.
 - **The A100's core voltage is an assumption** (0.85 V). Over 0.75–0.95 V the V² ratio runs from 2.1× to 3.3×, so
   at the maximum clock the V²f factor is 4.9–7.9× instead of 6.3× and the capacitance ratio 1.1–1.8× instead of
   1.4×. The 8.8× switching-power ratio is measured (242 W against 27.6 W) and does not move; the capacitance per

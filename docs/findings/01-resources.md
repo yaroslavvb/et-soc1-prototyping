@@ -150,7 +150,8 @@ and 23 W, where it had heated at idle until it dropped off the PCIe bus (out of 
   8192³ bf16 matmul"). The post names no format anywhere and the pair's own snippet has a bare `N`, though the runs
   earlier in the same story are 8192 × 8192 × 8192. A gist he posted the day before, with the post's title and link as
   its description, holds `mm_weird.py`, which multiplies `torch.bfloat16` at 8192³, and 258 TFLOPS at 83% fits the
-  A100's 16-bit peak of 312. Nothing found ties the pair to that script: its recorded runs read zeros/randn ×1.21–1.22
+  A100's 16-bit peak of 312. **So by the A100's peaks (datasheet: TF32 156 TFLOPS dense, FP16 and BF16 312), if his TFLOPS count as his
+  script's do, the pair is 16-bit; which format is a question for him.** Nothing found ties the pair to that script: its recorded runs read zeros/randn ×1.21–1.22
   and the post's chart ×1.22, against the pair's ×1.148, told in a passage that opens "It's 2022". And bf16 is not
   fp16: 8 exponent and 7 mantissa bits against 5 and 10
   ([`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §d).
