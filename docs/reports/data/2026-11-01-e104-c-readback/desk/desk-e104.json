@@ -1,0 +1,1440 @@
+{
+ "_bench": "rtl-sim/fma_toggle_v2 (vpu_top, -fno-dfg)",
+ "part_a": [
+  {
+   "case": "(1,1) x (1,1): both add",
+   "c": "0x58000000",
+   "model": "0x58000000",
+   "rtl": "0x58000000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "(1,1) x (-1,-1): both subtract",
+   "c": "0x58000000",
+   "model": "0x57ffffff",
+   "rtl": "0x57ffffff",
+   "rtl_ulps": -1
+  },
+  {
+   "case": "(1,1) x (lo 1, hi -1): high subtracts",
+   "c": "0x58000000",
+   "model": "0x57ffffff",
+   "rtl": "0x57ffffff",
+   "rtl_ulps": -1
+  },
+  {
+   "case": "(1,1) x (lo -1, hi 1): low subtracts",
+   "c": "0x58000000",
+   "model": "0x57ffffff",
+   "rtl": "0x57ffffff",
+   "rtl_ulps": -1
+  },
+  {
+   "case": "(-0,-0) x (1,1): zero products, both eff_sub set",
+   "c": "0x58000000",
+   "model": "0x58000000",
+   "rtl": "0x58000000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "(-0,-0) x (-1,-1): zero products, both add",
+   "c": "0x58000000",
+   "model": "0x58000000",
+   "rtl": "0x58000000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "(1,1) x (lo 1, hi -1) on a small C: the products cancel",
+   "c": "0x4b000000",
+   "model": "0x4b000000",
+   "rtl": "0x4b000000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "fp32 1 x 1 on 2^100: adds",
+   "c": "0x71800000",
+   "rtl": "0x71800000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "fp32 1 x -1 on 2^100: absorbed subtract, RNE",
+   "c": "0x71800000",
+   "rtl": "0x71800000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "fp32 -0 x 1 on 2^100: zero product, eff_sub set",
+   "c": "0x71800000",
+   "rtl": "0x71800000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "fp32 -0 x -1 on 2^100: zero product, adds",
+   "c": "0x71800000",
+   "rtl": "0x71800000",
+   "rtl_ulps": 0
+  }
+ ],
+ "tiles": {
+  "fp16.c_abs": {
+   "tile": "fp16.c_abs",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1472409728,
+   "real_c08": 1472409728,
+   "fl_c00": 1472409728,
+   "fl_c08": 1472409728
+  },
+  "fp16.c_alt": {
+   "tile": "fp16.c_alt",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    128,
+    128,
+    128,
+    128
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    15,
+    30,
+    45,
+    60
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 128,
+   "real_c00": 1472409728,
+   "real_c08": 3618302961,
+   "fl_c00": 1472409728,
+   "fl_c08": 3619893376
+  },
+  "fp16.c_cancel": {
+   "tile": "fp16.c_cancel",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 0,
+   "real_c08": 0,
+   "fl_c00": 0,
+   "fl_c08": 0
+  },
+  "fp16.h_add": {
+   "tile": "fp16.h_add",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1472409728,
+   "real_c08": 3619893376,
+   "fl_c00": 1472409728,
+   "fl_c08": 3619893376
+  },
+  "fp16.h_allsub": {
+   "tile": "fp16.h_allsub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    256,
+    256,
+    256,
+    256
+   ],
+   "from_fl_ulps_c00": [
+    15,
+    30,
+    45,
+    60
+   ],
+   "from_fl_ulps_c08": [
+    -15,
+    -30,
+    -45,
+    -60
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 256,
+   "real_c00": 3618302961,
+   "real_c08": 1470819313,
+   "fl_c00": 3619893376,
+   "fl_c08": 1472409728
+  },
+  "fp16.h_sub": {
+   "tile": "fp16.h_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    128,
+    128,
+    128,
+    128
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    -15,
+    -30,
+    -45,
+    -60
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 128,
+   "real_c00": 1472409728,
+   "real_c08": 1470819313,
+   "fl_c00": 1472409728,
+   "fl_c08": 1472409728
+  },
+  "fp16.hh_sub": {
+   "tile": "fp16.hh_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    128,
+    128,
+    128,
+    128
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    -15,
+    -30,
+    -45,
+    -60
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 128,
+   "real_c00": 1472409728,
+   "real_c08": 1470819313,
+   "fl_c00": 1472409728,
+   "fl_c08": 1472409728
+  },
+  "fp16.hl_sub": {
+   "tile": "fp16.hl_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    128,
+    128,
+    128,
+    128
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    -15,
+    -30,
+    -45,
+    -60
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 128,
+   "real_c00": 1472409728,
+   "real_c08": 1470819313,
+   "fl_c00": 1472409728,
+   "fl_c08": 1472409728
+  },
+  "fp16.m_h_sub": {
+   "tile": "fp16.m_h_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1262294780,
+   "real_c08": 1254305920,
+   "fl_c00": 1262294780,
+   "fl_c08": 1254305920
+  },
+  "fp16.r_abs": {
+   "tile": "fp16.r_abs",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    256,
+    256,
+    256,
+    256
+   ],
+   "from_fl_ulps_c00": [
+    -15,
+    -30,
+    -45,
+    -60
+   ],
+   "from_fl_ulps_c08": [
+    -15,
+    -30,
+    -45,
+    -60
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 256,
+   "real_c00": 1470819313,
+   "real_c08": 1470819313,
+   "fl_c00": 1472409728,
+   "fl_c08": 1472409728
+  },
+  "fp16.r_cancel": {
+   "tile": "fp16.r_cancel",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 0,
+   "real_c08": 0,
+   "fl_c00": 0,
+   "fl_c08": 0
+  },
+  "fp16.r_walk": {
+   "tile": "fp16.r_walk",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    256,
+    256,
+    256,
+    256
+   ],
+   "from_fl_ulps_c00": [
+    7,
+    14,
+    21,
+    29
+   ],
+   "from_fl_ulps_c08": [
+    11,
+    21,
+    32,
+    42
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 256,
+   "real_c00": 3385308086,
+   "real_c08": 3346950719,
+   "fl_c00": 3386266131,
+   "fl_c08": 3347547829
+  },
+  "fp16.s_abs": {
+   "tile": "fp16.s_abs",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    256,
+    256,
+    256,
+    256
+   ],
+   "from_fl_ulps_c00": [
+    -9,
+    -18,
+    -27,
+    -36
+   ],
+   "from_fl_ulps_c08": [
+    -10,
+    -20,
+    -30,
+    -40
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 256,
+   "real_c00": 1471430785,
+   "real_c08": 1471326427,
+   "fl_c00": 1472409728,
+   "fl_c08": 1472409728
+  },
+  "fp16.signs": {
+   "tile": "fp16.signs",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1234330720,
+   "real_c08": 3368235136,
+   "fl_c00": 1234330720,
+   "fl_c08": 3368235136
+  },
+  "fp16.w_c": {
+   "tile": "fp16.w_c",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1262294780,
+   "real_c08": 1254305920,
+   "fl_c00": 1262294780,
+   "fl_c08": 1254305920
+  },
+  "fp16.w_h_add": {
+   "tile": "fp16.w_h_add",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1262294780,
+   "real_c08": 3401789568,
+   "fl_c00": 1262294780,
+   "fl_c08": 3401789568
+  },
+  "fp16.w_h_sub": {
+   "tile": "fp16.w_h_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1262294780,
+   "real_c08": 1220751488,
+   "fl_c00": 1262294780,
+   "fl_c08": 1220751488
+  },
+  "fp16.x_add": {
+   "tile": "fp16.x_add",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1245917312,
+   "real_c08": 3393400960,
+   "fl_c00": 1245917312,
+   "fl_c08": 3393400960
+  },
+  "fp16.x_sub": {
+   "tile": "fp16.x_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1245917312,
+   "real_c08": 1245917312,
+   "fl_c00": 1245917312,
+   "fl_c08": 1245917312
+  },
+  "fp16.z_add": {
+   "tile": "fp16.z_add",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 3619893376,
+   "real_c08": 1472409728,
+   "fl_c00": 3619893376,
+   "fl_c08": 1472409728
+  },
+  "fp16.z_allsub": {
+   "tile": "fp16.z_allsub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1472409728,
+   "real_c08": 3619893376,
+   "fl_c00": 1472409728,
+   "fl_c08": 3619893376
+  },
+  "fp16.z_hh": {
+   "tile": "fp16.z_hh",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1472409728,
+   "real_c08": 1472409728,
+   "fl_c00": 1472409728,
+   "fl_c08": 1472409728
+  },
+  "fp16.z_hl": {
+   "tile": "fp16.z_hl",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1472409728,
+   "real_c08": 1472409728,
+   "fl_c00": 1472409728,
+   "fl_c08": 1472409728
+  },
+  "fp16.z_sub": {
+   "tile": "fp16.z_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1472409728,
+   "real_c08": 1472409728,
+   "fl_c00": 1472409728,
+   "fl_c08": 1472409728
+  },
+  "fp32.bj_6": {
+   "tile": "fp32.bj_6",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    224,
+    224,
+    224,
+    240
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    -1
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 256,
+   "real_c00": 1251108272,
+   "real_c08": 1251108272,
+   "fl_c00": 1251130497,
+   "fl_c08": 1251130546
+  },
+  "fp32.c_abs": {
+   "tile": "fp32.c_abs",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 2051223680,
+   "real_c08": 2051223680,
+   "fl_c00": 2051223680,
+   "fl_c08": 2051223680
+  },
+  "fp32.c_alt": {
+   "tile": "fp32.c_alt",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 2051223680,
+   "real_c08": 4198707328,
+   "fl_c00": 2051223680,
+   "fl_c08": 4198707328
+  },
+  "fp32.h_add": {
+   "tile": "fp32.h_add",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 2051223680,
+   "real_c08": 4198707328,
+   "fl_c00": 2051223680,
+   "fl_c08": 4198707328
+  },
+  "fp32.h_allsub": {
+   "tile": "fp32.h_allsub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 4198707328,
+   "real_c08": 2051223680,
+   "fl_c00": 4198707328,
+   "fl_c08": 2051223680
+  },
+  "fp32.h_sub": {
+   "tile": "fp32.h_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 2051223680,
+   "real_c08": 2051223680,
+   "fl_c00": 2051223680,
+   "fl_c08": 2051223680
+  },
+  "fp32.m_h_sub": {
+   "tile": "fp32.m_h_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1253906172,
+   "real_c08": 1245917312,
+   "fl_c00": 1253906172,
+   "fl_c08": 1245917312
+  },
+  "fp32.pm_pi": {
+   "tile": "fp32.pm_pi",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    256,
+    256,
+    256,
+    256
+   ],
+   "from_fl_ulps_c00": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "from_fl_ulps_c08": [
+    -1,
+    -2,
+    -3,
+    -4
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 256,
+   "real_c00": 1257343095,
+   "real_c08": 1248821401,
+   "fl_c00": 1257295403,
+   "fl_c08": 1248906795
+  },
+  "fp32.r_abs": {
+   "tile": "fp32.r_abs",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 2051223680,
+   "real_c08": 2051223680,
+   "fl_c00": 2051223680,
+   "fl_c08": 2051223680
+  },
+  "fp32.s_abs": {
+   "tile": "fp32.s_abs",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 2051223680,
+   "real_c08": 2051223680,
+   "fl_c00": 2051223680,
+   "fl_c08": 2051223680
+  },
+  "fp32.signs": {
+   "tile": "fp32.signs",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 3368235136,
+   "real_c08": 0,
+   "fl_c00": 3368235136,
+   "fl_c08": 0
+  },
+  "fp32.w_c": {
+   "tile": "fp32.w_c",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1253906172,
+   "real_c08": 1245917312,
+   "fl_c00": 1253906172,
+   "fl_c08": 1245917312
+  },
+  "fp32.w_h_add": {
+   "tile": "fp32.w_h_add",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1253906172,
+   "real_c08": 3393400960,
+   "fl_c00": 1253906172,
+   "fl_c08": 3393400960
+  },
+  "fp32.w_h_sub": {
+   "tile": "fp32.w_h_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1253906172,
+   "real_c08": 1212362880,
+   "fl_c00": 1253906172,
+   "fl_c08": 1212362880
+  },
+  "fp32.z_add": {
+   "tile": "fp32.z_add",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 4198707328,
+   "real_c08": 2051223680,
+   "fl_c00": 4198707328,
+   "fl_c08": 2051223680
+  },
+  "fp32.z_sub": {
+   "tile": "fp32.z_sub",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 2051223680,
+   "real_c08": 2051223680,
+   "fl_c00": 2051223680,
+   "fl_c08": 2051223680
+  }
+ }
+}

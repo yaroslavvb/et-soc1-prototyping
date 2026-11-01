@@ -1,0 +1,1044 @@
+{
+ "experiment": "E104",
+ "title": "the accumulators read back, and fp16's add/subtract premium on sums that really do or do not move, on aifoundry1 card 1 at 600 MHz",
+ "request": "Q132: the fault lane a1c1-e102-bits found in the lab's tools",
+ "date": "2026-11-01",
+ "registration": "tools/claims-v3/kinds/E104.md",
+ "card": {
+  "name": "aifoundry1-c1",
+  "device": 1,
+  "clock_mhz": 600,
+  "config_gate": {
+   "expected": {
+    "tdp_w": 65,
+    "temp_threshold_c": 65
+   }
+  }
+ },
+ "inputs_frozen": {
+  "counts_e78": {
+   "path": "docs/reports/data/2026-11-01-q132-rtl-bench/counts-v2.json",
+   "sha256": "422bdeac130a12d352f77e2e635eae2592188e7548d8196c9e033f5228986f45"
+  },
+  "counts_e92": {
+   "path": "docs/reports/data/2026-11-01-q132-rtl-bench/counts-e92.json",
+   "sha256": "429e708061c1587b76168b5d9380b7100cb7aafdabb66b36bb3eb8eb81ef7678"
+  },
+  "counts_e104": {
+   "path": "docs/reports/data/2026-11-01-e104-c-readback/desk/counts-e104.json",
+   "sha256": "a7553107fff667bcd03ed3fc1650e89b9803060dfae35ea53235bb970e5697b8"
+  },
+  "counts_e104b": {
+   "path": "docs/reports/data/2026-11-01-e104-c-readback/desk/counts-e104b.json",
+   "sha256": "ea4e30a3abb35332e8a990f127d34bbb41e7c3e468a33370d53e8a38e255535c"
+  },
+  "counts_e104c": {
+   "path": "docs/reports/data/2026-11-01-e104-c-readback/desk/counts-e104c.json",
+   "sha256": "54384b89264eec8f59537e5968228cc9c50386afb9611f410eb228c4e65374ef"
+  },
+  "desk_check": {
+   "path": "docs/reports/data/2026-11-01-e104-c-readback/desk/desk-e104.txt",
+   "sha256": "472a05eb980ff100c1e5da26d5c0d08371490e716e4d2fcb87a1e8e7a30743c7"
+  },
+  "selection_e103": {
+   "path": "tools/claims-v3/kinds/e103/selection.json",
+   "sha256": "dfa66f2c24254db7b6f8dadadccf42766c772e3028bb864fe5fb3bd5e3b91251"
+  }
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337"
+  },
+  "e104_json_sha256": "72b42f2a2f382cbf6b1bd622af23fc0f4e71254d4d7505053a6d4bf6b8dccd3b",
+  "e104_files_sha256": {
+   "tools/claims-v3/kinds/e104_common.py": "cf5565a4eb2d5e50f76a53ecc71d22ad1f15b5abf65da9682eafa3f1b2e9905a",
+   "tools/claims-v3/kinds/run_e104.py": "64f818320e72479cee8de4dd039077cfb60f25f2ded8b3fa15674ab85653fe37",
+   "tools/claims-v3/kinds/block_e104.sh": "bcf9c5606dee07250b60c535a998a972b3368d5d5ccb6a13f699ebea066fb4a4",
+   "tools/claims-v3/kinds/queue_e104.sh": "f398bc6233cb02646e84e47f429fa7bfc41bdb7171b7b9b6d54b72e26ef4cc23",
+   "tools/claims-v3/kinds/run_e104.sh": "0646bd38a5ea182434cb04fb3173355456689573c6e75d905bcf258cb8324a96",
+   "tools/claims-v3/kinds/reduce_e104.py": "f85fa671ec5e6b31eb38d6a7cb418518516438bb99d6dddf2eb6596e88eb1605",
+   "tools/claims-v3/kinds/score_e104.py": "c80f18fc0706cc7e02d7dfd3053035a9d1cc5210af9e868b7152c543d485e203",
+   "tools/claims-v3/kinds/collect_e104.sh": "0f4db239e58b95a7ee18d8dabd75eac96ed3efb6f1df5922fadeced8cdfd59f8",
+   "tools/claims-v3/kinds/readback_e104.py": "b52e7a9bdc0d7f0210955ea51e4365c0fa863dccef15cae64d0e8357feac1ad1",
+   "tools/claims-v3/kinds/block_readback_e104.sh": "1a42036f4e87f498e2a7fcd9a9f0576ac102e2ea8898415ddf6a53ff5886dd7c",
+   "tools/claims-v3/kinds/build_host_e104.sh": "014be46ff36ba5a643b177878eb8faecb8bb6ea1780c7b8eb733547e4a70e1f4",
+   "tools/claims-v3/kinds/patch_host_e104.py": "d9db479776d05096ea5e0b189497abf4751553c0282e81649f1affa460c7e775",
+   "tools/claims-v3/kinds/manual_e104.c": "a17d0aec61668512e1bb4a82c0ef2b6a51f6387a889ba0c713c29eb6ed944433"
+  }
+ },
+ "plan": {
+  "passes": [
+   10410,
+   10411,
+   10412
+  ],
+  "smoke": 10401,
+  "readback": 10402,
+  "runs_per_pass": 40,
+  "items_per_pass": "the tie twice, E78's six anchors three times, E104's 20 tiles once",
+  "reduction_primary": "dips removed, leak 0.2414 (E82's)",
+  "min_kept_passes_scored": 2,
+  "min_tile_passes": 2
+ },
+ "card_budget": {
+  "card_minutes_about": 25,
+  "queue_budget_s": 1300,
+  "first_pass_estimate_s": 420,
+  "queue_deadline": "2026-11-01 07:00 PST",
+  "every_run_ends_by": "07:15 PST"
+ },
+ "model": {
+  "name": "M4",
+  "coef_fJ": {
+   "a_clocked": 1.0660910178957255,
+   "k_bus": 7.533039550355875,
+   "k_core": 1.624383735237168,
+   "k_rest": 2.222188844199022
+  },
+  "card1_scale": 0.9722467829213307,
+  "card1_scale_se": 0.0018618294751800036,
+  "interval_pool": {
+   "n": 88,
+   "rms_w": 0.17561079622126327
+  },
+  "scale_note": "E103's card-1 float scale, E82 dips removed through the origin over E82's float kinds, model M4: the same number carries E92's aifoundry3 watts to card 1 only as an estimate"
+ },
+ "e92_dips_on_aifoundry3_w": {
+  "fp16.h_premium": 6.812,
+  "fp16.c_alt - c_abs": 7.258,
+  "fp16.s_abs - c_abs": 4.587,
+  "fp16.signs - ones": 4.965,
+  "fp32.h_premium": 4.396,
+  "fp32.s_abs - c_abs": 2.52,
+  "fp32.signs - ones": 5.016,
+  "fp32.w_premium": 2.785
+ },
+ "e92_ratio": 1.552,
+ "tiles": {
+  "fp16.c_abs": {
+   "type": "fp16",
+   "kind": "c_abs",
+   "group": "frozen, by E92's reading",
+   "pred": {
+    "M": 8.041986041710304,
+    "lo95": 7.6679524129153,
+    "hi95": 8.416019670505309,
+    "half95": 0.3740336287950044,
+    "launch_points_w": [
+     8.047185586397948,
+     8.033542882722204,
+     8.045229656010763
+    ],
+    "terms_w": [
+     0.0009110187640308173,
+     0.0026925063725517853,
+     0.0633752171588722,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 16098.666666666666,
+   "ff_toggles": 48717.333333333336
+  },
+  "fp16.h_add": {
+   "type": "fp16",
+   "kind": "h_add",
+   "group": "frozen, by E92's reading",
+   "pred": {
+    "M": 8.754893704379114,
+    "lo95": 8.376772955554099,
+    "hi95": 9.13301445320413,
+    "half95": 0.3781207488250151,
+    "launch_points_w": [
+     8.803074164104528,
+     8.670407388016493,
+     8.791199561016318
+    ],
+    "terms_w": [
+     0.0009110187640308173,
+     0.11196886256587303,
+     0.6670065236343602,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 252317.33333333334,
+   "ff_toggles": 138829.33333333334
+  },
+  "fp16.h_sub": {
+   "type": "fp16",
+   "kind": "h_sub",
+   "group": "frozen, by E92's reading",
+   "pred": {
+    "M": 15.74229091386749,
+    "lo95": 14.345290335734706,
+    "hi95": 17.139291492000275,
+    "half95": 1.397000578132784,
+    "launch_points_w": [
+     14.69375906127921,
+     17.01436402084059,
+     15.518749659482669
+    ],
+    "terms_w": [
+     4.358219361033893,
+     0.520269394469389,
+     2.888794858949359,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 3476589.3333333335,
+   "ff_toggles": 1047400.0
+  },
+  "fp16.u_sub": {
+   "type": "fp16",
+   "kind": "u_sub",
+   "group": "halves together",
+   "pred": {
+    "M": 12.472558096208845,
+    "lo95": 12.102051014296938,
+    "hi95": 12.843065178120751,
+    "half95": 0.3705070819119066,
+    "launch_points_w": [
+     12.497812706471995,
+     12.477580377538098,
+     12.44228120461644
+    ],
+    "terms_w": [
+     3.1694767628035043,
+     0.0935043981329671,
+     1.234569635857523,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 2270709.3333333335,
+   "ff_toggles": 453932.0
+  },
+  "fp16.c_alt": {
+   "type": "fp16",
+   "kind": "c_alt",
+   "group": "frozen, by E92's reading",
+   "pred": {
+    "M": 15.758549535987092,
+    "lo95": 14.506187740583586,
+    "hi95": 17.010911331390595,
+    "half95": 1.2523617954035047,
+    "launch_points_w": [
+     14.82573553157743,
+     16.88845500091218,
+     15.561458075471673
+    ],
+    "terms_w": [
+     4.358219361033893,
+     0.48769663445022593,
+     2.9376262410881253,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 3485138.6666666665,
+   "ff_toggles": 1064552.0
+  },
+  "fp16.s_abs": {
+   "type": "fp16",
+   "kind": "s_abs",
+   "group": "frozen, by E92's reading",
+   "pred": {
+    "M": 12.672603505240255,
+    "lo95": 12.290826657254302,
+    "hi95": 13.05438035322621,
+    "half95": 0.3817768479859535,
+    "launch_points_w": [
+     12.558116640231846,
+     12.735402043347117,
+     12.724291832141803
+    ],
+    "terms_w": [
+     2.8049689507210447,
+     0.3517031723406491,
+     1.5409240827637125,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 2081928.6666666667,
+   "ff_toggles": 647674.6666666666
+  },
+  "fp16.z_add": {
+   "type": "fp16",
+   "kind": "z_add",
+   "group": "truly frozen, zero products",
+   "pred": {
+    "M": 8.776911004116206,
+    "lo95": 8.398941918193213,
+    "hi95": 9.1548800900392,
+    "half95": 0.37796908592299266,
+    "launch_points_w": [
+     8.824595712281862,
+     8.692672563533463,
+     8.813464736533291
+    ],
+    "terms_w": [
+     0.009719106917820998,
+     0.1117061790173314,
+     0.6804784187662037,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 254712.66666666666,
+   "ff_toggles": 140077.33333333334
+  },
+  "fp16.z_sub": {
+   "type": "fp16",
+   "kind": "z_sub",
+   "group": "truly frozen, zero products",
+   "pred": {
+    "M": 12.35228351467724,
+    "lo95": 11.977644329827923,
+    "hi95": 12.726922699526556,
+    "half95": 0.3746391848493163,
+    "launch_points_w": [
+     12.314789250755172,
+     12.351592783100683,
+     12.390468510175861
+    ],
+    "terms_w": [
+     3.211076806157927,
+     0.07387974802733557,
+     1.0923196610771266,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 2245806.0,
+   "ff_toggles": 437853.3333333333
+  },
+  "fp16.z_s": {
+   "type": "fp16",
+   "kind": "z_s",
+   "group": "truly frozen, zero products",
+   "pred": {
+    "M": 10.243085498450274,
+    "lo95": 9.867842302003881,
+    "hi95": 10.618328694896666,
+    "half95": 0.3752431964463935,
+    "launch_points_w": [
+     10.225533795852856,
+     10.219427634656514,
+     10.284295064841452
+    ],
+    "terms_w": [
+     1.7104937830835216,
+     0.039780139882274246,
+     0.5178042760696273,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 1160490.6666666667,
+   "ff_toggles": 276843.0
+  },
+  "fp16.w_h_add": {
+   "type": "fp16",
+   "kind": "w_h_add",
+   "group": "moving",
+   "pred": {
+    "M": 13.074168302354565,
+    "lo95": 12.376994523570165,
+    "hi95": 13.771342081138965,
+    "half95": 0.6971737787843999,
+    "launch_points_w": [
+     13.068879597437062,
+     13.592155045427386,
+     12.561470264199244
+    ],
+    "terms_w": [
+     1.8101801232158028,
+     0.5375162112033259,
+     2.751464668520586,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 1976464.0,
+   "ff_toggles": 761669.3333333334
+  },
+  "fp16.m_h_sub": {
+   "type": "fp16",
+   "kind": "m_h_sub",
+   "group": "moving",
+   "pred": {
+    "M": 15.7202234945138,
+    "lo95": 15.162983711477573,
+    "hi95": 16.277463277550027,
+    "half95": 0.5572397830362269,
+    "launch_points_w": [
+     15.588385097870894,
+     16.139169455750213,
+     15.433115929920287
+    ],
+    "terms_w": [
+     4.173192866150577,
+     0.49649379703940694,
+     3.075529531908966,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 3460890.6666666665,
+   "ff_toggles": 1047673.3333333334
+  },
+  "fp32.c_abs": {
+   "type": "fp32",
+   "kind": "c_abs",
+   "group": "frozen, by E92's reading",
+   "pred": {
+    "M": 8.056201863037735,
+    "lo95": 7.682207974471616,
+    "hi95": 8.430195751603854,
+    "half95": 0.37399388856611876,
+    "launch_points_w": [
+     8.056258242465045,
+     8.050330352059731,
+     8.062016994588433
+    ],
+    "terms_w": [
+     0.0006183529678202225,
+     0.003349177770524875,
+     0.06779943933614839,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 15176.0,
+   "ff_toggles": 50773.333333333336
+  },
+  "fp32.h_add": {
+   "type": "fp32",
+   "kind": "h_add",
+   "group": "frozen, by E92's reading",
+   "pred": {
+    "M": 8.85928697868124,
+    "lo95": 8.484400551192996,
+    "hi95": 9.234173406169484,
+    "half95": 0.3748864274882439,
+    "launch_points_w": [
+     8.84281242190201,
+     8.80712884632493,
+     8.927919667816779
+    ],
+    "terms_w": [
+     0.0006183529678202225,
+     0.0747983035417222,
+     0.7994354292084551,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 304642.6666666667,
+   "ff_toggles": 181845.33333333334
+  },
+  "fp32.h_sub": {
+   "type": "fp32",
+   "kind": "h_sub",
+   "group": "frozen, by E92's reading",
+   "pred": {
+    "M": 12.846259577521739,
+    "lo95": 12.26644283343728,
+    "hi95": 13.426076321606198,
+    "half95": 0.5798167440844587,
+    "launch_points_w": [
+     13.042936067252164,
+     13.085631509282193,
+     12.410211156030854
+    ],
+    "terms_w": [
+     3.926876483526469,
+     0.03894240035139708,
+     0.8960058006806302,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 2574909.3333333335,
+   "ff_toggles": 617716.0
+  },
+  "fp32.u_sub": {
+   "type": "fp32",
+   "kind": "u_sub",
+   "group": "halves together",
+   "pred": {
+    "M": 12.386674317302262,
+    "lo95": 11.839526477805048,
+    "hi95": 12.933822156799476,
+    "half95": 0.5471478394972134,
+    "launch_points_w": [
+     12.564401587438365,
+     12.602429916762357,
+     11.993191447706064
+    ],
+    "terms_w": [
+     3.550823474058518,
+     0.03395146877179138,
+     0.8174644815087097,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 2329842.6666666665,
+   "ff_toggles": 563472.0
+  },
+  "fp32.z_add": {
+   "type": "fp32",
+   "kind": "z_add",
+   "group": "truly frozen, zero products",
+   "pred": {
+    "M": 8.872082294486239,
+    "lo95": 8.497221622768482,
+    "hi95": 9.246942966203996,
+    "half95": 0.37486067171775683,
+    "launch_points_w": [
+     8.855253072058662,
+     8.820101494954102,
+     8.940892316445952
+    ],
+    "terms_w": [
+     0.0101532613265748,
+     0.07466696323699575,
+     0.8028271769594254,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 306488.0,
+   "ff_toggles": 182485.33333333334
+  },
+  "fp32.z_sub": {
+   "type": "fp32",
+   "kind": "z_sub",
+   "group": "truly frozen, zero products",
+   "pred": {
+    "M": 11.427211420359999,
+    "lo95": 10.78422478950403,
+    "hi95": 12.070198051215968,
+    "half95": 0.6429866308559694,
+    "launch_points_w": [
+     11.67561904353877,
+     11.703122084898144,
+     10.902893132643081
+    ],
+    "terms_w": [
+     2.699535527184919,
+     0.03894240035139708,
+     0.7042985998604409,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 1797581.3333333333,
+   "ff_toggles": 407272.0
+  },
+  "fp32.z_s": {
+   "type": "fp32",
+   "kind": "z_s",
+   "group": "truly frozen, zero products",
+   "pred": {
+    "M": 10.05729813227646,
+    "lo95": 9.574767628594806,
+    "hi95": 10.539828635958113,
+    "half95": 0.4825305036816535,
+    "launch_points_w": [
+     10.203733766711895,
+     10.21799897786938,
+     9.750161652248103
+    ],
+    "terms_w": [
+     1.598345656656189,
+     0.02503674558848252,
+     0.4494808370685459,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 1070079.0,
+   "ff_toggles": 261566.83333333334
+  },
+  "fp32.w_h_add": {
+   "type": "fp32",
+   "kind": "w_h_add",
+   "group": "moving",
+   "pred": {
+    "M": 12.888950874804447,
+    "lo95": 12.081635733347083,
+    "hi95": 13.696266016261811,
+    "half95": 0.8073151414573648,
+    "launch_points_w": [
+     13.298022526059174,
+     13.200445550771649,
+     12.168384547582518
+    ],
+    "terms_w": [
+     1.7106097620771985,
+     0.5438583118215066,
+     2.6500479079424992,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 1864613.3333333333,
+   "ff_toggles": 819717.3333333334
+  },
+  "fp32.m_h_sub": {
+   "type": "fp32",
+   "kind": "m_h_sub",
+   "group": "moving",
+   "pred": {
+    "M": 14.603911773052697,
+    "lo95": 13.635486644110888,
+    "hi95": 15.572336901994507,
+    "half95": 0.9684251289418108,
+    "launch_points_w": [
+     15.13815766695427,
+     14.969290665909567,
+     13.704286986294262
+    ],
+    "terms_w": [
+     3.5148457158850395,
+     0.4950872786664124,
+     2.609543885538004,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0,
+   "unit_nets_map": 2883058.6666666665,
+   "ff_toggles": 963421.3333333334
+  }
+ },
+ "contrasts": {
+  "fp16.h_premium": {
+   "plus": [
+    "fp16.h_sub"
+   ],
+   "minus": [
+    "fp16.h_add"
+   ],
+   "what": "E92's fp16 add/subtract premium",
+   "M": 6.987397209488376,
+   "half95": 1.442704299940298,
+   "frozen_reading_w": 6.622945085260105
+  },
+  "fp16.u_premium": {
+   "plus": [
+    "fp16.u_sub"
+   ],
+   "minus": [
+    "fp16.h_add"
+   ],
+   "what": "the same with the halves together: the adder swings, the result bus does not",
+   "M": 3.717664391829731,
+   "half95": 0.5103036510533242,
+   "frozen_reading_w": 6.181415412909431
+  },
+  "fp16.z_premium": {
+   "plus": [
+    "fp16.z_sub"
+   ],
+   "minus": [
+    "fp16.z_add"
+   ],
+   "what": "the alternation on zero products: the sum truly holds and the adder's output does not swing",
+   "M": 3.5753725105610332,
+   "half95": 0.512992781912735,
+   "frozen_reading_w": 6.622945085260105
+  },
+  "fp16.h_sub - u_sub": {
+   "plus": [
+    "fp16.h_sub"
+   ],
+   "minus": [
+    "fp16.u_sub"
+   ],
+   "what": "the two halves' swing on the result path, E104-R4",
+   "M": 3.269732817658646,
+   "half95": 1.4401934440810524,
+   "frozen_reading_w": 0.4415296723506736
+  },
+  "fp16.u_premium - z_premium": {
+   "plus": [
+    "fp16.u_sub",
+    "fp16.z_add"
+   ],
+   "minus": [
+    "fp16.h_add",
+    "fp16.z_sub"
+   ],
+   "what": "what an absorbed operand adds over a zero one: the adder's output swinging",
+   "M": 0.14229188126869727,
+   "half95": 0.7104586282683543,
+   "frozen_reading_w": null
+  },
+  "fp16.m_premium": {
+   "plus": [
+    "fp16.m_h_sub"
+   ],
+   "minus": [
+    "fp16.w_h_add"
+   ],
+   "what": "fp16's missing moving-sum pair: same magnitudes, adder alternating or not",
+   "M": 2.646055192159235,
+   "half95": 0.883436403101757,
+   "frozen_reading_w": 4.202361714756527
+  },
+  "fp16.c_alt - c_abs": {
+   "plus": [
+    "fp16.c_alt"
+   ],
+   "minus": [
+    "fp16.c_abs"
+   ],
+   "what": "E92's second fp16 contrast",
+   "M": 7.716563494276788,
+   "half95": 1.3020958545115644,
+   "frozen_reading_w": 7.056567150443018
+  },
+  "fp16.s_abs - c_abs": {
+   "plus": [
+    "fp16.s_abs"
+   ],
+   "minus": [
+    "fp16.c_abs"
+   ],
+   "what": "E92's frozen random signs on fp16: the 92%",
+   "M": 4.630617463529951,
+   "half95": 0.5097547290722592,
+   "frozen_reading_w": 4.459695993260143
+  },
+  "fp16.z_s - c_abs": {
+   "plus": [
+    "fp16.z_s"
+   ],
+   "minus": [
+    "fp16.c_abs"
+   ],
+   "what": "random signs in a sum that truly holds",
+   "M": 2.2010994567399687,
+   "half95": 0.4973299407233996,
+   "frozen_reading_w": 4.459695993260143
+  },
+  "fp16.h_add - c_abs": {
+   "plus": [
+    "fp16.h_add"
+   ],
+   "minus": [
+    "fp16.c_abs"
+   ],
+   "what": "the operand and sum signs alone",
+   "M": 0.7129076626688092,
+   "half95": 0.5030451385174955,
+   "frozen_reading_w": null
+  },
+  "fp16.z_add - c_abs": {
+   "plus": [
+    "fp16.z_add"
+   ],
+   "minus": [
+    "fp16.c_abs"
+   ],
+   "what": "the operand and sum signs on zero products",
+   "M": 0.7349249624059012,
+   "half95": 0.5030787288097984,
+   "frozen_reading_w": null
+  },
+  "fp32.h_premium": {
+   "plus": [
+    "fp32.h_sub"
+   ],
+   "minus": [
+    "fp32.h_add"
+   ],
+   "what": "E92's fp32 premium, where nothing is in dispute",
+   "M": 3.9869725988404983,
+   "half95": 0.6787115585056936,
+   "frozen_reading_w": 4.27399685772217
+  },
+  "fp32.u_premium": {
+   "plus": [
+    "fp32.u_sub"
+   ],
+   "minus": [
+    "fp32.h_add"
+   ],
+   "what": "the same at 14/15 of the alternations",
+   "M": 3.527387338621022,
+   "half95": 0.6501504910668432,
+   "frozen_reading_w": 3.9890637338740254
+  },
+  "fp32.z_premium": {
+   "plus": [
+    "fp32.z_sub"
+   ],
+   "minus": [
+    "fp32.z_add"
+   ],
+   "what": "the alternation on zero products",
+   "M": 2.5551291258737616,
+   "half95": 0.7309013185012841,
+   "frozen_reading_w": 4.27399685772217
+  },
+  "fp32.h_sub - u_sub": {
+   "plus": [
+    "fp32.h_sub"
+   ],
+   "minus": [
+    "fp32.u_sub"
+   ],
+   "what": "the control on R4: both sums hold, only 1/15 of the alternations differ",
+   "M": 0.45958526021947665,
+   "half95": 0.7653402071040921,
+   "frozen_reading_w": 0.2849331238481446
+  },
+  "fp32.u_premium - z_premium": {
+   "plus": [
+    "fp32.u_sub",
+    "fp32.z_add"
+   ],
+   "minus": [
+    "fp32.h_add",
+    "fp32.z_sub"
+   ],
+   "what": "what an absorbed operand adds over a zero one, fp32",
+   "M": 0.9722582127472603,
+   "half95": 0.9610838540418116,
+   "frozen_reading_w": null
+  },
+  "fp32.m_premium": {
+   "plus": [
+    "fp32.m_h_sub"
+   ],
+   "minus": [
+    "fp32.w_h_add"
+   ],
+   "what": "fp32's moving pair with w_h_add's magnitudes",
+   "M": 1.7149608982482516,
+   "half95": 1.2547915851950993,
+   "frozen_reading_w": 2.707707290435906
+  },
+  "fp32.z_s - c_abs": {
+   "plus": [
+    "fp32.z_s"
+   ],
+   "minus": [
+    "fp32.c_abs"
+   ],
+   "what": "random signs on zero products, fp32",
+   "M": 2.001096269238724,
+   "half95": 0.582073660278024,
+   "frozen_reading_w": 2.4500618929617533
+  },
+  "fp32.h_add - c_abs": {
+   "plus": [
+    "fp32.h_add"
+   ],
+   "minus": [
+    "fp32.c_abs"
+   ],
+   "what": "the operand and sum signs alone, fp32",
+   "M": 0.8030851156435042,
+   "half95": 0.5024178111506961,
+   "frozen_reading_w": null
+  }
+ },
+ "session_tie": {
+  "reference": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/posthoc/e82-nodips.json items.<cell>.D.mean (dips removed, as E104's primary)",
+  "cells": {
+   "fp32.randn": {
+    "ref_w": 24.0017,
+    "band_w": 0.5
+   },
+   "fp16.randn": {
+    "ref_w": 21.4901,
+    "band_w": 0.5
+   },
+   "anchor_pi": {
+    "ref_w": 8.1353,
+    "band_w": 0.5
+   },
+   "int8.full": {
+    "ref_w": 6.8392,
+    "band_w": 0.25
+   }
+  }
+ },
+ "rules": {
+  "E104-R1": {
+   "kind": "read",
+   "what": "the accumulators of E92's fp16 'frozen' tiles, read back: every word of every minion against the three readings",
+   "tiles": [
+    "fp16.h_sub",
+    "fp16.c_alt",
+    "fp16.h_allsub",
+    "fp16.hh_sub",
+    "fp16.hl_sub",
+    "fp16.s_abs"
+   ],
+   "verdicts": {
+    "RTL": "every read of all six equals accum.c",
+    "MANUAL": "every read of all six equals the exact sum truncated: h_sub walks, hh_sub and hl_sub hold one word",
+    "FROZEN": "every read of all six equals fl(n S): h_sub holds one word",
+    "NONE": "no reading fits: report the first mismatch and the rate",
+    "UNREAD": "a read is missing or the minions disagree"
+   }
+  },
+  "E104-R2": {
+   "kind": "read",
+   "what": "the controls, where the three readings coincide: the read path itself, and that the new designs do what they were built to. If a gate tile misses, the read-back is broken and R1 and R3 are not scored",
+   "gate_tiles": [
+    "fp16.c_abs",
+    "fp16.h_add",
+    "fp32.c_abs",
+    "fp32.h_add"
+   ],
+   "tiles": [
+    "fp16.c_abs",
+    "fp16.h_add",
+    "fp32.c_abs",
+    "fp32.h_add",
+    "fp16.z_add",
+    "fp16.z_sub",
+    "fp16.z_s",
+    "fp16.z_allsub",
+    "fp16.z_hh",
+    "fp16.z_hl",
+    "fp16.x_add",
+    "fp16.x_sub",
+    "fp16.w_h_add",
+    "fp16.w_h_sub",
+    "fp16.w_c",
+    "fp16.m_h_sub",
+    "fp16.signs",
+    "fp32.h_sub",
+    "fp32.u_sub",
+    "fp32.c_alt",
+    "fp32.h_allsub",
+    "fp32.s_abs",
+    "fp32.r_abs",
+    "fp32.z_add",
+    "fp32.z_sub",
+    "fp32.z_s",
+    "fp32.w_h_add",
+    "fp32.w_h_sub",
+    "fp32.w_c",
+    "fp32.m_h_sub",
+    "fp32.signs"
+   ]
+  },
+  "E104-R3": {
+   "kind": "read",
+   "what": "the fault's other tiles, read back: E88's fp16.r_abs and r_walk, E104's fp16.u_sub (its halves meet each op), and fp32's near-identical bj_6 and pm_pi",
+   "tiles": [
+    "fp16.r_abs",
+    "fp16.r_walk",
+    "fp16.u_sub",
+    "fp32.pm_pi",
+    "fp32.bj_6"
+   ]
+  },
+  "E104-R4": {
+   "kind": "power",
+   "what": "where fp16's h_sub premium goes: h_sub - u_sub, the two halves' swing on the result path, 95% t over passes, with fp32's as the control",
+   "frozen_band_w": 1.0,
+   "M_w": 3.269732817658646,
+   "verdicts": {
+    "FROZEN-READING": "the interval lies inside +-1 W: E92's reading holds",
+    "RESULT-PATH": "the interval lies above +1 W: the moving result pays that much of E92's premium",
+    "INCONCLUSIVE": "else"
+   }
+  },
+  "E104-R5": {
+   "kind": "power",
+   "what": "E92's 1.55x with the halves together: fp16 u premium over fp32 u premium, per pass",
+   "e92_ratio": 1.552,
+   "equal_above": 1.2,
+   "verdicts": {
+    "1.55x HOLDS": "the interval holds 1.552 and lies above 1.2",
+    "1.55x GOES": "the interval lies below 1.552",
+    "INCONCLUSIVE": "else"
+   }
+  },
+  "E104-R6": {
+   "kind": "power",
+   "what": "E92's 1.55x, moving regime: fp16 m premium over fp32 m premium, per pass",
+   "e92_ratio": 1.552,
+   "equal_above": 1.2,
+   "verdicts": {
+    "1.55x HOLDS": "as R5",
+    "1.55x GOES": "as R5",
+    "INCONCLUSIVE": "else"
+   }
+  },
+  "E104-R7": {
+   "kind": "power",
+   "what": "the bench's model on E104's float tiles: rms(D - M4)",
+   "pass_w": 0.6,
+   "fail_w": 1.0
+  },
+  "E104-R8": {
+   "kind": "power",
+   "what": "E92's fp16 watts stand: fp16 h_sub - h_add on this card against E92's dips-removed value carried by 0.9722",
+   "e92_dips_w": 6.812,
+   "scale": 0.9722467829213307,
+   "band_w": 1.0
+  },
+  "E104-S1": {
+   "kind": "power",
+   "what": "the session tie against E82, dips removed: every cell inside its band"
+  }
+ },
+ "not_scored_if": "fewer than 2 kept passes in the primary reduction: every power rule NOT SCORED. The read-back rules need no pass; a gate tile that misses leaves R1 and R3 NOT SCORED."
+}
