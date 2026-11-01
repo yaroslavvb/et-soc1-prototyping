@@ -1,0 +1,157 @@
+A. Runs that did not run, from each pass's marks.jsonl (E78's runner: the launch reading not reached)
+  p10410 fp32.zeros pos 35: start 59.0 C, hot 60.0 C, heats 0, wait 1.4 s
+  p10412 fp16.z_sub pos 7: start 59.0 C, hot 60.0 C, heats 0, wait 1.4 s
+  pass gates: set aside [{'pass': 10410, 'why': ['int8.zeros departs -0.281 W from its straight line']}] kept [10411, 10412] dip samples removed {'p10410': 4, 'p10411': 7, 'p10412': 6}
+B. The contrasts, paired within a pass, t(0.975, n-1)
+  fp16 h_sub - h_add                   primary   6.713 ±  0.219 (n=2) | all three   6.660 ±  0.232 (n=3) | per pass 10:6.554 11:6.731 12:6.696
+  fp16 u_sub - h_add                   primary   3.554 ±  0.288 (n=2) | all three   3.478 ±  0.334 (n=3) | per pass 10:3.325 11:3.532 12:3.577
+  fp16 z_sub - z_add                   primary   3.635 ±    nan (n=1) | all three   3.762 ±  1.618 (n=2) | per pass 10:3.890 11:3.635
+  fp16 h_sub - u_sub                   primary   3.159 ±  0.507 (n=2) | all three   3.183 ±  0.141 (n=3) | per pass 10:3.229 11:3.199 12:3.119
+  fp16 m_h_sub - w_h_add               primary   3.271 ±  1.961 (n=2) | all three   3.253 ±  0.392 (n=3) | per pass 10:3.216 11:3.425 12:3.117
+  fp16 c_alt - c_abs                   primary   7.162 ±  2.280 (n=2) | all three   7.014 ±  0.775 (n=3) | per pass 10:6.719 11:6.982 12:7.341
+  fp16 s_abs - c_abs                   primary   4.374 ±  1.653 (n=2) | all three   4.467 ±  0.515 (n=3) | per pass 10:4.653 11:4.504 12:4.244
+  fp16 z_s - c_abs                     primary   2.153 ±  0.330 (n=2) | all three   2.172 ±  0.103 (n=3) | per pass 10:2.209 11:2.179 12:2.127
+  fp16 s_abs - z_s                     primary   2.220 ±  1.323 (n=2) | all three   2.295 ±  0.412 (n=3) | per pass 10:2.444 11:2.324 12:2.116
+  fp16 h_add - c_abs                   primary   0.450 ±  0.537 (n=2) | all three   0.535 ±  0.380 (n=3) | per pass 10:0.705 11:0.492 12:0.408
+  fp16 z_add - c_abs                   primary   0.628 ±  0.311 (n=2) | all three   0.550 ±  0.341 (n=3) | per pass 10:0.394 11:0.652 12:0.603
+  fp32 h_sub - h_add                   primary   4.006 ±  0.423 (n=2) | all three   3.898 ±  0.472 (n=3) | per pass 10:3.682 11:3.972 12:4.039
+  fp32 u_sub - h_add                   primary   3.757 ±  1.482 (n=2) | all three   3.630 ±  0.618 (n=3) | per pass 10:3.376 11:3.640 12:3.873
+  fp32 z_sub - z_add                   primary   2.603 ±  5.319 (n=2) | all three   2.631 ±  1.047 (n=3) | per pass 10:2.688 11:3.022 12:2.185
+  fp32 h_sub - u_sub                   primary   0.249 ±  1.059 (n=2) | all three   0.268 ±  0.222 (n=3) | per pass 10:0.305 11:0.333 12:0.166
+  fp32 u_sub - z_sub + z_add - h_add   primary   1.153 ±  6.801 (n=2) | all three   0.998 ±  1.487 (n=3) | per pass 10:0.689 11:0.618 12:1.689
+  fp16 u_sub - z_sub + z_add - h_add   primary  -0.103 ±    nan (n=1) | all three  -0.334 ±  2.932 (n=2) | per pass 10:-0.565 11:-0.103
+  fp32 m_h_sub - w_h_add               primary   2.121 ±  2.457 (n=2) | all three   2.099 ±  0.489 (n=3) | per pass 10:2.056 11:1.928 12:2.314
+  fp32 z_s - c_abs                     primary   1.728 ±  0.827 (n=2) | all three   1.663 ±  0.322 (n=3) | per pass 10:1.534 11:1.663 12:1.793
+  fp32 h_add - c_abs                   primary   0.493 ±  0.623 (n=2) | all three   0.525 ±  0.186 (n=3) | per pass 10:0.590 11:0.542 12:0.444
+  fp32 z_add - c_abs                   primary   0.425 ±  1.554 (n=2) | all three   0.463 ±  0.346 (n=3) | per pass 10:0.540 11:0.303 12:0.548
+C. fp16 over fp32, the per-pass ratio, the ratio of the two contrasts' means beside it
+  halves together: u_sub - h_add (R5)      primary    0.947 ±  0.297 (n=2); of means 0.946
+  halves together: u_sub - h_add (R5)      all three  0.960 ±  0.079 (n=3); of means 0.958
+  moving, alike: m_h_sub - w_h_add (R6)    primary    1.562 ±  2.734 (n=2); of means 1.542
+  moving, alike: m_h_sub - w_h_add (R6)    all three  1.563 ±  0.535 (n=3); of means 1.549
+  zero products: z_sub - z_add             primary    1.203 ±    nan (n=1); of means 1.203
+  zero products: z_sub - z_add             all three  1.325 ±  1.553 (n=2); of means 1.318
+  E92's: h_sub - h_add                     primary    1.676 ±  0.232 (n=2); of means 1.676
+  E92's: h_sub - h_add                     all three  1.711 ±  0.156 (n=3); of means 1.709
+  random signs held: z_s - c_abs           primary    1.249 ±  0.789 (n=2); of means 1.246
+  random signs held: z_s - c_abs           all three  1.313 ±  0.315 (n=3); of means 1.306
+D. Per lane alternation, the contrast over (alternations an op x ops a second), in fJ. Rate: each type's own rate in the reduction. An alternation here is a lane-micro-op whose eff_sub differs from the lane's last one (fp16: eff_sub1 and eff_sub2 move together on h_, u_, z_).
+  ops a second (all minions): {'fp32': 1.121, 'fp16': 1.121} x 1e9
+  fp32 h_sub - h_add           3840 a op: primary    931 fJ, all three    905 fJ
+  fp32 u_sub - h_add           3472 a op: primary    965 fJ, all three    933 fJ
+  fp32 z_sub - z_add           3840 a op: primary    605 fJ, all three    611 fJ
+  fp32 m_h_sub - w_h_add       3840 a op: primary    493 fJ, all three    488 fJ
+  fp16 h_sub - h_add           3840 a op: primary   1560 fJ, all three   1547 fJ
+  fp16 u_sub - h_add           3472 a op: primary    913 fJ, all three    894 fJ
+  fp16 z_sub - z_add           3840 a op: primary    844 fJ, all three    874 fJ
+  fp16 m_h_sub - w_h_add       3840 a op: primary    760 fJ, all three    756 fJ
+E. POST HOC. How much of ±1 - +1 remains in a sum that truly holds. ±1 - +1 is E92's dips-removed value on aifoundry3 x 0.9722 (no ±1 tile ran here): fp32 5.016, fp16 4.965 W.
+  fp32 z_s - c_abs over ±1 - +1, primary  : 0.354 ± 0.170 (n=2); the step 4.877 W
+  fp32 z_s - c_abs over ±1 - +1, all three: 0.341 ± 0.066 (n=3); the step 4.877 W
+  fp16 z_s - c_abs over ±1 - +1, primary  : 0.446 ± 0.068 (n=2); the step 4.827 W
+  fp16 z_s - c_abs over ±1 - +1, all three: 0.450 ± 0.021 (n=3); the step 4.827 W
+  beside it, E92's s_abs - c_abs on aifoundry3, dips removed, x 0.9722: fp32 2.450 W, 0.502 of the step (fp32.s_abs reads back held); fp16 4.459 W, 0.924 of the step (fp16.s_abs reads back as 9 words: not a held sum)
+F. The read-back, per tile: which readings every read equals
+  fp16.c_abs     n 2,16,1000,199874,541999                minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 588452f0 C08 588452f0
+  fp16.c_alt     n 2,16,1000,199874,541999                minions 1024 equals manual,rtl | words on the card at the last n: 2 | C00 588452f0 C08 d83b3adf
+  fp16.c_cancel  n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 00000000 C08 00000000
+  fp16.h_add     n 2,16,1000,199874,541999                minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 588452f0 C08 d88452f0
+  fp16.h_allsub  n 2,16,1000,199874,541999                minions 1024 equals manual,rtl | words on the card at the last n: 2 | C00 d83b3adf C08 583b3adf
+  fp16.h_sub     n 2,16,1000,199874,541999                minions 1024 equals manual,rtl | words on the card at the last n: 2 | C00 588452f0 C08 583b3adf
+  fp16.hh_sub    n 2,16,1000,199874,541999                minions 1024 equals rtl | words on the card at the last n: 2 | C00 588452f0 C08 583b3adf
+  fp16.hl_sub    n 2,16,1000,199874,541999                minions 1024 equals rtl | words on the card at the last n: 2 | C00 588452f0 C08 583b3adf
+  fp16.m_h_sub   n 1000,199874,500000                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 4bec82e0 C08 4b742400
+  fp16.r_abs     n 2,16,1000,199874,541999                minions 1024 equals rtl | words on the card at the last n: 1 | C00 583b3adf C08 583b3adf
+  fp16.r_cancel  n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 00000000 C08 00000000
+  fp16.r_walk    n 199874                                 minions 1024 equals rtl | words on the card at the last n: 256 | C00 c9c7b3b6 C08 c77e6a3f
+  fp16.s_abs     n 2,16,1000,199874,541999                minions 1024 equals rtl | words on the card at the last n: 9 | C00 5858649c C08 58535709
+  fp16.signs     n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 15 | C00 49926460 C08 c8c33080
+  fp16.u_sub     n 1000,199874,541999                     minions 1024 equals manual,rtl | words on the card at the last n: 1 | C00 5862b3ed C08 5862b3ed
+  fp16.w_c       n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 4b3d16fc C08 4ac33080
+  fp16.w_h_add   n 1000,199874,500000                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 4bec82e0 C08 cb742400
+  fp16.w_h_sub   n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 4b3d16fc C08 48c33080
+  fp16.x_add     n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 4a433080 C08 ca433080
+  fp16.x_sub     n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 4a433080 C08 4a433080
+  fp16.z_add     n 1000,199874,541999                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 d88452f0 C08 588452f0
+  fp16.z_allsub  n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 57c33080 C08 d7c33080
+  fp16.z_hh      n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 57c33080 C08 57c33080
+  fp16.z_hl      n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 57c33080 C08 57c33080
+  fp16.z_s       n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 57c33080 C08 57c33080
+  fp16.z_sub     n 1000,199874,541999                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 588452f0 C08 588452f0
+  fp32.bj_6      n 199874                                 minions 1024 equals manual,rtl | words on the card at the last n: 8 | C00 4a9265b0 C08 4a9265b0
+  fp32.c_abs     n 1000,199874,541999                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 7b0452f0 C08 7b0452f0
+  fp32.c_alt     n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 7a433080 C08 fa433080
+  fp32.h_add     n 1000,199874,541999                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 7b0452f0 C08 fb0452f0
+  fp32.h_allsub  n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 fa433080 C08 7a433080
+  fp32.h_sub     n 1000,199874,541999                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 7b0452f0 C08 7b0452f0
+  fp32.m_h_sub   n 1000,199874,500000                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 4b6c82e0 C08 4af42400
+  fp32.pm_pi     n 199874                                 minions 1024 equals manual,rtl | words on the card at the last n: 17 | C00 4af18877 C08 4a6f8099
+  fp32.r_abs     n 1000,199874,541999                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 7b0452f0 C08 7b0452f0
+  fp32.s_abs     n 1000,199874,541999                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 7b0452f0 C08 7b0452f0
+  fp32.signs     n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 11 | C00 c8c33080 C08 00000000
+  fp32.u_sub     n 1000,199874,541999                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 7b0452f0 C08 7b0452f0
+  fp32.w_c       n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 4abd16fc C08 4a433080
+  fp32.w_h_add   n 1000,199874,500000                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 4b6c82e0 C08 caf42400
+  fp32.w_h_sub   n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 4abd16fc C08 48433080
+  fp32.z_add     n 1000,199874,541999                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 2 | C00 fb0452f0 C08 7b0452f0
+  fp32.z_s       n 199874                                 minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 7a433080 C08 7a433080
+  fp32.z_sub     n 1000,199874,541999                     minions 1024 equals fl,manual,rtl | words on the card at the last n: 1 | C00 7b0452f0 C08 7b0452f0
+  110 reads; all 1,024 minions on one C in 110; equal rtl 110; equal manual 89; equal frozen 69
+G. POST HOC. fp16.h_sub on the card: C[0][0] and C[0][8], and the deficit of C[0][8] in units of its own last place
+  n       2 C00 4.294967e+09 C08 4.294961e+09 C08/C00 1.00000 deficit           23 ulps of C08's binade
+  n      16 C00 3.435974e+10 C08 3.435941e+10 C08/C00 0.99999 deficit          161 ulps of C08's binade
+  n    1000 C00 2.147484e+12 C08 2.146189e+12 C08/C00 0.99940 deficit         9881 ulps of C08's binade
+  n  199874 C00 4.292261e+14 C08 3.758607e+14 C08/C00 0.87567 deficit      1590415 ulps of C08's binade
+  n  541999 C00 1.163934e+15 C08 8.234461e+14 C08/C00 0.70747 deficit      5073665 ulps of C08's binade
+H. The same contrasts on the minion rail: Drail in each reduction, per pass (the rail has no temperature term in any arm)
+  fp16 h_sub - h_add           primary   5.395 ±  0.221 (n=2) | all three   5.436 ±  0.182 (n=3)
+  fp16 u_sub - h_add           primary   2.862 ±  0.522 (n=2) | all three   2.784 ±  0.353 (n=3)
+  fp16 h_sub - u_sub           primary   2.532 ±  0.301 (n=2) | all three   2.652 ±  0.518 (n=3)
+  fp16 z_sub - z_add           primary   3.184 ±    nan (n=1) | all three   3.184 ±  0.000 (n=2)
+  fp16 m_h_sub - w_h_add       primary   2.465 ±  0.981 (n=2) | all three   2.549 ±  0.407 (n=3)
+  fp16 z_s - c_abs             primary   1.723 ±  2.429 (n=2) | all three   1.714 ±  0.477 (n=3)
+  fp16 s_abs - c_abs           primary   3.768 ±  1.552 (n=2) | all three   3.818 ±  0.372 (n=3)
+  fp32 h_sub - h_add           primary   3.628 ±  2.618 (n=2) | all three   3.533 ±  0.655 (n=3)
+  fp32 u_sub - h_add           primary   2.974 ±  0.215 (n=2) | all three   2.943 ±  0.140 (n=3)
+  fp32 h_sub - u_sub           primary   0.654 ±  2.403 (n=2) | all three   0.590 ±  0.545 (n=3)
+  fp32 z_sub - z_add           primary   2.352 ±  1.916 (n=2) | all three   2.270 ±  0.515 (n=3)
+  fp32 m_h_sub - w_h_add       primary   1.920 ±  3.019 (n=2) | all three   1.906 ±  0.593 (n=3)
+  fp32 z_s - c_abs             primary   1.510 ±  1.124 (n=2) | all three   1.445 ±  0.353 (n=3)
+  ratio fp16/fp32 u_sub - h_add        primary    0.962 ±  0.106 (n=2)
+  ratio fp16/fp32 u_sub - h_add        all three  0.946 ±  0.076 (n=3)
+  ratio fp16/fp32 m_h_sub - w_h_add    primary    1.309 ±  2.568 (n=2)
+  ratio fp16/fp32 m_h_sub - w_h_add    all three  1.355 ±  0.540 (n=3)
+  ratio fp16/fp32 h_sub - h_add        primary    1.491 ±  1.015 (n=2)
+  ratio fp16/fp32 h_sub - h_add        all three  1.544 ±  0.302 (n=3)
+  ratio fp16/fp32 z_s - c_abs          primary    1.153 ±  2.467 (n=2)
+  ratio fp16/fp32 z_s - c_abs          all three  1.198 ±  0.520 (n=3)
+I. M4's frozen contrasts against the primary and the all-three arm: the miss, measured - M4, and whether the measured mean lies inside M4's frozen interval
+  fp16.h_premium                     M4   6.99 ± 1.44 | primary  6.713 miss -0.274 | all three  6.660 miss -0.327 inside True | frozen reading  6.62, the all-three mean off it by +0.037
+  fp16.u_premium                     M4   3.72 ± 0.51 | primary  3.554 miss -0.163 | all three  3.478 miss -0.240 inside True | frozen reading  6.18, the all-three mean off it by -2.704
+  fp16.z_premium                     M4   3.58 ± 0.51 | primary  3.635 miss +0.060 | all three  3.762 miss +0.187 inside True | frozen reading  6.62, the all-three mean off it by -2.861
+  fp16.h_sub - u_sub                 M4   3.27 ± 1.44 | primary  3.159 miss -0.111 | all three  3.183 miss -0.087 inside True | frozen reading  0.44, the all-three mean off it by +2.741
+  fp16.u_premium - z_premium         M4   0.14 ± 0.71 | primary -0.103 miss -0.246 | all three -0.334 miss -0.476 inside True
+  fp16.m_premium                     M4   2.65 ± 0.88 | primary  3.271 miss +0.625 | all three  3.253 miss +0.607 inside True | frozen reading  4.20, the all-three mean off it by -0.950
+  fp16.c_alt - c_abs                 M4   7.72 ± 1.30 | primary  7.162 miss -0.555 | all three  7.014 miss -0.703 inside True | frozen reading  7.06, the all-three mean off it by -0.043
+  fp16.s_abs - c_abs                 M4   4.63 ± 0.51 | primary  4.374 miss -0.257 | all three  4.467 miss -0.164 inside True | frozen reading  4.46, the all-three mean off it by +0.007
+  fp16.z_s - c_abs                   M4   2.20 ± 0.50 | primary  2.153 miss -0.048 | all three  2.172 miss -0.029 inside True | frozen reading  4.46, the all-three mean off it by -2.288
+  fp16.h_add - c_abs                 M4   0.71 ± 0.50 | primary  0.450 miss -0.263 | all three  0.535 miss -0.178 inside True
+  fp16.z_add - c_abs                 M4   0.73 ± 0.50 | primary  0.628 miss -0.107 | all three  0.550 miss -0.185 inside True
+  fp32.h_premium                     M4   3.99 ± 0.68 | primary  4.006 miss +0.019 | all three  3.898 miss -0.089 inside True | frozen reading  4.27, the all-three mean off it by -0.376
+  fp32.u_premium                     M4   3.53 ± 0.65 | primary  3.757 miss +0.229 | all three  3.630 miss +0.102 inside True | frozen reading  3.99, the all-three mean off it by -0.359
+  fp32.z_premium                     M4   2.56 ± 0.73 | primary  2.603 miss +0.048 | all three  2.631 miss +0.076 inside True | frozen reading  4.27, the all-three mean off it by -1.643
+  fp32.h_sub - u_sub                 M4   0.46 ± 0.77 | primary  0.249 miss -0.210 | all three  0.268 miss -0.192 inside True | frozen reading  0.28, the all-three mean off it by -0.017
+  fp32.u_premium - z_premium         M4   0.97 ± 0.96 | primary  1.153 miss +0.181 | all three  0.998 miss +0.026 inside True
+  fp32.m_premium                     M4   1.71 ± 1.25 | primary  2.121 miss +0.406 | all three  2.099 miss +0.384 inside True | frozen reading  2.71, the all-three mean off it by -0.608
+  fp32.z_s - c_abs                   M4   2.00 ± 0.58 | primary  1.728 miss -0.273 | all three  1.663 miss -0.338 inside True | frozen reading  2.45, the all-three mean off it by -0.787
+  fp32.h_add - c_abs                 M4   0.80 ± 0.50 | primary  0.493 miss -0.310 | all three  0.525 miss -0.278 inside True
+J. E88's fp16.r_abs against r_cancel: result-path bits an op on the RTL's arithmetic (e104.json counts_real, at two op indices over a launch), priced at 30 fJ (E92's fp32 moving part) and 51.75 fJ (E88's fp16 price)
+  fp16.r_abs: cbus 248 rbus 248 store 7936 total 8432
+  fp16.r_cancel: cbus 0 rbus 0 store 0 total 0
+  at 1.121e9 ops a second: 0.284 W at 30 fJ, 0.489 W at 51.75 fJ; E88's A16 is 0.388 ± 0.111 W
+K. POST HOC. The result path's price on real sums. Result bits are e104.json's counts_real (C read + result bus + store, RTL's arithmetic, two op indices over a launch; a count on a tile with two words moves with n, so these are rough)
+  fp16 h_sub - u_sub       primary  3.159 ± 0.507 (n=2) | all three  3.183 ± 0.141 (n=3) | result bits   102896 -   11688 =    91208 |   30.9 fJ a bit, all three   31.1
+  fp32 h_sub - u_sub       primary  0.249 ± 1.059 (n=2) | all three  0.268 ± 0.222 (n=3) | result bits      272 -     272 =        0 |    nan fJ a bit, all three    nan
+  fp16 w_h_add - h_add     primary  4.036 ± 3.302 (n=2) | all three  3.987 ± 0.680 (n=3) | result bits   100600 -    8464 =    92136 |   39.1 fJ a bit, all three   38.6
+  fp32 w_h_add - h_add     primary  3.677 ± 0.695 (n=2) | all three  3.763 ± 0.395 (n=3) | result bits   100600 -    8464 =    92136 |   35.6 fJ a bit, all three   36.4
+  fp16's h_sub - u_sub less fp32's, the 1/15 of the alternations taken out: primary 2.910 ± 0.552 (n=2) | all three 2.915 ± 0.110 (n=3) | over 91208 bits: 28.5 fJ a bit, all three 28.5; E92's fp32 moving part read 29.7-30.0 fJ
