@@ -1,0 +1,3061 @@
+{
+ "experiment": "E92",
+ "title": "where a random sign's cost goes (aifoundry3 card 0, 600 MHz)",
+ "request": "Q132, item 2 of the kinds page's section 11",
+ "date": "2026-11-01",
+ "registration": "tools/claims-v3/kinds/E92.md",
+ "card": "aifoundry3 card 0",
+ "inputs_frozen": {
+  "e78_reduction": {
+   "path": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json",
+   "sha256": "b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5"
+  },
+  "e82_reduction": {
+   "path": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json",
+   "sha256": "4794f5ac4ccfde95f45535aa855fa06c8d85b7d7716c9b63bd508ded1ade8601"
+  },
+  "e88_scored": {
+   "path": "docs/reports/data/2026-10-31-e88-result-path/scored.json",
+   "sha256": "6296cfe99830ac18880677f3766805b51d783906ec641b6e08d7e2854d406b07"
+  },
+  "e88_fit": {
+   "path": "tools/claims-v3/rpath/e88.json",
+   "sha256": "59a7b0efbc2cc0d936dbf725c386eda2fdb88f64d9523925a21f9f0ee9e3ca42"
+  },
+  "e90_reduction": {
+   "path": "docs/reports/data/2026-10-31-e90-signs-spread/e90.json",
+   "sha256": "7a8b03cd3b8b5c1bbe1cf427732172a883a355cdc1660011d92826a515c847df"
+  },
+  "e90_scored": {
+   "path": "docs/reports/data/2026-10-31-e90-signs-spread/scored.json",
+   "sha256": "bdb7dce20042bd7bfb12260490c1e91e95edebf2a0c92318564de8634a79600c"
+  },
+  "e65_hl": {
+   "path": "docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/hl.json",
+   "sha256": "b4ad71eaef92233e815a6f721a9f396e3ee27aeab1a73cf58cd89f6149b12130"
+  },
+  "e67_hl": {
+   "path": "docs/reports/data/2026-10-27-e67-a-side-bit-prices/hl.json",
+   "sha256": "d6dbdc0ecca301510206a3609321ea66f7a7756a45682616d7a31f85650323e9"
+  },
+  "e79_readme": {
+   "path": "docs/reports/data/2026-10-31-e79-fp16-int8-bit-prices/README.md",
+   "sha256": "833b495db2fa1f8b7cb9e17c122c9f543555ff1ccd08787f24d1d1fb34676df4"
+  },
+  "make_real": {
+   "path": "tools/claims-v3/kinds/real/make_real.py",
+   "sha256": "01e1dbe89f8f44a092db9777a3e699732d5e85a9288925015429e2983b3cb562"
+  },
+  "e92_json": {
+   "path": "tools/claims-v3/kinds/e92/e92.json",
+   "sha256": "be979e0a9b128435a5ae374684f9bb34937cc059652f6b2d94bc016ff4dc4ea5"
+  }
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337"
+  },
+  "e92_files_sha256": {
+   "tools/claims-v3/kinds/e92_common.py": "4099006de56a8bc4500fb19a5ff1a42d87ceb03c3175520729cccc6b979cb9fd",
+   "tools/claims-v3/kinds/run_e92.py": "65e92c7515d3e01c561dc1ee9c7e7bb22693d4f5644e7e4b30fe32c6c2e00289",
+   "tools/claims-v3/kinds/reduce_e92.py": "f0de51a975503c8f351060c2f2892dfac7b22b3041b06d754bf9972708a14ea4",
+   "tools/claims-v3/kinds/block_e92.sh": "517f7f8a67d3cd7ddd69ac20ec41242bf7e29c6e956c31bde078ce86aefc821b",
+   "tools/claims-v3/kinds/queue_e92.sh": "360ba7d2e35044b020511d9480d4e35abd5afb87e68ae83eb892f467d57bda24",
+   "tools/claims-v3/kinds/run_e92.sh": "8289eecdbea5c74435ef78e2a7dd4e8e13423386bfbc969dcc997db42d18edb1",
+   "tools/claims-v3/kinds/make_e92.py": "e4e64d32b8bcd2b031472e8f18f2f552fdc7af22f49b1b56664b01bfae711705"
+  },
+  "e92_json_sha256": "be979e0a9b128435a5ae374684f9bb34937cc059652f6b2d94bc016ff4dc4ea5"
+ },
+ "plan": {
+  "passes": [
+   9210,
+   9211,
+   9212,
+   9213
+  ],
+  "smoke": 9201,
+  "runs_per_pass": 54,
+  "min_passes": 3,
+  "items_per_pass": "the tie twice, E78's six anchors three times, E92's 32 tiles and fp32.ones, fp16.ones once"
+ },
+ "card_budget": {
+  "card_minutes_max": 45,
+  "queue_budget_min": 41,
+  "queue_deadline": "2026-11-01 06:45 PST",
+  "every_run_ends_by": "07:15 PST"
+ },
+ "models": {
+  "sign_bit_prices_w": {
+   "fp32": {
+    "B": 0.5628524509803882,
+    "A": 0.560740259740261
+   },
+   "fp16": {
+    "B": 0.313,
+    "A": 0.327
+   }
+  },
+  "sign_bit_price_sources": {
+   "fp32.B": "docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/hl.json cards.aifoundry3.items.bit_31.d_p80",
+   "fp32.A": "docs/reports/data/2026-10-27-e67-a-side-bit-prices/hl.json cards.aifoundry3.items.abit_31.d_p80",
+   "fp16.B": "docs/reports/data/2026-10-31-e79-fp16-int8-bit-prices/README.md table '### fp16, B side (A = 1.0), jg layout' row 15 (a bound)",
+   "fp16.A": "docs/reports/data/2026-10-31-e79-fp16-int8-bit-prices/README.md table '### fp16, A side (B = 1.0)' row 15"
+  },
+  "item_flips": {
+   "fp32": {
+    "B": 4096,
+    "A": 2048
+   },
+   "fp16": {
+    "B": 8192,
+    "A": 4096
+   }
+  },
+  "card_scale": {
+   "fp32": 1.0308,
+   "fp16": 1.0336
+  },
+  "card_scale_source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.<t>.randn.D.mean over docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.<t>.randn.D.mean",
+  "M32s_w": 2.524,
+  "R32s_w": 2.2592,
+  "M32s_source": "docs/reports/data/2026-10-31-e88-result-path/scored.json primary.contrasts.M32s.D.mean",
+  "P_bits_s_abs_w": 0.569,
+  "N_alt_s_abs": 2080.0,
+  "p_alt_w_per_alternation_per_op": 0.0009398936828241158,
+  "p_alt_fj_per_alternation": 835.3,
+  "ratio_fp16_over_fp32_beyond_bits": 1.079,
+  "alt_pred_h_sub_w": {
+   "fp32": 3.72,
+   "fp16": 4.025
+  },
+  "e88_d_s_abs_minus_c_abs_w": 0.242,
+  "f_w_per_flop_bit_per_op": 7.514796787483008e-06,
+  "f_fj_per_flop_bit": 6.68,
+  "linear_band_w": {
+   "fp32": 0.744,
+   "fp16": 0.805
+  }
+ },
+ "contrasts": {
+  "fp32.h_add-c_abs": {
+   "hi": "fp32.h_add",
+   "lo": "fp32.c_abs",
+   "rule": "E92-R1",
+   "what": "the sign bits: every B, product and C sign moves, the adder always adds",
+   "bits_w": 0.5629,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 0.808,
+    "lo": -0.446,
+    "hi": 2.063
+   },
+   "e88_flops_w": 0.833,
+   "dN_alt": 0.0,
+   "dflops": 0.0,
+   "threshold_w": 1.1258
+  },
+  "fp16.h_add-c_abs": {
+   "hi": "fp16.h_add",
+   "lo": "fp16.c_abs",
+   "rule": "E92-R1",
+   "what": "the same in fp16",
+   "bits_w": 0.313,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 1.021,
+    "lo": -0.177,
+    "hi": 2.219
+   },
+   "e88_flops_w": 1.055,
+   "dN_alt": 0.0,
+   "dflops": 0.0,
+   "threshold_w": 0.626
+  },
+  "fp32.h_sub-h_add": {
+   "hi": "fp32.h_sub",
+   "lo": "fp32.h_add",
+   "rule": "E92-R2",
+   "what": "the same operands: alternate add, subtract, against always add",
+   "bits_w": -0.0352,
+   "alt_w": 3.72,
+   "e88": {
+    "mu": -0.406,
+    "lo": -1.662,
+    "hi": 0.849
+   },
+   "e88_flops_w": 3.924,
+   "dN_alt": 3840.0,
+   "dflops": 560592.0,
+   "pred_w": 3.72
+  },
+  "fp16.h_sub-h_add": {
+   "hi": "fp16.h_sub",
+   "lo": "fp16.h_add",
+   "rule": "E92-R2",
+   "what": "the same in fp16",
+   "bits_w": -0.0196,
+   "alt_w": 4.025,
+   "e88": {
+    "mu": -0.511,
+    "lo": -1.71,
+    "hi": 0.688
+   },
+   "e88_flops_w": 3.669,
+   "dN_alt": 7680.0,
+   "dflops": 540424.0,
+   "pred_w": 4.025
+  },
+  "fp32.c_alt-c_abs": {
+   "hi": "fp32.c_alt",
+   "lo": "fp32.c_abs",
+   "rule": "E92-R2",
+   "what": "no operand or product sign moves at k >= 1: only the sign the sum holds, so the adder alternates",
+   "bits_w": 0.0352,
+   "alt_w": 3.72,
+   "e88": {
+    "mu": 0.406,
+    "lo": -0.849,
+    "hi": 1.662
+   },
+   "e88_flops_w": 4.761,
+   "dN_alt": 3840.0,
+   "dflops": 560592.0,
+   "pred_w": 3.72
+  },
+  "fp16.c_alt-c_abs": {
+   "hi": "fp16.c_alt",
+   "lo": "fp16.c_abs",
+   "rule": "E92-R2",
+   "what": "the same in fp16",
+   "bits_w": 0.0196,
+   "alt_w": 4.025,
+   "e88": {
+    "mu": 0.511,
+    "lo": -0.688,
+    "hi": 1.71
+   },
+   "e88_flops_w": 4.726,
+   "dN_alt": 7680.0,
+   "dflops": 540424.0,
+   "pred_w": 4.025
+  },
+  "fp32.h_allsub-h_add": {
+   "hi": "fp32.h_allsub",
+   "lo": "fp32.h_add",
+   "rule": "E92-R3",
+   "what": "the same operands: always subtract, against always add",
+   "bits_w": -0.0022,
+   "alt_w": 0.016,
+   "e88": {
+    "mu": -0.002,
+    "lo": -1.255,
+    "hi": 1.252
+   },
+   "e88_flops_w": 0.016,
+   "dN_alt": 16.0,
+   "dflops": 2272.0,
+   "band_w": 0.5
+  },
+  "fp16.h_allsub-h_add": {
+   "hi": "fp16.h_allsub",
+   "lo": "fp16.h_add",
+   "rule": "E92-R3",
+   "what": "the same in fp16",
+   "bits_w": -0.0012,
+   "alt_w": 0.017,
+   "e88": {
+    "mu": -0.002,
+    "lo": -1.199,
+    "hi": 1.194
+   },
+   "e88_flops_w": 0.014,
+   "dN_alt": 32.0,
+   "dflops": 2148.0,
+   "band_w": 0.5
+  },
+  "fp32.c_neg-c_abs": {
+   "hi": "fp32.c_neg",
+   "lo": "fp32.c_abs",
+   "rule": "E92-R3",
+   "what": "nothing moves at k >= 1: always subtract, against always add",
+   "bits_w": 0.0022,
+   "alt_w": 0.016,
+   "e88": {
+    "mu": 0.002,
+    "lo": -1.252,
+    "hi": 1.255
+   },
+   "e88_flops_w": 0.019,
+   "dN_alt": 16.0,
+   "dflops": 2272.0,
+   "band_w": 0.5
+  },
+  "fp32.i_sub-i_add": {
+   "hi": "fp32.i_sub",
+   "lo": "fp32.i_add",
+   "rule": "E92-R4",
+   "what": "the A-side twin: alternation every two micro-ops",
+   "bits_w": -0.035,
+   "alt_w": 1.86,
+   "e88": {
+    "mu": -0.203,
+    "lo": -1.457,
+    "hi": 1.051
+   },
+   "e88_flops_w": 1.962,
+   "dN_alt": 1920.0,
+   "dflops": 280272.0
+  },
+  "fp32.h_sub2-c_abs": {
+   "hi": "fp32.h_sub2",
+   "lo": "fp32.c_abs",
+   "rule": "E92-R5",
+   "what": "2 of 8 lanes alternate",
+   "bits_w": 0.1319,
+   "alt_w": 0.93,
+   "e88": {
+    "mu": 0.1,
+    "lo": -1.153,
+    "hi": 1.354
+   },
+   "e88_flops_w": 1.189,
+   "dN_alt": 960.0,
+   "dflops": 140148.0
+  },
+  "fp32.h_sub4-c_abs": {
+   "hi": "fp32.h_sub4",
+   "lo": "fp32.c_abs",
+   "rule": "E92-R5",
+   "what": "4 of 8 lanes alternate",
+   "bits_w": 0.2638,
+   "alt_w": 1.86,
+   "e88": {
+    "mu": 0.201,
+    "lo": -1.053,
+    "hi": 1.455
+   },
+   "e88_flops_w": 2.378,
+   "dN_alt": 1920.0,
+   "dflops": 280296.0
+  },
+  "fp32.h_sub6-c_abs": {
+   "hi": "fp32.h_sub6",
+   "lo": "fp32.c_abs",
+   "rule": "E92-R5",
+   "what": "6 of 8 lanes alternate",
+   "bits_w": 0.3958,
+   "alt_w": 2.79,
+   "e88": {
+    "mu": 0.301,
+    "lo": -0.952,
+    "hi": 1.555
+   },
+   "e88_flops_w": 3.567,
+   "dN_alt": 2880.0,
+   "dflops": 420444.0
+  },
+  "fp32.h_sub-c_abs": {
+   "hi": "fp32.h_sub",
+   "lo": "fp32.c_abs",
+   "rule": "E92-R5",
+   "what": "8 of 8 lanes alternate",
+   "bits_w": 0.5277,
+   "alt_w": 3.72,
+   "e88": {
+    "mu": 0.402,
+    "lo": -0.852,
+    "hi": 1.656
+   },
+   "e88_flops_w": 4.757,
+   "dN_alt": 3840.0,
+   "dflops": 560592.0
+  },
+  "fp32.s_abs-c_abs": {
+   "hi": "fp32.s_abs",
+   "lo": "fp32.c_abs",
+   "rule": "E92-R6",
+   "what": "random signs, frozen: E88's M32s on this card",
+   "bits_w": 0.569,
+   "alt_w": 2.015,
+   "e88": {
+    "mu": 0.242,
+    "lo": -1.012,
+    "hi": 1.496
+   },
+   "e88_flops_w": 2.602,
+   "dN_alt": 2080.0,
+   "dflops": 303668.0
+  },
+  "fp16.s_abs-c_abs": {
+   "hi": "fp16.s_abs",
+   "lo": "fp16.c_abs",
+   "rule": "E92-R6",
+   "what": "random signs, frozen, in fp16",
+   "bits_w": 0.2973,
+   "alt_w": 2.002,
+   "e88": {
+    "mu": 0.306,
+    "lo": -0.892,
+    "hi": 1.504
+   },
+   "e88_flops_w": 2.739,
+   "dN_alt": 3820.0,
+   "dflops": 311953.0
+  },
+  "fp16.h_sub-c_abs": {
+   "hi": "fp16.h_sub",
+   "lo": "fp16.c_abs",
+   "rule": "E92-R6",
+   "what": "both products alternate",
+   "bits_w": 0.2934,
+   "alt_w": 4.025,
+   "e88": {
+    "mu": 0.51,
+    "lo": -0.69,
+    "hi": 1.71
+   },
+   "e88_flops_w": 4.725,
+   "dN_alt": 7680.0,
+   "dflops": 540424.0
+  },
+  "fp32.r_h_sub-r_h_add": {
+   "hi": "fp32.r_h_sub",
+   "lo": "fp32.r_h_add",
+   "rule": "E92-R7",
+   "what": "the core contrast on random positive magnitudes, frozen",
+   "bits_w": -0.0352,
+   "alt_w": 3.72,
+   "e88": {
+    "mu": -0.406,
+    "lo": -1.662,
+    "hi": 0.849
+   },
+   "e88_flops_w": 3.924,
+   "dN_alt": 3840.0,
+   "dflops": 560592.0
+  },
+  "fp32.w_h_sub-w_h_add": {
+   "hi": "fp32.w_h_sub",
+   "lo": "fp32.w_h_add",
+   "rule": "E92-R8",
+   "what": "the core contrast with a moving sum, magnitude 1",
+   "bits_w": -0.0352,
+   "alt_w": 3.72,
+   "e88": {
+    "mu": -0.167,
+    "lo": -1.421,
+    "hi": 1.088
+   },
+   "e88_flops_w": 2.487,
+   "dN_alt": 3840.0,
+   "dflops": 343288.0,
+   "pred_w": 2.487
+  },
+  "fp32.wr_h_sub-wr_h_add": {
+   "hi": "fp32.wr_h_sub",
+   "lo": "fp32.wr_h_add",
+   "rule": "E92-R8",
+   "what": "the core contrast with moving sums on random positive magnitudes",
+   "bits_w": -0.0352,
+   "alt_w": 3.72,
+   "e88": {
+    "mu": -0.538,
+    "lo": -1.794,
+    "hi": 0.717
+   },
+   "e88_flops_w": 0.652,
+   "dN_alt": 3840.0,
+   "dflops": 155761.0,
+   "pred_w": 0.652,
+   "e90_linear_w": 2.572,
+   "e90_linear_source": "(E90 randn - abs_randn 1.866 W, minus its bits 0.547 W) x N_alt(wr_h_sub) / N_alt(randn)"
+  },
+  "fp32.k_only-c_abs": {
+   "hi": "fp32.k_only",
+   "lo": "fp32.c_abs",
+   "rule": "E92-R9",
+   "what": "the kinds page's design: operand signs flip at k boundaries only, every product +",
+   "bits_w": 0.0526,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 0.006,
+    "lo": -1.248,
+    "hi": 1.259
+   },
+   "e88_flops_w": 0.006,
+   "dN_alt": 0.0,
+   "dflops": 0.0,
+   "band_w": 0.5
+  },
+  "fp16.hh_sub-hl_sub": {
+   "hi": "fp16.hh_sub",
+   "lo": "fp16.hl_sub",
+   "rule": "E92-R10",
+   "what": "aligner 1 against aligner 2",
+   "bits_w": 0.0,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 0.0,
+    "lo": -1.196,
+    "hi": 1.196
+   },
+   "e88_flops_w": 1.372,
+   "dN_alt": 0.0,
+   "dflops": 176640.0,
+   "pred_w": 1.372
+  },
+  "fp16.hh_sub-c_abs": {
+   "hi": "fp16.hh_sub",
+   "lo": "fp16.c_abs",
+   "rule": null,
+   "what": "only the high product alternates",
+   "bits_w": 0.1467,
+   "alt_w": 2.013,
+   "e88": {
+    "mu": 0.255,
+    "lo": -0.942,
+    "hi": 1.452
+   },
+   "e88_flops_w": 3.932,
+   "dN_alt": 3840.0,
+   "dflops": 472288.0
+  },
+  "fp16.hl_sub-c_abs": {
+   "hi": "fp16.hl_sub",
+   "lo": "fp16.c_abs",
+   "rule": null,
+   "what": "only the low product alternates",
+   "bits_w": 0.1467,
+   "alt_w": 2.013,
+   "e88": {
+    "mu": 0.255,
+    "lo": -0.942,
+    "hi": 1.452
+   },
+   "e88_flops_w": 2.56,
+   "dN_alt": 3840.0,
+   "dflops": 295648.0
+  },
+  "fp32.w_h_add-w_c": {
+   "hi": "fp32.w_h_add",
+   "lo": "fp32.w_c",
+   "rule": null,
+   "what": "the sign bits with a moving sum (E65's bit_31 layout)",
+   "bits_w": 0.5629,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 0.808,
+    "lo": -0.446,
+    "hi": 2.063
+   },
+   "e88_flops_w": 0.833,
+   "dN_alt": 0.0,
+   "dflops": 0.0
+  },
+  "fp32.w_h_sub-w_c": {
+   "hi": "fp32.w_h_sub",
+   "lo": "fp32.w_c",
+   "rule": null,
+   "what": "signs and alternation with a moving sum",
+   "bits_w": 0.5277,
+   "alt_w": 3.72,
+   "e88": {
+    "mu": 0.642,
+    "lo": -0.614,
+    "hi": 1.897
+   },
+   "e88_flops_w": 3.321,
+   "dN_alt": 3840.0,
+   "dflops": 343288.0
+  },
+  "fp32.r_h_add-r_abs": {
+   "hi": "fp32.r_h_add",
+   "lo": "fp32.r_abs",
+   "rule": null,
+   "what": "the sign bits on random magnitudes, frozen",
+   "bits_w": 0.5629,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 0.808,
+    "lo": -0.446,
+    "hi": 2.063
+   },
+   "e88_flops_w": 0.833,
+   "dN_alt": 0.0,
+   "dflops": 0.0
+  },
+  "fp32.r_h_sub-r_abs": {
+   "hi": "fp32.r_h_sub",
+   "lo": "fp32.r_abs",
+   "rule": null,
+   "what": "signs and alternation on random magnitudes, frozen",
+   "bits_w": 0.5277,
+   "alt_w": 3.72,
+   "e88": {
+    "mu": 0.402,
+    "lo": -0.852,
+    "hi": 1.656
+   },
+   "e88_flops_w": 4.757,
+   "dN_alt": 3840.0,
+   "dflops": 560592.0
+  },
+  "fp32.wr_h_add-r_walk": {
+   "hi": "fp32.wr_h_add",
+   "lo": "fp32.r_walk",
+   "rule": null,
+   "what": "the sign bits on random magnitudes, moving sums",
+   "bits_w": 0.5629,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 1.137,
+    "lo": -0.12,
+    "hi": 2.393
+   },
+   "e88_flops_w": 1.155,
+   "dN_alt": 0.0,
+   "dflops": -2181.5
+  },
+  "fp32.signs-ones": {
+   "hi": "fp32.signs",
+   "lo": "fp32.ones",
+   "rule": null,
+   "what": "E90's headline step, this session",
+   "bits_w": 0.592,
+   "alt_w": 1.907,
+   "e88": {
+    "mu": 3.69,
+    "lo": 2.289,
+    "hi": 5.09
+   },
+   "e88_flops_w": 5.748,
+   "dN_alt": 1968.0,
+   "dflops": 251028.0
+  },
+  "fp16.signs-ones": {
+   "hi": "fp16.signs",
+   "lo": "fp16.ones",
+   "rule": null,
+   "what": "E90's headline step in fp16, this session",
+   "bits_w": 0.317,
+   "alt_w": 2.147,
+   "e88": {
+    "mu": 3.736,
+    "lo": 2.402,
+    "hi": 5.07
+   },
+   "e88_flops_w": 6.541,
+   "dN_alt": 4096.0,
+   "dflops": 344959.0
+  },
+  "fp32.ones-c_abs": {
+   "hi": "fp32.ones",
+   "lo": "fp32.c_abs",
+   "rule": null,
+   "what": "E88's W32 on this card",
+   "bits_w": 0.0,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 0.365,
+    "lo": -0.89,
+    "hi": 1.621
+   },
+   "e88_flops_w": 0.381,
+   "dN_alt": 0.0,
+   "dflops": 600.0
+  },
+  "fp16.ones-c_abs": {
+   "hi": "fp16.ones",
+   "lo": "fp16.c_abs",
+   "rule": null,
+   "what": "the same in fp16",
+   "bits_w": 0.0,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 0.463,
+    "lo": -0.737,
+    "hi": 1.663
+   },
+   "e88_flops_w": 0.482,
+   "dN_alt": 0.0,
+   "dflops": 440.0
+  },
+  "fp32.r_walk-r_abs": {
+   "hi": "fp32.r_walk",
+   "lo": "fp32.r_abs",
+   "rule": null,
+   "what": "E88's R32 on this card",
+   "bits_w": 0.0,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 5.016,
+    "lo": 3.452,
+    "hi": 6.58
+   },
+   "e88_flops_w": 7.09,
+   "dN_alt": 0.0,
+   "dflops": 247854.5
+  },
+  "fp32.r_abs-c_abs": {
+   "hi": "fp32.r_abs",
+   "lo": "fp32.c_abs",
+   "rule": null,
+   "what": "E88's M32 on this card",
+   "bits_w": 0.0,
+   "alt_w": 0.0,
+   "e88": {
+    "mu": 9.716,
+    "lo": 8.159,
+    "hi": 11.272
+   },
+   "e88_flops_w": 10.015,
+   "dN_alt": 0.0,
+   "dflops": 0.0
+  }
+ },
+ "tiles": {
+  "fp32.c_abs": {
+   "type": "fp32",
+   "group": "frozen",
+   "sha256": "3321477ba0c76532b4efd8d9ffc83a7b29928848cd04d0450a6c69f7c3d89672",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 160,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 0,
+    "hamming_a": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 112.0,
+    "dsum": 112.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 0.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 16.0,
+    "csa2": 0.0,
+    "comb_s": 8.0,
+    "comb_c": 0.0,
+    "comb_add": 8.0,
+    "other_frac": 0.0,
+    "flops": 32.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.564,
+   "D_pred_w": 7.797,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 8.323,
+    "pi95_w": [
+     6.129,
+     10.518
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.c_neg": {
+   "type": "fp32",
+   "group": "frozen",
+   "sha256": "66b0e9ed2b9ec3ebeaee04460aaa7d8b6459b889b1d789801862ffba44d1b29d",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 176,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 16,
+    "hamming_a": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.0234,
+     "sign": 0.0039,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 128.0,
+    "dsum": 128.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 16.0,
+    "N_alt2": 0.0,
+    "sub1": 0.9375,
+    "sub2": 0.0,
+    "P_sign": 16.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 816.0,
+    "csa2": 0.0,
+    "comb_s": 824.0,
+    "comb_c": 156.0,
+    "comb_add": 508.0,
+    "other_frac": 0.0,
+    "flops": 2304.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.566,
+   "D_pred_w": 7.817,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 8.323,
+    "pi95_w": [
+     6.129,
+     10.518
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.c_alt": {
+   "type": "fp32",
+   "group": "frozen",
+   "sha256": "7a8ce8160a8e8215b927b0fefa074c55136ffd6ab70073cad4e5526497e1c26b",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 416,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 256,
+    "hamming_a": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.082,
+     "sign": 0.0625,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 4111.5,
+    "rbus": 4111.5,
+    "store": 496.0,
+    "prod": 368.0,
+    "dsum": 368.0,
+    "res_bits_per_op": 8719.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 3840.0,
+    "N_alt2": 0.0,
+    "sub1": 0.46875,
+    "sub2": 0.0,
+    "P_sign": 256.0,
+    "C_sign": 4096.0,
+    "R_sign": 4096.0,
+    "csa3": 199680.0,
+    "csa2": 0.0,
+    "comb_s": 199672.0,
+    "comb_c": 39352.0,
+    "comb_add": 121920.0,
+    "other_frac": 0.0,
+    "flops": 560624.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.971,
+   "D_pred_w": 12.559,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 8.666,
+    "pi95_w": [
+     6.472,
+     10.86
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.h_add": {
+   "type": "fp32",
+   "group": "frozen",
+   "sha256": "a8eacaf5635f408ab4cfb7195f016cbe1cf36d37a615d2267411e99ab589715a",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 4256,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 4096,
+    "hamming_a": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 1.0195,
+     "sign": 1.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 4111.5,
+    "rbus": 4111.5,
+    "store": 496.0,
+    "prod": 4208.0,
+    "dsum": 4208.0,
+    "res_bits_per_op": 8719.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 4096.0,
+    "C_sign": 4096.0,
+    "R_sign": 4096.0,
+    "csa3": 16.0,
+    "csa2": 0.0,
+    "comb_s": 8.0,
+    "comb_c": 0.0,
+    "comb_add": 8.0,
+    "other_frac": 0.0,
+    "flops": 32.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 8.373,
+   "D_pred_w": 8.63,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 13.964,
+    "pi95_w": [
+     11.769,
+     16.158
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.h_sub": {
+   "type": "fp32",
+   "group": "frozen",
+   "sha256": "441ac51e7259d04f67a5fded7bf1378d80d7e712e71d73218c7a38271e5c99f5",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 4000,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 3840,
+    "hamming_a": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.957,
+     "sign": 0.9375,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 3952.0,
+    "dsum": 3952.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 3840.0,
+    "N_alt2": 0.0,
+    "sub1": 0.46875,
+    "sub2": 0.0,
+    "P_sign": 3840.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 199680.0,
+    "csa2": 0.0,
+    "comb_s": 199672.0,
+    "comb_c": 39352.0,
+    "comb_add": 121920.0,
+    "other_frac": 0.0,
+    "flops": 560624.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.966,
+   "D_pred_w": 12.554,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 13.621,
+    "pi95_w": [
+     11.426,
+     15.815
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.h_allsub": {
+   "type": "fp32",
+   "group": "frozen",
+   "sha256": "3164a2686fc98a890aed28d5244119ed38313b735aa2b95b76cf6cc37413b0c7",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 4240,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 4080,
+    "hamming_a": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 1.0156,
+     "sign": 0.9961,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 4111.5,
+    "rbus": 4111.5,
+    "store": 496.0,
+    "prod": 4192.0,
+    "dsum": 4192.0,
+    "res_bits_per_op": 8719.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 16.0,
+    "N_alt2": 0.0,
+    "sub1": 0.9375,
+    "sub2": 0.0,
+    "P_sign": 4080.0,
+    "C_sign": 4096.0,
+    "R_sign": 4096.0,
+    "csa3": 816.0,
+    "csa2": 0.0,
+    "comb_s": 824.0,
+    "comb_c": 156.0,
+    "comb_add": 508.0,
+    "other_frac": 0.0,
+    "flops": 2304.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 8.371,
+   "D_pred_w": 8.646,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 13.964,
+    "pi95_w": [
+     11.769,
+     16.158
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.i_add": {
+   "type": "fp32",
+   "group": "frozen",
+   "sha256": "c24258d523e5e3443b125b7bcbb624d90ba08df8b3c423a6a300dcff1d2ce41d",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 2208,
+    "sign_flips_per_op_a": 2048,
+    "sign_flips_per_op_b": 0,
+    "hamming_a": {
+     "all": 0.5195,
+     "sign": 0.5,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 2063.5,
+    "rbus": 2063.5,
+    "store": 496.0,
+    "prod": 2160.0,
+    "dsum": 2160.0,
+    "res_bits_per_op": 4623.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 2048.0,
+    "C_sign": 2048.0,
+    "R_sign": 2048.0,
+    "csa3": 16.0,
+    "csa2": 0.0,
+    "comb_s": 8.0,
+    "comb_c": 0.0,
+    "comb_add": 8.0,
+    "other_frac": 0.0,
+    "flops": 32.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.969,
+   "D_pred_w": 8.214,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 11.504,
+    "pi95_w": [
+     9.31,
+     13.699
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.i_sub": {
+   "type": "fp32",
+   "group": "frozen",
+   "sha256": "5cb43141891edfd68361341f5c2aab6dc84d549051a1633a9c0e522510973889",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 2080,
+    "sign_flips_per_op_a": 1920,
+    "sign_flips_per_op_b": 0,
+    "hamming_a": {
+     "all": 0.4883,
+     "sign": 0.4688,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 2032.0,
+    "dsum": 2032.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 1920.0,
+    "N_alt2": 0.0,
+    "sub1": 0.46875,
+    "sub2": 0.0,
+    "P_sign": 1920.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 99840.0,
+    "csa2": 0.0,
+    "comb_s": 99832.0,
+    "comb_c": 19672.0,
+    "comb_add": 60960.0,
+    "other_frac": 0.0,
+    "flops": 280304.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.765,
+   "D_pred_w": 10.176,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 11.315,
+    "pi95_w": [
+     9.121,
+     13.509
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.h_sub2": {
+   "type": "fp32",
+   "group": "ladder",
+   "sha256": "87794ec36128c92f26ef388aef15a63842656b4fa2cd34ea68fac4b169c9e5ff",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 1120,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 960,
+    "hamming_a": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.2539,
+     "sign": 0.2344,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 1072.0,
+    "dsum": 1072.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 960.0,
+    "N_alt2": 0.0,
+    "sub1": 0.11719,
+    "sub2": 0.0,
+    "P_sign": 960.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 49932.0,
+    "csa2": 0.0,
+    "comb_s": 49924.0,
+    "comb_c": 9838.0,
+    "comb_add": 30486.0,
+    "other_frac": 0.0,
+    "flops": 140180.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.665,
+   "D_pred_w": 8.987,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 9.648,
+    "pi95_w": [
+     7.453,
+     11.842
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.h_sub4": {
+   "type": "fp32",
+   "group": "ladder",
+   "sha256": "6d5dd8b3dba9364894c78d4202327c176f47ae389747efd38f8586802bc1ce1f",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 2080,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 1920,
+    "hamming_a": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.4883,
+     "sign": 0.4688,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 2032.0,
+    "dsum": 2032.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 1920.0,
+    "N_alt2": 0.0,
+    "sub1": 0.23438,
+    "sub2": 0.0,
+    "P_sign": 1920.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 99848.0,
+    "csa2": 0.0,
+    "comb_s": 99840.0,
+    "comb_c": 19676.0,
+    "comb_add": 60964.0,
+    "other_frac": 0.0,
+    "flops": 280328.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.765,
+   "D_pred_w": 10.176,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 10.972,
+    "pi95_w": [
+     8.778,
+     13.166
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.h_sub6": {
+   "type": "fp32",
+   "group": "ladder",
+   "sha256": "49fb6175bcff978507425dfb24aa7375c5bce86d5083dbb342939e9c0f50b9a4",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 3040,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 2880,
+    "hamming_a": {
+     "all": 0.0195,
+     "sign": 0.0,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.7227,
+     "sign": 0.7031,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 2992.0,
+    "dsum": 2992.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 2880.0,
+    "N_alt2": 0.0,
+    "sub1": 0.35156,
+    "sub2": 0.0,
+    "P_sign": 2880.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 149764.0,
+    "csa2": 0.0,
+    "comb_s": 149756.0,
+    "comb_c": 29514.0,
+    "comb_add": 91442.0,
+    "other_frac": 0.0,
+    "flops": 420476.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.866,
+   "D_pred_w": 11.365,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 12.296,
+    "pi95_w": [
+     10.102,
+     14.491
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.s_abs": {
+   "type": "fp32",
+   "group": "frozen",
+   "sha256": "79f5ac27db1f7f109e1ea6a3ba607f5a8024743d404aa2b4cb495c3320b57d4e",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 3364,
+    "sign_flips_per_op_a": 944,
+    "sign_flips_per_op_b": 2260,
+    "hamming_a": {
+     "all": 0.25,
+     "sign": 0.2305,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.5713,
+     "sign": 0.5518,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 2192.0,
+    "dsum": 2192.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 2080.0,
+    "N_alt2": 0.0,
+    "sub1": 0.45703,
+    "sub2": 0.0,
+    "P_sign": 2080.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 108168.0,
+    "csa2": 0.0,
+    "comb_s": 108166.0,
+    "comb_c": 21319.0,
+    "comb_add": 66047.0,
+    "other_frac": 0.0,
+    "flops": 303700.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.807,
+   "D_pred_w": 10.399,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 12.142,
+    "pi95_w": [
+     9.947,
+     14.336
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.k_only": {
+   "type": "fp32",
+   "group": "frozen",
+   "sha256": "31fa029e9f94c7fa95eeacd866873a7f7e7adfe435e7481b82cc23171ac6cfa6",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 416,
+    "sign_flips_per_op_a": 128,
+    "sign_flips_per_op_b": 128,
+    "hamming_a": {
+     "all": 0.0508,
+     "sign": 0.0312,
+     "exp": 0.0195,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.0508,
+     "sign": 0.0312,
+     "exp": 0.0195,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 112.0,
+    "dsum": 112.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 0.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 16.0,
+    "csa2": 0.0,
+    "comb_s": 8.0,
+    "comb_c": 0.0,
+    "comb_add": 8.0,
+    "other_frac": 0.0,
+    "flops": 32.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.57,
+   "D_pred_w": 7.803,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 8.501,
+    "pi95_w": [
+     6.307,
+     10.696
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.r_abs": {
+   "type": "fp32",
+   "group": "frozen_random",
+   "sha256": "c35268792c5200908cbeec7257058e28fc544943dfd7593600bf392e884b8cd7",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 75694,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 0,
+    "hamming_a": {
+     "all": 6.1797,
+     "sign": 0.0,
+     "exp": 0.7148,
+     "mant": 5.4648
+    },
+    "hamming_b": {
+     "all": 12.3003,
+     "sign": 0.0,
+     "exp": 1.7285,
+     "mant": 10.5718
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 97462.0,
+    "dsum": 97462.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 0.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 16.0,
+    "csa2": 0.0,
+    "comb_s": 8.0,
+    "comb_c": 0.0,
+    "comb_add": 8.0,
+    "other_frac": 0.0,
+    "flops": 32.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 17.28,
+   "D_pred_w": 17.812,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 23.433,
+    "pi95_w": [
+     21.239,
+     25.628
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.r_h_add": {
+   "type": "fp32",
+   "group": "frozen_random",
+   "sha256": "6409a2a6fe290fa777d066c26553930febe9fe216f60f70b10634f8ca656bd04",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 79790,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 4096,
+    "hamming_a": {
+     "all": 6.1797,
+     "sign": 0.0,
+     "exp": 0.7148,
+     "mant": 5.4648
+    },
+    "hamming_b": {
+     "all": 13.3003,
+     "sign": 1.0,
+     "exp": 1.7285,
+     "mant": 10.5718
+    }
+   },
+   "stream": {
+    "cbus": 4111.5,
+    "rbus": 4111.5,
+    "store": 496.0,
+    "prod": 101558.0,
+    "dsum": 101558.0,
+    "res_bits_per_op": 8719.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 4096.0,
+    "C_sign": 4096.0,
+    "R_sign": 4096.0,
+    "csa3": 16.0,
+    "csa2": 0.0,
+    "comb_s": 8.0,
+    "comb_c": 0.0,
+    "comb_add": 8.0,
+    "other_frac": 0.0,
+    "flops": 32.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 18.088,
+   "D_pred_w": 18.645,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 23.776,
+    "pi95_w": [
+     21.582,
+     25.971
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.r_h_sub": {
+   "type": "fp32",
+   "group": "frozen_random",
+   "sha256": "efba5a2cb2507c2fa5435663da0a53619546ab0c942a66ba89744b4d783e228c",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 79534,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 3840,
+    "hamming_a": {
+     "all": 6.1797,
+     "sign": 0.0,
+     "exp": 0.7148,
+     "mant": 5.4648
+    },
+    "hamming_b": {
+     "all": 13.2378,
+     "sign": 0.9375,
+     "exp": 1.7285,
+     "mant": 10.5718
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 101302.0,
+    "dsum": 101302.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 3840.0,
+    "N_alt2": 0.0,
+    "sub1": 0.46875,
+    "sub2": 0.0,
+    "P_sign": 3840.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 199680.0,
+    "csa2": 0.0,
+    "comb_s": 199672.0,
+    "comb_c": 39352.0,
+    "comb_add": 121920.0,
+    "other_frac": 0.0,
+    "flops": 560624.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 17.682,
+   "D_pred_w": 22.569,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 23.433,
+    "pi95_w": [
+     21.239,
+     25.628
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.w_c": {
+   "type": "fp32",
+   "group": "walking",
+   "sha256": "bc09593cbe3a3459c63c28b90350bba91fb53a9d62741285899d8dc1c26763c5",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 1664,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 0,
+    "hamming_a": {
+     "all": 0.0273,
+     "sign": 0.0,
+     "exp": 0.0273,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.3789,
+     "sign": 0.0,
+     "exp": 0.3789,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 45629.0,
+    "rbus": 45533.5,
+    "store": 8144.0,
+    "prod": 2304.0,
+    "dsum": 2304.0,
+    "res_bits_per_op": 99306.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 0.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 8192.0,
+    "csa2": 0.0,
+    "comb_s": 38096.0,
+    "comb_c": 3968.0,
+    "comb_add": 38276.0,
+    "other_frac": 0.0,
+    "flops": 88532.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 12.355,
+   "D_pred_w": 13.421,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 8.672,
+    "pi95_w": [
+     6.478,
+     10.866
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.w_h_add": {
+   "type": "fp32",
+   "group": "walking",
+   "sha256": "3eaf05a6f13538042f0ce8b20c8be264c2838c05161058511d797a0203559d87",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 5760,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 4096,
+    "hamming_a": {
+     "all": 0.0273,
+     "sign": 0.0,
+     "exp": 0.0273,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 1.3789,
+     "sign": 1.0,
+     "exp": 0.3789,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 49725.0,
+    "rbus": 49629.5,
+    "store": 8144.0,
+    "prod": 6400.0,
+    "dsum": 6400.0,
+    "res_bits_per_op": 107498.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 4096.0,
+    "C_sign": 4096.0,
+    "R_sign": 4096.0,
+    "csa3": 8192.0,
+    "csa2": 0.0,
+    "comb_s": 38096.0,
+    "comb_c": 3968.0,
+    "comb_add": 38276.0,
+    "other_frac": 0.0,
+    "flops": 88532.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 13.163,
+   "D_pred_w": 14.254,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 13.969,
+    "pi95_w": [
+     11.775,
+     16.164
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.w_h_sub": {
+   "type": "fp32",
+   "group": "walking",
+   "sha256": "9e3f8919c318f55cbed1ad2735bf54349343b143f851460916d0d17d59df78b1",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 4064,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 3840,
+    "hamming_a": {
+     "all": 0.0273,
+     "sign": 0.0,
+     "exp": 0.0273,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.9648,
+     "sign": 0.9375,
+     "exp": 0.0273,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 50510.5,
+    "rbus": 50418.5,
+    "store": 8096.0,
+    "prod": 3984.0,
+    "dsum": 3984.0,
+    "res_bits_per_op": 109025.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 3840.0,
+    "N_alt2": 0.0,
+    "sub1": 0.46875,
+    "sub2": 0.0,
+    "P_sign": 3840.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 192512.0,
+    "csa2": 0.0,
+    "comb_s": 165254.0,
+    "comb_c": 34954.0,
+    "comb_add": 39100.0,
+    "other_frac": 0.0,
+    "flops": 431820.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 12.996,
+   "D_pred_w": 16.741,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 13.627,
+    "pi95_w": [
+     11.432,
+     15.821
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.r_walk": {
+   "type": "fp32",
+   "group": "walking_random",
+   "sha256": "4b48dbafbe6fd0a9d5037f0fc33cb4279d133045690a58c48151c40b9629bd1e",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 75568,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 0,
+    "hamming_a": {
+     "all": 6.1602,
+     "sign": 0.0,
+     "exp": 0.6953,
+     "mant": 5.4648
+    },
+    "hamming_b": {
+     "all": 12.2891,
+     "sign": 0.0,
+     "exp": 1.7173,
+     "mant": 10.5718
+    }
+   },
+   "stream": {
+    "cbus": 50186.38,
+    "rbus": 50194.56,
+    "store": 8580.81,
+    "prod": 97410.0,
+    "dsum": 97410.0,
+    "res_bits_per_op": 108961.75,
+    "chg_rate": 0.798538,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 0.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 53748.0,
+    "csa2": 0.0,
+    "comb_s": 95288.25,
+    "comb_c": 3547.5,
+    "comb_add": 95302.75,
+    "other_frac": 0.0,
+    "flops": 247886.5,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 22.296,
+   "D_pred_w": 24.902,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 23.419,
+    "pi95_w": [
+     21.225,
+     25.613
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.wr_h_add": {
+   "type": "fp32",
+   "group": "walking_random",
+   "sha256": "4e1e9202f840bf44f8d3137e3ab231d80eb860dba77d649f8041c141f5956045",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 82056,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 4096,
+    "hamming_a": {
+     "all": 6.1875,
+     "sign": 0.0,
+     "exp": 0.7227,
+     "mant": 5.4648
+    },
+    "hamming_b": {
+     "all": 13.8457,
+     "sign": 1.0,
+     "exp": 2.1533,
+     "mant": 10.6924
+    }
+   },
+   "stream": {
+    "cbus": 57389.19,
+    "rbus": 57384.5,
+    "store": 6905.31,
+    "prod": 102314.0,
+    "dsum": 102314.0,
+    "res_bits_per_op": 121679.0,
+    "chg_rate": 0.658783,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 4096.0,
+    "C_sign": 4096.0,
+    "R_sign": 4096.0,
+    "csa3": 52205.0,
+    "csa2": 0.0,
+    "comb_s": 95418.0,
+    "comb_c": 2662.5,
+    "comb_add": 95419.5,
+    "other_frac": 0.0,
+    "flops": 245705.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 23.433,
+   "D_pred_w": 26.057,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 23.798,
+    "pi95_w": [
+     21.604,
+     25.992
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.wr_h_sub": {
+   "type": "fp32",
+   "group": "walking_random",
+   "sha256": "26f0e341c90ca5cca6ab5ca9fd774d6749c5f9805b04edbe4d3c50206d304d01",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 79592,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 3840,
+    "hamming_a": {
+     "all": 6.1875,
+     "sign": 0.0,
+     "exp": 0.7227,
+     "mant": 5.4648
+    },
+    "hamming_b": {
+     "all": 13.2441,
+     "sign": 0.9375,
+     "exp": 1.7344,
+     "mant": 10.5723
+    }
+   },
+   "stream": {
+    "cbus": 53095.75,
+    "rbus": 53086.62,
+    "store": 6801.12,
+    "prod": 101324.0,
+    "dsum": 101324.0,
+    "res_bits_per_op": 112983.5,
+    "chg_rate": 0.651886,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 3840.0,
+    "N_alt2": 0.0,
+    "sub1": 0.46875,
+    "sub2": 0.0,
+    "P_sign": 3840.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 148671.0,
+    "csa2": 0.0,
+    "comb_s": 111057.5,
+    "comb_c": 46575.0,
+    "comb_add": 95162.5,
+    "other_frac": 0.0,
+    "flops": 401466.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 22.895,
+   "D_pred_w": 26.709,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 23.44,
+    "pi95_w": [
+     21.245,
+     25.634
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp32.signs": {
+   "type": "fp32",
+   "group": "signs",
+   "sha256": "fb0d8777988b10234ee959fb91828e42ce8b12647ac4fc62a9342557c275bf2a",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 3244,
+    "sign_flips_per_op_a": 1072,
+    "sign_flips_per_op_b": 2172,
+    "hamming_a": {
+     "all": 0.2617,
+     "sign": 0.2617,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.5303,
+     "sign": 0.5303,
+     "exp": 0.0,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 35677.62,
+    "rbus": 35680.38,
+    "store": 11630.38,
+    "prod": 2140.0,
+    "dsum": 2140.0,
+    "res_bits_per_op": 82988.38,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 1968.0,
+    "N_alt2": 0.0,
+    "sub1": 0.43286,
+    "sub2": 0.0,
+    "P_sign": 2140.0,
+    "C_sign": 2174.0,
+    "R_sign": 2174.0,
+    "csa3": 102418.0,
+    "csa2": 0.0,
+    "comb_s": 102586.0,
+    "comb_c": 20397.0,
+    "comb_add": 26259.0,
+    "other_frac": 0.0,
+    "flops": 251660.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 11.62,
+   "D_pred_w": 13.34,
+   "D_pred_source": "E90's measured D",
+   "q130n_predictor": {
+    "point_w": 12.203,
+    "pi95_w": [
+     10.008,
+     14.397
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp16.c_abs": {
+   "type": "fp16",
+   "group": "fp16",
+   "sha256": "bd04fdad05c400eb65026177034b48e76b3800210302e87366eee8561beba888",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 128,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 0,
+    "hamming_a": {
+     "all": 0.0156,
+     "sign": 0.0,
+     "exp": 0.0156,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.0156,
+     "sign": 0.0,
+     "exp": 0.0156,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 224.0,
+    "dsum": 64.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 0.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 16.0,
+    "csa2": 16.0,
+    "comb_s": 8.0,
+    "comb_c": 16.0,
+    "comb_add": 8.0,
+    "other_frac": 0.0,
+    "flops": 64.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.571,
+   "D_pred_w": 7.826,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 8.454,
+    "pi95_w": [
+     6.65,
+     10.258
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp16.c_alt": {
+   "type": "fp16",
+   "group": "fp16",
+   "sha256": "32485da16ea914095f112bc4235ecede11c1a19479a9a4923e56e10b7a6e33b7",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 640,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 512,
+    "hamming_a": {
+     "all": 0.0156,
+     "sign": 0.0,
+     "exp": 0.0156,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.1406,
+     "sign": 0.125,
+     "exp": 0.0156,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 4111.5,
+    "rbus": 4111.5,
+    "store": 496.0,
+    "prod": 736.0,
+    "dsum": 320.0,
+    "res_bits_per_op": 8719.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 3840.0,
+    "N_alt2": 3840.0,
+    "sub1": 0.46875,
+    "sub2": 0.46875,
+    "P_sign": 256.0,
+    "C_sign": 4096.0,
+    "R_sign": 4096.0,
+    "csa3": 199680.0,
+    "csa2": 111360.0,
+    "comb_s": 88328.0,
+    "comb_c": 111360.0,
+    "comb_add": 29760.0,
+    "other_frac": 0.0,
+    "flops": 540488.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 8.082,
+   "D_pred_w": 12.552,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 8.798,
+    "pi95_w": [
+     6.994,
+     10.602
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp16.h_add": {
+   "type": "fp16",
+   "group": "fp16",
+   "sha256": "9475c0306743bd33210aeed692b900426a03a1b1cdac003c6af70a2a94605897",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 8320,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 8192,
+    "hamming_a": {
+     "all": 0.0156,
+     "sign": 0.0,
+     "exp": 0.0156,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 2.0156,
+     "sign": 2.0,
+     "exp": 0.0156,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 4111.5,
+    "rbus": 4111.5,
+    "store": 496.0,
+    "prod": 8416.0,
+    "dsum": 4160.0,
+    "res_bits_per_op": 8719.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "sub1": 0.0,
+    "sub2": 0.0,
+    "P_sign": 4096.0,
+    "C_sign": 4096.0,
+    "R_sign": 4096.0,
+    "csa3": 16.0,
+    "csa2": 16.0,
+    "comb_s": 8.0,
+    "comb_c": 16.0,
+    "comb_add": 8.0,
+    "other_frac": 0.0,
+    "flops": 64.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 8.593,
+   "D_pred_w": 8.882,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 14.108,
+    "pi95_w": [
+     12.304,
+     15.912
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp16.h_sub": {
+   "type": "fp16",
+   "group": "fp16",
+   "sha256": "68837b6a79c533033d2afd3a25bc8012203134e72bb4ad8c4b7e3dee8a0ee026",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 7808,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 7680,
+    "hamming_a": {
+     "all": 0.0156,
+     "sign": 0.0,
+     "exp": 0.0156,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 1.8906,
+     "sign": 1.875,
+     "exp": 0.0156,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 7904.0,
+    "dsum": 3904.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 3840.0,
+    "N_alt2": 3840.0,
+    "sub1": 0.46875,
+    "sub2": 0.46875,
+    "P_sign": 3840.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 199680.0,
+    "csa2": 111360.0,
+    "comb_s": 88328.0,
+    "comb_c": 111360.0,
+    "comb_add": 29760.0,
+    "other_frac": 0.0,
+    "flops": 540488.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 8.081,
+   "D_pred_w": 12.551,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 13.765,
+    "pi95_w": [
+     11.961,
+     15.568
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp16.h_allsub": {
+   "type": "fp16",
+   "group": "fp16",
+   "sha256": "3f88fb6b6c760d362dba8d7d008bf20ae43baca31464e15c3e18f66b65d37016",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 8288,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 8160,
+    "hamming_a": {
+     "all": 0.0156,
+     "sign": 0.0,
+     "exp": 0.0156,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 2.0078,
+     "sign": 1.9922,
+     "exp": 0.0156,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 4111.5,
+    "rbus": 4111.5,
+    "store": 496.0,
+    "prod": 8384.0,
+    "dsum": 4144.0,
+    "res_bits_per_op": 8719.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 16.0,
+    "N_alt2": 16.0,
+    "sub1": 0.9375,
+    "sub2": 0.9375,
+    "P_sign": 4080.0,
+    "C_sign": 4096.0,
+    "R_sign": 4096.0,
+    "csa3": 816.0,
+    "csa2": 448.0,
+    "comb_s": 376.0,
+    "comb_c": 448.0,
+    "comb_add": 124.0,
+    "other_frac": 0.0,
+    "flops": 2212.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 8.59,
+   "D_pred_w": 8.896,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 14.108,
+    "pi95_w": [
+     12.304,
+     15.912
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp16.hh_sub": {
+   "type": "fp16",
+   "group": "fp16",
+   "sha256": "20ccb5e05776bb3d19b02a8d2c1d70582e12bf33a8cf328e0650829433b6652b",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 3968,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 3840,
+    "hamming_a": {
+     "all": 0.0156,
+     "sign": 0.0,
+     "exp": 0.0156,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.9531,
+     "sign": 0.9375,
+     "exp": 0.0156,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 4064.0,
+    "dsum": 3904.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 3840.0,
+    "N_alt2": 0.0,
+    "sub1": 0.46875,
+    "sub2": 0.0,
+    "P_sign": 3840.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 199680.0,
+    "csa2": 16.0,
+    "comb_s": 199688.0,
+    "comb_c": 39368.0,
+    "comb_add": 33600.0,
+    "other_frac": 0.0,
+    "flops": 472352.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.826,
+   "D_pred_w": 11.759,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 13.765,
+    "pi95_w": [
+     11.961,
+     15.568
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp16.hl_sub": {
+   "type": "fp16",
+   "group": "fp16",
+   "sha256": "7426ecb9a42f51d54a63b892b1feb39fabbf4b073f692976117af7e52552d347",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 3968,
+    "sign_flips_per_op_a": 0,
+    "sign_flips_per_op_b": 3840,
+    "hamming_a": {
+     "all": 0.0156,
+     "sign": 0.0,
+     "exp": 0.0156,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.9531,
+     "sign": 0.9375,
+     "exp": 0.0156,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 4064.0,
+    "dsum": 3904.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 0.0,
+    "N_alt2": 3840.0,
+    "sub1": 0.0,
+    "sub2": 0.46875,
+    "P_sign": 0.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 16.0,
+    "csa2": 111360.0,
+    "comb_s": 111368.0,
+    "comb_c": 39368.0,
+    "comb_add": 33600.0,
+    "other_frac": 0.0,
+    "flops": 295712.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.826,
+   "D_pred_w": 10.387,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 13.765,
+    "pi95_w": [
+     11.961,
+     15.568
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp16.s_abs": {
+   "type": "fp16",
+   "group": "fp16",
+   "sha256": "6b45a129f905fa5f7d0d7b37bc64b06ecfa788a9c4b7e4f89e72e24c0eea95fa",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 5834,
+    "sign_flips_per_op_a": 1904,
+    "sign_flips_per_op_b": 3802,
+    "hamming_a": {
+     "all": 0.4805,
+     "sign": 0.4648,
+     "exp": 0.0156,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.9438,
+     "sign": 0.9282,
+     "exp": 0.0156,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 15.5,
+    "rbus": 15.5,
+    "store": 496.0,
+    "prod": 4044.0,
+    "dsum": 3324.0,
+    "res_bits_per_op": 527.0,
+    "chg_rate": 0.0625,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 2012.0,
+    "N_alt2": 1808.0,
+    "sub1": 0.46289,
+    "sub2": 0.46338,
+    "P_sign": 2012.0,
+    "C_sign": 0.0,
+    "R_sign": 0.0,
+    "csa3": 104628.0,
+    "csa2": 52432.0,
+    "comb_s": 100448.0,
+    "comb_c": 41214.5,
+    "comb_add": 13294.5,
+    "other_frac": 0.0,
+    "flops": 312017.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 7.877,
+   "D_pred_w": 10.566,
+   "D_pred_source": "scale x (e88 + f flops)",
+   "q130n_predictor": {
+    "point_w": 13.391,
+    "pi95_w": [
+     11.587,
+     15.194
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  },
+  "fp16.signs": {
+   "type": "fp16",
+   "group": "signs",
+   "sha256": "8a3a928f3ad3577a933b14f1b191b627e545667822b16fa9ee701b5f7c5455ce",
+   "stats": {
+    "gated_lane_frac": 0.0,
+    "bus_bits_per_op": 6082,
+    "sign_flips_per_op_a": 2032,
+    "sign_flips_per_op_b": 4050,
+    "hamming_a": {
+     "all": 0.4961,
+     "sign": 0.4961,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "hamming_b": {
+     "all": 0.9888,
+     "sign": 0.9888,
+     "exp": 0.0,
+     "mant": 0.0
+    }
+   },
+   "stream": {
+    "cbus": 31591.88,
+    "rbus": 31586.5,
+    "store": 4053.62,
+    "prod": 4074.0,
+    "dsum": 3546.0,
+    "res_bits_per_op": 67232.0,
+    "chg_rate": 0.510254,
+    "live_frac": 1.0
+   },
+   "sign": {
+    "N_alt1": 2070.0,
+    "N_alt2": 2026.0,
+    "sub1": 0.43188,
+    "sub2": 0.44263,
+    "P_sign": 2126.0,
+    "C_sign": 1998.0,
+    "R_sign": 1998.0,
+    "csa3": 107481.0,
+    "csa2": 58825.0,
+    "comb_s": 106445.0,
+    "comb_c": 48251.0,
+    "comb_add": 24461.0,
+    "other_frac": 0.04028,
+    "flops": 345463.0,
+    "op_indices": [
+     67750,
+     203250,
+     338750,
+     474250
+    ]
+   },
+   "e88_D_w": 11.77,
+   "D_pred_w": 13.39,
+   "D_pred_source": "E90's measured D",
+   "q130n_predictor": {
+    "point_w": 13.721,
+    "pi95_w": [
+     11.917,
+     15.525
+    ],
+    "model": "u,N_sig,A,B,Vs_sig",
+    "features_outside_e78_range": []
+   }
+  }
+ },
+ "back_test": {
+  "E90 fp32 signs - ones": {
+   "measured_w": 5.006,
+   "e88_w": 3.69,
+   "e88_flops_w": 5.748,
+   "bits_w": 0.592,
+   "source": "docs/reports/data/2026-10-31-e90-signs-spread/scored.json"
+  },
+  "E90 fp16 signs - ones": {
+   "measured_w": 5.079,
+   "e88_w": 3.736,
+   "e88_flops_w": 6.541,
+   "bits_w": 0.317,
+   "source": "docs/reports/data/2026-10-31-e90-signs-spread/scored.json"
+  },
+  "E90 fp32 randn - abs_randn": {
+   "measured_w": 1.866,
+   "e88_w": 0.912,
+   "e88_flops_w": 1.627,
+   "bits_w": 0.547,
+   "source": "docs/reports/data/2026-10-31-e90-signs-spread/scored.json"
+  },
+  "E90 fp16 randn - abs_randn": {
+   "measured_w": 2.613,
+   "e88_w": 1.417,
+   "e88_flops_w": 3.431,
+   "bits_w": 0.311,
+   "source": "docs/reports/data/2026-10-31-e90-signs-spread/scored.json"
+  },
+  "E88 R32s s_walk - s_abs (card 1, no scale)": {
+   "measured_w": 2.259,
+   "e88_w": 3.684,
+   "e88_flops_w": 3.292,
+   "bits_w": null,
+   "source": "docs/reports/data/2026-10-31-e88-result-path/scored.json"
+  }
+ },
+ "e78_reference": {
+  "fp32.randn": {
+   "D_w": 24.7249
+  },
+  "fp16.randn": {
+   "D_w": 22.1624
+  },
+  "int8.full": {
+   "D_w": 7.0565
+  },
+  "fp32.ones": {
+   "D_w": 8.2566
+  },
+  "fp16.ones": {
+   "D_w": 8.4483
+  },
+  "anchor_pi": {
+   "D_w": 8.3603
+  }
+ },
+ "e90_reference": {
+  "fp32.randn": {
+   "D_w": 24.718
+  },
+  "fp16.randn": {
+   "D_w": 22.16
+  },
+  "int8.full": {
+   "D_w": 7.2265
+  },
+  "fp32.ones": {
+   "D_w": 8.3339
+  },
+  "fp16.ones": {
+   "D_w": 8.3106
+  },
+  "anchor_pi": {
+   "D_w": 8.4016
+  },
+  "fp32.signs": {
+   "D_w": 13.3396
+  },
+  "fp16.signs": {
+   "D_w": 13.39
+  }
+ },
+ "e88_reference": {
+  "M32s_w": 2.524,
+  "F32_w": 7.9223,
+  "M32_w": 8.6142,
+  "R32_w": 5.0422
+ },
+ "rules": {
+  "E92-R1": {
+   "what": "the sign bits' price holds for h_add - c_abs (every operand, product and C sign moves; the adder always adds)",
+   "contrasts": [
+    "fp32.h_add-c_abs",
+    "fp16.h_add-c_abs"
+   ],
+   "factor": 2.0,
+   "per_contrast": "CONFIRMED if the 95% upper bound <= 2 x P_bits, REFUTED if the 95% lower bound > 2 x P_bits, else INCONCLUSIVE"
+  },
+  "E92-R2": {
+   "what": "the adder-alternation reading: same operands, or none moving; only the effective operation differs",
+   "contrasts": [
+    "fp32.h_sub-h_add",
+    "fp16.h_sub-h_add",
+    "fp32.c_alt-c_abs",
+    "fp16.c_alt-c_abs"
+   ],
+   "per_contrast": "CONFIRMED if the 95% interval lies inside [0.5, 2] x pred_w, REFUTED if it lies wholly below 0.25 x pred_w or wholly above 4 x pred_w, else INCONCLUSIVE"
+  },
+  "E92-R3": {
+   "what": "subtraction itself is not dear: a steady effective subtract costs what a steady add costs",
+   "contrasts": [
+    "fp32.h_allsub-h_add",
+    "fp16.h_allsub-h_add",
+    "fp32.c_neg-c_abs"
+   ],
+   "band_w": 0.5,
+   "per_contrast": "CONFIRMED if the 95% interval lies inside +-0.50 W, REFUTED if wholly outside, else INCONCLUSIVE"
+  },
+  "E92-R4": {
+   "what": "the A-side twin: alternation every two micro-ops costs half (N_alt ratio from e92.json)",
+   "statistic": "(i_sub - i_add) - (N_alt(i_sub) / N_alt(h_sub)) x (h_sub - h_add), paired per pass",
+   "band_w": 0.744,
+   "per_contrast": "CONFIRMED if the 95% interval lies inside +-band, REFUTED if wholly outside, else INCONCLUSIVE"
+  },
+  "E92-R5": {
+   "what": "linear in the number of lanes alternating",
+   "statistic": "for m = 2, 4, 6: (h_sub<m> - c_abs) - (m / 8) x (h_sub - c_abs), paired per pass",
+   "band_w": 0.744,
+   "per_contrast": "each rung as R4; CONFIRMED if all three are, REFUTED if any is, else INCONCLUSIVE"
+  },
+  "E92-R6": {
+   "what": "random signs at about 50% alternation are the same price per alternation as structured signs at 100%",
+   "statistic": "(s_abs - c_abs - P_bits(s_abs)) - (N_alt(s_abs) / N_alt(h_sub)) x (h_sub - c_abs - P_bits(h_sub)), paired per pass; fp32, fp16",
+   "band_w": {
+    "fp32": 0.744,
+    "fp16": 0.805
+   },
+   "per_contrast": "as R4"
+  },
+  "E92-R7": {
+   "what": "with the product absorbed its magnitude does not matter",
+   "statistic": "(r_h_sub - r_h_add) - (h_sub - h_add), paired per pass",
+   "band_w": 0.744,
+   "per_contrast": "as R4"
+  },
+  "E92-R8": {
+   "what": "with moving sums the alternation's price follows the adder's flops (e88+flops)",
+   "contrasts": [
+    "fp32.w_h_sub-w_h_add",
+    "fp32.wr_h_sub-wr_h_add"
+   ],
+   "per_contrast": "as R2, with pred_w = e88_flops_w"
+  },
+  "E92-R9": {
+   "what": "a few hundred operand sign flips an op, every product positive: nothing to measure",
+   "contrasts": [
+    "fp32.k_only-c_abs"
+   ],
+   "band_w": 0.5,
+   "per_contrast": "as R3"
+  },
+  "E92-R10": {
+   "what": "fp16's two aligners: the 52-bit one costs more than the 29-bit one",
+   "contrasts": [
+    "fp16.hh_sub-hl_sub"
+   ],
+   "per_contrast": "CONFIRMED if the 95% lower bound >= 0.5 x pred_w, REFUTED if the 95% upper bound < 0, else INCONCLUSIVE"
+  },
+  "E92-S1": {
+   "what": "the session tie to E78 and to E90 (reported; a failure means the session moved)",
+   "cells": {
+    "fp32.randn": 0.5,
+    "fp16.randn": 0.5,
+    "fp32.ones": 0.5,
+    "fp16.ones": 0.5,
+    "anchor_pi": 0.5,
+    "int8.full": 0.25
+   },
+   "cells_e90_only": {
+    "fp32.signs": 0.5,
+    "fp16.signs": 0.5
+   },
+   "rule": "each cell's D within its band of E78's and of E90's; E90's own tiles of E90's"
+  },
+  "E92-S2": {
+   "what": "the frozen models, out of sample (reported)",
+   "rule": "for every contrast: inside E88's band or not; rms of e88+flops over the contrasts with a rule; Q130(n)'s count of tiles inside its 95% interval"
+  },
+  "E92-S3": {
+   "what": "the tie to E88, across cards (reported)",
+   "rule": "s_abs - c_abs within +-0.75 W of scale x M32s; c_abs - zeros within +-1.0 W of scale x F32"
+  }
+ },
+ "not_scored_if": "fewer than 3 kept passes in the primary reduction: then every rule is scored on the registered dips-removed arm (E86's posthoc_dips method), labelled as that arm; fewer than 3 there too: NOT SCORED."
+}
