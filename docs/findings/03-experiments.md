@@ -3514,8 +3514,9 @@ against the run's own idle bracket (**S**); six passes 7810–7815, all kept; 38
 (two more were skipped before launch by the registered launch-reading rule). 64.8 card-minutes of the registered 90.
 Leakage slope (the registered `auto`) 0.1994 W/°C over 250 runs; idle 25.911 ± 0.012 W.
 
-**Results** (± is the 95% interval over six passes of **one tile per kind**, at the primary leakage slope; the
-registered arms move D by up to about ±0.6 W on the high-power kinds — fp32 random 25.344 / 24.725 / 24.163 W at
+**Results** (board power, read from the board meter; the minion rail, deconvolved, reads 0.800–0.865 of board D over
+the 36 kinds above 3 W and is reported beside it, never scored; ± is the 95% interval over six passes of **one tile per
+kind**, at the primary leakage slope; the registered arms move D by up to about ±0.6 W on the high-power kinds — fp32 random 25.344 / 24.725 / 24.163 W at
 k = 0 / 0.1994 / 0.3803 W/°C — and re-drawing a kind's rule moves its gated fraction: fp32 `sparse50` gates
 0.711–0.792 across 400 draws, this tile 0.774).
 - **At a pinned clock the data never changes speed:** 546.001 / 546.001 / 318.000 cycles per op on every kind,
@@ -3596,7 +3597,8 @@ card-minutes. Ten passes ran and the registered drift gate set two aside (7912, 
 - **Constant to zeros, paired per pass with no idle bracket (exploratory):** 8.736 ± 0.054 W (fp16) and
   1.834 ± 0.113 W (int8). 🛑 An all-zero tile is gated under any gate rule, so this does **not** test the gate's width.
 - **aifoundry3's firmware, read for the first time since 25 September:** release 1.4.0, BL1 and BL2 0.22.0, PMIC
-  1.5.0, minions 0.25.1, TDP 0, threshold 65 °C — the build aifoundry2 reported under E69.
+  1.5.0, minions 0.25.1, TDP 0, threshold 65 °C — the versions aifoundry2 reported under E69 (no BL2 git hash is
+  exposed, so the same build is not established).
 
 **Scored: 12 passed (two vacuously), 8 failed and 5 not scored of 25; no verdict moves at E71's slope.** Failures:
 P1b (the fp16 span 2.41× against ≥ 3.0), P3a, P3a_A, P4_fp16, P6_fp16 (the layout control, which fails on exactly the
@@ -3649,7 +3651,8 @@ sustained run of about 76 s; 57 runs, 40.5 card-minutes of the 90 allowed.
 R7 and R8 are named in the README.
 **What it changes.** The speed column of the kinds table has 18 measured kinds. The open part is no longer the
 governor — its two arms act as the source reads (Q130(d)) — but the **heat path's drift between sessions**: a
-sustained prediction needs a die line measured in the same session, which E83 then did.
+sustained prediction needs a die line measured the same day, as E83's was (its relation was fitted in E80's session
+that afternoon).
 **Report:** no page of its own; the data README is the public record.
 
 ## E81 — dp: the DRAM pattern question, period against arrangement (Q130; card runs 2026-10-31, 14:47–15:13 PDT, aifoundry3) — pre-registered
@@ -3699,7 +3702,8 @@ four lines, so a period ladder needs a registered host change.
 **Pre-registered** in [`tools/claims-v3/kinds/E82.md`](../../tools/claims-v3/kinds/E82.md) with
 `predictions-e82.json` (`06bc042e`, pushed 13:44:00 PDT, before the claim at 13:44:56): E78's harness and reduction
 unchanged, the cross-card rules X1–X3 frozen. Amendments: A1 (`249055ff`, before pass 8210) — **card 1 reports
-release 1.4.0, BL1 and BL2 0.22.0, PMIC 1.3.0, minions 0.25.1, not the 1.2.0 / BL2 0.18.0 on record**, and the smoke
+release 1.4.0, BL1 and BL2 0.22.0, PMIC 1.3.0, minions 0.25.1, not the 1.2.0 / BL2 0.18.0 on record** in AGENT.md §4 and 14-card-behaviour.md (START.md had
+carried release 1.4.0 since the lab lead's update of 7 October, `1c00d6ff`, and neither took it up), and the smoke
 ran at 600 MHz in all 375 samples at up to 56.8 W; A2 (`0117ee1c`) — one pass added after pass 8210 was set aside by a
 board-meter dip, and a labelled dip-filtered view. Data:
 [`docs/reports/data/2026-10-31-e82-kinds-aifoundry1/`](../reports/data/2026-10-31-e82-kinds-aifoundry1/README.md)
@@ -3707,7 +3711,8 @@ board-meter dip, and a labelled dip-filtered view. Data:
 8210–8216, five kept by the registered gates; 78 of 90 card-minutes; 600 MHz in every busy sample at 498.7 mV; TDP
 65 W / 65 °C read, nothing set.
 
-**Results.**
+**Results** (board power, as E78's: the minion rail, deconvolved, reads lower, fp32 random Drail 20.03 W against D
+23.99 W, and is reported, never scored).
 - **The kinds rank the same on both cards:** Spearman **0.995 / 0.997 / 1.000** over 17 / 16 / 15 non-zero kinds
   (X1 PASS).
 - **The cards differ by about one scale:** D(aifoundry3) / D(card 1) has a median of **1.031** (IQR 1.025–1.034;
@@ -3766,8 +3771,8 @@ baseline, not a power over idle (at 800 MHz the same data switch 1.91× as much)
 clock is free to move beside them (R1 19.8, R3 18.3, S1 10.6 / 8.4 MHz); and the burst passes ran in two rounds,
 pass 2 from a die 1.3 °C warmer and 7.9 MHz slower on the power-limited kinds.
 **What it changes.** The speed column of the kinds table is complete on one card in one afternoon, and the governor's
-sustained clock closes out of sample once the heat path is measured in the same session; the open part is the power
-model.
+sustained clock closes out of sample once the heat path is measured the same day (for E83, in E80's session that
+afternoon); the open part is the power model.
 **Report:** no page of its own; the data README is the public record.
 
 ## E84 — kspeed/e84: E80's speed design on aifoundry1's card 0 (Q130, second workflow; registered 2026-10-31, 15:41 PDT) — pre-registered; results to follow
@@ -3776,7 +3781,7 @@ model.
 in [`tools/claims-v3/kspeed/e84/`](../../tools/claims-v3/kspeed/e84/README.md) (`337b03b2`, 15:41:11 PDT: 11 kinds,
 frozen predictions), with amendment A1 (`1713a3f9`, 15:42:43, before the smoke): card 0 reports **release 1.4.0, BL1
 and BL2 0.22.0, PMIC 1.6.1, minions 0.25.1** — not the 1.4.1 / BL2 0.21.2 on record — and read TDP 65 W, threshold
-65 °C, idle at 600 MHz / 519 mV, so E84 measures the same governor build as aifoundry2's and nothing frozen changed.
+65 °C, idle at 600 MHz / 519 mV, so E84 measures the same BL2 version as aifoundry2's and nothing frozen changed.
 **In progress when this entry was written:** the card was released at about 16:08 PDT and its data landed as
 `d6d1a0c8` (16:13 PDT, [`docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/`](../reports/data/2026-10-31-e84-speed-aifoundry1-card0/README.md)),
 but no verification had been done, so nothing of it is folded in here; its results follow in the Q130 addendum.
@@ -3789,12 +3794,15 @@ aifoundry2 after E83. **Running when this entry was written;** its results follo
 
 **Lane lessons from E78–E83, recorded for the next registration.** (1) A heat column read from a 2 s window over a
 whole-degree die reading resolves a kind only above about 12 W of switching on these cards: register a longer window,
-or a launch away from a step, before quoting heat for low-power kinds. (2) Four of the six card lanes looked at
-partial data while their card ran (E78 at 13:48, E81 at 14:55, E83 at 14:06 and 14:26, and E82's look at pass
-8210 that led to A2); each is disclosed and none changed a decision, but a registration should say whether an interim
-look is allowed. (3) Open no device — not even `ettelem --help` — before the claim or outside `flock -n` (E79's D2).
+or a launch away from a step, before quoting heat for low-power kinds. (2) All six card lanes looked at
+partial data while their card ran (E78 at 13:48, E81 at 14:55, E83 at 14:06 and 14:26; E79 at pass 7910, written up as
+A4 during pass 7912; E80 at the burst block, A1 during the sustained block; E82 at pass 8210, A2); each is disclosed
+and none changed a frozen prediction or rule, but three led to amendments that added items (E79), a labelled post-hoc
+view (E80) and a pass with a dip-filtered view (E82), so a registration should say whether an interim look is
+allowed. (3) Open no device — not even `ettelem --help` — before the claim or outside `flock -n` (E79's D2).
 (4) Every registered leakage arm moved some cell by more than its interval: publish each cell at the registered arms.
-(5) A sustained-clock prediction needs the die line measured in the same session: E80, scored on 23 October's line,
+(5) A sustained-clock prediction needs the die line measured the same day (for E83, E80's session that afternoon):
+E80, scored on 23 October's line,
 failed on a drift of about 3 W, while E83, scored an hour later on E80's same-day relation, passed. (6) Single low
 board-meter samples, often at a launch boundary, set two passes aside on aifoundry1's card 1 (E82) and failed E81's P5
 by 0.0007 W on aifoundry3: register a dip filter (E82 A2's definition) before the data.

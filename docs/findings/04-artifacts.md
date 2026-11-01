@@ -883,7 +883,7 @@ now carries the page's own 38.29 / 46.73 / 63.40 W, from the new `card_descripti
 its "~1,050 toggles" label corrected against Q126(b) (`36aaef68`, version `f73a3a4ac4b8`, GitHub Pages `9565edd6`),
 then its two corrected facts made to cite the recount and its "65 wires" made 65 merged nets (`cb1f6e4d`, version
 `1bc01254c64a`, GitHub Pages `e9afd4d4`; `check-mirror --via https` exit 0); [MIRROR.md](../reports/MIRROR.md) records
-both deploys and the test recipe (`ca86be15`, `22c98029`). The memory levels page was not redeployed. Two data
+both deploys and the test recipe (`ca86be15`, `22c98029`). The memory levels page was not redeployed. Three data
 directories' text was corrected as well: the Q129 ledger-scope directory no longer calls the global-route estimate a
 lower bound on the wire (`88e2f336`), and the toggle recount's and the routed netlist's READMEs now link the fixes that
 answer them (`99295452`).

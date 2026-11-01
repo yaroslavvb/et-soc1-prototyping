@@ -252,8 +252,9 @@ Read [Terms](#terms) first.
    **a zero is worth most in fp32 and least in int8** (half the elements zero: 0.30× / 0.60× / 0.77× of random power).
    Under aifoundry2's own governor the same kinds set the speed through their power: on a cool die only the power test
    acts (random fp32 712 MHz against 800 for sparse or small-integer data), in sustained work only the thermal test
-   (604 against 800 MHz), int8 barely throttles, and one power-to-clock relation gives 33 kinds' clocks from their
-   measured power to 7.5–7.9 MHz rms. 🛑 Both frozen explanation models failed parts of their scoring and are reported
+   (random 604 against sparse90's 800 MHz), int8 barely throttles, and one power-to-clock relation gives 33 kinds'
+   clocks from their measured power to 7.5–7.9 MHz rms (8.4–10.6 MHz over the kinds whose clock is free to move, post
+   hoc). 🛑 Both frozen explanation models failed parts of their scoring and are reported
    as failing; heat is measured only above about 12 W of switching, because the die reads whole degrees; and the RTL
    toggle counts are provisional, because neither bench computes a·b+c on a multiply-add. → [03-experiments.md](03-experiments.md),
    E78–E85; [05-claims.md](05-claims.md), "Q130";
