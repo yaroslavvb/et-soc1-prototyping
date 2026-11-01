@@ -1,0 +1,64 @@
+# E93 scored (kept passes [9310, 9311, 9312, 9313, 9314], set aside [], leak {'mode': '0.2414', 'k_w_per_c': 0.2414, 'n_runs': -1})
+
+Tally: {'PASS': 23, 'FAIL': 1}. Int8 pairing: **rtl: (l, l+8), the RTL's reading**. Session tie: E82 **PASS**, E91 **PASS**.
+
+| rule | contrast | W, 95% | threshold | verdict | at the arms |
+|---|---|---|---|---|---|
+| R1-fp32-both | fp32.nz_both | 7.936 ± 0.068 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R1-fp32-a | fp32.a_nz_b_randn − fp32.a_zeros_b_randn | 11.367 ± 0.133 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R1-fp32-b | fp32.a_randn_b_nz − 0.631 (E82) | 11.791 ± 0.127 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R1-fp16-both | fp16.nz_both | 8.022 ± 0.255 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R1-fp16-a | fp16.a_nz_b_randn − 0.761 (E82) | 11.719 ± 0.231 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R1-fp16-b | fp16.a_randn_b_nz − 0.624 (E82) | 11.101 ± 0.177 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R2-fp32 | fp32.nz_both − anchor_pi | -0.147 ± 0.138 | inside ±1.0 | **PASS** | same at all |
+| R2-fp16 | fp16.nz_both − 8.085 (E82) | -0.063 ± 0.255 | inside ±1.0 | **PASS** | same at all |
+| R3-fp32-one | fp32.dn1_both | 8.013 ± 0.080 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R3-fp32-both | fp32.dnr_both | 9.418 ± 0.073 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R3-fp32-a | fp32.a_dnr_b_randn − fp32.a_zeros_b_randn | 12.041 ± 0.209 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R3-fp32-b | fp32.a_randn_b_dnr − 0.631 (E82) | 12.694 ± 0.127 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R3-fp16-both | fp16.dnr_both | 9.249 ± 0.274 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R3-fp16-a | fp16.a_dnr_b_randn − 0.761 (E82) | 12.202 ± 0.111 | low > 5.0, high < 2.0 fails | **PASS** | same at all |
+| R4-fp32-both | fp32.dnr_both − fp32.dn1_both | 1.405 ± 0.083 | high < 4.98 | **PASS** | same at all |
+| R4-fp32-a | fp32.a_dnr_b_randn − fp32.a_nz_b_randn | 0.674 ± 0.191 | high < 3.94 | **PASS** | same at all |
+| R4-fp16-both | fp16.dnr_both − fp16.nz_both | 1.227 ± 0.286 | high < 3.58 | **PASS** | same at all |
+| R4-fp16-a | fp16.a_dnr_b_randn − fp16.a_nz_b_randn | 0.483 ± 0.215 | high < 2.48 | **PASS** | same at all |
+| R5-fp32 | fp32.a_randn_b_nz − fp32.a_nz_b_randn | 0.308 ± 0.158 | low > 1.0, high < 1.0 fails | **FAIL** | same at all |
+| R6a | int8.b_unpaired − int8.b_pairs_rtl | 1.249 ± 0.301 | low > 0.3, high < 0.3 fails | **PASS** | same at all |
+| R6b | int8.b_pairs_alt − int8.b_pairs_rtl | 1.326 ± 0.196 | low > 0.3, high < 0.3 fails | **PASS** | same at all |
+| R6c | int8.b_unpaired − int8.b_pairs_alt | -0.078 ± 0.177 | inside ±0.6 | **PASS** | same at all |
+| R7 | int8.a_3of4_b_full − int8.a_zeros_b_full | 5.398 ± 0.217 | low > 1.0, high < 1.0 fails | **PASS** | same at all |
+| R8 | fp32.sparse50_mask − fp32.sparse50 | 5.821 ± 0.149 | low > 1.0, high < 1.0 fails | **PASS** | same at all |
+
+| tile | live share | D over the type's zeros, W | predicted point | band | verdict |
+|---|---|---|---|---|---|
+| fp16.a_dnr_b_randn | 1.000 | 12.963 ± 0.111 | 11.34 | [9.07, 13.60] | PASS |
+| fp16.a_nz_b_randn | 1.000 | 12.480 ± 0.231 | 10.77 | [8.50, 13.03] | PASS |
+| fp16.a_randn_b_nz | 1.000 | 11.725 ± 0.177 | 11.78 | [9.15, 14.41] | PASS |
+| fp16.dnr_both | 1.000 | 9.249 ± 0.274 | 9.64 | [7.96, 11.14] | PASS |
+| fp16.nz_both | 1.000 | 8.022 ± 0.255 | 7.96 | [6.96, 8.96] | PASS |
+| fp32.a_dnr_b_randn | 1.000 | 12.788 ± 0.122 | 10.90 | [8.64, 13.17] | PASS |
+| fp32.a_nz_b_randn | 1.000 | 12.114 ± 0.183 | 10.40 | [8.13, 12.66] | PASS |
+| fp32.a_randn_b_dnr | 1.000 | 13.325 ± 0.127 | 14.53 | [11.90, 17.16] | PASS |
+| fp32.a_randn_b_nz | 1.000 | 12.422 ± 0.127 | 13.50 | [10.87, 16.13] | PASS |
+| fp32.dn1_both | 1.000 | 8.013 ± 0.080 | 7.92 | [6.92, 8.92] | PASS |
+| fp32.dnr_both | 1.000 | 9.418 ± 0.073 | 9.46 | [7.92, 10.96] | PASS |
+| fp32.nz_both | 1.000 | 7.936 ± 0.068 | 7.92 | [6.92, 8.92] | PASS |
+| fp32.sparse50_mask | 0.515 | 12.753 ± 0.152 | 10.42 | [8.42, 12.42] | FAIL |
+| int8.a_3of4_b_full | 1.000 | 5.801 ± 0.204 | 4.68 | [2.00, 7.37] | PASS |
+| int8.b_pairs_alt | 1.000 | 5.582 ± 0.138 | 5.76 | [3.90, 7.37] | PASS |
+| int8.b_pairs_rtl | 0.500 | 4.255 ± 0.189 | 3.61 | [2.86, 4.36] | INCONCLUSIVE |
+| int8.b_unpaired | 1.000 | 5.504 ± 0.143 | 5.76 | [3.90, 7.37] | PASS |
+
+| tie cell | against | D | theirs | difference | band | verdict |
+|---|---|---|---|---|---|---|
+| anchor_pi | E82 | 8.083 | 8.0954 | -0.013 | ±0.5 | PASS |
+| fp16.randn | E82 | 21.588 | 21.4415 | 0.146 | ±0.5 | PASS |
+| fp32.a_zeros_b_randn | E82 | 0.747 | 0.7234 | 0.023 | ±0.25 | PASS |
+| fp32.randn | E82 | 24.006 | 23.9869 | 0.019 | ±0.5 | PASS |
+| fp32.sparse50 | E82 | 6.933 | 6.7601 | 0.173 | ±0.75 | PASS |
+| int8.a_zeros_b_full | E82 | 0.404 | 0.3352 | 0.068 | ±0.25 | PASS |
+| int8.full | E82 | 6.963 | 6.8688 | 0.094 | ±0.25 | PASS |
+| anchor_pi | E91 at 0.1994 | 8.083 | 8.1079 | -0.025 | ±0.5 | PASS |
+| fp16.randn | E91 at 0.1994 | 21.588 | 21.7129 | -0.125 | ±0.5 | PASS |
+| fp32.randn | E91 at 0.1994 | 24.006 | 24.1164 | -0.11 | ±0.5 | PASS |
+| int8.full | E91 at 0.1994 | 6.963 | 6.9431 | 0.02 | ±0.25 | PASS |
