@@ -1,0 +1,23 @@
+Q132(r): rebuild check, Sun 1 Nov 2026. From the committed scripts' runs; nothing here touches a card.
+
+1. Two full builds, capture_real2.py -> make_real2.py -> make_predictions_real2.py, arm64 macOS, CPython 3.11.17,
+   numpy 1.26.4 (bundled OpenBLAS), torch 2.5.1, torchvision 0.20.1, transformers 4.46.3: every output byte-identical.
+   6e259fd2e9edaa3d4fdeb663461ec39389ec8c24436c114719536a51d26c8715  f1/real2.json
+   6e259fd2e9edaa3d4fdeb663461ec39389ec8c24436c114719536a51d26c8715  f2/real2.json
+   715ba7a0995c268177c7bd3c707adfe9e813de7853be539713d147dbcf575acd  cap1/capture.json
+   715ba7a0995c268177c7bd3c707adfe9e813de7853be539713d147dbcf575acd  cap2/capture.json
+   (and all 30 tiles: the two builds' sha256 lists differ in 0 lines)
+
+2. make_predictions_real2.py on x86_64 macOS (numpy 1.26.4, CPython 3.11) from the committed files: predictions-real2.json
+   and predictions-real2.txt byte-identical to the arm64 run's:
+   0957e0c295990ac95cded56430697fb0683c9cf451d90f6943c8ff8d6a0b021a  predictions-real2.json
+
+3. Not done: the capture on another machine. Q130(n)'s rebuild-check.txt shows what another BLAS does to fp32 and fp16 tiles'
+   low-order bits. Its committed int8 l6_mlp_down tile, made on x86_64, came back byte for byte from this arm64 capture
+   (real2.json committed_int8_l6_mlp_down_reproduced_from_this_capture).
+
+4. The first fp16 forward pass, kept for the record (README, Departure 1): it squared in fp16 before averaging, and
+   d*d overflowed. The log's lines, before the fix; no committed tile came from this pass:
+   capture_real2.py:154: RuntimeWarning: overflow encountered in multiply
+   00:00:47 gpt2 fp16 forward {'mean_next_token_nll_nats': 4.4407, 'perplexity': 84.83, 'top1_next_token_accuracy': 0.2441, 'positions_scored': 127} 20.1 s
+   00:00:47 fp16 computed vs rounded l6_gelu {'identical_bits_frac': 0.00393, 'median_ulps': 229.0, 'p90_ulps': 1305.0, 'p99_ulps': 13646.85, 'mean_bits_differing_per_element': 5.505, 'sign_differs_frac': 0.04276, 'rel_rms_fp16computed_vs_fp32': 0.325368, 'rel_rm

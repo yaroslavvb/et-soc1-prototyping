@@ -1,0 +1,72 @@
+PASS fp32/resnet18_l2c1: gate 0.191406 A zero words 0.191406
+PASS fp32/resnet18_l3c1: gate 0.445312 A zero words 0.445312
+PASS fp32/vgg16_fc2: gate 0.722656 A zero words 0.722656
+PASS fp32/t5small_l0_down: gate 0.949219 A zero words 0.949219
+PASS fp32/gpt2_l3_mlp_down: gate 0.000000 A zero words 0.000000
+PASS fp32/gpt2_l9_attn_qk: gate 0.000000 A zero words 0.000000
+PASS fp32/bert_l6_up: gate 0.000000 A zero words 0.000000
+PASS fp32/vit_l5_down: gate 0.000000 A zero words 0.000000
+PASS fp32/t5small_l0_up: gate 0.000000 A zero words 0.000000
+PASS fp32/vit_l11_down: gate 0.000000 A zero words 0.000000
+PASS fp32/gpt2_l6_mlp_down_bf16fwd: gate 0.000000 A zero words 0.000000
+PASS fp16/resnet18_l3c1: gate 0.367188 A zero words 0.367188
+PASS fp16/vgg16_fc2: gate 0.550781 A zero words 0.550781
+PASS fp16/t5small_l0_down: gate 0.871094 A zero words 0.871094
+PASS fp16/gpt2_l9_attn_qk: gate 0.000000 A zero words 0.000000
+PASS fp16/bert_l6_up: gate 0.000000 A zero words 0.000000
+PASS fp16/vit_l5_down: gate 0.000000 A zero words 0.000000
+PASS fp16/gpt2_l6_mlp_down_fp16fwd: gate 0.000000 A zero words 0.000000
+PASS fp16/gpt2_l6_attn_qk_fp16fwd: gate 0.000000 A zero words 0.000000
+PASS int8/resnet18_l3c1: gate 0.175781 A zero words 0.175781
+PASS int8/vgg16_fc2: gate 0.335938 A zero words 0.335938
+PASS int8/t5small_l0_down: gate 0.765625 A zero words 0.765625
+PASS int8/vit_l11_down: gate 0.546875 A zero words 0.546875
+PASS int8/gpt2_l6_down_per_token: gate 0.000000 A zero words 0.000000
+PASS int8/gpt2_l6_down_p9999: gate 0.000000 A zero words 0.000000
+PASS int8/gpt2_l6_down_p999: gate 0.000000 A zero words 0.000000
+PASS int8/gpt2_l11_down_maxabs: gate 0.636719 A zero words 0.636719
+PASS int8/gpt2_l11_down_p999: gate 0.000000 A zero words 0.000000
+PASS int8/gpt2_l11_down_asym: gate 0.000000 A zero words 0.000000
+PASS int8/vgg16_fc2_asym: gate 0.000000 A zero words 0.000000
+PASS 30 tiles: 30
+PASS 25 new tier-1, 5 tier-2: {1: 25, 2: 5}
+PASS pair int8/gpt2_l6_down_per_token vs l6_mlp_down: same B, different A
+PASS pair int8/gpt2_l6_down_p9999 vs l6_mlp_down: same B, different A
+PASS pair int8/gpt2_l6_down_p999 vs l6_mlp_down: same B, different A
+PASS pair fp16/gpt2_l6_mlp_down_fp16fwd vs l6_mlp_down: same B, different A
+PASS pair int8/gpt2_l11_down_p999 vs gpt2_l11_down_maxabs: same B, different A
+PASS pair int8/gpt2_l11_down_asym vs gpt2_l11_down_maxabs: same B, different A
+PASS pair int8/vgg16_fc2_asym vs vgg16_fc2: same B, different A
+PASS nested resnet18_l3c1: fp16's first 16 k are fp32's, rounded
+PASS nested resnet18_l3c1: an exact zero in fp32 is a zero byte in int8
+PASS nested resnet18_l3c1: same rows and columns in all three
+PASS nested vgg16_fc2: fp16's first 16 k are fp32's, rounded
+PASS nested vgg16_fc2: an exact zero in fp32 is a zero byte in int8
+PASS nested vgg16_fc2: same rows and columns in all three
+PASS nested t5small_l0_down: fp16's first 16 k are fp32's, rounded
+PASS nested t5small_l0_down: an exact zero in fp32 is a zero byte in int8
+PASS nested t5small_l0_down: same rows and columns in all three
+PASS asym: every exact zero of the fp32 tile's k range is -128 here
+PASS asym: no zero byte in A: zero bytes 0 (symmetric tile 783 of 1024), -128 bytes 779
+PASS T5 B on the bf16 grid (tile)
+PASS T5 B on the bf16 grid (whole weight, t5small_l0_ff_up)
+PASS T5 B on the bf16 grid (whole weight, t5small_l0_ff_down)
+PASS T5 B on the bf16 grid (whole weight, t5small_l2_ff_up)
+PASS T5 B on the bf16 grid (whole weight, t5small_l2_ff_down)
+PASS T5 B on the bf16 grid (whole weight, t5small_l5_ff_up)
+PASS T5 B on the bf16 grid (whole weight, t5small_l5_ff_down)
+PASS other models' weights are not
+PASS vit_l11_down: -0.0 share in A, no +0.0: 0.640625
+PASS every (a) point from the frozen beta and every (c) from its formula
+PASS known misses float_ungated/fp32: rms 1.0406, half-width 2.461
+PASS known misses float_ungated/fp16: rms 1.3947, half-width 3.155
+PASS known misses float_gated: rms 1.2848, half-width 3.144
+PASS known misses int8_ungated: rms 0.3680, half-width 1.022
+PASS known misses int8_gated: rms 0.4536, half-width 1.110
+PASS gpt2_l6_down_per_token = amendment-1.json calibration_sensitivity 'per-token max-abs (vector-wise)': D 5.354 W, bus 46996
+PASS gpt2_l6_down_p9999 = amendment-1.json calibration_sensitivity 'per-tensor 99.99th percentile clip': D 5.224 W, bus 44500
+PASS gpt2_l6_down_p999 = amendment-1.json calibration_sensitivity 'per-tensor 99.9th percentile clip': D 5.427 W, bus 47092
+PASS the committed int8 l6_mlp_down tile came back from this capture byte for byte
+predictions-real2.json sha256 0957e0c295990ac95cded56430697fb0683c9cf451d90f6943c8ff8d6a0b021a
+real2.json sha256 6e259fd2e9edaa3d4fdeb663461ec39389ec8c24436c114719536a51d26c8715
+ALL PASS
