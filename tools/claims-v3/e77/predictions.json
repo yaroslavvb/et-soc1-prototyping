@@ -1,0 +1,94 @@
+{
+ "experiment": "E77",
+ "frozen": "before the claim and the first launch (the commit that adds this file)",
+ "sources": {
+  "E77-PLAN.md": "eda860f60d082646f1d7cdee323751d442ded33476050c8a7c0d11d227f073f8",
+  "rail-ledger.json": "d660139e25e74c6cf079dcf0168a47bb0a37dc61c9aedd60e2dd07150813eba2",
+  "law": "rail-ledger.json hart_law_600mhz.per_card.aifoundry2.minion",
+  "law_offset_w": -0.44551420369132494,
+  "law_mw_per_hart": 22.313058757137036
+ },
+ "transfer": {
+  "f_ratio": 1.3333333333333333,
+  "v_a_nominal": 0.516,
+  "v_b_nominal": 0.618,
+  "per_hart_ratio": 1.9126
+ },
+ "rungs": [
+  {
+   "rung": 1,
+   "arm_a_harts": 1024,
+   "arm_a_minion_w": 22.4,
+   "arm_b_harts": 544,
+   "arm_b_minion_w": 22.36,
+   "mismatch_pct": -0.2
+  },
+  {
+   "rung": 2,
+   "arm_a_harts": 768,
+   "arm_a_minion_w": 16.69,
+   "arm_b_harts": 416,
+   "arm_b_minion_w": 16.9,
+   "mismatch_pct": 1.3
+  },
+  {
+   "rung": 3,
+   "arm_a_harts": 544,
+   "arm_a_minion_w": 11.69,
+   "arm_b_harts": 288,
+   "arm_b_minion_w": 11.44,
+   "mismatch_pct": -2.2
+  },
+  {
+   "rung": 4,
+   "arm_a_harts": 288,
+   "arm_a_minion_w": 5.98,
+   "arm_b_harts": 160,
+   "arm_b_minion_w": 5.98,
+   "mismatch_pct": -0.1
+  }
+ ],
+ "plan_table_check": "these reproduce E77-PLAN.md's table: 22.40/16.69/11.69/5.98 and 22.36/16.90/11.44/5.98 W",
+ "P1_ratio": {
+  "what": "minion-rail watts over idle, arm B / arm A at the SAME hart count (544 and 288)",
+  "predicted": 1.913,
+  "tolerance_pct": 5.0,
+  "rule": "PASS if both hart counts read within 5% of 1.913 (the tolerance is this registration's: the plan names the ratio, not a band; 5% is its matching tolerance). Also reported against (800/600)*(V_B/V_A)^2 from the measured sp.minion_mv. A FAIL is reported before anything else: the matching itself is then wrong"
+ },
+ "P2_matching": {
+  "what": "measured minion-rail watts over idle in each rung pair (A rung g against B rung g)",
+  "tolerance_pct": 5.0,
+  "rule": "a pair differing by more than 5% is reported as mismatched and the 43.4% check is reported against the achieved mismatch; if more than one pair misses, the f*V^2 transfer is reported as refuted on this card, and since the ladder cannot be re-cut inside this session the verdict below is reported as provisional, pending a re-cut ladder"
+ },
+ "P3_conduction_excess": {
+  "what": "at matched rail watts, arm A's conduction loss exceeds arm B's by (V_B/V_A)^2 - 1 of the conduction part, from the per-rung MEASURED voltages",
+  "nominal": 0.4344
+ },
+ "V_fit": {
+  "model": "offrail = a_m*dminion + a_s*dSRAM + a_n*dNoC + R_eff*[((m0 + dminion)/V)^2 - (m0/V0)^2], no intercept, all as deltas over each launch's own pre-launch idle, on the central (drift_split) footing; m0 = the idle bracket's minion-rail watts, V0 its sp.minion_mv and V the window's, in volts. The conduction term is the change in the regulator's I^2 from the TOTAL minion current: a regulator loses R I^2 in its whole current, and E77-PLAN.md's literal R_eff*(dminion/V)^2 leaves out the idle current's cross term 2*I0*dI, which is larger than dI^2 at these loads (m0 about 15-16 W, so I0 about 30 A, against a load step of at most about 43 A) and differs between the arms through 1/V^2 (registered before any data as README departure 10; the literal form is reported beside it as a secondary)",
+  "unit": "per pass: the rung means of arm A pass k and arm B pass k (8 points), least squares; the unit of replication is the pass (CONTEXT section 4)",
+  "PASS": "R_eff's two-sided 99% interval over passes (mean +- t(0.995, n-1) * SD/sqrt(n)) excludes 0, AND the pooled fit over every rung mean has an rms at least 30% below the same fit without the R_eff term",
+  "FAIL": "R_eff's 99% interval contains 0: the whole 0.875 pJ row is then off-rail logic in step with the rails, the conduction loss bounded above by the interval's upper edge. A FAIL is a result",
+  "neither": "the interval excludes 0 but the rms improves by less than 30%: reported as 'R_eff resolved, not a material term', neither PASS nor FAIL",
+  "report": "R_eff in milliohm; the conduction loss it implies at a 21 W minion rail at arm A's measured voltage, R_eff*(21/V_A)^2; that loss as a share of the published minion coefficient's 0.188*21 W; and that share of the 0.875 pJ row in pJ (the pJ this moves out of 'delivery loss plus logic in step' into a named regulator conduction loss)",
+  "secondary_plan_literal_square": "E77-PLAN.md's R_eff*(dminion/V)^2 with the same rules; no verdict",
+  "secondary_fixed_small_rails": {
+   "a_s": 0.03400652628838857,
+   "a_n": 0.2905790533074672,
+   "what": "the same fit with the SRAM and NoC coefficients held at the published aifoundry2 values; secondary, does not carry the verdict"
+  },
+  "sensitivities": [
+   "uncorrected footing",
+   "board_only footing",
+   "the rails deconvolved (tools/ettelem/deconv.py) instead of the settling ratio",
+   "launches flagged below_floor left out",
+   "launch-level pooled fit"
+  ]
+ },
+ "no_outcome_predicted": "E77-PLAN.md freezes the structure of the test, not the size or sign of R_eff, and this registration adds none",
+ "row_quoted": {
+  "row_pJ": 0.875,
+  "coef_minion": 0.18789339920416637,
+  "source": "docs/reports/data/2026-10-27-q129-rail-ledger/README.md Results table"
+ }
+}

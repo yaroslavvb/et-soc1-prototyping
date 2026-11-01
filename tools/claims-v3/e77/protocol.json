@@ -1,0 +1,133 @@
+{
+ "experiment": "E77",
+ "question": "Split the rail ledger's 0.875 pJ 'regulators' delivery loss plus logic in step with the rails' row into conduction loss (carries 1/V^2) and logic (does not), from the same minion-rail watts delivered at two rail voltages (E77-PLAN.md).",
+ "design_source": "docs/reports/data/2026-10-27-q129-rail-ledger/E77-PLAN.md",
+ "card": "aifoundry2 card 0",
+ "type": "fp32",
+ "values": "randn",
+ "tools": {
+  "heater": "build/sparsity_t2/host/sparsity_host",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-e77/ettelem"
+ },
+ "sampler": {
+  "every_ms": 100,
+  "profile": "no-PMIC-read (ettelem-e77: no GET_ASIC_VOLTAGE, no GET_MODULE_VOLTAGE, no statistics reset)"
+ },
+ "arms": {
+  "A": {
+   "what": "600 MHz at about 516 mV: the static TDP level at 0 (the vmin-LUT floor pin, E72's write on this card)",
+   "tdp_w": 0,
+   "clock_mhz": 600,
+   "per_shire": [
+    32,
+    24,
+    17,
+    9
+   ],
+   "predicted_minion_w": [
+    22.4,
+    16.69,
+    11.69,
+    5.98
+   ],
+   "heater": {
+    "per_shire": 32,
+    "seconds": 2,
+    "note": "fp32 randn on 1,024 harts at 600 MHz, about 53-55 W on the board (E80's sustained 54.2 W)"
+   }
+  },
+  "B": {
+   "what": "800 MHz at about 618 mV: the card's own governor at its own 65 W / 65 C",
+   "tdp_w": 65,
+   "clock_mhz": 800,
+   "per_shire": [
+    17,
+    13,
+    9,
+    5
+   ],
+   "predicted_minion_w": [
+    22.36,
+    16.9,
+    11.44,
+    5.98
+   ],
+   "heater": {
+    "per_shire": 24,
+    "seconds": 2,
+    "note": "fp32 randn on 768 harts, not 1,024: at 800 MHz the full card reads 82-85 W with single readings to 88.88 W (E83), which would trip the 85 W single-reading abort; 768 harts model to about 66-70 W"
+   }
+  }
+ },
+ "launch": {
+  "seconds": 4,
+  "budget": 5.5
+ },
+ "rounds_per_pass": 3,
+ "passes": {
+  "B": [
+   1,
+   2,
+   3
+  ],
+  "A": [
+   1,
+   2,
+   3
+  ],
+  "order": "B1 B2 | set TDP 0 | A1 A2 A3 SETTLE | restore TDP 65 | RETURN B3"
+ },
+ "settling": {
+  "per_shire": 32,
+  "seconds": 8,
+  "budget": 9.5,
+  "note": "E77-PLAN's 12 s settling rung cannot be one launch under the lab's timeout 10; one 8 s launch of arm A's top rung gives the rails 4 s after the 4 s window (more than 6 tau)"
+ },
+ "return_burst": {
+  "per_shire": 17,
+  "seconds": 4,
+  "budget": 5.5,
+  "note": "after the restore, one launch of arm B's top rung: the clock must step up to 800 MHz and the ring must hold a throttle-up line"
+ },
+ "gate": {
+  "preheat_c": 59,
+  "launch_c": 58,
+  "min_approach_s": 6.0,
+  "settle_w": 0.15,
+  "max_below_c": 5,
+  "max_heats": 8,
+  "max_reheats": 3,
+  "max_wait_s": 40,
+  "note": "E60/E72's strict start (preheat to 59 C, launch at <= 58 C) with the rail ledger's S2 screen made a launch condition: >= 6 s since the last device process and the minion rail settled within 0.15 W between [t-5, t-3] and [t-2, t-0.3]. On this card the die falls from 59-60 C to 58 C within about 0.5 s of a heater ending (E72's own telemetry, 27 Oct) while the rails need about 10 s to settle, so the launch reading is expected at 55-58 C: a die that falls below 53 C before the rails settle is heated again (at most 3 times), after which the launch goes ahead at its reading, flagged below_floor; every launch reading is recorded and used in the leakage correction"
+ },
+ "est_launch_s": 22,
+ "cuts_card_min": {
+  "before_move": 16,
+  "move_by": 17,
+  "restore_by": 36,
+  "b3_by": 45,
+  "note": "card-minutes since the session took the lock; a pass is cut by whole rounds; the restore and the return burst are never cut; the runner's hard stop is 47 card-min and 18:55 PST"
+ },
+ "watchdog": {
+  "deadline_min": 75
+ },
+ "time": {
+  "no_start_after": "18:00",
+  "hard_stop": "18:55"
+ },
+ "identity": {
+  "anchor": "E69's firmware revisions read, 27 Oct 2026 13:56:26 PDT (docs/reports/data/2026-10-27-e69-governor-knob/README.md:187)",
+  "anchor_epoch": 1793134586,
+  "rule": "the module uptime (DM_CMD_GET_MODULE_UPTIME, RAM) must exceed the minutes since the anchor: no service-processor reset since, so the identity read then still names the running image"
+ },
+ "safety": {
+  "board_abort_w": 85.0,
+  "board_rule": "any single 10 Hz reading >= 85.0 W",
+  "die_abort_c": 72,
+  "die_rule": "the die mean (minshire[0]) on any reading",
+  "high_abort_c": 80,
+  "high_rule": "the die high-water latch (minshire[2], E69 A1: not a live reading)",
+  "pin_rule": "while the TDP is 0, any minion clock other than 600 MHz during a measurement launch"
+ }
+}
