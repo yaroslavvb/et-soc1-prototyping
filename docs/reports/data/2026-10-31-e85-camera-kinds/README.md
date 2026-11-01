@@ -31,7 +31,7 @@ they do is for the orchestrator and the owner to rule (C1). The lab knew of two 
   found this in the firmware source (deviation 1). It was not checked here for this card's build, and nothing in E85
   switched the trace back on.
 
-*Dated note, Sat 31 Oct 2026, about 22:3x PDT, added after the corrections without editing them: the owner has ruled
+*Dated note, Sat 31 Oct 2026, 22:43 PDT, added after the corrections without editing them: the owner has ruled
 on the question this paragraph and C1 leave to the orchestrator and the owner. Asked whether the camera runner's
 once-a-second statistics reset may be used, he answered "Yes, you can do the statistics reset." So the reset is
 allowed (the owner's ruling of 31 October 2026, [AGENT.md](../../../../AGENT.md) §5) and later runs may use
@@ -254,7 +254,7 @@ number below from committed files, and [`corrections-check.txt`](corrections-che
 | C8 | Small numbers were off: int8's per-lap scatter was "about 120 mK against 60–90"; int8's camera-read step read 1.80 here and 1.79 elsewhere; the push was given as 15:52:32; the workflow result said "45 allowed". | The scatter is now given as SE × √laps: 120 mK against 77 and 53 (unweighted: 115 against 103 and 95). The camera-read step is 1.79 (the value is 1.7948). The push was at 15:52:31 (GitHub's push record). The runner's cap was 44 card-minutes (`session.json` `caps.max_card_min`), inside the 45 planned. |
 | C9 | Found while fixing C1: the first version called the reset flag harmless. | Post hoc, the clock excursions cluster just after the resets. 13 late ramps fell in the 47 launches whose 1.5 s check sample came right after a reset, against 10 in the other 193 (one-sided Fisher p 3.5 × 10⁻⁵). 4 of the 6 mid-launch idle-reset dips did too (P 0.012 against an 18% base rate; the window was chosen after the data). Each reset call held the sampler ~121 ms, against its usual 78 ms sleep. This is suggestive only, and no verdict moves (Post hoc item 5). |
 
-*Dated note, Sat 31 Oct 2026, about 22:3x PDT: C1 left the reset's status to the orchestrator and the owner; the
+*Dated note, Sat 31 Oct 2026, 22:43 PDT: C1 left the reset's status to the orchestrator and the owner; the
 owner's ruling of 31 October 2026 allows it (the dated note under the safety paragraph, above).*
 
 ## Files
