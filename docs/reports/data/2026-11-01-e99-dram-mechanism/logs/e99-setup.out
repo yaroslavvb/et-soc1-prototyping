@@ -1,0 +1,48 @@
+2026-11-01T01:05:18-07:00
+== card and host ==
+No process holds an ET-SoC-1 device node or card lock.
+ 01:05:18 up 5 days,  9:46,  3 users,  load average: 0.71, 0.62, 0.63
+== the images, by hash against the Intel's ==
+sha256 check rc=0
+== the operands this experiment needs ==
+present: flw_pat
+present: bern:
+present: --operands file:
+present: lines: needs a whole number
+== .text hashes ==
+file   host f6633f1c0d0b00a84aa3b5590b903222830f4ddcfc95d87c6171672d99a5c11f 3574976 build/enercat-e99/host/enercat_host
+text   host eacec93bb16ee9047a6fbe2a308b68f714b1107c1caf6b372edb892d18ddaa77 build/enercat-e99/host/enercat_host
+code   host 2e7e4c0a198b9456e305dfe807bb0c4d086e5dc0a9d6940891d905dbd0662293 build/enercat-e99/host/enercat_host
+file   kernel 7ca7cc035358184ecb94053142b813e902ad4836dee57fc62b9a5bbce91731b1 80296 build/enercat-e99/host/../kernel/enercat.elf
+code   kernel a5743c3c5198edcb213f89047c38a4fe038ca3f719924ec456b5c73d200e6658 build/enercat-e99/host/../kernel/enercat.elf
+file   host 20e760c20e9b99c789ef96f1e4e950d51f534410275bfb933c2aaf96d1090fd0 3569104 build/sparsity/host/sparsity_host
+text   host 44e35dd24e025cd8c28c857245cd575f273f54a276c79aaf02be6ebf5e46350b build/sparsity/host/sparsity_host
+code   host 0c6106e215b313b9eb3112a1bfabf6c1a8c51ea6966071c826aaa9abd861a3e0 build/sparsity/host/sparsity_host
+== harness hashes ==
+033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa  tools/claims-v3/lib.sh
+8293b5a0fbf72b68cb2d1ded35fa520711f0bd404246ac36874d8922cb137735  tools/claims-v3/runitems.py
+aa638f73d5253e9d2aef2dce504f5bf485ef15f56f2f02a8bff366888d4cdae5  tools/claims-v3/text_hash.sh
+b653f4a1e555dd0a8eb92e01dbce1f61db288e6809bf7b7567c5a859da890223  tools/claims-v3/mf/block.sh
+7b90927171bfc417a755db7cff3eeacc8d725b55ca42981f1794d20d8b20137f  tools/claims-v3/mf/queue_mf.sh
+7512678064f727d1908452c4abfcfbfaa00fe3eaf8fffd0074b817576ed44c7a  tools/claims-v3/mf/make_mf.py
+13a16cd6296238c065959320f1aac6b74e5a7d794a19309606cfc2a743960906  tools/claims-v3/dm/README.md
+0029ff8cdb53df0f9cee9037f16291900e437e32c888da77f54ec7886d242a69  tools/claims-v3/dm/build_host.sh
+8b851a5de8968d893df5fb1a297ee8a548e12ee595488a578ecd70737ea638ee  tools/claims-v3/dm/dm_enc.py
+997f231c7b825b2a388331b9a83e81fefbda4b125a4e7bf2f326b9e8e5333b4c  tools/claims-v3/dm/make_dm.py
+64ae602348827de36eadb5f8837fd6b493c30aadfdd50272fdb49bf4b9da8133  tools/claims-v3/dm/make_host_src.py
+7038b1c679b2d3cf5c7e1702637b5d5352886f94d41c67af213612202841dc60  tools/claims-v3/dm/make_predictions_e99.py
+cb7c8c99ec3ac241fc9a55c101d2ae817d5937de9d1c292af3293bf0ac49f3c2  tools/claims-v3/dm/posthoc_desk.py
+fff9cc29e0043d6670f27a881a581c18f89dfe7abf9684fce1fdb3bb97b43c33  tools/claims-v3/dm/predictions.json
+80bc1be359e3042cb34c443ea2b019d7ac855a3e8fa10ae825861e248fd45f8e  tools/claims-v3/dm/reduce_dm.py
+fabaf4140a9f19bd91ec711610c1f673fa0e1e55ae7da87d6cbac41ed0db56d7  tools/claims-v3/dm/run_e99.sh
+3e3ff40833e8771fc1fc3f4b47783b65a4a1ccc470ad337b064752a04990160d  tools/claims-v3/dm/selftest_dm.py
+== dry run ==
+01:05:23 [aifoundry3] block 9900 #29 dm_L3: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+DRY approach: heat to 59, wait for 58
+DRY hold10: build/sparsity/host/sparsity_host --test fma --type fp32 --pattern none --values pi --shires 0xffffffff --per-shire 32 --seconds 4.0 --seed 9901 --stop-file /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/dm/p9900/STOP
+01:05:23 [aifoundry3] block 9900 #30 anchor_pi: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+01:05:23 [aifoundry3] done
+2026-11-01T01:05:28 [aifoundry3] dm p9900 ends: ok anchor_pi,dp_,dm_
+== size of one pass ==
+{"n": 30, "runs_per_block": 31, "blocks": 1, "max_s": 1774, "items": ["anchor_pi", "dp_zeros", "dp_bern", "dm_w1", "dm_u1", "dm_u2", "dm_u4", "dm_u5", "dm_u7", "dm_u8", "dm_l08", "dm_a08", "dm_a26", "dm_a35", "dm_a44", "dm_r08", "dm_r26", "dm_r44", "dm_L1", "dm_L2", "dm_L3", "dm_L4", "dm_L8", "dm_L16", "dm_L17", "dm_L32", "dm_L256", "dm_L8192", "dp_c1", "dp_c2"]}
+2026-11-01T01:05:28-07:00
