@@ -58,6 +58,7 @@ PART C, THE CAMERA BELOW 0.01 Hz (E111-C1..C4), from lockin_hlf.py's lockin.json
   * E111-C4, the hold: >= 95% of in-launch samples at >= 790 MHz and the die mean under 65 C (E73's R6).
 """
 import argparse
+import copy
 import glob
 import gzip
 import hashlib
@@ -422,9 +423,15 @@ def phone_window(rows, a, b):
 
 
 def part_a(data, P, H, phone):
-    pa = P["partA"]
+    pa = copy.deepcopy(P["partA"])
     out = {}
-    idles = {s: rest_block(os.path.join(data, s)) for s in ("W1", "W2", "END")}
+    # amendment A2: W1's hold was cut short by another user's login (exit 3), so H-I8 is read from W1B, the same hold from rest,
+    # with W1B's REST as its idle before and END2's as its idle after, when W1B ran; else from W1 as registered
+    a2 = os.path.join(HERE, "amendment-2.json")
+    if os.path.exists(a2) and os.path.exists(os.path.join(data, "W1B", "runs.jsonl")):
+        pa["holds"].update(json.load(open(a2))["partA_holds_override"])
+        out["amendment_2"] = "H-I8 read from W1B (from rest), idle before W1B, idle after END2"
+    idles = {s: rest_block(os.path.join(data, s)) for s in ("W1", "W2", "END", "W1B", "END2")}
     out["idles"] = {k: ({kk: (rnd(vv, 4) if isinstance(vv, float) else vv) for kk, vv in v.items()} if v else None) for k, v in idles.items()}
     for hname, spec in pa["holds"].items():
         pdir = os.path.join(data, spec["step"])

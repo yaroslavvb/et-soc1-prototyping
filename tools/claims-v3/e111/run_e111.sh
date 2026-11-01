@@ -10,9 +10,11 @@
 #   bash tools/claims-v3/e111/run_e111.sh config <tag>          # a read-only ettelem config into build/e111/config-<tag>.json
 #   bash tools/claims-v3/e111/run_e111.sh smoke                 # E98's smoke by hand (the queue runs it itself as its first step)
 #   bash tools/claims-v3/e111/run_e111.sh go <w1-not-before> <w1-latest>   # the queue (SMOKE, W1, W2, END, CAM), detached
+#   bash tools/claims-v3/e111/run_e111.sh go2 <card-min-used>         # amendment A2: W1B, END2, CAM after the first queue ended
+#   bash tools/claims-v3/e111/run_e111.sh drya2                       # A2's two new steps with --dry
 #   bash tools/claims-v3/e111/run_e111.sh watch
 set -u
-cmd=${1:?usage: run_e111.sh stage|check|dry|config|smoke|go|watch}
+cmd=${1:?usage: run_e111.sh stage|check|dry|config|smoke|go|go2|drya2|watch}
 ROOT="$HOME/claude/et-soc1-prototyping"
 T="$ROOT/tools/claims-v3"
 B="$ROOT/build/e111"
@@ -79,6 +81,23 @@ case "$cmd" in
     mkdir -p "$B/runs"
     setsid nohup python3 "$T/e111/queue_e111.py" --schedule "$B/schedule.json" --runs "$B/runs" > "$B/queue.out" 2>&1 < /dev/null &
     echo "queue pid $!"; sleep 3; tail -3 "$B/queue.out"; cat "$B/runs/status.json"; echo
+    ;;
+  go2)
+    # amendment A2: after the first queue has ended, the int8 hold from rest (W1B), its idle after (END2), then CAM, in the same runs dir
+    cmb=${2:?card minutes the first queue used}
+    if pgrep -f "queue_e111.py --schedule $B/schedule.json" > /dev/null; then echo "refusing: the first queue still runs"; exit 2; fi
+    rm -f "${B:?}/runs/SKIP-CAM"
+    python3 "$T/e111/make_schedule_e111.py" --date "$(date +%F)" --w1-not-before 00:00 --w1-latest 23:59 --no-start-after 18:00 \
+      --cutoff 18:55 --rest-from-ms 0 --card-min-before "$cmb" --out "$B/schedule2.json"
+    setsid nohup python3 "$T/e111/queue_e111.py" --schedule "$B/schedule2.json" --runs "$B/runs" --steps W1B,END2,CAM > "$B/queue2.out" 2>&1 < /dev/null &
+    echo "queue2 pid $!"; sleep 3; tail -3 "$B/queue2.out" | cut -c1-300; cat "$B/runs/status.json"; echo
+    ;;
+  drya2)
+    D="$B/dry-a2-$(date +%H%M%S)"; mkdir -p "$D"
+    python3 "$T/e111/make_schedule_e111.py" --date "$(date +%F)" --w1-not-before 00:00 --w1-latest 23:59 --no-start-after 23:58 \
+      --cutoff 23:59 --out "$D/schedule.json"
+    timeout 500 python3 "$T/e111/queue_e111.py" --schedule "$D/schedule.json" --runs "$D/runs" --steps W1B,END2 --dry > "$D/queue.out" 2>&1 < /dev/null
+    echo "dry a2 rc=$?"; grep -h '"kind": "\(end\|skip\|queue_end\)"' "$D/queue.out" | cut -c1-260
     ;;
   watch)
     cat "$B/runs/status.json" 2>/dev/null; echo; tail -4 "$B/queue.out" 2>/dev/null | cut -c1-400

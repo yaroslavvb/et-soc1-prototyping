@@ -52,9 +52,9 @@ ET_LIB = "/opt/et/lib"
 IDLE_W_BAR = 26.0
 IDLE_DIE_BAR = 55
 POLL_S = 20
-PLAN_MIN = {"SMOKE": 1.5, "W1": 44.5, "W2": 50.0, "END": 2.5, "CAM": 22.0}
-REST_MIN = {"SMOKE": 0, "W1": 15, "W2": 20, "END": 15, "CAM": 0}
-STEPS = ("SMOKE", "W1", "W2", "END", "CAM")
+PLAN_MIN = {"SMOKE": 1.5, "W1": 44.5, "W2": 50.0, "END": 2.5, "CAM": 22.0, "W1B": 30.0, "END2": 2.5}
+REST_MIN = {"SMOKE": 0, "W1": 15, "W2": 20, "END": 15, "CAM": 0, "W1B": 15, "END2": 15}
+STEPS = ("SMOKE", "W1", "W2", "END", "CAM")   # amendment A2: --steps W1B,END2,CAM runs the int8 hold from rest, its idle after, then CAM
 HEALTH = "http://p3-phone:8080/health"
 
 
@@ -93,6 +93,8 @@ class Queue:
         self.errors = 0
         self.card_min = 0.0
         self.dry = a.dry
+        self.steps = tuple(x for x in (a.steps or ",".join(STEPS)).split(",") if x)
+        assert all(x in PLAN_MIN for x in self.steps), self.steps
         os.makedirs(self.runs, exist_ok=True)
         self.ettelem = os.path.join(self.root, "build/ettelem-hpl/ettelem")
         self.cam_code = os.path.join(self.root, "build/e111/cam")
@@ -337,13 +339,13 @@ class Queue:
 
     def run(self):
         self.rec("queue_start", cutoff_ms=self.cutoff, no_start_after_ms=self.no_start_after, budget_card_min=self.budget,
-                 steps=list(STEPS), python=sys.version.split()[0], sensors=bool(shutil.which("sensors")), dry=self.dry)
+                 steps=list(self.steps), python=sys.version.split()[0], sensors=bool(shutil.which("sensors")), dry=self.dry)
         th = threading.Thread(target=self.phone_loop, daemon=True)
         th.start()
         why = "done"
         safety = False
-        for name in STEPS:
-            if safety and name != "END":
+        for name in self.steps:
+            if safety and name not in ("END", "END2"):
                 self.rec("skip", step=name, why="after a safety stop only END runs")
                 continue
             if not self.wait_for(name):
@@ -385,6 +387,7 @@ def main():
     ap.add_argument("--runs", required=True)
     ap.add_argument("--root", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
     ap.add_argument("--dry", action="store_true")
+    ap.add_argument("--steps", default=None, help="amendment A2: a comma list of steps (default SMOKE,W1,W2,END,CAM)")
     a = ap.parse_args()
     signal.signal(signal.SIGHUP, signal.SIG_IGN)
     return Queue(a).run()

@@ -106,7 +106,21 @@ def main():
     en["blocks"] = [blk(e98, "REST")]
     dump(en, "protocol-end.json")
 
-    for p, n in ((w1, "protocol-w1-dry.json"), (w2, "protocol-w2-dry.json"), (en, "protocol-end-dry.json"), (sm, "protocol-smoke-dry.json")):
+    # amendment A2: W1B = E98's REST + the int8 neg_ones hold of HOLD_N processes from rest (no sustained series before it);
+    # END2 = E98's REST block, the idle after it
+    w1b = base(e98, "W1B", 34)
+    holdb = blk(e98, "HOLD")
+    holdb["launch"]["processes"] = HOLD_N
+    holdb["title"] = (f"amendment A2: the int8 hold H-I8 from rest, {HOLD_N} back-to-back 8 s processes (~26.5 min) of int8 neg_ones behind "
+                      f"E98's 57 C gate; the steady reading is the last 300 s")
+    w1b["blocks"] = [blk(e98, "REST"), holdb]
+    dump(w1b, "protocol-w1b.json")
+    en2 = base(e98, "END2", 5)
+    en2["blocks"] = [blk(e98, "REST")]
+    dump(en2, "protocol-end2.json")
+
+    for p, n in ((w1, "protocol-w1-dry.json"), (w2, "protocol-w2-dry.json"), (en, "protocol-end-dry.json"), (sm, "protocol-smoke-dry.json"),
+                 (w1b, "protocol-w1b-dry.json"), (en2, "protocol-end2-dry.json")):
         dump(dry(p), n)
 
     # the camera session: run_hlc.py's protocol v2, E85's sets and safety, one block at 0.005 Hz
