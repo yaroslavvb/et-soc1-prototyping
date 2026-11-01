@@ -16,7 +16,7 @@
 - **C6. `c1` and `c16` replicate E105's aifoundry3 power arm.** They are E105's by-column `gemm1` and `gemm16` (`e105c.json`, passes 10520 and 10522), run again with rgm107 on the same card at the same clock. S agrees within 0.31 W in every cell the two share except random fp32's repeated block: E105 32.99 W, here 31.89, or 32.84 without its held reading. pJ per multiply-add agrees within 0.11 in the same cells, and T within 0.24% except in int8's repeated block (R1) (`corrections-check.txt` §8). The records should pool or compare these cells, not count them as new.
 - **C7. The `entry_point` sizes had no committed source.** They do now: [`entry-point-sizes.txt`](entry-point-sizes.txt), read with `tools/claims-v3/e107/elfsym_e107.py` from copies of the two ELFs whose sha256 equal the committed hashes of the binaries that ran.
 - **C8. sys_emu ran on aifoundry3's host.** It is now a dated departure, under Departures.
-- **C9. Precision.** T's 95% intervals are ±0.0051 µs at most (`c8.int8.full`), not "within ±0.005". R8 passes on means, as registered, but its first two steps are not resolved at 95%: paired by pass they are +1.12 ± 3.59 and +0.50 ± 1.89 nJ, and pass 10710 has `c16r8` under `c16r32`. Its last three steps are resolved (`corrections-check.txt` §5). The carry-over's ± is a standard error.
+- **C9. Precision.** T's 95% intervals are ±0.0051 µs at most (`c8.int8.full`), not "within ±0.005". R8 passes on means, as registered, but its first two steps are not resolved at 95%: paired by pass they are +1.12 ± 3.59 and +0.50 ± 1.88 nJ, and pass 10710 has `c16r8` under `c16r32`. Its last three steps are resolved (`corrections-check.txt` §5). The carry-over's ± is a standard error.
 
 ## The answer
 
