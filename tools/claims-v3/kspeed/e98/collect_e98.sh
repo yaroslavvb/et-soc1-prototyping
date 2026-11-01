@@ -10,7 +10,7 @@ mkdir -p "$DST/history"
 rsync -a -e "$SSH" --exclude='STOP' "aifoundry2:$REMOTE/runs/" "$DST/" || exit 3
 rsync -a -e "$SSH" "aifoundry2:$REMOTE/smoke/" "$DST/smoke/" || exit 3
 rsync -a -e "$SSH" "aifoundry2:$REMOTE/smoke.out" "$DST/smoke/run.out" || exit 3
-for f in schedule.json slots.txt queue.out; do rsync -a -e "$SSH" "aifoundry2:$REMOTE/$f" "$DST/$f" || exit 3; done
+for f in schedule.json schedule-a1.json slots.txt slots-a1.txt queue.out queue-first.out; do rsync -a -e "$SSH" "aifoundry2:$REMOTE/$f" "$DST/$f" || exit 3; done
 for f in "$DST"/*/tel/*.jsonl "$DST"/*/launches.jsonl; do [ -f "$f" ] && gzip -9 -n -f "$f"; done
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 for box in aifoundry1 aifoundry2 aifoundry3; do

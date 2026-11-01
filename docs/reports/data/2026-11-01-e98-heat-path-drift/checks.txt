@@ -1,0 +1,153 @@
+K1. Every registered slope with four probes is one contrast: P1 against P3, P6, P7
+  leverage of P1 in R1 and R2: 0.940  (x 95.510)
+  leverage of P3 in R1 and R2: 0.362  (x 94.588)
+  leverage of P6 in R1 and R2: 0.253  (x 94.810)
+  leverage of P7 in R1 and R2: 0.446  (x 94.502)
+  rest die, W-derived                    P1   95.510  later   94.588   94.810   94.502  mean   94.633  P1 - later  +0.877 C  sd of the three 0.159
+  rest W, 20 min of history              P1   22.110  later   21.897   21.949   21.877  mean   21.908  P1 - later  +0.203 W  sd of the three 0.037
+  rest die, raw history                  P1   46.867  later   46.090   46.196   45.679  mean   45.988  P1 - later  +0.878 C  sd of the three 0.273
+  rest W, the 60 s reading               P1   22.038  later   21.764   21.802   21.990  mean   21.852  P1 - later  +0.186 W  sd of the three 0.121
+  the line (R1)                          P1   39.803  later   39.331   39.397   39.310  mean   39.346  P1 - later  +0.457 C  sd of the three 0.045
+  hold die (R2)                          P1   60.415  later   58.049   58.795   58.485  mean   58.443  P1 - later  +1.973 C  sd of the three 0.375
+  hold ioshire                           P1   60.764  later   58.835   58.972   58.907  mean   58.905  P1 - later  +1.859 C  sd of the three 0.068
+  hold fine W (S2)                       P1   41.402  later   40.413   40.566   40.469  mean   40.483  P1 - later  +0.919 W  sd of the three 0.078
+  fp16 ones MHz (S4)                     P1  771.400  later  789.900  783.800  787.100  mean  786.933  P1 - later -15.533 MHz  sd of the three 3.053
+  fp16 ones W (S4)                       P1   52.370  later   54.180   53.620   53.720  mean   53.840  P1 - later  -1.470 W  sd of the three 0.299
+  ratios to the rest die's +0.877 C: line 0.52, hold die 2.25, hold ioshire 2.12; hold fine W per rest W 4.53; trip -17.7 MHz/C, -1.68 W/C
+  on the raw history die (+0.878 C): line 0.52, hold die 2.25
+  hold die minus rest die (raw history): P1 13.55, P3 11.96, P6 12.60, P7 12.81
+  W per C inside each hold, by die step, after its first 60 s: [0.516, 0.395, 0.622, 0.392], median 0.456 (E64's 0.442); hold die from fine W: +2.08 C at 0.442
+
+K2. How wide R1's interval really is. It has 2 df and P1's leverage leaves little to estimate from
+  residual scatter of a probe in the frozen fit: 0.036 C; from the eight positions' own scatter, as if independent: 0.063 C; planning noise: 0.15 C
+  slope 0.502, half-width on the fit's own            0.196: [0.306, 0.698]; holds 0.25: False; holds 0: False
+  slope 0.502, half-width on the positions' scatter   0.343: [0.159, 0.845]; holds 0.25: True; holds 0: False
+  slope 0.502, half-width on planning noise           0.815: [-0.313, 1.317]; holds 0.25: True; holds 0: True
+  R2: the hold's scatter among P3, P6, P7 is 0.375 C (planning 0.40 C). slope 2.19 [0.47, 3.90]: holds the room's 1.12: True; holds the path's 2.08: True; holds 1:1: True
+
+K3. Held and unheld runs: A2's expectation against the night, on the two rest readings
+  unheld, indexes 1-4: A2 expected 0.89; on the 20 min rest {'slope': 0.111, 'lo': -0.406, 'hi': 0.629, 'se': 0.12, 'n': 4, 'rms': 0.067, 'sxx': 0.6269, 'icpt': -10.537}
+     on the 60 s rest {'slope': 0.132, 'lo': -0.133, 'hi': 0.397, 'se': 0.062, 'n': 4, 'rms': 0.044, 'sxx': 1.0336, 'icpt': -12.493}
+  held, indexes 5-8: A2 expected 0.25; on the 20 min rest {'slope': 1.023, 'lo': 0.794, 'hi': 1.252, 'se': 0.053, 'n': 4, 'rms': 0.03, 'sxx': 0.6269, 'icpt': -97.08}
+     on the 60 s rest {'slope': 0.386, 'lo': -1.743, 'hi': 2.515, 'se': 0.495, 'n': 4, 'rms': 0.356, 'sxx': 1.0336, 'icpt': -36.53}
+  gate held, s, by index: P1: 0.0 0.0 0.0 0.0 0.0 1.4 17.0 19.6 26.1; P3: 0.0 0.0 0.0 0.0 0.0 0.0 11.8 12.4 16.2; P6: 0.0 0.0 0.0 0.0 0.0 0.2 14.0 14.6 16.8; P7: 0.0 0.0 0.0 0.0 0.0 0.0 10.6 11.0 15.0
+  limit by index: P1: n n n n n t t t t; P3: n n n n n n n t t; P6: n n n n n t t t t; P7: n n n n n n n t t
+  P2 kept what it ran (indexes 0-3). Not in R1 under the frozen rule, shown here. Indexes 1-3 on five probes:
+     line on the 20 min rest {'slope': 0.363, 'lo': -0.707, 'hi': 1.433, 'se': 0.336, 'n': 5, 'rms': 0.233, 'sxx': 0.801, 'icpt': -34.448}
+     line on the 60 s rest   {'slope': 0.351, 'lo': 0.017, 'hi': 0.684, 'se': 0.105, 'n': 5, 'rms': 0.126, 'sxx': 2.4179, 'icpt': -33.276}
+     fine W on the 20 min rest W {'slope': 0.696, 'lo': -1.077, 'hi': 2.468, 'se': 0.557, 'n': 5, 'rms': 0.089, 'sxx': 0.0429, 'icpt': -15.29}
+     fine W on the 60 s rest W   {'slope': 0.678, 'lo': 0.505, 'hi': 0.851, 'se': 0.054, 'n': 5, 'rms': 0.015, 'sxx': 0.1296, 'icpt': -14.89}
+  the from-rest run, five probes: line on the 60 s rest {'slope': 0.887, 'lo': 0.433, 'hi': 1.342, 'se': 0.143, 'n': 5, 'rms': 0.172, 'sxx': 2.4179, 'icpt': -48.072}; fine W on the 60 s rest W {'slope': 1.393, 'lo': 0.716, 'hi': 2.071, 'se': 0.213, 'n': 5, 'rms': 0.059, 'sxx': 0.1296, 'icpt': 2.657}
+
+K4. The night's readings across the boxes, 30 min bins, idle rows only, by the desk lane's filter (PST clock = UTC - 8)
+  UTC    | a2 W     die   nic   nvme  n  | a1c0 W   die   a1 nic nvme  n  | a1c1 W   die
+  07:00  |  22.12  46.56  44.26  37.21  360 |  18.53  47.03  53.14  43.92  160 |  30.28  52.19
+  07:30  |  22.13  46.82  44.36  37.67  352 |  18.62  47.68  53.88  44.17  179 |  30.47  52.38
+  08:00  |  22.52  48.37  45.22  38.27  103 |    -      -      -      -      - |    -      -
+  08:30  |  22.59  49.05  45.44  38.33   74 |  18.70  48.00  54.07  44.60  247 |  30.64  52.93
+  09:00  |  22.06  46.70  44.52  37.71  360 |  18.64  47.74  53.52  43.91  349 |  30.43  52.44
+  09:30  |  22.24  47.22  44.57  37.90  248 |  18.69  48.00  53.56  44.00   42 |  30.71  53.33
+  10:00  |  22.11  46.75  44.29  36.92   61 |  18.63  47.95  54.96  44.90   40 |  30.88  53.35
+  10:30  |    -      -      -      -      - |  18.74  48.00  54.55  44.90   55 |  31.02  53.84
+  11:00  |  22.09  46.88  44.47  37.44  176 |  18.53  47.21  53.50  43.89  270 |  30.25  51.94
+  11:30  |  21.87  46.00  43.84  36.90  120 |  18.39  46.70  52.42  42.90  360 |  29.92  51.05
+  12:00  |  22.01  46.27  43.82  37.00  229 |  18.29  46.12  52.03  42.87  360 |  29.71  50.54
+  12:30  |    -      -      -      -      - |  18.36  46.58  52.06  42.55  360 |  29.89  51.19
+  13:00  |  22.08  46.37  43.80  37.09  316 |  18.45  47.00  52.87  43.35  316 |  30.08  51.54
+  13:30  |  21.94  46.16  43.58  36.90  300 |  18.50  47.00  53.03  43.66  217 |  30.19  51.89
+  14:00  |  22.17  46.72  44.07  37.06  167 |  18.51  47.06  53.21  43.90  265 |  30.24  52.03
+  14:30  |  21.84  45.55  43.47  36.90  120 |  18.46  47.00  52.62  43.15  360 |  30.05  51.35
+  15:00  |  21.95  45.92  43.51  36.64  254 |  18.38  46.36  52.11  42.90  265 |  29.82  51.00
+
+K5. Was the room moving during a probe? aifoundry1's idle readings, not heated by this card, over each probe's rest window, its work, and the hold's last 2 min
+  P1 rest window   a1c0 W 18.622 die  47.66 a1 nic  53.87 nvme  44.15 n  173 | a1c1 W 30.415
+  P1 the work      a1c0 W    nan die    nan a1 nic    nan nvme    nan n    0 | a1c1 W    nan
+  P1 last 2.5 min  a1c0 W    nan die    nan a1 nic    nan nvme    nan n    0 | a1c1 W    nan
+  P3 rest window   a1c0 W 18.423 die  46.98 a1 nic  52.75 nvme  43.08 n  240 | a1c1 W 29.982
+  P3 the work      a1c0 W 18.383 die  46.61 a1 nic  52.30 nvme  42.90 n  228 | a1c1 W 29.894
+  P3 last 2.5 min  a1c0 W 18.326 die  46.00 a1 nic  52.20 nvme  42.90 n   30 | a1c1 W 29.811
+  P6 rest window   a1c0 W 18.502 die  47.00 a1 nic  52.89 nvme  43.57 n  154 | a1c1 W 30.189
+  P6 the work      a1c0 W 18.515 die  47.17 a1 nic  53.72 nvme  43.90 n   99 | a1c1 W 30.392
+  P6 last 2.5 min  a1c0 W 18.479 die  47.00 a1 nic  53.36 nvme  43.90 n   30 | a1c1 W 30.107
+  P7 rest window   a1c0 W 18.471 die  47.00 a1 nic  52.77 nvme  43.55 n  240 | a1c1 W 30.103
+  P7 the work      a1c0 W 18.466 die  47.00 a1 nic  52.58 nvme  43.14 n  228 | a1c1 W 30.058
+  P7 last 2.5 min  a1c0 W 18.487 die  47.00 a1 nic  52.39 nvme  42.90 n   30 | a1c1 W 30.101
+
+K6. The same reading across sessions: the kinds the sessions share, against the rest (desk lane's table; E96 from its own README section 5; E98 from this file)
+  session  rest W  raw rest die | int8 full line  fp32 randn line  mean | fp16 ones W, MHz, line
+  E64    22.693   49.28       | 42.13  42.24  42.18 |  49.28  737.1  42.86
+  E80    21.762   45.58       | 40.59  41.22  40.9 |  53.21  781.6  40.47
+  E83    22.025   46.42       | 41.06  40.73  40.9 | 
+  E87    22.174   47.15       | 41.59  41.79  41.69 | 
+  E96    22.145   46.79       | 40.77  41.48  41.13 | 
+  P1     22.110   46.87       | 41.74  41.77  41.75 |  52.37  771.4  41.23
+  P3     21.897   46.09       | 40.51  41.29  40.9 |  54.18  789.9  40.14
+  P6     21.949   46.20       | 41.03  41.24  41.13 |  53.62  783.8  40.50
+  P7     21.877   45.68       | 40.26  41.08  40.67 |  53.72  787.1  40.26
+  the mean line on the raw rest die, all sessions: {'slope': 0.409, 'lo': 0.227, 'hi': 0.59, 'se': 0.077, 'n': 9, 'rms': 0.213, 'sxx': 9.8898, 'icpt': 22.18}
+  the same without E64: {'slope': 0.58, 'lo': 0.201, 'hi': 0.96, 'se': 0.155, 'n': 8, 'rms': 0.201, 'sxx': 2.2402, 'icpt': 14.238}
+  the same, earlier sessions only (E64, E80, E83, E87, E96): {'slope': 0.381, 'lo': 0.111, 'hi': 0.65, 'se': 0.085, 'n': 5, 'rms': 0.181, 'sxx': 7.6081, 'icpt': 23.445}
+  fp16 ones' clock on the raw rest die (E64, E80, P1, P3, P6, P7): {'slope': -13.754, 'lo': -18.84, 'hi': -8.669, 'se': 1.832, 'n': 6, 'rms': 4.626, 'sxx': 9.5646, 'icpt': 1416.298}
+  fp16 ones' W on the raw rest die: {'slope': -1.238, 'lo': -1.783, 'hi': -0.694, 'se': 0.196, 'n': 6, 'rms': 0.495, 'sxx': 9.5646, 'icpt': 110.453}
+
+K7. Idle-reset dips and other flags, per probe (kept in the registered numbers)
+  P1: dips in the 40 s windows 0 of 9 runs; hold window 1; dips anywhere in the work 1; rest_ok True; since busy 19.9 min, rows 120
+  P2: dips in the 40 s windows 0 of 4 runs; hold window 0; dips anywhere in the work 0; rest_ok True; since busy 36.2 min, rows 240
+  P3: dips in the 40 s windows 0 of 9 runs; hold window 2; dips anywhere in the work 4; rest_ok True; since busy 24.7 min, rows 177
+  P6: dips in the 40 s windows 1 of 9 runs; hold window 1; dips anywhere in the work 2; rest_ok True; since busy None min, rows 240
+  P7: dips in the 40 s windows 0 of 9 runs; hold window 1; dips anywhere in the work 2; rest_ok True; since busy 23.9 min, rows 168
+  R1 with dips left out: {'df': 2, 'hi': 0.732, 'icpt': -8.232, 'lo': 0.2736, 'n': 4, 'rms': 0.0298, 'se': 0.0533, 'slope': 0.5028, 'x_range': 1.008}
+  binaries the same in every probe: True
+
+K8. P1 minus the later probes by position (the line, then board W and die), and the rest of the night's shape
+  index 0 fp32/zeros     line +0.73  W +0.18  die +0.82  MHz -1.7
+  index 1 fp16/zeros     line +0.46  W +0.32  die +0.61  MHz +1.9
+  index 2 int8/zeros     line +0.39  W -0.16  die +0.31  MHz -5.6
+  index 3 int8/neg_ones  line -0.15  W +0.27  die -0.03  MHz +4.1
+  index 4 int8/sparse50  line -0.13  W +0.82  die +0.24  MHz +7.5
+  index 5 fp16/ones      line +0.79  W -1.13  die +0.27  MHz -13.0
+  index 6 int8/full      line +1.14  W -1.81  die +0.31  MHz -19.1
+  index 7 fp32/randn     line +0.57  W -0.31  die +0.43  MHz -3.6
+  index 8 fp16/ones      line +1.06  W -1.81  die +0.23  MHz -18.2
+  hold, int8 neg_ones     line +1.58  W +0.86  die +1.97  MHz -0.5
+  rest W, expected at the freeze against measured: P1 22.105 / 22.110, P2 22.018 / 22.066, P3 21.801 / 21.897, P6 21.703 / 21.949, P7 21.668 / 21.877
+
+K9. The hold by minute: die and fine W, reset samples left out (is 5.5 min near steady?)
+  P1  0: 60.58 C 41.26 W; 1: 60.83 C 41.34 W; 2: 60.88 C 41.36 W; 3: 60.69 C 41.38 W; 4: 60.65 C 41.39 W; 5: 59.90 C 40.71 W
+  P3  0: 59.37 C 40.78 W; 1: 58.99 C 40.63 W; 2: 58.94 C 40.55 W; 3: 58.35 C 40.32 W; 4: 58.00 C 40.25 W; 5: 57.99 C 40.01 W
+  P6  0: 59.93 C 41.04 W; 1: 59.29 C 40.73 W; 2: 58.95 C 40.53 W; 3: 58.94 C 40.53 W; 4: 58.79 C 40.41 W; 5: 58.63 C 40.18 W
+  P7  0: 59.74 C 40.93 W; 1: 58.95 C 40.45 W; 2: 58.33 C 40.35 W; 3: 58.00 C 40.36 W; 4: 58.67 C 40.35 W; 5: 58.79 C 40.03 W
+
+K10. Nothing was set: every config read of the night
+  59 reads across the probes' runs and both ends of each probe; 0 not 65 W / 65 C
+
+K11. What else ran in the room: the share of each box's rows with a card held, over each probe's rest window and its work
+  P1: rest window aifoundry1 0.28, aifoundry3 0.74; the work aifoundry1 0.95, aifoundry3 0.67; the hold's last 2.5 min aifoundry1 1.00, aifoundry3 0.90; hold die 60.42
+  P3: rest window aifoundry1 0.00, aifoundry3 1.00; the work aifoundry1 0.00, aifoundry3 1.00; the hold's last 2.5 min aifoundry1 0.00, aifoundry3 1.00; hold die 58.05
+  P6: rest window aifoundry1 0.36, aifoundry3 1.00; the work aifoundry1 0.60, aifoundry3 1.00; the hold's last 2.5 min aifoundry1 0.00, aifoundry3 1.00; hold die 58.80
+  P7: rest window aifoundry1 0.00, aifoundry3 1.00; the work aifoundry1 0.00, aifoundry3 0.20; the hold's last 2.5 min aifoundry1 0.00, aifoundry3 0.00; hold die 58.48
+
+K12. Int8 full, the kind that lands on either side of the trip: its sustained clock and limit against the rest, every session
+  E64   raw rest die  49.28  rest W 22.693  clock  763.2 MHz, 1 run(s), each [763.2]
+  E80   raw rest die  45.58  rest W 21.762  clock  793.4 MHz, 2 run(s), each [796.7, 790.0]
+  E83   raw rest die  46.42  rest W 22.025  clock  786.5 MHz, 1 run(s), each [786.5]
+  E87   raw rest die  47.15  rest W 22.174  clock  774.7 MHz, 1 run(s), each [774.7]
+  E96   raw rest die  46.79  rest W 22.145  clock  789.4 MHz, 4 run(s), each [791.6, 793.4, 777.2, 795.4]
+  P1    raw rest die  46.87  rest W 22.110  clock  773.4 MHz, 1 run(s), each [773.4]
+  P3    raw rest die  46.09  rest W 21.897  clock  793.6 MHz, 1 run(s), each [793.6]
+  P6    raw rest die  46.20  rest W 21.949  clock  783.9 MHz, 1 run(s), each [783.9]
+  P7    raw rest die  45.68  rest W 21.877  clock  800.0 MHz, 1 run(s), each [800.0]
+  clock on the raw rest die, all: {'slope': -9.345, 'lo': -13.737, 'hi': -4.952, 'se': 1.857, 'n': 9, 'rms': 5.151, 'sxx': 9.8898, 'icpt': 1220.366}
+  the same without E64: {'slope': -13.71, 'lo': -22.754, 'hi': -4.665, 'se': 3.696, 'n': 8, 'rms': 4.791, 'sxx': 2.2402, 'icpt': 1422.252}
+  the night alone (P1, P3, P6, P7): {'slope': -22.771, 'lo': -41.46, 'hi': -4.083, 'se': 4.343, 'n': 4, 'rms': 2.621, 'sxx': 0.7281, 'icpt': 1839.955}
+
+K13. The proxies against the rest die: the nine-day relation (desk lane's room-proxies.txt: W of aifoundry2's idle per unit of the reading, so 0.2315 / that = the reading's C per C of rest die) and the night
+  a1c0-die  nine days  0.89; the night  0.81 [ 0.32,  1.29], n 5; values {'P1': 47.665, 'P2': 47.707, 'P3': 46.975, 'P6': 47.0, 'P7': 47.0}
+  a1c1-die  nine days  1.10; the night  1.05 [ 0.01,  2.09], n 5; values {'P1': 52.243, 'P2': 52.48, 'P3': 51.163, 'P6': 51.929, 'P7': 51.508}
+  a1c1-w    nine days  0.48; the night  0.41 [ 0.14,  0.68], n 5; values {'P1': 30.415, 'P2': 30.428, 'P3': 29.982, 'P6': 30.189, 'P7': 30.103}
+  a1c0-w    nine days  0.22; the night  0.20 [ 0.07,  0.33], n 5; values {'P1': 18.622, 'P2': 18.641, 'P3': 18.423, 'P6': 18.502, 'P7': 18.471}
+  a1-nic    nine days  0.92; the night  1.07 [ 0.60,  1.53], n 5; values {'P1': 53.865, 'P2': 53.429, 'P3': 52.746, 'P6': 52.885, 'P7': 52.774}
+  a1-nvme   nine days  0.91; the night  0.79 [ 0.01,  1.58], n 5; values {'P1': 44.149, 'P2': 43.9, 'P3': 43.083, 'P6': 43.569, 'P7': 43.546}
+  a2-nic    nine days  0.90; the night  0.80 [-0.05,  1.65], n 5; values {'P1': 44.357, 'P2': 44.427, 'P3': 43.915, 'P6': 43.568, 'P7': 43.572}
+  a2-nvme   nine days  0.85; the night  0.88 [ 0.43,  1.32], n 5; values {'P1': 37.675, 'P2': 37.608, 'P3': 36.9, 'P6': 36.9, 'P7': 36.9}
+  a3: {"n": 2, "note": "too few counted probes with rows"}

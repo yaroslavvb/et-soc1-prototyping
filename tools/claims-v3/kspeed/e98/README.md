@@ -196,3 +196,7 @@ It closes, narrows or leaves open item 9 of the kinds page's section 11, and it 
   *What that does to the expectation, stated before the data.* The desk's untested reason for 0.25 is the gate's anchor. A run the gate does not touch has no anchor, so on that same reasoning it should behave like the from-rest run, 0.89 in the line's units. If indexes 1–4 read 0.89 and the three kinds of indexes 5–8 read 0.25, the pooled R1 over 7 kinds reads **0.62**. So **under the room reading the registered R1 should now come out above 0.25**, `ABOVE_TARGET`, or `SUPPORTS` where its interval still holds 0.25. With R2 `SUPPORTS`, E98-V calls `ABOVE_TARGET` `PARTLY`, as registered. Hold R1's result against this paragraph. A reading near 0.25 on all eight would count against this reasoning, not for the desk's.
 
   *What is added.* Two arms in [`reduce_e98.py`](reduce_e98.py), neither a verdict: `R1_unanchored_idx1to4_A2`, set against 0.89, and `R1_anchored_idx5to8_A2`, set against 0.25. `gate.held_s` is reported per run, so a run that crosses from held to not held between probes is visible.
+
+## Results
+
+[`docs/reports/data/2026-11-01-e98-heat-path-drift/`](../../../../docs/reports/data/2026-11-01-e98-heat-path-drift/README.md): five probes started, four complete; E98-V `PARTLY`, one contrast of four probes. Nothing above is rewritten.

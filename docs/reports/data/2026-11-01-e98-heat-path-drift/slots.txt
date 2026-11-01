@@ -1,0 +1,20 @@
+Q132: aifoundry2's card tonight, under one Discord claim. E98's probes, and the slots of the only two other experiments under that claim, E100 and E96.
+The card lock is free between probes: E98's queue takes it only for a probe, and launches nothing inside a slot. No second post; the release is E98's lane's.
+Clocks go back at 02:00 PDT (09:00 UTC): trust the epoch seconds.
+
+SLOT E100: start 1793521800 (08:30 UTC = 01:30 PDT), end 1793524200 (09:10 UTC = 01:10 PST): the idle-reset test, int8 zeros, about 20 card-minutes.
+SLOT E96: start 1793527500 (10:05 UTC = 02:05 PST), end 1793532000 (11:20 UTC = 03:20 PST): real tensors' speed, about 60 card-minutes.
+A slot's experiment must have ended by its slot's end, and must not start before its start: a probe may be running until then. Check first:
+  python3 -m json.tool ~/claude/et-soc1-prototyping/build/e98/runs/status.json ; et-who
+Do not rebuild or replace build/sparsity_t2, build/ettelem-hpl or tools/claims-v3/kspeed/e98 on this box: every E98 probe runs them, and a changed binary breaks the night's comparison. Build what you need elsewhere.
+If an experiment overruns, E98's queue waits for the lock, rests 15 min, and drops the next probe at its latest start. Any launch in the 15 min before a probe's rest reading moves that probe.
+
+E98 P1: rest reading starts 1793520000 (08:00 UTC = 01:00 PDT); the card is busy about 24 min from then; latest start 1793520360 (08:06 UTC = 01:06 PDT).
+E98 P2: rest reading starts 1793525400 (09:30 UTC = 01:30 PST); the card is busy about 24 min from then; latest start 1793526060 (09:41 UTC = 01:41 PST).
+E98 P3: rest reading starts 1793533200 (11:40 UTC = 03:40 PST); the card is busy about 24 min from then; latest start 1793535000 (12:10 UTC = 04:10 PST).
+E98 P4: rest reading starts 1793535900 (12:25 UTC = 04:25 PST); the card is busy about 24 min from then; latest start 1793537460 (12:51 UTC = 04:51 PST).
+E98 P5: rest reading starts 1793538600 (13:10 UTC = 05:10 PST); the card is busy about 24 min from then; latest start 1793539800 (13:30 UTC = 05:30 PST).
+E98 P6: rest reading starts 1793541300 (13:55 UTC = 05:55 PST); the card is busy about 24 min from then; latest start 1793542140 (14:09 UTC = 06:09 PST).
+E98 P7: rest reading starts 1793544000 (14:40 UTC = 06:40 PST); the card is busy about 24 min from then; latest start 1793544480 (14:48 UTC = 06:48 PST).
+
+E98 ends by 1793546100 (15:15 UTC = 07:15 PST) whatever happens.

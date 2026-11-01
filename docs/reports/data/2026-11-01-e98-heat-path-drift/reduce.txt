@@ -1,0 +1,91 @@
+E98: the heat path's drift against the room, one night on aifoundry2, under its own governor
+probes run 5, counted 5, for the line 4, for the hold 4
+
+probe  rest t          rest W (20 min)  rows  die-from-W  raw die  60 s W   60 s die  nic    nvme    since busy  line    hold die hold W(fine) hold MHz dips(hold) config
+P1    1793520000215  22.1105  120  95.51  46.8667  22.0378  47.0  44.3567  37.675  19.9  39.803  60.4154  41.4018  792.6496  1  [(65, 65)]
+P2    1793525400225  22.0663  240  95.319  46.675  22.2027  47.0  44.4271  37.6083  36.2  None  None  None  None  0  [(65, 65)]
+P3    1793533200203  21.8971  177  94.588  46.0904  21.7635  45.968  43.9153  36.9  24.7  39.331  58.0486  40.4127  792.4061  2  [(65, 65)]
+P6    1793541300666  21.9486  240  94.81  46.1958  21.8015  45.0  43.5683  36.9  None  39.397  58.795  40.5663  796.2425  1  [(65, 65)]
+P7    1793544000256  21.8771  168  94.502  45.6786  21.9899  46.0  43.572  36.9  23.9  39.31  58.485  40.4694  790.6758  1  [(65, 65)]
+
+per run: probe idx kind W die line MHz share800 fineW dips gate(held,die) limit
+P1 0 fp32/zeros     33.12 51.51 36.37 795 0.972 33.3309 d0 0.0,47.0 none
+P1 1 fp16/zeros     33.97 53.21 37.68 800 1.000 33.9685 d0 0.0,50.0 none
+P1 2 int8/zeros     35.08 54.52 38.48 789 0.941 35.5963 d0 0.0,51.0 none
+P1 3 int8/neg_ones  39.86 56.82 38.59 800 1.000 39.8624 d0 0.0,52.0 none
+P1 4 int8/sparse50  48.84 61.48 39.15 800 1.000 48.8369 d0 0.0,54.0 none
+P1 5 fp16/ones      52.96 65.07 40.85 777 0.800 52.8542 d0 1.4,57.0 thermal
+P1 6 int8/full      51.11 65.11 41.74 773 0.760 50.9043 d0 17.0,57.0 thermal
+P1 7 fp32/randn     53.89 66.41 41.77 601 0.000 None d0 19.6,57.0 thermal
+P1 8 fp16/ones      51.79 65.28 41.60 765 0.652 None d0 26.1,57.0 thermal
+P2 0 fp32/zeros     33.41 52.47 37.19 794 0.969 33.6566 d0 0.0,47.0 none
+P2 1 fp16/zeros     34.21 54.00 38.36 800 1.000 34.2052 d0 0.0,51.0 none
+P2 2 int8/zeros     35.47 54.92 38.70 794 0.969 35.7288 d0 0.0,52.0 none
+P2 3 int8/neg_ones  39.53 56.90 38.82 795 0.972 39.8137 d0 0.0,53.0 none
+P3 0 fp32/zeros     32.77 50.52 35.53 794 0.969 33.0306 d0 0.0,46.0 none
+P3 1 fp16/zeros     33.38 52.41 37.14 794 0.969 33.6429 d0 0.0,49.0 none
+P3 2 int8/zeros     34.93 54.13 38.16 789 0.939 35.4623 d0 0.0,51.0 none
+P3 3 int8/neg_ones  39.10 56.84 38.96 788 0.934 39.802 d0 0.0,52.0 none
+P3 4 int8/sparse50  48.52 61.30 39.12 800 1.000 48.5155 d0 0.0,54.0 none
+P3 5 fp16/ones      54.44 64.84 39.94 794 0.939 54.356 d0 0.0,57.0 none
+P3 6 int8/full      52.87 64.69 40.51 794 0.959 53.3833 d0 11.8,57.0 none
+P3 7 fp32/randn     54.04 66.00 41.29 604 0.005 None d0 12.4,57.0 thermal
+P3 8 fp16/ones      53.92 65.00 40.34 786 0.882 54.2781 d0 16.2,57.0 thermal
+P6 0 fp32/zeros     33.04 50.54 35.44 800 1.000 33.0351 d0 0.0,45.0 none
+P6 1 fp16/zeros     33.65 52.34 36.95 800 1.000 33.6513 d0 0.0,49.0 none
+P6 2 int8/zeros     35.45 54.00 37.79 800 1.000 35.4525 d0 0.0,51.0 none
+P6 3 int8/neg_ones  39.79 56.77 38.58 800 1.000 39.7876 d0 0.0,52.0 none
+P6 4 int8/sparse50  47.32 61.32 39.68 783 0.908 48.66 d1 0.0,54.0 none
+P6 5 fp16/ones      53.73 64.94 40.37 786 0.882 54.0444 d0 0.2,57.0 thermal
+P6 6 int8/full      52.40 64.99 41.03 784 0.865 52.7485 d0 14.0,57.0 thermal
+P6 7 fp32/randn     54.15 66.01 41.24 603 0.008 None d0 14.6,57.0 thermal
+P6 8 fp16/ones      53.51 65.11 40.64 782 0.816 53.0121 d0 16.8,57.0 thermal
+P7 0 fp32/zeros     32.99 51.01 35.93 795 0.974 33.1958 d0 0.0,46.0 none
+P7 1 fp16/zeros     33.91 53.05 37.55 800 1.000 33.9094 d0 0.0,50.0 none
+P7 2 int8/zeros     35.34 54.48 38.31 795 0.969 35.6243 d0 0.0,51.0 none
+P7 3 int8/neg_ones  39.87 56.93 38.69 800 1.000 39.8736 d0 0.0,52.0 none
+P7 4 int8/sparse50  48.21 61.08 39.03 794 0.969 48.678 d0 0.0,54.0 none
+P7 5 fp16/ones      54.08 64.61 39.88 792 0.941 54.5666 d0 0.0,57.0 none
+P7 6 int8/full      53.49 64.72 40.26 800 1.000 53.4876 d0 10.6,57.0 none
+P7 7 fp32/randn     54.40 65.95 41.08 605 0.010 None d0 11.0,57.0 thermal
+P7 8 fp16/ones      53.37 65.04 40.63 783 0.854 53.6921 d0 15.0,57.0 thermal
+
+binaries the same in every probe (session.json sha256): True
+
+RULES
+R0 rest die's fall {"fall_w": 0.233, "fall_c_w_derived": 1.008, "range_c": 1.008, "expected_w": 0.437, "band_w": [0.1, 0.9], "against_expected": "INSIDE_BAND", "gate": "OK"}
+R1 line on rest die ABOVE_TARGET {"slope": 0.5021, "lo": 0.3045, "hi": 0.6998, "se": 0.0459, "icpt": -8.166, "rms": 0.0257, "n": 4, "df": 2, "x_range": 1.008}
+R2 hold die on rest die SUPPORTS {"slope": 2.1877, "lo": 0.4732, "hi": 3.9021, "se": 0.3984, "icpt": -148.568, "rms": 0.2231, "n": 4, "df": 2, "x_range": 1.008}
+V  the room's reading: PARTLY
+S1 fine line on rest W INCONCLUSIVE {"slope": 0.3836, "lo": -2.2358, "hi": 3.003, "se": 0.6087, "icpt": 27.963, "rms": 0.0789, "n": 4, "df": 2, "x_range": 0.233}
+S2 hold fine W on rest W SUPPORTS {"slope": 4.2984, "lo": 1.6883, "hi": 6.9085, "se": 0.6066, "icpt": -53.673, "rms": 0.0786, "n": 4, "df": 2, "x_range": 0.233}
+S3 from rest: W INCONCLUSIVE {"slope": 1.7743, "lo": -1.4716, "hi": 5.0201, "se": 1.0201, "icpt": -5.749, "rms": 0.1637, "n": 5, "df": 3, "x_range": 0.233} line INCONCLUSIVE {"slope": 1.157, "lo": -0.8743, "hi": 3.1882, "se": 0.6384, "icpt": -73.76, "rms": 0.4425, "n": 5, "df": 3, "x_range": 1.008}
+S4 trip: MHz SUPPORTS {"slope": -17.4576, "lo": -29.2168, "hi": -5.6984, "se": 2.7328, "icpt": 2438.92, "rms": 1.53, "n": 4, "df": 2, "x_range": 1.008} W INCONCLUSIVE {"slope": -1.6027, "lo": -3.2602, "hi": 0.0548, "se": 0.3852, "icpt": 205.494, "rms": 0.2157, "n": 4, "df": 2, "x_range": 1.008}
+
+ARMS (labelled, never a verdict)
+R1_on_60s_rest {"slope": 0.241, "lo": -0.7087, "hi": 1.1906, "se": 0.2207, "icpt": 16.666, "rms": 0.1587, "n": 4, "df": 2, "x_range": 1.185}
+R1_on_history_die {"slope": 0.441, "lo": -0.0516, "hi": 0.9337, "se": 0.1145, "icpt": 19.082, "rms": 0.0691, "n": 4, "df": 2, "x_range": 1.188}
+R1_dips_left_out {"slope": 0.5028, "lo": 0.2736, "hi": 0.732, "se": 0.0533, "icpt": -8.232, "rms": 0.0298, "n": 4, "df": 2, "x_range": 1.008}
+R1_unclamped_only {"slope": 0.1111, "lo": -0.4064, "hi": 0.6286, "se": 0.1203, "icpt": 27.829, "rms": 0.0673, "n": 4, "df": 2, "x_range": 1.008}
+R1_unanchored_idx1to4_A2 {"slope": 0.1111, "lo": -0.4064, "hi": 0.6286, "se": 0.1203, "icpt": 27.829, "rms": 0.0673, "n": 4, "df": 2, "x_range": 1.008}
+R1_anchored_idx5to8_A2 {"slope": 1.0235, "lo": 0.7945, "hi": 1.2525, "se": 0.0532, "icpt": -56.16, "rms": 0.0298, "n": 4, "df": 2, "x_range": 1.008}
+R2_on_60s_rest {"slope": 1.2468, "lo": -2.5301, "hi": 5.0237, "se": 0.8777, "icpt": -59.005, "rms": 0.631, "n": 4, "df": 2, "x_range": 1.185}
+R2_on_history_die {"slope": 1.8119, "lo": -1.395, "hi": 5.0189, "se": 0.7453, "icpt": -24.789, "rms": 0.4497, "n": 4, "df": 2, "x_range": 1.188}
+R2_ioshire {"slope": 1.9736, "lo": 0.4341, "hi": 3.5132, "se": 0.3578, "icpt": -127.836, "rms": 0.2003, "n": 4, "df": 2, "x_range": 1.008}
+S1_on_60s_rest {"slope": 0.7222, "lo": 0.3222, "hi": 1.1221, "se": 0.0929, "icpt": 20.572, "rms": 0.0155, "n": 4, "df": 2, "x_range": 0.274}
+S2_on_60s_rest {"slope": 2.319, "lo": -5.303, "hi": 9.9411, "se": 1.7713, "icpt": -10.07, "rms": 0.2948, "n": 4, "df": 2, "x_range": 0.274}
+R1_by_position {"1:fp16/zeros": {"slope": 0.3472, "lo": -1.6445, "hi": 2.3388, "se": 0.4628, "icpt": 4.4, "rms": 0.2591, "n": 4, "df": 2, "x_range": 1.008}, "2:int8/zeros": {"slope": 0.2701, "lo": -1.4993, "hi": 2.0394, "se": 0.4112, "icpt": 12.569, "rms": 0.2302, "n": 4, "df": 2, "x_range": 1.008}, "3:int8/neg_ones": {"slope": -0.2143, "lo": -1.1991, "hi": 0.7704, "se": 0.2289, "icpt": 59.035, "rms": 0.1281, "n": 4, "df": 2, "x_range": 1.008}, "4:int8/sparse50": {"slope": 0.0414, "lo": -1.9236, "hi": 2.0065, "se": 0.4567, "icpt": 35.313, "rms": 0.2557, "n": 4, "df": 2, "x_range": 1.008}, "5:fp16/ones": {"slope": 0.9604, "lo": 0.2919, "hi": 1.6288, "se": 0.1553, "icpt": -50.836, "rms": 0.087, "n": 4, "df": 2, "x_range": 1.008}, "6:int8/full": {"slope": 1.3927, "lo": 0.4114, "hi": 2.3741, "se": 0.2281, "icpt": -91.221, "rms": 0.1277, "n": 4, "df": 2, "x_range": 1.008}, "7:fp32/randn": {"slope": 0.6292, "lo": 0.0859, "hi": 1.1725, "se": 0.1263, "icpt": -18.339, "rms": 0.0707, "n": 4, "df": 2, "x_range": 1.008}, "8:fp16/ones": {"slope": 1.1366, "lo": -0.0435, "hi": 2.3167, "se": 0.2743, "icpt": -67.005, "rms": 0.1536, "n": 4, "df": 2, "x_range": 1.008}}
+
+PROXIES (labelled)
+a2-nic {"n": 5, "line_on_it": {"slope": 0.5385, "lo": -0.3988, "hi": 1.4757, "se": 0.2178, "icpt": 15.848, "rms": 0.0995, "n": 4, "df": 2, "x_range": 0.788}, "hold_on_it": {"slope": 2.0516, "lo": -3.6017, "hi": 7.7049, "se": 1.3138, "icpt": -31.032, "rms": 0.6003, "n": 4, "df": 2, "x_range": 0.788}, "it_on_rest_die": {"slope": 0.7984, "lo": -0.0495, "hi": 1.6463, "se": 0.2665, "icpt": -31.835, "rms": 0.1847, "n": 5, "df": 3, "x_range": 1.008}, "values": {"P1": 44.357, "P2": 44.427, "P3": 43.915, "P6": 43.568, "P7": 43.572}}
+a2-nvme {"n": 5, "line_on_it": {"slope": 0.5897, "lo": 0.3011, "hi": 0.8783, "se": 0.0671, "icpt": 17.586, "rms": 0.0318, "n": 4, "df": 2, "x_range": 0.775}, "hold_on_it": {"slope": 2.5452, "lo": 0.1411, "hi": 4.9493, "se": 0.5587, "icpt": -35.475, "rms": 0.2652, "n": 4, "df": 2, "x_range": 0.775}, "it_on_rest_die": {"slope": 0.8759, "lo": 0.4272, "hi": 1.3245, "se": 0.141, "icpt": -45.964, "rms": 0.0977, "n": 5, "df": 3, "x_range": 1.008}, "values": {"P1": 37.675, "P2": 37.608, "P3": 36.9, "P6": 36.9, "P7": 36.9}}
+a1-nic {"n": 5, "line_on_it": {"slope": 0.4314, "lo": 0.335, "hi": 0.5278, "se": 0.0224, "icpt": 16.566, "rms": 0.0147, "n": 4, "df": 2, "x_range": 1.119}, "hold_on_it": {"slope": 1.8901, "lo": 0.7, "hi": 3.0802, "se": 0.2766, "icpt": -41.365, "rms": 0.1812, "n": 4, "df": 2, "x_range": 1.119}, "it_on_rest_die": {"slope": 1.0673, "lo": 0.6043, "hi": 1.5304, "se": 0.1455, "icpt": -48.196, "rms": 0.1009, "n": 5, "df": 3, "x_range": 1.008}, "values": {"P1": 53.865, "P2": 53.429, "P3": 52.746, "P6": 52.885, "P7": 52.774}}
+a1-nvme {"n": 5, "line_on_it": {"slope": 0.4634, "lo": -0.3196, "hi": 1.2465, "se": 0.182, "icpt": 19.26, "rms": 0.0973, "n": 4, "df": 2, "x_range": 1.066}, "hold_on_it": {"slope": 2.2727, "lo": 0.2792, "hi": 4.2663, "se": 0.4633, "icpt": -40.125, "rms": 0.2477, "n": 4, "df": 2, "x_range": 1.066}, "it_on_rest_die": {"slope": 0.7926, "lo": 0.005, "hi": 1.5801, "se": 0.2475, "icpt": -31.602, "rms": 0.1716, "n": 5, "df": 3, "x_range": 1.008}, "values": {"P1": 44.149, "P2": 43.9, "P3": 43.083, "P6": 43.569, "P7": 43.546}}
+a1c0-die {"n": 5, "line_on_it": {"slope": 0.679, "lo": 0.3602, "hi": 0.9978, "se": 0.0741, "icpt": 7.438, "rms": 0.0306, "n": 4, "df": 2, "x_range": 0.69}, "hold_on_it": {"slope": 2.9549, "lo": 0.4713, "hi": 5.4384, "se": 0.5772, "icpt": -80.416, "rms": 0.2381, "n": 4, "df": 2, "x_range": 0.69}, "it_on_rest_die": {"slope": 0.809, "lo": 0.3249, "hi": 1.2931, "se": 0.1521, "icpt": -29.538, "rms": 0.1055, "n": 5, "df": 3, "x_range": 1.008}, "values": {"P1": 47.665, "P2": 47.707, "P3": 46.975, "P6": 47.0, "P7": 47.0}}
+a1c0-w {"n": 5, "line_on_it": {"slope": 2.5946, "lo": 0.0199, "hi": 5.1693, "se": 0.5983, "icpt": -8.551, "rms": 0.0621, "n": 4, "df": 2, "x_range": 0.199}, "hold_on_it": {"slope": 12.1247, "lo": 8.6952, "hi": 15.5541, "se": 0.797, "icpt": -165.425, "rms": 0.0828, "n": 4, "df": 2, "x_range": 0.199}, "it_on_rest_die": {"slope": 0.2017, "lo": 0.0739, "hi": 0.3296, "se": 0.0402, "icpt": -0.623, "rms": 0.0279, "n": 5, "df": 3, "x_range": 1.008}, "values": {"P1": 18.622, "P2": 18.641, "P3": 18.423, "P6": 18.502, "P7": 18.471}}
+a1c1-die {"n": 5, "line_on_it": {"slope": 0.4013, "lo": -0.449, "hi": 1.2516, "se": 0.1976, "icpt": 18.71, "rms": 0.1145, "n": 4, "df": 2, "x_range": 1.08}, "hold_on_it": {"slope": 1.9852, "lo": -0.7696, "hi": 4.7399, "se": 0.6402, "icpt": -43.718, "rms": 0.3711, "n": 4, "df": 2, "x_range": 1.08}, "it_on_rest_die": {"slope": 1.0533, "lo": 0.0131, "hi": 2.0935, "se": 0.3269, "icpt": -48.141, "rms": 0.2266, "n": 5, "df": 3, "x_range": 1.008}, "values": {"P1": 52.243, "P2": 52.48, "P3": 51.163, "P6": 51.929, "P7": 51.508}}
+a1c1-w {"n": 5, "line_on_it": {"slope": 1.1686, "lo": -0.3162, "hi": 2.6535, "se": 0.3451, "icpt": 4.2, "rms": 0.0772, "n": 4, "df": 2, "x_range": 0.433}, "hold_on_it": {"slope": 5.5572, "lo": 2.4421, "hi": 8.6723, "se": 0.7239, "icpt": -108.737, "rms": 0.162, "n": 4, "df": 2, "x_range": 0.433}, "it_on_rest_die": {"slope": 0.4106, "lo": 0.1395, "hi": 0.6818, "se": 0.0852, "icpt": -8.766, "rms": 0.0591, "n": 5, "df": 3, "x_range": 1.008}, "values": {"P1": 30.415, "P2": 30.428, "P3": 29.982, "P6": 30.189, "P7": 30.103}}
+a3-nic {"n": 2, "note": "too few counted probes with rows"}
+a3-nvme {"n": 2, "note": "too few counted probes with rows"}
+a3c0-die {"n": 2, "note": "too few counted probes with rows"}
+a3c0-w {"n": 2, "note": "too few counted probes with rows"}
