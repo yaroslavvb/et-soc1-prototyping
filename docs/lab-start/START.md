@@ -7,13 +7,13 @@ lab's Tailscale network; they logged in as the lab's shared `root` once, only to
 as that account and started you; then they pasted one line. Ask them only for what only they can do: a yes before the
 first run on a card, the lab's Discord posts, and anything for the lab lead.
 
-Version of 13 October 2026, fourteenth edition: the person creates their own account and starts Claude on the lab
+Version of 1 November 2026, fifteenth edition, with the card table's firmware and clocks as read on 27–31 October: the person creates their own account and starts Claude on the lab
 machine themselves; this brief is for that Claude, which never uses ssh or root. Since 13 October their account also
 runs `~/.local/bin/lab-sessions` every minute from its crontab: after a restart of the machine it brings back the tmux
 session `claude` (continuing the last conversation) and, once they have signed in, a Remote Control server in the
 tmux session `claude-rc`. So save what matters in files, never only in the conversation. Access (a Tailscale invite) comes from
-the lab lead by direct message, never from #community-lab. aifoundry3's card and aifoundry1's card 1 run firmware 1.4.0
-since the lab lead's update of 7 October. All four cards are in service: aifoundry2's again since 9 October, with a new
+the lab lead by direct message, never from #community-lab. All four cards report firmware 1.4.0, read on 27–31 October, and
+aifoundry3's card and aifoundry1's card 1 have since the lab lead's update of 7 October. All four cards are in service: aifoundry2's again since 9 October, with a new
 two-fan bracket at the card, and aifoundry1's card 0 since 2 October. The current copy is `docs/lab-start/START.md` in
 https://github.com/yaroslavvb/et-soc1-prototyping; if this one is more than a month old, read that one instead.
 
@@ -73,10 +73,10 @@ Discord, and anything for the lab admin.
 
 | Card | Firmware | Clock | Idle | Watch for | Use it for |
 |---|---|---|---|---|---|
-| aifoundry2 | 1.3.1 | DVFS 600–800 MHz, usually 600 | about 51 °C and 23 W since 9 Oct, when a two-fan bracket was fitted at the card | full load on every minion settles near 75 °C over 10 minutes, but nothing on the card stops a runaway: before the bracket it heated to 138 °C at idle and dropped off the PCIe bus | the card on aifoundry2 (back in service since 9 October) |
+| aifoundry2 | 1.4.0 (read 27 Oct; 1.3.1 before) | DVFS 600–800 MHz, usually 600 | about 51 °C and 23 W since 9 Oct, when a two-fan bracket was fitted at the card | full load on every minion settles near 75 °C over 10 minutes, but nothing on the card stops a runaway: before the bracket it heated to 138 °C at idle and dropped off the PCIe bus | the card on aifoundry2 (back in service since 9 October) |
 | aifoundry3 | 1.4.0 since 7 Oct (1.3.1 before) | pinned at 600 MHz (NoC 400) at every boot, seen again on 8 Oct under 1.4.0; no thermal step under 1.3.1 | 23.6 W at 50 °C; about 25 W at 55–57 °C since 25 Sep | reaches 88 °C under load, nothing slows it; a demo service can use the card without the lock | the card on aifoundry3; switching power over idle, never absolute watts |
-| aifoundry1 card 1 | 1.4.0 since 7 Oct (1.2.0 before) | 600 MHz in every sample of 25–30 Sep, under 1.2.0; not rechecked since: read `mhz.minion` | 31–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | the first choice on aifoundry1 |
-| aifoundry1 card 0 | 1.4.1 | idles at 300 MHz; sgemm runs as fast as on card 1 | 19–20 W | needs `ET_DEVICES=0` and `etsoc-shire0.lock`; its fan was replaced on 2 Oct: 49 °C idle, 52–53 °C (peak 56 °C) under 8 minutes of sgemm | the second choice on aifoundry1 |
+| aifoundry1 card 1 | 1.4.0 since 7 Oct (1.2.0 before) | 600 MHz in every sample of 25–30 Sep and of 31 Oct–1 Nov: read `mhz.minion` | 31–35 W | needs `ET_DEVICES=1` and `etsoc-shire1.lock`; a CI runner shares the host | the first choice on aifoundry1 |
+| aifoundry1 card 0 | 1.4.0 (read 31 Oct; 1.4.1 on the record before) | DVFS 600–800 MHz, idles at 600 MHz; its power controller's 75 W alarm drops fp32 random data at 800 MHz to 300 MHz about once a second; sgemm runs as fast as on card 1 | 19–21 W | needs `ET_DEVICES=0` and `etsoc-shire0.lock`; its fan was replaced on 2 Oct: 49 °C idle, 52–53 °C (peak 56 °C) under 8 minutes of sgemm | the second choice on aifoundry1 |
 
 Nothing on these cards limits the die temperature: aifoundry2's card reached 138 °C at idle on 2, 7 and 8 October,
 before its fan was replaced on 9 October, and nothing tripped.
