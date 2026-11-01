@@ -1,0 +1,500 @@
+{
+ "experiment": "E100",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793521821909,
+ "protocol": {
+  "experiment": "E100",
+  "request": "Q132",
+  "card": "aifoundry2",
+  "order_seed": 100,
+  "title": "The idle reset against launch gaps of different lengths, and one long launch with no gap",
+  "tools": {
+   "heater": "build/e100/host/sparsity_host",
+   "kernel": "build/e100/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 85,
+   "board_cap_w": 97,
+   "cap_consecutive": 3
+  },
+  "caps": {
+   "max_card_min": 32
+  },
+  "pause_s": [
+   0.0,
+   1.0
+  ],
+  "pause_seed": 100,
+  "blocks": [
+   {
+    "name": "SMOKE",
+    "title": "one short process of each flag and one full-length long kernel (not analysed)",
+    "default": false,
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 1,
+    "runs": [
+     {
+      "label": "smoke-a0",
+      "launch": {
+       "seconds": 2,
+       "budget": 3.5,
+       "processes": 1,
+       "fixed_iters": 850000
+      }
+     },
+     {
+      "label": "smoke-a100",
+      "launch": {
+       "seconds": 2,
+       "budget": 3.5,
+       "processes": 1,
+       "fixed_iters": 850000,
+       "gap_ms": 100
+      }
+     },
+     {
+      "label": "smoke-n",
+      "launch": {
+       "seconds": 4.5,
+       "budget": 7.5,
+       "processes": 1,
+       "one_kernel_iters": 10000000
+      }
+     },
+     {
+      "label": "smoke-r",
+      "sampler_reset_ms": 1000,
+      "launch": {
+       "seconds": 2,
+       "budget": 3.5,
+       "processes": 1,
+       "fixed_iters": 850000,
+       "gap_ms": 20
+      }
+     }
+    ]
+   },
+   {
+    "name": "R1A0",
+    "title": "round 1, arm A0",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 4,
+    "runs": [
+     {
+      "label": "a0",
+      "launch": {
+       "seconds": 7.5,
+       "budget": 9.0,
+       "processes": 3,
+       "fixed_iters": 850000
+      }
+     }
+    ]
+   },
+   {
+    "name": "R1A5",
+    "title": "round 1, arm A5",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 4,
+    "runs": [
+     {
+      "label": "a5",
+      "launch": {
+       "seconds": 7.5,
+       "budget": 9.0,
+       "processes": 3,
+       "fixed_iters": 850000,
+       "gap_ms": 5
+      }
+     }
+    ]
+   },
+   {
+    "name": "R1A20",
+    "title": "round 1, arm A20",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 4,
+    "runs": [
+     {
+      "label": "a20",
+      "launch": {
+       "seconds": 7.5,
+       "budget": 9.0,
+       "processes": 3,
+       "fixed_iters": 850000,
+       "gap_ms": 20
+      }
+     }
+    ]
+   },
+   {
+    "name": "R1A100",
+    "title": "round 1, arm A100",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 6,
+    "runs": [
+     {
+      "label": "a100",
+      "launch": {
+       "seconds": 7.5,
+       "budget": 9.0,
+       "processes": 2,
+       "fixed_iters": 850000,
+       "gap_ms": 100
+      }
+     }
+    ]
+   },
+   {
+    "name": "R1N",
+    "title": "round 1, arm N",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 5,
+    "runs": [
+     {
+      "label": "n",
+      "launch": {
+       "seconds": 4.5,
+       "budget": 7.5,
+       "processes": 5,
+       "one_kernel_iters": 10000000
+      }
+     }
+    ]
+   },
+   {
+    "name": "R1R",
+    "title": "round 1, arm R",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 4,
+    "runs": [
+     {
+      "label": "r",
+      "launch": {
+       "seconds": 7.5,
+       "budget": 9.0,
+       "processes": 3,
+       "fixed_iters": 850000,
+       "gap_ms": 20
+      },
+      "sampler_reset_ms": 1000
+     }
+    ]
+   },
+   {
+    "name": "R2R",
+    "title": "round 2, arm R",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 4,
+    "runs": [
+     {
+      "label": "r",
+      "launch": {
+       "seconds": 7.5,
+       "budget": 9.0,
+       "processes": 3,
+       "fixed_iters": 850000,
+       "gap_ms": 20
+      },
+      "sampler_reset_ms": 1000
+     }
+    ]
+   },
+   {
+    "name": "R2N",
+    "title": "round 2, arm N",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 5,
+    "runs": [
+     {
+      "label": "n",
+      "launch": {
+       "seconds": 4.5,
+       "budget": 7.5,
+       "processes": 5,
+       "one_kernel_iters": 10000000
+      }
+     }
+    ]
+   },
+   {
+    "name": "R2A100",
+    "title": "round 2, arm A100",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 6,
+    "runs": [
+     {
+      "label": "a100",
+      "launch": {
+       "seconds": 7.5,
+       "budget": 9.0,
+       "processes": 2,
+       "fixed_iters": 850000,
+       "gap_ms": 100
+      }
+     }
+    ]
+   },
+   {
+    "name": "R2A20",
+    "title": "round 2, arm A20",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 4,
+    "runs": [
+     {
+      "label": "a20",
+      "launch": {
+       "seconds": 7.5,
+       "budget": 9.0,
+       "processes": 3,
+       "fixed_iters": 850000,
+       "gap_ms": 20
+      }
+     }
+    ]
+   },
+   {
+    "name": "R2A5",
+    "title": "round 2, arm A5",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 4,
+    "runs": [
+     {
+      "label": "a5",
+      "launch": {
+       "seconds": 7.5,
+       "budget": 9.0,
+       "processes": 3,
+       "fixed_iters": 850000,
+       "gap_ms": 5
+      }
+     }
+    ]
+   },
+   {
+    "name": "R2A0",
+    "title": "round 2, arm A0",
+    "type": "int8",
+    "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+    "mask": "0xffffffff",
+    "per_shire": 32,
+    "seed": 1,
+    "start": {
+     "mode": "cool",
+     "max_c": 62,
+     "max_wait_s": 120
+    },
+    "tail_s": 2,
+    "passes": 4,
+    "runs": [
+     {
+      "label": "a0",
+      "launch": {
+       "seconds": 7.5,
+       "budget": 9.0,
+       "processes": 3,
+       "fixed_iters": 850000
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "R1A0-00-a0-r1",
+  "R1A0-00-a0-r2",
+  "R1A0-00-a0-r3",
+  "R1A0-00-a0-r4",
+  "R1A5-00-a5-r1",
+  "R1A5-00-a5-r2",
+  "R1A5-00-a5-r3",
+  "R1A5-00-a5-r4",
+  "R1A20-00-a20-r1",
+  "R1A20-00-a20-r2",
+  "R1A20-00-a20-r3",
+  "R1A20-00-a20-r4",
+  "R1A100-00-a100-r1",
+  "R1A100-00-a100-r2",
+  "R1A100-00-a100-r3",
+  "R1A100-00-a100-r4",
+  "R1A100-00-a100-r5",
+  "R1A100-00-a100-r6",
+  "R1N-00-n-r1",
+  "R1N-00-n-r2",
+  "R1N-00-n-r3",
+  "R1N-00-n-r4",
+  "R1N-00-n-r5",
+  "R1R-00-r-r1",
+  "R1R-00-r-r2",
+  "R1R-00-r-r3",
+  "R1R-00-r-r4",
+  "R2R-00-r-r1",
+  "R2R-00-r-r2",
+  "R2R-00-r-r3",
+  "R2R-00-r-r4",
+  "R2N-00-n-r1",
+  "R2N-00-n-r2",
+  "R2N-00-n-r3",
+  "R2N-00-n-r4",
+  "R2N-00-n-r5",
+  "R2A100-00-a100-r1",
+  "R2A100-00-a100-r2",
+  "R2A100-00-a100-r3",
+  "R2A100-00-a100-r4",
+  "R2A100-00-a100-r5",
+  "R2A100-00-a100-r6",
+  "R2A20-00-a20-r1",
+  "R2A20-00-a20-r2",
+  "R2A20-00-a20-r3",
+  "R2A20-00-a20-r4",
+  "R2A5-00-a5-r1",
+  "R2A5-00-a5-r2",
+  "R2A5-00-a5-r3",
+  "R2A5-00-a5-r4",
+  "R2A0-00-a0-r1",
+  "R2A0-00-a0-r2",
+  "R2A0-00-a0-r3",
+  "R2A0-00-a0-r4"
+ ],
+ "sha256": {
+  "heater": "4625fe5c1e53d5bdde125108cc3acc5f36f2c7e278f83e019037524eaf4f21d8",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e100/code/run_e100.py",
+  "--protocol",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e100/code/protocol.json",
+  "--out",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e100/runs/s1"
+ ],
+ "git_head": "0c187e1262b0e0f7fb744da4c22211b5dcfa9958",
+ "git_dirty_hpl": ""
+}

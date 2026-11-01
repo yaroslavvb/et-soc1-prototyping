@@ -4,6 +4,8 @@
 boxes' own 5 s history). Everything is post hoc: nothing here was registered before the data, so these are readings, not verdicts. The one new test it led to, E100, is pre-registered
 separately. Items are numbered as in section 11 of the kinds page, version `df55db86ada8`.*
 
+*Added the same night, Sun 1 Nov 2026: E100, the registered test of item 10 below, ran in its slot and passed all five rules. Its cross-round table reads 39 of 39 heartbeats in a gap fell and 0 of 234 inside a kernel, and one long kernel had no fall in 126 heartbeats: [`2026-11-01-e100-idle-reset`](../2026-11-01-e100-idle-reset/README.md). Nothing below changed.*
+
 ## Results first
 
 1. **Item 1, the alarm: aifoundry2 does not act on the reading that trips card 0.** Its power controller read 75 W or more 2,891 times in 93 runs, up to **88.88 W**, for up to

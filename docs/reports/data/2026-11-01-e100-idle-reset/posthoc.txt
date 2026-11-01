@@ -1,0 +1,55 @@
+1. What the gaps were (per arm, kernels after the calibration one)
+arm    kernels  wall at 800 MHz, s  mean gap ms   max gap ms   idle share of the kernels' time   f(1-f)     falls per heartbeat
+A0         508 0.3383          1.27      2          0.57%                         0.57%      2.05%
+A5         502 0.3383          6.36      12          2.02%                         1.98%      2.06%
+A20        475 0.3383          21.42      42          6.00%                         5.64%      6.82%
+A100       371 0.3384          101.78      201         21.90%                        17.11%     22.34%
+N            1 None          None      None          0.00%                         0.00%      0.00%
+R          471 0.3383          21.11      42          5.87%                         5.53%      8.18%
+
+2. Each round's lattice on the other round, by arm: gap and fell, gap no fall, kernel and fell, kernel no fall
+  A0     [0, 0, 1, 160]
+  A5     [2, 0, 0, 170]
+  A20    [7, 0, 0, 147]
+  A100   [32, 0, 0, 87]
+  N      [0, 0, 0, 161]
+  R      [11, 0, 0, 141]
+
+One lattice on the whole session (in sample): period 1000.0070 ms, table (53, 0, 0, 870)
+
+3. Every kernel-channel fall: arm, kernel, x (ms at 800 MHz inside the hit kernel, for the arms with no long gap), gap before it, distance of the kernel's start stamp from the whole-session lattice
+   {'arm': 'A0', 'round': 1, 'run': 'R1A0-00-a0-r4', 'launch': 18, 'x_ms': 2.2, 'gap_ms': 2, 'd_ms': -0.8, 'prev_g': 0.7999}
+   {'arm': 'A0', 'round': 2, 'run': 'R2A0-00-a0-r1', 'launch': 21, 'x_ms': 3.4, 'gap_ms': 1, 'd_ms': 0.9, 'prev_g': 0.7997}
+   {'arm': 'A0', 'round': 2, 'run': 'R2A0-00-a0-r3', 'launch': 12, 'x_ms': 3.8, 'gap_ms': 2, 'd_ms': 1.5, 'prev_g': 0.8}
+   {'arm': 'A5', 'round': 1, 'run': 'R1A5-00-a5-r3', 'launch': 12, 'x_ms': -2.7, 'gap_ms': 8, 'd_ms': 2.7, 'prev_g': 0.8}
+   {'arm': 'A5', 'round': 2, 'run': 'R2A5-00-a5-r1', 'launch': 4, 'x_ms': -0.2, 'gap_ms': 5, 'd_ms': 2.7, 'prev_g': 0.8}
+   {'arm': 'A5', 'round': 2, 'run': 'R2A5-00-a5-r3', 'launch': 15, 'x_ms': 9.2, 'gap_ms': 8, 'd_ms': 1.2, 'prev_g': 0.8003}
+   A0's and A5's falls at kernel starts: x [2.2, -2.7, -0.2, 9.2, 3.4, 3.8] ms; distance from the lattice [-0.8, 2.7, 2.7, 1.2, 0.9, 1.5] ms
+   all kernel-channel falls by arm: {'A0': 3, 'A5': 3, 'A20': 10, 'A100': 33, 'N': 0, 'R': 10} ; x in A100 and A20, median: -0.1
+
+4. Gaps between processes in a run (197 ms plus the random pause): lattice point in the gap against a fall, for a process that ended above 600 MHz
+   {'in_fell': 76, 'in_no': 0, 'out_fell': 0, 'out_no': 35} ; gap length median 751 ms; exceptions []
+
+5. Processes starting at 600 MHz: first 800 reading from the first lattice point inside a kernel, s (no limit in reach)
+  A0     n  18 median 0.300 sd 0.053 min 0.235 max 0.420
+  A5     n  14 median 0.312 sd 0.056 min 0.222 max 0.413
+  A20    n  17 median 0.285 sd 0.046 min 0.229 max 0.380
+  A100   n  22 median 0.331 sd 0.065 min 0.222 max 0.432
+  N      n  39 median 0.325 sd 0.059 min 0.199 max 0.416
+  R      n  20 median 0.365 sd 0.081 min 0.253 max 0.553
+
+6. The statistics reset in R
+   since_reset_ms 0 or 100 at 0.177 of R's readings; at 4 of its 12 falls; one-sided binomial p 0.148
+
+8. Sampler falls by where they land: x in ms at 800 MHz inside the kernel holding the 600 reading, for falls straight from 800 MHz with the kernel before at 0.79 GHz or more
+   R R2R-00-r-r1 kernel 15: x 119.1 ms, kernel's clock 0.658 GHz, the sampler's since_reset_ms there 0
+   R R2R-00-r-r3 kernel 11: x 99.8 ms, kernel's clock 0.648 GHz, the sampler's since_reset_ms there 0
+   A20 R2A20-00-a20-r2 kernel 8: x 337.9 ms, kernel's clock 0.800 GHz, the sampler's since_reset_ms there -1
+   A0     n   3 of 3: min 2.2, median 3.4, max 3.8 ms
+   A5     n   3 of 3: min -2.7, median -0.2, max 9.2 ms
+   A20    n  10 of 10: min -0.6, median 0.0, max 337.9 ms
+   A100   n   7 of 33: min -0.2, median -0.1, max 0.1 ms
+   R      n  11 of 12: min -0.4, median -0.0, max 119.1 ms
+
+7. The card: 13934 readings, highest die 57 C, highest board 36.52 W, 0 at 300 MHz; 56 configuration reads, 0 not 65 W / 65 C; alarm lines in the rings 0; POWER_IDLE records 193, period 1.000004 s on the SP's tick, R 0.9926
+   rules as scored: {'D1': 'PASS', 'D2': 'PASS', 'D3': 'PASS', 'D4': 'PASS', 'D5': 'PASS'}; left out []; nonzero rc 0
