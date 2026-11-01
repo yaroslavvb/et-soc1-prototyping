@@ -440,3 +440,7 @@ Rerun: `run_kinds.py … --types fp32,fp16,int8 --only __none__ --extra-tiles <t
 So the bus term did what it was added for: M2's 0.36 W shortfall on real gated tiles is gone, blind. **The largest misses:** `fp16.r2_bert_l6_up`, 21.74 W measured, 22.13 W predicted, and the other dense fp16 tiles, all 0.1–0.4 W high; int8's calibrations, ±0.3 W. These are real tensors, which E78's kinds resemble: E103 is the test built to hurt it.
 
 **E94, by the clock post hoc for M2 and no test at all for M4** (§10, §11). M2 on the 51 draws: fp32 0.437 W, bias −0.373; fp16 0.397 W, −0.159; int8 0.338 W, −0.332; all 51 inside the interval. M4 on them, for the record: 0.183, 0.174 and 0.283 W. **Within one rule, the bench says which draw costs more:** centred on the rule's mean, M2's error is 0.03–0.07 W where the draws themselves spread by 0.47–0.53 W (`fp32.nn_like`, `fp32.sparse50`, `fp16.nn_like`; `scored-frozen.json` `e94.within_rule`). I read no E94 data before M2's commit, but nothing shows that from outside.
+
+## 13. E103
+
+M4 and I3 then met [E103](../2026-11-01-e103-model-blind-test/README.md), 30 tiles chosen where they disagree most with the simple predictors, on another card: 0.314 W rms in floats and 0.365 W in int8, against 3.960 and 0.907 W for Q130(n). That README's Result 4 holds the plain statement of how good the model is, per format, on what, and where it fails.

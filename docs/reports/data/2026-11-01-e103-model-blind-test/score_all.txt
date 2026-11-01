@@ -1,0 +1,55 @@
+# BLIND: rms in W (bias, predicted minus measured)
+E92, two terms (hier2)                       floats n32 0.603 (-0.36)  fp32 n23 0.668 (-0.42)  fp16 n9 0.389 (-0.21)
+E95, M4 and I3                               floats n19 0.158 (+0.12)  fp32 n11 0.102 (+0.08)  fp16 n8 0.212 (+0.17)  int8 n11 0.166 (+0.00)
+E95, M2                                      floats n19 0.415 (+0.04)  fp32 n11 0.424 (+0.14)  fp16 n8 0.403 (-0.09)  int8 n11 0.285 (-0.25)
+E95, Q130(n)'s (a), the null                 floats n19 0.610 (-0.17)  fp32 n11 0.506 (-0.00)  fp16 n8 0.730 (-0.40)  int8 n11 0.824 (-0.70)
+E103, M4 and I3                              floats n23 0.314 (-0.05)  fp32 n13 0.392 (-0.14)  fp16 n10 0.162 (+0.06)  int8 n7 0.365 (+0.15)
+E103, M2                                     floats n23 0.579 (-0.11)  fp32 n13 0.702 (-0.14)  fp16 n10 0.360 (-0.08)  int8 n7 0.381 (+0.01)
+E103, Q130(n), the null                      floats n23 3.960 (+0.88)  fp32 n13 4.674 (+1.01)  fp16 n10 2.768 (+0.71)  int8 n7 0.907 (+0.03)
+E103, E92's flop price                       floats n23 1.775 (+0.44)  fp32 n13 2.190 (+0.89)  fp16 n10 1.006 (-0.14)
+E95 + E103 pooled, M4 and I3                 floats n42 0.255 (+0.02)  fp32 n24 0.297 (-0.04)  fp16 n18 0.186 (+0.11)  int8 n18 0.262 (+0.06)
+E95 + E103 null Q130(n): {'floats': 2.959, 'fp32': 3.457, 'fp16': 2.12, 'int8': 0.857} M2: {'floats': 0.511, 'fp32': 0.591, 'fp16': 0.38, 'int8': 0.326}
+# CONSTANTS FIRST: E102, board, over each item's own zero
+fp32 B balanced      M4/I3 n11 0.237 (+0.13)   M2 0.254
+fp32 B all-in        M4/I3 n10 0.224 (+0.02)   M2 0.238
+fp32 A balanced      M4/I3 n11 0.126 (+0.09)   M2 0.197
+fp32 A all-in        M4/I3 n10 0.216 (+0.09)   M2 0.210
+fp16 balanced        M4/I3 n8 0.096 (-0.04)   M2 0.147
+fp16 all-in          M4/I3 n6 0.232 (+0.09)   M2 0.247
+int8 B               M4/I3 n13 0.101 (-0.06)   M2 0.179
+# POST HOC: M4 and I3, form chosen after these
+E86                                          floats n6 0.145 (-0.07)  fp32 n3 0.192 (-0.15)  fp16 n3 0.071 (+0.01)  int8 n3 0.256 (-0.17)
+E90                                          floats n16 0.220 (+0.08)  fp32 n7 0.185 (+0.02)  fp16 n9 0.243 (+0.12)
+E92                                          floats n32 0.242 (+0.10)  fp32 n23 0.204 (+0.04)  fp16 n9 0.318 (+0.25)
+E82, with its own scale                      floats n33 0.146 (-0.02)  fp32 n17 0.149 (-0.04)  fp16 n16 0.143 (+0.01)  int8 n15 0.164 (+0.03)
+E88                                          floats n14 0.229 (+0.19)  fp32 n8 0.198 (+0.16)  fp16 n6 0.265 (+0.23)  int8 n5 0.365 (-0.21)
+E94                                          floats n41 0.176 (-0.01)  fp32 n19 0.169 (-0.09)  fp16 n22 0.183 (+0.06)  int8 n10 0.295 (-0.29)
+E65, one B bit, A = 1          n32 rms 0.185 bias +0.09 r 0.9917 measured/predicted 0.963
+E65, one B bit, A = pi         n5 rms 0.447 bias +0.42 r 0.9992 measured/predicted 0.930
+E67, one A bit, B = 1          n32 rms 0.241 bias +0.16 r 0.9900 measured/predicted 0.857
+E67, one A bit, B = pi         n5 rms 0.327 bias +0.32 r 0.9985 measured/predicted 0.884
+E67, the two-flip grid         n24 rms 0.689 bias +0.54 r 0.9767 measured/predicted 0.898
+E70, low bits                  n9 rms 0.289 bias +0.19 r 0.9985 measured/predicted 0.985
+E70, spread bits               n7 rms 0.369 bias +0.35 r 0.9993 measured/predicted 0.949
+E70, A low bits                n7 rms 0.650 bias +0.53 r 0.9986 measured/predicted 0.863
+E60, low bits, A = pi          n7 rms 0.951 bias +0.89 r 0.9996 measured/predicted 0.896
+E60, A's order                 n8 rms 0.314 bias +0.31 r 0.9997 measured/predicted 0.910
+# refit, reported
+{"float": {"aifoundry3 tiles (E78, E86, E90, E92, E95)": {"n": 108, "coef_fJ": {"k_core": 1.6174314867573072, "k_bus": 7.6670884537156905, "k_rest": 2.194511927592726, "a": 1.0625101736606233}, "rms_w": 0.17646495133922238}, "both cards, card 1 over the frozen scale, E103 included": {"n": 219, "coef_fJ": {"k_core": 1.6053052737348292, "k_bus": 7.627764272308868, "k_rest": 2.3061193605210533, "a": 1.0511598880406814}, "rms_w": 0.19587093594723234}}, "int8": {"aifoundry3 tiles (E78, E86, E90, E92, E95)": {"n": 31, "coef_fJ": {"k_nets": 3.1229836405151974, "k_bus": 16.567748193679755, "a": 1.8195887475804693}, "rms_w": 0.18921153769220145}, "both cards, card 1 over the frozen scale, E103 included": {"n": 68, "coef_fJ": {"k_nets": 3.284690760392338, "k_bus": 13.962613729576628, "a": 1.9125674635779613}, "rms_w": 0.23339541702278163}}}
+# largest misses, blind
+E103  fp32.c_near_rand                       D  19.15 predicted  18.26 miss +0.89  near-cancelling sums
+E103  int8.i_a127_bfull                      D   2.43 predicted   3.16 miss -0.73  one side busy, the other still
+E103  fp32.x_e_g                             D  14.79 predicted  14.17 miss +0.62  combinations
+E103  fp32.h_a_all_pi                        D  14.31 predicted  14.81 miss -0.50  A side (named weak spot)
+E103  fp32.s_bhalf_alt                       D  23.91 predicted  23.46 miss +0.45  sign structure: moving sums, the adder alternates each cycle
+E103  fp32.t_4_23                            D  20.17 predicted  19.73 miss +0.44  truncated mantissas
+E95   fp16.r2_bert_l6_up                     D  21.74 predicted  22.13 miss -0.40  N
+E103  int8.i_w8_1                            D   5.44 predicted   5.83 miss -0.39  operand widths
+E103  int8.i_sort_a                          D   6.23 predicted   5.87 miss +0.36  order
+E103  fp16.e_ab                              D  13.32 predicted  13.68 miss -0.35  exponent spread
+E95   int8.r2_gpt2_l11_down_asym             D   4.04 predicted   4.35 miss -0.30  C
+E95   fp16.r2_vit_l5_down                    D  21.60 predicted  21.88 miss -0.28  N
+E95   fp16.r2_gpt2_l6_mlp_down_fp16fwd       D  21.81 predicted  22.06 miss -0.26  F
+E95   int8.r2_gpt2_l6_down_p999              D   5.79 predicted   5.54 miss +0.25  C
+{'M4_D_over_M': 0.9831624517153121, 'M2_D_over_M': 0.9494958618241849, 'M4_bias_w': 0.2103996206719831, 'M2_bias_w': 0.6384767521707626}
+{'dips_kept': {'floats_rms_w': 0.40622739939772734, 'int8_rms_w': 0.4219065457311764}, 'gates_off': {'floats_rms_w': 0.3135616845033054, 'int8_rms_w': 0.3650637203984617}, 'auto': {'floats_rms_w': 0.3568003054864023, 'int8_rms_w': 0.40874967669791}, 'leak0.1994': {'floats_rms_w': 0.35070841467171365, 'int8_rms_w': 0.3534041001148523}, 'leak0.3803': {'floats_rms_w': 0.3877802475784866, 'int8_rms_w': 0.4192896026130048}, 'leak0.545': {'floats_rms_w': 0.6914294542479846, 'int8_rms_w': 0.5057115980884812}, 'leak0': {'floats_rms_w': 0.6598413113542931, 'int8_rms_w': 0.3692479417410895}}

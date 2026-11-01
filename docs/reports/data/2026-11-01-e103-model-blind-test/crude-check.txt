@@ -1,0 +1,35 @@
+# tile, crude D per pass, its mean, the reduction's D, M4 or I3
+fp16.c_near8               [18.43, 18.56, 18.44] crude  18.47  reduction  17.75  M  17.55
+fp16.e_ab                  [13.65, 13.62, 14.08] crude  13.78  reduction  13.32  M  13.68
+fp16.f_hi1                 [16.46, 16.41, 16.52] crude  16.46  reduction  15.85  M  15.93
+fp16.g_bcol500             [12.27, 12.32, 12.32] crude  12.30  reduction  11.79  M  12.02
+fp16.g_relu_shift15        [4.49, 4.53, 4.6] crude   4.54  reduction   4.24  M   4.13
+fp16.h_a_all               [12.83, 12.86, 13.14] crude  12.94  reduction  12.39  M  12.48
+fp16.o_a_maxflip_1         [11.76, 11.73, 11.71] crude  11.73  reduction  11.31  M  11.37
+fp16.s_arow_adds           [20.0, 19.9, 20.24] crude  20.04  reduction  19.42  M  19.52
+fp16.t_10_1                [19.28, 19.18, 18.81] crude  19.09  reduction  18.51  M  18.53
+fp16.x_e_s                 [24.42, 24.23, 24.45] crude  24.37  reduction  23.49  M  23.42
+fp32.c_near_rand           [19.92, 19.67] crude  19.79  reduction  19.15  M  18.26
+fp32.e_a                   [11.24, 11.2, 11.17] crude  11.20  reduction  10.71  M  10.69
+fp32.g_bcol500             [14.64, 14.73, 14.88] crude  14.75  reduction  14.28  M  14.04
+fp32.g_relu_shift15        [3.42, 3.41, 3.29] crude   3.37  reduction   3.06  M   3.05
+fp32.h_a_all_pi            [14.9, 14.59, 14.98] crude  14.82  reduction  14.31  M  14.81
+fp32.h_a_lo_pi             [10.9, 11.02, 11.04] crude  10.98  reduction  10.52  M  10.71
+fp32.o_a_maxflip_4_pi      [10.79, 10.76, 10.44] crude  10.66  reduction  10.32  M  10.53
+fp32.s_abs                 [23.25, 23.09, 22.92] crude  23.09  reduction  22.35  M  22.44
+fp32.s_bhalf_alt           [24.88, 24.63, 24.63] crude  24.71  reduction  23.91  M  23.46
+fp32.t_4_23                [20.98, 20.46, 20.88] crude  20.77  reduction  20.17  M  19.73
+fp32.x_e_g                 [15.36, 15.35] crude  15.36  reduction  14.79  M  14.17
+fp32.x_s_t                 [17.72, 17.85, 17.71] crude  17.76  reduction  17.18  M  17.02
+fp32.z_dn_ab               [9.84, 9.83, 9.75] crude   9.81  reduction   9.42  M   9.48
+int8.i_a127_bfull          [2.43, 2.46, 2.43] crude   2.44  reduction   2.43  M   3.16
+int8.i_afull_b127          [6.46, 6.3, 6.32] crude   6.36  reduction   6.16  M   6.36
+int8.i_arow500             [4.48, 4.14, 4.5] crude   4.37  reduction   4.18  M   4.30
+int8.i_bpair875            [1.85, 2.07, 2.15] crude   2.03  reduction   2.02  M   1.81
+int8.i_sort_a              [6.34, 6.16, 6.51] crude   6.34  reduction   6.23  M   5.87
+int8.i_w2_2                [5.52, 5.36, 5.51] crude   5.46  reduction   5.30  M   5.46
+int8.i_w8_1                [5.49, 5.45, 5.72] crude   5.55  reduction   5.44  M   5.83
+floats  n 23: rms(crude - reduction) 0.567 W; rms(crude - M) 0.713 W; rms(crude - Q130(n)) 3.931 W
+fp32    n 13: rms(crude - reduction) 0.551 W; rms(crude - M) 0.808 W; rms(crude - Q130(n)) 4.648 W
+fp16    n 10: rms(crude - reduction) 0.587 W; rms(crude - M) 0.567 W; rms(crude - Q130(n)) 2.732 W
+int8    n  7: rms(crude - reduction) 0.136 W; rms(crude - M) 0.351 W; rms(crude - Q130(n)) 0.865 W
