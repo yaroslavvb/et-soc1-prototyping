@@ -59,7 +59,8 @@ tools/
                         et-lab-health rev 3, its daily timer and et-reset (written, not installed)
   timeline/             the session-timeline page's extraction, privacy scan and build
 scripts/                VM setup, lab deploys, page building (build-report.py, paste-chartkit.py), check-mirror.py
-rtl-sim/                Verilator benches on the original RTL: fma_toggle (switching activity), pmu_carry (a counter bug)
+rtl-sim/                Verilator benches on the original RTL: fma_toggle_v2 (the fixed bench: build with -fno-dfg), fma_toggle and
+                        fma_toggle_formats (the old ones, kept as the record), pmu_carry (a counter bug)
 patches/                local fixes to et-platform and to the lab's gp-sdk (README.md explains each)
 external/               upstream clones, gitignored (scripts/clone-upstream.sh)
 build/                  build outputs and raw data not yet committed, gitignored
@@ -85,8 +86,8 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
 | ID | What | File |
 |---|---|---|
 | R1–R14 | resources that existed before any measurement: manuals, RTL, firmware source, papers, the machines | [`01-resources.md`](docs/findings/01-resources.md) |
-| Q1–Q131 | the owner's requests and what each produced (Q44–Q66: 25–28 September; Q67–Q131: 29 September – 31 October 2026) | [`02-requests.md`](docs/findings/02-requests.md) |
-| E1–E91 | experiments: command, time, card, raw files. E35–E47 are the version-3 three-card check (25–26 September; its plan, results and raw data are in `docs/reports/data/2026-09-25-claims-v3/`), E48 the gathers and scatters on the same three cards (26 September), E49 the g3log race, reproduced without a card on 25 September, the fixed build checked on aifoundry3's card on 26 September, E50 the host link on the three cards (27 September), E51 DV2 on aifoundry2 (development 28 September; the frozen validation from 20:45 PDT that day to 16:57 PDT on 29 September, reduced that evening), E52 the heat placement (27–28 September, development and a frozen validation), E53 the overheating experiments (28 September, pre-registered, aifoundry3 and aifoundry1's card 1), E54 NV, the mesh rail's voltage step (predictions frozen; its first write waits for the owner), E55–E58 the major pass's pcie2, nocr, memp2 and tau (28–29 September: developed on aifoundry1's card 1, validated on aifoundry3; E55–E57 also on aifoundry2 as a third card on the evening of 29 September), E59 the sparse parity solver on aifoundry3's card (29 September, an engineering benchmark, not pre-registered), E60–E76 the October campaign (Q119–Q129: the bit-flip ladder, the deterministic flips, the heat movies, the camera ladder, Horace's power limit, the bit-price lists, the stage map, the governor moved, the saturation ladder, the idle slopes, 600 MHz, the camera's heat path, the register file, the memory path, the trapping instructions), E77 reserved (the rail at one temperature; needs a governor move; not registered), E78–E91 Q130's (31 October: the kinds energy matrix, the fp16 and int8 bit prices and the DRAM pattern on aifoundry3, the kinds' speed under aifoundry2's own governor, the matrix on aifoundry1's card 1, a speed replicate on aifoundry1's card 0 and the camera per kind, and the evening round's real GPT-2 tiles' energy and speed, the result path's share, heat below 12 W, sign patterns and tile spread, and the real tiles on card 1, not scored) | [`03-experiments.md`](docs/findings/03-experiments.md) |
+| Q1–Q132 | the owner's requests and what each produced (Q44–Q66: 25–28 September; Q67–Q132: 29 September – 31 October 2026) | [`02-requests.md`](docs/findings/02-requests.md) |
+| E1–E104 | experiments: command, time, card, raw files. E35–E47 are the version-3 three-card check (25–26 September; its plan, results and raw data are in `docs/reports/data/2026-09-25-claims-v3/`), E48 the gathers and scatters on the same three cards (26 September), E49 the g3log race, reproduced without a card on 25 September, the fixed build checked on aifoundry3's card on 26 September, E50 the host link on the three cards (27 September), E51 DV2 on aifoundry2 (development 28 September; the frozen validation from 20:45 PDT that day to 16:57 PDT on 29 September, reduced that evening), E52 the heat placement (27–28 September, development and a frozen validation), E53 the overheating experiments (28 September, pre-registered, aifoundry3 and aifoundry1's card 1), E54 NV, the mesh rail's voltage step (predictions frozen; its first write waits for the owner), E55–E58 the major pass's pcie2, nocr, memp2 and tau (28–29 September: developed on aifoundry1's card 1, validated on aifoundry3; E55–E57 also on aifoundry2 as a third card on the evening of 29 September), E59 the sparse parity solver on aifoundry3's card (29 September, an engineering benchmark, not pre-registered), E60–E76 the October campaign (Q119–Q129: the bit-flip ladder, the deterministic flips, the heat movies, the camera ladder, Horace's power limit, the bit-price lists, the stage map, the governor moved, the saturation ladder, the idle slopes, 600 MHz, the camera's heat path, the register file, the memory path, the trapping instructions), E77 reserved (the rail at one temperature; needs a governor move; not registered), E78–E91 Q130's (31 October: the kinds energy matrix, the fp16 and int8 bit prices and the DRAM pattern on aifoundry3, the kinds' speed under aifoundry2's own governor, the matrix on aifoundry1's card 1, a speed replicate on aifoundry1's card 0 and the camera per kind, and the evening round's real GPT-2 tiles' energy and speed, the result path's share, heat below 12 W, sign patterns and tile spread, and the real tiles on card 1, not scored), E92–E104 Q132's (1 November: where a sign's cost goes and C read back, the zero gate on silicon, tile spread, more real tensors, heat below 12 W and a settled plateau, the drift, the DRAM mechanism, the idle reset, a matmul that streams, balanced bit prices, the model's blind test) | [`03-experiments.md`](docs/findings/03-experiments.md) |
 | A1–A25 | published artifacts: pages, images, tools, commits (A20 the session timeline, A21 the sparse parity page, A22 the heatsink study, A23 the transistor-heat timeline, A24 the matmul-to-transistor chain, A25 the kinds-of-numbers page) | [`04-artifacts.md`](docs/findings/04-artifacts.md) |
 
 - **To answer a question:** the "where to look" table → the topic file (10–20) → the number in
@@ -215,8 +216,17 @@ Each links to the full entry in [14-card-behaviour.md](docs/findings/14-card-beh
   ([the governor](docs/findings/14-card-behaviour.md#the-clock-governor-is-thermal-first)).
 - **aifoundry1 card 0's PMIC alarm**: on fp32 random data at 800 MHz its PMIC's 75 W over-power alarm drops the clock
   to a 300 MHz safe state about once a second (E84: in every fp32 random run, no other); under release 1.4.0 / BL2
-  0.22.0 the card idles at 600 MHz, not at the 300 MHz recorded under 1.4.1 in September
+  0.22.0 the card idles at 600 MHz, not at the 300 MHz recorded under 1.4.1 in September. On the other three cards no
+  measurement here shows a PMIC alarm acting: host-side aborts are the guard
   ([the alarm](docs/findings/14-card-behaviour.md#aifoundry1-card-0s-pmic-over-power-alarm-a-third-speed-limit-31-october-2026-e84)).
+- **A hot start does not hold the clock down**: at the 65 °C trip aifoundry2's clock cycles 600–800 MHz about once a second, and
+  the matmul benchmark's fp16 random data read 101.15 W on its board, over E101's 97 W stop. Keep a board stop on a streaming kernel
+  ([the entry](docs/findings/14-card-behaviour.md#a-hot-start-does-not-hold-the-clock-down-and-a-real-kernel-can-read-over-100-w-aifoundry2-1-november-2026-e101)).
+- **No host compute on any box beside a card run**, your own lane's included: a settled reading needs the room quiet and an
+  inlet read beside it (E97, not shown causal; [the trap](docs/findings/14-card-behaviour.md#traps-that-cost-time-here)).
+- **A desk emulation is not a read-back**: E88's and E92's fp16 "frozen" sums walk on silicon (E104). Read C back before
+  registering a state of C (`--dump-c`, `tools/claims-v3/kinds/patch_host_e104.py`). And build the RTL benches with
+  `-fno-dfg`: Verilator 5.052's optimiser miscompiles the multiply-add (`rtl-sim/fma_toggle_v2/`, Q132(b)).
 - **The telemetry lies in specific ways**: whole-degree die readings, rails that are a PMIC running average
   (τ 1.01–1.06 s on aifoundry3 and 1.08 s on aifoundry1's card 1, published one SP pass late; 0.54 s on card 1's SRAM
   rail: E58), a board value that changes once per service-processor pass (133 ms on aifoundry2, 135 on aifoundry1's
@@ -443,6 +453,17 @@ copy it here too.
 
 *Every edit to this file adds one line here, newest first, in the same commit (the owner's rule of 10 October 2026 for
 agent instruction files). It starts on 14 October 2026; earlier changes are in `git log -- AGENT.md`.*
+
+- **2026-11-01 (Sun, week 44, Q132 records)** — Section 3's index reads Q1–Q132 and E1–E104, where it read Q1–Q131 and E1–E91
+  (E92–E104 are the night's thirteen card experiments; A1–A25 is unchanged, and E105 and E106 are not in yet). Section 2's
+  map names `rtl-sim/fma_toggle_v2` and `-fno-dfg`. Section 6 adds three traps: a hot start does not hold the clock down
+  (E101), no host compute on any box beside a card run (E97), a desk emulation is not a read-back with `-fno-dfg` beside it
+  (E102, E104, Q132(b)), and card 0's trap says no measurement shows a PMIC alarm acting on the other three cards. *Why:*
+  constraint — E101's 101.15 W stop, E97's plateau moves (cause not established), E104's read-back and Q132(b)'s optimiser
+  fault; re-check: `docs/reports/data/2026-11-01-e101-real-matmul/README.md` session 2,
+  `docs/reports/data/2026-11-01-e97-heat-low-power-steady/corrections-check.txt` [C2], `.../2026-11-01-e104-c-readback/scored.json`
+  `readback.rows`, `rtl-sim/fma_toggle_v2/verilator_dfg_reproducer.sv`, and the last rows of `docs/findings/02-requests.md` and
+  `03-experiments.md`.
 
 - **2026-10-31 (Sat, week 44, Q130 addendum fixes)** — Section 5's rule carves the samplers' statistics reset
   (`ettelem sample --reset-ms`, which the SP forwards to the PMIC) out of "no PMIC commands": it is allowed, and left
