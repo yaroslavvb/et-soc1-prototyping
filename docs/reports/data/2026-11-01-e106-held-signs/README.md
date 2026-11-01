@@ -96,7 +96,7 @@ The rest of E104's §5.4 text stands. **May not say,** beyond E104's list: "abou
 1. **Three passes ran, not the registered four.** Passes took 305–329 s against the 290 s estimated, so the registered budget rule stopped before 10613 (992 s elapsed + 329 s > 1,250 s). That is about 18 card-minutes, near the 15 asked for. No pass was set aside, but the missing pass cost t: 4.30 against 3.18, half-widths 1.56× wider, which is why `E106.md` asked for four. R6 at n = 4 with the same sd would read ±0.047, still INCONCLUSIVE, so nothing turns on it.
 2. The card sat idle under the claim only for seconds between stages. The queue ended 09:05:20 and the claim was released at 09:09.
 3. `score_e106.py` was run on the read-back alone before any pass was read, to report the lane's status.
-4. The generator, the bench and the collection ran on the mini, not on the card's host.
+4. The generator, the bench and the collection ran on a desk machine, not on the card's host.
 5. The runner's log lines read "E78 pass … tiles verified against kinds.json": `run_e78.py`'s unchanged strings.
 6. **The session ran after the brief's 07:15 PST window for card work.** Q132's coordinator extended it by message at about 08:37 PST, having read that ssh still passed and the card was free. The session ran 08:47–09:09 PST.
 

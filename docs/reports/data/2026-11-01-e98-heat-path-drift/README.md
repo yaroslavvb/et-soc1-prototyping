@@ -218,6 +218,7 @@ aifoundry2 card 0 free at 07:21:12 PST (`et-who`: no process holds a device node
 | `history/<box>-2026-11-01.jsonl.gz` | the three boxes' own 5 s history, 07:00–15:30 UTC, numbers only |
 | `results.json`, `reduce.txt` | the registered reduction |
 | `checks.py`, `checks.txt` | post-hoc checks K1–K13, labelled, deciding nothing; left as committed, with K2's positional line and K6's fp16 ones rows superseded by the check below |
+| `p6-rest-note.py`, `p6-rest-note.txt` | added 1 Nov 2026 by the records (Q132(o)), post hoc, deciding nothing: E97's second move in P6's rest window (§2's dated note) |
 | `corrections-check.py`, `corrections-check.txt` | the desk check behind Corrections after verification: every number that section quotes, from committed files (standard library only) |
 
 The three slots: E100 1793521800–1793524200 (01:30 PDT–01:10 PST), E96 1793527500–1793532000 (02:05–03:20 PST), E101 1793535600–1793540100 (04:20–05:35 PST).

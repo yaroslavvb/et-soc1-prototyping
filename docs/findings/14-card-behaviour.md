@@ -440,9 +440,10 @@ operating-point changes is one candidate).
   alarms; PMIC 1.5.0 did not at those readings; **firmware or board, unknown**. aifoundry3 and card 1 never read above
   56.43 and 61.30 W, so they are untested. Not tested on any card: an alarm on the slow average, which the 65 W arm never
   let past 68.91 W; that needs a governor move or a PMIC read. E101 then read 101.15 W on aifoundry2, one held reading on
-  three samples, about 88 W on card 0's scale if the same line holds there: none of that session's 25,074 samples reads
-  300 MHz and its 82 rings hold no alarm line (post hoc, read with `tools/claims-v3/hpl/sptrace_full.py`). E84's "hotter
-  per board watt" compares readings on these two scales. Data:
+  three samples, about 88 W on card 0's scale if the same line holds there, and E105 96.25 W. Over nine of that night's
+  sessions: 353 rings, no alarm line, no POWER_SAFE record, no 300 MHz point; 164,208 readings, none at 300 MHz, 407 at 85 W
+  or more (post hoc, `rings-tonight.txt` in that directory). E84's "hotter per board watt" compares readings on these two
+  scales. Data:
   [`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §a.
 - **For a run on card 0:** expect fp32 random data at 800 MHz to cycle through 300 MHz, and register a label and a stop
   or a count for the alarm (E84's labels had no PMIC category, so its limit rule scored the alarm runs as misses); Q130's
@@ -488,7 +489,9 @@ state is not idle (`:879-880`, `:910-919`). So a launch's *internal* kernel boun
 - **How often:** about 1 in 500 kernel boundaries with the sparsity host's stock launches, post hoc over 25 falls in six
   sessions, with no dependence visible on die, power, format or session position. E100's own no-gap arm, 1 in 152 at
   800 MHz, 95% about 1 in 52 to 1 in 735, is compatible and adds no further support. Runs on a fixed grid (E63, E73, E85)
-  hold one phase against the heartbeat, so they pile up at one time in the process.
+  hold one phase against the heartbeat, so they pile up at one time in the process. A sustained run's count can miss them:
+  E105's `gemmc1-int8-zeros` read 786 MHz through 9 dips of 1.2–1.3 s, 6 at process boundaries, which `idle_resets_sus`
+  mostly does not count.
 - **What it does not show.** That the check is that heartbeat is read from source and tested from outside; any other
   once-a-second card-side check reading the same state would look the same. The cards report minions 0.25.1 against a
   public changelog at 0.24.0 plus unreleased, and the binary was not read. One card, one kind. N's 0 of 126 alone does not
@@ -521,6 +524,20 @@ loop's numbers do not bound a streaming kernel's: int8's benchmark runs +17.45 �
 aifoundry3 (R4). Data: [`2026-11-01-e101-real-matmul`](../reports/data/2026-11-01-e101-real-matmul/README.md), session 2,
 `aifoundry2/s1/tel/`.
 
+**The power rule that failed, and its future form (E105, the same morning).** E105's GEMM pattern with B packed by column, whose
+tiles fit the L2, reads as high from a cool start at 800 MHz. Its rule estimated a cell from a lower-power probe of the same layout
+and format (rho) and admitted it at 88 W or under: by-column random fp32, estimated 87.83 W (rho 0.81; the true share 0.90), read
+95.2 W at 800 MHz and peaked at **96.25 W, 0.75 W under the session's 97 W stop**. The 93 W lock then refused its sustained run; fp16
+random went on under the lock and read 91.91 W in the burst and 94.32 W sustained, on a hot die. The estimate ran 3.2–8.4 W under
+the reading on 19 of 63 runs, the high-power cells. 🛑 **So sustained random fp32 by column sits at this card's stop: about 98.7 W, an
+extrapolation, and it could not be expected to complete under the 97 W stop. Its refusal is not a gap to fill by rerunning. The
+rule's future form: estimate from the same kind's S on a pinned card (E105's P4 read 94.6 W against 95.2 W, and aifoundry3 had that
+S before the burst ran), never from a lower kind's rho, and lock by layout and format.** Two readings to carry with it. Only 600
+and 800 MHz held for a whole launch, on every layout, so a slope of T on the clock is a line through two points. And the sampled clock
+reads the governor's hunt high, so a rate gap can print above its clock gap, which the law forbids: use the kernel's own clock,
+cycles_max ÷ wall. Data: [`2026-11-01-e105-gemm-layout`](../reports/data/2026-11-01-e105-gemm-layout/README.md), "The power rule did
+not do what it was for", `aifoundry2/admission.json`, `aifoundry2/s1/skipped.jsonl`.
+
 ## The heat path moves with the hour and the day, and a hold settles slowly (1 November 2026; Q132(g), E98 on aifoundry2, E97 on aifoundry3)
 
 - **The rest die cycles by about 3.5 °C a day.** Nine days of the boxes' own 5 s history: aifoundry2 at rest reads 46.1 °C at
@@ -536,7 +553,8 @@ aifoundry3 (R4). Data: [`2026-11-01-e101-real-matmul`](../reports/data/2026-11-0
   Hosts' NIC and NVMe sensors are a free, coarse stand-in for an inlet reading, not a calibrated one.
 - **A hold settles at about 0.9 °C per board watt on aifoundry3, and that is a plateau, not a steady state** (E97, three
   single holds, one session). The registered steadiness test failed on two of three, and the plateau moved three times in
-  about an hour by 0.3–0.8 °C, uniformly across the sensors, cause not established. On the die's own sensors 45% of the rise
+  about an hour by 0.3–0.8 °C, uniformly across the sensors, cause not established (at the second, aifoundry2's idle reading
+  moved +1.21 °C inside E98's P6 rest window and was back by 05:50 PST: E98's dated note). On the die's own sensors 45% of the rise
   arrives by 60 s and 90% by 5 minutes; E73's 95% in 49 s is the camera on the back of another card. About a third of the
   board's rise over idle is the idle power's climb with temperature, and the loop gain works out to about 0.4 at the trip's
   temperature on this card (derived). The lab model's 1.47 °C/W is aifoundry2's September fit, not this card's, and nobody
