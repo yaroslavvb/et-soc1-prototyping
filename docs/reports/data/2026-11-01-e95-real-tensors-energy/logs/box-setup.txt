@@ -1,0 +1,36 @@
+== host (no device access) ==
+aifoundry3
+ 01:01:55 up 5 days,  9:43,  3 users,  load average: 0.42, 0.57, 0.61
+No process holds an ET-SoC-1 device node or card lock.
+== tree ==
+root /home/yaroslavvb/aifoundry
+reused E78 files identical to E95's freeze: all
+E95 files identical to the freeze: all
+== tiles against their registered sha256 (each file and each half) ==
+{"real2_tiles": 30, "e86_tiles": 3, "e78_tiles_checked": 6, "problems": []}
+== the binary takes fp16 and int8 with file: operands, --dump-tiles and --stop-file ==
+  fp16: present
+  int8: present
+  file:: present
+  --dump-tiles: present
+  --stop-file: present
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 4006896 Sep 25 07:25 build/ettelem/ettelem
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3569104 Sep 26 06:15 build/sparsity/host/sparsity_host
+numpy 1.26.4
+== the plan of the first pass ==
+{"real2": ["fp32.r2_bert_l6_up", "fp32.r2_gpt2_l3_mlp_down", "fp32.r2_gpt2_l6_mlp_down_bf16fwd", "fp32.r2_gpt2_l9_attn_qk", "fp32.r2_resnet18_l2c1", "fp32.r2_resnet18_l3c1", "fp32.r2_t5small
+  0 s-1 anchor_pi
+  1 s+0 fp32.randn
+  2 s+0 fp16.r2_bert_l6_up
+  3 s+0 int8.r2_gpt2_l11_down_p999
+  4 s+0 fp16.randn
+  5 s+0 fp16.r2_vgg16_fc2
+  6 s+0 fp16.real_l6_attn_qk
+  7 s+0 fp32.zeros
+== dry run of one whole pass (V3_DRY=1: lib.sh stubs every device call) ==
+dry rc=0
+device launches the pass would make: 55
+of them on real2 tiles: 30
+01:01:59 [aifoundry3] done
+DRY ettelem config
+2026-11-01T01:02:04 [aifoundry3] kinds p9500 ends: ok tiers 1,2
