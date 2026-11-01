@@ -1,0 +1,980 @@
+{
+ "_note": "Predictions from RTL counts and E78's fp32/fp16 kinds alone. No E92 measurement exists in this file's inputs.",
+ "e92_tiles_commit": "6b8f23f1",
+ "rate_ops_per_s": {
+  "fp32": 1120808135.1963668,
+  "fp16": 1120820675.7281513
+ },
+ "variants": {
+  "nets_hier2": {
+   "k_fJ_per_net_toggle": 1.8268190265516426,
+   "a_fJ_per_clocked_bit": 1.0817541328626843,
+   "fit_rms_w_on_e78": 0.28267233211773574,
+   "n_fit": 33,
+   "tiles_D_over_zeros_w": {
+    "fp32.c_abs": 8.396659870240693,
+    "fp32.c_alt": 12.247383257345351,
+    "fp32.c_neg": 8.412734217217729,
+    "fp32.h_add": 8.81200483441973,
+    "fp32.h_allsub": 8.935216014407429,
+    "fp32.h_sub": 12.035566607675815,
+    "fp32.h_sub2": 9.308352167680905,
+    "fp32.h_sub4": 10.216113238958254,
+    "fp32.h_sub6": 11.125839923317034,
+    "fp32.i_add": 8.613128470869617,
+    "fp32.i_sub": 10.224942117715681,
+    "fp32.k_only": 8.40217996697771,
+    "fp32.r_abs": 17.517874433203932,
+    "fp32.r_h_add": 17.933219397382967,
+    "fp32.r_h_sub": 21.156781170639054,
+    "fp32.r_walk": 22.476428273075754,
+    "fp32.s_abs": 10.394180039017803,
+    "fp32.signs": 13.022309152085954,
+    "fp32.w_c": 11.840823491633042,
+    "fp32.w_h_add": 12.052094137668847,
+    "fp32.w_h_sub": 14.515233920209845,
+    "fp32.wr_h_add": 23.127592206663138,
+    "fp32.wr_h_sub": 24.060476952642066,
+    "fp16.c_abs": 8.382948834894169,
+    "fp16.c_alt": 15.1787389774159,
+    "fp16.h_add": 8.752346266337272,
+    "fp16.h_allsub": 8.95743844595512,
+    "fp16.h_sub": 15.19718318653014,
+    "fp16.hh_sub": 14.209659045375703,
+    "fp16.hl_sub": 13.407647174459695,
+    "fp16.s_abs": 13.117343349344779,
+    "fp16.signs": 13.232180118465767
+   },
+   "contrasts_w": [
+    {
+     "rule": "R1",
+     "contrast": "fp32.h_add-c_abs",
+     "pred_w": 0.4153449641790363,
+     "d_nets_vpu_per_op": 202853.3333333333,
+     "d_register_bits_changed_per_op": 131072.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 140629.3333333333,
+      "exponent": 0.0,
+      "operand": 28688.0,
+      "multiplier": 0.0,
+      "adder_norm": 0.0,
+      "result": 73728.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 4096.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R1",
+     "contrast": "fp16.h_add-c_abs",
+     "pred_w": 0.3693974314431028,
+     "d_nets_vpu_per_op": 180410.66666666663,
+     "d_register_bits_changed_per_op": 90112.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 101034.66666666667,
+      "exponent": 0.0,
+      "operand": 49168.0,
+      "multiplier": 0.0,
+      "adder_norm": 0.0,
+      "result": 69632.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 4096.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R2",
+     "contrast": "fp32.h_sub-h_add",
+     "pred_w": 3.223561773256085,
+     "d_nets_vpu_per_op": 1574378.6666666667,
+     "d_register_bits_changed_per_op": 435870.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 24448.0,
+      "exponent": 150970.66666666666,
+      "operand": -13328.000000000002,
+      "multiplier": 0.0,
+      "adder_norm": 1364416.0,
+      "result": 6912.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": -4096.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R2",
+     "contrast": "fp16.h_sub-h_add",
+     "pred_w": 6.444836920192868,
+     "d_nets_vpu_per_op": 3147605.333333333,
+     "d_register_bits_changed_per_op": 908570.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 162514.6666666667,
+      "exponent": 297738.6666666666,
+      "operand": 316512.0,
+      "multiplier": 116400.0,
+      "adder_norm": 1792069.3333333333,
+      "result": 233314.6666666667,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 47189.333333333336,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R2",
+     "contrast": "fp32.c_alt-c_abs",
+     "pred_w": 3.850723387104658,
+     "d_nets_vpu_per_op": 1880682.6666666667,
+     "d_register_bits_changed_per_op": 655774.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 242304.0,
+      "exponent": 150970.66666666666,
+      "operand": 13328.0,
+      "multiplier": 0.0,
+      "adder_norm": 1360576.0,
+      "result": 154368.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 4096.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R2",
+     "contrast": "fp16.c_alt-c_abs",
+     "pred_w": 6.7957901425217315,
+     "d_nets_vpu_per_op": 3319008.0,
+     "d_register_bits_changed_per_op": 1015834.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 277373.3333333334,
+      "exponent": 282720.0,
+      "operand": 345557.3333333334,
+      "multiplier": 112304.0,
+      "adder_norm": 1771589.3333333333,
+      "result": 320696.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 55381.333333333336,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R3",
+     "contrast": "fp32.h_allsub-h_add",
+     "pred_w": 0.12321117998769893,
+     "d_nets_vpu_per_op": 60176.0,
+     "d_register_bits_changed_per_op": 5900.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 17722.666666666686,
+      "exponent": 448.0,
+      "operand": -80.0,
+      "multiplier": 0.0,
+      "adder_norm": 12933.333333333332,
+      "result": 320.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R3",
+     "contrast": "fp16.h_allsub-h_add",
+     "pred_w": 0.2050921796178482,
+     "d_nets_vpu_per_op": 100165.33333333337,
+     "d_register_bits_changed_per_op": 9221.333333333314,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 24461.333333333343,
+      "exponent": 821.3333333333333,
+      "operand": 2026.6666666666642,
+      "multiplier": 725.3333333333334,
+      "adder_norm": 9741.333333333334,
+      "result": 10744.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 634.6666666666661,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R3",
+     "contrast": "fp32.c_neg-c_abs",
+     "pred_w": 0.016074346977035248,
+     "d_nets_vpu_per_op": 7850.6666666666715,
+     "d_register_bits_changed_per_op": 3036.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 549.3333333333321,
+      "exponent": 384.0,
+      "operand": 80.0,
+      "multiplier": 0.0,
+      "adder_norm": 5253.333333333334,
+      "result": 320.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 256.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R4",
+     "contrast": "fp32.i_sub-i_add",
+     "pred_w": 1.6118136468460644,
+     "d_nets_vpu_per_op": 787205.3333333334,
+     "d_register_bits_changed_per_op": 217886.6666666667,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 12202.666666666672,
+      "exponent": 75450.66666666667,
+      "operand": -6672.0,
+      "multiplier": 0.0,
+      "adder_norm": 682176.0,
+      "result": 3456.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": -2048.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R5",
+     "contrast": "fp32.h_sub2-c_abs",
+     "pred_w": 0.9116922974402115,
+     "d_nets_vpu_per_op": 445268.0,
+     "d_register_bits_changed_per_op": 141735.66666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 41269.33333333333,
+      "exponent": 37742.666666666664,
+      "operand": 3840.0000000000005,
+      "multiplier": 0.0,
+      "adder_norm": 341104.0,
+      "result": 20160.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R5",
+     "contrast": "fp32.h_sub4-c_abs",
+     "pred_w": 1.8194533687175607,
+     "d_nets_vpu_per_op": 888616.0,
+     "d_register_bits_changed_per_op": 283471.3333333334,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 82538.66666666667,
+      "exponent": 75485.33333333333,
+      "operand": 7679.999999999999,
+      "multiplier": 0.0,
+      "adder_norm": 682208.0,
+      "result": 40320.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R5",
+     "contrast": "fp32.h_sub6-c_abs",
+     "pred_w": 2.729180053076341,
+     "d_nets_vpu_per_op": 1332924.0,
+     "d_register_bits_changed_per_op": 425207.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 123808.00000000001,
+      "exponent": 113228.0,
+      "operand": 11520.0,
+      "multiplier": 0.0,
+      "adder_norm": 1023312.0,
+      "result": 60480.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R5",
+     "contrast": "fp32.h_sub-c_abs",
+     "pred_w": 3.6389067374351214,
+     "d_nets_vpu_per_op": 1777232.0,
+     "d_register_bits_changed_per_op": 566942.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 165077.3333333333,
+      "exponent": 150970.66666666666,
+      "operand": 15360.0,
+      "multiplier": 0.0,
+      "adder_norm": 1364416.0,
+      "result": 80640.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R6",
+     "contrast": "fp32.s_abs-c_abs",
+     "pred_w": 1.9975201687771094,
+     "d_nets_vpu_per_op": 975583.3333333333,
+     "d_register_bits_changed_per_op": 309377.5,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 92806.66666666667,
+      "exponent": 82408.66666666667,
+      "operand": 12816.0,
+      "multiplier": 0.0,
+      "adder_norm": 735474.0,
+      "result": 43680.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R6",
+     "contrast": "fp16.s_abs-c_abs",
+     "pred_w": 4.73439451445061,
+     "d_nets_vpu_per_op": 2312239.3333333335,
+     "d_register_bits_changed_per_op": 598957.3333333333,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 120777.0,
+      "exponent": 103316.0,
+      "operand": 287856.6666666667,
+      "multiplier": 114659.0,
+      "adder_norm": 1206171.0,
+      "result": 210521.66666666666,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 30368.666666666668,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R6",
+     "contrast": "fp16.h_sub-c_abs",
+     "pred_w": 6.814234351635971,
+     "d_nets_vpu_per_op": 3328016.0,
+     "d_register_bits_changed_per_op": 998682.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 263549.3333333334,
+      "exponent": 297738.6666666666,
+      "operand": 365680.0,
+      "multiplier": 116400.0,
+      "adder_norm": 1792069.3333333333,
+      "result": 302946.6666666667,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 51285.333333333336,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R7",
+     "contrast": "fp32.r_h_sub-r_h_add",
+     "pred_w": 3.223561773256087,
+     "d_nets_vpu_per_op": 1574378.666666667,
+     "d_register_bits_changed_per_op": 435870.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 24448.0,
+      "exponent": 150970.66666666666,
+      "operand": -13328.0,
+      "multiplier": 0.0,
+      "adder_norm": 1364416.0,
+      "result": 6912.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": -4096.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R8",
+     "contrast": "fp32.w_h_sub-w_h_add",
+     "pred_w": 2.4631397825409973,
+     "d_nets_vpu_per_op": 1202990.6666666665,
+     "d_register_bits_changed_per_op": 230482.66666666663,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 82754.66666666669,
+      "exponent": 260154.6666666667,
+      "operand": -23269.333333333372,
+      "multiplier": 930.6666666666715,
+      "adder_norm": 926197.3333333333,
+      "result": -22128.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": -3717.3333333333358,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R8",
+     "contrast": "fp32.wr_h_sub-wr_h_add",
+     "pred_w": 0.932884745978928,
+     "d_nets_vpu_per_op": 455618.333333333,
+     "d_register_bits_changed_per_op": 14691.333333333256,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": -7328.333333333314,
+      "exponent": 101587.33333333331,
+      "operand": -25889.666666666628,
+      "multiplier": -12924.0,
+      "adder_norm": 408091.66666666674,
+      "result": -21295.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": -4922.666666666664,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R9",
+     "contrast": "fp32.k_only-c_abs",
+     "pred_w": 0.005520096737017255,
+     "d_nets_vpu_per_op": 2696.0,
+     "d_register_bits_changed_per_op": 512.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 768.0,
+      "exponent": 0.0,
+      "operand": 1024.0,
+      "multiplier": 0.0,
+      "adder_norm": 0.0,
+      "result": 0.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R10",
+     "contrast": "fp16.hh_sub-hl_sub",
+     "pred_w": 0.802011870916008,
+     "d_nets_vpu_per_op": 391696.0,
+     "d_register_bits_changed_per_op": 115200.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 35840.0,
+      "exponent": 24234.666666666686,
+      "operand": -3840.0,
+      "multiplier": 0.0,
+      "adder_norm": 334096.0,
+      "result": 0.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R4",
+     "contrast": "(i_sub-i_add) - 0.5*(h_sub-h_add), fp32",
+     "pred_w": 3.276021802189888e-05
+    },
+    {
+     "rule": "R5",
+     "contrast": "(h_sub2-c_abs) - 2/8*(h_sub-c_abs), fp32",
+     "pred_w": 0.0019656130814311723
+    },
+    {
+     "rule": "R5",
+     "contrast": "(h_sub4-c_abs) - 4/8*(h_sub-c_abs), fp32",
+     "pred_w": 0.0
+    },
+    {
+     "rule": "R5",
+     "contrast": "(h_sub6-c_abs) - 6/8*(h_sub-c_abs), fp32",
+     "pred_w": 0.0
+    },
+    {
+     "rule": "R7",
+     "contrast": "(r_h_sub-r_h_add) - (h_sub-h_add), fp32",
+     "pred_w": 1.7763568394002505e-15
+    }
+   ]
+  },
+  "nets_hier": {
+   "k_fJ_per_net_toggle": 2.348543584527963,
+   "a_fJ_per_clocked_bit": 1.120702701214661,
+   "fit_rms_w_on_e78": 0.43055154286510716,
+   "n_fit": 33,
+   "tiles_D_over_zeros_w": {
+    "fp32.c_abs": 8.683155850236629,
+    "fp32.c_alt": 9.793775878431942,
+    "fp32.c_neg": 8.686812946182133,
+    "fp32.h_add": 8.846946016824774,
+    "fp32.h_allsub": 9.061395034542883,
+    "fp32.h_sub": 9.176898899769933,
+    "fp32.h_sub2": 8.806591612619954,
+    "fp32.h_sub4": 8.93002737500328,
+    "fp32.h_sub6": 9.053463137386606,
+    "fp32.i_add": 8.776359151511908,
+    "fp32.i_sub": 8.941511077434848,
+    "fp32.k_only": 8.688230860541044,
+    "fp32.r_abs": 18.03999200797308,
+    "fp32.r_h_add": 18.203782174561226,
+    "fp32.r_h_sub": 18.533692941238293,
+    "fp32.r_walk": 22.24714835024364,
+    "fp32.s_abs": 9.023200843922,
+    "fp32.signs": 12.920102432800325,
+    "fp32.w_c": 10.69394793437736,
+    "fp32.w_h_add": 10.742732611577479,
+    "fp32.w_h_sub": 11.92105103103273,
+    "fp32.wr_h_add": 22.78305943577623,
+    "fp32.wr_h_sub": 24.060674854045523,
+    "fp16.c_abs": 8.665548677039284,
+    "fp16.c_alt": 11.138727843282762,
+    "fp16.h_add": 8.975120749941176,
+    "fp16.h_allsub": 9.065468175235273,
+    "fp16.h_sub": 11.22533389823409,
+    "fp16.hh_sub": 11.217928371570641,
+    "fp16.hl_sub": 11.155020001942352,
+    "fp16.s_abs": 12.961149863703797,
+    "fp16.signs": 13.022355137685905
+   },
+   "contrasts_w": [
+    {
+     "rule": "R1",
+     "contrast": "fp32.h_add-c_abs",
+     "pred_w": 0.16379016658814471,
+     "d_nets_vpu_per_op": 62223.999999999985,
+     "d_register_bits_changed_per_op": 131072.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 140629.3333333333,
+      "exponent": 0.0,
+      "operand": 28688.0,
+      "multiplier": 0.0,
+      "adder_norm": 0.0,
+      "result": 73728.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 4096.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R1",
+     "contrast": "fp16.h_add-c_abs",
+     "pred_w": 0.3095720729018918,
+     "d_nets_vpu_per_op": 117605.33333333334,
+     "d_register_bits_changed_per_op": 90112.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 101034.66666666667,
+      "exponent": 0.0,
+      "operand": 49168.0,
+      "multiplier": 0.0,
+      "adder_norm": 0.0,
+      "result": 69632.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 4096.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R2",
+     "contrast": "fp32.h_sub-h_add",
+     "pred_w": 0.32995288294515923,
+     "d_nets_vpu_per_op": 125349.33333333334,
+     "d_register_bits_changed_per_op": 435870.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 24448.0,
+      "exponent": 150970.66666666666,
+      "operand": -13328.000000000002,
+      "multiplier": 0.0,
+      "adder_norm": 1364416.0,
+      "result": 6912.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": -4096.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R2",
+     "contrast": "fp16.h_sub-h_add",
+     "pred_w": 2.2502131482929144,
+     "d_nets_vpu_per_op": 854848.0,
+     "d_register_bits_changed_per_op": 908570.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 162514.6666666667,
+      "exponent": 297738.6666666666,
+      "operand": 316512.0,
+      "multiplier": 116400.0,
+      "adder_norm": 1792069.3333333333,
+      "result": 233314.6666666667,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 47189.333333333336,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R2",
+     "contrast": "fp32.c_alt-c_abs",
+     "pred_w": 1.1106200281953136,
+     "d_nets_vpu_per_op": 421925.3333333333,
+     "d_register_bits_changed_per_op": 655774.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 242304.0,
+      "exponent": 150970.66666666666,
+      "operand": 13328.0,
+      "multiplier": 0.0,
+      "adder_norm": 1360576.0,
+      "result": 154368.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 4096.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R2",
+     "contrast": "fp16.c_alt-c_abs",
+     "pred_w": 2.4731791662434777,
+     "d_nets_vpu_per_op": 939552.0,
+     "d_register_bits_changed_per_op": 1015834.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 277373.3333333334,
+      "exponent": 282720.0,
+      "operand": 345557.3333333334,
+      "multiplier": 112304.0,
+      "adder_norm": 1771589.3333333333,
+      "result": 320696.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 55381.333333333336,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R3",
+     "contrast": "fp32.h_allsub-h_add",
+     "pred_w": 0.21444901771810976,
+     "d_nets_vpu_per_op": 81469.33333333334,
+     "d_register_bits_changed_per_op": 5900.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 17722.666666666686,
+      "exponent": 448.0,
+      "operand": -80.0,
+      "multiplier": 0.0,
+      "adder_norm": 12933.333333333332,
+      "result": 320.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R3",
+     "contrast": "fp16.h_allsub-h_add",
+     "pred_w": 0.09034742529409634,
+     "d_nets_vpu_per_op": 34322.66666666666,
+     "d_register_bits_changed_per_op": 9221.333333333314,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 24461.333333333343,
+      "exponent": 821.3333333333333,
+      "operand": 2026.6666666666642,
+      "multiplier": 725.3333333333334,
+      "adder_norm": 9741.333333333334,
+      "result": 10744.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 634.6666666666661,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R3",
+     "contrast": "fp32.c_neg-c_abs",
+     "pred_w": 0.0036570959455044516,
+     "d_nets_vpu_per_op": 1389.3333333333285,
+     "d_register_bits_changed_per_op": 3036.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 549.3333333333321,
+      "exponent": 384.0,
+      "operand": 80.0,
+      "multiplier": 0.0,
+      "adder_norm": 5253.333333333334,
+      "result": 320.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 256.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R4",
+     "contrast": "fp32.i_sub-i_add",
+     "pred_w": 0.16515192592293992,
+     "d_nets_vpu_per_op": 62741.33333333333,
+     "d_register_bits_changed_per_op": 217886.6666666667,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 12202.666666666672,
+      "exponent": 75450.66666666667,
+      "operand": -6672.0,
+      "multiplier": 0.0,
+      "adder_norm": 682176.0,
+      "result": 3456.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": -2048.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R5",
+     "contrast": "fp32.h_sub2-c_abs",
+     "pred_w": 0.1234357623833251,
+     "d_nets_vpu_per_op": 46893.33333333333,
+     "d_register_bits_changed_per_op": 141735.66666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 41269.33333333333,
+      "exponent": 37742.666666666664,
+      "operand": 3840.0000000000005,
+      "multiplier": 0.0,
+      "adder_norm": 341104.0,
+      "result": 20160.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R5",
+     "contrast": "fp32.h_sub4-c_abs",
+     "pred_w": 0.24687152476665197,
+     "d_nets_vpu_per_op": 93786.66666666667,
+     "d_register_bits_changed_per_op": 283471.3333333334,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 82538.66666666667,
+      "exponent": 75485.33333333333,
+      "operand": 7679.999999999999,
+      "multiplier": 0.0,
+      "adder_norm": 682208.0,
+      "result": 40320.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R5",
+     "contrast": "fp32.h_sub6-c_abs",
+     "pred_w": 0.37030728714997707,
+     "d_nets_vpu_per_op": 140680.0,
+     "d_register_bits_changed_per_op": 425207.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 123808.00000000001,
+      "exponent": 113228.0,
+      "operand": 11520.0,
+      "multiplier": 0.0,
+      "adder_norm": 1023312.0,
+      "result": 60480.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R5",
+     "contrast": "fp32.h_sub-c_abs",
+     "pred_w": 0.49374304953330395,
+     "d_nets_vpu_per_op": 187573.3333333333,
+     "d_register_bits_changed_per_op": 566942.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 165077.3333333333,
+      "exponent": 150970.66666666666,
+      "operand": 15360.0,
+      "multiplier": 0.0,
+      "adder_norm": 1364416.0,
+      "result": 80640.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R6",
+     "contrast": "fp32.s_abs-c_abs",
+     "pred_w": 0.3400449936853711,
+     "d_nets_vpu_per_op": 129183.33333333333,
+     "d_register_bits_changed_per_op": 309377.5,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 92806.66666666667,
+      "exponent": 82408.66666666667,
+      "operand": 12816.0,
+      "multiplier": 0.0,
+      "adder_norm": 735474.0,
+      "result": 43680.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R6",
+     "contrast": "fp16.s_abs-c_abs",
+     "pred_w": 4.295601186664513,
+     "d_nets_vpu_per_op": 1631883.6666666667,
+     "d_register_bits_changed_per_op": 598957.3333333333,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 120777.0,
+      "exponent": 103316.0,
+      "operand": 287856.6666666667,
+      "multiplier": 114659.0,
+      "adder_norm": 1206171.0,
+      "result": 210521.66666666666,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 30368.666666666668,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R6",
+     "contrast": "fp16.h_sub-c_abs",
+     "pred_w": 2.5597852211948062,
+     "d_nets_vpu_per_op": 972453.3333333334,
+     "d_register_bits_changed_per_op": 998682.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 263549.3333333334,
+      "exponent": 297738.6666666666,
+      "operand": 365680.0,
+      "multiplier": 116400.0,
+      "adder_norm": 1792069.3333333333,
+      "result": 302946.6666666667,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 51285.333333333336,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R7",
+     "contrast": "fp32.r_h_sub-r_h_add",
+     "pred_w": 0.32991076667706665,
+     "d_nets_vpu_per_op": 125333.33333333302,
+     "d_register_bits_changed_per_op": 435870.6666666666,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 24448.0,
+      "exponent": 150970.66666666666,
+      "operand": -13328.0,
+      "multiplier": 0.0,
+      "adder_norm": 1364416.0,
+      "result": 6912.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": -4096.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R8",
+     "contrast": "fp32.w_h_sub-w_h_add",
+     "pred_w": 1.1783184194552518,
+     "d_nets_vpu_per_op": 447643.9999999999,
+     "d_register_bits_changed_per_op": 230482.66666666663,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 82754.66666666669,
+      "exponent": 260154.6666666667,
+      "operand": -23269.333333333372,
+      "multiplier": 930.6666666666715,
+      "adder_norm": 926197.3333333333,
+      "result": -22128.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": -3717.3333333333358,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R8",
+     "contrast": "fp32.wr_h_sub-wr_h_add",
+     "pred_w": 1.277615418269292,
+     "d_nets_vpu_per_op": 485367.0,
+     "d_register_bits_changed_per_op": 14691.333333333256,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": -7328.333333333314,
+      "exponent": 101587.33333333331,
+      "operand": -25889.666666666628,
+      "multiplier": -12924.0,
+      "adder_norm": 408091.66666666674,
+      "result": -21295.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": -4922.666666666664,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R9",
+     "contrast": "fp32.k_only-c_abs",
+     "pred_w": 0.005075010304414818,
+     "d_nets_vpu_per_op": 1928.0,
+     "d_register_bits_changed_per_op": 512.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 768.0,
+      "exponent": 0.0,
+      "operand": 1024.0,
+      "multiplier": 0.0,
+      "adder_norm": 0.0,
+      "result": 0.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R10",
+     "contrast": "fp16.hh_sub-hl_sub",
+     "pred_w": 0.06290836962828905,
+     "d_nets_vpu_per_op": 23898.666666666628,
+     "d_register_bits_changed_per_op": 115200.0,
+     "d_unit_hier2_by_stage_per_op": {
+      "control": 35840.0,
+      "exponent": 24234.666666666686,
+      "operand": -3840.0,
+      "multiplier": 0.0,
+      "adder_norm": 334096.0,
+      "result": 0.0,
+      "vpu_sequencer": 0.0,
+      "lane_operand_bus": 0.0,
+      "c_regfile": 0.0,
+      "other": 0.0
+     }
+    },
+    {
+     "rule": "R4",
+     "contrast": "(i_sub-i_add) - 0.5*(h_sub-h_add), fp32",
+     "pred_w": 0.00017548445036030813
+    },
+    {
+     "rule": "R5",
+     "contrast": "(h_sub2-c_abs) - 2/8*(h_sub-c_abs), fp32",
+     "pred_w": -8.881784197001252e-16
+    },
+    {
+     "rule": "R5",
+     "contrast": "(h_sub4-c_abs) - 4/8*(h_sub-c_abs), fp32",
+     "pred_w": 0.0
+    },
+    {
+     "rule": "R5",
+     "contrast": "(h_sub6-c_abs) - 6/8*(h_sub-c_abs), fp32",
+     "pred_w": -8.881784197001252e-16
+    },
+    {
+     "rule": "R7",
+     "contrast": "(r_h_sub-r_h_add) - (h_sub-h_add), fp32",
+     "pred_w": -4.211626809258462e-05
+    }
+   ]
+  }
+ }
+}

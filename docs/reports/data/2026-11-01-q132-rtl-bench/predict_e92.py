@@ -11,7 +11,8 @@ Coefficients are fitted on E78's fp32 and fp16 kinds and on nothing else. No E92
 directory, only the bench's counts of E92's frozen tiles (tools/claims-v3/kinds/e92/tiles, commit 6b8f23f1). Three variants: nets_map (the recount's merge rule, learned once on
 random data and applied to every tile: the primary), nets_hier2 (the first version of this file's primary, commit de545f0c: its merge
 does not collapse a bus that flips with its control bit) and nets_hier (the recount's merge on each tile's own window, which does collapse
-it, so it under-predicts every alternating tile).
+it, so it under-predicts every alternating tile). e92-bench-prediction-frozen.json is that first commit's file, byte for byte; this script
+checks nets_hier2 against it.
 
 SPDX-License-Identifier: Apache-2.0
 """
@@ -81,6 +82,15 @@ def main():
         o["contrasts_w"].append({"rule": "R7", "contrast": "(r_h_sub-r_h_add) - (h_sub-h_add), fp32",
                                  "pred_w": (D("fp32.r_h_sub") - D("fp32.r_h_add")) - (D("fp32.h_sub") - D("fp32.h_add"))})
         out["variants"][var] = o
+    # E92's posthoc-check.py reads the stage split as it was frozen, which was computed before the merge map existed and cannot be recomputed from
+    # today's counts: carry it over from the frozen copy, and refuse to write anything that disagrees with that copy.
+    frozen = json.load(open(f"{a.counts}/e92-bench-prediction-frozen.json"))["variants"]["nets_hier2"]
+    now = out["variants"]["nets_hier2"]
+    assert max(abs(now["tiles_D_over_zeros_w"][k] - v) for k, v in frozen["tiles_D_over_zeros_w"].items()) < 1e-9
+    for c_now, c_frozen in zip(now["contrasts_w"], frozen["contrasts_w"]):
+        assert c_now["contrast"] == c_frozen["contrast"] and abs(c_now["pred_w"] - c_frozen["pred_w"]) < 1e-9
+        if "d_unit_hier2_by_stage_per_op" in c_frozen:
+            c_now["d_unit_hier2_by_stage_per_op"] = c_frozen["d_unit_hier2_by_stage_per_op"]
     json.dump(out, open(a.out, "w"), indent=1)
     for var, o in out["variants"].items():
         print(var, "k", round(o["k_fJ_per_net_toggle"], 3), "a", round(o["a_fJ_per_clocked_bit"], 3), "rms", round(o["fit_rms_w_on_e78"], 3))

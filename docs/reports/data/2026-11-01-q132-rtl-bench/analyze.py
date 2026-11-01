@@ -113,10 +113,13 @@ def apply_frozen(rows, cols, b, vscale=1.0):
 
 
 def ladder(hl_path, base, items, passes=None):
-    """Price of each item over its zero in E65/E67's raw runs: per-pass mean difference of p80, then the mean over passes."""
+    """Price of each item over its zero in E65/E67's raw runs: per-pass mean difference of p80, then the mean over passes.
+
+    Only the passes that experiment's own reduction kept (E65 set aside 654 and 656 for drift), so an item over its own zero equals that file's d_p80."""
     h = load(hl_path)
     # aifoundry3 only: E60's file holds three cards at different clocks, and pass numbers repeat between them
-    runs = [r for r in h["runs"] if not r.get("fail") and r.get("on_protocol", True) and r.get("p80") is not None and r.get("card") == "aifoundry3"]
+    kept = set(h["cards"]["aifoundry3"]["passes"])
+    runs = [r for r in h["runs"] if not r.get("fail") and r.get("on_protocol", True) and r.get("p80") is not None and r.get("card") == "aifoundry3" and r["pass"] in kept]
     byp = {}
     for r in runs:
         byp.setdefault(r["pass"], {}).setdefault(r["item"], []).append(r["p80"])
