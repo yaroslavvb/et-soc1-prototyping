@@ -161,3 +161,5 @@ None.
 ## Results (added after the data, Sun 1 Nov 2026; nothing above changed)
 
 [`docs/reports/data/2026-11-01-e96-real-tensors-speed/`](../../../../docs/reports/data/2026-11-01-e96-real-tensors-speed/README.md). The session ran 02:05–03:15 PST, all 96 runs in 70.3 card-minutes with the smoke, G3 included. S1, S2, S2b, S3, S4, S5 and T all PASS. I1 reads `SAME_WITHIN_BAR` (+6.1 MHz, 95% [−0.8, +13.1], four rounds), I2 and I3 `BELOW`. One expectation above was wrong: the 60 s rest reading was a true rest, because E98's P2 ended early, and the data README says so.
+
+*Corrected after verification, Sun 1 Nov 2026:* the data README's reading of I1 (a near-cap result: on these runs a real tile's ceiling bounds the difference at +10.6 MHz), of the relation's score (it takes same-session power; the frozen rows lead), and of what item 3 this narrows, with eight smaller points. No number or verdict changed; see the data README's [Corrections after verification](../../../../docs/reports/data/2026-11-01-e96-real-tensors-speed/README.md#corrections-after-verification-sun-1-nov-2026).
