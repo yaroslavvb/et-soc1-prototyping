@@ -52,8 +52,8 @@ lists E72's second card as the owner's call; the call was made on 1 Nov.
   · anything on card 1 [ ] · OTA [ ] · resets [ ] · host reboot [ ] · driver/PCI [ ] (a module unload on this host
   takes both cards) · AC cycle [ ] · SPI [ ] · PMIC write [ ] · PMIC firmware-management or slot query [ ] · clock
   command [ ] · threshold write [ ] · `--reset-ms` [ ] (not used, as in E72).
-- **Host:** `aifoundry1`. ⟨RUN AGENT: `uptime`, manifest⟩. Desk reading 13:00:10 PST: up 5 d 22 h 58 m, so booted
-  about 26 Oct 15:02 PDT.
+- **Host:** `aifoundry1`. **Live, 14:50:39 PST (PASS):** up 6 d 0 h 48 m (booted about 26 Oct 15:02 PDT), the
+  driver module `et_soc1` loaded with a use count of 0; the run's `et-lab-manifest` is saved with every pass.
 - **Card 0, expected** (E84's committed identity reads, 31 Oct 2026 15:42:00 PDT,
   `docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/ident/`): PCI `0000:01:00.0`, device 0, `/dev/et0_mgmt`;
   release **1.4.0**, BL1 **0.22.0**, BL2 **0.22.0**, PMIC **1.6.1**, minions **0.25.1**; module uptime then 5 d 0 h
@@ -61,10 +61,13 @@ lists E72's second card as the owner's call; the call was made on 1 Nov.
 - **Firmware identities: by continuity, not re-queried.** The revisions query E84 used is a PMIC command at
   et-platform `836a4ab`: its handler writes the PMIC's firmware-management command register twice, `ACTIVE_SLOT` then
   `VERSION` (`services/firmware_update.c:903` → `driver/pmic_controller.c:952-974, 2531-2557, 2581-2600`), so it is not
-  sent again. ⟨RUN AGENT: card 0's module uptime (`ettelem-dv2 uptime` or `DM_CMD_GET_MODULE_UPTIME`,
-  service-processor RAM, `thermal_pwr_mgmt.c:1451-1455`) must show no reset since before 15:42 PDT on 31 Oct, about
-  equal to the host's uptime; an image takes effect only through a reset, so an unbroken uptime carries E84's
-  identity. A shorter uptime is a **NO-GO**⟩.
+  sent again. Card 0's module uptime (`DM_CMD_GET_MODULE_UPTIME`, service-processor RAM,
+  `thermal_pwr_mgmt.c:1451-1455`) must show no reset since before 15:42 PDT on 31 Oct; an image takes effect only
+  through a reset, so an unbroken uptime carries E84's identity; a shorter uptime is a **NO-GO**. **Live, 14:50:39.729
+  PST (PASS):** `ettelem-e118 uptime` 6 d 0 h 49 m = 8,689 min, against E84's 7,240 min plus the 1,448.7 min since
+  its read = 8,688.7 (minute resolution): no service-processor reset since E84's read, so card 0 runs the image E84
+  identified (release 1.4.0, BL1/BL2 0.22.0, PMIC 1.6.1, minions 0.25.1). `ettelem-e118` opened `/dev/et0_mgmt` at
+  PCI `0000:01:00.0` (its device-layer banner, checked in code).
 - **Ordering:** after Q133's E114 (card 0) **and** E112 (card 1) have both ended — never two sessions on aifoundry1.
   Desk reading 13:00:10 PST: card 1 busy with our own E112 block (started about 12:55); card 0 free.
 
@@ -93,12 +96,29 @@ lists E72's second card as the owner's call; the call was made on 1 Nov.
 
 ## Current state
 
-- ⟨RUN AGENT⟩ kernel/module/tool digests; **originals on card 0 by the two RAM GETs: must read TDP 65, threshold 65**
-  (E84 read exactly that at 15:42:00 and 16:06:52 PDT on 31 Oct, with `low_power`, 600 MHz, 519 mV), else NO-GO.
-- **vmin-LUT floor:** ⟨RUN AGENT: `DM_CMD_GET_VMIN_LUT` (both locks held; a copy from service-processor RAM,
-  `driver/flashfs.c:2073`), parsed **in code** from the binary file; the floor must be **600 MHz**, else NO-GO. Card
-  0's LUT has never been read; its telemetry shows work at 600, 700 and 800 MHz (and 300 MHz only in the alarm's safe
-  state, E84)⟩.
+- **Originals on card 0 by the RAM GETs: must read TDP 65, threshold 65** (E84 read exactly that at 15:42:00 and
+  16:06:52 PDT on 31 Oct, with `low_power`, 600 MHz, 519 mV), else NO-GO. **Live, 14:50:39 PST (PASS):**
+  `ettelem-e118 config` (the TDP, threshold, power-state and frequency GETs; no voltage GET) read **TDP 65 W,
+  threshold 65 °C, `low_power`, 600 MHz**, under card 0's lock (`gov.jsonl` event `original`).
+- **Tools (live):** `ettelem-e118` sha256 `a8481df7673891a811d588c60040987de9543411bb4002344256d221ef5afcac`, built
+  14:48 PST from `tools/claims-v3/e118/ettelem-e118/` at the pre-registration `28e625c9`; the stock CLI
+  `/opt/et/bin/dev_mngt_service`; the sparsity host and kernel E60 ran (`e0fbecce…`, `990807f4…`); the host's shared
+  harness byte-identical to the repository (README "Checked before the claim").
+- **Exclusivity (live, 14:50:39–14:51:09 PST, PASS):** `et-who` shows no line for `/dev/et0_*`, `/dev/et1_*` or either
+  lock file; no other user's device process and no CI job (`Runner.Worker`; the runner's listener is idle); the
+  module's use count 0; the dashboard collector running with the same sha256 `58e7dc1b9f755be3` and its lock check
+  (it opens nothing on a card whose lock is held); the `#community-lab` claim posted at **14:50:28.709 PST**, message
+  `1566585247326535741` ("using aifoundry1 card 0 for 1 h, until ~15:50 PST"), after E114 had released card 0
+  (14:40 PST) and finished (its result at 14:49 PST).
+- **Kernel log before (whole log since boot, read on the host):** card 0 (`0000:01:00.0`) lines 714, of which
+  `Error Event Detected` 701 (the last at host uptime 520,656 s, about 14:40 PST, during E114), `Tried to open same
+  device` 0; AER lines 21 (whole log).
+- **SP trace ring before the pin:** 8,192 bytes, sha256 `4df35ccf1b0f3612647e435cfa63d43283722908c1a040227d9c20e1255ec630`,
+  14:50:39.774 PST (read only, card 0's lock).
+- **vmin-LUT floor:** `DM_CMD_GET_VMIN_LUT` (both locks held; a copy from service-processor RAM,
+  `driver/flashfs.c:2073`), parsed **in code** from the binary file; the floor must be **600 MHz**, else NO-GO.
+  **Live, 14:50:39 PST (PASS):** three non-zero minion points, **600, 700, 800 MHz**, floor 600 (the file's digest is
+  in `gov.jsonl`; only the frequencies are published, never the per-card voltage calibration).
 - Bank / boot counters: UNKNOWN (deliberately) / N-A. PMIC slots: not read (a PMIC command).
 
 ### What each planned query asks of the PMIC (et-platform `836a4ab`; corrected after verification)
@@ -199,8 +219,12 @@ card 0 ran at 800 MHz.
   mismatch; a management timeout; any activity appearing on card 1; a kernel-log line other than the known syndromes.
 - **Card time:** gates 5 min, control about 9 min, pin and passes about 23 min (E72's 22.6), restore and return 3 min,
   closing 2 min: **about 45 min**; the claim `using aifoundry1 card 0 for 1 h, until ~HH:MM PST`.
-- **GO / NO-GO:** desk **GO-READY**; ⟨RUN AGENT: GO only when every live item reads as expected and the telemetry
-  profile is settled, recorded in a commit made before the set⟩.
+- **GO / NO-GO: GO**, Sun 1 Nov 2026 14:5x PST, by E118's run agent: every live item above read as expected (G0
+  identity by continuity, originals 65 W / 65 °C, LUT floor 600 MHz, exclusivity, the claim posted), the telemetry
+  profile is settled (no-PMIC-read), rule 8 PASS at the version-matched source with its named residual, the envelope
+  and the stop rules are in code (`guard_e118.py`, `HL_MAX_C=72`, `gov_e118.py`'s allowlist of two commands and two
+  values). Recorded in this commit, made **before** the one write. Card-time cap: 45 minutes from the first gate read
+  (14:50:39 PST), so every card step ends by **15:35:39 PST**.
 
 ## Frozen predictions (the run's predict tool freezes them before the claim)
 
