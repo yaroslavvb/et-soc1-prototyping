@@ -167,3 +167,24 @@ It closes, narrows or leaves open item 9 of the kinds page's section 11, and it 
 | `desk/rest_window.py`, `desk/cycle.py` and their `.txt` | why the rest reading is a 20 min mean (post hoc, on the boxes' own history, before this freeze) |
 
 ## Amendments
+
+- **A1 (Sun 1 Nov 2026, about 01:02 PDT; written while P1 ran, before any of P1's numbers had been read, and committed before P2).** It drops two probes for a third other user of the card. **No rule, target, band, gate, noise figure, protocol, `predictions.json` or `reduce_e98.py` changes.**
+
+  *What changes.*
+
+  1. **P4 and P5 are dropped.** P1, P2, P3, P6 and P7 stay at their registered times, so the first and last probes are as far apart as before.
+  2. **A third slot, E101:** epoch **1793535600** to **1793540100**, 12:20–13:35 UTC, **04:20–05:35 PST**. It opens 16 min after P3's expected end and closes 20 min before P6's rest reading. **E101, a real matmul kind by kind under this card's own governor, is the third other user of the card under this one claim**, beside E100 and E96. No second post. ([`amendment-1.json`](amendment-1.json), `~/claude/work/q132-a2-slots.txt` on the box.)
+  3. **P3's latest start moves from 12:10 to 11:56 UTC** (03:56 PST), so it ends before that slot.
+  4. **How the running queue learns this.** It reads its schedule once, so it is stopped between probes: `QUEUE-STOP` touched while P1 ran, which ends that queue after P1 (its `queue.jsonl` will show a `skip` of P2 and a `queue_end`), and a new queue starts on [`make_schedule_a1_e98.py`](make_schedule_a1_e98.py)'s schedule, P2, P3, P6, P7, with the three slots. P1 is untouched. The queue's code is the same.
+
+  *Why.* The coordinator's reason: the final critic of the previous round ranks "a real matmul, kind by kind" first among what the post still lacks, and only this card's governor can give its speed.
+
+  *What it costs.* Five probes, not seven: 3 degrees of freedom, not 5. One lost probe leaves 4, the gate's minimum (2 df); two lost makes every slope rule UNDER-RESOLVED. A true 0.25 is now called `SUPPORTS` about one night in two, even at the full fall. On the frozen planning noise and the night's shape ([`amendment-1.txt`](amendment-1.txt), 20,000 seeded draws a row; seven probes in brackets):
+
+  | night's fall | R1 half-width | R1 if the slope is 0.25 | R1 if it is 0 | R2 half-width | R2 if the slope is 1.12 | R2 if it is 0.25 |
+  |---|---|---|---|---|---|---|
+  | 2 °C | ±0.27 (±0.20) | SUPPORTS 48%, INCONCLUSIVE 47% | BELOW_TARGET 49%, INCONCLUSIVE 47% | ±0.72 (±0.54) | SUPPORTS 71%, INCONCLUSIVE 28% | BELOW_BAND 61%, INCONCLUSIVE 38% |
+  | 1.5 °C | ±0.36 (±0.27) | SUPPORTS 30%, INCONCLUSIVE 65% | BELOW_TARGET 31%, INCONCLUSIVE 64% | ±0.96 (±0.72) | SUPPORTS 48%, INCONCLUSIVE 49% | BELOW_BAND 41%, INCONCLUSIVE 58% |
+  | 1 °C | ±0.54 (±0.41) | SUPPORTS 16%, INCONCLUSIVE 80% | BELOW_TARGET 16%, INCONCLUSIVE 80% | ±1.44 (±1.09) | SUPPORTS 25%, INCONCLUSIVE 72% | BELOW_BAND 22%, INCONCLUSIVE 76% |
+
+  *A fix to the text above, found while writing this.* "What the noise allows" gives R2's half-widths as ±0.53, ±0.71 and ±1.07, from an earlier draft of the schedule; `predictions.json`, which is what was frozen, says ±0.54, ±0.72 and ±1.09. The table is left as committed.
