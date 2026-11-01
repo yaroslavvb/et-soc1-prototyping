@@ -1,0 +1,107 @@
+{
+ "card": "aifoundry3",
+ "args": {
+  "out": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e97-smoke/p9701",
+  "root": "/home/yaroslavvb/aifoundry",
+  "tel_live": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e97-smoke/p9701/telemetry.jsonl.raw",
+  "sparsity": "build/sparsity/host/sparsity_host",
+  "pass_no": 9701,
+  "card": "aifoundry3",
+  "half_s": 10.0,
+  "cycles": 1,
+  "lead_s": 5.0,
+  "launch_s": 6.8,
+  "overhead_s": 0.75,
+  "min_launch_s": 1.0,
+  "idle_s": 5.0,
+  "gate_c": 62.0,
+  "gate_max_s": 0.0,
+  "max_c": 78.0,
+  "stale_s": 3.0,
+  "blocks": "i8r6dn,f16zero",
+  "smoke": true,
+  "dry": false,
+  "list": false
+ },
+ "blocks": {
+  "i8r6dn": [
+   "int8.real_l6_mlp_down",
+   "int8.zeros"
+  ],
+  "f16zero": [
+   "fp16.zeros",
+   "idle"
+  ]
+ },
+ "order": [
+  "i8r6dn",
+  "f16zero"
+ ],
+ "items": [
+  {
+   "name": "fp16.zeros",
+   "type": "fp16",
+   "kind": "zeros",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "sha256_a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "sha256_b": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "values": null,
+   "zero": "fp16.zeros",
+   "random": "fp16.randn",
+   "anchor": true,
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 0,
+   "provisional": false,
+   "cpo": 546.0,
+   "macs_per_op": 8192,
+   "rule": "every element +0.0 (0x0000): every lane gated"
+  },
+  {
+   "name": "int8.real_l6_mlp_down",
+   "type": "int8",
+   "kind": "real_l6_mlp_down",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+   "bytes": 2048,
+   "sha256": "3af027ef38e00cce862b16e79f7778bd5384da93164539621790fef1d1a03558",
+   "sha256_a": "27bc00a671028cc59eeec8c5121890dbf3b684d0a97ceb97efbfa4c8513cb4ee",
+   "sha256_b": "98128b56c7e44e132316a48719bdddbcb8c0fadebafcdf872a3b3733ae1bb9dd",
+   "values": null,
+   "zero": "int8.zeros",
+   "random": "int8.full",
+   "anchor": false,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 45684,
+   "provisional": true,
+   "cpo": 318.0,
+   "macs_per_op": 16384,
+   "rule": "layer 6 MLP down-projection: A = GELU output (tokens x 3072), B = h.6.mlp.c_proj.weight (3072 x 768)"
+  },
+  {
+   "name": "int8.zeros",
+   "type": "int8",
+   "kind": "zeros",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "sha256_a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "sha256_b": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "values": null,
+   "zero": "int8.zeros",
+   "random": "int8.full",
+   "anchor": true,
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 0,
+   "provisional": true,
+   "cpo": 318.0,
+   "macs_per_op": 16384,
+   "rule": "every byte 0x00: every lane gated"
+  }
+ ],
+ "et_devices": null,
+ "experiment": "E89"
+}

@@ -1,0 +1,47 @@
+No process holds an ET-SoC-1 device node or card lock.
+20e760c20e9b99c789ef96f1e4e950d51f534410275bfb933c2aaf96d1090fd0  build/sparsity/host/sparsity_host
+16037641ab75bdbe1209f323641e269c9b897468091243173bfaaaf0b21686e2  build/ettelem/ettelem
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 4006896 Sep 25 07:25 build/ettelem/ettelem
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3569104 Sep 26 06:15 build/sparsity/host/sparsity_host
+2026-11-01T02:30:42-08:00
+{"tdp_w":0,"temp_threshold_c":65,"power_state":0,"power_state_name":"max_power","minion_mhz":600,"minion_mv":523}
+config rc=0
+probe rc=0
+ticks: 3
+{"probe": "pvt_sample", "ticks": 3, "cmd74_ok_ticks": 3, "cmd74": true, "skipped_stale": 0}
+board_w 24.17 mhz {'minion': 600, 'noc': 400, 'ddr': 933} minshire [53, 48, 87] pvt st 0 n 34 min 1961 max 2002 took_ms 10
+board_w 24.38 mhz {'minion': 600, 'noc': 400, 'ddr': 933} minshire [53, 48, 87] pvt st 0 n 34 min 1960 max 2002 took_ms 10
+board_w 24.15 mhz {'minion': 600, 'noc': 400, 'ddr': 933} minshire [53, 48, 87] pvt st 0 n 34 min 1961 max 2004 took_ms 11
+2026-11-01T02:30:42-08:00
+2026-11-01T02:30:43 [aifoundry3] e97-smoke p9701 begins (die 53 C) -> /home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e97-smoke/p9701
+02:30:46 [aifoundry3] E89 pass 9701: 2 blocks ['i8r6dn', 'f16zero']; halves 10 s x 1 cycles after a 5 s lead-in (25 s a block); gate <= 62 C for <= 0 s, idle 5 s; cap 78 C; ET_DEVICES=None; tiles verified against kinds.json
+02:30:46 [aifoundry3] gate: die 53 C after 0.0 s (reached)
+02:31:17 [aifoundry3] pass 9701 block 1/2 i8r6dn (int8.real_l6_mlp_down vs int8.zeros) done, die 54 C
+02:31:42 [aifoundry3] pass 9701 block 2/2 f16zero (fp16.zeros vs idle) done, die 53 C
+02:31:47 [aifoundry3] done
+2026-11-01T02:31:51 [aifoundry3] e97-smoke p9701 ends: ok sampler pvt smoke
+2026-11-01T02:31:52 [aifoundry3] e97-smoke p9702 begins (die 53 C) -> /home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e97-smoke/p9702
+02:31:56 [aifoundry3] E97 Part B pass 9702: deadline 2026-11-01 07:13:00 PST, 281.1 min left; stop 78 C, resume 75 C, hard 82 C; tiles verified
+02:31:56 [aifoundry3] rest R0: slope, 20-20 s
+02:32:16 [aifoundry3] rest R0 ends (cap) after 20 s: 34-sensor mean None C
+02:32:16 [aifoundry3] hold H1: int8.full for 25 s
+02:32:30 [aifoundry3] hold H1: the stop at 55 C, 34.0 W, in phase natural
+02:32:41 [aifoundry3] hold H1 ends (time) after 25 s, 4 launches, die 54 C
+02:32:41 [aifoundry3] rest R1: level, 20-20 s
+02:33:01 [aifoundry3] rest R1 ends (cap) after 20 s: 34-sensor mean 54.281 C
+02:33:01 [aifoundry3] done
+2026-11-01T02:33:05 [aifoundry3] e97-smoke p9702 ends: ok sampler pvt smoke holds
+   ('i8r6dn', 'lead', 'int8.zeros') 10 records, cycles/op [318.0] ok True
+   ('i8r6dn', 'K', 'int8.real_l6_mlp_down') 21 records, cycles/op [318.0] ok True
+   ('i8r6dn', 'Z', 'int8.zeros') 21 records, cycles/op [318.0] ok True
+   ('f16zero', 'K', 'fp16.zeros') 21 records, cycles/op [546.0] ok True
+   telemetry 669 lines over 67 s, 669 with 34 sensors; 34-sensor mean 53.57-55.45 C
+   ('H1', 'H', 'int8.full') 47 records, cycles/op [318.0] ok True
+   telemetry 713 lines over 71 s, 713 with 34 sensors; 34-sensor mean 53.14-55.97 C
+   {'kind': 'rest', 'name': 'R0', 'why_end': 'cap'}
+   {'kind': 'phase', 'hold': 'H1', 'phase': 'natural'}
+   {'kind': 'stop', 'hold': 'H1', 'phase': 'natural', 'die_c': 55.0}
+   {'kind': 'phase', 'hold': 'H1', 'phase': 'reduced', 'die_c': 55.0}
+   {'kind': 'hold', 'name': 'H1', 'why_end': 'time', 'launches': 4, 'die_c': 54.0}
+   {'kind': 'rest', 'name': 'R1', 'why_end': 'cap'}
+2026-11-01T02:33:05-08:00

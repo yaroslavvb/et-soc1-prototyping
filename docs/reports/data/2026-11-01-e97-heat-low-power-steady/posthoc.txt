@@ -1,0 +1,206 @@
+[timeline] Part B, PST
+  rest R0: 04:50:15-05:04:07, 832 s, ended on slope
+  hold H1: 05:04:07-05:34:07, 1800 s, ended on time
+  decision at 05:34:07: chain: H2 for 15 min on H1, R1, H3, R3; 98.9 min left
+  hold H2: 05:34:07-05:49:07, 900 s, ended on time
+  rest R1: 05:49:07-05:59:08, 600 s, ended on level
+  stop in H3: 06:02:49, firmware reading 78.0 C, board 63.43 W
+  hold H3: 05:59:08-06:29:08, 1800 s, ended on time
+  rest R2: 06:29:08-06:44:08, 900 s, ended on level
+
+[wander] each hold in 60 s bins: the 34-sensor mean minus the idle baseline (C), board power over it (W)
+  H1 int8.full: 3.66/10.0 6.52/11.1 8.29/11.7 9.51/12.1 10.35/12.4 10.88/12.7 11.25/12.9 11.49/13.0 11.60/13.0 11.72/13.1 11.81/13.1 11.92/13.2 11.96/13.2 11.99/13.2 12.01/13.2 12.01/13.3 12.21/13.2 12.54/13.4 12.77/13.5 12.74/13.5 12.58/13.4 12.43/13.4 12.28/13.3 12.17/13.2 12.07/13.2 12.01/13.3 11.86/13.2 11.75/13.1 11.73/13.1 11.67/13.0 11.85/13.7
+  H2 fp32.ones: 11.85/13.7 11.99/13.8 12.08/13.8 12.28/14.0 12.45/14.0 12.59/14.0 12.64/14.1 12.73/14.1 12.90/14.2 13.07/14.3 13.17/14.3 13.19/14.4 13.18/14.3 13.17/14.3 13.14/14.2
+  H3 fp32.randn: 9.16/28.0 17.14/32.0 22.85/35.3 26.56/34.8 24.82/25.1 23.70/25.8 22.69/23.7 22.05/24.2 21.41/23.3 21.00/23.2 20.65/23.3 20.41/22.4 20.24/23.6 20.00/22.1 19.94/23.1 19.71/22.3 19.72/22.5 19.65/22.9 19.58/21.9 19.49/23.4 19.37/21.8 19.53/22.8 19.61/22.4 19.78/22.4 19.77/22.9 19.74/22.0 19.78/23.3 19.69/22.0 19.79/22.9 19.59/22.3
+
+[windows] the steady rise on other windows of the same hold (the registered one is the hold's last 300 s)
+  H1   600-  900 s: dT  11.94 C, dP  13.19 W, rise per board W 0.905, per minion-rail W 1.163
+  H1   660-  930 s: dT  11.97 C, dP  13.22 W, rise per board W 0.906, per minion-rail W 1.166
+  H1   900-  960 s: dT  12.01 C, dP  13.25 W, rise per board W 0.906, per minion-rail W 1.167
+  H1  1080- 1200 s: dT  12.76 C, dP  13.54 W, rise per board W 0.942, per minion-rail W 1.219
+  H1  1500- 1800 s: dT  11.80 C, dP  13.12 W, rise per board W 0.899, per minion-rail W 1.154
+  H2   240-  480 s: dT  12.60 C, dP  14.05 W, rise per board W 0.897, per minion-rail W 1.160
+  H2   600-  900 s: dT  13.17 C, dP  14.30 W, rise per board W 0.921, per minion-rail W 1.198
+  H3   900- 1200 s: dT  19.63 C, dP  22.61 W, rise per board W 0.868, per minion-rail W 1.197
+  H3  1200- 1500 s: dT  19.61 C, dP  22.48 W, rise per board W 0.873, per minion-rail W 1.198
+  H3  1500- 1800 s: dT  19.72 C, dP  22.49 W, rise per board W 0.877, per minion-rail W 1.202
+
+[bump] H1's bump: the 34 sensors between 660-930 s and 1080-1200 s of the hold; every launch the same tile
+  the bump per sensor: mean 0.790 C, sd 0.008, min 0.772, max 0.806; the rise per sensor at the plateau: mean 11.99, sd 0.34, min 11.17, max 12.48
+  board 36.445 -> 36.770 W, minion rail 16.860 -> 17.054 W; the idle law's slope there is 0.409 W/C, so leakage alone would add 0.323 W
+
+[room] the boxes' live history (room/, 5 s records), in 1 min means across H1's last 17 minutes and H2; time is minutes after H1 started. cpu% is the host's whole-machine CPU use; its temperature sensors are the host's
+  aifoundry1
+    min 13 05:17: cpu   0.2%, CPU sensor  41.8 C, NVMe  42.9 C, NIC  52.33 C, idle card readings [47, 51]
+    min 14 05:18: cpu   0.2%, CPU sensor  42.1 C, NVMe  42.9 C, NIC  52.32 C, idle card readings [47, 51]
+    min 15 05:19: cpu  12.7%, CPU sensor  55.2 C, NVMe  42.9 C, NIC  52.32 C, idle card readings [47, 51]
+    min 16 05:20: cpu  37.7%, CPU sensor  83.6 C, NVMe  42.9 C, NIC  52.48 C, idle card readings [47, 51]
+    min 17 05:21: cpu  36.8%, CPU sensor  85.3 C, NVMe  43.3 C, NIC  52.98 C, idle card readings [47, 52]
+    min 18 05:22: cpu   4.4%, CPU sensor  58.5 C, NVMe  43.9 C, NIC  53.67 C, idle card readings [47, 52]
+    min 19 05:23: cpu   0.2%, CPU sensor  43.9 C, NVMe  43.9 C, NIC  54.05 C, idle card readings [47, 52]
+    min 20 05:24: cpu   0.2%, CPU sensor  43.5 C, NVMe  43.9 C, NIC  54.21 C, idle card readings [47, 52]
+    min 21 05:25: cpu   0.1%, CPU sensor  42.2 C, NVMe  43.9 C, NIC  54.18 C, idle card readings [47, 52]
+    min 22 05:26: cpu   0.1%, CPU sensor  42.9 C, NVMe  43.9 C, NIC  54.02 C, idle card readings [47, 52]
+    min 23 05:27: cpu   0.2%, CPU sensor  42.8 C, NVMe  43.9 C, NIC  53.95 C, idle card readings [47, 52]
+    min 24 05:28: cpu   0.2%, CPU sensor  42.6 C, NVMe  43.9 C, NIC  53.83 C, idle card readings [47, 52]
+    min 25 05:29: cpu   0.2%, CPU sensor  42.8 C, NVMe  43.9 C, NIC  53.71 C, idle card readings [47, 52]
+    min 26 05:30: cpu   0.2%, CPU sensor  42.6 C, NVMe  43.9 C, NIC  53.63 C, idle card readings [47, 52]
+    min 27 05:31: cpu   1.2%, CPU sensor  43.9 C, NVMe  43.9 C, NIC  53.49 C, idle card readings [47, 52]
+    min 28 05:32: cpu   0.1%, CPU sensor  42.4 C, NVMe  43.9 C, NIC  53.36 C, idle card readings [47, 52]
+    min 29 05:33: cpu   0.1%, CPU sensor  41.8 C, NVMe  43.9 C, NIC  53.23 C, idle card readings [47, 51]
+    min 30 05:34: cpu   0.2%, CPU sensor  42.7 C, NVMe  43.9 C, NIC  53.14 C, idle card readings [47, 51]
+    min 31 05:35: cpu   0.7%, CPU sensor  44.4 C, NVMe  43.9 C, NIC  53.06 C, idle card readings [47, 51]
+    min 32 05:36: cpu   1.0%, CPU sensor  43.5 C, NVMe  43.9 C, NIC  52.97 C, idle card readings [47, 51]
+    min 33 05:37: cpu   0.6%, CPU sensor  42.1 C, NVMe  43.9 C, NIC  52.92 C, idle card readings [None, None]
+    min 34 05:38: cpu   0.3%, CPU sensor  44.3 C, NVMe  43.2 C, NIC  52.85 C, idle card readings [47, 53]
+    min 35 05:39: cpu   0.2%, CPU sensor  42.4 C, NVMe  43.0 C, NIC  52.82 C, idle card readings [47, 52]
+    min 36 05:40: cpu   0.2%, CPU sensor  42.2 C, NVMe  42.9 C, NIC  52.81 C, idle card readings [47, 52]
+    min 37 05:41: cpu   1.2%, CPU sensor  44.6 C, NVMe  42.9 C, NIC  52.80 C, idle card readings [47, 52]
+    min 38 05:42: cpu   0.1%, CPU sensor  42.7 C, NVMe  43.1 C, NIC  52.79 C, idle card readings [47, 52]
+    min 39 05:43: cpu   0.2%, CPU sensor  42.2 C, NVMe  43.8 C, NIC  52.78 C, idle card readings [47, 52]
+    min 40 05:44: cpu   0.2%, CPU sensor  42.1 C, NVMe  43.9 C, NIC  52.83 C, idle card readings [47, 52]
+    min 41 05:45: cpu   0.2%, CPU sensor  42.7 C, NVMe  43.9 C, NIC  52.87 C, idle card readings [47, 52]
+    min 42 05:46: cpu   0.1%, CPU sensor  42.6 C, NVMe  43.9 C, NIC  52.90 C, idle card readings [47, 52]
+    min 43 05:47: cpu   2.2%, CPU sensor  51.2 C, NVMe  43.9 C, NIC  52.91 C, idle card readings [None, None]
+    min 44 05:48: cpu   0.2%, CPU sensor  43.5 C, NVMe  43.9 C, NIC  53.01 C, idle card readings [47, 52]
+    min 45 05:49: cpu   0.5%, CPU sensor  45.5 C, NVMe  43.9 C, NIC  53.04 C, idle card readings [None, None]
+  aifoundry2
+    min 13 05:17: cpu   0.7%, CPU sensor  33.2 C, NVMe  36.9 C, NIC  43.41 C, idle card readings [45]
+    min 14 05:18: cpu   0.9%, CPU sensor  33.3 C, NVMe  36.9 C, NIC  43.37 C, idle card readings [45]
+    min 15 05:19: cpu   1.1%, CPU sensor  33.9 C, NVMe  36.9 C, NIC  43.33 C, idle card readings [45]
+    min 16 05:20: cpu   1.3%, CPU sensor  34.5 C, NVMe  36.9 C, NIC  43.34 C, idle card readings [45]
+    min 17 05:21: cpu   1.9%, CPU sensor  34.6 C, NVMe  36.9 C, NIC  43.42 C, idle card readings [46]
+    min 18 05:22: cpu   1.0%, CPU sensor  34.2 C, NVMe  36.9 C, NIC  43.49 C, idle card readings [46]
+    min 19 05:23: cpu   0.4%, CPU sensor  34.5 C, NVMe  36.9 C, NIC  43.60 C, idle card readings [46]
+    min 20 05:24: cpu   0.7%, CPU sensor  34.3 C, NVMe  36.9 C, NIC  43.69 C, idle card readings [46]
+    min 21 05:25: cpu   0.7%, CPU sensor  34.2 C, NVMe  36.9 C, NIC  43.72 C, idle card readings [47]
+    min 22 05:26: cpu   0.9%, CPU sensor  33.8 C, NVMe  36.9 C, NIC  43.76 C, idle card readings [46]
+    min 23 05:27: cpu   0.5%, CPU sensor  33.2 C, NVMe  36.9 C, NIC  43.75 C, idle card readings [46]
+    min 24 05:28: cpu   0.7%, CPU sensor  34.1 C, NVMe  36.9 C, NIC  43.73 C, idle card readings [46]
+    min 25 05:29: cpu   0.9%, CPU sensor  33.8 C, NVMe  36.9 C, NIC  43.73 C, idle card readings [46]
+    min 26 05:30: cpu   1.0%, CPU sensor  33.8 C, NVMe  36.9 C, NIC  43.71 C, idle card readings [46]
+    min 27 05:31: cpu   2.1%, CPU sensor  33.9 C, NVMe  36.9 C, NIC  43.67 C, idle card readings [46]
+    min 28 05:32: cpu   0.4%, CPU sensor  33.8 C, NVMe  36.9 C, NIC  43.64 C, idle card readings [46]
+    min 29 05:33: cpu   0.6%, CPU sensor  33.8 C, NVMe  36.9 C, NIC  43.57 C, idle card readings [46]
+    min 30 05:34: cpu   0.8%, CPU sensor  33.4 C, NVMe  36.9 C, NIC  43.52 C, idle card readings [46]
+    min 31 05:35: cpu   1.6%, CPU sensor  34.4 C, NVMe  36.9 C, NIC  43.49 C, idle card readings [46]
+    min 32 05:36: cpu   0.7%, CPU sensor  33.7 C, NVMe  36.9 C, NIC  43.46 C, idle card readings [46]
+    min 33 05:37: cpu   0.8%, CPU sensor  33.1 C, NVMe  36.9 C, NIC  43.43 C, idle card readings [46]
+    min 34 05:38: cpu   1.1%, CPU sensor  34.3 C, NVMe  36.9 C, NIC  43.42 C, idle card readings [46]
+    min 35 05:39: cpu   0.5%, CPU sensor  34.0 C, NVMe  36.9 C, NIC  43.39 C, idle card readings [46]
+    min 36 05:40: cpu   0.7%, CPU sensor  33.2 C, NVMe  36.9 C, NIC  43.37 C, idle card readings [46]
+    min 37 05:41: cpu   2.3%, CPU sensor  34.3 C, NVMe  36.9 C, NIC  43.42 C, idle card readings [46]
+    min 38 05:42: cpu   1.0%, CPU sensor  34.2 C, NVMe  36.9 C, NIC  43.45 C, idle card readings [46]
+    min 39 05:43: cpu   1.0%, CPU sensor  34.2 C, NVMe  36.9 C, NIC  43.56 C, idle card readings [47]
+    min 40 05:44: cpu   0.5%, CPU sensor  33.3 C, NVMe  36.9 C, NIC  43.68 C, idle card readings [47]
+    min 41 05:45: cpu   0.7%, CPU sensor  34.0 C, NVMe  36.9 C, NIC  43.71 C, idle card readings [47]
+    min 42 05:46: cpu   0.9%, CPU sensor  33.8 C, NVMe  36.9 C, NIC  43.72 C, idle card readings [47]
+    min 43 05:47: cpu   0.4%, CPU sensor  33.4 C, NVMe  36.9 C, NIC  43.78 C, idle card readings [47]
+    min 44 05:48: cpu   0.6%, CPU sensor  33.8 C, NVMe  36.9 C, NIC  43.73 C, idle card readings [46]
+    min 45 05:49: cpu   0.7%, CPU sensor  33.0 C, NVMe  36.9 C, NIC  43.73 C, idle card readings [46]
+  aifoundry3
+    min 13 05:17: cpu   0.3%, CPU sensor  37.5 C, NVMe  36.9 C, NIC  43.65 C, idle card readings [None]
+    min 14 05:18: cpu   0.3%, CPU sensor  37.2 C, NVMe  36.9 C, NIC  43.68 C, idle card readings [None]
+    min 15 05:19: cpu   0.5%, CPU sensor  39.0 C, NVMe  36.9 C, NIC  43.70 C, idle card readings [None]
+    min 16 05:20: cpu   0.1%, CPU sensor  37.7 C, NVMe  36.9 C, NIC  43.69 C, idle card readings [None]
+    min 17 05:21: cpu   1.6%, CPU sensor  39.6 C, NVMe  36.9 C, NIC  43.71 C, idle card readings [None]
+    min 18 05:22: cpu   0.2%, CPU sensor  37.8 C, NVMe  36.9 C, NIC  43.77 C, idle card readings [None]
+    min 19 05:23: cpu   0.2%, CPU sensor  37.8 C, NVMe  37.2 C, NIC  43.82 C, idle card readings [None]
+    min 20 05:24: cpu   0.6%, CPU sensor  37.7 C, NVMe  37.9 C, NIC  43.89 C, idle card readings [None]
+    min 21 05:25: cpu   0.5%, CPU sensor  39.1 C, NVMe  37.9 C, NIC  43.93 C, idle card readings [None]
+    min 22 05:26: cpu   0.4%, CPU sensor  38.1 C, NVMe  37.9 C, NIC  43.95 C, idle card readings [None]
+    min 23 05:27: cpu   0.6%, CPU sensor  37.3 C, NVMe  37.9 C, NIC  43.93 C, idle card readings [None]
+    min 24 05:28: cpu   0.2%, CPU sensor  37.4 C, NVMe  37.9 C, NIC  43.92 C, idle card readings [None]
+    min 25 05:29: cpu   0.2%, CPU sensor  36.8 C, NVMe  37.9 C, NIC  43.89 C, idle card readings [None]
+    min 26 05:30: cpu   0.3%, CPU sensor  38.6 C, NVMe  37.6 C, NIC  43.86 C, idle card readings [None]
+    min 27 05:31: cpu   1.6%, CPU sensor  38.5 C, NVMe  36.9 C, NIC  43.85 C, idle card readings [None]
+    min 28 05:32: cpu   0.6%, CPU sensor  37.3 C, NVMe  36.9 C, NIC  43.81 C, idle card readings [None]
+    min 29 05:33: cpu   0.4%, CPU sensor  38.2 C, NVMe  36.9 C, NIC  43.79 C, idle card readings [None]
+    min 30 05:34: cpu   0.3%, CPU sensor  37.2 C, NVMe  36.9 C, NIC  43.78 C, idle card readings [None]
+    min 31 05:35: cpu   0.4%, CPU sensor  37.2 C, NVMe  36.9 C, NIC  43.77 C, idle card readings [None]
+    min 32 05:36: cpu   0.6%, CPU sensor  38.9 C, NVMe  36.9 C, NIC  43.77 C, idle card readings [None]
+    min 33 05:37: cpu   0.5%, CPU sensor  38.8 C, NVMe  36.9 C, NIC  43.75 C, idle card readings [None]
+    min 34 05:38: cpu   0.5%, CPU sensor  39.0 C, NVMe  36.9 C, NIC  43.77 C, idle card readings [None]
+    min 35 05:39: cpu   0.8%, CPU sensor  37.8 C, NVMe  36.9 C, NIC  43.77 C, idle card readings [None]
+    min 36 05:40: cpu   0.6%, CPU sensor  37.7 C, NVMe  36.9 C, NIC  43.77 C, idle card readings [None]
+    min 37 05:41: cpu   1.8%, CPU sensor  38.9 C, NVMe  36.9 C, NIC  43.82 C, idle card readings [None]
+    min 38 05:42: cpu   0.7%, CPU sensor  38.2 C, NVMe  36.9 C, NIC  43.81 C, idle card readings [None]
+    min 39 05:43: cpu   0.7%, CPU sensor  37.9 C, NVMe  37.6 C, NIC  43.88 C, idle card readings [None]
+    min 40 05:44: cpu   0.8%, CPU sensor  36.9 C, NVMe  37.9 C, NIC  43.98 C, idle card readings [None]
+    min 41 05:45: cpu   0.6%, CPU sensor  37.3 C, NVMe  37.9 C, NIC  44.00 C, idle card readings [None]
+    min 42 05:46: cpu   0.7%, CPU sensor  37.6 C, NVMe  37.9 C, NIC  43.98 C, idle card readings [None]
+    min 43 05:47: cpu   0.5%, CPU sensor  37.4 C, NVMe  37.9 C, NIC  43.99 C, idle card readings [None]
+    min 44 05:48: cpu   0.6%, CPU sensor  37.3 C, NVMe  37.9 C, NIC  44.00 C, idle card readings [None]
+    min 45 05:49: cpu   0.4%, CPU sensor  33.4 C, NVMe  37.9 C, NIC  43.98 C, idle card readings [None]
+
+[bursts] host-CPU bursts on any box during E97's whole session: minutes with whole-machine CPU use of at least 10%
+  aifoundry1: 05:20-05:22
+  aifoundry2: none
+  aifoundry3: none
+
+[stop] H3's natural phase
+  the firmware's reading first read 78 C 216.5 s after the hold started; the runner saw it between launches at 221.3 s; the next launch started at 222.8 s, in the reduced phase (the reading was back at 75 C by then: the fast stages fall within a launch's gap)
+  31 natural launches, 226 reduced; at the first 78 C reading the 34-sensor mean read 78.45 C and the board 63.1 W; rate over the last 30 s before it 4.13 C/min
+
+[gaps] H3's reduced phase has idle gaps of about 3 s between launches: board power in the gaps' last 1.5 s against the idle law at the same moment's die (the law is carried up from the rests, whose top bin is 64.8 C)
+  182 gaps from 5 minutes into the reduced phase: board 30.19 W at a die of 69.25 C; the idle law gives 30.23 W there, so the law is +0.04 W against the gaps. The rails' own running average (1 s) still carries part of the last launch, and the fast stages are falling, so this is a rough check
+
+[common times] the rise per W of E78's S at the same seconds after a hold starts, H1 (compute share 0.965) against H3's natural phase (share 0.97)
+     2 s: H1   1.25 C, 0.134 C/W, 0.129 per board W | H3   2.80 C, 0.109 C/W, 0.108 per board W | ratio per S 0.811
+    10 s: H1   2.45 C, 0.263 C/W, 0.245 per board W | H3   5.93 C, 0.230 C/W, 0.214 per board W | ratio per S 0.875
+    30 s: H1   3.83 C, 0.411 C/W, 0.373 per board W | H3   9.58 C, 0.372 C/W, 0.341 per board W | ratio per S 0.903
+    60 s: H1   5.35 C, 0.575 C/W, 0.505 per board W | H3  13.72 C, 0.532 C/W, 0.458 per board W | ratio per S 0.927
+   120 s: H1   7.52 C, 0.807 C/W, 0.654 per board W | H3  20.24 C, 0.785 C/W, 0.603 per board W | ratio per S 0.973
+   180 s: H1   8.96 C, 0.962 C/W, 0.757 per board W | H3  25.25 C, 0.980 C/W, 0.679 per board W | ratio per S 1.018
+
+[peaks] the hottest sensor and the highest readings
+  H1: mean up to 63.47 C, hottest sensor 64.89 C, firmware reading up to 62 C, board up to 37.31 W, minion rail up to 17.4 W
+  H2: mean up to 63.90 C, hottest sensor 65.32 C, firmware reading up to 63 C, board up to 38.19 W, minion rail up to 17.9 W
+  H3: mean up to 78.88 C, hottest sensor 81.15 C, firmware reading up to 78 C, board up to 63.66 W, minion rail up to 35.3 W
+  the sensors' high latch: 2543 codes, 87.5 C, as in E89; a latch never moved backwards (0 drops); fault samples 0
+
+[pattern] per-sensor rise per board W at each hold's end, against each other and E89's reference pattern
+  H1 vs H2: correlation 1.0000
+  H1 vs H3: correlation 0.9996
+  H2 vs H3: correlation 0.9996
+  H1 vs E89's fp32 random at 1/60 Hz: correlation 0.9950; coolest sensor 0, warmest 30, 0.840-0.939 C/W
+  H2 vs E89's fp32 random at 1/60 Hz: correlation 0.9949; coolest sensor 0, warmest 30, 0.862-0.962 C/W
+  H3 vs E89's fp32 random at 1/60 Hz: correlation 0.9940; coolest sensor 0, warmest 30, 0.817-0.913 C/W
+
+[rests] how long a rest takes: seconds from the last launch to within 2, 1, 0.5, 0.2, 0.1 C of its final idle, and the board to within 0.5, 0.2, 0.1, 0.05 W of its final idle
+  R0: first 30 s mean 57.66 C; {'2.0': 194.98200011253357, '1.0': 284.98200011253357, '0.5': 374.98200011253357, '0.2': 464.98200011253357, '0.1': 524.9820001125336}; board {'0.5': 224.98200011253357, '0.2': 344.98200011253357, '0.1': 434.98200011253357, '0.05': 464.98200011253357}; idle 50.558 C (+0.000 from the starting idle), 23.214 W
+  R1: first 30 s mean 60.83 C; {'2.0': 255.03700017929077, '1.0': 345.03700017929077, '0.5': 405.03700017929077, '0.2': 495.03700017929077, '0.1': 495.03700017929077}; board {'0.5': 255.03700017929077, '0.2': 375.03700017929077, '0.1': 435.03700017929077, '0.05': 465.03700017929077}; idle 50.629 C (+0.071 from the starting idle), 23.262 W
+  R2: first 30 s mean 66.00 C; {'2.0': 284.9800000190735, '1.0': 374.9800000190735, '0.5': 434.9800000190735, '0.2': 494.9800000190735, '0.1': 524.9800000190735}; board {'0.5': 314.9800000190735, '0.2': 404.9800000190735, '0.1': 464.9800000190735, '0.05': 494.9800000190735}; idle 50.663 C (+0.104 from the starting idle), 23.344 W
+
+[part A] the 28 blocks, by frame
+  against idle (14): r per board W 1.082-1.130, mean 1.110; r per minion-rail W 0.987-1.073, mean 1.020; minion share of the board swing 0.853-0.909; 2 s rise per W 0.1267-0.1348
+  against own zeros (14): r per board W 1.062-1.101, mean 1.075; r per minion-rail W 0.989-1.008, mean 0.999; minion share of the board swing 0.860-0.887; 2 s rise per W 0.1176-0.1336
+  the reference: H by pass [0.19926947049434762, 0.19452669677402037], minion share 0.810; 2 s rise 2.848 C, 0.1152 C/W of D
+  E97-R2, the pass as the unit: INCONCLUSIVE 22; PASS 6
+  E97-R4, the pass as the unit: PASS 26; INCONCLUSIVE 2
+  E97-R5, the pass as the unit: INCONCLUSIVE 11; PASS 17
+  verdicts that move under a linear or cubic trend: E97-R2: 8; E97-R5: 10
+    R2 PASS at the pass unit: i8tern 1.066 [0.887, 1.246]
+    R2 PASS at the pass unit: i8pos 1.062 [0.891, 1.233]
+    R2 PASS at the pass unit: f16neg1 1.067 [0.903, 1.231]
+    R2 PASS at the pass unit: f32pi 1.080 [0.915, 1.245]
+    R2 PASS at the pass unit: i8r0up 1.073 [0.908, 1.238]
+    R2 PASS at the pass unit: i8r6dn 1.065 [0.900, 1.230]
+  with H_ref taken as a fixed number (its pass-to-pass spread out), r per board W at the pass unit:
+    the widest half-width 0.363
+
+[cycle] the 2 s step: cycle 1 over cycle 0, by baseline (E89 C6), against zeros
+  float against zeros, E89's line: c1/c0 1.072-1.242, mean 1.181
+  float against zeros, [-8, -2) s line: c1/c0 0.899-0.974, mean 0.919
+  float against zeros, quadratic: c1/c0 0.976-1.030, mean 1.002
+  float against zeros: the quadratic's mean rise over E89's line's: 0.944-0.980, mean 0.957
+  int8 against zeros, E89's line: c1/c0 0.998-1.218, mean 1.098
+  int8 against zeros, [-8, -2) s line: c1/c0 0.835-0.944, mean 0.890
+  int8 against zeros, quadratic: c1/c0 0.844-0.943, mean 0.894
+  int8 against zeros: the quadratic's mean rise over E89's line's: 0.972-1.029, mean 0.997
+  against idle, E89's line: c1/c0 0.940-1.027, mean 0.994
+  against idle, [-8, -2) s line: c1/c0 0.955-1.045, mean 0.986
+  against idle, quadratic: c1/c0 0.973-1.070, mean 1.017
+  against idle: the quadratic's mean rise over E89's line's: 0.925-1.000, mean 0.970
+
+[tie] fp32 random over idle, derived: its rise over fp32 zeros 2.848 + fp32 zeros over idle 0.258 = 3.106 C; E78 measured 3.16 +- 0.08 C
