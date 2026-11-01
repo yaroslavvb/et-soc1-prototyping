@@ -172,3 +172,27 @@ for r, nm in ((s, "primary"), (sn, "dips-removed")):
         e2 = [v["D_w"]["mean"] - v["e88_mu_w"] for v in cc.values()]
         inside = sum(1 for v in cc.values() if v["e88_inside"])
         print(f"    {nm} {ty}: n {len(cc)}, e88+flops rms {math.sqrt(st.fmean(x * x for x in e1)):.3f} W, e88 rms {math.sqrt(st.fmean(x * x for x in e2)):.3f} W, inside e88's band {inside} of {len(cc)}")
+print()
+print("# K. the RTL bench's prediction, frozen in Q132(b) (commit de545f0c, 00:43:14 PDT, written from E78's fit and RTL counts; no E92 data read): ../2026-11-01-q132-rtl-bench/e92-bench-prediction.json")
+bench = json.load(open(os.path.join(HERE, "..", "2026-11-01-q132-rtl-bench", "e92-bench-prediction.json")))["variants"]["nets_hier2"]
+errs = {"primary": {"fp32": [], "fp16": []}, "dips": {"fp32": [], "fp16": []}}
+for c in bench["contrasts_w"]:
+    k = c["contrast"]
+    ty = k.split(".")[0]
+    a, b = s["contrasts"].get(k), sn["contrasts"].get(k)
+    if not a:
+        print("    (not a scored contrast)", k)
+        continue
+    errs["primary"][ty].append(a["D_w"]["mean"] - c["pred_w"])
+    errs["dips"][ty].append(b["D_w"]["mean"] - c["pred_w"])
+    st_ = c["d_unit_hier2_by_stage_per_op"]
+    tot = sum(st_.values()) or 1
+    print(f"    {k:24s} bench {c['pred_w']:+6.2f}  measured {a['D_w']['mean']:+6.2f} +- {a['D_w']['ci95']:4.2f}  dips {b['D_w']['mean']:+6.2f} +- {b['D_w']['ci95']:4.2f}  e88+flops {a['e88_flops_w']:+6.2f}  alt {a['alt_w']:+6.2f}  stages (M nets, unit): " +
+          ", ".join(f"{n} {v / 1e6:.2f}" for n, v in st_.items() if abs(v) >= 0.05e6))
+for arm, d in errs.items():
+    print(f"    rms against the bench, {arm}: " + ", ".join(f"{t} {math.sqrt(st.fmean(x * x for x in v)):.3f} W over {len(v)}" for t, v in d.items()))
+tiles_b = bench["tiles_D_over_zeros_w"]
+for x in ("fp16.hh_sub", "fp16.hl_sub"):
+    print(f"    bench: {x} as a share of h_sub, each over c_abs: {(tiles_b[x] - tiles_b['fp16.c_abs']) / (tiles_b['fp16.h_sub'] - tiles_b['fp16.c_abs']):.3f}")
+print(f"    bench: additivity hh + hl - h_sub - c_abs: {tiles_b['fp16.hh_sub'] + tiles_b['fp16.hl_sub'] - tiles_b['fp16.h_sub'] - tiles_b['fp16.c_abs']:.2f} W")
+print(f"    bench: fp16 (h_sub - h_add) / fp32 (h_sub - h_add): {(tiles_b['fp16.h_sub'] - tiles_b['fp16.h_add']) / (tiles_b['fp32.h_sub'] - tiles_b['fp32.h_add']):.2f}; measured primary {s['contrasts']['fp16.h_sub-h_add']['D_w']['mean'] / s['contrasts']['fp32.h_sub-h_add']['D_w']['mean']:.2f}, dips {sn['contrasts']['fp16.h_sub-h_add']['D_w']['mean'] / sn['contrasts']['fp32.h_sub-h_add']['D_w']['mean']:.2f}")

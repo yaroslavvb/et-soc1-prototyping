@@ -88,7 +88,10 @@ both (`h_sub`) 7.810 ± 1.411 W (7.294 ± 0.121; rail 5.828). Either alone costs
 **+4.890 ± 1.627 W** (+4.611 ± 0.511). The registered direction holds, `hh_sub` − `hl_sub` = +1.043 ± 0.516 W (0.902 ± 0.329), the
 52-bit bus above the 29-bit one, but its lower bound misses the registered 0.686 W: R10 INCONCLUSIVE. The flop reading predicted the
 non-additivity at +1.77 W, and it prices fp16's alternation at half of what it costs: 11–18 fJ per flop bit, against fp32's 7
-(`posthoc-check.txt` C, I). **Why fp16 pays 1.5× fp32 per alternation is not explained here.**
+(`posthoc-check.txt` C, I). **fp16 pays 1.5× fp32 per alternation, and the RTL bench saw it coming.** Q132(b)'s bench, core-et's whole `vpu_top` with a correct multiply-add, froze its
+prediction from E78 and RTL counts alone at 00:43:14 PDT (`de545f0c`), before any E92 pass was read ([`e92-bench-prediction.json`](../2026-11-01-q132-rtl-bench/e92-bench-prediction.json), `nets_hier2`): `hh_sub` 0.855 and `hl_sub` 0.737
+of both (measured 0.88 and 0.75), hh + hl − both +4.04 W (measured +4.89 ± 1.63, +4.61 ± 0.51). Its counts say why: fp32's alternation moves almost only the adder and normaliser (1.36 M of 1.53 M net toggles a minion-op over the
+unit), and fp16's moves them more (1.79 M) and also the operand (0.32 M), exponent (0.30 M), result (0.23 M), control (0.16 M) and multiplier (0.12 M) stages (`posthoc-check.txt` K).
 
 **6. Where the ~5 W goes.** (`scored.json` › `budget`, `posthoc-check.txt` E.)
 
@@ -117,6 +120,7 @@ point, checked").
 |---|---|---|---|
 | **e88+flops**: E88's frozen prices + one price per flop bit of the adder, calibrated on E88's M32s alone | **0.283** (0.270) | 2.220 (1.959) | fp16's alternation, at half |
 | **e88**: E88's frozen four prices, no term for the effective operation | 2.916 (2.922) | 5.128 (4.850) | it says `h_sub` − `h_add` is −0.41 W; 9 of 22 inside its bands |
+| **the RTL bench** (Q132(b), frozen `de545f0c`, before any pass was read: 1.827 fJ per merged-net toggle + 1.082 fJ per clocked register bit, fitted on E78 alone) | 0.759 (0.727) | **0.611 (0.299)** | fp32's alternation, about a quarter low (3.22 W against 4.43); it has fp16's right (6.44 against 6.86) |
 | **Q130(n)'s predictor** | | | 21 of 32 tiles inside its 95% intervals: it prices sign flips, not alternations (`h_add` 13.96 W, measured 9.00) |
 
 **Post hoc, labelled, no rule depends on it** ([`posthoc-fit.txt`](posthoc-fit.txt), `posthoc_fit_e92.py`): refit on this card alone, over E78's,
@@ -161,7 +165,7 @@ cycles per op 546.001 / 546.001 / 318.0; every dumped tile equal to its register
 the waits read only the queue log. The collection script was exercised on the self-test's synthetic passes first. (3) `posthoc_fit_e92.py` was written during the run, before any pass was read, and first run
 on synthetic E92 values with E78's and E90's measured ones; its held-out test on E86's tiles and `posthoc-check.py` were written after the data. Neither is a registered test, and no rule depends on them. (4) The
 registered budget expected ~43 card-min and 10 min a pass; it took 39 and 9. (5) The runner's log lines read "E78 pass … tiles verified against kinds.json": `run_e78.py`'s unchanged strings, as in E90.
-(6) `code.sha256` was refreshed after the collection for one file, `posthoc_fit_e92.py`, edited after it ran.
+(6) `code.sha256` was refreshed after the collection for one file, `posthoc_fit_e92.py`, edited after it ran. (7) The comparison with Q132(b)'s bench is post hoc on my side; the bench's prediction is its lane's, frozen before these passes were read, and E92 was not designed to test it.
 
 ## Interpretation (labelled: a reading of the public RTL, not measured)
 
@@ -170,14 +174,13 @@ aligned operand are inverted** into the carry-save adder (`txfma_c2.v:303`, `:36
 trailing-zero counter (`txfma_f4.v:61-119`). A product shifted out of range is zapped to 0, so the bus is all 0s when adding and all 1s when subtracting, whatever the product is. When the operation holds, none of it
 moves; when it flips, all of it does. That is what the measurements show in fp32: nothing for a steady subtract, about 1,100 fJ a flip, no dependence on an absorbed product's magnitude, and a price that falls as
 moving sums and random mantissas already move those nets. A flop-level count of the reading, with one price calibrated on one datum from another card, predicted fp32's 15 contrasts to 0.28 W rms before the data.
-**E92 does not identify the gates**: the count is a reading, the card's C was not read back (the host skips its check for file tiles, E88 C8), and any net that moves with `eff_sub` is inside γ. fp16's extra cost is not
-in the count. The moving-sum part is E88's stream count of the C read and the result bus swinging between accumulators that have drifted apart (R32s, R32bus), not split further here.
+**E92 itself does not identify the gates**: the count is a reading, the card's C was not read back (the host skips its check for file tiles, E88 C8), and any net that moves with `eff_sub` is inside γ. fp16's extra cost is not
+in the flop count. The stage comes from the RTL bench's net counts (`de545f0c`): the adder and normaliser take 89% of fp32's alternation and 60% of fp16's, and its predictions track the silicon (result 8). The moving-sum part is E88's stream count of the C read and the result bus swinging between accumulators that have drifted apart (R32s, R32bus), not split further here.
 
 ## What it changes
 
-- **The kinds page's item 2 closes for fp32 and narrows for fp16.** The "adder alternates between adding and subtracting" guess is confirmed on silicon: with the operands fixed, the sum's sign alone moves 4.4–5.1 W in fp32 and
-  6.9–7.8 W in fp16, and a steady subtract moves nothing. Left open: why fp16 pays 1.5× fp32 per alternation and why its two aligned products overlap so much; fp16's alternation with moving sums (no pair run); a gate-level count on a
-  corrected RTL bench (E92's tiles are ready for it: `tools/claims-v3/kinds/e92/tiles/`; `h_add` against `h_sub` would name the stage).
+- **The kinds page's item 2 closes.** The "adder alternates between adding and subtracting" guess is confirmed on silicon: with the operands fixed, the sum's sign alone moves 4.4–5.1 W in fp32 and 6.9–7.8 W in fp16, and a steady
+  subtract moves nothing; the RTL bench, frozen first, places it in the adder and normaliser. Left open: fp16's alternation with moving sums (no pair run); the bench's quarter-low price on fp32's alternation; the moving-sum part's split.
 - **"Power is paid for operand bits that change" needs one more clause.** A sign bit costs what a sign bit costs (0.56 W for 4,096 flips) unless it flips the adder's operation.
 - **E90's "fp16 pays the same 5 W as fp32" is two different splits** that land on the same number. Its reading, that a sign's cost lives on the accumulate side and not on the operand bits, stands in both formats.
 - **The kinds page's item 6 gains a lead:** one more feature, the adder's flop bits, cuts the four-price model's error 3.7–4.5× over every fp32 and fp16 tile on this card (post hoc).

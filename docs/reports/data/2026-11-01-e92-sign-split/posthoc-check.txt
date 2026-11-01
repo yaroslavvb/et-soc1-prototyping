@@ -92,3 +92,38 @@ additivity: hh + hl - h_sub - c_abs            primary  +4.890 +- 1.627   dips-r
     primary fp16: n 7, e88+flops rms 2.220 W, e88 rms 5.128 W, inside e88's band 3 of 7
     dips-removed fp32: n 15, e88+flops rms 0.270 W, e88 rms 2.922 W, inside e88's band 5 of 15
     dips-removed fp16: n 7, e88+flops rms 1.959 W, e88 rms 4.850 W, inside e88's band 3 of 7
+
+# K. the RTL bench's prediction, frozen in Q132(b) (commit de545f0c, 00:43:14 PDT, written from E78's fit and RTL counts; no E92 data read): ../2026-11-01-q132-rtl-bench/e92-bench-prediction.json
+    fp32.h_add-c_abs         bench  +0.42  measured  +0.56 +- 0.14  dips  +0.54 +- 0.10  e88+flops  +0.83  alt  +0.00  stages (M nets, unit): control 0.14, result 0.07
+    fp16.h_add-c_abs         bench  +0.37  measured  +0.95 +- 1.03  dips  +0.48 +- 0.18  e88+flops  +1.05  alt  +0.00  stages (M nets, unit): control 0.10, result 0.07
+    fp32.h_sub-h_add         bench  +3.22  measured  +4.42 +- 0.44  dips  +4.40 +- 0.25  e88+flops  +3.92  alt  +3.72  stages (M nets, unit): exponent 0.15, adder_norm 1.36
+    fp16.h_sub-h_add         bench  +6.44  measured  +6.86 +- 0.40  dips  +6.81 +- 0.25  e88+flops  +3.67  alt  +4.03  stages (M nets, unit): control 0.16, exponent 0.30, operand 0.32, multiplier 0.12, adder_norm 1.79, result 0.23
+    fp32.c_alt-c_abs         bench  +3.85  measured  +5.08 +- 0.45  dips  +5.06 +- 0.24  e88+flops  +4.76  alt  +3.72  stages (M nets, unit): control 0.24, exponent 0.15, adder_norm 1.36, result 0.15
+    fp16.c_alt-c_abs         bench  +6.80  measured  +7.77 +- 1.58  dips  +7.26 +- 0.21  e88+flops  +4.73  alt  +4.03  stages (M nets, unit): control 0.28, exponent 0.28, operand 0.35, multiplier 0.11, adder_norm 1.77, result 0.32, lane_operand_bus 0.06
+    fp32.h_allsub-h_add      bench  +0.12  measured  +0.04 +- 0.35  dips  +0.05 +- 0.19  e88+flops  +0.02  alt  +0.02  stages (M nets, unit): 
+    fp16.h_allsub-h_add      bench  +0.21  measured  +0.19 +- 0.32  dips  +0.15 +- 0.20  e88+flops  +0.01  alt  +0.02  stages (M nets, unit): 
+    fp32.c_neg-c_abs         bench  +0.02  measured  +0.02 +- 0.06  dips  +0.01 +- 0.03  e88+flops  +0.02  alt  +0.02  stages (M nets, unit): 
+    fp32.i_sub-i_add         bench  +1.61  measured  +2.49 +- 1.53  dips  +2.17 +- 0.19  e88+flops  +1.96  alt  +1.86  stages (M nets, unit): exponent 0.08, adder_norm 0.68
+    fp32.h_sub2-c_abs        bench  +0.91  measured  +1.34 +- 0.22  dips  +1.32 +- 0.13  e88+flops  +1.19  alt  +0.93  stages (M nets, unit): adder_norm 0.34
+    fp32.h_sub4-c_abs        bench  +1.82  measured  +2.42 +- 0.21  dips  +2.38 +- 0.16  e88+flops  +2.38  alt  +1.86  stages (M nets, unit): control 0.08, exponent 0.08, adder_norm 0.68
+    fp32.h_sub6-c_abs        bench  +2.73  measured  +3.55 +- 0.50  dips  +3.54 +- 0.26  e88+flops  +3.57  alt  +2.79  stages (M nets, unit): control 0.12, exponent 0.11, adder_norm 1.02, result 0.06
+    fp32.h_sub-c_abs         bench  +3.64  measured  +4.98 +- 0.33  dips  +4.93 +- 0.23  e88+flops  +4.76  alt  +3.72  stages (M nets, unit): control 0.17, exponent 0.15, adder_norm 1.36, result 0.08
+    fp32.s_abs-c_abs         bench  +2.00  measured  +2.38 +- 0.56  dips  +2.52 +- 0.17  e88+flops  +2.60  alt  +2.02  stages (M nets, unit): control 0.09, exponent 0.08, adder_norm 0.74
+    fp16.s_abs-c_abs         bench  +4.73  measured  +5.07 +- 1.24  dips  +4.59 +- 0.12  e88+flops  +2.74  alt  +2.00  stages (M nets, unit): control 0.12, exponent 0.10, operand 0.29, multiplier 0.11, adder_norm 1.21, result 0.21
+    fp16.h_sub-c_abs         bench  +6.81  measured  +7.81 +- 1.41  dips  +7.29 +- 0.12  e88+flops  +4.72  alt  +4.03  stages (M nets, unit): control 0.26, exponent 0.30, operand 0.37, multiplier 0.12, adder_norm 1.79, result 0.30, lane_operand_bus 0.05
+    fp32.r_h_sub-r_h_add     bench  +3.22  measured  +4.38 +- 0.64  dips  +4.46 +- 0.42  e88+flops  +3.92  alt  +3.72  stages (M nets, unit): exponent 0.15, adder_norm 1.36
+    fp32.w_h_sub-w_h_add     bench  +2.46  measured  +2.79 +- 0.36  dips  +2.80 +- 0.19  e88+flops  +2.49  alt  +3.72  stages (M nets, unit): control 0.08, exponent 0.26, adder_norm 0.93
+    fp32.wr_h_sub-wr_h_add   bench  +0.93  measured  +0.41 +- 3.19  dips  +1.11 +- 0.18  e88+flops  +0.65  alt  +3.72  stages (M nets, unit): exponent 0.10, adder_norm 0.41
+    fp32.k_only-c_abs        bench  +0.01  measured  +0.09 +- 0.29  dips  +0.07 +- 0.17  e88+flops  +0.01  alt  +0.00  stages (M nets, unit): 
+    fp16.hh_sub-hl_sub       bench  +0.80  measured  +1.04 +- 0.52  dips  +0.90 +- 0.33  e88+flops  +1.37  alt  +0.00  stages (M nets, unit): adder_norm 0.33
+    (not a scored contrast) (i_sub-i_add) - 0.5*(h_sub-h_add), fp32
+    (not a scored contrast) (h_sub2-c_abs) - 2/8*(h_sub-c_abs), fp32
+    (not a scored contrast) (h_sub4-c_abs) - 4/8*(h_sub-c_abs), fp32
+    (not a scored contrast) (h_sub6-c_abs) - 6/8*(h_sub-c_abs), fp32
+    (not a scored contrast) (r_h_sub-r_h_add) - (h_sub-h_add), fp32
+    rms against the bench, primary: fp32 0.759 W over 15, fp16 0.611 W over 7
+    rms against the bench, dips: fp32 0.727 W over 15, fp16 0.299 W over 7
+    bench: fp16.hh_sub as a share of h_sub, each over c_abs: 0.855
+    bench: fp16.hl_sub as a share of h_sub, each over c_abs: 0.737
+    bench: additivity hh + hl - h_sub - c_abs: 4.04 W
+    bench: fp16 (h_sub - h_add) / fp32 (h_sub - h_add): 2.00; measured primary 1.55, dips 1.55
