@@ -1,0 +1,84 @@
+C1. Passes over one block per launch, in the arms that repeat one block, from the launch records (`passes`): the same loop, the same ops; only the addresses differ
+  gemm1.fp32: median 5836, range 5485-6146
+  gemmv1.fp32: median 7074, range 6491-7616
+  gemmc1.fp32: median 11367, range 8623-11425
+  gemmc1.int8: median 15465, range 15381-20360
+  the 16-block arms: {'gemmc16.fp32': (187, 199), 'gemmv16.fp32': (164, 166)}
+
+C2. Launches wholly at one clock level (every sample in the launch agrees, and the kernel's own clock within 1.5 MHz): T, us; what x1.333 of clock buys; per-run C (runs with more than 100 MHz of span)
+  gemm1.fp32         at 600: n  34 T 1.4159; at 800: n 308 T 1.2696; at 700: n 0; x1.333 of clock buys x1.115; per-run C 345-370 over 6 runs
+  gemmc1.fp16        at 600: n  88 T 0.8977; at 800: n 181 T 0.6779; at 700: n 0; x1.333 of clock buys x1.324; per-run C 527-530 over 6 runs
+  gemmc1.fp32        at 600: n  22 T 0.8978; at 800: n 478 T 0.6779; at 700: n 0; x1.333 of clock buys x1.324; per-run C 526-528 over 10 runs
+  gemmc1.fp32.half   at 600: n   6 T 0.8968; at 800: n 106 T 0.6769; at 700: n 0; x1.333 of clock buys x1.325; per-run C 527-528 over 2 runs
+  gemmc1.int8        at 600: n  29 T 0.4981; at 800: n 454 T 0.3775; at 700: n 0; x1.333 of clock buys x1.319; per-run C 289-290 over 8 runs
+  gemmc16.fp32       at 600: n   9 T 2.5918; at 800: n 161 T 2.4362; at 700: n 0; x1.333 of clock buys x1.064; per-run C 367-377 over 3 runs
+  gemmh1.fp32        at 600: n   2 T 0.9131; at 800: n  13 T 0.6938; at 700: n 0; x1.333 of clock buys x1.316; per-run C 526-526 over 1 runs
+  gemmv1.fp16        at 600: n  21 T 1.1935; at 800: n  28 T 1.0223; at 700: n 0; x1.333 of clock buys x1.167; per-run C 405-422 over 4 runs
+  gemmv1.fp32        at 600: n  73 T 1.1934; at 800: n 554 T 1.0247; at 700: n 0; x1.333 of clock buys x1.165; per-run C 395-414 over 11 runs
+  gemmv1.int8        at 600: n   8 T 1.1094; at 800: n 178 T 0.9662; at 700: n 0; x1.333 of clock buys x1.148; per-run C 343-357 over 4 runs
+  gemmv16.fp32       at 600: n   2 T 2.8862; at 800: n  20 T 2.7723; at 700: n 0; x1.333 of clock buys x1.041; per-run C 225-321 over 2 runs
+  all launches: {'gemm1.fp32': 498, 'gemmc1.fp32': 851, 'gemmv1.fp32': 997, 'gemmc1.int8': 867, 'gemmv1.int8': 200, 'gemmc16.fp32': 183, 'gemmv16.fp32': 26, 'gemmh1.fp32': 16, 'gemmc1.fp32.half': 183, 'gemmc1.fp16': 494, 'gemmv1.fp16': 190}
+  launches below 780 MHz: {'gemm1.fp32': 188, 'gemmc1.fp32': 364, 'gemmv1.fp32': 431, 'gemmc1.int8': 398, 'gemmv1.int8': 20, 'gemmc16.fp32': 22, 'gemmv16.fp32': 6, 'gemmh1.fp32': 3, 'gemmc1.fp32.half': 74, 'gemmc1.fp16': 309, 'gemmv1.fp16': 159}
+  cold strides, per-run C and M: {'C-03': (225.4, 2.493), 'C-04': (320.8, 2.369)}
+  E101 to E105, the same arm's C: 344.3 (the verifier's fit of E101),  354.75 with a printed +- 1.88
+  the rate by column over strides at 800 MHz: x1.51
+
+C2. The NoC rail per op over the idle just before the run, 2-4 s after the first launch began (post hoc), nJ
+  gemm1.fp32     randn   3.48 (n 2)
+  gemm1.fp32     zeros   1.75 (n 2)
+  gemmc1.fp16    randn   0.47 (n 2)
+  gemmc1.fp16    zeros   0.19 (n 2)
+  gemmc1.fp32    randn   0.52 (n 1)
+  gemmc1.fp32    zeros   0.18 (n 3)
+  gemmc1.int8    zeros   0.19 (n 3)
+  gemmc16.fp32   randn   3.04 (n 2)
+  gemmc16.fp32   zeros   1.58 (n 1)
+  gemmh1.fp32    zeros   0.30 (n 1)
+  gemmv1.fp16    randn   2.07 (n 2)
+  gemmv1.fp16    zeros   1.08 (n 1)
+  gemmv1.fp32    randn   2.17 (n 2)
+  gemmv1.fp32    zeros   1.11 (n 3)
+  gemmv1.int8    zeros   1.12 (n 1)
+  gemmv16.fp32   randn   4.53 (n 1)
+  gemmv16.fp32   zeros   2.63 (n 1)
+  gemmv1.fp32: over by column's base, as a share of as-run's: zeros 0.60, random 0.56
+  gemmc16.fp32: over by column's base, as a share of as-run's: zeros 0.89, random 0.85
+  gemmv16.fp32: over by column's base, as a share of as-run's: zeros 1.56, random 1.36
+  M per unit of that traffic on zeros, us/nJ: as run 0.53, strides 0.55
+  cold by column's M over as-run's: x2.38, on NoC traffic per op of 1.58 against 1.75 nJ
+
+C3. R8's gap: zeros and random in the cold burst, sampled clock and rate
+  gemmc16: clocks 800 and 800 MHz, rates 3.445 and 3.437; x1.002 at clock x1.000
+  gemmv16: clocks 800 and 800 MHz, rates 3.024 and 3.027; x0.999 at clock x1.000
+
+C4. The cold walk's traffic at 600 MHz, GB/s: per pass, T x 16 blocks x 64 ops per minion; 3 MB of A + B and 2 MB of C per block (strides' B reads the same 1 MB through its 1.08 MB pitch)
+  as run, E101  T 2.49 us; distinct A + B  19.8; C's stores  13.2; L2-miss traffic at the desk's 1.000 of 192 lines per shire per op  158.2
+  by column     T 2.59 us; distinct A + B  18.9; C's stores  12.6; L2-miss traffic at the desk's 0.667 of 192 lines per shire per op  101.1
+  strides       T 2.90 us; distinct A + B  16.9; C's stores  11.3; L2-miss traffic at the desk's 0.802 of 192 lines per shire per op  108.7
+
+C5. The power rule: estimate against the highest board reading of each run (aifoundry2/admission.json)
+  runs 63; reading above the estimate by 3 W or more on 19: 3.17 to 8.42 W; the largest: A-11-gemmc1-fp32-randn-r1
+  A-11-gemmc1-fp32-randn-r1: estimate 87.83; peak 96.25 W at 1.7 s, clock 700 MHz, die 61 C
+  E-04-gemmc1-fp16-randn-r1: estimate 86.13; peak 91.91 W at 6.3 s, clock 700 MHz, die 63 C
+  E-05-gemmc1-fp16-randn-r1: estimate 86.13; peak 94.32 W at 43.5 s, clock 700 MHz, die 67 C
+  samples over 97 W in any run: 0
+  extrapolation: 96.25 + (94.32 - 91.91) = 98.7 W
+  P4: the relation on aifoundry3's S: 94.6 W; aifoundry2's measured P_800 [95.2]
+
+C6. int8, one relation (E83's, E101's frozen constants) on each arm's own c, against the measured sustained gaps
+  the loop       c   9.11: relation's sustained clock  784.6 MHz, zeros / this x1.020 (zeros at 800)
+  by column      c  17.24: relation's sustained clock  671.6 MHz, zeros / this x1.191 (zeros at 800)
+  the benchmark  c  26.54: relation's sustained clock  600.9 MHz, zeros / this x1.331 (zeros at 800)
+  by column measured: x1.166 rate; with zeros at its burst rate, 88.877 TOPS, free of the dips: x1.188
+  zeros' sustained dips: {'B-01-gemmc1-int8-zeros-r1': [(1.3, False), (1.2, True), (1.3, True), (1.2, True), (1.2, False)], 'D-07-gemmc1-int8-zeros-rep2-r1': [(1.2, False), (1.2, True), (1.3, True), (1.3, True)]} total 9 at a process boundary 6
+  idle_resets_sus as counted: 1
+
+C8. Gaps on the kernel's own clock (cycles_max / wall), in the reducer's windows (burst from 1.5 s, sustained the last 40 s), beside the sampled clock
+  gemmc1-fp32-randn      burst rate x1.238, sampled clock x1.224, kernel clock x1.244
+  gemmc1-fp32-sparse25   sus   rate x1.221, sampled clock x1.211, kernel clock x1.228
+  gemmc1-fp16-randn      sus   rate x1.320, sampled clock x1.329, kernel clock x1.330
+  gemmc1-int8-full       sus   rate x1.166, sampled clock x1.156, kernel clock x1.174
+  by column fp32 random, the law's rate at the kernel's clocks: x1.237
+  sustained fp32 random by column, expected, at 800 and 600 MHz by the law: x1.320 (labelled, not measured)
+
+The frozen files are unchanged. score_e105p.py was first committed with the data; its git log says so.
