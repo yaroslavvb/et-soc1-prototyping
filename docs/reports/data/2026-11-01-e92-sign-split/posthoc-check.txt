@@ -1,0 +1,94 @@
+# A. the core contrasts, board D paired per pass; the rail is Drail, the same reduction; primary n = 3, dips-removed n = 4
+fp32.h_add - c_abs                             primary  +0.558 +- 0.143   dips-removed  +0.538 +- 0.100   rail(primary)  +0.455 +- 0.328   per pass [0.622, 0.544, 0.51]
+fp32.h_sub - h_add                             primary  +4.425 +- 0.443   dips-removed  +4.396 +- 0.247   rail(primary)  +3.463 +- 0.461   per pass [4.227, 4.573, 4.475]
+fp32.c_alt - c_abs                             primary  +5.076 +- 0.446   dips-removed  +5.059 +- 0.237   rail(primary)  +4.161 +- 0.110   per pass [5.164, 5.196, 4.87]
+fp32.h_allsub - h_add                          primary  +0.040 +- 0.348   dips-removed  +0.049 +- 0.186   rail(primary)  -0.112 +- 0.235   per pass [-0.069, 0.198, -0.01]
+fp32.h_sub - c_abs                             primary  +4.983 +- 0.333   dips-removed  +4.934 +- 0.229   rail(primary)  +3.918 +- 0.493   per pass [4.849, 5.116, 4.985]
+fp32.s_abs - c_abs                             primary  +2.377 +- 0.556   dips-removed  +2.520 +- 0.171   rail(primary)  +2.183 +- 0.264   per pass [2.39, 2.595, 2.148]
+fp32.signs - ones                              primary  +4.851 +- 1.128   dips-removed  +5.016 +- 0.219   rail(primary)  +4.019 +- 0.278   per pass [5.166, 4.331, 5.057]
+fp16.h_add - c_abs                             primary  +0.954 +- 1.026   dips-removed  +0.482 +- 0.176   rail(primary)  +0.453 +- 0.446   per pass [1.288, 0.492, 1.081]
+fp16.h_sub - h_add                             primary  +6.856 +- 0.405   dips-removed  +6.812 +- 0.246   rail(primary)  +5.375 +- 0.116   per pass [7.028, 6.704, 6.837]
+fp16.c_alt - c_abs                             primary  +7.766 +- 1.583   dips-removed  +7.258 +- 0.212   rail(primary)  +5.906 +- 0.392   per pass [8.318, 7.069, 7.909]
+fp16.h_allsub - h_add                          primary  +0.186 +- 0.319   dips-removed  +0.147 +- 0.204   rail(primary)  +0.167 +- 0.107   per pass [0.271, 0.039, 0.249]
+fp16.h_sub - c_abs                             primary  +7.810 +- 1.411   dips-removed  +7.294 +- 0.121   rail(primary)  +5.828 +- 0.474   per pass [8.316, 7.196, 7.918]
+fp16.s_abs - c_abs                             primary  +5.073 +- 1.239   dips-removed  +4.587 +- 0.116   rail(primary)  +3.813 +- 0.102   per pass [5.496, 4.522, 5.2]
+fp16.signs - ones                              primary  +4.826 +- 0.467   dips-removed  +4.965 +- 0.089   rail(primary)  +4.063 +- 0.265   per pass [4.954, 4.914, 4.61]
+fp32.c_neg - c_abs                             primary  +0.015 +- 0.062   dips-removed  +0.013 +- 0.034   rail(primary)  -0.023 +- 0.218   per pass [0.039, 0.017, -0.011]
+fp32.k_only - c_abs                            primary  +0.094 +- 0.295   dips-removed  +0.070 +- 0.175   rail(primary)  -0.022 +- 0.210   per pass [-0.043, 0.173, 0.151]
+fp32.i_sub - i_add                             primary  +2.494 +- 1.529   dips-removed  +2.169 +- 0.193   rail(primary)  +1.931 +- 0.095   per pass [2.021, 3.19, 2.271]
+fp32.i_add - c_abs                             primary  -0.031 +- 1.345   dips-removed  +0.263 +- 0.136   rail(primary)  +0.117 +- 0.207   per pass [0.375, -0.646, 0.176]
+
+# B. the alternation's premium by regime: always add against alternate, the same operands
+frozen, magnitude 1                            primary  +4.425 +- 0.443   dips-removed  +4.396 +- 0.247   rail(primary)  +3.463 +- 0.461   per pass [4.227, 4.573, 4.475]
+    fJ per alternation (3,840 an op, 1.121e+09 ops/s): primary 1028, dips-removed 1021, rail 804; dflops 560,592
+frozen, random magnitudes                      primary  +4.381 +- 0.644   dips-removed  +4.460 +- 0.425   rail(primary)  +3.511 +- 0.983   per pass [4.102, 4.613, 4.429]
+    fJ per alternation (3,840 an op, 1.121e+09 ops/s): primary 1018, dips-removed 1036, rail 816; dflops 560,592
+moving sums, magnitude 1                       primary  +2.785 +- 0.356   dips-removed  +2.797 +- 0.189   rail(primary)  +2.115 +- 0.551   per pass [2.886, 2.621, 2.847]
+    fJ per alternation (3,840 an op, 1.121e+09 ops/s): primary 647, dips-removed 650, rail 491; dflops 343,288
+moving sums, random magnitudes                 primary  +0.407 +- 3.186   dips-removed  +1.106 +- 0.181   rail(primary)  +0.592 +- 0.933   per pass [1.015, 1.272, -1.066]
+    fJ per alternation (3,840 an op, 1.121e+09 ops/s): primary 95, dips-removed 257, rail 138; dflops 155,761
+
+# C. fp16's two aligners
+fp16.hh_sub - c_abs                            primary  +6.871 +- 1.584   dips-removed  +6.403 +- 0.423   rail(primary)  +5.238 +- 0.232   per pass [7.204, 6.136, 7.273]
+fp16.hl_sub - c_abs                            primary  +5.829 +- 1.149   dips-removed  +5.501 +- 0.237   rail(primary)  +4.371 +- 0.302   per pass [5.967, 5.312, 6.206]
+fp16.hh_sub - hl_sub                           primary  +1.043 +- 0.516   dips-removed  +0.902 +- 0.329   rail(primary)  +0.867 +- 0.310   per pass [1.237, 0.824, 1.068]
+additivity: hh + hl - h_sub - c_abs            primary  +4.890 +- 1.627   dips-removed  +4.611 +- 0.511   rail(primary)  +3.781 +- 0.408   per pass [4.856, 4.252, 5.561]
+    flops say +227,512 bits an op: e88+flops' price puts that at 1.77 W
+    fp16.hh_sub as a share of h_sub, each over c_abs: primary 0.880, dips-removed 0.878
+    fp16.hl_sub as a share of h_sub, each over c_abs: primary 0.746, dips-removed 0.754
+
+# D. fp16: alternation events with every C positive: (either changes, eff_sub1 changes, eff_sub2 changes) per op
+    fp16.s_abs   (2844, 2012, 1808)
+    fp16.h_sub   (3840, 3840, 3840)
+    fp16.hh_sub  (3840, 3840, 0)
+    fp16.hl_sub  (3840, 0, 3840)
+    primary: (s_abs - c_abs - bits) / (h_sub - c_abs - bits) = 0.635; the eff_sub1 + eff_sub2 count says 0.497, the either-changes count 0.741
+    dips-removed: (s_abs - c_abs - bits) / (h_sub - c_abs - bits) = 0.613; the eff_sub1 + eff_sub2 count says 0.497, the either-changes count 0.741
+    fp32 primary: (s_abs - c_abs - bits) / (h_sub - c_abs - bits) = 0.406; the alternation count says 0.542
+    fp32 dips-removed: (s_abs - c_abs - bits) / (h_sub - c_abs - bits) = 0.443; the alternation count says 0.542
+
+# E. where the signs' ~5 W goes, in fp32, two readings of the alternation's share
+    primary: signs - ones 4.851 W. (a) frozen: bits 0.569 + the rest of s_abs - c_abs 1.808 = 2.377, moving sums 2.474. (b) the moving-sum price of an alternation x signs' rate 0.512: 1.427; bits 0.592; left 2.832
+    dips-removed: signs - ones 5.016 W. (a) frozen: bits 0.569 + the rest of s_abs - c_abs 1.951 = 2.520, moving sums 2.497. (b) the moving-sum price of an alternation x signs' rate 0.512: 1.434; bits 0.592; left 2.991
+
+# F. the dips
+    {'dips': 39, 'in_runs': 31, 'in_power_windows': 22} by pass: {'p9210': (12, 9, 4), 'p9211': (6, 4, 4), 'p9212': (8, 8, 6), 'p9213': (13, 10, 8)}
+    in power windows: [('p9210', 'fp16.c_abs', -9.7), ('p9210', 'fp16.c_abs', -9.6), ('p9210', 'fp16.hl_sub', -5.6), ('p9210', 'fp16.hl_sub', -5.5), ('p9211', 'fp32.w_h_sub', -12.7), ('p9211', 'fp16.s_abs', -10.8), ('p9211', 'fp32.randn', -14.2), ('p9211', 'fp32.randn', -14.2), ('p9212', 'fp32.r_walk', -14.6), ('p9212', 'fp32.r_walk', -14.6), ('p9212', 'fp16.randn', -15.5), ('p9212', 'fp32.i_add', -9.2), ('p9212', 'fp32.i_add', -9.2), ('p9212', 'fp32.signs', -10.0), ('p9213', 'anchor_pi', -4.0), ('p9213', 'fp16.c_abs', -5.6), ('p9213', 'fp16.c_abs', -5.6), ('p9213', 'fp16.signs', -4.1), ('p9213', 'fp16.signs', -4.4), ('p9213', 'fp32.s_abs', -7.1), ('p9213', 'fp32.wr_h_sub', -21.5), ('p9213', 'fp32.wr_h_sub', -21.5)]
+    set aside by E78's gates, primary: [{'pass': 9211, 'why': ['fp32.randn spans 1.344 W']}] ; dips-removed: []
+
+# G. the session's ties and checks
+    fp32.randn   D 24.950; minus E78 0.22550577497253244; minus E90 0.23240577497253412; band 0.5; inside True
+    fp16.randn   D 22.269; minus E78 0.1061241433129041; minus E90 0.10852414331290561; band 0.5; inside True
+    fp32.ones    D 8.498; minus E78 0.24187343594227073; minus E90 0.16457343594227147; band 0.5; inside True
+    fp16.ones    D 8.468; minus E78 0.019321078580039952; minus E90 0.15702107858003878; band 0.5; inside True
+    anchor_pi    D 8.509; minus E78 0.14849566563466965; minus E90 0.10719566563466998; band 0.5; inside True
+    int8.full    D 7.130; minus E78 0.07331726303850505; minus E90 -0.09668273696149488; band 0.25; inside True
+    fp32.signs   D 13.350; minus E78 None; minus E90 0.010191125987054406; band 0.5; inside True
+    fp16.signs   D 13.294; minus E78 None; minus E90 -0.09614342071376569; band 0.5; inside True
+    S3 {'s_abs_minus_c_abs_w': 2.377355765869011, 'e88_scaled_w': 2.6017392, 'inside_s_abs': True, 'c_abs_w': 8.436533559448335, 'e88_F32_scaled_w': 8.166306839999999, 'inside_c_abs': True}
+    leak {'mode': 'auto', 'k_w_per_c': 0.13956656346749385, 'n_runs': 194} tie drift {'9210': 0.26558668730650226, '9211': 0.2684334365325114, '9212': 0.2387817337461371, '9213': 0.42634674922601334} idle consistency 0.08531568214315044 carry-over {'slope_w_per_w': 0.0002856254265476555, 'se': 0.0023086588235507123, 'n': 159} duty 0.9958076378102284 0.9966015340059913 cpo {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0} v 0.5216040123456791 clock 600 runs 216 kept 162
+
+# H. per lane alternation against the sign bit's own flip
+    fp32 primary: an alternation 1099 fJ; h_add - c_abs per flipped sign bit 122 fJ (4096 flips an op); per lane-micro-op 122 fJ
+    fp32 dips-removed: an alternation 1092 fJ; h_add - c_abs per flipped sign bit 117 fJ (4096 flips an op); per lane-micro-op 117 fJ
+    fp16 primary: an alternation 1677 fJ; h_add - c_abs per flipped sign bit 104 fJ (8192 flips an op); per lane-micro-op 208 fJ
+    fp16 dips-removed: an alternation 1617 fJ; h_add - c_abs per flipped sign bit 52 fJ (8192 flips an op); per lane-micro-op 105 fJ
+
+# I. the alternation's premium over its flop bits, across fp32's regimes and fp16's designs (registered f: 6.68 fJ per flop bit, calibrated on E88's M32s)
+    frozen, magnitude 1              dflops   560,592  W primary  4.425, dips-removed  4.396  fJ per flop bit primary  7.04, dips-removed  6.99
+    frozen, random magnitudes        dflops   560,592  W primary  4.381, dips-removed  4.460  fJ per flop bit primary  6.97, dips-removed  7.10
+    moving sums, magnitude 1         dflops   343,288  W primary  2.785, dips-removed  2.797  fJ per flop bit primary  7.24, dips-removed  7.27
+    moving sums, random magnitudes   dflops   155,761  W primary  0.407, dips-removed  1.106  fJ per flop bit primary  2.33, dips-removed  6.34
+    fp32 frozen, random signs        dflops   303,668  W primary  2.377, dips-removed  2.520  fJ per flop bit primary  6.98, dips-removed  7.40
+    fp32 frozen, sum signs only      dflops   560,592  W primary  5.076, dips-removed  5.059  fJ per flop bit primary  8.08, dips-removed  8.05
+    fp16 frozen, both                dflops   540,424  W primary  6.856, dips-removed  6.812  fJ per flop bit primary 11.32, dips-removed 11.25
+    fp16 frozen, sum signs only      dflops   540,424  W primary  7.766, dips-removed  7.258  fJ per flop bit primary 12.82, dips-removed 11.98
+    fp16 frozen, high product        dflops   472,288  W primary  6.871, dips-removed  6.403  fJ per flop bit primary 12.98, dips-removed 12.09
+    fp16 frozen, low product         dflops   295,648  W primary  5.829, dips-removed  5.501  fJ per flop bit primary 17.59, dips-removed 16.60
+    fp16 frozen, random signs        dflops   311,953  W primary  5.073, dips-removed  4.587  fJ per flop bit primary 14.50, dips-removed 13.12
+
+# J. the frozen models over the contrasts with a rule, by format
+    primary fp32: n 15, e88+flops rms 0.283 W, e88 rms 2.916 W, inside e88's band 6 of 15
+    primary fp16: n 7, e88+flops rms 2.220 W, e88 rms 5.128 W, inside e88's band 3 of 7
+    dips-removed fp32: n 15, e88+flops rms 0.270 W, e88 rms 2.922 W, inside e88's band 5 of 15
+    dips-removed fp16: n 7, e88+flops rms 1.959 W, e88 rms 4.850 W, inside e88's band 3 of 7
