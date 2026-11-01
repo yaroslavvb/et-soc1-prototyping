@@ -1,0 +1,20 @@
+{
+ "fmt": "fp32",
+ "n": 40000,
+ "seed": 1,
+ "tally": {
+  "exact": 40000
+ },
+ "by_kind": {
+  "aligned|n": 5657,
+  "cancel|n": 7849,
+  "random|n": 26494
+ },
+ "fp16_against_exact_rtz": {},
+ "examples": {},
+ "reference_rules": {
+  "denormal_inputs": "a denormal operand reads as a signed zero (txfma_f0.v opa/opb/opc_ndn*: fraction cleared when the exponent is 0)",
+  "denormal_results": "a result below the smallest normal is flushed to a signed zero (DAZ/FTZ, checked here against the unit's own rule)",
+  "nan": "any NaN input or invalid operation gives the default NaN 0x7FC00000"
+ }
+}

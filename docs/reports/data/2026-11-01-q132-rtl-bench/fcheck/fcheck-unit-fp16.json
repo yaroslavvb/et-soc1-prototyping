@@ -1,0 +1,92 @@
+{
+ "fmt": "fp16",
+ "n": 40000,
+ "seed": 1,
+ "tally": {
+  "exact": 39701,
+  "window_cancel": 299
+ },
+ "by_kind": {
+  "aligned|n": 10227,
+  "cancel|n": 8746,
+  "cancel|window_cancel": 299,
+  "random|n": 21027
+ },
+ "fp16_against_exact_rtz": {
+  "equal": 33793,
+  "differ": 6207
+ },
+ "examples": {
+  "window_cancel": [
+   {
+    "a": "0e0bfa44",
+    "b": "4d453c00",
+    "c": "47487ffe",
+    "r": "ba000001",
+    "ref": "00000000",
+    "kind": "cancel"
+   },
+   {
+    "a": "4d815988",
+    "b": "c05a3395",
+    "c": "40bed17f",
+    "r": "b5800000",
+    "ref": "00000000",
+    "kind": "cancel"
+   },
+   {
+    "a": "2868f198",
+    "b": "52b8d96e",
+    "c": "c9f2fa8f",
+    "r": "bd000000",
+    "ref": "00000000",
+    "kind": "cancel"
+   },
+   {
+    "a": "2a20d7ed",
+    "b": "a3e05c6e",
+    "c": "470c6f58",
+    "r": "80000000",
+    "ref": "00000000",
+    "kind": "cancel"
+   },
+   {
+    "a": "0400278d",
+    "b": "84785156",
+    "c": "bfa12978",
+    "r": "80000000",
+    "ref": "00000000",
+    "kind": "cancel"
+   },
+   {
+    "a": "fa8a4f34",
+    "b": "dd4408e9",
+    "c": "cb89baa0",
+    "r": "3f000000",
+    "ref": "00000000",
+    "kind": "cancel"
+   },
+   {
+    "a": "9d82af84",
+    "b": "cadf53c6",
+    "c": "40e752dc",
+    "r": "b3800001",
+    "ref": "00000000",
+    "kind": "cancel"
+   },
+   {
+    "a": "c40c1122",
+    "b": "e5598400",
+    "c": "c5ad2160",
+    "r": "80000000",
+    "ref": "00000000",
+    "kind": "cancel"
+   }
+  ]
+ },
+ "reference_rules": {
+  "denormal_inputs": "a denormal operand reads as a signed zero (txfma_f0.v opa/opb/opc_ndn*: fraction cleared when the exponent is 0)",
+  "denormal_results": "a result below the smallest normal is flushed to a signed zero (DAZ/FTZ, checked here against the unit's own rule)",
+  "nan": "any NaN input or invalid operation gives the default NaN 0x7FC00000"
+ }
+}
