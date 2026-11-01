@@ -1,0 +1,98 @@
+E86 corrections-check (desk only; committed files only)
+kept passes ['8610', '8611', '8612', '8613'] (n = 4, t(0.975, 3) = 3.1824); idle level 25.8725 +- 0.0170 W
+
+== C1 heat: 2 s die rise (dT_win, whole-degree reading) of each real tile minus the same pass's random kind
+fp32: random kind fp32.randn dT per pass ['3.133', '3.015', '3.317', '3.283'] -> 3.187 +- 0.222 C; its S 26.665 W, so 0.1195 C per W of S
+   l0_mlp_up    dT 3.250 C; paired minus random per pass ['+0.167', '+0.335', '-0.017', '-0.233'] -> +0.063 +- 0.389 C (includes 0); S minus random -0.291 +- 0.786 W predicts -0.035 +- 0.094 C
+   l6_mlp_down  dT 3.237 C; paired minus random per pass ['+0.117', '+0.385', '-0.417', '+0.117'] -> +0.050 +- 0.535 C (includes 0); S minus random -0.098 +- 0.160 W predicts -0.012 +- 0.019 C
+   l6_attn_qk   dT 3.175 C; paired minus random per pass ['-0.333', '+0.235', '+0.033', '+0.017'] -> -0.012 +- 0.376 C (includes 0); S minus random -0.395 +- 0.166 W predicts -0.047 +- 0.020 C
+fp16: random kind fp16.randn dT per pass ['2.883', '2.950', '2.833', '2.900'] -> 2.892 +- 0.077 C; its S 24.003 W, so 0.1205 C per W of S
+   l0_mlp_up    dT 2.900 C; paired minus random per pass ['+0.017', '-0.050', '+0.067', '-0.000'] -> +0.008 +- 0.077 C (includes 0); S minus random -0.152 +- 0.228 W predicts -0.018 +- 0.028 C
+   l6_mlp_down  dT 2.775 C; paired minus random per pass ['+0.017', '-0.050', '+0.067', '-0.500'] -> -0.117 +- 0.414 C (includes 0); S minus random -0.080 +- 0.423 W predicts -0.010 +- 0.051 C
+   l6_attn_qk   dT 2.750 C; paired minus random per pass ['-0.033', '-0.200', '-0.233', '-0.100'] -> -0.142 +- 0.146 C (includes 0); S minus random -0.669 +- 0.207 W predicts -0.081 +- 0.025 C
+int8: random kind int8.full dT per pass ['1.167', '1.117', '1.100', '1.117'] -> 1.125 +- 0.046 C; its S 9.604 W, so 0.1171 C per W of S
+   l0_mlp_up    dT 1.000 C; paired minus random per pass ['-0.167', '-0.117', '-0.100', '-0.117'] -> -0.125 +- 0.046 C (excludes 0); S minus random -0.768 +- 0.801 W predicts -0.090 +- 0.094 C
+   l6_mlp_down  dT 1.000 C; paired minus random per pass ['-0.167', '-0.117', '-0.100', '-0.117'] -> -0.125 +- 0.046 C (excludes 0); S minus random -1.308 +- 0.274 W predicts -0.153 +- 0.032 C
+   l6_attn_qk   dT 0.950 C; paired minus random per pass ['-0.167', '-0.317', '-0.100', '-0.117'] -> -0.175 +- 0.157 C (excludes 0); S minus random -1.422 +- 0.206 W predicts -0.167 +- 0.024 C
+runs.csv cross-check (per-pass means of each item's runs, then paired):
+   fp32: l0_mlp_up +0.063 +- 0.389; l6_mlp_down +0.050 +- 0.535; l6_attn_qk -0.012 +- 0.376
+   fp16: l0_mlp_up +0.008 +- 0.077; l6_mlp_down -0.117 +- 0.414; l6_attn_qk -0.142 +- 0.146
+   int8: l0_mlp_up -0.125 +- 0.046; l6_mlp_down -0.125 +- 0.046; l6_attn_qk -0.175 +- 0.157
+
+== C2 the baseline behind the ratios (per kept pass, then the mean over passes; 95%)
+D = board power over the type's own all-zeros level (the registered ratio); S = over idle; p80 = the window's whole board power (leakage-corrected), i.e. idle plus S
+fp32 (random kind fp32.randn: D 24.691 W, S 26.665 W, p80 52.537 W; the type's zeros: S 1.998 W over idle)
+   l0_mlp_up    D 0.9863 +- 0.0310; S 0.9891 +- 0.0295; p80 0.9939 +- 0.0139
+   l6_mlp_down  D 0.9937 +- 0.0012; S 0.9963 +- 0.0060; p80 0.9974 +- 0.0010
+   l6_attn_qk   D 0.9833 +- 0.0023; S 0.9852 +- 0.0062; p80 0.9923 +- 0.0016
+   three-tile mean, D  : 0.9878 +- 0.0103 (tiles 0.9833-0.9937; saving 0.6-1.7%)
+   three-tile mean, S  : 0.9902 +- 0.0090 (tiles 0.9852-0.9963; saving 0.4-1.5%)
+   three-tile mean, p80: 0.9945 +- 0.0040 (tiles 0.9923-0.9974; saving 0.3-0.8%)
+   README's first arithmetic, (idle level + S) / (idle level + S(random)) from item means: 0.99248-0.99814
+fp16 (random kind fp16.randn: D 22.078 W, S 24.003 W, p80 49.899 W; the type's zeros: S 1.966 W over idle)
+   l0_mlp_up    D 0.9950 +- 0.0162; S 0.9937 +- 0.0095; p80 0.9975 +- 0.0062
+   l6_mlp_down  D 0.9957 +- 0.0175; S 0.9967 +- 0.0177; p80 0.9983 +- 0.0072
+   l6_attn_qk   D 0.9710 +- 0.0120; S 0.9722 +- 0.0084; p80 0.9868 +- 0.0040
+   three-tile mean, D  : 0.9872 +- 0.0142 (tiles 0.9710-0.9957; saving 0.4-2.9%)
+   three-tile mean, S  : 0.9875 +- 0.0107 (tiles 0.9722-0.9967; saving 0.3-2.8%)
+   three-tile mean, p80: 0.9942 +- 0.0057 (tiles 0.9868-0.9983; saving 0.2-1.3%)
+   README's first arithmetic, (idle level + S) / (idle level + S(random)) from item means: 0.98659-0.99840
+int8 (random kind int8.full: D 7.090 W, S 9.604 W, p80 35.507 W; the type's zeros: S 2.527 W over idle)
+   l0_mlp_up    D 0.8879 +- 0.1022; S 0.9202 +- 0.0823; p80 0.9767 +- 0.0215
+   l6_mlp_down  D 0.8109 +- 0.0441; S 0.8639 +- 0.0268; p80 0.9624 +- 0.0066
+   l6_attn_qk   D 0.7820 +- 0.0558; S 0.8520 +- 0.0200; p80 0.9578 +- 0.0089
+   three-tile mean, D  : 0.8269 +- 0.0501 (tiles 0.7820-0.8879; saving 11.2-21.8%)
+   three-tile mean, S  : 0.8787 +- 0.0316 (tiles 0.8520-0.9202; saving 8.0-14.8%)
+   three-tile mean, p80: 0.9657 +- 0.0110 (tiles 0.9578-0.9767; saving 2.3-4.2%)
+   README's first arithmetic, (idle level + S) / (idle level + S(random)) from item means: 0.95991-0.97834
+
+== C3 E89 as corrected (ae24b0af): heat per watt relative to fp32 random data
+per board W (tables.txt T1), the 7 kinds E89 measured: int8 full (random) 1.050, int8 gauss_q 1.041, int8 smallint 1.059, int8 sparse50 1.065, int8 neg_ones (−1) 1.043, int8 zeros 1.113, fp32 ones (1.0) 1.063 -> 1.041-1.113
+per minion-rail W, post hoc (posthoc.txt POST HOC 2): i8full 0.992, i8gauss 0.988, i8small 1.002, i8sp50 1.008, i8neg1 0.980, i8zero 0.991, f32ones 1.003 -> 0.980-1.008
+
+== C4 zeros in the real tiles (real.json tiles.<type>.<matrix>.stats; e86.json items.<item>.gated_lane_frac)
+   fp32 l0_mlp_up    A zero words 0.0000, zero elements 0.0000; B zero words 0.0000, zero elements 0.0000; gated 0.0
+   fp32 l6_mlp_down  A zero words 0.0000, zero elements 0.0000; B zero words 0.0000, zero elements 0.0000; gated 0.0
+   fp32 l6_attn_qk   A zero words 0.0000, zero elements 0.0000; B zero words 0.0000, zero elements 0.0000; gated 0.0
+   fp16 l0_mlp_up    A zero words 0.0000, zero elements 0.0000; B zero words 0.0000, zero elements 0.0000; gated 0.0
+   fp16 l6_mlp_down  A zero words 0.0000, zero elements 0.0000; B zero words 0.0000, zero elements 0.0000; gated 0.0
+   fp16 l6_attn_qk   A zero words 0.0000, zero elements 0.0000; B zero words 0.0000, zero elements 0.0000; gated 0.0
+   int8 l0_mlp_up    A zero words 0.0000, zero elements 0.0576; B zero words 0.0000, zero elements 0.0146; gated 0.0
+   int8 l6_mlp_down  A zero words 0.0000, zero elements 0.0928; B zero words 0.0000, zero elements 0.0107; gated 0.0
+   int8 l6_attn_qk   A zero words 0.0000, zero elements 0.0312; B zero words 0.0000, zero elements 0.0547; gated 0.0
+   int8 zero elements over the six operands: 0.0107-0.0928
+
+== C5 a no-model baseline beside E86-R2 (labelled; not a registered rule)
+fp32: predictor errors ['-0.109', '+0.164', '-0.183'] rms 0.155 W (scored.json R2 0.155); 'real = E78's fp32.randn' (24.7249 W) errors ['-0.372', '-0.188', '-0.447'] rms 0.353 W; ratio 2.28
+fp16: predictor errors ['+0.252', '+0.625', '-0.099'] rms 0.393 W (scored.json R2 0.393); 'real = E78's fp16.randn' (22.1624 W) errors ['-0.196', '-0.180', '-0.725'] rms 0.446 W; ratio 1.13
+int8: predictor errors ['+0.401', '+0.565', '-0.206'] rms 0.417 W (scored.json R2 0.417); 'real = E78's int8.full' (7.0565 W) errors ['-0.765', '-1.309', '-1.514'] rms 1.237 W; ratio 2.96; 'real = E78's int8.gauss_q' (6.598 W) errors ['-0.307', '-0.850', '-1.055'] rms 0.802 W, ratio 1.92
+
+== C6 facts
+   e86.json: kept [8610, 8611, 8612, 8613]; set aside 8614 (fp32.randn spans 1.988 W)
+   e86-leak0.1994.json: kept [8610, 8611, 8612, 8613]; set aside 8614 (fp32.randn spans 1.987 W)
+   e86-leak0.3803.json: kept [8611, 8612]; set aside 8610 (int8.zeros departs -0.284 W from its straight line); 8613 (fp16.zeros departs -0.300 W from its straight line); 8614 (fp32.randn spans 1.996 W)
+   e86-leak0.json: kept [8610, 8611, 8612, 8613]; set aside 8614 (fp32.randn spans 1.977 W)
+   times: logs/push-and-claim-times.txt
+      # E86: when the registration and the data reached GitHub, and when the card was claimed and released.
+      # Written Sat 31 Oct 2026 after verification (corrections-check.py C6). PDT = UTC-7.
+      # Commit times: git log --format=%ci. Push times: GitHub's repository activity record (activity_type push).
+      190c1ac4  pre-registration  committed 2026-10-31 20:05:44 -0700  pushed 2026-11-01T03:05:48Z = 20:05:48 PDT
+      a3c0b60d  data              committed 2026-10-31 20:48:13 -0700  pushed 2026-11-01T03:48:15Z = 20:48:15 PDT
+      claim     message 1566287365469896725 in #community-lab, posted 2026-11-01T03:06:48.140Z = 20:06:48.140 PDT (Discord's timestamp)
+      first device access  20:07:09 PDT: the session's opening ettelem config read under the card lock (logs/config_session_start.json; logs/et-lab-manifest.txt, first line)
+      closing config read  20:40:56 PDT (logs/config_session_end.json; the time is the box's file time, build/e86-ident)
+      release   the same post edited to append " — released", saved and read back at 20:41:29 PDT as "<ai> Claude says: using aifoundry3 for 1 h, until ~21:10 PDT doc — released (edited)"
+   claim held 20:06:48.140-20:41:29: 34.68 min; card time, first device access 20:07:09 to the closing config read 20:40:56: 33.78 min (registered max_card_min 40)
+
+== C7 one tile a cell: the window and the quantisation of each tile (real.json)
+   fp32 l0_mlp_up    rows (tokens) [96, 112], k [272, 288], cols [928, 944]
+   fp32 l6_mlp_down  rows (tokens) [112, 128], k [896, 912], cols [576, 592]
+   fp32 l6_attn_qk   rows (tokens) [48, 64], k [48, 64], cols [0, 16]
+   fp16 l0_mlp_up    rows (tokens) [0, 16], k [0, 32], cols [2032, 2048]
+   fp16 l6_mlp_down  rows (tokens) [16, 32], k [1088, 1120], cols [336, 352]
+   fp16 l6_attn_qk   rows (tokens) [64, 80], k [288, 320], cols [32, 48]
+   int8 l0_mlp_up    rows (tokens) [0, 16], k [512, 576], cols [1088, 1104]
+   int8 l6_mlp_down  rows (tokens) [112, 128], k [2816, 2880], cols [112, 128]
+   int8 l6_attn_qk   rows (tokens) [48, 64], k [640, 704], cols [80, 96]
+   int8 quantisation: A per tensor, symmetric, scale = max|A| / 127 over the whole 128 x 768 activation, round half to even, clip +-127; B per output channel (column of the (in, out) weight), symmetric, scale_j = max_k |W[k, j]| / 127 over the whole column, round half to even, clip +-127
+   conventions.int8: symmetric, zero point 0: weights per output channel, activations per tensor (max-abs over this text's 128 tokens), round half to even, clip +-127
