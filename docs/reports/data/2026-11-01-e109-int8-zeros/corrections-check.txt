@@ -1,0 +1,44 @@
+E109 CORRECTIONS CHECK (corrections-check.py): post hoc, deciding nothing; mean ± 95% over passes
+
+## C1: the lanes' price on zeros, per register-bit clock edge and per enabled bit, paired by pass
+2 kept passes (scored.json):
+  per edge, fJ, per pass: fp32 0.366, 0.337; int8 0.505, 0.444
+  int8 - fp32 +0.122 ± 0.204 fJ; int8 / fp32 1.35 ± 0.40 (one price would read 1.00)
+  per enabled bit, int8 / fp32 per pass 5.89, 5.62: 5.75 ± 1.71
+3 passes, gate lifted (scored-3pass.json, post hoc):
+  per edge, fJ, per pass: fp32 0.366, 0.337, 0.367; int8 0.505, 0.444, 0.510
+  int8 - fp32 +0.130 ± 0.050 fJ; int8 / fp32 1.36 ± 0.10 (one price would read 1.00)
+  per enabled bit, int8 / fp32 per pass 5.89, 5.62, 5.94: 5.82 ± 0.43
+
+## C2: item 15, a live -0 lane with random B over a constant live lane (pi x pi): the raw step and T
+2 kept passes (scored.json):
+  D(a_nz_b_randn) - D(anchor_pi) +4.120 ± 0.411 W; T_minus (B's bytes to the register files, no micro-op) +0.285 ± 0.673 W; the rest +3.835 ± 0.262 W (posthoc.txt's live_over_constant +3.835 ± 0.262 W)
+  R8 (random B in the gated lanes beyond T_plus) +0.526 ± 0.476 W: INCONCLUSIVE
+3 passes, gate lifted (scored-3pass.json, post hoc):
+  D(a_nz_b_randn) - D(anchor_pi) +4.148 ± 0.147 W; T_minus (B's bytes to the register files, no micro-op) +0.226 ± 0.284 W; the rest +3.922 ± 0.378 W (posthoc.txt's live_over_constant +3.922 ± 0.378 W)
+  R8 (random B in the gated lanes beyond T_plus) +0.593 ± 0.306 W: FAIL
+
+## C3: R6's predictions are the bench's cycles plus one constant fitted on the ordinary op
+fp32: the ordinary op, card 546.001 against the bench's 538.25: 7.751 cycles (frozen delta 7.75)
+int8: the ordinary op, card 318.001 against the bench's 310.25: 7.751 cycles (frozen delta 7.75)
+the ten arms, none used in the fit: m0.fp32.zeros 536.25 + 7.75 = 544.0 vs 544.001; k8.fp32.zeros 274.25 + 7.75 = 282.0 vs 282.001; r8.fp32.zeros 282.25 + 7.75 = 290.0 vs 290.001; m0k8.fp32.zeros 272.25 + 7.75 = 280.0 vs 280.001; m0.int8.zeros 310.25 + 7.75 = 318.0 vs 318.001; k8.int8.zeros 158.25 + 7.75 = 166.0 vs 166.0; r8.int8.zeros 182.25 + 7.75 = 190.0 vs 190.0; m0k8.int8.zeros 158.25 + 7.75 = 166.0 vs 166.0; m0.fp32.a_zeros_b_randn 536.25 + 7.75 = 544.0 vs 544.001; m0.fp32.a_nz_b_randn 536.25 + 7.75 = 544.0 vs 544.001
+largest |measured - predicted|: 0.001 cycles
+
+## C4: e_op, the per-op price with no micro-op issued: 95% upper bounds against the ops reading's price
+2 kept passes (scored.json): fp32 +0.7 ± 500.6 pJ (upper 501); int8 +40.0 ± 132.6 pJ (upper 173); the ops reading needs 770 pJ
+3 passes, gate lifted (scored-3pass.json, post hoc): fp32 +37.9 ± 187.3 pJ (upper 225); int8 +50.7 ± 52.7 pJ (upper 103); the ops reading needs 770 pJ
+
+## C5: the two readings compared
+29 of 29 quantities: each reading's mean inside the other's 95% interval
+verdicts that differ (2 kept -> 3 passes): R1_ops INCONCLUSIVE -> FAIL; R8_gated_transport INCONCLUSIVE -> FAIL; R5 int8 INCONCLUSIVE -> PASS
+verdicts that read the same in both (22): R0_answer PER-TIME, R2_lanes LANES-OPPOSE, R3_per_time PASS, R4_b_reads NOT-RESOLVED; H_reads CONSISTENT, R5 fp32 INCONCLUSIVE, R7_sign_unseen PASS, R6 x10, R10 x6
+R1's G_op: 2 kept +0.076 ± 0.817 W, 3 passes +0.055 ± 0.184 W, line 0.311 / 0.300 W
+R8: 2 kept +0.526 ± 0.476 W, 3 passes +0.593 ± 0.306 W (inside ±0.25 W is PASS)
+R5 int8: 2 kept +0.048 ± 0.515 W, 3 passes +0.048 ± 0.101 W (inside ±0.15 W is PASS)
+
+## C9: the owed replicate's card time, at this session's pace
+session 1163 s (19.4 card-minutes): smoke and config reads 49 s; passes 10910 387 s, 10911 348 s, 10912 334 s (the first heated from a cold die); 15 s after each pass
+3 passes: about 19.4 card-minutes at the warm passes' pace (341 s + 15 s), 19.4 if every added pass took the longest (387 s)
+4 passes: about 25.3 card-minutes at the warm passes' pace (341 s + 15 s), 26.1 if every added pass took the longest (387 s)
+5 passes: about 31.2 card-minutes at the warm passes' pace (341 s + 15 s), 32.8 if every added pass took the longest (387 s)
+E109's own 23-minute queue deadline admits a fourth pass: as it ran False; even with every pass at the warm pace False. So E109's frame unchanged runs at most 3 passes, and min_kept_passes is 3: no spare
