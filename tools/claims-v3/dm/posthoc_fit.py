@@ -13,9 +13,10 @@ line, W = 32, 64, 128, here): w, hi, t_enc, half (the 256-bit pieces), r32, r64,
 (bits changed between two reads of an 8-way and a 16-way path), k_bank (128-way).
 
 The search: a base of w, hi, t_enc, k_shire, k_chan, and 14 extras, each with and without a floor, printed in full. The account chosen
-is the base + half + r64 with no floor, for the second-lowest rms among models with a reading on a physical path (64 bits: four beats, one
-controller clock at 933 MHz; 256 bits: one BL16 burst). half + r64 + e64 fits a little better and separates less. Fitted per headline pass, so each price
-has a t interval. A fit of seven prices to 28 items is a description, with its out-of-sample check on 18 other points beside it.
+is the base + half + r64 with no floor: a floor adds nothing to it (+0.05 W, 0.061 against 0.063 W rms), half + r64 + e64 fits a little better
+(0.052 W) with one more price that separates less, and both extras have a reading on a physical path (64 bits: four beats, one controller clock at
+933 MHz; 256 bits: one BL16 burst). Fitted per headline pass, so each price has a t interval. A fit of seven prices to 28 items is a description, with
+its out-of-sample check on 18 other points beside it.
 """
 import argparse
 import hashlib

@@ -37,8 +37,8 @@ Each of those holds its other counts equal by construction (`gen/counts.json`, `
    and raw toggles nothing: 0.588 W, 0.311 W short, and **R12 fails**, just outside its ±0.30 W band (by more at the two sensitivities). High pins and encoded toggles are 65 % of the arrangement; the rest needs a path this design did not isolate (post-hoc account, below).
 3. **The largest price is a raw one, and it is not on the pins.** All-0xFF bytes hold every data pin low and still cost +2.174 W over zeros (`ones_u8`). Three independent pairs at equal high pins give 3.18, 3.29 and 3.48 pJ per one, and **E75's 3.255 pJ** [2.97, 3.55], from contiguous images, sits among them. So E75's price
    was right and it is not a pin's. It is off the compute rail too (`tie18`: rail +0.103 W of the board's +1.727). This experiment does not say where it is paid: the DRAM's internal read path, the PHY and controller, the memory shire and the mesh all carry raw ones.
-4. **The channel reading fails: a period that divides 16 is not free, and most of the step sits at an 8-way path.** Period 8 is free, period 16 is not. That is R11's registered named reading: a path of the 8-way interleave pays. The public datasheet names one candidate, each memory shire's 512-bit AXI port (§7.1.1.1), which carries every 8th line if bits 8:6 pick the shire, as the removal bits imply. The channel's own share is not separated from zero (post hoc, below).
-5. **There is no floor.** All six models frozen before the data needed +0.99 to +1.72 W for any non-zero line, and `floor_w1` reads +0.112 W. An all-zero line is not a special case. The "floor" was toggling on wide paths, which every E75 and E81 image had: `dm_l08` carries the same 256 ones and 32 high pins as E75's images, with every 16-bit word alike, and costs +1.155 W against their +1.77–2.35 W (`posthoc-fit.txt`).
+4. **The channel reading fails: a period that divides 16 is not free.** Period 8 is free, period 16 is not (`h16` present in the primary arm; +0.22 to +0.24 W and never absent in the three others). That is R11's registered named reading: a path of the 8-way interleave pays. The public datasheet names one candidate, each memory shire's 512-bit AXI port (§7.1.1.1), which carries every 8th line if bits 8:6 pick the shire, as the removal bits imply. Post hoc, the ladder gives the 8-way count more than the channel's, whose own share is not separated from zero (below).
+5. **There is no floor.** All six models frozen before the data needed +0.99 to +1.72 W for any non-zero line, and `floor_w1` reads +0.112 W. An all-zero line is not a special case. What the fits called a floor looks like toggling on wide paths (post hoc, below), which every E75 and E81 image had: `dm_l08` carries the same 256 ones and 32 high pins as E75's images, with every 16-bit word alike, and costs +1.155 W against their +1.77–2.35 W (`posthoc-fit.txt`).
 
 ### The tent, and the ladder
 
@@ -226,7 +226,7 @@ So **the 36.6 % E75's two prices explained is the ones (35 % here), and the 63 %
 
 1. **Section 11 item 12's mechanism question is narrowed, not closed.** The arrangement: read DBI is live on the silicon, and high pins plus encoded toggles are 65 % of it by direct prices. The period: the steps do not follow the channel count; period 16 costs, so an 8-way path pays most of it. Still open: where a one pays its 3.3 pJ; which wide paths carry `half` and the 64-bit toggles (post hoc); and that the 8-way path is the memory shire's AXI port, which is inferred.
 2. **E81's two candidate encodings are decided.** DBI-DC stands and the 16-bit-toggle account falls: raw toggles at 16-bit steps are free (`t_raw`) when inversion hides them.
-3. **E75's price of a carried one is confirmed by a different design**: 3.18–3.48 pJ against its 3.255, on images with equal high pins and no toggles. **E75's "first ones cost the most" is explained:** there is no floor, only wide-path toggles, which `dm_l08` (+1.155 W) does not have and which its contiguous images do.
+3. **E75's price of a carried one is confirmed by a different design**: 3.18–3.48 pJ against its 3.255, on images with equal high pins and no toggles. **E75's "first ones cost the most" has a reading, post hoc:** there is no floor, only wide-path toggles, which `dm_l08` (+1.155 W) does not have and which E75's contiguous images do.
 4. **For a power model of real data on this memory** (kinds page section 11 item 6), the zeros-to-random step has now been written as ones, high pins, pin toggles, wide-path toggles and path changes. That is post hoc; a model that uses it should test it on real tiles.
 5. **For the blog material.** At the same number of ones, a byte's pattern moves what the pins carry. Inversion makes 0xFF nearly as cheap on the pins as 0x00, and that is real, but a 0xFF byte still costs about 8 × 3.3 pJ off the pins.
 
@@ -305,9 +305,10 @@ Four readings, each from `posthoc-desk.txt`:
 4. **Of the 63 % that counting bits missed** (E75's two prices give 36.6 % of the 3.25 W chord), the largest part is a floor. In the ones + high pins + channel model, random floats'
    3.31 W over zeros divide as floor 1.09 W (33 %), ones 0.88 W (27 %), high pins 0.84 W (25 %) and channel changes 0.50 W (15 %). So the floor, the high pins and the channel changes are
    what counting bits missed. Nothing yet says what the floor is, or that it is more than the shape of the response near zero: E75's w128 image already costs 1.405 W over zeros for
-   128 ones and 16 high pins. `dm_w1`, one bit in every line, tests it. *(It did, Sun 1 Nov 2026, 01:35 PDT: there is no floor; § Results.)* *(It did, Sun 1 Nov 2026, 01:35 PDT: there is no floor; § Results.)*
+   128 ones and 16 high pins. `dm_w1`, one bit in every line, tests it. *(It did, Sun 1 Nov 2026, 01:35 PDT: there is no floor; § Results.)* *(It did, Sun 1 Nov 2026, 01:35 PDT: there is no floor; § Results.)* *(It did, Sun 1 Nov 2026, 01:35 PDT: there is no floor; § Results.)*
 
 **Why a registered test.** Images built to hold these counts apart, the same ones with different high pins, the same high pins with different ones, and the same high pins and toggles with different periods, make
 the candidates disagree by up to 1.7 W (`tools/claims-v3/dm/README.md` §3).
+
 
 
