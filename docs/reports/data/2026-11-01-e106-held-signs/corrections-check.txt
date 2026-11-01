@@ -1,0 +1,99 @@
+C1. A bracket, by the registration's own R5 row (E106.md: 'a LITTLE here ... would make the held part a bracket, not a number')
+  fp16 (z_ss - c_abs) less (x_s - x_c), W, paired, each over its baseline   1.204 ±  0.357 (n=3)
+  fp16 z_ss - x_s, W, directly, baselines left in                  1.175 ±  0.685 (n=3)
+  share of the step per pass: z_ss [0.477, 0.393, 0.465] x_s [0.172, 0.186, 0.204] z_ss / x_s [2.78, 2.11, 2.28]
+  share difference, z_ss - x_s                                     0.258 ±  0.123 (n=3)
+  outer interval of the two shares: 0.147 to 0.559
+  The bench, net toggles an op over the tile's baseline, k (modelled)
+    contrast                           front         aligner, CSA                adder normaliser, rounding     lane, bypass, rf   other     all  of step
+    fp16 signs-ones                     1859                 1750                 1197                  892                 1087     309    7094    1.000
+    fp16 z_ss-c_abs                      488                 1395                  712                  248                  229      81    3153    0.444
+    fp16 x_s-x_c                         252                  783                  232                    5                  122      30    1426    0.201
+    fp16 z_s-c_abs                       456                 1407                  724                  249                  160      57    3054    0.431
+    fp32 signs-ones                     2012                 1362                 1156                  918                 1149     364    6961    1.000
+    fp32 s_abs-c_abs                     529                 1127                 1148                  843                   73      24    3745    0.538
+    fp32 z_s-c_abs                       399                 1224                  738                  256                  115      49    2780    0.399
+    fp16 z_ss   aligner and CSA  1395 of  1750 (0.80); adder through normaliser   960 of  2090 (0.46); the adder block alone  220 of  519
+    fp16 x_s    aligner and CSA   783 of  1750 (0.45); adder through normaliser   238 of  2090 (0.11); the adder block alone   47 of  519
+    fp32 s_abs  aligner and CSA  1127 of  1362 (0.83); adder through normaliser  1992 of  2074 (0.96); the adder block alone  425 of  536
+    fp32 z_s    aligner and CSA  1224 of  1362 (0.90); adder through normaliser   994 of  2074 (0.48); the adder block alone  217 of  536
+  x_s is a floor by construction: with equal magnitudes in opposite phase, x ^ ~x = 1...1 and maj(c, x, ~x) = c, so the carry-save outputs do not change when the operands swap
+
+C3. Like for like: zero products in both, B's signs moving, A's still (E104, the same card, earlier that morning), over E106's steps, across sessions, post hoc
+  E104 two kept : fp32 z_s - c_abs 1.728 ± 0.827; fp16 2.153 ± 0.330; fp16 less fp32 0.426 ± 1.157; ratio 1.249 ± 0.789
+       over E106's steps: fp32 0.361, fp16 0.457, difference +0.096, about ± 0.218 (quadrature of the contrasts' and the steps' half-widths, rough)
+  E104 all three: fp32 z_s - c_abs 1.663 ± 0.322; fp16 2.172 ± 0.103; fp16 less fp32 0.509 ± 0.424; ratio 1.313 ± 0.315
+       over E106's steps: fp32 0.347, fp16 0.461, difference +0.114, about ± 0.134 (quadrature of the contrasts' and the steps' half-widths, rough)
+  rail, all three: fp32 1.445 ± 0.353, fp16 1.714 ± 0.477; over E106's rail steps 0.328, 0.433, difference +0.105
+  M4 frozen, over M4's steps here: fp32 z_s 0.417, fp16 z_s 0.453, fp16 z_ss 0.458
+  the bench's toggles over the step: fp32 z_s 0.399, fp16 z_s 0.431, fp16 z_ss 0.444
+  R6 as registered is absorbed (fp32) against zero products (fp16):
+  fp16 z_ss share less fp32 s_abs share                           -0.112 ±  0.073 (n=3)
+  No like for like on absorbed products: fp16's s_abs walks
+  fp16 s_abs - c_abs, E104, two kept                               4.374 ±  1.653 (n=2)
+  fp16 s_abs - c_abs, E104, all three                              4.467 ±  0.515 (n=3)
+    read back at n = 199874: 9 distinct words; below n x 2^31 by 6.8 to 14.1 units an op, mean over the 256 words 10.6 (a unit is the ulp C has when the op runs)
+    read back at n = 541999: 9 distinct words; below n x 2^31 by 6.5 to 13.2 units an op, mean over the 256 words 10.0 (a unit is the ulp C has when the op runs)
+  alternations an op, the draws differ: s_abs 2080 against signs 1968; z_ss 3858 against signs 4096
+  scaled to signs' rate (rough, only the alternation-priced part scales): s_abs 0.527, z_ss 0.473, R6 -0.055
+
+C4. The rest is what each held tile lacks, and not the same thing in the two formats. Bench, k toggles: step less held tile, and the part in adder through normaliser
+  fp16 rest against z_ss, W                                        2.625 ±  1.058 (n=3)
+  fp16 rest against x_s, W                                         3.829 ±  0.780 (n=3)
+  fp32 rest against s_abs, W                                       2.124 ±  0.509 (n=3)
+  fp16 against z_ss: rest 3941 k, adder through normaliser 1130 k, 0.287
+  fp32 against s_abs: rest 3216 k, adder through normaliser 83 k, 0.026
+  fp32 s_abs above signs - ones, k: {'txfma_f4': 120, 'txfma_f5': 109, 'txfma_norm_shf': 95}
+
+C5. What 'eff_sub flips as signs' does' means. One lane-micro-op stream, an op at index 136,000 (406,000 gives the same counts). The flips are the same kind on z_ss; the aligned operands are not
+  tile         alt1  alt2       bench  both   one  same   opp    phi  empty aligned  change C
+  fp16.signs   2070  2026  2070, 2026  1029  2038   495   534  0.005         0/4096 2090/4096
+  fp16.z_ss    2030  1828  2030, 1828  1003  1852   502   501  0.062      3840/4096  256/4096
+  fp16.x_s     1830  1826  1830, 1826  1820    16     0  1820 -0.882         0/4096  256/4096
+  fp16.x_c       16     0    16,    0     0    16     0     0  0.000         0/4096  256/4096
+  fp32.signs   1968     0  1968,    0     0  1968     0     0  0.000         0/4096 4096/4096
+  fp32.s_abs   2080     0  2080,    0     0  2080     0     0  0.000         0/4096  256/4096
+
+C6. What the reads see: op ends, at four lengths. R1 passes on tiles that do not hold
+  reads 40; on one value across all 1,024 minions: 40
+  fp32.signs: C08 at n = 2, 1,000, 199,874, 541,999: ['00000000', '00000000', '00000000', '00000000'] while 4096 of 4096 lane-micro-ops an op move C
+  fp16.z_ss: lane-micro-ops an op that leave C unchanged, by the emulation above: 3840 of 4096; k = 0 moves it, as in the baseline
+  fp16.x_s: lane-micro-ops an op that leave C unchanged, by the emulation above: 3840 of 4096; k = 0 moves it, as in the baseline
+  fp32.s_abs: lane-micro-ops an op that leave C unchanged, by the emulation above: 3840 of 4096; k = 0 moves it, as in the baseline
+  fp16.signs: words with S = 0: 25 of 256
+  fp32.signs: words with S = 0: 50 of 256
+
+C7. The kept dip: the registered test against thresholds of 3 and 2 W, post hoc
+  at the registered 4 W this reduction equals e106.json's D on the contrast tiles: largest difference 0.000000 W
+  fp16.signs in pass 10610, the window's 20 samples: [47.71, 47.71, 47.61, 47.61, 47.88, 44.05, 44.05, 47.88, 47.92, 47.92, 47.96, 47.78, 47.78, 48.1, 48.1, 48.16, 47.71, 47.71, 48.12, 48.02]
+  the first low sample's neighbours two away: 47.61 and 47.88; the second's: 47.88 and 47.92; the registered test wants below min of the two less 4.0
+  threshold 4 W: samples caught on contrast tiles: []
+  threshold 3 W: samples caught on contrast tiles: [('10610', 'fp16.signs', 2)]
+    effect on fp16.signs in pass 10610: +0.382 W
+    fp16 step per pass [4.581, 5.018, 4.931], 4.843 ± 0.575
+    z_ss share                                                     0.432 ±  0.091 (n=3)
+    x_s share                                                      0.183 ±  0.059 (n=3)
+    R6's difference                                               -0.125 ±  0.095 (n=3)
+  threshold 2 W: samples caught on contrast tiles: [('10610', 'fp16.signs', 2)]
+    effect on fp16.signs in pass 10610: +0.382 W
+    fp16 step per pass [4.581, 5.018, 4.931], 4.843 ± 0.575
+    z_ss share                                                     0.432 ±  0.091 (n=3)
+    x_s share                                                      0.183 ±  0.059 (n=3)
+    R6's difference                                               -0.125 ±  0.095 (n=3)
+  on window medians, no temperature term:
+    z_ss share                                                     0.417 ±  0.101 (n=3)
+
+C8. R4's band against R3's
+  R4's interval [0.332, 0.559]; R4's band [0.30, 0.70]: ABOUT HALF; R3's band [0.35, 0.65]: it would read INCONCLUSIVE
+
+C9. The pass the budget rule cost
+  t(2) / sqrt(3) against t(3) / sqrt(4): 1.561x wider; R6 at n = 4 with the same sd: -0.112 ± 0.047: neither inside ±0.15 nor outside it
+
+C10. A's signs: z_ss - c_abs here against E104's z_s - c_abs, across sessions
+  z_ss - c_abs, E106                                               2.091 ±  0.442 (n=3)
+  z_s - c_abs, E104 two kept                                       2.153 ±  0.330 (n=2)
+  z_s - c_abs, E104 all three                                      2.172 ±  0.103 (n=3)
+  M4 expected +0.023 W; the bench +99 k of 3054 k toggles
+
+C11. R7 over the tiles that toggle
+  rms over the five that toggle 0.058 W; over all ten 0.076 W; the other five (fp16 c_abs, ones, x_c; fp32 c_abs, ones) are baselines
