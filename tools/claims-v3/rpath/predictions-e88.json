@@ -1,0 +1,1632 @@
+{
+ "experiment": "E88",
+ "registered": "2026-10-31",
+ "registration": "tools/claims-v3/rpath/E88.md",
+ "card": {
+  "name": "aifoundry1-c1",
+  "clock_mhz": 600,
+  "config_gate": {
+   "expected": {
+    "tdp_w": 65,
+    "temp_threshold_c": 65
+   }
+  }
+ },
+ "model": {
+  "what": "D = F live + a N_op + c N_prod + b N_res, least squares per type on E82's registered e82.json D (card 1, passes 8211-8215), features from make_e88.py's exact-stream model",
+  "fit": {
+   "fp32": {
+    "coef": [
+     7.52726960227073,
+     2.170787871721187e-05,
+     8.295874320619204e-05,
+     4.632402190273519e-05
+    ],
+    "se": [
+     0.31481221225597933,
+     5.198110793300362e-06,
+     6.051848823573564e-06,
+     4.3093974068657175e-06
+    ],
+    "rms_w": 0.4432138498430161,
+    "n": 18,
+    "F_w": 7.52726960227073,
+    "a_fj_per_bus_bit": 19.291181281897266,
+    "c_fj_per_product_bit": 73.72310187269018,
+    "b_fj_per_result_bit": 41.16685540184475
+   },
+   "fp16": {
+    "coef": [
+     7.528512184619935,
+     2.7741164494312015e-05,
+     3.8666722694999777e-05,
+     5.823721210343633e-05
+    ],
+    "se": [
+     0.36759286091553844,
+     5.063922653252214e-06,
+     7.020025131814894e-06,
+     5.397374482725419e-06
+    ],
+    "rms_w": 0.4230146817374865,
+    "n": 17,
+    "F_w": 7.528512184619935,
+    "a_fj_per_bus_bit": 24.652792665843684,
+    "c_fj_per_product_bit": 34.3620289574705,
+    "b_fj_per_result_bit": 51.75377247473345
+   },
+   "int8": {
+    "coef": [
+     1.3592229493563224,
+     1.0926556073313538e-05,
+     9.90848634166191e-06,
+     1.8903060617386614e-05
+    ],
+    "se": [
+     0.2417956847788873,
+     4.280849783558164e-06,
+     4.7515308238474826e-06,
+     4.2545086868156665e-06
+    ],
+    "rms_w": 0.28725681997996827,
+    "n": 16,
+    "F_w": 1.3592229493563224,
+    "a_fj_per_bus_bit": 5.655346405132984,
+    "c_fj_per_product_bit": 5.12841578230548,
+    "b_fj_per_result_bit": 9.783810671108306
+   }
+  },
+  "predicted_D": {
+   "fp32.a_randn_b_zeros": {
+    "D_w": 0.606,
+    "D_se_w": 0.145,
+    "floor_w": 0.0,
+    "bus_w": 0.606,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     0.0,
+     27920.0,
+     0.0,
+     0.0
+    ]
+   },
+   "fp32.a_zeros_b_randn": {
+    "D_w": 1.211,
+    "D_se_w": 0.29,
+    "floor_w": 0.0,
+    "bus_w": 1.211,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     0.0,
+     55798.0,
+     0.0,
+     0.0
+    ]
+   },
+   "fp32.bf16trunc": {
+    "D_w": 17.419,
+    "D_se_w": 0.243,
+    "floor_w": 7.527,
+    "bus_w": 0.759,
+    "prod_w": 3.307,
+    "res_w": 5.825,
+    "x": [
+     1.0,
+     34980.0,
+     39858.0,
+     125752.88
+    ]
+   },
+   "fp32.c_abs": {
+    "D_w": 7.564,
+    "D_se_w": 0.313,
+    "floor_w": 7.527,
+    "bus_w": 0.003,
+    "prod_w": 0.009,
+    "res_w": 0.024,
+    "x": [
+     1.0,
+     160.0,
+     112.0,
+     510.0
+    ]
+   },
+   "fp32.fp16grid": {
+    "D_w": 18.607,
+    "D_se_w": 0.206,
+    "floor_w": 7.527,
+    "bus_w": 0.936,
+    "prod_w": 4.327,
+    "res_w": 5.816,
+    "x": [
+     1.0,
+     43136.0,
+     52158.0,
+     125548.69
+    ]
+   },
+   "fp32.neg_ones": {
+    "D_w": 7.929,
+    "D_se_w": 0.291,
+    "floor_w": 7.527,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.402,
+    "x": [
+     1.0,
+     0.0,
+     0.0,
+     8671.0
+    ]
+   },
+   "fp32.nn_like": {
+    "D_w": 12.558,
+    "D_se_w": 0.228,
+    "floor_w": 3.705,
+    "bus_w": 1.746,
+    "prod_w": 4.223,
+    "res_w": 2.884,
+    "x": [
+     0.492188,
+     80426.0,
+     50906.0,
+     62259.81
+    ]
+   },
+   "fp32.ones": {
+    "D_w": 7.929,
+    "D_se_w": 0.291,
+    "floor_w": 7.527,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.402,
+    "x": [
+     1.0,
+     0.0,
+     0.0,
+     8671.0
+    ]
+   },
+   "fp32.pi": {
+    "D_w": 8.06,
+    "D_se_w": 0.284,
+    "floor_w": 7.527,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.533,
+    "x": [
+     1.0,
+     0.0,
+     0.0,
+     11510.5
+    ]
+   },
+   "fp32.pow2": {
+    "D_w": 15.029,
+    "D_se_w": 0.271,
+    "floor_w": 7.527,
+    "bus_w": 0.552,
+    "prod_w": 1.717,
+    "res_w": 5.233,
+    "x": [
+     1.0,
+     25414.0,
+     20696.0,
+     112964.88
+    ]
+   },
+   "fp32.r_abs": {
+    "D_w": 17.279,
+    "D_se_w": 0.583,
+    "floor_w": 7.527,
+    "bus_w": 1.643,
+    "prod_w": 8.085,
+    "res_w": 0.024,
+    "x": [
+     1.0,
+     75694.0,
+     97462.0,
+     510.0
+    ]
+   },
+   "fp32.r_het": {
+    "D_w": 22.032,
+    "D_se_w": 0.252,
+    "floor_w": 7.527,
+    "bus_w": 1.707,
+    "prod_w": 8.33,
+    "res_w": 4.468,
+    "x": [
+     1.0,
+     78638.0,
+     100408.0,
+     96448.88
+    ]
+   },
+   "fp32.r_walk": {
+    "D_w": 22.296,
+    "D_se_w": 0.216,
+    "floor_w": 7.527,
+    "bus_w": 1.64,
+    "prod_w": 8.081,
+    "res_w": 5.048,
+    "x": [
+     1.0,
+     75568.0,
+     97410.0,
+     108963.25
+    ]
+   },
+   "fp32.randn": {
+    "D_w": 23.779,
+    "D_se_w": 0.22,
+    "floor_w": 7.527,
+    "bus_w": 1.785,
+    "prod_w": 8.685,
+    "res_w": 5.782,
+    "x": [
+     1.0,
+     82214.0,
+     104690.0,
+     124821.44
+    ]
+   },
+   "fp32.randn_large": {
+    "D_w": 23.724,
+    "D_se_w": 0.219,
+    "floor_w": 7.527,
+    "bus_w": 1.843,
+    "prod_w": 8.628,
+    "res_w": 5.726,
+    "x": [
+     1.0,
+     84896.0,
+     104008.0,
+     123603.56
+    ]
+   },
+   "fp32.randn_small": {
+    "D_w": 23.857,
+    "D_se_w": 0.211,
+    "floor_w": 7.527,
+    "bus_w": 1.785,
+    "prod_w": 8.5,
+    "res_w": 6.044,
+    "x": [
+     1.0,
+     82244.0,
+     102460.0,
+     130482.19
+    ]
+   },
+   "fp32.randn_sorted": {
+    "D_w": 23.19,
+    "D_se_w": 0.242,
+    "floor_w": 7.527,
+    "bus_w": 1.321,
+    "prod_w": 8.465,
+    "res_w": 5.877,
+    "x": [
+     1.0,
+     60856.0,
+     102036.0,
+     126872.88
+    ]
+   },
+   "fp32.s_abs": {
+    "D_w": 7.806,
+    "D_se_w": 0.315,
+    "floor_w": 7.527,
+    "bus_w": 0.073,
+    "prod_w": 0.182,
+    "res_w": 0.024,
+    "x": [
+     1.0,
+     3364.0,
+     2192.0,
+     510.0
+    ]
+   },
+   "fp32.s_walk": {
+    "D_w": 11.498,
+    "D_se_w": 0.258,
+    "floor_w": 7.527,
+    "bus_w": 0.07,
+    "prod_w": 0.173,
+    "res_w": 3.729,
+    "x": [
+     1.0,
+     3204.0,
+     2080.0,
+     80500.81
+    ]
+   },
+   "fp32.smallint": {
+    "D_w": 13.055,
+    "D_se_w": 0.288,
+    "floor_w": 6.641,
+    "bus_w": 0.43,
+    "prod_w": 1.02,
+    "res_w": 4.964,
+    "x": [
+     0.882324,
+     19806.0,
+     12294.0,
+     107161.44
+    ]
+   },
+   "fp32.sparse50": {
+    "D_w": 6.6,
+    "D_se_w": 0.293,
+    "floor_w": 1.7,
+    "bus_w": 1.618,
+    "prod_w": 1.924,
+    "res_w": 1.357,
+    "x": [
+     0.22583,
+     74550.0,
+     23196.0,
+     29298.62
+    ]
+   },
+   "fp32.sparse90": {
+    "D_w": 0.576,
+    "D_se_w": 0.089,
+    "floor_w": 0.062,
+    "bus_w": 0.386,
+    "prod_w": 0.075,
+    "res_w": 0.053,
+    "x": [
+     0.008301,
+     17780.0,
+     908.0,
+     1136.69
+    ]
+   },
+   "fp32.uniform01": {
+    "D_w": 22.405,
+    "D_se_w": 0.23,
+    "floor_w": 7.527,
+    "bus_w": 1.69,
+    "prod_w": 8.283,
+    "res_w": 4.905,
+    "x": [
+     1.0,
+     77842.0,
+     99844.0,
+     105894.12
+    ]
+   },
+   "fp32.zeros": {
+    "D_w": 0.0,
+    "D_se_w": 0.0,
+    "floor_w": 0.0,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "fp16.a_randn_b_zeros": {
+    "D_w": 0.779,
+    "D_se_w": 0.142,
+    "floor_w": 0.0,
+    "bus_w": 0.779,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     0.0,
+     28096.0,
+     0.0,
+     0.0
+    ]
+   },
+   "fp16.a_zeros_b_randn": {
+    "D_w": 1.548,
+    "D_se_w": 0.283,
+    "floor_w": 0.0,
+    "bus_w": 1.548,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     0.0,
+     55806.0,
+     0.0,
+     0.0
+    ]
+   },
+   "fp16.c_cancel": {
+    "D_w": 7.529,
+    "D_se_w": 0.368,
+    "floor_w": 7.529,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "fp16.fp8grid": {
+    "D_w": 17.903,
+    "D_se_w": 0.281,
+    "floor_w": 7.529,
+    "bus_w": 1.179,
+    "prod_w": 1.802,
+    "res_w": 7.394,
+    "x": [
+     1.0,
+     42486.0,
+     46596.0,
+     126968.06
+    ]
+   },
+   "fp16.neg_ones": {
+    "D_w": 8.033,
+    "D_se_w": 0.34,
+    "floor_w": 7.529,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.505,
+    "x": [
+     1.0,
+     0.0,
+     0.0,
+     8671.0
+    ]
+   },
+   "fp16.nn_like": {
+    "D_w": 17.075,
+    "D_se_w": 0.176,
+    "floor_w": 6.058,
+    "bus_w": 2.34,
+    "prod_w": 2.874,
+    "res_w": 5.803,
+    "x": [
+     0.804688,
+     84348.0,
+     74326.0,
+     99643.69
+    ]
+   },
+   "fp16.ones": {
+    "D_w": 8.033,
+    "D_se_w": 0.34,
+    "floor_w": 7.529,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.505,
+    "x": [
+     1.0,
+     0.0,
+     0.0,
+     8671.0
+    ]
+   },
+   "fp16.pair_half_zero": {
+    "D_w": 18.791,
+    "D_se_w": 0.21,
+    "floor_w": 7.529,
+    "bus_w": 2.019,
+    "prod_w": 2.261,
+    "res_w": 6.982,
+    "x": [
+     1.0,
+     72796.0,
+     58470.0,
+     119889.56
+    ]
+   },
+   "fp16.r_abs": {
+    "D_w": 13.292,
+    "D_se_w": 0.712,
+    "floor_w": 7.529,
+    "bus_w": 2.058,
+    "prod_w": 3.676,
+    "res_w": 0.03,
+    "x": [
+     1.0,
+     74180.0,
+     95060.0,
+     510.0
+    ]
+   },
+   "fp16.r_cancel": {
+    "D_w": 13.165,
+    "D_se_w": 0.71,
+    "floor_w": 7.529,
+    "bus_w": 1.985,
+    "prod_w": 3.651,
+    "res_w": 0.0,
+    "x": [
+     1.0,
+     71548.0,
+     94428.0,
+     0.0
+    ]
+   },
+   "fp16.r_walk": {
+    "D_w": 20.524,
+    "D_se_w": 0.206,
+    "floor_w": 7.529,
+    "bus_w": 2.056,
+    "prod_w": 3.668,
+    "res_w": 7.272,
+    "x": [
+     1.0,
+     74108.0,
+     94852.0,
+     124863.19
+    ]
+   },
+   "fp16.randn": {
+    "D_w": 21.273,
+    "D_se_w": 0.231,
+    "floor_w": 7.529,
+    "bus_w": 2.342,
+    "prod_w": 4.027,
+    "res_w": 7.376,
+    "x": [
+     1.0,
+     84416.0,
+     104142.0,
+     126653.0
+    ]
+   },
+   "fp16.randn_small": {
+    "D_w": 21.387,
+    "D_se_w": 0.224,
+    "floor_w": 7.529,
+    "bus_w": 2.528,
+    "prod_w": 3.988,
+    "res_w": 7.343,
+    "x": [
+     1.0,
+     91126.0,
+     103126.0,
+     126091.56
+    ]
+   },
+   "fp16.randn_sorted": {
+    "D_w": 20.383,
+    "D_se_w": 0.255,
+    "floor_w": 7.529,
+    "bus_w": 1.716,
+    "prod_w": 3.865,
+    "res_w": 7.274,
+    "x": [
+     1.0,
+     61846.0,
+     99966.0,
+     124898.44
+    ]
+   },
+   "fp16.smallint": {
+    "D_w": 16.689,
+    "D_se_w": 0.348,
+    "floor_w": 7.499,
+    "bus_w": 0.998,
+    "prod_w": 1.088,
+    "res_w": 7.104,
+    "x": [
+     0.996094,
+     35980.0,
+     28132.0,
+     121984.75
+    ]
+   },
+   "fp16.sparse50": {
+    "D_w": 12.603,
+    "D_se_w": 0.164,
+    "floor_w": 4.409,
+    "bus_w": 1.986,
+    "prod_w": 1.949,
+    "res_w": 4.26,
+    "x": [
+     0.585693,
+     71590.0,
+     50394.0,
+     73140.56
+    ]
+   },
+   "fp16.sparse90": {
+    "D_w": 1.145,
+    "D_se_w": 0.082,
+    "floor_w": 0.294,
+    "bus_w": 0.511,
+    "prod_w": 0.082,
+    "res_w": 0.258,
+    "x": [
+     0.039062,
+     18412.0,
+     2128.0,
+     4427.38
+    ]
+   },
+   "fp16.uniform01": {
+    "D_w": 19.609,
+    "D_se_w": 0.222,
+    "floor_w": 7.529,
+    "bus_w": 2.162,
+    "prod_w": 3.635,
+    "res_w": 6.283,
+    "x": [
+     1.0,
+     77948.0,
+     94010.0,
+     107884.56
+    ]
+   },
+   "fp16.wsparse50": {
+    "D_w": 6.604,
+    "D_se_w": 0.265,
+    "floor_w": 1.807,
+    "bus_w": 2.037,
+    "prod_w": 0.959,
+    "res_w": 1.802,
+    "x": [
+     0.23999,
+     73444.0,
+     24794.0,
+     30935.19
+    ]
+   },
+   "fp16.wsparse90": {
+    "D_w": 0.693,
+    "D_se_w": 0.088,
+    "floor_w": 0.074,
+    "bus_w": 0.505,
+    "prod_w": 0.039,
+    "res_w": 0.075,
+    "x": [
+     0.009766,
+     18192.0,
+     1014.0,
+     1295.44
+    ]
+   },
+   "fp16.zeros": {
+    "D_w": 0.0,
+    "D_se_w": 0.0,
+    "floor_w": 0.0,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "int8.a_full_b_zeros": {
+    "D_w": 0.713,
+    "D_se_w": 0.279,
+    "floor_w": 0.0,
+    "bus_w": 0.713,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     0.0,
+     65248.0,
+     0.0,
+     0.0
+    ]
+   },
+   "int8.a_zeros_b_full": {
+    "D_w": 0.045,
+    "D_se_w": 0.018,
+    "floor_w": 0.0,
+    "bus_w": 0.045,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     0.0,
+     4140.0,
+     0.0,
+     0.0
+    ]
+   },
+   "int8.c_cancel": {
+    "D_w": 1.359,
+    "D_se_w": 0.242,
+    "floor_w": 1.359,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "int8.full": {
+    "D_w": 6.588,
+    "D_se_w": 0.17,
+    "floor_w": 1.359,
+    "bus_w": 0.757,
+    "prod_w": 1.387,
+    "res_w": 3.085,
+    "x": [
+     1.0,
+     69312.0,
+     139942.0,
+     163184.06
+    ]
+   },
+   "int8.gauss_q": {
+    "D_w": 6.396,
+    "D_se_w": 0.178,
+    "floor_w": 1.359,
+    "bus_w": 0.76,
+    "prod_w": 1.361,
+    "res_w": 2.916,
+    "x": [
+     1.0,
+     69544.0,
+     137404.0,
+     154236.81
+    ]
+   },
+   "int8.highbit": {
+    "D_w": 3.458,
+    "D_se_w": 0.16,
+    "floor_w": 1.359,
+    "bus_w": 0.095,
+    "prod_w": 0.408,
+    "res_w": 1.596,
+    "x": [
+     1.0,
+     8664.0,
+     41200.0,
+     84406.31
+    ]
+   },
+   "int8.neg_ones": {
+    "D_w": 1.533,
+    "D_se_w": 0.222,
+    "floor_w": 1.359,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.174,
+    "x": [
+     1.0,
+     0.0,
+     0.0,
+     9200.0
+    ]
+   },
+   "int8.ones": {
+    "D_w": 1.533,
+    "D_se_w": 0.222,
+    "floor_w": 1.359,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.174,
+    "x": [
+     1.0,
+     0.0,
+     0.0,
+     9200.0
+    ]
+   },
+   "int8.pos": {
+    "D_w": 6.124,
+    "D_se_w": 0.169,
+    "floor_w": 1.359,
+    "bus_w": 0.668,
+    "prod_w": 0.961,
+    "res_w": 3.136,
+    "x": [
+     1.0,
+     61096.0,
+     96996.0,
+     165891.56
+    ]
+   },
+   "int8.r_cancel": {
+    "D_w": 3.483,
+    "D_se_w": 0.762,
+    "floor_w": 1.359,
+    "bus_w": 0.753,
+    "prod_w": 1.371,
+    "res_w": 0.0,
+    "x": [
+     1.0,
+     68906.0,
+     138322.0,
+     0.0
+    ]
+   },
+   "int8.r_walk": {
+    "D_w": 6.548,
+    "D_se_w": 0.164,
+    "floor_w": 1.359,
+    "bus_w": 0.753,
+    "prod_w": 1.363,
+    "res_w": 3.074,
+    "x": [
+     1.0,
+     68874.0,
+     137562.0,
+     162597.5
+    ]
+   },
+   "int8.smallint": {
+    "D_w": 6.222,
+    "D_se_w": 0.178,
+    "floor_w": 1.359,
+    "bus_w": 0.771,
+    "prod_w": 1.314,
+    "res_w": 2.779,
+    "x": [
+     1.0,
+     70526.0,
+     132566.0,
+     147001.31
+    ]
+   },
+   "int8.sorted": {
+    "D_w": 6.228,
+    "D_se_w": 0.146,
+    "floor_w": 1.359,
+    "bus_w": 0.583,
+    "prod_w": 1.197,
+    "res_w": 3.088,
+    "x": [
+     1.0,
+     53346.0,
+     120848.0,
+     163376.31
+    ]
+   },
+   "int8.sparse50": {
+    "D_w": 5.095,
+    "D_se_w": 0.239,
+    "floor_w": 1.264,
+    "bus_w": 0.584,
+    "prod_w": 0.559,
+    "res_w": 2.689,
+    "x": [
+     0.929688,
+     53480.0,
+     56368.0,
+     142231.25
+    ]
+   },
+   "int8.sparse90": {
+    "D_w": 0.711,
+    "D_se_w": 0.058,
+    "floor_w": 0.242,
+    "bus_w": 0.133,
+    "prod_w": 0.02,
+    "res_w": 0.317,
+    "x": [
+     0.178223,
+     12144.0,
+     1984.0,
+     16748.38
+    ]
+   },
+   "int8.ternary": {
+    "D_w": 5.416,
+    "D_se_w": 0.124,
+    "floor_w": 1.349,
+    "bus_w": 0.642,
+    "prod_w": 0.842,
+    "res_w": 2.583,
+    "x": [
+     0.992188,
+     58798.0,
+     84996.0,
+     136634.25
+    ]
+   },
+   "int8.wsparse50": {
+    "D_w": 2.41,
+    "D_se_w": 0.125,
+    "floor_w": 0.484,
+    "bus_w": 0.533,
+    "prod_w": 0.361,
+    "res_w": 1.032,
+    "x": [
+     0.356445,
+     48766.0,
+     36452.0,
+     54568.56
+    ]
+   },
+   "int8.wsparse90": {
+    "D_w": 0.261,
+    "D_se_w": 0.066,
+    "floor_w": 0.027,
+    "bus_w": 0.178,
+    "prod_w": 0.016,
+    "res_w": 0.039,
+    "x": [
+     0.02002,
+     16316.0,
+     1638.0,
+     2063.5
+    ]
+   },
+   "int8.zeros": {
+    "D_w": 0.0,
+    "D_se_w": 0.0,
+    "floor_w": 0.0,
+    "bus_w": 0.0,
+    "prod_w": 0.0,
+    "res_w": 0.0,
+    "x": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  }
+ },
+ "contrasts": [
+  {
+   "name": "F32",
+   "type": "fp32",
+   "a": "fp32.c_abs",
+   "b": "fp32.zeros",
+   "what": "the clocked lane: constant operands, a frozen accumulator",
+   "share": "i",
+   "predicted": {
+    "mu": 7.564,
+    "se_par": 0.313,
+    "tol": 1.086,
+    "lo": 6.478,
+    "hi": 8.649
+   }
+  },
+  {
+   "name": "W32",
+   "type": "fp32",
+   "a": "fp32.ones",
+   "b": "fp32.c_abs",
+   "what": "an all-equal accumulator walking (+1 a micro-op) against frozen",
+   "share": "ii",
+   "predicted": {
+    "mu": 0.365,
+    "se_par": 0.036,
+    "tol": 1.256,
+    "lo": -0.89,
+    "hi": 1.621
+   }
+  },
+  {
+   "name": "M32",
+   "type": "fp32",
+   "a": "fp32.r_abs",
+   "b": "fp32.c_abs",
+   "what": "random positive operands, result frozen, against constants",
+   "share": "iii",
+   "predicted": {
+    "mu": 9.716,
+    "se_par": 0.461,
+    "tol": 1.557,
+    "lo": 8.159,
+    "hi": 11.272
+   }
+  },
+  {
+   "name": "R32",
+   "type": "fp32",
+   "a": "fp32.r_walk",
+   "b": "fp32.r_abs",
+   "what": "the same operands, the result walking against frozen",
+   "share": "ii",
+   "predicted": {
+    "mu": 5.017,
+    "se_par": 0.468,
+    "tol": 1.564,
+    "lo": 3.453,
+    "hi": 6.581
+   }
+  },
+  {
+   "name": "R32bus",
+   "type": "fp32",
+   "a": "fp32.r_het",
+   "b": "fp32.r_abs",
+   "what": "frozen accumulators that differ from each other against equal ones",
+   "share": "ii",
+   "predicted": {
+    "mu": 4.753,
+    "se_par": 0.403,
+    "tol": 1.49,
+    "lo": 3.262,
+    "hi": 6.243
+   }
+  },
+  {
+   "name": "R32sum",
+   "type": "fp32",
+   "a": "fp32.r_walk",
+   "b": "fp32.r_het",
+   "what": "walking against frozen-but-different accumulators",
+   "share": "ii",
+   "predicted": {
+    "mu": 0.264,
+    "se_par": 0.065,
+    "tol": 1.26,
+    "lo": -0.996,
+    "hi": 1.525
+   }
+  },
+  {
+   "name": "M32s",
+   "type": "fp32",
+   "a": "fp32.s_abs",
+   "b": "fp32.c_abs",
+   "what": "random signs only, result frozen, against constants",
+   "share": "iii",
+   "predicted": {
+    "mu": 0.242,
+    "se_par": 0.013,
+    "tol": 1.254,
+    "lo": -1.012,
+    "hi": 1.496
+   }
+  },
+  {
+   "name": "R32s",
+   "type": "fp32",
+   "a": "fp32.s_walk",
+   "b": "fp32.s_abs",
+   "what": "random signs, the result walking against frozen",
+   "share": "ii",
+   "predicted": {
+    "mu": 3.693,
+    "se_par": 0.345,
+    "tol": 1.431,
+    "lo": 2.262,
+    "hi": 5.124
+   }
+  },
+  {
+   "name": "X32",
+   "type": "fp32",
+   "a": "fp32.randn",
+   "b": "fp32.r_walk",
+   "what": "E78's random tile against r_walk (signs and the k = 0 slice)",
+   "share": "-",
+   "predicted": {
+    "mu": 1.483,
+    "se_par": 0.049,
+    "tol": 1.257,
+    "lo": 0.225,
+    "hi": 2.74
+   }
+  },
+  {
+   "name": "F16",
+   "type": "fp16",
+   "a": "fp16.c_cancel",
+   "b": "fp16.zeros",
+   "what": "the clocked lane: constant operands, C frozen at 0",
+   "share": "i",
+   "predicted": {
+    "mu": 7.529,
+    "se_par": 0.368,
+    "tol": 1.121,
+    "lo": 6.408,
+    "hi": 8.649
+   }
+  },
+  {
+   "name": "W16",
+   "type": "fp16",
+   "a": "fp16.ones",
+   "b": "fp16.c_cancel",
+   "what": "an all-equal accumulator walking (+2 a micro-op) against frozen",
+   "share": "ii",
+   "predicted": {
+    "mu": 0.505,
+    "se_par": 0.047,
+    "tol": 1.2,
+    "lo": -0.695,
+    "hi": 1.705
+   }
+  },
+  {
+   "name": "M16",
+   "type": "fp16",
+   "a": "fp16.r_cancel",
+   "b": "fp16.c_cancel",
+   "what": "random operands, dot products cancel, against constants",
+   "share": "iii",
+   "predicted": {
+    "mu": 5.636,
+    "se_par": 0.579,
+    "tol": 1.664,
+    "lo": 3.972,
+    "hi": 7.301
+   }
+  },
+  {
+   "name": "R16",
+   "type": "fp16",
+   "a": "fp16.r_walk",
+   "b": "fp16.r_cancel",
+   "what": "the same A, the result walking against cancelled",
+   "share": "ii",
+   "predicted": {
+    "mu": 7.359,
+    "se_par": 0.67,
+    "tol": 1.797,
+    "lo": 5.563,
+    "hi": 9.156
+   }
+  },
+  {
+   "name": "A16",
+   "type": "fp16",
+   "a": "fp16.r_abs",
+   "b": "fp16.r_cancel",
+   "what": "two ways of freezing: absorbed against cancelled",
+   "share": "-",
+   "predicted": {
+    "mu": 0.127,
+    "se_par": 0.011,
+    "tol": 1.197,
+    "lo": -1.07,
+    "hi": 1.324
+   }
+  },
+  {
+   "name": "R16abs",
+   "type": "fp16",
+   "a": "fp16.r_walk",
+   "b": "fp16.r_abs",
+   "what": "the same operands, walking against absorbed",
+   "share": "ii",
+   "predicted": {
+    "mu": 7.232,
+    "se_par": 0.672,
+    "tol": 1.8,
+    "lo": 5.432,
+    "hi": 9.031
+   }
+  },
+  {
+   "name": "F8",
+   "type": "int8",
+   "a": "int8.c_cancel",
+   "b": "int8.zeros",
+   "what": "the clocked lane: constant operands, C frozen at 0",
+   "share": "i",
+   "predicted": {
+    "mu": 1.359,
+    "se_par": 0.242,
+    "tol": 0.751,
+    "lo": 0.608,
+    "hi": 2.11
+   }
+  },
+  {
+   "name": "W8",
+   "type": "int8",
+   "a": "int8.ones",
+   "b": "int8.c_cancel",
+   "what": "an all-equal accumulator walking (+4 a micro-op) against frozen",
+   "share": "ii",
+   "predicted": {
+    "mu": 0.174,
+    "se_par": 0.039,
+    "tol": 0.816,
+    "lo": -0.642,
+    "hi": 0.99
+   }
+  },
+  {
+   "name": "M8",
+   "type": "int8",
+   "a": "int8.r_cancel",
+   "b": "int8.c_cancel",
+   "what": "random operands, the four products cancel, against constants",
+   "share": "iii",
+   "predicted": {
+    "mu": 2.123,
+    "se_par": 0.669,
+    "tol": 1.565,
+    "lo": 0.558,
+    "hi": 3.689
+   }
+  },
+  {
+   "name": "R8",
+   "type": "int8",
+   "a": "int8.r_walk",
+   "b": "int8.r_cancel",
+   "what": "the same A, the result walking against cancelled",
+   "share": "ii",
+   "predicted": {
+    "mu": 3.066,
+    "se_par": 0.695,
+    "tol": 1.609,
+    "lo": 1.456,
+    "hi": 4.675
+   }
+  }
+ ],
+ "rules": [
+  {
+   "id": "H1-fp32",
+   "contrast": "W32",
+   "test": "le",
+   "thr": 1.0,
+   "what": "a constant's accumulator walk costs at most 1 W in fp32: the constant level is the clocked lane"
+  },
+  {
+   "id": "H1-fp16",
+   "contrast": "W16",
+   "test": "le",
+   "thr": 1.0,
+   "what": "the same in fp16"
+  },
+  {
+   "id": "H1-int8",
+   "contrast": "W8",
+   "test": "le",
+   "thr": 0.5,
+   "what": "the same in int8 (at most 0.5 W)"
+  },
+  {
+   "id": "H2-fp32",
+   "contrast": "R32",
+   "test": "ge",
+   "thr": 2.0,
+   "what": "the result path costs at least 2 W of fp32 random data with the operands held identical"
+  },
+  {
+   "id": "H2-fp16",
+   "contrast": "R16",
+   "test": "ge",
+   "thr": 2.0,
+   "what": "the same in fp16 (cancellation)"
+  },
+  {
+   "id": "H2-int8",
+   "contrast": "R8",
+   "test": "ge",
+   "thr": 1.0,
+   "what": "the same in int8, at least 1 W"
+  },
+  {
+   "id": "H3-fp32",
+   "contrast": "M32",
+   "test": "ge",
+   "thr": 4.0,
+   "what": "operand bits cost at least 4 W in fp32 with the result frozen"
+  },
+  {
+   "id": "H3-fp16",
+   "contrast": "M16",
+   "test": "ge",
+   "thr": 2.0,
+   "what": "at least 2 W in fp16"
+  },
+  {
+   "id": "H3-int8",
+   "contrast": "M8",
+   "test": "ge",
+   "thr": 0.5,
+   "what": "at least 0.5 W in int8"
+  },
+  {
+   "id": "H4-signs-mult",
+   "contrast": "M32s",
+   "test": "le",
+   "thr": 1.0,
+   "what": "random signs alone cost at most 1 W with the result frozen (fp32)"
+  },
+  {
+   "id": "H4-signs-result",
+   "contrast": "R32s",
+   "test": "ge",
+   "thr": 2.0,
+   "what": "random signs cost at least 2 W more when the result walks (fp32)"
+  },
+  {
+   "id": "H5-bus-share",
+   "kind": "ratio",
+   "num": [
+    "fp32.r_het",
+    "fp32.r_abs"
+   ],
+   "den": [
+    "fp32.r_walk",
+    "fp32.r_abs"
+   ],
+   "test": "ge",
+   "thr": 0.6,
+   "what": "at least 0.6 of the fp32 result path is the C read and result bus swinging between different accumulators (frozen-but-different over walking, both against frozen-and-equal)"
+  },
+  {
+   "id": "H6-two-freezes",
+   "contrast": "A16",
+   "test": "abs_le",
+   "thr": 1.0,
+   "what": "fp16: an absorbed and a cancelled result cost the same within 1 W"
+  },
+  {
+   "id": "P-F32",
+   "contrast": "F32",
+   "test": "band",
+   "lo": 6.478,
+   "hi": 8.649,
+   "what": "the E82-fitted model's F32: 7.56 W within +-1.09 W"
+  },
+  {
+   "id": "P-W32",
+   "contrast": "W32",
+   "test": "band",
+   "lo": -0.89,
+   "hi": 1.621,
+   "what": "the E82-fitted model's W32: 0.37 W within +-1.26 W"
+  },
+  {
+   "id": "P-M32",
+   "contrast": "M32",
+   "test": "band",
+   "lo": 8.159,
+   "hi": 11.272,
+   "what": "the E82-fitted model's M32: 9.72 W within +-1.56 W"
+  },
+  {
+   "id": "P-R32",
+   "contrast": "R32",
+   "test": "band",
+   "lo": 3.453,
+   "hi": 6.581,
+   "what": "the E82-fitted model's R32: 5.02 W within +-1.56 W"
+  },
+  {
+   "id": "P-R32bus",
+   "contrast": "R32bus",
+   "test": "band",
+   "lo": 3.262,
+   "hi": 6.243,
+   "what": "the E82-fitted model's R32bus: 4.75 W within +-1.49 W"
+  },
+  {
+   "id": "P-R32sum",
+   "contrast": "R32sum",
+   "test": "band",
+   "lo": -0.996,
+   "hi": 1.525,
+   "what": "the E82-fitted model's R32sum: 0.26 W within +-1.26 W"
+  },
+  {
+   "id": "P-M32s",
+   "contrast": "M32s",
+   "test": "band",
+   "lo": -1.012,
+   "hi": 1.496,
+   "what": "the E82-fitted model's M32s: 0.24 W within +-1.25 W"
+  },
+  {
+   "id": "P-R32s",
+   "contrast": "R32s",
+   "test": "band",
+   "lo": 2.262,
+   "hi": 5.124,
+   "what": "the E82-fitted model's R32s: 3.69 W within +-1.43 W"
+  },
+  {
+   "id": "P-X32",
+   "contrast": "X32",
+   "test": "band",
+   "lo": 0.225,
+   "hi": 2.74,
+   "what": "the E82-fitted model's X32: 1.48 W within +-1.26 W"
+  },
+  {
+   "id": "P-F16",
+   "contrast": "F16",
+   "test": "band",
+   "lo": 6.408,
+   "hi": 8.649,
+   "what": "the E82-fitted model's F16: 7.53 W within +-1.12 W"
+  },
+  {
+   "id": "P-W16",
+   "contrast": "W16",
+   "test": "band",
+   "lo": -0.695,
+   "hi": 1.705,
+   "what": "the E82-fitted model's W16: 0.50 W within +-1.20 W"
+  },
+  {
+   "id": "P-M16",
+   "contrast": "M16",
+   "test": "band",
+   "lo": 3.972,
+   "hi": 7.301,
+   "what": "the E82-fitted model's M16: 5.64 W within +-1.66 W"
+  },
+  {
+   "id": "P-R16",
+   "contrast": "R16",
+   "test": "band",
+   "lo": 5.563,
+   "hi": 9.156,
+   "what": "the E82-fitted model's R16: 7.36 W within +-1.80 W"
+  },
+  {
+   "id": "P-A16",
+   "contrast": "A16",
+   "test": "band",
+   "lo": -1.07,
+   "hi": 1.324,
+   "what": "the E82-fitted model's A16: 0.13 W within +-1.20 W"
+  },
+  {
+   "id": "P-R16abs",
+   "contrast": "R16abs",
+   "test": "band",
+   "lo": 5.432,
+   "hi": 9.031,
+   "what": "the E82-fitted model's R16abs: 7.23 W within +-1.80 W"
+  },
+  {
+   "id": "P-F8",
+   "contrast": "F8",
+   "test": "band",
+   "lo": 0.608,
+   "hi": 2.11,
+   "what": "the E82-fitted model's F8: 1.36 W within +-0.75 W"
+  },
+  {
+   "id": "P-W8",
+   "contrast": "W8",
+   "test": "band",
+   "lo": -0.642,
+   "hi": 0.99,
+   "what": "the E82-fitted model's W8: 0.17 W within +-0.82 W"
+  },
+  {
+   "id": "P-M8",
+   "contrast": "M8",
+   "test": "band",
+   "lo": 0.558,
+   "hi": 3.689,
+   "what": "the E82-fitted model's M8: 2.12 W within +-1.57 W"
+  },
+  {
+   "id": "P-R8",
+   "contrast": "R8",
+   "test": "band",
+   "lo": 1.456,
+   "hi": 4.675,
+   "what": "the E82-fitted model's R8: 3.07 W within +-1.61 W"
+  }
+ ],
+ "splits": {
+  "fp32": {
+   "total": "fp32.r_walk",
+   "parts": {
+    "i_clocked_lane": [
+     "fp32.c_abs",
+     "fp32.zeros"
+    ],
+    "iii_operand_multiplier": [
+     "fp32.r_abs",
+     "fp32.c_abs"
+    ],
+    "ii_result_path": [
+     "fp32.r_walk",
+     "fp32.r_abs"
+    ]
+   }
+  },
+  "fp16": {
+   "total": "fp16.r_walk",
+   "parts": {
+    "i_clocked_lane": [
+     "fp16.c_cancel",
+     "fp16.zeros"
+    ],
+    "iii_operand_multiplier": [
+     "fp16.r_cancel",
+     "fp16.c_cancel"
+    ],
+    "ii_result_path": [
+     "fp16.r_walk",
+     "fp16.r_cancel"
+    ]
+   }
+  },
+  "int8": {
+   "total": "int8.r_walk",
+   "parts": {
+    "i_clocked_lane": [
+     "int8.c_cancel",
+     "int8.zeros"
+    ],
+    "iii_operand_multiplier": [
+     "int8.r_cancel",
+     "int8.c_cancel"
+    ],
+    "ii_result_path": [
+     "int8.r_walk",
+     "int8.r_cancel"
+    ]
+   }
+  }
+ },
+ "primary": {
+  "reduction": "reduce_e88.py: reduce_e78.py unchanged, dips removed (E82 A2's definition), leakage slope auto (E78's primary)",
+  "arms": [
+   "dips kept",
+   "leak 0.545 (card 1's E44 idle slope)",
+   "leak 0.3803 (E71)",
+   "leak 0"
+  ],
+  "min_passes": 4
+ },
+ "budget": {
+  "card_minutes": 45,
+  "passes_max": 7,
+  "runs_per_pass": 36,
+  "smoke_runs": 6,
+  "queue_budget_min": 41,
+  "deadline": "22:15 PDT"
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa"
+  },
+  "e88_files_sha256": {
+   "tools/claims-v3/rpath/make_e88.py": "3a15762fd92c9a8fef83c4f2c187f0433985ce8ee456dd90dacd8af0265dc151",
+   "tools/claims-v3/rpath/e88.json": "59a7b0efbc2cc0d936dbf725c386eda2fdb88f64d9523925a21f9f0ee9e3ca42",
+   "tools/claims-v3/rpath/e88_common.py": "550eee7eee828299abbd9c2eb7b7a250532c410875faa331160b02c5bc32f853",
+   "tools/claims-v3/rpath/run_e88.py": "3333c92697081404d49f8cbe47360db0ec80735bd2a76fe328b4b5f8afce1ac2",
+   "tools/claims-v3/rpath/block_e88.sh": "9af800c075902d58357c912c6e30aad717e5764d553da1ccc60420d08362da8a",
+   "tools/claims-v3/rpath/queue_e88.sh": "401a0324df2f3ab09818f48dae6b06c5d337e5b7e8a0178426fe35589de1682e",
+   "tools/claims-v3/rpath/run_e88_a1.sh": "dade5d01ebda82a975a1ba840f46ebf520baa00330cfed0a051e29f559031d0d",
+   "tools/claims-v3/rpath/reduce_e88.py": "72fccf9cedc4d324e2b5074cd1e6459349dc97cd6a23c3f213f4267339e5bf51",
+   "tools/claims-v3/rpath/score_e88.py": "64ac49760bcdb4dfa2b47b666a9fbf67a530d942c51bebf8154d99837218e55c",
+   "tools/claims-v3/rpath/make_predictions_e88.py": "724a8b23e69c7a43addf060d7d445afc4a9edb8d9a73b277aa8bb77b2a26f1b4",
+   "tools/claims-v3/rpath/tiles/fp16/c_cancel.bin": "8cfdabfe79423bcbd047390f4bbc2cb7544fe887f5120c979fc7f4ccebe1e23c",
+   "tools/claims-v3/rpath/tiles/fp16/ones.bin": "c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8",
+   "tools/claims-v3/rpath/tiles/fp16/r_abs.bin": "96919111c47158496e99cf0bb67a51ec8623fa0e08f56cde0b349401f0dede41",
+   "tools/claims-v3/rpath/tiles/fp16/r_cancel.bin": "495e8635d4918116dd653adb5c4cd9017d2e9757a65d8309c781c87c7be42258",
+   "tools/claims-v3/rpath/tiles/fp16/r_walk.bin": "d4979d1f3b7324be409791fda39956c3d78e210b55af476c97ddf35022303fdd",
+   "tools/claims-v3/rpath/tiles/fp16/randn.bin": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974",
+   "tools/claims-v3/rpath/tiles/fp16/zeros.bin": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "tools/claims-v3/rpath/tiles/fp32/c_abs.bin": "3321477ba0c76532b4efd8d9ffc83a7b29928848cd04d0450a6c69f7c3d89672",
+   "tools/claims-v3/rpath/tiles/fp32/ones.bin": "fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1",
+   "tools/claims-v3/rpath/tiles/fp32/r_abs.bin": "c35268792c5200908cbeec7257058e28fc544943dfd7593600bf392e884b8cd7",
+   "tools/claims-v3/rpath/tiles/fp32/r_het.bin": "96209b3be5dd4498dd2275165da95d5af1ea8d962a797c84809fdc6af399adda",
+   "tools/claims-v3/rpath/tiles/fp32/r_walk.bin": "4b48dbafbe6fd0a9d5037f0fc33cb4279d133045690a58c48151c40b9629bd1e",
+   "tools/claims-v3/rpath/tiles/fp32/randn.bin": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa",
+   "tools/claims-v3/rpath/tiles/fp32/s_abs.bin": "79f5ac27db1f7f109e1ea6a3ba607f5a8024743d404aa2b4cb495c3320b57d4e",
+   "tools/claims-v3/rpath/tiles/fp32/s_walk.bin": "a4aa98612a755d9fd770fad5bf361ff5b54cc77925b98f77508ae89a470d3315",
+   "tools/claims-v3/rpath/tiles/fp32/zeros.bin": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "tools/claims-v3/rpath/tiles/int8/c_cancel.bin": "005d79c5496e5c5e4710298f0b7fc241be8d3aa0a5d5ecd22d431819e3ab58eb",
+   "tools/claims-v3/rpath/tiles/int8/full.bin": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9",
+   "tools/claims-v3/rpath/tiles/int8/ones.bin": "7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2",
+   "tools/claims-v3/rpath/tiles/int8/r_cancel.bin": "8fa23dfae80a61bf47b0df4975d65d900983b2edc3c04230de3909de5109dc82",
+   "tools/claims-v3/rpath/tiles/int8/r_walk.bin": "dc51b0492321075f0246526b8b3b1f682c0db2c023ebb1c6d40a6de0440fdb0d",
+   "tools/claims-v3/rpath/tiles/int8/zeros.bin": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  }
+ }
+}

@@ -1,0 +1,10353 @@
+{
+ "experiment": "E88",
+ "date": "2026-10-31",
+ "seed": 8800,
+ "generator": "tools/claims-v3/rpath/make_e88.py",
+ "items": {
+  "fp32.c_abs": {
+   "type": "fp32",
+   "kind": "c_abs",
+   "file": "tiles/fp32/c_abs.bin",
+   "bytes": 2048,
+   "sha256": "3321477ba0c76532b4efd8d9ffc83a7b29928848cd04d0450a6c69f7c3d89672",
+   "sha256_a": "884e5e691609aed052f70722a236479d8d819c2e44f2fe2a6ed097c89ccc3d30",
+   "sha256_b": "53dcfb0d7a3db29a4e832ed9798f1ab31858a005b9db32872633f1585c0789d8",
+   "source": "E88 (new)",
+   "rule": "A[:,0] = B[0,:] = 2^50 (a k = 0 product of 2^100), every other element 1.0: constant operands, a frozen accumulator (each 1.0 product is below half an ulp of (n+1) 2^100)"
+  },
+  "fp32.r_walk": {
+   "type": "fp32",
+   "kind": "r_walk",
+   "file": "tiles/fp32/r_walk.bin",
+   "bytes": 2048,
+   "sha256": "4b48dbafbe6fd0a9d5037f0fc33cb4279d133045690a58c48151c40b9629bd1e",
+   "sha256_a": "adb422e3449964cb2fdfa67d65008b776e7959be11c71d1b8c62a89b35361d9a",
+   "sha256_b": "72e671b87b91a77b004b0bdfc5eb5e6cab997ee4cf02e889304048cd88163db8",
+   "source": "E88 (new)",
+   "rule": "A[:,0] = B[0,:] = 1.0; A[:,1:], B[1:,:] = |N(0,1)| in fp32 (seed 8801): random positive operands, the accumulators walk and differ from each other"
+  },
+  "fp32.r_abs": {
+   "type": "fp32",
+   "kind": "r_abs",
+   "file": "tiles/fp32/r_abs.bin",
+   "bytes": 2048,
+   "sha256": "c35268792c5200908cbeec7257058e28fc544943dfd7593600bf392e884b8cd7",
+   "sha256_a": "39d4caf314aea0d7a8e432ad7ebc54217378cef2e9b4e259cff626da20587ea6",
+   "sha256_b": "6613169c5aabdd850504c021f910b73d6b09f283d804a1854df3f5158dce652b",
+   "source": "E88 (new)",
+   "rule": "r_walk's operands with r_walk's k = 0 slice replaced by 2^50 x 2^50: the same multiplier inputs on 15 of 16 k-groups, every later product absorbed, a frozen accumulator equal in every C element"
+  },
+  "fp32.r_het": {
+   "type": "fp32",
+   "kind": "r_het",
+   "file": "tiles/fp32/r_het.bin",
+   "bytes": 2048,
+   "sha256": "96209b3be5dd4498dd2275165da95d5af1ea8d962a797c84809fdc6af399adda",
+   "sha256_a": "39d4caf314aea0d7a8e432ad7ebc54217378cef2e9b4e259cff626da20587ea6",
+   "sha256_b": "dcc8e4f36f9cbc6adf64abb2a58d3aad324280ce7fab808080c8f6124bd1d739",
+   "source": "E88 (new)",
+   "rule": "r_abs with B[0, j] = 2^50 m_j, m_j in [1, 2) with 23 random bits (seed 8803): the accumulators frozen but different from each other, so the C read and the result bus swing between the two C elements a lane alternates between"
+  },
+  "fp32.s_walk": {
+   "type": "fp32",
+   "kind": "s_walk",
+   "file": "tiles/fp32/s_walk.bin",
+   "bytes": 2048,
+   "sha256": "a4aa98612a755d9fd770fad5bf361ff5b54cc77925b98f77508ae89a470d3315",
+   "sha256_a": "29fa6b4967034a179fd34a40a6ec905d966c20a9fee9070c8b203867ad31d361",
+   "sha256_b": "0dbeeb1195798996e5202ee30b8ec18dc9b72ac4ff4f4fc0103c8bf33143e875",
+   "source": "E88 (new)",
+   "rule": "A[:,0] = B[0,:] = 1.0; A[:,1:], B[1:,:] = +-1.0, random signs (seed 8802): only sign bits move, the accumulators walk by +-1"
+  },
+  "fp32.s_abs": {
+   "type": "fp32",
+   "kind": "s_abs",
+   "file": "tiles/fp32/s_abs.bin",
+   "bytes": 2048,
+   "sha256": "79f5ac27db1f7f109e1ea6a3ba607f5a8024743d404aa2b4cb495c3320b57d4e",
+   "sha256_a": "6acdb02833f9d4d6484de37398a64498db0c46b813047f59dca193c64c79d9da",
+   "sha256_b": "9193bc5ad3cbe12bf01fa25688edd9625207eef9e0affb2d2adf407eccf464dc",
+   "source": "E88 (new)",
+   "rule": "s_walk's signs with the k = 0 slice 2^50 x 2^50: sign bits move, every +-1 product absorbed"
+  },
+  "fp16.c_cancel": {
+   "type": "fp16",
+   "kind": "c_cancel",
+   "file": "tiles/fp16/c_cancel.bin",
+   "bytes": 2048,
+   "sha256": "8cfdabfe79423bcbd047390f4bbc2cb7544fe887f5120c979fc7f4ccebe1e23c",
+   "sha256_a": "aacc3a5507f223eaa76dcf389a19fbdd997ba700a8e6750973380d82a6cfe84c",
+   "sha256_b": "185c4e5049d698654b44b2dd55e925267706ba228b8461ec688869becd49cc05",
+   "source": "E88 (new)",
+   "rule": "A words (1, 1), B words (1, -1): each micro-op adds 1 - 1 = 0, constant operands, C frozen at +0"
+  },
+  "fp16.r_walk": {
+   "type": "fp16",
+   "kind": "r_walk",
+   "file": "tiles/fp16/r_walk.bin",
+   "bytes": 2048,
+   "sha256": "d4979d1f3b7324be409791fda39956c3d78e210b55af476c97ddf35022303fdd",
+   "sha256_a": "bb6d625300818ff4c103b06183faff9a008bb9bf6b13e8adc144652bb4411ff5",
+   "sha256_b": "3dd442c750a925d9bdf807a1d6273f76cba001755c8112453365180a9d6b17fc",
+   "source": "E88 (new)",
+   "rule": "A words (x, x), x = |N(0,1)| fp16; B words (u, -u'), u and u' independent |N(0,1)| (seed 8811); k-group 0 = c_cancel's (1, 1) x (1, -1): the accumulators walk"
+  },
+  "fp16.r_cancel": {
+   "type": "fp16",
+   "kind": "r_cancel",
+   "file": "tiles/fp16/r_cancel.bin",
+   "bytes": 2048,
+   "sha256": "495e8635d4918116dd653adb5c4cd9017d2e9757a65d8309c781c87c7be42258",
+   "sha256_a": "bb6d625300818ff4c103b06183faff9a008bb9bf6b13e8adc144652bb4411ff5",
+   "sha256_b": "e3f254a2f8047969ca8b7f91f6bfde29ad23a7f41acf4403dae8367b673f640e",
+   "source": "E88 (new)",
+   "rule": "r_walk's A and u with B words (u, -u): x u - x u = 0 in every micro-op, C frozen at +0"
+  },
+  "fp16.r_abs": {
+   "type": "fp16",
+   "kind": "r_abs",
+   "file": "tiles/fp16/r_abs.bin",
+   "bytes": 2048,
+   "sha256": "96919111c47158496e99cf0bb67a51ec8623fa0e08f56cde0b349401f0dede41",
+   "sha256_a": "ab69e766b0ed43f28362aa9d279cc26e48a252344db16284e21bfae6df6bfff2",
+   "sha256_b": "84c47c27c5e3307fa606ed8b1aae310d47c40573e156e0728f3920c9a0b9662c",
+   "source": "E88 (new)",
+   "rule": "r_walk's operands with k-group 0 = (2^15, 2^15) x (2^15, 2^15): 2^31 per op, every later dot product absorbed (|x (u - u')| < 2^5 < 2^7 = half an ulp)"
+  },
+  "int8.c_cancel": {
+   "type": "int8",
+   "kind": "c_cancel",
+   "file": "tiles/int8/c_cancel.bin",
+   "bytes": 2048,
+   "sha256": "005d79c5496e5c5e4710298f0b7fc241be8d3aa0a5d5ecd22d431819e3ab58eb",
+   "sha256_a": "5a648d8015900d89664e00e125df179636301a2d8fa191c1aa2bd9358ea53a69",
+   "sha256_b": "292649ad9eb27c9d7d234e763b468bed64bf8b4cce681a59e4d9dc037aa88988",
+   "source": "E88 (new)",
+   "rule": "A bytes 1, B bytes (1, -1, 1, -1) in every word: each micro-op adds 0, C frozen at 0"
+  },
+  "int8.r_walk": {
+   "type": "int8",
+   "kind": "r_walk",
+   "file": "tiles/int8/r_walk.bin",
+   "bytes": 2048,
+   "sha256": "dc51b0492321075f0246526b8b3b1f682c0db2c023ebb1c6d40a6de0440fdb0d",
+   "sha256_a": "1598ecac8c3a2ea3c99c951bb2534177f0c2257495dcf35bb9deb2f595b2110a",
+   "sha256_b": "d905ef9974b1f19309effe555b8f1a4e37c15daeb142b53a6c01329eb0b95baa",
+   "source": "E88 (new)",
+   "rule": "A words (x, x, y, y), x, y uniform in [-128, 127]; B words (u, -u', v, -v'), u, u', v, v' uniform in [-127, 127], all independent (seed 8821): the int32 accumulators walk"
+  },
+  "int8.r_cancel": {
+   "type": "int8",
+   "kind": "r_cancel",
+   "file": "tiles/int8/r_cancel.bin",
+   "bytes": 2048,
+   "sha256": "8fa23dfae80a61bf47b0df4975d65d900983b2edc3c04230de3909de5109dc82",
+   "sha256_a": "1598ecac8c3a2ea3c99c951bb2534177f0c2257495dcf35bb9deb2f595b2110a",
+   "sha256_b": "a2a6924cde727c049e026709dbd0f712e8ef86c6fdbacd661844240761a002d6",
+   "source": "E88 (new)",
+   "rule": "r_walk's A, u and v with B words (u, -u, v, -v): x u - x u + y v - y v = 0, C frozen at 0"
+  },
+  "fp32.zeros": {
+   "type": "fp32",
+   "kind": "zeros",
+   "file": "tiles/fp32/zeros.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "sha256_a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "sha256_b": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "source": "kinds.json tiles/fp32/zeros.bin",
+   "rule": "every element +0.0 (0x00000000): every lane gated on an accumulate pass"
+  },
+  "fp32.randn": {
+   "type": "fp32",
+   "kind": "randn",
+   "file": "tiles/fp32/randn.bin",
+   "bytes": 2048,
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa",
+   "sha256_a": "11ce14be9310c675be0eaf1b5e4235d7a9e99423ce855b6c7bca055cf7355abc",
+   "sha256_b": "9851fe6cf28fbe4491269f6d25eee093d531c26442b6e536892dd015a4f90994",
+   "source": "kinds.json tiles/fp32/randn.bin",
+   "rule": "standard normal, sigma 1"
+  },
+  "fp32.ones": {
+   "type": "fp32",
+   "kind": "ones",
+   "file": "tiles/fp32/ones.bin",
+   "bytes": 2048,
+   "sha256": "fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "source": "kinds.json tiles/fp32/ones.bin",
+   "rule": "every element 1.0 (0x3F800000)"
+  },
+  "fp16.zeros": {
+   "type": "fp16",
+   "kind": "zeros",
+   "file": "tiles/fp16/zeros.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "sha256_a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "sha256_b": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "source": "kinds.json tiles/fp16/zeros.bin",
+   "rule": "every element +0.0 (0x0000): every lane gated"
+  },
+  "fp16.randn": {
+   "type": "fp16",
+   "kind": "randn",
+   "file": "tiles/fp16/randn.bin",
+   "bytes": 2048,
+   "sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974",
+   "sha256_a": "d8659464e2ec2603f15d1ba55cd0002d8473fccd28b90dcdb40be77624dfe9c6",
+   "sha256_b": "9656c6d96211560bb89cb56e71945508c68c30e2a54cf872866fd88c9003c787",
+   "source": "kinds.json tiles/fp16/randn.bin",
+   "rule": "standard normal, sigma 1, rounded to fp16"
+  },
+  "fp16.ones": {
+   "type": "fp16",
+   "kind": "ones",
+   "file": "tiles/fp16/ones.bin",
+   "bytes": 2048,
+   "sha256": "c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8",
+   "sha256_a": "aacc3a5507f223eaa76dcf389a19fbdd997ba700a8e6750973380d82a6cfe84c",
+   "sha256_b": "aacc3a5507f223eaa76dcf389a19fbdd997ba700a8e6750973380d82a6cfe84c",
+   "source": "kinds.json tiles/fp16/ones.bin",
+   "rule": "every element 1.0 (0x3C00)"
+  },
+  "int8.zeros": {
+   "type": "int8",
+   "kind": "zeros",
+   "file": "tiles/int8/zeros.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "sha256_a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "sha256_b": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "source": "kinds.json tiles/int8/zeros.bin",
+   "rule": "every byte 0x00: every lane gated"
+  },
+  "int8.full": {
+   "type": "int8",
+   "kind": "full",
+   "file": "tiles/int8/full.bin",
+   "bytes": 2048,
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9",
+   "sha256_a": "ca9b3a28e84eb1147f024b26a30c71bbbf5afc262b8377ac0338eedf1c5d208b",
+   "sha256_b": "2cfbe5b8714ea56cf09294f9a56961bb5bbaac4459344eaf14459130f13c5e87",
+   "source": "kinds.json tiles/int8/full.bin",
+   "rule": "uniform over -128..127, the whole two's-complement range (E64's int8 `randn`)"
+  },
+  "int8.ones": {
+   "type": "int8",
+   "kind": "ones",
+   "file": "tiles/int8/ones.bin",
+   "bytes": 2048,
+   "sha256": "7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2",
+   "sha256_a": "5a648d8015900d89664e00e125df179636301a2d8fa191c1aa2bd9358ea53a69",
+   "sha256_b": "5a648d8015900d89664e00e125df179636301a2d8fa191c1aa2bd9358ea53a69",
+   "source": "kinds.json tiles/int8/ones.bin",
+   "rule": "every byte +1 (0x01), word 0x01010101"
+  }
+ },
+ "model": {
+  "fp32.zeros": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 0.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 49968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 116593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 149906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 183218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 216531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 249843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 283156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 316468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 349781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 383093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 416406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 449718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 483031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 516343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 0,
+   "kinds_json_gated_lane_frac": 1.0
+  },
+  "fp32.ones": {
+   "cbus": 256.0,
+   "rbus": 255.0,
+   "store": 8160.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 8671.0,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 280.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 49968,
+     "cbus": 280.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83281,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 116593,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 149906,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 183218,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 216531,
+     "cbus": 248.0,
+     "rbus": 264.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 249843,
+     "cbus": 248.0,
+     "rbus": 264.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 283156,
+     "cbus": 264.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 316468,
+     "cbus": 264.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 349781,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 383093,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 416406,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 449718,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 483031,
+     "cbus": 248.0,
+     "rbus": 272.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 516343,
+     "cbus": 248.0,
+     "rbus": 272.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 0,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.neg_ones": {
+   "cbus": 256.0,
+   "rbus": 255.0,
+   "store": 8160.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 8671.0,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 280.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 49968,
+     "cbus": 280.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83281,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 116593,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 149906,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 183218,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 216531,
+     "cbus": 248.0,
+     "rbus": 264.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 249843,
+     "cbus": 248.0,
+     "rbus": 264.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 283156,
+     "cbus": 264.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 316468,
+     "cbus": 264.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 349781,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 383093,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 416406,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 449718,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 483031,
+     "cbus": 248.0,
+     "rbus": 272.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 516343,
+     "cbus": 248.0,
+     "rbus": 272.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 0,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.pi": {
+   "cbus": 340.0,
+   "rbus": 338.5,
+   "store": 10832.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 11510.5,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 640.0,
+     "rbus": 624.0,
+     "store": 19968.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 49968,
+     "cbus": 448.0,
+     "rbus": 440.0,
+     "store": 14080.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83281,
+     "cbus": 472.0,
+     "rbus": 472.0,
+     "store": 15104.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 116593,
+     "cbus": 456.0,
+     "rbus": 456.0,
+     "store": 14592.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 149906,
+     "cbus": 448.0,
+     "rbus": 448.0,
+     "store": 14336.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 183218,
+     "cbus": 432.0,
+     "rbus": 432.0,
+     "store": 13824.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 216531,
+     "cbus": 248.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 249843,
+     "cbus": 272.0,
+     "rbus": 272.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 283156,
+     "cbus": 256.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 316468,
+     "cbus": 248.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 349781,
+     "cbus": 248.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 383093,
+     "cbus": 256.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 416406,
+     "cbus": 248.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 449718,
+     "cbus": 256.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 483031,
+     "cbus": 264.0,
+     "rbus": 264.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 516343,
+     "cbus": 248.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 0,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.randn": {
+   "cbus": 56004.12,
+   "rbus": 55992.5,
+   "store": 12824.81,
+   "prod": 104690.0,
+   "dsum": 104690.0,
+   "res_bits_per_op": 124821.44,
+   "chg_rate": 0.895721,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 54645.0,
+     "rbus": 54633.0,
+     "store": 20202.0,
+     "chg": 4051.0
+    },
+    {
+     "n": 49968,
+     "cbus": 60337.0,
+     "rbus": 60293.0,
+     "store": 16954.0,
+     "chg": 3982.0
+    },
+    {
+     "n": 83281,
+     "cbus": 58685.0,
+     "rbus": 58630.0,
+     "store": 15481.0,
+     "chg": 3912.0
+    },
+    {
+     "n": 116593,
+     "cbus": 56389.0,
+     "rbus": 56405.0,
+     "store": 14410.0,
+     "chg": 3843.0
+    },
+    {
+     "n": 149906,
+     "cbus": 55978.0,
+     "rbus": 55963.0,
+     "store": 13560.0,
+     "chg": 3795.0
+    },
+    {
+     "n": 183218,
+     "cbus": 56384.0,
+     "rbus": 56410.0,
+     "store": 13019.0,
+     "chg": 3755.0
+    },
+    {
+     "n": 216531,
+     "cbus": 55366.0,
+     "rbus": 55339.0,
+     "store": 12453.0,
+     "chg": 3691.0
+    },
+    {
+     "n": 249843,
+     "cbus": 55046.0,
+     "rbus": 54976.0,
+     "store": 12129.0,
+     "chg": 3647.0
+    },
+    {
+     "n": 283156,
+     "cbus": 55894.0,
+     "rbus": 55875.0,
+     "store": 11746.0,
+     "chg": 3616.0
+    },
+    {
+     "n": 316468,
+     "cbus": 54992.0,
+     "rbus": 54925.0,
+     "store": 11654.0,
+     "chg": 3594.0
+    },
+    {
+     "n": 349781,
+     "cbus": 54338.0,
+     "rbus": 54391.0,
+     "store": 11181.0,
+     "chg": 3555.0
+    },
+    {
+     "n": 383093,
+     "cbus": 54908.0,
+     "rbus": 54932.0,
+     "store": 10806.0,
+     "chg": 3520.0
+    },
+    {
+     "n": 416406,
+     "cbus": 55950.0,
+     "rbus": 55973.0,
+     "store": 10982.0,
+     "chg": 3491.0
+    },
+    {
+     "n": 449718,
+     "cbus": 55346.0,
+     "rbus": 55311.0,
+     "store": 10394.0,
+     "chg": 3448.0
+    },
+    {
+     "n": 483031,
+     "cbus": 56280.0,
+     "rbus": 56286.0,
+     "store": 10227.0,
+     "chg": 3411.0
+    },
+    {
+     "n": 516343,
+     "cbus": 55528.0,
+     "rbus": 55538.0,
+     "store": 9999.0,
+     "chg": 3391.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 82214,
+   "dA_sum": 3524,
+   "dB_sum": 54022,
+   "kinds_json_bus_bits_per_op": 82214,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.randn_small": {
+   "cbus": 58225.31,
+   "rbus": 58212.31,
+   "store": 14044.56,
+   "prod": 102460.0,
+   "dsum": 102460.0,
+   "res_bits_per_op": 130482.19,
+   "chg_rate": 0.927414,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 54715.0,
+     "rbus": 54735.0,
+     "store": 21288.0,
+     "chg": 4064.0
+    },
+    {
+     "n": 49968,
+     "cbus": 55169.0,
+     "rbus": 55139.0,
+     "store": 18015.0,
+     "chg": 4003.0
+    },
+    {
+     "n": 83281,
+     "cbus": 54981.0,
+     "rbus": 55000.0,
+     "store": 16588.0,
+     "chg": 3958.0
+    },
+    {
+     "n": 116593,
+     "cbus": 54990.0,
+     "rbus": 54978.0,
+     "store": 15676.0,
+     "chg": 3921.0
+    },
+    {
+     "n": 149906,
+     "cbus": 54779.0,
+     "rbus": 54770.0,
+     "store": 14857.0,
+     "chg": 3895.0
+    },
+    {
+     "n": 183218,
+     "cbus": 54739.0,
+     "rbus": 54727.0,
+     "store": 14435.0,
+     "chg": 3872.0
+    },
+    {
+     "n": 216531,
+     "cbus": 56224.0,
+     "rbus": 56223.0,
+     "store": 13796.0,
+     "chg": 3834.0
+    },
+    {
+     "n": 249843,
+     "cbus": 57106.0,
+     "rbus": 57057.0,
+     "store": 13474.0,
+     "chg": 3802.0
+    },
+    {
+     "n": 283156,
+     "cbus": 58419.0,
+     "rbus": 58445.0,
+     "store": 12940.0,
+     "chg": 3772.0
+    },
+    {
+     "n": 316468,
+     "cbus": 59109.0,
+     "rbus": 59031.0,
+     "store": 12747.0,
+     "chg": 3748.0
+    },
+    {
+     "n": 349781,
+     "cbus": 59078.0,
+     "rbus": 59093.0,
+     "store": 12544.0,
+     "chg": 3720.0
+    },
+    {
+     "n": 383093,
+     "cbus": 61017.0,
+     "rbus": 61046.0,
+     "store": 12131.0,
+     "chg": 3691.0
+    },
+    {
+     "n": 416406,
+     "cbus": 61685.0,
+     "rbus": 61680.0,
+     "store": 11720.0,
+     "chg": 3663.0
+    },
+    {
+     "n": 449718,
+     "cbus": 62438.0,
+     "rbus": 62383.0,
+     "store": 11738.0,
+     "chg": 3639.0
+    },
+    {
+     "n": 483031,
+     "cbus": 63818.0,
+     "rbus": 63747.0,
+     "store": 11311.0,
+     "chg": 3605.0
+    },
+    {
+     "n": 516343,
+     "cbus": 63338.0,
+     "rbus": 63343.0,
+     "store": 11453.0,
+     "chg": 3592.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 82244,
+   "dA_sum": 3434,
+   "dB_sum": 54772,
+   "kinds_json_bus_bits_per_op": 82244,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.randn_large": {
+   "cbus": 54943.44,
+   "rbus": 54940.38,
+   "store": 13719.75,
+   "prod": 104008.0,
+   "dsum": 104008.0,
+   "res_bits_per_op": 123603.56,
+   "chg_rate": 0.927872,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 55262.0,
+     "rbus": 55226.0,
+     "store": 21146.0,
+     "chg": 4078.0
+    },
+    {
+     "n": 49968,
+     "cbus": 54608.0,
+     "rbus": 54634.0,
+     "store": 18081.0,
+     "chg": 4031.0
+    },
+    {
+     "n": 83281,
+     "cbus": 54786.0,
+     "rbus": 54847.0,
+     "store": 16658.0,
+     "chg": 3983.0
+    },
+    {
+     "n": 116593,
+     "cbus": 54694.0,
+     "rbus": 54691.0,
+     "store": 15286.0,
+     "chg": 3941.0
+    },
+    {
+     "n": 149906,
+     "cbus": 53764.0,
+     "rbus": 53735.0,
+     "store": 14690.0,
+     "chg": 3903.0
+    },
+    {
+     "n": 183218,
+     "cbus": 54307.0,
+     "rbus": 54274.0,
+     "store": 14056.0,
+     "chg": 3871.0
+    },
+    {
+     "n": 216531,
+     "cbus": 55125.0,
+     "rbus": 55119.0,
+     "store": 13362.0,
+     "chg": 3827.0
+    },
+    {
+     "n": 249843,
+     "cbus": 53913.0,
+     "rbus": 53975.0,
+     "store": 12961.0,
+     "chg": 3787.0
+    },
+    {
+     "n": 283156,
+     "cbus": 54305.0,
+     "rbus": 54351.0,
+     "store": 12543.0,
+     "chg": 3768.0
+    },
+    {
+     "n": 316468,
+     "cbus": 54640.0,
+     "rbus": 54638.0,
+     "store": 12416.0,
+     "chg": 3734.0
+    },
+    {
+     "n": 349781,
+     "cbus": 55320.0,
+     "rbus": 55337.0,
+     "store": 12116.0,
+     "chg": 3715.0
+    },
+    {
+     "n": 383093,
+     "cbus": 55188.0,
+     "rbus": 55151.0,
+     "store": 11654.0,
+     "chg": 3687.0
+    },
+    {
+     "n": 416406,
+     "cbus": 54839.0,
+     "rbus": 54755.0,
+     "store": 11387.0,
+     "chg": 3658.0
+    },
+    {
+     "n": 449718,
+     "cbus": 55602.0,
+     "rbus": 55558.0,
+     "store": 11428.0,
+     "chg": 3635.0
+    },
+    {
+     "n": 483031,
+     "cbus": 56339.0,
+     "rbus": 56365.0,
+     "store": 10973.0,
+     "chg": 3612.0
+    },
+    {
+     "n": 516343,
+     "cbus": 56403.0,
+     "rbus": 56390.0,
+     "store": 10759.0,
+     "chg": 3579.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 84896,
+   "dA_sum": 3566,
+   "dB_sum": 56368,
+   "kinds_json_bus_bits_per_op": 84896,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.uniform01": {
+   "cbus": 48381.88,
+   "rbus": 48380.69,
+   "store": 9131.56,
+   "prod": 99844.0,
+   "dsum": 99844.0,
+   "res_bits_per_op": 105894.12,
+   "chg_rate": 0.816025,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 48639.0,
+     "rbus": 48681.0,
+     "store": 16372.0,
+     "chg": 4020.0
+    },
+    {
+     "n": 49968,
+     "cbus": 48580.0,
+     "rbus": 48531.0,
+     "store": 13325.0,
+     "chg": 3905.0
+    },
+    {
+     "n": 83281,
+     "cbus": 46761.0,
+     "rbus": 46741.0,
+     "store": 11517.0,
+     "chg": 3747.0
+    },
+    {
+     "n": 116593,
+     "cbus": 50009.0,
+     "rbus": 50000.0,
+     "store": 10860.0,
+     "chg": 3683.0
+    },
+    {
+     "n": 149906,
+     "cbus": 47659.0,
+     "rbus": 47677.0,
+     "store": 9741.0,
+     "chg": 3528.0
+    },
+    {
+     "n": 183218,
+     "cbus": 46404.0,
+     "rbus": 46416.0,
+     "store": 9455.0,
+     "chg": 3489.0
+    },
+    {
+     "n": 216531,
+     "cbus": 46945.0,
+     "rbus": 46923.0,
+     "store": 9062.0,
+     "chg": 3426.0
+    },
+    {
+     "n": 249843,
+     "cbus": 48481.0,
+     "rbus": 48473.0,
+     "store": 8457.0,
+     "chg": 3330.0
+    },
+    {
+     "n": 283156,
+     "cbus": 47727.0,
+     "rbus": 47740.0,
+     "store": 7967.0,
+     "chg": 3224.0
+    },
+    {
+     "n": 316468,
+     "cbus": 46916.0,
+     "rbus": 46868.0,
+     "store": 7538.0,
+     "chg": 3139.0
+    },
+    {
+     "n": 349781,
+     "cbus": 46911.0,
+     "rbus": 46970.0,
+     "store": 7419.0,
+     "chg": 3100.0
+    },
+    {
+     "n": 383093,
+     "cbus": 46846.0,
+     "rbus": 46794.0,
+     "store": 7300.0,
+     "chg": 3087.0
+    },
+    {
+     "n": 416406,
+     "cbus": 49313.0,
+     "rbus": 49353.0,
+     "store": 7211.0,
+     "chg": 3053.0
+    },
+    {
+     "n": 449718,
+     "cbus": 49875.0,
+     "rbus": 49850.0,
+     "store": 6909.0,
+     "chg": 2992.0
+    },
+    {
+     "n": 483031,
+     "cbus": 52173.0,
+     "rbus": 52158.0,
+     "store": 6652.0,
+     "chg": 2924.0
+    },
+    {
+     "n": 516343,
+     "cbus": 50871.0,
+     "rbus": 50916.0,
+     "store": 6320.0,
+     "chg": 2832.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 77842,
+   "dA_sum": 3240,
+   "dB_sum": 51922,
+   "kinds_json_bus_bits_per_op": 77842,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.sparse50": {
+   "cbus": 12895.38,
+   "rbus": 12882.75,
+   "store": 3520.5,
+   "prod": 23196.0,
+   "dsum": 23196.0,
+   "res_bits_per_op": 29298.62,
+   "chg_rate": 0.213409,
+   "live_frac": 0.22583,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 12210.0,
+     "rbus": 12239.0,
+     "store": 5196.0,
+     "chg": 917.0
+    },
+    {
+     "n": 49968,
+     "cbus": 12675.0,
+     "rbus": 12754.0,
+     "store": 4434.0,
+     "chg": 905.0
+    },
+    {
+     "n": 83281,
+     "cbus": 13098.0,
+     "rbus": 13057.0,
+     "store": 4100.0,
+     "chg": 902.0
+    },
+    {
+     "n": 116593,
+     "cbus": 13137.0,
+     "rbus": 13079.0,
+     "store": 3843.0,
+     "chg": 896.0
+    },
+    {
+     "n": 149906,
+     "cbus": 13240.0,
+     "rbus": 13264.0,
+     "store": 3626.0,
+     "chg": 891.0
+    },
+    {
+     "n": 183218,
+     "cbus": 13253.0,
+     "rbus": 13104.0,
+     "store": 3681.0,
+     "chg": 888.0
+    },
+    {
+     "n": 216531,
+     "cbus": 13103.0,
+     "rbus": 13071.0,
+     "store": 3471.0,
+     "chg": 885.0
+    },
+    {
+     "n": 249843,
+     "cbus": 13107.0,
+     "rbus": 13089.0,
+     "store": 3340.0,
+     "chg": 878.0
+    },
+    {
+     "n": 283156,
+     "cbus": 12869.0,
+     "rbus": 12945.0,
+     "store": 3330.0,
+     "chg": 866.0
+    },
+    {
+     "n": 316468,
+     "cbus": 12975.0,
+     "rbus": 12945.0,
+     "store": 3241.0,
+     "chg": 862.0
+    },
+    {
+     "n": 349781,
+     "cbus": 13000.0,
+     "rbus": 13001.0,
+     "store": 3237.0,
+     "chg": 859.0
+    },
+    {
+     "n": 383093,
+     "cbus": 12772.0,
+     "rbus": 12716.0,
+     "store": 3044.0,
+     "chg": 857.0
+    },
+    {
+     "n": 416406,
+     "cbus": 12835.0,
+     "rbus": 12812.0,
+     "store": 3100.0,
+     "chg": 851.0
+    },
+    {
+     "n": 449718,
+     "cbus": 12785.0,
+     "rbus": 12756.0,
+     "store": 2946.0,
+     "chg": 847.0
+    },
+    {
+     "n": 483031,
+     "cbus": 12716.0,
+     "rbus": 12715.0,
+     "store": 2940.0,
+     "chg": 844.0
+    },
+    {
+     "n": 516343,
+     "cbus": 12551.0,
+     "rbus": 12577.0,
+     "store": 2799.0,
+     "chg": 838.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 74550,
+   "dA_sum": 3246,
+   "dB_sum": 48582,
+   "kinds_json_bus_bits_per_op": 74550,
+   "kinds_json_gated_lane_frac": 0.77417
+  },
+  "fp32.sparse90": {
+   "cbus": 489.0,
+   "rbus": 486.69,
+   "store": 161.0,
+   "prod": 908.0,
+   "dsum": 908.0,
+   "res_bits_per_op": 1136.69,
+   "chg_rate": 0.008301,
+   "live_frac": 0.008301,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 504.0,
+     "rbus": 492.0,
+     "store": 225.0,
+     "chg": 34.0
+    },
+    {
+     "n": 49968,
+     "cbus": 464.0,
+     "rbus": 459.0,
+     "store": 205.0,
+     "chg": 34.0
+    },
+    {
+     "n": 83281,
+     "cbus": 464.0,
+     "rbus": 478.0,
+     "store": 175.0,
+     "chg": 34.0
+    },
+    {
+     "n": 116593,
+     "cbus": 497.0,
+     "rbus": 481.0,
+     "store": 178.0,
+     "chg": 34.0
+    },
+    {
+     "n": 149906,
+     "cbus": 507.0,
+     "rbus": 502.0,
+     "store": 161.0,
+     "chg": 34.0
+    },
+    {
+     "n": 183218,
+     "cbus": 496.0,
+     "rbus": 505.0,
+     "store": 167.0,
+     "chg": 34.0
+    },
+    {
+     "n": 216531,
+     "cbus": 505.0,
+     "rbus": 496.0,
+     "store": 139.0,
+     "chg": 34.0
+    },
+    {
+     "n": 249843,
+     "cbus": 498.0,
+     "rbus": 491.0,
+     "store": 146.0,
+     "chg": 34.0
+    },
+    {
+     "n": 283156,
+     "cbus": 521.0,
+     "rbus": 517.0,
+     "store": 161.0,
+     "chg": 34.0
+    },
+    {
+     "n": 316468,
+     "cbus": 505.0,
+     "rbus": 500.0,
+     "store": 139.0,
+     "chg": 34.0
+    },
+    {
+     "n": 349781,
+     "cbus": 475.0,
+     "rbus": 478.0,
+     "store": 158.0,
+     "chg": 34.0
+    },
+    {
+     "n": 383093,
+     "cbus": 456.0,
+     "rbus": 455.0,
+     "store": 142.0,
+     "chg": 34.0
+    },
+    {
+     "n": 416406,
+     "cbus": 483.0,
+     "rbus": 488.0,
+     "store": 147.0,
+     "chg": 34.0
+    },
+    {
+     "n": 449718,
+     "cbus": 452.0,
+     "rbus": 461.0,
+     "store": 141.0,
+     "chg": 34.0
+    },
+    {
+     "n": 483031,
+     "cbus": 504.0,
+     "rbus": 497.0,
+     "store": 156.0,
+     "chg": 34.0
+    },
+    {
+     "n": 516343,
+     "cbus": 493.0,
+     "rbus": 487.0,
+     "store": 136.0,
+     "chg": 34.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 17780,
+   "dA_sum": 618,
+   "dB_sum": 12836,
+   "kinds_json_bus_bits_per_op": 17780,
+   "kinds_json_gated_lane_frac": 0.991699
+  },
+  "fp32.smallint": {
+   "cbus": 47975.94,
+   "rbus": 48038.5,
+   "store": 11147.0,
+   "prod": 12294.0,
+   "dsum": 12294.0,
+   "res_bits_per_op": 107161.44,
+   "chg_rate": 0.875565,
+   "live_frac": 0.882324,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 43385.0,
+     "rbus": 43872.0,
+     "store": 11872.0,
+     "chg": 3614.0
+    },
+    {
+     "n": 49968,
+     "cbus": 45564.0,
+     "rbus": 46078.0,
+     "store": 11802.0,
+     "chg": 3614.0
+    },
+    {
+     "n": 83281,
+     "cbus": 47541.0,
+     "rbus": 47436.0,
+     "store": 11881.0,
+     "chg": 3614.0
+    },
+    {
+     "n": 116593,
+     "cbus": 47417.0,
+     "rbus": 47396.0,
+     "store": 11906.0,
+     "chg": 3614.0
+    },
+    {
+     "n": 149906,
+     "cbus": 47418.0,
+     "rbus": 47531.0,
+     "store": 11653.0,
+     "chg": 3609.0
+    },
+    {
+     "n": 183218,
+     "cbus": 46811.0,
+     "rbus": 46908.0,
+     "store": 11625.0,
+     "chg": 3608.0
+    },
+    {
+     "n": 216531,
+     "cbus": 48023.0,
+     "rbus": 47950.0,
+     "store": 11458.0,
+     "chg": 3604.0
+    },
+    {
+     "n": 249843,
+     "cbus": 46527.0,
+     "rbus": 46462.0,
+     "store": 11401.0,
+     "chg": 3597.0
+    },
+    {
+     "n": 283156,
+     "cbus": 50062.0,
+     "rbus": 50137.0,
+     "store": 11016.0,
+     "chg": 3596.0
+    },
+    {
+     "n": 316468,
+     "cbus": 48178.0,
+     "rbus": 48178.0,
+     "store": 10978.0,
+     "chg": 3584.0
+    },
+    {
+     "n": 349781,
+     "cbus": 49114.0,
+     "rbus": 49072.0,
+     "store": 10753.0,
+     "chg": 3579.0
+    },
+    {
+     "n": 383093,
+     "cbus": 49405.0,
+     "rbus": 49436.0,
+     "store": 10531.0,
+     "chg": 3573.0
+    },
+    {
+     "n": 416406,
+     "cbus": 49333.0,
+     "rbus": 49412.0,
+     "store": 10610.0,
+     "chg": 3562.0
+    },
+    {
+     "n": 449718,
+     "cbus": 49745.0,
+     "rbus": 49843.0,
+     "store": 10286.0,
+     "chg": 3546.0
+    },
+    {
+     "n": 483031,
+     "cbus": 49840.0,
+     "rbus": 49716.0,
+     "store": 10473.0,
+     "chg": 3542.0
+    },
+    {
+     "n": 516343,
+     "cbus": 49252.0,
+     "rbus": 49189.0,
+     "store": 10107.0,
+     "chg": 3525.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 19806,
+   "dA_sum": 912,
+   "dB_sum": 12510,
+   "kinds_json_bus_bits_per_op": 19806,
+   "kinds_json_gated_lane_frac": 0.117676
+  },
+  "fp32.pow2": {
+   "cbus": 55442.88,
+   "rbus": 55446.88,
+   "store": 2075.12,
+   "prod": 20696.0,
+   "dsum": 20696.0,
+   "res_bits_per_op": 112964.88,
+   "chg_rate": 0.254776,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 54781.0,
+     "rbus": 54741.0,
+     "store": 3389.0,
+     "chg": 1705.0
+    },
+    {
+     "n": 49968,
+     "cbus": 53341.0,
+     "rbus": 53385.0,
+     "store": 2879.0,
+     "chg": 1416.0
+    },
+    {
+     "n": 83281,
+     "cbus": 54587.0,
+     "rbus": 54528.0,
+     "store": 2505.0,
+     "chg": 1256.0
+    },
+    {
+     "n": 116593,
+     "cbus": 54145.0,
+     "rbus": 54127.0,
+     "store": 2387.0,
+     "chg": 1176.0
+    },
+    {
+     "n": 149906,
+     "cbus": 53331.0,
+     "rbus": 53328.0,
+     "store": 2141.0,
+     "chg": 1096.0
+    },
+    {
+     "n": 183218,
+     "cbus": 53688.0,
+     "rbus": 53712.0,
+     "store": 2051.0,
+     "chg": 1048.0
+    },
+    {
+     "n": 216531,
+     "cbus": 55350.0,
+     "rbus": 55347.0,
+     "store": 2003.0,
+     "chg": 1016.0
+    },
+    {
+     "n": 249843,
+     "cbus": 55479.0,
+     "rbus": 55464.0,
+     "store": 1958.0,
+     "chg": 978.0
+    },
+    {
+     "n": 283156,
+     "cbus": 56013.0,
+     "rbus": 56064.0,
+     "store": 1890.0,
+     "chg": 952.0
+    },
+    {
+     "n": 316468,
+     "cbus": 56557.0,
+     "rbus": 56579.0,
+     "store": 1847.0,
+     "chg": 928.0
+    },
+    {
+     "n": 349781,
+     "cbus": 56391.0,
+     "rbus": 56405.0,
+     "store": 1776.0,
+     "chg": 906.0
+    },
+    {
+     "n": 383093,
+     "cbus": 56574.0,
+     "rbus": 56609.0,
+     "store": 1769.0,
+     "chg": 890.0
+    },
+    {
+     "n": 416406,
+     "cbus": 56947.0,
+     "rbus": 56931.0,
+     "store": 1711.0,
+     "chg": 865.0
+    },
+    {
+     "n": 449718,
+     "cbus": 57061.0,
+     "rbus": 57057.0,
+     "store": 1676.0,
+     "chg": 852.0
+    },
+    {
+     "n": 483031,
+     "cbus": 56083.0,
+     "rbus": 56099.0,
+     "store": 1638.0,
+     "chg": 829.0
+    },
+    {
+     "n": 516343,
+     "cbus": 56758.0,
+     "rbus": 56774.0,
+     "store": 1582.0,
+     "chg": 784.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 25414,
+   "dA_sum": 1080,
+   "dB_sum": 16774,
+   "kinds_json_bus_bits_per_op": 25414,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.bf16trunc": {
+   "cbus": 56144.62,
+   "rbus": 56139.69,
+   "store": 13468.56,
+   "prod": 39858.0,
+   "dsum": 39858.0,
+   "res_bits_per_op": 125752.88,
+   "chg_rate": 0.92099,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 55234.0,
+     "rbus": 55202.0,
+     "store": 20937.0,
+     "chg": 4073.0
+    },
+    {
+     "n": 49968,
+     "cbus": 59008.0,
+     "rbus": 58989.0,
+     "store": 17798.0,
+     "chg": 4019.0
+    },
+    {
+     "n": 83281,
+     "cbus": 57317.0,
+     "rbus": 57252.0,
+     "store": 16050.0,
+     "chg": 3972.0
+    },
+    {
+     "n": 116593,
+     "cbus": 57078.0,
+     "rbus": 57074.0,
+     "store": 15003.0,
+     "chg": 3930.0
+    },
+    {
+     "n": 149906,
+     "cbus": 57197.0,
+     "rbus": 57225.0,
+     "store": 14138.0,
+     "chg": 3876.0
+    },
+    {
+     "n": 183218,
+     "cbus": 55250.0,
+     "rbus": 55255.0,
+     "store": 13610.0,
+     "chg": 3845.0
+    },
+    {
+     "n": 216531,
+     "cbus": 56483.0,
+     "rbus": 56451.0,
+     "store": 13293.0,
+     "chg": 3809.0
+    },
+    {
+     "n": 249843,
+     "cbus": 55791.0,
+     "rbus": 55811.0,
+     "store": 12922.0,
+     "chg": 3777.0
+    },
+    {
+     "n": 283156,
+     "cbus": 55614.0,
+     "rbus": 55601.0,
+     "store": 12463.0,
+     "chg": 3748.0
+    },
+    {
+     "n": 316468,
+     "cbus": 56323.0,
+     "rbus": 56352.0,
+     "store": 12047.0,
+     "chg": 3717.0
+    },
+    {
+     "n": 349781,
+     "cbus": 54168.0,
+     "rbus": 54135.0,
+     "store": 11679.0,
+     "chg": 3680.0
+    },
+    {
+     "n": 383093,
+     "cbus": 56024.0,
+     "rbus": 56014.0,
+     "store": 11492.0,
+     "chg": 3639.0
+    },
+    {
+     "n": 416406,
+     "cbus": 54956.0,
+     "rbus": 54962.0,
+     "store": 11335.0,
+     "chg": 3611.0
+    },
+    {
+     "n": 449718,
+     "cbus": 55716.0,
+     "rbus": 55768.0,
+     "store": 11004.0,
+     "chg": 3571.0
+    },
+    {
+     "n": 483031,
+     "cbus": 55517.0,
+     "rbus": 55530.0,
+     "store": 10903.0,
+     "chg": 3556.0
+    },
+    {
+     "n": 516343,
+     "cbus": 56638.0,
+     "rbus": 56614.0,
+     "store": 10823.0,
+     "chg": 3535.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 34980,
+   "dA_sum": 1368,
+   "dB_sum": 24036,
+   "kinds_json_bus_bits_per_op": 34980,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.fp16grid": {
+   "cbus": 56259.81,
+   "rbus": 56262.94,
+   "store": 13025.94,
+   "prod": 52158.0,
+   "dsum": 52158.0,
+   "res_bits_per_op": 125548.69,
+   "chg_rate": 0.902176,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 55233.0,
+     "rbus": 55204.0,
+     "store": 20413.0,
+     "chg": 4066.0
+    },
+    {
+     "n": 49968,
+     "cbus": 59384.0,
+     "rbus": 59345.0,
+     "store": 17092.0,
+     "chg": 4010.0
+    },
+    {
+     "n": 83281,
+     "cbus": 58532.0,
+     "rbus": 58561.0,
+     "store": 15537.0,
+     "chg": 3947.0
+    },
+    {
+     "n": 116593,
+     "cbus": 55989.0,
+     "rbus": 56049.0,
+     "store": 14704.0,
+     "chg": 3898.0
+    },
+    {
+     "n": 149906,
+     "cbus": 57505.0,
+     "rbus": 57483.0,
+     "store": 13938.0,
+     "chg": 3844.0
+    },
+    {
+     "n": 183218,
+     "cbus": 56172.0,
+     "rbus": 56184.0,
+     "store": 13472.0,
+     "chg": 3799.0
+    },
+    {
+     "n": 216531,
+     "cbus": 55764.0,
+     "rbus": 55748.0,
+     "store": 12912.0,
+     "chg": 3752.0
+    },
+    {
+     "n": 249843,
+     "cbus": 55006.0,
+     "rbus": 55002.0,
+     "store": 12446.0,
+     "chg": 3703.0
+    },
+    {
+     "n": 283156,
+     "cbus": 55338.0,
+     "rbus": 55339.0,
+     "store": 11853.0,
+     "chg": 3652.0
+    },
+    {
+     "n": 316468,
+     "cbus": 56556.0,
+     "rbus": 56592.0,
+     "store": 11702.0,
+     "chg": 3616.0
+    },
+    {
+     "n": 349781,
+     "cbus": 56370.0,
+     "rbus": 56388.0,
+     "store": 11267.0,
+     "chg": 3574.0
+    },
+    {
+     "n": 383093,
+     "cbus": 56236.0,
+     "rbus": 56247.0,
+     "store": 10905.0,
+     "chg": 3518.0
+    },
+    {
+     "n": 416406,
+     "cbus": 55120.0,
+     "rbus": 55095.0,
+     "store": 10829.0,
+     "chg": 3475.0
+    },
+    {
+     "n": 449718,
+     "cbus": 55509.0,
+     "rbus": 55532.0,
+     "store": 10465.0,
+     "chg": 3456.0
+    },
+    {
+     "n": 483031,
+     "cbus": 55346.0,
+     "rbus": 55359.0,
+     "store": 10597.0,
+     "chg": 3426.0
+    },
+    {
+     "n": 516343,
+     "cbus": 56097.0,
+     "rbus": 56079.0,
+     "store": 10283.0,
+     "chg": 3389.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 43136,
+   "dA_sum": 1796,
+   "dB_sum": 28768,
+   "kinds_json_bus_bits_per_op": 43136,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.a_randn_b_zeros": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 0.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 49968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 116593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 149906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 183218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 216531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 249843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 283156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 316468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 349781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 383093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 416406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 449718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 483031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 516343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 27920,
+   "dA_sum": 3490,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 27920,
+   "kinds_json_gated_lane_frac": 1.0
+  },
+  "fp32.a_zeros_b_randn": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 0.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 49968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 116593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 149906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 183218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 216531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 249843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 283156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 316468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 349781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 383093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 416406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 449718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 483031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 516343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 55798,
+   "dA_sum": 0,
+   "dB_sum": 55798,
+   "kinds_json_bus_bits_per_op": 55798,
+   "kinds_json_gated_lane_frac": 1.0
+  },
+  "fp32.randn_sorted": {
+   "cbus": 56637.69,
+   "rbus": 56639.62,
+   "store": 13595.56,
+   "prod": 102036.0,
+   "dsum": 102036.0,
+   "res_bits_per_op": 126872.88,
+   "chg_rate": 0.918564,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 55164.0,
+     "rbus": 55173.0,
+     "store": 20895.0,
+     "chg": 4065.0
+    },
+    {
+     "n": 49968,
+     "cbus": 59418.0,
+     "rbus": 59339.0,
+     "store": 17691.0,
+     "chg": 4003.0
+    },
+    {
+     "n": 83281,
+     "cbus": 59090.0,
+     "rbus": 59048.0,
+     "store": 16084.0,
+     "chg": 3951.0
+    },
+    {
+     "n": 116593,
+     "cbus": 58156.0,
+     "rbus": 58200.0,
+     "store": 15224.0,
+     "chg": 3905.0
+    },
+    {
+     "n": 149906,
+     "cbus": 57836.0,
+     "rbus": 57807.0,
+     "store": 14343.0,
+     "chg": 3867.0
+    },
+    {
+     "n": 183218,
+     "cbus": 57166.0,
+     "rbus": 57113.0,
+     "store": 14004.0,
+     "chg": 3820.0
+    },
+    {
+     "n": 216531,
+     "cbus": 56646.0,
+     "rbus": 56612.0,
+     "store": 13354.0,
+     "chg": 3790.0
+    },
+    {
+     "n": 249843,
+     "cbus": 56817.0,
+     "rbus": 56780.0,
+     "store": 13007.0,
+     "chg": 3755.0
+    },
+    {
+     "n": 283156,
+     "cbus": 56261.0,
+     "rbus": 56291.0,
+     "store": 12433.0,
+     "chg": 3715.0
+    },
+    {
+     "n": 316468,
+     "cbus": 56260.0,
+     "rbus": 56262.0,
+     "store": 12077.0,
+     "chg": 3690.0
+    },
+    {
+     "n": 349781,
+     "cbus": 55906.0,
+     "rbus": 55945.0,
+     "store": 11979.0,
+     "chg": 3668.0
+    },
+    {
+     "n": 383093,
+     "cbus": 55054.0,
+     "rbus": 55058.0,
+     "store": 11724.0,
+     "chg": 3650.0
+    },
+    {
+     "n": 416406,
+     "cbus": 55285.0,
+     "rbus": 55305.0,
+     "store": 11671.0,
+     "chg": 3626.0
+    },
+    {
+     "n": 449718,
+     "cbus": 55469.0,
+     "rbus": 55542.0,
+     "store": 11130.0,
+     "chg": 3596.0
+    },
+    {
+     "n": 483031,
+     "cbus": 55300.0,
+     "rbus": 55369.0,
+     "store": 11034.0,
+     "chg": 3566.0
+    },
+    {
+     "n": 516343,
+     "cbus": 56375.0,
+     "rbus": 56390.0,
+     "store": 10879.0,
+     "chg": 3532.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 60856,
+   "dA_sum": 2598,
+   "dB_sum": 40072,
+   "kinds_json_bus_bits_per_op": 60856,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.nn_like": {
+   "cbus": 27383.75,
+   "rbus": 27399.62,
+   "store": 7476.44,
+   "prod": 50906.0,
+   "dsum": 50906.0,
+   "res_bits_per_op": 62259.81,
+   "chg_rate": 0.467331,
+   "live_frac": 0.492188,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 28533.0,
+     "rbus": 28586.0,
+     "store": 11230.0,
+     "chg": 2008.0
+    },
+    {
+     "n": 49968,
+     "cbus": 27687.0,
+     "rbus": 27675.0,
+     "store": 9589.0,
+     "chg": 1989.0
+    },
+    {
+     "n": 83281,
+     "cbus": 27212.0,
+     "rbus": 27159.0,
+     "store": 8683.0,
+     "chg": 1978.0
+    },
+    {
+     "n": 116593,
+     "cbus": 27216.0,
+     "rbus": 27233.0,
+     "store": 8298.0,
+     "chg": 1963.0
+    },
+    {
+     "n": 149906,
+     "cbus": 27246.0,
+     "rbus": 27237.0,
+     "store": 7847.0,
+     "chg": 1945.0
+    },
+    {
+     "n": 183218,
+     "cbus": 27540.0,
+     "rbus": 27601.0,
+     "store": 7507.0,
+     "chg": 1931.0
+    },
+    {
+     "n": 216531,
+     "cbus": 27718.0,
+     "rbus": 27787.0,
+     "store": 7238.0,
+     "chg": 1924.0
+    },
+    {
+     "n": 249843,
+     "cbus": 27350.0,
+     "rbus": 27282.0,
+     "store": 7081.0,
+     "chg": 1913.0
+    },
+    {
+     "n": 283156,
+     "cbus": 27552.0,
+     "rbus": 27541.0,
+     "store": 6913.0,
+     "chg": 1904.0
+    },
+    {
+     "n": 316468,
+     "cbus": 27509.0,
+     "rbus": 27516.0,
+     "store": 7035.0,
+     "chg": 1897.0
+    },
+    {
+     "n": 349781,
+     "cbus": 27701.0,
+     "rbus": 27665.0,
+     "store": 6627.0,
+     "chg": 1886.0
+    },
+    {
+     "n": 383093,
+     "cbus": 26878.0,
+     "rbus": 26922.0,
+     "store": 6696.0,
+     "chg": 1875.0
+    },
+    {
+     "n": 416406,
+     "cbus": 27027.0,
+     "rbus": 27079.0,
+     "store": 6264.0,
+     "chg": 1864.0
+    },
+    {
+     "n": 449718,
+     "cbus": 27036.0,
+     "rbus": 27050.0,
+     "store": 6294.0,
+     "chg": 1858.0
+    },
+    {
+     "n": 483031,
+     "cbus": 26923.0,
+     "rbus": 26982.0,
+     "store": 6268.0,
+     "chg": 1848.0
+    },
+    {
+     "n": 516343,
+     "cbus": 27012.0,
+     "rbus": 27079.0,
+     "store": 6053.0,
+     "chg": 1844.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 80426,
+   "dA_sum": 3110,
+   "dB_sum": 55546,
+   "kinds_json_bus_bits_per_op": 80426,
+   "kinds_json_gated_lane_frac": 0.507812
+  },
+  "fp16.zeros": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 0.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 49968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 116593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 149906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 183218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 216531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 249843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 283156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 316468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 349781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 383093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 416406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 449718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 483031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 516343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 0,
+   "kinds_json_gated_lane_frac": 1.0
+  },
+  "fp16.ones": {
+   "cbus": 256.0,
+   "rbus": 255.0,
+   "store": 8160.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 8671.0,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 280.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 49968,
+     "cbus": 280.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83281,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 116593,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 149906,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 183218,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 216531,
+     "cbus": 248.0,
+     "rbus": 264.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 249843,
+     "cbus": 248.0,
+     "rbus": 264.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 283156,
+     "cbus": 264.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 316468,
+     "cbus": 264.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 349781,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 383093,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 416406,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 449718,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 483031,
+     "cbus": 248.0,
+     "rbus": 272.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 516343,
+     "cbus": 248.0,
+     "rbus": 272.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 0,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp16.neg_ones": {
+   "cbus": 256.0,
+   "rbus": 255.0,
+   "store": 8160.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 8671.0,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 280.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 49968,
+     "cbus": 280.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83281,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 116593,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 149906,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 183218,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 216531,
+     "cbus": 248.0,
+     "rbus": 264.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 249843,
+     "cbus": 248.0,
+     "rbus": 264.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 283156,
+     "cbus": 264.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 316468,
+     "cbus": 264.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 349781,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 383093,
+     "cbus": 248.0,
+     "rbus": 256.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 416406,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 449718,
+     "cbus": 256.0,
+     "rbus": 248.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 483031,
+     "cbus": 248.0,
+     "rbus": 272.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 516343,
+     "cbus": 248.0,
+     "rbus": 272.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 0,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp16.randn": {
+   "cbus": 56168.69,
+   "rbus": 56177.19,
+   "store": 14307.12,
+   "prod": 104142.0,
+   "dsum": 61734.0,
+   "res_bits_per_op": 126653.0,
+   "chg_rate": 0.945145,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 57930.0,
+     "rbus": 57958.0,
+     "store": 21687.0,
+     "chg": 4077.0
+    },
+    {
+     "n": 49968,
+     "cbus": 58083.0,
+     "rbus": 58076.0,
+     "store": 18328.0,
+     "chg": 4048.0
+    },
+    {
+     "n": 83281,
+     "cbus": 57748.0,
+     "rbus": 57710.0,
+     "store": 16866.0,
+     "chg": 4010.0
+    },
+    {
+     "n": 116593,
+     "cbus": 56720.0,
+     "rbus": 56704.0,
+     "store": 16004.0,
+     "chg": 3984.0
+    },
+    {
+     "n": 149906,
+     "cbus": 56039.0,
+     "rbus": 56018.0,
+     "store": 15093.0,
+     "chg": 3957.0
+    },
+    {
+     "n": 183218,
+     "cbus": 55661.0,
+     "rbus": 55696.0,
+     "store": 14640.0,
+     "chg": 3936.0
+    },
+    {
+     "n": 216531,
+     "cbus": 55136.0,
+     "rbus": 55170.0,
+     "store": 14208.0,
+     "chg": 3904.0
+    },
+    {
+     "n": 249843,
+     "cbus": 55546.0,
+     "rbus": 55623.0,
+     "store": 13646.0,
+     "chg": 3872.0
+    },
+    {
+     "n": 283156,
+     "cbus": 55188.0,
+     "rbus": 55249.0,
+     "store": 13073.0,
+     "chg": 3850.0
+    },
+    {
+     "n": 316468,
+     "cbus": 55813.0,
+     "rbus": 55798.0,
+     "store": 13042.0,
+     "chg": 3836.0
+    },
+    {
+     "n": 349781,
+     "cbus": 56294.0,
+     "rbus": 56266.0,
+     "store": 12768.0,
+     "chg": 3807.0
+    },
+    {
+     "n": 383093,
+     "cbus": 54850.0,
+     "rbus": 54856.0,
+     "store": 12440.0,
+     "chg": 3782.0
+    },
+    {
+     "n": 416406,
+     "cbus": 55730.0,
+     "rbus": 55744.0,
+     "store": 12145.0,
+     "chg": 3763.0
+    },
+    {
+     "n": 449718,
+     "cbus": 56005.0,
+     "rbus": 56040.0,
+     "store": 11875.0,
+     "chg": 3734.0
+    },
+    {
+     "n": 483031,
+     "cbus": 56307.0,
+     "rbus": 56293.0,
+     "store": 11634.0,
+     "chg": 3706.0
+    },
+    {
+     "n": 516343,
+     "cbus": 55649.0,
+     "rbus": 55634.0,
+     "store": 11465.0,
+     "chg": 3675.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 84416,
+   "dA_sum": 3452,
+   "dB_sum": 56800,
+   "kinds_json_bus_bits_per_op": 84416,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp16.randn_small": {
+   "cbus": 56185.25,
+   "rbus": 56181.81,
+   "store": 13724.5,
+   "prod": 103126.0,
+   "dsum": 57150.0,
+   "res_bits_per_op": 126091.56,
+   "chg_rate": 0.943069,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 57171.0,
+     "rbus": 57204.0,
+     "store": 21022.0,
+     "chg": 4081.0
+    },
+    {
+     "n": 49968,
+     "cbus": 56900.0,
+     "rbus": 56895.0,
+     "store": 17943.0,
+     "chg": 4054.0
+    },
+    {
+     "n": 83281,
+     "cbus": 55252.0,
+     "rbus": 55211.0,
+     "store": 16208.0,
+     "chg": 4018.0
+    },
+    {
+     "n": 116593,
+     "cbus": 55756.0,
+     "rbus": 55736.0,
+     "store": 15530.0,
+     "chg": 3987.0
+    },
+    {
+     "n": 149906,
+     "cbus": 54655.0,
+     "rbus": 54698.0,
+     "store": 14589.0,
+     "chg": 3950.0
+    },
+    {
+     "n": 183218,
+     "cbus": 55209.0,
+     "rbus": 55153.0,
+     "store": 13987.0,
+     "chg": 3922.0
+    },
+    {
+     "n": 216531,
+     "cbus": 54138.0,
+     "rbus": 54166.0,
+     "store": 13438.0,
+     "chg": 3895.0
+    },
+    {
+     "n": 249843,
+     "cbus": 54970.0,
+     "rbus": 54991.0,
+     "store": 13122.0,
+     "chg": 3872.0
+    },
+    {
+     "n": 283156,
+     "cbus": 55552.0,
+     "rbus": 55543.0,
+     "store": 12574.0,
+     "chg": 3841.0
+    },
+    {
+     "n": 316468,
+     "cbus": 56430.0,
+     "rbus": 56397.0,
+     "store": 12221.0,
+     "chg": 3819.0
+    },
+    {
+     "n": 349781,
+     "cbus": 56638.0,
+     "rbus": 56636.0,
+     "store": 12336.0,
+     "chg": 3797.0
+    },
+    {
+     "n": 383093,
+     "cbus": 58046.0,
+     "rbus": 58029.0,
+     "store": 11764.0,
+     "chg": 3772.0
+    },
+    {
+     "n": 416406,
+     "cbus": 55807.0,
+     "rbus": 55799.0,
+     "store": 11609.0,
+     "chg": 3738.0
+    },
+    {
+     "n": 449718,
+     "cbus": 56846.0,
+     "rbus": 56853.0,
+     "store": 11323.0,
+     "chg": 3717.0
+    },
+    {
+     "n": 483031,
+     "cbus": 57553.0,
+     "rbus": 57524.0,
+     "store": 11093.0,
+     "chg": 3688.0
+    },
+    {
+     "n": 516343,
+     "cbus": 58041.0,
+     "rbus": 58074.0,
+     "store": 10833.0,
+     "chg": 3654.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 91126,
+   "dA_sum": 3726,
+   "dB_sum": 61318,
+   "kinds_json_bus_bits_per_op": 91126,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp16.uniform01": {
+   "cbus": 48794.88,
+   "rbus": 48795.25,
+   "store": 10294.44,
+   "prod": 94010.0,
+   "dsum": 51854.0,
+   "res_bits_per_op": 107884.56,
+   "chg_rate": 0.937347,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 55166.0,
+     "rbus": 55158.0,
+     "store": 17618.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 49968,
+     "cbus": 46253.0,
+     "rbus": 46201.0,
+     "store": 14547.0,
+     "chg": 4081.0
+    },
+    {
+     "n": 83281,
+     "cbus": 47435.0,
+     "rbus": 47427.0,
+     "store": 12632.0,
+     "chg": 4052.0
+    },
+    {
+     "n": 116593,
+     "cbus": 48602.0,
+     "rbus": 48611.0,
+     "store": 12044.0,
+     "chg": 4034.0
+    },
+    {
+     "n": 149906,
+     "cbus": 47358.0,
+     "rbus": 47334.0,
+     "store": 10999.0,
+     "chg": 3988.0
+    },
+    {
+     "n": 183218,
+     "cbus": 46509.0,
+     "rbus": 46520.0,
+     "store": 10459.0,
+     "chg": 3956.0
+    },
+    {
+     "n": 216531,
+     "cbus": 48798.0,
+     "rbus": 48862.0,
+     "store": 10298.0,
+     "chg": 3942.0
+    },
+    {
+     "n": 249843,
+     "cbus": 51481.0,
+     "rbus": 51501.0,
+     "store": 9844.0,
+     "chg": 3904.0
+    },
+    {
+     "n": 283156,
+     "cbus": 52714.0,
+     "rbus": 52659.0,
+     "store": 9205.0,
+     "chg": 3838.0
+    },
+    {
+     "n": 316468,
+     "cbus": 48686.0,
+     "rbus": 48748.0,
+     "store": 8633.0,
+     "chg": 3748.0
+    },
+    {
+     "n": 349781,
+     "cbus": 48818.0,
+     "rbus": 48816.0,
+     "store": 8434.0,
+     "chg": 3712.0
+    },
+    {
+     "n": 383093,
+     "cbus": 46510.0,
+     "rbus": 46524.0,
+     "store": 8313.0,
+     "chg": 3687.0
+    },
+    {
+     "n": 416406,
+     "cbus": 47616.0,
+     "rbus": 47615.0,
+     "store": 8250.0,
+     "chg": 3677.0
+    },
+    {
+     "n": 449718,
+     "cbus": 48019.0,
+     "rbus": 48021.0,
+     "store": 8092.0,
+     "chg": 3643.0
+    },
+    {
+     "n": 483031,
+     "cbus": 48534.0,
+     "rbus": 48536.0,
+     "store": 7833.0,
+     "chg": 3581.0
+    },
+    {
+     "n": 516343,
+     "cbus": 48219.0,
+     "rbus": 48191.0,
+     "store": 7510.0,
+     "chg": 3491.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 77948,
+   "dA_sum": 3176,
+   "dB_sum": 52540,
+   "kinds_json_bus_bits_per_op": 77948,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp16.sparse50": {
+   "cbus": 33175.12,
+   "rbus": 33156.0,
+   "store": 6809.44,
+   "prod": 50394.0,
+   "dsum": 33754.0,
+   "res_bits_per_op": 73140.56,
+   "chg_rate": 0.436279,
+   "live_frac": 0.585693,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 32085.0,
+     "rbus": 31949.0,
+     "store": 10251.0,
+     "chg": 1895.0
+    },
+    {
+     "n": 49968,
+     "cbus": 34725.0,
+     "rbus": 34649.0,
+     "store": 8929.0,
+     "chg": 1868.0
+    },
+    {
+     "n": 83281,
+     "cbus": 34595.0,
+     "rbus": 34543.0,
+     "store": 8018.0,
+     "chg": 1850.0
+    },
+    {
+     "n": 116593,
+     "cbus": 34058.0,
+     "rbus": 34067.0,
+     "store": 7524.0,
+     "chg": 1842.0
+    },
+    {
+     "n": 149906,
+     "cbus": 33899.0,
+     "rbus": 33887.0,
+     "store": 7125.0,
+     "chg": 1826.0
+    },
+    {
+     "n": 183218,
+     "cbus": 33359.0,
+     "rbus": 33420.0,
+     "store": 6821.0,
+     "chg": 1815.0
+    },
+    {
+     "n": 216531,
+     "cbus": 33344.0,
+     "rbus": 33365.0,
+     "store": 6848.0,
+     "chg": 1803.0
+    },
+    {
+     "n": 249843,
+     "cbus": 33330.0,
+     "rbus": 33182.0,
+     "store": 6517.0,
+     "chg": 1794.0
+    },
+    {
+     "n": 283156,
+     "cbus": 33111.0,
+     "rbus": 33086.0,
+     "store": 6306.0,
+     "chg": 1779.0
+    },
+    {
+     "n": 316468,
+     "cbus": 32612.0,
+     "rbus": 32634.0,
+     "store": 6050.0,
+     "chg": 1761.0
+    },
+    {
+     "n": 349781,
+     "cbus": 32654.0,
+     "rbus": 32728.0,
+     "store": 6081.0,
+     "chg": 1751.0
+    },
+    {
+     "n": 383093,
+     "cbus": 32359.0,
+     "rbus": 32291.0,
+     "store": 5885.0,
+     "chg": 1740.0
+    },
+    {
+     "n": 416406,
+     "cbus": 32468.0,
+     "rbus": 32618.0,
+     "store": 5900.0,
+     "chg": 1732.0
+    },
+    {
+     "n": 449718,
+     "cbus": 32969.0,
+     "rbus": 32902.0,
+     "store": 5616.0,
+     "chg": 1717.0
+    },
+    {
+     "n": 483031,
+     "cbus": 32753.0,
+     "rbus": 32664.0,
+     "store": 5622.0,
+     "chg": 1714.0
+    },
+    {
+     "n": 516343,
+     "cbus": 32481.0,
+     "rbus": 32511.0,
+     "store": 5458.0,
+     "chg": 1705.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 71590,
+   "dA_sum": 3152,
+   "dB_sum": 46374,
+   "kinds_json_bus_bits_per_op": 71590,
+   "kinds_json_gated_lane_frac": 0.414307
+  },
+  "fp16.sparse90": {
+   "cbus": 2005.81,
+   "rbus": 2013.06,
+   "store": 408.5,
+   "prod": 2128.0,
+   "dsum": 1842.0,
+   "res_bits_per_op": 4427.38,
+   "chg_rate": 0.021744,
+   "live_frac": 0.039062,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 1960.0,
+     "rbus": 2003.0,
+     "store": 596.0,
+     "chg": 90.0
+    },
+    {
+     "n": 49968,
+     "cbus": 1981.0,
+     "rbus": 1986.0,
+     "store": 491.0,
+     "chg": 90.0
+    },
+    {
+     "n": 83281,
+     "cbus": 2040.0,
+     "rbus": 2047.0,
+     "store": 451.0,
+     "chg": 90.0
+    },
+    {
+     "n": 116593,
+     "cbus": 2007.0,
+     "rbus": 2032.0,
+     "store": 450.0,
+     "chg": 90.0
+    },
+    {
+     "n": 149906,
+     "cbus": 1989.0,
+     "rbus": 1983.0,
+     "store": 427.0,
+     "chg": 90.0
+    },
+    {
+     "n": 183218,
+     "cbus": 2034.0,
+     "rbus": 2007.0,
+     "store": 436.0,
+     "chg": 90.0
+    },
+    {
+     "n": 216531,
+     "cbus": 2009.0,
+     "rbus": 1989.0,
+     "store": 438.0,
+     "chg": 90.0
+    },
+    {
+     "n": 249843,
+     "cbus": 2067.0,
+     "rbus": 2038.0,
+     "store": 382.0,
+     "chg": 89.0
+    },
+    {
+     "n": 283156,
+     "cbus": 2004.0,
+     "rbus": 1982.0,
+     "store": 404.0,
+     "chg": 89.0
+    },
+    {
+     "n": 316468,
+     "cbus": 2005.0,
+     "rbus": 2029.0,
+     "store": 329.0,
+     "chg": 89.0
+    },
+    {
+     "n": 349781,
+     "cbus": 2012.0,
+     "rbus": 2034.0,
+     "store": 368.0,
+     "chg": 88.0
+    },
+    {
+     "n": 383093,
+     "cbus": 2050.0,
+     "rbus": 2067.0,
+     "store": 370.0,
+     "chg": 88.0
+    },
+    {
+     "n": 416406,
+     "cbus": 2029.0,
+     "rbus": 2070.0,
+     "store": 376.0,
+     "chg": 88.0
+    },
+    {
+     "n": 449718,
+     "cbus": 1983.0,
+     "rbus": 1996.0,
+     "store": 342.0,
+     "chg": 88.0
+    },
+    {
+     "n": 483031,
+     "cbus": 1961.0,
+     "rbus": 1973.0,
+     "store": 344.0,
+     "chg": 88.0
+    },
+    {
+     "n": 516343,
+     "cbus": 1962.0,
+     "rbus": 1973.0,
+     "store": 332.0,
+     "chg": 88.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 18412,
+   "dA_sum": 798,
+   "dB_sum": 12028,
+   "kinds_json_bus_bits_per_op": 18412,
+   "kinds_json_gated_lane_frac": 0.960938
+  },
+  "fp16.wsparse50": {
+   "cbus": 13532.62,
+   "rbus": 13556.62,
+   "store": 3845.94,
+   "prod": 24794.0,
+   "dsum": 14850.0,
+   "res_bits_per_op": 30935.19,
+   "chg_rate": 0.231659,
+   "live_frac": 0.23999,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 13006.0,
+     "rbus": 13078.0,
+     "store": 5598.0,
+     "chg": 980.0
+    },
+    {
+     "n": 49968,
+     "cbus": 14007.0,
+     "rbus": 14059.0,
+     "store": 4743.0,
+     "chg": 976.0
+    },
+    {
+     "n": 83281,
+     "cbus": 14018.0,
+     "rbus": 14022.0,
+     "store": 4465.0,
+     "chg": 973.0
+    },
+    {
+     "n": 116593,
+     "cbus": 14219.0,
+     "rbus": 14252.0,
+     "store": 4346.0,
+     "chg": 967.0
+    },
+    {
+     "n": 149906,
+     "cbus": 13761.0,
+     "rbus": 13902.0,
+     "store": 4027.0,
+     "chg": 963.0
+    },
+    {
+     "n": 183218,
+     "cbus": 13698.0,
+     "rbus": 13724.0,
+     "store": 3891.0,
+     "chg": 959.0
+    },
+    {
+     "n": 216531,
+     "cbus": 13602.0,
+     "rbus": 13729.0,
+     "store": 3842.0,
+     "chg": 957.0
+    },
+    {
+     "n": 249843,
+     "cbus": 13662.0,
+     "rbus": 13684.0,
+     "store": 3671.0,
+     "chg": 952.0
+    },
+    {
+     "n": 283156,
+     "cbus": 13309.0,
+     "rbus": 13380.0,
+     "store": 3521.0,
+     "chg": 947.0
+    },
+    {
+     "n": 316468,
+     "cbus": 13350.0,
+     "rbus": 13309.0,
+     "store": 3448.0,
+     "chg": 942.0
+    },
+    {
+     "n": 349781,
+     "cbus": 13246.0,
+     "rbus": 13265.0,
+     "store": 3406.0,
+     "chg": 935.0
+    },
+    {
+     "n": 383093,
+     "cbus": 13287.0,
+     "rbus": 13307.0,
+     "store": 3407.0,
+     "chg": 932.0
+    },
+    {
+     "n": 416406,
+     "cbus": 13276.0,
+     "rbus": 13265.0,
+     "store": 3367.0,
+     "chg": 929.0
+    },
+    {
+     "n": 449718,
+     "cbus": 13152.0,
+     "rbus": 13104.0,
+     "store": 3320.0,
+     "chg": 924.0
+    },
+    {
+     "n": 483031,
+     "cbus": 13407.0,
+     "rbus": 13415.0,
+     "store": 3285.0,
+     "chg": 923.0
+    },
+    {
+     "n": 516343,
+     "cbus": 13522.0,
+     "rbus": 13411.0,
+     "store": 3198.0,
+     "chg": 923.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 73444,
+   "dA_sum": 2800,
+   "dB_sum": 51044,
+   "kinds_json_bus_bits_per_op": 73444,
+   "kinds_json_gated_lane_frac": 0.76001
+  },
+  "fp16.wsparse90": {
+   "cbus": 554.69,
+   "rbus": 557.31,
+   "store": 183.44,
+   "prod": 1014.0,
+   "dsum": 612.0,
+   "res_bits_per_op": 1295.44,
+   "chg_rate": 0.009766,
+   "live_frac": 0.009766,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 497.0,
+     "rbus": 532.0,
+     "store": 273.0,
+     "chg": 40.0
+    },
+    {
+     "n": 49968,
+     "cbus": 538.0,
+     "rbus": 512.0,
+     "store": 223.0,
+     "chg": 40.0
+    },
+    {
+     "n": 83281,
+     "cbus": 552.0,
+     "rbus": 560.0,
+     "store": 211.0,
+     "chg": 40.0
+    },
+    {
+     "n": 116593,
+     "cbus": 543.0,
+     "rbus": 549.0,
+     "store": 197.0,
+     "chg": 40.0
+    },
+    {
+     "n": 149906,
+     "cbus": 536.0,
+     "rbus": 538.0,
+     "store": 178.0,
+     "chg": 40.0
+    },
+    {
+     "n": 183218,
+     "cbus": 548.0,
+     "rbus": 566.0,
+     "store": 200.0,
+     "chg": 40.0
+    },
+    {
+     "n": 216531,
+     "cbus": 528.0,
+     "rbus": 545.0,
+     "store": 195.0,
+     "chg": 40.0
+    },
+    {
+     "n": 249843,
+     "cbus": 560.0,
+     "rbus": 567.0,
+     "store": 183.0,
+     "chg": 40.0
+    },
+    {
+     "n": 283156,
+     "cbus": 559.0,
+     "rbus": 556.0,
+     "store": 163.0,
+     "chg": 40.0
+    },
+    {
+     "n": 316468,
+     "cbus": 541.0,
+     "rbus": 556.0,
+     "store": 169.0,
+     "chg": 40.0
+    },
+    {
+     "n": 349781,
+     "cbus": 554.0,
+     "rbus": 555.0,
+     "store": 157.0,
+     "chg": 40.0
+    },
+    {
+     "n": 383093,
+     "cbus": 606.0,
+     "rbus": 578.0,
+     "store": 166.0,
+     "chg": 40.0
+    },
+    {
+     "n": 416406,
+     "cbus": 576.0,
+     "rbus": 570.0,
+     "store": 154.0,
+     "chg": 40.0
+    },
+    {
+     "n": 449718,
+     "cbus": 591.0,
+     "rbus": 576.0,
+     "store": 160.0,
+     "chg": 40.0
+    },
+    {
+     "n": 483031,
+     "cbus": 577.0,
+     "rbus": 578.0,
+     "store": 144.0,
+     "chg": 40.0
+    },
+    {
+     "n": 516343,
+     "cbus": 569.0,
+     "rbus": 579.0,
+     "store": 162.0,
+     "chg": 40.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 18192,
+   "dA_sum": 1206,
+   "dB_sum": 8544,
+   "kinds_json_bus_bits_per_op": 18192,
+   "kinds_json_gated_lane_frac": 0.990234
+  },
+  "fp16.smallint": {
+   "cbus": 54418.12,
+   "rbus": 54467.88,
+   "store": 13098.75,
+   "prod": 28132.0,
+   "dsum": 17242.0,
+   "res_bits_per_op": 121984.75,
+   "chg_rate": 0.958374,
+   "live_frac": 0.996094,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 49239.0,
+     "rbus": 49724.0,
+     "store": 14956.0,
+     "chg": 4002.0
+    },
+    {
+     "n": 49968,
+     "cbus": 51827.0,
+     "rbus": 52280.0,
+     "store": 14714.0,
+     "chg": 4000.0
+    },
+    {
+     "n": 83281,
+     "cbus": 53765.0,
+     "rbus": 53604.0,
+     "store": 14530.0,
+     "chg": 3995.0
+    },
+    {
+     "n": 116593,
+     "cbus": 53319.0,
+     "rbus": 53211.0,
+     "store": 14496.0,
+     "chg": 3986.0
+    },
+    {
+     "n": 149906,
+     "cbus": 53612.0,
+     "rbus": 53693.0,
+     "store": 13830.0,
+     "chg": 3972.0
+    },
+    {
+     "n": 183218,
+     "cbus": 53919.0,
+     "rbus": 53984.0,
+     "store": 13462.0,
+     "chg": 3962.0
+    },
+    {
+     "n": 216531,
+     "cbus": 55046.0,
+     "rbus": 54986.0,
+     "store": 13304.0,
+     "chg": 3938.0
+    },
+    {
+     "n": 249843,
+     "cbus": 54129.0,
+     "rbus": 54122.0,
+     "store": 13218.0,
+     "chg": 3926.0
+    },
+    {
+     "n": 283156,
+     "cbus": 55551.0,
+     "rbus": 55624.0,
+     "store": 12964.0,
+     "chg": 3916.0
+    },
+    {
+     "n": 316468,
+     "cbus": 56108.0,
+     "rbus": 56116.0,
+     "store": 12476.0,
+     "chg": 3913.0
+    },
+    {
+     "n": 349781,
+     "cbus": 55627.0,
+     "rbus": 55585.0,
+     "store": 12359.0,
+     "chg": 3900.0
+    },
+    {
+     "n": 383093,
+     "cbus": 56551.0,
+     "rbus": 56539.0,
+     "store": 12206.0,
+     "chg": 3889.0
+    },
+    {
+     "n": 416406,
+     "cbus": 55859.0,
+     "rbus": 55879.0,
+     "store": 11966.0,
+     "chg": 3867.0
+    },
+    {
+     "n": 449718,
+     "cbus": 55295.0,
+     "rbus": 55361.0,
+     "store": 11785.0,
+     "chg": 3858.0
+    },
+    {
+     "n": 483031,
+     "cbus": 54917.0,
+     "rbus": 54895.0,
+     "store": 11716.0,
+     "chg": 3853.0
+    },
+    {
+     "n": 516343,
+     "cbus": 55926.0,
+     "rbus": 55883.0,
+     "store": 11598.0,
+     "chg": 3831.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 35980,
+   "dA_sum": 1456,
+   "dB_sum": 24332,
+   "kinds_json_bus_bits_per_op": 35980,
+   "kinds_json_gated_lane_frac": 0.003906
+  },
+  "fp16.fp8grid": {
+   "cbus": 56310.12,
+   "rbus": 56325.12,
+   "store": 14332.81,
+   "prod": 46596.0,
+   "dsum": 33270.0,
+   "res_bits_per_op": 126968.06,
+   "chg_rate": 0.954926,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 57821.0,
+     "rbus": 57828.0,
+     "store": 20653.0,
+     "chg": 4079.0
+    },
+    {
+     "n": 49968,
+     "cbus": 57931.0,
+     "rbus": 57907.0,
+     "store": 18018.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 83281,
+     "cbus": 57852.0,
+     "rbus": 57829.0,
+     "store": 16822.0,
+     "chg": 4034.0
+    },
+    {
+     "n": 116593,
+     "cbus": 56710.0,
+     "rbus": 56719.0,
+     "store": 15955.0,
+     "chg": 4015.0
+    },
+    {
+     "n": 149906,
+     "cbus": 56192.0,
+     "rbus": 56228.0,
+     "store": 15252.0,
+     "chg": 3996.0
+    },
+    {
+     "n": 183218,
+     "cbus": 55973.0,
+     "rbus": 55994.0,
+     "store": 14720.0,
+     "chg": 3969.0
+    },
+    {
+     "n": 216531,
+     "cbus": 56069.0,
+     "rbus": 56091.0,
+     "store": 14125.0,
+     "chg": 3947.0
+    },
+    {
+     "n": 249843,
+     "cbus": 56142.0,
+     "rbus": 56174.0,
+     "store": 13758.0,
+     "chg": 3923.0
+    },
+    {
+     "n": 283156,
+     "cbus": 56725.0,
+     "rbus": 56744.0,
+     "store": 13560.0,
+     "chg": 3896.0
+    },
+    {
+     "n": 316468,
+     "cbus": 56206.0,
+     "rbus": 56278.0,
+     "store": 13134.0,
+     "chg": 3880.0
+    },
+    {
+     "n": 349781,
+     "cbus": 54836.0,
+     "rbus": 54858.0,
+     "store": 12946.0,
+     "chg": 3851.0
+    },
+    {
+     "n": 383093,
+     "cbus": 55138.0,
+     "rbus": 55153.0,
+     "store": 12792.0,
+     "chg": 3839.0
+    },
+    {
+     "n": 416406,
+     "cbus": 55436.0,
+     "rbus": 55491.0,
+     "store": 12261.0,
+     "chg": 3809.0
+    },
+    {
+     "n": 449718,
+     "cbus": 55980.0,
+     "rbus": 55943.0,
+     "store": 12020.0,
+     "chg": 3780.0
+    },
+    {
+     "n": 483031,
+     "cbus": 55693.0,
+     "rbus": 55681.0,
+     "store": 11857.0,
+     "chg": 3762.0
+    },
+    {
+     "n": 516343,
+     "cbus": 56258.0,
+     "rbus": 56284.0,
+     "store": 11452.0,
+     "chg": 3749.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 42486,
+   "dA_sum": 1686,
+   "dB_sum": 28998,
+   "kinds_json_bus_bits_per_op": 42486,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp16.a_randn_b_zeros": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 0.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 49968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 116593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 149906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 183218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 216531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 249843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 283156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 316468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 349781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 383093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 416406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 449718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 483031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 516343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 28096,
+   "dA_sum": 3512,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 28096,
+   "kinds_json_gated_lane_frac": 1.0
+  },
+  "fp16.a_zeros_b_randn": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 0.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 49968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 116593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 149906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 183218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 216531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 249843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 283156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 316468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 349781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 383093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 416406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 449718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 483031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 516343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 55806,
+   "dA_sum": 0,
+   "dB_sum": 55806,
+   "kinds_json_bus_bits_per_op": 55806,
+   "kinds_json_gated_lane_frac": 1.0
+  },
+  "fp16.pair_half_zero": {
+   "cbus": 56430.44,
+   "rbus": 56432.19,
+   "store": 7026.94,
+   "prod": 58470.0,
+   "dsum": 50784.0,
+   "res_bits_per_op": 119889.56,
+   "chg_rate": 0.45517,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 53747.0,
+     "rbus": 53749.0,
+     "store": 10397.0,
+     "chg": 1946.0
+    },
+    {
+     "n": 49968,
+     "cbus": 58996.0,
+     "rbus": 58962.0,
+     "store": 9055.0,
+     "chg": 1928.0
+    },
+    {
+     "n": 83281,
+     "cbus": 59766.0,
+     "rbus": 59758.0,
+     "store": 8296.0,
+     "chg": 1915.0
+    },
+    {
+     "n": 116593,
+     "cbus": 58071.0,
+     "rbus": 58072.0,
+     "store": 7874.0,
+     "chg": 1904.0
+    },
+    {
+     "n": 149906,
+     "cbus": 57733.0,
+     "rbus": 57739.0,
+     "store": 7423.0,
+     "chg": 1895.0
+    },
+    {
+     "n": 183218,
+     "cbus": 57220.0,
+     "rbus": 57229.0,
+     "store": 7198.0,
+     "chg": 1887.0
+    },
+    {
+     "n": 216531,
+     "cbus": 56623.0,
+     "rbus": 56702.0,
+     "store": 6752.0,
+     "chg": 1878.0
+    },
+    {
+     "n": 249843,
+     "cbus": 55564.0,
+     "rbus": 55493.0,
+     "store": 6752.0,
+     "chg": 1874.0
+    },
+    {
+     "n": 283156,
+     "cbus": 55477.0,
+     "rbus": 55461.0,
+     "store": 6656.0,
+     "chg": 1869.0
+    },
+    {
+     "n": 316468,
+     "cbus": 55455.0,
+     "rbus": 55409.0,
+     "store": 6376.0,
+     "chg": 1858.0
+    },
+    {
+     "n": 349781,
+     "cbus": 54816.0,
+     "rbus": 54838.0,
+     "store": 6271.0,
+     "chg": 1845.0
+    },
+    {
+     "n": 383093,
+     "cbus": 55395.0,
+     "rbus": 55343.0,
+     "store": 6112.0,
+     "chg": 1829.0
+    },
+    {
+     "n": 416406,
+     "cbus": 55153.0,
+     "rbus": 55297.0,
+     "store": 5887.0,
+     "chg": 1814.0
+    },
+    {
+     "n": 449718,
+     "cbus": 56071.0,
+     "rbus": 56083.0,
+     "store": 5795.0,
+     "chg": 1807.0
+    },
+    {
+     "n": 483031,
+     "cbus": 55924.0,
+     "rbus": 55911.0,
+     "store": 5821.0,
+     "chg": 1795.0
+    },
+    {
+     "n": 516343,
+     "cbus": 56876.0,
+     "rbus": 56869.0,
+     "store": 5766.0,
+     "chg": 1786.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 72796,
+   "dA_sum": 3002,
+   "dB_sum": 48780,
+   "kinds_json_bus_bits_per_op": 72796,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp16.randn_sorted": {
+   "cbus": 55518.31,
+   "rbus": 55514.88,
+   "store": 13865.25,
+   "prod": 99966.0,
+   "dsum": 61384.0,
+   "res_bits_per_op": 124898.44,
+   "chg_rate": 0.946045,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 57327.0,
+     "rbus": 57343.0,
+     "store": 21245.0,
+     "chg": 4077.0
+    },
+    {
+     "n": 49968,
+     "cbus": 57549.0,
+     "rbus": 57514.0,
+     "store": 18189.0,
+     "chg": 4042.0
+    },
+    {
+     "n": 83281,
+     "cbus": 55759.0,
+     "rbus": 55795.0,
+     "store": 16444.0,
+     "chg": 4015.0
+    },
+    {
+     "n": 116593,
+     "cbus": 55570.0,
+     "rbus": 55646.0,
+     "store": 15535.0,
+     "chg": 3991.0
+    },
+    {
+     "n": 149906,
+     "cbus": 55155.0,
+     "rbus": 55153.0,
+     "store": 14762.0,
+     "chg": 3962.0
+    },
+    {
+     "n": 183218,
+     "cbus": 54254.0,
+     "rbus": 54251.0,
+     "store": 14092.0,
+     "chg": 3925.0
+    },
+    {
+     "n": 216531,
+     "cbus": 55325.0,
+     "rbus": 55345.0,
+     "store": 13792.0,
+     "chg": 3899.0
+    },
+    {
+     "n": 249843,
+     "cbus": 55408.0,
+     "rbus": 55384.0,
+     "store": 13237.0,
+     "chg": 3878.0
+    },
+    {
+     "n": 283156,
+     "cbus": 55658.0,
+     "rbus": 55599.0,
+     "store": 12715.0,
+     "chg": 3858.0
+    },
+    {
+     "n": 316468,
+     "cbus": 56272.0,
+     "rbus": 56264.0,
+     "store": 12254.0,
+     "chg": 3834.0
+    },
+    {
+     "n": 349781,
+     "cbus": 55439.0,
+     "rbus": 55357.0,
+     "store": 12296.0,
+     "chg": 3816.0
+    },
+    {
+     "n": 383093,
+     "cbus": 54694.0,
+     "rbus": 54747.0,
+     "store": 11863.0,
+     "chg": 3788.0
+    },
+    {
+     "n": 416406,
+     "cbus": 55314.0,
+     "rbus": 55285.0,
+     "store": 11549.0,
+     "chg": 3748.0
+    },
+    {
+     "n": 449718,
+     "cbus": 55422.0,
+     "rbus": 55422.0,
+     "store": 11442.0,
+     "chg": 3739.0
+    },
+    {
+     "n": 483031,
+     "cbus": 54803.0,
+     "rbus": 54815.0,
+     "store": 11220.0,
+     "chg": 3720.0
+    },
+    {
+     "n": 516343,
+     "cbus": 54344.0,
+     "rbus": 54318.0,
+     "store": 11209.0,
+     "chg": 3708.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 61846,
+   "dA_sum": 2636,
+   "dB_sum": 40758,
+   "kinds_json_bus_bits_per_op": 61846,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp16.nn_like": {
+   "cbus": 44335.81,
+   "rbus": 44341.69,
+   "store": 10966.19,
+   "prod": 74326.0,
+   "dsum": 43236.0,
+   "res_bits_per_op": 99643.69,
+   "chg_rate": 0.739807,
+   "live_frac": 0.804688,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 46032.0,
+     "rbus": 46131.0,
+     "store": 16866.0,
+     "chg": 3267.0
+    },
+    {
+     "n": 49968,
+     "cbus": 44756.0,
+     "rbus": 44723.0,
+     "store": 14135.0,
+     "chg": 3227.0
+    },
+    {
+     "n": 83281,
+     "cbus": 44498.0,
+     "rbus": 44515.0,
+     "store": 13150.0,
+     "chg": 3191.0
+    },
+    {
+     "n": 116593,
+     "cbus": 44794.0,
+     "rbus": 44749.0,
+     "store": 12443.0,
+     "chg": 3156.0
+    },
+    {
+     "n": 149906,
+     "cbus": 44674.0,
+     "rbus": 44654.0,
+     "store": 11761.0,
+     "chg": 3115.0
+    },
+    {
+     "n": 183218,
+     "cbus": 44658.0,
+     "rbus": 44663.0,
+     "store": 11200.0,
+     "chg": 3094.0
+    },
+    {
+     "n": 216531,
+     "cbus": 44198.0,
+     "rbus": 44248.0,
+     "store": 10737.0,
+     "chg": 3064.0
+    },
+    {
+     "n": 249843,
+     "cbus": 44511.0,
+     "rbus": 44477.0,
+     "store": 10253.0,
+     "chg": 3025.0
+    },
+    {
+     "n": 283156,
+     "cbus": 44631.0,
+     "rbus": 44707.0,
+     "store": 10175.0,
+     "chg": 3000.0
+    },
+    {
+     "n": 316468,
+     "cbus": 43986.0,
+     "rbus": 43946.0,
+     "store": 9745.0,
+     "chg": 2971.0
+    },
+    {
+     "n": 349781,
+     "cbus": 44639.0,
+     "rbus": 44583.0,
+     "store": 9552.0,
+     "chg": 2953.0
+    },
+    {
+     "n": 383093,
+     "cbus": 43809.0,
+     "rbus": 43795.0,
+     "store": 9436.0,
+     "chg": 2931.0
+    },
+    {
+     "n": 416406,
+     "cbus": 43712.0,
+     "rbus": 43762.0,
+     "store": 9276.0,
+     "chg": 2910.0
+    },
+    {
+     "n": 449718,
+     "cbus": 42629.0,
+     "rbus": 42574.0,
+     "store": 9039.0,
+     "chg": 2882.0
+    },
+    {
+     "n": 483031,
+     "cbus": 44096.0,
+     "rbus": 44122.0,
+     "store": 8986.0,
+     "chg": 2858.0
+    },
+    {
+     "n": 516343,
+     "cbus": 43750.0,
+     "rbus": 43818.0,
+     "store": 8705.0,
+     "chg": 2840.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 84348,
+   "dA_sum": 3084,
+   "dB_sum": 59676,
+   "kinds_json_bus_bits_per_op": 84348,
+   "kinds_json_gated_lane_frac": 0.195312
+  },
+  "int8.zeros": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 0.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 139843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 195781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 251718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 307656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 363593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 419531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 475468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 531406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 587343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 643281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 699218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 755156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 811093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 867031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 0,
+   "kinds_json_gated_lane_frac": 1.0
+  },
+  "int8.ones": {
+   "cbus": 513.0,
+   "rbus": 511.0,
+   "store": 8176.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 9200.0,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 592.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83906,
+     "cbus": 512.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 139843,
+     "cbus": 496.0,
+     "rbus": 528.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 195781,
+     "cbus": 496.0,
+     "rbus": 512.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 251718,
+     "cbus": 512.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 307656,
+     "cbus": 544.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 363593,
+     "cbus": 496.0,
+     "rbus": 512.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 419531,
+     "cbus": 496.0,
+     "rbus": 528.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 475468,
+     "cbus": 528.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 531406,
+     "cbus": 512.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 587343,
+     "cbus": 496.0,
+     "rbus": 560.0,
+     "store": 8960.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 643281,
+     "cbus": 496.0,
+     "rbus": 512.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 699218,
+     "cbus": 512.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 755156,
+     "cbus": 528.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 811093,
+     "cbus": 496.0,
+     "rbus": 512.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 867031,
+     "cbus": 496.0,
+     "rbus": 544.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 0,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "int8.neg_ones": {
+   "cbus": 513.0,
+   "rbus": 511.0,
+   "store": 8176.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 9200.0,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 592.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83906,
+     "cbus": 512.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 139843,
+     "cbus": 496.0,
+     "rbus": 528.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 195781,
+     "cbus": 496.0,
+     "rbus": 512.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 251718,
+     "cbus": 512.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 307656,
+     "cbus": 544.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 363593,
+     "cbus": 496.0,
+     "rbus": 512.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 419531,
+     "cbus": 496.0,
+     "rbus": 528.0,
+     "store": 8448.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 475468,
+     "cbus": 528.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 531406,
+     "cbus": 512.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 587343,
+     "cbus": 496.0,
+     "rbus": 560.0,
+     "store": 8960.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 643281,
+     "cbus": 496.0,
+     "rbus": 512.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 699218,
+     "cbus": 512.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 755156,
+     "cbus": 528.0,
+     "rbus": 496.0,
+     "store": 7936.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 811093,
+     "cbus": 496.0,
+     "rbus": 512.0,
+     "store": 8192.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 867031,
+     "cbus": 496.0,
+     "rbus": 544.0,
+     "store": 8704.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 0,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "int8.full": {
+   "cbus": 65304.06,
+   "rbus": 65330.25,
+   "store": 32549.75,
+   "prod": 139942.0,
+   "dsum": 38822.0,
+   "res_bits_per_op": 163184.06,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 64327.0,
+     "rbus": 65119.0,
+     "store": 32547.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83906,
+     "cbus": 64439.0,
+     "rbus": 64678.0,
+     "store": 32745.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 139843,
+     "cbus": 65999.0,
+     "rbus": 65659.0,
+     "store": 32488.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 195781,
+     "cbus": 65906.0,
+     "rbus": 65769.0,
+     "store": 32673.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 251718,
+     "cbus": 65964.0,
+     "rbus": 66163.0,
+     "store": 32482.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 307656,
+     "cbus": 65443.0,
+     "rbus": 65849.0,
+     "store": 32549.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 363593,
+     "cbus": 65077.0,
+     "rbus": 64917.0,
+     "store": 32796.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 419531,
+     "cbus": 66045.0,
+     "rbus": 65778.0,
+     "store": 32452.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 475468,
+     "cbus": 65538.0,
+     "rbus": 65768.0,
+     "store": 32425.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 531406,
+     "cbus": 66018.0,
+     "rbus": 66164.0,
+     "store": 32533.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 587343,
+     "cbus": 64682.0,
+     "rbus": 64176.0,
+     "store": 32563.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 643281,
+     "cbus": 64387.0,
+     "rbus": 64290.0,
+     "store": 32394.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 699218,
+     "cbus": 65654.0,
+     "rbus": 65740.0,
+     "store": 32453.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 755156,
+     "cbus": 65211.0,
+     "rbus": 65514.0,
+     "store": 32696.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 811093,
+     "cbus": 65012.0,
+     "rbus": 64913.0,
+     "store": 32532.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 867031,
+     "cbus": 65163.0,
+     "rbus": 64787.0,
+     "store": 32468.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 69312,
+   "dA_sum": 4078,
+   "dB_sum": 4064,
+   "kinds_json_bus_bits_per_op": 69312,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "int8.pos": {
+   "cbus": 65442.06,
+   "rbus": 65462.94,
+   "store": 34986.56,
+   "prod": 96996.0,
+   "dsum": 30186.0,
+   "res_bits_per_op": 165891.56,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 64111.0,
+     "rbus": 64887.0,
+     "store": 34889.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83906,
+     "cbus": 65658.0,
+     "rbus": 65809.0,
+     "store": 34810.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 139843,
+     "cbus": 65432.0,
+     "rbus": 65200.0,
+     "store": 34793.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 195781,
+     "cbus": 65606.0,
+     "rbus": 65475.0,
+     "store": 35108.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 251718,
+     "cbus": 65582.0,
+     "rbus": 65697.0,
+     "store": 34834.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 307656,
+     "cbus": 65982.0,
+     "rbus": 66308.0,
+     "store": 34908.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 363593,
+     "cbus": 65542.0,
+     "rbus": 65422.0,
+     "store": 35109.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 419531,
+     "cbus": 65054.0,
+     "rbus": 64855.0,
+     "store": 35053.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 475468,
+     "cbus": 65785.0,
+     "rbus": 65988.0,
+     "store": 35203.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 531406,
+     "cbus": 66039.0,
+     "rbus": 66148.0,
+     "store": 34858.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 587343,
+     "cbus": 65127.0,
+     "rbus": 64627.0,
+     "store": 34921.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 643281,
+     "cbus": 66358.0,
+     "rbus": 66272.0,
+     "store": 35046.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 699218,
+     "cbus": 64861.0,
+     "rbus": 65008.0,
+     "store": 34918.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 755156,
+     "cbus": 65235.0,
+     "rbus": 65456.0,
+     "store": 35040.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 811093,
+     "cbus": 65311.0,
+     "rbus": 65208.0,
+     "store": 35281.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 867031,
+     "cbus": 65390.0,
+     "rbus": 65047.0,
+     "store": 35014.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 61096,
+   "dA_sum": 3594,
+   "dB_sum": 3592,
+   "kinds_json_bus_bits_per_op": 61096,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "int8.smallint": {
+   "cbus": 65431.88,
+   "rbus": 65447.19,
+   "store": 16122.25,
+   "prod": 132566.0,
+   "dsum": 38894.0,
+   "res_bits_per_op": 147001.31,
+   "chg_rate": 0.989502,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 64622.0,
+     "rbus": 65334.0,
+     "store": 16115.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 83906,
+     "cbus": 66008.0,
+     "rbus": 66092.0,
+     "store": 16186.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 139843,
+     "cbus": 65854.0,
+     "rbus": 65603.0,
+     "store": 16163.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 195781,
+     "cbus": 65842.0,
+     "rbus": 65731.0,
+     "store": 16185.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 251718,
+     "cbus": 64853.0,
+     "rbus": 64970.0,
+     "store": 16210.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 307656,
+     "cbus": 65108.0,
+     "rbus": 65455.0,
+     "store": 16172.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 363593,
+     "cbus": 65537.0,
+     "rbus": 65420.0,
+     "store": 16034.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 419531,
+     "cbus": 66557.0,
+     "rbus": 66304.0,
+     "store": 16010.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 475468,
+     "cbus": 65080.0,
+     "rbus": 65312.0,
+     "store": 16028.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 531406,
+     "cbus": 64374.0,
+     "rbus": 64520.0,
+     "store": 16051.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 587343,
+     "cbus": 65734.0,
+     "rbus": 65268.0,
+     "store": 16210.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 643281,
+     "cbus": 64375.0,
+     "rbus": 64255.0,
+     "store": 15995.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 699218,
+     "cbus": 65697.0,
+     "rbus": 65836.0,
+     "store": 16152.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 755156,
+     "cbus": 66285.0,
+     "rbus": 66502.0,
+     "store": 16308.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 811093,
+     "cbus": 65586.0,
+     "rbus": 65516.0,
+     "store": 16118.0,
+     "chg": 4053.0
+    },
+    {
+     "n": 867031,
+     "cbus": 65398.0,
+     "rbus": 65037.0,
+     "store": 16019.0,
+     "chg": 4053.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 70526,
+   "dA_sum": 4148,
+   "dB_sum": 4158,
+   "kinds_json_bus_bits_per_op": 70526,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "int8.ternary": {
+   "cbus": 64735.94,
+   "rbus": 64746.75,
+   "store": 7151.56,
+   "prod": 84996.0,
+   "dsum": 35752.0,
+   "res_bits_per_op": 136634.25,
+   "chg_rate": 0.702881,
+   "live_frac": 0.992188,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 64108.0,
+     "rbus": 64860.0,
+     "store": 8381.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 83906,
+     "cbus": 64525.0,
+     "rbus": 64657.0,
+     "store": 6974.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 139843,
+     "cbus": 65008.0,
+     "rbus": 64749.0,
+     "store": 6874.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 195781,
+     "cbus": 64743.0,
+     "rbus": 64579.0,
+     "store": 7004.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 251718,
+     "cbus": 64913.0,
+     "rbus": 65026.0,
+     "store": 6942.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 307656,
+     "cbus": 63548.0,
+     "rbus": 63926.0,
+     "store": 7119.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 363593,
+     "cbus": 64990.0,
+     "rbus": 64881.0,
+     "store": 7069.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 419531,
+     "cbus": 64260.0,
+     "rbus": 63985.0,
+     "store": 6965.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 475468,
+     "cbus": 64693.0,
+     "rbus": 64942.0,
+     "store": 7022.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 531406,
+     "cbus": 64299.0,
+     "rbus": 64451.0,
+     "store": 6923.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 587343,
+     "cbus": 64556.0,
+     "rbus": 64092.0,
+     "store": 7463.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 643281,
+     "cbus": 64885.0,
+     "rbus": 64756.0,
+     "store": 7012.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 699218,
+     "cbus": 66387.0,
+     "rbus": 66503.0,
+     "store": 6953.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 755156,
+     "cbus": 64962.0,
+     "rbus": 65215.0,
+     "store": 6975.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 811093,
+     "cbus": 64947.0,
+     "rbus": 64785.0,
+     "store": 7660.0,
+     "chg": 2879.0
+    },
+    {
+     "n": 867031,
+     "cbus": 64951.0,
+     "rbus": 64541.0,
+     "store": 7089.0,
+     "chg": 2879.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 58798,
+   "dA_sum": 3442,
+   "dB_sum": 3726,
+   "kinds_json_bus_bits_per_op": 58798,
+   "kinds_json_gated_lane_frac": 0.007812
+  },
+  "int8.sparse50": {
+   "cbus": 60731.0,
+   "rbus": 60710.44,
+   "store": 20789.81,
+   "prod": 56368.0,
+   "dsum": 32652.0,
+   "res_bits_per_op": 142231.25,
+   "chg_rate": 0.719482,
+   "live_frac": 0.929688,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 59575.0,
+     "rbus": 60366.0,
+     "store": 20889.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 83906,
+     "cbus": 60582.0,
+     "rbus": 60630.0,
+     "store": 20740.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 139843,
+     "cbus": 60646.0,
+     "rbus": 60402.0,
+     "store": 20650.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 195781,
+     "cbus": 60331.0,
+     "rbus": 60192.0,
+     "store": 20792.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 251718,
+     "cbus": 60994.0,
+     "rbus": 60927.0,
+     "store": 20932.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 307656,
+     "cbus": 60374.0,
+     "rbus": 60735.0,
+     "store": 20717.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 363593,
+     "cbus": 60733.0,
+     "rbus": 60657.0,
+     "store": 20838.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 419531,
+     "cbus": 61496.0,
+     "rbus": 61129.0,
+     "store": 20740.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 475468,
+     "cbus": 61005.0,
+     "rbus": 61300.0,
+     "store": 20779.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 531406,
+     "cbus": 60524.0,
+     "rbus": 60535.0,
+     "store": 20847.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 587343,
+     "cbus": 60872.0,
+     "rbus": 60461.0,
+     "store": 20762.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 643281,
+     "cbus": 61009.0,
+     "rbus": 60831.0,
+     "store": 20979.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 699218,
+     "cbus": 61428.0,
+     "rbus": 61495.0,
+     "store": 20802.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 755156,
+     "cbus": 60593.0,
+     "rbus": 60627.0,
+     "store": 20923.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 811093,
+     "cbus": 60710.0,
+     "rbus": 60626.0,
+     "store": 20699.0,
+     "chg": 2947.0
+    },
+    {
+     "n": 867031,
+     "cbus": 60824.0,
+     "rbus": 60454.0,
+     "store": 20548.0,
+     "chg": 2947.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 53480,
+   "dA_sum": 3142,
+   "dB_sum": 3208,
+   "kinds_json_bus_bits_per_op": 53480,
+   "kinds_json_gated_lane_frac": 0.070312
+  },
+  "int8.sparse90": {
+   "cbus": 7926.62,
+   "rbus": 7950.62,
+   "store": 871.12,
+   "prod": 1984.0,
+   "dsum": 1966.0,
+   "res_bits_per_op": 16748.38,
+   "chg_rate": 0.03125,
+   "live_frac": 0.178223,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 7239.0,
+     "rbus": 7651.0,
+     "store": 887.0,
+     "chg": 128.0
+    },
+    {
+     "n": 83906,
+     "cbus": 7891.0,
+     "rbus": 7965.0,
+     "store": 869.0,
+     "chg": 128.0
+    },
+    {
+     "n": 139843,
+     "cbus": 7948.0,
+     "rbus": 7821.0,
+     "store": 851.0,
+     "chg": 128.0
+    },
+    {
+     "n": 195781,
+     "cbus": 8098.0,
+     "rbus": 8063.0,
+     "store": 905.0,
+     "chg": 128.0
+    },
+    {
+     "n": 251718,
+     "cbus": 8039.0,
+     "rbus": 8137.0,
+     "store": 838.0,
+     "chg": 128.0
+    },
+    {
+     "n": 307656,
+     "cbus": 7663.0,
+     "rbus": 7931.0,
+     "store": 857.0,
+     "chg": 128.0
+    },
+    {
+     "n": 363593,
+     "cbus": 8266.0,
+     "rbus": 8250.0,
+     "store": 871.0,
+     "chg": 128.0
+    },
+    {
+     "n": 419531,
+     "cbus": 7901.0,
+     "rbus": 7807.0,
+     "store": 817.0,
+     "chg": 128.0
+    },
+    {
+     "n": 475468,
+     "cbus": 7864.0,
+     "rbus": 8018.0,
+     "store": 879.0,
+     "chg": 128.0
+    },
+    {
+     "n": 531406,
+     "cbus": 7961.0,
+     "rbus": 8064.0,
+     "store": 884.0,
+     "chg": 128.0
+    },
+    {
+     "n": 587343,
+     "cbus": 7804.0,
+     "rbus": 7483.0,
+     "store": 870.0,
+     "chg": 128.0
+    },
+    {
+     "n": 643281,
+     "cbus": 8220.0,
+     "rbus": 8132.0,
+     "store": 861.0,
+     "chg": 128.0
+    },
+    {
+     "n": 699218,
+     "cbus": 8063.0,
+     "rbus": 8118.0,
+     "store": 911.0,
+     "chg": 128.0
+    },
+    {
+     "n": 755156,
+     "cbus": 7979.0,
+     "rbus": 8164.0,
+     "store": 890.0,
+     "chg": 128.0
+    },
+    {
+     "n": 811093,
+     "cbus": 7983.0,
+     "rbus": 7910.0,
+     "store": 862.0,
+     "chg": 128.0
+    },
+    {
+     "n": 867031,
+     "cbus": 7907.0,
+     "rbus": 7696.0,
+     "store": 886.0,
+     "chg": 128.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 12144,
+   "dA_sum": 710,
+   "dB_sum": 784,
+   "kinds_json_bus_bits_per_op": 12144,
+   "kinds_json_gated_lane_frac": 0.821777
+  },
+  "int8.wsparse50": {
+   "cbus": 23208.75,
+   "rbus": 23212.25,
+   "store": 8147.56,
+   "prod": 36452.0,
+   "dsum": 10214.0,
+   "res_bits_per_op": 54568.56,
+   "chg_rate": 0.250977,
+   "live_frac": 0.356445,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 22837.0,
+     "rbus": 23296.0,
+     "store": 8132.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 83906,
+     "cbus": 23406.0,
+     "rbus": 23432.0,
+     "store": 8174.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 139843,
+     "cbus": 23327.0,
+     "rbus": 23153.0,
+     "store": 8307.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 195781,
+     "cbus": 23402.0,
+     "rbus": 23326.0,
+     "store": 8085.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 251718,
+     "cbus": 22913.0,
+     "rbus": 23072.0,
+     "store": 8212.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 307656,
+     "cbus": 22459.0,
+     "rbus": 22822.0,
+     "store": 8158.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 363593,
+     "cbus": 23549.0,
+     "rbus": 23337.0,
+     "store": 8104.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 419531,
+     "cbus": 23400.0,
+     "rbus": 23218.0,
+     "store": 8187.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 475468,
+     "cbus": 23161.0,
+     "rbus": 23294.0,
+     "store": 8133.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 531406,
+     "cbus": 23021.0,
+     "rbus": 23182.0,
+     "store": 8030.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 587343,
+     "cbus": 23242.0,
+     "rbus": 22916.0,
+     "store": 8064.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 643281,
+     "cbus": 23471.0,
+     "rbus": 23272.0,
+     "store": 8143.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 699218,
+     "cbus": 23239.0,
+     "rbus": 23343.0,
+     "store": 8164.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 755156,
+     "cbus": 23221.0,
+     "rbus": 23402.0,
+     "store": 8245.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 811093,
+     "cbus": 23419.0,
+     "rbus": 23355.0,
+     "store": 8101.0,
+     "chg": 1028.0
+    },
+    {
+     "n": 867031,
+     "cbus": 23273.0,
+     "rbus": 22976.0,
+     "store": 8122.0,
+     "chg": 1028.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 48766,
+   "dA_sum": 2840,
+   "dB_sum": 3326,
+   "kinds_json_bus_bits_per_op": 48766,
+   "kinds_json_gated_lane_frac": 0.643555
+  },
+  "int8.wsparse90": {
+   "cbus": 858.25,
+   "rbus": 858.81,
+   "store": 346.44,
+   "prod": 1638.0,
+   "dsum": 532.0,
+   "res_bits_per_op": 2063.5,
+   "chg_rate": 0.010986,
+   "live_frac": 0.02002,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 779.0,
+     "rbus": 898.0,
+     "store": 350.0,
+     "chg": 45.0
+    },
+    {
+     "n": 83906,
+     "cbus": 863.0,
+     "rbus": 871.0,
+     "store": 342.0,
+     "chg": 45.0
+    },
+    {
+     "n": 139843,
+     "cbus": 914.0,
+     "rbus": 863.0,
+     "store": 345.0,
+     "chg": 45.0
+    },
+    {
+     "n": 195781,
+     "cbus": 921.0,
+     "rbus": 893.0,
+     "store": 340.0,
+     "chg": 45.0
+    },
+    {
+     "n": 251718,
+     "cbus": 858.0,
+     "rbus": 865.0,
+     "store": 345.0,
+     "chg": 45.0
+    },
+    {
+     "n": 307656,
+     "cbus": 817.0,
+     "rbus": 881.0,
+     "store": 353.0,
+     "chg": 45.0
+    },
+    {
+     "n": 363593,
+     "cbus": 832.0,
+     "rbus": 810.0,
+     "store": 351.0,
+     "chg": 45.0
+    },
+    {
+     "n": 419531,
+     "cbus": 877.0,
+     "rbus": 844.0,
+     "store": 345.0,
+     "chg": 45.0
+    },
+    {
+     "n": 475468,
+     "cbus": 839.0,
+     "rbus": 887.0,
+     "store": 334.0,
+     "chg": 45.0
+    },
+    {
+     "n": 531406,
+     "cbus": 847.0,
+     "rbus": 845.0,
+     "store": 336.0,
+     "chg": 45.0
+    },
+    {
+     "n": 587343,
+     "cbus": 873.0,
+     "rbus": 803.0,
+     "store": 359.0,
+     "chg": 45.0
+    },
+    {
+     "n": 643281,
+     "cbus": 883.0,
+     "rbus": 882.0,
+     "store": 334.0,
+     "chg": 45.0
+    },
+    {
+     "n": 699218,
+     "cbus": 881.0,
+     "rbus": 880.0,
+     "store": 351.0,
+     "chg": 45.0
+    },
+    {
+     "n": 755156,
+     "cbus": 836.0,
+     "rbus": 854.0,
+     "store": 341.0,
+     "chg": 45.0
+    },
+    {
+     "n": 811093,
+     "cbus": 858.0,
+     "rbus": 874.0,
+     "store": 360.0,
+     "chg": 45.0
+    },
+    {
+     "n": 867031,
+     "cbus": 854.0,
+     "rbus": 791.0,
+     "store": 357.0,
+     "chg": 45.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 16316,
+   "dA_sum": 984,
+   "dB_sum": 572,
+   "kinds_json_bus_bits_per_op": 16316,
+   "kinds_json_gated_lane_frac": 0.97998
+  },
+  "int8.highbit": {
+   "cbus": 39012.44,
+   "rbus": 39030.31,
+   "store": 6363.56,
+   "prod": 41200.0,
+   "dsum": 10566.0,
+   "res_bits_per_op": 84406.31,
+   "chg_rate": 0.624756,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 37289.0,
+     "rbus": 37995.0,
+     "store": 7721.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 83906,
+     "cbus": 38764.0,
+     "rbus": 38924.0,
+     "store": 6129.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 139843,
+     "cbus": 38524.0,
+     "rbus": 38248.0,
+     "store": 6243.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 195781,
+     "cbus": 39798.0,
+     "rbus": 39699.0,
+     "store": 6114.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 251718,
+     "cbus": 38988.0,
+     "rbus": 39093.0,
+     "store": 6144.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 307656,
+     "cbus": 39016.0,
+     "rbus": 39371.0,
+     "store": 6408.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 363593,
+     "cbus": 39866.0,
+     "rbus": 39779.0,
+     "store": 6229.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 419531,
+     "cbus": 39801.0,
+     "rbus": 39568.0,
+     "store": 6263.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 475468,
+     "cbus": 38711.0,
+     "rbus": 38935.0,
+     "store": 6242.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 531406,
+     "cbus": 38778.0,
+     "rbus": 38892.0,
+     "store": 6127.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 587343,
+     "cbus": 39561.0,
+     "rbus": 39059.0,
+     "store": 6833.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 643281,
+     "cbus": 39016.0,
+     "rbus": 38902.0,
+     "store": 6097.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 699218,
+     "cbus": 38619.0,
+     "rbus": 38776.0,
+     "store": 6101.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 755156,
+     "cbus": 38824.0,
+     "rbus": 39060.0,
+     "store": 6199.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 811093,
+     "cbus": 39213.0,
+     "rbus": 39115.0,
+     "store": 6540.0,
+     "chg": 2559.0
+    },
+    {
+     "n": 867031,
+     "cbus": 39431.0,
+     "rbus": 39069.0,
+     "store": 6427.0,
+     "chg": 2559.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 8664,
+   "dA_sum": 510,
+   "dB_sum": 504,
+   "kinds_json_bus_bits_per_op": 8664,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "int8.gauss_q": {
+   "cbus": 65461.5,
+   "rbus": 65486.31,
+   "store": 23289.0,
+   "prod": 137404.0,
+   "dsum": 39282.0,
+   "res_bits_per_op": 154236.81,
+   "chg_rate": 0.998291,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 65119.0,
+     "rbus": 65902.0,
+     "store": 23171.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 83906,
+     "cbus": 65111.0,
+     "rbus": 65248.0,
+     "store": 23304.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 139843,
+     "cbus": 65885.0,
+     "rbus": 65653.0,
+     "store": 23121.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 195781,
+     "cbus": 65849.0,
+     "rbus": 65798.0,
+     "store": 23613.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 251718,
+     "cbus": 65453.0,
+     "rbus": 65544.0,
+     "store": 23468.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 307656,
+     "cbus": 65105.0,
+     "rbus": 65521.0,
+     "store": 23248.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 363593,
+     "cbus": 65512.0,
+     "rbus": 65341.0,
+     "store": 23135.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 419531,
+     "cbus": 65356.0,
+     "rbus": 65143.0,
+     "store": 23307.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 475468,
+     "cbus": 65168.0,
+     "rbus": 65337.0,
+     "store": 23430.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 531406,
+     "cbus": 65529.0,
+     "rbus": 65700.0,
+     "store": 23328.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 587343,
+     "cbus": 65231.0,
+     "rbus": 64750.0,
+     "store": 23463.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 643281,
+     "cbus": 66369.0,
+     "rbus": 66235.0,
+     "store": 23140.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 699218,
+     "cbus": 65391.0,
+     "rbus": 65559.0,
+     "store": 23153.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 755156,
+     "cbus": 65223.0,
+     "rbus": 65431.0,
+     "store": 23380.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 811093,
+     "cbus": 65445.0,
+     "rbus": 65348.0,
+     "store": 23288.0,
+     "chg": 4089.0
+    },
+    {
+     "n": 867031,
+     "cbus": 65638.0,
+     "rbus": 65271.0,
+     "store": 23075.0,
+     "chg": 4089.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 69544,
+   "dA_sum": 4094,
+   "dB_sum": 4040,
+   "kinds_json_bus_bits_per_op": 69544,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "int8.a_full_b_zeros": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 0.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 139843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 195781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 251718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 307656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 363593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 419531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 475468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 531406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 587343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 643281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 699218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 755156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 811093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 867031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 65248,
+   "dA_sum": 4078,
+   "dB_sum": 0,
+   "kinds_json_bus_bits_per_op": 65248,
+   "kinds_json_gated_lane_frac": 1.0
+  },
+  "int8.a_zeros_b_full": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 0.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 139843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 195781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 251718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 307656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 363593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 419531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 475468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 531406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 587343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 643281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 699218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 755156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 811093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 867031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 4140,
+   "dA_sum": 0,
+   "dB_sum": 4140,
+   "kinds_json_bus_bits_per_op": 4140,
+   "kinds_json_gated_lane_frac": 1.0
+  },
+  "int8.sorted": {
+   "cbus": 65433.44,
+   "rbus": 65462.5,
+   "store": 32480.38,
+   "prod": 120848.0,
+   "dsum": 36764.0,
+   "res_bits_per_op": 163376.31,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 64955.0,
+     "rbus": 65674.0,
+     "store": 32350.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83906,
+     "cbus": 65288.0,
+     "rbus": 65409.0,
+     "store": 32411.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 139843,
+     "cbus": 66456.0,
+     "rbus": 66272.0,
+     "store": 32411.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 195781,
+     "cbus": 65488.0,
+     "rbus": 65364.0,
+     "store": 32732.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 251718,
+     "cbus": 65205.0,
+     "rbus": 65344.0,
+     "store": 32376.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 307656,
+     "cbus": 65653.0,
+     "rbus": 66065.0,
+     "store": 32365.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 363593,
+     "cbus": 64831.0,
+     "rbus": 64736.0,
+     "store": 32582.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 419531,
+     "cbus": 65806.0,
+     "rbus": 65523.0,
+     "store": 32566.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 475468,
+     "cbus": 64999.0,
+     "rbus": 65222.0,
+     "store": 32565.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 531406,
+     "cbus": 65751.0,
+     "rbus": 65867.0,
+     "store": 32573.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 587343,
+     "cbus": 66421.0,
+     "rbus": 65983.0,
+     "store": 32242.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 643281,
+     "cbus": 65000.0,
+     "rbus": 64823.0,
+     "store": 32565.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 699218,
+     "cbus": 65150.0,
+     "rbus": 65282.0,
+     "store": 32442.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 755156,
+     "cbus": 65518.0,
+     "rbus": 65744.0,
+     "store": 32343.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 811093,
+     "cbus": 65343.0,
+     "rbus": 65266.0,
+     "store": 32669.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 867031,
+     "cbus": 65071.0,
+     "rbus": 64826.0,
+     "store": 32494.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 53346,
+   "dA_sum": 3142,
+   "dB_sum": 3074,
+   "kinds_json_bus_bits_per_op": 53346,
+   "kinds_json_gated_lane_frac": 0.0
+  },
+  "fp32.c_abs": {
+   "cbus": 15.0,
+   "rbus": 15.0,
+   "store": 480.0,
+   "prod": 112.0,
+   "dsum": 112.0,
+   "res_bits_per_op": 510.0,
+   "chg_rate": 0.0625,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 49968,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 83281,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 116593,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 149906,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 183218,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 216531,
+     "cbus": 24.0,
+     "rbus": 24.0,
+     "store": 768.0,
+     "chg": 256.0
+    },
+    {
+     "n": 249843,
+     "cbus": 24.0,
+     "rbus": 24.0,
+     "store": 768.0,
+     "chg": 256.0
+    },
+    {
+     "n": 283156,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 316468,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 349781,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 383093,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 416406,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 449718,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 483031,
+     "cbus": 32.0,
+     "rbus": 32.0,
+     "store": 1024.0,
+     "chg": 256.0
+    },
+    {
+     "n": 516343,
+     "cbus": 32.0,
+     "rbus": 32.0,
+     "store": 1024.0,
+     "chg": 256.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 160,
+   "dA_sum": 10,
+   "dB_sum": 80
+  },
+  "fp32.r_walk": {
+   "cbus": 50165.69,
+   "rbus": 50157.12,
+   "store": 8640.44,
+   "prod": 97410.0,
+   "dsum": 97410.0,
+   "res_bits_per_op": 108963.25,
+   "chg_rate": 0.801178,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 51828.0,
+     "rbus": 51803.0,
+     "store": 15585.0,
+     "chg": 4017.0
+    },
+    {
+     "n": 49968,
+     "cbus": 50709.0,
+     "rbus": 50706.0,
+     "store": 12452.0,
+     "chg": 3879.0
+    },
+    {
+     "n": 83281,
+     "cbus": 48498.0,
+     "rbus": 48547.0,
+     "store": 11036.0,
+     "chg": 3764.0
+    },
+    {
+     "n": 116593,
+     "cbus": 49556.0,
+     "rbus": 49543.0,
+     "store": 10160.0,
+     "chg": 3670.0
+    },
+    {
+     "n": 149906,
+     "cbus": 51007.0,
+     "rbus": 51011.0,
+     "store": 9458.0,
+     "chg": 3549.0
+    },
+    {
+     "n": 183218,
+     "cbus": 53170.0,
+     "rbus": 53109.0,
+     "store": 8951.0,
+     "chg": 3460.0
+    },
+    {
+     "n": 216531,
+     "cbus": 51736.0,
+     "rbus": 51688.0,
+     "store": 8450.0,
+     "chg": 3381.0
+    },
+    {
+     "n": 249843,
+     "cbus": 51900.0,
+     "rbus": 51891.0,
+     "store": 8103.0,
+     "chg": 3291.0
+    },
+    {
+     "n": 283156,
+     "cbus": 49712.0,
+     "rbus": 49712.0,
+     "store": 7744.0,
+     "chg": 3204.0
+    },
+    {
+     "n": 316468,
+     "cbus": 49049.0,
+     "rbus": 48964.0,
+     "store": 7436.0,
+     "chg": 3108.0
+    },
+    {
+     "n": 349781,
+     "cbus": 49063.0,
+     "rbus": 49080.0,
+     "store": 6987.0,
+     "chg": 3026.0
+    },
+    {
+     "n": 383093,
+     "cbus": 49203.0,
+     "rbus": 49224.0,
+     "store": 6822.0,
+     "chg": 2959.0
+    },
+    {
+     "n": 416406,
+     "cbus": 50150.0,
+     "rbus": 50173.0,
+     "store": 6561.0,
+     "chg": 2897.0
+    },
+    {
+     "n": 449718,
+     "cbus": 48512.0,
+     "rbus": 48510.0,
+     "store": 6330.0,
+     "chg": 2815.0
+    },
+    {
+     "n": 483031,
+     "cbus": 48706.0,
+     "rbus": 48692.0,
+     "store": 6170.0,
+     "chg": 2775.0
+    },
+    {
+     "n": 516343,
+     "cbus": 49852.0,
+     "rbus": 49861.0,
+     "store": 6002.0,
+     "chg": 2711.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 75568,
+   "dA_sum": 3154,
+   "dB_sum": 50336
+  },
+  "fp32.r_abs": {
+   "cbus": 15.0,
+   "rbus": 15.0,
+   "store": 480.0,
+   "prod": 97462.0,
+   "dsum": 97462.0,
+   "res_bits_per_op": 510.0,
+   "chg_rate": 0.0625,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 49968,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 83281,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 116593,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 149906,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 183218,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 216531,
+     "cbus": 24.0,
+     "rbus": 24.0,
+     "store": 768.0,
+     "chg": 256.0
+    },
+    {
+     "n": 249843,
+     "cbus": 24.0,
+     "rbus": 24.0,
+     "store": 768.0,
+     "chg": 256.0
+    },
+    {
+     "n": 283156,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 316468,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 349781,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 383093,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 416406,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 449718,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 483031,
+     "cbus": 32.0,
+     "rbus": 32.0,
+     "store": 1024.0,
+     "chg": 256.0
+    },
+    {
+     "n": 516343,
+     "cbus": 32.0,
+     "rbus": 32.0,
+     "store": 1024.0,
+     "chg": 256.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 75694,
+   "dA_sum": 3164,
+   "dB_sum": 50382
+  },
+  "fp32.r_het": {
+   "cbus": 47644.94,
+   "rbus": 47646.94,
+   "store": 1157.0,
+   "prod": 100408.0,
+   "dsum": 100408.0,
+   "res_bits_per_op": 96448.88,
+   "chg_rate": 0.0625,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 44163.0,
+     "rbus": 44035.0,
+     "store": 1760.0,
+     "chg": 256.0
+    },
+    {
+     "n": 49968,
+     "cbus": 47580.0,
+     "rbus": 47612.0,
+     "store": 1424.0,
+     "chg": 256.0
+    },
+    {
+     "n": 83281,
+     "cbus": 55670.0,
+     "rbus": 55798.0,
+     "store": 1248.0,
+     "chg": 256.0
+    },
+    {
+     "n": 116593,
+     "cbus": 48191.0,
+     "rbus": 48127.0,
+     "store": 1312.0,
+     "chg": 256.0
+    },
+    {
+     "n": 149906,
+     "cbus": 49818.0,
+     "rbus": 49658.0,
+     "store": 1232.0,
+     "chg": 256.0
+    },
+    {
+     "n": 183218,
+     "cbus": 42110.0,
+     "rbus": 41982.0,
+     "store": 1088.0,
+     "chg": 256.0
+    },
+    {
+     "n": 216531,
+     "cbus": 45702.0,
+     "rbus": 45574.0,
+     "store": 1152.0,
+     "chg": 256.0
+    },
+    {
+     "n": 249843,
+     "cbus": 48345.0,
+     "rbus": 48633.0,
+     "store": 1104.0,
+     "chg": 256.0
+    },
+    {
+     "n": 283156,
+     "cbus": 45157.0,
+     "rbus": 45061.0,
+     "store": 1072.0,
+     "chg": 256.0
+    },
+    {
+     "n": 316468,
+     "cbus": 41679.0,
+     "rbus": 41487.0,
+     "store": 960.0,
+     "chg": 256.0
+    },
+    {
+     "n": 349781,
+     "cbus": 56283.0,
+     "rbus": 56315.0,
+     "store": 1136.0,
+     "chg": 256.0
+    },
+    {
+     "n": 383093,
+     "cbus": 43364.0,
+     "rbus": 43524.0,
+     "store": 912.0,
+     "chg": 256.0
+    },
+    {
+     "n": 416406,
+     "cbus": 43387.0,
+     "rbus": 43515.0,
+     "store": 1024.0,
+     "chg": 256.0
+    },
+    {
+     "n": 449718,
+     "cbus": 52356.0,
+     "rbus": 52228.0,
+     "store": 1216.0,
+     "chg": 256.0
+    },
+    {
+     "n": 483031,
+     "cbus": 46331.0,
+     "rbus": 46587.0,
+     "store": 896.0,
+     "chg": 256.0
+    },
+    {
+     "n": 516343,
+     "cbus": 52183.0,
+     "rbus": 52215.0,
+     "store": 976.0,
+     "chg": 256.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 78638,
+   "dA_sum": 3164,
+   "dB_sum": 53326
+  },
+  "fp32.s_walk": {
+   "cbus": 34260.06,
+   "rbus": 34270.56,
+   "store": 11970.19,
+   "prod": 2080.0,
+   "dsum": 2080.0,
+   "res_bits_per_op": 80500.81,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 23715.0,
+     "rbus": 23847.0,
+     "store": 12306.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 49968,
+     "cbus": 31703.0,
+     "rbus": 31927.0,
+     "store": 12306.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83281,
+     "cbus": 29382.0,
+     "rbus": 29388.0,
+     "store": 11628.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 116593,
+     "cbus": 33036.0,
+     "rbus": 33028.0,
+     "store": 11628.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 149906,
+     "cbus": 31745.0,
+     "rbus": 31957.0,
+     "store": 11616.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 183218,
+     "cbus": 35103.0,
+     "rbus": 35131.0,
+     "store": 11624.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 216531,
+     "cbus": 36548.0,
+     "rbus": 36420.0,
+     "store": 12139.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 249843,
+     "cbus": 36123.0,
+     "rbus": 36007.0,
+     "store": 12146.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 283156,
+     "cbus": 28720.0,
+     "rbus": 28864.0,
+     "store": 11687.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 316468,
+     "cbus": 35442.0,
+     "rbus": 35586.0,
+     "store": 11677.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 349781,
+     "cbus": 35511.0,
+     "rbus": 35345.0,
+     "store": 12161.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 383093,
+     "cbus": 36345.0,
+     "rbus": 36359.0,
+     "store": 11879.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 416406,
+     "cbus": 35895.0,
+     "rbus": 35977.0,
+     "store": 11608.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 449718,
+     "cbus": 40323.0,
+     "rbus": 40391.0,
+     "store": 11608.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 483031,
+     "cbus": 42057.0,
+     "rbus": 41883.0,
+     "store": 12755.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 516343,
+     "cbus": 36513.0,
+     "rbus": 36219.0,
+     "store": 12755.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 3204,
+   "dA_sum": 118,
+   "dB_sum": 2260
+  },
+  "fp32.s_abs": {
+   "cbus": 15.0,
+   "rbus": 15.0,
+   "store": 480.0,
+   "prod": 2192.0,
+   "dsum": 2192.0,
+   "res_bits_per_op": 510.0,
+   "chg_rate": 0.0625,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 49968,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 83281,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 116593,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 149906,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 183218,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 216531,
+     "cbus": 24.0,
+     "rbus": 24.0,
+     "store": 768.0,
+     "chg": 256.0
+    },
+    {
+     "n": 249843,
+     "cbus": 24.0,
+     "rbus": 24.0,
+     "store": 768.0,
+     "chg": 256.0
+    },
+    {
+     "n": 283156,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 316468,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 349781,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 383093,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 416406,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 449718,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 483031,
+     "cbus": 32.0,
+     "rbus": 32.0,
+     "store": 1024.0,
+     "chg": 256.0
+    },
+    {
+     "n": 516343,
+     "cbus": 32.0,
+     "rbus": 32.0,
+     "store": 1024.0,
+     "chg": 256.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 3364,
+   "dA_sum": 128,
+   "dB_sum": 2340
+  },
+  "fp16.c_cancel": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 49968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 116593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 149906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 183218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 216531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 249843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 283156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 316468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 349781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 383093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 416406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 449718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 483031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 516343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0
+  },
+  "fp16.r_walk": {
+   "cbus": 56080.88,
+   "rbus": 56099.44,
+   "store": 12682.88,
+   "prod": 94852.0,
+   "dsum": 50804.0,
+   "res_bits_per_op": 124863.19,
+   "chg_rate": 0.853607,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 54990.0,
+     "rbus": 54947.0,
+     "store": 19660.0,
+     "chg": 3804.0
+    },
+    {
+     "n": 49968,
+     "cbus": 58076.0,
+     "rbus": 58149.0,
+     "store": 16604.0,
+     "chg": 3744.0
+    },
+    {
+     "n": 83281,
+     "cbus": 59623.0,
+     "rbus": 59683.0,
+     "store": 15069.0,
+     "chg": 3691.0
+    },
+    {
+     "n": 116593,
+     "cbus": 56871.0,
+     "rbus": 56911.0,
+     "store": 14130.0,
+     "chg": 3645.0
+    },
+    {
+     "n": 149906,
+     "cbus": 57009.0,
+     "rbus": 56932.0,
+     "store": 13684.0,
+     "chg": 3606.0
+    },
+    {
+     "n": 183218,
+     "cbus": 56948.0,
+     "rbus": 57005.0,
+     "store": 13082.0,
+     "chg": 3569.0
+    },
+    {
+     "n": 216531,
+     "cbus": 56710.0,
+     "rbus": 56734.0,
+     "store": 12210.0,
+     "chg": 3527.0
+    },
+    {
+     "n": 249843,
+     "cbus": 55681.0,
+     "rbus": 55764.0,
+     "store": 12091.0,
+     "chg": 3478.0
+    },
+    {
+     "n": 283156,
+     "cbus": 56151.0,
+     "rbus": 56149.0,
+     "store": 11771.0,
+     "chg": 3446.0
+    },
+    {
+     "n": 316468,
+     "cbus": 56200.0,
+     "rbus": 56186.0,
+     "store": 11274.0,
+     "chg": 3428.0
+    },
+    {
+     "n": 349781,
+     "cbus": 55068.0,
+     "rbus": 55084.0,
+     "store": 11192.0,
+     "chg": 3398.0
+    },
+    {
+     "n": 383093,
+     "cbus": 55439.0,
+     "rbus": 55466.0,
+     "store": 10838.0,
+     "chg": 3374.0
+    },
+    {
+     "n": 416406,
+     "cbus": 54272.0,
+     "rbus": 54282.0,
+     "store": 10551.0,
+     "chg": 3344.0
+    },
+    {
+     "n": 449718,
+     "cbus": 54884.0,
+     "rbus": 54896.0,
+     "store": 10370.0,
+     "chg": 3317.0
+    },
+    {
+     "n": 483031,
+     "cbus": 55264.0,
+     "rbus": 55289.0,
+     "store": 10220.0,
+     "chg": 3292.0
+    },
+    {
+     "n": 516343,
+     "cbus": 54108.0,
+     "rbus": 54114.0,
+     "store": 10180.0,
+     "chg": 3279.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 74108,
+   "dA_sum": 3148,
+   "dB_sum": 48924
+  },
+  "fp16.r_cancel": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 94428.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 49968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 116593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 149906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 183218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 216531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 249843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 283156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 316468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 349781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 383093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 416406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 449718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 483031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 516343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 71548,
+   "dA_sum": 3148,
+   "dB_sum": 46364
+  },
+  "fp16.r_abs": {
+   "cbus": 15.0,
+   "rbus": 15.0,
+   "store": 480.0,
+   "prod": 95060.0,
+   "dsum": 50790.0,
+   "res_bits_per_op": 510.0,
+   "chg_rate": 0.0625,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 16656,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 49968,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 83281,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 116593,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 149906,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 183218,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 216531,
+     "cbus": 24.0,
+     "rbus": 24.0,
+     "store": 768.0,
+     "chg": 256.0
+    },
+    {
+     "n": 249843,
+     "cbus": 24.0,
+     "rbus": 24.0,
+     "store": 768.0,
+     "chg": 256.0
+    },
+    {
+     "n": 283156,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 316468,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 349781,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 383093,
+     "cbus": 16.0,
+     "rbus": 16.0,
+     "store": 512.0,
+     "chg": 256.0
+    },
+    {
+     "n": 416406,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 449718,
+     "cbus": 8.0,
+     "rbus": 8.0,
+     "store": 256.0,
+     "chg": 256.0
+    },
+    {
+     "n": 483031,
+     "cbus": 32.0,
+     "rbus": 32.0,
+     "store": 1024.0,
+     "chg": 256.0
+    },
+    {
+     "n": 516343,
+     "cbus": 32.0,
+     "rbus": 32.0,
+     "store": 1024.0,
+     "chg": 256.0
+    }
+   ],
+   "launch_ops": 533000,
+   "bus_bits_per_op": 74180,
+   "dA_sum": 3152,
+   "dB_sum": 48964
+  },
+  "int8.c_cancel": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 0.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 139843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 195781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 251718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 307656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 363593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 419531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 475468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 531406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 587343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 643281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 699218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 755156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 811093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 867031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 0,
+   "dA_sum": 0,
+   "dB_sum": 0
+  },
+  "int8.r_walk": {
+   "cbus": 65453.06,
+   "rbus": 65481.0,
+   "store": 31663.44,
+   "prod": 137562.0,
+   "dsum": 38260.0,
+   "res_bits_per_op": 162597.5,
+   "chg_rate": 1.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 64603.0,
+     "rbus": 65407.0,
+     "store": 31511.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 83906,
+     "cbus": 65557.0,
+     "rbus": 65695.0,
+     "store": 31628.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 139843,
+     "cbus": 65598.0,
+     "rbus": 65306.0,
+     "store": 31789.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 195781,
+     "cbus": 65668.0,
+     "rbus": 65535.0,
+     "store": 31562.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 251718,
+     "cbus": 65133.0,
+     "rbus": 65288.0,
+     "store": 31789.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 307656,
+     "cbus": 65429.0,
+     "rbus": 65730.0,
+     "store": 31680.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 363593,
+     "cbus": 65646.0,
+     "rbus": 65583.0,
+     "store": 31611.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 419531,
+     "cbus": 65642.0,
+     "rbus": 65410.0,
+     "store": 31751.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 475468,
+     "cbus": 64729.0,
+     "rbus": 65039.0,
+     "store": 31535.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 531406,
+     "cbus": 65430.0,
+     "rbus": 65564.0,
+     "store": 31843.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 587343,
+     "cbus": 65768.0,
+     "rbus": 65247.0,
+     "store": 31653.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 643281,
+     "cbus": 66121.0,
+     "rbus": 66037.0,
+     "store": 31410.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 699218,
+     "cbus": 65718.0,
+     "rbus": 65846.0,
+     "store": 31686.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 755156,
+     "cbus": 64573.0,
+     "rbus": 64860.0,
+     "store": 31843.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 811093,
+     "cbus": 66257.0,
+     "rbus": 66172.0,
+     "store": 31735.0,
+     "chg": 4096.0
+    },
+    {
+     "n": 867031,
+     "cbus": 65377.0,
+     "rbus": 64977.0,
+     "store": 31589.0,
+     "chg": 4096.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 68874,
+   "dA_sum": 4052,
+   "dB_sum": 4042
+  },
+  "int8.r_cancel": {
+   "cbus": 0.0,
+   "rbus": 0.0,
+   "store": 0.0,
+   "prod": 138322.0,
+   "dsum": 0.0,
+   "res_bits_per_op": 0.0,
+   "chg_rate": 0.0,
+   "live_frac": 1.0,
+   "samples": [
+    {
+     "n": 27968,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 83906,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 139843,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 195781,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 251718,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 307656,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 363593,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 419531,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 475468,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 531406,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 587343,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 643281,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 699218,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 755156,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 811093,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    },
+    {
+     "n": 867031,
+     "cbus": 0.0,
+     "rbus": 0.0,
+     "store": 0.0,
+     "chg": 0.0
+    }
+   ],
+   "launch_ops": 895000,
+   "bus_bits_per_op": 68906,
+   "dA_sum": 4052,
+   "dB_sum": 4074
+  }
+ },
+ "fit": {
+  "fp32": {
+   "features": [
+    "live",
+    "N_op",
+    "N_prod",
+    "N_res"
+   ],
+   "coef": [
+    7.52726960227073,
+    2.170787871721187e-05,
+    8.295874320619204e-05,
+    4.632402190273519e-05
+   ],
+   "se": [
+    0.31481221225597933,
+    5.198110793300362e-06,
+    6.051848823573564e-06,
+    4.3093974068657175e-06
+   ],
+   "cov": [
+    [
+     0.0991067289855038,
+     2.4475437723431113e-08,
+     1.319393261069634e-07,
+     -9.199854888707878e-07
+    ],
+    [
+     2.447543772343163e-08,
+     2.702035581942572e-11,
+     -1.9610280253877786e-11,
+     -2.2002123704262746e-12
+    ],
+    [
+     1.3193932610696408e-07,
+     -1.9610280253877786e-11,
+     3.6624874183388735e-11,
+     -1.3131771011209085e-11
+    ],
+    [
+     -9.199854888707883e-07,
+     -2.2002123704262713e-12,
+     -1.3131771011209083e-11,
+     1.8570906010300974e-11
+    ]
+   ],
+   "rms_w": 0.4432138498430161,
+   "n": 18,
+   "F_w": 7.52726960227073,
+   "F_se_w": 0.31481221225597933,
+   "a_fj_per_bus_bit": 19.291181281897266,
+   "a_se_fj": 4.61941486513997,
+   "c_fj_per_product_bit": 73.72310187269018,
+   "c_se_fj": 5.378107841261663,
+   "b_fj_per_result_bit": 41.16685540184475,
+   "b_se_fj": 3.829640273679495,
+   "F_pj_per_live_lane_cycle": 1.6331232400098716,
+   "residuals": {
+    "fp32.zeros": 0.0,
+    "fp32.ones": -0.011,
+    "fp32.neg_ones": 0.051,
+    "fp32.pi": 0.149,
+    "fp32.randn": 0.208,
+    "fp32.randn_small": 0.202,
+    "fp32.randn_large": 0.25,
+    "fp32.uniform01": -0.374,
+    "fp32.sparse50": 0.16,
+    "fp32.sparse90": 0.043,
+    "fp32.smallint": 0.603,
+    "fp32.pow2": -1.321,
+    "fp32.bf16trunc": 0.204,
+    "fp32.fp16grid": 0.616,
+    "fp32.a_randn_b_zeros": 0.025,
+    "fp32.a_zeros_b_randn": -0.488,
+    "fp32.randn_sorted": -0.629,
+    "fp32.nn_like": 0.177
+   },
+   "inputs": [
+    {
+     "name": "fp32.zeros",
+     "D": 0.0,
+     "D_ci95": 0.0,
+     "x": [
+      0.0,
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "fp32.ones",
+     "D": 7.91776366307232,
+     "D_ci95": 0.4265883983886242,
+     "x": [
+      1.0,
+      0,
+      0.0,
+      8671.0
+     ]
+    },
+    {
+     "name": "fp32.neg_ones",
+     "D": 7.979627355719384,
+     "D_ci95": 0.19483071640324928,
+     "x": [
+      1.0,
+      0,
+      0.0,
+      8671.0
+     ]
+    },
+    {
+     "name": "fp32.pi",
+     "D": 8.209477946478577,
+     "D_ci95": 0.2027924327247447,
+     "x": [
+      1.0,
+      0,
+      0.0,
+      11510.5
+     ]
+    },
+    {
+     "name": "fp32.randn",
+     "D": 23.986936105256,
+     "D_ci95": 0.10618094984493036,
+     "x": [
+      1.0,
+      82214,
+      104690.0,
+      124821.44
+     ]
+    },
+    {
+     "name": "fp32.randn_small",
+     "D": 24.059463815930382,
+     "D_ci95": 0.2788756423184048,
+     "x": [
+      1.0,
+      82244,
+      102460.0,
+      130482.19
+     ]
+    },
+    {
+     "name": "fp32.randn_large",
+     "D": 23.973945726639382,
+     "D_ci95": 0.35622312403191686,
+     "x": [
+      1.0,
+      84896,
+      104008.0,
+      123603.56
+     ]
+    },
+    {
+     "name": "fp32.uniform01",
+     "D": 22.031325337258306,
+     "D_ci95": 0.08817089081848573,
+     "x": [
+      1.0,
+      77842,
+      99844.0,
+      105894.12
+     ]
+    },
+    {
+     "name": "fp32.sparse50",
+     "D": 6.760052786898193,
+     "D_ci95": 0.4637071072461619,
+     "x": [
+      0.22583,
+      74550,
+      23196.0,
+      29298.62
+     ]
+    },
+    {
+     "name": "fp32.sparse90",
+     "D": 0.619586285861363,
+     "D_ci95": 0.1635459854959535,
+     "x": [
+      0.008301,
+      17780,
+      908.0,
+      1136.69
+     ]
+    },
+    {
+     "name": "fp32.smallint",
+     "D": 13.658968385754843,
+     "D_ci95": 0.10326208500939849,
+     "x": [
+      0.882324,
+      19806,
+      12294.0,
+      107161.44
+     ]
+    },
+    {
+     "name": "fp32.pow2",
+     "D": 13.707565759157678,
+     "D_ci95": 0.04424541784319788,
+     "x": [
+      1.0,
+      25414,
+      20696.0,
+      112964.88
+     ]
+    },
+    {
+     "name": "fp32.bf16trunc",
+     "D": 17.622753742466465,
+     "D_ci95": 0.11169700648658731,
+     "x": [
+      1.0,
+      34980,
+      39858.0,
+      125752.88
+     ]
+    },
+    {
+     "name": "fp32.fp16grid",
+     "D": 19.222640858413023,
+     "D_ci95": 0.17696927114003597,
+     "x": [
+      1.0,
+      43136,
+      52158.0,
+      125548.69
+     ]
+    },
+    {
+     "name": "fp32.a_randn_b_zeros",
+     "D": 0.6306350059162042,
+     "D_ci95": 0.05108338753156379,
+     "x": [
+      0.0,
+      27920,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "fp32.a_zeros_b_randn",
+     "D": 0.7234337597713634,
+     "D_ci95": 0.09056712116656129,
+     "x": [
+      0.0,
+      55798,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "fp32.randn_sorted",
+     "D": 22.561125327720248,
+     "D_ci95": 0.8183150367686816,
+     "x": [
+      1.0,
+      60856,
+      102036.0,
+      126872.88
+     ]
+    },
+    {
+     "name": "fp32.nn_like",
+     "D": 12.734700921159012,
+     "D_ci95": 0.18499639562800627,
+     "x": [
+      0.492188,
+      80426,
+      50906.0,
+      62259.81
+     ]
+    }
+   ]
+  },
+  "fp16": {
+   "features": [
+    "live",
+    "N_op",
+    "N_prod",
+    "N_res"
+   ],
+   "coef": [
+    7.528512184619935,
+    2.7741164494312015e-05,
+    3.8666722694999777e-05,
+    5.823721210343633e-05
+   ],
+   "se": [
+    0.36759286091553844,
+    5.063922653252214e-06,
+    7.020025131814894e-06,
+    5.397374482725419e-06
+   ],
+   "cov": [
+    [
+     0.13512451139607037,
+     4.10973399859715e-08,
+     1.534216913943314e-07,
+     -1.2416549226859803e-06
+    ],
+    [
+     4.109733998597148e-08,
+     2.5643312638120942e-11,
+     -1.7461384044895962e-11,
+     -4.6607954910754526e-12
+    ],
+    [
+     1.5342169139433042e-07,
+     -1.7461384044895982e-11,
+     4.9280752851312726e-11,
+     -2.214569959008358e-11
+    ],
+    [
+     -1.2416549226859788e-06,
+     -4.660795491075437e-12,
+     -2.2145699590083605e-11,
+     2.913165130677548e-11
+    ]
+   ],
+   "rms_w": 0.4230146817374865,
+   "n": 17,
+   "F_w": 7.528512184619935,
+   "F_se_w": 0.36759286091553844,
+   "a_fj_per_bus_bit": 24.652792665843684,
+   "a_se_fj": 4.5001656391206195,
+   "c_fj_per_product_bit": 34.3620289574705,
+   "c_se_fj": 6.238498896437064,
+   "b_fj_per_result_bit": 51.75377247473345,
+   "b_se_fj": 4.796494901640753,
+   "F_pj_per_live_lane_cycle": 1.6333928318033555,
+   "residuals": {
+    "fp16.zeros": 0.0,
+    "fp16.ones": 0.028,
+    "fp16.neg_ones": 0.051,
+    "fp16.randn": 0.168,
+    "fp16.randn_small": 0.234,
+    "fp16.uniform01": -0.791,
+    "fp16.sparse50": 0.51,
+    "fp16.sparse90": 0.209,
+    "fp16.wsparse50": 0.224,
+    "fp16.wsparse90": -0.039,
+    "fp16.smallint": -0.33,
+    "fp16.fp8grid": -0.426,
+    "fp16.a_randn_b_zeros": -0.155,
+    "fp16.a_zeros_b_randn": -0.787,
+    "fp16.pair_half_zero": 0.994,
+    "fp16.randn_sorted": -0.148,
+    "fp16.nn_like": -0.176
+   },
+   "inputs": [
+    {
+     "name": "fp16.zeros",
+     "D": 0.0,
+     "D_ci95": 0.0,
+     "x": [
+      0.0,
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "fp16.ones",
+     "D": 8.061764938760584,
+     "D_ci95": 0.028908275924569588,
+     "x": [
+      1.0,
+      0,
+      0.0,
+      8671.0
+     ]
+    },
+    {
+     "name": "fp16.neg_ones",
+     "D": 8.084699948213142,
+     "D_ci95": 0.06061535940962718,
+     "x": [
+      1.0,
+      0,
+      0.0,
+      8671.0
+     ]
+    },
+    {
+     "name": "fp16.randn",
+     "D": 21.441512616301118,
+     "D_ci95": 0.1848481183461908,
+     "x": [
+      1.0,
+      84416,
+      104142.0,
+      126653.0
+     ]
+    },
+    {
+     "name": "fp16.randn_small",
+     "D": 21.620744409996764,
+     "D_ci95": 0.1569475863548128,
+     "x": [
+      1.0,
+      91126,
+      103126.0,
+      126091.56
+     ]
+    },
+    {
+     "name": "fp16.uniform01",
+     "D": 18.817707296546182,
+     "D_ci95": 0.16329134349860766,
+     "x": [
+      1.0,
+      77948,
+      94010.0,
+      107884.56
+     ]
+    },
+    {
+     "name": "fp16.sparse50",
+     "D": 13.113228486791375,
+     "D_ci95": 0.028787133158950273,
+     "x": [
+      0.585693,
+      71590,
+      50394.0,
+      73140.56
+     ]
+    },
+    {
+     "name": "fp16.sparse90",
+     "D": 1.3542455210480568,
+     "D_ci95": 0.08460499335823624,
+     "x": [
+      0.039062,
+      18412,
+      2128.0,
+      4427.38
+     ]
+    },
+    {
+     "name": "fp16.wsparse50",
+     "D": 6.828385972260958,
+     "D_ci95": 0.14385178001955853,
+     "x": [
+      0.23999,
+      73444,
+      24794.0,
+      30935.19
+     ]
+    },
+    {
+     "name": "fp16.wsparse90",
+     "D": 0.6535508658466114,
+     "D_ci95": 0.1112180833511738,
+     "x": [
+      0.009766,
+      18192,
+      1014.0,
+      1295.44
+     ]
+    },
+    {
+     "name": "fp16.smallint",
+     "D": 16.359027298279234,
+     "D_ci95": 0.3329406975562236,
+     "x": [
+      0.996094,
+      35980,
+      28132.0,
+      121984.75
+     ]
+    },
+    {
+     "name": "fp16.fp8grid",
+     "D": 17.477244010028425,
+     "D_ci95": 0.10553979010846759,
+     "x": [
+      1.0,
+      42486,
+      46596.0,
+      126968.06
+     ]
+    },
+    {
+     "name": "fp16.a_randn_b_zeros",
+     "D": 0.6243933329902305,
+     "D_ci95": 0.1547674849300462,
+     "x": [
+      0.0,
+      28096,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "fp16.a_zeros_b_randn",
+     "D": 0.7610898019350032,
+     "D_ci95": 0.09837584659552587,
+     "x": [
+      0.0,
+      55806,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "fp16.pair_half_zero",
+     "D": 19.784700283910006,
+     "D_ci95": 0.10838892690196955,
+     "x": [
+      1.0,
+      72796,
+      58470.0,
+      119889.56
+     ]
+    },
+    {
+     "name": "fp16.randn_sorted",
+     "D": 20.235519199416064,
+     "D_ci95": 0.14196383972751975,
+     "x": [
+      1.0,
+      61846,
+      99966.0,
+      124898.44
+     ]
+    },
+    {
+     "name": "fp16.nn_like",
+     "D": 16.8985413217938,
+     "D_ci95": 0.44165100405256325,
+     "x": [
+      0.804688,
+      84348,
+      74326.0,
+      99643.69
+     ]
+    }
+   ]
+  },
+  "int8": {
+   "features": [
+    "live",
+    "N_op",
+    "N_prod",
+    "N_res"
+   ],
+   "coef": [
+    1.3592229493563224,
+    1.0926556073313538e-05,
+    9.90848634166191e-06,
+    1.8903060617386614e-05
+   ],
+   "se": [
+    0.2417956847788873,
+    4.280849783558164e-06,
+    4.7515308238474826e-06,
+    4.2545086868156665e-06
+   ],
+   "cov": [
+    [
+     0.05846515317769103,
+     1.0584374806368183e-07,
+     2.1702472961269088e-07,
+     -5.911732936445983e-07
+    ],
+    [
+     1.0584374806368129e-07,
+     1.8325674869389975e-11,
+     -3.746541449839314e-12,
+     -5.416459730579995e-12
+    ],
+    [
+     2.1702472961269098e-07,
+     -3.746541449839308e-12,
+     2.2577045169972735e-11,
+     -1.5958620583282083e-11
+    ],
+    [
+     -5.91173293644598e-07,
+     -5.41645973058e-12,
+     -1.5958620583282083e-11,
+     1.810084416618997e-11
+    ]
+   ],
+   "rms_w": 0.28725681997996827,
+   "n": 16,
+   "F_w": 1.3592229493563224,
+   "F_se_w": 0.2417956847788873,
+   "a_fj_per_bus_bit": 5.655346405132984,
+   "a_se_fj": 2.21567420438069,
+   "c_fj_per_product_bit": 5.12841578230548,
+   "c_se_fj": 2.4592884146866854,
+   "b_fj_per_result_bit": 9.783810671108306,
+   "b_se_fj": 2.202040628918265,
+   "F_pj_per_live_lane_cycle": 0.1717539222619178,
+   "residuals": {
+    "int8.zeros": 0.0,
+    "int8.ones": 0.026,
+    "int8.neg_ones": 0.194,
+    "int8.full": 0.281,
+    "int8.pos": -0.138,
+    "int8.smallint": -0.337,
+    "int8.ternary": -0.403,
+    "int8.sparse50": 0.197,
+    "int8.sparse90": 0.422,
+    "int8.wsparse50": 0.515,
+    "int8.wsparse90": 0.201,
+    "int8.highbit": -0.364,
+    "int8.gauss_q": 0.103,
+    "int8.a_full_b_zeros": -0.351,
+    "int8.a_zeros_b_full": 0.29,
+    "int8.sorted": 0.189
+   },
+   "inputs": [
+    {
+     "name": "int8.zeros",
+     "D": 0.0,
+     "D_ci95": 0.0,
+     "x": [
+      0.0,
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "int8.ones",
+     "D": 1.5588363984348006,
+     "D_ci95": 0.08638724795161043,
+     "x": [
+      1.0,
+      0,
+      0.0,
+      9200.0
+     ]
+    },
+    {
+     "name": "int8.neg_ones",
+     "D": 1.727334087465208,
+     "D_ci95": 0.08229707716607526,
+     "x": [
+      1.0,
+      0,
+      0.0,
+      9200.0
+     ]
+    },
+    {
+     "name": "int8.full",
+     "D": 6.868848968010575,
+     "D_ci95": 0.09944433901995738,
+     "x": [
+      1.0,
+      69312,
+      139942.0,
+      163184.06
+     ]
+    },
+    {
+     "name": "int8.pos",
+     "D": 5.985651201462663,
+     "D_ci95": 0.1348103459640503,
+     "x": [
+      1.0,
+      61096,
+      96996.0,
+      165891.56
+     ]
+    },
+    {
+     "name": "int8.smallint",
+     "D": 5.885456298264596,
+     "D_ci95": 0.13600932872594426,
+     "x": [
+      1.0,
+      70526,
+      132566.0,
+      147001.31
+     ]
+    },
+    {
+     "name": "int8.ternary",
+     "D": 5.013152521416183,
+     "D_ci95": 0.19047132672795208,
+     "x": [
+      0.992188,
+      58798,
+      84996.0,
+      136634.25
+     ]
+    },
+    {
+     "name": "int8.sparse50",
+     "D": 5.292606901923833,
+     "D_ci95": 0.1696517970435564,
+     "x": [
+      0.929688,
+      53480,
+      56368.0,
+      142231.25
+     ]
+    },
+    {
+     "name": "int8.sparse90",
+     "D": 1.1332664274426834,
+     "D_ci95": 0.06048318387037806,
+     "x": [
+      0.178223,
+      12144,
+      1984.0,
+      16748.38
+     ]
+    },
+    {
+     "name": "int8.wsparse50",
+     "D": 2.9247693730632647,
+     "D_ci95": 0.2880284032168181,
+     "x": [
+      0.356445,
+      48766,
+      36452.0,
+      54568.56
+     ]
+    },
+    {
+     "name": "int8.wsparse90",
+     "D": 0.46157423210541426,
+     "D_ci95": 0.0802702125997637,
+     "x": [
+      0.02002,
+      16316,
+      1638.0,
+      2063.5
+     ]
+    },
+    {
+     "name": "int8.highbit",
+     "D": 3.0938798111623114,
+     "D_ci95": 0.14492856086979772,
+     "x": [
+      1.0,
+      8664,
+      41200.0,
+      84406.31
+     ]
+    },
+    {
+     "name": "int8.gauss_q",
+     "D": 6.498676574400902,
+     "D_ci95": 0.0448736829098529,
+     "x": [
+      1.0,
+      69544,
+      137404.0,
+      154236.81
+     ]
+    },
+    {
+     "name": "int8.a_full_b_zeros",
+     "D": 0.3618287559421631,
+     "D_ci95": 0.16394121358496339,
+     "x": [
+      0.0,
+      65248,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "int8.a_zeros_b_full",
+     "D": 0.3351981119032644,
+     "D_ci95": 0.09334117571573139,
+     "x": [
+      0.0,
+      4140,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "int8.sorted",
+     "D": 6.416356957150116,
+     "D_ci95": 0.11247674266585266,
+     "x": [
+      1.0,
+      53346,
+      120848.0,
+      163376.31
+     ]
+    }
+   ]
+  }
+ },
+ "predicted_D": {
+  "fp32.a_randn_b_zeros": {
+   "D_w": 0.606,
+   "D_se_w": 0.145,
+   "floor_w": 0.0,
+   "bus_w": 0.606,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    0.0,
+    27920.0,
+    0.0,
+    0.0
+   ]
+  },
+  "fp32.a_zeros_b_randn": {
+   "D_w": 1.211,
+   "D_se_w": 0.29,
+   "floor_w": 0.0,
+   "bus_w": 1.211,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    0.0,
+    55798.0,
+    0.0,
+    0.0
+   ]
+  },
+  "fp32.bf16trunc": {
+   "D_w": 17.419,
+   "D_se_w": 0.243,
+   "floor_w": 7.527,
+   "bus_w": 0.759,
+   "prod_w": 3.307,
+   "res_w": 5.825,
+   "x": [
+    1.0,
+    34980.0,
+    39858.0,
+    125752.88
+   ]
+  },
+  "fp32.c_abs": {
+   "D_w": 7.564,
+   "D_se_w": 0.313,
+   "floor_w": 7.527,
+   "bus_w": 0.003,
+   "prod_w": 0.009,
+   "res_w": 0.024,
+   "x": [
+    1.0,
+    160.0,
+    112.0,
+    510.0
+   ]
+  },
+  "fp32.fp16grid": {
+   "D_w": 18.607,
+   "D_se_w": 0.206,
+   "floor_w": 7.527,
+   "bus_w": 0.936,
+   "prod_w": 4.327,
+   "res_w": 5.816,
+   "x": [
+    1.0,
+    43136.0,
+    52158.0,
+    125548.69
+   ]
+  },
+  "fp32.neg_ones": {
+   "D_w": 7.929,
+   "D_se_w": 0.291,
+   "floor_w": 7.527,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.402,
+   "x": [
+    1.0,
+    0.0,
+    0.0,
+    8671.0
+   ]
+  },
+  "fp32.nn_like": {
+   "D_w": 12.558,
+   "D_se_w": 0.228,
+   "floor_w": 3.705,
+   "bus_w": 1.746,
+   "prod_w": 4.223,
+   "res_w": 2.884,
+   "x": [
+    0.492188,
+    80426.0,
+    50906.0,
+    62259.81
+   ]
+  },
+  "fp32.ones": {
+   "D_w": 7.929,
+   "D_se_w": 0.291,
+   "floor_w": 7.527,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.402,
+   "x": [
+    1.0,
+    0.0,
+    0.0,
+    8671.0
+   ]
+  },
+  "fp32.pi": {
+   "D_w": 8.06,
+   "D_se_w": 0.284,
+   "floor_w": 7.527,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.533,
+   "x": [
+    1.0,
+    0.0,
+    0.0,
+    11510.5
+   ]
+  },
+  "fp32.pow2": {
+   "D_w": 15.029,
+   "D_se_w": 0.271,
+   "floor_w": 7.527,
+   "bus_w": 0.552,
+   "prod_w": 1.717,
+   "res_w": 5.233,
+   "x": [
+    1.0,
+    25414.0,
+    20696.0,
+    112964.88
+   ]
+  },
+  "fp32.r_abs": {
+   "D_w": 17.279,
+   "D_se_w": 0.583,
+   "floor_w": 7.527,
+   "bus_w": 1.643,
+   "prod_w": 8.085,
+   "res_w": 0.024,
+   "x": [
+    1.0,
+    75694.0,
+    97462.0,
+    510.0
+   ]
+  },
+  "fp32.r_het": {
+   "D_w": 22.032,
+   "D_se_w": 0.252,
+   "floor_w": 7.527,
+   "bus_w": 1.707,
+   "prod_w": 8.33,
+   "res_w": 4.468,
+   "x": [
+    1.0,
+    78638.0,
+    100408.0,
+    96448.88
+   ]
+  },
+  "fp32.r_walk": {
+   "D_w": 22.296,
+   "D_se_w": 0.216,
+   "floor_w": 7.527,
+   "bus_w": 1.64,
+   "prod_w": 8.081,
+   "res_w": 5.048,
+   "x": [
+    1.0,
+    75568.0,
+    97410.0,
+    108963.25
+   ]
+  },
+  "fp32.randn": {
+   "D_w": 23.779,
+   "D_se_w": 0.22,
+   "floor_w": 7.527,
+   "bus_w": 1.785,
+   "prod_w": 8.685,
+   "res_w": 5.782,
+   "x": [
+    1.0,
+    82214.0,
+    104690.0,
+    124821.44
+   ]
+  },
+  "fp32.randn_large": {
+   "D_w": 23.724,
+   "D_se_w": 0.219,
+   "floor_w": 7.527,
+   "bus_w": 1.843,
+   "prod_w": 8.628,
+   "res_w": 5.726,
+   "x": [
+    1.0,
+    84896.0,
+    104008.0,
+    123603.56
+   ]
+  },
+  "fp32.randn_small": {
+   "D_w": 23.857,
+   "D_se_w": 0.211,
+   "floor_w": 7.527,
+   "bus_w": 1.785,
+   "prod_w": 8.5,
+   "res_w": 6.044,
+   "x": [
+    1.0,
+    82244.0,
+    102460.0,
+    130482.19
+   ]
+  },
+  "fp32.randn_sorted": {
+   "D_w": 23.19,
+   "D_se_w": 0.242,
+   "floor_w": 7.527,
+   "bus_w": 1.321,
+   "prod_w": 8.465,
+   "res_w": 5.877,
+   "x": [
+    1.0,
+    60856.0,
+    102036.0,
+    126872.88
+   ]
+  },
+  "fp32.s_abs": {
+   "D_w": 7.806,
+   "D_se_w": 0.315,
+   "floor_w": 7.527,
+   "bus_w": 0.073,
+   "prod_w": 0.182,
+   "res_w": 0.024,
+   "x": [
+    1.0,
+    3364.0,
+    2192.0,
+    510.0
+   ]
+  },
+  "fp32.s_walk": {
+   "D_w": 11.498,
+   "D_se_w": 0.258,
+   "floor_w": 7.527,
+   "bus_w": 0.07,
+   "prod_w": 0.173,
+   "res_w": 3.729,
+   "x": [
+    1.0,
+    3204.0,
+    2080.0,
+    80500.81
+   ]
+  },
+  "fp32.smallint": {
+   "D_w": 13.055,
+   "D_se_w": 0.288,
+   "floor_w": 6.641,
+   "bus_w": 0.43,
+   "prod_w": 1.02,
+   "res_w": 4.964,
+   "x": [
+    0.882324,
+    19806.0,
+    12294.0,
+    107161.44
+   ]
+  },
+  "fp32.sparse50": {
+   "D_w": 6.6,
+   "D_se_w": 0.293,
+   "floor_w": 1.7,
+   "bus_w": 1.618,
+   "prod_w": 1.924,
+   "res_w": 1.357,
+   "x": [
+    0.22583,
+    74550.0,
+    23196.0,
+    29298.62
+   ]
+  },
+  "fp32.sparse90": {
+   "D_w": 0.576,
+   "D_se_w": 0.089,
+   "floor_w": 0.062,
+   "bus_w": 0.386,
+   "prod_w": 0.075,
+   "res_w": 0.053,
+   "x": [
+    0.008301,
+    17780.0,
+    908.0,
+    1136.69
+   ]
+  },
+  "fp32.uniform01": {
+   "D_w": 22.405,
+   "D_se_w": 0.23,
+   "floor_w": 7.527,
+   "bus_w": 1.69,
+   "prod_w": 8.283,
+   "res_w": 4.905,
+   "x": [
+    1.0,
+    77842.0,
+    99844.0,
+    105894.12
+   ]
+  },
+  "fp32.zeros": {
+   "D_w": 0.0,
+   "D_se_w": 0.0,
+   "floor_w": 0.0,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "fp16.a_randn_b_zeros": {
+   "D_w": 0.779,
+   "D_se_w": 0.142,
+   "floor_w": 0.0,
+   "bus_w": 0.779,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    0.0,
+    28096.0,
+    0.0,
+    0.0
+   ]
+  },
+  "fp16.a_zeros_b_randn": {
+   "D_w": 1.548,
+   "D_se_w": 0.283,
+   "floor_w": 0.0,
+   "bus_w": 1.548,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    0.0,
+    55806.0,
+    0.0,
+    0.0
+   ]
+  },
+  "fp16.c_cancel": {
+   "D_w": 7.529,
+   "D_se_w": 0.368,
+   "floor_w": 7.529,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "fp16.fp8grid": {
+   "D_w": 17.903,
+   "D_se_w": 0.281,
+   "floor_w": 7.529,
+   "bus_w": 1.179,
+   "prod_w": 1.802,
+   "res_w": 7.394,
+   "x": [
+    1.0,
+    42486.0,
+    46596.0,
+    126968.06
+   ]
+  },
+  "fp16.neg_ones": {
+   "D_w": 8.033,
+   "D_se_w": 0.34,
+   "floor_w": 7.529,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.505,
+   "x": [
+    1.0,
+    0.0,
+    0.0,
+    8671.0
+   ]
+  },
+  "fp16.nn_like": {
+   "D_w": 17.075,
+   "D_se_w": 0.176,
+   "floor_w": 6.058,
+   "bus_w": 2.34,
+   "prod_w": 2.874,
+   "res_w": 5.803,
+   "x": [
+    0.804688,
+    84348.0,
+    74326.0,
+    99643.69
+   ]
+  },
+  "fp16.ones": {
+   "D_w": 8.033,
+   "D_se_w": 0.34,
+   "floor_w": 7.529,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.505,
+   "x": [
+    1.0,
+    0.0,
+    0.0,
+    8671.0
+   ]
+  },
+  "fp16.pair_half_zero": {
+   "D_w": 18.791,
+   "D_se_w": 0.21,
+   "floor_w": 7.529,
+   "bus_w": 2.019,
+   "prod_w": 2.261,
+   "res_w": 6.982,
+   "x": [
+    1.0,
+    72796.0,
+    58470.0,
+    119889.56
+   ]
+  },
+  "fp16.r_abs": {
+   "D_w": 13.292,
+   "D_se_w": 0.712,
+   "floor_w": 7.529,
+   "bus_w": 2.058,
+   "prod_w": 3.676,
+   "res_w": 0.03,
+   "x": [
+    1.0,
+    74180.0,
+    95060.0,
+    510.0
+   ]
+  },
+  "fp16.r_cancel": {
+   "D_w": 13.165,
+   "D_se_w": 0.71,
+   "floor_w": 7.529,
+   "bus_w": 1.985,
+   "prod_w": 3.651,
+   "res_w": 0.0,
+   "x": [
+    1.0,
+    71548.0,
+    94428.0,
+    0.0
+   ]
+  },
+  "fp16.r_walk": {
+   "D_w": 20.524,
+   "D_se_w": 0.206,
+   "floor_w": 7.529,
+   "bus_w": 2.056,
+   "prod_w": 3.668,
+   "res_w": 7.272,
+   "x": [
+    1.0,
+    74108.0,
+    94852.0,
+    124863.19
+   ]
+  },
+  "fp16.randn": {
+   "D_w": 21.273,
+   "D_se_w": 0.231,
+   "floor_w": 7.529,
+   "bus_w": 2.342,
+   "prod_w": 4.027,
+   "res_w": 7.376,
+   "x": [
+    1.0,
+    84416.0,
+    104142.0,
+    126653.0
+   ]
+  },
+  "fp16.randn_small": {
+   "D_w": 21.387,
+   "D_se_w": 0.224,
+   "floor_w": 7.529,
+   "bus_w": 2.528,
+   "prod_w": 3.988,
+   "res_w": 7.343,
+   "x": [
+    1.0,
+    91126.0,
+    103126.0,
+    126091.56
+   ]
+  },
+  "fp16.randn_sorted": {
+   "D_w": 20.383,
+   "D_se_w": 0.255,
+   "floor_w": 7.529,
+   "bus_w": 1.716,
+   "prod_w": 3.865,
+   "res_w": 7.274,
+   "x": [
+    1.0,
+    61846.0,
+    99966.0,
+    124898.44
+   ]
+  },
+  "fp16.smallint": {
+   "D_w": 16.689,
+   "D_se_w": 0.348,
+   "floor_w": 7.499,
+   "bus_w": 0.998,
+   "prod_w": 1.088,
+   "res_w": 7.104,
+   "x": [
+    0.996094,
+    35980.0,
+    28132.0,
+    121984.75
+   ]
+  },
+  "fp16.sparse50": {
+   "D_w": 12.603,
+   "D_se_w": 0.164,
+   "floor_w": 4.409,
+   "bus_w": 1.986,
+   "prod_w": 1.949,
+   "res_w": 4.26,
+   "x": [
+    0.585693,
+    71590.0,
+    50394.0,
+    73140.56
+   ]
+  },
+  "fp16.sparse90": {
+   "D_w": 1.145,
+   "D_se_w": 0.082,
+   "floor_w": 0.294,
+   "bus_w": 0.511,
+   "prod_w": 0.082,
+   "res_w": 0.258,
+   "x": [
+    0.039062,
+    18412.0,
+    2128.0,
+    4427.38
+   ]
+  },
+  "fp16.uniform01": {
+   "D_w": 19.609,
+   "D_se_w": 0.222,
+   "floor_w": 7.529,
+   "bus_w": 2.162,
+   "prod_w": 3.635,
+   "res_w": 6.283,
+   "x": [
+    1.0,
+    77948.0,
+    94010.0,
+    107884.56
+   ]
+  },
+  "fp16.wsparse50": {
+   "D_w": 6.604,
+   "D_se_w": 0.265,
+   "floor_w": 1.807,
+   "bus_w": 2.037,
+   "prod_w": 0.959,
+   "res_w": 1.802,
+   "x": [
+    0.23999,
+    73444.0,
+    24794.0,
+    30935.19
+   ]
+  },
+  "fp16.wsparse90": {
+   "D_w": 0.693,
+   "D_se_w": 0.088,
+   "floor_w": 0.074,
+   "bus_w": 0.505,
+   "prod_w": 0.039,
+   "res_w": 0.075,
+   "x": [
+    0.009766,
+    18192.0,
+    1014.0,
+    1295.44
+   ]
+  },
+  "fp16.zeros": {
+   "D_w": 0.0,
+   "D_se_w": 0.0,
+   "floor_w": 0.0,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "int8.a_full_b_zeros": {
+   "D_w": 0.713,
+   "D_se_w": 0.279,
+   "floor_w": 0.0,
+   "bus_w": 0.713,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    0.0,
+    65248.0,
+    0.0,
+    0.0
+   ]
+  },
+  "int8.a_zeros_b_full": {
+   "D_w": 0.045,
+   "D_se_w": 0.018,
+   "floor_w": 0.0,
+   "bus_w": 0.045,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    0.0,
+    4140.0,
+    0.0,
+    0.0
+   ]
+  },
+  "int8.c_cancel": {
+   "D_w": 1.359,
+   "D_se_w": 0.242,
+   "floor_w": 1.359,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "int8.full": {
+   "D_w": 6.588,
+   "D_se_w": 0.17,
+   "floor_w": 1.359,
+   "bus_w": 0.757,
+   "prod_w": 1.387,
+   "res_w": 3.085,
+   "x": [
+    1.0,
+    69312.0,
+    139942.0,
+    163184.06
+   ]
+  },
+  "int8.gauss_q": {
+   "D_w": 6.396,
+   "D_se_w": 0.178,
+   "floor_w": 1.359,
+   "bus_w": 0.76,
+   "prod_w": 1.361,
+   "res_w": 2.916,
+   "x": [
+    1.0,
+    69544.0,
+    137404.0,
+    154236.81
+   ]
+  },
+  "int8.highbit": {
+   "D_w": 3.458,
+   "D_se_w": 0.16,
+   "floor_w": 1.359,
+   "bus_w": 0.095,
+   "prod_w": 0.408,
+   "res_w": 1.596,
+   "x": [
+    1.0,
+    8664.0,
+    41200.0,
+    84406.31
+   ]
+  },
+  "int8.neg_ones": {
+   "D_w": 1.533,
+   "D_se_w": 0.222,
+   "floor_w": 1.359,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.174,
+   "x": [
+    1.0,
+    0.0,
+    0.0,
+    9200.0
+   ]
+  },
+  "int8.ones": {
+   "D_w": 1.533,
+   "D_se_w": 0.222,
+   "floor_w": 1.359,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.174,
+   "x": [
+    1.0,
+    0.0,
+    0.0,
+    9200.0
+   ]
+  },
+  "int8.pos": {
+   "D_w": 6.124,
+   "D_se_w": 0.169,
+   "floor_w": 1.359,
+   "bus_w": 0.668,
+   "prod_w": 0.961,
+   "res_w": 3.136,
+   "x": [
+    1.0,
+    61096.0,
+    96996.0,
+    165891.56
+   ]
+  },
+  "int8.r_cancel": {
+   "D_w": 3.483,
+   "D_se_w": 0.762,
+   "floor_w": 1.359,
+   "bus_w": 0.753,
+   "prod_w": 1.371,
+   "res_w": 0.0,
+   "x": [
+    1.0,
+    68906.0,
+    138322.0,
+    0.0
+   ]
+  },
+  "int8.r_walk": {
+   "D_w": 6.548,
+   "D_se_w": 0.164,
+   "floor_w": 1.359,
+   "bus_w": 0.753,
+   "prod_w": 1.363,
+   "res_w": 3.074,
+   "x": [
+    1.0,
+    68874.0,
+    137562.0,
+    162597.5
+   ]
+  },
+  "int8.smallint": {
+   "D_w": 6.222,
+   "D_se_w": 0.178,
+   "floor_w": 1.359,
+   "bus_w": 0.771,
+   "prod_w": 1.314,
+   "res_w": 2.779,
+   "x": [
+    1.0,
+    70526.0,
+    132566.0,
+    147001.31
+   ]
+  },
+  "int8.sorted": {
+   "D_w": 6.228,
+   "D_se_w": 0.146,
+   "floor_w": 1.359,
+   "bus_w": 0.583,
+   "prod_w": 1.197,
+   "res_w": 3.088,
+   "x": [
+    1.0,
+    53346.0,
+    120848.0,
+    163376.31
+   ]
+  },
+  "int8.sparse50": {
+   "D_w": 5.095,
+   "D_se_w": 0.239,
+   "floor_w": 1.264,
+   "bus_w": 0.584,
+   "prod_w": 0.559,
+   "res_w": 2.689,
+   "x": [
+    0.929688,
+    53480.0,
+    56368.0,
+    142231.25
+   ]
+  },
+  "int8.sparse90": {
+   "D_w": 0.711,
+   "D_se_w": 0.058,
+   "floor_w": 0.242,
+   "bus_w": 0.133,
+   "prod_w": 0.02,
+   "res_w": 0.317,
+   "x": [
+    0.178223,
+    12144.0,
+    1984.0,
+    16748.38
+   ]
+  },
+  "int8.ternary": {
+   "D_w": 5.416,
+   "D_se_w": 0.124,
+   "floor_w": 1.349,
+   "bus_w": 0.642,
+   "prod_w": 0.842,
+   "res_w": 2.583,
+   "x": [
+    0.992188,
+    58798.0,
+    84996.0,
+    136634.25
+   ]
+  },
+  "int8.wsparse50": {
+   "D_w": 2.41,
+   "D_se_w": 0.125,
+   "floor_w": 0.484,
+   "bus_w": 0.533,
+   "prod_w": 0.361,
+   "res_w": 1.032,
+   "x": [
+    0.356445,
+    48766.0,
+    36452.0,
+    54568.56
+   ]
+  },
+  "int8.wsparse90": {
+   "D_w": 0.261,
+   "D_se_w": 0.066,
+   "floor_w": 0.027,
+   "bus_w": 0.178,
+   "prod_w": 0.016,
+   "res_w": 0.039,
+   "x": [
+    0.02002,
+    16316.0,
+    1638.0,
+    2063.5
+   ]
+  },
+  "int8.zeros": {
+   "D_w": 0.0,
+   "D_se_w": 0.0,
+   "floor_w": 0.0,
+   "bus_w": 0.0,
+   "prod_w": 0.0,
+   "res_w": 0.0,
+   "x": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  }
+ },
+ "constants": {
+  "CPO": {
+   "fp32": 546.0,
+   "fp16": 546.0,
+   "int8": 318.0
+  },
+  "MACS": {
+   "fp32": 4096,
+   "fp16": 8192,
+   "int8": 16384
+  },
+  "SLOTS": {
+   "fp32": 8,
+   "fp16": 8,
+   "int8": 16
+  },
+  "UOPS": {
+   "fp32": 512,
+   "fp16": 512,
+   "int8": 256
+  },
+  "LAUNCH_OPS": {
+   "fp32": 533000,
+   "fp16": 533000,
+   "int8": 895000
+  },
+  "CLOCK_HZ": 600000000.0,
+  "MINIONS": 1024,
+  "OPS_PER_S": {
+   "fp32": 1125274725.2747252,
+   "fp16": 1125274725.2747252,
+   "int8": 1932075471.6981132
+  },
+  "samples": 16
+ },
+ "fit_source": {
+  "file": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json",
+  "sha256": "4794f5ac4ccfde95f45535aa855fa06c8d85b7d7716c9b63bd508ded1ade8601",
+  "key": "items.<type>.<kind>.D.mean"
+ },
+ "checks": {
+  "fp32.c_abs": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C after op n == the k = 0 products added n+1 times with float32 rounding, nothing else: every k >= 1 product absorbed"
+  },
+  "fp32.r_walk": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C changes every op"
+  },
+  "fp32.r_abs": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C after op n == the k = 0 products added n+1 times with float32 rounding, nothing else: every k >= 1 product absorbed"
+  },
+  "fp32.r_het": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C after op n == the k = 0 products added n+1 times with float32 rounding, nothing else: every k >= 1 product absorbed"
+  },
+  "fp32.s_walk": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C changes every op"
+  },
+  "fp32.s_abs": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C after op n == the k = 0 products added n+1 times with float32 rounding, nothing else: every k >= 1 product absorbed"
+  },
+  "fp16.c_cancel": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C == 0 after every op: every micro-op's dot product cancels exactly"
+  },
+  "fp16.r_walk": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C changes every op"
+  },
+  "fp16.r_cancel": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C == 0 after every op: every micro-op's dot product cancels exactly"
+  },
+  "fp16.r_abs": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C == (n+1) 2^31 exactly after every op: every later dot product absorbed"
+  },
+  "int8.c_cancel": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C == 0 after every op: every micro-op's dot product cancels exactly"
+  },
+  "int8.r_walk": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C changes every op"
+  },
+  "int8.r_cancel": {
+   "ok": true,
+   "no_zero_word": true,
+   "what": "C == 0 after every op: every micro-op's dot product cancels exactly"
+  },
+  "bus_count_equals_kinds_json": {
+   "ok": true,
+   "differs": [],
+   "n": 51
+  }
+ }
+}
