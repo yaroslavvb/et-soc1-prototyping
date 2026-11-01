@@ -1,0 +1,336 @@
+#!/usr/bin/env python3
+"""E101, session 2 (Q132): the session's queue, detached on aifoundry2, ported from E96's queue_e96.py, itself E98's queue_e98.py. Started before the slot, it needs
+nothing from outside: no ssh, no person.
+
+    setsid nohup python3 tools/claims-v3/kspeed/e101/queue_e101s.py --slots ~/claude/work/q132-a2-slots.txt --runs build/e101/runs > build/e101/queue.out 2>&1 < /dev/null &
+
+Every time is epoch ms (clocks went back at 02:00 PDT that night; no local time is ever compared).
+
+  1. Reads E101's slot from the slots file E98's lane wrote: SLOT E101's start and end, and the first E98 rest reading after the end.
+     It refuses if the end is less than 20 min before that reading.
+  2. Sleeps until the slot's start. It launches nothing before it. Then it waits, polling every 20 s and taking no lock, until E98's
+     queue does not say a probe is running (build/e98/runs/status.json), the card lock is free (`flock -n`), `et-who` names no
+     holder, and nobody else is logged in (`who`, as the runner checks). It gives up at the slot's end minus 25 min and launches nothing.
+  3. Records the box's state before anything of ours touches the card: `sensors -j`, `uptime`, the load, `ettelem config` under a
+     non-blocking lock with timeout 10 (snapshot-start), and the last 40 min of the box's own 5 s history (history-before.jsonl).
+  4. Runs the smoke session (block SMOKE: the rest reading, then three 2 s launches). A session refused at its start because the
+     collector's reader was open at that instant (exit 3, no run recorded) is retried up to 5 times.
+  5. Checks the smoke: exit 0, every launch rc 0 and ok, the cycles per op session 1 measured (protocol.json smoke_cycles, within 2%), the config 65 W / 65 C. A failure ends the queue with QUEUE-HALT and no session.
+  6. Runs the session (blocks BURST and SUS), with --max-card-min set so that it ends by itself 3 min before the slot's end
+     (the runner's own cap: exit 0, the end queries run).
+  7. Records snapshot-end, the same as snapshot-start, and exits.
+
+The hard stop, as E98's queue: at slot_end - 120 s a running session's stop-file is touched (the launch loop ends at its next ~0.5 s
+launch boundary), at slot_end - 30 s it gets SIGTERM if still alive (its handler ends the session; a device process is never
+signalled). RUNS/QUEUE-STOP stops the queue at its next look before a session. Nothing is set on the card, so nothing is restored.
+Every record goes to RUNS/queue.jsonl; RUNS/status.json holds the current state. A login never goes in a record, only a count.
+"""
+import argparse
+import json
+import os
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import time
+
+LOCK = "/run/lock/etsoc-shire0.lock"
+ET_LIB = "/opt/et/lib"
+POLL_S = 20
+GRACE_MIN_BEFORE_NEXT_REST = 20
+CYC_REL = 0.02
+
+
+def now_ms():
+    return int(time.time() * 1000)
+
+
+def out(cmd, timeout=30, env=None, cwd=None):
+    try:
+        r = subprocess.run(cmd, capture_output=True, timeout=timeout, stdin=subprocess.DEVNULL, env=env, cwd=cwd)
+        return r.returncode, r.stdout.decode(errors="replace"), r.stderr.decode(errors="replace")
+    except (OSError, subprocess.SubprocessError) as e:
+        return -1, "", str(e)
+
+
+def parse_slots(path, name="E101"):
+    """(start_ms, end_ms, the first E98 rest reading after the end in ms, or None)."""
+    txt = open(path).read()
+    m = re.search(rf"SLOT {name}: start (\d+) .*?end (\d+) ", txt)
+    if not m:
+        raise SystemExit(f"refused: no SLOT {name} in {path}")
+    a, b = int(m.group(1)) * 1000, int(m.group(2)) * 1000
+    rests = sorted(int(x) * 1000 for x in re.findall(r"rest reading starts (\d+)", txt))
+    nxt = next((x for x in rests if x >= b), None)
+    return a, b, nxt
+
+
+class Queue:
+    def __init__(self, a):
+        self.a = a
+        self.root = os.path.abspath(a.root)
+        self.runs = os.path.abspath(a.runs)
+        os.makedirs(self.runs, exist_ok=True)
+        self.start_ms, self.end_ms, self.next_rest_ms = parse_slots(a.slots)
+        if self.next_rest_ms is not None and self.next_rest_ms - self.end_ms < GRACE_MIN_BEFORE_NEXT_REST * 60000:
+            raise SystemExit(f"refused: the slot ends {(self.next_rest_ms - self.end_ms) / 60000:.0f} min before E98's next rest reading")
+        self.stop_ms = self.end_ms - a.cap_margin_s * 1000         # the session's own cap
+        self.give_up_ms = self.end_ms - a.give_up_min * 60000
+        self.ettelem = os.path.join(self.root, "build/ettelem-hpl/ettelem")
+        self.e98_status = os.path.join(self.root, "build/e98/runs/status.json")
+
+    def rec(self, kind, **kw):
+        d = dict(t_ms=now_ms(), zone=time.strftime("%Z"), kind=kind, **kw)
+        with open(os.path.join(self.runs, "queue.jsonl"), "a") as f:
+            f.write(json.dumps(d) + "\n")
+        print(time.strftime("%H:%M:%S %Z"), json.dumps(d), flush=True)
+
+    def status(self, **kw):
+        d = dict(t_ms=now_ms(), zone=time.strftime("%Z"), pid=os.getpid(), **kw)
+        tmp = os.path.join(self.runs, "status.json.tmp")
+        json.dump(d, open(tmp, "w"))
+        os.replace(tmp, os.path.join(self.runs, "status.json"))
+
+    def stopped(self):
+        return os.path.exists(os.path.join(self.runs, "QUEUE-STOP"))
+
+    def halt(self, why):
+        open(os.path.join(self.runs, "QUEUE-HALT"), "a").write(json.dumps({"t_ms": now_ms(), "why": why}) + "\n")
+        self.rec("queue_halt", why=why)
+        self.status(state="halted", why=why)
+
+    # -- may the card be used
+    def why_not_free(self):
+        """None, or why the card may not be touched yet. Takes no lock beyond a non-blocking probe, which it releases at once."""
+        if self.a.dry:
+            return None
+        try:
+            st = json.load(open(self.e98_status))
+            if st.get("state") == "running":
+                return f"E98 {st.get('probe')} is running"
+        except (OSError, ValueError):
+            pass
+        rc, _, _ = out(["flock", "-n", LOCK, "true"], timeout=5)
+        if rc != 0:
+            return "the card lock is held"
+        rc, so, _ = out(["timeout", "10", "et-who"], timeout=15)
+        if rc == 0 and so.strip() and not so.strip().splitlines()[0].startswith("No process holds"):
+            return "et-who names a holder"
+        me = os.environ.get("USER") or os.environ.get("LOGNAME") or ""
+        rc, so, _ = out(["who"], timeout=5)
+        n = len({ln.split()[0] for ln in so.splitlines() if ln.split() and ln.split()[0] != me})
+        if n:
+            return f"{n} other user(s) logged in"
+        return None
+
+    def wait_for_slot(self):
+        """True when the card may be used; False when the queue must end."""
+        while now_ms() < self.start_ms:
+            if self.stopped():
+                self.rec("stop", why="QUEUE-STOP before the slot")
+                return False
+            self.status(state="waiting for the slot", until_ms=self.start_ms)
+            time.sleep(min(POLL_S, max(1.0, (self.start_ms - now_ms()) / 1000.0)))
+        waits = {}
+        while True:
+            if self.stopped():
+                self.rec("stop", why="QUEUE-STOP in the slot")
+                return False
+            if now_ms() >= self.give_up_ms:
+                self.rec("give_up", why="the card did not come free by slot end - 25 min", waits=waits)
+                return False
+            why = self.why_not_free()
+            if why is None:
+                self.rec("card_free", waits=waits, late_s=round((now_ms() - self.start_ms) / 1000.0, 1))
+                return True
+            waits[why.split(" ")[0]] = waits.get(why.split(" ")[0], 0) + 1
+            self.status(state="waiting for the card", why=why)
+            time.sleep(POLL_S)
+
+    # -- the record beside the sessions
+    def snapshot(self, tag):
+        snap = {"tag": tag, "t_ms": now_ms(), "zone": time.strftime("%Z")}
+        if self.a.dry:
+            json.dump(snap, open(os.path.join(self.runs, f"snapshot-{tag}.json"), "w"))
+            return snap
+        rc, so, _ = out(["sensors", "-j"], timeout=20)
+        if rc == 0:
+            open(os.path.join(self.runs, f"sensors-{tag}.json"), "w").write(so)
+        snap["sensors_rc"] = rc
+        rc, so, _ = out(["uptime"], timeout=5)
+        snap["uptime"] = so.strip()
+        env = dict(os.environ, LD_LIBRARY_PATH=ET_LIB)
+        for attempt in range(1, 6):
+            rc, so, se = out(["flock", "-n", LOCK, "timeout", "10", self.ettelem, "config"], timeout=15, env=env, cwd=self.root)
+            if rc == 0:
+                break
+            time.sleep(2)
+        snap["config_rc"], snap["config_attempts"] = rc, attempt
+        open(os.path.join(self.runs, f"config-{tag}.txt"), "w").write(so + (("\nstderr: " + se[-300:]) if rc else ""))
+        try:
+            snap["config"] = json.loads(so.strip().splitlines()[-1])
+        except (ValueError, IndexError):
+            snap["config"] = None
+        json.dump(snap, open(os.path.join(self.runs, f"snapshot-{tag}.json"), "w"), indent=1)
+        return snap
+
+    def copy_history(self, name, a_ms, b_ms):
+        """The box's own 5 s history rows in [a_ms, b_ms) to RUNS/<name>."""
+        if self.a.dry:
+            return 0
+        n = 0
+        days = {time.strftime("%Y-%m-%d", time.gmtime(t / 1000.0)) for t in (a_ms, b_ms)}
+        with open(os.path.join(self.runs, name), "w") as f:
+            for d in sorted(days):
+                p = os.path.expanduser(f"~/live/history/{d}.jsonl")
+                try:
+                    with open(p) as h:
+                        for ln in h:
+                            try:
+                                t = json.loads(ln).get("t", 0)
+                            except ValueError:
+                                continue
+                            if a_ms <= t < b_ms:
+                                f.write(ln)
+                                n += 1
+                except OSError:
+                    pass
+        return n
+
+    # -- one session
+    def session(self, name, only=None, cap_min=None):
+        rd = os.path.join(self.runs, name)
+        cmd = [sys.executable, os.path.join(self.root, "tools/claims-v3/kspeed/e101/run_e101s.py"), "--protocol", self.a.protocol, "--out", rd]
+        if only:
+            cmd += ["--only"] + only
+        if cap_min is not None:
+            cmd += ["--max-card-min", f"{cap_min:.2f}"]
+        if self.a.dry:
+            cmd.append("--dry")
+        self.rec("session_start", name=name, cap_min=cap_min)
+        self.status(state="running", session=name, t0_ms=now_ms())
+        os.makedirs(self.runs, exist_ok=True)
+        with open(os.path.join(self.runs, f"{name}.out"), "ab") as f:
+            proc = subprocess.Popen(cmd, stdout=f, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, cwd=self.root,
+                                    start_new_session=True)
+        stopped, termed = False, False
+        while proc.poll() is None:
+            now = now_ms()
+            if not stopped and now >= self.end_ms - 120000:
+                os.makedirs(rd, exist_ok=True)
+                open(os.path.join(rd, "STOP"), "a").close()
+                stopped = True
+                self.rec("slot_stop", session=name)
+            if stopped and not termed and now >= self.end_ms - 30000:
+                proc.terminate()
+                termed = True
+                self.rec("slot_term", session=name)
+            time.sleep(1.0)
+        try:
+            end = json.load(open(os.path.join(rd, "end.json")))
+        except (OSError, ValueError):
+            end = None
+        self.rec("session_end", name=name, rc=proc.returncode, end=end, slot_stopped=stopped)
+        return proc.returncode
+
+    def session_retry(self, name, only=None, cap_fn=None):
+        """A session refused at the start (exit 3 and no run recorded: the collector's reader, opened in the instant before the lock
+        was taken, reads as ours) moves aside and goes again, up to 5 times. Anything else is the session's result."""
+        for k in range(1, 6):
+            rc = self.session(name, only, cap_fn() if cap_fn else None)
+            rd = os.path.join(self.runs, name)
+            if rc == 3 and not os.path.exists(os.path.join(rd, "runs.jsonl")):
+                os.rename(rd, f"{rd}.refused{k}")
+                self.rec("session_refused_at_start", name=name, moved_to=f"{name}.refused{k}")
+                time.sleep(POLL_S)
+                why = self.why_not_free()
+                while why is not None and now_ms() < self.give_up_ms and not self.stopped():
+                    self.status(state="waiting for the card", why=why)
+                    time.sleep(POLL_S)
+                    why = self.why_not_free()
+                if why is not None:
+                    return rc
+                continue
+            return rc
+        return rc
+
+    def check_smoke(self):
+        """None if the smoke is sound, else why not."""
+        rd = os.path.join(self.runs, "smoke")
+        try:
+            end = json.load(open(os.path.join(rd, "end.json")))
+            runs = [json.loads(x) for x in open(os.path.join(rd, "runs.jsonl"))]
+            launches = [json.loads(x) for x in open(os.path.join(rd, "launches.jsonl"))]
+        except (OSError, ValueError) as e:
+            return f"smoke records unreadable: {e}"
+        if end.get("exit") != 0:
+            return f"smoke exit {end.get('exit')}: {end.get('reason')}"
+        if len(runs) != 4 or len([L for L in launches if L.get("role") == "work"]) != 3:
+            return f"smoke: {len(runs)} runs, {len(launches)} launches"
+        for r in runs:
+            c = (r.get("queries") or {}).get("config") or {}
+            if not self.a.dry and (c.get("tdp_w") != 65 or c.get("temp_threshold_c") != 65):
+                return f"smoke: config {c}"
+        for L in launches:
+            if L.get("rc") != 0:
+                return f"smoke: {L.get('run')} rc {L.get('rc')}"
+            sp = L.get("sparsity") or []
+            if not sp or not all(s.get("ok") for s in sp):
+                return f"smoke: {L.get('run')} sparsity records {len(sp)}, not all ok"
+            lab = next((r["label"] for r in runs if r["run"] == L.get("run")), None)
+            want = json.load(open(self.a.protocol))["smoke_cycles"].get(lab)
+            cyc = sp[-1].get("cycles_per_op")
+            if not self.a.dry and (cyc is None or want is None or abs(cyc / want - 1) > CYC_REL):
+                return f"smoke: {L.get('run')} {cyc} cycles per op, expected {want}"
+        return None
+
+    def run(self):
+        self.rec("queue_start", slot_start_ms=self.start_ms, slot_end_ms=self.end_ms, next_rest_ms=self.next_rest_ms,
+                 python=sys.version.split()[0], sensors=bool(shutil.which("sensors")), protocol=self.a.protocol)
+        if not self.wait_for_slot():
+            self.status(state="ended", why="no launch")
+            return 0
+        t0 = now_ms()
+        s0 = self.snapshot("start")
+        n = self.copy_history("history-before.jsonl", t0 - 40 * 60000, t0 + 1)
+        self.rec("before_first_launch", snapshot=s0, history_rows=n)
+        rc = self.session_retry("smoke", ["SMOKE"], lambda: 3.0)
+        bad = self.check_smoke()
+        self.rec("smoke_check", rc=rc, bad=bad)
+        if bad is not None:
+            self.halt(bad)
+            self.snapshot("end")
+            return 0
+
+        def cap():
+            return min(float(self.a.cap), max(0.5, (self.stop_ms - now_ms()) / 60000.0))
+        if now_ms() >= self.stop_ms or self.stopped():
+            self.rec("stop", why="no time left, or QUEUE-STOP, before the session")
+        else:
+            rc = self.session_retry("s1", None, cap)
+            self.rec("s1_end", rc=rc)
+        s1 = self.snapshot("end")
+        self.rec("queue_end", snapshot=s1, card_free_ms=now_ms(), before_slot_end_s=round((self.end_ms - now_ms()) / 1000.0, 1))
+        self.status(state="ended", why="done")
+        return 0
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--slots", required=True)
+    ap.add_argument("--runs", required=True)
+    ap.add_argument("--protocol", default="tools/claims-v3/kspeed/e101/protocol.json")
+    ap.add_argument("--cap", default=72.0, type=float)
+    ap.add_argument("--give-up-min", default=25.0, type=float, help="minutes before the slot's end after which nothing starts; the dry run of the time cut shortens it")
+    ap.add_argument("--cap-margin-s", default=180.0, type=float, help="the session's own cap ends it this long before the slot's end; the dry run of the hard stop shortens it")
+    ap.add_argument("--root", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))
+    ap.add_argument("--dry", action="store_true")
+    a = ap.parse_args()
+    a.protocol = os.path.abspath(a.protocol) if os.path.exists(a.protocol) else os.path.join(os.path.abspath(a.root), a.protocol)
+    signal.signal(signal.SIGHUP, signal.SIG_IGN)
+    return Queue(a).run()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
